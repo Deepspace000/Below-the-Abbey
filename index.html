@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.36';
+const VERSION='0.37';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2569,7 +2569,7 @@ const DOOR_MSGS={15:['The door is barred. Nobody answers.','The shutters are clo
 const NTREES=8,TREE_W=[1.95,1.5,1.4,1.35,2.05,1.7,1.3,1.85];
 function decorW(k){
   if(k.startsWith('tree'))return TREE_W[+k.slice(4)]||1;
-  return {barrel:.44,coffin:.92,cart:1.05,well:.95,grave:.5,cross:.55,statue:.7,bench:.9,bones:1.1}[k]||.7;
+  return {barrel:.44,coffin:.92,cart:1.05,well:.95,grave:.5,cross:.55,statue:.7,bench:.9,bones:.55}[k]||.7;
 }
 
 /* ==========================================================================
