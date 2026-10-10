@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.53';
+const VERSION='0.55';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1105,9 +1105,9 @@ function nextHero(){
   for(let k=1;k<=4;k++){const i=(G.sel+k)%4;if(G.heroes[i].alive&&!G.acted[i]){G.sel=i;return}}
 }
 function heroDone(i){
-  G.acted[i]=true;G.lockT=G.time+.38;
+  G.acted[i]=true;G.lockT=G.time+.12;
   const open=livingHeroes().filter(j=>!G.acted[j]);
-  if(open.length){nextHero()}else{later(420,endRound)}
+  if(open.length){nextHero()}else{later(160,endRound)}
 }
 function addFloat(x,y,text,col){G.floats.push({x,y,text,col,t:0})}
 function hurtEnemy(e,dmg){
@@ -1290,16 +1290,16 @@ function enemyAttack(e){
 }
 function enemyAct(e){
   const def=ENEMY_DEF[e.t],dist=()=>Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y);
-  if(e.chilled>0){e.chilled--;msg(`The ${def.name} is frozen stiff.`,'#9ad0ff');return 240}
+  if(e.chilled>0){e.chilled--;msg(`The ${def.name} is frozen stiff.`,'#9ad0ff');return 130}
   if(!e.alert){
     const path=bfs(e);
-    if(dist()<=6&&((path&&path.dist<=7)||hasLOS(e.x,e.y,G.P.x,G.P.y))){e.alert=true;sfx(e.t==='skel'?'rattle':e.t==='bat'?'screech':'squeak');return 280}
+    if(dist()<=6&&((path&&path.dist<=7)||hasLOS(e.x,e.y,G.P.x,G.P.y))){e.alert=true;sfx(e.t==='skel'?'rattle':e.t==='bat'?'screech':'squeak');return 150}
     return 0;
   }
   let dur=0;
   for(let s=0;s<(def.speed||1);s++){
-    if(def.ranged&&dist()>1&&dist()<=def.ranged&&hasLOS(e.x,e.y,G.P.x,G.P.y)){enemyShoot(e);return dur+640}
-    if(dist()===1){enemyAttack(e);return dur+560}
+    if(def.ranged&&dist()>1&&dist()<=def.ranged&&hasLOS(e.x,e.y,G.P.x,G.P.y)){enemyShoot(e);return dur+330}
+    if(dist()===1){enemyAttack(e);return dur+290}
     let moved=false;
     if(def.fly&&Math.random()<.3){ // bats flutter about
       const opts=DIRS.map(d=>[e.x+d[0],e.y+d[1]]).filter(([x,y])=>!cellBlocked(x,y)&&!enemyAt(x,y)&&!(x===G.P.x&&y===G.P.y));
@@ -1308,7 +1308,7 @@ function enemyAct(e){
       const path=bfs(e);
       if(path&&path.step>=0){e.x=path.step%MW;e.y=(path.step/MW)|0;moved=true}
     }
-    if(moved)dur+=240;
+    if(moved)dur+=130;
   }
   return dur;
 }
@@ -1381,7 +1381,7 @@ function viewTap(x,y){
 function act(id){
   if(G.state==='title'){audioInit();crInit();G.state='create';return}
   if(G.state!=='play')return;
-  if(!canAct()){if(['fwd','back','left','right','turnL','turnR'].includes(id))G.queued=id;return}
+  if(!canAct()){if(['fwd','back','left','right','turnL','turnR','attack','special'].includes(id)&&G.state==='play'&&!G.menu&&!G.inv.open&&!G.loot&&!G.cut&&!G.talk)G.queued=id;return}
   G.queued=null;
   const i=G.sel;
   switch(id){
@@ -1635,10 +1635,12 @@ function chevron(cx,cy,s,ang,dim){
   ctx.fillStyle=g;ctx.fill();ctx.lineWidth=1.2;ctx.strokeStyle='#1a1208';ctx.stroke();
   ctx.restore();
 }
-function txt(s,x,y,size,col,align,bold,font){
-  ctx.font=`${size*1.08}px ${font||FUI}`;ctx.fillStyle=col;ctx.textAlign=align||'left';ctx.textBaseline='middle';ctx.fillText(s,x,y);
+function txt(s,x,y,size,col,align,bold,font,maxW){
+  ctx.font=`${size*1.08}px ${font||FUI}`;
+  if(maxW){const w=ctx.measureText(s).width;if(w>maxW)ctx.font=`${size*1.08*maxW/w}px ${font||FUI}`} // shrink to fit its box
+  ctx.fillStyle=col;ctx.textAlign=align||'left';ctx.textBaseline='middle';ctx.fillText(s,x,y);
 }
-function txtS(s,x,y,size,col,align,bold){ctx.save();ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.lineJoin='round';ctx.font=`${size*1.12}px ${FTXT}`;ctx.textAlign=align||'left';ctx.textBaseline='middle';ctx.strokeText(s,x,y);ctx.fillStyle=col;ctx.fillText(s,x,y);ctx.restore()}
+function txtS(s,x,y,size,col,align,bold,maxW){ctx.save();ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.lineJoin='round';ctx.font=`${size*1.12}px ${FTXT}`;if(maxW){const w=ctx.measureText(s).width;if(w>maxW)ctx.font=`${size*1.12*maxW/w}px ${FTXT}`}ctx.textAlign=align||'left';ctx.textBaseline='middle';ctx.strokeText(s,x,y);ctx.fillStyle=col;ctx.fillText(s,x,y);ctx.restore()}
 
 /* little icons */
 function iconSword(cx,cy,s,col){ctx.save();ctx.translate(cx,cy);ctx.rotate(-.7);ctx.fillStyle=col||'#d8dce4';ctx.fillRect(-1.6*s,-9*s,3.2*s,15*s);ctx.beginPath();ctx.moveTo(-1.6*s,-9*s);ctx.lineTo(0,-12*s);ctx.lineTo(1.6*s,-9*s);ctx.fill();ctx.fillStyle='#c79a2e';ctx.fillRect(-5*s,6*s,10*s,2.4*s);ctx.fillStyle='#6a4a20';ctx.fillRect(-1.3*s,8*s,2.6*s,5*s);ctx.restore()}
@@ -1740,8 +1742,8 @@ function drawSpecialBtn(){
   const can=h.alive&&h.mp>=sp.cost&&(!HERO_DEF[hi].caster||sp.spell);ctx.globalAlpha=can?1:.5;
   if(main)itemIcon(idef(main),225,261,1.1);else classIcon(HERO_DEF[hi].clsId,225,261,1.3);
   ctx.globalAlpha=1;
-  {const ws=sp.name.split(' ');if(ws.length>1&&sp.name.length>7){txt(ws[0],225,233,6.4,'#c9ba8e','center',true);txt(ws.slice(1).join(' '),225,241,6.4,'#c9ba8e','center',true)}else txt(sp.name,225,235,6.4,'#c9ba8e','center',true)}
-  txt(sp.cost?`${sp.cost} ${HERO_DEF[hi].mpn.slice(0,4).toUpperCase()}`:'',225,285,7,can?'#9ac8ff':'#7a7a80','center',true);
+  {const ws=sp.name.split(' ');if(ws.length>1&&sp.name.length>7){txt(ws[0],225,233,6.4,'#c9ba8e','center',true,undefined,34);txt(ws.slice(1).join(' '),225,241,6.4,'#c9ba8e','center',true,undefined,34)}else txt(sp.name,225,235,6.4,'#c9ba8e','center',true,undefined,34)}
+  txt(sp.cost?`${sp.cost} ${HERO_DEF[hi].mpn.slice(0,4).toUpperCase()}`:'',225,285,7,can?'#9ac8ff':'#7a7a80','center',true,undefined,34);
   btn('special',206,226,38,72);
   // two small windows to its right: off hand and second weapon (tap to swap into the main hand)
   for(const [slot,y,id] of [['off',226,'swapoff'],['alt',264,'swapalt']]){
@@ -1753,12 +1755,12 @@ function drawSpecialBtn(){
 }
 function hudRight(){
   // wait, camp and potion down the right-hand side
-  panel(424,56,54,44,false,false);iconHourglass(451,76,.95);txt('Wait',451,93,7.5,'#c9ba8e','center',true);btn('wait',424,56,54,44);
-  panel(424,104,54,44,false,false);iconRest(451,123,.95);txt('Camp',451,141,7.5,'#c9ba8e','center',true);btn('rest',424,104,54,44);
+  panel(424,56,54,44,false,false);iconHourglass(451,76,.95);txt('Wait',451,93,7.5,'#c9ba8e','center',true,undefined,48);btn('wait',424,56,54,44);
+  panel(424,104,54,44,false,false);iconRest(451,123,.95);txt('Camp',451,141,7.5,'#c9ba8e','center',true,undefined,48);btn('rest',424,104,54,44);
   panel(424,152,54,52,false,false);
   const pc=countPotions();
   ctx.globalAlpha=pc>0?1:.4;iconPotion(451,174,1.4);ctx.globalAlpha=1;
-  txt('Potion',451,161,7.5,'#c9ba8e','center',true);txt('x'+pc,451,196,9,'#c9ba8e','center',true);
+  txt('Potion',451,161,7.5,'#c9ba8e','center',true,undefined,48);txt('x'+pc,451,196,9,'#c9ba8e','center',true,undefined,48);
   btn('potion',424,152,54,52);
   if(G.keys>0)txt('KEY',451,210,7,'#ffd76a','center',true);
 }
@@ -1811,10 +1813,10 @@ function statLines(d){
 }
 function drawItemCard(it,hi,x,y,w){
   const d=idef(it),h=G.heroes[hi];
-  txt(d.n,x+w/2,y+10,12,d.rar?'#e070e8':'#d2c9b2','center',true);
+  txt(d.n,x+w/2,y+10,12,d.rar?'#e070e8':'#d2c9b2','center',true,undefined,w-10);
   txt(`(${d.t.toUpperCase()})`,x+w/2,y+26,8.5,'#b8a888','center');
   let ly=y+46;
-  for(const [s,c] of statLines(d)){txt(s,x+w/2,ly,9.5,c,'center');ly+=14}
+  for(const [s,c] of statLines(d)){txt(s,x+w/2,ly,9.5,c,'center',false,undefined,w-10);ly+=14}
   const r=d.req||{};
   for(const [k,lab,have] of [['str','STR',h.str],['dex','DEX',h.dex],['int','INT',h.int]]){
     if(r[k]){txt(`${lab} ${r[k]}`,x+w/2,ly,10,have>=r[k]?'#6ce06c':'#ff6a5a','center',true);ly+=14}
@@ -2315,7 +2317,7 @@ function drawLoot(){
   const it=lootSelItem();
   if(it)drawItemCard(it,hi,158,8,150);
   else{
-    txt(L.name,233,20,12,'#d8c88e','center',true);
+    txt(L.name,233,20,12,'#d8c88e','center',true,undefined,140);
     txt(L.shop?'Buy from the cart, or':'Take what you find,',233,48,9,'#a89878','center');
     txt(L.shop?'sell from your bag.':'one item or all of it.',233,61,9,'#a89878','center');
     if(!box.length)txt(L.shop?'Sold out.':'It is empty.',233,100,10,'#8a7a58','center');
@@ -3268,7 +3270,7 @@ function ui(dt){
   txt('Menu',216,8,9,'#c9ba8e','center',true);chevron(216,14,2.4,Math.PI,false);btn('menu',176,0,80,18);
   // right column
   drawMinimap(424,2,54,50);btn('map',424,2,54,50);
-  txtS(`Day ${Math.floor(G.clock/1440)+1}  ${clockStr()}`,451,47,7,'#e8dca8','center',true);
+  txtS(`Day ${Math.floor(G.clock/1440)+1}  ${clockStr()}`,451,47,7,'#e8dca8','center',true,50);
   hudRight();
   // bottom
   drawPortraits(232,G.sel,'hero');
