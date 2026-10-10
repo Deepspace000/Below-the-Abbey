@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.69';
+const VERSION='0.71';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -637,17 +637,17 @@ const ITEMDEF={
   leggings:{n:'Leather Leggings',k:'legs',t:'Legs',ic:'legs',c:'#6a4a2c',armor:1,price:10,d:'Worn but sturdy.',sw:.4},
   torch:{n:'Torch',k:'light',t:'Light',ic:'torch',c:'#b88a4a',light:1,price:3,d:'Hold it in a hand to light the way.',sw:.34},
   lantern:{n:'Brass Lantern',k:'light',t:'Light',ic:'lantern',c:'#d8a838',light:2.3,price:45,d:'Gives a much wider, steadier light than a torch.',sw:.38},
-  potion:{n:'Healing Potion',k:'potion',t:'Potion',ic:'potion',c:'#c0201c',heal:15,stack:1,price:25,d:'Restores 15 health.',sw:.26},
-  bread:{n:'Loaf of Bread',k:'food',t:'Meal',ic:'bread',c:'#b8873c',heal:8,feed:45,stack:1,price:4,sw:.3},
-  cheese:{n:'Hard Cheese',k:'food',t:'Snack',ic:'cheese',c:'#d8b840',heal:4,feed:20,stack:1,price:5,sw:.3},
-  apple:{n:'Apple',k:'food',t:'Snack',ic:'apple',c:'#a8302a',heal:3,feed:20,stack:1,price:2,sw:.3},
-  ale:{n:'Mug of Ale',k:'food',t:'Snack',ic:'ale',c:'#d8a838',heal:4,feed:20,stack:1,price:3,sw:.3},
-  nuts:{n:'Hazelnuts',k:'food',t:'Snack',ic:'nuts',c:'#8a6a3a',heal:3,feed:20,stack:1,price:3,sw:.3},
-  herring:{n:'Salt Herring',k:'food',t:'Meal',ic:'herring',c:'#9aa4aa',heal:8,feed:45,stack:1,price:6,sw:.3},
-  sausage:{n:'Smoked Sausage',k:'food',t:'Meal',ic:'sausage',c:'#8a3a2a',heal:9,feed:45,stack:1,price:7,sw:.3},
-  pottage:{n:'Bowl of Pottage',k:'food',t:'Meal',ic:'pottage',c:'#7a6a3a',heal:10,feed:45,stack:1,price:6,sw:.3},
-  pie:{n:'Meat Pie',k:'food',t:'Big meal',ic:'pie',c:'#c89a50',heal:16,feed:80,stack:1,price:14,sw:.3},
-  roast:{n:'Roast Mutton',k:'food',t:'Big meal',ic:'roast',c:'#8a4a24',heal:18,feed:80,stack:1,price:18,sw:.3},
+  potion:{n:'Healing Potion',k:'potion',t:'Potion',ic:'potion',c:'#c0201c',heal:30,stack:1,price:25,d:'Restores 30 health.',sw:.26},
+  bread:{n:'Loaf of Bread',k:'food',t:'Meal',ic:'bread',c:'#b8873c',heal:16,feed:70,stack:1,price:4,sw:.3},
+  cheese:{n:'Hard Cheese',k:'food',t:'Snack',ic:'cheese',c:'#d8b840',heal:8,feed:40,stack:1,price:5,sw:.3},
+  apple:{n:'Apple',k:'food',t:'Snack',ic:'apple',c:'#a8302a',heal:6,feed:40,stack:1,price:2,sw:.3},
+  ale:{n:'Mug of Ale',k:'food',t:'Snack',ic:'ale',c:'#d8a838',heal:8,feed:40,stack:1,price:3,sw:.3},
+  nuts:{n:'Hazelnuts',k:'food',t:'Snack',ic:'nuts',c:'#8a6a3a',heal:6,feed:40,stack:1,price:3,sw:.3},
+  herring:{n:'Salt Herring',k:'food',t:'Meal',ic:'herring',c:'#9aa4aa',heal:16,feed:70,stack:1,price:6,sw:.3},
+  sausage:{n:'Smoked Sausage',k:'food',t:'Meal',ic:'sausage',c:'#8a3a2a',heal:18,feed:70,stack:1,price:7,sw:.3},
+  pottage:{n:'Bowl of Pottage',k:'food',t:'Meal',ic:'pottage',c:'#7a6a3a',heal:20,feed:70,stack:1,price:6,sw:.3},
+  pie:{n:'Meat Pie',k:'food',t:'Big meal',ic:'pie',c:'#c89a50',heal:32,feed:100,stack:1,price:14,sw:.3},
+  roast:{n:'Roast Mutton',k:'food',t:'Big meal',ic:'roast',c:'#8a4a24',heal:36,feed:100,stack:1,price:18,sw:.3},
   wood:{n:'Firewood',k:'quest',t:'Quest item',ic:'wood',c:'#8a6a40',stack:1,price:2,d:'Dry wood. Bram the innkeeper wants eight pieces.',sw:.34},
   ringV:{n:'Ring of Vigor',k:'ring',t:'Ring',ic:'ring',c:'#c85a50',hp:4,price:90,rar:1,d:'Adds 4 to maximum health.',sw:.2},
   ringM:{n:'Ring of Might',k:'ring',t:'Ring',ic:'ring',c:'#e0a040',dmgb:1,price:110,rar:1,d:'Adds 1 to melee damage.',sw:.2},
@@ -2108,9 +2108,24 @@ function iconBackpack(cx,cy,s){ctx.save();ctx.translate(cx,cy);ctx.scale(s,s);ct
 function iconFace(hi,cx,cy,s){const img=portraitImg(hi);ctx.save();ctx.beginPath();ctx.arc(cx,cy,13*s,0,TAU);ctx.clip();if(img)ctx.drawImage(img,cx-13*s,cy-13*s,26*s,26*s);ctx.restore();ctx.strokeStyle='#c79a2e';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,13*s,0,TAU);ctx.stroke()}
 function iconBook(cx,cy,s){ctx.save();ctx.translate(cx,cy);ctx.scale(s,s);ctx.fillStyle='#5a2a6a';ctx.strokeStyle='#1a0c20';ctx.lineWidth=1.5;rrect(ctx,-11,-13,22,26,3);ctx.fill();ctx.stroke();
   ctx.fillStyle='#d4a52c';ctx.fillRect(-11,-8,22,2);ctx.fillRect(-11,5,22,2);ctx.beginPath();ctx.arc(0,-1,4,0,TAU);ctx.fill();ctx.restore()}
-function iconRedX(cx,cy,s){ctx.save();ctx.translate(cx,cy);ctx.strokeStyle='#1a0404';ctx.lineWidth=11*s;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-12*s,-12*s);ctx.lineTo(12*s,12*s);ctx.moveTo(12*s,-12*s);ctx.lineTo(-12*s,12*s);ctx.stroke();
-  ctx.strokeStyle='#e02818';ctx.lineWidth=7*s;ctx.beginPath();ctx.moveTo(-12*s,-12*s);ctx.lineTo(12*s,12*s);ctx.moveTo(12*s,-12*s);ctx.lineTo(-12*s,12*s);ctx.stroke();ctx.restore()}
-
+function iconRedX(cx,cy,s){ // two crooked strokes of old oxblood ink, uneven and scratchy like a woodcut
+  ctx.save();ctx.translate(cx,cy);ctx.scale(s,s);ctx.lineCap='round';ctx.lineJoin='round';
+  const stroke=(x0,y0,x1,y1,seed)=>{
+    const n=9,pts=[];
+    for(let i=0;i<=n;i++){const t=i/n;pts.push([x0+(x1-x0)*t+(hash2(i,seed,41)-.5)*3.2,y0+(y1-y0)*t+(hash2(i,seed,42)-.5)*3.2,2.6*Math.sin(Math.PI*(.1+t*.8))+.5+hash2(i,seed,43)*.7])}
+    for(const [col,grow] of [['#1c0b07',1.1],['#5a1c14',0],['#7a2c1c',-.8]]){
+      ctx.fillStyle=col;ctx.globalAlpha=col==='#7a2c1c'?.55:1;
+      for(let i=0;i<n;i++){const a=pts[i],b=pts[i+1],w0=Math.max(.6,a[2]+grow),w1=Math.max(.6,b[2]+grow),dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy)||1,nx=-dy/l,ny=dx/l;
+        ctx.beginPath();ctx.moveTo(a[0]+nx*w0,a[1]+ny*w0);ctx.lineTo(b[0]+nx*w1,b[1]+ny*w1);ctx.lineTo(b[0]-nx*w1,b[1]-ny*w1);ctx.lineTo(a[0]-nx*w0,a[1]-ny*w0);ctx.closePath();ctx.fill()}
+    }
+    ctx.globalAlpha=1;
+  };
+  stroke(-12,-13,12,12,1);stroke(13,-12,-11,13,2);
+  ctx.strokeStyle='rgba(20,8,5,.7)';ctx.lineWidth=.7; // hatch scratches
+  for(let i=0;i<9;i++){const x=-12+hash2(i,3,44)*24,y=-12+hash2(i,4,44)*24,a=hash2(i,5,44)*6.28;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(a)*4,y+Math.sin(a)*4);ctx.stroke()}
+  ctx.fillStyle='#2a0f0a';for(let i=0;i<6;i++){ctx.beginPath();ctx.arc(-14+hash2(i,6,45)*28,-14+hash2(i,7,45)*28,.5+hash2(i,8,45)*1.1,0,TAU);ctx.fill()}
+  ctx.restore();
+}
 function drawInventory(){
   BTNS=[];
   const I=G.inv,hi=I.hero,h=G.heroes[hi],def=HERO_DEF[hi];
@@ -3676,7 +3691,7 @@ function drawWorld(){
   if(LOWC.width!==w){LOWC.width=w;LOWC.height=h}
   LOWX.imageSmoothingEnabled=true;LOWX.drawImage(vc,0,0,w,h);
   const im=LOWX.getImageData(0,0,w,h),D=im.data;
-  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const o=(y*w+x)*4,t=(BAYER[(y&3)*4+(x&3)]-7.5)*1.3;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const o=(y*w+x)*4,t=(BAYER[(y&3)*4+(x&3)]-7.5)*.91;
     D[o]=Math.round((D[o]+t)/10)*10;D[o+1]=Math.round((D[o+1]+t)/10)*10;D[o+2]=Math.round((D[o+2]+t)/10)*10}
   LOWX.putImageData(im,0,0);
   ctx.imageSmoothingEnabled=false;ctx.drawImage(LOWC,0,0,420,210);ctx.imageSmoothingEnabled=true;
