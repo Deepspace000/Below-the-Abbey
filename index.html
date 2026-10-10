@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.22';
+const VERSION='0.23';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -220,7 +220,7 @@ function exitTex(baseD){
   }
   return {d:pix(c),e:pix(e)};
 }
-function torchFrames(baseD){
+function torchFrames(baseD,red){
   const out=[];
   for(let f=0;f<4;f++){
     const c=toCanvas(baseD),x=c.getContext('2d');
@@ -231,11 +231,11 @@ function torchFrames(baseD){
     x.fillStyle='#14100c';x.beginPath();x.ellipse(64,62,10,8,0,0,TAU);x.fill();
     x.fillStyle='#2a1e12';x.fillRect(55,60,18,3);
     const e=document.createElement('canvas');e.width=e.height=TS;const ex=e.getContext('2d');
-    const rg=ex.createRadialGradient(64,50,2,64,50,34);rg.addColorStop(0,'rgba(255,170,60,.55)');rg.addColorStop(1,'rgba(255,120,30,0)');
+    const rg=ex.createRadialGradient(64,50,2,64,50,34);rg.addColorStop(0,red?'rgba(255,60,30,.6)':'rgba(255,170,60,.55)');rg.addColorStop(1,red?'rgba(255,40,20,0)':'rgba(255,120,30,0)');
     ex.fillStyle=rg;ex.fillRect(0,0,128,128);
     const w=Math.sin(f*1.9)*3, h=[26,31,24,29][f];
     ex.beginPath();ex.moveTo(54,62);ex.bezierCurveTo(48,50,60+w,42,64+w,64-h-14);ex.bezierCurveTo(70+w,42,80,50,74,62);ex.closePath();
-    const fg=ex.createRadialGradient(64,58,1,64,52,26);fg.addColorStop(0,'#fffbd0');fg.addColorStop(.35,'#ffc443');fg.addColorStop(.7,'#e8641a');fg.addColorStop(1,'rgba(160,32,8,.0)');
+    const fg=ex.createRadialGradient(64,58,1,64,52,26);fg.addColorStop(0,red?'#ffe0d0':'#fffbd0');fg.addColorStop(.35,red?'#ff6a48':'#ffc443');fg.addColorStop(.7,red?'#d82010':'#e8641a');fg.addColorStop(1,red?'rgba(110,10,4,0)':'rgba(160,32,8,.0)');
     ex.fillStyle=fg;ex.fill();
     out.push({d:pix(c),e:pix(e)});
   }
@@ -271,7 +271,7 @@ function dirtTex(seed){
   return d;
 }
 /* texture index map */
-let T_STONE,T_BRICK,T_DOOR,T_LOCK,T_EXIT,T_TORCH_STONE,T_TORCH_BRICK,FLOORD,CEILD;
+let T_STONE,T_BRICK,T_DOOR,T_LOCK,T_EXIT,T_TORCH_STONE,T_TORCH_BRICK,T_TORCH_STONE_R,T_TORCH_BRICK_R,FLOORD,CEILD;
 function buildTextures(){
   const stone=warpTex(stoneTex(7,stoneOpts),11,8), brick=warpTex(stoneTex(23,brickOpts),12,6);
   T_STONE=addTex(stone);T_BRICK=addTex(brick);
@@ -279,6 +279,8 @@ function buildTextures(){
   const ex=exitTex(stone);T_EXIT=addTex(warpTex(ex.d,15,4),warpTex(ex.e,15,4));
   T_TORCH_STONE=TEX.length;for(const f of torchFrames(stone))addTex(f.d,f.e);
   T_TORCH_BRICK=TEX.length;for(const f of torchFrames(brick))addTex(f.d,f.e);
+  T_TORCH_STONE_R=TEX.length;for(const f of torchFrames(stone,true))addTex(f.d,f.e);
+  T_TORCH_BRICK_R=TEX.length;for(const f of torchFrames(brick,true))addTex(f.d,f.e);
   FLOORD=dirtTex(41);
   CEILD=warpTex(stoneTex(57,{rows:2,cols:()=>2,stag:1,mortar:3,a:[78,76,82],b:[58,56,62],mort:[16,15,17],moss:0,cracks:2,flat:true}),16,8);
 }
@@ -388,7 +390,7 @@ const ITEMDEF={
   bracers:{n:'Leather Bracers',k:'arms',t:'Arms',ic:'arms',c:'#7a5a38',armor:1,price:10,d:'Straps to guard the forearms.',sw:.36},
   leggings:{n:'Leather Leggings',k:'legs',t:'Legs',ic:'legs',c:'#6a4a2c',armor:1,price:10,d:'Worn but sturdy.',sw:.4},
   torch:{n:'Torch',k:'light',t:'Light',ic:'torch',c:'#b88a4a',light:1,price:3,d:'Hold it in a hand to light the way.',sw:.34},
-  lantern:{n:'Brass Lantern',k:'light',t:'Light',ic:'lantern',c:'#d8a838',light:1.7,price:45,d:'Gives a wider, steadier light than a torch.',sw:.38},
+  lantern:{n:'Brass Lantern',k:'light',t:'Light',ic:'lantern',c:'#d8a838',light:2.3,price:45,d:'Gives a much wider, steadier light than a torch.',sw:.38},
   potion:{n:'Healing Potion',k:'potion',t:'Potion',ic:'potion',c:'#c0201c',heal:15,stack:1,price:25,d:'Restores 15 health.',sw:.26},
   bread:{n:'Bread',k:'food',t:'Food',ic:'bread',c:'#b8873c',heal:6,stack:1,price:4,d:'Restores 6 health.',sw:.3},
   cheese:{n:'Cheese',k:'food',t:'Food',ic:'cheese',c:'#d8b840',heal:5,stack:1,price:5,d:'Restores 5 health.',sw:.3},
@@ -996,8 +998,8 @@ const vimg=vctx.createImageData(VW,VH);for(let i=3;i<vimg.data.length;i+=4)vimg.
 const zbuf=new Float32Array(VW);
 const LUT=new Float32Array(1025);for(let i=0;i<=1024;i++){const t=1-i/1024;LUT[i]=AMB+(t>0?.5*Math.pow(t,1.8):0)}
 const baseL=d=>LUT[Math.min(1024,(d*1024/RANGE)|0)];
-let nearL=[]; // [x,y,I] flat
-const wd2=new Float32Array(64);
+let nearL=[],nearR=[]; // [x,y,I] flat, warm and red lights
+const wd2=new Float32Array(64),wr2=new Float32Array(64);
 
 function lightSees(ax,ay,bx,by){
   const dx=bx-ax,dy=by-ay,n=Math.ceil(Math.hypot(dx,dy)*6);
@@ -1008,20 +1010,20 @@ function render3D(){
   const t=G.time,C=G.C,dX=Math.cos(C.a),dY=Math.sin(C.a),pX=-dY*PL,pY=dX*PL;
   const cx=C.x+.5-dX*.28,cy=C.y+.5-dY*.28;
   // lights near camera, with flicker
-  nearL.length=0;G.hits=[];for(const L of LIGHTS)L._h=null;
+  nearL.length=0;nearR.length=0;G.hits=[];for(const L of LIGHTS)L._h=null;
   for(const L of LIGHTS){if(L.taken)continue;const d2=(L.x-cx)**2+(L.y-cy)**2;if(d2<100){
     // walls block torchlight: fade each torch in/out by line of sight to the camera
     const tgt=lightSees(cx,cy,L.x,L.y)?1:0;
     L.vis=(L.vis===undefined?tgt:L.vis)+clamp(tgt-(L.vis===undefined?tgt:L.vis),-.06,.06);
     if(L.vis<=.01)continue;
     const fl=.8+.16*Math.sin(t*9+L.ph)+.1*Math.sin(t*23.3+L.ph*2)+.07*Math.sin(t*5.1+L.ph*3);
-    nearL.push(L.x,L.y,1.5*fl*L.vis);
+    (L.red?nearR:nearL).push(L.x,L.y,1.5*fl*L.vis);
     // screen position of the flame so it can be tapped
     const rx=L.x-cx,ry=L.y-cy,tY=(-1/PL)*(-pY*rx+pX*ry),tX=(-1/PL)*(dY*rx-dX*ry);
     if(tY>.3){const sx=VW/2*(1+tX/tY),sy=HH-(.66-EYE)*F/tY,col=Math.floor(sx);
       if(col>=0&&col<VW&&L.vis>.5)L._h={type:'torch',L,sx,sy,r:Math.max(18,.18*F/tY),ty:tY,col}}}
     else L._h=null}
-  const nl=nearL,nn=nl.length;
+  const nl=nearL,nn=nl.length,nr=nearR,nrn=nr.length;
   const D=vimg.data;
   const fd=FLOORD,cd=CEILD;
   const tbR=1,tbG=.94,tbB=.84, ttR=1.3,ttG=.88,ttB=.5;
@@ -1041,10 +1043,12 @@ function render3D(){
       const lb=baseL(dist);let lt=0;
       let ltc=0;
       for(let k=0;k<nn;k+=3){const ax=fx-nl[k],ay=fy-nl[k+1],d2=ax*ax+ay*ay;lt+=nl[k+2]/(1+1.15*(d2+.44));ltc+=nl[k+2]/(1+1.15*(d2+.12))}
-      const kR=(lb*tbR+lt*ttR)*vg,kG=(lb*tbG+lt*ttG)*vg,kB=(lb*tbB+lt*ttB)*vg;
-      const kRc=(lb*tbR+ltc*ttR)*vg,kGc=(lb*tbG+ltc*ttG)*vg,kBc=(lb*tbB+ltc*ttB)*vg;
+      let lr=0,lrc=0;
+      for(let k=0;k<nrn;k+=3){const ax=fx-nr[k],ay=fy-nr[k+1],d2=ax*ax+ay*ay;lr+=nr[k+2]/(1+1.15*(d2+.44));lrc+=nr[k+2]/(1+1.15*(d2+.12))}
+      const kR=(lb*tbR+lt*ttR+lr*1.4)*vg,kG=(lb*tbG+lt*ttG+lr*.2)*vg,kB=(lb*tbB+lt*ttB+lr*.1)*vg;
+      const kRc=(lb*tbR+ltc*ttR+lrc*1.4)*vg,kGc=(lb*tbG+ltc*ttG+lrc*.2)*vg,kBc=(lb*tbB+ltc*ttB+lrc*.1)*vg;
       const ti=(v*TS+u)*4,io=yo+x*4,ic=yc+x*4;
-      const sm=Math.min(.32,dist*.042),sk=(lb*.55+lt*.45+.05)*sm,iv=1-sm;
+      const sm=Math.min(.32,dist*.042),sk=(lb*.55+(lt+lr)*.45+.05)*sm,iv=1-sm;
       D[io]=fd[ti]*kR*iv+86*sk;D[io+1]=fd[ti+1]*kG*iv+76*sk;D[io+2]=fd[ti+2]*kB*iv+62*sk;
       D[ic]=cd[ti]*kRc*.85*iv+69*sk;D[ic+1]=cd[ti+1]*kGc*.85*iv+61*sk;D[ic+2]=cd[ti+2]*kBc*.85*iv+50*sk;
     }
@@ -1074,15 +1078,15 @@ function render3D(){
     const face=side===0?(stx>0?3:1):(sty>0?0:2);
     let ti;
     if(g===1)ti=T_STONE;else if(g===2)ti=T_BRICK;else if(g===3)ti=T_DOOR;else if(g===4)ti=T_LOCK;else ti=T_EXIT;
-    if((g===1||g===2)&&torchAt.has((my*MW+mx)*4+face)){
-      const ph=((mx*7+my*3)&3);ti=(g===1?T_TORCH_STONE:T_TORCH_BRICK)+((fr+ph)&3);
-    }
+    const tv=(g===1||g===2)?torchAt.get((my*MW+mx)*4+face):0;
+    if(tv){const ph=((mx*7+my*3)&3);ti=(g===1?(tv===2?T_TORCH_STONE_R:T_TORCH_STONE):(tv===2?T_TORCH_BRICK_R:T_TORCH_BRICK))+((fr+ph)&3)}
     const tex=TEX[ti],td=tex.d,te=tex.e;
     const dist=perp*Math.hypot(rX,rY);
     const lb=baseL(dist);let lt=0;
     const px=hx-(side===0?stx*.03:0),py=hy-(side===1?sty*.03:0);
     for(let k=0;k<nn;k+=3){const ax=px-nl[k],ay=py-nl[k+1];lt+=nl[k+2]/(1+1.15*(ax*ax+ay*ay))}
     for(let k=0,j=0;k<nn;k+=3,j++){const ax=px-nl[k],ay=py-nl[k+1];wd2[j]=ax*ax+ay*ay}
+    for(let k=0,j=0;k<nrn;k+=3,j++){const ax=px-nr[k],ay=py-nr[k+1];wr2[j]=ax*ax+ay*ay}
     const lineH=F/perp,y0=HH-lineH/2;
     const ds=Math.max(0,Math.ceil(y0)),de=Math.min(VH-1,Math.floor(HH+lineH/2));
     const stepT=TS/lineH,smw=Math.min(.32,dist*.042),skw=(lb*.55+lt*.45+.05)*smw,ivw=1-smw;
@@ -1092,7 +1096,8 @@ function render3D(){
       const i=(v*TS+tx)*4,o=(y*VW+x)*4;
       const vy=(y-HH)/HH,vg=1-.28*vy*vy,zz=1-(y-y0)/lineH;
       let ltp=0;for(let k=0,j=0;k<nn;k+=3,j++){const dz=zz-.66;ltp+=nl[k+2]/(1+1.15*(wd2[j]+dz*dz))}
-      const kRp=lb*tbR+ltp*ttR,kGp=lb*tbG+ltp*ttG,kBp=lb*tbB+ltp*ttB;
+      let lpr=0;for(let k=0,j=0;k<nrn;k+=3,j++){const dz=zz-.66;lpr+=nr[k+2]/(1+1.15*(wr2[j]+dz*dz))}
+      const kRp=lb*tbR+ltp*ttR+lpr*1.4,kGp=lb*tbG+ltp*ttG+lpr*.2,kBp=lb*tbB+ltp*ttB+lpr*.1;
       let R=td[i]*kRp*vg*ivw+86*skw,Gc=td[i+1]*kGp*vg*ivw+76*skw,B=td[i+2]*kBp*vg*ivw+62*skw;
       if(te){const a=te[i+3]/255;R+=te[i]*a*.95;Gc+=te[i+1]*a*.95;B+=te[i+2]*a*.95}
       D[o]=R;D[o+1]=Gc;D[o+2]=B;
@@ -1137,6 +1142,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     // lighting
     const wx=s.x,wy=s.y,dist=Math.hypot(wx-cx,wy-cy);
     let lt=0;for(let k=0;k<nearL.length;k+=3){const ax=wx-nearL[k],ay=wy-nearL[k+1];lt+=nearL[k+2]/(1+1.15*(ax*ax+ay*ay))}
+    for(let k=0;k<nearR.length;k+=3){const ax=wx-nearR[k],ay=wy-nearR[k+1];lt+=nearR[k+2]/(1+1.15*(ax*ax+ay*ay))}
     const lum=clamp(.08+(baseL(dist)+lt*.85)*1.05,0,1);
     tmpX.clearRect(0,0,iw,ih);tmpX.globalCompositeOperation='source-over';tmpX.globalAlpha=1;
     tmpX.drawImage(img,0,0);
@@ -1233,23 +1239,33 @@ function iconFist(cx,cy,s){
 /* ==========================================================================
    LIGHTS (generated wall torches, party light)
    ========================================================================== */
+// x1,y1,x2,y2, minimum gap between torches (small = many, large = dark), red light?
+const LIGHT_ZONES=[
+  [7,17,10,19,2.0,0],   // the armoury: well lit, warm
+  [13,13,19,19,2.4,1],  // skeleton crypt: braziers everywhere, red
+  [21,11,26,19,2.3,1],  // the Rat King's lair: red
+  [1,15,5,19,4.6,0],    // start crypt
+  [1,5,8,9,10,0],       // rat hall: dark
+  [15,2,24,9,8.5,1],    // bat hall: dark, a few red lights
+  [3,10,3,14,12,0],[10,7,14,7,12,0],[11,3,13,5,12,0]];
 function setupLights(){
   LIGHTS.length=0;torchAt.clear();
+  const zoneAt=(x,y)=>{for(const z of LIGHT_ZONES)if(x>=z[0]&&x<=z[2]&&y>=z[1]&&y<=z[3])return z;return [0,0,0,0,6.2,0]};
   const cands=[];
   for(let y=1;y<MH-1;y++)for(let x=1;x<MW-1;x++){
     const g=G.grid[y][x];if(g!==1&&g!==2)continue;
     for(let f=0;f<4;f++){
       const nx=x+DIRS[f][0],ny=y+DIRS[f][1];
-      if(G.grid[ny][nx]===0&&!G.decor.some(d=>d.block&&d.x===nx&&d.y===ny))cands.push([x,y,f]);
+      if(G.grid[ny][nx]===0&&!G.decor.some(d=>d.block&&d.x===nx&&d.y===ny))cands.push([x,y,f,nx,ny]);
     }
   }
   cands.sort((a,b)=>hash2(a[0],a[1],a[2]*7+3)-hash2(b[0],b[1],b[2]*7+3));
   const out=[];
-  for(const c of cands)if(!out.some(t=>Math.hypot(t[0]-c[0],t[1]-c[1])<6.2))out.push(c);
-  for(const [x,y,f] of out){
-    const d=DIRS[f],key=(y*MW+x)*4+f;
-    torchAt.set(key,true);
-    LIGHTS.push({x:x+.5+d[0]*.62,y:y+.5+d[1]*.62,ph:hash2(x,y,5)*6.28,key,taken:false});
+  for(const c of cands){const gap=zoneAt(c[3],c[4])[4];if(!out.some(t=>Math.hypot(t[0]-c[0],t[1]-c[1])<gap))out.push(c)}
+  for(const [x,y,f,nx,ny] of out){
+    const d=DIRS[f],key=(y*MW+x)*4+f,red=!!zoneAt(nx,ny)[5];
+    torchAt.set(key,red?2:1);
+    LIGHTS.push({x:x+.5+d[0]*.62,y:y+.5+d[1]*.62,ph:hash2(x,y,5)*6.28,key,taken:false,red});
   }
 }
 function setLightLevel(l){
@@ -1962,7 +1978,7 @@ function snapshot(){
     enemies:G.enemies.map(e=>({t:e.t,x:e.x,y:e.y,hp:e.hp,maxhp:e.maxhp,alert:e.alert,chilled:e.chilled||0})),
     items:G.items.map(i=>i.taken?1:0),
     decor:G.decor.map(d=>({contents:d.contents||null,gold:d.gold||0,goldTaken:!!d.goldTaken})),
-    torches:LIGHTS.map(l=>l.taken?1:0)};
+    torches:LIGHTS.map(l=>l.taken?1:0),torchKeys:LIGHTS.filter(l=>l.taken).map(l=>l.key)};
 }
 function restore(sv){
   setParty(sv.party);reset();
@@ -1973,7 +1989,8 @@ function restore(sv){
   G.enemies=sv.enemies.map((e,i)=>({id:i,t:e.t,lvl:LEVEL,x:e.x,y:e.y,rx:e.x,ry:e.y,hp:e.hp,maxhp:e.maxhp,alert:!!e.alert,chilled:e.chilled||0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100}));
   G.items.forEach((it,i)=>{it.taken=!!sv.items[i]});
   G.decor.forEach((d,i)=>{const s=sv.decor[i];if(s){d.contents=s.contents;d.gold=s.gold;d.goldTaken=s.goldTaken}});
-  LIGHTS.forEach((l,i)=>{if(sv.torches[i]){l.taken=true;torchAt.delete(l.key)}});
+  if(sv.torchKeys){const ks=new Set(sv.torchKeys);LIGHTS.forEach(l=>{if(ks.has(l.key)){l.taken=true;torchAt.delete(l.key)}})}
+  else if(sv.torches&&sv.torches.length===LIGHTS.length)LIGHTS.forEach((l,i)=>{if(sv.torches[i]){l.taken=true;torchAt.delete(l.key)}});
   G.state='play';G.menu=false;G.map=false;G.inv.open=false;G.loot=null;G.saves=null;G.nextAuto=G.time+6;
   reveal();msg('Game loaded.','#9ae0a0');
 }
