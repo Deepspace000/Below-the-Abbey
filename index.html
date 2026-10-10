@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.56';
+const VERSION='0.57';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -888,7 +888,7 @@ const SLOT_LABEL={head:'Helm',chest:'Chest',arms:'Arms',legs:'Legs',main:'Main h
 const G={state:'title',P:{x:0,y:0,f:0,angT:0},C:{x:0,y:0,a:0},grid:[],seen:[],enemies:[],items:[],decor:[],heroes:[],
   sel:0,acted:[],keys:0,rounds:0,kills:0,timers:[],msgs:[],floats:[],shake:0,time:0,lockT:0,hold:null,queued:null,mute:false,menu:false,map:false,bossDead:false,
   bag:[],loot:null,saves:null,overview:false,cut:null,flags:{},arrows:[],day:0,winKind:null,nextAuto:0,gold:0,lightBoost:0,lightLevel:0,hits:[],inv:{open:false,tab:'inv',hero:0,sel:null,scroll:0}};
-window.__game=G;G.fx=[];G.dmgAcc=0;G.clock=480;G.restT=-99;G.starveT=0;
+window.__game=G;G.fx=[];G.buffs=[];G.lvlBanners=[];G.dmgAcc=0;G.clock=480;G.restT=-99;G.starveT=0;
 
 const mkItem=id=>({id,n:1});
 function portraitImg(hi){return IMG['pt'+HERO_DEF[hi].app]||IMG._pf0}
@@ -905,7 +905,7 @@ function reset(n){
   buildRegions();
   G.P={x:START.x,y:START.y,f:START.f,angT:(START.f-1)*Math.PI/2};
   G.C={x:START.x,y:START.y,a:G.P.angT};
-  G.heroes=HERO_DEF.map(h=>({hp:h.hp,max:h.hp,base:h.hp,mp:h.mp,mpMax:h.mp,alive:true,hurt:0,flash:0,lvl:1,xp:0,food:100,str:h.str,dex:h.dex,int:h.int,eq:{},spellSel:0,lvlFlash:0,unarmed:h.unarmed}));
+  G.heroes=HERO_DEF.map(h=>({hp:h.hp,max:h.hp,base:h.hp,mp:h.mp,mpMax:h.mp,alive:true,hurt:0,flash:0,lvl:1,xp:0,food:100,powSel:0,str:h.str,dex:h.dex,int:h.int,eq:{},spellSel:0,lvlFlash:0,unarmed:h.unarmed}));
   HERO_DEF.forEach((d,i)=>{if(d.caster)G.heroes[i].eq.s0=mkItem('sp_fire')});
   G.bag=[mkItem('potion')];G.gold=0;G.lightBoost=0;
   G.sel=0;G.acted=[false,false,false,false];G.keys=0;G.rounds=0;G.kills=0;G.bossDead=false;
@@ -915,7 +915,7 @@ function reset(n){
   G.items=ITEM_SPAWNS.map(s=>({k:s.k,x:s.x,y:s.y,taken:false}));
   G.decor=DECOR_SPAWNS.map(s=>{const o={k:s.k,x:s.x,y:s.y,block:!!s.block,loot:CONTAINERS.includes(s.k),shop:s.k==='cart'};if(s.deco){o.loot=false;o.shop=false}if(s.npc){o.npc=s.npc;o.loot=false;o.shop=false;if(s.goat)o.goat=s.goat}return o});
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++)if(MAPROWS[y][x]==='t')G.decor.push({k:'tree'+((hash2(x,y,7)*NTREES)|0),x,y,block:true,loot:false,shop:false});
-  G.loot=null;G.flags={};G.arrows=[];G.cut=null;G.winKind=null;G.quests={};G.lst={};G.talk=null;G.clock=480;G.starveT=0;
+  G.loot=null;G.flags={};G.arrows=[];G.cut=null;G.winKind=null;G.quests={};G.lst={};G.talk=null;G.clock=480;G.starveT=0;G.buffs=[];G.lvlBanners=[];
   setupLights();
   reveal();
 }
@@ -1022,6 +1022,7 @@ function reqFail(h,d){const r=d.req||{};if((r.str||0)>h.str)return 'STR '+r.str;
 function recalcMax(hi){
   const h=G.heroes[hi];let b=h.base;
   for(const k in h.eq)b+=idef(h.eq[k]).hp||0;
+  b+=pas(hi,'maxhp');
   const delta=b-h.max;h.max=b;if(delta>0)h.hp+=delta;if(h.hp>h.max)h.hp=h.max;
 }
 function equipTo(hi,slot,bagIdx){
@@ -1064,25 +1065,25 @@ const strB=h=>Math.floor(Math.max(0,h.str-8)/4);
 const intB=h=>Math.floor(Math.max(0,h.int-10)/3);
 function heroWeapon(h){const it=h.eq.main;return it&&idef(it).k==='weapon'?idef(it):null}
 function ringSum(h,key){let s=0;for(const k of RING_SLOTS)if(h.eq[k])s+=idef(h.eq[k])[key]||0;return s}
-function heroArmor(h){let a=0;for(const k of ['head','arms','legs','chest','off',...RING_SLOTS]){const it=h.eq[k];if(it)a+=idef(it).armor||0}return a}
+function heroArmor(h){let a=0;for(const k of ['head','arms','legs','chest','off',...RING_SLOTS]){const it=h.eq[k];if(it)a+=idef(it).armor||0}return a+pasH(h,'armor')}
 function heroDmgRange(h){const w=heroWeapon(h),r=w?w.dmg:(h.unarmed||[1,2]),b=strB(h)+ringSum(h,'dmgb');return [r[0]+b,r[1]+b]}
-function heroHitPct(hi,fly){const h=G.heroes[hi],w=heroWeapon(h);let c=HERO_DEF[hi].hit+(w?w.hit||0:-.1)+(h.dex-8)*.006+ringSum(h,'hitb');if(fly)c-=.2;return clamp(c,.2,.97)}
+function heroHitPct(hi,fly){const h=G.heroes[hi],w=heroWeapon(h);let c=HERO_DEF[hi].hit+(w?w.hit||0:-.1)+(h.dex-8)*.006+ringSum(h,'hitb')+pas(hi,'hitPct');if(fly)c-=.2;return clamp(c,.2,.97)}
 function magicBonus(h){let m=0;for(const k of ['main','off','alt']){const it=h.eq[k];if(it)m+=idef(it).magic||0}return m}
 function heroLight(h){let l=0;for(const k of ['main','off']){const it=h.eq[k];if(it&&idef(it).k==='light')l=Math.max(l,idef(it).light)}return l}
 function partyLight(){let l=0;for(const h of G.heroes)if(h.alive)l=Math.max(l,heroLight(h));return l}
 function rollDmg(h,mult){
   const r=heroDmgRange(h),w=heroWeapon(h);let d=rnd(r[0],r[1]),crit=false;
-  if(Math.random()<(w&&w.dbl||0)+ringSum(h,'dbl')){d*=2;crit=true}
-  return {d:Math.max(1,Math.round(d*(mult||1))),crit};
+  if(Math.random()<(w&&w.dbl||0)+ringSum(h,'dbl')+pasH(h,'crit')){d*=2;crit=true}
+  return {d:Math.max(1,Math.round(d*(mult||1)*(1+pasH(h,'dmgPct')))),crit};
 }
 function specialInfo(i){
-  const h=G.heroes[i],def=HERO_DEF[i];
-  if(def.caster){
+  const h=G.heroes[i],def=HERO_DEF[i],P=curPower(i);
+  if(def.caster&&P.type==='spell'){
     const it=h.eq['s'+h.spellSel]||SPELL_SLOTS.map(k=>h.eq[k]).find(Boolean);
     if(it){const S=SPELLS[idef(it).spell];return {name:S.n,cost:S.cost,spell:idef(it).spell}}
     return {name:'No spell',cost:0,spell:null};
   }
-  return {name:def.sp.name,cost:def.sp.cost};
+  return {name:P.name,cost:P.cost};
 }
 /* ---------- experience ---------- */
 function giveXP(amount){
@@ -1093,8 +1094,16 @@ function giveXP(amount){
 }
 function levelUp(hi){
   const h=G.heroes[hi],def=HERO_DEF[hi],g=def.grow;
+  const old={hp:h.max,mp:h.mpMax,str:h.str,dex:h.dex,int:h.int,lvl:h.lvl};
   h.xp-=xpNeed(h.lvl);h.lvl++;h.base+=g.hp;h.mpMax+=g.mp;h[g.a]++;if(h.lvl%2===0)h[g.b]++;
-  recalcMax(hi);h.hp=Math.min(h.max,h.hp+Math.ceil(g.hp*1.5));h.mp=h.mpMax;h.lvlFlash=1.6;
+  recalcMax(hi);
+  {const ch=[],gain={};for(const [k,lab] of [['str','Strength'],['dex','Dexterity'],['int','Intelligence']])if(h[k]!==old[k]){ch.push([lab,old[k],h[k]]);gain[k]=[old[k],h[k]]}
+   if(h.max!==old.hp){ch.push(['Health',old.hp,h.max]);gain.hp=[old.hp,h.max]}
+   if(h.mpMax!==old.mp){ch.push([def.mpn,old.mp,h.mpMax]);gain.mp=[old.mp,h.mpMax]}
+   gain.lvl=[old.lvl,h.lvl];h.gain=gain;
+   const pw=CLASSES[def.clsId].powers.filter(p=>p.lv>old.lvl&&p.lv<=h.lvl).map(p=>p.name);
+   G.lvlBanners.push({name:def.name,lvl:h.lvl,changes:ch,powers:pw,t:G.time});}
+  h.hp=Math.min(h.max,h.hp+Math.ceil(g.hp*1.5));h.mp=h.mpMax;h.lvlFlash=1.6;
   msg(`${def.name} reaches level ${h.lvl}!`,'#ffe36a');sfx('level');addFloat(portraitX(hi)+19,250,'LEVEL UP','#ffe36a');
 }
 
@@ -1112,10 +1121,11 @@ function heroDone(i){
 function addFloat(x,y,text,col){G.floats.push({x,y,text,col,t:0})}
 function hurtEnemy(e,dmg){
   const def=ENEMY_DEF[e.t],st=enemyStat(e.t);
+  if(e.t==='skel'&&G.curHero!==undefined)dmg=Math.round(dmg*(1+pas(G.curHero,'undeadPct')));
   G.dmgAcc=(G.dmgAcc||0)+dmg;e.hp-=dmg;e.flash=1;e.alert=true;addFloat(e.sx,e.sy-14,String(dmg),'#ffd76a');
   if(e.hp<=0){
     e.dying=.55;G.kills++;sfx(e.t==='skel'?'rattle':'ratdie');
-    const gold=rnd(st.gold[0],st.gold[1]);G.gold+=gold;
+    const gold=Math.round(rnd(st.gold[0],st.gold[1])*(1+Math.max(0,...livingHeroes().map(j=>pas(j,'goldPct')))));G.gold+=gold;
     msg(`The ${def.name} dies. +${st.xp} XP${gold?`, +${gold} gold`:''}.`,e.t==='boss'?'#ffd76a':'#b8d89a');
     if(e.t==='boss')G.bossDead=true;
     if(def.kind==='bandit'&&Math.random()<.3){const f=foodFor(Math.random());if(bagAdd(mkItem(f)))msg(`You find a ${ITEMDEF[f].n} on the body.`,'#9ae0a0')}
@@ -1133,14 +1143,15 @@ function heroAttack(i){
   return true;
 }
 function heroSpecial(i){
-  const def=HERO_DEF[i],h=G.heroes[i],sp=specialInfo(i),t=def.sp.type;
+  const def=HERO_DEF[i],h=G.heroes[i],sp=specialInfo(i),P=curPower(i),t=P.type;
   if(h.mp<sp.cost){msg(`${def.name} lacks the ${def.mpn.toLowerCase()}.`,'#d09a80');return false}
+  if(NEWT.includes(t))return powerNew(i,P);
   if(t==='melee'||t==='twin'||t==='backstab'||t==='butt'){
     const f=frontEnemy(1);if(!f){msg('There is nothing within reach.');return false}
     const E=f.e,en=ENEMY_DEF[E.t].name;h.mp-=sp.cost;
     if(t==='melee'){
-      let d=rollDmg(h,def.sp.m).d+(def.sp.a||0);if(def.sp.undead&&E.t==='skel')d*=2;
-      msg(`${def.name} uses ${sp.name} on the ${en} for ${d}!`,'#ffd76a');hurtEnemy(E,d);
+      let d=rollDmg(h,P.m).d+(P.a||0);if(P.undead&&E.t==='skel')d*=2;
+      msg(`${def.name} uses ${sp.name} on the ${en} for ${d}!`,'#ffd76a');hurtEnemy(E,d);if(P.daze&&E.hp>0)E.chilled=1;
     }else if(t==='twin'){
       let tot=0;for(let n=0;n<2;n++){const d=rollDmg(h).d;tot+=d;hurtEnemy(E,d);if(E.hp<=0)break}
       msg(`${def.name} stabs twice for ${tot}.`,'#ffd76a');
@@ -1152,11 +1163,11 @@ function heroSpecial(i){
     return true;
   }
   if(t==='shot'||t==='volley'){
-    const f=frontEnemy(def.sp.range);if(!f){msg('No target in range.');return false}
+    const f=frontEnemy(P.range);if(!f){msg('No target in range.');return false}
     const E=f.e,en=ENEMY_DEF[E.t].name;h.mp-=sp.cost;sfx('miss');let tot=0;
     for(let n=0;n<(t==='volley'?2:1);n++){
       if(E.hp<=0)break;
-      {const d=Math.max(1,Math.round(rollDmg(h,def.sp.m).d));tot+=d;hurtEnemy(E,d)}
+      {const d=Math.max(1,Math.round(rollDmg(h,P.m).d));tot+=d;hurtEnemy(E,d);if(P.daze&&E.hp>0)E.chilled=1}
     }
     msg(tot?`${def.name}'s ${sp.name} hits the ${en} for ${tot}.`:`${def.name}'s ${sp.name} misses.`,tot?'#ffd76a':'#a09880');
     return true;
@@ -1166,7 +1177,7 @@ function heroSpecial(i){
     const S=SPELLS[sp.spell];
     if(S.self){h.mp-=S.cost;G.lightBoost=40;sfx('heal');msg(`${def.name} conjures a glowing light. The party can see much farther for 40 rounds.`,'#f0e080');return true}
     const f=frontEnemy(S.range);if(!f){msg(`No target in the ${S.n}'s path.`);return false}
-    h.mp-=S.cost;const d=rnd(S.dmg[0],S.dmg[1])+intB(h)+magicBonus(h)+(def.sp.bonus||0);
+    h.mp-=S.cost;const d=Math.round((rnd(S.dmg[0],S.dmg[1])+intB(h)+magicBonus(h)+(P.bonus||0))*(1+pas(i,'spellPct')));
     sfx('fire');msg(`${def.name}'s ${S.n} hits for ${d}!`,S.chill?'#9ad0ff':'#ff9a50');
     if(S.chill&&f.e.hp-d>0){f.e.chilled=1}
     hurtEnemy(f.e,d);return true;
@@ -1175,22 +1186,249 @@ function heroSpecial(i){
   let best=-1,bf=2;
   for(const j of livingHeroes()){const fr=G.heroes[j].hp/G.heroes[j].max;if(fr<1&&fr<bf){bf=fr;best=j}}
   if(best<0){msg('Everyone is already healthy.');return false}
-  h.mp-=sp.cost;const amt=rnd(8,12)+Math.floor(Math.max(0,h.int-8)/3),tg=G.heroes[best];tg.hp=Math.min(tg.max,tg.hp+amt);
+  h.mp-=sp.cost;const amt=Math.round((rnd(8,12)+Math.floor(Math.max(0,h.int-8)/3))*(1+pas(i,'healPct'))),tg=G.heroes[best];tg.hp=Math.min(tg.max,tg.hp+amt);
   sfx('heal');msg(`${def.name} heals ${HERO_DEF[best].name} for ${amt}.`,'#9ae0a0');addFloat(portraitX(best)+19,250,'+'+amt,'#7fe08a');
   return true;
 }
 const portraitX=i=>6+i*40;
+/* ==========================================================================
+   POWERS: every class gains a power at levels 1, 4, 7, 10, 13, 16, 18 and 20.
+   Some are passive (always on), some are active (used from the Special button or the Powers tab).
+   ========================================================================== */
+const POWER_LV=[1,4,7,10,13,16,18,20];
+const actP=(lv,name,cost,type,d,o)=>Object.assign({lv,name,cost,type,d,act:true},o||{});
+const pas_=(lv,name,d,pas)=>({lv,name,d,act:false,pas});
+const EXTRA_POWERS={
+  Warrior:[
+    pas_(4,'Iron Skin','Armor +2.',{armor:2}),
+    actP(7,'Cleave',5,'multi','Two heavy swings that never miss, each at 1.2 times weapon damage.',{n:2,m:1.2}),
+    actP(10,'Battle Cry',6,'buff','The whole party deals 25% more damage for 8 rounds.',{b:'dmgPct',amt:.25,rounds:8,party:true}),
+    pas_(13,'Veteran','Max health +15 and +5% to hit.',{maxhp:15,hitPct:.05}),
+    actP(16,'Shield Wall',6,'buff','The whole party gains +4 armor for 8 rounds.',{b:'armor',amt:4,rounds:8,party:true}),
+    pas_(18,'Executioner','10% chance to deal double damage on every hit.',{crit:.1}),
+    actP(20,"Titan's Fury",10,'melee','Four times weapon damage plus 4.',{m:4,a:4})],
+  Barbarian:[
+    pas_(4,'Thick Hide','Max health +10.',{maxhp:10}),
+    actP(7,'Bloodlust',4,'buff','Deal 40% more damage for 6 rounds.',{b:'dmgPct',amt:.4,rounds:6,party:false}),
+    pas_(10,'Berserker','All damage +15%.',{dmgPct:.15}),
+    actP(13,'Savage Roar',6,'daze','Every enemy within 3 tiles is stunned for a turn.',{range:3}),
+    pas_(16,'Unbreakable','Armor +3 and recover 1 health every 5 rounds.',{armor:3,regen:.2}),
+    actP(18,'Whirlwind',7,'aoe','Hit every enemy within 2 tiles for 1.5 times weapon damage.',{range:2,m:1.5}),
+    actP(20,'Avatar of Ruin',12,'melee','Five times weapon damage.',{m:5,a:0})],
+  Paladin:[
+    pas_(4,'Blessed Armor','Armor +2.',{armor:2}),
+    actP(7,'Lay on Hands',5,'healx','Heals the most wounded ally for 12-18.',{amt:[12,18]}),
+    pas_(10,'Undead Bane','Deal 50% more damage to skeletons.',{undeadPct:.5}),
+    actP(13,'Divine Shield',6,'buff','The whole party gains +5 armor for 8 rounds.',{b:'armor',amt:5,rounds:8,party:true}),
+    pas_(16,'Crusader','All damage +15% and +5% to hit.',{dmgPct:.15,hitPct:.05}),
+    actP(18,'Holy Wrath',8,'aoe','Holy fire hits every enemy within 3 tiles for 12-18. Double against skeletons.',{range:3,dmg:[12,18],undead:1}),
+    actP(20,'Judgment',10,'melee','Three times weapon damage plus 12, doubled against skeletons.',{m:3,a:12,undead:1})],
+  Ranger:[
+    pas_(4,'Keen Eyes','+6% to hit.',{hitPct:.06}),
+    actP(7,'Pinning Shot',4,'shot','A shot for 1.5 times weapon damage that leaves the target dazed.',{range:3,m:1.5,daze:1}),
+    pas_(10,'Woodcraft','Enemies miss 8% more often. Hunger falls 25% slower.',{dodge:.08,hungerSlow:.25}),
+    actP(13,'Rapid Fire',6,'ranged','Three arrows that never miss, up to 4 tiles away.',{range:4,n:3,m:1}),
+    pas_(16,'Deadeye','12% chance to deal double damage on every hit.',{crit:.12}),
+    actP(18,"Hunter's Mark",5,'buff','Deal 50% more damage for 8 rounds.',{b:'dmgPct',amt:.5,rounds:8,party:false}),
+    actP(20,'Arrow Storm',10,'aoe','Arrows hit every enemy within 4 tiles for 2 times weapon damage.',{range:4,m:2})],
+  Archer:[
+    pas_(4,'Steady Aim','All damage +15%.',{dmgPct:.15}),
+    actP(7,'Piercing Shot',4,'shot','A shot for 2.5 times weapon damage, up to 4 tiles away.',{range:4,m:2.5}),
+    pas_(10,'Quick Draw','+6% to hit. Enemies miss 5% more often.',{hitPct:.06,dodge:.05}),
+    actP(13,'Triple Shot',6,'ranged','Three arrows that never miss, up to 4 tiles away.',{range:4,n:3,m:1}),
+    pas_(16,'Eagle Eye','12% chance to deal double damage on every hit.',{crit:.12}),
+    actP(18,'Arrow Rain',8,'aoe','Arrows hit every enemy within 4 tiles for 1.5 times weapon damage.',{range:4,m:1.5}),
+    actP(20,'Perfect Shot',10,'shot','One shot for 6 times weapon damage, up to 5 tiles away.',{range:5,m:6})],
+  Thief:[
+    pas_(4,'Nimble','Enemies miss 8% more often.',{dodge:.08}),
+    actP(7,'Smoke Bomb',4,'daze','Every enemy within 3 tiles is stunned for a turn.',{range:3}),
+    pas_(10,'Lucky','Enemies drop 30% more gold.',{goldPct:.3}),
+    actP(13,'Flurry',5,'multi','Three attacks that never miss, each at full weapon damage.',{n:3,m:1}),
+    pas_(16,'Shadow Step','10% double damage and enemies miss 5% more often.',{crit:.1,dodge:.05}),
+    actP(18,'Death Mark',6,'melee','Three and a half times weapon damage.',{m:3.5,a:0}),
+    pas_(20,'Master Thief','All damage +20% and 50% more gold.',{dmgPct:.2,goldPct:.5})],
+  Assassin:[
+    pas_(4,'Poise','6% chance to deal double damage on every hit.',{crit:.06}),
+    actP(7,'Vanish',4,'buff','Deal 100% more damage for 3 rounds.',{b:'dmgPct',amt:1,rounds:3,party:false}),
+    pas_(10,'Cold Blood','All damage +15%.',{dmgPct:.15}),
+    actP(13,'Nerve Strike',5,'melee','Two times weapon damage that leaves the target dazed.',{m:2,a:0,daze:1}),
+    pas_(16,'Shadowblade','10% double damage and +5% to hit.',{crit:.1,hitPct:.05}),
+    actP(18,'Assassinate',7,'melee','Four times weapon damage.',{m:4,a:0}),
+    pas_(20,"Death's Embrace",'20% chance of double damage and all damage +10%.',{crit:.2,dmgPct:.1})],
+  Mage:[
+    pas_(4,'Arcane Mind','Spell damage +15%.',{spellPct:.15}),
+    actP(7,'Mage Armor',4,'buff','The whole party gains +3 armor for 8 rounds.',{b:'armor',amt:3,rounds:8,party:true}),
+    pas_(10,'Mana Well','Recover 1 mana every 3 rounds.',{mpRegen:.34}),
+    actP(13,'Fireball',8,'aoe','Fire hits every enemy within 3 tiles for 14-20.',{range:3,dmg:[14,20]}),
+    pas_(16,'Spell Mastery','Spell damage +25%.',{spellPct:.25}),
+    actP(18,'Chain Lightning',9,'aoe','Lightning hits every enemy within 4 tiles for 12-18.',{range:4,dmg:[12,18]}),
+    actP(20,'Meteor',14,'aoe','A meteor hits every enemy within 4 tiles for 28-40.',{range:4,dmg:[28,40]})],
+  Sorcerer:[
+    pas_(4,'Innate Power','Spell damage +15%.',{spellPct:.15}),
+    actP(7,'Siphon',4,'drain','Drains 10-16 health from the enemy ahead and heals you for half.',{dmg:[10,16]}),
+    pas_(10,'Wild Magic','Spell damage +20%.',{spellPct:.2}),
+    actP(13,'Frost Nova',7,'aoe','Ice hits every enemy within 3 tiles for 8-12 and stuns them.',{range:3,dmg:[8,12],daze:1}),
+    pas_(16,'Overchannel','Spell damage +20%. Recover 1 mana every 4 rounds.',{spellPct:.2,mpRegen:.25}),
+    actP(18,'Lightning Storm',10,'aoe','Lightning hits every enemy within 4 tiles for 16-24.',{range:4,dmg:[16,24]}),
+    actP(20,'Cataclysm',15,'aoe','Ruin hits every enemy within 4 tiles for 34-48.',{range:4,dmg:[34,48]})],
+  Priest:[
+    pas_(4,'Faith','Healing is 20% stronger.',{healPct:.2}),
+    actP(7,'Blessing',5,'buff','The whole party deals 20% more damage for 8 rounds.',{b:'dmgPct',amt:.2,rounds:8,party:true}),
+    actP(10,'Mend',7,'healx','Heals every living ally for 6-10.',{amt:[6,10],all:1}),
+    pas_(13,'Sanctuary','Armor +3 and max health +8.',{armor:3,maxhp:8}),
+    actP(16,'Revive',12,'revive','Raises one fallen ally with 40% health.',{pct:.4}),
+    actP(18,'Greater Heal',8,'healx','Heals the most wounded ally for 24-34.',{amt:[24,34]}),
+    actP(20,'Divine Intervention',16,'healx','Fully heals every living ally.',{all:1,full:1})],
+  Monk:[
+    pas_(4,'Inner Calm','Enemies miss 8% more often. Hunger falls 30% slower.',{dodge:.08,hungerSlow:.3}),
+    actP(7,'Flurry of Blows',4,'multi','Three strikes that never miss, each at full damage.',{n:3,m:1}),
+    pas_(10,'Iron Body','Armor +3 and max health +10.',{armor:3,maxhp:10}),
+    actP(13,'Stunning Fist',5,'melee','Two and a half times weapon damage and the target is dazed.',{m:2.5,a:0,daze:1}),
+    pas_(16,'Ki Mastery','All damage +15%. Recover 1 stamina every 4 rounds.',{dmgPct:.15,mpRegen:.25}),
+    actP(18,'Dragon Kick',7,'melee','Four times weapon damage.',{m:4,a:0}),
+    pas_(20,'Perfect Harmony','All damage +25%, 12% double damage and enemies miss 10% more often.',{dmgPct:.25,crit:.12,dodge:.1})],
+  Goat:[
+    pas_(4,'Tough Hide','Armor +2. Hunger falls 30% slower.',{armor:2,hungerSlow:.3}),
+    pas_(7,'Stubborn','Max health +15.',{maxhp:15}),
+    actP(10,'Charge',5,'melee','Three times weapon damage and the target is dazed.',{m:3,a:0,daze:1}),
+    pas_(13,'Surefooted','Enemies miss 10% more often.',{dodge:.1}),
+    pas_(16,'Scavenger','Hunger falls 50% slower and recover 1 health every 6 rounds.',{hungerSlow:.5,regen:.17}),
+    actP(18,'Rampage',7,'multi','Three butts that never miss, each at 1.3 times damage.',{n:3,m:1.3}),
+    actP(20,'Legend of the Mountain',10,'melee','Five times weapon damage and the target is dazed.',{m:5,a:0,daze:1})]
+};
+for(const c of CLASSES)c.powers=[Object.assign({lv:1,act:true},c.sp)].concat(EXTRA_POWERS[c.name]||[]);
+const NEWT=['multi','ranged','aoe','daze','buff','healx','revive','drain'];
+function pas(hi,key){
+  const h=G.heroes[hi];if(!h)return 0;let s=0;
+  for(const p of CLASSES[HERO_DEF[hi].clsId].powers)if(!p.act&&h.lvl>=p.lv)s+=p.pas[key]||0;
+  for(const b of G.buffs)if(b.left>0&&b.b===key&&(b.hi===-1||b.hi===hi))s+=b.amt;
+  return s;
+}
+const pasH=(h,key)=>pas(G.heroes.indexOf(h),key);
+function curPower(i){
+  const h=G.heroes[i],c=CLASSES[HERO_DEF[i].clsId];let p=c.powers[h.powSel||0];
+  if(!p||!p.act||h.lvl<p.lv)p=c.powers[0];
+  return p;
+}
+function powerNew(i,P){
+  const def=HERO_DEF[i],h=G.heroes[i],t=P.type;
+  if(h.mp<P.cost){msg(`${def.name} lacks the ${def.mpn.toLowerCase()}.`,'#d09a80');return false}
+  if(t==='buff'){
+    h.mp-=P.cost;G.buffs=G.buffs.filter(b=>!(b.name===P.name&&b.hi===(P.party?-1:i)));
+    G.buffs.push({name:P.name,b:P.b,amt:P.amt,left:P.rounds,hi:P.party?-1:i});sfx('heal');
+    msg(`${def.name} uses ${P.name}. ${P.d}`,'#ffe9a0');return true;
+  }
+  if(t==='healx'){
+    const live=livingHeroes().filter(j=>G.heroes[j].hp<G.heroes[j].max);
+    if(!live.length){msg('Everyone is already healthy.');return false}
+    h.mp-=P.cost;const mult=1+pas(i,'healPct');let who=live;
+    if(!P.all){let best=live[0];for(const j of live)if(G.heroes[j].hp/G.heroes[j].max<G.heroes[best].hp/G.heroes[best].max)best=j;who=[best]}
+    for(const j of who){const g=G.heroes[j],amt=P.full?g.max-g.hp:Math.round((rnd(P.amt[0],P.amt[1])+Math.floor(Math.max(0,h.int-8)/3))*mult);
+      g.hp=Math.min(g.max,g.hp+amt);addFloat(portraitX(j)+19,250,'+'+amt,'#7fe08a')}
+    sfx('heal');msg(`${def.name} uses ${P.name}.`,'#9ae0a0');return true;
+  }
+  if(t==='revive'){
+    const dead=G.heroes.findIndex(x=>!x.alive);
+    if(dead<0){msg('No one has fallen.');return false}
+    h.mp-=P.cost;const g=G.heroes[dead];g.alive=true;g.hp=Math.max(1,Math.ceil(g.max*P.pct));
+    sfx('level');msg(`${def.name} raises ${HERO_DEF[dead].name} from the dead!`,'#ffe9a0');return true;
+  }
+  if(t==='multi'||t==='ranged'||t==='drain'){
+    const f=frontEnemy(t==='ranged'?P.range:1);
+    if(!f){msg(t==='ranged'?'No target in range.':'There is nothing within reach.');return false}
+    h.mp-=P.cost;const E=f.e,en=ENEMY_DEF[E.t].name;
+    if(t==='drain'){
+      const d=Math.round((rnd(P.dmg[0],P.dmg[1])+intB(h)+magicBonus(h))*(1+pas(i,'spellPct')));
+      sfx('fire');hurtEnemy(E,d);h.hp=Math.min(h.max,h.hp+Math.round(d/2));
+      msg(`${def.name}'s ${P.name} drains the ${en} for ${d}.`,'#d090ff');
+    }else{
+      let tot=0;for(let n=0;n<P.n;n++){if(E.hp<=0)break;const d=Math.max(1,Math.round(rollDmg(h,P.m).d));tot+=d;hurtEnemy(E,d)}
+      msg(`${def.name} uses ${P.name} on the ${en} for ${tot}!`,'#ffd76a');
+    }
+    return true;
+  }
+  if(t==='aoe'||t==='daze'){
+    const L=G.enemies.filter(e=>e.hp>0&&Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)<=P.range&&hasLOS(G.P.x,G.P.y,e.x,e.y));
+    if(!L.length){msg('No enemies in range.');return false}
+    h.mp-=P.cost;let tot=0;sfx('fire');
+    for(const E of L){
+      if(t==='aoe'){
+        let d=P.dmg?Math.round((rnd(P.dmg[0],P.dmg[1])+intB(h)+magicBonus(h))*(1+pas(i,'spellPct'))):Math.max(1,Math.round(rollDmg(h,P.m).d));
+        if(P.undead&&E.t==='skel')d*=2;tot+=d;hurtEnemy(E,d);
+      }
+      if(E.hp>0&&(P.daze||t==='daze'))E.chilled=1;
+    }
+    msg(`${def.name}'s ${P.name} hits ${L.length} ${L.length>1?'foes':'foe'}${tot?' for '+tot:''}!`,'#ff9a50');return true;
+  }
+  return false;
+}
+/* ---------- level-up news ---------- */
+function drawLevelBanners(){
+  G.lvlBanners=G.lvlBanners.filter(b=>G.time-b.t<9);
+  let y=22;
+  for(const b of G.lvlBanners.slice(-2)){
+    const age=G.time-b.t,a=clamp(Math.min(age*3,(9-age)*1.2),0,1),rows=Math.ceil(b.changes.length/3)+(b.powers.length?1:0),h=24+rows*11,x=40,w=340;
+    ctx.save();ctx.globalAlpha=a;
+    ctx.fillStyle='rgba(10,8,5,.92)';rrect(ctx,x,y,w,h,4);ctx.fill();ctx.lineWidth=1.8;ctx.strokeStyle=goldG(x,y,w,h);rrect(ctx,x,y,w,h,4);ctx.stroke();
+    txt(`${b.name} reaches level ${b.lvl}!`,x+w/2,y+11,10.5,'#ffe36a','center',true);
+    b.changes.forEach(([lab,o,n],k)=>txt(`${lab} ${o} > ${n}`,x+10+(k%3)*110,y+25+((k/3)|0)*11,8.5,'#f0dc90','left',true,undefined,104));
+    if(b.powers.length)txt('New power: '+b.powers.join(', '),x+w/2,y+25+Math.ceil(b.changes.length/3)*11,8.5,'#9ae0a0','center',true,undefined,w-16);
+    ctx.restore();y+=h+4;
+  }
+}
+function iconPowers(cx,cy,s){
+  ctx.save();ctx.translate(cx,cy);ctx.scale(s,s);
+  ctx.fillStyle='#e0b840';ctx.strokeStyle='#120c08';ctx.lineWidth=1.6;ctx.lineJoin='round';
+  ctx.beginPath();for(let k=0;k<10;k++){const r=k%2?5:13,an=-Math.PI/2+k*Math.PI/5;ctx.lineTo(Math.cos(an)*r,Math.sin(an)*r)}ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.fillStyle='rgba(255,245,200,.6)';ctx.beginPath();ctx.arc(-1,-2,2,0,TAU);ctx.fill();
+  ctx.restore();
+}
+function drawPowerLadder(hi){
+  const I=G.inv,h=G.heroes[hi],def=HERO_DEF[hi],c=CLASSES[def.clsId];
+  if(I.pw===undefined)I.pw=0;
+  txt(`${def.name} - ${def.cls}`,234,14,9.5,'#c8b982','center',true,undefined,140);
+  c.powers.forEach((p,k)=>{
+    const y=22+k*27,open=h.lvl>=p.lv,chosen=p.act&&(h.powSel||0)===k&&open,sel=I.pw===k;
+    ctx.save();rrect(ctx,164,y,140,25,4);ctx.fillStyle=sel?'rgba(78,26,18,.96)':'rgba(46,14,14,.9)';ctx.fill();
+    ctx.lineWidth=sel?2.2:1.3;ctx.strokeStyle=chosen?'#ffd76a':sel?'#d8b04a':'#7a6440';ctx.stroke();ctx.restore();
+    ctx.globalAlpha=open?1:.42;
+    txt('Lv '+p.lv,170,y+12.5,8,open?'#d8c88e':'#8a7a62','left',true);
+    txt(p.name,196,y+9,8.8,open?'#e2d8bc':'#9a8a72','left',true,undefined,86);
+    txt(p.act?`Active  ${p.cost} ${def.mpn.slice(0,4).toLowerCase()}`:'Passive',196,y+19,6.8,p.act?'#9ac8ff':'#a8d890','left',false,undefined,86);
+    if(chosen)txt('SET',298,y+12.5,7,'#ffd76a','right',true);
+    ctx.globalAlpha=1;
+    btn('ipr'+k,164,y,140,25);
+  });
+}
+function drawPowerDetail(rx,rw){
+  const I=G.inv,hi=I.hero,h=G.heroes[hi],def=HERO_DEF[hi],c=CLASSES[def.clsId],k=I.pw||0,p=c.powers[k];if(!p)return;
+  const open=h.lvl>=p.lv;
+  txt(p.name,rx+rw/2,20,12.5,open?'#d8c88e':'#8a7a62','center',true,undefined,rw-12);
+  txt(p.act?'ACTIVE POWER':'PASSIVE POWER',rx+rw/2,36,8.5,p.act?'#9ac8ff':'#a8d890','center',true);
+  txt(open?`Level ${p.lv}`:`Unlocks at level ${p.lv}`,rx+rw/2,50,9,open?'#c8b898':'#e8905a','center');
+  if(p.act)txt(`Cost ${p.cost} ${def.mpn.toLowerCase()}`,rx+rw/2,64,9,'#9ac8ff','center');
+  let ly=82;for(const s of wrapText(p.d,rw-14,9)){txt(s,rx+rw/2,ly,9,'#d2c9b2','center');ly+=12}
+  if(p.act&&open){
+    btnText('ipset',(h.powSel||0)===k?'Special power (set)':'Set as special',rx+14,150,rw-28,24);
+    btnText('ipuse','Use now',rx+14,180,rw-28,24);
+  }else if(!p.act&&open)txt('Always active',rx+rw/2,168,9,'#a8d890','center',true);
+  else txt(`${def.name} is level ${h.lvl}`,rx+rw/2,168,8.5,'#8a7a62','center');
+}
+
 /* ---------- impact graphics on the two attack buttons ---------- */
 function addImpact(id,hi,dmg){
-  const h=G.heroes[hi],def=HERO_DEF[hi],w=heroWeapon(h),t=id==='special'?def.sp.type:'',wt=w?w.t:'Fist';
+  const h=G.heroes[hi],def=HERO_DEF[hi],w=heroWeapon(h),t=id==='special'?curPower(hi).type:'',wt=w?w.t:'Fist';
   let kind,col='#f4f4ff',dagger=false,axe=false;
-  if(t==='heal'){kind='holy';col='#ffe9a0'}
+  if(t==='heal'||t==='healx'||t==='revive'||t==='buff'){kind='holy';col='#ffe9a0'}
+  else if(t==='aoe'||t==='daze'||t==='drain'){kind='magic';col=t==='drain'?'#d090ff':'#ff9a50'}
+  else if(t==='multi'){kind='slash';col='#f4f4ff';dagger=true}
+  else if(t==='ranged'){kind='arrow';col='#e8d8a8'}
   else if(t==='spell'){const sp=specialInfo(hi);kind='magic';col=sp.spell==='frost'?'#9ad0ff':sp.spell==='light'?'#f0e080':'#ff9a50'}
   else if(t==='shot'||t==='volley'||wt==='Bow'){kind='arrow';col='#e8d8a8'}
   else if(wt==='Mace'||wt==='Fist'||t==='butt'){kind='thud';col=wt==='Mace'?'#d8d0c0':'#e8c8a0'}
   else if(wt==='Staff'){kind='magic';col='#9ad0ff'}
   else{kind='slash';col=wt==='Axe'?'#f0d8c0':'#f4f4ff';dagger=wt==='Dagger'||t==='twin';axe=wt==='Axe'}
-  if(def.sp&&def.sp.undead&&id==='special')col='#ffe9a0';
+  if(id==='special'&&curPower(hi).undead)col='#ffe9a0';
   let p=clamp(dmg/10,.5,1.7);
   if(dmg<=0&&id==='attack'){kind='miss';p=.5}
   G.fx.push({id,kind,col,p,dagger,axe,t0:G.time,seed:Math.random()*99});
@@ -1231,8 +1469,8 @@ function drawImpacts(){
   }
 }
 {const a0=heroAttack,s0=heroSpecial;
- heroAttack=function(i){G.dmgAcc=0;const ok=a0(i);if(ok)addImpact('attack',i,G.dmgAcc);return ok};
- heroSpecial=function(i){G.dmgAcc=0;const ok=s0(i);if(ok)addImpact('special',i,G.dmgAcc);return ok};}
+ heroAttack=function(i){G.dmgAcc=0;G.curHero=i;const ok=a0(i);if(ok)addImpact('attack',i,G.dmgAcc);return ok};
+ heroSpecial=function(i){G.dmgAcc=0;G.curHero=i;const ok=s0(i);if(ok)addImpact('special',i,G.dmgAcc);return ok};}
 
 
 /* ---------- round / enemy phase ---------- */
@@ -1241,7 +1479,7 @@ function advanceTime(min){
   const before=G.heroes.map(h=>h.food);
   for(let m=0;m<min;m++){
     G.clock++;G.starveT=(G.starveT||0)+1;
-    for(const h of G.heroes)if(h.alive)h.food=Math.max(0,h.food-25/360);
+    G.heroes.forEach((h,hi)=>{if(h.alive)h.food=Math.max(0,h.food-25/360*(1-Math.min(.9,pas(hi,'hungerSlow'))))});
     if(G.starveT>=20){G.starveT=0;for(const h of G.heroes)if(h.alive&&h.food<=0){h.hp=Math.max(1,h.hp-1);h.hurt=.6}}
   }
   G.heroes.forEach((h,i)=>{if(!h.alive)return;
@@ -1281,7 +1519,7 @@ function enemyAttack(e){
   e.lunge=1;
   const dirToE=DIRS.findIndex(d=>G.P.x+d[0]===e.x&&G.P.y+d[1]===e.y);
   const side=dirToE===G.P.f?'':(dirToE===(G.P.f+2)%4?' from behind':' from the side');
-  const hitC=clamp(def.hit-heroArmor(h)*.03,.12,.95),verb=e.t==='skel'?'slashes':'bites';
+  const hitC=clamp(def.hit-heroArmor(h)*.03-pas(t,'dodge'),.1,.95),verb=e.t==='skel'?'slashes':'bites';
   if(Math.random()<hitC){
     const d=rnd(st.dmg[0],st.dmg[1]);h.hp-=d;h.hurt=1;G.shake=.35;sfx(e.t==='skel'?'hit':'bite');sfx('hurt');
     msg(`The ${def.name} ${verb} ${HERO_DEF[t].name}${side} for ${d}.`,'#e8a090');addFloat(portraitX(t)+19,250,'-'+d,'#ff6a5a');
@@ -1313,7 +1551,10 @@ function enemyAct(e){
   return dur;
 }
 function finishRound(){
-  for(const h of G.heroes)if(h.alive)h.mp=Math.min(h.mpMax,h.mp+1);
+  G.heroes.forEach((h,i)=>{if(!h.alive)return;h.mp=Math.min(h.mpMax,h.mp+1);
+    h.mpAcc=(h.mpAcc||0)+pas(i,'mpRegen');while(h.mpAcc>=1){h.mp=Math.min(h.mpMax,h.mp+1);h.mpAcc--}
+    h.hpAcc=(h.hpAcc||0)+pas(i,'regen');while(h.hpAcc>=1){h.hp=Math.min(h.max,h.hp+1);h.hpAcc--}});
+  for(const b of G.buffs)b.left--;G.buffs=G.buffs.filter(b=>b.left>0);
   if(G.lightBoost>0)G.lightBoost--;
   if(!livingHeroes().length){later(700,()=>{G.state='dead';sfx('lose')});return}
   if(!G.heroes[G.sel].alive)nextHero();
@@ -1860,13 +2101,27 @@ function drawInventory(){
         BTNS.push({id:'islot_'+sl,x:10,y,w:140,h:46,up:true,di:it?{kind:'inv',src:'slot',slot:sl,item:it}:null});
       }
     }else{
-      txt('Special power',80,16,10,'#c8b982','center',true);
+      txt('Spells',80,16,10,'#c8b982','center',true);txt('Only a Mage or Sorcerer can',80,40,9,'#a89878','center');txt('equip spell scrolls.',80,52,9,'#a89878','center');if(false){
       ctx.save();rrect(ctx,10,26,140,70,5);ctx.fillStyle='rgba(52,14,14,.94)';ctx.fill();ctx.lineWidth=1.6;ctx.strokeStyle='#8a7448';ctx.stroke();ctx.restore();
       classIcon(HERO_DEF[hi].clsId,40,61,1.7);
       txt(def.sp.name,98,44,11,'#d2c9b2','center',true);txt(`Cost ${def.sp.cost} ${def.mpn.toLowerCase()}`,98,60,8.5,'#9ac8ff','center');
       let ly=118;for(const s of wrapText(def.sp.d,136,9)){txt(s,80,ly,9,'#c8b898','center');ly+=12}
-      txt('Spell scrolls can only be used',80,176,8.5,'#8a7a58','center');txt('by a Mage or Sorcerer.',80,188,8.5,'#8a7a58','center');
+      }
     }
+  }else if(I.tab==='powers'){
+    txt('Party',80,14,10,'#c8b982','center',true);
+    for(let k=0;k<4;k++){
+      const hk=G.heroes[k],dk=HERO_DEF[k],sp=specialInfo(k),y=24+k*51,can=hk.alive&&(sp.spell!==null)&&hk.mp>=sp.cost&&!G.acted[k];
+      ctx.save();rrect(ctx,10,y,140,46,5);ctx.fillStyle=k===hi?'rgba(70,20,16,.95)':'rgba(46,14,14,.92)';ctx.fill();ctx.lineWidth=k===hi?2:1.4;ctx.strokeStyle=k===hi?'#d8b04a':'#8a7448';ctx.stroke();ctx.restore();
+      iconFace(k,27,y+17,.85);
+      txt(dk.name,46,y+10,8,'#b8a888','left',false,undefined,60);
+      txt(sp.name,46,y+23,9.5,hk.alive?'#d2c9b2':'#7a6a60','left',true,undefined,62);
+      txt(!hk.alive?'Fallen':sp.cost?`${sp.cost} ${dk.mpn.toLowerCase()}  (${hk.mp})`:'free',46,y+37,7.5,hk.alive&&hk.mp>=sp.cost?'#9ac8ff':'#9a7a7a','left',false,undefined,62);
+      ctx.save();ctx.globalAlpha=can?1:.45;panel(108,y+13,38,22,false,false);txt('Use',127,y+24,9,'#d8c88e','center',true);ctx.restore();
+      btn('ipow'+k,108,y+13,38,22);
+    }
+    const last=G.msgs[G.msgs.length-1];
+    if(last&&G.time-last.t<5)for(const [n,ln] of wrapText(last.text,140,8).entries())txt(ln,80,236+n*8,7.5,last.col,'center');
   }else{
     for(const [slot,c,r] of DOLL){
       const x=10+c*49,y=8+r*50,round=slot[0]==='r';
@@ -1886,23 +2141,14 @@ function drawInventory(){
       ['Strength',h.str],['Dexterity',h.dex],['Intelligence',h.int],['Armor',heroArmor(h)],['Damage',`${heroDmgRange(h)[0]}-${heroDmgRange(h)[1]}`],
       ['Hit chance',Math.round(heroHitPct(hi,false)*100)+'%'],['Gold',G.gold]];
     let y=16;
-    rows.forEach(([a,b],k)=>{txt(a,170,y,10,k===0?'#d8c88e':'#b8a888','left',k===0);txt(String(b),300,y,10,'#d2c9b2','right',true);y+=19});
+    const gk={Level:'lvl',Health:'hp',Strength:'str',Dexterity:'dex',Intelligence:'int'};gk[def.mpn]='mp';
+    rows.forEach(([a,b],k)=>{const gn=h.gain&&h.gain[gk[a]];
+      txt(a,170,y,10,k===0?'#d8c88e':gn?'#ffe36a':'#b8a888','left',k===0);
+      if(gn){txt(`${gn[0]} > ${gn[1]}`,300,y,10,'#ffe36a','right',true)}else txt(String(b),300,y,10,'#d2c9b2','right',true);y+=19});
     ctx.fillStyle='#141006';ctx.fillRect(170,y,130,6);ctx.fillStyle='#e8c040';ctx.fillRect(170,y,130*h.xp/nx,6);ctx.strokeStyle='#8a7448';ctx.lineWidth=1;roughStrokeRect(170,y,130,6);
     txt(`${nx-h.xp} XP to level ${h.lvl+1}`,235,y+16,8.5,'#b8a888','center');
-  }else if(I.tab==='spell'){
-    txt('Party powers',234,16,10,'#c8b982','center',true);
-    for(let k=0;k<4;k++){
-      const hk=G.heroes[k],dk=HERO_DEF[k],sp=specialInfo(k),y=24+k*51,can=hk.alive&&(sp.spell!==null)&&hk.mp>=sp.cost&&!G.acted[k];
-      ctx.save();rrect(ctx,164,y,140,46,5);ctx.fillStyle=k===hi?'rgba(70,20,16,.95)':'rgba(46,14,14,.92)';ctx.fill();ctx.lineWidth=k===hi?2:1.4;ctx.strokeStyle=k===hi?'#d8b04a':'#8a7448';ctx.stroke();ctx.restore();
-      iconFace(k,181,y+17,.85);
-      txt(dk.name,200,y+10,8,'#b8a888','left',false,undefined,60);
-      txt(sp.name,200,y+23,9.5,hk.alive?'#d2c9b2':'#7a6a60','left',true,undefined,62);
-      txt(!hk.alive?'Fallen':sp.cost?`${sp.cost} ${dk.mpn.toLowerCase()}  (${hk.mp})`:'free',200,y+37,7.5,hk.alive&&hk.mp>=sp.cost?'#9ac8ff':'#9a7a7a','left',false,undefined,62);
-      ctx.save();ctx.globalAlpha=can?1:.45;panel(262,y+13,38,22,false,false);txt('Use',281,y+24,9,'#d8c88e','center',true);ctx.restore();
-      btn('ipow'+k,262,y+13,38,22);
-    }
-    const last=G.msgs[G.msgs.length-1];
-    if(last&&G.time-last.t<5)for(const [n,ln] of wrapText(last.text,140,8).entries())txt(ln,234,236+n*8,7.5,last.col,'center');
+  }else if(I.tab==='powers'){
+    drawPowerLadder(hi);
   }else{
     ctx.save();ctx.beginPath();ctx.rect(BAGX-3,BAGY-1,BCOLS*BPITCH+2,BAGH+2);ctx.clip();
     const sc=clamp(I.scroll,0,maxScroll());I.scroll=sc;
@@ -1923,7 +2169,7 @@ function drawInventory(){
 
   /* ---- right: item card or hero summary ---- */
   const rx=316,rw=156;
-  if(cur){
+  if(I.tab==='powers'){drawPowerDetail(rx,rw)}else if(cur){
     drawItemCard(cur,hi,rx,8,rw);
     const d=idef(cur);let label=null,id=null;
     if(I.sel.src==='slot'){label='Unequip';id='iunequip'}
@@ -1948,10 +2194,10 @@ function drawInventory(){
 
   /* ---- bottom bar ---- */
   drawPortraits(250,hi,'ihero');
-  for(const [id,x,draw] of [['itab_inv',168,()=>iconBackpack(195,277,1.25)],['itab_char',226,()=>iconFace(hi,253,277,1.25)],['itab_spell',284,()=>iconBook(311,277,1.25)]]){
-    panel(x,252,54,62,false,I.tab===id.slice(5));draw();btn(id,x,252,54,62);
+  for(const [id,x,draw] of [['itab_inv',166,()=>iconBackpack(187,276,1.05)],['itab_char',210,()=>iconFace(hi,231,276,1.05)],['itab_spell',254,()=>iconBook(275,276,1.05)],['itab_powers',298,()=>iconPowers(319,276,1.05)]]){
+    panel(x,252,42,62,false,I.tab===id.slice(5));draw();btn(id,x,252,42,62);
   }
-  txt('Items',195,306,7.5,'#c9ba8e','center',true);txt('Hero',253,306,7.5,'#c9ba8e','center',true);txt('Powers',311,306,7.5,'#c9ba8e','center',true);
+  txt('Items',187,306,7,'#c9ba8e','center',true);txt('Hero',231,306,7,'#c9ba8e','center',true);txt('Spells',275,306,7,'#c9ba8e','center',true);txt('Powers',319,306,7,'#c9ba8e','center',true);
   panel(344,252,58,62,false,false);iconPotion(373,277,1.7);txt('x'+countPotions(),373,304,9,'#c9ba8e','center',true);btn('ipotion',344,252,58,62);
   panel(408,252,66,62,false,false);iconRedX(441,283,1.6);btn('iclose',408,252,66,62);
 }
@@ -1972,7 +2218,7 @@ function slotTap(slot){
 }
 function invBtn(id){
   const I=G.inv,hi=I.hero,h=G.heroes[hi];
-  if(id==='iclose'){I.open=false;return}
+  if(id==='iclose'){I.open=false;if(I.tab==='char')for(const g of G.heroes)g.gain=null;return}
   if(id.startsWith('ihero')){I.hero=+id.slice(5);I.sel=null;I.scroll=I.scroll;if(G.heroes[I.hero].alive)G.sel=I.hero;return}
   if(id.startsWith('itab_')){I.tab=id.slice(5);I.sel=null;return}
   if(id.startsWith('ibag')&&id!=='ibagarea'){const i=+id.slice(4);I.sel=(I.sel&&I.sel.src==='bag'&&I.sel.i===i)?null:(G.bag[i]?{src:'bag',i}:null);return}
@@ -1991,6 +2237,18 @@ function invBtn(id){
       I.sel=null;
       if(hostileNear()&&!G.acted[hi])heroDone(hi);
     }
+    return;
+  }
+  if(id.startsWith('ipr')){I.pw=+id.slice(3);return}
+  if(id==='ipset'){const c=CLASSES[HERO_DEF[hi].clsId],p=c.powers[I.pw||0];if(p&&p.act&&h.lvl>=p.lv){h.powSel=I.pw||0;sfx('equip');msg(`${HERO_DEF[hi].name}'s special is now ${p.name}.`,'#9ae0a0')}return}
+  if(id==='ipuse'){
+    const c=CLASSES[HERO_DEF[hi].clsId],p=c.powers[I.pw||0];
+    if(!p||!p.act||h.lvl<p.lv){return}
+    if(!h.alive){msg(`${HERO_DEF[hi].name} has fallen.`,'#d09a80');return}
+    if(G.acted[hi]){msg(`${HERO_DEF[hi].name} has already acted this round.`,'#d09a80');return}
+    if(G.timers.length){msg('Wait for the round to finish.','#d09a80');return}
+    const keep=h.powSel;h.powSel=I.pw||0;const ok=heroSpecial(hi);h.powSel=keep;
+    if(ok&&hostileNear()&&!G.acted[hi])heroDone(hi);
     return;
   }
   if(id.startsWith('ipow')){
@@ -2433,18 +2691,24 @@ function setScroll(d,v){if(d==='lbag'&&G.loot)G.loot.sl=clamp(v,0,maxScroll());e
 /* ==========================================================================
    SAVE / LOAD  (autosave + three manual slots, a backup of the previous run)
    ========================================================================== */
-const SAVE_SLOTS=[['auto','Autosave'],['1','Slot 1'],['2','Slot 2'],['3','Slot 3'],['prev','Previous run']];
+const SAVE_SLOTS=[['auto','Autosave'],['1','Slot 1'],['2','Slot 2'],['3','Slot 3'],['prev','Previous run'],['prev2','Older run']];
 const hasSave=k=>{try{return !!localStorage.getItem('abbeySave_'+k)}catch(e){return false}};
 function readSave(k){try{const s=localStorage.getItem('abbeySave_'+k);return s?JSON.parse(s):null}catch(e){return null}}
 function writeSave(k){
   try{localStorage.setItem('abbeySave_'+k,JSON.stringify(snapshot()));return true}catch(e){return false}
 }
 // keep the old run safe before anything replaces it
-function backupAuto(){try{const a=localStorage.getItem('abbeySave_auto');if(a)localStorage.setItem('abbeySave_prev',a)}catch(e){}}
+function backupAuto(){ // keep the old run safe, but never push a real run out with a brand new one
+  try{const a=localStorage.getItem('abbeySave_auto');if(!a)return;
+    let trivial=false;try{const j=JSON.parse(a);trivial=(j.rounds||0)<40&&(j.kills||0)===0}catch(e){}
+    if(trivial)return;
+    const p=localStorage.getItem('abbeySave_prev');if(p)localStorage.setItem('abbeySave_prev2',p);
+    localStorage.setItem('abbeySave_prev',a)}catch(e){}
+}
 function snapshot(){
   return {v:1,gv:VERSION,t:Date.now(),lvl:LEVEL,level:LEVEL,flags:G.flags,quests:G.quests,lst:G.lst,clock:G.clock,
     party:HERO_DEF.map(d=>({app:d.app,cls:d.clsId,name:d.name,bs:d.str-CLASSES[d.clsId].str,bd:d.dex-CLASSES[d.clsId].dex,bi:d.int-CLASSES[d.clsId].int})),
-    heroes:G.heroes.map(h=>({hp:h.hp,max:h.max,base:h.base,mp:h.mp,mpMax:h.mpMax,alive:h.alive,lvl:h.lvl,xp:h.xp,food:h.food,str:h.str,dex:h.dex,int:h.int,spellSel:h.spellSel,
+    heroes:G.heroes.map(h=>({hp:h.hp,max:h.max,base:h.base,mp:h.mp,mpMax:h.mpMax,alive:h.alive,lvl:h.lvl,xp:h.xp,food:h.food,powSel:h.powSel||0,str:h.str,dex:h.dex,int:h.int,spellSel:h.spellSel,
       eq:Object.fromEntries(Object.entries(h.eq).map(([k,it])=>[k,{id:it.id,n:it.n}]))})),
     bag:G.bag.map(b=>({id:b.id,n:b.n})),gold:G.gold,keys:G.keys,rounds:G.rounds,kills:G.kills,bossDead:G.bossDead,sel:G.sel,lightBoost:G.lightBoost,
     P:{x:G.P.x,y:G.P.y,f:G.P.f},
@@ -2456,7 +2720,7 @@ function snapshot(){
 }
 function restore(sv){
   setParty(sv.party);reset(sv.level||1);
-  sv.heroes.forEach((s,i)=>Object.assign(G.heroes[i],{hp:s.hp,max:s.max,base:s.base,mp:s.mp,mpMax:s.mpMax,alive:s.alive,lvl:s.lvl,xp:s.xp,food:s.food===undefined?100:s.food,str:s.str,dex:s.dex,int:s.int,spellSel:s.spellSel||0,eq:s.eq||{}}));
+  sv.heroes.forEach((s,i)=>Object.assign(G.heroes[i],{hp:s.hp,max:s.max,base:s.base,mp:s.mp,mpMax:s.mpMax,alive:s.alive,lvl:s.lvl,xp:s.xp,food:s.food===undefined?100:s.food,powSel:s.powSel||0,str:s.str,dex:s.dex,int:s.int,spellSel:s.spellSel||0,eq:s.eq||{}}));
   G.bag=sv.bag;G.gold=sv.gold;G.keys=sv.keys;G.rounds=sv.rounds;G.kills=sv.kills;G.bossDead=!!sv.bossDead;G.sel=sv.sel||0;G.lightBoost=sv.lightBoost||0;
   G.P={x:sv.P.x,y:sv.P.y,f:sv.P.f,angT:(sv.P.f-1)*Math.PI/2};G.C={x:sv.P.x,y:sv.P.y,a:G.P.angT};
   if(LEVEL===1){G.grid=sv.grid;G.seen=sv.seen.map(r=>Uint8Array.from(r))}
@@ -2983,7 +3247,7 @@ function enemyShoot(e){
   const pool=[];for(const j of l)for(let k=0;k<(j<2?3:1);k++)pool.push(j);
   const t=pool[rnd(0,pool.length-1)],h=G.heroes[t];e.lunge=1;
   G.arrows.push({x0:clamp(e.sx,14,406),y0:clamp(e.sy,40,170),x1:210+rnd(-30,30),y1:196,t:G.time});sfx('arrow');
-  const hitC=clamp(def.hit-heroArmor(h)*.03,.12,.95);
+  const hitC=clamp(def.hit-heroArmor(h)*.03-pas(t,'dodge'),.1,.95);
   if(Math.random()<hitC){
     const d=rnd(st.dmg[0],st.dmg[1]);h.hp-=d;h.hurt=1;G.shake=.3;sfx('hurt');
     msg(`An arrow from the ${def.name} hits ${HERO_DEF[t].name} for ${d}.`,'#e8a090');addFloat(portraitX(t)+19,250,'-'+d,'#ff6a5a');
@@ -3281,7 +3545,7 @@ function ui(dt){
   ctx.drawImage(vc,0,0,420,210);
   if(SMOKE){drawSmoke(G.time);ctx.fillStyle=HATCHP;ctx.fillRect(0,0,420,210)}
   if(G.state==='title'){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,420,210)}
-  if(G.state==='play'){drawEnemyPlate();drawArrows();drawFloats(dt);drawMessages()}
+  if(G.state==='play'){drawEnemyPlate();drawArrows();drawFloats(dt);drawMessages();drawLevelBanners()}
   ctx.restore();
   if(G.cut)drawCut();
   if(G.talk)drawTalk();
