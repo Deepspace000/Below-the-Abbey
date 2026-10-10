@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.71';
+const VERSION='0.72';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -721,7 +721,7 @@ function itemIconOn(X,d,cx,cy,s){
     case 'pottage':X.fillStyle='#5a3a22';X.beginPath();X.moveTo(-13,-1);X.lineTo(13,-1);X.quadraticCurveTo(12,13,0,13);X.quadraticCurveTo(-12,13,-13,-1);X.closePath();X.fill();X.stroke();X.fillStyle=c;X.beginPath();X.ellipse(0,-1,13,4.4,0,0,TAU);X.fill();X.stroke();X.fillStyle='rgba(70,100,40,.7)';for(const [px,py] of [[-6,-2],[2,-1],[7,-2]]){X.beginPath();X.arc(px,py,1.6,0,TAU);X.fill()}break;
     case 'pie':X.fillStyle='#8a5a28';X.beginPath();X.ellipse(0,5,14,6,0,0,TAU);X.fill();X.stroke();X.fillStyle=c;X.beginPath();X.ellipse(0,0,14,8,0,0,TAU);X.fill();X.stroke();X.strokeStyle='#6a4018';X.lineWidth=1.2;for(let a=0;a<12;a++){const an=a*.52;X.beginPath();X.moveTo(Math.cos(an)*12,Math.sin(an)*6.6);X.lineTo(Math.cos(an)*14,Math.sin(an)*8);X.stroke()}X.beginPath();X.moveTo(-5,-1);X.lineTo(5,1);X.moveTo(-3,2);X.lineTo(4,-2);X.stroke();break;
     case 'roast':X.rotate(-.4);X.fillStyle='#e8e0c8';X.fillRect(8,-2.4,9,4.8);X.strokeRect(8,-2.4,9,4.8);X.beginPath();X.arc(18,-2.4,2.6,0,TAU);X.arc(18,2.4,2.6,0,TAU);X.fill();X.fillStyle=c;X.beginPath();X.ellipse(-2,0,11,8,0,0,TAU);X.fill();X.stroke();X.fillStyle='rgba(230,160,90,.45)';X.beginPath();X.ellipse(-4,-3,6,2.6,-.2,0,TAU);X.fill();break;
-    case 'potion':if(IMG.potion)X.drawImage(IMG.potion,-12,-16,24,30);break;
+    case 'potion':if(IMG.potion)X.drawImage(IMG.potion,-14,-15,28,28);break;
     case 'scroll':X.fillStyle='#e8dcb0';X.beginPath();X.moveTo(-9,-11);X.lineTo(9,-11);X.lineTo(9,9);X.lineTo(-9,9);X.closePath();X.fill();X.stroke();
       X.fillStyle='#c8b888';X.beginPath();X.ellipse(-9,-1,3,10,0,0,TAU);X.fill();X.stroke();X.beginPath();X.ellipse(9,-1,3,10,0,0,TAU);X.fill();X.stroke();
       X.fillStyle=c;X.beginPath();X.arc(0,-1,4.4,0,TAU);X.fill();X.stroke();X.strokeStyle='rgba(60,40,20,.6)';X.lineWidth=1;for(const y of [-8,-5,4,7]){X.beginPath();X.moveTo(-6,y);X.lineTo(6,y);X.stroke()}break;
@@ -3681,6 +3681,8 @@ function ui(dt){
   // aged finish: wash the colour out towards grey and add a faint dusty veil
   ctx.save();ctx.globalCompositeOperation='saturation';ctx.fillStyle='rgba(128,128,128,.4)';ctx.fillRect(0,0,DW,DH);
   ctx.globalCompositeOperation='source-over';ctx.fillStyle='rgba(70,64,54,.07)';ctx.fillRect(0,0,DW,DH);
+  if(!DITHERP)makeDitherPat();
+  if(DITHERP){ctx.globalCompositeOperation='soft-light';ctx.globalAlpha=.5;ctx.fillStyle=DITHERP;ctx.fillRect(0,0,DW,DH);ctx.globalAlpha=1}
   if(PAPERP){ctx.globalCompositeOperation='multiply';ctx.fillStyle='rgba(224,206,170,.12)';ctx.fillRect(0,0,DW,DH);ctx.globalAlpha=.75;ctx.fillStyle=PAPERP;ctx.fillRect(0,0,DW,DH)}
   ctx.restore();
 }
@@ -3691,10 +3693,16 @@ function drawWorld(){
   if(LOWC.width!==w){LOWC.width=w;LOWC.height=h}
   LOWX.imageSmoothingEnabled=true;LOWX.drawImage(vc,0,0,w,h);
   const im=LOWX.getImageData(0,0,w,h),D=im.data;
-  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const o=(y*w+x)*4,t=(BAYER[(y&3)*4+(x&3)]-7.5)*.91;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const o=(y*w+x)*4,t=(BAYER[(y&3)*4+(x&3)]-7.5)*.73;
     D[o]=Math.round((D[o]+t)/10)*10;D[o+1]=Math.round((D[o+1]+t)/10)*10;D[o+2]=Math.round((D[o+2]+t)/10)*10}
   LOWX.putImageData(im,0,0);
   ctx.imageSmoothingEnabled=false;ctx.drawImage(LOWC,0,0,420,210);ctx.imageSmoothingEnabled=true;
+}
+let DITHERP=null;
+function makeDitherPat(){
+  const c=document.createElement('canvas');c.width=c.height=4;const x=c.getContext('2d');
+  for(let i=0;i<16;i++){const g=Math.round(128+(BAYER[i]-7.5)*10);x.fillStyle=`rgb(${g},${g},${g})`;x.fillRect(i%4,(i/4)|0,1,1)}
+  DITHERP=ctx.createPattern(c,'repeat');
 }
 function veil(a){ctx.fillStyle=`rgba(4,3,2,${a})`;ctx.fillRect(0,0,DW,DH)}
 function bigPanel(x,y,w,h){illum(x,y,w,h,(x+y)|0);ctx.save();ctx.fillStyle='rgba(10,8,6,.92)';rrect(ctx,x,y,w,h,8);ctx.fill();ctx.restore();ctx.lineWidth=3;ctx.strokeStyle=goldG(x,y,w,h);rrect(ctx,x,y,w,h,8);ctx.stroke();wornEdge(x,y,w,h,8);ctx.lineWidth=1;ctx.strokeStyle='rgba(255,230,150,.25)';rrect(ctx,x+5,y+5,w-10,h-10,5);ctx.stroke()}
@@ -3985,8 +3993,10 @@ addEventListener('resize',fit);fit();
   IMG._fbRat=fallbackRat(false);IMG._fbBoss=fallbackRat(true);
   for(let i=0;i<4;i++)IMG['_pf'+i]=heroFallback(i);
   try{await Promise.race([Promise.all([document.fonts.load("16px 'IM Fell English SC'"),document.fonts.load("16px 'IM Fell English'"),document.fonts.load("16px 'UnifrakturCook'")]),new Promise(r=>setTimeout(r,2500))])}catch(e){}
-  await Promise.all([loadImg('rat','assets/rat.png'),loadImg('boss','assets/boss.png'),loadImg('wolf','assets/wolf.png'),loadImg('bandit','assets/bandit.png'),loadImg('archer','assets/archer.png'),loadImg('bat','assets/bat.png'),loadImg('skel','assets/skel.png'),...['wolfA','banditA','archerA','ratA','bossA','batA','skelA','gandrickA'].map(n=>loadImg(n,'assets/'+n+'.png')),...['tree0','tree1','tree2','tree3','tree4','tree5','tree6','tree7','grave','grave2','cross','statue','well','bench','barrel','coffin','cart','tex_forestwall','tex_abbeywall','tex_ground'].map(n=>loadImg(n,'assets/'+n+'.png')),...['peasantM','peasantW','beggar','drunk','thug','pickpocket','merchant','mayor','goat','shepherdess','huntress','innkeeper','gandrick'].map(n=>loadImg(n,'assets/'+n+'.png')),...Array.from({length:NPORT},(_,i)=>loadImg('pt'+i,'assets/pt/'+i+'.png'))]);
-  applyAITextures();reset();buildUIPatterns();crtInit();makeAtmos();try{G.crt=localStorage.getItem('abbeyCRT')!=='0'}catch(e){G.crt=true}fit();
+  await Promise.all([loadImg('rat','assets/rat.png'),loadImg('boss','assets/boss.png'),loadImg('wolf','assets/wolf.png'),loadImg('bandit','assets/bandit.png'),loadImg('archer','assets/archer.png'),loadImg('bat','assets/bat.png'),loadImg('skel','assets/skel.png'),...['dagger', 'sword', 'mace', 'staff', 'gravemace', 'bow', 'axe', 'shield', 'cap', 'jerkin', 'bracers', 'leggings', 'helm', 'torch', 'lantern', 'potion', 'key', 'wood', 'ringV', 'ringM', 'ringW', 'ringS', 'sp_fire', 'scrollFrost', 'scrollLight'].map(n=>loadImg('icn_'+n,'assets/icons/'+n+'.png')),...['wolfA','banditA','archerA','ratA','bossA','batA','skelA','gandrickA'].map(n=>loadImg(n,'assets/'+n+'.png')),...['tree0','tree1','tree2','tree3','tree4','tree5','tree6','tree7','grave','grave2','cross','statue','well','bench','barrel','coffin','cart','tex_forestwall','tex_abbeywall','tex_ground'].map(n=>loadImg(n,'assets/'+n+'.png')),...['peasantM','peasantW','beggar','drunk','thug','pickpocket','merchant','mayor','goat','shepherdess','huntress','innkeeper','gandrick'].map(n=>loadImg(n,'assets/'+n+'.png')),...Array.from({length:NPORT},(_,i)=>loadImg('pt'+i,'assets/pt/'+i+'.png'))]);
+  applyAITextures();
+  for(const id of ['dagger', 'sword', 'mace', 'staff', 'gravemace', 'bow', 'axe', 'shield', 'cap', 'jerkin', 'bracers', 'leggings', 'helm', 'torch', 'lantern', 'potion', 'key', 'wood', 'ringV', 'ringM', 'ringW', 'ringS', 'sp_fire', 'scrollFrost', 'scrollLight']){const im=IMG['icn_'+id];if(!im)continue;IMG['ic_'+id]=im;IMG['it_'+id]=im;if(id==='potion')IMG.potion=im;if(id==='key')IMG.key=im}
+  reset();buildUIPatterns();crtInit();makeAtmos();try{G.crt=localStorage.getItem('abbeyCRT')!=='0'}catch(e){G.crt=true}fit();
   addEventListener('pagehide',()=>{if(G.state==='play'&&G.timers.length===0)writeSave('auto')});
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&G.state==='play'&&G.timers.length===0)writeSave('auto')});
   window.__ready=true;
