@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.37';
+const VERSION='0.38';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1459,7 +1459,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     let lt=0;for(let k=0;k<nearL.length;k+=3){const ax=wx-nearL[k],ay=wy-nearL[k+1];lt+=nearL[k+2]/(1+1.15*(ax*ax+ay*ay))}
     for(let k=0;k<nearR.length;k+=3){const ax=wx-nearR[k],ay=wy-nearR[k+1];lt+=nearR[k+2]/(1+1.15*(ax*ax+ay*ay))}
     const lum=clamp(.08+(Math.max(baseL(dist),G.day||0,G.amb||0)+lt*.85)*1.05,0,1);
-    tmpX.clearRect(0,0,iw,ih);tmpX.globalCompositeOperation='source-over';tmpX.globalAlpha=1;
+    tmpX.clearRect(0,0,iw+16,ih+16);tmpX.globalCompositeOperation='source-over';tmpX.globalAlpha=1;
     tmpX.drawImage(img,0,0);
     tmpX.globalCompositeOperation='source-atop';
     tmpX.fillStyle=`rgba(8,5,3,${(1-lum).toFixed(3)})`;tmpX.fillRect(0,0,iw,ih);
