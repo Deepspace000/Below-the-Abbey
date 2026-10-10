@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.34';
+const VERSION='0.35';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2367,16 +2367,53 @@ function savesBtn(id){
   if(S.confirm===k){try{localStorage.removeItem('abbeySave_'+k)}catch(e){}S.confirm=null;S.note='Erased.';refreshSaves()}
   else{S.confirm=k;S.note='Tap Erase again to confirm.'}
 }
+function drawInitialFrame(x,y,w,h){
+  ctx.save();
+  // deep red field with a faint woven pattern
+  const g=ctx.createLinearGradient(x,y,x+w,y+h);g.addColorStop(0,'#6a1e1a');g.addColorStop(.5,'#4a1210');g.addColorStop(1,'#2c1a4a');
+  ctx.fillStyle=g;ctx.fillRect(x,y,w,h);
+  ctx.strokeStyle='rgba(216,190,110,.16)';ctx.lineWidth=1;
+  for(let i=-h;i<w;i+=7){ctx.beginPath();ctx.moveTo(x+i,y);ctx.lineTo(x+i+h,y+h);ctx.stroke();ctx.beginPath();ctx.moveTo(x+i+h,y);ctx.lineTo(x+i,y+h);ctx.stroke()}
+  // gilded double border
+  ctx.lineWidth=3;ctx.strokeStyle=goldG(x,y,w,h);ctx.strokeRect(x,y,w,h);
+  ctx.lineWidth=1;ctx.strokeStyle='#e8d48a';ctx.strokeRect(x+4,y+4,w-8,h-8);
+  ctx.strokeStyle='rgba(20,10,4,.8)';ctx.strokeRect(x-1.5,y-1.5,w+3,h+3);
+  // vines with leaves along the top and bottom
+  const vine=(vy,dir)=>{
+    ctx.strokeStyle='#4a7a3a';ctx.lineWidth=1.3;ctx.beginPath();
+    for(let i=0;i<=w-12;i+=2){const px=x+6+i,py=vy+Math.sin(i*.45)*2.2*dir;i?ctx.lineTo(px,py):ctx.moveTo(px,py)}
+    ctx.stroke();
+    for(let i=8;i<w-10;i+=9){const px=x+6+i,py=vy+Math.sin(i*.45)*2.2*dir;
+      ctx.fillStyle=(i/9|0)%2?'#5a8a44':'#3a6a5a';ctx.beginPath();ctx.ellipse(px,py+dir*3,2.4,1.2,dir*.9,0,TAU);ctx.fill();
+      ctx.fillStyle='#e8c860';ctx.beginPath();ctx.arc(px+4.5,py-dir*1.6,1.1,0,TAU);ctx.fill()}
+  };
+  vine(y+9,1);vine(y+h-9,-1);
+  // corner rosettes
+  for(const [cx,cy] of [[x,y],[x+w,y],[x,y+h],[x+w,y+h]]){
+    ctx.fillStyle='#1c0c06';ctx.beginPath();ctx.arc(cx,cy,5.6,0,TAU);ctx.fill();
+    ctx.fillStyle=goldG(cx-5,cy-5,10,10);ctx.beginPath();ctx.arc(cx,cy,4.6,0,TAU);ctx.fill();
+    ctx.fillStyle='#2a5aa0';ctx.beginPath();ctx.arc(cx,cy,2.5,0,TAU);ctx.fill();
+    ctx.fillStyle='#e8f0ff';ctx.beginPath();ctx.arc(cx-.7,cy-.7,.8,0,TAU);ctx.fill();
+  }
+  // side studs
+  ctx.fillStyle='#d8b860';for(let i=1;i<6;i++){const py=y+i*h/6;ctx.beginPath();ctx.arc(x+2,py,1.3,0,TAU);ctx.arc(x+w-2,py,1.3,0,TAU);ctx.fill()}
+  ctx.restore();
+}
 function drawTitle(){
   BTNS=[];veil(.6);
   ctx.save();ctx.textAlign='center';
-  ctx.save();ctx.font=`22px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#c9b88a';ctx.fillText('Below the',210,50);ctx.restore();
-  ctx.save();ctx.font=`bold 50px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=5;ctx.strokeStyle='#000';ctx.strokeText('Abbey',210,98);ctx.fillStyle=goldG(110,70,200,50);ctx.fillText('Abbey',210,98);ctx.restore();
-  txtS('Four companions descend into the crypts beneath the abbey',210,134,10,'#d8c9a0','center');
+  ctx.save();ctx.font=`bold 38px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='#000';ctx.strokeText('Below the',210,46);ctx.fillStyle='#d6c594';ctx.fillText('Below the',210,46);ctx.restore();
+  ctx.save();ctx.font=`bold 50px ${FTITLE}`;ctx.textBaseline='middle';
+  {const aw=ctx.measureText('A').width,rw=ctx.measureText('bbey').width,fw=aw+26,fh=62,tw=fw+4+rw,x0=210-tw/2,fy=69;
+    drawInitialFrame(x0,fy,fw,fh);
+    ctx.lineWidth=5;ctx.strokeStyle='#000';ctx.textAlign='center';ctx.strokeText('A',x0+fw/2,100);ctx.fillStyle=goldG(x0,fy,fw,fh);ctx.fillText('A',x0+fw/2,100);
+    ctx.textAlign='left';ctx.strokeText('bbey',x0+fw+4,100);ctx.fillStyle=goldG(110,70,200,50);ctx.fillText('bbey',x0+fw+4,100)}
+  ctx.restore();
+  txtS('Four companions descend into the crypts beneath the abbey',210,142,10,'#d8c9a0','center');
   const any=SAVE_SLOTS.some(([k])=>hasSave(k)),items=[];
   if(hasSave('auto')||hasSave('prev'))items.push(['tcont','Continue']);
   items.push(['tnew','New game']);if(any)items.push(['tload','Load game']);
-  items.forEach(([id,label],i)=>btnText(id,label,170,158+i*30,140,26));
+  items.forEach(([id,label],i)=>btnText(id,label,170,162+i*29,140,26));
   txt('Version '+VERSION,240,306,11,'#b8a880','center',true);
   ctx.restore();
 }
