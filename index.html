@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.23';
+const VERSION='0.25';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -104,10 +104,10 @@ function warpTex(d,seed,amp){
 function pix(c){return c.getContext('2d').getImageData(0,0,TS,TS).data}
 function rrect(x,X,Y,W,H,r){
   // hand-cut, slightly wobbly outline (deterministic, so it never flickers)
-  const sd=(X*13+Y*29+W*7+H*3)|0,J=(W<44||H<44)?.55:1.1,pts=[];
+  const sd=(X*13+Y*29+W*7+H*3)|0,J=(W<44||H<44)?.44:.88,pts=[];
   const jt=(k,i,m)=>(hash2(sd,k*131+i,m)-.5)*2*J;
   const edge=(x0,y0,x1,y1,k)=>{const n=Math.max(1,Math.round(Math.hypot(x1-x0,y1-y0)/7));for(let i=0;i<n;i++){const t=i/n;pts.push([x0+(x1-x0)*t+jt(k,i,1),y0+(y1-y0)*t+jt(k,i,2)])}};
-  const cj=k=>1+hash2(sd,k,3)*.9; // chipped corners
+  const cj=k=>1+hash2(sd,k,3)*.72; // chipped corners
   edge(X+r,Y,X+W-r,Y,1);pts.push([X+W-r*.25*cj(1),Y+r*.25*cj(1)]);
   edge(X+W,Y+r,X+W,Y+H-r,2);pts.push([X+W-r*.25*cj(2),Y+H-r*.25*cj(2)]);
   edge(X+W-r,Y+H,X+r,Y+H,3);pts.push([X+r*.25*cj(3),Y+H-r*.25*cj(3)]);
@@ -123,7 +123,7 @@ function wornEdge(x,y,w,h,r){ // worn-away patches along a brass border
 // weathering for item and prop art: wobbly chipped edges, grime, scratches and rust
 function wornSprite(c,seed,amp){
   const w=c.width,h=c.height,x=c.getContext('2d'),S=x.getImageData(0,0,w,h).data,dst=x.createImageData(w,h),D=dst.data;
-  amp=amp||1.5;
+  amp=(amp||1.5)*.8;
   for(let y=0;y<h;y++)for(let i=0;i<w;i++){
     const n1=(vnoise(i/5,y/5,64,seed)-.5)*2*amp,n2=(vnoise(i/5+23,y/5+11,64,seed+7)-.5)*2*amp;
     const sx=Math.min(w-1,Math.max(0,Math.round(i+n1))),sy=Math.min(h-1,Math.max(0,Math.round(y+n2)));
@@ -220,24 +220,71 @@ function exitTex(baseD){
   }
   return {d:pix(c),e:pix(e)};
 }
+// a living flame: swaying, ragged tongues, white-hot core fading to red, redrawn for every frame
+const FLAME_FRAMES=8,flameMemo={};
+function flameRamp(I,red){
+  const st=red?[[0,[96,8,6]],[.25,[200,26,14]],[.5,[255,96,70]],[.8,[255,200,170]],[1,[255,240,230]]]
+              :[[0,[170,30,8]],[.25,[240,84,14]],[.5,[255,150,30]],[.8,[255,214,96]],[1,[255,250,214]]];
+  for(let i=1;i<st.length;i++)if(I<=st[i][0]){const t=(I-st[i-1][0])/(st[i][0]-st[i-1][0]),p=st[i-1][1],q=st[i][1];return [p[0]+(q[0]-p[0])*t,p[1]+(q[1]-p[1])*t,p[2]+(q[2]-p[2])*t]}
+  return st[st.length-1][1];
+}
+function flameEmissive(f,red){
+  const key=f+(red?'r':'w');if(flameMemo[key])return flameMemo[key];
+  const e=document.createElement('canvas');e.width=e.height=TS;const ex=e.getContext('2d');
+  const rg=ex.createRadialGradient(64,56,2,64,50,38);rg.addColorStop(0,red?'rgba(255,60,30,.5)':'rgba(255,160,50,.46)');rg.addColorStop(1,red?'rgba(255,40,20,0)':'rgba(255,110,30,0)');
+  ex.fillStyle=rg;ex.fillRect(0,0,TS,TS);
+  const id=ex.getImageData(0,0,TS,TS),D=id.data,seed=red?91:47,ph=hash2(f,3,seed)*6;
+  for(let j=0;j<0;j++)for(let i=30;i<98;i++){
+    const v=(68-j)/52;if(v>1.02)continue;
+    const vv=Math.max(0,v);
+    const sway=Math.sin(f*.8+vv*3.4)*3.4*vv+(vnoise(i/7+f*.35,j/7-f*1.9,64,seed)-.5)*8*vv;
+    const half=21*Math.pow(1-vv,.6)*(1+.4*Math.sin(vv*8-f*1.5+ph))*(v<0?.55+v*3:1);
+    const d=Math.abs(i-64-sway)/Math.max(.5,half);
+    let I=Math.pow(Math.max(0,1-d),.6)*Math.pow(Math.max(0,1-vv*vv),.8);
+    I*=.74+.5*vnoise(i/3,j/3-f*2.4,64,seed+5);
+    I=Math.max(0,Math.min(1,I));if(I<.03)continue;
+    const [r,g,b]=flameRamp(I,red),k=(j*TS+i)*4,al=Math.min(255,I*310);
+    D[k]=Math.max(D[k],r);D[k+1]=Math.max(D[k+1],g);D[k+2]=Math.max(D[k+2],b);D[k+3]=Math.max(D[k+3],al);
+  }
+  ex.putImageData(id,0,0);
+  return flameMemo[key]=e;
+}
+let FLAMES=[],GLOWS=[];
+function makeFlames(){
+  for(const red of [false,true]){
+    for(let f=0;f<FLAME_FRAMES;f++){
+      const c=document.createElement('canvas');c.width=64;c.height=96;
+      const x=c.getContext('2d'),id=x.createImageData(64,96),D=id.data,seed=red?91:47,ph=hash2(f,3,seed)*6;
+      for(let j=0;j<96;j++)for(let i=0;i<64;i++){
+        const v=(90-j)/82;if(v>1.02||v<-.08)continue;
+        const vv=Math.max(0,v);
+        const sway=Math.sin(f*.8+vv*3.4)*5*vv+(vnoise(i/9+f*.35,j/9-f*1.9,64,seed)-.5)*12*vv;
+        const half=26*Math.pow(1-vv,.6)*(1+.4*Math.sin(vv*8-f*1.5+ph))*(v<0?.6+v*4:1);
+        const d=Math.abs(i-32-sway)/Math.max(.5,half);
+        let I=Math.pow(Math.max(0,1-d),.6)*Math.pow(Math.max(0,1-vv*vv),.8);
+        I*=.74+.5*vnoise(i/4,j/4-f*2.4,64,seed+5);I=Math.max(0,Math.min(1,I));if(I<.03)continue;
+        const [r,g,b]=flameRamp(I,red),k=(j*64+i)*4;D[k]=r;D[k+1]=g;D[k+2]=b;D[k+3]=Math.min(255,I*330);
+      }
+      x.putImageData(id,0,0);FLAMES.push(c);
+    }
+    const gc=document.createElement('canvas');gc.width=gc.height=64;const gx=gc.getContext('2d'),gg=gx.createRadialGradient(32,32,2,32,32,32);
+    gg.addColorStop(0,red?'rgba(255,70,40,.8)':'rgba(255,170,60,.75)');gg.addColorStop(.5,red?'rgba(200,30,15,.3)':'rgba(230,110,30,.28)');gg.addColorStop(1,'rgba(0,0,0,0)');
+    gx.fillStyle=gg;gx.fillRect(0,0,64,64);GLOWS.push(gc);
+  }
+}
 function torchFrames(baseD,red){
   const out=[];
-  for(let f=0;f<4;f++){
+  for(let f=0;f<FLAME_FRAMES;f++){
     const c=toCanvas(baseD),x=c.getContext('2d');
     x.strokeStyle='#161514';x.lineWidth=5;x.lineCap='round';
     x.beginPath();x.moveTo(64,108);x.lineTo(64,96);x.moveTo(50,90);x.quadraticCurveTo(64,108,78,90);x.stroke();
     const g=x.createLinearGradient(57,0,71,0);g.addColorStop(0,'#33200f');g.addColorStop(.5,'#6d4624');g.addColorStop(1,'#25160a');
-    x.fillStyle=g;x.beginPath();x.moveTo(60,100);x.lineTo(68,100);x.lineTo(71,66);x.lineTo(57,66);x.closePath();x.fill();
-    x.fillStyle='#14100c';x.beginPath();x.ellipse(64,62,10,8,0,0,TAU);x.fill();
-    x.fillStyle='#2a1e12';x.fillRect(55,60,18,3);
-    const e=document.createElement('canvas');e.width=e.height=TS;const ex=e.getContext('2d');
-    const rg=ex.createRadialGradient(64,50,2,64,50,34);rg.addColorStop(0,red?'rgba(255,60,30,.6)':'rgba(255,170,60,.55)');rg.addColorStop(1,red?'rgba(255,40,20,0)':'rgba(255,120,30,0)');
-    ex.fillStyle=rg;ex.fillRect(0,0,128,128);
-    const w=Math.sin(f*1.9)*3, h=[26,31,24,29][f];
-    ex.beginPath();ex.moveTo(54,62);ex.bezierCurveTo(48,50,60+w,42,64+w,64-h-14);ex.bezierCurveTo(70+w,42,80,50,74,62);ex.closePath();
-    const fg=ex.createRadialGradient(64,58,1,64,52,26);fg.addColorStop(0,red?'#ffe0d0':'#fffbd0');fg.addColorStop(.35,red?'#ff6a48':'#ffc443');fg.addColorStop(.7,red?'#d82010':'#e8641a');fg.addColorStop(1,red?'rgba(110,10,4,0)':'rgba(160,32,8,.0)');
-    ex.fillStyle=fg;ex.fill();
-    out.push({d:pix(c),e:pix(e)});
+    x.fillStyle=g;x.beginPath();x.moveTo(60,100);x.lineTo(68,100);x.lineTo(71,68);x.lineTo(57,68);x.closePath();x.fill();
+    x.fillStyle='#14100c';x.beginPath();x.ellipse(64,64,10,8,0,0,TAU);x.fill();
+    x.fillStyle='#2a1e12';x.fillRect(55,62,18,3);
+    // glowing charred wrapping below the flame
+    x.fillStyle=red?'rgba(160,30,10,.55)':'rgba(190,80,20,.5)';x.beginPath();x.ellipse(64,60,8,4,0,0,TAU);x.fill();
+    out.push({d:pix(c),e:pix(flameEmissive(f,red))});
   }
   return out;
 }
@@ -273,16 +320,17 @@ function dirtTex(seed){
 /* texture index map */
 let T_STONE,T_BRICK,T_DOOR,T_LOCK,T_EXIT,T_TORCH_STONE,T_TORCH_BRICK,T_TORCH_STONE_R,T_TORCH_BRICK_R,FLOORD,CEILD;
 function buildTextures(){
-  const stone=warpTex(stoneTex(7,stoneOpts),11,8), brick=warpTex(stoneTex(23,brickOpts),12,6);
+  const stone=warpTex(stoneTex(7,stoneOpts),11,6.4), brick=warpTex(stoneTex(23,brickOpts),12,4.8);
   T_STONE=addTex(stone);T_BRICK=addTex(brick);
-  T_DOOR=addTex(warpTex(doorTex(stone,false),13,4));T_LOCK=addTex(warpTex(doorTex(stone,true),14,4));
-  const ex=exitTex(stone);T_EXIT=addTex(warpTex(ex.d,15,4),warpTex(ex.e,15,4));
+  T_DOOR=addTex(warpTex(doorTex(stone,false),13,3.2));T_LOCK=addTex(warpTex(doorTex(stone,true),14,3.2));
+  const ex=exitTex(stone);T_EXIT=addTex(warpTex(ex.d,15,3.2),warpTex(ex.e,15,3.2));
   T_TORCH_STONE=TEX.length;for(const f of torchFrames(stone))addTex(f.d,f.e);
   T_TORCH_BRICK=TEX.length;for(const f of torchFrames(brick))addTex(f.d,f.e);
   T_TORCH_STONE_R=TEX.length;for(const f of torchFrames(stone,true))addTex(f.d,f.e);
   T_TORCH_BRICK_R=TEX.length;for(const f of torchFrames(brick,true))addTex(f.d,f.e);
+  makeFlames();
   FLOORD=dirtTex(41);
-  CEILD=warpTex(stoneTex(57,{rows:2,cols:()=>2,stag:1,mortar:3,a:[78,76,82],b:[58,56,62],mort:[16,15,17],moss:0,cracks:2,flat:true}),16,8);
+  CEILD=warpTex(stoneTex(57,{rows:2,cols:()=>2,stag:1,mortar:3,a:[78,76,82],b:[58,56,62],mort:[16,15,17],moss:0,cracks:2,flat:true}),16,6.4);
 }
 
 /* ==========================================================================
@@ -606,7 +654,7 @@ const SLOT_LABEL={head:'Helm',chest:'Chest',arms:'Arms',legs:'Legs',main:'Main h
 
 const G={state:'title',P:{x:0,y:0,f:0,angT:0},C:{x:0,y:0,a:0},grid:[],seen:[],enemies:[],items:[],decor:[],heroes:[],
   sel:0,acted:[],keys:0,rounds:0,kills:0,timers:[],msgs:[],floats:[],shake:0,time:0,lockT:0,hold:null,queued:null,mute:false,menu:false,map:false,bossDead:false,
-  bag:[],loot:null,saves:null,nextAuto:0,gold:0,lightBoost:0,lightLevel:0,hits:[],inv:{open:false,tab:'inv',hero:0,sel:null,scroll:0}};
+  bag:[],loot:null,saves:null,overview:false,nextAuto:0,gold:0,lightBoost:0,lightLevel:0,hits:[],inv:{open:false,tab:'inv',hero:0,sel:null,scroll:0}};
 window.__game=G;
 
 const mkItem=id=>({id,n:1});
@@ -1054,7 +1102,7 @@ function render3D(){
     }
   }
   // walls
-  const grid=G.grid,seen=G.seen,fr=Math.floor(t*7.5);
+  const grid=G.grid,seen=G.seen,fr=Math.floor(t*10);
   for(let x=0;x<VW;x++){
     const camX=2*x/VW-1,rX=dX+pX*camX,rY=dY+pY*camX;
     let mx=Math.floor(cx),my=Math.floor(cy);
@@ -1079,7 +1127,7 @@ function render3D(){
     let ti;
     if(g===1)ti=T_STONE;else if(g===2)ti=T_BRICK;else if(g===3)ti=T_DOOR;else if(g===4)ti=T_LOCK;else ti=T_EXIT;
     const tv=(g===1||g===2)?torchAt.get((my*MW+mx)*4+face):0;
-    if(tv){const ph=((mx*7+my*3)&3);ti=(g===1?(tv===2?T_TORCH_STONE_R:T_TORCH_STONE):(tv===2?T_TORCH_BRICK_R:T_TORCH_BRICK))+((fr+ph)&3)}
+    if(tv){const ph=((mx*7+my*3)&3);ti=(g===1?(tv===2?T_TORCH_STONE_R:T_TORCH_STONE):(tv===2?T_TORCH_BRICK_R:T_TORCH_BRICK))+((fr+ph*2)&7)}
     const tex=TEX[ti],td=tex.d,te=tex.e;
     const dist=perp*Math.hypot(rX,rY);
     const lb=baseL(dist);let lt=0;
@@ -1105,6 +1153,14 @@ function render3D(){
   }
   vctx.putImageData(vimg,0,0);
   for(const L of LIGHTS){const h=L._h;if(!L.taken&&h&&h.col>=0&&h.ty<=zbuf[h.col]+.45)G.hits.push(h)}
+  vctx.save();vctx.globalCompositeOperation='lighter';
+  for(const h of G.hits){
+    if(h.type!=='torch'||h.ty<.4)continue;
+    const L=h.L,w=.42*F/h.ty,hh=w*1.5,base=HH-.12*F/h.ty,fi=(Math.floor(t*10)+((L.key*7)&7))&7,ri=L.red?1:0;
+    vctx.globalAlpha=.5+.12*Math.sin(t*13+L.ph);vctx.drawImage(GLOWS[ri],h.sx-w*1.7,base-hh*.4-w*1.7,w*3.4,w*3.4);
+    vctx.globalAlpha=1;vctx.drawImage(FLAMES[ri*8+fi],h.sx-w/2,base-hh*.94,w,hh);
+  }
+  vctx.restore();
   drawSprites(cx,cy,dX,dY,pX,pY);
 }
 const tmpC=document.createElement('canvas');tmpC.width=640;tmpC.height=480;const tmpX=tmpC.getContext('2d');
@@ -2037,7 +2093,7 @@ function drawTitle(){
   if(hasSave('auto')||hasSave('prev'))items.push(['tcont','Continue']);
   items.push(['tnew','New game']);if(any)items.push(['tload','Load game']);
   items.forEach(([id,label],i)=>btnText(id,label,170,158+i*30,140,26));
-  txt('v'+VERSION,6,314,8,'#6a5a40','left');
+  txt('Version '+VERSION,240,306,11,'#b8a880','center',true);
   ctx.restore();
 }
 function drawSaves(){
@@ -2065,12 +2121,55 @@ function drawSaves(){
   btnText('sv_close','Close',190,290,100,20);
 }
 
+const ZONE_LABELS=[['Start crypt',1,15,5,19],['Armoury',7,17,10,19],['Rat hall',1,5,8,9],['Closet',11,3,13,5],['Bat hall',15,2,24,9],['Skeleton crypt',13,13,19,19],["Rat King's lair",21,11,26,19]];
+const KIND_LETTER={weapon:'W',shield:'A',head:'A',chest:'A',arms:'A',legs:'A',ring:'R',spell:'S',light:'L',potion:'P',food:'F'};
+function drawOverview(){
+  BTNS=[];veil(.95);
+  const cs=12,ox=6,oy=30;
+  ctx.save();ctx.font=`24px ${FTITLE}`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle='#d8c88e';ctx.fillText(`Level ${LEVEL}: the crypts below the abbey`,8,15);ctx.restore();
+  for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){
+    const g=G.grid[y][x];
+    ctx.fillStyle=g===0?'#7a6446':g===1?'#46403a':g===2?'#6a2e26':g===3?'#a8702e':g===4?'#c03a2a':'#7ab0f0';
+    ctx.fillRect(ox+x*cs,oy+y*cs,cs-.6,cs-.6);
+  }
+  for(const [name,x1,y1,x2,y2] of ZONE_LABELS){
+    ctx.fillStyle='rgba(0,0,0,.38)';ctx.fillRect(ox+x1*cs,oy+(y1+(y2-y1)/2)*cs-1,(x2-x1+1)*cs-.6,cs*.9);
+    txt(name,ox+(x1+x2+1)/2*cs,oy+(y1+y2+1)/2*cs+1,7,'#f0e4b4','center',true);
+  }
+  for(const d of G.decor){ctx.fillStyle=d.k==='cart'?'#d8b040':d.k==='coffin'?'#aaaab4':d.k==='barrel'?'#8a5a2a':'#d8d0b0';ctx.fillRect(ox+d.x*cs+2.5,oy+d.y*cs+2.5,cs-5.6,cs-5.6)}
+  for(const L of LIGHTS){ctx.fillStyle=L.taken?'rgba(255,255,255,.2)':L.red?'#ff4a30':'#ffb040';ctx.beginPath();ctx.arc(ox+L.x*cs,oy+L.y*cs,2.4,0,TAU);ctx.fill()}
+  for(const it of G.items){ctx.fillStyle=it.taken?'rgba(255,255,255,.25)':it.k==='key'?'#ffd76a':(ITEMDEF[it.k]&&ITEMDEF[it.k].rar)?'#e070e8':'#e8e0d0';
+    const lt=it.k==='key'?'K':KIND_LETTER[ITEMDEF[it.k].k]||'?';txt(lt,ox+(it.x+.5)*cs,oy+(it.y+.5)*cs+.5,7.5,ctx.fillStyle,'center',true)}
+  for(const e of G.enemies){if(e.hp<=0)continue;ctx.fillStyle=e.t==='boss'?'#ff3030':e.t==='skel'?'#e8e4d0':e.t==='bat'?'#b070e0':'#d08a60';
+    ctx.beginPath();ctx.arc(ox+(e.x+.5)*cs,oy+(e.y+.5)*cs,cs*.42,0,TAU);ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.stroke();
+    txt(e.t==='boss'?'K':e.t==='skel'?'S':e.t==='bat'?'B':'R',ox+(e.x+.5)*cs,oy+(e.y+.5)*cs+.5,7.5,'#120c08','center',true)}
+  const px=ox+(G.C.x+.5)*cs,py=oy+(G.C.y+.5)*cs;ctx.save();ctx.translate(px,py);ctx.rotate(G.C.a+Math.PI/2);ctx.fillStyle='#ffe36a';ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(5,5);ctx.lineTo(0,2);ctx.lineTo(-5,5);ctx.closePath();ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.stroke();ctx.restore();
+  // legend
+  const lx=350;let ly=36;
+  const row=(label,c,t)=>{txt(t,lx+6,ly,8,c,'center',true);txt(label,lx+16,ly,8,'#cdbf94','left');ly+=12};
+  txt('Legend',lx,ly-2,10,'#d8c88e','left',true);ly+=12;
+  row('Rat','#d08a60','R');row('Bat','#b070e0','B');row('Skeleton','#e8e4d0','S');row('Rat King','#ff3030','K');
+  row('Key','#ffd76a','K');row('Weapon','#e8e0d0','W');row('Armour','#e8e0d0','A');row('Ring','#e8e0d0','R');row('Scroll','#e8e0d0','S');row('Lantern/torch','#e8e0d0','L');row('Potion','#e8e0d0','P');row('Food','#e8e0d0','F');
+  row('Magic item','#e070e8','*');
+  ly+=2;
+  ctx.fillStyle='#ffb040';ctx.beginPath();ctx.arc(lx+6,ly-1,3,0,TAU);ctx.fill();txt('Torch',lx+16,ly,8,'#cdbf94','left');ly+=12;
+  ctx.fillStyle='#ff4a30';ctx.beginPath();ctx.arc(lx+6,ly-1,3,0,TAU);ctx.fill();txt('Red torch',lx+16,ly,8,'#cdbf94','left');ly+=12;
+  ctx.fillStyle='#a8702e';ctx.fillRect(lx+2,ly-5,8,8);txt('Door',lx+16,ly,8,'#cdbf94','left');ly+=12;
+  ctx.fillStyle='#c03a2a';ctx.fillRect(lx+2,ly-5,8,8);txt('Locked door',lx+16,ly,8,'#cdbf94','left');ly+=12;
+  ctx.fillStyle='#7ab0f0';ctx.fillRect(lx+2,ly-5,8,8);txt('Exit stairs',lx+16,ly,8,'#cdbf94','left');ly+=12;
+  txt('Tap or press O to close',lx,ly+10,8,'#8a7a58','left');
+  btn('ovclose',0,0,DW,DH);
+}
 function drawMinimap(x,y,w,h){
   ctx.save();ctx.fillStyle='#0b0907';ctx.fillRect(x,y,w,h);
-  const cs=Math.min((w-4)/MW,(h-4)/MH),ox=x+(w-cs*MW)/2,oy=y+(h-cs*MH)/2;
+  ctx.beginPath();ctx.rect(x+2,y+2,w-4,h-4);ctx.clip();
+  const cs=4.6,ox=x+w/2-(G.C.x+.5)*cs,oy=y+h/2-(G.C.y+.5)*cs;
   drawMapCells(ox,oy,cs);
+  for(const it of G.items)if(!it.taken&&G.seen[it.y][it.x]){ctx.fillStyle=it.k==='key'?'#ffd76a':'#c8b078';ctx.fillRect(ox+(it.x+.5)*cs-1,oy+(it.y+.5)*cs-1,2.2,2.2)}
+  for(const e of G.enemies)if(e.hp>0&&Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)<=7&&hasLOS(e.x,e.y,G.P.x,G.P.y)){ctx.fillStyle='#e03a2a';ctx.beginPath();ctx.arc(ox+(e.rx+.5)*cs,oy+(e.ry+.5)*cs,cs*.5,0,TAU);ctx.fill()}
+  const vg=ctx.createRadialGradient(x+w/2,y+h/2,h*.25,x+w/2,y+h/2,w*.62);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.6)');ctx.fillStyle=vg;ctx.fillRect(x,y,w,h);
   ctx.restore();
-  ctx.lineWidth=2;ctx.strokeStyle=goldG(x,y,w,h);rrect(ctx,x+1,y+1,w-2,h-2,4);ctx.stroke();
+  ctx.lineWidth=2;ctx.strokeStyle=goldG(x,y,w,h);rrect(ctx,x+1,y+1,w-2,h-2,4);ctx.stroke();wornEdge(x+1,y+1,w-2,h-2,4);
 }
 function drawMapCells(ox,oy,cs){
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){
@@ -2081,8 +2180,8 @@ function drawMapCells(ox,oy,cs){
     ctx.fillRect(ox+x*cs,oy+y*cs,cs,cs);
     if(g>0&&g<3){ctx.fillStyle='rgba(255,255,255,.07)';ctx.fillRect(ox+x*cs,oy+y*cs,cs,Math.max(1,cs*.2))}
   }
-  const px=ox+(G.P.x+.5)*cs,py=oy+(G.P.y+.5)*cs;
-  ctx.save();ctx.translate(px,py);ctx.rotate(G.P.f*Math.PI/2);ctx.fillStyle='#ffe36a';ctx.beginPath();ctx.moveTo(0,-cs*.75);ctx.lineTo(cs*.55,cs*.5);ctx.lineTo(0,cs*.15);ctx.lineTo(-cs*.55,cs*.5);ctx.closePath();ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=.8;ctx.stroke();ctx.restore();
+  const px=ox+(G.C.x+.5)*cs,py=oy+(G.C.y+.5)*cs;
+  ctx.save();ctx.translate(px,py);ctx.rotate(G.C.a+Math.PI/2);ctx.fillStyle='#ffe36a';ctx.beginPath();ctx.moveTo(0,-cs*.75);ctx.lineTo(cs*.55,cs*.5);ctx.lineTo(0,cs*.15);ctx.lineTo(-cs*.55,cs*.5);ctx.closePath();ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=.8;ctx.stroke();ctx.restore();
 }
 function drawEnemyPlate(){
   const f=frontEnemy(4);if(!f)return;
@@ -2153,6 +2252,7 @@ function ui(dt){
   if(G.keys>0)txt('Key: rusty iron',6,318,7.5,'#ffd76a','left');
   // overlays
   if(G.saves)drawSaves();
+  else if(G.overview)drawOverview();
   else if(G.state==='title')drawTitle();
   else if(G.state==='create')drawCreate();
   else if(G.loot)drawLoot();
@@ -2179,7 +2279,7 @@ function drawMenu(){
   btnText('resume','Resume',170,66,140,26);
   btnText('mute',G.mute?'Sound: Off':'Sound: On',100,98,130,26);btnText('crt',G.crt?'CRT: On':'CRT: Off',250,98,130,26);
   btnText('restart','Restart dungeon',100,130,130,26);btnText('newparty','New party',250,130,130,26);
-  btnText('savemenu','Save / Load',170,162,140,26);
+  btnText('savemenu','Save / Load',100,162,130,26);btnText('overview','Level layout',250,162,130,26);
   const L=['Arrows / WASD: move and turn   Q / E: step sideways','Space: attack   X: special   P: potion   Z: wait','1-4: choose hero   I: inventory   M: map   Esc: menu','',
     'Tap a portrait to open that hero\'s inventory.','Tap torches and items in the view to pick them up.','Heroes act once per round, then the monsters move.','Heroes gain experience from kills. Monsters match the dungeon level.'];
   L.forEach((s,i)=>txt(s,240,200+i*11.5,8,'#d8c9a0','center'));
@@ -2296,6 +2396,7 @@ function frame(now){
   requestAnimationFrame(frame);
 }
 function handleBtn(id){
+  if(G.overview){G.overview=false;return}
   if(G.saves){savesBtn(id);return}
   if(G.state==='title'){titleBtn(id);return}
   if(G.state==='create'){crBtn(id);return}
@@ -2308,6 +2409,7 @@ function handleBtn(id){
     else if(id==='mute'){G.mute=!G.mute}
     else if(id==='crt'){G.crt=!G.crt;try{localStorage.setItem('abbeyCRT',G.crt?'1':'0')}catch(e){}fit()}
     else if(id==='savemenu'){openSaves('menu')}
+    else if(id==='overview'){G.menu=false;G.overview=true}
     else if(id==='newparty'){backupAuto();G.menu=false;crInit();G.state='create'}
     else if(id==='restart'){backupAuto();reset();G.state='play';audioInit();msg('You wake in the crypts below the abbey. Something is scratching in the dark...')}
     return;
@@ -2423,8 +2525,9 @@ addEventListener('keydown',e=>{
   if(G.state==='title'){titleBtn(hasSave('auto')||hasSave('prev')?'tcont':'tnew');e.preventDefault();return}
   if(G.state==='create'){if(e.key==='Enter'){crBtn(G.cr.step==='done'?'cr_start':'cr_ok');e.preventDefault()}return}
   if(G.state==='win'||G.state==='dead'){if(e.key==='Enter'||e.key===' '){reset();G.state='play'}return}
-  if(e.key==='Escape'){if(G.loot){G.loot=null}else if(G.inv.open){G.inv.open=false}else{G.menu=!G.menu;G.map=false}e.preventDefault();return}
+  if(e.key==='Escape'){if(G.overview){G.overview=false}else if(G.loot){G.loot=null}else if(G.inv.open){G.inv.open=false}else{G.menu=!G.menu;G.map=false}e.preventDefault();return}
   if(e.key==='i'||e.key==='I'){if(G.inv.open)G.inv.open=false;else openInv(G.sel);e.preventDefault();return}
+  if((e.key==='o'||e.key==='O')&&G.state==='play'){G.overview=!G.overview;return}
   if(e.key==='m'||e.key==='M'){G.map=!G.map;G.menu=false;return}
   if(G.menu||G.map||G.inv.open||G.loot)return;
   if(e.key>='1'&&e.key<='4'){const i=+e.key-1;if(G.heroes[i].alive)G.sel=i;return}
