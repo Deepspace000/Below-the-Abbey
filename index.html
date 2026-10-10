@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.39';
+const VERSION='0.40';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -854,13 +854,13 @@ function setParty(party){for(let i=0;i<4;i++)HERO_DEF[i]=heroDefFrom(party[i])}
 setParty(DEFAULT_PARTY);
 const ENEMY_DEF={
   rat:{name:'Black Rat',hp:50,dmg:[3,7],hit:.7,w:.72,img:'rat',xp:40,gold:[1,4],speed:1},
-  bat:{name:'Cave Bat',hp:72,dmg:[2,5],hit:.62,w:.64,img:'bat',xp:32,gold:[0,3],speed:2,fly:true},
-  skel:{name:'Skeleton',hp:160,dmg:[6,12],hit:.72,w:.48,img:'skel',xp:80,gold:[3,9],speed:1},
-  boss:{name:'Rat King',hp:448,dmg:[9,15],hit:.8,w:1.4,img:'boss',xp:500,gold:[40,70],speed:1},
-  wolf:{name:'Grey Wolf',hp:130,dmg:[6,12],hit:.72,w:.9,img:'wolf',xp:60,gold:[0,0],speed:2,kind:'wolf'},
-  bandit:{name:'Bandit',hp:150,dmg:[7,13],hit:.72,w:.44,img:'bandit',xp:90,gold:[4,14],speed:1,kind:'bandit'},
-  archer:{name:'Bandit Archer',hp:110,dmg:[6,11],hit:.66,w:.34,img:'archer',xp:75,gold:[3,10],speed:1,ranged:6,kind:'bandit'},
-  gandrick:{name:'Gandrick',hp:320,dmg:[10,15],hit:.78,w:.5,img:'gandrick',xp:900,gold:[150,220],speed:1}};
+  bat:{name:'Cave Bat',hp:40,dmg:[2,5],hit:.62,w:.64,img:'bat',xp:32,gold:[0,3],speed:2,fly:true},
+  skel:{name:'Skeleton',hp:80,dmg:[6,12],hit:.72,w:.48,img:'skel',xp:80,gold:[3,9],speed:1},
+  boss:{name:'Rat King',hp:224,dmg:[9,15],hit:.8,w:1.4,img:'boss',xp:500,gold:[40,70],speed:1},
+  wolf:{name:'Grey Wolf',hp:65,dmg:[6,12],hit:.72,w:.9,img:'wolf',xp:60,gold:[0,0],speed:2,kind:'wolf'},
+  bandit:{name:'Bandit',hp:75,dmg:[7,13],hit:.72,w:.44,img:'bandit',xp:90,gold:[4,14],speed:1,kind:'bandit'},
+  archer:{name:'Bandit Archer',hp:55,dmg:[6,11],hit:.66,w:.34,img:'archer',xp:75,gold:[3,10],speed:1,ranged:6,kind:'bandit'},
+  gandrick:{name:'Gandrick',hp:160,dmg:[10,15],hit:.78,w:.5,img:'gandrick',xp:900,gold:[150,220],speed:1}};
 /* creatures are the same level as the dungeon level */
 function enemyStat(t){
   const d=ENEMY_DEF[t],lv=DIFF(),m=1+.45*(lv-1);
