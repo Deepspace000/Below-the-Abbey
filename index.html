@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.74';
+const VERSION='0.75';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3688,14 +3688,10 @@ function ui(dt){
 }
 const LOWC=document.createElement('canvas'),LOWX=LOWC.getContext('2d',{willReadFrequently:true});
 const BAYER=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
-function drawWorld(){
-  const w=G.day>0?300:336,h=w/2;
+function drawWorld(){ // a slightly softer, lower-res picture; the screen-wide dither overlay gives it the same grain as the menus
+  const w=G.day>0?360:384,h=w/2;
   if(LOWC.width!==w){LOWC.width=w;LOWC.height=h}
   LOWX.imageSmoothingEnabled=true;LOWX.drawImage(vc,0,0,w,h);
-  const im=LOWX.getImageData(0,0,w,h),D=im.data;
-  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const o=(y*w+x)*4,t=(BAYER[(y&3)*4+(x&3)]-7.5)*.42;
-    D[o]=Math.round((D[o]+t)/6)*6;D[o+1]=Math.round((D[o+1]+t)/6)*6;D[o+2]=Math.round((D[o+2]+t)/6)*6}
-  LOWX.putImageData(im,0,0);
   ctx.imageSmoothingEnabled=false;ctx.drawImage(LOWC,0,0,420,210);ctx.imageSmoothingEnabled=true;
 }
 let DITHERP=null;
