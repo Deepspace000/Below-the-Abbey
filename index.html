@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.76';
+const VERSION='0.77';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1377,10 +1377,10 @@ function powerNew(i,P){
 }
 /* ---------- level-up news ---------- */
 function drawLevelBanners(){
-  G.lvlBanners=G.lvlBanners.filter(b=>G.time-b.t<9);
+  G.lvlBanners=G.lvlBanners.filter(b=>G.time-b.t<9&&(b.out===undefined||G.time-b.out<.45));
   let y=22;
   for(const b of G.lvlBanners.slice(-2)){
-    const age=G.time-b.t,a=clamp(Math.min(age*3,(9-age)*1.2),0,1),rows=Math.ceil(b.changes.length/3)+(b.powers.length?1:0),h=24+rows*11,x=40,w=340;
+    const age=G.time-b.t,a=clamp(Math.min(age*3,(9-age)*1.2),0,1)*(b.out===undefined?1:clamp(1-(G.time-b.out)/.45,0,1)),rows=Math.ceil(b.changes.length/3)+(b.powers.length?1:0),h=24+rows*11,x=40,w=340;
     ctx.save();ctx.globalAlpha=a;
     ctx.fillStyle='rgba(10,8,5,.92)';rrect(ctx,x,y,w,h,4);ctx.fill();ctx.lineWidth=1.8;ctx.strokeStyle=goldG(x,y,w,h);rrect(ctx,x,y,w,h,4);ctx.stroke();
     txt(`${b.name} reaches level ${b.lvl}!`,x+w/2,y+11,10.5,'#ffe36a','center',true);
@@ -1638,6 +1638,7 @@ function act(id){
   if(!canAct()){if(['fwd','back','left','right','turnL','turnR','attack','special'].includes(id)&&G.state==='play'&&!G.menu&&!G.inv.open&&!G.loot&&!G.cut&&!G.talk)G.queued=id;return}
   G.queued=null;
   if(['attack','special','wait','rest','potion','fwd','back','left','right','turnL','turnR'].includes(id)&&!(G.hold&&G.hold.id===id))pressFx(id);
+  if(['attack','special','fwd','back','left','right','turnL','turnR','wait','rest','potion'].includes(id))for(const b of G.lvlBanners)if(b.out===undefined)b.out=G.time; // level notices fade once the party acts
   const i=G.sel;
   switch(id){
     case 'fwd':doMove(0);break;case 'right':doMove(1);break;case 'back':doMove(2);break;case 'left':doMove(3);break;
