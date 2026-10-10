@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.77';
+const VERSION='0.78';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -457,11 +457,82 @@ function caveCanvas(baseD){
   x.strokeStyle='#14110e';x.lineWidth=3;x.beginPath();x.moveTo(14,TS);x.lineTo(18,70);x.lineTo(30,44);x.lineTo(44,30);x.lineTo(60,24);x.lineTo(78,28);x.lineTo(94,38);x.lineTo(108,60);x.lineTo(114,TS);x.stroke();
   return c;
 }
+/* more building types: stone cottage, dilapidated house, farmhouse; their doors */
+function stoneCottageCanvas(){
+  const c=document.createElement('canvas');c.width=c.height=TS;const x=c.getContext('2d');
+  x.fillStyle='#2e3238';x.fillRect(0,0,TS,TS);
+  x.fillStyle='#3a4048';x.fillRect(0,0,TS,24);x.strokeStyle='#1c2026';x.lineWidth=1.3;
+  for(let r=0;r<4;r++){const yy=3+r*5.5;x.beginPath();x.moveTo(0,yy);x.lineTo(TS,yy);x.stroke();for(let i=0;i<7;i++){const xx=(i*19+(r%2)*9)%TS;x.beginPath();x.moveTo(xx,yy);x.lineTo(xx,yy+5.5);x.stroke()}}
+  x.fillStyle='#16191d';x.fillRect(0,24,TS,5);
+  x.fillStyle='#24221e';x.fillRect(0,29,TS,TS-29);
+  const rows=[[29,26],[55,24],[79,24],[103,25]];
+  let k=0;
+  for(const [y0,h] of rows){let xx=-((k%2)*22);while(xx<TS){const w=36+hash2(k,xx+50,17)*26,sh=Math.floor(104+hash2(k,xx+50,18)*34);
+    x.fillStyle=`rgb(${sh},${sh-3},${sh-10})`;x.fillRect(xx+2,y0+2,w-4,h-4);x.fillStyle='rgba(255,255,255,.07)';x.fillRect(xx+2,y0+2,w-4,3);x.fillStyle='rgba(0,0,0,.18)';x.fillRect(xx+2,y0+h-6,w-4,4);xx+=w}k++}
+  x.fillStyle='#20160c';x.fillRect(76,48,38,38);
+  const g=x.createLinearGradient(80,52,110,82);g.addColorStop(0,'#f0d070');g.addColorStop(1,'#b87a28');x.fillStyle=g;x.fillRect(82,54,26,26);
+  x.strokeStyle='#2a1a0a';x.lineWidth=2;x.beginPath();x.moveTo(95,54);x.lineTo(95,80);x.moveTo(82,67);x.lineTo(108,67);x.stroke();
+  x.fillStyle='#4a3a28';x.fillRect(66,50,9,34);x.fillRect(115,50,9,34);x.fillStyle='#8a867c';x.fillRect(73,86,44,6);x.fillStyle='#5a5650';x.fillRect(74,44,42,6);
+  return c;
+}
+function stoneCottageGlow(){
+  const c=document.createElement('canvas');c.width=c.height=TS;const x=c.getContext('2d');
+  x.fillStyle='#ffc060';x.fillRect(83,55,24,24);return c;
+}
+function ruinCanvas(){
+  const c=tudorCanvas(1),x=c.getContext('2d');
+  x.fillStyle='#0c0a08';
+  for(const [px,w] of [[14,18],[58,26],[100,16]]){x.beginPath();x.moveTo(px,0);x.lineTo(px+w,0);x.lineTo(px+w*.7,13);x.lineTo(px+w*.2,9);x.closePath();x.fill()}
+  for(const [px,py,w,h] of [[14,64,30,30],[72,30,28,26],[94,82,24,28]]){x.fillStyle='#3a2c1e';x.fillRect(px,py,w,h);x.strokeStyle='#150f09';x.lineWidth=2;for(let i=0;i<w;i+=5){x.beginPath();x.moveTo(px+i,py);x.lineTo(px+i,py+h);x.stroke()}}
+  x.save();x.translate(34,85);x.fillStyle='#4a3a28';x.strokeStyle='#150f09';x.lineWidth=1.2;
+  x.rotate(-.35);x.fillRect(-18,-3,36,6);x.strokeRect(-18,-3,36,6);x.rotate(.7);x.fillRect(-18,-3,36,6);x.strokeRect(-18,-3,36,6);x.restore();
+  x.fillStyle='rgba(10,8,6,.3)';for(const px of [20,48,82,110])x.fillRect(px,30,6,70);
+  return c;
+}
+function farmCanvas(){
+  const c=document.createElement('canvas');c.width=c.height=TS;const x=c.getContext('2d');
+  x.fillStyle='#cdc6ae';x.fillRect(0,0,TS,TS);
+  x.fillStyle='#8a7442';x.beginPath();x.moveTo(0,0);x.lineTo(TS,0);for(let i=TS;i>=0;i-=4)x.lineTo(i,36+hash2(i,3,19)*8);x.closePath();x.fill();
+  for(let i=0;i<300;i++){const px=hash2(i,1,20)*TS,py=hash2(i,2,20)*38,l=8+hash2(i,3,20)*8,t=hash2(i,4,20);x.strokeStyle=t<.5?'#a89050':'#5c4a28';x.lineWidth=1.3;x.beginPath();x.moveTo(px,py);x.lineTo(px+(t-.5)*3,py+l);x.stroke()}
+  const sg=x.createLinearGradient(0,40,0,56);sg.addColorStop(0,'rgba(0,0,0,.4)');sg.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=sg;x.fillRect(0,40,TS,16);
+  x.fillStyle='#2b1e12';x.fillRect(0,40,7,TS-52);x.fillRect(TS-7,40,7,TS-52);x.fillRect(TS/2-3,40,6,TS-52);x.fillRect(0,76,TS,5);
+  x.fillStyle='#5b564c';x.fillRect(0,TS-12,TS,12);x.strokeStyle='#2a2620';x.lineWidth=1.5;x.beginPath();x.moveTo(0,TS-6);x.lineTo(TS,TS-6);x.stroke();
+  tWin(x,32,96,16,18,true);
+  x.fillStyle='#1a1208';x.fillRect(86,48,26,22);x.strokeStyle='#4a3a20';x.lineWidth=2;for(let i=0;i<4;i++){x.beginPath();x.moveTo(86,52+i*5);x.lineTo(112,52+i*5);x.stroke()}
+  return c;
+}
+function doorCanvas2(baseD,kind){
+  const c=toCanvas(baseD),x=c.getContext('2d');
+  if(kind==='farm'){
+    const L=22,R=106,top=62;x.fillStyle='#20160c';x.fillRect(L-4,top-4,R-L+8,TS-top+4);
+    const g=x.createLinearGradient(L,0,R,0);g.addColorStop(0,'#3e3220');g.addColorStop(.5,'#6a5836');g.addColorStop(1,'#3e3220');x.fillStyle=g;x.fillRect(L,top,R-L,TS-top);
+    x.strokeStyle='rgba(0,0,0,.55)';x.lineWidth=1.2;for(let px=L+8;px<R;px+=8){x.beginPath();x.moveTo(px,top);x.lineTo(px,TS);x.stroke()}
+    x.strokeStyle='#1a1410';x.lineWidth=5;x.beginPath();x.moveTo(L,top+2);x.lineTo((L+R)/2-2,TS);x.moveTo((L+R)/2-2,top+2);x.lineTo(L,TS);x.moveTo((L+R)/2+2,top+2);x.lineTo(R,TS);x.moveTo(R,top+2);x.lineTo((L+R)/2+2,TS);x.stroke();
+    x.fillStyle='#0c0a08';x.fillRect((L+R)/2-1.5,top,3,TS-top);
+    x.strokeStyle='#b8a050';x.lineWidth=2;x.beginPath();x.arc((L+R)/2-8,TS-34,4,0,TAU);x.arc((L+R)/2+8,TS-34,4,0,TAU);x.stroke();
+  }else if(kind==='ruin'){
+    const L=44,R=84,top=60;x.fillStyle='#0a0806';x.fillRect(L-4,top-4,R-L+8,TS-top+4);
+    x.fillStyle='#3a2e22';x.fillRect(L,top,12,TS-top);x.fillRect(R-10,top+20,10,TS-top-20);x.strokeStyle='#150f09';x.lineWidth=1.2;x.strokeRect(L,top,12,TS-top);
+    x.save();x.fillStyle='#5a4a34';x.strokeStyle='#150f09';x.translate((L+R)/2,TS-40);x.rotate(-.3);x.fillRect(-26,-4,52,8);x.strokeRect(-26,-4,52,8);x.rotate(.62);x.fillRect(-26,-4,52,8);x.strokeRect(-26,-4,52,8);x.restore();
+  }else{ // house2: a painted blue-grey door with a ring knocker and a lintel
+    const L=42,R=86,top=60;x.fillStyle='#5a5650';x.fillRect(L-6,top-8,R-L+12,8);x.fillStyle='#20160c';x.fillRect(L-3,top-3,R-L+6,TS-top+3);
+    const g=x.createLinearGradient(L,0,R,0);g.addColorStop(0,'#1e2a30');g.addColorStop(.5,'#3c4a52');g.addColorStop(1,'#1e2a30');x.fillStyle=g;x.fillRect(L,top,R-L,TS-top);
+    x.strokeStyle='rgba(0,0,0,.5)';x.lineWidth=1.2;for(let px=L+11;px<R;px+=11){x.beginPath();x.moveTo(px,top);x.lineTo(px,TS);x.stroke()}
+    x.strokeStyle='#b8a050';x.lineWidth=2;x.beginPath();x.arc((L+R)/2,TS-40,5,0,TAU);x.stroke();x.fillStyle='#1a1714';x.fillRect(L,top+14,R-L,4);x.fillRect(L,top+44,R-L,4);
+  }
+  return c;
+}
+
 function makeTownTextures(){
   const A=warpTex(grimeData(shearCanvas(tudorCanvas(0),.07),71),72,3.6),B=warpTex(grimeData(shearCanvas(tudorCanvas(1),-.06),73),74,3.6),Cc=warpTex(grimeData(shearCanvas(tudorCanvas(2),.04),75),76,3.6);
   T_WALL[9]=addTex(A);T_WALL[10]=addTex(B);T_WALL[11]=addTex(Cc);
   const pal=warpTex(grimeData(palisadeCanvas(),77),78,3),plank=warpTex(grimeData(plankCanvas(false),79),80,2.4),panel=warpTex(grimeData(plankCanvas(true),81),82,2.2);
   T_WALL[12]=addTex(pal);T_WALL[13]=addTex(plank);T_WALL[14]=addTex(panel);
+  const SCd=warpTex(grimeData(stoneCottageCanvas(),121),122,2.4);T_WALL[20]=addTex(SCd,warpTex(pix(stoneCottageGlow()),122,2.4));
+  const RUd=warpTex(grimeData(shearCanvas(ruinCanvas(),.1),123),124,3.6);T_WALL[21]=addTex(RUd);
+  const FRd=warpTex(grimeData(shearCanvas(farmCanvas(),.03),125),126,3);T_WALL[22]=addTex(FRd);
+  T_DOORS.house2=addTex(warpTex(grimeData(doorCanvas2(SCd,'house2'),130),131,2));T_DOORS.farm=addTex(warpTex(grimeData(doorCanvas2(FRd,'farm'),132),133,2));T_DOORS.ruin=addTex(warpTex(grimeData(doorCanvas2(RUd,'ruin'),134),135,2));
+  FLOORS.grass=GRASSD;
   const wd=(base,kind,seed)=>warpTex(grimeData(doorCanvas(base,kind),seed),seed+1,2);
   T_DOORS.house=addTex(wd(A,'house',90));T_DOORS.bakery=addTex(wd(A,'bakery',92));T_DOORS.smith=addTex(wd(B,'smith',94));
   T_DOORS.shop=addTex(wd(B,'shop',96));T_DOORS.inn=addTex(wd(Cc,'inn',98));T_DOORS.hall=addTex(wd(Cc,'hall',100));
@@ -1600,8 +1671,8 @@ function doMove(rel){ // rel: 0 forward, 1 right, 2 back, 3 left
   }
   if(g===5||g===7){exitLevel(g);return}
   if(g===8){sfx('locked');msg('The crypt door has sealed behind you.','#d09a80');return}
-  if(g>=15&&g<=17){sfx('locked');const ms=DOOR_MSGS[g];msg(ms[(hash2(nx,ny,3)*ms.length)|0],'#d09a80');return}
-  if(g>=20){usePortal(g-20);return}
+  if(g>=15&&g<=19){sfx('locked');const ms=DOOR_MSGS[g];msg(ms[(hash2(nx,ny,3)*ms.length)|0],'#d09a80');return}
+  if(g>=30){usePortal(g-30);return}
   if(g===0){const dc=G.decor.find(d=>d.loot&&d.x===nx&&d.y===ny);if(dc){openLoot(dc);return}
     const nd=G.decor.find(d=>d.npc&&d.x===nx&&d.y===ny);if(nd){startTalk(nd);return}}
   if(g>0||G.decor.some(d=>d.block&&d.x===nx&&d.y===ny)){sfx('bump');G.shake=.12;return}
@@ -1693,6 +1764,7 @@ function render3D(){
   const day=G.day||0,lbm=Math.max(day,G.amb||0),fd=G.fl||(day?GRASSD:FLOORD),cd=G.cl||(day?SKYD:CEILD);
   const hzr=day?[132,146,132]:[86,76,62],hzc=day?[110,124,112]:[69,61,50],hzmax=day?.55:.32,hzrate=day?.07:.042;
   const tbR=1,tbG=.94,tbB=.84, ttR=1.3,ttG=.88,ttB=.5;
+  const fmp=G.fmap,fd2=G.fl2;
   // floor + ceiling
   for(let y=HH;y<VH;y++){
     const p=y-HH+.5,rd=EYE*F/p;
@@ -1713,9 +1785,9 @@ function render3D(){
       for(let k=0;k<nrn;k+=3){const ax=fx-nr[k],ay=fy-nr[k+1],d2=ax*ax+ay*ay;lr+=nr[k+2]/(1+1.15*(d2+.44));lrc+=nr[k+2]/(1+1.15*(d2+.12))}
       const kR=(lb*tbR+lt*ttR+lr*1.4)*vg,kG=(lb*tbG+lt*ttG+lr*.2)*vg,kB=(lb*tbB+lt*ttB+lr*.1)*vg;
       const kRc=(lb*tbR+ltc*ttR+lrc*1.4)*vg,kGc=(lb*tbG+ltc*ttG+lrc*.2)*vg,kBc=(lb*tbB+ltc*ttB+lrc*.1)*vg;
-      const ti=(v*TS+u)*4,io=yo+x*4,ic=yc+x*4;
+      const ti=(v*TS+u)*4,io=yo+x*4,ic=yc+x*4,fdd=(fmp&&cxl>=0&&cyl>=0&&cxl<MW&&cyl<MH&&fmp.charCodeAt(cyl*MW+cxl)===49)?fd2:fd;
       const sm=Math.min(hzmax,dist*hzrate),sk=(lb*.55+(lt+lr)*.45+.05)*sm,iv=1-sm,cs=day?1:.85;
-      D[io]=fd[ti]*kR*iv+hzr[0]*sk;D[io+1]=fd[ti+1]*kG*iv+hzr[1]*sk;D[io+2]=fd[ti+2]*kB*iv+hzr[2]*sk;
+      D[io]=fdd[ti]*kR*iv+hzr[0]*sk;D[io+1]=fdd[ti+1]*kG*iv+hzr[1]*sk;D[io+2]=fdd[ti+2]*kB*iv+hzr[2]*sk;
       D[ic]=cd[ti]*kRc*cs*iv+hzc[0]*sk;D[ic+1]=cd[ti+1]*kGc*cs*iv+hzc[1]*sk;D[ic+2]=cd[ti+2]*kBc*cs*iv+hzc[2]*sk;
     }
   }
@@ -1742,7 +1814,7 @@ function render3D(){
     if((side===0&&rX>0)||(side===1&&rY<0))tx=TS-1-tx;
     const face=side===0?(stx>0?3:1):(sty>0?0:2);
     let ti;
-    if(g===1)ti=(LEVEL===2&&T_ABBEY!==undefined)?T_ABBEY:T_STONE;else if(g===2)ti=(LEVEL===2&&T_ABBEY!==undefined)?T_ABBEY:T_BRICK;else if(g===3||g===8)ti=T_DOOR;else if(g===4)ti=T_LOCK;else if(g===6)ti=T_FOREST;else if(g===7)ti=T_GATE;else if(g>=9&&g<=14)ti=T_WALL[g];else if(g>=15&&g<=17)ti=g===15?T_DOORS.house:g===16?T_DOORS.bakery:T_DOORS.smith;else if(g>=20)ti=T_DOORS[(G.portals[g-20]||{}).tex]||T_DOORS.house;else ti=T_EXIT;
+    if(g===1)ti=(LEVEL===2&&T_ABBEY!==undefined)?T_ABBEY:T_STONE;else if(g===2)ti=(LEVEL===2&&T_ABBEY!==undefined)?T_ABBEY:T_BRICK;else if(g===3||g===8)ti=T_DOOR;else if(g===4)ti=T_LOCK;else if(g===6)ti=T_FOREST;else if(g===7)ti=T_GATE;else if((g>=9&&g<=14)||(g>=20&&g<=22))ti=T_WALL[g];else if(g>=15&&g<=19)ti=[T_DOORS.house,T_DOORS.bakery,T_DOORS.house2,T_DOORS.farm,T_DOORS.ruin][g-15];else if(g>=30)ti=T_DOORS[(G.portals[g-30]||{}).tex]||T_DOORS.house;else ti=T_EXIT;
     const tv=(g===1||g===2)?torchAt.get((my*MW+mx)*4+face):0;
     if(tv){const ph=((mx*7+my*3)&3);ti=(g===1?(tv===2?T_TORCH_STONE_R:T_TORCH_STONE):(tv===2?T_TORCH_BRICK_R:T_TORCH_BRICK))+((fr+ph*2)&7)}
     const tex=TEX[ti],td=tex.d,te=tex.e;
@@ -2583,7 +2655,7 @@ function crBtn(id){
 /* ==========================================================================
    LOOT WINDOW AND SHOPS  (your bag | item card | the container or shop stock)
    ========================================================================== */
-const CONTAINERS=['barrel','coffin','cart'];
+const CONTAINERS=['barrel','coffin','cart','crate'];
 const SHOP_STOCK=[['potion',5],['bread',4],['cheese',3],['apple',4],['torch',3],['dagger',1],['sword',1],['mace',1],['bow',1],['cap',1],['jerkin',1],['shield',1],['bracers',1],['leggings',1],['helm',1]];
 const sellPrice=id=>Math.max(1,Math.floor(ITEMDEF[id].price*.4));
 const FOOD_TABLE=[['apple',3],['nuts',3],['cheese',3],['ale',2],['bread',3],['herring',2],['sausage',2],['pottage',1],['pie',1],['roast',1]];
@@ -2592,7 +2664,7 @@ function lootFor(d){
   const r=k=>hash2(d.x,d.y,100+k),items=[];
   const add=(id,n)=>items.push({id,n:ITEMDEF[id].stack?(n||1):1});
   if(d.k==='barrel'&&LEVEL===1&&d.x===1&&d.y===15){add('cheese',4);d.gold=3+Math.floor(r(20)*10)}
-  else if(d.k==='barrel'){
+  else if(d.k==='barrel'||d.k==='crate'){
     const n=1+Math.floor(r(1)*3);
     for(let k=0;k<n;k++){const p=r(2+k);add(p<.28?foodFor(r(30+k)):p<.5?'potion':'torch',1)}
     d.gold=3+Math.floor(r(20)*10);
@@ -2605,7 +2677,7 @@ function lootFor(d){
 }
 function openLoot(d){
   if(!d.contents)d.contents=d.shop?SHOP_STOCK.map(([id,n])=>({id,n})):lootFor(d);
-  G.loot={decor:d,shop:!!d.shop,name:d.shop?(d.shopName||"Peddler's Cart"):(d.k==='coffin'?'Stone coffin':'Barrel'),sel:null,sl:0,sr:0,t:G.time};
+  G.loot={decor:d,shop:!!d.shop,name:d.shop?(d.shopName||"Peddler's Cart"):(d.k==='coffin'?'Stone coffin':d.k==='crate'?'Wooden crate':'Barrel'),sel:null,sl:0,sr:0,t:G.time};
   G.hold=null;
   if(!d.shop&&d.gold&&!d.goldTaken){d.goldTaken=true;G.gold+=d.gold;msg(`You find ${d.gold} gold.`,'#ffe9a0');sfx('key')}else sfx('equip');
 }
@@ -2911,7 +2983,7 @@ function drawOverview(){
   ctx.save();ctx.font=`24px ${FTITLE}`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle='#d8c88e';ctx.fillText(`Level ${LEVEL}: ${LEVEL_NAMES[LEVEL]}`,8,15);ctx.restore();
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){
     const g=G.grid[y][x];
-    ctx.fillStyle=g===0?'#7a6446':g>=20?'#d8b060':g>=15?'#a8702e':g>=9?'#46403a':g===1?'#46403a':g===2?'#6a2e26':g===3?'#a8702e':g===4?'#c03a2a':g===5?'#7ab0f0':g===6?'#2c4a2a':g===7?'#d8b060':'#6a4a24';
+    ctx.fillStyle=g===0?'#7a6446':g>=30?'#d8b060':(g>=15&&g<=19)?'#a8702e':g>=9?'#46403a':g===1?'#46403a':g===2?'#6a2e26':g===3?'#a8702e':g===4?'#c03a2a':g===5?'#7ab0f0':g===6?'#2c4a2a':g===7?'#d8b060':'#6a4a24';
     ctx.fillRect(ox+x*cs,oy+y*cs,cs-.6,cs-.6);
   }
   for(const [name,x1,y1,x2,y2] of (LEVEL===1?ZONE_LABELS:[])){
@@ -2948,27 +3020,27 @@ function drawOverview(){
 const LEVEL1_DATA={rows:MAPROWS,start:START,enemies:ENEMY_SPAWNS,items:ITEM_SPAWNS,decor:DECOR_SPAWNS,outdoor:false,name:'The crypts below the abbey'};
 const FOREST={"rows": ["TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT..G.T", "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT....T", "TTTTTTTTTTTTTTTTTTTTT.....TTTTTTTT.....T", "TTTTTTTTTTTTTTTTTTTT.t....TTTTTTt.t....T", "TTTTTTTTTTTTTTTTTTT.t..tt.TTTT.T.......T", "T##############TTTT..tt.t.T....t.......T", "T#............#TTTTt....t...t..........T", "T#............#TTT.....t....t.........tT", "T#%%%%........#....tt..tT.ttt..........T", "T#%%%%................tTT.t..........ttT", "T#%%%%...................tt..........TTT", "T#%%%C....................t........TTTTT", "T#%%%%................tt.t.......ttTTTTT", "T#%%%%........................tt...TTTTT", "T#%%%%........#t..t...........t...tTTTTT", "T#%%%%........#T.............tttt...TTTT", "T#............#TTttt..........tt.....TTT", "T#............#T...t.T.....t...tt.t..TTT", "T##############........t.............TTT", "TTTTTTTTTTTTTTTt..t...Tt......T......TTT", "TTTTTTTTTTTTTTTt..t.ttTTTT.TTTTTtt..TTTT", "TTTTTTTTTTTTTTT......TTTTTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTt..tTTTTTTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"], "decor": [{"k": "tree2", "x": 3, "y": 7, "block": true}, {"k": "tree0", "x": 13, "y": 7, "block": true}, {"k": "tree3", "x": 3, "y": 18, "block": true}, {"k": "tree1", "x": 13, "y": 18, "block": true}, {"k": "well", "x": 9, "y": 12, "block": true}, {"k": "grave", "x": 8, "y": 8, "block": true}, {"k": "grave", "x": 10, "y": 8, "block": true}, {"k": "grave", "x": 12, "y": 8, "block": true}, {"k": "grave", "x": 8, "y": 17, "block": true}, {"k": "grave", "x": 10, "y": 17, "block": true}, {"k": "grave", "x": 12, "y": 17, "block": true}, {"k": "grave", "x": 11, "y": 14, "block": true}, {"k": "cross", "x": 7, "y": 8, "block": true}, {"k": "cross", "x": 13, "y": 17, "block": true}, {"k": "statue", "x": 9, "y": 15, "block": true}, {"k": "statue", "x": 9, "y": 9, "block": true}, {"k": "bench", "x": 7, "y": 10, "block": true}, {"k": "bench", "x": 7, "y": 14, "block": true}, {"k": "barrel", "x": 12, "y": 9, "block": true}, {"k": "barrel", "x": 13, "y": 15, "block": true}, {"k": "bones", "x": 11, "y": 11, "block": false}, {"k": "bones", "x": 6, "y": 16, "block": false}, {"k": "barrel", "x": 20, "y": 13, "block": true}, {"k": "barrel", "x": 24, "y": 13, "block": true}, {"k": "barrel", "x": 36, "y": 9, "block": true}], "items": [{"k": "potion", "x": 27, "y": 15}, {"k": "potion", "x": 29, "y": 14}, {"k": "bread", "x": 37, "y": 9}, {"k": "apple", "x": 21, "y": 10}, {"k": "cheese", "x": 23, "y": 4}, {"k": "cheese", "x": 30, "y": 18}, {"k": "potion", "x": 17, "y": 16}, {"k": "potion", "x": 8, "y": 13}, {"k": "bread", "x": 12, "y": 12}, {"k": "wood", "x": 30, "y": 11}, {"k": "wood", "x": 35, "y": 19}, {"k": "wood", "x": 32, "y": 6}, {"k": "wood", "x": 19, "y": 12}, {"k": "wood", "x": 19, "y": 21}, {"k": "wood", "x": 27, "y": 19}, {"k": "wood", "x": 23, "y": 15}, {"k": "wood", "x": 24, "y": 8}], "start": {"x": 6, "y": 12, "f": 1}};
 const LEVEL2_DATA={rows:FOREST.rows,start:FOREST.start,enemies:[],items:FOREST.items,decor:FOREST.decor,outdoor:true,floor:'forest',name:'The abbey grounds and the Thornwood',label:'Thornwood',diff:4};
-const TOWNJ={"rows": ["ppppppppppppppppppp1pppppppppppppppppppp", "p......................................p", "paaaaa.bbbbbb.ccccc..bbbbb.cccccc.aaaaap", "paaaaa.bbbbbb.ccccc..bbbbb.cccccc.aaaaap", "paaaaa.bbbbbb.ccccc..bbbbb.cccccc.aaaaap", "paaaaa.bbbbbb.ccccc..bbbbb.cccccc.aaaaap", "paaaaa.bbbbbb.ccccc..bbbbb.cccccc.aaaaap", "paahaa.bbhbbb.cchcc..bbhbb.cchccc.aahaap", "p......................................p", "p......................................p", "paaaaa.bbbbbb........bbbbb.cccccc.aaaaap", "paaaaa.bbbbbb........bbbbb.cccccc.aaaaap", "paaaaa.bbbbbb........bbbbb.cccccc.aaaaap", "paaaaa.bbbbbb........bbbbb.cccccc.aaaaap", "paaaaa.bbbbbb........bbbbb.cccccc.aaaaap", "paahaa.bb4bbb........bbhbb.cc2ccc.aahaap", "p......................................p", "p......................................p", "paaaaa.bb3bbb.ccccc........cckccc.aaaaap", "paaaaa.bbbbbb.ccccc........cccccc.aaaaap", "paaaaa.bbbbbb.ccccc........cccccc.aaaaap", "paaaaa.bbbbbb.ccccc........cccccc.aaaaap", "paaaaa.bbbbbb.ccccc........cccccc.aaaaap", "paahaa.bbbbbb.cchcc........cccccc.aahaap", "p......................................p", "p......................................p", "paahaa.bbmbbb.cchcc..bbhbb.cchccc.aahaap", "paaaaa.bbbbbb.ccccc..bbbbb.cccccc.aaaaap", "paaaaa.bbbbbb.ccccc..bbbbb.cccccc.aaaaap", "paaaaa.bbbbbb.ccccc..bbbbb.cccccc.aaaaap", "paaaaa.bbbbbb.ccccc..bbbbb.cccccc.aaaaap", "paaaaa.bbbbbb.ccccc..bbbbb.cccccc.aaaaap", "paaaaa.bbbbbb.ccccc..bbbbb.cccccc.aaaaap", "paaaaa.bbbbbb.ccccc..bbbbb.cccccc.aaaaap", "p......................................p", "pppppppppppppppppppp0ppppppppppppppppppp"], "decor": [{"k": "well", "x": 16, "y": 12, "block": true}, {"k": "bench", "x": 15, "y": 11, "block": true, "deco": true}, {"k": "bench", "x": 17, "y": 14, "block": true, "deco": true}, {"k": "barrel", "x": 4, "y": 8, "block": true}, {"k": "barrel", "x": 24, "y": 9, "block": true}, {"k": "barrel", "x": 35, "y": 8, "block": true}, {"k": "barrel", "x": 10, "y": 17, "block": true}, {"k": "barrel", "x": 32, "y": 16, "block": true}, {"k": "barrel", "x": 12, "y": 25, "block": true}, {"k": "barrel", "x": 28, "y": 24, "block": true}, {"k": "barrel", "x": 3, "y": 17, "block": true}, {"k": "cart", "x": 22, "y": 20, "block": true, "deco": true}, {"k": "cart", "x": 24, "y": 22, "block": true, "deco": true}, {"k": "goat", "x": 6, "y": 13, "block": true, "npc": "goat", "goat": 1}, {"k": "goat", "x": 26, "y": 5, "block": true, "npc": "goat", "goat": 2}, {"k": "goat", "x": 33, "y": 28, "block": true, "npc": "goat", "goat": 3}, {"k": "goat", "x": 13, "y": 30, "block": true, "npc": "goat", "goat": 4}, {"k": "goat", "x": 23, "y": 21, "block": true, "npc": "goat", "goat": 5}, {"k": "peasantM", "x": 19, "y": 33, "block": true, "npc": "rolf"}, {"k": "huntress", "x": 20, "y": 31, "block": true, "npc": "hild"}, {"k": "peasantM", "x": 19, "y": 5, "block": true, "npc": "tam"}, {"k": "peasantW", "x": 17, "y": 13, "block": true, "npc": "mabel"}, {"k": "beggar", "x": 20, "y": 22, "block": true, "npc": "wat"}, {"k": "drunk", "x": 10, "y": 16, "block": true, "npc": "hob"}, {"k": "thug", "x": 13, "y": 12, "block": true, "npc": "jem"}, {"k": "pickpocket", "x": 24, "y": 17, "block": true, "npc": "nim"}, {"k": "shepherdess", "x": 17, "y": 9, "block": true, "npc": "maud"}, {"k": "peasantM", "x": 20, "y": 2, "block": true, "npc": "guard"}, {"k": "peasantW", "x": 8, "y": 9, "block": true, "npc": "edda"}, {"k": "peasantM", "x": 30, "y": 25, "block": true, "npc": "will"}], "items": [{"k": "potion", "x": 33, "y": 9}, {"k": "bread", "x": 22, "y": 17}, {"k": "apple", "x": 1, "y": 9}, {"k": "cheese", "x": 19, "y": 13}], "start": {"x": 20, "y": 34, "f": 0}, "interiors": {"shop": {"rows": ["wwwwwwwww", "w.......w", "w.......w", "w.......w", "w.......w", "w.......w", "w.......w", "wwww0wwww"], "decor": [{"k": "bench", "x": 2, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 3, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 5, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 6, "y": 3, "block": true, "deco": true}, {"k": "barrel", "x": 1, "y": 1, "block": true, "deco": true}, {"k": "barrel", "x": 7, "y": 1, "block": true, "deco": true}, {"k": "barrel", "x": 1, "y": 2, "block": true, "deco": true}, {"k": "barrel", "x": 7, "y": 5, "block": true, "deco": true}, {"k": "barrel", "x": 1, "y": 6, "block": true, "deco": true}, {"k": "merchant", "x": 4, "y": 2, "block": true, "npc": "aldous"}], "items": [], "start": {"x": 4, "y": 6, "f": 0}, "lights": [[2, 2], [6, 2], [4, 5]]}, "hall": {"rows": ["vvvvvvvvvvvvv", "v...........v", "v...........v", "v...........v", "v...........v", "v...........v", "v...........v", "v...........v", "vvvvvv0vvvvvv"], "decor": [{"k": "bench", "x": 4, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 5, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 7, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 8, "y": 3, "block": true, "deco": true}, {"k": "statue", "x": 2, "y": 1, "block": true, "deco": true}, {"k": "statue", "x": 10, "y": 1, "block": true, "deco": true}, {"k": "bench", "x": 2, "y": 6, "block": true, "deco": true}, {"k": "bench", "x": 10, "y": 6, "block": true, "deco": true}, {"k": "mayor", "x": 6, "y": 2, "block": true, "npc": "corbin"}, {"k": "peasantM", "x": 3, "y": 4, "block": true, "npc": "clerk"}], "items": [], "start": {"x": 6, "y": 7, "f": 0}, "lights": [[3, 2], [9, 2], [6, 5], [2, 7], [10, 7]]}, "inn": {"rows": ["wwwwwwwwwwwww", "w...........w", "w...........w", "w...........w", "w...........w", "w...........w", "w...........w", "w...........w", "wwwwww0wwwwww"], "decor": [{"k": "barrel", "x": 4, "y": 1, "block": true, "deco": true}, {"k": "barrel", "x": 8, "y": 1, "block": true, "deco": true}, {"k": "bench", "x": 4, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 5, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 7, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 8, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 2, "y": 5, "block": true, "deco": true}, {"k": "bench", "x": 10, "y": 5, "block": true, "deco": true}, {"k": "bench", "x": 2, "y": 6, "block": true, "deco": true}, {"k": "bench", "x": 10, "y": 6, "block": true, "deco": true}, {"k": "innkeeper", "x": 6, "y": 2, "block": true, "npc": "bram"}, {"k": "drunk", "x": 3, "y": 4, "block": true, "npc": "patron1"}, {"k": "peasantM", "x": 9, "y": 4, "block": true, "npc": "patron2"}], "items": [], "start": {"x": 6, "y": 7, "f": 0}, "lights": [[3, 2], [9, 2], [6, 5], [2, 7], [10, 7]]}}};
+const TOWNJ={"rows": ["ppppppppppppppppppppppppp", "pdddeeeffff..cccccaaadddp", "pdddeeeffff..cccccaaadddp", "pdddeeeffff..cccccaaadddp", "pdddeeeffff..cccccaaadddp", "pdhderefgff..cc2ccaiadhdp", "p.......................p", "p.......................p", "p.......................p", "0.......................1", "p.......................p", "p......akaa..bb3bbcc4cccp", "p......aaaa..bbbbbccccccp", "pbibdhdaaaa..bbbbbccccccp", "pbbbdddaaaa..bbbbbccccccp", "pbbbdddaaaa..bbbbbccccccp", "pbbbdddaaaa..bbbbbccccccp", "pbbbdddaaaa..bbbbbccccccp", "pbbbdddaaaa..bbbbbccccccp", "pbbbdddaaaa..bbbbbccccccp", "ppppppppppppppppppppppppp"], "decor": [{"k": "bush", "x": 1, "y": 6, "block": true}, {"k": "fence", "x": 1, "y": 7, "block": true}, {"k": "bush", "x": 3, "y": 6, "block": true}, {"k": "fence", "x": 3, "y": 7, "block": true}, {"k": "bush", "x": 4, "y": 6, "block": true}, {"k": "bush", "x": 6, "y": 6, "block": true}, {"k": "hay", "x": 7, "y": 6, "block": true}, {"k": "fence", "x": 7, "y": 7, "block": true}, {"k": "hay", "x": 9, "y": 6, "block": true}, {"k": "fence", "x": 9, "y": 7, "block": true}, {"k": "hay", "x": 10, "y": 6, "block": true}, {"k": "fence", "x": 10, "y": 7, "block": true}, {"k": "bush", "x": 13, "y": 6, "block": true}, {"k": "fence", "x": 13, "y": 7, "block": true}, {"k": "veg", "x": 14, "y": 6, "block": true}, {"k": "fence", "x": 14, "y": 7, "block": true}, {"k": "veg", "x": 16, "y": 6, "block": true}, {"k": "fence", "x": 16, "y": 7, "block": true}, {"k": "bush", "x": 17, "y": 6, "block": true}, {"k": "fence", "x": 17, "y": 7, "block": true}, {"k": "veg", "x": 18, "y": 6, "block": true}, {"k": "fence", "x": 18, "y": 7, "block": true}, {"k": "veg", "x": 20, "y": 6, "block": true}, {"k": "fence", "x": 20, "y": 7, "block": true}, {"k": "bush", "x": 21, "y": 6, "block": true}, {"k": "fence", "x": 21, "y": 7, "block": true}, {"k": "bush", "x": 23, "y": 6, "block": true}, {"k": "fence", "x": 23, "y": 7, "block": true}, {"k": "veg", "x": 1, "y": 12, "block": true}, {"k": "fence", "x": 1, "y": 11, "block": true}, {"k": "veg", "x": 3, "y": 12, "block": true}, {"k": "fence", "x": 3, "y": 11, "block": true}, {"k": "bush", "x": 4, "y": 12, "block": true}, {"k": "fence", "x": 4, "y": 11, "block": true}, {"k": "bush", "x": 6, "y": 12, "block": true}, {"k": "fence", "x": 6, "y": 11, "block": true}, {"k": "well", "x": 12, "y": 9, "block": true}, {"k": "barrel", "x": 4, "y": 10, "block": true}, {"k": "barrel", "x": 10, "y": 8, "block": true}, {"k": "barrel", "x": 14, "y": 8, "block": true}, {"k": "barrel", "x": 21, "y": 10, "block": true}, {"k": "barrel", "x": 11, "y": 4, "block": true}, {"k": "barrel", "x": 11, "y": 6, "block": true}, {"k": "barrel", "x": 11, "y": 14, "block": true}, {"k": "barrel", "x": 11, "y": 18, "block": true}, {"k": "crate", "x": 11, "y": 2, "block": true}, {"k": "crate", "x": 11, "y": 12, "block": true}, {"k": "crate", "x": 11, "y": 16, "block": true}, {"k": "crate", "x": 10, "y": 10, "block": true}, {"k": "crate", "x": 13, "y": 10, "block": true}, {"k": "crate", "x": 17, "y": 10, "block": true}, {"k": "crate", "x": 18, "y": 8, "block": true}, {"k": "goat", "x": 12, "y": 1, "block": true, "npc": "goat", "goat": 1}, {"k": "goat", "x": 11, "y": 19, "block": true, "npc": "goat", "goat": 2}, {"k": "goat", "x": 1, "y": 8, "block": true, "npc": "goat", "goat": 3}, {"k": "goat", "x": 1, "y": 10, "block": true, "npc": "goat", "goat": 4}, {"k": "goat", "x": 23, "y": 10, "block": true, "npc": "goat", "goat": 5}, {"k": "peasantM", "x": 3, "y": 8, "block": true, "npc": "rolf"}, {"k": "huntress", "x": 3, "y": 10, "block": true, "npc": "hild"}, {"k": "peasantM", "x": 23, "y": 8, "block": true, "npc": "guard"}, {"k": "peasantM", "x": 6, "y": 9, "block": true, "npc": "tam"}, {"k": "peasantW", "x": 14, "y": 10, "block": true, "npc": "mabel"}, {"k": "beggar", "x": 9, "y": 10, "block": true, "npc": "wat"}, {"k": "drunk", "x": 19, "y": 9, "block": true, "npc": "hob"}, {"k": "thug", "x": 11, "y": 15, "block": true, "npc": "jem"}, {"k": "pickpocket", "x": 16, "y": 9, "block": true, "npc": "nim"}, {"k": "shepherdess", "x": 9, "y": 8, "block": true, "npc": "maud"}, {"k": "peasantW", "x": 21, "y": 9, "block": true, "npc": "edda"}, {"k": "peasantM", "x": 7, "y": 8, "block": true, "npc": "will"}], "items": [{"k": "potion", "x": 13, "y": 9}, {"k": "bread", "x": 11, "y": 8}, {"k": "apple", "x": 2, "y": 8}, {"k": "cheese", "x": 9, "y": 9}], "start": {"x": 1, "y": 9, "f": 1}, "fmap": ["1111111111111111111111111", "1111111111100111111111111", "1111111111100111111111111", "1111111111100111111111111", "1111111111100111111111111", "1111111111100111111111111", "1101101101100110111011011", "1101101101100110111011011", "1000000000000000000000001", "1000000000000000000000001", "1000000000000000000000001", "1101101111100111111111111", "1101101111100111111111111", "1111111111100111111111111", "1111111111100111111111111", "1111111111100111111111111", "1111111111100111111111111", "1111111111100111111111111", "1111111111100111111111111", "1111111111100111111111111", "1111111111111111111111111"], "interiors": {"shop": {"rows": ["wwwwwwwww", "w.......w", "w.......w", "w.......w", "w.......w", "w.......w", "w.......w", "wwww0wwww"], "decor": [{"k": "bench", "x": 2, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 3, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 5, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 6, "y": 3, "block": true, "deco": true}, {"k": "barrel", "x": 1, "y": 1, "block": true, "deco": true}, {"k": "barrel", "x": 7, "y": 1, "block": true, "deco": true}, {"k": "barrel", "x": 1, "y": 2, "block": true, "deco": true}, {"k": "barrel", "x": 7, "y": 5, "block": true, "deco": true}, {"k": "barrel", "x": 1, "y": 6, "block": true, "deco": true}, {"k": "merchant", "x": 4, "y": 2, "block": true, "npc": "aldous"}], "items": [], "start": {"x": 4, "y": 6, "f": 0}, "lights": [[2, 2], [6, 2], [4, 5]]}, "hall": {"rows": ["vvvvvvvvvvvvv", "v...........v", "v...........v", "v...........v", "v...........v", "v...........v", "v...........v", "v...........v", "vvvvvv0vvvvvv"], "decor": [{"k": "bench", "x": 4, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 5, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 7, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 8, "y": 3, "block": true, "deco": true}, {"k": "statue", "x": 2, "y": 1, "block": true, "deco": true}, {"k": "statue", "x": 10, "y": 1, "block": true, "deco": true}, {"k": "bench", "x": 2, "y": 6, "block": true, "deco": true}, {"k": "bench", "x": 10, "y": 6, "block": true, "deco": true}, {"k": "mayor", "x": 6, "y": 2, "block": true, "npc": "corbin"}, {"k": "peasantM", "x": 3, "y": 4, "block": true, "npc": "clerk"}], "items": [], "start": {"x": 6, "y": 7, "f": 0}, "lights": [[3, 2], [9, 2], [6, 5], [2, 7], [10, 7]]}, "inn": {"rows": ["wwwwwwwwwwwww", "w...........w", "w...........w", "w...........w", "w...........w", "w...........w", "w...........w", "w...........w", "wwwwww0wwwwww"], "decor": [{"k": "barrel", "x": 4, "y": 1, "block": true, "deco": true}, {"k": "barrel", "x": 8, "y": 1, "block": true, "deco": true}, {"k": "bench", "x": 4, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 5, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 7, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 8, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 2, "y": 5, "block": true, "deco": true}, {"k": "bench", "x": 10, "y": 5, "block": true, "deco": true}, {"k": "bench", "x": 2, "y": 6, "block": true, "deco": true}, {"k": "bench", "x": 10, "y": 6, "block": true, "deco": true}, {"k": "innkeeper", "x": 6, "y": 2, "block": true, "npc": "bram"}, {"k": "drunk", "x": 3, "y": 4, "block": true, "npc": "patron1"}, {"k": "peasantM", "x": 9, "y": 4, "block": true, "npc": "patron2"}], "items": [], "start": {"x": 6, "y": 7, "f": 0}, "lights": [[3, 2], [9, 2], [6, 5], [2, 7], [10, 7]]}}};
 const GJ={"forest": {"rows": ["TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTT..0..TTTTTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTT......TTTTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTT.......TTTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTT.........tTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTT..........tt.TTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTTT..........tt.TTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTTTT..t.........t.TTTTTTTT", "TTTTTTTTTTTTTTTTTT...t....T.........TTTTTTTT", "TTTTTTTTTTTTTTTTTT...tttt........t..TTTTTTTT", "TTTTTTTTTTTTTTTT....ttt...tt......ttTTTTTTTT", "TTTTTTTTTTTTTTT.......tt.t.........TTTTTTTTT", "TTTTTTTTTTTTTT....................TTTTTTTTTT", "TTTTTTTTTTTT.....................TTTTTTTTTTT", "TTTTTTTTTTt..................tTTTTTTTTTTTTTT", "TTTTTTTTT........tttt.......TTTTTTTTTTTTTTTT", "TTTTTTTTt........TTTT.t.t..TTTTTTTTTTTTTTTTT", "TTTTTTTT.tt......TTTTTTTTTTTTTTTTTT...TTTTTT", "TTTTTTTTT.t.....tTTTTTTTTTTTTTTTTT..t..TTTTT", "TTTTTTTTT..t.....tTTTTTTTTTTTTTTT...ttt.TTTT", "TTTTTTTTTTtt.......ttTTTTTTTTTTTTt.t...tTTTT", "TTTTTTTTTTTTt.......t..TTTTTTTTTT..tt...TTTT", "TTTTTT....TTTt.........TTTTTTTTTTTtttt.TTTTT", "TTTTT.tttttTTTT.........TTTTTTTTTTTtt.TTTTTT", "TTTTTttt.t.tTTT.........TTTTTTTTTTTTTTTTTTTT", "TTTTT.......TTT........tTTTTTTTTTTTTTTTTTTTT", "TTTTT..tttt.TTTTtt.......TTTTTTTTTTTTTTTTTTT", "TTTTTTttt..TTTTT..t......TTTTTTTTTTTTTTTTTTT", "TTTTTTT...TTTTTTT........TTTTTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTTTT1TTTTTTTTTTTTTTTTTTTTT"], "decor": [{"k": "barrel", "x": 32, "y": 12, "block": true}, {"k": "barrel", "x": 24, "y": 11, "block": true}, {"k": "barrel", "x": 19, "y": 14, "block": true}, {"k": "barrel", "x": 21, "y": 14, "block": true}], "items": [{"k": "potion", "x": 16, "y": 23}, {"k": "bread", "x": 16, "y": 17}, {"k": "cheese", "x": 25, "y": 4}, {"k": "apple", "x": 19, "y": 25}, {"k": "potion", "x": 31, "y": 9}, {"k": "potion", "x": 21, "y": 25}], "enemies": [{"t": "wolf", "x": 19, "y": 23}, {"t": "wolf", "x": 21, "y": 25}, {"t": "bandit", "x": 12, "y": 17}, {"t": "archer", "x": 11, "y": 18}, {"t": "wolf", "x": 22, "y": 12}, {"t": "bandit", "x": 24, "y": 13}, {"t": "archer", "x": 20, "y": 9}, {"t": "bandit", "x": 31, "y": 9}, {"t": "bandit", "x": 30, "y": 11}, {"t": "archer", "x": 32, "y": 8}, {"t": "wolf", "x": 24, "y": 5}, {"t": "bandit", "x": 23, "y": 5}], "start": {"x": 22, "y": 28, "f": 0}}, "cave": {"rows": ["################################", "################################", "##########............####.....#", "##########............####.....#", "##########............####.....#", "##########..............L......#", "##########............####.....#", "##########............####.....#", "##########............####.....#", "################.#########.....#", "################.###############", "################.###############", "################D###############", "############..........##########", "############..........##########", "#.......####..........##########", "#.......####..........##########", "#.......####..........##########", "0........D............##########", "#.......####..........##########", "#.......####..........##########", "################################"], "decor": [{"k": "coffin", "x": 13, "y": 14, "block": true}, {"k": "coffin", "x": 13, "y": 17, "block": true}, {"k": "coffin", "x": 20, "y": 14, "block": true}, {"k": "coffin", "x": 20, "y": 17, "block": true}, {"k": "barrel", "x": 11, "y": 3, "block": true}, {"k": "barrel", "x": 21, "y": 3, "block": true}, {"k": "barrel", "x": 2, "y": 16, "block": true}, {"k": "barrel", "x": 7, "y": 20, "block": true}, {"k": "bones", "x": 3, "y": 19, "block": false}, {"k": "bones", "x": 18, "y": 15, "block": false}, {"k": "bones", "x": 12, "y": 6, "block": false}, {"k": "bones", "x": 17, "y": 3, "block": false}, {"k": "bones", "x": 28, "y": 8, "block": false}], "items": [{"k": "potion", "x": 3, "y": 16}, {"k": "potion", "x": 5, "y": 20}, {"k": "key", "x": 20, "y": 3}, {"k": "bread", "x": 2, "y": 20}, {"k": "potion", "x": 14, "y": 19}, {"k": "ringW", "x": 30, "y": 9}, {"k": "scrollFrost", "x": 26, "y": 9}], "enemies": [{"t": "skel", "x": 14, "y": 15}, {"t": "skel", "x": 17, "y": 18}, {"t": "skel", "x": 19, "y": 14}, {"t": "bandit", "x": 12, "y": 4}, {"t": "bandit", "x": 15, "y": 6}, {"t": "bandit", "x": 18, "y": 3}, {"t": "archer", "x": 20, "y": 7}, {"t": "bandit", "x": 27, "y": 3}, {"t": "archer", "x": 27, "y": 8}, {"t": "gandrick", "x": 29, "y": 5}], "start": {"x": 1, "y": 18, "f": 1}}};
 const mkInterior=(j,name,to,extra)=>Object.assign({rows:j.rows,start:j.start,enemies:[],items:j.items,decor:j.decor,day:0,amb:.6,floor:'wood',ceil:'beam',name,label:name,lights:j.lights,portals:[to],diff:2},extra||{});
-const LEVEL3_DATA={rows:TOWNJ.rows,start:TOWNJ.start,enemies:[],items:TOWNJ.items,decor:TOWNJ.decor,outdoor:true,day:.95,floor:'cobble',name:'Thornwick',label:'Thornwick',diff:2,
-  portals:[{to:2,x:37,y:2,f:2,tex:'tgate'},{to:7,x:22,y:28,f:0,tex:'tgate',req:'northGate',lock:'The north gate is barred. Only the mayor can order it opened.'},
+const LEVEL3_DATA={fmap:TOWNJ.fmap,rows:TOWNJ.rows,start:TOWNJ.start,enemies:[],items:TOWNJ.items,decor:TOWNJ.decor,outdoor:true,day:.95,floor:'cobble',name:'Thornwick',label:'Thornwick',diff:2,
+  portals:[{to:2,x:37,y:2,f:2,tex:'tgate'},{to:7,x:22,y:28,f:0,tex:'tgate',req:'northGate',lock:'The east gate is barred. Only the mayor can order it opened.'},
     {to:5,x:6,y:7,f:0,tex:'hall'},{to:4,x:4,y:6,f:0,tex:'shop'},{to:6,x:6,y:7,f:0,tex:'inn'}]};
-const LEVEL4_DATA=mkInterior(TOWNJ.interiors.shop,"Aldous's Store",{to:3,x:9,y:17,f:0,tex:'in'});
-const LEVEL5_DATA=mkInterior(TOWNJ.interiors.hall,'Town Hall',{to:3,x:29,y:16,f:2,tex:'in'},{amb:.54});
-const LEVEL6_DATA=mkInterior(TOWNJ.interiors.inn,'The Wounded Hart',{to:3,x:9,y:16,f:2,tex:'in'});
+const LEVEL4_DATA=mkInterior(TOWNJ.interiors.shop,"Aldous's Store",{to:3,x:15,y:10,f:0,tex:'in'});
+const LEVEL5_DATA=mkInterior(TOWNJ.interiors.hall,"Mayor's House",{to:3,x:15,y:6,f:2,tex:'in'},{amb:.54});
+const LEVEL6_DATA=mkInterior(TOWNJ.interiors.inn,'The Wounded Hart',{to:3,x:20,y:10,f:0,tex:'in'});
 const LEVEL7_DATA={rows:GJ.forest.rows,start:GJ.forest.start,enemies:GJ.forest.enemies,items:GJ.forest.items,decor:GJ.forest.decor,outdoor:true,day:.8,floor:'forest',name:"Gandrick's Wood",label:"Gandrick's Wood",diff:5,
-  portals:[{to:8,x:1,y:18,f:1,tex:'cave'},{to:3,x:19,y:1,f:2,tex:'tgate'}]};
+  portals:[{to:8,x:1,y:18,f:1,tex:'cave'},{to:3,x:23,y:9,f:3,tex:'tgate'}]};
 const LEVEL8_DATA={rows:GJ.cave.rows,start:GJ.cave.start,enemies:GJ.cave.enemies,items:GJ.cave.items,decor:GJ.cave.decor,day:0,name:"Gandrick's Cave",label:"Gandrick's Cave",diff:5,torchGap:4.2,
   portals:[{to:7,x:22,y:2,f:2,tex:'light'}]};
 const LEVELS={1:LEVEL1_DATA,2:LEVEL2_DATA,3:LEVEL3_DATA,4:LEVEL4_DATA,5:LEVEL5_DATA,6:LEVEL6_DATA,7:LEVEL7_DATA,8:LEVEL8_DATA};
 const LEVEL_NAMES={};for(const k in LEVELS)LEVEL_NAMES[k]=LEVELS[k].name;
-const WALLCH={a:9,b:10,c:11,p:12,w:13,v:14,h:15,k:16,m:17,'0':20,'1':21,'2':22,'3':23,'4':24,'5':25};
+const WALLCH={a:9,b:10,c:11,p:12,w:13,v:14,h:15,k:16,i:17,g:18,r:19,d:20,e:21,f:22,'0':30,'1':31,'2':32,'3':33,'4':34,'5':35};
 const DIFF=()=>(LEVELS[LEVEL]&&LEVELS[LEVEL].diff)||LEVEL;
 function loadLevel(n){
   const L=LEVELS[n]||LEVELS[1];
   LEVEL=n;MAPROWS=L.rows;MW=MAPROWS[0].length;MH=MAPROWS.length;START=L.start;ENEMY_SPAWNS=L.enemies;ITEM_SPAWNS=L.items;DECOR_SPAWNS=L.decor;
-  G.day=L.day!==undefined?L.day:(L.outdoor?.98:0);G.dayBase=G.day;G.amb=L.amb||0;G.fl=L.floor?FLOORS[L.floor]:null;G.cl=L.ceil?CEILS[L.ceil]:null;G.portals=L.portals||[];G.extraLights=L.lights||null;
+  G.day=L.day!==undefined?L.day:(L.outdoor?.98:0);G.dayBase=G.day;G.amb=L.amb||0;G.fl=L.floor?FLOORS[L.floor]:null;G.cl=L.ceil?CEILS[L.ceil]:null;G.portals=L.portals||[];G.fmap=L.fmap?L.fmap.join(''):null;G.fl2=L.fmap?FLOORS.grass:null;G.extraLights=L.lights||null;
 }
 function levelState(){
   return {items:G.items.map(i=>i.taken?1:0),decor:G.decor.map(d=>({contents:d.contents||null,gold:d.gold||0,goldTaken:!!d.goldTaken,found:!!d.found})),
@@ -3026,11 +3098,13 @@ function usePortal(i){
 }
 function exitLevel(g){
   if(LEVEL===1&&g===5){sfx('win');goToLevel(2);return}
-  if(LEVEL===2&&g===7){sfx('door');goToLevel(3,{x:20,y:34,f:0});return}
+  if(LEVEL===2&&g===7){sfx('door');goToLevel(3,{x:1,y:9,f:1});return}
   G.state='win';sfx('win');
 }
 const DOOR_MSGS={15:['The door is barred. Nobody answers.','The shutters are closed. Someone inside is watching you.','Locked. You hear a child crying inside.','Locked tight. A dog barks behind the door.'],
-  16:['The bakery is shut. The ovens are cold. The baker fled when the wolves came.'],17:['The smithy is closed. The forge has gone cold.']};
+  16:['The bakery is shut. The ovens are cold. The baker fled when the wolves came.'],
+  17:['The door is barred. Nobody answers.','Locked. A cat watches you from the window.','The shutters are drawn. Someone inside is holding their breath.'],
+  18:['The farmhouse is locked. A dog barks somewhere in the barn.'],19:['The door is boarded up. Nobody has lived here for years.']};
 const NTREES=8,TREE_W=[1.95,1.5,1.4,1.35,2.05,1.7,1.3,1.85];
 function decorW(k){
   if(k.startsWith('tree'))return TREE_W[+k.slice(4)]||1;
@@ -3358,13 +3432,13 @@ function drawArrows(){
 /* ==========================================================================
    TOWNSFOLK, DIALOGUE AND QUESTS
    ========================================================================== */
-const NPC_H={tree0:2.0,tree1:2.3,tree2:1.9,tree3:2.1,tree4:2.0,tree5:.8,tree6:2.3,tree7:2.1,grave:.55,grave2:.5,cross:.9,statue:1.15,well:.95,bench:.58,barrel:.62,coffin:.52,cart:.74,peasantM:.8,peasantW:.76,beggar:.7,drunk:.78,thug:.82,pickpocket:.76,merchant:.74,mayor:.78,goat:.42,shepherdess:.72,huntress:.8,innkeeper:.78};
+const NPC_H={fence:.5,bush:.55,veg:.38,hay:.72,crate:.62,tree0:2.0,tree1:2.3,tree2:1.9,tree3:2.1,tree4:2.0,tree5:.8,tree6:2.3,tree7:2.1,grave:.55,grave2:.5,cross:.9,statue:1.15,well:.95,bench:.58,barrel:.62,coffin:.52,cart:.74,peasantM:.8,peasantW:.76,beggar:.7,drunk:.78,thug:.82,pickpocket:.76,merchant:.74,mayor:.78,goat:.42,shepherdess:.72,huntress:.8,innkeeper:.78};
 const say=(text,opts)=>({text,opts:opts||[]});
 const BYE=['Goodbye.',()=>null];
 const bagCount=id=>G.bag.reduce((n,b)=>n+(b.id===id?b.n:0),0);
 function bagRemove(id,n){for(let i=G.bag.length-1;i>=0&&n>0;i--){const b=G.bag[i];if(b.id!==id)continue;const t=Math.min(n,b.n);b.n-=t;n-=t;if(b.n<=0)G.bag.splice(i,1)}}
 const QUESTS={
-  gandrick:{title:'Kill Gandrick',who:'Mayor Corbin',desc:'Gandrick sent the wolves and bandits. Find him in the wood north of Thornwick and kill him.',need:1,goal:()=>G.flags.gandrickDead?1:0,reward:{gold:300,xp:500,items:['ringW']}},
+  gandrick:{title:'Kill Gandrick',who:'Mayor Corbin',desc:'Gandrick sent the wolves and bandits. Find him in the wood east of Thornwick and kill him.',need:1,goal:()=>G.flags.gandrickDead?1:0,reward:{gold:300,xp:500,items:['ringW']}},
   wood:{title:'Firewood',who:'Bram, the innkeeper',desc:'Bram needs 8 pieces of firewood. Pieces of wood lie on the ground in the Thornwood.',need:8,goal:()=>bagCount('wood'),take:{wood:8},reward:{gold:60,xp:150}},
   goats:{title:'The Lost Goats',who:'Old Maud',desc:'Old Maud lost 5 goats. They are hiding in the streets of Thornwick. Tap or walk into a goat to find it.',need:5,goal:()=>Object.keys(G.flags.goats||{}).length,reward:{gold:70,xp:150,items:['cheese','cheese']}},
   wolves:{title:'Wolf Bounty',who:'Hild, the huntress',desc:'Kill 6 wolves. Hild pays for the danger on the road.',need:6,goal:q=>(G.flags.wolfKills||0)-(q.base||0),reward:{gold:90,xp:200,items:['axe']}},
@@ -3416,9 +3490,9 @@ const NPCS={
     const st=qSt('gandrick');
     if(st==='done')return say('Thornwick owes you more than gold. The road is open and people sleep at night. Rest here as long as you like.',[['Do you have other work?',work],BYE]);
     if(qReady('gandrick'))return say('Gandrick is dead? You are certain?',[['Yes. He is dead.',()=>{qTurnIn('gandrick');G.flags.finale=1;startCut('finale');return null}],BYE]);
-    if(st==='active')return say('Gandrick is still alive. His cave is in the wood north of town. The north gate is open for you.',[['Do you have other work?',work],BYE]);
+    if(st==='active')return say('Gandrick is still alive. His cave is in the wood east of town. The east gate is open for you.',[['Do you have other work?',work],BYE]);
     return say('You walked out of the Thornwood alive. Few have. A man called Gandrick has sent wolves and bandits down that road for a month. Nobody goes out now. Trade has stopped and people are hungry. Find him in the wood north of town and kill him.',[
-      ['We will do it.',()=>{qAccept('gandrick');G.flags.northGate=1;return say('Thank you. I have ordered the north gate opened. Take the road north and follow it to his cave.',[['We will find him.',()=>null]])}],
+      ['We will do it.',()=>{qAccept('gandrick');G.flags.northGate=1;return say('Thank you. I have ordered the east gate opened. Take the road east and follow it to his cave.',[['We will find him.',()=>null]])}],
       ['Why does he want us dead?',()=>say('His note said nothing from the abbey must reach the town. I do not know what lies under that abbey. You do. Tell me when this is over.',[BYE])],
       ['We need to rest first.',()=>say('Of course. The inn is across the square.',[BYE])]]);
   }},
@@ -3471,7 +3545,7 @@ const NPCS={
     if(F.nimStole===1)return say('You can still catch him if you ask.',[['Stop him.',()=>{F.nimStole=2;G.gold+=F.nimAmt;return say('He drops your gold in your hand and runs.',[BYE])}],BYE]);
     return say('I am sorry about that. Old habits. Keep your eyes open in the lanes.',[BYE]);
   }},
-  guard:{name:'North gate guard',root:()=>say(G.flags.northGate?'The mayor sent word. The north gate is open. Be careful out there.':'The north gate stays shut until the mayor says otherwise. Talk to him in the town hall.',[BYE])},
+  guard:{name:'East gate guard',root:()=>say(G.flags.northGate?'The mayor sent word. The east gate is open. Be careful out there.':'The east gate stays shut until the mayor says otherwise. Talk to him in the town hall.',[BYE])},
   clerk:{name:'The clerk',root:()=>say('The mayor is busy, but he will see you. Go ahead.',[BYE])},
   tam:gossip('Old Tam','peasantM',['The mayor has not slept in a week. Gandrick is all anyone talks about.','My brother went to cut wood in the Thornwood. He did not come back.']),
   mabel:gossip('Goodwife Mabel','peasantW',['The well water tastes of iron since the wolves started. I do not like it.','Old Maud lost her goats. They wander off when they are afraid.']),
@@ -3547,10 +3621,10 @@ function drawQuestLog(){
 }
 CUTS.townArrive=()=>[
   {text:'Thornwick is a small timber town behind a log palisade. Smoke rises from a few chimneys, but the streets are almost empty. People watch from doorways and look away.'},
-  {who:'Rolf, the gate warden',text:'You came out of the Thornwood alive? Then see the mayor. The town hall is on the square. Do not wander about with drawn swords. People are afraid.'},
+  {who:'Rolf, the gate warden',text:'You came out of the Thornwood alive? Then see the mayor. The mayor lives by the crossroads. Do not wander about with drawn swords. People are afraid.'},
   {who:hn(0),text:'We need food, a bed and answers. The mayor first.'}];
 CUTS.gwood=()=>[
-  {text:'North of Thornwick the forest is older and darker. No birds sing. Bones lie along the trail, and black-coated figures move between the trees.'},
+  {text:'East of Thornwick the forest is older and darker. No birds sing. Bones lie along the trail, and black-coated figures move between the trees.'},
   {who:hn(1),text:'This is his wood. Everything here has been put here to stop us.'},
   {who:hn(0),text:'Stay together. Find the cave.'}];
 CUTS.cave=()=>[
@@ -3582,7 +3656,7 @@ function drawMapCells(ox,oy,cs){
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){
     if(!G.seen[y][x])continue;
     const g=G.grid[y][x];
-    ctx.fillStyle=g===0?'#7a6446':g>=20?'#d8b060':g>=15?'#a8702e':g===3?'#a8702e':g===4?'#c03a2a':g===5?'#7ab0f0':g===6?'#2c4a2a':g===7?'#d8b060':g===8?'#6a4a24':'#45403a';
+    ctx.fillStyle=g===0?'#7a6446':g>=30?'#d8b060':(g>=15&&g<=19)?'#a8702e':(g>=20&&g<=22)?'#45403a':g===3?'#a8702e':g===4?'#c03a2a':g===5?'#7ab0f0':g===6?'#2c4a2a':g===7?'#d8b060':g===8?'#6a4a24':'#45403a';
     if(g===0&&G.decor.some(d=>d.block&&d.x===x&&d.y===y))ctx.fillStyle='#4a3a28';
     ctx.fillRect(ox+x*cs,oy+y*cs,cs,cs);
     if(g>0&&g<3){ctx.fillStyle='rgba(255,255,255,.07)';ctx.fillRect(ox+x*cs,oy+y*cs,cs,Math.max(1,cs*.2))}
@@ -3990,7 +4064,7 @@ addEventListener('resize',fit);fit();
   IMG._fbRat=fallbackRat(false);IMG._fbBoss=fallbackRat(true);
   for(let i=0;i<4;i++)IMG['_pf'+i]=heroFallback(i);
   try{await Promise.race([Promise.all([document.fonts.load("16px 'IM Fell English SC'"),document.fonts.load("16px 'IM Fell English'"),document.fonts.load("16px 'UnifrakturCook'")]),new Promise(r=>setTimeout(r,2500))])}catch(e){}
-  await Promise.all([loadImg('rat','assets/rat.png'),loadImg('boss','assets/boss.png'),loadImg('wolf','assets/wolf.png'),loadImg('bandit','assets/bandit.png'),loadImg('archer','assets/archer.png'),loadImg('bat','assets/bat.png'),loadImg('skel','assets/skel.png'),...['dagger', 'sword', 'mace', 'staff', 'gravemace', 'bow', 'axe', 'shield', 'cap', 'jerkin', 'bracers', 'leggings', 'helm', 'torch', 'lantern', 'potion', 'key', 'wood', 'ringV', 'ringM', 'ringW', 'ringS', 'sp_fire', 'scrollFrost', 'scrollLight'].map(n=>loadImg('icn_'+n,'assets/icons/'+n+'.png')),...['wolfA','banditA','archerA','ratA','bossA','batA','skelA','gandrickA'].map(n=>loadImg(n,'assets/'+n+'.png')),...['tree0','tree1','tree2','tree3','tree4','tree5','tree6','tree7','grave','grave2','cross','statue','well','bench','barrel','coffin','cart','tex_forestwall','tex_abbeywall','tex_ground'].map(n=>loadImg(n,'assets/'+n+'.png')),...['peasantM','peasantW','beggar','drunk','thug','pickpocket','merchant','mayor','goat','shepherdess','huntress','innkeeper','gandrick'].map(n=>loadImg(n,'assets/'+n+'.png')),...Array.from({length:NPORT},(_,i)=>loadImg('pt'+i,'assets/pt/'+i+'.png'))]);
+  await Promise.all([loadImg('rat','assets/rat.png'),loadImg('boss','assets/boss.png'),loadImg('wolf','assets/wolf.png'),loadImg('bandit','assets/bandit.png'),loadImg('archer','assets/archer.png'),loadImg('bat','assets/bat.png'),loadImg('skel','assets/skel.png'),...['dagger', 'sword', 'mace', 'staff', 'gravemace', 'bow', 'axe', 'shield', 'cap', 'jerkin', 'bracers', 'leggings', 'helm', 'torch', 'lantern', 'potion', 'key', 'wood', 'ringV', 'ringM', 'ringW', 'ringS', 'sp_fire', 'scrollFrost', 'scrollLight'].map(n=>loadImg('icn_'+n,'assets/icons/'+n+'.png')),...['wolfA','banditA','archerA','ratA','bossA','batA','skelA','gandrickA'].map(n=>loadImg(n,'assets/'+n+'.png')),...['tree0','tree1','tree2','tree3','tree4','tree5','tree6','tree7','grave','grave2','cross','statue','well','bench','barrel','coffin','cart','fence','bush','veg','hay','crate','tex_forestwall','tex_abbeywall','tex_ground'].map(n=>loadImg(n,'assets/'+n+'.png')),...['peasantM','peasantW','beggar','drunk','thug','pickpocket','merchant','mayor','goat','shepherdess','huntress','innkeeper','gandrick'].map(n=>loadImg(n,'assets/'+n+'.png')),...Array.from({length:NPORT},(_,i)=>loadImg('pt'+i,'assets/pt/'+i+'.png'))]);
   applyAITextures();
   for(const id of ['dagger', 'sword', 'mace', 'staff', 'gravemace', 'bow', 'axe', 'shield', 'cap', 'jerkin', 'bracers', 'leggings', 'helm', 'torch', 'lantern', 'potion', 'key', 'wood', 'ringV', 'ringM', 'ringW', 'ringS', 'sp_fire', 'scrollFrost', 'scrollLight']){const im=IMG['icn_'+id];if(!im)continue;IMG['ic_'+id]=im;IMG['it_'+id]=im;if(id==='potion')IMG.potion=im;if(id==='key')IMG.key=im}
   reset();buildUIPatterns();crtInit();makeAtmos();try{G.crt=localStorage.getItem('abbeyCRT')!=='0'}catch(e){G.crt=true}fit();
