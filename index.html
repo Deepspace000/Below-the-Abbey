@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.35';
+const VERSION='0.36';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1296,12 +1296,12 @@ function act(id){
 /* ==========================================================================
    3D RENDERER
    ========================================================================== */
-const VW=420,VH=210,HH=VH/2,PL=.75,F=(VW/2)/PL,EYE=.5,AMB=.018;
+const VW=420,VH=210,HH=VH/2,PL=.75,F=(VW/2)/PL,EYE=.5,AMB=.05;
 let RANGE=5.2;
 const vc=document.createElement('canvas');vc.width=VW;vc.height=VH;const vctx=vc.getContext('2d');
 const vimg=vctx.createImageData(VW,VH);for(let i=3;i<vimg.data.length;i+=4)vimg.data[i]=255;
 const zbuf=new Float32Array(VW);
-const LUT=new Float32Array(1025);for(let i=0;i<=1024;i++){const t=1-i/1024;LUT[i]=AMB+(t>0?.5*Math.pow(t,1.8):0)}
+const LUT=new Float32Array(1025);for(let i=0;i<=1024;i++){const t=1-i/1024;LUT[i]=AMB+(t>0?.66*Math.pow(t,1.6):0)}
 const baseL=d=>LUT[Math.min(1024,(d*1024/RANGE)|0)];
 let nearL=[],nearR=[]; // [x,y,I] flat, warm and red lights
 const wd2=new Float32Array(64),wr2=new Float32Array(64);
@@ -1592,8 +1592,8 @@ function setupLights(){
   if(G.extraLights)for(const [x,y] of G.extraLights)LIGHTS.push({x:x+.5,y:y+.5,ph:hash2(x,y,9)*6.28,key:-1-LIGHTS.length,taken:false,red:false,free:true});
 }
 function setLightLevel(l){
-  RANGE=5.2+2.6*l;const amp=.5+.3*l;
-  for(let i=0;i<=1024;i++){const t=1-i/1024;LUT[i]=AMB+(t>0?amp*Math.pow(t,1.8):0)}
+  RANGE=5.2+2.6*l;const amp=.66+.3*l;
+  for(let i=0;i<=1024;i++){const t=1-i/1024;LUT[i]=AMB+(t>0?amp*Math.pow(t,1.6):0)}
 }
 
 /* ==========================================================================
@@ -3184,11 +3184,11 @@ function ui(dt){
   drawDragGhost();
   if(G.time-G.restT<2.4){const a=Math.sin((G.time-G.restT)/2.4*Math.PI);veil(clamp(a*1.4,0,.94));if(a>.5)txt('The party rests for eight hours...',DW/2,DH/2-6,11,'#d8c88e','center',true)}
   // dark, dirty corners like an old lens
-  {const vg=ctx.createRadialGradient(DW/2,DH/2,DH*.36,DW/2,DH/2,DW*.62);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.4)');ctx.fillStyle=vg;ctx.fillRect(0,0,DW,DH)}
+  {const vg=ctx.createRadialGradient(DW/2,DH/2,DH*.36,DW/2,DH/2,DW*.62);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.26)');ctx.fillStyle=vg;ctx.fillRect(0,0,DW,DH)}
   // aged finish: wash the colour out towards grey and add a faint dusty veil
   ctx.save();ctx.globalCompositeOperation='saturation';ctx.fillStyle='rgba(128,128,128,.4)';ctx.fillRect(0,0,DW,DH);
   ctx.globalCompositeOperation='source-over';ctx.fillStyle='rgba(70,64,54,.07)';ctx.fillRect(0,0,DW,DH);
-  if(PAPERP){ctx.globalCompositeOperation='multiply';ctx.fillStyle='rgba(214,192,150,.24)';ctx.fillRect(0,0,DW,DH);ctx.globalAlpha=.75;ctx.fillStyle=PAPERP;ctx.fillRect(0,0,DW,DH)}
+  if(PAPERP){ctx.globalCompositeOperation='multiply';ctx.fillStyle='rgba(224,206,170,.12)';ctx.fillRect(0,0,DW,DH);ctx.globalAlpha=.75;ctx.fillStyle=PAPERP;ctx.fillRect(0,0,DW,DH)}
   ctx.restore();
 }
 function veil(a){ctx.fillStyle=`rgba(4,3,2,${a})`;ctx.fillRect(0,0,DW,DH)}
