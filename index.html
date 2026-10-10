@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.50';
+const VERSION='0.51';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -653,9 +653,9 @@ const ITEMDEF={
   ringM:{n:'Ring of Might',k:'ring',t:'Ring',ic:'ring',c:'#e0a040',dmgb:1,price:110,rar:1,d:'Adds 1 to melee damage.',sw:.2},
   ringW:{n:'Ring of Warding',k:'ring',t:'Ring',ic:'ring',c:'#60a8e0',armor:1,price:100,rar:1,d:'Adds 1 armor.',sw:.2},
   ringS:{n:'Ring of Keen Eye',k:'ring',t:'Ring',ic:'ring',c:'#70d070',hitb:.05,price:120,rar:1,d:'Adds 5% to hit chance.',sw:.2},
-  sp_fire:{n:'Scroll: Firebolt',k:'spell',t:'Spell',ic:'scroll',c:'#e87a30',spell:'fire',price:60,d:'A bolt of fire. Reaches 3 tiles.',sw:.28},
-  scrollFrost:{n:'Scroll: Frost Shard',k:'spell',t:'Spell',ic:'scroll',c:'#7ac0f0',spell:'frost',price:80,d:'Ice that also freezes the target for a turn.',sw:.28},
-  scrollLight:{n:'Scroll: Light',k:'spell',t:'Spell',ic:'scroll',c:'#f0e080',spell:'light',price:50,d:'A glowing orb lights the way for 40 rounds.',sw:.28}
+  sp_fire:{n:'Scroll: Firebolt',k:'spell',t:'Spell',ic:'scroll',c:'#e87a30',spell:'fire',price:60,d:'For Mage and Sorcerer only. A bolt of fire. Reaches 3 tiles.',sw:.28},
+  scrollFrost:{n:'Scroll: Frost Shard',k:'spell',t:'Spell',ic:'scroll',c:'#7ac0f0',spell:'frost',price:80,d:'For Mage and Sorcerer only. Ice that also freezes the target for a turn.',sw:.28},
+  scrollLight:{n:'Scroll: Light',k:'spell',t:'Spell',ic:'scroll',c:'#f0e080',spell:'light',price:50,d:'For Mage and Sorcerer only. A glowing orb lights the way for 40 rounds.',sw:.28}
 };
 for(const k in ITEMDEF){const d=ITEMDEF[k];if(d.feed)d.d=`${d.t}. Fills ${d.feed} hunger and restores ${d.heal} health.`}
 const SPELLS={
@@ -1025,7 +1025,7 @@ function recalcMax(hi){
 }
 function equipTo(hi,slot,bagIdx){
   const h=G.heroes[hi],it=G.bag[bagIdx];if(!it)return false;const d=idef(it);
-  if(!slotFits(slot,d,hi)){msg(slot[0]==='s'&&d.k==='spell'?'Only the mage can use spell scrolls.':'That does not fit there.','#d09a80');return false}
+  if(!slotFits(slot,d,hi)){msg(slot[0]==='s'&&d.k==='spell'?'Only a Mage or Sorcerer can use spell scrolls.':'That does not fit there.','#d09a80');return false}
   const rf=reqFail(h,d);if(rf){msg(`${HERO_DEF[hi].name} needs ${rf} to use the ${d.n}.`,'#d09a80');return false}
   const old=h.eq[slot],taken=bagTake(bagIdx);
   if(old&&!bagAdd(old)){G.bag.splice(bagIdx,0,taken);msg('Your bag is full.','#d09a80');return false}
@@ -1163,7 +1163,7 @@ function heroSpecial(i){
   if(t==='spell'){
     if(!sp.spell){msg('No spell is ready. Equip a scroll in the spell tab.','#d09a80');return false}
     const S=SPELLS[sp.spell];
-    if(S.self){h.mp-=S.cost;G.lightBoost=40;sfx('heal');msg(`${def.name} conjures a glowing light.`,'#f0e080');return true}
+    if(S.self){h.mp-=S.cost;G.lightBoost=40;sfx('heal');msg(`${def.name} conjures a glowing light. The party can see much farther for 40 rounds.`,'#f0e080');return true}
     const f=frontEnemy(S.range);if(!f){msg(`No target in the ${S.n}'s path.`);return false}
     h.mp-=S.cost;const d=rnd(S.dmg[0],S.dmg[1])+intB(h)+magicBonus(h)+(def.sp.bonus||0);
     sfx('fire');msg(`${def.name}'s ${S.n} hits for ${d}!`,S.chill?'#9ad0ff':'#ff9a50');
@@ -1964,7 +1964,7 @@ function invBtn(id){
   if(id==='iequip'){
     const it=selItem();if(!it||I.sel.src!=='bag')return;
     const slot=autoSlot(hi,idef(it));
-    if(!slot){msg('Only the mage can use spell scrolls.','#d09a80');return}
+    if(!slot){msg('Only a Mage or Sorcerer can use spell scrolls.','#d09a80');return}
     if(equipTo(hi,slot,I.sel.i))I.sel={src:'slot',slot};
     return;
   }
@@ -3368,7 +3368,7 @@ function update(dt){
   }
   for(const h of G.heroes){if(h.hurt>0)h.hurt=Math.max(0,h.hurt-dt*2.6);if(h.lvlFlash>0)h.lvlFlash=Math.max(0,h.lvlFlash-dt)}
   { // party light eases towards the best light being carried
-    const target=Math.max(partyLight(),G.lightBoost>0?1.1:0);
+    const target=Math.max(partyLight(),G.lightBoost>0?1.8:0);
     const prev=G.lightLevel;G.lightLevel+=clamp(target-prev,-dt*1.5,dt*1.5);
     if(Math.abs(G.lightLevel-(update._set||0))>.01){update._set=G.lightLevel;setLightLevel(G.lightLevel)}
   }
