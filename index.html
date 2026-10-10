@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.67';
+const VERSION='0.68';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2858,8 +2858,8 @@ function drawTitle(){
   const any=SAVE_SLOTS.some(([k])=>hasSave(k)),items=[];
   if(hasSave('auto')||hasSave('prev'))items.push(['tcont','Continue']);
   items.push(['tnew','New game']);if(any)items.push(['tload','Load game']);
-  items.forEach(([id,label],i)=>btnText(id,label,170,162+i*29,140,26));
-  txt('Version '+VERSION,240,306,11,'#b8a880','center',true);
+  items.forEach(([id,label],i)=>btnText(id,label,140,162+i*29,140,26));
+  txt('Version '+VERSION,210,306,11,'#b8a880','center',true);
   ctx.restore();
 }
 function drawSaves(){
