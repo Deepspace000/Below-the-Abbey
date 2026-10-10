@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.46';
+const VERSION='0.47';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2172,7 +2172,8 @@ function foodFor(u){let t=FOOD_TABLE.reduce((a,f)=>a+f[1],0)*u;for(const [id,w] 
 function lootFor(d){
   const r=k=>hash2(d.x,d.y,100+k),items=[];
   const add=(id,n)=>items.push({id,n:ITEMDEF[id].stack?(n||1):1});
-  if(d.k==='barrel'){
+  if(d.k==='barrel'&&LEVEL===1&&d.x===1&&d.y===15){add('cheese',4);d.gold=3+Math.floor(r(20)*10)}
+  else if(d.k==='barrel'){
     const n=1+Math.floor(r(1)*3);
     for(let k=0;k<n;k++){const p=r(2+k);add(p<.28?foodFor(r(30+k)):p<.5?'potion':'torch',1)}
     d.gold=3+Math.floor(r(20)*10);
@@ -3219,6 +3220,7 @@ function drawMenu(){
   if(G.menu==='quests'){drawQuestLog();return}
   BTNS=[];veil(.6);bigPanel(90,12,300,296);
   txt('MENU',240,30,14,'#d8c88e','center',true);
+  txt('Version '+VERSION,240,298,8,'#9a8a68','center');
   btnText('resume','Resume',170,44,140,26);
   btnText('quests',anyQuestReady()?'Quests  *':'Quests',170,76,140,26);
   btnText('mute',G.mute?'Sound: Off':'Sound: On',100,108,130,26);btnText('crt',G.crt?'CRT: On':'CRT: Off',250,108,130,26);
