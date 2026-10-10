@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.72';
+const VERSION='0.74';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2789,7 +2789,7 @@ function restore(sv){
 function refreshSaves(){
   G.saves.rows=SAVE_SLOTS.map(([k,label])=>{
     const sv=readSave(k);
-    return {k,label,sv:sv?{t:sv.t,party:sv.party,lvl:Math.max(...sv.heroes.map(h=>h.lvl)),rounds:sv.rounds,gold:sv.gold,alive:sv.heroes.filter(h=>h.alive).length}:null};
+    return {k,label,sv:sv?{t:sv.t,area:(LEVELS[sv.level||1]||LEVELS[1]).label||LEVEL_NAMES[sv.level||1],party:sv.party,lvl:Math.max(...sv.heroes.map(h=>h.lvl)),rounds:sv.rounds,gold:sv.gold,alive:sv.heroes.filter(h=>h.alive).length}:null};
   });
 }
 function openSaves(mode){G.saves={mode,confirm:null,note:'',noteT:0,rows:[]};refreshSaves()}
@@ -2888,7 +2888,7 @@ function drawSaves(){
     txt(r.label,52,y+10,10,'#d8c88e','left',true);
     if(r.sv){
       r.sv.party.forEach((p,j)=>{ctx.save();ctx.beginPath();ctx.rect(52+j*30,y+14,27,20);ctx.clip();drawCover(IMG['pt'+p.app],52+j*30,y+14,27,20);ctx.restore();ctx.strokeStyle='#5a4c30';ctx.lineWidth=1;roughStrokeRect(52+j*30,y+14,27,20)});
-      txt(r.sv.party.map(p=>p.name).join(', '),176,y+11,9,'#cdbf94','left');
+      txt((r.sv.area?r.sv.area+':  ':'')+r.sv.party.map(p=>p.name).join(', '),176,y+11,9,'#cdbf94','left',false,undefined,250);
       txt(`Level ${r.sv.lvl}   Round ${r.sv.rounds}   Gold ${r.sv.gold}   ${r.sv.alive}/4 alive`,176,y+22,8.5,'#a89878','left');
       let when='';try{when=new Date(r.sv.t).toLocaleString([], {dateStyle:'medium',timeStyle:'short'})}catch(e){when=new Date(r.sv.t).toLocaleString()}
       txt(when,176,y+32,8,'#7a6a48','left');
@@ -3689,12 +3689,12 @@ function ui(dt){
 const LOWC=document.createElement('canvas'),LOWX=LOWC.getContext('2d',{willReadFrequently:true});
 const BAYER=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
 function drawWorld(){
-  const w=G.day>0?256:300,h=w/2;
+  const w=G.day>0?300:336,h=w/2;
   if(LOWC.width!==w){LOWC.width=w;LOWC.height=h}
   LOWX.imageSmoothingEnabled=true;LOWX.drawImage(vc,0,0,w,h);
   const im=LOWX.getImageData(0,0,w,h),D=im.data;
-  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const o=(y*w+x)*4,t=(BAYER[(y&3)*4+(x&3)]-7.5)*.73;
-    D[o]=Math.round((D[o]+t)/10)*10;D[o+1]=Math.round((D[o+1]+t)/10)*10;D[o+2]=Math.round((D[o+2]+t)/10)*10}
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const o=(y*w+x)*4,t=(BAYER[(y&3)*4+(x&3)]-7.5)*.42;
+    D[o]=Math.round((D[o]+t)/6)*6;D[o+1]=Math.round((D[o+1]+t)/6)*6;D[o+2]=Math.round((D[o+2]+t)/6)*6}
   LOWX.putImageData(im,0,0);
   ctx.imageSmoothingEnabled=false;ctx.drawImage(LOWC,0,0,420,210);ctx.imageSmoothingEnabled=true;
 }
