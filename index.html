@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.63';
+const VERSION='0.64';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2852,7 +2852,7 @@ function drawTitle(){
     ctx.lineWidth=5;ctx.strokeStyle='#000';ctx.textAlign='center';ctx.strokeText('A',x0+fw/2,100);ctx.fillStyle=goldG(x0,fy,fw,fh);ctx.fillText('A',x0+fw/2,100);
     ctx.textAlign='left';ctx.strokeText('bbey',x0+fw+4,100);ctx.fillStyle=goldG(110,70,200,50);ctx.fillText('bbey',x0+fw+4,100)}
   ctx.restore();
-  txtS('Four companions descend into the crypts beneath the abbey',210,142,10,'#d8c9a0','center');
+  txtS('grid-movement, turn-based fantasy rpg',210,142,10,'#d8c9a0','center');
   const any=SAVE_SLOTS.some(([k])=>hasSave(k)),items=[];
   if(hasSave('auto')||hasSave('prev'))items.push(['tcont','Continue']);
   items.push(['tnew','New game']);if(any)items.push(['tload','Load game']);
