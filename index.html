@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.38';
+const VERSION='0.39';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -853,7 +853,7 @@ function heroDefFrom(p){
 function setParty(party){for(let i=0;i<4;i++)HERO_DEF[i]=heroDefFrom(party[i])}
 setParty(DEFAULT_PARTY);
 const ENEMY_DEF={
-  rat:{name:'Black Rat',hp:120,dmg:[3,7],hit:.7,w:.72,img:'rat',xp:40,gold:[1,4],speed:1},
+  rat:{name:'Black Rat',hp:50,dmg:[3,7],hit:.7,w:.72,img:'rat',xp:40,gold:[1,4],speed:1},
   bat:{name:'Cave Bat',hp:72,dmg:[2,5],hit:.62,w:.64,img:'bat',xp:32,gold:[0,3],speed:2,fly:true},
   skel:{name:'Skeleton',hp:160,dmg:[6,12],hit:.72,w:.48,img:'skel',xp:80,gold:[3,9],speed:1},
   boss:{name:'Rat King',hp:448,dmg:[9,15],hit:.8,w:1.4,img:'boss',xp:500,gold:[40,70],speed:1},
