@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.44';
+const VERSION='0.46';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1644,30 +1644,34 @@ function drawPortraits(y0,selIdx,prefix){
     btn(prefix+i,x,y,w,hh+15);
   }
 }
-function hudRight(){
+function drawSpecialBtn(){
   const hi=G.sel,h=G.heroes[hi],sp=specialInfo(hi),main=h.eq.main;
-  // big window: the main hand; tap to use the hero's special power
-  panel(424,56,54,70,false,false);
+  // special attack: next to the normal attack; tap to use the hero's special power
+  panel(206,226,38,72,false,false);
   const can=h.alive&&h.mp>=sp.cost&&(!HERO_DEF[hi].caster||sp.spell);ctx.globalAlpha=can?1:.5;
-  if(main)itemIcon(idef(main),451,87,1.5);
-  else classIcon(HERO_DEF[hi].clsId,451,88,1.9);
+  if(main)itemIcon(idef(main),225,261,1.1);else classIcon(HERO_DEF[hi].clsId,225,261,1.3);
   ctx.globalAlpha=1;
-  txt(sp.name,451,68,sp.name.length>9?6.2:7.5,'#c9ba8e','center',true);
-  txt(sp.cost?`${sp.cost} ${HERO_DEF[hi].mpn.slice(0,4).toUpperCase()}`:'',451,116,8,can?'#9ac8ff':'#7a7a80','center',true);
-  btn('special',424,56,54,70);
-  // two small windows: off hand and second weapon (tap to swap into the main hand)
-  for(const [slot,y,id] of [['off',56,'swapoff'],['alt',92,'swapalt']]){
-    panel(388,y,32,34,false,false);
+  {const ws=sp.name.split(' ');if(ws.length>1&&sp.name.length>7){txt(ws[0],225,233,6.4,'#c9ba8e','center',true);txt(ws.slice(1).join(' '),225,241,6.4,'#c9ba8e','center',true)}else txt(sp.name,225,235,6.4,'#c9ba8e','center',true)}
+  txt(sp.cost?`${sp.cost} ${HERO_DEF[hi].mpn.slice(0,4).toUpperCase()}`:'',225,285,7,can?'#9ac8ff':'#7a7a80','center',true);
+  btn('special',206,226,38,72);
+  // two small windows to its right: off hand and second weapon (tap to swap into the main hand)
+  for(const [slot,y,id] of [['off',226,'swapoff'],['alt',264,'swapalt']]){
+    panel(248,y,38,34,false,false);
     const it=h.eq[slot];
-    if(it)itemIcon(idef(it),404,y+17,.82);else txt('+',404,y+17,11,'rgba(220,200,160,.3)','center');
-    btn(id,388,y,32,34);
+    if(it)itemIcon(idef(it),267,y+17,.9);else txt('+',267,y+17,11,'rgba(220,200,160,.3)','center');
+    btn(id,248,y,38,34);
   }
-  panel(424,130,54,70,false,false);
+}
+function hudRight(){
+  // wait, camp and potion down the right-hand side
+  panel(424,56,54,44,false,false);iconHourglass(451,76,.95);txt('Wait',451,93,7.5,'#c9ba8e','center',true);btn('wait',424,56,54,44);
+  panel(424,104,54,44,false,false);iconRest(451,123,.95);txt('Camp',451,141,7.5,'#c9ba8e','center',true);btn('rest',424,104,54,44);
+  panel(424,152,54,52,false,false);
   const pc=countPotions();
-  ctx.globalAlpha=pc>0?1:.4;iconPotion(451,160,1.9);ctx.globalAlpha=1;
-  txt('Potion',451,142,7.5,'#c9ba8e','center',true);txt('x'+pc,451,188,10,'#c9ba8e','center',true);
-  btn('potion',424,130,54,70);
-  if(G.keys>0)txt('KEY',451,206,7,'#ffd76a','center',true);
+  ctx.globalAlpha=pc>0?1:.4;iconPotion(451,174,1.4);ctx.globalAlpha=1;
+  txt('Potion',451,161,7.5,'#c9ba8e','center',true);txt('x'+pc,451,196,9,'#c9ba8e','center',true);
+  btn('potion',424,152,54,52);
+  if(G.keys>0)txt('KEY',451,210,7,'#ffd76a','center',true);
 }
 
 /* ==========================================================================
@@ -3175,8 +3179,7 @@ function ui(dt){
   drawPortraits(232,G.sel,'hero');
   const hs=hint=>hint;
   panel(164,226,38,72,false,false);iconFist(183,254,1.1);txt('Attack',183,288,7,'#c9ba8e','center',true);btn('attack',164,226,38,72);
-  panel(206,226,38,72,false,false);iconHourglass(225,254,1.1);txt('Wait',225,288,7,'#c9ba8e','center',true);btn('wait',206,226,38,72);
-  panel(248,226,38,72,false,false);iconRest(267,252,1.05);txt('Rest',267,288,7,'#c9ba8e','center',true);btn('rest',248,226,38,72);
+  drawSpecialBtn();
   const cell=[[290,214,'turnL',-Math.PI/4],[354,214,'fwd',0],[418,214,'turnR',Math.PI/4],[290,267,'left',-Math.PI/2],[354,267,'back',Math.PI],[418,267,'right',Math.PI/2]];
   for(const [x,y,id,a] of cell){
     const pr=G.hold&&G.hold.id===id;
