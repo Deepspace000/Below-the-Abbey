@@ -1,0 +1,24 @@
+All sources confirmed CC0 1.0 (Public Domain) on their pages. Converted: mono 44.1kHz OGG Vorbis, trimmed.
+wind_loop.ogg | https://opengameart.org/content/mild-wind-background-noise | see OGA page (uploader not captured) | CC0
+rain_loop.ogg | https://opengameart.org/content/amb-rain-loop-1 | see OGA page (uploader not captured) | CC0
+dungeon_ambience.ogg | https://opengameart.org/content/dungeon-ambience | Creomoto | CC0
+village_ambience.ogg | https://freesound.org/s/578072/ | ramonmineiro | CC0
+music_tavern.ogg | https://opengameart.org/content/chiptune-medieval-the-old-tower-inn | Snabisch (RandomMind) | CC0
+music_feast.ogg | https://opengameart.org/content/medieval-kings-feast | Snabisch (RandomMind) | CC0
+step_stone1.ogg | https://opengameart.org/content/different-steps-on-wood-stone-leaves-gravel-and-mud | qubodup | CC0
+step_stone2-4.ogg | same as step_stone1 (pitch-shifted variants) | qubodup | CC0
+step_wood1-3.ogg | https://opengameart.org/content/different-steps-on-wood-stone-leaves-gravel-and-mud | qubodup | CC0
+step_wood4.ogg | wood01 pitch-shifted variant | qubodup | CC0
+step_dirt1-4.ogg | same pack (gravel, mud02, leaves01, leaves02) | qubodup | CC0
+step_cobble1-4.ogg | https://opengameart.org/content/fantozzis-footsteps-grasssand-stone (cut from fallfantozi.ogg) | Raassh | CC0
+clash1-3.ogg | https://opengameart.org/content/20-sword-sound-effects-attacks-and-clashes | StarNinjas (posted by MedicineStorm) | CC0
+hit1-2.ogg | same pack, sword attack sounds | StarNinjas | CC0
+church_bell1.ogg | https://freesound.org/s/425172/ | Audeption | CC0
+church_bell2.ogg | https://freesound.org/s/393782/ | _CAZAPROD_ | CC0
+a_goat.ogg | https://freesound.org/s/811458/ | TheKingOfGeeks360 | CC0
+a_sheep.ogg | https://opengameart.org/content/sheep-baa | see OGA page | CC0
+a_chicken.ogg | https://freesound.org/s/346961/ | evsecrets | CC0
+a_cow.ogg | https://freesound.org/s/513559/ | spurioustransients | CC0
+a_dog.ogg | https://opengameart.org/content/dog-barking-mono | HaelDB | CC0
+cart_horse.ogg | https://freesound.org/s/538438/ | bruno.auzet | CC0
+horse_hooves.ogg | https://opengameart.org/content/horse-trotting | KobatoGames | CC0
