@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.55';
+const VERSION='0.56';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1865,7 +1865,7 @@ function drawInventory(){
       classIcon(HERO_DEF[hi].clsId,40,61,1.7);
       txt(def.sp.name,98,44,11,'#d2c9b2','center',true);txt(`Cost ${def.sp.cost} ${def.mpn.toLowerCase()}`,98,60,8.5,'#9ac8ff','center');
       let ly=118;for(const s of wrapText(def.sp.d,136,9)){txt(s,80,ly,9,'#c8b898','center');ly+=12}
-      txt('Spell scrolls can only be',80,176,8.5,'#8a7a58','center');txt('learned by the mage.',80,188,8.5,'#8a7a58','center');
+      txt('Spell scrolls can only be used',80,176,8.5,'#8a7a58','center');txt('by a Mage or Sorcerer.',80,188,8.5,'#8a7a58','center');
     }
   }else{
     for(const [slot,c,r] of DOLL){
@@ -1889,6 +1889,20 @@ function drawInventory(){
     rows.forEach(([a,b],k)=>{txt(a,170,y,10,k===0?'#d8c88e':'#b8a888','left',k===0);txt(String(b),300,y,10,'#d2c9b2','right',true);y+=19});
     ctx.fillStyle='#141006';ctx.fillRect(170,y,130,6);ctx.fillStyle='#e8c040';ctx.fillRect(170,y,130*h.xp/nx,6);ctx.strokeStyle='#8a7448';ctx.lineWidth=1;roughStrokeRect(170,y,130,6);
     txt(`${nx-h.xp} XP to level ${h.lvl+1}`,235,y+16,8.5,'#b8a888','center');
+  }else if(I.tab==='spell'){
+    txt('Party powers',234,16,10,'#c8b982','center',true);
+    for(let k=0;k<4;k++){
+      const hk=G.heroes[k],dk=HERO_DEF[k],sp=specialInfo(k),y=24+k*51,can=hk.alive&&(sp.spell!==null)&&hk.mp>=sp.cost&&!G.acted[k];
+      ctx.save();rrect(ctx,164,y,140,46,5);ctx.fillStyle=k===hi?'rgba(70,20,16,.95)':'rgba(46,14,14,.92)';ctx.fill();ctx.lineWidth=k===hi?2:1.4;ctx.strokeStyle=k===hi?'#d8b04a':'#8a7448';ctx.stroke();ctx.restore();
+      iconFace(k,181,y+17,.85);
+      txt(dk.name,200,y+10,8,'#b8a888','left',false,undefined,60);
+      txt(sp.name,200,y+23,9.5,hk.alive?'#d2c9b2':'#7a6a60','left',true,undefined,62);
+      txt(!hk.alive?'Fallen':sp.cost?`${sp.cost} ${dk.mpn.toLowerCase()}  (${hk.mp})`:'free',200,y+37,7.5,hk.alive&&hk.mp>=sp.cost?'#9ac8ff':'#9a7a7a','left',false,undefined,62);
+      ctx.save();ctx.globalAlpha=can?1:.45;panel(262,y+13,38,22,false,false);txt('Use',281,y+24,9,'#d8c88e','center',true);ctx.restore();
+      btn('ipow'+k,262,y+13,38,22);
+    }
+    const last=G.msgs[G.msgs.length-1];
+    if(last&&G.time-last.t<5)for(const [n,ln] of wrapText(last.text,140,8).entries())txt(ln,234,236+n*8,7.5,last.col,'center');
   }else{
     ctx.save();ctx.beginPath();ctx.rect(BAGX-3,BAGY-1,BCOLS*BPITCH+2,BAGH+2);ctx.clip();
     const sc=clamp(I.scroll,0,maxScroll());I.scroll=sc;
@@ -1937,7 +1951,7 @@ function drawInventory(){
   for(const [id,x,draw] of [['itab_inv',168,()=>iconBackpack(195,277,1.25)],['itab_char',226,()=>iconFace(hi,253,277,1.25)],['itab_spell',284,()=>iconBook(311,277,1.25)]]){
     panel(x,252,54,62,false,I.tab===id.slice(5));draw();btn(id,x,252,54,62);
   }
-  txt('Items',195,306,7.5,'#c9ba8e','center',true);txt('Hero',253,306,7.5,'#c9ba8e','center',true);txt(HERO_DEF[hi].caster?'Spells':'Power',311,306,7.5,'#c9ba8e','center',true);
+  txt('Items',195,306,7.5,'#c9ba8e','center',true);txt('Hero',253,306,7.5,'#c9ba8e','center',true);txt('Powers',311,306,7.5,'#c9ba8e','center',true);
   panel(344,252,58,62,false,false);iconPotion(373,277,1.7);txt('x'+countPotions(),373,304,9,'#c9ba8e','center',true);btn('ipotion',344,252,58,62);
   panel(408,252,66,62,false,false);iconRedX(441,283,1.6);btn('iclose',408,252,66,62);
 }
@@ -1977,6 +1991,14 @@ function invBtn(id){
       I.sel=null;
       if(hostileNear()&&!G.acted[hi])heroDone(hi);
     }
+    return;
+  }
+  if(id.startsWith('ipow')){
+    const k=+id.slice(4);
+    if(!G.heroes[k].alive){msg(`${HERO_DEF[k].name} has fallen.`,'#d09a80');return}
+    if(G.acted[k]){msg(`${HERO_DEF[k].name} has already acted this round.`,'#d09a80');return}
+    if(G.timers.length){msg('Wait for the round to finish.','#d09a80');return}
+    if(heroSpecial(k)&&hostileNear()&&!G.acted[k])heroDone(k);
     return;
   }
   if(id==='isort'){
