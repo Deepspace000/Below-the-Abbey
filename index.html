@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.40';
+const VERSION='0.42';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -584,14 +584,15 @@ IMG.bones=mkCanvas(180,90,(x)=>{
     x.fillStyle='#0a0805';x.beginPath();x.moveTo(0,5);x.lineTo(-4.5,13);x.quadraticCurveTo(0,11,4.5,13);x.closePath();x.fill();
     // cracks
     x.strokeStyle='rgba(30,24,12,.7)';x.lineWidth=.9;x.beginPath();x.moveTo(-3,-27);x.lineTo(-6,-18);x.lineTo(-3,-12);x.lineTo(-7,-8);x.moveTo(15,-22);x.lineTo(12,-14);x.stroke();
-    // teeth
-    x.fillStyle='#d8d0b4';for(let i=0;i<8;i++){x.fillRect(-12+i*3.1,15,2.4,5.5);}
-    x.strokeStyle='#2a2418';x.lineWidth=.7;for(let i=0;i<9;i++){x.beginPath();x.moveTo(-12+i*3.1-.4,15);x.lineTo(-12+i*3.1-.4,20.5);x.stroke()}
-    // jaw
-    const jg=x.createLinearGradient(0,20,0,32);jg.addColorStop(0,'#b8ae8e');jg.addColorStop(1,'#5e5642');
+    // mouth: dark gap, upper teeth, then a narrower jaw with its own teeth
+    x.fillStyle='#0a0805';x.beginPath();x.moveTo(-13,15);x.lineTo(13,15);x.lineTo(11,27);x.lineTo(-11,27);x.closePath();x.fill();
+    for(let i=0;i<8;i++){const tx=-11.5+i*3,th=i===0||i===7?5:6.4;
+      const tg=x.createLinearGradient(tx,15,tx+2.6,15);tg.addColorStop(0,'#f0e8d0');tg.addColorStop(1,'#bdb292');
+      x.fillStyle=tg;x.strokeStyle='#2a2418';x.lineWidth=.8;x.beginPath();x.moveTo(tx,14);x.lineTo(tx+2.6,14);x.lineTo(tx+2.4,14+th);x.lineTo(tx+.2,14+th);x.closePath();x.fill();x.stroke()}
+    const jg=x.createLinearGradient(0,24,0,36);jg.addColorStop(0,'#c4ba9a');jg.addColorStop(1,'#5e5642');
     x.fillStyle=jg;x.strokeStyle='#2a2418';x.lineWidth=1.2;
-    x.beginPath();x.moveTo(-16,22);x.quadraticCurveTo(-18,33,-6,34);x.lineTo(8,34);x.quadraticCurveTo(19,33,17,22);x.lineTo(13,22);x.lineTo(-12,22);x.closePath();x.fill();x.stroke();
-    x.fillStyle='#d0c8aa';for(let i=0;i<7;i++){x.fillRect(-10+i*3.2,22,2.2,4.5)}
+    x.beginPath();x.moveTo(-12.5,23);x.quadraticCurveTo(-14,32,-6,35.5);x.lineTo(6,35.5);x.quadraticCurveTo(14,32,12.5,23);x.lineTo(9,23);x.lineTo(-9,23);x.closePath();x.fill();x.stroke();
+    for(let i=0;i<7;i++){const tx=-9+i*2.7;x.fillStyle='#e0d8bc';x.strokeStyle='#2a2418';x.lineWidth=.7;x.beginPath();x.moveTo(tx,23);x.lineTo(tx+2.3,23);x.lineTo(tx+2.1,18.6);x.lineTo(tx+.3,18.6);x.closePath();x.fill();x.stroke()}
     x.restore();
     // dirt and stain
     x.fillStyle='rgba(70,52,30,.18)';for(let i=0;i<26;i++){x.beginPath();x.arc(10+hash2(i,1,21)*160,20+hash2(i,2,21)*56,1+hash2(i,3,21)*2.4,0,TAU);x.fill()}
@@ -1421,7 +1422,7 @@ function render3D(){
   vctx.restore();
   drawSprites(cx,cy,dX,dY,pX,pY);
 }
-const tmpC=document.createElement('canvas');tmpC.width=640;tmpC.height=480;const tmpX=tmpC.getContext('2d');
+const tmpC=document.createElement('canvas');tmpC.width=820;tmpC.height=820;const tmpX=tmpC.getContext('2d');
 function spriteList(){
   const L=[];
   for(const e of G.enemies){
@@ -1466,7 +1467,9 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     if(s.flash>0){tmpX.fillStyle=`rgba(255,70,40,${(s.flash*.55).toFixed(3)})`;tmpX.fillRect(0,0,iw,ih)}
     if(s.fade!==undefined&&s.fade<1){vctx.globalAlpha=Math.max(0,s.fade)}
     let x0=Math.max(0,Math.floor(left)),x1=Math.min(VW,Math.ceil(left+sw));
-    let run=-1;
+    let run=-1,allVis=x1>x0;
+    for(let x=x0;x<x1;x++)if(!(zbuf[x]>ty)){allVis=false;break}
+    if(allVis){vctx.drawImage(tmpC,0,0,iw,ih,left,top,sw,sh);anyVis=true;x0=x1+1}
     for(let x=x0;x<=x1;x++){
       const vis=x<x1&&zbuf[x]>ty;
       if(vis&&run<0)run=x;
