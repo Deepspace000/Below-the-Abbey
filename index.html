@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.51';
+const VERSION='0.52';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -959,6 +959,7 @@ function reveal(){
   const px=G.P.x,py=G.P.y,r=G.reg?G.reg[py*MW+px]:-1,was=G.seen[py][px];
   for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const x=px+dx,y=py+dy;if(x>=0&&y>=0&&x<MW&&y<MH&&((dx===0&&dy===0)||G.grid[y][x]>0))G.seen[y][x]=1}
   if(r>=0&&!was){G.regSeen[r]++;checkRegion(r)}
+  if(r!==G.lastReg){const first=G.lastReg===undefined;G.lastReg=r;if(!first&&G.state==='play'&&G.timers.length<=1&&!G.cut)G.autoNow=true}
 }
 function camSettled(){const C=G.C,P=G.P;return Math.abs(C.x-P.x)<.02&&Math.abs(C.y-P.y)<.02&&Math.abs(C.a-P.angT)<.02}
 function canAct(){return G.state==='play'&&!G.menu&&!G.map&&!G.inv.open&&!G.loot&&!G.cut&&!G.talk&&G.timers.length===0&&G.time>=G.lockT&&camSettled()}
@@ -1317,7 +1318,6 @@ function finishRound(){
   if(!livingHeroes().length){later(700,()=>{G.state='dead';sfx('lose')});return}
   if(!G.heroes[G.sel].alive)nextHero();
   storyTick();
-  if(G.timers.length===0&&!G.cut)writeSave('auto');
 }
 
 /* ---------- player movement ---------- */
@@ -2443,7 +2443,7 @@ function restore(sv){
   if(sv.decor.length===G.decor.length)G.decor.forEach((d,i)=>{const s=sv.decor[i];if(s){d.contents=s.contents;d.gold=s.gold;d.goldTaken=s.goldTaken}});
   if(sv.torchKeys){const ks=new Set(sv.torchKeys);LIGHTS.forEach(l=>{if(ks.has(l.key)){l.taken=true;torchAt.delete(l.key)}})}
   else if(sv.torches&&sv.torches.length===LIGHTS.length)LIGHTS.forEach((l,i)=>{if(sv.torches[i]){l.taken=true;torchAt.delete(l.key)}});
-  G.state='play';G.menu=false;G.map=false;G.inv.open=false;G.loot=null;G.saves=null;G.nextAuto=G.time+6;G.flags=sv.flags||{};G.quests=sv.quests||{};G.lst=sv.lst||{};G.clock=sv.clock||480;G.talk=null;G.cut=null;G.arrows=[];
+  G.state='play';G.menu=false;G.map=false;G.inv.open=false;G.loot=null;G.saves=null;G.nextAuto=G.time+180;G.lastReg=-2;G.flags=sv.flags||{};G.quests=sv.quests||{};G.lst=sv.lst||{};G.clock=sv.clock||480;G.talk=null;G.cut=null;G.arrows=[];
   recountRegions();reveal();msg('Game loaded.','#9ae0a0');
 }
 function refreshSaves(){
@@ -2659,7 +2659,7 @@ function goToLevel(n,entry){
   applyLevelState(G.lst[n]);
   if(entry){G.P={x:entry.x,y:entry.y,f:entry.f,angT:(entry.f-1)*Math.PI/2};G.C={x:entry.x,y:entry.y,a:G.P.angT}}
   reveal();G.hold=null;
-  G.acted=[false,false,false,false];G.state='play';G.nextAuto=G.time+6;
+  G.acted=[false,false,false,false];G.state='play';G.nextAuto=G.time+180;G.lastReg=G.reg?G.reg[G.P.y*MW+G.P.x]:-2;writeSave('auto');
   if(n===2&&!G.flags.townSeen)startCut('abbeyIntro');
   else if(n===2){respawnForest();msg('You walk back into the Thornwood. The wolves and bandits have returned.','#e8a090')}
   else if(n===3&&!G.flags.townSeen){G.flags.townSeen=1;startCut('townArrive')}
@@ -3376,7 +3376,8 @@ function update(dt){
   // held d-pad repeat, queued input
   if(G.hold&&G.time>=G.hold.t){act(G.hold.id);G.hold.t=G.time+.16}
   if(G.queued&&canAct()){const q=G.queued;G.queued=null;act(q)}
-  if(G.state==='play'&&G.time>=G.nextAuto&&G.timers.length===0&&!G.drag&&!G.cut){G.nextAuto=G.time+6;writeSave('auto')}
+  if(G.autoNow&&G.state==='play'&&!G.cut&&!G.drag){G.autoNow=false;G.nextAuto=G.time+180;writeSave('auto')}
+  if(G.state==='play'&&G.time>=G.nextAuto&&G.timers.length===0&&!G.drag&&!G.cut){G.nextAuto=G.time+180;writeSave('auto')}
 }
 const crtC=document.createElement('canvas');crtC.width=240;crtC.height=160;const crtX=crtC.getContext('2d');
 let SCANP=null,NOISEP=null;
