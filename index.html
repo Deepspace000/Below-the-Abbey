@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.52';
+const VERSION='0.53';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2882,11 +2882,13 @@ const CUTS={
     {text:'The trail narrows between ancient trees whose branches claw at the sky. The air feels wrong. Too still.'},
     {text:'Then a growl, low and close. And another. Pale eyes gleam between the trunks. Wolves.'},
     {who:hn(0),text:'Weapons up! Here they come!'}],
-  banditsReveal:()=>[
+  wolvesSent:()=>[
     {text:'The last wolf falls. The party stands among the bodies, breathing hard, blades dripping.'},
     {who:hn(1),text:"That wasn't hunting. They circled, they waited, they struck together. No wild pack fights like that."},
     {who:hn(0),text:'Someone was sending them.'},
-    {text:'A shrill whistle cuts through the trees. Shapes step out of the shadows, bows drawn and blades bare. Bandits.'},
+    {text:'The trail ahead is quiet for now. There is time to tend wounds, eat and rest. But whoever sent the wolves is still watching, and the road leads deeper into the wood.'}],
+  banditsReveal:()=>[
+    {text:'The forest goes silent. Then a shrill whistle cuts through the trees. Shapes step out of the shadows, bows drawn and blades bare. Bandits.'},
     {text:'Arrows hiss down from the branches above the trail.'}],
   note:()=>[
     {text:`When the last bandit falls, ${hn(1)} searches the nearest body and finds a crumpled note stuffed in his belt. The ink is fresh. The seal is a black raven.`},
@@ -2944,10 +2946,12 @@ function spawnWave(types){
 function storyTick(){
   if(LEVEL!==2||G.cut||G.state!=='play')return;
   const F=G.flags,P=G.P;
+  if(F.cutB&&!F.cutB2&&((F.bandKills||0)>0||G.enemies.some(e=>e.hp>0&&ENEMY_DEF[e.t].kind==='bandit')))F.cutB2=1; // saves from before the pause
   const wolvesAlive=G.enemies.some(e=>e.hp>0&&ENEMY_DEF[e.t].kind==='wolf');
   if(!F.wolves1&&P.x>=17){F.wolves1=1;startCut('wolves1',()=>spawnWave(['wolf','wolf','wolf','wolf']))}
-  else if(!F.cutB&&F.wolves1&&(F.wolfKills||0)>=4&&!wolvesAlive){F.cutB=1;startCut('banditsReveal',()=>spawnWave(['bandit','bandit','bandit','archer','archer']))}
-  else if(!F.cutC&&F.cutB&&(F.bandKills||0)>=3){F.cutC=1;startCut('note',()=>spawnWave(['wolf','wolf','wolf','bandit','bandit','archer']))}
+  else if(!F.cutB&&F.wolves1&&(F.wolfKills||0)>=4&&!wolvesAlive){F.cutB=1;startCut('wolvesSent')}
+  else if(!F.cutB2&&F.cutB&&Math.abs(P.x-14)+Math.abs(P.y-12)>=20){F.cutB2=1;startCut('banditsReveal',()=>spawnWave(['bandit','bandit','bandit','archer','archer']))}
+  else if(!F.cutC&&F.cutB2&&(F.bandKills||0)>=3){F.cutC=1;startCut('note',()=>spawnWave(['wolf','wolf','wolf','bandit','bandit','archer']))}
   else if(!F.wave3&&F.cutC&&P.x>=29){F.wave3=1;spawnWave(['wolf','wolf','bandit','archer','archer']);msg('More of them close in from the trees!','#e8a090')}
 }
 function enemyShoot(e){
