@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.20';
+const VERSION='0.22';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -588,10 +588,10 @@ function heroDefFrom(p){
 function setParty(party){for(let i=0;i<4;i++)HERO_DEF[i]=heroDefFrom(party[i])}
 setParty(DEFAULT_PARTY);
 const ENEMY_DEF={
-  rat:{name:'Black Rat',hp:8,dmg:[1,3],hit:.7,w:.72,img:'rat',xp:8,gold:[1,4],speed:1},
-  bat:{name:'Cave Bat',hp:5,dmg:[1,3],hit:.62,w:.64,img:'bat',xp:7,gold:[0,3],speed:2,fly:true},
-  skel:{name:'Skeleton',hp:14,dmg:[2,5],hit:.72,w:.95,img:'skel',xp:16,gold:[3,9],speed:1},
-  boss:{name:'Rat King',hp:38,dmg:[3,6],hit:.8,w:1.4,img:'boss',xp:100,gold:[40,70],speed:1}};
+  rat:{name:'Black Rat',hp:19,dmg:[1,3],hit:.7,w:.72,img:'rat',xp:12,gold:[1,4],speed:1},
+  bat:{name:'Cave Bat',hp:12,dmg:[1,3],hit:.62,w:.64,img:'bat',xp:10,gold:[0,3],speed:2,fly:true},
+  skel:{name:'Skeleton',hp:25,dmg:[2,5],hit:.72,w:.95,img:'skel',xp:24,gold:[3,9],speed:1},
+  boss:{name:'Rat King',hp:76,dmg:[3,6],hit:.8,w:1.4,img:'boss',xp:150,gold:[40,70],speed:1}};
 /* creatures are the same level as the dungeon level */
 function enemyStat(t){
   const d=ENEMY_DEF[t],m=1+.45*(LEVEL-1);
@@ -604,7 +604,7 @@ const SLOT_LABEL={head:'Helm',chest:'Chest',arms:'Arms',legs:'Legs',main:'Main h
 
 const G={state:'title',P:{x:0,y:0,f:0,angT:0},C:{x:0,y:0,a:0},grid:[],seen:[],enemies:[],items:[],decor:[],heroes:[],
   sel:0,acted:[],keys:0,rounds:0,kills:0,timers:[],msgs:[],floats:[],shake:0,time:0,lockT:0,hold:null,queued:null,mute:false,menu:false,map:false,bossDead:false,
-  bag:[],loot:null,gold:0,lightBoost:0,lightLevel:0,hits:[],inv:{open:false,tab:'inv',hero:0,sel:null,scroll:0}};
+  bag:[],loot:null,saves:null,nextAuto:0,gold:0,lightBoost:0,lightLevel:0,hits:[],inv:{open:false,tab:'inv',hero:0,sel:null,scroll:0}};
 window.__game=G;
 
 const mkItem=id=>({id,n:1});
@@ -912,6 +912,7 @@ function finishRound(){
   if(G.lightBoost>0)G.lightBoost--;
   if(!livingHeroes().length){later(700,()=>{G.state='dead';sfx('lose')});return}
   if(!G.heroes[G.sel].alive)nextHero();
+  if(G.timers.length===0)writeSave('auto');
 }
 
 /* ---------- player movement ---------- */
@@ -996,6 +997,7 @@ const zbuf=new Float32Array(VW);
 const LUT=new Float32Array(1025);for(let i=0;i<=1024;i++){const t=1-i/1024;LUT[i]=AMB+(t>0?.5*Math.pow(t,1.8):0)}
 const baseL=d=>LUT[Math.min(1024,(d*1024/RANGE)|0)];
 let nearL=[]; // [x,y,I] flat
+const wd2=new Float32Array(64);
 
 function lightSees(ax,ay,bx,by){
   const dx=bx-ax,dy=by-ay,n=Math.ceil(Math.hypot(dx,dy)*6);
@@ -1037,12 +1039,14 @@ function render3D(){
       if(hv===1){const tmp=u;u=v;v=tmp}else if(hv===2)u=127-u;else if(hv===3)v=127-v;
       const dx=fx-cx,dy=fy-cy,dist=Math.sqrt(dx*dx+dy*dy);
       const lb=baseL(dist);let lt=0;
-      for(let k=0;k<nn;k+=3){const ax=fx-nl[k],ay=fy-nl[k+1];lt+=nl[k+2]/(1+1.15*(ax*ax+ay*ay))}
+      let ltc=0;
+      for(let k=0;k<nn;k+=3){const ax=fx-nl[k],ay=fy-nl[k+1],d2=ax*ax+ay*ay;lt+=nl[k+2]/(1+1.15*(d2+.44));ltc+=nl[k+2]/(1+1.15*(d2+.12))}
       const kR=(lb*tbR+lt*ttR)*vg,kG=(lb*tbG+lt*ttG)*vg,kB=(lb*tbB+lt*ttB)*vg;
+      const kRc=(lb*tbR+ltc*ttR)*vg,kGc=(lb*tbG+ltc*ttG)*vg,kBc=(lb*tbB+ltc*ttB)*vg;
       const ti=(v*TS+u)*4,io=yo+x*4,ic=yc+x*4;
-      const sm=Math.min(.42,dist*.055),sk=(lb*.55+lt*.45+.05)*sm,iv=1-sm;
+      const sm=Math.min(.32,dist*.042),sk=(lb*.55+lt*.45+.05)*sm,iv=1-sm;
       D[io]=fd[ti]*kR*iv+86*sk;D[io+1]=fd[ti+1]*kG*iv+76*sk;D[io+2]=fd[ti+2]*kB*iv+62*sk;
-      D[ic]=cd[ti]*kR*.85*iv+69*sk;D[ic+1]=cd[ti+1]*kG*.85*iv+61*sk;D[ic+2]=cd[ti+2]*kB*.85*iv+50*sk;
+      D[ic]=cd[ti]*kRc*.85*iv+69*sk;D[ic+1]=cd[ti+1]*kGc*.85*iv+61*sk;D[ic+2]=cd[ti+2]*kBc*.85*iv+50*sk;
     }
   }
   // walls
@@ -1078,16 +1082,18 @@ function render3D(){
     const lb=baseL(dist);let lt=0;
     const px=hx-(side===0?stx*.03:0),py=hy-(side===1?sty*.03:0);
     for(let k=0;k<nn;k+=3){const ax=px-nl[k],ay=py-nl[k+1];lt+=nl[k+2]/(1+1.15*(ax*ax+ay*ay))}
-    const kR=lb*tbR+lt*ttR,kG=lb*tbG+lt*ttG,kB=lb*tbB+lt*ttB;
+    for(let k=0,j=0;k<nn;k+=3,j++){const ax=px-nl[k],ay=py-nl[k+1];wd2[j]=ax*ax+ay*ay}
     const lineH=F/perp,y0=HH-lineH/2;
     const ds=Math.max(0,Math.ceil(y0)),de=Math.min(VH-1,Math.floor(HH+lineH/2));
-    const stepT=TS/lineH,smw=Math.min(.42,dist*.055),skw=(lb*.55+lt*.45+.05)*smw,ivw=1-smw;
+    const stepT=TS/lineH,smw=Math.min(.32,dist*.042),skw=(lb*.55+lt*.45+.05)*smw,ivw=1-smw;
     let tyf=(ds-y0)*stepT;
     for(let y=ds;y<=de;y++,tyf+=stepT){
       const v=tyf>=TS?TS-1:(tyf|0);
       const i=(v*TS+tx)*4,o=(y*VW+x)*4;
-      const vy=(y-HH)/HH,vg=1-.28*vy*vy;
-      let R=td[i]*kR*vg*ivw+86*skw,Gc=td[i+1]*kG*vg*ivw+76*skw,B=td[i+2]*kB*vg*ivw+62*skw;
+      const vy=(y-HH)/HH,vg=1-.28*vy*vy,zz=1-(y-y0)/lineH;
+      let ltp=0;for(let k=0,j=0;k<nn;k+=3,j++){const dz=zz-.66;ltp+=nl[k+2]/(1+1.15*(wd2[j]+dz*dz))}
+      const kRp=lb*tbR+ltp*ttR,kGp=lb*tbG+ltp*ttG,kBp=lb*tbB+ltp*ttB;
+      let R=td[i]*kRp*vg*ivw+86*skw,Gc=td[i+1]*kGp*vg*ivw+76*skw,B=td[i+2]*kBp*vg*ivw+62*skw;
       if(te){const a=te[i+3]/255;R+=te[i]*a*.95;Gc+=te[i+1]*a*.95;B+=te[i+2]*a*.95}
       D[o]=R;D[o+1]=Gc;D[o+2]=B;
     }
@@ -1212,7 +1218,7 @@ function txtS(s,x,y,size,col,align,bold){ctx.save();ctx.lineWidth=3;ctx.strokeSt
 function iconSword(cx,cy,s,col){ctx.save();ctx.translate(cx,cy);ctx.rotate(-.7);ctx.fillStyle=col||'#d8dce4';ctx.fillRect(-1.6*s,-9*s,3.2*s,15*s);ctx.beginPath();ctx.moveTo(-1.6*s,-9*s);ctx.lineTo(0,-12*s);ctx.lineTo(1.6*s,-9*s);ctx.fill();ctx.fillStyle='#c79a2e';ctx.fillRect(-5*s,6*s,10*s,2.4*s);ctx.fillStyle='#6a4a20';ctx.fillRect(-1.3*s,8*s,2.6*s,5*s);ctx.restore()}
 function iconDagger(cx,cy,s,col){ctx.save();ctx.translate(cx,cy);ctx.rotate(.5);ctx.fillStyle=col||'#bfe0ff';ctx.beginPath();ctx.moveTo(0,-11*s);ctx.lineTo(2.4*s,4*s);ctx.lineTo(-2.4*s,4*s);ctx.closePath();ctx.fill();ctx.fillStyle='#c79a2e';ctx.fillRect(-4.5*s,4*s,9*s,2*s);ctx.fillStyle='#4a3a20';ctx.fillRect(-1.2*s,6*s,2.4*s,5*s);ctx.restore()}
 function iconFlame(cx,cy,s){ctx.save();ctx.translate(cx,cy);const g=ctx.createLinearGradient(0,-12*s,0,10*s);g.addColorStop(0,'#fff4a0');g.addColorStop(.5,'#ff9a30');g.addColorStop(1,'#d02a10');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,-13*s);ctx.bezierCurveTo(10*s,-3*s,11*s,6*s,0,11*s);ctx.bezierCurveTo(-11*s,6*s,-9*s,-2*s,-3*s,-6*s);ctx.bezierCurveTo(-3*s,-3*s,-1*s,-4*s,0,-13*s);ctx.fill();ctx.restore()}
-function iconCross(cx,cy,s){ctx.save();ctx.translate(cx,cy);const g=ctx.createLinearGradient(0,-10*s,0,10*s);g.addColorStop(0,'#fff8d8');g.addColorStop(1,'#d0a030');ctx.fillStyle=g;ctx.fillRect(-2.6*s,-11*s,5.2*s,22*s);ctx.fillRect(-8*s,-5*s,16*s,5.2*s);ctx.restore();ctx.fillStyle='rgba(255,255,255,.7)';for(const [dx,dy] of [[10,-8],[-10,-6],[9,8]]){ctx.fillRect(cx+dx*s-1,cy+dy*s-1,2,2)}}
+function iconCross(cx,cy,s){ctx.save();ctx.translate(cx,cy);const g=ctx.createLinearGradient(0,-10*s,0,10*s);g.addColorStop(0,'#fff8d8');g.addColorStop(1,'#d0a030');ctx.fillStyle=g;ctx.fillRect(-2.6*s,-11*s,5.2*s,22*s);ctx.fillRect(-8*s,-5*s,16*s,5.2*s);ctx.restore();}
 function iconPotion(cx,cy,s){ctx.save();ctx.translate(cx,cy);ctx.drawImage(IMG.potion,-10*s,-13*s,20*s,25*s);ctx.restore()}
 function iconFist(cx,cy,s){
   ctx.save();ctx.translate(cx,cy);
@@ -1617,7 +1623,7 @@ function crInit(){
   G.cr={slot:0,step:ok?'done':'look',page:0,note:'',party:ok?saved:[null,null,null,null],cur:ok?Object.assign({},saved[0]):blankHero()};
 }
 function startGame(){
-  const C=G.cr;setParty(C.party);
+  backupAuto();const C=G.cr;setParty(C.party);
   try{localStorage.setItem('abbeyParty',JSON.stringify(C.party))}catch(e){}
   reset();G.state='play';audioInit();
   msg('You wake in the crypts below the abbey. Something is scratching in the dark...');
@@ -1934,6 +1940,114 @@ function makeCart(){
 
 function getScroll(d){if(d==='lbag')return G.loot?G.loot.sl:0;if(d==='lbox')return G.loot?G.loot.sr:0;return G.inv.scroll}
 function setScroll(d,v){if(d==='lbag'&&G.loot)G.loot.sl=clamp(v,0,maxScroll());else if(d==='lbox'&&G.loot)G.loot.sr=clamp(v,0,lootMaxScroll(Math.max(9,G.loot.decor.contents.length)));else G.inv.scroll=clamp(v,0,maxScroll())}
+/* ==========================================================================
+   SAVE / LOAD  (autosave + three manual slots, a backup of the previous run)
+   ========================================================================== */
+const SAVE_SLOTS=[['auto','Autosave'],['1','Slot 1'],['2','Slot 2'],['3','Slot 3'],['prev','Previous run']];
+const hasSave=k=>{try{return !!localStorage.getItem('abbeySave_'+k)}catch(e){return false}};
+function readSave(k){try{const s=localStorage.getItem('abbeySave_'+k);return s?JSON.parse(s):null}catch(e){return null}}
+function writeSave(k){
+  try{localStorage.setItem('abbeySave_'+k,JSON.stringify(snapshot()));return true}catch(e){return false}
+}
+// keep the old run safe before anything replaces it
+function backupAuto(){try{const a=localStorage.getItem('abbeySave_auto');if(a)localStorage.setItem('abbeySave_prev',a)}catch(e){}}
+function snapshot(){
+  return {v:1,t:Date.now(),lvl:LEVEL,
+    party:HERO_DEF.map(d=>({app:d.app,cls:d.clsId,name:d.name,bs:d.str-CLASSES[d.clsId].str,bd:d.dex-CLASSES[d.clsId].dex,bi:d.int-CLASSES[d.clsId].int})),
+    heroes:G.heroes.map(h=>({hp:h.hp,max:h.max,base:h.base,mp:h.mp,mpMax:h.mpMax,alive:h.alive,lvl:h.lvl,xp:h.xp,str:h.str,dex:h.dex,int:h.int,spellSel:h.spellSel,
+      eq:Object.fromEntries(Object.entries(h.eq).map(([k,it])=>[k,{id:it.id,n:it.n}]))})),
+    bag:G.bag.map(b=>({id:b.id,n:b.n})),gold:G.gold,keys:G.keys,rounds:G.rounds,kills:G.kills,bossDead:G.bossDead,sel:G.sel,lightBoost:G.lightBoost,
+    P:{x:G.P.x,y:G.P.y,f:G.P.f},
+    grid:G.grid.map(r=>r.slice()),seen:G.seen.map(r=>Array.from(r)),
+    enemies:G.enemies.map(e=>({t:e.t,x:e.x,y:e.y,hp:e.hp,maxhp:e.maxhp,alert:e.alert,chilled:e.chilled||0})),
+    items:G.items.map(i=>i.taken?1:0),
+    decor:G.decor.map(d=>({contents:d.contents||null,gold:d.gold||0,goldTaken:!!d.goldTaken})),
+    torches:LIGHTS.map(l=>l.taken?1:0)};
+}
+function restore(sv){
+  setParty(sv.party);reset();
+  sv.heroes.forEach((s,i)=>Object.assign(G.heroes[i],{hp:s.hp,max:s.max,base:s.base,mp:s.mp,mpMax:s.mpMax,alive:s.alive,lvl:s.lvl,xp:s.xp,str:s.str,dex:s.dex,int:s.int,spellSel:s.spellSel||0,eq:s.eq||{}}));
+  G.bag=sv.bag;G.gold=sv.gold;G.keys=sv.keys;G.rounds=sv.rounds;G.kills=sv.kills;G.bossDead=!!sv.bossDead;G.sel=sv.sel||0;G.lightBoost=sv.lightBoost||0;
+  G.P={x:sv.P.x,y:sv.P.y,f:sv.P.f,angT:(sv.P.f-1)*Math.PI/2};G.C={x:sv.P.x,y:sv.P.y,a:G.P.angT};
+  G.grid=sv.grid;G.seen=sv.seen.map(r=>Uint8Array.from(r));
+  G.enemies=sv.enemies.map((e,i)=>({id:i,t:e.t,lvl:LEVEL,x:e.x,y:e.y,rx:e.x,ry:e.y,hp:e.hp,maxhp:e.maxhp,alert:!!e.alert,chilled:e.chilled||0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100}));
+  G.items.forEach((it,i)=>{it.taken=!!sv.items[i]});
+  G.decor.forEach((d,i)=>{const s=sv.decor[i];if(s){d.contents=s.contents;d.gold=s.gold;d.goldTaken=s.goldTaken}});
+  LIGHTS.forEach((l,i)=>{if(sv.torches[i]){l.taken=true;torchAt.delete(l.key)}});
+  G.state='play';G.menu=false;G.map=false;G.inv.open=false;G.loot=null;G.saves=null;G.nextAuto=G.time+6;
+  reveal();msg('Game loaded.','#9ae0a0');
+}
+function refreshSaves(){
+  G.saves.rows=SAVE_SLOTS.map(([k,label])=>{
+    const sv=readSave(k);
+    return {k,label,sv:sv?{t:sv.t,party:sv.party,lvl:Math.max(...sv.heroes.map(h=>h.lvl)),rounds:sv.rounds,gold:sv.gold,alive:sv.heroes.filter(h=>h.alive).length}:null};
+  });
+}
+function openSaves(mode){G.saves={mode,confirm:null,note:'',noteT:0,rows:[]};refreshSaves()}
+function titleBtn(id){
+  audioInit();
+  if(id==='tnew'){crInit();G.state='create'}
+  else if(id==='tcont'){const sv=readSave('auto')||readSave('prev');if(sv)restore(sv)}
+  else if(id==='tload')openSaves('title');
+}
+function savesBtn(id){
+  const S=G.saves;
+  if(id==='sv_close'){G.saves=null;return}
+  const m=id.match(/^sv_(load|save|del)_(\w+)$/);if(!m)return;
+  const [,what,k]=m;
+  if(what!=='del')S.confirm=null;
+  S.noteT=G.time;
+  if(what==='save'){
+    if(G.state!=='play'||G.timers.length){S.note='Wait for the round to finish, then save.';return}
+    if(writeSave(k)){S.note='Game saved.';refreshSaves()}else S.note='Could not save: storage is full or blocked.';
+    return;
+  }
+  if(what==='load'){
+    const sv=readSave(k);if(!sv){S.note='That slot is empty.';return}
+    if(G.state==='play'&&G.timers.length===0&&k!=='prev')writeSave('prev'); // so a mistaken load can be undone
+    restore(sv);return;
+  }
+  if(S.confirm===k){try{localStorage.removeItem('abbeySave_'+k)}catch(e){}S.confirm=null;S.note='Erased.';refreshSaves()}
+  else{S.confirm=k;S.note='Tap Erase again to confirm.'}
+}
+function drawTitle(){
+  BTNS=[];veil(.6);
+  ctx.save();ctx.textAlign='center';
+  ctx.save();ctx.font=`22px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#c9b88a';ctx.fillText('Below the',210,50);ctx.restore();
+  ctx.save();ctx.font=`bold 50px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=5;ctx.strokeStyle='#000';ctx.strokeText('Abbey',210,98);ctx.fillStyle=goldG(110,70,200,50);ctx.fillText('Abbey',210,98);ctx.restore();
+  txtS('Four companions descend into the crypts beneath the abbey',210,134,10,'#d8c9a0','center');
+  const any=SAVE_SLOTS.some(([k])=>hasSave(k)),items=[];
+  if(hasSave('auto')||hasSave('prev'))items.push(['tcont','Continue']);
+  items.push(['tnew','New game']);if(any)items.push(['tload','Load game']);
+  items.forEach(([id,label],i)=>btnText(id,label,170,158+i*30,140,26));
+  txt('v'+VERSION,6,314,8,'#6a5a40','left');
+  ctx.restore();
+}
+function drawSaves(){
+  BTNS=[];const S=G.saves;
+  veil(.82);bigPanel(34,8,412,304);
+  ctx.save();ctx.font=`26px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='#000';
+  const title=S.mode==='title'?'Load Game':'Save and Load';ctx.strokeText(title,240,28);ctx.fillStyle='#d8c88e';ctx.fillText(title,240,28);ctx.restore();
+  S.rows.forEach((r,i)=>{
+    const y=44+i*47,h=43;
+    ctx.fillStyle='rgba(30,26,20,.85)';rrect(ctx,44,y,392,h,3);ctx.fill();ctx.lineWidth=1.4;ctx.strokeStyle='#6a5a38';rrect(ctx,44,y,392,h,3);ctx.stroke();
+    txt(r.label,52,y+11,10.5,'#d8c88e','left',true);
+    if(r.sv){
+      r.sv.party.forEach((p,j)=>{ctx.save();ctx.beginPath();ctx.rect(52+j*30,y+17,27,24);ctx.clip();drawCover(IMG['pt'+p.app],52+j*30,y+17,27,24);ctx.restore();ctx.strokeStyle='#5a4c30';ctx.lineWidth=1;roughStrokeRect(52+j*30,y+17,27,24)});
+      txt(r.sv.party.map(p=>p.name).join(', '),176,y+13,9,'#cdbf94','left');
+      txt(`Level ${r.sv.lvl}   Round ${r.sv.rounds}   Gold ${r.sv.gold}   ${r.sv.alive}/4 alive`,176,y+25,8.5,'#a89878','left');
+      let when='';try{when=new Date(r.sv.t).toLocaleString([], {dateStyle:'medium',timeStyle:'short'})}catch(e){when=new Date(r.sv.t).toLocaleString()}
+      txt(when,176,y+36,8,'#7a6a48','left');
+    }else txt('(empty)',176,y+25,10,'#6a5a40','left');
+    const can=!!r.sv;
+    panel(332,y+3,48,18,false,false);ctx.globalAlpha=can?1:.4;txt('Load',356,y+12,9,'#cdbf94','center',true);ctx.globalAlpha=1;btn('sv_load_'+r.k,332,y+3,48,18);
+    if(S.mode==='menu'&&r.k!=='auto'&&r.k!=='prev'){panel(384,y+3,48,18,false,false);txt('Save',408,y+12,9,'#cdbf94','center',true);btn('sv_save_'+r.k,384,y+3,48,18)}
+    if(can){panel(332,y+23,100,17,false,false);txt(S.confirm===r.k?'Sure? Tap again':'Erase',382,y+31.5,8.5,S.confirm===r.k?'#e07a5a':'#8a7a58','center',true);btn('sv_del_'+r.k,332,y+23,100,17)}
+  });
+  if(S.note&&G.time-S.noteT<4)txt(S.note,240,285,10,'#d8c88e','center',true);
+  btnText('sv_close','Close',190,290,100,20);
+}
+
 function drawMinimap(x,y,w,h){
   ctx.save();ctx.fillStyle='#0b0907';ctx.fillRect(x,y,w,h);
   const cs=Math.min((w-4)/MW,(h-4)/MH),ox=x+(w-cs*MW)/2,oy=y+(h-cs*MH)/2;
@@ -2021,7 +2135,8 @@ function ui(dt){
   txt(`Level ${LEVEL}  Round ${G.rounds+1}  Gold ${G.gold}`,6,224,8,'#9a8a68','left');
   if(G.keys>0)txt('Key: rusty iron',6,318,7.5,'#ffd76a','left');
   // overlays
-  if(G.state==='title')drawTitle();
+  if(G.saves)drawSaves();
+  else if(G.state==='title')drawTitle();
   else if(G.state==='create')drawCreate();
   else if(G.loot)drawLoot();
   else if(G.inv.open)drawInventory();
@@ -2041,23 +2156,13 @@ function ui(dt){
 function veil(a){ctx.fillStyle=`rgba(4,3,2,${a})`;ctx.fillRect(0,0,DW,DH)}
 function bigPanel(x,y,w,h){illum(x,y,w,h,(x+y)|0);ctx.save();ctx.fillStyle='rgba(10,8,6,.92)';rrect(ctx,x,y,w,h,8);ctx.fill();ctx.restore();ctx.lineWidth=3;ctx.strokeStyle=goldG(x,y,w,h);rrect(ctx,x,y,w,h,8);ctx.stroke();wornEdge(x,y,w,h,8);ctx.lineWidth=1;ctx.strokeStyle='rgba(255,230,150,.25)';rrect(ctx,x+5,y+5,w-10,h-10,5);ctx.stroke()}
 function btnText(id,label,x,y,w,h){panel(x,y,w,h,false,false);txt(label,x+w/2,y+h/2,11,'#c9ba8e','center',true);btn(id,x,y,w,h)}
-function drawTitle(){
-  BTNS=[{id:'start',x:0,y:0,w:DW,h:DH}];
-  ctx.save();ctx.textAlign='center';
-  ctx.save();ctx.font=`22px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#c9b88a';ctx.fillText('Below the',210,50);ctx.restore();
-  ctx.save();ctx.font=`bold 50px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=5;ctx.strokeStyle='#000';ctx.strokeText('Abbey',210,98);ctx.fillStyle=goldG(110,70,200,50);ctx.fillText('Abbey',210,98);ctx.restore();
-  txtS('Four companions descend into the crypts beneath the abbey',210,134,10,'#d8c9a0','center');
-  const a=.55+.45*Math.sin(G.time*3);ctx.globalAlpha=a;txtS('Tap or press any key to descend',210,176,12,'#e0d29a','center',true);ctx.globalAlpha=1;
-  txt('v'+VERSION,6,314,8,'#6a5a40','left');
-  ctx.restore();
-}
 function drawMenu(){
   BTNS=[];veil(.6);bigPanel(90,30,300,260);
   txt('MENU',240,50,14,'#d8c88e','center',true);
   btnText('resume','Resume',170,66,140,26);
   btnText('mute',G.mute?'Sound: Off':'Sound: On',100,98,130,26);btnText('crt',G.crt?'CRT: On':'CRT: Off',250,98,130,26);
-  btnText('restart','Restart dungeon',170,130,140,26);
-  btnText('newparty','New party',170,162,140,26);
+  btnText('restart','Restart dungeon',100,130,130,26);btnText('newparty','New party',250,130,130,26);
+  btnText('savemenu','Save / Load',170,162,140,26);
   const L=['Arrows / WASD: move and turn   Q / E: step sideways','Space: attack   X: special   P: potion   Z: wait','1-4: choose hero   I: inventory   M: map   Esc: menu','',
     'Tap a portrait to open that hero\'s inventory.','Tap torches and items in the view to pick them up.','Heroes act once per round, then the monsters move.','Heroes gain experience from kills. Monsters match the dungeon level.'];
   L.forEach((s,i)=>txt(s,240,200+i*11.5,8,'#d8c9a0','center'));
@@ -2117,6 +2222,7 @@ function update(dt){
   // held d-pad repeat, queued input
   if(G.hold&&G.time>=G.hold.t){act(G.hold.id);G.hold.t=G.time+.16}
   if(G.queued&&canAct()){const q=G.queued;G.queued=null;act(q)}
+  if(G.state==='play'&&G.time>=G.nextAuto&&G.timers.length===0&&!G.drag){G.nextAuto=G.time+6;writeSave('auto')}
 }
 const crtC=document.createElement('canvas');crtC.width=240;crtC.height=160;const crtX=crtC.getContext('2d');
 let SCANP=null,NOISEP=null;
@@ -2135,19 +2241,18 @@ function crtPass(t){
   const by=((t*55)%(H+200))-100,g=ctx.createLinearGradient(0,by-60,0,by+60); // slow rolling band
   g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,'rgba(220,235,220,.05)');g.addColorStop(1,'rgba(255,255,255,0)');
   ctx.fillStyle=g;ctx.fillRect(0,by-60,W,120);
-  ctx.globalCompositeOperation='overlay';ctx.globalAlpha=.5;ctx.fillStyle=NOISEP;                // grain
-  ctx.translate((Math.random()*128)|0,(Math.random()*128)|0);ctx.fillRect(-128,-128,W+256,H+256);
   ctx.setTransform(1,0,0,1,0,0);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;
   ctx.fillStyle=`rgba(0,0,0,${(.03+.025*Math.sin(t*41)+.015*Math.sin(t*7.3)).toFixed(3)})`;ctx.fillRect(0,0,W,H); // flicker
   ctx.restore();
 }
-let SMOKE=null,PAPERP=null,HATCHP=null;
+let SMOKE=null,SMOKEP=null,PAPERP=null,HATCHP=null;
 function makeAtmos(){
   SMOKE=mkCanvas(256,128,(x)=>{
     const id=x.createImageData(256,128),D=id.data;
     for(let y=0;y<128;y++)for(let i=0;i<256;i++){const n=fbm(i/256,y/128,401),a=Math.max(0,Math.min(1,(n-.42)*3.2)),k=(y*256+i)*4;D[k]=158;D[k+1]=142;D[k+2]=122;D[k+3]=a*105}
     x.putImageData(id,0,0);
   });
+  SMOKEP=ctx.createPattern(SMOKE,'repeat');
   PAPERP=ctx.createPattern(mkCanvas(256,256,(x)=>{
     x.fillStyle='#ffffff';x.fillRect(0,0,256,256);
     for(let i=0;i<46;i++){const px=Math.random()*256,py=Math.random()*256,r=8+Math.random()*34,a=.06+Math.random()*.22;
@@ -2159,12 +2264,12 @@ function makeAtmos(){
   }),'repeat');
   HATCHP=ctx.createPattern(mkCanvas(4,4,(x)=>{x.strokeStyle='rgba(0,0,0,.11)';x.lineWidth=1;x.beginPath();x.moveTo(0,4);x.lineTo(4,0);x.moveTo(-1,1);x.lineTo(1,-1);x.moveTo(3,5);x.lineTo(5,3);x.stroke()}),'repeat');
 }
-function drawSmoke(t){
-  for(const [sp,ph,al,sc] of [[9,0,.36,1.15],[-6,.5,.28,.85]]){
-    const ox=(((t*sp+ph*256)%256)+256)%256,oy=Math.sin(t*.13+ph*6)*10;ctx.globalAlpha=al;
-    for(let tx=-1;tx<=2;tx++)for(let ty=0;ty<=2;ty++)ctx.drawImage(SMOKE,(tx*256+ox)*sc,(ty*128+oy-20)*sc,256*sc+1,128*sc+1);
+function drawSmoke(t){ // seamless drifting layers: one repeating pattern each, so no tile seams show
+  for(const [sp,ph,al,sc] of [[9,0,.24,1.15],[-6,.5,.17,.85]]){
+    const ox=(((t*sp+ph*256)%256)+256)%256,oy=Math.sin(t*.13+ph*6)*10;
+    ctx.save();ctx.globalAlpha=al;ctx.translate(ox*sc,(oy-20)*sc);ctx.scale(sc,sc);ctx.fillStyle=SMOKEP;
+    ctx.fillRect(-ox-8,-(oy-20)-8,420/sc+16,230/sc+16);ctx.restore();
   }
-  ctx.globalAlpha=1;
 }
 let last=performance.now();
 function frame(now){
@@ -2174,9 +2279,10 @@ function frame(now){
   requestAnimationFrame(frame);
 }
 function handleBtn(id){
-  if(G.state==='title'){act('start');return}
+  if(G.saves){savesBtn(id);return}
+  if(G.state==='title'){titleBtn(id);return}
   if(G.state==='create'){crBtn(id);return}
-  if(G.state==='win'||G.state==='dead'){if(id==='restart'){reset();G.state='play'}return}
+  if(G.state==='win'||G.state==='dead'){if(id==='restart'){backupAuto();reset();G.state='play'}return}
   if(G.loot){lootBtn(id);return}
   if(G.inv.open){invBtn(id);return}
   if(G.map){if(id==='mapclose'||id==='map')G.map=false;return}
@@ -2184,8 +2290,9 @@ function handleBtn(id){
     if(id==='resume'||id==='menuclose'||id==='menu')G.menu=false;
     else if(id==='mute'){G.mute=!G.mute}
     else if(id==='crt'){G.crt=!G.crt;try{localStorage.setItem('abbeyCRT',G.crt?'1':'0')}catch(e){}fit()}
-    else if(id==='newparty'){G.menu=false;crInit();G.state='create'}
-    else if(id==='restart'){reset();G.state='play';audioInit();msg('You wake in the crypts below the abbey. Something is scratching in the dark...')}
+    else if(id==='savemenu'){openSaves('menu')}
+    else if(id==='newparty'){backupAuto();G.menu=false;crInit();G.state='create'}
+    else if(id==='restart'){backupAuto();reset();G.state='play';audioInit();msg('You wake in the crypts below the abbey. Something is scratching in the dark...')}
     return;
   }
   if(id==='menu'){G.menu=true;return}
@@ -2295,7 +2402,8 @@ const KEYMAP={ArrowUp:'fwd',w:'fwd',W:'fwd',ArrowDown:'back',s:'back',S:'back',A
 addEventListener('keydown',e=>{
   if(e.ctrlKey||e.metaKey||e.altKey)return;
   audioInit();
-  if(G.state==='title'){act('start');e.preventDefault();return}
+  if(G.saves){if(e.key==='Escape')G.saves=null;e.preventDefault();return}
+  if(G.state==='title'){titleBtn(hasSave('auto')||hasSave('prev')?'tcont':'tnew');e.preventDefault();return}
   if(G.state==='create'){if(e.key==='Enter'){crBtn(G.cr.step==='done'?'cr_start':'cr_ok');e.preventDefault()}return}
   if(G.state==='win'||G.state==='dead'){if(e.key==='Enter'||e.key===' '){reset();G.state='play'}return}
   if(e.key==='Escape'){if(G.loot){G.loot=null}else if(G.inv.open){G.inv.open=false}else{G.menu=!G.menu;G.map=false}e.preventDefault();return}
@@ -2321,6 +2429,8 @@ addEventListener('resize',fit);fit();
   try{await Promise.race([Promise.all([document.fonts.load("16px 'IM Fell English SC'"),document.fonts.load("16px 'IM Fell English'"),document.fonts.load("16px 'UnifrakturCook'")]),new Promise(r=>setTimeout(r,2500))])}catch(e){}
   await Promise.all([loadImg('rat','assets/rat.png'),loadImg('boss','assets/boss.png'),loadImg('bat','assets/bat.png'),loadImg('skel','assets/skel.png'),...Array.from({length:NPORT},(_,i)=>loadImg('pt'+i,'assets/pt/'+i+'.png'))]);
   reset();buildUIPatterns();crtInit();makeAtmos();try{G.crt=localStorage.getItem('abbeyCRT')!=='0'}catch(e){G.crt=true}fit();
+  addEventListener('pagehide',()=>{if(G.state==='play'&&G.timers.length===0)writeSave('auto')});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden&&G.state==='play'&&G.timers.length===0)writeSave('auto')});
   window.__ready=true;
   requestAnimationFrame(frame);
 })();
