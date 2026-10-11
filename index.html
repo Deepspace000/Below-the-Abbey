@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.39';
+const VERSION='1.40';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1515,6 +1515,8 @@ function specialInfo(i){
   return {name:P.name,cost:P.cost};
 }
 /* ---------- experience ---------- */
+// experience from a kill: 15% lighter overall, and creatures well below the party's level are worth less and less
+function killXP(base,elvl){const L=livingHeroes();const pl=L.length?L.reduce((n,i)=>n+G.heroes[i].lvl,0)/L.length:1;return Math.max(1,Math.round(base*Math.max(.3,1-.06*Math.max(0,pl-elvl))*.85))}
 function giveXP(amount){
   for(const hi of livingHeroes()){
     const h=G.heroes[hi];h.xp+=amount;
@@ -1555,11 +1557,12 @@ function hurtEnemy(e,dmg){
   if(e.hp<=0){
     e.dying=.55;G.kills++;sfx(e.t==='skel'?'rattle':'ratdie');
     const gold=Math.round(rnd(st.gold[0],st.gold[1])*(1+Math.max(0,...livingHeroes().map(j=>pas(j,'goldPct')))));G.gold+=gold;
-    msg(`The ${def.name} dies. +${st.xp} XP${gold?`, +${gold} gold`:''}.`,e.t==='boss'?'#ffd76a':'#b8d89a');
+    const xpGain=killXP(st.xp,e.lvl);
+    msg(`The ${def.name} dies. +${xpGain} XP${gold?`, +${gold} gold`:''}.`,e.t==='boss'?'#ffd76a':'#b8d89a');
     if(e.t==='boss')G.bossDead=true;
     if(def.kind==='bandit'&&Math.random()<.3){const f=foodFor(Math.random());if(bagAdd(mkItem(f)))msg(`You find a ${ITEMDEF[f].n} on the body.`,'#9ae0a0')}
     if(e.t==='gandrick'){G.flags.gandrickDead=1;G.flags.ledger=1;later(900,()=>startCut('gandrickDead'))}
-    giveXP(st.xp);
+    giveXP(xpGain);
     {const F=G.flags;if(def.kind==='wolf')F.wolfKills=(F.wolfKills||0)+1;if(def.kind==='bandit')F.bandKills=(F.bandKills||0)+1;if(e.t==='rat'||e.t==='bat')F.ratKills=(F.ratKills||0)+1;if(e.t==='ghost')F.ghostKills=(F.ghostKills||0)+1;if(LEVEL===18)F.mineKills=(F.mineKills||0)+1;if(LEVEL===20&&e.t==='ghost')F.graveKills=(F.graveKills||0)+1;if(e.t==='overseer')F.overseerDead=1;
     if(e.t==='halbrecht'){F.halDown=1;later(900,()=>startCut('halDown',halEnd))}
     if(e.t==='wraith'){F.wraithDead=1;msg('The wraith shrieks and falls to mist. The seal on the tomb chest breaks.','#b8d8f0')}
