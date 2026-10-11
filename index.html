@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.28';
+const VERSION='1.29';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3699,6 +3699,7 @@ for(const k in MINIDEFS){const M=MINIDEFS[k];if(M.portals)LEVELS[k].portals=M.po
 const WALLCH={a:9,b:10,c:11,p:12,w:13,v:14,h:15,k:16,i:17,g:18,r:19,d:20,e:21,f:22,'0':30,'1':31,'2':32,'3':33,'4':34,'5':35,'6':36,'7':37,'8':38,'9':39};
 const DIFF=()=>(LEVELS[LEVEL]&&LEVELS[LEVEL].diff)||LEVEL;
 function loadLevel(n){
+  {const F=G.flags;if(F&&F.ironRoad&&!F.mayorKilled)delete F.ironRoad} // the Ironhill road opens only after the mayor business, never from a jump link
   const L=LEVELS[n]||LEVELS[1];
   LEVEL=n;MAPROWS=L.rows;MW=MAPROWS[0].length;MH=MAPROWS.length;START=L.start;ENEMY_SPAWNS=L.enemies;ITEM_SPAWNS=L.items;DECOR_SPAWNS=L.decor;
   G.day=L.day!==undefined?L.day:(L.outdoor?.98:0);G.dayBase=G.day;G.amb=L.amb||0;G.fl=L.floor?FLOORS[L.floor]:null;G.cl=L.ceil?CEILS[L.ceil]:null;G.portals=L.portals||[];G.fmap=L.fmap?L.fmap.join(''):null;G.fl2=L.fmap?(FLOORS[L.floor2]||FLOORS.grass):null;G.fl3=L.fmap?(FLOORS.dirt||FLOORS.grass):null;G.fl4=L.fmap?(FLOORS.mosscobble||FLOORS.cobble):null;G.fl5=L.fmap?(FLOORS.stainedcobble||FLOORS.cobble):null;G.fl6=L.fmap?(FLOORS.wetcobble||FLOORS.cobble):null;G.extraLights=L.lights||null;
@@ -4753,8 +4754,17 @@ function drawRain(){
     }
     ctx.globalCompositeOperation='source-over';
   }
-  ctx.strokeStyle='rgba(150,166,184,.5)';ctx.lineWidth=1;ctx.beginPath();
-  for(let i=0;i<150;i++){const sp=300+(i%5)*50,x=((i*37.7+G.time*70)%470)-20,y=((i*53.3+G.time*sp)%270)-30;ctx.moveTo(x,y);ctx.lineTo(x-8,y+26)}
+  // dark rain: every drop has its own speed, length and slant, and lands somewhere new each time it falls, so no pattern ever repeats
+  const T=G.time;
+  for(let b=0;b<3;b++){
+    ctx.strokeStyle=['rgba(14,18,26,.85)','rgba(24,30,40,.7)','rgba(40,48,60,.55)'][b];ctx.lineWidth=[1.7,1.4,1.1][b];ctx.beginPath();
+    for(let i=b;i<190;i+=3){
+      const sp=240+hash2(i,1,71)*260,ln=10+sp*.06*(.6+hash2(i,2,72)),slant=.18+hash2(i,3,73)*.22,ph=hash2(i,4,74)*300,
+        pos=ph+T*sp,cyc=Math.floor(pos/300),y=(pos%300)-35,x=hash2(i,cyc,75)*500-40+(y*slant);
+      ctx.moveTo(x,y);ctx.lineTo(x-ln*slant,y+ln)
+    }
+    ctx.stroke();
+  }
   ctx.stroke();ctx.restore();
 }
 
