@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.22';
+const VERSION='1.23';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -5138,6 +5138,13 @@ addEventListener('resize',fit);fit();
   });
   IMG.chest=mkCanvas(120,84,(x,w,h)=>{x.fillStyle='#3a2616';x.fillRect(6,34,108,46);x.fillStyle='#5a3c22';x.beginPath();x.moveTo(6,34);x.quadraticCurveTo(60,-2,114,34);x.closePath();x.fill();x.strokeStyle='#17110a';x.lineWidth=3;x.strokeRect(6,34,108,46);x.beginPath();x.moveTo(6,34);x.quadraticCurveTo(60,-2,114,34);x.stroke();x.fillStyle='#2a2622';for(const bx of [24,92]){x.fillRect(bx,12,8,68)}x.fillStyle='#b8a050';x.fillRect(54,32,12,14);x.strokeStyle='#17110a';x.lineWidth=1.5;x.strokeRect(54,32,12,14)});
   for(const k in ART_KEEP)IMG[k]=ART_KEEP[k];
+  { // a little colour for the plainest greys: keep the light and dark, lean the hue
+    const TONE={peasantW:'168,84,96',shepherdess:'92,132,84',beggar:'138,106,64',fisher:'104,116,112',waterwoman:'80,108,158',sergeant:'156,66,58',oldman:'126,104,132',drunk:'150,80,60',innkeeper:'132,100,70'};
+    for(const k in TONE){const im=IMG[k];if(!im)continue;
+      IMG[k]=mkCanvas(im.width,im.height,(x,w,h)=>{x.drawImage(im,0,0);
+        const t=mkCanvas(w,h,(y)=>{y.drawImage(im,0,0);y.globalCompositeOperation='source-atop';y.fillStyle=`rgb(${TONE[k]})`;y.fillRect(0,0,w,h)});
+        x.globalCompositeOperation='color';x.globalAlpha=.36;x.drawImage(t,0,0)})}
+  }
   if(IMG.signblank){const mkSignText=(base,text)=>mkCanvas(base.width,base.height,(x,w,h)=>{x.drawImage(base,0,0);let fs=Math.round(w*.2);x.font=`bold ${fs}px Georgia,serif`;while(x.measureText(text).width>w*.64&&fs>8){fs--;x.font=`bold ${fs}px Georgia,serif`}x.textAlign='center';x.textBaseline='middle';x.lineWidth=Math.max(2,fs*.18);x.strokeStyle='rgba(20,12,6,.9)';x.strokeText(text,w*.5,h*.3);x.fillStyle='#d8cca4';x.fillText(text,w*.5,h*.3)});IMG.sign_thornwick=mkSignText(IMG.signblank,'THORNWICK');IMG.sign_ironhill=mkSignText(IMG.signblank,'IRONHILL')}
   for(const id of ['dagger', 'sword', 'mace', 'staff', 'gravemace', 'bow', 'axe', 'shield', 'cap', 'jerkin', 'bracers', 'leggings', 'helm', 'torch', 'lantern', 'potion', 'key', 'wood', 'ringV', 'ringM', 'ringW', 'ringS', 'sp_fire', 'scrollFrost', 'scrollLight']){const im=IMG['icn_'+id];if(!im)continue;IMG['ic_'+id]=im;IMG['it_'+id]=im;if(id==='potion')IMG.potion=im;if(id==='key')IMG.key=im}
   reset();buildUIPatterns();crtInit();makeAtmos();try{G.crt=localStorage.getItem('abbeyCRT')!=='0'}catch(e){G.crt=true}gfxLoad();fit();
