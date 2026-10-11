@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.31';
+const VERSION='1.32';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3577,7 +3577,7 @@ const LEVEL4_DATA=mkInterior(TOWNJ.interiors.shop,"Aldous's Store",TB('3'));
 const LEVEL5_DATA=mkInterior(TOWNJ.interiors.hall,"Mayor's House",TB('2'),{amb:.6,fmap:["0000000000000", "0000011100000", "0000011100000", "0000011100000", "0000011100000", "0000011100000", "0000011100000", "0000011100000", "0000011100000"],floor2:'carpet',lights:TOWNJ.interiors.hall.lights.concat([[4,4],[8,4],[4,7],[8,7]]),decor:TOWNJ.interiors.hall.decor.concat([{k:'statue',x:4,y:1,block:true,deco:true},{k:'statue',x:8,y:1,block:true,deco:true},{k:'statue',x:1,y:3,block:true,deco:true},{k:'statue',x:11,y:3,block:true,deco:true}])});
 const LEVEL6_DATA=mkInterior(TOWNJ.interiors.inn,'The Bickering Goat',TB('4'));
 const LEVEL7_DATA={rows:GJ.forest.rows,start:GJ.forest.start,enemies:GJ.forest.enemies,items:GJ.forest.items,decor:GJ.forest.decor,outdoor:true,day:.8,floor:'forest',name:"Gandrick's Wood",label:"Gandrick's Wood",diff:5,
-  portals:[{to:8,x:1,y:18,f:1,tex:'cave'},{to:3,x:TOWNJ.exits.E.x,y:TOWNJ.exits.E.y,f:3,tex:'tgate'},{to:10,x:1,y:15,f:1,tex:'tgate',req:'ironRoad',lock:'The forest is thick here. There is no reason to go this way.'}]};
+  portals:[{to:8,x:1,y:18,f:1,tex:'cave'},{to:3,x:TOWNJ.exits.E.x,y:TOWNJ.exits.E.y,f:3,tex:'tgate'},{to:10,x:1,y:15,f:1,tex:'tgate'}]};
 const LEVEL8_DATA={rows:GJ.cave.rows,start:GJ.cave.start,enemies:GJ.cave.enemies,items:GJ.cave.items,decor:GJ.cave.decor,day:0,name:"Gandrick's Cave",label:"Gandrick's Cave",diff:5,torchGap:4.2,
   portals:[{to:7,x:22,y:2,f:2,tex:'light'}]};
 const LEVEL9_DATA={rows:["#########","#.......#","#.......#","#.......#","####.####","#.......#","#.......#","####.####","#.......#","#.......#","#.......#","####0####"],start:{x:4,y:10,f:0},
@@ -3728,7 +3728,6 @@ function forestExtras(L){
   return L._xd=out;
 }
 function loadLevel(n){
-  {const F=G.flags;if(F&&F.ironRoad&&!F.mayorKilled)delete F.ironRoad} // the Ironhill road opens only after the mayor business, never from a jump link
   const L=LEVELS[n]||LEVELS[1];
   LEVEL=n;MAPROWS=L.rows;MW=MAPROWS[0].length;MH=MAPROWS.length;START=L.start;ENEMY_SPAWNS=L.enemies;ITEM_SPAWNS=L.items;DECOR_SPAWNS=forestExtras(L).length?L.decor.concat(forestExtras(L)):L.decor;
   G.day=L.day!==undefined?L.day:(L.outdoor?.98:0);G.dayBase=G.day;G.amb=L.amb||0;G.fl=L.floor?FLOORS[L.floor]:null;G.cl=L.ceil?CEILS[L.ceil]:null;G.portals=L.portals||[];G.fmap=L.fmap?L.fmap.join(''):null;G.fl2=L.fmap?(FLOORS[L.floor2]||FLOORS.grass):null;G.fl3=L.fmap?(FLOORS.dirt||FLOORS.grass):null;G.fl4=L.fmap?(FLOORS.mosscobble||FLOORS.cobble):null;G.fl5=L.fmap?(FLOORS.stainedcobble||FLOORS.cobble):null;G.fl6=L.fmap?(FLOORS.wetcobble||FLOORS.cobble):null;G.extraLights=L.lights||null;
