@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Below the Abbey: Spawn Points</title>
+<style>
+:root{--bg:#14110d;--card:#211b14;--ink:#e8dcc0;--dim:#a8997a;--gold:#d8c88e;--line:#4a3d2a}
+@media (prefers-color-scheme:light){:root{--bg:#efe6d0;--card:#f8f1de;--ink:#2a1f10;--dim:#6a5a3c;--gold:#7a5a14;--line:#c8b88e}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Georgia,serif;padding:20px 16px 48px}
+main{max-width:720px;margin:0 auto}h1{font-size:26px;color:var(--gold);margin:0 0 4px}p.s{color:var(--dim);margin:0 0 18px}
+.lv{display:flex;gap:10px;align-items:center;margin:0 0 20px;color:var(--dim)}.lv input{width:70px;font:inherit;padding:6px 8px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:6px}
+h2{font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:22px 0 8px}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+a.c{display:block;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--ink);text-decoration:none}
+a.c:hover,a.c:focus{border-color:var(--gold)}a.c b{display:block;color:var(--gold)}a.c span{font-size:13px;color:var(--dim)}
+</style></head><body><main>
+<h1>Below the Abbey</h1><p class="s">Jump straight to any area. The party is set to the level below, with gear.</p>
+<div class="lv"><label for="l">Party level</label><input id="l" type="number" min="1" max="40" value="12"></div>
+<div id="out"></div>
+</main><script>
+const BASE='https://deepspace000.github.io/Below-the-Abbey/';
+const GROUPS=[
+ ['Early game',[['Abbey and the Thornwood','thornwood','Grim woodland, paths fork to Thornwick'],['Thornwick','thornwick','Village under an overcast sky'],['Thornwick, town square','thornwick&at=square','Start in the middle of town'],["Gandrick's Wood",'gwood','Bandit camp, burnable thicket']]],
+ ['Ironhill',[['Ironhill Road','road','Rainy pine wood'],['Ironhill','ironhill','The town gate'],['Ironhill, town square','ironhill&at=square','Start in the middle of town'],['Ironhill Moor','moor','Open heath and standing stones'],['Burial Ground','grave','Fenced graveyard with lanterns']]],
+ ['The mountain and beyond',[['Greyfang Pass','pass','The climb to the summit'],['Greendale Forest','greendale','Bright lush forest'],['Anaea','anaea','Start at the gate'],['Anaea, town square','anaea&at=square','Start in the middle of town']]]];
+const lv=document.getElementById('l'),out=document.getElementById('out');
+const DEF={pass:14,greendale:34,anaea:34};
+function draw(){out.innerHTML='';for(const [t,items] of GROUPS){const h=document.createElement('h2');h.textContent=t;out.appendChild(h);const g=document.createElement('div');g.className='g';
+ for(const [n,k,d] of items){const a=document.createElement('a');a.className='c';a.href=BASE+'?town='+k+'&lvl='+(+lv.value||12);a.innerHTML='<b></b><span></span>';a.firstChild.textContent=n;a.lastChild.textContent=d;g.appendChild(a)}out.appendChild(g)}}
+lv.addEventListener('input',draw);draw();
+</script></body></html>
