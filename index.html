@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.29';
+const VERSION='1.31';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1333,7 +1333,7 @@ function reset(n){
   G.inv={open:false,tab:'inv',hero:0,sel:null,scroll:0};
   G.enemies=ENEMY_SPAWNS.map((s,i)=>{const st=enemyStat(s.t);return {id:i,t:s.t,lvl:DIFF(),x:s.x,y:s.y,rx:s.x,ry:s.y,hp:st.hp,maxhp:st.hp,alert:false,chilled:0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100}});
   G.items=ITEM_SPAWNS.map(s=>({k:s.k,x:s.x,y:s.y,taken:false}));
-  G.decor=DECOR_SPAWNS.map(s=>{const o={k:s.k,x:s.x,y:s.y,block:!!s.block,loot:CONTAINERS.includes(s.k),shop:s.k==='cart'};if(s.deco){o.loot=false;o.shop=false}if(s.npc){o.npc=s.npc;o.loot=false;o.shop=false;if(s.goat)o.goat=s.goat}if(s.sc)o.sc=s.sc;if(s.walk)o.walk=true;if(s.wd)o.wd=s.wd;if(s.txt)o.txt=s.txt;return o});
+  G.decor=DECOR_SPAWNS.map(s=>{const o={k:s.k,x:s.x,y:s.y,block:!!s.block,loot:CONTAINERS.includes(s.k),shop:s.k==='cart'};if(s.deco){o.loot=false;o.shop=false}if(s.npc){o.npc=s.npc;o.loot=false;o.shop=false;if(s.goat)o.goat=s.goat}if(s.sc)o.sc=s.sc;if(s.walk)o.walk=true;if(s.wd)o.wd=s.wd;if(s.txt)o.txt=s.txt;if(s.bob)o.bob=s.bob;return o});
   G.decor.forEach(d=>{if(!d.npc&&(d.k==='grave'||d.k==='grave2'||d.k==='cross')){d.npc='epitaph';d.loot=false}});
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++)if(MAPROWS[y][x]==='t')G.decor.push({k:'tree'+((hash2(x,y,7)*NTREES)|0),x,y,block:true,loot:false,shop:false});
   G.loot=null;G.flags={};G.arrows=[];G.cut=null;G.winKind=null;G.quests={};G.lst={};G.talk=null;G.clock=480;G.starveT=0;G.buffs=[];G.lvlBanners=[];
@@ -2187,7 +2187,7 @@ function render3D(){
     if((side===0&&rX>0)||(side===1&&rY<0))tx=TS-1-tx;
     const face=side===0?(stx>0?3:1):(sty>0?0:2);
     let ti;
-    if(g>=100)ti=T_TILE[g];else if(g===1)ti=(LEVEL===22&&T_ROCK!==undefined)?T_ROCK:(LEVEL===2&&T_ABBEY!==undefined)?T_ABBEY:T_STONE;else if(g===2)ti=(LEVEL===2&&T_ABBEY!==undefined)?T_ABBEY:T_BRICK;else if(g===3||g===8)ti=T_DOOR;else if(g===4)ti=T_LOCK;else if(g===6)ti=T_FOREST;else if(g===7)ti=T_GATE;else if((g>=9&&g<=14)||(g>=20&&g<=22))ti=T_WALL[g];else if(g>=15&&g<=19)ti=[T_DOORS.house,T_DOORS.bakery,T_DOORS.house2,T_DOORS.farm,T_DOORS.ruin][g-15];else if(g>=30&&g<100)ti=T_DOORS[(G.portals[g-30]||{}).tex]||T_DOORS.house;else ti=T_EXIT;
+    if(g>=100)ti=T_TILE[g];else if(g===1)ti=(LEVEL===22&&T_ROCK!==undefined)?T_ROCK:(LEVEL===2&&T_ABBEY!==undefined)?T_ABBEY:T_STONE;else if(g===2)ti=(LEVEL===2&&T_ABBEY!==undefined)?T_ABBEY:T_BRICK;else if(g===3||g===8)ti=T_DOOR;else if(g===4)ti=T_LOCK;else if(g===6)ti=forestWallFor(LEVEL);else if(g===7)ti=T_GATE;else if((g>=9&&g<=14)||(g>=20&&g<=22))ti=T_WALL[g];else if(g>=15&&g<=19)ti=[T_DOORS.house,T_DOORS.bakery,T_DOORS.house2,T_DOORS.farm,T_DOORS.ruin][g-15];else if(g>=30&&g<100)ti=T_DOORS[(G.portals[g-30]||{}).tex]||T_DOORS.house;else ti=T_EXIT;
     const tv=(g===1||g===2)?torchAt.get((my*MW+mx)*4+face):0;
     if(tv){const ph=((mx*7+my*3)&3);ti=(g===1?(tv===2?T_TORCH_STONE_R:T_TORCH_STONE):(tv===2?T_TORCH_BRICK_R:T_TORCH_BRICK))+((fr+ph*2)&7)}
     const tex=TEX[ti],td=tex.d,te=tex.e;
@@ -2254,6 +2254,7 @@ function spriteList(){
   for(const it of G.items)if(!it.taken){const d=ITEMDEF[it.k];L.push({x:it.x+.5,y:it.y+.5,img:IMG['it_'+it.k]||IMG[it.k],w:it.k==='key'?.3:(d?d.sw:.3)*.95,item:it})}
   const DROP={well:.07,fountain:.1,chest:.05,cart:.05,barrel:.03,crate:.03,bench:.04,urn:.03,memorial:.04,statue:.03,coffin:.03,gate:.02,tree0:.15,tree1:.13,tree2:.09,tree3:.14,tree4:.15,tree5:.16,tree6:.13,tree7:.14};
   for(const d of G.decor){if(d.found)continue;const k=(d.k==='grave'&&IMG.grave2&&hash2(d.x,d.y,5)>.5)?'grave2':d.k;if(d.wd&&d.txt){L.push({x:d.x+.5+d.wd[0]*.1,y:d.y+.5+d.wd[1]*.1,img:shopSign(d),w:.8,bob:.3,hang:[d.wd[0],d.wd[1]],decor:d});continue}
+    if(d.wd&&d.k.startsWith('branch')){L.push({x:d.x+.5+d.wd[0]*.1,y:d.y+.5+d.wd[1]*.1,img:IMG[d.k],w:.8,bob:d.bob||.4,hang:[d.wd[0],d.wd[1]],decor:d});continue}
     L.push({x:d.x+.5,y:d.y+.5,img:IMG[k],w:(NPC_H[k]&&IMG[k]?NPC_H[k]*IMG[k].width/IMG[k].height:decorW(k))*(d.sc||1),drop:DROP[k]||0,decor:d})}
   return L;
 }
@@ -3324,7 +3325,7 @@ function restore(sv){
   if(G.grid[G.P.y]===undefined||G.grid[G.P.y][G.P.x]!==0||G.decor.some(d=>d.block&&d.x===G.P.x&&d.y===G.P.y)){G.P={x:START.x,y:START.y,f:START.f,angT:(START.f-1)*Math.PI/2};G.C={x:START.x,y:START.y,a:G.P.angT}}
   G.enemies=sv.enemies.map((e,i)=>({id:i,t:e.t,lvl:DIFF(),x:e.x,y:e.y,rx:e.x,ry:e.y,hp:e.hp>0?Math.max(1,Math.ceil(enemyStat(e.t).hp*e.hp/e.maxhp)):e.hp,maxhp:enemyStat(e.t).hp,alert:!!e.alert,chilled:e.chilled||0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100}));
   if(sv.items.length===G.items.length)G.items.forEach((it,i)=>{it.taken=!!sv.items[i]});
-  if(sv.decor.length===G.decor.length)G.decor.forEach((d,i)=>{const s=sv.decor[i];if(s){d.contents=s.contents;d.gold=s.gold;d.goldTaken=s.goldTaken;if(s.found){d.found=true;d.block=false}}});
+  if(sv.decor.length<=G.decor.length)G.decor.forEach((d,i)=>{const s=sv.decor[i];if(s){d.contents=s.contents;d.gold=s.gold;d.goldTaken=s.goldTaken;if(s.found){d.found=true;d.block=false}}});
   if(sv.torchKeys){const ks=new Set(sv.torchKeys);LIGHTS.forEach(l=>{if(ks.has(l.key)){l.taken=true;torchAt.delete(l.key)}})}
   else if(sv.torches&&sv.torches.length===LIGHTS.length)LIGHTS.forEach((l,i)=>{if(sv.torches[i]){l.taken=true;torchAt.delete(l.key)}});
   G.state='play';G.menu=false;G.map=false;G.inv.open=false;G.loot=null;G.saves=null;G.nextAuto=G.time+180;G.lastReg=-2;G.flags=sv.flags||{};G.quests=sv.quests||{};G.lst=sv.lst||{};G.clock=sv.clock||480;G.talk=null;G.cut=null;G.arrows=[];
@@ -3698,10 +3699,38 @@ for(const k in MINIDEFS){const M=MINIDEFS[k];if(M.portals)LEVELS[k].portals=M.po
 
 const WALLCH={a:9,b:10,c:11,p:12,w:13,v:14,h:15,k:16,i:17,g:18,r:19,d:20,e:21,f:22,'0':30,'1':31,'2':32,'3':33,'4':34,'5':35,'6':36,'7':37,'8':38,'9':39};
 const DIFF=()=>(LEVELS[LEVEL]&&LEVELS[LEVEL].diff)||LEVEL;
+function forestExtras(L){
+  if(L._xd)return L._xd;
+  const rows=L.rows,H=rows.length,W=rows[0].length,out=[];
+  if(!L.outdoor||!rows.some(r=>r.includes('T')))return L._xd=[];
+  const occ=new Set((L.decor||[]).map(d=>d.x+','+d.y));
+  const ch=(x,y)=>(y>=0&&y<H&&x>=0&&x<W)?rows[y][x]:'T';
+  const dirs=[[1,0],[-1,0],[0,1],[0,-1]];
+  // flood fill that treats extra trees as solid, to make sure no tree ever closes a route
+  const st=L.start,blocked=new Set([...(L.decor||[]).filter(d=>d.block!==false).map(d=>d.x+','+d.y)]);
+  const reach=()=>{const seen=new Set([st.x+','+st.y]),q=[[st.x,st.y]];while(q.length){const [x,y]=q.pop();for(const [dx,dy] of dirs){const nx=x+dx,ny=y+dy,k=nx+','+ny;if(seen.has(k)||blocked.has(k))continue;const c=ch(nx,ny);if(c==='T'||c==='t')continue;seen.add(k);if(c==='.')q.push([nx,ny])}}return seen};
+  const base=reach();
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){
+    if(rows[y][x]!=='.'||occ.has(x+','+y))continue;
+    const wd=dirs.filter(([dx,dy])=>ch(x+dx,y+dy)==='T');
+    const nearWall=wd.length>0||dirs.some(([dx,dy])=>ch(x+dx*2,y+dy*2)==='T');
+    if(!nearWall)continue;
+    if(wd.length&&hash2(x,y,311)<.2)out.push({k:'bush'+(hash2(x,y,313)>.5?1:0),x,y,block:false,walk:true});
+    if(wd.length&&hash2(x,y,312)<.1){const d=wd[(hash2(x,y,314)*wd.length)|0];out.push({k:'branch'+(hash2(x,y,315)>.5?1:0),x,y,block:false,wd:[d[0],d[1]],bob:.22+hash2(x,y,316)*.5})}
+    // more trees close to the wall, only where they leave every lane open
+    if(!wd.length&&hash2(x,y,317)<.12&&Math.abs(x-st.x)+Math.abs(y-st.y)>3){
+      const open8=[-1,0,1].every(dx=>[-1,0,1].every(dy=>ch(x+dx,y+dy)==='.'||(dx===0&&dy===0)||ch(x+dx,y+dy)==='T'));
+      if(!open8)continue;
+      const k=x+','+y;blocked.add(k);const r=reach();let ok=true;for(const c of base)if(c!==k&&!r.has(c)){ok=false;break}
+      if(ok)out.push({k:'tree'+((hash2(x,y,7)*NTREES)|0),x,y,block:true,loot:false,shop:false});else blocked.delete(k)
+    }
+  }
+  return L._xd=out;
+}
 function loadLevel(n){
   {const F=G.flags;if(F&&F.ironRoad&&!F.mayorKilled)delete F.ironRoad} // the Ironhill road opens only after the mayor business, never from a jump link
   const L=LEVELS[n]||LEVELS[1];
-  LEVEL=n;MAPROWS=L.rows;MW=MAPROWS[0].length;MH=MAPROWS.length;START=L.start;ENEMY_SPAWNS=L.enemies;ITEM_SPAWNS=L.items;DECOR_SPAWNS=L.decor;
+  LEVEL=n;MAPROWS=L.rows;MW=MAPROWS[0].length;MH=MAPROWS.length;START=L.start;ENEMY_SPAWNS=L.enemies;ITEM_SPAWNS=L.items;DECOR_SPAWNS=forestExtras(L).length?L.decor.concat(forestExtras(L)):L.decor;
   G.day=L.day!==undefined?L.day:(L.outdoor?.98:0);G.dayBase=G.day;G.amb=L.amb||0;G.fl=L.floor?FLOORS[L.floor]:null;G.cl=L.ceil?CEILS[L.ceil]:null;G.portals=L.portals||[];G.fmap=L.fmap?L.fmap.join(''):null;G.fl2=L.fmap?(FLOORS[L.floor2]||FLOORS.grass):null;G.fl3=L.fmap?(FLOORS.dirt||FLOORS.grass):null;G.fl4=L.fmap?(FLOORS.mosscobble||FLOORS.cobble):null;G.fl5=L.fmap?(FLOORS.stainedcobble||FLOORS.cobble):null;G.fl6=L.fmap?(FLOORS.wetcobble||FLOORS.cobble):null;G.extraLights=L.lights||null;
   setLightLevel(G.lightLevel||0);
 }
@@ -3711,7 +3740,7 @@ function levelState(){
     seen:G.seen.map(r=>Array.from(r)),torchKeys:LIGHTS.filter(l=>l.taken).map(l=>l.key)};
 }
 function applyLevelState(s){
-  if(!s||s.items.length!==G.items.length||s.decor.length!==G.decor.length)return;
+  if(!s||s.items.length!==G.items.length||s.decor.length>G.decor.length)return;
   G.items.forEach((it,i)=>{if(s.items[i])it.taken=true});
   G.decor.forEach((d,i)=>{const t=s.decor[i];if(t){d.contents=t.contents;d.gold=t.gold;d.goldTaken=t.goldTaken;d.found=t.found;if(t.found)d.block=false}});
   if(s.seen&&s.seen.length===MH)G.seen=s.seen.map(r=>Uint8Array.from(r));
@@ -3797,7 +3826,9 @@ function decorW(k){
 /* ==========================================================================
    FOREST TEXTURES: grass, overcast sky, a dense treeline, the town gate
    ========================================================================== */
-let SKYD,GRASSD,T_FOREST,T_GATE,T_ABBEY,T_ROCK;
+let SKYD,GRASSD,T_FOREST,T_GATE,T_ABBEY,T_ROCK,FOREST_TI={};
+const FWMAP={2:3,7:1,10:2,19:2,20:3}; // each wilderness area keeps one forest wall picture; the pictures are never mixed within an area
+function forestWallFor(n){const i=FWMAP[n]||(1+n%3);return FOREST_TI[i]!==undefined?FOREST_TI[i]:T_FOREST}
 // painted textures: blend the edges so they tile, then lift them to suit the lighting
 function seamTex(img,gain){
   const c=document.createElement('canvas');c.width=c.height=TS;const x=c.getContext('2d');x.drawImage(img,0,0,TS,TS);
@@ -3815,6 +3846,7 @@ function pixelate(d,n){ // lower resolution: sample the texture on a coarse grid
 }
 function applyAITextures(){
   try{makeTudorSet()}catch(e){console.error(e)}
+  for(const i of [1,2,3])if(IMG['fw'+i]){const [c,x]=tcv();x.drawImage(IMG['fw'+i],0,0,TS,TS);FOREST_TI[i]=addTex(x.getImageData(0,0,TS,TS).data)}
   try{
     if(IMG.tex_forestwall)TEX[T_FOREST].d=pixelate(seamTex(IMG.tex_forestwall,2.8),64);
     T_ROCK=addTex(pixelate(warpTex(stoneTex(171,{rows:3,cols:r=>r%2?1:2,stag:1,mortar:7,a:[104,98,90],b:[66,62,58],mort:[18,16,14],moss:.06,cracks:9}),172,6),64));
@@ -4127,7 +4159,7 @@ function drawArrows(){
 /* ==========================================================================
    TOWNSFOLK, DIALOGUE AND QUESTS
    ========================================================================== */
-const NPC_H={counter2:.62,sack2:.5,counter:.62,sacks:.6,breadbasket:.52,produce:.58,widow:.78,miner:.82,scribe:.8,sergeant:.88,priest:.84,farmer:.82,oldwoman:.72,child:.62,smith:.86,baker:.76,monk:.84,guard:.86,waterwoman:.78,oldman:.78,fisher:.8,flora0:.3,flora1:.32,flora2:.42,flora3:.28,flora4:.22,flora5:.3,flora6:.18,flora7:.4,flora8:.3,flora9:.32,flora10:.26,flowerpot:.3,chicken:.3,chicken2:.3,urn:.55,noticeboard:.85,lamp:1.5,memorial:1.0,flora:.28,sign_thornwick:.8,sign_ironhill:.8,sign_smith:.75,sign_store:.75,sign_inn:.75,sign_bakery:.75,sign_church:.75,gate:.95,fountain:.86,chest:.48,fence:.44,bush:.55,veg:.38,hay:.72,crate:.48,tree0:2.0,tree1:2.3,tree2:2.5,tree3:2.1,tree4:2.0,tree5:.8,tree6:2.3,tree7:2.1,grave:.55,grave2:.5,cross:.9,statue:1.15,well:.78,bench:.58,barrel:.5,coffin:.52,cart:.74,peasantM:.8,peasantW:.76,beggar:.7,drunk:.78,thug:.82,pickpocket:.76,merchant:.74,mayor:.78,goat:.42,shepherdess:.72,huntress:.8,innkeeper:.78};
+const NPC_H={bush0:.34,bush1:.42,counter2:.62,sack2:.5,counter:.62,sacks:.6,breadbasket:.52,produce:.58,widow:.78,miner:.82,scribe:.8,sergeant:.88,priest:.84,farmer:.82,oldwoman:.72,child:.62,smith:.86,baker:.76,monk:.84,guard:.86,waterwoman:.78,oldman:.78,fisher:.8,flora0:.3,flora1:.32,flora2:.42,flora3:.28,flora4:.22,flora5:.3,flora6:.18,flora7:.4,flora8:.3,flora9:.32,flora10:.26,flowerpot:.3,chicken:.3,chicken2:.3,urn:.55,noticeboard:.85,lamp:1.5,memorial:1.0,flora:.28,sign_thornwick:.8,sign_ironhill:.8,sign_smith:.75,sign_store:.75,sign_inn:.75,sign_bakery:.75,sign_church:.75,gate:.95,fountain:.86,chest:.48,fence:.44,bush:.55,veg:.38,hay:.72,crate:.48,tree0:2.0,tree1:2.3,tree2:2.5,tree3:2.1,tree4:2.0,tree5:.8,tree6:2.3,tree7:2.1,grave:.55,grave2:.5,cross:.9,statue:1.15,well:.78,bench:.58,barrel:.5,coffin:.52,cart:.74,peasantM:.8,peasantW:.76,beggar:.7,drunk:.78,thug:.82,pickpocket:.76,merchant:.74,mayor:.78,goat:.42,shepherdess:.72,huntress:.8,innkeeper:.78};
 const say=(text,opts)=>({text,opts:opts||[]});
 const BYE=['Goodbye.',()=>null];
 const bagCount=id=>G.bag.reduce((n,b)=>n+(b.id===id?b.n:0),0);
@@ -5092,7 +5124,7 @@ addEventListener('resize',fit);fit();
   IMG._fbRat=fallbackRat(false);IMG._fbBoss=fallbackRat(true);
   for(let i=0;i<4;i++)IMG['_pf'+i]=heroFallback(i);
   try{await Promise.race([Promise.all([document.fonts.load("16px 'IM Fell English SC'"),document.fonts.load("16px 'IM Fell English'"),document.fonts.load("16px 'UnifrakturCook'")]),new Promise(r=>setTimeout(r,2500))])}catch(e){}
-  await Promise.all([loadImg('rat','assets/rat.png'),loadImg('boss','assets/boss.png'),loadImg('wolf','assets/wolf.png'),loadImg('bandit','assets/bandit.png'),loadImg('archer','assets/archer.png'),loadImg('bat','assets/bat.png'),loadImg('skel','assets/skel.png'),...['dagger', 'sword', 'mace', 'staff', 'gravemace', 'bow', 'axe', 'shield', 'cap', 'jerkin', 'bracers', 'leggings', 'helm', 'torch', 'lantern', 'potion', 'key', 'wood', 'ringV', 'ringM', 'ringW', 'ringS', 'sp_fire', 'scrollFrost', 'scrollLight'].map(n=>loadImg('icn_'+n,'assets/icons/'+n+'.png')),...['wolfA','banditA','archerA','ratA','bossA','batA','skelA','gandrickA'].map(n=>loadImg(n,'assets/'+n+'.png')),...['tree0','tree1','tree2','tree3','tree4','tree5','tree6','tree7','grave','grave2','cross','statue','well','bench','barrel','coffin','cart','fence','bush','veg','hay','crate','chicken','chicken2','widow','miner','scribe','sergeant','priest','flowerpot','urn','noticeboard','lamp','memorial','gate','fountain','chest','sign_smith','sign_store','sign_inn','sign_bakery','sign_church','signblank','farmer','oldwoman','child','smith','baker','monk','guard','waterwoman','oldman','fisher','flora0','flora1','flora2','flora3','flora4','flora5','flora6','flora7','flora8','flora9','flora10','signb0','signb1','sh8','sh9','sh10','sh11','counter2','sack2','sh0','sh1','sh2','sh3','sh4','sh5','sh6','sh7','counter','sacks','breadbasket','produce','tw0','tw1','tw2','tw3','tw4','tw5','tw6','tw7','td0','td1','td2','td3','tex_forestwall','tex_abbeywall','tex_ground'].map(n=>loadImg(n,'assets/'+n+'.png')),...['peasantM','peasantW','beggar','drunk','thug','pickpocket','merchant','mayor','goat','shepherdess','huntress','innkeeper','gandrick'].map(n=>loadImg(n,'assets/'+n+'.png')),...Array.from({length:NPORT},(_,i)=>loadImg('pt'+i,'assets/pt/'+i+'.png'))]);
+  await Promise.all([loadImg('rat','assets/rat.png'),loadImg('boss','assets/boss.png'),loadImg('wolf','assets/wolf.png'),loadImg('bandit','assets/bandit.png'),loadImg('archer','assets/archer.png'),loadImg('bat','assets/bat.png'),loadImg('skel','assets/skel.png'),...['dagger', 'sword', 'mace', 'staff', 'gravemace', 'bow', 'axe', 'shield', 'cap', 'jerkin', 'bracers', 'leggings', 'helm', 'torch', 'lantern', 'potion', 'key', 'wood', 'ringV', 'ringM', 'ringW', 'ringS', 'sp_fire', 'scrollFrost', 'scrollLight'].map(n=>loadImg('icn_'+n,'assets/icons/'+n+'.png')),...['wolfA','banditA','archerA','ratA','bossA','batA','skelA','gandrickA'].map(n=>loadImg(n,'assets/'+n+'.png')),...['tree0','tree1','tree2','tree3','tree4','tree5','tree6','tree7','grave','grave2','cross','statue','well','bench','barrel','coffin','cart','fence','bush','veg','hay','crate','chicken','chicken2','widow','miner','scribe','sergeant','priest','flowerpot','urn','noticeboard','lamp','memorial','gate','fountain','chest','sign_smith','sign_store','sign_inn','sign_bakery','sign_church','signblank','farmer','oldwoman','child','smith','baker','monk','guard','waterwoman','oldman','fisher','flora0','flora1','flora2','flora3','flora4','flora5','flora6','flora7','flora8','flora9','flora10','signb0','signb1','sh8','sh9','sh10','sh11','counter2','sack2','sh0','sh1','sh2','sh3','sh4','sh5','sh6','sh7','counter','sacks','breadbasket','produce','tw0','tw1','tw2','tw3','tw4','tw5','tw6','tw7','td0','td1','td2','td3','fw1','fw2','fw3','branch0','branch1','bush0','bush1','tex_forestwall','tex_abbeywall','tex_ground'].map(n=>loadImg(n,'assets/'+n+'.png')),...['peasantM','peasantW','beggar','drunk','thug','pickpocket','merchant','mayor','goat','shepherdess','huntress','innkeeper','gandrick'].map(n=>loadImg(n,'assets/'+n+'.png')),...Array.from({length:NPORT},(_,i)=>loadImg('pt'+i,'assets/pt/'+i+'.png'))]);
   applyAITextures();
   const ghostify=im=>im?mkCanvas(im.width,im.height,(x,w,h)=>{x.globalAlpha=.74;x.drawImage(im,0,0);x.globalAlpha=1;x.globalCompositeOperation='source-atop';x.fillStyle='rgba(168,196,212,.8)';x.fillRect(0,0,w,h);x.fillStyle='rgba(235,245,250,.18)';x.fillRect(0,0,w,h*.45)}):null;
   const tint=(im,col)=>im?mkCanvas(im.width,im.height,(x,w,h)=>{x.drawImage(im,0,0);x.globalCompositeOperation='source-atop';x.fillStyle=col;x.fillRect(0,0,w,h)}):null;
