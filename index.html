@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.45';
+const VERSION='1.46';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1342,7 +1342,7 @@ function reset(n){
   G.enemies=ENEMY_SPAWNS.map((s,i)=>{const st=enemyStat(s.t,s.lvl);return {id:i,t:s.t,lvl:s.lvl||lvlHere(),x:s.x,y:s.y,rx:s.x,ry:s.y,hp:st.hp,maxhp:st.hp,alert:false,chilled:0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100}});
   G.items=ITEM_SPAWNS.map(s=>({k:s.k,x:s.x,y:s.y,taken:false}));
   G.decor=DECOR_SPAWNS.map(s=>{const o={k:s.k,x:s.x,y:s.y,block:!!s.block,loot:CONTAINERS.includes(s.k),shop:s.k==='cart'};if(s.deco){o.loot=false;o.shop=false}if(s.npc){o.npc=s.npc;o.loot=false;o.shop=false;if(s.goat)o.goat=s.goat}if(s.sc)o.sc=s.sc;if(s.walk)o.walk=true;if(s.wd)o.wd=s.wd;if(s.txt)o.txt=s.txt;if(s.bob)o.bob=s.bob;if(s.opens){o.opens=s.opens;o.idx=s.idx}if(s.lockedBy)o.lockedBy=s.lockedBy;return o});
-  applyLevers();
+  applyLevers();clearDoorFronts();
   G.decor.forEach(d=>{if(!d.npc&&(d.k==='grave'||d.k==='grave2'||d.k==='cross')){d.npc='epitaph';d.loot=false}});
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++)if(MAPROWS[y][x]==='t')G.decor.push({k:'tree'+((hash2(x,y,7)*NTREES)|0),x,y,block:true,loot:false,shop:false});
   G.loot=null;G.flags={};G.arrows=[];G.cut=null;G.winKind=null;G.quests={};G.lst={};G.talk=null;G.clock=480;G.starveT=0;G.buffs=[];G.lvlBanners=[];
@@ -2074,6 +2074,18 @@ function pullLever(d){
   for(const [x,y] of d.opens)if(G.grid[y]&&G.grid[y][x]>0)G.grid[y][x]=0;
   msg('You pull the lever. Somewhere, stone grinds open.','#ffe9a0');
 }
+// nothing solid may stand in front of a door: points of interest cut doors into walls after the maps are laid out, so check them all here
+function clearDoorFronts(){
+  const g=G.grid;
+  for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){
+    const v=g[y][x];if(!((v>=30&&v<100)||v===3||v===4||v===5||v===7))continue;
+    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+      const nx=x+dx,ny=y+dy;if(!g[ny]||g[ny][nx]!==0)continue;
+      for(const d of G.decor){if(d.x!==nx||d.y!==ny||!d.block||d.found||d.npc&&!d.walk&&MAP_PEOPLE_OK(d))continue;if(/^(tree|flora|fence|gate|veg|bush|hay|lockedgate)/.test(d.k)||d.k==='lever')continue;d.found=true;d.block=false}
+    }
+  }
+}
+const MAP_PEOPLE_OK=d=>false;
 function applyLevers(){for(const d of G.decor)if(d.k==='lever'&&G.flags['lv'+LEVEL+'_'+d.idx]){d.pulled=true;for(const [x,y] of d.opens)if(G.grid[y]&&G.grid[y][x]>0)G.grid[y][x]=0}}
 function viewTap(x,y){
   if(G.state!=='play'||G.menu||G.map||G.inv.open||G.loot)return;
