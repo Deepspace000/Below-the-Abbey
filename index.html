@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.07';
+const VERSION='1.10';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -564,7 +564,7 @@ function roofBand(x,col,thatch,R){
   for(let r=0;r<3;r++){const yy=3+r*4.5;x.beginPath();x.moveTo(0,yy);x.lineTo(TS,yy);x.stroke();for(let i=0;i<9;i++){const xx=(i*15+(r%2)*7+R(30+r)*6)%TS;x.beginPath();x.moveTo(xx,yy);x.lineTo(xx,yy+4.5);x.stroke()}}
   return 18;
 }
-function timberTile(sp){
+function timberTileOld(sp){
   const R=k=>hash2(sp.seed,k,5),[c,x]=tcv(),[gc,gx]=tcv();
   const plasters=['#c9bda0','#bfb292','#cdbf9c','#b8aa88','#d2c4a4','#c4a888','#aaa090','#d6cdb4'],roofs=['#31271f','#3a2c22','#2b2b30','#40342a'];
   const pl=plasters[(R(1)*plasters.length)|0],rf=roofs[(R(2)*roofs.length)|0],T='#1a120a',foot=12,bot=TS-foot,lit=!!sp.lit||R(9)>.6;
@@ -685,6 +685,7 @@ function plainTile(sp){
   return {c,glow:null};
 }
 function doorTile(sp){
+  if(sp.base==='timber'&&TW_IMGS.length){const c=tudorArt('door',sp),g=glowFrom(c);if(g)c._glow=g;return c}
   const baseSp={seed:sp.seed+1,win:'none'};
   let base;
   if(sp.base==='stone')base=plainTile({fam:'plainstone',seed:sp.seed}).c;else if(sp.base==='farm')base=farmTile({seed:sp.seed,kind:'plain'}).c;else if(sp.base==='ruin')base=ruinTile({seed:sp.seed,kind:'peeled'}).c;else base=plainTile({fam:'plainplaster',seed:sp.seed}).c;
@@ -706,6 +707,34 @@ function doorTile(sp){
   }
   if(R(7)>.35){const lx=sp.base==='farm'?18:(Rr+6);x.strokeStyle='#17120c';x.lineWidth=2;x.beginPath();x.moveTo(lx,top-10);x.lineTo(lx,top-4);x.stroke();x.fillStyle='#2a2218';x.fillRect(lx-4,top-4,8,10);x.fillStyle='#e8b858';x.fillRect(lx-2.5,top-2.5,5,7);const gv=document.createElement('canvas');gv.width=gv.height=TS;const gg=gv.getContext('2d');gg.fillStyle='#ffc060';gg.fillRect(lx-2.5,top-2.5,5,7);base._glow=gv}
   return base;
+}
+const TW_IMGS=[],TD_IMGS=[];
+function glowFrom(c){const d=c.getContext('2d').getImageData(0,0,TS,TS),o=document.createElement('canvas');o.width=o.height=TS;const ox=o.getContext('2d'),od=ox.createImageData(TS,TS);let n=0;
+  for(let i=0;i<d.data.length;i+=4){const r=d.data[i],g=d.data[i+1],b=d.data[i+2];if(r>150&&g>105&&b<115&&r-b>70){od.data[i]=255;od.data[i+1]=190;od.data[i+2]=96;od.data[i+3]=255;n++}}
+  if(n<20)return null;ox.putImageData(od,0,0);return o}
+function tudorArt(kind,sp){ // a painted front: one of eight wall pictures or four door pictures, flipped and cropped differently for every house
+  const R=k=>hash2(sp.seed,k,51),[c,x]=tcv(),list=kind==='door'?TD_IMGS:TW_IMGS,im=list[(R(1)*list.length)|0];
+  x.save();if(R(2)>.5){x.translate(TS,0);x.scale(-1,1)}
+  const z=1+R(3)*.1,ox=(R(4)-.5)*(z-1)*TS,oy=R(5)*(z-1)*TS*.4;x.imageSmoothingEnabled=true;x.drawImage(im,-ox-(z-1)*TS/2,-oy,TS*z,TS*z);x.restore();
+  {const d=x.getImageData(0,0,TS,TS),k=1.32+R(6)*.14;for(let i=0;i<d.data.length;i+=4){d.data[i]=Math.min(255,d.data[i]*k+8);d.data[i+1]=Math.min(255,d.data[i+1]*k+8);d.data[i+2]=Math.min(255,d.data[i+2]*k+6)}x.putImageData(d,0,0)}
+  return c;
+}
+function timberTile(sp){
+  if(!TW_IMGS.length)return timberTileOld(sp);
+  const c=tudorArt('wall',sp),x=c.getContext('2d');
+  if(sp.sign){x.strokeStyle='#17120c';x.lineWidth=2.4;x.beginPath();x.moveTo(TS-34,60);x.lineTo(TS-6,60);x.stroke();x.fillStyle='#4a3418';x.fillRect(TS-32,64,26,18);x.strokeStyle='#17120c';x.lineWidth=1.4;x.strokeRect(TS-32,64,26,18);
+    if(sp.sign==='coin'){x.fillStyle='#d8b040';x.beginPath();x.arc(TS-19,73,6,0,TAU);x.fill()}else if(sp.sign==='mug'){x.fillStyle='#c8a040';x.fillRect(TS-25,68,11,11);x.fillStyle='#e8e0c0';x.fillRect(TS-25,68,11,3)}else{x.fillStyle='#c89048';x.beginPath();x.ellipse(TS-19,73,9,5.5,0,0,TAU);x.fill()}}
+  return {c,glow:glowFrom(c)};
+}
+function makeTudorSet(){
+  for(let i=0;i<8;i++)if(IMG['tw'+i])TW_IMGS.push(IMG['tw'+i]);
+  for(let i=0;i<4;i++)if(IMG['td'+i])TD_IMGS.push(IMG['td'+i]);
+  const cv=im=>{const [c,x]=tcv();x.drawImage(im,0,0,TS,TS);return c};
+  if(TD_IMGS.length===4){
+    T_DOORS.shop=addTex(warpTex(grimeData(cv(TD_IMGS[2]),210),211,2));T_DOORS.inn=addTex(warpTex(grimeData(cv(TD_IMGS[0]),212),213,2));
+    T_DOORS.house=addTex(warpTex(grimeData(cv(TD_IMGS[3]),214),215,2));T_DOORS.bakery=addTex(warpTex(grimeData(cv(TD_IMGS[1]),216),217,2));
+  }
+  LEVEL13_DATA.chars=makeBespokeTiles(IRONJ.town.tiles);LEVEL3_DATA.chars=makeBespokeTiles(TOWNJ.tiles);
 }
 let TNF=100,TND=200;
 function makeBespokeTiles(spec){
@@ -745,8 +774,6 @@ function makeTownTextures(){
   FLOORS.stainedcobble=(()=>{const m=new Uint8ClampedArray(COBBLED);for(let i=0;i<m.length;i+=4){const px=(i>>2)%TS,py=((i>>2)/TS)|0,n=Math.sin(px*.21+py*.13)*Math.sin(py*.27-px*.09);const k=n>.35?.62:hash2(i>>2,3,191)<.07?.7:1;m[i]*=k;m[i+1]*=k;m[i+2]*=k}return m})();
   FLOORS.wetcobble=(()=>{const m=new Uint8ClampedArray(COBBLED);for(let i=0;i<m.length;i+=4){const px=(i>>2)%TS,py=((i>>2)/TS)|0,n=Math.sin(px*.07+py*.05+1)*Math.sin(py*.09-px*.04),w=n>.1;m[i]=w?m[i]*.6+14:m[i];m[i+1]=w?m[i+1]*.66+22:m[i+1];m[i+2]=w?m[i+2]*.74+32:m[i+2]}return m})();
   FLOORS.mosscobble=(()=>{const m=new Uint8ClampedArray(COBBLED);for(let i=0;i<m.length;i+=4){if(hash2(i>>2,7,181)<.26){m[i]*=.72;m[i+1]=Math.min(255,m[i+1]+14);m[i+2]*=.62}}return m})();
-  LEVEL13_DATA.chars=makeBespokeTiles(IRONJ.town.tiles);
-  LEVEL3_DATA.chars=makeBespokeTiles(TOWNJ.tiles);
 }
 
 function buildTextures(){
@@ -1093,7 +1120,7 @@ function nz(dur,vol,type,f0,f1,delay){
 }
 /* recorded sounds (CC0, see assets/audio/CREDITS.txt): area loops, music, footsteps, sword clashes, village noises */
 const SMP={};let SND_LOADING=false;
-const SNDLIST=['wind_loop','rain_loop','dungeon_ambience','village_ambience','music_tavern','music_feast','step_stone1','step_stone2','step_stone3','step_stone4','step_wood1','step_wood2','step_wood3','step_wood4','step_dirt1','step_dirt2','step_dirt3','step_dirt4','step_cobble1','step_cobble2','step_cobble3','step_cobble4','clash1','clash2','clash3','hit1','hit2','church_bell1','church_bell2','a_goat','a_sheep','a_chicken','a_cow','a_dog','cart_horse','horse_hooves'];
+const SNDLIST=['wind_loop','rain_loop','dungeon_ambience','village_ambience','music_tavern','music_feast','step_stone1','step_stone2','step_stone3','step_stone4','step_wood1','step_wood2','step_wood3','step_wood4','step_dirt1','step_dirt2','step_dirt3','step_dirt4','clash1','clash2','clash3','hit1','hit2','church_bell1','church_bell2','a_goat','a_sheep','a_chicken','a_cow','a_dog','cart_horse','horse_hooves'];
 function loadSounds(){
   if(SND_LOADING||!AC)return;SND_LOADING=true;
   for(const n of SNDLIST)fetch('assets/audio/'+n+'.mp3?v='+VERSION).then(r=>r.arrayBuffer()).then(b=>AC.decodeAudioData(b)).then(buf=>{SMP[n]=buf}).catch(()=>{});
@@ -1150,9 +1177,10 @@ function areaAudio(){
     }
   }
 }
-function stepSample(){
-  const k=G.amb>0?'wood':(LEVEL===3||LEVEL===13)?'cobble':G.day>0?'dirt':'stone';
-  return playSmp(pickN('step_'+k,4),(k==='wood'?.6:.5)*(.85+Math.random()*.3),.92+Math.random()*.16);
+function stepSample(){ // the cobble recordings were 20 dB louder than the rest and carried stray noise, so the cobbles use the stone steps, a little crisper
+  const k0=G.amb>0?'wood':(LEVEL===3||LEVEL===13)?'cobble':G.day>0?'dirt':'stone',k=k0==='cobble'?'stone':k0;
+  const vol={stone:.55,wood:.6,dirt:.95}[k]*(.85+Math.random()*.3),rate=(k0==='cobble'?1.1:1)*(.92+Math.random()*.16);
+  return playSmp(pickN('step_'+k,4),vol,rate);
 }
 
 function sfx(n){
@@ -3702,6 +3730,7 @@ function pixelate(d,n){ // lower resolution: sample the texture on a coarse grid
   return o;
 }
 function applyAITextures(){
+  try{makeTudorSet()}catch(e){console.error(e)}
   try{
     if(IMG.tex_forestwall)TEX[T_FOREST].d=pixelate(seamTex(IMG.tex_forestwall,2.8),64);
     T_ROCK=addTex(pixelate(warpTex(stoneTex(171,{rows:3,cols:r=>r%2?1:2,stag:1,mortar:7,a:[104,98,90],b:[66,62,58],mort:[18,16,14],moss:.06,cracks:9}),172,6),64));
@@ -4942,7 +4971,7 @@ addEventListener('resize',fit);fit();
   IMG._fbRat=fallbackRat(false);IMG._fbBoss=fallbackRat(true);
   for(let i=0;i<4;i++)IMG['_pf'+i]=heroFallback(i);
   try{await Promise.race([Promise.all([document.fonts.load("16px 'IM Fell English SC'"),document.fonts.load("16px 'IM Fell English'"),document.fonts.load("16px 'UnifrakturCook'")]),new Promise(r=>setTimeout(r,2500))])}catch(e){}
-  await Promise.all([loadImg('rat','assets/rat.png'),loadImg('boss','assets/boss.png'),loadImg('wolf','assets/wolf.png'),loadImg('bandit','assets/bandit.png'),loadImg('archer','assets/archer.png'),loadImg('bat','assets/bat.png'),loadImg('skel','assets/skel.png'),...['dagger', 'sword', 'mace', 'staff', 'gravemace', 'bow', 'axe', 'shield', 'cap', 'jerkin', 'bracers', 'leggings', 'helm', 'torch', 'lantern', 'potion', 'key', 'wood', 'ringV', 'ringM', 'ringW', 'ringS', 'sp_fire', 'scrollFrost', 'scrollLight'].map(n=>loadImg('icn_'+n,'assets/icons/'+n+'.png')),...['wolfA','banditA','archerA','ratA','bossA','batA','skelA','gandrickA'].map(n=>loadImg(n,'assets/'+n+'.png')),...['tree0','tree1','tree2','tree3','tree4','tree5','tree6','tree7','grave','grave2','cross','statue','well','bench','barrel','coffin','cart','fence','bush','veg','hay','crate','chicken','chicken2','widow','miner','scribe','sergeant','priest','flowerpot','urn','noticeboard','lamp','memorial','gate','fountain','chest','sign_smith','sign_store','sign_inn','sign_bakery','sign_church','signblank','farmer','oldwoman','child','smith','baker','monk','guard','waterwoman','oldman','fisher','flora0','flora1','flora2','flora3','flora4','flora5','flora6','flora7','flora8','flora9','flora10','tex_forestwall','tex_abbeywall','tex_ground'].map(n=>loadImg(n,'assets/'+n+'.png')),...['peasantM','peasantW','beggar','drunk','thug','pickpocket','merchant','mayor','goat','shepherdess','huntress','innkeeper','gandrick'].map(n=>loadImg(n,'assets/'+n+'.png')),...Array.from({length:NPORT},(_,i)=>loadImg('pt'+i,'assets/pt/'+i+'.png'))]);
+  await Promise.all([loadImg('rat','assets/rat.png'),loadImg('boss','assets/boss.png'),loadImg('wolf','assets/wolf.png'),loadImg('bandit','assets/bandit.png'),loadImg('archer','assets/archer.png'),loadImg('bat','assets/bat.png'),loadImg('skel','assets/skel.png'),...['dagger', 'sword', 'mace', 'staff', 'gravemace', 'bow', 'axe', 'shield', 'cap', 'jerkin', 'bracers', 'leggings', 'helm', 'torch', 'lantern', 'potion', 'key', 'wood', 'ringV', 'ringM', 'ringW', 'ringS', 'sp_fire', 'scrollFrost', 'scrollLight'].map(n=>loadImg('icn_'+n,'assets/icons/'+n+'.png')),...['wolfA','banditA','archerA','ratA','bossA','batA','skelA','gandrickA'].map(n=>loadImg(n,'assets/'+n+'.png')),...['tree0','tree1','tree2','tree3','tree4','tree5','tree6','tree7','grave','grave2','cross','statue','well','bench','barrel','coffin','cart','fence','bush','veg','hay','crate','chicken','chicken2','widow','miner','scribe','sergeant','priest','flowerpot','urn','noticeboard','lamp','memorial','gate','fountain','chest','sign_smith','sign_store','sign_inn','sign_bakery','sign_church','signblank','farmer','oldwoman','child','smith','baker','monk','guard','waterwoman','oldman','fisher','flora0','flora1','flora2','flora3','flora4','flora5','flora6','flora7','flora8','flora9','flora10','tw0','tw1','tw2','tw3','tw4','tw5','tw6','tw7','td0','td1','td2','td3','tex_forestwall','tex_abbeywall','tex_ground'].map(n=>loadImg(n,'assets/'+n+'.png')),...['peasantM','peasantW','beggar','drunk','thug','pickpocket','merchant','mayor','goat','shepherdess','huntress','innkeeper','gandrick'].map(n=>loadImg(n,'assets/'+n+'.png')),...Array.from({length:NPORT},(_,i)=>loadImg('pt'+i,'assets/pt/'+i+'.png'))]);
   applyAITextures();
   const ghostify=im=>im?mkCanvas(im.width,im.height,(x,w,h)=>{x.globalAlpha=.74;x.drawImage(im,0,0);x.globalAlpha=1;x.globalCompositeOperation='source-atop';x.fillStyle='rgba(168,196,212,.8)';x.fillRect(0,0,w,h);x.fillStyle='rgba(235,245,250,.18)';x.fillRect(0,0,w,h*.45)}):null;
   const tint=(im,col)=>im?mkCanvas(im.width,im.height,(x,w,h)=>{x.drawImage(im,0,0);x.globalCompositeOperation='source-atop';x.fillStyle=col;x.fillRect(0,0,w,h)}):null;
