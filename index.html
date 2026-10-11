@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.24';
+const VERSION='1.25';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1554,7 +1554,7 @@ function hurtEnemy(e,dmg){
     giveXP(st.xp);
     {const F=G.flags;if(def.kind==='wolf')F.wolfKills=(F.wolfKills||0)+1;if(def.kind==='bandit')F.bandKills=(F.bandKills||0)+1;if(e.t==='rat'||e.t==='bat')F.ratKills=(F.ratKills||0)+1;if(e.t==='ghost')F.ghostKills=(F.ghostKills||0)+1;if(LEVEL===18)F.mineKills=(F.mineKills||0)+1;if(LEVEL===20&&e.t==='ghost')F.graveKills=(F.graveKills||0)+1;if(e.t==='overseer')F.overseerDead=1;
     if(e.t==='halbrecht'){F.halDown=1;later(900,()=>startCut('halDown',halEnd))}
-    if(e.t==='mayor'){F.mayorDown=1;later(900,()=>startCut('arrest',arrestEnd))}
+    if(e.t==='mayor'){F.mayorDown=1;F.mayorKilled=1;later(900,()=>startCut('arrest',arrestEnd))}
     if(e.t==='ghost'&&LEVEL===9){F.gd=F.gd||{};F.gd[e.id]=1;if(Object.keys(F.gd).length>=3)msg('The house is quiet. The ghosts are gone.','#b8d0e0')}storyTick()}
   }else{const hw=G.curHero!==undefined&&G.heroes[G.curHero]?heroWeapon(G.heroes[G.curHero]):null;sfx(hw&&['Sword','Dagger','Axe'].includes(hw.t)?'hack':'hit');if(e.t==='rat'&&Math.random()<.5)sfx('squeak')}
 }
@@ -2902,7 +2902,7 @@ function jumpFromUrl(){
   const F=G.flags;
   if(town==='abbey'||town==='thornwood'){F.townSeen=0;delete F.abbeyIntroSeen;G.bossDead=true;goToLevel(2);G.state='play';G.menu=false;return}
   F.townSeen=1;F.abbeyIntroSeen=1;F.gwoodSeen=1;
-  if(town==='ironhill'){F.gandrickDead=1;F.northGate=1;F.mayorDown=1;F.ironRoad=1;F.finale=1;F.halbrecht=1;F.roadSeen=1;F.tunnelSeen=1;
+  if(town==='ironhill'){F.gandrickDead=1;F.northGate=1;F.mayorDown=1;F.mayorKilled=1;F.ironRoad=1;F.finale=1;F.halbrecht=1;F.roadSeen=1;F.tunnelSeen=1;
     for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};
     goToLevel(13,{x:IRONJ.town.start.x,y:IRONJ.town.start.y,f:1})}
   else goToLevel(3,{x:TOWNJ.start.x,y:TOWNJ.start.y,f:1});
@@ -3717,7 +3717,8 @@ function goToLevel(n,entry){
   applyLevelState(G.lst[n]);applyEnemyState(G.lst[n]);
   if(entry){G.P={x:entry.x,y:entry.y,f:entry.f,angT:(entry.f-1)*Math.PI/2};G.C={x:entry.x,y:entry.y,a:G.P.angT}}
   if(n===14&&G.flags.betrayed){const hd=G.decor.find(d=>d.npc==='halbrecht');if(hd){hd.found=true;hd.block=false}}
-  if(n===5){const F=G.flags,cd=G.decor.find(d=>d.npc==='corbin');if(cd&&(F.mayorFight||F.mayorDown)){cd.found=true;cd.block=false}if(F.mayorFight&&!F.mayorDown&&cd)addEnemy('mayor',cd.x,cd.y,true)}
+  if(n===5){const F=G.flags,cd=G.decor.find(d=>d.npc==='corbin');if(cd&&F.mayorDown&&!F.mayorKilled&&!F.mayorFight){delete F.mayorDown;cd.found=false;cd.block=true} // repairs saves where a jump link had wrongly marked him defeated
+    if(cd&&(F.mayorFight||F.mayorDown)){cd.found=true;cd.block=false}if(F.mayorFight&&!F.mayorDown&&cd)addEnemy('mayor',cd.x,cd.y,true)}
   reveal();G.hold=null;
   G.acted=[false,false,false,false];G.state='play';G.nextAuto=G.time+180;G.lastReg=G.reg?G.reg[G.P.y*MW+G.P.x]:-2;writeSave('auto');
   if(n===2&&!G.flags.townSeen)startCut('abbeyIntro');
