@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.99';
+const VERSION='1.01';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2788,6 +2788,24 @@ function crInit(){
   const ok=Array.isArray(saved)&&saved.length===4&&saved.every(p=>p&&CLASSES[p.cls]&&p.app>=0&&p.app<NPORT&&p.name);
   G.cr={slot:0,step:ok?'done':'look',page:0,note:'',party:ok?saved:[null,null,null,null],cur:ok?Object.assign({},saved[0]):blankHero()};
 }
+// ?town=ironhill&lvl=8 puts the saved party (or the last one made) into that town at that level
+function jumpFromUrl(){
+  const q=new URLSearchParams(location.search),town=(q.get('town')||'').toLowerCase();if(!town)return;
+  const target=Math.max(1,Math.min(30,parseInt(q.get('lvl')||'8',10)||8));
+  backupAuto();
+  const sv=readSave('auto')||readSave('prev');
+  if(sv){restore(sv)}
+  else{let p=null;try{p=JSON.parse(localStorage.getItem('abbeyParty')||'null')}catch(e){}setParty(p||DEFAULT_PARTY);reset();G.state='play'}
+  G.heroes.forEach((h,i)=>{while(h.lvl<target){h.xp=xpNeed(h.lvl);levelUp(i)}h.alive=true;h.hp=h.max;h.mp=h.mpMax;h.food=Math.max(h.food||0,100)});
+  G.lvlBanners.length=0;G.msgs=[];G.cut=null;G.talk=null;
+  const F=G.flags;F.townSeen=1;F.abbeyIntroSeen=1;F.gwoodSeen=1;
+  if(town==='ironhill'){F.gandrickDead=1;F.northGate=1;F.mayorDown=1;F.ironRoad=1;F.finale=1;F.halbrecht=1;F.roadSeen=1;F.tunnelSeen=1;
+    for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};
+    goToLevel(13,{x:IRONJ.town.start.x,y:IRONJ.town.start.y,f:1})}
+  else goToLevel(3,{x:TOWNJ.start.x,y:TOWNJ.start.y,f:1});
+  G.state='play';G.menu=false;
+  msg(`Your party stands in ${town==='ironhill'?'Ironhill':'Thornwick'} at level ${target}.`,'#ffe36a');
+}
 function startGame(){
   backupAuto();const C=G.cr;setParty(C.party);
   try{localStorage.setItem('abbeyParty',JSON.stringify(C.party))}catch(e){}
@@ -4886,6 +4904,7 @@ addEventListener('resize',fit);fit();
   addEventListener('pagehide',()=>{if(G.state==='play'&&G.timers.length===0)writeSave('auto')});
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&G.state==='play'&&G.timers.length===0)writeSave('auto')});
   window.__ready=true;
+  try{jumpFromUrl()}catch(e){console.error(e)}
   requestAnimationFrame(frame);
 })();
 </script>
