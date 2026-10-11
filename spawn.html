@@ -20,7 +20,7 @@ const BASE='https://deepspace000.github.io/Below-the-Abbey/';
 const GROUPS=[
  ['Early game',[['Abbey and the Thornwood','thornwood','Grim woodland, paths fork to Thornwick'],['Thornwick','thornwick','Village under an overcast sky'],['Thornwick, town square','thornwick&at=square','Start in the middle of town'],["Gandrick's Wood",'gwood','Bandit camp, burnable thicket']]],
  ['Ironhill',[['Ironhill Road','road','Rainy pine wood'],['Ironhill','ironhill','The town gate'],['Ironhill, town square','ironhill&at=square','Start in the middle of town'],['Ironhill Moor','moor','Open heath and standing stones'],['Burial Ground','grave','Fenced graveyard with lanterns']]],
- ['The mountain and beyond',[['Greyfang Pass','pass','The climb to the summit'],['Greendale Forest','greendale','Bright lush forest'],['Anaea','anaea','Start at the gate'],['Anaea, town square','anaea&at=square','Start in the middle of town']]]];
+ ['The mountain and beyond',[['Greyfang Pass','pass','The climb to the summit'],['Greendale Forest','greendale','Bright lush forest'],['Overgrown Hollow','hollow','Flower maze with a nymph and a magic bow'],['Anaea','anaea','Start at the gate'],['Anaea, town square','anaea&at=square','Start in the middle of town']]]];
 const lv=document.getElementById('l'),out=document.getElementById('out');
 const DEF={pass:14,greendale:34,anaea:34};
 function draw(){out.innerHTML='';for(const [t,items] of GROUPS){const h=document.createElement('h2');h.textContent=t;out.appendChild(h);const g=document.createElement('div');g.className='g';
