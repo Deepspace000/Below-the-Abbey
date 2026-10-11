@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.61';
+const VERSION='1.62';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2283,7 +2283,7 @@ function render3D(){
     vctx.globalAlpha=1;vctx.drawImage(FLAMES[ri*8+fi],h.sx-w/2,base-hh*.94,w,hh);
   }
   vctx.restore();
-  drawSprites(cx,cy,dX,dY,pX,pY);
+  G._spr=[cx,cy,dX,dY,pX,pY];
 }
 const tmpC=document.createElement('canvas');tmpC.width=820;tmpC.height=820;const tmpX=tmpC.getContext('2d');
 const SPR_POOL=[128,256,512,820].map(n=>{const c=document.createElement('canvas');c.width=c.height=n;return{c,x:c.getContext('2d'),w:n}});
@@ -2342,6 +2342,7 @@ function spriteList(){
     L.push({x:d.x+.5+(d.ox||0),y:d.y+.5+(d.oy||0),img:(LEVEL>=33&&LEVEL<=38&&d.npc&&VIVID_KEYS.has(k))?vividImg(k,d):IMG[k],w:(NPC_H[k]&&IMG[k]?NPC_H[k]*IMG[k].width/IMG[k].height:decorW(k))*(d.sc||1),drop:DROP[k]||(/^[glp]tree/.test(k)?.05:0),decor:d})}
   return L;
 }
+let SC=ctx; // sprites are painted straight onto the full-size screen, not into the small 3D picture, so they stay sharp
 function drawSprites(cx,cy,dX,dY,pX,pY){
   const inv=-1/PL,list=spriteList(),proj=[];
   for(const s of list){
@@ -2367,7 +2368,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     if(s.e){s.e.sx=scrX;s.e.sy=top+sh*.45}
     {const xa=Math.max(0,Math.floor(left)),xb=Math.min(VW-1,Math.ceil(left+sw));if(xb<xa||ty>16)continue;let any=false;for(let xx=xa;xx<=xb;xx+=2)if(zbuf[xx]>ty){any=true;break}if(!any)continue} // skip hidden sprites
     let anyVis=false;
-    if(!s.hang&&!(s.decor&&NOSHADOW.test(s.decor.k))&&!(s.e&&ENEMY_DEF[s.e.t].fly)){vctx.save();const tr=s.decor&&NOSHADOW.test(s.decor.k);vctx.globalAlpha=(s.fade!==undefined?Math.max(0,Math.min(1,s.fade)):1)*(tr?.5:.36);vctx.fillStyle='#000';vctx.beginPath();vctx.ellipse(scrX,bottom,sw*(tr?.24:.34),Math.max(1.2,sw*(tr?.06:.055)),0,0,TAU);vctx.fill();vctx.restore()}
+    if(!s.hang&&!(s.decor&&NOSHADOW.test(s.decor.k))&&!(s.e&&ENEMY_DEF[s.e.t].fly)){SC.save();const tr=s.decor&&NOSHADOW.test(s.decor.k);SC.globalAlpha=(s.fade!==undefined?Math.max(0,Math.min(1,s.fade)):1)*(tr?.5:.36);SC.fillStyle='#000';SC.beginPath();SC.ellipse(scrX,bottom,sw*(tr?.24:.34),Math.max(1.2,sw*(tr?.06:.055)),0,0,TAU);SC.fill();SC.restore()}
     // lighting
     const wx=s.x,wy=s.y,dist=Math.hypot(wx-cx,wy-cy);
     let lt=0;for(let k=0;k<nearL.length;k+=3){const ax=wx-nearL[k],ay=wy-nearL[k+1];lt+=nearL[k+2]/(1+1.15*(ax*ax+ay*ay))}
@@ -2395,44 +2396,44 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
       if(s.decor&&s.decor.burn>0){X.fillStyle=`rgba(10,6,4,${(.15+.6*s.decor.burn/5).toFixed(3)})`;X.fillRect(0,0,tw,th)}
       if(s.flash>0){X.fillStyle=`rgba(255,70,40,${(s.flash*.55).toFixed(3)})`;X.fillRect(0,0,tw,th)}
     }
-    if(s.fade!==undefined&&s.fade<1){vctx.globalAlpha=Math.max(0,s.fade)}
+    if(s.fade!==undefined&&s.fade<1){SC.globalAlpha=Math.max(0,s.fade)}
     let x0=Math.max(0,Math.floor(left)),x1=Math.min(VW,Math.ceil(left+sw));
     let run=-1,allVis=x1>x0;
     for(let x=x0;x<x1;x++)if(!(zbuf[x]>ty)){allVis=false;break}
-    if(allVis){vctx.drawImage(SRC,0,0,tw,th,left,top,sw,sh);anyVis=true;x0=x1+1}
+    if(allVis){SC.drawImage(SRC,0,0,tw,th,left,top,sw,sh);anyVis=true;x0=x1+1}
     for(let x=x0;x<=x1;x++){
       const vis=x<x1&&zbuf[x]>ty;
       if(vis&&run<0)run=x;
       if(vis)anyVis=true;
       if((!vis||x===x1)&&run>=0){
         const u0=(run-left)/sw*tw,u1=(x-left)/sw*tw;
-        vctx.drawImage(SRC,u0,0,Math.max(.5,u1-u0),th,run,top,x-run,sh);
+        SC.drawImage(SRC,u0,0,Math.max(.5,u1-u0),th,run,top,x-run,sh);
         run=-1;
       }
     }
-    vctx.globalAlpha=1;
+    SC.globalAlpha=1;
     if(anyVis&&s.decor&&s.decor.burn>0){ // flames climbing the trunk, then smoke
       const bt=s.decor.burn,bp=bt/5,grow=Math.min(1,bt/.8)*(bp>.85?(1-bp)/.15:1),T=G.time;
-      vctx.save();vctx.globalCompositeOperation='lighter';
-      const cg=vctx.createRadialGradient(scrX,bottom-sh*.4,0,scrX,bottom-sh*.4,sw*1.3);cg.addColorStop(0,`rgba(255,140,40,${.2*grow})`);cg.addColorStop(1,'rgba(255,100,20,0)');vctx.fillStyle=cg;vctx.fillRect(scrX-sw*1.3,bottom-sh*.4-sw*1.3,sw*2.6,sw*2.6);
+      SC.save();SC.globalCompositeOperation='lighter';
+      const cg=SC.createRadialGradient(scrX,bottom-sh*.4,0,scrX,bottom-sh*.4,sw*1.3);cg.addColorStop(0,`rgba(255,140,40,${.2*grow})`);cg.addColorStop(1,'rgba(255,100,20,0)');SC.fillStyle=cg;SC.fillRect(scrX-sw*1.3,bottom-sh*.4-sw*1.3,sw*2.6,sw*2.6);
       for(let i=0;i<18;i++){
         const fx=scrX+(hash2(i,7,3)-.5)*sw*.5,yb=bottom-sh*(.04+hash2(i,9,5)*.72),fh=sh*(.08+.08*hash2(i,2,8))*grow*(.65+.35*Math.sin(T*13+i*2.1)),fw=fh*.5,tip=fx+Math.sin(T*9+i)*fw*.35;
-        const g=vctx.createRadialGradient(fx,yb-fh*.35,0,fx,yb-fh*.35,fh*.8);g.addColorStop(0,'rgba(255,230,150,.8)');g.addColorStop(.4,'rgba(255,140,40,.6)');g.addColorStop(1,'rgba(210,60,20,0)');
-        vctx.fillStyle=g;vctx.beginPath();vctx.moveTo(fx-fw/2,yb);vctx.quadraticCurveTo(fx-fw*.55,yb-fh*.6,tip,yb-fh);vctx.quadraticCurveTo(fx+fw*.55,yb-fh*.6,fx+fw/2,yb);vctx.closePath();vctx.fill();
+        const g=SC.createRadialGradient(fx,yb-fh*.35,0,fx,yb-fh*.35,fh*.8);g.addColorStop(0,'rgba(255,230,150,.8)');g.addColorStop(.4,'rgba(255,140,40,.6)');g.addColorStop(1,'rgba(210,60,20,0)');
+        SC.fillStyle=g;SC.beginPath();SC.moveTo(fx-fw/2,yb);SC.quadraticCurveTo(fx-fw*.55,yb-fh*.6,tip,yb-fh);SC.quadraticCurveTo(fx+fw*.55,yb-fh*.6,fx+fw/2,yb);SC.closePath();SC.fill();
       }
-      vctx.globalCompositeOperation='source-over';
-      for(let i=0;i<6;i++){const ph=((T*.5+i/6)%1),sx2=scrX+Math.sin(T*2+i*3)*sw*.18,sy2=top+sh*.25-ph*sh*.5;vctx.globalAlpha=.2*(1-ph)*Math.min(1,bt/1.5);vctx.fillStyle='#403a36';vctx.beginPath();vctx.arc(sx2,sy2,sw*(.08+.12*ph),0,TAU);vctx.fill()}
-      vctx.restore();
+      SC.globalCompositeOperation='source-over';
+      for(let i=0;i<6;i++){const ph=((T*.5+i/6)%1),sx2=scrX+Math.sin(T*2+i*3)*sw*.18,sy2=top+sh*.25-ph*sh*.5;SC.globalAlpha=.2*(1-ph)*Math.min(1,bt/1.5);SC.fillStyle='#403a36';SC.beginPath();SC.arc(sx2,sy2,sw*(.08+.12*ph),0,TAU);SC.fill()}
+      SC.restore();
     }
     if(anyVis&&s.decor&&s.decor.k==='lamp'){ // a lit lantern: bright glass and a warm halo
       const nk=Math.max(LEVEL===2?.8:0,clamp(1.2-(G.day||0)*1.35,0,1))*(s.fade===undefined?1:s.fade);
       if(nk>.02){
         const fk=.88+.12*Math.sin(G.time*7+(s.decor.x*5+s.decor.y*3)),gx=scrX,gy=top+sh*.23,rad=sw*(1.7+.25*fk);
-        vctx.save();vctx.globalCompositeOperation='lighter';
-        vctx.globalAlpha=nk*.95*fk;vctx.fillStyle='rgba(255,196,96,.9)';vctx.fillRect(gx-sw*.17,gy-sh*.06,sw*.34,sh*.12);
-        const gr=vctx.createRadialGradient(gx,gy,0,gx,gy,rad);gr.addColorStop(0,'rgba(255,190,90,.75)');gr.addColorStop(.35,'rgba(240,150,60,.28)');gr.addColorStop(1,'rgba(200,110,40,0)');
-        vctx.globalAlpha=nk*fk;vctx.fillStyle=gr;vctx.fillRect(gx-rad,gy-rad,rad*2,rad*2);
-        vctx.restore();
+        SC.save();SC.globalCompositeOperation='lighter';
+        SC.globalAlpha=nk*.95*fk;SC.fillStyle='rgba(255,196,96,.9)';SC.fillRect(gx-sw*.17,gy-sh*.06,sw*.34,sh*.12);
+        const gr=SC.createRadialGradient(gx,gy,0,gx,gy,rad);gr.addColorStop(0,'rgba(255,190,90,.75)');gr.addColorStop(.35,'rgba(240,150,60,.28)');gr.addColorStop(1,'rgba(200,110,40,0)');
+        SC.globalAlpha=nk*fk;SC.fillStyle=gr;SC.fillRect(gx-rad,gy-rad,rad*2,rad*2);
+        SC.restore();
       }
     }
     if(anyVis){
@@ -5136,6 +5137,7 @@ function drawWorld(){ // a slightly softer, lower-res picture; the screen-wide d
   if(LOWC.width!==w){LOWC.width=w;LOWC.height=h}
   LOWX.imageSmoothingEnabled=true;LOWX.drawImage(vc,0,0,w,h);
   ctx.imageSmoothingEnabled=false;ctx.drawImage(LOWC,0,0,420,210);ctx.imageSmoothingEnabled=true;
+  if(G._spr){ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';SC=ctx;drawSprites(...G._spr);ctx.restore()}
   if(LEVELS[LEVEL]&&LEVELS[LEVEL].rain)drawRain();
 }
 function drawRain(){
