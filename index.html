@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.58';
+const VERSION='1.59';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1137,7 +1137,7 @@ function nz(dur,vol,type,f0,f1,delay){
 }
 /* recorded sounds (CC0, see assets/audio/CREDITS.txt): area loops, music, footsteps, sword clashes, village noises */
 const SMP={};let SND_LOADING=false;
-const SNDLIST=['music_dungeon1','music_dungeon2','wind_loop','rain_loop','dungeon_ambience','village_ambience','music_tavern','music_feast','step_stone1','step_stone2','step_stone3','step_stone4','step_wood1','step_wood2','step_wood3','step_wood4','step_dirt1','step_dirt2','step_dirt3','step_dirt4','clash1','clash2','clash3','hit1','hit2','church_bell1','church_bell2','a_goat','a_sheep','a_chicken','a_cow','a_dog','cart_horse','horse_hooves'];
+const SNDLIST=['music_dungeon1','wind_loop','rain_loop','dungeon_ambience','village_ambience','music_tavern','music_feast','step_stone1','step_stone2','step_stone3','step_stone4','step_wood1','step_wood2','step_wood3','step_wood4','step_dirt1','step_dirt2','step_dirt3','step_dirt4','clash1','clash2','clash3','hit1','hit2','church_bell1','church_bell2','a_goat','a_sheep','a_chicken','a_cow','a_dog','cart_horse','horse_hooves'];
 function loadSounds(){
   if(SND_LOADING||!AC)return;SND_LOADING=true;
   for(const n of SNDLIST)fetch('assets/audio/'+n+'.mp3?v='+VERSION).then(r=>r.arrayBuffer()).then(b=>AC.decodeAudioData(b)).then(buf=>{SMP[n]=buf}).catch(()=>{});
@@ -1174,7 +1174,7 @@ function areaAudio(){
     if(LEVEL===32)T.wind_loop=.14;
     else if(LEVEL===33){T.village_ambience=.22;T.wind_loop=.1}
     else if(LEVEL===35){T.music_tavern=.5;T.village_ambience=.15}
-    else if(DUNGEON_LEVELS.includes(LEVEL)){T.dungeon_ambience=.3;T['music_dungeon'+(1+LEVEL%2)]=.55}
+    else if(DUNGEON_LEVELS.includes(LEVEL)){T.dungeon_ambience=.3;T.music_dungeon1=.5}
     else if(LEVEL===2||LEVEL===7||LEVEL===19||LEVEL===22)T.wind_loop=.5;
     else if(LEVEL===10){T.rain_loop=.7;T.wind_loop=.18}
     else if(LEVEL===3||LEVEL===13){T.village_ambience=.5;T.music_feast=.2}
