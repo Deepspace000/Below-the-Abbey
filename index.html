@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.87';
+const VERSION='0.88';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1039,12 +1039,22 @@ function setLayer(n,target){
   if(L.t!==target){L.t=target;L.g.gain.setTargetAtTime(target,AC.currentTime,1.4)}
 }
 const DUNGEON_LEVELS=[1,8,9,11,12,18,20,21];
+function huntTick(){
+  const F=G.flags;
+  if(!F.wanted||(LEVEL!==19&&LEVEL!==22)||G.state!=='play'||G.cut||G.talk||G.menu||G.inv.open||G.loot||G.timers.length)return;
+  if(G.huntNext===undefined||G.huntLvl!==LEVEL){G.huntLvl=LEVEL;G.huntNext=G.rounds+8+Math.floor(Math.random()*8);return}
+  if(G.rounds<G.huntNext)return;
+  if(G.enemies.filter(e=>e.hp>0&&Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)<=8).length>=4){G.huntNext=G.rounds+4;return}
+  G.huntNext=G.rounds+14+Math.floor(Math.random()*22);
+  const r=Math.random(),w=r<.4?['hunter']:r<.65?['hitman']:r<.85?['hunter','hitman']:['hunter','hitman','hitman'];
+  spawnWave(w);msg(w.length>1?'Hunters and hitmen close in. "In the king\'s name!"':w[0]==='hunter'?'A bounty hunter steps out. "There is a warrant for you."':'A hitman drops from the rocks. "Nothing personal."','#e8a090');
+}
 function areaAudio(){
   if(!AC)return;loadSounds();
   const T={};
   if(G.state==='play'&&!G.mute){
     if(DUNGEON_LEVELS.includes(LEVEL))T.dungeon_ambience=.55;
-    else if(LEVEL===2||LEVEL===7||LEVEL===19)T.wind_loop=.5;
+    else if(LEVEL===2||LEVEL===7||LEVEL===19||LEVEL===22)T.wind_loop=.5;
     else if(LEVEL===10){T.rain_loop=.7;T.wind_loop=.18}
     else if(LEVEL===3||LEVEL===13){T.village_ambience=.5;T.music_feast=.2}
     else if(LEVEL===4||LEVEL===15||LEVEL===17){T.village_ambience=.12}
@@ -1163,6 +1173,8 @@ const ENEMY_DEF={
   wolf:{name:'Grey Wolf',hp:36,dmg:[3,6],hit:.72,w:.9,img:'wolf',xp:40,gold:[0,0],speed:2,kind:'wolf'},
   bandit:{name:'Bandit',hp:44,dmg:[3,7],hit:.72,w:.44,img:'bandit',xp:60,gold:[4,14],speed:1,kind:'bandit'},
   archer:{name:'Bandit Archer',hp:32,dmg:[3,6],hit:.66,w:.34,img:'archer',xp:50,gold:[3,10],speed:1,ranged:2,kind:'bandit'},
+  hunter:{name:'Bounty Hunter',hp:52,dmg:[5,9],hit:.7,w:.36,img:'hunter',xp:80,gold:[10,25],speed:1,ranged:2},
+  hitman:{name:'Hitman',hp:66,dmg:[8,13],hit:.76,w:.44,img:'hitman',xp:110,gold:[15,35],speed:1},
   guard:{name:'Castle Guard',hp:58,dmg:[6,10],hit:.74,w:.46,img:'bandit',xp:70,gold:[6,16],speed:1},
   halbrecht:{name:'Mayor Halbrecht',hp:185,dmg:[9,14],hit:.78,w:.55,img:'mayor',xp:700,gold:[150,220],speed:1},
   overseer:{name:'Mine Overseer',hp:210,dmg:[10,16],hit:.78,w:.62,img:'skel',xp:600,gold:[110,170],speed:1},
@@ -2892,6 +2904,7 @@ function lootFor(d){
   const r=k=>hash2(d.x,d.y,100+k),items=[];
   const add=(id,n)=>items.push({id,n:ITEMDEF[id].stack?(n||1):1});
   if(d.k==='barrel'&&LEVEL===1&&d.x===1&&d.y===15){add('cheese',4);d.gold=3+Math.floor(r(20)*10)}
+  else if(d.k==='chest'&&LEVEL===22){add('ringS');add('potion',2);add('cheese',2);d.gold=110}
   else if(d.k==='chest'&&LEVEL===21){add('ringV');add('potion',2);add('cheese',2);d.gold=150}
   else if(d.k==='chest'&&LEVEL===18){add('ironaxe');add('potion',2);d.gold=120}
   else if(d.k==='chest'&&LEVEL===12){add('drowndagger');add('potion',1);d.gold=55}
@@ -3288,10 +3301,12 @@ const LEVEL15_DATA=mkInterior(IRONJ.town.interiors.smith,"Brannoch's Forge",IBAC
 const LEVEL16_DATA=mkInterior(IRONJ.town.interiors.inn,'The Anvil and Ale',IBACK('4'),{diff:6});
 const LEVEL17_DATA=mkInterior(IRONJ.town.interiors.store,"Dorn's Store",IBACK('5'),{diff:6});
 const LEVEL18_DATA={rows:IRONJ.mines.rows,start:IRONJ.mines.start,enemies:IRONJ.mines.enemies,items:IRONJ.mines.items,decor:IRONJ.mines.decor,day:0,name:'Ironhill Mines',label:'Ironhill Mines',diff:7,torchGap:4.2,portals:[{to:13,x:IEX['6'].x,y:IEX['6'].y,f:IEX['6'].f,tex:'cave'}]};
-const LEVEL19_DATA={rows:IRONJ.moor.rows,start:IRONJ.moor.start,enemies:IRONJ.moor.enemies,items:IRONJ.moor.items,decor:IRONJ.moor.decor,outdoor:true,day:.95,floor:'forest',name:'Ironhill Moor',label:'Ironhill Moor',diff:7,portals:[{to:13,x:42,y:15,f:3,tex:'tgate'}]};
+const LEVEL19_DATA={rows:IRONJ.moor.rows,start:IRONJ.moor.start,enemies:IRONJ.moor.enemies,items:IRONJ.moor.items,decor:IRONJ.moor.decor,outdoor:true,day:.95,floor:'forest',name:'Ironhill Moor',label:'Ironhill Moor',diff:7,portals:[{to:13,x:42,y:15,f:3,tex:'tgate'},{to:22,x:1,y:36,f:1,tex:'tgate',req:'wanted',lock:'The mountain pass is closed to you. There is no reason to go that way.'}]};
 const LEVEL20_DATA={rows:IRONJ.grave.rows,start:IRONJ.grave.start,enemies:IRONJ.grave.enemies,items:IRONJ.grave.items,decor:IRONJ.grave.decor,outdoor:true,day:.42,floor:'forest',name:'Ironhill Burial Ground',label:'Burial Ground',diff:7,portals:[{to:13,x:IEX['7'].x,y:IEX['7'].y,f:IEX['7'].f,tex:'light'}]};
 const LEVEL21_DATA={rows:["########################################", "########################################", "########################################", "########################################", "########################################", "########################################", "##...#...#...###.........###.........###", "##...#...#...###.........###.........###", "##...#...#...###.........###.........###", "###.###.###.####.........###.........###", "#....................................###", "########.#######.........###.........###", "########.#######.........###.........###", "########.#######.........###.........###", "########.#######.........###.........###", "########.###########.###########.#######", "####.........#######.###########.#######", "####.........###.........###.........###", "####.........###.........###.........###", "####.........###.........###.........###", "####.................................0##", "####.........###.........###.........###", "####.........###.........###.........###", "################.........###.........###", "################.........###.........###", "########################################", "########################################"],start:{"x": 3, "y": 7, "f": 2},enemies:[{"t": "guard", "x": 18, "y": 8}, {"t": "guard", "x": 22, "y": 8}, {"t": "guard", "x": 20, "y": 12}, {"t": "guard", "x": 18, "y": 20}, {"t": "guard", "x": 22, "y": 22}, {"t": "guard", "x": 30, "y": 8}, {"t": "guard", "x": 34, "y": 8}, {"t": "guard", "x": 32, "y": 12}, {"t": "guard", "x": 30, "y": 19}, {"t": "guard", "x": 34, "y": 22}, {"t": "halbrecht", "x": 33, "y": 21}],items:[{"k": "potion", "x": 5, "y": 18}, {"k": "potion", "x": 11, "y": 21}, {"k": "bread", "x": 6, "y": 21}, {"k": "torch", "x": 9, "y": 17}],decor:[{"k": "thug", "x": 3, "y": 9, "block": true, "npc": "jailer"}, {"k": "beggar", "x": 7, "y": 7, "block": true, "npc": "prisoner"}, {"k": "bones", "x": 11, "y": 7}, {"k": "bones", "x": 2, "y": 8}, {"k": "chest", "x": 24, "y": 24, "block": true}, {"k": "barrel", "x": 17, "y": 7, "block": true}, {"k": "barrel", "x": 23, "y": 7, "block": true}, {"k": "bench", "x": 31, "y": 12, "block": true, "deco": true}, {"k": "bench", "x": 32, "y": 12, "block": true, "deco": true}, {"k": "barrel", "x": 5, "y": 17, "block": true}, {"k": "crate", "x": 12, "y": 17, "block": true}],day:0,name:'Castle Dungeons',label:'Castle Dungeons',diff:7,torchGap:4.2,portals:[{to:14,x:8,y:9,f:0,tex:'in'}]};
-const LEVELS={1:LEVEL1_DATA,2:LEVEL2_DATA,3:LEVEL3_DATA,4:LEVEL4_DATA,5:LEVEL5_DATA,6:LEVEL6_DATA,7:LEVEL7_DATA,8:LEVEL8_DATA,9:LEVEL9_DATA,10:LEVEL10_DATA,11:LEVEL11_DATA,12:LEVEL12_DATA,13:LEVEL13_DATA,14:LEVEL14_DATA,15:LEVEL15_DATA,16:LEVEL16_DATA,17:LEVEL17_DATA,18:LEVEL18_DATA,19:LEVEL19_DATA,20:LEVEL20_DATA,21:LEVEL21_DATA};
+IRONJ.moor.rows[21]=IRONJ.moor.rows[21].slice(0,61)+'1';
+const LEVEL22_DATA={rows:["########################################################", "########################################################", "###########################################...##########", "#########...##############################.....####...##", "########.....############################..............#", "#######............######################..............X", "#######......t......#####################..............#", "#######.......t......#####################........#...##", "########....t##.......t####################....#########", "#########t..####........###################....#########", "################........#...##############.....#########", "#################............##...t.####........########", "####################...............t.............#######", "#######################.........t....t...........#######", "#######################..........................#######", "#######################......##.....#...........########", "#######################......#############.....#########", "########################.....##############...##########", "#####...##########...###.....###########################", "####.....###..................###############t..########", "###...........t.................############.t...#######", "###..................................######.......######", "###...........t.........................##...t....######", "##.......#........................................######", "#........#######.....t##.........................#######", "#.........###############...##...#t........t....########", "#.t.......#######.....##############...#################", "#.........###..........#################################", "##......................################################", "###.....................################################", "###..........t..........################################", "####.....##.....##......################################", "#####...###########.....################################", "###################..............##...##################", "#.........t....###.................t...#################", "#............................t..........################", "0...........t.................t.........################", "#.............t...........####....t.....################", "#......................###########.....#################", "########################################################"],start:{"x": 1, "y": 36, "f": 1},enemies:[{"t": "wolf", "x": 18, "y": 35}, {"t": "hunter", "x": 23, "y": 29}, {"t": "wolf", "x": 3, "y": 29}, {"t": "hitman", "x": 4, "y": 21}, {"t": "hunter", "x": 26, "y": 18}, {"t": "hitman", "x": 24, "y": 22}, {"t": "wolf", "x": 27, "y": 12}, {"t": "hunter", "x": 43, "y": 11}, {"t": "hitman", "x": 46, "y": 13}, {"t": "hunter", "x": 44, "y": 3}, {"t": "wolf", "x": 37, "y": 34}, {"t": "hitman", "x": 46, "y": 24}, {"t": "hunter", "x": 8, "y": 7}, {"t": "wolf", "x": 32, "y": 21}],items:[{"k": "potion", "x": 1, "y": 25}, {"k": "potion", "x": 35, "y": 36}, {"k": "potion", "x": 48, "y": 22}, {"k": "potion", "x": 9, "y": 6}, {"k": "cheese", "x": 21, "y": 28}, {"k": "bread", "x": 43, "y": 14}],decor:[{"k": "chest", "x": 10, "y": 5, "block": true}, {"k": "chest", "x": 47, "y": 21, "block": true}, {"k": "cross", "x": 7, "y": 21, "block": true}, {"k": "grave", "x": 26, "y": 13, "block": true}, {"k": "cart", "x": 44, "y": 6, "block": true}, {"k": "bones", "x": 36, "y": 35, "block": false}, {"k": "bones", "x": 25, "y": 23, "block": false}, {"k": "cross", "x": 45, "y": 14, "block": true}],outdoor:true,day:.78,floor:'scree',name:'The Greyfang Pass',label:'Greyfang Pass',diff:8,portals:[{to:19,x:60,y:21,f:3,tex:'tgate'}]};
+const LEVELS={1:LEVEL1_DATA,2:LEVEL2_DATA,3:LEVEL3_DATA,4:LEVEL4_DATA,5:LEVEL5_DATA,6:LEVEL6_DATA,7:LEVEL7_DATA,8:LEVEL8_DATA,9:LEVEL9_DATA,10:LEVEL10_DATA,11:LEVEL11_DATA,12:LEVEL12_DATA,13:LEVEL13_DATA,14:LEVEL14_DATA,15:LEVEL15_DATA,16:LEVEL16_DATA,17:LEVEL17_DATA,18:LEVEL18_DATA,19:LEVEL19_DATA,20:LEVEL20_DATA,21:LEVEL21_DATA,22:LEVEL22_DATA};
 const LEVEL_NAMES={};for(const k in LEVELS)LEVEL_NAMES[k]=LEVELS[k].name;
 const WALLCH={a:9,b:10,c:11,p:12,w:13,v:14,h:15,k:16,i:17,g:18,r:19,d:20,e:21,f:22,'0':30,'1':31,'2':32,'3':33,'4':34,'5':35,'6':36,'7':37};
 const DIFF=()=>(LEVELS[LEVEL]&&LEVELS[LEVEL].diff)||LEVEL;
@@ -3371,6 +3386,7 @@ function usePortal(i){
   sfx('door');goToLevel(p.to,{x:p.x,y:p.y,f:p.f});
 }
 function exitLevel(g){
+  if(LEVEL===22){sfx('win');startCut('passEnd',()=>{G.flags.passDone=1;G.winKind='pass';G.state='win';sfx('win')});return}
   if(LEVEL===11){sfx('win');startCut('ironhill',()=>{goToLevel(13,{x:1,y:15,f:1})});return}
   if(LEVEL===1&&g===5){sfx('win');goToLevel(2);return}
   if(LEVEL===2&&g===7){sfx('door');goToLevel(3,{x:1,y:9,f:1});return}
@@ -3416,7 +3432,10 @@ function applyAITextures(){
       const mud=new Uint8ClampedArray(FLOORS.forest);
       for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const i=(y*TS+x)*4,u=x/TS*TAU,v=y/TS*TAU,n=Math.sin(u*2+Math.sin(v*3))*Math.sin(v*2+1.3+Math.sin(u))*.5+.5,p=n>.7;
         mud[i]=p?96:mud[i]*.7;mud[i+1]=p?106:mud[i+1]*.62;mud[i+2]=p?116:mud[i+2]*.5}
-      FLOORS.mud=mud}
+      FLOORS.mud=mud;
+      const scree=new Uint8ClampedArray(FLOORS.forest);
+      for(let i=0;i<scree.length;i+=4){const l=(scree[i]+scree[i+1]+scree[i+2])/3*.95+20;scree[i]=l*.95;scree[i+1]=l*.97;scree[i+2]=l*1.04}
+      FLOORS.scree=scree}
   }catch(e){}
 }
 function grassTex(seed){
@@ -3991,6 +4010,11 @@ Object.assign(QUESTS,{
 });
 QUESTS.ironhill.desc="Tell the mayor of Ironhill what happened in Thornwick. He is in the castle.";
 QUESTS.ironhill.goal=()=>G.flags.halbrecht?1:0;
+QUESTS.pass={title:'Over the Pass',who:'Captain Rowan',desc:'A warrant names you as forgers. Hunters and hitmen are after you. Cross the Greyfang Pass, east of the moor, and keep moving.',need:1,goal:()=>G.flags.passDone?1:0,reward:{gold:0,xp:0}};
+CUTS.passEnd=()=>[
+  {text:'The last switchback tops out on a wind-cut ridge. Below lies a high green valley, and no road at all leading back.'},
+  {who:hn(1),text:'Nobody follows us up here. For now.'},
+  {who:hn(0),text:'Then we keep going. The warrant has a long reach, but this country is wide.'}];
 QUESTS.escape={title:'Out of the Dungeons',who:'Nobody',desc:'Mayor Halbrecht has thrown you in the castle dungeons. Bribe the jailer, fight your way out past the guards and deal with Halbrecht.',need:1,goal:()=>G.flags.halDown?1:0,reward:{gold:500,xp:900}};
 CUTS.betray=()=>[
   {text:'The mayor listens to your report. His smile slowly goes away.'},
@@ -4004,7 +4028,9 @@ CUTS.halDown=()=>[
   {who:'Mayor Halbrecht',text:'Corbin and I split the coin. Two mayors on one road, and Gandrick kept every other town poor. I could not let you tell the king.'},
   {text:'Footsteps on the stair. Captain Rowan comes in with six guards behind him. He looks at the bodies, then at the mayor.'},
   {who:'Captain Rowan',text:'I heard the fighting. I have served the wrong man for six years. Go. The guard will take him to the king, and the town is in my hands until a new mayor is chosen.'},
-  {text:'The way up is open. You have been paid in full from the mayor\'s strongbox.'}];
+  {text:'The way up is open. You have been paid in full from the mayor\'s strongbox.'},
+  {who:'Captain Rowan',text:'One more thing. Halbrecht sent a rider to the king at dawn, naming you as forgers. By now there is a warrant for all four of you, and the hunters and hitmen who live off warrants are already on the road.'},
+  {who:'Captain Rowan',text:'I can stop them in town, not on the moor. Take the Greyfang Pass, east of the moor. It is cold and steep, but they cannot ride it. Beyond it lies the next country. Go quickly.'}];
 function jailEnd(){
   const F=G.flags;F.betrayed=1;F.jailed=1;
   if(G.quests.mines)G.quests.mines.st='done';
@@ -4012,7 +4038,7 @@ function jailEnd(){
   goToLevel(21);
   msg('You are in a cell. The jailer is at the door.','#d09a80');
 }
-function halEnd(){qTurnIn('escape');msg('The way up is open.','#ffe36a')}
+function halEnd(){qTurnIn('escape');G.flags.wanted=1;if(qSt('pass')===null)qAccept('pass');msg('A warrant is out for you. Take the Greyfang Pass, east of the moor.','#e8a090')}
 function qg(name,img,greet,qid,o,pre){
   return {name,img,root:d=>{
     if(qReady(qid))return qNode(qid,o);
@@ -4294,8 +4320,8 @@ function drawEnd(win){
   BTNS=[];veil(.72);bigPanel(100,50,280,220);
   if(win){
     ctx.save();ctx.font=`30px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='#000';ctx.strokeText((G.winKind?'To Be Continued':'You Escape'),240,82);ctx.fillStyle='#d8c88e';ctx.fillText((G.winKind?'To Be Continued':'You Escape'),240,82);ctx.restore();
-    txt(G.winKind==='ironhill'?'The tunnel opens beneath the walls of Ironhill.':G.winKind==='town'?'The forest road opens onto a small town.':'Up the worn steps, daylight at last.',240,110,10,'#d8c9a0','center');
-    txt(G.winKind==='ironhill'?'The mayor will hear the news in the next part.':G.winKind==='town'?'What waits inside will come in the next part.':(G.bossDead?'The Rat King is dead and the crypts are quiet.':'The Rat King still lurks in the crypts...'),240,128,10,G.winKind?'#d8c88e':(G.bossDead?'#b8e8a0':'#d8a888'),'center');
+    txt(G.winKind==='pass'?'The pass opens onto a high green valley.':G.winKind==='ironhill'?'The tunnel opens beneath the walls of Ironhill.':G.winKind==='town'?'The forest road opens onto a small town.':'Up the worn steps, daylight at last.',240,110,10,'#d8c9a0','center');
+    txt(G.winKind==='pass'?'The warrant follows you. That is for the next part.':G.winKind==='ironhill'?'The mayor will hear the news in the next part.':G.winKind==='town'?'What waits inside will come in the next part.':(G.bossDead?'The Rat King is dead and the crypts are quiet.':'The Rat King still lurks in the crypts...'),240,128,10,G.winKind?'#d8c88e':(G.bossDead?'#b8e8a0':'#d8a888'),'center');
   }else{
     ctx.save();ctx.font=`26px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='#000';ctx.strokeText('The Party Has Fallen',240,82);ctx.fillStyle='#ff9a8a';ctx.fillText('The Party Has Fallen',240,82);ctx.restore();
     txt('The crypts keep their secrets.',240,110,10,'#d8c9a0','center');
@@ -4310,7 +4336,7 @@ function drawEnd(win){
    LOOP / INPUT
    ========================================================================== */
 function update(dt){
-  try{areaAudio()}catch(e){}
+  try{areaAudio();huntTick()}catch(e){}
   G.time+=dt;
   if(G.dayBase>0){const hr=(G.clock%1440)/60;G.day=Math.max(.16,G.dayBase*clamp(.66+.5*Math.cos((hr-12)/24*TAU),.5,1))}
   // timers
@@ -4555,6 +4581,8 @@ addEventListener('resize',fit);fit();
   await Promise.all([loadImg('rat','assets/rat.png'),loadImg('boss','assets/boss.png'),loadImg('wolf','assets/wolf.png'),loadImg('bandit','assets/bandit.png'),loadImg('archer','assets/archer.png'),loadImg('bat','assets/bat.png'),loadImg('skel','assets/skel.png'),...['dagger', 'sword', 'mace', 'staff', 'gravemace', 'bow', 'axe', 'shield', 'cap', 'jerkin', 'bracers', 'leggings', 'helm', 'torch', 'lantern', 'potion', 'key', 'wood', 'ringV', 'ringM', 'ringW', 'ringS', 'sp_fire', 'scrollFrost', 'scrollLight'].map(n=>loadImg('icn_'+n,'assets/icons/'+n+'.png')),...['wolfA','banditA','archerA','ratA','bossA','batA','skelA','gandrickA'].map(n=>loadImg(n,'assets/'+n+'.png')),...['tree0','tree1','tree2','tree3','tree4','tree5','tree6','tree7','grave','grave2','cross','statue','well','bench','barrel','coffin','cart','fence','bush','veg','hay','crate','tex_forestwall','tex_abbeywall','tex_ground'].map(n=>loadImg(n,'assets/'+n+'.png')),...['peasantM','peasantW','beggar','drunk','thug','pickpocket','merchant','mayor','goat','shepherdess','huntress','innkeeper','gandrick'].map(n=>loadImg(n,'assets/'+n+'.png')),...Array.from({length:NPORT},(_,i)=>loadImg('pt'+i,'assets/pt/'+i+'.png'))]);
   applyAITextures();
   const ghostify=im=>im?mkCanvas(im.width,im.height,(x,w,h)=>{x.globalAlpha=.74;x.drawImage(im,0,0);x.globalAlpha=1;x.globalCompositeOperation='source-atop';x.fillStyle='rgba(168,196,212,.8)';x.fillRect(0,0,w,h);x.fillStyle='rgba(235,245,250,.18)';x.fillRect(0,0,w,h*.45)}):null;
+  const tint=(im,col)=>im?mkCanvas(im.width,im.height,(x,w,h)=>{x.drawImage(im,0,0);x.globalCompositeOperation='source-atop';x.fillStyle=col;x.fillRect(0,0,w,h)}):null;
+  IMG.hunter=tint(IMG.archer,'rgba(58,84,38,.42)');IMG.hunterA=tint(IMG.archerA,'rgba(58,84,38,.42)');IMG.hitman=tint(IMG.bandit,'rgba(0,0,0,.6)');IMG.hitmanA=tint(IMG.banditA,'rgba(0,0,0,.6)');
   if(IMG.skel){IMG.ghost=ghostify(IMG.skel);if(IMG.skelA)IMG.ghostA=ghostify(IMG.skelA)}
   IMG.chest=mkCanvas(120,84,(x,w,h)=>{x.fillStyle='#3a2616';x.fillRect(6,34,108,46);x.fillStyle='#5a3c22';x.beginPath();x.moveTo(6,34);x.quadraticCurveTo(60,-2,114,34);x.closePath();x.fill();x.strokeStyle='#17110a';x.lineWidth=3;x.strokeRect(6,34,108,46);x.beginPath();x.moveTo(6,34);x.quadraticCurveTo(60,-2,114,34);x.stroke();x.fillStyle='#2a2622';for(const bx of [24,92]){x.fillRect(bx,12,8,68)}x.fillStyle='#b8a050';x.fillRect(54,32,12,14);x.strokeStyle='#17110a';x.lineWidth=1.5;x.strokeRect(54,32,12,14)});
   for(const id of ['dagger', 'sword', 'mace', 'staff', 'gravemace', 'bow', 'axe', 'shield', 'cap', 'jerkin', 'bracers', 'leggings', 'helm', 'torch', 'lantern', 'potion', 'key', 'wood', 'ringV', 'ringM', 'ringW', 'ringS', 'sp_fire', 'scrollFrost', 'scrollLight']){const im=IMG['icn_'+id];if(!im)continue;IMG['ic_'+id]=im;IMG['it_'+id]=im;if(id==='potion')IMG.potion=im;if(id==='key')IMG.key=im}
