@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.70';
+const VERSION='1.71';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2353,10 +2353,10 @@ function spriteList(){
 }
 let SC=ctx; // sprites are painted straight onto the full-size screen, not into the small 3D picture, so they stay sharp
 function drawSprites(cx,cy,dX,dY,pX,pY){
-  const inv=-1/PL,list=spriteList(),proj=[];
+  const inv=-1/PL,list=spriteList(),proj=[],far=(G.day||0)>0?34:20,far2=far*far,farT=(G.day||0)>0?33:16; // outdoors the trees stay drawn as far as the walls can be seen
   for(const s of list){
     const rx=s.x-cx,ry=s.y-cy;
-    if(rx*rx+ry*ry>400)continue;
+    if(rx*rx+ry*ry>far2)continue;
     const tX=inv*(dY*rx-dX*ry),tY=inv*(-pY*rx+pX*ry);
     if(tY<.25)continue;
     s.tX=tX;s.tY=tY;proj.push(s);
@@ -2375,7 +2375,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     const bottom=HH+EYE*F/ty-(s.bob||0)*F/ty+(s.sink||0)*sh*.25+(s.drop||0)*sh;
     const left=scrX-sw/2,top=bottom-sh;
     if(s.e){s.e.sx=scrX;s.e.sy=top+sh*.45}
-    {const xa=Math.max(0,Math.floor(left)),xb=Math.min(VW-1,Math.ceil(left+sw));if(xb<xa||ty>16)continue;let any=false;for(let xx=xa;xx<=xb;xx+=2)if(zbuf[xx]>ty){any=true;break}if(!any)continue} // skip hidden sprites
+    {const xa=Math.max(0,Math.floor(left)),xb=Math.min(VW-1,Math.ceil(left+sw));if(xb<xa||ty>farT)continue;let any=false;for(let xx=xa;xx<=xb;xx+=2)if(zbuf[xx]>ty){any=true;break}if(!any)continue} // skip hidden sprites
     let anyVis=false;
     if(!s.hang&&!(s.decor&&NOSHADOW.test(s.decor.k))&&!(s.e&&ENEMY_DEF[s.e.t].fly)){SC.save();const tr=s.decor&&NOSHADOW.test(s.decor.k);SC.globalAlpha=(s.fade!==undefined?Math.max(0,Math.min(1,s.fade)):1)*(tr?.5:.36);SC.fillStyle='#000';SC.beginPath();SC.ellipse(scrX,bottom,sw*(tr?.24:.34),Math.max(1.2,sw*(tr?.06:.055)),0,0,TAU);SC.fill();SC.restore()}
     // lighting
