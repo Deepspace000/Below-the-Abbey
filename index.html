@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.23';
+const VERSION='1.24';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3721,7 +3721,7 @@ function goToLevel(n,entry){
   reveal();G.hold=null;
   G.acted=[false,false,false,false];G.state='play';G.nextAuto=G.time+180;G.lastReg=G.reg?G.reg[G.P.y*MW+G.P.x]:-2;writeSave('auto');
   if(n===2&&!G.flags.townSeen)startCut('abbeyIntro');
-  else if(n===2){respawnForest();msg('You walk back into the Thornwood. The wolves and bandits have returned.','#e8a090')}
+  else if(n===2){respawnForest();msg('You walk back into the Thornwood. Some of the wolves and bandits have returned.','#e8a090')}
   else if(n===3&&!G.flags.townSeen){G.flags.townSeen=1;startCut('townArrive')}
   else if(n===7&&!G.flags.gwoodSeen){G.flags.gwoodSeen=1;startCut('gwood')}
   else if(n===10&&!G.flags.roadSeen){G.flags.roadSeen=1;startCut('road')}
