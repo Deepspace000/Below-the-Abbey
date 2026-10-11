@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.86';
+const VERSION='0.87';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1038,7 +1038,7 @@ function setLayer(n,target){
   }
   if(L.t!==target){L.t=target;L.g.gain.setTargetAtTime(target,AC.currentTime,1.4)}
 }
-const DUNGEON_LEVELS=[1,8,9,11,12,18,20];
+const DUNGEON_LEVELS=[1,8,9,11,12,18,20,21];
 function areaAudio(){
   if(!AC)return;loadSounds();
   const T={};
@@ -1163,6 +1163,8 @@ const ENEMY_DEF={
   wolf:{name:'Grey Wolf',hp:36,dmg:[3,6],hit:.72,w:.9,img:'wolf',xp:40,gold:[0,0],speed:2,kind:'wolf'},
   bandit:{name:'Bandit',hp:44,dmg:[3,7],hit:.72,w:.44,img:'bandit',xp:60,gold:[4,14],speed:1,kind:'bandit'},
   archer:{name:'Bandit Archer',hp:32,dmg:[3,6],hit:.66,w:.34,img:'archer',xp:50,gold:[3,10],speed:1,ranged:2,kind:'bandit'},
+  guard:{name:'Castle Guard',hp:58,dmg:[6,10],hit:.74,w:.46,img:'bandit',xp:70,gold:[6,16],speed:1},
+  halbrecht:{name:'Mayor Halbrecht',hp:185,dmg:[9,14],hit:.78,w:.55,img:'mayor',xp:700,gold:[150,220],speed:1},
   overseer:{name:'Mine Overseer',hp:210,dmg:[10,16],hit:.78,w:.62,img:'skel',xp:600,gold:[110,170],speed:1},
   mayor:{name:'Mayor Corbin',hp:130,dmg:[7,12],hit:.75,w:.55,img:'mayor',xp:400,gold:[100,160],speed:1},
   ghost:{name:'Ghost',hp:58,dmg:[5,9],hit:.7,w:.5,img:'ghost',xp:90,gold:[0,0],speed:1},
@@ -1424,6 +1426,7 @@ function hurtEnemy(e,dmg){
     if(e.t==='gandrick'){G.flags.gandrickDead=1;G.flags.ledger=1;later(900,()=>startCut('gandrickDead'))}
     giveXP(st.xp);
     {const F=G.flags;if(def.kind==='wolf')F.wolfKills=(F.wolfKills||0)+1;if(def.kind==='bandit')F.bandKills=(F.bandKills||0)+1;if(e.t==='rat'||e.t==='bat')F.ratKills=(F.ratKills||0)+1;if(LEVEL===18)F.mineKills=(F.mineKills||0)+1;if(LEVEL===20&&e.t==='ghost')F.graveKills=(F.graveKills||0)+1;if(e.t==='overseer')F.overseerDead=1;
+    if(e.t==='halbrecht'){F.halDown=1;later(900,()=>startCut('halDown',halEnd))}
     if(e.t==='mayor'){F.mayorDown=1;later(900,()=>startCut('arrest',arrestEnd))}
     if(e.t==='ghost'&&LEVEL===9){F.gd=F.gd||{};F.gd[e.id]=1;if(Object.keys(F.gd).length>=3)msg('The house is quiet. The ghosts are gone.','#b8d0e0')}storyTick()}
   }else{const hw=G.curHero!==undefined&&G.heroes[G.curHero]?heroWeapon(G.heroes[G.curHero]):null;sfx(hw&&['Sword','Dagger','Axe'].includes(hw.t)?'hack':'hit');if(e.t==='rat'&&Math.random()<.5)sfx('squeak')}
@@ -2889,6 +2892,7 @@ function lootFor(d){
   const r=k=>hash2(d.x,d.y,100+k),items=[];
   const add=(id,n)=>items.push({id,n:ITEMDEF[id].stack?(n||1):1});
   if(d.k==='barrel'&&LEVEL===1&&d.x===1&&d.y===15){add('cheese',4);d.gold=3+Math.floor(r(20)*10)}
+  else if(d.k==='chest'&&LEVEL===21){add('ringV');add('potion',2);add('cheese',2);d.gold=150}
   else if(d.k==='chest'&&LEVEL===18){add('ironaxe');add('potion',2);d.gold=120}
   else if(d.k==='chest'&&LEVEL===12){add('drowndagger');add('potion',1);d.gold=55}
   else if(d.k==='chest'){add('wardblade');add('potion',2);add('ringW');add('scrollLight');d.gold=90}
@@ -3286,7 +3290,8 @@ const LEVEL17_DATA=mkInterior(IRONJ.town.interiors.store,"Dorn's Store",IBACK('5
 const LEVEL18_DATA={rows:IRONJ.mines.rows,start:IRONJ.mines.start,enemies:IRONJ.mines.enemies,items:IRONJ.mines.items,decor:IRONJ.mines.decor,day:0,name:'Ironhill Mines',label:'Ironhill Mines',diff:7,torchGap:4.2,portals:[{to:13,x:IEX['6'].x,y:IEX['6'].y,f:IEX['6'].f,tex:'cave'}]};
 const LEVEL19_DATA={rows:IRONJ.moor.rows,start:IRONJ.moor.start,enemies:IRONJ.moor.enemies,items:IRONJ.moor.items,decor:IRONJ.moor.decor,outdoor:true,day:.95,floor:'forest',name:'Ironhill Moor',label:'Ironhill Moor',diff:7,portals:[{to:13,x:42,y:15,f:3,tex:'tgate'}]};
 const LEVEL20_DATA={rows:IRONJ.grave.rows,start:IRONJ.grave.start,enemies:IRONJ.grave.enemies,items:IRONJ.grave.items,decor:IRONJ.grave.decor,outdoor:true,day:.42,floor:'forest',name:'Ironhill Burial Ground',label:'Burial Ground',diff:7,portals:[{to:13,x:IEX['7'].x,y:IEX['7'].y,f:IEX['7'].f,tex:'light'}]};
-const LEVELS={1:LEVEL1_DATA,2:LEVEL2_DATA,3:LEVEL3_DATA,4:LEVEL4_DATA,5:LEVEL5_DATA,6:LEVEL6_DATA,7:LEVEL7_DATA,8:LEVEL8_DATA,9:LEVEL9_DATA,10:LEVEL10_DATA,11:LEVEL11_DATA,12:LEVEL12_DATA,13:LEVEL13_DATA,14:LEVEL14_DATA,15:LEVEL15_DATA,16:LEVEL16_DATA,17:LEVEL17_DATA,18:LEVEL18_DATA,19:LEVEL19_DATA,20:LEVEL20_DATA};
+const LEVEL21_DATA={rows:["########################################", "########################################", "########################################", "########################################", "########################################", "########################################", "##...#...#...###.........###.........###", "##...#...#...###.........###.........###", "##...#...#...###.........###.........###", "###.###.###.####.........###.........###", "#....................................###", "########.#######.........###.........###", "########.#######.........###.........###", "########.#######.........###.........###", "########.#######.........###.........###", "########.###########.###########.#######", "####.........#######.###########.#######", "####.........###.........###.........###", "####.........###.........###.........###", "####.........###.........###.........###", "####.................................0##", "####.........###.........###.........###", "####.........###.........###.........###", "################.........###.........###", "################.........###.........###", "########################################", "########################################"],start:{"x": 3, "y": 7, "f": 2},enemies:[{"t": "guard", "x": 18, "y": 8}, {"t": "guard", "x": 22, "y": 8}, {"t": "guard", "x": 20, "y": 12}, {"t": "guard", "x": 18, "y": 20}, {"t": "guard", "x": 22, "y": 22}, {"t": "guard", "x": 30, "y": 8}, {"t": "guard", "x": 34, "y": 8}, {"t": "guard", "x": 32, "y": 12}, {"t": "guard", "x": 30, "y": 19}, {"t": "guard", "x": 34, "y": 22}, {"t": "halbrecht", "x": 33, "y": 21}],items:[{"k": "potion", "x": 5, "y": 18}, {"k": "potion", "x": 11, "y": 21}, {"k": "bread", "x": 6, "y": 21}, {"k": "torch", "x": 9, "y": 17}],decor:[{"k": "thug", "x": 3, "y": 9, "block": true, "npc": "jailer"}, {"k": "beggar", "x": 7, "y": 7, "block": true, "npc": "prisoner"}, {"k": "bones", "x": 11, "y": 7}, {"k": "bones", "x": 2, "y": 8}, {"k": "chest", "x": 24, "y": 24, "block": true}, {"k": "barrel", "x": 17, "y": 7, "block": true}, {"k": "barrel", "x": 23, "y": 7, "block": true}, {"k": "bench", "x": 31, "y": 12, "block": true, "deco": true}, {"k": "bench", "x": 32, "y": 12, "block": true, "deco": true}, {"k": "barrel", "x": 5, "y": 17, "block": true}, {"k": "crate", "x": 12, "y": 17, "block": true}],day:0,name:'Castle Dungeons',label:'Castle Dungeons',diff:7,torchGap:4.2,portals:[{to:14,x:8,y:9,f:0,tex:'in'}]};
+const LEVELS={1:LEVEL1_DATA,2:LEVEL2_DATA,3:LEVEL3_DATA,4:LEVEL4_DATA,5:LEVEL5_DATA,6:LEVEL6_DATA,7:LEVEL7_DATA,8:LEVEL8_DATA,9:LEVEL9_DATA,10:LEVEL10_DATA,11:LEVEL11_DATA,12:LEVEL12_DATA,13:LEVEL13_DATA,14:LEVEL14_DATA,15:LEVEL15_DATA,16:LEVEL16_DATA,17:LEVEL17_DATA,18:LEVEL18_DATA,19:LEVEL19_DATA,20:LEVEL20_DATA,21:LEVEL21_DATA};
 const LEVEL_NAMES={};for(const k in LEVELS)LEVEL_NAMES[k]=LEVELS[k].name;
 const WALLCH={a:9,b:10,c:11,p:12,w:13,v:14,h:15,k:16,i:17,g:18,r:19,d:20,e:21,f:22,'0':30,'1':31,'2':32,'3':33,'4':34,'5':35,'6':36,'7':37};
 const DIFF=()=>(LEVELS[LEVEL]&&LEVELS[LEVEL].diff)||LEVEL;
@@ -3311,7 +3316,7 @@ function applyLevelState(s){
 // killed creatures stay dead, but some of them (sometimes one, sometimes a few) return each visit
 function applyEnemyState(s){
   if(!s||!s.dead||!s.dead.length)return;
-  const dead=new Set(s.dead),UNIQUE=['boss','gandrick','mayor','overseer'];
+  const dead=new Set(s.dead),UNIQUE=['boss','gandrick','mayor','overseer','halbrecht'];
   const cand=G.enemies.filter(e=>dead.has(e.id)&&!UNIQUE.includes(e.t));
   const k=cand.length?(Math.random()<.45?1:1+Math.floor(Math.random()*cand.length)):0;
   cand.sort(()=>Math.random()-.5);
@@ -3346,6 +3351,7 @@ function goToLevel(n,entry){
   reset(n);Object.assign(G,keep);
   applyLevelState(G.lst[n]);applyEnemyState(G.lst[n]);
   if(entry){G.P={x:entry.x,y:entry.y,f:entry.f,angT:(entry.f-1)*Math.PI/2};G.C={x:entry.x,y:entry.y,a:G.P.angT}}
+  if(n===14&&G.flags.betrayed){const hd=G.decor.find(d=>d.npc==='halbrecht');if(hd){hd.found=true;hd.block=false}}
   if(n===5){const F=G.flags,cd=G.decor.find(d=>d.npc==='corbin');if(cd&&(F.mayorFight||F.mayorDown)){cd.found=true;cd.block=false}if(F.mayorFight&&!F.mayorDown&&cd)addEnemy('mayor',cd.x,cd.y,true)}
   reveal();G.hold=null;
   G.acted=[false,false,false,false];G.state='play';G.nextAuto=G.time+180;G.lastReg=G.reg?G.reg[G.P.y*MW+G.P.x]:-2;writeSave('auto');
@@ -3985,6 +3991,28 @@ Object.assign(QUESTS,{
 });
 QUESTS.ironhill.desc="Tell the mayor of Ironhill what happened in Thornwick. He is in the castle.";
 QUESTS.ironhill.goal=()=>G.flags.halbrecht?1:0;
+QUESTS.escape={title:'Out of the Dungeons',who:'Nobody',desc:'Mayor Halbrecht has thrown you in the castle dungeons. Bribe the jailer, fight your way out past the guards and deal with Halbrecht.',need:1,goal:()=>G.flags.halDown?1:0,reward:{gold:500,xp:900}};
+CUTS.betray=()=>[
+  {text:'The mayor listens to your report. His smile slowly goes away.'},
+  {who:'Mayor Halbrecht',text:'Eight dead in the mines, and the overseer still walking. You are very useful. A little too useful.'},
+  {who:'Mayor Halbrecht',text:'A man from Thornwick told me you came with a ledger. Nobody has seen it but you. I think you wrote it yourselves, to ruin Corbin and take his road. I do not pay forgers.'},
+  {who:hn(0),text:'That ledger was real! Corbin is in irons because of it!'},
+  {who:'Mayor Halbrecht',text:'Guards! Take them to the dungeons. I will write to the king myself.'},
+  {text:'Iron cuffs, a long stair and a cold cell. The door slams. You hear the guards laughing, and then you hear nothing.'}];
+CUTS.halDown=()=>[
+  {text:'Halbrecht falls against the wall and slides down it. His sword lies on the floor.'},
+  {who:'Mayor Halbrecht',text:'Corbin and I split the coin. Two mayors on one road, and Gandrick kept every other town poor. I could not let you tell the king.'},
+  {text:'Footsteps on the stair. Captain Rowan comes in with six guards behind him. He looks at the bodies, then at the mayor.'},
+  {who:'Captain Rowan',text:'I heard the fighting. I have served the wrong man for six years. Go. The guard will take him to the king, and the town is in my hands until a new mayor is chosen.'},
+  {text:'The way up is open. You have been paid in full from the mayor\'s strongbox.'}];
+function jailEnd(){
+  const F=G.flags;F.betrayed=1;F.jailed=1;
+  if(G.quests.mines)G.quests.mines.st='done';
+  if(qSt('escape')===null)qAccept('escape');
+  goToLevel(21);
+  msg('You are in a cell. The jailer is at the door.','#d09a80');
+}
+function halEnd(){qTurnIn('escape');msg('The way up is open.','#ffe36a')}
 function qg(name,img,greet,qid,o,pre){
   return {name,img,root:d=>{
     if(qReady(qid))return qNode(qid,o);
@@ -4009,6 +4037,7 @@ Object.assign(NPCS,{
   halbrecht:{name:'Mayor Halbrecht',root:()=>{
     const F=G.flags;
     const work=()=>qSt('mines')!=='done'?qNode('mines',MINES_Q):say('The mines are open and the road is safe. Many people in town have smaller jobs. Ask around. Captain Rowan at the gate, Brannoch the smith, Wynn the herbalist, Odo the gravekeeper and others.',[BYE]);
+    if(qReady('mines'))return say('The mines are clear, I hear. Say what you want.',[['The undead are dead. We have come for our pay.',()=>{startCut('betray',jailEnd);return null}]]);
     if(qSt('ironhill')==='active')return say('You are from Thornwick? Few come through that tunnel. Why have you come?',[['Mayor Corbin sold the road to Gandrick. We found his ledger, and the king has him in irons.',()=>{F.halbrecht=1;qTurnIn('ironhill');return say('I knew Corbin. I never thought he would sell his own town. Ironhill is grateful. If you want more work, I have some.',[['What work?',work],BYE])}],BYE]);
     return say('Welcome to Ironhill. The castle is small, but the walls are strong.',[['Do you have work for us?',work],BYE]);
   }},
@@ -4043,6 +4072,13 @@ Object.assign(NPCS,{
   pip:{name:'Pip',img:'peasantM',root:()=>{const F=G.flags;
     if(qSt('pip')==='active'&&!F.pipHome){F.pipHome=1;const d=G.decor.find(x=>x.npc==='pip');if(d){d.found=true;d.block=false}return say('Mum sent you? I was only looking at the wolves. I will run home now. Do not tell her I came this far.',[['Go on, then.',()=>null]])}
     return say('I am hiding from the wolves. Do not tell my mum.',[BYE])}},
+  jailer:{name:'The jailer',img:'thug',root:()=>{
+    const F=G.flags;
+    if(F.escaped)return say('Go on. I never saw you.',[BYE]);
+    const cost=Math.min(100,G.gold);
+    const free=()=>{F.escaped=1;const d=G.decor.find(x=>x.npc==='jailer');if(d){d.found=true;d.block=false}sfx('door');return say(cost>=20?`He takes ${cost} gold and unlocks the door. "Quiet now. The guards sleep in the rooms ahead, and the mayor is down the east stair."`:'He looks at your empty purse and sighs. "Go on. The guards sleep in the rooms ahead. The mayor is down the east stair."',[['Thank you.',()=>null]])};
+    return say('You again. The mayor says you are forgers. I do not care. A hundred gold, and I forget the door.',[[cost>=20?`Pay ${cost} gold`:'Show your empty purse',()=>{G.gold-=cost>=20?cost:0;return free()}],['Never.',()=>say('Then rot.',[BYE])]])}},
+  prisoner:gossip('A prisoner','beggar',['Halbrecht jails anyone who knows about the Gandrick money. I saw Corbin\'s man at his table a year ago.','The jailer takes bribes. Everyone in here knows it.']),
   gore:gossip('Gore','drunk',['Hic. The castle has four towers. I counted. Twice.','The mines had the best ale in the north. Now nobody goes down.']),
   tilda:gossip('Tilda','peasantM',['The mayor is fair. That is rare in a mayor.','Ironhill makes the best nails in the country.']),
   ivo:gossip('Ivo','peasantW',['I heard the dead walking in the burial ground last night.','There is a tunnel from here to Thornwick. Nobody uses it. Nobody did, until you.']),
@@ -4055,7 +4091,7 @@ Object.assign(NPCS,{
   patronI1:gossip('A drunk patron','drunk',['Drink up. The dead cannot drink.']),
   patronI2:gossip('A miner','peasantM',['Three winters since I last saw the bottom of that mine.'])
 });
-for(const k of ['halbrecht','rowan','wynn','odo','hesta','ysolde','bryn','brannoch','mara','dorn','eadric','pip','gore','tilda','ivo','maren','osk','gateW','gateE','clerkI','sentry','patronI1','patronI2'])NPCS_BY[NPCS[k].name]=NPCS[k];
+for(const k of ['jailer','prisoner','halbrecht','rowan','wynn','odo','hesta','ysolde','bryn','brannoch','mara','dorn','eadric','pip','gore','tilda','ivo','maren','osk','gateW','gateE','clerkI','sentry','patronI1','patronI2'])NPCS_BY[NPCS[k].name]=NPCS[k];
 Object.assign(QGIVER,{halbrecht:['ironhill','mines'],rowan:['wolves2','bandits2'],wynn:'herbs',odo:'graves',hesta:'pick',ysolde:'pip',bryn:'overseer',brannoch:'ore',mara:'rats2',dorn:'parcel'});
 
 function drawQuestMarks(ox,oy,cs,big){
