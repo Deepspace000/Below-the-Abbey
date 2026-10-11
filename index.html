@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.25';
+const VERSION='1.26';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3717,7 +3717,8 @@ function goToLevel(n,entry){
   applyLevelState(G.lst[n]);applyEnemyState(G.lst[n]);
   if(entry){G.P={x:entry.x,y:entry.y,f:entry.f,angT:(entry.f-1)*Math.PI/2};G.C={x:entry.x,y:entry.y,a:G.P.angT}}
   if(n===14&&G.flags.betrayed){const hd=G.decor.find(d=>d.npc==='halbrecht');if(hd){hd.found=true;hd.block=false}}
-  if(n===5){const F=G.flags,cd=G.decor.find(d=>d.npc==='corbin');if(cd&&F.mayorDown&&!F.mayorKilled&&!F.mayorFight){delete F.mayorDown;cd.found=false;cd.block=true} // repairs saves where a jump link had wrongly marked him defeated
+  if(n===5){const F=G.flags,cd=G.decor.find(d=>d.npc==='corbin');if(cd&&F.mayorDown&&!F.mayorKilled&&!F.mayorFight){delete F.mayorDown;cd.found=false;cd.block=true}
+    if(cd&&!F.mayorKilled&&!F.mayorFight&&G.quests.gandrick&&G.quests.gandrick.st==='done')G.quests.gandrick.st='active'; // repairs saves where a jump link had wrongly marked him defeated
     if(cd&&(F.mayorFight||F.mayorDown)){cd.found=true;cd.block=false}if(F.mayorFight&&!F.mayorDown&&cd)addEnemy('mayor',cd.x,cd.y,true)}
   reveal();G.hold=null;
   G.acted=[false,false,false,false];G.state='play';G.nextAuto=G.time+180;G.lastReg=G.reg?G.reg[G.P.y*MW+G.P.x]:-2;writeSave('auto');
