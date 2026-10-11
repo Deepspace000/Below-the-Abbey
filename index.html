@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.91';
+const VERSION='0.93';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2021,7 +2021,7 @@ function render3D(){
     L.vis=(L.vis===undefined?tgt:L.vis)+clamp(tgt-(L.vis===undefined?tgt:L.vis),-.06,.06);
     if(L.vis<=.01)continue;
     const fl=.8+.16*Math.sin(t*9+L.ph)+.1*Math.sin(t*23.3+L.ph*2)+.07*Math.sin(t*5.1+L.ph*3);
-    (L.red?nearR:nearL).push(L.x,L.y,1.5*fl*L.vis);
+    (L.red?nearR:nearL).push(L.x,L.y,1.5*fl*L.vis*(L.lamp?clamp(1.3-(G.day||0)*1.4,.1,1.3):1));
     // screen position of the flame so it can be tapped
     const rx=L.x-cx,ry=L.y-cy,tY=(-1/PL)*(-pY*rx+pX*ry),tX=(-1/PL)*(dY*rx-dX*ry);
     if(!L.free&&tY>.3){const sx=VW/2*(1+tX/tY),sy=HH-(.66-EYE)*F/tY,col=Math.floor(sx);
@@ -2302,7 +2302,9 @@ const LIGHT_ZONES=[
   [3,10,3,14,3.6,0],[10,7,14,7,3.2,0],[11,3,13,5,3.0,0]];
 function setupLights(){
   LIGHTS.length=0;torchAt.clear();
-  if(G.day>0)return; // daylight: no wall torches outdoors
+  G.hasLamps=G.decor.some(d=>d.k==='lamp');
+  const lampLights=()=>{for(const d of G.decor)if(d.k==='lamp')LIGHTS.push({x:d.x+.5,y:d.y+.5,ph:hash2(d.x,d.y,13)*6.28,key:-1000-LIGHTS.length,taken:false,red:false,free:true,lamp:true})};
+  if(G.day>0){lampLights();return} // daylight: no wall torches outdoors, only street lanterns
   const tg=(LEVELS[LEVEL]&&LEVELS[LEVEL].torchGap)||6.2,zoneAt=(x,y)=>{if(LEVEL===1)for(const z of LIGHT_ZONES)if(x>=z[0]&&x<=z[2]&&y>=z[1]&&y<=z[3])return z;return [0,0,0,0,tg,0]};
   const cands=[];
   for(let y=1;y<MH-1;y++)for(let x=1;x<MW-1;x++){
@@ -3861,7 +3863,7 @@ function drawArrows(){
 /* ==========================================================================
    TOWNSFOLK, DIALOGUE AND QUESTS
    ========================================================================== */
-const NPC_H={flowerpot:.32,chicken:.2,urn:.5,noticeboard:.85,lamp:1.5,memorial:1.0,flora:.28,sign_thornwick:.8,sign_ironhill:.8,sign_smith:.75,sign_store:.75,sign_inn:.75,sign_bakery:.75,sign_church:.75,gate:.9,fountain:.95,chest:.5,fence:.5,bush:.55,veg:.38,hay:.72,crate:.62,tree0:2.0,tree1:2.3,tree2:1.9,tree3:2.1,tree4:2.0,tree5:.8,tree6:2.3,tree7:2.1,grave:.55,grave2:.5,cross:.9,statue:1.15,well:.95,bench:.58,barrel:.62,coffin:.52,cart:.74,peasantM:.8,peasantW:.76,beggar:.7,drunk:.78,thug:.82,pickpocket:.76,merchant:.74,mayor:.78,goat:.42,shepherdess:.72,huntress:.8,innkeeper:.78};
+const NPC_H={flowerpot:.32,chicken:.2,urn:.5,noticeboard:.85,lamp:1.5,memorial:1.0,flora:.28,sign_thornwick:.8,sign_ironhill:.8,sign_smith:.75,sign_store:.75,sign_inn:.75,sign_bakery:.75,sign_church:.75,gate:.9,fountain:.95,chest:.5,fence:.5,bush:.55,veg:.38,hay:.72,crate:.62,tree0:2.0,tree1:2.3,tree2:2.5,tree3:2.1,tree4:2.0,tree5:.8,tree6:2.3,tree7:2.1,grave:.55,grave2:.5,cross:.9,statue:1.15,well:.95,bench:.58,barrel:.62,coffin:.52,cart:.74,peasantM:.8,peasantW:.76,beggar:.7,drunk:.78,thug:.82,pickpocket:.76,merchant:.74,mayor:.78,goat:.42,shepherdess:.72,huntress:.8,innkeeper:.78};
 const say=(text,opts)=>({text,opts:opts||[]});
 const BYE=['Goodbye.',()=>null];
 const bagCount=id=>G.bag.reduce((n,b)=>n+(b.id===id?b.n:0),0);
@@ -4514,7 +4516,7 @@ function drawEnd(win){
 function update(dt){
   try{areaAudio();huntTick()}catch(e){}
   G.time+=dt;
-  if(G.dayBase>0){const hr=(G.clock%1440)/60;G.day=Math.max(.16,G.dayBase*clamp(.66+.5*Math.cos((hr-12)/24*TAU),.5,1))}
+  if(G.dayBase>0){const hr=(G.clock%1440)/60;G.day=Math.max(.16,G.dayBase*clamp(.66+.5*Math.cos((hr-12)/24*TAU),G.hasLamps?.2:.5,1))}
   // timers
   if(!G.cut)for(let i=0;i<G.timers.length;){const t=G.timers[i];if(G.time>=t.t){G.timers.splice(i,1);t.fn()}else i++}
   // camera easing
@@ -4811,7 +4813,7 @@ addEventListener('resize',fit);fit();
   const mkSign=(text,icon,col)=>mkCanvas(110,110,(x,w,h)=>{
     x.fillStyle='#3a2a18';x.fillRect(50,24,8,86);ln(x);x.strokeRect(50,24,8,86);
     x.fillStyle=col||'#6a4a2a';x.fillRect(6,10,98,42);x.strokeRect(6,10,98,42);x.strokeStyle='rgba(20,14,8,.5)';x.lineWidth=1.2;x.strokeRect(10,14,90,34);
-    if(text){x.fillStyle='#e6d9b0';x.font='bold 17px Georgia,serif';x.textAlign='center';x.textBaseline='middle';x.fillText(text,55,31)}
+    if(text){x.fillStyle='#e6d9b0';let fs=17;x.font=`bold ${fs}px Georgia,serif`;while(x.measureText(text).width>82&&fs>8){fs--;x.font=`bold ${fs}px Georgia,serif`}x.textAlign='center';x.textBaseline='middle';x.fillText(text,55,31)}
     if(icon==='anvil'){x.fillStyle='#d0d0d8';x.fillRect(36,22,38,10);x.fillRect(46,32,18,8);x.fillRect(38,40,34,5);x.strokeStyle=OL;x.lineWidth=1.5;x.strokeRect(36,22,38,10)}
     else if(icon==='coin'){x.fillStyle='#d8b040';x.beginPath();x.arc(55,31,13,0,TAU);x.fill();x.strokeStyle=OL;x.lineWidth=1.8;x.stroke();x.strokeStyle='#8a6a20';x.beginPath();x.arc(55,31,8,0,TAU);x.stroke()}
     else if(icon==='mug'){x.fillStyle='#c8a040';x.fillRect(42,20,22,22);x.fillStyle='#e8e0c0';x.fillRect(42,20,22,6);x.strokeStyle=OL;x.lineWidth=1.8;x.strokeRect(42,20,22,22);x.beginPath();x.arc(68,31,7,-1.5,1.5);x.stroke()}
@@ -4827,6 +4829,16 @@ addEventListener('resize',fit);fit();
     x.strokeStyle='#8a8478';x.lineWidth=3;x.beginPath();x.moveTo(52,50);x.lineTo(64,56);x.lineTo(52,62);x.stroke();
     x.fillStyle='#b89a40';x.fillRect(54,56,16,14);ln(x);x.strokeRect(54,56,16,14);x.beginPath();x.arc(62,56,6,Math.PI,0);x.stroke();
   });
+  if(IMG.tree2){ // the leafy tree had almost no trunk and seemed to hover: give it one
+    const t2=IMG.tree2,tw=t2.width,th=t2.height,nh=Math.round(th*1.55);
+    IMG.tree2=mkCanvas(tw,nh,(x,w,h)=>{
+      const cx=tw/2,top=th*.72;
+      x.fillStyle='#352a1e';x.beginPath();x.moveTo(cx-tw*.05,top);x.lineTo(cx+tw*.05,top);x.lineTo(cx+tw*.065,nh-th*.08);x.quadraticCurveTo(cx+tw*.14,nh-th*.02,cx+tw*.2,nh-2);x.lineTo(cx-tw*.2,nh-2);x.quadraticCurveTo(cx-tw*.14,nh-th*.02,cx-tw*.065,nh-th*.08);x.closePath();x.fill();
+      x.strokeStyle='#150f09';x.lineWidth=Math.max(2,tw*.008);x.stroke();
+      x.strokeStyle='rgba(90,72,50,.55)';x.lineWidth=Math.max(1.5,tw*.005);for(let i=-1;i<=1;i++){x.beginPath();x.moveTo(cx+i*tw*.025,top+th*.1);x.lineTo(cx+i*tw*.035,nh-th*.1);x.stroke()}
+      x.drawImage(t2,0,0);
+    });
+  }
   IMG.fountain=mkCanvas(120,110,(x,w,h)=>{
     x.fillStyle='#4a4844';x.beginPath();x.ellipse(60,92,54,15,0,0,TAU);x.fill();x.strokeStyle='#17140f';x.lineWidth=2.5;x.stroke();
     x.fillStyle='#6a6862';x.beginPath();x.ellipse(60,88,48,12,0,0,TAU);x.fill();x.stroke();
