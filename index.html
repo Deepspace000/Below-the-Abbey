@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.05';
+const VERSION='1.06';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2196,7 +2196,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     if(s.e){s.e.sx=scrX;s.e.sy=top+sh*.45}
     {const xa=Math.max(0,Math.floor(left)),xb=Math.min(VW-1,Math.ceil(left+sw));if(xb<xa||ty>16)continue;let any=false;for(let xx=xa;xx<=xb;xx+=2)if(zbuf[xx]>ty){any=true;break}if(!any)continue} // skip hidden sprites
     let anyVis=false;
-    if(!(s.e&&ENEMY_DEF[s.e.t].fly)){vctx.save();vctx.globalAlpha=(s.fade!==undefined?Math.max(0,Math.min(1,s.fade)):1)*.36;vctx.fillStyle='#000';vctx.beginPath();vctx.ellipse(scrX,bottom,sw*.34,Math.max(1.2,sw*.055),0,0,TAU);vctx.fill();vctx.restore()}
+    if(!(s.e&&ENEMY_DEF[s.e.t].fly)){vctx.save();const tr=s.decor&&s.decor.k.startsWith('tree');vctx.globalAlpha=(s.fade!==undefined?Math.max(0,Math.min(1,s.fade)):1)*(tr?.62:.36);vctx.fillStyle='#000';vctx.beginPath();vctx.ellipse(scrX,bottom-(tr?sh*.012:0),sw*(tr?.3:.34),Math.max(1.2,sw*(tr?.085:.055)),0,0,TAU);vctx.fill();vctx.restore()}
     // lighting
     const wx=s.x,wy=s.y,dist=Math.hypot(wx-cx,wy-cy);
     let lt=0;for(let k=0;k<nearL.length;k+=3){const ax=wx-nearL[k],ay=wy-nearL[k+1];lt+=nearL[k+2]/(1+1.15*(ax*ax+ay*ay))}
