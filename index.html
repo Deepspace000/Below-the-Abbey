@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.85';
+const VERSION='1.86';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4631,14 +4631,14 @@ const NPCS={
   pip2:gossip('Pip','child',['I can run to the standing stone and back before you finish a sentence.','I saw a grey man once. He was nice. I think he was sad because he only had one colour.']),
   sedge:gossip('Sedge','fisher',['The river by the old grove is full of trout. You cannot catch them. They are too clever.','Fish come in every colour, and nobody asks them to change. I do not see why people should be any different.']),
   hale:{name:'Hale, the scribe',img:'scribe',root:()=>{
-    const F=G.flags,st=qSt('colours'),HINT='The cellar door is in the south side of the market square, near the middle. It has been painted over so often it looks like part of the wall.';
+    const F=G.flags,st=qSt('colours'),HINT='Look for the dilapidated door on the south side of the main street, near the middle of town. The wood is grey and cracked, and nobody has opened it in my lifetime. The cellar is behind it.';
     if(st==='done')return say(F.haleTold?'A wizard, by accident. I think I will go and thank him. Without him I would be grey and dull, and I would rather be me.':'A spring and a gift. I wrote it in the records just like that.',[BYE]);
     if(qReady('colours'))return say('You have been down in the cellar. Tell me what you found.',[
       ['It was an old spring, and the colours are a gift. Nothing is wrong with you.',()=>{F.haleTold=0;qTurnIn('colours');return say('A gift. I like that more than anything I could have written myself. Thank you. Here is something for the trouble.',[BYE])}],
       ['A wizard named Orrin did it by accident, long ago.',()=>{F.haleTold=1;qTurnIn('colours');return say('A wizard. By accident. Well. That is a better story than a curse. We have worn these colours for sixty years, and I will not call them a mistake. Thank you.',[BYE])}],
       ['Not yet.',()=>null]]);
     if(st==='active')return say(HINT,[BYE]);
-    return say('I keep the town records. Seven births, two weddings and one goat this year. A quiet year.',[['Why is everyone here so many colours?',()=>say('I have kept the records for thirty years and I cannot tell you. The oldest page says only: sealed the cellar under the market. Nobody has opened it. I would like to know, although it would not change who I am. Would you look?',[['We will find out.',()=>{qAccept('colours');return say('Thank you. '+HINT,[BYE])}],['Not now.',()=>null]])],BYE])}},
+    return say('I keep the town records. Seven births, two weddings and one goat this year. A quiet year.',[['Why is everyone here so many colours?',()=>say('I have kept the records for thirty years and I cannot tell you. The oldest page says only: sealed the cellar under the town. Nobody has opened it. I would like to know, although it would not change who I am. Would you look?',[['We will find out.',()=>{qAccept('colours');return say('Thank you. '+HINT,[BYE])}],['Not now.',()=>null]])],BYE])}},
   moss:gossip('Brother Moss','monk',['We light the lamp at the Temple of the Sun every dawn. Come in if you want some quiet.','At the temple we teach that the sun shines the same on every colour. Difference is not a fault. It is only a difference.']),
   clerkA:gossip('The clerk','scribe',['The mayor sees anyone who asks. It is the law here.']),
   patronA1:gossip('A farmer','farmer',['The ale is honey ale. Do not drink more than two.']),
@@ -4815,7 +4815,7 @@ Object.assign(NPCS,{prismwiz:{name:'Orrin, the colour wizard',img:'prismwiz',roo
   if(F.prismGift&&F.prismOwed&&F.prismOwed.length){prismHand();return say('"Make room and I will give you the rest."',[BYE])}
   if(F.prismGift)return say('"Go gently. Keep my secret if you can. Or tell them, if you must. I find I mind less than I thought I would."',[BYE]);
   return say('A thin old man in a robe that shifts through every colour looks up from a bench of glass jars. "Visitors. Nobody has come down my stair in sixty years. I am Orrin. I am a colour wizard. There are very few of us, and most wizards think we only make pretty things."',[
-    ['Why is everyone in Anaea coloured?',()=>say('He puts down a jar and does not look at you. "That was me. I was young and proud. I wanted a dye that would never fade. I poured the failed batch into the old spring under the square. The water carried it into the well, and the well carried it into everyone. Their children were born coloured, and their children after."',[
+    ['Why is everyone in Anaea coloured?',()=>say('He puts down a jar and does not look at you. "That was me. I was young and proud. I wanted a dye that would never fade. I poured the failed batch into the old spring under the town. The water carried it into the well, and the well carried it into everyone. Their children were born coloured, and their children after."',[
       ['You did that to them?',()=>say('"Yes. I came down here to hide, and I never left. I was too ashamed to tell them." He breathes out. "But listen. They do not see it as a harm. They have made it theirs. They sing about their colours. They would not give them back, even if I could take them away. And if they learned it began as one fool\'s mistake, I think that would hurt them more than any curse."',[
         ['Why are you telling us?',()=>say('"Because you came a long way down, and you look like people who can keep a promise. Please do not tell them. Let the spring be a mystery. Let it be theirs." He opens a glass cabinet.',[['We will keep your secret.',()=>prismGift(true)],['They have a right to know.',()=>prismGift(false)]])]])]])],
     ['Just looking around.',()=>null]])
@@ -4959,7 +4959,7 @@ Object.assign(QUESTS,{
 QUESTS.ironhill.desc="Tell the mayor of Ironhill what happened in Thornwick. He is in the castle.";
 QUESTS.ironhill.goal=()=>G.flags.halbrecht?1:0;
 QUESTS.pass={title:'Over the Pass',who:'Captain Rowan',desc:'A warrant names you as forgers. Hunters and hitmen are after you. Cross the Greyfang Pass, east of the moor, and keep moving.',need:1,goal:()=>G.flags.passDone?1:0,reward:{gold:0,xp:0}};
-QUESTS.colours={title:'The Colours of Anaea',who:'Hale, the scribe',desc:'Hale wants to know why the people of Anaea are every colour. The oldest record mentions a sealed cellar under the market square. The door is in the south side of the square, near the middle.',need:1,goal:()=>G.flags.colourLearned?1:0,reward:{gold:250,xp:700,items:['potion','potion']}};QAREA.colours='Greendale';QGIVER.hale='colours';
+QUESTS.colours={title:'The Colours of Anaea',who:'Hale, the scribe',desc:'Hale wants to know why the people of Anaea are every colour. The oldest record mentions a sealed cellar under the town. The way in is a dilapidated door on the south side of the main street, near the middle of town.',need:1,goal:()=>G.flags.colourLearned?1:0,reward:{gold:250,xp:700,items:['potion','potion']}};QAREA.colours='Greendale';QGIVER.hale='colours';
 QUESTS.scoria={title:'Counsel in Scoria',who:'Mayor Marigold',desc:'Mayor Marigold says only the wizard Ishkander can speak for you to the king. He lives in Scoria, the desert kingdom to the north. Take the east gate of Anaea and follow the road.',need:1,goal:()=>G.flags.scoriaWizard?1:0,reward:{gold:0,xp:0}};
 QUESTS.honey={title:'Honeycomb for Marl',who:'Marl, the beekeeper',desc:'Marl needs 3 honeycombs from the wild hives in Greendale Forest.',need:3,goal:()=>bagCount('honeycomb'),take:{honeycomb:3},reward:{gold:90,xp:700,items:['potion']}};
 QUESTS.flowers={title:'Flowers for Wren',who:'Wren, the gardener',desc:'Wren wants 6 bunches of wildflowers from the forest for the temple.',need:6,goal:()=>bagCount('wildflower'),take:{wildflower:6},reward:{gold:70,xp:650,items:['potion']}};
