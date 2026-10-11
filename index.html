@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.36';
+const VERSION='1.37';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1299,7 +1299,7 @@ const ENEMY_DEF={
   mayor:{name:'Mayor Corbin',hp:130,dmg:[7,12],hit:.75,w:.55,img:'mayor',xp:400,gold:[100,160],speed:1},
   spectre:{name:'Spectre',hp:62,dmg:[5,10],hit:.7,w:.62,img:'spectre0',xp:100,gold:[0,0],speed:1},
   spectre2:{name:'Spectre',hp:62,dmg:[5,10],hit:.7,w:.62,img:'spectre1',xp:100,gold:[0,0],speed:1},
-  wraith:{name:'The Wraith',hp:140,dmg:[11,17],hit:.8,w:.78,img:'wraith',xp:1200,gold:[160,260],speed:1},
+  wraith:{name:'The Wraith',hp:90,dmg:[11,17],hit:.8,w:.78,img:'wraith',xp:1200,gold:[160,260],speed:1},
   ghost:{name:'Ghost',hp:58,dmg:[5,9],hit:.7,w:.5,img:'ghost',xp:90,gold:[0,0],speed:1},
   gandrick:{name:'Gandrick',hp:160,dmg:[10,15],hit:.78,w:.5,img:'gandrick',xp:900,gold:[150,220],speed:1}};
 /* creatures are the same level as the dungeon level */
