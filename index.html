@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.64';
+const VERSION='1.65';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1143,9 +1143,13 @@ function loadSounds(){
   for(const n of SNDLIST)fetch('assets/audio/'+n+'.mp3?v='+VERSION).then(r=>r.arrayBuffer()).then(b=>AC.decodeAudioData(b)).then(buf=>{SMP[n]=buf}).catch(()=>{});
 }
 function playSmp(n,vol,rate){
-  const b=SMP[n];if(!b||!AC||G.mute)return false;
+  const b=SMP[n];if(!b||!AC||G.mute||!SNDOPT[SND_CAT(n)])return false;
   const s=AC.createBufferSource(),g=AC.createGain();s.buffer=b;s.playbackRate.value=rate||1;g.gain.value=vol;s.connect(g);g.connect(MASTER);s.start();return true;
 }
+const SNDOPT={combat:1,amb:1,music:1,steps:1};
+try{Object.assign(SNDOPT,JSON.parse(localStorage.getItem('abbeySND')||'{}'))}catch(e){}
+const SND_CAT=n=>/^step_/.test(n)?'steps':/^(clash|hit)\d/.test(n)?'combat':/^music_/.test(n)?'music':'amb';
+const SND_COMBAT=new Set(['hit','hack','spell','frost','miss','squeak','ratdie','bite','hurt','fire','arrow','growl','rattle','screech']);
 const pickN=(p,n)=>p+(1+Math.floor(Math.random()*n));
 const LAYERS={};
 function setLayer(n,target){
@@ -1182,13 +1186,14 @@ function areaAudio(){
     else if(LEVEL===5||LEVEL===14)T.music_feast=.4;
     else if(LEVEL===6||LEVEL===16){T.music_tavern=.55;T.village_ambience=.18}
   }
+  for(const n of Object.keys(T))if(!SNDOPT[SND_CAT(n)])delete T[n];
   for(const n of SNDLIST){if(n in T||LAYERS[n])setLayer(n,T[n]||0)}
-  if(G.state==='play'&&!G.mute&&(LEVEL===3||LEVEL===13||LEVEL===29||LEVEL===30)){
+  if(G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===3||LEVEL===13||LEVEL===29||LEVEL===30)){
     if(!G.bellNext)G.bellNext=G.time+50+Math.random()*60;
     if(G.time>G.bellNext){G.bellNext=G.time+150+Math.random()*100;const v=(LEVEL===29||LEVEL===30)?.3:.6;playSmp('church_bell1',v);setTimeout(()=>playSmp('church_bell2',v*.8),2600);if(LEVEL===3||LEVEL===13)msg('The church bell tolls.','#d8c88e')}
   }
   // now and then a village noise
-  if(G.state==='play'&&!G.mute&&(LEVEL===3||LEVEL===13)){
+  if(G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===3||LEVEL===13)){
     if(!G.sndNext)G.sndNext=G.time+6+Math.random()*10;
     if(G.time>G.sndNext){
       G.sndNext=G.time+12+Math.random()*28;
@@ -1200,7 +1205,7 @@ function areaAudio(){
 function stepSample(){ // the cobble recordings were 20 dB louder than the rest and carried stray noise, so the cobbles use the stone steps, a little crisper
   const k0=G.amb>0?'wood':(LEVEL===3||LEVEL===13)?'cobble':G.day>0?'dirt':'stone',k=k0==='cobble'?'stone':k0;
   const vol={stone:.55,wood:.6,dirt:.95}[k]*(.85+Math.random()*.3),rate=(k0==='cobble'?1.1:1)*(.92+Math.random()*.16);
-  if(k0==='cobble'&&AC&&!G.mute){ // the original cobble step, tamed: the recordings clip at full scale, so bring them down to the stone level and soften the top end
+  if(k0==='cobble'&&AC&&!G.mute&&SNDOPT.steps){ // the original cobble step, tamed: the recordings clip at full scale, so bring them down to the stone level and soften the top end
     const b=SMP[pickN('step_cobble',4)];if(b){const src=AC.createBufferSource(),g=AC.createGain(),f=AC.createBiquadFilter();src.buffer=b;src.playbackRate.value=.92+Math.random()*.16;g.gain.value=.12*(.85+Math.random()*.3);f.type='lowpass';f.frequency.value=2600;f.Q.value=.6;src.connect(f);f.connect(g);g.connect(MASTER);src.start();return true}
   }
   return playSmp(pickN('step_'+k,4),vol,rate);
@@ -1208,6 +1213,8 @@ function stepSample(){ // the cobble recordings were 20 dB louder than the rest 
 
 function sfx(n){
   if(!AC||G.mute)return;
+  if((n==='step'||n==='turn'||n==='bump')&&!SNDOPT.steps)return;
+  if(SND_COMBAT.has(n)&&!SNDOPT.combat)return;
   if(n==='step'&&stepSample())return;
   if(n==='hack'&&playSmp(pickN('clash',3),.55,.94+Math.random()*.12)){nz(.1,.1,'lowpass',500,200);return}
   if(n==='hit'&&playSmp(pickN('hit',2),.5,.94+Math.random()*.12)){tone(140,60,.12,'triangle',.12);return}
@@ -5183,12 +5190,13 @@ function btnText(id,label,x,y,w,h){panel(x,y,w,h,false,false);txt(label,x+w/2,y+
 function drawMenu(){
   if(G.menu==='quests'){drawQuestLog();return}
   if(G.menu==='gfx'){drawGfx();return}
+  if(G.menu==='snd'){drawSnd();return}
   BTNS=[];veil(.6);bigPanel(90,12,300,296);
   txt('MENU',240,30,14,'#d8c88e','center',true);
   txt('Version '+VERSION,240,298,8,'#9a8a68','center');
   btnText('resume','Resume',170,44,140,26);
   btnText('quests',anyQuestReady()?'Quests  *':'Quests',170,76,140,26);
-  btnText('mute',G.mute?'Sound: Off':'Sound: On',100,108,130,26);btnText('gfx','Graphics',250,108,130,26);
+  btnText('mute','Sound',100,108,130,26);btnText('gfx','Graphics',250,108,130,26);
   btnText('savemenu','Save / Load',100,140,130,26);btnText('overview','Level layout',250,140,130,26);
   btnText('newparty','New party',100,172,130,26);btnText('restart','Restart game',250,172,130,26);
   const L=['Arrows / WASD: move and turn   Q / E: step sideways','Space: attack   X: special   P: potion   Z: wait   R: rest','1-4: choose hero   I: inventory   J: quests   M: map   Esc: menu','',
@@ -5267,6 +5275,15 @@ function gfxApply(){
   try{localStorage.setItem('abbeyGFX',JSON.stringify(GFX))}catch(e){}
 }
 function gfxLoad(){try{const o=JSON.parse(localStorage.getItem('abbeyGFX')||'null');if(o){for(const k in GFX)if(typeof o[k]==='number')GFX[k]=o[k]}else if(localStorage.getItem('abbeyCRT')==='0')GFX.scan=0}catch(e){}gfxApply()}
+const SND_ROWS=[['combat','Combat sounds'],['amb','Ambient sounds'],['music','Music'],['steps','Footsteps']];
+function drawSnd(){
+  BTNS=[];veil(.6);bigPanel(90,12,300,296);
+  txt('SOUND',240,30,14,'#d8c88e','center',true);
+  SND_ROWS.forEach(([k,l],i)=>{const y=46+i*38;txt(l,104,y+13,9,'#d8c9a0','left');btnText('s_'+k,SNDOPT[k]?'On':'Off',290,y,86,26)});
+  txt('Ambient: wind, rain, towns and villages.',240,46+4*38+6,8,'#9a8a68','center');
+  btnText('s_back','Back',170,46+4*38+22,140,26);
+  btn('menuclose3',0,0,DW,DH);BTNS.unshift(BTNS.pop());
+}
 function drawGfx(){
   BTNS=[];veil(.6);bigPanel(90,12,300,296);
   txt('GRAPHICS',240,30,14,'#d8c88e','center',true);
@@ -5344,6 +5361,11 @@ function handleBtn(id){
   if(G.inv.open){invBtn(id);return}
   if(G.map){if(id==='mapclose'||id==='map')G.map=false;return}
   if(G.menu==='quests'){if(id==='qexit')G.menu=false;return}
+  if(G.menu==='snd'){
+    if(id==='s_back'||id==='menuclose3'||id==='menu')G.menu=true;
+    else if(id&&id.startsWith('s_')){const k=id.slice(2);if(k in SNDOPT){SNDOPT[k]=SNDOPT[k]?0:1;try{localStorage.setItem('abbeySND',JSON.stringify(SNDOPT))}catch(e){}areaAudio()}}
+    return;
+  }
   if(G.menu==='gfx'){
     if(id==='g_back'||id==='menuclose2'||id==='menu')G.menu=true;
     else if(id==='g_crt'){G.crt=!G.crt;try{localStorage.setItem('abbeyCRT',G.crt?'1':'0')}catch(e){}fit()}
@@ -5353,7 +5375,7 @@ function handleBtn(id){
   if(G.menu){
     if(id==='resume'||id==='menuclose'||id==='menu')G.menu=false;
     else if(id==='quests'){G.menu='quests'}
-    else if(id==='mute'){G.mute=!G.mute}
+    else if(id==='mute'){G.menu='snd'}
     else if(id==='gfx'){G.menu='gfx'}
     else if(id==='savemenu'){openSaves('menu')}
     else if(id==='overview'){G.menu=false;G.overview=true}
