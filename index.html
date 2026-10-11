@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.65';
+const VERSION='1.67';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3761,12 +3761,13 @@ function drawTownBody(cs,ox,oy){
   ctx.fillStyle='#b8382a';ctx.beginPath();ctx.arc(20,255,3.2,0,TAU);ctx.fill();ctx.stroke();txt('Person',32,255,7.5,ink,'left');
   ctx.fillStyle='#a8402e';ctx.beginPath();ctx.moveTo(25,267);ctx.lineTo(18,263);ctx.lineTo(18,271);ctx.closePath();ctx.fill();ctx.stroke();txt('Gate or exit',32,267,7.5,ink,'left');
 }
-function mapFit(){return Math.max(2.5,Math.min((DW-12)/MW,(DH-40)/MH))}
+const mapRes=()=>(LEVEL===3||LEVEL===13)?[0,58]:[136,0]; // room kept clear for the legend
+function mapFit(){const [rw,rh]=mapRes();return Math.max(2.5,Math.min((DW-12-rw)/MW,(DH-40-rh)/MH))}
 function mapOrigin(cs){ // where cell (0,0) sits, honouring the pan; a map smaller than the screen is centred
-  const w=MW*cs,h=MH*cs;
-  G.panMinX=Math.min(0,DW-12-w);G.panMinY=Math.min(0,DH-36-h);
+  const w=MW*cs,h=MH*cs,[rw,rh]=mapRes();
+  G.panMinX=Math.min(0,DW-12-rw-w);G.panMinY=Math.min(0,DH-36-rh-h);
   G.panX=clamp(G.panX||0,G.panMinX,0);G.panY=clamp(G.panY||0,G.panMinY,0);
-  return [w<DW-12?(DW-w)/2:6+G.panX,h<DH-36?30+(DH-36-h)/2:30+G.panY];
+  return [w<DW-12-rw?(DW-rw-w)/2:6+G.panX,h<DH-36-rh?30+(DH-36-rh-h)/2:30+G.panY];
 }
 function setMapZoom(ncs,ax,ay){
   ncs=clamp(ncs,mapFit(),34);const cs=G.mz||12,[ox,oy]=mapOrigin(cs),wx=(ax-ox)/cs,wy=(ay-oy)/cs;
@@ -3774,10 +3775,11 @@ function setMapZoom(ncs,ax,ay){
 }
 function drawOverview(){
   BTNS=[];veil(.95);
-  if(!G.ovInit||G.ovLevel!==LEVEL){G.mz=clamp(12,mapFit(),34);G.panX=DW/2-((G.C.x+.5)*G.mz+6);G.panY=DH/2-((G.C.y+.5)*G.mz+30);G.ovInit=true;G.ovLevel=LEVEL}
+  if(!G.ovInit||G.ovLevel!==LEVEL){G.mz=clamp(12,mapFit(),34);const [rw,rh]=mapRes();G.panX=(DW-rw)/2-((G.C.x+.5)*G.mz+6);G.panY=(DH-rh)/2-((G.C.y+.5)*G.mz+30);G.ovInit=true;G.ovLevel=LEVEL}
   const cs=G.mz,[ox,oy]=mapOrigin(cs);
   ctx.save();ctx.font=`24px ${FTITLE}`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle='#d8c88e';ctx.fillText(`Level ${LEVEL}: ${LEVEL_NAMES[LEVEL]}`,8,15);ctx.restore();
   const TOWN=(LEVEL===3||LEVEL===13);
+  ctx.save();ctx.beginPath();ctx.rect(0,0,DW-mapRes()[0],DH);ctx.clip();
   if(TOWN)drawTownBody(cs,ox,oy);
   else{
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){
@@ -3799,20 +3801,21 @@ function drawOverview(){
     txt(e.t==='boss'?'K':e.t==='skel'?'S':e.t==='bat'?'B':e.t==='wolf'?'W':e.t==='bandit'?'D':e.t==='archer'?'A':e.t==='gandrick'?'G':'R',ox+(e.x+.5)*cs,oy+(e.y+.5)*cs+.5,7.5,'#120c08','center',true)}
   }
   const px=ox+(G.C.x+.5)*cs,py=oy+(G.C.y+.5)*cs;ctx.save();ctx.translate(px,py);ctx.rotate(G.C.a+Math.PI/2);ctx.fillStyle='#ffe36a';ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(5,5);ctx.lineTo(0,2);ctx.lineTo(-5,5);ctx.closePath();ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.stroke();ctx.restore();
+  ctx.restore();
   // legend
-  const lx=TOWN?1200:350;let ly=36;
-  ctx.fillStyle='rgba(8,6,4,.82)';rrect(ctx,lx-8,22,128,DH-30,5);ctx.fill();
-  const row=(label,c,t)=>{txt(t,lx+6,ly,8,c,'center',true);txt(label,lx+16,ly,8,'#cdbf94','left');ly+=12};
-  txt('Legend',lx,ly-2,10,'#d8c88e','left',true);ly+=12;
+  const lx=TOWN?1200:350;let ly=34;const LS=9.6;
+  ctx.fillStyle='rgba(8,6,4,.82)';rrect(ctx,lx-8,22,128,DH-70,5);ctx.fill();
+  const row=(label,c,t)=>{txt(t,lx+6,ly,8,c,'center',true);txt(label,lx+16,ly,8,'#cdbf94','left');ly+=LS};
+  txt('Legend',lx,ly-2,10,'#d8c88e','left',true);ly+=LS;
   row('Rat','#d08a60','R');row('Bat','#b070e0','B');row('Skeleton','#e8e4d0','S');row('Rat King','#ff3030','K');
   row('Key','#ffd76a','K');row('Weapon','#e8e0d0','W');row('Armour','#e8e0d0','A');row('Ring','#e8e0d0','R');row('Scroll','#e8e0d0','S');row('Lantern/torch','#e8e0d0','L');row('Potion','#e8e0d0','P');row('Food','#e8e0d0','F');
   row('Magic item','#e070e8','*');
   ly+=2;
-  ctx.fillStyle='#ffb040';ctx.beginPath();ctx.arc(lx+6,ly-1,3,0,TAU);ctx.fill();txt('Torch',lx+16,ly,8,'#cdbf94','left');ly+=12;
-  ctx.fillStyle='#ff4a30';ctx.beginPath();ctx.arc(lx+6,ly-1,3,0,TAU);ctx.fill();txt('Red torch',lx+16,ly,8,'#cdbf94','left');ly+=12;
-  ctx.fillStyle='#a8702e';ctx.fillRect(lx+2,ly-5,8,8);txt('Door',lx+16,ly,8,'#cdbf94','left');ly+=12;
-  ctx.fillStyle='#c03a2a';ctx.fillRect(lx+2,ly-5,8,8);txt('Locked door',lx+16,ly,8,'#cdbf94','left');ly+=12;
-  ctx.fillStyle='#7ab0f0';ctx.fillRect(lx+2,ly-5,8,8);txt('Exit stairs',lx+16,ly,8,'#cdbf94','left');ly+=12;
+  ctx.fillStyle='#ffb040';ctx.beginPath();ctx.arc(lx+6,ly-1,3,0,TAU);ctx.fill();txt('Torch',lx+16,ly,8,'#cdbf94','left');ly+=LS;
+  ctx.fillStyle='#ff4a30';ctx.beginPath();ctx.arc(lx+6,ly-1,3,0,TAU);ctx.fill();txt('Red torch',lx+16,ly,8,'#cdbf94','left');ly+=LS;
+  ctx.fillStyle='#a8702e';ctx.fillRect(lx+2,ly-5,8,8);txt('Door',lx+16,ly,8,'#cdbf94','left');ly+=LS;
+  ctx.fillStyle='#c03a2a';ctx.fillRect(lx+2,ly-5,8,8);txt('Locked door',lx+16,ly,8,'#cdbf94','left');ly+=LS;
+  ctx.fillStyle='#7ab0f0';ctx.fillRect(lx+2,ly-5,8,8);txt('Exit stairs',lx+16,ly,8,'#cdbf94','left');ly+=LS;
   txt('Drag the map to move it',lx,ly+8,8,'#8a7a58','left');
   btn('ovclose',0,0,0,0);BTNS.pop();
   BTNS.push({id:'maparea',x:0,y:0,w:DW,h:DH,up:true,drag:'map'});
