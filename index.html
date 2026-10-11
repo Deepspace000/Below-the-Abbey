@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.06';
+const VERSION='1.07';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1298,6 +1298,7 @@ function reset(n){
   G.enemies=ENEMY_SPAWNS.map((s,i)=>{const st=enemyStat(s.t);return {id:i,t:s.t,lvl:DIFF(),x:s.x,y:s.y,rx:s.x,ry:s.y,hp:st.hp,maxhp:st.hp,alert:false,chilled:0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100}});
   G.items=ITEM_SPAWNS.map(s=>({k:s.k,x:s.x,y:s.y,taken:false}));
   G.decor=DECOR_SPAWNS.map(s=>{const o={k:s.k,x:s.x,y:s.y,block:!!s.block,loot:CONTAINERS.includes(s.k),shop:s.k==='cart'};if(s.deco){o.loot=false;o.shop=false}if(s.npc){o.npc=s.npc;o.loot=false;o.shop=false;if(s.goat)o.goat=s.goat}if(s.sc)o.sc=s.sc;if(s.walk)o.walk=true;return o});
+  G.decor.forEach(d=>{if(!d.npc&&(d.k==='grave'||d.k==='grave2'||d.k==='cross')){d.npc='epitaph';d.loot=false}});
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++)if(MAPROWS[y][x]==='t')G.decor.push({k:'tree'+((hash2(x,y,7)*NTREES)|0),x,y,block:true,loot:false,shop:false});
   G.loot=null;G.flags={};G.arrows=[];G.cut=null;G.winKind=null;G.quests={};G.lst={};G.talk=null;G.clock=480;G.starveT=0;G.buffs=[];G.lvlBanners=[];
   setupLights();
@@ -2206,6 +2207,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     tmpX.drawImage(img,0,0);
     tmpX.globalCompositeOperation='source-atop';
     tmpX.fillStyle=`rgba(8,5,3,${(1-lum).toFixed(3)})`;tmpX.fillRect(0,0,iw,ih);
+    {const dy=(G.day||0)>0,hz=dy?[132,146,132]:[86,76,62],smS=Math.min(dy?.4:.26,dist*(dy?.04:.03))*.75;if(smS>.02){tmpX.fillStyle=`rgba(${hz[0]},${hz[1]},${hz[2]},${smS.toFixed(3)})`;tmpX.fillRect(0,0,iw,ih)}}
     if(s.flash>0){tmpX.fillStyle=`rgba(255,70,40,${(s.flash*.55).toFixed(3)})`;tmpX.fillRect(0,0,iw,ih)}
     if(s.fade!==undefined&&s.fade<1){vctx.globalAlpha=Math.max(0,s.fade)}
     let x0=Math.max(0,Math.floor(left)),x1=Math.min(VW,Math.ceil(left+sw));
@@ -4187,6 +4189,41 @@ const BRAM_Q={
   accept:'Good. Look for pieces of wood on the ground. Be careful in there.',
   remind:(n,m)=>`You have ${n} of ${m} pieces of firewood.`,
   ready:'You have the firewood! All eight pieces.',turn:'Here it is.',thanks:'That will last a month. Here is your pay.',after:'The fire is burning well. Thank you.'};
+const EPITAPHS=[
+ ['Brother Tobias','He said the crypt door was safe.'],
+ ['Agnes Thatcher','She was right, and she never let anyone forget it.'],
+ ['Old Pip, a dog','Good boy.'],
+ ['Wat the Swift','Not swift enough.'],
+ ['Hob Miller','He did not believe in ghosts. Now he is one, and he is embarrassed.'],
+ ['Sister Maud','"I told them not to touch the bells."'],
+ ['Gregor Ironside','Died as he lived: loudly, and at the wrong end of a goat.'],
+ ['A monk, name forgotten','The bees remember.'],
+ ['Bartholomew Crake','He tried the cheese. May he rest.'],
+ ['Edda Fenn, beloved wife','Terrible cook. Dearly missed.'],
+ ['Thomas Wicke','"I am fine."'],
+ ['Hugh the Porter','He knew where the key was. Nobody asked.'],
+ ['Brother Aldous','Your sermons were long. Your rest will be longer.'],
+ ['Mabel Crowe','Gone to a better place. It has more cake.'],
+ ['Cuthbert the Cautious','He checked for traps. He missed the other trap.'],
+ ['Rowan Pike','"What is the worst that could happen?"'],
+ ['Joan Weaver','Nobody asked her opinion. She gave it anyway. Now: silence.'],
+ ["The abbot's goat",'Faithful to the very end. Mostly.'],
+ ['John Little','Killed by a rat. Do not tell his mother.'],
+ ['Walter Fisk','"I told you I was ill."'],
+ ['Lady Isolde','She loved roses, music and poisoning her cousin.'],
+ ['Brother Ambrose','Inventor of the blessing of the sandwich.'],
+ ['A pilgrim','If you can read this, you are standing on me.'],
+ ['Dunstan Hale','Cause of death: "Hold my ale."'],
+ ['Brother Cedric','He kept the lamps lit. Pray they outlast us.'],
+ ['Margery Hale, aged seven','The wolves came in winter.'],
+ ['Peter and Annis','Together at the last.'],
+ ['Father Anselm','Keeper of the crypts. Let none disturb him.'],
+ ['Sir Aldred of Thornwick','Faithful unto death.'],
+ ['Nan Forge','She said the well was safe to drink from.'],
+ ['Gilbert Marsh','Here lies Gilbert. Here lies the last of his socks, too.'],
+ ['Osric the Bold','He was not bold. He was just very loud.']
+];
+Object.assign(NPCS,{epitaph:{name:'A gravestone',root:d=>{const e=EPITAPHS[Math.floor(hash2(d.x,d.y,LEVEL*7+3)*EPITAPHS.length)];return say(`${e[0]}. ${e[1]}`,[BYE])}}});
 function startTalk(d){
   if(d.goat){foundGoat(d);return}
   const n=NPCS[d.npc];if(!n)return;
