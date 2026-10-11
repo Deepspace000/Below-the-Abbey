@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.82';
+const VERSION='1.83';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2882,7 +2882,10 @@ function drawInventory(){
     else if(d.k==='potion'||d.k==='food'){label=d.k==='food'?'Eat':'Drink';id='iuse'}
     else if(d.k==='quest'){label=null}
     else{label='Equip';id='iequip'}
-    if(label)btnText(id,label,rx+22,176,112,26);
+    const dk=I.sel.src==='bag'?'b'+I.sel.i:'s'+I.sel.slot,sure=I.dropKey===dk;
+    if(label){btnText(id,label,rx+6,176,70,26);btnText('idrop',sure?'Sure?':'Discard',rx+80,176,70,26)}
+    else btnText('idrop',sure?'Sure?':'Discard',rx+22,176,112,26);
+    if(sure)txt('Tap again to throw it away',rx+rw/2,203,7.5,'#e8905a','center');
   }else{
     txt(def.name,rx+rw/2,20,13,'#d8c88e','center',true);
     txt(`${def.cls}  Level ${h.lvl}`,rx+rw/2,38,10,'#c8b898','center');
@@ -2935,6 +2938,14 @@ function invBtn(id){
     if(!slot){msg('Only a Mage or Sorcerer can use spell scrolls.','#d09a80');return}
     if(equipTo(hi,slot,I.sel.i))I.sel={src:'slot',slot};
     return;
+  }
+  if(id==='idrop'){
+    const it=selItem();if(!it)return;
+    const dk=I.sel.src==='bag'?'b'+I.sel.i:'s'+I.sel.slot;
+    if(I.dropKey!==dk){I.dropKey=dk;return}
+    const name=idef(it).n;
+    if(I.sel.src==='bag')G.bag.splice(I.sel.i,1);else{delete h.eq[I.sel.slot];recalcMax(hi)}
+    I.sel=null;I.dropKey=null;sfx('equip');msg(`Discarded ${name}.`,'#c8b898');return;
   }
   if(id==='iunequip'){if(I.sel&&I.sel.src==='slot'&&unequip(hi,I.sel.slot))I.sel=null;return}
   if(id==='iuse'||id==='ipotion'){
