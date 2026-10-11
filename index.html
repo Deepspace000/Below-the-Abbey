@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.97';
+const VERSION='0.99';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -524,7 +524,7 @@ function doorCanvas2(baseD,kind){
 }
 
 /* bespoke painted facade tiles: every house front is drawn from its own spec, so nothing repeats */
-const T_TILE={},TILE_MSG={};
+const T_TILE={},TILE_MSG={},LIT_TILES=new Set();
 function tcv(){const c=document.createElement('canvas');c.width=c.height=TS;return [c,c.getContext('2d')]}
 function roofBand(x,col,thatch,R){
   if(thatch){
@@ -684,10 +684,10 @@ function makeBespokeTiles(spec){
   const chars={};
   for(const ch in spec){
     const sp=spec[ch];
-    if(sp.fam==='door'){const c=doorTile(sp),gid=TND++;T_TILE[gid]=addTex(warpTex(grimeData(c,sp.seed),sp.seed+1,2),c._glow?warpTex(pix(c._glow),sp.seed+1,2):null);TILE_MSG[gid]=sp.msg;chars[ch]=gid;continue}
+    if(sp.fam==='door'){const c=doorTile(sp),gid=TND++;T_TILE[gid]=addTex(warpTex(grimeData(c,sp.seed),sp.seed+1,2),c._glow?warpTex(pix(c._glow),sp.seed+1,2):null);TILE_MSG[gid]=sp.msg;if(c._glow)LIT_TILES.add(gid);chars[ch]=gid;continue}
     const t=sp.fam==='timber'?timberTile(sp):sp.fam==='stone'?stoneTile(sp):sp.fam==='farm'?farmTile(sp):sp.fam==='ruin'?ruinTile(sp):sp.fam==='grand'?grandTile(sp):sp.fam==='church'?churchTile(sp):plainTile(sp);
     const lean=sp.fam==='ruin'?.1:sp.fam==='timber'?(hash2(sp.seed,1,3)-.5)*.1:0,src=lean?shearCanvas(t.c,lean):t.c,gid=TNF++;
-    T_TILE[gid]=addTex(warpTex(grimeData(src,sp.seed),sp.seed+1,2.6),t.glow?warpTex(pix(t.glow),sp.seed+1,2.6):null);chars[ch]=gid;
+    T_TILE[gid]=addTex(warpTex(grimeData(src,sp.seed),sp.seed+1,2.6),t.glow?warpTex(pix(t.glow),sp.seed+1,2.6):null);if(t.glow)LIT_TILES.add(gid);chars[ch]=gid;
   }
   return chars;
 }
@@ -1023,7 +1023,16 @@ function makeItemSprites(){
    AUDIO (tiny synth)
    ========================================================================== */
 let AC=null,MASTER=null,NB=null;
+function audioUnlock(){ // iPad and iPhone keep sound off until a touch, and mute Web Audio when the silent switch is on
+  try{
+    if(AC&&AC.state!=='running')AC.resume();
+    if(!window.__silentEl){const a=document.createElement('audio');a.setAttribute('playsinline','');a.loop=true;a.src='data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYyLjEyLjEwMQAAAAAAAAAAAAAA//NwwAAAAAAAAAAAAEluZm8AAAAPAAAADgAAA5IAQUFBQUFBQVBQUFBQUFBeXl5eXl5ebW1tbW1tbXx8fHx8fHyKioqKioqKmZmZmZmZmaioqKioqKiotra2tra2tsXFxcXFxcXU1NTU1NTU4uLi4uLi4vHx8fHx8fH/////////AAAAAExhdmM2Mi4yOAAAAAAAAAAAAAAAACQDaQAAAAAAAAOSa0KUHgAAAAAAAAAAAAAAAAD/8yDEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVV//MixCcAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVVVVVVVVVVVVVVX/8yDETwAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVV//MgxHYAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVVVVVVVVVVVVVf/zIMSdAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVX/8yLExAAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVf/zIMTYAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVVVVVVVVVVVVVVX/8yDE2AAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVV//MgxNgAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zIsTXAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//MgxNgAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zIMTYAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/8yDE2AAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//MixNcAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=';a.volume=.01;window.__silentEl=a}
+    const p=window.__silentEl.play();if(p&&p.catch)p.catch(()=>{});
+  }catch(e){}
+}
+['pointerdown','touchend','keydown','click'].forEach(ev=>addEventListener(ev,audioUnlock,{passive:true}));
 function audioInit(){
+  audioUnlock();
   if(AC)return;
   try{
     AC=new (window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=.55;MASTER.connect(AC.destination);
@@ -1058,7 +1067,7 @@ const SMP={};let SND_LOADING=false;
 const SNDLIST=['wind_loop','rain_loop','dungeon_ambience','village_ambience','music_tavern','music_feast','step_stone1','step_stone2','step_stone3','step_stone4','step_wood1','step_wood2','step_wood3','step_wood4','step_dirt1','step_dirt2','step_dirt3','step_dirt4','step_cobble1','step_cobble2','step_cobble3','step_cobble4','clash1','clash2','clash3','hit1','hit2','church_bell1','church_bell2','a_goat','a_sheep','a_chicken','a_cow','a_dog','cart_horse','horse_hooves'];
 function loadSounds(){
   if(SND_LOADING||!AC)return;SND_LOADING=true;
-  for(const n of SNDLIST)fetch('assets/audio/'+n+'.ogg?v='+VERSION).then(r=>r.arrayBuffer()).then(b=>AC.decodeAudioData(b)).then(buf=>{SMP[n]=buf}).catch(()=>{});
+  for(const n of SNDLIST)fetch('assets/audio/'+n+'.mp3?v='+VERSION).then(r=>r.arrayBuffer()).then(b=>AC.decodeAudioData(b)).then(buf=>{SMP[n]=buf}).catch(()=>{});
 }
 function playSmp(n,vol,rate){
   const b=SMP[n];if(!b||!AC||G.mute)return false;
@@ -2034,7 +2043,7 @@ function render3D(){
   const day=G.day||0,lbm=Math.max(day,G.amb||0),fd=G.fl||(day?GRASSD:FLOORD),cd=G.cl||(day?SKYD:CEILD);
   const hzr=day?[132,146,132]:[86,76,62],hzc=day?[110,124,112]:[69,61,50],hzmax=day?.55:.32,hzrate=day?.07:.042;
   const tbR=1,tbG=.94,tbB=.84, ttR=1.3,ttG=.88,ttB=.5;
-  const fmp=G.fmap,fd2=G.fl2,fd3=G.fl3,fd4=G.fl4,fd5=G.fl5,fd6=G.fl6;
+  const fmp=G.fmap,fd2=G.fl2,fd3=G.fl3,fd4=G.fl4,fd5=G.fl5,fd6=G.fl6,lmp=G.lmap,lmN=lmp?clamp(1.2-(G.day||0)*1.35,0,1)*.95:0;
   // floor + ceiling
   for(let y=HH;y<VH;y++){
     const p=y-HH+.5,rd=EYE*F/p;
@@ -2050,6 +2059,7 @@ function render3D(){
       const dx=fx-cx,dy=fy-cy,dist=Math.sqrt(dx*dx+dy*dy);
       const lb=Math.max(baseL(dist),lbm);let lt=0;
       let ltc=0;
+      if(lmN>0&&cxl>=0&&cyl>=0&&cxl<MW&&cyl<MH){const lv=lmp[cyl*MW+cxl]*lmN;lt+=lv;ltc+=lv}
       for(let k=0;k<nn;k+=3){const ax=fx-nl[k],ay=fy-nl[k+1],d2=ax*ax+ay*ay;lt+=nl[k+2]/(1+1.15*(d2+.44));ltc+=nl[k+2]/(1+1.15*(d2+.12))}
       let lr=0,lrc=0;
       for(let k=0;k<nrn;k+=3){const ax=fx-nr[k],ay=fy-nr[k+1],d2=ax*ax+ay*ay;lr+=nr[k+2]/(1+1.15*(d2+.44));lrc+=nr[k+2]/(1+1.15*(d2+.12))}
@@ -2307,7 +2317,19 @@ function setupLights(){
   LIGHTS.length=0;torchAt.clear();
   G.hasLamps=G.decor.some(d=>d.k==='lamp');
   const lampLights=()=>{for(const d of G.decor)if(d.k==='lamp')LIGHTS.push({x:d.x+.5,y:d.y+.5,ph:hash2(d.x,d.y,13)*6.28,key:-1000-LIGHTS.length,taken:false,red:false,free:true,lamp:true})};
-  if(G.day>0){lampLights();return} // daylight: no wall torches outdoors, only street lanterns
+  G.lmap=null;
+  if(G.day>0){
+    lampLights();
+    const lm=new Float32Array(MW*MH);let any=false;
+    for(let y=1;y<MH-1;y++)for(let x=1;x<MW-1;x++){
+      const g=G.grid[y][x];if(!LIT_TILES.has(g))continue;
+      for(const [dx,dy] of [[0,1],[0,-1],[1,0],[-1,0]]){
+        const nx=x+dx,ny=y+dy;if(G.grid[ny][nx]!==0)continue;
+        for(let ay=-1;ay<=1;ay++)for(let ax=-1;ax<=1;ax++){const px=nx+ax,py=ny+ay;if(px<0||py<0||px>=MW||py>=MH||G.grid[py][px]!==0)continue;lm[py*MW+px]=Math.min(1.1,lm[py*MW+px]+(ax||ay?.22:.5));any=true}
+      }
+    }
+    if(any)G.lmap=lm;
+    return} // daylight: no wall torches outdoors, only street lanterns and window light
   const tg=(LEVELS[LEVEL]&&LEVELS[LEVEL].torchGap)||6.2,zoneAt=(x,y)=>{if(LEVEL===1)for(const z of LIGHT_ZONES)if(x>=z[0]&&x<=z[2]&&y>=z[1]&&y<=z[3])return z;return [0,0,0,0,tg,0]};
   const cands=[];
   for(let y=1;y<MH-1;y++)for(let x=1;x<MW-1;x++){
@@ -2328,7 +2350,7 @@ function setupLights(){
   if(G.extraLights)for(const [x,y] of G.extraLights)LIGHTS.push({x:x+.5,y:y+.5,ph:hash2(x,y,9)*6.28,key:-1-LIGHTS.length,taken:false,red:false,free:true});
 }
 function setLightLevel(l){
-  RANGE=5.2+2.6*l;const amp=.66+.3*l;
+  RANGE=(5.2+2.6*l)*((G.day||0)>0?1.2:1);const amp=.66+.3*l;
   for(let i=0;i<=1024;i++){const t=1-i/1024;LUT[i]=AMB+(t>0?amp*Math.pow(t,1.6):0)}
 }
 
@@ -3446,6 +3468,7 @@ function loadLevel(n){
   const L=LEVELS[n]||LEVELS[1];
   LEVEL=n;MAPROWS=L.rows;MW=MAPROWS[0].length;MH=MAPROWS.length;START=L.start;ENEMY_SPAWNS=L.enemies;ITEM_SPAWNS=L.items;DECOR_SPAWNS=L.decor;
   G.day=L.day!==undefined?L.day:(L.outdoor?.98:0);G.dayBase=G.day;G.amb=L.amb||0;G.fl=L.floor?FLOORS[L.floor]:null;G.cl=L.ceil?CEILS[L.ceil]:null;G.portals=L.portals||[];G.fmap=L.fmap?L.fmap.join(''):null;G.fl2=L.fmap?(FLOORS[L.floor2]||FLOORS.grass):null;G.fl3=L.fmap?(FLOORS.dirt||FLOORS.grass):null;G.fl4=L.fmap?(FLOORS.mosscobble||FLOORS.cobble):null;G.fl5=L.fmap?(FLOORS.stainedcobble||FLOORS.cobble):null;G.fl6=L.fmap?(FLOORS.wetcobble||FLOORS.cobble):null;G.extraLights=L.lights||null;
+  setLightLevel(G.lightLevel||0);
 }
 function levelState(){
   return {items:G.items.map(i=>i.taken?1:0),decor:G.decor.map(d=>({contents:d.contents||null,gold:d.gold||0,goldTaken:!!d.goldTaken,found:!!d.found})),
