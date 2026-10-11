@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.53';
+const VERSION='1.54';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2183,7 +2183,7 @@ function render3D(){
   const nl=nearL,nn=nl.length,nr=nearR,nrn=nr.length;
   const D=vimg.data;
   const day=G.day||0,lbm=Math.max(day,G.amb||0),fd=G.fl||(day?GRASSD:FLOORD),cd=G.cl||(day?SKYD:CEILD);
-  const skyLv=LEVEL===22,lushLv=LEVEL===32||LEVEL===33,grimLv=LEVEL===2,hzr=skyLv?[176,192,216]:grimLv?[104,114,100]:lushLv?[170,200,160]:day?[132,146,132]:[86,76,62],hzc=grimLv?[84,92,80]:lushLv?[140,176,130]:skyLv?[150,172,208]:day?[110,124,112]:[69,61,50],hzmax=skyLv?.38:lushLv?.34:grimLv?.4:day?.55:.32,hzrate=skyLv?.05:lushLv?.04:grimLv?.045:day?.07:.042;
+  const skyLv=LEVEL===22,lushLv=LEVEL===32||LEVEL===33,grimLv=LEVEL===2,hzr=skyLv?[176,192,216]:grimLv?[78,88,74]:lushLv?[170,200,160]:day?[132,146,132]:[86,76,62],hzc=grimLv?[62,70,58]:lushLv?[140,176,130]:skyLv?[150,172,208]:day?[110,124,112]:[69,61,50],hzmax=skyLv?.38:lushLv?.34:grimLv?.27:day?.55:.32,hzrate=skyLv?.05:lushLv?.04:grimLv?.032:day?.07:.042;
   const tbR=1,tbG=.94,tbB=.84, ttR=1.3,ttG=.88,ttB=.5;
   const fmp=G.fmap,fd2=G.fl2,fd3=G.fl3,fd4=G.fl4,fd5=G.fl5,fd6=G.fl6,lmp=G.lmap,lmN=lmp?clamp(1.2-(G.day||0)*1.35,0,1)*.95:0;
   // floor + ceiling (the ceiling is its own plane, CEILH above the floor); a daylit sky needs no lamp light, and indoors only the nearest few lights reach the ceiling
@@ -2372,8 +2372,8 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     const wx=s.x,wy=s.y,dist=Math.hypot(wx-cx,wy-cy);
     let lt=0;for(let k=0;k<nearL.length;k+=3){const ax=wx-nearL[k],ay=wy-nearL[k+1];lt+=nearL[k+2]/(1+1.15*(ax*ax+ay*ay))}
     for(let k=0;k<nearR.length;k+=3){const ax=wx-nearR[k],ay=wy-nearR[k+1];lt+=nearR[k+2]/(1+1.15*(ax*ax+ay*ay))}
-    const lum=clamp(.08+(Math.max(baseL(dist),G.day||0,G.amb||0)+lt*.85)*1.05,0,1);
-    const kq0=Math.min(1,Math.max(.05,2*sw/iw)),dyv=(G.day||0)>0,hzv=dyv?[132,146,132]:[86,76,62],smS=Math.min(dyv?.4:.26,dist*(dyv?.04:.03))*.75;
+    const lum=clamp(.08+(Math.max(baseL(dist),G.day||0,G.amb||0)+lt*.85)*1.05,0,1)*(LEVEL===2?.84:1);
+    const kq0=Math.min(1,Math.max(.05,2*sw/iw)),dyv=(G.day||0)>0,hzv=LEVEL===2?[58,66,54]:dyv?[132,146,132]:[86,76,62],smS=Math.min(dyv?.4:.26,dist*(dyv?.04:.03))*(LEVEL===2?.38:.75);
     let SRC,tw,th;
     if(!s.flash&&!(s.decor&&s.decor.burn>0)){
       let tier=SPR_TIERS[SPR_TIERS.length-1];for(const t of SPR_TIERS){if(t>=iw*kq0){tier=t;break}}
