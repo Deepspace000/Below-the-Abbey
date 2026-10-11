@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.90';
+const VERSION='1.91';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -5206,10 +5206,20 @@ function drawCompare(e,def){
   ctx.fillStyle='#fff4d0';ctx.beginPath();ctx.moveTo(nx,gy-1.5);ctx.lineTo(nx-3,gy-5.5);ctx.lineTo(nx+3,gy-5.5);ctx.closePath();ctx.fill();ctx.fillRect(nx-.6,gy-1.5,1.2,7.5);
   txt(verdict[0].toUpperCase(),x0+7,gy+11,7.5,verdict[1],'left',true);txt('about '+Math.max(1,Math.round(toKill))+' rounds to win',x0+w-6,gy+11,6.2,'#b8a888','right');
 }
+// message line with each party member's name in their class colour
+function txtSNames(text,x,y,size,col){
+  const names=HERO_DEF.map(d=>d.name).filter(n=>n&&text.includes(n));
+  if(!names.length){txtS(text,x,y,size,col,'center',false);return}
+  const parts=[];let rest=text;
+  while(rest){let at=-1,nm='';for(const n of names){const k=rest.indexOf(n);if(k>=0&&(at<0||k<at)){at=k;nm=n}}if(at<0){parts.push(rest);break}if(at>0)parts.push(rest.slice(0,at));parts.push(nm);rest=rest.slice(at+nm.length)}
+  ctx.save();ctx.font=`${size*1.12}px ${FTXT}`;const ws=parts.map(p=>ctx.measureText(p).width);ctx.restore();
+  let px=x-ws.reduce((a,b)=>a+b,0)/2;
+  parts.forEach((p,i)=>{const hi=HERO_DEF.findIndex(d=>d.name===p);txtS(p,px,y,size,hi>=0?heroSpeech(hi):col,'left',false);px+=ws[i]});
+}
 function drawMessages(){
   const now=G.time,lines=G.msgs.filter(m=>now-m.t<6).slice(-3);
   let y=VH-8-lines.length*12;
-  for(let i=0;i<lines.length;i++){const m=lines[i],a=clamp(1-(now-m.t-4.5)/1.5,0,1);ctx.globalAlpha=a;txtS(m.text,210,y+i*12+6,10,m.col,'center',false)}
+  for(let i=0;i<lines.length;i++){const m=lines[i],a=clamp(1-(now-m.t-4.5)/1.5,0,1);ctx.globalAlpha=a;txtSNames(m.text,210,y+i*12+6,10,m.col)}
   ctx.globalAlpha=1;
 }
 function drawFloats(dt){
