@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.35';
+const VERSION='1.36';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1189,6 +1189,9 @@ function areaAudio(){
 function stepSample(){ // the cobble recordings were 20 dB louder than the rest and carried stray noise, so the cobbles use the stone steps, a little crisper
   const k0=G.amb>0?'wood':(LEVEL===3||LEVEL===13)?'cobble':G.day>0?'dirt':'stone',k=k0==='cobble'?'stone':k0;
   const vol={stone:.55,wood:.6,dirt:.95}[k]*(.85+Math.random()*.3),rate=(k0==='cobble'?1.1:1)*(.92+Math.random()*.16);
+  if(k0==='cobble'&&AC&&!G.mute){ // the original cobble step, tamed: the recordings clip at full scale, so bring them down to the stone level and soften the top end
+    const b=SMP[pickN('step_cobble',4)];if(b){const src=AC.createBufferSource(),g=AC.createGain(),f=AC.createBiquadFilter();src.buffer=b;src.playbackRate.value=.92+Math.random()*.16;g.gain.value=.12*(.85+Math.random()*.3);f.type='lowpass';f.frequency.value=2600;f.Q.value=.6;src.connect(f);f.connect(g);g.connect(MASTER);src.start();return true}
+  }
   return playSmp(pickN('step_'+k,4),vol,rate);
 }
 
