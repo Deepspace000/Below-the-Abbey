@@ -14,14 +14,14 @@
 </style>
 </head>
 <body>
-<canvas id="c" width="960" height="640"></canvas><div id="glass"></div>
+<canvas id="c" width="960" height="640"></canvas><div id="glass"></div><svg width="0" height="0" style="position:absolute"><filter id="sharpL" color-interpolation-filters="sRGB"><feConvolveMatrix order="3" kernelMatrix="0 -.25 0 -.25 2 -.25 0 -.25 0" preserveAlpha="true"/></filter><filter id="sharpH" color-interpolation-filters="sRGB"><feConvolveMatrix order="3" kernelMatrix="0 -.6 0 -.6 3.4 -.6 0 -.6 0" preserveAlpha="true"/></filter></svg>
 <script>
 'use strict';
 /* ==========================================================================
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.17';
+const VERSION='1.18';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4679,17 +4679,17 @@ function ui(dt){
   // dark, dirty corners like an old lens
   {const vg=ctx.createRadialGradient(DW/2,DH/2,DH*.36,DW/2,DH/2,DW*.62);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.26)');ctx.fillStyle=vg;ctx.fillRect(0,0,DW,DH)}
   // aged finish: wash the colour out towards grey and add a faint dusty veil
-  ctx.save();ctx.globalCompositeOperation='saturation';ctx.fillStyle='rgba(128,128,128,.4)';ctx.fillRect(0,0,DW,DH);
+  ctx.save();ctx.globalCompositeOperation='saturation';ctx.fillStyle=`rgba(128,128,128,${[.4,.12,0][GFX.color]})`;ctx.fillRect(0,0,DW,DH);
   ctx.globalCompositeOperation='source-over';ctx.fillStyle='rgba(70,64,54,.07)';ctx.fillRect(0,0,DW,DH);
   if(!DITHERP)makeDitherPat();
-  if(DITHERP){ctx.globalCompositeOperation='soft-light';ctx.globalAlpha=.5;ctx.fillStyle=DITHERP;ctx.fillRect(0,0,DW,DH);ctx.globalAlpha=1}
+  if(DITHERP&&GFX.dither){ctx.globalCompositeOperation='soft-light';ctx.globalAlpha=[0,.22,.5,.95][GFX.dither];ctx.fillStyle=DITHERP;ctx.fillRect(0,0,DW,DH);ctx.globalAlpha=1}
   if(PAPERP){ctx.globalCompositeOperation='multiply';ctx.fillStyle='rgba(224,206,170,.12)';ctx.fillRect(0,0,DW,DH);ctx.globalAlpha=.75;ctx.fillStyle=PAPERP;ctx.fillRect(0,0,DW,DH)}
   ctx.restore();
 }
 const LOWC=document.createElement('canvas'),LOWX=LOWC.getContext('2d',{willReadFrequently:true});
 const BAYER=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
 function drawWorld(){ // a slightly softer, lower-res picture; the screen-wide dither overlay gives it the same grain as the menus
-  const w=G.day>0?360:384,h=w/2;
+  const w=GFX.sharp?420:(G.day>0?360:384),h=w/2;
   if(LOWC.width!==w){LOWC.width=w;LOWC.height=h}
   LOWX.imageSmoothingEnabled=true;LOWX.drawImage(vc,0,0,w,h);
   ctx.imageSmoothingEnabled=false;ctx.drawImage(LOWC,0,0,420,210);ctx.imageSmoothingEnabled=true;
@@ -4724,12 +4724,13 @@ function bigPanel(x,y,w,h){illum(x,y,w,h,(x+y)|0);ctx.save();ctx.fillStyle='rgba
 function btnText(id,label,x,y,w,h){panel(x,y,w,h,false,false);txt(label,x+w/2,y+h/2,11,'#c9ba8e','center',true);btn(id,x,y,w,h)}
 function drawMenu(){
   if(G.menu==='quests'){drawQuestLog();return}
+  if(G.menu==='gfx'){drawGfx();return}
   BTNS=[];veil(.6);bigPanel(90,12,300,296);
   txt('MENU',240,30,14,'#d8c88e','center',true);
   txt('Version '+VERSION,240,298,8,'#9a8a68','center');
   btnText('resume','Resume',170,44,140,26);
   btnText('quests',anyQuestReady()?'Quests  *':'Quests',170,76,140,26);
-  btnText('mute',G.mute?'Sound: Off':'Sound: On',100,108,130,26);btnText('crt',G.crt?'CRT: On':'CRT: Off',250,108,130,26);
+  btnText('mute',G.mute?'Sound: Off':'Sound: On',100,108,130,26);btnText('gfx','Graphics',250,108,130,26);
   btnText('savemenu','Save / Load',100,140,130,26);btnText('overview','Level layout',250,140,130,26);
   btnText('newparty','New party',100,172,130,26);btnText('restart','Restart game',250,172,130,26);
   const L=['Arrows / WASD: move and turn   Q / E: step sideways','Space: attack   X: special   P: potion   Z: wait   R: rest','1-4: choose hero   I: inventory   J: quests   M: map   Esc: menu','',
@@ -4796,20 +4797,40 @@ function update(dt){
   if(G.autoNow&&G.state==='play'&&!G.cut&&!G.drag){G.autoNow=false;G.nextAuto=G.time+180;writeSave('auto')}
   if(G.state==='play'&&G.time>=G.nextAuto&&G.timers.length===0&&!G.drag&&!G.cut){G.nextAuto=G.time+180;writeSave('auto')}
 }
+const GFX={dither:2,scan:2,color:0,sharp:0,bright:2};
+const GFX_NAMES={dither:['Off','Low','Normal','Strong'],scan:['Off','Light','Normal'],color:['Washed out','Normal','Vivid'],sharp:['Off','Low','High'],bright:['Darker','Dim','Normal','Bright','Brighter']};
+function gfxApply(){
+  const f=[];const b=[.78,.9,1,1.14,1.3][GFX.bright];if(b!==1)f.push(`brightness(${b})`);
+  if(GFX.color===2)f.push('saturate(1.45) contrast(1.05)');else if(GFX.color===1)f.push('saturate(1.12)');
+  if(GFX.sharp)f.push(GFX.sharp===1?'url(#sharpL)':'url(#sharpH)');
+  cv.style.filter=f.join(' ');
+  try{localStorage.setItem('abbeyGFX',JSON.stringify(GFX))}catch(e){}
+}
+function gfxLoad(){try{const o=JSON.parse(localStorage.getItem('abbeyGFX')||'null');if(o){for(const k in GFX)if(typeof o[k]==='number')GFX[k]=o[k]}else if(localStorage.getItem('abbeyCRT')==='0')GFX.scan=0}catch(e){}gfxApply()}
+function drawGfx(){
+  BTNS=[];veil(.6);bigPanel(90,12,300,296);
+  txt('GRAPHICS',240,30,14,'#d8c88e','center',true);
+  const rows=[['dither','Dithering'],['scan','Scanlines'],['color','Colour'],['sharp','Sharpening'],['bright','Brightness']];
+  rows.forEach(([k,l],i)=>{const y=46+i*32;txt(l,104,y+13,9,'#d8c9a0','left');btnText('g_'+k,GFX_NAMES[k][GFX[k]],200,y,176,26)});
+  txt('CRT screen (glow, curved glass)',104,46+5*32+13,9,'#d8c9a0','left');btnText('g_crt',G.crt?'On':'Off',290,46+5*32,86,26);
+  btnText('g_back','Back',170,46+6*32+4,140,26);
+  btn('menuclose2',0,0,DW,DH);BTNS.unshift(BTNS.pop());
+}
 const crtC=document.createElement('canvas');crtC.width=240;crtC.height=160;const crtX=crtC.getContext('2d');
 let SCANP=null,NOISEP=null;
 function crtInit(){
-  SCANP=ctx.createPattern(mkCanvas(4,3,(x)=>{x.fillStyle='rgba(0,0,0,.36)';x.fillRect(0,2,4,1)}),'repeat');
+  SCANP=[null,ctx.createPattern(mkCanvas(4,3,(x)=>{x.fillStyle='rgba(0,0,0,.17)';x.fillRect(0,2,4,1)}),'repeat'),ctx.createPattern(mkCanvas(4,3,(x)=>{x.fillStyle='rgba(0,0,0,.36)';x.fillRect(0,2,4,1)}),'repeat')];
   NOISEP=ctx.createPattern(mkCanvas(128,128,(x)=>{const id=x.createImageData(128,128);for(let i=0;i<id.data.length;i+=4){const v=Math.random()*255;id.data[i]=id.data[i+1]=id.data[i+2]=v;id.data[i+3]=Math.random()<.5?0:30}x.putImageData(id,0,0)}),'repeat');
 }
 function crtPass(t){
-  if(!G.crt||!SCANP)return;
+  if(!SCANP||(!G.crt&&!GFX.scan))return;
   ctx.save();ctx.setTransform(1,0,0,1,0,0);
   const W=cv.width,H=cv.height;
+  if(!G.crt){ctx.fillStyle=SCANP[GFX.scan];ctx.fillRect(0,0,W,H);ctx.restore();return}
   crtX.drawImage(cv,0,0,240,160);                       // phosphor bloom
   ctx.globalCompositeOperation='screen';ctx.globalAlpha=.22;ctx.drawImage(crtC,0,0,W,H);
   ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
-  ctx.fillStyle=SCANP;ctx.fillRect(0,0,W,H);             // scanlines
+  if(GFX.scan){ctx.fillStyle=SCANP[GFX.scan];ctx.fillRect(0,0,W,H)}             // scanlines
   const by=((t*55)%(H+200))-100,g=ctx.createLinearGradient(0,by-60,0,by+60); // slow rolling band
   g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,'rgba(220,235,220,.05)');g.addColorStop(1,'rgba(255,255,255,0)');
   ctx.fillStyle=g;ctx.fillRect(0,by-60,W,120);
@@ -4862,11 +4883,17 @@ function handleBtn(id){
   if(G.inv.open){invBtn(id);return}
   if(G.map){if(id==='mapclose'||id==='map')G.map=false;return}
   if(G.menu==='quests'){G.menu=false;return}
+  if(G.menu==='gfx'){
+    if(id==='g_back'||id==='menuclose2'||id==='menu')G.menu=true;
+    else if(id==='g_crt'){G.crt=!G.crt;try{localStorage.setItem('abbeyCRT',G.crt?'1':'0')}catch(e){}fit()}
+    else if(id&&id.startsWith('g_')){const k=id.slice(2);if(GFX_NAMES[k]){GFX[k]=(GFX[k]+1)%GFX_NAMES[k].length;gfxApply()}}
+    return;
+  }
   if(G.menu){
     if(id==='resume'||id==='menuclose'||id==='menu')G.menu=false;
     else if(id==='quests'){G.menu='quests'}
     else if(id==='mute'){G.mute=!G.mute}
-    else if(id==='crt'){G.crt=!G.crt;try{localStorage.setItem('abbeyCRT',G.crt?'1':'0')}catch(e){}fit()}
+    else if(id==='gfx'){G.menu='gfx'}
     else if(id==='savemenu'){openSaves('menu')}
     else if(id==='overview'){G.menu=false;G.overview=true}
     else if(id==='newparty'){backupAuto();G.menu=false;crInit();G.state='create'}
@@ -5109,7 +5136,7 @@ addEventListener('resize',fit);fit();
   for(const k in ART_KEEP)IMG[k]=ART_KEEP[k];
   if(IMG.signblank){const mkSignText=(base,text)=>mkCanvas(base.width,base.height,(x,w,h)=>{x.drawImage(base,0,0);let fs=Math.round(w*.2);x.font=`bold ${fs}px Georgia,serif`;while(x.measureText(text).width>w*.64&&fs>8){fs--;x.font=`bold ${fs}px Georgia,serif`}x.textAlign='center';x.textBaseline='middle';x.lineWidth=Math.max(2,fs*.18);x.strokeStyle='rgba(20,12,6,.9)';x.strokeText(text,w*.5,h*.3);x.fillStyle='#d8cca4';x.fillText(text,w*.5,h*.3)});IMG.sign_thornwick=mkSignText(IMG.signblank,'THORNWICK');IMG.sign_ironhill=mkSignText(IMG.signblank,'IRONHILL')}
   for(const id of ['dagger', 'sword', 'mace', 'staff', 'gravemace', 'bow', 'axe', 'shield', 'cap', 'jerkin', 'bracers', 'leggings', 'helm', 'torch', 'lantern', 'potion', 'key', 'wood', 'ringV', 'ringM', 'ringW', 'ringS', 'sp_fire', 'scrollFrost', 'scrollLight']){const im=IMG['icn_'+id];if(!im)continue;IMG['ic_'+id]=im;IMG['it_'+id]=im;if(id==='potion')IMG.potion=im;if(id==='key')IMG.key=im}
-  reset();buildUIPatterns();crtInit();makeAtmos();try{G.crt=localStorage.getItem('abbeyCRT')!=='0'}catch(e){G.crt=true}fit();
+  reset();buildUIPatterns();crtInit();makeAtmos();try{G.crt=localStorage.getItem('abbeyCRT')!=='0'}catch(e){G.crt=true}gfxLoad();fit();
   addEventListener('pagehide',()=>{if(G.state==='play'&&G.timers.length===0)writeSave('auto')});
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&G.state==='play'&&G.timers.length===0)writeSave('auto')});
   window.__ready=true;
