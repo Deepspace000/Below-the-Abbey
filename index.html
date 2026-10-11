@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.67';
+const VERSION='1.68';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1124,13 +1124,13 @@ function drone(){
   }
 }
 function tone(f0,f1,dur,type,vol,delay){
-  if(!AC||G.mute)return;const t=AC.currentTime+(delay||0),o=AC.createOscillator(),g=AC.createGain();
+  if(!AC||G.mute)return;vol*=SFXM;const t=AC.currentTime+(delay||0),o=AC.createOscillator(),g=AC.createGain();
   o.type=type||'sine';o.frequency.setValueAtTime(f0,t);if(f1&&f1!==f0)o.frequency.exponentialRampToValueAtTime(f1,t+dur);
   g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+Math.min(.015,dur/3));g.gain.exponentialRampToValueAtTime(.0001,t+dur);
   o.connect(g);g.connect(MASTER);o.start(t);o.stop(t+dur+.05);
 }
 function nz(dur,vol,type,f0,f1,delay){
-  if(!AC||G.mute)return;const t=AC.currentTime+(delay||0),s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();
+  if(!AC||G.mute)return;vol*=SFXM;const t=AC.currentTime+(delay||0),s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();
   s.buffer=NB;s.loop=true;f.type=type;f.frequency.setValueAtTime(f0,t);if(f1)f.frequency.exponentialRampToValueAtTime(f1,t+dur);f.Q.value=1.2;
   g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
   s.connect(f);f.connect(g);g.connect(MASTER);s.start(t);s.stop(t+dur+.05);
@@ -1144,9 +1144,9 @@ function loadSounds(){
 }
 function playSmp(n,vol,rate){
   const b=SMP[n];if(!b||!AC||G.mute||!SNDOPT[SND_CAT(n)])return false;
-  const s=AC.createBufferSource(),g=AC.createGain();s.buffer=b;s.playbackRate.value=rate||1;g.gain.value=vol;s.connect(g);g.connect(MASTER);s.start();return true;
+  const s=AC.createBufferSource(),g=AC.createGain();s.buffer=b;s.playbackRate.value=rate||1;g.gain.value=vol*SNDOPT[SND_CAT(n)];s.connect(g);g.connect(MASTER);s.start();return true;
 }
-const SNDOPT={combat:1,amb:1,music:1,steps:1};
+const SNDOPT={combat:1,amb:1,music:1,steps:1};let SFXM=1;
 try{Object.assign(SNDOPT,JSON.parse(localStorage.getItem('abbeySND')||'{}'))}catch(e){}
 const SND_CAT=n=>/^step_/.test(n)?'steps':/^(clash|hit)\d/.test(n)?'combat':/^music_/.test(n)?'music':'amb';
 const SND_COMBAT=new Set(['hit','hack','spell','frost','miss','squeak','ratdie','bite','hurt','fire','arrow','growl','rattle','screech']);
@@ -1186,7 +1186,7 @@ function areaAudio(){
     else if(LEVEL===5||LEVEL===14)T.music_feast=.4;
     else if(LEVEL===6||LEVEL===16){T.music_tavern=.55;T.village_ambience=.18}
   }
-  for(const n of Object.keys(T))if(!SNDOPT[SND_CAT(n)])delete T[n];
+  for(const n of Object.keys(T)){T[n]*=SNDOPT[SND_CAT(n)];if(!(T[n]>0))delete T[n]}
   for(const n of SNDLIST){if(n in T||LAYERS[n])setLayer(n,T[n]||0)}
   if(G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===3||LEVEL===13||LEVEL===29||LEVEL===30)){
     if(!G.bellNext)G.bellNext=G.time+50+Math.random()*60;
@@ -1206,7 +1206,7 @@ function stepSample(){ // the cobble recordings were 20 dB louder than the rest 
   const k0=G.amb>0?'wood':(LEVEL===3||LEVEL===13)?'cobble':G.day>0?'dirt':'stone',k=k0==='cobble'?'stone':k0;
   const vol={stone:.55,wood:.6,dirt:.95}[k]*(.85+Math.random()*.3),rate=(k0==='cobble'?1.1:1)*(.92+Math.random()*.16);
   if(k0==='cobble'&&AC&&!G.mute&&SNDOPT.steps){ // the original cobble step, tamed: the recordings clip at full scale, so bring them down to the stone level and soften the top end
-    const b=SMP[pickN('step_cobble',4)];if(b){const src=AC.createBufferSource(),g=AC.createGain(),f=AC.createBiquadFilter();src.buffer=b;src.playbackRate.value=.92+Math.random()*.16;g.gain.value=.12*(.85+Math.random()*.3);f.type='lowpass';f.frequency.value=2600;f.Q.value=.6;src.connect(f);f.connect(g);g.connect(MASTER);src.start();return true}
+    const b=SMP[pickN('step_cobble',4)];if(b){const src=AC.createBufferSource(),g=AC.createGain(),f=AC.createBiquadFilter();src.buffer=b;src.playbackRate.value=.92+Math.random()*.16;g.gain.value=.12*SNDOPT.steps*(.85+Math.random()*.3);f.type='lowpass';f.frequency.value=2600;f.Q.value=.6;src.connect(f);f.connect(g);g.connect(MASTER);src.start();return true}
   }
   return playSmp(pickN('step_'+k,4),vol,rate);
 }
@@ -1215,6 +1215,7 @@ function sfx(n){
   if(!AC||G.mute)return;
   if((n==='step'||n==='turn'||n==='bump')&&!SNDOPT.steps)return;
   if(SND_COMBAT.has(n)&&!SNDOPT.combat)return;
+  SFXM=(n==='step'||n==='turn'||n==='bump')?SNDOPT.steps:SND_COMBAT.has(n)?SNDOPT.combat:1;
   if(n==='step'&&stepSample())return;
   if(n==='hack'&&playSmp(pickN('clash',3),.55,.94+Math.random()*.12)){nz(.1,.1,'lowpass',500,200);return}
   if(n==='hit'&&playSmp(pickN('hit',2),.5,.94+Math.random()*.12)){tone(140,60,.12,'triangle',.12);return}
@@ -5282,7 +5283,7 @@ const SND_ROWS=[['combat','Combat sounds'],['amb','Ambient sounds'],['music','Mu
 function drawSnd(){
   BTNS=[];veil(.6);bigPanel(90,12,300,296);
   txt('SOUND',240,30,14,'#d8c88e','center',true);
-  SND_ROWS.forEach(([k,l],i)=>{const y=46+i*38;txt(l,104,y+13,9,'#d8c9a0','left');btnText('s_'+k,SNDOPT[k]?'On':'Off',290,y,86,26)});
+  SND_ROWS.forEach(([k,l],i)=>{const y=46+i*38;txt(l,104,y+13,9,'#d8c9a0','left');btnText('s_'+k+'_dn','-',236,y,30,26);txt(Math.round(SNDOPT[k]*100)+'%',301,y+13,9,'#f0e4b4','center',true);btnText('s_'+k+'_up','+',336,y,30,26)});
   txt('Ambient: wind, rain, towns and villages.',240,46+4*38+6,8,'#9a8a68','center');
   btnText('s_back','Back',170,46+4*38+22,140,26);
   btn('menuclose3',0,0,DW,DH);BTNS.unshift(BTNS.pop());
@@ -5366,7 +5367,7 @@ function handleBtn(id){
   if(G.menu==='quests'){if(id==='qexit')G.menu=false;return}
   if(G.menu==='snd'){
     if(id==='s_back'||id==='menuclose3'||id==='menu')G.menu=true;
-    else if(id&&id.startsWith('s_')){const k=id.slice(2);if(k in SNDOPT){SNDOPT[k]=SNDOPT[k]?0:1;try{localStorage.setItem('abbeySND',JSON.stringify(SNDOPT))}catch(e){}areaAudio()}}
+    else if(id&&id.startsWith('s_')){const m=id.match(/^s_(\w+)_(up|dn)$/),k=m&&m[1];if(k&&k in SNDOPT){SNDOPT[k]=Math.round(clamp(SNDOPT[k]+(m[2]==='up'?.1:-.1),0,1)*10)/10;try{localStorage.setItem('abbeySND',JSON.stringify(SNDOPT))}catch(e){}areaAudio()}}
     return;
   }
   if(G.menu==='gfx'){
