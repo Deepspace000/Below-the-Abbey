@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.89';
+const VERSION='1.90';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1881,7 +1881,7 @@ function iconPowers(cx,cy,s){
 function drawPowerLadder(hi){
   const I=G.inv,h=G.heroes[hi],def=HERO_DEF[hi],c=CLASSES[def.clsId];
   if(I.pw===undefined)I.pw=0;
-  txt(`${def.name} - ${def.cls}`,234,14,9.5,'#c8b982','center',true,undefined,140);
+  txt(`${def.name} - ${def.cls}`,234,14,9.5,heroSpeech(hi),'center',true,undefined,140);
   c.powers.forEach((p,k)=>{
     const y=22+k*27,open=h.lvl>=p.lv,chosen=p.act&&(h.powSel||0)===k&&open,sel=I.pw===k;
     ctx.save();rrect(ctx,164,y,140,25,4);ctx.fillStyle=sel?'rgba(78,26,18,.96)':'rgba(46,14,14,.9)';ctx.fill();
@@ -2917,7 +2917,7 @@ function drawInventory(){
     else btnText('idrop',sure?'Sure?':'Discard',rx+22,176,112,26);
     if(sure)txt('Tap again to throw it away',rx+rw/2,203,7.5,'#e8905a','center');
   }else{
-    txt(def.name,rx+rw/2,20,13,'#d8c88e','center',true);
+    txt(def.name,rx+rw/2,20,13,heroSpeech(hi),'center',true);
     txt(`${def.cls}  Level ${h.lvl}`,rx+rw/2,38,10,'#c8b898','center');
     const nx=xpNeed(h.lvl);ctx.fillStyle='#141006';ctx.fillRect(rx+16,50,rw-32,6);ctx.fillStyle='#e8c040';ctx.fillRect(rx+16,50,(rw-32)*h.xp/nx,6);ctx.strokeStyle='#8a7448';ctx.lineWidth=1;roughStrokeRect(rx+16,50,rw-32,6);
     txt(`${h.xp} / ${nx} XP`,rx+rw/2,66,8.5,'#b8a888','center');
@@ -3411,7 +3411,7 @@ function drawLoot(){
   if(!L.shop&&box.length)btnText('ltakeall','Take all',324,214,146,26);
   // bottom bar
   drawPortraits(250,hi,'lhero');
-  panel(168,252,230,62,false,false);txt(`${HERO_DEF[hi].name}  -  health ${h.hp}/${h.max}`,283,276,10,'#cdbf94','center',true);
+  panel(168,252,230,62,false,false);txt(`${HERO_DEF[hi].name}  -  health ${h.hp}/${h.max}`,283,276,10,heroSpeech(hi),'center',true);
   txt(L.shop?'Prices are shown on each item.':'Tap an item, then take it.',283,296,8.5,'#8a7a58','center');
   panel(408,252,66,62,false,false);iconRedX(441,283,1.6);btn('lclose',408,252,66,62);
 }
