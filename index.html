@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.15';
+const VERSION='1.16';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2239,6 +2239,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
   for(const s of proj){
     const img=s.img;if(!img)continue;
     const iw=img.width,ih=img.height,ty=s.tY;
+    if(s.hang||(s.decor&&/^sign_|^lamp$/.test(s.decor.k))){const f=clamp((ty-.35)/.55,0,1);if(f<.03)continue;s.fade=f} // signs and lanterns melt away when you stand beside them
     let sw=F*s.w/ty;sw*=(1+(s.lunge||0)*.28);
     if(s.hang){const rx=s.x-cx,ry=s.y-cy,dl=Math.hypot(rx,ry)||1;sw*=Math.max(.07,Math.abs((rx*s.hang[1]-ry*s.hang[0])/dl))}
     const sh=sw*ih/iw*(1-(s.sink||0)*.6);
@@ -2277,7 +2278,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     }
     vctx.globalAlpha=1;
     if(anyVis&&s.decor&&s.decor.k==='lamp'){ // a lit lantern: bright glass and a warm halo
-      const nk=clamp(1.2-(G.day||0)*1.35,0,1);
+      const nk=clamp(1.2-(G.day||0)*1.35,0,1)*(s.fade===undefined?1:s.fade);
       if(nk>.02){
         const fk=.88+.12*Math.sin(G.time*7+(s.decor.x*5+s.decor.y*3)),gx=scrX,gy=top+sh*.23,rad=sw*(1.7+.25*fk);
         vctx.save();vctx.globalCompositeOperation='lighter';
