@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.16';
+const VERSION='1.17';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2205,7 +2205,10 @@ function shopSign(d){
   const base=IMG['signb'+key];if(!base)return IMG[d.k];
   const w=base.width,h=base.height;
   return SIGN_CACHE[id]=mkCanvas(w,h,(x)=>{
-    x.drawImage(base,0,0);x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';
+    x.drawImage(base,0,0);
+    const TINT={sign_church:'112,134,176',sign_bakery:'196,148,64',sign_store:'92,142,84',sign_inn:'168,70,62',sign_smith:'124,100,140'}[d.k]||'140,120,90';
+    x.save();x.globalCompositeOperation='source-atop';x.fillStyle=`rgba(${TINT},.4)`;x.fillRect(w*.08,h*.44,w*.88,h*.56);x.restore();
+    x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';
     const cx=w*.535,mw=w*.68;
     const line=(t,y,fs0,font,col)=>{let fs=fs0;x.font=`${font} ${fs}px Georgia,serif`;while(x.measureText(t).width>mw&&fs>10){fs-=2;x.font=`${font} ${fs}px Georgia,serif`}x.lineWidth=Math.max(3,fs*.16);x.strokeStyle='rgba(18,12,6,.9)';x.strokeText(t,cx,y);x.fillStyle=col;x.fillText(t,cx,y)};
     line(d.txt[0],h*.67,h*.16,'bold','#d6c9a0');
