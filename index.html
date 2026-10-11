@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='0.85';
+const VERSION='0.86';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -523,6 +523,143 @@ function doorCanvas2(baseD,kind){
   return c;
 }
 
+/* bespoke painted facade tiles: every house front is drawn from its own spec, so nothing repeats */
+const T_TILE={},TILE_MSG={};
+function tcv(){const c=document.createElement('canvas');c.width=c.height=TS;return [c,c.getContext('2d')]}
+function roofBand(x,col,thatch,R){
+  if(thatch){
+    x.fillStyle='#8a7442';x.beginPath();x.moveTo(0,0);x.lineTo(TS,0);for(let i=TS;i>=0;i-=4)x.lineTo(i,34+hash2(i,3,19)*9);x.closePath();x.fill();
+    for(let i=0;i<300;i++){const px=hash2(i,1,20)*TS,py=hash2(i,2,20)*38,l=8+hash2(i,3,20)*8,t=hash2(i,4,20);x.strokeStyle=t<.5?'#a89050':'#5c4a28';x.lineWidth=1.3;x.beginPath();x.moveTo(px,0+py);x.lineTo(px+(t-.5)*3,py+l);x.stroke()}
+    return 40;
+  }
+  x.fillStyle=col;x.fillRect(0,0,TS,18);x.strokeStyle='#17110c';x.lineWidth=1.3;
+  for(let r=0;r<3;r++){const yy=3+r*4.5;x.beginPath();x.moveTo(0,yy);x.lineTo(TS,yy);x.stroke();for(let i=0;i<9;i++){const xx=(i*15+(r%2)*7+R(30+r)*6)%TS;x.beginPath();x.moveTo(xx,yy);x.lineTo(xx,yy+4.5);x.stroke()}}
+  return 18;
+}
+function timberTile(sp){
+  const R=k=>hash2(sp.seed,k,5),[c,x]=tcv(),glow=tcv();
+  const plasters=['#c9bda0','#bfb292','#cdbf9c','#b8aa88','#d2c4a4','#c4a888','#aaa090','#d6cdb4'],roofs=['#31271f','#3a2c22','#2b2b30','#40342a'];
+  const pl=plasters[(R(1)*plasters.length)|0],rf=roofs[(R(2)*roofs.length)|0],T='#2b1e12',foot=12,bot=TS-foot;
+  x.fillStyle=pl;x.fillRect(0,0,TS,TS);
+  roofBand(x,rf,false,R);
+  x.fillStyle=pl;x.fillRect(0,18,TS,28);x.fillStyle='rgba(0,0,0,.08)';x.fillRect(0,18,TS,28);
+  x.fillStyle=T;x.fillRect(0,18,7,28);x.fillRect(TS-7,18,7,28);if(R(3)>.35)x.fillRect(TS/2-3,18,6,28);
+  if(sp.win==='double'||sp.win==='wide'){tWin(x,32,32,14,12,true);tWin(x,96,32,14,12,true)}else if(R(4)>.5)tWin(x,64,32,16,12,false);
+  x.fillStyle='#1e1409';x.fillRect(0,46,TS,8);x.fillStyle='#3a2a18';x.fillRect(0,46,TS,2);
+  const sg=x.createLinearGradient(0,54,0,70);sg.addColorStop(0,'rgba(0,0,0,.4)');sg.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=sg;x.fillRect(0,54,TS,16);
+  x.fillStyle=T;x.fillRect(0,54,7,bot-54);x.fillRect(TS-7,54,7,bot-54);x.fillRect(TS/2-3,54,6,bot-54);x.fillRect(0,bot-5,TS,5);
+  const mid=(54+bot)/2;x.strokeStyle=T;x.lineWidth=4.5;const br=(a,b,c2,d)=>{x.beginPath();x.moveTo(a,b);x.lineTo(c2,d);x.stroke()};
+  if(sp.brace==='X'){br(7,56,61,bot-5);br(61,56,7,bot-5)}else if(sp.brace==='diag'){br(8,bot-6,60,56);br(70,bot-6,120,56)}else if(sp.brace==='herring'){for(let i=0;i<4;i++){br(8+i*14,bot-6,22+i*14,56);br(70+i*13,bot-6,83+i*13,56)}}
+  const wx=sp.brace&&sp.brace!=='none'?96:null;
+  if(sp.win==='small')tWin(x,wx||34,mid,16,18,true);else if(sp.win==='wide')tWin(x,wx||64,mid,34,18,false);else if(sp.win==='double'){tWin(x,32,mid,18,22,true);tWin(x,96,mid,18,22,true)}else if(sp.win==='arch'){x.fillStyle='#17110a';x.beginPath();x.moveTo(wx-12,mid+14);x.lineTo(wx-12,mid-4);x.arc(wx,mid-4,12,Math.PI,0);x.lineTo(wx+12,mid+14);x.closePath();x.fill();x.fillStyle='#34444a';x.beginPath();x.moveTo(wx-9,mid+12);x.lineTo(wx-9,mid-4);x.arc(wx,mid-4,9,Math.PI,0);x.lineTo(wx+9,mid+12);x.closePath();x.fill()}
+  if(sp.box){x.fillStyle='#4a3a22';x.fillRect(24,bot-12,26,6);x.fillRect(80,bot-12,26,6);for(const [fx,fc] of [[28,'#7a3a3a'],[35,'#8a7a3a'],[42,'#6a4a6a'],[86,'#8a7a3a'],[93,'#7a3a3a'],[100,'#6a4a6a']]){x.fillStyle=fc;x.beginPath();x.arc(fx,bot-14,2.4,0,TAU);x.fill()}}
+  if(sp.sign){x.strokeStyle='#17120c';x.lineWidth=2.4;x.beginPath();x.moveTo(TS-34,60);x.lineTo(TS-6,60);x.stroke();x.fillStyle='#4a3418';x.fillRect(TS-32,64,26,18);x.strokeStyle='#17120c';x.lineWidth=1.4;x.strokeRect(TS-32,64,26,18);
+    if(sp.sign==='coin'){x.fillStyle='#d8b040';x.beginPath();x.arc(TS-19,73,6,0,TAU);x.fill()}else if(sp.sign==='mug'){x.fillStyle='#c8a040';x.fillRect(TS-25,68,11,11);x.fillStyle='#e8e0c0';x.fillRect(TS-25,68,11,3)}else{x.fillStyle='#c89048';x.beginPath();x.ellipse(TS-19,73,9,5.5,0,0,TAU);x.fill()}}
+  x.fillStyle='#5b564c';x.fillRect(0,bot,TS,foot);x.strokeStyle='#2a2620';x.lineWidth=1.5;x.beginPath();x.moveTo(0,bot+6);x.lineTo(TS,bot+6);x.stroke();
+  return {c,glow:null};
+}
+function stoneTile(sp){
+  const R=k=>hash2(sp.seed,k,6),[c,x]=tcv(),[gc,gx]=tcv();
+  x.fillStyle='#2e3238';x.fillRect(0,0,TS,TS);
+  x.fillStyle='#3a4048';x.fillRect(0,0,TS,24);x.strokeStyle='#1c2026';x.lineWidth=1.3;
+  for(let r=0;r<4;r++){const yy=3+r*5.5;x.beginPath();x.moveTo(0,yy);x.lineTo(TS,yy);x.stroke();for(let i=0;i<7;i++){const xx=(i*19+(r%2)*9+R(10+r)*5)%TS;x.beginPath();x.moveTo(xx,yy);x.lineTo(xx,yy+5.5);x.stroke()}}
+  x.fillStyle='#16191d';x.fillRect(0,24,TS,5);x.fillStyle='#24221e';x.fillRect(0,29,TS,TS-29);
+  const rows=[[29,26],[55,24],[79,24],[103,25]],tint=(R(1)*18)|0;let k=0;
+  for(const [y0,h] of rows){let xx=-((k%2)*22)-R(20+k)*20;while(xx<TS){const w=34+hash2(k,xx+50,sp.seed)*28,sh=Math.floor(98+tint+hash2(k,xx+50,sp.seed+1)*36);
+    x.fillStyle=`rgb(${sh},${sh-3},${sh-9})`;x.fillRect(xx+2,y0+2,w-4,h-4);x.fillStyle='rgba(255,255,255,.07)';x.fillRect(xx+2,y0+2,w-4,3);x.fillStyle='rgba(0,0,0,.18)';x.fillRect(xx+2,y0+h-6,w-4,4);xx+=w}k++}
+  const wx=R(2)>.5?84:36;
+  if(sp.win==='lit'){x.fillStyle='#20160c';x.fillRect(wx-18,48,38,38);const g=x.createLinearGradient(wx-14,52,wx+16,82);g.addColorStop(0,'#f0d070');g.addColorStop(1,'#b87a28');x.fillStyle=g;x.fillRect(wx-12,54,26,26);x.strokeStyle='#2a1a0a';x.lineWidth=2;x.beginPath();x.moveTo(wx+1,54);x.lineTo(wx+1,80);x.moveTo(wx-12,67);x.lineTo(wx+14,67);x.stroke();x.fillStyle='#4a3a28';x.fillRect(wx-28,50,9,34);x.fillRect(wx+21,50,9,34);gx.fillStyle='#ffc060';gx.fillRect(wx-11,55,24,24)}
+  else if(sp.win==='barred'){x.fillStyle='#20160c';x.fillRect(wx-14,54,30,28);x.fillStyle='#0c0a08';x.fillRect(wx-11,57,24,22);x.strokeStyle='#5a5a60';x.lineWidth=2.2;for(let i=0;i<4;i++){x.beginPath();x.moveTo(wx-8+i*7,57);x.lineTo(wx-8+i*7,79);x.stroke()}}
+  else if(sp.win==='shutter'){x.fillStyle='#20160c';x.fillRect(wx-16,50,34,38);x.fillStyle='#5a5448';x.fillRect(wx-13,53,13,32);x.fillRect(wx+2,53,13,32);x.strokeStyle='#1c1a16';x.lineWidth=1;for(let i=0;i<6;i++){x.beginPath();x.moveTo(wx-13,57+i*5);x.lineTo(wx-0,57+i*5);x.moveTo(wx+2,57+i*5);x.lineTo(wx+15,57+i*5);x.stroke()}}
+  else if(sp.win==='chimney'){x.fillStyle='#4a4640';x.fillRect(84,0,30,TS-20);x.strokeStyle='#1c1a16';x.lineWidth=2;for(let yy=8;yy<TS-20;yy+=14){x.beginPath();x.moveTo(84,yy);x.lineTo(114,yy);x.stroke()}x.fillStyle='#1a1816';x.fillRect(80,0,38,10);x.fillStyle='rgba(0,0,0,.35)';x.fillRect(84,0,30,TS-20);x.fillStyle='#20160c';x.fillRect(24,56,24,24);x.fillStyle='#1a2028';x.fillRect(27,59,18,18);x.strokeStyle='#0c0a08';x.lineWidth=1.5;x.beginPath();x.moveTo(36,59);x.lineTo(36,77);x.moveTo(27,68);x.lineTo(45,68);x.stroke()}
+  if(sp.ivy||R(5)>.62){x.fillStyle='rgba(60,96,52,.8)';for(let i=0;i<60;i++){const px=R(40)*TS*.5+hash2(i,1,sp.seed)*40,py=30+hash2(i,2,sp.seed)*90;x.beginPath();x.ellipse(px,py,3+hash2(i,3,sp.seed)*3,2,hash2(i,4,sp.seed)*3,0,TAU);x.fill()}}
+  return {c,glow:sp.win==='lit'?gc:null};
+}
+function farmTile(sp){
+  const R=k=>hash2(sp.seed,k,7),[c,x]=tcv();
+  x.fillStyle='#cdc6ae';x.fillRect(0,0,TS,TS);roofBand(x,'',true,R);
+  const sg=x.createLinearGradient(0,40,0,56);sg.addColorStop(0,'rgba(0,0,0,.4)');sg.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=sg;x.fillRect(0,40,TS,16);
+  x.fillStyle='#2b1e12';x.fillRect(0,40,7,TS-52);x.fillRect(TS-7,40,7,TS-52);if(sp.kind!=='plain')x.fillRect(TS/2-3,40,6,TS-52);x.fillRect(0,76,TS,5);
+  x.fillStyle='#5b564c';x.fillRect(0,TS-12,TS,12);x.strokeStyle='#2a2620';x.lineWidth=1.5;x.beginPath();x.moveTo(0,TS-6);x.lineTo(TS,TS-6);x.stroke();
+  if(sp.kind==='hatch'){x.fillStyle='#1a1208';x.fillRect(46,46,36,26);x.strokeStyle='#4a3a20';x.lineWidth=2;for(let i=0;i<5;i++){x.beginPath();x.moveTo(46,50+i*5);x.lineTo(82,50+i*5);x.stroke()}x.fillStyle='#a89050';x.fillRect(52,62,22,6)}
+  else if(sp.kind==='window')tWin(x,64,98,22,22,true);
+  else{x.fillStyle='rgba(60,50,30,.25)';for(let i=0;i<6;i++)x.fillRect(14+i*18,84+hash2(i,2,sp.seed)*10,6,18)}
+  return {c,glow:null};
+}
+function ruinTile(sp){
+  const t=timberTile({seed:sp.seed,win:'small',brace:'X'}),c=t.c,x=c.getContext('2d');
+  x.fillStyle='#0c0a08';for(const [px,w] of [[10,18],[54,28],[96,18]]){x.beginPath();x.moveTo(px,0);x.lineTo(px+w,0);x.lineTo(px+w*.7,13);x.lineTo(px+w*.2,9);x.closePath();x.fill()}
+  for(const [px,py,w,h] of [[14,64,30,30],[72,30,28,26],[94,82,24,28]]){x.fillStyle='#3a2c1e';x.fillRect(px,py,w,h);x.strokeStyle='#150f09';x.lineWidth=2;for(let i=0;i<w;i+=5){x.beginPath();x.moveTo(px+i,py);x.lineTo(px+i,py+h);x.stroke()}}
+  if(sp.kind==='boards'){x.save();x.translate(96,84);x.fillStyle='#4a3a28';x.strokeStyle='#150f09';x.lineWidth=1.2;x.rotate(-.35);x.fillRect(-20,-3,40,6);x.strokeRect(-20,-3,40,6);x.rotate(.7);x.fillRect(-20,-3,40,6);x.strokeRect(-20,-3,40,6);x.restore()}
+  else{x.fillStyle='rgba(10,8,6,.4)';for(const px of [22,50,84,108])x.fillRect(px,26,7,80)}
+  return {c,glow:null};
+}
+function grandTile(sp){
+  const R=k=>hash2(sp.seed,k,8),[c,x]=tcv(),[gc,gx]=tcv();
+  x.fillStyle='#8a867c';x.fillRect(0,0,TS,TS);
+  x.fillStyle='#3a4048';x.fillRect(0,0,TS,16);x.strokeStyle='#1c2026';x.lineWidth=1.3;for(let i=0;i<9;i++){x.beginPath();x.moveTo(i*15,0);x.lineTo(i*15+3,16);x.stroke()}
+  x.fillStyle='#bfb292';x.fillRect(0,16,TS,34);x.fillStyle='#2b1e12';x.fillRect(0,16,7,34);x.fillRect(TS-7,16,7,34);x.fillRect(TS/2-3,16,6,34);x.fillRect(0,44,TS,6);
+  const rows=[[50,26],[76,26],[102,26]];let k=0;
+  for(const [y0,h] of rows){let xx=-((k%2)*24);while(xx<TS){const w=40+hash2(k,xx+60,sp.seed)*20,sh=Math.floor(110+hash2(k,xx+60,sp.seed+3)*30);x.fillStyle=`rgb(${sh},${sh-2},${sh-8})`;x.fillRect(xx+2,y0+2,w-4,h-4);x.fillStyle='rgba(255,255,255,.08)';x.fillRect(xx+2,y0+2,w-4,3);xx+=w}k++}
+  x.strokeStyle='#26241f';x.lineWidth=3;for(const [y0] of rows){x.beginPath();x.moveTo(0,y0);x.lineTo(TS,y0);x.stroke()}
+  const cx=64;
+  if(sp.kind==='arch'||sp.kind==='arch2'){const lit=sp.kind==='arch';x.fillStyle='#17110a';x.beginPath();x.moveTo(cx-18,112);x.lineTo(cx-18,74);x.arc(cx,74,18,Math.PI,0);x.lineTo(cx+18,112);x.closePath();x.fill();
+    x.fillStyle=lit?'#e8c060':'#1c2228';x.beginPath();x.moveTo(cx-13,112);x.lineTo(cx-13,74);x.arc(cx,74,13,Math.PI,0);x.lineTo(cx+13,112);x.closePath();x.fill();
+    x.strokeStyle='#17110a';x.lineWidth=2;x.beginPath();x.moveTo(cx,60);x.lineTo(cx,112);x.moveTo(cx-13,86);x.lineTo(cx+13,86);x.stroke();
+    if(lit){gx.fillStyle='#ffc060';gx.beginPath();gx.moveTo(cx-12,112);gx.lineTo(cx-12,74);gx.arc(cx,74,12,Math.PI,0);gx.lineTo(cx+12,112);gx.closePath();gx.fill()}}
+  else if(sp.kind==='bay'){x.fillStyle='#2b1e12';x.beginPath();x.moveTo(24,54);x.lineTo(104,54);x.lineTo(112,112);x.lineTo(16,112);x.closePath();x.fill();
+    for(let i=0;i<3;i++){const x0=28+i*24;const g=x.createLinearGradient(x0,60,x0+20,108);g.addColorStop(0,'#e8c060');g.addColorStop(1,'#a8742c');x.fillStyle=g;x.fillRect(x0,60,20,46);gx.fillStyle='#ffc060';gx.fillRect(x0+1,61,18,44)}
+    x.strokeStyle='#17110a';x.lineWidth=2;for(let i=0;i<3;i++){const x0=28+i*24;x.strokeRect(x0,60,20,46);x.beginPath();x.moveTo(x0,83);x.lineTo(x0+20,83);x.stroke()}}
+  else{x.fillStyle='#17110a';x.fillRect(cx-22,60,44,56);x.fillStyle='#7a2a24';x.beginPath();x.moveTo(cx-16,66);x.lineTo(cx+16,66);x.lineTo(cx+16,88);x.lineTo(cx,106);x.lineTo(cx-16,88);x.closePath();x.fill();x.strokeStyle='#d8c070';x.lineWidth=2;x.stroke();x.fillStyle='#d8c070';x.fillRect(cx-2,70,4,28);x.fillRect(cx-10,78,20,4)}
+  return {c,glow:gc};
+}
+function plainTile(sp){
+  const R=k=>hash2(sp.seed,k,9),[c,x]=tcv();
+  if(sp.fam==='plainstone'){
+    x.fillStyle='#3a4048';x.fillRect(0,0,TS,24);x.strokeStyle='#1c2026';x.lineWidth=1.3;for(let r=0;r<4;r++){const yy=3+r*5.5;x.beginPath();x.moveTo(0,yy);x.lineTo(TS,yy);x.stroke();for(let i=0;i<7;i++){const xx=(i*19+(r%2)*9)%TS;x.beginPath();x.moveTo(xx,yy);x.lineTo(xx,yy+5.5);x.stroke()}}
+    x.fillStyle='#16191d';x.fillRect(0,24,TS,5);x.fillStyle='#24221e';x.fillRect(0,29,TS,TS-29);
+    const rows=[[29,26],[55,24],[79,24],[103,25]];let k=0;for(const [y0,h] of rows){let xx=-((k%2)*22)-R(3)*18;while(xx<TS){const w=34+hash2(k,xx+50,sp.seed)*28,sh=Math.floor(96+R(1)*16+hash2(k,xx+50,sp.seed+1)*34);x.fillStyle=`rgb(${sh},${sh-3},${sh-9})`;x.fillRect(xx+2,y0+2,w-4,h-4);xx+=w}k++}
+  }else{
+    x.fillStyle='#31271f';x.fillRect(0,0,TS,18);x.strokeStyle='#17110c';x.lineWidth=1.3;for(let r=0;r<3;r++){const yy=3+r*4.5;x.beginPath();x.moveTo(0,yy);x.lineTo(TS,yy);x.stroke()}
+    x.fillStyle=['#c2b598','#b5a888','#a89e86'][(R(1)*3)|0];x.fillRect(0,18,TS,TS-18);x.fillStyle='#1e1409';x.fillRect(0,46,TS,6);x.fillStyle='#2b1e12';x.fillRect(0,18,7,TS-18);x.fillRect(TS-7,18,7,TS-18);x.fillRect(TS/2-3,52,6,TS-52);x.fillStyle='#5b564c';x.fillRect(0,TS-12,TS,12);
+  }
+  return {c,glow:null};
+}
+function doorTile(sp){
+  const baseSp={seed:sp.seed+1,win:'none'};
+  let base;
+  if(sp.base==='stone')base=plainTile({fam:'plainstone',seed:sp.seed}).c;else if(sp.base==='farm')base=farmTile({seed:sp.seed,kind:'plain'}).c;else if(sp.base==='ruin')base=ruinTile({seed:sp.seed,kind:'peeled'}).c;else base=plainTile({fam:'plainplaster',seed:sp.seed}).c;
+  const x=base.getContext('2d'),R=k=>hash2(sp.seed,k,10);
+  const cols=[['#3c4a52','#1e2a30'],['#5a3a22','#3c2514'],['#4a3a28','#2a2016'],['#2e3c2e','#1a241a'],['#5a2a24','#321612'],['#4e341c','#2e1e0e'],['#4c4636','#2e2a20']];
+  const col=cols[(R(1)*cols.length)|0];
+  let L=42,Rr=86,top=60;if(sp.base==='farm'){L=22;Rr=106}else if(sp.base==='ruin'){L=44;Rr=84}
+  x.fillStyle='#20160c';x.fillRect(L-4,top-4,Rr-L+8,TS-top+4);
+  if(sp.base==='ruin'){x.fillStyle='#0a0806';x.fillRect(L,top,Rr-L,TS-top);x.fillStyle='#3a2e22';x.fillRect(L,top,12,TS-top);x.fillRect(Rr-10,top+20,10,TS-top-20);x.save();x.fillStyle='#5a4a34';x.strokeStyle='#150f09';x.translate((L+Rr)/2,TS-40);x.rotate(-.3);x.fillRect(-26,-4,52,8);x.strokeRect(-26,-4,52,8);x.rotate(.62);x.fillRect(-26,-4,52,8);x.strokeRect(-26,-4,52,8);x.restore();return base}
+  const g=x.createLinearGradient(L,0,Rr,0);g.addColorStop(0,sp.base==='farm'?'#3e3220':col[1]);g.addColorStop(.5,sp.base==='farm'?'#6a5836':col[0]);g.addColorStop(1,sp.base==='farm'?'#3e3220':col[1]);x.fillStyle=g;x.fillRect(L,top,Rr-L,TS-top);
+  x.strokeStyle='rgba(0,0,0,.5)';x.lineWidth=1.2;const pw=sp.base==='farm'?8:11;for(let px=L+pw;px<Rr;px+=pw){x.beginPath();x.moveTo(px,top);x.lineTo(px,TS);x.stroke()}
+  if(sp.base==='farm'){x.strokeStyle='#1a1410';x.lineWidth=5;x.beginPath();x.moveTo(L,top+2);x.lineTo((L+Rr)/2-2,TS);x.moveTo((L+Rr)/2-2,top+2);x.lineTo(L,TS);x.moveTo((L+Rr)/2+2,top+2);x.lineTo(Rr,TS);x.moveTo(Rr,top+2);x.lineTo((L+Rr)/2+2,TS);x.stroke();x.fillStyle='#0c0a08';x.fillRect((L+Rr)/2-1.5,top,3,TS-top)}
+  else{
+    if(sp.style==='arch'){x.fillStyle='#5a5650';x.beginPath();x.moveTo(L-8,TS);x.lineTo(L-8,top+6);x.arc((L+Rr)/2,top+6,(Rr-L)/2+8,Math.PI,0);x.lineTo(Rr+8,TS);x.lineTo(Rr,TS);x.lineTo(Rr,top+6);x.arc((L+Rr)/2,top+6,(Rr-L)/2,0,Math.PI,true);x.lineTo(L,TS);x.closePath();x.fill()}
+    else{x.fillStyle='#5a5650';x.fillRect(L-6,top-8,Rr-L+12,8)}
+    if(sp.style==='strap'||sp.style==='plank'){x.fillStyle='#1a1714';for(const sy of [top+12,top+44])x.fillRect(L,sy,Rr-L,sp.style==='strap'?6:3)}
+    x.strokeStyle='#b8a050';x.lineWidth=2;x.beginPath();x.arc(R(2)>.5?(L+Rr)/2:Rr-10,TS-40,4.5,0,TAU);x.stroke();
+    if(sp.style==='sign'){x.strokeStyle='#17120c';x.lineWidth=2.4;x.beginPath();x.moveTo(Rr+4,top+2);x.lineTo(Rr+30,top+2);x.stroke();x.fillStyle='#4a3418';x.fillRect(Rr+6,top+6,24,16)}
+  }
+  return base;
+}
+let TNF=100,TND=200;
+function makeBespokeTiles(spec){
+  const chars={};
+  for(const ch in spec){
+    const sp=spec[ch];
+    if(sp.fam==='door'){const c=doorTile(sp),gid=TND++;T_TILE[gid]=addTex(warpTex(grimeData(c,sp.seed),sp.seed+1,2));TILE_MSG[gid]=sp.msg;chars[ch]=gid;continue}
+    const t=sp.fam==='timber'?timberTile(sp):sp.fam==='stone'?stoneTile(sp):sp.fam==='farm'?farmTile(sp):sp.fam==='ruin'?ruinTile(sp):sp.fam==='grand'?grandTile(sp):plainTile(sp);
+    const lean=sp.fam==='ruin'?.1:sp.fam==='timber'?(hash2(sp.seed,1,3)-.5)*.1:0,src=lean?shearCanvas(t.c,lean):t.c,gid=TNF++;
+    T_TILE[gid]=addTex(warpTex(grimeData(src,sp.seed),sp.seed+1,2.6),t.glow?warpTex(pix(t.glow),sp.seed+1,2.6):null);chars[ch]=gid;
+  }
+  return chars;
+}
+
 function makeTownTextures(){
   const A=warpTex(grimeData(shearCanvas(tudorCanvas(0),.07),71),72,3.6),B=warpTex(grimeData(shearCanvas(tudorCanvas(1),-.06),73),74,3.6),Cc=warpTex(grimeData(shearCanvas(tudorCanvas(2),.04),75),76,3.6);
   T_WALL[9]=addTex(A);T_WALL[10]=addTex(B);T_WALL[11]=addTex(Cc);
@@ -544,6 +681,7 @@ function makeTownTextures(){
   COBBLED=warpTex(stoneTex(33,{rows:6,cols:()=>5,stag:1,mortar:2,a:[122,112,98],b:[86,80,70],mort:[36,32,24],moss:.04,cracks:2,flat:true}),34,4);
   WOODF=warpTex(grimeData(woodFloorCanvas(),111),112,1.6);BEAMC=warpTex(grimeData(beamCeilCanvas(),113),114,1.6);
   FLOORS.cobble=COBBLED;FLOORS.wood=WOODF;CEILS.beam=BEAMC;
+  LEVEL13_DATA.chars=makeBespokeTiles(IRONJ.town.tiles);
 }
 
 function buildTextures(){
@@ -700,6 +838,12 @@ const ITEMDEF={
   mace:{n:'Battered Mace',k:'weapon',t:'Mace',ic:'mace',c:'#8a8e98',dmg:[3,6],hit:-.03,req:{str:8},price:24,d:'A heavy iron head on a wooden handle.',sw:.4},
   staff:{n:'Gnarled Staff',k:'weapon',t:'Staff',ic:'staff',c:'#8a6a40',dmg:[1,3],magic:2,req:{int:6},price:28,d:'Adds 2 to the power of spells.',sw:.4},
   drowndagger:{n:"Drowned Dagger",k:'weapon',t:'Dagger',ic:'dagger',c:'#8fc0d0',dmg:[4,6],hit:.1,req:{dex:8},price:120,rar:1,d:'Pale and wet, with a groove for blood. It is quick and it rarely misses.',sw:.34},
+  ore:{n:'Iron Ore',k:'quest',t:'Quest item',ic:'ore',c:'#8a8a96',stack:1,price:3,d:'Heavy grey ore. Brannoch the smith wants six pieces.',sw:.34},
+  herb:{n:'Moor Herb',k:'quest',t:'Quest item',ic:'herb',c:'#6a9a58',stack:1,price:2,d:'A grey-green herb from the moor. Wynn wants six.',sw:.3},
+  pick:{n:"Miner's Pick",k:'quest',t:'Quest item',ic:'pick',c:'#9a8a78',stack:1,price:1,d:"A miner's pick with a name carved in the handle. Hesta wants it.",sw:.4},
+  parcel:{n:'Sealed Parcel',k:'quest',t:'Quest item',ic:'parcel',c:'#b89a68',stack:1,price:1,d:'A parcel for Farmer Eadric on the moor.',sw:.3},
+  ironblade:{n:"Brannoch's Blade",k:'weapon',t:'Sword',ic:'sword',c:'#b8bcc8',dmg:[6,9],hit:.04,req:{str:10},price:200,rar:1,d:'Plain iron, well made. It never rusts.',sw:.4},
+  ironaxe:{n:'Overseer\'s Axe',k:'weapon',t:'Axe',ic:'axe',c:'#a8a0a0',dmg:[7,11],hit:-.03,req:{str:11},price:240,rar:1,d:'A heavy mining axe, still sharp after years in the dark.',sw:.4},
   wardblade:{n:"Warden's Blade",k:'weapon',t:'Sword',ic:'sword',c:'#b8d0e0',dmg:[6,10],hit:.05,req:{str:10},price:260,rar:1,d:'A pale blade from the empty house. It is cold to hold and it cuts well.',sw:.4},
   gravemace:{n:"Gravewarden's Mace",k:'weapon',t:'Mace',ic:'mace',c:'#b8a8d8',dmg:[4,8],hit:0,dbl:.12,req:{str:9},price:210,rar:1,d:'Carved with funeral prayers. It rings when it hits bone.',sw:.42},
   bow:{n:'Short Bow',k:'weapon',t:'Bow',ic:'bow',c:'#8a6a40',dmg:[2,5],hit:.02,ranged:3,req:{dex:8},price:30,d:'Shoots at targets up to 3 tiles ahead.',sw:.4},
@@ -788,6 +932,10 @@ function itemIconOn(X,d,cx,cy,s){
       X.fillStyle='rgba(60,36,16,.6)';X.beginPath();X.ellipse(-3,5,4.5,3,.5,0,TAU);X.fill();
       X.strokeStyle='rgba(30,14,8,.6)';X.lineWidth=.9;for(const [a1,a2] of [[-6,3],[0,7],[5,2]]){X.beginPath();X.moveTo(a1,-3);X.quadraticCurveTo(a1+2,a2-2,a1-1,a2+4);X.stroke()}
       X.strokeStyle='#3a2410';X.lineWidth=2;X.beginPath();X.moveTo(0,-6);X.lineTo(2,-11);X.stroke();X.fillStyle='#4a5a30';X.beginPath();X.ellipse(5,-9,3.4,1.7,.5,0,TAU);X.fill();break;
+    case 'ore':X.fillStyle=c;X.beginPath();X.moveTo(-9,4);X.lineTo(-5,-7);X.lineTo(3,-9);X.lineTo(10,-1);X.lineTo(7,7);X.lineTo(-4,8);X.closePath();X.fill();X.stroke();X.fillStyle='rgba(255,255,255,.28)';X.fillRect(-3,-5,5,3);break;
+    case 'herb':X.fillStyle=c;for(const [a,b,r2] of [[-5,-3,-.7],[4,-4,.6],[0,-7,0],[-3,3,-.3],[4,3,.4]]){X.save();X.translate(a,b);X.rotate(r2);X.beginPath();X.ellipse(0,0,3,6,0,0,TAU);X.fill();X.stroke();X.restore()}X.strokeStyle='#3a5a2a';X.beginPath();X.moveTo(0,10);X.lineTo(0,-2);X.stroke();break;
+    case 'pick':X.rotate(-.6);X.fillStyle='#6a4a28';X.fillRect(-1.6,-9,3.2,19);X.strokeRect(-1.6,-9,3.2,19);X.fillStyle=c;X.beginPath();X.moveTo(-11,-6);X.quadraticCurveTo(0,-14,11,-6);X.lineTo(9,-4);X.quadraticCurveTo(0,-9,-9,-4);X.closePath();X.fill();X.stroke();break;
+    case 'parcel':X.fillStyle=c;X.fillRect(-9,-7,18,14);X.strokeRect(-9,-7,18,14);X.strokeStyle='#5a3a1a';X.beginPath();X.moveTo(0,-7);X.lineTo(0,7);X.moveTo(-9,0);X.lineTo(9,0);X.stroke();X.fillStyle='#a02a22';X.beginPath();X.arc(0,0,2.4,0,TAU);X.fill();break;
     case 'wood':X.rotate(-.35);for(const [ox,oy,r2] of [[-3,4,0],[3,0,.2],[0,-5,-.15]]){X.save();X.translate(ox,oy);X.rotate(r2);X.fillStyle='#7a5430';X.fillRect(-11,-3.4,22,6.8);X.strokeRect(-11,-3.4,22,6.8);X.fillStyle='#b8905a';X.beginPath();X.ellipse(11,0,2.6,3.4,0,0,TAU);X.fill();X.stroke();X.restore()}break;
     case 'ale':X.fillStyle='#6a4a22';X.fillRect(-8,-8,14,18);X.strokeRect(-8,-8,14,18);X.fillStyle='#d8a838';X.fillRect(-6.5,-4,11,12);X.fillStyle='#ece4c0';X.fillRect(-6.5,-8,11,4);X.strokeStyle='#6a4a22';X.lineWidth=3;X.beginPath();X.arc(8,1,5,-1.4,1.4);X.stroke();break;
     case 'nuts':for(const [ox,oy] of [[-6,3],[5,4],[0,-4]]){X.fillStyle='#8a6030';X.beginPath();X.ellipse(ox,oy,6,7,0,0,TAU);X.fill();X.stroke();X.fillStyle='#5a3c18';X.beginPath();X.ellipse(ox,oy-4.5,4.4,2.2,0,0,TAU);X.fill();X.fillStyle='rgba(255,230,170,.4)';X.fillRect(ox-3,oy-1,2,3)}break;
@@ -890,22 +1038,22 @@ function setLayer(n,target){
   }
   if(L.t!==target){L.t=target;L.g.gain.setTargetAtTime(target,AC.currentTime,1.4)}
 }
-const DUNGEON_LEVELS=[1,8,9,11,12];
+const DUNGEON_LEVELS=[1,8,9,11,12,18,20];
 function areaAudio(){
   if(!AC)return;loadSounds();
   const T={};
   if(G.state==='play'&&!G.mute){
     if(DUNGEON_LEVELS.includes(LEVEL))T.dungeon_ambience=.55;
-    else if(LEVEL===2||LEVEL===7)T.wind_loop=.5;
+    else if(LEVEL===2||LEVEL===7||LEVEL===19)T.wind_loop=.5;
     else if(LEVEL===10){T.rain_loop=.7;T.wind_loop=.18}
-    else if(LEVEL===3){T.village_ambience=.5;T.music_feast=.2}
-    else if(LEVEL===4){T.village_ambience=.12}
-    else if(LEVEL===5)T.music_feast=.4;
-    else if(LEVEL===6){T.music_tavern=.55;T.village_ambience=.18}
+    else if(LEVEL===3||LEVEL===13){T.village_ambience=.5;T.music_feast=.2}
+    else if(LEVEL===4||LEVEL===15||LEVEL===17){T.village_ambience=.12}
+    else if(LEVEL===5||LEVEL===14)T.music_feast=.4;
+    else if(LEVEL===6||LEVEL===16){T.music_tavern=.55;T.village_ambience=.18}
   }
   for(const n of SNDLIST){if(n in T||LAYERS[n])setLayer(n,T[n]||0)}
   // now and then a village noise
-  if(G.state==='play'&&!G.mute&&LEVEL===3){
+  if(G.state==='play'&&!G.mute&&(LEVEL===3||LEVEL===13)){
     if(!G.sndNext)G.sndNext=G.time+6+Math.random()*10;
     if(G.time>G.sndNext){
       G.sndNext=G.time+12+Math.random()*28;
@@ -915,7 +1063,7 @@ function areaAudio(){
   }
 }
 function stepSample(){
-  const k=G.amb>0?'wood':LEVEL===3?'cobble':G.day>0?'dirt':'stone';
+  const k=G.amb>0?'wood':(LEVEL===3||LEVEL===13)?'cobble':G.day>0?'dirt':'stone';
   return playSmp(pickN('step_'+k,4),(k==='wood'?.6:.5)*(.85+Math.random()*.3),.92+Math.random()*.16);
 }
 
@@ -1015,6 +1163,7 @@ const ENEMY_DEF={
   wolf:{name:'Grey Wolf',hp:36,dmg:[3,6],hit:.72,w:.9,img:'wolf',xp:40,gold:[0,0],speed:2,kind:'wolf'},
   bandit:{name:'Bandit',hp:44,dmg:[3,7],hit:.72,w:.44,img:'bandit',xp:60,gold:[4,14],speed:1,kind:'bandit'},
   archer:{name:'Bandit Archer',hp:32,dmg:[3,6],hit:.66,w:.34,img:'archer',xp:50,gold:[3,10],speed:1,ranged:2,kind:'bandit'},
+  overseer:{name:'Mine Overseer',hp:210,dmg:[10,16],hit:.78,w:.62,img:'skel',xp:600,gold:[110,170],speed:1},
   mayor:{name:'Mayor Corbin',hp:130,dmg:[7,12],hit:.75,w:.55,img:'mayor',xp:400,gold:[100,160],speed:1},
   ghost:{name:'Ghost',hp:58,dmg:[5,9],hit:.7,w:.5,img:'ghost',xp:90,gold:[0,0],speed:1},
   gandrick:{name:'Gandrick',hp:160,dmg:[10,15],hit:.78,w:.5,img:'gandrick',xp:900,gold:[150,220],speed:1}};
@@ -1043,7 +1192,7 @@ function reset(n){
   for(let y=0;y<MH;y++){G.grid.push([]);G.seen.push(new Uint8Array(MW));
     for(let x=0;x<MW;x++){
       const ch=MAPROWS[y][x];
-      G.grid[y][x]= (ch==='.'||ch==='t')?0 : ch==='D'?3 : ch==='L'?4 : ch==='X'?5 : ch==='%'?2 : ch==='T'?6 : ch==='G'?7 : ch==='C'?8 : WALLCH[ch]!==undefined?WALLCH[ch] : 1;
+      G.grid[y][x]= ((LEVELS[LEVEL].chars||{})[ch]!==undefined)?LEVELS[LEVEL].chars[ch]:(ch==='.'||ch==='t')?0 : ch==='D'?3 : ch==='L'?4 : ch==='X'?5 : ch==='%'?2 : ch==='T'?6 : ch==='G'?7 : ch==='C'?8 : WALLCH[ch]!==undefined?WALLCH[ch] : 1;
     }}
   buildRegions();
   G.P={x:START.x,y:START.y,f:START.f,angT:(START.f-1)*Math.PI/2};
@@ -1274,7 +1423,8 @@ function hurtEnemy(e,dmg){
     if(def.kind==='bandit'&&Math.random()<.3){const f=foodFor(Math.random());if(bagAdd(mkItem(f)))msg(`You find a ${ITEMDEF[f].n} on the body.`,'#9ae0a0')}
     if(e.t==='gandrick'){G.flags.gandrickDead=1;G.flags.ledger=1;later(900,()=>startCut('gandrickDead'))}
     giveXP(st.xp);
-    {const F=G.flags;if(def.kind==='wolf')F.wolfKills=(F.wolfKills||0)+1;if(def.kind==='bandit')F.bandKills=(F.bandKills||0)+1;if(e.t==='rat'||e.t==='bat')F.ratKills=(F.ratKills||0)+1;if(e.t==='mayor'){F.mayorDown=1;later(900,()=>startCut('arrest',arrestEnd))}
+    {const F=G.flags;if(def.kind==='wolf')F.wolfKills=(F.wolfKills||0)+1;if(def.kind==='bandit')F.bandKills=(F.bandKills||0)+1;if(e.t==='rat'||e.t==='bat')F.ratKills=(F.ratKills||0)+1;if(LEVEL===18)F.mineKills=(F.mineKills||0)+1;if(LEVEL===20&&e.t==='ghost')F.graveKills=(F.graveKills||0)+1;if(e.t==='overseer')F.overseerDead=1;
+    if(e.t==='mayor'){F.mayorDown=1;later(900,()=>startCut('arrest',arrestEnd))}
     if(e.t==='ghost'&&LEVEL===9){F.gd=F.gd||{};F.gd[e.id]=1;if(Object.keys(F.gd).length>=3)msg('The house is quiet. The ghosts are gone.','#b8d0e0')}storyTick()}
   }else{const hw=G.curHero!==undefined&&G.heroes[G.curHero]?heroWeapon(G.heroes[G.curHero]):null;sfx(hw&&['Sword','Dagger','Axe'].includes(hw.t)?'hack':'hit');if(e.t==='rat'&&Math.random()<.5)sfx('squeak')}
 }
@@ -1736,7 +1886,8 @@ function doMove(rel){ // rel: 0 forward, 1 right, 2 back, 3 left
   }
   if(g===8){sfx('locked');msg('The crypt door has sealed behind you.','#d09a80');return}
   if(g>=15&&g<=19){sfx('locked');const ms=DOOR_MSGS[g];msg(ms[(hash2(nx,ny,3)*ms.length)|0],'#d09a80');return}
-  if(g>=30){usePortal(g-30);return}
+  if(g>=200){sfx('locked');msg(TILE_MSG[g]||'It is locked.','#d09a80');return}
+  if(g>=30&&g<100){usePortal(g-30);return}
   if(g===0){const dc=G.decor.find(d=>d.loot&&d.x===nx&&d.y===ny);if(dc){openLoot(dc);return}
     const nd=G.decor.find(d=>d.npc&&!d.found&&d.x===nx&&d.y===ny);if(nd){startTalk(nd);return}}
   if(g>0||G.decor.some(d=>d.block&&d.x===nx&&d.y===ny)){sfx('bump');G.shake=.12;return}
@@ -1878,7 +2029,7 @@ function render3D(){
     if((side===0&&rX>0)||(side===1&&rY<0))tx=TS-1-tx;
     const face=side===0?(stx>0?3:1):(sty>0?0:2);
     let ti;
-    if(g===1)ti=(LEVEL===2&&T_ABBEY!==undefined)?T_ABBEY:T_STONE;else if(g===2)ti=(LEVEL===2&&T_ABBEY!==undefined)?T_ABBEY:T_BRICK;else if(g===3||g===8)ti=T_DOOR;else if(g===4)ti=T_LOCK;else if(g===6)ti=T_FOREST;else if(g===7)ti=T_GATE;else if((g>=9&&g<=14)||(g>=20&&g<=22))ti=T_WALL[g];else if(g>=15&&g<=19)ti=[T_DOORS.house,T_DOORS.bakery,T_DOORS.house2,T_DOORS.farm,T_DOORS.ruin][g-15];else if(g>=30)ti=T_DOORS[(G.portals[g-30]||{}).tex]||T_DOORS.house;else ti=T_EXIT;
+    if(g>=100)ti=T_TILE[g];else if(g===1)ti=(LEVEL===2&&T_ABBEY!==undefined)?T_ABBEY:T_STONE;else if(g===2)ti=(LEVEL===2&&T_ABBEY!==undefined)?T_ABBEY:T_BRICK;else if(g===3||g===8)ti=T_DOOR;else if(g===4)ti=T_LOCK;else if(g===6)ti=T_FOREST;else if(g===7)ti=T_GATE;else if((g>=9&&g<=14)||(g>=20&&g<=22))ti=T_WALL[g];else if(g>=15&&g<=19)ti=[T_DOORS.house,T_DOORS.bakery,T_DOORS.house2,T_DOORS.farm,T_DOORS.ruin][g-15];else if(g>=30&&g<100)ti=T_DOORS[(G.portals[g-30]||{}).tex]||T_DOORS.house;else ti=T_EXIT;
     const tv=(g===1||g===2)?torchAt.get((my*MW+mx)*4+face):0;
     if(tv){const ph=((mx*7+my*3)&3);ti=(g===1?(tv===2?T_TORCH_STONE_R:T_TORCH_STONE):(tv===2?T_TORCH_BRICK_R:T_TORCH_BRICK))+((fr+ph*2)&7)}
     const tex=TEX[ti],td=tex.d,te=tex.e;
@@ -2738,6 +2889,7 @@ function lootFor(d){
   const r=k=>hash2(d.x,d.y,100+k),items=[];
   const add=(id,n)=>items.push({id,n:ITEMDEF[id].stack?(n||1):1});
   if(d.k==='barrel'&&LEVEL===1&&d.x===1&&d.y===15){add('cheese',4);d.gold=3+Math.floor(r(20)*10)}
+  else if(d.k==='chest'&&LEVEL===18){add('ironaxe');add('potion',2);d.gold=120}
   else if(d.k==='chest'&&LEVEL===12){add('drowndagger');add('potion',1);d.gold=55}
   else if(d.k==='chest'){add('wardblade');add('potion',2);add('ringW');add('scrollLight');d.gold=90}
   else if(d.k==='barrel'||d.k==='crate'){
@@ -3059,7 +3211,7 @@ function drawOverview(){
   ctx.save();ctx.font=`24px ${FTITLE}`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle='#d8c88e';ctx.fillText(`Level ${LEVEL}: ${LEVEL_NAMES[LEVEL]}`,8,15);ctx.restore();
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){
     const g=G.grid[y][x];
-    ctx.fillStyle=g===0?'#7a6446':g>=30?'#d8b060':(g>=15&&g<=19)?'#a8702e':g>=9?'#46403a':g===1?'#46403a':g===2?'#6a2e26':g===3?'#a8702e':g===4?'#c03a2a':g===5?'#7ab0f0':g===6?'#2c4a2a':g===7?'#d8b060':'#6a4a24';
+    ctx.fillStyle=g===0?'#7a6446':g>=200?'#a8702e':g>=100?'#45403a':g>=30?'#d8b060':(g>=15&&g<=19)?'#a8702e':g>=9?'#46403a':g===1?'#46403a':g===2?'#6a2e26':g===3?'#a8702e':g===4?'#c03a2a':g===5?'#7ab0f0':g===6?'#2c4a2a':g===7?'#d8b060':'#6a4a24';
     ctx.fillRect(ox+x*cs,oy+y*cs,cs-.6,cs-.6);
   }
   for(const [name,x1,y1,x2,y2] of (LEVEL===1?ZONE_LABELS:[])){
@@ -3124,9 +3276,19 @@ const LEVEL12_DATA={rows:WELL_ROWS,fmap:WELL_WET,floor2:'water',start:{x:3,y:9,f
   enemies:[{t:'bandit',x:2,y:2},{t:'bandit',x:5,y:3},{t:'bandit',x:10,y:2},{t:'archer',x:11,y:4}],
   items:[{k:'potion',x:5,y:9}],decor:[{k:'chest',x:12,y:1,block:true},{k:'bones',x:3,y:2},{k:'bones',x:9,y:4},{k:'barrel',x:1,y:1,block:true}],
   day:0,name:'The Well Cellar',label:'The Well Cellar',diff:4,torchGap:4.2,portals:[WELL_EXIT]};
-const LEVELS={1:LEVEL1_DATA,2:LEVEL2_DATA,3:LEVEL3_DATA,4:LEVEL4_DATA,5:LEVEL5_DATA,6:LEVEL6_DATA,7:LEVEL7_DATA,8:LEVEL8_DATA,9:LEVEL9_DATA,10:LEVEL10_DATA,11:LEVEL11_DATA,12:LEVEL12_DATA};
+const IRONJ={"town": {"rows": ["AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "AHHHHHH......AAAAAAAAAAAAAAAAAA.HHHHHHH....A", "AHHHHHH......AAAAAAAAAAAAAAAAAA.HHHHHHH....A", "AHHHHHH......AAAAAAAAAAAAAAAAAA.HHHHHHH....A", "Acd7efg......AAAAAAAAAAAAAAAAAA.hij6klm....A", "A............AAAAAAAAAAAAAAAAAA............A", "A............AAAAAAAAAAAAAAAAAA............A", "ABBBB.AAAA...AAAAAAAAAAAAAAAAAA..BBBB.EEEE.A", "ABBBB.AAAA...AAAAAAAAAAAAAAAAAA..BBBB.EEEE.A", "ABBBB.AAAA...IJKMNOPQ2RSUVWYZab..BBBB.EEEE.A", "ABBBB.AAAA.......................BBBB.EEEE.A", "An,oq.rs;u.......................v:wx.yz!\u0100.A", "A..........................................A", "A..........................................A", "A..........................................A", "0..........................................1", "A..........................................A", "A.\u0101\u01023\u0103\u0104\u0105.....\u0106\u0107\u01085\u0109\u010a\u010b....\u010c\u010d\u010e\u010f4\u0110\u0111\u0112...........A", "A.AAAAAA.....BBBBBBB....BBBBBBBB...........A", "A.AAAAAA.\u0113?\u0114\u0115BBBBBBB....BBBBBBBB..\u0116~\u0117\u0118.\u0119\u011a^\u011bA", "A.AAAAAA.BBBBBBBBBBB....BBBBBBBB..AAAA.BBBBA", "A........BBBB.....................AAAA.BBBBA", "A........BBBB.....................AAAA.BBBBA", "A..........................................A", "A.\u011c\u011d&\u011e\u011f....................................A", "A.FFFFF....................................A", "A.FFFFF....................................A", "A.FFFFF....................................A", "A..........................................A", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"], "decor": [{"k": "bush", "x": 1, "y": 12, "block": true}, {"k": "fence", "x": 1, "y": 13, "block": true}, {"k": "bush", "x": 3, "y": 12, "block": true}, {"k": "fence", "x": 3, "y": 13, "block": true}, {"k": "veg", "x": 4, "y": 12, "block": true}, {"k": "fence", "x": 4, "y": 13, "block": true}, {"k": "veg", "x": 6, "y": 12, "block": true}, {"k": "fence", "x": 6, "y": 13, "block": true}, {"k": "bush", "x": 7, "y": 12, "block": true}, {"k": "fence", "x": 7, "y": 13, "block": true}, {"k": "bush", "x": 9, "y": 12, "block": true}, {"k": "fence", "x": 9, "y": 13, "block": true}, {"k": "bush", "x": 33, "y": 12, "block": true}, {"k": "fence", "x": 33, "y": 13, "block": true}, {"k": "bush", "x": 35, "y": 12, "block": true}, {"k": "fence", "x": 35, "y": 13, "block": true}, {"k": "veg", "x": 36, "y": 12, "block": true}, {"k": "fence", "x": 36, "y": 13, "block": true}, {"k": "hay", "x": 38, "y": 12, "block": true}, {"k": "fence", "x": 38, "y": 13, "block": true}, {"k": "hay", "x": 39, "y": 12, "block": true}, {"k": "fence", "x": 39, "y": 13, "block": true}, {"k": "hay", "x": 41, "y": 12, "block": true}, {"k": "fence", "x": 41, "y": 13, "block": true}, {"k": "bush", "x": 9, "y": 18, "block": true}, {"k": "fence", "x": 9, "y": 17, "block": true}, {"k": "bush", "x": 11, "y": 18, "block": true}, {"k": "fence", "x": 11, "y": 17, "block": true}, {"k": "veg", "x": 12, "y": 18, "block": true}, {"k": "fence", "x": 12, "y": 17, "block": true}, {"k": "veg", "x": 34, "y": 18, "block": true}, {"k": "fence", "x": 34, "y": 17, "block": true}, {"k": "veg", "x": 36, "y": 18, "block": true}, {"k": "fence", "x": 36, "y": 17, "block": true}, {"k": "bush", "x": 37, "y": 18, "block": true}, {"k": "fence", "x": 37, "y": 17, "block": true}, {"k": "bush", "x": 39, "y": 18, "block": true}, {"k": "fence", "x": 39, "y": 17, "block": true}, {"k": "veg", "x": 40, "y": 18, "block": true}, {"k": "fence", "x": 40, "y": 17, "block": true}, {"k": "veg", "x": 42, "y": 18, "block": true}, {"k": "fence", "x": 42, "y": 17, "block": true}, {"k": "bush", "x": 2, "y": 23, "block": true}, {"k": "bush", "x": 3, "y": 23, "block": true}, {"k": "fence", "x": 3, "y": 22, "block": true}, {"k": "bush", "x": 5, "y": 23, "block": true}, {"k": "fence", "x": 5, "y": 22, "block": true}, {"k": "bush", "x": 6, "y": 23, "block": true}, {"k": "tree1", "x": 10, "y": 8, "block": true}, {"k": "tree0", "x": 11, "y": 3, "block": true}, {"k": "tree4", "x": 9, "y": 2, "block": true}, {"k": "tree6", "x": 11, "y": 6, "block": true}, {"k": "tree2", "x": 8, "y": 3, "block": true}, {"k": "tree3", "x": 37, "y": 8, "block": true}, {"k": "tree5", "x": 41, "y": 3, "block": true}, {"k": "tree1", "x": 40, "y": 3, "block": true}, {"k": "tree7", "x": 41, "y": 5, "block": true}, {"k": "tree0", "x": 39, "y": 2, "block": true}, {"k": "tree7", "x": 30, "y": 12, "block": true}, {"k": "tree2", "x": 8, "y": 24, "block": true}, {"k": "tree0", "x": 10, "y": 27, "block": true}, {"k": "tree6", "x": 12, "y": 25, "block": true}, {"k": "tree3", "x": 14, "y": 27, "block": true}, {"k": "tree5", "x": 16, "y": 24, "block": true}, {"k": "tree1", "x": 18, "y": 27, "block": true}, {"k": "tree2", "x": 25, "y": 25, "block": true}, {"k": "tree0", "x": 27, "y": 27, "block": true}, {"k": "tree6", "x": 29, "y": 24, "block": true}, {"k": "tree3", "x": 31, "y": 27, "block": true}, {"k": "tree1", "x": 33, "y": 24, "block": true}, {"k": "tree4", "x": 35, "y": 27, "block": true}, {"k": "tree7", "x": 37, "y": 25, "block": true}, {"k": "tree2", "x": 40, "y": 27, "block": true}, {"k": "tree5", "x": 41, "y": 24, "block": true}, {"k": "well", "x": 17, "y": 12, "block": true}, {"k": "statue", "x": 15, "y": 12, "block": true, "deco": true}, {"k": "statue", "x": 28, "y": 12, "block": true, "deco": true}, {"k": "barrel", "x": 1, "y": 14, "block": true}, {"k": "barrel", "x": 8, "y": 17, "block": true}, {"k": "barrel", "x": 12, "y": 17, "block": true}, {"k": "barrel", "x": 20, "y": 17, "block": true}, {"k": "barrel", "x": 23, "y": 17, "block": true}, {"k": "barrel", "x": 32, "y": 17, "block": true}, {"k": "barrel", "x": 12, "y": 10, "block": true}, {"k": "barrel", "x": 36, "y": 6, "block": true}, {"k": "barrel", "x": 10, "y": 12, "block": true}, {"k": "crate", "x": 9, "y": 17, "block": true}, {"k": "crate", "x": 23, "y": 18, "block": true}, {"k": "crate", "x": 32, "y": 18, "block": true}, {"k": "crate", "x": 11, "y": 10, "block": true}, {"k": "crate", "x": 30, "y": 10, "block": true}, {"k": "crate", "x": 39, "y": 6, "block": true}, {"k": "crate", "x": 10, "y": 13, "block": true}, {"k": "cart", "x": 26, "y": 22, "block": true, "deco": true}, {"k": "cart", "x": 15, "y": 22, "block": true, "deco": true}, {"k": "thug", "x": 20, "y": 10, "block": true, "npc": "rowan"}, {"k": "peasantW", "x": 10, "y": 14, "block": true, "npc": "wynn"}, {"k": "beggar", "x": 7, "y": 6, "block": true, "npc": "odo"}, {"k": "peasantW", "x": 36, "y": 13, "block": true, "npc": "hesta"}, {"k": "peasantW", "x": 4, "y": 14, "block": true, "npc": "ysolde"}, {"k": "thug", "x": 34, "y": 6, "block": true, "npc": "bryn"}, {"k": "drunk", "x": 27, "y": 16, "block": true, "npc": "gore"}, {"k": "peasantM", "x": 30, "y": 14, "block": true, "npc": "tilda"}, {"k": "peasantW", "x": 14, "y": 15, "block": true, "npc": "ivo"}, {"k": "thug", "x": 3, "y": 16, "block": true, "npc": "gateW"}, {"k": "thug", "x": 42, "y": 14, "block": true, "npc": "gateE"}, {"k": "peasantM", "x": 16, "y": 11, "block": true, "npc": "maren"}, {"k": "beggar", "x": 25, "y": 13, "block": true, "npc": "osk"}], "items": [{"k": "potion", "x": 18, "y": 15}, {"k": "bread", "x": 8, "y": 15}, {"k": "apple", "x": 29, "y": 14}, {"k": "cheese", "x": 19, "y": 14}], "start": {"x": 1, "y": 15, "f": 1}, "fmap": ["11111111111111111111111111111111111111111111", "11111111111111111111111111111111111111111111", "11111111111111111111111111111111111111111111", "11111111111111111111111111111111111111111111", "11111111111111111111111111111111111111111111", "11111111111111111111111111111111111111111111", "11111111111111111111111111111111111111111111", "11111111111111111111111111111111111111111111", "11111111111111111111111111111111111111111111", "11111111111111111111111111111111111111111111", "11111111111100000000000000000000111111111111", "11111111111100000000000000000000111111111111", "11011111011100000000000000000000110111110111", "11011111011100000000000000000000110111110111", "10000000000000000000000000000000000000000001", "10000000000000000000000000000000000000000001", "10000000000000000000000000000000000000000001", "11111111110111111111100111111111111011111011", "11111111110111111111100111111111111011111011", "11111111111111111111100111111111111111111111", "11111111111111111111100111111111111111111111", "11111111111111111111100111111111111111111111", "11110111111111111111100111111111111111111111", "11110111111111111111100111111111111111111111", "11111111111111111111100111111111111111111111", "11111111111111111111100111111111111111111111", "11111111111111111111100111111111111111111111", "11111111111111111111100111111111111111111111", "11111111111111111111100111111111111111111111", "11111111111111111111111111111111111111111111"], "tiles": {"A": {"fam": "plainstone", "seed": 303}, "B": {"fam": "plainplaster", "seed": 306}, "E": {"fam": "plainstone", "seed": 309}, "F": {"fam": "plainplaster", "seed": 312}, "H": {"fam": "plainstone", "seed": 315}, "I": {"fam": "stone", "seed": 322, "win": "barred"}, "J": {"fam": "stone", "seed": 329, "win": "lit", "ivy": 1}, "K": {"fam": "stone", "seed": 336, "win": "shutter"}, "M": {"fam": "grand", "seed": 343, "kind": "arch"}, "N": {"fam": "grand", "seed": 350, "kind": "bay"}, "O": {"fam": "grand", "seed": 357, "kind": "arch2"}, "P": {"fam": "grand", "seed": 364, "kind": "crest"}, "Q": {"fam": "grand", "seed": 371, "kind": "bay"}, "R": {"fam": "grand", "seed": 378, "kind": "bay"}, "S": {"fam": "grand", "seed": 385, "kind": "crest"}, "U": {"fam": "grand", "seed": 392, "kind": "arch2"}, "V": {"fam": "grand", "seed": 399, "kind": "bay"}, "W": {"fam": "grand", "seed": 406, "kind": "arch"}, "Y": {"fam": "stone", "seed": 413, "win": "shutter"}, "Z": {"fam": "stone", "seed": 420, "win": "lit"}, "a": {"fam": "stone", "seed": 427, "win": "barred", "ivy": 1}, "b": {"fam": "stone", "seed": 434, "win": "chimney"}, "c": {"fam": "stone", "seed": 441, "win": "barred"}, "d": {"fam": "stone", "seed": 448, "win": "shutter", "ivy": 1}, "e": {"fam": "stone", "seed": 455, "win": "lit"}, "f": {"fam": "ruin", "seed": 462, "kind": "peeled"}, "g": {"fam": "stone", "seed": 469, "win": "barred"}, "h": {"fam": "stone", "seed": 476, "win": "chimney"}, "i": {"fam": "farm", "seed": 483, "kind": "hatch"}, "j": {"fam": "stone", "seed": 490, "win": "barred"}, "k": {"fam": "farm", "seed": 497, "kind": "plain"}, "l": {"fam": "stone", "seed": 504, "win": "shutter"}, "m": {"fam": "stone", "seed": 511, "win": "barred", "ivy": 1}, "n": {"fam": "timber", "seed": 518, "win": "double", "box": 1}, "o": {"fam": "timber", "seed": 525, "win": "small", "brace": "X"}, "q": {"fam": "timber", "seed": 532, "win": "small"}, ",": {"fam": "door", "base": "timber", "seed": 543, "msg": "The door is barred. Somebody coughs inside.", "style": "strap"}, "r": {"fam": "stone", "seed": 550, "win": "lit"}, "s": {"fam": "stone", "seed": 557, "win": "shutter"}, "u": {"fam": "stone", "seed": 564, "win": "barred", "ivy": 1}, ";": {"fam": "door", "base": "stone", "seed": 575, "msg": "Locked. The curtains move.", "style": "arch"}, "v": {"fam": "timber", "seed": 582, "win": "wide", "brace": "herring"}, "w": {"fam": "timber", "seed": 589, "win": "small", "box": 1}, "x": {"fam": "timber", "seed": 596, "win": "double", "brace": "diag"}, ":": {"fam": "door", "base": "timber", "seed": 607, "msg": "No answer. A lamp burns inside.", "style": "plank"}, "y": {"fam": "farm", "seed": 614, "kind": "window"}, "z": {"fam": "farm", "seed": 621, "kind": "plain"}, "\u0100": {"fam": "farm", "seed": 628, "kind": "hatch"}, "!": {"fam": "door", "base": "farm", "seed": 639, "msg": "The farmhouse door is locked. A hen clucks behind it."}, "\u0101": {"fam": "stone", "seed": 646, "win": "chimney"}, "\u0102": {"fam": "stone", "seed": 653, "win": "barred"}, "\u0103": {"fam": "stone", "seed": 660, "win": "lit"}, "\u0104": {"fam": "stone", "seed": 667, "win": "shutter"}, "\u0105": {"fam": "stone", "seed": 674, "win": "barred", "ivy": 1}, "\u0106": {"fam": "timber", "seed": 681, "win": "wide", "sign": "coin"}, "\u0107": {"fam": "timber", "seed": 688, "win": "small", "box": 1}, "\u0108": {"fam": "timber", "seed": 695, "win": "double"}, "\u0109": {"fam": "timber", "seed": 702, "win": "wide"}, "\u010a": {"fam": "timber", "seed": 709, "win": "small", "brace": "diag"}, "\u010b": {"fam": "timber", "seed": 716, "win": "double", "box": 1}, "\u010c": {"fam": "grand", "seed": 723, "kind": "bay"}, "\u010d": {"fam": "timber", "seed": 730, "win": "wide", "sign": "mug"}, "\u010e": {"fam": "timber", "seed": 737, "win": "double", "box": 1}, "\u010f": {"fam": "timber", "seed": 744, "win": "small", "brace": "herring"}, "\u0110": {"fam": "timber", "seed": 751, "win": "wide", "brace": "X"}, "\u0111": {"fam": "timber", "seed": 758, "win": "double"}, "\u0112": {"fam": "grand", "seed": 765, "kind": "bay"}, "\u0113": {"fam": "timber", "seed": 772, "win": "small", "brace": "herring"}, "\u0114": {"fam": "timber", "seed": 779, "win": "double", "box": 1}, "\u0115": {"fam": "timber", "seed": 786, "win": "small"}, "?": {"fam": "door", "base": "timber", "seed": 797, "msg": "Locked tight. A dog barks behind the door.", "style": "strap"}, "\u0116": {"fam": "stone", "seed": 804, "win": "shutter"}, "\u0117": {"fam": "stone", "seed": 811, "win": "lit"}, "\u0118": {"fam": "stone", "seed": 818, "win": "chimney"}, "~": {"fam": "door", "base": "stone", "seed": 829, "msg": "Locked. You hear a child singing inside.", "style": "plank"}, "\u0119": {"fam": "timber", "seed": 836, "win": "arch", "brace": "diag"}, "\u011a": {"fam": "timber", "seed": 843, "win": "wide", "box": 1}, "\u011b": {"fam": "timber", "seed": 850, "win": "double", "brace": "X"}, "^": {"fam": "door", "base": "timber", "seed": 861, "msg": "The shutters are drawn. Someone is holding their breath.", "style": "sign"}, "\u011c": {"fam": "ruin", "seed": 868, "kind": "boards"}, "\u011d": {"fam": "ruin", "seed": 875, "kind": "peeled"}, "\u011e": {"fam": "ruin", "seed": 882, "kind": "boards"}, "\u011f": {"fam": "ruin", "seed": 889, "kind": "peeled"}, "&": {"fam": "door", "base": "ruin", "seed": 900, "msg": "The door is boarded up. The roof fell in years ago."}}, "interiors": {"castle": {"rows": ["vvvvvvvvvvvvvvvvv", "v...............v", "v...............v", "v...............v", "v...............v", "v...............v", "v...............v", "v...............v", "v...............v", "v...............v", "vvvvvvvv0vvvvvvvv"], "decor": [{"k": "statue", "x": 3, "y": 1, "block": true, "deco": true}, {"k": "statue", "x": 13, "y": 1, "block": true, "deco": true}, {"k": "statue", "x": 5, "y": 1, "block": true, "deco": true}, {"k": "statue", "x": 11, "y": 1, "block": true, "deco": true}, {"k": "statue", "x": 2, "y": 4, "block": true, "deco": true}, {"k": "statue", "x": 14, "y": 4, "block": true, "deco": true}, {"k": "bench", "x": 3, "y": 8, "block": true, "deco": true}, {"k": "bench", "x": 4, "y": 8, "block": true, "deco": true}, {"k": "bench", "x": 12, "y": 8, "block": true, "deco": true}, {"k": "bench", "x": 13, "y": 8, "block": true, "deco": true}, {"k": "bench", "x": 2, "y": 6, "block": true, "deco": true}, {"k": "bench", "x": 14, "y": 6, "block": true, "deco": true}, {"k": "mayor", "x": 8, "y": 2, "block": true, "npc": "halbrecht"}, {"k": "peasantM", "x": 5, "y": 5, "block": true, "npc": "clerkI"}, {"k": "thug", "x": 11, "y": 5, "block": true, "npc": "sentry"}], "items": [], "start": {"x": 8, "y": 9, "f": 0}, "lights": [[4, 2], [12, 2], [4, 6], [12, 6], [8, 5], [3, 9], [13, 9]], "fmap": ["00000000000000000", "00000001110000000", "00000001110000000", "00000001110000000", "00000001110000000", "00000001110000000", "00000001110000000", "00000001110000000", "00000001110000000", "00000001110000000", "00000001110000000"]}, "smith": {"rows": ["wwwwwwwwwww", "w.........w", "w.........w", "w.........w", "w.........w", "w.........w", "w.........w", "wwwww0wwwww"], "decor": [{"k": "barrel", "x": 1, "y": 1, "block": true, "deco": true}, {"k": "barrel", "x": 9, "y": 1, "block": true, "deco": true}, {"k": "crate", "x": 1, "y": 2, "block": true, "deco": true}, {"k": "crate", "x": 9, "y": 2, "block": true, "deco": true}, {"k": "barrel", "x": 2, "y": 5, "block": true, "deco": true}, {"k": "crate", "x": 8, "y": 5, "block": true, "deco": true}, {"k": "bench", "x": 3, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 7, "y": 3, "block": true, "deco": true}, {"k": "thug", "x": 5, "y": 2, "block": true, "npc": "brannoch"}], "items": [], "start": {"x": 5, "y": 6, "f": 0}, "lights": [[3, 2], [7, 2], [5, 5]]}, "inn": {"rows": ["wwwwwwwwwwwww", "w...........w", "w...........w", "w...........w", "w...........w", "w...........w", "w...........w", "w...........w", "wwwwww0wwwwww"], "decor": [{"k": "barrel", "x": 4, "y": 1, "block": true, "deco": true}, {"k": "barrel", "x": 8, "y": 1, "block": true, "deco": true}, {"k": "bench", "x": 4, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 5, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 7, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 8, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 2, "y": 5, "block": true, "deco": true}, {"k": "bench", "x": 10, "y": 5, "block": true, "deco": true}, {"k": "bench", "x": 2, "y": 6, "block": true, "deco": true}, {"k": "bench", "x": 10, "y": 6, "block": true, "deco": true}, {"k": "innkeeper", "x": 6, "y": 2, "block": true, "npc": "mara"}, {"k": "drunk", "x": 3, "y": 4, "block": true, "npc": "patronI1"}, {"k": "peasantW", "x": 9, "y": 4, "block": true, "npc": "patronI2"}], "items": [], "start": {"x": 6, "y": 7, "f": 0}, "lights": [[3, 2], [9, 2], [6, 5], [2, 7], [10, 7]]}, "store": {"rows": ["wwwwwwwww", "w.......w", "w.......w", "w.......w", "w.......w", "w.......w", "w.......w", "wwww0wwww"], "decor": [{"k": "barrel", "x": 1, "y": 1, "block": true, "deco": true}, {"k": "barrel", "x": 7, "y": 1, "block": true, "deco": true}, {"k": "crate", "x": 1, "y": 2, "block": true, "deco": true}, {"k": "crate", "x": 7, "y": 5, "block": true, "deco": true}, {"k": "barrel", "x": 1, "y": 6, "block": true, "deco": true}, {"k": "bench", "x": 2, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 3, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 5, "y": 3, "block": true, "deco": true}, {"k": "bench", "x": 6, "y": 3, "block": true, "deco": true}, {"k": "merchant", "x": 4, "y": 2, "block": true, "npc": "dorn"}], "items": [], "start": {"x": 4, "y": 6, "f": 0}, "lights": [[2, 2], [6, 2], [4, 5]]}}, "exits": {"2": {"x": 21, "y": 10, "f": 2}, "3": {"x": 4, "y": 16, "f": 0}, "4": {"x": 28, "y": 16, "f": 0}, "5": {"x": 16, "y": 16, "f": 0}, "6": {"x": 35, "y": 5, "f": 2}, "7": {"x": 3, "y": 5, "f": 2}}, "portals": [{"to": 11, "x": 30, "y": 14, "f": 3, "tex": "tgate"}, {"to": 19, "x": 1, "y": 20, "f": 1, "tex": "tgate"}, {"to": 14, "x": 8, "y": 9, "f": 0, "tex": "hall"}, {"to": 15, "x": 5, "y": 6, "f": 0, "tex": "shop"}, {"to": 16, "x": 6, "y": 7, "f": 0, "tex": "inn"}, {"to": 17, "x": 4, "y": 6, "f": 0, "tex": "shop"}, {"to": 18, "x": 1, "y": 14, "f": 1, "tex": "cave"}, {"to": 20, "x": 1, "y": 13, "f": 1, "tex": "light"}]}, "mines": {"rows": ["############################################", "############################################", "############################################", "############........###........#############", "############........###........#############", "############........###........#############", "############..............................##", "############........###........###........##", "############........###........###........##", "############........###........###........##", "###############.##########.#######........##", "##.......######.##########.#######........##", "##.......######.##########.#######........##", "##.......######.#######........###........##", "0...................###........######.######", "##.......###........###........######.######", "##.......###........###........######.######", "##.......###........###...................##", "############...................###........##", "############........###........###........##", "############........###........###........##", "############........###........###........##", "############........##############........##", "##################################........##", "##################################........##", "############################################", "############################################", "############################################"], "start": {"x": 1, "y": 14, "f": 1}, "enemies": [{"t": "rat", "x": 17, "y": 6}, {"t": "rat", "x": 14, "y": 3}, {"t": "bat", "x": 18, "y": 5}, {"t": "skel", "x": 12, "y": 17}, {"t": "rat", "x": 12, "y": 14}, {"t": "bat", "x": 16, "y": 17}, {"t": "skel", "x": 24, "y": 8}, {"t": "bat", "x": 28, "y": 3}, {"t": "skel", "x": 23, "y": 6}, {"t": "skel", "x": 28, "y": 17}, {"t": "rat", "x": 27, "y": 14}, {"t": "bat", "x": 29, "y": 15}, {"t": "skel", "x": 36, "y": 7}, {"t": "skel", "x": 41, "y": 13}, {"t": "overseer", "x": 41, "y": 18}], "items": [{"k": "ore", "x": 17, "y": 5}, {"k": "ore", "x": 12, "y": 22}, {"k": "ore", "x": 25, "y": 7}, {"k": "ore", "x": 25, "y": 18}, {"k": "ore", "x": 35, "y": 8}, {"k": "ore", "x": 39, "y": 19}, {"k": "pick", "x": 15, "y": 19}, {"k": "potion", "x": 2, "y": 11}, {"k": "potion", "x": 26, "y": 19}, {"k": "torch", "x": 39, "y": 13}], "decor": [{"k": "chest", "x": 41, "y": 17, "block": true}, {"k": "coffin", "x": 13, "y": 4, "block": true}, {"k": "cart", "x": 25, "y": 4, "block": true, "deco": true}, {"k": "cart", "x": 4, "y": 12, "block": true, "deco": true}, {"k": "bones", "x": 28, "y": 19}, {"k": "bones", "x": 16, "y": 20}, {"k": "barrel", "x": 36, "y": 7, "block": true}]}, "moor": {"rows": ["TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTTTTTTTTTTT...TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTTTTTTTTT.......TTTTTTTTTTTTTTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTTTTTTTT.........TTTTTTTTTTTTTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTTTTTTTT.........TTTTTTTT...TTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTTT...............TTTTT.......TTTTTTTTTTTTTT", "TTTTTTTTTTTTT...TTTT................TTTT.........TTTTTTTTTTTTT", "TTTTTTTTTTT.......T.................TTTT.........TTTTTTTTTTTTT", "TTTTTTTTTT.............tt..........TTTT...........TTTTTTTTTTTT", "TTTTTTTTTT.........................TTTT...........TTTTTTTTTTTT", "TTTTTTTTT.........................TTTTT...........TTTTTTTTTTTT", "TTTTTTTTT...................T...TTTTTT............tTTTTTTTTTTT", "TTTTTTTT...................TTTTTTTTTT..............TTTTTTTTTTT", "TTTTTT..............t.....TTTTTTTTTT.t..t......t......TTTTTTTT", "TTTTT......................TTTTTTTT.................t..TTTTTTT", "TTTTt....t.......t.t........TTTTTT.t....t..TTTTTT....t..TTTTTT", "TTT................t......ttT...T.t......TTTTTTTT...........TT", "T..........tTTTTTT.tt..................TTTTTTTTTT..t.........T", "T..........TTTTTTTT..t....t...........TTTTTTTTTTTT...t.......T", "T.........TTTTTTTTTTTTT...............TTTTTTTTTTTTT..........T", "0.......TTTTTTTTTTTTTTT...............TTTTTTTTTTTTTTT........T", "T........TTTTTTTTTTTTTT..............TTTTTTTTTTTTTTTT........T", "T.........TTTTTTTTTTTT..t...........TTTTTTTTTTTTTTTT.........T", "T..........TTTTTTTTTT..t.............TTTTTTTTTTTTTT.t........T", "TTT.........TTTTT.....t................TTTTTTTTTTT.t.........T", "TTTT..t.t..t.TTTt.t.t.............tt....TTTTTTTTTTt..........T", "TTTTTt............................t......TTTTTT....t........TT", "TTTTTT.t.........t..........TTT...........TTT...........TTTTTT", "TTTTTT....................TTTTTTt........t.......t......TTTTTT", "TTTTTT...................TTTTTTTT......................TTTTTTT", "TTTTTTT.................TTTTTTTTTT....t.............TTTTTTTTTT", "TTTTTTTT..................TTTTTTTTTTTT.............TTTTTTTTTTT", "TTTTTTTTT............t.....TT...TTTTTT............TTTTTTTTTTTT", "TTTTTTTTTT............t...tt......TTTT............TTTTTTTTTTTT", "TTTTTTTTTT.........................TTTT...........TTTTTTTTTTTT", "TTTTTTTTTTT........................TTTTT.........TTTTTTTTTTTTT", "TTTTTTTTTTTTT...T..t...t............TTTT.........TTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTT..................TTTTT.......TTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTTTT..............TTTTTTT...TTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTTTTT............TTTTTTTTTTTTTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTTTTTTTT.........TTTTTTTTTTTTTTTTTTTTTTTTTTT", "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"], "start": {"x": 1, "y": 20, "f": 1}, "enemies": [{"t": "wolf", "x": 13, "y": 31}, {"t": "wolf", "x": 14, "y": 28}, {"t": "wolf", "x": 30, "y": 23}, {"t": "wolf", "x": 31, "y": 22}, {"t": "wolf", "x": 30, "y": 38}, {"t": "wolf", "x": 43, "y": 35}, {"t": "wolf", "x": 30, "y": 6}, {"t": "wolf", "x": 15, "y": 10}, {"t": "bandit", "x": 44, "y": 11}, {"t": "bandit", "x": 41, "y": 9}, {"t": "archer", "x": 44, "y": 12}, {"t": "bandit", "x": 60, "y": 22}, {"t": "bandit", "x": 58, "y": 22}, {"t": "archer", "x": 57, "y": 20}, {"t": "bandit", "x": 43, "y": 31}, {"t": "bandit", "x": 28, "y": 38}], "items": [{"k": "herb", "x": 11, "y": 12}, {"k": "herb", "x": 30, "y": 10}, {"k": "herb", "x": 33, "y": 37}, {"k": "herb", "x": 14, "y": 30}, {"k": "herb", "x": 42, "y": 35}, {"k": "herb", "x": 57, "y": 24}, {"k": "herb", "x": 27, "y": 20}, {"k": "potion", "x": 43, "y": 12}], "decor": [{"k": "peasantM", "x": 32, "y": 5, "block": true, "npc": "pip"}, {"k": "peasantM", "x": 15, "y": 13, "block": true, "npc": "eadric"}]}, "grave": {"rows": ["######################################", "#....................................#", "#....................................#", "#....................................#", "#..................................t.#", "#.....................t..............#", "#....................................#", "#....................t...............#", "#..................................t.#", "#....................................#", "#.........................t..........#", "#....................................#", "#....................................#", "0....................................#", "#.................................t..#", "#..............t..................t..#", "#....................................#", "#...................t................#", "#...............................t....#", "#....................................#", "#....................................#", "#..............t...............t.....#", "#....................................#", "#....................................#", "#....................................#", "######################################"], "start": {"x": 1, "y": 13, "f": 1}, "enemies": [{"t": "ghost", "x": 14, "y": 6}, {"t": "ghost", "x": 21, "y": 6}, {"t": "ghost", "x": 16, "y": 16}, {"t": "ghost", "x": 20, "y": 5}, {"t": "ghost", "x": 26, "y": 12}, {"t": "ghost", "x": 19, "y": 7}, {"t": "ghost", "x": 32, "y": 22}, {"t": "ghost", "x": 15, "y": 19}, {"t": "skel", "x": 33, "y": 2}, {"t": "skel", "x": 36, "y": 13}, {"t": "skel", "x": 32, "y": 24}], "items": [{"k": "potion", "x": 30, "y": 3}, {"k": "potion", "x": 33, "y": 18}], "decor": [{"k": "grave2", "x": 24, "y": 6, "block": true}, {"k": "grave", "x": 18, "y": 17, "block": true}, {"k": "grave2", "x": 33, "y": 17, "block": true}, {"k": "cross", "x": 30, "y": 12, "block": true}, {"k": "grave", "x": 33, "y": 21, "block": true}, {"k": "grave", "x": 17, "y": 15, "block": true}, {"k": "grave2", "x": 34, "y": 9, "block": true}, {"k": "grave2", "x": 23, "y": 12, "block": true}, {"k": "cross", "x": 8, "y": 3, "block": true}, {"k": "grave2", "x": 34, "y": 22, "block": true}, {"k": "grave", "x": 27, "y": 20, "block": true}, {"k": "grave2", "x": 20, "y": 2, "block": true}, {"k": "grave", "x": 6, "y": 15, "block": true}, {"k": "grave2", "x": 7, "y": 7, "block": true}, {"k": "grave2", "x": 8, "y": 18, "block": true}, {"k": "grave2", "x": 31, "y": 11, "block": true}, {"k": "cross", "x": 18, "y": 2, "block": true}, {"k": "cross", "x": 10, "y": 11, "block": true}, {"k": "grave", "x": 11, "y": 14, "block": true}, {"k": "grave", "x": 14, "y": 15, "block": true}, {"k": "grave", "x": 15, "y": 8, "block": true}, {"k": "grave", "x": 26, "y": 11, "block": true}, {"k": "cross", "x": 8, "y": 9, "block": true}, {"k": "statue", "x": 19, "y": 12, "block": true}]}};
+const LEVEL13_DATA={fmap:IRONJ.town.fmap,rows:IRONJ.town.rows,start:IRONJ.town.start,enemies:[],items:IRONJ.town.items,decor:IRONJ.town.decor,outdoor:true,day:.9,floor:'cobble',name:'Ironhill',label:'Ironhill',diff:6,portals:IRONJ.town.portals};
+const IEX=IRONJ.town.exits,IBACK=k=>({to:13,x:IEX[k].x,y:IEX[k].y,f:IEX[k].f,tex:'in'});
+const LEVEL14_DATA=mkInterior(IRONJ.town.interiors.castle,'Ironhill Castle',IBACK('2'),{amb:.62,fmap:IRONJ.town.interiors.castle.fmap,floor2:'carpet',diff:6});
+const LEVEL15_DATA=mkInterior(IRONJ.town.interiors.smith,"Brannoch's Forge",IBACK('3'),{diff:6});
+const LEVEL16_DATA=mkInterior(IRONJ.town.interiors.inn,'The Anvil and Ale',IBACK('4'),{diff:6});
+const LEVEL17_DATA=mkInterior(IRONJ.town.interiors.store,"Dorn's Store",IBACK('5'),{diff:6});
+const LEVEL18_DATA={rows:IRONJ.mines.rows,start:IRONJ.mines.start,enemies:IRONJ.mines.enemies,items:IRONJ.mines.items,decor:IRONJ.mines.decor,day:0,name:'Ironhill Mines',label:'Ironhill Mines',diff:7,torchGap:4.2,portals:[{to:13,x:IEX['6'].x,y:IEX['6'].y,f:IEX['6'].f,tex:'cave'}]};
+const LEVEL19_DATA={rows:IRONJ.moor.rows,start:IRONJ.moor.start,enemies:IRONJ.moor.enemies,items:IRONJ.moor.items,decor:IRONJ.moor.decor,outdoor:true,day:.95,floor:'forest',name:'Ironhill Moor',label:'Ironhill Moor',diff:7,portals:[{to:13,x:42,y:15,f:3,tex:'tgate'}]};
+const LEVEL20_DATA={rows:IRONJ.grave.rows,start:IRONJ.grave.start,enemies:IRONJ.grave.enemies,items:IRONJ.grave.items,decor:IRONJ.grave.decor,outdoor:true,day:.42,floor:'forest',name:'Ironhill Burial Ground',label:'Burial Ground',diff:7,portals:[{to:13,x:IEX['7'].x,y:IEX['7'].y,f:IEX['7'].f,tex:'light'}]};
+const LEVELS={1:LEVEL1_DATA,2:LEVEL2_DATA,3:LEVEL3_DATA,4:LEVEL4_DATA,5:LEVEL5_DATA,6:LEVEL6_DATA,7:LEVEL7_DATA,8:LEVEL8_DATA,9:LEVEL9_DATA,10:LEVEL10_DATA,11:LEVEL11_DATA,12:LEVEL12_DATA,13:LEVEL13_DATA,14:LEVEL14_DATA,15:LEVEL15_DATA,16:LEVEL16_DATA,17:LEVEL17_DATA,18:LEVEL18_DATA,19:LEVEL19_DATA,20:LEVEL20_DATA};
 const LEVEL_NAMES={};for(const k in LEVELS)LEVEL_NAMES[k]=LEVELS[k].name;
-const WALLCH={a:9,b:10,c:11,p:12,w:13,v:14,h:15,k:16,i:17,g:18,r:19,d:20,e:21,f:22,'0':30,'1':31,'2':32,'3':33,'4':34,'5':35};
+const WALLCH={a:9,b:10,c:11,p:12,w:13,v:14,h:15,k:16,i:17,g:18,r:19,d:20,e:21,f:22,'0':30,'1':31,'2':32,'3':33,'4':34,'5':35,'6':36,'7':37};
 const DIFF=()=>(LEVELS[LEVEL]&&LEVELS[LEVEL].diff)||LEVEL;
 function loadLevel(n){
   const L=LEVELS[n]||LEVELS[1];
@@ -3149,7 +3311,7 @@ function applyLevelState(s){
 // killed creatures stay dead, but some of them (sometimes one, sometimes a few) return each visit
 function applyEnemyState(s){
   if(!s||!s.dead||!s.dead.length)return;
-  const dead=new Set(s.dead),UNIQUE=['boss','gandrick','mayor'];
+  const dead=new Set(s.dead),UNIQUE=['boss','gandrick','mayor','overseer'];
   const cand=G.enemies.filter(e=>dead.has(e.id)&&!UNIQUE.includes(e.t));
   const k=cand.length?(Math.random()<.45?1:1+Math.floor(Math.random()*cand.length)):0;
   cand.sort(()=>Math.random()-.5);
@@ -3203,7 +3365,7 @@ function usePortal(i){
   sfx('door');goToLevel(p.to,{x:p.x,y:p.y,f:p.f});
 }
 function exitLevel(g){
-  if(LEVEL===11){sfx('win');startCut('ironhill',()=>{G.flags.ironhill=1;qTurnIn('ironhill');G.winKind='ironhill';G.state='win';sfx('win')});return}
+  if(LEVEL===11){sfx('win');startCut('ironhill',()=>{goToLevel(13,{x:1,y:15,f:1})});return}
   if(LEVEL===1&&g===5){sfx('win');goToLevel(2);return}
   if(LEVEL===2&&g===7){sfx('door');goToLevel(3,{x:1,y:9,f:1});return}
   G.state='win';sfx('win');
@@ -3567,7 +3729,7 @@ const qSt=id=>G.quests[id]?G.quests[id].st:null;
 const qGoal=id=>{const q=QUESTS[id];return clamp(q.goal(G.quests[id]||{}),0,q.need)};
 const qReady=id=>qSt(id)==='active'&&qGoal(id)>=QUESTS[id].need;
 const anyQuestReady=()=>Object.keys(QUESTS).some(qReady);
-function qAccept(id){G.quests[id]={st:'active',base:id==='wolves'?(G.flags.wolfKills||0):id==='rats'?(G.flags.ratKills||0):id==='bandits'?(G.flags.bandKills||0):0};msg('New quest: '+QUESTS[id].title,'#ffe36a');sfx('level')}
+function qAccept(id){G.quests[id]={st:'active',base:QUESTS[id].cnt?(G.flags[QUESTS[id].cnt]||0):id==='wolves'?(G.flags.wolfKills||0):id==='rats'?(G.flags.ratKills||0):id==='bandits'?(G.flags.bandKills||0):0};if(QUESTS[id].give)bagAdd(mkItem(QUESTS[id].give));msg('New quest: '+QUESTS[id].title,'#ffe36a');sfx('level')}
 function qTurnIn(id){
   const q=QUESTS[id];if(!qReady(id))return false;
   for(const k in (q.take||{}))bagRemove(k,q.take[k]);
@@ -3796,7 +3958,7 @@ CUTS.tunnel=()=>[
   {who:hn(0),text:'Ironhill is on the other side. Stay together and keep going.'}];
 CUTS.ironhill=()=>[
   {text:'At last the tunnel climbs. Grey light shows ahead and the sound of rain returns. The party steps out beneath the stone walls of Ironhill.'},
-  {who:hn(1),text:'We made it. Now to find their mayor and tell him what we found in Thornwick.'}];
+  {who:hn(1),text:'We made it. The mayor will be in the castle. Let us tell him what we found in Thornwick.'}];
 function arrestEnd(){
   const F=G.flags;F.finale=1;F.ironRoad=1;
   qTurnIn('gandrick');
@@ -3805,10 +3967,102 @@ function arrestEnd(){
 }
 
 const QGIVER={maud:'goats',hild:'wolves',rolf:'bandits',wat:'bread',bram:'wood',corbin:'gandrick',tam:'apples',mabel:'cheese',hob:'ale',edda:'rats',will:'fish',nim:'ghosts'};
+/* ===== Ironhill: people, quests and their talk ===== */
+const SMITH_STOCK=[['dagger',2],['sword',3],['mace',2],['axe',2],['bow',1],['staff',1],['helm',2],['shield',2],['jerkin',2],['leggings',2],['bracers',2],['potion',3]];
+const cq=cnt=>q=>(G.flags[cnt]||0)-(q.base||0);
+Object.assign(QUESTS,{
+  mines:{title:'Clear the Mines',who:'Mayor Halbrecht',desc:'Undead, rats and bats have come up from the old mines east of the castle. Kill 8 of them inside the mines.',need:8,cnt:'mineKills',goal:cq('mineKills'),reward:{gold:220,xp:450}},
+  overseer:{title:'The Overseer',who:'Foreman Bryn',desc:'The dead Mine Overseer still walks the deepest room of the mines. Kill him.',need:1,goal:()=>G.flags.overseerDead?1:0,reward:{gold:260,xp:520,items:['potion','potion']}},
+  ore:{title:'Iron for Brannoch',who:'Brannoch, the smith',desc:'Bring Brannoch 6 pieces of iron ore. They lie on the floor of the mines.',need:6,goal:()=>bagCount('ore'),take:{ore:6},reward:{gold:130,xp:260,items:['ironblade']}},
+  pick:{title:"Hesta's Pick",who:'Hesta',desc:"Hesta's husband died in the mines. Bring her his pick. It lies somewhere in the tunnels.",need:1,goal:()=>bagCount('pick'),take:{pick:1},reward:{gold:80,xp:200}},
+  herbs:{title:'Herbs for Wynn',who:'Wynn, the herbalist',desc:'Wynn needs 6 moor herbs. They grow on the moor east of town.',need:6,goal:()=>bagCount('herb'),take:{herb:6},reward:{gold:75,xp:170,items:['potion','potion']}},
+  wolves2:{title:'Wolves on the Moor',who:'Captain Rowan',desc:'Kill 8 wolves on the moor east of Ironhill.',need:8,cnt:'wolfKills',goal:cq('wolfKills'),reward:{gold:170,xp:320}},
+  bandits2:{title:'The Moor Bandits',who:'Captain Rowan',desc:'Kill 6 bandits or archers on the moor.',need:6,cnt:'bandKills',goal:cq('bandKills'),reward:{gold:200,xp:380,items:['ringM']}},
+  graves:{title:'The Burial Ground',who:'Odo, the gravekeeper',desc:'Ghosts walk in the burial ground next to the gravekeeper hut. Kill 6 of them.',need:6,cnt:'graveKills',goal:cq('graveKills'),reward:{gold:130,xp:300}},
+  pip:{title:'Lost Boy',who:'Ysolde',desc:"Ysolde's son Pip went onto the moor to watch the wolves. Find him and tell him to go home.",need:1,goal:()=>G.flags.pipHome?1:0,reward:{gold:90,xp:210}},
+  parcel:{title:'A Parcel for Eadric',who:'Dorn, the merchant',desc:'Take the sealed parcel to Farmer Eadric on the moor, then tell Dorn.',need:1,give:'parcel',goal:()=>G.flags.parcelDone?1:0,reward:{gold:95,xp:160}},
+  rats2:{title:'Vermin',who:'Mara, the innkeeper',desc:'Kill 6 rats or bats. They nest in the mines.',need:6,cnt:'ratKills',goal:cq('ratKills'),reward:{gold:65,xp:130}}
+});
+QUESTS.ironhill.desc="Tell the mayor of Ironhill what happened in Thornwick. He is in the castle.";
+QUESTS.ironhill.goal=()=>G.flags.halbrecht?1:0;
+function qg(name,img,greet,qid,o,pre){
+  return {name,img,root:d=>{
+    if(qReady(qid))return qNode(qid,o);
+    const st=qSt(qid),opts=pre?pre(d):[];
+    if(st===null)opts.push(['Do you need help?',()=>qNode(qid,o)]);
+    else if(st==='active')opts.push(['About the job',()=>qNode(qid,o)]);
+    opts.push(BYE);
+    return say(greet,opts)}};
+}
+const MINES_Q={offer:'The old mines under the hill are full of the dead. Rats and bats too. Eight of them gone would let the miners work again. Will you clear them?',accept:'The mines are east of the castle, behind the gravekeeper and the foreman. Take torches.',remind:(n,m)=>`${n} of ${m} killed in the mines.`,ready:'You have cleared them. The miners are talking about it already.',turn:'The mines are quieter.',thanks:'Ironhill pays its debts. Here is your pay.',after:'The mines are open again. Thank you.'};
+const WOLF2_Q={offer:'Wolves come down from the moor at night and take sheep. Kill eight of them on the moor, through the east gate.',accept:'Stay together. They come in packs.',remind:(n,m)=>`${n} of ${m} wolves killed.`,ready:'The shepherds say the howling has stopped.',turn:'Eight wolves.',thanks:'Well done. Here is your pay.',after:'The wolves keep away from the gate now. Thank you.'};
+const BAND2_Q={offer:'Now bandits camp on the moor and rob the farmers. Kill six of them, archers too. Do not let them surround you.',accept:'They hold the far end of the moor.',remind:(n,m)=>`${n} of ${m} bandits killed.`,ready:'The farmers say the moor is quiet.',turn:'Six bandits.',thanks:'The town thanks you. Take this ring from the guard chest.',after:'The moor is safe. Thank you.'};
+const HERB_Q={offer:'I make salves for the whole town and I have run out of herbs. Bring me six from the moor, east of the gate. The wolves have kept me from going.',accept:'They are grey-green plants. You will see them in the grass.',remind:(n,m)=>`You have ${n} of ${m} herbs.`,ready:'Moor herbs! Six of them.',turn:'Here they are.',thanks:'Thank you. Here is your pay and two of my best salves.',after:'My salves are made. Thank you.'};
+const GRAVE_Q={offer:'The dead do not rest in my burial ground. Ghosts walk between the graves every night. Kill six of them and I will pay you what I have saved.',accept:'The burial ground is behind my hut. Be careful.',remind:(n,m)=>`${n} of ${m} ghosts gone.`,ready:'It is quiet again. I can feel it.',turn:'Six ghosts.',thanks:'God rest them. Here is your pay.',after:'It is quiet now. Thank you.'};
+const PICK_Q={offer:'My husband went into the mines three winters ago and did not come out. I do not need his body. I want his pick. It has his name carved in the handle. It is somewhere in the tunnels.',accept:'Thank you. It is all I have of him.',remind:()=>'Have you found the pick?',ready:'That is his pick. That is his name.',turn:'Here.',thanks:'Thank you. I have little, but take this.',after:'I keep it by the door. Thank you.'};
+const PIP_Q={offer:'My boy Pip ran onto the moor to look at the wolves. He is six. Please find him and tell him to come home.',accept:'God keep you. He likes to hide in quiet corners.',remind:()=>'Have you found my Pip?',ready:'Pip came home! He told me you found him.',turn:'Pip is home.',thanks:'Thank you. Take this, it is all I can give.',after:'Pip is at home. Thank you.'};
+const OVERSEER_Q={offer:'The overseer was a cruel man and he died in the deepest room. Now he walks and gives orders to the dead. Nobody can work while he is there. Kill him.',accept:'He is in the last room. He hits hard.',remind:()=>'The overseer is still down there.',ready:'The overseer is dead? Truly?',turn:'He is dead.',thanks:'The miners will cheer. Here is your pay.',after:'The mines are ours again. Thank you.'};
+const ORE_Q={offer:'I am out of iron. The ore is in the mines, on the floor in the side rooms, where the miners dropped it. Bring me six pieces and I will make you a good blade.',accept:'Take torches. The mines are dark.',remind:(n,m)=>`You have ${n} of ${m} pieces of ore.`,ready:'That is good ore. Six pieces.',turn:'Here is the ore.',thanks:'I will not charge for this. Take the blade I made last winter. It is better than anything on the rack.',after:'The forge is hot again. Thank you.'};
+const PARCEL_Q={offer:'I have a sealed parcel for Farmer Eadric on the moor, but I will not walk there with wolves about. Will you take it? He will be near the old well on the west side of the moor.',accept:'Give it to him yourself. He will tell me you did.',remind:()=>'Have you given the parcel to Eadric?',ready:'Eadric got his parcel? Good.',turn:'It is delivered.',thanks:'Thank you. Here is your pay.',after:'Eadric got his parcel. Thank you.'};
+const RATS2_Q={offer:'The cellar is clean, but there are rats and bats in the mines and they come up the drains. Kill six of them and I will pay you.',accept:'They nest in the mines.',remind:(n,m)=>`${n} of ${m} rats and bats killed.`,ready:'The cellar is quiet.',turn:'Six dead.',thanks:'Thank you. Here is your pay.',after:'No more rats. Thank you.'};
+Object.assign(NPCS,{
+  halbrecht:{name:'Mayor Halbrecht',root:()=>{
+    const F=G.flags;
+    const work=()=>qSt('mines')!=='done'?qNode('mines',MINES_Q):say('The mines are open and the road is safe. Many people in town have smaller jobs. Ask around. Captain Rowan at the gate, Brannoch the smith, Wynn the herbalist, Odo the gravekeeper and others.',[BYE]);
+    if(qSt('ironhill')==='active')return say('You are from Thornwick? Few come through that tunnel. Why have you come?',[['Mayor Corbin sold the road to Gandrick. We found his ledger, and the king has him in irons.',()=>{F.halbrecht=1;qTurnIn('ironhill');return say('I knew Corbin. I never thought he would sell his own town. Ironhill is grateful. If you want more work, I have some.',[['What work?',work],BYE])}],BYE]);
+    return say('Welcome to Ironhill. The castle is small, but the walls are strong.',[['Do you have work for us?',work],BYE]);
+  }},
+  rowan:{name:'Captain Rowan',img:'thug',root:()=>{const q=qSt('wolves2')==='done'?'bandits2':'wolves2';return qNode(q,q==='wolves2'?WOLF2_Q:BAND2_Q)}},
+  wynn:qg('Wynn, the herbalist','peasantW','Salves and herbs. Nothing fancy.','herbs',HERB_Q),
+  odo:qg('Odo, the gravekeeper','beggar','The dead keep me company. Most of them are quiet.','graves',GRAVE_Q),
+  hesta:qg('Hesta','peasantW','I wait by the mine road. Habit.','pick',PICK_Q),
+  ysolde:qg('Ysolde','peasantW','Have you seen a small boy?','pip',PIP_Q),
+  bryn:qg('Foreman Bryn','thug','No work today. Not with the dead in the mines.','overseer',OVERSEER_Q),
+  brannoch:{name:'Brannoch, the smith',img:'thug',root:d=>{
+    if(qReady('ore'))return qNode('ore',ORE_Q);
+    const o=[['Trade',()=>{openShop(d,SMITH_STOCK,"Brannoch's Forge");return null}]];
+    const st=qSt('ore');
+    if(st===null)o.push(['Do you need help?',()=>qNode('ore',ORE_Q)]);else if(st==='active')o.push(['About the ore',()=>qNode('ore',ORE_Q)]);
+    o.push(BYE);return say('Plain iron and plain prices.',o)}},
+  mara:{name:'Mara, the innkeeper',root:d=>{
+    if(qReady('rats2'))return qNode('rats2',RATS2_Q);
+    const o=[['Rent a room (25 gold)',()=>{if(G.gold<25)return say('You cannot afford a room.',[BYE]);G.gold-=25;restParty(true);return say('You sleep in clean beds and eat breakfast. Fallen heroes rise, and everyone wakes healed and fed.',[BYE])}]];
+    const st=qSt('rats2');
+    if(st===null)o.push(['Do you need help?',()=>qNode('rats2',RATS2_Q)]);else if(st==='active')o.push(['About the vermin',()=>qNode('rats2',RATS2_Q)]);
+    o.push(['Any news?',()=>say('The miners drink here, when there are miners. Business has been thin since the dead came up.',[BYE])]);
+    o.push(BYE);return say('Welcome to the Anvil and Ale. Beds are 25 gold.',o)}},
+  dorn:{name:'Dorn, the merchant',root:d=>{
+    if(qReady('parcel'))return qNode('parcel',PARCEL_Q);
+    const o=[['Trade',()=>{openShop(d,MERCHANT_STOCK,"Dorn's Store");return null}]];
+    const st=qSt('parcel');
+    if(st===null)o.push(['Do you need help?',()=>qNode('parcel',PARCEL_Q)]);else if(st==='active')o.push(['About the parcel',()=>qNode('parcel',PARCEL_Q)]);
+    o.push(BYE);return say('Food and plain goods. Ironhill prices.',o)}},
+  eadric:{name:'Farmer Eadric',img:'peasantM',root:()=>{const F=G.flags;
+    if(qSt('parcel')==='active'&&bagCount('parcel')>0&&!F.parcelDone){bagRemove('parcel',1);F.parcelDone=1;return say('A parcel from Dorn! Seeds, at last. Tell him I thank him.',[BYE])}
+    return say('The wolves took my dog last spring. I stay close to the old well now.',[BYE])}},
+  pip:{name:'Pip',img:'peasantM',root:()=>{const F=G.flags;
+    if(qSt('pip')==='active'&&!F.pipHome){F.pipHome=1;const d=G.decor.find(x=>x.npc==='pip');if(d){d.found=true;d.block=false}return say('Mum sent you? I was only looking at the wolves. I will run home now. Do not tell her I came this far.',[['Go on, then.',()=>null]])}
+    return say('I am hiding from the wolves. Do not tell my mum.',[BYE])}},
+  gore:gossip('Gore','drunk',['Hic. The castle has four towers. I counted. Twice.','The mines had the best ale in the north. Now nobody goes down.']),
+  tilda:gossip('Tilda','peasantM',['The mayor is fair. That is rare in a mayor.','Ironhill makes the best nails in the country.']),
+  ivo:gossip('Ivo','peasantW',['I heard the dead walking in the burial ground last night.','There is a tunnel from here to Thornwick. Nobody uses it. Nobody did, until you.']),
+  maren:gossip('Maren','peasantM',['A well is a good thing. Do not drink from this one.','The captain trains the guard every morning. They need it.']),
+  osk:gossip('Osk','beggar',['Spare a coin? No? Then spare a cheese.','The moor is wide and the wolves are hungry.']),
+  gateW:gossip('West gate guard','thug',['The tunnel to Thornwick. Nobody comes that way. Nobody except you.']),
+  gateE:gossip('East gate guard','thug',['The moor lies through this gate. Wolves and bandits. Take care.']),
+  clerkI:gossip('The clerk','peasantM',['The mayor will see you. Go on in.']),
+  sentry:gossip('Castle sentry','thug',['Move along. Wait, you are the heroes from Thornwick? Go on in.']),
+  patronI1:gossip('A drunk patron','drunk',['Drink up. The dead cannot drink.']),
+  patronI2:gossip('A miner','peasantM',['Three winters since I last saw the bottom of that mine.'])
+});
+for(const k of ['halbrecht','rowan','wynn','odo','hesta','ysolde','bryn','brannoch','mara','dorn','eadric','pip','gore','tilda','ivo','maren','osk','gateW','gateE','clerkI','sentry','patronI1','patronI2'])NPCS_BY[NPCS[k].name]=NPCS[k];
+Object.assign(QGIVER,{halbrecht:['ironhill','mines'],rowan:['wolves2','bandits2'],wynn:'herbs',odo:'graves',hesta:'pick',ysolde:'pip',bryn:'overseer',brannoch:'ore',mara:'rats2',dorn:'parcel'});
+
 function drawQuestMarks(ox,oy,cs,big){
   const pulse=.6+.4*Math.sin(G.time*5);
   for(const d of G.decor){
-    const q=QGIVER[d.npc];if(!q||d.found)continue;
+    const qv=QGIVER[d.npc];if(!qv||d.found)continue;
+    const q=Array.isArray(qv)?qv.find(z=>qSt(z)!=='done'):qv;if(!q)continue;
     const st=qSt(q),ready=qReady(q);
     if(st==='done'||(st==='active'&&!ready))continue;
     const cx=ox+(d.x+.5)*cs,cy=oy+(d.y+.5)*cs,col=ready?'#7ae07a':'#ffe36a';
@@ -3834,7 +4088,7 @@ function drawMapCells(ox,oy,cs){
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){
     if(!G.seen[y][x])continue;
     const g=G.grid[y][x];
-    ctx.fillStyle=g===0?'#7a6446':g>=30?'#d8b060':(g>=15&&g<=19)?'#a8702e':(g>=20&&g<=22)?'#45403a':g===3?'#a8702e':g===4?'#c03a2a':g===5?'#7ab0f0':g===6?'#2c4a2a':g===7?'#d8b060':g===8?'#6a4a24':'#45403a';
+    ctx.fillStyle=g===0?'#7a6446':g>=200?'#a8702e':g>=100?'#45403a':g>=30?'#d8b060':(g>=15&&g<=19)?'#a8702e':(g>=20&&g<=22)?'#45403a':g===3?'#a8702e':g===4?'#c03a2a':g===5?'#7ab0f0':g===6?'#2c4a2a':g===7?'#d8b060':g===8?'#6a4a24':'#45403a';
     if(g===0&&G.decor.some(d=>d.block&&d.x===x&&d.y===y))ctx.fillStyle='#4a3a28';
     ctx.fillRect(ox+x*cs,oy+y*cs,cs,cs);
     if(g>0&&g<3){ctx.fillStyle='rgba(255,255,255,.07)';ctx.fillRect(ox+x*cs,oy+y*cs,cs,Math.max(1,cs*.2))}
