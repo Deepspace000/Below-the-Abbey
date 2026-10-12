@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.61';
+const VERSION='2.64';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2317,7 +2317,7 @@ function skyTod(hr){
   const m=(hr>=19.3?hr-19.3:hr+4.7)/11.4,moon=m>=0&&m<=1?Math.sin(m*Math.PI):-1;
   return {k:[mix(a[1][0],b[1][0]),mix(a[1][1],b[1][1]),mix(a[1][2],b[1][2])],g:[mix(a[2][0],b[2][0]),mix(a[2][1],b[2][1]),mix(a[2][2],b[2][2])],glow:mix(a[3],b[3]),stars:mix(a[4],b[4]),moon};
 }
-const SCOLS=new Int16Array(1024);
+const STARS=(()=>{const t=new Uint8Array(1024*256);for(let v=0;v<150;v++)for(let u=0;u<1024;u++){const h=hash2(u,v,31);if(h>.9955)t[v*1024+u]=Math.round((h-.9955)/.0045*255)||1}return t})(); // the stars are fixed once, not worked out for every pixel of every frame
 function paintDesertSky(D,SKP,UCOL,SK,ST,stormC,dX,dY,pX,pY,t){
   const kr=SK.k[0],kg=SK.k[1],kb=SK.k[2],sA=SK.stars*(1-ST*.9),gl=SK.glow*(1-ST*.8);
   const sc=new Int16Array(VW);if(sA>.02)for(let x=0;x<VW;x++){const cm=2*x/VW-1;sc[x]=((((Math.atan2(dY+pY*cm,dX+pX*cm)/TAU)%1)+1)%1*1024)|0}
@@ -2329,8 +2329,8 @@ function paintDesertSky(D,SKP,UCOL,SK,ST,stormC,dX,dY,pX,pY,t){
     for(let x=0;x<VW;x++){
       const i=(v*1024+UCOL[x])*4,io=o+x*4;
       let r=SKP[i]*kr+gR,g=SKP[i+1]*kg+gG,b=SKP[i+2]*kb+gB;
-      if(sA>.02&&v<146){const h=hash2(sc[x],v,31);if(h>.9955){const s=sA*(.55+.45*((h-.9955)/.0045))*(1-hz*2.5>0?1-hz*2.5:0);r=Math.max(r,255*s);g=Math.max(g,255*s);b=Math.max(b,246*s)}}
-      if(ma>0){const dx=x-msx,dy=y-msy,d=Math.sqrt(dx*dx+dy*dy);
+      if(sA>.02&&v<146){const sv=STARS[v*1024+sc[x]];if(sv){const s=sA*(.55+.45*sv/255)*(1-hz*2.5>0?1-hz*2.5:0);r=Math.max(r,255*s);g=Math.max(g,255*s);b=Math.max(b,246*s)}}
+      if(ma>0&&x>msx-MR*2.6&&x<msx+MR*2.6&&y>msy-MR*2.6&&y<msy+MR*2.6){const dx=x-msx,dy=y-msy,d=Math.sqrt(dx*dx+dy*dy);
         if(d<MR){const sh=.82+.18*Math.sin(dx*.9+dy*.5)*Math.sin(dy*.7),e=clamp((MR-d)/1.5,0,1);r=r*(1-e*ma)+238*sh*e*ma;g=g*(1-e*ma)+238*sh*e*ma;b=b*(1-e*ma)+224*sh*e*ma}
         else if(d<MR*2.6){const k=Math.pow(1-(d-MR)/(MR*1.6),2)*.28*ma;r+=200*k;g+=210*k;b+=240*k}}
       if(ST>.01){const c=ST*.92;r=r*(1-c)+stormC[0]*c;g=g*(1-c)+stormC[1]*c;b=b*(1-c)+stormC[2]*c}
@@ -2597,7 +2597,7 @@ function spriteList(){
   if(G.flora&&G.flora.length){const px=G.C.x+.5,py=G.C.y+.5;for(const f of G.flora){const dx=f.wx-px,dy=f.wy-py;if(dx*dx+dy*dy>256)continue;const im=IMG[f.k];if(!im)continue;L.push({x:f.wx,y:f.wy,img:im,w:(NPC_H[f.k]?NPC_H[f.k]*im.width/im.height:decorW(f.k))*f.sc,decor:f.decor})}} // lots of tiny tufts: only those within sixteen cells are drawn
   const DROP={well:.07,fountain:.1,chest:.05,cart:.05,barrel:.03,crate:.03,bench:.04,urn:.03,memorial:.04,statue:.03,coffin:.03,gate:.02,tree0:.15,tree1:.13,tree2:.09,tree3:.14,tree4:.15,tree5:.16,tree6:.13,tree7:.14};
   const cam=G.C||{x:0,y:0};
-  for(const d of G.decor){if(d.found)continue;if(d.hidden)continue;if(G.decor.length>1500&&((d.x-cam.x)*(d.x-cam.x)+(d.y-cam.y)*(d.y-cam.y))>1300)continue;const k=(d.k==='grave'&&IMG.grave2&&hash2(d.x,d.y,5)>.5)?'grave2':d.k;if(d.wd&&d.txt){L.push({x:d.x+.5+d.wd[0]*.1,y:d.y+.5+d.wd[1]*.1,img:shopSign(d),w:.8,bob:.3,hang:[d.wd[0],d.wd[1]],decor:d});continue}
+  for(const d of G.decor){if(d.found)continue;if(d.hidden)continue;if(G.decor.length>250&&((d.x-cam.x)*(d.x-cam.x)+(d.y-cam.y)*(d.y-cam.y))>1300)continue;const k=(d.k==='grave'&&IMG.grave2&&hash2(d.x,d.y,5)>.5)?'grave2':d.k;if(d.wd&&d.txt){L.push({x:d.x+.5+d.wd[0]*.1,y:d.y+.5+d.wd[1]*.1,img:shopSign(d),w:.8,bob:.3,hang:[d.wd[0],d.wd[1]],decor:d});continue}
     if(d.k==='lever'){L.push({x:d.x+.5+d.wd[0]*.43,y:d.y+.5+d.wd[1]*.43,img:IMG.lever,w:.42,bob:.3,flat:[d.wd[0],d.wd[1]],decor:d});continue}
     if(d.wd&&d.k.startsWith('branch')){L.push({x:d.x+.5+d.wd[0]*.1,y:d.y+.5+d.wd[1]*.1,img:IMG[d.k],w:.8,bob:d.bob||.4,hang:[d.wd[0],d.wd[1]],decor:d});continue}
     L.push({x:d.x+.5+(d.ox||0),y:d.y+.5+(d.oy||0),img:(LEVEL>=33&&LEVEL<=38&&d.npc&&VIVID_KEYS.has(k))?vividImg(k,d):(k==='brazier'?IMG['brazier'+(((G.time*7+d.x*3+d.y)|0)&3)]:k==='teleporter'?IMG['tele'+(teleActive(LEVEL)?1+(((G.time*5)|0)&3):0)]:IMG[k]),w:(NPC_H[k]&&IMG[k]?NPC_H[k]*IMG[k].width/IMG[k].height:decorW(k))*(d.sc||1),drop:DROP[k]||(/^[glp]tree/.test(k)?.05:0),decor:d})}
@@ -5823,11 +5823,13 @@ function drawMinimap(x,y,w,h){
   ctx.lineWidth=2;ctx.strokeStyle=goldG(x,y,w,h);rrect(ctx,x+1,y+1,w-2,h-2,4);ctx.stroke();wornEdge(x+1,y+1,w-2,h-2,4);
 }
 function drawMapCells(ox,oy,cs){
-  for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){
+  const bx0=Math.max(0,Math.floor(-ox/cs)),bx1=Math.min(MW,Math.ceil((DW-ox)/cs)),by0=Math.max(0,Math.floor(-oy/cs)),by1=Math.min(MH,Math.ceil((DH-oy)/cs)); // only the cells on screen
+  const blk=new Set();for(const d of G.decor)if(d.block)blk.add(d.y*MW+d.x);
+  for(let y=by0;y<by1;y++)for(let x=bx0;x<bx1;x++){
     if(!G.seen[y][x])continue;
     const g=G.grid[y][x];
     ctx.fillStyle=g===0?'#7a6446':g>=200?'#a8702e':g>=100?'#45403a':g>=30?'#d8b060':(g>=15&&g<=19)?'#a8702e':(g>=20&&g<=22)?'#45403a':g===3?'#a8702e':g===4?'#c03a2a':g===5?'#7ab0f0':g===6?'#2c4a2a':g===7?'#d8b060':g===8?'#6a4a24':'#45403a';
-    if(g===0&&G.decor.some(d=>d.block&&d.x===x&&d.y===y))ctx.fillStyle='#4a3a28';
+    if(g===0&&blk.has(y*MW+x))ctx.fillStyle='#4a3a28';
     ctx.fillRect(ox+x*cs,oy+y*cs,cs,cs);
     if(g>0&&g<3){ctx.fillStyle='rgba(255,255,255,.07)';ctx.fillRect(ox+x*cs,oy+y*cs,cs,Math.max(1,cs*.2))}
   }
