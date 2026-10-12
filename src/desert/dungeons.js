@@ -137,3 +137,17 @@ Object.assign(ENEMY_DEF,{
     }
   }
 })();
+
+// the Sand Road and the Red Dunes carry about sixty creatures each: thin the crowds evenly across the land
+(function thinCrowds(){
+  const thin=(lv,cut)=>{
+    const L=LEVELS[lv];
+    for(const [t,r] of Object.entries(cut)){
+      const idx=[];L.enemies.forEach((e,i)=>{if(e.t===t)idx.push(i)});
+      const kill=new Set();for(let i=0;i<r&&i<idx.length;i++)kill.add(idx[Math.floor(i*idx.length/r)]);
+      L.enemies=L.enemies.filter((e,i)=>!kill.has(i));
+    }
+  };
+  thin(41,{dwolf:12,nomad:18});
+  thin(43,{scorpion:12,nomad2:5,nomad:6,mummy:4,dwolf:3});
+})();

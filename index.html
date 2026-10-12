@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.54';
+const VERSION='2.55';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -8027,6 +8027,20 @@ Object.assign(ENEMY_DEF,{
       L.enemies.push({t:'dskeleton',x,y,lvl:lv===62?20:lv===61?18:lv===60?16:lv===43?15:14});p++;
     }
   }
+})();
+
+// the Sand Road and the Red Dunes carry about sixty creatures each: thin the crowds evenly across the land
+(function thinCrowds(){
+  const thin=(lv,cut)=>{
+    const L=LEVELS[lv];
+    for(const [t,r] of Object.entries(cut)){
+      const idx=[];L.enemies.forEach((e,i)=>{if(e.t===t)idx.push(i)});
+      const kill=new Set();for(let i=0;i<r&&i<idx.length;i++)kill.add(idx[Math.floor(i*idx.length/r)]);
+      L.enemies=L.enemies.filter((e,i)=>!kill.has(i));
+    }
+  };
+  thin(41,{dwolf:12,nomad:18});
+  thin(43,{scorpion:12,nomad2:5,nomad:6,mummy:4,dwolf:3});
 })();
 
 /* ---- src/desert/terrain.js ---- */
