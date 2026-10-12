@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.01';
+const VERSION='2.02';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2457,7 +2457,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     if(s.e){s.e.sx=scrX;s.e.sy=top+sh*.45}
     {const xa=Math.max(0,Math.floor(left)),xb=Math.min(VW-1,Math.ceil(left+sw));if(xb<xa||ty>farT)continue;let any=s.decor&&s.decor.k==='abbeyspire';for(let xx=xa;xx<=xb&&!any;xx+=2)if(zbuf[xx]>ty){any=true;break}if(!any)continue} // skip hidden sprites
     let anyVis=false;
-    if(!s.hang&&!(s.decor&&(NOSHADOW.test(s.decor.k)||s.decor.k==='abbeyspire'))&&!(s.e&&ENEMY_DEF[s.e.t].fly)){SC.save();const tr=s.decor&&NOSHADOW.test(s.decor.k);SC.globalAlpha=(s.fade!==undefined?Math.max(0,Math.min(1,s.fade)):1)*(tr?.5:.36);SC.fillStyle='#000';SC.beginPath();SC.ellipse(scrX,bottom,sw*(tr?.24:.34),Math.max(1.2,sw*(tr?.06:.055)),0,0,TAU);SC.fill();SC.restore()}
+    if(!s.hang&&!(s.decor&&(NOSHADOW.test(s.decor.k)||s.decor.k==='abbeyspire'||/^pgrass|^pflw/.test(s.decor.k)))&&!(s.e&&ENEMY_DEF[s.e.t].fly)){SC.save();const tr=s.decor&&NOSHADOW.test(s.decor.k);SC.globalAlpha=(s.fade!==undefined?Math.max(0,Math.min(1,s.fade)):1)*(tr?.5:.36);SC.fillStyle='#000';SC.beginPath();SC.ellipse(scrX,bottom,sw*(tr?.24:.34),Math.max(1.2,sw*(tr?.06:.055)),0,0,TAU);SC.fill();SC.restore()}
     // lighting
     const wx=s.x,wy=s.y,dist=Math.hypot(wx-cx,wy-cy);
     let lt=0;for(let k=0;k<nearL.length;k+=3){const ax=wx-nearL[k],ay=wy-nearL[k+1];lt+=nearL[k+2]/(1+1.15*(ax*ax+ay*ay))}
@@ -4123,7 +4123,7 @@ function forestExtras(L){
 }
 function loadLevel(n){
   const L=LEVELS[n]||LEVELS[1];
-  LEVEL=n;CEILH=ceilFor(n,L);MAPROWS=L.rows;MW=MAPROWS[0].length;MH=MAPROWS.length;START=L.start;ENEMY_SPAWNS=L.enemies;ITEM_SPAWNS=L.items;DECOR_SPAWNS=forestExtras(L).length?L.decor.concat(forestExtras(L)):L.decor;
+  LEVEL=n;CEILH=ceilFor(n,L);MAPROWS=L.rows;MW=MAPROWS[0].length;MH=MAPROWS.length;START=L.start;ENEMY_SPAWNS=L.enemies;ITEM_SPAWNS=L.items;DECOR_SPAWNS=(forestExtras(L).length?L.decor.concat(forestExtras(L)):L.decor).concat(n===32?pathEdgeDecor(L):[]);
   G.day=L.day!==undefined?L.day:(L.outdoor?.98:0);G.dayBase=G.day;G.amb=L.amb||0;G.fl=L.floor?FLOORS[L.floor]:null;G.cl=L.ceil?CEILS[L.ceil]:null;G.portals=L.portals||[];G.fmap=L.fmap?L.fmap.join(''):null;G.fl2=L.fmap?(FLOORS[L.floor2]||FLOORS.grass):null;G.fl3=L.fmap?(FLOORS.dirt||FLOORS.grass):null;G.fl4=L.fmap?(FLOORS.mosscobble||FLOORS.cobble):null;G.fl5=L.fmap?(FLOORS.stainedcobble||FLOORS.cobble):null;G.fl6=L.fmap?(FLOORS.wetcobble||FLOORS.cobble):null;if(L.floorSet){const F2=L.floorSet.map(nm=>FLOORS[nm]);G.fl=F2[0];G.fl2=F2[1];G.fl3=F2[2];G.fl4=F2[3];G.fl5=F2[4];G.fl6=F2[5]}G.extraLights=L.lights||null;
   setLightLevel(G.lightLevel||0);
 }
@@ -4719,7 +4719,69 @@ function makeAbbeyArt(){
   LEVEL2_DATA.chars={W:mk('window',3,1),V:mk('window',8,1),U:mk('buttress',5),N:mk('niche',2),'%':mk('niche',11)};
   const dt=abTile('door',4);T_ABDOOR=addTex(dt.d);TEX[T_ABDOOR].h=ABH;TEX[T_ABDOOR].wh=ABWH;window.__abbeyTiles.door=dt.c;
 }
+/* ---- Greendale: grass and wild flowers along both edges of the trail, so the path has no straight lines ---- */
+const PF_COL=['#d8302c','#f2c92a','#f6f4ec','#e870a0','#4a78e0','#9a5ad0']; // poppy, buttercup, daisy, pink, cornflower, violet
+function pfBlades(x,r,W,H,n){
+  for(let i=0;i<n;i++){
+    const bx=W*(.08+.84*r()),h=H*(.3+.5*r()),lean=(r()-.5)*W*.5,g=x.createLinearGradient(0,H,0,H-h);
+    g.addColorStop(0,'#2b5a22');g.addColorStop(1,['#7fb84a','#9bd05a','#68a63e','#b0d86a'][(r()*4)|0]);
+    x.fillStyle=g;x.beginPath();x.moveTo(bx-2.4,H-1);x.quadraticCurveTo(bx+lean*.3,H-h*.5,bx+lean,H-h);x.quadraticCurveTo(bx+lean*.3+2.4,H-h*.5,bx+2.4,H-1);x.closePath();x.fill();
+    x.strokeStyle='rgba(12,30,8,.35)';x.lineWidth=.8;x.stroke();
+  }
+}
+function pfHead(x,cx,cy,ci,r){
+  const col=PF_COL[ci],ol='rgba(14,20,8,.55)';
+  const petals=(n,rad,pr)=>{for(let i=0;i<n;i++){const a=i*6.2832/n+r();x.fillStyle=col;x.beginPath();x.ellipse(cx+Math.cos(a)*rad,cy+Math.sin(a)*rad,pr*1.2,pr*.8,a,0,6.3);x.fill();x.strokeStyle=ol;x.lineWidth=.7;x.stroke()}};
+  if(ci===0){petals(5,3.4,3.4);x.fillStyle='#2a1a14';x.beginPath();x.arc(cx,cy,2,0,6.3);x.fill()}
+  else if(ci===1){petals(6,3,2.6);x.fillStyle='#c98a1a';x.beginPath();x.arc(cx,cy,2,0,6.3);x.fill()}
+  else if(ci===2){petals(9,3.8,2.2);x.fillStyle='#f0b820';x.beginPath();x.arc(cx,cy,2.6,0,6.3);x.fill()}
+  else if(ci===3){petals(5,3,3);x.fillStyle='#fff0a0';x.beginPath();x.arc(cx,cy,1.8,0,6.3);x.fill()}
+  else if(ci===4){petals(8,3.2,2.2);x.fillStyle='#2a3c90';x.beginPath();x.arc(cx,cy,2,0,6.3);x.fill()}
+  else{for(let i=0;i<4;i++){x.fillStyle=col;x.beginPath();x.arc(cx+(i%2?1.5:-1.5),cy+i*3.4-4,3,0,6.3);x.fill();x.strokeStyle=ol;x.lineWidth=.7;x.stroke()}}
+}
+function makePathFlora(){
+  for(let v=0;v<4;v++){IMG['pgrass'+v]=mkCanvas(60,46,(x)=>{pfBlades(x,abRng(500+v*13),60,46,20+v*2)});NPC_H['pgrass'+v]=.3}
+  for(let ci=0;ci<6;ci++)for(let v=0;v<2;v++){
+    IMG['pflw'+ci+'_'+v]=mkCanvas(56,64,(x)=>{
+      const r=abRng(900+ci*31+v*7);pfBlades(x,r,56,64,9);
+      const n=3+((r()*3)|0);
+      for(let k=0;k<n;k++){
+        const sx=56*(.18+.64*r()),top=64*(.12+.3*r()),lean=(r()-.5)*10;
+        x.strokeStyle='#3b7a2f';x.lineWidth=1.8;x.beginPath();x.moveTo(sx,62);x.quadraticCurveTo(sx+lean*.2,40,sx+lean,top);x.stroke();
+        x.fillStyle='#4f9238';x.beginPath();x.ellipse(sx+lean*.3+4,top+(62-top)*.55,5,2,-.6,0,6.3);x.fill();
+        pfHead(x,sx+lean,top,ci,r);
+      }
+    });
+    NPC_H['pflw'+ci+'_'+v]=.45;
+  }
+}
+function pathEdgeDecor(L){
+  if(L._pe)return L._pe;
+  const fm=L.fmap,rows=L.rows,H=rows.length,W=rows[0].length,out=[];
+  if(!fm)return L._pe=[];
+  const isP=(x,y)=>y>=0&&y<H&&x>=0&&x<W&&fm[y][x]==='1';
+  const occ=new Set((L.decor||[]).filter(d=>d.block!==false).map(d=>d.x+','+d.y));
+  const D4=[[1,0],[-1,0],[0,1],[0,-1]];
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){
+    if(rows[y][x]!=='.'||occ.has(x+','+y))continue;
+    const on=isP(x,y);let near=false,px=0,py=0;
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if((dx||dy)&&(on?!isP(x+dx,y+dy):isP(x+dx,y+dy))){near=true;px+=dx;py+=dy}
+    if(!near)continue;
+    const h=(k)=>hash2(x,y,k);
+    let n=on?(h(31)<.7?1+(h(34)<.25?1:0):0):(h(31)<.92?1+(h(32)<.7?1:0)+(h(33)<.4?1:0):0);
+    for(let i=0;i<n;i++){
+      const r=h(40+i);let k;
+      if(r<.42)k='pgrass'+((h(60+i)*4)|0);
+      else{const ci=h(70+i)<.75?((hash2(x>>2,y>>2,9)*6)|0):((h(80+i)*6)|0);k='pflw'+ci+'_'+((h(90+i)*2)|0)}
+      let ox=(h(50+i)-.5)*.84,oy=(h(55+i)-.5)*.84;
+      if(on){const l=Math.hypot(px,py)||1;ox=-px/l*.3+(h(50+i)-.5)*.3;oy=-py/l*.3+(h(55+i)-.5)*.3}  // on the trail itself, only right at its rim, leaning out
+      out.push({k,x,y,block:false,walk:true,ox:+ox.toFixed(2),oy:+oy.toFixed(2),sc:+(.75+h(65+i)*.6).toFixed(2)});
+    }
+  }
+  return L._pe=out;
+}
 function makeForestProps(){
+  makePathFlora();
   for(let v=0;v<NTREES;v++)IMG['tree'+v]=drawTreeSprite(v);
   const ol='#100b07';
   IMG.well=mkCanvas(130,150,(x)=>{
