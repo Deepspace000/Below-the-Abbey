@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.06';
+const VERSION='2.07';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1207,8 +1207,36 @@ function windTick(){
   WIND.g.gain.setTargetAtTime(amt*climb*e*e*1.9,now,.2); // squared, so quiet stays quiet and a gust really lands
   WIND.f.frequency.setTargetAtTime(220+2600*e,now,.25);   // a gust is brighter as well as louder
 }
+/* ---- long tracks (several megabytes each) are streamed, not decoded whole, and play one after another ---- */
+const STREAM_LISTS={41:['music_sands_forgotten','music_sands_vibration','music_sands_holycity','music_sands_goldenkey'],
+  42:['music_sands_tomb'],
+  43:['music_sands_goldenkey','music_sands_holycity','music_sands_vibration','music_sands_forgotten']};
+const STREAM={el:null,gain:null,list:null,idx:0,playing:false,want:null};
+function streamTick(){
+  if(!AC)return;
+  const want=(G.state==='play'&&!G.mute&&SNDOPT.music&&STREAM_LISTS[LEVEL])||null,wantKey=want?LEVEL:null;
+  if(!STREAM.el){
+    if(!want)return;
+    const el=new Audio();el.preload='auto';el.loop=false;
+    el.addEventListener('ended',()=>{if(STREAM.list){STREAM.idx=(STREAM.idx+1)%STREAM.list.length;streamLoad()}});
+    STREAM.el=el;STREAM.gain=AC.createGain();STREAM.gain.gain.value=0;
+    try{AC.createMediaElementSource(el).connect(STREAM.gain);STREAM.gain.connect(MASTER)}catch(e){STREAM.el=null;return}
+  }
+  if(wantKey!==STREAM.want){ // the area changed: fade the old music out first, then start the new list
+    STREAM.gain.gain.setTargetAtTime(0,AC.currentTime,.5);
+    if(STREAM.gain.gain.value<.02){STREAM.want=wantKey;STREAM.list=want;STREAM.idx=want?Math.floor(Math.random()*want.length):0;if(want)streamLoad();else{STREAM.el.pause();STREAM.playing=false}}
+    return;
+  }
+  if(!want)return;
+  STREAM.gain.gain.setTargetAtTime(.8*SNDOPT.music,AC.currentTime,.9);
+}
+function streamLoad(){
+  const el=STREAM.el;if(!el||!STREAM.list)return;
+  el.src='assets/audio/'+STREAM.list[STREAM.idx]+'.mp3?v='+VERSION;
+  const pr=el.play();if(pr&&pr.catch)pr.catch(()=>{STREAM.playing=false});STREAM.playing=true;
+}
 function areaAudio(){
-  if(!AC)return;loadSounds();windTick();
+  if(!AC)return;loadSounds();windTick();streamTick();
   const T={};
   if(G.state==='play'&&!G.mute){
     if(LEVEL===32){T.music_mithral=.55;loadLazy('music_mithral')}
