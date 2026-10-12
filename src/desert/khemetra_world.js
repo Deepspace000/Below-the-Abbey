@@ -99,8 +99,7 @@ function khBuildWorld(){
   LEVELS[KH_STUDY]={rows:st.rows,start:st.start,enemies:[],items:[],decor:st.decor,day:0,amb:.7,floor:'kh2',ceil:'beam',name:"Ishkander's Study",label:'The Wizards Study',lights:st.lights,portals:[back(KH_CISTERN,KH_CIST_END.x,KH_CIST_END.y,2)],diff:17,chars:wall?{w:wall}:undefined};
   const tn=khBuildSeaTunnel();
   LEVELS[KH_SEATUNNEL]={rows:tn.rows,start:tn.start,enemies:[],items:[],decor:tn.decor,day:.55,amb:.55,floor:'sand',ceil:'cloud',name:'The Tunnel to the Vaast Ocean',label:'Sea Tunnel',lights:tn.lights,portals:[back(62,KH_SEA_MOUTH.x,KH_SEA_MOUTH.y+1,2)],diff:20,noExtras:true,seaTunnel:true};
-  // the mouth of the tunnel, in the east of the Violet Erg
-  const V=LEVELS[62];V.decor=V.decor||[];
-  V.decor.push({k:'dburrow',x:KH_SEA_MOUTH.x,y:KH_SEA_MOUTH.y,block:true,enter:{to:KH_SEATUNNEL,x:tn.start.x,y:tn.start.y,f:0}});
 }
 const KH_PALACE_FRONT={x:200,y:206,f:2},KH_HATCH={x:108,y:112},KH_CIST_END={x:39,y:2},KH_SEA_MOUTH={x:292,y:150};
+// the mouth of the tunnel to the sea stands in the east of the Violet Erg from the start
+(function(){const V=LEVELS[62];if(V){V.decor=V.decor||[];V.decor.push({k:'dburrow',x:KH_SEA_MOUTH.x,y:KH_SEA_MOUTH.y,block:true,enter:{to:KH_SEATUNNEL,x:15,y:17,f:0}})}})();

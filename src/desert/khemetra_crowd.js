@@ -104,8 +104,8 @@ function khCrowd(C,L){
     const b=KH_BUILDINGS.find(x=>x.id==='granary');if(b&&b.front){const q=near(b.front[0],b.front[1],6,true);if(q){const kp=KH_KEEPERS.kh_gebu;add({k:khFaceKey(kp.face),x:q[0],y:q[1],block:true,npc:'kh_gebu',sc:1})}}
   }
   // ---- the gate guards, the palace guards ----
-  for(const [x,y] of [[196,388],[204,388]]){const q=near(x,y,2,true);if(q)add({k:'kh_npc3_0',x:q[0],y:q[1],block:true,npc:'kh_gateguard',sc:1})}
-  for(const [x,y] of [[196,236],[204,236],[196,241],[204,241]]){const q=near(x,y,2,true);if(q)add({k:'kh_npc3_1',x:q[0],y:q[1],block:true,npc:'kh_gateguard',sc:1})}
+  for(const [x,y] of [[196,388],[204,388]]){const q=near(x,y,2,true);if(q)add({k:khFaceKey('kh_npc3_0'),x:q[0],y:q[1],block:true,npc:'kh_gateguard',sc:1})}
+  for(const [x,y] of [[196,236],[204,236],[196,241],[204,241]]){const q=near(x,y,2,true);if(q)add({k:khFaceKey('kh_npc3_1'),x:q[0],y:q[1],block:true,npc:'kh_gateguard',sc:1})}
   // ---- the people of the streets ----
   let crowd=0;const want=520;
   for(let tries=0;tries<400000&&crowd<want;tries++){
@@ -149,7 +149,7 @@ function khAddCitizen(decor,occ,idx,x,y,kind,rng){
   const face=kind==='guard'?pick(F.guards):kind==='market'?pick(F.men.concat(F.women)):rng()<.1?pick(F.kids):rng()<.06?pick(F.poor):rng()<.5?pick(F.men):pick(F.women);
   const nm=KH_NAMES[(rng()*KH_NAMES.length)|0]+(kind==='market'?' the seller':kind==='guard'?' of the watch':' '+KH_TITLES[(rng()*KH_TITLES.length)|0]);
   const kl=[(rng()*KH_GOSSIP.length)|0,(rng()*KH_GOSSIP.length)|0,(rng()*KH_GOSSIP.length)|0];
-  decor.push({k:khFaceKey(face),x,y,block:true,npc:'kh_citizen',kname:nm,kl,sc:(KH_NPC_H[face]?KH_NPC_H[face]/.82:1)*(.95+rng()*.1)});
+  decor.push({k:khFaceKey(face),x,y,block:true,npc:'kh_citizen',kname:nm,kl,sc:.95+rng()*.1});
   occ[idx(x,y)]=1;
 }
 khNpc('kh_gateguard','A guard of the watch','kh_npc3_0',()=>say('Welcome to Khemetra, the Golden City. Keep your blades sheathed in the streets, and your purses close. The palace is at the north end of the great avenue.',[BYE]));

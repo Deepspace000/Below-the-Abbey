@@ -27,4 +27,5 @@ function khEnter(then){
   msg('The great gates of Khemetra swing open...','#ffe9a0');
   khPrepare().then(then).catch(e=>{console.error(e);msg('The city is not ready yet.','#d09a80')});
 }
-function khMakeFloors2(){return khMakeFloors()}
+/* run something once the city is ready (its pictures loaded and its rooms built) */
+function khThen(then){khPrepare().then(then).catch(e=>{console.error(e);msg('The city is not ready yet.','#d09a80')})}

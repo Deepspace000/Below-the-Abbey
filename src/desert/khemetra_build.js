@@ -213,8 +213,9 @@ function khRoomRuin(b){
   return {w:11,h:9,floor:'kh3',amb:.4,noExtras:true,lights:[[2,2],[8,2],[5,6]],
     enemies:en.map((t,i)=>[t,2+((i*3)%7),1+(i%2)*3,15]),items:[],
     build:({put,raw})=>{raw('bones',3,6);raw('bones',7,5);raw('crate',1,1);raw('barrel',9,1);raw('crate',9,7);raw('bones',2,3);
-      if(b.id==='urnhouse')decor_urn(raw);
-      if(b.id==='ledgerhouse')raw('chest',5,1,{khLedger:true,block:true,deco:false});
+      if(b.id==='urnhouse')raw('urn',5,2,{npc:'kh_urn'});
+      if(b.id==='ledgerhouse')raw('chest',5,1,{npc:'kh_ledger'});
+      else if(b.id==='denC'){raw('chest',5,1,{npc:'kh_sealchest'});raw('sacks',2,6,{npc:'kh_drumsack'})}
       else raw('chest',5,1,{block:true,deco:false});}};
 }
 function decor_urn(raw){raw('urn',5,2,{npc:'kh_urn'})}
