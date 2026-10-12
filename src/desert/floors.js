@@ -12,7 +12,7 @@ function dsSand(base,dark,seed,ripple){
     const n=dsNoise(x,y,4,seed)*.55+dsNoise(x,y,8,seed+1)*.3+dsNoise(x,y,16,seed+2)*.15;
     const r=Math.sin(TAU*(3*x/TS+y/TS+n*.7))*.5+.5,r2=Math.sin(TAU*(2*x/TS-2*y/TS+n*1.1))*.5+.5;
     let k=.9+.07*r*ripple+.04*r2*ripple+.22*(n-.5);
-    const sp=hash2(x,y,seed+9);if(sp>.985)k*=.78;else if(sp>.972)k*=1.1;
+    
     const dk=n*.5+r*.25;
     return [base[0]*k+(dark[0]-base[0])*dk*.15,base[1]*k+(dark[1]-base[1])*dk*.15,base[2]*k+(dark[2]-base[2])*dk*.15];
   });
@@ -37,7 +37,7 @@ function makeDesertFloors(){
   FLOORS.redsand2=dsSand([176,86,54],[120,50,32],131,1);
   FLOORS.dgrass=dsFloor((x,y)=>{ // dry grass going to sand
     const n=dsNoise(x,y,4,141)*.6+dsNoise(x,y,8,142)*.4,m=dsNoise(x,y,6,143);
-    const sand=[212,190,138],gr=[146,150,72],k=.88+.2*(n-.5)+(hash2(x,y,144)>.97?-.12:0);
+    const sand=[212,190,138],gr=[146,150,72],k=.88+.2*(n-.5);
     const t=clamp((m-.35)*3,0,1);return [(sand[0]*(1-t)+gr[0]*t)*k,(sand[1]*(1-t)+gr[1]*t)*k,(sand[2]*(1-t)+gr[2]*t)*k];
   });
   FLOORS.scrub=dsFloor((x,y)=>{ // sand with dry earth, pebbles and stubby tufts

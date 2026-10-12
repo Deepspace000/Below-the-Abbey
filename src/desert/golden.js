@@ -6,6 +6,7 @@
    ========================================================================== */
 const GER={W:300,H:300,CY:150,CX:150,OASES:[[70,70],[225,95],[140,225]]};
 const VER={W:300,H:300,CY:150,CX:150,OASES:[[80,215],[230,200],[150,80]]};
+const WER={W:250,H:250,CY:125,CX:125,OASES:[[60,60],[190,80],[125,170]]};
 function buildErg(E,seed,rk){
   const W=E.W,H=E.H,rows=[],fm=[],R=(x,y,k)=>hash2(x,y,k+seed);
   const od=(x,y)=>{let m=1e9;for(const [ox,oy] of E.OASES)m=Math.min(m,Math.hypot(x-ox,(y-oy)*1.1));return m};
@@ -45,8 +46,8 @@ function buildErg(E,seed,rk){
   for(let gy=0;gy<5;gy++)for(let gx=0;gx<5;gx++){const x=36+gx*57+((R(gx,gy,7)-.5)*24|0),y=36+gy*57+((R(gx,gy,8)-.5)*24|0);if(x<50&&Math.abs(y-E.CY)<30)continue;camp(T[(gx+gy*2+((R(gx,gy,9)*3)|0))%4],x,y,2+((R(gx,gy,10)*2)|0),rk+((R(gx,gy,11)*3)|0))}
   return {rows,fm,decor,scen,enemies,items};
 }
-const GOLDEN=buildErg(GER,0,17),VIOLET=buildErg(VER,500,20);
-GOLDEN.start={x:2,y:GER.CY,f:1};VIOLET.start={x:VER.CX,y:2,f:2};
+const GOLDEN=buildErg(GER,0,17),VIOLET=buildErg(VER,500,20),WHITE=buildErg(WER,900,16);
+WHITE.start={x:WER.CX,y:WER.H-3,f:0};GOLDEN.start={x:2,y:GER.CY,f:1};VIOLET.start={x:VER.CX,y:2,f:2};
 const erdata=(B,name,label,diff,floors)=>({rows:B.rows,start:B.start,enemies:B.enemies,items:B.items,decor:B.decor,scenery:B.scen,fmap:B.fm,outdoor:true,day:1,floor:floors[0],
   floorSet:floors.concat(['bluegrass','bluewater']),ceil:'cloud',noExtras:true,name,label,diff});
 const LEVEL61_DATA=erdata(GOLDEN,'The Golden Erg','Golden Erg',18,['goldsand','goldsand2','goldsand3']);
@@ -59,14 +60,25 @@ LEVEL61_DATA.rows[GER.H-1]=LEVEL61_DATA.rows[GER.H-1].slice(0,GER.CX)+'1'+LEVEL6
 LEVEL61_DATA.portals=[{to:60,x:BDN.W-3,y:BDN.OY,f:3,tex:'bluecave'},{to:62,x:VER.CX,y:2,f:2,tex:'bluecave'}];
 LEVEL62_DATA.rows[0]=LEVEL62_DATA.rows[0].slice(0,VER.CX)+'0'+LEVEL62_DATA.rows[0].slice(VER.CX+1);
 LEVEL62_DATA.portals=[{to:61,x:GER.CX,y:GER.H-3,f:0,tex:'bluecave'}];
+const LEVEL63_DATA=erdata(WHITE,'The White Dunes','White Dunes',17,['whiteSand','whiteSand2','whiteSand3']);
+// the White Dunes lie north of the Blue Dunes: a low cave in the Blue Dunes' north wall leads to their south wall
+LEVEL60_DATA.rows[0]=LEVEL60_DATA.rows[0].slice(0,BDN.OX)+'2'+LEVEL60_DATA.rows[0].slice(BDN.OX+1);
+LEVEL60_DATA.portals[2]={to:63,x:WER.CX,y:WER.H-3,f:0,tex:'bluecave'};
+LEVEL63_DATA.rows[WER.H-1]=LEVEL63_DATA.rows[WER.H-1].slice(0,WER.CX)+'0'+LEVEL63_DATA.rows[WER.H-1].slice(WER.CX+1);
+LEVEL63_DATA.portals=[{to:60,x:BDN.OX,y:2,f:2,tex:'bluecave'}];
+LEVELS[63]=LEVEL63_DATA;LEVEL_NAMES[63]=LEVEL63_DATA.name;
 LEVELS[61]=LEVEL61_DATA;LEVEL_NAMES[61]=LEVEL61_DATA.name;LEVELS[62]=LEVEL62_DATA;LEVEL_NAMES[62]=LEVEL62_DATA.name;
 function makeGoldenArt(ydune,ycl){
   FLOORS.goldsand=dsRidges([246,208,64],[222,176,34],3,1,401);
   FLOORS.goldsand2=dsRidges([244,205,60],[220,172,30],4,-1,411);
   FLOORS.goldsand3=dsRidges([248,211,70],[224,180,40],3,-2,421);
-  FLOORS.vioSand=dsSand([178,142,222],[120,86,176],431,1.2);
-  FLOORS.vioSand2=dsSand([166,128,214],[110,76,168],441,1.0);
-  FLOORS.vioSand3=dsSand([192,158,232],[132,98,188],451,1.4);
+  FLOORS.vioSand=dsRidges([186,146,236],[146,104,206],3,1,431);
+  FLOORS.vioSand2=dsRidges([180,140,230],[140,98,200],4,-1,441);
+  FLOORS.vioSand3=dsRidges([192,152,240],[152,110,212],3,-2,451);
+  FLOORS.whiteSand=dsRidges([252,252,254],[216,224,238],3,1,501);
+  FLOORS.whiteSand2=dsRidges([250,251,254],[212,221,236],4,-1,511);
+  FLOORS.whiteSand3=dsRidges([254,254,255],[220,228,240],3,-2,521);
+  LEVEL63_DATA.chars={D:ydune,C:ycl};
   LEVEL61_DATA.chars={D:ydune,C:ycl};LEVEL62_DATA.chars={D:ydune,C:ycl};
 }
 // smooth wind ridges and nothing else: a long crest with a gentle windward side and a short lee side, no grains or specks
