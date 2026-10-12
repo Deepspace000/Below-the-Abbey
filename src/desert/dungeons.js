@@ -151,7 +151,6 @@ Object.assign(ENEMY_DEF,{
     }
   };
   thin(41,{dwolf:12,nomad:18});
-  thin(42,{scorpion:10,mummy:4});
   thin(43,{scorpion:12,nomad2:5,nomad:6,mummy:4,dwolf:3});
 })();
 

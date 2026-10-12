@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.78';
+const VERSION='2.80';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -7473,40 +7473,41 @@ function buildTomb(){
   const W=TOMBSZ.W,H=TOMBSZ.H,g=[],fl=[],th=[];
   for(let y=0;y<H;y++){g.push(new Array(W).fill('W'));fl.push(new Array(W).fill('0'));th.push(new Array(W).fill(''))}
   const R=(x0,y0,x1,y1,ft,t)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){g[y][x]='.';fl[y][x]=ft;th[y][x]=t}};
+  const corr=new Set(); // narrow passages: nothing is ever placed in them or beside them
+  const C=(x0,y0,x1,y1,ft)=>{R(x0,y0,x1,y1,ft||'1','hall');for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)corr.add(x+','+y)};
   const decor=[],enemies=[],items=[],lights=[],secrets=[];
   const put=(k,x,y,o)=>{decor.push(Object.assign({k,x,y,block:false},o||{}));return decor[decor.length-1]};
   const foe=(t,x,y,lvl)=>enemies.push({t,x,y,lvl:lvl||(t==='mummy'?16:15)});
   const brazier=(x,y)=>{put('brazier',x,y,{block:true});lights.push([x,y])};
-  // ---- the cave of sand: a winding way in from the gate ----
-  R(44,64,52,71,'2','cave');R(40,58,50,64,'2','cave');R(34,52,44,60,'2','cave');R(38,47,47,53,'2','cave');
-  R(26,54,33,58,'2','cave');R(51,54,60,60,'2','cave');R(45,46,49,46,'1','hall');
-  // ---- the Hall of Eternity ----
-  R(30,26,66,45,'1','hall');R(46,26,50,45,'4','hall');
-  // ---- corridors to the four wings and the great door ----
-  R(22,34,29,36,'1','hall');           // west
-  R(67,34,74,36,'1','hall');           // east
-  R(37,14,41,25,'1','hall');R(33,14,36,16,'1','hall');   // north-west
-  R(55,14,59,25,'1','hall');R(60,14,65,17,'1','hall');   // north-east
-  R(47,13,49,24,'4','hall');           // beyond the great door
+  const walk={block:false,walk:true}; // treasure and vases can be walked through, like lamps
+  // ---- the cave of sand: a winding, narrow way in from the gate ----
+  R(47,63,49,71,'2','cave');R(40,61,49,63,'2','cave');R(40,53,42,61,'2','cave');R(40,53,50,55,'2','cave');R(48,46,50,55,'2','cave');
+  R(35,56,39,58,'2','cave');R(50,61,56,63,'2','cave');
+  // ---- the Hall of Eternity: a long processional hall ----
+  R(40,26,56,45,'1','hall');R(44,26,52,45,'4','hall');
+  // ---- passages: one cell wide ----
+  C(22,35,39,35);C(57,35,75,35);                                  // west and east
+  C(42,15,42,25);C(24,15,41,15);                                  // north-west, to the Chamber of Switches
+  C(54,16,54,25);C(54,16,75,16);                                  // north-east, to the Sand Pit
+  C(48,13,48,18,'4');R(47,19,49,24,'4','hall');                   // beyond the great door: a narrow guard chamber, then a passage to Sut
   // ---- Wing A: the Hall of Embers ----
-  R(6,28,21,42,'5','fire');
+  R(6,31,21,39,'5','fire');
   // ---- Wing B: the Crypt of Sarcophagi, with a vault behind a secret door ----
-  R(75,26,90,44,'3','crypt');R(92,33,94,37,'1','vault');
+  R(76,32,90,38,'3','crypt');R(92,34,94,36,'1','vault');
   // ---- Wing C: the Chamber of Switches ----
-  R(8,10,32,20,'3','switch');R(18,22,22,24,'5','vault');R(10,3,30,7,'3','crypt');R(14,8,16,9,'3','switch');
-  R(1,12,4,16,'1','vault');
+  R(15,10,23,20,'3','switch');R(19,22,21,24,'5','vault');R(15,4,30,6,'3','crypt');C(15,7,15,9,'3');
+  C(8,14,14,14,'1');R(2,13,4,15,'1','vault');
   // ---- Wing D: the Sand Pit ----
-  R(66,4,90,22,'2','pit');
+  R(76,5,89,17,'2','pit');
   // ---- the throne room of Sut ----
-  R(34,2,62,12,'4','throne');
-  // ---- the great door (three cells wide), the secrets, the gate cells of the vault ----
+  R(40,2,56,12,'4','throne');
+  // ---- the great door, the secrets, the gate cells of the vault ----
   g[25][47]=g[25][49]='G';g[25][48]='B';
   g[35][91]='S';secrets.push({x:91,y:35,id:'vaultB'});
   g[21][20]='S';secrets.push({x:20,y:21,id:'closet'});
   for(const x of [5,6,7]){g[14][x]='Q'}
   g[1][48]='H'; // where the way out will appear
-  // the way in: the gate at the foot of the cave
-  g[72][48]='0';
+  g[72][48]='0'; // the way in: the gate at the foot of the cave
   // ---- walls: pick a face for every wall that borders a room ----
   const wall=(x,y,t)=>{
     const r=hash2(x,y,3);
@@ -7525,76 +7526,93 @@ function buildTomb(){
     let c=g[y][x];
     if(c==='W'){let t='';for(let dy=-1;dy<=1&&!t;dy++)for(let dx=-1;dx<=1;dx++){const nx=x+dx,ny=y+dy;if(nx>=0&&ny>=0&&nx<W&&ny<H&&g[ny][nx]==='.'){t=th[ny][nx];break}}c=t?wall(x,y,t):'W'}
     row+=c}out.push(row)}
-  // ---- the cave: sand drifts, bones, a few scorpions ----
-  for(let y=47;y<=71;y++)for(let x=26;x<=60;x++){if(g[y][x]!=='.'||th[y][x]!=='cave')continue;
-    if(hash2(x,y,21)<.16)put('dune'+((hash2(x,y,22)*3)|0),x,y,{block:true,sc:.5+hash2(x,y,23)*.4,ox:(hash2(x,y,24)-.5)*.5,oy:.2});
-    else if(hash2(x,y,25)<.012)put('dbones',x,y,{walk:true})}
-  for(const [x,y] of [[48,66],[42,61],[36,56],[40,50],[28,56],[57,57],[55,58]])foe('scorpion',x,y);
+  const floor=(x,y)=>y>=0&&y<H&&x>=0&&x<W&&g[y][x]==='.';
+  // places where a passage meets a room or a door: nothing stands within two squares of these
+  const MOUTHS=[[48,26],[48,24],[48,19],[48,13],[48,12],[48,45],[48,46],[40,35],[56,35],[42,26],[54,26],[21,35],[76,35],[90,35],[76,16],[23,15],[15,14],[16,14],[15,10],[15,6],[20,20],[20,22],[4,14],[8,14],[48,70],[48,71]];
+  const near=(x,y,r,list)=>list.some(([a,b])=>Math.max(Math.abs(a-x),Math.abs(b-y))<=r);
+  const clearOf=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(corr.has((x+dx)+','+(y+dy)))return false;return !near(x,y,2,MOUTHS)};
+  // spots for creatures: floor cells of a region that keep clear of the passages, spread out
+  const spots=(x0,y0,x1,y1,n,seed,gap)=>{
+    const c=[];for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(floor(x,y)&&clearOf(x,y)&&!corr.has(x+','+y))c.push([x,y,hash2(x,y,seed)]);
+    c.sort((a,b)=>a[2]-b[2]);const got=[];for(const p of c){if(got.length>=n)break;if(got.every(q=>Math.max(Math.abs(q[0]-p[0]),Math.abs(q[1]-p[1]))>=(gap||3)))got.push(p)}
+    return got.map(p=>[p[0],p[1]]);
+  };
+  // ---- the cave ----
+  for(const [x0,y0,x1,y1] of [[35,56,39,58],[50,61,56,63]])for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(floor(x,y)&&hash2(x,y,21)<.22&&clearOf(x,y)&&x>x0&&x<x1)put('dune'+((hash2(x,y,22)*3)|0),x,y,{block:true,sc:.5+hash2(x,y,23)*.4,ox:(hash2(x,y,24)-.5)*.5,oy:.2});
+  for(let y=47;y<=71;y++)for(let x=34;x<=57;x++){if(!floor(x,y)||hash2(x,y,25)>=.02||!clearOf(x,y))continue;put('dbones',x,y,{walk:true})}
+  for(const [x,y] of [[41,58],[52,62],[45,54]])foe('scorpion',x,y);
+  lights.push([48,66],[44,62],[41,57],[45,54],[49,49]);
   // ---- the hall ----
-  for(const y of [29,33,37,41])for(const x of [36,42,54,60])put('dpillar'+((x+y)%2),x,y,{block:true});
-  for(const [x,y] of [[33,27],[63,27],[33,44],[63,44],[45,27],[51,27],[45,44],[51,44],[42,31],[54,31],[42,39],[54,39]])brazier(x,y);
-  for(const [x,y,k] of [[31,28,'danubis'],[65,28,'danubis'],[31,43,'danubis'],[65,43,'danubis'],[31,31,'dbastet'],[65,31,'dbastet'],[31,40,'dbastet'],[65,40,'dbastet']])put(k,x,y,{block:true});
-  for(const [x,y] of [[34,45],[62,45],[34,27],[64,27]])put('vase'+((x+y)%4),x,y,{block:true});
-  put('offering',48,28,{block:true});
-  for(const [x,y] of [[38,44],[58,44]])put('sarcoph',x,y,{block:true,ambush:['mummy','mummy']});
+  for(const y of [29,33,37,41])for(const x of [43,53])put('dpillar'+((x+y)%2),x,y,{block:true});
+  for(const [x,y] of [[40,28],[56,28],[40,43],[56,43],[46,27],[50,27],[46,44],[50,44]])brazier(x,y);
+  for(const [x,y,k] of [[40,31,'danubis'],[56,31,'danubis'],[40,40,'danubis'],[56,40,'danubis'],[40,38,'dbastet'],[56,38,'dbastet'],[40,32,'dbastet'],[56,32,'dbastet']])put(k,x,y,{block:true});
+  for(const [x,y] of [[41,44],[55,44],[41,27],[55,27]])put('vase'+((x+y)%4),x,y,walk);
+  put('offering',44,28,{block:true});
+  for(const [x,y] of [[41,43],[55,43]])put('sarcoph',x,y,{block:true,ambush:['mummy','mummy']});
+  lights.push([48,31],[48,40],[44,35],[52,35]);
+  for(const x of [28,34,63,69])lights.push([x,35]);
   // ---- Wing A: the Hall of Embers ----
   { // a winding safe path east to west; the other cells hold scorched slabs that fire when stepped on
-    const safe=new Set();let sy=35;for(let x=21;x>=9;x--){safe.add(x+','+sy);if(x<20&&hash2(x,sy,31)<.5){const ny=sy+(hash2(x,sy,32)<.5?-1:1);if(ny>=31&&ny<=39){sy=ny;safe.add(x+','+sy)}}}
+    const safe=new Set();let sy=35;for(let x=21;x>=9;x--){safe.add(x+','+sy);if(x<20&&hash2(x,sy,31)<.5){const ny=sy+(hash2(x,sy,32)<.5?-1:1);if(ny>=32&&ny<=38){sy=ny;safe.add(x+','+sy)}}}
     while(sy!==35){sy+=sy<35?1:-1;safe.add('9,'+sy)}   // the path ends in line with the disc
     for(const c of ['8,35','7,35','8,34','8,36'])safe.add(c);
-    for(let y=29;y<=41;y++)for(let x=9;x<=20;x++){if(safe.has(x+','+y))continue;if(hash2(x,y,33)<.62)put('ventplate',x,y,{trap:'fire',walk:true,sc:1.7})}
+    for(let y=31;y<=39;y++)for(let x=9;x<=20;x++){if(safe.has(x+','+y))continue;if(hash2(x,y,33)<.62)put('ventplate',x,y,{trap:'fire',walk:true,sc:1.7})}
     for(const [x,y] of [[8,33],[8,37],[7,33],[7,37]])put('ventplate',x,y,{trap:'fire',hidden:true,walk:true,sc:1.7}); // hidden ones, off the path
     items.push({k:'sundisc1',x:7,y:35});
-    for(const [x,y] of [[7,29],[7,41],[20,29],[20,41],[13,28]])brazier(x,y);
-    put('danubis',6,33,{block:true});put('danubis',6,37,{block:true});put('treasure',6,30,{block:true});put('vase2',6,40,{block:true});
-    foe('scorpion',12,32);foe('scorpion',16,39);foe('scorpion',10,37);foe('mummy',9,31);foe('mummy',9,40);
+    for(const [x,y] of [[7,31],[7,39],[20,31],[20,39],[13,31]])brazier(x,y);
+    put('danubis',6,33,{block:true});put('danubis',6,37,{block:true});put('treasure',6,31,walk);put('vase2',6,39,walk);
+    foe('scorpion',12,33);foe('scorpion',16,38);foe('mummy',10,32);foe('mummy',11,39);
+    lights.push([14,35],[10,35]);
   }
   // ---- Wing B: the Crypt of Sarcophagi ----
-  for(const [x,y,amb] of [[78,28,1],[78,32,0],[78,38,1],[78,42,0],[83,28,0],[83,42,1],[87,30,1],[87,40,0]])put('sarcoph',x,y,{block:true,ambush:amb?['mummy','mummy']:undefined});
-  for(const [x,y] of [[76,35],[88,35],[82,35]])put('sarcophU',x,y,{block:true,ambush:['mummy']});
-  for(const [x,y] of [[76,27],[89,27],[76,43],[89,43],[82,31],[82,39]])brazier(x,y);
-  for(const [x,y] of [[80,29],[85,43],[88,28],[80,43],[84,33],[84,37]])put('vase'+((x+y)%4),x,y,{block:true});
-  put('treasure',90,27,{block:true});put('treasure',90,43,{block:true});
-  foe('scorpion',80,35);foe('scorpion',86,36);foe('mummy',82,30,16);
-  items.push({k:'sundisc2',x:93,y:35});put('treasure',93,33,{block:true});put('treasure',93,37,{block:true});brazier(94,34);
+  for(const [x,y,amb] of [[78,32,1],[82,32,0],[86,32,1],[78,38,0],[82,38,1],[86,38,0]])put('sarcoph',x,y,{block:true,ambush:amb?['mummy','mummy']:undefined});
+  for(const [x,y] of [[80,34],[84,36],[88,34]])put('sarcophU',x,y,{block:true,ambush:['mummy']});
+  for(const [x,y] of [[76,32],[90,32],[76,38],[90,38],[83,34],[83,36]])brazier(x,y);
+  for(const [x,y] of [[80,33],[88,37],[85,37],[79,37]])put('vase'+((x+y)%4),x,y,walk);
+  put('treasure',90,33,walk);put('treasure',90,37,walk);
+  foe('scorpion',80,36);foe('scorpion',86,36);foe('mummy',84,34,16);
+  items.push({k:'sundisc2',x:93,y:35});put('treasure',93,34,walk);put('treasure',93,36,walk);brazier(94,34);
+  lights.push([82,35],[86,35]);
   // ---- Wing C: the Chamber of Switches ----
-  for(const [x,y] of [[12,12],[12,18],[29,12],[29,18],[21,12],[21,18]])put('dpillar'+((x+y)%2),x,y,{block:true});
-  for(const [x,y] of [[9,11],[9,19],[31,11],[31,19],[18,10],[23,10]])brazier(x,y);
+  for(const [x,y] of [[17,12],[21,12],[17,18],[21,18]])put('dpillar'+((x+y)%2),x,y,{block:true});
+  for(const [x,y] of [[15,11],[23,11],[15,19],[23,19]])brazier(x,y);
   put('lever',20,10,{wd:[0,-1],idx:1,opens:[[7,14]],deco:true});
   put('lever',20,24,{wd:[0,1],idx:2,opens:[[6,14]],deco:true});
   put('lever',30,5,{wd:[1,0],idx:3,opens:[[5,14]],deco:true});
-  foe('mummy',16,15);foe('mummy',26,15);foe('scorpion',14,18);
-  for(const [x,y] of [[12,4],[26,4],[20,6],[13,6],[28,6]])foe('scorpion',x,y);
-  put('treasure',29,4,{block:true});put('vase1',11,4,{block:true});put('vase3',29,6,{block:true});brazier(10,3);brazier(30,3);
-  items.push({k:'sundisc3',x:2,y:14});put('treasure',2,12,{block:true});put('treasure',2,16,{block:true});put('vase0',4,12,{block:true});put('vase2',4,16,{block:true});brazier(3,13);
+  foe('mummy',18,15);foe('mummy',22,16);foe('scorpion',19,19);foe('scorpion',27,5);
+  put('treasure',29,4,walk);put('vase1',17,4,walk);put('vase3',29,6,walk);brazier(15,4);brazier(30,4);
+  items.push({k:'sundisc3',x:2,y:14});put('treasure',2,13,walk);put('treasure',2,15,walk);put('vase0',4,13,walk);put('vase2',4,15,walk);lights.push([3,14],[11,14]);
+  lights.push([19,15],[20,5],[28,5],[20,23]);
   // ---- Wing D: the Sand Pit ----
-  for(let y=5;y<=21;y++)for(let x=67;x<=89;x++){if(g[y][x]!=='.')continue;
-    if(hash2(x,y,41)<.12)put('dune'+((hash2(x,y,42)*3)|0),x,y,{block:true,sc:.55+hash2(x,y,43)*.5,ox:(hash2(x,y,44)-.5)*.5,oy:.2});
+  for(let y=5;y<=17;y++)for(let x=76;x<=89;x++){if(!floor(x,y))continue;
+    if(hash2(x,y,41)<.1&&clearOf(x,y)&&!(x===89&&y===6))put('dune'+((hash2(x,y,42)*3)|0),x,y,{block:true,sc:.55+hash2(x,y,43)*.5,ox:(hash2(x,y,44)-.5)*.5,oy:.2});
     else if(hash2(x,y,45)<.02)put('dbones',x,y,{walk:true})}
-  for(const [x,y] of [[70,8],[74,6],[78,10],[82,7],[86,9],[72,14],[77,16],[83,15],[88,13],[80,19],[75,20],[86,20],[69,18],[84,11],[79,13]])foe('scorpion',x,y);
-  foe('mummy',87,7,16);foe('mummy',88,10,16);foe('mummy',84,5,16);
-  for(const [x,y] of [[70,5],[78,5],[88,5],[88,21],[70,21],[79,21]])put('treasure',x,y,{block:true});
-  for(const [x,y] of [[71,10],[85,17],[80,8],[75,13]])put('vase'+((x+y)%4),x,y,{block:true});
-  for(const [x,y] of [[67,5],[67,21],[89,5],[89,21],[78,12]])brazier(x,y);
-  items.push({k:'sundisc4',x:89,y:6});
+  for(const [x,y] of spots(76,5,89,17,4,46,4))foe('scorpion',x,y);
+  foe('mummy',87,8,16);foe('mummy',88,11,16);foe('mummy',85,6,16);
+  for(const [x,y] of [[77,5],[89,17],[77,17],[89,12]])put('treasure',x,y,walk);
+  for(const [x,y] of [[80,9],[85,14],[82,6],[79,14]])put('vase'+((x+y)%4),x,y,walk);
+  for(const [x,y] of [[76,5],[76,17],[89,5],[89,17],[82,11]])brazier(x,y);
+  items.push({k:'sundisc4',x:89,y:6});lights.push([80,10],[86,12],[83,7]);
   // ---- the great door and the sealed way to Sut ----
-  for(const [x,y] of [[46,15],[50,15],[46,22],[50,22]])brazier(x,y);
-  foe('mummy',48,18,16);foe('mummy',48,21,16);foe('mummy',47,16,16);foe('mummy',49,16,16);
+  foe('mummy',48,20,16);foe('mummy',48,22,16);foe('mummy',47,19,16);
+  lights.push([48,21],[48,15]);
   // ---- the throne room ----
-  for(const y of [4,7,10])for(const x of [37,43,53,59])put('dpillar'+((x+y)%2),x,y,{block:true});
-  for(const [x,y] of [[35,3],[61,3],[35,11],[61,11],[45,3],[51,3],[40,12],[56,12]])brazier(x,y);
-  put('dpharaoh',44,2,{block:true});put('dpharaoh',52,2,{block:true});put('sarcophU',40,3,{block:true});put('sarcophU',56,3,{block:true});
-  for(const [x,y] of [[36,6],[60,6],[36,9],[60,9]])put('danubis',x,y,{block:true});
-  for(const [x,y] of [[39,11],[57,11],[48,11]])put('treasure',x,y,{block:true});
+  for(const y of [4,7,10])for(const x of [44,52])put('dpillar'+((x+y)%2),x,y,{block:true});
+  for(const [x,y] of [[41,2],[55,2],[41,12],[55,12],[46,3],[50,3]])brazier(x,y);
+  put('dpharaoh',44,2,{block:true});put('dpharaoh',52,2,{block:true});put('sarcophU',41,4,{block:true});put('sarcophU',55,4,{block:true});
+  for(const [x,y] of [[41,7],[55,7],[41,10],[55,10]])put('danubis',x,y,{block:true});
+  for(const [x,y] of [[42,11],[54,11],[46,11]])put('treasure',x,y,walk);
   foe('sut',48,6,20);
-  items.push({k:'potion',x:35,y:12},{k:'potion',x:61,y:12},{k:'potion',x:21,y:30},{k:'potion',x:48,y:60},{k:'potion',x:12,y:5},{k:'potion',x:76,y:44});
-  // nothing may stand inside a wall or on top of something solid
+  items.push({k:'potion',x:42,y:8},{k:'potion',x:54,y:8},{k:'potion',x:9,y:35},{k:'potion',x:41,y:58},{k:'potion',x:18,y:5},{k:'potion',x:79,y:34});
+  lights.push([48,6],[48,9]);
+  // nothing stands in a wall, in a passage or beside a doorway
+  const keepD=decor.filter(d=>['lever','ventplate','dbones','brazier'].includes(d.k)?floor(d.x,d.y):(floor(d.x,d.y)&&clearOf(d.x,d.y)));
+  decor.length=0;decor.push(...keepD);
   const solid=new Set(decor.filter(d=>d.block).map(d=>d.x+','+d.y));
-  const okCell=(x,y)=>y>=0&&y<H&&x>=0&&x<W&&g[y][x]==='.';
-  const keepE=enemies.filter(e=>okCell(e.x,e.y)&&!solid.has(e.x+','+e.y));
+  const keepE=enemies.filter(e=>floor(e.x,e.y)&&!solid.has(e.x+','+e.y)&&!corr.has(e.x+','+e.y));
   const discCells=new Set(items.filter(i=>/^sundisc/.test(i.k)).map(i=>i.x+','+i.y));
-  for(let i=decor.length-1;i>=0;i--){const d=decor[i];if(d.block&&discCells.has(d.x+','+d.y))decor.splice(i,1)}
-  const keepI=items.filter(i=>okCell(i.x,i.y));
+  for(let i=decor.length-1;i>=0;i--){const d=decor[i];if(discCells.has(d.x+','+d.y)&&d.k!=='lever')decor.splice(i,1)}
+  const keepI=items.filter(i=>floor(i.x,i.y));
   return {rows:out,fm:fl.map(r=>r.join('')),decor,enemies:keepE,items:keepI,lights,secrets,start:{x:48,y:70,f:0}};
 }
 const TOMB=buildTomb();
@@ -8138,7 +8156,6 @@ Object.assign(ENEMY_DEF,{
     }
   };
   thin(41,{dwolf:12,nomad:18});
-  thin(42,{scorpion:10,mummy:4});
   thin(43,{scorpion:12,nomad2:5,nomad:6,mummy:4,dwolf:3});
 })();
 
@@ -8637,6 +8654,7 @@ function springTrap(d){
 }
 function desertStep(nx,ny){
   if(LEVEL===42){const d=G.decor.find(q=>q.trap&&!q.opened&&q.x===nx&&q.y===ny);if(d)springTrap(d)}
+  if(LEVEL===42){const d=G.decor.find(q=>q.walk&&!q.block&&!q.stepLooted&&CONTAINERS.includes(q.k)&&q.x===nx&&q.y===ny);if(d){d.stepLooted=true;openLoot(d)}} // treasure and vases are walked through; stepping on one opens it once
 }
 function desertDisc(it){
   const n=+it.k.slice(7);G.flags.discs=(G.flags.discs||0)|(1<<n);it.taken=true;sfx('key');
@@ -8695,12 +8713,12 @@ Object.assign(CUTS,{
 /* one line of news each time the party enters a part of the tomb */
 function tombStory(){
   const F=G.flags,x=G.P.x,y=G.P.y;
-  if(y>=26&&y<=45&&x>=30&&x<=66&&!F.zHall){F.zHall=1;msg('The Hall of Eternity. Pillars, gold and lapis, and a great gold door in the north wall with four round sockets.','#e8d8a0')}
-  if(x<22&&y>=28&&y<=42&&!F.zA){F.zA=1;msg('The Hall of Embers. The floor is scorched, and carved slabs lie across it in a pattern. Some have been fired before.','#e8c8a0')}
-  if(x>=75&&y>=26&&y<=44&&!F.zB){F.zB=1;msg('The Crypt of Sarcophagi. And on the far wall one eye of gold, bright among the dull signs.','#e8d8a0')}
-  if(x<=34&&y>=10&&y<=20&&!F.zC){F.zC=1;msg('The Chamber of Switches. At the far west end, three gold barriers close off a vault. The levers that raise them must be somewhere in this wing.','#e8d8a0')}
-  if(x>=66&&y<=22&&!F.zD){F.zD=1;msg('The Sand Pit. Sand pours from the ceiling here, deep and dry, and something moves under it.','#e8c8a0')}
-  if(y<=13&&x>=34&&x<=62&&!F.zSut&&!F.sutDead){F.zSut=1;startCut('sutRoom')}
+  if(y>=26&&y<=45&&x>=40&&x<=56&&!F.zHall){F.zHall=1;msg('The Hall of Eternity. Pillars, gold and lapis, and a great gold door in the north wall with four round sockets.','#e8d8a0')}
+  if(x<22&&y>=31&&y<=39&&!F.zA){F.zA=1;msg('The Hall of Embers. The floor is scorched, and carved slabs lie across it in a pattern. Some have been fired before.','#e8c8a0')}
+  if(x>=76&&y>=32&&y<=38&&!F.zB){F.zB=1;msg('The Crypt of Sarcophagi. And on the far wall one eye of gold, bright among the dull signs.','#e8d8a0')}
+  if(x>=15&&x<=23&&y>=10&&y<=20&&!F.zC){F.zC=1;msg('The Chamber of Switches. At the far west end, three gold barriers close off a vault. The levers that raise them must be somewhere in this wing.','#e8d8a0')}
+  if(x>=76&&y<=17&&!F.zD){F.zD=1;msg('The Sand Pit. Sand pours from the ceiling here, deep and dry, and something moves under it.','#e8c8a0')}
+  if(y<=12&&x>=40&&x<=56&&!F.zSut&&!F.sutDead){F.zSut=1;startCut('sutRoom')}
 }
 
 /*@@DESERT:END@@*/

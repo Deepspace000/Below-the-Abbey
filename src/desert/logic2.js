@@ -46,6 +46,7 @@ function springTrap(d){
 }
 function desertStep(nx,ny){
   if(LEVEL===42){const d=G.decor.find(q=>q.trap&&!q.opened&&q.x===nx&&q.y===ny);if(d)springTrap(d)}
+  if(LEVEL===42){const d=G.decor.find(q=>q.walk&&!q.block&&!q.stepLooted&&CONTAINERS.includes(q.k)&&q.x===nx&&q.y===ny);if(d){d.stepLooted=true;openLoot(d)}} // treasure and vases are walked through; stepping on one opens it once
 }
 function desertDisc(it){
   const n=+it.k.slice(7);G.flags.discs=(G.flags.discs||0)|(1<<n);it.taken=true;sfx('key');
@@ -104,10 +105,10 @@ Object.assign(CUTS,{
 /* one line of news each time the party enters a part of the tomb */
 function tombStory(){
   const F=G.flags,x=G.P.x,y=G.P.y;
-  if(y>=26&&y<=45&&x>=30&&x<=66&&!F.zHall){F.zHall=1;msg('The Hall of Eternity. Pillars, gold and lapis, and a great gold door in the north wall with four round sockets.','#e8d8a0')}
-  if(x<22&&y>=28&&y<=42&&!F.zA){F.zA=1;msg('The Hall of Embers. The floor is scorched, and carved slabs lie across it in a pattern. Some have been fired before.','#e8c8a0')}
-  if(x>=75&&y>=26&&y<=44&&!F.zB){F.zB=1;msg('The Crypt of Sarcophagi. And on the far wall one eye of gold, bright among the dull signs.','#e8d8a0')}
-  if(x<=34&&y>=10&&y<=20&&!F.zC){F.zC=1;msg('The Chamber of Switches. At the far west end, three gold barriers close off a vault. The levers that raise them must be somewhere in this wing.','#e8d8a0')}
-  if(x>=66&&y<=22&&!F.zD){F.zD=1;msg('The Sand Pit. Sand pours from the ceiling here, deep and dry, and something moves under it.','#e8c8a0')}
-  if(y<=13&&x>=34&&x<=62&&!F.zSut&&!F.sutDead){F.zSut=1;startCut('sutRoom')}
+  if(y>=26&&y<=45&&x>=40&&x<=56&&!F.zHall){F.zHall=1;msg('The Hall of Eternity. Pillars, gold and lapis, and a great gold door in the north wall with four round sockets.','#e8d8a0')}
+  if(x<22&&y>=31&&y<=39&&!F.zA){F.zA=1;msg('The Hall of Embers. The floor is scorched, and carved slabs lie across it in a pattern. Some have been fired before.','#e8c8a0')}
+  if(x>=76&&y>=32&&y<=38&&!F.zB){F.zB=1;msg('The Crypt of Sarcophagi. And on the far wall one eye of gold, bright among the dull signs.','#e8d8a0')}
+  if(x>=15&&x<=23&&y>=10&&y<=20&&!F.zC){F.zC=1;msg('The Chamber of Switches. At the far west end, three gold barriers close off a vault. The levers that raise them must be somewhere in this wing.','#e8d8a0')}
+  if(x>=76&&y<=17&&!F.zD){F.zD=1;msg('The Sand Pit. Sand pours from the ceiling here, deep and dry, and something moves under it.','#e8c8a0')}
+  if(y<=12&&x>=40&&x<=56&&!F.zSut&&!F.sutDead){F.zSut=1;startCut('sutRoom')}
 }

@@ -4,7 +4,7 @@ const fs=require('fs'),path=require('path');
 const src=f=>fs.readFileSync(path.join(__dirname,'..','src','desert',f),'utf8');
 const TAU=Math.PI*2,clamp=(v,a,b)=>v<a?a:v>b?b:v;
 function hash2(x,y,s){let h=Math.imul(x|0,374761393)+Math.imul(y|0,668265263)+Math.imul(s|0,1274126177);h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967296}
-const code='const DS_MAGIC_TOMB=["a","b","c"],EMBERS_LEVELS=[];\n'+src('road.js')+'\n'+src('tomb.js')+'\n'+src('burrows.js')+'\n'+src('redsands.js')+'\nreturn {LEVELS,SANDROAD,TOMB,LEVEL41_DATA,LEVEL42_DATA,REDDUNES,LEVEL43_DATA};';
+const code='const DUNE_SPRITES=false;const DS_MAGIC_TOMB=["a","b","c"],EMBERS_LEVELS=[];\n'+src('road.js')+'\n'+src('tomb.js')+'\n'+src('burrows.js')+'\n'+src('redsands.js')+'\nreturn {LEVELS,SANDROAD,TOMB,LEVEL41_DATA,LEVEL42_DATA,REDDUNES,LEVEL43_DATA};';
 const LEVELS={};
 const fn=new Function('LEVELS','hash2','clamp','TAU',code);
 const {SANDROAD,TOMB,LEVEL41_DATA,LEVEL42_DATA,REDDUNES,LEVEL43_DATA}=fn(LEVELS,hash2,clamp,TAU);
@@ -74,4 +74,16 @@ for(let k=0;k<10;k++){
 }
 console.log('burrows at',SANDROAD.burrows.map(b=>b.x+','+b.y).join(' '));
 console.log(bad?bad+' problem(s)':'all good');
-process.exit(bad?1:0);
+
+{ // the tomb: every walkable square can be reached once the doors are open, and nothing narrows a passage
+  const T=TOMB,rows=T.rows,H=rows.length,W=rows[0].length,open=new Set(['91,35','20,21','48,25','5,14','6,14','7,14']);
+  const rr=reach(rows,T.decor,[T.start.x,T.start.y],open);
+  let n=0,lost=0;for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(rows[y][x]==='.'){n++;const blk=T.decor.some(d=>d.block&&d.x===x&&d.y===y);if(!blk&&!rr(x,y)){lost++;if(lost<6)fail('floor square cut off at '+x+','+y)}}
+  for(const d of T.decor){if(['treasure','vase0','vase1','vase2','vase3'].includes(d.k)&&d.block)fail('treasure or vase blocks the way at '+d.x+','+d.y)}
+  for(const e of T.enemies)if(!rr(e.x,e.y))fail('tomb creature cut off '+e.t+' '+e.x+','+e.y);
+  // a passage cell is one with walls on two opposite sides: no blocking object may stand there
+  let squeeze=0;for(const d of T.decor){if(!d.block||d.k==='lever')continue;const o=(x,y)=>rows[y]&&rows[y][x]==='.';
+    const ns=!o(d.x,d.y-1)&&!o(d.x,d.y+1),ew=!o(d.x-1,d.y)&&!o(d.x+1,d.y);if(ns||ew){squeeze++;fail('object in a narrow place: '+d.k+' at '+d.x+','+d.y)}}
+  console.log('tomb floor squares',n,'cut off',lost,'objects in passages',squeeze,'creatures',T.enemies.length);
+}
+console.log(bad?bad+' problem(s)':'all good');process.exit(bad?1:0);
