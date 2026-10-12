@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.19';
+const VERSION='2.21';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3759,10 +3759,10 @@ const WORLD_LOCS=[
   {k:'pass',n:'Greyfang Pass',lv:[22,27],x:390,y:136,ic:'mountains'},
   {k:'greendale',n:'Greendale',lv:[32],x:418,y:186,ic:'trees'},
   {k:'anaea',n:'Anaea',sub:'white stone',lv:[33,34,35,36,37,38],x:402,y:238,ic:'town'},
-  {k:'sandroad',n:'The Sand Road',sub:'forest to dunes',lv:[41,50,51,52,53,54,55,56,57,58,59],x:446,y:186,ic:'dunes'},
-  {k:'tomb',n:'Tomb of Sut',lv:[42],x:452,y:128,ic:'cave'},
-  {k:'reddunes',n:'The Red Dunes',lv:[43],x:440,y:92,ic:'dunes'},
-  {k:'scoria',n:'Khemetra',sub:'the golden city',lv:[44],x:430,y:58,ic:'castle'}
+  {k:'sandroad',n:'The Sand Road',sub:'forest to dunes',lv:[41,50,51,52,53,54,55,56,57,58,59],x:500,y:196,ic:'dunes'},
+  {k:'tomb',n:'Tomb of Sut',lv:[42],x:506,y:136,ic:'cave'},
+  {k:'reddunes',n:'The Red Dunes',lv:[43],x:498,y:96,ic:'dunes'},
+  {k:'scoria',n:'Khemetra',sub:'the golden city',lv:[44],x:486,y:56,ic:'castle'}
 ];
 const WORLD_ROADS=[['abbey','thornwood','thornwick','gwood'],['gwood','road','tunnel','ironhill'],['ironhill','graves'],['ironhill','mines'],['ironhill','moor','pass','greendale','anaea']];
 function lab(s,x,y,size,col){ctx.save();ctx.font=`bold ${size}px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(200,184,140,.9)';ctx.strokeText(s,x,y);ctx.fillStyle=col;ctx.fillText(s,x,y);ctx.restore()}
@@ -3775,14 +3775,16 @@ function drawWorldMap(){
   rrect(ctx,x0,y0,w,h,6);ctx.clip();
   const g=ctx.createLinearGradient(0,y0,0,y0+h);g.addColorStop(0,'#bcaa7e');g.addColorStop(1,'#9e8c64');ctx.fillStyle=g;ctx.fillRect(x0,y0,w,h);
   ctx.globalAlpha=.13;for(let i=0;i<110;i++){const a=hash2(i,1,7),b=hash2(i,2,7);ctx.fillStyle=i%3?'#5a4630':'#e8dcb0';ctx.beginPath();ctx.ellipse(x0+a*w,y0+b*h,6+hash2(i,3,7)*30,3+hash2(i,4,7)*14,hash2(i,5,7)*3,0,TAU);ctx.fill()}ctx.globalAlpha=1;
-  const WV=G.wv||(G.wv={z:1,x:0,y:0});
+  const WV=G.wv||(G.wv=wvDefault());
   ctx.save();ctx.translate(240+WV.x,160+WV.y);ctx.scale(WV.z,WV.z);ctx.translate(-240,-160); // the lands themselves can be dragged and zoomed
-  { // beyond the right-hand edge of the charted lands: the unknown lands
-    ctx.save();ctx.beginPath();ctx.rect(472,-300,900,900);ctx.clip();ctx.fillStyle='rgba(70,52,30,.16)';ctx.fillRect(472,-300,900,900);
-    ctx.strokeStyle='rgba(70,52,30,.16)';ctx.lineWidth=1;for(let q=0;q<1800;q+=11){ctx.beginPath();ctx.moveTo(472+q,-300);ctx.lineTo(472+q-900,600);ctx.stroke()}
-    ctx.restore();ctx.strokeStyle='rgba(70,52,30,.45)';ctx.lineWidth=1.4;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(472,-300);ctx.lineTo(472,600);ctx.stroke();ctx.setLineDash([]);
-    ctx.font=`italic 22px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.7)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('The Unknown Lands',600,160);
-    ctx.font=`italic 9px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.5)';ctx.fillText('no road leads here yet',600,182);
+  { // everything east of Greyfang Pass, Anaea included, is still the unknown lands
+    const UL=[[424,-300],[424,100],[416,140],[398,200],[380,262],[380,600],[1500,600],[1500,-300]];
+    const path=()=>{ctx.beginPath();UL.forEach((q,k)=>k?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.closePath()};
+    ctx.save();path();ctx.clip();ctx.fillStyle='rgba(70,52,30,.16)';ctx.fillRect(300,-300,1300,900);
+    ctx.strokeStyle='rgba(70,52,30,.16)';ctx.lineWidth=1;for(let q=0;q<1800;q+=11){ctx.beginPath();ctx.moveTo(300+q,-300);ctx.lineTo(300+q-900,600);ctx.stroke()}
+    ctx.restore();ctx.strokeStyle='rgba(70,52,30,.5)';ctx.lineWidth=1.4;ctx.setLineDash([5,4]);ctx.beginPath();UL.slice(0,5).forEach((q,k)=>k?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.lineTo(380,600);ctx.stroke();ctx.setLineDash([]);
+    ctx.font=`italic 17px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.72)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('The Unknown Lands',476,16);
+    ctx.font=`italic 8px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.55)';ctx.fillText('east of Greyfang Pass, uncharted',476,29);
   }
   // faint hand-drawn coast and old survey marks, to show where the lands are still blank
   ctx.strokeStyle='rgba(60,44,26,.28)';ctx.lineWidth=1.2;ctx.setLineDash([3,4]);
@@ -3795,8 +3797,8 @@ function drawWorldMap(){
   const by={};WORLD_LOCS.forEach(l=>by[l.k]=l);
   ctx.strokeStyle='rgba(50,34,18,.75)';ctx.lineWidth=1.5;ctx.setLineDash([2.5,3.5]);
   for(const r of WORLD_ROADS){ctx.beginPath();r.forEach((k,i)=>{const l=by[k];if(i===0)ctx.moveTo(l.x,l.y);else ctx.lineTo(l.x,l.y)});ctx.stroke()}
-  ctx.beginPath();ctx.moveTo(402,238);ctx.lineTo(444,214);ctx.lineTo(448,120);ctx.lineTo(432,70);ctx.stroke();ctx.setLineDash([]);
-  lab('the road north',452,160,7.5,'#3a2a16');
+  ctx.beginPath();ctx.moveTo(402,238);ctx.lineTo(466,228);ctx.lineTo(500,196);ctx.lineTo(506,136);ctx.lineTo(498,96);ctx.lineTo(486,56);ctx.stroke();ctx.setLineDash([]);
+  lab('the road east, then north',470,236,7.5,'#3a2a16');
   const visited=l=>l.lv.some(v=>v===LEVEL||G.lst[v]),here=WORLD_LOCS.find(l=>l.lv.includes(LEVEL));
   const stroke=()=>{ctx.strokeStyle=ink;ctx.lineWidth=1.3;ctx.lineJoin='round'};
   const ICONS={
@@ -5997,7 +5999,7 @@ function frame(now){
 function handleBtn(id){
   if(G.cut){cutAdvance();return}
   if(G.talk){talkBtn(id);return}
-  if(G.overview){if(id==='ovexit'){G.overview=false;G.world=false}else if(id==='worldback')G.world=false;else if(id==='worldmap'){G.world=true;G.wv={z:1,x:0,y:0}}else if(id==='wzin')setWorldZoom((G.wv?G.wv.z:1)*1.4,240,160);else if(id==='wzout')setWorldZoom((G.wv?G.wv.z:1)/1.4,240,160);else if(id==='wreset')G.wv={z:1,x:0,y:0};else if(id==='wmap'){}
+  if(G.overview){if(id==='ovexit'){G.overview=false;G.world=false}else if(id==='worldback')G.world=false;else if(id==='worldmap'){G.world=true;G.wv=wvDefault()}else if(id==='wzin')setWorldZoom((G.wv?G.wv.z:1)*1.4,240,160);else if(id==='wzout')setWorldZoom((G.wv?G.wv.z:1)/1.4,240,160);else if(id==='wreset')G.wv=wvDefault();else if(id==='wmap'){}
     else if(id==='mzin')setMapZoom((G.mz||12)*1.3,DW/2,DH/2);else if(id==='mzout')setMapZoom((G.mz||12)/1.3,DW/2,DH/2);else if(id==='mzfit')setMapZoom(0,DW/2,DH/2);return}
   if(G.saves){savesBtn(id);return}
   if(G.state==='title'){titleBtn(id);return}
@@ -6098,8 +6100,9 @@ function drawDragGhost(){
   if(d.hover){ctx.strokeStyle='#ffe36a';ctx.lineWidth=2;rrect(ctx,d.hover.x-1,d.hover.y-1,d.hover.w+2,d.hover.h+2,4);ctx.stroke()}
   ctx.globalAlpha=.92;if(def)itemIcon(def,d.x,d.y,1.5);ctx.globalAlpha=1;
 }
+const wvDefault=()=>({z:.85,x:-30,y:0});
 function setWorldZoom(nz,cx,cy){
-  const V=G.wv||(G.wv={z:1,x:0,y:0});nz=clamp(nz,.6,5);
+  const V=G.wv||(G.wv=wvDefault());nz=clamp(nz,.6,5);
   const px=240+(cx-240-V.x)/V.z,py=160+(cy-160-V.y)/V.z; // the map point under the cursor stays under it
   V.z=nz;V.x=cx-240-(px-240)*nz;V.y=cy-160-(py-160)*nz;clampWorld();
 }
@@ -6108,7 +6111,7 @@ cv.addEventListener('pointerdown',e=>{
   e.preventDefault();audioInit();
   if(G.overview&&G.world){
     const [wx,wy]=toDesign(e),wb=topBtn(wx,wy);
-    if(wb&&wb.id==='wmap'){(G.pts=G.pts||{})[e.pointerId]=[wx,wy];const a=Object.values(G.pts);if(a.length===2){G.pinch=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);G.wdrag=null}else{const V=G.wv||(G.wv={z:1,x:0,y:0});G.wdrag={x:wx,y:wy,px:V.x,py:V.y}}return}
+    if(wb&&wb.id==='wmap'){(G.pts=G.pts||{})[e.pointerId]=[wx,wy];const a=Object.values(G.pts);if(a.length===2){G.pinch=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);G.wdrag=null}else{const V=G.wv||(G.wv=wvDefault());G.wdrag={x:wx,y:wy,px:V.x,py:V.y}}return}
   }
   if(G.overview&&!G.world){const [qx,qy]=toDesign(e);(G.pts=G.pts||{})[e.pointerId]=[qx,qy];if(Object.keys(G.pts).length===2){const a=Object.values(G.pts);G.pinch=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);PTR=null;return}}
   const [x,y]=toDesign(e),b=topBtn(x,y);
