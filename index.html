@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.52';
+const VERSION='2.53';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2103,7 +2103,7 @@ function enemyAct(e){
   const def=ENEMY_DEF[e.t],dist=()=>Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y);
   if(e.chilled>0){e.chilled--;msg(`The ${def.name} is frozen stiff.`,'#9ad0ff');return 130}
   if(e.alert&&def.act){const used=def.act(e);if(used)return used}
-  if(!e.alert&&def.patrol)return patrolStep(e,def);
+  if(!e.alert&&(def.patrol||(def.wander&&LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor)))return patrolStep(e,def);
   if(!e.alert){
     const path=bfs(e);
     if(dist()<=6&&((path&&path.dist<=7)||hasLOS(e.x,e.y,G.P.x,G.P.y))){e.alert=true;sfx(e.t==='skel'?'rattle':(e.t==='bat'||e.t==='vulture')?'screech':'squeak');return 150}
@@ -4099,7 +4099,7 @@ function setMapZoom(ncs,ax,ay){
   ncs=clamp(ncs,mapFit(),34);const cs=G.mz||12,[ox,oy]=mapOrigin(cs),wx=(ax-ox)/cs,wy=(ay-oy)/cs;
   G.mz=ncs;G.panX=ax-6-wx*ncs;G.panY=ay-30-wy*ncs;
 }
-const ENEMY_GLYPH_FIX={boss:['#ff3030','K'],skel:['#e8e4d0','S'],bat:['#b070e0','B'],wolf:['#a0a8b0','W'],bandit:['#d0a040','D'],archer:['#80b060','A'],gandrick:['#ff3030','G'],rat:['#d08a60','R']};
+const ENEMY_GLYPH_FIX={dskeleton:['#e8e4d0','S'],boss:['#ff3030','K'],skel:['#e8e4d0','S'],bat:['#b070e0','B'],wolf:['#a0a8b0','W'],bandit:['#d0a040','D'],archer:['#80b060','A'],gandrick:['#ff3030','G'],rat:['#d08a60','R']};
 function enemyGlyph(t){
   const f=ENEMY_GLYPH_FIX[t];if(f)return f;
   const nm=((ENEMY_DEF[t]&&ENEMY_DEF[t].name)||t).replace(/^(The|Giant|Desert|Carrion|Desperate|Cave)\s+/,''),pal=['#d08a60','#e0a050','#c88ad0','#8ac8d0','#d8d070','#d07a7a','#8ad09a'];
@@ -6015,7 +6015,7 @@ function patrolStep(e,def){ // a creature that walks the land, and charges when 
   if(e.hx===undefined){e.hx=e.x;e.hy=e.y}
   if(!e.tgt||Math.abs(e.x-e.tgt.x)+Math.abs(e.y-e.tgt.y)<3||(e.pt=(e.pt||0)+1)>60){
     e.pt=0;e.tgt=null;
-    for(let t=0;t<30;t++){const x=Math.round(e.hx+(Math.random()*2-1)*55),y=Math.round(e.hy+(Math.random()*2-1)*55);if(x>2&&y>2&&x<MW-3&&y<MH-3&&!cellBlocked(x,y)){e.tgt={x,y};break}}
+    for(let t=0;t<30;t++){const rr=def.roam||55,x=Math.round(e.hx+(Math.random()*2-1)*rr),y=Math.round(e.hy+(Math.random()*2-1)*rr);if(x>2&&y>2&&x<MW-3&&y<MH-3&&!cellBlocked(x,y)){e.tgt={x,y};break}}
   }
   if(e.tgt){
     let best=null,bd=Math.abs(e.x-e.tgt.x)+Math.abs(e.y-e.tgt.y);
@@ -6420,7 +6420,7 @@ addEventListener('resize',fit);fit();
 /*@@DESERT:BEGIN@@*/
 /* ---- src/desert/artlist.js ---- */
 /* written by tools/inject.py */
-const DS_PAINTED=['brazier0', 'brazier1', 'brazier2', 'brazier3', 'ceil_tomb', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'offering', 'rrock0', 'rrock1', 'rrock2', 'skybirdA', 'skybirdB', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA'];
+const DS_PAINTED=['brazier0', 'brazier1', 'brazier2', 'brazier3', 'ceil_tomb', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dskeleton', 'dskeletonA', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'offering', 'rrock0', 'rrock1', 'rrock2', 'skybirdA', 'skybirdB', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA'];
 
 /* ---- src/desert/artpack.js ---- */
 /* ==========================================================================
@@ -6899,6 +6899,7 @@ Object.assign(ENEMY_DEF,{
   nomad:{name:'Desperate Nomad',hp:44,dmg:[5,9],hit:.72,w:.38,img:'nomad',xp:90,gold:[6,22],speed:1,verb:'slashes'},
   nomad2:{name:'Desperate Nomad',hp:44,dmg:[5,9],hit:.72,w:.38,img:'nomad2',xp:90,gold:[6,22],speed:1,verb:'slashes'},
   vulture:{name:'Carrion Vulture',hp:34,dmg:[5,9],hit:.74,w:1.0,img:'vulture',xp:90,gold:[0,0],speed:2,fly:true,verb:'rakes'},
+  dskeleton:{name:'Skeleton',hp:48,dmg:[6,10],hit:.74,w:.7,img:'dskeleton',xp:110,gold:[3,12],speed:1,verb:'slashes',wander:true,roam:22},
   mummy:{name:'Mummy',hp:45,dmg:[6,10],hit:.76,w:.36,img:'mummy',xp:150,gold:[10,30],speed:1,verb:'claws'},
   sut:{name:'Sut, Lord of the Red Desert',hp:110,dmg:[8,13],hit:.82,w:.78,img:'sut',xp:5000,gold:[800,1200],speed:1,verb:'smites',ranged:3,shot:'a bolt of red fire',boss:true}});
 
@@ -7940,7 +7941,7 @@ function buildDng(idx,cls,lvl,entryK){
   rooms.forEach((r,i)=>{if(i>0&&Rn(700+i,3)===0){const x=r.x0+Rn(710+i,r.x1-r.x0+1),y=r.y0+Rn(720+i,r.y1-r.y0+1);if(Math.abs(x-fx)+Math.abs(y-fy)>2)put('vase'+(i%4),x,y,{block:true,plain:true})}});
   // now and then something is awake in there
   if(Rn(960,100)<38){
-    const T=['scorpion','mummy','nomad'][Rn(961,3)],n=1+(Rn(962,3)===0?1:0);
+    const T=['scorpion','mummy','nomad','dskeleton','dskeleton'][Rn(961,5)],n=1+(Rn(962,3)===0?1:0);
     for(let i=0;i<n;i++){const cand=[];for(let y=1;y<Hd-1;y++)for(let x=1;x<Wd-1;x++)if(g[y][x]==='.'&&!used.has(x+','+y)&&d0[y*Wd+x]>10)cand.push([x,y]);if(cand.length){const p=cand[Rn(970+i,cand.length)];used.add(p[0]+','+p[1]);enemies.push({t:T,x:p[0],y:p[1],lvl})}}
   }
   return {rows,fm:fl.map(r=>r.join('')),decor,enemies,items,lights,start:{x:start.x,y:start.y,f:0}};
@@ -7993,6 +7994,24 @@ Object.assign(ENEMY_DEF,{
   const W=LEVELS[63],px=125,py=95;
   for(let i=W.enemies.length-1;i>=0;i--)if(Math.hypot(W.enemies[i].x-px,W.enemies[i].y-py)<14)W.enemies.splice(i,1);
   W.enemies.push({t:'cyclops',x:px,y:py,lvl:44,home:{x:px,y:py}});
+})();
+
+// skeletons: now and then in the tombs, and a few wandering the open sand
+(function placeSkeletons(){
+  const tomb=LEVELS[42];let n=0;
+  for(const e of tomb.enemies)if((e.t==='mummy'||e.t==='scorpion')&&n<2&&hash2(e.x,e.y,555)<.5){e.t='dskeleton';n++}
+  if(n<2)for(const e of tomb.enemies)if(e.t==='scorpion'&&n<2){e.t='dskeleton';n++}
+  for(let k=0;k<BURROW_N;k++)if(k%3===1){const L=LEVELS[BURROW_BASE+k];if(L&&L.enemies.length)L.enemies[0].t='dskeleton'}
+  for(const [lv,cnt] of [[41,4],[43,5],[60,4],[61,6],[62,6],[63,5],[64,5]]){
+    const L=LEVELS[lv],rows=L.rows,H=rows.length,W=rows[0].length;let p=0;
+    for(let k=0;k<500&&p<cnt;k++){
+      const x=14+((hash2(k,lv,821)*(W-28))|0),y=14+((hash2(k,lv,822)*(H-28))|0);
+      if(lv===41&&y>140)continue;
+      if(rows[y][x]!=='.'||Math.hypot(x-L.start.x,y-L.start.y)<30)continue;
+      if(L.enemies.some(e=>Math.abs(e.x-x)+Math.abs(e.y-y)<6)||L.items.some(i=>i.x===x&&i.y===y)||(L.decor||[]).some(d=>Math.abs(d.x-x)<=1&&Math.abs(d.y-y)<=1))continue;
+      L.enemies.push({t:'dskeleton',x,y,lvl:lv===62?20:lv===61?18:lv===60?16:lv===43?15:14});p++;
+    }
+  }
 })();
 
 /* ---- src/desert/terrain.js ---- */

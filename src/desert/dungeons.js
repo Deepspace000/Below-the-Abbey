@@ -65,7 +65,7 @@ function buildDng(idx,cls,lvl,entryK){
   rooms.forEach((r,i)=>{if(i>0&&Rn(700+i,3)===0){const x=r.x0+Rn(710+i,r.x1-r.x0+1),y=r.y0+Rn(720+i,r.y1-r.y0+1);if(Math.abs(x-fx)+Math.abs(y-fy)>2)put('vase'+(i%4),x,y,{block:true,plain:true})}});
   // now and then something is awake in there
   if(Rn(960,100)<38){
-    const T=['scorpion','mummy','nomad'][Rn(961,3)],n=1+(Rn(962,3)===0?1:0);
+    const T=['scorpion','mummy','nomad','dskeleton','dskeleton'][Rn(961,5)],n=1+(Rn(962,3)===0?1:0);
     for(let i=0;i<n;i++){const cand=[];for(let y=1;y<Hd-1;y++)for(let x=1;x<Wd-1;x++)if(g[y][x]==='.'&&!used.has(x+','+y)&&d0[y*Wd+x]>10)cand.push([x,y]);if(cand.length){const p=cand[Rn(970+i,cand.length)];used.add(p[0]+','+p[1]);enemies.push({t:T,x:p[0],y:p[1],lvl})}}
   }
   return {rows,fm:fl.map(r=>r.join('')),decor,enemies,items,lights,start:{x:start.x,y:start.y,f:0}};
@@ -118,4 +118,22 @@ Object.assign(ENEMY_DEF,{
   const W=LEVELS[63],px=125,py=95;
   for(let i=W.enemies.length-1;i>=0;i--)if(Math.hypot(W.enemies[i].x-px,W.enemies[i].y-py)<14)W.enemies.splice(i,1);
   W.enemies.push({t:'cyclops',x:px,y:py,lvl:44,home:{x:px,y:py}});
+})();
+
+// skeletons: now and then in the tombs, and a few wandering the open sand
+(function placeSkeletons(){
+  const tomb=LEVELS[42];let n=0;
+  for(const e of tomb.enemies)if((e.t==='mummy'||e.t==='scorpion')&&n<2&&hash2(e.x,e.y,555)<.5){e.t='dskeleton';n++}
+  if(n<2)for(const e of tomb.enemies)if(e.t==='scorpion'&&n<2){e.t='dskeleton';n++}
+  for(let k=0;k<BURROW_N;k++)if(k%3===1){const L=LEVELS[BURROW_BASE+k];if(L&&L.enemies.length)L.enemies[0].t='dskeleton'}
+  for(const [lv,cnt] of [[41,4],[43,5],[60,4],[61,6],[62,6],[63,5],[64,5]]){
+    const L=LEVELS[lv],rows=L.rows,H=rows.length,W=rows[0].length;let p=0;
+    for(let k=0;k<500&&p<cnt;k++){
+      const x=14+((hash2(k,lv,821)*(W-28))|0),y=14+((hash2(k,lv,822)*(H-28))|0);
+      if(lv===41&&y>140)continue;
+      if(rows[y][x]!=='.'||Math.hypot(x-L.start.x,y-L.start.y)<30)continue;
+      if(L.enemies.some(e=>Math.abs(e.x-x)+Math.abs(e.y-y)<6)||L.items.some(i=>i.x===x&&i.y===y)||(L.decor||[]).some(d=>Math.abs(d.x-x)<=1&&Math.abs(d.y-y)<=1))continue;
+      L.enemies.push({t:'dskeleton',x,y,lvl:lv===62?20:lv===61?18:lv===60?16:lv===43?15:14});p++;
+    }
+  }
 })();
