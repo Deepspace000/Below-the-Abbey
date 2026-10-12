@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.15';
+const VERSION='2.16';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -6607,8 +6607,8 @@ Object.assign(ENEMY_DEF,{
   dwolf:{name:'Desert Wolf',hp:36,dmg:[4,8],hit:.74,w:.95,img:'dwolf',xp:70,gold:[0,0],speed:2,verb:'bites'},
   nomad:{name:'Desperate Nomad',hp:44,dmg:[5,9],hit:.72,w:.38,img:'nomad',xp:90,gold:[6,22],speed:1,verb:'slashes'},
   nomad2:{name:'Desperate Nomad',hp:44,dmg:[5,9],hit:.72,w:.38,img:'nomad2',xp:90,gold:[6,22],speed:1,verb:'slashes'},
-  mummy:{name:'Mummy',hp:60,dmg:[8,13],hit:.76,w:.36,img:'mummy',xp:150,gold:[10,30],speed:1,verb:'claws'},
-  sut:{name:'Sut, Lord of the Red Desert',hp:170,dmg:[12,19],hit:.82,w:.78,img:'sut',xp:5000,gold:[800,1200],speed:1,verb:'smites',ranged:3,shot:'a bolt of red fire',boss:true}});
+  mummy:{name:'Mummy',hp:45,dmg:[6,10],hit:.76,w:.36,img:'mummy',xp:150,gold:[10,30],speed:1,verb:'claws'},
+  sut:{name:'Sut, Lord of the Red Desert',hp:110,dmg:[8,13],hit:.82,w:.78,img:'sut',xp:5000,gold:[800,1200],speed:1,verb:'smites',ranged:3,shot:'a bolt of red fire',boss:true}});
 
 const DS_OL='#2a1808';
 // the painted pictures made for the desert creatures (see tools/ingest_art.py)
@@ -7360,7 +7360,7 @@ function desertStory(){
 /* ==========================================================================
    The tomb and the mounds: traps, secret doors, the sun discs and the great door, ambushes, loot, and Sut himself
    ========================================================================== */
-const F_TRAPDMG=()=>Math.round(7+(LEVELS[LEVEL].diff||15)*.9);
+const F_TRAPDMG=()=>Math.round(5+(LEVELS[LEVEL].diff||15)*.7);
 function sunDiscCount(){let n=0;const m=G.flags.discs||0;for(let i=1;i<=4;i++)if(m&(1<<i))n++;return n}
 function setSunDoor(){const n=sunDiscCount();for(let y=0;y<MH;y++)for(let x=0;x<MW;x++)if(SUNDOOR_GIDS.includes(G.grid[y][x]))G.grid[y][x]=SUNDOOR_GIDS[n]}
 function freeNear(x,y,rad,count){
@@ -7437,7 +7437,7 @@ function desertApplyState(){
 function sutDefeated(){G.flags.sutDead=1;G.grid[1][48]=31;sfx('door');startCut('sutDown')}
 ENEMY_DEF.sut.act=function(e){ // when he is hurt, Sut calls the dead of his tomb to stand with him
   e.calls=(e.calls||0)+1;
-  const mummies=G.enemies.filter(o=>o.hp>0&&o.t==='mummy').length;
+  const mummies=G.enemies.filter(o=>o.hp>0&&o.t==='mummy'&&Math.abs(o.x-e.x)+Math.abs(o.y-e.y)<=14).length;
   if(e.calls%4===0&&e.hp<e.maxhp*.8&&mummies<5){
     const spots=freeNear(e.x,e.y,3,2);
     if(spots.length){for(const [x,y] of spots)addEnemy('mummy',x,y,true);sfx('screech');msg('Sut raises his sceptre, and the dead of his tomb rise at his call!','#ff9a80');return 700}

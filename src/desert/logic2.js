@@ -1,7 +1,7 @@
 /* ==========================================================================
    The tomb and the mounds: traps, secret doors, the sun discs and the great door, ambushes, loot, and Sut himself
    ========================================================================== */
-const F_TRAPDMG=()=>Math.round(7+(LEVELS[LEVEL].diff||15)*.9);
+const F_TRAPDMG=()=>Math.round(5+(LEVELS[LEVEL].diff||15)*.7);
 function sunDiscCount(){let n=0;const m=G.flags.discs||0;for(let i=1;i<=4;i++)if(m&(1<<i))n++;return n}
 function setSunDoor(){const n=sunDiscCount();for(let y=0;y<MH;y++)for(let x=0;x<MW;x++)if(SUNDOOR_GIDS.includes(G.grid[y][x]))G.grid[y][x]=SUNDOOR_GIDS[n]}
 function freeNear(x,y,rad,count){
@@ -78,7 +78,7 @@ function desertApplyState(){
 function sutDefeated(){G.flags.sutDead=1;G.grid[1][48]=31;sfx('door');startCut('sutDown')}
 ENEMY_DEF.sut.act=function(e){ // when he is hurt, Sut calls the dead of his tomb to stand with him
   e.calls=(e.calls||0)+1;
-  const mummies=G.enemies.filter(o=>o.hp>0&&o.t==='mummy').length;
+  const mummies=G.enemies.filter(o=>o.hp>0&&o.t==='mummy'&&Math.abs(o.x-e.x)+Math.abs(o.y-e.y)<=14).length;
   if(e.calls%4===0&&e.hp<e.maxhp*.8&&mummies<5){
     const spots=freeNear(e.x,e.y,3,2);
     if(spots.length){for(const [x,y] of spots)addEnemy('mummy',x,y,true);sfx('screech');msg('Sut raises his sceptre, and the dead of his tomb rise at his call!','#ff9a80');return 700}
