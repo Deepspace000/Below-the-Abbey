@@ -26,3 +26,4 @@ horse_hooves.ogg | https://opengameart.org/content/horse-trotting | KobatoGames 
 music_mithral.mp3 | Finding Mithral (open world game music) | Geoff Harvey, via Pixabay | Pixabay Content License (not CC0), used for Greendale
 music_wanderer.mp3 | Wanderer at Night | Zambolino, via freetouse.com | Free To Use licence (not CC0; credit Zambolino), used for the Thornwood
 music_embers.mp3 | Embers on the Flagstone (seamless loop) | Kaazoom, via Pixabay | Pixabay Content License (not CC0), used for the first crypt and the tiny dungeons
+music_andorios.mp3 | RPG Medieval Animated Music | Andorios, via Pixabay | Pixabay Content License (not CC0), used for the abbey grounds

@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.00';
+const VERSION='2.01';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1219,6 +1219,7 @@ function areaAudio(){
     else if(LEVEL===39){T.music_dungeon1=.3}
     else if(LEVEL===40){T.music_tavern=.3}
     else if(LEVEL===22){climbNotes()}
+    else if(LEVEL===2){T.music_andorios=.55;loadLazy('music_andorios')}
     else if(LEVEL===7){T.music_wanderer=.55;loadLazy('music_wanderer')}
     else if(LEVEL===10){T.rain_loop=.7}
     else if(LEVEL===3||LEVEL===13){T.village_ambience=.5;T.music_feast=.2}
@@ -1227,7 +1228,7 @@ function areaAudio(){
     else if(LEVEL===6||LEVEL===16){T.music_tavern=.55;T.village_ambience=.18}
   }
   for(const n of Object.keys(T)){T[n]*=SNDOPT[SND_CAT(n)];if(!(T[n]>0))delete T[n]}
-  for(const n of SNDLIST.concat(['music_mithral','music_wanderer','music_embers'])){if(n in T||LAYERS[n])setLayer(n,T[n]||0)}
+  for(const n of SNDLIST.concat(['music_mithral','music_wanderer','music_embers','music_andorios'])){if(n in T||LAYERS[n])setLayer(n,T[n]||0)}
   if(G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===3||LEVEL===13||LEVEL===29||LEVEL===30)){
     if(!G.bellNext)G.bellNext=G.time+50+Math.random()*60;
     if(G.time>G.bellNext){G.bellNext=G.time+150+Math.random()*100;const v=(LEVEL===29||LEVEL===30)?.3:.6;playSmp('church_bell1',v);setTimeout(()=>playSmp('church_bell2',v*.8),2600);if(LEVEL===3||LEVEL===13)msg('The church bell tolls.','#d8c88e')}
