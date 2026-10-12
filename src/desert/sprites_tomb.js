@@ -146,12 +146,15 @@ function dsOffering(){
     x.strokeStyle='#3a7a2a';x.lineWidth=2;x.beginPath();x.moveTo(60,46);x.lineTo(60,36);x.stroke();
   });
 }
-function dsVent(){ // a scorched slab with a carved scarab and soot round it: the sign of a fire trap
-  return mkCanvas(90,50,(x)=>{
-    x.fillStyle='rgba(0,0,0,.25)';x.beginPath();x.ellipse(45,34,40,12,0,0,TAU);x.fill();
-    const g=x.createRadialGradient(45,28,4,45,28,36);g.addColorStop(0,'#5a4a3a');g.addColorStop(1,'#2a2018');x.fillStyle=g;x.beginPath();x.ellipse(45,28,34,13,0,0,TAU);x.fill();x.strokeStyle='#17120e';x.lineWidth=2;x.stroke();
-    x.fillStyle='#c8962a';x.beginPath();x.ellipse(45,28,9,6,0,0,TAU);x.fill();x.strokeStyle='#17120e';x.lineWidth=1.2;x.stroke();x.beginPath();x.moveTo(45,22);x.lineTo(45,34);x.stroke();
-    x.strokeStyle='rgba(20,14,8,.7)';x.lineWidth=1.6;for(let i=0;i<9;i++){const a=i/9*TAU;x.beginPath();x.moveTo(45+Math.cos(a)*15,28+Math.sin(a)*8);x.lineTo(45+Math.cos(a)*30,28+Math.sin(a)*12);x.stroke()}
+function dsVent(){ // a scorched black slab with ember-bright cracks round a carved scarab: the warning of a fire trap
+  const W=110,H=60;
+  return mkCanvas(W,H,(x)=>{
+    {const S=pc(W,H),s=S.getContext('2d');const g=s.createRadialGradient(55,32,4,55,32,52);g.addColorStop(0,'rgba(255,150,40,.7)');g.addColorStop(1,'rgba(255,90,10,0)');s.fillStyle=g;s.fillRect(0,0,W,H);x.drawImage(S,0,0)}
+    const slab=t=>{t.beginPath();t.ellipse(55,34,44,16,0,0,TAU)};
+    pForm(x,W,H,slab,t=>{const g=t.createRadialGradient(46,28,4,55,34,48);g.addColorStop(0,'#5a4a3c');g.addColorStop(.7,'#2a2018');g.addColorStop(1,'#120c08');return g},
+      s=>{s.fillStyle='rgba(255,140,40,.35)';s.beginPath();s.ellipse(55,34,24,9,0,0,TAU);s.fill()},
+      {blur:2,rim:.6,rimW:6,grain:.2,seed:7,fine:f=>{f.strokeStyle='rgba(255,150,40,.95)';f.lineWidth=2;for(let i=0;i<10;i++){const a=i/10*TAU+.3;f.beginPath();f.moveTo(55+Math.cos(a)*16,34+Math.sin(a)*6);f.lineTo(55+Math.cos(a+.1)*30,34+Math.sin(a+.1)*11);f.lineTo(55+Math.cos(a-.15)*40,34+Math.sin(a-.15)*14);f.stroke()}
+        f.fillStyle='#e8a030';f.beginPath();f.ellipse(55,34,10,6,0,0,TAU);f.fill();f.strokeStyle='#2a1808';f.lineWidth=1.4;f.stroke();f.beginPath();f.moveTo(55,28);f.lineTo(55,40);f.stroke()}});
   });
 }
 function dsSunDisc(n){ // the golden sun disc, held up on a little stand
@@ -170,6 +173,6 @@ function makeTombSprites(){
   for(let f=0;f<4;f++)IMG['brazier'+f]=dsBrazier(f);NPC_H.brazier0=NPC_H.brazier1=NPC_H.brazier2=NPC_H.brazier3=.9;
   IMG.dpillar0=dsPillar(0);IMG.dpillar1=dsPillar(1);NPC_H.dpillar0=NPC_H.dpillar1=1.6;
   IMG.danubis=dsAnubis();NPC_H.danubis=1.3;IMG.dbastet=dsBastet();NPC_H.dbastet=.85;IMG.dpharaoh=dsPharaoh();NPC_H.dpharaoh=1.8;NPC_H.dsutstatue=1.7;
-  IMG.treasure=dsTreasure();NPC_H.treasure=.42;IMG.offering=dsOffering();NPC_H.offering=.5;IMG.ventplate=dsVent();NPC_H.ventplate=.17;
+  IMG.treasure=dsTreasure();NPC_H.treasure=.42;IMG.offering=dsOffering();NPC_H.offering=.5;IMG.ventplate=dsVent();NPC_H.ventplate=.2;
   for(let n=1;n<=4;n++){IMG['it_sundisc'+n]=dsSunDisc(n)}
 }

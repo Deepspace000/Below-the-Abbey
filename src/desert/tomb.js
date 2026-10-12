@@ -78,8 +78,8 @@ function buildTomb(){
     const safe=new Set();let sy=35;for(let x=21;x>=9;x--){safe.add(x+','+sy);if(x<20&&hash2(x,sy,31)<.5){const ny=sy+(hash2(x,sy,32)<.5?-1:1);if(ny>=31&&ny<=39){sy=ny;safe.add(x+','+sy)}}}
     while(sy!==35){sy+=sy<35?1:-1;safe.add('9,'+sy)}   // the path ends in line with the disc
     for(const c of ['8,35','7,35','8,34','8,36'])safe.add(c);
-    for(let y=29;y<=41;y++)for(let x=9;x<=20;x++){if(safe.has(x+','+y))continue;if(hash2(x,y,33)<.62)put('ventplate',x,y,{trap:'fire',walk:true})}
-    for(const [x,y] of [[8,33],[8,37],[7,33],[7,37]])put('ventplate',x,y,{trap:'fire',hidden:true,walk:true}); // hidden ones, off the path
+    for(let y=29;y<=41;y++)for(let x=9;x<=20;x++){if(safe.has(x+','+y))continue;if(hash2(x,y,33)<.62)put('ventplate',x,y,{trap:'fire',walk:true,sc:1.7})}
+    for(const [x,y] of [[8,33],[8,37],[7,33],[7,37]])put('ventplate',x,y,{trap:'fire',hidden:true,walk:true,sc:1.7}); // hidden ones, off the path
     items.push({k:'sundisc1',x:7,y:35});
     for(const [x,y] of [[7,29],[7,41],[20,29],[20,41],[13,28]])brazier(x,y);
     put('danubis',6,33,{block:true});put('danubis',6,37,{block:true});put('treasure',6,30,{block:true});put('vase2',6,40,{block:true});
