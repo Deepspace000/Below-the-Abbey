@@ -20,7 +20,8 @@ const TERR_SPEC={
   60:{amp:1.0,len:19,seed:37,peak:6,mask:()=>1},
   61:{amp:1.5,len:24,seed:53,peak:7,mask:()=>1},
   62:{amp:1.7,len:26,seed:67,peak:7.5,mask:()=>1},
-  63:{amp:1.3,len:22,seed:71,peak:6.5,mask:()=>1}
+  63:{amp:1.3,len:22,seed:71,peak:6.5,mask:()=>1},
+  64:{amp:0,len:22,seed:79,peak:6.5,mask:()=>1}
 };
 const MTN_BAND=14,MTN_BLOCK=1.7; // mountains rise over the last fourteen cells before a sky wall; above this height they cannot be climbed
 function terrFor(n){
@@ -31,6 +32,7 @@ function terrFor(n){
   rows.forEach((r,y)=>{for(let x=0;x<W;x++){const c=r[x];if(c==='.')open[y*W+x]=1;else if(c>='0'&&c<='9'){flat.push([x,y,5]);gates.push([x,y])}}});
   for(const d of L.decor||[])if(/^(chest|dpillar|danubis|dbastet|dsphinx|dobelisk|dpharaoh|treasure|offering|vase|brazier|dsutstatue|sarcoph|dburrow|teleporter)/.test(d.k))flat.push([d.x,d.y,3.5]);
   if(n===61)for(const [ox,oy] of GER.OASES)flat.push([ox,oy,9]);
+  if(n===64)for(const [ox,oy] of FLR.OASES)flat.push([ox,oy,9]);
   if(n===63)for(const [ox,oy] of WER.OASES)flat.push([ox,oy,9]);
   if(n===62)for(const [ox,oy] of VER.OASES)flat.push([ox,oy,9]);
   if(n===60)flat.push([BDN.OX,BDN.OY,9]);                       // the oasis lies flat

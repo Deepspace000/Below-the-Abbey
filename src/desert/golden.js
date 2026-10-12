@@ -6,6 +6,7 @@
    ========================================================================== */
 const GER={W:300,H:300,CY:150,CX:150,OASES:[[70,70],[225,95],[140,225]]};
 const VER={W:300,H:300,CY:150,CX:150,OASES:[[80,215],[230,200],[150,80]]};
+const FLR={W:250,H:250,CY:125,CX:125,OASES:[[70,70],[180,170]]};
 const WER={W:250,H:250,CY:125,CX:125,OASES:[[60,60],[190,80],[125,170]]};
 function buildErg(E,seed,rk){
   const W=E.W,H=E.H,rows=[],fm=[],R=(x,y,k)=>hash2(x,y,k+seed);
@@ -33,7 +34,7 @@ function buildErg(E,seed,rk){
     else if(r<.075)sc('dbones',x,y,{ox,oy,sc:.8+R(x,y,25)*.5});
     else if(r<.1)sc('dshrub'+((R(x,y,26)*3)|0),x,y,{ox,oy,sc:.7+R(x,y,27)*.5});
   }
-  const ruins=[];for(let i=0;i<11;i++)ruins.push([30+((R(i,1,90)*240)|0),30+((R(i,2,90)*240)|0)]);
+  const ruins=[];for(let i=0;i<11;i++)ruins.push([30+((R(i,1,90)*(W-60))|0),30+((R(i,2,90)*(H-60))|0)]);
   ruins.forEach(([cx,cy],n)=>{ // old ruins in rings, one chest or a pile of plain gold inside
     if(od(cx,cy)<14||(cx<40&&Math.abs(cy-E.CY)<20))return;
     for(let a=0;a<8;a++){const x=Math.round(cx+Math.cos(a/8*TAU)*4),y=Math.round(cy+Math.sin(a/8*TAU)*4);if(a%2||n%3===0)put('dpillar'+(a%2),x,y,{block:true})}
@@ -46,8 +47,8 @@ function buildErg(E,seed,rk){
   for(let gy=0;gy<5;gy++)for(let gx=0;gx<5;gx++){const x=36+gx*57+((R(gx,gy,7)-.5)*24|0),y=36+gy*57+((R(gx,gy,8)-.5)*24|0);if(x<50&&Math.abs(y-E.CY)<30)continue;camp(T[(gx+gy*2+((R(gx,gy,9)*3)|0))%4],x,y,2+((R(gx,gy,10)*2)|0),rk+((R(gx,gy,11)*3)|0))}
   return {rows,fm,decor,scen,enemies,items};
 }
-const GOLDEN=buildErg(GER,0,17),VIOLET=buildErg(VER,500,20),WHITE=buildErg(WER,900,16);
-WHITE.start={x:WER.CX,y:WER.H-3,f:0};GOLDEN.start={x:2,y:GER.CY,f:1};VIOLET.start={x:VER.CX,y:2,f:2};
+const GOLDEN=buildErg(GER,0,17),VIOLET=buildErg(VER,500,20),WHITE=buildErg(WER,900,16),FLAT=buildErg(FLR,1300,18);
+FLAT.start={x:FLR.W-3,y:FLR.CY,f:3};WHITE.start={x:WER.CX,y:WER.H-3,f:0};GOLDEN.start={x:2,y:GER.CY,f:1};VIOLET.start={x:VER.CX,y:2,f:2};
 const erdata=(B,name,label,diff,floors)=>({rows:B.rows,start:B.start,enemies:B.enemies,items:B.items,decor:B.decor,scenery:B.scen,fmap:B.fm,outdoor:true,day:1,floor:floors[0],
   floorSet:floors.concat(['bluegrass','bluewater']),ceil:'cloud',noExtras:true,name,label,diff});
 const LEVEL61_DATA=erdata(GOLDEN,'The Golden Erg','Golden Erg',18,['goldsand','goldsand2','goldsand3']);
@@ -66,6 +67,13 @@ LEVEL60_DATA.rows[0]=LEVEL60_DATA.rows[0].slice(0,BDN.OX)+'2'+LEVEL60_DATA.rows[
 LEVEL60_DATA.portals[2]={to:63,x:WER.CX,y:WER.H-3,f:0,tex:'bluecave'};
 LEVEL63_DATA.rows[WER.H-1]=LEVEL63_DATA.rows[WER.H-1].slice(0,WER.CX)+'0'+LEVEL63_DATA.rows[WER.H-1].slice(WER.CX+1);
 LEVEL63_DATA.portals=[{to:60,x:BDN.OX,y:2,f:2,tex:'bluecave'}];
+const LEVEL64_DATA=erdata(FLAT,'The Flatlands','Flatlands',18,['pebA','pebB','pebC']);
+// the Flatlands lie west of the White Dunes: a low cave in the White Dunes' west wall leads to their east wall
+LEVEL63_DATA.rows[WER.CY]=LEVEL63_DATA.rows[WER.CY].slice(0,0)+'1'+LEVEL63_DATA.rows[WER.CY].slice(1);
+LEVEL63_DATA.portals[1]={to:64,x:FLR.W-3,y:FLR.CY,f:3,tex:'bluecave'};
+LEVEL64_DATA.rows[FLR.CY]=LEVEL64_DATA.rows[FLR.CY].slice(0,FLR.W-1)+'0';
+LEVEL64_DATA.portals=[{to:63,x:2,y:WER.CY,f:1,tex:'bluecave'}];
+LEVELS[64]=LEVEL64_DATA;LEVEL_NAMES[64]=LEVEL64_DATA.name;
 LEVELS[63]=LEVEL63_DATA;LEVEL_NAMES[63]=LEVEL63_DATA.name;
 LEVELS[61]=LEVEL61_DATA;LEVEL_NAMES[61]=LEVEL61_DATA.name;LEVELS[62]=LEVEL62_DATA;LEVEL_NAMES[62]=LEVEL62_DATA.name;
 function makeGoldenArt(ydune,ycl){
@@ -78,6 +86,8 @@ function makeGoldenArt(ydune,ycl){
   FLOORS.whiteSand=dsRidges([252,252,254],[216,224,238],3,1,501);
   FLOORS.whiteSand2=dsRidges([250,251,254],[212,221,236],4,-1,511);
   FLOORS.whiteSand3=dsRidges([254,254,255],[220,228,240],3,-2,521);
+  FLOORS.pebA=dsPebbles(0,.05,601);FLOORS.pebB=dsPebbles(1,.07,611);FLOORS.pebC=dsPebbles(2,.04,621);
+  LEVEL64_DATA.chars={D:ydune,C:ycl};
   LEVEL63_DATA.chars={D:ydune,C:ycl};
   LEVEL61_DATA.chars={D:ydune,C:ycl};LEVEL62_DATA.chars={D:ydune,C:ycl};
 }
@@ -89,5 +99,20 @@ function dsRidges(light,shade,n,tilt,seed){
     const p=t<.72?Math.pow(t/.72,1.4):Math.pow(1-(t-.72)/.28,1.2);            // slow rise, quicker fall
     const k=.9+.1*p;
     return [shade[0]+(light[0]-shade[0])*p,shade[1]+(light[1]-shade[1])*p,shade[2]+(light[2]-shade[2])*p].map(v=>v*(k+.0));
+  });
+}
+// perfectly level ground: pale sand strewn with tiny pebbles, no ridges and no hollows
+function dsPebbles(v,dens,seed){
+  const base=[[214,192,150],[208,186,146],[218,196,156]][v];
+  return dsFloor((x,y)=>{
+    const n=dsNoise(x,y,4,seed)*.5+dsNoise(x,y,8,seed+1)*.5,k=.97+.06*(n-.5);
+    let c=[base[0]*k,base[1]*k,base[2]*k];
+    // each pebble is a little disc, one to two texels wide, in greys and browns
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+      const px=((x+dx)%TS+TS)%TS,py=((y+dy)%TS+TS)%TS,h=hash2(px,py,seed+7);
+      if(h<dens){const r=h<dens*.25?1.3:.8,ox=(hash2(px,py,seed+8)-.5)*.6,oy=(hash2(px,py,seed+9)-.5)*.6;
+        if(Math.hypot(dx-ox,dy-oy)<r){const t=hash2(px,py,seed+10),tone=t<.4?[132,122,110]:t<.7?[160,140,112]:[104,92,80],lit=dy<0||dx<0?1.12:.9;c=[tone[0]*lit,tone[1]*lit,tone[2]*lit]}}
+    }
+    return c;
   });
 }

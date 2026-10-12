@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.48';
+const VERSION='2.49';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2301,6 +2301,59 @@ function climbView(cx,cy,dX,dY){ // the Greyfang Pass climbs: look uphill and th
   const sl=(altAt(cx+dX*1.1,cy+dY*1.1)-altAt(cx-dX*1.1,cy-dY*1.1))/2.2;
   PITCH+=(-clamp(sl*55,-15,15)-PITCH)*.12;return Math.round(PITCH);
 }
+
+/* ---------- the desert sky: it follows the clock, and sometimes a sandstorm blows ---------- */
+const SKY_KEYS=[ // hour, sky colour, ground tint, glow at the horizon, stars
+  [0,[.10,.13,.27],[.55,.62,.95],0,1],[4.5,[.14,.17,.33],[.58,.64,.96],0,.9],[5.8,[.55,.42,.52],[.9,.8,.95],.65,.3],
+  [7,[1.0,.82,.72],[1,.9,.82],.55,0],[9,[.98,.96,1.0],[1,.98,.96],.1,0],[12,[1,1,1],[1,1,1],0,0],[15.5,[1.02,.98,.92],[1.02,.98,.9],0,0],
+  [17.5,[1.12,.92,.72],[1.1,.92,.76],.15,0],[18.8,[1.25,.66,.42],[1.12,.78,.6],.9,0],[19.8,[.62,.42,.62],[.8,.68,.82],.5,.35],
+  [21,[.22,.22,.42],[.62,.66,.95],0,.9],[24,[.10,.13,.27],[.55,.62,.95],0,1]];
+function skyTod(hr){
+  let i=0;while(i<SKY_KEYS.length-2&&hr>=SKY_KEYS[i+1][0])i++;
+  const a=SKY_KEYS[i],b=SKY_KEYS[i+1],t0=clamp((hr-a[0])/(b[0]-a[0]),0,1),t=t0*t0*(3-2*t0),mix=(p,q)=>p+(q-p)*t;
+  const m=(hr>=19.3?hr-19.3:hr+4.7)/11.4,moon=m>=0&&m<=1?Math.sin(m*Math.PI):-1;
+  return {k:[mix(a[1][0],b[1][0]),mix(a[1][1],b[1][1]),mix(a[1][2],b[1][2])],g:[mix(a[2][0],b[2][0]),mix(a[2][1],b[2][1]),mix(a[2][2],b[2][2])],glow:mix(a[3],b[3]),stars:mix(a[4],b[4]),moon};
+}
+const SCOLS=new Int16Array(1024);
+function paintDesertSky(D,SKP,UCOL,SK,ST,stormC,dX,dY,pX,pY,t){
+  const kr=SK.k[0],kg=SK.k[1],kb=SK.k[2],sA=SK.stars*(1-ST*.9),gl=SK.glow*(1-ST*.8);
+  const sc=new Int16Array(VW);if(sA>.02)for(let x=0;x<VW;x++){const cm=2*x/VW-1;sc[x]=((((Math.atan2(dY+pY*cm,dX+pX*cm)/TAU)%1)+1)%1*1024)|0}
+  let msx=-999,msy=0;const MR=9;
+  if(SK.moon>0&&ST<.6){const am=2.2,mx=Math.cos(am),my=Math.sin(am),a=(mx*dX+my*dY)/(dX*dX+dY*dY),b=(mx*pX+my*pY)/(pX*pX+pY*pY);if(a>.05)msx=(b/a+1)*VW/2;msy=HH-14-SK.moon*HH*.9}
+  const ma=clamp(SK.moon*6,0,1)*(1-ST);
+  for(let y=0;y<VH;y++){
+    const v=clamp(y-HH+150,0,255)|0,o=y*VW*4,hz=v<=150?Math.exp(-(150-v)/38):0,gR=gl*hz*250,gG=gl*hz*120,gB=gl*hz*40;
+    for(let x=0;x<VW;x++){
+      const i=(v*1024+UCOL[x])*4,io=o+x*4;
+      let r=SKP[i]*kr+gR,g=SKP[i+1]*kg+gG,b=SKP[i+2]*kb+gB;
+      if(sA>.02&&v<146){const h=hash2(sc[x],v,31);if(h>.9955){const s=sA*(.55+.45*((h-.9955)/.0045))*(1-hz*2.5>0?1-hz*2.5:0);r=Math.max(r,255*s);g=Math.max(g,255*s);b=Math.max(b,246*s)}}
+      if(ma>0){const dx=x-msx,dy=y-msy,d=Math.sqrt(dx*dx+dy*dy);
+        if(d<MR){const sh=.82+.18*Math.sin(dx*.9+dy*.5)*Math.sin(dy*.7),e=clamp((MR-d)/1.5,0,1);r=r*(1-e*ma)+238*sh*e*ma;g=g*(1-e*ma)+238*sh*e*ma;b=b*(1-e*ma)+224*sh*e*ma}
+        else if(d<MR*2.6){const k=Math.pow(1-(d-MR)/(MR*1.6),2)*.28*ma;r+=200*k;g+=210*k;b+=240*k}}
+      if(ST>.01){const c=ST*.92;r=r*(1-c)+stormC[0]*c;g=g*(1-c)+stormC[1]*c;b=b*(1-c)+stormC[2]*c}
+      D[io]=r;D[io+1]=g;D[io+2]=b;
+    }
+  }
+}
+const STORM={a:0,on:false,t:150+Math.random()*200};
+function stormTick(dt){
+  const S=STORM,des=LEVEL===43||(LEVEL>=60&&LEVEL<=64)||(LEVEL===41&&G.P&&rdBiome(G.P.x,G.P.y)>.7);
+  if(!des||G.state!=='play'){S.a=Math.max(0,S.a-dt*.5);return}
+  S.t-=dt;
+  if(S.t<=0){if(S.on){S.on=false;S.t=150+Math.random()*250;msg('The wind drops and the sand settles.','#e8d8a0')}else{S.on=true;S.t=50+Math.random()*50;msg('A sandstorm is blowing in. The air turns thick with sand.','#f0d090')}}
+  S.a+=((S.on?1:0)-S.a)*Math.min(1,dt*.35);
+}
+function drawStorm(){
+  const a=STORM.a;if(a<.02)return;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();
+  ctx.fillStyle=`rgba(190,150,96,${a*.22})`;ctx.fillRect(0,0,420,210);
+  const T=G.time;ctx.lineWidth=1;
+  for(let i=0;i<150;i++){
+    const sp=240+(i%5)*70,x=((i*97.3+T*sp)%480)-30,y=(i*53.7)%210,len=18+(i%7)*9,al=a*(.1+.26*((i*37)%10)/10);
+    ctx.strokeStyle=`rgba(238,208,152,${al})`;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-len,y+len*.06);ctx.stroke();
+  }
+  ctx.restore();
+}
 function render3D(){
   const t=G.time,C=G.C,dX=Math.cos(C.a),dY=Math.sin(C.a),pX=-dY*PL,pY=dX*PL;
   const cx=C.x+.5-dX*.28,cy=C.y+.5-dY*.28;
@@ -2325,15 +2378,21 @@ function render3D(){
   const nl=nearL,nn=nl.length,nr=nearR,nrn=nr.length;
   const D=vimg.data;
   const day=G.day||0,lbm=Math.max(day,G.amb||0),fd=G.fl||(day?GRASSD:FLOORD),cd=G.cl||(day?SKYD:CEILD);
-  const desertLv=LEVEL===41||LEVEL===43||LEVEL>=60&&LEVEL<=63,dsBio=LEVEL===41?clamp(rdBiome(G.C.x|0,G.C.y|0)*1.3,0,1):1,mix3=(a,b)=>[a[0]+(b[0]-a[0])*dsBio,a[1]+(b[1]-a[1])*dsBio,a[2]+(b[2]-a[2])*dsBio];
-  const skyLv=LEVEL===22,lushLv=LEVEL===32||LEVEL===33,grimLv=GRIM_L(),rainLv=LEVEL===10,mossLv=LEVEL===39,hzr=desertLv?(LEVEL===63?[238,242,250]:LEVEL===62?[226,204,242]:LEVEL===61?[244,226,172]:LEVEL===60?[196,214,240]:LEVEL===43?[238,200,166]:mix3([170,200,160],[242,226,190])):skyLv?[176,192,216]:rainLv?[58,72,82]:mossLv?[70,104,70]:grimLv?[30,46,32]:lushLv?[170,200,160]:day?[132,146,132]:[86,76,62],hzc=desertLv?(LEVEL===63?[214,226,244]:LEVEL===62?[196,160,222]:LEVEL===61?[232,200,128]:LEVEL===60?[172,196,232]:LEVEL===43?[218,172,136]:mix3([140,176,130],[228,210,168])):mossLv?[48,76,50]:rainLv?[48,60,70]:grimLv?[26,40,28]:lushLv?[140,176,130]:skyLv?[150,172,208]:day?[110,124,112]:[69,61,50],hzmax=desertLv?.5+.22*dsBio:skyLv?(.42-.26*ALTN):mossLv?.34:lushLv?.34:grimLv?.36:rainLv?.34:day?.55:.32,hzrate=desertLv?.03:skyLv?.05:mossLv?.05:lushLv?.04:grimLv?.034:rainLv?.036:day?.07:.042;
-  const tbR=1,tbG=.94,tbB=.84, ttR=1.3,ttG=.88,ttB=.5;
+  const desertLv=LEVEL===41||LEVEL===43||LEVEL>=60&&LEVEL<=64,dsBio=LEVEL===41?clamp(rdBiome(G.C.x|0,G.C.y|0)*1.3,0,1):1,mix3=(a,b)=>[a[0]+(b[0]-a[0])*dsBio,a[1]+(b[1]-a[1])*dsBio,a[2]+(b[2]-a[2])*dsBio];
+  const skyLv=LEVEL===22,lushLv=LEVEL===32||LEVEL===33,grimLv=GRIM_L(),rainLv=LEVEL===10,mossLv=LEVEL===39,hzr0=desertLv?(LEVEL===64?[236,224,196]:LEVEL===63?[238,242,250]:LEVEL===62?[226,204,242]:LEVEL===61?[244,226,172]:LEVEL===60?[196,214,240]:LEVEL===43?[238,200,166]:mix3([170,200,160],[242,226,190])):skyLv?[176,192,216]:rainLv?[58,72,82]:mossLv?[70,104,70]:grimLv?[30,46,32]:lushLv?[170,200,160]:day?[132,146,132]:[86,76,62],hzc0=desertLv?(LEVEL===64?[216,198,160]:LEVEL===63?[214,226,244]:LEVEL===62?[196,160,222]:LEVEL===61?[232,200,128]:LEVEL===60?[172,196,232]:LEVEL===43?[218,172,136]:mix3([140,176,130],[228,210,168])):mossLv?[48,76,50]:rainLv?[48,60,70]:grimLv?[26,40,28]:lushLv?[140,176,130]:skyLv?[150,172,208]:day?[110,124,112]:[69,61,50],hzmax0=desertLv?.5+.22*dsBio:skyLv?(.42-.26*ALTN):mossLv?.34:lushLv?.34:grimLv?.36:rainLv?.34:day?.55:.32,hzrate0=desertLv?.03:skyLv?.05:mossLv?.05:lushLv?.04:grimLv?.034:rainLv?.036:day?.07:.042;
+  // the desert sky follows the clock; a sandstorm thickens the air and tints it
+  const SK=desertLv?skyTod((G.clock%1440)/60):null,ST=desertLv?STORM.a:0,stm=(v,c)=>v+(c-v)*ST;
+  const stormC=SK?[206*Math.min(1,SK.k[0]*1.1+.05),166*Math.min(1,SK.k[1]*1.1+.05),112*Math.min(1,SK.k[2]*1.1+.05)]:null;
+  const hzr=SK?hzr0.map((v,i)=>stm(v*SK.k[i],stormC[i])):hzr0,hzc=SK?hzc0.map((v,i)=>stm(v*SK.k[i],stormC[i]*.92)):hzc0;
+  const hzmax=SK?stm(hzmax0,.97):hzmax0,hzrate=SK?hzrate0+.16*ST:hzrate0;
+  const tbR=SK?SK.g[0]:1,tbG=SK?SK.g[1]*.94:.94,tbB=SK?SK.g[2]*.84:.84, ttR=1.3,ttG=.88,ttB=.5;
   const ovcLv=LEVEL===2||LEVEL===3||LEVEL===7||LEVEL===10||LEVEL===19||LEVEL===20,SKP=ovcLv&&SKYOVC?SKYOVC:SKYPAN; // the early open areas sit under a heavy moving overcast
   const skyPan=(skyLv||ovcLv||desertLv||LEVEL===3||LEVEL===13||LEVEL===32||LEVEL===33)&&SKP?(()=>{for(let x=0;x<VW;x++){const cm=2*x/VW-1;UCOL[x]=((((Math.atan2(dY+pY*cm,dX+pX*cm)/TAU)%1)+1)%1*1024+t*(ovcLv?11:7))%1024|0}return true})():false; // the sky is one panorama on walls and ceiling alike
   const fmp=G.fmap,fd2=G.fl2,fd3=G.fl3,fd4=G.fl4,fd5=G.fl5,fd6=G.fl6,lmp=G.lmap,lmN=lmp?clamp(1.2-(G.day||0)*1.35,0,1)*.95:0;
   TERR_NOW=desertLv&&skyPan?terrFor(LEVEL):null;CAMZ=EYE; // real hills: the camera rides the ground, the ground is marched column by column, the sky is painted behind it
   if(TERR_NOW){CAMZ=terrH(cx,cy)+EYE;TC={D,cx,cy,fmp,fds:[fd,fd2||fd,fd3||fd,fd4||fd,fd5||fd,fd6||fd],hzr,hzmax,hzrate,lbm,tbR,tbG,tbB,rock:terrRock()};
-    for(let y=0;y<VH;y++){const v=clamp(y-HH+150,0,255)|0,o=y*VW*4;for(let x=0;x<VW;x++){const i=(v*1024+UCOL[x])*4,io=o+x*4;D[io]=SKP[i]*lbm*tbR;D[io+1]=SKP[i+1]*lbm*tbG;D[io+2]=SKP[i+2]*lbm*tbB}}}
+    if(SK)paintDesertSky(D,SKP,UCOL,SK,ST,stormC,dX,dY,pX,pY,t);
+    else for(let y=0;y<VH;y++){const v=clamp(y-HH+150,0,255)|0,o=y*VW*4;for(let x=0;x<VW;x++){const i=(v*1024+UCOL[x])*4,io=o+x*4;D[io]=SKP[i]*lbm*tbR;D[io+1]=SKP[i+1]*lbm*tbG;D[io+2]=SKP[i+2]*lbm*tbB}}}
   // floor + ceiling (the ceiling is its own plane, CEILH above the floor); a daylit sky needs no lamp light, and indoors only the nearest few lights reach the ceiling
   const ncl=day>.5?0:Math.min(nn,12),nrcl=day>.5?0:Math.min(nrn,6);
   for(let y=HH,yEnd=TERR_NOW?HH:Math.max(VH,2*HH);y<yEnd;y++){
@@ -2386,7 +2445,7 @@ function render3D(){
       if(mx<0||my<0||mx>=MW||my>=MH){g=1;break}
       g=grid[my][mx];if(g>0)break;
     }
-    if(g===0&&(LEVEL===41||LEVEL===43||LEVEL>=60&&LEVEL<=63)){if(TERR_NOW)terrMarch(x,rX,rY,TFAR);zbuf[x]=99;wtop[x]=-1e9;continue} // open desert: no wall to be found, only the horizon
+    if(g===0&&(LEVEL===41||LEVEL===43||LEVEL>=60&&LEVEL<=64)){if(TERR_NOW)terrMarch(x,rX,rY,TFAR);zbuf[x]=99;wtop[x]=-1e9;continue} // open desert: no wall to be found, only the horizon
     let perp=side===0?sdx-ddx:sdy-ddy;if(perp<.05)perp=.05;
     zbuf[x]=perp;
     const hx=cx+rX*perp,hy=cy+rY*perp;
@@ -3268,7 +3327,7 @@ function jumpFromUrl(){
   const F=G.flags,sq=T=>q.get('at')==='square'?{x:25,y:T.gate_y,f:1}:{x:T.start.x,y:T.start.y,f:1}; // &at=square lands in the middle of the town
   if(town==='abbey'||town==='thornwood'){F.townSeen=0;delete F.abbeyIntroSeen;G.bossDead=true;goToLevel(2);G.state='play';G.menu=false;return}
   F.townSeen=1;F.abbeyIntroSeen=1;F.gwoodSeen=1;
-  const AREAS={bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
+  const AREAS={bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
   if(!AREAS[town]&&town.length>=4){const m=Object.keys(AREAS).filter(k=>k.startsWith(town)||town.startsWith(k));if(m.length===1)town=m[0]} // near-misses like whitedune find the right area
   if(AREAS[town]&&town!=='thornwood'){const [lv,ax,ay,af]=AREAS[town];F.gandrickDead=1;F.northGate=1;F.mayorKilled=1;F.mayorDown=1;F.ironRoad=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};goToLevel(lv,{x:ax,y:ay,f:af});G.state='play';G.menu=false;return}
   if(town==='greendale'||town==='anaea'){F.passDone=1;F.passSeen=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};goToLevel(town==='anaea'?33:32,town==='anaea'?sq(ANAEAJ):{x:2,y:36,f:1});G.state='play';G.menu=false;return}
@@ -3812,6 +3871,7 @@ const WORLD_LOCS=[
   {k:'reddunes',n:'The Red Dunes',lv:[43],x:498,y:96,ic:'dunes'},
   {k:'bluedunes',n:'The Blue Dunes',sub:'a quiet desert',lv:[60],x:566,y:190,ic:'dunes'},
   {k:'whitedunes',n:'The White Dunes',sub:'a pale desert',lv:[63],x:566,y:134,ic:'dunes'},
+  {k:'flatlands',n:'The Flatlands',sub:'level and pebbled',lv:[64],x:510,y:134,ic:'dunes'},
   {k:'goldenerg',n:'The Golden Erg',sub:'the biggest desert',lv:[61],x:622,y:206,ic:'dunes'},
   {k:'violeterg',n:'The Violet Erg',sub:'a purple desert',lv:[62],x:622,y:262,ic:'dunes'},
   {k:'scoria',n:'Khemetra',sub:'the golden city',lv:[44],x:486,y:56,ic:'castle'}
@@ -5861,7 +5921,7 @@ function drawWorld(){ // a slightly softer, lower-res picture; the screen-wide d
   LOWX.imageSmoothingEnabled=true;LOWX.drawImage(vc,0,0,w,h);
   ctx.imageSmoothingEnabled=false;ctx.drawImage(LOWC,0,0,420,210);ctx.imageSmoothingEnabled=true;
   if(G._spr){ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';SC=ctx;drawSprites(...G._spr);ctx.restore()}
-  if(LEVELS[LEVEL]&&LEVELS[LEVEL].rain)drawRain();
+  if(LEVELS[LEVEL]&&LEVELS[LEVEL].rain)drawRain(); if(STORM.a>.02)drawStorm();
 }
 function drawRain(){
   const hr=(G.clock%1440)/60,sun=hr>=7&&hr<=18?Math.sin((hr-7)/11*Math.PI):0;
@@ -5956,8 +6016,8 @@ function update(dt){
   if(!G.overview)G.ovInit=false;
   try{areaAudio();huntTick()}catch(e){}
   burnTick(dt);
-  G.time+=dt;
-  if(G.dayBase>0){const hr=(G.clock%1440)/60;G.day=Math.max(.16,G.dayBase*clamp(.66+.5*Math.cos((hr-12)/24*TAU),G.hasLamps?.2:.5,1))}
+  G.time+=dt;try{stormTick(dt)}catch(e){}
+  if(G.dayBase>0){const hr=(G.clock%1440)/60,dsl=LEVEL===43||(LEVEL>=60&&LEVEL<=64)||LEVEL===41;G.day=Math.max(.16,G.dayBase*clamp(.66+.5*Math.cos((hr-12)/24*TAU),dsl?.3:G.hasLamps?.2:.5,1))}
   // timers
   if(!G.cut)for(let i=0;i<G.timers.length;){const t=G.timers[i];if(G.time>=t.t){G.timers.splice(i,1);t.fn()}else i++}
   // camera easing
@@ -7596,6 +7656,7 @@ function makeBlueArt(ydune,ycl){
    ========================================================================== */
 const GER={W:300,H:300,CY:150,CX:150,OASES:[[70,70],[225,95],[140,225]]};
 const VER={W:300,H:300,CY:150,CX:150,OASES:[[80,215],[230,200],[150,80]]};
+const FLR={W:250,H:250,CY:125,CX:125,OASES:[[70,70],[180,170]]};
 const WER={W:250,H:250,CY:125,CX:125,OASES:[[60,60],[190,80],[125,170]]};
 function buildErg(E,seed,rk){
   const W=E.W,H=E.H,rows=[],fm=[],R=(x,y,k)=>hash2(x,y,k+seed);
@@ -7623,7 +7684,7 @@ function buildErg(E,seed,rk){
     else if(r<.075)sc('dbones',x,y,{ox,oy,sc:.8+R(x,y,25)*.5});
     else if(r<.1)sc('dshrub'+((R(x,y,26)*3)|0),x,y,{ox,oy,sc:.7+R(x,y,27)*.5});
   }
-  const ruins=[];for(let i=0;i<11;i++)ruins.push([30+((R(i,1,90)*240)|0),30+((R(i,2,90)*240)|0)]);
+  const ruins=[];for(let i=0;i<11;i++)ruins.push([30+((R(i,1,90)*(W-60))|0),30+((R(i,2,90)*(H-60))|0)]);
   ruins.forEach(([cx,cy],n)=>{ // old ruins in rings, one chest or a pile of plain gold inside
     if(od(cx,cy)<14||(cx<40&&Math.abs(cy-E.CY)<20))return;
     for(let a=0;a<8;a++){const x=Math.round(cx+Math.cos(a/8*TAU)*4),y=Math.round(cy+Math.sin(a/8*TAU)*4);if(a%2||n%3===0)put('dpillar'+(a%2),x,y,{block:true})}
@@ -7636,8 +7697,8 @@ function buildErg(E,seed,rk){
   for(let gy=0;gy<5;gy++)for(let gx=0;gx<5;gx++){const x=36+gx*57+((R(gx,gy,7)-.5)*24|0),y=36+gy*57+((R(gx,gy,8)-.5)*24|0);if(x<50&&Math.abs(y-E.CY)<30)continue;camp(T[(gx+gy*2+((R(gx,gy,9)*3)|0))%4],x,y,2+((R(gx,gy,10)*2)|0),rk+((R(gx,gy,11)*3)|0))}
   return {rows,fm,decor,scen,enemies,items};
 }
-const GOLDEN=buildErg(GER,0,17),VIOLET=buildErg(VER,500,20),WHITE=buildErg(WER,900,16);
-WHITE.start={x:WER.CX,y:WER.H-3,f:0};GOLDEN.start={x:2,y:GER.CY,f:1};VIOLET.start={x:VER.CX,y:2,f:2};
+const GOLDEN=buildErg(GER,0,17),VIOLET=buildErg(VER,500,20),WHITE=buildErg(WER,900,16),FLAT=buildErg(FLR,1300,18);
+FLAT.start={x:FLR.W-3,y:FLR.CY,f:3};WHITE.start={x:WER.CX,y:WER.H-3,f:0};GOLDEN.start={x:2,y:GER.CY,f:1};VIOLET.start={x:VER.CX,y:2,f:2};
 const erdata=(B,name,label,diff,floors)=>({rows:B.rows,start:B.start,enemies:B.enemies,items:B.items,decor:B.decor,scenery:B.scen,fmap:B.fm,outdoor:true,day:1,floor:floors[0],
   floorSet:floors.concat(['bluegrass','bluewater']),ceil:'cloud',noExtras:true,name,label,diff});
 const LEVEL61_DATA=erdata(GOLDEN,'The Golden Erg','Golden Erg',18,['goldsand','goldsand2','goldsand3']);
@@ -7656,6 +7717,13 @@ LEVEL60_DATA.rows[0]=LEVEL60_DATA.rows[0].slice(0,BDN.OX)+'2'+LEVEL60_DATA.rows[
 LEVEL60_DATA.portals[2]={to:63,x:WER.CX,y:WER.H-3,f:0,tex:'bluecave'};
 LEVEL63_DATA.rows[WER.H-1]=LEVEL63_DATA.rows[WER.H-1].slice(0,WER.CX)+'0'+LEVEL63_DATA.rows[WER.H-1].slice(WER.CX+1);
 LEVEL63_DATA.portals=[{to:60,x:BDN.OX,y:2,f:2,tex:'bluecave'}];
+const LEVEL64_DATA=erdata(FLAT,'The Flatlands','Flatlands',18,['pebA','pebB','pebC']);
+// the Flatlands lie west of the White Dunes: a low cave in the White Dunes' west wall leads to their east wall
+LEVEL63_DATA.rows[WER.CY]=LEVEL63_DATA.rows[WER.CY].slice(0,0)+'1'+LEVEL63_DATA.rows[WER.CY].slice(1);
+LEVEL63_DATA.portals[1]={to:64,x:FLR.W-3,y:FLR.CY,f:3,tex:'bluecave'};
+LEVEL64_DATA.rows[FLR.CY]=LEVEL64_DATA.rows[FLR.CY].slice(0,FLR.W-1)+'0';
+LEVEL64_DATA.portals=[{to:63,x:2,y:WER.CY,f:1,tex:'bluecave'}];
+LEVELS[64]=LEVEL64_DATA;LEVEL_NAMES[64]=LEVEL64_DATA.name;
 LEVELS[63]=LEVEL63_DATA;LEVEL_NAMES[63]=LEVEL63_DATA.name;
 LEVELS[61]=LEVEL61_DATA;LEVEL_NAMES[61]=LEVEL61_DATA.name;LEVELS[62]=LEVEL62_DATA;LEVEL_NAMES[62]=LEVEL62_DATA.name;
 function makeGoldenArt(ydune,ycl){
@@ -7668,6 +7736,8 @@ function makeGoldenArt(ydune,ycl){
   FLOORS.whiteSand=dsRidges([252,252,254],[216,224,238],3,1,501);
   FLOORS.whiteSand2=dsRidges([250,251,254],[212,221,236],4,-1,511);
   FLOORS.whiteSand3=dsRidges([254,254,255],[220,228,240],3,-2,521);
+  FLOORS.pebA=dsPebbles(0,.05,601);FLOORS.pebB=dsPebbles(1,.07,611);FLOORS.pebC=dsPebbles(2,.04,621);
+  LEVEL64_DATA.chars={D:ydune,C:ycl};
   LEVEL63_DATA.chars={D:ydune,C:ycl};
   LEVEL61_DATA.chars={D:ydune,C:ycl};LEVEL62_DATA.chars={D:ydune,C:ycl};
 }
@@ -7679,6 +7749,21 @@ function dsRidges(light,shade,n,tilt,seed){
     const p=t<.72?Math.pow(t/.72,1.4):Math.pow(1-(t-.72)/.28,1.2);            // slow rise, quicker fall
     const k=.9+.1*p;
     return [shade[0]+(light[0]-shade[0])*p,shade[1]+(light[1]-shade[1])*p,shade[2]+(light[2]-shade[2])*p].map(v=>v*(k+.0));
+  });
+}
+// perfectly level ground: pale sand strewn with tiny pebbles, no ridges and no hollows
+function dsPebbles(v,dens,seed){
+  const base=[[214,192,150],[208,186,146],[218,196,156]][v];
+  return dsFloor((x,y)=>{
+    const n=dsNoise(x,y,4,seed)*.5+dsNoise(x,y,8,seed+1)*.5,k=.97+.06*(n-.5);
+    let c=[base[0]*k,base[1]*k,base[2]*k];
+    // each pebble is a little disc, one to two texels wide, in greys and browns
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+      const px=((x+dx)%TS+TS)%TS,py=((y+dy)%TS+TS)%TS,h=hash2(px,py,seed+7);
+      if(h<dens){const r=h<dens*.25?1.3:.8,ox=(hash2(px,py,seed+8)-.5)*.6,oy=(hash2(px,py,seed+9)-.5)*.6;
+        if(Math.hypot(dx-ox,dy-oy)<r){const t=hash2(px,py,seed+10),tone=t<.4?[132,122,110]:t<.7?[160,140,112]:[104,92,80],lit=dy<0||dx<0?1.12:.9;c=[tone[0]*lit,tone[1]*lit,tone[2]*lit]}}
+    }
+    return c;
   });
 }
 
@@ -7705,7 +7790,8 @@ const TERR_SPEC={
   60:{amp:1.0,len:19,seed:37,peak:6,mask:()=>1},
   61:{amp:1.5,len:24,seed:53,peak:7,mask:()=>1},
   62:{amp:1.7,len:26,seed:67,peak:7.5,mask:()=>1},
-  63:{amp:1.3,len:22,seed:71,peak:6.5,mask:()=>1}
+  63:{amp:1.3,len:22,seed:71,peak:6.5,mask:()=>1},
+  64:{amp:0,len:22,seed:79,peak:6.5,mask:()=>1}
 };
 const MTN_BAND=14,MTN_BLOCK=1.7; // mountains rise over the last fourteen cells before a sky wall; above this height they cannot be climbed
 function terrFor(n){
@@ -7716,6 +7802,7 @@ function terrFor(n){
   rows.forEach((r,y)=>{for(let x=0;x<W;x++){const c=r[x];if(c==='.')open[y*W+x]=1;else if(c>='0'&&c<='9'){flat.push([x,y,5]);gates.push([x,y])}}});
   for(const d of L.decor||[])if(/^(chest|dpillar|danubis|dbastet|dsphinx|dobelisk|dpharaoh|treasure|offering|vase|brazier|dsutstatue|sarcoph|dburrow|teleporter)/.test(d.k))flat.push([d.x,d.y,3.5]);
   if(n===61)for(const [ox,oy] of GER.OASES)flat.push([ox,oy,9]);
+  if(n===64)for(const [ox,oy] of FLR.OASES)flat.push([ox,oy,9]);
   if(n===63)for(const [ox,oy] of WER.OASES)flat.push([ox,oy,9]);
   if(n===62)for(const [ox,oy] of VER.OASES)flat.push([ox,oy,9]);
   if(n===60)flat.push([BDN.OX,BDN.OY,9]);                       // the oasis lies flat
