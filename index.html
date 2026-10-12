@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.91';
+const VERSION='1.92';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2668,6 +2668,7 @@ function setLightLevel(l){
    HUD PIECES
    ========================================================================== */
 function drawPortraits(y0,selIdx,prefix){
+  const cl=G.cut&&G.cut.lines[G.cut.i],spk=cl&&cl.hi!==undefined?cl.hi:-1; // whoever is speaking in a cutscene lights up
   for(let i=0;i<4;i++){
     const h=G.heroes[i],x=portraitX(i),y=y0,w=38,hh=58;
     const img=portraitImg(i);
@@ -2679,9 +2680,11 @@ function drawPortraits(y0,selIdx,prefix){
       if(h.hurt>0){ctx.fillStyle=`rgba(200,20,10,${h.hurt*.45})`;ctx.fillRect(x,y,w,hh)}
       if(G.acted[i]&&G.state==='play'&&!G.inv.open){ctx.fillStyle='rgba(10,8,6,.45)';ctx.fillRect(x,y,w,hh)}
       if(h.lvlFlash>0){ctx.fillStyle=`rgba(255,230,120,${Math.min(.5,h.lvlFlash*.35)})`;ctx.fillRect(x,y,w,hh)}
+      if(spk===i){ctx.globalCompositeOperation='lighter';ctx.fillStyle=`rgba(255,244,214,${.2+.08*Math.sin(G.time*8)})`;ctx.fillRect(x,y,w,hh);ctx.globalCompositeOperation='source-over'}
     }
     ctx.restore();
     const sel=selIdx===i&&h.alive;
+    if(spk===i&&h.alive){ctx.save();ctx.shadowColor=heroSpeech(i);ctx.shadowBlur=10+3*Math.sin(G.time*8);ctx.lineWidth=2.6;ctx.strokeStyle=heroSpeech(i);roughStrokeRect(x-1,y-1,w+2,hh+2);ctx.restore()}
     ctx.lineWidth=sel?2.4:1.5;ctx.strokeStyle=sel?'#ffe36a':goldG(x,y,w,hh);roughStrokeRect(x,y,w,hh);
     if(sel){ctx.strokeStyle='rgba(255,220,90,.35)';ctx.lineWidth=3;roughStrokeRect(x-1.5,y-1.5,w+3,hh+3)}
     // level badge
