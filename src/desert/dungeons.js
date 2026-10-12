@@ -159,3 +159,9 @@ Object.assign(ENEMY_DEF,{
   let n=0;for(const e of LEVELS[42].enemies)if(e.t==='scorpion'&&n<3&&hash2(e.x,e.y,556)<.35){e.t='dskeleton';n++}
   for(const e of LEVELS[42].enemies)if(e.t==='scorpion'&&n<3){e.t='dskeleton';n++}
 })();
+
+// six of the Tomb of Sut's scorpions give way to cobras
+(function cobrasInTomb(){
+  const idx=[];LEVELS[42].enemies.forEach((e,i)=>{if(e.t==='scorpion')idx.push(i)});
+  for(let k=0;k<6&&k<idx.length;k++)LEVELS[42].enemies[idx[Math.floor(k*idx.length/6)]].t='cobra';
+})();

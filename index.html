@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.57';
+const VERSION='2.58';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -6435,7 +6435,7 @@ addEventListener('resize',fit);fit();
 /*@@DESERT:BEGIN@@*/
 /* ---- src/desert/artlist.js ---- */
 /* written by tools/inject.py */
-const DS_PAINTED=['brazier0', 'brazier1', 'brazier2', 'brazier3', 'ceil_tomb', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dskeleton', 'dskeletonA', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'offering', 'rrock0', 'rrock1', 'rrock2', 'skybirdA', 'skybirdB', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA'];
+const DS_PAINTED=['brazier0', 'brazier1', 'brazier2', 'brazier3', 'ceil_tomb', 'cobra', 'cobraA', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dskeleton', 'dskeletonA', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'offering', 'rrock0', 'rrock1', 'rrock2', 'skybirdA', 'skybirdB', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA'];
 
 /* ---- src/desert/artpack.js ---- */
 /* ==========================================================================
@@ -6915,6 +6915,7 @@ Object.assign(ENEMY_DEF,{
   nomad2:{name:'Desperate Nomad',hp:44,dmg:[5,9],hit:.72,w:.38,img:'nomad2',xp:90,gold:[6,22],speed:1,verb:'slashes'},
   vulture:{name:'Carrion Vulture',hp:34,dmg:[5,9],hit:.74,w:1.0,img:'vulture',xp:90,gold:[0,0],speed:2,fly:true,verb:'rakes'},
   dskeleton:{name:'Skeleton',hp:48,dmg:[6,10],hit:.74,w:.7,img:'dskeleton',xp:110,gold:[3,12],speed:1,verb:'slashes',wander:true,roam:22},
+  cobra:{name:'Cobra',hp:30,dmg:[5,9],hit:.8,w:.8,img:'cobra',xp:100,gold:[2,6],speed:1,verb:'bites'},
   mummy:{name:'Mummy',hp:45,dmg:[6,10],hit:.76,w:.36,img:'mummy',xp:150,gold:[10,30],speed:1,verb:'claws'},
   sut:{name:'Sut, Lord of the Red Desert',hp:110,dmg:[8,13],hit:.82,w:.78,img:'sut',xp:5000,gold:[800,1200],speed:1,verb:'smites',ranged:3,shot:'a bolt of red fire',boss:true}});
 
@@ -8049,6 +8050,12 @@ Object.assign(ENEMY_DEF,{
   for(const lv of [41,43,60,61,62,63,64]){let i=0;for(const e of LEVELS[lv].enemies)if(e.t==='dwolf'){if(i++%2===0)e.t='dskeleton'}}
   let n=0;for(const e of LEVELS[42].enemies)if(e.t==='scorpion'&&n<3&&hash2(e.x,e.y,556)<.35){e.t='dskeleton';n++}
   for(const e of LEVELS[42].enemies)if(e.t==='scorpion'&&n<3){e.t='dskeleton';n++}
+})();
+
+// six of the Tomb of Sut's scorpions give way to cobras
+(function cobrasInTomb(){
+  const idx=[];LEVELS[42].enemies.forEach((e,i)=>{if(e.t==='scorpion')idx.push(i)});
+  for(let k=0;k<6&&k<idx.length;k++)LEVELS[42].enemies[idx[Math.floor(k*idx.length/6)]].t='cobra';
 })();
 
 /* ---- src/desert/terrain.js ---- */
