@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.02';
+const VERSION='2.03';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4764,17 +4764,17 @@ function pathEdgeDecor(L){
   const D4=[[1,0],[-1,0],[0,1],[0,-1]];
   for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){
     if(rows[y][x]!=='.'||occ.has(x+','+y))continue;
-    const on=isP(x,y);let near=false,px=0,py=0;
-    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if((dx||dy)&&(on?!isP(x+dx,y+dy):isP(x+dx,y+dy))){near=true;px+=dx;py+=dy}
+    const on=isP(x,y);if(on)continue;let near=false,px=0,py=0;
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if((dx||dy)&&isP(x+dx,y+dy)){near=true;px+=dx;py+=dy}
     if(!near)continue;
     const h=(k)=>hash2(x,y,k);
-    let n=on?(h(31)<.7?1+(h(34)<.25?1:0):0):(h(31)<.92?1+(h(32)<.7?1:0)+(h(33)<.4?1:0):0);
+    let n=on?0:(h(31)<.92?1+(h(32)<.7?1:0)+(h(33)<.4?1:0):0); // never on the trail itself: its middle stays clear
     for(let i=0;i<n;i++){
       const r=h(40+i);let k;
       if(r<.42)k='pgrass'+((h(60+i)*4)|0);
       else{const ci=h(70+i)<.75?((hash2(x>>2,y>>2,9)*6)|0):((h(80+i)*6)|0);k='pflw'+ci+'_'+((h(90+i)*2)|0)}
       let ox=(h(50+i)-.5)*.84,oy=(h(55+i)-.5)*.84;
-      if(on){const l=Math.hypot(px,py)||1;ox=-px/l*.3+(h(50+i)-.5)*.3;oy=-py/l*.3+(h(55+i)-.5)*.3}  // on the trail itself, only right at its rim, leaning out
+      {const l=Math.hypot(px,py)||1;ox=clamp(ox-px/l*.14,-.45,.45);oy=clamp(oy-py/l*.14,-.45,.45)} // nudged a little away from the trail, so the plants sit on its borders
       out.push({k,x,y,block:false,walk:true,ox:+ox.toFixed(2),oy:+oy.toFixed(2),sc:+(.75+h(65+i)*.6).toFixed(2)});
     }
   }
