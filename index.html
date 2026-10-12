@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.47';
+const VERSION='2.48';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3256,7 +3256,7 @@ function giveJumpGear(target){
   G.gold=Math.max(G.gold,rich?900:200);
 }
 function jumpFromUrl(){
-  const q=new URLSearchParams(location.search),town=(q.get('town')||'').toLowerCase();if(!town)return;
+  const q=new URLSearchParams(location.search);let town=(q.get('town')||'').toLowerCase().replace(/[^a-z]/g,'');if(!town)return;
   const target=Math.max(1,Math.min(40,parseInt(q.get('lvl')||'8',10)||8));
   backupAuto();
   const sv=readSave('auto')||readSave('prev');
@@ -3269,6 +3269,7 @@ function jumpFromUrl(){
   if(town==='abbey'||town==='thornwood'){F.townSeen=0;delete F.abbeyIntroSeen;G.bossDead=true;goToLevel(2);G.state='play';G.menu=false;return}
   F.townSeen=1;F.abbeyIntroSeen=1;F.gwoodSeen=1;
   const AREAS={bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
+  if(!AREAS[town]&&town.length>=4){const m=Object.keys(AREAS).filter(k=>k.startsWith(town)||town.startsWith(k));if(m.length===1)town=m[0]} // near-misses like whitedune find the right area
   if(AREAS[town]&&town!=='thornwood'){const [lv,ax,ay,af]=AREAS[town];F.gandrickDead=1;F.northGate=1;F.mayorKilled=1;F.mayorDown=1;F.ironRoad=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};goToLevel(lv,{x:ax,y:ay,f:af});G.state='play';G.menu=false;return}
   if(town==='greendale'||town==='anaea'){F.passDone=1;F.passSeen=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};goToLevel(town==='anaea'?33:32,town==='anaea'?sq(ANAEAJ):{x:2,y:36,f:1});G.state='play';G.menu=false;return}
   if(town==='ironhill'){F.gandrickDead=1;F.northGate=1;F.mayorDown=1;F.mayorKilled=1;F.ironRoad=1;F.finale=1;F.halbrecht=1;F.roadSeen=1;F.tunnelSeen=1;
@@ -7730,7 +7731,7 @@ function terrFor(n){
   // mountains: along every sky wall the land climbs into a range, so the edge of the level is a mountainside and not a wall;
   // they keep clear of every door, gate and arrival point, which are left in a wide pass
   const dw=new Float32Array(W*H).fill(1e9);
-  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(rows[y][x]==='D')dw[y*W+x]=0;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(rows[y][x]==='D'||(n===41&&y<147&&rows[y][x]==='T'))dw[y*W+x]=0;   // on the Sand Road the last of the trees give way to mountains too
   const relax=(i,j,c)=>{if(dw[j]+c<dw[i])dw[i]=dw[j]+c};
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(x>0)relax(i,i-1,1);if(y>0){relax(i,i-W,1);if(x>0)relax(i,i-W-1,1.41);if(x<W-1)relax(i,i-W+1,1.41)}}
   for(let y=H-1;y>=0;y--)for(let x=W-1;x>=0;x--){const i=y*W+x;if(x<W-1)relax(i,i+1,1);if(y<H-1){relax(i,i+W,1);if(x<W-1)relax(i,i+W+1,1.41);if(x>0)relax(i,i+W-1,1.41)}}

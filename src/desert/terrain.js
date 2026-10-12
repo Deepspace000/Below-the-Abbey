@@ -46,7 +46,7 @@ function terrFor(n){
   // mountains: along every sky wall the land climbs into a range, so the edge of the level is a mountainside and not a wall;
   // they keep clear of every door, gate and arrival point, which are left in a wide pass
   const dw=new Float32Array(W*H).fill(1e9);
-  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(rows[y][x]==='D')dw[y*W+x]=0;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(rows[y][x]==='D'||(n===41&&y<147&&rows[y][x]==='T'))dw[y*W+x]=0;   // on the Sand Road the last of the trees give way to mountains too
   const relax=(i,j,c)=>{if(dw[j]+c<dw[i])dw[i]=dw[j]+c};
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(x>0)relax(i,i-1,1);if(y>0){relax(i,i-W,1);if(x>0)relax(i,i-W-1,1.41);if(x<W-1)relax(i,i-W+1,1.41)}}
   for(let y=H-1;y>=0;y--)for(let x=W-1;x>=0;x--){const i=y*W+x;if(x<W-1)relax(i,i+1,1);if(y<H-1){relax(i,i+W,1);if(x<W-1)relax(i,i+W+1,1.41);if(x>0)relax(i,i+W-1,1.41)}}
