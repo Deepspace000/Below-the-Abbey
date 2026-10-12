@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.17';
+const VERSION='2.18';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4241,6 +4241,7 @@ function goToLevel(n,entry){
   reset(n);Object.assign(G,keep);
   applyLevelState(G.lst[n]);applyEnemyState(G.lst[n]);
   if(n>=41)desertApplyState();
+  rebalanceEnemies(); // a party far above the creatures of a new area meets them raised to within 2-5 levels of itself
   if(entry){G.P={x:entry.x,y:entry.y,f:entry.f,angT:(entry.f-1)*Math.PI/2};G.C={x:entry.x,y:entry.y,a:G.P.angT}
     for(const d of G.decor)if(d.block&&!d.found&&!d.npc&&d.x===entry.x&&d.y===entry.y){d.found=true;d.block=false} // never arrive inside a tree or a rock
   }
