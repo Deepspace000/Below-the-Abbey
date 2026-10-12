@@ -22,3 +22,6 @@ a_cow.ogg | https://freesound.org/s/513559/ | spurioustransients | CC0
 a_dog.ogg | https://opengameart.org/content/dog-barking-mono | HaelDB | CC0
 cart_horse.ogg | https://freesound.org/s/538438/ | bruno.auzet | CC0
 horse_hooves.ogg | https://opengameart.org/content/horse-trotting | KobatoGames | CC0
+
+music_mithral.mp3 | Finding Mithral (open world game music) | Geoff Harvey, via Pixabay | Pixabay Content License (not CC0), used for Greendale
+music_wanderer.mp3 | Wanderer at Night | Zambolino, via freetouse.com | Free To Use licence (not CC0; credit Zambolino), used for the Thornwood
