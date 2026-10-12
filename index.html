@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.99';
+const VERSION='2.00';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1121,18 +1121,7 @@ function audioInit(){
   try{
     AC=new (window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=.55;MASTER.connect(AC.destination);
     const len=AC.sampleRate;NB=AC.createBuffer(1,len,AC.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
-    drone();
   }catch(e){AC=null}
-}
-function drone(){
-  const g=AC.createGain();g.gain.value=0;g.connect(MASTER);
-  g.gain.linearRampToValueAtTime(.05,AC.currentTime+6);
-  for(const [f,dt] of [[55,0],[82.6,4],[110.4,-5],[164.9,3]]){
-    const o=AC.createOscillator();o.type='sine';o.frequency.value=f;o.detune.value=dt;
-    const og=AC.createGain();og.gain.value=f>100?.35:1;
-    const l=AC.createOscillator();l.frequency.value=.05+Math.random()*.08;const lg=AC.createGain();lg.gain.value=.4;l.connect(lg);lg.connect(og.gain);
-    o.connect(og);og.connect(g);o.start();l.start();
-  }
 }
 function tone(f0,f1,dur,type,vol,delay){
   if(!AC||G.mute)return;vol*=SFXM;const t=AC.currentTime+(delay||0),o=AC.createOscillator(),g=AC.createGain();
@@ -1190,21 +1179,48 @@ function climbNotes(){ // plain notes as the party gains height
   for(const [at,txt] of [[.2,'The path climbs. The trees thin out and the wind picks up.'],[.45,'Cloud drifts past below the path. The party is above the weather now.'],[.72,'The air is thin. Every breath is a little shorter.'],[.93,'The summit. Stone stairs lead down the far side.']])
     if(ALTN>=at&&!said[at]&&G.state==='play'){said[at]=1;msg(txt,'#cfe0f0')}
 }
+/* ---- the wind: one looping recording, played through a filter and a gain that are moved by hand.
+   It swells into gusts, eases off, and now and then drops away to near silence, so it never sits still like a drone. ---- */
+const WIND_AMT={2:.8,7:.9,10:.7,19:1,20:.8,22:.7,32:.7,39:.5}; // every outdoor place that is not a town
+const WIND={src:null,g:null,f:null,mode:'blow',until:0,gust:0,gv:0,nextGust:0,p:Math.random()*6.3,t:0,env:0,last:0};
+function windTick(){
+  if(!AC||!SMP.wind_loop)return;
+  const now=AC.currentTime,dt=Math.min(.5,Math.max(0,now-WIND.last));WIND.last=now;
+  if(!WIND.src){
+    const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();s.buffer=SMP.wind_loop;s.loop=true;s.loopStart=0;f.type='lowpass';f.frequency.value=500;f.Q.value=.7;g.gain.value=0;
+    s.connect(f);f.connect(g);g.connect(MASTER);s.start();WIND.src=s;WIND.f=f;WIND.g=g;WIND.until=now+8;
+  }
+  const amt=(G.state==='play'&&!G.mute&&SNDOPT.amb&&WIND_AMT[LEVEL])||0;
+  const climb=LEVEL===22?.55+.45*ALTN:1;
+  WIND.t+=dt;
+  if(now>WIND.until){ // alternate between blowing and lulls; a lull is almost silent
+    if(WIND.mode==='blow'){WIND.mode='lull';WIND.until=now+4.5+Math.random()*9}
+    else{WIND.mode='blow';WIND.until=now+14+Math.random()*26;WIND.nextGust=now+1+Math.random()*3}
+  }
+  if(WIND.mode==='blow'&&now>WIND.nextGust){WIND.gust=.55+Math.random()*.45;WIND.nextGust=now+2.5+Math.random()*7}
+  WIND.gust*=Math.exp(-dt/2.4);
+  WIND.gv+=(WIND.gust-WIND.gv)*(1-Math.exp(-dt/.9)); // gusts rise slowly and fall slowly
+  const swell=.5+.5*Math.sin(WIND.t*.33+WIND.p)*Math.sin(WIND.t*.113+WIND.p*1.7); // the long undulation underneath
+  const target=WIND.mode==='lull'?.02:Math.min(1,.2+.3*swell+.75*WIND.gv);
+  WIND.env+=(target-WIND.env)*(1-Math.exp(-dt/(WIND.mode==='lull'?1.4:.7)));
+  const e=WIND.env;
+  WIND.g.gain.setTargetAtTime(amt*climb*e*e*1.9,now,.2); // squared, so quiet stays quiet and a gust really lands
+  WIND.f.frequency.setTargetAtTime(220+2600*e,now,.25);   // a gust is brighter as well as louder
+}
 function areaAudio(){
-  if(!AC)return;loadSounds();
+  if(!AC)return;loadSounds();windTick();
   const T={};
   if(G.state==='play'&&!G.mute){
-    if(LEVEL===32){T.wind_loop=.08;T.music_mithral=.55;loadLazy('music_mithral')}
+    if(LEVEL===32){T.music_mithral=.55;loadLazy('music_mithral')}
     else if(LEVEL===33){T.village_ambience=.22;T.wind_loop=.1}
     else if(LEVEL===35){T.music_tavern=.5;T.village_ambience=.15}
     else if(EMBERS_LEVELS.includes(LEVEL)){T.dungeon_ambience=.22;T.music_embers=.55;loadLazy('music_embers')}
     else if(DUNGEON_LEVELS.includes(LEVEL)){T.dungeon_ambience=.3;T.music_dungeon1=.5}
-    else if(LEVEL===39){T.wind_loop=.1;T.music_dungeon1=.3}
+    else if(LEVEL===39){T.music_dungeon1=.3}
     else if(LEVEL===40){T.music_tavern=.3}
-    else if(LEVEL===22){T.wind_loop=.3+.55*ALTN;climbNotes()}
-    else if(LEVEL===2){T.wind_loop=.22;T.music_wanderer=.55;loadLazy('music_wanderer')}
-    else if(LEVEL===7||LEVEL===19)T.wind_loop=.5;
-    else if(LEVEL===10){T.rain_loop=.7;T.wind_loop=.18}
+    else if(LEVEL===22){climbNotes()}
+    else if(LEVEL===7){T.music_wanderer=.55;loadLazy('music_wanderer')}
+    else if(LEVEL===10){T.rain_loop=.7}
     else if(LEVEL===3||LEVEL===13){T.village_ambience=.5;T.music_feast=.2}
     else if(LEVEL===4||LEVEL===15||LEVEL===17||LEVEL===24){T.village_ambience=.12}
     else if(LEVEL===5||LEVEL===14)T.music_feast=.4;
