@@ -143,6 +143,12 @@ function dsWallTile(kind,seed){
     for(let i=0;i<4;i++){const px=8+i*30;const g=x.createLinearGradient(px,0,px+22,0);g.addColorStop(0,'#c8a870');g.addColorStop(.5,'#e8d0a0');g.addColorStop(1,'#8e7448');x.fillStyle=g;x.fillRect(px,0,22,TS);x.strokeStyle='#3a2a18';x.lineWidth=1.2;x.strokeRect(px+.5,.5,21,TS-1)}
     for(const yy of [0,26,52,78,104]){x.fillStyle=DS_COL.gold;x.fillRect(0,yy,TS,3);x.fillStyle=DS_COL.blue;x.fillRect(0,yy+3,TS,3)}
     for(let i=0;i<4;i++){x.fillStyle=DS_COL.teal;x.beginPath();x.moveTo(19+i*30,2);x.quadraticCurveTo(26+i*30,10,19+i*30,20);x.quadraticCurveTo(12+i*30,10,19+i*30,2);x.fill()}
+  }else if(kind==='eye'){ // a hidden door is marked by one eye of gold among the dull signs
+    dsStoneWall(x,r,sand,mort,4);dsBand(x,4,10,TS);dsBand(x,TS-14,10,TS);
+    for(let row=0;row<3;row++)for(let col=0;col<4;col++)if(!(row===1&&(col===1||col===2)))dsGlyph(x,16+col*32,38+row*26,1,(col*3+row*2+((r()*7)|0))%7);
+    x.fillStyle='#e0b038';x.strokeStyle='#17120e';x.lineWidth=2.2;x.beginPath();x.moveTo(34,64);x.quadraticCurveTo(64,34,94,64);x.quadraticCurveTo(64,94,34,64);x.closePath();x.fill();x.stroke();
+    x.fillStyle='#1e3a8a';x.beginPath();x.arc(64,64,14,0,TAU);x.fill();x.stroke();x.fillStyle='#17120e';x.beginPath();x.arc(64,64,6,0,TAU);x.fill();x.fillStyle='#fff6c0';x.fillRect(60,60,3,3);
+    x.strokeStyle='#e0b038';x.lineWidth=3;x.beginPath();x.moveTo(60,80);x.lineTo(54,98);x.moveTo(70,80);x.quadraticCurveTo(80,92,74,100);x.stroke();
   }else if(kind==='rubble'){
     dsStoneWall(x,r,[180,150,100],mort,3);x.fillStyle='rgba(236,208,150,.45)';x.beginPath();x.moveTo(0,TS);x.lineTo(30,60);x.lineTo(60,90);x.lineTo(90,50);x.lineTo(TS,80);x.lineTo(TS,TS);x.fill();
   }
