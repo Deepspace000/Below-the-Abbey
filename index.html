@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.49';
+const VERSION='2.50';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2104,7 +2104,7 @@ function enemyAct(e){
   if(e.alert&&def.act){const used=def.act(e);if(used)return used}
   if(!e.alert){
     const path=bfs(e);
-    if(dist()<=6&&((path&&path.dist<=7)||hasLOS(e.x,e.y,G.P.x,G.P.y))){e.alert=true;sfx(e.t==='skel'?'rattle':e.t==='bat'?'screech':'squeak');return 150}
+    if(dist()<=6&&((path&&path.dist<=7)||hasLOS(e.x,e.y,G.P.x,G.P.y))){e.alert=true;sfx(e.t==='skel'?'rattle':(e.t==='bat'||e.t==='vulture')?'screech':'squeak');return 150}
     return 0;
   }
   let dur=0;
@@ -2343,6 +2343,28 @@ function stormTick(dt){
   if(S.t<=0){if(S.on){S.on=false;S.t=150+Math.random()*250;msg('The wind drops and the sand settles.','#e8d8a0')}else{S.on=true;S.t=50+Math.random()*50;msg('A sandstorm is blowing in. The air turns thick with sand.','#f0d090')}}
   S.a+=((S.on?1:0)-S.a)*Math.min(1,dt*.35);
 }
+let SKYV=null;
+const BIRDS={a:0,on:false,t:40+Math.random()*80,ac:0};
+function birdTick(dt){
+  const B=BIRDS,des=SKYV&&(LEVEL===43||(LEVEL>=60&&LEVEL<=64)||(LEVEL===41&&G.P&&rdBiome(G.P.x,G.P.y)>.6));
+  if(!des||G.state!=='play'||STORM.a>.3){B.a=Math.max(0,B.a-dt*.4);return}
+  B.t-=dt;if(B.t<=0){B.on=!B.on;B.t=B.on?55+Math.random()*50:110+Math.random()*200;if(B.on)B.ac=Math.random()*TAU}
+  B.a+=((B.on?1:0)-B.a)*Math.min(1,dt*.5);
+}
+function drawSkyBirds(){ // a few birds circling high above the sand, now and then, by day
+  const V=SKYV,B=BIRDS,hr=(G.clock%1440)/60;
+  if(!V||B.a<.03||hr<5.8||hr>19.5||!IMG.skybirdA)return;
+  const sx=420/V.VW,sy=210/V.VH;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();
+  for(let i=0;i<5;i++){
+    const ph=G.time*(.32+i*.025)+i*1.25,az=B.ac+.5*Math.cos(ph)+i*.07,el=.42+.2*Math.sin(ph*1.0+i)+i*.05,mx=Math.cos(az),my=Math.sin(az);
+    const a=(mx*V.dX+my*V.dY)/(V.dX*V.dX+V.dY*V.dY),b=(mx*V.pX+my*V.pY)/(V.pX*V.pX+V.pY*V.pY);if(a<=.05)continue;
+    const px=((b/a+1)*V.VW/2)*sx,py=(V.HH-24-el*V.HH*.8)*sy,im=IMG[(Math.floor(G.time*3.2+i)%2)?'skybirdB':'skybirdA'];if(!im||px<-20||px>440)continue;
+    const w=24+i%3*5,h=w*im.height/im.width,dir=-Math.sin(ph)>0?1:-1;
+    ctx.globalAlpha=B.a*.92;ctx.translate(px,py);ctx.rotate(Math.cos(ph)*.12*dir);ctx.drawImage(im,-w/2,-h/2,w,h);ctx.setTransform(1,0,0,1,0,0);
+  }
+  ctx.restore();
+}
 function drawStorm(){
   const a=STORM.a;if(a<.02)return;
   ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();
@@ -2383,6 +2405,7 @@ function render3D(){
   // the desert sky follows the clock; a sandstorm thickens the air and tints it
   const SK=desertLv?skyTod((G.clock%1440)/60):null,ST=desertLv?STORM.a:0,stm=(v,c)=>v+(c-v)*ST;
   const stormC=SK?[206*Math.min(1,SK.k[0]*1.1+.05),166*Math.min(1,SK.k[1]*1.1+.05),112*Math.min(1,SK.k[2]*1.1+.05)]:null;
+  SKYV=SK?{dX,dY,pX,pY,HH,VW,VH}:null;
   const hzr=SK?hzr0.map((v,i)=>stm(v*SK.k[i],stormC[i])):hzr0,hzc=SK?hzc0.map((v,i)=>stm(v*SK.k[i],stormC[i]*.92)):hzc0;
   const hzmax=SK?stm(hzmax0,.97):hzmax0,hzrate=SK?hzrate0+.16*ST:hzrate0;
   const tbR=SK?SK.g[0]:1,tbG=SK?SK.g[1]*.94:.94,tbB=SK?SK.g[2]*.84:.84, ttR=1.3,ttG=.88,ttB=.5;
@@ -5921,7 +5944,7 @@ function drawWorld(){ // a slightly softer, lower-res picture; the screen-wide d
   LOWX.imageSmoothingEnabled=true;LOWX.drawImage(vc,0,0,w,h);
   ctx.imageSmoothingEnabled=false;ctx.drawImage(LOWC,0,0,420,210);ctx.imageSmoothingEnabled=true;
   if(G._spr){ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';SC=ctx;drawSprites(...G._spr);ctx.restore()}
-  if(LEVELS[LEVEL]&&LEVELS[LEVEL].rain)drawRain(); if(STORM.a>.02)drawStorm();
+  if(LEVELS[LEVEL]&&LEVELS[LEVEL].rain)drawRain(); if(STORM.a>.02)drawStorm();else drawSkyBirds();
 }
 function drawRain(){
   const hr=(G.clock%1440)/60,sun=hr>=7&&hr<=18?Math.sin((hr-7)/11*Math.PI):0;
@@ -6016,7 +6039,7 @@ function update(dt){
   if(!G.overview)G.ovInit=false;
   try{areaAudio();huntTick()}catch(e){}
   burnTick(dt);
-  G.time+=dt;try{stormTick(dt)}catch(e){}
+  G.time+=dt;try{stormTick(dt);birdTick(dt)}catch(e){}
   if(G.dayBase>0){const hr=(G.clock%1440)/60,dsl=LEVEL===43||(LEVEL>=60&&LEVEL<=64)||LEVEL===41;G.day=Math.max(.16,G.dayBase*clamp(.66+.5*Math.cos((hr-12)/24*TAU),dsl?.3:G.hasLamps?.2:.5,1))}
   // timers
   if(!G.cut)for(let i=0;i<G.timers.length;){const t=G.timers[i];if(G.time>=t.t){G.timers.splice(i,1);t.fn()}else i++}
@@ -6328,7 +6351,7 @@ addEventListener('resize',fit);fit();
 /*@@DESERT:BEGIN@@*/
 /* ---- src/desert/artlist.js ---- */
 /* written by tools/inject.py */
-const DS_PAINTED=['brazier0', 'brazier1', 'brazier2', 'brazier3', 'ceil_tomb', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'ddead', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'drock0', 'drock1', 'drock2', 'dshrub0', 'dshrub1', 'dshrub2', 'dsphinx', 'dsutstatue', 'dwolf', 'dwolfA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'offering', 'rrock0', 'rrock1', 'rrock2', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate'];
+const DS_PAINTED=['brazier0', 'brazier1', 'brazier2', 'brazier3', 'ceil_tomb', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'ddead', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'drock0', 'drock1', 'drock2', 'dshrub0', 'dshrub1', 'dshrub2', 'dsphinx', 'dsutstatue', 'dwolf', 'dwolfA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'offering', 'rrock0', 'rrock1', 'rrock2', 'skybirdA', 'skybirdB', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA'];
 
 /* ---- src/desert/artpack.js ---- */
 /* ==========================================================================
@@ -6806,6 +6829,7 @@ Object.assign(ENEMY_DEF,{
   dwolf:{name:'Desert Wolf',hp:36,dmg:[4,8],hit:.74,w:1.3,img:'dwolf',xp:70,gold:[0,0],speed:2,verb:'bites'},
   nomad:{name:'Desperate Nomad',hp:44,dmg:[5,9],hit:.72,w:.38,img:'nomad',xp:90,gold:[6,22],speed:1,verb:'slashes'},
   nomad2:{name:'Desperate Nomad',hp:44,dmg:[5,9],hit:.72,w:.38,img:'nomad2',xp:90,gold:[6,22],speed:1,verb:'slashes'},
+  vulture:{name:'Carrion Vulture',hp:34,dmg:[5,9],hit:.74,w:1.0,img:'vulture',xp:90,gold:[0,0],speed:2,fly:true,verb:'rakes'},
   mummy:{name:'Mummy',hp:45,dmg:[6,10],hit:.76,w:.36,img:'mummy',xp:150,gold:[10,30],speed:1,verb:'claws'},
   sut:{name:'Sut, Lord of the Red Desert',hp:110,dmg:[8,13],hit:.82,w:.78,img:'sut',xp:5000,gold:[800,1200],speed:1,verb:'smites',ranged:3,shot:'a bolt of red fire',boss:true}});
 
@@ -7693,8 +7717,8 @@ function buildErg(E,seed,rk){
     items.push({k:'potion',x:cx+2,y:cy+1});
   });
   const camp=(t,x,y,n,lvl)=>{let p=0;for(let k=0;k<n*10&&p<n;k++){const ex=x+Math.round((R(x,y,100+k)*2-1)*4),ey=y+Math.round((R(x,y,160+k)*2-1)*4);if(!taken.has(ex+','+ey)&&!enemies.some(e=>e.x===ex&&e.y===ey)&&!items.some(i=>i.x===ex&&i.y===ey)&&ex>14&&ey>14&&ex<W-15&&ey<H-15&&od(ex,ey)>8){enemies.push({t,x:ex,y:ey,lvl});p++}}};
-  const T=['scorpion','dwolf','nomad','mummy'];
-  for(let gy=0;gy<5;gy++)for(let gx=0;gx<5;gx++){const x=36+gx*57+((R(gx,gy,7)-.5)*24|0),y=36+gy*57+((R(gx,gy,8)-.5)*24|0);if(x<50&&Math.abs(y-E.CY)<30)continue;camp(T[(gx+gy*2+((R(gx,gy,9)*3)|0))%4],x,y,2+((R(gx,gy,10)*2)|0),rk+((R(gx,gy,11)*3)|0))}
+  const T=['scorpion','dwolf','vulture','nomad','mummy','scorpion'];
+  for(let gy=0;gy<5;gy++)for(let gx=0;gx<5;gx++){const x=36+gx*57+((R(gx,gy,7)-.5)*24|0),y=36+gy*57+((R(gx,gy,8)-.5)*24|0);if(x<50&&Math.abs(y-E.CY)<30)continue;camp(T[(gx+gy*2+((R(gx,gy,9)*3)|0))%6],x,y,2+((R(gx,gy,10)*2)|0),rk+((R(gx,gy,11)*3)|0))}
   return {rows,fm,decor,scen,enemies,items};
 }
 const GOLDEN=buildErg(GER,0,17),VIOLET=buildErg(VER,500,20),WHITE=buildErg(WER,900,16),FLAT=buildErg(FLR,1300,18);
@@ -7765,6 +7789,18 @@ function dsPebbles(v,dens,seed){
     }
     return c;
   });
+}
+
+// vultures wheel over the older deserts too: a few singly or in pairs, well away from where you arrive
+for(const [n,cnt] of [[41,8],[43,10],[60,6]]){
+  const L=LEVELS[n],rows=L.rows,H=rows.length,W=rows[0].length;let p=0;
+  for(let k=0;k<400&&p<cnt;k++){
+    const x=12+((hash2(k,n,801)*(W-24))|0),y=12+((hash2(k,n,802)*(H-24))|0);
+    if(n===41&&y>150)continue;
+    if(rows[y][x]!=='.'||Math.hypot(x-L.start.x,y-L.start.y)<30)continue;
+    if(L.enemies.some(e=>Math.abs(e.x-x)+Math.abs(e.y-y)<6)||L.items.some(i=>i.x===x&&i.y===y)||(L.decor||[]).some(d=>d.x===x&&d.y===y))continue;
+    L.enemies.push({t:'vulture',x,y,lvl:n===60?16:n===43?15:14});p++;
+  }
 }
 
 /* ---- src/desert/terrain.js ---- */

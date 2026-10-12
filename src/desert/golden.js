@@ -43,8 +43,8 @@ function buildErg(E,seed,rk){
     items.push({k:'potion',x:cx+2,y:cy+1});
   });
   const camp=(t,x,y,n,lvl)=>{let p=0;for(let k=0;k<n*10&&p<n;k++){const ex=x+Math.round((R(x,y,100+k)*2-1)*4),ey=y+Math.round((R(x,y,160+k)*2-1)*4);if(!taken.has(ex+','+ey)&&!enemies.some(e=>e.x===ex&&e.y===ey)&&!items.some(i=>i.x===ex&&i.y===ey)&&ex>14&&ey>14&&ex<W-15&&ey<H-15&&od(ex,ey)>8){enemies.push({t,x:ex,y:ey,lvl});p++}}};
-  const T=['scorpion','dwolf','nomad','mummy'];
-  for(let gy=0;gy<5;gy++)for(let gx=0;gx<5;gx++){const x=36+gx*57+((R(gx,gy,7)-.5)*24|0),y=36+gy*57+((R(gx,gy,8)-.5)*24|0);if(x<50&&Math.abs(y-E.CY)<30)continue;camp(T[(gx+gy*2+((R(gx,gy,9)*3)|0))%4],x,y,2+((R(gx,gy,10)*2)|0),rk+((R(gx,gy,11)*3)|0))}
+  const T=['scorpion','dwolf','vulture','nomad','mummy','scorpion'];
+  for(let gy=0;gy<5;gy++)for(let gx=0;gx<5;gx++){const x=36+gx*57+((R(gx,gy,7)-.5)*24|0),y=36+gy*57+((R(gx,gy,8)-.5)*24|0);if(x<50&&Math.abs(y-E.CY)<30)continue;camp(T[(gx+gy*2+((R(gx,gy,9)*3)|0))%6],x,y,2+((R(gx,gy,10)*2)|0),rk+((R(gx,gy,11)*3)|0))}
   return {rows,fm,decor,scen,enemies,items};
 }
 const GOLDEN=buildErg(GER,0,17),VIOLET=buildErg(VER,500,20),WHITE=buildErg(WER,900,16),FLAT=buildErg(FLR,1300,18);
@@ -115,4 +115,16 @@ function dsPebbles(v,dens,seed){
     }
     return c;
   });
+}
+
+// vultures wheel over the older deserts too: a few singly or in pairs, well away from where you arrive
+for(const [n,cnt] of [[41,8],[43,10],[60,6]]){
+  const L=LEVELS[n],rows=L.rows,H=rows.length,W=rows[0].length;let p=0;
+  for(let k=0;k<400&&p<cnt;k++){
+    const x=12+((hash2(k,n,801)*(W-24))|0),y=12+((hash2(k,n,802)*(H-24))|0);
+    if(n===41&&y>150)continue;
+    if(rows[y][x]!=='.'||Math.hypot(x-L.start.x,y-L.start.y)<30)continue;
+    if(L.enemies.some(e=>Math.abs(e.x-x)+Math.abs(e.y-y)<6)||L.items.some(i=>i.x===x&&i.y===y)||(L.decor||[]).some(d=>d.x===x&&d.y===y))continue;
+    L.enemies.push({t:'vulture',x,y,lvl:n===60?16:n===43?15:14});p++;
+  }
 }
