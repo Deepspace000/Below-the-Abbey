@@ -58,13 +58,16 @@ function buildRedDunes(){
   const enemies=[];
   const free=(x,y)=>x>0&&y>0&&x<W-1&&y<H-1&&open[idx(x,y)]&&!occ.has(x+','+y)&&!enemies.some(e=>e.x===x&&e.y===y);
   const spawn=(t,x,y,lvl)=>{if(free(x,y))enemies.push({t,x,y,lvl})};
-  for(let gy=0;gy<H;gy+=6)for(let gx=0;gx<W;gx+=6){
-    const x=gx+((R(gx,gy,70)*6)|0),y=gy+((R(gx,gy,71)*6)|0);if(!open[idx(x,y)]||y>H-22||y<RS.NORTH+8)continue;
+  // creatures live in camps with open sand between them, not scattered everywhere
+  const camp=(t,cx,cy,n,lvl,spread)=>{let placed=0;for(let k=0;k<n*8&&placed<n;k++){const x=cx+Math.round((R(cx,cy,100+k)*2-1)*spread),y=cy+Math.round((R(cx,cy,160+k)*2-1)*spread);if(free(x,y)){enemies.push({t:typeof t==='function'?t(x,y):t,x,y,lvl});placed++}}};
+  for(let gy=0;gy<H;gy+=24)for(let gx=0;gx<W;gx+=24){
+    const x=gx+4+((R(gx,gy,70)*16)|0),y=gy+4+((R(gx,gy,71)*16)|0);if(!open[idx(x,y)]||y>H-22||y<RS.NORTH+8)continue;
     const r=R(gx,gy,72);
-    if(r<.17)spawn('scorpion',x,y,16);
-    else if(r<.27){for(const [dx,dy] of [[0,0],[1,0],[0,1]])spawn('dwolf',x+dx,y+dy,15)}
-    else if(r<.36){for(const [dx,dy] of [[0,0],[1,1]])spawn('nomad'+(R(x,y,73)<.5?'':'2'),x+dx,y+dy,15)}
-    else if(r<.44){for(const [dx,dy] of [[0,0],[1,0]])spawn('mummy',x+dx,y+dy,17)}
+    if(r>.62)continue; // many stretches are empty
+    if(r<.16)camp('scorpion',x,y,5,16,3);
+    else if(r<.30)camp('dwolf',x,y,4,15,3);
+    else if(r<.44)camp((px,py)=>'nomad'+(R(px,py,73)<.5?'':'2'),x,y,5,15,3);
+    else camp('mummy',x,y,4,17,2);
   }
   const items=[];
   for(let k=0;k<12;k++)for(let t=0;t<20;t++){const x=4+((R(k,t,80)*(W-8))|0),y=20+((R(k,t,81)*(H-50))|0);if(free(x,y)&&!enemies.some(e=>Math.abs(e.x-x)+Math.abs(e.y-y)<4)){items.push({k:['potion','bread','cheese','potion','apple'][k%5],x,y});break}}

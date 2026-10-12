@@ -125,13 +125,16 @@ function buildSandRoad(){
   const enemies=[];
   const free=(x,y)=>x>0&&y>0&&x<W-1&&y<H-1&&open[idx(x,y)]&&!occ.has(x+','+y)&&!enemies.some(e=>e.x===x&&e.y===y);
   const spawn=(t,x,y,lvl)=>{if(free(x,y))enemies.push({t,x,y,lvl})};
-  for(let gy=0;gy<H;gy+=6)for(let gx=0;gx<W;gx+=6){
-    const x=gx+((R(gx,gy,60)*6)|0),y=gy+((R(gx,gy,61)*6)|0);if(!open[idx(x,y)])continue;
+  // creatures live in camps with open sand between them, not scattered everywhere
+  const camp=(t,cx,cy,n,lvl,spread)=>{let placed=0;for(let k=0;k<n*8&&placed<n;k++){const x=cx+Math.round((R(cx,cy,100+k)*2-1)*spread),y=cy+Math.round((R(cx,cy,160+k)*2-1)*spread);if(free(x,y)){enemies.push({t:typeof t==='function'?t(x,y):t,x,y,lvl});placed++}}};
+  for(let gy=0;gy<H;gy+=24)for(let gx=0;gx<W;gx+=24){
+    const x=gx+4+((R(gx,gy,60)*16)|0),y=gy+4+((R(gx,gy,61)*16)|0);if(!open[idx(x,y)])continue;
     if(y>RD.CY-30)continue; // the first stretch out of Anaea is quiet
     const b=rdBiome(x,y),r=R(gx,gy,62);
-    if(b>.58&&r<.16)spawn('scorpion',x,y,15);
-    else if(b>.4&&r<.24){for(const [dx,dy] of [[0,0],[1,0],[0,1]])spawn('dwolf',x+dx,y+dy,14)}
-    else if(b>.45&&r<.32){for(const [dx,dy] of [[0,0],[1,1]])spawn('nomad',x+dx,y+dy,14);if(R(gx,gy,63)<.4)spawn('nomad',x-1,y,14)}
+    if(r>.5)continue; // many stretches of the road are empty
+    if(b>.58&&r<.18)camp('scorpion',x,y,5,15,3);
+    else if(b>.4&&r<.34)camp('dwolf',x,y,4,14,3);
+    else if(b>.45)camp('nomad',x,y,4,14,3);
   }
   // ---- things to pick up ----
   const items=[];

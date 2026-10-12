@@ -14,7 +14,7 @@ const DS_OL='#2a1808';
 const DESERT_ART=['dcity','scorpion','scorpionA','mummy','mummyA','sut','sutA','nomad','nomadA','nomad2','nomad2A','sarcoph','sarcophU'];
 function makeDesertCreatures(){} // nothing is drawn by code: creatures are painted art
 function makeDesertWolf(){ // creatures made from the painted art the game already has (needs the pictures to have loaded)
-  const sand=im=>im?mkCanvas(im.width,im.height,(x,w,h)=>{x.drawImage(im,0,0);x.globalCompositeOperation='source-atop';x.fillStyle='rgba(222,184,112,.62)';x.fillRect(0,0,w,h);x.globalCompositeOperation='lighter';x.fillStyle='rgba(40,28,10,.35)';x.fillRect(0,0,w,h)}):null;
+  const sand=im=>im?mkCanvas(im.width,im.height,(x,w,h)=>{x.drawImage(im,0,0);x.globalCompositeOperation='source-atop';x.fillStyle='rgba(196,134,62,.42)';x.fillRect(0,0,w,h);x.globalCompositeOperation='multiply';x.fillStyle='rgb(238,214,170)';x.fillRect(0,0,w,h);x.globalCompositeOperation='destination-in';x.drawImage(im,0,0)}):null;
   if(IMG.wolf){IMG.dwolf=sand(IMG.wolf);if(IMG.wolfA)IMG.dwolfA=sand(IMG.wolfA)}
   // the nomads: the painted bandit, recoloured into dusty desert robes, with sand clinging to the hem
   if(IMG.bandit&&!IMG.nomad){IMG.nomad=pToneMap(IMG.bandit,[34,24,16],[232,204,150],3.4,.8,.7);IMG.nomad2=pFlip(IMG.nomad);if(IMG.banditA){IMG.nomadA=pToneMap(IMG.banditA,[34,24,16],[232,204,150],3.4,.8,.7);IMG.nomad2A=pFlip(IMG.nomadA)}}
