@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.18';
+const VERSION='2.19';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3769,17 +3769,28 @@ function lab(s,x,y,size,col){ctx.save();ctx.font=`bold ${size}px ${FTITLE}`;ctx.
 function drawWorldMap(){
   BTNS=[];veil(1);
   const x0=14,y0=14,w=452,h=292,ink='#2a1c0e';
+  btn('wmap',x0,y0,w,h); // the whole map: drag it to move, wheel or pinch to zoom
+
   ctx.save();
   rrect(ctx,x0,y0,w,h,6);ctx.clip();
   const g=ctx.createLinearGradient(0,y0,0,y0+h);g.addColorStop(0,'#bcaa7e');g.addColorStop(1,'#9e8c64');ctx.fillStyle=g;ctx.fillRect(x0,y0,w,h);
   ctx.globalAlpha=.13;for(let i=0;i<110;i++){const a=hash2(i,1,7),b=hash2(i,2,7);ctx.fillStyle=i%3?'#5a4630':'#e8dcb0';ctx.beginPath();ctx.ellipse(x0+a*w,y0+b*h,6+hash2(i,3,7)*30,3+hash2(i,4,7)*14,hash2(i,5,7)*3,0,TAU);ctx.fill()}ctx.globalAlpha=1;
+  const WV=G.wv||(G.wv={z:1,x:0,y:0});
+  ctx.save();ctx.translate(240+WV.x,160+WV.y);ctx.scale(WV.z,WV.z);ctx.translate(-240,-160); // the lands themselves can be dragged and zoomed
+  { // beyond the right-hand edge of the charted lands: the unknown lands
+    ctx.save();ctx.beginPath();ctx.rect(472,-300,900,900);ctx.clip();ctx.fillStyle='rgba(70,52,30,.16)';ctx.fillRect(472,-300,900,900);
+    ctx.strokeStyle='rgba(70,52,30,.16)';ctx.lineWidth=1;for(let q=0;q<1800;q+=11){ctx.beginPath();ctx.moveTo(472+q,-300);ctx.lineTo(472+q-900,600);ctx.stroke()}
+    ctx.restore();ctx.strokeStyle='rgba(70,52,30,.45)';ctx.lineWidth=1.4;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(472,-300);ctx.lineTo(472,600);ctx.stroke();ctx.setLineDash([]);
+    ctx.font=`italic 22px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.7)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('The Unknown Lands',600,160);
+    ctx.font=`italic 9px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.5)';ctx.fillText('no road leads here yet',600,182);
+  }
   // faint hand-drawn coast and old survey marks, to show where the lands are still blank
   ctx.strokeStyle='rgba(60,44,26,.28)';ctx.lineWidth=1.2;ctx.setLineDash([3,4]);
   ctx.beginPath();ctx.moveTo(30,288);for(let i=0;i<=24;i++)ctx.lineTo(30+i*18,284+Math.sin(i*1.3)*5+Math.cos(i*.7)*3);ctx.stroke();
   ctx.beginPath();ctx.moveTo(34,60);for(let i=0;i<=8;i++)ctx.lineTo(34+i*8,60-i*5+Math.sin(i)*3);ctx.stroke();
   ctx.setLineDash([]);
   ctx.font=`italic 9px ${FTITLE}`;ctx.fillStyle='rgba(60,44,26,.34)';ctx.textAlign='center';ctx.textBaseline='middle';
-  for(const [t,x,y] of [['Uncharted',390,70],['Uncharted',420,232],['Uncharted',70,100],['Uncharted',250,50],['Unknown seas',150,285],['Unexplored',400,150]])ctx.fillText(t,x,y);
+  for(const [t,x,y] of [['Uncharted',70,100],['Uncharted',250,50],['Unknown seas',150,285]])ctx.fillText(t,x,y);
   // roads
   const by={};WORLD_LOCS.forEach(l=>by[l.k]=l);
   ctx.strokeStyle='rgba(50,34,18,.75)';ctx.lineWidth=1.5;ctx.setLineDash([2.5,3.5]);
@@ -3812,6 +3823,7 @@ function drawWorldMap(){
   }
   // you are here
   if(here){const pulse=.5+.5*Math.sin(G.time*4);ctx.strokeStyle=`rgba(150,30,20,${.55+.4*pulse})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(here.x,here.y,17+pulse*3,0,TAU);ctx.stroke();ctx.fillStyle='rgba(150,30,20,.9)';ctx.beginPath();ctx.arc(here.x,here.y-24,3.2,0,TAU);ctx.fill();ctx.beginPath();ctx.moveTo(here.x-4,here.y-22);ctx.lineTo(here.x+4,here.y-22);ctx.lineTo(here.x,here.y-14);ctx.closePath();ctx.fill()}
+  ctx.restore();
   // compass and scale
   const cx=420,cy=262;ctx.strokeStyle=ink;ctx.fillStyle=ink;ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(cx,cy,15,0,TAU);ctx.stroke();
   for(const [a,l] of [[-Math.PI/2,'N'],[0,'E'],[Math.PI/2,'S'],[Math.PI,'W']]){ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*17,cy+Math.sin(a)*17);ctx.lineTo(cx+Math.cos(a+.2)*5,cy+Math.sin(a+.2)*5);ctx.lineTo(cx+Math.cos(a-.2)*5,cy+Math.sin(a-.2)*5);ctx.closePath();ctx.fill();lab(l,cx+Math.cos(a)*25,cy+Math.sin(a)*25,8,ink)}
@@ -3820,6 +3832,8 @@ function drawWorldMap(){
   ctx.lineWidth=2.4;ctx.strokeStyle=goldG(x0,y0,w,h);rrect(ctx,x0,y0,w,h,6);ctx.stroke();wornEdge(x0,y0,w,h,6);
   ctx.save();ctx.font=`26px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='rgba(235,220,170,.5)';ctx.strokeText('The Known Lands',240,36);ctx.fillStyle=ink;ctx.fillText('The Known Lands',240,36);ctx.restore();
   btnText('worldback','Level map',18,284,100,24);btnText('ovexit','Exit',362,284,100,24);
+  btnText('wzin','+',196,284,26,24);btnText('wzout','-',226,284,26,24);btnText('wreset','Fit',256,284,44,24);
+  txt(Math.round(WV.z*100)+'%',334,296,8,'#d8c88e','center');
 }
 /* the town map: drawn like the world map, with buildings, doors, gates and the people you can talk to */
 const MAP_PROPS=new Set(['notice','noticeboard','urn','memorial','lockedgate','gate','cairn','banner','grave','grave2','cross','goat','chicken','chicken2','fountain','well','statue','lamp','flowerpot','barrel','crate','cart','bench','fence','bones','hay','veg','bush','tsign']);
@@ -5983,7 +5997,7 @@ function frame(now){
 function handleBtn(id){
   if(G.cut){cutAdvance();return}
   if(G.talk){talkBtn(id);return}
-  if(G.overview){if(id==='ovexit'){G.overview=false;G.world=false}else if(id==='worldback')G.world=false;else if(id==='worldmap')G.world=true;
+  if(G.overview){if(id==='ovexit'){G.overview=false;G.world=false}else if(id==='worldback')G.world=false;else if(id==='worldmap'){G.world=true;G.wv={z:1,x:0,y:0}}else if(id==='wzin')setWorldZoom((G.wv?G.wv.z:1)*1.4,240,160);else if(id==='wzout')setWorldZoom((G.wv?G.wv.z:1)/1.4,240,160);else if(id==='wreset')G.wv={z:1,x:0,y:0};else if(id==='wmap'){}
     else if(id==='mzin')setMapZoom((G.mz||12)*1.3,DW/2,DH/2);else if(id==='mzout')setMapZoom((G.mz||12)/1.3,DW/2,DH/2);else if(id==='mzfit')setMapZoom(0,DW/2,DH/2);return}
   if(G.saves){savesBtn(id);return}
   if(G.state==='title'){titleBtn(id);return}
@@ -6084,8 +6098,18 @@ function drawDragGhost(){
   if(d.hover){ctx.strokeStyle='#ffe36a';ctx.lineWidth=2;rrect(ctx,d.hover.x-1,d.hover.y-1,d.hover.w+2,d.hover.h+2,4);ctx.stroke()}
   ctx.globalAlpha=.92;if(def)itemIcon(def,d.x,d.y,1.5);ctx.globalAlpha=1;
 }
+function setWorldZoom(nz,cx,cy){
+  const V=G.wv||(G.wv={z:1,x:0,y:0});nz=clamp(nz,.6,5);
+  const px=240+(cx-240-V.x)/V.z,py=160+(cy-160-V.y)/V.z; // the map point under the cursor stays under it
+  V.z=nz;V.x=cx-240-(px-240)*nz;V.y=cy-160-(py-160)*nz;clampWorld();
+}
+function clampWorld(){const V=G.wv;V.x=clamp(V.x,-420*V.z,260*V.z);V.y=clamp(V.y,-170*V.z,170*V.z)}
 cv.addEventListener('pointerdown',e=>{
   e.preventDefault();audioInit();
+  if(G.overview&&G.world){
+    const [wx,wy]=toDesign(e),wb=topBtn(wx,wy);
+    if(wb&&wb.id==='wmap'){(G.pts=G.pts||{})[e.pointerId]=[wx,wy];const a=Object.values(G.pts);if(a.length===2){G.pinch=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);G.wdrag=null}else{const V=G.wv||(G.wv={z:1,x:0,y:0});G.wdrag={x:wx,y:wy,px:V.x,py:V.y}}return}
+  }
   if(G.overview&&!G.world){const [qx,qy]=toDesign(e);(G.pts=G.pts||{})[e.pointerId]=[qx,qy];if(Object.keys(G.pts).length===2){const a=Object.values(G.pts);G.pinch=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);PTR=null;return}}
   const [x,y]=toDesign(e),b=topBtn(x,y);
   if(b){if(b.up){PTR={b,x,y,sc:getScroll(b.drag),moved:false,mode:null}}else{pressFx(b.id,x,y);handleBtn(b.id)}return}
@@ -6093,6 +6117,11 @@ cv.addEventListener('pointerdown',e=>{
 });
 cv.addEventListener('pointermove',e=>{
   const [x,y]=toDesign(e);
+  if(G.overview&&G.world&&G.pts&&G.pts[e.pointerId]){
+    G.pts[e.pointerId]=[x,y];const a=Object.values(G.pts);
+    if(a.length===2&&G.pinch){const d=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);setWorldZoom((G.wv?G.wv.z:1)*d/G.pinch,(a[0][0]+a[1][0])/2,(a[0][1]+a[1][1])/2);G.pinch=d;return}
+    if(G.wdrag&&a.length===1){G.wv.x=G.wdrag.px+(x-G.wdrag.x);G.wv.y=G.wdrag.py+(y-G.wdrag.y);clampWorld();return}
+  }
   if(G.pts&&G.pts[e.pointerId]){G.pts[e.pointerId]=[x,y];const a=Object.values(G.pts);if(a.length===2&&G.pinch){const d=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);setMapZoom((G.mz||12)*d/G.pinch,(a[0][0]+a[1][0])/2,(a[0][1]+a[1][1])/2);G.pinch=d;PTR=null;return}}
   if(G.drag){G.drag.x=x;G.drag.y=y;const hb=topBtn(x,y);G.drag.hover=hb&&dropOk(G.drag,hb.id)?hb:null}
   if(!PTR)return;
@@ -6115,12 +6144,13 @@ function ptrEnd(){
   }
 }
 addEventListener('pointerup',ptrEnd);
-addEventListener('pointerup',e=>{if(G.pts){delete G.pts[e.pointerId];if(Object.keys(G.pts).length<2)G.pinch=0}});
+addEventListener('pointerup',e=>{if(G.pts){delete G.pts[e.pointerId];if(Object.keys(G.pts).length<2)G.pinch=0}if(!G.pts||!Object.keys(G.pts).length)G.wdrag=null});
 addEventListener('pointercancel',e=>{G.hold=null;PTR=null;G.drag=null;if(G.pts){delete G.pts[e.pointerId];G.pinch=0}});
 cv.addEventListener('wheel',e=>{
   if(G.loot){const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*DW,d=x<156?'lbag':'lbox';setScroll(d,getScroll(d)+e.deltaY*.5);e.preventDefault();return}
   if(G.menu==='quests'){G.qs=clamp((G.qs||0)+e.deltaY*.5,0,G.qMax||0);e.preventDefault();return}
   if(G.overview&&!G.world){const [wx,wy]=toDesign(e);setMapZoom((G.mz||12)*Math.exp(-e.deltaY*.0016),wx,wy);e.preventDefault();return}
+  if(G.overview&&G.world){const [wx,wy]=toDesign(e);setWorldZoom((G.wv?G.wv.z:1)*Math.exp(-e.deltaY*.0016),wx,wy);e.preventDefault();return}
   if(G.inv.open){G.inv.scroll=clamp(G.inv.scroll+e.deltaY*.5,0,maxScroll());e.preventDefault()}
 },{passive:false});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
