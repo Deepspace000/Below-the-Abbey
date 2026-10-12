@@ -2,9 +2,9 @@
    THE RED DUNES (level 43). Through the door that Sut's fall opens, a second desert: red sand, red rock, old ruins,
    and creatures that have lived on it a long time. Far ahead to the north a city rises over the horizon: Khemetra.
    ========================================================================== */
-const RS={W:112,H:190,NORTH:7};
-const rsCentre=y=>56+13*Math.sin(y/23)+9*Math.sin(y/57+2);
-const rsHalf=y=>34+14*Math.sin(y/31+1)+8*Math.sin(y/13);
+const RS={W:168,H:190,NORTH:7};
+const rsCentre=y=>84+13*Math.sin(y/23)+9*Math.sin(y/57+2);
+const rsHalf=y=>56+16*Math.sin(y/31+1)+8*Math.sin(y/13);
 function buildRedDunes(){
   const W=RS.W,H=RS.H,rows=[],fm=[],open=new Uint8Array(W*H),idx=(x,y)=>y*W+x;
   const R=(x,y,k)=>hash2(x,y,k);

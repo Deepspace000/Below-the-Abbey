@@ -4,11 +4,11 @@
    party is in a vast desert of dunes. At the far north is a cliff, and in it the tomb of Sut.
    The map is made by code, the same way every time.
    ========================================================================== */
-const RD={W:112,H:224,CY:210,CX0:56,NORTH:6};
+const RD={W:168,H:224,CY:210,CX0:84,NORTH:6};
 const BURROW_N=10,BURROW_BASE=50,BURROW_START={x:10,y:14,f:0}; // the mounds in the dunes lead to levels 50 to 59
 const rdStep=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 function rdCentre(y){return RD.CX0+7*Math.sin(y/19)+9*Math.sin(y/47+1.3)}      // the road's middle once it has turned north
-function rdHalf(y){const t=clamp((RD.CY-y)/(RD.CY-RD.NORTH),0,1);return 4+46*rdStep(.14,.62,t)}   // half the width of the land: a funnel
+function rdHalf(y){const t=clamp((RD.CY-y)/(RD.CY-RD.NORTH),0,1);return 4+74*rdStep(.14,.62,t)}   // half the width of the land: a funnel
 function rdBiome(x,y){ // 0 = lush forest, 1 = open desert: it depends on how far along the road a place is
   const s=(y>=RD.CY-6&&x<RD.CX0+8)?clamp(x/280,0,.2):.2+.8*clamp((RD.CY-y)/(RD.CY-RD.NORTH),0,1);
   return clamp(rdStep(.3,.86,s)+(hash2(x>>2,y>>2,41)-.5)*.14,0,1);

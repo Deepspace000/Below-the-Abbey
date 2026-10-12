@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.39';
+const VERSION='2.40';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1459,7 +1459,7 @@ function reset(n){
 function msg(text,col){G.msgs.push({text,col:col||'#e8dcc0',t:G.time});if(G.msgs.length>6)G.msgs.shift()}
 function later(ms,fn){G.timers.push({t:G.time+ms/1000,fn})}
 
-const cellBlocked=(x,y)=>{if(x<0||y<0||x>=MW||y>=MH||G.grid[y][x]>0)return true;const l=G.dmap&&G.dmap.get(y*MW+x);if(!l)return false;for(let i=0;i<l.length;i++)if(l[i].block)return true;return false};
+const cellBlocked=(x,y)=>{if(x<0||y<0||x>=MW||y>=MH||G.grid[y][x]>0||(TERR_BLOCK&&TERR_BLOCK[y*MW+x]))return true;const l=G.dmap&&G.dmap.get(y*MW+x);if(!l)return false;for(let i=0;i<l.length;i++)if(l[i].block)return true;return false};
 function buildDecorMap(){G.dmap=new Map();for(const d of G.decor){if(!d.block)continue;const k=d.y*MW+d.x,l=G.dmap.get(k);if(l)l.push(d);else G.dmap.set(k,[d])}}
 const enemyAt=(x,y)=>G.enemies.find(e=>e.hp>0&&e.x===x&&e.y===y);
 // the map fills in as the party walks: only squares stepped on, plus the walls beside them.
@@ -2322,7 +2322,7 @@ function render3D(){
   const skyPan=(skyLv||ovcLv||desertLv||LEVEL===3||LEVEL===13||LEVEL===32||LEVEL===33)&&SKP?(()=>{for(let x=0;x<VW;x++){const cm=2*x/VW-1;UCOL[x]=((((Math.atan2(dY+pY*cm,dX+pX*cm)/TAU)%1)+1)%1*1024+t*(ovcLv?11:7))%1024|0}return true})():false; // the sky is one panorama on walls and ceiling alike
   const fmp=G.fmap,fd2=G.fl2,fd3=G.fl3,fd4=G.fl4,fd5=G.fl5,fd6=G.fl6,lmp=G.lmap,lmN=lmp?clamp(1.2-(G.day||0)*1.35,0,1)*.95:0;
   TERR_NOW=desertLv&&skyPan?terrFor(LEVEL):null;CAMZ=EYE; // real hills: the camera rides the ground, the ground is marched column by column, the sky is painted behind it
-  if(TERR_NOW){CAMZ=terrH(cx,cy)+EYE;TC={D,cx,cy,fmp,fds:[fd,fd2||fd,fd3||fd,fd4||fd,fd5||fd,fd6||fd],hzr,hzmax,hzrate,lbm,tbR,tbG,tbB};
+  if(TERR_NOW){CAMZ=terrH(cx,cy)+EYE;TC={D,cx,cy,fmp,fds:[fd,fd2||fd,fd3||fd,fd4||fd,fd5||fd,fd6||fd],hzr,hzmax,hzrate,lbm,tbR,tbG,tbB,rock:terrRock()};
     for(let y=0;y<VH;y++){const v=clamp(y-HH+150,0,255)|0,o=y*VW*4;for(let x=0;x<VW;x++){const i=(v*1024+UCOL[x])*4,io=o+x*4;D[io]=SKP[i]*lbm*tbR;D[io+1]=SKP[i+1]*lbm*tbG;D[io+2]=SKP[i+2]*lbm*tbB}}}
   // floor + ceiling (the ceiling is its own plane, CEILH above the floor); a daylit sky needs no lamp light, and indoors only the nearest few lights reach the ceiling
   const ncl=day>.5?0:Math.min(nn,12),nrcl=day>.5?0:Math.min(nrn,6);
@@ -4241,7 +4241,7 @@ function forestExtras(L){
 }
 function loadLevel(n){
   const L=LEVELS[n]||LEVELS[1];
-  LEVEL=n;CEILH=ceilFor(n,L);MAPROWS=L.rows;MW=MAPROWS[0].length;MH=MAPROWS.length;START=L.start;ENEMY_SPAWNS=L.enemies;ITEM_SPAWNS=L.items;DECOR_SPAWNS=forestExtras(L).length?L.decor.concat(forestExtras(L)):L.decor;G.flora=(L.scenery||[]).concat((n===32||n===41)?pathEdgeDecor(L):[]);
+  LEVEL=n;CEILH=ceilFor(n,L);MAPROWS=L.rows;MW=MAPROWS[0].length;MH=MAPROWS.length;START=L.start;ENEMY_SPAWNS=L.enemies;ITEM_SPAWNS=L.items;DECOR_SPAWNS=forestExtras(L).length?L.decor.concat(forestExtras(L)):L.decor;if(typeof terrFor==='function'){terrFor(n);TERR_BLOCK=TERRS[n]?TERRS[n].block:null}G.flora=(L.scenery||[]).concat((n===32||n===41)?pathEdgeDecor(L):[]);
   G.day=L.day!==undefined?L.day:(L.outdoor?.98:0);G.dayBase=G.day;G.amb=L.amb||0;G.fl=L.floor?FLOORS[L.floor]:null;G.cl=L.ceil?CEILS[L.ceil]:null;G.portals=L.portals||[];G.fmap=L.fmap?L.fmap.join(''):null;G.fl2=L.fmap?(FLOORS[L.floor2]||FLOORS.grass):null;G.fl3=L.fmap?(FLOORS.dirt||FLOORS.grass):null;G.fl4=L.fmap?(FLOORS.mosscobble||FLOORS.cobble):null;G.fl5=L.fmap?(FLOORS.stainedcobble||FLOORS.cobble):null;G.fl6=L.fmap?(FLOORS.wetcobble||FLOORS.cobble):null;if(L.floorSet){const F2=L.floorSet.map(nm=>FLOORS[nm]);G.fl=F2[0];G.fl2=F2[1];G.fl3=F2[2];G.fl4=F2[3];G.fl5=F2[4];G.fl6=F2[5]}G.extraLights=L.lights||null;
   setLightLevel(G.lightLevel||0);
 }
@@ -6936,6 +6936,7 @@ function teleSpot(n){
   const L=LEVELS[n];if(!L)return null;if(L._tele)return L._tele;if(L.tele)return L._tele=L.tele;
   const rows=L.rows,H=rows.length,W=rows[0].length,st=L.start;
   const solid=new Set((L.decor||[]).filter(d=>d.block!==false).map(d=>d.x+','+d.y)),bad=new Set(solid); // solid scenery and people cannot be walked through, so the stone is never put behind them
+  const tb=typeof terrFor==='function'?terrFor(n):null;if(tb)for(let q=0;q<tb.block.length;q++)if(tb.block[q]){const k=(q%tb.W)+','+((q/tb.W)|0);solid.add(k);bad.add(k)}
   for(const e of L.enemies||[])bad.add(e.x+','+e.y);
   for(const it of L.items||[])bad.add(it.x+','+it.y);
   const nearDoor=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const c=(rows[y+dy]||'')[x+dx];if(c&&c!=='.'&&/[0-9]/.test(c))return true}return false};
@@ -7039,11 +7040,11 @@ const DS_MAGIC_TOMB=['sunblade','dunebow','sandstaff','jackalhelm','goldmail','s
    party is in a vast desert of dunes. At the far north is a cliff, and in it the tomb of Sut.
    The map is made by code, the same way every time.
    ========================================================================== */
-const RD={W:112,H:224,CY:210,CX0:56,NORTH:6};
+const RD={W:168,H:224,CY:210,CX0:84,NORTH:6};
 const BURROW_N=10,BURROW_BASE=50,BURROW_START={x:10,y:14,f:0}; // the mounds in the dunes lead to levels 50 to 59
 const rdStep=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 function rdCentre(y){return RD.CX0+7*Math.sin(y/19)+9*Math.sin(y/47+1.3)}      // the road's middle once it has turned north
-function rdHalf(y){const t=clamp((RD.CY-y)/(RD.CY-RD.NORTH),0,1);return 4+46*rdStep(.14,.62,t)}   // half the width of the land: a funnel
+function rdHalf(y){const t=clamp((RD.CY-y)/(RD.CY-RD.NORTH),0,1);return 4+74*rdStep(.14,.62,t)}   // half the width of the land: a funnel
 function rdBiome(x,y){ // 0 = lush forest, 1 = open desert: it depends on how far along the road a place is
   const s=(y>=RD.CY-6&&x<RD.CX0+8)?clamp(x/280,0,.2):.2+.8*clamp((RD.CY-y)/(RD.CY-RD.NORTH),0,1);
   return clamp(rdStep(.3,.86,s)+(hash2(x>>2,y>>2,41)-.5)*.14,0,1);
@@ -7396,9 +7397,9 @@ for(let k=0;k<BURROW_N;k++)EMBERS_LEVELS.push(BURROW_BASE+k);
    THE RED DUNES (level 43). Through the door that Sut's fall opens, a second desert: red sand, red rock, old ruins,
    and creatures that have lived on it a long time. Far ahead to the north a city rises over the horizon: Khemetra.
    ========================================================================== */
-const RS={W:112,H:190,NORTH:7};
-const rsCentre=y=>56+13*Math.sin(y/23)+9*Math.sin(y/57+2);
-const rsHalf=y=>34+14*Math.sin(y/31+1)+8*Math.sin(y/13);
+const RS={W:168,H:190,NORTH:7};
+const rsCentre=y=>84+13*Math.sin(y/23)+9*Math.sin(y/57+2);
+const rsHalf=y=>56+16*Math.sin(y/31+1)+8*Math.sin(y/13);
 function buildRedDunes(){
   const W=RS.W,H=RS.H,rows=[],fm=[],open=new Uint8Array(W*H),idx=(x,y)=>y*W+x;
   const R=(x,y,k)=>hash2(x,y,k);
@@ -7480,7 +7481,7 @@ LEVEL42_DATA.portals[1]={to:43,x:REDDUNES.cxS,y:REDDUNES.start.y,f:0,tex:'sutdoo
    pale blue sand in long smooth swells, almost nothing living on it, and a tiny oasis in the middle with food and water.
    The edge of the land is the same moving sky as the rest of the desert.
    ========================================================================== */
-const BDN={W:150,H:150,OX:75,OY:75};
+const BDN={W:220,H:220,OX:110,OY:110};
 const DS_BLU=['#dbe8f6','#b4cdea','#86a6d4','#6684ba','#445d94'];
 function buildBlueDunes(){
   const W=BDN.W,H=BDN.H,rows=[],fm=[],R=(x,y,k)=>hash2(x,y,k),cx=BDN.OX,cy=BDN.OY;
@@ -7510,14 +7511,14 @@ function buildBlueDunes(){
   ['dates','water','dates','water','dates','water','apple','bread','water'].forEach((k,i)=>{const [dx,dy]=spots[i];items.push({k,x:Math.round(cx+dx),y:Math.round(cy+dy)})});
   // a few creatures: three small groups, far from the cave and the oasis
   const camp=(t,x,y,n,lvl)=>{let p=0;for(let k=0;k<n*8&&p<n;k++){const ex=x+Math.round((R(x,y,100+k)*2-1)*3),ey=y+Math.round((R(x,y,160+k)*2-1)*3);if(!enemies.some(e=>e.x===ex&&e.y===ey)&&!items.some(i=>i.x===ex&&i.y===ey)){enemies.push({t,x:ex,y:ey,lvl});p++}}};
-  camp('scorpion',34,38,2,16);camp('dwolf',118,52,2,15);camp('scorpion',104,118,2,16);camp('dwolf',38,112,1,15);
+  camp('scorpion',50,56,2,16);camp('dwolf',172,76,2,15);camp('scorpion',152,172,2,16);camp('dwolf',56,164,1,15);camp('scorpion',110,40,2,16);camp('dwolf',110,184,2,15);camp('scorpion',190,120,1,16);
   return {rows,fm,decor,scen,enemies,items,start:{x:2,y:cy,f:1}};
 }
 const BLUEDUNES=buildBlueDunes();
 // the way in: a small, low cave in the east wall of the Sand Road
 const BLUECAVE=(()=>{
   const rows=LEVEL41_DATA.rows;let best=null;
-  for(let y=60;y<140;y++){const r=rows[y];for(let x=r.length-3;x>40;x--){if(r[x]==='.'&&r[x+1]==='D'){if(!best||x>best.x)best={x,y};break}}}
+  for(let y=90;y<200;y++){const r=rows[y];for(let x=r.length-3;x>40;x--){if(r[x]==='.'&&r[x+1]==='D'){if(!best||x>best.x)best={x,y};break}}}
   const {x,y}=best;
   rows[y]=rows[y].slice(0,x+1)+'2'+rows[y].slice(x+2);
   for(const list of [SANDROAD.decor,SANDROAD.scen,SANDROAD.enemies])for(let i=list.length-1;i>=0;i--){const d=list[i],dx=(d.x!==undefined?d.x:Math.floor(d.wx))-x,dy=(d.y!==undefined?d.y:Math.floor(d.wy))-y;if(Math.abs(dx)<=3&&Math.abs(dy)<=3)list.splice(i,1)}
@@ -7560,7 +7561,7 @@ function makeBlueArt(ydune,ycl){
    ========================================================================== */
 const TFAR=34,YBK=144,YBS=4;           // how far the ground is drawn; how finely hidden-behind-a-hill is remembered for sprites
 const YB=new Int16Array(VW*YBK);       // for each screen column and distance: the lowest screen row not yet covered by nearer ground
-let TERRS={},TERR_NOW=null,CAMZ=.5,TC=null;
+let TERRS={},TERR_NOW=null,TERR_BLOCK=null,CAMZ=.5,TC=null;
 function tsmooth(x,y,seed){const x0=Math.floor(x),y0=Math.floor(y),fx=x-x0,fy=y-y0,sx=fx*fx*(3-2*fx),sy=fy*fy*(3-2*fy),h=(i,j)=>hash2(i,j,seed);return (h(x0,y0)*(1-sx)+h(x0+1,y0)*sx)*(1-sy)+(h(x0,y0+1)*(1-sx)+h(x0+1,y0+1)*sx)*sy}
 function dsDuneShape(x,y,len,seed){ // long gentle windward slope, shorter slip face, crests that wander
   const n1=tsmooth(x/40,y/40,seed)*2-1,n2=tsmooth(x/13,y/13,seed+1)*2-1;
@@ -7568,16 +7569,17 @@ function dsDuneShape(x,y,len,seed){ // long gentle windward slope, shorter slip 
   return sm*.82+.18*tsmooth(x/7,y/7,seed+2);
 }
 const TERR_SPEC={
-  41:{amp:1.25,len:17,seed:11,mask:(x,y)=>clamp((rdBiome(x,y)-.45)*2.2,0,1)},
-  43:{amp:1.6,len:21,seed:23,mask:()=>1},
-  60:{amp:1.0,len:19,seed:37,mask:()=>1}
+  41:{amp:1.25,len:17,seed:11,peak:6.5,mask:(x,y)=>clamp((rdBiome(x,y)-.45)*2.2,0,1)},
+  43:{amp:1.6,len:21,seed:23,peak:7,mask:()=>1},
+  60:{amp:1.0,len:19,seed:37,peak:6,mask:()=>1}
 };
+const MTN_BAND=14,MTN_BLOCK=1.7; // mountains rise over the last fourteen cells before a sky wall; above this height they cannot be climbed
 function terrFor(n){
   if(TERRS[n]!==undefined)return TERRS[n];
   const spec=TERR_SPEC[n],L=LEVELS[n];if(!spec||!L)return TERRS[n]=null;
   const rows=L.rows,H=rows.length,W=rows[0].length,h=new Float32Array(W*H),open=new Uint8Array(W*H);
-  const flat=[[L.start.x,L.start.y,6]];
-  rows.forEach((r,y)=>{for(let x=0;x<W;x++){const c=r[x];if(c==='.')open[y*W+x]=1;else if(c>='0'&&c<='9')flat.push([x,y,5])}});
+  const flat=[[L.start.x,L.start.y,6]],gates=[[L.start.x,L.start.y]];
+  rows.forEach((r,y)=>{for(let x=0;x<W;x++){const c=r[x];if(c==='.')open[y*W+x]=1;else if(c>='0'&&c<='9'){flat.push([x,y,5]);gates.push([x,y])}}});
   for(const d of L.decor||[])if(/^(chest|dpillar|danubis|dbastet|dsphinx|dobelisk|dpharaoh|treasure|offering|vase|brazier|dsutstatue|sarcoph|dburrow|teleporter)/.test(d.k))flat.push([d.x,d.y,3.5]);
   if(n===60)flat.push([BDN.OX,BDN.OY,9]);                       // the oasis lies flat
   if(n===43)for(let y=RS.NORTH;y<130;y+=3)flat.push([rsCentre(y),y,4.5]); // so does the old paved road
@@ -7588,6 +7590,32 @@ function terrFor(n){
     if(!open[y*W+x])continue;
     const a=spec.amp*spec.mask(x,y);if(a<.01)continue;
     h[y*W+x]=a*dsDuneShape(x,y,spec.len,spec.seed)*(1-keep(x,y));
+  }
+  // mountains: along every sky wall the land climbs into a range, so the edge of the level is a mountainside and not a wall;
+  // they keep clear of every door, gate and arrival point, which are left in a wide pass
+  const dw=new Float32Array(W*H).fill(1e9);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(rows[y][x]==='D')dw[y*W+x]=0;
+  const relax=(i,j,c)=>{if(dw[j]+c<dw[i])dw[i]=dw[j]+c};
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(x>0)relax(i,i-1,1);if(y>0){relax(i,i-W,1);if(x>0)relax(i,i-W-1,1.41);if(x<W-1)relax(i,i-W+1,1.41)}}
+  for(let y=H-1;y>=0;y--)for(let x=W-1;x>=0;x--){const i=y*W+x;if(x<W-1)relax(i,i+1,1);if(y<H-1){relax(i,i+W,1);if(x<W-1)relax(i,i+W+1,1.41);if(x>0)relax(i,i+W-1,1.41)}}
+  const rk=new Float32Array(W*H),block=new Uint8Array(W*H);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const i=y*W+x;if(!open[i]||dw[i]>=MTN_BAND)continue;
+    let dm=1e9;for(let k=0;k<gates.length;k++){const dx=x-gates[k][0],dy=y-gates[k][1],d=dx*dx+dy*dy;if(d<dm)dm=d}
+    const supp=clamp((Math.sqrt(dm)-8)/10,0,1);if(supp<=0)continue;
+    const rg=1-Math.abs(2*tsmooth(x/5.5,y/5.5,spec.seed+6)-1),m=Math.pow(1-dw[i]/MTN_BAND,1.35)*(.5+.8*tsmooth(x/10,y/10,spec.seed+5))*(.62+.62*rg)*supp,hm=spec.peak*m+m*.9*(tsmooth(x/2.5,y/2.5,spec.seed+7)-.5);  // ridges and crags, not smooth humps
+    h[i]+=hm;rk[i]=clamp(hm/2,0,1);if(hm>MTN_BLOCK)block[i]=1;
+  }
+  // nothing stands inside a mountain
+  const cellOf=(x,y)=>y*W+x;
+  for(const list of [L.enemies,L.items,L.decor])if(list)for(let q=list.length-1;q>=0;q--){const e=list[q];if(block[cellOf(e.x,e.y)])list.splice(q,1)}
+  if(L.scenery)for(let q=L.scenery.length-1;q>=0;q--){const e=L.scenery[q];if(block[cellOf(e.wx|0,e.wy|0)])L.scenery.splice(q,1)}
+  // low foliage round the feet of the mountains
+  L.scenery=L.scenery||[];
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){
+    const i=y*W+x;if(!open[i]||block[i])continue;
+    const m=rk[i];if(m<.06||m>.7)continue;
+    if(hash2(x,y,707)<.1+.1*m){const k='dshrub'+((hash2(x,y,708)*3)|0);L.scenery.push({k,wx:x+.5+(hash2(x,y,709)-.5)*.8,wy:y+.5+(hash2(x,y,710)-.5)*.8,sc:.8+hash2(x,y,711)*.9,decor:{k,walk:true,x,y}})}
   }
   // walls take the height of the open ground beside them
   const g2=new Float32Array(h);
@@ -7602,8 +7630,9 @@ function terrFor(n){
     const K=3.4,nl=Math.hypot(hx*K,hy*K,1),dif=(hx*K*.55+hy*K*.35+.76)/nl;   // facing the light is high, the lee side is low
     s[i]=clamp(.18+1.0*dif,.42,1.2);
   }
-  return TERRS[n]={W,H,h:sm,s};
+  return TERRS[n]={W,H,h:sm,s,rk,block};
 }
+function terrRock(){const t=TEX[LEVEL===43?DS_TEXREG.cliffR:DS_TEXREG.cliffY];return {d:t&&t.d,tint:LEVEL===60?[.8,.92,1.22]:[1,1,1]}}
 function terrH(x,y){
   const T=TERR_NOW;if(!T)return 0;
   const gx=clamp(x-.5,0,T.W-1.001),gy=clamp(y-.5,0,T.H-1.001),ix=gx|0,iy=gy|0,fx=gx-ix,fy=gy-iy,i=iy*T.W+ix,h=T.h;
@@ -7612,7 +7641,7 @@ function terrH(x,y){
 // paints the ground along one screen column, from the camera out to tmax, and remembers how much of the column
 // each distance has already covered (so scenery behind a hill can be cut off by it)
 function terrMarch(x,rX,rY,tmax){
-  const T=TERR_NOW,W=T.W,Hh=T.H,h=T.h,sh=T.s,C=TC,D=C.D,cx=C.cx,cy=C.cy,cz=CAMZ,HHv=HH,fm=C.fmp,fds=C.fds,hz=C.hzr,hzmax=C.hzmax,hzrate=C.hzrate,lbm=C.lbm;
+  const T=TERR_NOW,W=T.W,Hh=T.H,h=T.h,sh=T.s,rkA=T.rk,rock=TC.rock,C=TC,D=C.D,cx=C.cx,cy=C.cy,cz=CAMZ,HHv=HH,fm=C.fmp,fds=C.fds,hz=C.hzr,hzmax=C.hzmax,hzrate=C.hzrate,lbm=C.lbm;
   const rl=Math.hypot(rX,rY),base=x*YBK;
   let yb=VH,t=.9,lastK=-1;
   const kR0=lbm*C.tbR,kG0=lbm*C.tbG,kB0=lbm*C.tbB;
@@ -7627,7 +7656,13 @@ function terrMarch(x,rX,rY,tmax){
         const shade=sh[i]*w00+sh[i+1]*w10+sh[i+W]*w01+sh[i+W+1]*w11;
         const cxl=px|0,cyl=py|0,fcc=(fm&&cxl>=0&&cyl>=0&&cxl<W&&cyl<Hh)?fm.charCodeAt(cyl*W+cxl):48,fdd=fds[fcc-48]||fds[0];
         const u=((px-cxl)*TS)|0,v=((py-cyl)*TS)|0,ti=(v*TS+u)*4,dist=t*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv,sk=smv*(lbm*.55+.05);
-        const r=fdd[ti]*kR0*shade*iv+hz[0]*sk,g=fdd[ti+1]*kG0*shade*iv+hz[1]*sk,b=fdd[ti+2]*kB0*shade*iv+hz[2]*sk;
+        let r=fdd[ti]*kR0*shade*iv+hz[0]*sk,g=fdd[ti+1]*kG0*shade*iv+hz[1]*sk,b=fdd[ti+2]*kB0*shade*iv+hz[2]*sk;
+        const rkv=rkA[i]*w00+rkA[i+1]*w10+rkA[i+W]*w01+rkA[i+W+1]*w11;
+        if(rkv>.03&&rock.d){ // rock on the upper slopes, with strata that follow the height
+          const ru=((px*TS*.4)|0)&(TS-1),rv=((hg*TS*.35)|0)&(TS-1),rt=(rv*TS+ru)*4,m=Math.min(1,rkv*1.5),rs=shade*.95+.1;
+          const lc=1+1.5*((rock.d[rt]+rock.d[rt+1]+rock.d[rt+2])/765-.5),ivr=1-smv*.6,skr=sk*.5;   // mountains stay readable through the haze
+          r=r*(1-m)+(rock.d[rt]*rock.tint[0]*kR0*rs*lc*ivr+hz[0]*skr)*m;g=g*(1-m)+(rock.d[rt+1]*rock.tint[1]*kG0*rs*lc*ivr+hz[1]*skr)*m;b=b*(1-m)+(rock.d[rt+2]*rock.tint[2]*kB0*rs*lc*ivr+hz[2]*skr)*m;
+        }
         let o=(ys*VW+x)*4;
         for(let y=ys;y<ye;y++,o+=VW*4){D[o]=r;D[o+1]=g;D[o+2]=b}
       }
@@ -7762,6 +7797,7 @@ function freeNear(x,y,rad,count){
   return out;
 }
 function desertBump(nx,ny,g){
+  if(TERR_BLOCK&&TERR_BLOCK[ny*MW+nx]){sfx('bump');msg('The mountainside is too steep to climb.','#d8c8a0');return true}
   { // the door in the side of a mound: walk into it
     const d=G.decor.find(q=>q.enter&&q.x===nx&&q.y===ny&&!q.found);
     if(d){sfx('door');goToLevel(d.enter.to,{x:d.enter.x,y:d.enter.y,f:d.enter.f});return true}

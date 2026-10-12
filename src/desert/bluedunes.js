@@ -3,7 +3,7 @@
    pale blue sand in long smooth swells, almost nothing living on it, and a tiny oasis in the middle with food and water.
    The edge of the land is the same moving sky as the rest of the desert.
    ========================================================================== */
-const BDN={W:150,H:150,OX:75,OY:75};
+const BDN={W:220,H:220,OX:110,OY:110};
 const DS_BLU=['#dbe8f6','#b4cdea','#86a6d4','#6684ba','#445d94'];
 function buildBlueDunes(){
   const W=BDN.W,H=BDN.H,rows=[],fm=[],R=(x,y,k)=>hash2(x,y,k),cx=BDN.OX,cy=BDN.OY;
@@ -33,14 +33,14 @@ function buildBlueDunes(){
   ['dates','water','dates','water','dates','water','apple','bread','water'].forEach((k,i)=>{const [dx,dy]=spots[i];items.push({k,x:Math.round(cx+dx),y:Math.round(cy+dy)})});
   // a few creatures: three small groups, far from the cave and the oasis
   const camp=(t,x,y,n,lvl)=>{let p=0;for(let k=0;k<n*8&&p<n;k++){const ex=x+Math.round((R(x,y,100+k)*2-1)*3),ey=y+Math.round((R(x,y,160+k)*2-1)*3);if(!enemies.some(e=>e.x===ex&&e.y===ey)&&!items.some(i=>i.x===ex&&i.y===ey)){enemies.push({t,x:ex,y:ey,lvl});p++}}};
-  camp('scorpion',34,38,2,16);camp('dwolf',118,52,2,15);camp('scorpion',104,118,2,16);camp('dwolf',38,112,1,15);
+  camp('scorpion',50,56,2,16);camp('dwolf',172,76,2,15);camp('scorpion',152,172,2,16);camp('dwolf',56,164,1,15);camp('scorpion',110,40,2,16);camp('dwolf',110,184,2,15);camp('scorpion',190,120,1,16);
   return {rows,fm,decor,scen,enemies,items,start:{x:2,y:cy,f:1}};
 }
 const BLUEDUNES=buildBlueDunes();
 // the way in: a small, low cave in the east wall of the Sand Road
 const BLUECAVE=(()=>{
   const rows=LEVEL41_DATA.rows;let best=null;
-  for(let y=60;y<140;y++){const r=rows[y];for(let x=r.length-3;x>40;x--){if(r[x]==='.'&&r[x+1]==='D'){if(!best||x>best.x)best={x,y};break}}}
+  for(let y=90;y<200;y++){const r=rows[y];for(let x=r.length-3;x>40;x--){if(r[x]==='.'&&r[x+1]==='D'){if(!best||x>best.x)best={x,y};break}}}
   const {x,y}=best;
   rows[y]=rows[y].slice(0,x+1)+'2'+rows[y].slice(x+2);
   for(const list of [SANDROAD.decor,SANDROAD.scen,SANDROAD.enemies])for(let i=list.length-1;i>=0;i--){const d=list[i],dx=(d.x!==undefined?d.x:Math.floor(d.wx))-x,dy=(d.y!==undefined?d.y:Math.floor(d.wy))-y;if(Math.abs(dx)<=3&&Math.abs(dy)<=3)list.splice(i,1)}

@@ -14,6 +14,7 @@ function freeNear(x,y,rad,count){
   return out;
 }
 function desertBump(nx,ny,g){
+  if(TERR_BLOCK&&TERR_BLOCK[ny*MW+nx]){sfx('bump');msg('The mountainside is too steep to climb.','#d8c8a0');return true}
   { // the door in the side of a mound: walk into it
     const d=G.decor.find(q=>q.enter&&q.x===nx&&q.y===ny&&!q.found);
     if(d){sfx('door');goToLevel(d.enter.to,{x:d.enter.x,y:d.enter.y,f:d.enter.f});return true}

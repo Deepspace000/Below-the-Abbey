@@ -6,6 +6,7 @@ function teleSpot(n){
   const L=LEVELS[n];if(!L)return null;if(L._tele)return L._tele;if(L.tele)return L._tele=L.tele;
   const rows=L.rows,H=rows.length,W=rows[0].length,st=L.start;
   const solid=new Set((L.decor||[]).filter(d=>d.block!==false).map(d=>d.x+','+d.y)),bad=new Set(solid); // solid scenery and people cannot be walked through, so the stone is never put behind them
+  const tb=typeof terrFor==='function'?terrFor(n):null;if(tb)for(let q=0;q<tb.block.length;q++)if(tb.block[q]){const k=(q%tb.W)+','+((q/tb.W)|0);solid.add(k);bad.add(k)}
   for(const e of L.enemies||[])bad.add(e.x+','+e.y);
   for(const it of L.items||[])bad.add(it.x+','+it.y);
   const nearDoor=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const c=(rows[y+dy]||'')[x+dx];if(c&&c!=='.'&&/[0-9]/.test(c))return true}return false};
