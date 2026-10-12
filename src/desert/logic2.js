@@ -63,8 +63,8 @@ function desertLoot(d){
   const r=k=>hash2(d.x,d.y,100+k),items=[],add=(id,n)=>{if(ITEMDEF[id])items.push({id,n:ITEMDEF[id].stack?(n||1):1})};
   const lv=LEVELS[LEVEL].diff||15,pick=a=>a[Math.floor(r(9)*a.length)],rings=['ringM','ringS','ringW','ringV'];
   if(d.k==='sarcoph'||d.k==='sarcophU'){d.gold=d.goldAmt||(60+Math.floor(r(1)*70)+lv*4);if(r(2)<.5)add('potion',1+(r(3)<.4?1:0));if(r(4)<.22)add(pick(DS_MAGIC_TOMB));else if(r(5)<.3)add(pick(rings));return items}
-  if(/^vase\d$/.test(d.k)){d.gold=d.goldAmt||(10+Math.floor(r(1)*40)+lv);if(r(2)<.2)add('potion',1);else if(r(3)<.12)add(pick(rings));return items}
-  if(d.k==='treasure'){d.gold=d.goldAmt||(180+Math.floor(r(1)*220)+lv*8);add('potion',2);if(r(2)<.55)add(pick(DS_MAGIC_TOMB));else add(pick(rings));return items}
+  if(/^vase\d$/.test(d.k)){d.gold=d.goldAmt||(10+Math.floor(r(1)*40)+lv);if(r(2)<.2)add('potion',1);else if(!d.plain&&r(3)<.12)add(pick(rings));return items}
+  if(d.k==='treasure'){d.gold=d.goldAmt||(180+Math.floor(r(1)*220)+lv*8);add('potion',2);if(d.plain){}else if(r(2)<.55)add(pick(DS_MAGIC_TOMB));else add(pick(rings));return items}
   if(d.k==='offering'){d.gold=d.goldAmt||(30+Math.floor(r(1)*40));add('bread',2);add('potion',1);return items}
   if(d.k==='chest'){d.gold=d.goldAmt||(130+Math.floor(r(1)*160)+lv*3);add('potion',2);if(d.magic)add(d.magic);else if(r(2)<.45)add(pick(DS_MAGIC_TOMB));else add(pick(rings));add(foodFor(r(6)),1);return items}
   return null;
