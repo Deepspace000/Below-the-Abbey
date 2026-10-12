@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.56';
+const VERSION='2.57';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -8042,6 +8042,13 @@ Object.assign(ENEMY_DEF,{
   thin(41,{dwolf:12,nomad:18});
   thin(42,{scorpion:10,mummy:4});
   thin(43,{scorpion:12,nomad2:5,nomad:6,mummy:4,dwolf:3});
+})();
+
+// more skeletons, fewer wolves: every second desert wolf in the open deserts becomes a skeleton, and a few more skeletons walk the tomb
+(function wolvesToSkeletons(){
+  for(const lv of [41,43,60,61,62,63,64]){let i=0;for(const e of LEVELS[lv].enemies)if(e.t==='dwolf'){if(i++%2===0)e.t='dskeleton'}}
+  let n=0;for(const e of LEVELS[42].enemies)if(e.t==='scorpion'&&n<3&&hash2(e.x,e.y,556)<.35){e.t='dskeleton';n++}
+  for(const e of LEVELS[42].enemies)if(e.t==='scorpion'&&n<3){e.t='dskeleton';n++}
 })();
 
 /* ---- src/desert/terrain.js ---- */

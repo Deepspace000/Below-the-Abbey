@@ -152,3 +152,10 @@ Object.assign(ENEMY_DEF,{
   thin(42,{scorpion:10,mummy:4});
   thin(43,{scorpion:12,nomad2:5,nomad:6,mummy:4,dwolf:3});
 })();
+
+// more skeletons, fewer wolves: every second desert wolf in the open deserts becomes a skeleton, and a few more skeletons walk the tomb
+(function wolvesToSkeletons(){
+  for(const lv of [41,43,60,61,62,63,64]){let i=0;for(const e of LEVELS[lv].enemies)if(e.t==='dwolf'){if(i++%2===0)e.t='dskeleton'}}
+  let n=0;for(const e of LEVELS[42].enemies)if(e.t==='scorpion'&&n<3&&hash2(e.x,e.y,556)<.35){e.t='dskeleton';n++}
+  for(const e of LEVELS[42].enemies)if(e.t==='scorpion'&&n<3){e.t='dskeleton';n++}
+})();
