@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.76';
+const VERSION='2.77';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -6160,15 +6160,16 @@ function drawMenu(){
   if(G.menu==='snd'){drawSnd();return}
   BTNS=[];veil(.6);bigPanel(90,12,300,296);
   txt('MENU',240,30,14,'#d8c88e','center',true);
-  txt('Version '+VERSION,240,298,8,'#9a8a68','center');
+  txt('Version '+VERSION,240,302,7,'#9a8a68','center');
   btnText('resume','Resume',170,44,140,26);
   btnText('quests',anyQuestReady()?'Quests  *':'Quests',100,76,130,26);btnText('ach','Achievements',250,76,130,26);
   btnText('mute','Sound',100,108,130,26);btnText('gfx','Graphics',250,108,130,26);
   btnText('savemenu','Save / Load',100,140,130,26);btnText('overview','Level layout',250,140,130,26);
   btnText('newparty','New party',100,172,130,26);btnText('restart','Restart game',250,172,130,26);
-  const L=['W / S: forward and back   A / D: step sideways   Q / E: turn   (arrow keys work too)','Space: attack   X: special   P: potion   Z: wait   R: rest','1-4: choose hero   I: inventory   J: quests   M: map   Esc: menu','',
+  btnText('quittitle','Quit to title',170,204,140,24);
+  const L=['W / S: forward and back   A / D: step sideways   Q / E: turn   (arrow keys work too)','Space: attack   X: special   P: potion   Z: wait   R: rest','1-4: choose hero   I: inventory   J: quests   M: map   Esc: menu',
     'Tap a portrait to open that hero\'s inventory.','Tap people, goats, torches and items in the view.','You can also walk into a person to talk to them.','Heroes act once per round, then the monsters move.'];
-  L.forEach((s,i)=>txt(s,240,214+i*10.5,8,'#d8c9a0','center'));
+  L.forEach((s,i)=>txt(s,240,240+i*9.5,8,'#d8c9a0','center'));
   btn('menuclose',0,0,DW,DH); BTNS.unshift(BTNS.pop());
 }
 function drawFullMap(){
@@ -6366,7 +6367,8 @@ function handleBtn(id){
     else if(id==='savemenu'){openSaves('menu')}
     else if(id==='overview'){G.menu=false;G.overview=true}
     else if(id==='newparty'){backupAuto();G.menu=false;crInit();G.state='create'}
-    else if(id==='restart'){backupAuto();reset();G.state='play';audioInit();msg('You wake in the crypts below the abbey. Something is scratching in the dark...')}
+    else if(id==='restart'){backupAuto();writeSave('auto');G.menu=false;G.cut=null;G.talk=null;G.loot=null;G.overview=false;G.state='title'}
+    else if(id==='quittitle'){writeSave('auto');G.menu=false;G.cut=null;G.talk=null;G.loot=null;G.overview=false;G.state='title'}
     return;
   }
   if(id==='menu'){G.menu=true;return}
