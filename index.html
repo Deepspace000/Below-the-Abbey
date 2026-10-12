@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.10';
+const VERSION='2.11';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -255,7 +255,7 @@ function flameEmissive(f,red){
   return flameMemo[key]=e;
 }
 let FLAMES=[],GLOWS=[];
-const TORCH_OUT=.3,TORCH_RISE=.27; // how far a wall torch stands out from the wall, and how much higher its head is than where it is fixed, in cells
+const TORCH_OUT=.14,TORCH_RISE=.5,TORCH_ZA=-.2; // how far a wall torch stands out from the wall, and how much higher its head is than where it is fixed, in cells
 function makeFlames(){
   for(const red of [false,true]){
     for(let f=0;f<FLAME_FRAMES;f++){
@@ -2390,7 +2390,7 @@ function render3D(){
     const L=h.L;if(h.type!=='torch'||h.ty<.4||L.key<0)continue;
     const dd=DIRS[L.key&3],ax=L.x-dd[0]*TORCH_OUT,ay=L.y-dd[1]*TORCH_OUT,rx=ax-cx,ry=ay-cy,t2=(-1/PL)*(-pY*rx+pX*ry),x2=(-1/PL)*(dY*rx-dX*ry);
     if(t2<.25)continue;
-    const sx2=VW/2*(1+x2/t2),zA=CEILH*.5-.06,y2=HH-(zA-EYE)*F/t2,y1=HH-(zA+TORCH_RISE-EYE)*F/h.ty,w1=.11*F/h.ty,w2=.075*F/t2;
+    const sx2=VW/2*(1+x2/t2),zA=CEILH*.5+TORCH_ZA,y2=HH-(zA-EYE)*F/t2,y1=HH-(zA+TORCH_RISE-EYE)*F/h.ty,w1=.11*F/h.ty,w2=.075*F/t2;
     const lit=clamp(.8+.3*Math.max(0,1-h.ty/6),.6,1.2);
     vctx.save();vctx.globalAlpha=1;
     vctx.fillStyle='rgb('+((64*lit)|0)+','+((58*lit)|0)+','+((50*lit)|0)+')'; // the iron plate fixed to the wall
@@ -2407,7 +2407,7 @@ function render3D(){
   vctx.save();vctx.globalCompositeOperation='lighter';
   for(const h of G.hits){
     if(h.type!=='torch'||h.ty<.4)continue;
-    const L=h.L,w=.42*F/h.ty,hh=w*1.5,base=HH-(CEILH*.5-.06+TORCH_RISE-EYE)*F/h.ty,fi=(Math.floor(t*10)+((L.key*7)&7))&7,ri=L.red?1:0;
+    const L=h.L,w=.42*F/h.ty,hh=w*1.5,base=HH-(CEILH*.5+TORCH_ZA+TORCH_RISE-EYE)*F/h.ty,fi=(Math.floor(t*10)+((L.key*7)&7))&7,ri=L.red?1:0;
     vctx.globalAlpha=.5+.12*Math.sin(t*13+L.ph);vctx.drawImage(GLOWS[ri],h.sx-w*1.7,base-hh*.4-w*1.7,w*3.4,w*3.4);
     vctx.globalAlpha=1;vctx.drawImage(FLAMES[ri*8+fi],h.sx-w/2,base-hh*.94,w,hh);
   }
