@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='1.94';
+const VERSION='1.95';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2747,7 +2747,7 @@ const BAGX=163,BAGY=8,BCELL=43,BPITCH=46,BAGH=232,BCOLS=3;
 const bagRows=()=>Math.ceil(BAGCAP/BCOLS);
 const maxScroll=()=>Math.max(0,bagRows()*BPITCH-BAGH);
 function wrapText(s,maxW,size){
-  ctx.font=`${size*1.08}px ${FTXT}`;const words=s.split(' '),lines=[];let cur='';
+  ctx.font=`${size*1.08}px ${FUI}`;maxW*=.96;const words=s.split(' '),lines=[];let cur='';
   for(const w of words){const t=cur?cur+' '+w:w;if(ctx.measureText(t).width>maxW&&cur){lines.push(cur);cur=w}else cur=t}
   if(cur)lines.push(cur);return lines;
 }
@@ -4756,9 +4756,9 @@ function drawCut(){
   ctx.save();
   ctx.fillStyle='rgba(12,9,5,.9)';rrect(ctx,bx,by,bw,bh,4);ctx.fill();
   ctx.lineWidth=2.2;ctx.strokeStyle=goldG(bx,by,bw,bh);rrect(ctx,bx,by,bw,bh,4);ctx.stroke();wornEdge(bx,by,bw,bh,4);illum(bx,by,bw,bh,31);
-  if(ln.who){ctx.fillStyle='rgba(8,6,4,.88)';rrect(ctx,4,4,140,22,5);ctx.fill();ctx.lineWidth=1.6;ctx.strokeStyle=goldG(4,4,140,22);rrect(ctx,4,4,140,22,5);ctx.stroke();txt(ln.who.toUpperCase(),14,15,11,ln.hi!==undefined?heroSpeech(ln.hi):'#d8c88e','left',true)}
+  if(ln.who){ctx.fillStyle='rgba(8,6,4,.88)';rrect(ctx,4,4,140,22,5);ctx.fill();ctx.lineWidth=1.6;ctx.strokeStyle=goldG(4,4,140,22);rrect(ctx,4,4,140,22,5);ctx.stroke();txt(ln.who.toUpperCase(),14,15,11,ln.hi!==undefined?heroSpeech(ln.hi):'#d8c88e','left',true,undefined,126)}
   let left=shown,y=by+20;
-  for(const s of lines){const part=s.slice(0,Math.max(0,left));left-=s.length+1;if(part)txt(part,bx+13,y,10.5,ln.hi!==undefined?heroSpeech(ln.hi):'#e6d9b0','left');y+=13.5}
+  for(const s of lines){const part=s.slice(0,Math.max(0,left));left-=s.length+1;if(part)txt(part,bx+13,y,10.5,ln.hi!==undefined?heroSpeech(ln.hi):'#e6d9b0','left',false,undefined,bw-26);y+=13.5}
   if(shown>=ln.text.length&&((G.time*2)|0)%2===0){ctx.fillStyle='#d8c88e';ctx.beginPath();ctx.moveTo(bx+bw-18,by+bh-12);ctx.lineTo(bx+bw-10,by+bh-12);ctx.lineTo(bx+bw-14,by+bh-6);ctx.closePath();ctx.fill()}
   ctx.restore();
 }
@@ -5128,18 +5128,18 @@ function drawTalk(){
   ctx.fillStyle='rgba(12,9,5,.94)';rrect(ctx,bx,by,bw,bh,4);ctx.fill();
   ctx.lineWidth=2.2;ctx.strokeStyle=goldG(bx,by,bw,bh);rrect(ctx,bx,by,bw,bh,4);ctx.stroke();wornEdge(bx,by,bw,bh,4);
   ctx.fillStyle='rgba(8,6,4,.92)';rrect(ctx,bx+6,by-15,170,20,5);ctx.fill();ctx.lineWidth=1.6;ctx.strokeStyle=goldG(bx+6,by-15,170,20);rrect(ctx,bx+6,by-15,170,20,5);ctx.stroke();
-  txt(T.n.name.toUpperCase(),bx+16,by-5,10,'#d8c88e','left',true);
+  txt(T.n.name.toUpperCase(),bx+16,by-5,10,'#d8c88e','left',true,undefined,150);
   if(img){
     ctx.save();ctx.beginPath();ctx.rect(bx+8,by+10,60,62);ctx.clip();ctx.fillStyle='rgba(60,50,36,.7)';ctx.fillRect(bx+8,by+10,60,62);
     const iw=img.width,ih=img.height,sh=Math.min(ih,iw*1.05);ctx.drawImage(img,0,0,iw,sh,bx+8,by+10,60,60*sh/iw);ctx.restore();
     ctx.lineWidth=1.6;ctx.strokeStyle=goldG(bx+8,by+10,60,62);rrect(ctx,bx+8,by+10,60,62,3);ctx.stroke();
   }
   let left=shown,y=by+18;
-  for(const s of lines){const part=s.slice(0,Math.max(0,left));left-=s.length+1;if(part)txt(part,tx,y,10,'#e6d9b0','left');y+=12.5}
+  for(const s of lines){const part=s.slice(0,Math.max(0,left));left-=s.length+1;if(part)txt(part,tx,y,10,'#e6d9b0','left',false,undefined,tw);y+=12.5}
   if(done)nd.opts.forEach((o,i)=>{
     const ox=tx,ow=bx+bw-tx-8,oy=by+bh-optH-4+i*17;
     ctx.fillStyle='rgba(44,32,14,.92)';rrect(ctx,ox,oy,ow,15,3);ctx.fill();ctx.lineWidth=1.2;ctx.strokeStyle=goldG(ox,oy,ow,15);rrect(ctx,ox,oy,ow,15,3);ctx.stroke();
-    txt(`${i+1}.  ${o[0]}`,ox+8,oy+8,9.5,'#e0d09a','left');
+    txt(`${i+1}.  ${o[0]}`,ox+8,oy+8,9.5,'#e0d09a','left',false,undefined,ow-16);
     T.btns.push({id:'tk'+i,x:ox,y:oy,w:ow,h:15});
   });
   else if(!nd.opts.length&&((G.time*2)|0)%2===0){ctx.fillStyle='#d8c88e';ctx.beginPath();ctx.moveTo(bx+bw-18,by+bh-12);ctx.lineTo(bx+bw-10,by+bh-12);ctx.lineTo(bx+bw-14,by+bh-6);ctx.closePath();ctx.fill()}
