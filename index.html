@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.42';
+const VERSION='2.43';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1754,10 +1754,10 @@ function heroSpecial(i){
 }
 const portraitX=i=>6+i*40;
 /* ==========================================================================
-   POWERS: every class gains a power at levels 1, 4, 7, 10, 13, 16, 18 and 20.
+   POWERS: every class gains a power at levels 1, 10, 20, 30, 40, 50, 60, 70 and 80.
    Some are passive (always on), some are active (used from the Special button or the Powers tab).
    ========================================================================== */
-const POWER_LV=[1,4,7,10,13,16,18,20];
+const POWER_LV=[1,10,20,30,40,50,60,70,80]; // a new power every ten levels, up to level 80
 const actP=(lv,name,cost,type,d,o)=>Object.assign({lv,name,cost,type,d,act:true},o||{});
 const pas_=(lv,name,d,pas)=>({lv,name,d,act:false,pas});
 const EXTRA_POWERS={
@@ -1840,7 +1840,7 @@ const EXTRA_POWERS={
     pas_(13,'Sanctuary','Armor +3 and max health +8.',{armor:3,maxhp:8}),
     actP(16,'Revive',12,'revive','Raises one fallen ally with 40% health.',{pct:.4}),
     actP(18,'Greater Heal',8,'healx','Heals the most wounded ally for 24-34.',{amt:[24,34]}),
-    actP(20,'Divine Intervention',16,'healx','Fully heals every living ally.',{all:1,full:1})],
+    actP(20,'Divine Intervention',16,'healx','Heals every living ally for 35% of their maximum health.',{all:1,pct:.35})],
   Monk:[
     pas_(4,'Inner Calm','Enemies miss 8% more often. Hunger falls 30% slower.',{dodge:.08,hungerSlow:.3}),
     actP(7,'Flurry of Blows',4,'multi','Three strikes that never miss, each at full damage.',{n:3,m:1}),
@@ -1858,7 +1858,17 @@ const EXTRA_POWERS={
     actP(18,'Rampage',7,'multi','Three butts that never miss, each at 1.3 times damage.',{n:3,m:1.3}),
     actP(20,'Legend of the Mountain',10,'melee','Five times weapon damage and the target is dazed.',{m:5,a:0,daze:1})]
 };
-for(const c of CLASSES)c.powers=[Object.assign({lv:1,act:true},c.sp)].concat(EXTRA_POWERS[c.name]||[]);
+const CAPSTONE={Warrior:['Warlord','Max health +30, all damage +10%.',{maxhp:30,dmgPct:.1}],Barbarian:['Primal Rage','All damage +15% and max health +25.',{dmgPct:.15,maxhp:25}],
+  Paladin:['Aura of Light','Armor +4 and all damage +10%.',{armor:4,dmgPct:.1}],Ranger:['Master of the Wild','+8% to hit and 10% more double damage.',{hitPct:.08,crit:.1}],
+  Archer:['Legendary Marksman','All damage +15% and 10% more double damage.',{dmgPct:.15,crit:.1}],Thief:['Ghost','Enemies miss 10% more often and 10% more double damage.',{dodge:.1,crit:.1}],
+  Assassin:['Angel of Death','All damage +15% and 10% more double damage.',{dmgPct:.15,crit:.1}],Mage:['Archmage','Spell damage +30% and recover 1 mana every 3 rounds.',{spellPct:.3,mpRegen:.34}],
+  Sorcerer:['Living Storm','Spell damage +30% and recover 1 mana every 3 rounds.',{spellPct:.3,mpRegen:.34}],Priest:['Saint','Healing is 30% stronger and max health +20.',{healPct:.3,maxhp:20}],
+  Monk:['Enlightenment','All damage +15%, armor +3 and enemies miss 8% more often.',{dmgPct:.15,armor:3,dodge:.08}],Goat:['Mountain King','Max health +30, armor +3 and enemies miss 8% more often.',{maxhp:30,armor:3,dodge:.08}]};
+for(const c of CLASSES){
+  c.powers=[Object.assign({lv:1,act:true},c.sp)].concat(EXTRA_POWERS[c.name]||[]);
+  const cs=CAPSTONE[c.name];if(cs)c.powers.push(pas_(80,cs[0],cs[1],cs[2]));
+  c.powers.forEach((p,k)=>{p.lv=POWER_LV[k]||p.lv});
+}
 const NEWT=['multi','ranged','aoe','daze','buff','healx','revive','drain'];
 function pas(hi,key){
   const h=G.heroes[hi];if(!h)return 0;let s=0;
@@ -1885,7 +1895,7 @@ function powerNew(i,P){
     if(!live.length){msg('Everyone is already healthy.');return false}
     h.mp-=P.cost;const mult=1+pas(i,'healPct');let who=live;
     if(!P.all){let best=live[0];for(const j of live)if(G.heroes[j].hp/G.heroes[j].max<G.heroes[best].hp/G.heroes[best].max)best=j;who=[best]}
-    for(const j of who){const g=G.heroes[j],amt=P.full?g.max-g.hp:Math.round((rnd(P.amt[0],P.amt[1])+Math.floor(Math.max(0,h.int-8)/3))*mult);
+    for(const j of who){const g=G.heroes[j],amt=P.pct?Math.round(g.max*P.pct*mult):Math.round((rnd(P.amt[0],P.amt[1])+Math.floor(Math.max(0,h.int-8)/3))*mult);
       g.hp=Math.min(g.max,g.hp+amt);addFloat(portraitX(j)+19,250,'+'+amt,'#7fe08a')}
     sfx('heal');msg(`${def.name} uses ${P.name}.`,'#9ae0a0');return true;
   }
@@ -1950,8 +1960,8 @@ function drawPowerLadder(hi){
   if(I.pw===undefined)I.pw=0;
   txt(`${def.name} - ${def.cls}`,234,14,9.5,heroSpeech(hi),'center',true,undefined,140);
   c.powers.forEach((p,k)=>{
-    const y=22+k*27,open=h.lvl>=p.lv,chosen=p.act&&(h.powSel||0)===k&&open,sel=I.pw===k;
-    ctx.save();rrect(ctx,164,y,140,25,4);ctx.fillStyle=sel?'rgba(78,26,18,.96)':'rgba(46,14,14,.9)';ctx.fill();
+    const y=22+k*26,open=h.lvl>=p.lv,chosen=p.act&&(h.powSel||0)===k&&open,sel=I.pw===k;
+    ctx.save();rrect(ctx,164,y,140,24,4);ctx.fillStyle=sel?'rgba(78,26,18,.96)':'rgba(46,14,14,.9)';ctx.fill();
     ctx.lineWidth=sel?2.2:1.3;ctx.strokeStyle=chosen?'#ffd76a':sel?'#d8b04a':'#7a6440';ctx.stroke();ctx.restore();
     ctx.globalAlpha=open?1:.42;
     txt('Lv '+p.lv,170,y+12.5,8,open?'#d8c88e':'#8a7a62','left',true);
