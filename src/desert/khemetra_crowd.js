@@ -56,16 +56,28 @@ function khCrowd(C,L){
   const hq=near(KH_HATCH.x,KH_HATCH.y,2,false)||[KH_HATCH.x,KH_HATCH.y];
   KH_HATCH.x=hq[0];KH_HATCH.y=hq[1];
   decor.push({k:'dhatch',x:hq[0],y:hq[1],block:true,enter:{to:KH_CISTERN,x:1,y:29,f:0},hatch:true});occ[idx(hq[0],hq[1])]=1;
-  // ---- palms, vases and lamps along the streets ----
+  // ---- palms, vases and lamps along the streets: how wide a street is decides how much stands in it ----
+  const run=new Uint8Array(W*H*2);
+  for(let y=0;y<H;y++){let x=0;while(x<W){if(!open(x,y)){x++;continue}let e=x;while(e<W&&open(e,y))e++;for(let k=x;k<e;k++)run[idx(k,y)*2]=Math.min(255,e-x);x=e}}
+  for(let x=0;x<W;x++){let y=0;while(y<H){if(!open(x,y)){y++;continue}let e=y;while(e<H&&open(x,e))e++;for(let k=y;k<e;k++)run[idx(x,k)*2+1]=Math.min(255,e-y);y=e}}
+  const width=i=>Math.min(run[i*2],run[i*2+1]);
+  const wallNear=(x,y)=>KH_DIRS.some(([a,b])=>!open(x+a,y+b));
   for(let y=4;y<H-4;y++)for(let x=4;x<W-4;x++){
     const i=idx(x,y);if(occ[i]||!open(x,y)||!C.reach[i])continue;
-    const r=khHash(x,y,11);
+    const r=khHash(x,y,11),wd=width(i),z=C.zone[i];
+    if(z===0&&wd<5){ // a narrow street: a few things along the walls, the middle kept free
+      if(!d3[i]&&wd<3)continue;
+      if(!wallNear(x,y))continue;
+      if(r<.02)add({k:'dpalm'+((x+y)&3),x,y,block:true,sc:.8+khHash(x,y,12)*.3});
+      else if(r<.07)add({k:vases[(x+y)&3],x,y,block:false,walk:true,sc:.9+khHash(x,y,13)*.3});
+      else if(r<.075)add({k:'urn',x,y,block:false,walk:true});
+      continue;
+    }
     if(d3[i]&&!d5[i]){ // a cell one in from the wall of a wide street
       if(r<.16){add({k:['dpalm0','dpalm1','dpalm2','dpalm3'][((x*3+y)>>1)&3],x,y,block:true,sc:.9+khHash(x,y,12)*.4})}
       else if(r<.22){add({k:vases[(x+y)&3],x,y,block:false,walk:true,sc:.9+khHash(x,y,13)*.3})}
       else if(r<.235){add({k:'urn',x,y,block:false,walk:true})}
     }else if(d5[i]){
-      const z=C.zone[i];
       if(z===2&&r<.05)add({k:['dpalm0','dpalm1','dpalm2','dpalm3'][(x+y)&3],x,y,block:true,sc:.9+khHash(x,y,12)*.5});
       else if(z===6&&r<.03)add({k:['dpalm0','dpalm2'][(x+y)&1],x,y,block:true,sc:1.1});
       else if(z===0&&r<.012)add({k:'dpalm'+((x+y)&3),x,y,block:true});

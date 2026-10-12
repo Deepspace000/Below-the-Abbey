@@ -26,7 +26,7 @@ function khBuild(seed){
   // ---- the castle wall round everything ----
   R(0,0,W-1,H-1,(x,y)=>{if(x<B||y<B||x>=W-B||y>=H-B)solid[idx(x,y)]=1});
   // ---- the grid of blocks: streets of every width, blocks of every size ----
-  const cuts=(lo,hi)=>{const out=[];let p=lo;while(p<hi){const bw=12+Math.floor(rng()*15),sw=[2,3,3,3,4,4,5][Math.floor(rng()*7)];if(p+bw+sw>hi-9){out.push([p,hi]);break}out.push([p,p+bw-1]);p+=bw+sw}return out};
+  const cuts=(lo,hi)=>{const out=[];let p=lo;while(p<hi){const bw=12+Math.floor(rng()*15),sw=[2,2,3,3,3][Math.floor(rng()*5)];if(p+bw+sw>hi-9){out.push([p,hi]);break}out.push([p,p+bw-1]);p+=bw+sw}return out};
   const xb=cuts(B+1,W-B-2),yb=cuts(B+1,H-B-2);
   const blocks=[];
   for(let j=0;j<yb.length;j++)for(let i=0;i<xb.length;i++)blocks.push({i,j,x0:xb[i][0],x1:xb[i][1],y0:yb[j][0],y1:yb[j][1]});
@@ -46,10 +46,10 @@ function khBuild(seed){
   // ---- the great avenues: the south gate to the palace, the ring road, the cross roads ----
   const open=(x0,y0,x1,y1,z,f)=>R(x0,y0,x1,y1,(x,y)=>{if(x<B||y<B||x>=W-B||y>=H-B)return;solid[idx(x,y)]=0;if(z!==undefined){zone[idx(x,y)]=z}if(f!==undefined)fl[idx(x,y)]=f});
   open(KH.CX-4,246,KH.CX+4,H-B-1,0,1);                 // the avenue from the gate (nine wide)
-  open(KH.CX-3,B,KH.CX+3,150,0,1);                     // the avenue behind the palace
-  open(B,KH.CY-3,150,KH.CY+3,0,1);open(250,KH.CY-3,W-B-1,KH.CY+3,0,1); // east and west cross roads
-  open(150,152,250,157,0,1);open(150,243,250,248,0,1); // the ring road round the palace
-  open(145,152,150,248,0,1);open(250,152,255,248,0,1);
+  open(KH.CX-2,B,KH.CX+2,150,0,1);                     // the avenue behind the palace
+  open(B,KH.CY-1,150,KH.CY+1,0,1);open(250,KH.CY-1,W-B-1,KH.CY+1,0,1); // east and west cross roads
+  open(150,153,250,155,0,1);open(150,245,250,247,0,1); // the ring road round the palace
+  open(147,153,149,247,0,1);open(251,153,253,247,0,1);
   // ---- the palace and its court ----
   const PAL={x0:160,y0:162,x1:240,y1:238};
   open(PAL.x0-1,PAL.y0-1,PAL.x1+1,PAL.y1+1,6,2);
