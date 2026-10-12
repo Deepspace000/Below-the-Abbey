@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.31';
+const VERSION='2.32';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -6216,7 +6216,7 @@ addEventListener('resize',fit);fit();
 /*@@DESERT:BEGIN@@*/
 /* ---- src/desert/artlist.js ---- */
 /* written by tools/inject.py */
-const DS_PAINTED=['bdune0', 'bdune1', 'bdune2', 'bpeb0', 'bpeb1', 'bpeb2', 'dbones', 'dburrow', 'dcactus', 'ddead', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpeb0', 'dpeb1', 'dpeb2', 'drock0', 'drock1', 'drock2', 'dshrub0', 'dshrub1', 'dshrub2', 'dune0', 'dune1', 'dune2', 'rdune0', 'rdune1', 'rdune2', 'rpeb0', 'rpeb1', 'rpeb2', 'rrock0', 'rrock1', 'rrock2'];
+const DS_PAINTED=['bdune0', 'bdune1', 'bdune2', 'bpeb0', 'bpeb1', 'bpeb2', 'brazier0', 'brazier1', 'brazier2', 'brazier3', 'ceil_tomb', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'ddead', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpeb0', 'dpeb1', 'dpeb2', 'dpharaoh', 'dpillar0', 'dpillar1', 'drock0', 'drock1', 'drock2', 'dshrub0', 'dshrub1', 'dshrub2', 'dsphinx', 'dsutstatue', 'dune0', 'dune1', 'dune2', 'dwolf', 'dwolfA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'offering', 'rdune0', 'rdune1', 'rdune2', 'rpeb0', 'rpeb1', 'rpeb2', 'rrock0', 'rrock1', 'rrock2', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate'];
 
 /* ---- src/desert/artpack.js ---- */
 /* ==========================================================================
@@ -6230,11 +6230,11 @@ function dsApplyPainted(){
     const im=IMG['art_'+k];if(!im)continue;
     if(k.startsWith('floor_'))FLOORS[k.slice(6)]=dsPaintedTex(im);
     else if(k.startsWith('ceil_'))CEILS[k.slice(5)]=dsPaintedTex(im);
-    else if(k.startsWith('tex_'))DS_PAINTED_TEX[k.slice(4)]=dsPaintedTex(im);
+    else if(k.startsWith('tex_')){const id=DS_TEXREG[k.slice(4)];if(id!==undefined&&TEX[id])TEX[id].d=dsPaintedTex(im)} // a painted wall or door picture goes into the texture the code made for it
     else IMG[k]=im;
   }
 }
-const DS_PAINTED_TEX={};
+const DS_TEXREG={}; // name -> texture number of every wall and door picture the desert code makes, so a painted picture can replace it
 
 /* ---- src/desert/paint.js ---- */
 /* ==========================================================================
@@ -6690,7 +6690,7 @@ function dsBurrow(){ // a low mound of sand, a door of old wood set into it unde
    ========================================================================== */
 Object.assign(ENEMY_DEF,{
   scorpion:{name:'Giant Scorpion',hp:40,dmg:[6,11],hit:.74,w:.95,img:'scorpion',xp:120,gold:[2,8],speed:1,verb:'stings'},
-  dwolf:{name:'Desert Wolf',hp:36,dmg:[4,8],hit:.74,w:.95,img:'dwolf',xp:70,gold:[0,0],speed:2,verb:'bites'},
+  dwolf:{name:'Desert Wolf',hp:36,dmg:[4,8],hit:.74,w:1.3,img:'dwolf',xp:70,gold:[0,0],speed:2,verb:'bites'},
   nomad:{name:'Desperate Nomad',hp:44,dmg:[5,9],hit:.72,w:.38,img:'nomad',xp:90,gold:[6,22],speed:1,verb:'slashes'},
   nomad2:{name:'Desperate Nomad',hp:44,dmg:[5,9],hit:.72,w:.38,img:'nomad2',xp:90,gold:[6,22],speed:1,verb:'slashes'},
   mummy:{name:'Mummy',hp:45,dmg:[6,10],hit:.76,w:.36,img:'mummy',xp:150,gold:[10,30],speed:1,verb:'claws'},
@@ -7294,7 +7294,9 @@ function makeTombArt(rdune,rcl){
   // the great sealed door, in five states from empty to full
   SUNDOOR_GIDS.length=0;for(let n=0;n<=4;n++){const t=dsDoorSocketed(n),id=addTex(t.d);const gid=TNF++;T_TILE[gid]=id;SUNDOOR_GIDS.push(gid)}
   LEVEL42_DATA.chars={H:gH,G:gG,L:gL,P:gP,K:gK,W:gW,S:gS,B:SUNDOOR_GIDS[0],Q:gG};
-  T_DOORS.sutdoor=addTex(dsDoorSocketed(4).d,null);
+  Object.assign(DS_TEXREG,{wall_glyph:T_TILE[gH],wall_gold:T_TILE[gG],wall_lapis:T_TILE[gL],wall_pillar:T_TILE[gP],wall_cave:T_TILE[gK],wall_plain:T_TILE[gW],wall_eye:T_TILE[gS],wall_rubble:T_TILE[gR]});
+  SUNDOOR_GIDS.forEach((g,n)=>{DS_TEXREG['sundoor'+n]=T_TILE[g]});
+  T_DOORS.sutdoor=addTex(dsDoorSocketed(4).d,null);DS_TEXREG.sutdoor=T_DOORS.sutdoor;
   LEVEL42_DATA.gidH=gH;
   if(typeof makeBurrowArt==='function')makeBurrowArt();
 }
@@ -7457,7 +7459,7 @@ function buildBlueDunes(){
   for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){
     if(nearOasis(x,y,8.5)||nearCave(x,y))continue;
     const oX=(R(x,y,3)-.5)*.8,oY=(R(x,y,4)-.5)*.8;
-    if(R(x,y,20)<.045)sc('bdune'+((R(x,y,21)*3)|0),x,y,{ox:oX,oy:oY,sc:.9+R(x,y,22)*.9});
+    if(R(x,y,20)<.03)put('bdune'+((R(x,y,21)*3)|0),x,y,{block:true,ox:oX*.4,oy:oY*.4,sc:.9+R(x,y,22)*.7});  // low smooth swells you walk round
     else if(R(x,y,26)<.1)sc('bpeb'+((R(x,y,27)*3)|0),x,y,{ox:oX,oy:oY,sc:.8+R(x,y,28)*.9});
   }
   // the oasis: a pool, reeds at its edge, a ring of palms, a few bushes
@@ -7502,11 +7504,11 @@ function makeBlueArt(ydune,ycl){
   FLOORS.bluegrass=dsFloor((x,y)=>{const n=dsNoise(x,y,5,321)*.6+dsNoise(x,y,10,322)*.4,k=.86+.3*(n-.5);return [118*k,170*k,92*k]}); // green round the pool
   FLOORS.bluewater=dsFloor((x,y)=>{const n=dsNoise(x,y,4,331),r=Math.sin(TAU*(2*x/TS+y/TS+n))*.5+.5,k=.86+.2*r;return [66*k,128*k,184*k]});
   for(let i=0;i<3;i++){
-    IMG['bdune'+i]=dsDune(380+i*40,76+i*12,700+i*9,DS_BLU);NPC_H['bdune'+i]=.8+i*.14;
+    IMG['bdune'+i]=dsDune(380+i*40,76+i*12,700+i*9,DS_BLU);NPC_H['bdune'+i]=.55+i*.1;
     IMG['bpeb'+i]=dsDune(150,26,800+i*7,DS_BLU);NPC_H['bpeb'+i]=.16;
   }
   LEVEL60_DATA.chars={D:ydune,C:ycl};
-  T_DOORS.bluecave=dsLowCave();
+  T_DOORS.bluecave=dsLowCave();DS_TEXREG.bluecave=T_DOORS.bluecave;
 }
 
 /* ---- src/desert/dunes.js ---- */
@@ -7546,9 +7548,9 @@ function makeDesertArt(){
   makeDesertFloors();makeDesertSprites();makeDesertCreatures();makeTeleSprites();
   const mkWall=(t,wh,sky)=>{const id=addTex(t.d,t.e||null);if(wh)TEX[id].wh=wh;if(sky)TEX[id].sky=true;const gid=TNF++;T_TILE[gid]=id;return gid}; // a 'sky' wall is a piece of the moving sky itself, so the edge of the desert is open sky
   const ydune=mkWall(dsDuneWallTile(false,401),0,true),rdune=mkWall(dsDuneWallTile(true,402),0,true),ycl=mkWall(dsCliffTile(false,403),0),rcl=mkWall(dsCliffTile(true,404),0);
-  LEVEL41_DATA.chars={D:ydune,C:ycl};
-  const ycity=mkWall(dsCityWallTile(),1.9);LEVEL43_DATA.chars={D:rdune,C:rcl,Y:ycity};T_DOORS.citygate=dsCityGate();
-  T_DOORS.tomb=dsTombDoor();
+  LEVEL41_DATA.chars={D:ydune,C:ycl};DS_TEXREG.cliffY=T_TILE[ycl];DS_TEXREG.cliffR=T_TILE[rcl];
+  const ycity=mkWall(dsCityWallTile(),1.9);LEVEL43_DATA.chars={D:rdune,C:rcl,Y:ycity};T_DOORS.citygate=dsCityGate();DS_TEXREG.citywall=T_TILE[ycity];DS_TEXREG.citygate=T_DOORS.citygate;
+  T_DOORS.tomb=dsTombDoor();DS_TEXREG.tombdoor=T_DOORS.tomb;
   if(typeof makeTombArt==='function')makeTombArt(rdune,rcl);
   if(typeof makeBlueArt==='function')makeBlueArt(ydune,ycl);
 

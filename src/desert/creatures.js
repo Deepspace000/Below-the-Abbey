@@ -3,7 +3,7 @@
    ========================================================================== */
 Object.assign(ENEMY_DEF,{
   scorpion:{name:'Giant Scorpion',hp:40,dmg:[6,11],hit:.74,w:.95,img:'scorpion',xp:120,gold:[2,8],speed:1,verb:'stings'},
-  dwolf:{name:'Desert Wolf',hp:36,dmg:[4,8],hit:.74,w:.95,img:'dwolf',xp:70,gold:[0,0],speed:2,verb:'bites'},
+  dwolf:{name:'Desert Wolf',hp:36,dmg:[4,8],hit:.74,w:1.3,img:'dwolf',xp:70,gold:[0,0],speed:2,verb:'bites'},
   nomad:{name:'Desperate Nomad',hp:44,dmg:[5,9],hit:.72,w:.38,img:'nomad',xp:90,gold:[6,22],speed:1,verb:'slashes'},
   nomad2:{name:'Desperate Nomad',hp:44,dmg:[5,9],hit:.72,w:.38,img:'nomad2',xp:90,gold:[6,22],speed:1,verb:'slashes'},
   mummy:{name:'Mummy',hp:45,dmg:[6,10],hit:.76,w:.36,img:'mummy',xp:150,gold:[10,30],speed:1,verb:'claws'},

@@ -37,8 +37,9 @@ bb = out.getchannel('A').point(lambda v: 255 if v > 128 else 0).getbbox()
 out = out.crop(bb)
 if 'xscale' in opts: out = out.resize((max(1, int(out.width * float(opts['xscale']))), out.height), Image.LANCZOS)
 if 'flip' in opts: out = out.transpose(Image.FLIP_LEFT_RIGHT)
-s = height / out.height
-out = out.resize((max(1, round(out.width * s)), height), Image.LANCZOS)
+s = float(opts['scale']) if 'scale' in opts else height / out.height   # scale=<x> keeps one common size across animation frames
+out = out.resize((max(1, round(out.width * s)), max(1, round(out.height * s))), Image.LANCZOS)
+height = out.height
 rgb2 = out.convert('RGB').filter(ImageFilter.UnsharpMask(radius=1.4, percent=90, threshold=2))
 if any(k in opts for k in ('hue', 'sat', 'val')):
     dh = float(opts.get('hue', 0)) / 360; ds = float(opts.get('sat', 1)); dv = float(opts.get('val', 1))
@@ -46,8 +47,16 @@ if any(k in opts for k in ('hue', 'sat', 'val')):
     hsv[..., 0] = (hsv[..., 0] + dh * 255) % 256
     hsv[..., 1] = np.clip(hsv[..., 1] * ds, 0, 255); hsv[..., 2] = np.clip(hsv[..., 2] * dv, 0, 255)
     rgb2 = Image.fromarray(hsv.astype(np.uint8), 'HSV').convert('RGB')
+if 'fixpink' in opts:   # flame glow picks up some of the magenta background: turn magenta-ish pixels orange again
+    hv = np.array(rgb2.convert('HSV')).astype(float)
+    hh = hv[..., 0] * 360 / 255; sv = hv[..., 1] / 255
+    m = (hh > 255) & (hh < 345) & (sv > .18)
+    hv[..., 0][m] = 22 * 255 / 360; hv[..., 1][m] = np.clip(hv[..., 1][m] * 1.1, 0, 255)
+    rgb2 = Image.fromarray(hv.astype(np.uint8), 'HSV').convert('RGB')
 alpha = out.getchannel('A').filter(ImageFilter.GaussianBlur(max(1.2, height / 110))).point(lambda v: 0 if v < 70 else 255 if v > 185 else int((v - 70) * 255 / 115))  # smooth the stair-steps the small source leaves on the edge
 final = Image.merge('RGBA', (*rgb2.split(), alpha))
+if 'padto' in opts:   # pad frames to one height (picture stays at the bottom) so an animation does not change size
+    ph = int(opts['padto']); pad = Image.new('RGBA', (final.width, max(ph, final.height)), (0, 0, 0, 0)); pad.paste(final, (0, pad.height - final.height)); final = pad
 dst = pathlib.Path(__file__).resolve().parent.parent / 'assets' / ('ds_' + name + '.png')
 final.save(dst, optimize=True)
 print(dst.name, final.size)

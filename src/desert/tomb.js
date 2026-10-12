@@ -148,7 +148,9 @@ function makeTombArt(rdune,rcl){
   // the great sealed door, in five states from empty to full
   SUNDOOR_GIDS.length=0;for(let n=0;n<=4;n++){const t=dsDoorSocketed(n),id=addTex(t.d);const gid=TNF++;T_TILE[gid]=id;SUNDOOR_GIDS.push(gid)}
   LEVEL42_DATA.chars={H:gH,G:gG,L:gL,P:gP,K:gK,W:gW,S:gS,B:SUNDOOR_GIDS[0],Q:gG};
-  T_DOORS.sutdoor=addTex(dsDoorSocketed(4).d,null);
+  Object.assign(DS_TEXREG,{wall_glyph:T_TILE[gH],wall_gold:T_TILE[gG],wall_lapis:T_TILE[gL],wall_pillar:T_TILE[gP],wall_cave:T_TILE[gK],wall_plain:T_TILE[gW],wall_eye:T_TILE[gS],wall_rubble:T_TILE[gR]});
+  SUNDOOR_GIDS.forEach((g,n)=>{DS_TEXREG['sundoor'+n]=T_TILE[g]});
+  T_DOORS.sutdoor=addTex(dsDoorSocketed(4).d,null);DS_TEXREG.sutdoor=T_DOORS.sutdoor;
   LEVEL42_DATA.gidH=gH;
   if(typeof makeBurrowArt==='function')makeBurrowArt();
 }

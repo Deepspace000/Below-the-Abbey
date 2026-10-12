@@ -34,9 +34,9 @@ function makeDesertArt(){
   makeDesertFloors();makeDesertSprites();makeDesertCreatures();makeTeleSprites();
   const mkWall=(t,wh,sky)=>{const id=addTex(t.d,t.e||null);if(wh)TEX[id].wh=wh;if(sky)TEX[id].sky=true;const gid=TNF++;T_TILE[gid]=id;return gid}; // a 'sky' wall is a piece of the moving sky itself, so the edge of the desert is open sky
   const ydune=mkWall(dsDuneWallTile(false,401),0,true),rdune=mkWall(dsDuneWallTile(true,402),0,true),ycl=mkWall(dsCliffTile(false,403),0),rcl=mkWall(dsCliffTile(true,404),0);
-  LEVEL41_DATA.chars={D:ydune,C:ycl};
-  const ycity=mkWall(dsCityWallTile(),1.9);LEVEL43_DATA.chars={D:rdune,C:rcl,Y:ycity};T_DOORS.citygate=dsCityGate();
-  T_DOORS.tomb=dsTombDoor();
+  LEVEL41_DATA.chars={D:ydune,C:ycl};DS_TEXREG.cliffY=T_TILE[ycl];DS_TEXREG.cliffR=T_TILE[rcl];
+  const ycity=mkWall(dsCityWallTile(),1.9);LEVEL43_DATA.chars={D:rdune,C:rcl,Y:ycity};T_DOORS.citygate=dsCityGate();DS_TEXREG.citywall=T_TILE[ycity];DS_TEXREG.citygate=T_DOORS.citygate;
+  T_DOORS.tomb=dsTombDoor();DS_TEXREG.tombdoor=T_DOORS.tomb;
   if(typeof makeTombArt==='function')makeTombArt(rdune,rcl);
   if(typeof makeBlueArt==='function')makeBlueArt(ydune,ycl);
 }

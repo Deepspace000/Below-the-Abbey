@@ -21,7 +21,7 @@ function buildBlueDunes(){
   for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){
     if(nearOasis(x,y,8.5)||nearCave(x,y))continue;
     const oX=(R(x,y,3)-.5)*.8,oY=(R(x,y,4)-.5)*.8;
-    if(R(x,y,20)<.045)sc('bdune'+((R(x,y,21)*3)|0),x,y,{ox:oX,oy:oY,sc:.9+R(x,y,22)*.9});
+    if(R(x,y,20)<.03)put('bdune'+((R(x,y,21)*3)|0),x,y,{block:true,ox:oX*.4,oy:oY*.4,sc:.9+R(x,y,22)*.7});  // low smooth swells you walk round
     else if(R(x,y,26)<.1)sc('bpeb'+((R(x,y,27)*3)|0),x,y,{ox:oX,oy:oY,sc:.8+R(x,y,28)*.9});
   }
   // the oasis: a pool, reeds at its edge, a ring of palms, a few bushes
@@ -66,9 +66,9 @@ function makeBlueArt(ydune,ycl){
   FLOORS.bluegrass=dsFloor((x,y)=>{const n=dsNoise(x,y,5,321)*.6+dsNoise(x,y,10,322)*.4,k=.86+.3*(n-.5);return [118*k,170*k,92*k]}); // green round the pool
   FLOORS.bluewater=dsFloor((x,y)=>{const n=dsNoise(x,y,4,331),r=Math.sin(TAU*(2*x/TS+y/TS+n))*.5+.5,k=.86+.2*r;return [66*k,128*k,184*k]});
   for(let i=0;i<3;i++){
-    IMG['bdune'+i]=dsDune(380+i*40,76+i*12,700+i*9,DS_BLU);NPC_H['bdune'+i]=.8+i*.14;
+    IMG['bdune'+i]=dsDune(380+i*40,76+i*12,700+i*9,DS_BLU);NPC_H['bdune'+i]=.55+i*.1;
     IMG['bpeb'+i]=dsDune(150,26,800+i*7,DS_BLU);NPC_H['bpeb'+i]=.16;
   }
   LEVEL60_DATA.chars={D:ydune,C:ycl};
-  T_DOORS.bluecave=dsLowCave();
+  T_DOORS.bluecave=dsLowCave();DS_TEXREG.bluecave=T_DOORS.bluecave;
 }

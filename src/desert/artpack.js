@@ -9,8 +9,8 @@ function dsApplyPainted(){
     const im=IMG['art_'+k];if(!im)continue;
     if(k.startsWith('floor_'))FLOORS[k.slice(6)]=dsPaintedTex(im);
     else if(k.startsWith('ceil_'))CEILS[k.slice(5)]=dsPaintedTex(im);
-    else if(k.startsWith('tex_'))DS_PAINTED_TEX[k.slice(4)]=dsPaintedTex(im);
+    else if(k.startsWith('tex_')){const id=DS_TEXREG[k.slice(4)];if(id!==undefined&&TEX[id])TEX[id].d=dsPaintedTex(im)} // a painted wall or door picture goes into the texture the code made for it
     else IMG[k]=im;
   }
 }
-const DS_PAINTED_TEX={};
+const DS_TEXREG={}; // name -> texture number of every wall and door picture the desert code makes, so a painted picture can replace it
