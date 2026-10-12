@@ -53,9 +53,10 @@ function buildBurrow(k){
   rooms.forEach((r,i)=>{for(const [x,y] of [[r.x0,r.y0],[r.x1,r.y0]]){if(i===0&&y>H-6)continue;if(put('brazier',x,y,{block:true}))lights.push([x,y])}});
   rooms.forEach((r,i)=>{if(i===0||i===tr)return;const p=spot(r,700+i);if(p)put('vase'+((k+i)%4),p[0],p[1],{block:true,plain:true});if(i%2===0){const q=spot(r,800+i);if(q)put(T.ambush?'sarcoph':'offering',q[0],q[1],T.ambush?{block:true,ambush:['mummy']}:{block:true})}});
   if(T.ambush&&!decor.some(d=>d.k==='sarcoph')){const r=rooms[(tr+1)%rooms.length],p=spot(r,900);if(p)put('sarcoph',p[0],p[1],{block:true,ambush:['mummy','mummy']})}
-  // creatures: half as many as before, in the rooms between the door and the treasure
+  // creatures: one to three per mound (varies by mound), in the rooms between the door and the treasure
   const side=rooms.map((r,i)=>i).filter(i=>i!==0&&i!==tr);
-  let ci=0;for(const [t,n] of T.foes)for(let i=0;i<Math.max(1,n>>1);i++,ci++){const r=rooms[side[ci%side.length]],p=spot(r,1000+ci);if(p){used.add(p[0]+','+p[1]);enemies.push({t,x:p[0],y:p[1],lvl:15+(k%3)})}}
+  const BUR_COUNT=[2,1,3,2,3,1,2,3,1,2],pool=[];for(const [t,n] of T.foes)for(let i=0;i<n;i++)pool.push(t);
+  for(let ci=0;ci<BUR_COUNT[k%10];ci++){const t=pool[(ci*2+k)%pool.length],r=rooms[side[ci%side.length]],p=spot(r,1000+ci);if(p){used.add(p[0]+','+p[1]);enemies.push({t,x:p[0],y:p[1],lvl:15+(k%3)})}}
   items.push({k:'potion',x:start.x,y:start.y-1});
   return {rows,fm:fl.map(r=>r.join('')),decor,enemies,items,lights,start:{x:start.x,y:start.y,f:0}};
 }
