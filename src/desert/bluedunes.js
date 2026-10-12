@@ -22,7 +22,7 @@ function buildBlueDunes(){
     if(nearOasis(x,y,8.5)||nearCave(x,y))continue;
     const oX=(R(x,y,3)-.5)*.8,oY=(R(x,y,4)-.5)*.8;
     if(DUNE_SPRITES&&R(x,y,20)<.03)put('bdune'+((R(x,y,21)*3)|0),x,y,{block:true,ox:oX*.4,oy:oY*.4,sc:.9+R(x,y,22)*.7});  // low smooth swells you walk round
-    else if(R(x,y,26)<.1)sc('bpeb'+((R(x,y,27)*3)|0),x,y,{ox:oX,oy:oY,sc:.8+R(x,y,28)*.9});
+    else if(DUNE_SPRITES&&R(x,y,26)<.1)sc('bpeb'+((R(x,y,27)*3)|0),x,y,{ox:oX,oy:oY,sc:.8+R(x,y,28)*.9});
   }
   // the oasis: a pool, reeds at its edge, a ring of palms, a few bushes
   for(let a=0;a<14;a++){const r=2.9+R(a,1,40)*.5,x=Math.round(cx+Math.cos(a/14*TAU)*r),y=Math.round(cy+Math.sin(a/14*TAU)*r*.9);if(a%2===0)sc('greeds',x,y,{ox:(R(a,2,41)-.5)*.5,oy:(R(a,3,41)-.5)*.5,sc:.8+R(a,4,41)*.5})}

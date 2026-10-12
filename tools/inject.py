@@ -16,7 +16,7 @@ END = '/*@@DESERT:END@@*/'
 ANCHOR = '/* ---------- boot ---------- */'
 
 # the list of painted pictures is whatever assets/ds_*.png files exist
-names = sorted(p.stem[3:] for p in (ROOT / 'assets').glob('ds_*.png'))
+names = sorted(p.stem[3:] for p in (ROOT / 'assets').glob('ds_*.png') if not p.stem[3:].startswith(('dune', 'rdune', 'bdune', 'dpeb', 'rpeb', 'bpeb')))  # the flat dune and ripple pictures are no longer used
 (SRC / 'artlist.js').write_text('/* written by tools/inject.py */'+chr(10)+'const DS_PAINTED=' + repr(names) + ';'+chr(10), encoding='utf-8')
 s = HTML.read_text(encoding='utf-8')
 parts = []

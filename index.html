@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.37';
+const VERSION='2.38';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -6236,7 +6236,7 @@ addEventListener('resize',fit);fit();
 /*@@DESERT:BEGIN@@*/
 /* ---- src/desert/artlist.js ---- */
 /* written by tools/inject.py */
-const DS_PAINTED=['bdune0', 'bdune1', 'bdune2', 'bpeb0', 'bpeb1', 'bpeb2', 'brazier0', 'brazier1', 'brazier2', 'brazier3', 'ceil_tomb', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'ddead', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpeb0', 'dpeb1', 'dpeb2', 'dpharaoh', 'dpillar0', 'dpillar1', 'drock0', 'drock1', 'drock2', 'dshrub0', 'dshrub1', 'dshrub2', 'dsphinx', 'dsutstatue', 'dune0', 'dune1', 'dune2', 'dwolf', 'dwolfA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'offering', 'rdune0', 'rdune1', 'rdune2', 'rpeb0', 'rpeb1', 'rpeb2', 'rrock0', 'rrock1', 'rrock2', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate'];
+const DS_PAINTED=['brazier0', 'brazier1', 'brazier2', 'brazier3', 'ceil_tomb', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'ddead', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'drock0', 'drock1', 'drock2', 'dshrub0', 'dshrub1', 'dshrub2', 'dsphinx', 'dsutstatue', 'dwolf', 'dwolfA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'offering', 'rrock0', 'rrock1', 'rrock2', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate'];
 
 /* ---- src/desert/artpack.js ---- */
 /* ==========================================================================
@@ -7098,7 +7098,7 @@ function buildSandRoad(){
       else if(R(x,y,28)<.005*dp)put('ddead',x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,29)*.5});
       else if(R(x,y,30)<.045*dp)sc('dshrub'+((R(x,y,31)*3)|0),x,y,{ox:oX,oy:oY,sc:.8+R(x,y,32)*.7});
       else if(R(x,y,33)<.003*dp)sc('dbones',x,y,{ox:oX,oy:oY,sc:.9+R(x,y,34)*.4});
-      if(R(x,y,35)<.16*dp)sc('dpeb'+((R(x,y,36)*3)|0),x,y,{ox:(R(x,y,37)-.5)*.9,oy:(R(x,y,38)-.5)*.9,sc:.8+R(x,y,39)*.8}); // low ripples of sand
+      if(DUNE_SPRITES&&R(x,y,35)<.16*dp)sc('dpeb'+((R(x,y,36)*3)|0),x,y,{ox:(R(x,y,37)-.5)*.9,oy:(R(x,y,38)-.5)*.9,sc:.8+R(x,y,39)*.8}); // low ripples of sand
     }
   }
   // ---- landmarks ----
@@ -7410,7 +7410,7 @@ function buildRedDunes(){
     else if(R(x,y,28)<.007)put('ddead',x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,29)*.5});
     else if(R(x,y,30)<.04)sc('dshrub'+((R(x,y,31)*3)|0),x,y,{ox:oX,oy:oY,sc:.8+R(x,y,32)*.7});
     else if(R(x,y,33)<.004)sc('dbones',x,y,{ox:oX,oy:oY,sc:.9+R(x,y,34)*.4});
-    if(R(x,y,35)<.18)sc('rpeb'+((R(x,y,36)*3)|0),x,y,{ox:(R(x,y,37)-.5)*.9,oy:(R(x,y,38)-.5)*.9,sc:.8+R(x,y,39)*.8});
+    if(DUNE_SPRITES&&R(x,y,35)<.18)sc('rpeb'+((R(x,y,36)*3)|0),x,y,{ox:(R(x,y,37)-.5)*.9,oy:(R(x,y,38)-.5)*.9,sc:.8+R(x,y,39)*.8});
   }
   // ruins: rings of broken pillars with a chest at the heart of each
   const ruins=[];
@@ -7481,7 +7481,7 @@ function buildBlueDunes(){
     if(nearOasis(x,y,8.5)||nearCave(x,y))continue;
     const oX=(R(x,y,3)-.5)*.8,oY=(R(x,y,4)-.5)*.8;
     if(DUNE_SPRITES&&R(x,y,20)<.03)put('bdune'+((R(x,y,21)*3)|0),x,y,{block:true,ox:oX*.4,oy:oY*.4,sc:.9+R(x,y,22)*.7});  // low smooth swells you walk round
-    else if(R(x,y,26)<.1)sc('bpeb'+((R(x,y,27)*3)|0),x,y,{ox:oX,oy:oY,sc:.8+R(x,y,28)*.9});
+    else if(DUNE_SPRITES&&R(x,y,26)<.1)sc('bpeb'+((R(x,y,27)*3)|0),x,y,{ox:oX,oy:oY,sc:.8+R(x,y,28)*.9});
   }
   // the oasis: a pool, reeds at its edge, a ring of palms, a few bushes
   for(let a=0;a<14;a++){const r=2.9+R(a,1,40)*.5,x=Math.round(cx+Math.cos(a/14*TAU)*r),y=Math.round(cy+Math.sin(a/14*TAU)*r*.9);if(a%2===0)sc('greeds',x,y,{ox:(R(a,2,41)-.5)*.5,oy:(R(a,3,41)-.5)*.5,sc:.8+R(a,4,41)*.5})}

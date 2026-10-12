@@ -34,7 +34,7 @@ function buildRedDunes(){
     else if(R(x,y,28)<.007)put('ddead',x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,29)*.5});
     else if(R(x,y,30)<.04)sc('dshrub'+((R(x,y,31)*3)|0),x,y,{ox:oX,oy:oY,sc:.8+R(x,y,32)*.7});
     else if(R(x,y,33)<.004)sc('dbones',x,y,{ox:oX,oy:oY,sc:.9+R(x,y,34)*.4});
-    if(R(x,y,35)<.18)sc('rpeb'+((R(x,y,36)*3)|0),x,y,{ox:(R(x,y,37)-.5)*.9,oy:(R(x,y,38)-.5)*.9,sc:.8+R(x,y,39)*.8});
+    if(DUNE_SPRITES&&R(x,y,35)<.18)sc('rpeb'+((R(x,y,36)*3)|0),x,y,{ox:(R(x,y,37)-.5)*.9,oy:(R(x,y,38)-.5)*.9,sc:.8+R(x,y,39)*.8});
   }
   // ruins: rings of broken pillars with a chest at the heart of each
   const ruins=[];

@@ -81,7 +81,7 @@ function buildSandRoad(){
       else if(R(x,y,28)<.005*dp)put('ddead',x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,29)*.5});
       else if(R(x,y,30)<.045*dp)sc('dshrub'+((R(x,y,31)*3)|0),x,y,{ox:oX,oy:oY,sc:.8+R(x,y,32)*.7});
       else if(R(x,y,33)<.003*dp)sc('dbones',x,y,{ox:oX,oy:oY,sc:.9+R(x,y,34)*.4});
-      if(R(x,y,35)<.16*dp)sc('dpeb'+((R(x,y,36)*3)|0),x,y,{ox:(R(x,y,37)-.5)*.9,oy:(R(x,y,38)-.5)*.9,sc:.8+R(x,y,39)*.8}); // low ripples of sand
+      if(DUNE_SPRITES&&R(x,y,35)<.16*dp)sc('dpeb'+((R(x,y,36)*3)|0),x,y,{ox:(R(x,y,37)-.5)*.9,oy:(R(x,y,38)-.5)*.9,sc:.8+R(x,y,39)*.8}); // low ripples of sand
     }
   }
   // ---- landmarks ----
