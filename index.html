@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.30';
+const VERSION='2.31';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -970,6 +970,9 @@ const ITEMDEF={
   torch:{n:'Torch',k:'light',t:'Light',ic:'torch',c:'#b88a4a',light:1,price:3,d:'Hold it in a hand to light the way.',sw:.34},
   lantern:{n:'Brass Lantern',k:'light',t:'Light',ic:'lantern',c:'#d8a838',light:2.3,price:45,d:'Gives a much wider, steadier light than a torch.',sw:.38},
   potion:{n:'Healing Potion',k:'potion',t:'Potion',ic:'potion',c:'#c0201c',heal:30,stack:1,price:25,d:'Restores 30 health.',sw:.26},
+  potion2:{n:'Strong Healing Potion',k:'potion',t:'Potion',ic:'potion',c:'#e0601c',heal:90,stack:1,price:75,minLvl:20,d:'Restores 90 health. Seen from level 20.',sw:.28},
+  potion3:{n:'Very Strong Healing Potion',k:'potion',t:'Potion',ic:'potion',c:'#d8a020',heal:210,stack:1,price:180,minLvl:40,d:'Restores 210 health. Seen from level 40.',sw:.3},
+  potion4:{n:'Ultra Healing Potion',k:'potion',t:'Potion',ic:'potion',c:'#e8e0ff',heal:450,stack:1,price:420,minLvl:50,d:'Restores 450 health. Seen from level 50.',sw:.32},
   bread:{n:'Loaf of Bread',k:'food',t:'Meal',ic:'bread',c:'#b8873c',heal:16,feed:70,stack:1,price:4,sw:.3},
   cheese:{n:'Hard Cheese',k:'food',t:'Snack',ic:'cheese',c:'#d8b840',heal:8,feed:40,stack:1,price:5,sw:.3},
   dates:{n:'Dates',k:'food',t:'Snack',ic:'nuts',c:'#6a3a1a',heal:6,feed:45,stack:1,price:3,sw:.3},
@@ -1442,7 +1445,7 @@ function reset(n){
   G.timers=[];G.msgs=[];G.floats=[];G.shake=0;G.lockT=0;G.hold=null;G.queued=null;G.menu=false;G.map=false;G.hits=[];
   G.inv={open:false,tab:'inv',hero:0,sel:null,scroll:0};
   G.enemies=ENEMY_SPAWNS.map((s,i)=>{const st=enemyStat(s.t,s.lvl);return {id:i,t:s.t,lvl:s.lvl||lvlHere(),x:s.x,y:s.y,rx:s.x,ry:s.y,hp:st.hp,maxhp:st.hp,alert:false,chilled:0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100}});
-  G.items=ITEM_SPAWNS.map(s=>({k:s.k,x:s.x,y:s.y,taken:false}));
+  G.items=ITEM_SPAWNS.map(s=>({k:s.k==='potion'?potionFor(hash2(s.x,s.y,LEVEL+7)):s.k,x:s.x,y:s.y,taken:false}));
   G.decor=DECOR_SPAWNS.map(s=>{const o={k:s.k,x:s.x,y:s.y,block:!!s.block,loot:CONTAINERS.includes(s.k),shop:s.k==='cart'};if(s.deco){o.loot=false;o.shop=false}if(s.npc){o.npc=s.npc;o.loot=false;o.shop=false;if(s.goat)o.goat=s.goat}if(s.sc)o.sc=s.sc;if(s.walk)o.walk=true;if(s.wd)o.wd=s.wd;if(s.txt)o.txt=s.txt;if(s.bob)o.bob=s.bob;if(s.ox!==undefined){o.ox=s.ox;o.oy=s.oy}if(s.opens){o.opens=s.opens;o.idx=s.idx}if(s.lockedBy)o.lockedBy=s.lockedBy;if(s.secret)o.secret=true;for(const kk of ['ambush','hidden','trap','frame','goldAmt','enter','magic'])if(s[kk]!==undefined)o[kk]=s[kk];return o});
   applyLevers();clearDoorFronts();
   G.decor.forEach(d=>{if(!d.npc&&(d.k==='grave'||d.k==='grave2'||d.k==='cross')){d.npc='epitaph';d.loot=false}});
@@ -1542,7 +1545,21 @@ function bagAdd(it){
   G.bag.push(it);return true;
 }
 function bagTake(i){const it=G.bag[i];if(it.n>1){it.n--;return {id:it.id,n:1}}G.bag.splice(i,1);return it}
-const countPotions=()=>G.bag.reduce((a,b)=>a+(b.id==='potion'?b.n:0),0);
+const HEAL_IDS=['potion','potion2','potion3','potion4'];
+const countPotions=()=>G.bag.reduce((a,b)=>a+(HEAL_IDS.includes(b.id)?b.n:0),0);
+const partyLevel=()=>G.heroes&&G.heroes.length?Math.max(...G.heroes.map(h=>h.lvl)):1;
+function potionFor(roll){ // better potions turn up only once the party is strong enough for them
+  const L=partyLevel(),open=HEAL_IDS.filter(id=>!ITEMDEF[id].minLvl||L>=ITEMDEF[id].minLvl);
+  if(open.length<2)return 'potion';
+  return roll<.55?open[open.length-1]:open[open.length-2];
+}
+function potionStockRows(){const L=partyLevel();return [['potion2',2],['potion3',2],['potion4',1]].filter(([id])=>L>=ITEMDEF[id].minLvl)}
+function bestPotionIndex(hi){ // the weakest potion that heals everything that is missing, or else the strongest
+  const h=G.heroes[hi],need=h.max-h.hp;let best=-1;
+  G.bag.forEach((b,i)=>{const d=idef(b);if(!HEAL_IDS.includes(b.id))return;if(best<0){best=i;return}const e=idef(G.bag[best]);
+    if(e.heal>=need){if(d.heal>=need&&d.heal<e.heal)best=i}else if(d.heal>e.heal)best=i});
+  return best;
+}
 function slotFits(slot,d,hi){
   switch(slot){
     case 'head':return d.k==='head';case 'chest':return d.k==='chest';case 'arms':return d.k==='arms';case 'legs':return d.k==='legs';
@@ -3418,21 +3435,22 @@ function lootFor(d){
   {const dl=desertLoot(d);if(dl)return dl}
   const r=k=>hash2(d.x,d.y,100+k),items=[];
   const add=(id,n)=>items.push({id,n:ITEMDEF[id].stack?(n||1):1});
+  const addPots=n=>{for(let q=0;q<n;q++)add(potionFor(r(40+q)),1)};
   if(d.k==='barrel'&&LEVEL===1&&d.x===1&&d.y===15){add('cheese',4);d.gold=3+Math.floor(r(20)*10)}
-  else if(d.k==='chest'&&LEVEL===39&&d.lockedBy){add('sylvanbow');add('potion',2);d.gold=150}
-  else if(d.k==='chest'&&d.secret){add('potion',3);add(['ringM','ringS','ringW','ringV'][Math.floor(r(5)*4)]);add(['dagger','cap','jerkin','bracers','leggings'][Math.floor(r(8)*5)]);add(foodFor(r(6)),2);d.gold=120+Math.floor(r(7)*120)}
-  else if(d.k==='chest'&&LEVEL===31&&d.lockedBy){add('wraithmail');add('potion',3);d.gold=240}
-  else if(d.k==='chest'&&LEVEL===31){add('potion',2);add('ringW');d.gold=140}
-  else if(d.k==='chest'&&LEVEL===22&&d.x<20){add('wardblade');add('potion',2);d.gold=180}
-  else if(d.k==='chest'&&LEVEL===22){add('ringS');add('potion',2);add('cheese',2);d.gold=110}
-  else if(d.k==='chest'&&LEVEL===21){add('ringV');add('potion',2);add('cheese',2);d.gold=150}
-  else if(d.k==='chest'&&LEVEL===18){add('ironaxe');add('potion',2);d.gold=120}
-  else if(d.k==='chest'&&LEVEL===12){add('drowndagger');add('potion',1);d.gold=55}
-  else if(d.k==='chest'&&LEVEL!==9){add('potion',2);add(['ringV','ringW','ringS','ringM','dagger','cap','jerkin'][Math.floor(r(5)*7)]);add(foodFor(r(6)),1);d.gold=40+Math.floor(r(7)*50)}
-  else if(d.k==='chest'){add('wardblade');add('potion',2);add('ringW');add('scrollLight');d.gold=90}
+  else if(d.k==='chest'&&LEVEL===39&&d.lockedBy){add('sylvanbow');addPots(2);d.gold=150}
+  else if(d.k==='chest'&&d.secret){addPots(3);add(['ringM','ringS','ringW','ringV'][Math.floor(r(5)*4)]);add(['dagger','cap','jerkin','bracers','leggings'][Math.floor(r(8)*5)]);add(foodFor(r(6)),2);d.gold=120+Math.floor(r(7)*120)}
+  else if(d.k==='chest'&&LEVEL===31&&d.lockedBy){add('wraithmail');addPots(3);d.gold=240}
+  else if(d.k==='chest'&&LEVEL===31){addPots(2);add('ringW');d.gold=140}
+  else if(d.k==='chest'&&LEVEL===22&&d.x<20){add('wardblade');addPots(2);d.gold=180}
+  else if(d.k==='chest'&&LEVEL===22){add('ringS');addPots(2);add('cheese',2);d.gold=110}
+  else if(d.k==='chest'&&LEVEL===21){add('ringV');addPots(2);add('cheese',2);d.gold=150}
+  else if(d.k==='chest'&&LEVEL===18){add('ironaxe');addPots(2);d.gold=120}
+  else if(d.k==='chest'&&LEVEL===12){add('drowndagger');addPots(1);d.gold=55}
+  else if(d.k==='chest'&&LEVEL!==9){addPots(2);add(['ringV','ringW','ringS','ringM','dagger','cap','jerkin'][Math.floor(r(5)*7)]);add(foodFor(r(6)),1);d.gold=40+Math.floor(r(7)*50)}
+  else if(d.k==='chest'){add('wardblade');addPots(2);add('ringW');add('scrollLight');d.gold=90}
   else if(d.k==='barrel'||d.k==='crate'){
     const n=1+Math.floor(r(1)*3);
-    for(let k=0;k<n;k++){const p=r(2+k);add(p<.28?foodFor(r(30+k)):p<.5?'potion':'torch',1)}
+    for(let k=0;k<n;k++){const p=r(2+k);add(p<.28?foodFor(r(30+k)):p<.5?potionFor(r(50+k)):'torch',1)}
     d.gold=3+Math.floor(r(20)*10);
   }else{
     d.gold=6+Math.floor(r(1)*14);
@@ -3540,7 +3558,7 @@ function lootBtn(id){
 }
 function useHeal(hi,idx){
   const h=G.heroes[hi];
-  if(idx<0)idx=G.bag.findIndex(b=>b.id==='potion');
+  if(idx<0)idx=bestPotionIndex(hi);
   const it=G.bag[idx];
   if(it&&idef(it).dye){const d=idef(it);bagTake(idx);h.tint={col:d.dye,until:G.clock+4*1440};sfx('potion');msg(`${HERO_DEF[hi].name} drinks the ${d.n}. A rush of colour spreads over their face. It will last four days.`,d.dye);return true}
   if(!it||!idef(it).heal){msg('You have nothing to drink.');return false}
@@ -5116,7 +5134,7 @@ function qNode(id,o){
   return say(o.offer,[[o.yes||'We will help.',()=>{qAccept(id);return say(o.accept,[BYE])}],['Not now.',()=>null]]);
 }
 const MERCHANT_STOCK=[['bread',6],['cheese',4],['apple',6],['ale',4],['herring',3],['sausage',3],['pottage',3],['pie',2],['potion',4],['torch',4],['dagger',2],['sword',2],['mace',2],['axe',1],['bow',1],['staff',1],['cap',2],['jerkin',1]];
-function openShop(d,stock,name){d.shop=true;if(!d.contents)d.contents=stock.map(([id,n])=>({id,n}));d.shopName=name;openLoot(d)}
+function openShop(d,stock,name){d.shop=true;if(!d.contents)d.contents=stock.concat(stock.some(r=>r[0]==='potion')?potionStockRows():[]).map(([id,n])=>({id,n}));d.shopName=name;openLoot(d)}
 function gossip(name,img,lines){
   return {name,img,root:()=>{const F=G.flags,k='g_'+name,i=(F[k]||0)%lines.length;F[k]=i+1;
     return say(lines[i],lines.length>1?[['Anything else?',()=>NPCS_BY[name].root()],BYE]:[BYE])}};
@@ -6198,7 +6216,7 @@ addEventListener('resize',fit);fit();
 /*@@DESERT:BEGIN@@*/
 /* ---- src/desert/artlist.js ---- */
 /* written by tools/inject.py */
-const DS_PAINTED=['bdune0', 'bdune1', 'bdune2', 'dune0', 'dune1', 'dune2', 'rdune0', 'rdune1', 'rdune2'];
+const DS_PAINTED=['bdune0', 'bdune1', 'bdune2', 'bpeb0', 'bpeb1', 'bpeb2', 'dbones', 'dburrow', 'dcactus', 'ddead', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpeb0', 'dpeb1', 'dpeb2', 'drock0', 'drock1', 'drock2', 'dshrub0', 'dshrub1', 'dshrub2', 'dune0', 'dune1', 'dune2', 'rdune0', 'rdune1', 'rdune2', 'rpeb0', 'rpeb1', 'rpeb2', 'rrock0', 'rrock1', 'rrock2'];
 
 /* ---- src/desert/artpack.js ---- */
 /* ==========================================================================
@@ -6971,7 +6989,7 @@ Object.assign(ITEMDEF,{
   eyering:{n:'Eye of Ra',k:'ring',t:'Ring',ic:'ring',c:'#4a7ae0',hitb:.12,price:780,rar:1,d:'A ring with a blue eye that follows the foe. Adds 12% to hit chance.',sw:.2},
   wardring:{n:'Ring of the Tomb Guard',k:'ring',t:'Ring',ic:'ring',c:'#c8b070',armor:3,price:720,rar:1,d:'A heavy ring of old bronze. Adds 3 armor.',sw:.2}
 });
-const ART_ITEM_IDS=['dagger','sword','mace','staff','drowndagger','ore','herb','pick','parcel','ironblade','ironaxe','wardblade','gravemace','sylvanbow','prismhelm','redpotion','bluepotion','greenpotion','yellowpotion','bow','axe','shield','cap','helm','wraithmail','honeycomb','wildflower','jerkin','bracers','leggings','torch','lantern','potion','bread','cheese','apple','ale','nuts','herring','sausage','pottage','pie','roast','wood','ringV','ringM','ringW','ringS','sp_fire','scrollFrost','scrollLight','key']; // items whose picture is painted art (assets/icn_<id>.png); the drawn icon stands in until the picture exists
+const ART_ITEM_IDS=['potion2','potion3','potion4','dates','water','dagger','sword','mace','staff','drowndagger','ore','herb','pick','parcel','ironblade','ironaxe','wardblade','gravemace','sylvanbow','prismhelm','redpotion','bluepotion','greenpotion','yellowpotion','bow','axe','shield','cap','helm','wraithmail','honeycomb','wildflower','jerkin','bracers','leggings','torch','lantern','potion','bread','cheese','apple','ale','nuts','herring','sausage','pottage','pie','roast','wood','ringV','ringM','ringW','ringS','sp_fire','scrollFrost','scrollLight','key']; // items whose picture is painted art (assets/icn_<id>.png); the drawn icon stands in until the picture exists
 const DS_ITEM_IDS=['sunblade','dunebow','sandstaff','jackalhelm','goldmail','sunbracers','duneboots','pharaohshield','scarabring','ankhring','eyering','wardring','sundisc'];
 const DS_MAGIC_TOMB=['sunblade','dunebow','sandstaff','jackalhelm','goldmail','sunbracers','duneboots','pharaohshield','scarabring','ankhring','eyering','wardring'];
 

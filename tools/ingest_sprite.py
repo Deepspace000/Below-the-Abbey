@@ -20,7 +20,7 @@ if 'cell' in opts:
     im = im.crop((c * W0 // cols, r * H0 // rows, (c + 1) * W0 // cols, (r + 1) * H0 // rows))
 a = np.array(im).astype(int)
 r_, g_, b_ = a[..., 0], a[..., 1], a[..., 2]
-key = (r_ > 140) & (b_ > 140) & (g_ < 140) & (r_ - g_ > 60) & (b_ - g_ > 60)
+key = (r_ > 110) & (b_ > 110) & (r_ - g_ > 45) & (b_ - g_ > 45)
 mask = Image.fromarray(np.where(key, 0, 255).astype(np.uint8)).filter(ImageFilter.MinFilter(3))
 a[..., 0] = np.minimum(r_, np.maximum(g_, 40) + 110); a[..., 2] = np.minimum(b_, np.maximum(g_, 40) + 110)
 rgb = Image.fromarray(a.clip(0, 255).astype(np.uint8))
