@@ -165,3 +165,11 @@ Object.assign(ENEMY_DEF,{
   const idx=[];LEVELS[42].enemies.forEach((e,i)=>{if(e.t==='scorpion')idx.push(i)});
   for(let k=0;k<6&&k<idx.length;k++)LEVELS[42].enemies[idx[Math.floor(k*idx.length/6)]].t='cobra';
 })();
+
+// the small desert dungeons play the Egyptian music, streamed: change this list to change the tracks.
+// options: music_sands_tomb (2:51), music_sands_forgotten (2:33), music_sands_holycity (8:11), music_sands_goldenkey (9:16), music_sands_vibration (13:03)
+const DNG_MUSIC=['music_sands_tomb','music_sands_forgotten'];
+(function dungeonMusic(){
+  const lv=Object.keys(DNG_INFO).map(Number);for(let k=0;k<BURROW_N;k++)lv.push(BURROW_BASE+k);
+  for(const n of lv){STREAM_LISTS[n]=DNG_MUSIC;const i=EMBERS_LEVELS.indexOf(n);if(i>=0)EMBERS_LEVELS.splice(i,1)}
+})();
