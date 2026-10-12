@@ -15,9 +15,9 @@ function dsDuneShape(x,y,len,seed){ // long gentle windward slope, shorter slip 
   return sm*.82+.18*tsmooth(x/7,y/7,seed+2);
 }
 const TERR_SPEC={
-  41:{amp:.9,len:15,seed:11,mask:(x,y)=>clamp((rdBiome(x,y)-.45)*2.2,0,1)},
-  43:{amp:1.05,len:19,seed:23,mask:()=>1},
-  60:{amp:.55,len:17,seed:37,mask:()=>1}
+  41:{amp:1.25,len:17,seed:11,mask:(x,y)=>clamp((rdBiome(x,y)-.45)*2.2,0,1)},
+  43:{amp:1.6,len:21,seed:23,mask:()=>1},
+  60:{amp:1.0,len:19,seed:37,mask:()=>1}
 };
 function terrFor(n){
   if(TERRS[n]!==undefined)return TERRS[n];
@@ -46,8 +46,8 @@ function terrFor(n){
   const s=new Float32Array(W*H);
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){
     const i=y*W+x,hx=(sm[Math.min(W-1,x+1)+y*W]-sm[Math.max(0,x-1)+y*W])*.5,hy=(sm[x+Math.min(H-1,y+1)*W]-sm[x+Math.max(0,y-1)*W])*.5;
-    const nl=Math.hypot(hx*2.6,hy*2.6,1),dif=(-hx*2.6*-.55+-hy*2.6*-.35+1*.76)/nl;
-    s[i]=clamp(.5+.62*dif,.5,1.12);
+    const K=3.4,nl=Math.hypot(hx*K,hy*K,1),dif=(hx*K*.55+hy*K*.35+.76)/nl;   // facing the light is high, the lee side is low
+    s[i]=clamp(.18+1.0*dif,.42,1.2);
   }
   return TERRS[n]={W,H,h:sm,s};
 }

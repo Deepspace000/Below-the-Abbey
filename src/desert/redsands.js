@@ -28,7 +28,7 @@ function buildRedDunes(){
     if(!open[idx(x,y)])continue;
     const road=Math.abs(x-Math.round(rsCentre(y)))<=3&&y<roadFrom+10,oX=(R(x,y,3)-.5)*.7,oY=(R(x,y,4)-.5)*.7;
     if(road)continue;
-    if(R(x,y,20)<.055&&!nearDune(x,y)){dunes.add(x+','+y);put('rdune'+((R(x,y,21)*3)|0),x,y,{block:true,ox:oX*.4,oy:oY*.3,sc:.95+R(x,y,22)*.8})}
+    if(DUNE_SPRITES&&R(x,y,20)<.055&&!nearDune(x,y)){dunes.add(x+','+y);put('rdune'+((R(x,y,21)*3)|0),x,y,{block:true,ox:oX*.4,oy:oY*.3,sc:.95+R(x,y,22)*.8})}
     else if(R(x,y,23)<.016)put('rrock'+((R(x,y,24)*3)|0),x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,25)*.7});
     else if(R(x,y,26)<.006)put('dcactus',x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,27)*.4});
     else if(R(x,y,28)<.007)put('ddead',x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,29)*.5});

@@ -13,4 +13,5 @@ function dsApplyPainted(){
     else IMG[k]=im;
   }
 }
+const DUNE_SPRITES=false; // the dunes are real hills now (terrain.js); the old flat dune pictures are not placed
 const DS_TEXREG={}; // name -> texture number of every wall and door picture the desert code makes, so a painted picture can replace it
