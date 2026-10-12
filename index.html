@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.72';
+const VERSION='2.73';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3858,11 +3858,13 @@ function jumpToLevel(n,target){
   goToLevel(n,{x:st.x,y:st.y,f:st.f!==undefined?st.f:1});G.state='play';G.menu=false;
 }
 const AREA_STATS={};
+const AREA_WAVES={2:['wolf','wolf','wolf','wolf','bandit','bandit','archer','wolf','wolf','wolf','bandit','archer','wolf','wolf','bandit','archer']}; // the wolf and bandit attacks of the Thornwood quest
 function areaStats(n){ // what a level holds: creatures and their levels, potions, gold and other items
   if(AREA_STATS[n])return AREA_STATS[n];
   const L=LEVELS[n],o={en:0,lo:0,hi:0,pot:0,gold:0,it:0};if(!L)return o;
   const base=(L.diff||n)+(L.lvlBonus||0);let lo=1e9,hi=0;
-  for(const e of L.enemies||[]){const lv=e.lvl||base;o.en++;lo=Math.min(lo,lv);hi=Math.max(hi,lv);if(ENEMY_DEF[e.t]){const g=enemyStat(e.t,lv).gold;o.gold+=(g[0]+g[1])/2}}
+  const spawned=(AREA_WAVES[n]||[]).map(t=>({t})); // creatures a quest sends in later, not placed in the map
+  for(const e of (L.enemies||[]).concat(spawned)){const lv=e.lvl||base;o.en++;lo=Math.min(lo,lv);hi=Math.max(hi,lv);if(ENEMY_DEF[e.t]){const g=enemyStat(e.t,lv).gold;o.gold+=(g[0]+g[1])/2}}
   if(o.en){o.lo=lo;o.hi=hi}
   for(const it of L.items||[]){if(/potion/.test(it.k))o.pot++;else o.it++}
   const keep=LEVEL;
