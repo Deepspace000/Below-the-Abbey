@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.67';
+const VERSION='2.68';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1240,7 +1240,7 @@ function areaAudio(){
     if(LEVEL===32){T.music_mithral=.55;loadLazy('music_mithral')}
     else if(LEVEL===33){T.village_ambience=.22;T.wind_loop=.1}
     else if(LEVEL===35){T.music_tavern=.5;T.village_ambience=.15}
-    else if(STREAM_LISTS[LEVEL]&&LEVEL>=50){T.dungeon_ambience=.18}
+    else if(STREAM_LISTS[LEVEL]&&LEVEL>=50&&!(LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor)){T.dungeon_ambience=.18}
     else if(EMBERS_LEVELS.includes(LEVEL)){T.dungeon_ambience=.22;T.music_embers=.55;loadLazy('music_embers')}
     else if(DUNGEON_LEVELS.includes(LEVEL)){T.dungeon_ambience=.3;T.music_dungeon1=.5}
     else if(LEVEL===39){T.music_dungeon1=.3}
@@ -2600,7 +2600,7 @@ function spriteList(){
   for(const d of G.decor){if(d.found)continue;if(d.hidden)continue;if(G.decor.length>250&&((d.x-cam.x)*(d.x-cam.x)+(d.y-cam.y)*(d.y-cam.y))>1300)continue;const k=(d.k==='grave'&&IMG.grave2&&hash2(d.x,d.y,5)>.5)?'grave2':d.k;if(d.wd&&d.txt){L.push({x:d.x+.5+d.wd[0]*.1,y:d.y+.5+d.wd[1]*.1,img:shopSign(d),w:.8,bob:.3,hang:[d.wd[0],d.wd[1]],decor:d});continue}
     if(d.k==='lever'){L.push({x:d.x+.5+d.wd[0]*.43,y:d.y+.5+d.wd[1]*.43,img:IMG.lever,w:.42,bob:.3,flat:[d.wd[0],d.wd[1]],decor:d});continue}
     if(d.wd&&d.k.startsWith('branch')){L.push({x:d.x+.5+d.wd[0]*.1,y:d.y+.5+d.wd[1]*.1,img:IMG[d.k],w:.8,bob:d.bob||.4,hang:[d.wd[0],d.wd[1]],decor:d});continue}
-    L.push({x:d.x+.5+(d.ox||0),y:d.y+.5+(d.oy||0),img:(LEVEL>=33&&LEVEL<=38&&d.npc&&VIVID_KEYS.has(k))?vividImg(k,d):(k==='brazier'?IMG['brazier'+(((G.time*7+d.x*3+d.y)|0)&3)]:k==='teleporter'?IMG['tele'+(teleActive(LEVEL)?1+(((G.time*5)|0)&3):0)]:IMG[k]),w:(NPC_H[k]&&IMG[k]?NPC_H[k]*IMG[k].width/IMG[k].height:decorW(k))*(d.sc||1),drop:DROP[k]||(/^[glp]tree/.test(k)?.05:0),decor:d})}
+    L.push({x:d.x+.5+(d.ox||0),y:d.y+.5+(d.oy||0),img:(LEVEL>=33&&LEVEL<=38&&d.npc&&VIVID_KEYS.has(k))?vividImg(k,d):(k==='brazier'?IMG['brazier'+(((G.time*7+d.x*3+d.y)|0)&3)]:k==='teleporter'?IMG['tele'+(teleActive(LEVEL)?1+(((G.time*5)|0)&3):0)]:IMG[k]),w:(NPC_H[k]&&IMG[k]?NPC_H[k]*IMG[k].width/IMG[k].height:decorW(k))*(d.sc||1),drop:DROP[k]||(/^[glp]tree/.test(k)?.05:0),bob:d.bob||0,decor:d})}
   return L;
 }
 let SC=ctx; // sprites are painted straight onto the full-size screen, not into the small 3D picture, so they stay sharp
@@ -4377,7 +4377,7 @@ function loadLevel(n){
   G.day=L.day!==undefined?L.day:(L.outdoor?.98:0);G.dayBase=G.day;G.amb=L.amb||0;G.fl=L.floor?FLOORS[L.floor]:null;G.cl=L.ceil?CEILS[L.ceil]:null;G.portals=L.portals||[];G.fmap=L.fmap?L.fmap.join(''):null;G.fl2=L.fmap?(FLOORS[L.floor2]||FLOORS.grass):null;G.fl3=L.fmap?(FLOORS.dirt||FLOORS.grass):null;G.fl4=L.fmap?(FLOORS.mosscobble||FLOORS.cobble):null;G.fl5=L.fmap?(FLOORS.stainedcobble||FLOORS.cobble):null;G.fl6=L.fmap?(FLOORS.wetcobble||FLOORS.cobble):null;if(L.floorSet){const F2=L.floorSet.map(nm=>FLOORS[nm]);G.fl=F2[0];G.fl2=F2[1];G.fl3=F2[2];G.fl4=F2[3];G.fl5=F2[4];G.fl6=F2[5]}G.extraLights=L.lights||null;
   setLightLevel(G.lightLevel||0);
 }
-function sparseDecor(){const o={};G.decor.forEach((d,i)=>{if(d.contents||d.gold||d.goldTaken||d.found||d.opened||d.ambushed)o[i]={contents:d.contents||null,gold:d.gold||0,goldTaken:!!d.goldTaken,found:!!d.found,opened:!!d.opened,ambushed:!!d.ambushed}});return o}
+function sparseDecor(){const o={};G.decor.forEach((d,i)=>{if(d.caravan)return;if(d.contents||d.gold||d.goldTaken||d.found||d.opened||d.ambushed)o[i]={contents:d.contents||null,gold:d.gold||0,goldTaken:!!d.goldTaken,found:!!d.found,opened:!!d.opened,ambushed:!!d.ambushed}});return o}
 function applySparseDecor(sd){ // old saves kept every piece of scenery in a list; new ones keep only what changed
   const put=(d,t)=>{if(!t)return;d.contents=t.contents;d.gold=t.gold;d.goldTaken=t.goldTaken;d.opened=t.opened;d.ambushed=t.ambushed;if(t.found){d.found=true;d.block=false}};
   if(Array.isArray(sd)){if(sd.length<=G.decor.length)G.decor.forEach((d,i)=>put(d,sd[i]))}else if(sd)for(const k in sd){const d=G.decor[+k];if(d)put(d,sd[k])}
@@ -6124,7 +6124,7 @@ function update(dt){
   if(!G.overview)G.ovInit=false;
   try{areaAudio();huntTick()}catch(e){}
   burnTick(dt);
-  G.time+=dt;try{stormTick(dt);birdTick(dt);if(G.flags)(G.flags.lvSeen=G.flags.lvSeen||{})[LEVEL]=1}catch(e){}
+  G.time+=dt;try{stormTick(dt);birdTick(dt);caravanTick(dt);if(G.flags)(G.flags.lvSeen=G.flags.lvSeen||{})[LEVEL]=1}catch(e){}
   if(G.dayBase>0){const hr=(G.clock%1440)/60,dsl=LEVEL===43||(LEVEL>=60&&LEVEL<=64)||LEVEL===41;G.day=Math.max(.16,G.dayBase*clamp(.66+.5*Math.cos((hr-12)/24*TAU),dsl?.3:G.hasLamps?.2:.5,1))}
   // timers
   if(!G.cut)for(let i=0;i<G.timers.length;){const t=G.timers[i];if(G.time>=t.t){G.timers.splice(i,1);t.fn()}else i++}
@@ -6438,7 +6438,7 @@ addEventListener('resize',fit);fit();
 /*@@DESERT:BEGIN@@*/
 /* ---- src/desert/artlist.js ---- */
 /* written by tools/inject.py */
-const DS_PAINTED=['bat', 'batA', 'brazier0', 'brazier1', 'brazier2', 'brazier3', 'ceil_tomb', 'cobra', 'cobraA', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dskeleton', 'dskeletonA', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'offering', 'rrock0', 'rrock1', 'rrock2', 'skel', 'skelA', 'skybirdA', 'skybirdB', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA'];
+const DS_PAINTED=['bat', 'batA', 'brazier0', 'brazier1', 'brazier2', 'brazier3', 'camelpE', 'camelpW', 'camelrE', 'camelrW', 'ceil_tomb', 'cobra', 'cobraA', 'cvnomadA', 'cvnomadB', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dskeleton', 'dskeletonA', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'offering', 'rrock0', 'rrock1', 'rrock2', 'skel', 'skelA', 'skybirdA', 'skybirdB', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA'];
 
 /* ---- src/desert/artpack.js ---- */
 /* ==========================================================================
@@ -7996,6 +7996,7 @@ function buildDng(idx,cls,lvl,entryK){
   });
 })();
 function makeDngArt(){
+  if(typeof makeCaravanArt==='function')makeCaravanArt();
   for(const n of Object.keys(DNG_INFO))LEVELS[n].chars=LEVEL42_DATA.chars;
   for(const [k,,h] of DNG_ENTRY)NPC_H[k]=h;
 }
@@ -8068,6 +8069,74 @@ const DNG_MUSIC=['music_sands_vibration'];
   const lv=Object.keys(DNG_INFO).map(Number);for(let k=0;k<BURROW_N;k++)lv.push(BURROW_BASE+k);
   for(const n of lv){STREAM_LISTS[n]=DNG_MUSIC;const i=EMBERS_LEVELS.indexOf(n);if(i>=0)EMBERS_LEVELS.splice(i,1)}
 })();
+
+/* ---- src/desert/caravan.js ---- */
+/* ==========================================================================
+   THE CARAVANS. Now and then (rarely) a trading caravan is crossing an open desert: one to four camels in a line, each
+   carrying a nomad rider or a load, and a few nomads on foot behind. They walk back and forth along a straight route
+   and stop when you come close. Walk into any of them to talk, and to buy water and food.
+   ========================================================================== */
+const CV_CHANCE=.28;   // the chance that a given visit to an open desert has a caravan
+const CV_LEVELS=[41,43,60,61,62,63,64];
+const CV_STOCK=[['water',14],['dates',10],['bread',8],['cheese',6],['apple',6]];
+NPCS.caravan={name:'Caravan trader',img:'cvnomadA',root:d=>{
+  const F=G.flags,lines=[
+    'Peace on your road. We carry water, dates and bread across the sand, and we sell what we can spare.',
+    'You are a long way from any well. Buy water while you can. The next oasis is further than it looks.',
+    'We have been walking since before dawn. Take what you need, and pay fairly.',
+    'The sand is quiet today. When the wind rises, we stop and wait it out. You should do the same.'];
+  const i=(F.cvTalk||0)%lines.length;F.cvTalk=i+1;
+  return say(lines[i],[['Buy water and food',()=>{openShop(d,CV_STOCK,'The Caravan');return null}],BYE]);
+}};
+for(const n of CV_LEVELS)STREAM_LISTS[n]=['music_sands_goldenkey']; // Golden Key plays in every open desert
+function cvFlip(k){ // the mirror of a picture, made once from the painted one
+  const im=IMG[k];if(!im||IMG[k+'f'])return;
+  IMG[k+'f']=mkCanvas(im.width,im.height,(x,w,h)=>{x.translate(w,0);x.scale(-1,1);x.drawImage(im,0,0)});
+}
+function makeCaravanArt(){NPC_H.camelrE=1.05;NPC_H.camelrW=1.05;NPC_H.camelpE=.82;NPC_H.camelpW=.82;NPC_H.cvnomadA=.62;NPC_H.cvnomadB=.62;NPC_H.cvnomadAf=.62;NPC_H.cvnomadBf=.62}
+function maybeSpawnCaravan(){
+  if(!CV_LEVELS.includes(LEVEL)||Math.random()>CV_CHANCE)return;
+  const L=LEVELS[LEVEL],rows=L.rows,W=rows[0].length,H=rows.length,T=terrFor(LEVEL);
+  const blocked=new Set();for(const d of G.decor)if(d.block)blocked.add(d.y*W+d.x);
+  const clear=(x,y)=>{const cx=Math.floor(x),cy=Math.floor(y);if(cx<3||cy<3||cx>=W-3||cy>=H-3)return false;if(rows[cy][cx]!=='.')return false;if(T&&T.block&&T.block[cy*W+cx])return false;
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(blocked.has((cy+dy)*W+cx+dx))return false;
+    if(LEVEL===41&&(cy>140||rdBiome(cx,cy)<.7))return false;return true};
+  const px=G.P.x,py=G.P.y;
+  for(let t=0;t<500;t++){
+    const x0=20+Math.random()*(W-40),y0=20+Math.random()*(H-40),a=Math.random()*Math.PI*2,len=45+Math.random()*60,x1=x0+Math.cos(a)*len,y1=y0+Math.sin(a)*len;
+    if(Math.hypot((x0+x1)/2-px,(y0+y1)/2-py)<14)continue;
+    let ok=true;for(let s=0;s<=len&&ok;s+=1.5)if(!clear(x0+(x1-x0)*s/len,y0+(y1-y0)*s/len))ok=false;
+    if(!ok)continue;
+    const camels=1+Math.floor(Math.random()*4),walkers=1+Math.floor(Math.random()*3),members=[];
+    const add=(k,camel)=>{const d={k,x:0,y:0,block:true,npc:'caravan',caravan:true,camel};G.decor.push(d);members.push(d)};
+    for(let i=0;i<camels;i++)add(i===0||Math.random()<.45?'camelrE':'camelpE',true);
+    for(let i=0;i<walkers;i++)add('cvnomadA',false);
+    // distance behind the leader: camels two cells apart, a gap, then the walkers a cell and a half apart
+    const offs=[];let o=0;members.forEach((d,i)=>{offs.push(o);o+=d.camel?2.1:(i===camels?2.6:1.6)});
+    G.caravan={x0:x0+.5,y0:y0+.5,x1:x1+.5,y1:y1+.5,len,D:Math.random()*len*2,speed:.75,members,offs,t:0};
+    return;
+  }
+}
+function caravanTick(dt){
+  if(G.state!=='play')return;
+  if(G._cvLevel!==LEVEL||G._cvDecor!==G.decor){G._cvLevel=LEVEL;G._cvDecor=G.decor;G.caravan=null;maybeSpawnCaravan();G._cvDecor=G.decor}
+  const C=G.caravan;if(!C)return;
+  if(!IMG.cvnomadAf){cvFlip('cvnomadA');cvFlip('cvnomadB')}
+  C.t+=dt;
+  // stop while you are talking, shopping, or standing close to any of them
+  let near=!!(G.talk||G.loot);
+  if(!near)for(const d of C.members)if(Math.abs(d.x-G.P.x)+Math.abs(d.y-G.P.y)<=2){near=true;break}
+  if(!near)C.D+=dt*C.speed;
+  const dx=C.x1-C.x0,dy=C.y1-C.y0,L2=C.len*2;
+  const at=(D)=>{let m=((D%L2)+L2)%L2;const f=m<C.len?m:L2-m;return [C.x0+dx*f/C.len,C.y0+dy*f/C.len,m<C.len?1:-1]};
+  C.members.forEach((d,i)=>{
+    const [x,y,dir]=at(C.D-C.offs[i]);
+    d.x=Math.floor(x);d.y=Math.floor(y);d.ox=x-(d.x+.5);d.oy=y-(d.y+.5);
+    const E=(dx*dir)>0||((Math.abs(dx)<.5)&&(dy*dir)>0);
+    if(d.camel){const rider=d.k.startsWith('camelr');d.k=(rider?'camelr':'camelp')+(E?'E':'W');d.bob=.015+.012*Math.abs(Math.sin(C.t*5+i*1.7))}
+    else{d.k=((Math.floor(C.t*3+i)&1)?'cvnomadB':'cvnomadA')+(E?'f':'');d.bob=.01+.012*Math.abs(Math.sin(C.t*6+i))}
+  });
+}
 
 /* ---- src/desert/terrain.js ---- */
 /* ==========================================================================
