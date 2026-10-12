@@ -56,7 +56,7 @@ function buildBurrow(k){
   // creatures: half as many as before, in the rooms between the door and the treasure
   const side=rooms.map((r,i)=>i).filter(i=>i!==0&&i!==tr);
   let ci=0;for(const [t,n] of T.foes)for(let i=0;i<Math.max(1,n>>1);i++,ci++){const r=rooms[side[ci%side.length]],p=spot(r,1000+ci);if(p){used.add(p[0]+','+p[1]);enemies.push({t,x:p[0],y:p[1],lvl:15+(k%3)})}}
-  items.push({k:'potion',x:start.x,y:start.y-1});if(k%2){const p=spot(rooms[side[0]],1100);if(p)items.push({k:'bread',x:p[0],y:p[1]})}
+  items.push({k:'potion',x:start.x,y:start.y-1});
   return {rows,fm:fl.map(r=>r.join('')),decor,enemies,items,lights,start:{x:start.x,y:start.y,f:0}};
 }
 for(let k=0;k<BURROW_N;k++){

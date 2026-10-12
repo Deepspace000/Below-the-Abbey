@@ -123,7 +123,7 @@ function buildTomb(){
   for(const [x,y] of [[36,6],[60,6],[36,9],[60,9]])put('danubis',x,y,{block:true});
   for(const [x,y] of [[39,11],[57,11],[48,11]])put('treasure',x,y,{block:true});
   foe('sut',48,6,20);
-  items.push({k:'potion',x:35,y:12},{k:'potion',x:61,y:12},{k:'bread',x:21,y:30},{k:'potion',x:48,y:60},{k:'cheese',x:12,y:5},{k:'potion',x:76,y:44});
+  items.push({k:'potion',x:35,y:12},{k:'potion',x:61,y:12},{k:'potion',x:21,y:30},{k:'potion',x:48,y:60},{k:'potion',x:12,y:5},{k:'potion',x:76,y:44});
   // nothing may stand inside a wall or on top of something solid
   const solid=new Set(decor.filter(d=>d.block).map(d=>d.x+','+d.y));
   const okCell=(x,y)=>y>=0&&y<H&&x>=0&&x<W&&g[y][x]==='.';

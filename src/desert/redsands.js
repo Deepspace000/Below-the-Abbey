@@ -70,7 +70,7 @@ function buildRedDunes(){
     else camp('mummy',x,y,4,17,2);
   }
   const items=[];
-  for(let k=0;k<12;k++)for(let t=0;t<20;t++){const x=4+((R(k,t,80)*(W-8))|0),y=20+((R(k,t,81)*(H-50))|0);if(free(x,y)&&!enemies.some(e=>Math.abs(e.x-x)+Math.abs(e.y-y)<4)){items.push({k:['potion','bread','cheese','potion','apple'][k%5],x,y});break}}
+  for(let k=0;k<12;k++)for(let t=0;t<20;t++){const x=4+((R(k,t,80)*(W-8))|0),y=20+((R(k,t,81)*(H-50))|0);if(free(x,y)&&!enemies.some(e=>Math.abs(e.x-x)+Math.abs(e.y-y)<4)){items.push({k:'potion',x,y});break}}
   return {rows,fm,decor,scen,enemies,items,start:{x:cxS,y:H-3,f:0},cxN,cxS};
 }
 const REDDUNES=buildRedDunes();

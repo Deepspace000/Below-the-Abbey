@@ -138,7 +138,7 @@ function buildSandRoad(){
   }
   // ---- things to pick up ----
   const items=[];
-  for(let k=0;k<14;k++)for(let t=0;t<20;t++){const x=3+((R(k,t,70)*(W-6))|0),y=20+((R(k,t,71)*180)|0);if(free(x,y)&&!enemies.some(e=>Math.abs(e.x-x)+Math.abs(e.y-y)<4)){items.push({k:['potion','bread','cheese','potion','apple'][k%5],x,y});break}}
+  for(let k=0;k<14;k++)for(let t=0;t<20;t++){const x=3+((R(k,t,70)*(W-6))|0),y=20+((R(k,t,71)*180)|0);if(free(x,y)&&!enemies.some(e=>Math.abs(e.x-x)+Math.abs(e.y-y)<4)){items.push({k:'potion',x,y});break}}
   return {rows,fm,decor,scen,enemies,items,start:{x:2,y:RD.CY,f:1},cxN,burrows};
 }
 const SANDROAD=buildSandRoad();

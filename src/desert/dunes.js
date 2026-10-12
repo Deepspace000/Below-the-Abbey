@@ -38,5 +38,6 @@ function makeDesertArt(){
   const ycity=mkWall(dsCityWallTile(),1.9);LEVEL43_DATA.chars={D:rdune,C:rcl,Y:ycity};T_DOORS.citygate=dsCityGate();DS_TEXREG.citywall=T_TILE[ycity];DS_TEXREG.citygate=T_DOORS.citygate;
   T_DOORS.tomb=dsTombDoor();DS_TEXREG.tombdoor=T_DOORS.tomb;
   if(typeof makeTombArt==='function')makeTombArt(rdune,rcl);
-  if(typeof makeBlueArt==='function')makeBlueArt(ydune,ycl);
+  if(typeof makeBlueArt==='function')makeBlueArt(ydune,ycl);
+  if(typeof makeGoldenArt==='function')makeGoldenArt(ydune,ycl);
 }

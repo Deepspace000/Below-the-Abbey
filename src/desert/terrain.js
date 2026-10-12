@@ -17,7 +17,9 @@ function dsDuneShape(x,y,len,seed){ // long gentle windward slope, shorter slip 
 const TERR_SPEC={
   41:{amp:1.25,len:17,seed:11,peak:6.5,mask:(x,y)=>clamp((rdBiome(x,y)-.45)*2.2,0,1)},
   43:{amp:1.6,len:21,seed:23,peak:7,mask:()=>1},
-  60:{amp:1.0,len:19,seed:37,peak:6,mask:()=>1}
+  60:{amp:1.0,len:19,seed:37,peak:6,mask:()=>1},
+  61:{amp:1.5,len:24,seed:53,peak:7,mask:()=>1},
+  62:{amp:1.7,len:26,seed:67,peak:7.5,mask:()=>1}
 };
 const MTN_BAND=14,MTN_BLOCK=1.7; // mountains rise over the last fourteen cells before a sky wall; above this height they cannot be climbed
 function terrFor(n){
@@ -27,6 +29,8 @@ function terrFor(n){
   const flat=[[L.start.x,L.start.y,6]],gates=[[L.start.x,L.start.y]];
   rows.forEach((r,y)=>{for(let x=0;x<W;x++){const c=r[x];if(c==='.')open[y*W+x]=1;else if(c>='0'&&c<='9'){flat.push([x,y,5]);gates.push([x,y])}}});
   for(const d of L.decor||[])if(/^(chest|dpillar|danubis|dbastet|dsphinx|dobelisk|dpharaoh|treasure|offering|vase|brazier|dsutstatue|sarcoph|dburrow|teleporter)/.test(d.k))flat.push([d.x,d.y,3.5]);
+  if(n===61)for(const [ox,oy] of GER.OASES)flat.push([ox,oy,9]);
+  if(n===62)for(const [ox,oy] of VER.OASES)flat.push([ox,oy,9]);
   if(n===60)flat.push([BDN.OX,BDN.OY,9]);                       // the oasis lies flat
   if(n===43)for(let y=RS.NORTH;y<130;y+=3)flat.push([rsCentre(y),y,4.5]); // so does the old paved road
   if(n===41)for(let y=0;y<H;y+=4)flat.push([rdCentre(y),y,2.2]);   // and the road through the sand
@@ -78,7 +82,7 @@ function terrFor(n){
   }
   return TERRS[n]={W,H,h:sm,s,rk,block};
 }
-function terrRock(){const t=TEX[LEVEL===43?DS_TEXREG.cliffR:DS_TEXREG.cliffY];return {d:t&&t.d,tint:LEVEL===60?[.8,.92,1.22]:[1,1,1]}}
+function terrRock(){const t=TEX[LEVEL===43?DS_TEXREG.cliffR:DS_TEXREG.cliffY];return {d:t&&t.d,tint:LEVEL===60?[.8,.92,1.22]:LEVEL===61?[1.1,.98,.74]:LEVEL===62?[1,.8,1.25]:[1,1,1]}}
 function terrH(x,y){
   const T=TERR_NOW;if(!T)return 0;
   const gx=clamp(x-.5,0,T.W-1.001),gy=clamp(y-.5,0,T.H-1.001),ix=gx|0,iy=gy|0,fx=gx-ix,fy=gy-iy,i=iy*T.W+ix,h=T.h;

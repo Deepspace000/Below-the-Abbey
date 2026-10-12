@@ -10,7 +10,7 @@ import re, sys, pathlib
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 HTML = ROOT / 'index.html'
 SRC = ROOT / 'src' / 'desert'
-ORDER = ['artlist.js', 'artpack.js', 'paint.js', 'floors.js', 'sprites_out.js', 'creatures.js', 'sprites_tomb.js', 'teleport.js', 'magic.js', 'road.js', 'tomb.js', 'burrows.js', 'redsands.js', 'bluedunes.js', 'terrain.js', 'dunes.js', 'logic.js', 'logic2.js', 'boot.js']
+ORDER = ['artlist.js', 'artpack.js', 'paint.js', 'floors.js', 'sprites_out.js', 'creatures.js', 'sprites_tomb.js', 'teleport.js', 'magic.js', 'road.js', 'tomb.js', 'burrows.js', 'redsands.js', 'bluedunes.js', 'golden.js', 'terrain.js', 'dunes.js', 'logic.js', 'logic2.js', 'boot.js']
 BEGIN = '/*@@DESERT:BEGIN@@*/'
 END = '/*@@DESERT:END@@*/'
 ANCHOR = '/* ---------- boot ---------- */'
