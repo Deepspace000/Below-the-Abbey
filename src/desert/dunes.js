@@ -31,7 +31,7 @@ function dsTombDoor(){ // the gate of the tomb: a pylon of carved stone, a golde
   return addTex(pix(c));
 }
 function makeDesertArt(){
-  makeDesertFloors();makeDesertSprites();makeDesertCreatures();
+  makeDesertFloors();makeDesertSprites();makeDesertCreatures();makeTeleSprites();
   const mkWall=(t,wh,sky)=>{const id=addTex(t.d,t.e||null);if(wh)TEX[id].wh=wh;if(sky)TEX[id].sky=true;const gid=TNF++;T_TILE[gid]=id;return gid}; // a 'sky' wall is a piece of the moving sky itself, so the edge of the desert is open sky
   const ydune=mkWall(dsDuneWallTile(false,401),0,true),rdune=mkWall(dsDuneWallTile(true,402),0,true),ycl=mkWall(dsCliffTile(false,403),0),rcl=mkWall(dsCliffTile(true,404),0);
   LEVEL41_DATA.chars={D:ydune,C:ycl};

@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.21';
+const VERSION='2.22';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1445,6 +1445,7 @@ function reset(n){
   applyLevers();clearDoorFronts();
   G.decor.forEach(d=>{if(!d.npc&&(d.k==='grave'||d.k==='grave2'||d.k==='cross')){d.npc='epitaph';d.loot=false}});
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++)if(MAPROWS[y][x]==='t')G.decor.push({k:'tree'+((hash2(x,y,7)*NTREES)|0),x,y,block:true,loot:false,shop:false});
+  placeTeleporter();
   buildDecorMap();
   G.loot=null;G.flags={};G.arrows=[];G.cut=null;G.winKind=null;G.quests={};G.lst={};G.talk=null;G.clock=480;G.starveT=0;G.buffs=[];G.lvlBanners=[];
   setupLights();
@@ -2148,6 +2149,7 @@ function doMove(rel){ // rel: 0 forward, 1 right, 2 back, 3 left
   const e=enemyAt(nx,ny);
   if(e){msg(`The ${ENEMY_DEF[e.t].name} blocks the way!`);sfx('bump');return}
   G.P.x=nx;G.P.y=ny;sfx('step');reveal();
+  teleStep(nx,ny);
   if(LEVEL>=41)desertStep(nx,ny);
   for(const it of G.items)if(!it.taken&&it.x===nx&&it.y===ny)pickup(it);
   storyTick();
@@ -2234,6 +2236,7 @@ function act(id){
     case 'swapoff':case 'swapalt':if(G.heroes[i].alive&&swapHand(i,id==='swapoff'?'off':'alt')&&hostileNear()&&!G.acted[i])heroDone(i);break;
     case 'wait':msg('The party waits.','#a09880');endRound();break;
     case 'rest':restParty(false);break;
+    case 'teleport':if(teleOn()&&teleActive(LEVEL))openTeleMap();break;
   }
 }
 
@@ -2479,7 +2482,7 @@ function spriteList(){
   for(const d of G.decor){if(d.found)continue;if(d.hidden)continue;if(G.decor.length>1500&&((d.x-cam.x)*(d.x-cam.x)+(d.y-cam.y)*(d.y-cam.y))>1300)continue;const k=(d.k==='grave'&&IMG.grave2&&hash2(d.x,d.y,5)>.5)?'grave2':d.k;if(d.wd&&d.txt){L.push({x:d.x+.5+d.wd[0]*.1,y:d.y+.5+d.wd[1]*.1,img:shopSign(d),w:.8,bob:.3,hang:[d.wd[0],d.wd[1]],decor:d});continue}
     if(d.k==='lever'){L.push({x:d.x+.5+d.wd[0]*.43,y:d.y+.5+d.wd[1]*.43,img:IMG.lever,w:.42,bob:.3,flat:[d.wd[0],d.wd[1]],decor:d});continue}
     if(d.wd&&d.k.startsWith('branch')){L.push({x:d.x+.5+d.wd[0]*.1,y:d.y+.5+d.wd[1]*.1,img:IMG[d.k],w:.8,bob:d.bob||.4,hang:[d.wd[0],d.wd[1]],decor:d});continue}
-    L.push({x:d.x+.5+(d.ox||0),y:d.y+.5+(d.oy||0),img:(LEVEL>=33&&LEVEL<=38&&d.npc&&VIVID_KEYS.has(k))?vividImg(k,d):(k==='brazier'?IMG['brazier'+(((G.time*7+d.x*3+d.y)|0)&3)]:IMG[k]),w:(NPC_H[k]&&IMG[k]?NPC_H[k]*IMG[k].width/IMG[k].height:decorW(k))*(d.sc||1),drop:DROP[k]||(/^[glp]tree/.test(k)?.05:0),decor:d})}
+    L.push({x:d.x+.5+(d.ox||0),y:d.y+.5+(d.oy||0),img:(LEVEL>=33&&LEVEL<=38&&d.npc&&VIVID_KEYS.has(k))?vividImg(k,d):(k==='brazier'?IMG['brazier'+(((G.time*7+d.x*3+d.y)|0)&3)]:k==='teleporter'?IMG['tele'+(teleActive(LEVEL)?1+(((G.time*5)|0)&3):0)]:IMG[k]),w:(NPC_H[k]&&IMG[k]?NPC_H[k]*IMG[k].width/IMG[k].height:decorW(k))*(d.sc||1),drop:DROP[k]||(/^[glp]tree/.test(k)?.05:0),decor:d})}
   return L;
 }
 let SC=ctx; // sprites are painted straight onto the full-size screen, not into the small 3D picture, so they stay sharp
@@ -3825,7 +3828,11 @@ function drawWorldMap(){
   }
   // you are here
   if(here){const pulse=.5+.5*Math.sin(G.time*4);ctx.strokeStyle=`rgba(150,30,20,${.55+.4*pulse})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(here.x,here.y,17+pulse*3,0,TAU);ctx.stroke();ctx.fillStyle='rgba(150,30,20,.9)';ctx.beginPath();ctx.arc(here.x,here.y-24,3.2,0,TAU);ctx.fill();ctx.beginPath();ctx.moveTo(here.x-4,here.y-22);ctx.lineTo(here.x+4,here.y-22);ctx.lineTo(here.x,here.y-14);ctx.closePath();ctx.fill()}
+  // woken teleporters: a small glowing stone by each place that has one
+  const awake=WORLD_LOCS.filter(l=>l.lv.some(teleActive));
+  for(const l of awake){const mx=l.x+17,my=l.y-13,pl=.5+.5*Math.sin(G.time*4+l.x);ctx.fillStyle='rgba(150,210,255,'+(.25+.25*pl)+')';ctx.beginPath();ctx.arc(mx,my,9+pl*2,0,TAU);ctx.fill();ctx.fillStyle='#46506a';stroke();ctx.beginPath();ctx.ellipse(mx,my+1,6.5,3.2,0,0,TAU);ctx.fill();ctx.stroke();ctx.strokeStyle='#cfeaff';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(mx,my,3.4,0,TAU);ctx.stroke()}
   ctx.restore();
+  for(const l of awake){const sx=240+WV.x+(l.x+17-240)*WV.z,sy=160+WV.y+(l.y-13-160)*WV.z,r=Math.max(10,12*WV.z);btn('wtp_'+l.k,sx-r,sy-r,r*2,r*2)}
   // compass and scale
   const cx=420,cy=262;ctx.strokeStyle=ink;ctx.fillStyle=ink;ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(cx,cy,15,0,TAU);ctx.stroke();
   for(const [a,l] of [[-Math.PI/2,'N'],[0,'E'],[Math.PI/2,'S'],[Math.PI,'W']]){ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*17,cy+Math.sin(a)*17);ctx.lineTo(cx+Math.cos(a+.2)*5,cy+Math.sin(a+.2)*5);ctx.lineTo(cx+Math.cos(a-.2)*5,cy+Math.sin(a-.2)*5);ctx.closePath();ctx.fill();lab(l,cx+Math.cos(a)*25,cy+Math.sin(a)*25,8,ink)}
@@ -3833,6 +3840,8 @@ function drawWorldMap(){
   ctx.restore();
   ctx.lineWidth=2.4;ctx.strokeStyle=goldG(x0,y0,w,h);rrect(ctx,x0,y0,w,h,6);ctx.stroke();wornEdge(x0,y0,w,h,6);
   ctx.save();ctx.font=`26px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='rgba(235,220,170,.5)';ctx.strokeText('The Known Lands',240,36);ctx.fillStyle=ink;ctx.fillText('The Known Lands',240,36);ctx.restore();
+  if(G.teleMode||awake.length)txt(teleOn()?'Tap a glowing stone to travel there.':'Woken teleporters glow on the map. Stand on one to travel.',240,52,9,'#2a1c0e','center',true);
+  if(G.wnote&&G.time-G.wnote.t<4)txt(G.wnote.text,240,64,9,'#7a1a10','center',true);
   btnText('worldback','Level map',18,284,100,24);btnText('ovexit','Exit',362,284,100,24);
   btnText('wzin','+',196,284,26,24);btnText('wzout','-',226,284,26,24);btnText('wreset','Fit',256,284,44,24);
   txt(Math.round(WV.z*100)+'%',334,296,8,'#d8c88e','center');
@@ -5736,7 +5745,7 @@ function ui(dt){
   drawWorld();
   if(SMOKE){drawSmoke(G.time);ctx.fillStyle=HATCHP;ctx.fillRect(0,0,420,210)}
   if(G.state==='title'){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,420,210)}
-  if(G.state==='play'){drawEnemyPlate();drawArrows();drawFloats(dt);drawMessages();drawLevelBanners()}
+  if(G.state==='play'){drawEnemyPlate();drawArrows();drawFloats(dt);drawMessages();drawLevelBanners();if(teleOn()&&!G.cut&&!G.talk&&!G.menu&&!G.inv.open&&!G.loot&&!G.overview&&teleActive(LEVEL))btnText('teleport','Teleport  (T)',160,30,100,20)}
   ctx.restore();
   if(G.cut)drawCut();
   if(G.talk)drawTalk();
@@ -5999,7 +6008,7 @@ function frame(now){
 function handleBtn(id){
   if(G.cut){cutAdvance();return}
   if(G.talk){talkBtn(id);return}
-  if(G.overview){if(id==='ovexit'){G.overview=false;G.world=false}else if(id==='worldback')G.world=false;else if(id==='worldmap'){G.world=true;G.wv=wvDefault()}else if(id==='wzin')setWorldZoom((G.wv?G.wv.z:1)*1.4,240,160);else if(id==='wzout')setWorldZoom((G.wv?G.wv.z:1)/1.4,240,160);else if(id==='wreset')G.wv=wvDefault();else if(id==='wmap'){}
+  if(G.overview){if(id==='ovexit'){G.overview=false;G.world=false;G.teleMode=false}else if(/^wtp_/.test(id))teleFromMap(id.slice(4));else if(id==='worldback')G.world=false;else if(id==='worldmap'){G.world=true;G.wv=wvDefault()}else if(id==='wzin')setWorldZoom((G.wv?G.wv.z:1)*1.4,240,160);else if(id==='wzout')setWorldZoom((G.wv?G.wv.z:1)/1.4,240,160);else if(id==='wreset')G.wv=wvDefault();else if(id==='wmap'){}
     else if(id==='mzin')setMapZoom((G.mz||12)*1.3,DW/2,DH/2);else if(id==='mzout')setMapZoom((G.mz||12)/1.3,DW/2,DH/2);else if(id==='mzfit')setMapZoom(0,DW/2,DH/2);return}
   if(G.saves){savesBtn(id);return}
   if(G.state==='title'){titleBtn(id);return}
@@ -6157,7 +6166,7 @@ cv.addEventListener('wheel',e=>{
   if(G.inv.open){G.inv.scroll=clamp(G.inv.scroll+e.deltaY*.5,0,maxScroll());e.preventDefault()}
 },{passive:false});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
-const KEYMAP={ArrowUp:'fwd',w:'fwd',W:'fwd',ArrowDown:'back',s:'back',S:'back',ArrowLeft:'turnL',q:'turnL',Q:'turnL',ArrowRight:'turnR',e:'turnR',E:'turnR',a:'left',A:'left',d:'right',D:'right',' ':'attack',Enter:'attack',x:'special',X:'special',p:'potion',P:'potion',z:'wait',Z:'wait',r:'rest',R:'rest'};
+const KEYMAP={ArrowUp:'fwd',w:'fwd',W:'fwd',ArrowDown:'back',s:'back',S:'back',ArrowLeft:'turnL',q:'turnL',Q:'turnL',ArrowRight:'turnR',e:'turnR',E:'turnR',a:'left',A:'left',d:'right',D:'right',' ':'attack',Enter:'attack',x:'special',X:'special',p:'potion',P:'potion',z:'wait',Z:'wait',r:'rest',R:'rest',t:'teleport',T:'teleport'};
 addEventListener('keydown',e=>{
   if(e.ctrlKey||e.metaKey||e.altKey)return;
   audioInit();
@@ -6836,6 +6845,83 @@ function makeTombSprites(){
   for(let n=1;n<=4;n++){IMG['it_sundisc'+n]=dsSunDisc(n)}
 }
 
+/* ---- src/desert/teleport.js ---- */
+/* ==========================================================================
+   STONE TELEPORTERS. Every map has one. Standing on it wakes it; a woken teleporter can carry the party to any other
+   woken teleporter. They show on the world map, where a tap on one travels there (while standing on a teleporter).
+   ========================================================================== */
+function teleSpot(n){
+  const L=LEVELS[n];if(!L)return null;if(L._tele)return L._tele;if(L.tele)return L._tele=L.tele;
+  const rows=L.rows,H=rows.length,W=rows[0].length,st=L.start;
+  const solid=new Set((L.decor||[]).filter(d=>d.block!==false).map(d=>d.x+','+d.y)),bad=new Set(solid); // solid scenery and people cannot be walked through, so the stone is never put behind them
+  for(const e of L.enemies||[])bad.add(e.x+','+e.y);
+  for(const it of L.items||[])bad.add(it.x+','+it.y);
+  const nearDoor=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const c=(rows[y+dy]||'')[x+dx];if(c&&c!=='.'&&/[0-9]/.test(c))return true}return false};
+  const seen=new Set([st.x+','+st.y]),q=[[st.x,st.y,0]];let best=null,far=null;
+  while(q.length){
+    const [x,y,d]=q.shift();
+    if(d>=3&&!bad.has(x+','+y)&&!nearDoor(x,y)){if(!best)best={x,y}}
+    far=[x,y];if(best&&d>9)break;
+    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy,k=nx+','+ny;if(nx<0||ny<0||nx>=W||ny>=H||seen.has(k)||rows[ny][nx]!=='.'||solid.has(k))continue;seen.add(k);q.push([nx,ny,d+1])}
+  }
+  if(!best)best=far?{x:far[0],y:far[1]}:{x:st.x,y:st.y};
+  return L._tele=best;
+}
+function teleActive(n){return !!(G.flags.teles&&G.flags.teles[n])}
+function teleOn(){return !!(G.tele&&G.P.x===G.tele.x&&G.P.y===G.tele.y&&G.state==='play')}
+function placeTeleporter(){ // called when a level is built: one stone in every map
+  const sp=teleSpot(LEVEL);G.tele=null;if(!sp)return;
+  for(const d of G.decor)if(d.block&&!d.npc&&d.x===sp.x&&d.y===sp.y){d.found=true;d.block=false}
+  G.decor.push({k:'teleporter',x:sp.x,y:sp.y,block:false,walk:true,loot:false,shop:false,tele:true});
+  G.tele={x:sp.x,y:sp.y,n:LEVEL};
+}
+function teleStep(nx,ny){
+  if(!G.tele||nx!==G.tele.x||ny!==G.tele.y)return;
+  const F=G.flags;F.teles=F.teles||{};
+  if(!F.teles[LEVEL]){F.teles[LEVEL]=1;sfx('level');msg('The stone hums, and runes of pale light run round its rim. This teleporter is awake. Press T to travel.','#a8d8ff')}
+  else msg('A woken teleporter. Press T, or tap Teleport, to travel to another.','#a8d8ff');
+}
+function teleportTo(n){
+  const sp=teleSpot(n);if(!sp||!teleActive(n))return;
+  const L=LEVELS[n];let f=0;for(let k=0;k<4;k++){const c=(L.rows[sp.y+DIRS[k][1]]||'')[sp.x+DIRS[k][0]];if(c==='.'){f=k;break}}
+  G.teleMode=false;G.overview=false;G.world=false;sfx('level');
+  goToLevel(n,{x:sp.x,y:sp.y,f});
+  msg('The stone flares, and the party stands in '+(L.label||L.name)+'.','#a8d8ff');
+}
+function openTeleMap(){G.overview=true;G.world=true;G.wv=wvDefault();G.teleMode=true;G.wnote=null}
+function teleFromMap(k){
+  const loc=WORLD_LOCS.find(l=>l.k===k);if(!loc)return;
+  if(!teleOn()){G.wnote={text:'Stand on a woken teleporter to travel.',t:G.time};return}
+  const lv=loc.lv.filter(teleActive);if(!lv.length)return;
+  const go=lv.filter(v=>v!==LEVEL);
+  if(!go.length){G.wnote={text:'You are already here.',t:G.time};return}
+  if(go.length===1){teleportTo(go[0]);return}
+  G.overview=false;G.world=false;G.teleMode=false;
+  G.talk={d:{k:'teleporter'},n:{name:'Teleporter'},node:say('Which stone in '+loc.n+'?',go.map(v=>[LEVELS[v].label||LEVELS[v].name,()=>{teleportTo(v);return null}]).concat([['Stay here.',()=>null]])),t:G.time,btns:[]};G.hold=null;G.queued=null;
+}
+/* the stone itself, painted: a round dais of old grey stone with a ring of runes that wakes to a pale blue light */
+function dsTeleStone(frame){
+  const W=180,H=100;
+  return mkCanvas(W,H,(x)=>{
+    const on=frame>0,pulse=on?.6+.4*Math.sin(frame*1.6):0;
+    {const S=pc(W,H),s=S.getContext('2d');s.fillStyle='rgba(0,0,0,.5)';s.beginPath();s.ellipse(90,78,76,12,0,0,TAU);s.fill();x.drawImage(pBlur(S,4),0,0)}
+    if(on){const g=x.createRadialGradient(90,52,6,90,52,86);g.addColorStop(0,'rgba(190,230,255,'+(.55*pulse+.2)+')');g.addColorStop(1,'rgba(120,180,255,0)');x.fillStyle=g;x.fillRect(0,0,W,H)}
+    pForm(x,W,H,t=>{t.beginPath();t.ellipse(90,62,76,24,0,0,TAU)},t=>{const g=t.createLinearGradient(14,30,166,90);g.addColorStop(0,'#8c8a82');g.addColorStop(.5,'#6a685f');g.addColorStop(1,'#3a3832');return g},
+      s=>{s.fillStyle='rgba(255,255,240,.25)';s.beginPath();s.ellipse(70,50,46,9,-.1,0,TAU);s.fill();s.fillStyle='rgba(20,18,14,.45)';s.beginPath();s.ellipse(120,74,50,10,.1,0,TAU);s.fill()},
+      {blur:3,rim:.6,rimW:7,grain:.18,seed:21,shadow:.3,sx:0,sy:4,fine:f=>{f.strokeStyle='rgba(30,26,20,.5)';f.lineWidth=1.4;for(let i=0;i<14;i++){const a=i/14*TAU;f.beginPath();f.moveTo(90+Math.cos(a)*60,62+Math.sin(a)*19);f.lineTo(90+Math.cos(a)*76,62+Math.sin(a)*24);f.stroke()}}});
+    // the raised inner disc
+    pForm(x,W,H,t=>{t.beginPath();t.ellipse(90,56,54,16,0,0,TAU)},t=>{const g=t.createLinearGradient(40,40,140,72);g.addColorStop(0,'#a8a69c');g.addColorStop(1,'#56544c');return g},
+      s=>{s.fillStyle='rgba(255,255,240,.3)';s.beginPath();s.ellipse(76,50,30,6,-.1,0,TAU);s.fill()},{blur:2,rim:.5,rimW:5,grain:.16,seed:22});
+    // the runes round the disc, dark when asleep and bright when awake
+    for(let i=0;i<10;i++){const a=i/10*TAU+.3,px=90+Math.cos(a)*40,py=56+Math.sin(a)*11,s=1+Math.sin(a)*.2;
+      x.save();x.translate(px,py);x.scale(s,s*.5);
+      x.strokeStyle=on?'rgba(210,240,255,'+(.55+.45*pulse)+')':'rgba(40,36,30,.8)';x.lineWidth=on?2.6:2;x.lineCap='round';
+      x.beginPath();if(i%3===0){x.moveTo(-4,-6);x.lineTo(4,6);x.moveTo(4,-6);x.lineTo(-4,6)}else if(i%3===1){x.moveTo(0,-7);x.lineTo(0,7);x.moveTo(-5,-2);x.lineTo(5,-2)}else{x.arc(0,0,5,0,TAU)}x.stroke();x.restore()}
+    if(on){const g=x.createRadialGradient(90,54,2,90,54,26);g.addColorStop(0,'rgba(255,255,255,'+(.8*pulse+.2)+')');g.addColorStop(1,'rgba(150,210,255,0)');x.fillStyle=g;x.beginPath();x.ellipse(90,54,26,9,0,0,TAU);x.fill()}
+  });
+}
+function makeTeleSprites(){for(let f=0;f<=4;f++)IMG['tele'+f]=dsTeleStone(f);NPC_H.teleporter=.62}
+
 /* ---- src/desert/magic.js ---- */
 /* ==========================================================================
    MAGIC GEAR of the desert: found in the tomb, and in the little dungeons under the mounds of the dunes.
@@ -7326,7 +7412,7 @@ function dsTombDoor(){ // the gate of the tomb: a pylon of carved stone, a golde
   return addTex(pix(c));
 }
 function makeDesertArt(){
-  makeDesertFloors();makeDesertSprites();makeDesertCreatures();
+  makeDesertFloors();makeDesertSprites();makeDesertCreatures();makeTeleSprites();
   const mkWall=(t,wh,sky)=>{const id=addTex(t.d,t.e||null);if(wh)TEX[id].wh=wh;if(sky)TEX[id].sky=true;const gid=TNF++;T_TILE[gid]=id;return gid}; // a 'sky' wall is a piece of the moving sky itself, so the edge of the desert is open sky
   const ydune=mkWall(dsDuneWallTile(false,401),0,true),rdune=mkWall(dsDuneWallTile(true,402),0,true),ycl=mkWall(dsCliffTile(false,403),0),rcl=mkWall(dsCliffTile(true,404),0);
   LEVEL41_DATA.chars={D:ydune,C:ycl};
