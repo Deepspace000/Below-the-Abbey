@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.38';
+const VERSION='2.39';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2172,7 +2172,7 @@ function doMove(rel){ // rel: 0 forward, 1 right, 2 back, 3 left
   if(LEVEL>=41)desertStep(nx,ny);
   for(const it of G.items)if(!it.taken&&it.x===nx&&it.y===ny)pickup(it);
   storyTick();
-  later(300,endRound);
+  if(hostileNear())later(300,endRound);else endRound(); // with nothing hostile near there is no round to wait for, so walking never pauses
 }
 /* tap an object in the 3D view: floor items and wall torches */
 /* burning trees: a torch (used up) or a lantern (kept) sets a tree alight for five seconds, then it is ash you can walk over */
@@ -5931,6 +5931,13 @@ function drawEnd(win){
 /* ==========================================================================
    LOOP / INPUT
    ========================================================================== */
+const MOVE_IDS=new Set(['fwd','back','left','right','turnL','turnR']),KDOWN=[]; // move keys now held, newest last
+function heldMoveId(){
+  if(G.state!=='play'||G.menu||G.cut||G.talk)return null;
+  if(KDOWN.length)return KDOWN[KDOWN.length-1][1];
+  if(G.hold&&G.time>=G.hold.t&&MOVE_IDS.has(G.hold.id))return G.hold.id;
+  return null;
+}
 function update(dt){
   if(!G.overview)G.ovInit=false;
   try{areaAudio();huntTick()}catch(e){}
@@ -5941,7 +5948,16 @@ function update(dt){
   if(!G.cut)for(let i=0;i<G.timers.length;){const t=G.timers[i];if(G.time>=t.t){G.timers.splice(i,1);t.fn()}else i++}
   // camera easing
   const C=G.C,P=G.P;
-  const mv=dt*5.2;C.x+=clamp(P.x-C.x,-mv,mv);C.y+=clamp(P.y-C.y,-mv,mv);
+  // the camera glides at one steady speed. While a move key is held the next step is taken the instant the camera
+  // arrives, with the unused part of the frame carried into it, so there is never a pause or a stutter between steps
+  let budget=Math.min(dt,.05)*5.2;
+  for(let guard=0;guard<4;guard++){
+    const dx=P.x-C.x,dy=P.y-C.y,dist=Math.abs(dx)+Math.abs(dy);
+    if(dist>1e-5){const m=Math.min(budget,dist);C.x+=clamp(dx,-m,m);C.y+=clamp(dy,-m,m);budget-=m}
+    if(!(Math.abs(P.x-C.x)<1e-4&&Math.abs(P.y-C.y)<1e-4&&budget>1e-4))break;
+    const id=heldMoveId();if(!id||!canAct())break;
+    act(id);
+  }
   const ma=dt*7.5;C.a+=clamp(P.angT-C.a,-ma,ma);
   // entity animation
   for(const e of G.enemies){
@@ -5958,7 +5974,7 @@ function update(dt){
   }
   if(G.shake>0)G.shake=Math.max(0,G.shake-dt*1.6);
   // held d-pad repeat, queued input
-  if(G.hold&&G.time>=G.hold.t){act(G.hold.id);G.hold.t=G.time+.16}
+  if(G.hold&&G.time>=G.hold.t&&!MOVE_IDS.has(G.hold.id)){act(G.hold.id);G.hold.t=G.time+.16}
   if(G.queued&&canAct()){const q=G.queued;G.queued=null;act(q)}
   if(G.autoNow&&G.state==='play'&&!G.cut&&!G.drag){G.autoNow=false;G.nextAuto=G.time+180;writeSave('auto')}
   if(G.state==='play'&&G.time>=G.nextAuto&&G.timers.length===0&&!G.drag&&!G.cut){G.nextAuto=G.time+180;writeSave('auto')}
@@ -6224,8 +6240,10 @@ addEventListener('keydown',e=>{
   if(e.key==='m'||e.key==='M'){G.overview=!G.overview;G.menu=false;return}
   if(G.menu||G.map||G.inv.open||G.loot)return;
   if(e.key>='1'&&e.key<='4'){const i=+e.key-1;if(G.heroes[i].alive)G.sel=i;return}
-  const id=KEYMAP[e.key];if(id){e.preventDefault();act(id)}
+  const id=KEYMAP[e.key];if(id){e.preventDefault();if(MOVE_IDS.has(id)){if(e.repeat)return;if(!KDOWN.some(k=>k[0]===e.key))KDOWN.push([e.key,id])}act(id)}
 });
+addEventListener('keyup',e=>{const i=KDOWN.findIndex(k=>k[0]===e.key);if(i>=0)KDOWN.splice(i,1)});
+addEventListener('blur',()=>{KDOWN.length=0});
 function fit(){
   const s=Math.min(innerWidth/DW,innerHeight/DH),w=Math.floor(DW*s),h=Math.floor(DH*s);
   cv.style.width=w+'px';cv.style.height=h+'px';cv.style.left=Math.floor((innerWidth-w)/2)+'px';cv.style.top=Math.floor((innerHeight-h)/2)+'px';
