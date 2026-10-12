@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.24';
+const VERSION='2.25';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -7077,13 +7077,16 @@ function buildSandRoad(){
   const enemies=[];
   const free=(x,y)=>x>0&&y>0&&x<W-1&&y<H-1&&open[idx(x,y)]&&!occ.has(x+','+y)&&!enemies.some(e=>e.x===x&&e.y===y);
   const spawn=(t,x,y,lvl)=>{if(free(x,y))enemies.push({t,x,y,lvl})};
-  for(let gy=0;gy<H;gy+=6)for(let gx=0;gx<W;gx+=6){
-    const x=gx+((R(gx,gy,60)*6)|0),y=gy+((R(gx,gy,61)*6)|0);if(!open[idx(x,y)])continue;
+  // creatures live in camps with open sand between them, not scattered everywhere
+  const camp=(t,cx,cy,n,lvl,spread)=>{let placed=0;for(let k=0;k<n*8&&placed<n;k++){const x=cx+Math.round((R(cx,cy,100+k)*2-1)*spread),y=cy+Math.round((R(cx,cy,160+k)*2-1)*spread);if(free(x,y)){enemies.push({t:typeof t==='function'?t(x,y):t,x,y,lvl});placed++}}};
+  for(let gy=0;gy<H;gy+=24)for(let gx=0;gx<W;gx+=24){
+    const x=gx+4+((R(gx,gy,60)*16)|0),y=gy+4+((R(gx,gy,61)*16)|0);if(!open[idx(x,y)])continue;
     if(y>RD.CY-30)continue; // the first stretch out of Anaea is quiet
     const b=rdBiome(x,y),r=R(gx,gy,62);
-    if(b>.58&&r<.16)spawn('scorpion',x,y,15);
-    else if(b>.4&&r<.24){for(const [dx,dy] of [[0,0],[1,0],[0,1]])spawn('dwolf',x+dx,y+dy,14)}
-    else if(b>.45&&r<.32){for(const [dx,dy] of [[0,0],[1,1]])spawn('nomad',x+dx,y+dy,14);if(R(gx,gy,63)<.4)spawn('nomad',x-1,y,14)}
+    if(r>.5)continue; // many stretches of the road are empty
+    if(b>.58&&r<.18)camp('scorpion',x,y,5,15,3);
+    else if(b>.4&&r<.34)camp('dwolf',x,y,4,14,3);
+    else if(b>.45)camp('nomad',x,y,4,14,3);
   }
   // ---- things to pick up ----
   const items=[];
@@ -7364,13 +7367,16 @@ function buildRedDunes(){
   const enemies=[];
   const free=(x,y)=>x>0&&y>0&&x<W-1&&y<H-1&&open[idx(x,y)]&&!occ.has(x+','+y)&&!enemies.some(e=>e.x===x&&e.y===y);
   const spawn=(t,x,y,lvl)=>{if(free(x,y))enemies.push({t,x,y,lvl})};
-  for(let gy=0;gy<H;gy+=6)for(let gx=0;gx<W;gx+=6){
-    const x=gx+((R(gx,gy,70)*6)|0),y=gy+((R(gx,gy,71)*6)|0);if(!open[idx(x,y)]||y>H-22||y<RS.NORTH+8)continue;
+  // creatures live in camps with open sand between them, not scattered everywhere
+  const camp=(t,cx,cy,n,lvl,spread)=>{let placed=0;for(let k=0;k<n*8&&placed<n;k++){const x=cx+Math.round((R(cx,cy,100+k)*2-1)*spread),y=cy+Math.round((R(cx,cy,160+k)*2-1)*spread);if(free(x,y)){enemies.push({t:typeof t==='function'?t(x,y):t,x,y,lvl});placed++}}};
+  for(let gy=0;gy<H;gy+=24)for(let gx=0;gx<W;gx+=24){
+    const x=gx+4+((R(gx,gy,70)*16)|0),y=gy+4+((R(gx,gy,71)*16)|0);if(!open[idx(x,y)]||y>H-22||y<RS.NORTH+8)continue;
     const r=R(gx,gy,72);
-    if(r<.17)spawn('scorpion',x,y,16);
-    else if(r<.27){for(const [dx,dy] of [[0,0],[1,0],[0,1]])spawn('dwolf',x+dx,y+dy,15)}
-    else if(r<.36){for(const [dx,dy] of [[0,0],[1,1]])spawn('nomad'+(R(x,y,73)<.5?'':'2'),x+dx,y+dy,15)}
-    else if(r<.44){for(const [dx,dy] of [[0,0],[1,0]])spawn('mummy',x+dx,y+dy,17)}
+    if(r>.62)continue; // many stretches are empty
+    if(r<.16)camp('scorpion',x,y,5,16,3);
+    else if(r<.30)camp('dwolf',x,y,4,15,3);
+    else if(r<.44)camp((px,py)=>'nomad'+(R(px,py,73)<.5?'':'2'),x,y,5,15,3);
+    else camp('mummy',x,y,4,17,2);
   }
   const items=[];
   for(let k=0;k<12;k++)for(let t=0;t<20;t++){const x=4+((R(k,t,80)*(W-8))|0),y=20+((R(k,t,81)*(H-50))|0);if(free(x,y)&&!enemies.some(e=>Math.abs(e.x-x)+Math.abs(e.y-y)<4)){items.push({k:['potion','bread','cheese','potion','apple'][k%5],x,y});break}}
