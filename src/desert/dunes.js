@@ -38,4 +38,5 @@ function makeDesertArt(){
   const ycity=mkWall(dsCityWallTile(),1.9);LEVEL43_DATA.chars={D:rdune,C:rcl,Y:ycity};T_DOORS.citygate=dsCityGate();
   T_DOORS.tomb=dsTombDoor();
   if(typeof makeTombArt==='function')makeTombArt(rdune,rcl);
+  if(typeof makeBlueArt==='function')makeBlueArt(ydune,ycl);
 }

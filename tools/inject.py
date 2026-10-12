@@ -10,11 +10,14 @@ import re, sys, pathlib
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 HTML = ROOT / 'index.html'
 SRC = ROOT / 'src' / 'desert'
-ORDER = ['paint.js', 'floors.js', 'sprites_out.js', 'creatures.js', 'sprites_tomb.js', 'teleport.js', 'magic.js', 'road.js', 'tomb.js', 'burrows.js', 'redsands.js', 'dunes.js', 'logic.js', 'logic2.js', 'boot.js']
+ORDER = ['artlist.js', 'artpack.js', 'paint.js', 'floors.js', 'sprites_out.js', 'creatures.js', 'sprites_tomb.js', 'teleport.js', 'magic.js', 'road.js', 'tomb.js', 'burrows.js', 'redsands.js', 'bluedunes.js', 'dunes.js', 'logic.js', 'logic2.js', 'boot.js']
 BEGIN = '/*@@DESERT:BEGIN@@*/'
 END = '/*@@DESERT:END@@*/'
 ANCHOR = '/* ---------- boot ---------- */'
 
+# the list of painted pictures is whatever assets/ds_*.png files exist
+names = sorted(p.stem[3:] for p in (ROOT / 'assets').glob('ds_*.png'))
+(SRC / 'artlist.js').write_text('/* written by tools/inject.py */'+chr(10)+'const DS_PAINTED=' + repr(names) + ';'+chr(10), encoding='utf-8')
 s = HTML.read_text(encoding='utf-8')
 parts = []
 for name in ORDER:

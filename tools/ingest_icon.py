@@ -1,6 +1,6 @@
 """Turns a picture made on a flat magenta background (Canva image generator) into an inventory icon.
 
-    python tools/ingest_icon.py <source.jpg|png> <id>     ->  assets/icn_<id>.png   (96x96, transparent)
+    python tools/ingest_icon.py <source.jpg|png> <id> [col,row,cols,rows]     ->  assets/icn_<id>.png   (96x96, transparent)
 
 The magenta is keyed out, the pink fringe is cleaned from the edge, the picture is cropped to what is in it and
 fitted into the square with a little padding. The game loads assets/icn_<id>.png for the item with that id.
@@ -12,6 +12,10 @@ from PIL import Image, ImageFilter
 src, name = sys.argv[1], sys.argv[2]
 SIZE = 96
 im = Image.open(src).convert('RGB')
+if len(sys.argv) > 3:   # a cell of a sheet:  col,row,cols,rows   (e.g. 1,0,2,2 is the top-right of a 2 by 2 sheet)
+    c, r, cols, rows = map(int, sys.argv[3].split(','))
+    W0, H0 = im.size
+    im = im.crop((c * W0 // cols, r * H0 // rows, (c + 1) * W0 // cols, (r + 1) * H0 // rows))
 a = np.array(im).astype(int)
 r, g, b = a[..., 0], a[..., 1], a[..., 2]
 key = (r > 140) & (b > 140) & (g < 140) & (r - g > 60) & (b - g > 60)
