@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.65';
+const VERSION='2.67';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3893,13 +3893,13 @@ const WORLD_LOCS=[
   {k:'greendale',n:'Greendale',lv:[32],x:418,y:186,ic:'trees'},
   {k:'anaea',n:'Anaea',sub:'white stone',lv:[33,34,35,36,37,38],x:402,y:238,ic:'town'},
   {k:'sandroad',n:'The Sand Road',sub:'forest to dunes',lv:[41,50,51,52,53,54,55,56,57,58,59],x:500,y:196,ic:'dunes'},
-  {k:'tomb',n:'Tomb of Sut',lv:[42],x:506,y:136,ic:'cave'},
+  {k:'tomb',n:'Tomb of Sut',lv:[42],x:490,y:142,ic:'cave'},
   {k:'reddunes',n:'The Red Dunes',lv:[43],x:498,y:96,ic:'dunes'},
-  {k:'bluedunes',n:'The Blue Dunes',sub:'a quiet desert',lv:[60],x:566,y:190,ic:'dunes'},
-  {k:'whitedunes',n:'The White Dunes',sub:'a pale desert',lv:[63],x:566,y:134,ic:'dunes'},
-  {k:'flatlands',n:'The Flatlands',sub:'level and pebbled',lv:[64],x:530,y:164,ic:'dunes'},
-  {k:'goldenerg',n:'The Golden Erg',sub:'the biggest desert',lv:[61],x:622,y:206,ic:'dunes'},
-  {k:'violeterg',n:'The Violet Erg',sub:'a purple desert',lv:[62],x:622,y:262,ic:'dunes'},
+  {k:'bluedunes',n:'The Blue Dunes',sub:'a quiet desert',lv:[60],x:584,y:190,ic:'dunes'},
+  {k:'whitedunes',n:'The White Dunes',sub:'a pale desert',lv:[63],x:584,y:126,ic:'dunes'},
+  {k:'flatlands',n:'The Flatlands',sub:'level and pebbled',lv:[64],x:526,y:124,ic:'dunes'},
+  {k:'goldenerg',n:'The Golden Erg',sub:'the biggest desert',lv:[61],x:640,y:206,ic:'dunes'},
+  {k:'violeterg',n:'The Violet Erg',sub:'a purple desert',lv:[62],x:640,y:262,ic:'dunes'},
   {k:'scoria',n:'Khemetra',sub:'the golden city',lv:[44],x:486,y:56,ic:'castle'}
 ];
 const WORLD_ROADS=[['abbey','thornwood','thornwick','gwood'],['gwood','road','tunnel','ironhill'],['ironhill','graves'],['ironhill','mines'],['ironhill','moor','pass','greendale','anaea']];
