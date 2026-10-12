@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.09';
+const VERSION='2.10';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -255,7 +255,7 @@ function flameEmissive(f,red){
   return flameMemo[key]=e;
 }
 let FLAMES=[],GLOWS=[];
-const TORCH_OUT=.3,TORCH_RISE=.225; // how far a wall torch stands out from the wall, and how much higher its head is than where it is fixed, in cells
+const TORCH_OUT=.3,TORCH_RISE=.27; // how far a wall torch stands out from the wall, and how much higher its head is than where it is fixed, in cells
 function makeFlames(){
   for(const red of [false,true]){
     for(let f=0;f<FLAME_FRAMES;f++){
