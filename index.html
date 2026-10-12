@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.07';
+const VERSION='2.08';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -255,6 +255,7 @@ function flameEmissive(f,red){
   return flameMemo[key]=e;
 }
 let FLAMES=[],GLOWS=[];
+const TORCH_OUT=.3; // how far a wall torch stands out from the wall, in cells
 function makeFlames(){
   for(const red of [false,true]){
     for(let f=0;f<FLAME_FRAMES;f++){
@@ -280,15 +281,7 @@ function makeFlames(){
 function torchFrames(baseD,red){
   const out=[];
   for(let f=0;f<FLAME_FRAMES;f++){
-    const c=toCanvas(baseD),x=c.getContext('2d');
-    x.strokeStyle='#161514';x.lineWidth=5;x.lineCap='round';
-    x.beginPath();x.moveTo(64,108);x.lineTo(64,96);x.moveTo(50,90);x.quadraticCurveTo(64,108,78,90);x.stroke();
-    const g=x.createLinearGradient(57,0,71,0);g.addColorStop(0,'#33200f');g.addColorStop(.5,'#6d4624');g.addColorStop(1,'#25160a');
-    x.fillStyle=g;x.beginPath();x.moveTo(60,100);x.lineTo(68,100);x.lineTo(71,68);x.lineTo(57,68);x.closePath();x.fill();
-    x.fillStyle='#14100c';x.beginPath();x.ellipse(64,64,10,8,0,0,TAU);x.fill();
-    x.fillStyle='#2a1e12';x.fillRect(55,62,18,3);
-    // glowing charred wrapping below the flame
-    x.fillStyle=red?'rgba(160,30,10,.55)':'rgba(190,80,20,.5)';x.beginPath();x.ellipse(64,60,8,4,0,0,TAU);x.fill();
+    const c=toCanvas(baseD); // the torch itself is drawn in front of the wall, standing out from it (see torchBodies)
     out.push({d:pix(c),e:pix(flameEmissive(f,red))});
   }
   return out;
@@ -2392,6 +2385,25 @@ function render3D(){
   }
   vctx.putImageData(vimg,0,0);
   for(const L of LIGHTS){const h=L._h;if(!L.taken&&h&&h.col>=0&&h.ty<=zbuf[h.col]+.45)G.hits.push(h)}
+  // wall torches: an iron plate on the wall and a wooden stick that runs out to the cloth-wrapped head under the flame
+  for(const h of G.hits){
+    const L=h.L;if(h.type!=='torch'||h.ty<.4||L.key<0)continue;
+    const dd=DIRS[L.key&3],ax=L.x-dd[0]*TORCH_OUT,ay=L.y-dd[1]*TORCH_OUT,rx=ax-cx,ry=ay-cy,t2=(-1/PL)*(-pY*rx+pX*ry),x2=(-1/PL)*(dY*rx-dX*ry);
+    if(t2<.25)continue;
+    const sx2=VW/2*(1+x2/t2),zA=CEILH*.5-.06,y2=HH-(zA-EYE)*F/t2,y1=HH-(CEILH*.5+.12-EYE)*F/h.ty,w1=.11*F/h.ty,w2=.075*F/t2;
+    const lit=clamp(.8+.3*Math.max(0,1-h.ty/6),.6,1.2);
+    vctx.save();vctx.globalAlpha=1;
+    vctx.fillStyle='rgb('+((64*lit)|0)+','+((58*lit)|0)+','+((50*lit)|0)+')'; // the iron plate fixed to the wall
+    vctx.beginPath();vctx.ellipse(sx2,y2,.11*F/t2,.075*F/t2,0,0,TAU);vctx.fill();
+    const g=vctx.createLinearGradient(sx2,y2,h.sx,y1);g.addColorStop(0,'rgb('+((98*lit)|0)+','+((64*lit)|0)+','+((34*lit)|0)+')');g.addColorStop(1,'rgb('+((176*lit)|0)+','+((112*lit)|0)+','+((52*lit)|0)+')');
+    vctx.fillStyle=g;vctx.beginPath();vctx.moveTo(sx2-w2/2,y2);vctx.lineTo(sx2+w2/2,y2);vctx.lineTo(h.sx+w1/2,y1);vctx.lineTo(h.sx-w1/2,y1);vctx.closePath();vctx.fill();
+    const mx=(sx2+h.sx)/2,my=(y2+y1)/2,mw=(w1+w2)/2*1.25; // an iron band round the middle of the stick
+    vctx.fillStyle='rgb('+((44*lit)|0)+','+((40*lit)|0)+','+((36*lit)|0)+')';vctx.fillRect(mx-mw/2,my-.014*F/h.ty,mw,.03*F/h.ty);vctx.strokeStyle='rgba(255,210,140,.35)';vctx.lineWidth=Math.max(1,.012*F/h.ty);vctx.beginPath();vctx.moveTo(sx2-w2*.2,y2);vctx.lineTo(h.sx-w1*.2,y1);vctx.stroke(); // a lit edge along the stick
+    const hw=.13*F/h.ty,hh=.1*F/h.ty; // the head: cloth wound round the end, charred and glowing underneath the flame
+    vctx.fillStyle='rgb('+((78*lit)|0)+','+((52*lit)|0)+','+((28*lit)|0)+')';vctx.beginPath();vctx.ellipse(h.sx,y1,hw/2,hh/2,0,0,TAU);vctx.fill();vctx.strokeStyle='rgba(30,18,8,.8)';vctx.lineWidth=Math.max(1,.01*F/h.ty);vctx.stroke();
+    vctx.fillStyle=L.red?'rgba(190,40,20,.7)':'rgba(230,110,30,.7)';vctx.beginPath();vctx.ellipse(h.sx,y1-hh*.25,hw*.38,hh*.28,0,0,TAU);vctx.fill();
+    vctx.restore();
+  }
   vctx.save();vctx.globalCompositeOperation='lighter';
   for(const h of G.hits){
     if(h.type!=='torch'||h.ty<.4)continue;
@@ -2714,7 +2726,7 @@ function setupLights(){
   for(const [x,y,f,nx,ny] of out){
     const d=DIRS[f],key=(y*MW+x)*4+f,red=!!zoneAt(nx,ny)[5];
     torchAt.set(key,red?2:1);
-    LIGHTS.push({x:x+.5+d[0]*.62,y:y+.5+d[1]*.62,ph:hash2(x,y,5)*6.28,key,taken:false,red});
+    LIGHTS.push({x:x+.5+d[0]*(.5+TORCH_OUT),y:y+.5+d[1]*(.5+TORCH_OUT),ph:hash2(x,y,5)*6.28,key,taken:false,red});
   }
   if(G.extraLights)for(const [x,y] of G.extraLights)LIGHTS.push({x:x+.5,y:y+.5,ph:hash2(x,y,9)*6.28,key:-1-LIGHTS.length,taken:false,red:false,free:true});
 }
