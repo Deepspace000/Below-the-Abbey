@@ -61,11 +61,21 @@ LEVEL62_DATA.rows[0]=LEVEL62_DATA.rows[0].slice(0,VER.CX)+'0'+LEVEL62_DATA.rows[
 LEVEL62_DATA.portals=[{to:61,x:GER.CX,y:GER.H-3,f:0,tex:'bluecave'}];
 LEVELS[61]=LEVEL61_DATA;LEVEL_NAMES[61]=LEVEL61_DATA.name;LEVELS[62]=LEVEL62_DATA;LEVEL_NAMES[62]=LEVEL62_DATA.name;
 function makeGoldenArt(ydune,ycl){
-  FLOORS.goldsand=dsSand([244,206,98],[200,150,52],401,1.2);
-  FLOORS.goldsand2=dsSand([236,194,84],[190,138,44],411,1.0);
-  FLOORS.goldsand3=dsSand([250,216,118],[206,160,64],421,1.4);
+  FLOORS.goldsand=dsRidges([246,208,64],[222,176,34],3,1,401);
+  FLOORS.goldsand2=dsRidges([244,205,60],[220,172,30],4,-1,411);
+  FLOORS.goldsand3=dsRidges([248,211,70],[224,180,40],3,-2,421);
   FLOORS.vioSand=dsSand([178,142,222],[120,86,176],431,1.2);
   FLOORS.vioSand2=dsSand([166,128,214],[110,76,168],441,1.0);
   FLOORS.vioSand3=dsSand([192,158,232],[132,98,188],451,1.4);
   LEVEL61_DATA.chars={D:ydune,C:ycl};LEVEL62_DATA.chars={D:ydune,C:ycl};
+}
+// smooth wind ridges and nothing else: a long crest with a gentle windward side and a short lee side, no grains or specks
+function dsRidges(light,shade,n,tilt,seed){
+  return dsFloor((x,y)=>{
+    const w=dsNoise(x,y,2,seed)*.9+dsNoise(x,y,4,seed+1)*.25;                 // slow bends in the crest lines
+    const t=((n*(x+tilt*y)/TS+w*.6)%1+1)%1;
+    const p=t<.72?Math.pow(t/.72,1.4):Math.pow(1-(t-.72)/.28,1.2);            // slow rise, quicker fall
+    const k=.9+.1*p;
+    return [shade[0]+(light[0]-shade[0])*p,shade[1]+(light[1]-shade[1])*p,shade[2]+(light[2]-shade[2])*p].map(v=>v*(k+.0));
+  });
 }
