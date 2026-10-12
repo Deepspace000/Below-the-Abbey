@@ -30,7 +30,8 @@ function terrFor(n){
   const rows=L.rows,H=rows.length,W=rows[0].length,h=new Float32Array(W*H),open=new Uint8Array(W*H);
   const flat=[[L.start.x,L.start.y,6]],gates=[[L.start.x,L.start.y]];
   rows.forEach((r,y)=>{for(let x=0;x<W;x++){const c=r[x];if(c==='.')open[y*W+x]=1;else if(c>='0'&&c<='9'){flat.push([x,y,5]);gates.push([x,y])}}});
-  for(const d of L.decor||[])if(/^(chest|dpillar|danubis|dbastet|dsphinx|dobelisk|dpharaoh|treasure|offering|vase|brazier|dsutstatue|sarcoph|dburrow|teleporter)/.test(d.k))flat.push([d.x,d.y,3.5]);
+  for(const d of L.decor||[])if(d.enter||/^(chest|dpillar|danubis|dbastet|dsphinx|dobelisk|dpharaoh|treasure|offering|vase|brazier|dsutstatue|sarcoph|dburrow|teleporter)/.test(d.k))flat.push([d.x,d.y,3.5]);
+  if(n===62)flat.push([VER.CX,262,12]);                           // the fire lizard's ground is level
   if(n===61)for(const [ox,oy] of GER.OASES)flat.push([ox,oy,9]);
   if(n===64)for(const [ox,oy] of FLR.OASES)flat.push([ox,oy,9]);
   if(n===63)for(const [ox,oy] of WER.OASES)flat.push([ox,oy,9]);

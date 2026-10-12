@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.50';
+const VERSION='2.52';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1399,6 +1399,7 @@ function rebalanceEnemies(){
   const L=G.heroes.filter(h=>h.alive);if(!L.length)return;
   const pl=Math.floor(L.reduce((n,h)=>n+h.lvl,0)/L.length);
   for(const e of G.enemies){
+    const ap=ENEMY_DEF[e.t]&&ENEMY_DEF[e.t].aboveParty;if(ap&&e.hp>0&&!e.dying){if(e.lvl!==pl+ap){const fr=e.hp/e.maxhp;e.lvl=pl+ap;e.maxhp=enemyStat(e.t,e.lvl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*fr))}continue} // the great creatures always stand a few levels above the party
     if(e.hp<=0||e.dying||pl-e.lvl<=5)continue;
     const nl=Math.max(1,pl-(2+Math.floor(Math.random()*4))),frac=e.hp/e.maxhp;
     e.lvl=nl;e.maxhp=enemyStat(e.t,nl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*frac));
@@ -1681,13 +1682,13 @@ function hurtEnemy(e,dmg){
   G.dmgAcc=(G.dmgAcc||0)+dmg;e.hp-=dmg;e.flash=1;e.alert=true;addFloat(e.sx,e.sy-14,String(dmg),'#ffd76a');
   if(e.hp<=0){
     e.dying=.55;G.kills++;sfx(e.t==='skel'?'rattle':'ratdie');
-    const gold=Math.round(rnd(st.gold[0],st.gold[1])*(1+Math.max(0,...livingHeroes().map(j=>pas(j,'goldPct')))));G.gold+=gold;
+    const gold=def.goldFixed||Math.round(rnd(st.gold[0],st.gold[1])*(1+Math.max(0,...livingHeroes().map(j=>pas(j,'goldPct')))));G.gold+=gold;
     const xpGain=killXP(st.xp,e.lvl);
     msg(`The ${def.name} dies. +${xpGain} XP${gold?`, +${gold} gold`:''}.`,e.t==='boss'?'#ffd76a':'#b8d89a');
     if(e.t==='boss')G.bossDead=true;
     if(def.kind==='bandit'&&Math.random()<.3){const f=foodFor(Math.random());if(bagAdd(mkItem(f)))msg(`You find a ${ITEMDEF[f].n} on the body.`,'#9ae0a0')}
     if(e.t==='gandrick'){G.flags.gandrickDead=1;G.flags.ledger=1;later(900,()=>startCut('gandrickDead'))}
-    giveXP(xpGain);
+    giveXP(xpGain);if(def.dropMagic)dropMagic(e,def);
     {const F=G.flags;if(def.kind==='wolf')F.wolfKills=(F.wolfKills||0)+1;if(def.kind==='bandit')F.bandKills=(F.bandKills||0)+1;if(e.t==='rat'||e.t==='bat')F.ratKills=(F.ratKills||0)+1;if(e.t==='ghost')F.ghostKills=(F.ghostKills||0)+1;if(LEVEL===18)F.mineKills=(F.mineKills||0)+1;if(LEVEL===20&&e.t==='ghost')F.graveKills=(F.graveKills||0)+1;if(e.t==='overseer')F.overseerDead=1;
     if(e.t==='halbrecht'){F.halDown=1;later(900,()=>startCut('halDown',halEnd))}
     if(e.t==='sut')later(1100,()=>sutDefeated());
@@ -2102,6 +2103,7 @@ function enemyAct(e){
   const def=ENEMY_DEF[e.t],dist=()=>Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y);
   if(e.chilled>0){e.chilled--;msg(`The ${def.name} is frozen stiff.`,'#9ad0ff');return 130}
   if(e.alert&&def.act){const used=def.act(e);if(used)return used}
+  if(!e.alert&&def.patrol)return patrolStep(e,def);
   if(!e.alert){
     const path=bfs(e);
     if(dist()<=6&&((path&&path.dist<=7)||hasLOS(e.x,e.y,G.P.x,G.P.y))){e.alert=true;sfx(e.t==='skel'?'rattle':(e.t==='bat'||e.t==='vulture')?'screech':'squeak');return 150}
@@ -4097,6 +4099,13 @@ function setMapZoom(ncs,ax,ay){
   ncs=clamp(ncs,mapFit(),34);const cs=G.mz||12,[ox,oy]=mapOrigin(cs),wx=(ax-ox)/cs,wy=(ay-oy)/cs;
   G.mz=ncs;G.panX=ax-6-wx*ncs;G.panY=ay-30-wy*ncs;
 }
+const ENEMY_GLYPH_FIX={boss:['#ff3030','K'],skel:['#e8e4d0','S'],bat:['#b070e0','B'],wolf:['#a0a8b0','W'],bandit:['#d0a040','D'],archer:['#80b060','A'],gandrick:['#ff3030','G'],rat:['#d08a60','R']};
+function enemyGlyph(t){
+  const f=ENEMY_GLYPH_FIX[t];if(f)return f;
+  const nm=((ENEMY_DEF[t]&&ENEMY_DEF[t].name)||t).replace(/^(The|Giant|Desert|Carrion|Desperate|Cave)\s+/,''),pal=['#d08a60','#e0a050','#c88ad0','#8ac8d0','#d8d070','#d07a7a','#8ad09a'];
+  let h=0;for(const c of t)h=(h*31+c.charCodeAt(0))>>>0;
+  return [pal[h%pal.length],nm[0].toUpperCase()];
+}
 function drawOverview(){
   BTNS=[];veil(.95);
   if(!G.ovInit||G.ovLevel!==LEVEL){G.mz=clamp(12,mapFit(),34);const [rw,rh]=mapRes();G.panX=(DW-rw)/2-((G.C.x+.5)*G.mz+6);G.panY=(DH-rh)/2-((G.C.y+.5)*G.mz+30);G.ovInit=true;G.ovLevel=LEVEL}
@@ -4120,9 +4129,9 @@ function drawOverview(){
   for(const L of LIGHTS){ctx.fillStyle=L.taken?'rgba(255,255,255,.2)':L.red?'#ff4a30':'#ffb040';ctx.beginPath();ctx.arc(ox+L.x*cs,oy+L.y*cs,2.4,0,TAU);ctx.fill()}
   for(const it of G.items){ctx.fillStyle=it.taken?'rgba(255,255,255,.25)':it.k==='key'?'#ffd76a':(ITEMDEF[it.k]&&ITEMDEF[it.k].rar)?'#e070e8':'#e8e0d0';
     const lt=it.k==='key'?'K':KIND_LETTER[ITEMDEF[it.k].k]||'?';txt(lt,ox+(it.x+.5)*cs,oy+(it.y+.5)*cs+.5,7.5,ctx.fillStyle,'center',true)}
-  for(const e of G.enemies){if(e.hp<=0)continue;ctx.fillStyle=e.t==='boss'?'#ff3030':e.t==='skel'?'#e8e4d0':e.t==='bat'?'#b070e0':e.t==='wolf'?'#a0a8b0':e.t==='bandit'?'#d0a040':e.t==='archer'?'#80b060':e.t==='gandrick'?'#ff3030':'#d08a60';
+  for(const e of G.enemies){if(e.hp<=0)continue;const gl=enemyGlyph(e.t);ctx.fillStyle=gl[0];
     ctx.beginPath();ctx.arc(ox+(e.x+.5)*cs,oy+(e.y+.5)*cs,cs*.42,0,TAU);ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.stroke();
-    txt(e.t==='boss'?'K':e.t==='skel'?'S':e.t==='bat'?'B':e.t==='wolf'?'W':e.t==='bandit'?'D':e.t==='archer'?'A':e.t==='gandrick'?'G':'R',ox+(e.x+.5)*cs,oy+(e.y+.5)*cs+.5,7.5,'#120c08','center',true)}
+    txt(gl[1],ox+(e.x+.5)*cs,oy+(e.y+.5)*cs+.5,7.5,'#120c08','center',true)}
   }
   const px=ox+(G.C.x+.5)*cs,py=oy+(G.C.y+.5)*cs;ctx.save();ctx.translate(px,py);ctx.rotate(G.C.a+Math.PI/2);ctx.fillStyle='#ffe36a';ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(5,5);ctx.lineTo(0,2);ctx.lineTo(-5,5);ctx.closePath();ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.stroke();ctx.restore();
   ctx.restore();
@@ -4131,15 +4140,25 @@ function drawOverview(){
   ctx.fillStyle='rgba(8,6,4,.82)';rrect(ctx,lx-8,22,128,DH-70,5);ctx.fill();
   const row=(label,c,t)=>{txt(t,lx+6,ly,8,c,'center',true);txt(label,lx+16,ly,8,'#cdbf94','left');ly+=LS};
   txt('Legend',lx,ly-2,10,'#d8c88e','left',true);ly+=LS;
-  row('Rat','#d08a60','R');row('Bat','#b070e0','B');row('Skeleton','#e8e4d0','S');row('Rat King','#ff3030','K');
-  row('Key','#ffd76a','K');row('Weapon','#e8e0d0','W');row('Armour','#e8e0d0','A');row('Ring','#e8e0d0','R');row('Scroll','#e8e0d0','S');row('Lantern/torch','#e8e0d0','L');row('Potion','#e8e0d0','P');row('Food','#e8e0d0','F');
-  row('Magic item','#e070e8','*');
-  ly+=2;
-  ctx.fillStyle='#ffb040';ctx.beginPath();ctx.arc(lx+6,ly-1,3,0,TAU);ctx.fill();txt('Torch',lx+16,ly,8,'#cdbf94','left');ly+=LS;
-  ctx.fillStyle='#ff4a30';ctx.beginPath();ctx.arc(lx+6,ly-1,3,0,TAU);ctx.fill();txt('Red torch',lx+16,ly,8,'#cdbf94','left');ly+=LS;
-  ctx.fillStyle='#a8702e';ctx.fillRect(lx+2,ly-5,8,8);txt('Door',lx+16,ly,8,'#cdbf94','left');ly+=LS;
-  ctx.fillStyle='#c03a2a';ctx.fillRect(lx+2,ly-5,8,8);txt('Locked door',lx+16,ly,8,'#cdbf94','left');ly+=LS;
-  ctx.fillStyle='#7ab0f0';ctx.fillRect(lx+2,ly-5,8,8);txt('Exit stairs',lx+16,ly,8,'#cdbf94','left');ly+=LS;
+  {
+    const room=DH-70+22-ly-22,maxRows=Math.floor(room/LS),R=[];
+    const seenT=[];for(const e of G.enemies)if(!seenT.includes(e.t))seenT.push(e.t);
+    for(const t of seenT){const gl=enemyGlyph(t),d=ENEMY_DEF[t];R.push(()=>row(((d&&d.name)||t).split(',')[0].replace(/^The /,'').slice(0,17),gl[0],gl[1]))}
+    const kinds={},names={W:'Weapon',A:'Armour',R:'Ring',S:'Scroll',L:'Lantern/torch',P:'Potion',F:'Food'};let key=false,rare=false;
+    for(const it of G.items){if(it.k==='key'){key=true;continue}const d=ITEMDEF[it.k];if(!d)continue;kinds[KIND_LETTER[d.k]||'?']=1;if(d.rar)rare=true}
+    if(key)R.push(()=>row('Key','#ffd76a','K'));
+    for(const L of ['W','A','R','S','L','P','F'])if(kinds[L])R.push(()=>row(names[L],'#e8e0d0',L));
+    if(rare)R.push(()=>row('Magic item','#e070e8','*'));
+    const dot=(label,c)=>R.push(()=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(lx+6,ly-1,3,0,TAU);ctx.fill();txt(label,lx+16,ly,8,'#cdbf94','left');ly+=LS});
+    const sq=(label,c)=>R.push(()=>{ctx.fillStyle=c;ctx.fillRect(lx+2,ly-5,8,8);txt(label,lx+16,ly,8,'#cdbf94','left');ly+=LS});
+    if(LIGHTS.some(l=>!l.red))dot('Torch','#ffb040');if(LIGHTS.some(l=>l.red))dot('Red torch','#ff4a30');
+    let hasDoor=false,hasLock=false,hasExit=false,hasGate=false;
+    for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const g=G.grid[y][x];if(g===3||(g>=15&&g<=19))hasDoor=true;else if(g===4||g>=200)hasLock=true;else if(g===5)hasExit=true;else if(g===7||(g>=30&&g<100))hasGate=true}
+    if(hasDoor)sq('Door','#a8702e');if(hasLock)sq('Locked door','#c03a2a');if(hasExit)sq('Exit stairs','#7ab0f0');if(hasGate)sq(LEVEL>=41?'Cave, stairs or gate':'Gate or exit','#d8b060');
+    if(G.decor.some(d=>d.k==='coffin'||d.k==='sarcoph'||d.k==='sarcophU'))R.push(()=>{ctx.fillStyle='#aaaab4';ctx.fillRect(lx+2,ly-5,8,8);txt('Coffin','#cdbf94'&&lx+16,ly,8,'#cdbf94','left');ly+=LS});
+    R.push(()=>{ctx.fillStyle='#ffe36a';ctx.beginPath();ctx.moveTo(lx+6,ly-6);ctx.lineTo(lx+10,ly+2);ctx.lineTo(lx+6,ly);ctx.lineTo(lx+2,ly+2);ctx.closePath();ctx.fill();txt('You','#cdbf94'&&lx+16,ly,8,'#cdbf94','left');ly+=LS});
+    R.slice(0,Math.max(1,maxRows)).forEach(fn=>fn());
+  }
   txt('Drag the map to move it',lx,ly+8,8,'#8a7a58','left');
   btn('ovclose',0,0,0,0);BTNS.pop();
   BTNS.push({id:'maparea',x:0,y:0,w:DW,h:DH,up:true,drag:'map'});
@@ -4363,7 +4382,7 @@ function applyLevelState(s){
 // killed creatures stay dead, but some of them (sometimes one, sometimes a few) return each visit
 function applyEnemyState(s){
   if(!s||!s.dead||!s.dead.length)return;
-  const dead=new Set(s.dead),UNIQUE=['boss','gandrick','mayor','overseer','halbrecht','wraith','sut'];
+  const dead=new Set(s.dead),UNIQUE=['boss','gandrick','mayor','overseer','halbrecht','wraith','sut','firelizard','cyclops'];
   const cand=G.enemies.filter(e=>dead.has(e.id)&&!UNIQUE.includes(e.t));
   const k=cand.length?(Math.random()<.45?1:1+Math.floor(Math.random()*cand.length)):0;
   cand.sort(()=>Math.random()-.5);
@@ -5982,15 +6001,63 @@ function makeDitherPat(){
 function veil(a){ctx.fillStyle=`rgba(4,3,2,${a})`;ctx.fillRect(0,0,DW,DH)}
 function bigPanel(x,y,w,h){illum(x,y,w,h,(x+y)|0);ctx.save();ctx.fillStyle='rgba(10,8,6,.92)';rrect(ctx,x,y,w,h,8);ctx.fill();ctx.restore();ctx.lineWidth=3;ctx.strokeStyle=goldG(x,y,w,h);rrect(ctx,x,y,w,h,8);ctx.stroke();wornEdge(x,y,w,h,8);ctx.lineWidth=1;ctx.strokeStyle='rgba(255,230,150,.25)';rrect(ctx,x+5,y+5,w-10,h-10,5);ctx.stroke()}
 function btnText(id,label,x,y,w,h){panel(x,y,w,h,false,false);txt(label,x+w/2,y+h/2,11,'#c9ba8e','center',true);btn(id,x,y,w,h)}
+
+function dropMagic(e,def){ // the great creatures leave magic behind them
+  for(let k=0;k<def.dropMagic;k++){
+    const id=DS_MAGIC_TOMB[Math.floor(Math.random()*DS_MAGIC_TOMB.length)];
+    if(bagAdd(mkItem(id)))msg(`The ${def.name.split(',')[0].replace(/^The /,'')} drops ${ITEMDEF[id].n}!`,'#e090f0');
+    else{G.items.push({k:id,x:e.x,y:e.y,taken:false});msg(`${ITEMDEF[id].n} falls to the ground. Your bag is full.`,'#e090f0')}
+  }
+}
+function patrolStep(e,def){ // a creature that walks the land, and charges when it sees you
+  const near=Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y);
+  if(near<=9&&(near<=4||hasLOS(e.x,e.y,G.P.x,G.P.y))){e.alert=true;sfx('growl');msg(`${def.name} sees you and charges!`,'#ff9a7a');return 200}
+  if(e.hx===undefined){e.hx=e.x;e.hy=e.y}
+  if(!e.tgt||Math.abs(e.x-e.tgt.x)+Math.abs(e.y-e.tgt.y)<3||(e.pt=(e.pt||0)+1)>60){
+    e.pt=0;e.tgt=null;
+    for(let t=0;t<30;t++){const x=Math.round(e.hx+(Math.random()*2-1)*55),y=Math.round(e.hy+(Math.random()*2-1)*55);if(x>2&&y>2&&x<MW-3&&y<MH-3&&!cellBlocked(x,y)){e.tgt={x,y};break}}
+  }
+  if(e.tgt){
+    let best=null,bd=Math.abs(e.x-e.tgt.x)+Math.abs(e.y-e.tgt.y);
+    const opts=DIRS.map(d=>[e.x+d[0],e.y+d[1]]).filter(([x,y])=>!cellBlocked(x,y)&&!enemyAt(x,y)&&!(x===G.P.x&&y===G.P.y));
+    for(const o of opts){const d=Math.abs(o[0]-e.tgt.x)+Math.abs(o[1]-e.tgt.y);if(d<bd||(d===bd&&!best&&Math.random()<.3)){bd=d;best=o}}
+    if(best){e.x=best[0];e.y=best[1];return 130}
+    e.tgt=null;
+  }
+  return 0;
+}
+/* ---------- achievements: the dungeons you have been into ---------- */
+function achList(){
+  const seen=(G.flags&&G.flags.lvSeen)||{},out=[];let total=0,got=0;
+  const add=(head,arr)=>{if(!arr.length)return;out.push({h:head});for(const [n,name] of arr){const s=!!seen[n];total++;if(s)got++;out.push({n:name,s})}};
+  for(const [dl,dname] of DNG_DESERTS)add(dname,Object.keys(DNG_INFO).filter(n=>DNG_INFO[n].desert===dname).map(n=>[+n,DNG_INFO[n].name]));
+  const bur=[];for(let k=0;k<BURROW_N;k++)bur.push([BURROW_BASE+k,LEVEL_NAMES[BURROW_BASE+k]]);add('Mounds of the Sand Road',bur);
+  const oth=[];for(const k of Object.keys(LEVELS)){const n=+k,L=LEVELS[n];if(!L||L.outdoor||!LEVEL_NAMES[n]||(DNG_INFO[n])||(n>=BURROW_BASE&&n<BURROW_BASE+BURROW_N))continue;oth.push([n,LEVEL_NAMES[n]])}
+  add('Other dungeons',oth);
+  return {out,total,got};
+}
+function drawAch(){
+  BTNS=[];veil(.7);bigPanel(24,8,432,304);
+  const A=achList(),per=30,pages=Math.max(1,Math.ceil(A.out.length/per));G.achPage=clamp(G.achPage||0,0,pages-1);
+  txt('ACHIEVEMENTS',240,24,13,'#d8c88e','center',true);
+  txt(`Dungeons visited: ${A.got} of ${A.total}`,240,40,9.5,'#e8d890','center',true);
+  const page=A.out.slice(G.achPage*per,G.achPage*per+per);
+  page.forEach((r,i)=>{const col=i<15?0:1,row=i%15,x=44+col*208,y=58+row*15.5;
+    if(r.h)txt(r.h,x,y,8.5,'#c8a860','left',true,undefined,196);
+    else txt((r.s?'* ':'  ')+r.n,x+4,y,8,r.s?'#b8e8a0':'#8a7e66','left',false,undefined,192)});
+  txt(`Page ${G.achPage+1} of ${pages}`,240,296,8,'#9a8a68','center');
+  btnText('ach_prev','Prev',44,284,90,22);btnText('ach_back','Back',195,284,90,22);btnText('ach_next','Next',346,284,90,22);
+}
 function drawMenu(){
   if(G.menu==='quests'){drawQuestLog();return}
+  if(G.menu==='ach'){drawAch();return}
   if(G.menu==='gfx'){drawGfx();return}
   if(G.menu==='snd'){drawSnd();return}
   BTNS=[];veil(.6);bigPanel(90,12,300,296);
   txt('MENU',240,30,14,'#d8c88e','center',true);
   txt('Version '+VERSION,240,298,8,'#9a8a68','center');
   btnText('resume','Resume',170,44,140,26);
-  btnText('quests',anyQuestReady()?'Quests  *':'Quests',170,76,140,26);
+  btnText('quests',anyQuestReady()?'Quests  *':'Quests',100,76,130,26);btnText('ach','Achievements',250,76,130,26);
   btnText('mute','Sound',100,108,130,26);btnText('gfx','Graphics',250,108,130,26);
   btnText('savemenu','Save / Load',100,140,130,26);btnText('overview','Level layout',250,140,130,26);
   btnText('newparty','New party',100,172,130,26);btnText('restart','Restart game',250,172,130,26);
@@ -6039,7 +6106,7 @@ function update(dt){
   if(!G.overview)G.ovInit=false;
   try{areaAudio();huntTick()}catch(e){}
   burnTick(dt);
-  G.time+=dt;try{stormTick(dt);birdTick(dt)}catch(e){}
+  G.time+=dt;try{stormTick(dt);birdTick(dt);if(G.flags)(G.flags.lvSeen=G.flags.lvSeen||{})[LEVEL]=1}catch(e){}
   if(G.dayBase>0){const hr=(G.clock%1440)/60,dsl=LEVEL===43||(LEVEL>=60&&LEVEL<=64)||LEVEL===41;G.day=Math.max(.16,G.dayBase*clamp(.66+.5*Math.cos((hr-12)/24*TAU),dsl?.3:G.hasLamps?.2:.5,1))}
   // timers
   if(!G.cut)for(let i=0;i<G.timers.length;){const t=G.timers[i];if(G.time>=t.t){G.timers.splice(i,1);t.fn()}else i++}
@@ -6172,6 +6239,7 @@ function handleBtn(id){
   if(G.inv.open){invBtn(id);return}
   if(G.map){if(id==='mapclose'||id==='map')G.map=false;return}
   if(G.menu==='quests'){if(id==='qexit')G.menu=false;return}
+  if(G.menu==='ach'){if(id==='ach_prev')G.achPage=Math.max(0,(G.achPage||0)-1);else if(id==='ach_next')G.achPage=(G.achPage||0)+1;else if(id==='ach_back'||id==='menu')G.menu=true;return}
   if(G.menu==='snd'){
     if(id==='s_back'||id==='menuclose3'||id==='menu')G.menu=true;
     else if(id&&id.startsWith('s_')){const m=id.match(/^s_(\w+)_(up|dn)$/),k=m&&m[1];if(k&&k in SNDOPT){SNDOPT[k]=Math.round(clamp(SNDOPT[k]+(m[2]==='up'?.1:-.1),0,1)*10)/10;try{localStorage.setItem('abbeySND',JSON.stringify(SNDOPT))}catch(e){}areaAudio()}}
@@ -6186,6 +6254,7 @@ function handleBtn(id){
   if(G.menu){
     if(id==='resume'||id==='menuclose'||id==='menu')G.menu=false;
     else if(id==='quests'){G.menu='quests'}
+    else if(id==='ach'){G.menu='ach';G.achPage=0}
     else if(id==='mute'){G.menu='snd'}
     else if(id==='gfx'){G.menu='gfx'}
     else if(id==='savemenu'){openSaves('menu')}
@@ -6351,7 +6420,7 @@ addEventListener('resize',fit);fit();
 /*@@DESERT:BEGIN@@*/
 /* ---- src/desert/artlist.js ---- */
 /* written by tools/inject.py */
-const DS_PAINTED=['brazier0', 'brazier1', 'brazier2', 'brazier3', 'ceil_tomb', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'ddead', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'drock0', 'drock1', 'drock2', 'dshrub0', 'dshrub1', 'dshrub2', 'dsphinx', 'dsutstatue', 'dwolf', 'dwolfA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'offering', 'rrock0', 'rrock1', 'rrock2', 'skybirdA', 'skybirdB', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA'];
+const DS_PAINTED=['brazier0', 'brazier1', 'brazier2', 'brazier3', 'ceil_tomb', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'offering', 'rrock0', 'rrock1', 'rrock2', 'skybirdA', 'skybirdB', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA'];
 
 /* ---- src/desert/artpack.js ---- */
 /* ==========================================================================
@@ -7509,7 +7578,7 @@ for(let k=0;k<BURROW_N;k++){
     portals:[{to:41,x:spot.x,y:spot.y+1,f:2,tex:'tomb'}]};
 }
 // the tiny dungeons share the tomb's walls and the same music as the other small dungeons
-function makeBurrowArt(){for(let k=0;k<BURROW_N;k++)LEVELS[BURROW_BASE+k].chars=LEVEL42_DATA.chars}
+function makeBurrowArt(){for(let k=0;k<BURROW_N;k++)LEVELS[BURROW_BASE+k].chars=LEVEL42_DATA.chars;if(typeof makeDngArt==='function')makeDngArt()}
 for(let k=0;k<BURROW_N;k++)EMBERS_LEVELS.push(BURROW_BASE+k);
 
 /* ---- src/desert/redsands.js ---- */
@@ -7803,6 +7872,129 @@ for(const [n,cnt] of [[41,8],[43,10],[60,6]]){
   }
 }
 
+/* ---- src/desert/dungeons.js ---- */
+/* ==========================================================================
+   THE LITTLE DUNGEONS OF THE DESERTS: five to ten in every desert, each with its own way in (a hatch, a mound with a
+   door, a hole in a great tree, a small or a larger crypt, a spire, a ruin with stairs, or bare stairs going down), its own
+   name, and its own plan: three rooms and a passage or two, five rooms, or a labyrinth. Most hold only a coffin, some a
+   creature. They are numbered from DNG_BASE upward, and DNG_INFO says which is which (the Achievements page reads it).
+   Also here: the two great creatures that walk the Violet Erg and the White Dunes.
+   ========================================================================== */
+const DNG_BASE=100;
+const DNG_TYPES=['Tomb','Crypt','Vault','Hollow','Sepulchre','Barrow','Catacomb','Shrine','Mausoleum','Ossuary','Reliquary','Undercroft'];
+const DNG_EPI=['the Midday Sun','the Weeping Jackal','the Last Pharaoh','Whispering Sands','the Hundred Scarabs','the Drowned Star','the Silent Vizier','Amber Dust','the Sleeping Sphinx','Forgotten Kings',
+  'the Burning Moon','the Veiled Queen','Golden Ash','the Thirsty Dead','the Salt Priest','Seven Winds','the Jackal Lord','the Crimson Dawn','the Blind Oracle','Endless Thirst',
+  'the Copper Serpent','Dust and Honey','the Mirage Court','the Ninth Hour','Hollow Stars','the Bone Gardener','the Glass Prince','the Shattered Hourglass','the Sand Mother','the Lantern Thief',
+  'Cinder Lilies','the Bitter Well','the Moth Saint','the Obsidian Door','the Pale Cartographer','Fallen Obelisks','the Dune Singer','the Ivory Beetle','Sunken Gold','the Wandering Tomb',
+  'Red Mercy','the Twin Suns','the Cobalt Scribe','Vanished Caravans','the Amber Heron','Quiet Thunder','the Last Oasis','the Iron Asp','Nightfall Sands','the Violet Pilgrim'];
+const DNG_ENTRY=[['dhatch','a hatch',.26],['dburrow','a mound with a door',.62],['dtreehole','a hole in a great tree',.95],['dcryptS','a small crypt',.62],['dcryptL','a larger crypt',.9],['dspire','a small spire',1.15],['druinstairs','a ruin with stairs',.62],['dstairs','stairs going down',.3]];
+const DNG_DESERTS=[[41,'The Sand Road',14],[43,'The Red Dunes',15],[60,'The Blue Dunes',16],[61,'The Golden Erg',18],[62,'The Violet Erg',21],[63,'The White Dunes',17],[64,'The Flatlands',18]];
+const DNG_INFO={};
+function buildDng(idx,cls,lvl,entryK){
+  const Wd=[21,27,37][cls],Hd=[15,19,29][cls],g=[],fl=[],Rn=(i,m)=>(hash2(idx*17+i,idx*5+3,91)*m)|0;
+  for(let y=0;y<Hd;y++){g.push(new Array(Wd).fill('W'));fl.push(new Array(Wd).fill('0'))}
+  const rooms=[],cut=(r)=>{for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)g[y][x]='.'};
+  const ew=3+Rn(1,3),sx=2+Rn(2,Wd-ew-4);rooms.push({x0:sx,y0:Hd-4,x1:sx+ew-1,y1:Hd-2});
+  const want=[3,5,4][cls],big=cls===2?2:0;
+  for(let t=0;t<500&&rooms.length<want;t++){
+    const w=3+big+Rn(100+t,4),h=3+big+Rn(200+t,2),x0=1+Rn(300+t,Wd-w-2),y0=1+Rn(400+t,Hd-h-2);
+    if(rooms.some(r=>x0<=r.x1+2&&x0+w-1>=r.x0-2&&y0<=r.y1+2&&y0+h-1>=r.y0-2))continue;
+    rooms.push({x0,y0,x1:x0+w-1,y1:y0+h-1});
+  }
+  const mid=r=>[(r.x0+r.x1)>>1,(r.y0+r.y1)>>1];
+  if(cls===2){ // a labyrinth: a maze of one-cell passages on the odd cells, with a few chambers cut into it
+    const seen=new Set(),stack=[[1,1]];g[1][1]='.';seen.add('1,1');
+    while(stack.length){
+      const [cx,cy]=stack[stack.length-1],nb=[[2,0],[-2,0],[0,2],[0,-2]].map(([a,b])=>[cx+a,cy+b,a,b]).filter(([x,y])=>x>0&&y>0&&x<Wd-1&&y<Hd-1&&!seen.has(x+','+y));
+      if(!nb.length){stack.pop();continue}
+      const [nx,ny,a,b]=nb[Rn(900+seen.size,nb.length)];g[cy+b/2][cx+a/2]='.';g[ny][nx]='.';seen.add(nx+','+ny);stack.push([nx,ny]);
+    }
+    rooms.forEach(cut);
+  }else{
+    rooms.forEach(cut);
+    for(let i=1;i<rooms.length;i++){
+      let bj=0,bd=1e9;const [ax,ay]=mid(rooms[i]);for(let j=0;j<i;j++){const [bx,by]=mid(rooms[j]),d=Math.abs(ax-bx)+Math.abs(ay-by)+Rn(500+i*9+j,6);if(d<bd){bd=d;bj=j}}
+      const [bx,by]=mid(rooms[bj]),hf=Rn(600+i,2)===0;
+      const hl=(y,x0,x1)=>{for(let x=Math.min(x0,x1);x<=Math.max(x0,x1);x++)g[y][x]='.'},vl=(x,y0,y1)=>{for(let y=Math.min(y0,y1);y<=Math.max(y0,y1);y++)g[y][x]='.'};
+      if(hf){hl(ay,ax,bx);vl(bx,ay,by)}else{vl(ax,ay,by);hl(by,ax,bx)}
+    }
+  }
+  const e0=rooms[0],start={x:mid(e0)[0],y:Hd-2};
+  g[Hd-1][start.x]='0';
+  const bfs=(blocked)=>{const d=new Int16Array(Wd*Hd).fill(-1),q=[start.x+start.y*Wd];d[q[0]]=0;for(let i=0;i<q.length;i++){const c=q[i],x=c%Wd,y=(c/Wd)|0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=Wd||ny>=Hd||g[ny][nx]!=='.'||d[ny*Wd+nx]>=0||blocked.has(nx+','+ny))continue;d[ny*Wd+nx]=d[c]+1;q.push(ny*Wd+nx)}}return d};
+  const d0=bfs(new Set());let far=0,fd=-1;for(let i=0;i<Wd*Hd;i++)if(d0[i]>fd){fd=d0[i];far=i}
+  const fx=far%Wd,fy=(far/Wd)|0;
+  for(let y=0;y<Hd;y++)for(let x=0;x<Wd;x++)if(g[y][x]==='.'){fl[y][x]=(Math.abs(x-fx)+Math.abs(y-fy)<=3)?'1':(x>=e0.x0&&x<=e0.x1&&y>=e0.y0&&y<=e0.y1)?'2':'0'}
+  const rows=g.map((r,y)=>r.map((c,x)=>c==='W'?(hash2(x,y,60+idx)<.4?'W':'H'):c).join(''));
+  const decor=[],enemies=[],items=[],lights=[],blocked=new Set(),used=new Set([start.x+','+start.y]);
+  const okBlock=(x,y)=>{const key=x+','+y;if(g[y][x]!=='.'||used.has(key)||blocked.has(key))return false;blocked.add(key);const d=bfs(blocked);let ok=true;for(let yy=0;yy<Hd&&ok;yy++)for(let xx=0;xx<Wd;xx++)if(g[yy][xx]==='.'&&!blocked.has(xx+','+yy)&&d[yy*Wd+xx]<0){ok=false;break}if(!ok)blocked.delete(key);return ok};
+  const put=(k,x,y,o)=>{if(o&&o.block&&!okBlock(x,y))return false;used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false},o||{}));return true};
+  const mummy=Rn(950,4)===0;
+  // the coffin lies at the far end
+  if(!put('sarcoph',fx,fy,Object.assign({block:true,goldAmt:90+idx%7*30},mummy?{ambush:['mummy']}:{}))){put('sarcoph',fx,fy-1,{block:true})}
+  if(Rn(951,6)===0){const r=rooms[1+Rn(952,rooms.length-1)],cc=[];for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)if(Math.abs(x-fx)+Math.abs(y-fy)>2)cc.push([x,y]);const c=cc.length?cc[Rn(953,cc.length)]:null;if(c)put('chest',c[0],c[1],{block:true,magic:DS_MAGIC_TOMB[(idx*7+3)%DS_MAGIC_TOMB.length],goldAmt:200+idx%5*40})}
+  // light: a brazier or two in the first chamber, and unseen lamps along the way
+  for(const [x,y] of [[e0.x0,e0.y0],[e0.x1,e0.y0]])if(y<Hd-3&&put('brazier',x,y,{block:true}))lights.push([x,y]);
+  rooms.forEach((r,i)=>{if(i){const [mx,my]=mid(r);lights.push([mx,my])}});
+  for(let y=1;y<Hd-1;y+=5)for(let x=1;x<Wd-1;x+=5)if(g[y][x]==='.')lights.push([x,y]);
+  rooms.forEach((r,i)=>{if(i>0&&Rn(700+i,3)===0){const x=r.x0+Rn(710+i,r.x1-r.x0+1),y=r.y0+Rn(720+i,r.y1-r.y0+1);if(Math.abs(x-fx)+Math.abs(y-fy)>2)put('vase'+(i%4),x,y,{block:true,plain:true})}});
+  // now and then something is awake in there
+  if(Rn(960,100)<38){
+    const T=['scorpion','mummy','nomad'][Rn(961,3)],n=1+(Rn(962,3)===0?1:0);
+    for(let i=0;i<n;i++){const cand=[];for(let y=1;y<Hd-1;y++)for(let x=1;x<Wd-1;x++)if(g[y][x]==='.'&&!used.has(x+','+y)&&d0[y*Wd+x]>10)cand.push([x,y]);if(cand.length){const p=cand[Rn(970+i,cand.length)];used.add(p[0]+','+p[1]);enemies.push({t:T,x:p[0],y:p[1],lvl})}}
+  }
+  return {rows,fm:fl.map(r=>r.join('')),decor,enemies,items,lights,start:{x:start.x,y:start.y,f:0}};
+}
+(function placeDungeons(){
+  let idx=0;
+  DNG_DESERTS.forEach(([dl,dname,dlvl],di)=>{
+    const L=LEVELS[dl],rows=L.rows,H=rows.length,W=rows[0].length,count=5+((hash2(di,3,901)*6)|0);
+    L.decor=L.decor||[];const placed=[];
+    for(let k=0;k<2000&&placed.length<count;k++){
+      const x=24+((hash2(k,di,811)*(W-48))|0),y=24+((hash2(k,di,812)*(H-48))|0);
+      if(rows[y][x]!=='.'||Math.hypot(x-L.start.x,y-L.start.y)<30)continue;
+      if(dl===41&&(y>140||Math.abs(x-rdCentre(y))<7))continue;
+      if(dl===43&&y<85&&Math.abs(x-rsCentre(y))<7)continue;
+      if(placed.some(p=>Math.hypot(p.x-x,p.y-y)<22))continue;
+      let bad=false;for(let dy=-4;dy<=4&&!bad;dy++)for(let dx=-4;dx<=4;dx++){const c=L.fmap&&L.fmap[y+dy]&&L.fmap[y+dy][x+dx];if(dl!==41&&(c==='3'||c==='4')){bad=true;break}}
+      if(bad)continue;
+      if(L.decor.some(d=>Math.abs(d.x-x)<=3&&Math.abs(d.y-y)<=3)||(L.scenery||[]).some(s=>Math.abs(s.wx-x)<2&&Math.abs(s.wy-y)<2))continue;
+      // somewhere to come out: a free open cell beside the entrance
+      let out=null;for(const [dx,dy,f] of [[0,1,2],[1,0,1],[-1,0,3],[0,-1,0]]){if(rows[y+dy][x+dx]==='.'&&!L.decor.some(d=>d.x===x+dx&&d.y===y+dy)){out={x:x+dx,y:y+dy,f};break}}
+      if(!out)continue;
+      const lvlN=DNG_BASE+idx,cls=[0,1,0,1,2,0,1,2,0,1][idx%10],entry=DNG_ENTRY[(idx*3+di)%DNG_ENTRY.length];
+      const B=buildDng(idx,cls,dlvl,entry[0]);
+      const name=DNG_TYPES[(idx*5+3)%12]+' of '+DNG_EPI[idx%DNG_EPI.length];
+      LEVELS[lvlN]={rows:B.rows,fmap:B.fm,start:B.start,enemies:B.enemies,items:B.items,decor:B.decor,lights:B.lights,secrets:[],
+        amb:.34,ceilH:1.3,floor:'tombslab',floorSet:['tombslab','tombgold','tombsand','tombdark','tomblapis','tombred'],ceil:'tomb',name,label:'Desert Dungeon',diff:dlvl,
+        portals:[{to:dl,x:out.x,y:out.y,f:out.f,tex:'tomb'}]};
+      LEVEL_NAMES[lvlN]=name;EMBERS_LEVELS.push(lvlN);
+      DNG_INFO[lvlN]={name,desert:dname,cls,entry:entry[1]};
+      L.decor.push({k:entry[0],x,y,block:true,enter:{to:lvlN,x:B.start.x,y:B.start.y,f:0}});
+      placed.push({x,y});idx++;
+    }
+  });
+})();
+function makeDngArt(){
+  for(const n of Object.keys(DNG_INFO))LEVELS[n].chars=LEVEL42_DATA.chars;
+  for(const [k,,h] of DNG_ENTRY)NPC_H[k]=h;
+}
+
+/* ---- the great creatures: a fire lizard in the south of the Violet Erg, a patrolling cyclops over the White Dunes ---- */
+Object.assign(ENEMY_DEF,{
+  firelizard:{name:'Cinderback, the Fire Lizard',hp:70,dmg:[6,10],hit:.8,w:1.7,img:'firelizard',xp:160,gold:[0,0],goldFixed:400,dropMagic:1,aboveParty:3,speed:1,verb:'scorches',ranged:3,shot:'a gout of flame',boss:true},
+  cyclops:{name:'The Wandering Cyclops',hp:90,dmg:[6,10],hit:.78,w:1.35,img:'cyclops',xp:220,gold:[0,0],goldFixed:500,dropMagic:2,aboveParty:10,speed:1,verb:'clubs',patrol:true,boss:true}});
+(function placeBosses(){
+  const V=LEVELS[62],cx=VER.CX,cy=262;
+  for(const list of [V.enemies,V.items,V.decor])for(let i=list.length-1;i>=0;i--)if(Math.hypot(list[i].x-cx,list[i].y-cy)<18)list.splice(i,1);
+  for(let a=0;a<10;a++){const x=Math.round(cx+Math.cos(a/10*TAU)*10),y=Math.round(cy+Math.sin(a/10*TAU)*10);if(a!==5&&a!==4)V.decor.push({k:'dpillar'+(a%2),x,y,block:true})} // a ring of broken pillars, open to the north
+  V.decor.push({k:'dbones',x:cx-3,y:cy+3,block:false},{k:'dbones',x:cx+4,y:cy-2,block:false});
+  V.enemies.push({t:'firelizard',x:cx,y:cy,lvl:40});
+  const W=LEVELS[63],px=125,py=95;
+  for(let i=W.enemies.length-1;i>=0;i--)if(Math.hypot(W.enemies[i].x-px,W.enemies[i].y-py)<14)W.enemies.splice(i,1);
+  W.enemies.push({t:'cyclops',x:px,y:py,lvl:44,home:{x:px,y:py}});
+})();
+
 /* ---- src/desert/terrain.js ---- */
 /* ==========================================================================
    REAL DUNES. The open desert levels (the Sand Road, the Red Dunes, the Blue Dunes) have a height under every cell, so
@@ -7836,7 +8028,8 @@ function terrFor(n){
   const rows=L.rows,H=rows.length,W=rows[0].length,h=new Float32Array(W*H),open=new Uint8Array(W*H);
   const flat=[[L.start.x,L.start.y,6]],gates=[[L.start.x,L.start.y]];
   rows.forEach((r,y)=>{for(let x=0;x<W;x++){const c=r[x];if(c==='.')open[y*W+x]=1;else if(c>='0'&&c<='9'){flat.push([x,y,5]);gates.push([x,y])}}});
-  for(const d of L.decor||[])if(/^(chest|dpillar|danubis|dbastet|dsphinx|dobelisk|dpharaoh|treasure|offering|vase|brazier|dsutstatue|sarcoph|dburrow|teleporter)/.test(d.k))flat.push([d.x,d.y,3.5]);
+  for(const d of L.decor||[])if(d.enter||/^(chest|dpillar|danubis|dbastet|dsphinx|dobelisk|dpharaoh|treasure|offering|vase|brazier|dsutstatue|sarcoph|dburrow|teleporter)/.test(d.k))flat.push([d.x,d.y,3.5]);
+  if(n===62)flat.push([VER.CX,262,12]);                           // the fire lizard's ground is level
   if(n===61)for(const [ox,oy] of GER.OASES)flat.push([ox,oy,9]);
   if(n===64)for(const [ox,oy] of FLR.OASES)flat.push([ox,oy,9]);
   if(n===63)for(const [ox,oy] of WER.OASES)flat.push([ox,oy,9]);

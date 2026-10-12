@@ -66,5 +66,5 @@ for(let k=0;k<BURROW_N;k++){
     portals:[{to:41,x:spot.x,y:spot.y+1,f:2,tex:'tomb'}]};
 }
 // the tiny dungeons share the tomb's walls and the same music as the other small dungeons
-function makeBurrowArt(){for(let k=0;k<BURROW_N;k++)LEVELS[BURROW_BASE+k].chars=LEVEL42_DATA.chars}
+function makeBurrowArt(){for(let k=0;k<BURROW_N;k++)LEVELS[BURROW_BASE+k].chars=LEVEL42_DATA.chars;if(typeof makeDngArt==='function')makeDngArt()}
 for(let k=0;k<BURROW_N;k++)EMBERS_LEVELS.push(BURROW_BASE+k);
