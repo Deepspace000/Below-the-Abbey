@@ -9,13 +9,18 @@ function teleSpot(n){
   for(const e of L.enemies||[])bad.add(e.x+','+e.y);
   for(const it of L.items||[])bad.add(it.x+','+it.y);
   const nearDoor=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const c=(rows[y+dy]||'')[x+dx];if(c&&c!=='.'&&/[0-9]/.test(c))return true}return false};
-  const seen=new Set([st.x+','+st.y]),q=[[st.x,st.y,0]];let best=null,far=null;
+  const seen=new Set([st.x+','+st.y]),q=[[st.x,st.y,0]],cells=[];let far=null,maxD=0;
   while(q.length){
-    const [x,y,d]=q.shift();
-    if(d>=3&&!bad.has(x+','+y)&&!nearDoor(x,y)){if(!best)best={x,y}}
-    far=[x,y];if(best&&d>9)break;
+    const [x,y,d]=q.shift();far=[x,y];if(d>maxD)maxD=d;
+    if(!bad.has(x+','+y)&&!nearDoor(x,y))cells.push([x,y,d]);
     for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy,k=nx+','+ny;if(nx<0||ny<0||nx>=W||ny>=H||seen.has(k)||rows[ny][nx]!=='.'||solid.has(k))continue;seen.add(k);q.push([nx,ny,d+1])}
   }
+  // hidden but reachable: well away from the arrival point, tucked into a nook (walls or scenery on several sides), so the player has to search
+  const walls=(x,y)=>{let n=0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const c=(rows[y+dy]||'')[x+dx];if(!c||c!=='.'||solid.has((x+dx)+','+(y+dy)))n++}return n};
+  const minD=Math.max(5,Math.floor(maxD*.45)),maxOk=Math.max(minD+2,Math.floor(maxD*.9));
+  let pool=cells.filter(c=>c[2]>=minD&&c[2]<=maxOk),best=null,bs=-1;
+  if(!pool.length)pool=cells.filter(c=>c[2]>=3);
+  for(const [x,y,d] of pool){const sc=walls(x,y)*10+((x*73+y*151+n*31)%7);if(sc>bs){bs=sc;best={x,y}}}
   if(!best)best=far?{x:far[0],y:far[1]}:{x:st.x,y:st.y};
   return L._tele=best;
 }
