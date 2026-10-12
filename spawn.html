@@ -12,7 +12,7 @@ h2{font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)
 a.c{display:block;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--ink);text-decoration:none}
 a.c:hover,a.c:focus{border-color:var(--gold)}a.c b{display:block;color:var(--gold)}a.c span{font-size:13px;color:var(--dim)}
 </style></head><body><main>
-<h1>Below the Abbey</h1><p class="s">Jump straight to any area. The party is set to the level below, with gear.</p>
+<h1>Below the Abbey</h1><p class="s">Jump straight to any area. The party starts at the level below, with gear. The desert areas start at level 34 until you change it.</p>
 <div class="lv"><label for="l">Party level</label><input id="l" type="number" min="1" max="40" value="12"></div>
 <div id="out"></div>
 </main><script>
@@ -21,10 +21,11 @@ const GROUPS=[
  ['Early game',[['Abbey and the Thornwood','thornwood','Grim woodland, paths fork to Thornwick'],['Thornwick','thornwick','Village under an overcast sky'],['Thornwick, town square','thornwick&at=square','Start in the middle of town'],["Gandrick's Wood",'gwood','Bandit camp, burnable thicket']]],
  ['North of Anaea',[['Sand Road, start','sandroad','The forest corridor east of Anaea'],['Sand Road, the palms','sandpalms','Forest gives way to palms'],['The Dunes','desert','A vast desert of dunes'],['The Tomb Gate','tombgate','Cliff, sphinxes and the way in'],['Tomb of Sut, the cave','tomb','The sand-filled cave inside the gate'],['Tomb of Sut, the Hall','tombhall','The Hall of Eternity, four wings and the great door'],['A Buried Chamber','burrow','One of the ten little dungeons under the dunes'],['The Red Dunes','reddunes','Red sand, ruins and a long road'],['Khemetra, the gate','khemetra','The golden city on the horizon']]],
  ['Ironhill',[['Ironhill Road','road','Rainy pine wood'],['Ironhill','ironhill','The town gate'],['Ironhill, town square','ironhill&at=square','Start in the middle of town'],['Ironhill Moor','moor','Open heath and standing stones'],['Burial Ground','grave','Fenced graveyard with lanterns']]],
- ['The mountain and beyond',[['Greyfang Pass','pass','The climb to the summit'],['Greendale Forest','greendale','Bright lush forest'],['Overgrown Hollow','hollow','Peaceful flower maze, a nymph and a magic bow'],['Anaea','anaea','Start at the gate'],['Prism Cellars','prism','Rainbow dungeon under Anaea, no enemies'],['Anaea, town square','anaea&at=square','Start in the middle of town']]]];
+ ['The mountain and beyond',[['Greyfang Pass','pass','The climb to the summit'],['Greendale Forest','greendale','Bright lush forest'],['Overgrown Hollow','hollow','Peaceful flower maze, a nymph and a magic bow'],['Anaea','anaea','Start at the gate'],['Prism Cellars','prism','Rainbow dungeon under Anaea, no enemies'],['Anaea, town square','anaea&at=square','Start in the middle of town']]],
+ ['The Unknown Lands',[['Sand Road','sandroad','Where the desert road begins',34],['Sand Road, palms','sandpalms','Palms along the road',34],['The Desert','desert','Open sand',34],['Tomb Gate','tombgate','Outside the Tomb of Sut',34],['Tomb of Sut','tomb','Just inside the tomb',34],['Tomb of Sut, deep hall','tombhall','Further in',34],['Buried Chamber','burrow','A chamber under a dune mound',34],['Red Dunes','reddunes','Red sand and old ruins',34],['Khemetra','khemetra','The golden city, its wall and gate',34]]]];
 const lv=document.getElementById('l'),out=document.getElementById('out');
 const DEF={pass:14,greendale:34,anaea:34};
 function draw(){out.innerHTML='';for(const [t,items] of GROUPS){const h=document.createElement('h2');h.textContent=t;out.appendChild(h);const g=document.createElement('div');g.className='g';
- for(const [n,k,d] of items){const a=document.createElement('a');a.className='c';a.href=BASE+'?town='+k+'&lvl='+(+lv.value||12);a.innerHTML='<b></b><span></span>';a.firstChild.textContent=n;a.lastChild.textContent=d;g.appendChild(a)}out.appendChild(g)}}
-lv.addEventListener('input',draw);draw();
+ for(const [n,k,d,dl] of items){const a=document.createElement('a');a.className='c';a.href=BASE+'?town='+k+'&lvl='+(touched?(+lv.value||12):(dl||(+lv.value||12)));a.innerHTML='<b></b><span></span>';a.firstChild.textContent=n;a.lastChild.textContent=d;g.appendChild(a)}out.appendChild(g)}}
+let touched=false;lv.addEventListener('input',()=>{touched=true;draw()});draw();
 </script></body></html>
