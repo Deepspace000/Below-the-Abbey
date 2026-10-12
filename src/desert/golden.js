@@ -29,7 +29,7 @@ function buildErg(E,seed,rk){
   for(let y=18;y<H-18;y+=2)for(let x=18;x<W-18;x+=2){ // the empty land
     if(!inland(x,y))continue;const r=R(x,y,20),ox=(R(x,y,3)-.5)*1.4,oy=(R(x,y,4)-.5)*1.4;
     if(r<.02)put('drock'+((R(x,y,21)*3)|0),x,y,{block:true,sc:.9+R(x,y,22)*.7});
-    else if(r<.04)sc('dcactus',x,y,{ox,oy,sc:.8+R(x,y,23)*.6});
+    else if(r<.04)sc('dplant'+((R(x,y,29)*4)|0),x,y,{ox,oy,sc:.8+R(x,y,23)*.6});
     else if(r<.055)sc('ddead',x,y,{ox,oy,sc:.8+R(x,y,24)*.5});
     else if(r<.075)sc('dbones',x,y,{ox,oy,sc:.8+R(x,y,25)*.5});
     else if(r<.1)sc('dshrub'+((R(x,y,26)*3)|0),x,y,{ox,oy,sc:.7+R(x,y,27)*.5});

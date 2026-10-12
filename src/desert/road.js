@@ -77,7 +77,7 @@ function buildSandRoad(){
     if(dp>0){
       if(DUNE_SPRITES&&R(x,y,20)<.06*dp&&!nearDune(x,y)){dunes.add(x+','+y);put('dune'+((R(x,y,21)*3)|0),x,y,{block:true,ox:oX*.4,oy:oY*.3,sc:.95+R(x,y,22)*.7})}
       else if(R(x,y,23)<.011*dp)put('drock'+((R(x,y,24)*3)|0),x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,25)*.5});
-      else if(R(x,y,26)<.008*dp)put('dcactus',x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,27)*.4});
+      else if(R(x,y,26)<.008*dp)put('dplant'+((R(x,y,29)*4)|0),x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,27)*.4});
       else if(R(x,y,28)<.005*dp)put('ddead',x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,29)*.5});
       else if(R(x,y,30)<.045*dp)sc('dshrub'+((R(x,y,31)*3)|0),x,y,{ox:oX,oy:oY,sc:.8+R(x,y,32)*.7});
       else if(R(x,y,33)<.003*dp)sc('dbones',x,y,{ox:oX,oy:oY,sc:.9+R(x,y,34)*.4});

@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.68';
+const VERSION='2.70';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3770,6 +3770,7 @@ function titleBtn(id){
   if(id==='tnew'){crInit();G.state='create'}
   else if(id==='tcont'){const sv=readSave('auto')||readSave('prev');if(sv)restore(sv)}
   else if(id==='tload')openSaves('title');
+  else if(id==='tgoto'){G.state='goto';G.gotoPage=0}
 }
 function importSaveFile(){
   const inp=document.createElement('input');inp.type='file';inp.accept='.json,application/json';
@@ -3831,6 +3832,51 @@ function drawInitialFrame(x,y,w,h){
   ctx.fillStyle='#d8b860';for(let i=1;i<6;i++){const py=y+i*h/6;ctx.beginPath();ctx.arc(x+2,py,1.3,0,TAU);ctx.arc(x+w-2,py,1.3,0,TAU);ctx.fill()}
   ctx.restore();
 }
+/* ---------- the title screen's "Go to area": pick any area or dungeon and start there ---------- */
+G.gotoLvl=34;
+function gotoList(){
+  const out=[],nm=n=>LEVEL_NAMES[n]||(LEVELS[n]&&LEVELS[n].name)||('Level '+n),hd=h=>out.push({h});
+  const has=n=>LEVELS[n];
+  hd('The Known Lands');for(let n=1;n<=40;n++)if(has(n))out.push({n,name:nm(n)});
+  hd('The Deserts');for(const n of [41,42,43,60,61,62,63,64])if(has(n))out.push({n,name:nm(n)});
+  hd('Mounds of the Sand Road');for(let n=BURROW_BASE;n<BURROW_BASE+BURROW_N;n++)if(has(n))out.push({n,name:nm(n)});
+  for(const [dl,dname] of DNG_DESERTS){const ids=Object.keys(DNG_INFO).map(Number).filter(n=>DNG_INFO[n].desert===dname).sort((a,b)=>a-b);if(ids.length){hd('Dungeons of '+dname);for(const n of ids)out.push({n,name:nm(n)})}}
+  return out;
+}
+function jumpToLevel(n,target){
+  audioInit();backupAuto();
+  const sv=readSave('auto')||readSave('prev');
+  if(sv){restore(sv)}
+  else{let p=null;try{p=JSON.parse(localStorage.getItem('abbeyParty')||'null')}catch(e){}setParty(p||DEFAULT_PARTY);reset();G.state='play'}
+  G.heroes.forEach((h,i)=>{while(h.lvl<target){h.xp=xpNeed(h.lvl);levelUp(i)}h.alive=true;h.hp=h.max;h.mp=h.mpMax;h.food=Math.max(h.food||0,100)});
+  G.lvlBanners.length=0;G.msgs=[];G.cut=null;G.talk=null;
+  giveJumpGear(Math.min(40,target));
+  const F=G.flags;F.townSeen=1;F.abbeyIntroSeen=1;F.gwoodSeen=1;F.gandrickDead=1;F.northGate=1;F.mayorKilled=1;F.mayorDown=1;F.ironRoad=1;F.passDone=1;F.passSeen=1;
+  for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};
+  const L=LEVELS[n],st=L.start||{x:1,y:1,f:1};
+  goToLevel(n,{x:st.x,y:st.y,f:st.f!==undefined?st.f:1});G.state='play';G.menu=false;
+}
+function drawGoto(){
+  BTNS=[];veil(.82);bigPanel(24,8,432,304);
+  const A=gotoList(),per=30,pages=Math.max(1,Math.ceil(A.length/per));G.gotoPage=clamp(G.gotoPage||0,0,pages-1);
+  txt('GO TO AREA',240,22,13,'#d8c88e','center',true);
+  txt('Choose where to start. Your party is raised to the level shown.',240,36,8.5,'#c8b888','center');
+  const page=A.slice(G.gotoPage*per,G.gotoPage*per+per);
+  page.forEach((r,i)=>{const col=i<15?0:1,row=i%15,x=36+col*210,y=52+row*15.4;
+    if(r.h)txt(r.h,x+2,y+6,8.5,'#c8a860','left',true,undefined,200);
+    else{btnText('go_'+r.n,'',x,y-1,204,14);txt(r.n+'  '+r.name,x+6,y+6,8,'#e2d8bc','left',false,undefined,194)}});
+  txt(`Page ${G.gotoPage+1} of ${pages}`,240,284,8,'#9a8a68','center');
+  btnText('go_prev','Prev',36,290,70,18);btnText('go_back','Back',120,290,70,18);btnText('go_next','Next',204,290,70,18);
+  btnText('go_lm','-',300,290,26,18);txt('Party level '+G.gotoLvl,356,299,9,'#e8dca8','center',true);btnText('go_lp','+',394,290,26,18);
+}
+function gotoBtn(id){
+  if(id==='go_prev')G.gotoPage=Math.max(0,(G.gotoPage||0)-1);
+  else if(id==='go_next')G.gotoPage=(G.gotoPage||0)+1;
+  else if(id==='go_back')G.state='title';
+  else if(id==='go_lm')G.gotoLvl=Math.max(1,G.gotoLvl-2);
+  else if(id==='go_lp')G.gotoLvl=Math.min(80,G.gotoLvl+2);
+  else if(/^go_\d+$/.test(id))jumpToLevel(+id.slice(3),G.gotoLvl);
+}
 function drawTitle(){
   BTNS=[];veil(.6);
   ctx.save();ctx.textAlign='center';
@@ -3844,7 +3890,7 @@ function drawTitle(){
   txtS('grid-movement, turn-based fantasy rpg',210,142,10,'#d8c9a0','center');
   const any=SAVE_SLOTS.some(([k])=>hasSave(k)),items=[];
   if(hasSave('auto')||hasSave('prev'))items.push(['tcont','Continue']);
-  items.push(['tnew','New game']);if(any)items.push(['tload','Load game']);
+  items.push(['tnew','New game']);if(any)items.push(['tload','Load game']);items.push(['tgoto','Go to area']);
   items.forEach(([id,label],i)=>btnText(id,label,140,162+i*29,140,26));
   txt('Version '+VERSION,210,306,11,'#b8a880','center',true);
   ctx.restore();
@@ -5919,7 +5965,7 @@ function ui(dt){
   ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();
   drawWorld();
   if(SMOKE){drawSmoke(G.time);ctx.fillStyle=HATCHP;ctx.fillRect(0,0,420,210)}
-  if(G.state==='title'){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,420,210)}
+  if(G.state==='title'||G.state==='goto'){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,420,210)}
   if(G.state==='play'){drawEnemyPlate();drawArrows();drawFloats(dt);drawMessages();drawLevelBanners();if(teleOn()&&!G.cut&&!G.talk&&!G.menu&&!G.inv.open&&!G.loot&&!G.overview&&teleActive(LEVEL))btnText('teleport','Teleport  (T)',160,30,100,20)}
   ctx.restore();
   if(G.cut)drawCut();
@@ -5951,6 +5997,7 @@ function ui(dt){
   if(G.saves)drawSaves();
   else if(G.overview){if(G.world)drawWorldMap();else drawOverview()}
   else if(G.state==='title')drawTitle();
+  else if(G.state==='goto')drawGoto();
   else if(G.state==='create')drawCreate();
   else if(G.loot)drawLoot();
   else if(G.inv.open)drawInventory();
@@ -6251,6 +6298,7 @@ function handleBtn(id){
     else if(id==='mzin')setMapZoom((G.mz||12)*1.3,DW/2,DH/2);else if(id==='mzout')setMapZoom((G.mz||12)/1.3,DW/2,DH/2);else if(id==='mzfit')setMapZoom(0,DW/2,DH/2);return}
   if(G.saves){savesBtn(id);return}
   if(G.state==='title'){titleBtn(id);return}
+  if(G.state==='goto'){gotoBtn(id);return}
   if(G.state==='create'){crBtn(id);return}
   if(G.state==='win'||G.state==='dead'){if(id==='endload')loadRecent();else if(id==='endmenu'){G.state='title'}return}
   if(G.loot){lootBtn(id);return}
@@ -6438,7 +6486,7 @@ addEventListener('resize',fit);fit();
 /*@@DESERT:BEGIN@@*/
 /* ---- src/desert/artlist.js ---- */
 /* written by tools/inject.py */
-const DS_PAINTED=['bat', 'batA', 'brazier0', 'brazier1', 'brazier2', 'brazier3', 'camelpE', 'camelpW', 'camelrE', 'camelrW', 'ceil_tomb', 'cobra', 'cobraA', 'cvnomadA', 'cvnomadB', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dskeleton', 'dskeletonA', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'offering', 'rrock0', 'rrock1', 'rrock2', 'skel', 'skelA', 'skybirdA', 'skybirdB', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA'];
+const DS_PAINTED=['bat', 'batA', 'brazier0', 'brazier1', 'brazier2', 'brazier3', 'camelpE', 'camelpW', 'camelrE', 'camelrW', 'ceil_tomb', 'cobra', 'cobraA', 'cvnomadA', 'cvnomadB', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'dplant0', 'dplant1', 'dplant2', 'dplant3', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dskeleton', 'dskeletonA', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'offering', 'rrock0', 'rrock1', 'rrock2', 'skel', 'skelA', 'skybirdA', 'skybirdB', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA'];
 
 /* ---- src/desert/artpack.js ---- */
 /* ==========================================================================
@@ -7300,7 +7348,7 @@ function buildSandRoad(){
     if(dp>0){
       if(DUNE_SPRITES&&R(x,y,20)<.06*dp&&!nearDune(x,y)){dunes.add(x+','+y);put('dune'+((R(x,y,21)*3)|0),x,y,{block:true,ox:oX*.4,oy:oY*.3,sc:.95+R(x,y,22)*.7})}
       else if(R(x,y,23)<.011*dp)put('drock'+((R(x,y,24)*3)|0),x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,25)*.5});
-      else if(R(x,y,26)<.008*dp)put('dcactus',x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,27)*.4});
+      else if(R(x,y,26)<.008*dp)put('dplant'+((R(x,y,29)*4)|0),x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,27)*.4});
       else if(R(x,y,28)<.005*dp)put('ddead',x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,29)*.5});
       else if(R(x,y,30)<.045*dp)sc('dshrub'+((R(x,y,31)*3)|0),x,y,{ox:oX,oy:oY,sc:.8+R(x,y,32)*.7});
       else if(R(x,y,33)<.003*dp)sc('dbones',x,y,{ox:oX,oy:oY,sc:.9+R(x,y,34)*.4});
@@ -7634,7 +7682,7 @@ function buildRedDunes(){
     if(road)continue;
     if(DUNE_SPRITES&&R(x,y,20)<.055&&!nearDune(x,y)){dunes.add(x+','+y);put('rdune'+((R(x,y,21)*3)|0),x,y,{block:true,ox:oX*.4,oy:oY*.3,sc:.95+R(x,y,22)*.8})}
     else if(R(x,y,23)<.016)put('rrock'+((R(x,y,24)*3)|0),x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,25)*.7});
-    else if(R(x,y,26)<.006)put('dcactus',x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,27)*.4});
+    else if(R(x,y,26)<.006)put('dplant'+((R(x,y,29)*4)|0),x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,27)*.4});
     else if(R(x,y,28)<.007)put('ddead',x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,29)*.5});
     else if(R(x,y,30)<.04)sc('dshrub'+((R(x,y,31)*3)|0),x,y,{ox:oX,oy:oY,sc:.8+R(x,y,32)*.7});
     else if(R(x,y,33)<.004)sc('dbones',x,y,{ox:oX,oy:oY,sc:.9+R(x,y,34)*.4});
@@ -7792,7 +7840,7 @@ function buildErg(E,seed,rk){
   for(let y=18;y<H-18;y+=2)for(let x=18;x<W-18;x+=2){ // the empty land
     if(!inland(x,y))continue;const r=R(x,y,20),ox=(R(x,y,3)-.5)*1.4,oy=(R(x,y,4)-.5)*1.4;
     if(r<.02)put('drock'+((R(x,y,21)*3)|0),x,y,{block:true,sc:.9+R(x,y,22)*.7});
-    else if(r<.04)sc('dcactus',x,y,{ox,oy,sc:.8+R(x,y,23)*.6});
+    else if(r<.04)sc('dplant'+((R(x,y,29)*4)|0),x,y,{ox,oy,sc:.8+R(x,y,23)*.6});
     else if(r<.055)sc('ddead',x,y,{ox,oy,sc:.8+R(x,y,24)*.5});
     else if(r<.075)sc('dbones',x,y,{ox,oy,sc:.8+R(x,y,25)*.5});
     else if(r<.1)sc('dshrub'+((R(x,y,26)*3)|0),x,y,{ox,oy,sc:.7+R(x,y,27)*.5});
@@ -8093,7 +8141,7 @@ function cvFlip(k){ // the mirror of a picture, made once from the painted one
   const im=IMG[k];if(!im||IMG[k+'f'])return;
   IMG[k+'f']=mkCanvas(im.width,im.height,(x,w,h)=>{x.translate(w,0);x.scale(-1,1);x.drawImage(im,0,0)});
 }
-function makeCaravanArt(){NPC_H.camelrE=1.05;NPC_H.camelrW=1.05;NPC_H.camelpE=.82;NPC_H.camelpW=.82;NPC_H.cvnomadA=.62;NPC_H.cvnomadB=.62;NPC_H.cvnomadAf=.62;NPC_H.cvnomadBf=.62}
+function makeCaravanArt(){NPC_H.dplant0=1.0;NPC_H.dplant1=1.1;NPC_H.dplant2=.5;NPC_H.dplant3=.45;NPC_H.camelrE=1.05;NPC_H.camelrW=1.05;NPC_H.camelpE=.82;NPC_H.camelpW=.82;NPC_H.cvnomadA=.62;NPC_H.cvnomadB=.62;NPC_H.cvnomadAf=.62;NPC_H.cvnomadBf=.62}
 function maybeSpawnCaravan(){
   if(!CV_LEVELS.includes(LEVEL)||Math.random()>CV_CHANCE)return;
   const L=LEVELS[LEVEL],rows=L.rows,W=rows[0].length,H=rows.length,T=terrFor(LEVEL);

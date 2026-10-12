@@ -20,7 +20,7 @@ function cvFlip(k){ // the mirror of a picture, made once from the painted one
   const im=IMG[k];if(!im||IMG[k+'f'])return;
   IMG[k+'f']=mkCanvas(im.width,im.height,(x,w,h)=>{x.translate(w,0);x.scale(-1,1);x.drawImage(im,0,0)});
 }
-function makeCaravanArt(){NPC_H.camelrE=1.05;NPC_H.camelrW=1.05;NPC_H.camelpE=.82;NPC_H.camelpW=.82;NPC_H.cvnomadA=.62;NPC_H.cvnomadB=.62;NPC_H.cvnomadAf=.62;NPC_H.cvnomadBf=.62}
+function makeCaravanArt(){NPC_H.dplant0=1.0;NPC_H.dplant1=1.1;NPC_H.dplant2=.5;NPC_H.dplant3=.45;NPC_H.camelrE=1.05;NPC_H.camelrW=1.05;NPC_H.camelpE=.82;NPC_H.camelpW=.82;NPC_H.cvnomadA=.62;NPC_H.cvnomadB=.62;NPC_H.cvnomadAf=.62;NPC_H.cvnomadBf=.62}
 function maybeSpawnCaravan(){
   if(!CV_LEVELS.includes(LEVEL)||Math.random()>CV_CHANCE)return;
   const L=LEVELS[LEVEL],rows=L.rows,W=rows[0].length,H=rows.length,T=terrFor(LEVEL);
