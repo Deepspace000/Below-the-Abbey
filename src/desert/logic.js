@@ -10,10 +10,25 @@ Object.assign(CUTS,{
     {who:hn(1),text:'I am only glad to see something built by living hands.'}],
   cityGate:()=>[
     {text:'The old road ends at a gate three times the height of a house. Its doors are cedar, bound with bronze and studded with gold, and carved above them is a winged sun with a lion on either side. A hot wind blows under the doors.'},
-    {who:hn(0),text:'Shut tight. Barred from the inside.'},
-    {who:hn(1),text:'Somebody is in there, though. Look at the smoke over the roofs.'},
-    {who:hn(2),text:'Then we will knock until they open. We have come a long way for this.'},
-    {text:'Khemetra waits behind its gates. The road to it was long, and what lies within is another story.'}],
+    {who:hn(0),text:'The doors stand open. Look at the smoke over the roofs, and at the gold on those towers.'},
+    {who:hn(1),text:'Somebody keeps this place. Somebody keeps it well.'},
+    {who:hn(2),text:'Then we walk in, and we ask for the wizard. We have come a long way for this.'},
+    {text:'Khemetra waits beyond the open gate.'}],
+  khArrive:()=>[
+    {text:'The gate of Khemetra closes behind the party, and the sound of the desert goes with it. Ahead, a great avenue of pale stone runs north between white houses trimmed with gold, and at the end of it, so far away that it seems to stand in the sky, rises a palace with a spire of gold.'},
+    {who:hn(0),text:'I have never seen a city this big. I did not know a wall could go on this long.'},
+    {who:hn(1),text:'Look at the roofs. Domes, towers, gardens on the tops of houses, and palms everywhere. Somebody loved this place.'},
+    {who:hn(3),text:'A city this size will have a wizard in it somewhere. And a vizier, and a market, and a lot of pockets to watch.'},
+    {who:hn(2),text:'Then we start with the palace. Mayor Marigold said the king listens to the wizard. If anyone knows where he is, it will be the palace.'},
+    {text:'Khemetra, the Golden City. Four hundred thousand souls, and not one of them has heard of you.'}],
+  khTunnel:()=>[
+    {text:'The cave is dry and bright. Light falls in from somewhere ahead, white and flickering, and the air smells of salt for the first time in the party\'s lives.'},
+    {who:hn(1),text:'Salt. I know that smell from the old stories. That is the sea.'}],
+  khSea:()=>[
+    {text:'The tunnel opens. Beyond the rock lies a grey-blue plain that runs to the end of the world, wrinkled with waves and silver where the sun strikes it. Sea birds wheel over a shore of white shingle. The Vaast Ocean.'},
+    {who:hn(0),text:'It does not end. It just does not end.'},
+    {who:hn(2),text:'Menkaure was right. The sea is real, and the road to it is open. We should tell him.'},
+    {text:'The party stands on the shore of the Vaast Ocean. The road to Khemetra and the shipwright is long, but it is the road to everything that lies beyond.'}],
   sandRoad:()=>[
     {text:"Anaea's east gate closes behind the party. The road runs on between walls of green, and the birdsong thins. A dry wind comes down it from somewhere far to the north."},
     {who:hn(0),text:"Smell that? Dust and hot stone. We are a long way from Greendale's flowers."},

@@ -10,7 +10,7 @@ import re, sys, pathlib
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 HTML = ROOT / 'index.html'
 SRC = ROOT / 'src' / 'desert'
-ORDER = ['artlist.js', 'artpack.js', 'paint.js', 'floors.js', 'sprites_out.js', 'creatures.js', 'sprites_tomb.js', 'teleport.js', 'magic.js', 'road.js', 'tomb.js', 'burrows.js', 'redsands.js', 'bluedunes.js', 'golden.js', 'dungeons.js', 'caravan.js', 'pyramid.js', 'terrain.js', 'dunes.js', 'logic.js', 'logic2.js', 'boot.js']
+ORDER = ['artlist.js', 'artpack.js', 'paint.js', 'floors.js', 'sprites_out.js', 'creatures.js', 'sprites_tomb.js', 'teleport.js', 'magic.js', 'road.js', 'tomb.js', 'burrows.js', 'redsands.js', 'bluedunes.js', 'golden.js', 'dungeons.js', 'caravan.js', 'pyramid.js', 'terrain.js', 'khemetra_map.js', 'khemetra_art.js', 'khemetra_city.js', 'khemetra_data.js', 'khemetra_build.js', 'khemetra_people.js', 'khemetra_story.js', 'khemetra_quests.js', 'khemetra_main.js', 'khemetra_world.js', 'khemetra_crowd.js', 'dunes.js', 'logic.js', 'logic2.js', 'boot.js']
 BEGIN = '/*@@DESERT:BEGIN@@*/'
 END = '/*@@DESERT:END@@*/'
 ANCHOR = '/* ---------- boot ---------- */'

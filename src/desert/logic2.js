@@ -14,6 +14,7 @@ function freeNear(x,y,rad,count){
   return out;
 }
 function desertBump(nx,ny,g){
+  if(LEVEL===44&&g>=1000&&khBump(nx,ny,g))return true;
   if(TERR_BLOCK&&TERR_BLOCK[ny*MW+nx]){sfx('bump');msg('The mountainside is too steep to climb.','#d8c8a0');return true}
   { // the door in the side of a mound: walk into it
     const d=G.decor.find(q=>q.enter&&q.x===nx&&q.y===ny&&!q.found);
@@ -45,6 +46,7 @@ function springTrap(d){
   }
 }
 function desertStep(nx,ny){
+  if(LEVEL===266&&ny<=3&&nx<=5&&!G.flags.khSeaSeen){G.flags.khSeaSeen=1;startCut('khSea')}
   if(LEVEL===42){const d=G.decor.find(q=>q.trap&&!q.opened&&q.x===nx&&q.y===ny);if(d)springTrap(d)}
   if(LEVEL===42){const d=G.decor.find(q=>q.walk&&!q.block&&!q.stepLooted&&CONTAINERS.includes(q.k)&&q.x===nx&&q.y===ny);if(d){d.stepLooted=true;openLoot(d)}} // treasure and vases are walked through; stepping on one opens it once
 }
@@ -71,6 +73,7 @@ function desertLoot(d){
   return null;
 }
 function desertApplyState(){
+  if(LEVEL===44){khApplyState();return}
   if(LEVEL!==42)return;
   setSunDoor();
   for(const s of LEVEL42_DATA.secrets||[])if(G.flags['sec_'+s.id])G.grid[s.y][s.x]=0;

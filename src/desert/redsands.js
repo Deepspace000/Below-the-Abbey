@@ -76,6 +76,6 @@ function buildRedDunes(){
 const REDDUNES=buildRedDunes();
 const LEVEL43_DATA={rows:REDDUNES.rows,start:REDDUNES.start,enemies:REDDUNES.enemies,items:REDDUNES.items,decor:REDDUNES.decor,scenery:REDDUNES.scen,fmap:REDDUNES.fm,outdoor:true,day:.97,floor:'redsand',
   floorSet:['redsand','redsand2','redpath','sandpath'],ceil:'cloud',noExtras:true,name:'The Red Dunes',label:'Red Dunes',diff:16,
-  portals:[{to:42,x:48,y:2,f:2,tex:'sutdoor'},{to:44,x:0,y:0,f:0,tex:'citygate',req:'cityOpen',lock:'The great gates of Khemetra are shut, barred with beams of cedar as thick as a man. Beyond them the city waits. (The journey on from here comes in a later chapter.)'}]};
+  portals:[{to:42,x:48,y:2,f:2,tex:'sutdoor'},{to:44,x:200,y:391,f:0,tex:'citygate'}]};
 LEVELS[43]=LEVEL43_DATA;
 LEVEL42_DATA.portals[1]={to:43,x:REDDUNES.cxS,y:REDDUNES.start.y,f:0,tex:'sutdoor'};

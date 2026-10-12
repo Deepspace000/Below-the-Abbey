@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.81';
+const VERSION='2.83';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1690,7 +1690,7 @@ function hurtEnemy(e,dmg){
     if(def.kind==='bandit'&&Math.random()<.3){const f=foodFor(Math.random());if(bagAdd(mkItem(f)))msg(`You find a ${ITEMDEF[f].n} on the body.`,'#9ae0a0')}
     if(e.t==='gandrick'){G.flags.gandrickDead=1;G.flags.ledger=1;later(900,()=>startCut('gandrickDead'))}
     giveXP(xpGain);if(def.dropMagic)dropMagic(e,def);
-    {const F=G.flags;if(def.kind==='wolf')F.wolfKills=(F.wolfKills||0)+1;if(def.kind==='bandit')F.bandKills=(F.bandKills||0)+1;if(e.t==='rat'||e.t==='bat')F.ratKills=(F.ratKills||0)+1;if(e.t==='ghost')F.ghostKills=(F.ghostKills||0)+1;if(LEVEL===18)F.mineKills=(F.mineKills||0)+1;if(LEVEL===20&&e.t==='ghost')F.graveKills=(F.graveKills||0)+1;if(e.t==='overseer')F.overseerDead=1;
+    {const F=G.flags;F['k_'+e.t]=(F['k_'+e.t]||0)+1;if(e.t==='skel'||e.t==='dskeleton')F.k_skel=(F.k_skel||0)+1;if(e.t==='scorpion'||e.t==='cobra')F.k_scorp=(F.k_scorp||0)+1;if(def.kind==='wolf')F.wolfKills=(F.wolfKills||0)+1;if(def.kind==='bandit')F.bandKills=(F.bandKills||0)+1;if(e.t==='rat'||e.t==='bat')F.ratKills=(F.ratKills||0)+1;if(e.t==='ghost')F.ghostKills=(F.ghostKills||0)+1;if(LEVEL===18)F.mineKills=(F.mineKills||0)+1;if(LEVEL===20&&e.t==='ghost')F.graveKills=(F.graveKills||0)+1;if(e.t==='overseer')F.overseerDead=1;
     if(e.t==='halbrecht'){F.halDown=1;later(900,()=>startCut('halDown',halEnd))}
     if(e.t==='sut')later(1100,()=>sutDefeated());
     if(e.t==='wraith'){F.wraithDead=1;msg('The wraith shrieks and falls to mist. The seal on the tomb chest breaks.','#b8d8f0')}
@@ -2173,7 +2173,7 @@ function doMove(rel){ // rel: 0 forward, 1 right, 2 back, 3 left
   }
   if(g===8){sfx('locked');msg('The crypt door has sealed behind you.','#d09a80');return}
   if(g>=15&&g<=19){sfx('locked');const ms=DOOR_MSGS[g];msg(ms[(hash2(nx,ny,3)*ms.length)|0],'#d09a80');return}
-  if(g>=200){sfx('locked');msg(TILE_MSG[g]||'It is locked.','#d09a80');return}
+  if(g>=200&&g<1000){sfx('locked');msg(TILE_MSG[g]||'It is locked.','#d09a80');return}
   if(g>=30&&g<100){usePortal(g-30);return}
   if(g===0){const dc=G.decor.find(d=>d.loot&&d.x===nx&&d.y===ny);if(dc){openLoot(dc);return}
     const nd=G.decor.find(d=>d.npc&&!d.walk&&!d.found&&d.x===nx&&d.y===ny);if(nd){startTalk(nd);return}}
@@ -2404,8 +2404,8 @@ function render3D(){
   const nl=nearL,nn=nl.length,nr=nearR,nrn=nr.length;
   const D=vimg.data;
   const day=G.day||0,lbm=Math.max(day,G.amb||0),fd=G.fl||(day?GRASSD:FLOORD),cd=G.cl||(day?SKYD:CEILD);
-  const desertLv=LEVEL===41||LEVEL===43||LEVEL>=60&&LEVEL<=64,dsBio=LEVEL===41?clamp(rdBiome(G.C.x|0,G.C.y|0)*1.3,0,1):1,mix3=(a,b)=>[a[0]+(b[0]-a[0])*dsBio,a[1]+(b[1]-a[1])*dsBio,a[2]+(b[2]-a[2])*dsBio];
-  const skyLv=LEVEL===22,lushLv=LEVEL===32||LEVEL===33,grimLv=GRIM_L(),rainLv=LEVEL===10,mossLv=LEVEL===39,hzr0=desertLv?(LEVEL===64?[236,224,196]:LEVEL===63?[238,242,250]:LEVEL===62?[226,204,242]:LEVEL===61?[244,226,172]:LEVEL===60?[196,214,240]:LEVEL===43?[238,200,166]:mix3([170,200,160],[242,226,190])):skyLv?[176,192,216]:rainLv?[58,72,82]:mossLv?[70,104,70]:grimLv?[30,46,32]:lushLv?[170,200,160]:day?[132,146,132]:[86,76,62],hzc0=desertLv?(LEVEL===64?[216,198,160]:LEVEL===63?[214,226,244]:LEVEL===62?[196,160,222]:LEVEL===61?[232,200,128]:LEVEL===60?[172,196,232]:LEVEL===43?[218,172,136]:mix3([140,176,130],[228,210,168])):mossLv?[48,76,50]:rainLv?[48,60,70]:grimLv?[26,40,28]:lushLv?[140,176,130]:skyLv?[150,172,208]:day?[110,124,112]:[69,61,50],hzmax0=desertLv?.5+.22*dsBio:skyLv?(.42-.26*ALTN):mossLv?.34:lushLv?.34:grimLv?.36:rainLv?.34:day?.55:.32,hzrate0=desertLv?.03:skyLv?.05:mossLv?.05:lushLv?.04:grimLv?.034:rainLv?.036:day?.07:.042;
+  const desertLv=LEVEL===41||LEVEL===43||LEVEL===44||LEVEL>=60&&LEVEL<=64,dsBio=LEVEL===41?clamp(rdBiome(G.C.x|0,G.C.y|0)*1.3,0,1):1,mix3=(a,b)=>[a[0]+(b[0]-a[0])*dsBio,a[1]+(b[1]-a[1])*dsBio,a[2]+(b[2]-a[2])*dsBio];
+  const skyLv=LEVEL===22,lushLv=LEVEL===32||LEVEL===33,grimLv=GRIM_L(),rainLv=LEVEL===10,mossLv=LEVEL===39,hzr0=desertLv?(LEVEL===64?[236,224,196]:LEVEL===63?[238,242,250]:LEVEL===62?[226,204,242]:LEVEL===61?[244,226,172]:LEVEL===60?[196,214,240]:LEVEL===43?[238,200,166]:mix3([170,200,160],[242,226,190])):skyLv?[176,192,216]:rainLv?[58,72,82]:mossLv?[70,104,70]:grimLv?[30,46,32]:lushLv?[170,200,160]:day?[132,146,132]:[86,76,62],hzc0=desertLv?(LEVEL===64?[216,198,160]:LEVEL===63?[214,226,244]:LEVEL===62?[196,160,222]:LEVEL===61?[232,200,128]:LEVEL===60?[172,196,232]:LEVEL===43?[218,172,136]:mix3([140,176,130],[228,210,168])):mossLv?[48,76,50]:rainLv?[48,60,70]:grimLv?[26,40,28]:lushLv?[140,176,130]:skyLv?[150,172,208]:day?[110,124,112]:[69,61,50],hzmax0=desertLv?(LEVEL===44?.36:.5+.22*dsBio):skyLv?(.42-.26*ALTN):mossLv?.34:lushLv?.34:grimLv?.36:rainLv?.34:day?.55:.32,hzrate0=desertLv?(LEVEL===44?.02:.03):skyLv?.05:mossLv?.05:lushLv?.04:grimLv?.034:rainLv?.036:day?.07:.042;
   // the desert sky follows the clock; a sandstorm thickens the air and tints it
   const SK=desertLv?skyTod((G.clock%1440)/60):null,ST=desertLv?STORM.a:0,stm=(v,c)=>v+(c-v)*ST;
   const stormC=SK?[206*Math.min(1,SK.k[0]*1.1+.05),166*Math.min(1,SK.k[1]*1.1+.05),112*Math.min(1,SK.k[2]*1.1+.05)]:null;
@@ -2569,7 +2569,7 @@ function vividImg(k,d){ // each person is one colour, head to foot, a different 
   x.putImageData(id2,0,0);return VIVID_CACHE[id]=c;
 }
 const SIGN_CACHE={};
-const BURNABLE=/^[gp]?tree\d/,NOSHADOW=/^[glp]?tree\d/,SKYLINE=/^(abbeyspire|dcity)$/; // skyline sprites stand behind a wall and only the part above it shows // dead trees can be burned; no tree casts a round shadow
+const BURNABLE=/^[gp]?tree\d/,NOSHADOW=/^[glp]?tree\d/,SKYLINE=/^(abbeyspire|dcity|kroof)$/; // skyline sprites stand behind a wall and only the part above it shows // dead trees can be burned; no tree casts a round shadow
 function shopSign(d){
   const key=(d.x*31+d.y)%2,id=key+'|'+d.txt.join('|');if(SIGN_CACHE[id])return SIGN_CACHE[id];
   const base=IMG['signb'+key];if(!base)return IMG[d.k];
@@ -2606,10 +2606,10 @@ function spriteList(){
 }
 let SC=ctx; // sprites are painted straight onto the full-size screen, not into the small 3D picture, so they stay sharp
 function drawSprites(cx,cy,dX,dY,pX,pY){
-  const inv=-1/PL,list=spriteList(),proj=[],far=(G.day||0)>0?34:20,far2=far*far,farT=(G.day||0)>0?33:16; // outdoors the trees stay drawn as far as the walls can be seen
+  const inv=-1/PL,list=spriteList().concat(LEVEL===44&&LEVELS[44].sky?khSkyList(cx,cy,dX,dY):[]),proj=[],far=(G.day||0)>0?34:20,far2=far*far,farT=(G.day||0)>0?33:16; // outdoors the trees stay drawn as far as the walls can be seen
   for(const s of list){
     const rx=s.x-cx,ry=s.y-cy;
-    if(rx*rx+ry*ry>far2)continue;
+    if(rx*rx+ry*ry>(s.sky?60000:far2))continue;
     if(s.decor&&s.img&&(G.day||0)>0&&!SKYLINE.test(s.decor.k)){const hh=s.w*s.img.height/s.img.width,mh=CEILH-.12;if(hh>mh)s.w*=mh/hh} // nothing grows through the sky
     const tX=inv*(dY*rx-dX*ry),tY=inv*(-pY*rx+pX*ry);
     if(tY<.25)continue;
@@ -2629,7 +2629,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     const bottom=HH+(TERR_NOW?CAMZ-(s.decor&&!s.e?terrFoot(s,cx,cy):terrH(s.x,s.y)):EYE)*F/ty-(s.bob||0)*F/ty+(s.sink||0)*sh*.25+(s.drop||0)*sh+(TERR_NOW&&s.decor&&!s.e?sh*.06:0);
     const left=scrX-sw/2,top=bottom-sh;
     if(s.e){s.e.sx=scrX;s.e.sy=top+sh*.45}
-    {const xa=Math.max(0,Math.floor(left)),xb=Math.min(VW-1,Math.ceil(left+sw));if(xb<xa||ty>farT)continue;let any=s.decor&&SKYLINE.test(s.decor.k);for(let xx=xa;xx<=xb&&!any;xx+=2)if(zbuf[xx]>ty){any=true;break}if(!any)continue} // skip hidden sprites
+    {const xa=Math.max(0,Math.floor(left)),xb=Math.min(VW-1,Math.ceil(left+sw));if(xb<xa||ty>(s.sky?400:farT))continue;let any=s.decor&&SKYLINE.test(s.decor.k);for(let xx=xa;xx<=xb&&!any;xx+=2)if(zbuf[xx]>ty){any=true;break}if(!any)continue} // skip hidden sprites
     let anyVis=false;
     if(!TERR_NOW&&!s.hang&&!(s.decor&&(NOSHADOW.test(s.decor.k)||SKYLINE.test(s.decor.k)||/^pgrass|^pflw/.test(s.decor.k)))&&!(s.e&&ENEMY_DEF[s.e.t].fly)){SC.save();const tr=s.decor&&NOSHADOW.test(s.decor.k);SC.globalAlpha=(s.fade!==undefined?Math.max(0,Math.min(1,s.fade)):1)*(tr?.5:.36);SC.fillStyle='#000';SC.beginPath();SC.ellipse(scrX,bottom,sw*(tr?.24:.34),Math.max(1.2,sw*(tr?.06:.055)),0,0,TAU);SC.fill();SC.restore()}
     // lighting
@@ -2663,10 +2663,15 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     if(s.fade!==undefined&&s.fade<1){SC.globalAlpha=Math.max(0,s.fade)}
     if(s.decor&&SKYLINE.test(s.decor.k)){ // the tower, or the far city, rises behind a wall: draw only what stands above the nearest wall
       const xa=Math.max(0,Math.floor(left)),xb=Math.min(VW-1,Math.ceil(left+sw)),ku=tw/sw;
+      let rs=-1,rc=0;
+      const flushRun=(xe)=>{if(rs<0)return;const u0=Math.max(0,(rs-left)*ku),uw=Math.max(.5,(xe-rs)*ku);SC.drawImage(SRC,u0,0,Math.min(uw,tw-u0),th*(rc-top)/sh,rs,top,xe-rs,rc-top);rs=-1};
       for(let xx=xa;xx<=xb;xx++){
-        const cut=zbuf[xx]>ty?bottom:Math.min(bottom,wtop[xx]);if(cut<=top)continue;
-        SC.drawImage(SRC,Math.max(0,(xx-left)*ku),0,Math.max(.5,ku),th*(cut-top)/sh,xx,top,1,cut-top);
+        const cut=zbuf[xx]>ty?bottom:Math.min(bottom,wtop[xx]);
+        if(cut<=top){flushRun(xx);continue}
+        if(rs>=0&&Math.abs(cut-rc)>.8)flushRun(xx);
+        if(rs<0){rs=xx;rc=cut}
       }
+      flushRun(xb+1);
       SC.globalAlpha=1;continue;
     }
     let x0=Math.max(0,Math.floor(left)),x1=Math.min(VW,Math.ceil(left+sw));
@@ -3354,9 +3359,9 @@ function jumpFromUrl(){
   const F=G.flags,sq=T=>q.get('at')==='square'?{x:25,y:T.gate_y,f:1}:{x:T.start.x,y:T.start.y,f:1}; // &at=square lands in the middle of the town
   if(town==='abbey'||town==='thornwood'){F.townSeen=0;delete F.abbeyIntroSeen;G.bossDead=true;goToLevel(2);G.state='play';G.menu=false;return}
   F.townSeen=1;F.abbeyIntroSeen=1;F.gwoodSeen=1;
-  const AREAS={bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
+  const AREAS={bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],khemetracity:[44,200,391,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
   if(!AREAS[town]&&town.length>=4){const m=Object.keys(AREAS).filter(k=>k.startsWith(town)||town.startsWith(k));if(m.length===1)town=m[0]} // near-misses like whitedune find the right area
-  if(AREAS[town]&&town!=='thornwood'){const [lv,ax,ay,af]=AREAS[town];F.gandrickDead=1;F.northGate=1;F.mayorKilled=1;F.mayorDown=1;F.ironRoad=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};goToLevel(lv,{x:ax,y:ay,f:af});G.state='play';G.menu=false;return}
+  if(AREAS[town]&&town!=='thornwood'){const [lv,ax,ay,af]=AREAS[town];F.gandrickDead=1;F.northGate=1;F.mayorKilled=1;F.mayorDown=1;F.ironRoad=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};if(lv===44&&LEVELS[44].stub){khEnter(()=>{goToLevel(lv,{x:ax,y:ay,f:af});G.state='play';G.menu=false});return}goToLevel(lv,{x:ax,y:ay,f:af});G.state='play';G.menu=false;return}
   if(town==='greendale'||town==='anaea'){F.passDone=1;F.passSeen=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};goToLevel(town==='anaea'?33:32,town==='anaea'?sq(ANAEAJ):{x:2,y:36,f:1});G.state='play';G.menu=false;return}
   if(town==='ironhill'){F.gandrickDead=1;F.northGate=1;F.mayorDown=1;F.mayorKilled=1;F.ironRoad=1;F.finale=1;F.halbrecht=1;F.roadSeen=1;F.tunnelSeen=1;
     for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};
@@ -3845,6 +3850,7 @@ function gotoList(){
   return out;
 }
 function jumpToLevel(n,target){
+  if(n===44&&LEVELS[44].stub){khEnter(()=>jumpToLevel(n,target));return}
   audioInit();backupAuto();
   const sv=readSave('auto')||readSave('prev');
   if(sv){restore(sv)}
@@ -4529,6 +4535,8 @@ function goToLevel(n,entry){
   else if(n===33&&!G.flags.anaeaSeen){G.flags.anaeaSeen=1;startCut('anaeaArrive')}
   else if(n===41&&!G.flags.sandRoadSeen){G.flags.sandRoadSeen=1;startCut('sandRoad')}
   else if(n===42&&!G.flags.tombSeen){G.flags.tombSeen=1;startCut('tombEnter')}
+  else if(n===44&&!G.flags.khemetraSeen){G.flags.khemetraSeen=1;startCut('khArrive')}
+  else if(n===266&&!G.flags.khTunnelSeen){G.flags.khTunnelSeen=1;startCut('khTunnel')}
   else if(n===7&&!G.flags.gwoodSeen){G.flags.gwoodSeen=1;startCut('gwood')}
   else if(n===10&&!G.flags.roadSeen){G.flags.roadSeen=1;startCut('road')}
   else if(n===11&&!G.flags.tunnelSeen){G.flags.tunnelSeen=1;startCut('tunnel')}
@@ -4538,6 +4546,7 @@ function goToLevel(n,entry){
 }
 function usePortal(i){
   const p=G.portals[i];if(!p)return;
+  if(p.to===44&&!(LEVELS[44]&&!LEVELS[44].stub)){khEnter(()=>{sfx('door');goToLevel(44,{x:p.x,y:p.y,f:p.f})});return}
   if(p.req&&!G.flags[p.req]){sfx('locked');msg(p.lock||'It will not open.','#d09a80');return}
   sfx('door');goToLevel(p.to,{x:p.x,y:p.y,f:p.f});
 }
@@ -5600,7 +5609,7 @@ Object.assign(NPCS,{prismwiz:{name:'Orrin, the colour wizard',img:'prismwiz',roo
 function startTalk(d){
   if(d.goat){foundGoat(d);return}
   const n=NPCS[d.npc];if(!n)return;
-  G.talk={d,n,node:n.root(d),t:G.time,btns:[]};G.hold=null;G.queued=null;
+  G.talk={d,n:d.kname?Object.assign({},n,{name:d.kname}):n,node:n.root(d),t:G.time,btns:[]};G.hold=null;G.queued=null;
 }
 function talkBtn(id){
   const T=G.talk;if(!T)return;
@@ -6213,7 +6222,7 @@ function update(dt){
   try{areaAudio();huntTick()}catch(e){}
   burnTick(dt);
   G.time+=dt;try{if(G.pharFlash>0)G.pharFlash-=dt;stormTick(dt);birdTick(dt);caravanTick(dt);if(G.flags)(G.flags.lvSeen=G.flags.lvSeen||{})[LEVEL]=1}catch(e){}
-  if(G.dayBase>0){const hr=(G.clock%1440)/60,dsl=LEVEL===43||(LEVEL>=60&&LEVEL<=64)||LEVEL===41;G.day=Math.max(.16,G.dayBase*clamp(.66+.5*Math.cos((hr-12)/24*TAU),dsl?.3:G.hasLamps?.2:.5,1))}
+  if(G.dayBase>0){const hr=(G.clock%1440)/60,dsl=LEVEL===43||LEVEL===44||(LEVEL>=60&&LEVEL<=64)||LEVEL===41;G.day=Math.max(.16,G.dayBase*clamp(.66+.5*Math.cos((hr-12)/24*TAU),dsl?.3:G.hasLamps?.2:.5,1))}
   // timers
   if(!G.cut)for(let i=0;i<G.timers.length;){const t=G.timers[i];if(G.time>=t.t){G.timers.splice(i,1);t.fn()}else i++}
   // camera easing
@@ -7790,7 +7799,7 @@ function buildRedDunes(){
 const REDDUNES=buildRedDunes();
 const LEVEL43_DATA={rows:REDDUNES.rows,start:REDDUNES.start,enemies:REDDUNES.enemies,items:REDDUNES.items,decor:REDDUNES.decor,scenery:REDDUNES.scen,fmap:REDDUNES.fm,outdoor:true,day:.97,floor:'redsand',
   floorSet:['redsand','redsand2','redpath','sandpath'],ceil:'cloud',noExtras:true,name:'The Red Dunes',label:'Red Dunes',diff:16,
-  portals:[{to:42,x:48,y:2,f:2,tex:'sutdoor'},{to:44,x:0,y:0,f:0,tex:'citygate',req:'cityOpen',lock:'The great gates of Khemetra are shut, barred with beams of cedar as thick as a man. Beyond them the city waits. (The journey on from here comes in a later chapter.)'}]};
+  portals:[{to:42,x:48,y:2,f:2,tex:'sutdoor'},{to:44,x:200,y:391,f:0,tex:'citygate'}]};
 LEVELS[43]=LEVEL43_DATA;
 LEVEL42_DATA.portals[1]={to:43,x:REDDUNES.cxS,y:REDDUNES.start.y,f:0,tex:'sutdoor'};
 
@@ -8501,6 +8510,1147 @@ function terrMarch(x,rX,rY,tmax){
   for(let k=lastK+1;k<YBK;k++)YB[base+k]=yv;
 }
 
+/* ---- src/desert/khemetra_map.js ---- */
+/* ==========================================================================
+   KHEMETRA, THE GOLDEN CITY (level 44): the map. A vast walled city, 400 by 400, of white and gold houses.
+   This file only lays out streets, blocks, plazas and the face of every building; the pictures come from
+   khemetra_art.js and the people, shops and quests from khemetra_data.js.
+   ========================================================================== */
+const KH={W:400,H:400,WALL:5,CX:200,CY:200,GATE_X:200};
+const KH_FLOOR={sand:'0',herring:'1',gold:'2',market:'3',lawn:'4',mosaic:'5'};
+function khRng(seed){let s=seed>>>0;return ()=>{s=(Math.imul(s,1664525)+1013904223)>>>0;return s/4294967296}}
+/* pools of facade pictures by kind. Each entry is {f: name, n: cells wide, wh: wall height}. khemetra_art.js fills this in from the
+   pictures; before that a plain stand-in is used so the map can still be built and checked. */
+let KH_POOLS=null;
+function khStandIn(){
+  const mk=(p,k,n,wh)=>{const a=[];for(let i=0;i<k;i++)a.push({f:p+i,n,wh});return a};
+  return {house:mk('h',12,2,2),mansion:mk('m',6,3,3),low:mk('l',12,2,1.3),shop:{potion:mk('sp',2,2,1.8),scroll:mk('ss',2,2,1.8),food:mk('sf',2,2,1.8),spice:mk('sx',2,2,1.8),weapon:mk('sw',2,2,1.8),cloth:mk('sc',2,2,1.8),
+    inn:mk('in',3,3,2.2),ship:mk('sh',1,3,2.2),quest:mk('qh',1,3,2.2),work:mk('wk',1,3,2.2),map:mk('mp',1,3,2.2)},temple:mk('t',4,3,3),pray:mk('p',6,2,1.6),bath:mk('b',4,3,2),ruin:mk('r',6,2,1.8),palace:mk('pa',4,3,3.4),castle:mk('c',4,4,3.4),
+    roofs:[],towers:[]};
+}
+function khBuild(seed){
+  const P=KH_POOLS||(KH_POOLS=khStandIn());
+  const W=KH.W,H=KH.H,B=KH.WALL,rng=khRng(seed||4321);
+  const idx=(x,y)=>y*W+x;
+  const solid=new Uint8Array(W*H);        // 1 = a building or wall, 0 = open ground
+  const fl=new Uint8Array(W*H);           // floor kind
+  const zone=new Uint8Array(W*H);         // 0 street, 1 market, 2 garden, 3 plaza, 4 temple court, 5 bath court, 6 palace court
+  const R=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)f(x,y)};
+  // ---- the castle wall round everything ----
+  R(0,0,W-1,H-1,(x,y)=>{if(x<B||y<B||x>=W-B||y>=H-B)solid[idx(x,y)]=1});
+  // ---- the grid of blocks: streets of every width, blocks of every size ----
+  const cuts=(lo,hi)=>{const out=[];let p=lo;while(p<hi){const bw=12+Math.floor(rng()*15),sw=[2,3,3,3,4,4,5][Math.floor(rng()*7)];if(p+bw+sw>hi-9){out.push([p,hi]);break}out.push([p,p+bw-1]);p+=bw+sw}return out};
+  const xb=cuts(B+1,W-B-2),yb=cuts(B+1,H-B-2);
+  const blocks=[];
+  for(let j=0;j<yb.length;j++)for(let i=0;i<xb.length;i++)blocks.push({i,j,x0:xb[i][0],x1:xb[i][1],y0:yb[j][0],y1:yb[j][1]});
+  for(const b of blocks){R(b.x0,b.y0,b.x1,b.y1,(x,y)=>{solid[idx(x,y)]=1})}
+  // some neighbours merge into one great block, others split by a narrow lane
+  for(const b of blocks){
+    const r=rng();
+    if(r<.10&&b.i+1<xb.length){const n=blocks.find(q=>q.i===b.i+1&&q.j===b.j);if(n)R(b.x1+1,b.y0+2,n.x0-1,b.y1-2,(x,y)=>{solid[idx(x,y)]=1})}
+    else if(r<.18&&b.j+1<yb.length){const n=blocks.find(q=>q.i===b.i&&q.j===b.j+1);if(n)R(b.x0+2,b.y1+1,b.x1-2,n.y0-1,(x,y)=>{solid[idx(x,y)]=1})}
+  }
+  // lanes: a narrow dead-end alley bitten into the bigger blocks
+  for(const b of blocks){
+    const w=b.x1-b.x0+1,h=b.y1-b.y0+1;if(w<16||h<16||rng()<.35)continue;
+    if(rng()<.5){const x=b.x0+4+Math.floor(rng()*(w-8)),len=6+Math.floor(rng()*(h>>1)),top=rng()<.5;R(x,top?b.y0:b.y1-len+1,x+1,top?b.y0+len-1:b.y1,(xx,yy)=>{solid[idx(xx,yy)]=0})}
+    else{const y=b.y0+4+Math.floor(rng()*(h-8)),len=6+Math.floor(rng()*(w>>1)),left=rng()<.5;R(left?b.x0:b.x1-len+1,y,left?b.x0+len-1:b.x1,y+1,(xx,yy)=>{solid[idx(xx,yy)]=0})}
+  }
+  // ---- the great avenues: the south gate to the palace, the ring road, the cross roads ----
+  const open=(x0,y0,x1,y1,z,f)=>R(x0,y0,x1,y1,(x,y)=>{if(x<B||y<B||x>=W-B||y>=H-B)return;solid[idx(x,y)]=0;if(z!==undefined){zone[idx(x,y)]=z}if(f!==undefined)fl[idx(x,y)]=f});
+  open(KH.CX-4,246,KH.CX+4,H-B-1,0,1);                 // the avenue from the gate (nine wide)
+  open(KH.CX-3,B,KH.CX+3,150,0,1);                     // the avenue behind the palace
+  open(B,KH.CY-3,150,KH.CY+3,0,1);open(250,KH.CY-3,W-B-1,KH.CY+3,0,1); // east and west cross roads
+  open(150,152,250,157,0,1);open(150,243,250,248,0,1); // the ring road round the palace
+  open(145,152,150,248,0,1);open(250,152,255,248,0,1);
+  // ---- the palace and its court ----
+  const PAL={x0:160,y0:162,x1:240,y1:238};
+  open(PAL.x0-1,PAL.y0-1,PAL.x1+1,PAL.y1+1,6,2);
+  R(PAL.x0,PAL.y0,PAL.x1,PAL.y1,(x,y)=>{if(x<PAL.x0+2||x>PAL.x1-2||y<PAL.y0+2||y>PAL.y1-2)solid[idx(x,y)]=1;else{solid[idx(x,y)]=0;zone[idx(x,y)]=6;fl[idx(x,y)]=KH_FLOOR.gold.charCodeAt(0)-48}});
+  open(KH.CX-3,PAL.y1-1,KH.CX+3,PAL.y1+1,6,2);          // the gate through the palace wall
+  const PB={x0:176,y0:176,x1:224,y1:204};                // the palace itself
+  R(PB.x0,PB.y0,PB.x1,PB.y1,(x,y)=>{solid[idx(x,y)]=1});
+  // ---- plazas: markets, gardens, courts ----
+  const plazas=[];
+  const plaza=(name,cx,cy,w,h,z,f)=>{const x0=cx-(w>>1),y0=cy-(h>>1);open(x0,y0,x0+w-1,y0+h-1,z,f);plazas.push({name,x0,y0,x1:x0+w-1,y1:y0+h-1,z,f})};
+  plaza('The Spice Market',112,300,34,26,1,3);plaza('The Cloth Market',288,300,34,26,1,3);plaza('The Grand Bazaar',200,320,30,22,1,3);
+  plaza('The Potters Market',108,110,26,22,1,3);plaza('The Fruit Market',292,110,26,22,1,3);
+  plaza('The Fountain Garden',100,200,24,20,2,4);plaza('The Palm Garden',300,200,24,20,2,4);plaza('The Moon Garden',200,100,22,16,2,4);
+  plaza('The Temple Court',330,60,28,22,4,2);plaza('The Court of Baths',330,340,26,20,5,5);plaza('The Weavers Square',60,330,22,18,3,1);plaza('The Old Square',60,60,24,20,3,0);
+  // ---- floors: worn cobbles everywhere, painted tile in the squares and where streets cross ----
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const i=idx(x,y);if(solid[i]||fl[i])continue;
+    const z=zone[i];
+    if(z===1)fl[i]=3;else if(z===2)fl[i]=4;else if(z===4)fl[i]=2;else if(z===5)fl[i]=5;else if(z===6)fl[i]=2;
+    else{
+      let all=true;for(let dy=-2;dy<=2&&all;dy++)for(let dx=-2;dx<=2;dx++){const xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=W||yy>=H||solid[idx(xx,yy)]){all=false;break}}
+      fl[i]=all?2:(((x>>3)*7+(y>>3)*13+((x*y)>>9))%5===0?1:0);
+    }
+  }
+  // ---- districts decide what kind of face a building shows ----
+  const dist=(x,y)=>Math.hypot(x-KH.CX,y-KH.CY);
+  const kindAt=(x,y,face)=>{ // which pool a facade at this spot is taken from
+    const d=dist(x,y);
+    // facing a market: shop fronts
+    for(const p of plazas)if(p.z===1&&x>=p.x0-3&&x<=p.x1+3&&y>=p.y0-3&&y<=p.y1+3)return 'shop';
+    for(const p of plazas)if(p.z===4&&x>=p.x0-4&&x<=p.x1+4&&y>=p.y0-4&&y<=p.y1+4)return rng()<.55?'temple':'pray';
+    for(const p of plazas)if(p.z===5&&x>=p.x0-4&&x<=p.x1+4&&y>=p.y0-4&&y<=p.y1+4)return 'bath';
+    if(x<125&&y<125&&rng()<.7)return 'ruin';
+    if(x<60||x>340)return rng()<.2?'ruin':'low';
+    if(d<95)return rng()<.7?'mansion':'house';
+    const r=rng();
+    return r<.5?'house':r<.75?'low':r<.85?'shop':r<.92?'pray':'mansion';
+  };
+  // ---- every exposed wall cell gets a slot: (facade, slice) ----
+  const slotOf=new Int32Array(W*H).fill(-1);   // index into modules, or -2 for hidden cells
+  const modules=[];                              // {f,n,wh,kind,cells:[[x,y]...],face}
+  const DIRS=[[0,-1],[0,1],[-1,0],[1,0]];        // faces: north, south, west, east
+  const isOpen=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&!solid[idx(x,y)];
+  const flat=k=>k==='shop'?[].concat(...Object.values(P.shop)):(P[k]||P.house);
+  const pickFromPool=(kind,face)=>{
+    let pool=null;
+    if(kind==='shop'){const ks=Object.keys(P.shop);pool=P.shop[ks[Math.floor(rng()*ks.length)]]}
+    else pool=P[kind];
+    if(!pool||!pool.length)pool=P.house;
+    return pool[Math.floor(rng()*pool.length)];
+  };
+  for(let d=0;d<4;d++){
+    const [dx,dy]=DIRS[d],horiz=d<2;
+    const L=horiz?W:H,M=horiz?H:W;
+    for(let a=0;a<M;a++){
+      let run=[];
+      const flush=()=>{
+        if(!run.length)return;
+        let p=0;
+        while(p<run.length){
+          const [x,y]=run[p];
+          const wallZone=(x<B+1||y<B+1||x>=W-B-1||y>=H-B-1);
+          const inPalace=(x>=PAL.x0-1&&x<=PAL.x1+1&&y>=PAL.y0-1&&y<=PAL.y1+1);
+          const kind=wallZone?'castle':inPalace?'palace':kindAt(x,y,d);
+          let f=pickFromPool(kind,d);
+          let n=Math.min(f.n,run.length-p);
+          if(n<f.n){const alt=flat(kind).filter(q=>q.n<=run.length-p);f=alt.length?alt[Math.floor(rng()*alt.length)]:{f:'plain',n:1,wh:f.wh};n=Math.min(f.n,run.length-p)}
+          const m={f:f.f,n,wh:f.wh,kind,face:d,e:f,cells:run.slice(p,p+n)};
+          modules.push(m);const mi=modules.length-1;
+          for(const [cx,cy] of m.cells)slotOf[idx(cx,cy)]=mi;
+          p+=n;
+        }
+        run=[];
+      };
+      for(let b=0;b<L;b++){
+        const x=horiz?b:a,y=horiz?a:b,i=idx(x,y);
+        if(solid[i]&&slotOf[i]<0&&isOpen(x+dx,y+dy))run.push([x,y]);else flush();
+      }
+      flush();
+    }
+  }
+  // which open cells can be reached from the city gate at all
+  const reach=new Uint8Array(W*H),q=[idx(KH.CX,H-KH.WALL-4)];reach[q[0]]=1;
+  while(q.length){const c=q.pop(),x=c%W,y=(c/W)|0;for(const [dx,dy] of DIRS){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;const i=idx(nx,ny);if(solid[i]||reach[i])continue;reach[i]=1;q.push(i)}}
+  return {W,H,solid,fl,zone,slotOf,modules,plazas,PAL,PB,blocks,xb,yb,idx,rng,reach};
+}
+
+/* ---- src/desert/khemetra_art.js ---- */
+/* ==========================================================================
+   KHEMETRA: THE PICTURES. Every house front, rooftop, tower, stall and townsperson is a painted picture (assets/kh,
+   made with Gemini and cut by tools/ingest_kh.py). They are loaded the first time the city is needed. A house front
+   is cut into one slice per street cell, and houses come in one, two and three storeys.
+   ========================================================================== */
+let KH_MAN=null,KH_LOADING=null,KH_READY=false,KH_NEXT_GID=1000;
+const KH_DOOR={};   // door tile number -> where it leads
+function khLoadAssets(){
+  if(KH_LOADING)return KH_LOADING;
+  KH_LOADING=(async()=>{
+    try{KH_MAN=await (await fetch('assets/kh/manifest.json?v='+VERSION)).json()}catch(e){KH_MAN={}}
+    const names=Object.keys(KH_MAN);
+    await Promise.all(names.map(k=>loadImg('kh_'+k,'assets/kh/'+KH_MAN[k].file)));
+    KH_READY=true;
+  })();
+  return KH_LOADING;
+}
+const khImg=k=>IMG['kh_'+k];
+/* the strips of a facade picture that make up one, two or three storeys: [from, to] as fractions of the picture height */
+const KH_LV={1:[[0,.12],[.5,1]],2:[[0,1]],3:[[0,.12],[.12,.5],[.12,.5],[.5,1]]};
+function khFacadeEntry(key,n,lv,kindOf){
+  const m=KH_MAN[key];if(!m)return null;
+  const strips=KH_LV[lv]||KH_LV[2],hh=strips.reduce((a,s)=>a+(s[1]-s[0]),0),wh=Math.round(n*hh*m.h/m.w*20)/20;
+  return {f:key,n,wh,lv,strips};
+}
+function khBuildPools(){
+  const P={house:[],mansion:[],low:[],shop:{},temple:[],pray:[],bath:[],ruin:[],palace:[],palaceDoor:[],castle:[],roofs:[],towers:[]};
+  const piece=(sheet,k)=>sheet+'_'+k;
+  const has=key=>!!(KH_MAN&&KH_MAN[key]);
+  const add=(arr,key,n,lvs)=>{if(!has(key))return;for(const lv of lvs){const e=khFacadeEntry(key,n,lv);if(e)arr.push(e)}};
+  for(let k=0;k<6;k++){add(P.house,piece('fac1',k),2,[1,2,3]);add(P.house,piece('fac2',k),2,[1,2,3]);add(P.mansion,piece('fac3',k),2,[2,3]);add(P.low,piece('fac4',k),2,[1,1,2]);add(P.low,piece('fac5',k),2,[1,1,2]);add(P.pray,piece('pray1',k),2,[2]);add(P.ruin,piece('ruin1',k),2,[1,2])}
+  const SH1=['potion','scroll','food','spice','weapon','cloth'],SH2=['inn','inn2','ship','quest','work','map'];
+  P.shop={potion:[],scroll:[],food:[],spice:[],weapon:[],cloth:[],inn:[],inn2:[],ship:[],quest:[],work:[],map:[]};
+  SH1.forEach((s,k)=>add(P.shop[s],piece('shop1',k),2,[2]));SH2.forEach((s,k)=>add(P.shop[s],piece('shop2',k),2,[2]));
+  for(let k=0;k<4;k++){add(P.temple,piece('temple1',k),3,[2]);add(P.bath,piece('bath1',k),3,[2]);if(k===0||k===2)add(P.palace,piece('palace1',k),3,[2]);else add(P.palaceDoor,piece('palace1',k),3,[2])}
+  for(let k=0;k<4;k++)add(P.castle,piece('castle1',k),5,[2]);
+  for(const s of ['roof1','roof2'])for(let k=0;k<6;k++)if(has(piece(s,k)))P.roofs.push(piece(s,k));
+  for(const s of ['tow1','tow2'])for(let k=0;k<6;k++)if(has(piece(s,k)))P.towers.push(piece(s,k));
+  // when a kind has nothing painted yet, a neighbour stands in
+  for(const k of ['house','mansion','low','temple','pray','bath','ruin','palace','castle'])if(!P[k].length)P[k]=P.house.length?P.house:[{f:'plain',n:2,wh:1.6,lv:2,strips:[[0,1]]}];
+  for(const s of Object.keys(P.shop))if(!P.shop[s].length)P.shop[s]=P.house;
+  return P;
+}
+/* one picture, cut into n tiles of 128 by (128*wh): the walls of the city */
+const KH_TILE_CACHE={};
+function khTileSet(e){
+  const key=e.f+'|'+e.n+'|'+e.lv;if(KH_TILE_CACHE[key])return KH_TILE_CACHE[key];
+  const im=khImg(e.f),W=128*e.n,Hp=Math.max(64,Math.round(128*e.wh));
+  const full=mkCanvas(W,Hp,(x,w,h)=>{
+    if(!im){x.fillStyle='#d8c8a0';x.fillRect(0,0,w,h);return}
+    const iw=im.width,ih=im.height,k=w/iw,tot=e.strips.reduce((a,s)=>a+(s[1]-s[0]),0)*ih*k;let y=0;
+    for(const s of e.strips){const sh=(s[1]-s[0])*ih,dh=sh*k*(h/tot);x.drawImage(im,0,s[0]*ih,iw,sh,0,y,w,dh+1);y+=dh}
+  });
+  const tiles=[];
+  for(let s=0;s<e.n;s++){
+    const c=mkCanvas(128,Hp,(x)=>{x.drawImage(full,s*128,0,128,Hp,0,0,128,Hp)});
+    const d=c.getContext('2d').getImageData(0,0,128,Hp).data,id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=e.wh;
+    const gid=KH_NEXT_GID++;T_TILE[gid]=id;tiles.push({gid,tex:id});
+  }
+  return KH_TILE_CACHE[key]=tiles;
+}
+/* floors: the painted paving sheets, cut into seamless squares */
+function khMakeFloors(){
+  const names=[];
+  const put=(n,key)=>{const im=khImg(key);if(!im)return false;FLOORS[n]=dsPaintedTex(im);names.push(n);return true};
+  // 0 cobbles, 1 slabs, 2 painted tile, 3 market cobbles, 4 lawn, 5 mosaic
+  const want=[['floor2_0','floor1_0'],['floor2_1','floor1_1'],['floor3_0','floor1_2'],['floor2_3','floor1_3'],['floor1_4'],['floor3_2','floor1_5']];
+  const base=['#c9b48a','#d4c09a','#c8b890','#b89c70','#6e8f4a','#7aa0b8'];
+  want.forEach((keys,i)=>{
+    if(keys.some(k=>put('kh'+i,k)))return;
+    const [c,x]=tcv();x.fillStyle=base[i];x.fillRect(0,0,TS,TS);
+    for(let k=0;k<70;k++){x.fillStyle='rgba('+(k%2?'255,245,220':'80,60,30')+',.18)';x.beginPath();x.ellipse(hash2(k,i,3)*TS,hash2(k,i,4)*TS,6+hash2(k,i,5)*10,5+hash2(k,i,6)*7,0,0,TAU);x.fill()}
+    FLOORS['kh'+i]=pix(c);names.push('kh'+i);
+  });
+  return names;
+}
+
+/* ---- src/desert/khemetra_city.js ---- */
+/* ==========================================================================
+   KHEMETRA: THE CITY. khPrepare() builds level 44 from the map (khemetra_map.js) and the pictures (khemetra_art.js):
+   wall tiles, doors, floors, the skyline of roofs, towers, palace and church, and then the buildings, people and
+   markets (khemetra_build.js, khemetra_crowd.js).
+   ========================================================================== */
+const KH_ROOFS_OK=['roof1_0','roof1_1','roof1_2','roof1_4','roof1_5','roof2_2','roof2_5','roof2_0','roof3_0','roof3_1','roof3_2','roof3_3','roof3_4','roof3_5'];
+LEVELS[44]={stub:true,rows:['.'],start:{x:0,y:0,f:0},enemies:[],items:[],decor:[],name:'Khemetra, the Golden City',label:'Khemetra',diff:16,outdoor:true,day:.98,ceil:'cloud',floor:'sand',portals:[]};
+let KH_CITY=null;
+const khHash=(a,b,c)=>hash2(a|0,b|0,c|0);
+const KH_CHARS={n:0,map:{},chars:{}};
+function khChar(gid){if(KH_CHARS.map[gid]!==undefined)return KH_CHARS.map[gid];const ch=String.fromCharCode(0x100+KH_CHARS.n++);KH_CHARS.map[gid]=ch;KH_CHARS.chars[ch]=gid;return ch}
+const KH_SEED_NUM=4321;
+/* the palace door: the middle of the palace front facing the court */
+function khPalaceDoor(C){
+  const P=KH_POOLS,cands=C.modules.filter(m=>m.kind==='palace'&&m.face===1&&m.cells.length===3&&m.cells.some(([x,y])=>y===C.PB.y1&&Math.abs(x-KH.CX)<=2));
+  const m=cands.sort((a,b)=>Math.abs(a.cells[1][0]-KH.CX)-Math.abs(b.cells[1][0]-KH.CX))[0];
+  if(!m)return null;
+  const pool=P.palaceDoor&&P.palaceDoor.length?P.palaceDoor:P.palace;
+  m.e=Object.assign({},pool[0],{n:3});m.wh=m.e.wh;
+  const mid=m.cells[1];m.doorCells=[mid];m.lvl=KH_PALACE;m.palace=true;
+  KH_PALACE_FRONT.x=mid[0];KH_PALACE_FRONT.y=mid[1]+1;
+  return m;
+}
+/* build the level the first time it is needed; returns when the pictures and the map are ready */
+async function khPrepare(){
+  if(KH_CITY)return KH_CITY;
+  await khLoadAssets();
+  KH_POOLS=khBuildPools();
+  for(const k in KH_PROPS){const p=KH_PROPS[k];if(IMG[p[0]])NPC_H[p[0]]=p[2]}
+  for(const k in KH_NPC_H)NPC_H[k]=KH_NPC_H[k];
+  const C=khBuild(KH_SEED_NUM);
+  const W=C.W,H=C.H,idx=C.idx,L=LEVELS[44];
+  const placed=khPlaceBuildings(C),pm=khPalaceDoor(C);
+  khBuildWorld(); // the palace, cisterns, study and sea tunnel rooms need the door positions above
+  khMakeDoorsAndRooms(C,L,placed);
+  if(pm){pm.at=LEVELS[KH_PALACE].start}
+  KH_CHARS.n=0;KH_CHARS.map={};KH_CHARS.chars={};
+  const rowCodes=new Array(H);for(let y=0;y<H;y++)rowCodes[y]=new Uint16Array(W);
+  const WALL_DEFAULT='#'.charCodeAt(0),DOT='.'.charCodeAt(0);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++)rowCodes[y][x]=C.solid[idx(x,y)]?WALL_DEFAULT:DOT;
+  const gateMod=C.modules.find(m=>m.kind==='castle'&&m.face===0&&m.cells.some(([x,y])=>x===KH.CX&&y===H-KH.WALL));
+  for(const m of C.modules){
+    const tiles=khTileSet(m.e),door=m.doorCells||(m===gateMod?m.cells:null);
+    m.cells.forEach(([x,y],i)=>{
+      let gid=tiles[Math.min(i,tiles.length-1)].gid;
+      if(door&&door.some(c=>c[0]===x&&c[1]===y)){const g2=KH_NEXT_GID++;T_TILE[g2]=T_TILE[gid];KH_DOOR[g2]=m===gateMod?{gate:true}:{lvl:m.lvl,at:m.at};gid=g2}
+      rowCodes[y][x]=khChar(gid).charCodeAt(0);
+    });
+  }
+  const rows=rowCodes.map(r=>{let s='';for(let i=0;i<r.length;i+=512)s+=String.fromCharCode.apply(null,r.subarray(i,i+512));return s});
+  const fmap=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=String.fromCharCode(48+C.fl[idx(x,y)]);fmap.push(s)}
+  Object.assign(L,{stub:false,rows,fmap,start:{x:KH.CX,y:H-KH.WALL-4,f:0},floor:'kh0',floor2:'kh1',floorSet:['kh0','kh1','kh2','kh3','kh4','kh5'],ceil:'cloud',chars:KH_CHARS.chars,noExtras:true,outdoor:true,day:.98,
+    name:'Khemetra, the Golden City',label:'Khemetra',diff:16,portals:[],enemies:[],items:[],decor:[],sky:[]});
+  khMakeFloors();
+  KH_CITY=C;C.L=L;
+  khSkyline(C,L);
+  khCrowd(C,L);
+  if(typeof AREA_STATS!=='undefined')delete AREA_STATS[44];
+  return C;
+}
+/* roofs, the palace, the church and tall towers rise over the walls */
+function khSkyline(C,L){
+  const W=C.W,H=C.H,idx=C.idx,rng=khRng(777),sky=L.sky,P=KH_POOLS;
+  const okRoofs=KH_ROOFS_OK.filter(k=>KH_MAN[k]);
+  const dirs=KH_DIRS;
+  let k=0;
+  for(const m of C.modules){
+    if(m.kind==='castle'||m.kind==='palace'||!okRoofs.length)continue;
+    if((k++&1)&&khHash(m.cells[0][0],m.cells[0][1],5)<.7)continue;
+    const cx=m.cells.reduce((a,c)=>a+c[0],0)/m.cells.length+.5,cy=m.cells.reduce((a,c)=>a+c[1],0)/m.cells.length+.5,d=dirs[m.face];
+    const key=okRoofs[(khHash(m.cells[0][0],m.cells[0][1],9)*okRoofs.length)|0],im=KH_MAN[key];
+    const w=m.n*.95*(m.kind==='temple'||m.kind==='bath'?1.2:1);
+    sky.push({x:cx-d[0]*1.6,y:cy-d[1]*1.6,k:'kh_'+key,w,z:m.wh-.02,h:w*im.h/im.w});
+  }
+  const pal=KH_MAN.palace_0;
+  if(pal){const w=54,hh=w*pal.h/pal.w;sky.push({x:KH.CX+.5,y:C.PB.y0+9,k:'kh_palace_0',w,z:2.2,h:hh,big:1})}
+  const ch=KH_MAN.church_0;
+  if(ch){const w=24,hh=w*ch.h/ch.w;sky.push({x:122.5,y:196.5,k:'kh_church_0',w,z:1.9,h:hh,big:1})}
+  const tw=P.towers;
+  if(tw.length){
+    for(let n=0;n<70;n++){
+      const x=12+((rng()*(W-24))|0),y=12+((rng()*(H-24))|0);
+      if(!C.solid[idx(x,y)])continue;
+      if(x>C.PAL.x0-8&&x<C.PAL.x1+8&&y>C.PAL.y0-8&&y<C.PAL.y1+8)continue;
+      const key=tw[(rng()*tw.length)|0],im=KH_MAN[key],hgt=6+rng()*9;
+      sky.push({x:x+.5,y:y+.5,k:'kh_'+key,w:hgt*im.w/im.h,z:0,h:hgt,big:1});
+    }
+  }
+  L.skyN=sky.length;
+}
+
+/* ---- src/desert/khemetra_data.js ---- */
+/* ==========================================================================
+   KHEMETRA: how the engine meets the city (skyline drawing, doors, entering). The people, shops and quests are in
+   khemetra_people.js.
+   ========================================================================== */
+const KH_SKYD={k:'kroof'};
+/* the roofs, towers, palace and church that rise over the walls: only those in front of the camera and in range */
+function khSkyList(cx,cy,dX,dY){
+  const L=LEVELS[44],out=[],sk=L.sky;
+  for(let i=0;i<sk.length;i++){
+    const e=sk[i],rx=e.x-cx,ry=e.y-cy,d2=rx*rx+ry*ry,lim=e.big?58000:2500;
+    if(d2>lim||d2<4)continue;
+    const dot=rx*dX+ry*dY;if(dot<=0)continue;
+    if(Math.abs(rx*dY-ry*dX)>dot*1.1+e.w*.6)continue;
+    const img=IMG[e.k];if(!img)continue;
+    out.push({x:e.x,y:e.y,img,w:e.w,bob:e.z,decor:KH_SKYD,sky:true});
+  }
+  return out;
+}
+/* walking into a door tile of the city */
+function khBump(nx,ny,g){
+  const d=KH_DOOR[g];if(!d)return false;
+  if(d.gate){sfx('door');const L=LEVELS[43],gx=Math.max(1,L.rows[6].indexOf('1'));goToLevel(43,{x:gx,y:8,f:2});return true}
+  if(d.lvl!==undefined){sfx("door");goToLevel(d.lvl,d.at);return true}
+  return false;
+}
+function khEnter(then){
+  msg('The great gates of Khemetra swing open...','#ffe9a0');
+  khPrepare().then(then).catch(e=>{console.error(e);msg('The city is not ready yet.','#d09a80')});
+}
+function khMakeFloors2(){return khMakeFloors()}
+
+/* ---- src/desert/khemetra_build.js ---- */
+/* ==========================================================================
+   KHEMETRA: THE BUILDINGS. Which fronts on the street are doors, what lies behind each one, and the rooms themselves.
+   ========================================================================== */
+const KH_PROPS={ // painted props by role: [sheet piece, height in cells]; the old game sprites stand in until a picture exists
+  counter:['kh_int1_0','counter',.62],table:['kh_int1_1','bench',.5],shelf:['kh_int1_2','crate',1.05],bookcase:['kh_int1_3','crate',1.1],chair:['kh_int1_4','bench',.55],bed:['kh_int1_5','bench',.6],
+  cushions:['kh_int2_0','sacks',.4],brazier:['kh_int2_1','brazier0',.75],hlamp:['kh_int2_2','lamp',.5],basin:['kh_int2_3','fountain',.7],amphora:['kh_int2_4','urn',.8],chest:['kh_int2_5','chest',.5],
+  fountain:['kh_city1_0','fountain',1.1],well:['kh_city1_1','well',1.0],obelisk:['kh_city1_2','memorial',2.4],statue:['kh_city1_3','statue',1.5],lamp:['kh_city1_4','lamp',1.5],bench:['kh_city1_5','bench',.6],
+  palm:['kh_city2_0','dpalm0',2.4],tree:['kh_city2_1','ltree17',1.6],shrub:['kh_city2_2','lbush0',.7],planter:['kh_city2_3','flowerpot',.5],pot:['kh_city2_4','flowerpot',.9],pergola:['kh_city2_5','bench',1.3],
+  ship:['kh_ship1_0','crate',.9],wheel:['kh_ship1_1','barrel',.8],anchor:['kh_ship1_2','barrel',.8],rope:['kh_ship1_3','sacks',.35],seachest:['kh_ship1_4','chest',.5],sail:['kh_ship1_5','crate',1.1],
+  throne:['kh_throne1_0','statue',1.4],banner:['kh_throne1_1','banner',1.3],maptable:['kh_throne1_2','counter',.6],candle:['kh_throne1_3','lamp',1.2],
+  stallA:['kh_stall1_0','cart',.95],stallB:['kh_stall1_1','cart',.95],stallC:['kh_stall1_2','cart',.95],stallD:['kh_stall1_3','cart',.95],stallE:['kh_stall1_4','cart',.95],stallF:['kh_stall1_5','cart',.95],
+  melons:['kh_stall2_0','crate',.5],amphorae:['kh_stall2_1','urn',.7],hay:['kh_stall2_2','cart',.7],veg:['kh_stall2_3','produce',.55],carpets:['kh_stall2_4','sacks',.6],copper:['kh_stall2_5','urn',.8],
+  vase0:['vase0','vase0',.55],vase1:['vase1','vase1',.7],vase2:['vase2','vase2',.6],vase3:['vase3','vase3',.55]
+};
+function khProp(role){const p=KH_PROPS[role];return IMG[p[0]]?p[0]:p[1]}
+function khPropH(role){return KH_PROPS[role][2]}
+/* every building with a door: a pool of fronts to take it from, a name, a keeper, and the kind of room behind it */
+const KH_BUILDINGS=[
+  // shops
+  {id:'potion1',pool:'shop',sub:'potion',name:"Nefer's Philtres",room:'shop',keeper:'kh_nefer',stock:'potion'},
+  {id:'potion2',pool:'shop',sub:'potion',name:'The Green Flask',room:'shop',keeper:'kh_greenflask',stock:'potion'},
+  {id:'potion3',pool:'shop',sub:'potion',name:"Old Senet's Remedies",room:'shop',keeper:'kh_senet',stock:'potion'},
+  {id:'scroll1',pool:'shop',sub:'scroll',name:'The Silver Quill',room:'shop',keeper:'kh_quill',stock:'scroll'},
+  {id:'scroll2',pool:'shop',sub:'scroll',name:'House of Seven Scrolls',room:'shop',keeper:'kh_sevenscrolls',stock:'scroll'},
+  {id:'food1',pool:'shop',sub:'food',name:'The Golden Crust Bakery',room:'shop',keeper:'kh_baker',stock:'food'},
+  {id:'food2',pool:'shop',sub:'food',name:'Dates and Dreams',room:'shop',keeper:'kh_dates',stock:'food'},
+  {id:'food3',pool:'shop',sub:'spice',name:'The Spice Garden',room:'shop',keeper:'kh_spices',stock:'food'},
+  {id:'food4',pool:'shop',sub:'food',name:"Hapi's Pantry",room:'shop',keeper:'kh_pantry',stock:'food'},
+  {id:'arms1',pool:'shop',sub:'weapon',name:'The Sun Forge',room:'shop',keeper:'kh_forge',stock:'arms'},
+  {id:'arms2',pool:'shop',sub:'weapon',name:"The Guard's Armoury",room:'shop',keeper:'kh_armoury',stock:'armour'},
+  {id:'gen1',pool:'shop',sub:'cloth',name:'Silk and Linen',room:'shop',keeper:'kh_silk',stock:'general'},
+  {id:'gen2',pool:'shop',sub:'cloth',name:"The Wanderer's Pack",room:'shop',keeper:'kh_pack',stock:'general'},
+  {id:'ship',pool:'shop',sub:'ship',name:"Menkaure's Shipwrights",room:'ship',keeper:'kh_captain'},
+  // inns
+  {id:'inn1',pool:'shop',sub:'inn',name:'The Gilded Camel',room:'inn',keeper:'kh_inn1'},
+  {id:'inn2',pool:'shop',sub:'inn2',name:'The Sleeping Sphinx',room:'inn',keeper:'kh_inn2'},
+  {id:'inn3',pool:'shop',sub:'inn',name:'The Moon and Mint',room:'inn',keeper:'kh_inn3'},
+  // work, quests, maps
+  {id:'work1',pool:'shop',sub:'work',name:"The Labourers' Hall",room:'hall',keeper:'kh_work1'},
+  {id:'work2',pool:'shop',sub:'work',name:'The Day Hire House',room:'hall',keeper:'kh_work2'},
+  {id:'work3',pool:'shop',sub:'work',name:"Porters' Guild",room:'hall',keeper:'kh_work3'},
+  {id:'quest1',pool:'shop',sub:'quest',name:'The Contract House',room:'hall',keeper:'kh_quest1'},
+  {id:'quest2',pool:'shop',sub:'quest',name:"The Bounty Board",room:'hall',keeper:'kh_quest2'},
+  // prayer houses and temples
+  {id:'pray1',pool:'pray',name:'House of the Rising Sun',room:'prayer',keeper:'kh_pray1'},
+  {id:'pray2',pool:'pray',name:'House of the Guiding Star',room:'prayer',keeper:'kh_pray2'},
+  {id:'pray3',pool:'pray',name:'House of Eternal Life',room:'prayer',keeper:'kh_pray3'},
+  {id:'pray4',pool:'pray',name:'House of the New Moon',room:'prayer',keeper:'kh_pray4'},
+  {id:'temple1',pool:'temple',name:'Temple of the Sun',room:'temple',keeper:'kh_temple1'},
+  {id:'temple2',pool:'temple',name:'Temple of Bastet',room:'temple',keeper:'kh_temple2'},
+  {id:'church',pool:'pray',name:'The Church of Light',room:'temple',keeper:'kh_church',near:[122,205]},
+  // baths
+  {id:'bath1',pool:'bath',name:'The Court Baths',room:'bath',keeper:'kh_bath1'},
+  {id:'bath2',pool:'bath',name:'The Blue Hammam',room:'bath',keeper:'kh_bath2'},
+  // houses with something going on
+  {id:'granary',pool:'low',name:'The Old Granary',room:'cellar',keeper:null,enemies:['rat','rat','rat','rat','rat','rat','rat','rat','bat','bat']},
+  {id:'denA',pool:'ruin',name:'A Ruined House',room:'ruin',keeper:null,enemies:['skel','skel','skel']},
+  {id:'denB',pool:'ruin',name:'A Collapsed House',room:'ruin',keeper:null,enemies:['skel','skel','skel']},
+  {id:'denC',pool:'ruin',name:'A Boarded House',room:'ruin',keeper:null,enemies:['bandit','bandit','bandit','archer']},
+  {id:'denD',pool:'ruin',name:'An Abandoned House',room:'ruin',keeper:null,enemies:['skel','skel','bat','bat']},
+  {id:'urnhouse',pool:'ruin',name:'A Shuttered House',room:'ruin',keeper:null,enemies:[]},
+  {id:'drumhouse',pool:'house',name:'The Musicians House',room:'home',keeper:'kh_drummer'},
+  {id:'ledgerhouse',pool:'ruin',name:'The Tax Collectors Old House',room:'ruin',keeper:null,enemies:['bandit']},
+  {id:'baths_cellar',pool:'bath',name:'The Bath Cellar',room:'cellar',keeper:null,enemies:['ghost','ghost','ghost','ghost'],near:[330,340]},
+  // homes of those who give quests
+  {id:'homeA',pool:'house',name:'A Quiet House',room:'home',keeper:'kh_homeA'},
+  {id:'homeB',pool:'mansion',name:"A Merchant's House",room:'home',keeper:'kh_homeB'},
+  {id:'homeC',pool:'house',name:"A Scholar's House",room:'home',keeper:'kh_homeC'},
+];
+const KH_DIRS=[[0,-1],[0,1],[-1,0],[1,0]];
+const KH_FACE_F=[0,2,3,1]; // the way you face when you step out: north, south, west, east
+let KH_LEVEL_NEXT=200;
+/* choose, for each building, a stretch of street front of the right sort and far from its own kind */
+function khPlaceBuildings(C){
+  const rng=khRng(2024),placed=[],P=KH_POOLS,mods=C.modules;
+  const byKind={};for(const m of mods){(byKind[m.kind]=byKind[m.kind]||[]).push(m)}
+  const centre=m=>{const a=m.cells[Math.floor(m.cells.length/2)];return [a[0],a[1]]};
+  const used=new Set();
+  const poolOf=(b)=>b.pool==='shop'?P.shop[b.sub]:P[b.pool];
+  const wantKind=(b)=>b.pool==='shop'?'shop':b.pool;
+  const out=[];
+  const frontOk=m=>{const mid=m.cells[Math.floor((m.cells.length-1)/2)],d=KH_DIRS[m.face],x=mid[0]+d[0],y=mid[1]+d[1];return C.reach[C.idx(x,y)]===1&&C.reach[C.idx(x+d[0],y+d[1])]===1};
+  for(const kk in byKind)byKind[kk]=byKind[kk].filter(frontOk);
+  for(const b of KH_BUILDINGS){
+    const e0=poolOf(b)[0];if(!e0)continue;
+    const need=e0.n;
+    let cands=(byKind[wantKind(b)]||[]).filter(m=>m.n===need&&!used.has(m));
+    if(b.pool==='low')cands=(byKind.low||[]).filter(m=>m.n===2&&!used.has(m));
+    if(b.pool==='shop'&&cands.length<20)cands=mods.filter(m=>m.n===2&&!used.has(m)&&frontOk(m)&&(m.kind==='house'||m.kind==='shop'||m.kind==='mansion'));
+    if(b.pool==='ruin'&&cands.length<10)cands=mods.filter(m=>m.n===2&&!used.has(m)&&frontOk(m)&&m.kind!=='castle'&&m.kind!=='palace');
+    if(!cands.length)cands=mods.filter(m=>m.n===need&&!used.has(m)&&frontOk(m)&&m.kind!=='castle'&&m.kind!=='palace');
+    let best=null,bs=-1e18;
+    for(let t=0;t<260;t++){
+      const m=cands[(rng()*cands.length)|0];if(!m||used.has(m))continue;
+      const c=centre(m);
+      let sc=1e9;
+      if(b.near)sc=-Math.hypot(c[0]-b.near[0],c[1]-b.near[1]);
+      else for(const q of placed)if(q.b.pool===b.pool&&q.b.sub===b.sub)sc=Math.min(sc,Math.hypot(c[0]-q.c[0],c[1]-q.c[1]));
+      if(b.pool==='ruin'||b.id==='granary'){const dd=Math.hypot(c[0]-60,c[1]-60);sc=-dd+rng()*30}
+      if(sc>bs){bs=sc;best=m}
+    }
+    if(!best)continue;
+    used.add(best);
+    const pool=poolOf(b),ent=pool[(rng()*pool.length)|0];
+    best.e=ent;best.n=ent.n;best.wh=ent.wh;best.bld=b.id;
+    // the module may now be a different size from the cells it holds: keep n equal to the cells
+    best.e=Object.assign({},ent,{n:best.cells.length});
+    placed.push({b,m:best,c:centre(best)});
+    out.push({b,m:best});
+  }
+  return out;
+}
+/* the door tiles are the middle of each such front, and the rooms behind them are built into levels 200 and up */
+function khMakeDoorsAndRooms(C,L,placed){
+  const doors={};
+  for(const {b,m} of placed){
+    const lvl=KH_LEVEL_NEXT++;
+    m.lvl=lvl;
+    const dir=KH_DIRS[m.face],cells=m.cells,mid=cells[Math.floor((cells.length-1)/2)];
+    const front=[mid[0]+dir[0],mid[1]+dir[1]],ff=KH_FACE_F[m.face];
+    const doorCells=cells.length===2?cells:[mid];
+    m.doorCells=doorCells;
+    const room=khRoom(b,lvl,{to:44,x:front[0],y:front[1],f:ff});
+    LEVELS[lvl]=room.level;
+    m.at=room.start;
+    doors[b.id]={lvl,front,face:ff,b};
+    b.lvl=lvl;b.front=front;
+  }
+  return doors;
+}
+/* ---- the rooms ---- */
+const KH_KEEPERS={}; // npc id -> {name, face, root}: filled in by khemetra_story.js
+function khKeeperFace(id){const k=KH_KEEPERS[id];return k?k.face:'peasantM'}
+function khInteriorWall(kind){ // a painted wall for the inside of a building
+  const pick={shop:0,inn:3,hall:3,prayer:5,temple:1,bath:2,cellar:4,ruin:4,home:0,ship:3,palace:5}[kind];
+  const im=IMG['kh_wall1_'+(pick===undefined?0:pick)];if(!im)return null;
+  KH_WALLGID=KH_WALLGID||{};if(KH_WALLGID[kind]!==undefined)return KH_WALLGID[kind];
+  const [c,x]=tcv();x.drawImage(im,0,0,TS,TS);const id=addTex(pix(c)),gid=KH_NEXT_GID++;T_TILE[gid]=id;return KH_WALLGID[kind]=gid;
+}
+let KH_WALLGID=null;
+function khRoom(b,lvl,back){
+  const rooms={shop:khRoomShop,inn:khRoomInn,prayer:khRoomPrayer,temple:khRoomTemple,bath:khRoomBath,hall:khRoomHall,cellar:khRoomCellar,ruin:khRoomRuin,home:khRoomHome,ship:khRoomShip};
+  const R=(rooms[b.room]||khRoomShop)(b);
+  const W=R.w,H=R.h,mid=W>>1;
+  const rows=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++){r+=(y===0||x===0||x===W-1)?'w':y===H-1?(x===mid?'0':'w'):'.'}rows.push(r)}
+  const decor=[],put=(role,x,y,o)=>{const k=khProp(role);if(IMG[k]&&k.startsWith('kh_'))NPC_H[k]=khPropH(role);decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}))};
+  const raw=(k,x,y,o)=>decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}));
+  const npc=(id,x,y,extra)=>{const kp=KH_KEEPERS[id];if(!kp)return;decor.push(Object.assign({k:kp.face,x,y,block:true,npc:id,sc:kp.sc||1},extra||{}))};
+  R.build({put,raw,npc,mid,W,H});
+  const wall=khInteriorWall(b.room);
+  const level={rows,start:{x:mid,y:H-2,f:0},enemies:(R.enemies||[]).map(e=>({t:e[0],x:e[1],y:e[2],lvl:e[3]})),items:R.items||[],decor,day:0,amb:R.amb||.66,
+    floor:R.floor||'kh1',ceil:'beam',name:b.name,label:b.name,lights:R.lights||[],portals:[{to:back.to,x:back.x,y:back.y,f:back.f,tex:'in'}],diff:16,khRoom:b.id,
+    chars:wall?{w:wall}:undefined};
+  if(R.noExtras)level.noExtras=true;
+  return {level,start:{x:mid,y:H-2,f:0}};
+}
+const khPlan=(x0,y0,x1,y1)=>{const o=[];for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)o.push([x,y]);return o};
+function khRoomShop(b){return {w:11,h:8,lights:[[3,2],[7,2],[5,5]],build:({put,raw,npc,mid})=>{
+  for(const x of [3,4,6,7])put('counter',x,3);
+  for(const x of [1,2,3,7,8,9])put('shelf',x,1);
+  put('amphora',1,5);put('amphora',9,5);put('chest',1,6);put('chest',9,6);raw('barrel',9,3);raw('crate',1,3);
+  npc(b.keeper,mid,2);
+}}}
+function khRoomInn(b){return {w:13,h:9,lights:[[3,2],[9,2],[6,5],[2,7],[10,7]],build:({put,raw,npc,mid})=>{
+  for(const x of [4,5,7,8])put('counter',x,3);
+  put('shelf',3,1);put('shelf',4,1);put('shelf',8,1);put('shelf',9,1);raw('barrel',2,2);raw('barrel',10,2);
+  for(const [x,y] of [[3,5],[9,5],[3,7],[9,7]]){put('table',x,y);put('chair',x-1,y);put('chair',x+1,y)}
+  put('brazier',6,1);put('cushions',1,5);put('cushions',11,5);
+  npc(b.keeper,mid,2);
+  npc(b.id+'_p1',3,6);npc(b.id+'_p2',10,6);
+}}}
+function khRoomPrayer(b){return {w:9,h:8,floor:'kh2',lights:[[2,1],[6,1],[4,4]],amb:.6,build:({put,raw,npc,mid})=>{
+  put('brazier',3,1);put('brazier',5,1);put('statue',4,1);
+  for(const [x,y] of [[2,4],[3,4],[5,4],[6,4],[2,5],[3,5],[5,5],[6,5]])put('cushions',x,y);
+  put('amphora',1,2);put('amphora',7,2);
+  npc(b.keeper,mid,3);
+}}}
+function khRoomTemple(b){return {w:13,h:11,floor:'kh2',lights:[[4,1],[8,1],[6,5],[2,8],[10,8]],amb:.6,build:({put,raw,npc,mid})=>{
+  put('statue',2,2);put('statue',10,2);put('statue',6,1);
+  put('brazier',4,1);put('brazier',8,1);put('brazier',6,6);
+  put('obelisk',1,5);put('obelisk',11,5);put('amphora',1,8);put('amphora',11,8);
+  for(const [x,y] of [[3,6],[4,6],[8,6],[9,6],[3,8],[4,8],[8,8],[9,8]])put('cushions',x,y);
+  npc(b.keeper,mid,3);
+}}}
+function khRoomBath(b){return {w:13,h:9,floor:'kh5',lights:[[3,2],[9,2],[6,5]],amb:.7,build:({put,raw,npc,mid})=>{
+  for(const [x,y] of [[2,2],[10,2],[2,5],[10,5]])put('basin',x,y);
+  put('cushions',4,1);put('cushions',8,1);put('amphora',1,7);put('amphora',11,7);put('brazier',6,1);
+  npc(b.keeper,mid,3);
+}}}
+function khRoomHall(b){return {w:11,h:8,lights:[[3,2],[7,2],[5,5]],build:({put,raw,npc,mid})=>{
+  for(const x of [3,4,6,7])put('counter',x,3);
+  for(const x of [1,2,3,7,8,9])raw('noticeboard',x,1);
+  put('table',2,5);put('chair',2,6);put('table',8,5);put('chair',8,6);raw('crate',1,3);raw('barrel',9,3);
+  npc(b.keeper,mid,2);
+}}}
+function khRoomHome(b){return {w:9,h:7,lights:[[2,2],[6,2]],build:({put,raw,npc,mid})=>{
+  put('bed',1,1);put('bed',7,1);put('table',4,3);put('chair',3,3);put('chair',5,3);put('chest',7,4);put('amphora',1,4);
+  npc(b.keeper,mid,1);
+}}}
+function khRoomShip(b){return {w:13,h:9,lights:[[3,2],[9,2],[6,5]],build:({put,raw,npc,mid})=>{
+  put('ship',6,1);put('wheel',2,2);put('anchor',10,2);put('rope',3,5);put('seachest',9,5);put('sail',1,4);put('sail',11,4);
+  for(const x of [4,5,7,8])put('counter',x,3);
+  npc(b.keeper,mid,2);
+}}}
+function khRoomCellar(b){
+  const en=(b.enemies||[]);
+  return {w:15,h:11,floor:'kh3',amb:.34,noExtras:true,lights:[[2,2],[12,2],[7,6],[3,8],[11,8]],
+    enemies:en.map((t,i)=>[t,2+((i*5)%11),1+(i%3)*3,15]),items:[{k:'potion',x:13,y:9},{k:'potion',x:1,y:9}],
+    build:({put,raw})=>{for(const [x,y] of [[3,3],[4,3],[7,3],[8,3],[11,3],[3,6],[7,6],[8,6],[11,6],[4,9],[10,9]])raw(((x+y)&1)?'barrel':'crate',x,y);raw('sacks',6,1);raw('sacks',9,9)}};
+}
+function khRoomRuin(b){
+  const en=(b.enemies||[]);
+  return {w:11,h:9,floor:'kh3',amb:.4,noExtras:true,lights:[[2,2],[8,2],[5,6]],
+    enemies:en.map((t,i)=>[t,2+((i*3)%7),1+(i%2)*3,15]),items:[],
+    build:({put,raw})=>{raw('bones',3,6);raw('bones',7,5);raw('crate',1,1);raw('barrel',9,1);raw('crate',9,7);raw('bones',2,3);
+      if(b.id==='urnhouse')decor_urn(raw);
+      if(b.id==='ledgerhouse')raw('chest',5,1,{khLedger:true,block:true,deco:false});
+      else raw('chest',5,1,{block:true,deco:false});}};
+}
+function decor_urn(raw){raw('urn',5,2,{npc:'kh_urn'})}
+
+/* ---- src/desert/khemetra_people.js ---- */
+/* ==========================================================================
+   KHEMETRA: THE PEOPLE. Every enterable building (shops, inns, prayer houses, temples, baths, work houses, quest halls, the
+   ship shop, derelict houses, the palace), the room inside it, who stands there, and the crowd in the streets and markets.
+   ========================================================================== */
+const KH_NAMES=['Amun','Bastet','Cheops','Dedi','Eset','Faiza','Gebu','Hapi','Imhotep','Jabari','Kenna','Layla','Merit','Nebet','Omari','Paser','Qadir','Rashida','Sennet','Tarek','Usi','Vashti','Wahid','Xena','Yasmin','Zahra','Ahmose','Banu','Cyra','Djet','Emre','Farah','Gamal','Hana','Idris','Jamila','Karim','Lina','Mahir','Nadia','Osiri','Pia','Rami','Sabah','Tuya','Umar','Wenis','Yara','Zaki','Anuket','Baqet','Dalila','Eman','Fahim','Ghada','Hasan','Inas','Jelani','Khaled','Leila','Mona','Nour','Orsa','Qamar','Rania','Samir','Talia'];
+const KH_TITLES=['the water seller','the weaver','the potter','the scribe','the carpenter','the dyer','the fisher','the baker','the glassblower','the mason','the lamp maker','the sandal maker','the date seller','the barber','the rope maker','the porter','the tanner','the incense seller','the jeweller','the shepherd'];
+const KH_GOSSIP=[
+ 'Khemetra was built when the Red God was bound beneath the dunes. Everything you see stands on his chains, they say.',
+ 'Mind the noon sun. The white stone throws it back at you, and the gold throws it back twice.',
+ 'The grand vizier has not smiled in a year. Some say it is the missing seal. Some say it is the king.',
+ 'My cousin walked the Sand Road once and came back with a scorpion in his shoe and a tale for every tavern.',
+ 'You can buy anything in the Grand Bazaar if you know whom to ask, and whom not to.',
+ 'The bathhouses are the only place in the city where the guards leave their spears at the door.',
+ 'There is a wizard somewhere in Khemetra. Nobody agrees where. Everyone agrees he is old.',
+ 'I sell dates to the palace kitchens. They pay late, but they pay well, and the dates are the best in the world.',
+ 'Never haggle with a spice seller before noon. They are grumpy until their second cup of mint tea.',
+ 'They say the golden spire of the palace can be seen from three deserts away. I believe it. I have seen it from the roof.',
+ 'The old quarter in the north-west is falling down. The owners left, and the sand moved in.',
+ 'A ship in a city this far from the sea sounds like a joke, but the shipwright takes it very seriously.',
+ 'The temple bells ring at dawn, noon and dusk. If they ring at any other time, bar your door.',
+ 'The palm trees were planted by the first queen, one for every child born in the city. We have a lot of palm trees.',
+ 'Cats own this city. The people only rent it.',
+ 'The carpet sellers and the cloth sellers have been feuding for forty years. Nobody remembers why.',
+ 'If you hear singing from under the Potters Market, ignore it. It is only the cistern.',
+ 'The night watch sings out the hours. The one in the east gets every note wrong. We love him for it.',
+ 'You look like adventurers. We get a lot of those. Most go out the south gate and come back poorer, and wiser if lucky.',
+ 'The market opens at dawn. By noon the best of everything is gone, and by dusk the rest is cheap.',
+ 'My grandmother says the city has a heartbeat, if you stand on the palace steps at midnight. I have never dared.',
+ 'The vizier keeps the city. The cartographer keeps the maps. The wizard, they say, keeps the secrets.',
+ 'Wear white and gold and nobody asks questions. Wear grey and everybody does.',
+ 'There used to be a fountain in every square. Half of them have gone dry. We do not talk about it.',
+ 'A traveller told me there is an ocean beyond the eastern desert. I told him I had never heard of an ocean. He laughed.',
+ 'The bathhouse on the court is warm all year, even in the cold nights. The old stones remember the sun.',
+ 'The Moon Garden is the best place to be in the evening. Bring a friend, or a lantern, or both.',
+ 'We are very proud of our walls. Four hundred cells a side and not one crack. Well, one. We do not mention it.',
+ 'Beware of pickpockets near the Fruit Market. They are small, quick, and polite.',
+ 'I would give a month of wages for a single tin of the red ink that the scribes use. They hide it like gold.',
+];
+const KH_FACES={ // which painted person stands for which kind of citizen
+  men:['kh_npc1_0','kh_npc1_2','kh_npc5_2','kh_npc5_3','kh_npc5_4','kh_npc5_5','kh_npc2_0'],
+  women:['kh_npc1_1','kh_npc1_3','kh_npc1_5','kh_npc2_1','kh_npc2_4'],
+  kids:['kh_npc1_4','kh_npc5_1'],
+  poor:['kh_npc5_0'],
+  guards:['kh_npc3_0','kh_npc3_0','kh_npc3_2'],
+};
+const KH_NPC_H={kh_npc1_4:.6,kh_npc5_1:.62,kh_npc1_2:.76,kh_npc3_1:.92,kh_npc3_0:.88,kh_npc3_2:.9,kh_npc3_5:.88};
+
+/* ---- src/desert/khemetra_story.js ---- */
+/* ==========================================================================
+   KHEMETRA: THE STORY. Shopkeepers and priests, twenty quests of city life, the cartographer's chain across the seven
+   deserts, the grand vizier and the wizard under the city, and the shipwright who looks to the sea.
+   ========================================================================== */
+const khNpc=(id,name,face,root,o)=>{o=o||{};KH_KEEPERS[id]={name,face,sc:o.sc||1,root};NPCS[id]={name,img:face,root};if(o.q)QGIVER[id]=o.q};
+const khQuest=(id,title,who,desc,need,goal,reward,extra)=>{QUESTS[id]=Object.assign({title,who,desc,need,goal,reward},extra||{});QAREA[id]='Khemetra'};
+QAREA_ORDER.splice(QAREA_ORDER.indexOf('Greendale')+1,0,'Khemetra');
+const khFlag=f=>()=>G.flags[f]?1:0;
+const khKills=(k,cnt)=>q=>(G.flags[k]||0)-(q.base||0);
+/* ---- what the shops sell ---- */
+const KH_STOCK={
+  potion:()=>[['potion',8],['redpotion',3],['bluepotion',3],['greenpotion',3],['yellowpotion',3]].concat(potionStockRows()),
+  scroll:()=>[['sp_fire',2],['scrollFrost',2],['scrollLight',3],['ringV',1],['ringM',1],['ringW',1],['ringS',1]],
+  food:()=>[['bread',14],['cheese',10],['dates',14],['water',14],['apple',10],['ale',8],['nuts',10],['herring',6],['sausage',8],['pottage',8],['pie',5],['roast',4],['honeycomb',4]],
+  arms:()=>[['dagger',4],['sword',4],['mace',3],['axe',3],['bow',3],['staff',3],['ironblade',1],['ironaxe',1]],
+  armour:()=>[['cap',4],['helm',3],['shield',4],['jerkin',4],['leggings',4],['bracers',4],['prismhelm',1]],
+  general:()=>[['torch',14],['lantern',4],['bread',8],['water',10],['herb',6],['honeycomb',3],['wildflower',4],['potion',4],['ore',3]],
+};
+const khShop=(id,name,face,title,greet,stock,sc)=>khNpc(id,name,face,d=>say(greet,[['Browse the wares',()=>{openShop(d,KH_STOCK[stock](),title);return null}],BYE]),{sc});
+khShop('kh_nefer','Nefer, the potion seller','kh_npc2_2',"Nefer's Philtres",'Potions for every ache and every adventure. Red for blood, blue for breath, green for the sickly, yellow for the brave. Everything is brewed this week.','potion');
+khShop('kh_greenflask','Tamit, of the Green Flask','kh_npc1_3','The Green Flask','Welcome to the Green Flask. My grandmother brewed these. Her grandmother knew the recipe before the city had walls.','potion');
+khShop('kh_senet','Old Senet, the healer','kh_npc4_5',"Old Senet's Remedies",'Come in, come in. Sit. Tell me where it hurts, and then buy something, because whatever it is, I have a bottle for it.','potion');
+khShop('kh_quill','Iry, of the Silver Quill','kh_npc2_3','The Silver Quill','Scrolls of fire, frost and light, sealed with wax and warranted against smudging. Rings too, if you are the sort who likes jewellery with consequences.','scroll');
+khShop('kh_sevenscrolls','Wenis, keeper of Seven Scrolls','kh_npc4_2','House of Seven Scrolls','Every spell here was copied by hand by my family. Please do not read them aloud inside the shop.','scroll');
+khShop('kh_baker','Merit, the baker','kh_npc2_4','The Golden Crust Bakery','Bread, still warm. The best in Khemetra, and I will fight anyone who says the baker on the next street is better.','food');
+khShop('kh_dates','Hapu, the date seller','kh_npc2_0','Dates and Dreams','Dates from the oasis groves. Fresh dates, honeyed dates, dates stuffed with almonds. A date a day keeps the healer away.','food');
+khShop('kh_spices','Perneb, the spice merchant','kh_npc2_1','The Spice Garden','Saffron from the north, pepper from the east, and mint from my own window box. What shall we season today?','food');
+khShop('kh_pantry','Hapi, of the Pantry','kh_npc1_0',"Hapi's Pantry",'Cheese, nuts, dried fish and ale. Provisions for the road, and a seat by the door if you want to hear about the road.','food');
+khShop('kh_forge','Khaset, the smith','kh_npc5_4','The Sun Forge','Swords, maces and axes, hammered while the sun is high so the steel takes the light. Do not touch the hot ones.','arms',1.05);
+khShop('kh_armoury','Sergeant Ahmose, the armourer','kh_npc3_0',"The Guard's Armoury",'Helms, shields and mail. Everything is tested on my own guards, who complain a great deal and survive.','armour');
+khShop('kh_silk','Qadir, the cloth trader','kh_npc2_5','Silk and Linen','Silk from the far east, linen from the river, and a few travel supplies in the back for the sort of person who needs both.','general');
+khShop('kh_pack','Zahra, of the Wanderer\'s Pack','kh_npc1_1',"The Wanderer's Pack",'Torches, lanterns, food and water. All the things you forget until you are three days into the dunes.','general');
+/* ---- inns, prayer houses, temples, baths ---- */
+const khInn=(id,name,face,title,cost,line)=>khNpc(id,name,face,()=>say(line,[['Rent rooms ('+cost+' gold)',()=>{if(G.gold<cost)return say('You cannot afford a room. Come back with a little more silver.',[BYE]);G.gold-=cost;restParty(true);return say('You sleep in clean beds with the windows open to the night air. Everyone wakes healed and fed.',[BYE])}],['Any news?',()=>say(KH_GOSSIP[(Math.abs(id.length*7+(G.rounds||0))%KH_GOSSIP.length)],[BYE])],BYE]));
+khInn('kh_inn1','Hasan, innkeeper of the Gilded Camel','kh_npc6_2','The Gilded Camel',25,'The Gilded Camel! Beds, baths of hot water, and a cook who can make a lamb disappear into a dozen dishes. A room is 25 gold.');
+khInn('kh_inn2','Dalila, innkeeper of the Sleeping Sphinx','kh_npc1_1','The Sleeping Sphinx',20,'Welcome to the Sleeping Sphinx. We never close, and the sphinx has never once complained about noise. Twenty gold for a room.');
+khInn('kh_inn3','Rashid, innkeeper of the Moon and Mint','kh_npc1_0','The Moon and Mint',30,'The Moon and Mint, where the tea is sweet and the sheets are cleaner. Thirty gold, and the tea is free.');
+for(const i of [1,2,3]){khNpc('kh_inn'+i+'_p1','A traveller','kh_npc5_2',()=>say(KH_GOSSIP[(i*5+3)%KH_GOSSIP.length],[BYE]));khNpc('kh_inn'+i+'_p2','A merchant','kh_npc2_0',()=>say(KH_GOSSIP[(i*7+11)%KH_GOSSIP.length],[BYE]))}
+for(const a of ['inn1','inn2','inn3']){} // patrons are named for the inns that hold them
+const khPray=(id,name,face,line,cost)=>khNpc(id,name,face,()=>say(line,[['Offer a prayer ('+cost+' gold, the party is healed)',()=>{if(G.gold<cost)return say('Give what you can, and the blessing comes anyway. But the lamps are expensive, and you have too little for even a small offering.',[BYE]);G.gold-=cost;G.heroes.forEach((h,i)=>{if(!h.alive){h.alive=true;h.hp=Math.max(1,Math.ceil(h.max/2))}else h.hp=h.max;h.mp=h.mpMax});sfx('potion');return say('Warm light washes over the party. Wounds close, and the weariness lifts away.',[BYE])}],['Ask for a blessing without an offering',()=>say('Blessings are free. The healing comes from the lamps, and the lamps are not.',[BYE])],BYE]));
+khPray('kh_pray1','Priestess Nebet','kh_npc4_1','Welcome to the House of the Rising Sun. Rest your eyes in the light, and tell me what troubles you.',15);
+khPray('kh_pray2','Brother Omari','kh_npc4_4','The Guiding Star shows the way home to anyone who is lost. Even to those who are not sure where home is.',15);
+khPray('kh_pray3','Priestess Hana','kh_npc4_1','In the House of Eternal Life we do not fear the end. We tend the lamps, and we sing for those who walked ahead.',15);
+khPray('kh_pray4','Brother Pasha','kh_npc4_0','Under the New Moon every beginning is allowed. What would you like to begin?',15);
+khPray('kh_temple1','Acolyte Tuya','kh_npc4_1','The Temple of the Sun burns one lamp for every soul in the city. Four hundred thousand lamps. Please do not count them.',20);
+khPray('kh_temple2','High Priest Omari','kh_npc4_0','The Temple of Bastet is the cat goddess house. The cats here are holy. So is anything they sit on.',20);
+khPray('kh_church','Father Idris','kh_npc4_0','The Church of Light has stood longer than the palace. We ring the bell for every traveller who comes home.',20);
+const khBath=(id,name,face,line)=>khNpc(id,name,face,()=>say(line,[['Take the waters (10 gold, rest and refresh)',()=>{if(G.gold<10)return say('The waters are open to everyone with ten gold. You have a little less.',[BYE]);G.gold-=10;G.heroes.forEach(h=>{if(h.alive){h.hp=Math.min(h.max,h.hp+Math.ceil(h.max*.6));h.mp=h.mpMax}});advanceTime(60);sfx('potion');return say('Hot water, mint and steam. The party emerges pink, calm and a good deal more cheerful.',[BYE])}],BYE]));
+khBath('kh_bath1','Isis, the bath attendant','kh_npc6_3','Welcome to the Court Baths. Towels, oils and hot water, in that order. Weapons are left at the door.');
+khBath('kh_bath2','Dedi, keeper of the Blue Hammam','kh_npc6_3','The Blue Hammam is the oldest bath in the city. The tiles are older than the vizier, and cleaner.');
+/* ---- work houses, quest halls ---- */
+const khJob=(id,title,who,item,n,pay,xp,line)=>khQuest(id,title,who,line,n,()=>bagCount(item),{gold:pay,xp},{take:{[item]:n}});
+khJob('kh_j_water','Water for the Labourers',"The Labourers' Hall",'water',8,40,90,'The Labourers Hall needs 8 jars of water for the workers on the new aqueduct. Water is sold at the markets.');
+khJob('kh_j_bread','Bread for the Crews',"The Labourers' Hall",'bread',6,36,80,'The Labourers Hall needs 6 loaves of bread for the dawn crew.');
+khJob('kh_j_torch','Torches for the Night Gang',"The Labourers' Hall",'torch',6,40,90,'The night gang needs 6 torches. Buy them at any general store.');
+khJob('kh_j_dates','Dates for the Drivers',"The Day Hire House",'dates',8,50,100,'The Day Hire House needs 8 handfuls of dates for the caravan drivers.');
+khJob('kh_j_ale','Ale for the Roofers',"The Day Hire House",'ale',5,45,95,'The roofers need 5 mugs of ale to finish the Weavers roof before dark.');
+khJob('kh_j_nuts','Nuts for the Cooks',"The Day Hire House",'nuts',6,40,90,'The Day Hire House needs 6 handfuls of nuts for the palace kitchens.');
+khJob('kh_j_lantern',"Lanterns for the Porters",'Porters Guild','lantern',3,150,200,'The Porters Guild needs 3 lanterns for the night deliveries.');
+khJob('kh_j_herb',"Herbs for the Porters",'Porters Guild','herb',5,60,120,'The Porters Guild needs 5 bundles of herbs for the guild healer.');
+khJob('kh_j_cheese',"Cheese for the Porters",'Porters Guild','cheese',5,55,110,'The Porters Guild needs 5 pieces of cheese for the feast of the first haul.');
+const khBoard=(id,name,face,jobs,line)=>khNpc(id,name,face,()=>{
+  const open=jobs.filter(j=>qSt(j)===null),act=jobs.filter(j=>qSt(j)==='active');
+  const rd=act.find(qReady);
+  if(rd)return say('You have what we asked for. Hand it over.',[['Here you are.',()=>{qTurnIn(rd);return say('Fair work, fairly done. Come back when you want more.',[BYE])}],BYE]);
+  const opts=open.map(j=>[QUESTS[j].title,()=>say(QUESTS[j].desc+' It pays '+QUESTS[j].reward.gold+' gold.',[['I will do it.',()=>{qAccept(j);return say('Good. Bring it here when you have it.',[BYE])}],['Not now.',()=>null]])]);
+  if(act.length)return say('You already have work from us: '+act.map(j=>QUESTS[j].title).join(', ')+'.',opts.concat([BYE]));
+  if(!opts.length)return say('There is no more work today. You have done every job we had. Come back some other season.',[BYE]);
+  return say(line,opts.concat([BYE]));
+});
+khBoard('kh_work1','Clerk Wenis','kh_npc3_3',['kh_j_water','kh_j_bread','kh_j_torch'],'Day work for day wages. Pick a job and bring us the goods.');
+khBoard('kh_work2','Clerk Bastet','kh_npc3_3',['kh_j_dates','kh_j_ale','kh_j_nuts'],'We hire by the day. Honest work, honest pay, mostly.');
+khBoard('kh_work3','Guildmaster Pia','kh_npc5_3',['kh_j_lantern','kh_j_herb','kh_j_cheese'],'The Porters Guild always has deliveries. Choose one.');
+// bounty contracts, bought from the quest halls
+khQuest('kh_b_skel','Contract: Skeletons','The Contract House',"Kill 10 skeletons. The Contract House pays for the dead who do not stay buried.",10,khKills('k_skel'),{gold:260,xp:500},{cnt:'k_skel'});
+khQuest('kh_b_scorp','Contract: Scorpions','The Contract House','Kill 10 scorpions or cobras in the deserts. The caravans pay well for safe roads.',10,khKills('k_scorp'),{gold:300,xp:550},{cnt:'k_scorp'});
+khQuest('kh_b_mummy','Contract: The Wrapped Dead','The Bounty Board','Kill 8 mummies. Anywhere in the deserts. The temples will pay for proof.',8,khKills('k_mummy'),{gold:380,xp:700},{cnt:'k_mummy'});
+const khContracts=(id,name,face,jobs,fee)=>khNpc(id,name,face,()=>{
+  const act=jobs.find(j=>qSt(j)==='active'),rd=act&&qReady(act);
+  if(rd)return say('The contract is fulfilled. The seal is on the paper, and the gold is yours.',[['Collect the reward.',()=>{qTurnIn(act);return say('A pleasure doing business. Come back for another contract.',[BYE])}],BYE]);
+  const open=jobs.filter(j=>qSt(j)===null);
+  const opts=open.map(j=>[QUESTS[j].title+' ('+fee+' gold to take it)',()=>say(QUESTS[j].desc+' It pays '+QUESTS[j].reward.gold+' gold.',[['Take the contract.',()=>{if(G.gold<fee)return say('The fee is '+fee+' gold. You have too little.',[BYE]);G.gold-=fee;qAccept(j);return say('Signed and sealed. Good hunting.',[BYE])}],['Not now.',()=>null]])]);
+  if(act)return say('You already carry a contract: '+QUESTS[act].title+'. Finish it first.',[BYE]);
+  if(!opts.length)return say('Every contract on the board is done. We will have more after the next caravan.',[BYE]);
+  return say('Contracts for the brave. A small fee seals each one, and the reward is paid in full on completion.',opts.concat([BYE]));
+});
+khContracts('kh_quest1','Clerk Seba','kh_npc3_3',['kh_b_skel','kh_b_scorp'],30);
+khContracts('kh_quest2','Bounty Master Gamal','kh_npc3_2',['kh_b_mummy','kh_b_scorp'],40);
+
+/* ---- src/desert/khemetra_quests.js ---- */
+/* ==========================================================================
+   TWENTY QUESTS OF CITY LIFE
+   ========================================================================== */
+const khAfterShop=(id,qid,dlg)=>{ // a shopkeeper or priest who also has a favour to ask
+  const n=NPCS[id];if(!n)return;const old=n.root;QGIVER[id]=qid;
+  n.root=d=>{if(qSt(qid)==='active'||qReady(qid))return qNode(qid,dlg);const node=old(d);if(qSt(qid)===null)node.opts.splice(Math.max(0,node.opts.length-1),0,['Is there anything you need?',()=>qNode(qid,dlg)]);return node};
+  KH_KEEPERS[id].root=n.root;
+};
+const khStreetQ=(id,name,face,idle,qid,dlg,o)=>{khNpc(id,name,face,d=>{
+  const st=qSt(qid);
+  if(st==='active'||qReady(qid))return qNode(qid,dlg);
+  if(st==='done')return say(dlg.after,[BYE]);
+  return say(idle,[['Can we help?',()=>qNode(qid,dlg)],BYE])},Object.assign({q:qid},o||{}))};
+const khQD=(offer,accept,remind,ready,thanks,after,turn)=>({offer,accept,remind,ready,thanks,after,turn});
+const khBag=(id,n)=>Math.min(bagCount(id),n);
+// 1. wedding feast
+khQuest('kh_wedding','A Feast for the Bride','Mother Sabah','Mother Sabah needs 4 bread, 3 cheese and 3 ale for her daughters wedding feast. The Weavers Square is in the south-west.',10,()=>khBag('bread',4)+khBag('cheese',3)+khBag('ale',3),{gold:140,xp:400,items:['potion']},{take:{bread:4,cheese:3,ale:3}});
+khStreetQ('kh_sabah','Mother Sabah','kh_npc1_6','My daughter marries at sunset, and the feast is half a feast. Would that I had hands enough for all of it.','kh_wedding',khQD('My daughter marries at sunset and my cooks have run off to the races. I need 4 loaves of bread, 3 pieces of cheese and 3 mugs of ale. Can you buy them for me?','Bless you. Any bakery has the bread, and the ale is at the pantry or the date seller.',(n,m)=>'You have '+n+' of the '+m+' things I need: bread, cheese and ale.','Bread, cheese and ale! The bride will weep with joy.','Take this for your trouble, and a drink at the feast if you can come.','The wedding was beautiful. The bread was warm, and nobody noticed the cheese was a little hard.'));
+// 2. lanterns
+khQuest('kh_lanterns','Lanterns for the Moon Festival','Hapi the Festival Master','The Moon Festival needs 4 lanterns. They are sold in the general stores. The Moon Garden is in the north.',4,()=>bagCount('lantern'),{gold:220,xp:450},{take:{lantern:4}});
+khStreetQ('kh_hapi','Hapi, the Festival Master','kh_npc5_3','The Moon Festival is in three days, and I have a garden and no light to put in it.','kh_lanterns',khQD('The Moon Festival is in three days, and the garden is dark. I need 4 lanterns. Real ones, with glass. Can you find them?','Splendid. Lanterns are in the general stores, if you do not have your own.',(n,m)=>'You have '+n+' of '+m+' lanterns.','Four lanterns! The garden will glow like a second sky.','Here, for your help. The best seat at the festival is yours.','The Moon Garden was lit by your lanterns. They said it was the finest festival in years.'));
+// 3. the lost cats
+khQuest('kh_cats','The Lost Cats','Old Dalila','Old Dalila has lost 4 cats. They hide in the alleys of Khemetra. Walk up to a cat, or tap it, to send it home.',4,()=>Object.keys(G.flags.khCats||{}).length,{gold:150,xp:350,items:['cheese','cheese']});
+khStreetQ('kh_dalila','Old Dalila','kh_npc1_2','Have you seen my cats? Four of them, and every one is the most important cat in Khemetra.','kh_cats',khQD('My four darlings have run off, one after the other. They hide in the alleys, all over the city. Would you find them?','They are small, and they are quick. They like corners and shade.',(n,m)=>n+' of '+m+' cats are home.','All four, home and purring! The house is whole again.','You are very kind. Take this, and may the cats forgive you for chasing them.','They sit on the roof now, and they look down at everyone. I think they are grateful.'));
+khNpc('kh_cat','A cat','kh_anim1_0',d=>{const F=G.flags;F.khCats=F.khCats||{};if(F.khCats[d.cat]){return say('The cat has gone home. It looks back once from the corner.',[BYE])}
+  F.khCats[d.cat]=1;d.found=true;d.block=false;sfx('key');const n=Object.keys(F.khCats).length;
+  return say(n>=4?'The fourth cat trots off home. That is all of them. Old Dalila will be very glad.':'The cat sniffs your hand, then trots home across the roofs. '+n+' of 4 found.',[BYE])});
+// 4. the purse snatcher
+khQuest('kh_thief','The Purse Snatcher','Merchant Cheops','A thief stole Cheops purse and ran to the Old Square in the north-west. Kill him and bring back the purse.',1,q=>(G.flags.k_nomad2||0)-(q.base||0),{gold:240,xp:500,items:['ringV']},{cnt:'k_nomad2'});
+khStreetQ('kh_cheops','Cheops, the cloth merchant','kh_npc2_5','The city is full of thieves, and they all go for my pockets. I should wear less jewellery.','kh_thief',khQD('A little rat in a ragged coat took my purse and ran off to the Old Square. That is in the north-west. Get it back, and I will make it worth your while.','He is fast, and he is desperate. Do not underestimate him.',(n,m)=>'The thief is still free.','The thief is dead and the purse is mine again! You are heroes.','Gold for gold. Keep your head up, friends.','I keep my purse in my boot now. Nobody wants to look there.'));
+// 5. wild dogs
+khQuest('kh_dogs','Strays of the Old Quarter','Captain Rami','Five wild dogs hunt in the ruined streets of the north-west. Kill 5 of them.',5,q=>(G.flags.k_dwolf||0)-(q.base||0),{gold:200,xp:450},{cnt:'k_dwolf'});
+khStreetQ('kh_rami','Captain Rami of the Gate Watch','kh_npc3_2','The south gate is my post, and the whole city is my worry.','kh_dogs',khQD('Wild dogs have come into the old quarter, in the north-west. They have bitten two children. My men cannot be everywhere. Will you thin the pack? Five should do it.','Be careful. They hunt together.',(n,m)=>'You have killed '+n+' of '+m+' dogs.','The old quarter is quiet again. My men thank you.','The city pays its debts. Take this.','No more dogs, no more bites. The children play there again, and they wave to the watch.'));
+// 6. the stolen urn
+khQuest('kh_urn','The Stolen Urn','Eman the potter','Emans finest urn was stolen and hidden in a shuttered house somewhere in the old quarter. Find it and tell Eman.',1,khFlag('khUrn'),{gold:160,xp:380,items:['potion']});
+khStreetQ('kh_eman','Eman, the potter','kh_npc5_4','I make pots. Good ones. Some are stolen, but never the bad ones.','kh_urn',khQD('My best urn was stolen last night. It has a blue bird painted on it, and it holds my grandmothers ashes. The thieves took it to a shuttered house in the old quarter, I am told. Please find it.','Thank you. If you see a blue bird, you have found it.',(n,m)=>'The urn is not found yet.','You found it! The blue bird, grandmother, and all.','Take this. You have given me my grandmother back.','I put the urn on the shelf and I tell her about my day.'));
+khNpc('kh_urn','An urn with a blue bird','urn',d=>{const F=G.flags;if(qSt('kh_urn')==='active'&&!F.khUrn){F.khUrn=1;sfx('key');return say('A blue bird, painted on grey clay. This is the potters urn. You wrap it carefully and carry it out of the house.',[BYE])}
+  return say(F.khUrn?'An empty niche where the urn once stood.':'A cracked old urn. Its paint is gone, and there is only dust inside.',[BYE])});
+// 7. the ledger
+khQuest('kh_tax','The Missing Ledger','Tax Official Usi','Tax Official Usi lost the district ledger in a collapsed house in the old quarter. There may be thieves in it.',1,khFlag('khLedger'),{gold:230,xp:480,items:['ringS']});
+khStreetQ('kh_usi','Usi, the tax official','kh_npc3_3','Taxes. Everyone hates them. Nobody offers to carry them for me.','kh_tax',khQD('I left the district ledger in my old house in the north-west, and now it is full of thieves. Without the ledger I cannot collect, and without collecting the guard goes unpaid. Please bring it back.','It is bound in green leather. It is in a chest at the back.',(n,m)=>'The ledger is not recovered.','The ledger, and not a page torn. You have saved us all.','The treasury is grateful. Here is something from it.','The guard has been paid. I have not been thanked, but I take it as the best I can hope for.'));
+khNpc('kh_ledger','A dusty chest','chest',d=>{const F=G.flags;if(qSt('kh_tax')==='active'&&!F.khLedger){F.khLedger=1;sfx('key');return say('Under old papers lies a ledger bound in green leather. Every page is still there.',[BYE])}
+  return say(F.khLedger?'An empty chest.':'A dusty chest full of mouldy papers. Nothing here that matters.',[BYE])});
+// 8. the drum
+khQuest('kh_drum','A Drum for Yara','Yara the musician','Yaras drum was taken by bandits and hidden in a boarded house in the old quarter. Bring it back.',1,khFlag('khDrum'),{gold:180,xp:400});
+khStreetQ('kh_yara','Yara, the musician','kh_npc5_5','I play for coins. My hands are free, but my song is hollow without the drum.','kh_drum',khQD('Bandits took my drum, the red one with the gold rim. They hide in a boarded house in the old quarter. Without it I cannot play, and without playing I cannot eat.','Beware, they are armed. The drum is round and red.',(n,m)=>'The drum is not found yet.','My drum! Listen to it. It remembers me.','Take this, and come to the Palm Garden to hear me play.','I play every evening in the Palm Garden. Come by, and I will play you a song of the desert.'));
+khNpc('kh_drumsack','A bundle of cloth','sacks',d=>{const F=G.flags;if(qSt('kh_drum')==='active'&&!F.khDrum){F.khDrum=1;sfx('key');return say('Under a rotten blanket sits a round red drum with a gold rim. This is Yaras drum.',[BYE])}return say(F.khDrum?'Only a rotten blanket now.':'A bundle of old cloth and straw.',[BYE])});
+// 9 and 10. deliveries
+khQuest('kh_letter','A Letter for Anuket','Porter Pia','Porter Pia asks you to deliver a sealed letter to Anuket in the Moon Garden in the north.',1,khFlag('khLetter'),{gold:120,xp:320},{give:'parcel'});
+khStreetQ('kh_pia','Pia, the porter','kh_npc5_3','I carry things. Boxes, sacks, news. Never my own, though.','kh_letter',khQD('I have a letter I am too shy to deliver. It is for Anuket, who sits in the Moon Garden in the north. Please take it to her, and do not read it.','It is a sealed letter. Anuket sits near the fountain, most evenings.',(n,m)=>'The letter is still with you.','You delivered it? And she smiled? Oh, I could weep.','A small thank you, from a very happy porter.','Anuket and I are having tea tomorrow. All because of you.'));
+khNpc('kh_anuket','Anuket','kh_npc1_4',d=>{const F=G.flags;
+  if(qSt('kh_letter')==='active'&&!F.khLetter&&bagCount('parcel')>0)return say('You have a letter for me? From whom?',[['From Pia, the porter.',()=>{bagRemove('parcel',1);F.khLetter=1;sfx('key');return say('Pia? Pia wrote me a letter? Oh. Oh my. Tell her I will answer it tonight.',[BYE])}],BYE]);
+  return say('The Moon Garden is the nicest place to sit. Especially at dusk.',[BYE])});
+khQuest('kh_parcel','A Parcel for Perneb','Clerk Meryt','Clerk Meryt gave you a sealed parcel for Perneb, the spice merchant at the Spice Garden shop.',1,khFlag('khParcel'),{gold:130,xp:330},{give:'parcel'});
+khStreetQ('kh_meryt','Meryt, the palace clerk','kh_npc3_3','The palace has too many papers and not enough hands to carry them.','kh_parcel',khQD('This parcel must reach Perneb the spice merchant. He keeps the Spice Garden, in the south-west market. I cannot leave my desk. Would you?','It is sealed. Perneb will know what to do with it.',(n,m)=>'Perneb has not received the parcel yet.','Perneb has acknowledged it? Wonderful. The palace thanks you.','Here is the fee, in good coin.','The spices came in time for the royal banquet. I did not get a word of thanks, but I got a full stomach.'));
+{const spices=NPCS.kh_spices,old=spices.root;spices.root=d=>{if(qSt('kh_parcel')==='active'&&!G.flags.khParcel&&bagCount('parcel')>0)return say('A parcel with the palace seal! Let me see... yes. Tell the clerk that the order is accepted.',[['Hand over the parcel.',()=>{bagRemove('parcel',1);G.flags.khParcel=1;sfx('key');return say('Excellent. Saffron for the royal table, as promised. Tell Meryt I said so.',[BYE])}],BYE]);return old(d)};KH_KEEPERS.kh_spices.root=spices.root}
+// 11 to 15. favours asked by shopkeepers and priests
+khQuest('kh_water','Water for the Baths','Isis','Isis needs 6 jars of water for the Court Baths. The markets sell it.',6,()=>bagCount('water'),{gold:100,xp:300},{take:{water:6}});
+khAfterShop('kh_bath1','kh_water',khQD('The cistern for the baths ran dry this morning, and the guests are growing hot. Could you bring 6 jars of water? I will pay well.','Thank you. Any market sells water.',(n,m)=>'You have '+n+' of '+m+' jars.','Six jars of water. You have saved the morning.','There you are. A bath is on the house if you ever want it.','The cistern is full again.'));
+khQuest('kh_herbs','Herbs for the Healer','Old Senet','Old Senet needs 6 bundles of herbs for her remedies. The general stores sell them.',6,()=>bagCount('herb'),{gold:130,xp:340,items:['potion2']},{take:{herb:6}});
+khAfterShop('kh_senet','kh_herbs',khQD('I have run out of herbs for my brews. Six bundles would keep me going for the season. Can you find them?','Thank you. Herbs grow wild in the moors, and the general stores stock them.',(n,m)=>'You have '+n+' of '+m+' bundles.','Herbs! Good ones, too. You have a sharp eye.','Take this potion. A fair trade.','My remedies are brewing again, and the sick are on the mend.'));
+khQuest('kh_honey','Honey for the Priestess','Priestess Nebet','Priestess Nebet needs 3 honeycombs for the temple offerings. The food shops sell them.',3,()=>bagCount('honeycomb'),{gold:130,xp:360},{take:{honeycomb:3}});
+khAfterShop('kh_pray1','kh_honey',khQD('We offer honey to the rising sun every morning, and our stores are empty. Three honeycombs would last us the month. Could you find them?','The food shops and the bakeries keep honeycomb.',(n,m)=>'You have '+n+' of '+m+' honeycombs.','Honeycomb! The sun will be pleased.','May the sun warm your road.','The offering was sweet. The sun rose a little brighter, or so we like to say.'));
+khQuest('kh_torches','Lamps for the Temple','Acolyte Tuya','Acolyte Tuya needs 5 torches for the Temple of the Sun. General stores sell them.',5,()=>bagCount('torch'),{gold:120,xp:330},{take:{torch:5}});
+khAfterShop('kh_temple1','kh_torches',khQD('The lamps in the cellar of the temple are failing, and the cellar is dark. Five torches would help. Could you fetch them?','General stores sell torches. They are cheap.',(n,m)=>'You have '+n+' of '+m+' torches.','Five torches, bright and tall. Thank you.','May the sun see your face in the dark.','The cellar is bright, and the old stone smells of smoke and prayer.'));
+khQuest('kh_ore','Ore for the Sun Forge','Khaset the smith','Khaset needs 6 pieces of iron ore. Some general stores sell it, and it lies in old mines.',6,()=>bagCount('ore'),{gold:240,xp:500,items:['ironblade']},{take:{ore:6}});
+khAfterShop('kh_forge','kh_ore',khQD('My iron is gone, and the guard wants forty swords by next moon. Six pieces of ore, and I can forge something worth the carrying.','Ore comes from mines. Some general stores keep a little.',(n,m)=>'You have '+n+' of '+m+' pieces of ore.','Six pieces of good ore. Let me set the forge going.','Here is a blade I made last winter. It is yours.','The forge sings all day, and the blades are fine.'));
+// 16 to 18. the dead and the rats
+khQuest('kh_skel','The Restless Dead','High Priest Omari','Kill 6 skeletons. They walk in the ruined houses of the old quarter in the north-west.',6,q=>(G.flags.k_skel||0)-(q.base||0),{gold:220,xp:520},{cnt:'k_skel'});
+khAfterShop('kh_temple2','kh_skel',khQD('The old quarter is full of restless dead. The cat goddess is not fond of them, and neither am I. Six skeletons put back to sleep would please her.','They walk in the empty houses of the north-west. Take care.',(n,m)=>'You have laid '+n+' of '+m+' skeletons to rest.','The dead sleep again. Bastet will purr tonight.','May her claws protect you. Take this.','The old quarter is quiet, though the cats still do not go there.'));
+khQuest('kh_ghosts','The Haunted Cellar','Dedi','Kill 4 ghosts in the cellar under the baths. The cellar is in a building near the bathhouses.',4,q=>(G.flags.ghostKills||0)-(q.base||0),{gold:250,xp:560},{cnt:'ghostKills'});
+khAfterShop('kh_bath2','kh_ghosts',khQD('The cellar under the baths is haunted. Cold hands, whispers, and a shiver that follows you up the stairs. Four ghosts, I counted. Will you put them to rest?','The cellar is in a building near the baths. The door looks like any other.',(n,m)=>'You have banished '+n+' of '+m+' ghosts.','The cellar is silent. Ah. I can breathe.','Thank you. The baths will be warm again.','No more cold hands. Only warm water now.'));
+khQuest('kh_rats','Rats in the Granary','Gebu the keeper','Kill 8 rats or bats in the old granary. It is a low building in the old part of the city.',8,q=>(G.flags.ratKills||0)-(q.base||0),{gold:140,xp:360},{cnt:'ratKills'});
+khStreetQ('kh_gebu','Gebu, the granary keeper','kh_npc5_4','I keep the grain. Or I did, until the rats took the keeping from me.','kh_rats',khQD('Rats and bats have taken over the old granary. I cannot get in without being bitten. Eight of the little beasts would let me through to my own grain.','The door is in a low house in the old part of the city.',(n,m)=>'You have killed '+n+' of '+m+' rats and bats.','The granary is clear! I can almost smell the wheat.','Take this, with my thanks.','The grain is safe, and the cats are fat.'));
+// 19 and 20. odd jobs
+khQuest('kh_dates','Dates for the Palace Kitchens','Cook Nadia','Cook Nadia needs 6 dates for the royal kitchens. The date seller and the pantries have them.',6,()=>bagCount('dates'),{gold:90,xp:280},{take:{dates:6}});
+khStreetQ('kh_nadia','Nadia, the palace cook','kh_npc1_6','Fifty mouths at the royal table, and every one of them wants dessert.','kh_dates',khQD('My dates for the royal dessert are late. Six dates would do. Can you find some? I would run, but my knees are not what they were.','Date sellers are everywhere. The market has them.',(n,m)=>'You have '+n+' of '+m+' dates.','Six sweet dates. You are a blessing.','A little coin and a little thanks.','The dessert was a triumph. I mentioned you to the royal steward.'));
+khQuest('kh_boots','Leggings for the Recruits','Sergeant Ahmose','Sergeant Ahmose needs 2 pairs of leggings for new recruits. They are sold in the armoury.',2,()=>bagCount('leggings'),{gold:120,xp:310},{take:{leggings:2}});
+khAfterShop('kh_armoury','kh_boots',khQD('Two new recruits, no leggings. The captain will have my head if they march in kilts. Could you find me two pairs?','Leggings are sold in the armoury, and in a few general shops.',(n,m)=>'You have '+n+' of '+m+' pairs.','Two pairs of leggings. The recruits will not be mocked.','Here is a small reward. Keep marching.','The recruits march proudly, in matching leggings.'));
+
+/* ---- src/desert/khemetra_main.js ---- */
+/* ==========================================================================
+   KHEMETRA: THE GREAT STORIES. The cartographer who sends the party across the seven deserts for the pieces of the
+   Instrument of Dawn, the grand vizier who wants his seal back before he says where the wizard lives, the wizard in the
+   cisterns beneath the city, and the shipwright who looks east to the Vaast Ocean.
+   ========================================================================== */
+const KH_FACE_FALLBACK={kh_npc5_0:'beggar',kh_npc5_1:'child',kh_npc5_2:'fisher',kh_npc5_3:'miner',kh_npc5_4:'smith',kh_npc5_5:'drunk',kh_npc6_0:'scribe',kh_npc6_1:'sergeant',kh_npc6_2:'innkeeper',kh_npc6_3:'waterwoman',kh_npc6_4:'prismwiz',kh_npc6_5:'child',kh_anim1_0:'chicken'};
+function khFaceKey(face){return IMG[face]?face:(KH_FACE_FALLBACK[face]&&IMG[KH_FACE_FALLBACK[face]]?KH_FACE_FALLBACK[face]:'peasantM')}
+/* ---- the seven pieces of the Instrument of Dawn: one in a little dungeon of each desert ---- */
+const KH_ARTS=[
+  {id:'khart1',n:'Compass of Dawn',d:'A golden compass whose needle points not north but toward the sunrise. It is warm to the touch.',desert:'The Sand Road',lv:103,quest:'kh_c1'},
+  {id:'khart2',n:'Sphinx Scroll Case',d:'A bronze scroll case sealed with a sphinx. Inside, a map of stars that no longer exist.',desert:'The Red Dunes',lv:108,quest:'kh_c2'},
+  {id:'khart3',n:'Copper Serpent Amulet',d:'A sun amulet with a copper serpent coiled round it. It hums when the wind turns.',desert:'The Blue Dunes',lv:120,quest:'kh_c3'},
+  {id:'khart4',n:'Sand Mother Astrolabe',d:'A bronze astrolabe of the oldest design. Its rings still turn, though the sands have filled them twice.',desert:'The Golden Erg',lv:128,quest:'kh_c4'},
+  {id:'khart5',n:'Jade Scarab of the Pale Cartographer',d:'A jade beetle carved with a tiny map along its wings. The map changes when you are not looking.',desert:'The Violet Erg',lv:134,quest:'kh_c5'},
+  {id:'khart6',n:'Lens of the Twin Suns',d:'A crystal lens in a gold ring. Through it, the desert at noon shows two suns, one a little behind the other.',desert:'The White Dunes',lv:141,quest:'kh_c6'},
+  {id:'khart7',n:'Ankh Key of the Last Oasis',d:'A golden key shaped like an ankh. It fits no lock in Khemetra, and it opens every door it touches.',desert:'The Flatlands',lv:146,quest:'kh_c7'},
+];
+for(const a of KH_ARTS){ITEMDEF[a.id]={n:a.n,k:'quest',ic:'sundisc',c:'#f0d070',price:1,d:a.d,sw:.34}}
+if(typeof DS_ITEM_IDS!=='undefined')for(const a of KH_ARTS)DS_ITEM_IDS.push(a.id);
+(function placeArtifacts(){
+  for(const a of KH_ARTS){
+    const L=LEVELS[a.lv];if(!L)continue;
+    const cof=(L.decor||[]).find(d=>d.k==='sarcoph')||{x:L.start.x,y:L.start.y-3};
+    let spot=null;
+    for(let r=1;r<=3&&!spot;r++)for(const [dx,dy] of [[0,1],[1,0],[-1,0],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1],[0,2],[2,0],[-2,0],[0,-2]]){
+      const x=cof.x+dx*r,y=cof.y+dy*r;
+      if(!L.rows[y]||L.rows[y][x]!=='.')continue;
+      if((L.decor||[]).some(d=>d.block&&d.x===x&&d.y===y)||(L.items||[]).some(i=>i.x===x&&i.y===y))continue;
+      spot=[x,y];break;
+    }
+    if(spot)(L.items=L.items||[]).push({k:a.id,x:spot[0],y:spot[1]});
+  }
+})();
+const khHave=n=>KH_ARTS.slice(0,n).every(a=>bagCount(a.id)>0||G.flags['kh_gave_'+a.id]);
+/* ---- the cartographer, Neferet ---- */
+khQuest('kh_c1','The Compass of Dawn','Neferet, the cartographer','Neferet asks you to recover the Compass of Dawn from the Catacomb of Whispering Sands, a little dungeon on the Sand Road, north-east of Anaea.',1,()=>bagCount('khart1'),{gold:300,xp:900,items:['potion2']},{take:{khart1:1}});
+khQuest('kh_c2','The Sphinx Scroll Case','Neferet, the cartographer','Neferet needs the Sphinx Scroll Case from the Shrine of the Sleeping Sphinx, a little dungeon in the Red Dunes.',1,()=>bagCount('khart2'),{gold:400,xp:1200,items:['potion2']},{take:{khart2:1}});
+khQuest('kh_c3','The Copper Serpent Amulet','Neferet, the cartographer','Neferet needs the Copper Serpent Amulet from the Shrine of the Copper Serpent in the Blue Dunes.',1,()=>bagCount('khart3'),{gold:500,xp:1500,items:['potion3']},{take:{khart3:1}});
+khQuest('kh_c4','The Sand Mother Astrolabe','Neferet, the cartographer','Neferet needs the Astrolabe from the Undercroft of the Sand Mother in the Golden Erg.',1,()=>bagCount('khart4'),{gold:600,xp:1800,items:['potion3']},{take:{khart4:1}});
+khQuest('kh_c5','The Jade Scarab','Neferet, the cartographer','Neferet needs the Jade Scarab from the Barrow of the Pale Cartographer in the Violet Erg.',1,()=>bagCount('khart5'),{gold:700,xp:2200,items:['potion3']},{take:{khart5:1}});
+khQuest('kh_c6','The Lens of the Twin Suns','Neferet, the cartographer','Neferet needs the Lens of the Twin Suns from the Sepulchre of the Twin Suns in the White Dunes.',1,()=>bagCount('khart6'),{gold:800,xp:2600,items:['potion4']},{take:{khart6:1}});
+khQuest('kh_c7','The Ankh Key','Neferet, the cartographer','Neferet needs the Ankh Key from the Barrow of the Last Oasis in the Flatlands.',1,()=>bagCount('khart7'),{gold:1000,xp:3200,items:['potion4']},{take:{khart7:1}});
+const KH_CART=['kh_c1','kh_c2','kh_c3','kh_c4','kh_c5','kh_c6','kh_c7'];
+const KH_CART_TALK=[
+  ['Beyond the Sand Road, in a little dungeon called the Catacomb of Whispering Sands, lies the first piece, the Compass of Dawn. Bring it to me.','The Sand Road. Take the east gate of Anaea and walk north. Little dungeons are scattered through the dunes and the palms.','The compass is warm, and it points to the sunrise. This is the first piece of the Instrument. Thank you.'],
+  ['The second piece is the Sphinx Scroll Case, kept in the Shrine of the Sleeping Sphinx, a small dungeon in the Red Dunes, beyond the tomb of Sut.','The Red Dunes lie north of the tomb of Sut. The shrine has a stair or a hatch, and it keeps a scroll case.','A map of dead stars, sealed by a sphinx. The second piece. You have more courage than most.'],
+  ['The third piece, the Copper Serpent Amulet, rests in the Shrine of the Copper Serpent in the Blue Dunes. Few have come back from there with their wits.','The Blue Dunes are east of the Red Dunes. Follow the road, and ask the wind.','A copper serpent, and it hums. The third piece is mine. I hear the Instrument beginning to sing.'],
+  ['The fourth piece is the Astrolabe, in the Undercroft of the Sand Mother in the Golden Erg. The sand there is pure gold, and it is not kind.','The Golden Erg is a sea of yellow sand. Look for the Undercroft, and take water.','The astrolabe turns! Four pieces, and I have not slept in a week. Thank you.'],
+  ['The fifth is the Jade Scarab, in the Barrow of the Pale Cartographer, in the Violet Erg. It was a cartographer like me. Be kind to her ghost.','The Violet Erg is east of the Golden Erg, beyond the shifting dunes. The barrow is small and cold.','The scarab shows a new map every hour. The fifth piece. You have my gratitude, and my admiration.'],
+  ['The sixth is the Lens of the Twin Suns, in the Sepulchre of the Twin Suns in the White Dunes. They say it shows two suns at noon.','The White Dunes lie beyond the Violet Erg. The sepulchre is cold and bright.','The lens is perfect. Through it I see where the last piece lies. The sixth piece. Thank you.'],
+  ['The last piece is the Ankh Key, in the Barrow of the Last Oasis, in the Flatlands. Take care. The key opens more than doors.','The Flatlands lie east of the White Dunes. The barrow is hard to find, and harder to leave.','The Ankh Key. All seven, and the Instrument of Dawn is whole. You have given Khemetra back its sunrise.'],
+];
+khNpc('kh_neferet','Neferet, the royal cartographer','kh_npc6_0',()=>{
+  const F=G.flags;
+  for(let i=0;i<7;i++){const q=KH_CART[i];if(qReady(q))return say(KH_CART_TALK[i][2],[['Hand over the piece.',()=>{qTurnIn(q);F['kh_gave_khart'+(i+1)]=1;if(i===6){F.khInstrument=1;return say('All seven pieces, on my table. The Instrument of Dawn hums, and for a heartbeat the whole city is lit from inside. Take this, with the thanks of Khemetra. The Instrument will point the way to something far across the sands. When it does, I will send word.',[BYE])}return say('Another piece. Come to me again, and I will tell you where the next one lies.',[BYE])}],BYE])}
+  for(let i=0;i<7;i++){const q=KH_CART[i];if(qSt(q)==='active')return say(KH_CART_TALK[i][1],[BYE])}
+  const next=KH_CART.findIndex(q=>qSt(q)===null);
+  if(next<0)return say('The Instrument of Dawn is whole, and the maps are drawn. You have done more than any cartographer could ask.',[BYE]);
+  if(next===0&&!F.khNeferetMet)return say('You are the travellers the vizier mentioned. I am Neferet, the royal cartographer. This room holds every map of every desert, and none of them is complete. A long time ago the first cartographers built the Instrument of Dawn, seven pieces that together show the shape of the whole world. The pieces were lost in the little dungeons of the deserts. I would give a great deal to see them again.',[['I would like to help.',()=>{F.khNeferetMet=1;qAccept('kh_c1');return say(KH_CART_TALK[0][0],[BYE])}],['Not now.',()=>null]]);
+  return say(KH_CART_TALK[next][0],[['We will find it.',()=>{qAccept(KH_CART[next]);return say(KH_CART_TALK[next][1],[BYE])}],['Not now.',()=>null]]);
+},{q:KH_CART});
+/* ---- the grand vizier, Hotep-Ra ---- */
+khQuest('kh_seal','The Stolen Seal','Hotep-Ra, the grand vizier','The royal seal was stolen by a band that hides in the ruined houses of the old quarter, in the north-west of Khemetra. Recover it from a boarded house.',1,khFlag('khSeal'),{gold:500,xp:1500,items:['ringW']});
+khNpc('kh_sealchest','A locked chest','chest',d=>{const F=G.flags;if(qSt('kh_seal')==='active'&&!F.khSeal){F.khSeal=1;sfx('key');return say('Under a pile of stolen silver lies a heavy gold ring with the sun of Khemetra cut into its face. This is the royal seal.',[BYE])}
+  return say(F.khSeal?'An empty chest. The stolen silver is gone.':'A chest of stolen silver and pewter. Nothing of the crown is here.',[BYE])});
+khNpc('kh_vizier','Hotep-Ra, the grand vizier','kh_npc3_5',()=>{
+  const F=G.flags,st=qSt('kh_seal');
+  if(qReady('kh_seal'))return say('You have it. Show me.',[['The royal seal is here.',()=>{qTurnIn('kh_seal');F.khWizardKnown=1;msg('The vizier names the wizard\'s hiding place. A hatch in the Potters Market now opens.','#ffe36a');return say('The seal of the king, unbroken. You have done Khemetra a great service, and a service is the only coin I accept. Now I will keep my word. The wizard Ishkander lives beneath the city, in the old cisterns. The entrance is a hatch in the Potters Market, in the north-west, hidden behind a stall. He receives few visitors. Tell him I sent you, and be careful. The cisterns are not empty.',[BYE])}],BYE]);
+  if(st==='active')return say('The seal is in a boarded house in the old quarter, in the north-west. The thieves call themselves the Hollow Hand. Bring me the ring, and the wizard is yours.',[BYE]);
+  if(st==='done'){return say(F.scoriaWizard?'Ishkander has spoken for you? Then you have friends in high places, and I am not one of them. Yet.':'The cisterns lie below the Potters Market. Ishkander does not like to be disturbed.',[BYE])}
+  if(!F.khVizierMet){F.khVizierMet=1;return say('Strangers in white robes, and not a single one of you is carrying a petition. Interesting. I am Hotep-Ra, grand vizier of Khemetra. State your business, or leave it.',[
+    ['Mayor Marigold of Anaea sent us to find the wizard Ishkander.',()=>say('Ishkander. Yes, I know the name. He has not walked in the upper city for ten years. I could tell you where he lives. I will not tell strangers. But I will tell those who have served Khemetra. The royal seal was stolen last week by a gang that hides in the ruined houses of the old quarter. Recover it, and I will give you what you ask.',[['We will recover the seal.',()=>{qAccept('kh_seal');return say('The old quarter is in the north-west. The seal is a gold ring with the sun on its face. They will have hidden it in a chest, in a boarded house. Take care.',[BYE])}],['Not now.',()=>null]])],
+    ['We are only travellers.',()=>say('Then you are welcome in the city, and you may buy bread. I have nothing else for you.',[BYE])]])}
+  return say('Do you want to take on the matter of the seal?',[['Yes. Tell me again.',()=>{if(qSt('kh_seal')===null){qAccept('kh_seal');return say('The seal is a gold ring with the sun of Khemetra on its face. The thieves, the Hollow Hand, hide in the ruined houses in the north-west of the city. Bring it to me.',[BYE])}return say('You already know the task.',[BYE])}],['Not yet.',()=>null]]);
+},{q:'kh_seal'});
+/* ---- Ishkander, in the cisterns ---- */
+khNpc('kh_ishkander','Ishkander, the wizard','kh_npc6_4',()=>{
+  const F=G.flags;
+  if(F.scoriaWizard)return say('The warrant will be torn up by the end of the week. I have written to the king, and to the one man who can read my handwriting. You may rest. Or you may look to the sea. The shipwright Menkaure is looking for brave people. He may be your road onward.',[BYE]);
+  return say('Visitors. In my cistern. I have lived here ten years, and in all that time not a soul has come to the door who was not lost or hungry. You are neither. Who sent you?',[
+    ['The grand vizier. And before him, Mayor Marigold of Anaea.',()=>say('Marigold! She once gave me a loaf of honey bread and a bad piece of advice, and I have never forgotten either. And the vizier, who does not give a name away for nothing. So you are the ones who killed Gandrick, and took his ledger to a mayor who threw you in his dungeon.',[
+      ['We were set up. We want the warrant torn up.',()=>say('The warrant is forged, and I knew it as soon as I heard the word forger. The king trusts me, though I do not know why. I will vouch for you. A letter, with my seal, in my own hand. It will reach the king within the week. Go and breathe the air of the city for a while.',[['Thank you, Ishkander.',()=>{F.scoriaWizard=1;qTurnIn('scoria');giveXP(2500);G.gold+=500;msg('Quest complete: Counsel in Scoria. +500 gold.','#ffe36a');sfx('win');return say('You are welcome. If you want a way onward, the shipwright Menkaure on the Street of Anchors is looking for people who can walk a hard road. Past the Violet Erg lies the Vaast Ocean. Nobody has seen it for a hundred years.',[BYE])}]])],
+      ['Just the wizard we were told of.',()=>say('Then you have found him. Sit down, and tell me when you are ready.',[BYE])]])],
+    ['Nobody. We got lost.',()=>say('Lost, in the cisterns, under a city of four hundred thousand. How remarkable. The way up is that way.',[BYE])]]);
+},{q:'scoria'});
+/* ---- Captain Menkaure, the shipwright, and the road to the sea ---- */
+khQuest('kh_sea','The Road to the Vaast Ocean','Captain Menkaure','Menkaure the shipwright says a tunnel runs from the east of the Violet Erg to the shore of the Vaast Ocean. Find it, walk it, and see the sea.',1,khFlag('khSeaSeen'),{gold:900,xp:4000,items:['potion4']});
+khNpc('kh_captain','Menkaure, the shipwright','kh_npc6_1',()=>{
+  const F=G.flags,st=qSt('kh_sea');
+  if(qReady('kh_sea'))return say('You have been to the shore? Tell me everything. How wide was it? What colour? Did it smell of salt?',[['We stood on the shore of the Vaast Ocean.',()=>{qTurnIn('kh_sea');F.khSeaReport=1;return say('Then the old sailors were right. There is a sea, and the road to it exists. I will start building at once. A ship takes time, and so does a crew, but I think we shall sail before the year is out. Come and see me when the keel is laid.',[BYE])}],BYE]);
+  if(st==='active')return say('The tunnel lies in the east of the Violet Erg, near the coast. Look for a cave mouth between two dunes, with sea birds over it. Do not go at noon.',[BYE]);
+  if(st==='done')return say('The ship will be called the Dawn Walker. She will not sail before the keel is laid, and the keel needs a century-old cedar, which is a problem for another day. Come back when you hear the hammers.',[BYE]);
+  return say('Menkaure, shipwright of Khemetra, and every man in this city thinks I am mad. Four hundred miles from the sea, building ships. But my grandfather sailed, and my grandfather\'s grandfather, and their charts say the Vaast Ocean lies east of the Violet Erg, at the end of a tunnel in the rock. Nobody has seen it for a hundred years.',[['We could look for the tunnel.',()=>{qAccept('kh_sea');return say('Brave souls! Go east, past the Violet Erg, to the coast. Find the tunnel and walk it to the shore. Then come back and tell me what you saw. The sea will be waiting, or it will not.',[BYE])}],['Not now.',()=>null]]);
+},{q:'kh_sea'});
+
+/* ---- src/desert/khemetra_world.js ---- */
+/* ==========================================================================
+   KHEMETRA: THE WORLD AROUND THE STORY. The palace inside, the cisterns beneath the city and the wizard's study, the tunnel
+   to the Vaast Ocean, the crowd, the markets and the gardens, and how the city reacts to what the party has done.
+   ========================================================================== */
+const KH_PALACE=199,KH_CISTERN=260,KH_STUDY=261,KH_SEATUNNEL=266;
+/* ---- the palace: three rooms behind a great hall ---- */
+function khBuildPalace(back){
+  const W=33,H=23,g=[];
+  for(let y=0;y<H;y++){g.push(new Array(W).fill('w'))}
+  const room=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)g[y][x]='.'};
+  room(1,1,10,12);room(12,1,20,12);room(22,1,31,12);   // the map room, the throne room, the vizier's study
+  room(1,14,31,21);                                    // the great hall
+  for(const x of [5,16,26])g[13][x]='.';               // three doorways
+  g[22][16]='0';
+  const rows=g.map(r=>r.join(''));
+  const decor=[],put=(role,x,y,o)=>{const k=khProp(role);if(IMG[k]&&k.startsWith('kh_'))NPC_H[k]=khPropH(role);decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}))};
+  const npc=(id,x,y,extra)=>{const kp=KH_KEEPERS[id];if(!kp)return;decor.push(Object.assign({k:khFaceKey(kp.face),x,y,block:true,npc:id,sc:kp.sc||1},extra||{}))};
+  // the throne room
+  put('throne',16,2);put('banner',13,2);put('banner',19,2);put('candle',14,4);put('candle',18,4);put('statue',12,6);put('statue',20,6);
+  put('brazier',13,9);put('brazier',19,9);
+  npc('kh_guardA',14,11);npc('kh_guardB',18,11);
+  // the map room
+  put('maptable',3,3);put('maptable',7,3);put('maptable',3,7);put('maptable',7,7);put('bookcase',1,5);put('bookcase',10,5);put('bookcase',1,9);put('bookcase',10,9);put('candle',5,1);
+  npc('kh_neferet',5,5);
+  // the study
+  put('bookcase',23,1);put('bookcase',24,1);put('bookcase',29,1);put('bookcase',30,1);put('table',27,4);put('chair',27,6);put('candle',22,5);put('candle',31,5);put('brazier',27,10);put('chest',31,9);
+  npc('kh_vizier',27,3);
+  // the great hall: guards, pages, petitioners and statues
+  for(const x of [3,9,15,17,23,29]){put('statue',x,15);}
+  for(const x of [5,11,21,27]){put('brazier',x,20)}
+  npc('kh_guardC',8,16);npc('kh_guardD',24,16);npc('kh_page',13,17);npc('kh_herald',19,17);
+  for(const [i,x,y] of [[1,4,18],[2,12,19],[3,20,19],[4,28,18]])npc('kh_noble'+i,x,y);
+  return {rows,start:{x:16,y:21,f:0},decor,lights:[[5,3],[16,4],[27,3],[8,16],[16,17],[24,16],[5,9],[16,9],[27,9]]};
+}
+for(let i=1;i<=4;i++)khNpc('kh_noble'+i,['Lady Meret','Lord Sobek','Lady Tiye','Lord Anen'][i-1],['kh_npc1_1','kh_npc2_5','kh_npc1_3','kh_npc1_2'][i-1],()=>say(KH_GOSSIP[(i*9+4)%KH_GOSSIP.length],[BYE]));
+khNpc('kh_guardA','A palace guard','kh_npc3_1',()=>say('The throne room is closed to the public. The king is away at his summer court. The vizier receives visitors in his study, to the east. The cartographer is in the map room, to the west.',[BYE]),{sc:1});
+khNpc('kh_guardB','A palace guard','kh_npc3_1',()=>say('Whatever you came to say to the king, say it to the vizier instead. He answers for him.',[BYE]));
+khNpc('kh_guardC','A palace guard','kh_npc3_0',()=>say('Welcome to the palace of Khemetra. Mind the statues. Some of them are real kings, and the kings do not like being touched.',[BYE]));
+khNpc('kh_guardD','A palace guard','kh_npc3_0',()=>say('I have stood in this hall for nine years. I have counted the tiles. There are eleven thousand three hundred and six.',[BYE]));
+khNpc('kh_page','A palace page','kh_npc6_5',()=>say('The grand vizier is in the east room. The cartographer is in the west. If you want the king, he is out of town, and I am not allowed to say where.',[BYE]));
+khNpc('kh_herald','The royal herald','kh_npc3_4',()=>say('I announce the arrival of important persons. At the moment, I am announcing nothing, because nobody is important. Please wait.',[BYE]));
+/* ---- the cisterns beneath the city, and the wizard's study ---- */
+function khBuildCisterns(){
+  const W=41,H=31,g=[],rng=khRng(909);
+  for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
+  const seen=new Set(['1,1']),stack=[[1,1]];g[1][1]='.';
+  while(stack.length){
+    const [cx,cy]=stack[stack.length-1],nb=[[2,0],[-2,0],[0,2],[0,-2]].map(([a,b])=>[cx+a,cy+b,a,b]).filter(([x,y])=>x>0&&y>0&&x<W-1&&y<H-1&&!seen.has(x+','+y));
+    if(!nb.length){stack.pop();continue}
+    const [nx,ny,a,b]=nb[(rng()*nb.length)|0];g[cy+b/2][cx+a/2]='.';g[ny][nx]='.';seen.add(nx+','+ny);stack.push([nx,ny]);
+  }
+  // chambers cut into the maze
+  const rooms=[[3,5,7,8],[15,3,19,7],[27,9,33,13],[5,17,10,21],[19,19,25,24],[31,21,37,27]];
+  for(const [x0,y0,x1,y1] of rooms)for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)g[y][x]='.';
+  // the way in is at the bottom, the way on to the study at the far top corner
+  for(let y=H-2;y<H;y++)g[y][1]='.';
+  g[H-1][1]='0';
+  g[1][W-2]='.';g[0][W-2]='1';
+  const rows=g.map(r=>r.join('').replace(/#/g,'w'));
+  const decor=[],enemies=[],items=[];
+  const free=(x,y)=>rows[y][x]==='.';
+  const cell=(x,y)=>({k:'bones',x,y,block:false,walk:true});
+  for(let i=0;i<40;i++){const x=1+((rng()*(W-2))|0),y=1+((rng()*(H-2))|0);if(free(x,y)&&Math.abs(x-1)+Math.abs(y-H+2)>6)decor.push(cell(x,y))}
+  const types=['skel','skel','ghost','scorpion','bat','skel','ghost','mummy'];
+  for(let i=0;i<22;i++){let x,y,t=0;do{x=1+((rng()*(W-2))|0);y=1+((rng()*(H-4))|0);t++}while((!free(x,y)||Math.abs(x-1)+Math.abs(y-H+2)<10)&&t<80);if(free(x,y))enemies.push({t:types[i%types.length],x,y,lvl:16})}
+  for(const [x,y] of [[5,6],[17,5],[30,11],[7,19],[22,22],[34,24]])if(free(x,y))decor.push({k:'chest',x,y,block:true,deco:false});
+  for(const [x,y] of [[3,8],[19,3],[27,13],[10,21],[25,24],[37,27]])if(free(x,y))items.push({k:'potion',x,y});
+  return {rows,start:{x:1,y:H-2,f:0},decor,enemies,items,W,H};
+}
+function khBuildStudy(){
+  const W=15,H=11,g=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=(y===0||x===0||x===W-1||y===H-1)?'w':'.';g.push(r)}
+  g[H-1]=g[H-1].slice(0,7)+'0'+g[H-1].slice(8);
+  const decor=[],put=(role,x,y,o)=>{const k=khProp(role);if(IMG[k]&&k.startsWith('kh_'))NPC_H[k]=khPropH(role);decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}))};
+  for(const x of [1,2,3,11,12,13])put('bookcase',x,1);
+  put('table',7,4);put('chair',6,4);put('chair',8,4);put('candle',2,5);put('candle',12,5);put('brazier',3,8);put('brazier',11,8);put('chest',13,8);put('cushions',1,6);put('maptable',12,3);
+  decor.push({k:khFaceKey('kh_npc6_4'),x:7,y:2,block:true,npc:'kh_ishkander',sc:1});
+  return {rows:g,start:{x:7,y:H-2,f:0},decor,lights:[[3,2],[11,2],[7,5],[3,8],[11,8]]};
+}
+/* ---- the tunnel to the Vaast Ocean: a short, bright cave ending at the shore ---- */
+function khBuildSeaTunnel(){
+  const W=31,H=19,g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
+  const cut=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)g[y][x]='.'};
+  cut(14,15,16,17);cut(14,11,24,13);cut(22,6,24,13);cut(10,4,24,6);cut(6,2,10,8);cut(2,1,8,3);cut(1,1,3,10);
+  g[H-1][15]='0';
+  const rows=g.map(r=>r.join('').replace(/#/g,'w'));
+  const decor=[{k:'dbones',x:12,y:5,block:false,walk:true},{k:'dbones',x:23,y:9,block:false,walk:true},{k:'dobelisk',x:3,y:8,block:true,deco:true,sc:.7}];
+  return {rows,start:{x:15,y:H-2,f:0},decor,lights:[[15,16],[18,12],[23,8],[16,5],[8,3],[2,5]],W,H};
+}
+let KH_WORLD_DONE=false;
+function khBuildWorld(){
+  if(KH_WORLD_DONE)return;KH_WORLD_DONE=true;
+  const wall=khInteriorWall('palace'),back=(to,x,y,f)=>({to,x,y,f,tex:'in'});
+  const pal=khBuildPalace();
+  LEVELS[KH_PALACE]={rows:pal.rows,start:pal.start,enemies:[],items:[],decor:pal.decor,day:0,amb:.72,floor:'kh2',ceil:'beam',name:'The Palace of Khemetra',label:'Palace',lights:pal.lights,portals:[back(44,KH_PALACE_FRONT.x,KH_PALACE_FRONT.y,KH_PALACE_FRONT.f)],diff:16,chars:wall?{w:wall}:undefined};
+  const cis=khBuildCisterns();
+  LEVELS[KH_CISTERN]={rows:cis.rows,start:cis.start,enemies:cis.enemies,items:cis.items,decor:cis.decor,day:0,amb:.28,floor:'kh3',ceil:'beam',name:'The Cisterns beneath Khemetra',label:'Cisterns',lights:[[1,28],[11,27],[21,16],[31,5],[39,2]],portals:[back(44,KH_HATCH.x,KH_HATCH.y+1,2),back(KH_STUDY,7,9,0)],diff:17,noExtras:true,chars:{w:khInteriorWall('cellar')||undefined}};
+  if(!LEVELS[KH_CISTERN].chars.w)delete LEVELS[KH_CISTERN].chars;
+  const st=khBuildStudy();
+  LEVELS[KH_STUDY]={rows:st.rows,start:st.start,enemies:[],items:[],decor:st.decor,day:0,amb:.7,floor:'kh2',ceil:'beam',name:"Ishkander's Study",label:'The Wizards Study',lights:st.lights,portals:[back(KH_CISTERN,KH_CIST_END.x,KH_CIST_END.y,2)],diff:17,chars:wall?{w:wall}:undefined};
+  const tn=khBuildSeaTunnel();
+  LEVELS[KH_SEATUNNEL]={rows:tn.rows,start:tn.start,enemies:[],items:[],decor:tn.decor,day:.55,amb:.55,floor:'sand',ceil:'cloud',name:'The Tunnel to the Vaast Ocean',label:'Sea Tunnel',lights:tn.lights,portals:[back(62,KH_SEA_MOUTH.x,KH_SEA_MOUTH.y+1,2)],diff:20,noExtras:true,seaTunnel:true};
+  // the mouth of the tunnel, in the east of the Violet Erg
+  const V=LEVELS[62];V.decor=V.decor||[];
+  V.decor.push({k:'dburrow',x:KH_SEA_MOUTH.x,y:KH_SEA_MOUTH.y,block:true,enter:{to:KH_SEATUNNEL,x:tn.start.x,y:tn.start.y,f:0}});
+}
+const KH_PALACE_FRONT={x:200,y:206,f:2},KH_HATCH={x:108,y:112},KH_CIST_END={x:39,y:2},KH_SEA_MOUTH={x:292,y:150};
+
+/* ---- src/desert/khemetra_crowd.js ---- */
+/* ==========================================================================
+   KHEMETRA: THE CROWD. Markets with stalls and sellers, gardens and fountains, palms along the wide streets, vases and
+   urns, lamps, cats in the alleys, the people of the streets, and the few who mean harm.
+   ========================================================================== */
+khNpc('kh_citizen','A citizen','kh_npc1_0',d=>{
+  const F=G.flags,k='kc_'+d.x+'_'+d.y,i=(F[k]||0),L=d.kl||[0,1,2];
+  F[k]=i+1;
+  return say(KH_GOSSIP[L[i%L.length]%KH_GOSSIP.length],[BYE]);
+});
+function khCrowd(C,L){
+  const W=C.W,H=C.H,idx=C.idx,rng=khRng(31337);
+  const open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&!C.solid[idx(x,y)];
+  const d3=new Uint8Array(W*H),d5=new Uint8Array(W*H);
+  for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){
+    if(!open(x,y))continue;
+    let a=true;for(let dy=-1;dy<=1&&a;dy++)for(let dx=-1;dx<=1;dx++)if(!open(x+dx,y+dy)){a=false;break}
+    if(!a)continue;d3[idx(x,y)]=1;
+    let b=true;for(let dy=-2;dy<=2&&b;dy++)for(let dx=-2;dx<=2;dx++)if(!open(x+dx,y+dy)){b=false;break}
+    if(b)d5[idx(x,y)]=1;
+  }
+  const occ=new Uint8Array(W*H);        // decor, people or a reserved cell
+  const reserve=(x,y,r)=>{for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){const xx=x+dx,yy=y+dy;if(xx>=0&&yy>=0&&xx<W&&yy<H)occ[idx(xx,yy)]=1}};
+  // doors, the palace gate, the gate of the city and the hatch keep clear
+  for(const m of C.modules)if(m.doorCells&&m.lvl!==undefined){for(const [x,y] of m.doorCells){const d=KH_DIRS[m.face];reserve(x+d[0],y+d[1],2)}}
+  reserve(KH_PALACE_FRONT.x,KH_PALACE_FRONT.y,3);reserve(KH.CX,H-KH.WALL-4,6);reserve(KH_HATCH.x,KH_HATCH.y,2);
+  const decor=L.decor,enemies=L.enemies;
+  const add=(o)=>{decor.push(o);occ[idx(o.x,o.y)]=1;return o};
+  const freeAt=(x,y,need3)=>open(x,y)&&C.reach[idx(x,y)]&&!occ[idx(x,y)]&&(!need3||d3[idx(x,y)]);
+  const near=(x,y,rad,need3)=>{for(let r=0;r<=rad;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(freeAt(x+dx,y+dy,need3))return [x+dx,y+dy]}return null};
+  const prop=(role,x,y,o)=>{const k=khProp(role);if(IMG[k]&&k.startsWith('kh_'))NPC_H[k]=khPropH(role);return add(Object.assign({k,x,y,block:true,deco:true},o||{}))};
+  const vases=['vase0','vase1','vase2','vase3'];
+  // ---- the squares: a fountain or an obelisk in the middle, stalls in the markets ----
+  for(const p of C.plazas){
+    const cx=(p.x0+p.x1)>>1,cy=(p.y0+p.y1)>>1;
+    reserve(cx,cy,0);
+    if(p.z===2){prop('fountain',cx,cy);for(const [dx,dy] of [[-3,0],[3,0],[0,-3],[0,3]]){const q=near(cx+dx,cy+dy,1,true);if(q)prop('bench',q[0],q[1],{walk:true,block:false})}}
+    else if(p.z===4){prop('obelisk',cx,cy);for(const [dx,dy] of [[-4,0],[4,0]]){const q=near(cx+dx,cy+dy,1,true);if(q)prop('statue',q[0],q[1])}}
+    else if(p.z===5){prop('fountain',cx,cy)}
+    else if(p.z===3){prop('well',cx,cy)}
+    else if(p.z===1){
+      // rows of stalls with aisles between them, and a seller at each
+      const roles=['stallA','stallB','stallC','stallD','stallE','stallF'],goods=['melons','amphorae','hay','veg','carpets','copper'];
+      let n=0;
+      for(let y=p.y0+3;y<=p.y1-3;y+=5)for(let x=p.x0+3;x<=p.x1-3;x+=5){
+        if(Math.abs(x-cx)<2&&Math.abs(y-cy)<2)continue;
+        if(!freeAt(x,y,true))continue;
+        prop(roles[(n+((x*7+y)>>3))%6],x,y);
+        const sx=freeAt(x,y+1,true)?[x,y+1]:near(x,y+1,1,true);
+        if(sx&&n%2===0)khAddCitizen(decor,occ,idx,sx[0],sx[1],'market',rng);
+        if(n%3===0){const q=near(x+2,y,1,true);if(q)prop(goods[n%6],q[0],q[1],{walk:true,block:false})}
+        n++;
+      }
+    }
+  }
+  // ---- the hatch to the cisterns, hidden behind the potters stalls ----
+  const hq=near(KH_HATCH.x,KH_HATCH.y,2,false)||[KH_HATCH.x,KH_HATCH.y];
+  KH_HATCH.x=hq[0];KH_HATCH.y=hq[1];
+  decor.push({k:'dhatch',x:hq[0],y:hq[1],block:true,enter:{to:KH_CISTERN,x:1,y:29,f:0},hatch:true});occ[idx(hq[0],hq[1])]=1;
+  // ---- palms, vases and lamps along the streets ----
+  for(let y=4;y<H-4;y++)for(let x=4;x<W-4;x++){
+    const i=idx(x,y);if(occ[i]||!open(x,y)||!C.reach[i])continue;
+    const r=khHash(x,y,11);
+    if(d3[i]&&!d5[i]){ // a cell one in from the wall of a wide street
+      if(r<.16){add({k:['dpalm0','dpalm1','dpalm2','dpalm3'][((x*3+y)>>1)&3],x,y,block:true,sc:.9+khHash(x,y,12)*.4})}
+      else if(r<.22){add({k:vases[(x+y)&3],x,y,block:false,walk:true,sc:.9+khHash(x,y,13)*.3})}
+      else if(r<.235){add({k:'urn',x,y,block:false,walk:true})}
+    }else if(d5[i]){
+      const z=C.zone[i];
+      if(z===2&&r<.05)add({k:['dpalm0','dpalm1','dpalm2','dpalm3'][(x+y)&3],x,y,block:true,sc:.9+khHash(x,y,12)*.5});
+      else if(z===6&&r<.03)add({k:['dpalm0','dpalm2'][(x+y)&1],x,y,block:true,sc:1.1});
+      else if(z===0&&r<.012)add({k:'dpalm'+((x+y)&3),x,y,block:true});
+      else if(r<.01)add({k:vases[(x*5+y)&3],x,y,block:false,walk:true});
+      else if(r>.995)add({k:'lamp',x,y,block:false,walk:true});
+    }
+  }
+  // lamps down the great avenue
+  for(let y=250;y<H-10;y+=10)for(const x of [KH.CX-5,KH.CX+5]){const q=near(x,y,1,false);if(q)add({k:'lamp',x:q[0],y:q[1],block:false,walk:true})}
+  // ---- cats in the alleys ----
+  const cats=[[40,180],[330,120],[190,60],[240,350]];
+  cats.forEach(([cx,cy],ci)=>{
+    let best=null;for(let r=0;r<40&&!best;r++)for(let dy=-r;dy<=r&&!best;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=cx+dx,y=cy+dy;if(!freeAt(x,y,false))continue;
+      let w=0;for(const [a,b] of KH_DIRS)if(!open(x+a,y+b))w++;if(w>=1&&!occ[idx(x,y)]){best=[x,y];break}}
+    if(best)add({k:khFaceKey('kh_anim1_0'),x:best[0],y:best[1],block:true,npc:'kh_cat',cat:ci,sc:.8});
+  });
+  // ---- the named people of the quests, each in their own corner ----
+  const anchors={kh_sabah:[60,330],kh_hapi:[196,102],kh_dalila:[288,110],kh_cheops:[196,322],kh_rami:[203,386],kh_eman:[104,106],kh_usi:[196,250],kh_yara:[300,196],kh_pia:[108,298],kh_anuket:[204,104],kh_meryt:[204,246],kh_nadia:[286,298]};
+  for(const [id,[ax,ay]] of Object.entries(anchors)){
+    const q=near(ax,ay,8,true);if(!q)continue;const kp=KH_KEEPERS[id];if(!kp)continue;
+    add({k:khFaceKey(kp.face),x:q[0],y:q[1],block:true,npc:id,sc:kp.sc||1});
+  }
+  { // the granary keeper waits outside the granary
+    const b=KH_BUILDINGS.find(x=>x.id==='granary');if(b&&b.front){const q=near(b.front[0],b.front[1],6,true);if(q){const kp=KH_KEEPERS.kh_gebu;add({k:khFaceKey(kp.face),x:q[0],y:q[1],block:true,npc:'kh_gebu',sc:1})}}
+  }
+  // ---- the gate guards, the palace guards ----
+  for(const [x,y] of [[196,388],[204,388]]){const q=near(x,y,2,true);if(q)add({k:'kh_npc3_0',x:q[0],y:q[1],block:true,npc:'kh_gateguard',sc:1})}
+  for(const [x,y] of [[196,236],[204,236],[196,241],[204,241]]){const q=near(x,y,2,true);if(q)add({k:'kh_npc3_1',x:q[0],y:q[1],block:true,npc:'kh_gateguard',sc:1})}
+  // ---- the people of the streets ----
+  let crowd=0;const want=520;
+  for(let tries=0;tries<400000&&crowd<want;tries++){
+    const x=6+((rng()*(W-12))|0),y=6+((rng()*(H-12))|0),i=idx(x,y);
+    if(!d3[i]||occ[i]||!C.reach[i])continue;
+    if(C.zone[i]===6&&rng()<.7)continue;
+    khAddCitizen(decor,occ,idx,x,y,(rng()<.12)?'guard':'street',rng);crowd++;
+  }
+  // ---- those who mean harm: a thief in the Old Square, wild dogs and the restless dead in the old quarter ----
+  const enemyAt=(cx,cy,rad,t,lvl)=>{const q=near(cx,cy,rad,true);if(q&&Math.abs(q[0]-KH.CX)+Math.abs(q[1]-H)>60){enemies.push({t,x:q[0],y:q[1],lvl:lvl||16});occ[idx(q[0],q[1])]=1}};
+  khKeepOpen(C,L);
+  enemyAt(60,60,6,'nomad2',17);
+  for(const [x,y] of [[70,90],[40,100],[90,60],[30,40],[100,100],[56,120]])enemyAt(x,y,12,'dwolf',16);
+  for(const [x,y] of [[80,40],[50,80],[110,70],[34,60],[96,92],[64,100]])enemyAt(x,y,12,'dskeleton',16);
+}
+/* nothing the crowd or the markets place may seal off a part of the city: blocking things that wall off reachable ground are made walk-through */
+function khKeepOpen(C,L){
+  const W=C.W,H=C.H,idx=C.idx,blk=new Uint8Array(W*H),by=new Map();
+  for(const d of L.decor)if(d.block){blk[idx(d.x,d.y)]=1;by.set(idx(d.x,d.y),d)}
+  for(let pass=0;pass<60;pass++){
+    const seen=new Uint8Array(W*H),q=[idx(KH.CX,H-KH.WALL-4)];seen[q[0]]=1;
+    while(q.length){const c=q.pop(),x=c%W,y=(c/W)|0;for(const [dx,dy] of KH_DIRS){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;const i=idx(nx,ny);if(seen[i]||C.solid[i]||blk[i])continue;seen[i]=1;q.push(i)}}
+    let fixed=0;
+    for(const [i,d] of by){
+      if(!blk[i])continue;
+      const x=i%W,y=(i/W)|0;let a=false,b=false;
+      for(const [dx,dy] of KH_DIRS){const j=idx(x+dx,y+dy);if(C.solid[j])continue;if(seen[j])a=true;else if(C.reach[j]&&!blk[j])b=true}
+      if(a&&b){blk[i]=0;d.block=false;d.walk=true;by.delete(i);fixed++}
+    }
+    if(!fixed)break;
+  }
+  // anything still unreachable: free every blocker in sight of it
+  const seen=new Uint8Array(W*H),q=[idx(KH.CX,H-KH.WALL-4)];seen[q[0]]=1;
+  while(q.length){const c=q.pop(),x=c%W,y=(c/W)|0;for(const [dx,dy] of KH_DIRS){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;const i=idx(nx,ny);if(seen[i]||C.solid[i]||blk[i])continue;seen[i]=1;q.push(i)}}
+  let lost=0;for(let i=0;i<W*H;i++)if(C.reach[i]&&!seen[i]&&!blk[i])lost++;
+  L.khLost=lost;
+}
+/* a person of the street: a face, a name, and three things they have to say */
+function khAddCitizen(decor,occ,idx,x,y,kind,rng){
+  const F=KH_FACES,pick=a=>a[(rng()*a.length)|0];
+  const face=kind==='guard'?pick(F.guards):kind==='market'?pick(F.men.concat(F.women)):rng()<.1?pick(F.kids):rng()<.06?pick(F.poor):rng()<.5?pick(F.men):pick(F.women);
+  const nm=KH_NAMES[(rng()*KH_NAMES.length)|0]+(kind==='market'?' the seller':kind==='guard'?' of the watch':' '+KH_TITLES[(rng()*KH_TITLES.length)|0]);
+  const kl=[(rng()*KH_GOSSIP.length)|0,(rng()*KH_GOSSIP.length)|0,(rng()*KH_GOSSIP.length)|0];
+  decor.push({k:khFaceKey(face),x,y,block:true,npc:'kh_citizen',kname:nm,kl,sc:(KH_NPC_H[face]?KH_NPC_H[face]/.82:1)*(.95+rng()*.1)});
+  occ[idx(x,y)]=1;
+}
+khNpc('kh_gateguard','A guard of the watch','kh_npc3_0',()=>say('Welcome to Khemetra, the Golden City. Keep your blades sheathed in the streets, and your purses close. The palace is at the north end of the great avenue.',[BYE]));
+/* what the city looks like after what the party has done */
+function khApplyState(){
+  const F=G.flags;
+  for(const d of G.decor){
+    if(d.hatch)d.found=!F.khWizardKnown;
+    if(d.npc==='kh_cat'&&F.khCats&&F.khCats[d.cat]){d.found=true;d.block=false}
+  }
+  buildDecorMap();
+}
+
 /* ---- src/desert/dunes.js ---- */
 /* ==========================================================================
    THE SAND ROAD: dune walls, the cliff, the doorway into the tomb, and the one function that makes it all
@@ -8560,10 +9710,25 @@ Object.assign(CUTS,{
     {who:hn(1),text:'I am only glad to see something built by living hands.'}],
   cityGate:()=>[
     {text:'The old road ends at a gate three times the height of a house. Its doors are cedar, bound with bronze and studded with gold, and carved above them is a winged sun with a lion on either side. A hot wind blows under the doors.'},
-    {who:hn(0),text:'Shut tight. Barred from the inside.'},
-    {who:hn(1),text:'Somebody is in there, though. Look at the smoke over the roofs.'},
-    {who:hn(2),text:'Then we will knock until they open. We have come a long way for this.'},
-    {text:'Khemetra waits behind its gates. The road to it was long, and what lies within is another story.'}],
+    {who:hn(0),text:'The doors stand open. Look at the smoke over the roofs, and at the gold on those towers.'},
+    {who:hn(1),text:'Somebody keeps this place. Somebody keeps it well.'},
+    {who:hn(2),text:'Then we walk in, and we ask for the wizard. We have come a long way for this.'},
+    {text:'Khemetra waits beyond the open gate.'}],
+  khArrive:()=>[
+    {text:'The gate of Khemetra closes behind the party, and the sound of the desert goes with it. Ahead, a great avenue of pale stone runs north between white houses trimmed with gold, and at the end of it, so far away that it seems to stand in the sky, rises a palace with a spire of gold.'},
+    {who:hn(0),text:'I have never seen a city this big. I did not know a wall could go on this long.'},
+    {who:hn(1),text:'Look at the roofs. Domes, towers, gardens on the tops of houses, and palms everywhere. Somebody loved this place.'},
+    {who:hn(3),text:'A city this size will have a wizard in it somewhere. And a vizier, and a market, and a lot of pockets to watch.'},
+    {who:hn(2),text:'Then we start with the palace. Mayor Marigold said the king listens to the wizard. If anyone knows where he is, it will be the palace.'},
+    {text:'Khemetra, the Golden City. Four hundred thousand souls, and not one of them has heard of you.'}],
+  khTunnel:()=>[
+    {text:'The cave is dry and bright. Light falls in from somewhere ahead, white and flickering, and the air smells of salt for the first time in the party\'s lives.'},
+    {who:hn(1),text:'Salt. I know that smell from the old stories. That is the sea.'}],
+  khSea:()=>[
+    {text:'The tunnel opens. Beyond the rock lies a grey-blue plain that runs to the end of the world, wrinkled with waves and silver where the sun strikes it. Sea birds wheel over a shore of white shingle. The Vaast Ocean.'},
+    {who:hn(0),text:'It does not end. It just does not end.'},
+    {who:hn(2),text:'Menkaure was right. The sea is real, and the road to it is open. We should tell him.'},
+    {text:'The party stands on the shore of the Vaast Ocean. The road to Khemetra and the shipwright is long, but it is the road to everything that lies beyond.'}],
   sandRoad:()=>[
     {text:"Anaea's east gate closes behind the party. The road runs on between walls of green, and the birdsong thins. A dry wind comes down it from somewhere far to the north."},
     {who:hn(0),text:"Smell that? Dust and hot stone. We are a long way from Greendale's flowers."},
@@ -8622,6 +9787,7 @@ function freeNear(x,y,rad,count){
   return out;
 }
 function desertBump(nx,ny,g){
+  if(LEVEL===44&&g>=1000&&khBump(nx,ny,g))return true;
   if(TERR_BLOCK&&TERR_BLOCK[ny*MW+nx]){sfx('bump');msg('The mountainside is too steep to climb.','#d8c8a0');return true}
   { // the door in the side of a mound: walk into it
     const d=G.decor.find(q=>q.enter&&q.x===nx&&q.y===ny&&!q.found);
@@ -8653,6 +9819,7 @@ function springTrap(d){
   }
 }
 function desertStep(nx,ny){
+  if(LEVEL===266&&ny<=3&&nx<=5&&!G.flags.khSeaSeen){G.flags.khSeaSeen=1;startCut('khSea')}
   if(LEVEL===42){const d=G.decor.find(q=>q.trap&&!q.opened&&q.x===nx&&q.y===ny);if(d)springTrap(d)}
   if(LEVEL===42){const d=G.decor.find(q=>q.walk&&!q.block&&!q.stepLooted&&CONTAINERS.includes(q.k)&&q.x===nx&&q.y===ny);if(d){d.stepLooted=true;openLoot(d)}} // treasure and vases are walked through; stepping on one opens it once
 }
@@ -8679,6 +9846,7 @@ function desertLoot(d){
   return null;
 }
 function desertApplyState(){
+  if(LEVEL===44){khApplyState();return}
   if(LEVEL!==42)return;
   setSunDoor();
   for(const s of LEVEL42_DATA.secrets||[])if(G.flags['sec_'+s.id])G.grid[s.y][s.x]=0;
