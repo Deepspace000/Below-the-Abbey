@@ -168,3 +168,27 @@ function dsDoorSocketed(n){ // the great sealed door: a winged sun, four sockets
     else{x.fillStyle='rgba(232,192,74,.25)';x.beginPath();x.arc(px,py,8,0,TAU);x.fill()}}
   return {d:pix(c),c};
 }
+
+/* ---------- the wall and the gate of Khemetra ---------- */
+function dsCityWallTile(){
+  const [c,x]=tcv(),r=abRng(808);
+  const g=x.createLinearGradient(0,0,0,TS);g.addColorStop(0,'#e8cc8c');g.addColorStop(.6,'#d4aa66');g.addColorStop(1,'#a07a40');x.fillStyle=g;x.fillRect(0,0,TS,TS);
+  for(let k=0,y=0;y<TS;k++){const h=24+((r()*8)|0);let xx=-((k%2)?36:0);while(xx<TS){const w=60+((r()*24)|0),sh=r()*22-11;x.fillStyle='rgba('+(200+sh)+','+(160+sh)+','+(100+sh)+',.35)';x.fillRect(xx+2,y+2,w-4,h-4);xx+=w}y+=h}
+  x.strokeStyle='rgba(70,44,16,.5)';x.lineWidth=1.6;for(let y=26;y<TS;y+=26){x.beginPath();x.moveTo(0,y);x.lineTo(TS,y);x.stroke()}
+  dsBand(x,52,12,TS);
+  x.fillStyle='#17110a';for(const px of [24,64,104]){x.fillRect(px-3,86,6,22)} // arrow slits
+  x.fillStyle='rgba(255,246,210,.18)';x.fillRect(0,0,TS,4);x.fillStyle='rgba(40,24,8,.25)';x.fillRect(0,TS-14,TS,14);
+  return {d:pix(c)};
+}
+function dsCityGate(){
+  const [c,x]=tcv();
+  x.fillStyle='#caa064';x.fillRect(0,0,TS,TS);dsBand(x,0,12,TS);
+  x.fillStyle='#8a6a38';x.beginPath();x.moveTo(14,TS);x.lineTo(14,52);x.quadraticCurveTo(14,14,64,10);x.quadraticCurveTo(114,14,114,52);x.lineTo(114,TS);x.closePath();x.fill();x.strokeStyle='#17120e';x.lineWidth=2.5;x.stroke();
+  for(const k of [-1,1]){const g=x.createLinearGradient(k<0?20:66,0,k<0?62:108,0);g.addColorStop(0,'#6a4a2a');g.addColorStop(.5,'#8a6238');g.addColorStop(1,'#4a321c');x.fillStyle=g;x.fillRect(k<0?20:66,34,42,TS-34);x.strokeRect(k<0?20:66,34,42,TS-34);
+    for(let yy=44;yy<TS;yy+=16){x.fillStyle='#26201a';x.fillRect(k<0?20:66,yy,42,5)}
+    for(let i=0;i<3;i++)for(let j=0;j<5;j++){x.fillStyle='#e0b038';x.beginPath();x.arc((k<0?28:74)+i*13,40+j*17,2.2,0,TAU);x.fill()}
+    x.fillStyle='#e0b038';x.beginPath();x.arc(k<0?54:74,86,8,0,TAU);x.fill();x.stroke();x.fillStyle='#17120e';x.beginPath();x.arc(k<0?54:74,86,3,0,TAU);x.fill()}
+  x.fillStyle='#17120e';x.fillRect(62,34,4,TS-34);
+  x.fillStyle='#e0b038';x.beginPath();x.arc(64,24,9,0,TAU);x.fill();x.strokeStyle='#b02a2a';x.lineWidth=2;x.stroke();
+  return addTex(pix(c));
+}

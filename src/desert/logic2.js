@@ -48,7 +48,7 @@ function desertStep(nx,ny){
 }
 function desertDisc(it){
   const n=+it.k.slice(7);G.flags.discs=(G.flags.discs||0)|(1<<n);it.taken=true;sfx('key');
-  const c=sunDiscCount();msg('You lift the golden sun disc. That is '+c+' of 4.','#ffe070');setSunDoor();
+  const c=sunDiscCount();msg('You lift the golden sun disc: sun disc '+n+' of 4. You have '+c+'.','#ffe070');setSunDoor();
   if(c>=4)msg('All four suns are yours. The great door in the Hall of Eternity will answer them.','#ffe9a0');
   if(n===4&&!G.flags.disc4Trap){G.flags.disc4Trap=1;msg('The sand stirs all round the pedestal. Bandaged shapes rise out of it!','#e8a090');for(const [x,y] of freeNear(it.x,it.y,3,3))addEnemy('mummy',x,y,true)}
 }

@@ -153,7 +153,7 @@ function makeDesertSprites(){
   }
   IMG.dcactus=dsCactus();NPC_H.dcactus=1.1;IMG.ddead=dsDeadTree();NPC_H.ddead=1.2;IMG.dbones=dsBones();NPC_H.dbones=.3;
   IMG.dburrow=dsBurrow();NPC_H.dburrow=.62;
-  IMG.dobelisk=dsObelisk();NPC_H.dobelisk=2.4;IMG.dsphinx=dsSphinx();NPC_H.dsphinx=1.9;IMG.dcity=dsCity();NPC_H.dcity=9;
+  IMG.dobelisk=dsObelisk();NPC_H.dobelisk=2.4;IMG.dsphinx=dsSphinx();NPC_H.dsphinx=1.9;IMG.dcity=dsCity();NPC_H.dcity=13;
 }
 
 function dsBurrow(){ // a low mound of sand, a door of old wood set into it under a stone lintel: easy to miss from far off

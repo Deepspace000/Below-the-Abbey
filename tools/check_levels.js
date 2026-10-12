@@ -4,10 +4,10 @@ const fs=require('fs'),path=require('path');
 const src=f=>fs.readFileSync(path.join(__dirname,'..','src','desert',f),'utf8');
 const TAU=Math.PI*2,clamp=(v,a,b)=>v<a?a:v>b?b:v;
 function hash2(x,y,s){let h=Math.imul(x|0,374761393)+Math.imul(y|0,668265263)+Math.imul(s|0,1274126177);h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967296}
-const code='const DS_MAGIC_TOMB=["a","b","c"],EMBERS_LEVELS=[];\n'+src('road.js')+'\n'+src('tomb.js')+'\n'+src('burrows.js')+'\nreturn {LEVELS,SANDROAD,TOMB,LEVEL41_DATA,LEVEL42_DATA};';
+const code='const DS_MAGIC_TOMB=["a","b","c"],EMBERS_LEVELS=[];\n'+src('road.js')+'\n'+src('tomb.js')+'\n'+src('burrows.js')+'\n'+src('redsands.js')+'\nreturn {LEVELS,SANDROAD,TOMB,LEVEL41_DATA,LEVEL42_DATA,REDDUNES,LEVEL43_DATA};';
 const LEVELS={};
 const fn=new Function('LEVELS','hash2','clamp','TAU',code);
-const {SANDROAD,TOMB,LEVEL41_DATA,LEVEL42_DATA}=fn(LEVELS,hash2,clamp,TAU);
+const {SANDROAD,TOMB,LEVEL41_DATA,LEVEL42_DATA,REDDUNES,LEVEL43_DATA}=fn(LEVELS,hash2,clamp,TAU);
 
 function reach(rows,decor,start,opened){
   const H=rows.length,W=rows[0].length,block=new Set(decor.filter(d=>d.block).map(d=>d.x+','+d.y));
@@ -63,6 +63,14 @@ for(let k=0;k<10;k++){
   for(const e of L.enemies)if(L.rows[e.y][e.x]!=='.'||L.decor.some(d=>d.block&&d.x===e.x&&d.y===e.y))fail('burrow '+k+' enemy blocked '+e.t+' '+e.x+','+e.y);
   const road=reach(SANDROAD.rows,SANDROAD.decor,[SANDROAD.start.x,SANDROAD.start.y],new Set());
   if(!road(spot.x,spot.y+1))fail('burrow '+k+' mound front not reachable on the road at '+spot.x+','+spot.y);
+}
+{ // the red dunes
+  const D=REDDUNES,rr=reach(D.rows,D.decor,[D.start.x,D.start.y],new Set());
+  console.log('red dunes',D.rows[0].length+'x'+D.rows.length,'decor',D.decor.length,'enemies',D.enemies.length,'items',D.items.length);
+  const gx=D.rows[6].indexOf('1');
+  if(gx<0)fail('no city gate in the red dunes');else if(!rr(gx,7))fail('the city gate cannot be reached');
+  for(const d of D.decor.filter(d=>d.k==='chest'))if(![[0,1],[0,-1],[1,0],[-1,0]].some(([dx,dy])=>rr(d.x+dx,d.y+dy)))fail('red dunes chest not reachable at '+d.x+','+d.y);
+  for(const e of D.enemies)if(D.rows[e.y][e.x]!=='.')fail('red dunes enemy in a wall '+e.t);
 }
 console.log('burrows at',SANDROAD.burrows.map(b=>b.x+','+b.y).join(' '));
 console.log(bad?bad+' problem(s)':'all good');

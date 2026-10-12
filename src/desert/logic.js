@@ -2,6 +2,18 @@
    THE SAND ROAD: the story beats (cutscenes) and the small rules of the desert and the tomb
    ========================================================================== */
 Object.assign(CUTS,{
+  citySeen:()=>[
+    {text:'The dunes climb, and beyond the last red ridge the horizon stops being empty. A wall of golden stone runs from one edge of the world to the other, and above it stand towers and domes and a stepped temple glowing in the heat haze.'},
+    {who:hn(0),text:'It is real. A whole city, out here in the middle of nothing.'},
+    {who:hn(3),text:'Khemetra. The caravan people called it the Golden City of the Sun, and I thought it was a story to sell water with.'},
+    {who:hn(2),text:'Stories do not have walls that tall. Keep your eyes open, there will be more than sand between us and that gate.'},
+    {who:hn(1),text:'I am only glad to see something built by living hands.'}],
+  cityGate:()=>[
+    {text:'The old road ends at a gate three times the height of a house. Its doors are cedar, bound with bronze and studded with gold, and carved above them is a winged sun with a lion on either side. A hot wind blows under the doors.'},
+    {who:hn(0),text:'Shut tight. Barred from the inside.'},
+    {who:hn(1),text:'Somebody is in there, though. Look at the smoke over the roofs.'},
+    {who:hn(2),text:'Then we will knock until they open. We have come a long way for this.'},
+    {text:'Khemetra waits behind its gates. The road to it was long, and what lies within is another story.'}],
   sandRoad:()=>[
     {text:"Anaea's east gate closes behind the party. The road runs on between walls of green, and the birdsong thins. A dry wind comes down it from somewhere far to the north."},
     {who:hn(0),text:"Smell that? Dust and hot stone. We are a long way from Greendale's flowers."},
@@ -34,4 +46,11 @@ function desertStory(){
     if(G.P.y<=22&&!F.caveMouth){F.caveMouth=1;startCut('caveMouth')}
   }
   if(LEVEL===42)tombStory();
+  if(LEVEL===43){
+    const y=G.P.y;
+    if(!F.redIn){F.redIn=1;msg('Red sand, and a red sky at its edge. The wind here tastes of iron.','#f0c8a0')}
+    if(y<=120&&!F.redRuins){F.redRuins=1;msg('Broken pillars stand in rings across the dunes. Whoever built here did not leave anything behind but their gold.','#e8c8a0')}
+    if(y<=62&&!F.citySeen){F.citySeen=1;startCut('citySeen')}
+    if(y<=RS.NORTH+6&&!F.cityGate){F.cityGate=1;startCut('cityGate')}
+  }
 }

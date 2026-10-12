@@ -11,7 +11,7 @@ Object.assign(ENEMY_DEF,{
 
 const DS_OL='#2a1808';
 // the painted pictures made for the desert creatures (see tools/ingest_art.py)
-const DESERT_ART=['scorpion','scorpionA','mummy','mummyA','sut','sutA','nomad','nomadA','nomad2','nomad2A'];
+const DESERT_ART=['dcity','scorpion','scorpionA','mummy','mummyA','sut','sutA','nomad','nomadA','nomad2','nomad2A'];
 function makeDesertCreatures(){} // nothing is drawn by code: creatures are painted art
 function makeDesertWolf(){ // creatures made from the painted art the game already has (needs the pictures to have loaded)
   const sand=im=>im?mkCanvas(im.width,im.height,(x,w,h)=>{x.drawImage(im,0,0);x.globalCompositeOperation='source-atop';x.fillStyle='rgba(222,184,112,.62)';x.fillRect(0,0,w,h);x.globalCompositeOperation='lighter';x.fillStyle='rgba(40,28,10,.35)';x.fillRect(0,0,w,h)}):null;

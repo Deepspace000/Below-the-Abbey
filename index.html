@@ -1174,7 +1174,7 @@ function climbNotes(){ // plain notes as the party gains height
 }
 /* ---- the wind: one looping recording, played through a filter and a gain that are moved by hand.
    It swells into gusts, eases off, and now and then drops away to near silence, so it never sits still like a drone. ---- */
-const WIND_AMT={2:.8,7:.9,10:.7,19:1,20:.8,22:.7,32:.7,39:.5}; // every outdoor place that is not a town
+const WIND_AMT={2:.8,7:.9,10:.7,19:1,20:.8,22:.7,32:.7,39:.5,41:.9,43:1}; // every outdoor place that is not a town
 const WIND={src:null,g:null,f:null,mode:'blow',until:0,gust:0,gv:0,nextGust:0,p:Math.random()*6.3,t:0,env:0,last:0};
 function windTick(){
   if(!AC||!SMP.wind_loop)return;
@@ -2447,7 +2447,7 @@ function vividImg(k,d){ // each person is one colour, head to foot, a different 
   x.putImageData(id2,0,0);return VIVID_CACHE[id]=c;
 }
 const SIGN_CACHE={};
-const BURNABLE=/^[gp]?tree\d/,NOSHADOW=/^[glp]?tree\d/; // dead trees can be burned; no tree casts a round shadow
+const BURNABLE=/^[gp]?tree\d/,NOSHADOW=/^[glp]?tree\d/,SKYLINE=/^(abbeyspire|dcity)$/; // skyline sprites stand behind a wall and only the part above it shows // dead trees can be burned; no tree casts a round shadow
 function shopSign(d){
   const key=(d.x*31+d.y)%2,id=key+'|'+d.txt.join('|');if(SIGN_CACHE[id])return SIGN_CACHE[id];
   const base=IMG['signb'+key];if(!base)return IMG[d.k];
@@ -2488,7 +2488,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
   for(const s of list){
     const rx=s.x-cx,ry=s.y-cy;
     if(rx*rx+ry*ry>far2)continue;
-    if(s.decor&&s.img&&(G.day||0)>0&&s.decor.k!=='abbeyspire'){const hh=s.w*s.img.height/s.img.width,mh=CEILH-.12;if(hh>mh)s.w*=mh/hh} // nothing grows through the sky
+    if(s.decor&&s.img&&(G.day||0)>0&&!SKYLINE.test(s.decor.k)){const hh=s.w*s.img.height/s.img.width,mh=CEILH-.12;if(hh>mh)s.w*=mh/hh} // nothing grows through the sky
     const tX=inv*(dY*rx-dX*ry),tY=inv*(-pY*rx+pX*ry);
     if(tY<.25)continue;
     s.tX=tX;s.tY=tY;proj.push(s);
@@ -2507,9 +2507,9 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     const bottom=HH+EYE*F/ty-(s.bob||0)*F/ty+(s.sink||0)*sh*.25+(s.drop||0)*sh;
     const left=scrX-sw/2,top=bottom-sh;
     if(s.e){s.e.sx=scrX;s.e.sy=top+sh*.45}
-    {const xa=Math.max(0,Math.floor(left)),xb=Math.min(VW-1,Math.ceil(left+sw));if(xb<xa||ty>farT)continue;let any=s.decor&&s.decor.k==='abbeyspire';for(let xx=xa;xx<=xb&&!any;xx+=2)if(zbuf[xx]>ty){any=true;break}if(!any)continue} // skip hidden sprites
+    {const xa=Math.max(0,Math.floor(left)),xb=Math.min(VW-1,Math.ceil(left+sw));if(xb<xa||ty>farT)continue;let any=s.decor&&SKYLINE.test(s.decor.k);for(let xx=xa;xx<=xb&&!any;xx+=2)if(zbuf[xx]>ty){any=true;break}if(!any)continue} // skip hidden sprites
     let anyVis=false;
-    if(!s.hang&&!(s.decor&&(NOSHADOW.test(s.decor.k)||s.decor.k==='abbeyspire'||/^pgrass|^pflw/.test(s.decor.k)))&&!(s.e&&ENEMY_DEF[s.e.t].fly)){SC.save();const tr=s.decor&&NOSHADOW.test(s.decor.k);SC.globalAlpha=(s.fade!==undefined?Math.max(0,Math.min(1,s.fade)):1)*(tr?.5:.36);SC.fillStyle='#000';SC.beginPath();SC.ellipse(scrX,bottom,sw*(tr?.24:.34),Math.max(1.2,sw*(tr?.06:.055)),0,0,TAU);SC.fill();SC.restore()}
+    if(!s.hang&&!(s.decor&&(NOSHADOW.test(s.decor.k)||SKYLINE.test(s.decor.k)||/^pgrass|^pflw/.test(s.decor.k)))&&!(s.e&&ENEMY_DEF[s.e.t].fly)){SC.save();const tr=s.decor&&NOSHADOW.test(s.decor.k);SC.globalAlpha=(s.fade!==undefined?Math.max(0,Math.min(1,s.fade)):1)*(tr?.5:.36);SC.fillStyle='#000';SC.beginPath();SC.ellipse(scrX,bottom,sw*(tr?.24:.34),Math.max(1.2,sw*(tr?.06:.055)),0,0,TAU);SC.fill();SC.restore()}
     // lighting
     const wx=s.x,wy=s.y,dist=Math.hypot(wx-cx,wy-cy);
     let lt=0;for(let k=0;k<nearL.length;k+=3){const ax=wx-nearL[k],ay=wy-nearL[k+1];lt+=nearL[k+2]/(1+1.15*(ax*ax+ay*ay))}
@@ -2539,7 +2539,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
       if(s.flash>0){X.fillStyle=`rgba(255,70,40,${(s.flash*.55).toFixed(3)})`;X.fillRect(0,0,tw,th)}
     }
     if(s.fade!==undefined&&s.fade<1){SC.globalAlpha=Math.max(0,s.fade)}
-    if(s.decor&&s.decor.k==='abbeyspire'){ // the tower rises behind the chapel: draw only what stands above the nearest wall
+    if(s.decor&&SKYLINE.test(s.decor.k)){ // the tower, or the far city, rises behind a wall: draw only what stands above the nearest wall
       const xa=Math.max(0,Math.floor(left)),xb=Math.min(VW-1,Math.ceil(left+sw)),ku=tw/sw;
       for(let xx=xa;xx<=xb;xx++){
         const cut=zbuf[xx]>ty?bottom:Math.min(bottom,wtop[xx]);if(cut<=top)continue;
@@ -3222,7 +3222,7 @@ function jumpFromUrl(){
   const F=G.flags,sq=T=>q.get('at')==='square'?{x:25,y:T.gate_y,f:1}:{x:T.start.x,y:T.start.y,f:1}; // &at=square lands in the middle of the town
   if(town==='abbey'||town==='thornwood'){F.townSeen=0;delete F.abbeyIntroSeen;G.bossDead=true;goToLevel(2);G.state='play';G.menu=false;return}
   F.townSeen=1;F.abbeyIntroSeen=1;F.gwoodSeen=1;
-  const AREAS={prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
+  const AREAS={prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
   if(AREAS[town]&&town!=='thornwood'){const [lv,ax,ay,af]=AREAS[town];F.gandrickDead=1;F.northGate=1;F.mayorKilled=1;F.mayorDown=1;F.ironRoad=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};goToLevel(lv,{x:ax,y:ay,f:af});G.state='play';G.menu=false;return}
   if(town==='greendale'||town==='anaea'){F.passDone=1;F.passSeen=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};goToLevel(town==='anaea'?33:32,town==='anaea'?sq(ANAEAJ):{x:2,y:36,f:1});G.state='play';G.menu=false;return}
   if(town==='ironhill'){F.gandrickDead=1;F.northGate=1;F.mayorDown=1;F.mayorKilled=1;F.ironRoad=1;F.finale=1;F.halbrecht=1;F.roadSeen=1;F.tunnelSeen=1;
@@ -3759,7 +3759,10 @@ const WORLD_LOCS=[
   {k:'pass',n:'Greyfang Pass',lv:[22,27],x:390,y:136,ic:'mountains'},
   {k:'greendale',n:'Greendale',lv:[32],x:418,y:186,ic:'trees'},
   {k:'anaea',n:'Anaea',sub:'white stone',lv:[33,34,35,36,37,38],x:402,y:238,ic:'town'},
-  {k:'scoria',n:'Scoria',sub:'desert kingdom',lv:[],x:430,y:60,ic:'dunes'}
+  {k:'sandroad',n:'The Sand Road',sub:'forest to dunes',lv:[41,50,51,52,53,54,55,56,57,58,59],x:446,y:186,ic:'dunes'},
+  {k:'tomb',n:'Tomb of Sut',lv:[42],x:452,y:128,ic:'cave'},
+  {k:'reddunes',n:'The Red Dunes',lv:[43],x:440,y:92,ic:'dunes'},
+  {k:'scoria',n:'Khemetra',sub:'the golden city',lv:[44],x:430,y:58,ic:'castle'}
 ];
 const WORLD_ROADS=[['abbey','thornwood','thornwick','gwood'],['gwood','road','tunnel','ironhill'],['ironhill','graves'],['ironhill','mines'],['ironhill','moor','pass','greendale','anaea']];
 function lab(s,x,y,size,col){ctx.save();ctx.font=`bold ${size}px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(200,184,140,.9)';ctx.strokeText(s,x,y);ctx.fillStyle=col;ctx.fillText(s,x,y);ctx.restore()}
@@ -6389,6 +6392,30 @@ function dsDoorSocketed(n){ // the great sealed door: a winged sun, four sockets
   return {d:pix(c),c};
 }
 
+/* ---------- the wall and the gate of Khemetra ---------- */
+function dsCityWallTile(){
+  const [c,x]=tcv(),r=abRng(808);
+  const g=x.createLinearGradient(0,0,0,TS);g.addColorStop(0,'#e8cc8c');g.addColorStop(.6,'#d4aa66');g.addColorStop(1,'#a07a40');x.fillStyle=g;x.fillRect(0,0,TS,TS);
+  for(let k=0,y=0;y<TS;k++){const h=24+((r()*8)|0);let xx=-((k%2)?36:0);while(xx<TS){const w=60+((r()*24)|0),sh=r()*22-11;x.fillStyle='rgba('+(200+sh)+','+(160+sh)+','+(100+sh)+',.35)';x.fillRect(xx+2,y+2,w-4,h-4);xx+=w}y+=h}
+  x.strokeStyle='rgba(70,44,16,.5)';x.lineWidth=1.6;for(let y=26;y<TS;y+=26){x.beginPath();x.moveTo(0,y);x.lineTo(TS,y);x.stroke()}
+  dsBand(x,52,12,TS);
+  x.fillStyle='#17110a';for(const px of [24,64,104]){x.fillRect(px-3,86,6,22)} // arrow slits
+  x.fillStyle='rgba(255,246,210,.18)';x.fillRect(0,0,TS,4);x.fillStyle='rgba(40,24,8,.25)';x.fillRect(0,TS-14,TS,14);
+  return {d:pix(c)};
+}
+function dsCityGate(){
+  const [c,x]=tcv();
+  x.fillStyle='#caa064';x.fillRect(0,0,TS,TS);dsBand(x,0,12,TS);
+  x.fillStyle='#8a6a38';x.beginPath();x.moveTo(14,TS);x.lineTo(14,52);x.quadraticCurveTo(14,14,64,10);x.quadraticCurveTo(114,14,114,52);x.lineTo(114,TS);x.closePath();x.fill();x.strokeStyle='#17120e';x.lineWidth=2.5;x.stroke();
+  for(const k of [-1,1]){const g=x.createLinearGradient(k<0?20:66,0,k<0?62:108,0);g.addColorStop(0,'#6a4a2a');g.addColorStop(.5,'#8a6238');g.addColorStop(1,'#4a321c');x.fillStyle=g;x.fillRect(k<0?20:66,34,42,TS-34);x.strokeRect(k<0?20:66,34,42,TS-34);
+    for(let yy=44;yy<TS;yy+=16){x.fillStyle='#26201a';x.fillRect(k<0?20:66,yy,42,5)}
+    for(let i=0;i<3;i++)for(let j=0;j<5;j++){x.fillStyle='#e0b038';x.beginPath();x.arc((k<0?28:74)+i*13,40+j*17,2.2,0,TAU);x.fill()}
+    x.fillStyle='#e0b038';x.beginPath();x.arc(k<0?54:74,86,8,0,TAU);x.fill();x.stroke();x.fillStyle='#17120e';x.beginPath();x.arc(k<0?54:74,86,3,0,TAU);x.fill()}
+  x.fillStyle='#17120e';x.fillRect(62,34,4,TS-34);
+  x.fillStyle='#e0b038';x.beginPath();x.arc(64,24,9,0,TAU);x.fill();x.strokeStyle='#b02a2a';x.lineWidth=2;x.stroke();
+  return addTex(pix(c));
+}
+
 /* ---- src/desert/sprites_out.js ---- */
 /* ==========================================================================
    THE SAND ROAD: pictures for the open desert: palms, dunes, rocks, cacti, bones, the sphinx, the far city
@@ -6545,7 +6572,7 @@ function makeDesertSprites(){
   }
   IMG.dcactus=dsCactus();NPC_H.dcactus=1.1;IMG.ddead=dsDeadTree();NPC_H.ddead=1.2;IMG.dbones=dsBones();NPC_H.dbones=.3;
   IMG.dburrow=dsBurrow();NPC_H.dburrow=.62;
-  IMG.dobelisk=dsObelisk();NPC_H.dobelisk=2.4;IMG.dsphinx=dsSphinx();NPC_H.dsphinx=1.9;IMG.dcity=dsCity();NPC_H.dcity=9;
+  IMG.dobelisk=dsObelisk();NPC_H.dobelisk=2.4;IMG.dsphinx=dsSphinx();NPC_H.dsphinx=1.9;IMG.dcity=dsCity();NPC_H.dcity=13;
 }
 
 function dsBurrow(){ // a low mound of sand, a door of old wood set into it under a stone lintel: easy to miss from far off
@@ -6585,7 +6612,7 @@ Object.assign(ENEMY_DEF,{
 
 const DS_OL='#2a1808';
 // the painted pictures made for the desert creatures (see tools/ingest_art.py)
-const DESERT_ART=['scorpion','scorpionA','mummy','mummyA','sut','sutA','nomad','nomadA','nomad2','nomad2A'];
+const DESERT_ART=['dcity','scorpion','scorpionA','mummy','mummyA','sut','sutA','nomad','nomadA','nomad2','nomad2A'];
 function makeDesertCreatures(){} // nothing is drawn by code: creatures are painted art
 function makeDesertWolf(){ // creatures made from the painted art the game already has (needs the pictures to have loaded)
   const sand=im=>im?mkCanvas(im.width,im.height,(x,w,h)=>{x.drawImage(im,0,0);x.globalCompositeOperation='source-atop';x.fillStyle='rgba(222,184,112,.62)';x.fillRect(0,0,w,h);x.globalCompositeOperation='lighter';x.fillStyle='rgba(40,28,10,.35)';x.fillRect(0,0,w,h)}):null;
@@ -7148,6 +7175,86 @@ for(let k=0;k<BURROW_N;k++){
 function makeBurrowArt(){for(let k=0;k<BURROW_N;k++)LEVELS[BURROW_BASE+k].chars=LEVEL42_DATA.chars}
 for(let k=0;k<BURROW_N;k++)EMBERS_LEVELS.push(BURROW_BASE+k);
 
+/* ---- src/desert/redsands.js ---- */
+/* ==========================================================================
+   THE RED DUNES (level 43). Through the door that Sut's fall opens, a second desert: red sand, red rock, old ruins,
+   and creatures that have lived on it a long time. Far ahead to the north a city rises over the horizon: Khemetra.
+   ========================================================================== */
+const RS={W:112,H:190,NORTH:7};
+const rsCentre=y=>56+13*Math.sin(y/23)+9*Math.sin(y/57+2);
+const rsHalf=y=>34+14*Math.sin(y/31+1)+8*Math.sin(y/13);
+function buildRedDunes(){
+  const W=RS.W,H=RS.H,rows=[],fm=[],open=new Uint8Array(W*H),idx=(x,y)=>y*W+x;
+  const R=(x,y,k)=>hash2(x,y,k);
+  for(let y=RS.NORTH;y<H-1;y++)for(let x=1;x<W-1;x++){const hw=rsHalf(y)+(hash2(x>>1,y>>1,9)-.5)*2.4;if(Math.abs(x-rsCentre(y))<=hw)open[idx(x,y)]=1}
+  const roadFrom=70; // the last stretch of the way is an old paved road
+  const onRoad=(x,y)=>y<roadFrom&&Math.abs(x-Math.round(rsCentre(y)))<=1;
+  for(let y=0;y<H;y++){let row='',fr='';for(let x=0;x<W;x++){
+    if(!open[idx(x,y)]){row+=y<RS.NORTH?'Y':'D';fr+='0';continue}
+    row+='.';const n=hash2(x>>3,y>>3,5);fr+=onRoad(x,y)?'2':(n<.34?'1':'0')}
+    rows.push(row);fm.push(fr)}
+  const setc=(x,y,c)=>{rows[y]=rows[y].slice(0,x)+c+rows[y].slice(x+1)};
+  const cxN=Math.round(rsCentre(RS.NORTH+2)),cxS=Math.round(rsCentre(H-3));
+  setc(cxS,H-1,'0');open[idx(cxS,H-2)]=1;setc(cxS,H-2,'.');
+  setc(cxN,RS.NORTH-1,'1');   // the gate of the city
+  for(let dx=-3;dx<=3;dx++){setc(cxN+dx,RS.NORTH,'.');open[idx(cxN+dx,RS.NORTH)]=1}
+  const decor=[],scen=[],occ=new Set(),dunes=new Set();
+  const put=(k,x,y,o)=>{const d=Object.assign({k,x,y,block:false},o||{});decor.push(d);if(d.block)occ.add(x+','+y);return d};
+  const sc=(k,x,y,o)=>scen.push(Object.assign({k,wx:x+.5+((o&&o.ox)||0),wy:y+.5+((o&&o.oy)||0),sc:(o&&o.sc)||1,decor:{k,walk:true,x,y}}));
+  const nearDune=(x,y)=>{for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)if(dunes.has((x+dx)+','+(y+dy)))return true;return false};
+  for(let y=RS.NORTH+1;y<H-3;y++)for(let x=1;x<W-1;x++){
+    if(!open[idx(x,y)])continue;
+    const road=Math.abs(x-Math.round(rsCentre(y)))<=3&&y<roadFrom+10,oX=(R(x,y,3)-.5)*.7,oY=(R(x,y,4)-.5)*.7;
+    if(road)continue;
+    if(R(x,y,20)<.055&&!nearDune(x,y)){dunes.add(x+','+y);put('rdune'+((R(x,y,21)*3)|0),x,y,{block:true,ox:oX*.4,oy:oY*.3,sc:.95+R(x,y,22)*.8})}
+    else if(R(x,y,23)<.016)put('rrock'+((R(x,y,24)*3)|0),x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,25)*.7});
+    else if(R(x,y,26)<.006)put('dcactus',x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,27)*.4});
+    else if(R(x,y,28)<.007)put('ddead',x,y,{block:true,ox:oX*.5,oy:oY*.5,sc:.9+R(x,y,29)*.5});
+    else if(R(x,y,30)<.04)sc('dshrub'+((R(x,y,31)*3)|0),x,y,{ox:oX,oy:oY,sc:.8+R(x,y,32)*.7});
+    else if(R(x,y,33)<.004)sc('dbones',x,y,{ox:oX,oy:oY,sc:.9+R(x,y,34)*.4});
+    if(R(x,y,35)<.18)sc('rpeb'+((R(x,y,36)*3)|0),x,y,{ox:(R(x,y,37)-.5)*.9,oy:(R(x,y,38)-.5)*.9,sc:.8+R(x,y,39)*.8});
+  }
+  // ruins: rings of broken pillars with a chest at the heart of each
+  const ruins=[];
+  for(let k=0;k<9;k++){
+    for(let t=0;t<80;t++){
+      const y=20+((R(k,t,60)*(H-60))|0),c=Math.round(rsCentre(y)),x=clamp(c+Math.round((R(k,t,61)-.5)*rsHalf(y)*1.4),8,W-9);
+      let clear=true;for(let dy=-4;dy<=4&&clear;dy++)for(let dx=-4;dx<=4;dx++)if(!open[idx(x+dx,y+dy)])clear=false;
+      if(!clear||Math.abs(x-c)<5||ruins.some(r=>Math.hypot(r.x-x,r.y-y)<22))continue;
+      for(let i=decor.length-1;i>=0;i--){const d=decor[i];if(Math.abs(d.x-x)<=4&&Math.abs(d.y-y)<=4){occ.delete(d.x+','+d.y);decor.splice(i,1)}}
+      for(let a=0;a<8;a++){const px=Math.round(x+Math.cos(a/8*TAU)*3.2),py=Math.round(y+Math.sin(a/8*TAU)*3.2);if(a!==2)put('dpillar'+(a%2),px,py,{block:true,sc:.7+.3*R(px,py,62)})}
+      put('chest',x,y,{block:true,magic:DS_MAGIC_TOMB[(k*5+3)%DS_MAGIC_TOMB.length],goldAmt:320+k*40});
+      put('dbones',x+1,y+1,{walk:true});ruins.push({x,y});break;
+    }
+  }
+  // the old road: obelisks on both sides every twelve cells, then the guardians at the city gate
+  for(let y=roadFrom-4;y>RS.NORTH+10;y-=12){const c=Math.round(rsCentre(y));put('dobelisk',c-4,y,{block:true});put('dobelisk',c+4,y,{block:true})}
+  put('dsphinx',cxN-5,RS.NORTH+4,{block:true});put('dsphinx',cxN+5,RS.NORTH+4,{block:true});
+  // the city itself stands behind its wall: only the part above the wall can be seen, from a long way off
+  put('dcity',cxN,RS.NORTH-3,{block:false,deco:true,sc:1});
+  // ---- the creatures ----
+  const enemies=[];
+  const free=(x,y)=>x>0&&y>0&&x<W-1&&y<H-1&&open[idx(x,y)]&&!occ.has(x+','+y)&&!enemies.some(e=>e.x===x&&e.y===y);
+  const spawn=(t,x,y,lvl)=>{if(free(x,y))enemies.push({t,x,y,lvl})};
+  for(let gy=0;gy<H;gy+=6)for(let gx=0;gx<W;gx+=6){
+    const x=gx+((R(gx,gy,70)*6)|0),y=gy+((R(gx,gy,71)*6)|0);if(!open[idx(x,y)]||y>H-22||y<RS.NORTH+8)continue;
+    const r=R(gx,gy,72);
+    if(r<.17)spawn('scorpion',x,y,16);
+    else if(r<.27){for(const [dx,dy] of [[0,0],[1,0],[0,1]])spawn('dwolf',x+dx,y+dy,15)}
+    else if(r<.36){for(const [dx,dy] of [[0,0],[1,1]])spawn('nomad'+(R(x,y,73)<.5?'':'2'),x+dx,y+dy,15)}
+    else if(r<.44){for(const [dx,dy] of [[0,0],[1,0]])spawn('mummy',x+dx,y+dy,17)}
+  }
+  const items=[];
+  for(let k=0;k<12;k++)for(let t=0;t<20;t++){const x=4+((R(k,t,80)*(W-8))|0),y=20+((R(k,t,81)*(H-50))|0);if(free(x,y)&&!enemies.some(e=>Math.abs(e.x-x)+Math.abs(e.y-y)<4)){items.push({k:['potion','bread','cheese','potion','apple'][k%5],x,y});break}}
+  return {rows,fm,decor,scen,enemies,items,start:{x:cxS,y:H-3,f:0},cxN,cxS};
+}
+const REDDUNES=buildRedDunes();
+const LEVEL43_DATA={rows:REDDUNES.rows,start:REDDUNES.start,enemies:REDDUNES.enemies,items:REDDUNES.items,decor:REDDUNES.decor,scenery:REDDUNES.scen,fmap:REDDUNES.fm,outdoor:true,day:.97,floor:'redsand',
+  floorSet:['redsand','redsand2','redpath','sandpath'],ceil:'cloud',noExtras:true,name:'The Red Dunes',label:'Red Dunes',diff:16,
+  portals:[{to:42,x:48,y:2,f:2,tex:'sutdoor'},{to:44,x:0,y:0,f:0,tex:'citygate',req:'cityOpen',lock:'The great gates of Khemetra are shut, barred with beams of cedar as thick as a man. Beyond them the city waits. (The journey on from here comes in a later chapter.)'}]};
+LEVELS[43]=LEVEL43_DATA;
+LEVEL42_DATA.portals[1]={to:43,x:REDDUNES.cxS,y:REDDUNES.start.y,f:0,tex:'sutdoor'};
+
 /* ---- src/desert/dunes.js ---- */
 /* ==========================================================================
    THE SAND ROAD: dune walls, the cliff, the doorway into the tomb, and the one function that makes it all
@@ -7186,6 +7293,7 @@ function makeDesertArt(){
   const mkWall=(t,wh,sky)=>{const id=addTex(t.d,t.e||null);if(wh)TEX[id].wh=wh;if(sky)TEX[id].sky=true;const gid=TNF++;T_TILE[gid]=id;return gid}; // a 'sky' wall is a piece of the moving sky itself, so the edge of the desert is open sky
   const ydune=mkWall(dsDuneWallTile(false,401),0,true),rdune=mkWall(dsDuneWallTile(true,402),0,true),ycl=mkWall(dsCliffTile(false,403),0),rcl=mkWall(dsCliffTile(true,404),0);
   LEVEL41_DATA.chars={D:ydune,C:ycl};
+  const ycity=mkWall(dsCityWallTile(),1.9);LEVEL43_DATA.chars={D:rdune,C:rcl,Y:ycity};T_DOORS.citygate=dsCityGate();
   T_DOORS.tomb=dsTombDoor();
   if(typeof makeTombArt==='function')makeTombArt(rdune,rcl);
 }
@@ -7195,6 +7303,18 @@ function makeDesertArt(){
    THE SAND ROAD: the story beats (cutscenes) and the small rules of the desert and the tomb
    ========================================================================== */
 Object.assign(CUTS,{
+  citySeen:()=>[
+    {text:'The dunes climb, and beyond the last red ridge the horizon stops being empty. A wall of golden stone runs from one edge of the world to the other, and above it stand towers and domes and a stepped temple glowing in the heat haze.'},
+    {who:hn(0),text:'It is real. A whole city, out here in the middle of nothing.'},
+    {who:hn(3),text:'Khemetra. The caravan people called it the Golden City of the Sun, and I thought it was a story to sell water with.'},
+    {who:hn(2),text:'Stories do not have walls that tall. Keep your eyes open, there will be more than sand between us and that gate.'},
+    {who:hn(1),text:'I am only glad to see something built by living hands.'}],
+  cityGate:()=>[
+    {text:'The old road ends at a gate three times the height of a house. Its doors are cedar, bound with bronze and studded with gold, and carved above them is a winged sun with a lion on either side. A hot wind blows under the doors.'},
+    {who:hn(0),text:'Shut tight. Barred from the inside.'},
+    {who:hn(1),text:'Somebody is in there, though. Look at the smoke over the roofs.'},
+    {who:hn(2),text:'Then we will knock until they open. We have come a long way for this.'},
+    {text:'Khemetra waits behind its gates. The road to it was long, and what lies within is another story.'}],
   sandRoad:()=>[
     {text:"Anaea's east gate closes behind the party. The road runs on between walls of green, and the birdsong thins. A dry wind comes down it from somewhere far to the north."},
     {who:hn(0),text:"Smell that? Dust and hot stone. We are a long way from Greendale's flowers."},
@@ -7227,6 +7347,13 @@ function desertStory(){
     if(G.P.y<=22&&!F.caveMouth){F.caveMouth=1;startCut('caveMouth')}
   }
   if(LEVEL===42)tombStory();
+  if(LEVEL===43){
+    const y=G.P.y;
+    if(!F.redIn){F.redIn=1;msg('Red sand, and a red sky at its edge. The wind here tastes of iron.','#f0c8a0')}
+    if(y<=120&&!F.redRuins){F.redRuins=1;msg('Broken pillars stand in rings across the dunes. Whoever built here did not leave anything behind but their gold.','#e8c8a0')}
+    if(y<=62&&!F.citySeen){F.citySeen=1;startCut('citySeen')}
+    if(y<=RS.NORTH+6&&!F.cityGate){F.cityGate=1;startCut('cityGate')}
+  }
 }
 
 /* ---- src/desert/logic2.js ---- */
@@ -7280,7 +7407,7 @@ function desertStep(nx,ny){
 }
 function desertDisc(it){
   const n=+it.k.slice(7);G.flags.discs=(G.flags.discs||0)|(1<<n);it.taken=true;sfx('key');
-  const c=sunDiscCount();msg('You lift the golden sun disc. That is '+c+' of 4.','#ffe070');setSunDoor();
+  const c=sunDiscCount();msg('You lift the golden sun disc: sun disc '+n+' of 4. You have '+c+'.','#ffe070');setSunDoor();
   if(c>=4)msg('All four suns are yours. The great door in the Hall of Eternity will answer them.','#ffe9a0');
   if(n===4&&!G.flags.disc4Trap){G.flags.disc4Trap=1;msg('The sand stirs all round the pedestal. Bandaged shapes rise out of it!','#e8a090');for(const [x,y] of freeNear(it.x,it.y,3,3))addEnemy('mummy',x,y,true)}
 }
