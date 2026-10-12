@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.71';
+const VERSION='2.72';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3704,8 +3704,8 @@ function makeCart(){
   wornSprite(IMG.cart,59,1.6);
 }
 
-function getScroll(d){if(d==='quest')return G.qs||0;if(d==='map')return{x:G.panX||0,y:G.panY||0};if(d==='lbag')return G.loot?G.loot.sl:0;if(d==='lbox')return G.loot?G.loot.sr:0;return G.inv.scroll}
-function setScroll(d,v){if(d==='quest'){G.qs=clamp(v,0,G.qMax||0);return}if(d==='map'){return}if(d==='lbag'&&G.loot)G.loot.sl=clamp(v,0,maxScroll());else if(d==='lbox'&&G.loot)G.loot.sr=clamp(v,0,lootMaxScroll(Math.max(9,G.loot.decor.contents.length)));else G.inv.scroll=clamp(v,0,maxScroll())}
+function getScroll(d){if(d==='goto')return G.gs||0;if(d==='quest')return G.qs||0;if(d==='map')return{x:G.panX||0,y:G.panY||0};if(d==='lbag')return G.loot?G.loot.sl:0;if(d==='lbox')return G.loot?G.loot.sr:0;return G.inv.scroll}
+function setScroll(d,v){if(d==='goto'){G.gs=clamp(v,0,gotoMax());return}if(d==='quest'){G.qs=clamp(v,0,G.qMax||0);return}if(d==='map'){return}if(d==='lbag'&&G.loot)G.loot.sl=clamp(v,0,maxScroll());else if(d==='lbox'&&G.loot)G.loot.sr=clamp(v,0,lootMaxScroll(Math.max(9,G.loot.decor.contents.length)));else G.inv.scroll=clamp(v,0,maxScroll())}
 /* ==========================================================================
    SAVE / LOAD  (autosave + three manual slots, a backup of the previous run)
    ========================================================================== */
@@ -3771,7 +3771,7 @@ function titleBtn(id){
   if(id==='tnew'){crInit();G.state='create'}
   else if(id==='tcont'){const sv=readSave('auto')||readSave('prev');if(sv)restore(sv)}
   else if(id==='tload')openSaves('title');
-  else if(id==='tgoto'){G.state='goto';G.gotoPage=0}
+  else if(id==='tgoto'){G.state='goto';G.gs=0}
 }
 function importSaveFile(){
   const inp=document.createElement('input');inp.type='file';inp.accept='.json,application/json';
@@ -3857,22 +3857,49 @@ function jumpToLevel(n,target){
   const L=LEVELS[n],st=L.start||{x:1,y:1,f:1};
   goToLevel(n,{x:st.x,y:st.y,f:st.f!==undefined?st.f:1});G.state='play';G.menu=false;
 }
+const AREA_STATS={};
+function areaStats(n){ // what a level holds: creatures and their levels, potions, gold and other items
+  if(AREA_STATS[n])return AREA_STATS[n];
+  const L=LEVELS[n],o={en:0,lo:0,hi:0,pot:0,gold:0,it:0};if(!L)return o;
+  const base=(L.diff||n)+(L.lvlBonus||0);let lo=1e9,hi=0;
+  for(const e of L.enemies||[]){const lv=e.lvl||base;o.en++;lo=Math.min(lo,lv);hi=Math.max(hi,lv);if(ENEMY_DEF[e.t]){const g=enemyStat(e.t,lv).gold;o.gold+=(g[0]+g[1])/2}}
+  if(o.en){o.lo=lo;o.hi=hi}
+  for(const it of L.items||[]){if(/potion/.test(it.k))o.pot++;else o.it++}
+  const keep=LEVEL;
+  try{LEVEL=n;for(const d of L.decor||[]){if(!CONTAINERS.includes(d.k)||d.shop||d.npc)continue;
+    try{const c=Object.assign({},d);delete c.contents;const its=lootFor(c);o.gold+=c.gold||0;for(const i of its){if(/potion/.test(i.id))o.pot+=i.n||1;else o.it+=i.n||1}}catch(e){}}}
+  finally{LEVEL=keep}
+  o.gold=Math.round(o.gold);return AREA_STATS[n]=o;
+}
+const GO_LIST=[36,50,396,228],GO_ROW=42,GO_HEAD=16;
+function gotoLayout(){let y=0;const A=gotoList(),rows=A.map(r=>{const h=r.h?GO_HEAD:GO_ROW,o={r,y,h};y+=h;return o});return{rows,total:y}}
+function gotoMax(){return Math.max(0,gotoLayout().total-GO_LIST[3])}
 function drawGoto(){
   BTNS=[];veil(.82);bigPanel(24,8,432,304);
-  const A=gotoList(),per=30,pages=Math.max(1,Math.ceil(A.length/per));G.gotoPage=clamp(G.gotoPage||0,0,pages-1);
+  const [lx,ly,lw,lh]=GO_LIST,Ly=gotoLayout();G.gs=clamp(G.gs||0,0,Math.max(0,Ly.total-lh));
   txt('GO TO AREA',240,22,13,'#d8c88e','center',true);
-  txt('Choose where to start. Your party is raised to the level shown.',240,36,8.5,'#c8b888','center');
-  const page=A.slice(G.gotoPage*per,G.gotoPage*per+per);
-  page.forEach((r,i)=>{const col=i<15?0:1,row=i%15,x=36+col*210,y=52+row*15.4;
-    if(r.h)txt(r.h,x+2,y+6,8.5,'#c8a860','left',true,undefined,200);
-    else{btnText('go_'+r.n,'',x,y-1,204,14);txt(r.n+'  '+r.name,x+6,y+6,8,'#e2d8bc','left',false,undefined,194)}});
-  txt(`Page ${G.gotoPage+1} of ${pages}`,240,284,8,'#9a8a68','center');
-  btnText('go_prev','Prev',36,290,70,18);btnText('go_back','Back',120,290,70,18);btnText('go_next','Next',204,290,70,18);
-  btnText('go_lm','-',300,290,26,18);txt('Party level '+G.gotoLvl,356,299,9,'#e8dca8','center',true);btnText('go_lp','+',394,290,26,18);
+  txt('Choose where to start. Your party is raised to the level shown. Drag or use the wheel to scroll.',240,37,7.5,'#c8b888','center');
+  BTNS.push({id:'go_listarea',x:lx,y:ly,w:lw,h:lh,up:true,drag:'goto'});
+  ctx.save();ctx.beginPath();ctx.rect(lx,ly,lw,lh);ctx.clip();
+  for(const {r,y,h} of Ly.rows){
+    const yy=ly+y-G.gs;if(yy+h<ly||yy>ly+lh)continue;
+    if(r.h){txt(r.h,lx+2,yy+9,9,'#c8a860','left',true,undefined,lw);ctx.fillStyle='rgba(200,168,96,.35)';ctx.fillRect(lx,yy+h-2,lw,1);continue}
+    const st=areaStats(r.n),vy=Math.max(yy,ly),vh=Math.min(yy+h,ly+lh)-vy;
+    panel(lx,yy+1,lw-8,h-3,false,false);
+    txt(r.name,lx+8,yy+12,10,'#ece0c0','left',true,undefined,lw-30);
+    txt(st.en?`${st.en} creatures, level ${st.lo===st.hi?st.lo:st.lo+' to '+st.hi}`:'No creatures',lx+8,yy+25,8.5,st.en?'#e8a090':'#a8c8a0','left',false,undefined,lw-20);
+    txt(`${st.pot} potions   ${st.gold} gold   ${st.it} items`,lx+8,yy+35,8.5,'#e8dca8','left',false,undefined,lw-20);
+    if(vh>4)BTNS.push({id:'go_'+r.n,x:lx,y:vy,w:lw-8,h:vh,up:true,drag:'goto'});
+  }
+  ctx.restore();
+  if(Ly.total>lh){const th=Math.max(16,lh*lh/Ly.total),ty=ly+(lh-th)*(G.gs/(Ly.total-lh));ctx.fillStyle='rgba(216,200,142,.55)';rrect(ctx,lx+lw-5,ty,4,th,2);ctx.fill()}
+  btnText('go_back','Back',36,286,80,20);
+  btnText('go_up','Up',126,286,60,20);btnText('go_dn','Down',192,286,60,20);
+  btnText('go_lm','-',300,286,26,20);txt('Party level '+G.gotoLvl,360,296,9,'#e8dca8','center',true);btnText('go_lp','+',402,286,26,20);
 }
 function gotoBtn(id){
-  if(id==='go_prev')G.gotoPage=Math.max(0,(G.gotoPage||0)-1);
-  else if(id==='go_next')G.gotoPage=(G.gotoPage||0)+1;
+  if(id==='go_up')G.gs=Math.max(0,(G.gs||0)-GO_ROW*3);
+  else if(id==='go_dn')G.gs=Math.min(gotoMax(),(G.gs||0)+GO_ROW*3);
   else if(id==='go_back')G.state='title';
   else if(id==='go_lm')G.gotoLvl=Math.max(1,G.gotoLvl-2);
   else if(id==='go_lp')G.gotoLvl=Math.min(80,G.gotoLvl+2);
@@ -6450,6 +6477,7 @@ addEventListener('pointerup',ptrEnd);
 addEventListener('pointerup',e=>{if(G.pts){delete G.pts[e.pointerId];if(Object.keys(G.pts).length<2)G.pinch=0}if(!G.pts||!Object.keys(G.pts).length)G.wdrag=null});
 addEventListener('pointercancel',e=>{G.hold=null;PTR=null;G.drag=null;if(G.pts){delete G.pts[e.pointerId];G.pinch=0}});
 cv.addEventListener('wheel',e=>{
+  if(G.state==='goto'){G.gs=clamp((G.gs||0)+e.deltaY*.5,0,gotoMax());e.preventDefault();return}
   if(G.loot){const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*DW,d=x<156?'lbag':'lbox';setScroll(d,getScroll(d)+e.deltaY*.5);e.preventDefault();return}
   if(G.menu==='quests'){G.qs=clamp((G.qs||0)+e.deltaY*.5,0,G.qMax||0);e.preventDefault();return}
   if(G.overview&&!G.world){const [wx,wy]=toDesign(e);setMapZoom((G.mz||12)*Math.exp(-e.deltaY*.0016),wx,wy);e.preventDefault();return}
