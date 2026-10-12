@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.35';
+const VERSION='2.36';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -5741,10 +5741,16 @@ function txtSNames(text,x,y,size,col){
   let px=x-ws.reduce((a,b)=>a+b,0)/2;
   parts.forEach((p,i)=>{const hi=HERO_DEF.findIndex(d=>d.name===p);txtS(p,px,y,size,hi>=0?heroSpeech(hi):col,'left',false);px+=ws[i]});
 }
+function wrapMsg(text,maxW,size){ // a message is broken into lines that fit the play area, so none runs off its edge
+  ctx.save();ctx.font=`${size*1.12}px ${FTXT}`;const words=text.split(' '),lines=[];let cur='';
+  for(const w of words){const t=cur?cur+' '+w:w;if(ctx.measureText(t).width>maxW&&cur){lines.push(cur);cur=w}else cur=t}
+  if(cur)lines.push(cur);ctx.restore();return lines;
+}
 function drawMessages(){
-  const now=G.time,lines=G.msgs.filter(m=>now-m.t<6).slice(-3);
-  let y=VH-8-lines.length*12;
-  for(let i=0;i<lines.length;i++){const m=lines[i],a=clamp(1-(now-m.t-4.5)/1.5,0,1);ctx.globalAlpha=a;txtSNames(m.text,210,y+i*12+6,10,m.col)}
+  const now=G.time,ms=G.msgs.filter(m=>now-m.t<6).slice(-3),all=[];
+  for(const m of ms){const a=clamp(1-(now-m.t-4.5)/1.5,0,1);for(const ln of wrapMsg(m.text,VW-24,10))all.push({ln,m,a})}
+  const lines=all.slice(-5);let y=VH-8-lines.length*12;
+  for(let i=0;i<lines.length;i++){const e=lines[i];ctx.globalAlpha=e.a;txtSNames(e.ln,210,y+i*12+6,10,e.m.col)}
   ctx.globalAlpha=1;
 }
 function drawFloats(dt){

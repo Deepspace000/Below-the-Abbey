@@ -1,0 +1,90 @@
+/* ==========================================================================
+   REAL DUNES. The open desert levels (the Sand Road, the Red Dunes, the Blue Dunes) have a height under every cell, so
+   the dunes are hills the party walks up and down, not flat pictures. The ground is drawn by marching along each
+   screen column and painting every strip of ground that rises above the one in front of it (the "voxel space"
+   method). Walls, doors and cliffs still stand on the ground as before, and creatures and scenery sit at the height of
+   the ground beneath them.
+   ========================================================================== */
+const TFAR=34,YBK=144,YBS=4;           // how far the ground is drawn; how finely hidden-behind-a-hill is remembered for sprites
+const YB=new Int16Array(VW*YBK);       // for each screen column and distance: the lowest screen row not yet covered by nearer ground
+let TERRS={},TERR_NOW=null,CAMZ=.5,TC=null;
+function tsmooth(x,y,seed){const x0=Math.floor(x),y0=Math.floor(y),fx=x-x0,fy=y-y0,sx=fx*fx*(3-2*fx),sy=fy*fy*(3-2*fy),h=(i,j)=>hash2(i,j,seed);return (h(x0,y0)*(1-sx)+h(x0+1,y0)*sx)*(1-sy)+(h(x0,y0+1)*(1-sx)+h(x0+1,y0+1)*sx)*sy}
+function dsDuneShape(x,y,len,seed){ // long gentle windward slope, shorter slip face, crests that wander
+  const n1=tsmooth(x/40,y/40,seed)*2-1,n2=tsmooth(x/13,y/13,seed+1)*2-1;
+  const ph=(x*.93+y*.37)/len+n1*1.7+n2*.45,f=ph-Math.floor(ph),t=f<.7?f/.7:(1-f)/.3,sm=t*t*(3-2*t);
+  return sm*.82+.18*tsmooth(x/7,y/7,seed+2);
+}
+const TERR_SPEC={
+  41:{amp:.9,len:15,seed:11,mask:(x,y)=>clamp((rdBiome(x,y)-.45)*2.2,0,1)},
+  43:{amp:1.05,len:19,seed:23,mask:()=>1},
+  60:{amp:.55,len:17,seed:37,mask:()=>1}
+};
+function terrFor(n){
+  if(TERRS[n]!==undefined)return TERRS[n];
+  const spec=TERR_SPEC[n],L=LEVELS[n];if(!spec||!L)return TERRS[n]=null;
+  const rows=L.rows,H=rows.length,W=rows[0].length,h=new Float32Array(W*H),open=new Uint8Array(W*H);
+  const flat=[[L.start.x,L.start.y,6]];
+  rows.forEach((r,y)=>{for(let x=0;x<W;x++){const c=r[x];if(c==='.')open[y*W+x]=1;else if(c>='0'&&c<='9')flat.push([x,y,5])}});
+  for(const d of L.decor||[])if(/^(chest|dpillar|danubis|dbastet|dsphinx|dobelisk|dpharaoh|treasure|offering|vase|brazier|dsutstatue|sarcoph|dburrow|teleporter)/.test(d.k))flat.push([d.x,d.y,3.5]);
+  if(n===60)flat.push([BDN.OX,BDN.OY,9]);                       // the oasis lies flat
+  if(n===43)for(let y=RS.NORTH;y<130;y+=3)flat.push([rsCentre(y),y,4.5]); // so does the old paved road
+  if(n===41)for(let y=0;y<H;y+=4)flat.push([rdCentre(y),y,2.2]);   // and the road through the sand
+  const R2=(r)=>(r+4)*(r+4);
+  const keep=(x,y)=>{let m=0;for(let i=0;i<flat.length;i++){const p=flat[i],dx=x-p[0],dy=y-p[1],d2=dx*dx+dy*dy;if(d2<R2(p[2])){const k=clamp(1-(Math.sqrt(d2)-p[2])/4,0,1);if(k>m)m=k;if(m>=1)break}}return m};
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    if(!open[y*W+x])continue;
+    const a=spec.amp*spec.mask(x,y);if(a<.01)continue;
+    h[y*W+x]=a*dsDuneShape(x,y,spec.len,spec.seed)*(1-keep(x,y));
+  }
+  // walls take the height of the open ground beside them
+  const g2=new Float32Array(h);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(!open[y*W+x]){let s=0,c=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const xx=x+dx,yy=y+dy;if(xx>=0&&yy>=0&&xx<W&&yy<H&&open[yy*W+xx]){s+=h[yy*W+xx];c++}}g2[y*W+x]=c?s/c:0}
+  // one light smoothing pass so no crest is a knife edge
+  const sm=new Float32Array(g2);
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const i=y*W+x;sm[i]=(g2[i]*4+g2[i-1]+g2[i+1]+g2[i-W]+g2[i+W])/8}
+  // light from the north-west: slopes facing it are bright, the lee side is in shade
+  const s=new Float32Array(W*H);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const i=y*W+x,hx=(sm[Math.min(W-1,x+1)+y*W]-sm[Math.max(0,x-1)+y*W])*.5,hy=(sm[x+Math.min(H-1,y+1)*W]-sm[x+Math.max(0,y-1)*W])*.5;
+    const nl=Math.hypot(hx*2.6,hy*2.6,1),dif=(-hx*2.6*-.55+-hy*2.6*-.35+1*.76)/nl;
+    s[i]=clamp(.5+.62*dif,.5,1.12);
+  }
+  return TERRS[n]={W,H,h:sm,s};
+}
+function terrH(x,y){
+  const T=TERR_NOW;if(!T)return 0;
+  const gx=clamp(x-.5,0,T.W-1.001),gy=clamp(y-.5,0,T.H-1.001),ix=gx|0,iy=gy|0,fx=gx-ix,fy=gy-iy,i=iy*T.W+ix,h=T.h;
+  return (h[i]*(1-fx)+h[i+1]*fx)*(1-fy)+(h[i+T.W]*(1-fx)+h[i+T.W+1]*fx)*fy;
+}
+// paints the ground along one screen column, from the camera out to tmax, and remembers how much of the column
+// each distance has already covered (so scenery behind a hill can be cut off by it)
+function terrMarch(x,rX,rY,tmax){
+  const T=TERR_NOW,W=T.W,Hh=T.H,h=T.h,sh=T.s,C=TC,D=C.D,cx=C.cx,cy=C.cy,cz=CAMZ,HHv=HH,fm=C.fmp,fds=C.fds,hz=C.hzr,hzmax=C.hzmax,hzrate=C.hzrate,lbm=C.lbm;
+  const rl=Math.hypot(rX,rY),base=x*YBK;
+  let yb=VH,t=.9,lastK=-1;
+  const kR0=lbm*C.tbR,kG0=lbm*C.tbG,kB0=lbm*C.tbB;
+  while(t<tmax){
+    const px=cx+rX*t,py=cy+rY*t,gx=Math.min(W-1.001,Math.max(0,px-.5)),gy=Math.min(Hh-1.001,Math.max(0,py-.5)),ix=gx|0,iy=gy|0,fx=gx-ix,fy=gy-iy,i=iy*W+ix;
+    const w00=(1-fx)*(1-fy),w10=fx*(1-fy),w01=(1-fx)*fy,w11=fx*fy;
+    const hg=h[i]*w00+h[i+1]*w10+h[i+W]*w01+h[i+W+1]*w11;
+    const ytop=HHv-(hg-cz)*F/t;
+    if(ytop<yb){
+      const ys=Math.max(0,Math.ceil(ytop)),ye=Math.min(VH,Math.ceil(yb));
+      if(ye>ys){
+        const shade=sh[i]*w00+sh[i+1]*w10+sh[i+W]*w01+sh[i+W+1]*w11;
+        const cxl=px|0,cyl=py|0,fcc=(fm&&cxl>=0&&cyl>=0&&cxl<W&&cyl<Hh)?fm.charCodeAt(cyl*W+cxl):48,fdd=fds[fcc-48]||fds[0];
+        const u=((px-cxl)*TS)|0,v=((py-cyl)*TS)|0,ti=(v*TS+u)*4,dist=t*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv,sk=smv*(lbm*.55+.05);
+        const r=fdd[ti]*kR0*shade*iv+hz[0]*sk,g=fdd[ti+1]*kG0*shade*iv+hz[1]*sk,b=fdd[ti+2]*kB0*shade*iv+hz[2]*sk;
+        let o=(ys*VW+x)*4;
+        for(let y=ys;y<ye;y++,o+=VW*4){D[o]=r;D[o+1]=g;D[o+2]=b}
+      }
+      yb=ytop;
+    }
+    const kb=Math.min(YBK-1,(t*YBS)|0),yv=Math.max(0,Math.min(VH,Math.ceil(yb)));
+    for(let k=lastK+1;k<=kb;k++)YB[base+k]=yv;
+    lastK=kb;
+    t+=.04+t*.02;
+  }
+  const yv=Math.max(0,Math.min(VH,Math.ceil(yb)));
+  for(let k=lastK+1;k<YBK;k++)YB[base+k]=yv;
+}
