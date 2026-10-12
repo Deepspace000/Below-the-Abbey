@@ -61,6 +61,8 @@ function terrFor(n){
     const rg=1-Math.abs(2*tsmooth(x/5.5,y/5.5,spec.seed+6)-1),m=Math.pow(1-dw[i]/MTN_BAND,1.35)*(.5+.8*tsmooth(x/10,y/10,spec.seed+5))*(.62+.62*rg)*supp,hm=spec.peak*m+m*.9*(tsmooth(x/2.5,y/2.5,spec.seed+7)-.5);  // ridges and crags, not smooth humps
     h[i]+=hm;rk[i]=clamp(hm/2,0,1);if(hm>MTN_BLOCK)block[i]=1;
   }
+  // the Golden Pyramid: four smooth faces climbing to a point, too steep to walk
+  if(n===61&&typeof PYR!=='undefined'){for(let y=PYR.cy-PYR.half;y<=PYR.cy+PYR.half;y++)for(let x=PYR.cx-PYR.half;x<=PYR.cx+PYR.half;x++){const i=y*W+x,d=Math.max(Math.abs(x-PYR.cx),Math.abs(y-PYR.cy));h[i]=PYR.peak*Math.max(0,1-d/(PYR.half+.6));rk[i]=1;block[i]=1}}
   // nothing stands inside a mountain
   const cellOf=(x,y)=>y*W+x;
   for(const list of [L.enemies,L.items,L.decor])if(list)for(let q=list.length-1;q>=0;q--){const e=list[q];if(block[cellOf(e.x,e.y)])list.splice(q,1)}
@@ -87,7 +89,7 @@ function terrFor(n){
   }
   return TERRS[n]={W,H,h:sm,s,rk,block};
 }
-function terrRock(){const t=TEX[LEVEL===43?DS_TEXREG.cliffR:DS_TEXREG.cliffY];return {d:t&&t.d,tint:LEVEL===60?[.8,.92,1.22]:LEVEL===61?[1.1,.98,.74]:LEVEL===62?[1,.8,1.25]:LEVEL===63?[1.12,1.14,1.2]:[1,1,1]}}
+function terrRock(){const t=TEX[LEVEL===43?DS_TEXREG.cliffR:DS_TEXREG.cliffY];return {d:t&&t.d,tint:LEVEL===60?[.8,.92,1.22]:LEVEL===61?[1.22,1.06,.7]:LEVEL===62?[1,.8,1.25]:LEVEL===63?[1.12,1.14,1.2]:[1,1,1]}}
 // where a rock or a tree really meets the ground: the lowest point under its width, so it never hangs over a slope
 function terrFoot(s,cx,cy){
   const rx=s.x-cx,ry=s.y-cy,dl=Math.hypot(rx,ry)||1,px=-ry/dl,py=rx/dl,hw=(s.w||1)*.4;

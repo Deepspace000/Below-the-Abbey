@@ -101,6 +101,7 @@ function buildDng(idx,cls,lvl,entryK){
   });
 })();
 function makeDngArt(){
+  if(typeof makePyramidArt==='function')makePyramidArt();
   if(typeof makeCaravanArt==='function')makeCaravanArt();
   for(const n of Object.keys(DNG_INFO))LEVELS[n].chars=LEVEL42_DATA.chars;
   for(const [k,,h] of DNG_ENTRY)NPC_H[k]=h;
