@@ -152,5 +152,29 @@ function makeDesertSprites(){
     IMG['dshrub'+i]=dsShrub(700+i);NPC_H['dshrub'+i]=.34;
   }
   IMG.dcactus=dsCactus();NPC_H.dcactus=1.1;IMG.ddead=dsDeadTree();NPC_H.ddead=1.2;IMG.dbones=dsBones();NPC_H.dbones=.3;
+  IMG.dburrow=dsBurrow();NPC_H.dburrow=.62;
   IMG.dobelisk=dsObelisk();NPC_H.dobelisk=2.4;IMG.dsphinx=dsSphinx();NPC_H.dsphinx=1.9;IMG.dcity=dsCity();NPC_H.dcity=9;
+}
+
+function dsBurrow(){ // a low mound of sand, a door of old wood set into it under a stone lintel: easy to miss from far off
+  const W=240,H=130,cx=120;
+  return mkCanvas(W,H,(x)=>{
+    {const S=pc(W,H),s=S.getContext('2d');s.fillStyle='rgba(60,36,12,.5)';s.beginPath();s.ellipse(cx,118,100,9,0,0,TAU);s.fill();x.drawImage(pBlur(S,4),0,0)}
+    const sandG=t=>{const g=t.createLinearGradient(0,30,W,H);g.addColorStop(0,'#f1dca4');g.addColorStop(.5,'#dcb87a');g.addColorStop(1,'#a98450');return g};
+    const mound=t=>{t.beginPath();t.moveTo(8,120);t.bezierCurveTo(14,82,52,30,cx,24);t.bezierCurveTo(188,30,226,82,232,120);t.closePath()};
+    pForm(x,W,H,mound,sandG,s=>{s.fillStyle='rgba(255,248,222,.5)';s.beginPath();s.ellipse(80,52,52,16,-.4,0,TAU);s.fill();s.fillStyle='rgba(80,48,22,.45)';s.beginPath();s.ellipse(190,96,60,28,.2,0,TAU);s.fill()},
+      {blur:5,rim:.35,rimW:6,grain:.12,seed:11,fine:f=>{for(let i=0;i<14;i++){f.strokeStyle=i%2?'rgba(255,248,222,.3)':'rgba(96,60,28,.22)';f.lineWidth=1.6;f.beginPath();for(let k=0;k<=10;k++){const px=10+k*22,py=40+i*6+Math.sin(k*1.1+i)*3;if(k)f.lineTo(px,py);else f.moveTo(px,py)}f.stroke()}}});
+    // the stone doorway set into the mound
+    const frame=t=>{t.beginPath();t.moveTo(78,122);t.lineTo(78,64);t.quadraticCurveTo(78,38,cx,36);t.quadraticCurveTo(162,38,162,64);t.lineTo(162,122);t.closePath()};
+    pForm(x,W,H,frame,t=>{const g=t.createLinearGradient(78,0,162,0);g.addColorStop(0,'#cdb88e');g.addColorStop(.5,'#e4d2a8');g.addColorStop(1,'#8c7650');return g},
+      s=>{s.strokeStyle='rgba(60,40,18,.6)';s.lineWidth=3;for(let i=0;i<5;i++){s.beginPath();s.moveTo(78,50+i*15);s.lineTo(162,50+i*15);s.stroke()}for(let i=0;i<4;i++){s.beginPath();s.moveTo(88+i*22,40);s.lineTo(88+i*22,122);s.stroke()}},
+      {blur:2,rim:.5,rimW:6,grain:.16,seed:12,shadow:.3,sx:2,sy:3});
+    const door=t=>{t.beginPath();t.moveTo(90,122);t.lineTo(90,68);t.quadraticCurveTo(90,50,cx,48);t.quadraticCurveTo(150,50,150,68);t.lineTo(150,122);t.closePath()};
+    pForm(x,W,H,door,t=>{const g=t.createLinearGradient(90,0,150,0);g.addColorStop(0,'#4a3220');g.addColorStop(.5,'#6e4c2e');g.addColorStop(1,'#33220f');return g},
+      s=>{for(let i=0;i<5;i++){s.strokeStyle='rgba(10,6,2,.7)';s.lineWidth=2.4;s.beginPath();s.moveTo(100+i*12,52);s.lineTo(100+i*12,122);s.stroke()}s.fillStyle='rgba(0,0,0,.45)';s.fillRect(90,48,60,14);s.fillStyle='rgba(255,220,160,.18)';s.fillRect(96,60,6,60)},
+      {blur:1.6,rim:.7,rimW:8,grain:.2,seed:13,fine:f=>{f.fillStyle='#2a2218';for(const yy of [78,102]){f.fillRect(90,yy,60,6)}f.fillStyle='#8a7858';for(const yy of [78,102])for(let i=0;i<5;i++){f.beginPath();f.arc(98+i*11,yy+3,1.8,0,TAU);f.fill()}f.strokeStyle='#2a2218';f.lineWidth=3;f.beginPath();f.arc(132,98,5,0,TAU);f.stroke()}});
+    // a carved sun over the door and sand drifted against the step
+    x.fillStyle='#d8b848';x.beginPath();x.arc(cx,30,7,0,TAU);x.fill();x.strokeStyle='rgba(60,36,8,.7)';x.lineWidth=1.4;x.stroke();
+    {const S=pc(W,H),s=S.getContext('2d');const g=s.createLinearGradient(0,104,0,128);g.addColorStop(0,'rgba(236,208,150,0)');g.addColorStop(1,'rgba(236,208,150,.95)');s.fillStyle=g;s.beginPath();s.moveTo(60,128);s.quadraticCurveTo(100,100,cx,110);s.quadraticCurveTo(150,100,184,128);s.closePath();s.fill();x.drawImage(pBlur(S,2),0,0)}
+  });
 }

@@ -33,4 +33,5 @@ function desertStory(){
     if(b>.84&&!F.roadDesert){F.roadDesert=1;msg('The last palm is behind you. Ahead, dunes roll away in every direction.','#f0e0a8')}
     if(G.P.y<=22&&!F.caveMouth){F.caveMouth=1;startCut('caveMouth')}
   }
+  if(LEVEL===42)tombStory();
 }

@@ -5,6 +5,7 @@
    The map is made by code, the same way every time.
    ========================================================================== */
 const RD={W:112,H:224,CY:210,CX0:56,NORTH:6};
+const BURROW_N=10,BURROW_BASE=50,BURROW_START={x:10,y:14,f:0}; // the mounds in the dunes lead to levels 50 to 59
 const rdStep=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 function rdCentre(y){return RD.CX0+7*Math.sin(y/19)+9*Math.sin(y/47+1.3)}      // the road's middle once it has turned north
 function rdHalf(y){const t=clamp((RD.CY-y)/(RD.CY-RD.NORTH),0,1);return 4+46*rdStep(.14,.62,t)}   // half the width of the land: a funnel
@@ -105,6 +106,21 @@ function buildSandRoad(){
     for(let t=0;t<30;t++){const x=6+((R(k,t,50)*(W-12))|0),y=14+((R(k,t,51)*90)|0),i=idx(x,y);
       if(open[i]&&!bandWide(x,y)&&!occ.has(x+','+y)&&rdBiome(x,y)>.7){put('chest',x,y,{block:true});sc('dbones',x+1,y,{sc:1});break}}
   }
+  // ---- ten little mounds with a door in the side, low and quiet, each the way into a small dungeon ----
+  const burrows=[];
+  for(let k=0;k<BURROW_N;k++){
+    const yy=[134,122,110,98,88,78,66,54,42,30][k];
+    for(let t=0;t<160;t++){
+      const c=Math.round(rdCentre(yy)),hw=rdHalf(yy)-4,side=(k+t)%2?1:-1;
+      const x=clamp(Math.round(c+side*hw*(.25+.6*R(k,t,80))),5,W-6),y=yy+((R(k,t,81)*14)|0)-7;
+      if(!open[idx(x,y)]||bandWide(x,y)||rdBiome(x,y)<.34||burrows.some(b=>Math.hypot(b.x-x,b.y-y)<14))continue;
+      let clear=true;for(let dy=-2;dy<=2&&clear;dy++)for(let dx=-2;dx<=2;dx++)if(!open[idx(x+dx,y+dy)])clear=false;
+      if(!clear)continue;
+      for(let i=decor.length-1;i>=0;i--){const d=decor[i];if(Math.abs(d.x-x)<=1&&d.y>=y-1&&d.y<=y+2){occ.delete(d.x+','+d.y);decor.splice(i,1)}}
+      put('dburrow',x,y,{block:true,enter:{to:BURROW_BASE+k,x:BURROW_START.x,y:BURROW_START.y,f:BURROW_START.f}});
+      burrows.push({x,y});break;
+    }
+  }
   // ---- the creatures ----
   const enemies=[];
   const free=(x,y)=>x>0&&y>0&&x<W-1&&y<H-1&&open[idx(x,y)]&&!occ.has(x+','+y)&&!enemies.some(e=>e.x===x&&e.y===y);
@@ -120,7 +136,7 @@ function buildSandRoad(){
   // ---- things to pick up ----
   const items=[];
   for(let k=0;k<14;k++)for(let t=0;t<20;t++){const x=3+((R(k,t,70)*(W-6))|0),y=20+((R(k,t,71)*180)|0);if(free(x,y)&&!enemies.some(e=>Math.abs(e.x-x)+Math.abs(e.y-y)<4)){items.push({k:['potion','bread','cheese','potion','apple'][k%5],x,y});break}}
-  return {rows,fm,decor,scen,enemies,items,start:{x:2,y:RD.CY,f:1},cxN};
+  return {rows,fm,decor,scen,enemies,items,start:{x:2,y:RD.CY,f:1},cxN,burrows};
 }
 const SANDROAD=buildSandRoad();
 const LEVEL41_DATA={rows:SANDROAD.rows,start:SANDROAD.start,enemies:SANDROAD.enemies,items:SANDROAD.items,decor:SANDROAD.decor,scenery:SANDROAD.scen,fmap:SANDROAD.fm,outdoor:true,day:.97,floor:'lush',

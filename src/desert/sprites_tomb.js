@@ -164,15 +164,12 @@ function dsSunDisc(n){ // the golden sun disc, held up on a little stand
     x.strokeStyle='#b02a2a';x.lineWidth=2;x.beginPath();x.arc(40,38,15,0,TAU);x.stroke();x.fillStyle='#b02a2a';for(let i=0;i<n;i++){x.beginPath();x.arc(40+(i-(n-1)/2)*8,38,2.6,0,TAU);x.fill()}
   });
 }
-function dsSutStatue(){
-  const im=dsSut(false);return mkCanvas(im.width,im.height,(x,w,h)=>{x.drawImage(im,0,0);x.globalCompositeOperation='source-atop';x.fillStyle='rgba(120,100,70,.78)';x.fillRect(0,0,w,h);x.globalCompositeOperation='source-over';x.fillStyle='rgba(255,230,160,.12)';x.fillRect(0,0,w,h*.3)});
-}
 function makeTombSprites(){
   IMG.sarcoph=dsSarcoph();NPC_H.sarcoph=.6;IMG.sarcophU=dsSarcophU();NPC_H.sarcophU=1.35;
   for(let i=0;i<4;i++){IMG['vase'+i]=dsVase(i);NPC_H['vase'+i]=[.52,.64,.58,.58][i]}
   for(let f=0;f<4;f++)IMG['brazier'+f]=dsBrazier(f);NPC_H.brazier0=NPC_H.brazier1=NPC_H.brazier2=NPC_H.brazier3=.9;
   IMG.dpillar0=dsPillar(0);IMG.dpillar1=dsPillar(1);NPC_H.dpillar0=NPC_H.dpillar1=1.6;
-  IMG.danubis=dsAnubis();NPC_H.danubis=1.3;IMG.dbastet=dsBastet();NPC_H.dbastet=.85;IMG.dpharaoh=dsPharaoh();NPC_H.dpharaoh=1.8;IMG.dsutstatue=dsSutStatue();NPC_H.dsutstatue=1.7;
+  IMG.danubis=dsAnubis();NPC_H.danubis=1.3;IMG.dbastet=dsBastet();NPC_H.dbastet=.85;IMG.dpharaoh=dsPharaoh();NPC_H.dpharaoh=1.8;NPC_H.dsutstatue=1.7;
   IMG.treasure=dsTreasure();NPC_H.treasure=.42;IMG.offering=dsOffering();NPC_H.offering=.5;IMG.ventplate=dsVent();NPC_H.ventplate=.17;
   for(let n=1;n<=4;n++){IMG['it_sundisc'+n]=dsSunDisc(n)}
 }
