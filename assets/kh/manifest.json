@@ -2105,5 +2105,47 @@
 "h": 174,
 "kind": "sprite",
 "sheet": "ytree1"
+},
+"yroof3_0": {
+"file": "yroof3_0.webp",
+"w": 289,
+"h": 220,
+"kind": "sprite",
+"sheet": "yroof3"
+},
+"yroof3_1": {
+"file": "yroof3_1.webp",
+"w": 289,
+"h": 187,
+"kind": "sprite",
+"sheet": "yroof3"
+},
+"yroof3_2": {
+"file": "yroof3_2.webp",
+"w": 290,
+"h": 187,
+"kind": "sprite",
+"sheet": "yroof3"
+},
+"yroof3_3": {
+"file": "yroof3_3.webp",
+"w": 286,
+"h": 185,
+"kind": "sprite",
+"sheet": "yroof3"
+},
+"yroof3_4": {
+"file": "yroof3_4.webp",
+"w": 283,
+"h": 187,
+"kind": "sprite",
+"sheet": "yroof3"
+},
+"yroof3_5": {
+"file": "yroof3_5.webp",
+"w": 284,
+"h": 187,
+"kind": "sprite",
+"sheet": "yroof3"
 }
 }

@@ -343,8 +343,8 @@ function drawAfflictions(){
     const ry=top+i*rowH-G.afs;if(ry<top-rowH||ry>top+viewH)return;
     const A=AFFL[id],known=true,sel=G.affSel===id;
     if(sel){ctx.fillStyle='rgba(216,200,142,.2)';ctx.fillRect(lx,ry,150,rowH-1)}
-    ctx.fillStyle=known?A.col:'#4a4438';ctx.fillRect(lx+4,ry+4,7,7);ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=.8;ctx.strokeRect(lx+4,ry+4,7,7);
-    txt(A.n,lx+16,ry+8,9,act.has(id)?'#ffe9a0':seen[id]?'#d8cca8':'#a89c80','left',act.has(id));
+    {const im=afflPic(id);if(im)ctx.drawImage(im,lx+2,ry+1,14,14);else{ctx.fillStyle=known?A.col:'#4a4438';ctx.fillRect(lx+4,ry+4,7,7);ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=.8;ctx.strokeRect(lx+4,ry+4,7,7)}}
+    txt(A.n,lx+20,ry+8,9,act.has(id)?'#ffe9a0':seen[id]?'#d8cca8':'#a89c80','left',act.has(id));
     if(act.has(id))txt('now',lx+144,ry+8,7,'#9ae0a0','right',true);else if(seen[id])txt('met',lx+144,ry+8,6.5,'#8a9a78','right')
     BTNS.push({id:'af_'+id,x:lx,y:Math.max(top,ry),w:150,h:Math.min(rowH-1,top+viewH-Math.max(top,ry)),up:true,drag:'aff'});
   });
@@ -357,9 +357,10 @@ function drawAfflictions(){
     txt('Unknown',px,top+10,12,'#8a8070','left',true);
     wrapText('You have not met this one yet. The healers of Khemetra say that the road and the old places hold many sicknesses and a few blessings.',pw,9).forEach((l,i)=>txt(l,px,top+30+i*12,9,'#8a8070','left'));
   }else{
-    txt(A.n,px,top+10,13,A.col,'left',true);
+    {const im=afflPic(G.affSel);if(im){ctx.fillStyle='rgba(10,8,5,.6)';ctx.fillRect(px-1,top-1,22,22);ctx.drawImage(im,px,top,20,20);ctx.strokeStyle=A.kind==='good'?'#a8d898':A.kind==='state'?'#e8d090':A.col;ctx.lineWidth=1;ctx.strokeRect(px-1,top-1,22,22)}}
+    txt(A.n,px+26,top+10,13,A.col,'left',true);
     txt(A.kind==='bad'?'AFFLICTION':A.kind==='good'?'BLESSING':'STATE',px+pw,top+10,8,A.kind==='good'?'#9ae0a0':A.kind==='bad'?'#e8907a':'#e8d090','right',true);
-    let y=top+26;
+    let y=top+30;
     const who=afflList().filter(e=>e.id===G.affSel);
     if(who.length){
       const parts=who.map(e=>{let t=afflHeroName(e.hi);if(e.until){const dl=Math.max(0,Math.ceil((e.until-G.clock)/1440));t+=' ('+(dl<=1?'under a day':dl+' days')+' left)'}else if(e.left)t+=' ('+e.left+' rounds)';if(AFFL[e.id].rest)t+=' ('+Math.max(0,AFFL[e.id].rest-e.rests)+' rests to go)';if(e.id==='warned')t+=' (warning '+(e.count||G.flags.khWarn||1)+' of 3)';return t});
@@ -376,9 +377,14 @@ function drawAfflictions(){
 
 /* ---- the row of little pictures at the top right of the view: one for each affliction the party has ---- */
 let AFFL_ICON_LOADED=false;
+/* the picture of an affliction; the files are loaded the first time anything asks for one */
+function afflPic(id){
+  if(!AFFL_ICON_LOADED){AFFL_ICON_LOADED=true;for(const k of AFFL_ORDER)loadImg('af_'+k,'assets/af_'+k+'.png')}
+  return IMG['af_'+id]||null;
+}
 function afflHud(){
   const L=afflList();if(!L.length||G.cut||G.talk||G.menu||G.inv.open||G.loot||G.overview)return;
-  if(!AFFL_ICON_LOADED){AFFL_ICON_LOADED=true;for(const id of AFFL_ORDER)loadImg('af_'+id,'assets/af_'+id+'.png')}
+  afflPic('');
   const groups=new Map();
   for(const e of L){const g=groups.get(e.id)||groups.set(e.id,[]).get(e.id);g.push(e.hi)}
   const ids=AFFL_ORDER.filter(id=>groups.has(id)).sort((a,b)=>(AFFL[a].kind==='good')-(AFFL[b].kind==='good')),S=18,gap=3;
@@ -418,7 +424,7 @@ function afflHeroPanel(hi,rx,rw){
   const L=afflList().filter(e=>e.hi===hi&&AFFL[e.id]);if(!L.length)return false;
   txt('AFFLICTED',rx+rw/2,84,10,'#e8907a','center',true);
   L.slice(0,4).forEach((e,i)=>{
-    const A=AFFL[e.id],y=97+i*12;ctx.fillStyle=A.col;ctx.fillRect(rx+14,y-4,8,8);ctx.strokeStyle='rgba(0,0,0,.7)';ctx.lineWidth=.8;ctx.strokeRect(rx+14,y-4,8,8);
+    const A=AFFL[e.id],y=97+i*12,im=afflPic(e.id);if(im)ctx.drawImage(im,rx+12,y-5.5,11,11);else{ctx.fillStyle=A.col;ctx.fillRect(rx+14,y-4,8,8);ctx.strokeStyle='rgba(0,0,0,.7)';ctx.lineWidth=.8;ctx.strokeRect(rx+14,y-4,8,8)}
     txt(A.n,rx+27,y,8.8,A.kind==='good'?'#a8e0a0':'#e8d8b8','left',true,undefined,rw-34);
     btn('afr_'+e.id,rx+10,y-6,rw-20,12);
   });
