@@ -3,7 +3,7 @@
    wall tiles, doors, floors, the skyline of roofs, towers, palace and church, and then the buildings, people and
    markets (khemetra_build.js, khemetra_crowd.js).
    ========================================================================== */
-const KH_ROOFS_OK=['roof1_0','roof1_1','roof1_5','roof1_4','roof3_2','roof2_5','roof2_0c','roof2_2c','roof1_0','roof1_1']; // only roofs seen from the side: domes, cupolas, a tent, a pointed roof. The slabs they stood on show their top, so those are cut away
+const KH_ROOFS_OK=['roofup1_0','roofup1_1','roofup1_2','roofup1_3','roofup1_4','roofup1_5','roofup1_1','roofup1_5','roofup1_2','roofup1_0']; // roofs drawn as seen from the street looking up: the profile against the sky and the underside of the cornice, never the top of a roof
 LEVELS[44]={stub:true,rows:['.'],start:{x:0,y:0,f:0},enemies:[],items:[],decor:[],name:'Khemetra, the Golden City',label:'Khemetra',diff:16,outdoor:true,day:.98,ceil:'cloud',floor:'sand',portals:[]};
 let KH_CITY=null;
 const khHash=(a,b,c)=>hash2(a|0,b|0,c|0);

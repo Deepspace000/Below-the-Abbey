@@ -1755,5 +1755,47 @@
 "h": 386,
 "kind": "sprite",
 "sheet": "maptable1"
+},
+"roofup1_0": {
+"file": "roofup1_0.webp",
+"w": 258,
+"h": 230,
+"kind": "sprite",
+"sheet": "roofup1"
+},
+"roofup1_1": {
+"file": "roofup1_1.webp",
+"w": 260,
+"h": 213,
+"kind": "sprite",
+"sheet": "roofup1"
+},
+"roofup1_2": {
+"file": "roofup1_2.webp",
+"w": 242,
+"h": 221,
+"kind": "sprite",
+"sheet": "roofup1"
+},
+"roofup1_3": {
+"file": "roofup1_3.webp",
+"w": 154,
+"h": 212,
+"kind": "sprite",
+"sheet": "roofup1"
+},
+"roofup1_4": {
+"file": "roofup1_4.webp",
+"w": 260,
+"h": 213,
+"kind": "sprite",
+"sheet": "roofup1"
+},
+"roofup1_5": {
+"file": "roofup1_5.webp",
+"w": 330,
+"h": 193,
+"kind": "sprite",
+"sheet": "roofup1"
 }
 }
