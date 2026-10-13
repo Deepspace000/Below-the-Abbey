@@ -71,25 +71,27 @@ function bondFall(t){
 const FOOD_KIND=()=>G.bag.filter(b=>idef(b).k==='food');
 function foodUnits(){return G.bag.reduce((a,b)=>a+(idef(b).k==='food'?b.n:0),0)}
 function takeFood(n){let t=0;while(t<n){let fi=-1;for(let i=G.bag.length-1;i>=0;i--)if(G.bag[i]&&idef(G.bag[i]).k==='food'){fi=i;break}if(fi<0)break;bagTake(fi);t++}return t}
+function campLog(){const F=G.flags,d=dayNum();if(F.campDay!==d){F.campDay=d;F.campDone={}}return F.campDone} // what each hero has done today: one choice per hero per day
+function campFree(hi){return !campLog()[hi]&&G.heroes[hi]&&G.heroes[hi].alive}
 function campOk(){if(hostileNear()){msg('Not with enemies about.','#d09a80');return false}return true}
 const CAMP_ACTS=[
   {id:'rest',n:'Rest the night',d:'Eight hours. Heals everyone, cures what rest cures.',cost:'8 hours',ok:()=>true,run:()=>{restParty(false)}},
-  {id:'cook',n:'Cook a hearty meal',d:'Two food items make a stew for the party: Well Fed (+2 strength) for a day and hunger filled. A cook makes it better.',cost:'1 hour, 2 food',ok:()=>foodUnits()>=2,run:()=>{
+  {id:'cook',n:'Cook a hearty meal',d:'Two food items make a stew for the party: Well Fed (+2 strength) for a day and hunger filled. A cook makes it better.',cost:'1 hour, 2 food',ok:()=>foodUnits()>=2,run:hi=>{
     takeFood(2);advanceTime(60);const r=profPerk('cook');
     G.heroes.forEach(h=>{if(h.alive)h.food=Math.min(100,h.food+40+r*8)});afflInflict('wellfed',-1,true);if(r>=3)G.buffs.push({name:'A Master\'s Stew',b:'regen',amt:.4,left:200,hi:-1});
     profXP('cook',2);msg('The stew is hot and hearty. The party eats in good spirits.','#e8c070');bondRandom(1)}},
-  {id:'sharpen',n:'Sharpen and mend the gear',d:'Blades keen, straps mended: the party deals more damage for the next day of fighting. A smith does it better.',cost:'30 minutes',ok:()=>true,run:()=>{
+  {id:'sharpen',n:'Sharpen and mend the gear',d:'Blades keen, straps mended: the party deals more damage for the next day of fighting. A smith does it better.',cost:'30 minutes',ok:()=>true,run:hi=>{
     advanceTime(30);const r=profPerk('smith');G.buffs=G.buffs.filter(b=>b.name!=='Sharpened Blades');G.buffs.push({name:'Sharpened Blades',b:'dmgPct',amt:.06+.025*r,left:400,hi:-1});
     profXP('smith',2);msg(`Whetstones ring. The party deals ${Math.round((.06+.025*r)*100)}% more damage for a long while.`,'#e0a070')}},
-  {id:'tend',n:'Tend the sick',d:'Rest and care for those with afflictions that a healer can ease. Each has a chance of cure; a healer improves it.',cost:'2 hours',ok:()=>afflList().some(e=>AFFL[e.id]&&AFFL[e.id].healer),run:()=>{
+  {id:'tend',n:'Tend the sick',d:'Rest and care for those with afflictions that a healer can ease. Each has a chance of cure; a healer improves it.',cost:'2 hours',ok:()=>afflList().some(e=>AFFL[e.id]&&AFFL[e.id].healer),run:hi=>{
     advanceTime(120);const r=profPerk('healer'),sk=skBase('persuade')*.01;let n=0;
     for(const e of afflList().slice()){const A=AFFL[e.id];if(A&&A.healer&&Math.random()<.35+.12*r+sk){afflRemove(e,true);n++}else if(A&&A.rest&&Math.random()<.5)e.rests++}
     profXP('healer',2);msg(n?'Careful nursing works. '+n+(n>1?' sicknesses are cured.':' sickness is cured.'):'The patients rest, but nothing is cured yet.','#a8e0a0')}},
-  {id:'stories',n:'Tell stories round the fire',d:'An hour of tales and songs. Friendships grow, grudges cool a little, and morale rises.',cost:'1 hour',ok:()=>true,run:()=>{
-    advanceTime(60);bondRandom(2);bondRandom(1);luckAdd(1);msg('The fire crackles, the tales get bigger, and the party laughs together.','#e8d8a0')}},
-  {id:'spar',n:'Spar',d:'Two heroes drill together. Friends grow closer, and rivals settle things a little. A small crowd gathers.',cost:'1 hour',ok:()=>true,run:()=>{
-    advanceTime(60);const a=(Math.random()*4)|0;let b=(a+1+((Math.random()*3)|0))%4;bondAdd(a,b,bondVal(a,b)<0?1:1);giveXP(8);msg(`${HERO_DEF[a].name} and ${HERO_DEF[b].name} spar until both are out of breath.`,'#e8d8a0')}},
-  {id:'forage',n:'Forage',d:'Search the wilds for herbs and reagents. Only outdoors. A scout finds more.',cost:'1 hour',ok:()=>!!wxRegionOf(LEVEL)&&!repTownOf(LEVEL),run:()=>{forage()}}
+  {id:'stories',n:'Tell stories round the fire',d:'An hour of tales and songs. Friendships grow, grudges cool a little, and morale rises.',cost:'1 hour',ok:()=>true,run:hi=>{
+    advanceTime(60);for(let j=0;j<4;j++)if(j!==hi&&G.heroes[j].alive)bondAdd(hi,j,1);bondRandom(1);luckAdd(1);msg(`${HERO_DEF[hi].name} tells a tale by the fire. It gets bigger with every telling, and the party laughs together.`,'#e8d8a0')}},
+  {id:'spar',n:'Spar',d:'Two heroes drill together. Friends grow closer, and rivals settle things a little. A small crowd gathers.',cost:'1 hour',ok:()=>true,run:hi=>{
+    const free=[0,1,2,3].filter(j=>j!==hi&&campFree(j)),b=free.length?free[(Math.random()*free.length)|0]:(hi+1)%4,a=hi;advanceTime(60);bondAdd(a,b,1);giveXP(8);campLog()[b]='sparred';msg(`${HERO_DEF[a].name} and ${HERO_DEF[b].name} spar until both are out of breath.`,'#e8d8a0')}},
+  {id:'forage',n:'Forage',d:'Search the wilds for herbs and reagents. Only outdoors. A scout finds more.',cost:'1 hour',ok:()=>!!wxRegionOf(LEVEL)&&!repTownOf(LEVEL),run:hi=>{forage()}}
 ];
 function bondRandom(a){const i=(Math.random()*4)|0;let j=(i+1+((Math.random()*3)|0))%4;if(G.heroes[i].alive&&G.heroes[j].alive)bondAdd(i,j,a)}
 function forage(){
@@ -103,7 +105,14 @@ function forage(){
 function campRun(id){
   const a=CAMP_ACTS.find(x=>x.id===id);if(!a)return;
   if(!campOk())return;if(!a.ok()){msg('You cannot do that now.','#d09a80');return}
-  a.run();
+  const hi=G.sel;
+  if(id!=='rest'){ // sleeping is for everyone; every other choice uses up one hero's day
+    const done=campLog();
+    if(done[hi]){msg(`${HERO_DEF[hi].name} has already chosen today: ${done[hi]}. Pick another hero, or wait for tomorrow.`,'#d09a80');return}
+    if(!G.heroes[hi].alive){msg(`${HERO_DEF[hi].name} cannot do that now.`,'#d09a80');return}
+    done[hi]={cook:'cooked',sharpen:'sharpened the gear',tend:'tended the sick',stories:'told stories',spar:'sparred',forage:'foraged'}[id]||id;
+  }
+  a.run(hi);
 }
 journalPage({id:'camp',title:'Camp and Bonds',
   summary:()=>{const v=[];for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){const b=bondVal(i,j);if(Math.abs(b)>=5)v.push(`${HERO_DEF[i].name} & ${HERO_DEF[j].name}: ${bondTier(b)}`)}return 'Cook, sharpen, tend the sick, forage, spar or tell stories. '+(v.length?v.slice(0,2).join('; ')+'.':'No firm friendships or rivalries yet.')},
@@ -111,22 +120,25 @@ journalPage({id:'camp',title:'Camp and Bonds',
   draw(){
     jFrame('Camp and bonds');
     txt(`Hour ${((G.clock%1440)/60)|0}   ${weatherLabel()}`,440,25,8,'#a89878','right');
+    const done=campLog(),hiC=G.sel,freeC=campFree(hiC);
     CAMP_ACTS.forEach((a,k)=>{
-      const x=36+(k%2)*212,y=36+Math.floor(k/2)*36,ok=a.ok();
+      const x=36+(k%2)*212,y=36+Math.floor(k/2)*36,ok=a.ok()&&(a.id==='rest'||freeC);
       ctx.save();rrect(ctx,x,y,204,32,4);ctx.fillStyle=ok?'rgba(44,22,14,.92)':'rgba(24,18,14,.85)';ctx.fill();ctx.lineWidth=1.3;ctx.strokeStyle=ok?'#a88a48':'#4a4034';ctx.stroke();ctx.restore();
       txt(a.n,x+7,y+8,8.8,ok?'#ecdca8':'#7a7060','left',true,undefined,130);txt(a.cost,x+198,y+8,6.8,ok?'#9ac8ff':'#6a6a70','right');
       wrapText(a.d,190,6.8).slice(0,2).forEach((l,q)=>txt(l,x+7,y+18+q*7.6,6.8,ok?'#b8aa88':'#6a6050','left'));
       btn('cp_'+a.id,x,y,204,32);
     });
-    txt('BONDS',40,186,10,'#d8c88e','left',true);
+    txt(freeC?`${HERO_DEF[hiC].name} can do one thing today.`:`${HERO_DEF[hiC].name} has already ${done[hiC]||'chosen'} today.`,40,184,7.6,freeC?'#e8d8a0':'#d09a80','left');
+    txt('Tap a portrait to choose who acts. Each hero gets one choice a day; resting is for all.',440,184,7,'#988a70','right');
+    txt('BONDS',40,197,10,'#d8c88e','left',true);
     let n=0;
     for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){
-      const v=bondVal(i,j),col=v>=2?'#a8d880':v<=-2?'#e08060':'#a89878',x=40+(n%2)*212,y=196+Math.floor(n/2)*22;n++;
+      const v=bondVal(i,j),col=v>=2?'#a8d880':v<=-2?'#e08060':'#a89878',x=40+(n%2)*212,y=204+Math.floor(n/2)*20;n++;
       txt(`${HERO_DEF[i].name} & ${HERO_DEF[j].name}`,x,y+6,8.5,'#e2d8bc','left',true,undefined,140);txt(bondTier(v),x+204,y+6,8,col,'right');
       jBar(x,y+11,204,5,(v+10)/20,v>=0?'#a8d880':'#d07050');ctx.fillStyle='rgba(255,255,255,.4)';ctx.fillRect(x+102,y+10,1,7);
     }
-    txt('Friends (5+) dodge more and fight in a fury if a friend falls. Rivals (-5 or less) hit harder to prove a point, but lose their aim a little.',40,262,7.2,'#988a70','left',false,undefined,400);
-    txt('Camp activities need a quiet moment with no enemy near.',40,284,7.4,'#a89878','left');
+    txt('Friends (5+) dodge more and fight in a fury if a friend falls. Rivals (-5 or less) hit harder to prove a point, but lose their aim a little.',40,274,7.2,'#988a70','left',false,undefined,400);
+    txt('Camp activities need a quiet moment with no enemy near.',40,292,7.4,'#a89878','left');
   },
   click(id){const m=/^cp_(.+)$/.exec(id);if(m)campRun(m[1])}
 });
