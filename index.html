@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.87';
+const VERSION='2.88';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -8757,7 +8757,7 @@ function khMakeFloors(){
    wall tiles, doors, floors, the skyline of roofs, towers, palace and church, and then the buildings, people and
    markets (khemetra_build.js, khemetra_crowd.js).
    ========================================================================== */
-const KH_ROOFS_OK=['roof1_0','roof1_1','roof1_2','roof1_4','roof1_5','roof2_2','roof2_5','roof2_0','roof3_2'];
+const KH_ROOFS_OK=['roof1_0','roof1_1','roof1_5','roof1_4','roof3_2','roof2_5','roof2_0c','roof2_2c','roof1_0','roof1_1']; // only roofs seen from the side: domes, cupolas, a tent, a pointed roof. The slabs they stood on show their top, so those are cut away
 LEVELS[44]={stub:true,rows:['.'],start:{x:0,y:0,f:0},enemies:[],items:[],decor:[],name:'Khemetra, the Golden City',label:'Khemetra',diff:16,outdoor:true,day:.98,ceil:'cloud',floor:'sand',portals:[]};
 let KH_CITY=null;
 const khHash=(a,b,c)=>hash2(a|0,b|0,c|0);
@@ -8815,6 +8815,11 @@ async function khPrepare(){
 /* roofs, the palace, the church and tall towers rise over the walls */
 function khSkyline(C,L){
   const W=C.W,H=C.H,idx=C.idx,rng=khRng(777),sky=L.sky,P=KH_POOLS;
+  for(const [src,keep] of [['roof2_0',.52],['roof2_2',.58]]){ // a dome on a flat slab: keep the dome, drop the slab seen from above
+    const im=IMG['kh_'+src],m=KH_MAN[src];if(!im||!m)continue;
+    const h=Math.round(im.height*keep),c=mkCanvas(im.width,h,(x)=>{x.drawImage(im,0,0,im.width,h,0,0,im.width,h)});
+    IMG['kh_'+src+'c']=c;KH_MAN[src+'c']={w:im.width,h};
+  }
   const okRoofs=KH_ROOFS_OK.filter(k=>KH_MAN[k]);
   const dirs=KH_DIRS;
   let k=0;
