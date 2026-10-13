@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.01';
+const VERSION='3.02';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2465,7 +2465,7 @@ function render3D(){
     }
   }
   // walls
-  const grid=G.grid,seen=G.seen,fr=Math.floor(t*10);
+  const grid=G.grid,seen=G.seen,fr=Math.floor(t*10),fastW=LEVEL===44;let lastCell=-1,lastSide=-1;
   for(let x=0;x<VW;x++){
     const camX=2*x/VW-1,rX=dX+pX*camX,rY=dY+pY*camX;
     let mx=Math.floor(cx),my=Math.floor(cy);
@@ -2508,14 +2508,18 @@ function render3D(){
       const u=UCOL[x],kr=lbm*tbR,kg=lbm*tbG,kb=lbm*tbB;
       for(let y=ds;y<=de;y++){const v=clamp(y-HH+150,0,255)|0,i=(v*1024+u)*4,o=(y*VW+x)*4;D[o]=SKYPAN[i]*kr;D[o+1]=SKYPAN[i+1]*kg;D[o+2]=SKYPAN[i+2]*kb}
       continue}
+    const wcell=my*MW+mx,farW=fastW&&perp>9;
+    if(farW&&(x&1)&&wcell===lastCell&&side===lastSide){for(let y=ds;y<=de;y++){const o=(y*VW+x)*4,so=o-4;D[o]=D[so];D[o+1]=D[so+1];D[o+2]=D[so+2]}continue} // far walls: every second column repeats its neighbour
+    lastCell=wcell;lastSide=side;
+    const nnP=fastW&&perp>12?0:nn,nrP=fastW&&perp>12?0:nrn;  // and out there the lamps no longer light the wall pixel by pixel
     const stepT=TS/lineH,smw=Math.min(hzmax,dist*hzrate),skw=(lb*.55+lt*.45+.05)*smw,ivw=1-smw;
     let tyf=(ds-y0)*stepT;
     for(let y=ds;y<=de;y++,tyf+=stepT){
       const v=skyW?(((tyf*CEILH)|0)&(TS-1)):tileW?(((tyf*wh/1.55)|0)&(TS-1)):(tex.h?Math.min(tex.h-1,(tyf*tex.h/TS)|0):tyf>=TS?TS-1:(tyf|0)); // sky walls tile upward instead of stretching
       const i=(v*TS+tx)*4,o=(y*VW+x)*4;
       const vy=(y-HH)/HH,vg=1-.28*vy*vy,zz=(yBot-y)/unit;
-      let ltp=0;for(let k=0,j=0;k<nn;k+=3,j++){const dz=zz-.66;ltp+=nl[k+2]/(1+1.15*(wd2[j]+dz*dz))}
-      let lpr=0;for(let k=0,j=0;k<nrn;k+=3,j++){const dz=zz-.66;lpr+=nr[k+2]/(1+1.15*(wr2[j]+dz*dz))}
+      let ltp=0;for(let k=0,j=0;k<nnP;k+=3,j++){const dz=zz-.66;ltp+=nl[k+2]/(1+1.15*(wd2[j]+dz*dz))}
+      let lpr=0;for(let k=0,j=0;k<nrP;k+=3,j++){const dz=zz-.66;lpr+=nr[k+2]/(1+1.15*(wr2[j]+dz*dz))}
       const kRp=lb*tbR+ltp*ttR+lpr*1.4,kGp=lb*tbG+ltp*ttG+lpr*.2,kBp=lb*tbB+ltp*ttB+lpr*.1;
       let R=td[i]*kRp*vg*ivw+hzr[0]*skw,Gc=td[i+1]*kGp*vg*ivw+hzr[1]*skw,B=td[i+2]*kBp*vg*ivw+hzr[2]*skw;
       if(te){const a=te[i+3]/255;R+=te[i]*a*.95;Gc+=te[i+1]*a*.95;B+=te[i+2]*a*.95}
