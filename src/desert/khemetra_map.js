@@ -42,10 +42,11 @@ function khBuild(seed){
   const parks=[];
   for(const b of blocks){const w=b.x1-b.x0+1,h=b.y1-b.y0+1;if(b.i%3===1&&b.j%3===1&&w>=11&&h>=11&&!khInPQ((b.x0+b.x1)>>1,(b.y0+b.y1)>>1)){R(b.x0,b.y0,b.x1,b.y1,(x,y)=>{solid[idx(x,y)]=0;zone[idx(x,y)]=2});parks.push({name:'A Park',x0:b.x0,y0:b.y0,x1:b.x1,y1:b.y1,z:2,f:4,park:true})}}
   // lanes: a narrow dead-end alley bitten into the bigger blocks
+  const lanes=[]; // kept so the map can name each cul-de-sac
   for(const b of blocks){
     const w=b.x1-b.x0+1,h=b.y1-b.y0+1;if(w<16||h<16||rng()<.35)continue;
-    if(rng()<.5){const x=b.x0+4+Math.floor(rng()*(w-8)),len=6+Math.floor(rng()*(h>>1)),top=rng()<.5;R(x,top?b.y0:b.y1-len+1,x+1,top?b.y0+len-1:b.y1,(xx,yy)=>{solid[idx(xx,yy)]=0})}
-    else{const y=b.y0+4+Math.floor(rng()*(h-8)),len=6+Math.floor(rng()*(w>>1)),left=rng()<.5;R(left?b.x0:b.x1-len+1,y,left?b.x0+len-1:b.x1,y+1,(xx,yy)=>{solid[idx(xx,yy)]=0})}
+    if(rng()<.5){const x=b.x0+4+Math.floor(rng()*(w-8)),len=6+Math.floor(rng()*(h>>1)),top=rng()<.5;R(x,top?b.y0:b.y1-len+1,x+1,top?b.y0+len-1:b.y1,(xx,yy)=>{solid[idx(xx,yy)]=0});lanes.push({x0:x,x1:x+1,y0:top?b.y0:b.y1-len+1,y1:top?b.y0+len-1:b.y1,v:true,top})}
+    else{const y=b.y0+4+Math.floor(rng()*(h-8)),len=6+Math.floor(rng()*(w>>1)),left=rng()<.5;R(left?b.x0:b.x1-len+1,y,left?b.x0+len-1:b.x1,y+1,(xx,yy)=>{solid[idx(xx,yy)]=0});lanes.push({x0:left?b.x0:b.x1-len+1,x1:left?b.x0+len-1:b.x1,y0:y,y1:y+1,v:false,left})}
   }
   // ---- the great avenues: the south gate to the palace, the ring road, the cross roads ----
   const open=(x0,y0,x1,y1,z,f)=>R(x0,y0,x1,y1,(x,y)=>{if(x<B||y<B||x>=W-B||y>=H-B)return;solid[idx(x,y)]=0;if(z!==undefined){zone[idx(x,y)]=z}if(f!==undefined)fl[idx(x,y)]=f});
@@ -141,5 +142,5 @@ function khBuild(seed){
   const reach=new Uint8Array(W*H),q=[idx(KH.CX,H-KH.WALL-4)];reach[q[0]]=1;
   while(q.length){const c=q.pop(),x=c%W,y=(c/W)|0;for(const [dx,dy] of DIRS){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;const i=idx(nx,ny);if(solid[i]||reach[i])continue;reach[i]=1;q.push(i)}}
   for(const pk of parks)if(!(pk.x1>=PAL.x0-6&&pk.x0<=PAL.x1+6&&pk.y1>=PAL.y0-6&&pk.y0<=PAL.y1+6))plazas.push(pk);
-  return {W,H,solid,fl,zone,slotOf,modules,plazas,PAL,PB,blocks,xb,yb,idx,rng,reach,parks};
+  return {W,H,solid,fl,zone,slotOf,modules,plazas,PAL,PB,blocks,xb,yb,idx,rng,reach,parks,lanes};
 }

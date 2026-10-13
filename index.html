@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.13';
+const VERSION='3.14';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2516,6 +2516,7 @@ function render3D(){
     const wh=TEX[ti].wh||(LEVEL===3&&mx>0&&my>0&&mx<MW-1&&my<MH-1?1.55:CEILH); // Thornwick's houses are one storey under the high sky; the forest round it stays tall
     const skyW=(LEVEL===22&&g===1&&T_SKY[0]!==undefined)||(!!TEX[ti].sky&&!!SKYPAN),tileW=!skyW&&!TEX[ti].h&&wh>2&&(g>=100||g===1||g===2||g===6||(g>=9&&g<=14)||(g>=20&&g<=22)); // tall plain walls repeat their pattern instead of stretching
     const tex=TEX[ti],td=tex.d,te=tex.e;
+    const kd=LEVEL===44&&g>=100?KH_DOOR[g]:undefined,dg=kd!==undefined&&kd.lvl!==undefined,dgs=dg?(.7+.18*Math.sin(t*2.1+mx*1.7+my*.9))*(1-Math.min(.55,perp*.008)):0; // a doorway that can be entered glows softly, brighter near the threshold
     const dist=perp*Math.hypot(rX,rY);
     const lb=Math.max(baseL(dist),lbm);let lt=0;
     const px=hx-(side===0?stx*.03:0),py=hy-(side===1?sty*.03:0);
@@ -2540,6 +2541,7 @@ function render3D(){
       const kRp=lb*tbR+ltp*ttR+lpr*1.4,kGp=lb*tbG+ltp*ttG+lpr*.2,kBp=lb*tbB+ltp*ttB+lpr*.1;
       let R=td[i]*kRp*vg*ivw+hzr[0]*skw,Gc=td[i+1]*kGp*vg*ivw+hzr[1]*skw,B=td[i+2]*kBp*vg*ivw+hzr[2]*skw;
       if(te){const a=te[i+3]/255;R+=te[i]*a*.95;Gc+=te[i+1]*a*.95;B+=te[i+2]*a*.95}
+      if(dg){const vp=Math.max(0,Math.min(1,(y-y0)/(yBot-y0))),u=kd.n===2?((kd.lf?kd.i:1-kd.i)+tx/TS)/2:.5+(tx/TS-.5)*.55,hw=(u-.5)/.17,f=dgs*Math.exp(-hw*hw)*(vp<.3?0:Math.min(1,(vp-.3)/.25))*.55;R+=170*f;Gc+=108*f;B+=30*f} // only the doorway itself: a warm pool of light on and round the door
       D[o]=R;D[o+1]=Gc;D[o+2]=B;
     }
   }
@@ -3827,7 +3829,7 @@ function snapshot(){
     torches:LIGHTS.map(l=>l.taken?1:0),torchKeys:LIGHTS.filter(l=>l.taken).map(l=>l.key)};
 }
 function restore(sv){ // the golden city and the rooms in it are built the first time they are needed
-  const l=sv.level||1;if(l===44||(l>=199&&l<=266))if(!LEVELS[l]||LEVELS[44].stub){khThen(()=>restoreNow(sv));return}
+  const l=sv.level||1;if(l===44||(l>=199&&l<=266)||(l>=1000&&l<30000))if((!LEVELS[l]&&!(typeof KH_LAZY!=='undefined'&&KH_LAZY[l]))||LEVELS[44].stub){khThen(()=>restoreNow(sv));return}
   restoreNow(sv);
 }
 function restoreNow(sv){
@@ -4542,6 +4544,7 @@ function forestExtras(L){
   return L._xd=out;
 }
 function loadLevel(n){
+  if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n](); // the room behind an ordinary door in Khemetra is built when first entered
   const L=LEVELS[n]||LEVELS[1];
   G._cb=undefined;LEVEL=n;CEILH=ceilFor(n,L);MAPROWS=L.rows;MW=MAPROWS[0].length;MH=MAPROWS.length;START=L.start;ENEMY_SPAWNS=L.enemies;ITEM_SPAWNS=L.items;DECOR_SPAWNS=forestExtras(L).length?L.decor.concat(forestExtras(L)):L.decor;if(typeof terrFor==='function'){terrFor(n);TERR_BLOCK=TERRS[n]?TERRS[n].block:null}G.flora=(L.scenery||[]).concat((n===32||n===41)?pathEdgeDecor(L):[]);
   G.day=L.day!==undefined?L.day:(L.outdoor?.98:0);G.dayBase=G.day;G.amb=L.amb||0;G.fl=L.floor?FLOORS[L.floor]:null;G.cl=L.ceil?CEILS[L.ceil]:null;G.portals=L.portals||[];G.fmap=L.fmap?L.fmap.join(''):null;G.fl2=L.fmap?(FLOORS[L.floor2]||FLOORS.grass):null;G.fl3=L.fmap?(FLOORS.dirt||FLOORS.grass):null;G.fl4=L.fmap?(FLOORS.mosscobble||FLOORS.cobble):null;G.fl5=L.fmap?(FLOORS.stainedcobble||FLOORS.cobble):null;G.fl6=L.fmap?(FLOORS.wetcobble||FLOORS.cobble):null;if(L.floorSet){const F2=L.floorSet.map(nm=>FLOORS[nm]);G.fl=F2[0];G.fl2=F2[1];G.fl3=F2[2];G.fl4=F2[3];G.fl5=F2[4];G.fl6=F2[5]}G.extraLights=L.lights||null;
@@ -5363,8 +5366,19 @@ const SCENES={
   priest:"You enter a priest's house. Incense smoke fills the air, and there are small gold gods on a low altar.",
   children:"You enter a children's house. There are small beds, wooden toys and animals painted on the walls."
 };
+const SCENES_SHOP={
+  merchant:'You enter a closed shop. There are chests, scales and rolled carpets, but nobody is selling today.',
+  potter:"You enter a potter's workshop. There is a wheel, a kiln and shelves of pots. The potter is out.",
+  healer:"You enter a healer's shop. Herbs hang from the ceiling and jars line the shelves. Nobody is here.",
+  scholar:"You enter a scribe's shop. There are scrolls and ink everywhere, but the scribe is away.",
+  empty:'You enter an empty shop. The shelves are bare and the counter is dusty.',
+  taxman:'You enter a tax office. There is a desk of ledgers and a locked iron box. The clerk has gone home.',
+  fisher:"You enter a fishmonger's shop. Nets and dried fish hang from the roof. Nobody is here.",
+  musician:'You enter a music shop. Drums, harps and flutes hang on the walls, but nobody is playing.',
+  boarded:'You enter a boarded-up shop. The windows are nailed shut and there is dust and cobwebs everywhere.'
+};
 function startScene(n){
-  const L=LEVELS[n],text=SCENES[L.scene];if(!text)return;
+  const L=LEVELS[n],text=(L.sceneShop&&SCENES_SHOP[L.scene])||SCENES[L.scene];if(!text)return;
   const k='sc_'+L.scene;if(!IMG[k])loadImg(k,'assets/'+k+'.jpg');
   G.cut={id:'scene',pic:k,i:0,t:G.time,lines:[{text,title:L.name}],end:null};G.hold=null;G.queued=null;
 }
@@ -8717,10 +8731,11 @@ function khBuild(seed){
   const parks=[];
   for(const b of blocks){const w=b.x1-b.x0+1,h=b.y1-b.y0+1;if(b.i%3===1&&b.j%3===1&&w>=11&&h>=11&&!khInPQ((b.x0+b.x1)>>1,(b.y0+b.y1)>>1)){R(b.x0,b.y0,b.x1,b.y1,(x,y)=>{solid[idx(x,y)]=0;zone[idx(x,y)]=2});parks.push({name:'A Park',x0:b.x0,y0:b.y0,x1:b.x1,y1:b.y1,z:2,f:4,park:true})}}
   // lanes: a narrow dead-end alley bitten into the bigger blocks
+  const lanes=[]; // kept so the map can name each cul-de-sac
   for(const b of blocks){
     const w=b.x1-b.x0+1,h=b.y1-b.y0+1;if(w<16||h<16||rng()<.35)continue;
-    if(rng()<.5){const x=b.x0+4+Math.floor(rng()*(w-8)),len=6+Math.floor(rng()*(h>>1)),top=rng()<.5;R(x,top?b.y0:b.y1-len+1,x+1,top?b.y0+len-1:b.y1,(xx,yy)=>{solid[idx(xx,yy)]=0})}
-    else{const y=b.y0+4+Math.floor(rng()*(h-8)),len=6+Math.floor(rng()*(w>>1)),left=rng()<.5;R(left?b.x0:b.x1-len+1,y,left?b.x0+len-1:b.x1,y+1,(xx,yy)=>{solid[idx(xx,yy)]=0})}
+    if(rng()<.5){const x=b.x0+4+Math.floor(rng()*(w-8)),len=6+Math.floor(rng()*(h>>1)),top=rng()<.5;R(x,top?b.y0:b.y1-len+1,x+1,top?b.y0+len-1:b.y1,(xx,yy)=>{solid[idx(xx,yy)]=0});lanes.push({x0:x,x1:x+1,y0:top?b.y0:b.y1-len+1,y1:top?b.y0+len-1:b.y1,v:true,top})}
+    else{const y=b.y0+4+Math.floor(rng()*(h-8)),len=6+Math.floor(rng()*(w>>1)),left=rng()<.5;R(left?b.x0:b.x1-len+1,y,left?b.x0+len-1:b.x1,y+1,(xx,yy)=>{solid[idx(xx,yy)]=0});lanes.push({x0:left?b.x0:b.x1-len+1,x1:left?b.x0+len-1:b.x1,y0:y,y1:y+1,v:false,left})}
   }
   // ---- the great avenues: the south gate to the palace, the ring road, the cross roads ----
   const open=(x0,y0,x1,y1,z,f)=>R(x0,y0,x1,y1,(x,y)=>{if(x<B||y<B||x>=W-B||y>=H-B)return;solid[idx(x,y)]=0;if(z!==undefined){zone[idx(x,y)]=z}if(f!==undefined)fl[idx(x,y)]=f});
@@ -8816,7 +8831,7 @@ function khBuild(seed){
   const reach=new Uint8Array(W*H),q=[idx(KH.CX,H-KH.WALL-4)];reach[q[0]]=1;
   while(q.length){const c=q.pop(),x=c%W,y=(c/W)|0;for(const [dx,dy] of DIRS){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;const i=idx(nx,ny);if(solid[i]||reach[i])continue;reach[i]=1;q.push(i)}}
   for(const pk of parks)if(!(pk.x1>=PAL.x0-6&&pk.x0<=PAL.x1+6&&pk.y1>=PAL.y0-6&&pk.y0<=PAL.y1+6))plazas.push(pk);
-  return {W,H,solid,fl,zone,slotOf,modules,plazas,PAL,PB,blocks,xb,yb,idx,rng,reach,parks};
+  return {W,H,solid,fl,zone,slotOf,modules,plazas,PAL,PB,blocks,xb,yb,idx,rng,reach,parks,lanes};
 }
 
 /* ---- src/desert/khemetra_art.js ---- */
@@ -8948,6 +8963,7 @@ async function khPrepare(){
   const placed=khPlaceBuildings(C),pm=khPalaceDoor(C);
   khBuildWorld(); // the palace, cisterns, study and sea tunnel rooms need the door positions above
   khMakeDoorsAndRooms(C,L,placed);
+  khMakeHouseDoors(C); // and a door, with a picture of the room behind it, on every other house that can be walked up to
   if(pm){pm.at=LEVELS[KH_PALACE].start}
   KH_CHARS.n=0;KH_CHARS.map={};KH_CHARS.chars={};
   const rowCodes=new Array(H);for(let y=0;y<H;y++)rowCodes[y]=new Uint16Array(W);
@@ -8958,7 +8974,7 @@ async function khPrepare(){
     const tiles=khTileSet(m.e),door=m.doorCells||(m===gateMod?m.cells:null);
     m.cells.forEach(([x,y],i)=>{
       let gid=tiles[Math.min(i,tiles.length-1)].gid;
-      if(door&&door.some(c=>c[0]===x&&c[1]===y)){const g2=KH_NEXT_GID++;T_TILE[g2]=T_TILE[gid];KH_DOOR[g2]=m===gateMod?{gate:true}:{lvl:m.lvl,at:m.at};gid=g2}
+      if(door&&door.some(c=>c[0]===x&&c[1]===y)){const g2=KH_NEXT_GID++;T_TILE[g2]=T_TILE[gid];KH_DOOR[g2]=m===gateMod?{gate:true}:{lvl:m.lvl,at:m.at,i,n:m.cells.length,lf:m.face===1||m.face===2};gid=g2}
       rowCodes[y][x]=khChar(gid).charCodeAt(0);
     });
   }
@@ -9324,6 +9340,43 @@ function khRoomRuin(b){
       else raw('chest',5,1,{block:true,deco:false});}};
 }
 function decor_urn(raw){raw('urn',5,2,{npc:'kh_urn'})}
+
+/* ---- every other house, shop and prayer house with a clear way up to its front door: a door, and a picture of the room behind it ----
+   The room is only built the first time the party walks in (KH_LAZY, called from loadLevel), so a thousand doors cost nothing. */
+const KH_LAZY={};let KH_HOUSE_NEXT=1000;
+const KH_SCENE_NAME={warm:'A Warm House',wizard:"A Wizard's House",empty:'An Empty House',worker:"A Worker's House",noble:"A Nobleman's House",spartan:'A Spartan House',messy:'A Messy House',dark:'A Dark House',magic:'A Magical House',ruined:'A Ruined House',scholar:"A Scholar's House",musician:"A Musician's House",merchant:"A Merchant's House",healer:"A Healer's House",cats:"A Cat Lover's House",fisher:"A Fisherman's House",boarded:'A Boarded-up House',taxman:"A Tax Collector's House",potter:"A Potter's House",soldier:"A Soldier's House",priest:"A Priest's House",children:"A Children's House",bath_grand:'A Bathhouse',bath_hammam:'A Hammam'};
+const KH_SHOP_NAME={merchant:'A Closed Shop',potter:"A Potter's Workshop",healer:"A Healer's Shop",scholar:"A Scribe's Shop",empty:'An Empty Shop',taxman:'A Tax Office',fisher:"A Fishmonger's Shop",musician:'A Music Shop',boarded:'A Boarded-up Shop'};
+function khPickScene(m){
+  const [cx,cy]=m.cells[0],r=khHash(cx,cy,61),pick=a=>a[(r*a.length)|0],k=m.kind;
+  if(k==='bath')return pick(['bath_grand','bath_hammam']);
+  if(k==='pray'||k==='temple')return pick(['priest','priest','magic','empty','scholar']);
+  if(k==='shop')return pick(['merchant','potter','healer','scholar','empty','taxman','fisher','musician','boarded']);
+  if(khInPQ(cx,cy))return pick(['messy','dark','boarded','empty','worker','spartan','messy','dark']);
+  if(cx<125&&cy<125)return pick(['ruined','boarded','dark','empty','ruined','messy']);
+  if(k==='mansion'||Math.hypot(cx-KH.CX,cy-KH.CY)<80)return pick(['noble','magic','wizard','scholar','merchant','noble','warm','priest','musician']);
+  if(k==='low'||k==='ruin')return pick(['worker','fisher','potter','messy','spartan','children','warm','soldier','empty']);
+  return pick(['warm','worker','warm','scholar','healer','cats','fisher','potter','soldier','children','musician','messy','spartan','empty','wizard','priest','merchant']);
+}
+function khMakeHouseDoors(C){
+  const idx=C.idx;let n=0;
+  const frontOk=m=>{const mid=m.cells[(m.cells.length-1)>>1],d=KH_DIRS[m.face],x=mid[0]+d[0],y=mid[1]+d[1];return C.reach[idx(x,y)]===1&&C.reach[idx(x+d[0],y+d[1])]===1};
+  for(const m of C.modules){
+    if(m.doorCells||m.kind==='castle'||m.kind==='palace'||m.cells.length>4||!frontOk(m))continue;
+    const scene=khPickScene(m),shop=m.kind==='shop',lvl=KH_HOUSE_NEXT++,mid=m.cells[(m.cells.length-1)>>1],d=KH_DIRS[m.face];
+    const front=[mid[0]+d[0],mid[1]+d[1]],ff=KH_FACE_F[m.face];
+    const name=(shop?KH_SHOP_NAME[scene]:KH_SCENE_NAME[scene])||KH_SCENE_NAME.warm;
+    m.lvl=lvl;m.doorCells=m.cells.length===2?m.cells:[mid];m.at={x:4,y:5,f:0};m.house=true;
+    KH_LAZY[lvl]=()=>{
+      if(LEVELS[lvl])return;
+      const b={id:'house'+lvl,name,room:'home',keeper:null,scene};
+      const lv=khRoom(b,lvl,{to:44,x:front[0],y:front[1],f:ff}).level;
+      if(shop)lv.sceneShop=true;
+      LEVELS[lvl]=lv;LEVEL_NAMES[lvl]=name;
+    };
+    n++;
+  }
+  return n;
+}
 
 /* ---- src/desert/khemetra_people.js ---- */
 /* ==========================================================================
@@ -9932,7 +9985,7 @@ function khCrowd(C,L){
   const occ=new Uint8Array(W*H);        // decor, people or a reserved cell
   const reserve=(x,y,r)=>{for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){const xx=x+dx,yy=y+dy;if(xx>=0&&yy>=0&&xx<W&&yy<H)occ[idx(xx,yy)]=1}};
   // doors, the palace gate, the gate of the city and the hatch keep clear
-  for(const m of C.modules)if(m.doorCells&&m.lvl!==undefined){for(const [x,y] of m.doorCells){const d=KH_DIRS[m.face];reserve(x+d[0],y+d[1],2)}}
+  for(const m of C.modules)if(m.doorCells&&m.lvl!==undefined){for(const [x,y] of m.doorCells){const d=KH_DIRS[m.face];reserve(x+d[0],y+d[1],m.house?1:2)}}
   reserve(KH_PALACE_FRONT.x,KH_PALACE_FRONT.y,3);reserve(KH.CX,H-KH.WALL-4,6);reserve(KH_HATCH.x,KH_HATCH.y,2);
   const decor=L.decor,enemies=L.enemies;
   const add=(o)=>{decor.push(o);occ[idx(o.x,o.y)]=1;return o};

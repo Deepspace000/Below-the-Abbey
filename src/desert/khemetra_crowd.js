@@ -23,7 +23,7 @@ function khCrowd(C,L){
   const occ=new Uint8Array(W*H);        // decor, people or a reserved cell
   const reserve=(x,y,r)=>{for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){const xx=x+dx,yy=y+dy;if(xx>=0&&yy>=0&&xx<W&&yy<H)occ[idx(xx,yy)]=1}};
   // doors, the palace gate, the gate of the city and the hatch keep clear
-  for(const m of C.modules)if(m.doorCells&&m.lvl!==undefined){for(const [x,y] of m.doorCells){const d=KH_DIRS[m.face];reserve(x+d[0],y+d[1],2)}}
+  for(const m of C.modules)if(m.doorCells&&m.lvl!==undefined){for(const [x,y] of m.doorCells){const d=KH_DIRS[m.face];reserve(x+d[0],y+d[1],m.house?1:2)}}
   reserve(KH_PALACE_FRONT.x,KH_PALACE_FRONT.y,3);reserve(KH.CX,H-KH.WALL-4,6);reserve(KH_HATCH.x,KH_HATCH.y,2);
   const decor=L.decor,enemies=L.enemies;
   const add=(o)=>{decor.push(o);occ[idx(o.x,o.y)]=1;return o};

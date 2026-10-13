@@ -33,6 +33,7 @@ async function khPrepare(){
   const placed=khPlaceBuildings(C),pm=khPalaceDoor(C);
   khBuildWorld(); // the palace, cisterns, study and sea tunnel rooms need the door positions above
   khMakeDoorsAndRooms(C,L,placed);
+  khMakeHouseDoors(C); // and a door, with a picture of the room behind it, on every other house that can be walked up to
   if(pm){pm.at=LEVELS[KH_PALACE].start}
   KH_CHARS.n=0;KH_CHARS.map={};KH_CHARS.chars={};
   const rowCodes=new Array(H);for(let y=0;y<H;y++)rowCodes[y]=new Uint16Array(W);
@@ -43,7 +44,7 @@ async function khPrepare(){
     const tiles=khTileSet(m.e),door=m.doorCells||(m===gateMod?m.cells:null);
     m.cells.forEach(([x,y],i)=>{
       let gid=tiles[Math.min(i,tiles.length-1)].gid;
-      if(door&&door.some(c=>c[0]===x&&c[1]===y)){const g2=KH_NEXT_GID++;T_TILE[g2]=T_TILE[gid];KH_DOOR[g2]=m===gateMod?{gate:true}:{lvl:m.lvl,at:m.at};gid=g2}
+      if(door&&door.some(c=>c[0]===x&&c[1]===y)){const g2=KH_NEXT_GID++;T_TILE[g2]=T_TILE[gid];KH_DOOR[g2]=m===gateMod?{gate:true}:{lvl:m.lvl,at:m.at,i,n:m.cells.length,lf:m.face===1||m.face===2};gid=g2}
       rowCodes[y][x]=khChar(gid).charCodeAt(0);
     });
   }

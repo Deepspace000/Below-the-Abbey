@@ -241,3 +241,40 @@ function khRoomRuin(b){
       else raw('chest',5,1,{block:true,deco:false});}};
 }
 function decor_urn(raw){raw('urn',5,2,{npc:'kh_urn'})}
+
+/* ---- every other house, shop and prayer house with a clear way up to its front door: a door, and a picture of the room behind it ----
+   The room is only built the first time the party walks in (KH_LAZY, called from loadLevel), so a thousand doors cost nothing. */
+const KH_LAZY={};let KH_HOUSE_NEXT=1000;
+const KH_SCENE_NAME={warm:'A Warm House',wizard:"A Wizard's House",empty:'An Empty House',worker:"A Worker's House",noble:"A Nobleman's House",spartan:'A Spartan House',messy:'A Messy House',dark:'A Dark House',magic:'A Magical House',ruined:'A Ruined House',scholar:"A Scholar's House",musician:"A Musician's House",merchant:"A Merchant's House",healer:"A Healer's House",cats:"A Cat Lover's House",fisher:"A Fisherman's House",boarded:'A Boarded-up House',taxman:"A Tax Collector's House",potter:"A Potter's House",soldier:"A Soldier's House",priest:"A Priest's House",children:"A Children's House",bath_grand:'A Bathhouse',bath_hammam:'A Hammam'};
+const KH_SHOP_NAME={merchant:'A Closed Shop',potter:"A Potter's Workshop",healer:"A Healer's Shop",scholar:"A Scribe's Shop",empty:'An Empty Shop',taxman:'A Tax Office',fisher:"A Fishmonger's Shop",musician:'A Music Shop',boarded:'A Boarded-up Shop'};
+function khPickScene(m){
+  const [cx,cy]=m.cells[0],r=khHash(cx,cy,61),pick=a=>a[(r*a.length)|0],k=m.kind;
+  if(k==='bath')return pick(['bath_grand','bath_hammam']);
+  if(k==='pray'||k==='temple')return pick(['priest','priest','magic','empty','scholar']);
+  if(k==='shop')return pick(['merchant','potter','healer','scholar','empty','taxman','fisher','musician','boarded']);
+  if(khInPQ(cx,cy))return pick(['messy','dark','boarded','empty','worker','spartan','messy','dark']);
+  if(cx<125&&cy<125)return pick(['ruined','boarded','dark','empty','ruined','messy']);
+  if(k==='mansion'||Math.hypot(cx-KH.CX,cy-KH.CY)<80)return pick(['noble','magic','wizard','scholar','merchant','noble','warm','priest','musician']);
+  if(k==='low'||k==='ruin')return pick(['worker','fisher','potter','messy','spartan','children','warm','soldier','empty']);
+  return pick(['warm','worker','warm','scholar','healer','cats','fisher','potter','soldier','children','musician','messy','spartan','empty','wizard','priest','merchant']);
+}
+function khMakeHouseDoors(C){
+  const idx=C.idx;let n=0;
+  const frontOk=m=>{const mid=m.cells[(m.cells.length-1)>>1],d=KH_DIRS[m.face],x=mid[0]+d[0],y=mid[1]+d[1];return C.reach[idx(x,y)]===1&&C.reach[idx(x+d[0],y+d[1])]===1};
+  for(const m of C.modules){
+    if(m.doorCells||m.kind==='castle'||m.kind==='palace'||m.cells.length>4||!frontOk(m))continue;
+    const scene=khPickScene(m),shop=m.kind==='shop',lvl=KH_HOUSE_NEXT++,mid=m.cells[(m.cells.length-1)>>1],d=KH_DIRS[m.face];
+    const front=[mid[0]+d[0],mid[1]+d[1]],ff=KH_FACE_F[m.face];
+    const name=(shop?KH_SHOP_NAME[scene]:KH_SCENE_NAME[scene])||KH_SCENE_NAME.warm;
+    m.lvl=lvl;m.doorCells=m.cells.length===2?m.cells:[mid];m.at={x:4,y:5,f:0};m.house=true;
+    KH_LAZY[lvl]=()=>{
+      if(LEVELS[lvl])return;
+      const b={id:'house'+lvl,name,room:'home',keeper:null,scene};
+      const lv=khRoom(b,lvl,{to:44,x:front[0],y:front[1],f:ff}).level;
+      if(shop)lv.sceneShop=true;
+      LEVELS[lvl]=lv;LEVEL_NAMES[lvl]=name;
+    };
+    n++;
+  }
+  return n;
+}
