@@ -126,11 +126,11 @@ function khPlaceHanging(C,L,E){
   for(let y=8;y<H-8;y++)for(let x=8;x<W-8;x++){
     const i=idx(x,y);if(!C.reach[i]||!open(x,y)||C.zone[i]!==0||khInPQ(x,y))continue;
     const rh=run[i*2],rv=run[i*2+1];
-    const avenue=x>=KH.CX-4&&x<=KH.CX+4&&y>=250&&y<=H-14;
+    const avenue=x>=KH.CX-6&&x<=KH.CX+6&&y>=250&&y<=H-14&&rh>=9&&rh<=11;   // the great avenue is eleven squares wide
     // a north-south street: narrow across, long along; this square is the west end of its row
-    if(!open(x-1,y)&&((rh>=2&&rh<=3&&rv>=8)||(avenue&&rh===9))){
-      const cells=[];let ok=true;for(let k=0;k<rh;k++){const j=idx(x+k,y);if(!C.reach[j]||run[j*2+1]<8){ok=false;break}cells.push([x+k,y])}
-      const main=avenue&&rh===9;
+    if(!open(x-1,y)&&((rh>=2&&rh<=3&&rv>=8)||avenue)){
+      const cells=[];let ok=true;for(let k=0;k<rh;k++){const j=idx(x+k,y);if(!C.reach[j]||run[j*2+1]<8){ok=false;break}if(!avenue||k%2===0||k===rh-1)cells.push([x+k,y])}   // across the avenue every second square
+      const main=avenue;
       if(ok&&!tooClose(x+rh/2,y,main?11:15)&&khHash(x,y,87)<(main?1:.8)){hangString(cells,[1,0],main);note(x+rh/2,y)}
     }
     // an east-west street: narrow across, long along; this square is the north end of its column
