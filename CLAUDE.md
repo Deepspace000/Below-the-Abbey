@@ -21,6 +21,14 @@ make or ask for any picture, and before you push.
    at the waist looks as if the person has sunk into the floor.
 7. Reuse the lanterns, urns, vases and carts that already exist before you make new ones.
 
+## Towns
+
+- A town is small and grew by itself: one little main road, about three even smaller lanes going off it, a little main square, and
+  a dirt track at the back running out to a couple of cottages. No town grid, no blocks. Every road still runs in a straight line,
+  north to south or east to west. Roads are one square wide, and nothing stands in the road (lamps, tubs and arches stand beside it
+  or are walk-through), so the whole town can be walked.
+- Houses are tiny (two squares across and two deep; the shops and the inn three across), each with its own painted roof.
+
 ## Writing
 
 - Never use em dashes, in the game, in notes, in commit messages, anywhere.

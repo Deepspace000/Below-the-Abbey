@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.39';
+const VERSION='3.40';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1256,7 +1256,7 @@ function streamLoad(){
   const pr=el.play();if(pr&&pr.catch)pr.catch(()=>{STREAM.playing=false});STREAM.playing=true;
 }
 function areaAudio(){
-  if(!AC)return;loadSounds();windTick();try{if(typeof seaSoundTick==='function')seaSoundTick()}catch(e){}streamTick();
+  if(!AC)return;loadSounds();windTick();try{if(typeof seaSoundTick==='function')seaSoundTick()}catch(e){}try{if(typeof yarSoundTick==='function')yarSoundTick()}catch(e){}streamTick();
   const T={};
   if(G.state==='play'&&!G.mute){
     if(LEVEL===32){T.music_mithral=.55;loadLazy('music_mithral')}
@@ -12441,109 +12441,105 @@ khNpc('kh_snakeoil','A shifty salesman','kh_npc5_5',d=>{
 
 /* ---- src/desert/yarrim_layout.js ---- */
 /* ==========================================================================
-   YARRIM: THE PLAN OF THE VILLAGE. Pure arithmetic, no pictures: where the little cobbled lanes run, where each tiny house stands
-   (nearly all of them two squares across and two deep), which of them are the inn, the ship dealer, the trader and the other
-   buildings whose doors open, where the little park is, and which cells are yards. yarrim.js turns the plan into walls, floors,
-   people and props. The whole village is about twenty squares across: a hamlet by the harbour, not a town.
+   YARRIM: THE PLAN OF THE VILLAGE. Pure arithmetic, no pictures. A hamlet that grew up by itself: one little cobbled road runs from
+   the back of the village down to the harbour square, three even smaller lanes go off it (two north, one south) and end at a door,
+   a tiny park lies behind the inn, and a dirt track runs out at the back past a couple of outlying cottages to the gorge and the
+   tunnel. Every road is one square wide and runs straight north to south or east to west, but nothing lines up with anything else:
+   no blocks, no grid. Nearly all the houses are two squares across and two deep; the inn, the shops and the chapel are three across.
    Test it in a terminal:  node tools/yar_layout_test.js
    ========================================================================== */
 const YP={W:112,H:80};
 YP.coast=y=>64+5*Math.sin(y*.11)+3*Math.sin(y*.27+1);          // where the water starts (the same line the terrain uses)
 YP.shore=y=>Math.floor(YP.coast(y));
-YP.GORGE={x0:17,x1:25,y:40};                                    // the short rocky way from the tunnel mouth (a door in the rock at x0) into the village
+YP.GORGE={x0:17,x1:25,y:40};                                    // the short rocky way from the tunnel mouth (a door in the rock at x0) out into the open
 function yarMulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 
-/* the buildings whose doors open: a little larger than a plain house (three squares across), still tiny */
+/* the buildings whose doors open (the same names and colours as ever) */
 const YP_SPECIAL=[
-  {id:'inn',     band:'A',x0:26,w:3,d:2,name:'The Drowned Lantern',hue:3,wh:1.5,roof:1},
-  {id:'harbour', band:'A',x0:44,w:3,d:2,name:"The Harbourmaster's Office",hue:5,wh:1.45,roof:2},
-  {id:'chandler',band:'D',x0:27,w:3,d:2,name:'Brine and Rope',hue:1,wh:1.45,roof:4},
-  {id:'trader',  band:'D',x0:34,w:3,d:2,name:"Wen's Trading Post",hue:4,wh:1.5,roof:0},
-  {id:'dealer',  band:'D',x0:44,w:3,d:2,name:"Selk's Ship Dealing",hue:0,wh:1.5,roof:3},
-  {id:'maren',   band:'E',x0:28,w:2,d:2,name:"Old Maren's House",hue:2,wh:1.3,roof:5},
-  {id:'chapel',  band:'B',x0:34,w:3,d:2,name:'The Chapel of the Tides',hue:5,wh:1.6,roof:3},
-  {id:'loft',    band:'E',x0:36,w:3,d:2,name:'The Net Loft',hue:1,wh:1.4,roof:2}
+  {id:'inn',     name:'The Drowned Lantern',          hue:3,wh:1.5, roof:1},
+  {id:'harbour', name:"The Harbourmaster's Office",   hue:5,wh:1.45,roof:2},
+  {id:'chandler',name:'Brine and Rope',               hue:1,wh:1.45,roof:4},
+  {id:'trader',  name:"Wen's Trading Post",           hue:4,wh:1.5, roof:0},
+  {id:'dealer',  name:"Selk's Ship Dealing",          hue:0,wh:1.5, roof:3},
+  {id:'maren',   name:"Old Maren's House",            hue:2,wh:1.3, roof:5},
+  {id:'chapel',  name:'The Chapel of the Tides',      hue:5,wh:1.6, roof:3},
+  {id:'loft',    name:'The Net Loft',                 hue:1,wh:1.4, roof:2}
 ];
-/* the bands of houses: each is a row two squares deep along a lane. face: which way the doors look; lane: the lane they open on */
-const YP_BANDS={
-  A:{y:38,d:2,face:'S',lane:40,x0:26,x1:48},     // north side of the main lane, doors on the south face
-  B:{y:35,d:2,face:'S',lane:37,x0:26,x1:42},     // behind them, facing the back lane
-  D:{y:41,d:2,face:'N',lane:40,x0:26,x1:48},     // south side of the main lane, doors on the north face
-  E:{y:44,d:2,face:'N',lane:43,x0:26,x1:46}
-};
-const YP_LANES_EW=[ // [y, x from, x to]
-  [40,25,56],[40+1,49,56],[37,26,48],[43,26,48]
+/* the roads: [surface, x from, y from, x to, y to], each a straight line */
+const YP_ROADS=[
+  ['cobble',33,40,47,40],      // the main road, from the back of the village to the harbour square
+  ['cobble',36,33,36,39],      // Net Lane, north, ending at the Net Loft
+  ['cobble',45,35,45,39],      // Chapel Lane, north, ending at the chapel
+  ['cobble',46,35,47,35],      // the little path from the chapel's lane into the park
+  ['cobble',41,41,41,47],      // Gull Lane, south, ending at Old Maren's door
+  ['dirt',18,40,32,40],        // the track at the back: out past the cottages to the gorge and the tunnel
+  ['cobble',54,40,56,41]       // the quay, down to the pier
 ];
-const YP_LANES_NS=[ // [x, y from, y to]
-  [32,34,46],[43,34,46]
+const YP_SQUARE={x0:48,y0:38,x1:53,y1:42};                      // the little main square at the front, by the beach
+/* the houses: [id, x0, y0, width, depth, face, which square of that face the door is in]. A face is the side the door looks out of. */
+const YP_HOUSES=[
+  // north side of the main road
+  ['n1',34,38,2,2,'S',1],['n2',38,38,2,2,'S',0],['n3',41,38,3,2,'S',1],
+  // south side of the main road
+  ['s1',34,41,2,2,'N',0],['s2',37,41,3,2,'N',1],['chandler',43,41,3,2,'N',1],['s4',46,41,2,2,'N',1],
+  // Net Lane
+  ['w1',34,35,2,2,'E',1],['e1',37,35,2,2,'W',0],['loft',35,31,3,2,'S',1],
+  // Gull Lane
+  ['g1',39,43,2,2,'E',1],['g2',39,46,2,2,'E',0],['g3',42,43,2,2,'W',0],['g4',42,46,2,2,'W',1],['maren',40,48,2,2,'N',1],
+  // Chapel Lane
+  ['c1',43,36,2,2,'E',0],['c2',46,36,2,2,'W',1],['chapel',44,33,3,2,'S',1],
+  // the square: the inn and the trader on the north side, the harbourmaster and the ship dealer on the south
+  ['inn',48,36,3,2,'S',1],['trader',51,36,3,2,'S',1],['harbour',48,43,3,2,'N',1],['dealer',51,43,3,2,'N',1],
+  // two cottages out on the track
+  ['o1',30,38,2,2,'S',0],['o2',27,41,2,2,'N',1]
 ];
-const YP_HARBOUR={x0:49,y0:39,x1:54,y1:41};              // the little harbour square at the root of the pier
-const YP_PARK={x0:44,y0:31,x1:51,y1:36,gate:[47,37]};    // a lawn north of the harbour, open to the back lane
+const YP_PARK={x0:48,y0:30,x1:54,y1:35,gate:[47,35]};          // a lawn behind the inn, entered by a path from Chapel Lane
 const YP_LIGHT={x0:57,y0:23,x1:59,y1:25,door:[57,24],front:[56,24]};   // the lighthouse on the north point
+/* iron lamp posts stand beside the road, never on it, so the lanes stay open: the square, the road junctions, the ends of the lanes */
+const YP_LAMPS=[[48,38],[53,38],[48,42],[53,42],[47,39],[37,39],[40,39],[44,39],[36,41],[40,41],[42,41],[35,33],[44,35],[42,48],[33,41],[29,41]];
+/* the names of the ways, where the area map writes them */
+const YP_NAMES=[{t:'Quay Road',x:40,y:39.4,k:'lane'},{t:'Net Lane',x:35,y:34.5,k:'lane',v:1},{t:'Chapel Lane',x:46.6,y:37.8,k:'lane'},{t:'Gull Lane',x:42.9,y:44.9,k:'lane'},
+  {t:'The Back Track',x:25,y:39.2,k:'lane'},{t:'The Harbour',x:50.5,y:40.2,k:'place'},{t:'The Little Green',x:51,y:32.8,k:'place'}];
 
 function yarPlan(seed){
   const W=YP.W,H=YP.H,rng=yarMulberry(seed||90210),R=(a,b)=>a+Math.floor(rng()*(b-a+1)),pick=a=>a[Math.floor(rng()*a.length)];
-  const street=new Uint8Array(W*H),house=new Int16Array(W*H).fill(-1),yard=new Uint8Array(W*H);
+  const street=new Uint8Array(W*H),dirt=new Uint8Array(W*H),house=new Int16Array(W*H).fill(-1),yard=new Uint8Array(W*H);
   const inB=(x,y)=>x>=1&&y>=1&&x<W-1&&y<H-1;
-  const st=(x,y)=>{if(inB(x,y))street[y*W+x]=1};
-  // ---- streets: every one of them a lane, one square wide, except the quay that runs out to the pier ----
-  for(const [y,x0,x1] of YP_LANES_EW)for(let x=x0;x<=x1;x++)st(x,y);
-  for(const [x,y0,y1] of YP_LANES_NS)for(let y=y0;y<=y1;y++)st(x,y);
-  for(let y=YP_HARBOUR.y0;y<=YP_HARBOUR.y1;y++)for(let x=YP_HARBOUR.x0;x<=YP_HARBOUR.x1;x++)st(x,y);
-  const conn=new Set(YP_LANES_NS.map(l=>l[0]));
-  const free=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){if(!inB(x,y)||street[y*W+x]||house[y*W+x]>=0||yard[y*W+x])return false}return true};
-  const houses=[];
-  const put=h=>{h.i=houses.length;houses.push(h);for(let y=h.y0;y<=h.y1;y++)for(let x=h.x0;x<=h.x1;x++)house[y*W+x]=h.i;return h};
-  const make=(band,x0,w,d,opt)=>{
-    const B=YP_BANDS[band];let y0,y1,door,front;
-    if(B.face==='S'){y1=B.y+B.d-1;y0=y1-d+1;door=[x0+(opt.doorAt!==undefined?opt.doorAt:(w>>1)),y1];front=[door[0],y1+1]}
-    else{y0=B.y;y1=y0+d-1;door=[x0+(opt.doorAt!==undefined?opt.doorAt:(w>>1)),y0];front=[door[0],y0-1]}
-    return Object.assign({band,x0,x1:x0+w-1,y0,y1,w,d,face:B.face,door,front},opt);
-  };
-  // ---- the buildings with doors that open go in first ----
-  const special={};
-  for(const s of YP_SPECIAL){
-    const h=make(s.band,s.x0,s.w,s.d,{doorAt:s.w===2?(rng()<.5?0:1):1,hue:s.hue,wh:s.wh,roof:s.roof,sp:s});
-    if(free(h.x0,h.y0,h.x1,h.y1)&&street[h.front[1]*W+h.front[0]]){put(h);special[s.id]=h}
+  const st=(x,y,d)=>{if(inB(x,y)){street[y*W+x]=1;if(d)dirt[y*W+x]=1}};
+  for(const [kind,x0,y0,x1,y1] of YP_ROADS)for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)st(x,y,kind==='dirt');
+  for(let y=YP_SQUARE.y0;y<=YP_SQUARE.y1;y++)for(let x=YP_SQUARE.x0;x<=YP_SQUARE.x1;x++)st(x,y,false);
+  const houses=[],special={};
+  const hues=[0,1,2,3,4,5];let last=-1;
+  for(const [id,x0,y0,w,d,face,di] of YP_HOUSES){
+    const x1=x0+w-1,y1=y0+d-1;
+    const door=face==='S'?[x0+di,y1]:face==='N'?[x0+di,y0]:face==='E'?[x1,y0+di]:[x0,y0+di];
+    const front=face==='S'?[door[0],y1+1]:face==='N'?[door[0],y0-1]:face==='E'?[x1+1,door[1]]:[x0-1,door[1]];
+    const sp=YP_SPECIAL.find(s=>s.id===id)||null;
+    const h={id,x0,x1,y0,y1,w,d,face,door,front,sp,outlying:id[0]==='o'&&!sp};
+    if(sp){h.hue=sp.hue;h.wh=sp.wh;h.roof=sp.roof}
+    else{let hue=pick(hues);if(hue===last)hue=(hue+1+R(0,4))%6;last=hue;h.hue=hue;h.wh=pick([1.15,1.2,1.25,1.3,1.35,1.4]);h.roof=R(0,5)}
+    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){if(!inB(x,y)||street[y*W+x]||house[y*W+x]>=0)throw new Error('house '+id+' overlaps a road or a house at '+x+','+y)}
+    if(!street[front[1]*W+front[0]])throw new Error('house '+id+' has no road at its door: '+front);
+    h.i=houses.length;houses.push(h);for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)house[y*W+x]=h.i;
+    if(sp)special[id]=h;
   }
-  // ---- then the tiny houses along every band, with gaps, so no two rows look alike ----
-  const hues=[0,1,2,3,4,5];
-  for(const band of Object.keys(YP_BANDS)){
-    const B=YP_BANDS[band];
-    let x=B.x0,last=-1;
-    while(x<B.x1-1){
-      const w=pick([2,2,2,2,2,2,3]),d=2;
-      const h=make(band,x,w,d,{});
-      let blocked=false;for(let xx=h.x0;xx<=h.x1;xx++)if(conn.has(xx))blocked=true;
-      const okLane=street[h.front[1]*W+h.front[0]]&&street[h.front[1]*W+h.x1];
-      if(!blocked&&okLane&&free(h.x0,h.y0,h.x1,h.y1)&&h.x1<=B.x1&&rng()<.88){
-        let hue=pick(hues);if(hue===last)hue=(hue+1+R(0,4))%6;last=hue;
-        h.hue=hue;h.wh=pick([1.15,1.2,1.25,1.3,1.35,1.4]);h.roof=R(0,5);
-        h.doorAt=w===2?R(0,1):pick([0,1,2]);h.door=[h.x0+h.doorAt,h.door[1]];h.front=[h.door[0],h.front[1]];
-        put(h);x=h.x1+1+pick([0,0,1,1,2]);
-      }else x++;
-    }
-  }
-  // ---- the little park: a lawn with a well, trees and benches; no house stands on it ----
   const park=YP_PARK;
-  const keep=houses.filter(h=>!(h.x1>=park.x0&&h.x0<=park.x1&&h.y1>=park.y0&&h.y0<=park.y1+1));
-  for(let i=0;i<W*H;i++)house[i]=-1;
-  houses.length=0;for(const h of keep){h.i=houses.length;houses.push(h);for(let y=h.y0;y<=h.y1;y++)for(let x=h.x0;x<=h.x1;x++)house[y*W+x]=h.i}
-  for(let y=park.y0;y<=park.y1;y++)for(let x=park.x0;x<=park.x1;x++)yard[y*W+x]=2;
-  for(const k of Object.keys(special))special[k]=houses.find(h=>h.sp&&h.sp.id===k)||null;
-  return {W,H,street,house,yard,houses,special,park,rng,light:YP_LIGHT,harbour:YP_HARBOUR};
+  for(let y=park.y0;y<=park.y1;y++)for(let x=park.x0;x<=park.x1;x++){if(house[y*W+x]>=0||street[y*W+x])throw new Error('the park overlaps a house or a road at '+x+','+y);yard[y*W+x]=2}
+  for(const [x,y] of YP_LAMPS)if(street[y*W+x]&&!(x>=YP_SQUARE.x0&&x<=YP_SQUARE.x1&&y>=YP_SQUARE.y0&&y<=YP_SQUARE.y1))throw new Error('a lamp stands in the road at '+x+','+y);
+  return {W,H,street,dirt,house,yard,houses,special,park,rng,light:YP_LIGHT,harbour:YP_SQUARE,square:YP_SQUARE,lamps:YP_LAMPS,names:YP_NAMES};
 }
 
-/* a picture of the plan for the terminal: o tiny house, uppercase letter a building with a door that opens, D a door, . lane, p park */
+/* a picture of the plan for the terminal: o tiny house, uppercase letter a building with a door that opens, D a door, . cobbles, : dirt, p park */
 function yarAscii(P,x0,y0,x1,y1){
   const out=[];
   for(let y=y0;y<=y1;y++){let s='';for(let x=x0;x<=x1;x++){const i=y*P.W+x;
     if(P.house[i]>=0){const h=P.houses[P.house[i]];const door=(x===h.door[0]&&y===h.door[1]);s+=door?'D':h.sp?h.sp.id[0].toUpperCase():(h.w*h.d>=6?'#':'o')}
-    else if(P.street[i])s+='.';else if(P.yard[i]===2)s+='p';else s+=' ';}
+    else if(P.lamps.some(l=>l[0]===x&&l[1]===y))s+='*';
+    else if(P.street[i])s+=P.dirt[i]?':':'.';else if(P.yard[i]===2)s+='p';else s+=' ';}
     out.push(String(y).padStart(2)+' '+s)}
   return out.join('\n');
 }
-if(typeof module!=='undefined')module.exports={YP,yarPlan,yarAscii,YP_SPECIAL,YP_LIGHT};
+if(typeof module!=='undefined')module.exports={YP,yarPlan,yarAscii,YP_SPECIAL,YP_LIGHT,YP_HOUSES,YP_ROADS};
 
 /* ---- src/desert/yarrim.js ---- */
 /* ==========================================================================
@@ -12844,8 +12840,8 @@ function yarBuild(){
   // meadows: green where the land is gentle, in drifts rather than everywhere
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(fm[i]!=='0'||block[i])continue;if(tsmooth(x/6,y/6,61)>.52&&x>G0.x1+1)fm[i]='5'}
   // ---- the lanes, the harbour square and the quay: little cobbled ways, one square wide ----
-  for(let i=0;i<N;i++)if(P.street[i]){block[i]=0;fm[i]='1'}
-  for(let x=G0.x0;x<=G0.x1;x++){const i=G0.y*W+x;block[i]=0;fm[i]='0'}                  // the gorge floor is bare earth
+  for(let i=0;i<N;i++)if(P.street[i]){block[i]=0;fm[i]=P.dirt[i]?'6':'1'}                // the main road and the lanes are cobbled; the track at the back is packed earth
+  for(let x=G0.x0;x<=G0.x1;x++){const i=G0.y*W+x;block[i]=0;fm[i]='6'}                  // and the gorge floor is the start of the track
   rows[G0.y][G0.x0]='0';                                                                  // the door in the rock: the way back to the tunnel
   for(let y=P.park.y0;y<=P.park.y1;y++)for(let x=P.park.x0;x<=P.park.x1;x++){block[y*W+x]=0;fm[y*W+x]='5'}
   for(let y=26;y<=52;y++)for(let x=G0.x1+1;x<=P.park.x1+3;x++){const i=y*W+x;if(!block[i]&&fm[i]!=='1'&&P.yard[i]!==2&&!P.street[i]&&tsmooth(x/3,y/3,62)>.55)fm[i]='5'}   // a few green patches in the yards
@@ -12865,11 +12861,11 @@ function yarBuild(){
     // an odd cottage has rose vines, nets or driftwood on its sides, so they are not all the same
     const odd=!sp&&hs(hz.x0,hz.y0,63)<.38?SIDE[(hs(hz.x0,hz.y0,64)*SIDE.length)|0]:null,oddC=odd?ch(TM.special(odd,wh)):plain;
     for(let y=hz.y0;y<=hz.y1;y++)for(let x=hz.x0;x<=hz.x1;x++){
-      const front=hz.face==='S'?y===hz.y1:y===hz.y0,isDoor=x===hz.door[0]&&y===hz.door[1];
+      const front=hz.face==='S'?y===hz.y1:hz.face==='N'?y===hz.y0:hz.face==='E'?x===hz.x1:x===hz.x0,isDoor=x===hz.door[0]&&y===hz.door[1];
       let c;
       if(isDoor)c=S?String(S.p):ch(TM.door((hs(hz.x0,hz.y0,65)*YR_DOORTEX.length)|0,wh));
       else if(front)c=win;
-      else c=(x===hz.x0||x===hz.x1)?oddC:plain;
+      else c=((hz.face==='E'||hz.face==='W')?(y===hz.y0||y===hz.y1):(x===hz.x0||x===hz.x1))?oddC:plain;
       rows[y][x]=c;block[y*W+x]=1;fm[y*W+x]='0';
     }
     if(S){hz.p=S.p;specialDoors[S.p]=hz}
@@ -12904,8 +12900,8 @@ function yarBuild(){
   YR.crates=[27,35,47,53].map(yy=>crateAt(yy));
   YR.crates.forEach(([x,y],i)=>{if(free(x,y)){used.add(x+','+y);decor.push({k:'yar_crates',x,y,block:true,npc:'yr_crate',cat:i})}});
   // beached boats and nets on the sand beside the harbour square
-  for(const [k,x,y] of [['yar_boat_row',54,44],['yar_boat_fish',52,46],['yar_boat_row',55,36],['yar_boat_row',51,35]])tryDc(k,x,y);
-  for(const [k,x,y] of [['yar_nets',53,43],['yar_pots',55,43],['yar_crates',50,43],['yar_nets',52,37],['yar_pots',54,37]])tryDc(k,x,y);
+  for(const [k,x,y] of [['yar_boat_row',56,44],['yar_boat_fish',58,46],['yar_boat_row',57,37],['yar_boat_row',59,35]])tryDc(k,x,y);
+  for(const [k,x,y] of [['yar_nets',54,43],['yar_pots',56,42],['yar_crates',55,39],['yar_nets',54,37],['yar_pots',56,38]])tryDc(k,x,y);
   // ---- the village is pretty: flower tubs by every door, lamps along the lanes, washing, olive trees ----
   for(const hz of P.houses){
     const [fx,fy]=hz.front,horiz=hz.face==='S'||hz.face==='N';
@@ -12913,15 +12909,14 @@ function yarBuild(){
     const sides=horiz?[[fx-1,fy],[fx+1,fy]]:[[fx,fy-1],[fx,fy+1]];
     for(const [tx,ty] of sides)if(P.street[ty*W+tx]&&hs(tx,ty,67)<.55)sc2(hs(tx,ty,68)<.5?'yar_tub':'yar_lavender',tx,ty,.8+hs(tx,ty,69)*.3);
   }
-  // the lamps: iron posts along the main lane and in the harbour square, every fifth square
+  // the lamps: iron posts beside the road, never on it: the corners of the square, the junctions, the ends of the lanes
   const lights=[];
-  for(let x=27;x<=47;x+=5)if(tryDc('lamp',x,40))lights.push([x,40]);
-  for(const [x,y] of [[50,39],[53,41],[48,37],[32,44],[43,44],[32,36],[43,36]])if(tryDc('lamp',x,y))lights.push([x,y]);
-  // washing lines, rose arches over a lane end, olive trees, benches
-  for(const [x,y] of [[30,34],[39,34],[37,46],[30,47],[41,46],[47,45]])tryDc('yar_washing',x,y);
-  for(const [x,y] of [[32,34],[43,34],[32,46],[43,46]])tryDc('yar_arch2',x,y);
-  for(const [x,y] of [[27,33],[29,32],[33,32],[38,33],[26,46],[34,47],[44,47],[48,48],[24,35],[24,44],[46,31],[40,31],[22,38],[22,42]])tryDc('yar_olive',x,y);
-  for(const [x,y] of [[49,38],[49,42],[53,39]])tryDc('yar_bench',x,y);
+  for(const [x,y] of P.lamps)if(tryDc('lamp',x,y))lights.push([x,y]);
+  // washing lines in the yards, rose arches that you walk under (over the way into the village and the way into the park), olive trees, benches
+  for(const [x,y] of [[33,37],[38,44],[44,38],[47,44],[31,36],[37,50],[38,33]])tryDc('yar_washing',x,y);
+  for(const [x,y] of [[33,40],[P.park.gate[0],P.park.gate[1]]])tryDc('yar_arch2',x,y,{block:false,walk:true});
+  for(const [x,y] of [[32,37],[33,34],[31,43],[35,45],[38,48],[44,46],[47,46],[50,46],[56,35],[29,36],[26,38],[25,43],[24,36],[44,43],[52,48],[34,30]])tryDc('yar_olive',x,y);
+  for(const [x,y] of [[50,38],[51,42]])tryDc('yar_bench',x,y);
   // ---- the little park: a well, benches, trees, flowers ----
   {const pk=P.park;
     dc('well',Math.round((pk.x0+pk.x1)/2),Math.round((pk.y0+pk.y1)/2));
@@ -12937,7 +12932,7 @@ function yarBuild(){
     if(!free(x,y)||P.street[y*W+x]||P.yard[y*W+x]===2)continue;
     const nearHouse=P.houses.some(q=>x>=q.x0-1&&x<=q.x1+1&&y>=q.y0-1&&y<=q.y1+1);if(nearHouse)continue;
     if(x>P.park.x0-1&&x<P.park.x1+2&&y>P.park.y0-2&&y<P.park.y1+2)continue;
-    if(y>=30&&y<=48&&x>=G0.x1+1&&x<=50&&hs(n,3,71)<.8)continue;   // the village itself stays clear
+    if(y>=28&&y<=51&&x>=G0.x1+1&&x<=58&&hs(n,3,71)<.85)continue;   // the village itself stays clear
     const k='yar_wtree'+((hs(n,4,71)*6)|0);used.add(x+','+y);decor.push({k,x,y,block:true,deco:true,sc:.8+hs(n,5,71)*.5,wind:1});YR.windTrees.push([x,y]);
   }
   // fishermen's buckets, crates and coiled rope at the foot of the walls, where there is room
@@ -12953,7 +12948,7 @@ function yarBuild(){
     }
   }
   // gear along the harbour: buckets by the nets, a barrel or two
-  for(const [x,y] of [[50,38],[51,42],[54,38],[49,41],[52,42]])if(free(x,y)){const k='yar_bucket'+((hs(x,y,75)*6)|0);used.add(x+','+y);scenery.push({k,wx:x+.5,wy:y+.5,sc:1,decor:{k,walk:true,x,y}})}
+  for(const [x,y] of [[49,39],[52,41],[54,39],[50,42],[48,40]])if(free(x,y)){const k='yar_bucket'+((hs(x,y,75)*6)|0);used.add(x+','+y);scenery.push({k,wx:x+.5,wy:y+.5,sc:1,decor:{k,walk:true,x,y}})}
   // flowers and lavender at the foot of the walls, in the yards
   for(let n=0;n<150;n++){const x=G0.x1+2+((hs(n,11,41)*30)|0),y=30+((hs(n,12,41)*22)|0);if(!free(x,y)||P.street[y*W+x])continue;
     const nb=rows[y-1][x]!=='.'||rows[y+1][x]!=='.'||rows[y][x-1]!=='.'||rows[y][x+1]!=='.';if(!nb)continue;
@@ -12968,7 +12963,7 @@ function yarBuild(){
   }
   for(let n=0;n<40;n++){const x=58+hs(n,6,36)*28,y=40.2+hs(n,7,37)*1.6;scB('yar_gull_stand',x,y,.9+hs(n,8,38)*.3)}
   for(const [cx,cy,r] of YR_ISLANDS)for(let n=0;n<4;n++){const a=hs(cx,n,41)*TAU,x=cx+Math.cos(a)*r*.55,y=cy+Math.sin(a)*r*.55,i=(y|0)*W+(x|0);if(h[i]>.05&&h[i]<1)scB('yar_gull_stand',x,y,.9)}
-  for(const [x,y] of [[36,38],[30,42]])items.push({k:'potion',x:Math.min(x,48),y});
+  for(const [x,y] of [[44,38],[31,41]])items.push({k:'potion',x,y});
   // ---- the signs of the buildings whose doors open, and their names on the map ----
   const nameOf=p=>{const q=YR_HOUSES.find(z=>z.p===p);return q?q.name:''};
   const KEEP_NAME={yr_inn:'Bessa, innkeeper',yr_harbour:'Tamsin Kell',yr_dealer:'Selk, ship dealer',yr_trader:'Wen, trader',yr_priest:'Brother Haldane',yr_maren:'Old Maren',yr_orsa:'Orsa, keeper',yr_chandler:'Pell, chandler'};
@@ -12985,23 +12980,21 @@ function yarBuild(){
   // ---- the people of the village, who walk through and can be spoken to ----
   YR.people=[];
   const person=(id,x,y)=>{const kp=KH_KEEPERS[id];if(!kp)return null;const q=near(x,y,4);if(!q)return null;walk(khFaceKey(kp.face),q[0],q[1],{npc:id,sc:kp.sc||1});YR.people.push([id,q[0],q[1]]);return q};
-  person('yr_fisher1',50,40);person('yr_fisher2',55,38);person('yr_child',33,38);person('yr_old',43,38);person('yr_woman',30,41);person('yr_net',52,44);person('yr_tam',47,33);
+  person('yr_fisher1',50,40);person('yr_fisher2',57,38);person('yr_child',36,35);person('yr_old',49,41);person('yr_woman',39,40);person('yr_net',55,44);person('yr_tam',50,33);
   { // Corran's fish stall on the harbour square: a seller with a basket of herring
     const q=near(51,38,3);if(q){dc('yar_crates',q[0],q[1]-1>0&&free(q[0],q[1]-1)?q[1]-1:q[1],{deco:true,block:false,walk:true});walk(khFaceKey(KH_KEEPERS.yr_fish.face),q[0],q[1],{npc:'yr_fish',sc:1})}
   }
   // the donkey and its cart wait on the harbour square, for the road to Khemetra and beyond
-  { const q=near(53,42,3);if(q){walk(khFaceKey('kh_cart1_0'),q[0],q[1],{npc:'yr_donkey',sc:1});YR.donkeyAt=q} }
+  { const q=near(53,41,3);if(q){walk(khFaceKey('kh_cart1_0'),q[0],q[1],{npc:'yr_donkey',sc:1});YR.donkeyAt=q} }
   // quest folk and objects (yarrim_quests.js)
   if(typeof yarPlaceQuestFolk==='function')yarPlaceQuestFolk({near,free,walk,dc,sc2,decor,scenery,P,rows,used});
   // ---- the level ----
-  const mapNames=[ // the names the area map writes over the village
-    {t:'Quay Lane',x:36,y:39.4,k:'lane'},{t:'Net Lane',x:36,y:36.4,k:'lane'},{t:'Gull Lane',x:36,y:42.4,k:'lane'},
-    {t:'The Harbour',x:51.5,y:40,k:'place'},{t:'The Pier',x:70,y:40,k:'place'},{t:'The Little Green',x:(P.park.x0+P.park.x1+1)/2,y:(P.park.y0+P.park.y1+1)/2+2.4,k:'place'},
-    {t:'The Gorge',x:21,y:38.6,k:'lane'},{t:'Yarrim Point',x:61,y:27,k:'place'},{t:'The Beach',x:58,y:50,k:'place'}
-  ];
+  const mapNames=P.names.concat([ // the names the area map writes over the village, and over the shore
+    {t:'The Pier',x:70,y:40,k:'place'},{t:'The Gorge',x:21,y:38.6,k:'lane'},{t:'Yarrim Point',x:61,y:27,k:'place'},{t:'The Beach',x:58,y:50,k:'place'}
+  ]);
   const lv={rows:rows.map(r=>r.join('')),start:{x:G0.x0+1,y:G0.y,f:1},enemies:[],items,decor,scenery,sky:roofs,
-    fmap:null,floorSet:['sand','cobble','wood','bluesand','bluewater','lush'],floor:'sand',ceil:'cloud',
-    day:.98,outdoor:true,amb:.9,name:'Yarrim',label:'Yarrim',noExtras:true,diff:16,tele:{x:44,y:40},
+    fmap:null,floorSet:['sand','cobble','wood','bluesand','bluewater','lush','sandpath'],floor:'sand',ceil:'cloud',
+    day:.98,outdoor:true,amb:.9,name:'Yarrim',label:'Yarrim',noExtras:true,diff:16,tele:{x:44,y:38},
     chars,lights,portals:[],mapNames};
   const fmap=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmap.push(s)}
   lv.fmap=fmap;
@@ -13171,8 +13164,8 @@ yrObj('yr_admiral','kh_yprop1_4',[72,40],3);
 const YR_CRABS=[
   ['The red crab raises both claws and holds still while you tally him. "Count me properly," he says, in the way crabs say things, which is by clicking.',[53,46]],
   ['The green crab will not be counted until you have said please. You say please. He allows it, with the air of a magistrate.',[56,45]],
-  ['You tally the hermit crab, and then, to be fair, you tally his shell. He objects. The tally stands at one crab. The shell is a resident.',[52,35]],
-  ['The spider crab is quite a lot of crab. You are not sure whether to count the legs. You decide on one crab with eight points of view.',[55,34]],
+  ['You tally the hermit crab, and then, to be fair, you tally his shell. He objects. The tally stands at one crab. The shell is a resident.',[58,35]],
+  ['The spider crab is quite a lot of crab. You are not sure whether to count the legs. You decide on one crab with eight points of view.',[59,32]],
   ['The grey crab holds up his one enormous claw like a very rude question. You count him anyway. He is a great one for being counted.',[57,48]],
   ['A tiny crab in a brass thimble stands to attention and demands to be counted twice, on the grounds that he is wearing a helmet. You count him once and give him a nod. He accepts the nod.',[51,50]]
 ];
@@ -13268,7 +13261,7 @@ yrHook('yr_priest',d=>{
     if(bagCount('wildflower')<3)return say('Three wildflowers, for the bridesmaids. A boat deserves a bouquet, even a small one. Wen sells them.',[BYE]);
     return say('You have the flowers? Three, that is a small and honest wedding.',[['Give him the 3 wildflowers.',()=>{bagRemove('wildflower',3);F.yq5b=1;yrStep('The bridesmaids are in flowers. Now for the toast.');return say('He arranges them in a jar, bows to them, and says a few words over it in a language that sounds like waves. "The boats are blessed. A toast, now, if you would. Ale, at the water. Two mugs, one for each."',[BYE])}],BYE])}
   return null});
-[['yr_boatA','The Silver Gull','yar_boat_dhow',[52,45],"The Silver Gull, a dhow with a good heart and a bad rudder."],['yr_boatB','The Little Prudence','yar_boat_fish',[55,47],"The Little Prudence, a fishing smack that has never lost a crew. Mostly."]].forEach(([id,nm,k,at,txt])=>{
+[['yr_boatA','The Silver Gull','yar_boat_dhow',[52,46],"The Silver Gull, a dhow with a good heart and a bad rudder."],['yr_boatB','The Little Prudence','yar_boat_fish',[55,48],"The Little Prudence, a fishing smack that has never lost a crew. Mostly."]].forEach(([id,nm,k,at,txt])=>{
   khNpc(id,nm,k,d=>{
     const F=G.flags;
     if(qSt('yq_wed')==='active'&&F.yq5b&&!F.yq5c){
@@ -13334,7 +13327,7 @@ khNpc('yr_seal','A grey seal','kh_yprop1_2',d=>{
     if(bagCount('herring')<2)return say('The seal looks at you, and then at your hands. He wants 2 salt herring with the old net, as a deposit.',[BYE]);
     return say('The seal holds a good net firmly in his mouth. He looks at you, and then at the bundle in your arms.',[['Trade him the old net and 2 salt herring.',()=>{bagRemove('herring',2);F.yq7c=1;yrStep('The seal has taken the old net. Nell\'s nets are safe.');return say('The seal sniffs the old net, accepts it as an upgrade, accepts the herring as a down payment, and shuffles up the beach with his pups behind him, leaving Nell\'s good net on the sand. One of the pups looks back. It is the best moment of the week.',[BYE])}],BYE])}
   return say(F.yq7c?'A cold pile of old net on the sand, a flat patch where a seal slept, and a very small nose-print.':'A seal, awake, in the dark, looking at you with enormous eyes.',[BYE])});
-yrObj('yr_seal','kh_yprop1_2',[52,44],3);
+yrObj('yr_seal','kh_yprop1_2',[55,45],3);
 
 /* ---- 8. the drowned lantern: Bessa, Orsa, Pell and a boat hook ---- */
 yrQ('yq_lant','The Drowned Lantern','Bessa, the innkeeper',[
@@ -13409,6 +13402,137 @@ yrHook('yr_fisher2',d=>{
 
 /* a few more words from the people who belong to no quest, so that the village talks */
 khNpc('yr_tam','Tam, a boy with a kite','kh_yfolk3_4',d=>yrLines('tam',["I flew my kite over the lighthouse and it saw the whole sea. Now it will not stop talking about it.","The wind here is always going somewhere. I do not know where. I follow it, but it is quicker.","If you let go of the string, the kite goes up and up and never comes back. That is not a mistake. That is a plan."]));
+
+/* ---- src/desert/yarrim_sound.js ---- */
+/* ==========================================================================
+   THE SOUND OF YARRIM. Made in the browser, no recordings.
+   The wind comes in off the sea: the recorded wind of the engine in index.html, swelling and dropping, and a whistle that rides on
+   top of its gusts and shrills when the party is in one of the narrow lanes between the cottages.
+   And the shanty: a jig-time sea song of the Drowned Lantern, played on a fiddle and a squeezebox with a stamp and a clap, which
+   spills out of the inn into the lanes, louder near the door and faint down on the pier. Until Rafe has his last verse, the
+   tune stops short on the fifth note of the scale and starts again, as if it were holding its breath. After that, it comes home.
+   ========================================================================== */
+Object.assign(WIND_AMT,{290:.85,300:.7,301:.7,302:.8,303:.9,304:.55});   // the wind of the sea, in Yarrim and on the isles
+const YRS={bus:null,lp:null,wet:null,nextT:0,step:0,pass:false,wh:null,whT:0,lastOn:false,vol:0,done:null};
+const yrsHz=m=>440*Math.pow(2,(m-69)/12);
+const YRS_BPM=108,YRS_STEP=60/YRS_BPM/2;   // eighth notes; four to a beat of a bar of eight
+/* the tune, D dorian. [step, MIDI note, length in eighths] */
+const YRS_VA=[[0,62,2],[2,65,2],[4,69,2],[6,69,1],[7,67,1],[8,65,2],[10,64,2],[12,62,4],[16,62,2],[18,65,2],[20,69,2],[22,72,2],[24,71,2],[26,69,2],[28,67,4],
+  [32,69,2],[34,69,2],[36,72,2],[38,74,2],[40,72,2],[42,69,2],[44,67,2],[46,65,2],[48,64,2],[50,65,2],[52,67,2],[54,64,2],[56,62,6]];
+const YRS_VB=[[0,69,2],[2,69,2],[4,72,2],[6,69,2],[8,67,2],[10,65,2],[12,64,2],[14,62,2],[16,65,2],[18,67,2],[20,69,2],[22,71,2],[24,72,4],[28,69,4],
+  [32,74,2],[34,72,2],[36,71,2],[38,69,2],[40,67,2],[42,69,2],[44,65,2],[46,67,2],[48,64,2],[50,62,2],[52,64,2],[54,65,2],[56,67,6]];
+const YRS_CH=[[0,69,1],[1,69,1],[2,69,2],[4,69,2],[6,72,2],[8,74,4],[12,72,2],[14,69,2],[16,67,2],[18,69,2],[20,71,2],[22,67,2]];   // "haul away for Yarrim, boys"; the last bar is added below
+const YRS_CHORDS={Dm:[[62,65,69],38,45],C:[[60,64,67],36,43],G:[[55,59,62],43,50],Am:[[57,60,64],45,52]};
+const YRS_PROG_A=['Dm','Dm','C','Dm','Dm','C','G','Dm'],YRS_PROG_B=['Dm','C','Dm','Dm','C','Dm','G','Dm'],YRS_PROG_C=['Dm','C','G','Am'];
+/* a pass through the song is: verse A (8 bars), chorus (4), verse B (8), chorus (4) */
+function yrsSong(finished){
+  const S=[],add=(step,midi,len,part)=>{(S[step]=S[step]||[]).push({midi,len,part})};
+  const mel=(list,base)=>list.forEach(([s,m,l])=>add(base+s,m,l,'lead'));
+  const comp=(prog,base)=>prog.forEach((c,i)=>{
+    const [tri,b1,b2]=YRS_CHORDS[c],o=base+i*8;
+    add(o,b1,3,'bass');add(o+4,b2,3,'bass');add(o+2,tri,1,'stab');add(o+6,tri,1,'stab');
+    add(o,0,1,'stamp');add(o+4,0,1,'stamp');add(o+2,0,1,'clap');add(o+6,0,1,'clap');
+  });
+  for(const [a,b,prog] of [[0,YRS_VA,YRS_PROG_A],[12*8,YRS_VB,YRS_PROG_B]]){mel(b,a);comp(prog,a)}
+  for(const base of [64,64+96]){
+    mel(YRS_CH,base);
+    if(finished){add(base+24,69,3,'lead');add(base+27,67,1,'lead');add(base+28,65,2,'lead');add(base+30,62,2,'lead')}   // the last line comes home to the tonic
+    else add(base+24,69,6,'lead');                                                                                     // the song has no last verse, so it stops on the fifth
+    comp(YRS_PROG_C,base);
+  }
+  return S;
+}
+let YRS_SONG=yrsSong(false),YRS_SONG_DONE=yrsSong(true);
+const YRS_LEN=192;
+function yrsBus(){
+  if(YRS.bus)return;
+  YRS.bus=AC.createGain();YRS.bus.gain.value=0;YRS.lp=AC.createBiquadFilter();YRS.lp.type='lowpass';YRS.lp.frequency.value=7000;YRS.lp.Q.value=.5;
+  YRS.bus.connect(YRS.lp);YRS.lp.connect(MASTER);
+  // a little room: a short tail of decaying noise
+  const len=Math.floor(AC.sampleRate*1.1),ir=AC.createBuffer(2,len,AC.sampleRate);
+  for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6)}
+  const cv=AC.createConvolver();cv.buffer=ir;YRS.wet=AC.createGain();YRS.wet.gain.value=.22;YRS.lp.connect(cv);cv.connect(YRS.wet);YRS.wet.connect(MASTER);
+}
+const yrsEnv=(g,t,peak,a,dur,r)=>{g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+a);g.gain.setValueAtTime(peak,Math.max(t+a,t+dur-r));g.gain.linearRampToValueAtTime(0,t+dur+.02)};
+function yrsLead(t,midi,dur){ // the fiddle: two saws, a bow that bites a little at the start, a vibrato that comes in late
+  const f=yrsHz(midi),o1=AC.createOscillator(),o2=AC.createOscillator(),lp=AC.createBiquadFilter(),g=AC.createGain(),vib=AC.createOscillator(),vg=AC.createGain();
+  o1.type=o2.type='sawtooth';o1.frequency.value=f;o2.frequency.value=f;o2.detune.value=8;
+  vib.frequency.value=5.2;vg.gain.setValueAtTime(0,t);vg.gain.linearRampToValueAtTime(f*.011,t+Math.min(.35,dur));vib.connect(vg);vg.connect(o1.frequency);vg.connect(o2.frequency);
+  lp.type='lowpass';lp.frequency.setValueAtTime(3200,t);lp.frequency.exponentialRampToValueAtTime(1900,t+.12);lp.Q.value=.9;
+  yrsEnv(g,t,.1,.025,dur*YRS_STEP*.94,.07);
+  o1.connect(lp);o2.connect(lp);lp.connect(g);g.connect(YRS.bus);
+  const e=t+dur*YRS_STEP*.94+.1;o1.start(t);o2.start(t);vib.start(t);o1.stop(e);o2.stop(e);vib.stop(e);
+  const s=AC.createBufferSource(),bp=AC.createBiquadFilter(),ng=AC.createGain();s.buffer=NB;bp.type='bandpass';bp.frequency.value=2600;bp.Q.value=.8;ng.gain.setValueAtTime(.05,t);ng.gain.exponentialRampToValueAtTime(.001,t+.07);s.connect(bp);bp.connect(ng);ng.connect(YRS.bus);s.start(t);s.stop(t+.09); // the bow
+}
+function yrsStab(t,notes){ // the squeezebox: reedy chords on the off-beats
+  const g=AC.createGain(),lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1700;lp.Q.value=.6;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.045,t+.012);g.gain.exponentialRampToValueAtTime(.001,t+.3);
+  lp.connect(g);g.connect(YRS.bus);
+  for(const n of notes)for(const dt of [-7,6]){const o=AC.createOscillator();o.type='square';o.frequency.value=yrsHz(n);o.detune.value=dt;o.connect(lp);o.start(t);o.stop(t+.34)}
+}
+function yrsBass(t,midi,len){
+  const f=yrsHz(midi),o=AC.createOscillator(),o2=AC.createOscillator(),g=AC.createGain(),lp=AC.createBiquadFilter();
+  o.type='triangle';o.frequency.value=f;o2.type='sine';o2.frequency.value=f*2;lp.type='lowpass';lp.frequency.value=700;
+  const d=len*YRS_STEP;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.2,t+.015);g.gain.exponentialRampToValueAtTime(.001,t+d);
+  o.connect(lp);o2.connect(lp);lp.connect(g);g.connect(YRS.bus);o.start(t);o2.start(t);o.stop(t+d+.05);o2.stop(t+d+.05);
+}
+function yrsStamp(t){ // a boot on a plank
+  const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(48,t+.11);
+  g.gain.setValueAtTime(.34,t);g.gain.exponentialRampToValueAtTime(.001,t+.16);o.connect(g);g.connect(YRS.bus);o.start(t);o.stop(t+.18);
+  const s=AC.createBufferSource(),lp=AC.createBiquadFilter(),ng=AC.createGain();s.buffer=NB;lp.type='lowpass';lp.frequency.value=520;ng.gain.setValueAtTime(.22,t);ng.gain.exponentialRampToValueAtTime(.001,t+.07);s.connect(lp);lp.connect(ng);ng.connect(YRS.bus);s.start(t);s.stop(t+.09);
+}
+function yrsClap(t){ // two palms, one just after the other
+  for(const dt of [0,.018]){const s=AC.createBufferSource(),bp=AC.createBiquadFilter(),g=AC.createGain();s.buffer=NB;bp.type='bandpass';bp.frequency.value=1500+dt*9000;bp.Q.value=1.1;
+    g.gain.setValueAtTime(.15,t+dt);g.gain.exponentialRampToValueAtTime(.001,t+dt+.075);s.connect(bp);bp.connect(g);g.connect(YRS.bus);s.start(t+dt);s.stop(t+dt+.09)}
+}
+function yrsPlay(t,ev){
+  for(const e of ev){
+    if(e.part==='lead')yrsLead(t,e.midi,e.len);
+    else if(e.part==='stab')yrsStab(t,e.midi);
+    else if(e.part==='bass')yrsBass(t,e.midi,e.len);
+    else if(e.part==='stamp')yrsStamp(t);
+    else if(e.part==='clap')yrsClap(t);
+  }
+}
+/* how loud the shanty is where the party stands: full inside the Drowned Lantern, muffled through the walls of the other houses,
+   and in the lanes it falls off from the inn door at the west end of the main lane to the pier and the beaches */
+function yrsLoudness(){
+  if(LEVEL===291)return {v:1.15,lp:9000};
+  if(LEVEL>=292&&LEVEL<=299)return {v:.28,lp:650};
+  if(LEVEL!==290)return {v:0,lp:7000};
+  const inn=YR.plan&&YR.plan.special&&YR.plan.special.inn,ix=inn?inn.front[0]:49,iy=inn?inn.front[1]:38,d=Math.hypot(G.P.x-ix,(G.P.y-iy)*1.2);
+  const v=d<7?1:d<32?1-.62*(d-7)/25:.32-Math.min(.2,(d-32)*.012);
+  return {v:Math.max(.1,v),lp:d<10?7500:d<30?5200:3300};
+}
+/* the whistle of the wind in the lanes, riding on the gusts of the wind engine */
+function yrsWindTick(now,on){
+  if(!YRS.wh){
+    const mk=q=>{const s=AC.createBufferSource(),bp=AC.createBiquadFilter(),g=AC.createGain();s.buffer=NB;s.loop=true;s.loopStart=Math.random()*.5;bp.type='bandpass';bp.Q.value=q;g.gain.value=0;s.connect(bp);bp.connect(g);g.connect(MASTER);s.start();return {bp,g}};
+    YRS.wh=[mk(22),mk(30)];
+  }
+  const e=typeof WIND!=='undefined'?WIND.env:.3,t=G.time;
+  let lane=.35;
+  if(LEVEL===290){const gr=G.grid;let w=0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const r=gr[G.P.y+dy];if(r&&r[G.P.x+dx]>0)w++}lane=.3+.28*w}
+  const a=on?lane*e*e:0;
+  YRS.wh[0].bp.frequency.setTargetAtTime(520+330*Math.sin(t*.21+1.3)+620*e,now,.4);YRS.wh[0].g.gain.setTargetAtTime(a*.2,now,.35);
+  YRS.wh[1].bp.frequency.setTargetAtTime(1080+420*Math.sin(t*.17+.4)+900*e,now,.4);YRS.wh[1].g.gain.setTargetAtTime(a*.08,now,.45);
+}
+function yarSoundTick(){
+  if(!AC||!NB||!MASTER)return;
+  const now=AC.currentTime,outdoors=LEVEL===290||LEVEL===291||(LEVEL>=292&&LEVEL<=299);
+  const play=G.state==='play'&&!G.mute&&outdoors;
+  yrsWindTick(now,G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===290||LEVEL===300||LEVEL===301||LEVEL===302||LEVEL===303||LEVEL===304));
+  if(!YRS.bus){if(!play||!SNDOPT.music)return;yrsBus()}
+  const L=play&&SNDOPT.music?yrsLoudness():{v:0,lp:7000};
+  YRS.bus.gain.setTargetAtTime(L.v*1.4*SNDOPT.music,now,.9);YRS.lp.frequency.setTargetAtTime(L.lp,now,.5);
+  if(!(play&&SNDOPT.music&&L.v>0)){YRS.lastOn=false;return}
+  const song=(G.flags&&G.flags.yrShanty)?YRS_SONG_DONE:YRS_SONG;
+  if(!YRS.lastOn||YRS.nextT<now-.5){YRS.lastOn=true;YRS.nextT=now+.15;if(YRS.step>=YRS_LEN)YRS.step=0}   // starting again, or the page was asleep for a while
+  while(YRS.nextT<now+.7){
+    const ev=song[YRS.step];if(ev)yrsPlay(YRS.nextT,ev);
+    YRS.nextT+=YRS_STEP;YRS.step=(YRS.step+1)%YRS_LEN;
+  }
+}
 
 /* ---- src/desert/voyage.js ---- */
 /* ==========================================================================

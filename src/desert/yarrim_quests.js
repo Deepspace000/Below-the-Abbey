@@ -72,8 +72,8 @@ yrObj('yr_admiral','kh_yprop1_4',[72,40],3);
 const YR_CRABS=[
   ['The red crab raises both claws and holds still while you tally him. "Count me properly," he says, in the way crabs say things, which is by clicking.',[53,46]],
   ['The green crab will not be counted until you have said please. You say please. He allows it, with the air of a magistrate.',[56,45]],
-  ['You tally the hermit crab, and then, to be fair, you tally his shell. He objects. The tally stands at one crab. The shell is a resident.',[52,35]],
-  ['The spider crab is quite a lot of crab. You are not sure whether to count the legs. You decide on one crab with eight points of view.',[55,34]],
+  ['You tally the hermit crab, and then, to be fair, you tally his shell. He objects. The tally stands at one crab. The shell is a resident.',[58,35]],
+  ['The spider crab is quite a lot of crab. You are not sure whether to count the legs. You decide on one crab with eight points of view.',[59,32]],
   ['The grey crab holds up his one enormous claw like a very rude question. You count him anyway. He is a great one for being counted.',[57,48]],
   ['A tiny crab in a brass thimble stands to attention and demands to be counted twice, on the grounds that he is wearing a helmet. You count him once and give him a nod. He accepts the nod.',[51,50]]
 ];
@@ -169,7 +169,7 @@ yrHook('yr_priest',d=>{
     if(bagCount('wildflower')<3)return say('Three wildflowers, for the bridesmaids. A boat deserves a bouquet, even a small one. Wen sells them.',[BYE]);
     return say('You have the flowers? Three, that is a small and honest wedding.',[['Give him the 3 wildflowers.',()=>{bagRemove('wildflower',3);F.yq5b=1;yrStep('The bridesmaids are in flowers. Now for the toast.');return say('He arranges them in a jar, bows to them, and says a few words over it in a language that sounds like waves. "The boats are blessed. A toast, now, if you would. Ale, at the water. Two mugs, one for each."',[BYE])}],BYE])}
   return null});
-[['yr_boatA','The Silver Gull','yar_boat_dhow',[52,45],"The Silver Gull, a dhow with a good heart and a bad rudder."],['yr_boatB','The Little Prudence','yar_boat_fish',[55,47],"The Little Prudence, a fishing smack that has never lost a crew. Mostly."]].forEach(([id,nm,k,at,txt])=>{
+[['yr_boatA','The Silver Gull','yar_boat_dhow',[52,46],"The Silver Gull, a dhow with a good heart and a bad rudder."],['yr_boatB','The Little Prudence','yar_boat_fish',[55,48],"The Little Prudence, a fishing smack that has never lost a crew. Mostly."]].forEach(([id,nm,k,at,txt])=>{
   khNpc(id,nm,k,d=>{
     const F=G.flags;
     if(qSt('yq_wed')==='active'&&F.yq5b&&!F.yq5c){
@@ -235,7 +235,7 @@ khNpc('yr_seal','A grey seal','kh_yprop1_2',d=>{
     if(bagCount('herring')<2)return say('The seal looks at you, and then at your hands. He wants 2 salt herring with the old net, as a deposit.',[BYE]);
     return say('The seal holds a good net firmly in his mouth. He looks at you, and then at the bundle in your arms.',[['Trade him the old net and 2 salt herring.',()=>{bagRemove('herring',2);F.yq7c=1;yrStep('The seal has taken the old net. Nell\'s nets are safe.');return say('The seal sniffs the old net, accepts it as an upgrade, accepts the herring as a down payment, and shuffles up the beach with his pups behind him, leaving Nell\'s good net on the sand. One of the pups looks back. It is the best moment of the week.',[BYE])}],BYE])}
   return say(F.yq7c?'A cold pile of old net on the sand, a flat patch where a seal slept, and a very small nose-print.':'A seal, awake, in the dark, looking at you with enormous eyes.',[BYE])});
-yrObj('yr_seal','kh_yprop1_2',[52,44],3);
+yrObj('yr_seal','kh_yprop1_2',[55,45],3);
 
 /* ---- 8. the drowned lantern: Bessa, Orsa, Pell and a boat hook ---- */
 yrQ('yq_lant','The Drowned Lantern','Bessa, the innkeeper',[
