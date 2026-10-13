@@ -62,12 +62,13 @@ function khTileSet(e){
 /* floors: the painted paving sheets, cut into seamless squares */
 function khMakeFloors(){
   const names=[];
-  const put=(n,key)=>{const im=khImg(key);if(!im)return false;FLOORS[n]=dsPaintedTex(im);names.push(n);return true};
-  // 0 cobbles, 1 slabs, 2 painted tile, 3 market cobbles, 4 lawn, 5 mosaic
-  const want=[['floor2_0','floor1_0'],['floor2_1','floor1_1'],['floor3_0','floor1_2'],['floor2_3','floor1_3'],['floor1_4'],['floor3_2','floor1_5']];
+  // a picture drawn at the size of one cell; zoom takes the middle part of it, so fine patterns read at game scale
+  const put=(n,key,zoom)=>{const im=khImg(key);if(!im)return false;const [c,x]=tcv(),sw=im.width/zoom,sh=im.height/zoom,sx=(im.width-sw)/2,sy=(im.height-sh)/2;x.drawImage(im,sx,sy,sw,sh,0,0,TS,TS);FLOORS[n]=pix(c);names.push(n);return true};
+  // 0 cobbles, 1 slabs, 2 painted tile, 3 market setts, 4 lawn, 5 mosaic
+  const want=[[['floor2_0'],1],[['floor2_2','floor2_1'],1],[['floor3_0','floor2_4'],2],[['floor2_5','floor2_3'],1],[['floor1_4'],1],[['floor3_2','floor2_4'],2]];
   const base=['#c9b48a','#d4c09a','#c8b890','#b89c70','#6e8f4a','#7aa0b8'];
-  want.forEach((keys,i)=>{
-    if(keys.some(k=>put('kh'+i,k)))return;
+  want.forEach(([keys,zoom],i)=>{
+    if(keys.some(k=>put('kh'+i,k,zoom)))return;
     const [c,x]=tcv();x.fillStyle=base[i];x.fillRect(0,0,TS,TS);
     for(let k=0;k<70;k++){x.fillStyle='rgba('+(k%2?'255,245,220':'80,60,30')+',.18)';x.beginPath();x.ellipse(hash2(k,i,3)*TS,hash2(k,i,4)*TS,6+hash2(k,i,5)*10,5+hash2(k,i,6)*7,0,0,TAU);x.fill()}
     FLOORS['kh'+i]=pix(c);names.push('kh'+i);

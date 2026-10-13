@@ -3,7 +3,7 @@
    wall tiles, doors, floors, the skyline of roofs, towers, palace and church, and then the buildings, people and
    markets (khemetra_build.js, khemetra_crowd.js).
    ========================================================================== */
-const KH_ROOFS_OK=['roof1_0','roof1_1','roof1_2','roof1_4','roof1_5','roof2_2','roof2_5','roof2_0','roof3_0','roof3_1','roof3_2','roof3_3','roof3_4','roof3_5'];
+const KH_ROOFS_OK=['roof1_0','roof1_1','roof1_2','roof1_4','roof1_5','roof2_2','roof2_5','roof2_0','roof3_2'];
 LEVELS[44]={stub:true,rows:['.'],start:{x:0,y:0,f:0},enemies:[],items:[],decor:[],name:'Khemetra, the Golden City',label:'Khemetra',diff:16,outdoor:true,day:.98,ceil:'cloud',floor:'sand',portals:[]};
 let KH_CITY=null;
 const khHash=(a,b,c)=>hash2(a|0,b|0,c|0);

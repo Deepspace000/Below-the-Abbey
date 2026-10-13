@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.85';
+const VERSION='2.86';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -8729,12 +8729,13 @@ function khTileSet(e){
 /* floors: the painted paving sheets, cut into seamless squares */
 function khMakeFloors(){
   const names=[];
-  const put=(n,key)=>{const im=khImg(key);if(!im)return false;FLOORS[n]=dsPaintedTex(im);names.push(n);return true};
-  // 0 cobbles, 1 slabs, 2 painted tile, 3 market cobbles, 4 lawn, 5 mosaic
-  const want=[['floor2_0','floor1_0'],['floor2_1','floor1_1'],['floor3_0','floor1_2'],['floor2_3','floor1_3'],['floor1_4'],['floor3_2','floor1_5']];
+  // a picture drawn at the size of one cell; zoom takes the middle part of it, so fine patterns read at game scale
+  const put=(n,key,zoom)=>{const im=khImg(key);if(!im)return false;const [c,x]=tcv(),sw=im.width/zoom,sh=im.height/zoom,sx=(im.width-sw)/2,sy=(im.height-sh)/2;x.drawImage(im,sx,sy,sw,sh,0,0,TS,TS);FLOORS[n]=pix(c);names.push(n);return true};
+  // 0 cobbles, 1 slabs, 2 painted tile, 3 market setts, 4 lawn, 5 mosaic
+  const want=[[['floor2_0'],1],[['floor2_2','floor2_1'],1],[['floor3_0','floor2_4'],2],[['floor2_5','floor2_3'],1],[['floor1_4'],1],[['floor3_2','floor2_4'],2]];
   const base=['#c9b48a','#d4c09a','#c8b890','#b89c70','#6e8f4a','#7aa0b8'];
-  want.forEach((keys,i)=>{
-    if(keys.some(k=>put('kh'+i,k)))return;
+  want.forEach(([keys,zoom],i)=>{
+    if(keys.some(k=>put('kh'+i,k,zoom)))return;
     const [c,x]=tcv();x.fillStyle=base[i];x.fillRect(0,0,TS,TS);
     for(let k=0;k<70;k++){x.fillStyle='rgba('+(k%2?'255,245,220':'80,60,30')+',.18)';x.beginPath();x.ellipse(hash2(k,i,3)*TS,hash2(k,i,4)*TS,6+hash2(k,i,5)*10,5+hash2(k,i,6)*7,0,0,TAU);x.fill()}
     FLOORS['kh'+i]=pix(c);names.push('kh'+i);
@@ -8748,7 +8749,7 @@ function khMakeFloors(){
    wall tiles, doors, floors, the skyline of roofs, towers, palace and church, and then the buildings, people and
    markets (khemetra_build.js, khemetra_crowd.js).
    ========================================================================== */
-const KH_ROOFS_OK=['roof1_0','roof1_1','roof1_2','roof1_4','roof1_5','roof2_2','roof2_5','roof2_0','roof3_0','roof3_1','roof3_2','roof3_3','roof3_4','roof3_5'];
+const KH_ROOFS_OK=['roof1_0','roof1_1','roof1_2','roof1_4','roof1_5','roof2_2','roof2_5','roof2_0','roof3_2'];
 LEVELS[44]={stub:true,rows:['.'],start:{x:0,y:0,f:0},enemies:[],items:[],decor:[],name:'Khemetra, the Golden City',label:'Khemetra',diff:16,outdoor:true,day:.98,ceil:'cloud',floor:'sand',portals:[]};
 let KH_CITY=null;
 const khHash=(a,b,c)=>hash2(a|0,b|0,c|0);
@@ -8872,10 +8873,10 @@ function khThen(then){khPrepare().then(then).catch(e=>{console.error(e);msg('The
    KHEMETRA: THE BUILDINGS. Which fronts on the street are doors, what lies behind each one, and the rooms themselves.
    ========================================================================== */
 const KH_PROPS={ // painted props by role: [sheet piece, height in cells]; the old game sprites stand in until a picture exists
-  counter:['kh_int1_0','counter',.62],table:['kh_int1_1','bench',.5],shelf:['kh_int1_2','crate',1.05],bookcase:['kh_int1_3','crate',1.1],chair:['kh_int1_4','bench',.55],bed:['kh_int1_5','bench',.6],
-  cushions:['kh_int2_0','sacks',.4],brazier:['kh_int2_1','brazier0',.75],hlamp:['kh_int2_2','lamp',.5],basin:['kh_int2_3','fountain',.7],amphora:['kh_int2_4','urn',.8],chest:['kh_int2_5','chest',.5],
-  fountain:['kh_city1_0','fountain',1.1],well:['kh_city1_1','well',1.0],obelisk:['kh_city1_2','memorial',2.4],statue:['kh_city1_3','statue',1.5],lamp:['kh_city1_4','lamp',1.5],bench:['kh_city1_5','bench',.6],
-  palm:['kh_city2_0','dpalm0',2.4],tree:['kh_city2_1','ltree17',1.6],shrub:['kh_city2_2','lbush0',.7],planter:['kh_city2_3','flowerpot',.5],pot:['kh_city2_4','flowerpot',.9],pergola:['kh_city2_5','bench',1.3],
+  counter:['kh_int1_1','counter',.6],table:['kh_int1_2','bench',.5],shelf:['kh_int1_0','crate',1.05],bookcase:['kh_int1_3','crate',1.1],chair:['kh_int1_4','bench',.55],bed:['kh_int1_5','bench',.6],
+  cushions:['kh_int2_0','sacks',.4],brazier:['kh_int2_2','brazier0',.75],hlamp:['kh_int2_1','lamp',.5],basin:['kh_int2_3','fountain',.7],amphora:['kh_int2_4','urn',.8],chest:['kh_int2_5','chest',.5],
+  fountain:['kh_city1_0','fountain',1.1],well:['kh_city1_1','well',1.0],obelisk:['kh_city1_2','memorial',2.4],statue:['kh_city1_3','statue',1.5],lamp:['kh_nolamp','lamp',1.5],bench:['kh_city1_4','bench',.6],
+  palm:['kh_city2_0','dpalm0',2.4],tree:['kh_city2_1','ltree17',1.7],shrub:['kh_city2_2','lbush0',.8],planter:['kh_city2_5','flowerpot',.5],pot:['kh_city2_3','flowerpot',.9],pergola:['kh_city2_4','bench',1.5],
   ship:['kh_ship1_0','crate',.9],wheel:['kh_ship1_1','barrel',.8],anchor:['kh_ship1_2','barrel',.8],rope:['kh_ship1_3','sacks',.35],seachest:['kh_ship1_4','chest',.5],sail:['kh_ship1_5','crate',1.1],
   throne:['kh_throne1_0','statue',1.4],banner:['kh_throne1_1','banner',1.3],maptable:['kh_throne1_2','counter',.6],candle:['kh_throne1_3','lamp',1.2],
   stallA:['kh_stall1_0','cart',.95],stallB:['kh_stall1_1','cart',.95],stallC:['kh_stall1_2','cart',.95],stallD:['kh_stall1_3','cart',.95],stallE:['kh_stall1_4','cart',.95],stallF:['kh_stall1_5','cart',.95],
@@ -9584,14 +9585,16 @@ function khCrowd(C,L){
       if(!d3[i]&&wd<3)continue;
       if(!wallNear(x,y))continue;
       if(r<.02)add({k:'dpalm'+((x+y)&3),x,y,block:true,sc:.8+khHash(x,y,12)*.3});
-      else if(r<.07)add({k:vases[(x+y)&3],x,y,block:false,walk:true,sc:.9+khHash(x,y,13)*.3});
+      else if(r<.05)add({k:vases[(x+y)&3],x,y,block:false,walk:true,sc:.9+khHash(x,y,13)*.3});
+      else if(r<.07)add({k:khProp(khHash(x,y,15)<.5?'planter':'pot'),x,y,block:false,walk:true});
       else if(r<.075)add({k:'urn',x,y,block:false,walk:true});
       continue;
     }
     if(d3[i]&&!d5[i]){ // a cell one in from the wall of a wide street
-      if(r<.16){add({k:['dpalm0','dpalm1','dpalm2','dpalm3'][((x*3+y)>>1)&3],x,y,block:true,sc:.9+khHash(x,y,12)*.4})}
-      else if(r<.22){add({k:vases[(x+y)&3],x,y,block:false,walk:true,sc:.9+khHash(x,y,13)*.3})}
-      else if(r<.235){add({k:'urn',x,y,block:false,walk:true})}
+      if(r<.16){add({k:khHash(x,y,14)<.4?khProp('palm'):['dpalm0','dpalm1','dpalm2','dpalm3'][((x*3+y)>>1)&3],x,y,block:true,sc:.9+khHash(x,y,12)*.4})}
+      else if(r<.20){add({k:vases[(x+y)&3],x,y,block:false,walk:true,sc:.9+khHash(x,y,13)*.3})}
+      else if(r<.215){add({k:'urn',x,y,block:false,walk:true})}
+      else if(r<.235){const q=khHash(x,y,15);add({k:khProp(q<.3?'planter':q<.55?'pot':q<.8?'shrub':'tree'),x,y,block:q>=.55,walk:q<.55,sc:.95+khHash(x,y,16)*.2})}
     }else if(d5[i]){
       if(z===2&&r<.05)add({k:['dpalm0','dpalm1','dpalm2','dpalm3'][(x+y)&3],x,y,block:true,sc:.9+khHash(x,y,12)*.5});
       else if(z===6&&r<.03)add({k:['dpalm0','dpalm2'][(x+y)&1],x,y,block:true,sc:1.1});
@@ -9628,6 +9631,14 @@ function khCrowd(C,L){
     if(!d3[i]||occ[i]||!C.reach[i])continue;
     if(C.zone[i]===6&&rng()<.7)continue;
     khAddCitizen(decor,occ,idx,x,y,(rng()<.12)?'guard':'street',rng);crowd++;
+  }
+  // ---- animals of the streets: dogs, goats, donkeys with baskets, doves, and now and then a camel ----
+  const beasts=['kh_anim1_1','kh_anim1_3','kh_anim1_4','kh_anim1_5','kh_anim1_5','kh_anim1_1','kh_anim1_2','kh_anim1_3'];
+  for(let n=0,tries=0;n<70&&tries<90000;tries++){
+    const x=6+((rng()*(W-12))|0),y=6+((rng()*(H-12))|0),i=idx(x,y);
+    if(!d3[i]||occ[i]||!C.reach[i])continue;
+    const k=beasts[n%beasts.length];if(!IMG[k])break;
+    add({k,x,y,block:false,walk:true});n++;
   }
   // ---- those who mean harm: a thief in the Old Square, wild dogs and the restless dead in the old quarter ----
   const enemyAt=(cx,cy,rad,t,lvl)=>{const q=near(cx,cy,rad,true);if(q&&Math.abs(q[0]-KH.CX)+Math.abs(q[1]-H)>60){enemies.push({t,x:q[0],y:q[1],lvl:lvl||16});occ[idx(q[0],q[1])]=1}};

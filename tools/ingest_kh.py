@@ -105,6 +105,15 @@ for (x0, y0, x1, y1) in pieces:
     if kind == 'tex':
         m = int((x1 - x0) * .03)
         crop = crop.crop((m, m, crop.width - m, crop.height - m)).resize((256, 256), Image.LANCZOS)
+        seam = opts.get('seam', 'xy')
+        if seam != 'none':   # blend the edges so the tile repeats without a visible line
+            a = np.array(crop).astype(float); u = np.linspace(0, 1, 256)
+            wx = (1 - np.abs(2 * u - 1))[None, :]; wy = (1 - np.abs(2 * u - 1))[:, None]
+            if seam == 'xy':
+                r_ = np.roll(a, (128, 128), (0, 1)); wm = (wx * wy)[..., None]
+            else:
+                r_ = np.roll(a, 128, 1); wm = np.broadcast_to(wx, (256, 256))[..., None]
+            crop = Image.fromarray((a * wm + r_ * (1 - wm)).clip(0, 255).astype(np.uint8))
         crop.save(OUT / ('%s_%d.jpg' % (name, n)), quality=90)
         man['%s_%d' % (name, n)] = {'file': '%s_%d.jpg' % (name, n), 'w': 256, 'h': 256, 'kind': 'tex', 'sheet': name}
     elif kind == 'fac':

@@ -69,14 +69,16 @@ function khCrowd(C,L){
       if(!d3[i]&&wd<3)continue;
       if(!wallNear(x,y))continue;
       if(r<.02)add({k:'dpalm'+((x+y)&3),x,y,block:true,sc:.8+khHash(x,y,12)*.3});
-      else if(r<.07)add({k:vases[(x+y)&3],x,y,block:false,walk:true,sc:.9+khHash(x,y,13)*.3});
+      else if(r<.05)add({k:vases[(x+y)&3],x,y,block:false,walk:true,sc:.9+khHash(x,y,13)*.3});
+      else if(r<.07)add({k:khProp(khHash(x,y,15)<.5?'planter':'pot'),x,y,block:false,walk:true});
       else if(r<.075)add({k:'urn',x,y,block:false,walk:true});
       continue;
     }
     if(d3[i]&&!d5[i]){ // a cell one in from the wall of a wide street
-      if(r<.16){add({k:['dpalm0','dpalm1','dpalm2','dpalm3'][((x*3+y)>>1)&3],x,y,block:true,sc:.9+khHash(x,y,12)*.4})}
-      else if(r<.22){add({k:vases[(x+y)&3],x,y,block:false,walk:true,sc:.9+khHash(x,y,13)*.3})}
-      else if(r<.235){add({k:'urn',x,y,block:false,walk:true})}
+      if(r<.16){add({k:khHash(x,y,14)<.4?khProp('palm'):['dpalm0','dpalm1','dpalm2','dpalm3'][((x*3+y)>>1)&3],x,y,block:true,sc:.9+khHash(x,y,12)*.4})}
+      else if(r<.20){add({k:vases[(x+y)&3],x,y,block:false,walk:true,sc:.9+khHash(x,y,13)*.3})}
+      else if(r<.215){add({k:'urn',x,y,block:false,walk:true})}
+      else if(r<.235){const q=khHash(x,y,15);add({k:khProp(q<.3?'planter':q<.55?'pot':q<.8?'shrub':'tree'),x,y,block:q>=.55,walk:q<.55,sc:.95+khHash(x,y,16)*.2})}
     }else if(d5[i]){
       if(z===2&&r<.05)add({k:['dpalm0','dpalm1','dpalm2','dpalm3'][(x+y)&3],x,y,block:true,sc:.9+khHash(x,y,12)*.5});
       else if(z===6&&r<.03)add({k:['dpalm0','dpalm2'][(x+y)&1],x,y,block:true,sc:1.1});
@@ -113,6 +115,14 @@ function khCrowd(C,L){
     if(!d3[i]||occ[i]||!C.reach[i])continue;
     if(C.zone[i]===6&&rng()<.7)continue;
     khAddCitizen(decor,occ,idx,x,y,(rng()<.12)?'guard':'street',rng);crowd++;
+  }
+  // ---- animals of the streets: dogs, goats, donkeys with baskets, doves, and now and then a camel ----
+  const beasts=['kh_anim1_1','kh_anim1_3','kh_anim1_4','kh_anim1_5','kh_anim1_5','kh_anim1_1','kh_anim1_2','kh_anim1_3'];
+  for(let n=0,tries=0;n<70&&tries<90000;tries++){
+    const x=6+((rng()*(W-12))|0),y=6+((rng()*(H-12))|0),i=idx(x,y);
+    if(!d3[i]||occ[i]||!C.reach[i])continue;
+    const k=beasts[n%beasts.length];if(!IMG[k])break;
+    add({k,x,y,block:false,walk:true});n++;
   }
   // ---- those who mean harm: a thief in the Old Square, wild dogs and the restless dead in the old quarter ----
   const enemyAt=(cx,cy,rad,t,lvl)=>{const q=near(cx,cy,rad,true);if(q&&Math.abs(q[0]-KH.CX)+Math.abs(q[1]-H)>60){enemies.push({t,x:q[0],y:q[1],lvl:lvl||16});occ[idx(q[0],q[1])]=1}};

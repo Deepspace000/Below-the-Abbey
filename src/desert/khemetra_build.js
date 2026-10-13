@@ -2,10 +2,10 @@
    KHEMETRA: THE BUILDINGS. Which fronts on the street are doors, what lies behind each one, and the rooms themselves.
    ========================================================================== */
 const KH_PROPS={ // painted props by role: [sheet piece, height in cells]; the old game sprites stand in until a picture exists
-  counter:['kh_int1_0','counter',.62],table:['kh_int1_1','bench',.5],shelf:['kh_int1_2','crate',1.05],bookcase:['kh_int1_3','crate',1.1],chair:['kh_int1_4','bench',.55],bed:['kh_int1_5','bench',.6],
-  cushions:['kh_int2_0','sacks',.4],brazier:['kh_int2_1','brazier0',.75],hlamp:['kh_int2_2','lamp',.5],basin:['kh_int2_3','fountain',.7],amphora:['kh_int2_4','urn',.8],chest:['kh_int2_5','chest',.5],
-  fountain:['kh_city1_0','fountain',1.1],well:['kh_city1_1','well',1.0],obelisk:['kh_city1_2','memorial',2.4],statue:['kh_city1_3','statue',1.5],lamp:['kh_city1_4','lamp',1.5],bench:['kh_city1_5','bench',.6],
-  palm:['kh_city2_0','dpalm0',2.4],tree:['kh_city2_1','ltree17',1.6],shrub:['kh_city2_2','lbush0',.7],planter:['kh_city2_3','flowerpot',.5],pot:['kh_city2_4','flowerpot',.9],pergola:['kh_city2_5','bench',1.3],
+  counter:['kh_int1_1','counter',.6],table:['kh_int1_2','bench',.5],shelf:['kh_int1_0','crate',1.05],bookcase:['kh_int1_3','crate',1.1],chair:['kh_int1_4','bench',.55],bed:['kh_int1_5','bench',.6],
+  cushions:['kh_int2_0','sacks',.4],brazier:['kh_int2_2','brazier0',.75],hlamp:['kh_int2_1','lamp',.5],basin:['kh_int2_3','fountain',.7],amphora:['kh_int2_4','urn',.8],chest:['kh_int2_5','chest',.5],
+  fountain:['kh_city1_0','fountain',1.1],well:['kh_city1_1','well',1.0],obelisk:['kh_city1_2','memorial',2.4],statue:['kh_city1_3','statue',1.5],lamp:['kh_nolamp','lamp',1.5],bench:['kh_city1_4','bench',.6],
+  palm:['kh_city2_0','dpalm0',2.4],tree:['kh_city2_1','ltree17',1.7],shrub:['kh_city2_2','lbush0',.8],planter:['kh_city2_5','flowerpot',.5],pot:['kh_city2_3','flowerpot',.9],pergola:['kh_city2_4','bench',1.5],
   ship:['kh_ship1_0','crate',.9],wheel:['kh_ship1_1','barrel',.8],anchor:['kh_ship1_2','barrel',.8],rope:['kh_ship1_3','sacks',.35],seachest:['kh_ship1_4','chest',.5],sail:['kh_ship1_5','crate',1.1],
   throne:['kh_throne1_0','statue',1.4],banner:['kh_throne1_1','banner',1.3],maptable:['kh_throne1_2','counter',.6],candle:['kh_throne1_3','lamp',1.2],
   stallA:['kh_stall1_0','cart',.95],stallB:['kh_stall1_1','cart',.95],stallC:['kh_stall1_2','cart',.95],stallD:['kh_stall1_3','cart',.95],stallE:['kh_stall1_4','cart',.95],stallF:['kh_stall1_5','cart',.95],
