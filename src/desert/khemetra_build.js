@@ -2,8 +2,12 @@
    KHEMETRA: THE BUILDINGS. Which fronts on the street are doors, what lies behind each one, and the rooms themselves.
    ========================================================================== */
 const KH_PROPS={ // painted props by role: [sheet piece, height in cells]; the old game sprites stand in until a picture exists
-  counter:['kh_int1_1','counter',.6],table:['kh_int1_2','bench',.5],shelf:['kh_int1_0','crate',1.05],bookcase:['kh_int1_3','crate',1.1],chair:['kh_int1_4','bench',.55],bed:['kh_int1_5','bench',.6],
-  cushions:['kh_int2_0','sacks',.4],brazier:['kh_int2_2','brazier0',.75],hlamp:['kh_int2_1','lamp',.5],basin:['kh_int2_3','fountain',.7],amphora:['kh_int2_4','urn',.8],chest:['kh_int2_5','chest',.5],
+  counter:['kh_int3_0','counter',.55],table:['kh_int3_1','bench',.6],shelf:['kh_int1_0','crate',1.05],bookcase:['kh_int1_3','crate',1.1],chair:['kh_int3_2','bench',.6],bed:['kh_int3_3','bench',.65],
+  // household things, all seen head-on from the front
+  wardrobe:['kh_int4_0','crate',1.15],hearth:['kh_int4_1','crate',1.0],loom:['kh_int4_2','crate',1.0],tapestry:['kh_int4_3','banner',1.0],dresser:['kh_int4_4','crate',1.0],desk:['kh_int4_5','counter',.6],
+  harp:['kh_int5_0','crate',.9],cradle:['kh_int5_1','bench',.5],washstand:['kh_int5_2','bench',.65],rack:['kh_int5_3','crate',.8],rolledcarpets:['kh_int5_4','sacks',.8],floorlamp:['kh_int5_5','lamp',1.1],
+  feast:['kh_int6_0','bench',.6],shrine:['kh_int6_1','crate',.75],birdcage:['kh_int6_2','lamp',.85],potshelf:['kh_int6_3','crate',.9],oven:['kh_int6_4','crate',.6],kitchenshelf:['kh_int6_5','crate',.6],
+  cushions:['kh_int3_4','sacks',.45],brazier:['kh_int2_2','brazier0',.75],hlamp:['kh_int2_1','lamp',.5],basin:['kh_int2_3','fountain',.7],amphora:['kh_int2_4','urn',.8],chest:['kh_int3_5','chest',.5],
   fountain:['kh_city1_0','fountain',1.1],well:['kh_city1_1','well',1.0],obelisk:['kh_city1_2','memorial',2.4],statue:['kh_city1_3','statue',1.5],lamp:['kh_nolamp','lamp',1.5],bench:['kh_city1_4','bench',.6],
   palm:['kh_city2_0','dpalm0',2.4],tree:['kh_city2_1','ltree17',1.7],shrub:['kh_city2_2','lbush0',.8],planter:['kh_city2_5','flowerpot',.5],pot:['kh_city2_3','flowerpot',.9],pergola:['kh_city2_4','bench',1.5],
   ship:['kh_ship1_0','crate',.9],wheel:['kh_ship1_1','barrel',.8],anchor:['kh_ship1_2','barrel',.8],rope:['kh_ship1_3','sacks',.35],seachest:['kh_ship1_4','chest',.5],sail:['kh_ship1_5','crate',1.1],
@@ -213,9 +217,40 @@ function khRoomHall(b){return {w:11,h:8,lights:[[3,2],[7,2],[5,5]],build:({put,r
   put('table',2,5);put('chair',2,6);put('table',8,5);put('chair',8,6);raw('crate',1,3);raw('barrel',9,3);
   npc(b.keeper,mid,2);
 }}}
-function khRoomHome(b){return {w:9,h:7,lights:[[2,2],[6,2]],build:({put,raw,npc,mid})=>{
-  if(b.scene==='empty')return;
-  put('bed',1,1);put('bed',7,1);put('table',4,3);put('chair',3,3);put('chair',5,3);put('chest',7,4);put('amphora',1,4);
+/* a house: small, and furnished to suit whoever lives there (poor houses have a few humble things, rich ones a great many) */
+const KH_HOME_SETS={
+  warm:[['hearth',2,1],['kitchenshelf',4,1,{bob:.5}],['bed',6,1],['table',2,3],['chair',1,3],['cushions',6,3]],
+  worker:[['bed',1,1],['potshelf',6,1],['table',2,3],['chair',1,4],['amphora',6,3]],
+  spartan:[['bed',1,1],['rack',6,1],['amphora',6,4]],
+  messy:[['bed',1,1],['cushions',2,3],['cushions',6,3],['chest',6,1],['desk',3,1],['amphora',1,4],['potshelf',5,1]],
+  empty:[],
+  dark:[['brazier',2,1],['brazier',6,1],['wardrobe',4,1],['chest',1,4]],
+  noble:[['bed',1,1],['wardrobe',6,1],['dresser',3,1],['tapestry',4,1,{bob:.45,block:false}],['harp',6,3],['cushions',2,3],['floorlamp',1,4],['birdcage',6,4]],
+  magic:[['bookcase',1,1],['bookcase',6,1],['brazier',3,1],['brazier',5,1],['cushions',2,3],['hlamp',6,3,{bob:.8}]],
+  wizard:[['bookcase',1,1],['shelf',6,1],['desk',2,3],['brazier',5,1],['chair',1,3],['amphora',6,3]],
+  scholar:[['bookcase',1,1],['bookcase',3,1],['bookcase',6,1],['desk',2,3],['chair',1,4],['floorlamp',6,3]],
+  musician:[['harp',1,1],['tapestry',4,1,{bob:.45,block:false}],['cushions',2,3],['cushions',6,3],['floorlamp',6,1]],
+  merchant:[['chest',1,1],['chest',2,1],['rolledcarpets',6,1],['desk',2,3],['amphora',6,3]],
+  healer:[['potshelf',1,1],['potshelf',6,1],['washstand',3,1],['bed',6,3],['table',2,3],['amphora',1,4]],
+  cats:[['shrine',4,1,{bob:.3,block:false}],['cushions',1,1],['cushions',6,1],['cushions',2,3],['cushions',6,3]],
+  fisher:[['potshelf',1,1],['bed',6,1],['table',2,3],['chair',1,3],['amphora',6,3]],
+  potter:[['oven',1,1],['potshelf',3,1],['potshelf',6,1],['amphora',1,3],['amphora',2,4],['amphora',6,3]],
+  soldier:[['rack',1,1],['bed',6,1],['table',2,3],['chair',1,3],['chest',6,3]],
+  priest:[['shrine',4,1,{bob:.3,block:false}],['brazier',2,1],['brazier',6,1],['cushions',2,3],['cushions',6,3],['amphora',1,4]],
+  children:[['bed',1,1],['bed',6,1],['cradle',3,1],['cushions',2,3],['cushions',6,3],['chair',1,4]],
+  taxman:[['bookcase',1,1],['desk',2,2],['chest',6,1],['counter',6,3],['chair',2,3]],
+  boarded:[['chair',1,4],['amphora',6,4]],
+  ruined:[['amphora',6,4],['chest',1,1]],
+  bath_grand:[['basin',2,1],['basin',6,1],['cushions',2,3],['amphora',6,3]],
+  bath_hammam:[['basin',2,1],['basin',6,1],['cushions',6,3],['amphora',1,4]]
+};
+function khRoomHome(b){return {w:8,h:6,lights:[[2,2],[5,2]],build:({put,raw,npc,mid})=>{
+  const set=KH_HOME_SETS[b.scene||KH_SCENE_OF[b.id]||'warm']||KH_HOME_SETS.warm,taken=new Set();
+  for(const [role,x,y,o] of set){put(role,x,y,o);taken.add(x+','+y)}
+  if(b.gold){ // a little gold lying in a corner, or a hoard in a chest
+    const spot=[[6,4],[1,4],[6,3],[1,3],[2,4],[5,4],[6,2]].find(q=>!taken.has(q[0]+','+q[1]))||[6,4];
+    put(b.gold>=500?'chest':'amphora',spot[0],spot[1],{npc:'kh_gold',gold:b.gold,gid:b.id,msg:b.goldMsg});
+  }
   npc(b.keeper,mid,1);
 }}}
 function khRoomShip(b){return {w:13,h:9,lights:[[3,2],[9,2],[6,5]],build:({put,raw,npc,mid})=>{
@@ -244,7 +279,7 @@ function decor_urn(raw){raw('urn',5,2,{npc:'kh_urn'})}
 
 /* ---- every other house, shop and prayer house with a clear way up to its front door: a door, and a picture of the room behind it ----
    The room is only built the first time the party walks in (KH_LAZY, called from loadLevel), so a thousand doors cost nothing. */
-const KH_LAZY={};let KH_HOUSE_NEXT=1000;
+const KH_LAZY={},KH_GOLD={};let KH_HOUSE_NEXT=1000; // KH_GOLD: the gold waiting in a house, by level number
 const KH_SCENE_NAME={warm:'A Warm House',wizard:"A Wizard's House",empty:'An Empty House',worker:"A Worker's House",noble:"A Nobleman's House",spartan:'A Spartan House',messy:'A Messy House',dark:'A Dark House',magic:'A Magical House',ruined:'A Ruined House',scholar:"A Scholar's House",musician:"A Musician's House",merchant:"A Merchant's House",healer:"A Healer's House",cats:"A Cat Lover's House",fisher:"A Fisherman's House",boarded:'A Boarded-up House',taxman:"A Tax Collector's House",potter:"A Potter's House",soldier:"A Soldier's House",priest:"A Priest's House",children:"A Children's House",bath_grand:'A Bathhouse',bath_hammam:'A Hammam'};
 const KH_SHOP_NAME={merchant:'A Closed Shop',potter:"A Potter's Workshop",healer:"A Healer's Shop",scholar:"A Scribe's Shop",empty:'An Empty Shop',taxman:'A Tax Office',fisher:"A Fishmonger's Shop",musician:'A Music Shop',boarded:'A Boarded-up Shop'};
 function khPickScene(m){
@@ -261,16 +296,26 @@ function khPickScene(m){
 function khMakeHouseDoors(C){
   const idx=C.idx;let n=0;
   const frontOk=m=>{const mid=m.cells[(m.cells.length-1)>>1],d=KH_DIRS[m.face],x=mid[0]+d[0],y=mid[1]+d[1];return C.reach[idx(x,y)]===1&&C.reach[idx(x+d[0],y+d[1])]===1};
+  const eligible=m=>!m.doorCells&&m.kind!=='castle'&&m.kind!=='palace'&&m.cells.length<=4&&frontOk(m);
+  // three hoards, one in each far corner of the city: 1000, 2000 and 5000 gold (the 5000 is in the haunted old quarter)
+  const hoards=new Map();
+  for(const [tx,ty,amt,scene,msg] of [[345,345,1000,'merchant','A strongbox is pushed under the table. It is full of coins.'],[345,60,2000,'noble','A heavy chest stands behind the curtain, full of gold.'],[50,50,5000,'dark','An iron-bound chest, black with age, packed to the lid with gold.']]){
+    let best=null,bd=1e9;for(const m of C.modules){if(!eligible(m)||(m.kind!=='house'&&m.kind!=='mansion'&&m.kind!=='low')||hoards.has(m))continue;const c=m.cells[0],d=Math.hypot(c[0]-tx,c[1]-ty);if(d<bd){bd=d;best=m}}
+    if(best)hoards.set(best,{amt,scene,msg});
+  }
+  C._hoards=hoards;
   for(const m of C.modules){
-    if(m.doorCells||m.kind==='castle'||m.kind==='palace'||m.cells.length>4||!frontOk(m))continue;
-    const scene=khPickScene(m),shop=m.kind==='shop',lvl=KH_HOUSE_NEXT++,mid=m.cells[(m.cells.length-1)>>1],d=KH_DIRS[m.face];
+    if(!eligible(m))continue;
+    const hoard=hoards.get(m),scene=hoard?hoard.scene:khPickScene(m),shop=m.kind==='shop'&&!hoard,lvl=KH_HOUSE_NEXT++,mid=m.cells[(m.cells.length-1)>>1],d=KH_DIRS[m.face];
     const front=[mid[0]+d[0],mid[1]+d[1]],ff=KH_FACE_F[m.face];
     const name=(shop?KH_SHOP_NAME[scene]:KH_SCENE_NAME[scene])||KH_SCENE_NAME.warm;
-    m.lvl=lvl;m.doorCells=m.cells.length===2?m.cells:[mid];m.at={x:4,y:5,f:0};m.house=true;
+    m.lvl=lvl;m.doorCells=m.cells.length===2?m.cells:[mid];m.at={x:4,y:4,f:0};m.house=true;
     KH_LAZY[lvl]=()=>{
       if(LEVELS[lvl])return;
       const b={id:'house'+lvl,name,room:'home',keeper:null,scene};
+      if(hoard){b.gold=hoard.amt;b.goldMsg=hoard.msg}else if(khHash(lvl,7,91)<.1){b.gold=5+((khHash(lvl,9,92)*46)|0);b.goldMsg='A few coins lie forgotten in the corner.'}
       const lv=khRoom(b,lvl,{to:44,x:front[0],y:front[1],f:ff}).level;
+      if(b.gold)KH_GOLD[lvl]={gold:b.gold,msg:b.goldMsg};
       if(shop)lv.sceneShop=true;
       LEVELS[lvl]=lv;LEVEL_NAMES[lvl]=name;
     };
@@ -278,3 +323,4 @@ function khMakeHouseDoors(C){
   }
   return n;
 }
+

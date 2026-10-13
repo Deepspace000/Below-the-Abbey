@@ -123,7 +123,7 @@ function khBuild(seed){
           const kind=wallZone?'castle':inPalace?'palace':kindAt(x,y,d);
           let f=pickFromPool(kind,d);
           let n=Math.min(f.n,run.length-p);
-          if(n<f.n){const alt=flat(kind).filter(q=>q.n<=run.length-p);f=alt.length?alt[Math.floor(rng()*alt.length)]:{f:'plain',n:1,wh:f.wh};n=Math.min(f.n,run.length-p)}
+          if(n<f.n){const alt=flat(kind).filter(q=>q.n<=run.length-p),nar=(P.narrow&&P.narrow[kind])||[];f=alt.length?alt[Math.floor(rng()*alt.length)]:nar.length?nar[(khHash(x,y,97)*nar.length)|0]:{f:'plain',n:1,wh:f.wh};n=Math.min(f.n,run.length-p)}  // the odd square left over gets a narrow front, picked without disturbing the city's random numbers
           const m={f:f.f,n,wh:f.wh,kind,face:d,e:f,cells:run.slice(p,p+n)};
           modules.push(m);const mi=modules.length-1;
           for(const [cx,cy] of m.cells)slotOf[idx(cx,cy)]=mi;

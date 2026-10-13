@@ -32,9 +32,32 @@ function khShrinkBig(){
 function khFreeSheets(){for(const k in IMG)if(KH_SHEETS.test(k))delete IMG[k]}
 /* the strips of a facade picture that make up one, two or three storeys: [from, to] as fractions of the picture height */
 const KH_LV={1:[[0,.12],[.5,1]],2:[[0,1]],3:[[0,.12],[.12,.5],[.12,.5],[.5,1]]};
+/* Where to cut a front to leave out its upper storey (or repeat it). The cut goes along a row of plain wall, found by looking for the quietest row
+   of the picture, so that no door, window or cornice is ever sliced in two. */
+const KH_SEAM_CACHE={};
+function khSeams(key){
+  if(KH_SEAM_CACHE[key])return KH_SEAM_CACHE[key];
+  const im=khImg(key),def={top:.12,mid:.5};
+  if(!im||!im.width)return KH_SEAM_CACHE[key]=def;
+  const w=96,h=Math.max(24,Math.round(96*im.height/im.width)),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(im,0,0,w,h);
+  const d=x.getImageData(0,0,w,h).data,L=(i,j)=>{const o=(j*w+i)*4;return .3*d[o]+.59*d[o+1]+.11*d[o+2]};
+  const row=new Float32Array(h);
+  for(let j=1;j<h;j++){let a=0;for(let i=1;i<w-1;i++){a+=Math.abs(L(i,j)-L(i,j-1))*1.0+Math.abs(L(i,j)-L(i+1,j))*1.3;if(L(i,j)<60)a+=14}row[j]=a/w}
+  const sm=new Float32Array(h);for(let j=0;j<h;j++){let a=0,n=0;for(let k=-1;k<=1;k++){const q=j+k;if(q>=1&&q<h){a+=row[q];n++}}sm[j]=a/Math.max(1,n)}
+  const best=(lo,hi,pref)=>{let bj=Math.round(pref*h),bv=1e9;for(let j=Math.max(2,Math.floor(lo*h));j<=Math.min(h-3,Math.ceil(hi*h));j++){const v=sm[j]+Math.abs(j/h-pref)*12;if(v<bv){bv=v;bj=j}}return bj/h};
+  const top=best(.05,.2,.12),mid=best(Math.max(top+.15,.36),.62,.5),med=[...sm.slice(1)].sort((p,q)=>p-q)[(h-1)>>1]||1;
+  // only a front with a really quiet band of wall at both cuts may lose or repeat a storey; every other front is always shown whole
+  return KH_SEAM_CACHE[key]={top,mid,ok:sm[Math.round(top*h)]/med<.4&&sm[Math.round(mid*h)]/med<.4};
+}
+function khStrips(key,lv){
+  if(lv===2||(lv!==1&&lv!==3))return [[0,1]];
+  const {top,mid,ok}=khSeams(key);
+  if(!ok)return [[0,1]];
+  return lv===1?[[0,top],[mid,1]]:[[0,top],[top,mid],[top,mid],[mid,1]];
+}
 function khFacadeEntry(key,n,lv,kindOf){
   const m=KH_MAN[key];if(!m)return null;
-  const strips=KH_LV[lv]||KH_LV[2],hh=strips.reduce((a,s)=>a+(s[1]-s[0]),0),wh=Math.round(n*hh*m.h/m.w*20)/20;
+  const strips=khStrips(key,lv),hh=strips.reduce((a,s)=>a+(s[1]-s[0]),0),wh=Math.round(n*hh*m.h/m.w*20)/20;
   return {f:key,n,wh,lv,strips};
 }
 function khBuildPools(){
@@ -50,6 +73,11 @@ function khBuildPools(){
   for(let k=0;k<4;k++)add(P.castle,piece('castle1',k),5,[2]);
   for(const s of ['roof1','roof2'])for(let k=0;k<6;k++)if(has(piece(s,k)))P.roofs.push(piece(s,k));
   for(const s of ['tow1','tow2'])for(let k=0;k<6;k++)if(has(piece(s,k)))P.towers.push(piece(s,k));
+  // narrow fronts, one square wide, for the odd square left at the end of a stretch of wall (so no front is ever cut off short, nor left as a blank slab)
+  P.narrow={house:[],mansion:[],low:[],shop:[],temple:[],pray:[],bath:[],ruin:[]};
+  for(let k=0;k<6;k++){add(P.narrow.house,piece('fac1',k),1,[2]);add(P.narrow.house,piece('fac2',k),1,[2]);add(P.narrow.mansion,piece('fac3',k),1,[2]);add(P.narrow.low,piece('fac4',k),1,[2]);add(P.narrow.low,piece('fac5',k),1,[2]);add(P.narrow.pray,piece('pray1',k),1,[2]);add(P.narrow.ruin,piece('ruin1',k),1,[2])}
+  for(let k=0;k<6;k++){add(P.narrow.shop,piece('shop1',k),1,[2])}
+  for(const k of ['temple','bath'])P.narrow[k]=P.narrow.house;
   // when a kind has nothing painted yet, a neighbour stands in
   for(const k of ['house','mansion','low','temple','pray','bath','ruin','palace','castle'])if(!P[k].length)P[k]=P.house.length?P.house:[{f:'plain',n:2,wh:1.6,lv:2,strips:[[0,1]]}];
   for(const s of Object.keys(P.shop))if(!P.shop[s].length)P.shop[s]=P.house;

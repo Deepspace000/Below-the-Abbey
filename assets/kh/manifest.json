@@ -1797,5 +1797,173 @@
 "h": 193,
 "kind": "sprite",
 "sheet": "roofup1"
+},
+"int3_0": {
+"file": "int3_0.webp",
+"w": 406,
+"h": 259,
+"kind": "sprite",
+"sheet": "int3"
+},
+"int3_1": {
+"file": "int3_1.webp",
+"w": 422,
+"h": 242,
+"kind": "sprite",
+"sheet": "int3"
+},
+"int3_2": {
+"file": "int3_2.webp",
+"w": 224,
+"h": 293,
+"kind": "sprite",
+"sheet": "int3"
+},
+"int3_3": {
+"file": "int3_3.webp",
+"w": 427,
+"h": 298,
+"kind": "sprite",
+"sheet": "int3"
+},
+"int3_4": {
+"file": "int3_4.webp",
+"w": 379,
+"h": 287,
+"kind": "sprite",
+"sheet": "int3"
+},
+"int3_5": {
+"file": "int3_5.webp",
+"w": 362,
+"h": 238,
+"kind": "sprite",
+"sheet": "int3"
+},
+"int4_0": {
+"file": "int4_0.webp",
+"w": 195,
+"h": 300,
+"kind": "sprite",
+"sheet": "int4"
+},
+"int4_1": {
+"file": "int4_1.webp",
+"w": 153,
+"h": 300,
+"kind": "sprite",
+"sheet": "int4"
+},
+"int4_2": {
+"file": "int4_2.webp",
+"w": 233,
+"h": 300,
+"kind": "sprite",
+"sheet": "int4"
+},
+"int4_3": {
+"file": "int4_3.webp",
+"w": 199,
+"h": 300,
+"kind": "sprite",
+"sheet": "int4"
+},
+"int4_4": {
+"file": "int4_4.webp",
+"w": 168,
+"h": 300,
+"kind": "sprite",
+"sheet": "int4"
+},
+"int4_5": {
+"file": "int4_5.webp",
+"w": 264,
+"h": 300,
+"kind": "sprite",
+"sheet": "int4"
+},
+"int5_0": {
+"file": "int5_0.webp",
+"w": 147,
+"h": 300,
+"kind": "sprite",
+"sheet": "int5"
+},
+"int5_1": {
+"file": "int5_1.webp",
+"w": 375,
+"h": 245,
+"kind": "sprite",
+"sheet": "int5"
+},
+"int5_2": {
+"file": "int5_2.webp",
+"w": 191,
+"h": 296,
+"kind": "sprite",
+"sheet": "int5"
+},
+"int5_3": {
+"file": "int5_3.webp",
+"w": 203,
+"h": 300,
+"kind": "sprite",
+"sheet": "int5"
+},
+"int5_4": {
+"file": "int5_4.webp",
+"w": 192,
+"h": 284,
+"kind": "sprite",
+"sheet": "int5"
+},
+"int5_5": {
+"file": "int5_5.webp",
+"w": 72,
+"h": 289,
+"kind": "sprite",
+"sheet": "int5"
+},
+"int6_0": {
+"file": "int6_0.webp",
+"w": 272,
+"h": 280,
+"kind": "sprite",
+"sheet": "int6"
+},
+"int6_1": {
+"file": "int6_1.webp",
+"w": 405,
+"h": 277,
+"kind": "sprite",
+"sheet": "int6"
+},
+"int6_2": {
+"file": "int6_2.webp",
+"w": 173,
+"h": 300,
+"kind": "sprite",
+"sheet": "int6"
+},
+"int6_3": {
+"file": "int6_3.webp",
+"w": 284,
+"h": 300,
+"kind": "sprite",
+"sheet": "int6"
+},
+"int6_4": {
+"file": "int6_4.webp",
+"w": 284,
+"h": 274,
+"kind": "sprite",
+"sheet": "int6"
+},
+"int6_5": {
+"file": "int6_5.webp",
+"w": 343,
+"h": 243,
+"kind": "sprite",
+"sheet": "int6"
 }
 }

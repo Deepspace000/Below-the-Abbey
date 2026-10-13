@@ -2,12 +2,19 @@
    KHEMETRA: THE CROWD. Markets with stalls and sellers, gardens and fountains, palms along the wide streets, vases and
    urns, lamps, cats in the alleys, the people of the streets, and the few who mean harm.
    ========================================================================== */
+KH_GOSSIP.push('Some of the houses have a little gold lying about. You only have to walk in and look around.','My neighbour found coins in a corner of an empty house. Nobody was home, so nobody minded.','They say there is a great deal of gold in three houses far apart in the city, one in each far corner. Knock on every door.','Try the doors. Most houses are open, and some have something worth finding inside.');
 khNpc('kh_citizen','A citizen','kh_npc1_0',d=>{
   const F=G.flags,k='kc_'+d.x+'_'+d.y,i=(F[k]||0);
   if(!d.kl){const n=KH_GOSSIP.length,h=(hash2(d.x*13+5,d.y*7+9,LEVEL)*n)|0;d.kl=[h,(h+7)%n,(h+17)%n]}   // each person has their own three things to say
   const L=d.kl;
   F[k]=i+1;
   return say(KH_GOSSIP[L[i%L.length]%KH_GOSSIP.length],[BYE]);
+});
+khNpc('kh_gold','A little gold','chest',d=>{
+  const F=G.flags,e=KH_GOLD[LEVEL],k='kg'+LEVEL;
+  if(!e||F[k])return say('There is nothing left here. You took the gold.',[BYE]);
+  F[k]=1;G.gold+=e.gold;sfx('key');
+  return say((e.msg||'There is gold in here.')+' You take '+e.gold+' gold.',[BYE]);
 });
 function khCrowd(C,L){
   const W=C.W,H=C.H,idx=C.idx,rng=khRng(31337);
@@ -182,7 +189,7 @@ function khAddCitizen(decor,occ,idx,x,y,kind,rng){
   decor.push({k:khFaceKey(face),x,y,block:false,walk:true,npc:'kh_citizen',kname:nm,kl,sc:.95+rng()*.1});
   occ[idx(x,y)]=1;
 }
-khNpc('kh_gateguard','A guard of the watch','kh_npc3_0',()=>say('Welcome to Khemetra, the Golden City. Keep your blades sheathed in the streets, and your purses close. The palace is at the north end of the great avenue.',[BYE]));
+khNpc('kh_gateguard','A guard of the watch','kh_npc3_0',()=>say('Welcome to Khemetra, the Golden City. Keep your blades sheathed in the streets, and your purses close. The palace is at the north end of the great avenue. And a tip: there is good to be found in some of the houses, if you just walk in. Every door that glows will open.',[BYE]));
 /* what the city looks like after what the party has done */
 function khApplyState(){
   const F=G.flags;
