@@ -214,9 +214,11 @@ function afflUseItem(hi,idx){
 /* ---------------------------------------------------------------- the watch of Khemetra, and the temple cells ---------------------------------------------------------------- */
 const KH_JAIL=270;
 function khGuardNear(){
-  const P=G.P,L=LEVELS[44];let best=null,bd=Math.pow(19-(typeof skLevel==='function'?skLevel('stealth')*.9:0),2);
-  for(const w of (L.walkers||[]))if(w.guard){const d=(w.x-P.x)**2+(w.y-P.y)**2;if(d<bd){bd=d;best=w}}
-  for(const d of G.decor)if(d.npc==='kh_gateguard'&&!d.found){const q=(d.x-P.x)**2+(d.y-P.y)**2;if(q<bd){bd=q;best={k:d.k}}}
+  // a guard notices only if he is close (about five squares) and has a clear line to the party; stealth shortens it
+  const P=G.P,L=LEVELS[44],R=Math.max(3,5.5-(typeof skLevel==='function'?skLevel('stealth')*.25:0));let best=null,bd=R*R;
+  const sees=(x,y)=>hasLOS(Math.round(x),Math.round(y),P.x,P.y);
+  for(const w of (L.walkers||[]))if(w.guard){const d=(w.x-P.x)**2+(w.y-P.y)**2;if(d<bd&&sees(w.x,w.y)){bd=d;best=w}}
+  for(const d of G.decor)if(d.npc==='kh_gateguard'&&!d.found){const q=(d.x-P.x)**2+(d.y-P.y)**2;if(q<bd&&sees(d.x,d.y)){bd=q;best={k:d.k}}}
   return best;
 }
 function khGuardTalk(guard,text,opts){
