@@ -89,10 +89,11 @@ function yarBuild(){
   const free=(x,y)=>x>0&&y>0&&x<W-1&&y<H-1&&rows[y][x]==='.'&&!block[y*W+x];
   const dc=(k,x,y,o)=>decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}));
   // moored boats and the boats pulled up for mending
-  const boats=[['yar_boat_fish',64,35],['yar_boat_fish',67,46],['yar_boat_fish',73,34],['yar_boat_dhow',71,44],['yar_boat_dhow',78,35],['yar_boat_row',62,37],['yar_boat_row',63,44],['yar_boat_row',75,46],['yar_boat_row',80,43],['yar_boat_row',82,34],['yar_boat_row',88,40],['yar_boat_fish',72,28],['yar_boat_dhow',68,52],['yar_boat_row',70,22],['yar_boat_fish',66,60]];
+  const boats=[['yar_boat_fish',64,35],['yar_boat_fish',67,46],['yar_boat_fish',73,34],['yar_boat_dhow',71,44],['yar_boat_dhow',78,35],['yar_boat_row',62,37],['yar_boat_row',63,44],['yar_boat_row',75,46],['yar_boat_row',80,43],['yar_boat_row',82,34],['yar_boat_row',91,46],['yar_boat_fish',72,28],['yar_boat_dhow',68,52],['yar_boat_row',70,22],['yar_boat_fish',66,60]];
   YR.boats=boats; // drawn each frame by yrSprites, so that they rock on the water
   // gear along the promenade
   for(const [x,y] of [[11,43],[22,44],[36,44],[47,43],[11,37],[24,38],[36,38],[47,38],[55,38]])dc(['yar_pots','yar_nets','yar_crates','yar_pots','yar_nets','yar_crates','yar_pots','yar_nets','yar_crates'][(x+y)%9],x,y);
+  dc('yar_ship_dawn',87,40,{npc:'yr_ship',deco:false});dc(khFaceKey('kh_npc6_1'),85,38,{npc:'yr_menkaure',deco:false}); // the Dawn Walker and her captain at the end of the pier
   // washed-up crates for the harbourmaster
   const crateAt=y=>{const x=Math.floor(yarCoast(y))-2;return [x,y]};
   YR.crates=[26,34,47,53].map(yy=>crateAt(yy));
@@ -122,17 +123,23 @@ function yarBuild(){
   for(const q of YR_HOUSES)lv.portals[q.p]={to:YR.FIRST+q.p-1,x:0,y:0,f:0,tex:'yardoor'};
   LEVELS[YR.ID]=lv;LEVEL_NAMES[YR.ID]='Yarrim';
   TERRS[YR.ID]=yarTerrain(W,H,h,rk,block);
-  // the buildings
+  // the buildings: each room is built when first entered (so the Khemetra pictures are loaded by then); the doors know where in the room you arrive
+  const START={inn:[6,7],hall:[5,6],shop:[5,6],prayer:[4,6],home:[4,4]};
   for(const q of YR_HOUSES){
-    const id=YR.FIRST+q.p-1,b={id:'yr'+q.p,name:q.name,room:q.room,keeper:q.keeper,scene:q.scene};
-    const R=khRoom(b,id,{to:YR.ID,x:q.f[0],y:q.f[1],f:q.f[2]}),L=R.level;
-    if(q.room==='hall'&&q.p===7){for(const [x,y] of [[2,4],[8,4],[4,5],[6,5],[3,6],[9,5],[1,5],[9,6]])L.enemies.push({t:'rat',x,y,lvl:5})}
-    LEVELS[id]=L;LEVEL_NAMES[id]=q.name;
-    lv.portals[q.p].x=R.start.x;lv.portals[q.p].y=R.start.y;lv.portals[q.p].f=R.start.f;
+    const id=YR.FIRST+q.p-1,st=START[q.room];
+    lv.portals[q.p].x=st[0];lv.portals[q.p].y=st[1];lv.portals[q.p].f=0;
+    KH_LAZY[id]=()=>{
+      if(LEVELS[id])return;
+      const b={id:'yr'+q.p,name:q.name,room:q.room,keeper:q.keeper,scene:q.scene};
+      const R=khRoom(b,id,{to:YR.ID,x:q.f[0],y:q.f[1],f:q.f[2]}),L=R.level;
+      if(q.room==='hall'&&q.p===7){for(const [x,y] of [[2,4],[8,4],[4,5],[6,5],[3,6],[9,5],[1,5],[9,6]])L.enemies.push({t:'rat',x,y,lvl:5})}
+      LEVELS[id]=L;LEVEL_NAMES[id]=q.name;
+    };
   }
 }
+LEVEL_NAMES[YR.ID]='Yarrim';LEVEL_NAMES[YR.TUN]='The Sea Gate Tunnel';YR_HOUSES.forEach(q=>{LEVEL_NAMES[YR.FIRST+q.p-1]=q.name}); // so the area list can name them before they are built
 KH_LAZY[YR.ID]=yarBuild;
-for(let i=0;i<8;i++)KH_LAZY[YR.FIRST+i]=()=>{yarBuild()};
+for(let i=0;i<8;i++){const id=YR.FIRST+i,stub=()=>{yarBuild();if(!LEVELS[id]&&KH_LAZY[id]!==stub)KH_LAZY[id]()};KH_LAZY[id]=stub} // a room asked for before the town exists builds the town first
 
 /* ---- the tunnel from the east gate of Khemetra ---- */
 function yarBuildTunnel(){
@@ -157,7 +164,7 @@ KH_LAZY[YR.TUN]=function(){
 function yarGateBump(nx,ny){
   const F=G.flags;sfx('door');
   if(F.yarOpen){goToLevel(YR.TUN,{x:1,y:10,f:1});return true}
-  const hint=qSt('yar2')==='active'?' The warden\'s key is in a chest down in the cisterns, beneath the Potters Market.':qSt('yar1')==='active'?' Menkaure said to ask the grand vizier about it.':' Someone ought to ask why.';
+  const hint=qSt('yar2')==='active'?' The warden\'s key is in a chest down in the cisterns, beneath the Potters Market.':F.kingOrder?' The king has ordered it opened. Ask the grand vizier for the key.':' Someone ought to ask why.';
   G.talk={d:{k:'_',x:nx,y:ny},n:{name:'The Sea Gate'},node:say('A great gate of black timber and bronze, and the doorway behind it is bricked up. Salt crust runs down the stones, though the sea is hundreds of miles away. A plaque reads: SEA GATE. SEALED BY ORDER OF THE CROWN.'+hint,[['Leave it.',()=>null]]),t:G.time,btns:[]};
   G.hold=null;G.queued=null;return true;
 }
@@ -165,26 +172,28 @@ function yarGateBump(nx,ny){
 /* ---- the quest chain ---- */
 const yq=(id,t,who,desc,need,goal,reward,extra)=>{QUESTS[id]=Object.assign({title:t,who,desc,need,goal,reward},extra||{});QAREA[id]='Yarrim'};
 QAREA_ORDER.splice(QAREA_ORDER.indexOf('Khemetra')+1,0,'Yarrim');
-yq('yar1','A Door in the Wall','Menkaure, the shipwright','Menkaure says the old Sea Gate in the east wall of Khemetra has been bricked up for a hundred years, and behind it a tunnel runs to the sea. Ask the grand vizier, Hotep-Ra, about it, then tell Menkaure.',1,khFlag('yarVizier'),{gold:100,xp:400});
 yq('yar2','The Warden\'s Key','Hotep-Ra, the grand vizier','The vizier will unseal the Sea Gate if you bring the old gate warden\'s key. It lies in a chest somewhere in the cisterns beneath the Potters Market.',1,khFlag('yarKey'),{gold:300,xp:1200});
 yq('yar3','Salt and Bones','Menkaure, the shipwright','The Sea Gate is open, but the tunnel beyond is full of the drowned dead. Kill 8 skeletons in the tunnel so that honest people can walk it.',8,q=>(G.flags.k_skel||0)-(q.base||0),{gold:500,xp:2200},{cnt:'k_skel'});
 yq('yar4','Washed Ashore','Tamsin Kell, the harbourmaster','Four crates from a wrecked trader have washed up along the beach at Yarrim. Find them all and tell Tamsin Kell, the harbourmaster.',4,()=>Object.keys(G.flags.yarCrates||{}).length,{gold:400,xp:1800});
 yq('yar5','Rats in the Net Loft','Tamsin Kell, the harbourmaster','Rats have taken over the Net Loft, and the fishermen cannot mend their nets. Kill 6 rats there.',6,q=>(G.flags.k_rat||0)-(q.base||0),{gold:500,xp:2200},{cnt:'k_rat'});
 yq('yar6','The Lamp of Yarrim','Orsa, keeper of the Yarrim Light','The lighthouse has been dark for a year because Orsa has no torches for the great lamp. Bring her 3 torches.',3,()=>bagCount('torch'),{gold:900,xp:4000,items:['potion4']},{take:{torch:3}});
-const D1=khQD('The old Sea Gate, in the east wall? Bricked up since my grandfather was a boy. The sailors say it opens onto a tunnel, and the tunnel onto the Vaast Sea itself. Nobody has the right to reseal the sea. Go and ask the grand vizier, Hotep-Ra. He keeps the keys of the city. Tell him Menkaure sent you.','Bless you. Hotep-Ra is in the east room of the palace. Be polite. He is not used to it.',(n,m)=>'Have you spoken to Hotep-Ra about the Sea Gate? He is in the palace, in the east room.','You spoke to the vizier? And what did that old fox say?','Then the gate can be opened! I will start counting the ropes. Here, for your trouble.','The Sea Gate is a matter for the vizier now. I wait for the day it opens.');
-const D3=khQD('The gate stands open, but there are dead things in the tunnel. Kill 8 of the skeletons that walk it, so that carts and children can use it, and Yarrim, at the far end, can sell us its fish.','Eight, then. Mind the narrow bends.',(n,m)=>`The tunnel to the sea is not safe yet. ${n} of ${m} skeletons are down.`,'You have cleared the tunnel? Then the road to Yarrim is open at last.','Done! Yarrim has a harbourmaster called Tamsin Kell who will be glad of strong arms. Tell her I sent you.','The tunnel is quiet now. Every day a cart goes through.');
-const D4=khQD('A trader was wrecked on the rocks last week and her crates are scattered along the beach. Four of them. Find them for me before the gulls do, or the tide.','Walk the beach, north and south of the pier. They are heavy and square, you cannot miss them.',(n,m)=>`${n} of ${m} crates found so far. Keep walking the beach.`,'All four crates? Wonderful.','Thank you. Half the cargo is spoiled, but half is more than I had. Here is your share.','Those crates fed Yarrim for a month.');
-const D5=khQD('Now that the nets are dry, the rats want them. The Net Loft is full of them. Kill six, and the fishermen will stop cursing me.','The Net Loft is east of the harbourmaster\'s office. They are not big, but there are many.',(n,m)=>`${n} of ${m} rats are dead.`,'Six rats? The loft is quiet.','Splendid! Orsa at the lighthouse has been asking for someone who can be trusted. Go and see her.','The loft is quiet, and the nets are mended.');
-const D6=khQD('The Yarrim Light. It has been dark a year, ever since the torches ran out, and ships have found the rocks in the dark. I need three torches for the great lamp. Will you bring them?','Three torches. The general stores in Khemetra sell them, and so do the ships\' chandlers.',(n,m)=>`${n} of ${m} torches. The lamp is waiting.`,'Torches! Give them here.','The lamp is lit. Look out over the water tonight, and you will see it. Yarrim will not forget you.','The lamp burns every night. Ships find the harbour again.');
+const D3=khQD('The gate stands open, but the tunnel behind it has been shut for a hundred years, and the dead have made it their own. Kill 8 of the skeletons that walk it. The king\'s rider said Corvane\'s ship is off Yarrim, and the Dawn Walker is hidden at the far end. We need that road.','Eight, then. Mind the narrow bends.',(n,m)=>`The tunnel to the sea is not safe yet. ${n} of ${m} skeletons are down.`,'You have cleared the tunnel? Then the road to Yarrim is open at last.','Done! Yarrim has a harbourmaster called Tamsin Kell who will be glad of strong arms. Tell her I sent you.','The tunnel is quiet now. Every day a cart goes through.');
+const D4=khQD('So you are the four. Menkaure\'s message reached me before you did. The Dawn Walker is hidden in the boathouse, and Corvane\'s men are in every tavern asking for strangers. We need stores for the voyage. A trader was wrecked on the rocks last week and her crates are scattered along the beach. Four of them. Find them for me before the gulls do, or the tide.','Walk the beach, north and south of the pier. They are heavy and square, you cannot miss them.',(n,m)=>`${n} of ${m} crates found so far. Keep walking the beach.`,'All four crates? Wonderful.','Thank you. Half the cargo is spoiled, but half is more than I had. Here is your share.','Those crates fed Yarrim for a month.');
+const D5=khQD('The Dawn Walker\'s sails are in the Net Loft, and the rats have got at them. Kill six, and she will have a sail that holds.','The Net Loft is east of the harbourmaster\'s office. They are not big, but there are many.',(n,m)=>`${n} of ${m} rats are dead.`,'Six rats? The loft is quiet.','Splendid! Orsa at the lighthouse has been asking for someone who can be trusted. Go and see her.','The loft is quiet, and the nets are mended.');
+const D6=khQD('The Yarrim Light. It has been dark a year, ever since the torches ran out. If you mean to run the reef at night with a black ship on your tail, you will need that lamp. I need three torches for the great lamp. Will you bring them?','Three torches. The general stores in Khemetra sell them, and so do the ships\' chandlers.',(n,m)=>`${n} of ${m} torches. The lamp is waiting.`,'Torches! Give them here.','The lamp is lit. Look out over the water tonight, and you will see it. Yarrim will not forget you.','The lamp burns every night. Ships find the harbour again.');
 
-repWrap('kh_captain',()=>true,'About the Sea Gate',()=>{if(qSt('yar1')==='active'||qReady('yar1'))return qNode('yar1',D1);return G.flags.yarOpen||qSt('yar3')!==null?qNode('yar3',D3):qNode('yar1',D1)});
-repWrap('kh_vizier',()=>qSt('yar1')!==null,'About the Sea Gate',()=>{
+repWrap('kh_captain',()=>true,'About the Sea Gate',()=>{
+  const F=G.flags;
+  if(F.yarOpen)return qNode('yar3',D3);
+  if(F.kingOrder)return say('The king has ordered the Sea Gate unsealed? Then the vizier has the key to find, and I have a tunnel to sweep. Come back when the gate is open and I will tell you what lies behind it.',[BYE]);
+  return say('The old Sea Gate in the east wall of the city. Bricked up since my grandfather was a boy. Behind it, they say, is a tunnel, and at the end of the tunnel the Vaast Sea. I have a ship hidden at the far end, and nobody to sail her. Ishkander says the king comes home soon. Ask him. A king can open a gate that a shipwright cannot.',[BYE]);
+});
+repWrap('kh_vizier',()=>G.flags.kingOrder,'About the Sea Gate',()=>{
   const F=G.flags;
   if(qReady('yar2'))return say('You have the warden\'s key? Show me.',[['Here is the Sea Gate key.',()=>{qTurnIn('yar2');F.yarOpen=1;msg('The Sea Gate in the east wall of Khemetra is open.','#ffe36a');return say('Then the order is signed, and the gate is unsealed. A hundred years it has been shut. The east gate is yours. Do be careful what you let in.',[BYE])}],BYE]);
   if(qSt('yar2')==='active')return say('The key was lost in the cisterns when the old warden died. There is a chest down there that will hold it. Beneath the Potters Market, if you can bear the dark.',[BYE]);
   if(qSt('yar2')==='done')return say('The Sea Gate stands open. Do not make me regret it.',[BYE]);
-  F.yarVizier=1;
-  return say('The Sea Gate? Menkaure again. The gate was sealed by my predecessor, because of the dead that walk the tunnel, and because he did not like the smell of the sea. The key was lost in the cisterns beneath the Potters Market. Bring it to me, and I will have the gate opened.',[['We will find the key.',()=>{qAccept('yar2');return say('Take a lantern. The cisterns are not kind.',[BYE])}],['Not now.',()=>null]]);
+  return say('The king has ordered the Sea Gate unsealed. I would obey faster if I knew where the key was. It was lost in the cisterns beneath the Potters Market when the old warden died. Bring it to me, and I will have the gate opened by the hour.',[['We will find the key.',()=>{qAccept('yar2');return say('Take a lantern. The cisterns are not kind.',[BYE])}],['Not now.',()=>null]]);
 });
 /* the warden's key, in a chest in the cisterns */
 khNpc('yar_keychest','An old bronze chest','chest',d=>{const F=G.flags;
@@ -230,16 +239,19 @@ function yarEnter(n){
   const F=G.flags;
   if(n===YR.ID&&!F.yarSeen){F.yarSeen=1;msg('Salt wind and the cry of gulls. Beyond the beach, the Vaast Sea runs to the sky.','#a8d8ff')}
   if(n===YR.ID)F.khSeaSeen=1;
+  if(typeof mqEnter==='function')mqEnter(n);
+  if(typeof seaEnter==='function')seaEnter(n);
 }
 function yrSprites(out){
-  if(LEVEL!==YR.ID)return;
+  if(!yarSea(LEVEL))return;
   const t=G.time,up=IMG.yar_gull_up,dn=IMG.yar_gull_down;if(!up||!dn)return;
-  (YR.boats||[]).forEach(([k,x,y],i)=>{const im=IMG[k];if(!im)return;
+  if(LEVEL===YR.ID)(YR.boats||[]).forEach(([k,x,y],i)=>{const im=IMG[k];if(!im)return;
     const ph=t*(.8+(i%3)*.15)+i*2.1;
     out.push({x:x+.5+Math.sin(ph*.6)*.07,y:y+.5+Math.cos(ph*.5)*.07,img:im,w:NPC_H[k]*im.width/im.height,bob:-.07+Math.sin(ph)*.035,decor:{k:'yar_boat_s'+i}});
   });
   for(let i=0;i<18;i++){
-    const cx=[56,60,66,70,76,50,84,62,72,90,58,68,80,64,74,52,88,66][i],cy=[30,44,38,48,36,52,42,26,40,34,56,30,50,58,26,40,46,32][i],r=2.5+i%5*1.1,sp=.5+(i%4)*.12,a=t*sp+i*1.7;
+    let cx=[56,60,66,70,76,50,84,62,72,90,58,68,80,64,74,52,88,66][i],cy=[30,44,38,48,36,52,42,26,40,34,56,30,50,58,26,40,46,32][i];const r=2.5+i%5*1.1,sp=.5+(i%4)*.12,a=t*sp+i*1.7;
+    if(LEVEL!==YR.ID){const S=SEA[LEVEL];cx=S.cx+Math.cos(i*1.7)*(5+i%6*3);cy=S.cy+Math.sin(i*1.7)*(4+i%5*3)}
     const img=((t*3.4+i)|0)%2?up:dn;
     out.push({x:cx+Math.cos(a)*r,y:cy+Math.sin(a*1.1)*r,img,w:.5,bob:1.3+(i%4)*.35+Math.sin(t*1.7+i)*.18,decor:{walk:true,k:'yar_gull_fly'}});
   }
