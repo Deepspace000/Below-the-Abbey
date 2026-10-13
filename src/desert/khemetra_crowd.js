@@ -148,6 +148,7 @@ function khCrowd(C,L){
   // brigands and thieves keep to the far districts, away from the gate and the palace
   const gangs=[[322,232],[350,238],[376,252],[326,264],[356,274],[380,288],[318,292],[346,294],[150,40],[262,42],[44,150]];
   gangs.forEach(([gx,gy],gi)=>{const mix=[['bandit','bandit','archer'],['nomad2','bandit','nomad2'],['bandit','archer','nomad2','bandit'],['bandit','bandit']][gi%4];mix.forEach((t,k)=>enemyAt(gx+k*2,gy+(k%2)*2,10,t,16+(gi%2)))});
+  khMakeWalkers(C,L,rng,open,run); // guards, citizens, donkeys, goats and cats that move about the streets
 }
 /* nothing the crowd or the markets place may seal off a part of the city: blocking things that wall off reachable ground are made walk-through */
 function khKeepOpen(C,L){

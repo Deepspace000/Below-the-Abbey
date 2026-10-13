@@ -67,7 +67,26 @@ const KH_BUILDINGS=[
   {id:'homeA',pool:'house',name:'A Quiet House',room:'home',keeper:'kh_homeA'},
   {id:'homeB',pool:'mansion',name:"A Merchant's House",room:'home',keeper:'kh_homeB'},
   {id:'homeC',pool:'house',name:"A Scholar's House",room:'home',keeper:'kh_homeC'},
+  // ordinary houses with nobody home: each shows a painted picture of its room when the party walks in (SCENES in index.html)
+  {id:'hs_warm',pool:'house',name:'A Warm House',room:'home',keeper:null,scene:'warm'},
+  {id:'hs_wizard',pool:'house',name:"A Wizard's House",room:'home',keeper:null,scene:'wizard'},
+  {id:'hs_empty',pool:'house',name:'An Empty House',room:'home',keeper:null,scene:'empty'},
+  {id:'hs_worker',pool:'house',name:"A Worker's House",room:'home',keeper:null,scene:'worker'},
+  {id:'hs_noble',pool:'mansion',name:"A Nobleman's House",room:'home',keeper:null,scene:'noble'},
+  {id:'hs_spartan',pool:'house',name:'A Spartan House',room:'home',keeper:null,scene:'spartan'},
+  {id:'hs_messy',pool:'house',name:'A Messy House',room:'home',keeper:null,scene:'messy'},
+  {id:'hs_dark',pool:'house',name:'A Dark House',room:'home',keeper:null,scene:'dark'},
+  {id:'hs_magic',pool:'house',name:'A Magical House',room:'home',keeper:null,scene:'magic'},
+  {id:'hs_healer',pool:'house',name:"A Healer's House",room:'home',keeper:null,scene:'healer'},
+  {id:'hs_cats',pool:'house',name:"A Cat Lover's House",room:'home',keeper:null,scene:'cats'},
+  {id:'hs_fisher',pool:'house',name:"A Fisherman's House",room:'home',keeper:null,scene:'fisher'},
+  {id:'hs_potter',pool:'house',name:"A Potter's House",room:'home',keeper:null,scene:'potter'},
+  {id:'hs_soldier',pool:'house',name:"A Soldier's House",room:'home',keeper:null,scene:'soldier'},
+  {id:'hs_priest',pool:'house',name:"A Priest's House",room:'home',keeper:null,scene:'priest'},
+  {id:'hs_children',pool:'house',name:"A Children's House",room:'home',keeper:null,scene:'children'},
 ];
+// the picture shown for the buildings above that were here first
+const KH_SCENE_OF={bath1:'bath_grand',bath2:'bath_hammam',homeA:'warm',homeB:'merchant',homeC:'scholar',drumhouse:'musician',denA:'dark',denB:'ruined',denC:'messy',denD:'empty',urnhouse:'boarded',ledgerhouse:'taxman'};
 const KH_DIRS=[[0,-1],[0,1],[-1,0],[1,0]];
 const KH_FACE_F=[0,2,3,1]; // the way you face when you step out: north, south, west, east
 let KH_LEVEL_NEXT=200;
@@ -150,7 +169,7 @@ function khRoom(b,lvl,back){
   R.build({put,raw,npc,mid,W,H});
   const wall=khInteriorWall(b.room);
   const level={rows,start:{x:mid,y:H-2,f:0},enemies:(R.enemies||[]).map(e=>({t:e[0],x:e[1],y:e[2],lvl:e[3]})),items:R.items||[],decor,day:0,amb:R.amb||.66,
-    floor:R.floor||'kh1',ceil:'beam',name:b.name,label:b.name,lights:R.lights||[],portals:[{to:back.to,x:back.x,y:back.y,f:back.f,tex:'in'}],diff:16,khRoom:b.id,
+    floor:R.floor||'kh1',ceil:'beam',name:b.name,label:b.name,lights:R.lights||[],portals:[{to:back.to,x:back.x,y:back.y,f:back.f,tex:'in'}],diff:16,khRoom:b.id,scene:b.scene||KH_SCENE_OF[b.id],
     chars:wall?{w:wall}:undefined};
   if(R.noExtras)level.noExtras=true;
   return {level,start:{x:mid,y:H-2,f:0}};
@@ -195,6 +214,7 @@ function khRoomHall(b){return {w:11,h:8,lights:[[3,2],[7,2],[5,5]],build:({put,r
   npc(b.keeper,mid,2);
 }}}
 function khRoomHome(b){return {w:9,h:7,lights:[[2,2],[6,2]],build:({put,raw,npc,mid})=>{
+  if(b.scene==='empty')return;
   put('bed',1,1);put('bed',7,1);put('table',4,3);put('chair',3,3);put('chair',5,3);put('chest',7,4);put('amphora',1,4);
   npc(b.keeper,mid,1);
 }}}

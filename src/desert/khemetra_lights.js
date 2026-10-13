@@ -31,10 +31,11 @@ function khPlaceLights(C,L,E){
   };
   const note=(x,y)=>{const k=((x/BS)|0)+','+((y/BS)|0);const l=grid.get(k);if(l)l.push([x,y]);else grid.set(k,[[x,y]])};
   const pickFrom=(arr,x,y,seed,sub)=>{const a=sub?sub.map(k=>arr[k]).filter(Boolean):arr;return a.length?a[(khHash(x,y,seed)*a.length)|0]:null};
-  const lantern=(x,y,isRed,sub)=>{
+  const lantern=(x,y,isRed,sub,ox,oy)=>{
     const list=isRed&&red.length?red:amber;
     const p=pickFrom(list,x,y,81,sub&&sub.filter(k=>k<list.length));
     const d={k:'lamp',x,y,block:false,walk:true,red:!!isRed};
+    if(ox)d.ox=ox;if(oy)d.oy=oy;
     if(p){d.lk=p[0];d.glow=[p[2],p[3]]}
     return add(d);
   };
@@ -67,7 +68,10 @@ function khPlaceLights(C,L,E){
         else if(name==='park')sub=[1,5,2];
         else sub=wd<=3?[0,1,3,4]:[0,1,3,4,2];
       }
-      lantern(x,y,isRed,sub);note(x,y);if(isRed)nR++;else nL++;
+      // in a street one square wide the lantern stands against one wall, not in the middle of the way
+      let ox=0,oy=0;
+      if(wd===1){const side=khHash(x,y,89)<.5?-.38:.38;if(run[i*2]===1)ox=side;else oy=side}
+      lantern(x,y,isRed,sub,ox,oy);note(x,y);if(isRed)nR++;else nL++;
     }
   }
   // ---- copper braziers at the corners of the great square and either side of the palace gate ----
