@@ -3,7 +3,7 @@
    crafting, camp and bonds, luck and omens, weather and the season. Each system registers its own page here with journalPage().
    ========================================================================== */
 const JOURNAL=[];
-const JORDER=['rep','rumour','aff','camp','trade','craft','pets','wx','luck'];
+const JORDER=['story','rep','rumour','aff','camp','trade','craft','pets','wx','luck'];
 function journalPage(p){JOURNAL.push(p);JOURNAL.sort((a,b)=>(JORDER.indexOf(a.id)+100)%100-(JORDER.indexOf(b.id)+100)%100)}
 const jp=id=>JOURNAL.find(p=>p.id===id);
 function drawJournal(){

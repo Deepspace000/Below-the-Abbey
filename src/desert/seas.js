@@ -4,8 +4,8 @@
      300 Saltbarrow (pirates)  301 The Isle of Bells (a drowned abbey)  302 Cinder Isle (a volcano)  303 Last Light (a ruined beacon)
      304 Oldhaven Quay (the harbour of the king's city, where this part of the story ends)
    ========================================================================== */
-const yarSea=n=>n===290||(n>=300&&n<=304);
-const SEA_TINT={300:[1.05,.98,.9],301:[.8,.9,.82],302:[.55,.5,.52],303:[.85,.88,.96],304:[.96,.93,.88]};
+const yarSea=n=>n===290||(n>=300&&n<=305);
+const SEA_TINT={305:[.96,.93,.88],300:[1.05,.98,.9],301:[.8,.9,.82],302:[.55,.5,.52],303:[.85,.88,.96],304:[.96,.93,.88]};
 const SEA={
   300:{name:'Saltbarrow',label:'Saltbarrow',cx:50,cy:40,rx:27,ry:20,peak:2.2,pow:1.4,seed:31,diff:17,
     floors:['sand','whiteSand','wood','bluesand','bluewater','pebA'],hills:[[34,30,6,2.8],[68,50,5,2.4]],
@@ -50,7 +50,7 @@ function seaBuild(id){
   // walls and gate (Oldhaven)
   for(const [x0,y0,x1,y1,ch] of sp.walls||[])for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){rows[y][x]=ch;block[y*W+x]=1}
   const portals=[];
-  if(sp.gate){rows[sp.gate[1]][sp.gate[0]]='1';block[sp.gate[1]*W+sp.gate[0]]=1;portals[1]={to:44,x:394,y:200,f:3,tex:'citygate',req:'oldhavenOpen',lock:'The great gate of Oldhaven is barred. The herald says the king\'s court meets at noon, and that is where this part of the story ends for now.'}}
+  if(sp.gate){rows[sp.gate[1]][sp.gate[0]]='1';block[sp.gate[1]*W+sp.gate[0]]=1;portals[1]={to:305,x:45,y:62,f:0,tex:'citygate',req:'oldhavenOpen',lock:'The great gate of Oldhaven is barred until noon. Speak to the herald.'}}
   const spot=(dx,dy)=>{for(let r=0;r<14;r++)for(let yy=-r;yy<=r;yy++)for(let xx=-r;xx<=r;xx++){if(Math.max(Math.abs(xx),Math.abs(yy))!==r)continue;const x=cx+dx+xx,y=cy+dy+yy;if(x<2||y<2||x>=W-2||y>=H-2)continue;if(!block[y*W+x]&&rows[y][x]==='.')return [x,y]}return null};
   // the pier and the ship
   let sy=-1;for(let y=H-2;y>0;y--)if(!block[y*W+cx]&&h[y*W+cx]>-.06){sy=y;break}
@@ -141,6 +141,7 @@ function seaSpawn(t,r,alert){ // a creature appears a few cells from the party
 }
 function seaEnter(n){
   const F=G.flags;
-  if(n===304&&!F.oldhavenSeen){F.oldhavenSeen=1;startCut('oldhavenArrive',()=>{if(qSt('vq5')===null)qAccept('vq5');if(qReady('vq5'))qTurnIn('vq5');F.act3=1;msg('The gate of Oldhaven stays shut until noon. To be continued.','#ffe36a')})}
+  if(n===304&&!F.oldhavenSeen){F.oldhavenSeen=1;startCut('oldhavenArrive',()=>{if(qSt('vq5')===null)qAccept('vq5');if(qReady('vq5'))qTurnIn('vq5');F.act3=1;msg('The gate of Oldhaven stays shut until noon. Speak to the herald.','#ffe36a')})}
+  if(typeof ohEnter==='function')ohEnter(n);
   else if(n>=300&&n<=303&&!(F.seaArr&&F.seaArr[n])){(F.seaArr=F.seaArr||{})[n]=1;msg({300:'Saltbarrow. A pirate haven of sand, wrecks and canvas tents. Gulls cry over the water.',301:'The Isle of Bells. Mist over a drowned abbey. Somewhere in the grey, a bell is moving in the wind.',302:'Cinder Isle. Black rock and red glow. The mountain breathes.',303:'Last Light. A scrap of rock at the end of the chart. A small lamp burns in a hut on the shore.'}[n],'#a8d8ff')}
 }

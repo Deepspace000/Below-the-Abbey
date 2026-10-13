@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.32';
+const VERSION='3.33';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1256,13 +1256,14 @@ function streamLoad(){
   const pr=el.play();if(pr&&pr.catch)pr.catch(()=>{STREAM.playing=false});STREAM.playing=true;
 }
 function areaAudio(){
-  if(!AC)return;loadSounds();windTick();streamTick();
+  if(!AC)return;loadSounds();windTick();try{if(typeof seaSoundTick==='function')seaSoundTick()}catch(e){}streamTick();
   const T={};
   if(G.state==='play'&&!G.mute){
     if(LEVEL===32){T.music_mithral=.55;loadLazy('music_mithral')}
     else if(LEVEL===33){T.village_ambience=.22;T.wind_loop=.1}
     else if(LEVEL===35){T.music_tavern=.5;T.village_ambience=.15}
     else if(LEVEL===44){T.village_ambience=.8}
+    else if(typeof yarSea==='function'&&yarSea(LEVEL)){T.village_ambience=LEVEL===290||LEVEL===304?.22:.06}
     else if(STREAM_LISTS[LEVEL]&&LEVEL>=50&&!(LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor)){T.dungeon_ambience=.18}
     else if(EMBERS_LEVELS.includes(LEVEL)){T.dungeon_ambience=.22;T.music_embers=.55;loadLazy('music_embers')}
     else if(DUNGEON_LEVELS.includes(LEVEL)){T.dungeon_ambience=.3;T.music_dungeon1=.5}
@@ -3870,7 +3871,7 @@ function snapshot(){
     torches:LIGHTS.map(l=>l.taken?1:0),torchKeys:LIGHTS.filter(l=>l.taken).map(l=>l.key)};
 }
 function restore(sv){ // the golden city and the rooms in it are built the first time they are needed
-  const l=sv.level||1;if(l===44||(l>=199&&l<=270)||(l>=1000&&l<30000)||(l>=271&&l<=280)||(l>=289&&l<=304)||l>=40000)if((!LEVELS[l]&&!(typeof KH_LAZY!=='undefined'&&KH_LAZY[l]))||LEVELS[44].stub){khThen(()=>restoreNow(sv));return}
+  const l=sv.level||1;if(l===44||(l>=199&&l<=270)||(l>=1000&&l<30000)||(l>=271&&l<=280)||(l>=289&&l<=312)||l>=40000)if((!LEVELS[l]&&!(typeof KH_LAZY!=='undefined'&&KH_LAZY[l]))||LEVELS[44].stub){khThen(()=>restoreNow(sv));return}
   restoreNow(sv);
 }
 function restoreNow(sv){
@@ -3968,16 +3969,21 @@ function drawInitialFrame(x,y,w,h){
 G.gotoLvl=34;
 function gotoList(){
   const out=[],nm=n=>LEVEL_NAMES[n]||(LEVELS[n]&&LEVELS[n].name)||('Level '+n),hd=h=>out.push({h});
-  const has=n=>{if(!LEVELS[n]&&n>=289&&n<=304&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();return LEVELS[n]||(typeof KH_LAZY!=='undefined'&&KH_LAZY[n])};
+  const has=n=>{if(!LEVELS[n]&&n>=289&&n<=312&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();return LEVELS[n]||(typeof KH_LAZY!=='undefined'&&KH_LAZY[n])};
   hd('The Known Lands');for(let n=1;n<=40;n++)if(has(n))out.push({n,name:nm(n)});
   hd('The Deserts');for(const n of [41,42,43,44,60,61,62,63,64,65])if(has(n))out.push({n,name:nm(n)});
-  hd('Yarrim and the Vaast Sea');for(const n of [289,290,291,292,293,294,295,296,297,298,300,301,302,303,304,305,306,307,308,309,310,311,312])if(has(n))out.push({n,name:nm(n)});
+  const FIXED={199:'The Palace of Khemetra',260:'The Cisterns beneath Khemetra',261:"Ishkander's Study",266:'The Tunnel to the Vaast Ocean',270:'The Temple Dungeons',271:"Ironhill: Corvin's Arcana",272:'Ironhill: The Cauldron',273:'Ironhill: Steelhold Blades',274:'Ironhill: Plate and Mail'};
+  hd('Khemetra: the palace, the cisterns and the cells');for(const n of [199,260,261,266,270])out.push({n,name:LEVEL_NAMES[n]||FIXED[n]});
+  hd('Ironhill shops');for(const n of [271,272,273,274])out.push({n,name:LEVEL_NAMES[n]||FIXED[n]});
+  hd('Yarrim and the Vaast Sea');for(const n of [289,290,291,292,293,294,295,296,297,298])if(has(n))out.push({n,name:nm(n)});
+  hd('The Islands of the Vaast Sea');for(const n of [300,301,302,303])if(has(n))out.push({n,name:nm(n)});
+  hd('Oldhaven, the city of King Osric');for(const n of [304,305,306,307,308,309,310])if(has(n))out.push({n,name:nm(n)});
     hd('Mounds of the Sand Road');for(let n=BURROW_BASE;n<BURROW_BASE+BURROW_N;n++)if(has(n))out.push({n,name:nm(n)});
   for(const [dl,dname] of DNG_DESERTS){const ids=Object.keys(DNG_INFO).map(Number).filter(n=>DNG_INFO[n].desert===dname).sort((a,b)=>a-b);if(ids.length){hd('Dungeons of '+dname);for(const n of ids)out.push({n,name:nm(n)})}}
   return out;
 }
 function jumpToLevel(n,target){
-  if(n===44&&LEVELS[44].stub){khEnter(()=>jumpToLevel(n,target));return}
+  if((n===44||(n>=199&&n<=274))&&LEVELS[44].stub){khEnter(()=>jumpToLevel(n,target));return}
   if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();
   audioInit();backupAuto();
   const sv=readSave('auto')||readSave('prev');
@@ -4115,12 +4121,12 @@ const WORLD_LOCS=[
   {k:'goldenerg',n:'The Golden Erg',sub:'the biggest desert',lv:[61],x:640,y:206,ic:'dunes'},
   {k:'violeterg',n:'The Violet Erg',sub:'a purple desert',lv:[62],x:640,y:262,ic:'dunes'},
   {k:'scoria',n:'Khemetra',sub:'the golden city',lv:[44],x:486,y:56,ic:'castle'},
-  {k:'yarrim',n:'Yarrim',sub:'a town on the Vaast Sea',lv:[290,289],x:548,y:62,ic:'town'},
-  {k:'saltbarrow',n:'Saltbarrow',sub:'a pirate island',lv:[300],x:608,y:76,ic:'trees'},
-  {k:'bells',n:'The Isle of Bells',sub:'a drowned abbey',lv:[301],x:630,y:102,ic:'abbey'},
-  {k:'cinder',n:'Cinder Isle',sub:'a volcano',lv:[302],x:606,y:126,ic:'mountains'},
-  {k:'lastlight',n:'Last Light',sub:'a ruined beacon',lv:[303],x:628,y:150,ic:'castle'},
-  {k:'oldhaven',n:'Oldhaven',sub:"the king's city",lv:[304],x:34,y:170,ic:'castle'}
+  {k:'yarrim',n:'Yarrim',sub:'a town on the Vaast Sea',lv:[290,289],x:692,y:66,ic:'town'},
+  {k:'saltbarrow',n:'Saltbarrow',sub:'a pirate island',lv:[300],x:772,y:70,ic:'trees'},
+  {k:'bells',n:'The Isle of Bells',sub:'a drowned abbey',lv:[301],x:834,y:112,ic:'abbey'},
+  {k:'cinder',n:'Cinder Isle',sub:'a volcano',lv:[302],x:774,y:154,ic:'mountains'},
+  {k:'lastlight',n:'Last Light',sub:'a ruined beacon',lv:[303],x:850,y:196,ic:'castle'},
+  {k:'oldhaven',n:'Oldhaven',sub:"the king's city",lv:[304,305,306,307,308,309,310],x:34,y:170,ic:'castle'}
 ];
 const WORLD_ROADS=[['abbey','thornwood','thornwick','gwood'],['gwood','road','tunnel','ironhill'],['ironhill','graves'],['ironhill','mines'],['ironhill','moor','pass','greendale','anaea']];
 function lab(s,x,y,size,col){ctx.save();ctx.font=`bold ${size}px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(200,184,140,.9)';ctx.strokeText(s,x,y);ctx.fillStyle=col;ctx.fillText(s,x,y);ctx.restore()}
@@ -4144,6 +4150,11 @@ function drawWorldMap(){
     ctx.font=`italic 17px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.72)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('The Unknown Lands',476,16);
     ctx.font=`italic 8px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.55)';ctx.fillText('east of Greyfang Pass, uncharted',476,29);
   }
+  { // the names of the two ends of the map: where the road began, and the lands along the sea
+    ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font=`italic 17px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.72)';ctx.fillText('The Known Lands',210,16);ctx.font=`italic 8px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.55)';ctx.fillText('where the road began',210,29);
+    ctx.font=`italic 17px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.72)';ctx.fillText('The Sea Lands',652,16);ctx.font=`italic 8px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.55)';ctx.fillText('the country along the coast',652,29);ctx.restore();
+  }
   // faint hand-drawn coast and old survey marks, to show where the lands are still blank
   ctx.strokeStyle='rgba(60,44,26,.28)';ctx.lineWidth=1.2;ctx.setLineDash([3,4]);
   ctx.beginPath();ctx.moveTo(30,288);for(let i=0;i<=24;i++)ctx.lineTo(30+i*18,284+Math.sin(i*1.3)*5+Math.cos(i*.7)*3);ctx.stroke();
@@ -4152,11 +4163,31 @@ function drawWorldMap(){
   ctx.font=`italic 9px ${FTITLE}`;ctx.fillStyle='rgba(60,44,26,.34)';ctx.textAlign='center';ctx.textBaseline='middle';
   for(const [t,x,y] of [['Uncharted',70,100],['Uncharted',250,50],['Unknown seas',150,285]])ctx.fillText(t,x,y);
   // roads
+  { // the Vaast Sea: a coast running north to south far in the east, and islands scattered in the water
+    const cxo=y=>714+10*Math.sin(y*.045)+6*Math.sin(y*.13+1)+(y>200?-8:0);
+    ctx.save();ctx.beginPath();ctx.moveTo(cxo(-300),-300);for(let y=-300;y<=600;y+=6)ctx.lineTo(cxo(y),y);ctx.lineTo(1500,600);ctx.lineTo(1500,-300);ctx.closePath();
+    ctx.fillStyle='rgba(78,104,112,.55)';ctx.fill();ctx.clip();
+    ctx.strokeStyle='rgba(30,50,58,.3)';ctx.lineWidth=1;
+    for(let i=0;i<300;i++){const wx=724+hash2(i,1,17)*420,wy=-260+hash2(i,2,17)*840;ctx.beginPath();ctx.moveTo(wx,wy);ctx.quadraticCurveTo(wx+4,wy-3,wx+8,wy);ctx.quadraticCurveTo(wx+12,wy+3,wx+16,wy);ctx.stroke()}
+    ctx.strokeStyle='rgba(235,240,230,.45)';ctx.lineWidth=1.2;for(let k=1;k<=3;k++){ctx.beginPath();for(let y=-300;y<=600;y+=6){const x=cxo(y)+k*5+Math.sin(y*.2+k)*1.5;y===-300?ctx.moveTo(x,y):ctx.lineTo(x,y)}ctx.stroke()} // surf along the shore
+    ctx.restore();
+    ctx.strokeStyle='rgba(40,34,22,.8)';ctx.lineWidth=1.7;ctx.beginPath();for(let y=-300;y<=600;y+=6){y===-300?ctx.moveTo(cxo(y),y):ctx.lineTo(cxo(y),y)}ctx.stroke();
+    const ISL=[[772,70,16],[834,112,14],[774,154,13],[850,196,18],[744,14,6],[802,22,7],[902,60,9],[892,152,8],[744,230,10],[822,254,12],[914,232,9],[782,298,8],[872,302,11],[742,112,5],[928,120,7],[958,40,6],[942,182,6],[762,342,9],[842,362,8],[902,362,10],[732,192,4],[966,270,8],[958,110,5],[690,180,3]];
+    for(const [ix,iy,ir] of ISL){
+      ctx.beginPath();for(let k=0;k<14;k++){const a=k/14*TAU,rr=ir*(.72+.5*hash2(ix+k,iy,19));k?ctx.lineTo(ix+Math.cos(a)*rr*1.2,iy+Math.sin(a)*rr*.85):ctx.moveTo(ix+Math.cos(a)*rr*1.2,iy+Math.sin(a)*rr*.85)}ctx.closePath();
+      ctx.fillStyle='#b4a67c';ctx.fill();ctx.strokeStyle='rgba(40,34,22,.85)';ctx.lineWidth=1.2;ctx.stroke();
+      ctx.strokeStyle='rgba(235,240,230,.5)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(ix,iy,ir*1.35,ir*.98,0,0,TAU);ctx.stroke();
+      if(ir>=9){ctx.fillStyle='#7a8a5a';ctx.beginPath();ctx.ellipse(ix-ir*.15,iy-ir*.1,ir*.45,ir*.3,0,0,TAU);ctx.fill();if(ir>=12){ctx.strokeStyle='rgba(40,34,22,.7)';ctx.lineWidth=.9;ctx.beginPath();ctx.moveTo(ix-ir*.3,iy+ir*.1);ctx.lineTo(ix,iy-ir*.5);ctx.lineTo(ix+ir*.3,iy+ir*.1);ctx.stroke()}}
+    }
+    ctx.font=`italic 20px ${FTITLE}`;ctx.fillStyle='rgba(30,44,52,.72)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('The Vaast Sea',836,24);
+    ctx.font=`italic 8px ${FTITLE}`;ctx.fillStyle='rgba(30,44,52,.6)';ctx.fillText('a great ocean, and no charts',836,38);ctx.fillText('the western coast lies on the far side',836,330);
+  }
   const by={};WORLD_LOCS.forEach(l=>by[l.k]=l);
   ctx.strokeStyle='rgba(50,34,18,.75)';ctx.lineWidth=1.5;ctx.setLineDash([2.5,3.5]);
   for(const r of WORLD_ROADS){ctx.beginPath();r.forEach((k,i)=>{const l=by[k];if(i===0)ctx.moveTo(l.x,l.y);else ctx.lineTo(l.x,l.y)});ctx.stroke()}
   ctx.beginPath();ctx.moveTo(402,238);ctx.lineTo(466,228);ctx.lineTo(500,196);ctx.lineTo(506,136);ctx.lineTo(498,96);ctx.lineTo(486,56);ctx.stroke();ctx.setLineDash([]);
   lab('the road east, then north',470,236,7.5,'#3a2a16');
+  if(G.flags.voyage){ctx.strokeStyle='rgba(30,70,110,.8)';ctx.lineWidth=1.5;ctx.setLineDash([2,3.5]);ctx.beginPath();['yarrim','saltbarrow','bells','cinder','lastlight'].forEach((k,i)=>{const l=by[k];i?ctx.lineTo(l.x,l.y):ctx.moveTo(l.x,l.y)});ctx.stroke();ctx.setLineDash([])}
   const visited=l=>l.lv.some(v=>v===LEVEL||G.lst[v]),here=WORLD_LOCS.find(l=>l.lv.includes(LEVEL));
   const stroke=()=>{ctx.strokeStyle=ink;ctx.lineWidth=1.3;ctx.lineJoin='round'};
   const ICONS={
@@ -4194,7 +4225,7 @@ function drawWorldMap(){
   ctx.fillRect(40,272,60,2);ctx.fillRect(40,269,2,8);ctx.fillRect(70,270,2,6);ctx.fillRect(98,269,2,8);lab('about a day on foot',70,284,7,'#3a2a16');
   ctx.restore();
   ctx.lineWidth=2.4;ctx.strokeStyle=goldG(x0,y0,w,h);rrect(ctx,x0,y0,w,h,6);ctx.stroke();wornEdge(x0,y0,w,h,6);
-  ctx.save();ctx.font=`26px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='rgba(235,220,170,.5)';ctx.strokeText('The Known Lands',240,36);ctx.fillStyle=ink;ctx.fillText('The Known Lands',240,36);ctx.restore();
+  ctx.save();ctx.font=`26px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='rgba(235,220,170,.5)';ctx.strokeText('The Far Lands',240,36);ctx.fillStyle=ink;ctx.fillText('The Far Lands',240,36);ctx.restore();
   if(G.teleMode||awake.length)txt(teleOn()?'Tap a glowing stone to travel there.':'Woken teleporters glow on the map. Stand on one to travel.',240,52,9,'#2a1c0e','center',true);
   if(G.wnote&&G.time-G.wnote.t<4)txt(G.wnote.text,240,64,9,'#7a1a10','center',true);
   btnText('worldback','Level map',18,284,100,24);btnText('ovexit','Exit',362,284,100,24);
@@ -4652,7 +4683,7 @@ function respawnForest(){
 }
 // carry the party, bag, gold and quests into the next level
 function goToLevel(n,entry){
-  if(n===43||n===62||n===13||(n>=271&&n<=280)||(n>=289&&n<=304)||n>=40000)khLoadAssets(); // the city's pictures arrive in the background while the party walks to its gate
+  if(n===43||n===62||n===13||(n>=271&&n<=280)||(n>=289&&n<=312)||n>=40000)khLoadAssets(); // the city's pictures arrive in the background while the party walks to its gate
   G.lst[LEVEL]=levelState();
   const keep={heroes:G.heroes,bag:G.bag,gold:G.gold,keys:G.keys,rounds:G.rounds,kills:G.kills,sel:G.sel,bossDead:G.bossDead,flags:G.flags,quests:G.quests,lst:G.lst,clock:G.clock,starveT:G.starveT,aff:G.aff};
   reset(n);Object.assign(G,keep);
@@ -6701,7 +6732,7 @@ function setWorldZoom(nz,cx,cy){
   const px=240+(cx-240-V.x)/V.z,py=160+(cy-160-V.y)/V.z; // the map point under the cursor stays under it
   V.z=nz;V.x=cx-240-(px-240)*nz;V.y=cy-160-(py-160)*nz;clampWorld();
 }
-function clampWorld(){const V=G.wv;V.x=clamp(V.x,-420*V.z,260*V.z);V.y=clamp(V.y,-170*V.z,170*V.z)}
+function clampWorld(){const V=G.wv;V.x=clamp(V.x,-720*V.z,260*V.z);V.y=clamp(V.y,-170*V.z,170*V.z)}
 cv.addEventListener('pointerdown',e=>{
   e.preventDefault();audioInit();
   if(G.overview&&G.world){
@@ -6749,7 +6780,7 @@ cv.addEventListener('wheel',e=>{
   if(G.loot){const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*DW,d=x<156?'lbag':'lbox';setScroll(d,getScroll(d)+e.deltaY*.5);e.preventDefault();return}
   if(G.menu==='quests'){G.qs=clamp((G.qs||0)+e.deltaY*.5,0,G.qMax||0);e.preventDefault();return}
   if(G.menu==='aff'){G.afs=clamp((G.afs||0)+e.deltaY*.5,0,G.afMax||0);e.preventDefault();return}
-  if(G.menu==='jp:rumour'){G.rs=Math.max(0,(G.rs||0)+e.deltaY*.5);e.preventDefault();return}
+  if(G.menu==='jp:rumour'||G.menu==='jp:story'){G.rs=Math.max(0,(G.rs||0)+e.deltaY*.5);e.preventDefault();return}
   if(G.overview&&!G.world){const [wx,wy]=toDesign(e);setMapZoom((G.mz||12)*Math.exp(-e.deltaY*.0016),wx,wy);e.preventDefault();return}
   if(G.overview&&G.world){const [wx,wy]=toDesign(e);setWorldZoom((G.wv?G.wv.z:1)*Math.exp(-e.deltaY*.0016),wx,wy);e.preventDefault();return}
   if(G.inv.open){G.inv.scroll=clamp(G.inv.scroll+e.deltaY*.5,0,maxScroll());e.preventDefault()}
@@ -6787,7 +6818,7 @@ addEventListener('resize',fit);fit();
 /*@@DESERT:BEGIN@@*/
 /* ---- src/desert/artlist.js ---- */
 /* written by tools/inject.py */
-const DS_PAINTED=['assassin', 'assassinA', 'bat', 'batA', 'brazier0', 'brazier1', 'brazier2', 'brazier3', 'camelpE', 'camelpW', 'camelrE', 'camelrW', 'ceil_tomb', 'cobra', 'cobraA', 'cvnomadA', 'cvnomadB', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'dplant0', 'dplant1', 'dplant2', 'dplant3', 'dpyrgate', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dskeleton', 'dskeletonA', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'offering', 'pharaohboss', 'pharaohbossA', 'pservant', 'pservantA', 'rrock0', 'rrock1', 'rrock2', 'skel', 'skelA', 'skybirdA', 'skybirdB', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'tex_yardoor', 'tex_yardrift', 'tex_yarnet', 'tex_yarwall', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA'];
+const DS_PAINTED=['assassin', 'assassinA', 'bat', 'batA', 'brazier0', 'brazier1', 'brazier2', 'brazier3', 'camelpE', 'camelpW', 'camelrE', 'camelrW', 'ceil_tomb', 'cobra', 'cobraA', 'cvnomadA', 'cvnomadB', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'dplant0', 'dplant1', 'dplant2', 'dplant3', 'dpyrgate', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dskeleton', 'dskeletonA', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'offering', 'pharaohboss', 'pharaohbossA', 'pservant', 'pservantA', 'rrock0', 'rrock1', 'rrock2', 'skel', 'skelA', 'skybirdA', 'skybirdB', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'tex_yarblue', 'tex_yarcoral', 'tex_yardoor', 'tex_yardoor2', 'tex_yardoor3', 'tex_yardoor4', 'tex_yardoor5', 'tex_yardoor6', 'tex_yardoor7', 'tex_yardrift', 'tex_yargreen', 'tex_yarnet', 'tex_yarpink', 'tex_yarrose', 'tex_yarwall', 'tex_yaryellow', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA'];
 
 /* ---- src/desert/artpack.js ---- */
 /* ==========================================================================
@@ -11001,7 +11032,7 @@ function khPlaceCarts(C,L,near,add,reachFree){
    crafting, camp and bonds, luck and omens, weather and the season. Each system registers its own page here with journalPage().
    ========================================================================== */
 const JOURNAL=[];
-const JORDER=['rep','rumour','aff','camp','trade','craft','pets','wx','luck'];
+const JORDER=['story','rep','rumour','aff','camp','trade','craft','pets','wx','luck'];
 function journalPage(p){JOURNAL.push(p);JOURNAL.sort((a,b)=>(JORDER.indexOf(a.id)+100)%100-(JORDER.indexOf(b.id)+100)%100)}
 const jp=id=>JOURNAL.find(p=>p.id===id);
 function drawJournal(){
@@ -12326,8 +12357,8 @@ khNpc('kh_snakeoil','A shifty salesman','kh_npc5_5',d=>{
    A chain of quests (yar1..yar6) from Menkaure and the vizier in Khemetra opens the gate, then goes on in Yarrim.
    ========================================================================== */
 const YR={ID:290,TUN:289,W:112,H:80,FIRST:291};
-for(const n of ['boat_fish','boat_row','boat_dhow','gull_stand','gull_up','gull_down','crab','crates','driftwood','nets','pots','shells'])loadImg('yar_'+n,'assets/yar_'+n+'.png');
-Object.assign(NPC_H,{yar_boat_fish:1.5,yar_boat_row:.5,yar_boat_dhow:1.75,yar_gull_stand:.4,yar_gull_up:.34,yar_gull_down:.2,yar_crab:.2,yar_crates:.5,yar_driftwood:.32,yar_nets:.95,yar_pots:.5,yar_shells:.2});
+for(const n of ['tub','lavender','arch2','washing','olive','boat_fish','boat_row','boat_dhow','gull_stand','gull_up','gull_down','crab','crates','driftwood','nets','pots','shells'])loadImg('yar_'+n,'assets/yar_'+n+'.png');
+Object.assign(NPC_H,{yar_boat_fish:1.5,yar_boat_row:.5,yar_boat_dhow:1.75,yar_gull_stand:.4,yar_gull_up:.34,yar_gull_down:.2,yar_crab:.2,yar_crates:.5,yar_driftwood:.32,yar_nets:.95,yar_pots:.5,yar_shells:.2,yar_tub:.55,yar_lavender:.5,yar_arch2:1.55,yar_washing:.8,yar_olive:1.7});
 
 /* ---- wall and door pictures: the painted ones (ds_tex_yarwall ...) replace these plain tiles at start-up ---- */
 function makeYarArt(){
@@ -12335,6 +12366,9 @@ function makeYarArt(){
   const mk=(name,col)=>{const id=addTex(flat(col[0],col[1],col[2]));TEX[id].wh=1.7;const gid=TNF++;T_TILE[gid]=id;DS_TEXREG[name]=id;return gid};
   YR.gW=mk('yarwall',[226,222,212]);YR.gN=mk('yarnet',[220,214,200]);YR.gF=mk('yardrift',[140,128,112]);
   T_DOORS.yardoor=addTex(flat(70,100,150));DS_TEXREG.yardoor=T_DOORS.yardoor;
+  // the cottages are painted in faded pastels, and every door has its own colour
+  YR.gP=mk('yarpink',[200,160,160]);YR.gY=mk('yaryellow',[210,190,130]);YR.gG=mk('yargreen',[160,180,160]);YR.gB=mk('yarblue',[150,170,200]);YR.gR=mk('yarrose',[210,190,180]);YR.gO=mk('yarcoral',[220,150,120]);
+  for(let i=2;i<=7;i++){T_DOORS['yardoor'+i]=addTex(flat(90,80,70));DS_TEXREG['yardoor'+i]=T_DOORS['yardoor'+i]}
 }
 
 /* ---- the land: where the water starts, and how high the ground is ---- */
@@ -12401,7 +12435,8 @@ function yarBuild(){
   const plank=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;block[i]=0;h[i]=.08;rk[i]=0;fm[i]='2'}};
   plank(57,40,86,41);plank(84,36,86,45);
   // houses
-  const putBlock=(b,doorCell)=>{for(let y=b[1];y<=b[3];y++)for(let x=b[0];x<=b[2];x++){rows[y][x]=((x*3+y*5)%7===0)?'N':((x+y)%11===0)?'F':'W';block[y*W+x]=1}};
+  const PAINT=['P','Y','G','B','R','O','W','P','Y','B'];let bi=0;
+  const putBlock=(b,doorCell)=>{const base=PAINT[(bi++*7+3)%PAINT.length];for(let y=b[1];y<=b[3];y++)for(let x=b[0];x<=b[2];x++){rows[y][x]=((x*3+y*5)%9===0)?'W':base;block[y*W+x]=1}};
   for(const q of YR_HOUSES){putBlock(q.b);rows[q.d[1]][q.d[0]]=String(q.p)}
   for(const b of YR_PLAIN)putBlock(b);
   // decor, scenery, items
@@ -12432,15 +12467,31 @@ function yarBuild(){
   for(let n=0;n<40;n++){const x=58+hash2(n,6,36)*28,y=40.2+hash2(n,7,37)*1.6;sc('yar_gull_stand',x,y,.9+hash2(n,8,38)*.3)} // gulls on the pier
   for(const [cx,cy,r] of YR_ISLANDS)for(let n=0;n<4;n++){const a=hash2(cx,n,41)*TAU,x=cx+Math.cos(a)*r*.55,y=cy+Math.sin(a)*r*.55,i=(y|0)*W+(x|0);if(h[i]>.05&&h[i]<1)sc('yar_gull_stand',x,y,.9)}
   for(const [x,y] of [[35,34],[44,40],[22,41],[30,48]])items.push({k:'potion',x,y});
+  // the village is pretty: flower tubs by every door, lamps along the promenade, rose arches over the lanes, washing, olive trees
+  const lights=[];
+  const tryDc=(k,x,y,o)=>{if(free(x,y)&&!used.has(x+','+y)){dc(k,x,y,o);used.add(x+','+y);return true}return false};
+  const used=new Set(decor.map(d=>d.x+','+d.y));
+  for(const q of YR_HOUSES){const [fx,fy,ff]=q.f,horiz=ff===0||ff===2;if(horiz){tryDc('yar_tub',fx-1,fy);tryDc('yar_tub',fx+1,fy)}else{tryDc('yar_tub',fx,fy-1);tryDc('yar_tub',fx,fy+1)}}
+  for(let x=14;x<=54;x+=7){if(tryDc('lamp',x,38))lights.push([x,38]);if(tryDc('lamp',x+3,42))lights.push([x+3,42])}
+  for(const [x,y] of [[36,26],[36,48],[57,34],[57,28]])tryDc('yar_arch2',x,y);
+  for(const [x,y] of [[32,24],[20,57],[32,58],[47,57],[53,51],[20,24]])tryDc('yar_washing',x,y);
+  for(const [x,y] of [[10,36],[10,44],[55,50],[46,52],[34,51],[22,52],[10,32],[10,48],[55,25],[44,29]])tryDc('yar_olive',x,y);
+  for(const [x,y] of [[18,38],[24,42],[40,38],[45,42],[28,38],[50,42],[15,42],[33,42]])tryDc('yar_tub',x,y);
+  for(const [x,y] of [[20,38],[44,38],[30,42],[52,42],[26,38],[48,42]])tryDc('yar_bench',x,y);
+  const sc2=(k,x,y,s)=>scenery.push({k,wx:x+.5,wy:y+.5,sc:s||1,decor:{k,walk:true,x,y}});
+  for(let n=0;n<160;n++){const x=10+((hash2(n,11,41)*46)|0),y=18+((hash2(n,12,41)*44)|0);if(!free(x,y)||used.has(x+','+y))continue;
+    const nb=rows[y-1][x]!=='.'||rows[y+1][x]!=='.'||rows[y][x-1]!=='.'||rows[y][x+1]!=='.';if(!nb)continue; // along the foot of the walls
+    sc2(hash2(n,13,41)<.5?'yar_lavender':'yar_tub',x,y,.8+hash2(n,14,41)*.4)}
   // the level
   const lv={rows:rows.map(r=>r.join('')),start:{x:3,y:40,f:1},enemies:[],items,decor,scenery,
-    fmap:null,floorSet:['sand','sandpath','wood','bluesand','bluewater','pebA'],floor:'sand',ceil:'cloud',
+    fmap:null,floorSet:['sand','cobble','wood','bluesand','bluewater','pebA'],floor:'sand',ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:'Yarrim',label:'Yarrim',noExtras:true,diff:16,tele:{x:36,y:40},
-    chars:{D:LEVEL41_DATA.chars.D,W:YR.gW,N:YR.gN,F:YR.gF},lights:[],portals:[]};
+    chars:{D:LEVEL41_DATA.chars.D,W:YR.gW,N:YR.gN,F:YR.gF,P:YR.gP,Y:YR.gY,G:YR.gG,B:YR.gB,R:YR.gR,O:YR.gO},lights,portals:[]};
   const fmap=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmap.push(s)}
   lv.fmap=fmap;
   lv.portals[0]={to:YR.TUN,x:62,y:12,f:3,tex:'cave'};
-  for(const q of YR_HOUSES)lv.portals[q.p]={to:YR.FIRST+q.p-1,x:0,y:0,f:0,tex:'yardoor'};
+  const DOORS=['yardoor3','yardoor2','yardoor5','yardoor6','yardoor4','yardoor7','yardoor','yardoor2'];
+  for(const q of YR_HOUSES)lv.portals[q.p]={to:YR.FIRST+q.p-1,x:0,y:0,f:0,tex:DOORS[q.p-1]};
   LEVELS[YR.ID]=lv;LEVEL_NAMES[YR.ID]='Yarrim';
   TERRS[YR.ID]=yarTerrain(W,H,h,rk,block);
   // the buildings: each room is built when first entered (so the Khemetra pictures are loaded by then); the doors know where in the room you arrive
@@ -12571,7 +12622,7 @@ function yrSprites(out){
   });
   for(let i=0;i<18;i++){
     let cx=[56,60,66,70,76,50,84,62,72,90,58,68,80,64,74,52,88,66][i],cy=[30,44,38,48,36,52,42,26,40,34,56,30,50,58,26,40,46,32][i];const r=2.5+i%5*1.1,sp=.5+(i%4)*.12,a=t*sp+i*1.7;
-    if(LEVEL!==YR.ID){const S=SEA[LEVEL];cx=S.cx+Math.cos(i*1.7)*(5+i%6*3);cy=S.cy+Math.sin(i*1.7)*(4+i%5*3)}
+    if(LEVEL!==YR.ID){const S=SEA[LEVEL];if(!S)return;cx=S.cx+Math.cos(i*1.7)*(5+i%6*3);cy=S.cy+Math.sin(i*1.7)*(4+i%5*3)}
     const img=((t*3.4+i)|0)%2?up:dn;
     out.push({x:cx+Math.cos(a)*r,y:cy+Math.sin(a*1.1)*r,img,w:.5,bob:1.3+(i%4)*.35+Math.sin(t*1.7+i)*.18,decor:{walk:true,k:'yar_gull_fly'}});
   }
@@ -12601,8 +12652,8 @@ function yarGulls(){ // the high ones, wheeling over the water
    King Osric at Oldhaven.
    Quests: mq1 mq2 (Khemetra), yar2 .. yar7 (the road to Yarrim), vq1 .. vq5 (the islands and home).
    ========================================================================== */
-for(const n of ['ship_dawn','ship_heron','palms','tent','arch','wreck','runestone','crystals','bones','altar','p_king','p_corvane','p_maeve','p_aldous','p_ketra','p_isolde'])loadImg('yar_'+n,'assets/yar_'+n+'.png');
-Object.assign(NPC_H,{yar_ship_dawn:2.6,yar_ship_heron:2.8,yar_palms:1.7,yar_tent:1.0,yar_arch:1.6,yar_wreck:1.7,yar_runestone:1.4,yar_crystals:.9,yar_bones:.55,yar_altar:.95,yar_p_king:1,yar_p_corvane:1,yar_p_maeve:.95,yar_p_aldous:.92,yar_p_ketra:.95,yar_p_isolde:.9});
+for(const n of ['bench','ship_dawn','ship_heron','palms','tent','arch','wreck','runestone','crystals','bones','altar','p_king','p_corvane','p_maeve','p_aldous','p_ketra','p_isolde'])loadImg('yar_'+n,'assets/yar_'+n+'.png');
+Object.assign(NPC_H,{yar_bench:.62,yar_ship_dawn:2.6,yar_ship_heron:2.8,yar_palms:1.7,yar_tent:1.0,yar_arch:1.6,yar_wreck:1.7,yar_runestone:1.4,yar_crystals:.9,yar_bones:.55,yar_altar:.95,yar_p_king:1,yar_p_corvane:1,yar_p_maeve:.95,yar_p_aldous:.92,yar_p_ketra:.95,yar_p_isolde:.9});
 Object.assign(ENEMY_DEF,{
   assassin:{name:'Assassin',hp:70,dmg:[9,14],hit:.8,w:.5,img:'assassin',xp:140,gold:[40,90],speed:1,verb:'stabs',aboveParty:1},
   cinder:{name:'Cinder Guardian',hp:260,dmg:[11,17],hit:.8,w:1.3,img:'yar_crystals',xp:900,gold:[200,320],speed:1,verb:'smashes',aboveParty:2},
@@ -12641,7 +12692,10 @@ function mqStalk(){
   msg(MQ_STALK[(F.mqAtt-1)%MQ_STALK.length],'#e8a090');
 }
 function mqTick(){
-  const F=G.flags;if(F.mqDay0===undefined||G.state!=='play')return;
+  const F=G.flags;
+  if(typeof storyTickDays==='function'&&G.state==='play'&&G.time>(MQ._s||0)){MQ._s=G.time+3;try{storyTickDays()}catch(e){}}
+  if(LEVEL===306&&F.courtFight&&!F.pardoned&&!G.cut&&!G.enemies.some(e=>e.t==='chancellor'&&e.hp>0)&&typeof oldhavenPardon==='function')oldhavenPardon();
+  if(F.mqDay0===undefined||G.state!=='play')return;
   const t=G.time;if(t<(MQ._t||0))return;MQ._t=t+4;
   if(!F.kingBack&&dayNum()>=F.mqDay0+3){F.kingBack=1;msg('Trumpets sound over Khemetra. The king has come home. He will see you in the throne room.','#ffe36a');sfx('level')}
   if(LEVEL===44&&!F.voyage&&(F.mqAtt||0)<9&&!G.talk&&!G.cut&&!G.menu&&!(G.inv&&G.inv.open)&&!G.loot&&!(G.timers&&G.timers.length)&&!hostileNear()){
@@ -12760,8 +12814,8 @@ khNpc('yr_ship','The Dawn Walker','yar_ship_dawn',()=>seaChart());
      300 Saltbarrow (pirates)  301 The Isle of Bells (a drowned abbey)  302 Cinder Isle (a volcano)  303 Last Light (a ruined beacon)
      304 Oldhaven Quay (the harbour of the king's city, where this part of the story ends)
    ========================================================================== */
-const yarSea=n=>n===290||(n>=300&&n<=304);
-const SEA_TINT={300:[1.05,.98,.9],301:[.8,.9,.82],302:[.55,.5,.52],303:[.85,.88,.96],304:[.96,.93,.88]};
+const yarSea=n=>n===290||(n>=300&&n<=305);
+const SEA_TINT={305:[.96,.93,.88],300:[1.05,.98,.9],301:[.8,.9,.82],302:[.55,.5,.52],303:[.85,.88,.96],304:[.96,.93,.88]};
 const SEA={
   300:{name:'Saltbarrow',label:'Saltbarrow',cx:50,cy:40,rx:27,ry:20,peak:2.2,pow:1.4,seed:31,diff:17,
     floors:['sand','whiteSand','wood','bluesand','bluewater','pebA'],hills:[[34,30,6,2.8],[68,50,5,2.4]],
@@ -12806,7 +12860,7 @@ function seaBuild(id){
   // walls and gate (Oldhaven)
   for(const [x0,y0,x1,y1,ch] of sp.walls||[])for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){rows[y][x]=ch;block[y*W+x]=1}
   const portals=[];
-  if(sp.gate){rows[sp.gate[1]][sp.gate[0]]='1';block[sp.gate[1]*W+sp.gate[0]]=1;portals[1]={to:44,x:394,y:200,f:3,tex:'citygate',req:'oldhavenOpen',lock:'The great gate of Oldhaven is barred. The herald says the king\'s court meets at noon, and that is where this part of the story ends for now.'}}
+  if(sp.gate){rows[sp.gate[1]][sp.gate[0]]='1';block[sp.gate[1]*W+sp.gate[0]]=1;portals[1]={to:305,x:45,y:62,f:0,tex:'citygate',req:'oldhavenOpen',lock:'The great gate of Oldhaven is barred until noon. Speak to the herald.'}}
   const spot=(dx,dy)=>{for(let r=0;r<14;r++)for(let yy=-r;yy<=r;yy++)for(let xx=-r;xx<=r;xx++){if(Math.max(Math.abs(xx),Math.abs(yy))!==r)continue;const x=cx+dx+xx,y=cy+dy+yy;if(x<2||y<2||x>=W-2||y>=H-2)continue;if(!block[y*W+x]&&rows[y][x]==='.')return [x,y]}return null};
   // the pier and the ship
   let sy=-1;for(let y=H-2;y>0;y--)if(!block[y*W+cx]&&h[y*W+cx]>-.06){sy=y;break}
@@ -12897,9 +12951,331 @@ function seaSpawn(t,r,alert){ // a creature appears a few cells from the party
 }
 function seaEnter(n){
   const F=G.flags;
-  if(n===304&&!F.oldhavenSeen){F.oldhavenSeen=1;startCut('oldhavenArrive',()=>{if(qSt('vq5')===null)qAccept('vq5');if(qReady('vq5'))qTurnIn('vq5');F.act3=1;msg('The gate of Oldhaven stays shut until noon. To be continued.','#ffe36a')})}
+  if(n===304&&!F.oldhavenSeen){F.oldhavenSeen=1;startCut('oldhavenArrive',()=>{if(qSt('vq5')===null)qAccept('vq5');if(qReady('vq5'))qTurnIn('vq5');F.act3=1;msg('The gate of Oldhaven stays shut until noon. Speak to the herald.','#ffe36a')})}
+  if(typeof ohEnter==='function')ohEnter(n);
   else if(n>=300&&n<=303&&!(F.seaArr&&F.seaArr[n])){(F.seaArr=F.seaArr||{})[n]=1;msg({300:'Saltbarrow. A pirate haven of sand, wrecks and canvas tents. Gulls cry over the water.',301:'The Isle of Bells. Mist over a drowned abbey. Somewhere in the grey, a bell is moving in the wind.',302:'Cinder Isle. Black rock and red glow. The mountain breathes.',303:'Last Light. A scrap of rock at the end of the chart. A small lamp burns in a hut on the shore.'}[n],'#a8d8ff')}
 }
+
+/* ---- src/desert/oldhaven.js ---- */
+/* ==========================================================================
+   OLDHAVEN, the city of King Osric. Reached from the quay (304) through a gate that opens at noon.
+     305 Oldhaven (the city)   306 The Court of King Osric   307 The King's Rest (inn)   308 Oldhaven Arms (smith)
+     309 The Apothecary   310 The Chapel of Saint Brannoch
+   The end of this part of the story is in the court: the master ledger is read, the chancellor turns on the king, and the warrant is torn up.
+   ========================================================================== */
+for(const n of ['osric','vance','aldwyn','rguard'])loadImg('yar_p_'+n,'assets/yar_p_'+n+'.png');
+Object.assign(NPC_H,{yar_p_osric:1,yar_p_vance:1,yar_p_aldwyn:1,yar_p_rguard:1});
+Object.assign(ENEMY_DEF,{
+  chancellor:{name:'Chancellor Vance',hp:300,dmg:[11,17],hit:.82,w:.6,img:'yar_p_vance',xp:1600,gold:[400,700],speed:1,verb:'strikes',aboveParty:3},
+  rguard:{name:'Royal Guard',hp:120,dmg:[9,14],hit:.78,w:.55,img:'yar_p_rguard',xp:300,gold:[40,90],speed:1,verb:'cuts',aboveParty:1}
+});
+const OH={W:90,H:70,ID:305,COURT:306,ROOM:307};
+vq('vq6','The Court of King Osric','King Osric','At noon the party is brought before King Osric with the master ledger. Make him read it.',1,khFlag('pardoned'),{gold:6000,xp:25000,items:['potion4']});
+const OH_HOUSES=[
+  {b:[20,36,30,44],p:3,d:[25,36],f:[25,35,0],room:'inn',name:'The King\'s Rest',keeper:'oh_inn'},
+  {b:[58,36,68,44],p:4,d:[63,36],f:[63,35,0],room:'shop',name:'Oldhaven Arms',keeper:'oh_smith'},
+  {b:[20,48,28,56],p:5,d:[24,48],f:[24,47,0],room:'shop',name:'The Apothecary',keeper:'oh_apoth'},
+  {b:[60,48,70,56],p:6,d:[65,48],f:[65,47,0],room:'prayer',name:'The Chapel of Saint Brannoch',keeper:'oh_priest'}
+];
+const OH_PLAIN=[[12,22,24,30],[28,22,40,30],[50,22,62,30],[66,22,78,30],[12,48,17,56],[32,48,40,58],[48,48,56,58],[74,40,80,50]];
+function ohBuild(){
+  if(LEVELS[OH.ID])return;
+  const W=OH.W,H=OH.H,N=W*H;
+  const rows=[];for(let y=0;y<H;y++){const r=[];for(let x=0;x<W;x++)r.push((x===0||y===0||x===W-1||y===H-1)?'D':'.');rows.push(r)}
+  const h=new Float32Array(N),rk=new Float32Array(N),block=new Uint8Array(N),fm=new Array(N).fill('0');
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;h[i]=.45+.05*tsmooth(x/7,y/7,81);fm[i]='0'}
+  const wall=(x0,y0,x1,y1,ch)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){rows[y][x]=ch;block[y*W+x]=1}};
+  wall(4,4,85,5,'C');wall(4,64,85,65,'C');wall(4,4,5,65,'C');wall(84,4,85,65,'C'); // the city wall
+  const street=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(!block[y*W+x])fm[y*W+x]='1'};
+  street(43,17,47,63);street(10,32,80,34);street(10,46,80,48);street(34,22,36,31);
+  for(const q of OH_HOUSES){for(let y=q.b[1];y<=q.b[3];y++)for(let x=q.b[0];x<=q.b[2];x++){rows[y][x]=['a','b','c'][(x+y*2)%3];block[y*W+x]=1}rows[q.d[1]][q.d[0]]=String(q.p)}
+  for(const b of OH_PLAIN)for(let y=b[1];y<=b[3];y++)for(let x=b[0];x<=b[2];x++){rows[y][x]=['a','b','c'][(x*2+y)%3];block[y*W+x]=1}
+  wall(30,6,60,16,'C'); // the palace, with its gate in the south face
+  rows[16][45]='1';
+  rows[65][45]='2';block[65*W+45]=1;rows[64][45]='.';block[64*W+45]=0;rows[64][44]='.';block[64*W+44]=0;rows[64][46]='.';block[64*W+46]=0;
+  for(let x=43;x<=47;x++){rows[64][x]='.';block[64*W+x]=0;rows[65][x]=x===45?'2':'C'}
+  const decor=[],scenery=[],used=new Set();
+  const put=(k,x,y,o)=>{if(x<2||y<2||x>=W-2||y>=H-2||rows[y][x]!=='.'||block[y*W+x]||used.has(x+','+y))return false;decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}));used.add(x+','+y);return true};
+  put('fountain',45,40);put('well',38,40);put('well',52,40);
+  for(const [k,x,y] of [['cart',31,38],['barrel',32,38],['crate',33,38],['crate',55,38],['barrel',56,38],['cart',57,38],['barrel',31,43],['crate',57,43]])put(k,x,y);
+  for(let x=14;x<=78;x+=8){put('lamp',x,31);put('lamp',x+3,49)}
+  for(const [id,face,x,y] of [['oh_cap','yar_p_aldwyn',45,19],['oh_guardA','yar_p_rguard',43,18],['oh_guardB','yar_p_rguard',47,18],['oh_g1','guard',45,61],['oh_g2','guard',43,61],['oh_m1','merchant',40,38],['oh_m2','baker',50,38],['oh_w1','peasantW',36,42],['oh_w2','peasantM',54,42],['oh_k1','child',46,44],['oh_o1','oldman',40,44],['oh_s1','scribe',48,36],['oh_pr','priest',44,50]])put(face,x,y,{block:true,deco:false,npc:id,sc:1});
+  for(const [id,face,x,y] of [['oh_shop1','smith',22,34],['oh_shop2','merchant',66,34]])put(face,x,y,{block:true,deco:false,npc:id,sc:1});
+  const lv={rows:rows.map(r=>r.join('')),start:{x:45,y:62,f:0},enemies:[],items:[{k:'potion',x:44,y:44},{k:'potion',x:48,y:36}],decor,scenery,
+    fmap:null,floorSet:['cobble','cobble','wood','bluesand','bluewater','pebA'],floor:'cobble',ceil:'cloud',day:.98,outdoor:true,amb:.9,name:'Oldhaven',label:'Oldhaven',noExtras:true,diff:25,tele:{x:45,y:60},
+    chars:{D:LEVEL41_DATA.chars.D,C:LEVEL41_DATA.chars.C},lights:[],portals:[]};
+  const fmap=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmap.push(s)}lv.fmap=fmap;
+  lv.portals[1]={to:OH.COURT,x:15,y:21,f:0,tex:'tgate',req:'courtOpen',lock:'The great gate of the palace is shut. The gate-captain, Aldwyn, can tell you when the court sits.'};
+  lv.portals[2]={to:304,x:0,y:0,f:2,tex:'tgate'};
+  const START={inn:[6,7],hall:[5,6],shop:[5,6],prayer:[4,6],home:[4,4]};
+  for(const q of OH_HOUSES){
+    const id=OH.ROOM+q.p-3,st=START[q.room];
+    lv.portals[q.p]={to:id,x:st[0],y:st[1],f:0,tex:q.room==='inn'?'inn':q.room==='prayer'?'hall':'shop'};
+    KH_LAZY[id]=()=>{if(LEVELS[id])return;const L=khRoom({id:'oh'+q.p,name:q.name,room:q.room,keeper:q.keeper},id,{to:OH.ID,x:q.f[0],y:q.f[1],f:q.f[2]}).level;LEVELS[id]=L;LEVEL_NAMES[id]=q.name};
+  }
+  LEVELS[OH.ID]=lv;LEVEL_NAMES[OH.ID]='Oldhaven';TERRS[OH.ID]=yarTerrain(W,H,h,rk,block);
+  const q4=LEVELS[304];if(q4)lv.portals[2].x=q4.start.x,lv.portals[2].y=q4.start.y;
+}
+KH_LAZY[OH.ID]=()=>{seaBuild(304);ohBuild()};LEVEL_NAMES[OH.ID]='Oldhaven';
+for(const q of OH_HOUSES){const id=OH.ROOM+q.p-3,stub=()=>{seaBuild(304);ohBuild();if(!LEVELS[id]&&KH_LAZY[id]!==stub)KH_LAZY[id]()};KH_LAZY[id]=stub;LEVEL_NAMES[id]=q.name}
+/* ---- the court ---- */
+function ohBuildCourt(){
+  const W=31,H=24,g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('w'));
+  for(let y=1;y<=21;y++)for(let x=1;x<=29;x++)g[y][x]='.';
+  g[H-1][15]='0';g[22][15]='.';
+  const rows=g.map(r=>r.join(''));
+  const decor=[],put=(role,x,y,o)=>{const k=khProp(role);if(IMG[k]&&k.startsWith('kh_'))NPC_H[k]=khPropH(role);decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}))};
+  const npc=(id,k,x,y,o)=>decor.push(Object.assign({k,x,y,block:true,npc:id,sc:1},o||{}));
+  put('throne',15,2);put('banner',11,2);put('banner',19,2);put('banner',6,2);put('banner',24,2);
+  for(const x of [5,10,20,25])put('statue',x,6);
+  for(const [x,y] of [[8,9],[22,9],[8,14],[22,14]])put('brazier',x,y);
+  for(const x of [3,27])for(const y of [10,16])put('candle',x,y);
+  npc('oh_king','yar_p_osric',15,4);npc('oh_vance','yar_p_vance',19,5);npc('oh_halb','mayor',11,5);
+  return {rows,start:{x:15,y:21,f:0},decor,lights:[[8,4],[15,5],[22,4],[8,10],[22,10],[8,16],[22,16],[15,18]]};
+}
+KH_LAZY[OH.COURT]=()=>{
+  if(LEVELS[OH.COURT])return;const c=ohBuildCourt();
+  LEVELS[OH.COURT]={rows:c.rows,start:c.start,enemies:[],items:[],decor:c.decor,day:0,amb:.75,floor:'kh2',ceil:'beam',name:'The Court of King Osric',label:'Royal Court',lights:c.lights,
+    portals:[{to:OH.ID,x:45,y:18,f:2,tex:'tgate'}],diff:25,noExtras:true};
+  LEVEL_NAMES[OH.COURT]='The Court of King Osric';
+};
+LEVEL_NAMES[OH.COURT]='The Court of King Osric';
+/* ---- people ---- */
+khNpc('oh_cap','Captain Aldwyn, of the Gate','yar_p_aldwyn',()=>{
+  const F=G.flags;
+  if(F.pardoned)return say('The warrant is void, and I am glad of it. I have never liked being told to chase honest people. The court is open to you.',[BYE]);
+  if(F.courtOpen)return say('The court is sitting. Go in. Say your piece, and let the king read what you carry.',[BYE]);
+  if(qSt('vq4')!=='done')return say('The court sits at noon, and not for armed strangers with a price on their heads. If you carry something the king should read, go and get it first.',[BYE]);
+  return say('The court sits at noon. Armed parties are not admitted. But I hear there is a ledger, and a scribe called Isolde. Is it true you have it?',[['We have the master ledger, whole, in Isolde\'s hand.',()=>{F.courtOpen=1;return say('Then the king will want to see it, whatever Chancellor Vance says. Go in. The doors are open. I have not seen you, and I never saw you on the quay, and I will stand outside the door with my halberd and listen.',[BYE])}],['Not yet.',()=>null]])
+},{q:'vq6'});
+khNpc('oh_guardA','A royal guard','yar_p_rguard',()=>say('Eyes front. The gate-captain talks to petitioners. I just keep the door.',[BYE]));
+khNpc('oh_guardB','A royal guard','yar_p_rguard',()=>say('If you are the four from the quay, keep your hands where I can see them. I am told to be polite. I do not always do what I am told.',[BYE]));
+khNpc('oh_g1','A gate guard','guard',()=>say('Oldhaven. Walk, do not run, and do not draw anything in the street.',[BYE]));
+khNpc('oh_g2','A gate guard','guard',()=>say('Twenty thousand crowns a head. I could have a very nice house. I could. Please do not make this difficult.',[BYE]));
+khNpc('oh_m1','A merchant','merchant',()=>say(G.flags.pardoned?'Is it true? The king tore up the warrant in open court? Then the world is round after all. I have been selling lamp oil to the watch for years, and I never liked their faces.':'The whole city is talking about four strangers. A ransom! I would not mind five minutes in a back room with them. For the reward, you understand.',[BYE]));
+khNpc('oh_m2','A baker','baker',()=>say('Fresh rolls. Not for sale to anyone on the king\'s list. Which is everyone this week, apparently.',[BYE]));
+khNpc('oh_w1','A washerwoman','peasantW',()=>say('The chancellor has been buying silence in this city for years. Everyone knows. Nobody says. Here, in the lane, anyone can say anything, because it is all very quiet.',[BYE]));
+khNpc('oh_w2','A porter','peasantM',()=>say('The king is old, and the chancellor is clever. That is all you need to know about Oldhaven.',[BYE]));
+khNpc('oh_k1','A child','child',()=>say('Is it true that the Dawn Walker has a gull figurehead? My brother says it has a lady. I say it is a gull.',[BYE]));
+khNpc('oh_o1','An old soldier','oldman',()=>say('Osric was a good king, once. The old kind, who knew the names of his captains. Then he grew tired, and let the clever ones sign for him.',[BYE]));
+khNpc('oh_s1','A city scribe','scribe',()=>say('I keep the court roll. Today the chancellor ordered the roll closed to the public. I have never heard that order before. I find it interesting.',[BYE]));
+khNpc('oh_pr','A priest','priest',()=>say('Oldhaven has a chapel for every kind of sinner. Mine is for the tired ones.',[BYE]));
+khShop('oh_shop1','Bram, the smith','smith',"Oldhaven Arms",'Steel, oil and a hot fire. Whatever the court says about you, steel does not ask.','arms');
+khShop('oh_shop2','Hester, the grocer','merchant','The King\'s Larder','Bread, cheese and travelling food. The king\'s crest on the barrel makes it taste better.','food');
+khInn('oh_inn','Wynn, innkeeper of the King\'s Rest','innkeeper','The King\'s Rest',30,'The King\'s Rest. Clean beds, hot water, a fire, and no questions. A room is 30 gold, and the soup is free.');
+khShop('oh_smith','Bram, at the Oldhaven Arms','smith','Oldhaven Arms','Swords, axes and plate. All of it made in the shop behind me.','arms');
+khShop('oh_apoth','Maud, the apothecary','merchant','The Apothecary','Draughts for the body and tinctures for the mind. Tell me what ails you.','potion');
+khNpc('oh_priest','Sister Margery, of the Chapel','priest',()=>say('Saint Brannoch watched over travellers. I watch over the ones who return. Would you like a blessing before you go to the court?',[['Ask for a blessing.',()=>{try{afflCure('cursed',-1,true)}catch(e){}msg('A calm settles on the party.','#a8d8ff');return say('Go with grace.',[BYE])}],BYE]));
+khNpc('oh_king','King Osric','yar_p_osric',()=>say(G.flags.pardoned?'You have done me and my kingdom a greater service than any lord of mine. Ask what you will. The road is long, and there is more unwritten in that ledger than a single reading can hold.':'Speak, since you came such a long way.',[BYE]));
+khNpc('oh_vance','Chancellor Vance','yar_p_vance',()=>say('Majesty, they are lying, as every forger does.',[BYE]));
+khNpc('oh_halb','Mayor Halbrecht','mayor',()=>say(G.flags.pardoned?'The king has taken me for a liar. A pity. I was so good at it.':'The ledger is a forgery, your majesty! Do not listen!',[BYE]));
+/* ---- the noon gate on the quay, the court, and the end ---- */
+function ohWaitNoon(){const m=G.clock%1440;if(m<720)G.clock+=720-m;G.flags.oldhavenOpen=1;msg('Noon bells ring over Oldhaven. The gate on the quay swings open.','#ffe36a');sfx('level')}
+(function(){
+  const n=NPCS.oh_herald;if(!n||n._wn)return;n._wn=1;
+  n.root=()=>{
+    const F=G.flags;
+    if(F.oldhavenOpen||F.pardoned)return say('The gate stands open. Walk, do not run.',[BYE]);
+    return say('The king\'s court meets at noon. The gate is barred until the bells ring. Wait on the quay and do not touch your swords.',[['Wait for noon.',()=>{ohWaitNoon();return say('You wait on the stones while the harbour goes about its business around you. Then the noon bells ring, and the gate groans open.',[BYE])}],['Not yet.',()=>null]]);
+  };
+})();
+Object.assign(CUTS,{
+ oldhavenCourt:()=>[
+  {text:'The great doors of the Court of Oldhaven open on a long hall of pale stone and blue banners. King Osric sits on a plain silver throne, older than the portraits of him. Chancellor Vance stands at his right hand, smiling, with a scroll in his ink-stained fingers. Mayor Halbrecht of Ironhill waits in chains by the dais.'},
+  {who:'King Osric',text:'So these are the four forgers. You came a very long way to be hanged.'},
+  {who:hn(0),text:'We came to be heard, majesty. We carry the master ledger, in the hand of your own scribe, Isolde.'},
+  {who:'Chancellor Vance',text:'The scribe Isolde is a thief and a liar, your majesty. Whatever these people carry, it was written in a garret by a woman who fled the court with the king\'s silver.'},
+  {who:hn(1),text:'She fled because the man who ordered the tolls was your Warden, Lord Corvane. The tolls, the warrant, the knives sent across the sea. Read the last page, majesty. It names who he paid.'},
+  {who:'King Osric',text:'Corvane is dead?'},
+  {who:hn(2),text:'He died on an island at the end of the Vaast Sea, with a sword in his hand, and the third page of the ledger in an altar at his back.'},
+  {text:'The king takes the ledger. The court is silent as he turns the pages. His hands are steady until the last one.'},
+  {who:'King Osric',text:'Every toll. Every year. And on the last page, in Corvane\'s own hand, a name that is not mine. Vance. My chancellor.'},
+  {who:'Chancellor Vance',text:'Your majesty, a forger\'s fancy! Guards! These people have come to murder the king! Seize them!'},
+  {text:'Silver armour rings on stone. The guards at the doors draw their swords, and Vance throws off his chain of office. In his chains, Halbrecht begins to laugh.'},
+  {who:'King Osric',text:'Guards of the Crown, to me! Those who stand with Vance, die with him!'}
+ ],
+ oldhavenPardon:()=>[
+  {text:'Vance falls on the steps of the dais, and the hall goes quiet. The guards who stood with him lower their swords one by one.'},
+  {who:'King Osric',text:'I have kept faith with the wrong men for twenty years. And four people I called forgers have kept it for me.'},
+  {who:'King Osric',text:'By my seal and my crown, the warrant against you is void, and the ransom on your heads is lifted. Let it be read in every town from Oldhaven to Thornwick. And let Mayor Halbrecht of Ironhill see the inside of the gaol he built for honest people.'},
+  {who:'Mayor Halbrecht',text:'Majesty, I only did what I was told!'},
+  {who:'King Osric',text:'Yes. That is what is wrong with you.'},
+  {who:hn(0),text:'We ask nothing, majesty, except to walk our own road without a price on it.'},
+  {who:'King Osric',text:'Then it is yours, and the gates of Oldhaven with it. But the road is long, and there is more written in that ledger than one reading can hold. Corvane was not the only man who wrote letters.'},
+  {text:'On the table behind the king, Ishkander\'s letter lies open, the seal still unbroken. The road home is clear. The road onward is not.'}
+ ]
+});
+function ohCourtFight(){
+  const F=G.flags;F.courtFight=1;
+  const v=G.decor.find(d=>d.npc==='oh_vance');if(v)v.hidden=true;
+  seaSpawn('chancellor',3,true);for(let i=0;i<4;i++)seaSpawn('rguard',5,true);
+  msg('Chancellor Vance draws a sword from under his robe.','#ff8a7a');
+}
+function oldhavenPardon(){
+  const F=G.flags;if(F.pardoned)return;F.pardoned=1;F.wanted=0;
+  for(const e of G.enemies)if(e.t==='rguard'&&e.hp>0){e.hp=0;e.dying=.55}
+  const hb=G.decor.find(d=>d.npc==='oh_halb');if(hb)hb.hidden=true;
+  startCut('oldhavenPardon',()=>{if(qSt('vq6')===null)qAccept('vq6');if(qReady('vq6'))qTurnIn('vq6');msg('The warrant is void. The ransom is lifted.','#ffe36a');sfx('win')});
+}
+function ohEnter(n){
+  const F=G.flags;
+  if(n===OH.COURT){
+    const k=G.decor.find(d=>d.npc==='oh_halb');if(k&&F.pardoned)k.hidden=true;const v=G.decor.find(d=>d.npc==='oh_vance');if(v&&(F.courtFight))v.hidden=true;
+    if(!F.courtSeen){F.courtSeen=1;if(qSt('vq6')===null)qAccept('vq6');startCut('oldhavenCourt',ohCourtFight)}
+  }
+}
+
+/* ---- src/desert/seasound.js ---- */
+/* ==========================================================================
+   THE SOUND OF THE SEA. Made in the browser, no recordings: surf that swells and hisses back, gulls crying near and far, and the
+   creak of rigging and the knock of halyards against masts when the party is near the water and the boats. Quieter inland.
+   ========================================================================== */
+const SEAS={src:null,t:0,last:0,nextGull:0,nextCreak:0,nextClink:0,nextLap:0,p:Math.random()*6.3,prox:.3,proxT:0};
+function seaProx(){ // 1 at the water's edge, falling to .15 deep inland
+  const T=TERRS[LEVEL];if(!T)return .5;const x=G.P.x+.5,y=G.P.y+.5;
+  for(let k=0;k<6;k++){const r=[2,5,9,14,22,32][k];for(let a=0;a<8;a++){const xx=Math.round(x+Math.cos(a*.785)*r),yy=Math.round(y+Math.sin(a*.785)*r);if(xx<1||yy<1||xx>=T.W-1||yy>=T.H-1)continue;if(T.h[yy*T.W+xx]<-.1)return Math.max(.15,1-k*.16)}}
+  return .15;
+}
+function seaRigging(){ // how close the party is to the boats and the pier
+  if(LEVEL===290)return clamp((G.P.x-46)/12,0,1);
+  const L=LEVELS[LEVEL];if(!L||!L.start||!SEA[LEVEL])return 0;
+  return clamp(1-Math.hypot(G.P.x-L.start.x,G.P.y-L.start.y)/16,0,1);
+}
+function gullCry(a){
+  const t=AC.currentTime,pan=Math.random()*2-1,vol=(.035+.09*a)*4*(.5+Math.random()*.5)*SFXM,n=2+((Math.random()*3)|0);let base=1500+Math.random()*650;
+  const out=AC.createGain();out.gain.value=vol;
+  if(AC.createStereoPanner){const pn=AC.createStereoPanner();pn.pan.value=pan;out.connect(pn);pn.connect(MASTER)}else out.connect(MASTER);
+  let at=t;
+  for(let i=0;i<n;i++){
+    const d=.15+Math.random()*.2,f0=base*(1+.12*Math.random()),f1=f0*(.58+.1*Math.random());
+    const o=AC.createOscillator(),bp=AC.createBiquadFilter(),hp=AC.createBiquadFilter(),g=AC.createGain(),vib=AC.createOscillator(),vg=AC.createGain();
+    o.type='sawtooth';o.frequency.setValueAtTime(f0*.85,at);o.frequency.linearRampToValueAtTime(f0*1.1,at+d*.2);o.frequency.exponentialRampToValueAtTime(f1,at+d); // a quick rise and a long fall: "keow"
+    vib.frequency.value=34+Math.random()*8;vg.gain.value=f0*.05;vib.connect(vg);vg.connect(o.frequency);
+    bp.type='bandpass';bp.frequency.value=f0*1.35;bp.Q.value=1.5;hp.type='highpass';hp.frequency.value=700;
+    g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(1,at+.025);g.gain.exponentialRampToValueAtTime(.001,at+d);
+    o.connect(hp);hp.connect(bp);bp.connect(g);g.connect(out);o.start(at);vib.start(at);o.stop(at+d+.05);vib.stop(at+d+.05);
+    at+=d+.04+Math.random()*.07;base*=.96;
+  }
+}
+function rigCreak(v){ // wood and rope working against each other: a slow groan with a stick-and-slip flutter
+  const t=AC.currentTime,d=.5+Math.random()*.9,o=AC.createOscillator(),lfo=AC.createOscillator(),lg=AC.createGain(),am=AC.createGain(),bp=AC.createBiquadFilter(),g=AC.createGain();
+  const f=100+Math.random()*90;o.type='sawtooth';o.frequency.setValueAtTime(f,t);o.frequency.linearRampToValueAtTime(f*(1.15+Math.random()*.5),t+d);
+  lfo.type='square';lfo.frequency.value=13+Math.random()*10;lg.gain.value=.5;am.gain.value=.5;lfo.connect(lg);lg.connect(am.gain);
+  bp.type='bandpass';bp.frequency.setValueAtTime(480+Math.random()*300,t);bp.frequency.linearRampToValueAtTime(850+Math.random()*450,t+d);bp.Q.value=7;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v*.7*SFXM,t+.09);g.gain.linearRampToValueAtTime(v*.42*SFXM,t+d*.7);g.gain.linearRampToValueAtTime(0,t+d);
+  o.connect(am);am.connect(bp);bp.connect(g);g.connect(MASTER);o.start(t);lfo.start(t);o.stop(t+d+.05);lfo.stop(t+d+.05);
+}
+function rigClink(v){ // a halyard slapping the mast: two quick taps, wood and a little metal
+  const j=Math.random();
+  nz(.05,.25*v,'bandpass',900+j*300,500,0);tone(1800+j*700,1300,.08,'triangle',.14*v,0);
+  if(Math.random()<.6){nz(.045,.18*v,'bandpass',800,450,.13+Math.random()*.1);tone(1500+j*500,1100,.07,'triangle',.1*v,.13)}
+}
+function seaSoundTick(){
+  if(!AC||!NB)return;
+  const now=AC.currentTime,dt=Math.min(.5,Math.max(0,now-SEAS.last));SEAS.last=now;
+  const on=G.state==='play'&&!G.mute&&SNDOPT.amb&&yarSea(LEVEL);
+  if(!SEAS.src){
+    const mk=(type,f,q)=>{const s=AC.createBufferSource(),fl=AC.createBiquadFilter(),g=AC.createGain();s.buffer=NB;s.loop=true;s.loopStart=Math.random()*.5;fl.type=type;fl.frequency.value=f;fl.Q.value=q;g.gain.value=0;s.connect(fl);fl.connect(g);g.connect(MASTER);s.start();return {s,f:fl,g}};
+    SEAS.src=mk('lowpass',400,.7);SEAS.hush=mk('bandpass',2600,.5);SEAS.deep=mk('lowpass',160,.6);
+  }
+  SEAS.t+=dt;
+  if(now>SEAS.proxT){SEAS.prox=on?seaProx():0;SEAS.proxT=now+.6}
+  const a=on?SEAS.prox:0;
+  const ph=SEAS.t*.62+SEAS.p+.8*Math.sin(SEAS.t*.19);
+  const w=Math.max(0,Math.sin(ph)),wave=w*w,hs=Math.max(0,Math.sin(ph-.9)); // a wave builds, breaks, and hisses back up the sand
+  SEAS.src.g.gain.setTargetAtTime(a*(.08+.5*wave),now,.35);SEAS.src.f.frequency.setTargetAtTime(240+760*wave,now,.3);
+  SEAS.hush.g.gain.setTargetAtTime(a*(.015+.15*hs*hs),now,.4);SEAS.hush.f.frequency.setTargetAtTime(2200+1400*hs,now,.4);
+  SEAS.deep.g.gain.setTargetAtTime(a*.22,now,1.2); // the long low roar of the open water
+  if(!on)return;
+  if(now>SEAS.nextGull){SEAS.nextGull=now+(2.5+Math.random()*7)/(.5+a);gullCry(Math.max(.25,a))}
+  const rg=seaRigging();
+  if(rg>.05){
+    if(now>SEAS.nextCreak){SEAS.nextCreak=now+3+Math.random()*7;rigCreak(rg)}
+    if(now>SEAS.nextClink){SEAS.nextClink=now+1.2+Math.random()*3.5;rigClink(rg)}
+    if(now>SEAS.nextLap){SEAS.nextLap=now+2+Math.random()*3;nz(.5,.22*rg,'bandpass',1300,600,0)} // water slapping the hulls
+  }
+}
+
+/* ---- src/desert/story.js ---- */
+/* ==========================================================================
+   THE STORY SO FAR. A page in the journal that writes the main story down as it happens: the chapters the party has lived through,
+   in order, each marked with the day it was reached, and a line at the top about what to do next.
+   An entry appears when its condition becomes true; the day is noted the first time the page (or the game) sees it.
+   ========================================================================== */
+const STORY=[
+  {id:'abbey',c:()=>true,t:'The Crypts and the Town',x:'The tale began in the crypts below the Abbey, and in the timber town of Thornwick above them, a town that did not much want four more adventurers. There was work to be had, and the road beyond the palisade was long.'},
+  {id:'gandrick',c:()=>G.flags.gandrickDead,t:'Gandrick\'s Ledger',x:'The party killed Gandrick, the bandit who raided the Thornwick road, and took his ledger from the body. It showed that the mayor of Thornwick had been paid to send travellers to their deaths.'},
+  {id:'ironhill',c:()=>G.flags.halbrecht||G.flags.wanted,t:'The Mayor of Ironhill',x:'At Ironhill the ledger was a gift to the wrong man. Mayor Halbrecht called it a forgery, threw the party in his dungeon, and sent a rider to the king naming them forgers. A warrant was out for all four of them, and hunters and hitmen were already on the road.'},
+  {id:'pass',c:()=>G.flags.passDone,t:'Over the Greyfang Pass',x:'With the hunters at their heels the party crossed the Greyfang Pass and left the known country behind. East of the pass the maps stop.'},
+  {id:'anaea',c:()=>G.flags.annaMet,t:'Mayor Marigold of Anaea',x:'In white-stoned Anaea, Mayor Marigold heard the whole story and believed it. The king would not listen to a village mayor, she said, but there was one man he did listen to: the wizard Ishkander, in the desert kingdom to the north.'},
+  {id:'khemetra',c:()=>G.flags.khWizardKnown||G.flags.scoriaWizard,t:'The Road to Khemetra',x:'The party crossed the Sand Road and the desert to Khemetra, the golden city. The grand vizier, Hotep-Ra, would not give the wizard\'s hiding place to strangers, but he named it for those who recovered the royal seal.'},
+  {id:'ishkander',c:()=>G.flags.scoriaWizard,t:'The Wizard in the Cistern',x:'Ishkander lives in a study at the end of the cisterns beneath the Potters Market. He knew the warrant was forged the moment he heard the word forger, and he promised to write to the king. The king of Khemetra was away at his summer court, and would be home in a few days.'},
+  {id:'knives',c:()=>G.flags.mqDay0!==undefined,t:'A Price on Their Heads',x:'Ishkander warned the party that the warrant carried a price, twenty thousand crowns on each head, and that such money buys knives. In Khemetra the knives came: cloaked strangers in the streets, and a few waiting behind the doors of the houses. The party stayed alive.'},
+  {id:'king',c:()=>G.flags.kingBack,t:'The King Returns',x:'The trumpets sounded over Khemetra. King Rahotep was home, and Ishkander told the party to go straight to the palace.'},
+  {id:'audience',c:()=>G.flags.audience,t:'The King\'s Audience',x:'King Rahotep read Ishkander\'s letter and the dead bandit\'s ledger, and knew the hand that signed the warrant was not King Osric\'s. It was Lord Corvane, Warden of the western Crown, who had been taking the tolls for himself. The ledger the party carried was only a copy. The master was written in three pages by Corvane\'s scribe, Isolde, who fled by sea and hid them on the islands of the Vaast Sea. Then a dying rider fell at the foot of the throne: Corvane\'s black ship, the Black Heron, lay off Yarrim, and he meant to have the party by the new moon. The king ordered the Sea Gate unsealed.'},
+  {id:'gate',c:()=>G.flags.yarOpen,t:'The Sea Gate',x:'The warden\'s key lay in a rusted chest in the cisterns. With it the grand vizier unsealed the Sea Gate in the east wall of Khemetra, shut for a hundred years.'},
+  {id:'tunnel',c:()=>qSt('yar3')==='done',t:'The Tunnel',x:'The tunnel behind the Sea Gate was full of the drowned dead. The party cleared it, and Menkaure the shipwright called it a road at last.'},
+  {id:'yarrim',c:()=>G.flags.yarSeen,t:'Yarrim',x:'At the far end of the tunnel lay Yarrim, a small fishing town on the Vaast Sea, with gulls over the pier and fishing boats moored in the bay. The harbourmaster, Tamsin Kell, was hiding the Dawn Walker, a ship built in secret, from Corvane\'s men.'},
+  {id:'outfit',c:()=>qSt('yar6')==='done',t:'The Dawn Walker',x:'The party found the stores washed up on the beach, cleared the rats from the Net Loft, and brought torches to old Orsa so that the Yarrim Light burned again. The Dawn Walker was ready to sail.'},
+  {id:'castoff',c:()=>G.flags.voyage,t:'Cast Off',x:'The Dawn Walker slipped her moorings on the evening tide just as the Black Heron turned into the bay. Corvane called for them to heave to. The party ran for the shallows by the light of the lamp, and by dawn there was only the sea.'},
+  {id:'saltbarrow',c:()=>qSt('vq1')==='done',t:'Saltbarrow',x:'On a pirate island of sand and wrecks, Sable Maeve wanted Corvane\'s marines gone. The party cleared them from her shore, and she told them where Isolde had gone: to the Isle of Bells.'},
+  {id:'bells',c:()=>qSt('vq2')==='done',t:'The Isle of Bells',x:'On the Isle of Bells, in a drowned abbey, Brother Aldous would give up the first page of the ledger only to those who rang all three bells and faced the dead who woke. The party faced them. The first page was theirs.'},
+  {id:'cinder',c:()=>qSt('vq3')==='done',t:'Cinder Isle',x:'On a black volcano of an island, the ash-priestess Ketra asked for three crystals and the death of the Cinder Guardian that walked the slopes. The party brought both, and she gave up the second page.'},
+  {id:'lastlight',c:()=>qSt('vq4')==='done',t:'Last Light',x:'At the end of the chain, Isolde herself sat in a hut by a ruined beacon. The third page lay in the altar at the top of the island, and Lord Corvane had followed the party\'s lamp across half the sea to take it. He did not leave the island.'},
+  {id:'oldhaven',c:()=>G.flags.oldhavenSeen,t:'Oldhaven',x:'The Dawn Walker came home at dawn to Oldhaven, the king\'s city, with the whole master ledger in Isolde\'s own hand. The royal harbour was a wall of pale stone with every gun turned on the water. The gate would open at noon, and a warrant still stood against four named persons.'},
+  {id:'court',c:()=>G.flags.courtSeen,t:'The Court of King Osric',x:'At noon the party was brought before King Osric and his court, with the master ledger in their hands.'},
+  {id:'pardon',c:()=>G.flags.pardoned,t:'The Warrant Torn Up',x:'The ledger was read in open court, and the king saw whose hand wrote his tolls and his warrants. The chancellor who had stood behind Corvane fell, the warrant was torn in two, and the ransom on four heads was lifted. The road home, so long and so strange, was clear.'}
+];
+function storyNext(){ // what to do next, from the chapter the party has reached
+  const F=G.flags;
+  if(F.pardoned)return 'The warrant is torn up and the ransom lifted. The road is yours.';
+  if(F.courtSeen)return 'You stand in the court of King Osric. Finish what you started.';
+  if(F.oldhavenSeen)return 'Oldhaven. Wait for noon at the quay gate, then carry the master ledger to the king.';
+  if(qSt('vq4')==='done'||F.page3)return 'Take the Dawn Walker to Oldhaven, the king\'s city, with the whole ledger.';
+  if(qSt('vq3')==='done')return 'Sail to Last Light. Isolde keeps the last page, and Corvane is close behind.';
+  if(qSt('vq2')==='done')return 'Sail to Cinder Isle. Ketra the ash-priestess keeps the second page.';
+  if(qSt('vq1')==='done')return 'Sail to the Isle of Bells. Brother Aldous keeps the first page.';
+  if(F.voyage)return 'Corvane\'s marines are camped on Saltbarrow. Find Sable Maeve and help her.';
+  if(qSt('yar6')==='done')return 'Find Menkaure on the pier at Yarrim and cast off.';
+  if(F.yarSeen)return 'In Yarrim, fit out the Dawn Walker. The harbourmaster, Tamsin Kell, and the lighthouse keeper, Orsa, need help.';
+  if(F.yarOpen)return 'Go through the Sea Gate in the east wall of Khemetra, clear the tunnel with Menkaure\'s help, and reach Yarrim.';
+  if(F.audience)return 'The king has ordered the Sea Gate opened. Ask the grand vizier for the key.';
+  if(F.kingBack)return 'The king is home. Go to the throne room in the palace.';
+  if(F.mqDay0!==undefined)return 'Wait in Khemetra for the king to return, and stay alive.';
+  if(F.scoriaWizard)return 'Ask Ishkander about the king. Be careful in the streets.';
+  return 'Find the wizard Ishkander, hiding in the cisterns of Khemetra.';
+}
+function storyTickDays(){
+  const F=G.flags;F.storyD=F.storyD||{};
+  for(const e of STORY){if(!F.storyD[e.id]&&e.c()){F.storyD[e.id]=dayNum()+1;if(e.id!=='abbey'&&G.state==='play')msg('The journal records a new chapter: '+e.t+'.','#e8d8a0')}}
+}
+journalPage({id:'story',title:'The Story So Far',
+  summary:()=>{const n=STORY.filter(e=>e.c()).length;return `${n} chapters written. ${storyNext()}`},
+  note:()=>0,
+  open(){G.rs=1e6},
+  draw(){
+    jFrame('The story so far');
+    const F=G.flags;try{storyTickDays()}catch(e){}
+    const list=STORY.filter(e=>e.c());
+    txt(`${list.length} chapters`,440,25,8,'#a89878','right');
+    const nx=storyNext();const nl=wrapText('Next: '+nx,396,8.2);
+    nl.forEach((l,i)=>txt(l,240,40+i*10,8.2,'#e8c878','center'));
+    const top=44+nl.length*10+4,viewH=300-top,bw=392;let y=0;
+    const rows=list.map(e=>{const ls=wrapText(e.x,bw,8.2);const o={e,ls,y};y+=14+ls.length*10.4+12;return o});
+    const max=Math.max(0,y-viewH);G.rs=clamp(G.rs||0,0,max);
+    ctx.save();ctx.beginPath();ctx.rect(30,top,420,viewH);ctx.clip();
+    for(const o of rows){const ry=top+o.y-G.rs;if(ry<top-80||ry>top+viewH)continue;
+      ctx.fillStyle='#8a6a2a';ctx.fillRect(38,ry+2,3,13+o.ls.length*10.4);
+      txt(o.e.t,48,ry+7,9.6,'#e8d8a0','left',true);
+      const d=F.storyD&&F.storyD[o.e.id];txt(d&&o.e.id!=='abbey'?'Day '+d:'',440,ry+7,7.4,'#8a7a60','right');
+      o.ls.forEach((l,i)=>txt(l,48,ry+19+i*10.4,8.2,'#d2c9b2','left'));
+    }
+    ctx.restore();
+    if(max>0){btnText('st_up','Up',60,288,50,16);btnText('st_dn','Down',370,288,50,16)}
+    BTNS.push({id:'rmarea',x:30,y:top,w:420,h:viewH,up:true,drag:'rum'});
+  },
+  click(id){if(id==='st_up')G.rs=Math.max(0,(G.rs||0)-90);if(id==='st_dn')G.rs=(G.rs||0)+90}
+});
 
 /* ---- src/desert/spells.js ---- */
 /* ==========================================================================

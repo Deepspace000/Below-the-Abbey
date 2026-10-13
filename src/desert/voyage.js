@@ -8,8 +8,8 @@
    King Osric at Oldhaven.
    Quests: mq1 mq2 (Khemetra), yar2 .. yar7 (the road to Yarrim), vq1 .. vq5 (the islands and home).
    ========================================================================== */
-for(const n of ['ship_dawn','ship_heron','palms','tent','arch','wreck','runestone','crystals','bones','altar','p_king','p_corvane','p_maeve','p_aldous','p_ketra','p_isolde'])loadImg('yar_'+n,'assets/yar_'+n+'.png');
-Object.assign(NPC_H,{yar_ship_dawn:2.6,yar_ship_heron:2.8,yar_palms:1.7,yar_tent:1.0,yar_arch:1.6,yar_wreck:1.7,yar_runestone:1.4,yar_crystals:.9,yar_bones:.55,yar_altar:.95,yar_p_king:1,yar_p_corvane:1,yar_p_maeve:.95,yar_p_aldous:.92,yar_p_ketra:.95,yar_p_isolde:.9});
+for(const n of ['bench','ship_dawn','ship_heron','palms','tent','arch','wreck','runestone','crystals','bones','altar','p_king','p_corvane','p_maeve','p_aldous','p_ketra','p_isolde'])loadImg('yar_'+n,'assets/yar_'+n+'.png');
+Object.assign(NPC_H,{yar_bench:.62,yar_ship_dawn:2.6,yar_ship_heron:2.8,yar_palms:1.7,yar_tent:1.0,yar_arch:1.6,yar_wreck:1.7,yar_runestone:1.4,yar_crystals:.9,yar_bones:.55,yar_altar:.95,yar_p_king:1,yar_p_corvane:1,yar_p_maeve:.95,yar_p_aldous:.92,yar_p_ketra:.95,yar_p_isolde:.9});
 Object.assign(ENEMY_DEF,{
   assassin:{name:'Assassin',hp:70,dmg:[9,14],hit:.8,w:.5,img:'assassin',xp:140,gold:[40,90],speed:1,verb:'stabs',aboveParty:1},
   cinder:{name:'Cinder Guardian',hp:260,dmg:[11,17],hit:.8,w:1.3,img:'yar_crystals',xp:900,gold:[200,320],speed:1,verb:'smashes',aboveParty:2},
@@ -48,7 +48,10 @@ function mqStalk(){
   msg(MQ_STALK[(F.mqAtt-1)%MQ_STALK.length],'#e8a090');
 }
 function mqTick(){
-  const F=G.flags;if(F.mqDay0===undefined||G.state!=='play')return;
+  const F=G.flags;
+  if(typeof storyTickDays==='function'&&G.state==='play'&&G.time>(MQ._s||0)){MQ._s=G.time+3;try{storyTickDays()}catch(e){}}
+  if(LEVEL===306&&F.courtFight&&!F.pardoned&&!G.cut&&!G.enemies.some(e=>e.t==='chancellor'&&e.hp>0)&&typeof oldhavenPardon==='function')oldhavenPardon();
+  if(F.mqDay0===undefined||G.state!=='play')return;
   const t=G.time;if(t<(MQ._t||0))return;MQ._t=t+4;
   if(!F.kingBack&&dayNum()>=F.mqDay0+3){F.kingBack=1;msg('Trumpets sound over Khemetra. The king has come home. He will see you in the throne room.','#ffe36a');sfx('level')}
   if(LEVEL===44&&!F.voyage&&(F.mqAtt||0)<9&&!G.talk&&!G.cut&&!G.menu&&!(G.inv&&G.inv.open)&&!G.loot&&!(G.timers&&G.timers.length)&&!hostileNear()){

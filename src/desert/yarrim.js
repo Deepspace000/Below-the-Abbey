@@ -6,8 +6,8 @@
    A chain of quests (yar1..yar6) from Menkaure and the vizier in Khemetra opens the gate, then goes on in Yarrim.
    ========================================================================== */
 const YR={ID:290,TUN:289,W:112,H:80,FIRST:291};
-for(const n of ['boat_fish','boat_row','boat_dhow','gull_stand','gull_up','gull_down','crab','crates','driftwood','nets','pots','shells'])loadImg('yar_'+n,'assets/yar_'+n+'.png');
-Object.assign(NPC_H,{yar_boat_fish:1.5,yar_boat_row:.5,yar_boat_dhow:1.75,yar_gull_stand:.4,yar_gull_up:.34,yar_gull_down:.2,yar_crab:.2,yar_crates:.5,yar_driftwood:.32,yar_nets:.95,yar_pots:.5,yar_shells:.2});
+for(const n of ['tub','lavender','arch2','washing','olive','boat_fish','boat_row','boat_dhow','gull_stand','gull_up','gull_down','crab','crates','driftwood','nets','pots','shells'])loadImg('yar_'+n,'assets/yar_'+n+'.png');
+Object.assign(NPC_H,{yar_boat_fish:1.5,yar_boat_row:.5,yar_boat_dhow:1.75,yar_gull_stand:.4,yar_gull_up:.34,yar_gull_down:.2,yar_crab:.2,yar_crates:.5,yar_driftwood:.32,yar_nets:.95,yar_pots:.5,yar_shells:.2,yar_tub:.55,yar_lavender:.5,yar_arch2:1.55,yar_washing:.8,yar_olive:1.7});
 
 /* ---- wall and door pictures: the painted ones (ds_tex_yarwall ...) replace these plain tiles at start-up ---- */
 function makeYarArt(){
@@ -15,6 +15,9 @@ function makeYarArt(){
   const mk=(name,col)=>{const id=addTex(flat(col[0],col[1],col[2]));TEX[id].wh=1.7;const gid=TNF++;T_TILE[gid]=id;DS_TEXREG[name]=id;return gid};
   YR.gW=mk('yarwall',[226,222,212]);YR.gN=mk('yarnet',[220,214,200]);YR.gF=mk('yardrift',[140,128,112]);
   T_DOORS.yardoor=addTex(flat(70,100,150));DS_TEXREG.yardoor=T_DOORS.yardoor;
+  // the cottages are painted in faded pastels, and every door has its own colour
+  YR.gP=mk('yarpink',[200,160,160]);YR.gY=mk('yaryellow',[210,190,130]);YR.gG=mk('yargreen',[160,180,160]);YR.gB=mk('yarblue',[150,170,200]);YR.gR=mk('yarrose',[210,190,180]);YR.gO=mk('yarcoral',[220,150,120]);
+  for(let i=2;i<=7;i++){T_DOORS['yardoor'+i]=addTex(flat(90,80,70));DS_TEXREG['yardoor'+i]=T_DOORS['yardoor'+i]}
 }
 
 /* ---- the land: where the water starts, and how high the ground is ---- */
@@ -81,7 +84,8 @@ function yarBuild(){
   const plank=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;block[i]=0;h[i]=.08;rk[i]=0;fm[i]='2'}};
   plank(57,40,86,41);plank(84,36,86,45);
   // houses
-  const putBlock=(b,doorCell)=>{for(let y=b[1];y<=b[3];y++)for(let x=b[0];x<=b[2];x++){rows[y][x]=((x*3+y*5)%7===0)?'N':((x+y)%11===0)?'F':'W';block[y*W+x]=1}};
+  const PAINT=['P','Y','G','B','R','O','W','P','Y','B'];let bi=0;
+  const putBlock=(b,doorCell)=>{const base=PAINT[(bi++*7+3)%PAINT.length];for(let y=b[1];y<=b[3];y++)for(let x=b[0];x<=b[2];x++){rows[y][x]=((x*3+y*5)%9===0)?'W':base;block[y*W+x]=1}};
   for(const q of YR_HOUSES){putBlock(q.b);rows[q.d[1]][q.d[0]]=String(q.p)}
   for(const b of YR_PLAIN)putBlock(b);
   // decor, scenery, items
@@ -112,15 +116,31 @@ function yarBuild(){
   for(let n=0;n<40;n++){const x=58+hash2(n,6,36)*28,y=40.2+hash2(n,7,37)*1.6;sc('yar_gull_stand',x,y,.9+hash2(n,8,38)*.3)} // gulls on the pier
   for(const [cx,cy,r] of YR_ISLANDS)for(let n=0;n<4;n++){const a=hash2(cx,n,41)*TAU,x=cx+Math.cos(a)*r*.55,y=cy+Math.sin(a)*r*.55,i=(y|0)*W+(x|0);if(h[i]>.05&&h[i]<1)sc('yar_gull_stand',x,y,.9)}
   for(const [x,y] of [[35,34],[44,40],[22,41],[30,48]])items.push({k:'potion',x,y});
+  // the village is pretty: flower tubs by every door, lamps along the promenade, rose arches over the lanes, washing, olive trees
+  const lights=[];
+  const tryDc=(k,x,y,o)=>{if(free(x,y)&&!used.has(x+','+y)){dc(k,x,y,o);used.add(x+','+y);return true}return false};
+  const used=new Set(decor.map(d=>d.x+','+d.y));
+  for(const q of YR_HOUSES){const [fx,fy,ff]=q.f,horiz=ff===0||ff===2;if(horiz){tryDc('yar_tub',fx-1,fy);tryDc('yar_tub',fx+1,fy)}else{tryDc('yar_tub',fx,fy-1);tryDc('yar_tub',fx,fy+1)}}
+  for(let x=14;x<=54;x+=7){if(tryDc('lamp',x,38))lights.push([x,38]);if(tryDc('lamp',x+3,42))lights.push([x+3,42])}
+  for(const [x,y] of [[36,26],[36,48],[57,34],[57,28]])tryDc('yar_arch2',x,y);
+  for(const [x,y] of [[32,24],[20,57],[32,58],[47,57],[53,51],[20,24]])tryDc('yar_washing',x,y);
+  for(const [x,y] of [[10,36],[10,44],[55,50],[46,52],[34,51],[22,52],[10,32],[10,48],[55,25],[44,29]])tryDc('yar_olive',x,y);
+  for(const [x,y] of [[18,38],[24,42],[40,38],[45,42],[28,38],[50,42],[15,42],[33,42]])tryDc('yar_tub',x,y);
+  for(const [x,y] of [[20,38],[44,38],[30,42],[52,42],[26,38],[48,42]])tryDc('yar_bench',x,y);
+  const sc2=(k,x,y,s)=>scenery.push({k,wx:x+.5,wy:y+.5,sc:s||1,decor:{k,walk:true,x,y}});
+  for(let n=0;n<160;n++){const x=10+((hash2(n,11,41)*46)|0),y=18+((hash2(n,12,41)*44)|0);if(!free(x,y)||used.has(x+','+y))continue;
+    const nb=rows[y-1][x]!=='.'||rows[y+1][x]!=='.'||rows[y][x-1]!=='.'||rows[y][x+1]!=='.';if(!nb)continue; // along the foot of the walls
+    sc2(hash2(n,13,41)<.5?'yar_lavender':'yar_tub',x,y,.8+hash2(n,14,41)*.4)}
   // the level
   const lv={rows:rows.map(r=>r.join('')),start:{x:3,y:40,f:1},enemies:[],items,decor,scenery,
-    fmap:null,floorSet:['sand','sandpath','wood','bluesand','bluewater','pebA'],floor:'sand',ceil:'cloud',
+    fmap:null,floorSet:['sand','cobble','wood','bluesand','bluewater','pebA'],floor:'sand',ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:'Yarrim',label:'Yarrim',noExtras:true,diff:16,tele:{x:36,y:40},
-    chars:{D:LEVEL41_DATA.chars.D,W:YR.gW,N:YR.gN,F:YR.gF},lights:[],portals:[]};
+    chars:{D:LEVEL41_DATA.chars.D,W:YR.gW,N:YR.gN,F:YR.gF,P:YR.gP,Y:YR.gY,G:YR.gG,B:YR.gB,R:YR.gR,O:YR.gO},lights,portals:[]};
   const fmap=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmap.push(s)}
   lv.fmap=fmap;
   lv.portals[0]={to:YR.TUN,x:62,y:12,f:3,tex:'cave'};
-  for(const q of YR_HOUSES)lv.portals[q.p]={to:YR.FIRST+q.p-1,x:0,y:0,f:0,tex:'yardoor'};
+  const DOORS=['yardoor3','yardoor2','yardoor5','yardoor6','yardoor4','yardoor7','yardoor','yardoor2'];
+  for(const q of YR_HOUSES)lv.portals[q.p]={to:YR.FIRST+q.p-1,x:0,y:0,f:0,tex:DOORS[q.p-1]};
   LEVELS[YR.ID]=lv;LEVEL_NAMES[YR.ID]='Yarrim';
   TERRS[YR.ID]=yarTerrain(W,H,h,rk,block);
   // the buildings: each room is built when first entered (so the Khemetra pictures are loaded by then); the doors know where in the room you arrive
@@ -251,7 +271,7 @@ function yrSprites(out){
   });
   for(let i=0;i<18;i++){
     let cx=[56,60,66,70,76,50,84,62,72,90,58,68,80,64,74,52,88,66][i],cy=[30,44,38,48,36,52,42,26,40,34,56,30,50,58,26,40,46,32][i];const r=2.5+i%5*1.1,sp=.5+(i%4)*.12,a=t*sp+i*1.7;
-    if(LEVEL!==YR.ID){const S=SEA[LEVEL];cx=S.cx+Math.cos(i*1.7)*(5+i%6*3);cy=S.cy+Math.sin(i*1.7)*(4+i%5*3)}
+    if(LEVEL!==YR.ID){const S=SEA[LEVEL];if(!S)return;cx=S.cx+Math.cos(i*1.7)*(5+i%6*3);cy=S.cy+Math.sin(i*1.7)*(4+i%5*3)}
     const img=((t*3.4+i)|0)%2?up:dn;
     out.push({x:cx+Math.cos(a)*r,y:cy+Math.sin(a*1.1)*r,img,w:.5,bob:1.3+(i%4)*.35+Math.sin(t*1.7+i)*.18,decor:{walk:true,k:'yar_gull_fly'}});
   }
