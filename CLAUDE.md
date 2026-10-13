@@ -29,6 +29,11 @@ make or ask for any picture, and before you push.
   or are walk-through), so the whole town can be walked.
 - Houses are tiny (two squares across and two deep; the shops and the inn three across), each with its own painted roof.
 
+## Quest marks
+
+- A gold **!** over (or on the map beside) anyone with a quest to give. A green **?** over anyone the party can hand a finished
+  quest in to. Never a gold question mark. Same marks in the 3D view, on the minimap and on every area map.
+
 ## Writing
 
 - Never use em dashes, in the game, in notes, in commit messages, anywhere.

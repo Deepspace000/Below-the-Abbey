@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.40';
+const VERSION='3.41';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2808,7 +2808,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
         SC.restore();
       }
     }
-    if(anyVis&&s.decor&&s.decor.npc&&ty<20&&QGIVER[s.decor.npc]){ // a question mark over the head of anyone who has a quest for the party
+    if(anyVis&&s.decor&&s.decor.npc&&ty<20&&QGIVER[s.decor.npc]){ // a gold ! over anyone with a quest to give, a green ? over anyone the party can hand a finished quest in to
       const dd=s.decor;
       if(!dd._qt||G.time-dd._qt>.3){dd._qt=G.time;dd._qv=questMark(dd)}
       const cm=Math.max(0,Math.min(VW-1,Math.floor(scrX)));
@@ -2818,9 +2818,9 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
         const hg=SC.createRadialGradient(scrX,bb-sz*.5,0,scrX,bb-sz*.5,sz*.95);hg.addColorStop(0,ready?'rgba(150,255,140,.42)':'rgba(255,226,110,.42)');hg.addColorStop(1,'rgba(255,200,60,0)');
         SC.fillStyle=hg;SC.fillRect(scrX-sz,bb-sz*1.5,sz*2,sz*2);
         SC.font=`bold ${sz}px ${FUI}`;SC.textAlign='center';SC.textBaseline='alphabetic';SC.lineJoin='round';
-        SC.lineWidth=Math.max(2,sz*.24);SC.strokeStyle='rgba(30,16,4,.92)';SC.strokeText('?',scrX,bb);
+        SC.lineWidth=Math.max(2,sz*.24);SC.strokeStyle='rgba(30,16,4,.92)';SC.strokeText(ready?'?':'!',scrX,bb);
         const tg=SC.createLinearGradient(0,bb-sz,0,bb);tg.addColorStop(0,ready?'#d8ffc8':'#fff4a8');tg.addColorStop(1,ready?'#4cb83c':'#e8a420');
-        SC.fillStyle=tg;SC.fillText('?',scrX,bb);
+        SC.fillStyle=tg;SC.fillText(ready?'?':'!',scrX,bb);
         SC.restore();
       }
     }
