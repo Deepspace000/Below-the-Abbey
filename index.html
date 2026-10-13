@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.99';
+const VERSION='3.00';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2427,6 +2427,7 @@ function render3D(){
     else for(let y=0;y<VH;y++){const v=clamp(y-HH+150,0,255)|0,o=y*VW*4;for(let x=0;x<VW;x++){const i=(v*1024+UCOL[x])*4,io=o+x*4;D[io]=SKP[i]*lbm*tbR;D[io+1]=SKP[i+1]*lbm*tbG;D[io+2]=SKP[i+2]*lbm*tbB}}}
   // floor + ceiling (the ceiling is its own plane, CEILH above the floor); a daylit sky needs no lamp light, and indoors only the nearest few lights reach the ceiling
   const ncl=day>.5?0:Math.min(nn,12),nrcl=day>.5?0:Math.min(nrn,6);
+  const fastF=LEVEL===44;
   for(let y=HH,yEnd=TERR_NOW?HH:Math.max(VH,2*HH);y<yEnd;y++){
     const doF=y<VH,yci=2*HH-1-y,doC=yci>=0,p=y-HH+.5,rd=EYE*F/p,rdc=(CEILH-EYE)*F/p;
     let fx=cx+rd*(dX-pX),fy=cy+rd*(dY-pY),gx=cx+rdc*(dX-pX),gy=cy+rdc*(dY-pY);
@@ -2434,8 +2435,9 @@ function render3D(){
     const yo=(y*VW)*4,yc=(Math.max(0,yci)*VW)*4;
     const vg=1-.3*Math.pow(p/HH,2.2);
     for(let x=0;x<VW;x++,fx+=sx,fy+=sy,gx+=sxc,gy+=syc){
-      if(doF){const cxl=Math.floor(fx),cyl=Math.floor(fy);
-      let u=((fx-cxl)*TS)|0,v=((fy-cyl)*TS)|0;
+      if(doF&&fastF&&rd>7&&((y&1)||(x&1))){const io=yo+x*4,so=(y&1)?io-VW*4:io-4;D[io]=D[so];D[io+1]=D[so+1];D[io+2]=D[so+2]} // far streets are drawn at half size, in both directions
+      else if(doF){const cxl=Math.floor(fx),cyl=Math.floor(fy);
+      let u=((fx-cxl)*TS)|0,v=((fy-cyl)*TS)|0;if(fastF&&rd>11){u=64;v=64} // beyond that the cobbles fade to one flat tile colour
       const hv=(Math.imul(cxl,73856093)^Math.imul(cyl,19349663))&3;
       if(hv===1){const tmp=u;u=v;v=tmp}else if(hv===2)u=127-u;else if(hv===3)v=127-v;
       const dx=fx-cx,dy=fy-cy,dist=Math.sqrt(dx*dx+dy*dy);
