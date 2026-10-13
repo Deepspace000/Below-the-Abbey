@@ -98,10 +98,10 @@ function khCrowd(C,L){
       else if(r<.20)walkThrough({k:vases[(x+y)&3],x,y,sc:big(x,y)});
       else if(r<.215)walkThrough({k:'urn',x,y,sc:big(x,y)});
       else if(r<.235){const q=khHash(x,y,15);walkThrough({k:khProp(q<.3?'planter':q<.55?'pot':q<.8?'shrub':'tree'),x,y,sc:.95+khHash(x,y,16)*.2})}
-    }else if(d5[i]&&r>.997)walkThrough({k:'lamp',x,y});
+    }
   }
-  // lamps down the great avenue
-  for(let y=250;y<H-10;y+=10)for(const x of [KH.CX-5,KH.CX+5]){const q=near(x,y,1,false);if(q)add({k:'lamp',x:q[0],y:q[1],block:false,walk:true})}
+  // lanterns on the streets and squares, braziers at the palace gate, fires in the Beggars' Quarter, lanterns hung across the streets
+  khPlaceLights(C,L,{occ,open,d3,run,add});
   // ---- cats in the alleys ----
   const cats=[[40,180],[330,120],[190,60],[240,350]];
   cats.forEach(([cx,cy],ci)=>{

@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.05';
+const VERSION='3.09';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -44,6 +44,16 @@ const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
    TEXTURES (procedural, painted-stone look)
    ========================================================================== */
 const TS=128;
+const FMIP=new WeakMap();
+function floorMips(a){ // a paving picture and halved copies of it down to one pixel (each pixel the average of four), made once
+  let m=FMIP.get(a);if(m)return m;
+  m=[a];let w=TS;
+  while(w>1){const nw=w>>1,src=m[m.length-1],dst=new Uint8ClampedArray(nw*nw*4);
+    for(let y=0;y<nw;y++)for(let x=0;x<nw;x++){const i0=(2*y*w+2*x)*4,i2=i0+w*4,o=(y*nw+x)*4;
+      for(let c=0;c<4;c++)dst[o+c]=(src[i0+c]+src[i0+4+c]+src[i2+c]+src[i2+4+c]+2)>>2}
+    m.push(dst);w=nw}
+  FMIP.set(a,m);return m;
+}
 function stoneTex(seed,o){
   const d=new Uint8ClampedArray(TS*TS*4), rh=TS/o.rows;
   for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){
@@ -1450,7 +1460,7 @@ function reset(n){
   G.inv={open:false,tab:'inv',hero:0,sel:null,scroll:0};
   G.enemies=ENEMY_SPAWNS.map((s,i)=>{const st=enemyStat(s.t,s.lvl);return {id:i,t:s.t,lvl:s.lvl||lvlHere(),x:s.x,y:s.y,rx:s.x,ry:s.y,hp:st.hp,maxhp:st.hp,alert:false,chilled:0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100}});
   G.items=ITEM_SPAWNS.map(s=>({k:s.k==='potion'?potionFor(hash2(s.x,s.y,LEVEL+7)):s.k,x:s.x,y:s.y,taken:false}));
-  G.decor=DECOR_SPAWNS.map(s=>{const o={k:s.k,x:s.x,y:s.y,block:!!s.block,loot:CONTAINERS.includes(s.k),shop:s.k==='cart'};if(s.deco){o.loot=false;o.shop=false}if(s.npc){o.npc=s.npc;o.loot=false;o.shop=false;if(s.goat)o.goat=s.goat}if(s.sc)o.sc=s.sc;if(s.walk)o.walk=true;if(s.wd)o.wd=s.wd;if(s.txt)o.txt=s.txt;if(s.bob)o.bob=s.bob;if(s.ox!==undefined){o.ox=s.ox;o.oy=s.oy}if(s.opens){o.opens=s.opens;o.idx=s.idx}if(s.lockedBy)o.lockedBy=s.lockedBy;if(s.secret)o.secret=true;for(const kk of ['ambush','hidden','trap','frame','goldAmt','enter','magic'])if(s[kk]!==undefined)o[kk]=s[kk];return o});
+  G.decor=DECOR_SPAWNS.map(s=>{const o={k:s.k,x:s.x,y:s.y,block:!!s.block,loot:CONTAINERS.includes(s.k),shop:s.k==='cart'};if(s.deco){o.loot=false;o.shop=false}if(s.npc){o.npc=s.npc;o.loot=false;o.shop=false;if(s.goat)o.goat=s.goat}if(s.sc)o.sc=s.sc;if(s.walk)o.walk=true;if(s.wd)o.wd=s.wd;if(s.txt)o.txt=s.txt;if(s.bob)o.bob=s.bob;if(s.ox!==undefined){o.ox=s.ox;o.oy=s.oy}if(s.opens){o.opens=s.opens;o.idx=s.idx}if(s.lockedBy)o.lockedBy=s.lockedBy;if(s.secret)o.secret=true;for(const kk of ['ambush','hidden','trap','frame','goldAmt','enter','magic','cat','scar','hatch','kname','kl','lk','glow','red','lit','deco'])if(s[kk]!==undefined)o[kk]=s[kk];return o});
   applyLevers();clearDoorFronts();
   G.decor.forEach(d=>{if(!d.npc&&(d.k==='grave'||d.k==='grave2'||d.k==='cross')){d.npc='epitaph';d.loot=false}});
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++)if(MAPROWS[y][x]==='t')G.decor.push({k:'tree'+((hash2(x,y,7)*NTREES)|0),x,y,block:true,loot:false,shop:false});
@@ -2393,14 +2403,14 @@ function render3D(){
   HH=105+climbView(cx,cy,dX,dY);
   // lights near camera, with flicker
   nearL.length=0;nearR.length=0;G.hits=[];for(const L of LIGHTS)L._h=null;
-  for(const L of LIGHTS){if(L.taken)continue;if(L.lamp&&LEVEL===44&&(G.day||0)>.5)continue; // the city's lamps are dark by day
-    const d2=(L.x-cx)**2+(L.y-cy)**2;if(d2<(L.lamp?56:100)){
+  for(const L of LIGHTS){if(L.taken)continue;if(L.city&&(G.day||0)>.5)continue; // the city's lamps and fires give no light by day
+    const d2=(L.x-cx)**2+(L.y-cy)**2;if(d2<(L.range2||(L.lamp?56:100))){
     // walls block torchlight: fade each torch in/out by line of sight to the camera
     const tgt=lightSees(cx,cy,L.x,L.y)?1:0;
     L.vis=(L.vis===undefined?tgt:L.vis)+clamp(tgt-(L.vis===undefined?tgt:L.vis),-.06,.06);
     if(L.vis<=.01)continue;
     const fl=.8+.16*Math.sin(t*9+L.ph)+.1*Math.sin(t*23.3+L.ph*2)+.07*Math.sin(t*5.1+L.ph*3);
-    (L.red?nearR:nearL).push(L.x,L.y,1.5*fl*L.vis*(L.fire?1.7:(L.lamp?(GRIM_L()?.95:clamp(1.3-(G.day||0)*1.4,.1,1.3)):1)));
+    (L.red?nearR:nearL).push(L.x,L.y,1.5*fl*L.vis*(L.kI||1)*(L.fire?1.7:(L.lamp?(GRIM_L()?.95:clamp(1.3-(G.day||0)*1.4,.1,1.3)):1)));
     // screen position of the flame so it can be tapped
     const rx=L.x-cx,ry=L.y-cy,tY=(-1/PL)*(-pY*rx+pX*ry),tX=(-1/PL)*(dY*rx-dX*ry);
     if(!L.free&&tY>.3){const sx=VW/2*(1+tX/tY),sy=HH-(CEILH*.5+.16-EYE)*F/tY,col=Math.floor(sx);
@@ -2431,16 +2441,18 @@ function render3D(){
   // floor + ceiling (the ceiling is its own plane, CEILH above the floor); a daylit sky needs no lamp light, and indoors only the nearest few lights reach the ceiling
   const ncl=day>.5?0:Math.min(nn,12),nrcl=day>.5?0:Math.min(nrn,6);
   const fastF=LEVEL===44;
+  const FLM=fastF?[fd,fd2||fd,fd3||fd,fd4||fd,fd5||fd,fd6||fd].map(floorMips):null; // each paving picture and its smaller, blurrier copies
   for(let y=HH,yEnd=TERR_NOW?HH:Math.max(VH,2*HH);y<yEnd;y++){
     const doF=y<VH,yci=2*HH-1-y,doC=yci>=0,p=y-HH+.5,rd=EYE*F/p,rdc=(CEILH-EYE)*F/p;
     let fx=cx+rd*(dX-pX),fy=cy+rd*(dY-pY),gx=cx+rdc*(dX-pX),gy=cy+rdc*(dY-pY);
     const sx=rd*2*pX/VW,sy=rd*2*pY/VW,sxc=rdc*2*pX/VW,syc=rdc*2*pY/VW;
     const yo=(y*VW)*4,yc=(Math.max(0,yci)*VW)*4;
     const vg=1-.3*Math.pow(p/HH,2.2);
+    let ml0=0,ml1=0,mw1=0,mw0=1; // how blurred the paving is on this row: a row far away covers many texels, so a smaller copy is read, blended with the next one
+    if(fastF){const lf=Math.min(6.9,Math.max(0,Math.log2(Math.max(.457*rd,.567*rd*rd))));ml0=lf|0;ml1=ml0+1;mw1=lf-ml0;mw0=1-mw1}
     for(let x=0;x<VW;x++,fx+=sx,fy+=sy,gx+=sxc,gy+=syc){
-      if(doF&&fastF&&rd>7&&((y&1)||(x&1))){const io=yo+x*4,so=(y&1)?io-VW*4:io-4;D[io]=D[so];D[io+1]=D[so+1];D[io+2]=D[so+2]} // far streets are drawn at half size, in both directions
-      else if(doF){const cxl=Math.floor(fx),cyl=Math.floor(fy);
-      let u=((fx-cxl)*TS)|0,v=((fy-cyl)*TS)|0;if(fastF&&rd>11){u=64;v=64} // beyond that the cobbles fade to one flat tile colour
+      if(doF){const cxl=Math.floor(fx),cyl=Math.floor(fy);
+      let u=((fx-cxl)*TS)|0,v=((fy-cyl)*TS)|0;
       const hv=(Math.imul(cxl,73856093)^Math.imul(cyl,19349663))&3;
       if(hv===1){const tmp=u;u=v;v=tmp}else if(hv===2)u=127-u;else if(hv===3)v=127-v;
       const dx=fx-cx,dy=fy-cy,dist=Math.sqrt(dx*dx+dy*dy);
@@ -2452,7 +2464,12 @@ function render3D(){
       const kR=(lb*tbR+lt*ttR+lr*1.4)*vg,kG=(lb*tbG+lt*ttG+lr*.2)*vg,kB=(lb*tbB+lt*ttB+lr*.1)*vg;
       const ti=(v*TS+u)*4,io=yo+x*4,fcc=(fmp&&cxl>=0&&cyl>=0&&cxl<MW&&cyl<MH)?fmp.charCodeAt(cyl*MW+cxl):48,fdd=fcc===49?fd2:fcc===50?fd3:fcc===51?fd4:fcc===52?fd5:fcc===53?fd6:fd;
       const sm=Math.min(hzmax,dist*hzrate),sk=(lb*.55+(lt+lr)*.45+.05)*sm,iv=1-sm;
-      D[io]=fdd[ti]*kR*iv+hzr[0]*sk;D[io+1]=fdd[ti+1]*kG*iv+hzr[1]*sk;D[io+2]=fdd[ti+2]*kB*iv+hzr[2]*sk;}
+      let tr,tg,tb;
+      if(fastF){const ma=FLM[(fcc>=49&&fcc<=53)?fcc-48:0],A=ma[ml0],ia=(((v>>ml0)<<(7-ml0))+(u>>ml0))<<2;
+        if(mw1<.03){tr=A[ia];tg=A[ia+1];tb=A[ia+2]}
+        else{const Bm=ma[ml1],ib=(((v>>ml1)<<(7-ml1))+(u>>ml1))<<2;tr=A[ia]*mw0+Bm[ib]*mw1;tg=A[ia+1]*mw0+Bm[ib+1]*mw1;tb=A[ia+2]*mw0+Bm[ib+2]*mw1}}
+      else{tr=fdd[ti];tg=fdd[ti+1];tb=fdd[ti+2]}
+      D[io]=tr*kR*iv+hzr[0]*sk;D[io+1]=tg*kG*iv+hzr[1]*sk;D[io+2]=tb*kB*iv+hzr[2]*sk;}
       // ceiling
       if(doC&&skyPan){const v=clamp(yci-HH+150,0,255)|0,i=(v*1024+UCOL[x])*4,ic=yc+x*4,kk=lbm*(ovcLv?.92:1);D[ic]=SKP[i]*kk*tbR;D[ic+1]=SKP[i+1]*kk*tbG;D[ic+2]=SKP[i+2]*kk*tbB}
       else if(doC){const ccx=Math.floor(gx),ccy=Math.floor(gy);
@@ -2468,7 +2485,7 @@ function render3D(){
     }
   }
   // walls
-  const grid=G.grid,seen=G.seen,fr=Math.floor(t*10),fastW=LEVEL===44;let lastCell=-1,lastSide=-1;
+  const grid=G.grid,seen=G.seen,fr=Math.floor(t*10),fastW=LEVEL===44;
   for(let x=0;x<VW;x++){
     const camX=2*x/VW-1,rX=dX+pX*camX,rY=dY+pY*camX;
     let mx=Math.floor(cx),my=Math.floor(cy);
@@ -2511,9 +2528,6 @@ function render3D(){
       const u=UCOL[x],kr=lbm*tbR,kg=lbm*tbG,kb=lbm*tbB;
       for(let y=ds;y<=de;y++){const v=clamp(y-HH+150,0,255)|0,i=(v*1024+u)*4,o=(y*VW+x)*4;D[o]=SKYPAN[i]*kr;D[o+1]=SKYPAN[i+1]*kg;D[o+2]=SKYPAN[i+2]*kb}
       continue}
-    const wcell=my*MW+mx,farW=fastW&&perp>9;
-    if(farW&&(x&1)&&wcell===lastCell&&side===lastSide){for(let y=ds;y<=de;y++){const o=(y*VW+x)*4,so=o-4;D[o]=D[so];D[o+1]=D[so+1];D[o+2]=D[so+2]}continue} // far walls: every second column repeats its neighbour
-    lastCell=wcell;lastSide=side;
     const nnP=fastW&&perp>12?0:nn,nrP=fastW&&perp>12?0:nrn;  // and out there the lamps no longer light the wall pixel by pixel
     const stepT=TS/lineH,smw=Math.min(hzmax,dist*hzrate),skw=(lb*.55+lt*.45+.05)*smw,ivw=1-smw;
     let tyf=(ds-y0)*stepT;
@@ -2612,7 +2626,7 @@ function spriteList(){
   if(G.flora&&G.flora.length){const px=G.C.x+.5,py=G.C.y+.5;for(const f of G.flora){const dx=f.wx-px,dy=f.wy-py;if(dx*dx+dy*dy>256)continue;const im=IMG[f.k];if(!im)continue;L.push({x:f.wx,y:f.wy,img:im,w:(NPC_H[f.k]?NPC_H[f.k]*im.width/im.height:decorW(f.k))*f.sc,decor:f.decor})}} // lots of tiny tufts: only those within sixteen cells are drawn
   const DROP={well:.07,fountain:.1,chest:.05,cart:.05,barrel:.03,crate:.03,bench:.04,urn:.03,memorial:.04,statue:.03,coffin:.03,gate:.02,tree0:.15,tree1:.13,tree2:.09,tree3:.14,tree4:.15,tree5:.16,tree6:.13,tree7:.14};
   const cam=G.C||{x:0,y:0};
-  for(const d of (LEVEL===44&&G.khB?khNearDecor(cam.x,cam.y):G.decor)){if(d.found)continue;if(d.hidden)continue;if(G.decor.length>250&&((d.x-cam.x)*(d.x-cam.x)+(d.y-cam.y)*(d.y-cam.y))>1300)continue;const k=(d.k==='grave'&&IMG.grave2&&hash2(d.x,d.y,5)>.5)?'grave2':d.k;if(d.wd&&d.txt){L.push({x:d.x+.5+d.wd[0]*.1,y:d.y+.5+d.wd[1]*.1,img:shopSign(d),w:.8,bob:.3,hang:[d.wd[0],d.wd[1]],decor:d});continue}
+  for(const d of (LEVEL===44&&G.khB?khNearDecor(cam.x,cam.y):G.decor)){if(d.found)continue;if(d.hidden)continue;if(G.decor.length>250&&((d.x-cam.x)*(d.x-cam.x)+(d.y-cam.y)*(d.y-cam.y))>1300)continue;const k=(d.lk&&IMG[d.lk])?d.lk:(d.k==='grave'&&IMG.grave2&&hash2(d.x,d.y,5)>.5)?'grave2':d.k;if(d.wd&&d.txt){L.push({x:d.x+.5+d.wd[0]*.1,y:d.y+.5+d.wd[1]*.1,img:shopSign(d),w:.8,bob:.3,hang:[d.wd[0],d.wd[1]],decor:d});continue}
     if(d.k==='lever'){L.push({x:d.x+.5+d.wd[0]*.43,y:d.y+.5+d.wd[1]*.43,img:IMG.lever,w:.42,bob:.3,flat:[d.wd[0],d.wd[1]],decor:d});continue}
     if(d.wd&&d.k.startsWith('branch')){L.push({x:d.x+.5+d.wd[0]*.1,y:d.y+.5+d.wd[1]*.1,img:IMG[d.k],w:.8,bob:d.bob||.4,hang:[d.wd[0],d.wd[1]],decor:d});continue}
     L.push({x:d.x+.5+(d.ox||0),y:d.y+.5+(d.oy||0),img:(LEVEL>=33&&LEVEL<=38&&d.npc&&VIVID_KEYS.has(k))?vividImg(k,d):(k==='brazier'?IMG['brazier'+(((G.time*7+d.x*3+d.y)|0)&3)]:k==='teleporter'?IMG['tele'+(teleActive(LEVEL)?1+(((G.time*5)|0)&3):0)]:IMG[k]),w:(NPC_H[k]&&IMG[k]?NPC_H[k]*IMG[k].width/IMG[k].height:decorW(k))*(d.sc||1),drop:DROP[k]||(/^[glp]tree/.test(k)?.05:0),bob:d.bob||0,decor:d})}
@@ -2646,13 +2660,14 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     if(s.e){s.e.sx=scrX;s.e.sy=top+sh*.45}
     {const xa=Math.max(0,Math.floor(left)),xb=Math.min(VW-1,Math.ceil(left+sw));if(xb<xa||ty>(s.sky?400:farT))continue;let any=s.decor&&SKYLINE.test(s.decor.k);for(let xx=xa;xx<=xb&&!any;xx+=2)if(zbuf[xx]>ty){any=true;break}if(!any)continue} // skip hidden sprites
     let anyVis=false;
-    if(!TERR_NOW&&!s.hang&&!(s.decor&&(NOSHADOW.test(s.decor.k)||SKYLINE.test(s.decor.k)||/^pgrass|^pflw/.test(s.decor.k)))&&!(s.e&&ENEMY_DEF[s.e.t].fly)){SC.save();const tr=s.decor&&NOSHADOW.test(s.decor.k);SC.globalAlpha=(s.fade!==undefined?Math.max(0,Math.min(1,s.fade)):1)*(tr?.5:.36);SC.fillStyle='#000';SC.beginPath();SC.ellipse(scrX,bottom,sw*(tr?.24:.34),Math.max(1.2,sw*(tr?.06:.055)),0,0,TAU);SC.fill();SC.restore()}
+    if(!TERR_NOW&&!s.hang&&!(s.decor&&(NOSHADOW.test(s.decor.k)||SKYLINE.test(s.decor.k)||/^pgrass|^pflw/.test(s.decor.k)||s.decor.k==='hlant'||s.decor.k==='cfire'))&&!(s.e&&ENEMY_DEF[s.e.t].fly)){SC.save();const tr=s.decor&&NOSHADOW.test(s.decor.k);SC.globalAlpha=(s.fade!==undefined?Math.max(0,Math.min(1,s.fade)):1)*(tr?.5:.36);SC.fillStyle='#000';SC.beginPath();SC.ellipse(scrX,bottom,sw*(tr?.24:.34),Math.max(1.2,sw*(tr?.06:.055)),0,0,TAU);SC.fill();SC.restore()}
     // lighting
     const wx=s.x,wy=s.y,dist=Math.hypot(wx-cx,wy-cy);
     let lt=0;for(let k=0;k<nearL.length;k+=3){const ax=wx-nearL[k],ay=wy-nearL[k+1];lt+=nearL[k+2]/(1+1.15*(ax*ax+ay*ay))}
     for(let k=0;k<nearR.length;k+=3){const ax=wx-nearR[k],ay=wy-nearR[k+1];lt+=nearR[k+2]/(1+1.15*(ax*ax+ay*ay))}
     const trD=(G.day||0)>0&&s.decor&&NOSHADOW.test(s.decor.k)&&LEVEL!==32&&LEVEL!==33&&!GRIM_L(); // woodland trees fade into dark green, not pale haze
-    const lum=clamp(.08+(Math.max(baseL(dist),G.day||0,G.amb||0)+lt*.85)*1.05,0,1)*(GRIM_L()?.66:trD?.78:1);
+    let lum=clamp(.08+(Math.max(baseL(dist),G.day||0,G.amb||0)+lt*.85)*1.05,0,1)*(GRIM_L()?.66:trD?.78:1);
+    if(LEVEL===44&&s.decor&&(s.decor.k==='lamp'||s.decor.k==='hlant'||s.decor.k==='cfire'))lum=Math.max(lum,.9); // a lantern or a fire shines by its own light
     const kq0=Math.min(1,Math.max(.05,2*sw/iw)),dyv=(G.day||0)>0,hzv=GRIM_L()?[30,46,32]:trD?[40,54,42]:dyv?[132,146,132]:[86,76,62],smS=Math.min(dyv?.4:.26,dist*(dyv?.04:.03))*(GRIM_L()?.55:.75);
     let SRC,tw,th,HZ=null,hA=0;
     if(!s.flash&&!(s.decor&&s.decor.burn>0)){
@@ -2735,14 +2750,39 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
       for(let i=0;i<6;i++){const ph=((T*.5+i/6)%1),sx2=scrX+Math.sin(T*2+i*3)*sw*.18,sy2=top+sh*.25-ph*sh*.5;SC.globalAlpha=.2*(1-ph)*Math.min(1,bt/1.5);SC.fillStyle='#403a36';SC.beginPath();SC.arc(sx2,sy2,sw*(.08+.12*ph),0,TAU);SC.fill()}
       SC.restore();
     }
-    if(anyVis&&s.decor&&s.decor.k==='lamp'){ // a lit lantern: bright glass and a warm halo
-      const nk=Math.max(GRIM_L()?.8:0,clamp(1.2-(G.day||0)*1.35,0,1))*(s.fade===undefined?1:s.fade);
+    if(anyVis&&s.decor&&(s.decor.k==='lamp'||s.decor.k==='hlant'||s.decor.k==='cfire')){ // a lit lantern, a hanging lantern or a fire: bright glass and a warm halo
+      const dc=s.decor,isF=dc.k==='cfire',rd=!!dc.red,T=G.time;
+      const nk=Math.max(GRIM_L()?.8:0,clamp(1.2-(G.day||0)*1.35,0,1),isF?.5:0)*(s.fade===undefined?1:s.fade);
       if(nk>.02){
-        const fk=.88+.12*Math.sin(G.time*7+(s.decor.x*5+s.decor.y*3)),gx=scrX,gy=top+sh*.23,rad=sw*(1.7+.25*fk);
+        const gl=dc.glow||[0,.23],fk=.88+.12*Math.sin(T*(isF?11:7)+(dc.x*5+dc.y*3)),gx=scrX+gl[0]*sw,gy=top+sh*(dc.k==='hlant'?.62:gl[1]),rad=LEVEL===44?Math.max(sw*1.7,sh*(dc.k==='hlant'?.45:.5),4+ty*.35)*(isF?1.3:1)*(.92+.16*fk):sw*(1.7+.25*fk);
+        const c2=rd?'255,60,50':isF?'255,160,50':'255,190,90',c3=rd?'225,40,40':isF?'235,110,30':'240,150,60',c4=rd?'180,20,30':'200,110,40';
         SC.save();SC.globalCompositeOperation='lighter';
-        SC.globalAlpha=nk*.95*fk;SC.fillStyle='rgba(255,196,96,.9)';SC.fillRect(gx-sw*.17,gy-sh*.06,sw*.34,sh*.12);
-        const gr=SC.createRadialGradient(gx,gy,0,gx,gy,rad);gr.addColorStop(0,'rgba(255,190,90,.75)');gr.addColorStop(.35,'rgba(240,150,60,.28)');gr.addColorStop(1,'rgba(200,110,40,0)');
+        if(!dc.lk){SC.globalAlpha=nk*.95*fk;SC.fillStyle='rgba(255,196,96,.9)';SC.fillRect(gx-sw*.17,gy-sh*.06,sw*.34,sh*.12)} // the bright glass of the plain lamp
+        const gr=SC.createRadialGradient(gx,gy,0,gx,gy,rad);gr.addColorStop(0,`rgba(${c2},.75)`);gr.addColorStop(.35,`rgba(${c3},.28)`);gr.addColorStop(1,`rgba(${c4},0)`);
         SC.globalAlpha=nk*fk;SC.fillStyle=gr;SC.fillRect(gx-rad,gy-rad,rad*2,rad*2);
+        if(isF){ // the painted fire is lit by flames that flicker over it
+          for(let i=0;i<4;i++){
+            const bx=gx+Math.sin(T*6+i*1.7+dc.x)*sw*.08,by=gy+Math.sin(T*9+i*2.3+dc.y)*sh*.03-i*sh*.015,br=sw*(.13+.035*Math.sin(T*13+i*1.9));
+            const fg=SC.createRadialGradient(bx,by,0,bx,by,br);fg.addColorStop(0,'rgba(255,225,130,.55)');fg.addColorStop(1,'rgba(255,120,30,0)');
+            SC.globalAlpha=nk*(.7+.3*Math.sin(T*15+i));SC.fillStyle=fg;SC.fillRect(bx-br,by-br,br*2,br*2);
+          }
+        }
+        SC.restore();
+      }
+    }
+    if(anyVis&&s.decor&&s.decor.npc&&ty<20&&QGIVER[s.decor.npc]){ // a question mark over the head of anyone who has a quest for the party
+      const dd=s.decor;
+      if(!dd._qt||G.time-dd._qt>.3){dd._qt=G.time;dd._qv=questMark(dd)}
+      const cm=Math.max(0,Math.min(VW-1,Math.floor(scrX)));
+      if(dd._qv&&zbuf[cm]>ty){
+        const sz=clamp(sw*.36,11,34),bb=top-sz*.12+Math.sin(G.time*3.2+dd.x*7+dd.y*3)*sz*.1,ready=dd._qv===2;
+        SC.save();SC.globalAlpha=s.fade===undefined?1:Math.max(0,Math.min(1,s.fade));
+        const hg=SC.createRadialGradient(scrX,bb-sz*.5,0,scrX,bb-sz*.5,sz*.95);hg.addColorStop(0,ready?'rgba(150,255,140,.42)':'rgba(255,226,110,.42)');hg.addColorStop(1,'rgba(255,200,60,0)');
+        SC.fillStyle=hg;SC.fillRect(scrX-sz,bb-sz*1.5,sz*2,sz*2);
+        SC.font=`bold ${sz}px ${FUI}`;SC.textAlign='center';SC.textBaseline='alphabetic';SC.lineJoin='round';
+        SC.lineWidth=Math.max(2,sz*.24);SC.strokeStyle='rgba(30,16,4,.92)';SC.strokeText('?',scrX,bb);
+        const tg=SC.createLinearGradient(0,bb-sz,0,bb);tg.addColorStop(0,ready?'#d8ffc8':'#fff4a8');tg.addColorStop(1,ready?'#4cb83c':'#e8a420');
+        SC.fillStyle=tg;SC.fillText('?',scrX,bb);
         SC.restore();
       }
     }
@@ -2868,7 +2908,13 @@ const LIGHT_ZONES=[
 function setupLights(){
   LIGHTS.length=0;torchAt.clear();
   G.hasLamps=G.decor.some(d=>d.k==='lamp');
-  const lampLights=()=>{for(const d of G.decor)if(d.k==='lamp')LIGHTS.push({x:d.x+.5,y:d.y+.5,ph:hash2(d.x,d.y,13)*6.28,key:-1000-LIGHTS.length,taken:false,red:false,free:true,lamp:true})};
+  const lampLights=()=>{
+    const city=LEVEL===44;
+    for(const d of G.decor){
+      if(d.k==='lamp')LIGHTS.push({x:d.x+.5,y:d.y+.5,ph:hash2(d.x,d.y,13)*6.28,key:-1000-LIGHTS.length,taken:false,red:!!d.red,free:true,lamp:true,city,range2:city?100:0,kI:city?2.3:1});
+      else if(city&&d.k==='hlant'&&d.lit)LIGHTS.push({x:d.x+.5,y:d.y+.5,ph:hash2(d.x,d.y,13)*6.28,key:-1000-LIGHTS.length,taken:false,red:!!d.red,free:true,lamp:true,city,range2:81,kI:1.7});
+      else if(city&&d.k==='cfire')LIGHTS.push({x:d.x+.5,y:d.y+.5,ph:hash2(d.x,d.y,13)*6.28,key:-1000-LIGHTS.length,taken:false,red:false,free:true,lamp:true,fire:true,city,range2:110,kI:1.5});
+    }};
   G.lmap=null;
   if(G.day>0){
     lampLights();
@@ -5384,6 +5430,14 @@ const QUESTS={
   bread:{title:'Bread for Wat',who:'Wat, the beggar',desc:'Wat is starving. Give him 1 bread.',need:1,goal:()=>bagCount('bread'),take:{bread:1},reward:{gold:10,xp:60}}
 };
 const qSt=id=>G.quests[id]?G.quests[id].st:null;
+/* 0: nothing for the party, 1: a quest to give, 2: a quest done and waiting for its reward (the question mark above the head) */
+function questMark(d){
+  const qv=QGIVER[d.npc];if(!qv||d.found||d.hidden)return 0;
+  const q=Array.isArray(qv)?qv.find(z=>qSt(z)!=='done'):qv;if(!q||!QUESTS[q])return 0;
+  const st=qSt(q);if(st==='done')return 0;
+  if(st==='active')return qReady(q)?2:0;
+  return 1;
+}
 const qGoal=id=>{const q=QUESTS[id];return clamp(q.goal(G.quests[id]||{}),0,q.need)};
 const qReady=id=>qSt(id)==='active'&&qGoal(id)>=QUESTS[id].need;
 const anyQuestReady=()=>Object.keys(QUESTS).some(qReady);
@@ -5902,7 +5956,7 @@ Object.assign(QGIVER,{halbrecht:['ironhill','mines'],rowan:['wolves2','bandits2'
 
 const WITCH_STOCK=[['potion',6],['scrollLight',2],['scrollFrost',2],['sp_fire',1],['torch',4]];
 const WITCH_Q={offer:'The road is full of lost souls and they will not leave my door in peace. Banish three ghosts and I will give you something for it.',accept:'They wander the forest and the old graves. Hit them hard.',remind:(n,m)=>`${n} of ${m} ghosts banished.`,ready:'The air is quiet. Yes. Three of them gone.',turn:'Three ghosts.',thanks:'Take this ring. It has kept me safe for years.',after:'Thank you again. The door is quiet now.'};
-QUESTS.witch={title:"The Witch's Ghosts",who:'The witch',desc:'The witch wants 3 ghosts banished. They haunt the forest and the graves.',need:3,cnt:'ghostKills',goal:cq('ghostKills'),reward:{gold:110,xp:260,items:['ringV']}};
+QGIVER.witch='witch';QUESTS.witch={title:"The Witch's Ghosts",who:'The witch',desc:'The witch wants 3 ghosts banished. They haunt the forest and the graves.',need:3,cnt:'ghostKills',goal:cq('ghostKills'),reward:{gold:110,xp:260,items:['ringV']}};
 Object.assign(NPCS,{
   witch:{name:'The witch',img:'peasantW',root:d=>{
     if(qReady('witch'))return qNode('witch',WITCH_Q);
@@ -6263,7 +6317,7 @@ function update(dt){
   try{areaAudio();huntTick()}catch(e){}
   burnTick(dt);
   G.time+=dt;try{if(G.pharFlash>0)G.pharFlash-=dt;stormTick(dt);birdTick(dt);caravanTick(dt);if(G.flags)(G.flags.lvSeen=G.flags.lvSeen||{})[LEVEL]=1}catch(e){}
-  if(G.dayBase>0){const hr=(G.clock%1440)/60,dsl=LEVEL===43||LEVEL===44||(LEVEL>=60&&LEVEL<=64)||LEVEL===41;G.day=Math.max(.16,G.dayBase*clamp(.66+.5*Math.cos((hr-12)/24*TAU),dsl?.3:G.hasLamps?.2:.5,1))}
+  if(G.dayBase>0){const hr=(G.clock%1440)/60,dsl=LEVEL===43||LEVEL===44||(LEVEL>=60&&LEVEL<=64)||LEVEL===41;G.day=Math.max(.16,G.dayBase*clamp(.66+.5*Math.cos((hr-12)/24*TAU),dsl?(LEVEL===44?.4:.3):G.hasLamps?.2:.5,1))}
   // timers
   if(!G.cut)for(let i=0;i<G.timers.length;){const t=G.timers[i];if(G.time>=t.t){G.timers.splice(i,1);t.fn()}else i++}
   // camera easing
@@ -8985,7 +9039,7 @@ const KH_PROPS={ // painted props by role: [sheet piece, height in cells]; the o
   fountain:['kh_city1_0','fountain',1.1],well:['kh_city1_1','well',1.0],obelisk:['kh_city1_2','memorial',2.4],statue:['kh_city1_3','statue',1.5],lamp:['kh_nolamp','lamp',1.5],bench:['kh_city1_4','bench',.6],
   palm:['kh_city2_0','dpalm0',2.4],tree:['kh_city2_1','ltree17',1.7],shrub:['kh_city2_2','lbush0',.8],planter:['kh_city2_5','flowerpot',.5],pot:['kh_city2_3','flowerpot',.9],pergola:['kh_city2_4','bench',1.5],
   ship:['kh_ship1_0','crate',.9],wheel:['kh_ship1_1','barrel',.8],anchor:['kh_ship1_2','barrel',.8],rope:['kh_ship1_3','sacks',.35],seachest:['kh_ship1_4','chest',.5],sail:['kh_ship1_5','crate',1.1],
-  throne:['kh_throne1_0','statue',1.4],banner:['kh_throne1_1','banner',1.3],maptable:['kh_maptable1_0','counter',.6],candle:['kh_throne1_3','lamp',1.2],
+  throne:['kh_throne1_0','statue',1.4],banner:['kh_throne1_1','banner',1.3],maptable:['kh_maptable1_1','counter',.72],mapstand:['kh_maptable1_0','counter',1.35],candle:['kh_throne1_3','lamp',1.2],
   stallA:['kh_stall1_0','cart',.95],stallB:['kh_stall1_1','cart',.95],stallC:['kh_stall1_2','cart',.95],stallD:['kh_stall1_3','cart',.95],stallE:['kh_stall1_4','cart',.95],stallF:['kh_stall1_5','cart',.95],
   melons:['kh_stall2_0','crate',.5],amphorae:['kh_stall2_1','urn',.7],hay:['kh_stall2_2','cart',.7],veg:['kh_stall2_3','produce',.55],carpets:['kh_stall2_4','sacks',.6],copper:['kh_stall2_5','urn',.8],
   vase0:['vase0','vase0',.55],vase1:['vase1','vase1',.7],vase2:['vase2','vase2',.6],vase3:['vase3','vase3',.55]
@@ -9882,10 +9936,10 @@ function khCrowd(C,L){
       else if(r<.20)walkThrough({k:vases[(x+y)&3],x,y,sc:big(x,y)});
       else if(r<.215)walkThrough({k:'urn',x,y,sc:big(x,y)});
       else if(r<.235){const q=khHash(x,y,15);walkThrough({k:khProp(q<.3?'planter':q<.55?'pot':q<.8?'shrub':'tree'),x,y,sc:.95+khHash(x,y,16)*.2})}
-    }else if(d5[i]&&r>.997)walkThrough({k:'lamp',x,y});
+    }
   }
-  // lamps down the great avenue
-  for(let y=250;y<H-10;y+=10)for(const x of [KH.CX-5,KH.CX+5]){const q=near(x,y,1,false);if(q)add({k:'lamp',x:q[0],y:q[1],block:false,walk:true})}
+  // lanterns on the streets and squares, braziers at the palace gate, fires in the Beggars' Quarter, lanterns hung across the streets
+  khPlaceLights(C,L,{occ,open,d3,run,add});
   // ---- cats in the alleys ----
   const cats=[[40,180],[330,120],[190,60],[240,350]];
   cats.forEach(([cx,cy],ci)=>{
@@ -9986,6 +10040,151 @@ function khResidentName(d){
   const t=KH_GENERIC[d.npc];if(t===undefined)return null;
   const nm=KH_NAMES[(hash2(d.x*7+3,d.y*5+1,LEVEL)*KH_NAMES.length)|0];
   return t?t+' '+nm:nm+(d.npc.endsWith('p1')?', a traveller':', a merchant');
+}
+
+/* ---- src/desert/khemetra_lights.js ---- */
+/* ==========================================================================
+   KHEMETRA: THE LIGHTS. Arabian lanterns on posts and pedestals along every street and round the great square before the
+   palace, some of them red, hardly any in the Beggars' Quarter (a few red ones and fires on the ground there), copper
+   braziers at the palace gate, and strings of lanterns hung across the narrow streets and the great avenue. Each one is a
+   painted picture (assets/kh lant1, lant2, fire1, hang1); the game lights the streets from them at night (setupLights).
+   ========================================================================== */
+// [picture, height in cells, glow centre across (fraction of the width, from the middle), glow centre down (fraction of the height)]
+const KH_LANT_AMBER=[['kh_lant1_0',1.55,0,.19],['kh_lant1_1',1.35,0,.2],['kh_lant1_2',1.05,0,.3],['kh_lant1_3',1.5,0,.19],['kh_lant1_4',1.6,.26,.4],['kh_lant1_5',1.0,0,.5]];
+const KH_LANT_RED=[['kh_lant2_0',1.5,.15,.33],['kh_lant2_1',1.55,.34,.48],['kh_lant2_2',1.05,0,.22],['kh_lant2_3',1.5,0,.2],['kh_lant2_4',1.5,.23,.29],['kh_lant2_5',1.35,0,.3]];
+// barrel, logs, stone ring, copper brazier, pot on a tripod, burning crates: [picture, height in cells, where the flames are, down the picture]
+const KH_FIRES=[['kh_fire1_0',.8,.14],['kh_fire1_1',.5,.3],['kh_fire1_2',.45,.35],['kh_fire1_3',.85,.28],['kh_fire1_4',.8,.78],['kh_fire1_5',.55,.45]];
+const KH_HANG_H=.62;     // a hanging lantern with its cord, in cells
+const KH_HANG_RED=new Set([3,4]);   // which of the hanging pictures are the red ones (hang1_5, a ball with no chain, is not used)
+
+function khPlaceLights(C,L,E){
+  const W=C.W,H=C.H,idx=C.idx,occ=E.occ,open=E.open,d3=E.d3,run=E.run,add=E.add,decor=L.decor;
+  const rng=khRng(4242);
+  const have=a=>a.filter(p=>IMG[p[0]]);
+  const amber=have(KH_LANT_AMBER),red=have(KH_LANT_RED);
+  for(const p of amber.concat(red))NPC_H[p[0]]=p[1];
+  for(const p of KH_FIRES)if(IMG[p[0]])NPC_H[p[0]]=p[1];
+  const wallNear=(x,y)=>KH_DIRS.some(([a,b])=>!open(x+a,y+b));
+  const inYard=(x,y)=>x>=KH.CX-15&&x<=KH.CX+15&&y>=236&&y<=252;     // the great square before the palace gate
+  const redBlock=(x,y)=>khHash(x>>5,y>>5,71)<.13;                    // a few districts are lit red
+  // ---- where a lantern may stand: spacing is kept with a grid of the ones already placed ----
+  const BS=32,grid=new Map();
+  const tooClose=(x,y,S)=>{
+    const gx=(x/BS)|0,gy=(y/BS)|0;
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const l=grid.get((gx+dx)+','+(gy+dy));if(l)for(const q of l){const ax=q[0]-x,ay=q[1]-y;if(ax*ax+ay*ay<S*S)return true}}
+    return false;
+  };
+  const note=(x,y)=>{const k=((x/BS)|0)+','+((y/BS)|0);const l=grid.get(k);if(l)l.push([x,y]);else grid.set(k,[[x,y]])};
+  const pickFrom=(arr,x,y,seed,sub)=>{const a=sub?sub.map(k=>arr[k]).filter(Boolean):arr;return a.length?a[(khHash(x,y,seed)*a.length)|0]:null};
+  const lantern=(x,y,isRed,sub)=>{
+    const list=isRed&&red.length?red:amber;
+    const p=pickFrom(list,x,y,81,sub&&sub.filter(k=>k<list.length));
+    const d={k:'lamp',x,y,block:false,walk:true,red:!!isRed};
+    if(p){d.lk=p[0];d.glow=[p[2],p[3]]}
+    return add(d);
+  };
+  // ---- candidates, in a scattered order so the lanterns do not fall into a grid ----
+  const cand=[];
+  for(let y=5;y<H-5;y++)for(let x=5;x<W-5;x++){const i=idx(x,y);if(open(x,y)&&C.reach[i]&&!occ[i])cand.push(i)}
+  const order=cand.map(i=>[khHash(i%W,(i/W)|0,83),i]).sort((a,b)=>a[0]-b[0]).map(a=>a[1]);
+  const passes=[ // [name, which cells, spacing]
+    ['yard',(x,y,i)=>inYard(x,y)&&(wallNear(x,y)||d3[i]),5],
+    ['palace',(x,y,i)=>C.zone[i]===6&&!inYard(x,y)&&d3[i],8],
+    ['plaza',(x,y,i)=>(C.zone[i]===1||C.zone[i]===3||C.zone[i]===4||C.zone[i]===5)&&d3[i]&&!khInPQ(x,y),8],
+    ['park',(x,y,i)=>C.zone[i]===2&&wallNear(x,y)&&!khInPQ(x,y),11],
+    ['street',(x,y,i)=>C.zone[i]===0&&!inYard(x,y)&&!khInPQ(x,y)&&wallNear(x,y),8.5],
+    ['poor',(x,y,i)=>khInPQ(x,y)&&wallNear(x,y),26]
+  ];
+  let nL=0,nR=0;
+  for(const [name,ok,S] of passes){
+    for(const i of order){
+      if(occ[i])continue;
+      const x=i%W,y=(i/W)|0;
+      if(!ok(x,y,i)||tooClose(x,y,S))continue;
+      const wd=Math.min(run[i*2],run[i*2+1]);
+      let isRed=false,sub=null;
+      if(name==='poor'){isRed=true;sub=[0,3,4]}
+      else{
+        const bazaar=C.plazas.some(p=>(p.name==='The Grand Bazaar'||p.name==='The Court of Baths'||p.name==='The Spice Market')&&x>=p.x0-2&&x<=p.x1+2&&y>=p.y0-2&&y<=p.y1+2);
+        isRed=(bazaar&&khHash(x,y,84)<.55)||redBlock(x,y);
+        if(name==='yard'||name==='palace')sub=[2,1,5,3];
+        else if(name==='plaza')sub=[2,5,1,4];
+        else if(name==='park')sub=[1,5,2];
+        else sub=wd<=3?[0,1,3,4]:[0,1,3,4,2];
+      }
+      lantern(x,y,isRed,sub);note(x,y);if(isRed)nR++;else nL++;
+    }
+  }
+  // ---- copper braziers at the corners of the great square and either side of the palace gate ----
+  const brz=IMG.kh_fire1_3?KH_FIRES[3]:null;
+  if(brz)for(const [bx,by] of [[KH.CX-8,241],[KH.CX+8,241],[KH.CX-8,245],[KH.CX+8,245],[KH.CX-4,240],[KH.CX+4,240]]){
+    let q=null;for(let r=0;r<=2&&!q;r++)for(let dy=-r;dy<=r&&!q;dy++)for(let dx=-r;dx<=r;dx++){const xx=bx+dx,yy=by+dy,i=idx(xx,yy);if(open(xx,yy)&&C.reach[i]&&!occ[i]){q=[xx,yy];break}}
+    if(q)add({k:'cfire',lk:brz[0],x:q[0],y:q[1],block:true,deco:true,glow:[0,brz[2]]});
+  }
+  // ---- fires on the ground in the Beggars' Quarter: barrels, logs, a ring of stones, a pot, burning crates ----
+  let nF=0;
+  const fires=[0,1,2,4,5,0,1].filter(k=>IMG[KH_FIRES[k][0]]);
+  if(fires.length){
+    const fcand=cand.filter(i=>{const x=i%W,y=(i/W)|0;return khInPQ(x,y)&&d3[i]&&!occ[i]}).map(i=>[khHash(i%W,(i/W)|0,85),i]).sort((a,b)=>a[0]-b[0]);
+    const fgrid=[];
+    for(const [,i] of fcand){
+      if(nF>=9)break;
+      const x=i%W,y=(i/W)|0;
+      if(fgrid.some(q=>(q[0]-x)**2+(q[1]-y)**2<15*15))continue;
+      const k=fires[nF%fires.length];
+      add({k:'cfire',lk:KH_FIRES[k][0],x,y,block:true,deco:true,glow:[0,KH_FIRES[k][2]]});
+      fgrid.push([x,y]);nF++;
+    }
+  }
+  L.khLights={lanterns:nL,red:nR,fires:nF};
+  khPlaceHanging(C,L,E);
+}
+
+/* strings of lanterns hung across the narrow streets and the great avenue */
+function khPlaceHanging(C,L,E){
+  const W=C.W,H=C.H,idx=C.idx,open=E.open,run=E.run,decor=L.decor;
+  const pics=[0,1,2,3,4].filter(k=>IMG['kh_hang1_'+k]);
+  if(!pics.length)return;
+  for(const k of pics)NPC_H['kh_hang1_'+k]=KH_HANG_H;
+  const amberP=pics.filter(k=>!KH_HANG_RED.has(k)),redP=pics.filter(k=>KH_HANG_RED.has(k));
+  const wallH=(x,y)=>{const ch=L.rows[y]&&L.rows[y][x],g=ch!==undefined?L.chars[ch]:undefined,ti=g!==undefined?T_TILE[g]:undefined;return ti!==undefined&&TEX[ti]&&TEX[ti].wh?TEX[ti].wh:2.4};
+  const BS=32,grid=new Map();
+  const tooClose=(x,y,S)=>{const gx=(x/BS)|0,gy=(y/BS)|0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const l=grid.get((gx+dx)+','+(gy+dy));if(l)for(const q of l){const ax=q[0]-x,ay=q[1]-y;if(ax*ax+ay*ay<S*S)return true}}return false};
+  const note=(x,y)=>{const k=((x/BS)|0)+','+((y/BS)|0);const l=grid.get(k);if(l)l.push([x,y]);else grid.set(k,[[x,y]])};
+  let strings=0,count=0;
+  const hangString=(cells,across,main)=>{ // cells: the squares across the street, in order; across: [dx,dy] of the street's side walls
+    const n=cells.length,first=cells[0],last=cells[n-1];
+    const wA=wallH(first[0]-across[0],first[1]-across[1]),wB=wallH(last[0]+across[0],last[1]+across[1]);
+    const top=Math.max(1.75,Math.min(2.4,Math.min(wA,wB)-.1));   // above the heads of the people in the street, whatever the height of the houses
+    const isRed=!main&&khHash(first[0]>>5,first[1]>>5,71)<.13;
+    const mid=(n-1)/2;
+    cells.forEach(([x,y],k)=>{
+      const sag=.22*(1-Math.pow((k-mid)/Math.max(1,mid+.5),2));    // the string sags in the middle
+      const pool=isRed&&redP.length?redP:amberP.length?amberP:pics;
+      const pk=pool[(khHash(x,y,86)*pool.length)|0];
+      const d={k:'hlant',lk:'kh_hang1_'+pk,x,y,block:false,bob:Math.max(.9,top-KH_HANG_H-sag),red:KH_HANG_RED.has(pk)};
+      if(Math.abs(k-mid)<=.5||(main&&(k===1||k===n-2)))d.lit=true;
+      decor.push(d);count++;
+    });
+    strings++;
+  };
+  for(let y=8;y<H-8;y++)for(let x=8;x<W-8;x++){
+    const i=idx(x,y);if(!C.reach[i]||!open(x,y)||C.zone[i]!==0||khInPQ(x,y))continue;
+    const rh=run[i*2],rv=run[i*2+1];
+    const avenue=x>=KH.CX-4&&x<=KH.CX+4&&y>=250&&y<=H-14;
+    // a north-south street: narrow across, long along; this square is the west end of its row
+    if(!open(x-1,y)&&((rh>=2&&rh<=3&&rv>=8)||(avenue&&rh===9))){
+      const cells=[];let ok=true;for(let k=0;k<rh;k++){const j=idx(x+k,y);if(!C.reach[j]||run[j*2+1]<8){ok=false;break}cells.push([x+k,y])}
+      const main=avenue&&rh===9;
+      if(ok&&!tooClose(x+rh/2,y,main?11:15)&&khHash(x,y,87)<(main?1:.8)){hangString(cells,[1,0],main);note(x+rh/2,y)}
+    }
+    // an east-west street: narrow across, long along; this square is the north end of its column
+    else if(!open(x,y-1)&&rv>=2&&rv<=3&&rh>=8){
+      const cells=[];let ok=true;for(let k=0;k<rv;k++){const j=idx(x,y+k);if(!C.reach[j]||run[j*2]<8){ok=false;break}cells.push([x,y+k])}
+      if(ok&&!tooClose(x,y+rv/2,15)&&khHash(x,y,88)<.8){hangString(cells,[0,1],false);note(x,y+rv/2)}
+    }
+  }
+  if(L.khLights)L.khLights.strings=strings,L.khLights.hung=count;
 }
 
 /* ---- src/desert/khemetra_mapview.js ---- */

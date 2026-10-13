@@ -3,7 +3,7 @@
     python tools/ingest_kh.py <sheet.jpg> <name> <fac|sprite|tex> [cols=<n> rows=<n>] [maxh=<px>]
 
 fac     each house front is cropped out and saved as assets/kh/<name>_<k>.jpg (opaque, a flat wall)
-sprite  each picture is keyed out of the magenta and saved as assets/kh/<name>_<k>.webp (with transparency)
+sprite  each picture is keyed out of the magenta and saved as assets/kh/<name>_<k>.webp (with transparency); soft=1 keeps thin dark parts and takes the purple fringe off flames
 tex     the sheet is cut into a cols x rows grid of seamless squares, saved as assets/kh/<name>_<k>.jpg
 
 Pieces are numbered in reading order. assets/kh/manifest.json lists every piece with its size.
@@ -79,10 +79,11 @@ else:
     # columns first (the gaps between neighbours are widest sideways), then the pieces stacked in each column
     forced_rows = int(opts.get('rows', 0))
     gapx = 3 if kind == 'sprite' else 6
-    for (x0, x1) in (runs(fg.sum(axis=0) > 6, gapx) if opts.get('order') != 'rows' else []):
+    thin = bool(opts.get('soft'))   # soft: a one or two pixel rope or chain still counts as part of the picture
+    for (x0, x1) in (runs(fg.sum(axis=0) > (2 if thin else 6), gapx) if opts.get('order') != 'rows' else []):
         if x1 - x0 < 40: continue
         col = fg[:, x0:x1 + 1]
-        spans = runs(col.sum(axis=1) > 3, 2)
+        spans = runs(col.sum(axis=1) > (0 if thin else 3), 2)
         if forced_rows and len(spans) < forced_rows:
             ys = np.where(col.sum(axis=1) > 3)[0]; top, bot = ys[0], ys[-1] + 1
             h = (bot - top) / forced_rows
@@ -138,8 +139,20 @@ for (x0, y0, x1, y1) in pieces:
         arr = np.array(crop).astype(int)
         rr, gg, bb = arr[..., 0], arr[..., 1], arr[..., 2]
         key = (rr > 140) & (bb > 140) & (gg < 125) & (np.abs(rr - bb) < 90)
-        alpha = Image.fromarray(np.where(key, 0, 255).astype(np.uint8)).filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(0.7))
+        if opts.get('soft'):   # thin dark parts (iron posts, chains) survive: no erosion, only the pixels beside the background lose opacity by how magenta they are
+            mg = np.minimum(rr, bb) - gg
+            edge = np.array(Image.fromarray((key * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(3))) > 0
+            edge &= ~key
+            a_ = np.where(key, 0, 255).astype(float)
+            a_[edge] = np.clip(255 * (1 - (mg[edge] - 30) / 90.0), 0, 255)
+            alpha = Image.fromarray(a_.astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.5))
+            # a purple fringe round bright things (flames): the magenta part of an edge pixel is taken out
+            fr = edge & (mg > 25)
+            arr[..., 0][fr] = np.minimum(rr[fr], gg[fr] + 25); arr[..., 2][fr] = np.minimum(bb[fr], gg[fr] + 25)
+        else:
+            alpha = Image.fromarray(np.where(key, 0, 255).astype(np.uint8)).filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(0.7))
         # pull the magenta out of the edge pixels
+        rr, gg, bb = arr[..., 0], arr[..., 1], arr[..., 2]
         arr[..., 0] = np.minimum(rr, np.maximum(gg, 50) + 100); arr[..., 2] = np.minimum(bb, np.maximum(gg, 50) + 100)
         out = Image.fromarray(arr.clip(0, 255).astype(np.uint8)).convert('RGBA'); out.putalpha(alpha)
         bb_ = out.getchannel('A').point(lambda v: 255 if v > 100 else 0).getbbox()
