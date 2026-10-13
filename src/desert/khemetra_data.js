@@ -35,7 +35,7 @@ function khStory(){
   const F=G.flags,x=G.P.x,y=G.P.y;
   if(khInPQ(x,y)&&!F.zPQ){F.zPQ=1;msg("The Beggars' Quarter. The houses lean together, rubbish lies in the doorways, and eyes watch from the shadows. Thieves and brigands lurk here.",'#e8a090')}
   else if(x<125&&y<125&&!F.zOld){F.zOld=1;msg('The Old Quarter. Half the houses have fallen in. Dogs and the restless dead keep it now.','#d8c8a0')}
-  if(x>=160&&x<=240&&y>=162&&y<=238&&!F.zCourt){F.zCourt=1;msg('The court of the palace. White marble, gold leaf, and guards who do not blink.','#ffe9a0')}
+  if(x>=160&&x<=240&&y>=162&&y<=238&&!F.zCourt){F.zCourt=1;msg('The Court of the Golden Sun, the square round the palace. White marble, gold leaf, and guards who do not blink.','#ffe9a0')}
 }
 
 /* the terrace inside the gate: the party arrives on a high platform and walks down a long stair into the avenue */

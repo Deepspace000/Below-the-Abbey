@@ -250,6 +250,7 @@ function khMapLabels(C){
   add('THE GREAT GATE',KH.CX,C.H-KH.WALL-2,1,{k:'major',col:'#5a2a0a'});
   add('The Avenue of the Sun',KH.CX+5.5,318,2,{k:'road',col:'#3a2a16',rot:-Math.PI/2});
   add('Ring Road',KH.CX,246,3,{k:'road',col:'#4a3820'});add('West Road',75,KH.CY+.5,3,{k:'road',col:'#4a3820'});add('East Road',325,KH.CY+.5,3,{k:'road',col:'#4a3820'});
+  add('THE COURT OF THE GOLDEN SUN',KH.CX,C.PB.y1+14,1,{k:'major',col:'#7a5a10'});
   add('The Palace Gate',KH.CX,243,3,{k:'road',col:'#5a2a0a'});
   // squares, markets, parks, ponds
   let pi=0;const pn=khShuffled(KH_PARK_NAMES,41);

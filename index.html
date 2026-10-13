@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.16';
+const VERSION='3.17';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -9083,7 +9083,7 @@ function khStory(){
   const F=G.flags,x=G.P.x,y=G.P.y;
   if(khInPQ(x,y)&&!F.zPQ){F.zPQ=1;msg("The Beggars' Quarter. The houses lean together, rubbish lies in the doorways, and eyes watch from the shadows. Thieves and brigands lurk here.",'#e8a090')}
   else if(x<125&&y<125&&!F.zOld){F.zOld=1;msg('The Old Quarter. Half the houses have fallen in. Dogs and the restless dead keep it now.','#d8c8a0')}
-  if(x>=160&&x<=240&&y>=162&&y<=238&&!F.zCourt){F.zCourt=1;msg('The court of the palace. White marble, gold leaf, and guards who do not blink.','#ffe9a0')}
+  if(x>=160&&x<=240&&y>=162&&y<=238&&!F.zCourt){F.zCourt=1;msg('The Court of the Golden Sun, the square round the palace. White marble, gold leaf, and guards who do not blink.','#ffe9a0')}
 }
 
 /* the terrace inside the gate: the party arrives on a high platform and walks down a long stair into the avenue */
@@ -10656,6 +10656,7 @@ function khMapLabels(C){
   add('THE GREAT GATE',KH.CX,C.H-KH.WALL-2,1,{k:'major',col:'#5a2a0a'});
   add('The Avenue of the Sun',KH.CX+5.5,318,2,{k:'road',col:'#3a2a16',rot:-Math.PI/2});
   add('Ring Road',KH.CX,246,3,{k:'road',col:'#4a3820'});add('West Road',75,KH.CY+.5,3,{k:'road',col:'#4a3820'});add('East Road',325,KH.CY+.5,3,{k:'road',col:'#4a3820'});
+  add('THE COURT OF THE GOLDEN SUN',KH.CX,C.PB.y1+14,1,{k:'major',col:'#7a5a10'});
   add('The Palace Gate',KH.CX,243,3,{k:'road',col:'#5a2a0a'});
   // squares, markets, parks, ponds
   let pi=0;const pn=khShuffled(KH_PARK_NAMES,41);
