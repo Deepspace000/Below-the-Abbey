@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.04';
+const VERSION='3.05';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2087,7 +2087,9 @@ function runEnemies(es,i){
   if(G.state!=='play')return;
   while(i<es.length&&es[i].hp<=0)i++;
   if(i>=es.length){finishRound();return}
-  const dur=enemyAct(es[i]);
+  const e=es[i],far=()=>Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)>12,was=far();
+  let dur=enemyAct(e);
+  if(was&&far())dur=0; // a creature far out of sight takes its turn at once, so walking never waits on it
   later(dur,()=>runEnemies(es,i+1));
 }
 function enemyAttack(e){
@@ -2391,7 +2393,8 @@ function render3D(){
   HH=105+climbView(cx,cy,dX,dY);
   // lights near camera, with flicker
   nearL.length=0;nearR.length=0;G.hits=[];for(const L of LIGHTS)L._h=null;
-  for(const L of LIGHTS){if(L.taken)continue;const d2=(L.x-cx)**2+(L.y-cy)**2;if(d2<(L.lamp?56:100)){
+  for(const L of LIGHTS){if(L.taken)continue;if(L.lamp&&LEVEL===44&&(G.day||0)>.5)continue; // the city's lamps are dark by day
+    const d2=(L.x-cx)**2+(L.y-cy)**2;if(d2<(L.lamp?56:100)){
     // walls block torchlight: fade each torch in/out by line of sight to the camera
     const tgt=lightSees(cx,cy,L.x,L.y)?1:0;
     L.vis=(L.vis===undefined?tgt:L.vis)+clamp(tgt-(L.vis===undefined?tgt:L.vis),-.06,.06);
@@ -2626,7 +2629,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     if(tY<.25)continue;
     s.tX=tX;s.tY=tY;proj.push(s);
   }
-  proj.sort((a,b)=>b.tY-a.tY);
+  proj.sort((a,b)=>b.tY-a.tY);G._sprN=proj.length;
   for(const s of proj){
     const img=s.img;if(!img)continue;
     const iw=img.width,ih=img.height,ty=s.tY;
@@ -2651,17 +2654,24 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     const trD=(G.day||0)>0&&s.decor&&NOSHADOW.test(s.decor.k)&&LEVEL!==32&&LEVEL!==33&&!GRIM_L(); // woodland trees fade into dark green, not pale haze
     const lum=clamp(.08+(Math.max(baseL(dist),G.day||0,G.amb||0)+lt*.85)*1.05,0,1)*(GRIM_L()?.66:trD?.78:1);
     const kq0=Math.min(1,Math.max(.05,2*sw/iw)),dyv=(G.day||0)>0,hzv=GRIM_L()?[30,46,32]:trD?[40,54,42]:dyv?[132,146,132]:[86,76,62],smS=Math.min(dyv?.4:.26,dist*(dyv?.04:.03))*(GRIM_L()?.55:.75);
-    let SRC,tw,th;
+    let SRC,tw,th,HZ=null,hA=0;
     if(!s.flash&&!(s.decor&&s.decor.burn>0)){
       let tier=SPR_TIERS[SPR_TIERS.length-1];for(const t of SPR_TIERS){if(t>=iw*kq0){tier=t;break}}
       tw=Math.max(2,Math.min(iw,tier));th=Math.max(2,Math.round(ih*tw/iw));
-      const lq=s.sky?Math.round(lum*6)*4:Math.round(lum*24),hq=s.sky?Math.round(smS*10)*5:Math.round(smS*50),key=(img._cid||(img._cid=++SPR_CID))+'|'+tw+'|'+lq+'|'+hq+(dyv?'d':'n');
+      const kh=LEVEL===44&&!s.sky; // in the city the haze is laid on at draw time, so a sprite needs one copy per size, not one per step of distance
+      const lq=s.sky?Math.round(lum*6)*4:kh?Math.round(lum*12)*2:Math.round(lum*24),hq=s.sky?Math.round(smS*10)*5:kh?0:Math.round(smS*50),key=(img._cid||(img._cid=++SPR_CID))+'|'+tw+'|'+lq+'|'+hq+(dyv?'d':'n');
       SRC=SPR_CACHE.get(key);
       if(!SRC){
         SRC=document.createElement('canvas');SRC.width=tw;SRC.height=th;const X=SRC.getContext('2d');X.drawImage(img,0,0,iw,ih,0,0,tw,th);
         X.globalCompositeOperation='source-atop';X.fillStyle=`rgba(8,5,3,${(1-lq/24).toFixed(3)})`;X.fillRect(0,0,tw,th);
         if(hq>1){X.fillStyle=`rgba(${hzv[0]},${hzv[1]},${hzv[2]},${(hq/50).toFixed(3)})`;X.fillRect(0,0,tw,th)}
         SPR_CACHE.set(key,SRC);if(SPR_CACHE.size>900)SPR_CACHE.delete(SPR_CACHE.keys().next().value);
+      }
+      if(kh&&smS>.01){ // the haze: the sprite's own shape in the haze colour, drawn over it at the right strength
+        const hk=img._cid+'|'+tw+'|z'+hzv.join(',');HZ=SPR_CACHE.get(hk);
+        if(!HZ){HZ=document.createElement('canvas');HZ.width=tw;HZ.height=th;const X=HZ.getContext('2d');X.drawImage(img,0,0,iw,ih,0,0,tw,th);X.globalCompositeOperation='source-in';X.fillStyle=`rgb(${hzv[0]},${hzv[1]},${hzv[2]})`;X.fillRect(0,0,tw,th);
+          SPR_CACHE.set(hk,HZ);if(SPR_CACHE.size>900)SPR_CACHE.delete(SPR_CACHE.keys().next().value)}
+        hA=smS;
       }
     }else{
       tw=Math.max(2,Math.round(iw*kq0));th=Math.max(2,Math.round(ih*kq0));
@@ -2673,6 +2683,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
       if(s.flash>0){X.fillStyle=`rgba(255,70,40,${(s.flash*.55).toFixed(3)})`;X.fillRect(0,0,tw,th)}
     }
     if(s.fade!==undefined&&s.fade<1){SC.globalAlpha=Math.max(0,s.fade)}
+    const blit=(sx,sy,sw2,sh2,dx,dy,dw,dh)=>{SC.drawImage(SRC,sx,sy,sw2,sh2,dx,dy,dw,dh);if(HZ){const ga=SC.globalAlpha;SC.globalAlpha=ga*hA;SC.drawImage(HZ,sx,sy,sw2,sh2,dx,dy,dw,dh);SC.globalAlpha=ga}};
     if(s.decor&&SKYLINE.test(s.decor.k)){ // the tower, or the far city, rises behind a wall: draw only what stands above the nearest wall
       const xa=Math.max(0,Math.floor(left)),xb=Math.min(VW-1,Math.ceil(left+sw)),ku=tw/sw;
       let rs=-1,rc=0;
@@ -2699,14 +2710,14 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     }
     let run=-1,allVis=x1>x0;
     for(let x=x0;x<x1;x++)if(!(zbuf[x]>ty)){allVis=false;break}
-    if(allVis){SC.drawImage(SRC,0,0,tw,th,left,top,sw,sh);anyVis=true;x0=x1+1}
+    if(allVis){blit(0,0,tw,th,left,top,sw,sh);anyVis=true;x0=x1+1}
     for(let x=x0;x<=x1;x++){
       const vis=x<x1&&zbuf[x]>ty;
       if(vis&&run<0)run=x;
       if(vis)anyVis=true;
       if((!vis||x===x1)&&run>=0){
         const u0=(run-left)/sw*tw,u1=(x-left)/sw*tw;
-        SC.drawImage(SRC,u0,0,Math.max(.5,u1-u0),th,run,top,x-run,sh);
+        blit(u0,0,Math.max(.5,u1-u0),th,run,top,x-run,sh);
         run=-1;
       }
     }
@@ -5919,9 +5930,10 @@ Object.assign(NPCS,{
 });
 for(const k of ['witch','hermit','p_monk','p_lonely','p_stones','p_traveller','p_hunter'])NPCS_BY[NPCS[k].name]=NPCS[k];
 
-function drawQuestMarks(ox,oy,cs,big){
+function drawQuestMarks(ox,oy,cs,big,rad){ // rad: only the marks within that many squares of the party (the minimap)
   const pulse=.6+.4*Math.sin(G.time*5);
-  for(const d of G.decor){
+  for(const d of (rad&&LEVEL===44&&G.khB?khNearDecor(G.C.x,G.C.y):G.decor)){
+    if(rad&&(Math.abs(d.x-G.C.x)>rad||Math.abs(d.y-G.C.y)>rad))continue;
     const qv=QGIVER[d.npc];if(!qv||d.found)continue;
     const q=Array.isArray(qv)?qv.find(z=>qSt(z)!=='done'):qv;if(!q)continue;
     const st=qSt(q),ready=qReady(q);
@@ -5938,7 +5950,7 @@ function drawMinimap(x,y,w,h){
   ctx.save();ctx.fillStyle='#0b0907';ctx.fillRect(x,y,w,h);
   ctx.beginPath();ctx.rect(x+2,y+2,w-4,h-4);ctx.clip();
   const cs=4.6,ox=x+w/2-(G.C.x+.5)*cs,oy=y+h/2-(G.C.y+.5)*cs;
-  drawMapCells(ox,oy,cs);drawQuestMarks(ox,oy,cs,false);
+  drawMapCells(ox,oy,cs);drawQuestMarks(ox,oy,cs,false,Math.ceil(w/cs/2)+1);
   for(const it of G.items)if(!it.taken&&G.seen[it.y][it.x]){ctx.fillStyle=it.k==='key'?'#ffd76a':'#c8b078';ctx.fillRect(ox+(it.x+.5)*cs-1,oy+(it.y+.5)*cs-1,2.2,2.2)}
   for(const e of G.enemies)if(e.hp>0&&Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)<=7&&hasLOS(e.x,e.y,G.P.x,G.P.y)){ctx.fillStyle='#e03a2a';ctx.beginPath();ctx.arc(ox+(e.rx+.5)*cs,oy+(e.ry+.5)*cs,cs*.5,0,TAU);ctx.fill()}
   const vg=ctx.createRadialGradient(x+w/2,y+h/2,h*.25,x+w/2,y+h/2,w*.62);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.6)');ctx.fillStyle=vg;ctx.fillRect(x,y,w,h);
@@ -5947,12 +5959,12 @@ function drawMinimap(x,y,w,h){
 }
 function drawMapCells(ox,oy,cs){
   const bx0=Math.max(0,Math.floor(-ox/cs)),bx1=Math.min(MW,Math.ceil((DW-ox)/cs)),by0=Math.max(0,Math.floor(-oy/cs)),by1=Math.min(MH,Math.ceil((DH-oy)/cs)); // only the cells on screen
-  const blk=new Set();for(const d of G.decor)if(d.block)blk.add(d.y*MW+d.x);
+  const dm=G.dmap;let blk=null;if(!dm){blk=new Set();for(const d of G.decor)if(d.block)blk.add(d.y*MW+d.x)} // the decor map already knows the blocked squares
   for(let y=by0;y<by1;y++)for(let x=bx0;x<bx1;x++){
     if(!G.seen[y][x])continue;
     const g=G.grid[y][x];
     ctx.fillStyle=g===0?'#7a6446':g>=200?'#a8702e':g>=100?'#45403a':g>=30?'#d8b060':(g>=15&&g<=19)?'#a8702e':(g>=20&&g<=22)?'#45403a':g===3?'#a8702e':g===4?'#c03a2a':g===5?'#7ab0f0':g===6?'#2c4a2a':g===7?'#d8b060':g===8?'#6a4a24':'#45403a';
-    if(g===0&&blk.has(y*MW+x))ctx.fillStyle='#4a3a28';
+    if(g===0&&(dm?dm.has(y*MW+x):blk.has(y*MW+x)))ctx.fillStyle='#4a3a28';
     ctx.fillRect(ox+x*cs,oy+y*cs,cs,cs);
     if(g>0&&g<3){ctx.fillStyle='rgba(255,255,255,.07)';ctx.fillRect(ox+x*cs,oy+y*cs,cs,Math.max(1,cs*.2))}
   }
@@ -6205,7 +6217,7 @@ function drawMenu(){
   btnText('savemenu','Save / Load',100,140,130,26);btnText('overview','Level layout',250,140,130,26);
   btnText('newparty','New party',100,172,130,26);btnText('restart','Restart game',250,172,130,26);
   btnText('quittitle','Quit to title',170,204,140,24);
-  const L=['W / S: forward and back   A / D: step sideways   Q / E: turn   (arrow keys work too)','Space: attack   X: special   P: potion   Z: wait   R: rest','1-4: choose hero   I: inventory   J: quests   M: map   Esc: menu',
+  const L=['W / S: forward and back   A / D: step sideways   Q / E: turn   (arrow keys work too)','Space: attack   X: special   P: potion   Z: wait   R: rest','1-4: choose hero   I: inventory   J: quests   M: map   F: frame counter   Esc: menu',
     'Tap a portrait to open that hero\'s inventory.','Tap people, goats, torches and items in the view.','You can also walk into a person to talk to them.','Heroes act once per round, then the monsters move.'];
   L.forEach((s,i)=>txt(s,240,240+i*9.5,8,'#d8c9a0','center'));
   btn('menuclose',0,0,DW,DH); BTNS.unshift(BTNS.pop());
@@ -6364,13 +6376,25 @@ function drawSmoke(t){ // seamless drifting layers: one repeating pattern each, 
   }
 }
 let last=performance.now();
+let FPS_ON=false;try{FPS_ON=localStorage.getItem('abbeyFPS')==='1'}catch(e){}
+const FPSD={iv:[],wk:[],last:0};
+function drawFps(now,work){ // F: frames per second, the slowest recent frame, and how long the game itself took
+  const gap=now-FPSD.last;if(FPSD.last&&gap>0&&gap<2000)FPSD.iv.push(gap);FPSD.last=now;FPSD.wk.push(work);
+  while(FPSD.iv.length>120)FPSD.iv.shift();while(FPSD.wk.length>120)FPSD.wk.shift();
+  const iv=FPSD.iv,n=iv.length;if(!n)return;
+  const avg=iv.reduce((a,b)=>a+b,0)/n,mx=Math.max(...iv),wa=FPSD.wk.reduce((a,b)=>a+b,0)/FPSD.wk.length;
+  ctx.save();ctx.fillStyle='rgba(0,0,0,.62)';ctx.fillRect(262,4,154,30);ctx.font='9px monospace';ctx.textAlign='left';ctx.textBaseline='top';
+  ctx.fillStyle=avg<20?'#9f9':avg<34?'#ff9':'#f99';ctx.fillText((1000/avg).toFixed(0)+' fps   slowest '+mx.toFixed(0)+' ms',267,8);
+  ctx.fillStyle='#ddd';ctx.fillText('game '+wa.toFixed(1)+' ms   sprites '+(G._sprN||0),267,20);ctx.restore();
+}
 function frame(now){
   const dt=Math.min(.05,(now-last)/1000);last=now;
+  const w0=performance.now();
   update(dt);
   // from above: the arrival in Khemetra, and the V key there, lift the camera over the roofs
   if(LEVEL===44){const ramp=khEyeAt(G.C.x,G.C.y);G.lookB=(G.lookB||0)+clamp((G.lookout?2.3:0)-(G.lookB||0),-1.3*dt,1.3*dt);G.eyeB=Math.max(ramp,G.lookB)}else{G.eyeB=0;G.lookB=0;G.lookout=false}
   if(G.eyeB>.01){if(G._cb===undefined)G._cb=CEILH;CEILH=G._cb+G.eyeB;EYE=EYE0+G.eyeB}else{if(G._cb!==undefined){CEILH=G._cb;G._cb=undefined}EYE=EYE0}
-  if(window.__ready){render3D();ctx.setTransform(2,0,0,2,0,0);ui(dt);crtPass(G.time)}
+  if(window.__ready){render3D();ctx.setTransform(2,0,0,2,0,0);ui(dt);crtPass(G.time);if(FPS_ON)drawFps(now,performance.now()-w0)}
   requestAnimationFrame(frame);
 }
 function handleBtn(id){
@@ -6554,6 +6578,7 @@ addEventListener('keydown',e=>{
   if((e.key==='o'||e.key==='O')&&G.state==='play'){G.overview=!G.overview;G.world=false;return}
   if((e.key==='j'||e.key==='J')&&G.state==='play'){G.menu=G.menu==='quests'?false:'quests';G.map=false;return}
   if(e.key==='m'||e.key==='M'){G.overview=!G.overview;G.menu=false;return}
+  if((e.key==='f'||e.key==='F')&&G.state==='play'){FPS_ON=!FPS_ON;FPSD.iv.length=0;FPSD.wk.length=0;FPSD.last=0;try{localStorage.setItem('abbeyFPS',FPS_ON?'1':'0')}catch(err){}msg(FPS_ON?'Frame counter on. Press F to hide it.':'Frame counter off.','#cfe8ff');return}
   if(G.menu||G.map||G.inv.open||G.loot)return;
   if(e.key>='1'&&e.key<='4'){const i=+e.key-1;if(G.heroes[i].alive)G.sel=i;return}
   const id=KEYMAP[e.key];if(id){e.preventDefault();if(MOVE_IDS.has(id)){if(e.repeat)return;if(!KDOWN.some(k=>k[0]===e.key))KDOWN.push([e.key,id])}act(id)}
@@ -8703,11 +8728,25 @@ function khLoadAssets(){
     try{KH_MAN=await (await fetch('assets/kh/manifest.json?v='+VERSION)).json()}catch(e){KH_MAN={}}
     const names=Object.keys(KH_MAN);
     await Promise.all(names.map(k=>loadImg('kh_'+k,'assets/kh/'+KH_MAN[k].file)));
+    khShrinkBig();
     KH_READY=true;
   })();
   return KH_LOADING;
 }
 const khImg=k=>IMG['kh_'+k];
+/* the house-front sheets: only needed to cut the wall tiles, so they are let go once the city is built (khFreeSheets) */
+const KH_SHEETS=/^kh_(fac[1-5]|shop[12]|temple1|bath1|palace1|castle1|pray1|ruin1)_/;
+/* a picture larger than it is ever drawn is kept at the largest size a sprite copy uses, 512 pixels on its longest side */
+function khShrinkBig(){
+  for(const k in IMG){
+    if(!k.startsWith('kh_')||KH_SHEETS.test(k))continue;
+    const im=IMG[k];if(!im||!im.width)continue;
+    const m=Math.max(im.width,im.height);if(m<=512)continue;
+    const w=Math.max(1,Math.round(im.width*512/m)),h=Math.max(1,Math.round(im.height*512/m));
+    IMG[k]=mkCanvas(w,h,x=>{x.imageSmoothingQuality='high';x.drawImage(im,0,0,w,h)});
+  }
+}
+function khFreeSheets(){for(const k in IMG)if(KH_SHEETS.test(k))delete IMG[k]}
 /* the strips of a facade picture that make up one, two or three storeys: [from, to] as fractions of the picture height */
 const KH_LV={1:[[0,.12],[.5,1]],2:[[0,1]],3:[[0,.12],[.12,.5],[.12,.5],[.5,1]]};
 function khFacadeEntry(key,n,lv,kindOf){
@@ -8826,6 +8865,7 @@ async function khPrepare(){
   KH_CITY=C;C.L=L;
   khSkyline(C,L);
   khCrowd(C,L);
+  khFreeSheets();
   if(typeof AREA_STATS!=='undefined')delete AREA_STATS[44];
   return C;
 }

@@ -11,11 +11,25 @@ function khLoadAssets(){
     try{KH_MAN=await (await fetch('assets/kh/manifest.json?v='+VERSION)).json()}catch(e){KH_MAN={}}
     const names=Object.keys(KH_MAN);
     await Promise.all(names.map(k=>loadImg('kh_'+k,'assets/kh/'+KH_MAN[k].file)));
+    khShrinkBig();
     KH_READY=true;
   })();
   return KH_LOADING;
 }
 const khImg=k=>IMG['kh_'+k];
+/* the house-front sheets: only needed to cut the wall tiles, so they are let go once the city is built (khFreeSheets) */
+const KH_SHEETS=/^kh_(fac[1-5]|shop[12]|temple1|bath1|palace1|castle1|pray1|ruin1)_/;
+/* a picture larger than it is ever drawn is kept at the largest size a sprite copy uses, 512 pixels on its longest side */
+function khShrinkBig(){
+  for(const k in IMG){
+    if(!k.startsWith('kh_')||KH_SHEETS.test(k))continue;
+    const im=IMG[k];if(!im||!im.width)continue;
+    const m=Math.max(im.width,im.height);if(m<=512)continue;
+    const w=Math.max(1,Math.round(im.width*512/m)),h=Math.max(1,Math.round(im.height*512/m));
+    IMG[k]=mkCanvas(w,h,x=>{x.imageSmoothingQuality='high';x.drawImage(im,0,0,w,h)});
+  }
+}
+function khFreeSheets(){for(const k in IMG)if(KH_SHEETS.test(k))delete IMG[k]}
 /* the strips of a facade picture that make up one, two or three storeys: [from, to] as fractions of the picture height */
 const KH_LV={1:[[0,.12],[.5,1]],2:[[0,1]],3:[[0,.12],[.12,.5],[.12,.5],[.5,1]]};
 function khFacadeEntry(key,n,lv,kindOf){
