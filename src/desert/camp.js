@@ -86,11 +86,11 @@ const CAMP_ACTS=[
   {id:'tend',n:'Tend the sick',d:'Rest and care for those with afflictions that a healer can ease. Each has a chance of cure; a healer improves it.',cost:'2 hours',ok:()=>afflList().some(e=>AFFL[e.id]&&AFFL[e.id].healer),run:hi=>{
     advanceTime(120);const r=profPerk('healer'),sk=skBase('persuade')*.01;let n=0;
     for(const e of afflList().slice()){const A=AFFL[e.id];if(A&&A.healer&&Math.random()<.35+.12*r+sk){afflRemove(e,true);n++}else if(A&&A.rest&&Math.random()<.5)e.rests++}
-    profXP('healer',2);msg(n?'Careful nursing works. '+n+(n>1?' sicknesses are cured.':' sickness is cured.'):'The patients rest, but nothing is cured yet.','#a8e0a0')}},
+    G._campInfo={n};profXP('healer',2);msg(n?'Careful nursing works. '+n+(n>1?' sicknesses are cured.':' sickness is cured.'):'The patients rest, but nothing is cured yet.','#a8e0a0')}},
   {id:'stories',n:'Tell stories round the fire',d:'An hour of tales and songs. Friendships grow, grudges cool a little, and morale rises.',cost:'1 hour',ok:()=>true,run:hi=>{
     advanceTime(60);for(let j=0;j<4;j++)if(j!==hi&&G.heroes[j].alive)bondAdd(hi,j,1);bondRandom(1);luckAdd(1);msg(`${HERO_DEF[hi].name} tells a tale by the fire. It gets bigger with every telling, and the party laughs together.`,'#e8d8a0')}},
   {id:'spar',n:'Spar',d:'Two heroes drill together. Friends grow closer, and rivals settle things a little. A small crowd gathers.',cost:'1 hour',ok:()=>true,run:hi=>{
-    const free=[0,1,2,3].filter(j=>j!==hi&&campFree(j)),b=free.length?free[(Math.random()*free.length)|0]:(hi+1)%4,a=hi;advanceTime(60);bondAdd(a,b,1);giveXP(8);campLog()[b]='sparred';msg(`${HERO_DEF[a].name} and ${HERO_DEF[b].name} spar until both are out of breath.`,'#e8d8a0')}},
+    const free=[0,1,2,3].filter(j=>j!==hi&&campFree(j)),b=free.length?free[(Math.random()*free.length)|0]:(hi+1)%4,a=hi;G._campInfo={b};advanceTime(60);bondAdd(a,b,1);giveXP(8);campLog()[b]='sparred';msg(`${HERO_DEF[a].name} and ${HERO_DEF[b].name} spar until both are out of breath.`,'#e8d8a0')}},
   {id:'forage',n:'Forage',d:'Search the wilds for herbs and reagents. Only outdoors. A scout finds more.',cost:'1 hour',ok:()=>!!wxRegionOf(LEVEL)&&!repTownOf(LEVEL),run:hi=>{forage()}}
 ];
 function bondRandom(a){const i=(Math.random()*4)|0;let j=(i+1+((Math.random()*3)|0))%4;if(G.heroes[i].alive&&G.heroes[j].alive)bondAdd(i,j,a)}
@@ -100,6 +100,7 @@ function forage(){
   const table=des?[['water',.6],['lotus',.15],['herb',.15]]:[['herb',.55],['wildflower',.5],['nightshade',.25],['honeycomb',.15]];
   for(const [id,p] of table)if(Math.random()<Math.max(.05,p+r*.07+luck-bad)){const n=1+((Math.random()<.3+r*.1)?1:0);if(bagAdd(mkItem2(id,n)))found.push(n+' '+ITEMDEF[id].n.toLowerCase())}
   profXP('scout',2);skXP('stealth',1);try{petForage()}catch(e){}
+  G._campInfo={found};
   msg(found.length?'Foraging turns up '+found.join(', ')+'.':'An hour of looking turns up nothing useful.','#a8d898');
 }
 function campRun(id){
@@ -112,8 +113,48 @@ function campRun(id){
     if(!G.heroes[hi].alive){msg(`${HERO_DEF[hi].name} cannot do that now.`,'#d09a80');return}
     done[hi]={cook:'cooked',sharpen:'sharpened the gear',tend:'tended the sick',stories:'told stories',spar:'sparred',forage:'foraged'}[id]||id;
   }
-  a.run(hi);
+  G._campInfo=null;a.run(hi);
+  if(id!=='rest')campMoment(id,hi);
 }
+/* a few lines that describe the moment, shown when a hero spends the day's choice */
+const CAMP_SCENES={
+  cook:[
+    "{n} hangs the pot over the fire and counts out what food is left. Onion, a little salt, whatever the road has given. The smell rises, and one by one the others drift closer.|{o} claims the first bowl, burns a tongue, and swears it is the best stew in the world.",
+    "{n} stirs with a wooden spoon and tastes, frowns, tastes again. A pinch of something from a pocket goes in. Nobody asks what.|The party eats in the firelight, mostly in silence, and silence is the kind of compliment a cook understands.",
+    "It takes an hour, and {n} will not be hurried. The pot bubbles. The steam smells of home, though not any home the party has had lately.|{o} wipes the bowl clean with a crust of bread. “Same again tomorrow,” {o} says, and means it."
+  ],
+  sharpen:[
+    "{n} sits on a stone with the whetstone and a rag and goes down the line of blades one by one. The ring of steel carries a long way in the dark.|The edges come up bright. Straps are mended, buckles are tightened, and the party's gear looks a little less like it has been dragged across a continent.",
+    "{n} spits on the stone and sets to work. Each stroke has the same sound, a dry whisper, and each blade ends up keener than it began.|{o} tests an edge on a thumbnail and nods, which is as close as {o} comes to thanks."
+  ],
+  tend:[
+    "{n} lays out clean cloths, heats water and gets to work on those who are ailing. It is slow, ugly, patient work, and nobody complains.|By the end of the hour the party is quieter, and a little healthier for it."
+  ],
+  stories:[
+    "{n} pokes the fire and begins, “This happened a long time ago, on a road a lot like this one.” The tale grows with every telling: a bigger beast, a taller wall, a worse storm.|{o} interrupts twice to correct the details, and is told to tell it properly then. The laughter carries out into the dark.",
+    "The fire pops. {n} starts a song, off-key and cheerfully, and halfway through the second verse the others are joining in on the parts they know.|Somewhere past midnight, the grudges of the road get a little smaller. Someone says they will remember tonight.",
+    "{n} tells the tale of the first fight the four of them ever shared, and gets it wrong in all the flattering ways. {o} lets the lies stand.|It is the sort of evening that does not change anything, and that will be remembered for a long time."
+  ],
+  forage:[
+    "{n} wanders off along the edge of the camp, head down, eyes on the ground, turning over leaves and stones with a stick.|{f}",
+    "{n} slips out of the firelight and into the quiet, looking for the small green things that make medicine and meals. It is slow, patient work, and the wild gives up its secrets grudgingly.|{f}"
+  ],
+  spar:[
+    "{n} and {p} clear a ring in the dust and take up wooden practice blades. They circle once, politely.|Then it gets less polite. A thud, a curse, a laugh. An hour on, both are out of breath and sitting in the dirt, and neither will admit to losing.",
+    "“One more round,” says {p}. “You said that three rounds ago,” says {n}. The sticks crack together under the torchlight.|By the end of it they have each learned something new about how the other thinks, and have the bruises to prove it."
+  ]
+};
+function campMoment(id,hi){
+  const pool=CAMP_SCENES[id];if(!pool)return;
+  const n=HERO_DEF[hi].name,others=[0,1,2,3].filter(j=>j!==hi&&G.heroes[j].alive),o=others.length?HERO_DEF[others[(Math.random()*others.length)|0]].name:n,info=G._campInfo||{};
+  const p=info.b!==undefined?HERO_DEF[info.b].name:o;
+  let parts=pool[(Math.random()*pool.length)|0].split('|');
+  const f=info.found&&info.found.length?'Back at the fire with '+info.found.join(', ')+'.':'Back at the fire with empty hands, and a good story about a thorn.';
+  const lines=parts.map(t=>({text:t.replace(/\{f\}/g,f).replace(/\{n\}/g,n).replace(/\{o\}/g,o).replace(/\{p\}/g,p)}));
+  if(id==='tend'&&info.n!==undefined)lines.push({text:info.n?`${info.n===1?'One':'Some'} of the sick feel better. The fever breaks, or the cough eases.`:'Nothing is cured yet, but rest and care will do more tomorrow.'});
+  G._campLines=lines;startCut('campMoment');
+}
+Object.assign(CUTS,{campMoment:()=>G._campLines||[{text:'The hour passes quietly.'}]});
 journalPage({id:'camp',title:'Camp and Bonds',
   summary:()=>{const v=[];for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){const b=bondVal(i,j);if(Math.abs(b)>=5)v.push(`${HERO_DEF[i].name} & ${HERO_DEF[j].name}: ${bondTier(b)}`)}return 'Cook, sharpen, tend the sick, forage, spar or tell stories. '+(v.length?v.slice(0,2).join('; ')+'.':'No firm friendships or rivalries yet.')},
   note:()=>0,
