@@ -24,10 +24,25 @@ function khRide(d,fare,x0,y0){
   G.talk=null;
   startCut('khRide',()=>{
     G.P.x=d.x;G.P.y=d.y;G.P.f=d.f||0;G.P.angT=(G.P.f-1)*Math.PI/2;G.C.x=d.x;G.C.y=d.y;G.C.a=G.P.angT;
+    khCartBehind(d);
     advanceTime(Math.max(5,Math.round((Math.abs(d.x-x0)+Math.abs(d.y-y0))/9)));reveal();
     msg('You step down from the cart in '+d.n+'.','#ffe9a0');
   });
   return null;
+}
+/* a cart waits on the street just behind the drop-off, so the party can turn round and ride back */
+function khCartBehind(d){
+  const C=KH_CITY;if(!C)return;
+  const px=d.x,py=d.y;
+  if(G.decor.some(o=>o.npc==='kh_cart'&&!o.found&&Math.abs(o.x-px)<=3&&Math.abs(o.y-py)<=3))return;
+  const f=d.f||0,b=DIRS[(f+2)%4],sd=DIRS[(f+1)%4];
+  const cand=[[px+b[0]*2,py+b[1]*2],[px+b[0],py+b[1]],[px+b[0]*2+sd[0],py+b[1]*2+sd[1]],[px+sd[0],py+sd[1]],[px-sd[0],py-sd[1]],[px+b[0]*3,py+b[1]*3]];
+  for(const [x,y] of cand){
+    if(x<0||y<0||x>=C.W||y>=C.H||!C.reach[y*C.W+x])continue;
+    if(G.decor.some(o=>!o.found&&o.block&&o.x===x&&o.y===y))continue;
+    G.decor.push({k:khFaceKey(KH_CART_FACE),x,y,block:false,walk:true,npc:'kh_cart',sc:1});
+    buildDecorMap();khBucketDecor();return;
+  }
 }
 function khCartMenu(d0){
   const x0=G.P.x,y0=G.P.y,F=G.flags;
