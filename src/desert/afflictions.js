@@ -355,3 +355,25 @@ function drawAfflictions(){
   }
   btnText('afexit','Close',190,282,100,22);
 }
+
+/* ---- the row of little pictures at the top right of the view: one for each affliction the party has ---- */
+let AFFL_ICON_LOADED=false;
+function afflHud(){
+  const L=afflList();if(!L.length||G.cut||G.talk||G.menu||G.inv.open||G.loot||G.overview)return;
+  if(!AFFL_ICON_LOADED){AFFL_ICON_LOADED=true;for(const id of AFFL_ORDER)loadImg('af_'+id,'assets/af_'+id+'.png')}
+  const groups=new Map();
+  for(const e of L){const g=groups.get(e.id)||groups.set(e.id,[]).get(e.id);g.push(e.hi)}
+  const ids=AFFL_ORDER.filter(id=>groups.has(id)).sort((a,b)=>(AFFL[a].kind==='good')-(AFFL[b].kind==='good')),S=18,gap=3;
+  ctx.save();
+  ids.forEach((id,k)=>{
+    const A=AFFL[id],col=k%8,row=(k/8)|0,x=420-6-(col+1)*(S+gap)+gap,y=4+row*(S+gap+4),im=IMG['af_'+id];
+    ctx.fillStyle='rgba(10,8,5,.72)';rrect(ctx,x-1.5,y-1.5,S+3,S+3,3);ctx.fill();
+    ctx.lineWidth=1.4;ctx.strokeStyle=A.kind==='good'?'#a8d898':A.kind==='state'?'#e8d090':A.col;rrect(ctx,x-1.5,y-1.5,S+3,S+3,3);ctx.stroke();
+    if(im)ctx.drawImage(im,x,y,S,S);else{ctx.fillStyle=A.col;ctx.fillRect(x+2,y+2,S-4,S-4);txt(A.n[0],x+S/2,y+S/2+.5,9,'#1a1208','center',true)}
+    const who=groups.get(id);
+    if(who.length<4&&AFFL[id].who!=='the whole party'){let w='';for(const hi of who)w+=afflHeroName(hi)[0];txt(w,x+S/2,y+S+4.5,6.5,'#e8dcb4','center',true)}
+    else if(who.length>=4)txt('all',x+S/2,y+S+4.5,6.5,'#e8dcb4','center',true);
+    btn('afhud_'+id,x,y,S,S);
+  });
+  ctx.restore();
+}

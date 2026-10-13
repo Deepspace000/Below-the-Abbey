@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.20';
+const VERSION='3.21';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1463,7 +1463,7 @@ function reset(n){
   buildRegions();
   G.P={x:START.x,y:START.y,f:START.f,angT:(START.f-1)*Math.PI/2};
   G.C={x:START.x,y:START.y,a:G.P.angT};
-  G.heroes=HERO_DEF.map(h=>({hp:h.hp,max:h.hp,base:h.hp,mp:h.mp,mpMax:h.mp,alive:true,hurt:0,flash:0,lvl:1,xp:0,food:100,powSel:0,str:h.str,dex:h.dex,int:h.int,eq:{},spellSel:0,lvlFlash:0,unarmed:h.unarmed}));
+  G.heroes=HERO_DEF.map(h=>({hp:h.hp,max:h.hp,base:h.hp,mp:h.mp,mpMax:h.mp,alive:true,hurt:0,flash:0,lvl:1,xp:0,food:100,powSel:0,learned:[],str:h.str,dex:h.dex,int:h.int,eq:{},spellSel:0,lvlFlash:0,unarmed:h.unarmed}));
   HERO_DEF.forEach((d,i)=>{if(d.caster)G.heroes[i].eq.s0=mkItem('sp_fire')});
   G.bag=[mkItem('potion')];G.gold=0;G.lightBoost=0;
   G.sel=0;G.acted=[false,false,false,false];G.keys=0;G.rounds=0;G.kills=0;G.bossDead=false;
@@ -1596,7 +1596,7 @@ function slotFits(slot,d,hi){
   if(slot[0]==='s')return d.k==='spell'&&HERO_DEF[hi].caster;
   return false;
 }
-function reqFail(h,d){const r=d.req||{};if((r.str||0)>h.str)return 'STR '+r.str;if((r.dex||0)>h.dex)return 'DEX '+r.dex;if((r.int||0)>h.int)return 'INT '+r.int;return null}
+function reqFail(h,d){const r=d.req||{};if((d.lvl||0)>h.lvl)return 'level '+d.lvl;if((r.str||0)>h.str)return 'STR '+r.str;if((r.dex||0)>h.dex)return 'DEX '+r.dex;if((r.int||0)>h.int)return 'INT '+r.int;return null}
 function recalcMax(hi){
   const h=G.heroes[hi];let b=h.base;
   for(const k in h.eq)b+=idef(h.eq[k]).hp||0;
@@ -1702,6 +1702,7 @@ function heroDone(i){
 function addFloat(x,y,text,col){G.floats.push({x,y,text,col,t:0})}
 function hurtEnemy(e,dmg){
   const def=ENEMY_DEF[e.t],st=enemyStat(e.t,e.lvl);
+  if(e.st)dmg=mxVuln(e,dmg);
   if(e.t==='skel'&&G.curHero!==undefined)dmg=Math.round(dmg*(1+pas(G.curHero,'undeadPct')));
   G.dmgAcc=(G.dmgAcc||0)+dmg;e.hp-=dmg;e.flash=1;e.alert=true;addFloat(e.sx,e.sy-14,String(dmg),'#ffd76a');
   if(e.hp<=0){
@@ -1728,7 +1729,7 @@ function heroAttack(i){
     const d0=DIRS[G.P.f];for(const k of [1,0,2]){const x=G.P.x+d0[0]*k,y=G.P.y+d0[1]*k,nd=G.decor.find(d=>d.npc&&d.walk&&!d.found&&d.x===x&&d.y===y);if(nd){startTalk(nd);return false}}
     msg(range>1?'No target in range.':'There is nothing within reach.');return false}
   const en=ENEMY_DEF[f.e.t].name,verb=range>1?'shoots':'hits';
-  if(Math.random()<heroHitPct(i,ENEMY_DEF[f.e.t].fly)){const r=rollDmg(h);msg(`${def.name} ${verb} the ${en} for ${r.d}${r.crit?' (double damage!)':''}.`,r.crit?'#ffd76a':undefined);hurtEnemy(f.e,r.d)}
+  if(Math.random()<heroHitPct(i,ENEMY_DEF[f.e.t].fly)){const r=rollDmg(h);msg(`${def.name} ${verb} the ${en} for ${r.d}${r.crit?' (double damage!)':''}.`,r.crit?'#ffd76a':undefined);hurtEnemy(f.e,r.d);try{if(w&&w.eff)weaponProc(i,f.e,r.d,w,f.k)}catch(x){console.error(x)}}
   else{msg(`${def.name} misses.`,'#a09880');sfx('miss');f.e.alert=true}
   return true;
 }
@@ -1897,20 +1898,22 @@ for(const c of CLASSES){
   const cs=CAPSTONE[c.name];if(cs)c.powers.push(pas_(80,cs[0],cs[1],cs[2]));
   c.powers.forEach((p,k)=>{p.lv=POWER_LV[k]||p.lv});
 }
-const NEWT=['multi','ranged','aoe','daze','buff','healx','revive','drain'];
+const NEWT=['multi','ranged','aoe','daze','buff','healx','revive','drain','mx'];
 function pas(hi,key){
   const h=G.heroes[hi];if(!h)return 0;let s=0;
   for(const p of CLASSES[HERO_DEF[hi].clsId].powers)if(!p.act&&h.lvl>=p.lv)s+=p.pas[key]||0;
   for(const b of G.buffs)if(b.left>0&&b.b===key&&(b.hi===-1||b.hi===hi))s+=b.amt;
+  if(typeof gearPas==='function')s+=gearPas(hi,key);
   return s;
 }
 const pasH=(h,key)=>pas(G.heroes.indexOf(h),key);
 function curPower(i){
-  const h=G.heroes[i],c=CLASSES[HERO_DEF[i].clsId];let p=c.powers[h.powSel||0];
+  const h=G.heroes[i],c=CLASSES[HERO_DEF[i].clsId],PW=typeof heroPowers==='function'?heroPowers(i):c.powers;let p=PW[h.powSel||0];
   if(!p||!p.act||h.lvl<p.lv)p=c.powers[0];
   return p;
 }
 function powerNew(i,P){
+  if(P.type==='mx')return mxCast(i,P);
   const def=HERO_DEF[i],h=G.heroes[i],t=P.type;
   if(h.mp<P.cost){msg(`${def.name} lacks the ${def.mpn.toLowerCase()}.`,'#d09a80');return false}
   if(t==='buff'){
@@ -1987,22 +1990,27 @@ function drawPowerLadder(hi){
   const I=G.inv,h=G.heroes[hi],def=HERO_DEF[hi],c=CLASSES[def.clsId];
   if(I.pw===undefined)I.pw=0;
   txt(`${def.name} - ${def.cls}`,234,14,9.5,heroSpeech(hi),'center',true,undefined,140);
-  c.powers.forEach((p,k)=>{
-    const y=22+k*26,open=h.lvl>=p.lv,chosen=p.act&&(h.powSel||0)===k&&open,sel=I.pw===k;
-    ctx.save();rrect(ctx,164,y,140,24,4);ctx.fillStyle=sel?'rgba(78,26,18,.96)':'rgba(46,14,14,.9)';ctx.fill();
+  const PW=heroPowers(hi),RH=PW.length>8?Math.min(26,Math.floor(228/PW.length)):26;
+  PW.forEach((p,k)=>{
+    const y=22+k*RH,open=h.lvl>=p.lv,chosen=p.act&&(h.powSel||0)===k&&open,sel=I.pw===k;
+    ctx.save();rrect(ctx,164,y,140,RH-2,4);ctx.fillStyle=sel?'rgba(78,26,18,.96)':'rgba(46,14,14,.9)';ctx.fill();
     ctx.lineWidth=sel?2.2:1.3;ctx.strokeStyle=chosen?'#ffd76a':sel?'#d8b04a':'#7a6440';ctx.stroke();ctx.restore();
     ctx.globalAlpha=open?1:.42;
-    txt('Lv '+p.lv,170,y+12.5,8,open?'#d8c88e':'#8a7a62','left',true);
-    txt(p.name,196,y+9,8.8,open?'#e2d8bc':'#9a8a72','left',true,undefined,86);
-    txt(p.act?`Active  ${p.cost} ${def.mpn.slice(0,4).toLowerCase()}`:'Passive',196,y+19,6.8,p.act?'#9ac8ff':'#a8d890','left',false,undefined,86);
-    if(chosen)txt('SET',298,y+12.5,7,'#ffd76a','right',true);
+    const ic=p.icn&&IMG[p.icn],cy=RH<22?y+7:y+9,cy2=RH<22?y+14.5:y+19,ix=RH<22?196:196;
+    if(ic)ctx.drawImage(ic,168,y+1,RH-4,RH-4);
+    const lx=ic?168+RH-1:170;
+    if(!ic)txt('Lv '+p.lv,170,y+RH/2,8,open?'#d8c88e':'#8a7a62','left',true);
+    txt(p.name,ic?lx:196,cy,RH<22?8:8.8,open?'#e2d8bc':'#9a8a72','left',true,undefined,ic?110-RH:86);
+    txt(p.act?(ic?`Lv ${p.lv}  `:'')+`Active  ${p.cost} ${def.mpn.slice(0,4).toLowerCase()}`:'Passive',ic?lx:196,cy2,RH<22?6.2:6.8,p.act?'#9ac8ff':'#a8d890','left',false,undefined,ic?110-RH:86);
+    if(chosen)txt('SET',298,y+RH/2-1,7,'#ffd76a','right',true);
     ctx.globalAlpha=1;
-    btn('ipr'+k,164,y,140,25);
+    btn('ipr'+k,164,y,140,RH-1);
   });
 }
 function drawPowerDetail(rx,rw){
-  const I=G.inv,hi=I.hero,h=G.heroes[hi],def=HERO_DEF[hi],c=CLASSES[def.clsId],k=I.pw||0,p=c.powers[k];if(!p)return;
+  const I=G.inv,hi=I.hero,h=G.heroes[hi],def=HERO_DEF[hi],c=CLASSES[def.clsId],k=I.pw||0,p=heroPowers(hi)[k];if(!p)return;
   const open=h.lvl>=p.lv;
+  {const ic=p.icn&&IMG[p.icn];if(ic)ctx.drawImage(ic,rx+rw-46,4,40,40)}
   txt(p.name,rx+rw/2,20,12.5,open?'#d8c88e':'#8a7a62','center',true,undefined,rw-12);
   txt(p.act?'ACTIVE POWER':'PASSIVE POWER',rx+rw/2,36,8.5,p.act?'#9ac8ff':'#a8d890','center',true);
   txt(open?`Level ${p.lv}`:`Unlocks at level ${p.lv}`,rx+rw/2,50,9,open?'#c8b898':'#e8905a','center');
@@ -2019,7 +2027,8 @@ function drawPowerDetail(rx,rw){
 function addImpact(id,hi,dmg){
   const h=G.heroes[hi],def=HERO_DEF[hi],w=heroWeapon(h),t=id==='special'?curPower(hi).type:'',wt=w?w.t:'Fist';
   let kind,col='#f4f4ff',dagger=false,axe=false;
-  if(t==='heal'||t==='healx'||t==='revive'||t==='buff'){kind='holy';col='#ffe9a0'}
+  if(t==='mx'){kind='magic';col=curPower(hi).col||'#d090ff'}
+  else if(t==='heal'||t==='healx'||t==='revive'||t==='buff'){kind='holy';col='#ffe9a0'}
   else if(t==='aoe'||t==='daze'||t==='drain'){kind='magic';col=t==='drain'?'#d090ff':'#ff9a50'}
   else if(t==='multi'){kind='slash';col='#f4f4ff';dagger=true}
   else if(t==='ranged'){kind='arrow';col='#e8d8a8'}
@@ -2123,16 +2132,18 @@ function enemyAttack(e){
   e.lunge=1;
   const dirToE=DIRS.findIndex(d=>G.P.x+d[0]===e.x&&G.P.y+d[1]===e.y);
   const side=dirToE===G.P.f?'':(dirToE===(G.P.f+2)%4?' from behind':' from the side');
-  const hitC=clamp(def.hit-heroArmor(h)*.03-pas(t,'dodge'),.1,.95),verb=def.verb||(e.t==='skel'?'slashes':'bites');
+  const hitC=clamp(def.hit-heroArmor(h)*.03-pas(t,'dodge')-(e.st?mxMiss(e):0),.1,.95),verb=def.verb||(e.t==='skel'?'slashes':'bites');
   if(Math.random()<hitC){
-    if(def.slows){G.slowT=Math.max(G.slowT||0,4);msg('Dead hands drag at the party. You are slowed.','#e8c870')}const d=rnd(st.dmg[0],st.dmg[1]);h.hp-=d;h.hurt=1;G.shake=.35;sfx(e.t==='skel'?'hit':'bite');sfx('hurt');
+    if(def.slows){G.slowT=Math.max(G.slowT||0,4);msg('Dead hands drag at the party. You are slowed.','#e8c870')}const d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*(e.st?mxMul(e):1)));h.hp-=d;h.hurt=1;G.shake=.35;sfx(e.t==='skel'?'hit':'bite');sfx('hurt');
     msg(`The ${def.name} ${verb} ${HERO_DEF[t].name}${side} for ${d}.`,'#e8a090');addFloat(portraitX(t)+19,250,'-'+d,'#ff6a5a');
     try{if(h.hp>0)afflHit(e.t,t)}catch(x){}
+    {const th=pas(t,'thorns');if(th>0&&e.hp>0){hurtEnemy(e,th);msg(`The ${def.name} is hurt for ${th} by ${HERO_DEF[t].name}'s armour.`,'#e8c870')}}
     if(h.hp<=0){h.hp=0;h.alive=false;msg(`${HERO_DEF[t].name} has fallen!`,'#ff8a7a');if(G.sel===t)nextHero()}
   }else{sfx('miss');msg(`The ${def.name} attacks ${HERO_DEF[t].name}${side} and misses.`,'#a09880')}
 }
 function enemyAct(e){
   const def=ENEMY_DEF[e.t],dist=()=>Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y);
+  if(e.st){const r=mxEnemyAct(e);if(r!==undefined)return r}
   if(e.chilled>0){e.chilled--;msg(`The ${def.name} is frozen stiff.`,'#9ad0ff');return 130}
   if(e.alert&&def.act){const used=def.act(e);if(used)return used}
   if(!e.alert&&(def.patrol||(def.wander&&LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor)))return patrolStep(e,def);
@@ -2633,7 +2644,7 @@ function spriteList(){
   const L=[];
   for(const e of G.enemies){
     if(e.hp<=0&&e.dying<=0)continue;
-    const def=ENEMY_DEF[e.t];
+    const def=e.poly?Object.assign({},ENEMY_DEF[e.t],{img:e.poly.img,w:e.poly.w,fly:false}):ENEMY_DEF[e.t];
     const base=IMG[def.img]||(e.t==='boss'?IMG._fbBoss:IMG._fbRat),atk=e.lunge>.2&&e.hp>0&&IMG[def.img+'A'];
     L.push({x:e.rx+.5,y:e.ry+.5,img:atk||base,w:atk?def.w*atk.width/base.width:def.w,e,
       bob:def.fly?.3+Math.sin(G.time*6+e.seed)*.08:Math.sin(G.time*3+e.seed)*.015,lunge:e.lunge,flash:e.flash,fade:e.hp<=0?e.dying/.55:1,sink:e.hp<=0?1-e.dying/.55:0});
@@ -3297,9 +3308,9 @@ function invBtn(id){
     return;
   }
   if(id.startsWith('ipr')){I.pw=+id.slice(3);return}
-  if(id==='ipset'){const c=CLASSES[HERO_DEF[hi].clsId],p=c.powers[I.pw||0];if(p&&p.act&&h.lvl>=p.lv){h.powSel=I.pw||0;sfx('equip');msg(`${HERO_DEF[hi].name}'s special is now ${p.name}.`,'#9ae0a0')}return}
+  if(id==='ipset'){const c=CLASSES[HERO_DEF[hi].clsId],p=heroPowers(hi)[I.pw||0];if(p&&p.act&&h.lvl>=p.lv){h.powSel=I.pw||0;sfx('equip');msg(`${HERO_DEF[hi].name}'s special is now ${p.name}.`,'#9ae0a0')}return}
   if(id==='ipuse'){
-    const c=CLASSES[HERO_DEF[hi].clsId],p=c.powers[I.pw||0];
+    const c=CLASSES[HERO_DEF[hi].clsId],p=heroPowers(hi)[I.pw||0];
     if(!p||!p.act||h.lvl<p.lv){return}
     if(!h.alive){msg(`${HERO_DEF[hi].name} has fallen.`,'#d09a80');return}
     if(G.acted[hi]){msg(`${HERO_DEF[hi].name} has already acted this round.`,'#d09a80');return}
@@ -3765,6 +3776,8 @@ function useHeal(hi,idx){
   if(idx<0)idx=bestPotionIndex(hi);
   const it=G.bag[idx];
   if(it&&idef(it).cures)return afflUseItem(hi,idx);
+  if(it&&idef(it).buff){const D=idef(it),B=D.buff;bagTake(idx);G.buffs=G.buffs.filter(x=>!(x.name===D.n&&x.hi===hi));G.buffs.push({name:D.n,b:B.b,amt:B.amt,left:B.rounds,hi});sfx('potion');msg(`${HERO_DEF[hi].name} drinks the ${D.n}. ${D.d}`,'#ffe9a0');return true}
+  if(it&&idef(it).mana){const D=idef(it);if(h.mp>=h.mpMax){msg(`${HERO_DEF[hi].name} is not tired.`);return false}bagTake(idx);h.mp=Math.min(h.mpMax,h.mp+D.mana);sfx('potion');msg(`${HERO_DEF[hi].name} drinks the ${D.n} (+${D.mana} ${HERO_DEF[hi].mpn.toLowerCase()}).`,'#9ac8ff');return true}
   if(it&&idef(it).dye){const d=idef(it);bagTake(idx);h.tint={col:d.dye,until:G.clock+4*1440};sfx('potion');msg(`${HERO_DEF[hi].name} drinks the ${d.n}. A rush of colour spreads over their face. It will last four days.`,d.dye);return true}
   if(!it||!idef(it).heal){msg('You have nothing to drink.');return false}
   const d0=idef(it);
@@ -3835,7 +3848,7 @@ function seenRows(s){
 function snapshot(){
   return {v:1,gv:VERSION,t:Date.now(),lvl:LEVEL,level:LEVEL,aff:G.aff||[],flags:G.flags,quests:G.quests,lst:G.lst,clock:G.clock,
     party:HERO_DEF.map(d=>({app:d.app,cls:d.clsId,name:d.name,bs:d.str-CLASSES[d.clsId].str,bd:d.dex-CLASSES[d.clsId].dex,bi:d.int-CLASSES[d.clsId].int})),
-    heroes:G.heroes.map(h=>({hp:h.hp,max:h.max,base:h.base,mp:h.mp,mpMax:h.mpMax,alive:h.alive,lvl:h.lvl,xp:h.xp,food:h.food,powSel:h.powSel||0,str:h.str,dex:h.dex,int:h.int,spellSel:h.spellSel,
+    heroes:G.heroes.map(h=>({hp:h.hp,max:h.max,base:h.base,mp:h.mp,mpMax:h.mpMax,alive:h.alive,lvl:h.lvl,xp:h.xp,food:h.food,powSel:h.powSel||0,learned:h.learned||[],str:h.str,dex:h.dex,int:h.int,spellSel:h.spellSel,
       eq:Object.fromEntries(Object.entries(h.eq).map(([k,it])=>[k,{id:it.id,n:it.n}]))})),
     bag:G.bag.map(b=>({id:b.id,n:b.n})),gold:G.gold,keys:G.keys,rounds:G.rounds,kills:G.kills,bossDead:G.bossDead,sel:G.sel,lightBoost:G.lightBoost,
     P:{x:G.P.x,y:G.P.y,f:G.P.f},
@@ -3846,12 +3859,12 @@ function snapshot(){
     torches:LIGHTS.map(l=>l.taken?1:0),torchKeys:LIGHTS.filter(l=>l.taken).map(l=>l.key)};
 }
 function restore(sv){ // the golden city and the rooms in it are built the first time they are needed
-  const l=sv.level||1;if(l===44||(l>=199&&l<=270)||(l>=1000&&l<30000))if((!LEVELS[l]&&!(typeof KH_LAZY!=='undefined'&&KH_LAZY[l]))||LEVELS[44].stub){khThen(()=>restoreNow(sv));return}
+  const l=sv.level||1;if(l===44||(l>=199&&l<=270)||(l>=1000&&l<30000)||(l>=271&&l<=280))if((!LEVELS[l]&&!(typeof KH_LAZY!=='undefined'&&KH_LAZY[l]))||LEVELS[44].stub){khThen(()=>restoreNow(sv));return}
   restoreNow(sv);
 }
 function restoreNow(sv){
   setParty(sv.party);reset(sv.level||1);
-  sv.heroes.forEach((s,i)=>Object.assign(G.heroes[i],{hp:s.hp,max:s.max,base:s.base,mp:s.mp,mpMax:s.mpMax,alive:s.alive,lvl:s.lvl,xp:s.xp,food:s.food===undefined?100:s.food,powSel:s.powSel||0,str:s.str,dex:s.dex,int:s.int,spellSel:s.spellSel||0,eq:s.eq||{}}));
+  sv.heroes.forEach((s,i)=>Object.assign(G.heroes[i],{hp:s.hp,max:s.max,base:s.base,mp:s.mp,mpMax:s.mpMax,alive:s.alive,lvl:s.lvl,xp:s.xp,food:s.food===undefined?100:s.food,powSel:s.powSel||0,learned:s.learned||[],str:s.str,dex:s.dex,int:s.int,spellSel:s.spellSel||0,eq:s.eq||{}}));
   G.aff=sv.aff||[];G.bag=sv.bag;G.gold=sv.gold;G.keys=sv.keys;G.rounds=sv.rounds;G.kills=sv.kills;G.bossDead=!!sv.bossDead;G.sel=sv.sel||0;G.lightBoost=sv.lightBoost||0;
   G.P={x:sv.P.x,y:sv.P.y,f:sv.P.f,angT:(sv.P.f-1)*Math.PI/2};G.C={x:sv.P.x,y:sv.P.y,a:G.P.angT};
   {const sr=seenRows(sv.seen);if(LEVEL===1){G.grid=sv.grid;if(sr)G.seen=sr}else if(sr&&sr.length===MH&&sr[0].length===MW)G.seen=sr}
@@ -4561,6 +4574,7 @@ function forestExtras(L){
   return L._xd=out;
 }
 function loadLevel(n){
+  if(n===13&&typeof ihShopsChars==='function')ihShopsChars();
   if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n](); // the room behind an ordinary door in Khemetra is built when first entered
   const L=LEVELS[n]||LEVELS[1];
   G._cb=undefined;LEVEL=n;CEILH=ceilFor(n,L);MAPROWS=L.rows;MW=MAPROWS[0].length;MH=MAPROWS.length;START=L.start;ENEMY_SPAWNS=L.enemies;ITEM_SPAWNS=L.items;DECOR_SPAWNS=forestExtras(L).length?L.decor.concat(forestExtras(L)):L.decor;if(typeof terrFor==='function'){terrFor(n);TERR_BLOCK=TERRS[n]?TERRS[n].block:null}G.flora=(L.scenery||[]).concat((n===32||n===41)?pathEdgeDecor(L):[]);
@@ -4618,7 +4632,7 @@ function respawnForest(){
 }
 // carry the party, bag, gold and quests into the next level
 function goToLevel(n,entry){
-  if(n===43||n===62)khLoadAssets(); // the city's pictures arrive in the background while the party walks to its gate
+  if(n===43||n===62||n===13||(n>=271&&n<=280))khLoadAssets(); // the city's pictures arrive in the background while the party walks to its gate
   G.lst[LEVEL]=levelState();
   const keep={heroes:G.heroes,bag:G.bag,gold:G.gold,keys:G.keys,rounds:G.rounds,kills:G.kills,sel:G.sel,bossDead:G.bossDead,flags:G.flags,quests:G.quests,lst:G.lst,clock:G.clock,starveT:G.starveT,aff:G.aff};
   reset(n);Object.assign(G,keep);
@@ -5467,9 +5481,9 @@ function enemyShoot(e){
   const pool=[];for(const j of l)for(let k=0;k<(j<2?3:1);k++)pool.push(j);
   const t=pool[rnd(0,pool.length-1)],h=G.heroes[t];e.lunge=1;
   G.arrows.push({x0:clamp(e.sx,14,406),y0:clamp(e.sy,40,170),x1:210+rnd(-30,30),y1:196,t:G.time});sfx('arrow');
-  const hitC=clamp(def.hit-heroArmor(h)*.03-pas(t,'dodge'),.1,.95);
+  const hitC=clamp(def.hit-heroArmor(h)*.03-pas(t,'dodge')-(e.st?mxMiss(e):0),.1,.95);
   if(Math.random()<hitC){
-    const d=rnd(st.dmg[0],st.dmg[1]);h.hp-=d;h.hurt=1;G.shake=.3;sfx('hurt');try{if(h.hp>0)afflHit(e.t,t)}catch(x){}
+    const d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*(e.st?mxMul(e):1)));h.hp-=d;h.hurt=1;G.shake=.3;sfx('hurt');try{if(h.hp>0)afflHit(e.t,t)}catch(x){}
     msg(def.shot?`${def.name} hurls ${def.shot} at ${HERO_DEF[t].name} for ${d}.`:`An arrow from the ${def.name} hits ${HERO_DEF[t].name} for ${d}.`,'#e8a090');addFloat(portraitX(t)+19,250,'-'+d,'#ff6a5a');
     if(h.hp<=0){h.hp=0;h.alive=false;msg(`${HERO_DEF[t].name} has fallen!`,'#ff8a7a');if(G.sel===t)nextHero()}
   }else msg(def.shot?`${def.name} hurls ${def.shot}, and it misses ${HERO_DEF[t].name}.`:`An arrow from the ${def.name} whistles past ${HERO_DEF[t].name}.`,'#a09880');
@@ -6114,7 +6128,8 @@ function drawEnemyPlate(){
   ctx.fillStyle='rgba(8,6,4,.78)';rrect(ctx,4,4,138,22,5);ctx.fill();
   ctx.lineWidth=1.6;ctx.strokeStyle=goldG(4,4,138,22);rrect(ctx,4,4,138,22,5);ctx.stroke();
   ctx.restore();
-  txt(def.name.toUpperCase(),14,15,11,'#d0c298','left',true);txt('Lv '+e.lvl,114,15,8.5,'#c8b898','right');
+  txt((e.poly?e.poly.name:def.name).toUpperCase(),14,15,11,'#d0c298','left',true);txt('Lv '+e.lvl,114,15,8.5,'#c8b898','right');
+  {const ms=mxPlate(e);if(ms)txt(ms,148,15,8,'#e8c878','left',true)}
   chevron(130,15,6,-Math.PI/2,false);
   // vertical hp bar
   const bx=8,by=40,bw=13,bh=150,fr=Math.max(0,e.hp/e.maxhp);
@@ -6190,7 +6205,7 @@ function ui(dt){
   drawWorld();
   if(SMOKE){drawSmoke(G.time);ctx.fillStyle=HATCHP;ctx.fillRect(0,0,420,210)}
   if(G.state==='title'||G.state==='goto'){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,420,210)}
-  if(G.state==='play'){drawEnemyPlate();drawArrows();drawFloats(dt);drawMessages();drawLevelBanners();if(teleOn()&&!G.cut&&!G.talk&&!G.menu&&!G.inv.open&&!G.loot&&!G.overview&&teleActive(LEVEL))btnText('teleport','Teleport  (T)',160,30,100,20)}
+  if(G.state==='play'){drawEnemyPlate();drawArrows();drawFloats(dt);drawMessages();drawLevelBanners();try{afflHud()}catch(e){}if(teleOn()&&!G.cut&&!G.talk&&!G.menu&&!G.inv.open&&!G.loot&&!G.overview&&teleActive(LEVEL))btnText('teleport','Teleport  (T)',160,30,100,20)}
   ctx.restore();
   if(G.cut&&!G.cut.pic)drawCut();
   if(G.talk)drawTalk();
@@ -6345,6 +6360,7 @@ function drawMenu(){
   if(G.menu==='gfx'){drawGfx();return}
   if(G.menu==='snd'){drawSnd();return}
   if(G.menu==='aff'){drawAfflictions();return}
+  if(G.menu==='spellshop'){drawSpellShop();return}
   BTNS=[];veil(.6);bigPanel(90,12,300,296);
   txt('MENU',240,30,14,'#d8c88e','center',true);
   txt('Version '+VERSION,240,302,7,'#9a8a68','center');
@@ -6548,7 +6564,9 @@ function handleBtn(id){
   if(G.loot){lootBtn(id);return}
   if(G.inv.open){invBtn(id);return}
   if(G.map){if(id==='mapclose'||id==='map')G.map=false;return}
+  if(/^afhud_/.test(id)){G.menu='aff';G.affSel=id.slice(6);G.afs=0;return}
   if(G.menu==='quests'){if(id==='qexit')G.menu=false;return}
+  if(G.menu==='spellshop'){spellShopBtn(id);return}
   if(G.menu==='aff'){if(id==='afexit')G.menu=false;else if(/^af_/.test(id))G.affSel=id.slice(3);return}
   if(G.menu==='ach'){if(id==='ach_prev')G.achPage=Math.max(0,(G.achPage||0)-1);else if(id==='ach_next')G.achPage=(G.achPage||0)+1;else if(id==='ach_back'||id==='menu')G.menu=true;return}
   if(G.menu==='snd'){
@@ -9237,6 +9255,11 @@ const KH_BUILDINGS=[
   {id:'hs_soldier',pool:'house',name:"A Soldier's House",room:'home',keeper:null,scene:'soldier'},
   {id:'hs_priest',pool:'house',name:"A Priest's House",room:'home',keeper:null,scene:'priest'},
   {id:'hs_children',pool:'house',name:"A Children's House",room:'home',keeper:null,scene:'children'},
+  // the shops of the Merchants' Quarter: spells, swords, armour and potions
+  {id:'magic1',pool:'shop',sub:'scroll',name:"The Wizard's Emporium",room:'shop',keeper:'kh_wizard',near:[190,322]},
+  {id:'sword1',pool:'shop',sub:'weapon',name:'The Gilded Blade',room:'shop',keeper:'kh_swordsmith',near:[145,335]},
+  {id:'armour1',pool:'shop',sub:'weapon',name:'The Iron Aegis',room:'shop',keeper:'kh_armourer',near:[245,335]},
+  {id:'potion4',pool:'shop',sub:'potion',name:"The Alchemist's Cellar",room:'shop',keeper:'kh_alchemist',near:[200,288]},
 ];
 // the picture shown for the buildings above that were here first
 const KH_SCENE_OF={bath1:'bath_grand',bath2:'bath_hammam',homeA:'warm',homeB:'merchant',homeC:'scholar',drumhouse:'musician',denA:'dark',denB:'ruined',denC:'messy',denD:'empty',urnhouse:'boarded',ledgerhouse:'taxman'};
@@ -11280,6 +11303,473 @@ function drawAfflictions(){
   }
   btnText('afexit','Close',190,282,100,22);
 }
+
+/* ---- the row of little pictures at the top right of the view: one for each affliction the party has ---- */
+let AFFL_ICON_LOADED=false;
+function afflHud(){
+  const L=afflList();if(!L.length||G.cut||G.talk||G.menu||G.inv.open||G.loot||G.overview)return;
+  if(!AFFL_ICON_LOADED){AFFL_ICON_LOADED=true;for(const id of AFFL_ORDER)loadImg('af_'+id,'assets/af_'+id+'.png')}
+  const groups=new Map();
+  for(const e of L){const g=groups.get(e.id)||groups.set(e.id,[]).get(e.id);g.push(e.hi)}
+  const ids=AFFL_ORDER.filter(id=>groups.has(id)).sort((a,b)=>(AFFL[a].kind==='good')-(AFFL[b].kind==='good')),S=18,gap=3;
+  ctx.save();
+  ids.forEach((id,k)=>{
+    const A=AFFL[id],col=k%8,row=(k/8)|0,x=420-6-(col+1)*(S+gap)+gap,y=4+row*(S+gap+4),im=IMG['af_'+id];
+    ctx.fillStyle='rgba(10,8,5,.72)';rrect(ctx,x-1.5,y-1.5,S+3,S+3,3);ctx.fill();
+    ctx.lineWidth=1.4;ctx.strokeStyle=A.kind==='good'?'#a8d898':A.kind==='state'?'#e8d090':A.col;rrect(ctx,x-1.5,y-1.5,S+3,S+3,3);ctx.stroke();
+    if(im)ctx.drawImage(im,x,y,S,S);else{ctx.fillStyle=A.col;ctx.fillRect(x+2,y+2,S-4,S-4);txt(A.n[0],x+S/2,y+S/2+.5,9,'#1a1208','center',true)}
+    const who=groups.get(id);
+    if(who.length<4&&AFFL[id].who!=='the whole party'){let w='';for(const hi of who)w+=afflHeroName(hi)[0];txt(w,x+S/2,y+S+4.5,6.5,'#e8dcb4','center',true)}
+    else if(who.length>=4)txt('all',x+S/2,y+S+4.5,6.5,'#e8dcb4','center',true);
+    btn('afhud_'+id,x,y,S,S);
+  });
+  ctx.restore();
+}
+
+/* ---- src/desert/spells.js ---- */
+/* ==========================================================================
+   THE WIZARD'S SPELLS. A shop (in Khemetra's Merchants' Quarter and in Ironhill) sells five spells to every class, at levels 10, 20, 30,
+   40 and 50 for 500, 1000, 1500, 2000 and 2500 gold. A bought spell is memorised by that hero and joins the power page.
+   Spells hold, sleep, scare, curse, burn, bleed and poison enemies, turn them into sheep and cows, make them fight each other, and more.
+   The enemy side of it (what happens on an enemy's turn) is mxEnemyAct, called first thing from enemyAct.
+   ========================================================================== */
+const MX_PRICE={10:500,20:1000,30:1500,40:2000,50:2500},MX_COST={10:6,20:9,30:12,40:15,50:18};
+const MX=[],MX_POWER={};
+/* mx(class, level, id, name, aim, effects, what it does, colour)
+   aim: 'front' (the foe ahead, up to 4 squares), ['area',n] (foes within n squares), 'party', 'self', 'dead'
+   effects: [kind, ...]  dmg [a,b] | hold n | sleep n | fear n | curse n | bleed n d | poison n d | burn n d | blind n | confuse n | poly kind n | vuln n | slow n
+            banish | exec pct [a,b] | steal k | heal [a,b] | healpct p | buff key amt rounds | cleanse | revive pct | feed n | surge */
+function mx(cls,lv,id,name,aim,fx,d,col){MX.push({cls,lv,id,name,aim,fx,d,col,cost:MX_COST[lv],price:MX_PRICE[lv]})}
+mx('Warrior',10,'w10','Intimidating Shout',['area',3],[['fear',4]],'A roar that sends every foe within 3 squares running for 4 rounds.','#e86a50');
+mx('Warrior',20,'w20','Shield Wall',  'party',[['buff','armor',5,8]],'The whole party locks shields: armor +5 for 8 rounds.','#6a9ae8');
+mx('Warrior',30,'w30','Hamstring',    'front',[['dmg',[20,30]],['slow',6],['bleed',6,4]],'A low cut to the legs: damage, slows the foe and leaves it bleeding.','#d04040');
+mx('Warrior',40,'w40','Battle Standard','party',[['buff','dmgPct',.25,10],['buff','hitPct',.1,10]],'A raised banner: the party deals 25% more damage and hits 10% more often for 10 rounds.','#e8c040');
+mx('Warrior',50,'w50',"Warlord's Challenge",['area',4],[['confuse',4],['vuln',4]],'Every foe within 4 squares turns on its neighbours, and takes more damage while it does.','#e8a040');
+mx('Barbarian',10,'b10','Savage Roar',['area',3],[['fear',4],['curse',4]],'A bestial roar: foes within 3 squares flee and fight weaker.','#e86a50');
+mx('Barbarian',20,'b20','Rend','front',[['dmg',[24,34]],['bleed',8,4]],'Claws tear the foe ahead and leave it bleeding for 8 rounds.','#d04040');
+mx('Barbarian',30,'b30','Blood Frenzy','self',[['buff','dmgPct',.6,6],['buff','crit',.15,6]],'Red rage: +60% damage and +15% double hits for 6 rounds.','#ff4040');
+mx('Barbarian',40,'b40','Earthshatter',['area',3],[['dmg',[30,44]],['hold',2]],'A fist into the ground: foes within 3 squares take damage and are thrown down for 2 rounds.','#c09050');
+mx('Barbarian',50,'b50','Avatar of the Bear','self',[['buff','dmgPct',1,8],['buff','regen',3,8],['buff','armor',4,8]],'The bear spirit takes you: double damage, fast healing and +4 armor for 8 rounds.','#b07840');
+mx('Paladin',10,'p10','Lay on Hands','front|ally',[['heal',[40,60]],['cleanse']],'Heals the most wounded ally for 40-60 and cleanses their afflictions.','#ffe9a0');
+mx('Paladin',20,'p20','Holy Chains','front',[['dmg',[18,26]],['hold',4]],'Golden chains hold the foe ahead for 4 rounds and burn it.','#f0d060');
+mx('Paladin',30,'p30','Aura of Courage','party',[['buff','dmgPct',.15,12],['buff','hitPct',.1,12],['buff','dodge',.08,12]],'The party fights bolder for 12 rounds: +15% damage, +10% to hit and enemies miss more.','#fff0b0');
+mx('Paladin',40,'p40','Smite Evil',['area',3],[['dmg',[30,40]],['curse',6]],'Holy fire on foes within 3 squares, doubled against the undead, and cursing them.','#fff8d0');
+mx('Paladin',50,'p50','Avenging Angel','party',[['buff','dmgPct',.4,8],['heal',[30,40],1]],'An angel at your side: the party heals for 30-40 and deals 40% more damage for 8 rounds.','#ffe070');
+mx('Ranger',10,'r10','Entangling Roots',['area',3],[['hold',3]],'Roots burst from the ground and hold every foe within 3 squares for 3 rounds.','#58a040');
+mx('Ranger',20,'r20','Bark Skin','party',[['buff','armor',6,10]],'The skin of the whole party toughens like bark: armor +6 for 10 rounds.','#8a6a3a');
+mx('Ranger',30,'r30','Poison Arrow','front',[['dmg',[26,36]],['poison',10,4]],'A poisoned shot: damage, then 4 poison damage each round for 10 rounds.','#50d050');
+mx('Ranger',40,'r40','Swarm of Wasps',['area',3],[['poison',6,3],['blind',5]],'Wasps cover every foe within 3 squares: stung, poisoned and unable to see.','#f0c030');
+mx('Ranger',50,'r50','Wrath of the Forest',['area',4],[['dmg',[36,52]],['hold',3],['confuse',3]],'The forest itself rises: foes take damage, are rooted and lash out at each other.','#2a8a30');
+mx('Archer',10,'a10','Flaming Arrow','front',[['dmg',[20,28]],['burn',5,5]],'An arrow wrapped in fire: damage and 5 burn damage each round for 5 rounds.','#ff8030');
+mx('Archer',20,'a20','Pinning Shot','front',[['dmg',[22,32]],['hold',3]],'An arrow through the foot: damage and pinned in place for 3 rounds.','#c0a060');
+mx('Archer',30,'a30','Rain of Arrows',['area',4],[['dmg',[26,38]]],'A hundred arrows fall on every foe within 4 squares.','#e8d8a8');
+mx('Archer',40,'a40','Cursed Arrow','front',[['dmg',[30,42]],['curse',8],['bleed',8,4]],'A black arrow: damage, bleeding, and the foe hits weaker for 8 rounds.','#a060d0');
+mx('Archer',50,'a50','Dragonbone Arrow','front',[['exec',.25,[70,100]]],'One arrow of dragon bone: 70-100 damage, and a foe under a quarter health simply dies.','#ffe090');
+mx('Thief',10,'t10','Pickpocket','front',[['steal',3]],'Lift gold from the foe ahead. You get more at higher levels.','#e8c840');
+mx('Thief',20,'t20','Smoke Bomb',['area',3],[['blind',5]],'Thick smoke blinds every foe within 3 squares for 5 rounds: they miss much more often.','#707080');
+mx('Thief',30,'t30','Venom Blade','front',[['dmg',[26,36]],['poison',8,4],['slow',6]],'A poisoned stab that also slows the foe.','#60e060');
+mx('Thief',40,'t40','Befuddle',['area',4],[['confuse',4]],'Foes within 4 squares see enemies everywhere and fight each other for 4 rounds.','#c070e0');
+mx('Thief',50,'t50','Master Heist',['area',4],[['steal',14],['hold',2]],'Rob every foe within 4 squares blind and leave them frozen with surprise for 2 rounds.','#ffd040');
+mx('Assassin',10,'s10','Garrote','front',[['dmg',[16,24]],['bleed',10,5]],'A wire round the throat: damage and 5 bleeding damage each round for 10 rounds.','#d04040');
+mx('Assassin',20,'s20','Marked for Death','front',[['vuln',8],['curse',8]],'The foe takes 50% more damage from every blow for 8 rounds and hits weaker.','#e04040');
+mx('Assassin',30,'s30','Night Terror',['area',4],[['fear',5]],'Nightmares walk among the foes within 4 squares: they flee for 5 rounds.','#8060a0');
+mx('Assassin',40,'s40','Poison Cloud',['area',3],[['dmg',[22,32]],['poison',8,5]],'A cloud of green death over every foe within 3 squares.','#70d070');
+mx('Assassin',50,'s50','Death Warrant','front',[['exec',.4,[80,110]]],'A foe under 40% health dies at once. Otherwise it takes 80-110 damage.','#c02020');
+mx('Mage',10,'m10','Hold Person','front',[['hold',5]],'The foe ahead cannot move or act for 5 rounds.','#70a8ff');
+mx('Mage',20,'m20','Polymorph: Sheep','front',[['poly','sheep',8]],'The foe becomes a harmless sheep for 8 rounds. Baa.','#f0f0f0');
+mx('Mage',30,'m30','Mirror Images','party',[['buff','dodge',.25,8]],'Ghostly copies of the party draw blows: enemies miss 25% more for 8 rounds.','#90c0ff');
+mx('Mage',40,'m40','Disintegrate','front',[['exec',.2,[90,130]]],'A beam of unmaking: 90-130 damage, and a foe under 20% health is dust.','#90ffb0');
+mx('Mage',50,'m50','Time Stop','all',[['hold',3]],'Time stops for every foe in sight for 3 rounds. The party moves freely.','#a0d0ff');
+mx('Sorcerer',10,'z10','Wail of Fear',['area',4],[['fear',5]],'A wail that turns the courage of every foe within 4 squares to water.','#c060e0');
+mx('Sorcerer',20,'z20','Polymorph: Cow','front',[['poly','cow',8]],'The foe becomes a placid cow for 8 rounds. Moo.','#d8b890');
+mx('Sorcerer',30,'z30','Wild Surge','front',[['surge']],'Raw chaos: a random mighty effect. Damage, a sheep, a heal, a hold. Anything can happen.','#ff60c0');
+mx('Sorcerer',40,'z40',"Dragon's Breath",['area',3],[['dmg',[34,48]],['burn',5,6]],'A cone of fire: foes within 3 squares take damage and burn for 5 rounds.','#ff6020');
+mx('Sorcerer',50,'z50','Rift of Banishing','front',[['banish']],'Opens a rift that swallows the foe ahead. Great beasts and bosses take a heavy blow instead.','#8040c0');
+mx('Priest',10,'c10','Purify','party',[['cleanse'],['heal',[12,20],1]],'Cleanses every affliction on the party and heals everyone for 12-20.','#e8f0ff');
+mx('Priest',20,'c20','Turn Undead',['area',4],[['undead',10,[40,60]]],'Undead within 4 squares flee for 10 rounds or are destroyed. Living foes cower for 2 rounds.','#fff0b0');
+mx('Priest',30,'c30','Sanctuary Ward','party',[['buff','armor',4,10],['buff','dodge',.15,10]],'A sacred ward: armor +4 and enemies miss 15% more for 10 rounds.','#ffe9a0');
+mx('Priest',40,'c40','Divine Wrath',['area',4],[['dmg',[34,50]],['curse',6]],'Light from the heavens strikes every foe within 4 squares, and curses them.','#fffbe0');
+mx('Priest',50,'c50','Resurrection','dead',[['revive',.7],['healpct',.5]],'Raises every fallen hero at 70% health and heals the living for half.','#ffd860');
+mx('Monk',10,'k10','Pressure Point','front',[['hold',4]],'A finger on the right spot: the foe ahead cannot move for 4 rounds.','#70e0a0');
+mx('Monk',20,'k20','Wholeness of Body','self',[['heal',[50,70]],['cleanse']],'You heal 50-70 and cleanse every affliction on you.','#70e090');
+mx('Monk',30,'k30','Quivering Palm','front',[['dmg',[30,44]],['bleed',6,5],['curse',6]],'A strike that keeps hurting: damage, bleeding and a weakened foe.','#b060e0');
+mx('Monk',40,'k40','Mantra of Peace',['area',4],[['sleep',5]],'Foes within 4 squares fall asleep until they are hurt, or 5 rounds pass.','#90b0ff');
+mx('Monk',50,'k50','Thousand Fists',['area',3],[['dmg',[26,36]],['dmg',[26,36]],['dmg',[26,36]],['dmg',[26,36]],['dmg',[26,36]]],'Five rapid blows land on every foe within 3 squares.','#ffd040');
+mx('Goat',10,'g10','Bleat of Doom',['area',4],[['fear',4]],'A bleat so awful that every foe within 4 squares runs for 4 rounds.','#c070e0');
+mx('Goat',20,'g20','Eat Anything','party',[['cleanse'],['feed',30],['heal',[16,24],1]],'The goat eats everything, then the party feels better: cleansed, fed and healed.','#a0c860');
+mx('Goat',30,'g30','Polymorph: Goat','front',[['poly','goat',10]],'The foe becomes a goat for 10 rounds. It seems pleased.','#e8e8d8');
+mx('Goat',40,'g40','Mountain Charge','front',[['dmg',[40,60]],['hold',3]],'A charge from the high peaks: heavy damage and a stunned foe.','#d0a060');
+mx('Goat',50,'g50','Great Stampede',['area',5],[['dmg',[44,64]],['hold',2]],'A spectral herd thunders through every foe within 5 squares.','#e8c880');
+for(const s of MX)MX_POWER[s.id]={lv:s.lv,act:true,cost:s.cost,type:'mx',name:s.name,d:s.d,col:s.col,mx:s.id,aim:s.aim,fx:s.fx,icn:'sp_'+s.id};
+const MX_BY_CLASS={};for(const s of MX)(MX_BY_CLASS[s.cls]=MX_BY_CLASS[s.cls]||[]).push(s);
+['sheep','cow','frog'].forEach(n=>{if(typeof loadImg==='function')loadImg(n,'assets/'+n+'.png')});
+for(const s of MX){if(typeof loadImg==='function')loadImg('sp_'+s.id,'assets/sp_'+s.id+'.png')}
+/* a hero's powers: the class powers, then every spell they have memorised */
+function heroPowers(hi){
+  const c=CLASSES[HERO_DEF[hi].clsId],h=G.heroes[hi];
+  if(!h||!h.learned||!h.learned.length)return c.powers;
+  return c.powers.concat(h.learned.map(id=>MX_POWER[id]).filter(Boolean));
+}
+/* ---------------------------------------------------------------- casting ---------------------------------------------------------------- */
+const MX_BOSS=new Set(['boss','gandrick','halbrecht','mayor','wraith','overseer','cyclops']);
+function mxIsBoss(e){const d=ENEMY_DEF[e.t];return !!(d.boss||MX_BOSS.has(e.t)||(d.xp||0)>=500)}
+function mxName(e){const d=ENEMY_DEF[e.t];return e.poly?e.poly.name:d.name}
+const MX_POLY={sheep:{img:'sheep',w:.62,name:'sheep',snd:'Baa!'},cow:{img:'cow',w:.9,name:'cow',snd:'Moo.'},goat:{img:'goat',w:.6,name:'goat',snd:'Maa-aa!'},frog:{img:'frog',w:.4,name:'frog',snd:'Ribbit.'},chicken:{img:'chicken',w:.4,name:'chicken',snd:'Bwaak!'}};
+function mxDmg(hi,r){
+  const h=G.heroes[hi],base=rnd(r[0],r[1])*(1+h.lvl*.035),stat=Math.max(0,Math.max(h.int,h.str,h.dex)-8)/3;
+  return Math.max(1,Math.round((base+stat)*(1+pas(hi,'spellPct'))));
+}
+function mxFloat(e,t,c){if(typeof addFloat==='function')addFloat(e.sx,e.sy-26,t,c||'#ffe9a0')}
+function mxApplyEnemy(hi,E,fx,P){
+  const h=G.heroes[hi],st=E.st||(E.st={}),boss=mxIsBoss(E),nm=mxName(E),k=fx[0];
+  const ctl=n=>boss?Math.max(1,Math.floor(n/2)):n;
+  if(boss&&['hold','sleep','fear','confuse','poly'].includes(k)&&Math.random()<.5){msg(`The ${nm} shrugs it off.`,'#c8b898');mxFloat(E,'Resists','#c8b898');return}
+  switch(k){
+    case 'dmg':{let d=mxDmg(hi,fx[1]);if(P&&P.mx==='p40'&&E.t==='skel')d*=2;hurtEnemy(E,d);break}
+    case 'hold':st.hold=Math.max(st.hold||0,ctl(fx[1]));msg(`The ${nm} is held fast.`,'#a0c8ff');mxFloat(E,'Held','#a0c8ff');break;
+    case 'sleep':st.sleep=Math.max(st.sleep||0,ctl(fx[1]));msg(`The ${nm} falls asleep.`,'#90b0ff');mxFloat(E,'Asleep','#90b0ff');break;
+    case 'fear':st.fear=Math.max(st.fear||0,ctl(fx[1]));msg(`The ${nm} turns to flee.`,'#e0a0f0');mxFloat(E,'Scared','#e0a0f0');break;
+    case 'curse':st.curse=Math.max(st.curse||0,fx[1]);msg(`The ${nm} is cursed.`,'#c080e0');mxFloat(E,'Cursed','#c080e0');break;
+    case 'bleed':st.bleed={n:fx[1],d:fx[2]+Math.floor(h.lvl/12)};msg(`The ${nm} is bleeding.`,'#e06060');mxFloat(E,'Bleeding','#e06060');break;
+    case 'poison':st.poison={n:fx[1],d:fx[2]+Math.floor(h.lvl/12)};msg(`The ${nm} is poisoned.`,'#70e070');mxFloat(E,'Poisoned','#70e070');break;
+    case 'burn':st.burn={n:fx[1],d:fx[2]+Math.floor(h.lvl/12)};msg(`The ${nm} is on fire.`,'#ff9040');mxFloat(E,'Burning','#ff9040');break;
+    case 'blind':st.blind=Math.max(st.blind||0,fx[1]);msg(`The ${nm} cannot see.`,'#b0b0c0');mxFloat(E,'Blind','#b0b0c0');break;
+    case 'confuse':st.confuse=Math.max(st.confuse||0,ctl(fx[1]));msg(`The ${nm} sees enemies everywhere.`,'#e080e0');mxFloat(E,'Confused','#e080e0');break;
+    case 'vuln':st.vuln=Math.max(st.vuln||0,fx[1]);msg(`The ${nm} lowers its guard.`,'#e8a060');mxFloat(E,'Exposed','#e8a060');break;
+    case 'slow':st.slow=Math.max(st.slow||0,fx[1]);msg(`The ${nm} slows down.`,'#a0b0d0');mxFloat(E,'Slowed','#a0b0d0');break;
+    case 'poly':{
+      if(boss){msg(`The ${nm} is too mighty to change.`,'#c8b898');mxFloat(E,'Immune','#c8b898');break}
+      const p=MX_POLY[fx[1]];E.poly={img:p.img,w:p.w,name:p.name,left:fx[2]};st.hold=0;st.fear=0;st.confuse=0;
+      msg(`The ${ENEMY_DEF[E.t].name} is turned into a ${p.name}! ${p.snd}`,'#ffe9a0');mxFloat(E,p.snd,'#ffe9a0');break}
+    case 'banish':{
+      if(boss){const d=Math.round(E.maxhp*.25);hurtEnemy(E,d);msg(`The rift tears a great piece from the ${nm}.`,'#c090ff');break}
+      msg(`The ${nm} is swallowed by the rift!`,'#c090ff');hurtEnemy(E,E.hp+1);break}
+    case 'exec':{
+      if(E.hp<=E.maxhp*fx[1]&&!boss){msg(`The ${nm} falls dead at once.`,'#ffe090');hurtEnemy(E,E.hp+1)}
+      else hurtEnemy(E,mxDmg(hi,fx[2]));break}
+    case 'steal':{const g=Math.max(1,Math.round(rnd(fx[1]*.6,fx[1]*1.4)*(1+h.lvl*.3)));G.gold+=g;msg(`${HERO_DEF[hi].name} steals ${g} gold from the ${nm}.`,'#ffd76a');mxFloat(E,'+'+g,'#ffd76a');break}
+    case 'undead':{
+      if(E.t==='skel'||/skel|ghost|spectre|wraith|mummy/.test(E.t)){
+        if(!boss&&E.hp<=E.maxhp*.5){msg(`The ${nm} crumbles to nothing.`,'#fff0b0');hurtEnemy(E,E.hp+1)}
+        else{st.fear=Math.max(st.fear||0,fx[1]);hurtEnemy(E,mxDmg(hi,fx[2]));mxFloat(E,'Turned','#fff0b0')}
+      }else{st.hold=Math.max(st.hold||0,2);mxFloat(E,'Cowers','#e0d8a0')}
+      break}
+    case 'surge':{
+      const r=Math.random();
+      if(r<.3)mxApplyEnemy(hi,E,['dmg',[70,110]],P);
+      else if(r<.5)mxApplyEnemy(hi,E,['poly',Math.random()<.5?'sheep':'frog',8],P);
+      else if(r<.7)mxApplyEnemy(hi,E,['hold',5],P);
+      else if(r<.85){mxApplyParty(hi,['heal',[40,60],1]);msg('The surge washes warm over the party.','#9ae0a0')}
+      else mxApplyEnemy(hi,E,['fear',6],P);
+      break}
+  }
+}
+function mxApplyParty(hi,fx,P){
+  const def=HERO_DEF[hi],k=fx[0];
+  if(k==='buff'){
+    const key=fx[1],self=P&&P.aim==='self';
+    G.buffs=G.buffs.filter(b=>!(b.name===P.name&&b.b===key&&b.hi===(self?hi:-1)));
+    G.buffs.push({name:P.name,b:key,amt:fx[2],left:fx[3],hi:self?hi:-1});
+  }else if(k==='heal'){
+    const who=fx[2]?livingHeroes():(()=>{const l=livingHeroes().filter(j=>G.heroes[j].hp<G.heroes[j].max);if(!l.length)return livingHeroes().slice(0,1);let b=l[0];for(const j of l)if(G.heroes[j].hp/G.heroes[j].max<G.heroes[b].hp/G.heroes[b].max)b=j;return [b]})();
+    for(const j of (P&&P.aim==='self'?[hi]:who)){const g=G.heroes[j],a=Math.round((rnd(fx[1][0],fx[1][1])+Math.floor(Math.max(0,G.heroes[hi].int-8)/3))*(1+pas(hi,'healPct')));g.hp=Math.min(g.max,g.hp+a);if(typeof addFloat==='function')addFloat(portraitX(j)+19,250,'+'+a,'#7fe08a')}
+    sfx('heal');
+  }else if(k==='healpct'){for(const j of livingHeroes()){const g=G.heroes[j];g.hp=Math.min(g.max,g.hp+Math.round(g.max*fx[1]));if(typeof addFloat==='function')addFloat(portraitX(j)+19,250,'+',' #7fe08a'.trim())}sfx('heal')}
+  else if(k==='cleanse'){
+    const sel=P&&P.aim==='self'?[hi]:P&&P.aim==='front|ally'?null:livingHeroes();
+    let n=0;for(const e of afflList().slice()){const A=AFFL[e.id];if(A&&A.kind==='bad'&&(!sel||sel.includes(e.hi))){afflRemove(e,false);n++}}
+    if(n)msg(n===1?'An affliction is lifted.':n+' afflictions are lifted.','#a8e0e8');
+  }
+  else if(k==='revive'){for(let j=0;j<4;j++){const g=G.heroes[j];if(!g.alive){g.alive=true;g.hp=Math.max(1,Math.ceil(g.max*fx[1]));msg(`${HERO_DEF[j].name} rises!`,'#ffe9a0')}}sfx('level')}
+  else if(k==='feed'){for(const g of G.heroes)if(g.alive)g.food=Math.min(100,g.food+fx[1])}
+}
+function mxTargets(hi,aim){
+  if(aim==='front'||aim==='front|ally'){const f=frontEnemy(4);return f?[f.e]:[]}
+  if(aim==='all')return G.enemies.filter(e=>e.hp>0&&Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)<=8&&hasLOS(G.P.x,G.P.y,e.x,e.y));
+  if(Array.isArray(aim)&&aim[0]==='area')return G.enemies.filter(e=>e.hp>0&&Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)<=aim[1]&&hasLOS(G.P.x,G.P.y,e.x,e.y));
+  return null; // party-side
+}
+function mxCast(i,P){
+  const h=G.heroes[i],def=HERO_DEF[i];
+  if(h.mp<P.cost){msg(`${def.name} lacks the ${def.mpn.toLowerCase()}.`,'#d09a80');return false}
+  const ally=P.aim==='party'||P.aim==='self'||P.aim==='front|ally'||P.aim==='dead';
+  if(P.aim==='dead'&&!G.heroes.some(x=>!x.alive)&&G.heroes.every(x=>x.hp>=x.max)){msg('Nobody needs it.');return false}
+  let T=null;
+  if(!ally||P.aim==='front|ally'){
+    T=mxTargets(i,P.aim==='front|ally'?'front':P.aim);
+    if(!T.length&&P.aim!=='front|ally'){msg('No foe in range.','#d09a80');return false}
+    if(P.aim==='front|ally'&&!T.length)T=[];
+  }
+  h.mp-=P.cost;sfx('spell');
+  msg(`${def.name} casts ${P.name}!`,P.col||'#ffe9a0');
+  if(typeof G!=='undefined')G.shake=Math.max(G.shake||0,.12);
+  const party=P.fx.filter(f=>['buff','heal','healpct','cleanse','revive','feed'].includes(f[0])),foe=P.fx.filter(f=>!party.includes(f));
+  if(P.aim==='front|ally'){for(const f of party)mxApplyParty(i,f,P);for(const E of T)for(const f of foe)mxApplyEnemy(i,E,f,P)}
+  else if(ally)for(const f of P.fx)mxApplyParty(i,f,P);
+  else{for(const E of T)for(const f of foe){if(E.hp>0)mxApplyEnemy(i,E,f,P)}for(const f of party)mxApplyParty(i,f,P)}
+  return true;
+}
+/* ---------------------------------------------------------------- the enemy's turn ---------------------------------------------------------------- */
+function mxFreeStep(e,pick){
+  const opts=DIRS.map(d=>[e.x+d[0],e.y+d[1]]).filter(([x,y])=>!cellBlocked(x,y)&&!enemyAt(x,y)&&!(x===G.P.x&&y===G.P.y));
+  if(!opts.length)return false;
+  const o=pick(opts);e.x=o[0];e.y=o[1];return true;
+}
+function mxEnemyAct(e){
+  const st=e.st;if(!st)return undefined;
+  const nm=mxName(e);
+  for(const k of ['bleed','poison','burn']){
+    const s=st[k];
+    if(s&&s.n>0){s.n--;const d=s.d;hurtEnemy(e,d);msg(`The ${nm} ${k==='burn'?'burns':k==='poison'?'sickens':'bleeds'} for ${d}.`,k==='burn'?'#ff9040':k==='poison'?'#70e070':'#e06060');if(e.hp<=0)return 220}
+    if(s&&s.n<=0)st[k]=null;
+  }
+  const tick=()=>{for(const k of ['curse','blind','vuln'])if(st[k]>0)st[k]--};
+  if(st.hold>0){st.hold--;tick();msg(`The ${nm} is held fast.`,'#a0c8ff');return 130}
+  if(st.sleep>0){st.sleep--;tick();msg(`The ${nm} sleeps.`,'#90b0ff');return 130}
+  if(e.poly){
+    e.poly.left--;
+    if(e.poly.left<=0){msg(`The ${e.poly.name} shimmers and becomes a ${ENEMY_DEF[e.t].name} again!`,'#ffd890');e.poly=null;return 200}
+    tick();
+    if(Math.random()<.5)msg(`The ${e.poly.name} ${e.poly.name==='cow'?'chews placidly':e.poly.name==='sheep'?'bleats and wanders':e.poly.name==='frog'?'hops about':'wanders about'}.`,'#e8dcb4');
+    mxFreeStep(e,o=>o[rnd(0,o.length-1)]);return 130;
+  }
+  if(st.fear>0){
+    st.fear--;tick();
+    const d0=Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y);
+    msg(`The ${nm} runs away in terror.`,'#e0a0f0');
+    mxFreeStep(e,o=>{let b=o[0],bd=-1;for(const q of o){const d=Math.abs(q[0]-G.P.x)+Math.abs(q[1]-G.P.y)+Math.random();if(d>bd){bd=d;b=q}}return bd>d0-1?b:o[rnd(0,o.length-1)]});
+    return 130;
+  }
+  if(st.confuse>0){
+    st.confuse--;tick();
+    const others=G.enemies.filter(o=>o!==e&&o.hp>0&&!o.poly);
+    let tgt=null,bd=99;for(const o of others){const d=Math.abs(o.x-e.x)+Math.abs(o.y-e.y);if(d<bd){bd=d;tgt=o}}
+    if(!tgt||bd>9){msg(`The ${nm} swings at shadows.`,'#e080e0');mxFreeStep(e,o=>o[rnd(0,o.length-1)]);return 150}
+    if(bd===1){
+      const sx=enemyStat(e.t,e.lvl),d=rnd(sx.dmg[0],sx.dmg[1]);hurtEnemy(tgt,d);e.lunge=1;
+      msg(`The ${nm} attacks the ${mxName(tgt)} for ${d}!`,'#f0a0f0');return 300;
+    }
+    mxFreeStep(e,o=>{let b=o[0],bd2=99;for(const q of o){const d=Math.abs(q[0]-tgt.x)+Math.abs(q[1]-tgt.y)+Math.random()*.5;if(d<bd2){bd2=d;b=q}}return b});
+    msg(`The ${nm} stumbles towards the ${mxName(tgt)}.`,'#e080e0');return 150;
+  }
+  if(st.slow>0){st.slow--;st.flip=!st.flip;if(st.flip){tick();msg(`The ${nm} moves sluggishly.`,'#a0b0d0');return 130}}
+  tick();
+  return undefined;
+}
+/* what an enemy's own attacks suffer from: cursed enemies hit weaker, blinded ones miss */
+function mxMiss(e){const s=e.st;return s&&s.blind>0?.35:(s&&s.curse>0?.12:0)}
+function mxMul(e){const s=e.st;return s&&s.curse>0?.7:1}
+function mxVuln(e,dmg){const s=e.st;if(!s)return dmg;if(s.sleep>0)s.sleep=0;return s.vuln>0?Math.round(dmg*1.5):dmg}
+function mxPlate(e){
+  const s=e.st,out=[];if(e.poly)out.push(e.poly.name);
+  if(s){if(s.hold>0)out.push('held');if(s.sleep>0)out.push('asleep');if(s.fear>0)out.push('scared');if(s.confuse>0)out.push('confused');if(s.curse>0)out.push('cursed');if(s.blind>0)out.push('blind');if(s.vuln>0)out.push('exposed');if(s.slow>0)out.push('slowed');if(s.bleed&&s.bleed.n>0)out.push('bleeding');if(s.poison&&s.poison.n>0)out.push('poisoned');if(s.burn&&s.burn.n>0)out.push('burning')}
+  return out.join(', ');
+}
+/* ---------------------------------------------------------------- buying: the shop screen ---------------------------------------------------------------- */
+function mxLearn(hi,s){
+  const h=G.heroes[hi];h.learned=h.learned||[];
+  if(h.learned.includes(s.id))return 'Already known.';
+  if(h.lvl<s.lv)return `${HERO_DEF[hi].name} must be level ${s.lv}.`;
+  if(G.gold<s.price)return `That costs ${s.price} gold.`;
+  G.gold-=s.price;h.learned.push(s.id);sfx('level');
+  msg(`${HERO_DEF[hi].name} memorises ${s.name}. It joins the power page.`,'#ffe9a0');
+  return null;
+}
+function openSpellShop(){G.talk=null;G.menu='spellshop';G.sshero=G.sshero===undefined?0:G.sshero;G.ssmsg=''}
+function drawSpellShop(){
+  BTNS=[];veil(.72);bigPanel(14,6,452,308);
+  txt("THE WIZARD'S SPELLS",240,22,13,'#d8c88e','center',true);
+  txt(`Gold: ${G.gold}`,452,22,9,'#ffe36a','right',true);
+  const hi=clamp(G.sshero||0,0,3),h=G.heroes[hi],def=HERO_DEF[hi],list=MX_BY_CLASS[def.cls]||[];
+  for(let k=0;k<4;k++){
+    const x=24+k*58,sel=k===hi,hh=G.heroes[k],img=portraitImg(k);
+    ctx.save();ctx.fillStyle='#0a0806';ctx.fillRect(x,32,50,56);if(img){const sw=Math.min(img.width,img.height*(50/56)),sx=(img.width-sw)/2;ctx.drawImage(img,sx,0,sw,img.height,x,32,50,56)}
+    ctx.lineWidth=sel?2.4:1.4;ctx.strokeStyle=sel?'#ffe36a':'#7a6440';ctx.strokeRect(x,32,50,56);ctx.restore();
+    txt(HERO_DEF[k].name,x+25,95,7.5,sel?'#ffe9a0':'#c8b898','center',true,undefined,50);
+    txt('Lv '+hh.lvl+' '+HERO_DEF[k].cls,x+25,104,6.5,'#9a8a68','center',false,undefined,56);
+    btn('ssh'+k,x,32,50,72);
+  }
+  txt(`${def.name} the ${def.cls}: ${list.length} spells for sale`,24+4*58+10,50,8,'#d8c88e','left',true,undefined,200);
+  txt('A bought spell is memorised and joins the power page.',24+4*58+10,62,7.5,'#a89878','left',false,undefined,210);
+  if(G.ssmsg)txt(G.ssmsg,24+4*58+10,80,8,'#e8a070','left',true,undefined,210);
+  const top=106,rh=38;
+  list.forEach((s,k)=>{
+    const y=top+k*rh,known=(h.learned||[]).includes(s.id),open=h.lvl>=s.lv,can=open&&G.gold>=s.price&&!known;
+    ctx.save();rrect(ctx,22,y,436,rh-3,5);ctx.fillStyle=known?'rgba(30,50,24,.92)':'rgba(40,18,14,.92)';ctx.fill();ctx.lineWidth=1.4;ctx.strokeStyle=known?'#7ac060':open?'#a88a48':'#5a4a34';ctx.stroke();ctx.restore();
+    const im=IMG['sp_'+s.id];ctx.fillStyle='#120c08';ctx.fillRect(28,y+3,34,34);
+    if(im)ctx.drawImage(im,29,y+4,32,32);else{ctx.fillStyle=s.col;ctx.fillRect(34,y+9,22,22)}
+    ctx.strokeStyle=s.col;ctx.lineWidth=1.2;ctx.strokeRect(28,y+3,34,34);
+    ctx.globalAlpha=open||known?1:.55;
+    txt(s.name,70,y+9,9.5,'#ecdca8','left',true,undefined,200);
+    txt(`Level ${s.lv}  -  ${s.cost} ${def.mpn.slice(0,4).toLowerCase()}`,70,y+19,7,'#9ac8ff','left');
+    wrapText(s.d,310,7.2).slice(0,2).forEach((l,q)=>txt(l,70,y+28+q*8.2,7.2,'#c8bc98','left'));
+    ctx.globalAlpha=1;
+    if(known)txt('MEMORISED',450,y+13,8,'#9ae0a0','right',true);
+    else if(!open)txt(`Needs level ${s.lv}`,450,y+13,8,'#e8905a','right',true);
+    else{btnText('ssb'+k,`Buy ${s.price}g`,388,y+4,66,18);if(!can)txt(G.gold<s.price?'too dear':'',450,y+31,6.5,'#e8905a','right')}
+  });
+  btnText('ssexit','Leave',190,298,100,16);
+}
+function spellShopBtn(id){
+  if(id==='ssexit'){G.menu=false;return}
+  let m=/^ssh(\d)$/.exec(id);if(m){G.sshero=+m[1];G.ssmsg='';return}
+  m=/^ssb(\d)$/.exec(id);
+  if(m){const hi=clamp(G.sshero||0,0,3),list=MX_BY_CLASS[HERO_DEF[hi].cls]||[],s=list[+m[1]];if(!s)return;G.ssmsg=mxLearn(hi,s)||''}
+}
+/* the wizards behind the counters */
+function mxWizard(d,who,line){
+  return say(line,[['Show me your spells.',()=>{openSpellShop();return null}],['What do you teach?',()=>say('Five spells for every kind of adventurer, at levels ten, twenty, thirty, forty and fifty. Warriors have shouts and shields, priests have mercy and wrath, thieves have smoke and sleight of hand, and goats have things I do not discuss. Each is memorised, and stays with whoever buys it.',[['Show me your spells.',()=>{openSpellShop();return null}],BYE])],BYE]);
+}
+khNpc('kh_wizard','Zahir, the court wizard','kh_npc6_4',d=>mxWizard(d,'Zahir','Spells, my friends. Every one is real, every one is sold fairly, and no one has ever been turned into a frog by accident. Not by me, at least. Look around, and ask.'));
+khNpc('ih_wizard','Corvin, the hedge wizard','kh_npc6_4',d=>mxWizard(d,'Corvin','A fine day for magic. Ironhill is full of strong arms and weak spells. Let me fix the second part.'));
+
+/* ---- src/desert/gear.js ---- */
+/* ==========================================================================
+   GEAR FOR THE HIGH LEVELS. Plain steel and leather, nothing magic: five weapons of each kind (swords, axes and maces, bows) and five of each armour
+   (helms, body armour, shields) for levels 10, 20, 30, 40 and 50, each with a way of its own: bleeding, cleaving, executing, stunning, thorns,
+   dodging. Plus stronger potions, mana and stamina draughts and brews of might, speed and iron skin. They are sold in the sword shops, armour shops
+   and potion shops of Khemetra's Merchants' Quarter and of Ironhill (the buildings are placed in khemetra_build.js and ironhill_shops.js).
+   ========================================================================== */
+const GEAR=[];
+function gw(id,n,t,lv,dmg,hit,req,price,col,eff,d,extra){
+  const it=Object.assign({n,k:'weapon',t,ic:t==='Bow'?'bow':t==='Axe'?'axe':t==='Mace'?'mace':'sword',c:col,dmg,hit,req,price,lvl:lv,eff,d:d+` Needs level ${lv}.`,sw:t==='Bow'?.42:.44,gear:1},extra||{});
+  if(t==='Bow')it.ranged=extra&&extra.ranged||4;
+  ITEMDEF[id]=it;GEAR.push(id);
+}
+function ga(id,k,n,t,lv,armor,price,col,pas,d,req){
+  ITEMDEF[id]={n,k,t,ic:k==='head'?'head':k==='shield'?'shield':'chest',c:col,armor,price,lvl:lv,pas:pas||null,req:req||null,d:d+` Needs level ${lv}.`,sw:k==='head'?.38:k==='shield'?.42:.46,gear:1};
+  GEAR.push(id);
+}
+// swords
+gw('cutlass',"Serrated Cutlass",'Sword',10,[10,16],.05,{str:14},400,'#b8a8a0',{bleed:[.25,5,3]},'A curved blade with a saw edge. A quarter of its hits leave the foe bleeding.');
+gw('greatsword','Cleaving Greatsword','Sword',20,[18,28],0,{str:18},900,'#b8bcc8',{cleave:1},'A huge blade swung in a great arc. Every hit also cuts the foe standing behind the first.');
+gw('executioner',"Executioner's Blade",'Sword',30,[26,38],.02,{str:22},1600,'#6a6a78',{exec:[.3,2.5]},'A black broad blade. Against a foe under 30% health it deals two and a half times damage.',{dbl:.1});
+gw('claymore','Vanguard Claymore','Sword',40,[38,54],.04,{str:26},2600,'#90b0d8',{stun:.2},'A heavy steel-blue claymore. One hit in five knocks the foe senseless for a round.');
+gw('kingslayer','Kingslayer','Sword',50,[54,78],.1,{str:30},4200,'#e8d890',{bossdmg:.5},'A king-sized longsword that rarely misses. Bosses and great beasts take half again as much from it.',{dbl:.12});
+// axes and hammers
+gw('splitaxe','Splitting Axe','Axe',10,[12,19],-.04,{str:16},400,'#a8a8b0',{daze:.15},'A woodsman\'s axe with a wicked edge. One hit in seven leaves the foe dazed.');
+gw('wolfaxe','Wolf-Haft Axe','Axe',20,[22,32],-.03,{str:20},900,'#9aa0aa',{cleave:1},'A bearded axe from the north. Hits carry through to the foe behind.');
+gw('maul','Spiked Maul','Mace',30,[34,50],-.04,{str:24},1600,'#80808c',{vuln:[.3,3]},'A spiked iron maul. A third of its hits crack the foe\'s guard: it takes half again as much damage for three rounds.');
+gw('headsman',"Headsman's Axe",'Axe',40,[46,66],-.02,{str:28},2600,'#505058',{exec:[.25,3]},'A long black axe. Against a foe under a quarter health it deals triple damage.');
+gw('worldaxe','Earthsplitter','Axe',50,[64,92],-.03,{str:32},4200,'#e0c870',{shock:.25},'A gigantic double axe. One hit in four shakes the ground and knocks down every foe within two squares.');
+// bows
+gw('hunterbow',"Hunter's Longbow",'Bow',10,[9,15],.1,{dex:14},400,'#8a6a40',{},'A plain, well-made longbow. Shoots up to 4 squares and rarely misses.',{ranged:4});
+gw('barbedbow','Barbed Bow','Bow',20,[16,24],.06,{dex:18},900,'#a89878',{bleed:[.3,6,4]},'Bone barbs on the limbs and barbed arrows. A third of its hits leave the foe bleeding.',{ranged:4});
+gw('twinbow','Twinstring Bow','Bow',30,[24,36],.06,{dex:22},1600,'#8a7a50',{double:.25},'Two strings, two arrows. One shot in four sends a second arrow after the first.',{ranged:4});
+gw('warbow','Steppe Warbow','Bow',40,[36,52],.08,{dex:26},2600,'#c0a070',{pierce:1},'A horn and sinew recurve bow. Its arrows pass through the foe and strike the one behind.',{ranged:5});
+gw('silverbow','Windrunner','Bow',50,[50,72],.15,{dex:30},4200,'#d0d8e8',{bossdmg:.25},'A slim bow of silvered wood, quick and true. Shoots 6 squares; great beasts take a quarter more.',{ranged:6,dbl:.2});
+// helms
+ga('ironcap','head','Iron Cap','Helm',10,3,250,'#9aa0aa',null,'A plain iron cap with a nose guard.',{str:10});
+ga('greathelm','head','Knight\'s Greathelm','Helm',20,4,500,'#b0b4bc',{dodge:.03},'A closed helm with a narrow slit. Blows glance off it.',{str:14});
+ga('hornhelm','head','Horned Helm','Helm',30,5,900,'#8a8a96',{dmgPct:.05},'A horned helm that makes the wearer look twice as angry. All damage +5%.',{str:18});
+ga('centurion','head','Centurion Helm','Helm',40,6,1500,'#c8a050',{crit:.05},'A bronze helm with a red crest. +5% double hits.',{str:22});
+ga('warlordhelm',"Warlord's Helm",'Helm',50,8,2400,'#d8b860',{dodge:.05,dmgPct:.05},'A gold-trimmed helm worn by great captains. Enemies miss 5% more; damage +5%.',{str:26});
+// body armour
+ga('brigandine','chest','Studded Brigandine','Chest',10,5,450,'#7a5a3a',{regen:.15},'Leather studded with iron. Recover a little health every few rounds.');
+ga('hauberk','chest','Steel Hauberk','Chest',20,7,900,'#a0a8b0',{dodge:.03},'A shirt of steel rings. Enemies miss 3% more.');
+ga('cuirass','chest','Plate Cuirass','Chest',30,9,1600,'#b8bcc4',{regen:.2},'A polished steel breastplate. Recover health steadily.');
+ga('lionplate','chest','Lionplate','Chest',40,12,2600,'#b0b4bc',{thorns:3},'Plate with lion-head pauldrons. Every enemy that strikes you takes 3 damage.');
+ga('goldplate','chest','Gilded Plate','Chest',50,15,4000,'#d8b860',{dodge:.06,regen:.3},'Gold-trimmed steel plate. Enemies miss 6% more and wounds close fast.');
+// shields
+ga('roundshield','shield','Banded Round Shield','Shield',10,3,300,'#8a6238',{dodge:.04},'A round shield with an iron boss. Enemies miss 4% more.',{str:10});
+ga('kiteshield','shield','Kite Shield','Shield',20,4,600,'#c0c8d0',{dodge:.06},'A long shield with a blue stripe. Enemies miss 6% more.',{str:14});
+ga('spikeshield','shield','Spiked Shield','Shield',30,5,1100,'#707078',{thorns:4},'An iron shield bristling with spikes. Every enemy that strikes you takes 4 damage.',{str:18});
+ga('towershield','shield','Lion Tower Shield','Shield',40,7,1800,'#303038',{dodge:.08},'A tall dark shield with a golden lion. Enemies miss 8% more.',{str:22});
+ga('dragonshield','shield','Dragon Shield','Shield',50,9,2800,'#a07840',{dodge:.1,thorns:6},'A huge bronze shield with a dragon. Enemies miss 10% more and take 6 damage for every blow they land.',{str:26});
+// potions and brews
+function gp(id,n,col,price,d,o){ITEMDEF[id]=Object.assign({n,k:'potion',t:'Potion',ic:'potion',c:col,stack:1,price,d,sw:.26},o)}
+gp('healdraught','Healing Draught','#d03a2a',60,'Restores 60 health.',{heal:60});
+gp('greaterheal','Greater Healing Draught','#e0502e',140,'Restores 120 health.',{heal:120});
+gp('superiorheal','Superior Healing Draught','#f06a30',320,'Restores 220 health.',{heal:220});
+gp('elixir','Elixir of Life','#ff9a3a',700,'Restores 400 health.',{heal:400});
+gp('manadraught','Mana Draught','#3a6ae0',70,'Restores 20 mana or stamina.',{mana:20});
+gp('greatermana','Greater Mana Draught','#4a7af0',170,'Restores 45 mana or stamina.',{mana:45});
+gp('supermana','Superior Mana Draught','#6a9aff',380,'Restores 80 mana or stamina.',{mana:80});
+gp('might','Potion of Might','#e07030',120,'The drinker deals 25% more damage for 25 rounds.',{buff:{b:'dmgPct',amt:.25,rounds:25}});
+gp('swiftness','Potion of Swiftness','#50d0e0',110,'Enemies miss the drinker 15% more for 25 rounds.',{buff:{b:'dodge',amt:.15,rounds:25}});
+gp('ironskin','Potion of Iron Skin','#9098a8',110,'The drinker gains +5 armor for 25 rounds.',{buff:{b:'armor',amt:5,rounds:25}});
+gp('keeneye','Potion of the Keen Eye','#f0e060',100,'The drinker hits 12% more often for 25 rounds.',{buff:{b:'hitPct',amt:.12,rounds:25}});
+if(typeof HEAL_IDS!=='undefined')for(const id of ['healdraught','greaterheal','superiorheal','elixir'])HEAL_IDS.push(id);
+if(typeof ART_ITEM_IDS!=='undefined')for(const id of GEAR)ART_ITEM_IDS.push(id);
+/* what the shops sell */
+const GEAR_STOCK={
+  sword:()=>['cutlass','greatsword','executioner','claymore','kingslayer','splitaxe','wolfaxe','maul','headsman','worldaxe','hunterbow','barbedbow','twinbow','warbow','silverbow'].map(id=>[id,1]),
+  armour:()=>['ironcap','greathelm','hornhelm','centurion','warlordhelm','brigandine','hauberk','cuirass','lionplate','goldplate','roundshield','kiteshield','spikeshield','towershield','dragonshield'].map(id=>[id,1]),
+  potion:()=>[['healdraught',6],['greaterheal',4],['superiorheal',2],['elixir',1],['manadraught',6],['greatermana',4],['supermana',2],['might',3],['swiftness',3],['ironskin',3],['keeneye',3],['antidote',5],['salve',5],['holywater',2],['sleeptea',3]]
+};
+/* what the gear does, in play */
+function gearPas(hi,key){
+  const h=G.heroes[hi];if(!h||!h.eq)return 0;let s=0;
+  for(const k in h.eq){const it=h.eq[k];if(!it)continue;const d=ITEMDEF[it.id];if(d&&d.pas&&d.pas[key])s+=d.pas[key]}
+  return s;
+}
+function weaponProc(i,E,dmg,w,k){
+  const e=w&&w.eff;if(!e||!E)return;
+  const h=G.heroes[i],d0=DIRS[G.P.f],nm=ENEMY_DEF[E.t].name;
+  if(E.hp>0){
+    if(e.bleed&&Math.random()<e.bleed[0])mxApplyEnemy(i,E,['bleed',e.bleed[1],e.bleed[2]],null);
+    if(e.daze&&Math.random()<e.daze){E.chilled=1;msg(`The ${nm} reels, dazed.`,'#e8c870')}
+    if(e.stun&&Math.random()<e.stun)mxApplyEnemy(i,E,['hold',1],null);
+    if(e.vuln&&Math.random()<e.vuln[0])mxApplyEnemy(i,E,['vuln',e.vuln[1]],null);
+    if(e.exec&&E.hp<=E.maxhp*e.exec[0]){const x=Math.round(dmg*(e.exec[1]-1));msg(`The finishing blow! +${x}.`,'#ffd76a');hurtEnemy(E,x)}
+    if(e.bossdmg&&mxIsBoss(E)){hurtEnemy(E,Math.round(dmg*e.bossdmg))}
+  }
+  if(e.cleave||e.pierce){
+    const e2=enemyAt(G.P.x+d0[0]*(k+1),G.P.y+d0[1]*(k+1));
+    if(e2&&e2.hp>0){const x=Math.max(1,Math.round(dmg*(e.pierce?.8:.6)));hurtEnemy(e2,x);msg(`${e.pierce?'The arrow passes through':'The blow carries on'} and hits the ${ENEMY_DEF[e2.t].name} for ${x}.`,'#ffd76a')}
+  }
+  if(e.shock&&Math.random()<e.shock){
+    const L=G.enemies.filter(q=>q.hp>0&&Math.abs(q.x-G.P.x)+Math.abs(q.y-G.P.y)<=2);
+    if(L.length>1||(L.length===1&&L[0]!==E)||true){for(const q of L)mxApplyEnemy(i,q,['hold',1],null);msg('The ground shudders. Foes are thrown down!','#e0c870');G.shake=Math.max(G.shake||0,.3)}
+  }
+  if(e.double&&Math.random()<e.double&&E.hp>0){const r=rollDmg(h);hurtEnemy(E,r.d);msg(`A second arrow follows for ${r.d}.`,'#ffd76a')}
+}
+
+/* ---- src/desert/new_shops.js ---- */
+/* ==========================================================================
+   THE NEW SHOPS: a wizard (spells), a swordsmith, an armourer and an alchemist, in Khemetra's Merchants' Quarter (the buildings are listed in
+   khemetra_build.js) and in Ironhill (four new buildings built into the town map here).
+   ========================================================================== */
+KH_STOCK.sword=GEAR_STOCK.sword;KH_STOCK.armour2=GEAR_STOCK.armour;KH_STOCK.potion2=GEAR_STOCK.potion;
+khShop('kh_swordsmith','Hakim, the swordsmith','kh_npc4_0','The Gilded Blade','Steel for every level of customer, from the first blade to the last. I sell nothing magic, and I need nothing magic. A good edge is enough.','sword');
+khShop('kh_armourer','Nadira, the armourer','kh_npc4_2','The Iron Aegis','Helms, plate and shields, each fitted for a fighter of a certain strength and standing. Try them on. They are heavier than they look.','armour2');
+khShop('kh_alchemist','Ptah-Em, the alchemist','kh_npc2_2',"The Alchemist's Cellar",'Draughts to heal, draughts to restore, brews of might and speed, and cures for what ails you. Mind the green one.','potion2');
+khShop('ih_swordsmith','Torvald, the swordsmith','kh_npc4_1','Steelhold Blades','Ironhill steel is the best in the north, and I keep the best of it. Take your time. Weigh them.','sword');
+khShop('ih_armourer','Grete, the armourer','kh_npc4_3','Ironhill Plate and Mail','Hammered in the north, tested on a wall. If it fails, you will not complain, but I will know.','armour2');
+khShop('ih_alchemist','Old Brannoch\'s sister, Ysolt','kh_npc2_3','The Cauldron','Potions, tonics, tinctures. Some of them even taste of something nice.','potion2');
+/* ---- Ironhill: four new buildings in the free ground of the town ---- */
+const IH_SHOPS=[
+  {n:271,name:"Corvin's Arcana",keeper:'ih_wizard',dir:'N',x:2,y:10,door:'9',idx:9,tex:'hall'},
+  {n:272,name:'The Cauldron',keeper:'ih_alchemist',dir:'N',x:40,y:10,door:'́',idx:10,tex:'shop'},
+  {n:273,name:'Steelhold Blades',keeper:'ih_swordsmith',dir:'S',x:2,y:21,door:'̂',idx:11,tex:'shop'},
+  {n:274,name:'Ironhill Plate and Mail',keeper:'ih_armourer',dir:'S',x:40,y:21,door:'̃',idx:12,tex:'shop'}
+];
+(function(){
+  const L=LEVELS[13];if(!L||!L.rows||L.rows.length<26||L._shops)return;
+  L._shops=1;
+  const src=L.rows.slice(),rows=L.rows.slice();
+  const put=(y,x,str)=>{rows[y]=rows[y].slice(0,x)+str+rows[y].slice(x+str.length)};
+  const ch=L.chars=Object.assign({},L.chars||{});
+  const portals=L.portals=(L.portals||[]).slice();
+  for(const S of IH_SHOPS){
+    let fx,fy,pat,dx;
+    if(S.dir==='N'){pat=[src[10].slice(12,16),src[11].slice(12,16),src[12].slice(12,16)];dx=1;fy=12;pat[2]=pat[2][0]+S.door+pat[2].slice(2);for(let k=0;k<3;k++)put(S.y+k,S.x,pat[k]);fx=S.x+dx;fy=S.y+2;}
+    else{pat=[src[21].slice(18,23),src[22].slice(18,23),src[23].slice(18,23),src[24].slice(18,23)];dx=2;pat[0]=pat[0].slice(0,2)+S.door+pat[0].slice(3);for(let k=0;k<4;k++)put(S.y+k,S.x,pat[k]);fx=S.x+dx;fy=S.y}
+    if(S.door!=='9')ch[S.door]=30+S.idx;
+    portals[S.idx]={to:S.n,x:fx,y:S.dir==='N'?fy+1:fy-1,f:S.dir==='N'?2:0,tex:S.tex};
+    S.exit={x:fx,y:S.dir==='N'?fy+1:fy-1,f:S.dir==='N'?2:0};
+    L.decor.push({k:'sign_'+S.keeper,x:S.exit.x-1,y:S.exit.y,block:false,wd:[0,S.dir==='N'?-1:1],txt:[S.name.toUpperCase(),{ih_wizard:'Corvin, Wizard',ih_alchemist:'Ysolt, Alchemist',ih_swordsmith:'Torvald, Swordsmith',ih_armourer:'Grete, Armourer'}[S.keeper]]});
+    KH_LAZY[S.n]=()=>{
+      if(LEVELS[S.n])return;
+      LEVELS[S.n]=khRoom({id:'ih'+S.n,name:S.name,room:'shop',keeper:S.keeper},S.n,{to:13,x:S.exit.x,y:S.exit.y,f:S.exit.f}).level;
+      LEVEL_NAMES[S.n]=S.name;
+    };
+  }
+  L.rows=rows;
+  const base=LEVEL13_DATA;if(base&&base!==L){base.rows=rows;base.chars=ch;base.portals=portals}
+})();
+/* the town's tile table is rebuilt when the pictures are ready, so the doors' characters are put back every time Ironhill is loaded */
+function ihShopsChars(){const L=LEVELS[13];if(!L)return;L.chars=L.chars||{};for(const S of IH_SHOPS)if(S.door!=='9')L.chars[S.door]=30+S.idx}
 
 /* ---- src/desert/dunes.js ---- */
 /* ==========================================================================
