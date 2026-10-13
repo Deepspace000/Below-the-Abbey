@@ -15,7 +15,8 @@ Object.assign(CUTS,{
     {who:hn(2),text:'Then we walk in, and we ask for the wizard. We have come a long way for this.'},
     {text:'Khemetra waits beyond the open gate.'}],
   khArrive:()=>[
-    {text:'The gate of Khemetra closes behind the party, and the sound of the desert goes with it. Ahead, a great avenue of pale stone runs north between white houses trimmed with gold, and at the end of it, so far away that it seems to stand in the sky, rises a palace with a spire of gold.'},
+    {text:'The gate of Khemetra closes behind the party, and the sound of the desert goes with it. They stand on a high marble terrace, and all of the golden city lies below them. A long stair leads down into the street. (Press V in the city to climb up and look over the roofs again.)'},
+    {text:'Ahead, a great avenue of pale stone runs north between white houses trimmed with gold, and at the end of it, so far away that it seems to stand in the sky, rises a palace with a spire of gold.'},
     {who:hn(0),text:'I have never seen a city this big. I did not know a wall could go on this long.'},
     {who:hn(1),text:'Look at the roofs. Domes, towers, gardens on the tops of houses, and palms everywhere. Somebody loved this place.'},
     {who:hn(3),text:'A city this size will have a wizard in it somewhere. And a vizier, and a market, and a lot of pockets to watch.'},

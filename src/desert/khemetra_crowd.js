@@ -66,12 +66,13 @@ function khCrowd(C,L){
   for(let x=0;x<W;x++){let y=0;while(y<H){if(!open(x,y)){y++;continue}let e=y;while(e<H&&open(x,e))e++;for(let k=y;k<e;k++)run[idx(x,k)*2+1]=Math.min(255,e-y);y=e}}
   const width=i=>Math.min(run[i*2],run[i*2+1]);
   const wallNear=(x,y)=>KH_DIRS.some(([a,b])=>!open(x+a,y+b));
-  const big=(x,y)=>1.6+khHash(x,y,13)*.7;           // jars and vases are big, taller than a child
+  const big=(x,y)=>.5+khHash(x,y,13)*.25;           // jars and vases are small, knee high
   const palmK=(x,y)=>khHash(x,y,14)<.4?khProp('palm'):['dpalm0','dpalm1','dpalm2','dpalm3'][((x*3+y)>>1)&3];
   const walkThrough=o=>add(Object.assign({block:false,walk:true},o)); // palms, trees, jars and people can all be walked through
   for(let y=4;y<H-4;y++)for(let x=4;x<W-4;x++){
     const i=idx(x,y);if(occ[i]||!open(x,y)||!C.reach[i])continue;
     const r=khHash(x,y,11),wd=width(i),z=C.zone[i],wn=wallNear(x,y);
+    if(khInPQ(x,y)){if(wn&&r<.07)walkThrough({k:['crate','barrel','sacks','dbones','crate','barrel'][((x*3+y)>>1)%6],x,y,sc:.7+khHash(x,y,17)*.3});continue}
     if(z===2){ // parks and gardens: lawns under palms, with shrubs, trees and planters
       if(!d3[i])continue;
       if(r<.10)walkThrough({k:palmK(x,y),x,y,sc:.95+khHash(x,y,12)*.5});
@@ -135,14 +136,14 @@ function khCrowd(C,L){
     add({k,x,y,block:false,walk:true});n++;
   }
   // ---- those who mean harm: a thief in the Old Square, wild dogs and the restless dead in the old quarter ----
-  const enemyAt=(cx,cy,rad,t,lvl)=>{const q=near(cx,cy,rad,true);if(q&&Math.abs(q[0]-KH.CX)+Math.abs(q[1]-H)>60){enemies.push({t,x:q[0],y:q[1],lvl:lvl||16});occ[idx(q[0],q[1])]=1}};
+  const enemyAt=(cx,cy,rad,t,lvl)=>{const q=near(cx,cy,rad,false);if(q&&Math.abs(q[0]-KH.CX)+Math.abs(q[1]-H)>60){enemies.push({t,x:q[0],y:q[1],lvl:lvl||16});occ[idx(q[0],q[1])]=1}};
   khKeepOpen(C,L);
   enemyAt(60,60,6,'nomad2',17);
   for(const [x,y] of [[70,90],[40,100],[90,60],[30,40],[100,100],[56,120]])enemyAt(x,y,12,'dwolf',16);
   for(const [x,y] of [[80,40],[50,80],[110,70],[34,60],[96,92],[64,100]])enemyAt(x,y,12,'dskeleton',16);
   // brigands and thieves keep to the far districts, away from the gate and the palace
-  const gangs=[[340,150],[60,230],[345,265],[150,40],[262,42],[44,150],[355,310],[120,372],[300,60],[330,200]];
-  gangs.forEach(([gx,gy],gi)=>{const mix=[['bandit','bandit','archer'],['nomad2','bandit'],['bandit','archer','nomad2'],['bandit','bandit']][gi%4];mix.forEach((t,k)=>enemyAt(gx+k*2,gy+(k%2)*2,10,t,16+(gi%2)))});
+  const gangs=[[322,232],[350,238],[376,252],[326,264],[356,274],[380,288],[318,292],[346,294],[150,40],[262,42],[44,150]];
+  gangs.forEach(([gx,gy],gi)=>{const mix=[['bandit','bandit','archer'],['nomad2','bandit','nomad2'],['bandit','archer','nomad2','bandit'],['bandit','bandit']][gi%4];mix.forEach((t,k)=>enemyAt(gx+k*2,gy+(k%2)*2,10,t,16+(gi%2)))});
 }
 /* nothing the crowd or the markets place may seal off a part of the city: blocking things that wall off reachable ground are made walk-through */
 function khKeepOpen(C,L){
@@ -169,7 +170,8 @@ function khKeepOpen(C,L){
 /* a person of the street: a face, a name, and three things they have to say */
 function khAddCitizen(decor,occ,idx,x,y,kind,rng){
   const F=KH_FACES,pick=a=>a[(rng()*a.length)|0];
-  const face=kind==='guard'?pick(F.guards):kind==='market'?pick(F.men.concat(F.women)):rng()<.1?pick(F.kids):rng()<.06?pick(F.poor):rng()<.5?pick(F.men):pick(F.women);
+  const poor=kind!=='guard'&&khInPQ(x,y);
+  const face=poor?(rng()<.4?pick(F.poor):rng()<.3?pick(F.kids):pick(F.men)):kind==='guard'?pick(F.guards):kind==='market'?pick(F.men.concat(F.women)):rng()<.1?pick(F.kids):rng()<.06?pick(F.poor):rng()<.5?pick(F.men):pick(F.women);
   const nm=KH_NAMES[(rng()*KH_NAMES.length)|0]+(kind==='market'?' the seller':kind==='guard'?' of the watch':' '+KH_TITLES[(rng()*KH_TITLES.length)|0]);
   const kl=[(rng()*KH_GOSSIP.length)|0,(rng()*KH_GOSSIP.length)|0,(rng()*KH_GOSSIP.length)|0];
   decor.push({k:khFaceKey(face),x,y,block:false,walk:true,npc:'kh_citizen',kname:nm,kl,sc:.95+rng()*.1});

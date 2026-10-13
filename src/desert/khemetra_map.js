@@ -3,7 +3,8 @@
    This file only lays out streets, blocks, plazas and the face of every building; the pictures come from
    khemetra_art.js and the people, shops and quests from khemetra_data.js.
    ========================================================================== */
-const KH={W:400,H:400,WALL:5,CX:200,CY:200,GATE_X:200};
+const KH={W:400,H:400,WALL:5,CX:200,CY:200,GATE_X:200,PQ:{x0:300,y0:214,x1:392,y1:300}}; // PQ: the poor quarter, where the thieves and brigands lurk
+const khInPQ=(x,y)=>x>=KH.PQ.x0&&x<=KH.PQ.x1&&y>=KH.PQ.y0&&y<=KH.PQ.y1;
 const KH_FLOOR={sand:'0',herring:'1',gold:'2',market:'3',lawn:'4',mosaic:'5'};
 function khRng(seed){let s=seed>>>0;return ()=>{s=(Math.imul(s,1664525)+1013904223)>>>0;return s/4294967296}}
 /* pools of facade pictures by kind. Each entry is {f: name, n: cells wide, wh: wall height}. khemetra_art.js fills this in from the
@@ -39,7 +40,7 @@ function khBuild(seed){
   }
   // parks: every third block each way is a wide lawn with palms, benches and people
   const parks=[];
-  for(const b of blocks){const w=b.x1-b.x0+1,h=b.y1-b.y0+1;if(b.i%3===1&&b.j%3===1&&w>=11&&h>=11){R(b.x0,b.y0,b.x1,b.y1,(x,y)=>{solid[idx(x,y)]=0;zone[idx(x,y)]=2});parks.push({name:'A Park',x0:b.x0,y0:b.y0,x1:b.x1,y1:b.y1,z:2,f:4,park:true})}}
+  for(const b of blocks){const w=b.x1-b.x0+1,h=b.y1-b.y0+1;if(b.i%3===1&&b.j%3===1&&w>=11&&h>=11&&!khInPQ((b.x0+b.x1)>>1,(b.y0+b.y1)>>1)){R(b.x0,b.y0,b.x1,b.y1,(x,y)=>{solid[idx(x,y)]=0;zone[idx(x,y)]=2});parks.push({name:'A Park',x0:b.x0,y0:b.y0,x1:b.x1,y1:b.y1,z:2,f:4,park:true})}}
   // lanes: a narrow dead-end alley bitten into the bigger blocks
   for(const b of blocks){
     const w=b.x1-b.x0+1,h=b.y1-b.y0+1;if(w<16||h<16||rng()<.35)continue;
@@ -85,6 +86,7 @@ function khBuild(seed){
     for(const p of plazas)if(p.z===1&&x>=p.x0-3&&x<=p.x1+3&&y>=p.y0-3&&y<=p.y1+3)return 'shop';
     for(const p of plazas)if(p.z===4&&x>=p.x0-4&&x<=p.x1+4&&y>=p.y0-4&&y<=p.y1+4)return rng()<.55?'temple':'pray';
     for(const p of plazas)if(p.z===5&&x>=p.x0-4&&x<=p.x1+4&&y>=p.y0-4&&y<=p.y1+4)return 'bath';
+    if(khInPQ(x,y))return rng()<.6?'low':'ruin';
     if(x<125&&y<125&&rng()<.7)return 'ruin';
     if(x<60||x>340)return rng()<.2?'ruin':'low';
     if(d<95)return rng()<.7?'mansion':'house';

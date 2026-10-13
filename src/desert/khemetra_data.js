@@ -29,3 +29,21 @@ function khEnter(then){
 }
 /* run something once the city is ready (its pictures loaded and its rooms built) */
 function khThen(then){khPrepare().then(then).catch(e=>{console.error(e);msg('The city is not ready yet.','#d09a80')})}
+
+/* a line of news the first time the party enters a quarter of the city */
+function khStory(){
+  const F=G.flags,x=G.P.x,y=G.P.y;
+  if(khInPQ(x,y)&&!F.zPQ){F.zPQ=1;msg("The Beggars' Quarter. The houses lean together, rubbish lies in the doorways, and eyes watch from the shadows. Thieves and brigands lurk here.",'#e8a090')}
+  else if(x<125&&y<125&&!F.zOld){F.zOld=1;msg('The Old Quarter. Half the houses have fallen in. Dogs and the restless dead keep it now.','#d8c8a0')}
+  if(x>=160&&x<=240&&y>=162&&y<=238&&!F.zCourt){F.zCourt=1;msg('The court of the palace. White marble, gold leaf, and guards who do not blink.','#ffe9a0')}
+}
+
+/* the terrace inside the gate: the party arrives on a high platform and walks down a long stair into the avenue */
+function khEyeAt(x,y){
+  if(x<192||x>208)return 0;
+  const T=2.3;
+  if(y>=386)return T;
+  if(y<=374)return 0;
+  const u=(y-374)/12,k=u*u*(3-2*u);       // a smooth fall, one step after another
+  return T*k;
+}
