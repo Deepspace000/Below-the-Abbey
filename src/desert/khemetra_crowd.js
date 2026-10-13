@@ -3,7 +3,9 @@
    urns, lamps, cats in the alleys, the people of the streets, and the few who mean harm.
    ========================================================================== */
 khNpc('kh_citizen','A citizen','kh_npc1_0',d=>{
-  const F=G.flags,k='kc_'+d.x+'_'+d.y,i=(F[k]||0),L=d.kl||[0,1,2];
+  const F=G.flags,k='kc_'+d.x+'_'+d.y,i=(F[k]||0);
+  if(!d.kl){const n=KH_GOSSIP.length,h=(hash2(d.x*13+5,d.y*7+9,LEVEL)*n)|0;d.kl=[h,(h+7)%n,(h+17)%n]}   // each person has their own three things to say
+  const L=d.kl;
   F[k]=i+1;
   return say(KH_GOSSIP[L[i%L.length]%KH_GOSSIP.length],[BYE]);
 });
@@ -108,7 +110,7 @@ function khCrowd(C,L){
     if(best)add({k:khFaceKey('kh_anim1_0'),x:best[0],y:best[1],block:false,walk:true,npc:'kh_cat',cat:ci,sc:.8});
   });
   // ---- the named people of the quests, each in their own corner ----
-  const anchors={kh_sabah:[60,330],kh_hapi:[196,102],kh_dalila:[288,110],kh_cheops:[196,322],kh_rami:[203,386],kh_eman:[104,106],kh_usi:[196,250],kh_yara:[300,196],kh_pia:[108,298],kh_anuket:[204,104],kh_meryt:[204,246],kh_nadia:[286,298]};
+  const anchors={kh_sabah:[205,377],kh_hapi:[196,102],kh_dalila:[288,110],kh_cheops:[200,366],kh_rami:[203,386],kh_eman:[205,357],kh_usi:[197,350],kh_yara:[300,196],kh_pia:[196,376],kh_anuket:[204,104],kh_meryt:[204,246],kh_nadia:[286,298]};
   for(const [id,[ax,ay]] of Object.entries(anchors)){
     const q=near(ax,ay,8,true);if(!q)continue;const kp=KH_KEEPERS[id];if(!kp)continue;
     add({k:khFaceKey(kp.face),x:q[0],y:q[1],block:false,walk:true,npc:id,sc:kp.sc||1});
@@ -196,6 +198,7 @@ const KH_GENERIC={kh_gateguard:'Guard',kh_guardA:'Guard',kh_guardB:'Guard',kh_gu
 const KH_CATNAMES=['Pasha','Mafdet','Sekhmet','Tiger','Dusty','Shadow'];
 function khResidentName(d){
   if(d.npc==='kh_cat')return KH_CATNAMES[(d.cat||0)%KH_CATNAMES.length]+', the cat';
+  if(d.npc==='kh_citizen'){const h1=hash2(d.x*7+3,d.y*5+1,LEVEL),h2=hash2(d.x*3+11,d.y*9+2,LEVEL);return KH_NAMES[(h1*KH_NAMES.length)|0]+' '+KH_TITLES[(h2*KH_TITLES.length)|0]}
   const t=KH_GENERIC[d.npc];if(t===undefined)return null;
   const nm=KH_NAMES[(hash2(d.x*7+3,d.y*5+1,LEVEL)*KH_NAMES.length)|0];
   return t?t+' '+nm:nm+(d.npc.endsWith('p1')?', a traveller':', a merchant');

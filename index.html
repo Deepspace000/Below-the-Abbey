@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.00';
+const VERSION='3.01';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -9194,6 +9194,36 @@ const KH_GOSSIP=[
  'We are very proud of our walls. Four hundred cells a side and not one crack. Well, one. We do not mention it.',
  'Beware of pickpockets near the Fruit Market. They are small, quick, and polite.',
  'I would give a month of wages for a single tin of the red ink that the scribes use. They hide it like gold.',
+ 'I came for one season and stayed for thirty years. The city does that. It is the shade, I think.',
+ 'My son wants to be a guard. I told him a guard stands in the sun all day. He said the uniform is worth it.',
+ 'The best lentil soup in Khemetra is made behind the Potters Market, by a woman who will not tell anyone her name.',
+ 'If you lose your way, walk toward the spire. All the roads in this city end up at the palace, sooner or later.',
+ 'The donkey cart drivers know every lane. Pay the fare, and they pay you back in stories.',
+ 'Somebody has been painting little blue eyes on the doorposts near the Weavers Row. Nobody knows who. Nobody scrubs them off.',
+ 'The glassblowers say the sand of the Golden Erg makes the best glass. The sand of the Blue Dunes makes the best excuses.',
+ 'I heard the king has not left the palace since the spring. The guards say he is busy. The cooks say he is eating.',
+ 'A camel never forgets a face or a debt. Mine has both, and I am still paying.',
+ 'Do not sit on the wall by the Fig Park at dusk. The sparrows own it, and they have opinions.',
+ 'There is a cat in the Weavers Quarter with one blue eye and one gold. Feed it, and it will bring you luck. Or fish.',
+ 'They say there are tunnels under the whole city. I say there are rumours under the whole city, and they are just as dusty.',
+ 'The scribes will write you a letter for two coins, and read it back to you for three. It is a fair price for the shock.',
+ 'I counted the palms in this street once. Forty-one. Then a child told me I missed one. I have been counting ever since.',
+ 'The lamp makers light the avenue each dusk. I like to watch. It is the one thing in this city that is always on time.',
+ 'My wife says I talk too much to strangers. She is right, so please excuse me, but do you know the way to the baths?',
+ 'There was a lion in the market once. Only a cub, and very polite. It bought a fish.',
+ 'The caravan masters pay the gate guards in dates, and the guards pass the dates to their cousins. The whole city is held together by dates.',
+ 'A fortune teller on the east side told me I would meet interesting strangers today. I think she meant you. Or the donkey.',
+ 'Last winter it rained for an hour. Children ran in the streets. Old men wept. We still speak of it.',
+ 'Never trust a man who sells sandals and has none on his own feet.',
+ 'The fountains sing when the wind is from the north. Stand by the Fountain Garden at sunset and listen.',
+ 'I swept this street every morning for twelve years. Now the council hired a boy to do it. He has a nicer broom, and I have more time to complain.',
+ 'Do you smell that? Cardamom, fresh bread and hot stone. That is Khemetra at dawn, friend.',
+ 'The hawkers in the Spice Market shout at everyone. It is not rude. It is how they say hello.',
+ 'My grandfather was a mason on the palace wall. He said every stone was laid by hand and every one has a little mark. Look for them.',
+ 'The sea is real. I have a shell from it. A sailor gave it to me. It still smells of salt, a little.',
+ 'Wizards, thieves and tax collectors. Those are the three things you meet in a city this size, and you cannot tell them apart.',
+ 'If the night watch calls out three bells, stay indoors. If he calls four, come out. Nobody knows why, and nobody has asked.',
+ 'The painter in the Old Square will do your portrait while you wait. It looks like you, only richer.',
 ];
 const KH_FACES={ // which painted person stands for which kind of citizen
   men:['kh_npc1_0','kh_npc1_2','kh_npc5_2','kh_npc5_3','kh_npc5_4','kh_npc5_5','kh_npc2_0','kh_npc2_4'],
@@ -9713,7 +9743,9 @@ const KH_PALACE_FRONT={x:200,y:206,f:2},KH_HATCH={x:108,y:112},KH_CIST_END={x:39
    urns, lamps, cats in the alleys, the people of the streets, and the few who mean harm.
    ========================================================================== */
 khNpc('kh_citizen','A citizen','kh_npc1_0',d=>{
-  const F=G.flags,k='kc_'+d.x+'_'+d.y,i=(F[k]||0),L=d.kl||[0,1,2];
+  const F=G.flags,k='kc_'+d.x+'_'+d.y,i=(F[k]||0);
+  if(!d.kl){const n=KH_GOSSIP.length,h=(hash2(d.x*13+5,d.y*7+9,LEVEL)*n)|0;d.kl=[h,(h+7)%n,(h+17)%n]}   // each person has their own three things to say
+  const L=d.kl;
   F[k]=i+1;
   return say(KH_GOSSIP[L[i%L.length]%KH_GOSSIP.length],[BYE]);
 });
@@ -9818,7 +9850,7 @@ function khCrowd(C,L){
     if(best)add({k:khFaceKey('kh_anim1_0'),x:best[0],y:best[1],block:false,walk:true,npc:'kh_cat',cat:ci,sc:.8});
   });
   // ---- the named people of the quests, each in their own corner ----
-  const anchors={kh_sabah:[60,330],kh_hapi:[196,102],kh_dalila:[288,110],kh_cheops:[196,322],kh_rami:[203,386],kh_eman:[104,106],kh_usi:[196,250],kh_yara:[300,196],kh_pia:[108,298],kh_anuket:[204,104],kh_meryt:[204,246],kh_nadia:[286,298]};
+  const anchors={kh_sabah:[205,377],kh_hapi:[196,102],kh_dalila:[288,110],kh_cheops:[200,366],kh_rami:[203,386],kh_eman:[205,357],kh_usi:[197,350],kh_yara:[300,196],kh_pia:[196,376],kh_anuket:[204,104],kh_meryt:[204,246],kh_nadia:[286,298]};
   for(const [id,[ax,ay]] of Object.entries(anchors)){
     const q=near(ax,ay,8,true);if(!q)continue;const kp=KH_KEEPERS[id];if(!kp)continue;
     add({k:khFaceKey(kp.face),x:q[0],y:q[1],block:false,walk:true,npc:id,sc:kp.sc||1});
@@ -9906,6 +9938,7 @@ const KH_GENERIC={kh_gateguard:'Guard',kh_guardA:'Guard',kh_guardB:'Guard',kh_gu
 const KH_CATNAMES=['Pasha','Mafdet','Sekhmet','Tiger','Dusty','Shadow'];
 function khResidentName(d){
   if(d.npc==='kh_cat')return KH_CATNAMES[(d.cat||0)%KH_CATNAMES.length]+', the cat';
+  if(d.npc==='kh_citizen'){const h1=hash2(d.x*7+3,d.y*5+1,LEVEL),h2=hash2(d.x*3+11,d.y*9+2,LEVEL);return KH_NAMES[(h1*KH_NAMES.length)|0]+' '+KH_TITLES[(h2*KH_TITLES.length)|0]}
   const t=KH_GENERIC[d.npc];if(t===undefined)return null;
   const nm=KH_NAMES[(hash2(d.x*7+3,d.y*5+1,LEVEL)*KH_NAMES.length)|0];
   return t?t+' '+nm:nm+(d.npc.endsWith('p1')?', a traveller':', a merchant');
