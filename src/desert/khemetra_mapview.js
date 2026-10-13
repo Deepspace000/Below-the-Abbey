@@ -318,6 +318,7 @@ function khDrawCityMap(cs,ox,oy){
     ctx.font=`${l.ital?'italic ':''}bold ${c.sz}px ${FUI}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';
     ctx.lineWidth=Math.max(2,c.sz*.3);ctx.strokeStyle=halo;ctx.strokeText(l.t,0,0);ctx.fillStyle=l.col;ctx.fillText(l.t,0,0);ctx.restore();
   }
+  if(typeof drawRumourMarks==='function')drawRumourMarks(ox,oy,cs);
   // the hatch to the cisterns once the vizier has named it
   if(G.flags.khWizardKnown){ctx.fillStyle='#7a1a10';ctx.beginPath();ctx.arc(ox+(KH_HATCH.x+.5)*cs,oy+(KH_HATCH.y+.5)*cs,Math.max(2,cs*.5),0,Math.PI*2);ctx.fill();
     const sx=ox+(KH_HATCH.x+.5)*cs,sy=oy+(KH_HATCH.y-1.5)*cs;ctx.font=`bold ${clamp(cs*1.4,7,10)}px ${FUI}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle=halo;ctx.strokeText('Hatch to the Cisterns',sx,sy);ctx.fillStyle='#7a1a10';ctx.fillText('Hatch to the Cisterns',sx,sy)}

@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.22';
+const VERSION='3.23';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1430,7 +1430,7 @@ function rebalanceEnemies(){
   }
 }
 const xpNeed=l=>30*l*(l+1)/2;
-const BAGCAP=60;
+let BAGCAP=60;
 const SPELL_SLOTS=['s0','s1','s2','s3'],RING_SLOTS=['r0','r1','r2','r3'];
 const SLOT_LABEL={head:'Helm',chest:'Chest',arms:'Arms',legs:'Legs',main:'Main hand',off:'Off hand',alt:'Second weapon',r0:'Ring',r1:'Ring',r2:'Ring',r3:'Ring',s0:'Spell',s1:'Spell',s2:'Spell',s3:'Spell'};
 
@@ -1560,7 +1560,7 @@ function bfs(e){
   }
   return null;
 }
-const hostileNear=()=>G.enemies.some(e=>e.hp>0&&e.alert&&Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)<=7);
+const hostileNear=()=>G.enemies.some(e=>e.hp>0&&!e.surr&&e.alert&&Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)<=7);
 
 /* ---------- bag and equipment ---------- */
 function bagAdd(it){
@@ -1704,7 +1704,8 @@ function hurtEnemy(e,dmg){
   const def=ENEMY_DEF[e.t],st=enemyStat(e.t,e.lvl);
   if(e.st)dmg=mxVuln(e,dmg);
   if(e.t==='skel'&&G.curHero!==undefined)dmg=Math.round(dmg*(1+pas(G.curHero,'undeadPct')));
-  G.dmgAcc=(G.dmgAcc||0)+dmg;e.hp-=dmg;e.flash=1;e.alert=true;addFloat(e.sx,e.sy-14,String(dmg),'#ffd76a');
+  if(e.surr&&typeof mercyBroken==='function')mercyBroken(e);
+  G.dmgAcc=(G.dmgAcc||0)+dmg;e.hp-=dmg;e.flash=1;e.alert=true;if(e.hp>0&&typeof mercyCheck==='function')mercyCheck(e);addFloat(e.sx,e.sy-14,String(dmg),'#ffd76a');
   if(e.hp<=0){
     e.dying=.55;G.kills++;sfx(e.t==='skel'?'rattle':'ratdie');
     const gold=def.goldFixed||Math.round(rnd(st.gold[0],st.gold[1])*(1+Math.max(0,...livingHeroes().map(j=>pas(j,'goldPct')))));G.gold+=gold;
@@ -1904,6 +1905,8 @@ function pas(hi,key){
   for(const p of CLASSES[HERO_DEF[hi].clsId].powers)if(!p.act&&h.lvl>=p.lv)s+=p.pas[key]||0;
   for(const b of G.buffs)if(b.left>0&&b.b===key&&(b.hi===-1||b.hi===hi))s+=b.amt;
   if(typeof gearPas==='function')s+=gearPas(hi,key);
+  if(typeof luckPas==='function')s+=luckPas(key);
+  if(typeof profPas==='function')s+=profPas(hi,key)+bondPas(hi,key);
   return s;
 }
 const pasH=(h,key)=>pas(G.heroes.indexOf(h),key);
@@ -2095,6 +2098,7 @@ function advanceTime(min){
     if(before[i]>=25&&h.food<25)msg(`${HERO_DEF[i].name} is hungry.`,'#e8a860');
     if(before[i]>0&&h.food<=0)msg(`${HERO_DEF[i].name} is starving and losing health.`,'#ff8a6a')});
   try{afflTime(min)}catch(e){console.error(e)}
+  try{worldEventsTick(min)}catch(e){console.error(e)}
 }
 function restParty(inn){
   if(!inn&&hostileNear()){msg('You cannot rest with enemies close by.','#d09a80');return false}
@@ -2108,10 +2112,11 @@ function restParty(inn){
   G.acted=[false,false,false,false];if(!G.heroes[G.sel].alive)nextHero();
   G.restT=G.time;sfx('heal');msg('The party rests for eight hours.','#9ae0a0');
   try{afflRest(inn)}catch(e){console.error(e)}
+  try{worldRest(inn)}catch(e){console.error(e)}
   return true;
 }
 function endRound(){
-  advanceTime(1);G.rounds++;G.acted=[false,false,false,false];try{afflRound()}catch(e){console.error(e)}
+  advanceTime(1);G.rounds++;G.acted=[false,false,false,false];try{afflRound();petsTick()}catch(e){console.error(e)}
   const es=G.enemies.filter(e=>e.hp>0);
   runEnemies(es,0);
 }
@@ -2138,7 +2143,7 @@ function enemyAttack(e){
     msg(`The ${def.name} ${verb} ${HERO_DEF[t].name}${side} for ${d}.`,'#e8a090');addFloat(portraitX(t)+19,250,'-'+d,'#ff6a5a');
     try{if(h.hp>0)afflHit(e.t,t)}catch(x){}
     {const th=pas(t,'thorns');if(th>0&&e.hp>0){hurtEnemy(e,th);msg(`The ${def.name} is hurt for ${th} by ${HERO_DEF[t].name}'s armour.`,'#e8c870')}}
-    if(h.hp<=0){h.hp=0;h.alive=false;msg(`${HERO_DEF[t].name} has fallen!`,'#ff8a7a');if(G.sel===t)nextHero()}
+    if(h.hp<=0){h.hp=0;h.alive=false;msg(`${HERO_DEF[t].name} has fallen!`,'#ff8a7a');try{bondFall(t)}catch(x){}if(G.sel===t)nextHero()}
   }else{sfx('miss');msg(`The ${def.name} attacks ${HERO_DEF[t].name}${side} and misses.`,'#a09880')}
 }
 function enemyAct(e){
@@ -2149,7 +2154,7 @@ function enemyAct(e){
   if(!e.alert&&(def.patrol||(def.wander&&LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor)))return patrolStep(e,def);
   if(!e.alert){
     const path=bfs(e);
-    if(dist()<=6&&((path&&path.dist<=7)||hasLOS(e.x,e.y,G.P.x,G.P.y))){e.alert=true;sfx(e.t==='skel'?'rattle':(e.t==='bat'||e.t==='vulture')?'screech':'squeak');return 150}
+    if(dist()<=(typeof wxAlert==='function'?wxAlert():6)&&((path&&path.dist<=7)||hasLOS(e.x,e.y,G.P.x,G.P.y))){e.alert=true;sfx(e.t==='skel'?'rattle':(e.t==='bat'||e.t==='vulture')?'screech':'squeak');return 150}
     return 0;
   }
   let dur=0;
@@ -2214,8 +2219,8 @@ function doMove(rel){ // rel: 0 forward, 1 right, 2 back, 3 left
     for(const [dx,dy,f] of [[0,1,0],[0,-1,2],[1,0,3],[-1,0,1]])if(rows[ey+dy]&&rows[ey+dy][ex+dx]==='.'){sfx('door');goToLevel(1,{x:ex+dx,y:ey+dy,f});return}
   }
   if(g===8){sfx('locked');msg('The crypt door has sealed behind you.','#d09a80');return}
-  if(g>=15&&g<=19){sfx('locked');const ms=DOOR_MSGS[g];msg(ms[(hash2(nx,ny,3)*ms.length)|0],'#d09a80');return}
-  if(g>=200&&g<1000){sfx('locked');msg(TILE_MSG[g]||'It is locked.','#d09a80');return}
+  if(g>=15&&g<=19){if(typeof lockedDoor==='function'&&lockedDoor(g,nx,ny))return;sfx('locked');const ms=DOOR_MSGS[g];msg(ms[(hash2(nx,ny,3)*ms.length)|0],'#d09a80');return}
+  if(g>=200&&g<1000){if(typeof lockedDoor==='function'&&lockedDoor(g,nx,ny))return;sfx('locked');msg(TILE_MSG[g]||'It is locked.','#d09a80');return}
   if(g>=30&&g<100){usePortal(g-30);return}
   if(g===0){const dc=G.decor.find(d=>d.loot&&d.x===nx&&d.y===ny);if(dc){openLoot(dc);return}
     const nd=G.decor.find(d=>d.npc&&!d.walk&&!d.found&&d.x===nx&&d.y===ny);if(nd){startTalk(nd);return}}
@@ -2453,8 +2458,9 @@ function render3D(){
   const SK=desertLv?skyTod((G.clock%1440)/60):null,ST=desertLv?STORM.a:0,stm=(v,c)=>v+(c-v)*ST;
   const stormC=SK?[206*Math.min(1,SK.k[0]*1.1+.05),166*Math.min(1,SK.k[1]*1.1+.05),112*Math.min(1,SK.k[2]*1.1+.05)]:null;
   SKYV=SK?{dX,dY,pX,pY,HH,VW,VH}:null;
-  const hzr=SK?hzr0.map((v,i)=>stm(v*SK.k[i],stormC[i])):hzr0,hzc=SK?hzc0.map((v,i)=>stm(v*SK.k[i],stormC[i]*.92)):hzc0;
-  const hzmax=SK?stm(hzmax0,.97):hzmax0,hzrate=SK?hzrate0+.16*ST:hzrate0;
+  const hzr=(SK?hzr0.map((v,i)=>stm(v*SK.k[i],stormC[i])):hzr0).slice(),hzc=SK?hzc0.map((v,i)=>stm(v*SK.k[i],stormC[i]*.92)):hzc0;
+  let hzmax=SK?stm(hzmax0,.97):hzmax0,hzrate=SK?hzrate0+.16*ST:hzrate0;
+  {const WXN=typeof weatherNow==='function'?weatherNow():null;if(WXN&&WXN.fog){hzrate+=WXN.fog;hzmax=Math.max(hzmax,WXN.haze);for(let i=0;i<3;i++)hzr[i]+=(WXN.col[i]-hzr[i])*WXN.mix}} // rain, fog, snow and heat thicken the air
   const tbR=SK?SK.g[0]:1,tbG=SK?SK.g[1]*.94:.94,tbB=SK?SK.g[2]*.84:.84, ttR=1.3,ttG=.88,ttB=.5;
   const ovcLv=LEVEL===2||LEVEL===3||LEVEL===7||LEVEL===10||LEVEL===19||LEVEL===20,SKP=ovcLv&&SKYOVC?SKYOVC:SKYPAN; // the early open areas sit under a heavy moving overcast
   const skyPan=(skyLv||ovcLv||desertLv||LEVEL===3||LEVEL===13||LEVEL===32||LEVEL===33)&&SKP?(()=>{for(let x=0;x<VW;x++){const cm=2*x/VW-1;UCOL[x]=((((Math.atan2(dY+pY*cm,dX+pX*cm)/TAU)%1)+1)%1*1024+t*(ovcLv?11:7))%1024|0}return true})():false; // the sky is one panorama on walls and ceiling alike
@@ -3811,8 +3817,8 @@ function makeCart(){
   wornSprite(IMG.cart,59,1.6);
 }
 
-function getScroll(d){if(d==='goto')return G.gs||0;if(d==='quest')return G.qs||0;if(d==='aff')return G.afs||0;if(d==='map')return{x:G.panX||0,y:G.panY||0};if(d==='lbag')return G.loot?G.loot.sl:0;if(d==='lbox')return G.loot?G.loot.sr:0;return G.inv.scroll}
-function setScroll(d,v){if(d==='goto'){G.gs=clamp(v,0,gotoMax());return}if(d==='quest'){G.qs=clamp(v,0,G.qMax||0);return}if(d==='aff'){G.afs=clamp(v,0,G.afMax||0);return}if(d==='map'){return}if(d==='lbag'&&G.loot)G.loot.sl=clamp(v,0,maxScroll());else if(d==='lbox'&&G.loot)G.loot.sr=clamp(v,0,lootMaxScroll(Math.max(9,G.loot.decor.contents.length)));else G.inv.scroll=clamp(v,0,maxScroll())}
+function getScroll(d){if(d==='goto')return G.gs||0;if(d==='quest')return G.qs||0;if(d==='aff')return G.afs||0;if(d==='rum')return G.rs||0;if(d==='map')return{x:G.panX||0,y:G.panY||0};if(d==='lbag')return G.loot?G.loot.sl:0;if(d==='lbox')return G.loot?G.loot.sr:0;return G.inv.scroll}
+function setScroll(d,v){if(d==='goto'){G.gs=clamp(v,0,gotoMax());return}if(d==='quest'){G.qs=clamp(v,0,G.qMax||0);return}if(d==='aff'){G.afs=clamp(v,0,G.afMax||0);return}if(d==='rum'){G.rs=Math.max(0,v);return}if(d==='map'){return}if(d==='lbag'&&G.loot)G.loot.sl=clamp(v,0,maxScroll());else if(d==='lbox'&&G.loot)G.loot.sr=clamp(v,0,lootMaxScroll(Math.max(9,G.loot.decor.contents.length)));else G.inv.scroll=clamp(v,0,maxScroll())}
 /* ==========================================================================
    SAVE / LOAD  (autosave + three manual slots, a backup of the previous run)
    ========================================================================== */
@@ -3859,7 +3865,7 @@ function snapshot(){
     torches:LIGHTS.map(l=>l.taken?1:0),torchKeys:LIGHTS.filter(l=>l.taken).map(l=>l.key)};
 }
 function restore(sv){ // the golden city and the rooms in it are built the first time they are needed
-  const l=sv.level||1;if(l===44||(l>=199&&l<=270)||(l>=1000&&l<30000)||(l>=271&&l<=280))if((!LEVELS[l]&&!(typeof KH_LAZY!=='undefined'&&KH_LAZY[l]))||LEVELS[44].stub){khThen(()=>restoreNow(sv));return}
+  const l=sv.level||1;if(l===44||(l>=199&&l<=270)||(l>=1000&&l<30000)||(l>=271&&l<=280)||l>=40000)if((!LEVELS[l]&&!(typeof KH_LAZY!=='undefined'&&KH_LAZY[l]))||LEVELS[44].stub){khThen(()=>restoreNow(sv));return}
   restoreNow(sv);
 }
 function restoreNow(sv){
@@ -4575,6 +4581,7 @@ function forestExtras(L){
 }
 function loadLevel(n){
   if(n===13&&typeof ihShopsChars==='function')ihShopsChars();
+  if(!LEVELS[n]&&n>=40000&&typeof makeLockedHouse==='function')makeLockedHouse(n);
   if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n](); // the room behind an ordinary door in Khemetra is built when first entered
   const L=LEVELS[n]||LEVELS[1];
   G._cb=undefined;LEVEL=n;CEILH=ceilFor(n,L);MAPROWS=L.rows;MW=MAPROWS[0].length;MH=MAPROWS.length;START=L.start;ENEMY_SPAWNS=L.enemies;ITEM_SPAWNS=L.items;DECOR_SPAWNS=forestExtras(L).length?L.decor.concat(forestExtras(L)):L.decor;if(typeof terrFor==='function'){terrFor(n);TERR_BLOCK=TERRS[n]?TERRS[n].block:null}G.flora=(L.scenery||[]).concat((n===32||n===41)?pathEdgeDecor(L):[]);
@@ -4632,7 +4639,7 @@ function respawnForest(){
 }
 // carry the party, bag, gold and quests into the next level
 function goToLevel(n,entry){
-  if(n===43||n===62||n===13||(n>=271&&n<=280))khLoadAssets(); // the city's pictures arrive in the background while the party walks to its gate
+  if(n===43||n===62||n===13||(n>=271&&n<=280)||n>=40000)khLoadAssets(); // the city's pictures arrive in the background while the party walks to its gate
   G.lst[LEVEL]=levelState();
   const keep={heroes:G.heroes,bag:G.bag,gold:G.gold,keys:G.keys,rounds:G.rounds,kills:G.kills,sel:G.sel,bossDead:G.bossDead,flags:G.flags,quests:G.quests,lst:G.lst,clock:G.clock,starveT:G.starveT,aff:G.aff};
   reset(n);Object.assign(G,keep);
@@ -4646,7 +4653,7 @@ function goToLevel(n,entry){
   if(n===5){const F=G.flags,cd=G.decor.find(d=>d.npc==='corbin');if(cd&&F.mayorDown&&!F.mayorKilled&&!F.mayorFight){delete F.mayorDown;cd.found=false;cd.block=true}
     if(cd&&!F.mayorKilled&&!F.mayorFight&&G.quests.gandrick&&G.quests.gandrick.st==='done')G.quests.gandrick.st='active'; // repairs saves where a jump link had wrongly marked him defeated
     if(cd&&(F.mayorFight||F.mayorDown)){cd.found=true;cd.block=false}if(F.mayorFight&&!F.mayorDown&&cd)addEnemy('mayor',cd.x,cd.y,true)}
-  reveal();G.hold=null;try{afflEnter(n)}catch(e){console.error(e)}
+  reveal();G.hold=null;try{afflEnter(n);petsApply();petEnter(n)}catch(e){console.error(e)}
   G.acted=[false,false,false,false];G.state='play';G.nextAuto=G.time+180;G.lastReg=G.reg?G.reg[G.P.y*MW+G.P.x]:-2;writeSave('auto');
   if(LEVELS[n]&&LEVELS[n].scene)startScene(n);
   if(n===2&&!G.flags.townSeen)startCut('abbeyIntro');
@@ -6203,7 +6210,7 @@ function ui(dt){
   ctx.save();
   if(G.shake>0){ctx.translate((Math.random()-.5)*5*G.shake,(Math.random()-.5)*4*G.shake)}
   ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();
-  drawWorld();
+  drawWorld();try{drawWeatherFx()}catch(e){}
   if(SMOKE){drawSmoke(G.time);ctx.fillStyle=HATCHP;ctx.fillRect(0,0,420,210)}
   if(G.state==='title'||G.state==='goto'){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,420,210)}
   if(G.state==='play'){drawEnemyPlate();drawArrows();drawFloats(dt);drawMessages();drawLevelBanners();try{afflHud()}catch(e){}if(teleOn()&&!G.cut&&!G.talk&&!G.menu&&!G.inv.open&&!G.loot&&!G.overview&&teleActive(LEVEL))btnText('teleport','Teleport  (T)',160,30,100,20)}
@@ -6217,7 +6224,8 @@ function ui(dt){
   txt('Menu',216,8,9,'#c9ba8e','center',true);chevron(216,14,2.4,Math.PI,false);btn('menu',176,0,80,18);
   // right column
   drawMinimap(424,2,54,50);btn('map',424,2,54,50);
-  txtS(`Day ${Math.floor(G.clock/1440)+1}  ${clockStr()}`,451,47,7,'#e8dca8','center',true,50);
+  txtS(`Day ${Math.floor(G.clock/1440)+1}  ${clockStr()}`,451,43,7,'#e8dca8','center',true,50);
+  if(typeof weatherLabel==='function')txtS(weatherLabel(),451,51,5.6,'#bcb090','center',true,52);
   hudRight();
   // bottom
   drawPortraits(232,G.sel,'hero');
@@ -6421,7 +6429,7 @@ function update(dt){
   burnTick(dt);
   if(LEVEL===44&&G.state==='play')try{khWalkTick(dt)}catch(e){}
   G.time+=dt;try{if(G.pharFlash>0)G.pharFlash-=dt;stormTick(dt);birdTick(dt);caravanTick(dt);if(G.flags)(G.flags.lvSeen=G.flags.lvSeen||{})[LEVEL]=1}catch(e){}
-  if(G.dayBase>0){const hr=(G.clock%1440)/60,dsl=LEVEL===43||LEVEL===44||(LEVEL>=60&&LEVEL<=64)||LEVEL===41;G.day=Math.max(.16,G.dayBase*clamp(.66+.5*Math.cos((hr-12)/24*TAU),dsl?(LEVEL===44?.4:.3):G.hasLamps?.2:.5,1))}
+  if(G.dayBase>0){const hr=(G.clock%1440)/60,dsl=LEVEL===43||LEVEL===44||(LEVEL>=60&&LEVEL<=64)||LEVEL===41;G.day=Math.max(.16,G.dayBase*clamp(.66+.5*Math.cos((hr-12)/24*TAU),dsl?(LEVEL===44?.4:.3):G.hasLamps?.2:.5,1));if(typeof weatherNow==='function'){const wn=weatherNow();if(wn&&wn.dark<1)G.day=Math.max(.14,G.day*wn.dark)}}
   // timers
   if(!G.cut)for(let i=0;i<G.timers.length;){const t=G.timers[i];if(G.time>=t.t){G.timers.splice(i,1);t.fn()}else i++}
   // camera easing
@@ -6724,6 +6732,7 @@ cv.addEventListener('wheel',e=>{
   if(G.loot){const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*DW,d=x<156?'lbag':'lbox';setScroll(d,getScroll(d)+e.deltaY*.5);e.preventDefault();return}
   if(G.menu==='quests'){G.qs=clamp((G.qs||0)+e.deltaY*.5,0,G.qMax||0);e.preventDefault();return}
   if(G.menu==='aff'){G.afs=clamp((G.afs||0)+e.deltaY*.5,0,G.afMax||0);e.preventDefault();return}
+  if(G.menu==='jp:rumour'){G.rs=Math.max(0,(G.rs||0)+e.deltaY*.5);e.preventDefault();return}
   if(G.overview&&!G.world){const [wx,wy]=toDesign(e);setMapZoom((G.mz||12)*Math.exp(-e.deltaY*.0016),wx,wy);e.preventDefault();return}
   if(G.overview&&G.world){const [wx,wy]=toDesign(e);setWorldZoom((G.wv?G.wv.z:1)*Math.exp(-e.deltaY*.0016),wx,wy);e.preventDefault();return}
   if(G.inv.open){G.inv.scroll=clamp(G.inv.scroll+e.deltaY*.5,0,maxScroll());e.preventDefault()}
@@ -10206,7 +10215,7 @@ function khCrowd(C,L){
     if(best)add({k:khFaceKey('kh_anim1_0'),x:best[0],y:best[1],block:false,walk:true,npc:'kh_cat',cat:ci,sc:.8});
   });
   // ---- the named people of the quests, each in their own corner ----
-  const anchors={kh_sabah:[205,377],kh_hapi:[196,102],kh_dalila:[288,110],kh_cheops:[200,366],kh_rami:[203,386],kh_eman:[205,357],kh_usi:[197,350],kh_yara:[300,196],kh_pia:[196,376],kh_anuket:[204,104],kh_meryt:[204,246],kh_nadia:[286,298],kh_healer:[104,206],kh_fixer:[310,228]};
+  const anchors={kh_sabah:[205,377],kh_hapi:[196,102],kh_dalila:[288,110],kh_cheops:[200,366],kh_rami:[203,386],kh_eman:[205,357],kh_usi:[197,350],kh_yara:[300,196],kh_pia:[196,376],kh_anuket:[204,104],kh_meryt:[204,246],kh_nadia:[286,298],kh_healer:[104,206],kh_fixer:[310,228],pet_trader:[196,292]};
   for(const [id,[ax,ay]] of Object.entries(anchors)){
     const q=near(ax,ay,8,true);if(!q)continue;const kp=KH_KEEPERS[id];if(!kp)continue;
     add({k:khFaceKey(kp.face),x:q[0],y:q[1],block:false,walk:true,npc:id,sc:kp.sc||1});
@@ -10851,6 +10860,7 @@ function khDrawCityMap(cs,ox,oy){
     ctx.font=`${l.ital?'italic ':''}bold ${c.sz}px ${FUI}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';
     ctx.lineWidth=Math.max(2,c.sz*.3);ctx.strokeStyle=halo;ctx.strokeText(l.t,0,0);ctx.fillStyle=l.col;ctx.fillText(l.t,0,0);ctx.restore();
   }
+  if(typeof drawRumourMarks==='function')drawRumourMarks(ox,oy,cs);
   // the hatch to the cisterns once the vizier has named it
   if(G.flags.khWizardKnown){ctx.fillStyle='#7a1a10';ctx.beginPath();ctx.arc(ox+(KH_HATCH.x+.5)*cs,oy+(KH_HATCH.y+.5)*cs,Math.max(2,cs*.5),0,Math.PI*2);ctx.fill();
     const sx=ox+(KH_HATCH.x+.5)*cs,sy=oy+(KH_HATCH.y-1.5)*cs;ctx.font=`bold ${clamp(cs*1.4,7,10)}px ${FUI}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle=halo;ctx.strokeText('Hatch to the Cisterns',sx,sy);ctx.fillStyle='#7a1a10';ctx.fillText('Hatch to the Cisterns',sx,sy)}
@@ -10958,7 +10968,8 @@ function khPlaceCarts(C,L,near,add,reachFree){
    crafting, camp and bonds, luck and omens, weather and the season. Each system registers its own page here with journalPage().
    ========================================================================== */
 const JOURNAL=[];
-function journalPage(p){JOURNAL.push(p)}
+const JORDER=['rep','rumour','aff','camp','trade','craft','pets','wx','luck'];
+function journalPage(p){JOURNAL.push(p);JOURNAL.sort((a,b)=>(JORDER.indexOf(a.id)+100)%100-(JORDER.indexOf(b.id)+100)%100)}
 const jp=id=>JOURNAL.find(p=>p.id===id);
 function drawJournal(){
   BTNS=[];veil(.72);bigPanel(24,8,432,304);
@@ -11126,10 +11137,10 @@ function afflTime(min){
   if(!G.heroes)return;
   const F=G.flags,M=F.affM||(F.affM={lastRest:G.clock,sun:0,thirst:0,cold:0,storm:0});
   for(const e of afflList().slice())if(e.until&&G.clock>=e.until)afflRemove(e,true);
-  const hour=(G.clock%1440)/60,des=LEVEL===43||(LEVEL>=60&&LEVEL<=64)||(LEVEL===41);
+  const hour=(G.clock%1440)/60,wx=typeof weatherNow==='function'?weatherNow():null,des=LEVEL===43||(LEVEL>=60&&LEVEL<=64)||(LEVEL===41)||(LEVEL===44&&wx&&wx.id==='heat');
   if(G.clock-M.lastRest>2400&&!afflHas('exhausted')){afflInflict('exhausted',-1);M.lastRest=G.clock-1200}
   if(des&&G.state==='play'){
-    M.thirst+=min;M.sun=(hour>=11&&hour<16)?M.sun+min:Math.max(0,M.sun-min);M.cold=(hour>=22||hour<5)?M.cold+min:Math.max(0,M.cold-min);
+    M.thirst+=min*(wx&&wx.thirst||1);M.sun=((hour>=11&&hour<16)||(wx&&wx.id==='heat'))?M.sun+min*(wx&&wx.sun||1):Math.max(0,M.sun-min);M.cold=(hour>=22||hour<5)?M.cold+min:Math.max(0,M.cold-min);
     if(M.sun>180){M.sun=0;afflInflict('sunstroke',-1)}
     if(M.thirst>480){M.thirst=0;afflInflict('dehydrated',-1)}
     if(M.cold>150){M.cold=0;afflInflict('frostbitten',-1)}
@@ -11137,14 +11148,16 @@ function afflTime(min){
   }
   // the cold open country of the north: nights in the forest and moor, and the high pass at any hour
   if(!des&&[2,7,10,19,20,22,32].includes(LEVEL)&&G.state==='play'){
-    const night=(hour>=22||hour<5)||LEVEL===22;
-    M.cold=night?M.cold+min:Math.max(0,M.cold-min);
+    const night=(hour>=22||hour<5)||LEVEL===22||(wx&&wx.cold>=2);
+    M.cold=night?M.cold+min*(wx&&wx.cold||1):Math.max(0,M.cold-min);
+    if(wx&&wx.wet){M.wet=(M.wet||0)+min*wx.wet;if(M.wet>420){M.wet=0;afflInflict('fever',(Math.random()*4)|0)}}else if(M.wet)M.wet=Math.max(0,M.wet-min);
     if(M.cold>(LEVEL===22?100:180)){M.cold=0;afflInflict('frostbitten',-1)}
     if(LEVEL===19){M.marsh=(M.marsh||0)+min;if(M.marsh>260){M.marsh=0;afflInflict('fever',(Math.random()*4)|0)}}
   }
 }
 /* each round of play: poisons and bleeding drain health (never to death) */
 function afflRound(){
+  try{mercyTick()}catch(e){}
   for(const e of afflList().slice()){
     const A=AFFL[e.id];if(!A)continue;const h=G.heroes[e.hi];if(!h||!h.alive)continue;
     if(A.drain){h.hp=Math.max(1,h.hp-A.drain);h.hurt=.4;if(typeof addFloat==='function')addFloat(portraitX(e.hi)+19,250,'-'+A.drain,A.col)}
@@ -11208,7 +11221,7 @@ function afflUseItem(hi,idx){
 /* ---------------------------------------------------------------- the watch of Khemetra, and the temple cells ---------------------------------------------------------------- */
 const KH_JAIL=270;
 function khGuardNear(){
-  const P=G.P,L=LEVELS[44];let best=null,bd=19*19;
+  const P=G.P,L=LEVELS[44];let best=null,bd=Math.pow(19-(typeof skLevel==='function'?skLevel('stealth')*.9:0),2);
   for(const w of (L.walkers||[]))if(w.guard){const d=(w.x-P.x)**2+(w.y-P.y)**2;if(d<bd){bd=d;best=w}}
   for(const d of G.decor)if(d.npc==='kh_gateguard'&&!d.found){const q=(d.x-P.x)**2+(d.y-P.y)**2;if(q<bd){bd=q;best={k:d.k}}}
   return best;
@@ -11220,18 +11233,29 @@ function khGuardTalk(guard,text,opts){
 function afflHouseBump(d){
   const sc=d.sc||(LEVELS[d.lvl]&&LEVELS[d.lvl].scene);
   if(!sc||/^bath/.test(sc))return false;
-  const g=khGuardNear();if(!g)return false;
+  const g=khGuardNear();if(!g){try{skXP('stealth',1)}catch(e){}return false}
   const F=G.flags;
   if(F.khWarnT!==undefined&&G.clock-F.khWarnT>2880){F.khWarn=0;afflCure('warned',-1,true)}
   F.khWarn=(F.khWarn||0)+1;F.khWarnT=G.clock;
   try{repAdd('khemetra',-2,'the watch noted it')}catch(e){}
   const enter=()=>{sfx('door');goToLevel(d.lvl,d.at);return null};
   sfx('locked');
-  if(F.khWarn>=3){
-    khGuardTalk(g,'Halt! That is three times I have told you to keep out of people\'s homes. You are under arrest, all of you. The temple cells will teach you manners.',[['Go quietly.',()=>{khJail();return null}]]);
+  const hard=F.khWarn>=3,pers=()=>{const ch=clamp(.32+skLevel('persuade')*.06+luckVal()*.012-(hard?.22:0),.08,.9);skXP('persuade',2);return Math.random()<ch};
+  const talkRound=['Talk him round.',()=>{
+    if(pers()){F.khWarn=Math.max(0,F.khWarn-1);return say('He hesitates, looks at his boots, and waves you on. "Mind it does not happen again."',[['Thank you, officer.',enter]])}
+    repAdd('khemetra',-1);return hard?say('"Nice try. Save your breath for the cells."',[['Go quietly.',()=>{khJail();return null}]]):say('"Do not try to be clever with me." He writes something in a little book.',[['Sorry, officer.',enter]]);
+  }];
+  const price=hard?120:40,bribe=['Slip him a coin ('+price+' gold).',()=>{
+    if(G.gold<price)return say('He looks at your purse and sneers. "You cannot even afford to bribe me properly."',hard?[['Go quietly.',()=>{khJail();return null}]]:[['Sorry, officer.',enter]]);
+    G.gold-=price;honourAdd(-2,'you bribed a guard');
+    if(Math.random()<(hard?.7:.8)){F.khWarn=Math.max(0,F.khWarn-1);return say('The coin vanishes. "I saw nothing. I was looking the other way."',[['Thank you.',enter]])}
+    F.khWarn++;repAdd('khemetra',-3);return F.khWarn>=3||hard?say('"Bribing a guard?" He grabs your arm. "That will cost you."',[['Go quietly.',()=>{khJail();return null}]]):say('"Bribing a guard?" That earns an extra warning.',[['Sorry, officer.',enter]]);
+  }];
+  if(hard){
+    khGuardTalk(g,'Halt! That is three times I have told you to keep out of people\'s homes. You are under arrest, all of you. The temple cells will teach you manners.',[['Go quietly.',()=>{khJail();return null}],talkRound,bribe]);
   }else{
     afflCure('warned',-1,true);afflInflict('warned',-1,true);
-    khGuardTalk(g,F.khWarn===1?'You there! Citizens do not just walk into other people\'s houses. That is your first warning. Do it again and the watch will take notice.':'I told you already, and here you are again. That is your second warning. The third time, you go to the cells.',[['Sorry, officer.',enter],['We will be quick.',enter]]);
+    khGuardTalk(g,F.khWarn===1?'You there! Citizens do not just walk into other people\'s houses. That is your first warning. Do it again and the watch will take notice.':'I told you already, and here you are again. That is your second warning. The third time, you go to the cells.',[['Sorry, officer.',enter],['We will be quick.',enter],talkRound,bribe]);
   }
   return true;
 }
@@ -11394,6 +11418,7 @@ const TOWNS=[
   {id:'khemetra',n:'Khemetra',col:'#f0d070',blurb:'The Golden City, ten thousand houses and a watch that notices.'}
 ];
 function repTownOf(n){
+  if(n>=40000)return repTownOf(Math.floor((n-40000)/10000));
   if([3,4,5,6,9,29].includes(n))return 'thornwick';
   if([13,14,15,16,17,21,30,271,272,273,274].includes(n))return 'ironhill';
   if(n>=32&&n<=39)return 'anaea';
@@ -11506,6 +11531,593 @@ journalPage({id:'rep',title:'Reputation',
     jBar(40,y+12,400,7,(h+100)/200,h>=0?'#a8d880':'#d07050');ctx.fillStyle='rgba(255,255,255,.4)';ctx.fillRect(240,y+10,1,11);
     txt('Honest quests and mercy raise it. Theft, threats, bribes and shady jobs lower it. Over 40, prices fall a little; under -40, they rise.',40,y+30,7.4,'#a89878','left',false,undefined,400);
   }
+});
+
+/* ---- src/desert/world.js ---- */
+/* ==========================================================================
+   THE LIVING WORLD: seasons and weather, luck and omens, and the things that happen on the road.
+   Seasons follow the calendar (thirty days each). Weather is set for each eight-hour stretch of the day from the day, the season and the region.
+   Rain, fog, snow, frost and heat change how far the party can see, how fast cold, thirst and sun wear it down, and how easily it is ambushed.
+   Luck nudges double hits, gold from the slain and the dodge; omens and the day's fortune push it up or down.
+   Events (a passing caravan, a night thief, a travelling bard) turn up now and then.
+   ========================================================================== */
+const SEASONS=['Spring','Summer','Autumn','Winter'];
+function seasonOf(){return SEASONS[Math.floor(G.clock/1440/30)%4]}
+function dayNum(){return Math.floor(G.clock/1440)}
+const WX_DEF={
+  clear:{n:'Clear',fog:0,haze:0,dark:1,mix:0,col:[0,0,0],text:'A clear sky. Nothing in the way.'},
+  rain:{n:'Rain',fog:.045,haze:.5,dark:.78,mix:.22,col:[96,108,120],fx:'rain',cold:2,wet:1,text:'Steady rain. The ground is slick, the light is grey and everyone is chilled through. Long exposure brings fever.'},
+  storm:{n:'Thunderstorm',fog:.07,haze:.62,dark:.58,mix:.32,col:[70,76,92],fx:'rain',cold:2.5,wet:2,flash:1,text:'A thunderstorm. Rain in sheets, lightning, and a roar that hides footsteps. Cold and wet wear the party down fast.'},
+  fog:{n:'Fog',fog:.14,haze:.9,dark:.88,mix:.5,col:[186,190,192],fx:'fog',stealth:1,text:'A thick fog. Nothing can be seen beyond a few squares, and it hides the party from enemies too.'},
+  snow:{n:'Snow',fog:.07,haze:.7,dark:.86,mix:.4,col:[222,228,236],fx:'snow',cold:3,text:'Falling snow. Silent and beautiful, and it bites. Cold exposure is three times as fast.'},
+  frost:{n:'Hard Frost',fog:.03,haze:.4,dark:.95,mix:.15,col:[190,210,230],cold:2.5,text:'A hard, bright frost. The air hurts to breathe, and fingers go numb quickly.'},
+  heat:{n:'Heat Wave',fog:.025,haze:.7,dark:1,mix:.28,col:[246,210,150],fx:'heat',sun:2,thirst:1.6,text:'A heat wave. The air shimmers. Sun and thirst wear the party down twice as fast.'},
+  haze:{n:'Dust Haze',fog:.06,haze:.8,dark:.92,mix:.45,col:[220,190,150],fx:'haze',text:'Dust hangs in the air and turns the sun to a dull coin. The view shortens.'}
+};
+function wxRegionOf(n){
+  if(n===41||n===43||n===44||(n>=60&&n<=64))return 'desert';
+  if([2,3,7,10,13,19,20,22,32,33,39].includes(n))return 'north';
+  return null;
+}
+/* the weather over the party right now: null indoors and underground */
+function weatherNow(){
+  const L=LEVELS[LEVEL];if(!L||!G.clock)return null;
+  const reg=wxRegionOf(LEVEL);if(!reg)return null;
+  const block=Math.floor(G.clock/480),season=Math.floor(G.clock/1440/30)%4,r=hash2(block,reg==='desert'?7:3,41);
+  let id='clear';
+  if(reg==='north'){
+    const T=[[['clear',.45],['rain',.25],['fog',.2],['storm',.1]],[['clear',.6],['rain',.14],['fog',.08],['storm',.06],['heat',.12]],[['clear',.34],['rain',.3],['fog',.3],['storm',.06]],[['clear',.3],['snow',.32],['fog',.2],['frost',.18]]][season];
+    let a=0;for(const [k,p] of T){a+=p;if(r<a){id=k;break}}
+  }else{
+    const T=season===1?[['clear',.45],['heat',.45],['haze',.1]]:[['clear',.65],['heat',.2],['haze',.15]];
+    let a=0;for(const [k,p] of T){a+=p;if(r<a){id=k;break}}
+  }
+  const w=WX_DEF[id];return Object.assign({id},w);
+}
+function wxAlert(){const w=weatherNow();return w&&w.id==='fog'?3:6}
+function weatherAhead(k){ // what the next stretch will bring, by id (for the journal)
+  const save=G.clock;G.clock+=480*k;const w=weatherNow();G.clock=save;return w;
+}
+/* the weather in the picture: rain, snow, a flash of lightning, a shimmer of heat */
+function drawWeatherFx(){
+  const w=weatherNow();if(!w||!w.fx)return;
+  const t=G.time;ctx.save();
+  if(w.fx==='rain'){
+    ctx.strokeStyle='rgba(190,205,225,.5)';ctx.lineWidth=.8;ctx.beginPath();
+    const n=w.id==='storm'?150:90;
+    for(let i=0;i<n;i++){const x=((i*47+t*130*(1+(i%3)*.2))%460)-20,y=((i*83+t*420)%230)-10;ctx.moveTo(x,y);ctx.lineTo(x-4,y+11)}
+    ctx.stroke();
+    if(w.flash&&((t*.37)%7)<.14){ctx.fillStyle='rgba(235,240,255,.55)';ctx.fillRect(0,0,420,210)}
+  }else if(w.fx==='snow'){
+    ctx.fillStyle='rgba(245,248,255,.85)';
+    for(let i=0;i<80;i++){const x=((i*53+t*18+Math.sin(t+i)*14)%440)-10,y=((i*71+t*38*(1+(i%4)*.25))%230)-10;ctx.fillRect(x,y,1.6+(i%3)*.6,1.6+(i%3)*.6)}
+  }else if(w.fx==='heat'){
+    ctx.fillStyle='rgba(255,200,110,.08)';ctx.fillRect(0,0,420,210);
+    ctx.fillStyle='rgba(255,236,190,.07)';for(let i=0;i<5;i++){const y=112+i*7+Math.sin(t*2+i)*2;ctx.fillRect(0,y,420,2.2)}
+  }else if(w.fx==='haze'){ctx.fillStyle='rgba(214,180,130,.12)';ctx.fillRect(0,0,420,210)}
+  else if(w.fx==='fog'){ctx.fillStyle='rgba(205,208,210,.10)';ctx.fillRect(0,0,420,210)}
+  ctx.restore();
+}
+/* what the weather says on the clock */
+function weatherLabel(){const w=weatherNow();return seasonOf()+(w?' - '+w.n:'')}
+/* ---------------------------------------------------------------- luck and omens ---------------------------------------------------------------- */
+const OMENS=[
+  {t:'A white dove lands on the road and does not fly away.',l:2,good:1},{t:'You find a four-leaf clover growing in a crack in the stones.',l:2,good:1},
+  {t:'A shooting star crosses the sky in broad daylight.',l:3,good:1},{t:'A beggar blesses you for no reason at all.',l:1,good:1},{t:'A rainbow stands over the road ahead.',l:2,good:1},
+  {t:'A black cat crosses your path and stares at you.',l:-2,good:0},{t:'A raven lands on a signpost and croaks three times.',l:-2,good:0},{t:'A mirror cracks in someone\'s window as you pass.',l:-3,good:0},
+  {t:'You spill salt, and the wind blows it over everyone\'s shoulder.',l:-2,good:0},{t:'Your shadow looks longer than it should, and is slow to follow.',l:-1,good:0}
+];
+function lukeData(){const F=G.flags;return F.luck||(F.luck={base:0,day:-1,omen:null,shift:0})}
+function luckVal(){
+  const L=lukeData(),d=dayNum();
+  if(L.day!==d){L.day=d;const o=OMENS[(hash2(d,5,77)*OMENS.length)|0];L.omen=(hash2(d,6,78)<.5)?o:null;L.shift=0;L.said=0}
+  let v=L.base+(L.omen?L.omen.l:0)+L.shift;
+  if(typeof companionLuck==='function')v+=companionLuck();
+  return clamp(v,-10,10);
+}
+function luckAdd(a,why){lukeData().base=clamp(lukeData().base+a,-6,6);if(why)msg(`${a>0?'Fortune smiles':'Fortune frowns'} (${why}).`,a>0?'#e8e090':'#d0a0a0')}
+function luckSay(){
+  const L=lukeData();luckVal();
+  if(L.omen&&!L.said&&G.state==='play'&&!G.cut){L.said=1;msg(L.omen.t,L.omen.good?'#e8e090':'#c0a8c8')}
+}
+function luckPas(key){const v=luckVal();return key==='crit'?v*.005:key==='goldPct'?v*.02:key==='dodge'?v*.003:0}
+/* ---------------------------------------------------------------- the road: caravans, night thieves and bards ---------------------------------------------------------------- */
+function worldEventsTick(min){
+  if(G.state!=='play'||G.cut||G.talk||G.menu)return;
+  const F=G.flags,E=F.ev||(F.ev={clock:G.clock,last:-9999}),t=repTownOf(LEVEL),reg=wxRegionOf(LEVEL),hour=(G.clock%1440)/60;
+  E.clock+=min;
+  luckSay();
+  if(E.clock<90||G.clock-E.last<240||G.decor.some(d=>d.ev))return; // events are rare
+  E.clock=0;
+  const luck=luckVal();
+  if(t&&hour>=18&&hour<24&&Math.random()<.35)return evSpawn('ev_bard',['peasantM','peasantW','drunk'][(Math.random()*3)|0],'A travelling bard has set up near the square. A small crowd gathers.');
+  if(!t&&reg&&hour>=7&&hour<19&&Math.random()<.28+Math.max(0,luck)*.01)return evSpawn('ev_trader','peasantM','A passing merchant has pulled his cart off the road and hung out a sign: wares for sale.');
+}
+function evSpawn(npc,face,text){
+  const f=freeNear(G.P.x,G.P.y,5,1);if(!f.length)return;
+  const [x,y]=f[0];G.decor.push({k:face,x,y,block:true,npc,ev:1});buildDecorMap();G.flags.ev.last=G.clock;
+  msg(text,'#e8e0a0');sfx('key');
+}
+/* a thief or an ambush while the party sleeps in the open */
+function worldRest(inn){
+  if(inn||G.state!=='play')return;
+  const reg=wxRegionOf(LEVEL);if(!reg||repTownOf(LEVEL))return;
+  const scout=typeof profPerk==='function'?profPerk('scout'):0,cat=typeof hasCompanion==='function'&&hasCompanion('cat')?.08:0,luck=luckVal();
+  const guard=scout*.06+cat+luck*.01+(weatherNow()&&weatherNow().stealth?.06:0);
+  const r=Math.random();
+  if(r<.14-guard){
+    const lost=Math.min(G.gold,Math.max(5,Math.round(G.gold*(.05+Math.random()*.08))));
+    if(lost>0){G.gold-=lost;msg(`Thieves came in the night. ${lost} gold is gone from the party's purse.`,'#e0a080');luckAdd(-1)}
+  }else if(r<.22-guard){
+    later(400,()=>{if(G.state==='play'&&!G.cut){msg('A shout in the dark! Bandits have found the camp!','#ff9a8a');spawnWave(['bandit','bandit','archer'])}});
+  }
+}
+khNpc('ev_trader','A passing merchant','peasantM',d=>say('A traveller\'s prices on a traveller\'s road. I carry what the road demands: food, light, cures and the odd bargain.',[['Show me your cart.',()=>{
+  openShop(d,[['bread',6],['cheese',4],['water',6],['torch',4],['antidote',3],['salve',3],['healdraught',3],['manadraught',2],['holywater',1],['sleeptea',2]],'The Passing Cart');return null}],['Any news from the road?',()=>say(typeof rumourFor==='function'?rumourFor('road'):'The road is long and the news is stale.',[BYE])],BYE]));
+khNpc('ev_bard','A travelling bard','peasantW',d=>{
+  const F=G.flags,day=dayNum();
+  if(F.bardDay===day)return say('I have sung you my best for today. Come back tomorrow; I know a hundred more.',[BYE]);
+  return say('A song for the weary! A ballad, a drinking song, a lament, or the tale of the goat who ate the tax roll. I do requests. Coins are welcome.',[
+    ['Hear a song (5 gold)',()=>{if(G.gold<5)return say('Five gold. Even bards have to eat.',[BYE]);G.gold-=5;F.bardDay=day;afflInflict('wellrested',-1,true);luckAdd(1);return say('A bright, rolling song about a dragon who went on a diet. The party laughs for the first time in days. Spirits rise.',[BYE])}],
+    ['Tip generously (25 gold)',()=>{if(G.gold<25)return say('That is a kind thought, and I can hear in your purse that you cannot afford it.',[BYE]);G.gold-=25;F.bardDay=day;luckAdd(2,'a generous tip');honourAdd(1);const t=repTownOf(LEVEL);if(t)repAdd(t,2,'you tipped the bard');afflInflict('wellrested',-1,true);return say('He bows to the ground and sings a long song that mentions you all by name. Half the square joins in.',[BYE])}],
+    ['Do you know anything useful?',()=>say(typeof rumourFor==='function'?rumourFor('town'):'Only songs, I am afraid. But songs travel, and so does gossip.',[BYE])],BYE]);
+});
+journalPage({id:'wx',title:'Weather and Seasons',
+  summary:()=>{const w=weatherNow();return `${seasonOf()}, day ${dayNum()+1}. ${w?'Now: '+w.n+'.':'Indoors or underground: no weather here.'} Open for the forecast and what each kind of weather does.`},
+  note:()=>0,
+  draw(){
+    jFrame('Weather and seasons');
+    const w=weatherNow(),yr=Math.floor(G.clock/1440/30),sd=Math.floor(G.clock/1440)%30+1;
+    txt(`${seasonOf()}, day ${sd} of 30`,40,46,12,'#e8d89a','left',true);
+    txt(`Day ${dayNum()+1} of the journey`,440,46,9,'#a89878','right');
+    SEASONS.forEach((s,i)=>{const x=40+i*100,cur=s===seasonOf();ctx.fillStyle=cur?'rgba(216,200,142,.35)':'rgba(40,24,16,.7)';ctx.fillRect(x,54,92,16);ctx.strokeStyle='#7a6440';ctx.strokeRect(x,54,92,16);txt(s,x+46,62.5,9,cur?'#fff0b0':'#a89878','center',cur)});
+    txt('Now',40,90,10,'#d8c88e','left',true);
+    txt(w?w.n:'No weather here',90,90,11,'#e0e8f0','left',true);
+    wrapText(w?w.text:'Under a roof or under the ground the weather cannot reach the party. Outside, it decides how far you see, how fast cold and heat wear you down, and how easily thieves find your camp.',380,8.5).forEach((l,i)=>txt(l,40,104+i*11,8.5,'#c8bc98','left'));
+    txt('Next stretches of the day (eight hours each)',40,148,10,'#d8c88e','left',true);
+    for(let k=1;k<=4;k++){const a=weatherAhead(k);txt(`${k===1?'Next':'In '+k*8+' hours'}`,40,166+(k-1)*14,8.5,'#a89878','left');txt(a?a.n:'-',140,166+(k-1)*14,9,'#e0e8f0','left',true)}
+    txt('A scout can tell you more, and a lucky party gets fewer bad days.',40,232,8,'#a89878','left');
+    const L=lukeData();txt(`Fortune today: ${luckVal()>0?'+':''}${luckVal()}${L.omen?'  -  '+L.omen.t:''}`,40,252,8.5,luckVal()>=0?'#e8e090':'#c0a8c8','left',false,undefined,400);
+  }
+});
+journalPage({id:'luck',title:'Luck and Omens',
+  summary:()=>{const v=luckVal();return `Luck ${v>0?'+':''}${v}. Luck nudges double hits, gold from the slain and the dodge. ${lukeData().omen?'Today: '+lukeData().omen.t:'No omen today.'}`},
+  note:()=>0,
+  draw(){
+    jFrame('Luck and omens');
+    const v=luckVal();
+    txt(`Luck: ${v>0?'+':''}${v}`,240,52,18,v>=0?'#e8e090':'#c0a8c8','center',true);
+    jBar(60,64,360,10,(v+10)/20,v>=0?'#e8d060':'#9080c0');ctx.fillStyle='rgba(255,255,255,.5)';ctx.fillRect(240,62,1,14);
+    wrapText('Luck nudges every roll: +0.5% double hits and +2% gold from the slain for each point, and enemies miss a little more often. It is made of what you have done (kind acts and fair play raise it, cruelty and curses lower it), the omen of the day, and the company you keep.',380,8.5).forEach((l,i)=>txt(l,40,92+i*11,8.5,'#c8bc98','left'));
+    const L=lukeData();
+    txt('Today',40,150,10,'#d8c88e','left',true);
+    wrapText(L.omen?L.omen.t+` (${L.omen.l>0?'+':''}${L.omen.l} luck for the day)`:'The day has no omen. Nothing in the sky or on the road to read.',380,8.5).forEach((l,i)=>txt(l,40,164+i*11,8.5,L.omen&&L.omen.good?'#e8e090':'#b8aa88','left'));
+    txt('What raises it',40,196,10,'#d8c88e','left',true);txt('Tipping bards, honest quests, kindness, a cat in the party, a rabbit\'s foot.',40,210,8,'#a8d898','left',false,undefined,400);
+    txt('What lowers it',40,228,10,'#d8c88e','left',true);txt('Curses, theft, black cats, ravens and cracked mirrors.',40,242,8,'#d09890','left',false,undefined,400);
+  }
+});
+
+/* ---------------------------------------------------------------- mercy: a beaten bandit may beg ---------------------------------------------------------------- */
+function mercyCheck(e){
+  const d=ENEMY_DEF[e.t];if(!d||d.kind!=='bandit'||e.surr||mxIsBoss(e)||e.poly)return;
+  if(e.hp>e.maxhp*.22||Math.random()>.45)return;
+  e.surr=true;e.surrT=0;e.alert=false;(e.st=e.st||{}).hold=0;
+  msg(`The ${d.name} throws down his weapon and begs for mercy!`,'#e8d890');if(typeof mxFloat==='function')mxFloat(e,'Mercy!','#e8d890');
+}
+function mercyBroken(e){
+  if(!e.surr||e.mercyDone)return;e.mercyDone=true;
+  honourAdd(-3,'you struck down a man who had surrendered');luckAdd(-1);const t=repTownOf(LEVEL);if(t)repAdd(t,-2,'word gets round');
+}
+function mercyTick(){
+  for(const e of G.enemies){
+    if(!e.surr||e.hp<=0||e.mercyDone)continue;
+    e.surrT=(e.surrT||0)+1;
+    if(e.surrT>=3){
+      const g=rnd(8,30),nm=ENEMY_DEF[e.t].name;e.hp=0;e.dying=.55;e.surr=false;G.gold+=g;
+      honourAdd(2,'mercy');luckAdd(1);const t=repTownOf(LEVEL);if(t)repAdd(t,1,'a bandit speaks well of you');
+      msg(`The ${nm} stammers his thanks, presses ${g} gold into your hand and runs. `+(Math.random()<.4?'"One thing I heard on the road," he calls back. '+rumourFor('road').replace('They say: ',''):''),'#a8e0a0');
+    }
+  }
+}
+
+/* ---- src/desert/camp.js ---- */
+/* ==========================================================================
+   THE PARTY AS A COMPANY: skills, trades, camp, bonds, crafting and companions.
+   - Skills (lockpicking, persuasion, stealth, appraisal) grow with use and open doors, talk guards round, hide the party and fetch better prices.
+   - Trades (healer, smith, scout, cook, alchemist, merchant): each hero may take one; ranks grow with use and give passive perks.
+   - Camp: cook, sharpen, tend the sick, tell stories, forage, spar. Camping builds friendships and rivalries, and they matter in a fight.
+   - Crafting: recipes learned from healers, alchemists and priests turn herbs and reagents into antidotes, salves, tea and potions.
+   - Companions: a goat, a cat or a donkey, each with a use of its own.
+   Everything is kept in G.flags, so it saves with the game.
+   ========================================================================== */
+const SKILLS={
+  lockpick:{n:'Lockpicking',d:'Opens locked doors and shuttered houses. Without it, a locked house stays locked.',cls:['Thief','Assassin']},
+  persuade:{n:'Persuasion',d:'Talks the watch round and lowers the prices shopkeepers ask. 1% off per level.',cls:['Paladin','Priest','Goat','Barbarian']},
+  stealth:{n:'Stealth',d:'Guards notice you from further off or not at all, and enemies wake later.',cls:['Thief','Assassin','Ranger','Archer']},
+  appraise:{n:'Appraisal',d:'Knows what things are worth: 1.5% more for everything you sell, per level.',cls:['Mage','Sorcerer','Monk','Warrior']}
+};
+function skData(){const F=G.flags;return F.skills||(F.skills={lockpick:0,persuade:0,stealth:0,appraise:0})}
+function skXP(id,n){const S=skData(),before=skBase(id);S[id]=(S[id]||0)+(n||2);const after=skBase(id);if(after>before)msg(`${SKILLS[id].n} improves to level ${after}.`,'#ffe9a0')}
+function skBase(id){return Math.min(10,Math.floor(Math.sqrt((skData()[id]||0)/3)))}
+function skLevel(id){let b=skBase(id);if(G.heroes&&G.heroes.some((h,i)=>h.alive&&SKILLS[id].cls.includes(HERO_DEF[i].cls)))b+=2;return Math.min(12,b)}
+function skillMul(side){return side==='buy'?1-Math.min(.1,skBase('persuade')*.01):1+Math.min(.15,skBase('appraise')*.015)}
+/* ---------------------------------------------------------------- trades ---------------------------------------------------------------- */
+const TRADES={
+  healer:{n:'Healer',d:'Heals 6% more per rank, tends the sick in camp, and calms the hurt.',col:'#a8e0a0'},
+  smith:{n:'Smith',d:'Deals 2% more damage per rank, and sharpens the party\'s blades at camp.',col:'#e0a070'},
+  scout:{n:'Scout',d:'Hits 1.5% more and is missed 1% more per rank. Better at foraging, reads the weather, spots thieves.',col:'#90d080'},
+  cook:{n:'Cook',d:'Hunger falls 8% slower per rank and hearty meals at camp are stronger.',col:'#e8c070'},
+  alchemist:{n:'Alchemist',d:'Brews more reliably, and a good brew sometimes makes double.',col:'#a0c8f0'},
+  merchant:{n:'Merchant',d:'Pays 1% less and sells for 1% more per rank, wherever the party shops.',col:'#e0d070'}
+};
+const TRADE_IDS=Object.keys(TRADES),RANK_XP=[0,10,30,70,140];
+function profData(){const F=G.flags;return F.prof||(F.prof={})}
+function profOf(hi){return profData()[hi]||null}
+function profRank(hi){const p=profOf(hi);if(!p)return 0;let r=1;for(let k=1;k<5;k++)if(p.xp>=RANK_XP[k])r=k+1;return r}
+function profXP(trade,n){
+  G.heroes.forEach((h,i)=>{const p=profOf(i);if(!p||p.id!==trade||!h.alive)return;const b=profRank(i);p.xp+=n||1;const a=profRank(i);if(a>b)msg(`${HERO_DEF[i].name} is now a rank ${a} ${TRADES[trade].n}.`,'#ffe9a0')});
+}
+function profPerk(trade){let r=0;G.heroes.forEach((h,i)=>{const p=profOf(i);if(p&&p.id===trade&&h.alive)r=Math.max(r,profRank(i))});return r}
+function profPas(hi,key){
+  const p=profOf(hi);if(!p||!G.heroes[hi].alive)return 0;const r=profRank(hi);
+  switch(p.id){
+    case 'healer':return key==='healPct'?.06*r:0;
+    case 'smith':return key==='dmgPct'?.02*r:0;
+    case 'scout':return key==='hitPct'?.015*r:key==='dodge'?.01*r:0;
+    case 'cook':return key==='hungerSlow'?.08*r:0;
+  }
+  return 0;
+}
+function profMul(side){const r=profPerk('merchant');return side==='buy'?1-.01*r:1+.01*r}
+/* ---------------------------------------------------------------- bonds ---------------------------------------------------------------- */
+function bondKey(i,j){return i<j?i+'-'+j:j+'-'+i}
+function bondData(){
+  const F=G.flags;
+  if(!F.bonds){F.bonds={};for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){const r=hash2(i*7+3,j*11+5,HERO_DEF[i].name.length*31+HERO_DEF[j].name.length);F.bonds[bondKey(i,j)]=Math.round((r-.5)*8)}}
+  return F.bonds;
+}
+function bondVal(i,j){return bondData()[bondKey(i,j)]||0}
+function bondAdd(i,j,a){const B=bondData(),k=bondKey(i,j),old=B[k]||0;B[k]=clamp(old+a,-10,10);const t0=bondTier(old),t1=bondTier(B[k]);if(t0!==t1)msg(`${HERO_DEF[i].name} and ${HERO_DEF[j].name}: ${t1}.`,B[k]>old?'#a8e0a0':'#e0a080')}
+function bondTier(v){return v>=8?'inseparable friends':v>=5?'good friends':v>=2?'friendly':v<=-8?'bitter rivals':v<=-5?'rivals':v<=-2?'at odds':'colleagues'}
+function bondPas(hi,key){
+  let s=0;
+  for(let j=0;j<4;j++){if(j===hi||!G.heroes[j].alive)continue;const v=bondVal(hi,j);
+    if(v>=5){if(key==='dodge')s+=.012;if(v>=8&&key==='armor')s+=1}
+    else if(v<=-5){if(key==='dmgPct')s+=.03;if(key==='hitPct')s-=.01}}
+  return s;
+}
+/* a friend falls: the others who loved them are enraged */
+function bondFall(t){
+  for(let j=0;j<4;j++){if(j===t||!G.heroes[j].alive)continue;if(bondVal(j,t)>=5){G.buffs.push({name:'Enraged',b:'dmgPct',amt:.3,left:10,hi:j});msg(`${HERO_DEF[j].name} cries out and fights on in a fury at ${HERO_DEF[t].name}'s fall!`,'#ff9a8a')}}
+}
+/* ---------------------------------------------------------------- companions ---------------------------------------------------------------- */
+const PETS={
+  goat:{n:'Goat',price:80,img:'kh_anim1_3',names:['Biscuit','Gruff','Clover','Thistle','Barnaby','Pip'],d:'Eats anything, may cure a stomach, and sniffs out gold hidden in houses. Fills the bag with its bleating, not with loot.'},
+  cat:{n:'Cat',price:60,img:'kh_anim1_0',names:['Pasha','Mafdet','Sekhmet','Dusty','Shadow','Tiger'],d:'Luck +1. Keeps the rats down, wards off thieves in the night, and always lands on its feet.'},
+  donkey:{n:'Donkey',price:150,img:'kh_anim1_4',names:['Hapi','Bartholomew','Old Grey','Dobbin','Moses','Basket'],d:'Carries twelve more things in the bag, and is not nearly as stubborn as the goat.'}
+};
+function petsData(){const F=G.flags;return F.pets||(F.pets=[])}
+function hasCompanion(id){return petsData().some(p=>p.id===id)}
+function companionLuck(){return hasCompanion('cat')?1:0}
+function petsApply(){BAGCAP=60+(hasCompanion('donkey')?12:0)}
+function petBuy(id){
+  const P=PETS[id];if(hasCompanion(id))return 'You already have one.';if(G.gold<P.price)return `That costs ${P.price} gold.`;
+  G.gold-=P.price;petsData().push({id,name:P.names[(hash2(G.clock,petsData().length,9)*P.names.length)|0]});petsApply();sfx('equip');
+  msg(`${petsData().find(p=>p.id===id).name} the ${P.n.toLowerCase()} joins the party.`,'#ffe9a0');return null;
+}
+function petsTick(){ // little scenes, and the goat's nose
+  if(!petsData().length||G.state!=='play'||G.cut||G.talk||G.menu)return;
+  const F=G.flags;F.petT=(F.petT||0)+1;
+  const goat=petsData().find(p=>p.id==='goat'),cat=petsData().find(p=>p.id==='cat'),don=petsData().find(p=>p.id==='donkey');
+  if(F.petT%40===0){
+    const lines=[];if(goat)lines.push(`${goat.name} the goat eats a corner of a map, and looks pleased.`,`${goat.name} butts a lamp post. The lamp post loses.`);
+    if(cat)lines.push(`${cat.name} the cat sits on the map and refuses to move.`,`${cat.name} washes a paw and watches the shadows.`);
+    if(don)lines.push(`${don.name} the donkey sighs deeply under the packs.`,`${don.name} brays, for no reason anybody understands.`);
+    if(lines.length)msg(lines[(Math.random()*lines.length)|0],'#d8d0a0');
+  }
+}
+function petEnter(n){
+  const goat=petsData().find(p=>p.id==='goat');
+  if(goat&&typeof KH_GOLD!=='undefined'&&KH_GOLD[n]&&!G.flags['kg'+n])later(500,()=>msg(`${goat.name} the goat paws at a corner of the room and bleats at a loose stone. There is something here.`,'#ffe9a0'));
+}
+/* ---------------------------------------------------------------- camp ---------------------------------------------------------------- */
+const FOOD_KIND=()=>G.bag.filter(b=>idef(b).k==='food');
+function foodUnits(){return G.bag.reduce((a,b)=>a+(idef(b).k==='food'?b.n:0),0)}
+function takeFood(n){let t=0;while(t<n){let fi=-1;for(let i=G.bag.length-1;i>=0;i--)if(G.bag[i]&&idef(G.bag[i]).k==='food'){fi=i;break}if(fi<0)break;bagTake(fi);t++}return t}
+function campOk(){if(hostileNear()){msg('Not with enemies about.','#d09a80');return false}return true}
+const CAMP_ACTS=[
+  {id:'rest',n:'Rest the night',d:'Eight hours. Heals everyone, cures what rest cures.',cost:'8 hours',ok:()=>true,run:()=>{restParty(false)}},
+  {id:'cook',n:'Cook a hearty meal',d:'Two food items make a stew for the party: Well Fed (+2 strength) for a day and hunger filled. A cook makes it better.',cost:'1 hour, 2 food',ok:()=>foodUnits()>=2,run:()=>{
+    takeFood(2);advanceTime(60);const r=profPerk('cook');
+    G.heroes.forEach(h=>{if(h.alive)h.food=Math.min(100,h.food+40+r*8)});afflInflict('wellfed',-1,true);if(r>=3)G.buffs.push({name:'A Master\'s Stew',b:'regen',amt:.4,left:200,hi:-1});
+    profXP('cook',2);msg('The stew is hot and hearty. The party eats in good spirits.','#e8c070');bondRandom(1)}},
+  {id:'sharpen',n:'Sharpen and mend the gear',d:'Blades keen, straps mended: the party deals more damage for the next day of fighting. A smith does it better.',cost:'30 minutes',ok:()=>true,run:()=>{
+    advanceTime(30);const r=profPerk('smith');G.buffs=G.buffs.filter(b=>b.name!=='Sharpened Blades');G.buffs.push({name:'Sharpened Blades',b:'dmgPct',amt:.06+.025*r,left:400,hi:-1});
+    profXP('smith',2);msg(`Whetstones ring. The party deals ${Math.round((.06+.025*r)*100)}% more damage for a long while.`,'#e0a070')}},
+  {id:'tend',n:'Tend the sick',d:'Rest and care for those with afflictions that a healer can ease. Each has a chance of cure; a healer improves it.',cost:'2 hours',ok:()=>afflList().some(e=>AFFL[e.id]&&AFFL[e.id].healer),run:()=>{
+    advanceTime(120);const r=profPerk('healer'),sk=skBase('persuade')*.01;let n=0;
+    for(const e of afflList().slice()){const A=AFFL[e.id];if(A&&A.healer&&Math.random()<.35+.12*r+sk){afflRemove(e,true);n++}else if(A&&A.rest&&Math.random()<.5)e.rests++}
+    profXP('healer',2);msg(n?'Careful nursing works. '+n+(n>1?' sicknesses are cured.':' sickness is cured.'):'The patients rest, but nothing is cured yet.','#a8e0a0')}},
+  {id:'stories',n:'Tell stories round the fire',d:'An hour of tales and songs. Friendships grow, grudges cool a little, and morale rises.',cost:'1 hour',ok:()=>true,run:()=>{
+    advanceTime(60);bondRandom(2);bondRandom(1);luckAdd(1);msg('The fire crackles, the tales get bigger, and the party laughs together.','#e8d8a0')}},
+  {id:'spar',n:'Spar',d:'Two heroes drill together. Friends grow closer, and rivals settle things a little. A small crowd gathers.',cost:'1 hour',ok:()=>true,run:()=>{
+    advanceTime(60);const a=(Math.random()*4)|0;let b=(a+1+((Math.random()*3)|0))%4;bondAdd(a,b,bondVal(a,b)<0?1:1);giveXP(8);msg(`${HERO_DEF[a].name} and ${HERO_DEF[b].name} spar until both are out of breath.`,'#e8d8a0')}},
+  {id:'forage',n:'Forage',d:'Search the wilds for herbs and reagents. Only outdoors. A scout finds more.',cost:'1 hour',ok:()=>!!wxRegionOf(LEVEL)&&!repTownOf(LEVEL),run:()=>{forage()}}
+];
+function bondRandom(a){const i=(Math.random()*4)|0;let j=(i+1+((Math.random()*3)|0))%4;if(G.heroes[i].alive&&G.heroes[j].alive)bondAdd(i,j,a)}
+function forage(){
+  advanceTime(60);const r=profPerk('scout'),luck=Math.max(0,luckVal())*.02;let found=[];
+  const des=wxRegionOf(LEVEL)==='desert',w=weatherNow(),bad=w&&(w.id==='snow'||w.id==='frost')?.3:0;
+  const table=des?[['water',.6],['lotus',.15],['herb',.15]]:[['herb',.55],['wildflower',.5],['nightshade',.25],['honeycomb',.15]];
+  for(const [id,p] of table)if(Math.random()<Math.max(.05,p+r*.07+luck-bad)){const n=1+((Math.random()<.3+r*.1)?1:0);if(bagAdd(mkItem2(id,n)))found.push(n+' '+ITEMDEF[id].n.toLowerCase())}
+  profXP('scout',2);skXP('stealth',1);
+  msg(found.length?'Foraging turns up '+found.join(', ')+'.':'An hour of looking turns up nothing useful.','#a8d898');
+}
+function campRun(id){
+  const a=CAMP_ACTS.find(x=>x.id===id);if(!a)return;
+  if(!campOk())return;if(!a.ok()){msg('You cannot do that now.','#d09a80');return}
+  a.run();
+}
+journalPage({id:'camp',title:'Camp and Bonds',
+  summary:()=>{const v=[];for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){const b=bondVal(i,j);if(Math.abs(b)>=5)v.push(`${HERO_DEF[i].name} & ${HERO_DEF[j].name}: ${bondTier(b)}`)}return 'Cook, sharpen, tend the sick, forage, spar or tell stories. '+(v.length?v.slice(0,2).join('; ')+'.':'No firm friendships or rivalries yet.')},
+  note:()=>0,
+  draw(){
+    jFrame('Camp and bonds');
+    txt(`Hour ${((G.clock%1440)/60)|0}   ${weatherLabel()}`,440,25,8,'#a89878','right');
+    CAMP_ACTS.forEach((a,k)=>{
+      const x=36+(k%2)*212,y=36+Math.floor(k/2)*36,ok=a.ok();
+      ctx.save();rrect(ctx,x,y,204,32,4);ctx.fillStyle=ok?'rgba(44,22,14,.92)':'rgba(24,18,14,.85)';ctx.fill();ctx.lineWidth=1.3;ctx.strokeStyle=ok?'#a88a48':'#4a4034';ctx.stroke();ctx.restore();
+      txt(a.n,x+7,y+8,8.8,ok?'#ecdca8':'#7a7060','left',true,undefined,130);txt(a.cost,x+198,y+8,6.8,ok?'#9ac8ff':'#6a6a70','right');
+      wrapText(a.d,190,6.8).slice(0,2).forEach((l,q)=>txt(l,x+7,y+18+q*7.6,6.8,ok?'#b8aa88':'#6a6050','left'));
+      btn('cp_'+a.id,x,y,204,32);
+    });
+    txt('BONDS',40,186,10,'#d8c88e','left',true);
+    let n=0;
+    for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){
+      const v=bondVal(i,j),col=v>=2?'#a8d880':v<=-2?'#e08060':'#a89878',x=40+(n%2)*212,y=196+Math.floor(n/2)*22;n++;
+      txt(`${HERO_DEF[i].name} & ${HERO_DEF[j].name}`,x,y+6,8.5,'#e2d8bc','left',true,undefined,140);txt(bondTier(v),x+204,y+6,8,col,'right');
+      jBar(x,y+11,204,5,(v+10)/20,v>=0?'#a8d880':'#d07050');ctx.fillStyle='rgba(255,255,255,.4)';ctx.fillRect(x+102,y+10,1,7);
+    }
+    txt('Friends (5+) dodge more and fight in a fury if a friend falls. Rivals (-5 or less) hit harder to prove a point, but lose their aim a little.',40,262,7.2,'#988a70','left',false,undefined,400);
+    txt('Camp activities need a quiet moment with no enemy near.',40,284,7.4,'#a89878','left');
+  },
+  click(id){const m=/^cp_(.+)$/.exec(id);if(m)campRun(m[1])}
+});
+/* ---------------------------------------------------------------- crafting and herbalism ---------------------------------------------------------------- */
+function mkItemN(id,n){return {id,n:n||1}}
+const RECIPES=[
+  {id:'antidote',n:'Antidote',in:{nightshade:1,herb:1},out:['antidote',2],from:'Merit the healer, or the witch',price:40},
+  {id:'salve',n:'Cleansing Salve',in:{herb:2,honeycomb:1},out:['salve',2],from:'Merit the healer',price:40},
+  {id:'sleeptea',n:'Sleeping Tea',in:{wildflower:2,water:1},out:['sleeptea',2],from:'The witch, or a priest',price:30},
+  {id:'holywater',n:'Holy Water',in:{water:2,wildflower:1},out:['holywater',1],from:'A priest',price:60},
+  {id:'healdraught',n:'Healing Draught',in:{herb:2,water:1},out:['healdraught',1],from:'An alchemist',price:80},
+  {id:'manadraught',n:'Mana Draught',in:{lotus:1,water:1},out:['manadraught',1],from:'An alchemist',price:80},
+  {id:'swiftness',n:'Potion of Swiftness',in:{lotus:1,honeycomb:1},out:['swiftness',1],from:'An alchemist',price:100},
+  {id:'ironskin',n:'Potion of Iron Skin',in:{ore:2,water:1},out:['ironskin',1],from:'A swordsmith',price:100}
+];
+ITEMDEF.nightshade={n:'Nightshade',k:'quest',t:'Reagent',ic:'herb',c:'#6a3a8a',stack:1,price:6,d:'Dark berries and a purple flower. Poison in a spoon, medicine in a pinch.',sw:.3};
+ITEMDEF.lotus={n:'Blue Lotus',k:'quest',t:'Reagent',ic:'herb',c:'#6a9ae0',stack:1,price:8,d:'A blue lotus from a still pool. Calming, and strange to taste.',sw:.3};
+function recData(){const F=G.flags;return F.recipes||(F.recipes={})}
+function mkItem2(id,n){return {id,n:n||1}}
+function canCraft(r){return recData()[r.id]&&Object.keys(r.in).every(k=>bagCount(k)>=r.in[k])}
+function craft(r){
+  if(!campOk())return;if(!canCraft(r)){msg('You lack something for that.','#d09a80');return}
+  const ar=profPerk('alchemist'),p=Math.min(.98,.8+.04*ar);
+  advanceTime(30);
+  const ok=Math.random()<p;
+  for(const k in r.in)bagRemove(k,ok?r.in[k]:Math.ceil(r.in[k]/2));
+  if(!ok){msg(`The ${r.n.toLowerCase()} goes wrong: a puff of smoke, and half the ingredients are wasted.`,'#d0a080');return}
+  let n=r.out[1];if(Math.random()<.04+ar*.06){n*=2;msg('The brew comes out twice as strong as you hoped!','#ffe9a0')}
+  for(let q=0;q<n;q++)if(!bagAdd(mkItem2(r.out[0],1)))msg('Your bag is full. Some was lost.','#d09a80');
+  profXP('alchemist',2);msg(`You brew ${n>1?n+' ':'a '}${ITEMDEF[r.out[0]].n.toLowerCase()}${n>1?'s':''}.`,'#9ae0a0');sfx('potion');
+}
+function learnRecipe(id,price){const r=RECIPES.find(x=>x.id===id);if(recData()[id])return say('You already know that one.',[BYE]);if(G.gold<price)return say(`That costs ${price} gold.`,[BYE]);G.gold-=price;recData()[id]=1;sfx('key');msg(`You learn to make ${r.n.toLowerCase()}.`,'#ffe9a0');return say(`There. Write it down: ${Object.keys(r.in).map(k=>r.in[k]+' '+ITEMDEF[k].n.toLowerCase()).join(' and ')} makes ${r.out[1]>1?r.out[1]+' ':'one '}${ITEMDEF[r.out[0]].n.toLowerCase()}${r.out[1]>1?'s':''}. Brew it at any camp.`,[BYE])}
+const RECIPE_TEACH={kh_healer:['antidote','salve'],kh_alchemist:['healdraught','manadraught','swiftness'],ih_alchemist:['healdraught','manadraught','swiftness'],priest:['holywater','sleeptea'],witch:['sleeptea','antidote'],kh_swordsmith:['ironskin'],ih_swordsmith:['ironskin']};
+for(const npc in RECIPE_TEACH)for(const rid of RECIPE_TEACH[npc]){
+  const r=RECIPES.find(x=>x.id===rid);
+  repWrap(npc,()=>!recData()[rid],`Learn to brew ${r.n.toLowerCase()} (${r.price} gold)`,()=>learnRecipe(rid,r.price));
+}
+journalPage({id:'craft',title:'Crafting and Herbalism',
+  summary:()=>{const k=Object.keys(recData()).length;return k?`${k} recipes known. Gather herbs, brew at camp.`:'No recipes yet. Healers, alchemists, priests and the witch teach them for a fee. Forage for herbs at camp.'},
+  note:()=>0,
+  draw(){
+    jFrame('Crafting and herbalism');
+    txt('Brewing takes half an hour and needs a quiet moment. Forage at camp for herbs. Recipes are taught by healers, alchemists, priests and the witch.',40,42,7.6,'#a89878','left',false,undefined,400);
+    RECIPES.forEach((r,k)=>{
+      const known=recData()[r.id],ok=canCraft(r),y=62+k*28;
+      ctx.save();rrect(ctx,36,y,408,25,4);ctx.fillStyle=known?'rgba(40,28,18,.92)':'rgba(24,18,14,.8)';ctx.fill();ctx.lineWidth=1.2;ctx.strokeStyle=ok?'#9ac870':known?'#a88a48':'#4a4034';ctx.stroke();ctx.restore();
+      txt(known?r.n:'???',44,y+8,9,known?'#ecdca8':'#6a6050','left',true);
+      txt(known?`Makes ${r.out[1]>1?r.out[1]+' ':''}${ITEMDEF[r.out[0]].n}`:`Taught by: ${r.from} (${r.price} gold)`,44,y+18,7,known?'#9ac8ff':'#8a7a60','left');
+      if(known){let x=190;for(const k2 in r.in){const have=bagCount(k2),need=r.in[k2];txt(`${ITEMDEF[k2].n} ${have}/${need}`,x,y+12.5,7.6,have>=need?'#a8d880':'#e08060','left');x+=96}}
+      if(known)btnText('cr_'+r.id,'Brew',390,y+3,48,19);
+    });
+  },
+  click(id){const m=/^cr_(.+)$/.exec(id);if(m){const r=RECIPES.find(x=>x.id===m[1]);if(r)craft(r)}}
+});
+/* ---------------------------------------------------------------- skills and trades ---------------------------------------------------------------- */
+journalPage({id:'trade',title:'Skills and Trades',
+  summary:()=>{const t=G.heroes.map((h,i)=>{const p=profOf(i);return p?`${HERO_DEF[i].name}: ${TRADES[p.id].n} ${profRank(i)}`:null}).filter(Boolean);return (t.length?t.join(', ')+'. ':'No hero has a trade yet. ')+'Lockpicking, persuasion, stealth and appraisal grow with use.'},
+  note:()=>G.heroes.some((h,i)=>h.alive)&&!Object.keys(profData()).length,
+  draw(){
+    jFrame('Skills and trades');
+    txt('SKILLS (party)',40,42,10,'#d8c88e','left',true);
+    Object.keys(SKILLS).forEach((id,k)=>{
+      const S=SKILLS[id],x=40+(k%2)*212,y=50+Math.floor(k/2)*38,b=skBase(id),bonus=skLevel(id)-b;
+      txt(`${S.n}  ${b}${bonus?` (+${bonus})`:''}`,x,y+6,9,'#ecdca8','left',true);jBar(x,y+11,200,5,b/10,'#d8b048');
+      wrapText(S.d,200,6.6).slice(0,2).forEach((l,q)=>txt(l,x,y+23+q*7,6.6,'#a89878','left'));
+    });
+    txt('TRADES (one per hero; changing a trade costs 100 gold after the first)',40,134,10,'#d8c88e','left',true);
+    G.heroes.forEach((h,i)=>{
+      const y=146+i*34,p=profOf(i),T=p&&TRADES[p.id];
+      ctx.save();rrect(ctx,36,y,408,31,4);ctx.fillStyle='rgba(44,22,14,.9)';ctx.fill();ctx.lineWidth=1.2;ctx.strokeStyle='#7a6440';ctx.stroke();ctx.restore();
+      txt(`${HERO_DEF[i].name} the ${HERO_DEF[i].cls}`,44,y+9,9,'#e2d8bc','left',true,undefined,150);
+      if(T){const r=profRank(i),next=RANK_XP[r]||null;txt(`${T.n}, rank ${r}`,44,y+21,8.5,T.col,'left',true);jBar(150,y+17,100,5,next?(p.xp-RANK_XP[r-1])/(next-RANK_XP[r-1]):1,T.col);wrapText(T.d,170,6.6).slice(0,2).forEach((l,q)=>txt(l,260,y+8+q*7.6,6.6,'#a89878','left'))}
+      else txt('No trade yet',44,y+21,8.5,'#8a7a60','left');
+      btnText('tr_'+i,p?'Change':'Take up',392,y+5,46,21);
+    });
+  },
+  click(id){
+    const m=/^tr_(\d)$/.exec(id);if(!m)return;const i=+m[1],P=profData(),cur=P[i];
+    const idx=cur?TRADE_IDS.indexOf(cur.id):-1,nextId=TRADE_IDS[(idx+1)%TRADE_IDS.length];
+    if(cur&&G.gold<100){msg('Changing trade costs 100 gold.','#d09a80');return}
+    if(cur)G.gold-=100;
+    P[i]={id:nextId,xp:cur&&cur.id===nextId?cur.xp:0};sfx('equip');msg(`${HERO_DEF[i].name} takes up the trade of ${TRADES[nextId].n.toLowerCase()}.`,'#ffe9a0');
+  }
+});
+/* ---------------------------------------------------------------- companions ---------------------------------------------------------------- */
+journalPage({id:'pets',title:'Companions',
+  summary:()=>{const p=petsData();return p.length?p.map(x=>`${x.name} the ${PETS[x.id].n.toLowerCase()}`).join(', ')+'.':'No companion yet. A goat, a cat or a donkey can be bought from animal traders in Khemetra and Ironhill.'},
+  note:()=>0,
+  draw(){
+    jFrame('Companions');
+    ['goat','cat','donkey'].forEach((id,k)=>{
+      const P=PETS[id],own=petsData().find(p=>p.id===id),y=44+k*80,im=IMG[P.img];
+      ctx.save();rrect(ctx,36,y,408,74,5);ctx.fillStyle=own?'rgba(34,40,22,.92)':'rgba(34,18,14,.9)';ctx.fill();ctx.lineWidth=1.4;ctx.strokeStyle=own?'#7ac060':'#7a6440';ctx.stroke();ctx.restore();
+      ctx.fillStyle='#120c08';ctx.fillRect(44,y+7,60,60);if(im)ctx.drawImage(im,44+30-Math.min(28,im.width*50/im.height/2),y+9,Math.min(56,im.width*56/im.height),56);ctx.strokeStyle='#7a6440';ctx.strokeRect(44,y+7,60,60);
+      txt(own?`${own.name} the ${P.n}`:P.n,116,y+14,12,own?'#ffe9a0':'#e2d8bc','left',true);
+      wrapText(P.d,310,8.2).slice(0,3).forEach((l,q)=>txt(l,116,y+30+q*10,8.2,'#c8bc98','left'));
+      txt(own?'In the party':`For sale for ${P.price} gold from animal traders`,116,y+64,8,own?'#9ae0a0':'#a89878','left',own);
+    });
+  }
+});
+khNpc('pet_trader','Kal, the animal trader','kh_npc5_2',d=>say('A goat to eat your troubles, a cat to watch your back, a donkey to carry the lot. All good animals, all fairly priced, and none of them have bitten anyone important.',
+  ['goat','cat','donkey'].map(id=>[hasCompanion(id)?`${PETS[id].n}: you have one`:`Buy a ${PETS[id].n.toLowerCase()} (${PETS[id].price} gold)`,()=>{const e=petBuy(id);return say(e||'A fine choice. Look after it, and it will look after you.',[BYE])}]).concat([BYE])));
+(function(){ // Kal sets up in Ironhill, near the south wall
+  const L=LEVELS[13];if(!L||!L.rows||L._kal)return;L._kal=1;
+  const taken=new Set((L.decor||[]).filter(d=>d.block||d.npc).map(d=>d.x+','+d.y));let best=null,bd=1e9;
+  for(let y=1;y<L.rows.length-1;y++)for(let x=1;x<L.rows[0].length-1;x++){if(L.rows[y][x]!=='.'||taken.has(x+','+y))continue;const d=Math.abs(x-9)+Math.abs(y-27);if(d<bd){bd=d;best=[x,y]}}
+  if(best)L.decor.push({k:'beggar',x:best[0],y:best[1],block:true,npc:'pet_trader'});
+})();
+
+/* ---------------------------------------------------------------- locked doors: pick the lock and walk into the house ---------------------------------------------------------------- */
+const LD_DIFF={15:0,16:.05,17:0,18:0,19:-.12};
+const lockedKey=(lv,x,y)=>40000+lv*10000+y*100+x;
+function lockedDoor(g,nx,ny){
+  const F=G.flags,key=lockedKey(LEVEL,nx,ny),un=F.unlocked||(F.unlocked={}),ms=g>=200?[(TILE_MSG[g]||'It is locked.')]:DOOR_MSGS[g];
+  if(!LEVELS[LEVEL]||LEVEL===44||LEVEL>=40000||(g>=200&&!repTownOf(LEVEL)))return false; // only the doors of towns and villages
+  if(un[key]){sfx('door');goToLevel(key,{x:4,y:4,f:0});return true}
+  const lv=skLevel('lockpick'),ch=clamp(.18+lv*.065+luckVal()*.01+(LD_DIFF[g]||0),.04,.95),t=repTownOf(LEVEL);
+  const text=ms[(hash2(nx,ny,3)*ms.length)|0]+(lv>0?` Chance of picking it: about ${Math.round(ch*100)}%.`:' You have no talent for locks yet, but you could try.');
+  G.talk={d:{k:'_',x:nx,y:ny},n:{name:'A locked door'},node:say(text,[['Try to pick the lock.',()=>{
+    if(Math.random()<ch){
+      un[key]=1;skXP('lockpick',3);honourAdd(-1,'breaking in');if(t&&Math.random()<.35)repAdd(t,-2,'a neighbour saw you at the door');
+      sfx('door');G.talk=null;goToLevel(key,{x:4,y:4,f:0});return null;
+    }
+    skXP('lockpick',1);if(t&&Math.random()<.3)repAdd(t,-2,'a neighbour heard the noise');
+    return say(Math.random()<.5?'The pick snaps in the lock with a tiny, awful sound.':'The pins will not set. Somewhere inside, a floorboard creaks.',[['Try again.',()=>lockedDoor(g,nx,ny)&&null],['Leave it.',()=>null]]);
+  }],['Leave it alone.',()=>null]]),t:G.time,btns:[]};
+  G.hold=null;G.queued=null;
+  return true;
+}
+function makeLockedHouse(n){
+  if(n<40000)return false;const id=n-40000,lv=Math.floor(id/10000),rem=id%10000,y=Math.floor(rem/100),x=rem%100,L0=LEVELS[lv];if(!L0||!L0.rows)return false;
+  let fx=x,fy=y+1,ff=2;
+  for(const [dx,dy,f] of [[0,1,2],[0,-1,0],[1,0,1],[-1,0,3]]){const q=L0.rows[y+dy]&&L0.rows[y+dy][x+dx];if(q==='.'){fx=x+dx;fy=y+dy;ff=f;break}}
+  const r=hash2(x*7+lv,y*13,n%101),scenes=['warm','worker','spartan','messy','children','healer','cats','fisher','scholar','empty','potter','soldier','warm','worker'];
+  const scene=scenes[(r*scenes.length)|0],name=KH_SCENE_NAME[scene],b={id:'lh'+n,name,room:'home',keeper:null,scene};
+  if(hash2(n,7,91)<.1){b.gold=5+((hash2(n,9,92)*46)|0);b.goldMsg='A few coins lie forgotten in the corner.'}
+  const lvl=khRoom(b,n,{to:lv,x:fx,y:fy,f:ff}).level;
+  if(b.gold)KH_GOLD[n]={gold:b.gold,msg:b.goldMsg};
+  LEVELS[n]=lvl;LEVEL_NAMES[n]=name;return true;
+}
+
+/* ---- src/desert/rumours.js ---- */
+/* ==========================================================================
+   RUMOURS AND LEADS. Townsfolk, bards, innkeepers and travellers let slip what they have heard. Each new rumour goes into the journal, and some of them
+   put a mark on the map of Khemetra (a shop, a healer, a hoard) so that the leads can be followed.
+   ========================================================================== */
+const RUMOURS=[
+  {id:'hoard_nw',t:'They say a dark house deep in Khemetra\'s Old Quarter, in the far north-west, hides a chest of gold so old that it carries a curse.',mark:'hoard5000',tag:'hoard'},
+  {id:'hoard_ne',t:'A noble family in the Temple District, in the far north-east, hid a chest of gold behind a curtain and died without telling a soul.',mark:'hoard2000',tag:'hoard'},
+  {id:'hoard_se',t:'A merchant in the far south-east, near the baths, pushed a strongbox of coins under his table and never came back for it.',mark:'hoard1000',tag:'hoard'},
+  {id:'houses_gold',t:'Some houses have a few coins lying in a corner. People are too polite to look.',tag:'hoard'},
+  {id:'wizard_kh',t:'The Wizard\'s Emporium in Khemetra\'s Merchants\' Quarter teaches a spell for every kind of adventurer, from level ten to level fifty.',mark:'shop:magic1',tag:'shop'},
+  {id:'sword_kh',t:'The Gilded Blade in the Merchants\' Quarter sells good plain steel for every level, nothing magic and all of it sharp.',mark:'shop:sword1',tag:'shop'},
+  {id:'armour_kh',t:'The Iron Aegis in the Merchants\' Quarter sells helms, plate and shields, with a few surprises for those who can lift them.',mark:'shop:armour1',tag:'shop'},
+  {id:'potion_kh',t:'The Alchemist\'s Cellar in the Merchants\' Quarter has draughts to restore body and mind, and brews of might and speed.',mark:'shop:potion4',tag:'shop'},
+  {id:'wizard_ih',t:'A hedge wizard called Corvin has set up shop in the north-west corner of Ironhill. He is not as bad as he looks.',tag:'shop'},
+  {id:'smith_ih',t:'Ironhill has two new shops in the south: Steelhold Blades and Ironhill Plate and Mail. The swordsmith swears his steel is the best in the north.',tag:'shop'},
+  {id:'healer_kh',t:'Merit the healer stands in the Fountain Garden and cures fevers and poisons for forty gold. She teaches her herbs too.',mark:'npc:kh_healer',tag:'cure'},
+  {id:'church_cure',t:'If a curse settles on you, the Church of Light in Khemetra will lift it, for nothing. The priest just asks that you come in.',mark:'shop:church',tag:'cure'},
+  {id:'bath_cure',t:'A good hot soak in the baths clears the dust from the lungs, the fleas from the hair and the sun from the head.',tag:'cure'},
+  {id:'fixer_th',t:'A man called Sly Dunstan, in Thornwick, pays well for jobs that nobody talks about.',tag:'dark'},
+  {id:'fixer_kh',t:'Khafre the Fixer drinks in the Beggars\' Quarter. If you need a little crime, he will arrange it.',tag:'dark'},
+  {id:'watch',t:'The watch in Khemetra gives three warnings to anyone who walks into a house, then the cells. A little persuasion helps. So does a coin.',tag:'watch'},
+  {id:'pets',t:'Kal the animal trader sells goats, cats and donkeys in Khemetra and in Ironhill. A donkey carries a great deal.',tag:'pets',mark:'npc:pet_trader'},
+  {id:'goat_nose',t:'A goat can smell gold hidden in a house. It is the only thing a goat smells that is worth anything.',tag:'pets'},
+  {id:'witch',t:'The witch of the road knows how to brew sleeping tea, and has opinions on everything else.',tag:'cure'},
+  {id:'heat',t:'Never cross the dunes at noon. Go at dawn or by night, and take water. A heat wave will cook the unwary.',tag:'wx'},
+  {id:'rain',t:'A cold rain brings fever to those who stay out in it. Find a roof, or a fire.',tag:'wx'},
+  {id:'luck',t:'A black cat is bad luck, unless it is your own cat. Then it is just a cat.',tag:'luck'},
+  {id:'bard',t:'A bard turns up in the evenings in the larger towns. A tip for a song brings luck, and sometimes a secret.',tag:'luck'},
+  {id:'caravan',t:'Merchants pull their carts off the road in fine weather. They carry things that no shop sells.',tag:'road'},
+  {id:'locks',t:'The shuttered houses of Thornwick are not as empty as they look. A thief with a good pick can get in. Some have a little gold.',tag:'dark'},
+  {id:'rest',t:'Sleeping in the open is dangerous. Thieves come in the night, and sometimes worse. A cat, a scout or a bit of luck keeps them away.',tag:'road'},
+  {id:'friends',t:'Companions who share a fire become friends. Friends fight better, and fall hard.',tag:'bond'}
+];
+function rumData(){const F=G.flags;return F.rumours||(F.rumours={})}
+function rumourFor(kind){
+  const known=rumData(),pool=RUMOURS.filter(r=>!known[r.id]&&(kind!=='road'||['road','wx','luck','cure','pets'].includes(r.tag))&&(kind!=='town'||r.tag!=='road'));
+  const r=pool.length?pool[(Math.random()*pool.length)|0]:RUMOURS[(Math.random()*RUMOURS.length)|0];
+  const fresh=!known[r.id];known[r.id]={day:dayNum(),town:repTownOf(LEVEL)||'the road'};
+  if(fresh)msg('A new rumour goes into the journal.','#e8d8a0');
+  return 'They say: '+r.t;
+}
+/* citizens and innkeepers let things slip */
+(function(){
+  const c=NPCS.kh_citizen;if(c&&!c._rm){c._rm=1;const base=c.root;c.root=function(d){const n=base(d);if(Math.random()<.16)n.text='I hear things, you know. '+rumourFor('town');return n};}
+  for(const id of ['bram','odalys','kh_inn1','kh_inn2','kh_inn3'])repWrap(id,()=>true,'Any rumours?',()=>say(rumourFor('town'),[BYE]));
+})();
+/* marks on the map of Khemetra */
+function rumourMarks(){
+  const out=[];if(typeof KH_CITY==='undefined'||!KH_CITY)return out;
+  const known=rumData();
+  for(const r of RUMOURS){
+    if(!known[r.id]||!r.mark)continue;
+    let x=0,y=0,t='';
+    const m=r.mark;
+    if(m.startsWith('hoard')){const amt=+m.slice(5),h=KH_CITY._hoards&&[...KH_CITY._hoards.entries()].find(([mm,hh])=>hh.amt===amt);if(!h)continue;x=h[0].cells[0][0];y=h[0].cells[0][1];t='Rumoured hoard'}
+    else if(m.startsWith('shop:')){const b=KH_BUILDINGS.find(q=>q.id===m.slice(5));if(!b||!b.front)continue;x=b.front[0];y=b.front[1];t=b.name}
+    else if(m==='npc:kh_healer'){x=104;y=206;t='Merit, the healer'}
+    else if(m==='npc:pet_trader'){x=196;y=292;t='Kal, animal trader'}
+    else continue;
+    out.push({x,y,t,hoard:m.startsWith('hoard')});
+  }
+  return out;
+}
+function drawRumourMarks(ox,oy,cs){
+  for(const k of rumourMarks()){
+    const sx=ox+(k.x+.5)*cs,sy=oy+(k.y+.5)*cs;if(sx<-20||sy<-20||sx>DW+20||sy>DH+20)continue;
+    ctx.save();ctx.translate(sx,sy);const r=Math.max(4,cs*.9);
+    ctx.fillStyle=k.hoard?'#ffd040':'#fff0a0';ctx.strokeStyle='#5a2a0a';ctx.lineWidth=1.2;ctx.beginPath();
+    for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}ctx.closePath();ctx.fill();ctx.stroke();
+    if(cs>=1.6||true){ctx.font=`italic bold ${clamp(cs*1.2,6.5,9)}px ${FUI}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(244,234,196,.95)';ctx.strokeText(k.t,0,r+7);ctx.fillStyle='#7a1a10';ctx.fillText(k.t,0,r+7)}
+    ctx.restore();
+  }
+}
+journalPage({id:'rumour',title:'Rumours and Leads',
+  summary:()=>{const n=Object.keys(rumData()).length;return n?`${n} of ${RUMOURS.length} rumours heard. Some are marked on Khemetra's map.`:'Nothing heard yet. Listen to citizens, innkeepers, bards and merchants on the road.'},
+  note:()=>0,
+  open(){G.rs=0},
+  draw(){
+    jFrame('Rumours and leads');
+    const known=rumData(),list=RUMOURS.filter(r=>known[r.id]);
+    txt(`${list.length} of ${RUMOURS.length} heard`,440,25,8,'#a89878','right');
+    if(!list.length){txt('Nothing yet. Talk to people. Citizens, innkeepers, bards and merchants on the road let things slip.',240,140,9,'#a89878','center',false,undefined,380)}
+    const viewH=222,top=38;let y=0;const rows=list.map(r=>{const ls=wrapText(r.t,380,8.4);const o={r,ls,y};y+=ls.length*10.6+14;return o});
+    const max=Math.max(0,y-viewH);G.rs=clamp(G.rs||0,0,max);
+    ctx.save();ctx.beginPath();ctx.rect(30,top,420,viewH);ctx.clip();
+    for(const o of rows){const ry=top+o.y-G.rs;if(ry<top-60||ry>top+viewH)continue;
+      const k=known[o.r.id],tc={hoard:'#ffd860',shop:'#a8c8f0',cure:'#a8e0a0',dark:'#d09090',watch:'#e8c878',pets:'#e0c8a0',wx:'#a0c0e0',luck:'#e8e090',road:'#c8b888',bond:'#e8b0c0'}[o.r.tag]||'#c8bc98';
+      ctx.fillStyle=tc;ctx.fillRect(38,ry+2,3,o.ls.length*10.6+4);
+      o.ls.forEach((l,i)=>txt(l,48,ry+8+i*10.6,8.4,'#d2c9b2','left'));
+      txt(`Heard on day ${k.day+1}${k.town?', '+(TOWNS.find(t=>t.id===k.town)?TOWNS.find(t=>t.id===k.town).n:k.town):''}${o.r.mark?'  -  marked on the map':''}`,48,ry+8+o.ls.length*10.6+1,6.6,'#8a7a60','left');
+    }
+    ctx.restore();
+    if(max>0){btnText('rm_up','Up',60,288,50,16);btnText('rm_dn','Down',370,288,50,16)}
+    BTNS.push({id:'rmarea',x:30,y:top,w:420,h:viewH,up:true,drag:'rum'});
+  },
+  click(id){if(id==='rm_up')G.rs=Math.max(0,(G.rs||0)-80);if(id==='rm_dn')G.rs=(G.rs||0)+80}
 });
 
 /* ---- src/desert/spells.js ---- */
@@ -11629,7 +12241,7 @@ function mxApplyEnemy(hi,E,fx,P){
     case 'exec':{
       if(E.hp<=E.maxhp*fx[1]&&!boss){msg(`The ${nm} falls dead at once.`,'#ffe090');hurtEnemy(E,E.hp+1)}
       else hurtEnemy(E,mxDmg(hi,fx[2]));break}
-    case 'steal':{const g=Math.max(1,Math.round(rnd(fx[1]*.6,fx[1]*1.4)*(1+h.lvl*.3)));G.gold+=g;msg(`${HERO_DEF[hi].name} steals ${g} gold from the ${nm}.`,'#ffd76a');mxFloat(E,'+'+g,'#ffd76a');break}
+    case 'steal':{try{honourAdd(-1,'you picked a pocket')}catch(e){};const g=Math.max(1,Math.round(rnd(fx[1]*.6,fx[1]*1.4)*(1+h.lvl*.3)));G.gold+=g;msg(`${HERO_DEF[hi].name} steals ${g} gold from the ${nm}.`,'#ffd76a');mxFloat(E,'+'+g,'#ffd76a');break}
     case 'undead':{
       if(E.t==='skel'||/skel|ghost|spectre|wraith|mummy/.test(E.t)){
         if(!boss&&E.hp<=E.maxhp*.5){msg(`The ${nm} crumbles to nothing.`,'#fff0b0');hurtEnemy(E,E.hp+1)}
@@ -11699,6 +12311,7 @@ function mxFreeStep(e,pick){
 }
 function mxEnemyAct(e){
   const st=e.st;if(!st)return undefined;
+  if(e.surr)return 0; // a man who has thrown down his sword does not fight
   const nm=mxName(e);
   for(const k of ['bleed','poison','burn']){
     const s=st[k];

@@ -118,7 +118,7 @@ function khCrowd(C,L){
     if(best)add({k:khFaceKey('kh_anim1_0'),x:best[0],y:best[1],block:false,walk:true,npc:'kh_cat',cat:ci,sc:.8});
   });
   // ---- the named people of the quests, each in their own corner ----
-  const anchors={kh_sabah:[205,377],kh_hapi:[196,102],kh_dalila:[288,110],kh_cheops:[200,366],kh_rami:[203,386],kh_eman:[205,357],kh_usi:[197,350],kh_yara:[300,196],kh_pia:[196,376],kh_anuket:[204,104],kh_meryt:[204,246],kh_nadia:[286,298],kh_healer:[104,206],kh_fixer:[310,228]};
+  const anchors={kh_sabah:[205,377],kh_hapi:[196,102],kh_dalila:[288,110],kh_cheops:[200,366],kh_rami:[203,386],kh_eman:[205,357],kh_usi:[197,350],kh_yara:[300,196],kh_pia:[196,376],kh_anuket:[204,104],kh_meryt:[204,246],kh_nadia:[286,298],kh_healer:[104,206],kh_fixer:[310,228],pet_trader:[196,292]};
   for(const [id,[ax,ay]] of Object.entries(anchors)){
     const q=near(ax,ay,8,true);if(!q)continue;const kp=KH_KEEPERS[id];if(!kp)continue;
     add({k:khFaceKey(kp.face),x:q[0],y:q[1],block:false,walk:true,npc:id,sc:kp.sc||1});

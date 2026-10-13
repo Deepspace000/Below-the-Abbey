@@ -130,10 +130,10 @@ function afflTime(min){
   if(!G.heroes)return;
   const F=G.flags,M=F.affM||(F.affM={lastRest:G.clock,sun:0,thirst:0,cold:0,storm:0});
   for(const e of afflList().slice())if(e.until&&G.clock>=e.until)afflRemove(e,true);
-  const hour=(G.clock%1440)/60,des=LEVEL===43||(LEVEL>=60&&LEVEL<=64)||(LEVEL===41);
+  const hour=(G.clock%1440)/60,wx=typeof weatherNow==='function'?weatherNow():null,des=LEVEL===43||(LEVEL>=60&&LEVEL<=64)||(LEVEL===41)||(LEVEL===44&&wx&&wx.id==='heat');
   if(G.clock-M.lastRest>2400&&!afflHas('exhausted')){afflInflict('exhausted',-1);M.lastRest=G.clock-1200}
   if(des&&G.state==='play'){
-    M.thirst+=min;M.sun=(hour>=11&&hour<16)?M.sun+min:Math.max(0,M.sun-min);M.cold=(hour>=22||hour<5)?M.cold+min:Math.max(0,M.cold-min);
+    M.thirst+=min*(wx&&wx.thirst||1);M.sun=((hour>=11&&hour<16)||(wx&&wx.id==='heat'))?M.sun+min*(wx&&wx.sun||1):Math.max(0,M.sun-min);M.cold=(hour>=22||hour<5)?M.cold+min:Math.max(0,M.cold-min);
     if(M.sun>180){M.sun=0;afflInflict('sunstroke',-1)}
     if(M.thirst>480){M.thirst=0;afflInflict('dehydrated',-1)}
     if(M.cold>150){M.cold=0;afflInflict('frostbitten',-1)}
@@ -141,14 +141,16 @@ function afflTime(min){
   }
   // the cold open country of the north: nights in the forest and moor, and the high pass at any hour
   if(!des&&[2,7,10,19,20,22,32].includes(LEVEL)&&G.state==='play'){
-    const night=(hour>=22||hour<5)||LEVEL===22;
-    M.cold=night?M.cold+min:Math.max(0,M.cold-min);
+    const night=(hour>=22||hour<5)||LEVEL===22||(wx&&wx.cold>=2);
+    M.cold=night?M.cold+min*(wx&&wx.cold||1):Math.max(0,M.cold-min);
+    if(wx&&wx.wet){M.wet=(M.wet||0)+min*wx.wet;if(M.wet>420){M.wet=0;afflInflict('fever',(Math.random()*4)|0)}}else if(M.wet)M.wet=Math.max(0,M.wet-min);
     if(M.cold>(LEVEL===22?100:180)){M.cold=0;afflInflict('frostbitten',-1)}
     if(LEVEL===19){M.marsh=(M.marsh||0)+min;if(M.marsh>260){M.marsh=0;afflInflict('fever',(Math.random()*4)|0)}}
   }
 }
 /* each round of play: poisons and bleeding drain health (never to death) */
 function afflRound(){
+  try{mercyTick()}catch(e){}
   for(const e of afflList().slice()){
     const A=AFFL[e.id];if(!A)continue;const h=G.heroes[e.hi];if(!h||!h.alive)continue;
     if(A.drain){h.hp=Math.max(1,h.hp-A.drain);h.hurt=.4;if(typeof addFloat==='function')addFloat(portraitX(e.hi)+19,250,'-'+A.drain,A.col)}
@@ -212,7 +214,7 @@ function afflUseItem(hi,idx){
 /* ---------------------------------------------------------------- the watch of Khemetra, and the temple cells ---------------------------------------------------------------- */
 const KH_JAIL=270;
 function khGuardNear(){
-  const P=G.P,L=LEVELS[44];let best=null,bd=19*19;
+  const P=G.P,L=LEVELS[44];let best=null,bd=Math.pow(19-(typeof skLevel==='function'?skLevel('stealth')*.9:0),2);
   for(const w of (L.walkers||[]))if(w.guard){const d=(w.x-P.x)**2+(w.y-P.y)**2;if(d<bd){bd=d;best=w}}
   for(const d of G.decor)if(d.npc==='kh_gateguard'&&!d.found){const q=(d.x-P.x)**2+(d.y-P.y)**2;if(q<bd){bd=q;best={k:d.k}}}
   return best;
@@ -224,18 +226,29 @@ function khGuardTalk(guard,text,opts){
 function afflHouseBump(d){
   const sc=d.sc||(LEVELS[d.lvl]&&LEVELS[d.lvl].scene);
   if(!sc||/^bath/.test(sc))return false;
-  const g=khGuardNear();if(!g)return false;
+  const g=khGuardNear();if(!g){try{skXP('stealth',1)}catch(e){}return false}
   const F=G.flags;
   if(F.khWarnT!==undefined&&G.clock-F.khWarnT>2880){F.khWarn=0;afflCure('warned',-1,true)}
   F.khWarn=(F.khWarn||0)+1;F.khWarnT=G.clock;
   try{repAdd('khemetra',-2,'the watch noted it')}catch(e){}
   const enter=()=>{sfx('door');goToLevel(d.lvl,d.at);return null};
   sfx('locked');
-  if(F.khWarn>=3){
-    khGuardTalk(g,'Halt! That is three times I have told you to keep out of people\'s homes. You are under arrest, all of you. The temple cells will teach you manners.',[['Go quietly.',()=>{khJail();return null}]]);
+  const hard=F.khWarn>=3,pers=()=>{const ch=clamp(.32+skLevel('persuade')*.06+luckVal()*.012-(hard?.22:0),.08,.9);skXP('persuade',2);return Math.random()<ch};
+  const talkRound=['Talk him round.',()=>{
+    if(pers()){F.khWarn=Math.max(0,F.khWarn-1);return say('He hesitates, looks at his boots, and waves you on. "Mind it does not happen again."',[['Thank you, officer.',enter]])}
+    repAdd('khemetra',-1);return hard?say('"Nice try. Save your breath for the cells."',[['Go quietly.',()=>{khJail();return null}]]):say('"Do not try to be clever with me." He writes something in a little book.',[['Sorry, officer.',enter]]);
+  }];
+  const price=hard?120:40,bribe=['Slip him a coin ('+price+' gold).',()=>{
+    if(G.gold<price)return say('He looks at your purse and sneers. "You cannot even afford to bribe me properly."',hard?[['Go quietly.',()=>{khJail();return null}]]:[['Sorry, officer.',enter]]);
+    G.gold-=price;honourAdd(-2,'you bribed a guard');
+    if(Math.random()<(hard?.7:.8)){F.khWarn=Math.max(0,F.khWarn-1);return say('The coin vanishes. "I saw nothing. I was looking the other way."',[['Thank you.',enter]])}
+    F.khWarn++;repAdd('khemetra',-3);return F.khWarn>=3||hard?say('"Bribing a guard?" He grabs your arm. "That will cost you."',[['Go quietly.',()=>{khJail();return null}]]):say('"Bribing a guard?" That earns an extra warning.',[['Sorry, officer.',enter]]);
+  }];
+  if(hard){
+    khGuardTalk(g,'Halt! That is three times I have told you to keep out of people\'s homes. You are under arrest, all of you. The temple cells will teach you manners.',[['Go quietly.',()=>{khJail();return null}],talkRound,bribe]);
   }else{
     afflCure('warned',-1,true);afflInflict('warned',-1,true);
-    khGuardTalk(g,F.khWarn===1?'You there! Citizens do not just walk into other people\'s houses. That is your first warning. Do it again and the watch will take notice.':'I told you already, and here you are again. That is your second warning. The third time, you go to the cells.',[['Sorry, officer.',enter],['We will be quick.',enter]]);
+    khGuardTalk(g,F.khWarn===1?'You there! Citizens do not just walk into other people\'s houses. That is your first warning. Do it again and the watch will take notice.':'I told you already, and here you are again. That is your second warning. The third time, you go to the cells.',[['Sorry, officer.',enter],['We will be quick.',enter],talkRound,bribe]);
   }
   return true;
 }

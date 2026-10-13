@@ -118,7 +118,7 @@ function mxApplyEnemy(hi,E,fx,P){
     case 'exec':{
       if(E.hp<=E.maxhp*fx[1]&&!boss){msg(`The ${nm} falls dead at once.`,'#ffe090');hurtEnemy(E,E.hp+1)}
       else hurtEnemy(E,mxDmg(hi,fx[2]));break}
-    case 'steal':{const g=Math.max(1,Math.round(rnd(fx[1]*.6,fx[1]*1.4)*(1+h.lvl*.3)));G.gold+=g;msg(`${HERO_DEF[hi].name} steals ${g} gold from the ${nm}.`,'#ffd76a');mxFloat(E,'+'+g,'#ffd76a');break}
+    case 'steal':{try{honourAdd(-1,'you picked a pocket')}catch(e){};const g=Math.max(1,Math.round(rnd(fx[1]*.6,fx[1]*1.4)*(1+h.lvl*.3)));G.gold+=g;msg(`${HERO_DEF[hi].name} steals ${g} gold from the ${nm}.`,'#ffd76a');mxFloat(E,'+'+g,'#ffd76a');break}
     case 'undead':{
       if(E.t==='skel'||/skel|ghost|spectre|wraith|mummy/.test(E.t)){
         if(!boss&&E.hp<=E.maxhp*.5){msg(`The ${nm} crumbles to nothing.`,'#fff0b0');hurtEnemy(E,E.hp+1)}
@@ -188,6 +188,7 @@ function mxFreeStep(e,pick){
 }
 function mxEnemyAct(e){
   const st=e.st;if(!st)return undefined;
+  if(e.surr)return 0; // a man who has thrown down his sword does not fight
   const nm=mxName(e);
   for(const k of ['bleed','poison','burn']){
     const s=st[k];
