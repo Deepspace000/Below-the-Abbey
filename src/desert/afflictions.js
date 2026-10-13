@@ -77,7 +77,26 @@ const AFFL={
 };
 const AFFL_ORDER=Object.keys(AFFL);
 /* which hits spread what: [creature name pattern, affliction, chance] */
-const AFFL_HITS=[[/^rat$|^boss$/,'fever',.12],[/^bat$/,'fever',.06],[/wolf/,'bleeding',.2],[/^(bandit|hitman|hunter|archer)$/,'bleeding',.1],[/skel/,'graverot',.12],[/ghost|spectre|wraith/,'haunted',.3],[/ghost|spectre|wraith/,'shaken',.15],[/cobra/,'stung',.4],[/scorpion/,'stung',.35],[/spider|viper|asp/,'poisoned',.35],[/mummy/,'cursed',.1]];
+const AFFL_HITS=[[/^rat$|^boss$/,'fever',.12],[/^bat$/,'fever',.06],[/wolf/,'bleeding',.2],[/^(bandit|hitman|hunter|archer)$/,'bleeding',.1],[/skel/,'graverot',.12],[/ghost|spectre|wraith/,'haunted',.3],[/ghost|spectre|wraith/,'shaken',.15],[/cobra/,'stung',.4],[/scorpion/,'stung',.35],[/spider|viper|asp/,'poisoned',.35],[/mummy/,'cursed',.1],[/^(hunter|hitman|overseer|guard|nomad2?|vulture)$/,'bleeding',.08],[/gandrick/,'cursed',.2],[/gandrick/,'shaken',.25],[/^boss$/,'shaken',.2],[/dwolf|wolf/,'fleas',.04]];
+/* places that make the party ill when it walks in: [affliction, chance for each hero], and what the party notices */
+function afflArea(n,L){
+  const nm=(L&&L.name)||'',out=[];let msgText=null;
+  const crypt=n===1||n===21||n===20||n===31||n===12||n===27;
+  const tomb=n===42||n===51||n===56||n===65||n===54||n===59||(n>=100&&n<=151);
+  if(crypt){msgText='Cold, damp air rises from the stones, and something old is rotting down here.';out.push(['graverot',n===12?.08:.18],['shaken',.15])}
+  if(tomb){msgText='Four thousand years of dust hang in the air, and every breath tastes of it.';out.push(['tomblung',.4],['shaken',.12],['graverot',.08])}
+  if(n===12||n===40||n===11){msgText=msgText||'The air is wet and sour. The walls sweat.';out.push(['fever',.14])}
+  if(n===8||n===26){msgText='A bitter cold lives in this cave, and the stone drips.';out.push(['frostbitten',.2])}
+  if(n===18){msgText='Rock dust hangs in the lamplight, thick as flour.';out.push(['tomblung',.3])}
+  if(n===23||n===53||n===58||n===52||n===57||n===25){msgText='It stinks of animals and old straw. Things move in the bedding.';out.push(['fleas',.3])}
+  if(n===50||n===55){msgText='Dry husks and clicking in the dark. Scorpions.';out.push(['stung',.4])}
+  if(n===24){msgText='Something hums in the witch\'s hut. The air prickles, and a hex settles over the party.';out.push(['cursed',.3])}
+  if(n===9){msgText='The house is too quiet. Something pale watches from the stairs.';out.push(['shaken',.5],['haunted',.25])}
+  if(n===39){msgText='Waist-high thorns and a rank, sweet smell. Some of it stings the skin.';out.push(['poisoned',.3])}
+  if(n===19){msgText='The moor is wet underfoot, and midges rise in clouds.';out.push(['fever',.06])}
+  if(n===260)msgText='Green water laps at the stones. It stinks.';
+  return {out,msgText};
+}
 const afflHeroName=hi=>(HERO_DEF[hi]&&HERO_DEF[hi].name)||'Hero';
 function afflList(){return G.aff||(G.aff=[])}
 function afflHas(id,hi){return afflList().some(e=>e.id===id&&(hi===undefined||e.hi===hi))}
@@ -119,6 +138,13 @@ function afflTime(min){
     if(M.thirst>480){M.thirst=0;afflInflict('dehydrated',-1)}
     if(M.cold>150){M.cold=0;afflInflict('frostbitten',-1)}
     if(typeof STORM!=='undefined'&&STORM.on&&STORM.a>.5){M.storm+=1;if(M.storm>25){M.storm=0;afflInflict('sandblind',-1)}}
+  }
+  // the cold open country of the north: nights in the forest and moor, and the high pass at any hour
+  if(!des&&[2,7,10,19,20,22,32].includes(LEVEL)&&G.state==='play'){
+    const night=(hour>=22||hour<5)||LEVEL===22;
+    M.cold=night?M.cold+min:Math.max(0,M.cold-min);
+    if(M.cold>(LEVEL===22?100:180)){M.cold=0;afflInflict('frostbitten',-1)}
+    if(LEVEL===19){M.marsh=(M.marsh||0)+min;if(M.marsh>260){M.marsh=0;afflInflict('fever',(Math.random()*4)|0)}}
   }
 }
 /* each round of play: poisons and bleeding drain health (never to death) */
@@ -165,7 +191,9 @@ function afflEnter(n){
       const c=afflCureOn('bath');if(c)msg('Warm water, steam and a good scrub. The party feels clean again.','#a8e0e8');
     }
     if(n===260){G.heroes.forEach((h,i)=>{if(h.alive&&Math.random()<.35)afflInflict('fever',i)})}
-    if(n===42||n===65){G.heroes.forEach((h,i)=>{if(h.alive&&Math.random()<.5)afflInflict('tomblung',i)})}
+    {const ar=afflArea(n,L);if(ar.out.length){if(ar.msgText)msg(ar.msgText,'#b8b0a0');for(const [id,ch] of ar.out)G.heroes.forEach((h,i)=>{if(h.alive&&Math.random()<ch)afflInflict(id,i)})}}
+    if(n===3||n===13||n===33){if(afflHas('dehydrated'))afflCureOn('water');(F.affM||(F.affM={})).thirst=0}
+    if(n===29||n===30||n===38){const c=afflCureOn('church');afflInflict('blessed',-1);if(c)msg('The bell tolls and the priest lays hands on the party. The weight lifts.','#ffe890')}
     if(sc==='dark'){msg('This house is cold and wrong. Something watches from the dark.','#a8a0c0');G.heroes.forEach((h,i)=>{if(h.alive&&Math.random()<.4)afflInflict('shaken',i);if(h.alive&&Math.random()<.15)afflInflict('sleepless',i)})}
     if(sc==='messy'||sc==='boarded'||sc==='worker'&&false){G.heroes.forEach((h,i)=>{if(h.alive&&Math.random()<.3)afflInflict('fleas',i)})}
     if(typeof khInPQ==='function'&&n===44&&G.P&&khInPQ(G.P.x,G.P.y)&&!afflHas('fleas')&&Math.random()<.1)G.heroes.forEach((h,i)=>{if(h.alive&&Math.random()<.3)afflInflict('fleas',i)});
@@ -248,6 +276,22 @@ khNpc('kh_jailer','The temple jailer','kh_npc3_2',d=>{
   if(!F.khJailed)return say('Go on, then. And keep out of people\'s houses.',[BYE]);
   return say('Three warnings, and you walked into houses anyway. The cells are cold and the bread is old. You can pay 100 gold to the temple and walk out now. Or sit out the night, lose some of your food to the rats, and walk out ill in the morning.',[['Pay 100 gold.',pay],['Spend the night in the cell.',night],['Not yet.',()=>null]]);
 });
+/* the priests of the chapels and the church of Ironhill heal for a fee as well */
+function afflHealOptions(price){
+  return afflList().filter(e=>{const A=AFFL[e.id];return A&&A.healer}).slice(0,4).map(e=>[`Cure ${AFFL[e.id].n} on ${afflHeroName(e.hi)} (${price} gold)`,()=>{
+    if(G.gold<price)return say(`${price} gold. Not a coin less. Healing is hard work and herbs are not free.`,[BYE]);
+    G.gold-=price;afflRemove(e,true);sfx('potion');return say('Hold still. There. Drink this and rest a little. You will be well.',[BYE]);
+  }]);
+}
+if(typeof NPCS!=='undefined'&&NPCS.priest&&!NPCS.priest._aff){
+  const base=NPCS.priest.root;NPCS.priest._aff=1;
+  NPCS.priest.root=function(d){
+    const n=base(d),extra=afflHealOptions(30);
+    if(afflList().some(e=>{const A=AFFL[e.id];return A&&(A.cureOn||[]).includes('church')}))n.opts.unshift(['Ask the priest to lift a curse or a haunting',()=>{const c=afflCureOn('church');sfx('heal');return say(c?'He lays a hand on each of you and says the old words. The weight lifts.':'You carry no curse that he can lift.',[BYE])}]);
+    n.opts.splice(Math.max(0,n.opts.length-1),0,...extra);
+    return n;
+  };
+}
 /* a healer of the city: cures the sicknesses of the body for a fee */
 khNpc('kh_healer','Merit, the healer','kh_npc1_3',d=>{
   const list=afflList().filter(e=>{const A=AFFL[e.id];return A&&A.healer});
