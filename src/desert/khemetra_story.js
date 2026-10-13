@@ -9,7 +9,7 @@ const khFlag=f=>()=>G.flags[f]?1:0;
 const khKills=(k,cnt)=>q=>(G.flags[k]||0)-(q.base||0);
 /* ---- what the shops sell ---- */
 const KH_STOCK={
-  potion:()=>[['potion',8],['redpotion',3],['bluepotion',3],['greenpotion',3],['yellowpotion',3]].concat(potionStockRows()),
+  potion:()=>[['antidote',5],['salve',5],['holywater',2],['sleeptea',3],['potion',8],['redpotion',3],['bluepotion',3],['greenpotion',3],['yellowpotion',3]].concat(potionStockRows()),
   scroll:()=>[['sp_fire',2],['scrollFrost',2],['scrollLight',3],['ringV',1],['ringM',1],['ringW',1],['ringS',1]],
   food:()=>[['bread',14],['cheese',10],['dates',14],['water',14],['apple',10],['ale',8],['nuts',10],['herring',6],['sausage',8],['pottage',8],['pie',5],['roast',4],['honeycomb',4]],
   arms:()=>[['dagger',4],['sword',4],['mace',3],['axe',3],['bow',3],['staff',3],['ironblade',1],['ironaxe',1]],

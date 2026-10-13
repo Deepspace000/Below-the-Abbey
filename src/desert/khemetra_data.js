@@ -20,7 +20,7 @@ function khSkyList(cx,cy,dX,dY){
 function khBump(nx,ny,g){
   const d=KH_DOOR[g];if(!d)return false;
   if(d.gate){sfx('door');const L=LEVELS[43],gx=Math.max(1,L.rows[6].indexOf('1'));goToLevel(43,{x:gx,y:8,f:2});return true}
-  if(d.lvl!==undefined){sfx("door");goToLevel(d.lvl,d.at);return true}
+  if(d.lvl!==undefined){if(typeof afflHouseBump==='function'&&afflHouseBump(d))return true;sfx("door");goToLevel(d.lvl,d.at);return true}
   return false;
 }
 function khEnter(then){

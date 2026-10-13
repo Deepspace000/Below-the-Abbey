@@ -14,6 +14,7 @@ khNpc('kh_gold','A little gold','chest',d=>{
   const F=G.flags,e=KH_GOLD[LEVEL],k='kg'+LEVEL;
   if(!e||F[k])return say('There is nothing left here. You took the gold.',[BYE]);
   F[k]=1;G.gold+=e.gold;sfx('key');
+  if(e.gold>=5000){afflInflict('cursed',-1,true);return say((e.msg||'')+' You take '+e.gold+' gold. As the last coin leaves the chest, the room goes cold. The gold was cursed. The whole party feels it settle on them. A church could lift it.',[BYE])}
   return say((e.msg||'There is gold in here.')+' You take '+e.gold+' gold.',[BYE]);
 });
 function khCrowd(C,L){
@@ -117,7 +118,7 @@ function khCrowd(C,L){
     if(best)add({k:khFaceKey('kh_anim1_0'),x:best[0],y:best[1],block:false,walk:true,npc:'kh_cat',cat:ci,sc:.8});
   });
   // ---- the named people of the quests, each in their own corner ----
-  const anchors={kh_sabah:[205,377],kh_hapi:[196,102],kh_dalila:[288,110],kh_cheops:[200,366],kh_rami:[203,386],kh_eman:[205,357],kh_usi:[197,350],kh_yara:[300,196],kh_pia:[196,376],kh_anuket:[204,104],kh_meryt:[204,246],kh_nadia:[286,298]};
+  const anchors={kh_sabah:[205,377],kh_hapi:[196,102],kh_dalila:[288,110],kh_cheops:[200,366],kh_rami:[203,386],kh_eman:[205,357],kh_usi:[197,350],kh_yara:[300,196],kh_pia:[196,376],kh_anuket:[204,104],kh_meryt:[204,246],kh_nadia:[286,298],kh_healer:[104,206]};
   for(const [id,[ax,ay]] of Object.entries(anchors)){
     const q=near(ax,ay,8,true);if(!q)continue;const kp=KH_KEEPERS[id];if(!kp)continue;
     add({k:khFaceKey(kp.face),x:q[0],y:q[1],block:false,walk:true,npc:id,sc:kp.sc||1});

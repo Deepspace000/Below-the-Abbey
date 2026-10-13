@@ -163,7 +163,7 @@ function khInteriorWall(kind){ // a painted wall for the inside of a building
 }
 let KH_WALLGID=null;
 function khRoom(b,lvl,back){
-  const rooms={shop:khRoomShop,inn:khRoomInn,prayer:khRoomPrayer,temple:khRoomTemple,bath:khRoomBath,hall:khRoomHall,cellar:khRoomCellar,ruin:khRoomRuin,home:khRoomHome,ship:khRoomShip};
+  const rooms={jail:khRoomJail,shop:khRoomShop,inn:khRoomInn,prayer:khRoomPrayer,temple:khRoomTemple,bath:khRoomBath,hall:khRoomHall,cellar:khRoomCellar,ruin:khRoomRuin,home:khRoomHome,ship:khRoomShip};
   const R=(rooms[b.room]||khRoomShop)(b);
   const W=R.w,H=R.h,mid=W>>1;
   const rows=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++){r+=(y===0||x===0||x===W-1)?'w':y===H-1?(x===mid?'0':'w'):'.'}rows.push(r)}
@@ -309,7 +309,7 @@ function khMakeHouseDoors(C){
     const hoard=hoards.get(m),scene=hoard?hoard.scene:khPickScene(m),shop=m.kind==='shop'&&!hoard,lvl=KH_HOUSE_NEXT++,mid=m.cells[(m.cells.length-1)>>1],d=KH_DIRS[m.face];
     const front=[mid[0]+d[0],mid[1]+d[1]],ff=KH_FACE_F[m.face];
     const name=(shop?KH_SHOP_NAME[scene]:KH_SCENE_NAME[scene])||KH_SCENE_NAME.warm;
-    m.lvl=lvl;m.doorCells=m.cells.length===2?m.cells:[mid];m.at={x:4,y:4,f:0};m.house=true;
+    m.lvl=lvl;m.doorCells=m.cells.length===2?m.cells:[mid];m.at={x:4,y:4,f:0};m.house=true;m.hscene=shop?undefined:scene;
     KH_LAZY[lvl]=()=>{
       if(LEVELS[lvl])return;
       const b={id:'house'+lvl,name,room:'home',keeper:null,scene};

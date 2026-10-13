@@ -44,7 +44,7 @@ async function khPrepare(){
     const tiles=khTileSet(m.e),door=m.doorCells||(m===gateMod?m.cells:null);
     m.cells.forEach(([x,y],i)=>{
       let gid=tiles[Math.min(i,tiles.length-1)].gid;
-      if(door&&door.some(c=>c[0]===x&&c[1]===y)){const g2=KH_NEXT_GID++;T_TILE[g2]=T_TILE[gid];KH_DOOR[g2]=m===gateMod?{gate:true}:{lvl:m.lvl,at:m.at,i,n:m.cells.length,lf:m.face===1||m.face===2};gid=g2}
+      if(door&&door.some(c=>c[0]===x&&c[1]===y)){const g2=KH_NEXT_GID++;T_TILE[g2]=T_TILE[gid];KH_DOOR[g2]=m===gateMod?{gate:true}:{lvl:m.lvl,at:m.at,i,n:m.cells.length,lf:m.face===1||m.face===2,sc:m.hscene};gid=g2}
       rowCodes[y][x]=khChar(gid).charCodeAt(0);
     });
   }
