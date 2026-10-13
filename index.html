@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.12';
+const VERSION='3.13';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4258,7 +4258,7 @@ function drawTownBody(cs,ox,oy){
   ctx.fillStyle='#a8402e';ctx.beginPath();ctx.moveTo(25,267);ctx.lineTo(18,263);ctx.lineTo(18,271);ctx.closePath();ctx.fill();ctx.stroke();txt('Gate or exit',32,267,7.5,ink,'left');
 }
 const mapRes=()=>(LEVEL===3||LEVEL===13)?[0,58]:[136,0]; // room kept clear for the legend
-function mapFit(){const [rw,rh]=mapRes();return Math.max(2.5,Math.min((DW-12-rw)/MW,(DH-40-rh)/MH))}
+function mapFit(){const [rw,rh]=mapRes();return Math.max(LEVEL===44?.4:2.5,Math.min((DW-12-rw)/MW,(DH-40-rh)/MH))}
 function mapOrigin(cs){ // where cell (0,0) sits, honouring the pan; a map smaller than the screen is centred
   const w=MW*cs,h=MH*cs,[rw,rh]=mapRes();
   G.panMinX=Math.min(0,DW-12-rw-w);G.panMinY=Math.min(0,DH-36-rh-h);
