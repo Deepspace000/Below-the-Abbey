@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.30';
+const VERSION='3.31';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2467,7 +2467,7 @@ function render3D(){
   const skyPan=(skyLv||ovcLv||desertLv||LEVEL===3||LEVEL===13||LEVEL===32||LEVEL===33)&&SKP?(()=>{for(let x=0;x<VW;x++){const cm=2*x/VW-1;UCOL[x]=((((Math.atan2(dY+pY*cm,dX+pX*cm)/TAU)%1)+1)%1*1024+t*(ovcLv?11:7))%1024|0}return true})():false; // the sky is one panorama on walls and ceiling alike
   const fmp=G.fmap,fd2=G.fl2,fd3=G.fl3,fd4=G.fl4,fd5=G.fl5,fd6=G.fl6,lmp=G.lmap,lmN=lmp?clamp(1.2-(G.day||0)*1.35,0,1)*.95:0;
   TERR_NOW=desertLv&&skyPan?terrFor(LEVEL):null;CAMZ=EYE; // real hills: the camera rides the ground, the ground is marched column by column, the sky is painted behind it
-  if(TERR_NOW){CAMZ=terrH(cx,cy)+EYE;TC={D,cx,cy,fmp,fds:[fd,fd2||fd,fd3||fd,fd4||fd,fd5||fd,fd6||fd],hzr,hzmax,hzrate,lbm,tbR,tbG,tbB,rock:terrRock()};
+  if(TERR_NOW){CAMZ=terrH(cx,cy)+EYE;TC={wat:LEVEL===290,tm:t,D,cx,cy,fmp,fds:[fd,fd2||fd,fd3||fd,fd4||fd,fd5||fd,fd6||fd],hzr,hzmax,hzrate,lbm,tbR,tbG,tbB,rock:terrRock()};
     if(SK)paintDesertSky(D,SKP,UCOL,SK,ST,stormC,dX,dY,pX,pY,t);
     else for(let y=0;y<VH;y++){const v=clamp(y-HH+150,0,255)|0,o=y*VW*4;for(let x=0;x<VW;x++){const i=(v*1024+UCOL[x])*4,io=o+x*4;D[io]=SKP[i]*lbm*tbR;D[io+1]=SKP[i+1]*lbm*tbG;D[io+2]=SKP[i+2]*lbm*tbB}}}
   // floor + ceiling (the ceiling is its own plane, CEILH above the floor); a daylit sky needs no lamp light, and indoors only the nearest few lights reach the ceiling
@@ -8722,14 +8722,16 @@ function terrMarch(x,rX,rY,tmax){
   while(t<tmax){
     const px=cx+rX*t,py=cy+rY*t,gx=Math.min(W-1.001,Math.max(0,px-.5)),gy=Math.min(Hh-1.001,Math.max(0,py-.5)),ix=gx|0,iy=gy|0,fx=gx-ix,fy=gy-iy,i=iy*W+ix;
     const w00=(1-fx)*(1-fy),w10=fx*(1-fy),w01=(1-fx)*fy,w11=fx*fy;
-    const hg=h[i]*w00+h[i+1]*w10+h[i+W]*w01+h[i+W+1]*w11;
+    let hg=h[i]*w00+h[i+1]*w10+h[i+W]*w01+h[i+W+1]*w11;
+    const cxl=px|0,cyl=py|0,fcc=(fm&&cxl>=0&&cyl>=0&&cxl<W&&cyl<Hh)?fm.charCodeAt(cyl*W+cxl):48,wv=C.wat&&(fcc===52||fcc===51); // the sea moves: the surface rises and falls a little, and the water picture drifts
+    if(wv)hg+=(Math.sin(px*1.9+C.tm*1.5)+Math.sin(py*1.5+px*.5-C.tm*1.1))*(fcc===52?.013:.007);
     const ytop=HHv-(hg-cz)*F/t;
     if(ytop<yb){
       const ys=Math.max(0,Math.ceil(ytop)),ye=Math.min(VH,Math.ceil(yb));
       if(ye>ys){
-        const shade=sh[i]*w00+sh[i+1]*w10+sh[i+W]*w01+sh[i+W+1]*w11;
-        const cxl=px|0,cyl=py|0,fcc=(fm&&cxl>=0&&cyl>=0&&cxl<W&&cyl<Hh)?fm.charCodeAt(cyl*W+cxl):48,fdd=fds[fcc-48]||fds[0];
-        const u=((px-cxl)*TS)|0,v=((py-cyl)*TS)|0,ti=(v*TS+u)*4,dist=t*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv,sk=smv*(lbm*.55+.05);
+        const shade=(sh[i]*w00+sh[i+1]*w10+sh[i+W]*w01+sh[i+W+1]*w11)*(wv?1+.1*Math.sin(px*3.1+C.tm*2.2)*Math.sin(py*2.7-C.tm*1.7):1);
+        const fdd=fds[fcc-48]||fds[0];
+        const u=wv?((((px-cxl)*TS+C.tm*9)|0)&(TS-1)):((px-cxl)*TS)|0,v=wv?((((py-cyl)*TS+Math.sin(C.tm*.7+px*.3)*6+C.tm*5)|0)&(TS-1)):((py-cyl)*TS)|0,ti=(v*TS+u)*4,dist=t*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv,sk=smv*(lbm*.55+.05);
         let r=fdd[ti]*kR0*shade*iv+hz[0]*sk,g=fdd[ti+1]*kG0*shade*iv+hz[1]*sk,b=fdd[ti+2]*kB0*shade*iv+hz[2]*sk;
         const rkv=rkA[i]*w00+rkA[i+1]*w10+rkA[i+W]*w01+rkA[i+W+1]*w11;
         if(rkv>.03&&rock.d){ // rock on the upper slopes, with strata that follow the height
@@ -12400,7 +12402,7 @@ function yarBuild(){
   const dc=(k,x,y,o)=>decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}));
   // moored boats and the boats pulled up for mending
   const boats=[['yar_boat_fish',64,35],['yar_boat_fish',67,46],['yar_boat_fish',73,34],['yar_boat_dhow',71,44],['yar_boat_dhow',78,35],['yar_boat_row',62,37],['yar_boat_row',63,44],['yar_boat_row',75,46],['yar_boat_row',80,43],['yar_boat_row',82,34],['yar_boat_row',88,40],['yar_boat_fish',72,28],['yar_boat_dhow',68,52],['yar_boat_row',70,22],['yar_boat_fish',66,60]];
-  for(const [k,x,y] of boats)dc(k,x,y,{bob:-.06});
+  YR.boats=boats; // drawn each frame by yrSprites, so that they rock on the water
   // gear along the promenade
   for(const [x,y] of [[11,43],[22,44],[36,44],[47,43],[11,37],[24,38],[36,38],[47,38],[55,38]])dc(['yar_pots','yar_nets','yar_crates','yar_pots','yar_nets','yar_crates','yar_pots','yar_nets','yar_crates'][(x+y)%9],x,y);
   // washed-up crates for the harbourmaster
@@ -12544,6 +12546,10 @@ function yarEnter(n){
 function yrSprites(out){
   if(LEVEL!==YR.ID)return;
   const t=G.time,up=IMG.yar_gull_up,dn=IMG.yar_gull_down;if(!up||!dn)return;
+  (YR.boats||[]).forEach(([k,x,y],i)=>{const im=IMG[k];if(!im)return;
+    const ph=t*(.8+(i%3)*.15)+i*2.1;
+    out.push({x:x+.5+Math.sin(ph*.6)*.07,y:y+.5+Math.cos(ph*.5)*.07,img:im,w:NPC_H[k]*im.width/im.height,bob:-.07+Math.sin(ph)*.035,decor:{k:'yar_boat_s'+i}});
+  });
   for(let i=0;i<18;i++){
     const cx=[56,60,66,70,76,50,84,62,72,90,58,68,80,64,74,52,88,66][i],cy=[30,44,38,48,36,52,42,26,40,34,56,30,50,58,26,40,46,32][i],r=2.5+i%5*1.1,sp=.5+(i%4)*.12,a=t*sp+i*1.7;
     const img=((t*3.4+i)|0)%2?up:dn;

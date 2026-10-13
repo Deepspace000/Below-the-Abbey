@@ -110,14 +110,16 @@ function terrMarch(x,rX,rY,tmax){
   while(t<tmax){
     const px=cx+rX*t,py=cy+rY*t,gx=Math.min(W-1.001,Math.max(0,px-.5)),gy=Math.min(Hh-1.001,Math.max(0,py-.5)),ix=gx|0,iy=gy|0,fx=gx-ix,fy=gy-iy,i=iy*W+ix;
     const w00=(1-fx)*(1-fy),w10=fx*(1-fy),w01=(1-fx)*fy,w11=fx*fy;
-    const hg=h[i]*w00+h[i+1]*w10+h[i+W]*w01+h[i+W+1]*w11;
+    let hg=h[i]*w00+h[i+1]*w10+h[i+W]*w01+h[i+W+1]*w11;
+    const cxl=px|0,cyl=py|0,fcc=(fm&&cxl>=0&&cyl>=0&&cxl<W&&cyl<Hh)?fm.charCodeAt(cyl*W+cxl):48,wv=C.wat&&(fcc===52||fcc===51); // the sea moves: the surface rises and falls a little, and the water picture drifts
+    if(wv)hg+=(Math.sin(px*1.9+C.tm*1.5)+Math.sin(py*1.5+px*.5-C.tm*1.1))*(fcc===52?.013:.007);
     const ytop=HHv-(hg-cz)*F/t;
     if(ytop<yb){
       const ys=Math.max(0,Math.ceil(ytop)),ye=Math.min(VH,Math.ceil(yb));
       if(ye>ys){
-        const shade=sh[i]*w00+sh[i+1]*w10+sh[i+W]*w01+sh[i+W+1]*w11;
-        const cxl=px|0,cyl=py|0,fcc=(fm&&cxl>=0&&cyl>=0&&cxl<W&&cyl<Hh)?fm.charCodeAt(cyl*W+cxl):48,fdd=fds[fcc-48]||fds[0];
-        const u=((px-cxl)*TS)|0,v=((py-cyl)*TS)|0,ti=(v*TS+u)*4,dist=t*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv,sk=smv*(lbm*.55+.05);
+        const shade=(sh[i]*w00+sh[i+1]*w10+sh[i+W]*w01+sh[i+W+1]*w11)*(wv?1+.1*Math.sin(px*3.1+C.tm*2.2)*Math.sin(py*2.7-C.tm*1.7):1);
+        const fdd=fds[fcc-48]||fds[0];
+        const u=wv?((((px-cxl)*TS+C.tm*9)|0)&(TS-1)):((px-cxl)*TS)|0,v=wv?((((py-cyl)*TS+Math.sin(C.tm*.7+px*.3)*6+C.tm*5)|0)&(TS-1)):((py-cyl)*TS)|0,ti=(v*TS+u)*4,dist=t*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv,sk=smv*(lbm*.55+.05);
         let r=fdd[ti]*kR0*shade*iv+hz[0]*sk,g=fdd[ti+1]*kG0*shade*iv+hz[1]*sk,b=fdd[ti+2]*kB0*shade*iv+hz[2]*sk;
         const rkv=rkA[i]*w00+rkA[i+1]*w10+rkA[i+W]*w01+rkA[i+W+1]*w11;
         if(rkv>.03&&rock.d){ // rock on the upper slopes, with strata that follow the height

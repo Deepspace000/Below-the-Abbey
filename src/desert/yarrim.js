@@ -90,7 +90,7 @@ function yarBuild(){
   const dc=(k,x,y,o)=>decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}));
   // moored boats and the boats pulled up for mending
   const boats=[['yar_boat_fish',64,35],['yar_boat_fish',67,46],['yar_boat_fish',73,34],['yar_boat_dhow',71,44],['yar_boat_dhow',78,35],['yar_boat_row',62,37],['yar_boat_row',63,44],['yar_boat_row',75,46],['yar_boat_row',80,43],['yar_boat_row',82,34],['yar_boat_row',88,40],['yar_boat_fish',72,28],['yar_boat_dhow',68,52],['yar_boat_row',70,22],['yar_boat_fish',66,60]];
-  for(const [k,x,y] of boats)dc(k,x,y,{bob:-.06});
+  YR.boats=boats; // drawn each frame by yrSprites, so that they rock on the water
   // gear along the promenade
   for(const [x,y] of [[11,43],[22,44],[36,44],[47,43],[11,37],[24,38],[36,38],[47,38],[55,38]])dc(['yar_pots','yar_nets','yar_crates','yar_pots','yar_nets','yar_crates','yar_pots','yar_nets','yar_crates'][(x+y)%9],x,y);
   // washed-up crates for the harbourmaster
@@ -234,6 +234,10 @@ function yarEnter(n){
 function yrSprites(out){
   if(LEVEL!==YR.ID)return;
   const t=G.time,up=IMG.yar_gull_up,dn=IMG.yar_gull_down;if(!up||!dn)return;
+  (YR.boats||[]).forEach(([k,x,y],i)=>{const im=IMG[k];if(!im)return;
+    const ph=t*(.8+(i%3)*.15)+i*2.1;
+    out.push({x:x+.5+Math.sin(ph*.6)*.07,y:y+.5+Math.cos(ph*.5)*.07,img:im,w:NPC_H[k]*im.width/im.height,bob:-.07+Math.sin(ph)*.035,decor:{k:'yar_boat_s'+i}});
+  });
   for(let i=0;i<18;i++){
     const cx=[56,60,66,70,76,50,84,62,72,90,58,68,80,64,74,52,88,66][i],cy=[30,44,38,48,36,52,42,26,40,34,56,30,50,58,26,40,46,32][i],r=2.5+i%5*1.1,sp=.5+(i%4)*.12,a=t*sp+i*1.7;
     const img=((t*3.4+i)|0)%2?up:dn;
