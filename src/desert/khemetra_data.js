@@ -4,11 +4,11 @@
    ========================================================================== */
 const KH_SKYD={k:'kroof'};
 /* the roofs, towers, palace and church that rise over the walls: only those in front of the camera and in range */
-function khSkyList(cx,cy,dX,dY){
-  const L=LEVELS[44],out=[],sk=L.sky;
+function khSkyList(cx,cy,dX,dY,L,minD2){
+  L=L||LEVELS[44];const out=[],sk=L.sky,md=minD2===undefined?4:minD2;
   for(let i=0;i<sk.length;i++){
     const e=sk[i],rx=e.x-cx,ry=e.y-cy,d2=rx*rx+ry*ry,lim=e.big?58000:1600;
-    if(d2>lim||d2<4)continue;
+    if(d2>lim||d2<md)continue;
     const dot=rx*dX+ry*dY;if(dot<=0)continue;
     if(Math.abs(rx*dY-ry*dX)>dot*1.1+e.w*.6)continue;
     const img=IMG[e.k];if(!img)continue;

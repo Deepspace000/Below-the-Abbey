@@ -22,19 +22,6 @@ function makeYarArt(){
 
 /* ---- the land: where the water starts, and how high the ground is ---- */
 const yarCoast=y=>64+5*Math.sin(y*.11)+3*Math.sin(y*.27+1);
-const YR_ISLANDS=[[82,22,4.5,2.8],[99,26,6.5,4.2],[90,52,5.5,3.4],[103,57,4.5,2.6],[76,58,3.5,1.9],[108,41,5.5,3.6]];
-const YR_HOUSES=[ // x0,y0,x1,y1, and the door (portal index, door cell, the cell in front, which way you face leaving)
-  {b:[12,30,22,37],p:1,d:[17,37],f:[17,38,2],room:'inn',name:'The Drowned Lantern',keeper:'yr_inn'},
-  {b:[26,30,34,37],p:2,d:[30,37],f:[30,38,2],room:'hall',name:"The Harbourmaster's Office",keeper:'yr_harbour'},
-  {b:[38,31,46,37],p:3,d:[42,37],f:[42,38,2],room:'shop',name:"Corran's Fish Stall",keeper:'yr_fish'},
-  {b:[12,43,20,50],p:4,d:[16,43],f:[16,42,0],room:'shop',name:'Brine and Rope',keeper:'yr_chandler'},
-  {b:[24,43,34,52],p:5,d:[29,43],f:[29,42,0],room:'prayer',name:'The Chapel of the Tides',keeper:'yr_priest'},
-  {b:[38,43,44,49],p:6,d:[41,43],f:[41,42,0],room:'home',name:"Old Maren's House",keeper:'yr_maren',scene:'fisher'},
-  {b:[48,30,54,37],p:7,d:[51,37],f:[51,38,2],room:'hall',name:'The Net Loft',keeper:null},
-  {b:[58,22,62,26],p:8,d:[58,24],f:[57,24,3],room:'prayer',name:'The Yarrim Light',keeper:'yr_orsa'}
-];
-const YR_PLAIN=[[12,20,18,27],[22,20,30,27],[34,20,44,27],[48,20,54,27],[12,54,19,60],[23,55,31,61],[36,54,46,60],[49,43,55,48],[49,54,55,59]];
-
 function yarTerrain(W,H,h,rk,block){
   const g2=new Float32Array(h),sm=new Float32Array(g2);
   for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const i=y*W+x;sm[i]=(g2[i]*4+g2[i-1]+g2[i+1]+g2[i-W]+g2[i+W])/8}
@@ -47,119 +34,7 @@ function yarTerrain(W,H,h,rk,block){
   return {W,H,h:sm,s,rk,block};
 }
 
-function yarBuild(){
-  if(LEVELS[YR.ID])return;
-  const W=YR.W,H=YR.H,N=W*H;
-  const rows=[];for(let y=0;y<H;y++){const r=[];for(let x=0;x<W;x++)r.push((x===0||y===0||x===W-1||y===H-1)?'D':'.');rows.push(r)}
-  const h=new Float32Array(N),rk=new Float32Array(N),block=new Uint8Array(N),fm=new Array(N).fill('4');
-  const sup=(x,y)=>clamp((Math.hypot(x-8,y-40)-4)/6,0,1);
-  for(let y=0;y<H;y++){
-    const sx=yarCoast(y);
-    for(let x=0;x<W;x++){
-      const i=y*W+x,land=x<sx;
-      let base=land?Math.min(.5,(sx-x)*.055):-.2+.03*(tsmooth(x/4,y/4,21)-.5);
-      if(land)base+=.1*tsmooth(x/9,y/9,22);
-      const bn=Math.pow(clamp((17-y)/15,0,1),1.2)*4.4*(.75+.5*tsmooth(x/6,y/6,3)),bs=Math.pow(clamp((y-(H-18))/15,0,1),1.2)*4.4*(.75+.5*tsmooth(x/6,y/6,5)),bw=Math.pow(clamp((10-x)/9,0,1),1.2)*4.4*(.75+.5*tsmooth(x/6,y/6,7));
-      let hh=base+Math.max(bn,bs,bw)*sup(x,y),isl=false;
-      for(const [cx,cy,r,pk] of YR_ISLANDS){
-        const d=Math.hypot(x-cx,y-cy)/(r*(1+.35*(tsmooth(x/3,y/3,9)-.5)));
-        if(d<1.5){const v=pk*Math.pow(Math.max(0,1-d),1.15)-.2+.35*Math.max(0,1-d/1.5)*(tsmooth(x/2,y/2,11)-.3);if(v>hh){hh=v;if(v>-.1)isl=true}}
-      }
-      h[i]=hh;rk[i]=clamp((hh-.7)/1.6,0,1);
-      block[i]=(!land||hh>1.7)?1:0;
-      if(hh>1.2)fm[i]='5';
-      else if(isl)fm[i]=hh>.05?'0':'3';
-      else if(land)fm[i]=x<sx-3?'0':'3';
-      else fm[i]=x<sx+3?'3':'4';
-      if(!land&&!isl&&hh<=-.1&&x<sx+3)fm[i]='3';
-    }
-  }
-  // streets and the promenade
-  const street=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(!block[y*W+x])fm[y*W+x]='1'};
-  street(9,38,56,42);street(35,22,37,58);street(56,22,58,38);street(9,28,56,29);street(9,52,56,53);
-  // the passage from the tunnel mouth in the west cliff
-  for(let x=1;x<=9;x++)for(let y=38;y<=42;y++){block[y*W+x]=0;fm[y*W+x]='1'}
-  rows[40][1]='0';
-  // the pier: a plank walk into the sea with a T at the end
-  const plank=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;block[i]=0;h[i]=.08;rk[i]=0;fm[i]='2'}};
-  plank(57,40,86,41);plank(84,36,86,45);
-  // houses
-  const PAINT=['P','Y','G','B','R','O','W','P','Y','B'];let bi=0;
-  const putBlock=(b,doorCell)=>{const base=PAINT[(bi++*7+3)%PAINT.length];for(let y=b[1];y<=b[3];y++)for(let x=b[0];x<=b[2];x++){rows[y][x]=((x*3+y*5)%9===0)?'W':base;block[y*W+x]=1}};
-  for(const q of YR_HOUSES){putBlock(q.b);rows[q.d[1]][q.d[0]]=String(q.p)}
-  for(const b of YR_PLAIN)putBlock(b);
-  // decor, scenery, items
-  const decor=[],scenery=[],items=[];
-  const free=(x,y)=>x>0&&y>0&&x<W-1&&y<H-1&&rows[y][x]==='.'&&!block[y*W+x];
-  const dc=(k,x,y,o)=>decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}));
-  // moored boats and the boats pulled up for mending
-  const boats=[['yar_boat_fish',64,35],['yar_boat_fish',67,46],['yar_boat_fish',73,34],['yar_boat_dhow',71,44],['yar_boat_dhow',78,35],['yar_boat_row',62,37],['yar_boat_row',63,44],['yar_boat_row',75,46],['yar_boat_row',80,43],['yar_boat_row',82,34],['yar_boat_row',91,46],['yar_boat_fish',72,28],['yar_boat_dhow',68,52],['yar_boat_row',70,22],['yar_boat_fish',66,60]];
-  YR.boats=boats; // drawn each frame by yrSprites, so that they rock on the water
-  // gear along the promenade
-  for(const [x,y] of [[11,43],[22,44],[36,44],[47,43],[11,37],[24,38],[36,38],[47,38],[55,38]])dc(['yar_pots','yar_nets','yar_crates','yar_pots','yar_nets','yar_crates','yar_pots','yar_nets','yar_crates'][(x+y)%9],x,y);
-  dc('yar_ship_dawn',87,40,{npc:'yr_ship',deco:false});dc(khFaceKey('kh_npc6_1'),85,38,{npc:'yr_menkaure',deco:false}); // the Dawn Walker and her captain at the end of the pier
-  // washed-up crates for the harbourmaster
-  const crateAt=y=>{const x=Math.floor(yarCoast(y))-2;return [x,y]};
-  YR.crates=[26,34,47,53].map(yy=>crateAt(yy));
-  YR.crates.forEach(([x,y],i)=>{if(free(x,y))decor.push({k:'yar_crates',x,y,block:true,npc:'yr_crate',cat:i})});
-  // people
-  const people=[['yr_fisher1','fisher',54,36],['yr_fisher2','fisher',59,39],['yr_child','child',33,41],['yr_old','oldman',44,41],['yr_woman','peasantW',20,41],['yr_net','peasantM',57,28]];
-  for(const [id,face,x,y] of people)if(free(x,y))decor.push({k:face,x,y,block:true,npc:id,sc:1});
-  // the beach: gulls, shells, driftwood and crabs
-  const sc=(k,x,y,s)=>scenery.push({k,wx:x,wy:y,sc:s||1,decor:{k,walk:true,x:x|0,y:y|0}});
-  for(let n=0;n<420;n++){
-    const y=2+((hash2(n,1,31)*(H-4))|0),sx=yarCoast(y),x=sx-1-hash2(n,2,32)*10;
-    if(x<12||y<18||y>62)continue;const cx=x|0,cy=y|0;if(!free(cx,cy)||fm[cy*W+cx]==='1')continue;
-    const r=hash2(n,3,33),k=r<.34?'yar_gull_stand':r<.5?'yar_shells':r<.66?'yar_driftwood':r<.74?'yar_crab':null;if(!k)continue;
-    sc(k,x,y+hash2(n,4,34)*.4-.2,.8+hash2(n,5,35)*.5);
-  }
-  for(let n=0;n<40;n++){const x=58+hash2(n,6,36)*28,y=40.2+hash2(n,7,37)*1.6;sc('yar_gull_stand',x,y,.9+hash2(n,8,38)*.3)} // gulls on the pier
-  for(const [cx,cy,r] of YR_ISLANDS)for(let n=0;n<4;n++){const a=hash2(cx,n,41)*TAU,x=cx+Math.cos(a)*r*.55,y=cy+Math.sin(a)*r*.55,i=(y|0)*W+(x|0);if(h[i]>.05&&h[i]<1)sc('yar_gull_stand',x,y,.9)}
-  for(const [x,y] of [[35,34],[44,40],[22,41],[30,48]])items.push({k:'potion',x,y});
-  // the village is pretty: flower tubs by every door, lamps along the promenade, rose arches over the lanes, washing, olive trees
-  const lights=[];
-  const tryDc=(k,x,y,o)=>{if(free(x,y)&&!used.has(x+','+y)){dc(k,x,y,o);used.add(x+','+y);return true}return false};
-  const used=new Set(decor.map(d=>d.x+','+d.y));
-  for(const q of YR_HOUSES){const [fx,fy,ff]=q.f,horiz=ff===0||ff===2;if(horiz){tryDc('yar_tub',fx-1,fy);tryDc('yar_tub',fx+1,fy)}else{tryDc('yar_tub',fx,fy-1);tryDc('yar_tub',fx,fy+1)}}
-  for(let x=14;x<=54;x+=7){if(tryDc('lamp',x,38))lights.push([x,38]);if(tryDc('lamp',x+3,42))lights.push([x+3,42])}
-  for(const [x,y] of [[36,26],[36,48],[57,34],[57,28]])tryDc('yar_arch2',x,y);
-  for(const [x,y] of [[32,24],[20,57],[32,58],[47,57],[53,51],[20,24]])tryDc('yar_washing',x,y);
-  for(const [x,y] of [[10,36],[10,44],[55,50],[46,52],[34,51],[22,52],[10,32],[10,48],[55,25],[44,29]])tryDc('yar_olive',x,y);
-  for(const [x,y] of [[18,38],[24,42],[40,38],[45,42],[28,38],[50,42],[15,42],[33,42]])tryDc('yar_tub',x,y);
-  for(const [x,y] of [[20,38],[44,38],[30,42],[52,42],[26,38],[48,42]])tryDc('yar_bench',x,y);
-  const sc2=(k,x,y,s)=>scenery.push({k,wx:x+.5,wy:y+.5,sc:s||1,decor:{k,walk:true,x,y}});
-  for(let n=0;n<160;n++){const x=10+((hash2(n,11,41)*46)|0),y=18+((hash2(n,12,41)*44)|0);if(!free(x,y)||used.has(x+','+y))continue;
-    const nb=rows[y-1][x]!=='.'||rows[y+1][x]!=='.'||rows[y][x-1]!=='.'||rows[y][x+1]!=='.';if(!nb)continue; // along the foot of the walls
-    sc2(hash2(n,13,41)<.5?'yar_lavender':'yar_tub',x,y,.8+hash2(n,14,41)*.4)}
-  // the level
-  const lv={rows:rows.map(r=>r.join('')),start:{x:3,y:40,f:1},enemies:[],items,decor,scenery,
-    fmap:null,floorSet:['sand','cobble','wood','bluesand','bluewater','pebA'],floor:'sand',ceil:'cloud',
-    day:.98,outdoor:true,amb:.9,name:'Yarrim',label:'Yarrim',noExtras:true,diff:16,tele:{x:36,y:40},
-    chars:{D:LEVEL41_DATA.chars.D,W:YR.gW,N:YR.gN,F:YR.gF,P:YR.gP,Y:YR.gY,G:YR.gG,B:YR.gB,R:YR.gR,O:YR.gO},lights,portals:[]};
-  const fmap=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmap.push(s)}
-  lv.fmap=fmap;
-  lv.portals[0]={to:YR.TUN,x:62,y:12,f:3,tex:'cave'};
-  const DOORS=['yardoor3','yardoor2','yardoor5','yardoor6','yardoor4','yardoor7','yardoor','yardoor2'];
-  for(const q of YR_HOUSES)lv.portals[q.p]={to:YR.FIRST+q.p-1,x:0,y:0,f:0,tex:DOORS[q.p-1]};
-  LEVELS[YR.ID]=lv;LEVEL_NAMES[YR.ID]='Yarrim';
-  TERRS[YR.ID]=yarTerrain(W,H,h,rk,block);
-  // the buildings: each room is built when first entered (so the Khemetra pictures are loaded by then); the doors know where in the room you arrive
-  const START={inn:[6,7],hall:[5,6],shop:[5,6],prayer:[4,6],home:[4,4]};
-  for(const q of YR_HOUSES){
-    const id=YR.FIRST+q.p-1,st=START[q.room];
-    lv.portals[q.p].x=st[0];lv.portals[q.p].y=st[1];lv.portals[q.p].f=0;
-    KH_LAZY[id]=()=>{
-      if(LEVELS[id])return;
-      const b={id:'yr'+q.p,name:q.name,room:q.room,keeper:q.keeper,scene:q.scene};
-      const R=khRoom(b,id,{to:YR.ID,x:q.f[0],y:q.f[1],f:q.f[2]}),L=R.level;
-      if(q.room==='hall'&&q.p===7){for(const [x,y] of [[2,4],[8,4],[4,5],[6,5],[3,6],[9,5],[1,5],[9,6]])L.enemies.push({t:'rat',x,y,lvl:5})}
-      LEVELS[id]=L;LEVEL_NAMES[id]=q.name;
-    };
-  }
-}
-LEVEL_NAMES[YR.ID]='Yarrim';LEVEL_NAMES[YR.TUN]='The Sea Gate Tunnel';YR_HOUSES.forEach(q=>{LEVEL_NAMES[YR.FIRST+q.p-1]=q.name}); // so the area list can name them before they are built
-KH_LAZY[YR.ID]=yarBuild;
-for(let i=0;i<8;i++){const id=YR.FIRST+i,stub=()=>{yarBuild();if(!LEVELS[id]&&KH_LAZY[id]!==stub)KH_LAZY[id]()};KH_LAZY[id]=stub} // a room asked for before the town exists builds the town first
+/* the village itself is built in yarrim_town.js, from the plan in yarrim_layout.js */
 
 /* ---- the tunnel from the east gate of Khemetra ---- */
 function yarBuildTunnel(){
@@ -176,7 +51,7 @@ function yarBuildTunnel(){
 KH_LAZY[YR.TUN]=function(){
   const t=yarBuildTunnel();
   LEVELS[YR.TUN]={rows:t.rows,start:t.start,enemies:t.enemies,items:t.items,decor:t.decor,day:.3,amb:.5,floor:'sand',ceil:'cloud',name:'The Sea Gate Tunnel',label:'Sea Gate Tunnel',lights:t.lights,
-    portals:[{to:44,x:394,y:200,f:3,tex:'cave'},{to:YR.ID,x:3,y:40,f:1,tex:'cave'}],diff:15,noExtras:true,chars:{w:LEVEL41_DATA.chars.C}};
+    portals:[{to:44,x:394,y:200,f:3,tex:'cave'},{to:YR.ID,x:YP.GORGE.x0+1,y:YP.GORGE.y,f:1,tex:'cave'}],diff:15,noExtras:true,chars:{w:LEVEL41_DATA.chars.C}};
   LEVEL_NAMES[YR.TUN]='The Sea Gate Tunnel';
 };
 
@@ -229,24 +104,26 @@ function yarAfterWorld(){
 }
 
 /* ---- Yarrim's people ---- */
-khNpc('yr_harbour','Tamsin Kell, the harbourmaster','kh_npc6_3',()=>{
-  if(qSt('yar4')==='done'||qSt('yar5')!==null)return qNode('yar5',D5);
-  return qNode('yar4',D4)},{q:'yar4'});
-QGIVER.yr_harbour=['yar4','yar5'];
-khNpc('yr_orsa','Orsa, keeper of the Yarrim Light','kh_npc4_5',()=>{
+khNpc('yr_harbour','Tamsin Kell, the harbourmaster','kh_yfolk1_2',()=>{
+  const L=[['yar4',D4],['yar5',D5],['yq_crab',typeof D_CRAB!=='undefined'?D_CRAB:null]].filter(x=>x[1]);
+  for(const [q,dl] of L)if(qSt(q)==='active'||qReady(q))return qNode(q,dl);      // what she is waiting for comes first
+  for(const [q,dl] of L)if(qSt(q)===null&&(q==='yar4'||qSt('yar4')==='done'))return qNode(q,dl);    // then whatever she has not yet asked
+  return qNode('yar5',D5)},{q:'yar4'});
+QGIVER.yr_harbour=['yar4','yar5','yq_crab'];
+khNpc('yr_orsa','Orsa, keeper of the Yarrim Light','kh_yfolk1_1',()=>{
   if(qSt('yar5')!=='done')return say('The lamp is dark, and I am too old to climb for nothing. Tamsin Kell speaks for those she trusts. Do something for her, and then come and see me.',[BYE]);
   return qNode('yar6',D6)},{q:'yar6'});
-khInn('yr_inn','Bessa, innkeeper of the Drowned Lantern','kh_npc6_2','The Drowned Lantern',20,'The Drowned Lantern. Named for the lantern the old skipper dropped overboard, and the lantern is still burning at the bottom of the bay, if you believe the regulars. Beds are 20 gold. Fish stew is free with the bed.');
-khShop('yr_fish','Corran, the fishmonger','kh_npc2_0',"Corran's Fish Stall",'Herring, dried and smoked, fresh when the boats come in, and a little salt cod for the road. Nothing here is more than a day out of the sea.','food');
-khShop('yr_chandler','Pell, the ship\'s chandler','kh_npc5_4','Brine and Rope','Rope, tar, lamps, oil, torches and a good sharp knife. Everything a sailor needs and a few things a landsman does not.','general');
-khNpc('yr_priest','Brother Haldane, of the Chapel of the Tides','kh_npc4_2',()=>say('We pray here for the boats, and for the people on them. The tide is God\'s breathing, and sailors know it. Light a candle if you like. It is a small thing, and the sea likes small things.',[['Ask for a blessing.',()=>{if(typeof afflCureOn==='function'){try{afflCure('cursed',-1,true)}catch(e){}}msg('A calm settles on the party.','#a8d8ff');return say('Go with the tide, friends.',[BYE])}],BYE]));
-khNpc('yr_maren','Old Maren','peasantW',()=>say(rumourFor('town'),[['Anything else?',()=>say('I was born in this house, and I will die in it, and the gulls will have the roof. My husband swore there is an island out there with a spring on it that never runs dry. He never found it. He found plenty of rocks.',[BYE])],BYE]));
-khNpc('yr_fisher1','A fisherman','fisher',()=>say('Herring are running thick. A good year, if the weather holds. You are from the city? Through the tunnel? I did not think anyone would come that way again in my lifetime.',[BYE]));
-khNpc('yr_fisher2','A fisherman','fisher',()=>say('See that dhow? Came in from the south a month ago, no crew on board, nobody ever came to claim it. Tamsin says it is ours to keep. I say it is cursed.',[BYE]));
-khNpc('yr_child','A child','child',()=>say('The gulls steal your fish if you do not watch them. One stole my whole supper yesterday, and then it sat on the roof and ate it in front of me.',[BYE]));
-khNpc('yr_old','An old sailor','oldman',()=>say('I remember when the Sea Gate was open. Carts, camels, gold from the city, spices from the south. Then somebody sealed it, and the road went quiet. Funny how a city forgets its own sea.',[BYE]));
-khNpc('yr_woman','A net-mender','peasantW',()=>say('Mind where you walk on the beach. The crabs nip, and the gulls dive. Everything out here wants a little of you.',[BYE]));
-khNpc('yr_net','A net-mender','peasantM',()=>say('The islands out there are only rocks and sand. Boats keep clear of them. The rocks are sharp and the currents are not kind.',[BYE]));
+khInn('yr_inn','Bessa, innkeeper of the Drowned Lantern','kh_yfolk1_3','The Drowned Lantern',20,'The Drowned Lantern. Named for the lantern the old skipper dropped overboard, and the lantern is still burning at the bottom of the bay, if you believe the regulars. Beds are 20 gold. Fish stew is free with the bed.');
+khShop('yr_fish','Corran, the fishmonger','kh_yfolk1_5',"Corran's Fish Stall",'Herring, dried and smoked, fresh when the boats come in, and a little salt cod for the road. Nothing here is more than a day out of the sea.','food');
+khShop('yr_chandler','Pell, the ship\'s chandler','kh_yfolk2_0','Brine and Rope','Rope, tar, lamps, oil, torches and a good sharp knife. Everything a sailor needs and a few things a landsman does not.','general');
+khNpc('yr_priest','Brother Haldane, of the Chapel of the Tides','kh_yfolk1_4',()=>say('We pray here for the boats, and for the people on them. The tide is God\'s breathing, and sailors know it. Light a candle if you like. It is a small thing, and the sea likes small things.',[['Ask for a blessing.',()=>{if(typeof afflCureOn==='function'){try{afflCure('cursed',-1,true)}catch(e){}}msg('A calm settles on the party.','#a8d8ff');return say('Go with the tide, friends.',[BYE])}],BYE]));
+khNpc('yr_maren','Old Maren','kh_yfolk1_0',()=>say(rumourFor('town'),[['Anything else?',()=>say('I was born in this house, and I will die in it, and the gulls will have the roof. My husband swore there is an island out there with a spring on it that never runs dry. He never found it. He found plenty of rocks.',[BYE])],BYE]));
+khNpc('yr_fisher1','Dunmore, a fisherman','kh_yfolk2_3',()=>say('Herring are running thick. A good year, if the weather holds. You are from the city? Through the tunnel? I did not think anyone would come that way again in my lifetime.',[BYE]));
+khNpc('yr_fisher2','Finn, a fisherman','kh_yfolk2_4',()=>say('See that dhow? Came in from the south a month ago, no crew on board, nobody ever came to claim it. Tamsin says it is ours to keep. I say it is cursed.',[BYE]));
+khNpc('yr_child','Wink, a child','kh_yfolk2_5',()=>say('The gulls steal your fish if you do not watch them. One stole my whole supper yesterday, and then it sat on the roof and ate it in front of me.',[BYE]));
+khNpc('yr_old','Old Jory, a sailor','kh_yfolk2_2',()=>say('I remember when the Sea Gate was open. Carts, camels, gold from the city, spices from the south. Then somebody sealed it, and the road went quiet. Funny how a city forgets its own sea.',[BYE]));
+khNpc('yr_woman','Nell, a net-mender','kh_yfolk3_0',()=>say('Mind where you walk on the beach. The crabs nip, and the gulls dive. Everything out here wants a little of you.',[BYE]));
+khNpc('yr_net','Garrick, a net-mender','kh_yfolk3_1',()=>say('The islands out there are only rocks and sand. Boats keep clear of them. The rocks are sharp and the currents are not kind.',[BYE]));
 khNpc('yr_crate','A washed-up crate','yar_crates',d=>{
   const F=G.flags;F.yarCrates=F.yarCrates||{};
   if(qSt('yar4')!=='active')return say('A square crate, swollen with water, stamped with a trader\'s mark. It is not your business yet.',[BYE]);

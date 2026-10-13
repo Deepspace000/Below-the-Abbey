@@ -7,38 +7,72 @@
 const YR_ISLANDS=[[82,22,4.5,2.8],[99,26,6.5,4.2],[90,52,5.5,3.4],[103,57,4.5,2.6],[76,58,3.5,1.9],[108,41,5.5,3.6]];
 /* p is the portal number and the room number (YR.FIRST+p-1); sp is the building's name in the plan */
 const YR_HOUSES=[
-  {p:1,sp:'inn',     name:'The Drowned Lantern',          room:'inn',   tpl:'inn',   keeper:'yr_inn',      start:[4,5],door:'yardoor3'},
-  {p:2,sp:'harbour', name:"The Harbourmaster's Office",   room:'hall',               keeper:'yr_harbour',  start:[5,6],door:'yardoor2'},
-  {p:3,sp:'dealer',  name:"Selk's Ship Dealing",          room:'ship',  tpl:'ship',  keeper:'yr_dealer',   start:[4,5],door:'yardoor5'},
-  {p:4,sp:'trader',  name:"Wen's Trading Post",           room:'shop',  tpl:'trader',keeper:'yr_trader',   start:[4,5],door:'yardoor6'},
-  {p:5,sp:'chapel',  name:'The Chapel of the Tides',      room:'prayer',             keeper:'yr_priest',   start:[4,6],door:'yardoor4'},
-  {p:6,sp:'maren',   name:"Old Maren's House",            room:'home',  scene:'fisher',keeper:'yr_maren',  start:[4,4],door:'yardoor7'},
-  {p:7,sp:'loft',    name:'The Net Loft',                 room:'hall',               keeper:null,          start:[5,6],door:'yardoor'},
-  {p:8,sp:'light',   name:'The Yarrim Light',             room:'prayer',             keeper:'yr_orsa',     start:[4,6],door:'yardoor2'},
-  {p:9,sp:'chandler',name:'Brine and Rope',               room:'shop',               keeper:'yr_chandler', start:[5,6],door:'yardoor3'}
+  {p:1,sp:'inn',     name:'The Drowned Lantern',          room:'inn',   tpl:'inn',     keeper:'yr_inn',      start:[4,5],door:'yardoor3'},
+  {p:2,sp:'harbour', name:"The Harbourmaster's Office",   room:'hall',  tpl:'harbour', keeper:'yr_harbour',  start:[4,5],door:'yardoor2'},
+  {p:3,sp:'dealer',  name:"Selk's Ship Dealing",          room:'ship',  tpl:'ship',    keeper:'yr_dealer',   start:[4,5],door:'yardoor5'},
+  {p:4,sp:'trader',  name:"Wen's Trading Post",           room:'shop',  tpl:'trader',  keeper:'yr_trader',   start:[4,5],door:'yardoor6'},
+  {p:5,sp:'chapel',  name:'The Chapel of the Tides',      room:'prayer',tpl:'chapel',  keeper:'yr_priest',   start:[4,5],door:'yardoor4'},
+  {p:6,sp:'maren',   name:"Old Maren's House",            room:'home',  tpl:'maren',   keeper:'yr_maren',    start:[4,5],door:'yardoor7',scene:'fisher'},
+  {p:7,sp:'loft',    name:'The Net Loft',                 room:'hall',  tpl:'loft',    keeper:null,          start:[4,5],door:'yardoor'},
+  {p:8,sp:'light',   name:'The Yarrim Light',             room:'prayer',tpl:'light',   keeper:'yr_orsa',     start:[3,7],door:'yardoor2',stone:true},
+  {p:9,sp:'chandler',name:'Brine and Rope',               room:'shop',  tpl:'chandler',keeper:'yr_chandler', start:[4,5],door:'yardoor3'}
 ];
 const YR_ROOMS=YR_HOUSES.length;
 const YR_WINTEX=['yarpink','yaryellow','yargreen','yarblue','yarcoral','yarwall'];   // the painted wall with a window, one for each colour of cottage
 const YR_DOORTEX=['yardoor','yardoor2','yardoor3','yardoor4','yardoor5','yardoor6','yardoor7'];
 
-/* ---- the little rooms: an inn of nine squares by seven, a ship dealer's, a trader's ---- */
+/* ---- the little rooms: nine squares by seven (the lighthouse seven by nine), a wooden floor, the plaster of the cottage's own colour, and
+   the sea everywhere: nets, rope, anchors, buckets and ships in bottles. The keeper always stands behind a gap in the counter, so the
+   party can step up and talk. ---- */
 const YR_TPL={
-  inn:b=>({w:9,h:7,lights:[[2,2],[6,2],[4,4]],build:({put,raw,npc,mid})=>{
-    for(const x of [3,4,5])put('counter',x,3);
-    put('shelf',2,1);put('shelf',3,1);put('shelf',5,1);put('shelf',6,1);raw('barrel',1,2);raw('barrel',7,2);
+  inn:b=>({w:9,h:7,floor:'wood',tele:[7,3],lights:[[2,2],[6,2],[4,4]],build:({put,raw,npc,mid})=>{
+    for(const x of [2,3,5,6])put('counter',x,3);
+    put('hearth',4,1);put('shelf',2,1);put('shelf',3,1);put('shelf',5,1);put('shelf',6,1);
+    raw('barrel',1,2);raw('barrel',7,2);raw('yar_bucket1',1,1);raw('yar_bucket3',7,1);
     for(const [x,y] of [[2,5],[6,5]]){put('table',x,y);put('chair',x-1,y);put('chair',x+1,y)}
-    put('brazier',4,1);
     npc(b.keeper,mid,2);npc(b.id+'_p1',1,4);npc(b.id+'_p2',7,4);
   }}),
-  ship:b=>({w:9,h:7,lights:[[2,2],[6,2],[4,4]],build:({put,raw,npc,mid})=>{
-    put('ship',4,1);put('wheel',1,2);put('anchor',7,2);put('rope',2,5);put('seachest',6,5);put('sail',1,4);put('sail',7,4);
-    for(const x of [3,5])put('counter',x,3);
+  harbour:b=>({w:9,h:7,floor:'wood',tele:[7,3],lights:[[2,2],[6,2],[4,4]],build:({put,raw,npc,mid})=>{
+    for(const x of [3,5])put('desk',x,3);
+    for(const x of [2,3,5,6])raw('noticeboard',x,1);
+    put('mapstand',1,2);put('maptable',7,2);put('wheel',1,4);put('rope',7,4);put('anchor',7,5);raw('barrel',1,5);raw('yar_bucket4',2,5);
     npc(b.keeper,mid,2);
   }}),
-  trader:b=>({w:9,h:7,lights:[[2,2],[6,2],[4,4]],build:({put,raw,npc,mid})=>{
+  ship:b=>({w:9,h:7,floor:'wood',tele:[7,3],lights:[[2,2],[6,2],[4,4]],build:({put,raw,npc,mid})=>{
+    for(const x of [3,5])put('counter',x,3);
+    put('wheel',4,1);put('ship',2,2);put('ship',6,2);put('sail',1,1);put('sail',7,1);
+    put('anchor',1,4);put('anchor',7,4);put('rope',2,5);put('seachest',6,5);
+    npc(b.keeper,mid,2);
+  }}),
+  trader:b=>({w:9,h:7,floor:'wood',tele:[1,2],lights:[[2,2],[6,2],[4,4]],build:({put,raw,npc,mid})=>{
     for(const x of [3,5])put('counter',x,3);
     for(const x of [1,2,3,5,6,7])put('shelf',x,1);
-    put('amphora',1,5);put('amphora',7,5);put('chest',1,4);put('chest',7,4);raw('barrel',7,3);raw('crate',1,3);
+    put('amphora',1,5);put('amphora',7,5);put('chest',1,4);put('chest',7,4);raw('barrel',7,3);raw('crate',1,3);put('rope',2,5);raw('yar_bucket0',6,5);
+    npc(b.keeper,mid,2);
+  }}),
+  chapel:b=>({w:9,h:7,floor:'wood',tele:[1,2],amb:.62,lights:[[2,2],[6,2],[4,4]],build:({put,raw,npc,mid})=>{
+    put('shrine',4,1);put('candle',3,1);put('candle',5,1);put('anchor',1,1);put('anchor',7,1);
+    put('sail',1,3);put('sail',7,3);put('hlamp',2,2);put('hlamp',6,2);
+    for(const [x,y] of [[2,4],[3,4],[5,4],[6,4],[2,5],[3,5],[5,5],[6,5]])put('chair',x,y);
+    npc(b.keeper,mid,2);
+  }}),
+  maren:b=>({w:9,h:7,floor:'wood',tele:[7,3],lights:[[2,2],[6,2],[4,4]],build:({put,raw,npc,mid})=>{
+    put('hearth',4,1);put('potshelf',2,1);put('kitchenshelf',6,1);put('bed',1,2);put('loom',7,2);
+    put('table',2,4);put('chair',1,4);put('chair',3,4);put('rope',6,4);put('amphora',7,5);raw('yar_bucket0',1,5);
+    npc(b.keeper,mid,2);
+  }}),
+  loft:b=>({w:9,h:7,floor:'wood',tele:[2,1],lights:[[2,2],[6,2],[4,4]],enemies:[['rat',2,2,5],['rat',4,2,5],['rat',6,2,5],['rat',2,4,5],['rat',6,4,5],['rat',3,3,5],['rat',5,3,5],['rat',4,4,5]],build:({put,raw})=>{
+    for(const x of [1,3,5,7])put('sail',x,1);
+    raw('crate',1,3);raw('crate',7,3);raw('barrel',2,5);raw('barrel',6,5);put('rope',1,5);put('rope',7,5);raw('yar_bucket2',1,2);raw('yar_bucket5',7,2);
+  }}),
+  light:b=>({w:7,h:9,floor:'wood',tele:[5,2],amb:.6,lights:[[2,2],[4,2],[3,5]],build:({put,raw,npc,mid})=>{
+    put('brazier',3,1);put('hlamp',1,1);put('hlamp',5,1);put('wheel',1,3);put('maptable',5,4);put('seachest',1,6);put('bed',5,6);put('rope',1,5);
+    npc(b.keeper,mid,2);
+  }}),
+  chandler:b=>({w:9,h:7,floor:'wood',tele:[7,2],lights:[[2,2],[6,2],[4,4]],build:({put,raw,npc,mid})=>{
+    for(const x of [3,5])put('counter',x,3);
+    for(const x of [1,2,6,7])put('shelf',x,1);put('wheel',3,1);put('anchor',5,1);
+    put('sail',1,3);put('sail',7,3);put('rope',1,5);put('rope',2,5);put('rope',6,5);put('seachest',7,5);raw('barrel',1,4);raw('barrel',7,4);raw('yar_bucket3',2,2);
     npc(b.keeper,mid,2);
   }})
 };
@@ -66,7 +100,7 @@ function yarBuild(){
   const rows=[];for(let y=0;y<H;y++){const r=[];for(let x=0;x<W;x++)r.push((x===0||y===0||x===W-1||y===H-1)?'D':'.');rows.push(r)}
   const h=new Float32Array(N),rk=new Float32Array(N),block=new Uint8Array(N),fm=new Array(N).fill('4');
   // ---- the land and the sea: a gentle shore, the rock to the west with the little gorge to the tunnel, headlands, and islands ----
-  const gorge=(x,y)=>x<=G0.x1+1&&Math.abs(y-G0.y)<=1;
+  const gorge=(x,y)=>(x>G0.x0&&x<=G0.x1+1&&Math.abs(y-G0.y)<=1)||(x===G0.x0&&y===G0.y);
   for(let y=0;y<H;y++){
     const sx=yarCoast(y);
     for(let x=0;x<W;x++){
@@ -74,9 +108,8 @@ function yarBuild(){
       let base=land?Math.min(.5,(sx-x)*.055):-.2+.03*(tsmooth(x/4,y/4,21)-.5);
       if(land)base+=.1*tsmooth(x/9,y/9,22);
       const bn=Math.pow(clamp((17-y)/15,0,1),1.2)*4.4*(.75+.5*tsmooth(x/6,y/6,3)),bs=Math.pow(clamp((y-(H-18))/15,0,1),1.2)*4.4*(.75+.5*tsmooth(x/6,y/6,5));
-      const bw=Math.pow(clamp((G0.x1+3-x)/12,0,1),1.2)*4.4*(.75+.5*tsmooth(x/6,y/6,7));
-      const sup=gorge(x,y)?0:clamp((Math.hypot(x-(G0.x1+8),y-G0.y)-2)/8,0,1);   // the gorge floor and the ground before it stay low
-      let hh=base+Math.max(bn*(y<30?1:0),bs,bw)*(bw>bn&&bw>bs?(gorge(x,y)?0:1):sup),isl=false;
+      const bw=Math.pow(clamp((G0.x1+1-x)/12,0,1),1.2)*4.4*(.75+.5*tsmooth(x/6,y/6,7));
+      let hh=base+Math.max(bn,bs,gorge(x,y)?0:bw),isl=false;   // the rock to the west, with the gorge floor cut through it
       for(const [cx,cy,r,pk] of YR_ISLANDS){
         const d=Math.hypot(x-cx,y-cy)/(r*(1+.35*(tsmooth(x/3,y/3,9)-.5)));
         if(d<1.5){const v=pk*Math.pow(Math.max(0,1-d),1.15)-.2+.35*Math.max(0,1-d/1.5)*(tsmooth(x/2,y/2,11)-.3);if(v>hh){hh=v;if(v>-.1)isl=true}}
@@ -233,13 +266,13 @@ function yarBuild(){
   }
   // ---- the people of the village, who walk through and can be spoken to ----
   YR.people=[];
-  const person=(id,face,x,y)=>{const q=near(x,y,4);if(!q)return null;walk(face,q[0],q[1],{npc:id,sc:1});YR.people.push([id,q[0],q[1]]);return q};
-  person('yr_fisher1','fisher',50,40);person('yr_fisher2','fisher',55,38);person('yr_child','child',33,38);person('yr_old','oldman',43,38);person('yr_woman','peasantW',30,41);person('yr_net','peasantM',52,43);
+  const person=(id,x,y)=>{const kp=KH_KEEPERS[id];if(!kp)return null;const q=near(x,y,4);if(!q)return null;walk(khFaceKey(kp.face),q[0],q[1],{npc:id,sc:kp.sc||1});YR.people.push([id,q[0],q[1]]);return q};
+  person('yr_fisher1',50,40);person('yr_fisher2',55,38);person('yr_child',33,38);person('yr_old',43,38);person('yr_woman',30,41);person('yr_net',52,44);person('yr_tam',47,33);
   { // Corran's fish stall on the harbour square: a seller with a basket of herring
-    const q=near(51,38,3);if(q){dc('yar_crates',q[0],q[1]-1>0&&free(q[0],q[1]-1)?q[1]-1:q[1],{deco:true,block:false,walk:true});walk(khFaceKey('kh_npc2_0'),q[0],q[1],{npc:'yr_fish',sc:1})}
+    const q=near(51,38,3);if(q){dc('yar_crates',q[0],q[1]-1>0&&free(q[0],q[1]-1)?q[1]-1:q[1],{deco:true,block:false,walk:true});walk(khFaceKey(KH_KEEPERS.yr_fish.face),q[0],q[1],{npc:'yr_fish',sc:1})}
   }
-  // the donkey and its cart wait at the mouth of the gorge, for the road to Khemetra and beyond
-  { const q=near(G0.x1+2,G0.y,3);if(q){walk(khFaceKey('kh_cart1_0'),q[0],q[1],{npc:'yr_donkey',sc:1});YR.donkeyAt=q} }
+  // the donkey and its cart wait on the harbour square, for the road to Khemetra and beyond
+  { const q=near(53,42,3);if(q){walk(khFaceKey('kh_cart1_0'),q[0],q[1],{npc:'yr_donkey',sc:1});YR.donkeyAt=q} }
   // quest folk and objects (yarrim_quests.js)
   if(typeof yarPlaceQuestFolk==='function')yarPlaceQuestFolk({near,free,walk,dc,sc2,decor,scenery,P,rows,used});
   // ---- the level ----
@@ -272,9 +305,9 @@ function yarBuild(){
     const id=YR.FIRST+q.p-1;
     KH_LAZY[id]=()=>{
       if(LEVELS[id])return;
-      const b={id:'yr'+q.p,name:q.name,room:q.room,keeper:q.keeper,scene:q.scene,tpl:q.tpl?YR_TPL[q.tpl]:undefined};
+      const hz=specialDoors[q.p],hue=q.stone?5:hz&&hz.hue!==undefined?hz.hue:1;   // inside, the plaster is the colour of the cottage outside
+      const b={id:'yr'+q.p,name:q.name,room:q.room,keeper:q.keeper,scene:q.scene,tpl:q.tpl?YR_TPL[q.tpl]:undefined,wallImg:'kh_ywall1_'+hue};
       const R=khRoom(b,id,{to:YR.ID,x:q.f[0],y:q.f[1],f:q.f[2]}),L=R.level;
-      if(q.p===7){for(const [x,y] of [[2,4],[8,4],[4,5],[6,5],[3,6],[9,5],[1,5],[9,6]])L.enemies.push({t:'rat',x,y,lvl:5})}
       LEVELS[id]=L;LEVEL_NAMES[id]=q.name;
     };
   }

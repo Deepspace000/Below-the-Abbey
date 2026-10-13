@@ -170,27 +170,29 @@ function khMakeDoorsAndRooms(C,L,placed){
 /* ---- the rooms ---- */
 const KH_KEEPERS={}; // npc id -> {name, face, root}: filled in by khemetra_story.js
 function khKeeperFace(id){const k=KH_KEEPERS[id];return k?k.face:'peasantM'}
-function khInteriorWall(kind){ // a painted wall for the inside of a building
+function khInteriorWall(kind,imgKey){ // a painted wall for the inside of a building (imgKey: a picture of its own, such as the plaster of a cottage)
   const pick={shop:0,inn:3,hall:3,prayer:5,temple:1,bath:2,cellar:4,ruin:4,home:0,ship:3,palace:5}[kind];
-  const im=IMG['kh_wall1_'+(pick===undefined?0:pick)];if(!im)return null;
-  KH_WALLGID=KH_WALLGID||{};if(KH_WALLGID[kind]!==undefined)return KH_WALLGID[kind];
-  const [c,x]=tcv();x.drawImage(im,0,0,TS,TS);const id=addTex(pix(c)),gid=KH_NEXT_GID++;T_TILE[gid]=id;return KH_WALLGID[kind]=gid;
+  const im=imgKey?IMG[imgKey]:IMG['kh_wall1_'+(pick===undefined?0:pick)];if(!im)return null;
+  const ck=imgKey||kind;
+  KH_WALLGID=KH_WALLGID||{};if(KH_WALLGID[ck]!==undefined)return KH_WALLGID[ck];
+  const [c,x]=tcv();x.drawImage(im,0,0,TS,TS);const id=addTex(pix(c)),gid=KH_NEXT_GID++;T_TILE[gid]=id;return KH_WALLGID[ck]=gid;
 }
 let KH_WALLGID=null;
 function khRoom(b,lvl,back){
   const rooms={jail:khRoomJail,shop:khRoomShop,inn:khRoomInn,prayer:khRoomPrayer,temple:khRoomTemple,bath:khRoomBath,hall:khRoomHall,cellar:khRoomCellar,ruin:khRoomRuin,home:khRoomHome,ship:khRoomShip};
-  const R=(rooms[b.room]||khRoomShop)(b);
+  const R=(b.tpl||rooms[b.room]||khRoomShop)(b);
   const W=R.w,H=R.h,mid=W>>1;
   const rows=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++){r+=(y===0||x===0||x===W-1)?'w':y===H-1?(x===mid?'0':'w'):'.'}rows.push(r)}
   const decor=[],put=(role,x,y,o)=>{const k=khProp(role);if(IMG[k]&&k.startsWith('kh_'))NPC_H[k]=khPropH(role);decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}))};
   const raw=(k,x,y,o)=>decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}));
   const npc=(id,x,y,extra)=>{const kp=KH_KEEPERS[id];if(!kp)return;decor.push(Object.assign({k:kp.face,x,y,block:true,npc:id,sc:kp.sc||1},extra||{}))};
   R.build({put,raw,npc,mid,W,H});
-  const wall=khInteriorWall(b.room);
+  const wall=khInteriorWall(b.room,b.wallImg);
   const level={rows,start:{x:mid,y:H-2,f:0},enemies:(R.enemies||[]).map(e=>({t:e[0],x:e[1],y:e[2],lvl:e[3]})),items:R.items||[],decor,day:0,amb:R.amb||.66,
-    floor:R.floor||'kh1',ceil:'beam',name:b.name,label:b.name,lights:R.lights||[],portals:[{to:back.to,x:back.x,y:back.y,f:back.f,tex:'in'}],diff:16,khRoom:b.id,scene:b.scene||KH_SCENE_OF[b.id],
+    floor:b.floor||R.floor||'kh1',ceil:'beam',name:b.name,label:b.name,lights:R.lights||[],portals:[{to:back.to,x:back.x,y:back.y,f:back.f,tex:'in'}],diff:16,khRoom:b.id,scene:b.scene||KH_SCENE_OF[b.id],
     chars:wall?{w:wall}:undefined};
   if(R.noExtras)level.noExtras=true;
+  if(R.tele)level.tele={x:R.tele[0],y:R.tele[1]};   // where this room's stone teleporter stands, when the room has a better nook for it than the default
   return {level,start:{x:mid,y:H-2,f:0}};
 }
 const khPlan=(x0,y0,x1,y1)=>{const o=[];for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)o.push([x,y]);return o};
