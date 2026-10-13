@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.14';
+const VERSION='3.15';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -53,6 +53,13 @@ function floorMips(a){ // a paving picture and halved copies of it down to one p
       for(let c=0;c<4;c++)dst[o+c]=(src[i0+c]+src[i0+4+c]+src[i2+c]+src[i2+4+c]+2)>>2}
     m.push(dst);w=nw}
   FMIP.set(a,m);return m;
+}
+function wallMip(tex,k){ // a wall picture blurred over 2^k texels, made once: a facade far down a street covers many texels per screen column and would otherwise crawl as the party walks
+  const key='m'+k;if(tex[key])return tex[key];
+  const src=tex.d,r=1<<(k-1),n=2*r+1,tmp=new Uint8ClampedArray(src.length),out=new Uint8ClampedArray(src.length);
+  for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const o=(y*TS+x)*4;let a=0,b=0,c=0;for(let d=-r;d<=r;d++){const i=(y*TS+((x+d)&(TS-1)))*4;a+=src[i];b+=src[i+1];c+=src[i+2]}tmp[o]=a/n;tmp[o+1]=b/n;tmp[o+2]=c/n;tmp[o+3]=255}
+  for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const o=(y*TS+x)*4;let a=0,b=0,c=0;for(let d=-r;d<=r;d++){const i=((Math.min(TS-1,Math.max(0,y+d)))*TS+x)*4;a+=tmp[i];b+=tmp[i+1];c+=tmp[i+2]}out[o]=a/n;out[o+1]=b/n;out[o+2]=c/n;out[o+3]=255}
+  return tex[key]=out;
 }
 function stoneTex(seed,o){
   const d=new Uint8ClampedArray(TS*TS*4), rh=TS/o.rows;
@@ -2515,7 +2522,7 @@ function render3D(){
     if(LEVEL===22&&g===1&&T_SKY[0]!==undefined)tx=(tx+((t*5)|0))&(TS-1); // the sky drifts past
     const wh=TEX[ti].wh||(LEVEL===3&&mx>0&&my>0&&mx<MW-1&&my<MH-1?1.55:CEILH); // Thornwick's houses are one storey under the high sky; the forest round it stays tall
     const skyW=(LEVEL===22&&g===1&&T_SKY[0]!==undefined)||(!!TEX[ti].sky&&!!SKYPAN),tileW=!skyW&&!TEX[ti].h&&wh>2&&(g>=100||g===1||g===2||g===6||(g>=9&&g<=14)||(g>=20&&g<=22)); // tall plain walls repeat their pattern instead of stretching
-    const tex=TEX[ti],td=tex.d,te=tex.e;
+    const tex=TEX[ti],te=tex.e,wlv=fastW&&perp>4?Math.min(4,Math.floor(Math.log2(TS*perp/F*.7))):0,td=wlv>0&&tex.d&&tex.d.length===TS*TS*4?wallMip(tex,wlv):tex.d; // far facades are read from blurred copies
     const kd=LEVEL===44&&g>=100?KH_DOOR[g]:undefined,dg=kd!==undefined&&kd.lvl!==undefined,dgs=dg?(.7+.18*Math.sin(t*2.1+mx*1.7+my*.9))*(1-Math.min(.55,perp*.008)):0; // a doorway that can be entered glows softly, brighter near the threshold
     const dist=perp*Math.hypot(rX,rY);
     const lb=Math.max(baseL(dist),lbm);let lt=0;
