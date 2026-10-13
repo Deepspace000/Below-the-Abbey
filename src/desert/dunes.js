@@ -39,5 +39,6 @@ function makeDesertArt(){
   T_DOORS.tomb=dsTombDoor();DS_TEXREG.tombdoor=T_DOORS.tomb;
   if(typeof makeTombArt==='function')makeTombArt(rdune,rcl);
   if(typeof makeBlueArt==='function')makeBlueArt(ydune,ycl);
-  if(typeof makeGoldenArt==='function')makeGoldenArt(ydune,ycl);
+  if(typeof makeGoldenArt==='function')makeGoldenArt(ydune,ycl);if(typeof makeYarArt==='function')makeYarArt();
+
 }

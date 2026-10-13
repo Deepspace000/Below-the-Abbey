@@ -10,6 +10,7 @@ const TOWNS=[
   {id:'khemetra',n:'Khemetra',col:'#f0d070',blurb:'The Golden City, ten thousand houses and a watch that notices.'}
 ];
 function repTownOf(n){
+  if(n>=289&&n<=299)return 'khemetra';
   if(n>=40000)return repTownOf(Math.floor((n-40000)/10000));
   if([3,4,5,6,9,29].includes(n))return 'thornwick';
   if([13,14,15,16,17,21,30,271,272,273,274].includes(n))return 'ironhill';
@@ -18,6 +19,7 @@ function repTownOf(n){
   return null;
 }
 function repTownOfArea(a){
+  if(/yarrim/i.test(a||''))return 'khemetra';
   if(/thornwick|road to ironhill/i.test(a||''))return 'thornwick';
   if(/ironhill|greyfang/i.test(a||''))return 'ironhill';
   if(/greendale|anaea/i.test(a||''))return 'anaea';

@@ -89,7 +89,7 @@ function terrFor(n){
   }
   return TERRS[n]={W,H,h:sm,s,rk,block};
 }
-function terrRock(){const t=TEX[LEVEL===43?DS_TEXREG.cliffR:DS_TEXREG.cliffY];return {d:t&&t.d,tint:LEVEL===60?[.8,.92,1.22]:LEVEL===61?[1.22,1.06,.7]:LEVEL===62?[1,.8,1.25]:LEVEL===63?[1.12,1.14,1.2]:[1,1,1]}}
+function terrRock(){const t=TEX[LEVEL===43?DS_TEXREG.cliffR:DS_TEXREG.cliffY];return {d:t&&t.d,tint:LEVEL===290?[.84,.9,.97]:LEVEL===60?[.8,.92,1.22]:LEVEL===61?[1.22,1.06,.7]:LEVEL===62?[1,.8,1.25]:LEVEL===63?[1.12,1.14,1.2]:[1,1,1]}}
 // where a rock or a tree really meets the ground: the lowest point under its width, so it never hangs over a slope
 function terrFoot(s,cx,cy){
   const rx=s.x-cx,ry=s.y-cy,dl=Math.hypot(rx,ry)||1,px=-ry/dl,py=rx/dl,hw=(s.w||1)*.4;

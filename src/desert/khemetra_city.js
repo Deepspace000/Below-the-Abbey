@@ -40,11 +40,13 @@ async function khPrepare(){
   const WALL_DEFAULT='#'.charCodeAt(0),DOT='.'.charCodeAt(0);
   for(let y=0;y<H;y++)for(let x=0;x<W;x++)rowCodes[y][x]=C.solid[idx(x,y)]?WALL_DEFAULT:DOT;
   const gateMod=C.modules.find(m=>m.kind==='castle'&&m.face===0&&m.cells.some(([x,y])=>x===KH.CX&&y===H-KH.WALL));
+  const eastMods=C.modules.filter(m=>m.kind==='castle'&&m.cells.some(([x,y])=>x>=W-KH.WALL&&y>=199&&y<=201));
+  for(const m of eastMods)m.doorCells=m.cells.filter(([x,y])=>y>=199&&y<=201);
   for(const m of C.modules){
     const tiles=khTileSet(m.e),door=m.doorCells||(m===gateMod?m.cells:null);
     m.cells.forEach(([x,y],i)=>{
       let gid=tiles[Math.min(i,tiles.length-1)].gid;
-      if(door&&door.some(c=>c[0]===x&&c[1]===y)){const g2=KH_NEXT_GID++;T_TILE[g2]=T_TILE[gid];KH_DOOR[g2]=m===gateMod?{gate:true}:{lvl:m.lvl,at:m.at,i,n:m.cells.length,lf:m.face===1||m.face===2,sc:m.hscene};gid=g2}
+      if(door&&door.some(c=>c[0]===x&&c[1]===y)){const g2=KH_NEXT_GID++;T_TILE[g2]=eastMods.includes(m)&&T_DOORS.citygate!==undefined?T_DOORS.citygate:T_TILE[gid];KH_DOOR[g2]=m===gateMod?{gate:true}:eastMods.includes(m)?{east:true,lvl:289,at:{x:1,y:10,f:1}}:{lvl:m.lvl,at:m.at,i,n:m.cells.length,lf:m.face===1||m.face===2,sc:m.hscene};gid=g2}
       rowCodes[y][x]=khChar(gid).charCodeAt(0);
     });
   }
