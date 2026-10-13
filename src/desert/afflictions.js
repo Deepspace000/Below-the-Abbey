@@ -228,6 +228,7 @@ function afflHouseBump(d){
   const F=G.flags;
   if(F.khWarnT!==undefined&&G.clock-F.khWarnT>2880){F.khWarn=0;afflCure('warned',-1,true)}
   F.khWarn=(F.khWarn||0)+1;F.khWarnT=G.clock;
+  try{repAdd('khemetra',-2,'the watch noted it')}catch(e){}
   const enter=()=>{sfx('door');goToLevel(d.lvl,d.at);return null};
   sfx('locked');
   if(F.khWarn>=3){
@@ -240,6 +241,7 @@ function afflHouseBump(d){
 }
 function khJail(){
   const F=G.flags;F.khJailed=1;F.khJailOpen=0;sfx('locked');
+  try{repAdd('khemetra',-6,'you were jailed')}catch(e){}
   afflCure('warned',-1,true);
   if(!LEVELS[KH_JAIL]&&KH_LAZY[KH_JAIL])KH_LAZY[KH_JAIL]();
   goToLevel(KH_JAIL,{x:4,y:3,f:0});
@@ -377,3 +379,8 @@ function afflHud(){
   });
   ctx.restore();
 }
+
+journalPage({id:'aff',title:'Afflictions and States',
+  summary:()=>{const n=afflList().filter(e=>AFFL[e.id]&&AFFL[e.id].kind!=='good').length;return n?`${n} afflictions on the party now. Open for how each feels, how it is caught and how it is cured.`:'The party is healthy. Open to read about every sickness and blessing.'},
+  note:()=>afflList().some(e=>AFFL[e.id]&&AFFL[e.id].kind==='bad'),
+  direct:()=>{G.menu='aff';G.afs=0}});
