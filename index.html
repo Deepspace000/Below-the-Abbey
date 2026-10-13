@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.97';
+const VERSION='2.98';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -8824,6 +8824,15 @@ async function khPrepare(){
   return C;
 }
 /* roofs, the palace, the church and tall towers rise over the walls */
+function khWallH(L,cells){
+  let lo=1e9;
+  for(const [x,y] of cells){
+    const ti=T_TILE[L.chars[L.rows[y][x]]],h=ti!==undefined&&TEX[ti]?TEX[ti].wh:null;
+    if(h===null||h===undefined)return null;
+    if(h<lo)lo=h;
+  }
+  return lo<1e9?lo:null;
+}
 function khSkyline(C,L){
   const W=C.W,H=C.H,idx=C.idx,rng=khRng(777),sky=L.sky,P=KH_POOLS;
   for(const [src,keep] of [['roof2_0',.52],['roof2_2',.58]]){ // a dome on a flat slab: keep the dome, drop the slab seen from above
@@ -8840,7 +8849,8 @@ function khSkyline(C,L){
     const cx=m.cells.reduce((a,c)=>a+c[0],0)/m.cells.length+.5,cy=m.cells.reduce((a,c)=>a+c[1],0)/m.cells.length+.5,d=dirs[m.face];
     const key=okRoofs[(khHash(m.cells[0][0],m.cells[0][1],9)*okRoofs.length)|0],im=KH_MAN[key];
     const w=m.n*.95*(m.kind==='temple'||m.kind==='bath'?1.2:1);
-    sky.push({x:cx-d[0]*1.6,y:cy-d[1]*1.6,k:'kh_'+key,w,z:m.wh-.02,h:w*im.h/im.w});
+    const az=khWallH(L,m.cells);if(az===null)continue;   // the roof sits on the wall that is really there
+    sky.push({x:cx-d[0]*1.6,y:cy-d[1]*1.6,k:'kh_'+key,w,z:az-.02,h:w*im.h/im.w});
   }
   const pal=KH_MAN.palace_0;
   if(pal){const w=54,hh=w*pal.h/pal.w;sky.push({x:KH.CX+.5,y:C.PB.y0+9,k:'kh_palace_0',w,z:2.2,h:hh,big:1})}
