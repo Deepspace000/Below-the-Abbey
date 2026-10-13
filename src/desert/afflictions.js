@@ -106,6 +106,7 @@ function afflInflict(id,hi,quiet){
   const A=AFFL[id];if(!A)return false;
   if(hi===undefined||hi===-1){let any=false;G.heroes.forEach((h,i)=>{if(h.alive&&afflInflict(id,i,true))any=true});if(any&&!quiet)msg((A.kind==='good'?'The party is ':'The whole party is ')+A.n.toLowerCase()+'.',A.col);return any}
   const h=G.heroes[hi];if(!h||!h.alive)return false;
+  if((id==='shaken'||id==='haunted')&&typeof hasCompanion==='function'&&hasCompanion('skeleton')&&Math.random()<.5)return false; // the little skeleton is not afraid of the dark
   const ex=afflList().find(e=>e.id===id&&e.hi===hi);
   const until=A.days?G.clock+A.days*1440:0,rounds=A.rounds||0;
   if(ex){ex.until=Math.max(ex.until,until);ex.left=Math.max(ex.left||0,rounds);if(id==='warned')ex.count=(G.flags.khWarn||1);return false}
@@ -334,24 +335,23 @@ function drawAfflictions(){
   BTNS=[];veil(.7);bigPanel(30,10,420,300);
   txt('AFFLICTIONS AND STATES',240,27,13,'#d8c88e','center',true);
   const act=new Set(afflList().map(e=>e.id)),seen=G.flags.affSeen||{};
-  const list=AFFL_ORDER.slice().sort((a,b)=>(act.has(b)-act.has(a))||(AFFL_ORDER.indexOf(a)-AFFL_ORDER.indexOf(b)));
+  const list=afflSorted();
   if(!G.affSel||!AFFL[G.affSel])G.affSel=list[0];
   const lx=38,top=42,viewH=232,rowH=16,total=list.length*rowH;G.afMax=Math.max(0,total-viewH);G.afs=clamp(G.afs||0,0,G.afMax);
   ctx.save();ctx.beginPath();ctx.rect(lx,top,150,viewH);ctx.clip();
   list.forEach((id,i)=>{
     const ry=top+i*rowH-G.afs;if(ry<top-rowH||ry>top+viewH)return;
-    const A=AFFL[id],known=act.has(id)||seen[id],sel=G.affSel===id;
+    const A=AFFL[id],known=true,sel=G.affSel===id;
     if(sel){ctx.fillStyle='rgba(216,200,142,.2)';ctx.fillRect(lx,ry,150,rowH-1)}
     ctx.fillStyle=known?A.col:'#4a4438';ctx.fillRect(lx+4,ry+4,7,7);ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=.8;ctx.strokeRect(lx+4,ry+4,7,7);
-    txt(known?A.n:'???',lx+16,ry+8,9,act.has(id)?'#ffe9a0':known?'#c8b890':'#6a6050','left',act.has(id));
-    if(act.has(id))txt('now',lx+144,ry+8,7,'#9ae0a0','right',true);
-    BTNS.push({id:'af_'+id,x:lx,y:Math.max(top,ry),w:150,h:rowH-1});
+    txt(A.n,lx+16,ry+8,9,act.has(id)?'#ffe9a0':seen[id]?'#d8cca8':'#a89c80','left',act.has(id));
+    if(act.has(id))txt('now',lx+144,ry+8,7,'#9ae0a0','right',true);else if(seen[id])txt('met',lx+144,ry+8,6.5,'#8a9a78','right')
+    BTNS.push({id:'af_'+id,x:lx,y:Math.max(top,ry),w:150,h:Math.min(rowH-1,top+viewH-Math.max(top,ry)),up:true,drag:'aff'});
   });
   ctx.restore();
-  BTNS.push({id:'afarea',x:lx,y:top,w:150,h:viewH,up:true,drag:'aff'});
   if(G.afMax>0){const th=viewH-4,bh=Math.max(20,th*viewH/total),by=top+2+(th-bh)*(G.afs/G.afMax);ctx.fillStyle='rgba(216,200,142,.12)';ctx.fillRect(190,top+2,3,th);ctx.fillStyle='rgba(216,200,142,.6)';ctx.fillRect(190,by,3,bh)}
   // the page for the chosen one
-  const A=AFFL[G.affSel],known=act.has(G.affSel)||seen[G.affSel],px=202,pw=238;
+  const A=AFFL[G.affSel],known=true,px=202,pw=238;
   ctx.fillStyle='rgba(216,200,142,.25)';ctx.fillRect(px-6,top,1,viewH);
   if(!known){
     txt('Unknown',px,top+10,12,'#8a8070','left',true);
@@ -371,7 +371,7 @@ function drawAfflictions(){
     sect('HOW YOU CATCH IT',A.src);
     sect('HOW TO CURE IT',A.cure,'#a8d8a0');
   }
-  btnText('afexit','Close',190,282,100,22);
+  btnText('afprev','< Previous',40,284,100,20);btnText('afnext','Next >',340,284,100,20);btnText('afexit','Close',190,284,100,20);
 }
 
 /* ---- the row of little pictures at the top right of the view: one for each affliction the party has ---- */
@@ -400,3 +400,29 @@ journalPage({id:'aff',title:'Afflictions and States',
   summary:()=>{const n=afflList().filter(e=>AFFL[e.id]&&AFFL[e.id].kind!=='good').length;return n?`${n} afflictions on the party now. Open for how each feels, how it is caught and how it is cured.`:'The party is healthy. Open to read about every sickness and blessing.'},
   note:()=>afflList().some(e=>AFFL[e.id]&&AFFL[e.id].kind==='bad'),
   direct:()=>{G.menu='aff';G.afs=0}});
+
+/* the list as the page shows it: active ones first */
+function afflSorted(){const act=new Set(afflList().map(e=>e.id));return AFFL_ORDER.slice().sort((a,b)=>(act.has(b)-act.has(a))||(AFFL_ORDER.indexOf(a)-AFFL_ORDER.indexOf(b)))}
+function afflNav(dir){
+  const list=afflSorted();let i=list.indexOf(G.affSel);if(i<0)i=0;i=(i+dir+list.length)%list.length;G.affSel=list[i];
+  const rowH=16,viewH=232;G.afs=clamp(Math.max(0,i*rowH-viewH/2+rowH),0,Math.max(0,list.length*rowH-viewH));
+}
+/* tapping a hero's portrait: what ails them, and where to read about it */
+function afflPortraitNote(hi){
+  const L=afflList().filter(e=>e.hi===hi&&AFFL[e.id]);if(!L.length)return;
+  const names=L.map(e=>AFFL[e.id].n);
+  msg(`${afflHeroName(hi)} is ${names.join(', ')}. Consult the Afflictions page in the menu to learn more.`,'#e8c8a0');
+}
+/* the hero page, when something is wrong with the hero */
+function afflHeroPanel(hi,rx,rw){
+  const L=afflList().filter(e=>e.hi===hi&&AFFL[e.id]);if(!L.length)return false;
+  txt('AFFLICTED',rx+rw/2,84,10,'#e8907a','center',true);
+  L.slice(0,4).forEach((e,i)=>{
+    const A=AFFL[e.id],y=97+i*12;ctx.fillStyle=A.col;ctx.fillRect(rx+14,y-4,8,8);ctx.strokeStyle='rgba(0,0,0,.7)';ctx.lineWidth=.8;ctx.strokeRect(rx+14,y-4,8,8);
+    txt(A.n,rx+27,y,8.8,A.kind==='good'?'#a8e0a0':'#e8d8b8','left',true,undefined,rw-34);
+    btn('afr_'+e.id,rx+10,y-6,rw-20,12);
+  });
+  if(L.length>4)txt(`and ${L.length-4} more`,rx+rw/2,148,7.5,'#a89878','center');
+  wrapText('Consult the Afflictions page to learn how each one feels and how to cure it.',rw-16,7.4).slice(0,2).forEach((l,i)=>txt(l,rx+rw/2,142+i*8,7.4,'#b8aa88','center'));
+  return true;
+}

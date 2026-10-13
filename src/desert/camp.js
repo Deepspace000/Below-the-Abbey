@@ -67,36 +67,6 @@ function bondPas(hi,key){
 function bondFall(t){
   for(let j=0;j<4;j++){if(j===t||!G.heroes[j].alive)continue;if(bondVal(j,t)>=5){G.buffs.push({name:'Enraged',b:'dmgPct',amt:.3,left:10,hi:j});msg(`${HERO_DEF[j].name} cries out and fights on in a fury at ${HERO_DEF[t].name}'s fall!`,'#ff9a8a')}}
 }
-/* ---------------------------------------------------------------- companions ---------------------------------------------------------------- */
-const PETS={
-  goat:{n:'Goat',price:80,img:'kh_anim1_3',names:['Biscuit','Gruff','Clover','Thistle','Barnaby','Pip'],d:'Eats anything, may cure a stomach, and sniffs out gold hidden in houses. Fills the bag with its bleating, not with loot.'},
-  cat:{n:'Cat',price:60,img:'kh_anim1_0',names:['Pasha','Mafdet','Sekhmet','Dusty','Shadow','Tiger'],d:'Luck +1. Keeps the rats down, wards off thieves in the night, and always lands on its feet.'},
-  donkey:{n:'Donkey',price:150,img:'kh_anim1_4',names:['Hapi','Bartholomew','Old Grey','Dobbin','Moses','Basket'],d:'Carries twelve more things in the bag, and is not nearly as stubborn as the goat.'}
-};
-function petsData(){const F=G.flags;return F.pets||(F.pets=[])}
-function hasCompanion(id){return petsData().some(p=>p.id===id)}
-function companionLuck(){return hasCompanion('cat')?1:0}
-function petsApply(){BAGCAP=60+(hasCompanion('donkey')?12:0)}
-function petBuy(id){
-  const P=PETS[id];if(hasCompanion(id))return 'You already have one.';if(G.gold<P.price)return `That costs ${P.price} gold.`;
-  G.gold-=P.price;petsData().push({id,name:P.names[(hash2(G.clock,petsData().length,9)*P.names.length)|0]});petsApply();sfx('equip');
-  msg(`${petsData().find(p=>p.id===id).name} the ${P.n.toLowerCase()} joins the party.`,'#ffe9a0');return null;
-}
-function petsTick(){ // little scenes, and the goat's nose
-  if(!petsData().length||G.state!=='play'||G.cut||G.talk||G.menu)return;
-  const F=G.flags;F.petT=(F.petT||0)+1;
-  const goat=petsData().find(p=>p.id==='goat'),cat=petsData().find(p=>p.id==='cat'),don=petsData().find(p=>p.id==='donkey');
-  if(F.petT%40===0){
-    const lines=[];if(goat)lines.push(`${goat.name} the goat eats a corner of a map, and looks pleased.`,`${goat.name} butts a lamp post. The lamp post loses.`);
-    if(cat)lines.push(`${cat.name} the cat sits on the map and refuses to move.`,`${cat.name} washes a paw and watches the shadows.`);
-    if(don)lines.push(`${don.name} the donkey sighs deeply under the packs.`,`${don.name} brays, for no reason anybody understands.`);
-    if(lines.length)msg(lines[(Math.random()*lines.length)|0],'#d8d0a0');
-  }
-}
-function petEnter(n){
-  const goat=petsData().find(p=>p.id==='goat');
-  if(goat&&typeof KH_GOLD!=='undefined'&&KH_GOLD[n]&&!G.flags['kg'+n])later(500,()=>msg(`${goat.name} the goat paws at a corner of the room and bleats at a loose stone. There is something here.`,'#ffe9a0'));
-}
 /* ---------------------------------------------------------------- camp ---------------------------------------------------------------- */
 const FOOD_KIND=()=>G.bag.filter(b=>idef(b).k==='food');
 function foodUnits(){return G.bag.reduce((a,b)=>a+(idef(b).k==='food'?b.n:0),0)}
@@ -127,7 +97,7 @@ function forage(){
   const des=wxRegionOf(LEVEL)==='desert',w=weatherNow(),bad=w&&(w.id==='snow'||w.id==='frost')?.3:0;
   const table=des?[['water',.6],['lotus',.15],['herb',.15]]:[['herb',.55],['wildflower',.5],['nightshade',.25],['honeycomb',.15]];
   for(const [id,p] of table)if(Math.random()<Math.max(.05,p+r*.07+luck-bad)){const n=1+((Math.random()<.3+r*.1)?1:0);if(bagAdd(mkItem2(id,n)))found.push(n+' '+ITEMDEF[id].n.toLowerCase())}
-  profXP('scout',2);skXP('stealth',1);
+  profXP('scout',2);skXP('stealth',1);try{petForage()}catch(e){}
   msg(found.length?'Foraging turns up '+found.join(', ')+'.':'An hour of looking turns up nothing useful.','#a8d898');
 }
 function campRun(id){
@@ -241,24 +211,6 @@ journalPage({id:'trade',title:'Skills and Trades',
     P[i]={id:nextId,xp:cur&&cur.id===nextId?cur.xp:0};sfx('equip');msg(`${HERO_DEF[i].name} takes up the trade of ${TRADES[nextId].n.toLowerCase()}.`,'#ffe9a0');
   }
 });
-/* ---------------------------------------------------------------- companions ---------------------------------------------------------------- */
-journalPage({id:'pets',title:'Companions',
-  summary:()=>{const p=petsData();return p.length?p.map(x=>`${x.name} the ${PETS[x.id].n.toLowerCase()}`).join(', ')+'.':'No companion yet. A goat, a cat or a donkey can be bought from animal traders in Khemetra and Ironhill.'},
-  note:()=>0,
-  draw(){
-    jFrame('Companions');
-    ['goat','cat','donkey'].forEach((id,k)=>{
-      const P=PETS[id],own=petsData().find(p=>p.id===id),y=44+k*80,im=IMG[P.img];
-      ctx.save();rrect(ctx,36,y,408,74,5);ctx.fillStyle=own?'rgba(34,40,22,.92)':'rgba(34,18,14,.9)';ctx.fill();ctx.lineWidth=1.4;ctx.strokeStyle=own?'#7ac060':'#7a6440';ctx.stroke();ctx.restore();
-      ctx.fillStyle='#120c08';ctx.fillRect(44,y+7,60,60);if(im)ctx.drawImage(im,44+30-Math.min(28,im.width*50/im.height/2),y+9,Math.min(56,im.width*56/im.height),56);ctx.strokeStyle='#7a6440';ctx.strokeRect(44,y+7,60,60);
-      txt(own?`${own.name} the ${P.n}`:P.n,116,y+14,12,own?'#ffe9a0':'#e2d8bc','left',true);
-      wrapText(P.d,310,8.2).slice(0,3).forEach((l,q)=>txt(l,116,y+30+q*10,8.2,'#c8bc98','left'));
-      txt(own?'In the party':`For sale for ${P.price} gold from animal traders`,116,y+64,8,own?'#9ae0a0':'#a89878','left',own);
-    });
-  }
-});
-khNpc('pet_trader','Kal, the animal trader','kh_npc5_2',d=>say('A goat to eat your troubles, a cat to watch your back, a donkey to carry the lot. All good animals, all fairly priced, and none of them have bitten anyone important.',
-  ['goat','cat','donkey'].map(id=>[hasCompanion(id)?`${PETS[id].n}: you have one`:`Buy a ${PETS[id].n.toLowerCase()} (${PETS[id].price} gold)`,()=>{const e=petBuy(id);return say(e||'A fine choice. Look after it, and it will look after you.',[BYE])}]).concat([BYE])));
 (function(){ // Kal sets up in Ironhill, near the south wall
   const L=LEVELS[13];if(!L||!L.rows||L._kal)return;L._kal=1;
   const taken=new Set((L.decor||[]).filter(d=>d.block||d.npc).map(d=>d.x+','+d.y));let best=null,bd=1e9;

@@ -93,6 +93,7 @@ const KH_BUILDINGS=[
   {id:'sword1',pool:'shop',sub:'weapon',name:'The Gilded Blade',room:'shop',keeper:'kh_swordsmith',near:[145,335]},
   {id:'armour1',pool:'shop',sub:'weapon',name:'The Iron Aegis',room:'shop',keeper:'kh_armourer',near:[245,335]},
   {id:'potion4',pool:'shop',sub:'potion',name:"The Alchemist's Cellar",room:'shop',keeper:'kh_alchemist',near:[200,288]},
+  {id:'pets1',pool:'shop',sub:'food',name:"Kal's Menagerie",room:'shop',keeper:'pet_trader',near:[165,292]},
 ];
 // the picture shown for the buildings above that were here first
 const KH_SCENE_OF={bath1:'bath_grand',bath2:'bath_hammam',homeA:'warm',homeB:'merchant',homeC:'scholar',drumhouse:'musician',denA:'dark',denB:'ruined',denC:'messy',denD:'empty',urnhouse:'boarded',ledgerhouse:'taxman'};

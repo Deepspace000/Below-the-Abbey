@@ -106,7 +106,7 @@ function evSpawn(npc,face,text){
 function worldRest(inn){
   if(inn||G.state!=='play')return;
   const reg=wxRegionOf(LEVEL);if(!reg||repTownOf(LEVEL))return;
-  const scout=typeof profPerk==='function'?profPerk('scout'):0,cat=typeof hasCompanion==='function'&&hasCompanion('cat')?.08:0,luck=luckVal();
+  const scout=typeof profPerk==='function'?profPerk('scout'):0,cat=typeof hasCompanion==='function'?((hasCompanion('cat')?.08:0)+(hasCompanion('dog')?.1:0)+(hasCompanion('duck')?.05:0)):0,luck=luckVal();
   const guard=scout*.06+cat+luck*.01+(weatherNow()&&weatherNow().stealth?.06:0);
   const r=Math.random();
   if(r<.14-guard){
