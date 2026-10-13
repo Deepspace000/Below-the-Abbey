@@ -133,7 +133,7 @@ Object.assign(CUTS,{mqAudience:()=>[
 
 /* ---- 4. cast off from Yarrim, and the ship's chart ---- */
 vq('yar7','Cast Off','Menkaure, the shipwright','The Dawn Walker is ready at the pier in Yarrim. Corvane\'s ship waits off the reef. Speak to Menkaure at the end of the pier.',1,khFlag('voyage'),{gold:0,xp:3000});
-khNpc('yr_menkaure','Menkaure, the shipwright','kh_npc6_1',()=>{
+khNpc('yr_menkaure','Menkaure, the shipwright','kh_menk1_0',()=>{
   const F=G.flags;
   if(F.voyage)return say('She runs better than I dared hope. Wherever the chart says, we sail.',[['Look at the chart.',()=>seaChart()],BYE]);
   if(qSt('yar6')!=='done')return say('She is nearly ready. Tamsin Kell is still gathering stores, and the lamp must burn before we try the reef at night. When all that is done, come and find me. I will be here on the pier, counting rope.',[BYE]);

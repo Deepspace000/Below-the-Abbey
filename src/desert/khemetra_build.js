@@ -100,6 +100,15 @@ const KH_SCENE_OF={bath1:'bath_grand',bath2:'bath_hammam',homeA:'warm',homeB:'me
 const KH_DIRS=[[0,-1],[0,1],[-1,0],[1,0]];
 const KH_FACE_F=[0,2,3,1]; // the way you face when you step out: north, south, west, east
 let KH_LEVEL_NEXT=200;
+/* the next free level number for a building's room: the numbers the palace, cisterns, study, sea tunnel, jail and the Ironhill shops
+   use are skipped (there are more than sixty buildings now, and the old plain count ran into them) */
+const KH_LEVEL_SKIP=new Set([199,260,261,266,270,271,272,273,274]);
+function khNextLevel(){
+  let n=KH_LEVEL_NEXT++;
+  while(KH_LEVEL_SKIP.has(n)||(n>=281&&n<289))n=KH_LEVEL_NEXT++;
+  if(n>=289)n=KH_HOUSE_NEXT++;   // out of room in the old range: the house numbers go on from 1000
+  return n;
+}
 /* choose, for each building, a stretch of street front of the right sort and far from its own kind */
 function khPlaceBuildings(C){
   const rng=khRng(2024),placed=[],P=KH_POOLS,mods=C.modules;
@@ -144,7 +153,7 @@ function khPlaceBuildings(C){
 function khMakeDoorsAndRooms(C,L,placed){
   const doors={};
   for(const {b,m} of placed){
-    const lvl=KH_LEVEL_NEXT++;
+    const lvl=khNextLevel();
     m.lvl=lvl;
     const dir=KH_DIRS[m.face],cells=m.cells,mid=cells[Math.floor((cells.length-1)/2)];
     const front=[mid[0]+dir[0],mid[1]+dir[1]],ff=KH_FACE_F[m.face];

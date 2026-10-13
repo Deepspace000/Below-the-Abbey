@@ -1965,5 +1965,145 @@
 "h": 243,
 "kind": "sprite",
 "sheet": "int6"
+},
+"menk1_0": {
+"file": "menk1_0.webp",
+"w": 189,
+"h": 420,
+"kind": "sprite",
+"sheet": "menk1"
+},
+"menk1_1": {
+"file": "menk1_1.webp",
+"w": 167,
+"h": 420,
+"kind": "sprite",
+"sheet": "menk1"
+},
+"ybucket1_0": {
+"file": "ybucket1_0.webp",
+"w": 208,
+"h": 200,
+"kind": "sprite",
+"sheet": "ybucket1"
+},
+"ybucket1_1": {
+"file": "ybucket1_1.webp",
+"w": 162,
+"h": 200,
+"kind": "sprite",
+"sheet": "ybucket1"
+},
+"ybucket1_2": {
+"file": "ybucket1_2.webp",
+"w": 220,
+"h": 190,
+"kind": "sprite",
+"sheet": "ybucket1"
+},
+"ybucket1_3": {
+"file": "ybucket1_3.webp",
+"w": 145,
+"h": 200,
+"kind": "sprite",
+"sheet": "ybucket1"
+},
+"ybucket1_4": {
+"file": "ybucket1_4.webp",
+"w": 211,
+"h": 200,
+"kind": "sprite",
+"sheet": "ybucket1"
+},
+"ybucket1_5": {
+"file": "ybucket1_5.webp",
+"w": 257,
+"h": 200,
+"kind": "sprite",
+"sheet": "ybucket1"
+},
+"ytree1_0": {
+"file": "ytree1_0.webp",
+"w": 273,
+"h": 226,
+"kind": "sprite",
+"sheet": "ytree1"
+},
+"ytree1_1": {
+"file": "ytree1_1.webp",
+"w": 235,
+"h": 218,
+"kind": "sprite",
+"sheet": "ytree1"
+},
+"ytree1_2": {
+"file": "ytree1_2.webp",
+"w": 283,
+"h": 219,
+"kind": "sprite",
+"sheet": "ytree1"
+},
+"ytree1_3": {
+"file": "ytree1_3.webp",
+"w": 294,
+"h": 223,
+"kind": "sprite",
+"sheet": "ytree1"
+},
+"ywall1_0": {
+"file": "ywall1_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ywall1"
+},
+"ywall1_1": {
+"file": "ywall1_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ywall1"
+},
+"ywall1_2": {
+"file": "ywall1_2.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ywall1"
+},
+"ywall1_3": {
+"file": "ywall1_3.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ywall1"
+},
+"ywall1_4": {
+"file": "ywall1_4.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ywall1"
+},
+"ywall1_5": {
+"file": "ywall1_5.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ywall1"
+},
+"ytree1_4": {
+"file": "ytree1_4.webp",
+"w": 288,
+"h": 233,
+"kind": "sprite",
+"sheet": "ytree1"
+},
+"ytree1_5": {
+"file": "ytree1_5.webp",
+"w": 218,
+"h": 174,
+"kind": "sprite",
+"sheet": "ytree1"
 }
 }

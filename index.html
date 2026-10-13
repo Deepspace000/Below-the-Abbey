@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.35';
+const VERSION='3.36';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -9086,7 +9086,13 @@ function khPalaceDoor(C){
   return m;
 }
 /* build the level the first time it is needed; returns when the pictures and the map are ready */
-async function khPrepare(){
+let KH_PREP=null;
+/* the city is built once, however many callers ask at the same time (a second build would number the rooms again and overwrite the first) */
+function khPrepare(){
+  if(KH_CITY)return Promise.resolve(KH_CITY);
+  return KH_PREP||(KH_PREP=khPrepareRun().catch(e=>{KH_PREP=null;throw e}));
+}
+async function khPrepareRun(){
   if(KH_CITY)return KH_CITY;
   await khLoadAssets();
   KH_POOLS=khBuildPools();
@@ -9336,6 +9342,15 @@ const KH_SCENE_OF={bath1:'bath_grand',bath2:'bath_hammam',homeA:'warm',homeB:'me
 const KH_DIRS=[[0,-1],[0,1],[-1,0],[1,0]];
 const KH_FACE_F=[0,2,3,1]; // the way you face when you step out: north, south, west, east
 let KH_LEVEL_NEXT=200;
+/* the next free level number for a building's room: the numbers the palace, cisterns, study, sea tunnel, jail and the Ironhill shops
+   use are skipped (there are more than sixty buildings now, and the old plain count ran into them) */
+const KH_LEVEL_SKIP=new Set([199,260,261,266,270,271,272,273,274]);
+function khNextLevel(){
+  let n=KH_LEVEL_NEXT++;
+  while(KH_LEVEL_SKIP.has(n)||(n>=281&&n<289))n=KH_LEVEL_NEXT++;
+  if(n>=289)n=KH_HOUSE_NEXT++;   // out of room in the old range: the house numbers go on from 1000
+  return n;
+}
 /* choose, for each building, a stretch of street front of the right sort and far from its own kind */
 function khPlaceBuildings(C){
   const rng=khRng(2024),placed=[],P=KH_POOLS,mods=C.modules;
@@ -9380,7 +9395,7 @@ function khPlaceBuildings(C){
 function khMakeDoorsAndRooms(C,L,placed){
   const doors={};
   for(const {b,m} of placed){
-    const lvl=KH_LEVEL_NEXT++;
+    const lvl=khNextLevel();
     m.lvl=lvl;
     const dir=KH_DIRS[m.face],cells=m.cells,mid=cells[Math.floor((cells.length-1)/2)];
     const front=[mid[0]+dir[0],mid[1]+dir[1]],ff=KH_FACE_F[m.face];
@@ -9643,7 +9658,7 @@ const KH_FACES={ // which painted person stands for which kind of citizen
   poor:['kh_npc5_0'],
   guards:['kh_npc3_0','kh_npc3_0','kh_npc3_2'],
 };
-const KH_NPC_H={kh_npc1_0:.82,kh_npc1_1:.84,kh_npc1_2:.8,kh_npc1_3:.8,kh_npc1_4:.82,kh_npc1_5:.62,kh_npc1_6:.8,kh_npc2_0:.78,kh_npc2_1:.82,kh_npc2_2:.82,kh_npc2_3:.84,kh_npc2_4:.82,kh_npc2_5:.84,kh_npc3_0:.92,kh_npc3_1:.98,kh_npc3_2:.92,kh_npc3_3:.82,kh_npc3_4:.86,kh_npc3_5:.9,kh_npc4_0:.92,kh_npc4_1:.84,kh_npc4_2:.82,kh_npc4_3:.84,kh_npc4_4:.8,kh_npc4_5:.8,kh_npc5_0:.74,kh_npc5_1:.62,kh_npc5_2:.84,kh_npc5_3:.84,kh_npc5_4:.84,kh_npc5_5:.82,kh_npc6_0:.84,kh_npc6_1:.86,kh_npc6_2:.8,kh_npc6_3:.8,kh_npc6_4:.92,kh_npc6_5:.64,kh_anim1_0:.38,kh_cart1_0:.85,kh_anim1_1:.34,kh_anim1_2:1.0,kh_anim1_3:.5,kh_anim1_4:.7,kh_anim1_5:.3};
+const KH_NPC_H={kh_menk1_0:.98,kh_npc1_0:.82,kh_npc1_1:.84,kh_npc1_2:.8,kh_npc1_3:.8,kh_npc1_4:.82,kh_npc1_5:.62,kh_npc1_6:.8,kh_npc2_0:.78,kh_npc2_1:.82,kh_npc2_2:.82,kh_npc2_3:.84,kh_npc2_4:.82,kh_npc2_5:.84,kh_npc3_0:.92,kh_npc3_1:.98,kh_npc3_2:.92,kh_npc3_3:.82,kh_npc3_4:.86,kh_npc3_5:.9,kh_npc4_0:.92,kh_npc4_1:.84,kh_npc4_2:.82,kh_npc4_3:.84,kh_npc4_4:.8,kh_npc4_5:.8,kh_npc5_0:.74,kh_npc5_1:.62,kh_npc5_2:.84,kh_npc5_3:.84,kh_npc5_4:.84,kh_npc5_5:.82,kh_npc6_0:.84,kh_npc6_1:.86,kh_npc6_2:.8,kh_npc6_3:.8,kh_npc6_4:.92,kh_npc6_5:.64,kh_anim1_0:.38,kh_cart1_0:.85,kh_anim1_1:.34,kh_anim1_2:1.0,kh_anim1_3:.5,kh_anim1_4:.7,kh_anim1_5:.3};
 
 /* ---- src/desert/khemetra_story.js ---- */
 /* ==========================================================================
@@ -9823,7 +9838,7 @@ khAfterShop('kh_armoury','kh_boots',khQD('Two new recruits, no leggings. The cap
    Instrument of Dawn, the grand vizier who wants his seal back before he says where the wizard lives, the wizard in the
    cisterns beneath the city, and the shipwright who looks east to the Vaast Ocean.
    ========================================================================== */
-const KH_FACE_FALLBACK={kh_npc5_0:'beggar',kh_npc5_1:'child',kh_npc5_2:'fisher',kh_npc5_3:'miner',kh_npc5_4:'smith',kh_npc5_5:'drunk',kh_npc6_0:'scribe',kh_npc6_1:'sergeant',kh_npc6_2:'innkeeper',kh_npc6_3:'waterwoman',kh_npc6_4:'prismwiz',kh_npc6_5:'child',kh_anim1_0:'chicken'};
+const KH_FACE_FALLBACK={kh_npc5_0:'beggar',kh_npc5_1:'child',kh_npc5_2:'fisher',kh_npc5_3:'miner',kh_npc5_4:'smith',kh_npc5_5:'drunk',kh_npc6_0:'scribe',kh_npc6_1:'sergeant',kh_menk1_0:'sergeant',kh_npc6_2:'innkeeper',kh_npc6_3:'waterwoman',kh_npc6_4:'prismwiz',kh_npc6_5:'child',kh_anim1_0:'chicken'};
 function khFaceKey(face){return IMG[face]?face:(KH_FACE_FALLBACK[face]&&IMG[KH_FACE_FALLBACK[face]]?KH_FACE_FALLBACK[face]:'peasantM')}
 /* ---- the seven pieces of the Instrument of Dawn: one in a little dungeon of each desert ---- */
 const KH_ARTS=[
@@ -9905,7 +9920,7 @@ khNpc('kh_ishkander','Ishkander, the wizard','kh_npc6_4',()=>{
 },{q:'scoria'});
 /* ---- Captain Menkaure, the shipwright, and the road to the sea ---- */
 khQuest('kh_sea','The Road to the Vaast Ocean','Captain Menkaure','Menkaure the shipwright says a tunnel runs from the east of the Violet Erg to the shore of the Vaast Ocean. Find it, walk it, and see the sea.',1,khFlag('khSeaSeen'),{gold:900,xp:4000,items:['potion4']});
-khNpc('kh_captain','Menkaure, the shipwright','kh_npc6_1',()=>{
+khNpc('kh_captain','Menkaure, the shipwright','kh_menk1_0',()=>{
   const F=G.flags,st=qSt('kh_sea');
   if(qReady('kh_sea'))return say('You have been to the shore? Tell me everything. How wide was it? What colour? Did it smell of salt?',[['We stood on the shore of the Vaast Ocean.',()=>{qTurnIn('kh_sea');F.khSeaReport=1;return say('Then the old sailors were right. There is a sea, and the road to it exists. I will start building at once. A ship takes time, and so does a crew, but I think we shall sail before the year is out. Come and see me when the keel is laid.',[BYE])}],BYE]);
   if(st==='active')return say('The tunnel lies in the east of the Violet Erg, near the coast. Look for a cave mouth between two dunes, with sea birds over it. Do not go at noon.',[BYE]);
@@ -12830,7 +12845,7 @@ Object.assign(CUTS,{mqAudience:()=>[
 
 /* ---- 4. cast off from Yarrim, and the ship's chart ---- */
 vq('yar7','Cast Off','Menkaure, the shipwright','The Dawn Walker is ready at the pier in Yarrim. Corvane\'s ship waits off the reef. Speak to Menkaure at the end of the pier.',1,khFlag('voyage'),{gold:0,xp:3000});
-khNpc('yr_menkaure','Menkaure, the shipwright','kh_npc6_1',()=>{
+khNpc('yr_menkaure','Menkaure, the shipwright','kh_menk1_0',()=>{
   const F=G.flags;
   if(F.voyage)return say('She runs better than I dared hope. Wherever the chart says, we sail.',[['Look at the chart.',()=>seaChart()],BYE]);
   if(qSt('yar6')!=='done')return say('She is nearly ready. Tamsin Kell is still gathering stores, and the lamp must burn before we try the reef at night. When all that is done, come and find me. I will be here on the pier, counting rope.',[BYE]);

@@ -22,7 +22,13 @@ function khPalaceDoor(C){
   return m;
 }
 /* build the level the first time it is needed; returns when the pictures and the map are ready */
-async function khPrepare(){
+let KH_PREP=null;
+/* the city is built once, however many callers ask at the same time (a second build would number the rooms again and overwrite the first) */
+function khPrepare(){
+  if(KH_CITY)return Promise.resolve(KH_CITY);
+  return KH_PREP||(KH_PREP=khPrepareRun().catch(e=>{KH_PREP=null;throw e}));
+}
+async function khPrepareRun(){
   if(KH_CITY)return KH_CITY;
   await khLoadAssets();
   KH_POOLS=khBuildPools();
