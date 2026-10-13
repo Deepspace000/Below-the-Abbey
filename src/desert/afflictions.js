@@ -228,6 +228,7 @@ function khGuardTalk(guard,text,opts){
 function afflHouseBump(d){
   const sc=d.sc||(LEVELS[d.lvl]&&LEVELS[d.lvl].scene);
   if(!sc||/^bath/.test(sc))return false;
+  if(afflHas('masked')){if(khGuardNear())msg('A guard glances your way, sees only a stranger in a fine mask, and looks away.','#c8b0e0');return false}
   const g=khGuardNear();if(!g){try{skXP('stealth',1)}catch(e){}return false}
   const F=G.flags;
   if(F.khWarnT!==undefined&&G.clock-F.khWarnT>2880){F.khWarn=0;afflCure('warned',-1,true)}

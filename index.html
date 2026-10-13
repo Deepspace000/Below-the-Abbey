@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.24';
+const VERSION='3.25';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3236,7 +3236,7 @@ function drawInventory(){
     drawItemCard(cur,hi,rx,8,rw);
     const d=idef(cur);let label=null,id=null;
     if(I.sel.src==='slot'){label='Unequip';id='iunequip'}
-    else if(d.k==='potion'||d.k==='food'){label=d.k==='food'?'Eat':'Drink';id='iuse'}
+    else if(d.k==='potion'||d.k==='food'){label=d.k==='food'?'Eat':d.mask?'Wear':'Drink';id='iuse'}
     else if(d.k==='quest'){label=null}
     else{label='Equip';id='iequip'}
     const dk=I.sel.src==='bag'?'b'+I.sel.i:'s'+I.sel.slot,sure=I.dropKey===dk;
@@ -3781,6 +3781,7 @@ function useHeal(hi,idx){
   const h=G.heroes[hi];
   if(idx<0)idx=bestPotionIndex(hi);
   const it=G.bag[idx];
+  if(it&&idef(it).mask){bagTake(idx);wearMask(hi);return true}
   if(it&&idef(it).cures)return afflUseItem(hi,idx);
   if(it&&idef(it).buff){const D=idef(it),B=D.buff;bagTake(idx);G.buffs=G.buffs.filter(x=>!(x.name===D.n&&x.hi===hi));G.buffs.push({name:D.n,b:B.b,amt:B.amt,left:B.rounds,hi});sfx('potion');msg(`${HERO_DEF[hi].name} drinks the ${D.n}. ${D.d}`,'#ffe9a0');return true}
   if(it&&idef(it).mana){const D=idef(it);if(h.mp>=h.mpMax){msg(`${HERO_DEF[hi].name} is not tired.`);return false}bagTake(idx);h.mp=Math.min(h.mpMax,h.mp+D.mana);sfx('potion');msg(`${HERO_DEF[hi].name} drinks the ${D.n} (+${D.mana} ${HERO_DEF[hi].mpn.toLowerCase()}).`,'#9ac8ff');return true}
@@ -10220,6 +10221,16 @@ function khCrowd(C,L){
     const q=near(ax,ay,8,true);if(!q)continue;const kp=KH_KEEPERS[id];if(!kp)continue;
     add({k:khFaceKey(kp.face),x:q[0],y:q[1],block:false,walk:true,npc:id,sc:kp.sc||1});
   }
+  { // the masks salesmen wait at the dead ends of narrow lanes, in quiet corners
+    let n=0;(C.lanes||[]).forEach((l,i)=>{
+      if(i%9!==4)return;const q0=C.idx((l.x0+l.x1)>>1,(l.y0+l.y1)>>1);if(C.solid[q0]||C.zone[q0]!==0)return
+      const ex=l.v?l.x0:(l.left?l.x1:l.x0),ey=l.v?(l.top?l.y1:l.y0):l.y0;
+      let q=null;for(let r=0;r<=5&&!q;r++)for(let dy=-r;dy<=r&&!q;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const xx=ex+dx,yy=ey+dy;if(open(xx,yy)&&C.reach[idx(xx,yy)]&&!decor.some(d=>d.x===xx&&d.y===yy&&d.block)){q=[xx,yy];break}}
+      if(!q)return
+      const kp=KH_KEEPERS.kh_snakeoil;if(!kp)returnadd({k:khFaceKey(kp.face),x:q[0],y:q[1],block:false,walk:true,npc:'kh_snakeoil',sc:1});n++;
+    });
+    L.khSnake=n;
+  }
   khPlaceCarts(C,L,near,add);
   khPlaceQuestFolk(C,L,near,add);
   { // the granary keeper waits outside the granary
@@ -11235,6 +11246,7 @@ function khGuardTalk(guard,text,opts){
 function afflHouseBump(d){
   const sc=d.sc||(LEVELS[d.lvl]&&LEVELS[d.lvl].scene);
   if(!sc||/^bath/.test(sc))return false;
+  if(afflHas('masked')){if(khGuardNear())msg('A guard glances your way, sees only a stranger in a fine mask, and looks away.','#c8b0e0');return false}
   const g=khGuardNear();if(!g){try{skXP('stealth',1)}catch(e){}return false}
   const F=G.flags;
   if(F.khWarnT!==undefined&&G.clock-F.khWarnT>2880){F.khWarn=0;afflCure('warned',-1,true)}
@@ -12055,6 +12067,7 @@ const RUMOURS=[
   {id:'caravan',t:'Merchants pull their carts off the road in fine weather. They carry things that no shop sells.',tag:'road'},
   {id:'locks',t:'The shuttered houses of Thornwick are not as empty as they look. A thief with a good pick can get in. Some have a little gold.',tag:'dark'},
   {id:'rest',t:'Sleeping in the open is dangerous. Thieves come in the night, and sometimes worse. A cat, a scout or a bit of luck keeps them away.',tag:'road'},
+  {id:'masks',t:'Shifty salesmen lurk in the quiet dead-end lanes of Khemetra and sell Magic Masks. Five hundred gold, and the watch looks right through you for twelve hours.',tag:'dark'},
   {id:'friends',t:'Companions who share a fire become friends. Friends fight better, and fall hard.',tag:'bond'}
 ];
 function rumData(){const F=G.flags;return F.rumours||(F.rumours={})}
@@ -12120,6 +12133,39 @@ journalPage({id:'rumour',title:'Rumours and Leads',
     BTNS.push({id:'rmarea',x:30,y:top,w:420,h:viewH,up:true,drag:'rum'});
   },
   click(id){if(id==='rm_up')G.rs=Math.max(0,(G.rs||0)-80);if(id==='rm_dn')G.rs=(G.rs||0)+80}
+});
+
+/* ---- src/desert/masks.js ---- */
+/* ==========================================================================
+   MAGIC MASKS. Shifty salesmen in the quiet corners of Khemetra (the dead ends of the narrow lanes) sell Magic Masks for 500 gold each.
+   Wearing one makes the whole party a stranger to the watch for twelve hours: no guard will accost it for walking into a house.
+   ========================================================================== */
+AFFL.masked={n:'Masked',kind:'good',who:'the whole party',col:'#c070e0',days:.5,
+  text:'A mask of gold and red, and a prickle of something that is not quite magic. To the watch, the party is nobody at all: a few strangers in fine masks, of no interest to anyone.',
+  src:'Wearing a Magic Mask, bought from a shifty salesman in a quiet corner of Khemetra for 500 gold.',cure:'Not an affliction. The mask works for twelve hours, and then it is just a mask.'};
+AFFL_ORDER.push('masked');
+ITEMDEF.magicmask={n:'Magic Mask',k:'potion',t:'Mask',ic:'magicmask',c:'#c04060',stack:1,mask:1,price:500,d:'A gold and red half mask. Wear it and, for twelve hours, the watch of Khemetra looks straight through the party: no warnings for walking into houses. The salesman swore it was real magic.',sw:.3};
+if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push('magicmask');
+function wearMask(hi){
+  afflInflict('masked',-1,true);
+  msg(`${HERO_DEF[hi].name} puts on the mask, and so do the others. For twelve hours the watch will not give the party a second look.`,'#e0c0f0');sfx('potion');
+}
+const MASK_LINES=[
+  'Psst. Friend. You have the look of someone who goes into houses. Not that there is anything wrong with that. I sell masks. Real magic. The guards look straight through you.',
+  'Quiet, quiet. A word. Masks, my friend. Enchanted by a genuine wizard I will not name. Wear one and no guard will trouble you. Five hundred gold. A bargain.',
+  'Over here. Not so loud. Do you want to walk into any house you like without a guard making a fuss? I have exactly the thing. Magic masks. Limited stock. Unlimited discretion.'
+];
+khNpc('kh_snakeoil','A shifty salesman','kh_npc5_5',d=>{
+  const line=MASK_LINES[(hash2(d.x,d.y,5)*MASK_LINES.length)|0];
+  return say(line,[
+    ['Buy a Magic Mask (500 gold).',()=>{
+      if(G.gold<500)return say('Five hundred. That is the price. I am not a charity, I am a businessman.',[BYE]);
+      if(!bagAdd(mkItem('magicmask')))return say('Your bag is full. I cannot be seen handing you things in a crowd.',[BYE]);
+      G.gold-=500;sfx('key');honourAdd(-1,'you bought a thief mask');
+      return say('Pleasure. Keep it out of the rain, and do not wear it near a mirror. Do not ask what happens. Nothing happens. Mostly.',[BYE]);
+    }],
+    ['What does the mask do?',()=>say('Wear it, and for twelve hours the watch sees a stranger in a pretty mask and thinks of something else. You can walk into any house you like, and nobody bats an eye. They work on the whole party at once. One mask, one party.',[['Buy a Magic Mask (500 gold).',()=>{if(G.gold<500)return say('Five hundred gold. I do not haggle in alleys.',[BYE]);if(!bagAdd(mkItem('magicmask')))return say('Your bag is full.',[BYE]);G.gold-=500;sfx('key');honourAdd(-1,'you bought a thief mask');return say('You will not regret it. Much.',[BYE])}],BYE])],
+    BYE]);
 });
 
 /* ---- src/desert/spells.js ---- */

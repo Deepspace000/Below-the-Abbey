@@ -29,6 +29,7 @@ const RUMOURS=[
   {id:'caravan',t:'Merchants pull their carts off the road in fine weather. They carry things that no shop sells.',tag:'road'},
   {id:'locks',t:'The shuttered houses of Thornwick are not as empty as they look. A thief with a good pick can get in. Some have a little gold.',tag:'dark'},
   {id:'rest',t:'Sleeping in the open is dangerous. Thieves come in the night, and sometimes worse. A cat, a scout or a bit of luck keeps them away.',tag:'road'},
+  {id:'masks',t:'Shifty salesmen lurk in the quiet dead-end lanes of Khemetra and sell Magic Masks. Five hundred gold, and the watch looks right through you for twelve hours.',tag:'dark'},
   {id:'friends',t:'Companions who share a fire become friends. Friends fight better, and fall hard.',tag:'bond'}
 ];
 function rumData(){const F=G.flags;return F.rumours||(F.rumours={})}

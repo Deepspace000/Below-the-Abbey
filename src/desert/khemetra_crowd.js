@@ -123,6 +123,16 @@ function khCrowd(C,L){
     const q=near(ax,ay,8,true);if(!q)continue;const kp=KH_KEEPERS[id];if(!kp)continue;
     add({k:khFaceKey(kp.face),x:q[0],y:q[1],block:false,walk:true,npc:id,sc:kp.sc||1});
   }
+  { // the masks salesmen wait at the dead ends of narrow lanes, in quiet corners
+    let n=0;(C.lanes||[]).forEach((l,i)=>{
+      if(i%9!==4)return;const q0=C.idx((l.x0+l.x1)>>1,(l.y0+l.y1)>>1);if(C.solid[q0]||C.zone[q0]!==0)return
+      const ex=l.v?l.x0:(l.left?l.x1:l.x0),ey=l.v?(l.top?l.y1:l.y0):l.y0;
+      let q=null;for(let r=0;r<=5&&!q;r++)for(let dy=-r;dy<=r&&!q;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const xx=ex+dx,yy=ey+dy;if(open(xx,yy)&&C.reach[idx(xx,yy)]&&!decor.some(d=>d.x===xx&&d.y===yy&&d.block)){q=[xx,yy];break}}
+      if(!q)return
+      const kp=KH_KEEPERS.kh_snakeoil;if(!kp)returnadd({k:khFaceKey(kp.face),x:q[0],y:q[1],block:false,walk:true,npc:'kh_snakeoil',sc:1});n++;
+    });
+    L.khSnake=n;
+  }
   khPlaceCarts(C,L,near,add);
   khPlaceQuestFolk(C,L,near,add);
   { // the granary keeper waits outside the granary
