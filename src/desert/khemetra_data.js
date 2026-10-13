@@ -39,11 +39,18 @@ function khStory(){
 }
 
 /* the terrace inside the gate: the party arrives on a high platform and walks down a long stair into the avenue */
-function khEyeAt(x,y){
-  if(x<192||x>208)return 0;
-  const T=2.3;
-  if(y>=386)return T;
-  if(y<=374)return 0;
-  const u=(y-374)/12,k=u*u*(3-2*u);       // a smooth fall, one step after another
-  return T*k;
+function khEyeAt(x,y){return 0}
+
+/* only the part of the city the party is in is worked on: decor is kept in 32 by 32 squares and just the squares near the camera are looked at */
+function khBucketDecor(){
+  const B=new Map();
+  for(const d of G.decor){const k=(d.x>>5)+','+(d.y>>5),l=B.get(k);if(l)l.push(d);else B.set(k,[d])}
+  G.khB=B;
+}
+const KH_NEARBUF=[];
+function khNearDecor(cx,cy){
+  const out=KH_NEARBUF;out.length=0;
+  const x0=Math.max(0,(cx-30)>>5),x1=(cx+30)>>5,y0=Math.max(0,(cy-30)>>5),y1=(cy+30)>>5;
+  for(let by=y0;by<=y1;by++)for(let bx=x0;bx<=x1;bx++){const l=G.khB.get(bx+','+by);if(l)for(let i=0;i<l.length;i++)out.push(l[i])}
+  return out;
 }

@@ -59,6 +59,7 @@ function khBuild(seed){
   open(PAL.x0-1,PAL.y0-1,PAL.x1+1,PAL.y1+1,6,2);
   R(PAL.x0,PAL.y0,PAL.x1,PAL.y1,(x,y)=>{if(x<PAL.x0+2||x>PAL.x1-2||y<PAL.y0+2||y>PAL.y1-2)solid[idx(x,y)]=1;else{solid[idx(x,y)]=0;zone[idx(x,y)]=6;fl[idx(x,y)]=KH_FLOOR.gold.charCodeAt(0)-48}});
   open(KH.CX-3,PAL.y1-1,KH.CX+3,PAL.y1+1,6,2);          // the gate through the palace wall
+  open(KH.CX-7,PAL.y1+2,KH.CX+7,245,6,2);                // a forecourt before the gate, where the avenue meets the palace
   const PB={x0:176,y0:176,x1:224,y1:204};                // the palace itself
   R(PB.x0,PB.y0,PB.x1,PB.y1,(x,y)=>{solid[idx(x,y)]=1});
   // ---- plazas: markets, gardens, courts ----

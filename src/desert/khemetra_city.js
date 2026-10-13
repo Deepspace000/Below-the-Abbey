@@ -79,6 +79,8 @@ function khSkyline(C,L){
   }
   const pal=KH_MAN.palace_0;
   if(pal){const w=54,hh=w*pal.h/pal.w;sky.push({x:KH.CX+.5,y:C.PB.y0+9,k:'kh_palace_0',w,z:2.2,h:hh,big:1})}
+  const mq=KH_MAN.mosque1_0,mb=KH_BUILDINGS.find(b=>b.id==='mosque');
+  if(mq&&mb&&mb.m){const dd=KH_DIRS[mb.m.face],cc=mb.m.cells[1]||mb.m.cells[0],w2=22,hh=w2*mq.h/mq.w;sky.push({x:cc[0]+.5-dd[0]*4,y:cc[1]+.5-dd[1]*4,k:'kh_mosque1_0',w:w2,z:mb.m.wh-.02,h:hh,big:1})}
   const ch=KH_MAN.church_0;
   if(ch){const w=24,hh=w*ch.h/ch.w;sky.push({x:122.5,y:196.5,k:'kh_church_0',w,z:1.9,h:hh,big:1})}
   const tw=P.towers;

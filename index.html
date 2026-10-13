@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.92';
+const VERSION='2.96';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1208,6 +1208,7 @@ function windTick(){
 /* ---- long tracks (several megabytes each) are streamed, not decoded whole, and play one after another ---- */
 const STREAM_LISTS={41:['music_sands_forgotten','music_sands_vibration','music_sands_holycity','music_sands_goldenkey'],
   42:['music_sands_tomb'],
+  44:['music_sands_holycity'],
   43:['music_sands_goldenkey','music_sands_holycity','music_sands_vibration','music_sands_forgotten']};
 const STREAM={el:null,gain:null,list:null,idx:0,playing:false,want:null};
 function streamTick(){
@@ -1240,6 +1241,7 @@ function areaAudio(){
     if(LEVEL===32){T.music_mithral=.55;loadLazy('music_mithral')}
     else if(LEVEL===33){T.village_ambience=.22;T.wind_loop=.1}
     else if(LEVEL===35){T.music_tavern=.5;T.village_ambience=.15}
+    else if(LEVEL===44){T.village_ambience=.4}
     else if(STREAM_LISTS[LEVEL]&&LEVEL>=50&&!(LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor)){T.dungeon_ambience=.18}
     else if(EMBERS_LEVELS.includes(LEVEL)){T.dungeon_ambience=.22;T.music_embers=.55;loadLazy('music_embers')}
     else if(DUNGEON_LEVELS.includes(LEVEL)){T.dungeon_ambience=.3;T.music_dungeon1=.5}
@@ -2601,7 +2603,7 @@ function spriteList(){
   if(G.flora&&G.flora.length){const px=G.C.x+.5,py=G.C.y+.5;for(const f of G.flora){const dx=f.wx-px,dy=f.wy-py;if(dx*dx+dy*dy>256)continue;const im=IMG[f.k];if(!im)continue;L.push({x:f.wx,y:f.wy,img:im,w:(NPC_H[f.k]?NPC_H[f.k]*im.width/im.height:decorW(f.k))*f.sc,decor:f.decor})}} // lots of tiny tufts: only those within sixteen cells are drawn
   const DROP={well:.07,fountain:.1,chest:.05,cart:.05,barrel:.03,crate:.03,bench:.04,urn:.03,memorial:.04,statue:.03,coffin:.03,gate:.02,tree0:.15,tree1:.13,tree2:.09,tree3:.14,tree4:.15,tree5:.16,tree6:.13,tree7:.14};
   const cam=G.C||{x:0,y:0};
-  for(const d of G.decor){if(d.found)continue;if(d.hidden)continue;if(G.decor.length>250&&((d.x-cam.x)*(d.x-cam.x)+(d.y-cam.y)*(d.y-cam.y))>1300)continue;const k=(d.k==='grave'&&IMG.grave2&&hash2(d.x,d.y,5)>.5)?'grave2':d.k;if(d.wd&&d.txt){L.push({x:d.x+.5+d.wd[0]*.1,y:d.y+.5+d.wd[1]*.1,img:shopSign(d),w:.8,bob:.3,hang:[d.wd[0],d.wd[1]],decor:d});continue}
+  for(const d of (LEVEL===44&&G.khB?khNearDecor(cam.x,cam.y):G.decor)){if(d.found)continue;if(d.hidden)continue;if(G.decor.length>250&&((d.x-cam.x)*(d.x-cam.x)+(d.y-cam.y)*(d.y-cam.y))>1300)continue;const k=(d.k==='grave'&&IMG.grave2&&hash2(d.x,d.y,5)>.5)?'grave2':d.k;if(d.wd&&d.txt){L.push({x:d.x+.5+d.wd[0]*.1,y:d.y+.5+d.wd[1]*.1,img:shopSign(d),w:.8,bob:.3,hang:[d.wd[0],d.wd[1]],decor:d});continue}
     if(d.k==='lever'){L.push({x:d.x+.5+d.wd[0]*.43,y:d.y+.5+d.wd[1]*.43,img:IMG.lever,w:.42,bob:.3,flat:[d.wd[0],d.wd[1]],decor:d});continue}
     if(d.wd&&d.k.startsWith('branch')){L.push({x:d.x+.5+d.wd[0]*.1,y:d.y+.5+d.wd[1]*.1,img:IMG[d.k],w:.8,bob:d.bob||.4,hang:[d.wd[0],d.wd[1]],decor:d});continue}
     L.push({x:d.x+.5+(d.ox||0),y:d.y+.5+(d.oy||0),img:(LEVEL>=33&&LEVEL<=38&&d.npc&&VIVID_KEYS.has(k))?vividImg(k,d):(k==='brazier'?IMG['brazier'+(((G.time*7+d.x*3+d.y)|0)&3)]:k==='teleporter'?IMG['tele'+(teleActive(LEVEL)?1+(((G.time*5)|0)&3):0)]:IMG[k]),w:(NPC_H[k]&&IMG[k]?NPC_H[k]*IMG[k].width/IMG[k].height:decorW(k))*(d.sc||1),drop:DROP[k]||(/^[glp]tree/.test(k)?.05:0),bob:d.bob||0,decor:d})}
@@ -2609,7 +2611,7 @@ function spriteList(){
 }
 let SC=ctx; // sprites are painted straight onto the full-size screen, not into the small 3D picture, so they stay sharp
 function drawSprites(cx,cy,dX,dY,pX,pY){
-  const inv=-1/PL,list=spriteList().concat(LEVEL===44&&LEVELS[44].sky?khSkyList(cx,cy,dX,dY):[]),proj=[],far=(G.day||0)>0?34:20,far2=far*far,farT=(G.day||0)>0?33:16; // outdoors the trees stay drawn as far as the walls can be seen
+  const inv=-1/PL,list=spriteList().concat(LEVEL===44&&LEVELS[44].sky?khSkyList(cx,cy,dX,dY):[]),proj=[],far=LEVEL===44?26:(G.day||0)>0?34:20,far2=far*far,farT=LEVEL===44?26:(G.day||0)>0?33:16; // outdoors the trees stay drawn as far as the walls can be seen
   for(const s of list){
     const rx=s.x-cx,ry=s.y-cy;
     if(rx*rx+ry*ry>(s.sky?60000:far2))continue;
@@ -3363,7 +3365,7 @@ function jumpFromUrl(){
   const F=G.flags,sq=T=>q.get('at')==='square'?{x:25,y:T.gate_y,f:1}:{x:T.start.x,y:T.start.y,f:1}; // &at=square lands in the middle of the town
   if(town==='abbey'||town==='thornwood'){F.townSeen=0;delete F.abbeyIntroSeen;G.bossDead=true;goToLevel(2);G.state='play';G.menu=false;return}
   F.townSeen=1;F.abbeyIntroSeen=1;F.gwoodSeen=1;
-  const AREAS={bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],khemetracity:[44,200,391,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
+  const AREAS={bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],khemetracity:[44,201,379,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
   if(!AREAS[town]&&town.length>=4){const m=Object.keys(AREAS).filter(k=>k.startsWith(town)||town.startsWith(k));if(m.length===1)town=m[0]} // near-misses like whitedune find the right area
   if(AREAS[town]&&town!=='thornwood'){const [lv,ax,ay,af]=AREAS[town];F.gandrickDead=1;F.northGate=1;F.mayorKilled=1;F.mayorDown=1;F.ironRoad=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};if(lv===44&&LEVELS[44].stub){khEnter(()=>{goToLevel(lv,{x:ax,y:ay,f:af});G.state='play';G.menu=false});return}goToLevel(lv,{x:ax,y:ay,f:af});G.state='play';G.menu=false;return}
   if(town==='greendale'||town==='anaea'){F.passDone=1;F.passSeen=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};goToLevel(town==='anaea'?33:32,town==='anaea'?sq(ANAEAJ):{x:2,y:36,f:1});G.state='play';G.menu=false;return}
@@ -4212,7 +4214,7 @@ function enemyGlyph(t){
 }
 function drawOverview(){
   BTNS=[];veil(.95);
-  if(!G.ovInit||G.ovLevel!==LEVEL){G.mz=clamp(LEVEL===44?5:12,mapFit(),34);const [rw,rh]=mapRes();G.panX=(DW-rw)/2-((G.C.x+.5)*G.mz+6);G.panY=(DH-rh)/2-((G.C.y+.5)*G.mz+30);G.ovInit=true;G.ovLevel=LEVEL}
+  if(!G.ovInit||G.ovLevel!==LEVEL){G.mz=clamp(LEVEL===44?1:12,mapFit(),34);const [rw,rh]=mapRes();G.panX=(DW-rw)/2-((G.C.x+.5)*G.mz+6);G.panY=(DH-rh)/2-((G.C.y+.5)*G.mz+30);G.ovInit=true;G.ovLevel=LEVEL}
   const cs=G.mz,[ox,oy]=mapOrigin(cs);
   ctx.save();ctx.font=`24px ${FTITLE}`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle='#d8c88e';ctx.fillText(`Level ${LEVEL}: ${LEVEL_NAMES[LEVEL]}`,8,15);ctx.restore();
   const TOWN=(LEVEL===3||LEVEL===13);
@@ -5629,6 +5631,7 @@ Object.assign(NPCS,{prismwiz:{name:'Orrin, the colour wizard',img:'prismwiz',roo
 function startTalk(d){
   if(d.goat){foundGoat(d);return}
   const n=NPCS[d.npc];if(!n)return;
+  if(!d.kname&&typeof khResidentName==='function'){const nm=khResidentName(d);if(nm)d.kname=nm}
   G.talk={d,n:d.kname?Object.assign({},n,{name:d.kname}):n,node:n.root(d),t:G.time,btns:[]};G.hold=null;G.queued=null;
 }
 function talkBtn(id){
@@ -6541,7 +6544,6 @@ addEventListener('keydown',e=>{
   if(G.state==='create'){if(e.key==='Enter'){crBtn(G.cr.step==='done'?'cr_start':'cr_ok');e.preventDefault()}return}
   if(G.state==='win'||G.state==='dead'){if(e.key==='Enter'||e.key===' ')loadRecent();return}
   if(e.key==='Escape'){if(G.overview){if(G.world)G.world=false;else G.overview=false}else if(G.loot){G.loot=null}else if(G.inv.open){G.inv.open=false}else{G.menu=!G.menu;G.map=false}e.preventDefault();return}
-  if((e.key==='v'||e.key==='V')&&LEVEL===44&&G.state==='play'){G.lookout=!G.lookout;msg(G.lookout?'You climb up to look out over the roofs. Press V to come down.':'You come back down to the street.','#cfe8ff');e.preventDefault();return}
   if(e.key==='i'||e.key==='I'){if(G.inv.open)G.inv.open=false;else openInv(G.sel);e.preventDefault();return}
   if((e.key==='o'||e.key==='O')&&G.state==='play'){G.overview=!G.overview;G.world=false;return}
   if((e.key==='j'||e.key==='J')&&G.state==='play'){G.menu=G.menu==='quests'?false:'quests';G.map=false;return}
@@ -7823,7 +7825,7 @@ function buildRedDunes(){
 const REDDUNES=buildRedDunes();
 const LEVEL43_DATA={rows:REDDUNES.rows,start:REDDUNES.start,enemies:REDDUNES.enemies,items:REDDUNES.items,decor:REDDUNES.decor,scenery:REDDUNES.scen,fmap:REDDUNES.fm,outdoor:true,day:.97,floor:'redsand',
   floorSet:['redsand','redsand2','redpath','sandpath'],ceil:'cloud',noExtras:true,name:'The Red Dunes',label:'Red Dunes',diff:16,
-  portals:[{to:42,x:48,y:2,f:2,tex:'sutdoor'},{to:44,x:200,y:391,f:0,tex:'citygate'}]};
+  portals:[{to:42,x:48,y:2,f:2,tex:'sutdoor'},{to:44,x:201,y:379,f:0,tex:'citygate'}]};
 LEVELS[43]=LEVEL43_DATA;
 LEVEL42_DATA.portals[1]={to:43,x:REDDUNES.cxS,y:REDDUNES.start.y,f:0,tex:'sutdoor'};
 
@@ -8596,6 +8598,7 @@ function khBuild(seed){
   open(PAL.x0-1,PAL.y0-1,PAL.x1+1,PAL.y1+1,6,2);
   R(PAL.x0,PAL.y0,PAL.x1,PAL.y1,(x,y)=>{if(x<PAL.x0+2||x>PAL.x1-2||y<PAL.y0+2||y>PAL.y1-2)solid[idx(x,y)]=1;else{solid[idx(x,y)]=0;zone[idx(x,y)]=6;fl[idx(x,y)]=KH_FLOOR.gold.charCodeAt(0)-48}});
   open(KH.CX-3,PAL.y1-1,KH.CX+3,PAL.y1+1,6,2);          // the gate through the palace wall
+  open(KH.CX-7,PAL.y1+2,KH.CX+7,245,6,2);                // a forecourt before the gate, where the avenue meets the palace
   const PB={x0:176,y0:176,x1:224,y1:204};                // the palace itself
   R(PB.x0,PB.y0,PB.x1,PB.y1,(x,y)=>{solid[idx(x,y)]=1});
   // ---- plazas: markets, gardens, courts ----
@@ -8748,7 +8751,7 @@ function khMakeFloors(){
   // a picture drawn at the size of one cell; zoom takes the middle part of it, so fine patterns read at game scale
   const put=(n,key,zoom)=>{const im=khImg(key);if(!im)return false;const [c,x]=tcv(),sw=im.width/zoom,sh=im.height/zoom,sx=(im.width-sw)/2,sy=(im.height-sh)/2;x.drawImage(im,sx,sy,sw,sh,0,0,TS,TS);FLOORS[n]=pix(c);names.push(n);return true};
   // 0 cobbles, 1 slabs, 2 painted tile, 3 market setts, 4 lawn, 5 mosaic
-  const want=[[['floor2_0'],1],[['floor2_2','floor2_1'],1],[['floor3_0','floor2_4'],2],[['floor2_5','floor2_3'],1],[['floor1_4'],1],[['floor3_2','floor2_4'],2]];
+  const want=[[['floor2_0'],1],[['floor2_2','floor2_1'],1],[['floor3_3','floor3_0','floor2_4'],1],[['floor2_5','floor2_3'],1],[['floor1_4'],1],[['floor3_2','floor2_4'],2]];
   const base=['#c9b48a','#d4c09a','#c8b890','#b89c70','#6e8f4a','#7aa0b8'];
   want.forEach(([keys,zoom],i)=>{
     if(keys.some(k=>put('kh'+i,k,zoom)))return;
@@ -8841,6 +8844,8 @@ function khSkyline(C,L){
   }
   const pal=KH_MAN.palace_0;
   if(pal){const w=54,hh=w*pal.h/pal.w;sky.push({x:KH.CX+.5,y:C.PB.y0+9,k:'kh_palace_0',w,z:2.2,h:hh,big:1})}
+  const mq=KH_MAN.mosque1_0,mb=KH_BUILDINGS.find(b=>b.id==='mosque');
+  if(mq&&mb&&mb.m){const dd=KH_DIRS[mb.m.face],cc=mb.m.cells[1]||mb.m.cells[0],w2=22,hh=w2*mq.h/mq.w;sky.push({x:cc[0]+.5-dd[0]*4,y:cc[1]+.5-dd[1]*4,k:'kh_mosque1_0',w:w2,z:mb.m.wh-.02,h:hh,big:1})}
   const ch=KH_MAN.church_0;
   if(ch){const w=24,hh=w*ch.h/ch.w;sky.push({x:122.5,y:196.5,k:'kh_church_0',w,z:1.9,h:hh,big:1})}
   const tw=P.towers;
@@ -8898,13 +8903,20 @@ function khStory(){
 }
 
 /* the terrace inside the gate: the party arrives on a high platform and walks down a long stair into the avenue */
-function khEyeAt(x,y){
-  if(x<192||x>208)return 0;
-  const T=2.3;
-  if(y>=386)return T;
-  if(y<=374)return 0;
-  const u=(y-374)/12,k=u*u*(3-2*u);       // a smooth fall, one step after another
-  return T*k;
+function khEyeAt(x,y){return 0}
+
+/* only the part of the city the party is in is worked on: decor is kept in 32 by 32 squares and just the squares near the camera are looked at */
+function khBucketDecor(){
+  const B=new Map();
+  for(const d of G.decor){const k=(d.x>>5)+','+(d.y>>5),l=B.get(k);if(l)l.push(d);else B.set(k,[d])}
+  G.khB=B;
+}
+const KH_NEARBUF=[];
+function khNearDecor(cx,cy){
+  const out=KH_NEARBUF;out.length=0;
+  const x0=Math.max(0,(cx-30)>>5),x1=(cx+30)>>5,y0=Math.max(0,(cy-30)>>5),y1=(cy+30)>>5;
+  for(let by=y0;by<=y1;by++)for(let bx=x0;bx<=x1;bx++){const l=G.khB.get(bx+','+by);if(l)for(let i=0;i<l.length;i++)out.push(l[i])}
+  return out;
 }
 
 /* ---- src/desert/khemetra_build.js ---- */
@@ -8917,7 +8929,7 @@ const KH_PROPS={ // painted props by role: [sheet piece, height in cells]; the o
   fountain:['kh_city1_0','fountain',1.1],well:['kh_city1_1','well',1.0],obelisk:['kh_city1_2','memorial',2.4],statue:['kh_city1_3','statue',1.5],lamp:['kh_nolamp','lamp',1.5],bench:['kh_city1_4','bench',.6],
   palm:['kh_city2_0','dpalm0',2.4],tree:['kh_city2_1','ltree17',1.7],shrub:['kh_city2_2','lbush0',.8],planter:['kh_city2_5','flowerpot',.5],pot:['kh_city2_3','flowerpot',.9],pergola:['kh_city2_4','bench',1.5],
   ship:['kh_ship1_0','crate',.9],wheel:['kh_ship1_1','barrel',.8],anchor:['kh_ship1_2','barrel',.8],rope:['kh_ship1_3','sacks',.35],seachest:['kh_ship1_4','chest',.5],sail:['kh_ship1_5','crate',1.1],
-  throne:['kh_throne1_0','statue',1.4],banner:['kh_throne1_1','banner',1.3],maptable:['kh_throne1_2','counter',.6],candle:['kh_throne1_3','lamp',1.2],
+  throne:['kh_throne1_0','statue',1.4],banner:['kh_throne1_1','banner',1.3],maptable:['kh_maptable1_0','counter',.6],candle:['kh_throne1_3','lamp',1.2],
   stallA:['kh_stall1_0','cart',.95],stallB:['kh_stall1_1','cart',.95],stallC:['kh_stall1_2','cart',.95],stallD:['kh_stall1_3','cart',.95],stallE:['kh_stall1_4','cart',.95],stallF:['kh_stall1_5','cart',.95],
   melons:['kh_stall2_0','crate',.5],amphorae:['kh_stall2_1','urn',.7],hay:['kh_stall2_2','cart',.7],veg:['kh_stall2_3','produce',.55],carpets:['kh_stall2_4','sacks',.6],copper:['kh_stall2_5','urn',.8],
   vase0:['vase0','vase0',.55],vase1:['vase1','vase1',.7],vase2:['vase2','vase2',.6],vase3:['vase3','vase3',.55]
@@ -8958,6 +8970,7 @@ const KH_BUILDINGS=[
   {id:'pray4',pool:'pray',name:'House of the New Moon',room:'prayer',keeper:'kh_pray4'},
   {id:'temple1',pool:'temple',name:'Temple of the Sun',room:'temple',keeper:'kh_temple1'},
   {id:'temple2',pool:'temple',name:'Temple of Bastet',room:'temple',keeper:'kh_temple2'},
+  {id:'mosque',pool:'temple',name:'The Great Mosque',room:'temple',keeper:'kh_mosque',near:[320,40]},
   {id:'church',pool:'pray',name:'The Church of Light',room:'temple',keeper:'kh_church',near:[122,205]},
   // baths
   {id:'bath1',pool:'bath',name:'The Court Baths',room:'bath',keeper:'kh_bath1'},
@@ -9034,7 +9047,7 @@ function khMakeDoorsAndRooms(C,L,placed){
     LEVELS[lvl]=room.level;
     m.at=room.start;
     doors[b.id]={lvl,front,face:ff,b};
-    b.lvl=lvl;b.front=front;
+    b.lvl=lvl;b.front=front;b.m=m;
   }
   return doors;
 }
@@ -9124,6 +9137,7 @@ function khRoomRuin(b){
     enemies:en.map((t,i)=>[t,2+((i*3)%7),1+(i%2)*3,15]),items:[],
     build:({put,raw})=>{raw('bones',3,6);raw('bones',7,5);raw('crate',1,1);raw('barrel',9,1);raw('crate',9,7);raw('bones',2,3);
       if(b.id==='urnhouse')raw('urn',5,2,{npc:'kh_urn'});
+      if(b.id==='denA')raw('sacks',2,6,{npc:'kh_sandals'});
       if(b.id==='ledgerhouse')raw('chest',5,1,{npc:'kh_ledger'});
       else if(b.id==='denC'){raw('chest',5,1,{npc:'kh_sealchest'});raw('sacks',2,6,{npc:'kh_drumsack'})}
       else raw('chest',5,1,{block:true,deco:false});}};
@@ -9176,7 +9190,7 @@ const KH_FACES={ // which painted person stands for which kind of citizen
   poor:['kh_npc5_0'],
   guards:['kh_npc3_0','kh_npc3_0','kh_npc3_2'],
 };
-const KH_NPC_H={kh_npc1_0:.82,kh_npc1_1:.84,kh_npc1_2:.8,kh_npc1_3:.8,kh_npc1_4:.82,kh_npc1_5:.62,kh_npc1_6:.8,kh_npc2_0:.78,kh_npc2_1:.82,kh_npc2_2:.82,kh_npc2_3:.84,kh_npc2_4:.82,kh_npc2_5:.84,kh_npc3_0:.92,kh_npc3_1:.98,kh_npc3_2:.92,kh_npc3_3:.82,kh_npc3_4:.86,kh_npc3_5:.9,kh_npc4_0:.92,kh_npc4_1:.84,kh_npc4_2:.82,kh_npc4_3:.84,kh_npc4_4:.8,kh_npc4_5:.8,kh_npc5_0:.74,kh_npc5_1:.62,kh_npc5_2:.84,kh_npc5_3:.84,kh_npc5_4:.84,kh_npc5_5:.82,kh_npc6_0:.84,kh_npc6_1:.86,kh_npc6_2:.8,kh_npc6_3:.8,kh_npc6_4:.92,kh_npc6_5:.64,kh_anim1_0:.38,kh_anim1_1:.34,kh_anim1_2:1.0,kh_anim1_3:.5,kh_anim1_4:.7,kh_anim1_5:.3};
+const KH_NPC_H={kh_npc1_0:.82,kh_npc1_1:.84,kh_npc1_2:.8,kh_npc1_3:.8,kh_npc1_4:.82,kh_npc1_5:.62,kh_npc1_6:.8,kh_npc2_0:.78,kh_npc2_1:.82,kh_npc2_2:.82,kh_npc2_3:.84,kh_npc2_4:.82,kh_npc2_5:.84,kh_npc3_0:.92,kh_npc3_1:.98,kh_npc3_2:.92,kh_npc3_3:.82,kh_npc3_4:.86,kh_npc3_5:.9,kh_npc4_0:.92,kh_npc4_1:.84,kh_npc4_2:.82,kh_npc4_3:.84,kh_npc4_4:.8,kh_npc4_5:.8,kh_npc5_0:.74,kh_npc5_1:.62,kh_npc5_2:.84,kh_npc5_3:.84,kh_npc5_4:.84,kh_npc5_5:.82,kh_npc6_0:.84,kh_npc6_1:.86,kh_npc6_2:.8,kh_npc6_3:.8,kh_npc6_4:.92,kh_npc6_5:.64,kh_anim1_0:.38,kh_cart1_0:.85,kh_anim1_1:.34,kh_anim1_2:1.0,kh_anim1_3:.5,kh_anim1_4:.7,kh_anim1_5:.3};
 
 /* ---- src/desert/khemetra_story.js ---- */
 /* ==========================================================================
@@ -9225,6 +9239,7 @@ khPray('kh_pray3','Priestess Hana','kh_npc4_1','In the House of Eternal Life we 
 khPray('kh_pray4','Brother Pasha','kh_npc4_0','Under the New Moon every beginning is allowed. What would you like to begin?',15);
 khPray('kh_temple1','Acolyte Tuya','kh_npc4_1','The Temple of the Sun burns one lamp for every soul in the city. Four hundred thousand lamps. Please do not count them.',20);
 khPray('kh_temple2','High Priest Omari','kh_npc4_0','The Temple of Bastet is the cat goddess house. The cats here are holy. So is anything they sit on.',20);
+khPray('kh_mosque','Imam Qadir','kh_npc4_3','Peace be upon you. The Great Mosque is open to every traveller. Come in out of the sun, and rest your eyes in the cool of the dome.',20);
 khPray('kh_church','Father Idris','kh_npc4_0','The Church of Light has stood longer than the palace. We ring the bell for every traveller who comes home.',20);
 const khBath=(id,name,face,line)=>khNpc(id,name,face,()=>say(line,[['Take the waters (10 gold, rest and refresh)',()=>{if(G.gold<10)return say('The waters are open to everyone with ten gold. You have a little less.',[BYE]);G.gold-=10;G.heroes.forEach(h=>{if(h.alive){h.hp=Math.min(h.max,h.hp+Math.ceil(h.max*.6));h.mp=h.mpMax}});advanceTime(60);sfx('potion');return say('Hot water, mint and steam. The party emerges pink, calm and a good deal more cheerful.',[BYE])}],BYE]));
 khBath('kh_bath1','Isis, the bath attendant','kh_npc6_3','Welcome to the Court Baths. Towels, oils and hot water, in that order. Weapons are left at the door.');
@@ -9444,6 +9459,134 @@ khNpc('kh_captain','Menkaure, the shipwright','kh_npc6_1',()=>{
   if(st==='done')return say('The ship will be called the Dawn Walker. She will not sail before the keel is laid, and the keel needs a century-old cedar, which is a problem for another day. Come back when you hear the hammers.',[BYE]);
   return say('Menkaure, shipwright of Khemetra, and every man in this city thinks I am mad. Four hundred miles from the sea, building ships. But my grandfather sailed, and my grandfather\'s grandfather, and their charts say the Vaast Ocean lies east of the Violet Erg, at the end of a tunnel in the rock. Nobody has seen it for a hundred years.',[['We could look for the tunnel.',()=>{qAccept('kh_sea');return say('Brave souls! Go east, past the Violet Erg, to the coast. Find the tunnel and walk it to the shore. Then come back and tell me what you saw. The sea will be waiting, or it will not.',[BYE])}],['Not now.',()=>null]]);
 },{q:'kh_sea'});
+
+/* ---- src/desert/khemetra_quests2.js ---- */
+/* ==========================================================================
+   TWENTY MORE QUIRKY QUESTS, spread over the quarters, the squares and the parks of Khemetra, each with its own resident.
+   ========================================================================== */
+const khHour=()=>((G.clock||0)%1440)/60;
+const khNight=()=>{const h=khHour();return h>=21||h<5};
+const KH_QFOLK=[];       // {id, anchor:[x,y]}: named people placed where their trouble is
+const KH_QOBJ=[];        // things in the world the quests ask the party to find: {npc, k, anchor, rad, o}
+const khFolk=(id,name,face,idle,qid,dlg,anchor)=>{khStreetQ(id,name,face,idle,qid,dlg);KH_QFOLK.push({id,anchor})};
+const khObj=(npc,k,anchor,o,rad)=>KH_QOBJ.push({npc,k,anchor,o:o||{},rad:rad||10});
+const khGain=(id,n)=>Math.min(bagCount(id),n);
+// 21. the cat who would be king
+khQuest('kh_q21','The Cat Who Would Be King','Sacristan Nefertari','Pasha, the temple cat, has taken the High Priest\'s throne and will not leave. Bring 3 salt herring to lure the royal cat away. Herring are sold in the food shops.',3,()=>bagCount('herring'),{gold:130,xp:380,items:['cheese']},{take:{herring:3}});
+khFolk('kh_nefertari','Sacristan Nefertari','kh_npc4_1','The cat sits on the throne, the priest stands, and neither will give way. It has been three days.','kh_q21',khQD('Pasha, our temple cat, has decided she is the High Priest. She sits on his throne and hisses at the congregation. The only thing she respects is salt herring. Three, please, and I will carry them in on a silver tray.','Fresh fish, mind. She is a connoisseur.',(n,m)=>'You have '+n+' of '+m+' herring.','Three herring! Oh, the tray, the tray, where did I put the tray.','She got down in an instant, ate all three, and went to sleep on the High Priest\'s hat. Here is your pay.','Pasha has gone back to ruling the rooftops. The High Priest has a new hat.'),[324,70]);
+// 22. the singing well
+khQuest('kh_q22','The Singing Well','Hapuseneb, the well keeper','The well in the Weavers Square sings at night. Hapuseneb wants a witness. Stand by the well between nine in the evening and five in the morning, and listen.',1,khFlag('khWell'),{gold:170,xp:420,items:['potion']});
+khFolk('kh_hapu2','Hapuseneb, the well keeper','kh_npc1_2','I have kept this well for sixty years. It never said a word. Until last week.','kh_q22',khQD('The well sings. At night, a low song with no words, and only when nobody is listening closely. People say I am old and deaf. Be my witness. Stand beside it between nine at night and five in the morning, and listen.','Wait for the dark, then speak to the well.',(n,m)=>'You have not yet heard the well sing.','You heard it? You really heard it? Tell me what it sang.','I knew it. I was not mad. Take this, and my thanks, and my deepest relief.','The well still sings. I sit by it every night with a flask of tea, and I am not lonely any more.'),[62,330]);
+khObj('kh_singwell','kh_city1_1',[60,326],{block:true},4);
+khNpc('kh_singwell','The old well',khFaceKey('kh_city1_1'),d=>{
+  const F=G.flags;
+  if(qSt('kh_q22')==='active'&&!F.khWell){if(!khNight())return say('The well is quiet. The water is still, and a cool smell comes up from the dark. Perhaps it only sings at night, between nine and five.',[BYE]);F.khWell=1;sfx('key');return say('You lean over the rim, and from far below comes a low, slow song, no words, many voices, like a choir of bees. It stops the moment you move. You have heard the singing well.',[BYE])}
+  return say('A stone well, cool and deep. A little breeze comes up out of it, and for a moment you think it hums.',[BYE])});
+// 23. the ring in the fountain
+khQuest('kh_q23','The Ring in the Fountain','Taia, the bride to be','Taia dropped her betrothal ring in the fountain of the Fountain Garden in the west. Search the fountain for it.',1,khFlag('khRing'),{gold:210,xp:450,items:['ringV']});
+khFolk('kh_taia','Taia, the bride to be','kh_npc1_4','I am to be married on the full moon, and my hand feels naked.','kh_q23',khQD('I dropped my betrothal ring in the fountain in the Fountain Garden. I leaned over to wave at my fiance, and plop. He thinks I did it on purpose. Will you fish it out?','The fountain is in the middle of the Fountain Garden. It is shallow, but the bottom is crowded with coins.',(n,m)=>'The ring is still in the fountain.','My ring! It sparkles, and you even washed it.','Take this, and come to the wedding if you like. There will be cake.','We were married on the full moon. My husband still thinks I did it on purpose.'),[104,196]);
+khObj('kh_ringfountain','kh_city1_0',[100,200],{block:true},3);
+khNpc('kh_ringfountain','The fountain',khFaceKey('kh_city1_0'),d=>{const F=G.flags;
+  if(qSt('kh_q23')==='active'&&!F.khRing){F.khRing=1;sfx('key');return say('You roll up your sleeves and sift through a hundred coins and a drowned sandal. At the bottom, caught in a crack, glints a gold ring set with a small blue stone.',[BYE])}
+  return say('The fountain splashes. The bottom is crowded with wishes in copper and silver.',[BYE])});
+// 24. the goat and the tax roll
+khQuest('kh_q24','The Goat Who Ate the Tax Roll','Clerk Senu','A goat has eaten the tax roll of the Craftsmen\'s Quarter. Find the goat, wherever it has wandered, and see whether the roll can be coaxed back.',1,khFlag('khGoat'),{gold:190,xp:430,items:['bread','bread']});
+khFolk('kh_senu','Clerk Senu','kh_npc3_3','Forty pages of tax, and every page eaten. I cannot prove anyone owes me anything.','kh_q24',khQD('A goat. A single, shameless goat has eaten the entire tax roll of the Craftsmen\'s Quarter. It trotted off toward the Fruit Market with a page still hanging out of its mouth. Please find it.','It is grey and white, and it looks very pleased with itself.',(n,m)=>'The goat is still at large.','The goat has been found? And the roll? Chewed, you say. Well, a chewed roll is a roll.','The treasury will not be thanking you, but I will. Here is a little something.','The goat now works in the palace gardens. I am told it is on the payroll.'),[286,170]);
+khObj('kh_goat','kh_anim1_3',[292,110],{block:false,walk:true},12);
+khNpc('kh_goat','A smug goat',khFaceKey('kh_anim1_3'),d=>{const F=G.flags;
+  if(qSt('kh_q24')==='active'&&!F.khGoat){F.khGoat=1;d.found=true;sfx('key');return say('The goat looks at you, chews, and a long strip of paper hangs from its lips with the word OWES written on it in small, neat letters. It swallows the word, burps, and trots away to the palace gardens. You may as well tell Clerk Senu.',[BYE])}
+  return say('The goat eats a leaf and regards you with calm contempt.',[BYE])});
+// 25. dates for a camel
+khQuest('kh_q25','A Hundred Dates for a Camel','Qadir, the camel master','Qadir\'s camel Sultana turns ten today and expects ten dates. Dates are sold by the date sellers and the food shops.',10,()=>bagCount('dates'),{gold:140,xp:360},{take:{dates:10}});
+khFolk('kh_qadir','Qadir, the camel master','kh_npc5_3','Sultana is sulking. She knows what day it is. Camels never forget a birthday.','kh_q25',khQD('Sultana, my camel, is ten today, and she expects ten dates. I have two, and she has already eaten one. Could you fetch ten? She is a camel of strong opinions.','Date sellers are all over the markets. Ten, no fewer, or she will spit.',(n,m)=>'You have '+n+' of '+m+' dates.','Ten dates! Sultana, my pearl, look what the kind strangers have brought.','Take this, and take my thanks. She even let me scratch her ear.','Sultana is the happiest camel in the Spice Market. She wears a flower behind each ear.'),[118,310]);
+// 26. verses for the moon
+khQuest('kh_q26','Verses for the Moon','Layla, the poet','Layla the poet needs 3 wildflowers for inspiration. They are sold in the general stores. The Moon Garden is in the north.',3,()=>bagCount('wildflower'),{gold:110,xp:320},{take:{wildflower:3}});
+khFolk('kh_layla','Layla, the poet','kh_npc1_1','There is nothing that rhymes with moon, except spoon, and I will not stoop.','kh_q26',khQD('I am writing an ode to the moon, and I have run out of inspiration. The last line needs flowers. Three, wild, and fresh. Could you find them, and I will read you the whole poem?','General stores sell wildflowers. A small bunch will do.',(n,m)=>'You have '+n+' of '+m+' wildflowers.','Flowers! I can feel the verse arriving. It rhymes with doom.','Take this, and sit while I read it. It is only forty verses.','The ode ran to sixty verses. Nobody applauded, but several wept, which I choose to count.'),[204,98]);
+// 27. wrong door, right house
+khQuest('kh_q27','Wrong Door, Right House','Mehit, the weaver','Mehit has a parcel for her rival Tuya, with a note. Deliver it to Tuya in the Cloth Market, in the east, without telling her who it is from.',1,khFlag('khTuya'),{gold:150,xp:340},{give:'parcel'});
+khFolk('kh_mehit','Mehit, the weaver','kh_npc1_6','Tuya and I have not spoken in twenty years. It is a good friendship, in its way.','kh_q27',khQD('Tuya and I have been rivals for twenty years. I wove her a scarf for her birthday, but I cannot be seen to give it. Will you take it to her, and say it is from nobody? She sells cloth at the Cloth Market.','Do not say my name. She would only throw it back.',(n,m)=>'The parcel is still with you.','She wore it! She came out of her stall wearing the scarf, and she looked at the street as if looking for me.','Here is your fee. And if you see her, say nothing.','Tuya has sent me a scarf. We have not mentioned it to each other.'),[56,326]);
+khFolk('kh_tuya','Tuya, the cloth seller','kh_npc2_5','I sell the best cloth in the city, and my neighbour of the Weavers Square sells the second best. We do not speak.','kh_q27',khQD('','','', '','','The scarf is nice. I do not know who sent it, but I wear it every day.'),[292,304]);
+{const t=NPCS.kh_tuya,old=t.root;t.root=d=>{const F=G.flags;if(qSt('kh_q27')==='active'&&!F.khTuya&&bagCount('parcel')>0)return say('A parcel for me? From who? No sender? How mysterious.',[['It is from nobody. Open it.',()=>{bagRemove('parcel',1);F.khTuya=1;sfx('key');return say('She unwraps a scarf of blue and silver, with a hem she knows very well. Her mouth twists. "Nobody has very good taste," she says, and puts it on.',[BYE])}],BYE]);return old(d)};QGIVER.kh_tuya=undefined}
+// 28. the missing sandals
+khQuest('kh_q28','The Noble\'s Missing Sandals','Bek, the steward','Lord Anen\'s gold sandals were stolen and hidden in a ruined house in the old quarter in the north-west. Bring them back before the banquet.',1,khFlag('khSandals'),{gold:230,xp:480,items:['ringM']});
+khFolk('kh_bek','Bek, the steward of Lord Anen','kh_npc3_3','My lord cannot attend the banquet barefoot. It would be a scandal, and a draught.','kh_q28',khQD('Lord Anen\'s gold sandals have been stolen, and my lord will not attend the banquet barefoot. A thief carried them off to the old quarter in the north-west. Look in the houses that are half fallen down.','They are gold, with tiny bells on the straps. You will hear them.',(n,m)=>'The sandals are still missing.','The sandals! The bells and all. My lord is saved.','My lord thanks you, in so far as he remembers to. Here is a purse.','My lord attended the banquet and was told he looked very well in gold. He claims it was his own idea.'),[186,64]);
+khNpc('kh_sandals','A pair of gold sandals','sacks',d=>{const F=G.flags;if(qSt('kh_q28')==='active'&&!F.khSandals){F.khSandals=1;sfx('key');return say('A pair of gold sandals with tiny bells sits on a stool, polished and unscuffed. The thief had time to admire them. You tuck them away.',[BYE])}return say(F.khSandals?'An empty stool, and a faint smell of polish.':'A pile of old cloth.',[BYE])});
+// 29. the bread dispute
+khQuest('kh_q29','The Great Bread Dispute','Sut-Neb, the baker','Sut-Neb swears his bread is better than Merit\'s. Bring him 4 loaves of bread from the Golden Crust to see the difference for himself.',4,()=>bagCount('bread'),{gold:120,xp:340,items:['pie']},{take:{bread:4}});
+khFolk('kh_sutneb','Sut-Neb, the baker','kh_npc2_4','Merit says her bread is the best in the city. Merit is wrong, and I intend to prove it.','kh_q29',khQD('I will say it once. My bread is better than Merit\'s. I cannot prove it without hers on my table. Four loaves from her shop, please, and I will do the taste test in front of witnesses.','Merit keeps the Golden Crust. Buy the bread from her, and do not tell her why.',(n,m)=>'You have '+n+' of '+m+' loaves.','Four loaves from the Golden Crust. Now, observe. I tear. I chew. I contemplate.','...It is better than mine. Do not tell anyone. Take this, and my thanks.','I have started selling her recipe as my own. We are both very happy.'),[210,316]);
+// 30. a hat to turn heads
+khQuest('kh_q30','A Hat to Turn Heads','Lady Isadora','Lady Isadora wants 5 wildflowers and a plain cap to make a hat that will turn every head at the garden party.',6,()=>khGain('wildflower',5)+khGain('cap',1),{gold:180,xp:420,items:['ringW']},{take:{wildflower:5,cap:1}});
+khFolk('kh_isadora','Lady Isadora','kh_npc1_3','A garden party without a hat is merely a standing-about.','kh_q30',khQD('I am hosting a garden party, and I have nothing to wear on my head. I need five wildflowers and a plain cap to build upon. Do you know any milliners? No? Then you will have to be one.','Wildflowers and caps are sold in the general stores and the armoury.',(n,m)=>'You have '+n+' of the '+m+' things I asked for.','Flowers and a cap! This will be the talk of the garden district.','It is magnificent. I look like a hedge in love. Take this.','The hat was a triumph. Three people fainted, and a duke asked for the recipe.'),[44,204]);
+// 31. a safe bet
+khQuest('kh_q31','A Safe Bet on Camel Three','Zeko, the bookmaker','Zeko takes bets on the camel race. Hand over 20 gold on camel three, then wait for the result.',1,khFlag('khBet'),{gold:0,xp:200});
+khFolk('kh_zeko','Zeko, the bookmaker','kh_npc2_0','Camel number three is a certainty. Certainties are my business. Also uncertainty.','kh_q31',{offer:'Camel number three, in the second race, is a sure thing. I am not saying that for any reason. Put twenty gold on her, and you will not regret it. Probably.',yes:'Twenty gold on camel three.',accept:'Done. The race is run when the sun sets. Come back and see.',remind:(n,m)=>'The race has not been run yet.',ready:'The race has been run, and the result is in the book.',turn:'Show me the book.',thanks:'',after:'Camel three won. A great day for camel three. A good day for me.'},[292,196]);
+{const z=NPCS.kh_zeko;z.root=d=>{const F=G.flags,st=qSt('kh_q31');
+  if(st==='active'&&!F.khBet)return say('Twenty gold on camel three, then?',[['Place the bet.',()=>{if(G.gold<20)return say('Twenty gold, my friend. You have a little less.',[BYE]);G.gold-=20;F.khBet=1;F.khBetDay=Math.floor((G.clock||0)/1440);return say('Camel three it is. Come back after the sun sets, and I will have the result.',[BYE])}],BYE]);
+  if(st==='active'&&F.khBet){if(Math.floor((G.clock||0)/1440)===F.khBetDay&&khHour()<18)return say('The race is not run yet. Camels are slow, and so are bookmakers.',[BYE]);
+    const win=hash2(F.khBetDay,7,31)<.55;return say(win?'Camel three won by a nose! You win 60 gold, and my deepest respect.':'Camel three stopped to eat a flower in the third furlong. A tragedy. But please, keep your dignity, and the 10 gold I have returned.',[['Collect.',()=>{F.khBet=1;G.gold+=win?60:10;QUESTS.kh_q31.reward={gold:0,xp:200};qTurnIn('kh_q31');return say(win?'Pleasure doing business. Do come again.':'Better luck next camel.',[BYE])}]])}
+  if(st==='done')return say('Camel three. A legend.',[BYE]);
+  return say('Camel number three is a certainty. Certainties are my business. Also uncertainty.',[['Can you tell me about the race?',()=>qNode('kh_q31',z.dlg)],BYE])};KH_KEEPERS.kh_zeko.root=z.root}
+NPCS.kh_zeko.dlg={offer:'Camel three is a sure thing. Put twenty gold on her.',yes:'Twenty gold on camel three.',accept:'Done.',remind:()=>'The race is not run.',ready:'The race is run.',thanks:'',after:'Camel three won.'};
+// 32. scarabs for the collector
+khQuest('kh_q32','Scarabs for the Collector','Imen, the collector','Imen collects scarab beetles. Four of them lie in the streets of the Old Quarter in the north-west. Pick them up and bring word.',4,()=>Object.keys(G.flags.khScar||{}).length,{gold:200,xp:460,items:['potion2']});
+khFolk('kh_imen','Imen, the collector','kh_npc4_3','Everyone collects something. I collect things nobody else would pick up.','kh_q32',khQD('I collect scarab beetles, the real ones, with a little gold on the back. Four have been seen in the streets of the Old Quarter in the north-west, glittering in the dust. I would go myself, but the dogs. Would you?','Look for a glint in the rubble. They are small.',(n,m)=>'You have found '+n+' of '+m+' scarabs.','Four scarabs! And one of them still ticking. I will treasure them.','Take this. I will let you hold the smallest one, for a moment.','The scarabs have pride of place on my shelf. The smallest sleeps in a matchbox.'),[110,170]);
+for(let i=0;i<4;i++)khObj('kh_scarab','dbones',[[20,30],[100,40],[40,100],[110,110]][i],{scar:i,walk:true,block:false},14);
+khNpc('kh_scarab','A glittering scarab','dbones',d=>{const F=G.flags;F.khScar=F.khScar||{};if(F.khScar[d.scar]){return say('Only a dent in the dust.',[BYE])}
+  if(qSt('kh_q32')!=='active')return say('A tiny golden beetle on the cobbles, glittering like a coin. It does not seem to be anybody\'s yet.',[BYE]);
+  F.khScar[d.scar]=1;d.found=true;sfx('key');const n=Object.keys(F.khScar).length;return say('You pick up a scarab the size of a thumbnail, bright as a coin. '+n+' of 4 found.',[BYE])});
+// 33. the headless statue
+khQuest('kh_q33','The Headless Statue','Pepi, the mason','The statue in the Temple Court has lost its nose. Pepi needs 2 pieces of ore to cast a new one. Ore is found in mines and some general stores.',2,()=>bagCount('ore'),{gold:170,xp:400},{take:{ore:2}});
+khFolk('kh_pepi','Pepi, the mason','kh_npc5_4','Statues are patient. They wait for centuries. Mostly they wait for their noses.','kh_q33',khQD('The great statue in the Temple Court has lost its nose. A pigeon, a drunk, and a ladder were involved. I can cast a new one in bronze, but I need two pieces of ore. Could you find them?','Some general stores keep ore, and old mines are full of it.',(n,m)=>'You have '+n+' of '+m+' pieces of ore.','Two pieces of good ore! The statue shall be dignified once more.','Take this. You will find the nose a little larger than before. That is a mason\'s privilege.','The statue has a splendid new nose. The pigeon has been warned.'),[336,64]);
+// 34. the puppet show
+khQuest('kh_q34','The Puppet Show','Zaza, the puppeteer','Zaza needs three children for her puppet show: Ani, Beb and Cali. They play in three different parks. Find all three and ask them to come.',3,()=>Object.keys(G.flags.khKids||{}).length,{gold:160,xp:380,items:['dates','dates']});
+khFolk('kh_zaza','Zaza, the puppeteer','kh_npc1_0','A show is nothing without an audience. A show with three audience members is a start.','kh_q34',khQD('I have a new puppet show, a dragon, a prince, and a very rude camel. I need three children for the front row: Ani, Beb and Cali. They play in the parks. Ask them to come, and tell them it is free.','Try the parks. Children can always be found where the lawns are widest.',(n,m)=>n+' of '+m+' children have been asked.','All three are in the front row! Ani, Beb and Cali. The camel is going to be a triumph.','Here is your fee. And a ticket, if you would like to come.','The camel was a triumph. Cali asked for it to be put in a cage.'),[204,248]);
+[['kh_ani','Ani','kh_npc1_5',[44,160]],['kh_beb','Beb','kh_npc5_1',[320,130]],['kh_cali','Cali','kh_npc1_5',[110,70]]].forEach(([id,nm,face,anchor])=>{
+  khNpc(id,nm,face,()=>{const F=G.flags;F.khKids=F.khKids||{};
+    if(qSt('kh_q34')==='active'&&!F.khKids[id]){F.khKids[id]=1;sfx('key');return say('A puppet show? With a rude camel? I am coming right now! Wait for me!',[BYE])}
+    return say(F.khKids[id]?'I am in the front row. I get the best seat, because I asked first.':'I am '+nm+'. I am playing the game where the floor is lava, except it is a lawn.',[BYE])});
+  KH_QFOLK.push({id,anchor,kid:true})});
+// 35. bread for the night watch
+khQuest('kh_q35','Bread for the Night Watch','Pasha, the night baker','Pasha bakes through the night and wants to feed the watch at the south gate. Bring 4 loaves to Captain Rami at the gate.',1,khFlag('khWatch'),{gold:120,xp:320},{});
+khFolk('kh_pasha','Pasha, the night baker','kh_npc2_4','I sleep while you sleep. No: I sleep while you work. No, the other way round.','kh_q35',khQD('The night watch at the south gate never gets a hot meal. I have the dough, but not the hands. Could you buy four loaves of bread, and take them to Captain Rami at the south gate? Tell him it is from the baker he has never met.','Four loaves, to Captain Rami at the gate.',(n,m)=>'The watch has not been fed yet.','The watch has eaten! Rami sent a message.','Thank you. Here is something for the road, and the next batch is on me.','The watch sends a message each week to say it has eaten. It is the nicest post I get.'),[210,350]);
+{const r=NPCS.kh_rami,old=r.root;r.root=d=>{const F=G.flags;if(qSt('kh_q35')==='active'&&!F.khWatch&&bagCount('bread')>=4)return say('Is that bread? Hot bread? For the watch? From whom?',[['From Pasha, the night baker.',()=>{bagRemove('bread',4);F.khWatch=1;sfx('key');return say('Pasha! I have never met him. Nobody has. I am touched. Tell him the watch will stand taller tonight.',[BYE])}],['Not now.',()=>null]]);return old(d)};KH_KEEPERS.kh_rami.root=r.root}
+// 36. the riddle of the statue
+khQuest('kh_q36','The Riddle of the Bathing Statue','Menes, the scholar','The marble statue in the Court of Baths in the south-east speaks a riddle to anyone who asks. Menes wants the answer.',1,khFlag('khRiddle'),{gold:200,xp:500,items:['scrollLight']});
+khFolk('kh_menes','Menes, the scholar','kh_npc4_3','The statue speaks. It also bores. I need the answer, and a good night\'s sleep.','kh_q36',khQD('The old statue in the Court of Baths in the south-east speaks a riddle: I have cities, but no houses; mountains, but no trees; water, but no fish. I have thought about it for thirty years. Please go and answer it for me, and tell me what it said.','Speak to the statue in the Court of Baths. It will ask you for an answer.',(n,m)=>'The statue has not been answered yet.','You answered it? And it let you through? What was the answer?','I should have thought of it. Take this, and a scroll I wrote about it.','I have started a second scroll about the answer. It is longer than the first.'),[318,326]);
+khObj('kh_riddle','kh_city1_3',[330,334],{block:true},8);
+khNpc('kh_riddle','The marble statue',khFaceKey('kh_city1_3'),d=>{const F=G.flags;
+  if(F.khRiddle)return say('The statue smiles a very small smile, and says nothing at all.',[BYE]);
+  return say('A voice comes out of the marble, slow and cool: "I have cities, but no houses. Mountains, but no trees. Water, but no fish. What am I?"',[
+    ['A map.',()=>{F.khRiddle=1;sfx('win');return say('"A map," says the marble, pleased. "Correct. You may go in peace, and I will think of another."',[BYE])}],
+    ['A mirage.',()=>say('"A mirage? Mirages do not have mountains. Try again."',[BYE])],
+    ['The sea.',()=>say('"The sea has fish, traveller. Try again."',[BYE])],
+    ['I would rather not say.',()=>null]])});
+// 37. the beggar king's toll
+khQuest('kh_q37','The Beggar King\'s Toll','Ugo, the Beggar King','Ugo, the self-proclaimed king of the Beggars\' Quarter in the east, wants 3 brigands who have been taking his tolls removed.',3,q=>(G.flags.k_bandit||0)-(q.base||0),{gold:240,xp:520,items:['ringS']},{cnt:'k_bandit'});
+khFolk('kh_ugo','Ugo, the Beggar King','kh_npc5_0','I am a king. These are my subjects. The fact that they do not know is a minor detail.','kh_q37',khQD('Three brigands have been taking tolls from my subjects. Tolls! That is my job. Remove them, and I will make you knights of the Order of the Tin Cup.','Brigands wear red scarves and hide in the dark side streets of this quarter.',(n,m)=>'You have dealt with '+n+' of '+m+' brigands.','The brigands are gone? Rise, Sir Knights, and sit on this very fine crate.','Take this purse. It was only slightly stolen.','My subjects are safe. I am considering levying a tax on the safety.'),[326,252]);
+// 38. the pigeon thief
+khQuest('kh_q38','The Palace Pigeon Thief','Hori, the palace page','Someone is stealing the royal pigeons. Hori saw two thieves slinking about the palace ring road. Deal with them.',2,q=>(G.flags.k_nomad2||0)-(q.base||0),{gold:190,xp:440},{cnt:'k_nomad2'});
+khFolk('kh_hori','Hori, the palace page','kh_npc6_5','The royal pigeons carry the royal post, and the royal post is missing royal pigeons.','kh_q38',khQD('Someone is stealing the pigeons from the palace loft. I saw two ragged men slinking away with a basket that cooed. They will be in the dark corners of the city. Please find them.','Thieves in ragged coats. They will run if they see the white and gold.',(n,m)=>'You have caught '+n+' of '+m+' thieves.','Two thieves! And the pigeons are back? Wonderful.','The vizier says well done. He says it quietly, from behind a pillar. Take this.','The pigeons are back, and so is the post. The vizier has taken to talking to them.'),[196,252]);
+// 39. the tax on sneezes
+khQuest('kh_q39','The Tax on Sneezes','Tax Collector Ptah','Tax Collector Ptah has invented a tax on sneezes. Collect 5 gold each from Hapu the date seller, Hapi of the Pantry and Zahra of the Wanderer\'s Pack.',3,()=>Object.keys(G.flags.khSneeze||{}).length,{gold:180,xp:420});
+khFolk('kh_ptah','Tax Collector Ptah','kh_npc3_3','Everything can be taxed. Even sneezes. Especially sneezes.','kh_q39',khQD('I have invented a tax. A sneeze tax, five gold per sneeze. Hapu, Hapi and Zahra were all heard to sneeze in the market last week. Collect five gold from each of them, and I will give you a tenth. They may pay without protest. They may not.','Hapu sells dates, Hapi keeps the Pantry, and Zahra keeps the Wanderer\'s Pack. All three have sneezed.',(n,m)=>'You have collected from '+n+' of '+m+' sneezers.','Fifteen gold in sneezes! A good week.','Take your tenth. And please do not tell the vizier. He sneezes.','The sneeze tax was repealed after the vizier sneezed. Nobody mentions it.'),[212,262]);
+for(const [id,nm] of [['kh_dates','Hapu'],['kh_pantry','Hapi'],['kh_pack','Zahra']]){const n=NPCS[id],old=n.root;n.root=d=>{const F=G.flags;F.khSneeze=F.khSneeze||{};
+  if(qSt('kh_q39')==='active'&&!F.khSneeze[id])return say('Ah. The tax collector sent you. I did sneeze. Once. It was a small one.',[['Collect 5 gold for the sneeze.',()=>{F.khSneeze[id]=1;sfx('key');return say('He grumbles, drops five gold in your hand, and sneezes again immediately. "That one is on the house," he says.',[BYE])}],['Never mind.',()=>old(d)]]);
+  return old(d)};KH_KEEPERS[id].root=n.root}
+// 40. nuts for the moon squirrels
+khQuest('kh_q40','Nuts for the Moon Squirrels','Zeb, the merchant','Zeb swears the moon is inhabited by squirrels, and wants 6 handfuls of nuts to feed them. Nuts are sold in the food shops.',6,()=>bagCount('nuts'),{gold:100,xp:300,items:['honeycomb']},{take:{nuts:6}});
+khFolk('kh_zeb','Zeb, the merchant','kh_npc2_0','I do not want to say the moon is full of squirrels. But I will not say it is not.','kh_q40',khQD('The moon is full of squirrels. I have seen them, running across it in a line. They are hungry, and I wish to leave nuts on the roof. Six handfuls, please. Do not laugh.','Nuts are sold in the food shops. Salted if possible.',(n,m)=>'You have '+n+' of '+m+' handfuls.','Six handfuls of nuts. The squirrels will be delighted.','Take this. In the morning the nuts will be gone. That is the proof.','The nuts were gone by morning. A pigeon was seen leaving. It was not the moon.'),[210,284]);
+/* the people of the quests stand where their trouble is */
+function khPlaceQuestFolk(C,L,near,add){
+  for(const f of KH_QFOLK){
+    const p=near(f.anchor[0],f.anchor[1],f.kid?40:18,true);if(!p)continue;
+    const kp=KH_KEEPERS[f.id];if(!kp)continue;
+    add({k:khFaceKey(kp.face),x:p[0],y:p[1],block:false,walk:true,npc:f.id,sc:kp.sc||1});
+  }
+  for(const o of KH_QOBJ){
+    const p=near(o.anchor[0],o.anchor[1],o.rad,false);if(!p)continue;
+    add(Object.assign({k:khFaceKey(o.k),x:p[0],y:p[1],block:false,walk:true,npc:o.npc,sc:1},o.o));
+  }
+}
 
 /* ---- src/desert/khemetra_world.js ---- */
 /* ==========================================================================
@@ -9668,6 +9811,8 @@ function khCrowd(C,L){
     const q=near(ax,ay,8,true);if(!q)continue;const kp=KH_KEEPERS[id];if(!kp)continue;
     add({k:khFaceKey(kp.face),x:q[0],y:q[1],block:false,walk:true,npc:id,sc:kp.sc||1});
   }
+  khPlaceCarts(C,L,near,add);
+  khPlaceQuestFolk(C,L,near,add);
   { // the granary keeper waits outside the granary
     const b=KH_BUILDINGS.find(x=>x.id==='granary');if(b&&b.front){const q=near(b.front[0],b.front[1],6,true);if(q){const kp=KH_KEEPERS.kh_gebu;add({k:khFaceKey(kp.face),x:q[0],y:q[1],block:false,walk:true,npc:'kh_gebu',sc:1})}}
   }
@@ -9741,6 +9886,17 @@ function khApplyState(){
     if(d.npc==='kh_cat'&&F.khCats&&F.khCats[d.cat]){d.found=true;d.block=false}
   }
   buildDecorMap();
+  khBucketDecor();
+}
+
+/* every resident has a name: those who stand about with nothing but a job get one from where they stand */
+const KH_GENERIC={kh_gateguard:'Guard',kh_guardA:'Guard',kh_guardB:'Guard',kh_guardC:'Guard',kh_guardD:'Guard',kh_page:'Page',kh_herald:'Herald',kh_inn1_p1:'',kh_inn1_p2:'',kh_inn2_p1:'',kh_inn2_p2:'',kh_inn3_p1:'',kh_inn3_p2:''};
+const KH_CATNAMES=['Pasha','Mafdet','Sekhmet','Tiger','Dusty','Shadow'];
+function khResidentName(d){
+  if(d.npc==='kh_cat')return KH_CATNAMES[(d.cat||0)%KH_CATNAMES.length]+', the cat';
+  const t=KH_GENERIC[d.npc];if(t===undefined)return null;
+  const nm=KH_NAMES[(hash2(d.x*7+3,d.y*5+1,LEVEL)*KH_NAMES.length)|0];
+  return t?t+' '+nm:nm+(d.npc.endsWith('p1')?', a traveller':', a merchant');
 }
 
 /* ---- src/desert/khemetra_mapview.js ---- */
@@ -9774,6 +9930,19 @@ function khBuildMapImage(){
   for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){
     const i=idx(cx,cy);
     x.fillStyle=C.solid[i]?'#b39a70':(GR[C.fl[i]]||'#e4d3a2');x.fillRect(cx*S,cy*S,S,S);
+  }
+  // how wide each street is: the shorter of the open runs across and along it
+  const run=new Uint8Array(W*H*2);
+  for(let y=0;y<H;y++){let k=0;while(k<W){if(C.solid[idx(k,y)]){k++;continue}let e=k;while(e<W&&!C.solid[idx(e,y)])e++;for(let q2=k;q2<e;q2++)run[idx(q2,y)*2]=Math.min(255,e-k);k=e}}
+  for(let xx=0;xx<W;xx++){let k=0;while(k<H){if(C.solid[idx(xx,k)]){k++;continue}let e=k;while(e<H&&!C.solid[idx(xx,e)])e++;for(let q2=k;q2<e;q2++)run[idx(xx,q2)*2+1]=Math.min(255,e-k);k=e}}
+  const SW={avenue:'#f3d57a',wide:'#ecd68e',street:'#e6d6a4',lane:'#d3be90'};
+  for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){
+    const i=idx(cx,cy);if(C.solid[i]||C.zone[i]!==0&&C.zone[i]!==6)continue;
+    if(C.zone[i]===6)continue;
+    const wd=Math.min(run[i*2],run[i*2+1]);
+    x.fillStyle=wd>=7?SW.avenue:wd>=5?SW.wide:wd>=3?SW.street:SW.lane;x.fillRect(cx*S,cy*S,S,S);
+    if(wd<=2&&((cx+cy)&1)===0){x.fillStyle='rgba(70,48,24,.16)';x.fillRect(cx*S+S/2-.5,cy*S+S/2-.5,1,1)}   // lanes are stippled
+    if(wd>=7){x.fillStyle='rgba(120,84,20,.16)';x.fillRect(cx*S,cy*S,S,1)}
   }
   const own=new Int32Array(W*H).fill(-1);
   C.modules.forEach((m,mi)=>{
@@ -9847,7 +10016,7 @@ function khDrawCityMap(cs,ox,oy){
     const st=C._streets||(C._streets=khNameStreets(C)),sz=clamp(cs*1.5,7,10);
     for(const s of st.v){for(let y=40;y<C.H-30;y+=95){let ok=true;for(let k=-4;k<=4;k++)if(C.solid[C.idx(s.x,y+k)])ok=false;if(ok&&vis(s.x,y,60))lab(s.n,ox+(s.x+.5)*cs,oy+y*cs,sz,'#4a3820',-Math.PI/2)}}
     for(const s of st.h){for(let xx=40;xx<C.W-30;xx+=110){let ok=true;for(let k=-4;k<=4;k++)if(C.solid[C.idx(xx+k,s.y)])ok=false;if(ok&&vis(xx,s.y,60))lab(s.n,ox+xx*cs,oy+(s.y+.5)*cs,sz,'#4a3820')}}
-    lab('Ring Road',ox+KH.CX*cs,oy+246*cs,clamp(cs*1.6,7,10),'#4a3820');lab('West Road',ox+75*cs,oy+(KH.CY+.5)*cs,clamp(cs*1.6,7,10),'#4a3820');lab('East Road',ox+325*cs,oy+(KH.CY+.5)*cs,clamp(cs*1.6,7,10),'#4a3820');
+    lab('Ring Road (3 wide)',ox+KH.CX*cs,oy+246*cs,clamp(cs*1.6,7,10),'#4a3820');lab('West Road',ox+75*cs,oy+(KH.CY+.5)*cs,clamp(cs*1.6,7,10),'#4a3820');lab('East Road',ox+325*cs,oy+(KH.CY+.5)*cs,clamp(cs*1.6,7,10),'#4a3820');
   }
   // shops, inns, temples and houses of note: the name at the door, with a small sign for what it is
   if(cs>=4.2){
@@ -9862,10 +10031,82 @@ function khDrawCityMap(cs,ox,oy){
   // the hatch to the cisterns once the vizier has named it
   if(G.flags.khWizardKnown&&vis(KH_HATCH.x,KH_HATCH.y,60)){lab('Hatch to the Cisterns',ox+(KH_HATCH.x+.5)*cs,oy+(KH_HATCH.y-1.5)*cs,clamp(cs*1.4,7,10),'#7a1a10');ctx.fillStyle='#7a1a10';ctx.beginPath();ctx.arc(ox+(KH_HATCH.x+.5)*cs,oy+(KH_HATCH.y+.5)*cs,Math.max(2,cs*.5),0,Math.PI*2);ctx.fill()}
   // a small key
-  ctx.save();ctx.fillStyle='rgba(30,20,10,.82)';rrect(ctx,6,DH-66,150,40,4);ctx.fill();
-  const key=[['#c1835a','Houses'],['#dcae4a','Shops'],['#ece4cc','Temples'],['#72bcc4','Baths'],['#938c80','Ruins'],['#a9c47f','Parks']];
-  key.forEach(([c,t],i)=>{const kx=12+(i%3)*48,ky=DH-60+Math.floor(i/3)*16;ctx.fillStyle=c;ctx.fillRect(kx,ky,8,8);txt(t,kx+11,ky+5,7,'#e8dcb4','left')});
+  ctx.save();ctx.fillStyle='rgba(30,20,10,.82)';rrect(ctx,6,DH-80,168,54,4);ctx.fill();
+  const key=[['#c1835a','Houses'],['#dcae4a','Shops'],['#ece4cc','Temples'],['#72bcc4','Baths'],['#938c80','Ruins'],['#a9c47f','Parks'],['#f3d57a','Avenue'],['#e6d6a4','Street'],['#d3be90','Narrow lane']];
+  key.forEach(([c,t],i)=>{const kx=12+(i%3)*54,ky=DH-74+Math.floor(i/3)*16;ctx.fillStyle=c;ctx.fillRect(kx,ky,8,8);ctx.strokeStyle='rgba(0,0,0,.5)';ctx.lineWidth=.6;ctx.strokeRect(kx,ky,8,8);txt(t,kx+11,ky+5,7,'#e8dcb4','left')});
   ctx.restore();
+}
+
+/* ---- src/desert/khemetra_cart.js ---- */
+/* ==========================================================================
+   KHEMETRA: THE DONKEY CARTS. A grey donkey and a canopied cart wait at the foot of the gate stair and in every quarter of
+   the city. For a few coins the driver takes the party to any quarter, any park, the palace, the mosque, the church or the
+   markets. The longer the ride, the higher the fare.
+   ========================================================================== */
+let KH_DEST=[];                     // {n, cat, x, y, f}: every place a cart goes
+const KH_CART_FACE='kh_cart1_0';
+function khFare(x0,y0,d){
+  const dist=Math.abs(d.x-x0)+Math.abs(d.y-y0);
+  let p=6+dist*.3;
+  if(d.n==='The Palace of Khemetra')p+=40;else if(d.n==='The Great Mosque')p+=20;else if(d.cat==='park')p-=3;else if(d.cat==='quarter')p+=8;
+  return Math.max(5,Math.round(p/5)*5);
+}
+function khRideLines(d){
+  const to=d.cat==='park'?'the green trees of '+d.n:d.n;
+  return [{text:'The driver clicks his tongue and the donkey sets off at a steady trot, the cart rattling over the cobbles. White walls, gold roofs and palms slide past on both sides.'},
+    {text:d.cat==='park'?'The streets fall away and the air smells of cut grass and blossom. The cart pulls up under the palms of '+d.n+'.':d.n==='The Palace of Khemetra'?'The avenue widens. Guards in white and gold stand in rows, and the great spire of the palace climbs the sky. The cart stops at the palace court.':'The cart rolls on through the streets and stops at last in '+d.n+'. "Here you are, friends. Mind the step."'}];
+}
+let KH_RIDE=null;
+CUTS.khRide=()=>khRideLines(KH_RIDE||{n:'the city',cat:'quarter'});
+function khRide(d,fare,x0,y0){
+  if(G.gold<fare)return say('The fare is '+fare+' gold, and you have too little. Perhaps a cheaper stop?',[BYE]);
+  G.gold-=fare;KH_RIDE=d;sfx('key');
+  G.talk=null;
+  startCut('khRide',()=>{
+    G.P.x=d.x;G.P.y=d.y;G.P.f=d.f||0;G.P.angT=(G.P.f-1)*Math.PI/2;G.C.x=d.x;G.C.y=d.y;G.C.a=G.P.angT;
+    advanceTime(Math.max(5,Math.round((Math.abs(d.x-x0)+Math.abs(d.y-y0))/9)));reveal();
+    msg('You step down from the cart in '+d.n+'.','#ffe9a0');
+  });
+  return null;
+}
+function khCartMenu(d0){
+  const x0=G.P.x,y0=G.P.y,F=G.flags;
+  const list=cat=>KH_DEST.filter(d=>d.cat===cat);
+  const dist=d=>Math.abs(d.x-x0)+Math.abs(d.y-y0);
+  const opt=d=>[d.n+'  ('+khFare(x0,y0,d)+' gold)',()=>khRide(d,khFare(x0,y0,d),x0,y0)];
+  const page=(label,arr,pg,backFn)=>{
+    const sorted=arr.slice().sort((a,b)=>dist(a)-dist(b)),per=5,slice=sorted.slice(pg*per,pg*per+per);
+    const o=slice.map(opt);
+    if((pg+1)*per<sorted.length)o.push(['More '+label+'...',()=>page(label,arr,pg+1,backFn)]);
+    if(pg>0)o.push(['Back',()=>page(label,arr,pg-1,backFn)]);else o.push(['Back',backFn]);
+    return say('Where to? The nearest ones come first.',o);
+  };
+  const top=()=>say('Where would you like to go? The longer the ride, the higher the fare.',[
+    ['To a quarter of the city',()=>page('quarters',list('quarter'),0,top)],
+    ['To a park',()=>page('parks',list('park'),0,top)],
+    ['To a market',()=>page('markets',list('market'),0,top)],
+    ['To the palace, the mosque or another landmark',()=>page('landmarks',list('landmark'),0,top)],
+    ['Never mind.',()=>null]]);
+  return top();
+}
+khNpc('kh_cart','The donkey cart',KH_CART_FACE,d=>say('A grey donkey stands in the shafts of a cart with a striped canopy. The driver tips his turban. "A ride, friends? To any quarter, any park, any market, the palace, the mosque. I know every street in Khemetra, and I go fast."',[['Ask for a ride',()=>khCartMenu(d)],BYE]));
+/* put the destinations and the carts into the city (called by khCrowd) */
+function khPlaceCarts(C,L,near,add,reachFree){
+  const dests=[],H=C.H;
+  const spot=(x,y,rad)=>near(x,y,rad,false);
+  for(const q of KH_DISTRICTS){const p=spot((q.x0+q.x1)>>1,(q.y0+q.y1)>>1,14);if(p)dests.push({n:q.n,cat:'quarter',x:p[0],y:p[1],f:0})}
+  let pi=0;
+  for(const pk of C.plazas){if(!pk.park)continue;const nm=KH_PARK_NAMES[(pi++)%KH_PARK_NAMES.length];const p=spot((pk.x0+pk.x1+4)>>1,(pk.y0+pk.y1+4)>>1,6);if(p)dests.push({n:nm,cat:'park',x:p[0],y:p[1],f:0})}
+  for(const p of C.plazas){if(p.park||!p.name)continue;const c=spot((p.x0+p.x1)>>1,(p.y0+p.y1)>>1,6);if(c)dests.push({n:p.name,cat:p.z===1?'market':'landmark',x:c[0],y:c[1],f:0})}
+  { // the palace stop is on the avenue before the gate, looking up at the palace and its spire
+    const pp=near(KH.CX,243,3,false)||[KH.CX,243];dests.push({n:'The Palace of Khemetra',cat:'landmark',x:pp[0],y:pp[1],f:0});
+  }
+  for(const id of ['mosque','church','temple1','bath1']){const b=KH_BUILDINGS.find(q=>q.id===id);if(b&&b.front)dests.push({n:b.name,cat:'landmark',x:b.front[0],y:b.front[1],f:KH_FACE_F[b.m?b.m.face:1]})}
+  dests.push({n:'The Great Gate',cat:'landmark',x:KH.CX,y:H-KH.WALL-4,f:0});
+  KH_DEST=dests;L.cartDests=dests;
+  // a cart at the foot of the gate stair and one in every quarter
+  const stops=[[203,372]].concat(KH_DISTRICTS.map(q=>[((q.x0+q.x1)>>1)+3,((q.y0+q.y1)>>1)+3]));
+  for(const [sx,sy] of stops){const p=near(sx,sy,16,true);if(p)add({k:khFaceKey(KH_CART_FACE),x:p[0],y:p[1],block:false,walk:true,npc:'kh_cart',sc:1})}
 }
 
 /* ---- src/desert/dunes.js ---- */
@@ -9932,7 +10173,7 @@ Object.assign(CUTS,{
     {who:hn(2),text:'Then we walk in, and we ask for the wizard. We have come a long way for this.'},
     {text:'Khemetra waits beyond the open gate.'}],
   khArrive:()=>[
-    {text:'The gate of Khemetra closes behind the party, and the sound of the desert goes with it. They stand on a high marble terrace, and all of the golden city lies below them. A long stair leads down into the street. (Press V in the city to climb up and look over the roofs again.)'},
+    {text:'The gate of Khemetra closes behind the party, and the sound of the desert goes with it. They stand in a street of pale stone. A donkey and cart wait close by, and the driver waves, ready to take anyone anywhere in the city for a few coins.'},
     {text:'Ahead, a great avenue of pale stone runs north between white houses trimmed with gold, and at the end of it, so far away that it seems to stand in the sky, rises a palace with a spire of gold.'},
     {who:hn(0),text:'I have never seen a city this big. I did not know a wall could go on this long.'},
     {who:hn(1),text:'Look at the roofs. Domes, towers, gardens on the tops of houses, and palms everywhere. Somebody loved this place.'},

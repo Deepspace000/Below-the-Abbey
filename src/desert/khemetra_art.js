@@ -65,7 +65,7 @@ function khMakeFloors(){
   // a picture drawn at the size of one cell; zoom takes the middle part of it, so fine patterns read at game scale
   const put=(n,key,zoom)=>{const im=khImg(key);if(!im)return false;const [c,x]=tcv(),sw=im.width/zoom,sh=im.height/zoom,sx=(im.width-sw)/2,sy=(im.height-sh)/2;x.drawImage(im,sx,sy,sw,sh,0,0,TS,TS);FLOORS[n]=pix(c);names.push(n);return true};
   // 0 cobbles, 1 slabs, 2 painted tile, 3 market setts, 4 lawn, 5 mosaic
-  const want=[[['floor2_0'],1],[['floor2_2','floor2_1'],1],[['floor3_0','floor2_4'],2],[['floor2_5','floor2_3'],1],[['floor1_4'],1],[['floor3_2','floor2_4'],2]];
+  const want=[[['floor2_0'],1],[['floor2_2','floor2_1'],1],[['floor3_3','floor3_0','floor2_4'],1],[['floor2_5','floor2_3'],1],[['floor1_4'],1],[['floor3_2','floor2_4'],2]];
   const base=['#c9b48a','#d4c09a','#c8b890','#b89c70','#6e8f4a','#7aa0b8'];
   want.forEach(([keys,zoom],i)=>{
     if(keys.some(k=>put('kh'+i,k,zoom)))return;

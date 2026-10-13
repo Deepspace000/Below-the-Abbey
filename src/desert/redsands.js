@@ -76,6 +76,6 @@ function buildRedDunes(){
 const REDDUNES=buildRedDunes();
 const LEVEL43_DATA={rows:REDDUNES.rows,start:REDDUNES.start,enemies:REDDUNES.enemies,items:REDDUNES.items,decor:REDDUNES.decor,scenery:REDDUNES.scen,fmap:REDDUNES.fm,outdoor:true,day:.97,floor:'redsand',
   floorSet:['redsand','redsand2','redpath','sandpath'],ceil:'cloud',noExtras:true,name:'The Red Dunes',label:'Red Dunes',diff:16,
-  portals:[{to:42,x:48,y:2,f:2,tex:'sutdoor'},{to:44,x:200,y:391,f:0,tex:'citygate'}]};
+  portals:[{to:42,x:48,y:2,f:2,tex:'sutdoor'},{to:44,x:201,y:379,f:0,tex:'citygate'}]};
 LEVELS[43]=LEVEL43_DATA;
 LEVEL42_DATA.portals[1]={to:43,x:REDDUNES.cxS,y:REDDUNES.start.y,f:0,tex:'sutdoor'};

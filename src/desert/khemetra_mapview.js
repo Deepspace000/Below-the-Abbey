@@ -29,6 +29,19 @@ function khBuildMapImage(){
     const i=idx(cx,cy);
     x.fillStyle=C.solid[i]?'#b39a70':(GR[C.fl[i]]||'#e4d3a2');x.fillRect(cx*S,cy*S,S,S);
   }
+  // how wide each street is: the shorter of the open runs across and along it
+  const run=new Uint8Array(W*H*2);
+  for(let y=0;y<H;y++){let k=0;while(k<W){if(C.solid[idx(k,y)]){k++;continue}let e=k;while(e<W&&!C.solid[idx(e,y)])e++;for(let q2=k;q2<e;q2++)run[idx(q2,y)*2]=Math.min(255,e-k);k=e}}
+  for(let xx=0;xx<W;xx++){let k=0;while(k<H){if(C.solid[idx(xx,k)]){k++;continue}let e=k;while(e<H&&!C.solid[idx(xx,e)])e++;for(let q2=k;q2<e;q2++)run[idx(xx,q2)*2+1]=Math.min(255,e-k);k=e}}
+  const SW={avenue:'#f3d57a',wide:'#ecd68e',street:'#e6d6a4',lane:'#d3be90'};
+  for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){
+    const i=idx(cx,cy);if(C.solid[i]||C.zone[i]!==0&&C.zone[i]!==6)continue;
+    if(C.zone[i]===6)continue;
+    const wd=Math.min(run[i*2],run[i*2+1]);
+    x.fillStyle=wd>=7?SW.avenue:wd>=5?SW.wide:wd>=3?SW.street:SW.lane;x.fillRect(cx*S,cy*S,S,S);
+    if(wd<=2&&((cx+cy)&1)===0){x.fillStyle='rgba(70,48,24,.16)';x.fillRect(cx*S+S/2-.5,cy*S+S/2-.5,1,1)}   // lanes are stippled
+    if(wd>=7){x.fillStyle='rgba(120,84,20,.16)';x.fillRect(cx*S,cy*S,S,1)}
+  }
   const own=new Int32Array(W*H).fill(-1);
   C.modules.forEach((m,mi)=>{
     const d=KH_DIRS[m.face],ix=-d[0],iy=-d[1],depth=m.kind==='castle'?KH.WALL:m.kind==='palace'?3:4+((khHash(m.cells[0][0],m.cells[0][1],8)*3)|0);
@@ -101,7 +114,7 @@ function khDrawCityMap(cs,ox,oy){
     const st=C._streets||(C._streets=khNameStreets(C)),sz=clamp(cs*1.5,7,10);
     for(const s of st.v){for(let y=40;y<C.H-30;y+=95){let ok=true;for(let k=-4;k<=4;k++)if(C.solid[C.idx(s.x,y+k)])ok=false;if(ok&&vis(s.x,y,60))lab(s.n,ox+(s.x+.5)*cs,oy+y*cs,sz,'#4a3820',-Math.PI/2)}}
     for(const s of st.h){for(let xx=40;xx<C.W-30;xx+=110){let ok=true;for(let k=-4;k<=4;k++)if(C.solid[C.idx(xx+k,s.y)])ok=false;if(ok&&vis(xx,s.y,60))lab(s.n,ox+xx*cs,oy+(s.y+.5)*cs,sz,'#4a3820')}}
-    lab('Ring Road',ox+KH.CX*cs,oy+246*cs,clamp(cs*1.6,7,10),'#4a3820');lab('West Road',ox+75*cs,oy+(KH.CY+.5)*cs,clamp(cs*1.6,7,10),'#4a3820');lab('East Road',ox+325*cs,oy+(KH.CY+.5)*cs,clamp(cs*1.6,7,10),'#4a3820');
+    lab('Ring Road (3 wide)',ox+KH.CX*cs,oy+246*cs,clamp(cs*1.6,7,10),'#4a3820');lab('West Road',ox+75*cs,oy+(KH.CY+.5)*cs,clamp(cs*1.6,7,10),'#4a3820');lab('East Road',ox+325*cs,oy+(KH.CY+.5)*cs,clamp(cs*1.6,7,10),'#4a3820');
   }
   // shops, inns, temples and houses of note: the name at the door, with a small sign for what it is
   if(cs>=4.2){
@@ -116,8 +129,8 @@ function khDrawCityMap(cs,ox,oy){
   // the hatch to the cisterns once the vizier has named it
   if(G.flags.khWizardKnown&&vis(KH_HATCH.x,KH_HATCH.y,60)){lab('Hatch to the Cisterns',ox+(KH_HATCH.x+.5)*cs,oy+(KH_HATCH.y-1.5)*cs,clamp(cs*1.4,7,10),'#7a1a10');ctx.fillStyle='#7a1a10';ctx.beginPath();ctx.arc(ox+(KH_HATCH.x+.5)*cs,oy+(KH_HATCH.y+.5)*cs,Math.max(2,cs*.5),0,Math.PI*2);ctx.fill()}
   // a small key
-  ctx.save();ctx.fillStyle='rgba(30,20,10,.82)';rrect(ctx,6,DH-66,150,40,4);ctx.fill();
-  const key=[['#c1835a','Houses'],['#dcae4a','Shops'],['#ece4cc','Temples'],['#72bcc4','Baths'],['#938c80','Ruins'],['#a9c47f','Parks']];
-  key.forEach(([c,t],i)=>{const kx=12+(i%3)*48,ky=DH-60+Math.floor(i/3)*16;ctx.fillStyle=c;ctx.fillRect(kx,ky,8,8);txt(t,kx+11,ky+5,7,'#e8dcb4','left')});
+  ctx.save();ctx.fillStyle='rgba(30,20,10,.82)';rrect(ctx,6,DH-80,168,54,4);ctx.fill();
+  const key=[['#c1835a','Houses'],['#dcae4a','Shops'],['#ece4cc','Temples'],['#72bcc4','Baths'],['#938c80','Ruins'],['#a9c47f','Parks'],['#f3d57a','Avenue'],['#e6d6a4','Street'],['#d3be90','Narrow lane']];
+  key.forEach(([c,t],i)=>{const kx=12+(i%3)*54,ky=DH-74+Math.floor(i/3)*16;ctx.fillStyle=c;ctx.fillRect(kx,ky,8,8);ctx.strokeStyle='rgba(0,0,0,.5)';ctx.lineWidth=.6;ctx.strokeRect(kx,ky,8,8);txt(t,kx+11,ky+5,7,'#e8dcb4','left')});
   ctx.restore();
 }

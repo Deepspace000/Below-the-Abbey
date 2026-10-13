@@ -113,6 +113,8 @@ function khCrowd(C,L){
     const q=near(ax,ay,8,true);if(!q)continue;const kp=KH_KEEPERS[id];if(!kp)continue;
     add({k:khFaceKey(kp.face),x:q[0],y:q[1],block:false,walk:true,npc:id,sc:kp.sc||1});
   }
+  khPlaceCarts(C,L,near,add);
+  khPlaceQuestFolk(C,L,near,add);
   { // the granary keeper waits outside the granary
     const b=KH_BUILDINGS.find(x=>x.id==='granary');if(b&&b.front){const q=near(b.front[0],b.front[1],6,true);if(q){const kp=KH_KEEPERS.kh_gebu;add({k:khFaceKey(kp.face),x:q[0],y:q[1],block:false,walk:true,npc:'kh_gebu',sc:1})}}
   }
@@ -186,4 +188,15 @@ function khApplyState(){
     if(d.npc==='kh_cat'&&F.khCats&&F.khCats[d.cat]){d.found=true;d.block=false}
   }
   buildDecorMap();
+  khBucketDecor();
+}
+
+/* every resident has a name: those who stand about with nothing but a job get one from where they stand */
+const KH_GENERIC={kh_gateguard:'Guard',kh_guardA:'Guard',kh_guardB:'Guard',kh_guardC:'Guard',kh_guardD:'Guard',kh_page:'Page',kh_herald:'Herald',kh_inn1_p1:'',kh_inn1_p2:'',kh_inn2_p1:'',kh_inn2_p2:'',kh_inn3_p1:'',kh_inn3_p2:''};
+const KH_CATNAMES=['Pasha','Mafdet','Sekhmet','Tiger','Dusty','Shadow'];
+function khResidentName(d){
+  if(d.npc==='kh_cat')return KH_CATNAMES[(d.cat||0)%KH_CATNAMES.length]+', the cat';
+  const t=KH_GENERIC[d.npc];if(t===undefined)return null;
+  const nm=KH_NAMES[(hash2(d.x*7+3,d.y*5+1,LEVEL)*KH_NAMES.length)|0];
+  return t?t+' '+nm:nm+(d.npc.endsWith('p1')?', a traveller':', a merchant');
 }

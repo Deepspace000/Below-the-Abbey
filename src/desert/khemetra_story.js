@@ -44,6 +44,7 @@ khPray('kh_pray3','Priestess Hana','kh_npc4_1','In the House of Eternal Life we 
 khPray('kh_pray4','Brother Pasha','kh_npc4_0','Under the New Moon every beginning is allowed. What would you like to begin?',15);
 khPray('kh_temple1','Acolyte Tuya','kh_npc4_1','The Temple of the Sun burns one lamp for every soul in the city. Four hundred thousand lamps. Please do not count them.',20);
 khPray('kh_temple2','High Priest Omari','kh_npc4_0','The Temple of Bastet is the cat goddess house. The cats here are holy. So is anything they sit on.',20);
+khPray('kh_mosque','Imam Qadir','kh_npc4_3','Peace be upon you. The Great Mosque is open to every traveller. Come in out of the sun, and rest your eyes in the cool of the dome.',20);
 khPray('kh_church','Father Idris','kh_npc4_0','The Church of Light has stood longer than the palace. We ring the bell for every traveller who comes home.',20);
 const khBath=(id,name,face,line)=>khNpc(id,name,face,()=>say(line,[['Take the waters (10 gold, rest and refresh)',()=>{if(G.gold<10)return say('The waters are open to everyone with ten gold. You have a little less.',[BYE]);G.gold-=10;G.heroes.forEach(h=>{if(h.alive){h.hp=Math.min(h.max,h.hp+Math.ceil(h.max*.6));h.mp=h.mpMax}});advanceTime(60);sfx('potion');return say('Hot water, mint and steam. The party emerges pink, calm and a good deal more cheerful.',[BYE])}],BYE]));
 khBath('kh_bath1','Isis, the bath attendant','kh_npc6_3','Welcome to the Court Baths. Towels, oils and hot water, in that order. Weapons are left at the door.');

@@ -7,7 +7,7 @@ const KH_PROPS={ // painted props by role: [sheet piece, height in cells]; the o
   fountain:['kh_city1_0','fountain',1.1],well:['kh_city1_1','well',1.0],obelisk:['kh_city1_2','memorial',2.4],statue:['kh_city1_3','statue',1.5],lamp:['kh_nolamp','lamp',1.5],bench:['kh_city1_4','bench',.6],
   palm:['kh_city2_0','dpalm0',2.4],tree:['kh_city2_1','ltree17',1.7],shrub:['kh_city2_2','lbush0',.8],planter:['kh_city2_5','flowerpot',.5],pot:['kh_city2_3','flowerpot',.9],pergola:['kh_city2_4','bench',1.5],
   ship:['kh_ship1_0','crate',.9],wheel:['kh_ship1_1','barrel',.8],anchor:['kh_ship1_2','barrel',.8],rope:['kh_ship1_3','sacks',.35],seachest:['kh_ship1_4','chest',.5],sail:['kh_ship1_5','crate',1.1],
-  throne:['kh_throne1_0','statue',1.4],banner:['kh_throne1_1','banner',1.3],maptable:['kh_throne1_2','counter',.6],candle:['kh_throne1_3','lamp',1.2],
+  throne:['kh_throne1_0','statue',1.4],banner:['kh_throne1_1','banner',1.3],maptable:['kh_maptable1_0','counter',.6],candle:['kh_throne1_3','lamp',1.2],
   stallA:['kh_stall1_0','cart',.95],stallB:['kh_stall1_1','cart',.95],stallC:['kh_stall1_2','cart',.95],stallD:['kh_stall1_3','cart',.95],stallE:['kh_stall1_4','cart',.95],stallF:['kh_stall1_5','cart',.95],
   melons:['kh_stall2_0','crate',.5],amphorae:['kh_stall2_1','urn',.7],hay:['kh_stall2_2','cart',.7],veg:['kh_stall2_3','produce',.55],carpets:['kh_stall2_4','sacks',.6],copper:['kh_stall2_5','urn',.8],
   vase0:['vase0','vase0',.55],vase1:['vase1','vase1',.7],vase2:['vase2','vase2',.6],vase3:['vase3','vase3',.55]
@@ -48,6 +48,7 @@ const KH_BUILDINGS=[
   {id:'pray4',pool:'pray',name:'House of the New Moon',room:'prayer',keeper:'kh_pray4'},
   {id:'temple1',pool:'temple',name:'Temple of the Sun',room:'temple',keeper:'kh_temple1'},
   {id:'temple2',pool:'temple',name:'Temple of Bastet',room:'temple',keeper:'kh_temple2'},
+  {id:'mosque',pool:'temple',name:'The Great Mosque',room:'temple',keeper:'kh_mosque',near:[320,40]},
   {id:'church',pool:'pray',name:'The Church of Light',room:'temple',keeper:'kh_church',near:[122,205]},
   // baths
   {id:'bath1',pool:'bath',name:'The Court Baths',room:'bath',keeper:'kh_bath1'},
@@ -124,7 +125,7 @@ function khMakeDoorsAndRooms(C,L,placed){
     LEVELS[lvl]=room.level;
     m.at=room.start;
     doors[b.id]={lvl,front,face:ff,b};
-    b.lvl=lvl;b.front=front;
+    b.lvl=lvl;b.front=front;b.m=m;
   }
   return doors;
 }
@@ -214,6 +215,7 @@ function khRoomRuin(b){
     enemies:en.map((t,i)=>[t,2+((i*3)%7),1+(i%2)*3,15]),items:[],
     build:({put,raw})=>{raw('bones',3,6);raw('bones',7,5);raw('crate',1,1);raw('barrel',9,1);raw('crate',9,7);raw('bones',2,3);
       if(b.id==='urnhouse')raw('urn',5,2,{npc:'kh_urn'});
+      if(b.id==='denA')raw('sacks',2,6,{npc:'kh_sandals'});
       if(b.id==='ledgerhouse')raw('chest',5,1,{npc:'kh_ledger'});
       else if(b.id==='denC'){raw('chest',5,1,{npc:'kh_sealchest'});raw('sacks',2,6,{npc:'kh_drumsack'})}
       else raw('chest',5,1,{block:true,deco:false});}};

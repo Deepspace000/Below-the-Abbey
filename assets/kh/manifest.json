@@ -1552,5 +1552,26 @@
 "h": 256,
 "kind": "tex",
 "sheet": "floor1"
+},
+"cart1_0": {
+"file": "cart1_0.webp",
+"w": 511,
+"h": 354,
+"kind": "sprite",
+"sheet": "cart1"
+},
+"cart1_1": {
+"file": "cart1_1.webp",
+"w": 254,
+"h": 358,
+"kind": "sprite",
+"sheet": "cart1"
+},
+"mosque1_0": {
+"file": "mosque1_0.webp",
+"w": 989,
+"h": 641,
+"kind": "sprite",
+"sheet": "mosque1"
 }
 }
