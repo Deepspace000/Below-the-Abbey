@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='2.86';
+const VERSION='2.87';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1700,7 +1700,10 @@ function hurtEnemy(e,dmg){
 }
 function heroAttack(i){
   const def=HERO_DEF[i],h=G.heroes[i],w=heroWeapon(h),range=(w&&w.ranged)||1;
-  const f=frontEnemy(range);if(!f){msg(range>1?'No target in range.':'There is nothing within reach.');return false}
+  const f=frontEnemy(range);
+  if(!f){ // nothing to strike: the person ahead, or beneath you, is spoken to instead
+    const d0=DIRS[G.P.f];for(const k of [1,0,2]){const x=G.P.x+d0[0]*k,y=G.P.y+d0[1]*k,nd=G.decor.find(d=>d.npc&&d.walk&&!d.found&&d.x===x&&d.y===y);if(nd){startTalk(nd);return false}}
+    msg(range>1?'No target in range.':'There is nothing within reach.');return false}
   const en=ENEMY_DEF[f.e.t].name,verb=range>1?'shoots':'hits';
   if(Math.random()<heroHitPct(i,ENEMY_DEF[f.e.t].fly)){const r=rollDmg(h);msg(`${def.name} ${verb} the ${en} for ${r.d}${r.crit?' (double damage!)':''}.`,r.crit?'#ffd76a':undefined);hurtEnemy(f.e,r.d)}
   else{msg(`${def.name} misses.`,'#a09880');sfx('miss');f.e.alert=true}
@@ -2622,6 +2625,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     if(s.decor&&s.decor.burn>0){const bp=s.decor.burn/5;s.fade=bp>.82?clamp((1-bp)/.18,0,1):1;if(s.fade<.03)continue}
     if(s.hang||(s.decor&&(s.decor.walk||/^sign_|^lamp$/.test(s.decor.k)))){const f=clamp((ty-.35)/.55,0,1);if(f<.03)continue;s.fade=f} // signs, lanterns and walk-through people melt away when you stand beside them
     let sw=F*s.w/ty;sw*=(1+(s.lunge||0)*.28);
+    if(s.smallSky&&sw<7)continue; // a far roof too small to see is not painted
     if(s.flat){const rx=s.x-cx,ry=s.y-cy,dl=Math.hypot(rx,ry)||1;sw*=Math.max(.06,Math.abs((rx*s.flat[0]+ry*s.flat[1])/dl))}
     if(s.hang){const rx=s.x-cx,ry=s.y-cy,dl=Math.hypot(rx,ry)||1;sw*=Math.max(.07,Math.abs((rx*s.hang[1]-ry*s.hang[0])/dl))}
     const sh=sw*ih/iw*(1-(s.sink||0)*.6);
@@ -2643,7 +2647,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     if(!s.flash&&!(s.decor&&s.decor.burn>0)){
       let tier=SPR_TIERS[SPR_TIERS.length-1];for(const t of SPR_TIERS){if(t>=iw*kq0){tier=t;break}}
       tw=Math.max(2,Math.min(iw,tier));th=Math.max(2,Math.round(ih*tw/iw));
-      const lq=Math.round(lum*24),hq=Math.round(smS*50),key=(img._cid||(img._cid=++SPR_CID))+'|'+tw+'|'+lq+'|'+hq+(dyv?'d':'n');
+      const lq=s.sky?Math.round(lum*6)*4:Math.round(lum*24),hq=s.sky?Math.round(smS*10)*5:Math.round(smS*50),key=(img._cid||(img._cid=++SPR_CID))+'|'+tw+'|'+lq+'|'+hq+(dyv?'d':'n');
       SRC=SPR_CACHE.get(key);
       if(!SRC){
         SRC=document.createElement('canvas');SRC.width=tw;SRC.height=th;const X=SRC.getContext('2d');X.drawImage(img,0,0,iw,ih,0,0,tw,th);
@@ -8553,7 +8557,7 @@ function khBuild(seed){
   // ---- the castle wall round everything ----
   R(0,0,W-1,H-1,(x,y)=>{if(x<B||y<B||x>=W-B||y>=H-B)solid[idx(x,y)]=1});
   // ---- the grid of blocks: streets of every width, blocks of every size ----
-  const cuts=(lo,hi)=>{const out=[];let p=lo;while(p<hi){const bw=12+Math.floor(rng()*15),sw=[2,2,3,3,3][Math.floor(rng()*5)];if(p+bw+sw>hi-9){out.push([p,hi]);break}out.push([p,p+bw-1]);p+=bw+sw}return out};
+  const cuts=(lo,hi)=>{const out=[];let p=lo;while(p<hi){const bw=12+Math.floor(rng()*15),sw=[2,2,2,2,3][Math.floor(rng()*5)];if(p+bw+sw>hi-9){out.push([p,hi]);break}out.push([p,p+bw-1]);p+=bw+sw}return out};
   const xb=cuts(B+1,W-B-2),yb=cuts(B+1,H-B-2);
   const blocks=[];
   for(let j=0;j<yb.length;j++)for(let i=0;i<xb.length;i++)blocks.push({i,j,x0:xb[i][0],x1:xb[i][1],y0:yb[j][0],y1:yb[j][1]});
@@ -8564,6 +8568,9 @@ function khBuild(seed){
     if(r<.10&&b.i+1<xb.length){const n=blocks.find(q=>q.i===b.i+1&&q.j===b.j);if(n)R(b.x1+1,b.y0+2,n.x0-1,b.y1-2,(x,y)=>{solid[idx(x,y)]=1})}
     else if(r<.18&&b.j+1<yb.length){const n=blocks.find(q=>q.i===b.i&&q.j===b.j+1);if(n)R(b.x0+2,b.y1+1,b.x1-2,n.y0-1,(x,y)=>{solid[idx(x,y)]=1})}
   }
+  // parks: every third block each way is a wide lawn with palms, benches and people
+  const parks=[];
+  for(const b of blocks){const w=b.x1-b.x0+1,h=b.y1-b.y0+1;if(b.i%3===1&&b.j%3===1&&w>=11&&h>=11){R(b.x0,b.y0,b.x1,b.y1,(x,y)=>{solid[idx(x,y)]=0;zone[idx(x,y)]=2});parks.push({name:'A Park',x0:b.x0,y0:b.y0,x1:b.x1,y1:b.y1,z:2,f:4,park:true})}}
   // lanes: a narrow dead-end alley bitten into the bigger blocks
   for(const b of blocks){
     const w=b.x1-b.x0+1,h=b.y1-b.y0+1;if(w<16||h<16||rng()<.35)continue;
@@ -8661,7 +8668,8 @@ function khBuild(seed){
   // which open cells can be reached from the city gate at all
   const reach=new Uint8Array(W*H),q=[idx(KH.CX,H-KH.WALL-4)];reach[q[0]]=1;
   while(q.length){const c=q.pop(),x=c%W,y=(c/W)|0;for(const [dx,dy] of DIRS){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;const i=idx(nx,ny);if(solid[i]||reach[i])continue;reach[i]=1;q.push(i)}}
-  return {W,H,solid,fl,zone,slotOf,modules,plazas,PAL,PB,blocks,xb,yb,idx,rng,reach};
+  for(const pk of parks)if(!(pk.x1>=PAL.x0-6&&pk.x0<=PAL.x1+6&&pk.y1>=PAL.y0-6&&pk.y0<=PAL.y1+6))plazas.push(pk);
+  return {W,H,solid,fl,zone,slotOf,modules,plazas,PAL,PB,blocks,xb,yb,idx,rng,reach,parks};
 }
 
 /* ---- src/desert/khemetra_art.js ---- */
@@ -8845,12 +8853,12 @@ const KH_SKYD={k:'kroof'};
 function khSkyList(cx,cy,dX,dY){
   const L=LEVELS[44],out=[],sk=L.sky;
   for(let i=0;i<sk.length;i++){
-    const e=sk[i],rx=e.x-cx,ry=e.y-cy,d2=rx*rx+ry*ry,lim=e.big?58000:2500;
+    const e=sk[i],rx=e.x-cx,ry=e.y-cy,d2=rx*rx+ry*ry,lim=e.big?58000:1600;
     if(d2>lim||d2<4)continue;
     const dot=rx*dX+ry*dY;if(dot<=0)continue;
     if(Math.abs(rx*dY-ry*dX)>dot*1.1+e.w*.6)continue;
     const img=IMG[e.k];if(!img)continue;
-    out.push({x:e.x,y:e.y,img,w:e.w,bob:e.z,decor:KH_SKYD,sky:true});
+    out.push({x:e.x,y:e.y,img,w:e.w,bob:e.z,decor:KH_SKYD,sky:true,smallSky:!e.big});
   }
   return out;
 }
@@ -9549,10 +9557,14 @@ function khCrowd(C,L){
   for(const p of C.plazas){
     const cx=(p.x0+p.x1)>>1,cy=(p.y0+p.y1)>>1;
     reserve(cx,cy,0);
+    if(p.park){ /* the people of a park stand in small groups, talking */
+      const groups=2+((p.x1-p.x0)>>3);
+      for(let g=0;g<groups;g++){const gx=p.x0+2+((rng()*(p.x1-p.x0-3))|0),gy=p.y0+2+((rng()*(p.y1-p.y0-3))|0);const n=3+((rng()*3)|0);for(let k=0;k<n;k++){const q=near(gx+((rng()*3)|0)-1,gy+((rng()*3)|0)-1,2,true);if(q)khAddCitizen(decor,occ,idx,q[0],q[1],'street',rng)}}
+    }
+
     if(p.z===2){prop('fountain',cx,cy);for(const [dx,dy] of [[-3,0],[3,0],[0,-3],[0,3]]){const q=near(cx+dx,cy+dy,1,true);if(q)prop('bench',q[0],q[1],{walk:true,block:false})}}
     else if(p.z===4){prop('obelisk',cx,cy);for(const [dx,dy] of [[-4,0],[4,0]]){const q=near(cx+dx,cy+dy,1,true);if(q)prop('statue',q[0],q[1])}}
-    else if(p.z===5){prop('fountain',cx,cy)}
-    else if(p.z===3){prop('well',cx,cy)}
+    else if(p.z===5){prop('fountain',cx,cy)}    else if(p.z===3){prop('well',cx,cy)}
     else if(p.z===1){
       // rows of stalls with aisles between them, and a seller at each
       const roles=['stallA','stallB','stallC','stallD','stallE','stallF'],goods=['melons','amphorae','hay','veg','carpets','copper'];
@@ -9578,30 +9590,36 @@ function khCrowd(C,L){
   for(let x=0;x<W;x++){let y=0;while(y<H){if(!open(x,y)){y++;continue}let e=y;while(e<H&&open(x,e))e++;for(let k=y;k<e;k++)run[idx(x,k)*2+1]=Math.min(255,e-y);y=e}}
   const width=i=>Math.min(run[i*2],run[i*2+1]);
   const wallNear=(x,y)=>KH_DIRS.some(([a,b])=>!open(x+a,y+b));
+  const big=(x,y)=>1.6+khHash(x,y,13)*.7;           // jars and vases are big, taller than a child
+  const palmK=(x,y)=>khHash(x,y,14)<.4?khProp('palm'):['dpalm0','dpalm1','dpalm2','dpalm3'][((x*3+y)>>1)&3];
+  const walkThrough=o=>add(Object.assign({block:false,walk:true},o)); // palms, trees, jars and people can all be walked through
   for(let y=4;y<H-4;y++)for(let x=4;x<W-4;x++){
     const i=idx(x,y);if(occ[i]||!open(x,y)||!C.reach[i])continue;
-    const r=khHash(x,y,11),wd=width(i),z=C.zone[i];
-    if(z===0&&wd<5){ // a narrow street: a few things along the walls, the middle kept free
+    const r=khHash(x,y,11),wd=width(i),z=C.zone[i],wn=wallNear(x,y);
+    if(z===2){ // parks and gardens: lawns under palms, with shrubs, trees and planters
+      if(!d3[i])continue;
+      if(r<.10)walkThrough({k:palmK(x,y),x,y,sc:.95+khHash(x,y,12)*.5});
+      else if(r<.135){const q=khHash(x,y,15);walkThrough({k:khProp(q<.3?'planter':q<.55?'pot':q<.8?'shrub':'tree'),x,y,sc:.95+khHash(x,y,16)*.3})}
+      else if(r<.15&&wn)walkThrough({k:vases[(x+y)&3],x,y,sc:big(x,y)});
+      continue;
+    }
+    if(z===6){if(d5[i]&&r<.03)walkThrough({k:['dpalm0','dpalm2'][(x+y)&1],x,y,sc:1.1});continue}
+    if(z!==0)continue;
+    if(wd<5){ // a narrow street: a few things hard against the walls, the middle kept free
       if(!d3[i]&&wd<3)continue;
-      if(!wallNear(x,y))continue;
-      if(r<.02)add({k:'dpalm'+((x+y)&3),x,y,block:true,sc:.8+khHash(x,y,12)*.3});
-      else if(r<.05)add({k:vases[(x+y)&3],x,y,block:false,walk:true,sc:.9+khHash(x,y,13)*.3});
-      else if(r<.07)add({k:khProp(khHash(x,y,15)<.5?'planter':'pot'),x,y,block:false,walk:true});
-      else if(r<.075)add({k:'urn',x,y,block:false,walk:true});
+      if(!wn)continue;
+      if(r<.02)walkThrough({k:'dpalm'+((x+y)&3),x,y,sc:.8+khHash(x,y,12)*.3});
+      else if(r<.06)walkThrough({k:vases[(x+y)&3],x,y,sc:big(x,y)});
+      else if(r<.08)walkThrough({k:khProp(khHash(x,y,15)<.5?'planter':'pot'),x,y,sc:1.2});
+      else if(r<.085)walkThrough({k:'urn',x,y,sc:big(x,y)});
       continue;
     }
     if(d3[i]&&!d5[i]){ // a cell one in from the wall of a wide street
-      if(r<.16){add({k:khHash(x,y,14)<.4?khProp('palm'):['dpalm0','dpalm1','dpalm2','dpalm3'][((x*3+y)>>1)&3],x,y,block:true,sc:.9+khHash(x,y,12)*.4})}
-      else if(r<.20){add({k:vases[(x+y)&3],x,y,block:false,walk:true,sc:.9+khHash(x,y,13)*.3})}
-      else if(r<.215){add({k:'urn',x,y,block:false,walk:true})}
-      else if(r<.235){const q=khHash(x,y,15);add({k:khProp(q<.3?'planter':q<.55?'pot':q<.8?'shrub':'tree'),x,y,block:q>=.55,walk:q<.55,sc:.95+khHash(x,y,16)*.2})}
-    }else if(d5[i]){
-      if(z===2&&r<.05)add({k:['dpalm0','dpalm1','dpalm2','dpalm3'][(x+y)&3],x,y,block:true,sc:.9+khHash(x,y,12)*.5});
-      else if(z===6&&r<.03)add({k:['dpalm0','dpalm2'][(x+y)&1],x,y,block:true,sc:1.1});
-      else if(z===0&&r<.012)add({k:'dpalm'+((x+y)&3),x,y,block:true});
-      else if(r<.01)add({k:vases[(x*5+y)&3],x,y,block:false,walk:true});
-      else if(r>.995)add({k:'lamp',x,y,block:false,walk:true});
-    }
+      if(r<.16)walkThrough({k:palmK(x,y),x,y,sc:.9+khHash(x,y,12)*.4});
+      else if(r<.20)walkThrough({k:vases[(x+y)&3],x,y,sc:big(x,y)});
+      else if(r<.215)walkThrough({k:'urn',x,y,sc:big(x,y)});
+      else if(r<.235){const q=khHash(x,y,15);walkThrough({k:khProp(q<.3?'planter':q<.55?'pot':q<.8?'shrub':'tree'),x,y,sc:.95+khHash(x,y,16)*.2})}
+    }else if(d5[i]&&r>.997)walkThrough({k:'lamp',x,y});
   }
   // lamps down the great avenue
   for(let y=250;y<H-10;y+=10)for(const x of [KH.CX-5,KH.CX+5]){const q=near(x,y,1,false);if(q)add({k:'lamp',x:q[0],y:q[1],block:false,walk:true})}
@@ -9610,20 +9628,20 @@ function khCrowd(C,L){
   cats.forEach(([cx,cy],ci)=>{
     let best=null;for(let r=0;r<40&&!best;r++)for(let dy=-r;dy<=r&&!best;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=cx+dx,y=cy+dy;if(!freeAt(x,y,false))continue;
       let w=0;for(const [a,b] of KH_DIRS)if(!open(x+a,y+b))w++;if(w>=1&&!occ[idx(x,y)]){best=[x,y];break}}
-    if(best)add({k:khFaceKey('kh_anim1_0'),x:best[0],y:best[1],block:true,npc:'kh_cat',cat:ci,sc:.8});
+    if(best)add({k:khFaceKey('kh_anim1_0'),x:best[0],y:best[1],block:false,walk:true,npc:'kh_cat',cat:ci,sc:.8});
   });
   // ---- the named people of the quests, each in their own corner ----
   const anchors={kh_sabah:[60,330],kh_hapi:[196,102],kh_dalila:[288,110],kh_cheops:[196,322],kh_rami:[203,386],kh_eman:[104,106],kh_usi:[196,250],kh_yara:[300,196],kh_pia:[108,298],kh_anuket:[204,104],kh_meryt:[204,246],kh_nadia:[286,298]};
   for(const [id,[ax,ay]] of Object.entries(anchors)){
     const q=near(ax,ay,8,true);if(!q)continue;const kp=KH_KEEPERS[id];if(!kp)continue;
-    add({k:khFaceKey(kp.face),x:q[0],y:q[1],block:true,npc:id,sc:kp.sc||1});
+    add({k:khFaceKey(kp.face),x:q[0],y:q[1],block:false,walk:true,npc:id,sc:kp.sc||1});
   }
   { // the granary keeper waits outside the granary
-    const b=KH_BUILDINGS.find(x=>x.id==='granary');if(b&&b.front){const q=near(b.front[0],b.front[1],6,true);if(q){const kp=KH_KEEPERS.kh_gebu;add({k:khFaceKey(kp.face),x:q[0],y:q[1],block:true,npc:'kh_gebu',sc:1})}}
+    const b=KH_BUILDINGS.find(x=>x.id==='granary');if(b&&b.front){const q=near(b.front[0],b.front[1],6,true);if(q){const kp=KH_KEEPERS.kh_gebu;add({k:khFaceKey(kp.face),x:q[0],y:q[1],block:false,walk:true,npc:'kh_gebu',sc:1})}}
   }
   // ---- the gate guards, the palace guards ----
-  for(const [x,y] of [[196,388],[204,388]]){const q=near(x,y,2,true);if(q)add({k:khFaceKey('kh_npc3_0'),x:q[0],y:q[1],block:true,npc:'kh_gateguard',sc:1})}
-  for(const [x,y] of [[196,236],[204,236],[196,241],[204,241]]){const q=near(x,y,2,true);if(q)add({k:khFaceKey('kh_npc3_1'),x:q[0],y:q[1],block:true,npc:'kh_gateguard',sc:1})}
+  for(const [x,y] of [[196,388],[204,388]]){const q=near(x,y,2,true);if(q)add({k:khFaceKey('kh_npc3_0'),x:q[0],y:q[1],block:false,walk:true,npc:'kh_gateguard',sc:1})}
+  for(const [x,y] of [[196,236],[204,236],[196,241],[204,241]]){const q=near(x,y,2,true);if(q)add({k:khFaceKey('kh_npc3_1'),x:q[0],y:q[1],block:false,walk:true,npc:'kh_gateguard',sc:1})}
   // ---- the people of the streets ----
   let crowd=0;const want=520;
   for(let tries=0;tries<400000&&crowd<want;tries++){
@@ -9646,6 +9664,9 @@ function khCrowd(C,L){
   enemyAt(60,60,6,'nomad2',17);
   for(const [x,y] of [[70,90],[40,100],[90,60],[30,40],[100,100],[56,120]])enemyAt(x,y,12,'dwolf',16);
   for(const [x,y] of [[80,40],[50,80],[110,70],[34,60],[96,92],[64,100]])enemyAt(x,y,12,'dskeleton',16);
+  // brigands and thieves keep to the far districts, away from the gate and the palace
+  const gangs=[[340,150],[60,230],[345,265],[150,40],[262,42],[44,150],[355,310],[120,372],[300,60],[330,200]];
+  gangs.forEach(([gx,gy],gi)=>{const mix=[['bandit','bandit','archer'],['nomad2','bandit'],['bandit','archer','nomad2'],['bandit','bandit']][gi%4];mix.forEach((t,k)=>enemyAt(gx+k*2,gy+(k%2)*2,10,t,16+(gi%2)))});
 }
 /* nothing the crowd or the markets place may seal off a part of the city: blocking things that wall off reachable ground are made walk-through */
 function khKeepOpen(C,L){
@@ -9675,7 +9696,7 @@ function khAddCitizen(decor,occ,idx,x,y,kind,rng){
   const face=kind==='guard'?pick(F.guards):kind==='market'?pick(F.men.concat(F.women)):rng()<.1?pick(F.kids):rng()<.06?pick(F.poor):rng()<.5?pick(F.men):pick(F.women);
   const nm=KH_NAMES[(rng()*KH_NAMES.length)|0]+(kind==='market'?' the seller':kind==='guard'?' of the watch':' '+KH_TITLES[(rng()*KH_TITLES.length)|0]);
   const kl=[(rng()*KH_GOSSIP.length)|0,(rng()*KH_GOSSIP.length)|0,(rng()*KH_GOSSIP.length)|0];
-  decor.push({k:khFaceKey(face),x,y,block:true,npc:'kh_citizen',kname:nm,kl,sc:.95+rng()*.1});
+  decor.push({k:khFaceKey(face),x,y,block:false,walk:true,npc:'kh_citizen',kname:nm,kl,sc:.95+rng()*.1});
   occ[idx(x,y)]=1;
 }
 khNpc('kh_gateguard','A guard of the watch','kh_npc3_0',()=>say('Welcome to Khemetra, the Golden City. Keep your blades sheathed in the streets, and your purses close. The palace is at the north end of the great avenue.',[BYE]));

@@ -26,7 +26,7 @@ function khBuild(seed){
   // ---- the castle wall round everything ----
   R(0,0,W-1,H-1,(x,y)=>{if(x<B||y<B||x>=W-B||y>=H-B)solid[idx(x,y)]=1});
   // ---- the grid of blocks: streets of every width, blocks of every size ----
-  const cuts=(lo,hi)=>{const out=[];let p=lo;while(p<hi){const bw=12+Math.floor(rng()*15),sw=[2,2,3,3,3][Math.floor(rng()*5)];if(p+bw+sw>hi-9){out.push([p,hi]);break}out.push([p,p+bw-1]);p+=bw+sw}return out};
+  const cuts=(lo,hi)=>{const out=[];let p=lo;while(p<hi){const bw=12+Math.floor(rng()*15),sw=[2,2,2,2,3][Math.floor(rng()*5)];if(p+bw+sw>hi-9){out.push([p,hi]);break}out.push([p,p+bw-1]);p+=bw+sw}return out};
   const xb=cuts(B+1,W-B-2),yb=cuts(B+1,H-B-2);
   const blocks=[];
   for(let j=0;j<yb.length;j++)for(let i=0;i<xb.length;i++)blocks.push({i,j,x0:xb[i][0],x1:xb[i][1],y0:yb[j][0],y1:yb[j][1]});
@@ -37,6 +37,9 @@ function khBuild(seed){
     if(r<.10&&b.i+1<xb.length){const n=blocks.find(q=>q.i===b.i+1&&q.j===b.j);if(n)R(b.x1+1,b.y0+2,n.x0-1,b.y1-2,(x,y)=>{solid[idx(x,y)]=1})}
     else if(r<.18&&b.j+1<yb.length){const n=blocks.find(q=>q.i===b.i&&q.j===b.j+1);if(n)R(b.x0+2,b.y1+1,b.x1-2,n.y0-1,(x,y)=>{solid[idx(x,y)]=1})}
   }
+  // parks: every third block each way is a wide lawn with palms, benches and people
+  const parks=[];
+  for(const b of blocks){const w=b.x1-b.x0+1,h=b.y1-b.y0+1;if(b.i%3===1&&b.j%3===1&&w>=11&&h>=11){R(b.x0,b.y0,b.x1,b.y1,(x,y)=>{solid[idx(x,y)]=0;zone[idx(x,y)]=2});parks.push({name:'A Park',x0:b.x0,y0:b.y0,x1:b.x1,y1:b.y1,z:2,f:4,park:true})}}
   // lanes: a narrow dead-end alley bitten into the bigger blocks
   for(const b of blocks){
     const w=b.x1-b.x0+1,h=b.y1-b.y0+1;if(w<16||h<16||rng()<.35)continue;
@@ -134,5 +137,6 @@ function khBuild(seed){
   // which open cells can be reached from the city gate at all
   const reach=new Uint8Array(W*H),q=[idx(KH.CX,H-KH.WALL-4)];reach[q[0]]=1;
   while(q.length){const c=q.pop(),x=c%W,y=(c/W)|0;for(const [dx,dy] of DIRS){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;const i=idx(nx,ny);if(solid[i]||reach[i])continue;reach[i]=1;q.push(i)}}
-  return {W,H,solid,fl,zone,slotOf,modules,plazas,PAL,PB,blocks,xb,yb,idx,rng,reach};
+  for(const pk of parks)if(!(pk.x1>=PAL.x0-6&&pk.x0<=PAL.x1+6&&pk.y1>=PAL.y0-6&&pk.y0<=PAL.y1+6))plazas.push(pk);
+  return {W,H,solid,fl,zone,slotOf,modules,plazas,PAL,PB,blocks,xb,yb,idx,rng,reach,parks};
 }

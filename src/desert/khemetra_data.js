@@ -7,12 +7,12 @@ const KH_SKYD={k:'kroof'};
 function khSkyList(cx,cy,dX,dY){
   const L=LEVELS[44],out=[],sk=L.sky;
   for(let i=0;i<sk.length;i++){
-    const e=sk[i],rx=e.x-cx,ry=e.y-cy,d2=rx*rx+ry*ry,lim=e.big?58000:2500;
+    const e=sk[i],rx=e.x-cx,ry=e.y-cy,d2=rx*rx+ry*ry,lim=e.big?58000:1600;
     if(d2>lim||d2<4)continue;
     const dot=rx*dX+ry*dY;if(dot<=0)continue;
     if(Math.abs(rx*dY-ry*dX)>dot*1.1+e.w*.6)continue;
     const img=IMG[e.k];if(!img)continue;
-    out.push({x:e.x,y:e.y,img,w:e.w,bob:e.z,decor:KH_SKYD,sky:true});
+    out.push({x:e.x,y:e.y,img,w:e.w,bob:e.z,decor:KH_SKYD,sky:true,smallSky:!e.big});
   }
   return out;
 }
