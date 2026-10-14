@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.51';
+const VERSION='3.52';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1476,6 +1476,7 @@ function reset(n){
   G.decor=DECOR_SPAWNS.map(s=>{const o={k:s.k,x:s.x,y:s.y,block:!!s.block,loot:CONTAINERS.includes(s.k),shop:s.k==='cart'};if(s.deco){o.loot=false;o.shop=false}if(s.npc){o.npc=s.npc;o.loot=false;o.shop=false;if(s.goat)o.goat=s.goat}if(s.sc)o.sc=s.sc;if(s.walk)o.walk=true;if(s.wd)o.wd=s.wd;if(s.txt)o.txt=s.txt;if(s.bob)o.bob=s.bob;if(s.ox!==undefined){o.ox=s.ox;o.oy=s.oy}if(s.opens){o.opens=s.opens;o.idx=s.idx}if(s.lockedBy)o.lockedBy=s.lockedBy;if(s.secret)o.secret=true;for(const kk of ['ambush','hidden','trap','frame','goldAmt','enter','magic','cat','scar','hatch','kname','kl','lk','glow','red','lit','deco','wind'])if(s[kk]!==undefined)o[kk]=s[kk];return o});
   applyLevers();clearDoorFronts();
   G.decor.forEach(d=>{if(!d.npc&&(d.k==='grave'||d.k==='grave2'||d.k==='cross')){d.npc='epitaph';d.loot=false}});
+  G.decor.forEach(d=>{if(d.npc&&!/^(lockedgate|gate|fence|lever|hatch)/.test(d.k)){d.block=false;d.walk=true}}); // the party walks through every person and creature; tap them or press attack to speak
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++)if(MAPROWS[y][x]==='t')G.decor.push({k:'tree'+((hash2(x,y,7)*NTREES)|0),x,y,block:true,loot:false,shop:false});
   placeTeleporter();
   buildDecorMap();
@@ -5661,6 +5662,7 @@ const qGoal=id=>{const q=QUESTS[id];return clamp(q.goal(G.quests[id]||{}),0,q.ne
 const qReady=id=>qSt(id)==='active'&&qGoal(id)>=QUESTS[id].need;
 const anyQuestReady=()=>Object.keys(QUESTS).some(qReady);
 function qAccept(id){G.quests[id]={st:'active',base:QUESTS[id].cnt?(G.flags[QUESTS[id].cnt]||0):id==='wolves'?(G.flags.wolfKills||0):id==='rats'?(G.flags.ratKills||0):id==='bandits'?(G.flags.bandKills||0):0};if(QUESTS[id].give)bagAdd(mkItem(QUESTS[id].give));msg('New quest: '+QUESTS[id].title,'#ffe36a');sfx('level')}
+function rewardText(id){const r=QUESTS[id].reward||{},o=[];if(r.gold)o.push(r.gold+' gold');if(r.xp)o.push(r.xp+' XP');for(const it of (r.items||[]))o.push((ITEMDEF[it]&&ITEMDEF[it].n)||it);return o.join(', ')||'our thanks'}
 function qTurnIn(id){
   const q=QUESTS[id];if(!qReady(id))return false;
   for(const k in (q.take||{}))bagRemove(k,q.take[k]);
@@ -5668,7 +5670,7 @@ function qTurnIn(id){
   if(r.gold)G.gold+=r.gold;
   for(const it of (r.items||[]))if(!bagAdd(mkItem(it)))msg('Your bag is full. A reward was lost.','#d09a80');
   if(r.xp)giveXP(r.xp);
-  msg(`Quest complete: ${q.title}. +${r.gold} gold, +${r.xp} XP.`,'#ffe36a');sfx('win');
+  msg(`Quest complete: ${q.title}. Reward: ${rewardText(id)}.`,'#ffe36a');sfx('win');
   try{afflQuest(id)}catch(e){}
   try{repQuest(id)}catch(e){console.error(e)}
   return true;
@@ -5683,7 +5685,7 @@ function foundGoat(d){
 function qNode(id,o){
   const st=qSt(id),q=QUESTS[id];
   if(st==='done')return say(o.after,[BYE]);
-  if(qReady(id))return say(o.ready,[[o.turn||'Here you go.',()=>{qTurnIn(id);return say(o.thanks,[BYE])}],BYE]);
+  if(qReady(id))return say(o.ready,[[o.turn||'Here you go.',()=>{const rw=rewardText(id);qTurnIn(id);return say(o.thanks+' Reward: '+rw+'.',[BYE])}],BYE]);
   if(st==='active')return say(o.remind(qGoal(id),q.need),[BYE]);
   return say(o.offer,[[o.yes||'We will help.',()=>{qAccept(id);return say(o.accept,[BYE])}],['Not now.',()=>null]]);
 }
