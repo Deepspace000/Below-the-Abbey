@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.64';
+const VERSION='3.65';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4149,10 +4149,11 @@ const WORLD_LOCS=[
   {k:'violeterg',n:'The Violet Erg',sub:'a purple desert',lv:[62],x:640,y:262,ic:'dunes'},
   {k:'scoria',n:'Khemetra',sub:'the golden city',lv:[44],x:486,y:56,ic:'castle'},
   {k:'yarrim',n:'Yarrim',sub:'a town on the Vaast Sea',lv:[290,289],x:692,y:66,ic:'town'},
-  {k:'saltbarrow',n:'Saltbarrow',sub:'a pirate island',lv:[300],x:772,y:70,ic:'trees'},
-  {k:'bells',n:'The Isle of Bells',sub:'a drowned abbey',lv:[301],x:834,y:112,ic:'abbey'},
-  {k:'cinder',n:'Cinder Isle',sub:'a volcano',lv:[302],x:774,y:154,ic:'mountains'},
-  {k:'lastlight',n:'Last Light',sub:'a ruined beacon',lv:[303],x:850,y:196,ic:'castle'},
+  {k:'saltbarrow',n:'Saltbarrow',sub:'a pirate island',lv:[300,320],x:772,y:70,ic:'trees'},
+  {k:'bells',n:'The Isle of Bells',sub:'a drowned abbey',lv:[301,321],x:834,y:112,ic:'abbey'},
+  {k:'cinder',n:'Cinder Isle',sub:'a volcano',lv:[302,322],x:774,y:154,ic:'mountains'},
+  {k:'lastlight',n:'Last Light',sub:'a ruined beacon',lv:[303,323],x:850,y:196,ic:'castle'},
+  {k:'openSea',n:'The Open Sea',sub:'sail the Dawn Walker',lv:[330,331,332,333,334,335,336,337,338,339,340,341,342,343],x:808,y:262,ic:'rain'},
   {k:'oldhaven',n:'Oldhaven',sub:"the king's city",lv:[304,305,306,307,308,309,310],x:34,y:170,ic:'castle'}
 ];
 const WORLD_ROADS=[['abbey','thornwood','thornwick','gwood'],['gwood','road','tunnel','ironhill'],['ironhill','graves'],['ironhill','mines'],['ironhill','moor','pass','greendale','anaea']];
@@ -12765,7 +12766,7 @@ function yrSprites(out){
   });
   for(let i=0;i<18;i++){
     let cx=[56,60,66,70,76,50,84,62,72,90,58,68,80,64,74,52,88,66][i],cy=[30,44,38,48,36,52,42,26,40,34,56,30,50,58,26,40,46,32][i];const r=2.5+i%5*1.1,sp=.5+(i%4)*.12,a=t*sp+i*1.7;
-    if(LEVEL!==YR.ID){const S=SEA[LEVEL];if(!S)return;cx=S.cx+Math.cos(i*1.7)*(5+i%6*3);cy=S.cy+Math.sin(i*1.7)*(4+i%5*3)}
+    if(LEVEL!==YR.ID){const S=SEA[LEVEL];if(S){cx=S.cx+Math.cos(i*1.7)*(5+i%6*3);cy=S.cy+Math.sin(i*1.7)*(4+i%5*3)}else if(LEVEL===330){cx=G.P.x+Math.cos(i*1.7+t*.05)*(7+i%6*3);cy=G.P.y+Math.sin(i*1.7+t*.05)*(6+i%5*3)}else return}
     const img=((t*3.4+i)|0)%2?up:dn;
     out.push({x:cx+Math.cos(a)*r,y:cy+Math.sin(a*1.1)*r,img,w:.3,bob:1.3+(i%4)*.35+Math.sin(t*1.7+i)*.18,decor:{walk:true,k:'yar_gull_fly'}});
   }
@@ -14809,7 +14810,8 @@ function rigClink(v){ // a halyard slapping the mast: two quick taps, wood and a
 function seaSoundTick(){
   if(!AC||!NB)return;
   const now=AC.currentTime,dt=Math.min(.5,Math.max(0,now-SEAS.last));SEAS.last=now;
-  const on=G.state==='play'&&!G.mute&&SNDOPT.amb&&yarSea(LEVEL);
+  const uw=typeof uwLv==='function'&&uwLv(LEVEL),on=G.state==='play'&&!G.mute&&SNDOPT.amb&&yarSea(LEVEL)&&!uw;
+  if(typeof uwSoundTick==='function')uwSoundTick(now,dt,uw&&G.state==='play'&&!G.mute&&SNDOPT.amb);
   if(!SEAS.src){
     const mk=(type,f,q)=>{const s=AC.createBufferSource(),fl=AC.createBiquadFilter(),g=AC.createGain();s.buffer=NB;s.loop=true;s.loopStart=Math.random()*.5;fl.type=type;fl.frequency.value=f;fl.Q.value=q;g.gain.value=0;s.connect(fl);fl.connect(g);g.connect(MASTER);s.start();return {s,f:fl,g}};
     SEAS.src=mk('lowpass',400,.7);SEAS.hush=mk('bandpass',2600,.5);SEAS.deep=mk('lowpass',160,.6);
@@ -14830,6 +14832,32 @@ function seaSoundTick(){
     if(now>SEAS.nextClink){SEAS.nextClink=now+1.2+Math.random()*3.5;rigClink(rg)}
     if(now>SEAS.nextLap){SEAS.nextLap=now+2+Math.random()*3;nz(.5,.22*rg,'bandpass',1300,600,0)} // water slapping the hulls
   }
+}
+
+/* ---- under the water: a low hush, bubbles, and now and then a far-off whale ---- */
+const UWSND={src:null,next:0,whale:0,vb:0};
+function uwBubbles(n,vol,spread){
+  for(let i=0;i<n;i++){const d=Math.random()*(spread||.3),f=260+Math.random()*520;tone(f,f*(1.7+Math.random()*.8),.07+Math.random()*.08,'sine',vol*(.5+Math.random()*.5),d)}
+}
+function uwWhale(){
+  const t=AC.currentTime,vol=.045*SFXM,o=AC.createOscillator(),o2=AC.createOscillator(),g=AC.createGain(),f=AC.createBiquadFilter(),pn=AC.createStereoPanner?AC.createStereoPanner():null,d=4+Math.random()*3,b=70+Math.random()*40;
+  o.type='sine';o2.type='sine';o.frequency.setValueAtTime(b,t);o.frequency.linearRampToValueAtTime(b*2.3,t+d*.4);o.frequency.linearRampToValueAtTime(b*1.5,t+d*.75);o.frequency.linearRampToValueAtTime(b*1.9,t+d);
+  o2.frequency.setValueAtTime(b*2.01,t);o2.frequency.linearRampToValueAtTime(b*4.6,t+d*.4);o2.frequency.linearRampToValueAtTime(b*3,t+d*.75);o2.frequency.linearRampToValueAtTime(b*3.8,t+d);
+  f.type='lowpass';f.frequency.value=600;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+d*.25);g.gain.linearRampToValueAtTime(vol*.7,t+d*.7);g.gain.linearRampToValueAtTime(0,t+d);
+  const mix=AC.createGain();mix.gain.value=.35;o2.connect(mix);mix.connect(f);o.connect(f);f.connect(g);if(pn){pn.pan.value=Math.random()*2-1;g.connect(pn);pn.connect(MASTER)}else g.connect(MASTER);
+  o.start(t);o2.start(t);o.stop(t+d+.1);o2.stop(t+d+.1);
+}
+function uwSoundTick(now,dt,on){
+  if(!UWSND.src){
+    const mk=(type,f,q)=>{const s=AC.createBufferSource(),fl=AC.createBiquadFilter(),g=AC.createGain();s.buffer=NB;s.loop=true;s.loopStart=Math.random()*.5;fl.type=type;fl.frequency.value=f;fl.Q.value=q;g.gain.value=0;s.connect(fl);fl.connect(g);g.connect(MASTER);s.start();return {s,f:fl,g}};
+    UWSND.src=mk('lowpass',150,.7);UWSND.hiss=mk('bandpass',900,.6);
+  }
+  const a=on?1:0,sw=.5+.5*Math.sin(now*.31)*Math.sin(now*.11+1);
+  UWSND.src.g.gain.setTargetAtTime(a*(.28+.1*sw),now,.6);UWSND.hiss.g.gain.setTargetAtTime(a*(.03+.035*sw),now,.8);UWSND.hiss.f.frequency.setTargetAtTime(600+500*sw,now,.8);
+  if(!a)return;
+  if(now>UWSND.next){UWSND.next=now+1.5+Math.random()*4;uwBubbles(2+((Math.random()*5)|0),.06,.5)}
+  if(G.uw&&G.uw.vent&&now>UWSND.vb){UWSND.vb=now+.22;uwBubbles(5,.1,.25)} // standing in a vent: a rush of bubbles
+  if(now>UWSND.whale){UWSND.whale=now+30+Math.random()*40;if(Math.random()<.8)uwWhale()}
 }
 
 /* ---- src/desert/underwater.js ---- */
@@ -14927,7 +14955,7 @@ function uwSkyFish(){
 /* ---- air: four minutes, refilled at the vents ---- */
 function uwBar(){
   if(!G.uw||G.cut||G.talk||G.menu||G.inv.open||G.loot||G.overview)return;
-  const a=G.uw.air/UW_MAX,x=135,y=4,w=150,h=11;
+  const a=G.uw.air/UW_MAX,x=135,y=20,w=150,h=11;
   ctx.save();
   ctx.fillStyle='rgba(6,20,30,.78)';rrect(ctx,x-2,y-2,w+4,h+4,4);ctx.fill();
   ctx.fillStyle=a>.5?'#5ac8f0':a>.2?'#e8d060':'#f06050';rrect(ctx,x,y,Math.max(2,w*a),h,3);ctx.fill();
@@ -15435,6 +15463,13 @@ khNpc('uw_oak','A drowned timber','uw_timber',d=>{
 /* sailing home with the boys: the check is also made on every landing */
 (function(){const _e=seaEnterHook;seaEnterHook=function(n){_e(n);if(n===290)sbHomeCheck()}})();
 
+/* the gold ! over everyone with another quest to give (the first not yet done in the list is the one that counts) */
+(function(){
+  const add=(id,ids)=>{const cur=QGIVER[id],arr=Array.isArray(cur)?cur.slice():(cur?[cur]:[]);for(const q of ids)if(!arr.includes(q))arr.push(q);QGIVER[id]=arr};
+  add('sb_maeve',['uq1','sa1','sa2']);add('ib_aldous',['uq2']);add('ci_ketra',['uq3']);add('ll_isolde',['uq4']);
+  add('yr_orsa',['sb1','sb2']);add('yr_harbour',['sc1','sc3']);add('yr_priest',['sc2']);add('yr_chandler',['sd1']);add('yr_menkaure',['sd2']);
+})();
+
 /* ---- src/desert/story.js ---- */
 /* ==========================================================================
    THE STORY SO FAR. A page in the journal that writes the main story down as it happens: the chapters the party has lived through,
@@ -15466,6 +15501,9 @@ const STORY=[
   {id:'bells',c:()=>qSt('vq2')==='done',t:'The Isle of Bells',x:'On the Isle of Bells, in a drowned abbey, Brother Aldous would give up the first page of the ledger only to those who rang all three bells and faced the dead who woke. The party faced them. The first page was theirs.'},
   {id:'cinder',c:()=>qSt('vq3')==='done',t:'Cinder Isle',x:'On a black volcano of an island, the ash-priestess Ketra asked for three crystals and the death of the Cinder Guardian that walked the slopes. The party brought both, and she gave up the second page.'},
   {id:'lastlight',c:()=>qSt('vq4')==='done',t:'Last Light',x:'At the end of the chain, Isolde herself sat in a hut by a ruined beacon. The third page lay in the altar at the top of the island, and Lord Corvane had followed the party\'s lamp across half the sea to take it. He did not leave the island.'},
+  {id:'dive',c:()=>G.flags.uwSeen&&Object.keys(G.flags.uwSeen).length>0,t:'Under the Sea',x:'Tam Salvor of Yarrim sold the party diving helms, and below every island there was a reef. The water was full of colour and teeth: coral gardens, drowned abbeys, vents that breathe, and a wreck among the kelp. Four minutes of air at a time, and the bubbles at the vents to fill the helms again.'},
+  {id:'sea',c:()=>G.flags.seaSeen,t:'The Open Sea',x:'The party took the helm of the Dawn Walker and sailed the Vaast Sea itself: a hundred cells of open water between the islands, serpents under the swell, wrecks adrift, and little islands where castaways and old chests wait.'},
+  {id:'kraken',c:()=>G.flags.krakenSlain,t:'The Kraken',x:'East of the line where the gulls stop, the sea went black and the Kraken rose. The party killed it, and for the first time in a hundred years the east of the Vaast Sea could be sailed.'},
   {id:'oldhaven',c:()=>G.flags.oldhavenSeen,t:'Oldhaven',x:'The Dawn Walker came home at dawn to Oldhaven, the king\'s city, with the whole master ledger in Isolde\'s own hand. The royal harbour was a wall of pale stone with every gun turned on the water. The gate would open at noon, and a warrant still stood against four named persons.'},
   {id:'court',c:()=>G.flags.courtSeen,t:'The Court of King Osric',x:'At noon the party was brought before King Osric and his court, with the master ledger in their hands.'},
   {id:'pardon',c:()=>G.flags.pardoned,t:'The Warrant Torn Up',x:'The ledger was read in open court, and the king saw whose hand wrote his tolls and his warrants. The chancellor who had stood behind Corvane fell, the warrant was torn in two, and the ransom on four heads was lifted. The road home, so long and so strange, was clear.'}

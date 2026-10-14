@@ -148,7 +148,7 @@ function yrSprites(out){
   });
   for(let i=0;i<18;i++){
     let cx=[56,60,66,70,76,50,84,62,72,90,58,68,80,64,74,52,88,66][i],cy=[30,44,38,48,36,52,42,26,40,34,56,30,50,58,26,40,46,32][i];const r=2.5+i%5*1.1,sp=.5+(i%4)*.12,a=t*sp+i*1.7;
-    if(LEVEL!==YR.ID){const S=SEA[LEVEL];if(!S)return;cx=S.cx+Math.cos(i*1.7)*(5+i%6*3);cy=S.cy+Math.sin(i*1.7)*(4+i%5*3)}
+    if(LEVEL!==YR.ID){const S=SEA[LEVEL];if(S){cx=S.cx+Math.cos(i*1.7)*(5+i%6*3);cy=S.cy+Math.sin(i*1.7)*(4+i%5*3)}else if(LEVEL===330){cx=G.P.x+Math.cos(i*1.7+t*.05)*(7+i%6*3);cy=G.P.y+Math.sin(i*1.7+t*.05)*(6+i%5*3)}else return}
     const img=((t*3.4+i)|0)%2?up:dn;
     out.push({x:cx+Math.cos(a)*r,y:cy+Math.sin(a*1.1)*r,img,w:.3,bob:1.3+(i%4)*.35+Math.sin(t*1.7+i)*.18,decor:{walk:true,k:'yar_gull_fly'}});
   }

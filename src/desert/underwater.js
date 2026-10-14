@@ -92,7 +92,7 @@ function uwSkyFish(){
 /* ---- air: four minutes, refilled at the vents ---- */
 function uwBar(){
   if(!G.uw||G.cut||G.talk||G.menu||G.inv.open||G.loot||G.overview)return;
-  const a=G.uw.air/UW_MAX,x=135,y=4,w=150,h=11;
+  const a=G.uw.air/UW_MAX,x=135,y=20,w=150,h=11;
   ctx.save();
   ctx.fillStyle='rgba(6,20,30,.78)';rrect(ctx,x-2,y-2,w+4,h+4,4);ctx.fill();
   ctx.fillStyle=a>.5?'#5ac8f0':a>.2?'#e8d060':'#f06050';rrect(ctx,x,y,Math.max(2,w*a),h,3);ctx.fill();

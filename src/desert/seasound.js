@@ -45,7 +45,8 @@ function rigClink(v){ // a halyard slapping the mast: two quick taps, wood and a
 function seaSoundTick(){
   if(!AC||!NB)return;
   const now=AC.currentTime,dt=Math.min(.5,Math.max(0,now-SEAS.last));SEAS.last=now;
-  const on=G.state==='play'&&!G.mute&&SNDOPT.amb&&yarSea(LEVEL);
+  const uw=typeof uwLv==='function'&&uwLv(LEVEL),on=G.state==='play'&&!G.mute&&SNDOPT.amb&&yarSea(LEVEL)&&!uw;
+  if(typeof uwSoundTick==='function')uwSoundTick(now,dt,uw&&G.state==='play'&&!G.mute&&SNDOPT.amb);
   if(!SEAS.src){
     const mk=(type,f,q)=>{const s=AC.createBufferSource(),fl=AC.createBiquadFilter(),g=AC.createGain();s.buffer=NB;s.loop=true;s.loopStart=Math.random()*.5;fl.type=type;fl.frequency.value=f;fl.Q.value=q;g.gain.value=0;s.connect(fl);fl.connect(g);g.connect(MASTER);s.start();return {s,f:fl,g}};
     SEAS.src=mk('lowpass',400,.7);SEAS.hush=mk('bandpass',2600,.5);SEAS.deep=mk('lowpass',160,.6);
@@ -66,4 +67,30 @@ function seaSoundTick(){
     if(now>SEAS.nextClink){SEAS.nextClink=now+1.2+Math.random()*3.5;rigClink(rg)}
     if(now>SEAS.nextLap){SEAS.nextLap=now+2+Math.random()*3;nz(.5,.22*rg,'bandpass',1300,600,0)} // water slapping the hulls
   }
+}
+
+/* ---- under the water: a low hush, bubbles, and now and then a far-off whale ---- */
+const UWSND={src:null,next:0,whale:0,vb:0};
+function uwBubbles(n,vol,spread){
+  for(let i=0;i<n;i++){const d=Math.random()*(spread||.3),f=260+Math.random()*520;tone(f,f*(1.7+Math.random()*.8),.07+Math.random()*.08,'sine',vol*(.5+Math.random()*.5),d)}
+}
+function uwWhale(){
+  const t=AC.currentTime,vol=.045*SFXM,o=AC.createOscillator(),o2=AC.createOscillator(),g=AC.createGain(),f=AC.createBiquadFilter(),pn=AC.createStereoPanner?AC.createStereoPanner():null,d=4+Math.random()*3,b=70+Math.random()*40;
+  o.type='sine';o2.type='sine';o.frequency.setValueAtTime(b,t);o.frequency.linearRampToValueAtTime(b*2.3,t+d*.4);o.frequency.linearRampToValueAtTime(b*1.5,t+d*.75);o.frequency.linearRampToValueAtTime(b*1.9,t+d);
+  o2.frequency.setValueAtTime(b*2.01,t);o2.frequency.linearRampToValueAtTime(b*4.6,t+d*.4);o2.frequency.linearRampToValueAtTime(b*3,t+d*.75);o2.frequency.linearRampToValueAtTime(b*3.8,t+d);
+  f.type='lowpass';f.frequency.value=600;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+d*.25);g.gain.linearRampToValueAtTime(vol*.7,t+d*.7);g.gain.linearRampToValueAtTime(0,t+d);
+  const mix=AC.createGain();mix.gain.value=.35;o2.connect(mix);mix.connect(f);o.connect(f);f.connect(g);if(pn){pn.pan.value=Math.random()*2-1;g.connect(pn);pn.connect(MASTER)}else g.connect(MASTER);
+  o.start(t);o2.start(t);o.stop(t+d+.1);o2.stop(t+d+.1);
+}
+function uwSoundTick(now,dt,on){
+  if(!UWSND.src){
+    const mk=(type,f,q)=>{const s=AC.createBufferSource(),fl=AC.createBiquadFilter(),g=AC.createGain();s.buffer=NB;s.loop=true;s.loopStart=Math.random()*.5;fl.type=type;fl.frequency.value=f;fl.Q.value=q;g.gain.value=0;s.connect(fl);fl.connect(g);g.connect(MASTER);s.start();return {s,f:fl,g}};
+    UWSND.src=mk('lowpass',150,.7);UWSND.hiss=mk('bandpass',900,.6);
+  }
+  const a=on?1:0,sw=.5+.5*Math.sin(now*.31)*Math.sin(now*.11+1);
+  UWSND.src.g.gain.setTargetAtTime(a*(.28+.1*sw),now,.6);UWSND.hiss.g.gain.setTargetAtTime(a*(.03+.035*sw),now,.8);UWSND.hiss.f.frequency.setTargetAtTime(600+500*sw,now,.8);
+  if(!a)return;
+  if(now>UWSND.next){UWSND.next=now+1.5+Math.random()*4;uwBubbles(2+((Math.random()*5)|0),.06,.5)}
+  if(G.uw&&G.uw.vent&&now>UWSND.vb){UWSND.vb=now+.22;uwBubbles(5,.1,.25)} // standing in a vent: a rush of bubbles
+  if(now>UWSND.whale){UWSND.whale=now+30+Math.random()*40;if(Math.random()<.8)uwWhale()}
 }

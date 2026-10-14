@@ -113,3 +113,10 @@ khNpc('uw_oak','A drowned timber','uw_timber',d=>{
 (function(){const _t=seaTick;seaTick=function(dt){_t(dt);const F=G.flags;if(LEVEL===SN.ID&&F.krakenSeen&&!F.krakenSlain&&(F.k_kraken||0)>0){F.krakenSlain=1;msg('The Kraken sinks, and the black water clears. For the first time in a hundred years the sea to the east is open.','#ffe36a');sfx('win');try{if(qSt('sd2')==='active')qTurnIn('sd2')}catch(e){}}sbHomeCheck()}})();
 /* sailing home with the boys: the check is also made on every landing */
 (function(){const _e=seaEnterHook;seaEnterHook=function(n){_e(n);if(n===290)sbHomeCheck()}})();
+
+/* the gold ! over everyone with another quest to give (the first not yet done in the list is the one that counts) */
+(function(){
+  const add=(id,ids)=>{const cur=QGIVER[id],arr=Array.isArray(cur)?cur.slice():(cur?[cur]:[]);for(const q of ids)if(!arr.includes(q))arr.push(q);QGIVER[id]=arr};
+  add('sb_maeve',['uq1','sa1','sa2']);add('ib_aldous',['uq2']);add('ci_ketra',['uq3']);add('ll_isolde',['uq4']);
+  add('yr_orsa',['sb1','sb2']);add('yr_harbour',['sc1','sc3']);add('yr_priest',['sc2']);add('yr_chandler',['sd1']);add('yr_menkaure',['sd2']);
+})();
