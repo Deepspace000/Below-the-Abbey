@@ -28,7 +28,7 @@ const IH_SHOPS=[
     if(S.dir==='N'){pat=[src[10].slice(12,16),src[11].slice(12,16),src[12].slice(12,16)];dx=1;fy=12;pat[2]=pat[2][0]+S.door+pat[2].slice(2);for(let k=0;k<3;k++)put(S.y+k,S.x,pat[k]);fx=S.x+dx;fy=S.y+2;}
     else{pat=[src[21].slice(18,23),src[22].slice(18,23),src[23].slice(18,23),src[24].slice(18,23)];dx=2;pat[0]=pat[0].slice(0,2)+S.door+pat[0].slice(3);for(let k=0;k<4;k++)put(S.y+k,S.x,pat[k]);fx=S.x+dx;fy=S.y}
     if(S.door!=='9')ch[S.door]=30+S.idx;
-    portals[S.idx]={to:S.n,x:fx,y:S.dir==='N'?fy+1:fy-1,f:S.dir==='N'?2:0,tex:S.tex};
+    portals[S.idx]={to:S.n,x:5,y:6,f:0,tex:S.tex}; // the party arrives just inside the shop door (the room's own start)
     S.exit={x:fx,y:S.dir==='N'?fy+1:fy-1,f:S.dir==='N'?2:0};
     L.decor.push({k:'sign_'+S.keeper,x:S.exit.x-1,y:S.exit.y,block:false,wd:[0,S.dir==='N'?-1:1],txt:[S.name.toUpperCase(),{ih_wizard:'Corvin, Wizard',ih_alchemist:'Ysolt, Alchemist',ih_swordsmith:'Torvald, Swordsmith',ih_armourer:'Grete, Armourer'}[S.keeper]]});
     KH_LAZY[S.n]=()=>{
