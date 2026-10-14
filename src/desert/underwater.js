@@ -191,6 +191,9 @@ function uwBuild(id){
   // the dive line up, the prize, and the boss
   dc('uw_buoy',start.x+2,start.y-1,{npc:'uw_up',cat:id,deco:false});
   for(let q=0;q<4;q++){let s=null;for(let r=0;r<10&&!s;r++)for(let yy=-r;yy<=r&&!s;yy++)for(let xx=-r;xx<=r&&!s;xx++){const x=[30,80,50,70][q]+xx,y=[40,30,60,80][q]+yy;if(free(x,y)&&Math.hypot(x-start.x,y-start.y)>10)s=[x,y]}if(s)dc('uw_timber',s[0],s[1],{npc:'uw_oak',cat:q,deco:false})}
+  {const tg={320:[94,18],321:[14,22],322:[92,68],323:[16,64]}[id];let s=null;   // the piece of the singing shell, in a far corner
+    if(tg)for(let r=0;r<12&&!s;r++)for(let yy=-r;yy<=r&&!s;yy++)for(let xx=-r;xx<=r&&!s;xx++){const x=tg[0]+xx,y=tg[1]+yy;if(free(x,y))s=[x,y]}
+    if(s){carve(60,56,s[0],s[1]);used.delete(s[0]+','+s[1]);dc('uw_clam',s[0],s[1],{npc:'uw_shellpc',cat:id,deco:false})}}
   dc('uw_shellchest',bossAt[0],bossAt[1]-4,{npc:'uw_prize',cat:id,deco:false});
   enemies.push({t:sp.boss[0],x:bossAt[0],y:bossAt[1]});
   for(const [t,cnt] of sp.foes){for(let q=0;q<cnt;q++){let tries=0,x,y;do{x=6+((R(q,t.length+51,seed)*0+Math.random()*(W-12))|0);y=6+((Math.random()*(H-30))|0);tries++}while((!free(x,y)||Math.hypot(x-start.x,y-start.y)<22||Math.hypot(x-bossAt[0],y-bossAt[1])<14)&&tries<80);if(tries<80)enemies.push({t,x,y})}}
