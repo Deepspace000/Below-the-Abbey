@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.85';
+const VERSION='3.86';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4348,6 +4348,11 @@ function drawTownBody(cs,ox,oy){
     ctx.beginPath();ctx.moveTo(cx-cs*.3,cy+cs*.4);ctx.lineTo(cx-cs*.3,cy-cs*.05);ctx.arc(cx,cy-cs*.05,cs*.3,Math.PI,0);ctx.lineTo(cx+cs*.3,cy+cs*.4);ctx.closePath();ctx.fill();ctx.stroke();
     if(p){const nm=LEVEL_NAMES[p.to];if(nm)dlab.push({nm,x,y})}
   }
+  if(LEVEL===22&&typeof PASS_ROUTE!=='undefined'&&PASS_ROUTE){ // the way through Greyfang Pass, as a dashed red line with arrowheads
+    const P=PASS_ROUTE.path;ctx.save();ctx.strokeStyle='#a8402e';ctx.lineWidth=Math.max(1.6,cs*.34);ctx.lineCap='round';ctx.lineJoin='round';ctx.setLineDash([cs*.9,cs*.7]);
+    ctx.beginPath();P.forEach(([x,y],i)=>{const px=ox+(x+.5)*cs,py=oy+(y+.5)*cs;if(i)ctx.lineTo(px,py);else ctx.moveTo(px,py)});ctx.stroke();ctx.setLineDash([]);
+    for(let i=14;i<P.length-6;i+=22){const [x,y]=P[i],[x2,y2]=P[i+3],a=Math.atan2(y2-y,x2-x);ctx.save();ctx.translate(ox+(x+.5)*cs,oy+(y+.5)*cs);ctx.rotate(a);ctx.fillStyle='#a8402e';ctx.beginPath();ctx.moveTo(cs*.9,0);ctx.lineTo(-cs*.4,-cs*.6);ctx.lineTo(-cs*.4,cs*.6);ctx.closePath();ctx.fill();ctx.restore()}
+    ctx.restore();lab('The way through the pass',ox+(P[Math.floor(P.length/2)][0]+.5)*cs,oy+(P[Math.floor(P.length/2)][1]-1.4)*cs,Math.max(8,Math.min(11,cs*.7)),'#6a1e12')}
   {const bd=G.flags.bathDoors2&&G.flags.bathDoors2[LEVEL];if(bd&&typeof BATH_TOWN!=='undefined'&&BATH_TOWN[LEVEL]){ // the town's bathhouse door: a blue arch with its name
     const cx=ox+(bd.x+.5)*cs,cy=oy+(bd.y+.5)*cs;ctx.fillStyle='#58a8d8';ctx.strokeStyle=ink;ctx.lineWidth=1.3;
     ctx.beginPath();ctx.moveTo(cx-cs*.4,cy+cs*.5);ctx.lineTo(cx-cs*.4,cy-cs*.05);ctx.arc(cx,cy-cs*.05,cs*.4,Math.PI,0);ctx.lineTo(cx+cs*.4,cy+cs*.5);ctx.closePath();ctx.fill();ctx.stroke();
@@ -16165,6 +16170,38 @@ function bathBuild(n,lv,fx,fy,ff){ // a locked-house number that is really the b
 }
 const _doorIsLocked=doorIsLocked;
 doorIsLocked=(lv,x,y)=>{const b=G.flags.bathDoors2&&G.flags.bathDoors2[lv];if(b&&b.x===x&&b.y===y)return false;return _doorIsLocked(lv,x,y)};
+
+/* ---- src/desert/passpath.js ---- */
+/* ==========================================================================
+   GREYFANG PASS: A CLEAR WAY THROUGH. The route from the west end of the pass to the way out in the east is found once,
+   laid down as a trail two squares wide (boulders and rocks cleared off it), marked with a cairn every dozen squares, and drawn on
+   the area map as a dashed red line.
+   ========================================================================== */
+const PASS_ROUTE=(function(){
+  const L=LEVELS[22];if(!L||!L.rows||L._route)return L&&L._route||null;
+  const rows=L.rows,H=rows.length,W=rows[0].length,st=L.start;let goal=null;
+  for(let y=0;y<H&&!goal;y++){const x=rows[y].indexOf('3');if(x>=0)goal=[x,y]}
+  if(!goal)return null;
+  const prev=new Int32Array(W*H).fill(-1),q=[st.y*W+st.x];prev[q[0]]=-2;
+  const open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&(rows[y][x]==='.'||(x===goal[0]&&y===goal[1]));
+  for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;if(x===goal[0]&&y===goal[1])break;
+    for(const [dx,dy] of [[1,0],[0,1],[0,-1],[-1,0]]){const nx=x+dx,ny=y+dy,n=ny*W+nx;if(!open(nx,ny)||prev[n]!==-1)continue;prev[n]=c;q.push(n)}}
+  const path=[];let c=goal[1]*W+goal[0];if(prev[c]===-1)return null;
+  while(c>=0){path.push([c%W,(c/W)|0]);c=prev[c]===-2?-1:prev[c]}path.reverse();
+  // the trail, two squares wide: the route and the open squares beside it
+  const fm=L.fmap.map(r=>r.split('')),near=new Set();
+  for(const [x,y] of path)for(const [dx,dy] of [[0,0],[1,0],[0,1],[-1,0],[0,-1]]){const nx=x+dx,ny=y+dy;if(open(nx,ny)){fm[ny][nx]='1';near.add(nx+','+ny)}}
+  L.fmap=fm.map(r=>r.join(''));
+  // clear the route and the squares beside it of rocks and boulders
+  for(const d of L.decor||[])if(near.has(d.x+','+d.y)&&/boulder|rocks|mossstone|gboulder|grocks|pbracken|pheather|pjuniper/.test(d.k)){d.found=true;d.block=false;d.hidden=true}
+  // a cairn beside the route every twelve squares
+  const taken=new Set((L.decor||[]).filter(d=>!d.found).map(d=>d.x+','+d.y));
+  for(let i=10;i<path.length-4;i+=12){
+    const [x,y]=path[i];let put=false;
+    for(const [dx,dy] of [[0,-2],[0,2],[2,0],[-2,0],[0,-3],[0,3]]){const nx=x+dx,ny=y+dy;if(open(nx,ny)&&!near.has(nx+','+ny)&&!taken.has(nx+','+ny)){L.decor.push({k:'cairn',x:nx,y:ny,block:true,deco:true});taken.add(nx+','+ny);put=true;break}}
+  }
+  return L._route={path,goal};
+})();
 
 /* ---- src/desert/dunes.js ---- */
 /* ==========================================================================
