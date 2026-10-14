@@ -115,7 +115,7 @@ khFolk('kh_zeb','Zeb, the merchant','kh_npc2_0','I do not want to say the moon i
 /* the people of the quests stand where their trouble is */
 function khPlaceQuestFolk(C,L,near,add){
   for(const f of KH_QFOLK){
-    const p=near(f.anchor[0],f.anchor[1],f.kid?40:18,true);if(!p)continue;
+    const p=near(f.anchor[0],f.anchor[1],f.kid?40:18,true)||near(f.anchor[0],f.anchor[1],70,true);if(!p)continue;   // a bigger search if the quarter around the anchor is full
     const kp=KH_KEEPERS[f.id];if(!kp)continue;
     add({k:khFaceKey(kp.face),x:p[0],y:p[1],block:false,walk:true,npc:f.id,sc:kp.sc||1});
   }
