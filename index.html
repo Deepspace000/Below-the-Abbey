@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.68';
+const VERSION='3.69';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2320,7 +2320,7 @@ function act(id){
     case 'potion':if(G.heroes[i].alive&&usePotion(i))heroDone(i);break;
     case 'swapoff':case 'swapalt':if(G.heroes[i].alive&&swapHand(i,id==='swapoff'?'off':'alt')&&hostileNear()&&!G.acted[i])heroDone(i);break;
     case 'wait':msg('The party waits.','#a09880');endRound();break;
-    case 'rest':restParty(false);break;
+    case 'rest':if(hostileNear()){msg('You cannot rest with enemies close by.','#d09a80');break}if(jp('camp')){G.menu='jp:camp';G.map=false}else restParty(false);break;
     case 'teleport':if(teleOn()&&teleActive(LEVEL))openTeleMap();break;
   }
 }
