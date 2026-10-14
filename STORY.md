@@ -4,101 +4,121 @@ This is every chapter of the story as it is written in the game (the Story So Fa
 
 ## 1. The Crypts and the Town
 
-The tale began in the crypts below the Abbey, and in the timber town of Thornwick above them, a town that did not much want four more adventurers. There was work to be had, and the road beyond the palisade was long.
+The tale began in the crypts below the Abbey, and in the timber town of Thornwick above them, a town behind a log palisade where the streets were almost empty and people watched from doorways and looked away. Four more adventurers were not what Thornwick wanted. But the road east was haunted by wolves and bandits, travellers had stopped coming back, and the mayor, Corbin, was offering work to anyone fool enough to take it. He sent the party after a bandit chief named Gandrick, who ran the raids from a camp in the Thornwood.
 
-## 2. Gandrick's Ledger
+## 2. The Thornwood
 
-The party killed Gandrick, the bandit who raided the Thornwick road, and took his ledger from the body. It showed that the mayor of Thornwick had been paid to send travellers to their deaths.
+East of Thornwick the forest is older and darker. No birds sing. Bones lie along the trail, and black-coated figures move between the trees. The party fought through wolves and bandits, and found the cave in the hillside where cold air breathes out smelling of wet stone and old death. The dead had been laid down there for a long time, and now the living guarded them.
 
-## 3. The Mayor of Ironhill
+## 3. Gandrick's Ledger
 
-At Ironhill the ledger was a gift to the wrong man. Mayor Halbrecht called it a forgery, threw the party in his dungeon, and sent a rider to the king naming them forgers. A warrant was out for all four of them, and hunters and hitmen were already on the road.
+The party killed Gandrick, and his black raven shrieked once and flew out into the dark. Among his things was a leather ledger: page after page of payments in silver, each marked with the letter C. The last entry read, "Forty crowns to C. for sending fools. Four more went into the wood today." The C was Corbin. The mayor of Thornwick had been taking a cut from the bandit all along, and had sent the party into the wood because he thought four strangers would die like all the rest.
 
-## 4. Over the Greyfang Pass
+## 4. The Mayor of Thornwick
 
-With the hunters at their heels the party crossed the Greyfang Pass and left the known country behind. East of the pass the maps stop.
+The party went back to Thornwick and laid the ledger before Mayor Corbin. He went grey, did not reach for the book, and reached for the sword on his wall instead. He had looked at the four of them and thought, here are four more fools. He told them they were meant to die in that wood, that Gandrick had paid him well, and that now they would not leave the room. The party fought him in his own hall, and he fell to his knees and dropped his sword.
 
-## 5. Mayor Marigold of Anaea
+## 5. The King's Captain
 
-In white-stoned Anaea, Mayor Marigold heard the whole story and believed it. The king would not listen to a village mayor, she said, but there was one man he did listen to: the wizard Ishkander, in the desert kingdom to the north.
+As Corbin fell, horns sounded in the square and soldiers in the king's colours pushed into the hall. Their captain looked at the mayor, then at the ledger. The raids on that road had been too well planned, he said; the crown had come to find out who was behind them. The soldiers cuffed Corbin in iron and led him away to the king's dungeons. The captain asked one more thing of the party: Ironhill was the next town, and its mayor must hear what happened here, in case he too had dealt with Gandrick. The way was east through Gandrick's wood, then west along a road through the forest that was a dead end except for a cave leading through the hill.
 
-## 6. The Road to Khemetra
+## 6. The Road West
 
-The party crossed the Sand Road and the desert to Khemetra, the golden city. The grand vizier, Hotep-Ra, would not give the wizard's hiding place to strangers, but he named it for those who recovered the royal seal.
+The road west was mud. Rain came down on the trees without stopping, and the whole forest dripped. Wolves followed the party, and something else moved between the trunks: ghosts, for the wood was haunted. The cave mouth swallowed the rain. Skeletons waited in the dark, with pale shapes among them. At last the tunnel climbed, grey light showed ahead, and the party stepped out beneath the stone walls of Ironhill.
 
-## 7. The Wizard in the Cistern
+## 7. The Mayor of Ironhill
+
+In Ironhill, Mayor Halbrecht had work first: undead, rats and bats had come up from the old mines east of the castle, and he wanted eight of them killed. The party did it. Then they reported to him, and gave him the story of Thornwick and the ledger. Halbrecht's smile slowly went away. A man from Thornwick had told him the party arrived with a ledger that nobody but they had seen. He thought they had written it themselves, to ruin Corbin and take his road. "I do not pay forgers," he said, and called the guards. The party was thrown into the castle dungeons, and he wrote to the king himself.
+
+## 8. Out of the Dungeons
+
+Iron cuffs, a long stair, a cold cell, and guards laughing outside the door. The party bribed the jailer, fought their way out past the guards, and cornered Halbrecht. He admitted it as he fell: he and Corbin had split the coin, two mayors on one road, and Gandrick had kept every other town poor. He could not let them tell the king. Captain Rowan came down with six guards, said he had served the wrong man for six years, and took the mayor into custody; the town was in his hands until a new mayor was chosen. But he also told them that Halbrecht had sent a rider to the king at dawn, naming the party as forgers. By now there was a warrant for all four of them, and the hunters and hitmen who live off warrants were already on the road.
+
+## 9. Over the Greyfang Pass
+
+Rowan could stop the hunters in town, not on the moor, so he sent the party up the Greyfang Pass, cold and steep, where horses could not follow. With the hunters at their heels the party crossed it and left the known country behind. From the ridge there was a wide green valley below, the air smelled of grass and flowers, and a road of pale stones wound down into the trees. Nobody followed them up. For now. This was Greendale, which the king never bothered with.
+
+## 10. Mayor Marigold of Anaea
+
+Anaea was a white town with yellow trim in a green valley, and the people in the square were every colour at once, a woman with blue skin and orange hair, a boy green from head to foot. They stared at the grey strangers. Mayor Marigold had not seen travellers come down the Greyfang road in years. She heard the whole story, from the ledger and the dead bandit to the dungeon and the warrant, and said it was a sorry tale and that she believed it, because liars tell it better. The king had not sent a tax collector or a soldier to Greendale in twenty years, and would not listen to a village mayor. But there was one man he did listen to: the wizard Ishkander, who had once saved the king's life, and who lived in the desert kingdom of Scoria to the north. If he vouched for the party, the warrant would be torn up. She sent them to him, by the east gate and the long road, and told them to take food and water.
+
+## 11. The Road to Khemetra
+
+The party took the road north from Anaea, crossed the Sand Road and the desert, and came to Khemetra, the golden city, four hundred thousand souls of whom not one had heard of them. A great avenue ran north between white houses trimmed with gold to a palace with a spire that seemed to stand in the sky. The mayor had said the king listened to the wizard, and the wizard must be found through the palace. The grand vizier, Hotep-Ra, would not give the wizard's hiding place to strangers, but he named it for those who recovered the royal seal.
+
+## 12. The Wizard in the Cistern
 
 Ishkander lives in a study at the end of the cisterns beneath the Potters Market. He knew the warrant was forged the moment he heard the word forger, and he promised to write to the king. The king of Khemetra was away at his summer court, and would be home in a few days.
 
-## 8. A Price on Their Heads
+## 13. A Price on Their Heads
 
 Ishkander warned the party that the warrant carried a price, twenty thousand crowns on each head, and that such money buys knives. In Khemetra the knives came: cloaked strangers in the streets, and a few waiting behind the doors of the houses. The party stayed alive.
 
-## 9. The King Returns
+## 14. The King Returns
 
 The trumpets sounded over Khemetra. King Rahotep was home, and Ishkander told the party to go straight to the palace.
 
-## 10. The King's Audience
+## 15. The King's Audience
 
 King Rahotep read Ishkander's letter and the dead bandit's ledger, and knew the hand that signed the warrant was not King Osric's. It was Lord Corvane, Warden of the western Crown, who had been taking the tolls for himself. The ledger the party carried was only a copy. The master was written in three pages by Corvane's scribe, Isolde, who fled by sea and hid them on the islands of the Vaast Sea. Then a dying rider fell at the foot of the throne: Corvane's black ship, the Black Heron, lay off Yarrim, and he meant to have the party by the new moon. The king ordered the Sea Gate unsealed.
 
-## 11. The Sea Gate
+## 16. The Sea Gate
 
 The warden's key lay in a rusted chest in the cisterns. With it the grand vizier unsealed the Sea Gate in the east wall of Khemetra, shut for a hundred years.
 
-## 12. The Tunnel
+## 17. The Tunnel
 
-The tunnel behind the Sea Gate was full of the drowned dead. The party cleared it, and Menkaure the shipwright called it a road at last.
+The king wanted the party out of the city by a way the warden's men would not be watching: not the long road back through the desert, but the sea. The tunnel behind the Sea Gate had been sealed for a hundred years, and it was full of the drowned dead. Menkaure the shipwright went with them, and when the party had cleared it he called it a road at last. It led east, under the cliffs, to the sea.
 
-## 13. Yarrim
+## 18. Yarrim
 
-At the far end of the tunnel lay Yarrim, a small fishing town on the Vaast Sea, with gulls over the pier and fishing boats moored in the bay. The harbourmaster, Tamsin Kell, was hiding the Dawn Walker, a ship built in secret, from Corvane's men.
+At the far end of the tunnel lay Yarrim, a small fishing town on the Vaast Sea, with gulls over the pier and fishing boats moored in the bay. The harbourmaster, Tamsin Kell, was hiding the Dawn Walker, a ship built in secret, from Corvane's men, whose black ship lay off the point. The reason for the voyage was Isolde's three pages: the master ledger was scattered across the islands of the Vaast Sea, and without it the party had only a copy and the word of a dead bandit against a warrant with a king's seal on it.
 
-## 14. The Dawn Walker
+## 19. The Dawn Walker
 
 The party found the stores washed up on the beach, cleared the rats from the Net Loft, and brought torches to old Orsa so that the Yarrim Light burned again. The Dawn Walker was ready to sail.
 
-## 15. Cast Off
+## 20. Cast Off
 
 The Dawn Walker slipped her moorings on the evening tide just as the Black Heron turned into the bay. Corvane called for them to heave to. The party ran for the shallows by the light of the lamp, and by dawn there was only the sea.
 
-## 16. Saltbarrow
+## 21. Saltbarrow
 
 On a pirate island of sand and wrecks, Sable Maeve wanted Corvane's marines gone. The party cleared them from her shore, and she told them where Isolde had gone: to the Isle of Bells.
 
-## 17. The Isle of Bells
+## 22. The Isle of Bells
 
 On the Isle of Bells, in a drowned abbey, Brother Aldous would give up the first page of the ledger only to those who rang all three bells and faced the dead who woke. The party faced them. The first page was theirs.
 
-## 18. Cinder Isle
+## 23. Cinder Isle
 
 On a black volcano of an island, the ash-priestess Ketra asked for three crystals and the death of the Cinder Guardian that walked the slopes. The party brought both, and she gave up the second page.
 
-## 19. Last Light
+## 24. Last Light
 
 At the end of the chain, Isolde herself sat in a hut by a ruined beacon. The third page lay in the altar at the top of the island, and Lord Corvane had followed the party's lamp across half the sea to take it. He did not leave the island.
 
-## 20. Oldhaven
+## 25. Oldhaven
 
 The Dawn Walker came home at dawn to Oldhaven, the king's city, with the whole master ledger in Isolde's own hand. The royal harbour was a wall of pale stone with every gun turned on the water. The gate would open at noon, and a warrant still stood against four named persons.
 
-## 21. The Court of King Osric
+## 26. The Court of King Osric
 
 At noon the party was brought before King Osric and his court, with the master ledger in their hands.
 
-## 22. The Warrant Torn Up
+## 27. The Warrant Torn Up
 
 The ledger was read in open court, and the king saw whose hand wrote his tolls and his warrants. The chancellor who had stood behind Corvane fell, the warrant was torn in two, and the ransom on four heads was lifted. The road home, so long and so strange, was clear.
 
-## 23. The Village of Yarrim
+## 28. The Village of Yarrim
 
 Yarrim is a hamlet that grew up by itself: one little cobbled road down to a harbour square, three lanes off it, a green behind the inn, and a dirt track at the back past two cottages to the gorge and the tunnel. Its people are small ones, and each has a favour to ask: a telescope stolen by a gull, a census of crabs, a message in a bottle, a left boot that is a right boot, a wedding of two boats, a donkey who will not budge, a thief of nets, a lantern at the bottom of the harbour, and a shanty with no last verse.
 
-## 24. The Wanderers
+## 29. The Wandering Monsters
 
-Strange things walk the levels without warning: the Ferryman of Dust, Mother Mossback, Aunt Marrow, the Hollow Bride and others, nine who ask for a favour and six who hunt. The rarest is the Messenger of Death, who writes the letters of his name on the walls, and whose letters kill when all five have been read. The Wanderers page in the main menu keeps a record of each one met.
+Strange things walk the levels without warning: the Ferryman of Dust, Mother Mossback, Aunt Marrow, the Hollow Bride and others, nine who ask for a favour and six who hunt. The rarest is the Messenger of Death, who writes the letters of his name on the walls, and whose letters kill when all five have been read. The Wandering Monsters page in the main menu keeps a record of each one met.
 
-## 25. What is still open
+## 30. What is still open
 
-The warrant is torn up and Lord Corvane is dead, but the story does not end at the pardon. The Dawn Walker is the ship of the party, with the whole Vaast Sea around her. Oldhaven, the city of the king, is a stony castle town with a court and a throne. The wanderers keep walking, the Messenger is somewhere in the dark of every level, and nobody has yet said where the road goes from here.
+The warrant is torn up and Lord Corvane is dead, but the story does not end at the pardon. The Dawn Walker is the ship of the party, with the whole Vaast Sea around her. Oldhaven, the city of the king, is a stony castle town with a court and a throne. The wanderers keep walking, the Messenger is somewhere in the dark of every level, On the table behind the king, Ishkander's letter lies open with its seal still unbroken, and Osric has said that Corvane was not the only man who wrote letters, so there is more written in the ledger than one reading can hold. Beyond that, nobody has yet said where the road goes from here.
 
