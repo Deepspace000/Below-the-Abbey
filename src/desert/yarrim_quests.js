@@ -8,7 +8,7 @@ Object.assign(NPC_H,{
   kh_yfolk1_0:.74,kh_yfolk1_1:.82,kh_yfolk1_2:.84,kh_yfolk1_3:.78,kh_yfolk1_4:.82,kh_yfolk1_5:.86,
   kh_yfolk2_0:.84,kh_yfolk2_1:.84,kh_yfolk2_2:.82,kh_yfolk2_3:.84,kh_yfolk2_4:.82,kh_yfolk2_5:.6,
   kh_yfolk3_0:.8,kh_yfolk3_1:.8,kh_yfolk3_2:.84,kh_yfolk3_3:.78,kh_yfolk3_4:.66,kh_yfolk3_5:.84,
-  kh_yprop1_0:.42,kh_yprop1_1:.42,kh_yprop1_3:.44,kh_yani1_0:.5,kh_yani1_1:.66,kh_yani1_2:.36,kh_yprop1_5:1.1,
+  kh_yprop1_0:.42,kh_yprop1_1:.42,kh_yprop1_3:.44,kh_yani1_0:.5,kh_yani1_1:.4,kh_yani1_2:.36,kh_yprop1_5:1.1,
   kh_ycrab2_0:.3,kh_ycrab2_1:.28,kh_ycrab2_2:.32,kh_ycrab2_3:.4,kh_ycrab2_4:.28,kh_ycrab2_5:.26
 });
 KH_STOCK.trader=()=>[['torch',8],['lantern',3],['potion',6],['antidote',4],['salve',4],['bread',10],['water',12],['dates',8],['herring',8],['ale',8],['apple',8],['wildflower',6],['herb',4],['cheese',4],['nuts',4],['dagger',2],['bow',2],['cap',3],['jerkin',2]];

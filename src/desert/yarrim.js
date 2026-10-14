@@ -7,7 +7,7 @@
    ========================================================================== */
 const YR={ID:290,TUN:289,W:112,H:80,FIRST:291};
 for(const n of ['tub','lavender','arch2','washing','olive','boat_fish','boat_row','boat_dhow','gull_stand','gull_up','gull_down','crab','crates','driftwood','nets','pots','shells'])loadImg('yar_'+n,'assets/yar_'+n+'.png');
-Object.assign(NPC_H,{yar_boat_fish:1.5,yar_boat_row:.5,yar_boat_dhow:1.75,yar_gull_stand:.4,yar_gull_up:.34,yar_gull_down:.2,yar_crab:.2,yar_crates:.5,yar_driftwood:.32,yar_nets:.95,yar_pots:.5,yar_shells:.2,yar_tub:.55,yar_lavender:.5,yar_arch2:1.55,yar_washing:.8,yar_olive:1.7});
+Object.assign(NPC_H,{yar_boat_fish:1.5,yar_boat_row:.5,yar_boat_dhow:1.75,yar_gull_stand:.24,yar_gull_up:.2,yar_gull_down:.12,yar_crab:.2,yar_crates:.5,yar_driftwood:.32,yar_nets:.95,yar_pots:.5,yar_shells:.2,yar_tub:.55,yar_lavender:.5,yar_arch2:1.55,yar_washing:.8,yar_olive:1.7});
 
 /* ---- wall and door pictures: the painted ones (ds_tex_yarwall ...) replace these plain tiles at start-up ---- */
 function makeYarArt(){
@@ -150,7 +150,7 @@ function yrSprites(out){
     let cx=[56,60,66,70,76,50,84,62,72,90,58,68,80,64,74,52,88,66][i],cy=[30,44,38,48,36,52,42,26,40,34,56,30,50,58,26,40,46,32][i];const r=2.5+i%5*1.1,sp=.5+(i%4)*.12,a=t*sp+i*1.7;
     if(LEVEL!==YR.ID){const S=SEA[LEVEL];if(!S)return;cx=S.cx+Math.cos(i*1.7)*(5+i%6*3);cy=S.cy+Math.sin(i*1.7)*(4+i%5*3)}
     const img=((t*3.4+i)|0)%2?up:dn;
-    out.push({x:cx+Math.cos(a)*r,y:cy+Math.sin(a*1.1)*r,img,w:.5,bob:1.3+(i%4)*.35+Math.sin(t*1.7+i)*.18,decor:{walk:true,k:'yar_gull_fly'}});
+    out.push({x:cx+Math.cos(a)*r,y:cy+Math.sin(a*1.1)*r,img,w:.3,bob:1.3+(i%4)*.35+Math.sin(t*1.7+i)*.18,decor:{walk:true,k:'yar_gull_fly'}});
   }
 }
 function yarGulls(){ // the high ones, wheeling over the water
@@ -161,7 +161,7 @@ function yarGulls(){ // the high ones, wheeling over the water
     const ph=G.time*(.2+i*.012)+i*.9,az=(i*.41+.55*Math.cos(ph*.7))%TAU,el=.34+.22*Math.sin(ph+i)+i%4*.05,mx=Math.cos(az),my=Math.sin(az);
     const a=(mx*V.dX+my*V.dY)/(V.dX*V.dX+V.dY*V.dY),b=(mx*V.pX+my*V.pY)/(V.pX*V.pX+V.pY*V.pY);if(a<=.05)continue;
     const px=((b/a+1)*V.VW/2)*sx,py=(V.HH-24-el*V.HH*.8)*sy,im=IMG[(Math.floor(G.time*3+i)%2)?'yar_gull_up':'yar_gull_down'];if(!im||px<-20||px>440)continue;
-    const w=18+i%3*4,hh=w*im.height/im.width;
+    const w=(18+i%3*4)*.6,hh=w*im.height/im.width;
     ctx.globalAlpha=.95;ctx.translate(px,py);ctx.rotate(Math.cos(ph)*.1);ctx.drawImage(im,-w/2,-hh/2,w,hh);ctx.setTransform(1,0,0,1,0,0);
   }
   ctx.restore();
