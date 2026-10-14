@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.84';
+const VERSION='3.85';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1419,7 +1419,7 @@ const ENEMY_DEF={
 function lvlHere(){return DIFF()+((LEVELS[LEVEL]||{}).lvlBonus||0)}
 function enemyStat(t,lvl){
   const d=ENEMY_DEF[t],lv=lvl||lvlHere(),m=1+.45*(lv-1);
-  return {hp:Math.round(d.hp*m),dmg:[Math.max(1,Math.round(d.dmg[0]*(1+.3*(lv-1))*.5)),Math.max(1,Math.round(d.dmg[1]*(1+.3*(lv-1))*.5))],xp:d.xp*lv,gold:d.gold[1]>=100?[d.gold[0],d.gold[1]]:[d.gold[0]*lv,d.gold[1]*lv]}; // bosses pay the gold written for them; only ordinary creatures pay more as they level
+  return {hp:Math.round(d.hp*m),dmg:[Math.max(1,Math.round(d.dmg[0]*(1+.3*(lv-1))*.5)),Math.max(1,Math.round(d.dmg[1]*(1+.3*(lv-1))*.5))],xp:d.xp*lv,gold:d.gold[1]>=100?[d.gold[0],d.gold[1]]:d.gold[1]>20?[Math.round(d.gold[0]*(1+.15*(lv-1))),Math.round(d.gold[1]*(1+.15*(lv-1)))]:[d.gold[0]*lv,d.gold[1]*lv]}; // bosses pay the gold written for them; only ordinary creatures pay more as they level
 }
 /* catch-up: a creature more than 5 levels below the party is raised to a random 2-5 levels below it; anything within 5 (or higher) is untouched */
 function rebalanceEnemies(){
@@ -3913,6 +3913,9 @@ function restoreNow(sv){
   if(sv.torchKeys){const ks=new Set(sv.torchKeys);LIGHTS.forEach(l=>{if(ks.has(l.key)){l.taken=true;torchAt.delete(l.key)}})}
   else if(sv.torches&&sv.torches.length===LIGHTS.length)LIGHTS.forEach((l,i)=>{if(sv.torches[i]){l.taken=true;torchAt.delete(l.key)}});
   G.state='play';G.menu=false;G.map=false;G.inv.open=false;G.loot=null;G.saves=null;G.nextAuto=G.time+180;G.lastReg=-2;G.flags=sv.flags||{};G.quests=sv.quests||{};G.lst=sv.lst||{};G.clock=sv.clock||480;G.talk=null;G.cut=null;G.arrows=[];
+  { // one-off correction 2: before v3.85 the guards in Halbrecht's fight paid by level; a young party that took it is set back to 1000
+    const F=G.flags;if(!F.goldFix385){F.goldFix385=1;if(F.halDown&&G.gold>1000&&Math.max(...G.heroes.map(h=>h.lvl))<=20){G.gold=1000;setTimeout(()=>msg('The windfall from Ironhill has been taken back. The party has 1000 gold.','#e8c870'),900)}}
+  }
   { // one-off correction: before v3.79 the mayor and Gandrick paid thousands of gold for their level; a young party that took it is set back to 500
     const F=G.flags;if(!F.goldFix379){F.goldFix379=1;if(F.mayorKilled&&F.gandrickDead&&G.gold>500&&Math.max(...G.heroes.map(h=>h.lvl))<=20){G.gold=500;setTimeout(()=>msg('The windfall from the mayor and Gandrick has been taken back. The party has 500 gold.','#e8c870'),600)}}
   }
