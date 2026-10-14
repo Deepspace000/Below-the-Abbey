@@ -27,6 +27,10 @@ const STORY=[
   {id:'court',c:()=>G.flags.courtSeen,t:'The Court of King Osric',x:'At noon the party was brought before King Osric and his court, with the master ledger in their hands.'},
   {id:'pardon',c:()=>G.flags.pardoned,t:'The Warrant Torn Up',x:'The ledger was read in open court, and the king saw whose hand wrote his tolls and his warrants. The chancellor who had stood behind Corvane fell, the warrant was torn in two, and the ransom on four heads was lifted. The road home, so long and so strange, was clear.'}
 ];
+STORY.push(
+  {id:'yarvillage',c:()=>G.flags.yarSeen,t:'The Village of Yarrim',x:'Yarrim is a hamlet that grew up by itself: one little cobbled road down to a harbour square, three lanes off it, a green behind the inn, and a dirt track at the back past two cottages to the gorge and the tunnel. Its people are small ones, and each has a favour to ask: a telescope stolen by a gull, a census of crabs, a message in a bottle, a left boot that is a right boot, a wedding of two boats, a donkey who will not budge, a thief of nets, a lantern at the bottom of the harbour, and a shanty with no last verse.'},
+  {id:'wanderers',c:()=>G.flags.wMet&&Object.keys(G.flags.wMet).length,t:'The Wanderers',x:'Strange things walk the levels without warning: the Ferryman of Dust, Mother Mossback, Aunt Marrow, the Hollow Bride and others, nine who ask for a favour and six who hunt. The rarest is the Messenger of Death, who writes the letters of his name on the walls, and whose letters kill when all five have been read. The Wanderers page in the main menu keeps a record of each one met.'},
+  {id:'open',c:()=>G.flags.pardoned,t:'What is still open',x:'The warrant is torn up and Lord Corvane is dead, but the story does not end at the pardon. The Dawn Walker is the ship of the party, with the whole Vaast Sea around her. Oldhaven, the city of the king, is a stony castle town with a court and a throne. The wanderers keep walking, the Messenger is somewhere in the dark of every level, and nobody has yet said where the road goes from here.'});
 function storyNext(){ // what to do next, from the chapter the party has reached
   const F=G.flags;
   if(F.pardoned)return 'The warrant is torn up and the ransom lifted. The road is yours.';
@@ -57,8 +61,8 @@ journalPage({id:'story',title:'The Story So Far',
   draw(){
     jFrame('The story so far');
     const F=G.flags;try{storyTickDays()}catch(e){}
-    const list=STORY.filter(e=>e.c());
-    txt(`${list.length} chapters`,440,25,8,'#a89878','right');
+    const lived=STORY.filter(e=>e.c()),list=G.storyAll?STORY:lived;
+    txt(G.storyAll?`all ${STORY.length} chapters, ${lived.length} lived`:`${lived.length} chapters`,440,25,8,'#a89878','right');
     const nx=storyNext();const nl=wrapText('Next: '+nx,396,8.2);
     nl.forEach((l,i)=>txt(l,240,40+i*10,8.2,'#e8c878','center'));
     const top=44+nl.length*10+4,viewH=300-top,bw=392;let y=0;
@@ -67,13 +71,15 @@ journalPage({id:'story',title:'The Story So Far',
     ctx.save();ctx.beginPath();ctx.rect(30,top,420,viewH);ctx.clip();
     for(const o of rows){const ry=top+o.y-G.rs;if(ry<top-80||ry>top+viewH)continue;
       ctx.fillStyle='#8a6a2a';ctx.fillRect(38,ry+2,3,13+o.ls.length*10.4);
-      txt(o.e.t,48,ry+7,9.6,'#e8d8a0','left',true);
-      const d=F.storyD&&F.storyD[o.e.id];txt(d&&o.e.id!=='abbey'?'Day '+d:'',440,ry+7,7.4,'#8a7a60','right');
-      o.ls.forEach((l,i)=>txt(l,48,ry+19+i*10.4,8.2,'#d2c9b2','left'));
+      const lv=o.e.c();
+      txt(o.e.t,48,ry+7,9.6,lv?'#e8d8a0':'#8a7e66','left',true);
+      const d=F.storyD&&F.storyD[o.e.id];txt(lv?(d&&o.e.id!=='abbey'?'Day '+d:''):'not yet reached',440,ry+7,7.4,'#8a7a60','right');
+      o.ls.forEach((l,i)=>txt(l,48,ry+19+i*10.4,8.2,lv?'#d2c9b2':'#8e8670','left'));
     }
     ctx.restore();
     if(max>0){btnText('st_up','Up',60,288,50,16);btnText('st_dn','Down',370,288,50,16)}
+    btnText('st_all',G.storyAll?'Only what I have lived':'The whole story',150,288,180,16);
     BTNS.push({id:'rmarea',x:30,y:top,w:420,h:viewH,up:true,drag:'rum'});
   },
-  click(id){if(id==='st_up')G.rs=Math.max(0,(G.rs||0)-90);if(id==='st_dn')G.rs=(G.rs||0)+90}
+  click(id){if(id==='st_all'){G.storyAll=!G.storyAll;G.rs=0}if(id==='st_up')G.rs=Math.max(0,(G.rs||0)-90);if(id==='st_dn')G.rs=(G.rs||0)+90}
 });
