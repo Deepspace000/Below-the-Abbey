@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.96';
+const VERSION='3.97';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3716,7 +3716,7 @@ function openLoot(d){
   if(!d.contents)d.contents=d.shop?SHOP_STOCK.map(([id,n])=>({id,n})):lootFor(d);
   G.loot={decor:d,shop:!!d.shop,name:d.shop?(d.shopName||"Peddler's Cart"):DS_LOOTNAME[d.k]||(d.k==='coffin'?'Stone coffin':d.k==='crate'?'Wooden crate':d.k==='chest'?'Old chest':'Barrel'),sel:null,sl:0,sr:0,t:G.time};
   G.hold=null;
-  if(!d.shop&&d.gold&&!d.goldTaken){d.goldTaken=true;G.gold+=d.gold;msg(`You find ${d.gold} gold.`,'#ffe9a0');sfx('key')}else sfx('equip');
+  if(!d.shop&&d.gold&&!d.goldTaken){d.goldTaken=true;const gc=typeof goldCut==='function'?goldCut(d.gold):d.gold;G.gold+=gc;msg(`You find ${gc} gold.`,'#ffe9a0');sfx('key')}else sfx('equip');
   if(d.ambush&&!d.ambushed)desertAmbush(d);
 }
 const lootMaxScroll=n=>Math.max(0,Math.ceil(n/3)*BPITCH-BAGH);
@@ -10372,9 +10372,9 @@ khNpc('kh_citizen','A citizen','kh_npc1_0',d=>{
 khNpc('kh_gold','A little gold','chest',d=>{
   const F=G.flags,e=KH_GOLD[LEVEL],k='kg'+LEVEL;
   if(!e||F[k])return say('There is nothing left here. You took the gold.',[BYE]);
-  F[k]=1;G.gold+=e.gold;sfx('key');
-  if(e.gold>=5000){afflInflict('cursed',-1,true);return say((e.msg||'')+' You take '+e.gold+' gold. As the last coin leaves the chest, the room goes cold. The gold was cursed. The whole party feels it settle on them. A church could lift it.',[BYE])}
-  return say((e.msg||'There is gold in here.')+' You take '+e.gold+' gold.',[BYE]);
+  F[k]=1;const amt=goldCut(e.gold);G.gold+=amt;sfx('key');
+  if(e.gold>=5000){afflInflict('cursed',-1,true);return say((e.msg||'')+' You take '+amt+' gold. As the last coin leaves the chest, the room goes cold. The gold was cursed. The whole party feels it settle on them. A church could lift it.',[BYE])}
+  return say((e.msg||'There is gold in here.')+' You take '+amt+' gold.',[BYE]);
 });
 function khCrowd(C,L){
   const W=C.W,H=C.H,idx=C.idx,rng=khRng(31337);
@@ -15233,7 +15233,7 @@ khNpc('uw_clam','A giant clam','uw_clam',d=>{
 khNpc('uw_chest','A shell-clasped chest','uw_shellchest',d=>{
   const F=G.flags;F.uwChest=F.uwChest||{};const key=LEVEL+':'+d.cat;
   if(F.uwChest[key])return say('The chest is open and empty.',[BYE]);
-  F.uwChest[key]=1;d.found=true;sfx('key');const tier=UW[LEVEL]?UW[LEVEL].diff:17,gold=Math.round(tier*(18+hash2(LEVEL,d.cat,79)*30));G.gold+=gold;
+  F.uwChest[key]=1;d.found=true;sfx('key');const tier=UW[LEVEL]?UW[LEVEL].diff:17,gold=Math.round(tier*(4+hash2(LEVEL,d.cat,79)*8));G.gold+=gold;
   const pool=['potion2','potion3','healdraught','manadraught','swiftness','ironskin'],it=pool[(hash2(LEVEL,d.cat,80)*pool.length)|0];
   const got=ITEMDEF[it]&&bagAdd(mkItem2(it,1));giveXP(Math.round(tier*30));
   return say(`The brass clasp is green with age. Inside, under a layer of silt: ${gold} gold${got?' and a '+ITEMDEF[it].n.toLowerCase():''}.`,[BYE])});
@@ -15242,7 +15242,7 @@ khNpc('uw_prize','A great chest','uw_shellchest',d=>{
   const boss=G.enemies.some(e=>e.hp>0&&sp&&e.t===sp.boss[0]);
   if(boss)return say('A great iron-bound chest sits in the sand, and the creature that guards it has not gone anywhere.',[BYE]);
   if(F.uwPrize[LEVEL])return say('The chest is empty.',[BYE]);
-  F.uwPrize[LEVEL]=1;d.found=true;sfx('key');G.gold+=sp.diff*120;giveXP(sp.diff*160);
+  F.uwPrize[LEVEL]=1;d.found=true;sfx('key');G.gold+=sp.diff*25;giveXP(sp.diff*160);
   const txt={320:'Inside, on a heap of Spanish-looking coin, lies Sable Maeve\'s sunk fortune and her old captain\'s cutlass.',321:'Inside, wrapped in oilcloth, lies the great bell\'s clapper, a heavy tongue of green bronze.',322:'Inside, in a nest of glowing rock, lies the Heart of the Vent: a black crystal that is warm to hold.',323:'Inside lies the ship\'s great lamp lens, a perfect disc of glass in a brass ring, unbroken.'}[LEVEL];
   if(LEVEL===323&&!F.gill&&bagAdd(mkItem2('gillpotion',1)))return say(txt+' Under it, a green glass bottle with a silver fish turning in it: a Potion of the Gill.',[BYE]);
   return say(txt,[BYE])});
@@ -15472,7 +15472,7 @@ for(const I of SN_ISLES)if(I.lv>=331){LEVEL_NAMES[I.lv]=I.n[0].toUpperCase()+I.n
 khNpc('isle_chest','A sea-bleached chest','uw_shellchest',d=>{
   const F=G.flags;F.isleChest=F.isleChest||{};const key=LEVEL+':'+d.cat;
   if(F.isleChest[key])return say('The chest is open and empty.',[BYE]);
-  F.isleChest[key]=1;d.found=true;sfx('key');const S=SN_SPEC[LEVEL]||{tier:1},gold=Math.round(120*(S.tier+1)*(.7+hash2(LEVEL,d.cat,91)*.8));G.gold+=gold;giveXP(S.tier*200+100);
+  F.isleChest[key]=1;d.found=true;sfx('key');const S=SN_SPEC[LEVEL]||{tier:1},gold=Math.round(30*(S.tier+1)*(.7+hash2(LEVEL,d.cat,91)*.8));G.gold+=gold;giveXP(S.tier*200+100);
   const pool=['potion2','potion3','healdraught','manadraught','swiftness','ironskin','antidote','holywater'],it=pool[(hash2(LEVEL,d.cat,92)*pool.length)|0];
   const got=ITEMDEF[it]&&bagAdd(mkItem2(it,1));
   return say(`Salt has eaten the lock. Inside: ${gold} gold${got?' and a '+ITEMDEF[it].n.toLowerCase():''}, and a smell of old seas.`,[BYE])});
@@ -15537,7 +15537,7 @@ khNpc('isle_altar','An old altar','yar_altar',d=>{
   if(LEVEL!==343)return say('A weathered stone altar. Someone burned something here long ago, and the stone still remembers the heat.',[BYE]);
   if(!F.krakenSlain)return say('A black altar of glass and bone. The sea beyond it is silent, and you feel watched.',[BYE]);
   if(F.saCache)return say('The cache is open and empty.',[BYE]);
-  F.saCache=1;sfx('key');G.gold+=4000;giveXP(6000);bagAdd(mkItem2('admiralblade',1));
+  F.saCache=1;sfx('key');G.gold+=goldCut(4000);giveXP(6000);bagAdd(mkItem2('admiralblade',1));
   return say('Under the altar, a vault of black stone, dry as a bone. A hundred years of coin in leather bags, charts, a captain\'s signet, and a sealed case with a blue-steel cutlass in it.',[BYE])});
 /* ---- chain B: Orsa's Sons ---- */
 vq('sb1','Two Boys at Sea',"Orsa, keeper of the Yarrim Light",'Orsa\'s sons, Tobin and Wren, sailed out in the Gull\'s Wing three weeks ago, and never came home. Find them. Tobin is on a big forest island, Wren on a rock far out. Ask the sailors.',2,()=>Object.keys(SQ('sbFound')).length,{gold:900,xp:5000});
@@ -16494,6 +16494,15 @@ function tombStory(){
   if(x>=76&&y<=17&&!F.zD){F.zD=1;msg('The Sand Pit. Sand pours from the ceiling here, deep and dry, and something moves under it.','#e8c8a0')}
   if(y<=12&&x>=40&&x<=56&&!F.zSut&&!F.sutDead){F.zSut=1;startCut('sutRoom')}
 }
+
+/* ---- src/desert/goldcut.js ---- */
+/* ==========================================================================
+   LESS GOLD. The party should never end up rich. One curve is used for every large sum of gold in the game: small sums are left alone, and
+   everything above 80 gold counts a fifth over that. Quest rewards are cut once, here, after every quest is defined, so that the reward
+   shown and the reward paid are the same; chests and hoards call goldCut when they pay out.
+   ========================================================================== */
+const goldCut=g=>g<=80?g:Math.round((80+(g-80)*.2)/5)*5;
+for(const id in QUESTS){const r=QUESTS[id].reward;if(r&&r.gold&&!r._cut){r.gold=goldCut(r.gold);r._cut=1}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

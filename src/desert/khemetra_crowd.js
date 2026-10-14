@@ -13,9 +13,9 @@ khNpc('kh_citizen','A citizen','kh_npc1_0',d=>{
 khNpc('kh_gold','A little gold','chest',d=>{
   const F=G.flags,e=KH_GOLD[LEVEL],k='kg'+LEVEL;
   if(!e||F[k])return say('There is nothing left here. You took the gold.',[BYE]);
-  F[k]=1;G.gold+=e.gold;sfx('key');
-  if(e.gold>=5000){afflInflict('cursed',-1,true);return say((e.msg||'')+' You take '+e.gold+' gold. As the last coin leaves the chest, the room goes cold. The gold was cursed. The whole party feels it settle on them. A church could lift it.',[BYE])}
-  return say((e.msg||'There is gold in here.')+' You take '+e.gold+' gold.',[BYE]);
+  F[k]=1;const amt=goldCut(e.gold);G.gold+=amt;sfx('key');
+  if(e.gold>=5000){afflInflict('cursed',-1,true);return say((e.msg||'')+' You take '+amt+' gold. As the last coin leaves the chest, the room goes cold. The gold was cursed. The whole party feels it settle on them. A church could lift it.',[BYE])}
+  return say((e.msg||'There is gold in here.')+' You take '+amt+' gold.',[BYE]);
 });
 function khCrowd(C,L){
   const W=C.W,H=C.H,idx=C.idx,rng=khRng(31337);

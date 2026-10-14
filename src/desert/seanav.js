@@ -222,7 +222,7 @@ for(const I of SN_ISLES)if(I.lv>=331){LEVEL_NAMES[I.lv]=I.n[0].toUpperCase()+I.n
 khNpc('isle_chest','A sea-bleached chest','uw_shellchest',d=>{
   const F=G.flags;F.isleChest=F.isleChest||{};const key=LEVEL+':'+d.cat;
   if(F.isleChest[key])return say('The chest is open and empty.',[BYE]);
-  F.isleChest[key]=1;d.found=true;sfx('key');const S=SN_SPEC[LEVEL]||{tier:1},gold=Math.round(120*(S.tier+1)*(.7+hash2(LEVEL,d.cat,91)*.8));G.gold+=gold;giveXP(S.tier*200+100);
+  F.isleChest[key]=1;d.found=true;sfx('key');const S=SN_SPEC[LEVEL]||{tier:1},gold=Math.round(30*(S.tier+1)*(.7+hash2(LEVEL,d.cat,91)*.8));G.gold+=gold;giveXP(S.tier*200+100);
   const pool=['potion2','potion3','healdraught','manadraught','swiftness','ironskin','antidote','holywater'],it=pool[(hash2(LEVEL,d.cat,92)*pool.length)|0];
   const got=ITEMDEF[it]&&bagAdd(mkItem2(it,1));
   return say(`Salt has eaten the lock. Inside: ${gold} gold${got?' and a '+ITEMDEF[it].n.toLowerCase():''}, and a smell of old seas.`,[BYE])});

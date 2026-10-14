@@ -242,7 +242,7 @@ khNpc('uw_clam','A giant clam','uw_clam',d=>{
 khNpc('uw_chest','A shell-clasped chest','uw_shellchest',d=>{
   const F=G.flags;F.uwChest=F.uwChest||{};const key=LEVEL+':'+d.cat;
   if(F.uwChest[key])return say('The chest is open and empty.',[BYE]);
-  F.uwChest[key]=1;d.found=true;sfx('key');const tier=UW[LEVEL]?UW[LEVEL].diff:17,gold=Math.round(tier*(18+hash2(LEVEL,d.cat,79)*30));G.gold+=gold;
+  F.uwChest[key]=1;d.found=true;sfx('key');const tier=UW[LEVEL]?UW[LEVEL].diff:17,gold=Math.round(tier*(4+hash2(LEVEL,d.cat,79)*8));G.gold+=gold;
   const pool=['potion2','potion3','healdraught','manadraught','swiftness','ironskin'],it=pool[(hash2(LEVEL,d.cat,80)*pool.length)|0];
   const got=ITEMDEF[it]&&bagAdd(mkItem2(it,1));giveXP(Math.round(tier*30));
   return say(`The brass clasp is green with age. Inside, under a layer of silt: ${gold} gold${got?' and a '+ITEMDEF[it].n.toLowerCase():''}.`,[BYE])});
@@ -251,7 +251,7 @@ khNpc('uw_prize','A great chest','uw_shellchest',d=>{
   const boss=G.enemies.some(e=>e.hp>0&&sp&&e.t===sp.boss[0]);
   if(boss)return say('A great iron-bound chest sits in the sand, and the creature that guards it has not gone anywhere.',[BYE]);
   if(F.uwPrize[LEVEL])return say('The chest is empty.',[BYE]);
-  F.uwPrize[LEVEL]=1;d.found=true;sfx('key');G.gold+=sp.diff*120;giveXP(sp.diff*160);
+  F.uwPrize[LEVEL]=1;d.found=true;sfx('key');G.gold+=sp.diff*25;giveXP(sp.diff*160);
   const txt={320:'Inside, on a heap of Spanish-looking coin, lies Sable Maeve\'s sunk fortune and her old captain\'s cutlass.',321:'Inside, wrapped in oilcloth, lies the great bell\'s clapper, a heavy tongue of green bronze.',322:'Inside, in a nest of glowing rock, lies the Heart of the Vent: a black crystal that is warm to hold.',323:'Inside lies the ship\'s great lamp lens, a perfect disc of glass in a brass ring, unbroken.'}[LEVEL];
   if(LEVEL===323&&!F.gill&&bagAdd(mkItem2('gillpotion',1)))return say(txt+' Under it, a green glass bottle with a silver fish turning in it: a Potion of the Gill.',[BYE]);
   return say(txt,[BYE])});

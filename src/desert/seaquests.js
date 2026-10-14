@@ -55,7 +55,7 @@ khNpc('isle_altar','An old altar','yar_altar',d=>{
   if(LEVEL!==343)return say('A weathered stone altar. Someone burned something here long ago, and the stone still remembers the heat.',[BYE]);
   if(!F.krakenSlain)return say('A black altar of glass and bone. The sea beyond it is silent, and you feel watched.',[BYE]);
   if(F.saCache)return say('The cache is open and empty.',[BYE]);
-  F.saCache=1;sfx('key');G.gold+=4000;giveXP(6000);bagAdd(mkItem2('admiralblade',1));
+  F.saCache=1;sfx('key');G.gold+=goldCut(4000);giveXP(6000);bagAdd(mkItem2('admiralblade',1));
   return say('Under the altar, a vault of black stone, dry as a bone. A hundred years of coin in leather bags, charts, a captain\'s signet, and a sealed case with a blue-steel cutlass in it.',[BYE])});
 /* ---- chain B: Orsa's Sons ---- */
 vq('sb1','Two Boys at Sea',"Orsa, keeper of the Yarrim Light",'Orsa\'s sons, Tobin and Wren, sailed out in the Gull\'s Wing three weeks ago, and never came home. Find them. Tobin is on a big forest island, Wren on a rock far out. Ask the sailors.',2,()=>Object.keys(SQ('sbFound')).length,{gold:900,xp:5000});
