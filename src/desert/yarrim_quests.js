@@ -8,7 +8,7 @@ Object.assign(NPC_H,{
   kh_yfolk1_0:.74,kh_yfolk1_1:.82,kh_yfolk1_2:.84,kh_yfolk1_3:.78,kh_yfolk1_4:.82,kh_yfolk1_5:.86,
   kh_yfolk2_0:.84,kh_yfolk2_1:.84,kh_yfolk2_2:.82,kh_yfolk2_3:.84,kh_yfolk2_4:.82,kh_yfolk2_5:.6,
   kh_yfolk3_0:.8,kh_yfolk3_1:.8,kh_yfolk3_2:.84,kh_yfolk3_3:.78,kh_yfolk3_4:.66,kh_yfolk3_5:.84,
-  kh_yprop1_0:.42,kh_yprop1_1:.42,kh_yprop1_3:.44,kh_yani1_0:.5,kh_yani1_1:.4,kh_yani1_2:.36,kh_yprop1_5:1.1,
+  kh_yprop1_0:.58,kh_yprop1_1:.42,kh_yprop1_3:.44,kh_yani1_0:.5,kh_yani1_1:.4,kh_yani1_2:.36,kh_yprop1_5:1.1,
   kh_ycrab2_0:.3,kh_ycrab2_1:.28,kh_ycrab2_2:.32,kh_ycrab2_3:.4,kh_ycrab2_4:.28,kh_ycrab2_5:.26
 });
 KH_STOCK.trader=()=>[['torch',8],['lantern',3],['potion',6],['antidote',4],['salve',4],['bread',10],['water',12],['dates',8],['herring',8],['ale',8],['apple',8],['wildflower',6],['herb',4],['cheese',4],['nuts',4],['dagger',2],['bow',2],['cap',3],['jerkin',2]];
@@ -129,11 +129,11 @@ yrObj('yr_post','yar_driftwood',[85,43],3);
 /* ---- 4. Wen's left boot ---- */
 yrQ('yq_boot',"Wen's Left Boot",'Wen, the trader',[
   ['Find the sea boot that washed up on the beach, south of the harbour.',()=>yrF().yq4a,['yr_boot']],
-  ['Coax the crab out of the boot with a salt herring.',()=>yrF().yq4b,['yr_boot']]
+  ['Go back to the boot on the beach, south-east of the harbour square (see the dashed ring on the map), walk up to it and offer the crab a salt herring.',()=>yrF().yq4b,['yr_boot']]
 ],{gold:300,xp:1500,items:['bracers']});
 const D_BOOT=khQD("I have lost my left boot, and I am a man with two feet and one boot. A fisherman said he saw it come ashore on the beach, south of the harbour, but he would say that. He said he saw a sea serpent last Tuesday. Find the boot, bring it back, and Wen will remember you in his will.",
   'The beach, south of the harbour. Look for something brown and boot-shaped, and do not step in anything.',
-  (n,m)=>!yrF().yq4a?'The boot is on the beach, south of the harbour.':'Coax the crab out with a salt herring, and bring the boot to Wen.',
+  (n,m)=>!yrF().yq4a?'The boot is on the beach, south of the harbour.':'The boot is on the beach, south-east of the harbour square. Walk up to it and offer the crab a salt herring, then bring the boot to Wen.',
   'That is a boot! That is certainly a boot.',
   'It is a boot. It is a very good boot. It is... (he looks at the boot, and at his own feet, and at you) ... it is a RIGHT boot. I lost my LEFT boot. ... Well. I have two right boots now. It is a start. A right boot is a right boot, and Wen is a man of his word. Here.',
   'I wear the right boot on the left foot. It has changed the way I walk. I think it is an improvement.',
