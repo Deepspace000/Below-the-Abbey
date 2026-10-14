@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.43';
+const VERSION='3.45';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4148,7 +4148,7 @@ const WORLD_ROADS=[['abbey','thornwood','thornwick','gwood'],['gwood','road','tu
 function lab(s,x,y,size,col){ctx.save();ctx.font=`bold ${size}px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(200,184,140,.9)';ctx.strokeText(s,x,y);ctx.fillStyle=col;ctx.fillText(s,x,y);ctx.restore()}
 const QWORLD={'Thornwick':'thornwick','The Road to Ironhill':'road','Ironhill':'ironhill','Greyfang Pass':'pass','Greendale':'greendale','The Wilds':'thornwood','Khemetra':'scoria','Yarrim':'yarrim'};
 const QWORLD_ID={vq1:'saltbarrow',vq2:'bells',vq3:'cinder',vq4:'lastlight',vq6:'oldhaven',yar7:'yarrim',vq5:'yarrim',colours:'anaea',anaea_shake:'anaea',anaea_fence:'anaea',thornwick_shake:'thornwick',thornwick_fence:'thornwick',ironhill_shake:'ironhill',ironhill_fence:'ironhill',khemetra_shake:'scoria',khemetra_fence:'scoria'};
-function questsLeft(){const o={};for(const id of Object.keys(QUESTS)){if(qSt(id)==='done')continue;const k=QWORLD_ID[id]||QWORLD[QAREA[id]];if(k)o[k]=(o[k]||0)+1}return o}
+function questsLeft(){const o={};for(const id of Object.keys(QUESTS)){if(qSt(id)!=='active')continue;const k=QWORLD_ID[id]||QWORLD[QAREA[id]];if(k)o[k]=(o[k]||0)+1}return o}
 function drawWorldMap(){
   BTNS=[];veil(1);
   const x0=14,y0=14,w=452,h=292,ink='#2a1c0e';
@@ -4231,7 +4231,8 @@ function drawWorldMap(){
     lab(l.n,l.x,l.y+(l.ic==='castle'?24:l.ic==='mountains'?20:18),big?10:8.5,v?'#1c1208':'#5a4a30');
     if(l.sub)lab(l.sub,l.x,l.y+29,7,'#4a3a22');
     const nq=QLEFT[l.k]||0;
-    if(nq){const y0=l.y+(l.sub?38:29);ctx.fillStyle='#b02818';for(let i=0;i<nq;i++){const row=(i/14)|0,inRow=Math.min(14,nq-row*14),col=i%14;ctx.beginPath();ctx.arc(l.x+(col-(inRow-1)/2)*3.4,y0+row*3.4,1.15,0,TAU);ctx.fill()}}
+    if(nq){ctx.fillStyle='#b02818';const left=l.k==='scoria'; // Khemetra's dots stand to the left of the city: below it is the Red Dunes
+      for(let i=0;i<nq;i++){const row=(i/14)|0,inRow=Math.min(14,nq-row*14),col=i%14;ctx.beginPath();if(left)ctx.arc(l.x-34-(inRow-1-col)*3.4,l.y-10+row*3.4,1.15,0,TAU);else ctx.arc(l.x+(col-(inRow-1)/2)*3.4,l.y+(l.sub?38:29)+row*3.4,1.15,0,TAU);ctx.fill()}}
   }
   // you are here
   if(here){const pulse=.5+.5*Math.sin(G.time*4);ctx.strokeStyle=`rgba(150,30,20,${.55+.4*pulse})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(here.x,here.y,17+pulse*3,0,TAU);ctx.stroke();ctx.fillStyle='rgba(150,30,20,.9)';ctx.beginPath();ctx.arc(here.x,here.y-24,3.2,0,TAU);ctx.fill();ctx.beginPath();ctx.moveTo(here.x-4,here.y-22);ctx.lineTo(here.x+4,here.y-22);ctx.lineTo(here.x,here.y-14);ctx.closePath();ctx.fill()}
