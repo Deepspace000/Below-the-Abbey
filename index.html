@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.49';
+const VERSION='3.50';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4378,10 +4378,18 @@ const mapRes=()=>drawnMap(LEVEL)?[0,58]:[136,0]; // room kept clear for the lege
 function questSpots(){
   const out=[],by={};for(const d of G.decor)if(d.npc&&!d.found)(by[d.npc]=by[d.npc]||[]).push(d);
   const giverOf={};for(const n in QGIVER)for(const q of [].concat(QGIVER[n]||[]))if(!giverOf[q]&&by[n])giverOf[q]=by[n][0];
+  const byName=q=>{const nm=(QUESTS[q].who||'').split(',')[0].trim();if(!nm)return null;for(const n in by)if(NPCS[n]&&NPCS[n].name&&NPCS[n].name.split(',')[0].trim()===nm)return by[n][0];return null};
+  const doorTo=(lvl)=>{const k=LEVEL+'>'+lvl;G._doorSpot=G._doorSpot||{};if(k in G._doorSpot)return G._doorSpot[k];let r=null;
+    const i=(G.portals||[]).findIndex(p=>p&&p.to===lvl);if(i>=0)for(let y=0;y<MH&&!r;y++)for(let x=0;x<MW;x++)if(G.grid[y][x]===30+i){r={x,y};break}
+    return G._doorSpot[k]=r};
+  const remoteGiver=q=>{ // the giver is inside a shop or house reached from here: the door of that building
+    const ids=[];for(const n in QGIVER)if([].concat(QGIVER[n]||[]).includes(q))ids.push(n);
+    for(const lv in LEVELS){const L=LEVELS[lv];if(!L||!L.decor||+lv===LEVEL)continue;if(L.decor.some(d=>d.npc&&ids.includes(d.npc))||ids.length===0&&L.decor.some(d=>d.npc&&NPCS[d.npc]&&NPCS[d.npc].name&&NPCS[d.npc].name.split(',')[0].trim()===(QUESTS[q].who||'').split(',')[0].trim())){const d=doorTo(+lv);if(d)return d}}
+    return null};
   for(const id of Object.keys(QUESTS)){
     const st=qSt(id);if(st==='done')continue;const q=QUESTS[id],g=giverOf[id];
     if(st===null)continue; // rings only for quests the party has accepted
-    if(qReady(id)){if(g)out.push({x:g.x,y:g.y,kind:'ready',t:'Hand in: '+q.title})}
+    if(qReady(id)){const gg=g||byName(id)||remoteGiver(id);if(gg)out.push({x:gg.x,y:gg.y,kind:'ready',t:'Hand in: '+q.title})}
     else{let t=[];try{t=q.targets||[]}catch(e){}let any=false;for(const n of t)for(const d of by[n]||[]){out.push({x:d.x,y:d.y,kind:'goal',t:q.title});any=true}
       if(!any&&g)out.push({x:g.x,y:g.y,kind:'goal',t:q.title})}
   }
