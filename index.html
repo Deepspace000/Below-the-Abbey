@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.45';
+const VERSION='3.46';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -6482,7 +6482,6 @@ function drawMenu(){
   if(typeof G.menu==='string'&&G.menu.startsWith('jp:')){drawJournalPage(G.menu.slice(3));return}
   BTNS=[];veil(.6);bigPanel(90,12,300,296);
   txt('MENU',240,30,14,'#d8c88e','center',true);
-  txt('Version '+VERSION,240,302,7,'#9a8a68','center');
   btnText('resume','Resume',170,44,140,26);
   btnText('quests',anyQuestReady()?'Quests  *':'Quests',100,72,130,24);btnText('ach','Achievements',250,72,130,24);
   btnText('journal',typeof journalNote==='function'&&journalNote()?'Journal  !':'Journal',100,99,130,24);btnText('aff',afflList().some(e=>AFFL[e.id]&&AFFL[e.id].kind!=='good')?'Afflictions  !':'Afflictions',250,99,130,24);
@@ -6492,7 +6491,8 @@ function drawMenu(){
   btnText('quittitle','Quit to title',170,207,140,22);
   const L=['W / S: forward and back   A / D: step sideways   Q / E: turn   (arrow keys work too)','Space: attack   X: special   P: potion   Z: wait   R: rest','1-4: choose hero   I: inventory   J: quests   M: map   F: frame counter   Esc: menu',
     'Tap a portrait to open that hero\'s inventory.','Tap people, goats, torches and items in the view.','You can also walk into a person to talk to them.','Heroes act once per round, then the monsters move.'];
-  L.forEach((s,i)=>txt(s,240,239+i*9,7.8,'#d8c9a0','center'));
+  txt('Version '+VERSION,240,236,8,'#b8a880','center'); // just under the buttons
+  L.forEach((s,i)=>txt(s,240,248+i*9,7.8,'#d8c9a0','center'));
   btn('menuclose',0,0,DW,DH); BTNS.unshift(BTNS.pop());
 }
 function drawFullMap(){
