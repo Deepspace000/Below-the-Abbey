@@ -8,6 +8,7 @@
 const uwLv=n=>n>=320&&n<=323;
 const UW_MAX=240; // seconds of air
 for(const n of ['staghorn','brain','kelp','seafan','anemone','rocks','tubes','clam','seagrass','amphora','softcoral','timber','vent0','vent1','buoy','shellchest','bow'])loadImg('uw_'+n,'assets/uw_'+n+'.png');
+for(const n of ['bsard','bgold','btang'])for(const f of [0,1])loadImg('uw_'+n+'_'+f,'assets/uw_'+n+'_'+f+'.png'); // whole schools seen from below
 for(const n of ['reef','angel','school','shark','ray','barra','crab','octo','jelly','eel','turtle','puffer','wshark','grouper','nautilus','serp','kraken']){
   loadImg('uw_'+n+'_0','assets/uw_'+n+'_0.png');
   loadImg('uw_'+n+'_1','assets/uw_'+n+'_1.png').then(()=>{IMG['uw_'+n+'_0A']=IMG['uw_'+n+'_1']}); // the second frame is the attack picture
@@ -71,13 +72,11 @@ function uwSkyFish(){
     const px=((b/a+1)*V.VW/2)*sx,py=(V.HH-18-el*V.HH*.9)*sy;if(px<-60||px>480||py<-30)return;
     const hh=w*im.height/im.width;ctx.globalAlpha=alpha;ctx.drawImage(im,px-w/2,py-hh/2,w,hh);
   };
-  // schools: a dozen small fish moving together, each with its own wiggle
+  // schools: whole shoals seen from underneath, head to the front of the drift, drawn as if swimming over the viewer
+  const SC=[['bsard',74],['bgold',92],['bsard',96]];
   for(let s=0;s<9;s++){
-    const base=(s*.71+t*(.025+.006*(s%4))*(s%2?1:-1))%TAU,el=.18+.34*((s*37)%7)/7,sp=KINDS[s%KINDS.length];
-    for(let i=0;i<8;i++){
-      const az=base+Math.sin(i*2.3+s)*.07+Math.sin(t*.8+i)*.012,e=el+Math.cos(i*1.7+s)*.045+Math.sin(t*.9+i*2)*.01;
-      draw(sp==='turtle'||sp==='ray'?'reef':sp,((t*5+i+s)|0)&1,az,e,sp==='school'?17:11+i%3*2,.82);
-    }
+    const [k,w]=SC[s%3],dir=s%2?1:-1,az=(s*.71+t*(.02+.005*(s%4))*dir)%TAU,el=.2+.32*((s*37)%7)/7+Math.sin(t*.3+s)*.015;
+    draw(k,((t*2.2+s)|0)&1,az,el,w*(.85+.3*((s*13)%5)/5),.9);
   }
   // singles
   for(let i=0;i<16;i++){
