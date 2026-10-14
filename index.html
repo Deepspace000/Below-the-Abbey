@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.66';
+const VERSION='3.67';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1978,12 +1978,12 @@ function drawLevelBanners(){
   G.lvlBanners=G.lvlBanners.filter(b=>G.time-b.t<9&&(b.out===undefined||G.time-b.out<.45));
   let y=22;
   for(const b of G.lvlBanners.slice(-2)){
-    const age=G.time-b.t,a=clamp(Math.min(age*3,(9-age)*1.2),0,1)*(b.out===undefined?1:clamp(1-(G.time-b.out)/.45,0,1)),rows=Math.ceil(b.changes.length/3)+(b.powers.length?1:0),h=24+rows*11,x=40,w=340;
+    const age=G.time-b.t,a=clamp(Math.min(age*3,(9-age)*1.2),0,1)*(b.out===undefined?1:clamp(1-(G.time-b.out)/.45,0,1)),rows=Math.ceil(b.changes.length/2)+(b.powers.length?1:0),h=24+rows*11,x=40,w=340;
     ctx.save();ctx.globalAlpha=a;
     ctx.fillStyle='rgba(10,8,5,.92)';rrect(ctx,x,y,w,h,4);ctx.fill();ctx.lineWidth=1.8;ctx.strokeStyle=goldG(x,y,w,h);rrect(ctx,x,y,w,h,4);ctx.stroke();
     txt(`${b.name} reaches level ${b.lvl}!`,x+w/2,y+11,10.5,'#ffe36a','center',true);
-    b.changes.forEach(([lab,o,n],k)=>txt(`${lab} ${o} > ${n}`,x+10+(k%3)*110,y+25+((k/3)|0)*11,8.5,'#f0dc90','left',true,undefined,104));
-    if(b.powers.length)txt('New power: '+b.powers.join(', '),x+w/2,y+25+Math.ceil(b.changes.length/3)*11,8.5,'#9ae0a0','center',true,undefined,w-16);
+    b.changes.forEach(([lab,o,n],k)=>{const cx=x+10+(k%2)*164,cy=y+25+((k/2)|0)*11;txt(`${lab} ${o} > ${n}`,cx,cy,8.5,'#f0dc90','left',true,undefined,112);txt(`+${n-o}`,cx+150,cy,9,'#9ae0a0','right',true)}); // every gain shows how much it rose
+    if(b.powers.length)txt('New power: '+b.powers.join(', '),x+w/2,y+25+Math.ceil(b.changes.length/2)*11,8.5,'#9ae0a0','center',true,undefined,w-16);
     ctx.restore();y+=h+4;
   }
 }
