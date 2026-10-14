@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.72';
+const VERSION='3.73';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -12267,17 +12267,21 @@ const lockedKey=(lv,x,y)=>40000+lv*10000+y*100+x;
 function lockedDoor(g,nx,ny){
   const F=G.flags,key=lockedKey(LEVEL,nx,ny),un=F.unlocked||(F.unlocked={}),ms=g>=200?[(TILE_MSG[g]||'It is locked.')]:DOOR_MSGS[g];
   if(!LEVELS[LEVEL]||LEVEL===44||LEVEL>=40000||(g>=200&&!repTownOf(LEVEL)))return false; // only the doors of towns and villages
-  if(un[key]){sfx('door');goToLevel(key,{x:4,y:4,f:0});return true}
-  const lv=skLevel('lockpick'),ch=clamp(.18+lv*.065+luckVal()*.01+(LD_DIFF[g]||0),.04,.95),t=repTownOf(LEVEL);
-  const text=ms[(hash2(nx,ny,3)*ms.length)|0]+(lv>0?` Chance of picking it: about ${Math.round(ch*100)}%.`:' You have no talent for locks yet, but you could try.');
-  G.talk={d:{k:'_',x:nx,y:ny},n:{name:'A locked door'},node:say(text,[['Try to pick the lock.',()=>{
+  if(un[key]||!doorIsLocked(LEVEL,nx,ny)){sfx('door');if(!un[key])msg('The door is on the latch. You walk in.','#d8c88e');goToLevel(key,{x:4,y:4,f:0});return true}
+  const lv=skLevel('lockpick'),ch=clamp(.3+lv*.065+luckVal()*.01+(LD_DIFF[g]||0),.08,.95),t=repTownOf(LEVEL),have=picksHave();
+  const text=ms[(hash2(nx,ny,3)*ms.length)|0]+(have?` You have ${have} lock pick${have>1?'s':''}. Chance of picking it: about ${Math.round(ch*100)}%.`:' You have no lock picks. Any trader sells them.');
+  const opts=[];
+  if(have)opts.push(['Pick the lock.',()=>{
     if(Math.random()<ch){
       un[key]=1;skXP('lockpick',3);honourAdd(-1,'breaking in');if(t&&Math.random()<.35)repAdd(t,-2,'a neighbour saw you at the door');
+      if(Math.random()<.25){pickSpend();msg('The lock clicks open, but the pick is bent beyond use.','#e8c870')}
       sfx('door');G.talk=null;goToLevel(key,{x:4,y:4,f:0});return null;
     }
-    skXP('lockpick',1);if(t&&Math.random()<.3)repAdd(t,-2,'a neighbour heard the noise');
-    return say(Math.random()<.5?'The pick snaps in the lock with a tiny, awful sound.':'The pins will not set. Somewhere inside, a floorboard creaks.',[['Try again.',()=>lockedDoor(g,nx,ny)&&null],['Leave it.',()=>null]]);
-  }],['Leave it alone.',()=>null]]),t:G.time,btns:[]};
+    pickSpend();skXP('lockpick',1);if(t&&Math.random()<.3)repAdd(t,-2,'a neighbour heard the noise');
+    return say((Math.random()<.5?'The pick snaps in the lock with a tiny, awful sound.':'The pins will not set, and the pick bends double. Somewhere inside, a floorboard creaks.')+(picksHave()?'':' That was your last pick.'),picksHave()?[['Try again.',()=>lockedDoor(g,nx,ny)&&null],['Leave it.',()=>null]]:[['Leave it.',()=>null]]);
+  }]);
+  opts.push(['Leave it alone.',()=>null]);
+  G.talk={d:{k:'_',x:nx,y:ny},n:{name:'A locked door'},node:say(text,opts),t:G.time,btns:[]};
   G.hold=null;G.queued=null;
   return true;
 }
@@ -16072,6 +16076,19 @@ const IH_SHOPS=[
 })();
 /* the town's tile table is rebuilt when the pictures are ready, so the doors' characters are put back every time Ironhill is loaded */
 function ihShopsChars(){const L=LEVELS[13];if(!L)return;L.chars=L.chars||{};for(const S of IH_SHOPS)if(S.door!=='9')L.chars[S.door]=30+S.idx}
+
+/* ---- src/desert/lockpicks.js ---- */
+/* ==========================================================================
+   LOCK PICKS. Every house door in the towns opens, but about one in three is locked. A locked door needs a real set of lock
+   picks (from any trader), and picks can bend or snap. The Lockpicking skill still decides the odds.
+   ========================================================================== */
+ITEMDEF.lockpick={n:'Lock Picks',k:'tool',t:'Tool',ic:'lockpick',c:'#b8b0a0',stack:1,price:25,d:'A little roll of tension wrenches and hooked picks. Needed to open a locked door. A pick can bend or snap, so buy a few.',sw:.1};
+if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push('lockpick');
+SHOP_STOCK.push(['lockpick',6]);MERCHANT_STOCK.push(['lockpick',6]);
+for(const k of ['general','trader','seagoods']){const f=KH_STOCK[k];if(f)KH_STOCK[k]=()=>f().concat([['lockpick',8]])}
+const picksHave=()=>bagCount('lockpick');
+function pickSpend(){const i=G.bag.findIndex(b=>b&&b.id==='lockpick');if(i>=0)bagTake(i)}
+const doorIsLocked=(lv,x,y)=>hash2(x*3+lv,y*5,41)<.34;
 
 /* ---- src/desert/dunes.js ---- */
 /* ==========================================================================

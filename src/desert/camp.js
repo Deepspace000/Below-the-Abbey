@@ -277,17 +277,21 @@ const lockedKey=(lv,x,y)=>40000+lv*10000+y*100+x;
 function lockedDoor(g,nx,ny){
   const F=G.flags,key=lockedKey(LEVEL,nx,ny),un=F.unlocked||(F.unlocked={}),ms=g>=200?[(TILE_MSG[g]||'It is locked.')]:DOOR_MSGS[g];
   if(!LEVELS[LEVEL]||LEVEL===44||LEVEL>=40000||(g>=200&&!repTownOf(LEVEL)))return false; // only the doors of towns and villages
-  if(un[key]){sfx('door');goToLevel(key,{x:4,y:4,f:0});return true}
-  const lv=skLevel('lockpick'),ch=clamp(.18+lv*.065+luckVal()*.01+(LD_DIFF[g]||0),.04,.95),t=repTownOf(LEVEL);
-  const text=ms[(hash2(nx,ny,3)*ms.length)|0]+(lv>0?` Chance of picking it: about ${Math.round(ch*100)}%.`:' You have no talent for locks yet, but you could try.');
-  G.talk={d:{k:'_',x:nx,y:ny},n:{name:'A locked door'},node:say(text,[['Try to pick the lock.',()=>{
+  if(un[key]||!doorIsLocked(LEVEL,nx,ny)){sfx('door');if(!un[key])msg('The door is on the latch. You walk in.','#d8c88e');goToLevel(key,{x:4,y:4,f:0});return true}
+  const lv=skLevel('lockpick'),ch=clamp(.3+lv*.065+luckVal()*.01+(LD_DIFF[g]||0),.08,.95),t=repTownOf(LEVEL),have=picksHave();
+  const text=ms[(hash2(nx,ny,3)*ms.length)|0]+(have?` You have ${have} lock pick${have>1?'s':''}. Chance of picking it: about ${Math.round(ch*100)}%.`:' You have no lock picks. Any trader sells them.');
+  const opts=[];
+  if(have)opts.push(['Pick the lock.',()=>{
     if(Math.random()<ch){
       un[key]=1;skXP('lockpick',3);honourAdd(-1,'breaking in');if(t&&Math.random()<.35)repAdd(t,-2,'a neighbour saw you at the door');
+      if(Math.random()<.25){pickSpend();msg('The lock clicks open, but the pick is bent beyond use.','#e8c870')}
       sfx('door');G.talk=null;goToLevel(key,{x:4,y:4,f:0});return null;
     }
-    skXP('lockpick',1);if(t&&Math.random()<.3)repAdd(t,-2,'a neighbour heard the noise');
-    return say(Math.random()<.5?'The pick snaps in the lock with a tiny, awful sound.':'The pins will not set. Somewhere inside, a floorboard creaks.',[['Try again.',()=>lockedDoor(g,nx,ny)&&null],['Leave it.',()=>null]]);
-  }],['Leave it alone.',()=>null]]),t:G.time,btns:[]};
+    pickSpend();skXP('lockpick',1);if(t&&Math.random()<.3)repAdd(t,-2,'a neighbour heard the noise');
+    return say((Math.random()<.5?'The pick snaps in the lock with a tiny, awful sound.':'The pins will not set, and the pick bends double. Somewhere inside, a floorboard creaks.')+(picksHave()?'':' That was your last pick.'),picksHave()?[['Try again.',()=>lockedDoor(g,nx,ny)&&null],['Leave it.',()=>null]]:[['Leave it.',()=>null]]);
+  }]);
+  opts.push(['Leave it alone.',()=>null]);
+  G.talk={d:{k:'_',x:nx,y:ny},n:{name:'A locked door'},node:say(text,opts),t:G.time,btns:[]};
   G.hold=null;G.queued=null;
   return true;
 }
