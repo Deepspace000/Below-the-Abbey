@@ -80,7 +80,7 @@ function seaBuildOpen(){
   for(const [x,y] of spots)enemies.push({t:'seaserpent',x,y});
   // gulls over the islands are made on the fly; here only the level
   const start={x:31,y:322,f:1};
-  const lv={rows:rows.map(r=>r.join('')),start,enemies,items:[],decor,scenery,fmap:null,floorSet:['sand','dgrass','wood','bluesand','bluewater','pebA'],floor:'sand',ceil:'cloud',
+  const lv={rows:rows.map(r=>r.join('')),start,enemies,items:[],decor,scenery,fmap:null,floorSet:['isleSand','lush','wood','bluesand','bluewater','isleSandDk'],floor:'isleSand',ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:'The Vaast Sea',label:'The Vaast Sea',noExtras:true,diff:22,tele:{x:start.x,y:start.y},chars:{D:LEVEL41_DATA.chars.D},lights:[],portals:[]};
   const fmapR=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmapR.push(s)}lv.fmap=fmapR;
   LEVELS[SN.ID]=lv;LEVEL_NAMES[SN.ID]='The Vaast Sea';TERRS[SN.ID]=yarTerrain(W,H,h,rk,block);
@@ -150,10 +150,10 @@ function seaEnterHook(n){
 /* ---- the islands nobody lives on ---- */
 const SN_SPEC={
   331:{w:56,h:50,fe:['bones','chest','sign'],tier:1,foes:[['uwcrab',2]],note:'A scrap of sand with a dead palm, a pile of weathered bones and a rotted sign.'},
-  332:{w:56,h:50,fe:['palms','chest','camp'],tier:1,foes:[['uwcrab',3]],note:'A little cay of white pebbles. Someone has camped here, and left in a hurry.'},
+  332:{w:56,h:50,green:.45,fe:['palms','chest','camp'],tier:1,foes:[['uwcrab',3]],note:'A little cay of white pebbles. Someone has camped here, and left in a hurry.'},
   333:{w:56,h:50,fe:['bones','wreck','chest'],tier:1,foes:[['uwcrab',2]],note:'A thin spit of sand. Gannets wheel over it, screaming, and the wind smells of fish.'},
-  334:{w:56,h:50,fe:['palms','wreck','chest'],tier:2,foes:[['uwcrab',3]],note:'A low sandbar that the tide nearly covers. Half a ship\'s ribs stick out of it.'},
-  335:{w:56,h:50,fe:['palms','bones','camp'],tier:1,foes:[['uwcrab',2]],note:'A palm and a pile of sand. Whoever chose this island for a camp was desperate.'},
+  334:{w:56,h:50,green:.2,fe:['palms','wreck','chest'],tier:2,foes:[['uwcrab',3]],note:'A low sandbar that the tide nearly covers. Half a ship\'s ribs stick out of it.'},
+  335:{w:56,h:50,green:.6,fe:['palms','bones','camp'],tier:1,foes:[['uwcrab',2]],note:'A palm and a pile of sand. Whoever chose this island for a camp was desperate.'},
   336:{w:56,h:50,fe:['bones','chest','arch'],npcs:[['sn_wren','fisher']],tier:2,foes:[['uwcrab',3]],note:'A ledge of black rock, whitened with bird droppings. A stone arch stands on it that nobody built.'},
   337:{w:84,h:70,fe:['wreck','arch','chest','bones','stones'],tier:2,foes:[['skel',5],['uwcrab',4]],note:'A rocky island of kelp-hung cliffs. A broken ship lies on the rocks, and nothing grows.'},
   338:{w:84,h:70,fe:['stones','altar','chest','bones','camp'],tier:3,foes:[['skel',6],['scorpion',4]],note:'Red cliffs and red sand. Some old people built an altar here, and it still smells of smoke.'},
@@ -165,16 +165,16 @@ const SN_SPEC={
 };
 function SEA_ARRIVE_ISLE(id){isleBuild(id);const L=LEVELS[id];return {x:L.start.x,y:L.start.y,f:L.start.f}}
 function isleBuild(id){
-  if(LEVELS[id])return;const I=SN_BY[id],S=SN_SPEC[id];if(!I||!S)return;
+  isleFloors();if(LEVELS[id])return;const I=SN_BY[id],S=SN_SPEC[id];if(!I||!S)return;
   const W=S.w,H=S.h,N=W*H,cx=W>>1,cy=(H>>1)-4,seed=id*7,rx=Math.min(W/2-10,I.kind==='forest'?58:I.kind==='rock'?32:14),ry=Math.min(H/2-12,I.kind==='forest'?48:I.kind==='rock'?26:11);
   const rows=[];for(let y=0;y<H;y++){const r=[];for(let x=0;x<W;x++)r.push((x===0||y===0||x===W-1||y===H-1)?'D':'.');rows.push(r)}
   const h=new Float32Array(N),rk=new Float32Array(N),block=new Uint8Array(N),fm=new Array(N).fill('4');
-  const peak=I.kind==='rock'?2.9:I.kind==='forest'?1.1:.5;
+  const peak=I.kind==='rock'?2.9:I.kind==='forest'?1.1:.5,GR=S.green||0;   // GR: how green the island is. Most of the little ones are bare on purpose.
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){
     const i=y*W+x,d=Math.hypot((x-cx)/rx,(y-cy)/ry)*(1+.28*(tsmooth(x/5,y/5,seed)-.5)),t=1-d;
     let hh=-.2+.03*(tsmooth(x/4,y/4,seed+1)-.5);
     if(t>-.12)hh=t>0?Math.min(.5,.5*Math.min(1,t/.2))-.05+peak*Math.pow(Math.max(0,t-.22),1.25)+.1*(tsmooth(x/6,y/6,seed+2)-.4)*Math.min(1,t*4):-.2+(t+.12)/.12*.15;
-    h[i]=hh;rk[i]=clamp((hh-.7)/1.6,0,1);block[i]=(hh<-.06||hh>1.7)?1:0;fm[i]=hh>1.2?'5':hh>.12?(S.forest?'1':'0'):hh>-.06?'3':(t>-.2?'3':'4');
+    h[i]=hh;rk[i]=clamp((hh-.7)/1.6,0,1);block[i]=(hh<-.06||hh>1.7)?1:0;fm[i]=hh>1.2?'5':hh>.12?(S.forest||(GR>0&&tsmooth(x/8,y/8,seed+30)+.25*(tsmooth(x/3,y/3,seed+31)-.5)>1-GR*.95)?'1':'0'):hh>-.06?'3':(t>-.2?'3':'4');
   }
   let sy=-1;for(let y=H-2;y>0;y--)if(!block[y*W+cx]&&h[y*W+cx]>-.06){sy=y;break}
   const plank=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;block[i]=0;h[i]=.08;rk[i]=0;fm[i]='2'}};
@@ -199,10 +199,13 @@ function isleBuild(id){
   }
   for(const [npc,face] of S.npcs||[]){const s=spot();if(s)put(face,s[0],s[1],{npc,deco:false})}
   // trees, bushes and shells
-  const dens=S.forest?.14:.012;
+  const dens=S.forest?.14:.012+.07*GR;
   for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){
     if(!free(x,y)||h[y*W+x]<.12)continue;const r=hash2(x,y,seed+11);
-    if(r<dens&&Math.hypot(x-cx,y-(sy-2))>7){const k=S.forest?'ltree'+((hash2(x,y,seed+12)*20)|0):'dpalm'+((hash2(x,y,seed+13)*4)|0);put(k,x,y,{sc:.85+hash2(x,y,seed+14)*.45})}
+    if(r<dens&&Math.hypot(x-cx,y-(sy-2))>7){const k=(S.forest||(GR>.5&&hash2(x,y,seed+17)<.5))?'ltree'+((hash2(x,y,seed+12)*20)|0):'dpalm'+((hash2(x,y,seed+13)*4)|0);put(k,x,y,{sc:.85+hash2(x,y,seed+14)*.45})}
+    else if(r>.9&&GR>0&&fm[y*W+x]==='1')scenery.push({k:'lbush0',wx:x+.5,wy:y+.5,sc:.7+hash2(x,y,seed+15)*.5,decor:{k:'lbush0',walk:true,x,y}});
+    else if(fm[y*W+x]==='1'&&r>.55&&r<.7)scenery.push({k:'pgrass'+((hash2(x,y,seed+18)*4)|0),wx:x+.5,wy:y+.5,sc:.5+hash2(x,y,seed+19)*.6,decor:{k:'pgrass0',walk:true,x,y}});
+    else if(fm[y*W+x]==='1'&&r>.7&&r<.73)scenery.push({k:'pflw'+((hash2(x,y,seed+20)*6)|0)+'_'+((hash2(x,y,seed+21)*2)|0),wx:x+.5,wy:y+.5,sc:.7,decor:{k:'pflw0_0',walk:true,x,y}});
     else if(r>.9&&S.forest)scenery.push({k:'lbush0',wx:x+.5,wy:y+.5,sc:.8+hash2(x,y,seed+15)*.6,decor:{k:'lbush0',walk:true,x,y}});
     else if(r>.985)scenery.push({k:hash2(x,y,seed+16)<.5?'yar_shells':'yar_driftwood',wx:x+.5,wy:y+.5,sc:.8,decor:{k:'yar_shells',walk:true,x,y}});
   }

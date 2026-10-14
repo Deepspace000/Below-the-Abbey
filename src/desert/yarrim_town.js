@@ -109,7 +109,7 @@ function yarTileMaker(){
 }
 
 function yarBuild(){
-  if(LEVELS[YR.ID])return;
+  isleFloors();if(LEVELS[YR.ID])return;
   const W=YR.W,H=YR.H,N=W*H,P=yarPlan(90210),G0=YP.GORGE;
   YR.plan=P;
   const rows=[];for(let y=0;y<H;y++){const r=[];for(let x=0;x<W;x++)r.push((x===0||y===0||x===W-1||y===H-1)?'D':'.');rows.push(r)}
@@ -122,7 +122,7 @@ function yarBuild(){
       const i=y*W+x,land=x<sx;
       let base=land?Math.min(.5,(sx-x)*.055):-.2+.03*(tsmooth(x/4,y/4,21)-.5);
       if(land)base+=.1*tsmooth(x/9,y/9,22);
-      const bn=Math.pow(clamp((17-y)/15,0,1),1.2)*4.4*(.75+.5*tsmooth(x/6,y/6,3)),bs=Math.pow(clamp((y-(H-18))/15,0,1),1.2)*4.4*(.75+.5*tsmooth(x/6,y/6,5));
+      const bn=Math.pow(clamp((7-y)/6,0,1),1.2)*4.4*(.75+.5*tsmooth(x/6,y/6,3)),bs=Math.pow(clamp((y-(H-8))/6,0,1),1.2)*4.4*(.75+.5*tsmooth(x/6,y/6,5));
       const bw=Math.pow(clamp((G0.x1+1-x)/12,0,1),1.2)*4.4*(.75+.5*tsmooth(x/6,y/6,7));
       let hh=base+Math.max(bn,bs,gorge(x,y)?0:bw),isl=false;   // the rock to the west, with the gorge floor cut through it
       for(const [cx,cy,r,pk] of YR_ISLANDS){
@@ -201,7 +201,7 @@ function yarBuild(){
   const menk=dc('kh_menk1_0',85,38,{npc:'yr_menkaure',deco:false,block:false,walk:true});
   // washed-up crates for the harbourmaster, along the beach
   const crateAt=y=>{const x=Math.floor(yarCoast(y))-2;return [x,y]};
-  YR.crates=[27,35,47,53].map(yy=>crateAt(yy));
+  YR.crates=[14,30,50,67].map(yy=>crateAt(yy));
   YR.crates.forEach(([x,y],i)=>{if(free(x,y)){used.add(x+','+y);decor.push({k:'yar_crates',x,y,block:false,walk:true,npc:'yr_crate',cat:i})}});
   // beached boats and nets on the sand beside the harbour square
   for(const [k,x,y] of [['yar_boat_row',56,44],['yar_boat_fish',58,46],['yar_boat_row',57,37],['yar_boat_row',59,35]])tryDc(k,x,y);
@@ -261,8 +261,8 @@ function yarBuild(){
   // the beach: gulls, shells, driftwood and crabs
   const scB=(k,x,y,s)=>scenery.push({k,wx:x,wy:y,sc:s||1,decor:{k,walk:true,x:x|0,y:y|0}});
   for(let n=0;n<420;n++){
-    const y=2+((hs(n,1,31)*(H-4))|0),sx=yarCoast(y),x=sx-1-hs(n,2,32)*10;
-    if(x<G0.x1+2||y<18||y>62)continue;const cx=x|0,cy=y|0;if(!free(cx,cy)||fm[cy*W+cx]==='1')continue;
+    const y=2+((hs(n,1,31)*(H-4))|0),sx=yarCoast(y),x=sx-1-hs(n,2,32)*13;
+    if(x<G0.x1+2||y<9||y>H-10)continue;const cx=x|0,cy=y|0;if(!free(cx,cy)||fm[cy*W+cx]==='1')continue;
     const r=hs(n,3,33),k=r<.34?'yar_gull_stand':r<.5?'yar_shells':r<.66?'yar_driftwood':r<.74?'yar_crab':null;if(!k)continue;
     scB(k,x,y+hs(n,4,34)*.4-.2,.8+hs(n,5,35)*.5);
   }
@@ -298,7 +298,7 @@ function yarBuild(){
     {t:'The Pier',x:70,y:40,k:'place'},{t:'The Gorge',x:21,y:38.6,k:'lane'},{t:'Yarrim Point',x:61,y:27,k:'place'},{t:'The Beach',x:58,y:50,k:'place'}
   ]);
   const lv={rows:rows.map(r=>r.join('')),start:{x:G0.x0+1,y:G0.y,f:1},enemies:[],items,decor,scenery,sky:roofs,
-    fmap:null,floorSet:['sand','cobble','wood','bluesand','bluewater','lush','sandpath'],floor:'sand',ceil:'cloud',
+    fmap:null,floorSet:['isleSand','cobble','wood','bluesand','bluewater','lush','sandpath'],floor:'isleSand',ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:'Yarrim',label:'Yarrim',noExtras:true,diff:16,tele:{x:44,y:38},
     chars,lights,portals:[],mapNames};
   const fmap=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmap.push(s)}

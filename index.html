@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.94';
+const VERSION='3.95';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -13004,7 +13004,7 @@ function yarTileMaker(){
 }
 
 function yarBuild(){
-  if(LEVELS[YR.ID])return;
+  isleFloors();if(LEVELS[YR.ID])return;
   const W=YR.W,H=YR.H,N=W*H,P=yarPlan(90210),G0=YP.GORGE;
   YR.plan=P;
   const rows=[];for(let y=0;y<H;y++){const r=[];for(let x=0;x<W;x++)r.push((x===0||y===0||x===W-1||y===H-1)?'D':'.');rows.push(r)}
@@ -13017,7 +13017,7 @@ function yarBuild(){
       const i=y*W+x,land=x<sx;
       let base=land?Math.min(.5,(sx-x)*.055):-.2+.03*(tsmooth(x/4,y/4,21)-.5);
       if(land)base+=.1*tsmooth(x/9,y/9,22);
-      const bn=Math.pow(clamp((17-y)/15,0,1),1.2)*4.4*(.75+.5*tsmooth(x/6,y/6,3)),bs=Math.pow(clamp((y-(H-18))/15,0,1),1.2)*4.4*(.75+.5*tsmooth(x/6,y/6,5));
+      const bn=Math.pow(clamp((7-y)/6,0,1),1.2)*4.4*(.75+.5*tsmooth(x/6,y/6,3)),bs=Math.pow(clamp((y-(H-8))/6,0,1),1.2)*4.4*(.75+.5*tsmooth(x/6,y/6,5));
       const bw=Math.pow(clamp((G0.x1+1-x)/12,0,1),1.2)*4.4*(.75+.5*tsmooth(x/6,y/6,7));
       let hh=base+Math.max(bn,bs,gorge(x,y)?0:bw),isl=false;   // the rock to the west, with the gorge floor cut through it
       for(const [cx,cy,r,pk] of YR_ISLANDS){
@@ -13096,7 +13096,7 @@ function yarBuild(){
   const menk=dc('kh_menk1_0',85,38,{npc:'yr_menkaure',deco:false,block:false,walk:true});
   // washed-up crates for the harbourmaster, along the beach
   const crateAt=y=>{const x=Math.floor(yarCoast(y))-2;return [x,y]};
-  YR.crates=[27,35,47,53].map(yy=>crateAt(yy));
+  YR.crates=[14,30,50,67].map(yy=>crateAt(yy));
   YR.crates.forEach(([x,y],i)=>{if(free(x,y)){used.add(x+','+y);decor.push({k:'yar_crates',x,y,block:false,walk:true,npc:'yr_crate',cat:i})}});
   // beached boats and nets on the sand beside the harbour square
   for(const [k,x,y] of [['yar_boat_row',56,44],['yar_boat_fish',58,46],['yar_boat_row',57,37],['yar_boat_row',59,35]])tryDc(k,x,y);
@@ -13156,8 +13156,8 @@ function yarBuild(){
   // the beach: gulls, shells, driftwood and crabs
   const scB=(k,x,y,s)=>scenery.push({k,wx:x,wy:y,sc:s||1,decor:{k,walk:true,x:x|0,y:y|0}});
   for(let n=0;n<420;n++){
-    const y=2+((hs(n,1,31)*(H-4))|0),sx=yarCoast(y),x=sx-1-hs(n,2,32)*10;
-    if(x<G0.x1+2||y<18||y>62)continue;const cx=x|0,cy=y|0;if(!free(cx,cy)||fm[cy*W+cx]==='1')continue;
+    const y=2+((hs(n,1,31)*(H-4))|0),sx=yarCoast(y),x=sx-1-hs(n,2,32)*13;
+    if(x<G0.x1+2||y<9||y>H-10)continue;const cx=x|0,cy=y|0;if(!free(cx,cy)||fm[cy*W+cx]==='1')continue;
     const r=hs(n,3,33),k=r<.34?'yar_gull_stand':r<.5?'yar_shells':r<.66?'yar_driftwood':r<.74?'yar_crab':null;if(!k)continue;
     scB(k,x,y+hs(n,4,34)*.4-.2,.8+hs(n,5,35)*.5);
   }
@@ -13193,7 +13193,7 @@ function yarBuild(){
     {t:'The Pier',x:70,y:40,k:'place'},{t:'The Gorge',x:21,y:38.6,k:'lane'},{t:'Yarrim Point',x:61,y:27,k:'place'},{t:'The Beach',x:58,y:50,k:'place'}
   ]);
   const lv={rows:rows.map(r=>r.join('')),start:{x:G0.x0+1,y:G0.y,f:1},enemies:[],items,decor,scenery,sky:roofs,
-    fmap:null,floorSet:['sand','cobble','wood','bluesand','bluewater','lush','sandpath'],floor:'sand',ceil:'cloud',
+    fmap:null,floorSet:['isleSand','cobble','wood','bluesand','bluewater','lush','sandpath'],floor:'isleSand',ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:'Yarrim',label:'Yarrim',noExtras:true,diff:16,tele:{x:44,y:38},
     chars,lights,portals:[],mapNames};
   const fmap=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmap.push(s)}
@@ -14105,7 +14105,7 @@ Object.assign(NPC_H,{yar_bench:.62,yar_ship_dawn:2.6,yar_ship_heron:2.8,yar_palm
 Object.assign(ENEMY_DEF,{
   assassin:{name:'Assassin',hp:70,dmg:[9,14],hit:.8,w:.5,img:'assassin',xp:140,gold:[40,90],speed:1,verb:'stabs',aboveParty:1},
   cinder:{name:'Cinder Guardian',hp:260,dmg:[11,17],hit:.8,w:1.3,img:'yar_crystals',xp:900,gold:[200,320],speed:1,verb:'smashes',aboveParty:2},
-  corvane:{name:'Lord Corvane',hp:340,dmg:[12,19],hit:.84,w:.6,img:'yar_p_corvane',xp:2400,gold:[600,900],speed:1,verb:'cuts',aboveParty:3}
+  corvane:{name:'Lord Corvane',hp:340,dmg:[12,19],hit:.84,w:.42,img:'yar_p_corvane',xp:2400,gold:[600,900],speed:1,verb:'cuts',aboveParty:3}
 });
 const MQ={};
 const QAREA_SEA=n=>{QAREA_ORDER.splice(QAREA_ORDER.indexOf('Yarrim')+1,0,n)};
@@ -14264,24 +14264,30 @@ khNpc('yr_ship','The Dawn Walker','yar_ship_dawn',()=>seaChart());
    ========================================================================== */
 const yarSea=n=>n===290||(n>=300&&n<=304)||(n>=320&&n<=323)||(n>=330&&n<=349);
 const SEA_TINT={305:[.96,.93,.88],300:[1.05,.98,.9],301:[.8,.9,.82],302:[.55,.5,.52],303:[.85,.88,.96],304:[.96,.93,.88]};
+/* the ground of every island is yellow sand: the gold-sand paving washed pale, and a darker one for the rocky slopes */
+function isleFloors(){
+  if(FLOORS.isleSand)return;const base=FLOORS.goldsand||FLOORS.sand;if(!base)return;
+  const mk=(r,g,b,a)=>{const d=new base.constructor(base.length);for(let i=0;i<base.length;i+=4){d[i]=base[i]*(1-a)+r*a;d[i+1]=base[i+1]*(1-a)+g*a;d[i+2]=base[i+2]*(1-a)+b*a;d[i+3]=base[i+3]}return d};
+  FLOORS.isleSand=mk(236,214,140,.55);FLOORS.isleSandDk=mk(206,176,104,.55);
+}
 const SEA={
   300:{name:'Saltbarrow',label:'Saltbarrow',cx:50,cy:40,rx:27,ry:20,peak:2.2,pow:1.4,seed:31,diff:17,
-    floors:['sand','whiteSand','wood','bluesand','bluewater','pebA'],hills:[[34,30,6,2.8],[68,50,5,2.4]],
+    floors:['isleSand','lush','wood','bluesand','bluewater','isleSandDk'],green:.4,hills:[[34,30,6,2.8],[68,50,5,2.4]],
     deco:[['yar_tent',-8,4],['yar_tent',-3,8],['yar_tent',4,6],['yar_tent',9,2],['yar_wreck',-14,-6],['yar_bones',14,-8],['yar_palms',6,-10],['yar_palms',-6,-12],['yar_palms',17,6],['yar_crates',-1,5],['yar_crates',2,4],['yar_p_maeve',0,2,{npc:'sb_maeve'}],['uw_buoy',10,15,{npc:'uw_dive_300'}],['peasantW',-5,3,{npc:'sb_cook'}],['fisher',7,8,{npc:'sb_hand'}]],
     sea:[['yar_ship_heron',36,-8]],scatter:[['yar_palms',5,0,0,17],['yar_driftwood',12,0,6,22],['yar_shells',10,0,8,20],['yar_crab',8,0,6,22]],
     enemies:[['bandit',10,14,-4,9],['archer',3,16,-4,8]]},
   301:{name:'The Isle of Bells',label:'Isle of Bells',cx:48,cy:40,rx:25,ry:22,peak:2.6,pow:1.3,seed:41,diff:19,
-    floors:['dgrass','mosscobble','wood','bluesand','bluewater','pebA'],hills:[[60,32,6,3.2]],
+    floors:['isleSand','lush','wood','bluesand','bluewater','isleSandDk'],green:.85,hills:[[60,32,6,3.2]],
     deco:[['yar_arch',-10,-6,{npc:'ib_bell',cat:0}],['yar_arch',10,-6,{npc:'ib_bell',cat:1}],['yar_arch',0,8,{npc:'ib_bell',cat:2}],['yar_altar',0,-1],['yar_p_aldous',0,-3,{npc:'ib_aldous'}],['uw_buoy',10,17,{npc:'uw_dive_301'}],['yar_runestone',-13,5],['yar_runestone',13,4],['yar_wreck',-18,-4],['yar_bones',8,12]],
     scatter:[['yar_bones',6,0,0,18],['yar_driftwood',6,0,6,20],['yar_shells',6,0,8,20]],
     enemies:[['ghost',4,0,-4,16],['spectre',3,0,2,14],['skel',5,0,0,16]]},
   302:{name:'Cinder Isle',label:'Cinder Isle',cx:50,cy:42,rx:23,ry:21,peak:5.4,pow:1.05,seed:51,diff:21,
-    floors:['scree','tombdark','wood','bluesand','bluewater','pebA'],hills:[],
+    floors:['isleSand','tombdark','wood','bluesand','bluewater','isleSandDk'],hills:[],
     deco:[['yar_p_ketra',-6,10,{npc:'ci_ketra'}],['uw_buoy',10,16,{npc:'uw_dive_302'}],['yar_tent',-9,12],['yar_runestone',-4,12],['yar_runestone',-8,8],['yar_crystals',-12,2,{npc:'ci_crystal',cat:0}],['yar_crystals',12,4,{npc:'ci_crystal',cat:1}],['yar_crystals',-14,-8,{npc:'ci_crystal',cat:2}],['yar_crystals',10,-12,{npc:'ci_crystal',cat:3}],['yar_crystals',2,14,{npc:'ci_crystal',cat:4}],['yar_crystals',-3,-14,{npc:'ci_crystal',cat:5}],['yar_bones',9,9]],
     scatter:[['yar_bones',4,0,0,16],['yar_shells',4,0,10,20]],
     enemies:[['cinder',1,0,-5,2],['skel',6,0,2,16],['scorpion',4,0,0,16]]},
   303:{name:'Last Light',label:'Last Light',cx:48,cy:40,rx:21,ry:19,peak:3.2,pow:1.2,seed:61,diff:23,
-    floors:['pale','pebB','wood','bluesand','bluewater','pebA'],hills:[[48,24,5,4.6]],
+    floors:['isleSand','lush','wood','bluesand','bluewater','isleSandDk'],green:.5,hills:[[48,24,5,4.6]],
     deco:[['yar_p_isolde',-7,6,{npc:'ll_isolde'}],['uw_buoy',10,14,{npc:'uw_dive_303'}],['yar_tent',-10,8],['yar_altar',0,-12,{npc:'ll_altar'}],['yar_runestone',-4,-11],['yar_runestone',4,-11],['yar_wreck',12,6],['yar_bones',-12,-2],['yar_palms',-14,2]],
     scatter:[['yar_driftwood',8,0,6,18],['yar_shells',8,0,8,18],['yar_bones',4,0,0,16]],
     enemies:[['assassin',3,0,2,14],['hitman',3,0,0,15]]},
@@ -14293,7 +14299,7 @@ const SEA={
 };
 function SEA_ARRIVE(id){seaBuild(id);const L=LEVELS[id];return {x:L.start.x,y:L.start.y,f:L.start.f}}
 function seaBuild(id){
-  if(LEVELS[id])return;const sp=SEA[id];if(!sp)return;
+  isleFloors();if(LEVELS[id])return;const sp=SEA[id];if(!sp)return;
   const W=sp.W||100,H=sp.H||84,cx=sp.cx,cy=sp.cy,N=W*H;
   const rows=[];for(let y=0;y<H;y++){const r=[];for(let x=0;x<W;x++)r.push((x===0||y===0||x===W-1||y===H-1)?'D':'.');rows.push(r)}
   const h=new Float32Array(N),rk=new Float32Array(N),block=new Uint8Array(N),fm=new Array(N).fill('4');
@@ -14314,6 +14320,8 @@ function seaBuild(id){
   let sy=-1;for(let y=H-2;y>0;y--)if(!block[y*W+cx]&&h[y*W+cx]>-.06){sy=y;break}
   const plank=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;block[i]=0;h[i]=.08;rk[i]=0;fm[i]='2'}};
   plank(cx,sy-1,cx+1,sy+4);
+  const GR=sp.green||0;
+  if(GR>0)for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(fm[i]==='0'&&h[i]>.12&&tsmooth(x/8,y/8,sp.seed+30)+.25*(tsmooth(x/3,y/3,sp.seed+31)-.5)>1-GR*.95)fm[i]='1'}   // drifts of grass; Cinder Isle stays bare
   const decor=[],scenery=[],used=new Set();
   const put=(k,x,y,o)=>{decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}));used.add(x+','+y)};
   put('yar_ship_dawn',cx,sy+6,{npc:'yr_ship',deco:false});
@@ -14321,6 +14329,13 @@ function seaBuild(id){
   for(const [k,dx,dy] of sp.sea||[])put(k,cx+dx,cy+dy);
   for(const [k,n,dx,dy,r] of sp.scatter){for(let q=0;q<n;q++){const a=hash2(id,q,k.length)*TAU,rr=2+hash2(id,q+9,k.length)*r,s=spot(dx+Math.cos(a)*rr|0,dy+Math.sin(a)*rr*.8|0);if(!s||used.has(s[0]+','+s[1]))continue;
       if(k==='yar_driftwood'||k==='yar_shells'||k==='yar_crab')scenery.push({k,wx:s[0]+.5,wy:s[1]+.5,sc:.8+hash2(id,q,3)*.5,decor:{k,walk:true,x:s[0],y:s[1]}});else put(k,s[0],s[1])}}
+  if(GR>0)for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){
+    const i=y*W+x;if(block[i]||rows[y][x]!=='.'||used.has(x+','+y)||h[i]<.12||Math.hypot(x-cx,y-(sy-2))<7)continue;const r=hash2(x,y,sp.seed+11),g=fm[i]==='1';
+    if(r<.012+.05*GR*(g?1.4:.4))put((GR>.6&&hash2(x,y,sp.seed+17)<.55)?'ltree'+((hash2(x,y,sp.seed+12)*20)|0):'dpalm'+((hash2(x,y,sp.seed+13)*4)|0),x,y,{sc:.85+hash2(x,y,sp.seed+14)*.45,deco:true});
+    else if(g&&r>.9)scenery.push({k:'lbush0',wx:x+.5,wy:y+.5,sc:.7+hash2(x,y,sp.seed+15)*.5,decor:{k:'lbush0',walk:true,x,y}});
+    else if(g&&r>.55&&r<.7)scenery.push({k:'pgrass'+((hash2(x,y,sp.seed+18)*4)|0),wx:x+.5,wy:y+.5,sc:.5+hash2(x,y,sp.seed+19)*.6,decor:{k:'pgrass0',walk:true,x,y}});
+    else if(g&&r>.7&&r<.73)scenery.push({k:'pflw'+((hash2(x,y,sp.seed+20)*6)|0)+'_'+((hash2(x,y,sp.seed+21)*2)|0),wx:x+.5,wy:y+.5,sc:.7,decor:{k:'pflw0_0',walk:true,x,y}});
+  }
   for(let q=0;q<26;q++){const a=hash2(id,q,91)*TAU,rr=sp.rx*(.55+hash2(id,q,92)*.4),x=cx+Math.cos(a)*rr,y=cy+Math.sin(a)*rr*(sp.ry/sp.rx),cxl=x|0,cyl=y|0;
     if(cxl<2||cyl<2||cxl>=W-2||cyl>=H-2||block[cyl*W+cxl]||used.has(cxl+','+cyl))continue;scenery.push({k:'yar_gull_stand',wx:x,wy:y,sc:.8+hash2(id,q,93)*.4,decor:{k:'yar_gull_stand',walk:true,x:cxl,y:cyl}})}
   const enemies=[];
@@ -14416,7 +14431,7 @@ function seaEnter(n){
 for(const n of ['osric','vance','aldwyn','rguard'])loadImg('yar_p_'+n,'assets/yar_p_'+n+'.png');
 Object.assign(NPC_H,{yar_p_osric:1,yar_p_vance:1,yar_p_aldwyn:1,yar_p_rguard:1});
 Object.assign(ENEMY_DEF,{
-  chancellor:{name:'Chancellor Vance',hp:300,dmg:[11,17],hit:.82,w:.6,img:'yar_p_vance',xp:1600,gold:[400,700],speed:1,verb:'strikes',aboveParty:3},
+  chancellor:{name:'Chancellor Vance',hp:300,dmg:[11,17],hit:.82,w:.5,img:'yar_p_vance',xp:1600,gold:[400,700],speed:1,verb:'strikes',aboveParty:3},
   rguard:{name:'Royal Guard',hp:120,dmg:[9,14],hit:.78,w:.55,img:'yar_p_rguard',xp:300,gold:[40,90],speed:1,verb:'cuts',aboveParty:1}
 });
 const OH={W:150,H:150,ID:305,COURT:306,ROOM:307,HOME:6000,CX:74};
@@ -15312,7 +15327,7 @@ function seaBuildOpen(){
   for(const [x,y] of spots)enemies.push({t:'seaserpent',x,y});
   // gulls over the islands are made on the fly; here only the level
   const start={x:31,y:322,f:1};
-  const lv={rows:rows.map(r=>r.join('')),start,enemies,items:[],decor,scenery,fmap:null,floorSet:['sand','dgrass','wood','bluesand','bluewater','pebA'],floor:'sand',ceil:'cloud',
+  const lv={rows:rows.map(r=>r.join('')),start,enemies,items:[],decor,scenery,fmap:null,floorSet:['isleSand','lush','wood','bluesand','bluewater','isleSandDk'],floor:'isleSand',ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:'The Vaast Sea',label:'The Vaast Sea',noExtras:true,diff:22,tele:{x:start.x,y:start.y},chars:{D:LEVEL41_DATA.chars.D},lights:[],portals:[]};
   const fmapR=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmapR.push(s)}lv.fmap=fmapR;
   LEVELS[SN.ID]=lv;LEVEL_NAMES[SN.ID]='The Vaast Sea';TERRS[SN.ID]=yarTerrain(W,H,h,rk,block);
@@ -15382,10 +15397,10 @@ function seaEnterHook(n){
 /* ---- the islands nobody lives on ---- */
 const SN_SPEC={
   331:{w:56,h:50,fe:['bones','chest','sign'],tier:1,foes:[['uwcrab',2]],note:'A scrap of sand with a dead palm, a pile of weathered bones and a rotted sign.'},
-  332:{w:56,h:50,fe:['palms','chest','camp'],tier:1,foes:[['uwcrab',3]],note:'A little cay of white pebbles. Someone has camped here, and left in a hurry.'},
+  332:{w:56,h:50,green:.45,fe:['palms','chest','camp'],tier:1,foes:[['uwcrab',3]],note:'A little cay of white pebbles. Someone has camped here, and left in a hurry.'},
   333:{w:56,h:50,fe:['bones','wreck','chest'],tier:1,foes:[['uwcrab',2]],note:'A thin spit of sand. Gannets wheel over it, screaming, and the wind smells of fish.'},
-  334:{w:56,h:50,fe:['palms','wreck','chest'],tier:2,foes:[['uwcrab',3]],note:'A low sandbar that the tide nearly covers. Half a ship\'s ribs stick out of it.'},
-  335:{w:56,h:50,fe:['palms','bones','camp'],tier:1,foes:[['uwcrab',2]],note:'A palm and a pile of sand. Whoever chose this island for a camp was desperate.'},
+  334:{w:56,h:50,green:.2,fe:['palms','wreck','chest'],tier:2,foes:[['uwcrab',3]],note:'A low sandbar that the tide nearly covers. Half a ship\'s ribs stick out of it.'},
+  335:{w:56,h:50,green:.6,fe:['palms','bones','camp'],tier:1,foes:[['uwcrab',2]],note:'A palm and a pile of sand. Whoever chose this island for a camp was desperate.'},
   336:{w:56,h:50,fe:['bones','chest','arch'],npcs:[['sn_wren','fisher']],tier:2,foes:[['uwcrab',3]],note:'A ledge of black rock, whitened with bird droppings. A stone arch stands on it that nobody built.'},
   337:{w:84,h:70,fe:['wreck','arch','chest','bones','stones'],tier:2,foes:[['skel',5],['uwcrab',4]],note:'A rocky island of kelp-hung cliffs. A broken ship lies on the rocks, and nothing grows.'},
   338:{w:84,h:70,fe:['stones','altar','chest','bones','camp'],tier:3,foes:[['skel',6],['scorpion',4]],note:'Red cliffs and red sand. Some old people built an altar here, and it still smells of smoke.'},
@@ -15397,16 +15412,16 @@ const SN_SPEC={
 };
 function SEA_ARRIVE_ISLE(id){isleBuild(id);const L=LEVELS[id];return {x:L.start.x,y:L.start.y,f:L.start.f}}
 function isleBuild(id){
-  if(LEVELS[id])return;const I=SN_BY[id],S=SN_SPEC[id];if(!I||!S)return;
+  isleFloors();if(LEVELS[id])return;const I=SN_BY[id],S=SN_SPEC[id];if(!I||!S)return;
   const W=S.w,H=S.h,N=W*H,cx=W>>1,cy=(H>>1)-4,seed=id*7,rx=Math.min(W/2-10,I.kind==='forest'?58:I.kind==='rock'?32:14),ry=Math.min(H/2-12,I.kind==='forest'?48:I.kind==='rock'?26:11);
   const rows=[];for(let y=0;y<H;y++){const r=[];for(let x=0;x<W;x++)r.push((x===0||y===0||x===W-1||y===H-1)?'D':'.');rows.push(r)}
   const h=new Float32Array(N),rk=new Float32Array(N),block=new Uint8Array(N),fm=new Array(N).fill('4');
-  const peak=I.kind==='rock'?2.9:I.kind==='forest'?1.1:.5;
+  const peak=I.kind==='rock'?2.9:I.kind==='forest'?1.1:.5,GR=S.green||0;   // GR: how green the island is. Most of the little ones are bare on purpose.
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){
     const i=y*W+x,d=Math.hypot((x-cx)/rx,(y-cy)/ry)*(1+.28*(tsmooth(x/5,y/5,seed)-.5)),t=1-d;
     let hh=-.2+.03*(tsmooth(x/4,y/4,seed+1)-.5);
     if(t>-.12)hh=t>0?Math.min(.5,.5*Math.min(1,t/.2))-.05+peak*Math.pow(Math.max(0,t-.22),1.25)+.1*(tsmooth(x/6,y/6,seed+2)-.4)*Math.min(1,t*4):-.2+(t+.12)/.12*.15;
-    h[i]=hh;rk[i]=clamp((hh-.7)/1.6,0,1);block[i]=(hh<-.06||hh>1.7)?1:0;fm[i]=hh>1.2?'5':hh>.12?(S.forest?'1':'0'):hh>-.06?'3':(t>-.2?'3':'4');
+    h[i]=hh;rk[i]=clamp((hh-.7)/1.6,0,1);block[i]=(hh<-.06||hh>1.7)?1:0;fm[i]=hh>1.2?'5':hh>.12?(S.forest||(GR>0&&tsmooth(x/8,y/8,seed+30)+.25*(tsmooth(x/3,y/3,seed+31)-.5)>1-GR*.95)?'1':'0'):hh>-.06?'3':(t>-.2?'3':'4');
   }
   let sy=-1;for(let y=H-2;y>0;y--)if(!block[y*W+cx]&&h[y*W+cx]>-.06){sy=y;break}
   const plank=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;block[i]=0;h[i]=.08;rk[i]=0;fm[i]='2'}};
@@ -15431,10 +15446,13 @@ function isleBuild(id){
   }
   for(const [npc,face] of S.npcs||[]){const s=spot();if(s)put(face,s[0],s[1],{npc,deco:false})}
   // trees, bushes and shells
-  const dens=S.forest?.14:.012;
+  const dens=S.forest?.14:.012+.07*GR;
   for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){
     if(!free(x,y)||h[y*W+x]<.12)continue;const r=hash2(x,y,seed+11);
-    if(r<dens&&Math.hypot(x-cx,y-(sy-2))>7){const k=S.forest?'ltree'+((hash2(x,y,seed+12)*20)|0):'dpalm'+((hash2(x,y,seed+13)*4)|0);put(k,x,y,{sc:.85+hash2(x,y,seed+14)*.45})}
+    if(r<dens&&Math.hypot(x-cx,y-(sy-2))>7){const k=(S.forest||(GR>.5&&hash2(x,y,seed+17)<.5))?'ltree'+((hash2(x,y,seed+12)*20)|0):'dpalm'+((hash2(x,y,seed+13)*4)|0);put(k,x,y,{sc:.85+hash2(x,y,seed+14)*.45})}
+    else if(r>.9&&GR>0&&fm[y*W+x]==='1')scenery.push({k:'lbush0',wx:x+.5,wy:y+.5,sc:.7+hash2(x,y,seed+15)*.5,decor:{k:'lbush0',walk:true,x,y}});
+    else if(fm[y*W+x]==='1'&&r>.55&&r<.7)scenery.push({k:'pgrass'+((hash2(x,y,seed+18)*4)|0),wx:x+.5,wy:y+.5,sc:.5+hash2(x,y,seed+19)*.6,decor:{k:'pgrass0',walk:true,x,y}});
+    else if(fm[y*W+x]==='1'&&r>.7&&r<.73)scenery.push({k:'pflw'+((hash2(x,y,seed+20)*6)|0)+'_'+((hash2(x,y,seed+21)*2)|0),wx:x+.5,wy:y+.5,sc:.7,decor:{k:'pflw0_0',walk:true,x,y}});
     else if(r>.9&&S.forest)scenery.push({k:'lbush0',wx:x+.5,wy:y+.5,sc:.8+hash2(x,y,seed+15)*.6,decor:{k:'lbush0',walk:true,x,y}});
     else if(r>.985)scenery.push({k:hash2(x,y,seed+16)<.5?'yar_shells':'yar_driftwood',wx:x+.5,wy:y+.5,sc:.8,decor:{k:'yar_shells',walk:true,x,y}});
   }

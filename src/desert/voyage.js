@@ -13,7 +13,7 @@ Object.assign(NPC_H,{yar_bench:.62,yar_ship_dawn:2.6,yar_ship_heron:2.8,yar_palm
 Object.assign(ENEMY_DEF,{
   assassin:{name:'Assassin',hp:70,dmg:[9,14],hit:.8,w:.5,img:'assassin',xp:140,gold:[40,90],speed:1,verb:'stabs',aboveParty:1},
   cinder:{name:'Cinder Guardian',hp:260,dmg:[11,17],hit:.8,w:1.3,img:'yar_crystals',xp:900,gold:[200,320],speed:1,verb:'smashes',aboveParty:2},
-  corvane:{name:'Lord Corvane',hp:340,dmg:[12,19],hit:.84,w:.6,img:'yar_p_corvane',xp:2400,gold:[600,900],speed:1,verb:'cuts',aboveParty:3}
+  corvane:{name:'Lord Corvane',hp:340,dmg:[12,19],hit:.84,w:.42,img:'yar_p_corvane',xp:2400,gold:[600,900],speed:1,verb:'cuts',aboveParty:3}
 });
 const MQ={};
 const QAREA_SEA=n=>{QAREA_ORDER.splice(QAREA_ORDER.indexOf('Yarrim')+1,0,n)};

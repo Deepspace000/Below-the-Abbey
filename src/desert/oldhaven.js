@@ -9,7 +9,7 @@
 for(const n of ['osric','vance','aldwyn','rguard'])loadImg('yar_p_'+n,'assets/yar_p_'+n+'.png');
 Object.assign(NPC_H,{yar_p_osric:1,yar_p_vance:1,yar_p_aldwyn:1,yar_p_rguard:1});
 Object.assign(ENEMY_DEF,{
-  chancellor:{name:'Chancellor Vance',hp:300,dmg:[11,17],hit:.82,w:.6,img:'yar_p_vance',xp:1600,gold:[400,700],speed:1,verb:'strikes',aboveParty:3},
+  chancellor:{name:'Chancellor Vance',hp:300,dmg:[11,17],hit:.82,w:.5,img:'yar_p_vance',xp:1600,gold:[400,700],speed:1,verb:'strikes',aboveParty:3},
   rguard:{name:'Royal Guard',hp:120,dmg:[9,14],hit:.78,w:.55,img:'yar_p_rguard',xp:300,gold:[40,90],speed:1,verb:'cuts',aboveParty:1}
 });
 const OH={W:150,H:150,ID:305,COURT:306,ROOM:307,HOME:6000,CX:74};
