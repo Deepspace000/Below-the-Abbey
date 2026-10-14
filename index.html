@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.76';
+const VERSION='3.77';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -6260,6 +6260,8 @@ function drawMapCells(ox,oy,cs){
     ctx.fillRect(ox+x*cs,oy+y*cs,cs,cs);
     if(g>0&&g<3){ctx.fillStyle='rgba(255,255,255,.07)';ctx.fillRect(ox+x*cs,oy+y*cs,cs,Math.max(1,cs*.2))}
   }
+  {const bd=G.flags&&G.flags.bathDoors2&&G.flags.bathDoors2[LEVEL];if(bd&&typeof BATH_TOWN!=='undefined'&&BATH_TOWN[LEVEL]){ // the bathhouse door, always marked in blue
+    const bx=ox+(bd.x+.5)*cs,by=oy+(bd.y+.5)*cs,r=Math.max(2.6,cs*.62);ctx.fillStyle='#4aa8e8';ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.beginPath();ctx.arc(bx,by,r,0,TAU);ctx.fill();ctx.stroke();ctx.strokeStyle='#0a2a44';ctx.lineWidth=.9;ctx.beginPath();ctx.moveTo(bx-r*.5,by+r*.2);ctx.quadraticCurveTo(bx-r*.25,by-r*.4,bx,by+r*.2);ctx.quadraticCurveTo(bx+r*.25,by+r*.8,bx+r*.5,by+r*.2);ctx.stroke()}}
   const px=ox+(G.C.x+.5)*cs,py=oy+(G.C.y+.5)*cs;
   ctx.save();ctx.translate(px,py);ctx.rotate(G.C.a+Math.PI/2);ctx.fillStyle='#ffe36a';ctx.beginPath();ctx.moveTo(0,-cs*.75);ctx.lineTo(cs*.55,cs*.5);ctx.lineTo(0,cs*.15);ctx.lineTo(-cs*.55,cs*.5);ctx.closePath();ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=.8;ctx.stroke();ctx.restore();
 }
