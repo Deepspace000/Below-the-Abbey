@@ -117,7 +117,7 @@ function terrMarch(x,rX,rY,tmax){
     if(ytop<yb){
       const ys=Math.max(0,Math.ceil(ytop)),ye=Math.min(VH,Math.ceil(yb));
       if(ye>ys){
-        const shade=(sh[i]*w00+sh[i+1]*w10+sh[i+W]*w01+sh[i+W+1]*w11)*(wv?1+.1*Math.sin(px*3.1+C.tm*2.2)*Math.sin(py*2.7-C.tm*1.7):1);
+        const shade=(sh[i]*w00+sh[i+1]*w10+sh[i+W]*w01+sh[i+W+1]*w11)*(wv?1+.1*Math.sin(px*3.1+C.tm*2.2)*Math.sin(py*2.7-C.tm*1.7):C.uw?1+.24*Math.sin(px*2.1+C.tm*.7+Math.sin(py*1.3+C.tm*.4)*1.5)*Math.sin(py*2.4-C.tm*.6+Math.cos(px*1.1+C.tm*.3)*1.5):1); // sunlight nets of caustics slide over the seabed
         const fdd=fds[fcc-48]||fds[0];
         const u=wv?((((px-cxl)*TS+C.tm*9)|0)&(TS-1)):((px-cxl)*TS)|0,v=wv?((((py-cyl)*TS+Math.sin(C.tm*.7+px*.3)*6+C.tm*5)|0)&(TS-1)):((py-cyl)*TS)|0,ti=(v*TS+u)*4,dist=t*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv,sk=smv*(lbm*.55+.05);
         let r=fdd[ti]*kR0*shade*iv+hz[0]*sk,g=fdd[ti+1]*kG0*shade*iv+hz[1]*sk,b=fdd[ti+2]*kB0*shade*iv+hz[2]*sk;

@@ -4,27 +4,27 @@
      300 Saltbarrow (pirates)  301 The Isle of Bells (a drowned abbey)  302 Cinder Isle (a volcano)  303 Last Light (a ruined beacon)
      304 Oldhaven Quay (the harbour of the king's city, where this part of the story ends)
    ========================================================================== */
-const yarSea=n=>n===290||(n>=300&&n<=304);
+const yarSea=n=>n===290||(n>=300&&n<=304)||(n>=320&&n<=323)||(n>=330&&n<=349);
 const SEA_TINT={305:[.96,.93,.88],300:[1.05,.98,.9],301:[.8,.9,.82],302:[.55,.5,.52],303:[.85,.88,.96],304:[.96,.93,.88]};
 const SEA={
   300:{name:'Saltbarrow',label:'Saltbarrow',cx:50,cy:40,rx:27,ry:20,peak:2.2,pow:1.4,seed:31,diff:17,
     floors:['sand','whiteSand','wood','bluesand','bluewater','pebA'],hills:[[34,30,6,2.8],[68,50,5,2.4]],
-    deco:[['yar_tent',-8,4],['yar_tent',-3,8],['yar_tent',4,6],['yar_tent',9,2],['yar_wreck',-14,-6],['yar_bones',14,-8],['yar_palms',6,-10],['yar_palms',-6,-12],['yar_palms',17,6],['yar_crates',-1,5],['yar_crates',2,4],['yar_p_maeve',0,2,{npc:'sb_maeve'}],['peasantW',-5,3,{npc:'sb_cook'}],['fisher',7,8,{npc:'sb_hand'}]],
+    deco:[['yar_tent',-8,4],['yar_tent',-3,8],['yar_tent',4,6],['yar_tent',9,2],['yar_wreck',-14,-6],['yar_bones',14,-8],['yar_palms',6,-10],['yar_palms',-6,-12],['yar_palms',17,6],['yar_crates',-1,5],['yar_crates',2,4],['yar_p_maeve',0,2,{npc:'sb_maeve'}],['uw_buoy',10,15,{npc:'uw_dive_300'}],['peasantW',-5,3,{npc:'sb_cook'}],['fisher',7,8,{npc:'sb_hand'}]],
     sea:[['yar_ship_heron',36,-8]],scatter:[['yar_palms',5,0,0,17],['yar_driftwood',12,0,6,22],['yar_shells',10,0,8,20],['yar_crab',8,0,6,22]],
     enemies:[['bandit',10,14,-4,9],['archer',3,16,-4,8]]},
   301:{name:'The Isle of Bells',label:'Isle of Bells',cx:48,cy:40,rx:25,ry:22,peak:2.6,pow:1.3,seed:41,diff:19,
     floors:['dgrass','mosscobble','wood','bluesand','bluewater','pebA'],hills:[[60,32,6,3.2]],
-    deco:[['yar_arch',-10,-6,{npc:'ib_bell',cat:0}],['yar_arch',10,-6,{npc:'ib_bell',cat:1}],['yar_arch',0,8,{npc:'ib_bell',cat:2}],['yar_altar',0,-1],['yar_p_aldous',0,-3,{npc:'ib_aldous'}],['yar_runestone',-13,5],['yar_runestone',13,4],['yar_wreck',-18,-4],['yar_bones',8,12]],
+    deco:[['yar_arch',-10,-6,{npc:'ib_bell',cat:0}],['yar_arch',10,-6,{npc:'ib_bell',cat:1}],['yar_arch',0,8,{npc:'ib_bell',cat:2}],['yar_altar',0,-1],['yar_p_aldous',0,-3,{npc:'ib_aldous'}],['uw_buoy',10,17,{npc:'uw_dive_301'}],['yar_runestone',-13,5],['yar_runestone',13,4],['yar_wreck',-18,-4],['yar_bones',8,12]],
     scatter:[['yar_bones',6,0,0,18],['yar_driftwood',6,0,6,20],['yar_shells',6,0,8,20]],
     enemies:[['ghost',4,0,-4,16],['spectre',3,0,2,14],['skel',5,0,0,16]]},
   302:{name:'Cinder Isle',label:'Cinder Isle',cx:50,cy:42,rx:23,ry:21,peak:5.4,pow:1.05,seed:51,diff:21,
     floors:['scree','tombdark','wood','bluesand','bluewater','pebA'],hills:[],
-    deco:[['yar_p_ketra',-6,10,{npc:'ci_ketra'}],['yar_tent',-9,12],['yar_runestone',-4,12],['yar_runestone',-8,8],['yar_crystals',-12,2,{npc:'ci_crystal',cat:0}],['yar_crystals',12,4,{npc:'ci_crystal',cat:1}],['yar_crystals',-14,-8,{npc:'ci_crystal',cat:2}],['yar_crystals',10,-12,{npc:'ci_crystal',cat:3}],['yar_crystals',2,14,{npc:'ci_crystal',cat:4}],['yar_crystals',-3,-14,{npc:'ci_crystal',cat:5}],['yar_bones',9,9]],
+    deco:[['yar_p_ketra',-6,10,{npc:'ci_ketra'}],['uw_buoy',10,16,{npc:'uw_dive_302'}],['yar_tent',-9,12],['yar_runestone',-4,12],['yar_runestone',-8,8],['yar_crystals',-12,2,{npc:'ci_crystal',cat:0}],['yar_crystals',12,4,{npc:'ci_crystal',cat:1}],['yar_crystals',-14,-8,{npc:'ci_crystal',cat:2}],['yar_crystals',10,-12,{npc:'ci_crystal',cat:3}],['yar_crystals',2,14,{npc:'ci_crystal',cat:4}],['yar_crystals',-3,-14,{npc:'ci_crystal',cat:5}],['yar_bones',9,9]],
     scatter:[['yar_bones',4,0,0,16],['yar_shells',4,0,10,20]],
     enemies:[['cinder',1,0,-5,2],['skel',6,0,2,16],['scorpion',4,0,0,16]]},
   303:{name:'Last Light',label:'Last Light',cx:48,cy:40,rx:21,ry:19,peak:3.2,pow:1.2,seed:61,diff:23,
     floors:['pale','pebB','wood','bluesand','bluewater','pebA'],hills:[[48,24,5,4.6]],
-    deco:[['yar_p_isolde',-7,6,{npc:'ll_isolde'}],['yar_tent',-10,8],['yar_altar',0,-12,{npc:'ll_altar'}],['yar_runestone',-4,-11],['yar_runestone',4,-11],['yar_wreck',12,6],['yar_bones',-12,-2],['yar_palms',-14,2]],
+    deco:[['yar_p_isolde',-7,6,{npc:'ll_isolde'}],['uw_buoy',10,14,{npc:'uw_dive_303'}],['yar_tent',-10,8],['yar_altar',0,-12,{npc:'ll_altar'}],['yar_runestone',-4,-11],['yar_runestone',4,-11],['yar_wreck',12,6],['yar_bones',-12,-2],['yar_palms',-14,2]],
     scatter:[['yar_driftwood',8,0,6,18],['yar_shells',8,0,8,18],['yar_bones',4,0,0,16]],
     enemies:[['assassin',3,0,2,14],['hitman',3,0,0,15]]},
   304:{name:'Oldhaven Quay',label:'Oldhaven Quay',cx:50,cy:30,rx:42,ry:22,peak:.4,pow:1,seed:71,diff:25,W:100,H:80,

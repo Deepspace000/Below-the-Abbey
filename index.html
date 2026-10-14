@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.63';
+const VERSION='3.64';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1547,7 +1547,7 @@ function frontEnemy(range){
 }
 function bfs(e){
   if(Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)>15)return null; // too far to reach in fourteen steps
-  const dist=new Int16Array(MW*MH).fill(-1),first=new Int16Array(MW*MH).fill(-1);
+  const dist=new Int16Array(MW*MH).fill(-1),first=new Int32Array(MW*MH).fill(-1); // cell numbers go past 32767 on the big levels
   const q=[[e.x,e.y]];dist[e.y*MW+e.x]=0;
   const occupied=new Set(G.enemies.filter(o=>o!==e&&o.hp>0).map(o=>o.y*MW+o.x));
   while(q.length){
@@ -2457,23 +2457,25 @@ function render3D(){
   const nl=nearL,nn=nl.length,nr=nearR,nrn=nr.length;
   const D=vimg.data;
   const day=G.day||0,lbm=Math.max(day,G.amb||0),fd=G.fl||(day?GRASSD:FLOORD),cd=G.cl||(day?SKYD:CEILD);
+  const uwL=typeof uwLv==='function'&&uwLv(LEVEL); // under the sea
   const desertLv=LEVEL===41||LEVEL===43||LEVEL===44||LEVEL>=60&&LEVEL<=64||yarSea(LEVEL),dsBio=LEVEL===41?clamp(rdBiome(G.C.x|0,G.C.y|0)*1.3,0,1):1,mix3=(a,b)=>[a[0]+(b[0]-a[0])*dsBio,a[1]+(b[1]-a[1])*dsBio,a[2]+(b[2]-a[2])*dsBio];
-  const skyLv=LEVEL===22,lushLv=LEVEL===32||LEVEL===33,grimLv=GRIM_L(),rainLv=LEVEL===10,mossLv=LEVEL===39,hzr0=desertLv?(yarSea(LEVEL)?[214,230,244]:LEVEL===64?[236,224,196]:LEVEL===63?[238,242,250]:LEVEL===62?[226,204,242]:LEVEL===61?[244,226,172]:LEVEL===60?[196,214,240]:LEVEL===43?[238,200,166]:mix3([170,200,160],[242,226,190])):skyLv?[176,192,216]:rainLv?[58,72,82]:mossLv?[70,104,70]:grimLv?[30,46,32]:lushLv?[170,200,160]:day?[132,146,132]:[86,76,62],hzc0=desertLv?(yarSea(LEVEL)?[176,204,230]:LEVEL===64?[216,198,160]:LEVEL===63?[214,226,244]:LEVEL===62?[196,160,222]:LEVEL===61?[232,200,128]:LEVEL===60?[172,196,232]:LEVEL===43?[218,172,136]:mix3([140,176,130],[228,210,168])):mossLv?[48,76,50]:rainLv?[48,60,70]:grimLv?[26,40,28]:lushLv?[140,176,130]:skyLv?[150,172,208]:day?[110,124,112]:[69,61,50],hzmax0=desertLv?(LEVEL===44?.36:.5+.22*dsBio):skyLv?(.42-.26*ALTN):mossLv?.34:lushLv?.34:grimLv?.36:rainLv?.34:day?.55:.32,hzrate0=desertLv?(LEVEL===44?.02:.03):skyLv?.05:mossLv?.05:lushLv?.04:grimLv?.034:rainLv?.036:day?.07:.042;
+  const skyLv=LEVEL===22,lushLv=LEVEL===32||LEVEL===33,grimLv=GRIM_L(),rainLv=LEVEL===10,mossLv=LEVEL===39,hzr0=desertLv?(uwL?[40,124,154]:yarSea(LEVEL)?[214,230,244]:LEVEL===64?[236,224,196]:LEVEL===63?[238,242,250]:LEVEL===62?[226,204,242]:LEVEL===61?[244,226,172]:LEVEL===60?[196,214,240]:LEVEL===43?[238,200,166]:mix3([170,200,160],[242,226,190])):skyLv?[176,192,216]:rainLv?[58,72,82]:mossLv?[70,104,70]:grimLv?[30,46,32]:lushLv?[170,200,160]:day?[132,146,132]:[86,76,62],hzc0=desertLv?(uwL?[58,140,168]:yarSea(LEVEL)?[176,204,230]:LEVEL===64?[216,198,160]:LEVEL===63?[214,226,244]:LEVEL===62?[196,160,222]:LEVEL===61?[232,200,128]:LEVEL===60?[172,196,232]:LEVEL===43?[218,172,136]:mix3([140,176,130],[228,210,168])):mossLv?[48,76,50]:rainLv?[48,60,70]:grimLv?[26,40,28]:lushLv?[140,176,130]:skyLv?[150,172,208]:day?[110,124,112]:[69,61,50],hzmax0=desertLv?(LEVEL===44?.36:.5+.22*dsBio):skyLv?(.42-.26*ALTN):mossLv?.34:lushLv?.34:grimLv?.36:rainLv?.34:day?.55:.32,hzrate0=desertLv?(LEVEL===44?.02:.03):skyLv?.05:mossLv?.05:lushLv?.04:grimLv?.034:rainLv?.036:day?.07:.042;
   // the desert sky follows the clock; a sandstorm thickens the air and tints it
-  const SK=desertLv?skyTod((G.clock%1440)/60):null,ST=desertLv?STORM.a:0,stm=(v,c)=>v+(c-v)*ST;
+  const SK=desertLv&&!uwL?skyTod((G.clock%1440)/60):null,ST=desertLv?STORM.a:0,stm=(v,c)=>v+(c-v)*ST;
   const stormC=SK?[206*Math.min(1,SK.k[0]*1.1+.05),166*Math.min(1,SK.k[1]*1.1+.05),112*Math.min(1,SK.k[2]*1.1+.05)]:null;
-  SKYV=SK?{dX,dY,pX,pY,HH,VW,VH}:null;
+  SKYV=(SK||uwL)?{dX,dY,pX,pY,HH,VW,VH}:null;
   const hzr=(SK?hzr0.map((v,i)=>stm(v*SK.k[i],stormC[i])):hzr0).slice(),hzc=SK?hzc0.map((v,i)=>stm(v*SK.k[i],stormC[i]*.92)):hzc0;
-  let hzmax=SK?stm(hzmax0,.97):hzmax0,hzrate=SK?hzrate0+.16*ST:hzrate0;
+  let hzmax=SK?stm(hzmax0,.97):hzmax0,hzrate=SK?hzrate0+.16*ST:hzrate0;if(uwL){hzmax=.68;hzrate=.042}
   {const WXN=typeof weatherNow==='function'?weatherNow():null;if(WXN&&WXN.fog){hzrate+=WXN.fog;hzmax=Math.max(hzmax,WXN.haze);for(let i=0;i<3;i++)hzr[i]+=(WXN.col[i]-hzr[i])*WXN.mix}} // rain, fog, snow and heat thicken the air
-  const tbR=SK?SK.g[0]:1,tbG=SK?SK.g[1]*.94:.94,tbB=SK?SK.g[2]*.84:.84, ttR=1.3,ttG=.88,ttB=.5;
-  const ovcLv=LEVEL===2||LEVEL===3||LEVEL===7||LEVEL===10||LEVEL===19||LEVEL===20,SKP=ovcLv&&SKYOVC?SKYOVC:SKYPAN; // the early open areas sit under a heavy moving overcast
+  const tbR=uwL?.84:SK?SK.g[0]:1,tbG=uwL?1:SK?SK.g[1]*.94:.94,tbB=uwL?1.12:SK?SK.g[2]*.84:.84, ttR=1.3,ttG=.88,ttB=.5;
+  const ovcLv=LEVEL===2||LEVEL===3||LEVEL===7||LEVEL===10||LEVEL===19||LEVEL===20,SKP=uwL?uwPan():ovcLv&&SKYOVC?SKYOVC:SKYPAN; // the early open areas sit under a heavy moving overcast
   const skyPan=(skyLv||ovcLv||desertLv||LEVEL===3||LEVEL===13||LEVEL===32||LEVEL===33)&&SKP?(()=>{for(let x=0;x<VW;x++){const cm=2*x/VW-1;UCOL[x]=((((Math.atan2(dY+pY*cm,dX+pX*cm)/TAU)%1)+1)%1*1024+t*(ovcLv?11:7))%1024|0}return true})():false; // the sky is one panorama on walls and ceiling alike
   const fmp=G.fmap,fd2=G.fl2,fd3=G.fl3,fd4=G.fl4,fd5=G.fl5,fd6=G.fl6,lmp=G.lmap,lmN=lmp?clamp(1.2-(G.day||0)*1.35,0,1)*.95:0;
   TERR_NOW=desertLv&&skyPan?terrFor(LEVEL):null;CAMZ=EYE; // real hills: the camera rides the ground, the ground is marched column by column, the sky is painted behind it
-  if(TERR_NOW){CAMZ=terrH(cx,cy)+EYE;TC={wat:yarSea(LEVEL),tm:t,D,cx,cy,fmp,fds:[fd,fd2||fd,fd3||fd,fd4||fd,fd5||fd,fd6||fd],hzr,hzmax,hzrate,lbm,tbR,tbG,tbB,rock:terrRock()};
+  if(TERR_NOW){CAMZ=terrH(cx,cy)+EYE;TC={wat:yarSea(LEVEL)&&!uwL,uw:uwL,tm:t,D,cx,cy,fmp,fds:[fd,fd2||fd,fd3||fd,fd4||fd,fd5||fd,fd6||fd],hzr,hzmax,hzrate,lbm,tbR,tbG,tbB,rock:terrRock()};
     if(SK)paintDesertSky(D,SKP,UCOL,SK,ST,stormC,dX,dY,pX,pY,t);
-    else for(let y=0;y<VH;y++){const v=clamp(y-HH+150,0,255)|0,o=y*VW*4;for(let x=0;x<VW;x++){const i=(v*1024+UCOL[x])*4,io=o+x*4;D[io]=SKP[i]*lbm*tbR;D[io+1]=SKP[i+1]*lbm*tbG;D[io+2]=SKP[i+2]*lbm*tbB}}}
+    else{const WOB=uwL?new Float32Array(VW):null;if(WOB)for(let x=0;x<VW;x++)WOB[x]=Math.sin(t*.7+x*.05)*4+Math.sin(t*.43+x*.021)*3; // the light moves and bends
+    for(let y=0;y<VH;y++){const v0=y-HH+150,o=y*VW*4;for(let x=0;x<VW;x++){const v=clamp(WOB?v0+WOB[x]:v0,0,255)|0,i=(v*1024+UCOL[x])*4,io=o+x*4;D[io]=SKP[i]*lbm*tbR;D[io+1]=SKP[i+1]*lbm*tbG;D[io+2]=SKP[i+2]*lbm*tbB}}}}
   // floor + ceiling (the ceiling is its own plane, CEILH above the floor); a daylit sky needs no lamp light, and indoors only the nearest few lights reach the ceiling
   const ncl=day>.5?0:Math.min(nn,12),nrcl=day>.5?0:Math.min(nrn,6);
   const fastF=LEVEL===44;
@@ -2671,7 +2673,7 @@ function spriteList(){
     L.push({x:d.x+.5+(d.ox||0),y:d.y+.5+(d.oy||0),img:(LEVEL>=33&&LEVEL<=38&&d.npc&&VIVID_KEYS.has(k))?vividImg(k,d):(k==='brazier'?IMG['brazier'+(((G.time*7+d.x*3+d.y)|0)&3)]:k==='teleporter'?IMG['tele'+(teleActive(LEVEL)?1+(((G.time*5)|0)&3):0)]:IMG[k]),w:(NPC_H[k]&&IMG[k]?NPC_H[k]*IMG[k].width/IMG[k].height:decorW(k))*(d.sc||1),drop:DROP[k]||(/^[glp]tree/.test(k)?.05:/^kh_int/.test(k)?.035:0),bob:d.bob||0,decor:d})}
   if(LEVEL===44&&LEVELS[44].walkers)khWalkSprites(LEVELS[44],cam.x,cam.y,L);
   if(typeof petSprites==='function')petSprites(L);
-  if(typeof yrSprites==='function')yrSprites(L);
+  if(typeof yrSprites==='function')yrSprites(L);if(typeof uwSprites==='function')uwSprites(L);if(typeof seaSprites==='function')seaSprites(L);
   return L;
 }
 let SC=ctx; // sprites are painted straight onto the full-size screen, not into the small 3D picture, so they stay sharp
@@ -3809,6 +3811,7 @@ function useHeal(hi,idx){
   if(idx<0)idx=bestPotionIndex(hi);
   const it=G.bag[idx];
   if(it&&idef(it).mask){bagTake(idx);wearMask(hi);return true}
+  if(it&&idef(it).gill){bagTake(idx);gillDrink(hi);return true}
   if(it&&idef(it).cures)return afflUseItem(hi,idx);
   if(it&&idef(it).buff){const D=idef(it),B=D.buff;bagTake(idx);G.buffs=G.buffs.filter(x=>!(x.name===D.n&&x.hi===hi));G.buffs.push({name:D.n,b:B.b,amt:B.amt,left:B.rounds,hi});sfx('potion');msg(`${HERO_DEF[hi].name} drinks the ${D.n}. ${D.d}`,'#ffe9a0');return true}
   if(it&&idef(it).mana){const D=idef(it);if(h.mp>=h.mpMax){msg(`${HERO_DEF[hi].name} is not tired.`);return false}bagTake(idx);h.mp=Math.min(h.mpMax,h.mp+D.mana);sfx('potion');msg(`${HERO_DEF[hi].name} drinks the ${D.n} (+${D.mana} ${HERO_DEF[hi].mpn.toLowerCase()}).`,'#9ac8ff');return true}
@@ -3999,6 +4002,8 @@ function gotoList(){
   hd('Ironhill shops');for(const n of [271,272,273,274])out.push({n,name:LEVEL_NAMES[n]||FIXED[n]});
   hd('Yarrim and the Vaast Sea');for(const n of [289,290,291,292,293,294,295,296,297,298])if(has(n))out.push({n,name:nm(n)});
   hd('The Islands of the Vaast Sea');for(const n of [300,301,302,303])if(has(n))out.push({n,name:nm(n)});
+  hd('Under the sea');for(const n of [320,321,322,323])if(has(n))out.push({n,name:nm(n)});
+  hd('The open sea and its lonely islands');for(const n of [330,331,332,333,334,335,336,337,338,339,340,341,342,343])if(has(n))out.push({n,name:nm(n)});
   hd('Oldhaven, the city of King Osric');for(const n of [304,305,306,307,308,309,310])if(has(n))out.push({n,name:nm(n)});
     hd('Mounds of the Sand Road');for(let n=BURROW_BASE;n<BURROW_BASE+BURROW_N;n++)if(has(n))out.push({n,name:nm(n)});
   for(const [dl,dname] of DNG_DESERTS){const ids=Object.keys(DNG_INFO).map(Number).filter(n=>DNG_INFO[n].desert===dname).sort((a,b)=>a-b);if(ids.length){hd('Dungeons of '+dname);for(const n of ids)out.push({n,name:nm(n)})}}
@@ -4775,7 +4780,7 @@ function goToLevel(n,entry){
   if(n===5){const F=G.flags,cd=G.decor.find(d=>d.npc==='corbin');if(cd&&F.mayorDown&&!F.mayorKilled&&!F.mayorFight){delete F.mayorDown;cd.found=false;cd.block=true}
     if(cd&&!F.mayorKilled&&!F.mayorFight&&G.quests.gandrick&&G.quests.gandrick.st==='done')G.quests.gandrick.st='active'; // repairs saves where a jump link had wrongly marked him defeated
     if(cd&&(F.mayorFight||F.mayorDown)){cd.found=true;cd.block=false}if(F.mayorFight&&!F.mayorDown&&cd)addEnemy('mayor',cd.x,cd.y,true)}
-  reveal();G.hold=null;try{afflEnter(n);petsApply();petEnter(n);if(typeof yarEnter==='function')yarEnter(n)}catch(e){console.error(e)}
+  reveal();G.hold=null;try{afflEnter(n);petsApply();petEnter(n);if(typeof yarEnter==='function')yarEnter(n);if(typeof uwEnterHook==='function')uwEnterHook(n);if(typeof seaEnterHook==='function')seaEnterHook(n)}catch(e){console.error(e)}
   G.acted=[false,false,false,false];G.state='play';G.nextAuto=G.time+180;G.lastReg=G.reg?G.reg[G.P.y*MW+G.P.x]:-2;writeSave('auto');
   if(LEVELS[n]&&LEVELS[n].scene)startScene(n);
   if(n===2&&!G.flags.townSeen)startCut('abbeyIntro');
@@ -6402,7 +6407,7 @@ function drawWorld(){ // a slightly softer, lower-res picture; the screen-wide d
   LOWX.imageSmoothingEnabled=true;LOWX.drawImage(vc,0,0,w,h);
   ctx.imageSmoothingEnabled=false;ctx.drawImage(LOWC,0,0,420,210);ctx.imageSmoothingEnabled=true;
   if(G._spr){ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';SC=ctx;drawSprites(...G._spr);ctx.restore()}
-  if(LEVELS[LEVEL]&&LEVELS[LEVEL].rain)drawRain(); if(STORM.a>.02)drawStorm();else{drawSkyBirds();if(yarSea(LEVEL)&&typeof yarGulls==='function')yarGulls()}if(G.pharFlash>0)drawPharFlash();
+  if(LEVELS[LEVEL]&&LEVELS[LEVEL].rain)drawRain(); if(STORM.a>.02)drawStorm();else{drawSkyBirds();if(typeof uwLv==='function'&&uwLv(LEVEL))uwSkyFish();else if(yarSea(LEVEL)&&typeof yarGulls==='function')yarGulls()}if(typeof uwHud==='function')uwHud();if(G.pharFlash>0)drawPharFlash();
 }
 function drawRain(){
   const hr=(G.clock%1440)/60,sun=hr>=7&&hr<=18?Math.sin((hr-7)/11*Math.PI):0;
@@ -6556,6 +6561,7 @@ function update(dt){
   burnTick(dt);
   if(LEVEL===44&&G.state==='play')try{khWalkTick(dt)}catch(e){}
   if(G.state==='play')try{petFollow(dt)}catch(e){}
+  try{if(typeof uwTick==='function')uwTick(dt);if(typeof seaTick==='function')seaTick(dt)}catch(e){console.error(e)}
   G.time+=dt;try{if(G.pharFlash>0)G.pharFlash-=dt;stormTick(dt);birdTick(dt);caravanTick(dt);if(G.flags)(G.flags.lvSeen=G.flags.lvSeen||{})[LEVEL]=1}catch(e){}
   if(G.dayBase>0){const hr=(G.clock%1440)/60,dsl=LEVEL===43||LEVEL===44||(LEVEL>=60&&LEVEL<=64)||LEVEL===41||yarSea(LEVEL);G.day=Math.max(.16,G.dayBase*clamp(.66+.5*Math.cos((hr-12)/24*TAU),dsl?(LEVEL===44?.4:.3):G.hasLamps?.2:.5,1));if(typeof weatherNow==='function'){const wn=weatherNow();if(wn&&wn.dark<1)G.day=Math.max(.14,G.day*wn.dark)}}
   // timers
@@ -6900,7 +6906,7 @@ addEventListener('resize',fit);fit();
 /*@@DESERT:BEGIN@@*/
 /* ---- src/desert/artlist.js ---- */
 /* written by tools/inject.py */
-const DS_PAINTED=['assassin', 'assassinA', 'bat', 'batA', 'brazier0', 'brazier1', 'brazier2', 'brazier3', 'camelpE', 'camelpW', 'camelrE', 'camelrW', 'ceil_tomb', 'cobra', 'cobraA', 'cvnomadA', 'cvnomadB', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'dplant0', 'dplant1', 'dplant2', 'dplant3', 'dpyrgate', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dskeleton', 'dskeletonA', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'messenger', 'messengerA', 'msgr_A', 'msgr_D', 'msgr_E', 'msgr_H', 'msgr_T', 'offering', 'pharaohboss', 'pharaohbossA', 'pservant', 'pservantA', 'rrock0', 'rrock1', 'rrock2', 'skel', 'skelA', 'skybirdA', 'skybirdB', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'tex_yarblue', 'tex_yarcoral', 'tex_yardoor', 'tex_yardoor2', 'tex_yardoor3', 'tex_yardoor4', 'tex_yardoor5', 'tex_yardoor6', 'tex_yardoor7', 'tex_yardrift', 'tex_yargreen', 'tex_yarnet', 'tex_yarpink', 'tex_yarrose', 'tex_yarwall', 'tex_yaryellow', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA', 'w_candleknight', 'w_candleknightA', 'w_crowncrab', 'w_crowncrabA', 'w_ferryman', 'w_ferrymanA', 'w_glassstag', 'w_glassstagA', 'w_hollowbride', 'w_hollowbrideA', 'w_manyeyedox', 'w_manyeyedoxA', 'w_marrow', 'w_marrowA', 'w_mossback', 'w_mossbackA', 'w_rattlebones', 'w_rattlebonesA', 'w_saltwife', 'w_saltwifeA', 'w_thistlewick', 'w_thistlewickA', 'w_toll', 'w_tollA', 'w_unfinished', 'w_unfinishedA', 'w_weatherhound', 'w_weatherhoundA'];
+const DS_PAINTED=['assassin', 'assassinA', 'bat', 'batA', 'brazier0', 'brazier1', 'brazier2', 'brazier3', 'camelpE', 'camelpW', 'camelrE', 'camelrW', 'ceil_tomb', 'cobra', 'cobraA', 'cvnomadA', 'cvnomadB', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'dplant0', 'dplant1', 'dplant2', 'dplant3', 'dpyrgate', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dskeleton', 'dskeletonA', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_seabed1', 'floor_seabed2', 'floor_seabed3', 'floor_seabed4', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'messenger', 'messengerA', 'msgr_A', 'msgr_D', 'msgr_E', 'msgr_H', 'msgr_T', 'offering', 'pharaohboss', 'pharaohbossA', 'pservant', 'pservantA', 'rrock0', 'rrock1', 'rrock2', 'skel', 'skelA', 'skybirdA', 'skybirdB', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'tex_yarblue', 'tex_yarcoral', 'tex_yardoor', 'tex_yardoor2', 'tex_yardoor3', 'tex_yardoor4', 'tex_yardoor5', 'tex_yardoor6', 'tex_yardoor7', 'tex_yardrift', 'tex_yargreen', 'tex_yarnet', 'tex_yarpink', 'tex_yarrose', 'tex_yarwall', 'tex_yaryellow', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA', 'w_candleknight', 'w_candleknightA', 'w_crowncrab', 'w_crowncrabA', 'w_ferryman', 'w_ferrymanA', 'w_glassstag', 'w_glassstagA', 'w_hollowbride', 'w_hollowbrideA', 'w_manyeyedox', 'w_manyeyedoxA', 'w_marrow', 'w_marrowA', 'w_mossback', 'w_mossbackA', 'w_rattlebones', 'w_rattlebonesA', 'w_saltwife', 'w_saltwifeA', 'w_thistlewick', 'w_thistlewickA', 'w_toll', 'w_tollA', 'w_unfinished', 'w_unfinishedA', 'w_weatherhound', 'w_weatherhoundA'];
 
 /* ---- src/desert/artpack.js ---- */
 /* ==========================================================================
@@ -8850,7 +8856,7 @@ function terrMarch(x,rX,rY,tmax){
     if(ytop<yb){
       const ys=Math.max(0,Math.ceil(ytop)),ye=Math.min(VH,Math.ceil(yb));
       if(ye>ys){
-        const shade=(sh[i]*w00+sh[i+1]*w10+sh[i+W]*w01+sh[i+W+1]*w11)*(wv?1+.1*Math.sin(px*3.1+C.tm*2.2)*Math.sin(py*2.7-C.tm*1.7):1);
+        const shade=(sh[i]*w00+sh[i+1]*w10+sh[i+W]*w01+sh[i+W+1]*w11)*(wv?1+.1*Math.sin(px*3.1+C.tm*2.2)*Math.sin(py*2.7-C.tm*1.7):C.uw?1+.24*Math.sin(px*2.1+C.tm*.7+Math.sin(py*1.3+C.tm*.4)*1.5)*Math.sin(py*2.4-C.tm*.6+Math.cos(px*1.1+C.tm*.3)*1.5):1); // sunlight nets of caustics slide over the seabed
         const fdd=fds[fcc-48]||fds[0];
         const u=wv?((((px-cxl)*TS+C.tm*9)|0)&(TS-1)):((px-cxl)*TS)|0,v=wv?((((py-cyl)*TS+Math.sin(C.tm*.7+px*.3)*6+C.tm*5)|0)&(TS-1)):((py-cyl)*TS)|0,ti=(v*TS+u)*4,dist=t*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv,sk=smv*(lbm*.55+.05);
         let r=fdd[ti]*kR0*shade*iv+hz[0]*sk,g=fdd[ti+1]*kG0*shade*iv+hz[1]*sk,b=fdd[ti+2]*kB0*shade*iv+hz[2]*sk;
@@ -14143,27 +14149,27 @@ khNpc('yr_ship','The Dawn Walker','yar_ship_dawn',()=>seaChart());
      300 Saltbarrow (pirates)  301 The Isle of Bells (a drowned abbey)  302 Cinder Isle (a volcano)  303 Last Light (a ruined beacon)
      304 Oldhaven Quay (the harbour of the king's city, where this part of the story ends)
    ========================================================================== */
-const yarSea=n=>n===290||(n>=300&&n<=304);
+const yarSea=n=>n===290||(n>=300&&n<=304)||(n>=320&&n<=323)||(n>=330&&n<=349);
 const SEA_TINT={305:[.96,.93,.88],300:[1.05,.98,.9],301:[.8,.9,.82],302:[.55,.5,.52],303:[.85,.88,.96],304:[.96,.93,.88]};
 const SEA={
   300:{name:'Saltbarrow',label:'Saltbarrow',cx:50,cy:40,rx:27,ry:20,peak:2.2,pow:1.4,seed:31,diff:17,
     floors:['sand','whiteSand','wood','bluesand','bluewater','pebA'],hills:[[34,30,6,2.8],[68,50,5,2.4]],
-    deco:[['yar_tent',-8,4],['yar_tent',-3,8],['yar_tent',4,6],['yar_tent',9,2],['yar_wreck',-14,-6],['yar_bones',14,-8],['yar_palms',6,-10],['yar_palms',-6,-12],['yar_palms',17,6],['yar_crates',-1,5],['yar_crates',2,4],['yar_p_maeve',0,2,{npc:'sb_maeve'}],['peasantW',-5,3,{npc:'sb_cook'}],['fisher',7,8,{npc:'sb_hand'}]],
+    deco:[['yar_tent',-8,4],['yar_tent',-3,8],['yar_tent',4,6],['yar_tent',9,2],['yar_wreck',-14,-6],['yar_bones',14,-8],['yar_palms',6,-10],['yar_palms',-6,-12],['yar_palms',17,6],['yar_crates',-1,5],['yar_crates',2,4],['yar_p_maeve',0,2,{npc:'sb_maeve'}],['uw_buoy',10,15,{npc:'uw_dive_300'}],['peasantW',-5,3,{npc:'sb_cook'}],['fisher',7,8,{npc:'sb_hand'}]],
     sea:[['yar_ship_heron',36,-8]],scatter:[['yar_palms',5,0,0,17],['yar_driftwood',12,0,6,22],['yar_shells',10,0,8,20],['yar_crab',8,0,6,22]],
     enemies:[['bandit',10,14,-4,9],['archer',3,16,-4,8]]},
   301:{name:'The Isle of Bells',label:'Isle of Bells',cx:48,cy:40,rx:25,ry:22,peak:2.6,pow:1.3,seed:41,diff:19,
     floors:['dgrass','mosscobble','wood','bluesand','bluewater','pebA'],hills:[[60,32,6,3.2]],
-    deco:[['yar_arch',-10,-6,{npc:'ib_bell',cat:0}],['yar_arch',10,-6,{npc:'ib_bell',cat:1}],['yar_arch',0,8,{npc:'ib_bell',cat:2}],['yar_altar',0,-1],['yar_p_aldous',0,-3,{npc:'ib_aldous'}],['yar_runestone',-13,5],['yar_runestone',13,4],['yar_wreck',-18,-4],['yar_bones',8,12]],
+    deco:[['yar_arch',-10,-6,{npc:'ib_bell',cat:0}],['yar_arch',10,-6,{npc:'ib_bell',cat:1}],['yar_arch',0,8,{npc:'ib_bell',cat:2}],['yar_altar',0,-1],['yar_p_aldous',0,-3,{npc:'ib_aldous'}],['uw_buoy',10,17,{npc:'uw_dive_301'}],['yar_runestone',-13,5],['yar_runestone',13,4],['yar_wreck',-18,-4],['yar_bones',8,12]],
     scatter:[['yar_bones',6,0,0,18],['yar_driftwood',6,0,6,20],['yar_shells',6,0,8,20]],
     enemies:[['ghost',4,0,-4,16],['spectre',3,0,2,14],['skel',5,0,0,16]]},
   302:{name:'Cinder Isle',label:'Cinder Isle',cx:50,cy:42,rx:23,ry:21,peak:5.4,pow:1.05,seed:51,diff:21,
     floors:['scree','tombdark','wood','bluesand','bluewater','pebA'],hills:[],
-    deco:[['yar_p_ketra',-6,10,{npc:'ci_ketra'}],['yar_tent',-9,12],['yar_runestone',-4,12],['yar_runestone',-8,8],['yar_crystals',-12,2,{npc:'ci_crystal',cat:0}],['yar_crystals',12,4,{npc:'ci_crystal',cat:1}],['yar_crystals',-14,-8,{npc:'ci_crystal',cat:2}],['yar_crystals',10,-12,{npc:'ci_crystal',cat:3}],['yar_crystals',2,14,{npc:'ci_crystal',cat:4}],['yar_crystals',-3,-14,{npc:'ci_crystal',cat:5}],['yar_bones',9,9]],
+    deco:[['yar_p_ketra',-6,10,{npc:'ci_ketra'}],['uw_buoy',10,16,{npc:'uw_dive_302'}],['yar_tent',-9,12],['yar_runestone',-4,12],['yar_runestone',-8,8],['yar_crystals',-12,2,{npc:'ci_crystal',cat:0}],['yar_crystals',12,4,{npc:'ci_crystal',cat:1}],['yar_crystals',-14,-8,{npc:'ci_crystal',cat:2}],['yar_crystals',10,-12,{npc:'ci_crystal',cat:3}],['yar_crystals',2,14,{npc:'ci_crystal',cat:4}],['yar_crystals',-3,-14,{npc:'ci_crystal',cat:5}],['yar_bones',9,9]],
     scatter:[['yar_bones',4,0,0,16],['yar_shells',4,0,10,20]],
     enemies:[['cinder',1,0,-5,2],['skel',6,0,2,16],['scorpion',4,0,0,16]]},
   303:{name:'Last Light',label:'Last Light',cx:48,cy:40,rx:21,ry:19,peak:3.2,pow:1.2,seed:61,diff:23,
     floors:['pale','pebB','wood','bluesand','bluewater','pebA'],hills:[[48,24,5,4.6]],
-    deco:[['yar_p_isolde',-7,6,{npc:'ll_isolde'}],['yar_tent',-10,8],['yar_altar',0,-12,{npc:'ll_altar'}],['yar_runestone',-4,-11],['yar_runestone',4,-11],['yar_wreck',12,6],['yar_bones',-12,-2],['yar_palms',-14,2]],
+    deco:[['yar_p_isolde',-7,6,{npc:'ll_isolde'}],['uw_buoy',10,14,{npc:'uw_dive_303'}],['yar_tent',-10,8],['yar_altar',0,-12,{npc:'ll_altar'}],['yar_runestone',-4,-11],['yar_runestone',4,-11],['yar_wreck',12,6],['yar_bones',-12,-2],['yar_palms',-14,2]],
     scatter:[['yar_driftwood',8,0,6,18],['yar_shells',8,0,8,18],['yar_bones',4,0,0,16]],
     enemies:[['assassin',3,0,2,14],['hitman',3,0,0,15]]},
   304:{name:'Oldhaven Quay',label:'Oldhaven Quay',cx:50,cy:30,rx:42,ry:22,peak:.4,pow:1,seed:71,diff:25,W:100,H:80,
@@ -14825,6 +14831,609 @@ function seaSoundTick(){
     if(now>SEAS.nextLap){SEAS.nextLap=now+2+Math.random()*3;nz(.5,.22*rg,'bandpass',1300,600,0)} // water slapping the hulls
   }
 }
+
+/* ---- src/desert/underwater.js ---- */
+/* ==========================================================================
+   THE UNDERWATER DUNGEONS. A reef under each of the four islands: 320 the Saltbarrow Reef, 321 the Drowned Abbey, 322 the Vent Gardens,
+   323 the Last Light Wreck. The party needs a Diving Helm each (it goes in the helmet slot; sold in Yarrim), has four minutes of air at
+   a time, and refills at the bubble vents. The seabed is sand; coral, kelp and rock stand where the trees stand in a forest; the sky is
+   a sunlit sea that drifts and refracts; fish and schools of fish swim overhead and across the reef. Some creatures bite, some do not.
+   A Potion of the Gill gives every hero the dive for good.
+   ========================================================================== */
+const uwLv=n=>n>=320&&n<=323;
+const UW_MAX=240; // seconds of air
+for(const n of ['staghorn','brain','kelp','seafan','anemone','rocks','tubes','clam','seagrass','amphora','softcoral','timber','vent0','vent1','buoy','shellchest','bow'])loadImg('uw_'+n,'assets/uw_'+n+'.png');
+for(const n of ['reef','angel','school','shark','ray','barra','crab','octo','jelly','eel','turtle','puffer','wshark','grouper','nautilus','serp','kraken']){
+  loadImg('uw_'+n+'_0','assets/uw_'+n+'_0.png');
+  loadImg('uw_'+n+'_1','assets/uw_'+n+'_1.png').then(()=>{IMG['uw_'+n+'_0A']=IMG['uw_'+n+'_1']}); // the second frame is the attack picture
+}
+Object.assign(NPC_H,{uw_staghorn:.95,uw_brain:.75,uw_kelp:1.7,uw_seafan:1,uw_anemone:.45,uw_rocks:.85,uw_tubes:.62,uw_clam:.5,uw_seagrass:.5,uw_amphora:.6,uw_softcoral:.75,uw_timber:1.3,uw_vent0:.8,uw_vent1:.8,uw_buoy:1.25,uw_shellchest:.55,
+  uw_reef_0:.42,uw_reef_1:.42,uw_angel_0:.55,uw_angel_1:.55,uw_school_0:.6,uw_school_1:.6,uw_ray_0:.5,uw_ray_1:.5,uw_turtle_0:.5,uw_turtle_1:.5,uw_puffer_0:.4,uw_puffer_1:.4,uw_wshark_0:1.6,uw_wshark_1:1.6,uw_grouper_0:.95,uw_grouper_1:.95,uw_nautilus_0:.4,uw_nautilus_1:.4,uw_jelly_0:.6,uw_jelly_1:.6});
+
+/* ---- items: the Diving Helm (helmet slot) and the Potion of the Gill ---- */
+ITEMDEF.divehelm={n:'Diving Helm',k:'head',t:'Helm',ic:'divehelm',c:'#c8a050',armor:3,price:300,dive:1,d:'A riveted brass helm with a round glass visor and a leather hose. Worn in the helmet slot it lets a hero breathe underwater for four minutes at a time, until air is found at the bubble vents. Every hero in the party needs one to dive.',sw:.5};
+ITEMDEF.gillpotion={n:'Potion of the Gill',k:'potion',t:'Potion',ic:'gillpotion',c:'#40c8a8',stack:1,gill:1,price:2500,rar:1,d:'A sea-green draught with a small silver fish turning in it. Whoever drinks it can breathe underwater for the rest of their life. The whole party is changed by one bottle.'};
+ITEMDEF.pearl={n:'Pearl',k:'quest',t:'Pearl',ic:'pearl',c:'#f0f0ff',stack:1,price:140,d:'A round white pearl, milky and faintly pink, taken from a giant clam. A priest would pay in blessings. A jeweller would pay in gold.',sw:.2};
+if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push('divehelm','gillpotion','pearl');
+function gillDrink(hi){const F=G.flags;F.gill=1;sfx('potion');msg(`${HERO_DEF[hi].name} drinks the Potion of the Gill. The whole party feels the sea open to them: from now on they can dive without helms.`,'#80f0d0')}
+function uwSuited(){const F=G.flags;if(F.gill)return true;const live=G.heroes.filter(h=>h.alive);return live.length>0&&live.every(h=>h.eq&&h.eq.head&&idef(h.eq.head).dive)}
+function uwWho(){return G.flags.gill?'':G.heroes.filter(h=>h.alive&&!(h.eq&&h.eq.head&&idef(h.eq.head).dive)).map((h,i)=>HERO_DEF[G.heroes.indexOf(h)].name).join(', ')}
+
+/* ---- the creatures that bite, and the big ones ---- */
+Object.assign(ENEMY_DEF,{
+  uwshark:{name:'Reef Shark',hp:90,dmg:[8,14],hit:.78,w:1.15,img:'uw_shark_0',xp:200,gold:[0,6],speed:2,fly:true,verb:'bites'},
+  uwbarra:{name:'Barracuda',hp:60,dmg:[6,11],hit:.8,w:.8,img:'uw_barra_0',xp:140,gold:[0,4],speed:2,fly:true,verb:'snaps at'},
+  uwcrab:{name:'Reef Crab',hp:70,dmg:[7,12],hit:.74,w:.85,img:'uw_crab_0',xp:150,gold:[2,10],speed:1,verb:'pinches'},
+  uwoctopus:{name:'Octopus',hp:110,dmg:[8,13],hit:.76,w:.8,img:'uw_octo_0',xp:260,gold:[4,14],speed:1,verb:'constricts'},
+  uwjelly:{name:'Glow Jelly',hp:50,dmg:[5,10],hit:.82,w:.7,img:'uw_jelly_0',xp:130,gold:[0,0],speed:1,fly:true,verb:'stings'},
+  uweel:{name:'Moray Eel',hp:100,dmg:[9,15],hit:.8,w:.95,img:'uw_eel_0',xp:230,gold:[2,12],speed:1,verb:'bites'},
+  uwpuffer:{name:'Spiny Puffer',hp:55,dmg:[6,10],hit:.78,w:.6,img:'uw_puffer_0',xp:120,gold:[0,3],speed:1,fly:true,verb:'spikes'},
+  uwgiant:{name:'The Reef Warden',hp:420,dmg:[13,20],hit:.84,w:2.4,img:'uw_octo_0',xp:2000,gold:[400,700],speed:1,verb:'crushes',aboveParty:2},
+  uweelboss:{name:'The Abbey Eel',hp:460,dmg:[14,22],hit:.85,w:2.3,img:'uw_eel_0',xp:2400,gold:[500,800],speed:1,verb:'savages',aboveParty:2},
+  uwmega:{name:'The Vent Tyrant',hp:520,dmg:[15,23],hit:.86,w:2.9,img:'uw_shark_0',xp:2800,gold:[600,900],speed:2,fly:true,verb:'rends',aboveParty:3},
+  uwgulper:{name:'Old Gulper',hp:600,dmg:[16,25],hit:.86,w:2.5,img:'uw_grouper_0',xp:3400,gold:[800,1200],speed:1,fly:true,verb:'swallows at',aboveParty:3}
+});
+
+/* ---- the sunlit sea for a sky ---- */
+let UWPAN=null;
+function uwPan(){
+  if(UWPAN)return UWPAN;
+  const W=1024,H=256,d=new Uint8ClampedArray(W*H*4),top=[110,226,236],mid=[34,146,186],low=[18,84,128];
+  const beams=[];for(let k=0;k<9;k++)beams.push({pos:(k/9+.04*Math.sin(k*3.7))*TAU,p:14+((k*37)%5)*18,a:.55+.4*((k*13)%4)/3});
+  for(let y=0;y<H;y++){
+    const t=clamp((y-45)/105,0,1),tt=Math.pow(t,.8);
+    let c0=[0,0,0];for(let i=0;i<3;i++)c0[i]=t<1?top[i]+(mid[i]-top[i])*tt:mid[i]+(low[i]-mid[i])*clamp((y-150)/100,0,1);
+    for(let x=0;x<W;x++){
+      const u=x/W*TAU;let b=0;
+      for(const q of beams)b+=q.a*Math.pow(Math.max(0,Math.cos(u-q.pos+(y/H)*.7)),q.p); // slanted shafts of sun that thin out as they go down
+      const fade=1-t*.78,sp=hash2(x,y,311)>.9965?1:0;
+      const o=(y*W+x)*4;
+      d[o]=c0[0]+(255-c0[0])*b*.7*fade+sp*60*fade;d[o+1]=c0[1]+(246-c0[1])*b*.7*fade+sp*60*fade;d[o+2]=c0[2]+(200-c0[2])*b*.55*fade+sp*40*fade;d[o+3]=255;
+    }
+  }
+  return UWPAN=d;
+}
+
+/* ---- the sea overhead: fish and schools of fish drift across the light, and now and then something huge ---- */
+function uwSkyFish(){
+  const V=SKYV;if(!V||!IMG.uw_reef_0)return;
+  const sx=420/V.VW,sy=210/V.VH,t=G.time;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,420,V.HH*sy-4);ctx.clip();
+  const KINDS=['reef','angel','school','school','reef','angel','turtle','ray'];
+  const draw=(k,fr,az,el,w,alpha)=>{
+    const im=IMG['uw_'+k+'_'+fr];if(!im)return;
+    const mx=Math.cos(az),my=Math.sin(az),a=(mx*V.dX+my*V.dY)/(V.dX*V.dX+V.dY*V.dY),b=(mx*V.pX+my*V.pY)/(V.pX*V.pX+V.pY*V.pY);if(a<=.05)return;
+    const px=((b/a+1)*V.VW/2)*sx,py=(V.HH-18-el*V.HH*.9)*sy;if(px<-60||px>480||py<-30)return;
+    const hh=w*im.height/im.width;ctx.globalAlpha=alpha;ctx.drawImage(im,px-w/2,py-hh/2,w,hh);
+  };
+  // schools: a dozen small fish moving together, each with its own wiggle
+  for(let s=0;s<9;s++){
+    const base=(s*.71+t*(.025+.006*(s%4))*(s%2?1:-1))%TAU,el=.18+.34*((s*37)%7)/7,sp=KINDS[s%KINDS.length];
+    for(let i=0;i<8;i++){
+      const az=base+Math.sin(i*2.3+s)*.07+Math.sin(t*.8+i)*.012,e=el+Math.cos(i*1.7+s)*.045+Math.sin(t*.9+i*2)*.01;
+      draw(sp==='turtle'||sp==='ray'?'reef':sp,((t*5+i+s)|0)&1,az,e,sp==='school'?17:11+i%3*2,.82);
+    }
+  }
+  // singles
+  for(let i=0;i<16;i++){
+    const az=(i*.39+t*(.03+.008*(i%5))*(i%2?1:-1)+8)%TAU,el=.16+.4*((i*53)%9)/9,k=['reef','angel','turtle','ray','angel','reef'][i%6];
+    draw(k,((t*3.5+i)|0)&1,az,el,k==='ray'?34:k==='turtle'?24:15+i%3*3,.9);
+  }
+  // an occasional giant crossing high above, a dark shape against the light
+  for(let g=0;g<2;g++){const az=((t*(.012+.004*g))*(g?-1:1)+g*3.1+5)%TAU;draw(g?'ray':'wshark',((t*1.6)|0)&1,az,.5+.1*g,g?70:100,.45)}
+  ctx.restore();
+}
+
+/* ---- air: four minutes, refilled at the vents ---- */
+function uwBar(){
+  if(!G.uw||G.cut||G.talk||G.menu||G.inv.open||G.loot||G.overview)return;
+  const a=G.uw.air/UW_MAX,x=135,y=4,w=150,h=11;
+  ctx.save();
+  ctx.fillStyle='rgba(6,20,30,.78)';rrect(ctx,x-2,y-2,w+4,h+4,4);ctx.fill();
+  ctx.fillStyle=a>.5?'#5ac8f0':a>.2?'#e8d060':'#f06050';rrect(ctx,x,y,Math.max(2,w*a),h,3);ctx.fill();
+  ctx.lineWidth=1.3;ctx.strokeStyle='#8fd8ff';rrect(ctx,x-2,y-2,w+4,h+4,4);ctx.stroke();
+  const m=Math.floor(G.uw.air/60),s=Math.floor(G.uw.air%60);
+  txt(`AIR ${m}:${String(s).padStart(2,'0')}`,x+w/2,y+h/2+.5,7.4,'#ffffff','center',true);
+  if(G.uw.vent)txt('Breathing from the vent',x+w/2,y+h+8,7,'#b8f0ff','center',true);
+  if(G.uw.air<=0)txt('DROWNING! Swim to a vent, or surface',x+w/2,y+h+18,7.6,'#ff8070','center',true);
+  ctx.restore();
+}
+function uwHud(){try{uwBar()}catch(e){}}
+function uwTick(dt){
+  if(!uwLv(LEVEL)){if(G.uw)G.uw=null;return}
+  const F=G.flags;if(!G.uw)G.uw={air:UW_MAX,vent:false,warn:3,drown:0,dmgT:0};
+  if(G.state!=='play'||G.cut||G.talk||G.menu||(G.inv&&G.inv.open)||G.loot)return;
+  const U=G.uw,L=UWS[LEVEL];
+  U.vent=false;if(L)for(const v of L.vents){if(Math.abs(v[0]-G.P.x)<=1&&Math.abs(v[1]-G.P.y)<=1){U.vent=true;break}}
+  if(U.vent){U.air=Math.min(UW_MAX,U.air+dt*70);if(U.air>=UW_MAX*.98)U.warn=3;if(!U.sip){U.sip=1;msg('The party breathes in the stream of bubbles. Cold air, tasting of metal.','#b8f0ff')}}
+  else{U.sip=0;U.air=Math.max(0,U.air-dt);
+    const w=U.air<=10?0:U.air<=30?1:U.air<=60?2:3;
+    if(w<U.warn){U.warn=w;msg(w===2?'One minute of air left.':w===1?'Thirty seconds of air. Find a vent.':'Ten seconds of air!',w===2?'#8fd8ff':'#ff9070')}}
+  if(U.air<=0){
+    U.drown+=dt;U.dmgT+=dt;
+    if(U.dmgT>=2){U.dmgT=0;for(const h of G.heroes)if(h.alive){h.hp=Math.max(1,h.hp-Math.max(1,Math.round(h.max*.07)))}msg('The party is drowning!','#ff7060');sfx('hurt')}
+    if(U.drown>=14){U.drown=0;msg('Gasping, the party is hauled up to the surface by the dive line.','#b8f0ff');uwSurface()}
+  }else U.drown=0;
+}
+function uwSurface(){
+  const L=UW[LEVEL];if(!L)return;
+  G.uw=null;goToLevel(L.island,SEA_ARRIVE(L.island));
+}
+function uwEnterHook(n){if(uwLv(n)){G.uw={air:UW_MAX,vent:false,warn:3,drown:0,dmgT:0};const L=UW[n];if(L&&!(G.flags.uwSeen&&G.flags.uwSeen[n])){(G.flags.uwSeen=G.flags.uwSeen||{})[n]=1;msg(L.intro,'#b8f0ff')}}else if(G.uw)G.uw=null}
+
+/* ---- the four reefs ---- */
+const UW={
+  320:{name:'The Saltbarrow Reef',island:300,diff:17,seed:101,theme:'reef',intro:'Light falls through the water in long gold shafts. A reef of staghorn and brain coral lies ahead, alive with colour.',boss:['uwgiant',54,16],prize:'maeve',
+    foes:[['uwshark',5],['uwbarra',6],['uwcrab',8],['uwoctopus',3],['uwjelly',5],['uweel',3]]},
+  321:{name:'The Drowned Abbey',island:301,diff:19,seed:202,theme:'abbey',intro:'Below the Isle of Bells the abbey still stands, roofless, hung with kelp. A great bronze bell sways in a broken arch, and no sound comes from it.',boss:['uweelboss',54,16],prize:'bells',
+    foes:[['uwshark',4],['uwbarra',7],['uwcrab',7],['uwoctopus',3],['uwjelly',6],['uweel',5]]},
+  322:{name:'The Vent Gardens',island:302,diff:21,seed:303,theme:'vent',intro:'Black rock and warm water. Columns of bubbles rise from cracks in the seabed, and tube sponges crowd round them like blue organ pipes.',boss:['uwmega',54,16],prize:'vent',
+    foes:[['uwshark',7],['uwbarra',6],['uwcrab',8],['uwoctopus',4],['uwjelly',6],['uweel',4],['uwpuffer',4]]},
+  323:{name:'The Last Light Wreck',island:303,diff:23,seed:404,theme:'wreck',intro:'A forest of kelp rises to the light. In the middle of it a ship lies on her side with her masts snapped, and something very large is turning slowly among them.',boss:['uwgulper',54,16],prize:'lens',
+    foes:[['uwshark',7],['uwbarra',8],['uwcrab',7],['uwoctopus',4],['uwjelly',7],['uweel',5],['uwpuffer',4]]}
+};
+const UWS={}; // per level: where the vents are, and what swims by
+const UW_THEME={
+  reef:{big:['staghorn','brain','rocks','tubes'],small:['softcoral','anemone','seafan','seagrass','kelp'],props:['clam','amphora']},
+  abbey:{big:['yar_arch','timber','rocks','brain'],small:['kelp','seagrass','softcoral','anemone'],props:['amphora','clam']},
+  vent:{big:['rocks','tubes','staghorn','yar_crystals'],small:['anemone','seafan','seagrass','softcoral'],props:['clam','amphora']},
+  wreck:{big:['timber','yar_wreck','rocks','brain'],small:['kelp','kelp','seagrass','softcoral','anemone'],props:['amphora','clam']}
+};
+function uwBuild(id){
+  if(LEVELS[id])return;const sp=UW[id];if(!sp)return;
+  const W=110,H=110,N=W*H,th=UW_THEME[sp.theme],seed=sp.seed;
+  const rows=[];for(let y=0;y<H;y++){const r=[];for(let x=0;x<W;x++)r.push((x===0||y===0||x===W-1||y===H-1)?'D':'.');rows.push(r)}
+  const h=new Float32Array(N),rk=new Float32Array(N),block=new Uint8Array(N),fm=new Array(N).fill('0');
+  const start={x:55,y:100,f:0},bossAt=[sp.boss[1],sp.boss[2]];
+  // the seabed: low rolling sand, rock walls round the edge, a few rock towers and ridges inside
+  const towers=[];for(let i=0;i<14;i++){towers.push([14+hash2(i,1,seed)*82,14+hash2(i,2,seed)*70,3+hash2(i,3,seed)*3.5,2.2+hash2(i,4,seed)*2])}
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const i=y*W+x,e=Math.min(x,y,W-1-x,H-1-y);
+    let hh=.2+.35*tsmooth(x/9,y/9,seed)+.12*Math.sin(x*.7+y*.4)*.5+.1*tsmooth(x/3,y/3,seed+1);
+    const edge=clamp((15-e)/13,0,1);hh+=Math.pow(edge,1.2)*(4.4+1.2*tsmooth(x/5,y/5,seed+2));
+    for(const [tx,ty,tr,tp] of towers){const d=Math.hypot(x-tx,y-ty)/tr;if(d<1&&Math.hypot(x-start.x,y-start.y)>14&&Math.hypot(x-bossAt[0],y-bossAt[1])>14)hh=Math.max(hh,tp*Math.pow(1-d,.9)+.3)}
+    // the start and the boss's arena are flat
+    const ds=Math.hypot(x-start.x,y-start.y),db=Math.hypot(x-bossAt[0],y-bossAt[1]);
+    if(ds<9)hh=.25+(hh-.25)*clamp((ds-5)/4,0,1);if(db<12)hh=.25+(hh-.25)*clamp((db-8)/4,0,1);
+    h[i]=hh;rk[i]=clamp((hh-.8)/1.6,0,1);block[i]=hh>1.7?1:0;
+    const n=tsmooth(x/6,y/6,seed+7);fm[i]=hh>1.15?'5':n<.3?'0':n<.55?'1':n<.8?'2':'3';
+  }
+  // a guaranteed corridor from the start to the arena, so no tower can wall the boss in
+  const carve=(x0,y0,x1,y1)=>{let x=x0,y=y0;const step=()=>{for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const xx=x+dx,yy=y+dy;if(xx<2||yy<2||xx>=W-2||yy>=H-2)continue;const i=yy*W+xx;if(block[i]){block[i]=0;h[i]=.3;rk[i]=0;fm[i]='0'}}};while(x!==x1||y!==y1){step();if(Math.abs(x-x1)>=Math.abs(y-y1)&&x!==x1)x+=Math.sign(x1-x);else if(y!==y1)y+=Math.sign(y1-y);else x+=Math.sign(x1-x)}step()};
+  carve(start.x,start.y,start.x-18,60);carve(start.x-18,60,bossAt[0]-10,40);carve(bossAt[0]-10,40,bossAt[0],bossAt[1]+8);
+  const decor=[],scenery=[],used=new Set(),enemies=[],items=[];
+  const free=(x,y)=>x>3&&y>3&&x<W-4&&y<H-4&&!block[y*W+x]&&rows[y][x]==='.'&&!used.has(x+','+y);
+  const dc=(k,x,y,o)=>{decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}));used.add(x+','+y)};
+  const sc=(k,x,y,s)=>scenery.push({k,wx:x+.5,wy:y+.5,sc:s||1,decor:{k,walk:true,x,y}});
+  const R=(a,b,c)=>hash2(a,b,c);
+  // coral gardens: clusters of big things with undergrowth between them
+  const gardens=[];for(let g=0;g<40;g++)gardens.push([8+R(g,1,seed+9)*94,10+R(g,2,seed+9)*84,3+R(g,3,seed+9)*5]);
+  let n=0;
+  for(const [gx,gy,gr] of gardens){
+    for(let q=0;q<6;q++){const a=R(n,q,5)*TAU,rr=R(n,q,6)*gr,x=Math.round(gx+Math.cos(a)*rr),y=Math.round(gy+Math.sin(a)*rr*.85);if(!free(x,y)||Math.hypot(x-start.x,y-start.y)<8||Math.hypot(x-bossAt[0],y-bossAt[1])<10)continue;const k=th.big[(R(n,q,7)*th.big.length)|0];dc(k.startsWith('yar_')?k:'uw_'+k,x,y,{sc:.9+R(n,q,8)*.4})}
+    for(let q=0;q<26;q++){const a=R(n,q+20,5)*TAU,rr=R(n,q+20,6)*gr*1.3,x=Math.round(gx+Math.cos(a)*rr),y=Math.round(gy+Math.sin(a)*rr*.85);if(!free(x,y))continue;const k=th.small[(R(n,q,9)*th.small.length)|0];sc('uw_'+k,x,y,.8+R(n,q,10)*.7)}
+    n++;
+  }
+  for(let q=0;q<700;q++){const x=4+((R(q,31,seed)*(W-8))|0),y=4+((R(q,32,seed)*(H-8))|0);if(!free(x,y))continue;sc('uw_'+(R(q,33,seed)<.6?'seagrass':R(q,34,seed)<.5?'kelp':'anemone'),x,y,.8+R(q,35,seed)*.6)} // undergrowth everywhere
+  // props: giant clams (some hold pearls), old pots
+  const clams=[];
+  for(let q=0;q<10;q++){const x=8+((R(q,41,seed)*(W-16))|0),y=14+((R(q,42,seed)*(H-34))|0);if(!free(x,y)||Math.hypot(x-start.x,y-start.y)<10)continue;clams.push([x,y]);dc('uw_clam',x,y,{npc:'uw_clam',cat:q,deco:false})}
+  for(let q=0;q<8;q++){const x=8+((R(q,43,seed)*(W-16))|0),y=14+((R(q,44,seed)*(H-34))|0);if(free(x,y))dc('uw_amphora',x,y)}
+  // chests and the vents
+  const chests=[[22,82],[88,76],[30,48],[80,42],[18,22],[92,24],[60,64],[44,30]];
+  chests.forEach(([cx,cy],q)=>{let s=null;for(let r=0;r<8&&!s;r++)for(let yy=-r;yy<=r&&!s;yy++)for(let xx=-r;xx<=r&&!s;xx++){const x=cx+xx,y=cy+yy;if(free(x,y)&&Math.hypot(x-start.x,y-start.y)>8)s=[x,y]}if(s)dc('uw_shellchest',s[0],s[1],{npc:'uw_chest',cat:q,deco:false})});
+  const vents=[],vspots=[[start.x-6,start.y-6],[26,66],[84,60],[54,34]];
+  for(const [vx,vy] of vspots){let s=null;for(let r=0;r<8&&!s;r++)for(let yy=-r;yy<=r&&!s;yy++)for(let xx=-r;xx<=r&&!s;xx++){const x=vx+xx,y=vy+yy;if(!block[y*W+x]&&rows[y][x]==='.')s=[x,y]}if(s){vents.push(s);used.add(s[0]+','+s[1])}}
+  // the dive line up, the prize, and the boss
+  dc('uw_buoy',start.x+2,start.y-1,{npc:'uw_up',cat:id,deco:false});
+  for(let q=0;q<4;q++){let s=null;for(let r=0;r<10&&!s;r++)for(let yy=-r;yy<=r&&!s;yy++)for(let xx=-r;xx<=r&&!s;xx++){const x=[30,80,50,70][q]+xx,y=[40,30,60,80][q]+yy;if(free(x,y)&&Math.hypot(x-start.x,y-start.y)>10)s=[x,y]}if(s)dc('uw_timber',s[0],s[1],{npc:'uw_oak',cat:q,deco:false})}
+  dc('uw_shellchest',bossAt[0],bossAt[1]-4,{npc:'uw_prize',cat:id,deco:false});
+  enemies.push({t:sp.boss[0],x:bossAt[0],y:bossAt[1]});
+  for(const [t,cnt] of sp.foes){for(let q=0;q<cnt;q++){let tries=0,x,y;do{x=6+((R(q,t.length+51,seed)*0+Math.random()*(W-12))|0);y=6+((Math.random()*(H-30))|0);tries++}while((!free(x,y)||Math.hypot(x-start.x,y-start.y)<22||Math.hypot(x-bossAt[0],y-bossAt[1])<14)&&tries<80);if(tries<80)enemies.push({t,x,y})}}
+  items.push({k:'potion',x:start.x+4,y:start.y-3});
+  // what swims by: schools, reef fish, turtles, rays, and the occasional giant
+  const swim=[];
+  const lane=(k,cnt,hlo,hhi,spd,n0)=>{for(let q=0;q<cnt;q++)swim.push({k,x0:6+R(q,n0,seed)*(W-12),y0:8+R(q,n0+1,seed)*(H-30),dx:(R(q,n0+2,seed)-.5)*60,dy:(R(q,n0+3,seed)-.5)*40,h:hlo+R(q,n0+4,seed)*(hhi-hlo),sp:spd*(.7+R(q,n0+5,seed)*.6),ph:R(q,n0+6,seed)*100,sz:.85+R(q,n0+7,seed)*.3})};
+  lane('reef',16,.5,1.8,.9,60);lane('angel',10,.6,2,.8,70);lane('school',9,.8,2.4,1.0,80);lane('turtle',3,.5,1.4,.35,90);lane('ray',3,1,2.4,.5,100);lane('puffer',3,.5,1.4,.4,110);lane('nautilus',3,.4,1,.3,120);lane('wshark',2,2.4,3.2,.25,130);lane('grouper',2,.6,1.2,.3,140);lane('jelly',6,1,2.6,.3,150);
+  const lv={rows:rows.map(r=>r.join('')),start,enemies,items,decor,scenery,fmap:null,floorSet:['seabed1','seabed2','seabed3','sand','sand','seabed4'],floor:'seabed1',ceil:'cloud',
+    day:.98,outdoor:true,amb:.95,name:sp.name,label:sp.name,noExtras:true,diff:sp.diff,tele:{x:start.x,y:start.y},chars:{D:LEVEL41_DATA.chars.D},lights:[],portals:[]};
+  const fmap=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmap.push(s)}lv.fmap=fmap;
+  UWS[id]={vents,swim};
+  LEVELS[id]=lv;LEVEL_NAMES[id]=sp.name;TERRS[id]=yarTerrain(W,H,h,rk,block);
+}
+for(const id in UW){LEVEL_NAMES[+id]=UW[id].name;KH_LAZY[+id]=()=>uwBuild(+id)}
+/* swimmers and the vents' bubbles */
+function uwSprites(out){
+  if(!uwLv(LEVEL)||!UWS[LEVEL])return;
+  const t=G.time,S=UWS[LEVEL];
+  for(const v of S.vents){const im=IMG['uw_vent'+(((t*2.4)|0)&1)];if(im)out.push({x:v[0]+.5,y:v[1]+.5,img:im,w:NPC_H.uw_vent0*im.width/im.height,bob:0,decor:{walk:true,k:'uw_vent'}})}
+  S.swim.forEach((f,i)=>{
+    const L=Math.hypot(f.dx,f.dy)||1,ph=(t*f.sp*.35+f.ph)%2,u=ph<1?ph:2-ph; // there and back
+    const fr=((t*3.4+i)|0)&1,im=IMG['uw_'+f.k+'_'+fr];if(!im)return;
+    const hh=NPC_H['uw_'+f.k+'_0']*f.sz,w=hh*im.width/im.height;
+    out.push({x:f.x0+f.dx*u,y:f.y0+f.dy*u,img:im,w,bob:f.h+Math.sin(t*.7+i)*.15,decor:{walk:true,k:'uw_sw'+(i%9)}});
+  });
+}
+/* ---- dive sites on the islands, the helm-maker in Yarrim, and the quests under the sea ---- */
+const UW_NAMES={300:'Saltbarrow',301:'the Isle of Bells',302:'Cinder Isle',303:'Last Light'};
+for(const id of [300,301,302,303]){
+  khNpc('uw_dive_'+id,'A dive line','uw_buoy',()=>{
+    const F=G.flags,tg=id+20;
+    if(uwSuited())return say(`A weathered line runs from a red-and-white buoy down into the clear water off ${UW_NAMES[id]}. Far below, a reef glitters.`,[['Dive.',()=>{G.uw=null;goToLevel(tg,SEA_ARRIVE_UW(tg));return null}],['Not now.',()=>null]]);
+    const who=uwWho();
+    return say(`A line runs from a buoy down into the water off ${UW_NAMES[id]}, and far below something glitters. To dive, every hero must wear a Diving Helm in the helmet slot, which gives four minutes of air at a time. They are made by Tam Salvor in Yarrim.${who?' Not yet wearing one: '+who+'.':''}`,[BYE]);
+  });
+}
+function SEA_ARRIVE_UW(id){uwBuild(id);const L=LEVELS[id];return {x:L.start.x,y:L.start.y,f:L.start.f}}
+khNpc('uw_up','The dive line','uw_buoy',d=>say('The dive line runs up through the light to the surface.',[['Go up.',()=>{uwSurface();return null}],['Stay.',()=>null]]));
+khNpc('uw_clam','A giant clam','uw_clam',d=>{
+  const F=G.flags;F.uwClam=F.uwClam||{};const key=LEVEL+':'+d.cat;
+  if(F.uwClam[key])return say('The clam has closed. It will not open for you again.',[BYE]);
+  F.uwClam[key]=1;d.found=true;sfx('key');
+  if(hash2(LEVEL,d.cat,77)<.55){bagAdd(mkItem2('pearl',1));return say('The clam eases open, and a white pearl glows in the lip of its shell. You take it.',[BYE])}
+  G.gold+=30+Math.floor(hash2(LEVEL,d.cat,78)*60);return say('The clam opens on nothing but sand and a few old coins. You take the coins.',[BYE])});
+khNpc('uw_chest','A shell-clasped chest','uw_shellchest',d=>{
+  const F=G.flags;F.uwChest=F.uwChest||{};const key=LEVEL+':'+d.cat;
+  if(F.uwChest[key])return say('The chest is open and empty.',[BYE]);
+  F.uwChest[key]=1;d.found=true;sfx('key');const tier=UW[LEVEL]?UW[LEVEL].diff:17,gold=Math.round(tier*(18+hash2(LEVEL,d.cat,79)*30));G.gold+=gold;
+  const pool=['potion2','potion3','healdraught','manadraught','swiftness','ironskin'],it=pool[(hash2(LEVEL,d.cat,80)*pool.length)|0];
+  const got=ITEMDEF[it]&&bagAdd(mkItem2(it,1));giveXP(Math.round(tier*30));
+  return say(`The brass clasp is green with age. Inside, under a layer of silt: ${gold} gold${got?' and a '+ITEMDEF[it].n.toLowerCase():''}.`,[BYE])});
+khNpc('uw_prize','A great chest','uw_shellchest',d=>{
+  const F=G.flags,sp=UW[LEVEL];F.uwPrize=F.uwPrize||{};
+  const boss=G.enemies.some(e=>e.hp>0&&sp&&e.t===sp.boss[0]);
+  if(boss)return say('A great iron-bound chest sits in the sand, and the creature that guards it has not gone anywhere.',[BYE]);
+  if(F.uwPrize[LEVEL])return say('The chest is empty.',[BYE]);
+  F.uwPrize[LEVEL]=1;d.found=true;sfx('key');G.gold+=sp.diff*120;giveXP(sp.diff*160);
+  const txt={320:'Inside, on a heap of Spanish-looking coin, lies Sable Maeve\'s sunk fortune and her old captain\'s cutlass.',321:'Inside, wrapped in oilcloth, lies the great bell\'s clapper, a heavy tongue of green bronze.',322:'Inside, in a nest of glowing rock, lies the Heart of the Vent: a black crystal that is warm to hold.',323:'Inside lies the ship\'s great lamp lens, a perfect disc of glass in a brass ring, unbroken.'}[LEVEL];
+  if(LEVEL===323&&!F.gill&&bagAdd(mkItem2('gillpotion',1)))return say(txt+' Under it, a green glass bottle with a silver fish turning in it: a Potion of the Gill.',[BYE]);
+  return say(txt,[BYE])});
+
+/* ---- src/desert/seanav.js ---- */
+/* ==========================================================================
+   THE OPEN SEA. Level 330 is the Vaast Sea itself: 640 by 640 cells of water with the four islands you know, six tiny islands, three bare
+   rocky ones and three big forest ones, and about a hundred cells of open water between most of them. The party pilots the Dawn Walker: you
+   see the sea over her bow rail, and walking is sailing. Sea serpents hunt in the open water. In the far east, past a line nobody has
+   crossed in living memory, the Kraken waits. Landing buoys mark the way into every island.
+     330 the open sea   331..345 the islands nobody lives on (built as you reach them)
+   ========================================================================== */
+const SN={W:640,H:640,ID:330,KRAKEN_X:545,FIRST:331};
+const SN_ISLES=[ // key, name, centre, radius, kind, level (0 = built from the table below)
+  {k:'saltbarrow',n:'Saltbarrow',x:150,y:420,r:26,kind:'sand',lv:300},
+  {k:'bells',n:'the Isle of Bells',x:300,y:160,r:28,kind:'green',lv:301},
+  {k:'cinder',n:'Cinder Isle',x:420,y:470,r:24,kind:'volcano',lv:302},
+  {k:'lastlight',n:'Last Light',x:520,y:250,r:22,kind:'rock',lv:303},
+  {k:'tern',n:'Tern Rock',x:80,y:200,r:5,kind:'tiny',lv:331},
+  {k:'pebble',n:'Pebble Cay',x:235,y:325,r:6,kind:'tiny',lv:332},
+  {k:'gannet',n:'Gannet Spit',x:385,y:55,r:5,kind:'tiny',lv:333},
+  {k:'sunk',n:'The Sunk Key',x:565,y:430,r:4,kind:'tiny',lv:334},
+  {k:'lonely',n:'Lonely Sands',x:330,y:590,r:5,kind:'tiny',lv:335},
+  {k:'cormorant',n:'Cormorant Ledge',x:115,y:565,r:6,kind:'tiny',lv:336},
+  {k:'kelpgate',n:'Kelpgate Rock',x:215,y:500,r:14,kind:'rock',lv:337},
+  {k:'redcliff',n:'Redcliff',x:505,y:345,r:15,kind:'rock',lv:338},
+  {k:'wrack',n:'Wrack Point',x:60,y:60,r:12,kind:'rock',lv:339},
+  {k:'greenmantle',n:'Greenmantle',x:380,y:350,r:36,kind:'forest',lv:340},
+  {k:'hollow',n:'The Hollow Isle',x:180,y:250,r:30,kind:'forest',lv:341},
+  {k:'ashwood',n:'Ashwood',x:480,y:100,r:32,kind:'forest',lv:342},
+  {k:'leviathan',n:"Leviathan's Rest",x:612,y:330,r:10,kind:'tiny',lv:343}
+];
+const SN_BY=Object.fromEntries(SN_ISLES.map(i=>[i.lv,i]));
+const SN_PORTS={}; // where the ship sits in the open water when she leaves an island
+for(const i of SN_ISLES)SN_PORTS[i.lv]={x:i.x,y:Math.min(SN.H-8,i.y+i.r+6),f:2};
+SN_PORTS[290]={x:30,y:322,f:1};
+const SN_BUOY=i=>({x:i.x,y:Math.min(SN.H-6,i.y+i.r+3)});
+for(const n of ['yar_palms'])loadImg(n,'assets/'+n+'.png');
+
+/* ---- the creatures of the open sea ---- */
+Object.assign(ENEMY_DEF,{
+  seaserpent:{name:'Sea Serpent',hp:240,dmg:[12,19],hit:.84,w:1.9,img:'uw_serp_0',xp:900,gold:[40,120],speed:1,verb:'strikes',aboveParty:1},
+  kraken:{name:'The Kraken',hp:1500,dmg:[18,28],hit:.9,w:4.2,img:'uw_kraken_0',xp:12000,gold:[2000,3000],speed:1,verb:'crushes',aboveParty:5}
+});
+
+function snHeight(x,y){ // contribution of the islands at this cell, and the rock tint
+  let best=-.2,isl=null;
+  for(const I of SN_ISLES){
+    const R=I.r*(I.kind==='forest'||I.kind==='green'?1.5:1.7);if(Math.abs(x-I.x)>R||Math.abs(y-I.y)>R)continue;
+    const d=Math.hypot(x-I.x,y-I.y)/(I.r*(1+.3*(tsmooth(x/6,y/6,I.lv)-.5))),t=1-d;if(t<-.14)continue;
+    let h;
+    if(t>0){
+      const peak=I.kind==='volcano'?5.2:I.kind==='rock'?2.9:I.kind==='green'?1.5:I.kind==='forest'?1.15:I.kind==='sand'?1.9:.6;
+      h=Math.min(.5,.5*Math.min(1,t/.2))-.05+peak*Math.pow(Math.max(0,t-.22),I.kind==='volcano'?1.05:1.3)+.1*(tsmooth(x/5,y/5,I.lv+3)-.4)*Math.min(1,t*4);
+    }else h=-.2+(t+.14)/.14*.15;
+    if(h>best){best=h;isl=I}
+  }
+  return {h:best,isl};
+}
+function seaBuildOpen(){
+  if(LEVELS[SN.ID])return;
+  const W=SN.W,H=SN.H,N=W*H;
+  const rows=[];for(let y=0;y<H;y++){const r=[];for(let x=0;x<W;x++)r.push((x===0||y===0||x===W-1||y===H-1)?'D':'.');rows.push(r)}
+  const h=new Float32Array(N),rk=new Float32Array(N),block=new Uint8Array(N),fm=new Array(N).fill('4');
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const i=y*W+x;let hh=-.2+.03*(tsmooth(x/8,y/8,9)-.5),land=false;
+    const r=snHeight(x,y);if(r.h>hh){hh=r.h;land=r.h>-.06}
+    // the coast of the mainland, in the west: Yarrim's shore
+    if(x<24){const cx=18+4*Math.sin(y*.05)+2*Math.sin(y*.17);const t=cx-x;if(t>0){hh=Math.max(hh,Math.min(.5,t*.07)-.05);land=true}else if(t>-3){hh=Math.max(hh,-.2+(t+3)/3*.15)}}
+    h[i]=hh;rk[i]=clamp((hh-.7)/1.6,0,1);block[i]=(land&&(hh>1.7||hh>-.05))?1:0;
+    fm[i]=hh>1.2?'5':hh>.1?(r.isl&&(r.isl.kind==='forest'||r.isl.kind==='green')?'1':'0'):hh>-.06?'3':(hh>-.18?'3':'4');
+  }
+  // the sea is open: land is solid, water is not
+  for(let i=0;i<N;i++)block[i]=h[i]>-.05?1:0;
+  const decor=[],scenery=[],enemies=[],used=new Set();
+  const put=(k,x,y,o)=>{decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}));used.add(x+','+y)};
+  // landing buoys at every island, and the buoy for Yarrim on the west shore
+  for(const I of SN_ISLES){let b=SN_BUOY(I);let g=0;while(g++<10&&(b.y>=H-3||block[b.y*W+b.x]))b.y=Math.min(H-3,b.y+1);put('uw_buoy',b.x,b.y,{npc:'sea_land_'+I.lv,deco:false});SN_PORTS[I.lv]={x:b.x,y:Math.min(H-3,b.y+2),f:2}}
+  put('uw_buoy',28,322,{npc:'sea_land_290',deco:false});SN_PORTS[290]={x:31,y:322,f:1};
+  // floating wrecks, for the sea quests and for the look of the thing
+  const wrecks=[[110,330],[260,230],[350,480],[470,200],[300,380],[200,440],[440,400]];
+  wrecks.forEach(([x,y],q)=>{if(!block[y*W+x]){put('yar_wreck',x,y,{npc:'sea_wreck',cat:q,deco:false})}});
+  // serpents in the open water, away from the shore and from the ports
+  const spots=[];for(let q=0;q<400&&spots.length<18;q++){const x=60+((hash2(q,3,501)*(SN.KRAKEN_X-70))|0),y=30+((hash2(q,4,501)*(H-60))|0);if(block[y*W+x])continue;let ok=true;for(const I of SN_ISLES)if(Math.hypot(x-I.x,y-I.y)<I.r+16)ok=false;for(const s of spots)if(Math.hypot(x-s[0],y-s[1])<50)ok=false;if(ok)spots.push([x,y])}
+  for(const [x,y] of spots)enemies.push({t:'seaserpent',x,y});
+  // gulls over the islands are made on the fly; here only the level
+  const start={x:31,y:322,f:1};
+  const lv={rows:rows.map(r=>r.join('')),start,enemies,items:[],decor,scenery,fmap:null,floorSet:['sand','dgrass','wood','bluesand','bluewater','pebA'],floor:'sand',ceil:'cloud',
+    day:.98,outdoor:true,amb:.9,name:'The Vaast Sea',label:'The Vaast Sea',noExtras:true,diff:22,tele:{x:start.x,y:start.y},chars:{D:LEVEL41_DATA.chars.D},lights:[],portals:[]};
+  const fmapR=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmapR.push(s)}lv.fmap=fmapR;
+  LEVELS[SN.ID]=lv;LEVEL_NAMES[SN.ID]='The Vaast Sea';TERRS[SN.ID]=yarTerrain(W,H,h,rk,block);
+}
+KH_LAZY[SN.ID]=seaBuildOpen;LEVEL_NAMES[SN.ID]='The Vaast Sea';
+function sailOpen(from){seaBuildOpen();const P=SN_PORTS[from]||SN_PORTS[290];G.flags.seaFrom=from;goToLevel(SN.ID,{x:P.x,y:P.y,f:P.f})}
+function arriveNearNpc(id,npc){
+  KH_LAZY[id]&&!LEVELS[id]&&KH_LAZY[id]();const L=LEVELS[id];if(!L)return null;
+  const d=L.decor.find(q=>q.npc===npc);if(!d)return {x:L.start.x,y:L.start.y,f:L.start.f};
+  const T=TERRS[id];
+  for(const [dx,dy] of [[0,-1],[-1,0],[1,0],[0,1],[-1,-1],[1,-1],[-1,1],[1,1],[0,-2],[-2,0],[2,0],[0,2]]){const x=d.x+dx,y=d.y+dy;if(L.rows[y]&&L.rows[y][x]==='.'&&!(T&&T.block[y*T.W+x]))return {x,y,f:0}}
+  return {x:L.start.x,y:L.start.y,f:L.start.f};
+}
+for(const I of SN_ISLES){
+  khNpc('sea_land_'+I.lv,'A landing buoy','uw_buoy',()=>{
+    const go=()=>{const t=I.lv;G.flags.seaFrom=t;const to=t<=343&&t>=331?SEA_ARRIVE_ISLE(t):SEA_ARRIVE(t);goToLevel(t,to);return null};
+    return say(`A red-and-white buoy marks the way in to ${I.n}.`,[[`Row ashore at ${I.n}.`,go],['Sail on.',()=>null]]);
+  });
+}
+khNpc('sea_land_290','A landing buoy','uw_buoy',()=>say('The buoy marks the harbour of Yarrim, and the smoke of its chimneys over the western hills.',[['Sail in to Yarrim.',()=>{G.flags.seaFrom=290;const a=arriveNearNpc(290,'yr_ship')||{x:3,y:40,f:1};goToLevel(290,a);return null}],['Sail on.',()=>null]]));
+khNpc('sea_wreck','A drifting wreck','yar_wreck',d=>say('The hull of a wrecked ship rides low in the water, broken-masted and weed-hung. Whatever she was, nothing is left aboard but a few ropes and gulls.',[BYE]));
+
+/* ---- the bow of the ship, and the kraken line ---- */
+function seaHud(){
+  if(LEVEL!==SN.ID||G.cut||G.talk||G.menu||(G.inv&&G.inv.open)||G.loot||G.overview)return;
+  const im=IMG.uw_bow;if(!im)return;
+  const t=G.time,w=420,hh=w*im.height/im.width,bob=Math.sin(t*1.1)*1.6+Math.sin(t*.37)*1.2,sway=Math.sin(t*.8)*.8;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();
+  ctx.drawImage(im,sway-2,210-hh*.72+bob+8,w+4,hh*.9);
+  ctx.restore();
+}
+(function(){const _h=uwHud;uwHud=function(){_h();try{seaHud()}catch(e){}}})();
+const SN_T={k:0,warn:0,last:null,clock:0};
+function seaTick(dt){
+  if(LEVEL!==SN.ID)return;
+  const F=G.flags,P=G.P;
+  // sailing takes time: a few minutes of the day for every cell
+  if(SN_T.last&&(SN_T.last[0]!==P.x||SN_T.last[1]!==P.y)&&G.state==='play')advanceTime(1.2);
+  SN_T.last=[P.x,P.y];
+  if(F.krakenSlain||G.state!=='play')return;
+  if(P.x>=SN.KRAKEN_X-30&&!SN_T.warn){SN_T.warn=1;msg('The water ahead is flat and cold. No gulls fly east of here.','#9ad0e8')}
+  if(P.x<SN.KRAKEN_X-45)SN_T.warn=0;
+  const kr=G.enemies.find(e=>e.t==='kraken'&&e.hp>0);
+  if(P.x>=SN.KRAKEN_X&&!kr&&!G.cut&&!G.talk){
+    // the sea goes dark under the ship and the Kraken rises ahead of her
+    let c=null;for(let i=0;i<60&&!c;i++){const a=Math.random()*TAU,d=4+Math.random()*3,x=Math.round(P.x+Math.cos(a)*d),y=Math.round(P.y+Math.sin(a)*d);if(x<2||y<2||x>=SN.W-2||y>=SN.H-2)continue;if(G.grid[y][x]!==0||cellBlocked(x,y)||enemyAt(x,y))continue;c=[x,y]}
+    if(c){addEnemy('kraken',c[0],c[1],true);F.krakenSeen=1;msg('The sea turns black. Something vast rises beside the ship, and a thousand suckers break the surface at once.','#ff8a7a');sfx('screech')}
+  }
+  if(kr&&P.x<SN.KRAKEN_X-12&&Math.hypot(kr.x-P.x,kr.y-P.y)>14){kr.hp=0;kr.dying=.55;msg('The ship slips back west and the great shape sinks into the dark. It will wait.','#9ad0e8')}
+}
+function seaEnterHook(n){
+  const F=G.flags;
+  if(n===SN.ID){SN_T.last=null;SN_T.warn=0;if(!F.seaSeen){F.seaSeen=1;msg('The Vaast Sea. Water to every horizon, and the Dawn Walker answering the helm. Walk forward to sail.','#a8d8ff')}}
+  if(n===SN.ID&&F.krakenSlain&&!F.seaClear)F.seaClear=1;
+}
+/* serpents that have died give a scale: the sea quests count them */
+/* the ship at an island: take the helm */
+(function(){
+  const _sc=seaChart;
+  seaChart=function(){
+    const n=_sc();if(!G.flags.voyage||!n||!n.opts)return n;
+    if(LEVEL===SN.ID)return n;
+    n.opts.splice(Math.max(0,n.opts.length-1),0,['Take the helm and sail the open sea.',()=>{sailOpen(LEVEL);return null}]);
+    return n;
+  };
+})();
+/* ---- the islands nobody lives on ---- */
+const SN_SPEC={
+  331:{w:56,h:50,fe:['bones','chest','sign'],tier:1,foes:[['uwcrab',2]],note:'A scrap of sand with a dead palm, a pile of weathered bones and a rotted sign.'},
+  332:{w:56,h:50,fe:['palms','chest','camp'],tier:1,foes:[['uwcrab',3]],note:'A little cay of white pebbles. Someone has camped here, and left in a hurry.'},
+  333:{w:56,h:50,fe:['bones','wreck','chest'],tier:1,foes:[['uwcrab',2]],note:'A thin spit of sand. Gannets wheel over it, screaming, and the wind smells of fish.'},
+  334:{w:56,h:50,fe:['palms','wreck','chest'],tier:2,foes:[['uwcrab',3]],note:'A low sandbar that the tide nearly covers. Half a ship\'s ribs stick out of it.'},
+  335:{w:56,h:50,fe:['palms','bones','camp'],tier:1,foes:[['uwcrab',2]],note:'A palm and a pile of sand. Whoever chose this island for a camp was desperate.'},
+  336:{w:56,h:50,fe:['bones','chest','arch'],npcs:[['sn_wren','fisher']],tier:2,foes:[['uwcrab',3]],note:'A ledge of black rock, whitened with bird droppings. A stone arch stands on it that nobody built.'},
+  337:{w:84,h:70,fe:['wreck','arch','chest','bones','stones'],tier:2,foes:[['skel',5],['uwcrab',4]],note:'A rocky island of kelp-hung cliffs. A broken ship lies on the rocks, and nothing grows.'},
+  338:{w:84,h:70,fe:['stones','altar','chest','bones','camp'],tier:3,foes:[['skel',6],['scorpion',4]],note:'Red cliffs and red sand. Some old people built an altar here, and it still smells of smoke.'},
+  339:{w:84,h:70,fe:['arch','wreck','bones','chest'],tier:2,foes:[['skel',5],['uwcrab',5]],note:'A hump of black stone at the north-west of the sea, its beaches heaped with wrack.'},
+  340:{w:150,h:130,forest:1,fe:['stones','chest','chest','camp','arch','bones'],tier:3,foes:[['wolf',8],['bandit',6],['archer',3]],note:'A big green island, thick with forest. Birds sing in it, and not all the birdsong is birds.'},
+  341:{w:140,h:120,forest:1,fe:['arch','chest','stones','camp','bones','altar'],npcs:[['sn_tobin','peasantM']],tier:3,foes:[['wolf',7],['skel',6],['ghost',3]],note:'A hollow island: forest on the rim and a ring of standing stones in the middle.'},
+  342:{w:140,h:120,forest:1,fe:['camp','chest','chest','stones','bones','arch','nest'],tier:4,foes:[['wolf',9],['bandit',7],['archer',4],['spectre',3]],note:'A great island of ash trees and tangled paths. The paths are too straight to be natural.'},
+  343:{w:60,h:54,fe:['altar','chest','bones','arch'],tier:5,foes:[['skel',6]],note:'A tiny island of black glass sand and bleached bone. The sea beyond it is silent.'}
+};
+function SEA_ARRIVE_ISLE(id){isleBuild(id);const L=LEVELS[id];return {x:L.start.x,y:L.start.y,f:L.start.f}}
+function isleBuild(id){
+  if(LEVELS[id])return;const I=SN_BY[id],S=SN_SPEC[id];if(!I||!S)return;
+  const W=S.w,H=S.h,N=W*H,cx=W>>1,cy=(H>>1)-4,seed=id*7,rx=Math.min(W/2-10,I.kind==='forest'?58:I.kind==='rock'?32:14),ry=Math.min(H/2-12,I.kind==='forest'?48:I.kind==='rock'?26:11);
+  const rows=[];for(let y=0;y<H;y++){const r=[];for(let x=0;x<W;x++)r.push((x===0||y===0||x===W-1||y===H-1)?'D':'.');rows.push(r)}
+  const h=new Float32Array(N),rk=new Float32Array(N),block=new Uint8Array(N),fm=new Array(N).fill('4');
+  const peak=I.kind==='rock'?2.9:I.kind==='forest'?1.1:.5;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const i=y*W+x,d=Math.hypot((x-cx)/rx,(y-cy)/ry)*(1+.28*(tsmooth(x/5,y/5,seed)-.5)),t=1-d;
+    let hh=-.2+.03*(tsmooth(x/4,y/4,seed+1)-.5);
+    if(t>-.12)hh=t>0?Math.min(.5,.5*Math.min(1,t/.2))-.05+peak*Math.pow(Math.max(0,t-.22),1.25)+.1*(tsmooth(x/6,y/6,seed+2)-.4)*Math.min(1,t*4):-.2+(t+.12)/.12*.15;
+    h[i]=hh;rk[i]=clamp((hh-.7)/1.6,0,1);block[i]=(hh<-.06||hh>1.7)?1:0;fm[i]=hh>1.2?'5':hh>.12?(S.forest?'1':'0'):hh>-.06?'3':(t>-.2?'3':'4');
+  }
+  let sy=-1;for(let y=H-2;y>0;y--)if(!block[y*W+cx]&&h[y*W+cx]>-.06){sy=y;break}
+  const plank=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;block[i]=0;h[i]=.08;rk[i]=0;fm[i]='2'}};
+  plank(cx,sy-1,cx+1,sy+4);
+  const decor=[],scenery=[],enemies=[],used=new Set();
+  const free=(x,y)=>x>2&&y>2&&x<W-3&&y<H-3&&!block[y*W+x]&&rows[y][x]==='.'&&!used.has(x+','+y)&&h[y*W+x]>.0;
+  const put=(k,x,y,o)=>{decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}));used.add(x+','+y)};
+  put('yar_ship_dawn',cx,sy+6,{npc:'yr_ship',deco:false});
+  const spot=()=>{for(let q=0;q<200;q++){const a=Math.random()*TAU,r=Math.sqrt(Math.random())*.8,x=Math.round(cx+Math.cos(a)*rx*r),y=Math.round(cy+Math.sin(a)*ry*r);if(free(x,y)&&Math.hypot(x-cx,y-(sy-2))>9)return [x,y]}return null};
+  let ci=0;
+  for(const f of S.fe){const s=spot();if(!s)continue;
+    if(f==='chest')put('uw_shellchest',s[0],s[1],{npc:'isle_chest',cat:ci++,deco:false});
+    else if(f==='bones')put('yar_bones',s[0],s[1]);
+    else if(f==='wreck')put('yar_wreck',s[0],s[1],{npc:'isle_wreck',cat:id*10+ci++,deco:false});
+    else if(f==='camp'){put('yar_tent',s[0],s[1]);put('yar_bones',s[0]+1,s[1]+1)}
+    else if(f==='arch')put('yar_arch',s[0],s[1]);
+    else if(f==='stones'){put('yar_runestone',s[0],s[1]);}
+    else if(f==='altar')put('yar_altar',s[0],s[1],{npc:'isle_altar',cat:id,deco:false});
+    else if(f==='palms')put('yar_palms',s[0],s[1]);
+    else if(f==='sign')put('yar_driftwood',s[0],s[1]);
+    else if(f==='nest')put('yar_driftwood',s[0],s[1],{npc:'sn_nest',deco:false});
+  }
+  for(const [npc,face] of S.npcs||[]){const s=spot();if(s)put(face,s[0],s[1],{npc,deco:false})}
+  // trees, bushes and shells
+  const dens=S.forest?.14:.012;
+  for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){
+    if(!free(x,y)||h[y*W+x]<.12)continue;const r=hash2(x,y,seed+11);
+    if(r<dens&&Math.hypot(x-cx,y-(sy-2))>7){const k=S.forest?'ltree'+((hash2(x,y,seed+12)*20)|0):'dpalm'+((hash2(x,y,seed+13)*4)|0);put(k,x,y,{sc:.85+hash2(x,y,seed+14)*.45})}
+    else if(r>.9&&S.forest)scenery.push({k:'lbush0',wx:x+.5,wy:y+.5,sc:.8+hash2(x,y,seed+15)*.6,decor:{k:'lbush0',walk:true,x,y}});
+    else if(r>.985)scenery.push({k:hash2(x,y,seed+16)<.5?'yar_shells':'yar_driftwood',wx:x+.5,wy:y+.5,sc:.8,decor:{k:'yar_shells',walk:true,x,y}});
+  }
+  for(let q=0;q<S.w/3;q++){const s=spot();if(s)scenery.push({k:'yar_gull_stand',wx:s[0]+.5,wy:s[1]+.5,sc:.9,decor:{k:'yar_gull_stand',walk:true,x:s[0],y:s[1]}})}
+  for(const [t,n] of S.foes)for(let q=0;q<n;q++){const s=spot();if(s)enemies.push({t,x:s[0],y:s[1]})}
+  const start={x:cx,y:sy-2,f:0};
+  const lv={rows:rows.map(r=>r.join('')),start,enemies,items:[{k:'potion',x:cx+3,y:sy-5}],decor,scenery,floorSet:['sand','dgrass','wood','bluesand','bluewater','pebA'],floor:'sand',ceil:'cloud',
+    day:.98,outdoor:true,amb:.9,name:I.n[0].toUpperCase()+I.n.slice(1),label:I.n,noExtras:true,diff:18+S.tier*2,tele:{x:start.x,y:start.y},chars:{D:LEVEL41_DATA.chars.D},lights:[],portals:[]};
+  const fm2=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fm2.push(s)}lv.fmap=fm2;
+  LEVELS[id]=lv;LEVEL_NAMES[id]=lv.name;TERRS[id]=yarTerrain(W,H,h,rk,block);
+}
+for(const I of SN_ISLES)if(I.lv>=331){LEVEL_NAMES[I.lv]=I.n[0].toUpperCase()+I.n.slice(1);KH_LAZY[I.lv]=()=>isleBuild(I.lv)}
+/* what is on the islands: chests, wrecks and altars give gold, and the sea quests hook into the wrecks and altars */
+khNpc('isle_chest','A sea-bleached chest','uw_shellchest',d=>{
+  const F=G.flags;F.isleChest=F.isleChest||{};const key=LEVEL+':'+d.cat;
+  if(F.isleChest[key])return say('The chest is open and empty.',[BYE]);
+  F.isleChest[key]=1;d.found=true;sfx('key');const S=SN_SPEC[LEVEL]||{tier:1},gold=Math.round(120*(S.tier+1)*(.7+hash2(LEVEL,d.cat,91)*.8));G.gold+=gold;giveXP(S.tier*200+100);
+  const pool=['potion2','potion3','healdraught','manadraught','swiftness','ironskin','antidote','holywater'],it=pool[(hash2(LEVEL,d.cat,92)*pool.length)|0];
+  const got=ITEMDEF[it]&&bagAdd(mkItem2(it,1));
+  return say(`Salt has eaten the lock. Inside: ${gold} gold${got?' and a '+ITEMDEF[it].n.toLowerCase():''}, and a smell of old seas.`,[BYE])});
+khNpc('isle_wreck','A wrecked hull','yar_wreck',d=>say('The ribs of a wrecked ship stand out of the sand, hung with weed. Cracked barrels, a rusted lantern and a broken oar lie in her shadow.',[BYE]));
+khNpc('isle_altar','An old altar','yar_altar',d=>say('A weathered stone altar. Someone burned something here long ago, and the stone still remembers the heat.',[BYE]));
+
+/* ---- src/desert/seaquests.js ---- */
+/* ==========================================================================
+   QUESTS OF THE SEA. Tam Salvor in Yarrim sells the Diving Helms. Four dive quests, one under each island. Four chains for the open sea:
+   the Drowned Fleet (Sable Maeve), Orsa's Sons, Serpents and Pearls, and the Kraken's Price.
+   ========================================================================== */
+ITEMDEF.wreckoak={n:'Wreck-Oak',k:'quest',t:'Timber',ic:'herb',c:'#7a6a4a',stack:1,price:30,d:'A salt-hard plank of black oak, long drowned and never rotted. Shipwrights say it takes any edge and any weight.',sw:.5};
+ITEMDEF.serpentegg={n:'Serpent Egg',k:'quest',t:'Egg',ic:'herb',c:'#40a080',stack:1,price:0,d:'A leathery green egg as big as a loaf, warm in the hand. Something inside turns over when you move.',sw:.5};
+ITEMDEF.admiralblade={n:"The Admiral's Cutlass",k:'weapon',t:'Sword',ic:'sword',c:'#d8e4f0',dmg:[22,32],hit:.1,req:{str:14},price:2800,rar:1,d:'A curved blade of blue steel with a pearl in the hilt, kept dry in a sealed case for a hundred years. It cuts as if the sea were helping.',sw:.4};
+ITEMDEF.greatharpoon={n:'The Great Harpoon',k:'weapon',t:'Sword',ic:'sword',c:'#c8d0d8',dmg:[26,36],hit:.06,req:{str:16},price:3200,rar:1,d:'Wreck-oak shaft, a barbed head as long as a forearm, and a coil of line. Made by Pell the chandler to answer the Kraken.',sw:.6};
+const SQ=n=>{const F=G.flags;return F[n]||(F[n]={})};
+/* ---- Tam Salvor and the helms ---- */
+khNpc('yr_diver','Tam Salvor, the helm-maker','kh_yfolk3_4',d=>{
+  const F=G.flags;
+  return say('Tam Salvor. I make helms for people who want to look at the bottom of things. A Diving Helm is brass, riveted, with a glass visor and a hose to a little bellows. It gives four minutes of air and no more, but there are streams of bubbles on the sea floor, vents, and a hero standing in one breathes freely until the helm is full again. Every one of you needs one, in the helmet slot.',[
+    ['Buy diving helms.',()=>{openShop(d,[['divehelm',8]],"Tam Salvor's Helms");return null}],
+    ['Where can we dive?',()=>say('Off every island you have a dive line, a red-and-white buoy on a rope. Saltbarrow has a reef, the Isle of Bells a drowned abbey, Cinder Isle a garden of vents and Last Light a wreck among the kelp. Giant clams hold pearls, and the big things down there bite, so go in with your swords.',[BYE])],
+    [F.gill?'Thank you for the helms, but I hear you do not need them any more.':'Is there another way to breathe down there?',()=>say(F.gill?'A Potion of the Gill. Imagine it. I make helms for a living and a bottle of green water does it better. Congratulations. I will find another trade.':'There is a potion. The old sailors call it the Gill. Whoever drinks it, the sea takes in for good. I have never seen a bottle. They say a priest might part with one for pearls, and that the last wreck keeps a bottle of its own.',[BYE])],
+    BYE]);
+});
+YR_QFOLK.push({id:'yr_diver',at:[60,41],rad:6});
+/* ---- the dive quests ---- */
+const dq=(id,t,who,desc,lv,reward)=>vq(id,t,who,desc,1,()=>(G.flags.uwPrize&&G.flags.uwPrize[lv])?1:0,reward);
+dq('uq1',"Maeve's Sunk Fortune",'Sable Maeve',"Sable Maeve's treasure went down with her flagship on the reef below Saltbarrow, and a very big octopus lives in it now. Dive, kill the Reef Warden and bring up her chest. You need a Diving Helm each.",320,{gold:900,xp:6000,items:['potion4']});
+dq('uq2','The Silent Bell','Brother Aldous','The great bell of the drowned abbey fell to the sea floor, and its clapper was torn away. Brother Aldous would like it back. A colossal moray lives in the abbey now.',321,{gold:1100,xp:7000,items:['potion4']});
+dq('uq3','The Heart of the Vent','Ketra, the ash-priestess','Ketra says the Cinder Isle was born from one black crystal at the bottom of the sea, the Heart of the Vent, and a creature of teeth guards it. Dive to the Vent Gardens and bring it up.',322,{gold:1300,xp:8000,items:['potion4']});
+dq('uq4','The Lens of Last Light','Isolde','The beacon of Last Light fell into the sea with its great lens. Isolde wants it raised, and a very old fish is circling in the wreck. Dive and bring the lens up.',323,{gold:1600,xp:9500,items:['potion4']});
+const DU={
+ uq1:khQD('Corvane\'s guns sank my flagship on the reef off this island, with the whole company\'s pay in the hold. A reef warden has moved in: an octopus the size of a cottage. If you can get a helm each from Tam Salvor in Yarrim, go down and fetch my chest. Mind the sharks.','The dive line is a buoy on the south beach. Four minutes of air a time, and the bubbles at the vents give you more.',(n,m)=>'The chest is on the reef floor, behind the Warden. The dive line is the buoy on the south beach.','You have it? My chest?','My old cutlass. My pay. Forty names I owe. Bless you, friends. Here, for the trouble.','The reef has quieted down. I sleep a little better.'),
+ uq2:khQD('When the sea took the abbey, the bell went with it, and the clapper tore off and fell separately. A bell with no tongue is a gate with no hinge. There is an eel down there that has made the nave its den. Bring me the clapper, and the bells will sound again.','The dive line is the buoy on the south beach. Bring a helm for every one of you.',(n,m)=>'The clapper is somewhere in the nave of the drowned abbey, and the Abbey Eel is guarding it.','The clapper! Give it here. Let me hold it.','It is heavier than I expected. When it rings again I will think of you.','The bell is hung again. On still nights you can hear it under the water.'),
+ uq3:khQD('Cinder Isle was born from one crystal, thrown up from the sea floor in the first fire of the world. The Heart of the Vent, we call it. It lies in the Vent Gardens, and a tyrant lives there, a shark as long as a ship. Bring me the Heart and the mountain will keep its peace.','Down the dive line off the south beach. The vents are your friends: bubbles to breathe.',(n,m)=>'The Heart of the Vent lies in the Tyrant\'s arena at the far end of the vent gardens.','The Heart. I can feel the mountain\'s pulse in it.','It is warm. The mountain is grateful, and so am I. Take this.','The mountain sleeps, because of you.'),
+ uq4:khQD('The beacon fell into the sea a century ago, with its lens. The lens is why it was called Last Light: you could see it from three days away. It lies in the wreck below the kelp, with a very old fish for company. If you bring it up, we can light it again.','Down the dive line. Wear your helms. The kelp forest is lovely, if you are not eaten in it.',(n,m)=>'The lens lies in the wreck among the kelp, and Old Gulper circles it.','The lens! Oh, look at the light in it.','I can hardly hold it. Thank you. There is another thing down there, if you have not found it yet: a green bottle in the same chest. The old keepers said it was a gift from the sea.','The lens sits on the shore, catching the sun. Soon the beacon will shine again.')
+};
+repWrap('sb_maeve',()=>qSt('vq1')==='done'&&qSt('uq1')!=='done','About the sunk flagship',()=>qNode('uq1',DU.uq1));
+repWrap('ib_aldous',()=>qSt('vq2')==='done'&&qSt('uq2')!=='done','About the abbey bell',()=>qNode('uq2',DU.uq2));
+repWrap('ci_ketra',()=>qSt('vq3')==='done'&&qSt('uq3')!=='done','About the Heart of the Vent',()=>qNode('uq3',DU.uq3));
+repWrap('ll_isolde',()=>qSt('vq4')==='done'&&qSt('uq4')!=='done','About the beacon lens',()=>qNode('uq4',DU.uq4));
+/* ---- chain A: the Drowned Fleet ---- */
+vq('sa1','Logbooks of the Fleet','Sable Maeve','Corvane scattered Sable Maeve\'s fleet across the Vaast Sea. The ships\' logbooks are in the wrecks that drift or lie on the islands. Bring Maeve the news from 3 of them.',3,()=>Math.min(3,Object.keys(SQ('saLogs')).length),{gold:900,xp:5000});
+vq('sa2',"The Admiral's Cache",'Sable Maeve',"The logbooks point to Leviathan's Rest, a speck far in the east, where Maeve's old Admiral buried his prize. Nobody sails east of the line, because of what lives there. Kill the Kraken, land on Leviathan's Rest and open the cache.",1,khFlag('saCache'),{gold:2500,xp:14000,items:['potion4']});
+const DA1=khQD('Corvane shot my fleet to pieces, and the pieces are scattered. Every ship kept a log, and the logs say where the Admiral hid the best of what we took. Look in the wrecks, the floating ones and the ones on the islands. Find three logs and tell me what they say.','Drifting wrecks mark the open sea, and the little islands keep more. Walk up to one and look.',(n,m)=>`${n} of ${m} logs found. There are more wrecks out there.`,'Three logs! Read them to me.','The Admiral\'s cache is on Leviathan\'s Rest, at the far east of the sea. That is past the line where the Kraken lives. A harpoon would help, if anyone made one.','The logs are in my sea chest. The Admiral\'s cache is a long way east.');
+const DA2=khQD('The cache is on Leviathan\'s Rest, past the Kraken line. Nobody has sailed there in a hundred years. The sea east of x545 belongs to something with a thousand arms. If you kill it, the cache is yours, and half of it is mine. Pell makes a harpoon, they say.','Sail east. You will know when you cross the line, because the gulls stop. The cache is under the old altar on the island.',(n,m)=>'The Kraken first, then Leviathan\'s Rest, at the far east of the sea.','The cache! Did you find it?','Every coin and the Admiral\'s own cutlass! I knew the old man hid it well. You have earned your half and more.','The Admiral\'s cache is yours, and the east is open.');
+repWrap('sb_maeve',()=>qSt('vq1')==='done',"About the Drowned Fleet",()=>{
+  if(qSt('sa1')!=='done')return qNode('sa1',DA1);
+  return qNode('sa2',DA2);
+});
+khNpc('sea_wreck','A drifting wreck','yar_wreck',d=>{
+  const F=G.flags,L=SQ('saLogs');
+  if(qSt('sa1')==='active'&&!L['f'+d.cat]){L['f'+d.cat]=1;sfx('key');const n=Object.keys(L).length;return say(`Among the weed and the rotted ropes, a sea chest with a bronze lock. Inside, in oilcloth: a ship's log, the last pages written in a shaking hand about a black hull and a red heron. ${n} of 3 logs found.`,[BYE])}
+  return say('The hull of a wrecked ship rides low in the water, broken-masted and weed-hung. Whatever she was, nothing is left aboard but a few ropes and gulls.',[BYE])});
+khNpc('isle_wreck','A wrecked hull','yar_wreck',d=>{
+  const F=G.flags,L=SQ('saLogs');
+  if(qSt('sa1')==='active'&&!L['i'+d.cat]){L['i'+d.cat]=1;sfx('key');const n=Object.keys(L).length;return say(`The ribs of a wrecked ship, and in the sand beneath the stern, a sea chest. A ship's log, wrapped in oilcloth, with a great many names crossed out. ${n} of 3 logs found.`,[BYE])}
+  return say('The ribs of a wrecked ship stand out of the sand, hung with weed. Cracked barrels, a rusted lantern and a broken oar lie in her shadow.',[BYE])});
+khNpc('isle_altar','An old altar','yar_altar',d=>{
+  const F=G.flags;
+  if(LEVEL!==343)return say('A weathered stone altar. Someone burned something here long ago, and the stone still remembers the heat.',[BYE]);
+  if(!F.krakenSlain)return say('A black altar of glass and bone. The sea beyond it is silent, and you feel watched.',[BYE]);
+  if(F.saCache)return say('The cache is open and empty.',[BYE]);
+  F.saCache=1;sfx('key');G.gold+=4000;giveXP(6000);bagAdd(mkItem2('admiralblade',1));
+  return say('Under the altar, a vault of black stone, dry as a bone. A hundred years of coin in leather bags, charts, a captain\'s signet, and a sealed case with a blue-steel cutlass in it.',[BYE])});
+/* ---- chain B: Orsa's Sons ---- */
+vq('sb1','Two Boys at Sea',"Orsa, keeper of the Yarrim Light",'Orsa\'s sons, Tobin and Wren, sailed out in the Gull\'s Wing three weeks ago, and never came home. Find them. Tobin is on a big forest island, Wren on a rock far out. Ask the sailors.',2,()=>Object.keys(SQ('sbFound')).length,{gold:900,xp:5000});
+vq('sb2','Bring Them Home',"Orsa, keeper of the Yarrim Light",'Tobin and Wren are alive. Take them home aboard the Dawn Walker and see Orsa at the Yarrim Light.',1,khFlag('sbHome'),{gold:1600,xp:8000,items:['potion4']});
+const DB1=khQD('My boys took the Gull\'s Wing out three weeks ago to fish the far reefs, and the wind took them. A fisherman from the pier swears he saw smoke on the big forest island in the middle of the sea, and a white sail on a rock to the north-west. Find them, if you have a ship and a heart. I will keep the lamp lit.','The Hollow Isle is the forest island north-west of the middle of the sea. The rock is Cormorant Ledge, in the south-west.',(n,m)=>`${n} of ${m} found.`,'You found them? Both?','Oh, thank you. Thank you. Go and bring them in.','They are home and well, and the lamp burns for them.');
+const DB2=khQD('Both alive! Then bring them home. The Dawn Walker is the only ship in Yarrim that can sail out and back.','They wait on their islands. When you have spoken to them both, sail home to the Light.',(n,m)=>'Talk to both boys, then bring them to me.','My boys! Are they aboard?','You have given me back my sons. I have no gold, but I have a lamp, and the lamp is yours as long as you live.','They are at home and sleeping, and I will not stop looking at them.');
+repWrap('yr_orsa',()=>qSt('yar6')==='done',"About her sons",()=>{
+  if(qSt('sb1')!=='done')return qNode('sb1',DB1);
+  return qNode('sb2',DB2);
+});
+khNpc('sn_tobin','Tobin, a castaway','peasantM',d=>{
+  const F=G.flags,S=SQ('sbFound');
+  if(qSt('sb1')===null)return say('A man in a torn smock, living on berries and a smoky fire. "Have you come from Yarrim? Is my mother still lighting the lamp?" He seems to know you have not come for him.',[BYE]);
+  if(!S.tobin){S.tobin=1;return say('A man in a torn smock, thin and brown. "The Gull\'s Wing is on the rocks round the headland. Wren and I split up to look for water. He went north-west on the little raft. My mother sent you? Tell her we are alive. Let me come aboard, I can work.", he says. He climbs down to the beach and waits by your boat.',[BYE])}
+  return say('Tobin waits by the ship, patient and happy. "Home," he says. "Home."',[BYE])});
+khNpc('sn_wren','Wren, a castaway','fisher',d=>{
+  const F=G.flags,S=SQ('sbFound');
+  if(qSt('sb1')===null)return say('A thin young man in a scrap of sail, waving at every gull that goes by. "Are you real?" he says. "Be real."',[BYE]);
+  if(!S.wren){S.wren=1;return say('"You came! I have been counting waves for nineteen days. Tobin? He is alive? Praise the tide." He stumbles down to the sand. "My mother will have lit the lamp every night, whatever I did."',[BYE])}
+  return say('Wren sits on the sand, laughing a little at nothing. "Home," he says.',[BYE])});
+function sbHomeCheck(){const S=SQ('sbFound');if(S.tobin&&S.wren&&!S.home&&qSt('sb2')==='active'){S.home=1;G.flags.sbHome=1}}
+/* ---- chain C: serpents and pearls ---- */
+vq('sc1','A Bounty on Serpents','Tamsin Kell, the harbourmaster','The sea serpents of the Vaast Sea take a boat a month. Tamsin Kell is paying for them. Kill 5 sea serpents in the open sea.',5,q=>(G.flags.k_seaserpent||0)-(q.base||0),{gold:1500,xp:6500},{cnt:'k_seaserpent'});
+vq('sc2','Pearls for the Tide','Brother Haldane',"Brother Haldane wants 5 pearls for the chapel's tide-offering. Giant clams under the islands keep pearls.",5,()=>Math.min(5,bagCount('pearl')),{gold:700,xp:4500,items:['gillpotion']},{take:{pearl:5}});
+vq('sc3','The Serpent\'s Egg','Tamsin Kell, the harbourmaster','A sea serpent has laid an egg on Ashwood, the big forest island in the north-east. Tamsin wants it brought to her. What she does with it is her business, or the party\'s.',1,()=>(bagCount('serpentegg')>0||G.flags.sc3Done)?1:0,{gold:1200,xp:6000});
+const DC1=khQD('The serpents take a boat a month, and a good sailor a boat. The town pays a bounty. Five dead serpents, and I will pay you from the harbour chest. They hunt in the open water, between the islands.','Take the Dawn Walker out. They are big and they hit hard. Keep the bow toward them.',(n,m)=>`${n} of ${m} serpents.`,'Five serpents dead? I will tell the whole harbour.','There is the harbour chest. I will have the fishermen name a boat after you.','The water is quieter. Boats are coming in whole again.');
+const DC3=khQD('A serpent laid an egg on Ashwood, in the north-east, on the high ground. The egg is worth a great deal. If it hatches the island is lost, and so is every boat that passes it. Bring it to me, and I will decide.','Ashwood is the big forest island in the north-east of the sea. Keep your swords out. The mother is not far.',(n,m)=>'The egg is in a nest on Ashwood.','You have the egg. Warm, isn\'t it? Almost alive.','Smash it, or give it to the sea. I will tell you what I think: the sea took my husband, and I have thought about it every night. Do as you think best.','The egg is gone from my life. One way or the other.');
+repWrap('yr_harbour',()=>qSt('yar6')==='done',"About serpents",()=>{
+  if(qSt('sc1')!=='done')return qNode('sc1',DC1);
+  if(!G.flags.sc3Done&&bagCount('serpentegg')>0)return say('You have the egg? Show me. Smash it, and the sea loses a monster and the town gains a good night. Give it back to the deep, and you will have done a thing the sea remembers.',[['Smash it.',()=>{bagRemove('serpentegg',1);G.flags.sc3Done=1;G.flags.sc3Smash=1;if(qSt('sc3')==='active'){qTurnIn('sc3')}honourAdd(-1,'you smashed the serpent egg');return say('It breaks with a sound like wet leather. The harbour is safe, and the party feels a little smaller.',[BYE])}],['Return it to the sea.',()=>{bagRemove('serpentegg',1);G.flags.sc3Done=1;G.flags.sc3Return=1;if(qSt('sc3')==='active'){qTurnIn('sc3')}honourAdd(3,'you returned the serpent egg');try{luckAdd(5)}catch(e){}return say('You carry it down to the end of the pier and set it in the water. It sinks slowly, glowing a little. Far out, something large turns over and goes down after it. The party feels very lucky.',[BYE])}],BYE]);
+  return qNode('sc3',DC3);
+});
+khNpc('sn_nest','A serpent nest','yar_driftwood',d=>{
+  const F=G.flags;
+  if(qSt('sc3')!=='active')return say('A heap of driftwood and kelp on a high ledge, with a smooth hollow in the middle. Something large was here. The sand is still warm.',[BYE]);
+  if(F.sc3Got)return say('The nest is empty now, and cold.',[BYE]);
+  F.sc3Got=1;d.found=true;sfx('key');bagAdd(mkItem2('serpentegg',1));
+  return say('In the hollow, an egg the size of a loaf, green and leathery, and warm. Somewhere out on the water, a very long neck lifts to look at the island.',[BYE])});
+const DPEARL=khQD('Pearls! For the tide-offering, five pearls, white and whole. The giant clams under the islands keep them. It is dangerous work down there, and there is a bottle of something under the last wreck, a gift of the sea. But a priest can offer something too.','Dive off any of the islands. Giant clams, open ones, hold pearls half the time.',(n,m)=>`${n} of ${m} pearls.`,'Five pearls. Show me.','Five perfect pearls. I will lay them in the tide. And here is a bottle our order has kept for years, and never found the right people for.','The chapel\'s tide is full of pearls. The sea is pleased.');
+repWrap('yr_priest',()=>true,"About the pearls",()=>qNode('sc2',DPEARL));
+/* ---- chain D: the Kraken's Price ---- */
+vq('sd1','Wreck-Oak',"Pell, the ship's chandler",'Pell can make a harpoon for the Kraken, if you bring him 3 planks of wreck-oak. Diving timbers under the islands are the only oak that has lasted.',3,()=>Math.min(3,bagCount('wreckoak')),{gold:600,xp:4000},{take:{wreckoak:3}});
+vq('sd2','Kraken Slayer','Menkaure, the shipwright','Pell has made the Great Harpoon. The east of the Vaast Sea is shut by the Kraken. Sail east of the line and kill it, so the east can be sailed.',1,khFlag('krakenSlain'),{gold:3000,xp:20000,items:['potion4']});
+const DD1=khQD('The Kraken. Everyone knows it is there and nobody says its name. I can make a harpoon to take it, with wreck-oak for the shaft, but I do not have any. Planks of black oak from the old wrecks, three of them. They are on the sea floor now. You have helms. Bring me wreck-oak.','Timbers stand in the wrecks under every island. The ones with iron nails in them are the right ones.',(n,m)=>`${n} of ${m} planks.`,'Three planks. Black as ink, and not a soft spot in them.','Give me a minute... There. The Great Harpoon. It is yours, for as long as you carry the nerve. Take it to Menkaure.','The Great Harpoon is made. Whatever happens to the Kraken is now between you and the sea.');
+const DD2=khQD('Pell has made a harpoon? Then the east is open to anyone who is brave enough. Past the line, where the gulls stop, the Kraken rises. Kill it, and the east of the sea is ours, and the Dawn Walker can go where she likes.','Go east. When the sea turns black, aim for the head. The tentacles are just for show.',(n,m)=>'The Kraken is in the far east of the sea.','It is dead? Truly?','The Kraken is dead. I have lived my whole life with that thing at the edge of every chart, and it is gone. Take this.','The east is open, and the sea is a little less afraid.');
+repWrap('yr_chandler',()=>qSt('yar6')==='done'&&qSt('sd1')!=='done',"About a harpoon",()=>{const r=qNode('sd1',DD1);return r});
+repWrap('yr_menkaure',()=>G.flags.voyage&&qSt('sd1')==='done',"About the Kraken",()=>qNode('sd2',DD2));
+// Pell makes the harpoon when the oak is handed in (the quest's own turn-in is not told about the item)
+(function(){const _t=qTurnIn;qTurnIn=function(id){const r=_t(id);if(r&&id==='sd1'){bagAdd(mkItem2('greatharpoon',1));msg('Pell hands over the Great Harpoon.','#ffe36a')}return r}})();
+khNpc('uw_oak','A drowned timber','uw_timber',d=>{
+  const F=G.flags;F.uwOak=F.uwOak||{};const key=LEVEL+':'+d.cat;
+  if(F.uwOak[key]||qSt('sd1')!=='active')return say(qSt('sd1')==='active'?'You have already cut a plank from this timber.':'A great black timber stands in the sand, hung with weed and barnacles. Iron nails run through it, black as the wood.',[BYE]);
+  F.uwOak[key]=1;bagAdd(mkItem2('wreckoak',1));sfx('key');d.found=true;return say('You work a plank loose from the black oak with the back of your sword. It is heavy and cold, and not a soft spot in it.',[BYE])});
+/* the kraken's death is the day the east opened */
+(function(){const _t=seaTick;seaTick=function(dt){_t(dt);const F=G.flags;if(LEVEL===SN.ID&&F.krakenSeen&&!F.krakenSlain&&(F.k_kraken||0)>0){F.krakenSlain=1;msg('The Kraken sinks, and the black water clears. For the first time in a hundred years the sea to the east is open.','#ffe36a');sfx('win');try{if(qSt('sd2')==='active')qTurnIn('sd2')}catch(e){}}sbHomeCheck()}})();
+/* sailing home with the boys: the check is also made on every landing */
+(function(){const _e=seaEnterHook;seaEnterHook=function(n){_e(n);if(n===290)sbHomeCheck()}})();
 
 /* ---- src/desert/story.js ---- */
 /* ==========================================================================
