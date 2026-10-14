@@ -318,9 +318,11 @@ function yarBuild(){
     LEVEL_NAMES[id]=name;
     KH_LAZY[id]=()=>{
       if(LEVELS[id])return;
-      const b={id:'yc'+c.k,name,room:'home',keeper:null,tpl:YR_COT_TPL(c),wallImg:'kh_ywall1_'+hz.hue};
-      const R=khRoom(b,id,{to:YR.ID,x:fx,y:fy,f:out});LEVELS[id]=R.level;LEVEL_NAMES[id]=name;
+      const bath=hz.x0===46&&hz.y0===41; // the Steam House: the cottage on the south side of the road, by the square
+      const b=bath?{id:'ybath',name:'The Steam House',room:'bath',keeper:'yr_bath',scene:'bath_hammam',wallImg:'kh_ywall1_'+hz.hue}:{id:'yc'+c.k,name,room:'home',keeper:null,tpl:YR_COT_TPL(c),wallImg:'kh_ywall1_'+hz.hue};
+      const R=khRoom(b,id,{to:YR.ID,x:fx,y:fy,f:out});LEVELS[id]=R.level;LEVEL_NAMES[id]=b.name;
     };
+    if(hz.x0===46&&hz.y0===41){LEVEL_NAMES[id]='The Steam House';const wall=out===2?[0,-1]:out===0?[0,1]:out===3?[1,0]:[-1,0],hor=out===2||out===0,sx=hor?fx-1:fx,sy=hor?fy:fy-1;decor.push({k:'sign_bath',x:(P.street[sy*W+sx]||(rows[sy]&&rows[sy][sx]==='.'))?sx:fx,y:(P.street[sy*W+sx]||(rows[sy]&&rows[sy][sx]==='.'))?sy:fy,block:false,wd:wall,txt:['THE STEAM HOUSE','Merrin, bath keeper']})}
   }
   LEVELS[YR.ID]=lv;LEVEL_NAMES[YR.ID]='Yarrim';
   TERRS[YR.ID]=yarTerrain(W,H,h,rk,block);

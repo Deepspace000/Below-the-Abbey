@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.73';
+const VERSION='3.74';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4781,7 +4781,7 @@ function goToLevel(n,entry){
   if(n===5){const F=G.flags,cd=G.decor.find(d=>d.npc==='corbin');if(cd&&F.mayorDown&&!F.mayorKilled&&!F.mayorFight){delete F.mayorDown;cd.found=false;cd.block=true}
     if(cd&&!F.mayorKilled&&!F.mayorFight&&G.quests.gandrick&&G.quests.gandrick.st==='done')G.quests.gandrick.st='active'; // repairs saves where a jump link had wrongly marked him defeated
     if(cd&&(F.mayorFight||F.mayorDown)){cd.found=true;cd.block=false}if(F.mayorFight&&!F.mayorDown&&cd)addEnemy('mayor',cd.x,cd.y,true)}
-  reveal();G.hold=null;try{afflEnter(n);petsApply();petEnter(n);if(typeof yarEnter==='function')yarEnter(n);if(typeof uwEnterHook==='function')uwEnterHook(n);if(typeof seaEnterHook==='function')seaEnterHook(n)}catch(e){console.error(e)}
+  reveal();G.hold=null;try{afflEnter(n);petsApply();petEnter(n);if(typeof yarEnter==='function')yarEnter(n);if(typeof uwEnterHook==='function')uwEnterHook(n);if(typeof bathEnter==='function')bathEnter(n);if(typeof seaEnterHook==='function')seaEnterHook(n)}catch(e){console.error(e)}
   G.acted=[false,false,false,false];G.state='play';G.nextAuto=G.time+180;G.lastReg=G.reg?G.reg[G.P.y*MW+G.P.x]:-2;writeSave('auto');
   if(LEVELS[n]&&LEVELS[n].scene)startScene(n);
   if(n===2&&!G.flags.townSeen)startCut('abbeyIntro');
@@ -12289,6 +12289,7 @@ function makeLockedHouse(n){
   if(n<40000)return false;const id=n-40000,lv=Math.floor(id/10000),rem=id%10000,y=Math.floor(rem/100),x=rem%100,L0=LEVELS[lv];if(!L0||!L0.rows)return false;
   let fx=x,fy=y+1,ff=2;
   for(const [dx,dy,f] of [[0,1,2],[0,-1,0],[1,0,1],[-1,0,3]]){const q=L0.rows[y+dy]&&L0.rows[y+dy][x+dx];if(q==='.'){fx=x+dx;fy=y+dy;ff=f;break}}
+  if(typeof bathBuild==='function'&&bathBuild(n,lv,fx,fy,ff))return true;
   const r=hash2(x*7+lv,y*13,n%101),scenes=['warm','worker','spartan','messy','children','healer','cats','fisher','scholar','empty','potter','soldier','warm','worker'];
   const scene=scenes[(r*scenes.length)|0],name=KH_SCENE_NAME[scene],b={id:'lh'+n,name,room:'home',keeper:null,scene};
   if(hash2(n,7,91)<.1){b.gold=5+((hash2(n,9,92)*46)|0);b.goldMsg='A few coins lie forgotten in the corner.'}
@@ -13170,9 +13171,11 @@ function yarBuild(){
     LEVEL_NAMES[id]=name;
     KH_LAZY[id]=()=>{
       if(LEVELS[id])return;
-      const b={id:'yc'+c.k,name,room:'home',keeper:null,tpl:YR_COT_TPL(c),wallImg:'kh_ywall1_'+hz.hue};
-      const R=khRoom(b,id,{to:YR.ID,x:fx,y:fy,f:out});LEVELS[id]=R.level;LEVEL_NAMES[id]=name;
+      const bath=hz.x0===46&&hz.y0===41; // the Steam House: the cottage on the south side of the road, by the square
+      const b=bath?{id:'ybath',name:'The Steam House',room:'bath',keeper:'yr_bath',scene:'bath_hammam',wallImg:'kh_ywall1_'+hz.hue}:{id:'yc'+c.k,name,room:'home',keeper:null,tpl:YR_COT_TPL(c),wallImg:'kh_ywall1_'+hz.hue};
+      const R=khRoom(b,id,{to:YR.ID,x:fx,y:fy,f:out});LEVELS[id]=R.level;LEVEL_NAMES[id]=b.name;
     };
+    if(hz.x0===46&&hz.y0===41){LEVEL_NAMES[id]='The Steam House';const wall=out===2?[0,-1]:out===0?[0,1]:out===3?[1,0]:[-1,0],hor=out===2||out===0,sx=hor?fx-1:fx,sy=hor?fy:fy-1;decor.push({k:'sign_bath',x:(P.street[sy*W+sx]||(rows[sy]&&rows[sy][sx]==='.'))?sx:fx,y:(P.street[sy*W+sx]||(rows[sy]&&rows[sy][sx]==='.'))?sy:fy,block:false,wd:wall,txt:['THE STEAM HOUSE','Merrin, bath keeper']})}
   }
   LEVELS[YR.ID]=lv;LEVEL_NAMES[YR.ID]='Yarrim';
   TERRS[YR.ID]=yarTerrain(W,H,h,rk,block);
@@ -14460,6 +14463,7 @@ const OH_SPECIAL=[
   {name:'The Cookshop',room:'shop',keeper:'oh_cookshop',want:[110,124],floor:'wood',pat:0},
   {name:'The Garrison Hall',room:'hall',keeper:'oh_sergeant',want:[28,100],floor:'cobble',pat:1},
   {name:"The Herbwife's Cottage",room:'shop',keeper:'oh_herbs',want:[20,128],floor:'wood',pat:0},
+  {name:'The Oldhaven Baths',room:'bath',keeper:'oh_bath',want:[76,58],pat:0,scene:'bath_grand'},
   {name:'The Glover and Tailor',room:'shop',keeper:'oh_tailor',want:[126,56],floor:'wood',pat:0}
 ];
 
@@ -14558,7 +14562,7 @@ function ohBuild(){
   for(const h of houses){
     h.id=h.sp&&h.sp.id?h.sp.id:OH.HOME+(homeN++);
     const d2=Math.hypot((h.x0+h.x1)/2-OH.CX,(h.y0+h.y1)/2-60);
-    if(h.sp){h.name=h.sp.name;h.room=h.sp.room;h.keeper=h.sp.keeper;h.floor=h.sp.floor;h.wpat=h.sp.pat}
+    if(h.sp){h.name=h.sp.name;h.room=h.sp.room;h.keeper=h.sp.keeper;h.floor=h.sp.floor;h.wpat=h.sp.pat;h.scene=h.sp.scene}
     else{
       const rich=d2<44||hs(h.x0,h.y0,14)<.12,pick=(rich?OH_RICH:OH_POOR),sc=pick[(hs(h.x0,h.y0,15)*pick.length)|0];
       h.scene=sc;h.name=OH_SCENES[sc].n;h.room='home';h.floor=(sc==='soldier'||sc==='spartan'||sc==='potter')?'cobble':'wood';h.wpat=hs(h.x0,h.y0,16)<.7?0:1;
@@ -14647,7 +14651,7 @@ function ohBuild(){
     // only on a street: a cell with a house wall or the square close by in neither
     const q=free(x,y)?[x,y]:near(x,y,1);if(q){const kp=KH_KEEPERS[aid];walk(khFaceKey(kp.face),q[0],q[1],{npc:aid,sc:kp.sc})}}
   // signs on the shops
-  const KNAME={oh_inn:'Wynn, innkeeper',oh_smith:'Bram, smith',oh_apoth:'Maud, apothecary',oh_priest:'Sister Margery',oh_armour:'Ser Gawen',oh_bakery:'Hild, baker',oh_scrolls:'Osbern, scribe',oh_pack:'Tilda',oh_inn2:'Dame Hester',oh_cookshop:'Pol',oh_sergeant:'Sergeant Cade',oh_herbs:'Old Ysolt',oh_tailor:'Fenwick'};
+  const KNAME={oh_bath:'Marta, bath keeper',oh_inn:'Wynn, innkeeper',oh_smith:'Bram, smith',oh_apoth:'Maud, apothecary',oh_priest:'Sister Margery',oh_armour:'Ser Gawen',oh_bakery:'Hild, baker',oh_scrolls:'Osbern, scribe',oh_pack:'Tilda',oh_inn2:'Dame Hester',oh_cookshop:'Pol',oh_sergeant:'Sergeant Cade',oh_herbs:'Old Ysolt',oh_tailor:'Fenwick'};
   for(const h of spec){
     const horizontal=h.face==='N'||h.face==='S',sx=horizontal?h.front[0]+1:h.front[0],sy=horizontal?h.front[1]:h.front[1]+1;
     const spot=(rows[sy]&&rows[sy][sx]==='.')?[sx,sy]:h.front;
@@ -16088,7 +16092,47 @@ SHOP_STOCK.push(['lockpick',6]);MERCHANT_STOCK.push(['lockpick',6]);
 for(const k of ['general','trader','seagoods']){const f=KH_STOCK[k];if(f)KH_STOCK[k]=()=>f().concat([['lockpick',8]])}
 const picksHave=()=>bagCount('lockpick');
 function pickSpend(){const i=G.bag.findIndex(b=>b&&b.id==='lockpick');if(i>=0)bagTake(i)}
-const doorIsLocked=(lv,x,y)=>hash2(x*3+lv,y*5,41)<.34;
+let doorIsLocked=(lv,x,y)=>hash2(x*3+lv,y*5,41)<.34;
+
+/* ==========================================================================
+   BATHHOUSES. Every town has one. In Khemetra the baths already stood; Yarrim (a cottage by the square) and Oldhaven (one of the
+   lots) now have one built in, and in Thornwick, Ironhill and Anaea one house door near the middle of the town opens on a bathhouse
+   with a sign beside it. The door is never locked. Inside: warm water, and every bath cure in the game.
+   ========================================================================== */
+const BATH_TOWN={3:{name:'The Thornwick Bathhouse',keeper:'th_bath',who:'Ada, bath keeper'},13:{name:'The Ironhill Steam Baths',keeper:'ih_bath',who:'Gunnar, bath keeper'},33:{name:'The Anaea Springs',keeper:'an_bath',who:'Sylvie, bath keeper'}};
+khBath('th_bath','Ada, the bath keeper','kh_npc6_3','Welcome to the Thornwick Bathhouse. Hot water from the abbey spring, soap that smells of lavender, and a rule that boots stay at the door. Cold, tired or mucky, we deal with all three.');
+khBath('ih_bath','Gunnar, the bath keeper','kh_npc6_3','Ironhill Steam Baths. Forge workers come in black and leave pink. The stones are hot, the water hotter, and the towels are only a little scratchy.');
+khBath('an_bath','Sylvie, the bath keeper','kh_npc6_3','The Springs have run warm since before Anaea had a name. Sit, soak, and let the forest go out of your bones.');
+khBath('yr_bath','Merrin, the bath keeper','kh_npc6_3','The Steam House. Kettles on the stove, salt in the water, and a tub for every sailor who smells of the sea. We take all comers.');
+khBath('oh_bath','Marta, the bath keeper','kh_npc6_3','The Oldhaven Baths, fit for a king, though the king himself has never once been seen in them. Steam, oils, hot stones. Ten gold and the whole kingdom\'s dust comes off.');
+function bathScan(lv){
+  const F=G.flags,B=F.bathDoors||(F.bathDoors={});if(B[lv])return B[lv];
+  if(LEVEL!==lv||!G.grid||!BATH_TOWN[lv])return null;
+  const cx=MW/2,cy=MH/2;let best=null,bd=1e9;
+  for(let y=3;y<MH-3;y++)for(let x=3;x<MW-3;x++){
+    const g=G.grid[y][x];if(!((g>=15&&g<=19)||(g>=200&&g<1000&&TILE_MSG[g])))continue;
+    for(const [dx,dy,f] of [[0,1,0],[0,-1,2],[1,0,3],[-1,0,1]]){ // the street cell is at (x+dx,y+dy); the party faces back at the door
+      const ox=x+dx,oy=y+dy;if(G.grid[oy][ox]!==0||G.decor.some(d=>d.block&&d.x===ox&&d.y===oy))continue;
+      if(!(G.grid[y-dy][x-dx]>0))continue; // wall behind the door
+      const d=Math.abs(x-cx)+Math.abs(y-cy);if(d<bd){bd=d;best={x,y,ox,oy,wd:[-dx,-dy],f}}
+    }
+  }
+  if(best)B[lv]=best;return best;
+}
+function bathEnter(n){
+  const T=BATH_TOWN[n];if(!T||LEVEL!==n)return;
+  const b=bathScan(n);if(!b)return;
+  if(G.decor.some(d=>d.k==='sign_bath'))return;
+  let sx=b.ox,sy=b.oy;const p0=Math.abs(b.wd[1]),p1=Math.abs(b.wd[0]); // the sign hangs on the wall beside the door
+  for(const [qx,qy] of [[b.ox+p0,b.oy+p1],[b.ox-p0,b.oy-p1]])if(G.grid[qy][qx]===0&&!G.decor.some(d=>d.block&&d.x===qx&&d.y===qy)&&G.grid[qy+b.wd[1]][qx+b.wd[0]]>0){sx=qx;sy=qy;break}
+  G.decor.push({k:'sign_bath',x:sx,y:sy,block:false,wd:b.wd,txt:[T.name.toUpperCase(),T.who]});
+}
+function bathBuild(n,lv,fx,fy,ff){ // a locked-house number that is really the bathhouse door
+  const T=BATH_TOWN[lv],b=G.flags.bathDoors&&G.flags.bathDoors[lv];if(!T||!b||lockedKey(lv,b.x,b.y)!==n)return false;
+  LEVELS[n]=khRoom({id:'bh'+n,name:T.name,room:'bath',keeper:T.keeper,scene:'bath_grand'},n,{to:lv,x:fx,y:fy,f:ff}).level;LEVEL_NAMES[n]=T.name;return true;
+}
+const _doorIsLocked=doorIsLocked;
+doorIsLocked=(lv,x,y)=>{const b=G.flags.bathDoors&&G.flags.bathDoors[lv];if(b&&b.x===x&&b.y===y)return false;return _doorIsLocked(lv,x,y)};
 
 /* ---- src/desert/dunes.js ---- */
 /* ==========================================================================

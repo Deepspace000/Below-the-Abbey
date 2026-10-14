@@ -299,6 +299,7 @@ function makeLockedHouse(n){
   if(n<40000)return false;const id=n-40000,lv=Math.floor(id/10000),rem=id%10000,y=Math.floor(rem/100),x=rem%100,L0=LEVELS[lv];if(!L0||!L0.rows)return false;
   let fx=x,fy=y+1,ff=2;
   for(const [dx,dy,f] of [[0,1,2],[0,-1,0],[1,0,1],[-1,0,3]]){const q=L0.rows[y+dy]&&L0.rows[y+dy][x+dx];if(q==='.'){fx=x+dx;fy=y+dy;ff=f;break}}
+  if(typeof bathBuild==='function'&&bathBuild(n,lv,fx,fy,ff))return true;
   const r=hash2(x*7+lv,y*13,n%101),scenes=['warm','worker','spartan','messy','children','healer','cats','fisher','scholar','empty','potter','soldier','warm','worker'];
   const scene=scenes[(r*scenes.length)|0],name=KH_SCENE_NAME[scene],b={id:'lh'+n,name,room:'home',keeper:null,scene};
   if(hash2(n,7,91)<.1){b.gold=5+((hash2(n,9,92)*46)|0);b.goldMsg='A few coins lie forgotten in the corner.'}

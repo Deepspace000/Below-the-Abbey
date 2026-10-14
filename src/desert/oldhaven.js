@@ -98,6 +98,7 @@ const OH_SPECIAL=[
   {name:'The Cookshop',room:'shop',keeper:'oh_cookshop',want:[110,124],floor:'wood',pat:0},
   {name:'The Garrison Hall',room:'hall',keeper:'oh_sergeant',want:[28,100],floor:'cobble',pat:1},
   {name:"The Herbwife's Cottage",room:'shop',keeper:'oh_herbs',want:[20,128],floor:'wood',pat:0},
+  {name:'The Oldhaven Baths',room:'bath',keeper:'oh_bath',want:[76,58],pat:0,scene:'bath_grand'},
   {name:'The Glover and Tailor',room:'shop',keeper:'oh_tailor',want:[126,56],floor:'wood',pat:0}
 ];
 
@@ -196,7 +197,7 @@ function ohBuild(){
   for(const h of houses){
     h.id=h.sp&&h.sp.id?h.sp.id:OH.HOME+(homeN++);
     const d2=Math.hypot((h.x0+h.x1)/2-OH.CX,(h.y0+h.y1)/2-60);
-    if(h.sp){h.name=h.sp.name;h.room=h.sp.room;h.keeper=h.sp.keeper;h.floor=h.sp.floor;h.wpat=h.sp.pat}
+    if(h.sp){h.name=h.sp.name;h.room=h.sp.room;h.keeper=h.sp.keeper;h.floor=h.sp.floor;h.wpat=h.sp.pat;h.scene=h.sp.scene}
     else{
       const rich=d2<44||hs(h.x0,h.y0,14)<.12,pick=(rich?OH_RICH:OH_POOR),sc=pick[(hs(h.x0,h.y0,15)*pick.length)|0];
       h.scene=sc;h.name=OH_SCENES[sc].n;h.room='home';h.floor=(sc==='soldier'||sc==='spartan'||sc==='potter')?'cobble':'wood';h.wpat=hs(h.x0,h.y0,16)<.7?0:1;
@@ -285,7 +286,7 @@ function ohBuild(){
     // only on a street: a cell with a house wall or the square close by in neither
     const q=free(x,y)?[x,y]:near(x,y,1);if(q){const kp=KH_KEEPERS[aid];walk(khFaceKey(kp.face),q[0],q[1],{npc:aid,sc:kp.sc})}}
   // signs on the shops
-  const KNAME={oh_inn:'Wynn, innkeeper',oh_smith:'Bram, smith',oh_apoth:'Maud, apothecary',oh_priest:'Sister Margery',oh_armour:'Ser Gawen',oh_bakery:'Hild, baker',oh_scrolls:'Osbern, scribe',oh_pack:'Tilda',oh_inn2:'Dame Hester',oh_cookshop:'Pol',oh_sergeant:'Sergeant Cade',oh_herbs:'Old Ysolt',oh_tailor:'Fenwick'};
+  const KNAME={oh_bath:'Marta, bath keeper',oh_inn:'Wynn, innkeeper',oh_smith:'Bram, smith',oh_apoth:'Maud, apothecary',oh_priest:'Sister Margery',oh_armour:'Ser Gawen',oh_bakery:'Hild, baker',oh_scrolls:'Osbern, scribe',oh_pack:'Tilda',oh_inn2:'Dame Hester',oh_cookshop:'Pol',oh_sergeant:'Sergeant Cade',oh_herbs:'Old Ysolt',oh_tailor:'Fenwick'};
   for(const h of spec){
     const horizontal=h.face==='N'||h.face==='S',sx=horizontal?h.front[0]+1:h.front[0],sy=horizontal?h.front[1]:h.front[1]+1;
     const spot=(rows[sy]&&rows[sy][sx]==='.')?[sx,sy]:h.front;
