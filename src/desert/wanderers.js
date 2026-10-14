@@ -75,7 +75,7 @@ for(const w of WANDERERS)NPC_H[w.key]=w.h;
 NPC_H.msgr_D=NPC_H.msgr_E=NPC_H.msgr_A=NPC_H.msgr_T=NPC_H.msgr_H=.5;
 
 /* ---- the favours: each is an ordinary quest ---- */
-QAREA_ORDER.splice(QAREA_ORDER.indexOf('Elsewhere'),0,'Wanderers');
+QAREA_ORDER.splice(QAREA_ORDER.indexOf('Elsewhere'),0,'Wandering Monsters');
 const wPlace=id=>{const r=((G.flags.wRec||{})[id])||null;return r&&LEVEL_NAMES[r.lv]?LEVEL_NAMES[r.lv]:'where you met'};
 for(const w of WANDERERS){
   const q=w.q;if(!q)continue;const id='wq_'+w.id;
@@ -83,7 +83,7 @@ for(const w of WANDERERS){
     goal:q.item?()=>Math.min(bagCount(q.item),q.n):q.gold?()=>G.gold>=q.gold?1:0:g=>Math.min(q.kills,G.kills-(g.base||0)),
     take:q.item?{[q.item]:q.n}:undefined};
   Object.defineProperty(QUESTS[id],'desc',{enumerable:true,get(){return q.item?'Bring '+q.n+' x '+(ITEMDEF[q.item]?ITEMDEF[q.item].n:q.item)+' to '+w.n+', last seen '+wPlace(w.id)+'. The shops and the wild have them.':q.gold?w.n+' wants '+q.gold+' gold to let you pass. Last seen '+wPlace(w.id)+'.':w.n+' wants '+q.kills+' creatures laid to rest. Last seen '+wPlace(w.id)+'.'}});
-  QAREA[id]='Wanderers';QGIVER['w_'+w.id]=id;
+  QAREA[id]='Wandering Monsters';QGIVER['w_'+w.id]=id;
   const root=d=>{
     const F=G.flags;
     if(qSt(id)==='done')return say(q.after,[BYE]);
@@ -228,7 +228,7 @@ function wLevelOk(){
   let open=0;for(let y=0;y<MH;y++)for(let x=0;x<MW;x++)if(G.grid[y][x]===0)open++;
   return open>=300;
 }
-function wMet(id){const F=G.flags;F.wMet=F.wMet||{};if(!F.wMet[id]){F.wMet[id]=1;msg('A new entry in the Wanderers menu: '+WBY[id].n+'.','#e0c8ff')}}
+function wMet(id){const F=G.flags;F.wMet=F.wMet||{};if(!F.wMet[id]){F.wMet[id]=1;msg('A new entry in the Wandering Monsters menu: '+WBY[id].n+'.','#e0c8ff')}}
 function wPlaceWanderer(){
   const F=G.flags;F.wRoll=F.wRoll||{};F.wRec=F.wRec||{};
   // those already standing on this level
@@ -285,7 +285,7 @@ function wSil(id){ // an unmet creature, as a black shape
 function drawWanderers(){
   BTNS=[];veil(.7);bigPanel(24,8,432,304);
   const F=G.flags,met=id=>!!(F.wMet&&F.wMet[id]);G.wsel=clamp(G.wsel||0,0,WANDERERS.length-1);
-  txt('THE WANDERERS',240,24,13,'#d8c88e','center',true);
+  txt('WANDERING MONSTERS',240,24,13,'#d8c88e','center',true);
   const n=WANDERERS.filter(w=>met(w.id)).length;txt(n+' of '+WANDERERS.length+' met',240,37,8.5,'#a89878','center');
   WANDERERS.forEach((w,i)=>{const y=48+i*15.2,sel=i===G.wsel;
     if(sel){ctx.fillStyle='rgba(216,200,142,.2)';ctx.fillRect(34,y-6,170,13)}

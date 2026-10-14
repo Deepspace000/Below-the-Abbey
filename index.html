@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.58';
+const VERSION='3.59';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -6506,7 +6506,7 @@ function drawMenu(){
   btnText('mute','Sound',100,126,130,24);btnText('gfx','Graphics',250,126,130,24);
   btnText('savemenu','Save / Load',100,153,130,24);btnText('overview','Level layout',250,153,130,24);
   btnText('newparty','New party',100,180,130,24);btnText('restart','Restart game',250,180,130,24);
-  btnText('quittitle','Quit to title',100,207,130,22);btnText('wander','Wanderers',250,207,130,22);
+  btnText('quittitle','Quit to title',100,207,130,22);btnText('wander','Wandering Monsters',250,207,130,22);
   const L=['W / S: forward and back   A / D: step sideways   Q / E: turn   (arrow keys work too)','Space: attack   X: special   P: potion   Z: wait   R: rest','1-4: choose hero   I: inventory   J: quests   M: map   Esc: menu',
     'Tap a portrait to open that hero\'s inventory.','Tap people, goats, torches and items in the view.','You can also walk into a person to talk to them.','Heroes act once per round, then the monsters move.'];
   txt('Version '+VERSION,240,236,8,'#b8a880','center'); // just under the buttons
@@ -13717,7 +13717,7 @@ for(const w of WANDERERS)NPC_H[w.key]=w.h;
 NPC_H.msgr_D=NPC_H.msgr_E=NPC_H.msgr_A=NPC_H.msgr_T=NPC_H.msgr_H=.5;
 
 /* ---- the favours: each is an ordinary quest ---- */
-QAREA_ORDER.splice(QAREA_ORDER.indexOf('Elsewhere'),0,'Wanderers');
+QAREA_ORDER.splice(QAREA_ORDER.indexOf('Elsewhere'),0,'Wandering Monsters');
 const wPlace=id=>{const r=((G.flags.wRec||{})[id])||null;return r&&LEVEL_NAMES[r.lv]?LEVEL_NAMES[r.lv]:'where you met'};
 for(const w of WANDERERS){
   const q=w.q;if(!q)continue;const id='wq_'+w.id;
@@ -13725,7 +13725,7 @@ for(const w of WANDERERS){
     goal:q.item?()=>Math.min(bagCount(q.item),q.n):q.gold?()=>G.gold>=q.gold?1:0:g=>Math.min(q.kills,G.kills-(g.base||0)),
     take:q.item?{[q.item]:q.n}:undefined};
   Object.defineProperty(QUESTS[id],'desc',{enumerable:true,get(){return q.item?'Bring '+q.n+' x '+(ITEMDEF[q.item]?ITEMDEF[q.item].n:q.item)+' to '+w.n+', last seen '+wPlace(w.id)+'. The shops and the wild have them.':q.gold?w.n+' wants '+q.gold+' gold to let you pass. Last seen '+wPlace(w.id)+'.':w.n+' wants '+q.kills+' creatures laid to rest. Last seen '+wPlace(w.id)+'.'}});
-  QAREA[id]='Wanderers';QGIVER['w_'+w.id]=id;
+  QAREA[id]='Wandering Monsters';QGIVER['w_'+w.id]=id;
   const root=d=>{
     const F=G.flags;
     if(qSt(id)==='done')return say(q.after,[BYE]);
@@ -13870,7 +13870,7 @@ function wLevelOk(){
   let open=0;for(let y=0;y<MH;y++)for(let x=0;x<MW;x++)if(G.grid[y][x]===0)open++;
   return open>=300;
 }
-function wMet(id){const F=G.flags;F.wMet=F.wMet||{};if(!F.wMet[id]){F.wMet[id]=1;msg('A new entry in the Wanderers menu: '+WBY[id].n+'.','#e0c8ff')}}
+function wMet(id){const F=G.flags;F.wMet=F.wMet||{};if(!F.wMet[id]){F.wMet[id]=1;msg('A new entry in the Wandering Monsters menu: '+WBY[id].n+'.','#e0c8ff')}}
 function wPlaceWanderer(){
   const F=G.flags;F.wRoll=F.wRoll||{};F.wRec=F.wRec||{};
   // those already standing on this level
@@ -13927,7 +13927,7 @@ function wSil(id){ // an unmet creature, as a black shape
 function drawWanderers(){
   BTNS=[];veil(.7);bigPanel(24,8,432,304);
   const F=G.flags,met=id=>!!(F.wMet&&F.wMet[id]);G.wsel=clamp(G.wsel||0,0,WANDERERS.length-1);
-  txt('THE WANDERERS',240,24,13,'#d8c88e','center',true);
+  txt('WANDERING MONSTERS',240,24,13,'#d8c88e','center',true);
   const n=WANDERERS.filter(w=>met(w.id)).length;txt(n+' of '+WANDERERS.length+' met',240,37,8.5,'#a89878','center');
   WANDERERS.forEach((w,i)=>{const y=48+i*15.2,sel=i===G.wsel;
     if(sel){ctx.fillStyle='rgba(216,200,142,.2)';ctx.fillRect(34,y-6,170,13)}
@@ -14840,7 +14840,7 @@ const STORY=[
 ];
 STORY.push(
   {id:'yarvillage',c:()=>G.flags.yarSeen,t:'The Village of Yarrim',x:'Yarrim is a hamlet that grew up by itself: one little cobbled road down to a harbour square, three lanes off it, a green behind the inn, and a dirt track at the back past two cottages to the gorge and the tunnel. Its people are small ones, and each has a favour to ask: a telescope stolen by a gull, a census of crabs, a message in a bottle, a left boot that is a right boot, a wedding of two boats, a donkey who will not budge, a thief of nets, a lantern at the bottom of the harbour, and a shanty with no last verse.'},
-  {id:'wanderers',c:()=>G.flags.wMet&&Object.keys(G.flags.wMet).length,t:'The Wanderers',x:'Strange things walk the levels without warning: the Ferryman of Dust, Mother Mossback, Aunt Marrow, the Hollow Bride and others, nine who ask for a favour and six who hunt. The rarest is the Messenger of Death, who writes the letters of his name on the walls, and whose letters kill when all five have been read. The Wanderers page in the main menu keeps a record of each one met.'},
+  {id:'wanderers',c:()=>G.flags.wMet&&Object.keys(G.flags.wMet).length,t:'The Wandering Monsters',x:'Strange things walk the levels without warning: the Ferryman of Dust, Mother Mossback, Aunt Marrow, the Hollow Bride and others, nine who ask for a favour and six who hunt. The rarest is the Messenger of Death, who writes the letters of his name on the walls, and whose letters kill when all five have been read. The Wanderers page in the main menu keeps a record of each one met.'},
   {id:'open',c:()=>G.flags.pardoned,t:'What is still open',x:'The warrant is torn up and Lord Corvane is dead, but the story does not end at the pardon. The Dawn Walker is the ship of the party, with the whole Vaast Sea around her. Oldhaven, the city of the king, is a stony castle town with a court and a throne. The wanderers keep walking, the Messenger is somewhere in the dark of every level, and nobody has yet said where the road goes from here.'});
 function storyNext(){ // what to do next, from the chapter the party has reached
   const F=G.flags;
