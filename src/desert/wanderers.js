@@ -225,12 +225,14 @@ function dropNamed(e,def){
 function wLevelOk(){
   const L=LEVELS[LEVEL];if(!L||LEVEL>=200&&LEVEL<1000&&!L.outdoor)return false;if(LEVEL>=1000)return false;
   if(LEVEL>=291&&LEVEL<=299)return false;
+  if(LEVEL===330||(typeof uwLv==='function'&&uwLv(LEVEL)))return false; // nobody stands on the open sea, and nobody waits under it
   let open=0;for(let y=0;y<MH;y++)for(let x=0;x<MW;x++)if(G.grid[y][x]===0)open++;
   return open>=300;
 }
 function wMet(id){const F=G.flags;F.wMet=F.wMet||{};if(!F.wMet[id]){F.wMet[id]=1;msg('A new entry in the Wandering Monsters menu: '+WBY[id].n+'.','#e0c8ff')}}
 function wPlaceWanderer(){
   const F=G.flags;F.wRoll=F.wRoll||{};F.wRec=F.wRec||{};
+  for(const id in F.wRec){const r=F.wRec[id];if(r.lv===330||(typeof uwLv==='function'&&uwLv(r.lv)))delete F.wRec[id]} // one that was left standing on the water is sent back to the land
   // those already standing on this level
   for(const id in F.wRec){const r=F.wRec[id];if(r.lv!==LEVEL)continue;const w=WBY[id];if(!w||(F.wDone&&F.wDone[id]))continue;
     if(w.mode==='quest')G.decor.push({k:w.key,x:r.x,y:r.y,block:false,walk:true,npc:'w_'+id,sc:1,wander:1})}
@@ -239,7 +241,8 @@ function wPlaceWanderer(){
   if(Object.values(F.wRec).some(r=>r.lv===LEVEL))return;
   const pool=WANDERERS.filter(w=>w.id!=='messenger'&&!(F.wRec[w.id]&&w.mode==='quest')&&!(F.wDone&&F.wDone[w.id]));
   if(!pool.length)return;const w=pool[(Math.random()*pool.length)|0];
-  const cells=wReach(G.P.x,G.P.y,26).filter(c=>c[2]>=8&&!G.decor.some(d=>d.x===c[0]&&d.y===c[1]&&d.block));
+  const TT=TERRS[LEVEL];
+  const cells=wReach(G.P.x,G.P.y,26).filter(c=>c[2]>=8&&!G.decor.some(d=>d.x===c[0]&&d.y===c[1]&&d.block)&&!(TT&&TT.h[c[1]*TT.W+c[0]]<.02)); // on dry ground only
   if(!cells.length)return;const c=cells[(Math.random()*cells.length)|0];
   if(w.mode==='quest'){
     F.wRec[w.id]={lv:LEVEL,x:c[0],y:c[1]};
