@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.90';
+const VERSION='3.91';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3914,6 +3914,9 @@ function restoreNow(sv){
   if(sv.torchKeys){const ks=new Set(sv.torchKeys);LIGHTS.forEach(l=>{if(ks.has(l.key)){l.taken=true;torchAt.delete(l.key)}})}
   else if(sv.torches&&sv.torches.length===LIGHTS.length)LIGHTS.forEach((l,i)=>{if(sv.torches[i]){l.taken=true;torchAt.delete(l.key)}});
   G.state='play';G.menu=false;G.map=false;G.inv.open=false;G.loot=null;G.saves=null;G.nextAuto=G.time+180;G.lastReg=-2;G.flags=sv.flags||{};G.quests=sv.quests||{};G.lst=sv.lst||{};G.clock=sv.clock||480;G.talk=null;G.cut=null;G.arrows=[];
+  { // one-off correction 3 (asked for by the owner): a young party with more than 1000 gold is set to 1000
+    const F=G.flags;if(!F.goldFix390){F.goldFix390=1;if(G.gold>1000&&Math.max(...G.heroes.map(h=>h.lvl))<=20){G.gold=1000;setTimeout(()=>msg('Your gold has been set to 1000.','#e8c870'),1200)}}
+  }
   { // one-off correction 2: before v3.85 the guards in Halbrecht's fight paid by level; a young party that took it is set back to 1000
     const F=G.flags;if(!F.goldFix385){F.goldFix385=1;if(F.halDown&&G.gold>1000&&Math.max(...G.heroes.map(h=>h.lvl))<=20){G.gold=1000;setTimeout(()=>msg('The windfall from Ironhill has been taken back. The party has 1000 gold.','#e8c870'),900)}}
   }
