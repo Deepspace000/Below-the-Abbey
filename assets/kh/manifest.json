@@ -2420,5 +2420,376 @@
 "h": 115,
 "kind": "sprite",
 "sheet": "ycrab2"
+},
+"ohroof1_0": {
+"file": "ohroof1_0.webp",
+"w": 303,
+"h": 229,
+"kind": "sprite",
+"sheet": "ohroof1"
+},
+"ohroof1_1": {
+"file": "ohroof1_1.webp",
+"w": 301,
+"h": 230,
+"kind": "sprite",
+"sheet": "ohroof1"
+},
+"ohroof1_2": {
+"file": "ohroof1_2.webp",
+"w": 302,
+"h": 231,
+"kind": "sprite",
+"sheet": "ohroof1"
+},
+"ohroof1_3": {
+"file": "ohroof1_3.webp",
+"w": 303,
+"h": 248,
+"kind": "sprite",
+"sheet": "ohroof1"
+},
+"ohroof1_4": {
+"file": "ohroof1_4.webp",
+"w": 303,
+"h": 233,
+"kind": "sprite",
+"sheet": "ohroof1"
+},
+"ohroof1_5": {
+"file": "ohroof1_5.webp",
+"w": 303,
+"h": 177,
+"kind": "sprite",
+"sheet": "ohroof1"
+},
+"ohsold1_0": {
+"file": "ohsold1_0.webp",
+"w": 144,
+"h": 292,
+"kind": "sprite",
+"sheet": "ohsold1"
+},
+"ohsold1_1": {
+"file": "ohsold1_1.webp",
+"w": 172,
+"h": 284,
+"kind": "sprite",
+"sheet": "ohsold1"
+},
+"ohsold1_2": {
+"file": "ohsold1_2.webp",
+"w": 147,
+"h": 284,
+"kind": "sprite",
+"sheet": "ohsold1"
+},
+"ohsold1_3": {
+"file": "ohsold1_3.webp",
+"w": 145,
+"h": 304,
+"kind": "sprite",
+"sheet": "ohsold1"
+},
+"ohsold1_4": {
+"file": "ohsold1_4.webp",
+"w": 193,
+"h": 318,
+"kind": "sprite",
+"sheet": "ohsold1"
+},
+"ohsold1_5": {
+"file": "ohsold1_5.webp",
+"w": 115,
+"h": 278,
+"kind": "sprite",
+"sheet": "ohsold1"
+},
+"ohcourt1_0": {
+"file": "ohcourt1_0.webp",
+"w": 140,
+"h": 297,
+"kind": "sprite",
+"sheet": "ohcourt1"
+},
+"ohcourt1_1": {
+"file": "ohcourt1_1.webp",
+"w": 135,
+"h": 294,
+"kind": "sprite",
+"sheet": "ohcourt1"
+},
+"ohcourt1_2": {
+"file": "ohcourt1_2.webp",
+"w": 118,
+"h": 300,
+"kind": "sprite",
+"sheet": "ohcourt1"
+},
+"ohcourt1_3": {
+"file": "ohcourt1_3.webp",
+"w": 148,
+"h": 306,
+"kind": "sprite",
+"sheet": "ohcourt1"
+},
+"ohcourt1_4": {
+"file": "ohcourt1_4.webp",
+"w": 144,
+"h": 280,
+"kind": "sprite",
+"sheet": "ohcourt1"
+},
+"ohcourt1_5": {
+"file": "ohcourt1_5.webp",
+"w": 140,
+"h": 306,
+"kind": "sprite",
+"sheet": "ohcourt1"
+},
+"ohfolk1_0": {
+"file": "ohfolk1_0.webp",
+"w": 119,
+"h": 261,
+"kind": "sprite",
+"sheet": "ohfolk1"
+},
+"ohfolk1_1": {
+"file": "ohfolk1_1.webp",
+"w": 124,
+"h": 249,
+"kind": "sprite",
+"sheet": "ohfolk1"
+},
+"ohfolk1_2": {
+"file": "ohfolk1_2.webp",
+"w": 127,
+"h": 262,
+"kind": "sprite",
+"sheet": "ohfolk1"
+},
+"ohfolk1_3": {
+"file": "ohfolk1_3.webp",
+"w": 152,
+"h": 258,
+"kind": "sprite",
+"sheet": "ohfolk1"
+},
+"ohfolk1_4": {
+"file": "ohfolk1_4.webp",
+"w": 97,
+"h": 259,
+"kind": "sprite",
+"sheet": "ohfolk1"
+},
+"ohfolk1_5": {
+"file": "ohfolk1_5.webp",
+"w": 122,
+"h": 244,
+"kind": "sprite",
+"sheet": "ohfolk1"
+},
+"ohfolk2_0": {
+"file": "ohfolk2_0.webp",
+"w": 120,
+"h": 251,
+"kind": "sprite",
+"sheet": "ohfolk2"
+},
+"ohfolk2_1": {
+"file": "ohfolk2_1.webp",
+"w": 91,
+"h": 254,
+"kind": "sprite",
+"sheet": "ohfolk2"
+},
+"ohfolk2_2": {
+"file": "ohfolk2_2.webp",
+"w": 102,
+"h": 254,
+"kind": "sprite",
+"sheet": "ohfolk2"
+},
+"ohfolk2_3": {
+"file": "ohfolk2_3.webp",
+"w": 128,
+"h": 237,
+"kind": "sprite",
+"sheet": "ohfolk2"
+},
+"ohfolk2_4": {
+"file": "ohfolk2_4.webp",
+"w": 90,
+"h": 251,
+"kind": "sprite",
+"sheet": "ohfolk2"
+},
+"ohfolk2_5": {
+"file": "ohfolk2_5.webp",
+"w": 94,
+"h": 244,
+"kind": "sprite",
+"sheet": "ohfolk2"
+},
+"ohwall1_0": {
+"file": "ohwall1_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall1"
+},
+"ohwall1_1": {
+"file": "ohwall1_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall1"
+},
+"ohwall1_2": {
+"file": "ohwall1_2.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall1"
+},
+"ohwall1_3": {
+"file": "ohwall1_3.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall1"
+},
+"ohwall1_4": {
+"file": "ohwall1_4.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall1"
+},
+"ohwall1_5": {
+"file": "ohwall1_5.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall1"
+},
+"ohgate1_0": {
+"file": "ohgate1_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohgate1"
+},
+"ohgate1_1": {
+"file": "ohgate1_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohgate1"
+},
+"ohtower1_0": {
+"file": "ohtower1_0.webp",
+"w": 126,
+"h": 280,
+"kind": "sprite",
+"sheet": "ohtower1"
+},
+"ohtower1_1": {
+"file": "ohtower1_1.webp",
+"w": 88,
+"h": 277,
+"kind": "sprite",
+"sheet": "ohtower1"
+},
+"ohtower1_2": {
+"file": "ohtower1_2.webp",
+"w": 124,
+"h": 185,
+"kind": "sprite",
+"sheet": "ohtower1"
+},
+"ohtower1_3": {
+"file": "ohtower1_3.webp",
+"w": 224,
+"h": 276,
+"kind": "sprite",
+"sheet": "ohtower1"
+},
+"ohtower1_4": {
+"file": "ohtower1_4.webp",
+"w": 108,
+"h": 294,
+"kind": "sprite",
+"sheet": "ohtower1"
+},
+"ohtower1_5": {
+"file": "ohtower1_5.webp",
+"w": 147,
+"h": 293,
+"kind": "sprite",
+"sheet": "ohtower1"
+},
+"ohkeep1_0": {
+"file": "ohkeep1_0.webp",
+"w": 419,
+"h": 419,
+"kind": "sprite",
+"sheet": "ohkeep1"
+},
+"ohkeep1_1": {
+"file": "ohkeep1_1.webp",
+"w": 422,
+"h": 421,
+"kind": "sprite",
+"sheet": "ohkeep1"
+},
+"ohprops1_1": {
+"file": "ohprops1_1.webp",
+"w": 89,
+"h": 245,
+"kind": "sprite",
+"sheet": "ohprops1"
+},
+"ohprops1_2": {
+"file": "ohprops1_2.webp",
+"w": 85,
+"h": 273,
+"kind": "sprite",
+"sheet": "ohprops1"
+},
+"ohprops1_4": {
+"file": "ohprops1_4.webp",
+"w": 202,
+"h": 200,
+"kind": "sprite",
+"sheet": "ohprops1"
+},
+"ohprops1_5": {
+"file": "ohprops1_5.webp",
+"w": 165,
+"h": 199,
+"kind": "sprite",
+"sheet": "ohprops1"
+},
+"ohprops1_6": {
+"file": "ohprops1_6.webp",
+"w": 168,
+"h": 114,
+"kind": "sprite",
+"sheet": "ohprops1"
+},
+"ohprops1_7": {
+"file": "ohprops1_7.webp",
+"w": 75,
+"h": 101,
+"kind": "sprite",
+"sheet": "ohprops1"
+},
+"ohtreb1_0": {
+"file": "ohtreb1_0.webp",
+"w": 329,
+"h": 259,
+"kind": "sprite",
+"sheet": "ohtreb1"
 }
 }

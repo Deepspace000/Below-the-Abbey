@@ -9,7 +9,7 @@
    Quests: mq1 mq2 (Khemetra), yar2 .. yar7 (the road to Yarrim), vq1 .. vq5 (the islands and home).
    ========================================================================== */
 for(const n of ['bench','ship_dawn','ship_heron','palms','tent','arch','wreck','runestone','crystals','bones','altar','p_king','p_corvane','p_maeve','p_aldous','p_ketra','p_isolde'])loadImg('yar_'+n,'assets/yar_'+n+'.png');
-Object.assign(NPC_H,{yar_bench:.62,yar_ship_dawn:2.6,yar_ship_heron:2.8,yar_palms:1.7,yar_tent:1.0,yar_arch:1.6,yar_wreck:1.7,yar_runestone:1.4,yar_crystals:.9,yar_bones:.55,yar_altar:.95,yar_p_king:1,yar_p_corvane:1,yar_p_maeve:.95,yar_p_aldous:.92,yar_p_ketra:.95,yar_p_isolde:.9});
+Object.assign(NPC_H,{yar_bench:.62,yar_ship_dawn:2.6,yar_ship_heron:2.8,yar_palms:1.7,yar_tent:1.0,yar_arch:1.6,yar_wreck:1.7,yar_runestone:1.4,yar_crystals:.9,yar_bones:.55,yar_altar:.95,yar_p_king:1,yar_p_corvane:1,yar_p_maeve:.95,yar_p_aldous:.92,yar_p_ketra:.72,yar_p_isolde:.9});
 Object.assign(ENEMY_DEF,{
   assassin:{name:'Assassin',hp:70,dmg:[9,14],hit:.8,w:.5,img:'assassin',xp:140,gold:[40,90],speed:1,verb:'stabs',aboveParty:1},
   cinder:{name:'Cinder Guardian',hp:260,dmg:[11,17],hit:.8,w:1.3,img:'yar_crystals',xp:900,gold:[200,320],speed:1,verb:'smashes',aboveParty:2},

@@ -113,9 +113,11 @@ CUTS.msgrTouch=()=>[
   {who:hn(0),text:'Then we find him first. Before the walls do.'},
   {who:hn(3),text:'I am going to be sick. Somebody tell me what the first letter is when we see it, because I do not want to know.'}];
 CUTS.msgrDeath=()=>[
-  {text:'The last letter is a crooked H, drips running down it from the crossbar, and as the party reads it the other four come back, one after another, in the order they were read: D. E. A. T. H.'},
-  {text:'It was never a curse on the walls. It was a curse on the reading.'},
-  {text:'The torches go out together. Nobody screams. The Messenger of Death, a little way off in the dark, is smiling the widest smile of all.'}];
+  {text:'The last letter is a crooked H, drips running down it from the crossbar. It is the fifth. D. E. A. T. H.'},
+  {who:hn(1),text:'It is too late. You have seen all the letters.'},
+  {text:'The torches go out together. In the dark, very close, something very thin and very black is smiling the widest smile of all, and its long fingers are already reaching.'},
+  {text:'The Messenger of Death comes through the party like a cold wind, touching each of the four in turn, and nobody has time to scream.'},
+  {text:'Four torches lie on the floor, burning, and then not.'}];
 function msgrPlace(){ // called when a level is built
   const F=G.flags;F.wRoll=F.wRoll||{};
   const dead=(F.msgrLv&&F.msgrLv[LEVEL]&&F.msgrLv[LEVEL].dead);

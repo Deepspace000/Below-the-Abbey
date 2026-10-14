@@ -4,7 +4,7 @@
      300 Saltbarrow (pirates)  301 The Isle of Bells (a drowned abbey)  302 Cinder Isle (a volcano)  303 Last Light (a ruined beacon)
      304 Oldhaven Quay (the harbour of the king's city, where this part of the story ends)
    ========================================================================== */
-const yarSea=n=>n===290||(n>=300&&n<=305);
+const yarSea=n=>n===290||(n>=300&&n<=304);
 const SEA_TINT={305:[.96,.93,.88],300:[1.05,.98,.9],301:[.8,.9,.82],302:[.55,.5,.52],303:[.85,.88,.96],304:[.96,.93,.88]};
 const SEA={
   300:{name:'Saltbarrow',label:'Saltbarrow',cx:50,cy:40,rx:27,ry:20,peak:2.2,pow:1.4,seed:31,diff:17,
@@ -50,7 +50,7 @@ function seaBuild(id){
   // walls and gate (Oldhaven)
   for(const [x0,y0,x1,y1,ch] of sp.walls||[])for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){rows[y][x]=ch;block[y*W+x]=1}
   const portals=[];
-  if(sp.gate){rows[sp.gate[1]][sp.gate[0]]='1';block[sp.gate[1]*W+sp.gate[0]]=1;portals[1]={to:305,x:45,y:62,f:0,tex:'citygate',req:'oldhavenOpen',lock:'The great gate of Oldhaven is barred until noon. Speak to the herald.'}}
+  if(sp.gate){rows[sp.gate[1]][sp.gate[0]]='1';block[sp.gate[1]*W+sp.gate[0]]=1;portals[1]={to:305,x:74,y:141,f:0,tex:'citygate',req:'oldhavenOpen',lock:'The great gate of Oldhaven is barred until noon. Speak to the herald.'}}
   const spot=(dx,dy)=>{for(let r=0;r<14;r++)for(let yy=-r;yy<=r;yy++)for(let xx=-r;xx<=r;xx++){if(Math.max(Math.abs(xx),Math.abs(yy))!==r)continue;const x=cx+dx+xx,y=cy+dy+yy;if(x<2||y<2||x>=W-2||y>=H-2)continue;if(!block[y*W+x]&&rows[y][x]==='.')return [x,y]}return null};
   // the pier and the ship
   let sy=-1;for(let y=H-2;y>0;y--)if(!block[y*W+cx]&&h[y*W+cx]>-.06){sy=y;break}
