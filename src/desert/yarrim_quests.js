@@ -310,3 +310,11 @@ yrHook('yr_fisher2',d=>{
 
 /* a few more words from the people who belong to no quest, so that the village talks */
 khNpc('yr_tam','Tam, a boy with a kite','kh_yfolk3_4',d=>yrLines('tam',["I flew my kite over the lighthouse and it saw the whole sea. Now it will not stop talking about it.","The wind here is always going somewhere. I do not know where. I follow it, but it is quicker.","If you let go of the string, the kite goes up and up and never comes back. That is not a mistake. That is a plan."]));
+
+/* ---- the people at home in the cottages: five households, a few lines each ---- */
+[['yc_res0','A fisherman, mending','kh_yfolk2_4',["Home for the tide. I mend one thing, the sea breaks two. It is a fair arrangement, if you do not look at the figures.","If you are going out on the water, take a second hat. The first one will go to the gulls.","My wife says I smell of herring. I say herring is a perfume, and the rest of the world is simply not trying."]],
+ ['yc_res1','A net-mender','kh_yfolk3_0',["Every hole in a net is a fish that got away, and I take it personally.","Mind the loom. It has opinions, and one of them is about you.","They say the old net racks on the beach get robbed at night. I say let them. I have mended worse."]],
+ ['yc_res2','A widow','kh_yfolk1_0',["The sea took my husband and gave me this view in exchange. I have decided the view was the better of the two. Do not tell him.","There is a bird in the cage, but he does not sing. He thinks about it. I have never pressed him.","Tea is hot, if you want it. It has been hot for nineteen years."]],
+ ['yc_res3','A boatbuilder','kh_yfolk2_0',["A boat is a promise made of wood, and every plank is a small lie that the sea is trying to disprove.","Selk sells them, I build them, and neither of us has ever been paid on the day. That is the trade.","Careful with the model. It took a winter, and it is the only ship in Yarrim that has never sunk."]],
+ ['yc_res4','A fisher, half asleep','kh_yfolk2_3',["Shh. I was out before dawn. I am going to sit very still and pretend it was a dream.","We are not poor. We are... streamlined.","The herring were thick today, and the gulls knew it before I did. Gulls always know."]]
+].forEach(([id,nm,face,lines],i)=>khNpc(id,nm,face,()=>yrLines('cot'+i,lines)));

@@ -77,6 +77,21 @@ const YR_TPL={
   }})
 };
 
+/* ---- the cottages: seven squares by six, a wooden floor, a hearth or a bed or a loom, and the things of the trade. Some have someone at home. ---- */
+const YR_COT0=1500;   // the level numbers of the cottage rooms
+const YR_COT_SETS=[
+  {n:"A Fisherman's Cottage",tele:[1,4],item:[5,4],res:[2,2],who:0,build:({put,raw})=>{put('hearth',3,1);put('bed',1,1);put('table',5,3);put('chair',4,3);put('rope',1,3);raw('yar_bucket2',5,1);raw('barrel',6,1);put('sail',6,4)}},
+  {n:"A Net-Mender's Cottage",tele:[6,4],item:[2,4],res:[4,2],who:1,build:({put,raw})=>{put('loom',5,1);put('potshelf',1,1);put('table',1,3);put('chair',2,3);put('sail',6,3);put('sail',6,2);raw('crate',5,4);raw('yar_bucket4',1,4)}},
+  {n:"A Widow's Cottage",tele:[6,4],item:[4,4],res:[2,3],who:2,build:({put,raw})=>{put('hearth',5,1);put('kitchenshelf',2,1);put('bed',1,2);put('birdcage',1,4);put('table',5,3);put('chair',6,3)}},
+  {n:"A Boatbuilder's House",tele:[1,4],item:[2,4],res:[4,2],who:3,build:({put,raw})=>{raw('crate',1,1);raw('barrel',2,1);put('wheel',5,1);put('ship',6,1);put('anchor',6,3);put('rope',1,3);put('seachest',5,4)}},
+  {n:"A Poor Fisher's Hut",tele:[6,2],item:[4,4],res:[2,3],who:4,build:({put,raw})=>{put('bed',1,1);put('potshelf',5,1);put('amphora',1,4);put('table',5,3);put('chair',5,4);raw('yar_bucket3',6,4)}}
+];
+const YR_COT_ITEMS=['bread','herring','ale','apple'];
+function YR_COT_TPL(c){
+  const set=YR_COT_SETS[c.set];
+  return b=>({w:7,h:6,floor:'wood',tele:set.tele,items:c.item?[{k:YR_COT_ITEMS[(c.k+c.set)%YR_COT_ITEMS.length],x:set.item[0],y:set.item[1]}]:[],lights:[[2,2],[5,2],[3,4]],
+    build:({put,raw,npc})=>{set.build({put,raw});if(c.res)npc('yc_res'+set.who,set.res[0],set.res[1])}});
+}
 /* ---- the tiles of the walls: plaster, windows, doors and the painted sea-green nets, each at the height of its own cottage ---- */
 function yarTileMaker(){
   const cache={};
@@ -138,7 +153,7 @@ function yarBuild(){
   // ---- the cottages ----
   const TM=yarTileMaker(),chars={D:LEVEL41_DATA.chars.D},chMap=new Map();let nextCh=0x300;
   const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
-  const roofs=[],signs=[],specialDoors={};
+  const roofs=[],signs=[],specialDoors={},cots=[];
   const SIDE=['yarrose','yarnet','yardrift'];
   const hs=(a,b,c)=>hash2(a,b,c);
   for(const hz of P.houses){
@@ -149,10 +164,13 @@ function yarBuild(){
     for(let y=hz.y0;y<=hz.y1;y++)for(let x=hz.x0;x<=hz.x1;x++){
       const front=hz.face==='S'?y===hz.y1:hz.face==='N'?y===hz.y0:hz.face==='E'?x===hz.x1:x===hz.x0,isDoor=x===hz.door[0]&&y===hz.door[1];
       let c;
-      if(isDoor)c=S?String(S.p):ch(TM.door((hs(hz.x0,hz.y0,65)*YR_DOORTEX.length)|0,wh));
+      if(isDoor){
+        if(S)c=String(S.p);
+        else{const k=cots.length,p=10+k;c=String.fromCharCode(nextCh++);chars[c]=30+p;cots.push({p,hz,k,style:(hs(hz.x0,hz.y0,65)*YR_DOORTEX.length)|0,set:(hs(hz.x0,hz.y0,81)*YR_COT_SETS.length)|0,res:hs(hz.x0,hz.y0,82)<.7,item:hs(hz.x0,hz.y0,83)<.5})}
+      }
       else if(front)c=win;
       else c=((hz.face==='E'||hz.face==='W')?(y===hz.y0||y===hz.y1):(x===hz.x0||x===hz.x1))?oddC:plain;
-      rows[y][x]=c;block[y*W+x]=1;fm[y*W+x]='0';
+      rows[y][x]=c;block[y*W+x]=isDoor?0:1;fm[y*W+x]='0';
     }
     if(S){hz.p=S.p;specialDoors[S.p]=hz}
     // the roof: a painted gable, straight on, standing on the walls and about as wide as the cottage
@@ -162,7 +180,7 @@ function yarBuild(){
   // the lighthouse: a squat stone tower on the point, with a brazier burning at its door
   const LH=P.light,lhWh=2.5,lhPlain=ch(TM.plain(5,lhWh));
   for(let y=LH.y0;y<=LH.y1;y++)for(let x=LH.x0;x<=LH.x1;x++){rows[y][x]=lhPlain;block[y*W+x]=1;fm[y*W+x]='0'}
-  {const hz={x0:LH.x0,x1:LH.x1,y0:LH.y0,y1:LH.y1,door:LH.door,front:LH.front,face:'W',wh:lhWh,w:3,d:3,sp:{id:'light'}};P.lighthouse=hz;specialDoors[8]=hz;rows[LH.door[1]][LH.door[0]]='8';
+  {const hz={x0:LH.x0,x1:LH.x1,y0:LH.y0,y1:LH.y1,door:LH.door,front:LH.front,face:'W',wh:lhWh,w:3,d:3,sp:{id:'light'}};P.lighthouse=hz;specialDoors[8]=hz;rows[LH.door[1]][LH.door[0]]='8';block[LH.door[1]*W+LH.door[0]]=0;
     for(let y=LH.y0;y<=LH.y1;y++)for(let x=LH.x0;x<=LH.x1;x++){const i=y*W+x;h[i]=Math.max(h[i],.5)}
     for(let y=LH.y0-2;y<=LH.y1+2;y++)for(let x=LH.x0-3;x<=LH.x1+2;x++){const i=y*W+x;if(!block[i]||(x>=LH.x0&&x<=LH.x1&&y>=LH.y0&&y<=LH.y1))continue;block[i]=0}}
   roofs.push({x:(LH.x0+LH.x1+1)/2,y:(LH.y0+LH.y1+1)/2,k:'yar_roof4',w:3.9,z:lhWh-.03});
@@ -291,6 +309,18 @@ function yarBuild(){
     const hz=specialDoors[q.p],wh=hz?hz.wh:1.5;
     const name=TM.portalDoor(q.door,wh);
     lv.portals[q.p]={to:YR.FIRST+q.p-1,x:q.start[0],y:q.start[1],f:0,tex:name};
+  }
+  // each plain cottage has a door that opens, on a humble room of its own
+  for(const c of cots){
+    const hz=c.hz,[fx,fy]=hz.front,out=hz.face==='S'?2:hz.face==='N'?0:hz.face==='W'?3:1,set=YR_COT_SETS[c.set],id=YR_COT0+c.k,name=set.n;
+    const tex=TM.portalDoor(YR_DOORTEX[c.style%YR_DOORTEX.length],hz.wh);
+    lv.portals[c.p]={to:id,x:3,y:4,f:0,tex};
+    LEVEL_NAMES[id]=name;
+    KH_LAZY[id]=()=>{
+      if(LEVELS[id])return;
+      const b={id:'yc'+c.k,name,room:'home',keeper:null,tpl:YR_COT_TPL(c),wallImg:'kh_ywall1_'+hz.hue};
+      const R=khRoom(b,id,{to:YR.ID,x:fx,y:fy,f:out});LEVELS[id]=R.level;LEVEL_NAMES[id]=name;
+    };
   }
   LEVELS[YR.ID]=lv;LEVEL_NAMES[YR.ID]='Yarrim';
   TERRS[YR.ID]=yarTerrain(W,H,h,rk,block);
