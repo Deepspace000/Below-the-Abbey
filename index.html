@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.41';
+const VERSION='3.42';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1305,6 +1305,7 @@ function stepSample(){ // the cobble recordings were 20 dB louder than the rest 
 
 function sfx(n){
   if(!AC||G.mute)return;
+  if(n==='bump'){if(G.bumpT&&G.time-G.bumpT<1.5)return;G.bumpT=G.time}else if(n==='step')G.bumpT=0; // a wall bumps once, however long the key is held
   if((n==='step'||n==='turn'||n==='bump')&&!SNDOPT.steps)return;
   if(SND_COMBAT.has(n)&&!SNDOPT.combat)return;
   SFXM=(n==='step'||n==='turn'||n==='bump')?SNDOPT.steps:SND_COMBAT.has(n)?SNDOPT.combat:1;
@@ -4145,6 +4146,9 @@ const WORLD_LOCS=[
 ];
 const WORLD_ROADS=[['abbey','thornwood','thornwick','gwood'],['gwood','road','tunnel','ironhill'],['ironhill','graves'],['ironhill','mines'],['ironhill','moor','pass','greendale','anaea']];
 function lab(s,x,y,size,col){ctx.save();ctx.font=`bold ${size}px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(200,184,140,.9)';ctx.strokeText(s,x,y);ctx.fillStyle=col;ctx.fillText(s,x,y);ctx.restore()}
+const QWORLD={'Thornwick':'thornwick','The Road to Ironhill':'road','Ironhill':'ironhill','Greyfang Pass':'pass','Greendale':'greendale','The Wilds':'thornwood','Khemetra':'scoria','Yarrim':'yarrim'};
+const QWORLD_ID={vq1:'saltbarrow',vq2:'bells',vq3:'cinder',vq4:'lastlight',vq6:'oldhaven',yar7:'yarrim',vq5:'yarrim',colours:'anaea',anaea_shake:'anaea',anaea_fence:'anaea',thornwick_shake:'thornwick',thornwick_fence:'thornwick',ironhill_shake:'ironhill',ironhill_fence:'ironhill',khemetra_shake:'scoria',khemetra_fence:'scoria'};
+function questsLeft(){const o={};for(const id of Object.keys(QUESTS)){if(qSt(id)==='done')continue;const k=QWORLD_ID[id]||QWORLD[QAREA[id]];if(k)o[k]=(o[k]||0)+1}return o}
 function drawWorldMap(){
   BTNS=[];veil(1);
   const x0=14,y0=14,w=452,h=292,ink='#2a1c0e';
@@ -4197,7 +4201,7 @@ function drawWorldMap(){
     ctx.font=`italic 20px ${FTITLE}`;ctx.fillStyle='rgba(30,44,52,.72)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('The Vaast Sea',836,24);
     ctx.font=`italic 8px ${FTITLE}`;ctx.fillStyle='rgba(30,44,52,.6)';ctx.fillText('a great ocean, and no charts',836,38);ctx.fillText('the western coast lies on the far side',836,330);
   }
-  const by={};WORLD_LOCS.forEach(l=>by[l.k]=l);
+  const by={};WORLD_LOCS.forEach(l=>by[l.k]=l);const QLEFT=questsLeft();
   ctx.strokeStyle='rgba(50,34,18,.75)';ctx.lineWidth=1.5;ctx.setLineDash([2.5,3.5]);
   for(const r of WORLD_ROADS){ctx.beginPath();r.forEach((k,i)=>{const l=by[k];if(i===0)ctx.moveTo(l.x,l.y);else ctx.lineTo(l.x,l.y)});ctx.stroke()}
   ctx.beginPath();ctx.moveTo(402,238);ctx.lineTo(466,228);ctx.lineTo(500,196);ctx.lineTo(506,136);ctx.lineTo(498,96);ctx.lineTo(486,56);ctx.stroke();ctx.setLineDash([]);
@@ -4226,6 +4230,8 @@ function drawWorldMap(){
     const big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey';
     lab(l.n,l.x,l.y+(l.ic==='castle'?24:l.ic==='mountains'?20:18),big?10:8.5,v?'#1c1208':'#5a4a30');
     if(l.sub)lab(l.sub,l.x,l.y+29,7,'#4a3a22');
+    const nq=QLEFT[l.k]||0;
+    if(nq){const y0=l.y+(l.sub?38:29);ctx.fillStyle='#b02818';for(let i=0;i<nq;i++){const row=(i/14)|0,inRow=Math.min(14,nq-row*14),col=i%14;ctx.beginPath();ctx.arc(l.x+(col-(inRow-1)/2)*3.4,y0+row*3.4,1.15,0,TAU);ctx.fill()}}
   }
   // you are here
   if(here){const pulse=.5+.5*Math.sin(G.time*4);ctx.strokeStyle=`rgba(150,30,20,${.55+.4*pulse})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(here.x,here.y,17+pulse*3,0,TAU);ctx.stroke();ctx.fillStyle='rgba(150,30,20,.9)';ctx.beginPath();ctx.arc(here.x,here.y-24,3.2,0,TAU);ctx.fill();ctx.beginPath();ctx.moveTo(here.x-4,here.y-22);ctx.lineTo(here.x+4,here.y-22);ctx.lineTo(here.x,here.y-14);ctx.closePath();ctx.fill()}
@@ -4249,8 +4255,14 @@ function drawWorldMap(){
 }
 /* the town map: drawn like the world map, with buildings, doors, gates and the people you can talk to */
 const MAP_PROPS=new Set(['notice','noticeboard','urn','memorial','lockedgate','gate','cairn','banner','grave','grave2','cross','goat','chicken','chicken2','fountain','well','statue','lamp','flowerpot','barrel','crate','cart','bench','fence','bones','hay','veg','bush','tsign']);
+const MAP_FLOOR={sand:'#d8c58f',cobble:'#b4aa98',wood:'#a6824f',bluesand:'#cfc9a6',bluesand2:'#cbc4a0',bluewater:'#8db3c2',lush:'#a3b878',sandpath:'#c4a56e',redsand:'#d3a078',redsand2:'#cf9a70',redpath:'#c48a5c',bluegrass:'#9fb98f',dgrass:'#b2b576',scrub:'#b9ae7a',trail:'#c0a672',forest:'#8fa06a',mud:'#a28b64',pale:'#d8d0b0',tombslab:'#a8a090',tombgold:'#c9b070'};
+const drawnMap=n=>{ // which levels get the hand-drawn parchment map: towns, every outdoor place, and every room and shop (not the crypts and dungeons)
+  if(n===44)return false;if(n===3||n===13)return true;const L=LEVELS[n];if(!L)return false;if(L.outdoor)return true;
+  if(n===1||n===42||n===65||(n>=50&&n<=151)||DUNGEON_LEVELS.includes(n)||EMBERS_LEVELS.includes(n))return false;
+  return !(G.enemies&&G.enemies.some(e=>e.hp>0))||n>=200;
+};
 function drawTownBody(cs,ox,oy){
-  const ink='#2a1c0e',halo='rgba(236,222,176,.85)';
+  const ink='#2a1c0e',halo='rgba(236,222,176,.85)',isT=LEVEL===3||LEVEL===13,L0=LEVELS[LEVEL],T0=(typeof TERRS!=='undefined'&&TERRS[LEVEL])||null,FS=L0&&L0.floorSet;
   const gr=ctx.createLinearGradient(0,0,0,DH);gr.addColorStop(0,'#bcaa7e');gr.addColorStop(1,'#9e8c64');ctx.fillStyle=gr;ctx.fillRect(0,0,DW,DH);
   ctx.save();ctx.globalAlpha=.13;for(let i=0;i<110;i++){const a=hash2(i,1,7),b=hash2(i,2,7);ctx.fillStyle=i%3?'#5a4630':'#e8dcb0';ctx.beginPath();ctx.ellipse(a*DW,b*DH,6+hash2(i,3,7)*30,3+hash2(i,4,7)*14,hash2(i,5,7)*3,0,TAU);ctx.fill()}ctx.restore();
   const lab=(t,x,y,sz,col)=>{ctx.save();ctx.font=`bold ${sz}px ${FUI}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=3;ctx.strokeStyle=halo;ctx.strokeText(t,x,y);ctx.fillStyle=col||ink;ctx.fillText(t,x,y);ctx.restore()};
@@ -4259,13 +4271,19 @@ function drawTownBody(cs,ox,oy){
   const isB=(x,y)=>!bord(x,y)&&G.grid[y]&&G.grid[y][x]>0;
   // ground
   const FM=G.fmap,GRND={48:'#cfc096',49:'#c3c590',50:'#c9b588',51:'#c4c596',52:'#c6b996',53:'#bfc19e'};
-  for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){
+  const vx0=Math.max(0,Math.floor(-ox/cs)),vx1=Math.min(MW,Math.ceil((DW-ox)/cs)),vy0=Math.max(0,Math.floor(-oy/cs)),vy1=Math.min(MH,Math.ceil((DH-oy)/cs));
+  for(let y=vy0;y<vy1;y++)for(let x=vx0;x<vx1;x++){
     if(bord(x,y)||G.grid[y][x]!==0)continue;
-    ctx.fillStyle=GRND[FM?FM.charCodeAt(y*MW+x):48]||'#cdbd90';ctx.fillRect(ox+x*cs,oy+y*cs,cs+.5,cs+.5);
+    const fc=FM?FM.charCodeAt(y*MW+x):48,fn=FS?FS[fc-48]:null;
+    if(T0&&T0.block[y*MW+x]&&!(fn&&/water/.test(fn))){ctx.fillStyle='#9a978a';ctx.fillRect(ox+x*cs,oy+y*cs,cs+.5,cs+.5);continue}
+    ctx.fillStyle=fn?(MAP_FLOOR[fn]||'#cdbd90'):(GRND[fc]||'#cdbd90');ctx.fillRect(ox+x*cs,oy+y*cs,cs+.5,cs+.5);
+    if(fn&&/water/.test(fn)&&cs>=4){ctx.fillStyle='rgba(255,255,255,.22)';if(((x*7+y*3)%5)===0)ctx.fillRect(ox+x*cs+cs*.2,oy+y*cs+cs*.45,cs*.6,Math.max(1,cs*.1))}
+    if(fn==='cobble'&&cs>=6){ctx.fillStyle='rgba(60,50,40,.18)';ctx.fillRect(ox+x*cs+cs*.1,oy+y*cs+cs*.1,cs*.35,cs*.3);ctx.fillRect(ox+x*cs+cs*.55,oy+y*cs+cs*.55,cs*.35,cs*.3)}
+    if(fn)continue;
     if(cs>=7&&(FM?FM.charCodeAt(y*MW+x)===48:true)){ctx.fillStyle='rgba(90,70,44,.32)';for(let k=0;k<2;k++)ctx.fillRect(ox+(x+hash2(x,y,20+k))*cs,oy+(y+hash2(x,y,30+k))*cs,Math.max(1,cs*.1),Math.max(1,cs*.07))}
   }
   // woods round the fence
-  for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){
+  if(isT)for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){
     if(!bord(x,y))continue;
     const jx=(hash2(x,y,41)-.5)*cs*.4,jy=(hash2(x,y,42)-.5)*cs*.4,cx=ox+(x+.5)*cs+jx,cy=oy+(y+.5)*cs+jy;
     ctx.fillStyle='#4a5a36';ctx.strokeStyle=ink;ctx.lineWidth=.9;ctx.beginPath();ctx.moveTo(cx,cy-cs*.62);ctx.lineTo(cx+cs*.46,cy+cs*.38);ctx.lineTo(cx-cs*.46,cy+cs*.38);ctx.closePath();ctx.fill();ctx.stroke();
@@ -4302,19 +4320,19 @@ function drawTownBody(cs,ox,oy){
     ctx.stroke();c.names=[];
   }
   // doors and gates
-  const gates=[];
+  const gates=[],dlab=[];
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){
-    const g=G.grid[y][x];if(!(g>=30&&g<100)&&g<200)continue;
+    const g=G.grid[y][x];if(!(g>=30&&g<100)&&(g<200||g>=1000))continue;
     const p=(g>=30&&g<100)?G.portals[g-30]:null,cx=ox+(x+.5)*cs,cy=oy+(y+.5)*cs;
     if(bord(x,y)){gates.push({x,y,p});continue}
     ctx.fillStyle=p?'#e0b850':'#7a5a34';ctx.strokeStyle=ink;ctx.lineWidth=1.1;
     ctx.beginPath();ctx.moveTo(cx-cs*.3,cy+cs*.4);ctx.lineTo(cx-cs*.3,cy-cs*.05);ctx.arc(cx,cy-cs*.05,cs*.3,Math.PI,0);ctx.lineTo(cx+cs*.3,cy+cs*.4);ctx.closePath();ctx.fill();ctx.stroke();
-    if(p){const c=comps[comp[y][x]];const nm=LEVEL_NAMES[p.to];if(c&&nm&&!c.names.includes(nm))c.names.push(nm)}
+    if(p){const nm=LEVEL_NAMES[p.to];if(nm)dlab.push({nm,x,y})}
   }
-  for(const c of comps){
-    if(!c.names.length)continue;
-    const [x0,y0,x1,y1]=c.bb,cx=ox+(x0+x1+1)/2*cs,cy=oy+(y0+y1+1)/2*cs,sz=Math.max(7,Math.min(11,cs*.62));
-    c.names.forEach((nm,i)=>lab(nm,cx,cy+(i-(c.names.length-1)/2)*(sz+2),sz,'#1c1208'));
+  for(const d of dlab){ // each door's name goes on the open ground in front of it
+    const sz=Math.max(7,Math.min(11,cs*.62)),open=(x,y)=>x>0&&y>0&&x<MW-1&&y<MH-1&&G.grid[y][x]===0;
+    const dy=open(d.x,d.y+1)?1.55:open(d.x,d.y-1)?-.75:.5;
+    lab(d.nm,ox+(d.x+.5)*cs,oy+(d.y+dy)*cs,sz,'#1c1208');
   }
   for(const gt of gates){
     const cx=ox+(gt.x+.5)*cs,cy=oy+(gt.y+.5)*cs,out=gt.x===0?[-1,0]:gt.x===MW-1?[1,0]:gt.y===0?[0,-1]:[0,1];
@@ -4333,6 +4351,7 @@ function drawTownBody(cs,ox,oy){
     else if(d.k==='noticeboard'){ctx.fillStyle='#6a4a28';ctx.strokeStyle=ink;ctx.lineWidth=.9;ctx.fillRect(cx-cs*.3,cy-cs*.22,cs*.6,cs*.4);ctx.strokeRect(cx-cs*.3,cy-cs*.22,cs*.6,cs*.4)}
     else if(d.k==='lamp'){ctx.fillStyle='#f0c860';ctx.strokeStyle=ink;ctx.lineWidth=.8;ctx.beginPath();ctx.arc(cx,cy,Math.max(1.6,cs*.14),0,TAU);ctx.fill();ctx.stroke()}
   }
+  for(const m of (L0&&L0.mapNames)||[]){lab(m.t,ox+m.x*cs,oy+m.y*cs,Math.max(7,Math.min(11,cs*(m.k==='place'?.7:.55))),m.k==='place'?'#1c1208':'#4a2e14')}
   // people you can talk to
   for(const d of G.decor){
     if(d.found||!d.npc||MAP_PROPS.has(d.k)||d.k.startsWith('sign_')||d.k.startsWith('flora')||d.k.startsWith('tree'))continue;
@@ -4340,21 +4359,48 @@ function drawTownBody(cs,ox,oy){
     ctx.fillStyle='#b8382a';ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.beginPath();ctx.arc(cx,cy,r,0,TAU);ctx.fill();ctx.stroke();
     if(cs>=11)lab(n.name.split(',')[0],cx,cy+r+6,6.6,'#3a1208');
   }
-  for(const d of G.decor){ // a '!' over anyone with work for you, a '?' over anyone you can report back to
-    const qv=QGIVER[d.npc];if(!qv||d.found)continue;const q=Array.isArray(qv)?qv.find(z=>qSt(z)!=='done'):qv;if(!q)continue;
-    const st=qSt(q),ready=qReady(q);if(st==='done'||(st==='active'&&!ready))continue;
-    const cx=ox+(d.x+.5)*cs,cy=oy+(d.y+.5)*cs,pul=Math.sin(G.time*5)*1.5;lab(ready?'?':'!',cx,cy-cs*.7-4+pul,13,ready?'#1f6a24':'#8a5a00');
-  }
   ctx.restore();
   // title and key
   ctx.save();ctx.font=`22px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='rgba(235,220,170,.7)';ctx.strokeText(LEVEL_NAMES[LEVEL],240,13);ctx.fillStyle=ink;ctx.fillText(LEVEL_NAMES[LEVEL],240,13);ctx.restore();
-  ctx.fillStyle='rgba(236,222,176,.9)';rrect(ctx,8,228,112,50,4);ctx.fill();ctx.strokeStyle='rgba(42,28,14,.6)';ctx.lineWidth=1;rrect(ctx,8,228,112,50,4);ctx.stroke();
+  ctx.fillStyle='rgba(236,222,176,.9)';rrect(ctx,8,212,112,66,4);ctx.fill();ctx.strokeStyle='rgba(42,28,14,.6)';ctx.lineWidth=1;rrect(ctx,8,212,112,66,4);ctx.stroke();
+  ctx.strokeStyle='#b02818';ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(16,221,4,0,TAU);ctx.stroke();txt('Quest, and what to do',24,221,7.5,'#7a1a10','left');
   ctx.fillStyle='#e0b850';ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(16,246);ctx.lineTo(16,240);ctx.arc(20,240,4,Math.PI,0);ctx.lineTo(24,246);ctx.closePath();ctx.fill();ctx.stroke();
   txt('Shop or door',32,243,7.5,ink,'left');
   ctx.fillStyle='#b8382a';ctx.beginPath();ctx.arc(20,255,3.2,0,TAU);ctx.fill();ctx.stroke();txt('Person',32,255,7.5,ink,'left');
   ctx.fillStyle='#a8402e';ctx.beginPath();ctx.moveTo(25,267);ctx.lineTo(18,263);ctx.lineTo(18,271);ctx.closePath();ctx.fill();ctx.stroke();txt('Gate or exit',32,267,7.5,ink,'left');
 }
-const mapRes=()=>(LEVEL===3||LEVEL===13)?[0,58]:[136,0]; // room kept clear for the legend
+const mapRes=()=>drawnMap(LEVEL)?[0,58]:[136,0]; // room kept clear for the legend
+/* a red ring round every place a quest begins or goes on in this level: new quests (!), what to do next (dashed), and where to hand in (green ?) */
+function questSpots(){
+  const out=[],by={};for(const d of G.decor)if(d.npc&&!d.found)(by[d.npc]=by[d.npc]||[]).push(d);
+  const giverOf={};for(const n in QGIVER)for(const q of [].concat(QGIVER[n]||[]))if(!giverOf[q]&&by[n])giverOf[q]=by[n][0];
+  for(const id of Object.keys(QUESTS)){
+    const st=qSt(id);if(st==='done')continue;const q=QUESTS[id],g=giverOf[id];
+    if(st===null){if(g)out.push({x:g.x,y:g.y,kind:'give',t:q.title})}
+    else if(qReady(id)){if(g)out.push({x:g.x,y:g.y,kind:'ready',t:'Hand in: '+q.title})}
+    else{let t=[];try{t=q.targets||[]}catch(e){}let any=false;for(const n of t)for(const d of by[n]||[]){out.push({x:d.x,y:d.y,kind:'goal',t:q.title});any=true}
+      if(!any&&g)out.push({x:g.x,y:g.y,kind:'goal',t:q.title})}
+  }
+  return out;
+}
+function drawQuestRings(ox,oy,cs){
+  const spots=questSpots(),pul=.75+.25*Math.sin(G.time*4),at={};
+  for(const sp of spots){const k=sp.x+','+sp.y,e=at[k];if(e){if(sp.kind==='ready')e.kind='ready';e.ts.push(sp.t)}else at[k]={x:sp.x,y:sp.y,kind:sp.kind,ts:[sp.t]}}
+  ctx.save();ctx.lineJoin='round';
+  for(const k in at){
+    const a=at[k],cx=ox+(a.x+.5)*cs,cy=oy+(a.y+.5)*cs,r=Math.max(7,Math.min(15,cs*1.15)),col=a.kind==='ready'?'#1f8a2c':'#b02818';
+    ctx.strokeStyle=col;ctx.lineWidth=1.8;ctx.globalAlpha=pul;
+    if(a.kind==='goal')ctx.setLineDash([3,3]);
+    ctx.beginPath();for(let i=0;i<=24;i++){const an=i/24*TAU+.2,rr=r*(1+.05*Math.sin(i*2.3+a.x));i?ctx.lineTo(cx+Math.cos(an)*rr,cy+Math.sin(an)*rr*.92):ctx.moveTo(cx+Math.cos(an)*rr,cy+Math.sin(an)*rr*.92)}ctx.stroke();
+    if(a.kind!=='goal'){ctx.setLineDash([]);ctx.beginPath();ctx.arc(cx,cy,r*.82,.3,TAU-.5);ctx.stroke()}
+    ctx.setLineDash([]);ctx.globalAlpha=1;
+    const mark=a.kind==='ready'?'?':a.kind==='give'?'!':'';
+    const sz=Math.max(7,Math.min(10,cs*.6)),lines=a.ts.slice(0,3);
+    if(mark){ctx.font=`bold 12px ${FUI}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(236,222,176,.9)';ctx.strokeText(mark,cx,cy-r-5);ctx.fillStyle=a.kind==='ready'?'#1f6a24':'#8a5a00';ctx.fillText(mark,cx,cy-r-5)}
+    lines.forEach((t,i)=>{ctx.font=`italic bold ${sz}px ${FUI}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(236,222,176,.92)';ctx.strokeText(t,cx,cy+r+6+i*(sz+1));ctx.fillStyle=col;ctx.fillText(t,cx,cy+r+6+i*(sz+1))});
+  }
+  ctx.restore();
+}
 function mapFit(){const [rw,rh]=mapRes();return Math.max(LEVEL===44?.4:2.5,Math.min((DW-12-rw)/MW,(DH-40-rh)/MH))}
 function mapOrigin(cs){ // where cell (0,0) sits, honouring the pan; a map smaller than the screen is centred
   const w=MW*cs,h=MH*cs,[rw,rh]=mapRes();
@@ -4378,7 +4424,7 @@ function drawOverview(){
   if(!G.ovInit||G.ovLevel!==LEVEL){G.mz=clamp(LEVEL===44?1:12,mapFit(),34);const [rw,rh]=mapRes();G.panX=(DW-rw)/2-((G.C.x+.5)*G.mz+6);G.panY=(DH-rh)/2-((G.C.y+.5)*G.mz+30);G.ovInit=true;G.ovLevel=LEVEL}
   const cs=G.mz,[ox,oy]=mapOrigin(cs);
   ctx.save();ctx.font=`24px ${FTITLE}`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle='#d8c88e';ctx.fillText(`Level ${LEVEL}: ${LEVEL_NAMES[LEVEL]}`,8,15);ctx.restore();
-  const TOWN=(LEVEL===3||LEVEL===13);
+  const TOWN=drawnMap(LEVEL);
   ctx.save();ctx.beginPath();ctx.rect(0,0,DW-mapRes()[0],DH);ctx.clip();
   if(TOWN)drawTownBody(cs,ox,oy);
   else if(LEVEL===44&&typeof khDrawCityMap==='function'&&KH_CITY)khDrawCityMap(cs,ox,oy);
@@ -4393,7 +4439,6 @@ function drawOverview(){
     txt(name,ox+(x1+x2+1)/2*cs,oy+(y1+y2+1)/2*cs+1,7,'#f0e4b4','center',true);
   }
   for(const d of G.decor){ctx.fillStyle=d.k==='cart'?'#d8b040':d.k==='coffin'?'#aaaab4':d.k==='barrel'?'#8a5a2a':'#d8d0b0';ctx.fillRect(ox+d.x*cs+2.5,oy+d.y*cs+2.5,cs-5.6,cs-5.6)}
-  drawQuestMarks(ox,oy,cs,true);
   for(const L of LIGHTS){ctx.fillStyle=L.taken?'rgba(255,255,255,.2)':L.red?'#ff4a30':'#ffb040';ctx.beginPath();ctx.arc(ox+L.x*cs,oy+L.y*cs,2.4,0,TAU);ctx.fill()}
   for(const it of G.items){ctx.fillStyle=it.taken?'rgba(255,255,255,.25)':it.k==='key'?'#ffd76a':(ITEMDEF[it.k]&&ITEMDEF[it.k].rar)?'#e070e8':'#e8e0d0';
     const lt=it.k==='key'?'K':KIND_LETTER[ITEMDEF[it.k].k]||'?';txt(lt,ox+(it.x+.5)*cs,oy+(it.y+.5)*cs+.5,7.5,ctx.fillStyle,'center',true)}
@@ -4401,6 +4446,7 @@ function drawOverview(){
     ctx.beginPath();ctx.arc(ox+(e.x+.5)*cs,oy+(e.y+.5)*cs,cs*.42,0,TAU);ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.stroke();
     txt(gl[1],ox+(e.x+.5)*cs,oy+(e.y+.5)*cs+.5,7.5,'#120c08','center',true)}
   }
+  drawQuestRings(ox,oy,cs);
   const px=ox+(G.C.x+.5)*cs,py=oy+(G.C.y+.5)*cs;ctx.save();ctx.translate(px,py);ctx.rotate(G.C.a+Math.PI/2);ctx.fillStyle='#ffe36a';ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(5,5);ctx.lineTo(0,2);ctx.lineTo(-5,5);ctx.closePath();ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.stroke();ctx.restore();
   ctx.restore();
   // legend
@@ -12884,11 +12930,11 @@ function yarBuild(){
   const decor=[],scenery=[],items=[];
   const used=new Set();
   const free=(x,y)=>x>0&&y>0&&x<W-1&&y<H-1&&rows[y][x]==='.'&&!block[y*W+x]&&!used.has(x+','+y);
-  const dc=(k,x,y,o)=>{used.add(x+','+y);return decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}))};
+  const dc=(k,x,y,o)=>{used.add(x+','+y);return decor.push(Object.assign({k,x,y,block:false,walk:true,deco:true},o||{}))};   // everything out of doors can be walked through
   const tryDc=(k,x,y,o)=>{if(free(x,y)){dc(k,x,y,o);return true}return false};
   const sc2=(k,x,y,s)=>scenery.push({k,wx:x+.5,wy:y+.5,sc:s||1,decor:{k,walk:true,x,y}});
   const walk=(k,x,y,o)=>{used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true},o||{}))};
-  const near=(x,y,rad)=>{for(let r=0;r<=rad;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(free(x+dx,y+dy))return [x+dx,y+dy]}return null};
+  const near=(x,y,rad,off)=>{for(let r=0;r<=rad;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(free(x+dx,y+dy)&&!(off&&P.street[(y+dy)*W+x+dx]))return [x+dx,y+dy]}return null};   // off: keep clear of the little roads
   YR.near=near;YR.free=free;
   // moored boats and the boats pulled up for mending
   const boats=[['yar_boat_fish',64,35],['yar_boat_fish',67,46],['yar_boat_fish',73,34],['yar_boat_dhow',71,44],['yar_boat_dhow',78,35],['yar_boat_row',62,37],['yar_boat_row',63,44],['yar_boat_row',75,46],['yar_boat_row',80,43],['yar_boat_row',82,34],['yar_boat_row',91,46],['yar_boat_fish',72,28],['yar_boat_dhow',68,52],['yar_boat_row',70,22],['yar_boat_fish',66,60]];
@@ -12898,7 +12944,7 @@ function yarBuild(){
   // washed-up crates for the harbourmaster, along the beach
   const crateAt=y=>{const x=Math.floor(yarCoast(y))-2;return [x,y]};
   YR.crates=[27,35,47,53].map(yy=>crateAt(yy));
-  YR.crates.forEach(([x,y],i)=>{if(free(x,y)){used.add(x+','+y);decor.push({k:'yar_crates',x,y,block:true,npc:'yr_crate',cat:i})}});
+  YR.crates.forEach(([x,y],i)=>{if(free(x,y)){used.add(x+','+y);decor.push({k:'yar_crates',x,y,block:false,walk:true,npc:'yr_crate',cat:i})}});
   // beached boats and nets on the sand beside the harbour square
   for(const [k,x,y] of [['yar_boat_row',56,44],['yar_boat_fish',58,46],['yar_boat_row',57,37],['yar_boat_row',59,35]])tryDc(k,x,y);
   for(const [k,x,y] of [['yar_nets',54,43],['yar_pots',56,42],['yar_crates',55,39],['yar_nets',54,37],['yar_pots',56,38]])tryDc(k,x,y);
@@ -12906,8 +12952,9 @@ function yarBuild(){
   for(const hz of P.houses){
     const [fx,fy]=hz.front,horiz=hz.face==='S'||hz.face==='N';
     // flower tubs on the foot of the wall, one or two squares from the door, where there is a lane to put them
-    const sides=horiz?[[fx-1,fy],[fx+1,fy]]:[[fx,fy-1],[fx,fy+1]];
-    for(const [tx,ty] of sides)if(P.street[ty*W+tx]&&hs(tx,ty,67)<.55)sc2(hs(tx,ty,68)<.5?'yar_tub':'yar_lavender',tx,ty,.8+hs(tx,ty,69)*.3);
+    const row=horiz?(hz.face==='S'?hz.y1:hz.y0):0,col=horiz?0:(hz.face==='E'?hz.x1:hz.x0);
+    const sides=horiz?[[hz.x0-1,row],[hz.x1+1,row]]:[[col,hz.y0-1],[col,hz.y1+1]];   // beside the house, on its own wall, off the road
+    for(const [tx,ty] of sides)if(!P.street[ty*W+tx]&&P.house[ty*W+tx]<0&&rows[ty][tx]==='.'&&hs(tx,ty,67)<.7)sc2(hs(tx,ty,68)<.5?'yar_tub':'yar_lavender',tx,ty,.8+hs(tx,ty,69)*.3);
   }
   // the lamps: iron posts beside the road, never on it: the corners of the square, the junctions, the ends of the lanes
   const lights=[];
@@ -12933,7 +12980,7 @@ function yarBuild(){
     const nearHouse=P.houses.some(q=>x>=q.x0-1&&x<=q.x1+1&&y>=q.y0-1&&y<=q.y1+1);if(nearHouse)continue;
     if(x>P.park.x0-1&&x<P.park.x1+2&&y>P.park.y0-2&&y<P.park.y1+2)continue;
     if(y>=28&&y<=51&&x>=G0.x1+1&&x<=58&&hs(n,3,71)<.85)continue;   // the village itself stays clear
-    const k='yar_wtree'+((hs(n,4,71)*6)|0);used.add(x+','+y);decor.push({k,x,y,block:true,deco:true,sc:.8+hs(n,5,71)*.5,wind:1});YR.windTrees.push([x,y]);
+    const k='yar_wtree'+((hs(n,4,71)*6)|0);used.add(x+','+y);decor.push({k,x,y,block:false,walk:true,deco:true,sc:.8+hs(n,5,71)*.5,wind:1});YR.windTrees.push([x,y]);
   }
   // fishermen's buckets, crates and coiled rope at the foot of the walls, where there is room
   YR.buckets=[];
@@ -12943,7 +12990,7 @@ function yarBuild(){
     const cands=horiz?[[hz.x0-1,fy],[hz.x1+1,fy],[hz.x0-1,hz.face==='S'?hz.y1:hz.y0]]:[[fx,hz.y0-1],[fx,hz.y1+1]];
     for(const [bx,by] of cands){
       if(!free(bx,by)||(bx===fx&&by===fy))continue;
-      if(!P.street[by*W+bx]&&!P.yard[by*W+bx]&&rows[by][bx]!=='.')continue;
+      if(P.street[by*W+bx]||P.house[by*W+bx]>=0||rows[by][bx]!=='.')continue;
       const k='yar_bucket'+((hs(bx,by,73)*6)|0);used.add(bx+','+by);scenery.push({k,wx:bx+.5,wy:by+.5,sc:.9+hs(bx,by,74)*.25,decor:{k,walk:true,x:bx,y:by}});YR.buckets.push([bx,by]);break;
     }
   }
@@ -13100,8 +13147,8 @@ Object.assign(NPC_H,{
   kh_yfolk1_0:.74,kh_yfolk1_1:.82,kh_yfolk1_2:.84,kh_yfolk1_3:.78,kh_yfolk1_4:.82,kh_yfolk1_5:.86,
   kh_yfolk2_0:.84,kh_yfolk2_1:.84,kh_yfolk2_2:.82,kh_yfolk2_3:.84,kh_yfolk2_4:.82,kh_yfolk2_5:.6,
   kh_yfolk3_0:.8,kh_yfolk3_1:.8,kh_yfolk3_2:.84,kh_yfolk3_3:.78,kh_yfolk3_4:.66,kh_yfolk3_5:.84,
-  kh_yprop1_0:.42,kh_yprop1_1:.42,kh_yprop1_2:.6,kh_yprop1_3:.44,kh_yprop1_4:.66,kh_yprop1_5:1.1,
-  kh_ycrab1_0:.3,kh_ycrab1_1:.3,kh_ycrab1_2:.34,kh_ycrab1_3:.38,kh_ycrab1_4:.3,kh_ycrab1_5:.28
+  kh_yprop1_0:.42,kh_yprop1_1:.42,kh_yprop1_3:.44,kh_yani1_0:.5,kh_yani1_1:.66,kh_yani1_2:.36,kh_yprop1_5:1.1,
+  kh_ycrab2_0:.3,kh_ycrab2_1:.28,kh_ycrab2_2:.32,kh_ycrab2_3:.4,kh_ycrab2_4:.28,kh_ycrab2_5:.26
 });
 KH_STOCK.trader=()=>[['torch',8],['lantern',3],['potion',6],['antidote',4],['salve',4],['bread',10],['water',12],['dates',8],['herring',8],['ale',8],['apple',8],['wildflower',6],['herb',4],['cheese',4],['nuts',4],['dagger',2],['bow',2],['cap',3],['jerkin',2]];
 
@@ -13131,7 +13178,7 @@ const yrPlace=(id,at,rad)=>YR_QFOLK.push({id,at,rad:rad||5});
 const yrObj=(npc,k,at,rad,o)=>YR_QOBJ.push({npc,k,at,rad:rad||3,o:o||{}});
 function yarPlaceQuestFolk(C){
   for(const f of YR_QFOLK){const kp=KH_KEEPERS[f.id];if(!kp)continue;const q=C.near(f.at[0],f.at[1],f.rad);if(q)C.walk(khFaceKey(kp.face),q[0],q[1],{npc:f.id,sc:kp.sc||1})}
-  for(const o of YR_QOBJ){const q=C.near(o.at[0],o.at[1],o.rad);if(q)C.dc(o.k,q[0],q[1],Object.assign({npc:o.npc,deco:false},o.o))}
+  for(const o of YR_QOBJ){const q=C.near(o.at[0],o.at[1],o.rad,true);if(q)C.dc(o.k,q[0],q[1],Object.assign({npc:o.npc,deco:false},o.o))}
 }
 
 /* ---- 1. the Admiral's telescope: Pell, Gwen and a herring gull in a very small hat ---- */
@@ -13152,13 +13199,13 @@ khNpc('yr_gwen','Gwen, who talks to gulls','kh_yfolk3_5',d=>{
   if(qSt('yq_tele')==='active'&&!F.yq1a){F.yq1a=1;yrStep('Gwen told you how to bargain with the Admiral.');return say("The Admiral? He is a sweetheart, if you are a herring. He will trade anything for two salt herring left on his post along the pier, and he means it. He is quite well known for it. Tell him Gwen sent you. He will not care, but it is polite.",[BYE])}
   return yrLines('gwen',["This is Mr Pickles. He is not the Admiral. The Admiral is much worse.","Gulls have a whole language. It is mostly the word 'mine'.","If a gull looks at you for a long time, it is not being friendly. It is pricing your lunch."])});
 yrPlace('yr_gwen',[55,41],3);
-khNpc('yr_admiral','The Admiral','kh_yprop1_4',d=>{
+khNpc('yr_admiral','The Admiral','kh_yani1_1',d=>{
   const F=G.flags;
   if(qSt('yq_tele')==='active'&&!F.yq1b){
     if(bagCount('herring')<2)return say('The Admiral looks at you, then at your empty hands, then at you again. It is a look that has ended careers. He wants 2 salt herring.',[BYE]);
-    return say('The Admiral stands on his post with a brass telescope tucked under one wing like a sceptre. He looks at you from under a tiny black hat. He looks at your hands.',[['Leave 2 salt herring for him.',()=>{bagRemove('herring',2);F.yq1b=1;yrStep('The Admiral has returned the telescope.');return say('The Admiral inspects the herring one at a time, as if checking them for forgeries, and then eats both. He hacks, drops the telescope on the planks with great dignity, and spreads his wings in the manner of a bird who has completed an honest day\'s trade.',[BYE])}],BYE])}
-  return say(F.yq1b?'The Admiral sits on his post and pretends he has never seen a telescope in his life.':'A very large herring gull in a very small hat, perched on a post. He has a medal on his chest and nobody remembers giving it to him. He regards you as a man regards a late tax.',[BYE])});
-yrObj('yr_admiral','kh_yprop1_4',[72,40],3);
+    return say('The Admiral stands on his post with a brass telescope tucked under one wing like a sceptre. He looks at you with one cold yellow eye. He looks at your hands.',[['Leave 2 salt herring for him.',()=>{bagRemove('herring',2);F.yq1b=1;yrStep('The Admiral has returned the telescope.');return say('The Admiral inspects the herring one at a time, as if checking them for forgeries, and then eats both. He hacks, drops the telescope on the planks with great dignity, and spreads his wings in the manner of a bird who has completed an honest day\'s trade.',[BYE])}],BYE])}
+  return say(F.yq1b?'The Admiral sits on his post and pretends he has never seen a telescope in his life.':'A very large herring gull on a post, with a brass ring on one leg that nobody remembers putting there. He regards you as a man regards a late tax.',[BYE])});
+yrObj('yr_admiral','kh_yani1_1',[72,40],3);
 
 /* ---- 2. the great crab census: Tamsin Kell wants every crab on the shore counted ---- */
 const YR_CRABS=[
@@ -13167,7 +13214,7 @@ const YR_CRABS=[
   ['You tally the hermit crab, and then, to be fair, you tally his shell. He objects. The tally stands at one crab. The shell is a resident.',[58,35]],
   ['The spider crab is quite a lot of crab. You are not sure whether to count the legs. You decide on one crab with eight points of view.',[59,32]],
   ['The grey crab holds up his one enormous claw like a very rude question. You count him anyway. He is a great one for being counted.',[57,48]],
-  ['A tiny crab in a brass thimble stands to attention and demands to be counted twice, on the grounds that he is wearing a helmet. You count him once and give him a nod. He accepts the nod.',[51,50]]
+  ['A small pale sand crab demands to be counted twice, on the grounds that he has two of everything. You count him once and give him a nod. He accepts the nod.',[51,50]]
 ];
 QUESTS.yq_crab={title:'The Great Crab Census',who:'Tamsin Kell, the harbourmaster',need:6,goal:()=>Object.keys(yrF().yqCrab||{}).length,
   desc:'The harbour board has decreed that every crab on the shore be counted before the spring tax. Find and tally the 6 crabs of Yarrim, on the beach and along the quay.',reward:{gold:420,xp:1900,items:['ringS']}};
@@ -13180,13 +13227,13 @@ const D_CRAB=khQD("The harbour board has decreed that every crab on the shore mu
   'Six, in the ledger, in my best handwriting. The crabs have been informed. They did not reply, but one of them clicked at me. Here is the harbour board\'s fee, and something from my own pocket.',
   'The census is in the archive. Next year we count the gulls, and then I shall need a bigger ledger.');
 YR_CRABS.forEach((c,i)=>{
-  khNpc('yr_crab'+i,'A crab','kh_ycrab1_'+i,d=>{
+  khNpc('yr_crab'+i,'A crab','kh_ycrab2_'+i,d=>{
     const F=G.flags;F.yqCrab=F.yqCrab||{};
     if(F.yqCrab[i])return say('You have already counted this one. He looks at you as if he knows it and expects an apology.',[BYE]);
     if(qSt('yq_crab')!=='active')return say('A crab, going about its business. It has the look of something that has been counted before and did not enjoy it.',[BYE]);
     F.yqCrab[i]=1;const n=Object.keys(F.yqCrab).length;yrStep(n+' of 6 crabs tallied.');
     return say(c[0]+' ('+n+' of 6)',[BYE])});
-  yrObj('yr_crab'+i,'kh_ycrab1_'+i,c[1],3);
+  yrObj('yr_crab'+i,'kh_ycrab2_'+i,c[1],3);
 });
 
 /* ---- 3. a message in a bottle: Wink, Old Maren and the tide ---- */
@@ -13318,7 +13365,7 @@ yrHook('yr_net',d=>{
   const F=G.flags;
   if(qSt('yq_seal')==='active'&&!F.yq7b){F.yq7b=1;yrStep('Garrick gave you his oldest net.');return say('My oldest net? Nell sent you. She would. (He rummages in a heap, and holds up something that is more hole than net.) This one. It has not caught a fish since before I had a moustache. It is holes, tied together with other holes. It is the perfect net for giving to anyone.',[BYE])}
   return null});
-khNpc('yr_seal','A grey seal','kh_yprop1_2',d=>{
+khNpc('yr_seal','A grey seal','kh_yani1_0',d=>{
   const F=G.flags,act=qSt('yq_seal')==='active';
   if(!khNight())return say(act?'A big grey seal sleeps among the net racks on the beach, snoring like a bellows. A seal sleeping beside the nets. Come back at night, between nine and five, and see what he does when the lamps are out.':'A big grey seal sleeps on the sand beside the net racks, snoring like a bellows. Better not to wake him.',[BYE]);
   if(act&&!F.yq7a){F.yq7a=1;yrStep('You have seen who takes the nets. He has a family.');return say('In the dark, a sleek grey seal is dragging a net down the beach with the dedication of a burglar. He sees you. He does not stop. Behind him under a pile of nets, three small pups yawn in a row. He is not a thief. He is a father with a draught.',[BYE])}
@@ -13327,7 +13374,7 @@ khNpc('yr_seal','A grey seal','kh_yprop1_2',d=>{
     if(bagCount('herring')<2)return say('The seal looks at you, and then at your hands. He wants 2 salt herring with the old net, as a deposit.',[BYE]);
     return say('The seal holds a good net firmly in his mouth. He looks at you, and then at the bundle in your arms.',[['Trade him the old net and 2 salt herring.',()=>{bagRemove('herring',2);F.yq7c=1;yrStep('The seal has taken the old net. Nell\'s nets are safe.');return say('The seal sniffs the old net, accepts it as an upgrade, accepts the herring as a down payment, and shuffles up the beach with his pups behind him, leaving Nell\'s good net on the sand. One of the pups looks back. It is the best moment of the week.',[BYE])}],BYE])}
   return say(F.yq7c?'A cold pile of old net on the sand, a flat patch where a seal slept, and a very small nose-print.':'A seal, awake, in the dark, looking at you with enormous eyes.',[BYE])});
-yrObj('yr_seal','kh_yprop1_2',[55,45],3);
+yrObj('yr_seal','kh_yani1_0',[55,45],3);
 
 /* ---- 8. the drowned lantern: Bessa, Orsa, Pell and a boat hook ---- */
 yrQ('yq_lant','The Drowned Lantern','Bessa, the innkeeper',[
@@ -13380,7 +13427,7 @@ CUTS.yrShanty=()=>[
   {text:'Rafe tucks the fiddle under his chin, and the inn goes quiet. It is a slow, rolling tune, in time with the tide. He sings, in a voice like a rusty hinge, and it is beautiful anyway.'},
   {text:'"I sailed from Yarrim in the morning, when the Vaast was young and wide, with a barrel of salt and a bottle of rum and a gull on every side." (Old Jory\'s verse.)'},
   {text:'"My Tobias went for the island with the spring that never dries. He came home with a bucket and a story and a pair of other men\'s eyes." (Old Maren\'s verse.)'},
-  {text:'"The herring run in silver and the gulls run off with half, and the Admiral wears a hat, and nobody dares to laugh." (Finn\'s verse.)'},
+  {text:'"The herring run in silver and the gulls run off with half, and the Admiral wears a ring, and nobody dares to laugh." (Finn\'s verse.)'},
   {text:'"So haul away for Yarrim, boys, the lantern light is low, the tide is in, the crab is out, so heave and off we go." The whole inn joins the chorus, and the lantern over the bar rings a little in the glass.'},
   {text:'Rafe sings the last verse, which he has had in his head the whole time, and which nobody has ever heard before. When he is done, there is a long silence, and then somebody blows their nose.'}];
 khStreetQ('yr1_p1','Rafe, a fiddler','kh_yfolk3_2',"A man at the next table sold me a map to a treasure island. I paid him in fish. He left. The map is of the next table.",'yq_shanty',D_SHANTY);
@@ -13397,7 +13444,7 @@ yrHook('yr_maren',d=>{
   return null});
 yrHook('yr_fisher2',d=>{
   const F=G.flags;
-  if(qSt('yq_shanty')==='active'&&!F.yq9c){F.yq9c=1;yrStep('Finn gave you a verse of the shanty.');return say('A verse? I do not sing. I fish. And complain, if you want to be exact about it. ... This is the only one I know. "The herring run in silver and the gulls run off with half, and the Admiral wears a hat, and nobody dares to laugh." That is the whole of Yarrim, in four lines, and a fiddler can have it for free.',[BYE])}
+  if(qSt('yq_shanty')==='active'&&!F.yq9c){F.yq9c=1;yrStep('Finn gave you a verse of the shanty.');return say('A verse? I do not sing. I fish. And complain, if you want to be exact about it. ... This is the only one I know. "The herring run in silver and the gulls run off with half, and the Admiral wears a ring, and nobody dares to laugh." That is the whole of Yarrim, in four lines, and a fiddler can have it for free.',[BYE])}
   return null});
 
 /* a few more words from the people who belong to no quest, so that the village talks */

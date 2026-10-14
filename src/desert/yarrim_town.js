@@ -170,11 +170,11 @@ function yarBuild(){
   const decor=[],scenery=[],items=[];
   const used=new Set();
   const free=(x,y)=>x>0&&y>0&&x<W-1&&y<H-1&&rows[y][x]==='.'&&!block[y*W+x]&&!used.has(x+','+y);
-  const dc=(k,x,y,o)=>{used.add(x+','+y);return decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}))};
+  const dc=(k,x,y,o)=>{used.add(x+','+y);return decor.push(Object.assign({k,x,y,block:false,walk:true,deco:true},o||{}))};   // everything out of doors can be walked through
   const tryDc=(k,x,y,o)=>{if(free(x,y)){dc(k,x,y,o);return true}return false};
   const sc2=(k,x,y,s)=>scenery.push({k,wx:x+.5,wy:y+.5,sc:s||1,decor:{k,walk:true,x,y}});
   const walk=(k,x,y,o)=>{used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true},o||{}))};
-  const near=(x,y,rad)=>{for(let r=0;r<=rad;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(free(x+dx,y+dy))return [x+dx,y+dy]}return null};
+  const near=(x,y,rad,off)=>{for(let r=0;r<=rad;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(free(x+dx,y+dy)&&!(off&&P.street[(y+dy)*W+x+dx]))return [x+dx,y+dy]}return null};   // off: keep clear of the little roads
   YR.near=near;YR.free=free;
   // moored boats and the boats pulled up for mending
   const boats=[['yar_boat_fish',64,35],['yar_boat_fish',67,46],['yar_boat_fish',73,34],['yar_boat_dhow',71,44],['yar_boat_dhow',78,35],['yar_boat_row',62,37],['yar_boat_row',63,44],['yar_boat_row',75,46],['yar_boat_row',80,43],['yar_boat_row',82,34],['yar_boat_row',91,46],['yar_boat_fish',72,28],['yar_boat_dhow',68,52],['yar_boat_row',70,22],['yar_boat_fish',66,60]];
@@ -184,7 +184,7 @@ function yarBuild(){
   // washed-up crates for the harbourmaster, along the beach
   const crateAt=y=>{const x=Math.floor(yarCoast(y))-2;return [x,y]};
   YR.crates=[27,35,47,53].map(yy=>crateAt(yy));
-  YR.crates.forEach(([x,y],i)=>{if(free(x,y)){used.add(x+','+y);decor.push({k:'yar_crates',x,y,block:true,npc:'yr_crate',cat:i})}});
+  YR.crates.forEach(([x,y],i)=>{if(free(x,y)){used.add(x+','+y);decor.push({k:'yar_crates',x,y,block:false,walk:true,npc:'yr_crate',cat:i})}});
   // beached boats and nets on the sand beside the harbour square
   for(const [k,x,y] of [['yar_boat_row',56,44],['yar_boat_fish',58,46],['yar_boat_row',57,37],['yar_boat_row',59,35]])tryDc(k,x,y);
   for(const [k,x,y] of [['yar_nets',54,43],['yar_pots',56,42],['yar_crates',55,39],['yar_nets',54,37],['yar_pots',56,38]])tryDc(k,x,y);
@@ -192,8 +192,9 @@ function yarBuild(){
   for(const hz of P.houses){
     const [fx,fy]=hz.front,horiz=hz.face==='S'||hz.face==='N';
     // flower tubs on the foot of the wall, one or two squares from the door, where there is a lane to put them
-    const sides=horiz?[[fx-1,fy],[fx+1,fy]]:[[fx,fy-1],[fx,fy+1]];
-    for(const [tx,ty] of sides)if(P.street[ty*W+tx]&&hs(tx,ty,67)<.55)sc2(hs(tx,ty,68)<.5?'yar_tub':'yar_lavender',tx,ty,.8+hs(tx,ty,69)*.3);
+    const row=horiz?(hz.face==='S'?hz.y1:hz.y0):0,col=horiz?0:(hz.face==='E'?hz.x1:hz.x0);
+    const sides=horiz?[[hz.x0-1,row],[hz.x1+1,row]]:[[col,hz.y0-1],[col,hz.y1+1]];   // beside the house, on its own wall, off the road
+    for(const [tx,ty] of sides)if(!P.street[ty*W+tx]&&P.house[ty*W+tx]<0&&rows[ty][tx]==='.'&&hs(tx,ty,67)<.7)sc2(hs(tx,ty,68)<.5?'yar_tub':'yar_lavender',tx,ty,.8+hs(tx,ty,69)*.3);
   }
   // the lamps: iron posts beside the road, never on it: the corners of the square, the junctions, the ends of the lanes
   const lights=[];
@@ -219,7 +220,7 @@ function yarBuild(){
     const nearHouse=P.houses.some(q=>x>=q.x0-1&&x<=q.x1+1&&y>=q.y0-1&&y<=q.y1+1);if(nearHouse)continue;
     if(x>P.park.x0-1&&x<P.park.x1+2&&y>P.park.y0-2&&y<P.park.y1+2)continue;
     if(y>=28&&y<=51&&x>=G0.x1+1&&x<=58&&hs(n,3,71)<.85)continue;   // the village itself stays clear
-    const k='yar_wtree'+((hs(n,4,71)*6)|0);used.add(x+','+y);decor.push({k,x,y,block:true,deco:true,sc:.8+hs(n,5,71)*.5,wind:1});YR.windTrees.push([x,y]);
+    const k='yar_wtree'+((hs(n,4,71)*6)|0);used.add(x+','+y);decor.push({k,x,y,block:false,walk:true,deco:true,sc:.8+hs(n,5,71)*.5,wind:1});YR.windTrees.push([x,y]);
   }
   // fishermen's buckets, crates and coiled rope at the foot of the walls, where there is room
   YR.buckets=[];
@@ -229,7 +230,7 @@ function yarBuild(){
     const cands=horiz?[[hz.x0-1,fy],[hz.x1+1,fy],[hz.x0-1,hz.face==='S'?hz.y1:hz.y0]]:[[fx,hz.y0-1],[fx,hz.y1+1]];
     for(const [bx,by] of cands){
       if(!free(bx,by)||(bx===fx&&by===fy))continue;
-      if(!P.street[by*W+bx]&&!P.yard[by*W+bx]&&rows[by][bx]!=='.')continue;
+      if(P.street[by*W+bx]||P.house[by*W+bx]>=0||rows[by][bx]!=='.')continue;
       const k='yar_bucket'+((hs(bx,by,73)*6)|0);used.add(bx+','+by);scenery.push({k,wx:bx+.5,wy:by+.5,sc:.9+hs(bx,by,74)*.25,decor:{k,walk:true,x:bx,y:by}});YR.buckets.push([bx,by]);break;
     }
   }

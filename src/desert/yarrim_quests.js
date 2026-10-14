@@ -8,8 +8,8 @@ Object.assign(NPC_H,{
   kh_yfolk1_0:.74,kh_yfolk1_1:.82,kh_yfolk1_2:.84,kh_yfolk1_3:.78,kh_yfolk1_4:.82,kh_yfolk1_5:.86,
   kh_yfolk2_0:.84,kh_yfolk2_1:.84,kh_yfolk2_2:.82,kh_yfolk2_3:.84,kh_yfolk2_4:.82,kh_yfolk2_5:.6,
   kh_yfolk3_0:.8,kh_yfolk3_1:.8,kh_yfolk3_2:.84,kh_yfolk3_3:.78,kh_yfolk3_4:.66,kh_yfolk3_5:.84,
-  kh_yprop1_0:.42,kh_yprop1_1:.42,kh_yprop1_2:.6,kh_yprop1_3:.44,kh_yprop1_4:.66,kh_yprop1_5:1.1,
-  kh_ycrab1_0:.3,kh_ycrab1_1:.3,kh_ycrab1_2:.34,kh_ycrab1_3:.38,kh_ycrab1_4:.3,kh_ycrab1_5:.28
+  kh_yprop1_0:.42,kh_yprop1_1:.42,kh_yprop1_3:.44,kh_yani1_0:.5,kh_yani1_1:.66,kh_yani1_2:.36,kh_yprop1_5:1.1,
+  kh_ycrab2_0:.3,kh_ycrab2_1:.28,kh_ycrab2_2:.32,kh_ycrab2_3:.4,kh_ycrab2_4:.28,kh_ycrab2_5:.26
 });
 KH_STOCK.trader=()=>[['torch',8],['lantern',3],['potion',6],['antidote',4],['salve',4],['bread',10],['water',12],['dates',8],['herring',8],['ale',8],['apple',8],['wildflower',6],['herb',4],['cheese',4],['nuts',4],['dagger',2],['bow',2],['cap',3],['jerkin',2]];
 
@@ -39,7 +39,7 @@ const yrPlace=(id,at,rad)=>YR_QFOLK.push({id,at,rad:rad||5});
 const yrObj=(npc,k,at,rad,o)=>YR_QOBJ.push({npc,k,at,rad:rad||3,o:o||{}});
 function yarPlaceQuestFolk(C){
   for(const f of YR_QFOLK){const kp=KH_KEEPERS[f.id];if(!kp)continue;const q=C.near(f.at[0],f.at[1],f.rad);if(q)C.walk(khFaceKey(kp.face),q[0],q[1],{npc:f.id,sc:kp.sc||1})}
-  for(const o of YR_QOBJ){const q=C.near(o.at[0],o.at[1],o.rad);if(q)C.dc(o.k,q[0],q[1],Object.assign({npc:o.npc,deco:false},o.o))}
+  for(const o of YR_QOBJ){const q=C.near(o.at[0],o.at[1],o.rad,true);if(q)C.dc(o.k,q[0],q[1],Object.assign({npc:o.npc,deco:false},o.o))}
 }
 
 /* ---- 1. the Admiral's telescope: Pell, Gwen and a herring gull in a very small hat ---- */
@@ -60,13 +60,13 @@ khNpc('yr_gwen','Gwen, who talks to gulls','kh_yfolk3_5',d=>{
   if(qSt('yq_tele')==='active'&&!F.yq1a){F.yq1a=1;yrStep('Gwen told you how to bargain with the Admiral.');return say("The Admiral? He is a sweetheart, if you are a herring. He will trade anything for two salt herring left on his post along the pier, and he means it. He is quite well known for it. Tell him Gwen sent you. He will not care, but it is polite.",[BYE])}
   return yrLines('gwen',["This is Mr Pickles. He is not the Admiral. The Admiral is much worse.","Gulls have a whole language. It is mostly the word 'mine'.","If a gull looks at you for a long time, it is not being friendly. It is pricing your lunch."])});
 yrPlace('yr_gwen',[55,41],3);
-khNpc('yr_admiral','The Admiral','kh_yprop1_4',d=>{
+khNpc('yr_admiral','The Admiral','kh_yani1_1',d=>{
   const F=G.flags;
   if(qSt('yq_tele')==='active'&&!F.yq1b){
     if(bagCount('herring')<2)return say('The Admiral looks at you, then at your empty hands, then at you again. It is a look that has ended careers. He wants 2 salt herring.',[BYE]);
-    return say('The Admiral stands on his post with a brass telescope tucked under one wing like a sceptre. He looks at you from under a tiny black hat. He looks at your hands.',[['Leave 2 salt herring for him.',()=>{bagRemove('herring',2);F.yq1b=1;yrStep('The Admiral has returned the telescope.');return say('The Admiral inspects the herring one at a time, as if checking them for forgeries, and then eats both. He hacks, drops the telescope on the planks with great dignity, and spreads his wings in the manner of a bird who has completed an honest day\'s trade.',[BYE])}],BYE])}
-  return say(F.yq1b?'The Admiral sits on his post and pretends he has never seen a telescope in his life.':'A very large herring gull in a very small hat, perched on a post. He has a medal on his chest and nobody remembers giving it to him. He regards you as a man regards a late tax.',[BYE])});
-yrObj('yr_admiral','kh_yprop1_4',[72,40],3);
+    return say('The Admiral stands on his post with a brass telescope tucked under one wing like a sceptre. He looks at you with one cold yellow eye. He looks at your hands.',[['Leave 2 salt herring for him.',()=>{bagRemove('herring',2);F.yq1b=1;yrStep('The Admiral has returned the telescope.');return say('The Admiral inspects the herring one at a time, as if checking them for forgeries, and then eats both. He hacks, drops the telescope on the planks with great dignity, and spreads his wings in the manner of a bird who has completed an honest day\'s trade.',[BYE])}],BYE])}
+  return say(F.yq1b?'The Admiral sits on his post and pretends he has never seen a telescope in his life.':'A very large herring gull on a post, with a brass ring on one leg that nobody remembers putting there. He regards you as a man regards a late tax.',[BYE])});
+yrObj('yr_admiral','kh_yani1_1',[72,40],3);
 
 /* ---- 2. the great crab census: Tamsin Kell wants every crab on the shore counted ---- */
 const YR_CRABS=[
@@ -75,7 +75,7 @@ const YR_CRABS=[
   ['You tally the hermit crab, and then, to be fair, you tally his shell. He objects. The tally stands at one crab. The shell is a resident.',[58,35]],
   ['The spider crab is quite a lot of crab. You are not sure whether to count the legs. You decide on one crab with eight points of view.',[59,32]],
   ['The grey crab holds up his one enormous claw like a very rude question. You count him anyway. He is a great one for being counted.',[57,48]],
-  ['A tiny crab in a brass thimble stands to attention and demands to be counted twice, on the grounds that he is wearing a helmet. You count him once and give him a nod. He accepts the nod.',[51,50]]
+  ['A small pale sand crab demands to be counted twice, on the grounds that he has two of everything. You count him once and give him a nod. He accepts the nod.',[51,50]]
 ];
 QUESTS.yq_crab={title:'The Great Crab Census',who:'Tamsin Kell, the harbourmaster',need:6,goal:()=>Object.keys(yrF().yqCrab||{}).length,
   desc:'The harbour board has decreed that every crab on the shore be counted before the spring tax. Find and tally the 6 crabs of Yarrim, on the beach and along the quay.',reward:{gold:420,xp:1900,items:['ringS']}};
@@ -88,13 +88,13 @@ const D_CRAB=khQD("The harbour board has decreed that every crab on the shore mu
   'Six, in the ledger, in my best handwriting. The crabs have been informed. They did not reply, but one of them clicked at me. Here is the harbour board\'s fee, and something from my own pocket.',
   'The census is in the archive. Next year we count the gulls, and then I shall need a bigger ledger.');
 YR_CRABS.forEach((c,i)=>{
-  khNpc('yr_crab'+i,'A crab','kh_ycrab1_'+i,d=>{
+  khNpc('yr_crab'+i,'A crab','kh_ycrab2_'+i,d=>{
     const F=G.flags;F.yqCrab=F.yqCrab||{};
     if(F.yqCrab[i])return say('You have already counted this one. He looks at you as if he knows it and expects an apology.',[BYE]);
     if(qSt('yq_crab')!=='active')return say('A crab, going about its business. It has the look of something that has been counted before and did not enjoy it.',[BYE]);
     F.yqCrab[i]=1;const n=Object.keys(F.yqCrab).length;yrStep(n+' of 6 crabs tallied.');
     return say(c[0]+' ('+n+' of 6)',[BYE])});
-  yrObj('yr_crab'+i,'kh_ycrab1_'+i,c[1],3);
+  yrObj('yr_crab'+i,'kh_ycrab2_'+i,c[1],3);
 });
 
 /* ---- 3. a message in a bottle: Wink, Old Maren and the tide ---- */
@@ -226,7 +226,7 @@ yrHook('yr_net',d=>{
   const F=G.flags;
   if(qSt('yq_seal')==='active'&&!F.yq7b){F.yq7b=1;yrStep('Garrick gave you his oldest net.');return say('My oldest net? Nell sent you. She would. (He rummages in a heap, and holds up something that is more hole than net.) This one. It has not caught a fish since before I had a moustache. It is holes, tied together with other holes. It is the perfect net for giving to anyone.',[BYE])}
   return null});
-khNpc('yr_seal','A grey seal','kh_yprop1_2',d=>{
+khNpc('yr_seal','A grey seal','kh_yani1_0',d=>{
   const F=G.flags,act=qSt('yq_seal')==='active';
   if(!khNight())return say(act?'A big grey seal sleeps among the net racks on the beach, snoring like a bellows. A seal sleeping beside the nets. Come back at night, between nine and five, and see what he does when the lamps are out.':'A big grey seal sleeps on the sand beside the net racks, snoring like a bellows. Better not to wake him.',[BYE]);
   if(act&&!F.yq7a){F.yq7a=1;yrStep('You have seen who takes the nets. He has a family.');return say('In the dark, a sleek grey seal is dragging a net down the beach with the dedication of a burglar. He sees you. He does not stop. Behind him under a pile of nets, three small pups yawn in a row. He is not a thief. He is a father with a draught.',[BYE])}
@@ -235,7 +235,7 @@ khNpc('yr_seal','A grey seal','kh_yprop1_2',d=>{
     if(bagCount('herring')<2)return say('The seal looks at you, and then at your hands. He wants 2 salt herring with the old net, as a deposit.',[BYE]);
     return say('The seal holds a good net firmly in his mouth. He looks at you, and then at the bundle in your arms.',[['Trade him the old net and 2 salt herring.',()=>{bagRemove('herring',2);F.yq7c=1;yrStep('The seal has taken the old net. Nell\'s nets are safe.');return say('The seal sniffs the old net, accepts it as an upgrade, accepts the herring as a down payment, and shuffles up the beach with his pups behind him, leaving Nell\'s good net on the sand. One of the pups looks back. It is the best moment of the week.',[BYE])}],BYE])}
   return say(F.yq7c?'A cold pile of old net on the sand, a flat patch where a seal slept, and a very small nose-print.':'A seal, awake, in the dark, looking at you with enormous eyes.',[BYE])});
-yrObj('yr_seal','kh_yprop1_2',[55,45],3);
+yrObj('yr_seal','kh_yani1_0',[55,45],3);
 
 /* ---- 8. the drowned lantern: Bessa, Orsa, Pell and a boat hook ---- */
 yrQ('yq_lant','The Drowned Lantern','Bessa, the innkeeper',[
@@ -288,7 +288,7 @@ CUTS.yrShanty=()=>[
   {text:'Rafe tucks the fiddle under his chin, and the inn goes quiet. It is a slow, rolling tune, in time with the tide. He sings, in a voice like a rusty hinge, and it is beautiful anyway.'},
   {text:'"I sailed from Yarrim in the morning, when the Vaast was young and wide, with a barrel of salt and a bottle of rum and a gull on every side." (Old Jory\'s verse.)'},
   {text:'"My Tobias went for the island with the spring that never dries. He came home with a bucket and a story and a pair of other men\'s eyes." (Old Maren\'s verse.)'},
-  {text:'"The herring run in silver and the gulls run off with half, and the Admiral wears a hat, and nobody dares to laugh." (Finn\'s verse.)'},
+  {text:'"The herring run in silver and the gulls run off with half, and the Admiral wears a ring, and nobody dares to laugh." (Finn\'s verse.)'},
   {text:'"So haul away for Yarrim, boys, the lantern light is low, the tide is in, the crab is out, so heave and off we go." The whole inn joins the chorus, and the lantern over the bar rings a little in the glass.'},
   {text:'Rafe sings the last verse, which he has had in his head the whole time, and which nobody has ever heard before. When he is done, there is a long silence, and then somebody blows their nose.'}];
 khStreetQ('yr1_p1','Rafe, a fiddler','kh_yfolk3_2',"A man at the next table sold me a map to a treasure island. I paid him in fish. He left. The map is of the next table.",'yq_shanty',D_SHANTY);
@@ -305,7 +305,7 @@ yrHook('yr_maren',d=>{
   return null});
 yrHook('yr_fisher2',d=>{
   const F=G.flags;
-  if(qSt('yq_shanty')==='active'&&!F.yq9c){F.yq9c=1;yrStep('Finn gave you a verse of the shanty.');return say('A verse? I do not sing. I fish. And complain, if you want to be exact about it. ... This is the only one I know. "The herring run in silver and the gulls run off with half, and the Admiral wears a hat, and nobody dares to laugh." That is the whole of Yarrim, in four lines, and a fiddler can have it for free.',[BYE])}
+  if(qSt('yq_shanty')==='active'&&!F.yq9c){F.yq9c=1;yrStep('Finn gave you a verse of the shanty.');return say('A verse? I do not sing. I fish. And complain, if you want to be exact about it. ... This is the only one I know. "The herring run in silver and the gulls run off with half, and the Admiral wears a ring, and nobody dares to laugh." That is the whole of Yarrim, in four lines, and a fiddler can have it for free.',[BYE])}
   return null});
 
 /* a few more words from the people who belong to no quest, so that the village talks */

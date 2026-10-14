@@ -2357,5 +2357,68 @@
 "h": 137,
 "kind": "sprite",
 "sheet": "ycrab1"
+},
+"yani1_0": {
+"file": "yani1_0.webp",
+"w": 160,
+"h": 326,
+"kind": "sprite",
+"sheet": "yani1"
+},
+"yani1_1": {
+"file": "yani1_1.webp",
+"w": 429,
+"h": 252,
+"kind": "sprite",
+"sheet": "yani1"
+},
+"yani1_2": {
+"file": "yani1_2.webp",
+"w": 317,
+"h": 164,
+"kind": "sprite",
+"sheet": "yani1"
+},
+"ycrab2_0": {
+"file": "ycrab2_0.webp",
+"w": 294,
+"h": 220,
+"kind": "sprite",
+"sheet": "ycrab2"
+},
+"ycrab2_1": {
+"file": "ycrab2_1.webp",
+"w": 283,
+"h": 179,
+"kind": "sprite",
+"sheet": "ycrab2"
+},
+"ycrab2_2": {
+"file": "ycrab2_2.webp",
+"w": 264,
+"h": 185,
+"kind": "sprite",
+"sheet": "ycrab2"
+},
+"ycrab2_3": {
+"file": "ycrab2_3.webp",
+"w": 319,
+"h": 176,
+"kind": "sprite",
+"sheet": "ycrab2"
+},
+"ycrab2_4": {
+"file": "ycrab2_4.webp",
+"w": 285,
+"h": 189,
+"kind": "sprite",
+"sheet": "ycrab2"
+},
+"ycrab2_5": {
+"file": "ycrab2_5.webp",
+"w": 277,
+"h": 115,
+"kind": "sprite",
+"sheet": "ycrab2"
 }
 }
