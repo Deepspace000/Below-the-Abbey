@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.83';
+const VERSION='3.84';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -5508,7 +5508,9 @@ const CLASS_SPEECH={Barbarian:'#ff9e8a',Warrior:'#ffae85',Goat:'#ffbf80',Paladin
 const heroSpeech=hi=>CLASS_SPEECH[(CLASSES[HERO_DEF[hi].clsId]||{}).name]||'#e6d9b0';
 function speechLines(lines){
   const names=[0,1,2,3].map(i=>HERO_DEF[i].name);
-  for(const ln of lines){const hi=names.indexOf(ln.who);if(hi<0||ln.hi!==undefined)continue;ln.hi=hi;ln.text='“'+ln.text.replace(/^["“]|["”]$/g,'')+'”'}
+  for(const ln of lines){const hi=names.indexOf(ln.who);
+    if(hi<0){if(ln.who&&!ln.q&&!/^["“]/.test(ln.text)&&!/^(narrator|the party)$/i.test(ln.who)){ln.q=1;ln.text='“'+ln.text.replace(/["”]$/g,'')+'”'}continue} // other characters speak in quotes too
+    if(ln.hi!==undefined)continue;ln.hi=hi;ln.text='“'+ln.text.replace(/^["“]|["”]$/g,'')+'”'}
   return lines;
 }
 function startCut(id,end){G.cut={id,i:0,t:G.time,lines:speechLines(CUTS[id]()),end};G.hold=null;G.queued=null}
@@ -5964,10 +5966,18 @@ function talkBtn(id){
   if(G.talk!==T)return;
   if(next){T.node=next;T.t=G.time}else G.talk=null;
 }
+/* a person speaking in a talk box: their words go in quotes unless it is plainly the narrator describing something (or already has quotation marks) */
+function talkQuoted(T,nd){
+  if(nd._q!==undefined)return nd._q;
+  const t=nd.text||'',nm=(T.n&&T.n.name)||'';
+  const person=nm&&!/^(a|an|the)\s/i.test(nm)&&!/(door|sign|board|chest|stone|teleporter|crate|grave|well|altar|notice|boat|bed|shelf|barrel|tent|cart)/i.test(nm);
+  const narr=/^(he|she|it|they|the|a|an|you|your|nobody|nothing|there|inside|behind|his|her|their|on |in |at |from |with |as |when |one |two |three |some |each|every)/i.test(t.trim());
+  nd._q=(person&&!narr&&t&&!/["“”]/.test(t))?'“'+t.replace(/^\s+|\s+$/g,'')+'”':t;return nd._q;
+}
 function drawTalk(){
-  const T=G.talk,nd=T.node,img=IMG[T.d.k];T.btns=[];
-  const bx=14,bw=366,tx=bx+(img?76:14),tw=bx+bw-tx-12,lines=wrapText(nd.text,tw,10);
-  const shown=Math.floor((G.time-T.t)*60),done=shown>=nd.text.length;
+  const T=G.talk,nd=T.node,img=IMG[T.d.k];T.btns=[];nd._qt=talkQuoted(T,nd);
+  const bx=14,bw=366,tx=bx+(img?76:14),tw=bx+bw-tx-12,lines=wrapText(nd._qt,tw,10);
+  const shown=Math.floor((G.time-T.t)*60),done=shown>=nd._qt.length;
   const optH=nd.opts.length*17,bh=Math.max(img?84:40,lines.length*12.5+16)+optH+10,by=24;
   ctx.save();
   ctx.fillStyle='rgba(12,9,5,.94)';rrect(ctx,bx,by,bw,bh,4);ctx.fill();
