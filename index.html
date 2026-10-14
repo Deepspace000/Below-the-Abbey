@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.77';
+const VERSION='3.78';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2110,7 +2110,7 @@ function restParty(inn){
   advanceTime(480);
   G.heroes.forEach((h,i)=>{
     if(!h.alive){h.alive=true;h.hp=Math.max(1,Math.ceil(h.max/2));msg(`${HERO_DEF[i].name} rises again.`,'#9ae0a0')}
-    else if(h.food>0||inn)h.hp=h.max;else h.hp=Math.max(h.hp,Math.ceil(h.max/2));
+    else if(h.food>0||inn)h.hp=h.max;else{h.hp=Math.max(h.hp,Math.ceil(h.max/2));msg(`${HERO_DEF[i].name} is starving and only heals to half. Eat something, then rest again.`,'#e8a090')}
     h.mp=h.mpMax;
     if(inn)h.food=Math.max(h.food,70);
   });
