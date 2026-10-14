@@ -39,12 +39,51 @@ function teleStep(nx,ny){
   if(!F.teles[LEVEL]){F.teles[LEVEL]=1;sfx('level');msg('The stone hums, and runes of pale light run round its rim. This teleporter is awake. Press T to travel.','#a8d8ff')}
   else msg('A woken teleporter. Press T, or tap Teleport, to travel to another.','#a8d8ff');
 }
+/* the journey: a blue-white swirl closes round the party, a sudden black, a swirl opening on the new place, and its name */
+var TP=null;
 function teleportTo(n){
-  const sp=teleSpot(n);if(!sp||!teleActive(n))return;
+  const sp=teleSpot(n);if(!sp||!teleActive(n)||TP)return;
   const L=LEVELS[n];let f=0;for(let k=0;k<4;k++){const c=(L.rows[sp.y+DIRS[k][1]]||'')[sp.x+DIRS[k][0]];if(c==='.'){f=k;break}}
-  G.teleMode=false;G.overview=false;G.world=false;sfx('level');
-  goToLevel(n,{x:sp.x,y:sp.y,f});
-  msg('The stone flares, and the party stands in '+(L.label||L.name)+'.','#a8d8ff');
+  G.teleMode=false;G.overview=false;G.world=false;
+  TP={ph:'out',t:0,n,sp,f,name:L.label||L.name};
+  sfx('level');
+}
+const TP_OUT=1.2,TP_BLACK=.45,TP_IN=1.3,TP_NAME=3.4;
+function tpTick(dt){
+  if(!TP)return;TP.t+=dt;
+  if(TP.ph==='out'&&TP.t>=TP_OUT){
+    TP.ph='black';TP.t=0;
+    const q=TP;goToLevel(q.n,{x:q.sp.x,y:q.sp.y,f:q.f});TP=q; // goToLevel starts a new level; the effect carries on over it
+    G.msgs=[];
+  }else if(TP.ph==='black'&&TP.t>=TP_BLACK){TP.ph='in';TP.t=0;sfx('level')}
+  else if(TP.ph==='in'&&TP.t>=TP_NAME)TP=null;
+}
+function tpSwirl(a,rot,tight){
+  const cx=210,cy=105;
+  ctx.save();
+  const g=ctx.createRadialGradient(cx,cy,2,cx,cy,170);g.addColorStop(0,'rgba(235,248,255,'+(.7*a)+')');g.addColorStop(.45,'rgba(120,180,255,'+(.4*a)+')');g.addColorStop(1,'rgba(10,20,60,'+(.75*a)+')');
+  ctx.fillStyle=g;ctx.fillRect(0,0,420,210);
+  ctx.lineCap='round';
+  for(let arm=0;arm<5;arm++){
+    for(let pass=0;pass<2;pass++){
+      ctx.beginPath();
+      for(let r=4;r<230;r+=4){const an=arm*TAU/5+rot+r*tight*(pass?1.12:1),x=cx+Math.cos(an)*r*1.5,y=cy+Math.sin(an)*r*.78;if(r===4)ctx.moveTo(x,y);else ctx.lineTo(x,y)}
+      ctx.strokeStyle=pass?'rgba(255,255,255,'+(.55*a)+')':'rgba(120,190,255,'+(.62*a)+')';ctx.lineWidth=pass?2.4:9;ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+function drawTport(){
+  if(!TP)return;
+  if(TP.ph==='out'){const p=TP.t/TP_OUT,e=p*p;tpSwirl(Math.min(1,e*1.1+.05),TP.t*(3+p*14),.016+p*.02)}
+  else if(TP.ph==='black'){ctx.fillStyle='#000';ctx.fillRect(0,0,420,210)}
+  else{
+    const p=Math.min(1,TP.t/TP_IN),a=1-p;
+    if(a>0){ctx.fillStyle='rgba(0,0,0,'+(.85*a*a)+')';ctx.fillRect(0,0,420,210);tpSwirl(a,-TP.t*(12-p*9),.036-p*.018)}
+    const fi=clamp(TP.t/.7,0,1),fo=clamp((TP_NAME-TP.t)/.9,0,1),al=Math.min(fi,fo);
+    if(al>0){ctx.save();ctx.globalAlpha=al;ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(0,78,420,50);
+      txt(TP.name,210,96,15,'#e8f4ff','center',true);txt('The party arrives.',210,114,8,'#a8d8ff','center',true);ctx.restore()}
+  }
 }
 function openTeleMap(){G.overview=true;G.world=true;G.wv=wvDefault();G.teleMode=true;G.wnote=null}
 function teleFromMap(k){

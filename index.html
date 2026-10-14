@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.67';
+const VERSION='3.68';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1529,7 +1529,7 @@ function reveal(){
   if(r!==G.lastReg){const first=G.lastReg===undefined;G.lastReg=r;if(!first&&G.state==='play'&&G.timers.length<=1&&!G.cut)G.autoNow=true}
 }
 function camSettled(){const C=G.C,P=G.P;return Math.abs(C.x-P.x)<.02&&Math.abs(C.y-P.y)<.02&&Math.abs(C.a-P.angT)<.02}
-function canAct(){return G.state==='play'&&!G.menu&&!G.map&&!G.inv.open&&!G.loot&&!G.cut&&!G.talk&&G.timers.length===0&&G.time>=G.lockT&&camSettled()}
+function canAct(){return !TP&&G.state==='play'&&!G.menu&&!G.map&&!G.inv.open&&!G.loot&&!G.cut&&!G.talk&&G.timers.length===0&&G.time>=G.lockT&&camSettled()}
 function hasLOS(ax,ay,bx,by){
   const dx=bx-ax,dy=by-ay,n=Math.ceil(Math.max(Math.abs(dx),Math.abs(dy))*5);
   for(let i=1;i<n;i++){const x=Math.floor(ax+.5+dx*i/n),y=Math.floor(ay+.5+dy*i/n);if(x<0||y<0||x>=MW||y>=MH||G.grid[y][x]>0)return false}
@@ -6288,7 +6288,12 @@ function drawCompare(e,def){
   let dpr=0;for(const o of H){const r=heroDmgRange(o.h);dpr+=(r[0]+r[1])/2*heroHitPct(o.i,false)}
   const eAvg=(st.dmg[0]+st.dmg[1])/2,hitC=clamp(def.hit-H.reduce((n,o)=>n+heroArmor(o.h),0)/H.length*.03,.1,.95),eDpr=Math.max(.1,eAvg*hitC);
   const toKill=Math.max(.2,e.hp/Math.max(1,dpr)),toDie=Math.max(.2,(pHp/H.length)/eDpr),ratio=toDie/toKill;
-  const verdict=ratio>=6?['Trivial','#8ad07a']:ratio>=3?['Easy','#a8d070']:ratio>=1.5?['Fair fight','#e0d070']:ratio>=.7?['Hard','#e89850']:['Deadly','#e85a48'];
+  const VER=[['Trivial','#8ad07a'],['Easy','#a8d070'],['Fair fight','#e0d070'],['Hard','#e89850'],['Deadly','#e85a48']];
+  let vi=ratio>=6?0:ratio>=3?1:ratio>=1.5?2:ratio>=.7?3:4;
+  // the level counts too: a creature below the party is never worse than a fair fight, one level with it never worse than hard, and only a creature above the party can be deadly
+  {const d=e.lvl-plvl;if(d<=-6)vi=Math.min(vi,1);else if(d<=-1)vi=Math.min(vi,2);else if(d===0)vi=Math.min(vi,3);
+   if(d>=3)vi=Math.max(vi,3);else if(d>=1)vi=Math.max(vi,2)}
+  const verdict=VER[vi];
   const x0=28,y0=30,w=124,h=84;
   ctx.save();ctx.fillStyle='rgba(8,6,4,.72)';rrect(ctx,x0,y0,w,h,5);ctx.fill();ctx.lineWidth=1.2;ctx.strokeStyle=goldG(x0,y0,w,h);rrect(ctx,x0,y0,w,h,5);ctx.stroke();ctx.restore();
   const bar=(y,label,v,mx,col,txtv)=>{txt(label,x0+6,y+3,6.5,'#a89a78','left');ctx.fillStyle='rgba(30,20,12,.9)';ctx.fillRect(x0+30,y,62,6);ctx.fillStyle=col;ctx.fillRect(x0+30,y,62*clamp(v/mx,0,1),6);ctx.strokeStyle='rgba(0,0,0,.7)';ctx.lineWidth=.8;ctx.strokeRect(x0+30,y,62,6);txt(txtv,x0+95,y+3,6.5,'#e0d4b0','left')};
@@ -6344,10 +6349,11 @@ function ui(dt){
   drawWorld();try{drawWeatherFx()}catch(e){}
   if(SMOKE){drawSmoke(G.time);ctx.fillStyle=HATCHP;ctx.fillRect(0,0,420,210)}
   if(G.state==='title'||G.state==='goto'){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,420,210)}
-  if(G.state==='play'){drawEnemyPlate();drawArrows();drawFloats(dt);drawMessages();drawLevelBanners();try{afflHud()}catch(e){}if(teleOn()&&!G.cut&&!G.talk&&!G.menu&&!G.inv.open&&!G.loot&&!G.overview&&teleActive(LEVEL))btnText('teleport','Teleport  (T)',160,30,100,20)}
+  if(G.state==='play'){drawEnemyPlate();drawArrows();drawFloats(dt);drawMessages();drawLevelBanners();try{afflHud()}catch(e){}if(!TP&&teleOn()&&!G.cut&&!G.talk&&!G.menu&&!G.inv.open&&!G.loot&&!G.overview&&teleActive(LEVEL))btnText('teleport','Teleport  (T)',160,30,100,20)}
   ctx.restore();
   if(G.cut&&!G.cut.pic)drawCut();
   if(G.talk)drawTalk();
+  ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();try{drawTport()}catch(e){TP=null}ctx.restore();
   ctx.lineWidth=2;ctx.strokeStyle='#050403';roughStrokeRect(1,1,418,208);
   // MENU tab
   ctx.save();ctx.fillStyle=STONEPAT;ctx.beginPath();ctx.moveTo(176,0);ctx.lineTo(256,0);ctx.lineTo(248,17);ctx.lineTo(184,17);ctx.closePath();ctx.fill();
@@ -6562,6 +6568,7 @@ function update(dt){
   burnTick(dt);
   if(LEVEL===44&&G.state==='play')try{khWalkTick(dt)}catch(e){}
   if(G.state==='play')try{petFollow(dt)}catch(e){}
+  try{tpTick(dt)}catch(e){console.error(e);TP=null}
   try{if(typeof uwTick==='function')uwTick(dt);if(typeof seaTick==='function')seaTick(dt)}catch(e){console.error(e)}
   G.time+=dt;try{if(G.pharFlash>0)G.pharFlash-=dt;stormTick(dt);birdTick(dt);caravanTick(dt);if(G.flags)(G.flags.lvSeen=G.flags.lvSeen||{})[LEVEL]=1}catch(e){}
   if(G.dayBase>0){const hr=(G.clock%1440)/60,dsl=LEVEL===43||LEVEL===44||(LEVEL>=60&&LEVEL<=64)||LEVEL===41||yarSea(LEVEL);G.day=Math.max(.16,G.dayBase*clamp(.66+.5*Math.cos((hr-12)/24*TAU),dsl?(LEVEL===44?.4:.3):G.hasLamps?.2:.5,1));if(typeof weatherNow==='function'){const wn=weatherNow();if(wn&&wn.dark<1)G.day=Math.max(.14,G.day*wn.dark)}}
@@ -6699,6 +6706,7 @@ function frame(now){
   requestAnimationFrame(frame);
 }
 function handleBtn(id){
+  if(TP)return;
   if(G.cut){cutAdvance();return}
   if(G.talk){talkBtn(id);return}
   if(G.overview){if(id==='ovexit'){G.overview=false;G.world=false;G.teleMode=false}else if(/^wtp_/.test(id))teleFromMap(id.slice(4));else if(id==='worldback')G.world=false;else if(id==='worldmap'){G.world=true;G.wv=wvDefault()}else if(id==='wzin')setWorldZoom((G.wv?G.wv.z:1)*1.4,240,160);else if(id==='wzout')setWorldZoom((G.wv?G.wv.z:1)/1.4,240,160);else if(id==='wreset')G.wv=wvDefault();else if(id==='wmap'){}
@@ -6880,6 +6888,7 @@ const KEYMAP={ArrowUp:'fwd',w:'fwd',W:'fwd',ArrowDown:'back',s:'back',S:'back',A
 addEventListener('keydown',e=>{
   if(e.ctrlKey||e.metaKey||e.altKey)return;
   audioInit();
+  if(TP){e.preventDefault();return}
   if(G.cut){if(e.key==='Enter'||e.key===' '||e.key==='Escape')cutAdvance();e.preventDefault();return}
   if(G.talk){if(e.key==='Escape')G.talk=null;else if(e.key==='Enter'||e.key===' ')talkBtn('tkskip');else if(e.key>='1'&&e.key<='4')talkBtn('tk'+(+e.key-1));e.preventDefault();return}
   if(G.saves){if(e.key==='Escape')G.saves=null;e.preventDefault();return}
@@ -7625,12 +7634,51 @@ function teleStep(nx,ny){
   if(!F.teles[LEVEL]){F.teles[LEVEL]=1;sfx('level');msg('The stone hums, and runes of pale light run round its rim. This teleporter is awake. Press T to travel.','#a8d8ff')}
   else msg('A woken teleporter. Press T, or tap Teleport, to travel to another.','#a8d8ff');
 }
+/* the journey: a blue-white swirl closes round the party, a sudden black, a swirl opening on the new place, and its name */
+var TP=null;
 function teleportTo(n){
-  const sp=teleSpot(n);if(!sp||!teleActive(n))return;
+  const sp=teleSpot(n);if(!sp||!teleActive(n)||TP)return;
   const L=LEVELS[n];let f=0;for(let k=0;k<4;k++){const c=(L.rows[sp.y+DIRS[k][1]]||'')[sp.x+DIRS[k][0]];if(c==='.'){f=k;break}}
-  G.teleMode=false;G.overview=false;G.world=false;sfx('level');
-  goToLevel(n,{x:sp.x,y:sp.y,f});
-  msg('The stone flares, and the party stands in '+(L.label||L.name)+'.','#a8d8ff');
+  G.teleMode=false;G.overview=false;G.world=false;
+  TP={ph:'out',t:0,n,sp,f,name:L.label||L.name};
+  sfx('level');
+}
+const TP_OUT=1.2,TP_BLACK=.45,TP_IN=1.3,TP_NAME=3.4;
+function tpTick(dt){
+  if(!TP)return;TP.t+=dt;
+  if(TP.ph==='out'&&TP.t>=TP_OUT){
+    TP.ph='black';TP.t=0;
+    const q=TP;goToLevel(q.n,{x:q.sp.x,y:q.sp.y,f:q.f});TP=q; // goToLevel starts a new level; the effect carries on over it
+    G.msgs=[];
+  }else if(TP.ph==='black'&&TP.t>=TP_BLACK){TP.ph='in';TP.t=0;sfx('level')}
+  else if(TP.ph==='in'&&TP.t>=TP_NAME)TP=null;
+}
+function tpSwirl(a,rot,tight){
+  const cx=210,cy=105;
+  ctx.save();
+  const g=ctx.createRadialGradient(cx,cy,2,cx,cy,170);g.addColorStop(0,'rgba(235,248,255,'+(.7*a)+')');g.addColorStop(.45,'rgba(120,180,255,'+(.4*a)+')');g.addColorStop(1,'rgba(10,20,60,'+(.75*a)+')');
+  ctx.fillStyle=g;ctx.fillRect(0,0,420,210);
+  ctx.lineCap='round';
+  for(let arm=0;arm<5;arm++){
+    for(let pass=0;pass<2;pass++){
+      ctx.beginPath();
+      for(let r=4;r<230;r+=4){const an=arm*TAU/5+rot+r*tight*(pass?1.12:1),x=cx+Math.cos(an)*r*1.5,y=cy+Math.sin(an)*r*.78;if(r===4)ctx.moveTo(x,y);else ctx.lineTo(x,y)}
+      ctx.strokeStyle=pass?'rgba(255,255,255,'+(.55*a)+')':'rgba(120,190,255,'+(.62*a)+')';ctx.lineWidth=pass?2.4:9;ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+function drawTport(){
+  if(!TP)return;
+  if(TP.ph==='out'){const p=TP.t/TP_OUT,e=p*p;tpSwirl(Math.min(1,e*1.1+.05),TP.t*(3+p*14),.016+p*.02)}
+  else if(TP.ph==='black'){ctx.fillStyle='#000';ctx.fillRect(0,0,420,210)}
+  else{
+    const p=Math.min(1,TP.t/TP_IN),a=1-p;
+    if(a>0){ctx.fillStyle='rgba(0,0,0,'+(.85*a*a)+')';ctx.fillRect(0,0,420,210);tpSwirl(a,-TP.t*(12-p*9),.036-p*.018)}
+    const fi=clamp(TP.t/.7,0,1),fo=clamp((TP_NAME-TP.t)/.9,0,1),al=Math.min(fi,fo);
+    if(al>0){ctx.save();ctx.globalAlpha=al;ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(0,78,420,50);
+      txt(TP.name,210,96,15,'#e8f4ff','center',true);txt('The party arrives.',210,114,8,'#a8d8ff','center',true);ctx.restore()}
+  }
 }
 function openTeleMap(){G.overview=true;G.world=true;G.wv=wvDefault();G.teleMode=true;G.wnote=null}
 function teleFromMap(k){
