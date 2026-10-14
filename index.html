@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.70';
+const VERSION='3.71';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3853,7 +3853,7 @@ function setScroll(d,v){if(d==='goto'){G.gs=clamp(v,0,gotoMax());return}if(d==='
 /* ==========================================================================
    SAVE / LOAD  (autosave + three manual slots, a backup of the previous run)
    ========================================================================== */
-const SAVE_SLOTS=[['auto','Autosave'],['1','Slot 1'],['2','Slot 2'],['3','Slot 3'],['prev','Previous run'],['prev2','Older run']];
+const SAVE_SLOTS=[['auto','Autosave'],['quick','Quick save'],['1','Slot 1'],['2','Slot 2'],['3','Slot 3'],['prev','Previous run'],['prev2','Older run']];
 const hasSave=k=>{try{return !!localStorage.getItem('abbeySave_'+k)}catch(e){return false}};
 function readSave(k){try{const s=localStorage.getItem('abbeySave_'+k);return s?JSON.parse(s):null}catch(e){return null}}
 function writeSave(k){
@@ -6353,6 +6353,7 @@ function ui(dt){
   ctx.restore();
   if(G.cut&&!G.cut.pic)drawCut();
   if(G.talk)drawTalk();
+  if(G.state==='play'&&!G.cut&&!G.talk&&!(TP))drawQSave();
   ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();try{drawTport()}catch(e){TP=null}ctx.restore();
   ctx.lineWidth=2;ctx.strokeStyle='#050403';roughStrokeRect(1,1,418,208);
   // MENU tab
@@ -6695,6 +6696,16 @@ function drawFps(now,work){ // F: frames per second, the slowest recent frame, a
   ctx.fillStyle=avg<20?'#9f9':avg<34?'#ff9':'#f99';ctx.fillText((1000/avg).toFixed(0)+' fps   slowest '+mx.toFixed(0)+' ms',267,8);
   ctx.fillStyle='#ddd';ctx.fillText('game '+wa.toFixed(1)+' ms   sprites '+(G._sprN||0),267,20);ctx.restore();
 }
+function drawQSave(){ // a little floppy disk in the top left corner: one tap saves
+  const x=5,y=5,w=15,flash=G.qsT!==undefined&&G.time-G.qsT<.7;
+  ctx.save();ctx.globalAlpha=flash?1:.82;
+  ctx.fillStyle='rgba(8,6,4,.55)';ctx.fillRect(x-2,y-2,w+4,w+4);
+  ctx.fillStyle=flash?'#8ad07a':'#6a82a8';ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w-3,y);ctx.lineTo(x+w,y+3);ctx.lineTo(x+w,y+w);ctx.lineTo(x,y+w);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#d8dce4';ctx.fillRect(x+3,y,w-8,5);ctx.fillStyle='#2a3448';ctx.fillRect(x+w-7,y+1,2,3);
+  ctx.fillStyle='#e8e0cc';ctx.fillRect(x+2,y+8,w-4,w-8);ctx.fillStyle='#a89870';ctx.fillRect(x+3,y+10,w-6,1);ctx.fillRect(x+3,y+12,w-6,1);
+  ctx.lineWidth=1;ctx.strokeStyle='#0a0806';ctx.strokeRect(x+.5,y+.5,w-1,w-1);ctx.restore();
+  btn('qsave',x-2,y-2,w+4,w+4);
+}
 function frame(now){
   const dt=Math.min(.05,(now-last)/1000);last=now;
   const w0=performance.now();
@@ -6755,6 +6766,7 @@ function handleBtn(id){
     else if(id==='quittitle'){writeSave('auto');G.menu=false;G.cut=null;G.talk=null;G.loot=null;G.overview=false;G.state='title'}
     return;
   }
+  if(id==='qsave'){const ok=writeSave('quick')&&writeSave('auto');G.qsT=G.time;sfx(ok?'level':'locked');msg(ok?'Game saved.':'The save failed: the browser would not store it.',ok?'#a8e8a0':'#e8a090');return}
   if(id==='menu'){G.menu=true;return}
   if(id==='map'){G.overview=true;return}
   if(id.startsWith('hero')){try{afflPortraitNote(+id.slice(4))}catch(e){}openInv(+id.slice(4));return}
