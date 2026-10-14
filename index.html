@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.48';
+const VERSION='3.49';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3738,6 +3738,9 @@ function drawLoot(){
   for(const [x,w] of [[4,152],[158,150],[312,164]]){
     ctx.fillStyle='rgba(14,8,6,.8)';rrect(ctx,x,4,w,242,5);ctx.fill();ctx.lineWidth=2;ctx.strokeStyle=goldG(x,4,w,242);rrect(ctx,x,4,w,242,5);ctx.stroke();wornEdge(x,4,w,242,5);illum(x,4,w,242,x+5);
   }
+  // which side is which: the party's bag on the left (blue), the shop or container on the right (gold), each named down its edge
+  ctx.fillStyle='rgba(70,110,170,.2)';rrect(ctx,4,4,152,242,5);ctx.fill();ctx.fillStyle='rgba(190,130,30,.24)';rrect(ctx,312,4,164,242,5);ctx.fill();
+  for(const [lx,t,col] of [[151,'YOUR PARTY',L.shop?'#9fc4f0':'#9fc4f0'],[466,L.shop?'SHOP':'FOUND HERE','#f0c860']]){ctx.save();ctx.translate(lx,125);ctx.rotate(-Math.PI/2);ctx.font=`bold 9px ${FUI}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(10,6,4,.9)';ctx.strokeText(t,0,0);ctx.fillStyle=col;ctx.fillText(t,0,0);ctx.restore()}
   L.sl=clamp(L.sl,0,maxScroll());L.sr=clamp(L.sr,0,lootMaxScroll(Math.max(9,box.length)));
   drawGrid(G.bag,'lbag',8,L.sl,BAGCAP,L.sel&&L.sel.side==='bag'?L.sel.i:-1,false);
   drawGrid(box,'lbox',318,L.sr,Math.max(9,Math.ceil(box.length/3)*3),L.sel&&L.sel.side==='box'?L.sel.i:-1,L.shop);
@@ -3746,8 +3749,8 @@ function drawLoot(){
   if(it)drawItemCard(it,hi,158,8,150);
   else{
     txt(L.name,233,20,12,'#d8c88e','center',true,undefined,140);
-    txt(L.shop?'Buy from the cart, or':'Take what you find,',233,48,9,'#a89878','center');
-    txt(L.shop?'sell from your bag.':'one item or all of it.',233,61,9,'#a89878','center');
+    txt(L.shop?'Buy from the shop (right),':'Take what you find (right),',233,48,9,'#a89878','center');
+    txt(L.shop?'sell from your party (left).':'one item or all of it.',233,61,9,'#a89878','center');
     if(!box.length)txt(L.shop?'Sold out.':'It is empty.',233,100,10,'#8a7a58','center');
   }
   const last=G.msgs[G.msgs.length-1];
