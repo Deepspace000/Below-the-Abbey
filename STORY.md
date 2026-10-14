@@ -98,27 +98,47 @@ On a black volcano of an island, the ash-priestess Ketra asked for three crystal
 
 At the end of the chain, Isolde herself sat in a hut by a ruined beacon. The third page lay in the altar at the top of the island, and Lord Corvane had followed the party's lamp across half the sea to take it. He did not leave the island.
 
-## 25. Oldhaven
+## 25. Under the Sea
+
+Tam Salvor of Yarrim sold the party diving helms, and below every island there was a reef. The water was full of colour and teeth: coral gardens, drowned abbeys, vents that breathe, and a wreck among the kelp. Four minutes of air at a time, and the bubbles at the vents to fill the helms again.
+
+## 26. The Open Sea
+
+The party took the helm of the Dawn Walker and sailed the Vaast Sea itself: a hundred cells of open water between the islands, serpents under the swell, wrecks adrift, and little islands where castaways and old chests wait.
+
+## 27. The Kraken
+
+East of the line where the gulls stop, the sea went black and the Kraken rose. The party killed it, and for the first time in a hundred years the east of the Vaast Sea could be sailed.
+
+## 28. Oldhaven
 
 The Dawn Walker came home at dawn to Oldhaven, the king's city, with the whole master ledger in Isolde's own hand. The royal harbour was a wall of pale stone with every gun turned on the water. The gate would open at noon, and a warrant still stood against four named persons.
 
-## 26. The Court of King Osric
+## 29. The Court of King Osric
 
 At noon the party was brought before King Osric and his court, with the master ledger in their hands.
 
-## 27. The Warrant Torn Up
+## 30. The Warrant Torn Up
 
 The ledger was read in open court, and the king saw whose hand wrote his tolls and his warrants. The chancellor who had stood behind Corvane fell, the warrant was torn in two, and the ransom on four heads was lifted. The road home, so long and so strange, was clear.
 
-## 28. The Village of Yarrim
+## 31. The Village of Yarrim
 
 Yarrim is a hamlet that grew up by itself: one little cobbled road down to a harbour square, three lanes off it, a green behind the inn, and a dirt track at the back past two cottages to the gorge and the tunnel. Its people are small ones, and each has a favour to ask: a telescope stolen by a gull, a census of crabs, a message in a bottle, a left boot that is a right boot, a wedding of two boats, a donkey who will not budge, a thief of nets, a lantern at the bottom of the harbour, and a shanty with no last verse.
 
-## 29. The Wandering Monsters
+## 32. The Singing Shell
+
+On the Isle of Bells, Brother Aldous told the party of a great spiral shell, a nautilus grown over a thousand years, that broke in four in a storm and sank, one piece beneath each island. The Whorl lies under Saltbarrow, the Lip under the Isle of Bells, the Spire under Cinder Isle and the Pearl-Lining under Last Light, each in a glowing pearl-white clam in a far corner of the reef. The party must dive all four underwater dungeons to bring them up.
+
+## 33. The Nautilus Helm
+
+Aldous laid the four pieces on the stone beside the abbey bell, and they closed together by themselves with a sound like the sea. The shell became a helm, pearl-white inside and rose at the lip: it heals its wearer every round of a battle, brings mana back faster, and lets them breathe under the sea. Far below, in the drowned abbey, something large turned over in its sleep and was quiet.
+
+## 34. The Wandering Monsters
 
 Strange things walk the levels without warning: the Ferryman of Dust, Mother Mossback, Aunt Marrow, the Hollow Bride and others, nine who ask for a favour and six who hunt. The rarest is the Messenger of Death, who writes the letters of his name on the walls, and whose letters kill when all five have been read. The Wandering Monsters page in the main menu keeps a record of each one met.
 
-## 30. What is still open
+## 35. What is still open
 
 The warrant is torn up and Lord Corvane is dead, but the story does not end at the pardon. The Dawn Walker is the ship of the party, with the whole Vaast Sea around her. Oldhaven, the city of the king, is a stony castle town with a court and a throne. The wanderers keep walking, the Messenger is somewhere in the dark of every level, On the table behind the king, Ishkander's letter lies open with its seal still unbroken, and Osric has said that Corvane was not the only man who wrote letters, so there is more written in the ledger than one reading can hold. Beyond that, nobody has yet said where the road goes from here.
 
