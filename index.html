@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.142';
+const VERSION='3.143';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -6093,6 +6093,8 @@ function questShow(qid){ // a quest picked in the log: open this level's map on 
   G.qFocus={id:qid,lvl:LEVEL};G.menu=false;G.map=false;G.overview=true;G.world=false;G.teleMode=false;
   const mz=clamp(LEVEL===44?1:12,mapFit(),34),[rw,rh]=mapRes();G.mz=mz;G.panX=(DW-rw)/2-((sp.x+.5)*mz+6);G.panY=(DH-rh)/2-((sp.y+.5)*mz+30);G.ovInit=true;G.ovLevel=LEVEL;
 }
+// the quests that carry the story from place to place: Thornwick to Ironhill, over the pass, Khemetra, Yarrim and the Narrow Sea
+const MAIN_QUESTS=new Set(['gandrick','ironhill','mines','overseer','escape','pass','scoria','kh_c1','kh_c2','kh_c3','kh_c4','kh_c5','kh_c6','kh_c7','kh_seal','kh_sea','mq1','mq2','yar2','yar3','yar4','yar5','yar6','yar7','vq1','vq2','vq3','vq4','vq5','vq6']);
 function drawQuestLog(){
   BTNS=[];veil(.7);bigPanel(40,12,400,296);
   txt('QUESTS',240,30,14,'#d8c88e','center',true);
@@ -6110,7 +6112,10 @@ function drawQuestLog(){
     const ry=top+4+r.y-G.qs;if(ry<top-40||ry>top+viewH+10)continue;
     if(r.t==='head'){txt(r.a.toUpperCase(),56,ry+7,9.5,'#d8c88e','left',true);ctx.fillStyle='rgba(216,200,142,.35)';ctx.fillRect(56,ry+12,368,1);continue}
     const q=QUESTS[r.id],st=qSt(r.id),done=st==='done',rd=qReady(r.id);
-    txt(q.title,62,ry+8,10.5,done?'#8a9a78':'#e8d89a','left',true);
+    const main=MAIN_QUESTS.has(r.id);
+    if(main){const rh=14+r.lines.length*11+4;ctx.save();rrect(ctx,50,ry-4,382,rh,4);ctx.fillStyle=done?'rgba(90,80,40,.18)':'rgba(150,110,20,.28)';ctx.fill();ctx.lineWidth=1.2;ctx.strokeStyle=done?'rgba(150,130,70,.5)':'rgba(255,210,70,.8)';ctx.stroke();ctx.restore()}
+    txt(q.title,62,ry+8,10.5,done?(main?'#b0a060':'#8a9a78'):main?'#ffd23a':'#e8d89a','left',true);
+    if(main&&!done)txt('MAIN QUEST',62+Math.min(250,ctx.measureText?(function(){ctx.save();ctx.font='bold 10.5px '+FUI;const w=ctx.measureText(q.title).width;ctx.restore();return w})():120)+8,ry+8,6.5,'#c89a20','left',true);
     txt(done?'Done':rd?'Ready: see '+q.who:`${qGoal(r.id)} of ${q.need}`,424,ry+8,9,done?'#8a9a78':rd?'#9ae0a0':'#c8b898','right',true);
     r.lines.forEach((l,k)=>txt(l,62,ry+19+k*11,8.5,done?'#6a7a60':'#b8aa88','left'));
     const rh=14+r.lines.length*11+4,vy=Math.max(ry-2,top),vh=Math.min(ry-2+rh,top+viewH)-vy;if(vh>6)rowBtns.push({id:'qrow_'+r.id,x:46,y:vy,w:388,h:vh,up:true,drag:'quest'});
