@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.114';
+const VERSION='3.115';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1431,6 +1431,12 @@ function rebalanceEnemies(){
   const pl=Math.floor(L.reduce((n,h)=>n+h.lvl,0)/L.length);
   for(const e of G.enemies){
     const def=ENEMY_DEF[e.t],ap=def&&def.aboveParty;
+    if(G.flags.noScale){ // a fixed world: the place's own level, the great creatures a few above it
+      if(e.hp<=0||e.dying)continue;
+      if(e.base===undefined||e.fixed!==LEVEL){e.base=DIFF()+(ap?Math.min(ap,8):0);e.fixed=LEVEL}
+      if(e.vd===undefined){const r=Math.random();e.vd=(ap||(def&&(def.boss||NO_VARY.includes(e.t)||/^w_/.test(e.t))))?0:r<.4?0:r<.75?1+Math.floor(Math.random()*3):4+Math.floor(Math.random()*4)}
+      const nl=Math.max(1,e.base-e.vd);if(nl!==e.lvl){const frac=e.hp/e.maxhp;e.lvl=nl;e.maxhp=enemyStat(e.t,nl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*frac))}
+      continue}
     if(ap&&e.hp>0&&!e.dying){if(e.lvl!==pl+ap){const fr=e.hp/e.maxhp;e.lvl=pl+ap;e.maxhp=enemyStat(e.t,e.lvl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*fr))}continue} // the great creatures always stand a few levels above the party
     if(e.hp<=0||e.dying)continue;
     if(e.base===undefined)e.base=e.lvl;
@@ -4270,6 +4276,7 @@ function drawWorldMap(){
     const big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey';
     lab(l.n,l.x,l.y+(l.ic==='castle'?24:l.ic==='mountains'?20:18),big?10:8.5,v?'#1c1208':'#5a4a30');
     if(l.sub)lab(l.sub,l.x,l.y+29,7,'#4a3a22');
+    if(G.flags.noScale&&typeof locRating==='function'){const lr=locRating(l);if(lr)lab('Lv '+lr,l.x+2,l.y-31,8,'#7a1a10')}   // only when autoscaling is off
     const nq=QLEFT[l.k]||0;
     if(nq){ctx.fillStyle='#b02818';const left=l.k==='scoria'; // Khemetra's dots stand to the left of the city: below it is the Red Dunes
       for(let i=0;i<nq;i++){const row=(i/14)|0,inRow=Math.min(14,nq-row*14),col=i%14;ctx.beginPath();if(left)ctx.arc(l.x-34-(inRow-1-col)*3.4,l.y-10+row*3.4,1.15,0,TAU);else ctx.arc(l.x+(col-(inRow-1)/2)*3.4,l.y+(l.sub?38:29)+row*3.4,1.15,0,TAU);ctx.fill()}}
@@ -4715,7 +4722,7 @@ addPOIs();
 for(const k in MINIDEFS){const M=MINIDEFS[k];if(M.portals)LEVELS[k].portals=M.portals;LEVELS[k].diff=M.diff||4}
 
 const WALLCH={a:9,b:10,c:11,p:12,w:13,v:14,h:15,k:16,i:17,g:18,r:19,d:20,e:21,f:22,'0':30,'1':31,'2':32,'3':33,'4':34,'5':35,'6':36,'7':37,'8':38,'9':39};
-const DIFF=()=>(LEVELS[LEVEL]&&LEVELS[LEVEL].diff)||LEVEL;
+const DIFF=()=>(G.flags.noScale&&typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[LEVEL]!==undefined)?LEVEL_RATING[LEVEL]:((LEVELS[LEVEL]&&LEVELS[LEVEL].diff)||LEVEL);   // with autoscaling off a place has the fixed level of the ladder
 function forestExtras(L){
   if(L._xd)return L._xd;
   const rows=L.rows,H=rows.length,W=rows[0].length,out=[];
@@ -6561,6 +6568,7 @@ function drawMenu(){
   if(G.menu==='quests'){drawQuestLog();return}
   if(G.menu==='ach'){drawAch();return}
   if(G.menu==='wander'){drawWanderers();return}
+  if(G.menu==='gameplay'){drawGameplay();return}
   if(G.menu==='gfx'){drawGfx();return}
   if(G.menu==='snd'){drawSnd();return}
   if(G.menu==='aff'){drawAfflictions();return}
@@ -6576,7 +6584,7 @@ function drawMenu(){
   btnText('mute','Sound',100,126,130,24);btnText('gfx','Graphics',250,126,130,24);
   btnText('savemenu','Save / Load',100,153,130,24);btnText('overview','Level layout',250,153,130,24);
   btnText('newparty','New party',100,180,130,24);btnText('restart','Restart game',250,180,130,24);
-  btnText('quittitle','Quit to title',100,207,130,22);btnText('wander','Wandering Monsters',250,207,130,22);
+  btnText('quittitle','Quit to title',100,207,130,22);btnText('wander','Wandering Monsters',250,207,130,22);btnText('gameplay','Gameplay',170,234,140,24);
   const L=['W / S: forward and back   A / D: step sideways   Q / E: turn   (arrow keys work too)','Space: attack   X: special   P: potion   Z: wait   R: rest','1-4: choose hero   I: inventory   J: quests   M: map   Esc: menu',
     'Tap a portrait to open that hero\'s inventory.','Tap people, goats, torches and items in the view.','You can also walk into a person to talk to them.','Heroes act once per round, then the monsters move.'];
   txt('Version '+VERSION,240,236,8,'#b8a880','center'); // just under the buttons
@@ -6814,6 +6822,7 @@ function handleBtn(id){
     else if(id==='ach'){G.menu='ach';G.achPage=0}
     else if(id==='mute'){G.menu='snd'}
     else if(id==='wander'){G.menu='wander';G.wsel=0}
+    else if(id==='gameplay'){G.menu='gameplay'}
     else if(id==='gfx'){G.menu='gfx'}
     else if(id==='savemenu'){openSaves('menu')}
     else if(id==='overview'){G.menu=false;G.overview=true}
@@ -16106,6 +16115,50 @@ khNpc('kg_harp','A Kraken gun','kg_harp1',d=>{
     try{for(let i=0;i<G.heroes.length;i++)recalcMax(i)}catch(e){}
     if(n)msg('The four harpoons flare white and fall to ash in your hands. They were never meant to outlast the Kraken.','#ffd9a0')}
 }})();
+
+/* ---- src/desert/difficulty.js ---- */
+/* ==========================================================================
+   GAMEPLAY: AUTOSCALING AND THE LADDER OF LEVELS.
+   By default the world scales to the party (see rebalanceEnemies). In Menu > Gameplay autoscaling can be turned off. Then every place has
+   a fixed level, a ladder that rises by about two levels for each place the story leads to, creatures stand at that level (with the usual
+   mix of some lower), the great creatures stand a few levels above it, and the world map shows each place's level.
+   The ladder only applies with autoscaling off; with it on, the places keep their old difficulty and the party is met by scaled creatures.
+   ========================================================================== */
+const LEVEL_LADDER=[ // [levels of the game that make up a place, its level]
+  [[1],1],[[2,23],3],[[3,4,5,6,9,12,29],3],[[7,25],5],[[8],7],[[10,24],9],[[11],11],
+  [[13,14,15,16,17,30],13],[[18],15],[[21],17],[[20],19],[[19,26,28],21],[[22,27],23],
+  [[32],25],[[33,34,35,36,37,38],25],
+  [[41],27],[[50,51,52,53,54,55,56,57,58,59],28],[[42],29],[[43],29],[[64],31],[[60],31],[[63],33],[[61],35],[[62],37],
+  [[44,199,261],39],[[260],41],[[266],43],[[289],45],[[290,291,292,293,294,295,296,297,298,299],45],
+  [[300],47],[[320],48],[[301],49],[[321],50],[[302],51],[[322],52],[[303],53],[[323],54],[[330],55],
+  [[331,332,333,335],56],[[334,336,337,339],57],[[338,340,341],58],[[342],59],[[343],60],
+  [[304],61],[[305,307,308,309,310],62],[[306],63]
+];
+const LEVEL_RATING={};
+for(const [ls,r] of LEVEL_LADDER)for(const l of ls)LEVEL_RATING[l]=r;
+const autoscaleOn=()=>!G.flags.noScale;
+// the level of a place on the world map: the lowest and highest of its levels that have one
+function locRating(loc){let lo=1e9,hi=-1;for(const v of loc.lv){const r=LEVEL_RATING[v];if(r!==undefined){lo=Math.min(lo,r);hi=Math.max(hi,r)}}return hi<0?null:(lo===hi?String(lo):lo+'-'+hi)}
+function drawGameplay(){
+  BTNS=[];veil(.6);bigPanel(70,24,340,272);
+  txt('GAMEPLAY',240,44,14,'#d8c88e','center',true);
+  const on=autoscaleOn();
+  btnText('gp_scale','Autoscaling:  '+(on?'ON':'OFF'),140,64,200,28);
+  const lines=on?[
+    'Creatures scale to the party. A party that has outgrown a place meets its creatures raised to within a few levels of itself, and the great creatures always stand above the party.',
+    'Turn autoscaling off for a fixed world: every place has its own level, rising as the story goes on, and each level is shown on the world map. You will meet creatures that are too strong for you, and too weak.'
+  ]:[
+    'The world is fixed. Every place has its own level, rising by about two for each place the story leads to, and the level of each place is shown on the world map.',
+    'Creatures stand at the level of the place (some a little lower, as ever), and the great creatures a few levels above it. If a place is too hard for the party, go elsewhere and come back stronger.'
+  ];
+  let y=110;for(const p of lines){for(const l of wrapText(p,300,8.4)){txt(l,240,y,8.4,'#cdbf94','center');y+=11}y+=8}
+  const r=LEVEL_RATING[LEVEL];
+  txt(on?'Autoscaling is on.':(r?'This place is level '+r+'.':'This place has no fixed level.'),240,y+6,9,'#e8c878','center',true);
+  btnText('gp_back','Back',190,260,100,24);
+}
+(function(){const _b=handleBtn;handleBtn=function(id){
+  if(G.menu==='gameplay'){if(id==='gp_back'||id==='menu')G.menu=true;else if(id==='gp_scale'){G.flags.noScale=G.flags.noScale?0:1;try{rebalanceEnemies()}catch(e){}msg(G.flags.noScale?'Autoscaling is off. The world is fixed.':'Autoscaling is on.','#e8d8a0')}return}
+  _b(id)}})();
 
 /* ---- src/desert/story.js ---- */
 /* ==========================================================================
