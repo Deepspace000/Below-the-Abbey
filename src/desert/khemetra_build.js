@@ -185,7 +185,8 @@ function khRoom(b,lvl,back){
   const rows=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++){r+=(y===0||x===0||x===W-1)?'w':y===H-1?(x===mid?'0':'w'):'.'}rows.push(r)}
   const decor=[],put=(role,x,y,o)=>{const k=khProp(role);if(IMG[k]&&k.startsWith('kh_'))NPC_H[k]=khPropH(role);decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}))};
   const raw=(k,x,y,o)=>decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}));
-  const npc=(id,x,y,extra)=>{const kp=KH_KEEPERS[id];if(!kp)return;decor.push(Object.assign({k:kp.face,x,y,block:true,npc:id,sc:kp.sc||1},extra||{}))};
+  const npc=(id,x,y,extra)=>{const kp=KH_KEEPERS[id];if(!kp)return;if(typeof KH_NPC_H!=='undefined'&&KH_NPC_H[kp.face]&&!NPC_H[kp.face])NPC_H[kp.face]=KH_NPC_H[kp.face]; // a keeper has her proper height even before the golden city has been visited
+  decor.push(Object.assign({k:kp.face,x,y,block:true,npc:id,sc:kp.sc||1},extra||{}))};
   R.build({put,raw,npc,mid,W,H});
   const wall=khInteriorWall(b.room,b.wallImg);
   const level={rows,start:{x:mid,y:H-2,f:0},enemies:(R.enemies||[]).map(e=>({t:e[0],x:e[1],y:e[2],lvl:e[3]})),items:R.items||[],decor,day:0,amb:R.amb||.66,
