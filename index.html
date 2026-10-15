@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.102';
+const VERSION='3.103';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -15739,7 +15739,7 @@ function storyTickDays(){
 journalPage({id:'story',title:'The Story So Far',
   summary:()=>{const n=STORY.filter(e=>e.c()).length;return `${n} chapters written. ${storyNext()}`},
   note:()=>0,
-  open(){G.rs=1e6},
+  open(){if(G.storyAll===undefined)G.storyAll=true;G.rs=G.storyAll?0:1e6},   // while the game is being tested the whole story is shown, from the top, with the unreached chapters greyed
   draw(){
     jFrame('The story so far');
     const F=G.flags;try{storyTickDays()}catch(e){}

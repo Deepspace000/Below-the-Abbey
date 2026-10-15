@@ -72,7 +72,7 @@ function storyTickDays(){
 journalPage({id:'story',title:'The Story So Far',
   summary:()=>{const n=STORY.filter(e=>e.c()).length;return `${n} chapters written. ${storyNext()}`},
   note:()=>0,
-  open(){G.rs=1e6},
+  open(){if(G.storyAll===undefined)G.storyAll=true;G.rs=G.storyAll?0:1e6},   // while the game is being tested the whole story is shown, from the top, with the unreached chapters greyed
   draw(){
     jFrame('The story so far');
     const F=G.flags;try{storyTickDays()}catch(e){}
