@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.115';
+const VERSION='3.116';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -16135,7 +16135,7 @@ const LEVEL_LADDER=[ // [levels of the game that make up a place, its level]
   [[304],61],[[305,307,308,309,310],62],[[306],63]
 ];
 const LEVEL_RATING={};
-for(const [ls,r] of LEVEL_LADDER)for(const l of ls)LEVEL_RATING[l]=r;
+for(const [ls,r] of LEVEL_LADDER)for(const l of ls)LEVEL_RATING[l]=r+3;   // the whole ladder stands three levels higher than the table below
 const autoscaleOn=()=>!G.flags.noScale;
 // the level of a place on the world map: the lowest and highest of its levels that have one
 function locRating(loc){let lo=1e9,hi=-1;for(const v of loc.lv){const r=LEVEL_RATING[v];if(r!==undefined){lo=Math.min(lo,r);hi=Math.max(hi,r)}}return hi<0?null:(lo===hi?String(lo):lo+'-'+hi)}
