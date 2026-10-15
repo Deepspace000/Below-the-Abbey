@@ -1,10 +1,10 @@
 /* ==========================================================================
    DISEMBARK AND EMBARK. A pier is not needed to explore an island.
    Sailing the open sea, within sight of any island a Disembark button appears. It puts the party ashore on the beach nearest the ship, and
-   the Dawn Walker is left riding at anchor just off that beach. Ashore, within a good way of the ship (about thirty cells), an Embark
+   the Dawn Walker is left riding at anchor just off that beach. Ashore, within eight cells of the ship, an Embark
    button appears and takes the party back aboard, where the ship lay. Ships tied to a pier work the same: the button shows near her.
    ========================================================================== */
-const EM={busy:false,near:null,reach:34};
+const EM={busy:false,near:null,reach:8};
 const emIslandLv=n=>!!SN_BY[n]||n===304;
 function emNearIsle(){ // the island the ship is close to, if any
   const P=G.P;let best=null,bd=1e9;
