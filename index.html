@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.117';
+const VERSION='3.118';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1609,8 +1609,8 @@ function slotFits(slot,d,hi){
   switch(slot){
     case 'head':return d.k==='head';case 'chest':return d.k==='chest';case 'arms':return d.k==='arms';case 'legs':return d.k==='legs';
     case 'main':return d.k==='weapon'||d.k==='light';
-    case 'off':return d.k==='weapon'||d.k==='shield'||d.k==='light';
-    case 'alt':return d.k==='weapon';
+    case 'off':return d.k==='weapon'||d.k==='shield'||d.k==='light'||d.k==='potion';
+    case 'alt':return d.k==='weapon'||d.k==='potion';
   }
   if(slot[0]==='r')return d.k==='ring';
   if(slot[0]==='s')return d.k==='spell'&&HERO_DEF[hi].caster;
@@ -1648,6 +1648,14 @@ function autoSlot(hi,d){
   return null;
 }
 /* swap a hand slot with the main hand (the small HUD windows) */
+function drinkPocket(hi,slot){ // a potion kept in the off hand or second weapon window: tap to drink it, then refill from the bag
+  const h=G.heroes[hi],it=h.eq[slot];if(!it)return false;
+  G.bag.push({id:it.id,n:1});const idx=G.bag.length-1;
+  if(!useHeal(hi,idx)){if(G.bag[idx]&&G.bag[idx].id===it.id&&G.bag[idx].n===1)G.bag.splice(idx,1);return false}
+  delete h.eq[slot];
+  const j=G.bag.findIndex(b=>b.id===it.id);if(j>=0)h.eq[slot]=bagTake(j);
+  recalcMax(hi);return true;
+}
 function swapHand(hi,slot){
   const h=G.heroes[hi],a=h.eq.main,b=h.eq[slot];
   if(!a&&!b){msg('Nothing to swap.');return false}
@@ -2339,7 +2347,7 @@ function act(id){
     case 'attack':if(G.heroes[i].alive&&heroAttack(i))heroDone(i);break;
     case 'special':if(G.heroes[i].alive&&heroSpecial(i))heroDone(i);break;
     case 'potion':if(G.heroes[i].alive&&usePotion(i))heroDone(i);break;
-    case 'swapoff':case 'swapalt':if(G.heroes[i].alive&&swapHand(i,id==='swapoff'?'off':'alt')&&hostileNear()&&!G.acted[i])heroDone(i);break;
+    case 'swapoff':case 'swapalt':if(G.heroes[i].alive&&G.heroes[i].eq[id==='swapoff'?'off':'alt']&&idef(G.heroes[i].eq[id==='swapoff'?'off':'alt']).k==='potion'){if(drinkPocket(i,id==='swapoff'?'off':'alt')&&hostileNear()&&!G.acted[i])heroDone(i);break}if(G.heroes[i].alive&&swapHand(i,id==='swapoff'?'off':'alt')&&hostileNear()&&!G.acted[i])heroDone(i);break;
     case 'wait':msg('The party waits.','#a09880');endRound();break;
     case 'rest':if(hostileNear()){msg('You cannot rest with enemies close by.','#d09a80');break}if(jp('camp')){G.menu='jp:camp';G.map=false}else restParty(false);break;
     case 'teleport':if(teleOn()&&teleActive(LEVEL))openTeleMap();break;
@@ -3084,6 +3092,7 @@ function drawSpecialBtn(){
     panel(248,y,38,34,false,false);
     const it=h.eq[slot];
     if(it)itemIcon(idef(it),267,y+17,.9);else txt('+',267,y+17,11,'rgba(220,200,160,.3)','center');
+    if(it&&idef(it).k==='potion'){const m=G.bag.reduce((a,b)=>a+(b.id===it.id?b.n:0),0)+1;txt('x'+m,267,y+30,6.5,'#c9ba8e','center',true)}
     btn(id,248,y,38,34);
   }
 }
@@ -6867,8 +6876,8 @@ function dropItem(d,id){
     if(h.type==='torch'){if(h.L.taken)return;takeTorch(h.L)}else{if(h.ref.taken)return;if(!pickup(h.ref))return}
     const key=h.type==='torch'?'torch':h.ref.k,idx=G.bag.findIndex(b=>b.id===key);
     if(idx<0)return;
-    const dfn=ITEMDEF[key];
-    if(dfn.k==='potion'||dfn.k==='food'||dfn.k==='quest'||(dfn.k==='spell'&&!HERO_DEF[hi].caster))return;
+    const dfn=ITEMDEF[key],sl0=slot;
+    if((dfn.k==='potion'&&sl0!=='off'&&sl0!=='alt')||dfn.k==='food'||dfn.k==='quest'||(dfn.k==='spell'&&!HERO_DEF[hi].caster))return;
     const sl=slot||autoSlot(hi,dfn);
     if(sl&&G.heroes[hi].alive&&(id.startsWith('hero')||slotFits(sl,dfn,hi)))equipTo(hi,sl,idx);
     return;
