@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.143';
+const VERSION='3.144';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -10189,12 +10189,13 @@ khNpc('kh_neferet','Neferet, the royal cartographer','kh_npc6_0',()=>{
 },{q:KH_CART});
 /* ---- the grand vizier, Hotep-Ra ---- */
 khQuest('kh_seal','The Stolen Seal','Hotep-Ra, the grand vizier','The royal seal was stolen by a band that hides in the ruined houses of the old quarter, in the north-west of Khemetra. Recover it from a boarded house.',1,khFlag('khSeal'),{gold:500,xp:1500,items:['ringW']});
+QUESTS.kh_seal.reward.gold=600;QUESTS.kh_seal.reward._cut=1; // the vizier pays properly for the king's seal, outside the general gold cut
 QUESTS.kh_seal.spot=()=>{if(LEVEL!==44)return null;const b=KH_BUILDINGS.find(z=>z.id==='denC');return b&&b.front?{x:b.front[0],y:b.front[1]}:null}; // the boarded house with the chest, for the quest log's map
 khNpc('kh_sealchest','A locked chest','chest',d=>{const F=G.flags;if(qSt('kh_seal')==='active'&&!F.khSeal){F.khSeal=1;sfx('key');return say('Under a pile of stolen silver lies a heavy gold ring with the sun of Khemetra cut into its face. This is the royal seal.',[BYE])}
   return say(F.khSeal?'An empty chest. The stolen silver is gone.':'A chest of stolen silver and pewter. Nothing of the crown is here.',[BYE])});
 khNpc('kh_vizier','Hotep-Ra, the grand vizier','kh_npc3_5',()=>{
   const F=G.flags,st=qSt('kh_seal');
-  if(qReady('kh_seal'))return say('You have it. Show me.',[['The royal seal is here.',()=>{qTurnIn('kh_seal');F.khWizardKnown=1;msg('The vizier names the wizard\'s hiding place. A hatch in the Potters Market now opens.','#ffe36a');return say('The seal of the king, unbroken. You have done Khemetra a great service, and a service is the only coin I accept. Now I will keep my word. The wizard Ishkander lives beneath the city, in the old cisterns. The entrance is a hatch in the Potters Market, in the north-west, hidden behind a stall. He receives few visitors. Tell him I sent you, and be careful. The cisterns are not empty.',[BYE])}],BYE]);
+  if(qReady('kh_seal'))return say('You have it. Show me.',[['The royal seal is here.',()=>{qTurnIn('kh_seal');F.khWizardKnown=1;msg('The vizier names the wizard\'s hiding place. A hatch in the Potters Market now opens.','#ffe36a');return say('The seal of the king, unbroken. You have done Khemetra a great service. Take this purse, six hundred gold from the treasury, and the thanks of the king with it. Now I will keep my word. The wizard Ishkander lives beneath the city, in the old cisterns. The entrance is a hatch in the Potters Market, in the north-west, hidden behind a stall. He receives few visitors. Tell him I sent you, and be careful. The cisterns are not empty.',[BYE])}],BYE]);
   if(st==='active')return say('The seal is in a boarded house in the old quarter, in the north-west. The thieves call themselves the Hollow Hand. Bring me the ring, and the wizard is yours.',[BYE]);
   if(st==='done'){return say(F.scoriaWizard?'Ishkander has spoken for you? Then you have friends in high places, and I am not one of them. Yet.':'The cisterns lie below the Potters Market. Ishkander does not like to be disturbed.',[BYE])}
   if(!F.khVizierMet){F.khVizierMet=1;return say('Strangers in white robes, and not a single one of you is carrying a petition. Interesting. I am Hotep-Ra, grand vizier of Khemetra. State your business, or leave it.',[
