@@ -207,9 +207,14 @@ function afflQuest(id){
 }
 /* a cure item (antidote, salve, holy water, sleeping tea) drunk by a hero */
 function afflUseItem(hi,idx){
-  const it=G.bag[idx],d=idef(it),k=it.id;let n=0;
-  for(const e of afflList().slice()){const A=AFFL[e.id];if(A&&(A.cureItem||[]).includes(k)&&(d.all||e.hi===hi)){afflRemove(e,true);n++}}
-  if(!n){msg(`${afflHeroName(hi)} has nothing that the ${d.n} would cure.`,'#d0c090');return false}
+  const it=G.bag[idx],d=idef(it),k=it.id;
+  const cure=who=>{let c=0;for(const e of afflList().slice()){const A=AFFL[e.id];if(A&&(A.cureItem||[]).includes(k)&&(d.all||e.hi===who)){afflRemove(e,true);c++}}return c};
+  let n=cure(hi),other=-1;
+  if(!n&&!d.all)for(let j=0;j<G.heroes.length&&!n;j++)if(j!==hi&&G.heroes[j].alive&&(n=cure(j)))other=j; // nobody drinks for nothing: it goes to whoever in the party needs it
+  if(!n){
+    const what=Object.keys(AFFL).filter(a=>(AFFL[a].cureItem||[]).includes(k)).map(a=>AFFL[a].n);
+    msg(`Nobody in the party has anything that the ${d.n} would cure${what.length?' (it cures '+what.join(', ')+')':''}.`,'#d0c090');return false}
+  if(other>=0)msg(`The ${d.n} goes to ${afflHeroName(other)}, who needed it.`,'#a8e0a8');
   bagTake(idx);sfx('potion');return true;
 }
 /* ---------------------------------------------------------------- the watch of Khemetra, and the temple cells ---------------------------------------------------------------- */
