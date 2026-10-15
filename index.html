@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.130';
+const VERSION='3.131';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -13359,7 +13359,7 @@ Object.assign(NPC_H,{
   kh_yprop1_0:.58,kh_yprop1_1:.42,kh_yprop1_3:.44,kh_yani1_0:.5,kh_yani1_1:.4,kh_yani1_2:.36,kh_yprop1_5:1.1,
   kh_ycrab2_0:.3,kh_ycrab2_1:.28,kh_ycrab2_2:.32,kh_ycrab2_3:.4,kh_ycrab2_4:.28,kh_ycrab2_5:.26
 });
-KH_STOCK.trader=()=>[['torch',8],['lantern',3],['potion',6],['antidote',4],['salve',4],['bread',10],['water',12],['dates',8],['herring',8],['ale',8],['apple',8],['wildflower',6],['herb',4],['cheese',4],['nuts',4],['dagger',2],['bow',2],['cap',3],['jerkin',2]];
+KH_STOCK.trader=()=>[['torch',8],['lantern',3],['potion',6],['antidote',4],['salve',4],['bread',10],['water',12],['dates',8],['herring',8],['ale',8],['apple',8],['wildflower',6],['herb',4],['cheese',4],['nuts',4],['dagger',2],['bow',2],['cap',3],['jerkin',2],...GEAR_STOCK.sword()]; // Wen also stocks every smith's weapon, since Yarrim has no swordsmith
 
 const YR_QFOLK=[];   // people placed where their trouble is: {id, at:[x,y], rad}
 const YR_QOBJ=[];    // things the quests ask the party to find: {npc, k, at:[x,y], rad, o}
