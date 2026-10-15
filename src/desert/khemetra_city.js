@@ -64,6 +64,7 @@ async function khPrepareRun(){
   KH_CITY=C;C.L=L;
   khSkyline(C,L);
   khCrowd(C,L);
+  khShopSigns(C,L);
   khFreeSheets();
   if(typeof AREA_STATS!=='undefined')delete AREA_STATS[44];
   return C;

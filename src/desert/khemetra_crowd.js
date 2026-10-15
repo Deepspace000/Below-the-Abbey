@@ -17,6 +17,19 @@ khNpc('kh_gold','A little gold','chest',d=>{
   if(e.gold>=5000){afflInflict('cursed',-1,true);return say((e.msg||'')+' You take '+amt+' gold. As the last coin leaves the chest, the room goes cold. The gold was cursed. The whole party feels it settle on them. A church could lift it.',[BYE])}
   return say((e.msg||'There is gold in here.')+' You take '+amt+' gold.',[BYE]);
 });
+/* a painted sign hung out over the street at a right angle to the wall, beside the door of every shop, so it can be read from along the street */
+function khShopSigns(C,L){
+  const idx=C.idx,taken=new Set(L.decor.filter(d=>d.block!==false).map(d=>d.x+','+d.y));
+  for(const b of KH_BUILDINGS){
+    if(b.room!=='shop'||!b.front||!b.m)continue;
+    const d=KH_DIRS[b.m.face],perp=[Math.abs(d[1]),Math.abs(d[0])],f=b.front;
+    for(const sgn of [1,-1]){
+      const x=f[0]+perp[0]*sgn,y=f[1]+perp[1]*sgn;
+      if(x<1||y<1||x>=C.W-1||y>=C.H-1||C.solid[idx(x,y)]||taken.has(x+','+y))continue;
+      L.decor.push({k:'sign_'+b.id,x,y,block:false,wd:[-d[0],-d[1]],sc:1.9,txt:[b.name.toUpperCase(),'']});break;
+    }
+  }
+}
 function khCrowd(C,L){
   const W=C.W,H=C.H,idx=C.idx,rng=khRng(31337);
   const open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&!C.solid[idx(x,y)];
