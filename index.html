@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.153';
+const VERSION='3.158';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4338,6 +4338,7 @@ function drawTownBody(cs,ox,oy){
   const gr=ctx.createLinearGradient(0,0,0,DH);gr.addColorStop(0,'#bcaa7e');gr.addColorStop(1,'#9e8c64');ctx.fillStyle=gr;ctx.fillRect(0,0,DW,DH);
   ctx.save();ctx.globalAlpha=.13;for(let i=0;i<110;i++){const a=hash2(i,1,7),b=hash2(i,2,7);ctx.fillStyle=i%3?'#5a4630':'#e8dcb0';ctx.beginPath();ctx.ellipse(a*DW,b*DH,6+hash2(i,3,7)*30,3+hash2(i,4,7)*14,hash2(i,5,7)*3,0,TAU);ctx.fill()}ctx.restore();
   const lab=(t,x,y,sz,col)=>{ctx.save();ctx.font=`bold ${sz}px ${FUI}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=3;ctx.strokeStyle=halo;ctx.strokeText(t,x,y);ctx.fillStyle=col||ink;ctx.fillText(t,x,y);ctx.restore()};
+  const LBL=[],addL=(t,x,y,sz,col,pri,minCs)=>{if(cs>=minCs)LBL.push({t,x,y,sz,col,pri})}; // names wait here: shops, services and quests first, the rest only when zoomed in and only where there is room
   ctx.save();ctx.beginPath();ctx.rect(0,24,DW,DH-24);ctx.clip();
   const bord=(x,y)=>x===0||y===0||x===MW-1||y===MH-1;
   const isB=(x,y)=>!bord(x,y)&&G.grid[y]&&G.grid[y][x]>0;
@@ -4399,28 +4400,29 @@ function drawTownBody(cs,ox,oy){
     if(bord(x,y)){gates.push({x,y,p});continue}
     ctx.fillStyle=p?'#e0b850':'#7a5a34';ctx.strokeStyle=ink;ctx.lineWidth=1.1;
     ctx.beginPath();ctx.moveTo(cx-cs*.3,cy+cs*.4);ctx.lineTo(cx-cs*.3,cy-cs*.05);ctx.arc(cx,cy-cs*.05,cs*.3,Math.PI,0);ctx.lineTo(cx+cs*.3,cy+cs*.4);ctx.closePath();ctx.fill();ctx.stroke();
-    if(p){const nm=LEVEL_NAMES[p.to];if(nm)dlab.push({nm,x,y})}
+    if(p){const nm=LEVEL_NAMES[p.to];if(nm)dlab.push({nm,x,y,to:p.to})}
   }
   if(LEVEL===22&&typeof PASS_ROUTE!=='undefined'&&PASS_ROUTE){ // the way through Greyfang Pass, as a dashed red line with arrowheads
     const P=PASS_ROUTE.path;ctx.save();ctx.strokeStyle='#a8402e';ctx.lineWidth=Math.max(1.6,cs*.34);ctx.lineCap='round';ctx.lineJoin='round';ctx.setLineDash([cs*.9,cs*.7]);
     ctx.beginPath();P.forEach(([x,y],i)=>{const px=ox+(x+.5)*cs,py=oy+(y+.5)*cs;if(i)ctx.lineTo(px,py);else ctx.moveTo(px,py)});ctx.stroke();ctx.setLineDash([]);
     for(let i=14;i<P.length-6;i+=22){const [x,y]=P[i],[x2,y2]=P[i+3],a=Math.atan2(y2-y,x2-x);ctx.save();ctx.translate(ox+(x+.5)*cs,oy+(y+.5)*cs);ctx.rotate(a);ctx.fillStyle='#a8402e';ctx.beginPath();ctx.moveTo(cs*.9,0);ctx.lineTo(-cs*.4,-cs*.6);ctx.lineTo(-cs*.4,cs*.6);ctx.closePath();ctx.fill();ctx.restore()}
-    ctx.restore();lab('The way through the pass',ox+(P[Math.floor(P.length/2)][0]+.5)*cs,oy+(P[Math.floor(P.length/2)][1]-1.4)*cs,Math.max(8,Math.min(11,cs*.7)),'#6a1e12')}
+    ctx.restore();addL('The way through the pass',ox+(P[Math.floor(P.length/2)][0]+.5)*cs,oy+(P[Math.floor(P.length/2)][1]-1.4)*cs,Math.max(8,Math.min(11,cs*.7)),'#6a1e12',1,0)}
   {const bd=G.flags.bathDoors2&&G.flags.bathDoors2[LEVEL];if(bd&&typeof BATH_TOWN!=='undefined'&&BATH_TOWN[LEVEL]){ // the town's bathhouse door: a blue arch with its name
     const cx=ox+(bd.x+.5)*cs,cy=oy+(bd.y+.5)*cs;ctx.fillStyle='#58a8d8';ctx.strokeStyle=ink;ctx.lineWidth=1.3;
     ctx.beginPath();ctx.moveTo(cx-cs*.4,cy+cs*.5);ctx.lineTo(cx-cs*.4,cy-cs*.05);ctx.arc(cx,cy-cs*.05,cs*.4,Math.PI,0);ctx.lineTo(cx+cs*.4,cy+cs*.5);ctx.closePath();ctx.fill();ctx.stroke();
-    dlab.push({nm:BATH_TOWN[LEVEL].name,x:bd.x,y:bd.y})}}
+    dlab.push({nm:BATH_TOWN[LEVEL].name,x:bd.x,y:bd.y,svc:1})}}
   for(const d of dlab){ // each door's name goes on the open ground in front of it
     const sz=Math.max(7,Math.min(11,cs*.62)),open=(x,y)=>x>0&&y>0&&x<MW-1&&y<MH-1&&G.grid[y][x]===0;
     const dy=open(d.x,d.y+1)?1.55:open(d.x,d.y-1)?-.75:.5;
-    lab(d.nm,ox+(d.x+.5)*cs,oy+(d.y+dy)*cs,sz,'#1c1208');
+    const Lv=d.to!==undefined?LEVELS[d.to]:null,svc=d.svc||(Lv&&Lv.decor?Lv.decor.some(q=>q.npc&&NPCS[q.npc]&&!/^(msgr|w_)/.test(q.npc)):/shop|store|inn|smith|bak|market|temple|church|chapel|hall|tavern|guild|forge|stall|stable|mill|school|bath|mayor|wizard|arcana|cauldron|blades|plate|post|office|quay|harbour|light/i.test(d.nm));
+    if(svc)addL(d.nm,ox+(d.x+.5)*cs,oy+(d.y+dy)*cs,sz,'#1c1208',2,4);else addL(d.nm,ox+(d.x+.5)*cs,oy+(d.y+dy)*cs,sz,'#3a2c18',7,15); // a shop or service shows early; a plain house only when zoomed right in
   }
   for(const gt of gates){
     const cx=ox+(gt.x+.5)*cs,cy=oy+(gt.y+.5)*cs,out=gt.x===0?[-1,0]:gt.x===MW-1?[1,0]:gt.y===0?[0,-1]:[0,1];
     ctx.save();ctx.translate(cx,cy);ctx.rotate(Math.atan2(out[1],out[0]));ctx.fillStyle='#a8402e';ctx.strokeStyle=ink;ctx.lineWidth=1.2;
     ctx.beginPath();ctx.moveTo(cs*.7,0);ctx.lineTo(-cs*.1,-cs*.7);ctx.lineTo(-cs*.1,-cs*.28);ctx.lineTo(-cs*.7,-cs*.28);ctx.lineTo(-cs*.7,cs*.28);ctx.lineTo(-cs*.1,cs*.28);ctx.lineTo(-cs*.1,cs*.7);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
     const nm=gt.p?(gt.p.to===3||gt.p.to===13?'':'To '+((LEVEL_NAMES[gt.p.to]||'the road').replace(/^The /,'').split(' and ')[0])):'';
-    if(nm){const lx=Math.max(70,Math.min(DW-70,cx-out[0]*(cs*2.2)-out[0]*0)),ly=Math.max(36,Math.min(DH-30,cy-out[1]*cs*1.6));lab(nm,lx+(out[0]?(-out[0]*34):0),ly,8,'#6a1e12')}
+    if(nm){const lx=Math.max(70,Math.min(DW-70,cx-out[0]*(cs*2.2)-out[0]*0)),ly=Math.max(36,Math.min(DH-30,cy-out[1]*cs*1.6));addL(nm,lx+(out[0]?(-out[0]*34):0),ly,8,'#6a1e12',1,0)}
   }
   // trees, wells and the like
   for(const d of G.decor){
@@ -4432,13 +4434,26 @@ function drawTownBody(cs,ox,oy){
     else if(d.k==='noticeboard'){ctx.fillStyle='#6a4a28';ctx.strokeStyle=ink;ctx.lineWidth=.9;ctx.fillRect(cx-cs*.3,cy-cs*.22,cs*.6,cs*.4);ctx.strokeRect(cx-cs*.3,cy-cs*.22,cs*.6,cs*.4)}
     else if(d.k==='lamp'){ctx.fillStyle='#f0c860';ctx.strokeStyle=ink;ctx.lineWidth=.8;ctx.beginPath();ctx.arc(cx,cy,Math.max(1.6,cs*.14),0,TAU);ctx.fill();ctx.stroke()}
   }
-  for(const m of (L0&&L0.mapNames)||[]){lab(m.t,ox+m.x*cs,oy+m.y*cs,Math.max(7,Math.min(11,cs*(m.k==='place'?.7:.55))),m.k==='place'?'#1c1208':'#4a2e14')}
+  for(const m of (L0&&L0.mapNames)||[]){addL(m.t,ox+m.x*cs,oy+m.y*cs,Math.max(7,Math.min(11,cs*(m.k==='place'?.7:.55))),m.k==='place'?'#1c1208':'#4a2e14',m.k==='place'?3:8,m.k==='place'?2.5:14)}
   // people you can talk to
   for(const d of G.decor){
     if(d.found||!d.npc||MAP_PROPS.has(d.k)||d.k.startsWith('sign_')||d.k.startsWith('flora')||d.k.startsWith('tree'))continue;
     const n=NPCS[d.npc];if(!n)continue;const cx=ox+(d.x+.5)*cs,cy=oy+(d.y+.5)*cs,r=Math.max(2.2,cs*.28);
     ctx.fillStyle='#b8382a';ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.beginPath();ctx.arc(cx,cy,r,0,TAU);ctx.fill();ctx.stroke();
-    if(cs>=11)lab(n.name.split(',')[0],cx,cy+r+6,6.6,'#3a1208');
+    addL(n.name.split(',')[0],cx,cy+r+6,6.6,'#3a1208',5,15);
+  }
+  { // place the names: the most important first, none on top of a quest's ring or its words, and any that would overlap are left out
+    const busy=typeof questLabelRects==='function'?questLabelRects(ox,oy,cs):[];
+    LBL.sort((a,b)=>a.pri-b.pri);
+    ctx.save();
+    for(const l of LBL){
+      ctx.font=`bold ${l.sz}px ${FUI}`;const w=ctx.measureText(l.t).width+3,h=l.sz+2,x0=l.x-w/2,y0=l.y-h/2;
+      if(x0<2||x0+w>DW-2||y0<26||y0+h>DH-2)continue;
+      let hit=false;for(const r of busy){if(x0<r[0]+r[2]&&x0+w>r[0]&&y0<r[1]+r[3]&&y0+h>r[1]){hit=true;break}}
+      if(hit)continue;
+      busy.push([x0,y0,w,h]);lab(l.t,l.x,l.y,l.sz,l.col);
+    }
+    ctx.restore();
   }
   ctx.restore();
   // title and key
@@ -4476,6 +4491,16 @@ function questSpots(){
   }
   return out;
 }
+/* the screen rectangles taken by quest rings and their words, so that no other name is written over them */
+function questLabelRects(ox,oy,cs){
+  const at={},out=[],r=Math.max(7,Math.min(15,cs*1.15)),sz=Math.max(7,Math.min(10,cs*.6));
+  for(const sp of questSpots()){const k=sp.x+','+sp.y;(at[k]=at[k]||{x:sp.x,y:sp.y,ts:[]}).ts.push(sp.t)}
+  ctx.save();ctx.font=`italic bold ${sz}px ${FUI}`;
+  for(const k in at){const a=at[k],cx=ox+(a.x+.5)*cs,cy=oy+(a.y+.5)*cs;out.push([cx-r,cy-r,r*2,r*2]);
+    a.ts.slice(0,3).forEach((t,i)=>{const w=ctx.measureText(t).width+4;out.push([cx-w/2,cy+r+6+i*(sz+1)-sz/2-1,w,sz+2])})}
+  for(const d of G.decor){if(d.found||(d.npc!=='yr_donkey'&&d.npc!=='kh_cart'))continue;const q=clamp(cs*2.1,14,24)*.65,cx=ox+(d.x+.5)*cs,cy=oy+(d.y+.5)*cs;out.push([cx-q,cy-q,q*2,q*2])} // the donkey badges too
+  ctx.restore();return out;
+}
 /* the donkey rides: Hamid's cart in Yarrim and the donkey carts of Khemetra show on the local map as a painted donkey head */
 let DONKEY_HEAD=null;
 function drawDonkeyMarks(ox,oy,cs){
@@ -4491,7 +4516,7 @@ function drawDonkeyMarks(ox,oy,cs){
     ctx.save();ctx.beginPath();ctx.arc(cx,cy,sz*.58,0,TAU);ctx.clip();
     const iw=DONKEY_HEAD.naturalWidth/192; // the head and ears of the standing donkey picture
     ctx.drawImage(DONKEY_HEAD,58*iw,4*iw,82*iw,96*iw,cx-sz*.5,cy-sz*.55,sz,sz*1.1);ctx.restore();
-    if(cs>=4){ctx.font=`italic bold 7.5px ${FUI}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(236,222,176,.92)';ctx.strokeText('Donkey ride',cx,cy+sz*.62+6);ctx.fillStyle='#3a2208';ctx.fillText('Donkey ride',cx,cy+sz*.62+6)}
+    if(cs>=16){ctx.font=`italic bold 7.5px ${FUI}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(236,222,176,.92)';ctx.strokeText('Donkey ride',cx,cy+sz*.62+6);ctx.fillStyle='#3a2208';ctx.fillText('Donkey ride',cx,cy+sz*.62+6)}
   }
   ctx.restore();
 }
@@ -11230,19 +11255,31 @@ function khMapLabels(C){
     else if(k==='temple'){nm='Temple of '+tm[(a3++)%tm.length];col='#2a3a7a';pri=5}
     else if(k==='bath'&&r<.6){nm=bn[(a4++)%bn.length];col='#0a5a6a';pri=6}
     else if(k==='mansion'&&r<.08){nm='Villa '+KH_NAMES[(r*1e3|0)%KH_NAMES.length];pri=7}
-    if(!nm)return;const [fx,fy]=front(m,1.7);add(nm,fx,fy,pri,{k:'shop',col});
+    if(!nm)return;const [fx,fy]=front(m,1.7);add(nm,fx,fy,pri,{k:'shop',col,minor:k==='pray'||k==='mansion'});
   });
+  /* what shows at which zoom, and what wins when two names meet: shops, services (inns, temples, baths) and the great places first, then
+     squares and roads, and only when zoomed right in the street names, lanes, market rows, ordinary houses and villas */
+  const RULE={dist:[0,0],major:[0,0],shopm:[1,.45],plaza:[3,.7],road:[4,1],pond:[5,1.2],tower:[6,1.5],street:[8,1.6],small:[8,2.2],lane:[9,2.4]};
+  for(const l of out){
+    const r=RULE[l.k];if(r){l.pri=r[0];l.min=r[1];continue}
+    if(l.k==='shop'){
+      const service=!l.minor&&(l.col==='#7a1a10'||l.col==='#2a3a7a'||l.col==='#0a5a6a'); // inns, temples and baths; the little houses of prayer are ordinary houses
+      if(service){l.pri=2;l.min=.6}
+      else if(/^Villa /.test(l.t)){l.pri=9;l.min=2.6}
+      else{l.pri=7;l.min=1.9}
+    }
+  }
   return out;
 }
 function khPlaceLabels(C,cs,ox,oy){
-  const key=cs.toFixed(3)+'|'+Math.round(ox)+'|'+Math.round(oy);
+  const qr=typeof questLabelRects==='function'?questLabelRects(ox,oy,cs):[],key=cs.toFixed(3)+'|'+Math.round(ox)+'|'+Math.round(oy)+'|'+qr.length;
   if(C._lk===key)return C._lp;
   if(!C._labels)C._labels=khMapLabels(C);
   const sizes={dist:[cs*3.6,9,15],major:[cs*2.6,8,12],plaza:[cs*1.9,7,11],pond:[cs*1.5,6.5,9],road:[cs*1.6,7,10],street:[cs*1.5,6.5,9.5],lane:[cs*1.3,6,8.5],tower:[cs*1.3,6.5,9],shop:[cs*1.15,6,9.5],shopm:[cs*1.6,7,11],small:[cs*1.2,6,8.5]};
   const cand=[];
-  for(const l of C._labels){const sx=ox+l.x*cs,sy=oy+l.y*cs;if(sx<-60||sy<-30||sx>DW+60||sy>DH+30)continue;const z=sizes[l.k]||sizes.shop;cand.push({l,sx,sy,sz:clamp(z[0],z[1],z[2])})}
+  for(const l of C._labels){if(cs<(l.min||0))continue;const sx=ox+l.x*cs,sy=oy+l.y*cs;if(sx<-60||sy<-30||sx>DW+60||sy>DH+30)continue;const z=sizes[l.k]||sizes.shop;cand.push({l,sx,sy,sz:clamp(z[0],z[1],z[2])})}
   cand.sort((a,b)=>a.l.pri-b.l.pri);
-  const placed=[],res=[],wcache=C._wc||(C._wc={});
+  const placed=qr.slice(),res=[],wcache=C._wc||(C._wc={}); // quest rings and their words are placed first, so no name sits over them
   ctx.save();
   for(const c of cand){
     const l=c.l,ck=l.t+'|'+Math.round(c.sz*2)+(l.ital?'i':'');let w=wcache[ck];
@@ -12945,6 +12982,9 @@ yq('yar3','Salt and Bones','Menkaure, the shipwright','The Sea Gate in the east 
 yq('yar4','Washed Ashore','Tamsin Kell, the harbourmaster','Four crates from a wrecked trader have washed up along the beach at Yarrim. Find them all and tell Tamsin Kell, the harbourmaster.',4,()=>Object.keys(G.flags.yarCrates||{}).length,{gold:400,xp:1800});
 yq('yar5','Rats in the Net Loft','Tamsin Kell, the harbourmaster','Rats have taken over the Net Loft, and the fishermen cannot mend their nets. Kill 6 rats there.',6,q=>(G.flags.k_rat||0)-(q.base||0),{gold:500,xp:2200},{cnt:'k_rat'});
 yq('yar6','The Lamp of Yarrim','Orsa, keeper of the Yarrim Light','The lighthouse has been dark for a year because Orsa has no torches for the great lamp. Bring her 3 torches.',3,()=>bagCount('torch'),{gold:900,xp:4000,items:['potion4']},{take:{torch:3}});
+QUESTS.yar5.spot=()=>{ // the rats are in the Net Loft: ring the door of the loft, not the harbourmaster who sent you
+  if(LEVEL!==YR.ID)return null;const n=YR.FIRST+6;if(!LEVELS[n]&&KH_LAZY[n])KH_LAZY[n]();const L=LEVELS[n],p=L&&(L.portals||[]).find(q=>q&&q.to===YR.ID);return p?{x:p.x,y:p.y}:null;
+};
 const QNEXT={yar3:'yar4',yar4:'yar5',yar5:'yar6'}; // the Yarrim story: each quest begins the next as it is handed in
 QUESTS.yar3.spot=()=>LEVEL===44?{x:394,y:200}:null; // the Sea Gate, in the east wall of Khemetra, for the quest log's map
 const D3=khQD('The gate stands open, but the tunnel behind it has been shut for a hundred years, and the dead have made it their own. Kill 8 of the skeletons that walk it. The king\'s rider said Corvane\'s ship is off Yarrim, and the Dawn Walker is hidden at the far end. We need that road.','Eight, then. Mind the narrow bends.',(n,m)=>`The tunnel to the sea is not safe yet. ${n} of ${m} skeletons are down.`,'You have cleared the tunnel? Then the road to Yarrim is open at last.','Done! Yarrim has a harbourmaster called Tamsin Kell who will be glad of strong arms. Tell her I sent you.','The tunnel is quiet now. Every day a cart goes through.');

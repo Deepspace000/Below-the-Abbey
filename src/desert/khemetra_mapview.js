@@ -284,19 +284,31 @@ function khMapLabels(C){
     else if(k==='temple'){nm='Temple of '+tm[(a3++)%tm.length];col='#2a3a7a';pri=5}
     else if(k==='bath'&&r<.6){nm=bn[(a4++)%bn.length];col='#0a5a6a';pri=6}
     else if(k==='mansion'&&r<.08){nm='Villa '+KH_NAMES[(r*1e3|0)%KH_NAMES.length];pri=7}
-    if(!nm)return;const [fx,fy]=front(m,1.7);add(nm,fx,fy,pri,{k:'shop',col});
+    if(!nm)return;const [fx,fy]=front(m,1.7);add(nm,fx,fy,pri,{k:'shop',col,minor:k==='pray'||k==='mansion'});
   });
+  /* what shows at which zoom, and what wins when two names meet: shops, services (inns, temples, baths) and the great places first, then
+     squares and roads, and only when zoomed right in the street names, lanes, market rows, ordinary houses and villas */
+  const RULE={dist:[0,0],major:[0,0],shopm:[1,.45],plaza:[3,.7],road:[4,1],pond:[5,1.2],tower:[6,1.5],street:[8,1.6],small:[8,2.2],lane:[9,2.4]};
+  for(const l of out){
+    const r=RULE[l.k];if(r){l.pri=r[0];l.min=r[1];continue}
+    if(l.k==='shop'){
+      const service=!l.minor&&(l.col==='#7a1a10'||l.col==='#2a3a7a'||l.col==='#0a5a6a'); // inns, temples and baths; the little houses of prayer are ordinary houses
+      if(service){l.pri=2;l.min=.6}
+      else if(/^Villa /.test(l.t)){l.pri=9;l.min=2.6}
+      else{l.pri=7;l.min=1.9}
+    }
+  }
   return out;
 }
 function khPlaceLabels(C,cs,ox,oy){
-  const key=cs.toFixed(3)+'|'+Math.round(ox)+'|'+Math.round(oy);
+  const qr=typeof questLabelRects==='function'?questLabelRects(ox,oy,cs):[],key=cs.toFixed(3)+'|'+Math.round(ox)+'|'+Math.round(oy)+'|'+qr.length;
   if(C._lk===key)return C._lp;
   if(!C._labels)C._labels=khMapLabels(C);
   const sizes={dist:[cs*3.6,9,15],major:[cs*2.6,8,12],plaza:[cs*1.9,7,11],pond:[cs*1.5,6.5,9],road:[cs*1.6,7,10],street:[cs*1.5,6.5,9.5],lane:[cs*1.3,6,8.5],tower:[cs*1.3,6.5,9],shop:[cs*1.15,6,9.5],shopm:[cs*1.6,7,11],small:[cs*1.2,6,8.5]};
   const cand=[];
-  for(const l of C._labels){const sx=ox+l.x*cs,sy=oy+l.y*cs;if(sx<-60||sy<-30||sx>DW+60||sy>DH+30)continue;const z=sizes[l.k]||sizes.shop;cand.push({l,sx,sy,sz:clamp(z[0],z[1],z[2])})}
+  for(const l of C._labels){if(cs<(l.min||0))continue;const sx=ox+l.x*cs,sy=oy+l.y*cs;if(sx<-60||sy<-30||sx>DW+60||sy>DH+30)continue;const z=sizes[l.k]||sizes.shop;cand.push({l,sx,sy,sz:clamp(z[0],z[1],z[2])})}
   cand.sort((a,b)=>a.l.pri-b.l.pri);
-  const placed=[],res=[],wcache=C._wc||(C._wc={});
+  const placed=qr.slice(),res=[],wcache=C._wc||(C._wc={}); // quest rings and their words are placed first, so no name sits over them
   ctx.save();
   for(const c of cand){
     const l=c.l,ck=l.t+'|'+Math.round(c.sz*2)+(l.ital?'i':'');let w=wcache[ck];
