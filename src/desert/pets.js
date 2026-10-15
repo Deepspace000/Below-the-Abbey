@@ -90,8 +90,10 @@ function petFollow(dt){
   });
 }
 const PET_STUB={};
+/* the animals stay below deck on the open sea and out of the water when the party dives: they are only seen on land */
+const petsAtSea=()=>(typeof SN!=='undefined'&&LEVEL===SN.ID)||(typeof UW!=='undefined'&&!!UW[LEVEL]);
 function petSprites(out){
-  const pets=petsData(),S=G._pf;if(!pets.length||!S)return;
+  const pets=petsData(),S=G._pf;if(!pets.length||!S||petsAtSea())return;
   pets.forEach((p,i)=>{
     const q=S.pos[i];if(!q)return;const P=PETS[p.id],img=IMG['pet_'+p.id+'_'+q.f]||IMG['pet_'+p.id+'_0'];if(!img)return;
     const stub=PET_STUB[p.id]||(PET_STUB[p.id]={walk:true,k:'pet_'+p.id});
