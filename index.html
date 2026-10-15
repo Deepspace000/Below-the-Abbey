@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.141';
+const VERSION='3.142';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4533,7 +4533,7 @@ function enemyGlyph(t){
 }
 function drawOverview(){
   BTNS=[];veil(.95);
-  if(!G.ovInit||G.ovLevel!==LEVEL){G.mz=clamp(LEVEL===44?1:12,mapFit(),34);const [rw,rh]=mapRes();G.panX=(DW-rw)/2-((G.C.x+.5)*G.mz+6);G.panY=(DH-rh)/2-((G.C.y+.5)*G.mz+30);G.ovInit=true;G.ovLevel=LEVEL}
+  if(!G.ovInit||G.ovLevel!==LEVEL){G.mz=clamp(LEVEL===44?1:12,mapFit(),34);const [rw,rh]=mapRes();G.panX=(DW-rw)/2-((G.C.x+.5)*G.mz+6);G.panY=(DH-rh)/2-((G.C.y+.5)*G.mz+30);const sv=G.ovSaved&&G.ovSaved[LEVEL];if(sv){G.mz=clamp(sv.mz,mapFit(),34);G.panX=sv.panX;G.panY=sv.panY} /* the map reopens as it was left: same zoom, same place */G.ovInit=true;G.ovLevel=LEVEL}
   const cs=G.mz,[ox,oy]=mapOrigin(cs);
   ctx.save();ctx.font=`24px ${FTITLE}`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle='#d8c88e';ctx.fillText(`Level ${LEVEL}: ${LEVEL_NAMES[LEVEL]}`,8,15);ctx.restore();
   const TOWN=drawnMap(LEVEL);
@@ -6685,7 +6685,7 @@ function heldMoveId(){
   return null;
 }
 function update(dt){
-  if(!G.overview)G.ovInit=false;
+  if(!G.overview){if(G.ovInit&&G.ovLevel===LEVEL&&G.mz)(G.ovSaved=G.ovSaved||{})[LEVEL]={mz:G.mz,panX:G.panX,panY:G.panY};G.ovInit=false}
   try{areaAudio();huntTick()}catch(e){}
   burnTick(dt);
   if(LEVEL===44&&G.state==='play')try{khWalkTick(dt)}catch(e){}
