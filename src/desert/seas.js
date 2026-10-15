@@ -59,7 +59,7 @@ const SEA={
     deco:[['yar_p_isolde',-7,6,{npc:'ll_isolde'}],['uw_buoy',10,14,{npc:'uw_dive_303'}],['yar_tent',-10,8],['yar_altar',0,-12,{npc:'ll_altar'}],['yar_runestone',-4,-11],['yar_runestone',4,-11],['yar_wreck',12,6],['yar_bones',-12,-2],['yar_palms',-14,2]],
     scatter:[['yar_driftwood',8,0,6,18],['yar_shells',8,0,8,18],['yar_bones',4,0,0,16]],
     enemies:[['assassin',3,0,2,14],['hitman',3,0,0,15]]},
-  304:{name:'Oldhaven Quay',label:'Oldhaven Quay',cx:50,cy:30,rx:42,ry:22,peak:.4,pow:1,seed:71,diff:25,W:100,H:80,
+  304:{name:'Oldhaven Quay',label:'Oldhaven Quay',cx:40,cy:22,rx:42,ry:22,peak:.4,pow:1,seed:71,diff:25,W:100,H:80,
     floors:['cobble','sandpath','wood','bluesand','bluewater','pebA'],hills:[],
     walls:[[20,14,46,15,'C'],[54,14,80,15,'C']],gate:[50,15],
     deco:[['KH:kh_npc3_4',0,0,{npc:'oh_herald'}],['KH:kh_npc3_0',-6,-4,{npc:'oh_guard'}],['KH:kh_npc3_0',6,-4,{npc:'oh_guard'}],['KH:kh_npc3_1',-12,-6,{npc:'oh_guard2'}],['KH:kh_npc3_1',12,-6,{npc:'oh_guard2'}],['yar_crates',-14,2],['yar_crates',14,2]],
@@ -67,7 +67,7 @@ const SEA={
 };
 function SEA_ARRIVE(id){seaBuild(id);const L=LEVELS[id];return {x:L.start.x,y:L.start.y,f:L.start.f}}
 function seaBuild(id){
-  isleFloors();if(LEVELS[id])return;const sp=SEA[id];if(!sp)return;
+  isleFloors();if(id===304){quayBuild();return}if(LEVELS[id])return;const sp=SEA[id];if(!sp)return;
   const W=sp.W||100,H=sp.H||84,cx=sp.cx,cy=sp.cy,N=W*H;
   const rows=[];for(let y=0;y<H;y++){const r=[];for(let x=0;x<W;x++)r.push((x===0||y===0||x===W-1||y===H-1)?'D':'.');rows.push(r)}
   const h=new Float32Array(N),rk=new Float32Array(N),block=new Uint8Array(N),fm=new Array(N).fill('4');
