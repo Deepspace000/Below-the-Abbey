@@ -25,6 +25,7 @@ const YR_RIDES=[ // where the donkey goes: the name, the level, where you step d
   {n:'Anaea, the white town',lv:33,fare:()=>yrFare(402,238),need:()=>G.flags.lvSeen&&G.flags.lvSeen[33],line:'The donkey knows this road. It goes west, and the dunes become scrub, and the scrub becomes a green valley with a white town in it.'},
   {n:'Greendale',lv:32,fare:()=>yrFare(418,186),need:()=>G.flags.lvSeen&&G.flags.lvSeen[32],line:'Past the pass, the land goes green, and the road runs down between hedges to a small, quiet valley.'},
   {n:'Ironhill',lv:13,fare:()=>yrFare(262,112),need:()=>G.flags.lvSeen&&G.flags.lvSeen[13],line:'A long road, a longer afternoon, and then smoke over a castle on a hill.'},
+  {n:'Oldhaven, the long way round by the north',lv:304,days:6,fare:()=>yrFare(1950,66,60),need:()=>G.flags.oldhavenSeen,line:'Hamid takes the coast road north, and then north again, past the last farm and the last well, until the two coasts of the Narrow Sea close together under a grey sky. Biscuit crosses the neck of land at a plod. The cart turns east and then south, six days of cold wind, and at the end of it the sea comes back on the other side, and a long grey wall runs along the shore. Hamid says he much prefers boats.'},
   {n:'Thornwick',lv:3,fare:()=>yrFare(156,204),need:()=>G.flags.lvSeen&&G.flags.lvSeen[3],line:'Over the moor and through the forest, where the road remembers the party. At the end of it, the little town with the goat on its sign.'}
 ];
 let YR_RIDE=null;
@@ -40,7 +41,7 @@ function yrRide(d,fare){
       if(!LEVELS[d.lv]&&KH_LAZY[d.lv])KH_LAZY[d.lv]();
       const L=LEVELS[d.lv],a=d.at||(L&&L.start)||{x:1,y:1,f:1};
       goToLevel(d.lv,{x:a.x,y:a.y,f:a.f!==undefined?a.f:1});
-      advanceTime(clamp(Math.round(fare*1.2),60,600));
+      advanceTime(d.days?d.days*1440:clamp(Math.round(fare*1.2),60,600));
       msg('You step down from the cart in '+d.n+'.','#ffe9a0');
     };
     if(d.lv===44&&LEVELS[44].stub)khEnter(arrive);else arrive();

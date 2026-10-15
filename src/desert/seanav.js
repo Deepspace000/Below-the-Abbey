@@ -1,11 +1,11 @@
 /* ==========================================================================
-   THE OPEN SEA. Level 330 is the Vaast Sea itself: 640 by 640 cells of water with the four islands you know, six tiny islands, three bare
+   THE OPEN SEA. Level 330 is the Narrow Sea itself: 800 by 640 cells of water with the four islands you know, six tiny islands, three bare
    rocky ones and three big forest ones, and about a hundred cells of open water between most of them. The party pilots the Dawn Walker: you
    see the sea over her bow rail, and walking is sailing. Sea serpents hunt in the open water. In the far east, past a line nobody has
    crossed in living memory, the Kraken waits, between the west shore and the Eastern Lands, where Oldhaven stands. Landing buoys mark the way into every island.
      330 the open sea   331..345 the islands nobody lives on (built as you reach them)
    ========================================================================== */
-const SN={W:640,H:640,ID:330,KRAKEN_X:545,FIRST:331};
+const SN={W:800,H:640,ID:330,KRAKEN_X:545,FIRST:331};
 const SN_ISLES=[ // key, name, centre, radius, kind, level (0 = built from the table below)
   {k:'saltbarrow',n:'Saltbarrow',x:150,y:420,r:26,kind:'sand',lv:300},
   {k:'bells',n:'the Isle of Bells',x:300,y:160,r:28,kind:'green',lv:301},
@@ -63,7 +63,7 @@ function seaBuildOpen(){
     // the coast of the mainland, in the west: Yarrim's shore
     if(x<24){const cx=18+4*Math.sin(y*.05)+2*Math.sin(y*.17);const t=cx-x;if(t>0){hh=Math.max(hh,Math.min(.5,t*.07)-.05);land=true}else if(t>-3){hh=Math.max(hh,-.2+(t+3)/3*.15)}}
     // the east coast, across the whole ocean: the west shore of the Eastern Lands, where Oldhaven stands
-    if(x>600){const ce=634+3*Math.sin(y*.05+1)+2*Math.sin(y*.17);const t=x-ce;if(t>0){hh=Math.max(hh,Math.min(.5,t*.07)-.05);land=true}else if(t>-3){hh=Math.max(hh,-.2+(t+3)/3*.15)}}
+    if(x>760){const ce=794+3*Math.sin(y*.05+1)+2*Math.sin(y*.17);const t=x-ce;if(t>0){hh=Math.max(hh,Math.min(.5,t*.07)-.05);land=true}else if(t>-3){hh=Math.max(hh,-.2+(t+3)/3*.15)}}
     h[i]=hh;rk[i]=clamp((hh-.7)/1.6,0,1);block[i]=(land&&(hh>1.7||hh>-.05))?1:0;
     fm[i]=hh>1.2?'5':hh>.1?(r.isl&&(r.isl.kind==='forest'||r.isl.kind==='green')?'1':'0'):hh>-.06?'3':(hh>-.18?'3':'4');
   }
@@ -74,7 +74,7 @@ function seaBuildOpen(){
   // landing buoys at every island, and the buoy for Yarrim on the west shore
   for(const I of SN_ISLES){let b=SN_BUOY(I);let g=0;while(g++<10&&(b.y>=H-3||block[b.y*W+b.x]))b.y=Math.min(H-3,b.y+1);put('uw_buoy',b.x,b.y,{npc:'sea_land_'+I.lv,deco:false});SN_PORTS[I.lv]={x:b.x,y:Math.min(H-3,b.y+2),f:2}}
   put('uw_buoy',28,322,{npc:'sea_land_290',deco:false});SN_PORTS[290]={x:31,y:322,f:1};
-  put('uw_buoy',622,200,{npc:'sea_land_oh',deco:false});SN_PORTS[304]={x:624,y:200,f:3};   // the harbour of Oldhaven, on the far shore
+  put('uw_buoy',782,200,{npc:'sea_land_oh',deco:false});SN_PORTS[304]={x:784,y:200,f:3};   // the harbour of Oldhaven, on the far shore
   // floating wrecks, for the sea quests and for the look of the thing
   const wrecks=[[110,330],[260,230],[350,480],[470,200],[300,380],[200,440],[440,400]];
   wrecks.forEach(([x,y],q)=>{if(!block[y*W+x]){put('yar_wreck',x,y,{npc:'sea_wreck',cat:q,deco:false})}});
@@ -84,11 +84,11 @@ function seaBuildOpen(){
   // gulls over the islands are made on the fly; here only the level
   const start={x:31,y:322,f:1};
   const lv={rows:rows.map(r=>r.join('')),start,enemies,items:[],decor,scenery,fmap:null,floorSet:['isleSand','lush','wood','bluesand','bluewater','isleGrassEdge'],floor:'isleSand',ceil:'cloud',
-    day:.98,outdoor:true,amb:.9,name:'The Vaast Sea',label:'The Vaast Sea',noExtras:true,diff:22,tele:{x:start.x,y:start.y},chars:{D:LEVEL41_DATA.chars.D},lights:[],portals:[]};
+    day:.98,outdoor:true,amb:.9,name:'The Narrow Sea',label:'The Narrow Sea',noExtras:true,diff:22,tele:{x:start.x,y:start.y},chars:{D:LEVEL41_DATA.chars.D},lights:[],portals:[]};
   const fmapR=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmapR.push(s)}lv.fmap=fmapR;
-  LEVELS[SN.ID]=lv;LEVEL_NAMES[SN.ID]='The Vaast Sea';TERRS[SN.ID]=yarTerrain(W,H,h,rk,block);
+  LEVELS[SN.ID]=lv;LEVEL_NAMES[SN.ID]='The Narrow Sea';TERRS[SN.ID]=yarTerrain(W,H,h,rk,block);
 }
-KH_LAZY[SN.ID]=seaBuildOpen;LEVEL_NAMES[SN.ID]='The Vaast Sea';
+KH_LAZY[SN.ID]=seaBuildOpen;LEVEL_NAMES[SN.ID]='The Narrow Sea';
 function sailOpen(from){seaBuildOpen();const P=SN_PORTS[from]||SN_PORTS[290];G.flags.seaFrom=from;goToLevel(SN.ID,{x:P.x,y:P.y,f:P.f})}
 function arriveNearNpc(id,npc){
   KH_LAZY[id]&&!LEVELS[id]&&KH_LAZY[id]();const L=LEVELS[id];if(!L)return null;
@@ -140,7 +140,7 @@ function seaTick(dt){
 }
 function seaEnterHook(n){
   const F=G.flags;
-  if(n===SN.ID){SN_T.last=null;SN_T.warn=0;if(!F.seaSeen){F.seaSeen=1;msg('The Vaast Sea. Water to every horizon, and the Dawn Walker answering the helm. Walk forward to sail.','#a8d8ff')}}
+  if(n===SN.ID){SN_T.last=null;SN_T.warn=0;if(!F.seaSeen){F.seaSeen=1;msg('The Narrow Sea. Water to every horizon, and the Dawn Walker answering the helm. Walk forward to sail.','#a8d8ff')}}
   if(n===SN.ID&&F.krakenSlain&&!F.seaClear)F.seaClear=1;
 }
 /* serpents that have died give a scale: the sea quests count them */

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   YARRIM. A small fishing town on the shore of the Vaast Sea, reached by a tunnel through the east wall of Khemetra. The
+   YARRIM. A small fishing town on the shore of the Narrow Sea, reached by a tunnel through the east wall of Khemetra. The
    sea is real ground: a heightfield under every cell (see terrain.js) with the water painted on it, a beach that slopes into
    it, a pier, moored boats, and islands of rock and sand that rise out of the water. Gulls everywhere.
    Levels: 289 the east tunnel, 290 Yarrim, 291..298 the buildings with doors.
@@ -81,7 +81,7 @@ repWrap('kh_captain',()=>true,'About the Sea Gate',()=>{
   const F=G.flags;
   if(F.yarOpen)return qNode('yar3',D3);
   if(F.kingOrder)return say('The king has ordered the Sea Gate unsealed? Then the vizier has the key to find, and I have a tunnel to sweep. Come back when the gate is open and I will tell you what lies behind it.',[BYE]);
-  return say('The old Sea Gate in the east wall of the city. Bricked up since my grandfather was a boy. Behind it, they say, is a tunnel, and at the end of the tunnel the Vaast Sea. I have a ship hidden at the far end, and nobody to sail her. Ishkander says the king comes home soon. Ask him. A king can open a gate that a shipwright cannot.',[BYE]);
+  return say('The old Sea Gate in the east wall of the city. Bricked up since my grandfather was a boy. Behind it, they say, is a tunnel, and at the end of the tunnel the Narrow Sea. I have a ship hidden at the far end, and nobody to sail her. Ishkander says the king comes home soon. Ask him. A king can open a gate that a shipwright cannot.',[BYE]);
 });
 repWrap('kh_vizier',()=>G.flags.kingOrder,'About the Sea Gate',()=>{
   const F=G.flags;
@@ -134,7 +134,7 @@ khNpc('yr_crate','A washed-up crate','yar_crates',d=>{
 /* ---- gulls ---- */
 function yarEnter(n){
   const F=G.flags;
-  if(n===YR.ID&&!F.yarSeen){F.yarSeen=1;msg('Salt wind and the cry of gulls. Beyond the beach, the Vaast Sea runs to the sky.','#a8d8ff')}
+  if(n===YR.ID&&!F.yarSeen){F.yarSeen=1;msg('Salt wind and the cry of gulls. Beyond the beach, the Narrow Sea runs to the sky.','#a8d8ff')}
   if(n===YR.ID)F.khSeaSeen=1;
   if(typeof mqEnter==='function')mqEnter(n);
   if(typeof seaEnter==='function')seaEnter(n);

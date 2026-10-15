@@ -286,7 +286,7 @@ const D_SHANTY=khQD("I am writing the shanty of Yarrim. Forty-one verses, and th
   'Here are the verses.');
 CUTS.yrShanty=()=>[
   {text:'Rafe tucks the fiddle under his chin, and the inn goes quiet. It is a slow, rolling tune, in time with the tide. He sings, in a voice like a rusty hinge, and it is beautiful anyway.'},
-  {text:'"I sailed from Yarrim in the morning, when the Vaast was young and wide, with a barrel of salt and a bottle of rum and a gull on every side." (Old Jory\'s verse.)'},
+  {text:'"I sailed from Yarrim in the morning, when the Narrow Sea was young and wide, with a barrel of salt and a bottle of rum and a gull on every side." (Old Jory\'s verse.)'},
   {text:'"My Tobias went for the island with the spring that never dries. He came home with a bucket and a story and a pair of other men\'s eyes." (Old Maren\'s verse.)'},
   {text:'"The herring run in silver and the gulls run off with half, and the Admiral wears a ring, and nobody dares to laugh." (Finn\'s verse.)'},
   {text:'"So haul away for Yarrim, boys, the lantern light is low, the tide is in, the crab is out, so heave and off we go." The whole inn joins the chorus, and the lantern over the bar rings a little in the glass.'},
@@ -297,7 +297,7 @@ khStreetQ('yr1_p1','Rafe, a fiddler','kh_yfolk3_2',"A man at the next table sold
   return old(d)};KH_KEEPERS.yr1_p1.root=n.root}
 yrHook('yr_old',d=>{
   const F=G.flags;
-  if(qSt('yq_shanty')==='active'&&!F.yq9a){F.yq9a=1;yrStep('Old Jory gave you a verse of the shanty.');return say('A verse? For the fiddler? I have a hundred, and ninety of them cannot be sung in front of a priest. This one can. "I sailed from Yarrim in the morning, when the Vaast was young and wide, with a barrel of salt and a bottle of rum and a gull on every side." That is the one. It is a true one. It is only a little exaggerated, and only about the gulls.',[BYE])}
+  if(qSt('yq_shanty')==='active'&&!F.yq9a){F.yq9a=1;yrStep('Old Jory gave you a verse of the shanty.');return say('A verse? For the fiddler? I have a hundred, and ninety of them cannot be sung in front of a priest. This one can. "I sailed from Yarrim in the morning, when the Narrow Sea was young and wide, with a barrel of salt and a bottle of rum and a gull on every side." That is the one. It is a true one. It is only a little exaggerated, and only about the gulls.',[BYE])}
   return null});
 yrHook('yr_maren',d=>{
   const F=G.flags;

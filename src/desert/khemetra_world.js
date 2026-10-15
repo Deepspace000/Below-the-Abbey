@@ -1,6 +1,6 @@
 /* ==========================================================================
    KHEMETRA: THE WORLD AROUND THE STORY. The palace inside, the cisterns beneath the city and the wizard's study, the tunnel
-   to the Vaast Ocean, the crowd, the markets and the gardens, and how the city reacts to what the party has done.
+   to the Narrow Sea, the crowd, the markets and the gardens, and how the city reacts to what the party has done.
    ========================================================================== */
 const KH_PALACE=199,KH_CISTERN=260,KH_STUDY=261,KH_SEATUNNEL=266;
 /* ---- the palace: three rooms behind a great hall ---- */
@@ -76,7 +76,7 @@ function khBuildStudy(){
   decor.push({k:khFaceKey('kh_npc6_4'),x:7,y:2,block:true,npc:'kh_ishkander',sc:1});
   return {rows:g,start:{x:7,y:H-2,f:0},decor,lights:[[3,2],[11,2],[7,5],[3,8],[11,8]]};
 }
-/* ---- the tunnel to the Vaast Ocean: a short, bright cave ending at the shore ---- */
+/* ---- the tunnel to the Narrow Sea: a short, bright cave ending at the shore ---- */
 function khBuildSeaTunnel(){
   const W=31,H=19,g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
   const cut=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)g[y][x]='.'};
@@ -98,7 +98,7 @@ function khBuildWorld(){
   const st=khBuildStudy();
   LEVELS[KH_STUDY]={rows:st.rows,start:st.start,enemies:[],items:[],decor:st.decor,day:0,amb:.7,floor:'kh2',ceil:'beam',name:"Ishkander's Study",label:'The Wizards Study',lights:st.lights,portals:[back(KH_CISTERN,KH_CIST_END.x,KH_CIST_END.y,2)],diff:17,chars:wall?{w:wall}:undefined};
   const tn=khBuildSeaTunnel();
-  LEVELS[KH_SEATUNNEL]={rows:tn.rows,start:tn.start,enemies:[],items:[],decor:tn.decor,day:.55,amb:.55,floor:'sand',ceil:'cloud',name:'The Tunnel to the Vaast Ocean',label:'Sea Tunnel',lights:tn.lights,portals:[back(62,KH_SEA_MOUTH.x,KH_SEA_MOUTH.y+1,2)],diff:20,noExtras:true,seaTunnel:true};
+  LEVELS[KH_SEATUNNEL]={rows:tn.rows,start:tn.start,enemies:[],items:[],decor:tn.decor,day:.55,amb:.55,floor:'sand',ceil:'cloud',name:'The Tunnel to the Narrow Sea',label:'Sea Tunnel',lights:tn.lights,portals:[back(62,KH_SEA_MOUTH.x,KH_SEA_MOUTH.y+1,2)],diff:20,noExtras:true,seaTunnel:true};
 }
 const KH_PALACE_FRONT={x:200,y:206,f:2},KH_HATCH={x:108,y:112},KH_CIST_END={x:39,y:2},KH_SEA_MOUTH={x:292,y:150};
 // the mouth of the tunnel to the sea stands in the east of the Violet Erg from the start

@@ -1,7 +1,7 @@
 /* ==========================================================================
    KHEMETRA: THE GREAT STORIES. The cartographer who sends the party across the seven deserts for the pieces of the
    Instrument of Dawn, the grand vizier who wants his seal back before he says where the wizard lives, the wizard in the
-   cisterns beneath the city, and the shipwright who looks east to the Vaast Ocean.
+   cisterns beneath the city, and the shipwright who looks east to the Narrow Sea.
    ========================================================================== */
 const KH_FACE_FALLBACK={kh_npc5_0:'beggar',kh_npc5_1:'child',kh_npc5_2:'fisher',kh_npc5_3:'miner',kh_npc5_4:'smith',kh_npc5_5:'drunk',kh_npc6_0:'scribe',kh_npc6_1:'sergeant',kh_menk1_0:'sergeant',kh_npc6_2:'innkeeper',kh_npc6_3:'waterwoman',kh_npc6_4:'prismwiz',kh_npc6_5:'child',kh_anim1_0:'chicken'};
 function khFaceKey(face){return IMG[face]?face:(KH_FACE_FALLBACK[face]&&IMG[KH_FACE_FALLBACK[face]]?KH_FACE_FALLBACK[face]:'peasantM')}
@@ -84,11 +84,11 @@ khNpc('kh_ishkander','Ishkander, the wizard','kh_npc6_4',()=>{
     ['Nobody. We got lost.',()=>say('Lost, in the cisterns, under a city of four hundred thousand. How remarkable. The way up is that way.',[BYE])]]);
 },{q:'scoria'});
 /* ---- Captain Menkaure, the shipwright, and the road to the sea ---- */
-khQuest('kh_sea','The Road to the Vaast Ocean','Captain Menkaure','Menkaure the shipwright says a tunnel runs from the east of the Violet Erg to the shore of the Vaast Ocean. Find it, walk it, and see the sea.',1,khFlag('khSeaSeen'),{gold:900,xp:4000,items:['potion4']});
+khQuest('kh_sea','The Road to the Narrow Sea','Captain Menkaure','Menkaure the shipwright says a tunnel runs from the east of the Violet Erg to the shore of the Narrow Sea. Find it, walk it, and see the sea.',1,khFlag('khSeaSeen'),{gold:900,xp:4000,items:['potion4']});
 khNpc('kh_captain','Menkaure, the shipwright','kh_menk1_0',()=>{
   const F=G.flags,st=qSt('kh_sea');
-  if(qReady('kh_sea'))return say('You have been to the shore? Tell me everything. How wide was it? What colour? Did it smell of salt?',[['We stood on the shore of the Vaast Ocean.',()=>{qTurnIn('kh_sea');F.khSeaReport=1;return say('Then the old sailors were right. There is a sea, and the road to it exists. I will start building at once. A ship takes time, and so does a crew, but I think we shall sail before the year is out. Come and see me when the keel is laid.',[BYE])}],BYE]);
+  if(qReady('kh_sea'))return say('You have been to the shore? Tell me everything. How wide was it? What colour? Did it smell of salt?',[['We stood on the shore of the Narrow Sea.',()=>{qTurnIn('kh_sea');F.khSeaReport=1;return say('Then the old sailors were right. There is a sea, and the road to it exists. I will start building at once. A ship takes time, and so does a crew, but I think we shall sail before the year is out. Come and see me when the keel is laid.',[BYE])}],BYE]);
   if(st==='active')return say('The tunnel lies in the east of the Violet Erg, near the coast. Look for a cave mouth between two dunes, with sea birds over it. Do not go at noon.',[BYE]);
   if(st==='done')return say('The ship will be called the Dawn Walker. She will not sail before the keel is laid, and the keel needs a century-old cedar, which is a problem for another day. Come back when you hear the hammers.',[BYE]);
-  return say('Menkaure, shipwright of Khemetra, and every man in this city thinks I am mad. Four hundred miles from the sea, building ships. But my grandfather sailed, and my grandfather\'s grandfather, and their charts say the Vaast Ocean lies east of the Violet Erg, at the end of a tunnel in the rock. Nobody has seen it for a hundred years.',[['We could look for the tunnel.',()=>{qAccept('kh_sea');return say('Brave souls! Go east, past the Violet Erg, to the coast. Find the tunnel and walk it to the shore. Then come back and tell me what you saw. The sea will be waiting, or it will not.',[BYE])}],['Not now.',()=>null]]);
+  return say('Menkaure, shipwright of Khemetra, and every man in this city thinks I am mad. Four hundred miles from the sea, building ships. But my grandfather sailed, and my grandfather\'s grandfather, and their charts say the Narrow Sea lies east of the Violet Erg, at the end of a tunnel in the rock. Nobody has seen it for a hundred years.',[['We could look for the tunnel.',()=>{qAccept('kh_sea');return say('Brave souls! Go east, past the Violet Erg, to the coast. Find the tunnel and walk it to the shore. Then come back and tell me what you saw. The sea will be waiting, or it will not.',[BYE])}],['Not now.',()=>null]]);
 },{q:'kh_sea'});

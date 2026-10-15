@@ -26,10 +26,10 @@ Object.assign(CUTS,{
     {text:'The cave is dry and bright. Light falls in from somewhere ahead, white and flickering, and the air smells of salt for the first time in the party\'s lives.'},
     {who:hn(1),text:'Salt. I know that smell from the old stories. That is the sea.'}],
   khSea:()=>[
-    {text:'The tunnel opens. Beyond the rock lies a grey-blue plain that runs to the end of the world, wrinkled with waves and silver where the sun strikes it. Sea birds wheel over a shore of white shingle. The Vaast Ocean.'},
+    {text:'The tunnel opens. Beyond the rock lies a grey-blue plain that runs to the end of the world, wrinkled with waves and silver where the sun strikes it. Sea birds wheel over a shore of white shingle. The Narrow Sea.'},
     {who:hn(0),text:'It does not end. It just does not end.'},
     {who:hn(2),text:'Menkaure was right. The sea is real, and the road to it is open. We should tell him.'},
-    {text:'The party stands on the shore of the Vaast Ocean. The road to Khemetra and the shipwright is long, but it is the road to everything that lies beyond.'}],
+    {text:'The party stands on the shore of the Narrow Sea. The road to Khemetra and the shipwright is long, but it is the road to everything that lies beyond.'}],
   sandRoad:()=>[
     {text:"Anaea's east gate closes behind the party. The road runs on between walls of green, and the birdsong thins. A dry wind comes down it from somewhere far to the north."},
     {who:hn(0),text:"Smell that? Dust and hot stone. We are a long way from Greendale's flowers."},

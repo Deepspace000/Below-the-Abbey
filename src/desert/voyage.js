@@ -4,7 +4,7 @@
    Now the king of Khemetra returns, and the audience shows who really wants them dead: Lord Corvane, Warden of the western
    Crown, who has put twenty thousand crowns on each of their heads and sent knives after them into the city. His black ship, the
    Black Heron, is hunting off Yarrim. The party must leave by sea in the Dawn Walker and follow the three pages of the master
-   ledger, copied by his exiled scribe Isolde and hidden on the islands of the Vaast Sea, then carry it home to the court of
+   ledger, copied by his exiled scribe Isolde and hidden on the islands of the Narrow Sea, then carry it home to the court of
    King Osric at Oldhaven.
    Quests: mq1 mq2 (Khemetra), yar2 .. yar7 (the road to Yarrim), vq1 .. vq5 (the islands and home).
    ========================================================================== */
@@ -17,8 +17,8 @@ Object.assign(ENEMY_DEF,{
 });
 const MQ={};
 const QAREA_SEA=n=>{QAREA_ORDER.splice(QAREA_ORDER.indexOf('Yarrim')+1,0,n)};
-QAREA_SEA('The Vaast Sea');
-const vq=(id,t,who,desc,need,goal,reward,extra)=>{QUESTS[id]=Object.assign({title:t,who,desc,need,goal,reward},extra||{});QAREA[id]='The Vaast Sea'};
+QAREA_SEA('The Narrow Sea');
+const vq=(id,t,who,desc,need,goal,reward,extra)=>{QUESTS[id]=Object.assign({title:t,who,desc,need,goal,reward},extra||{});QAREA[id]='The Narrow Sea'};
 const mq=(id,t,who,desc,need,goal,reward,extra)=>{QUESTS[id]=Object.assign({title:t,who,desc,need,goal,reward},extra||{});QAREA[id]='Khemetra'};
 
 /* ---- 1. until the king returns ---- */
@@ -110,7 +110,7 @@ Object.assign(CUTS,{mqAudience:()=>[
 ],
  corvaneDuel:()=>[
   {text:'The altar stands in a ring of broken stones at the highest point of the island. As the party reaches it, the wind drops to nothing, and a boat grates against the rocks far below.'},
-  {who:'Lord Corvane',text:'You are the first people I have been unable to find in a month. I have followed your lamp across half the Vaast Sea. Your friend Isolde wrote three copies of my ledger and one of them lies in that chest. Step away from it.'},
+  {who:'Lord Corvane',text:'You are the first people I have been unable to find in a month. I have followed your lamp across half the Narrow Sea. Your friend Isolde wrote three copies of my ledger and one of them lies in that chest. Step away from it.'},
   {who:hn(1),text:'You forged a king\'s warrant to cover your tolls. We have all three pages now, and a king who is going to read them.'},
   {who:'Lord Corvane',text:'Kings read what they are given. Osric reads what I give him. A pity. You were so close to being forgotten.'}
 ],

@@ -430,7 +430,7 @@ Object.assign(CUTS,{
   {who:'Chancellor Vance',text:'The scribe Isolde is a thief and a liar, your majesty. Whatever these people carry, it was written in a garret by a woman who fled the court with the king\'s silver.'},
   {who:hn(1),text:'She fled because the man who ordered the tolls was your Warden, Lord Corvane. The tolls, the warrant, the knives sent across the sea. Read the last page, majesty. It names who he paid.'},
   {who:'King Osric',text:'Corvane is dead?'},
-  {who:hn(2),text:'He died on an island at the end of the Vaast Sea, with a sword in his hand, and the third page of the ledger in an altar at his back.'},
+  {who:hn(2),text:'He died on an island at the end of the Narrow Sea, with a sword in his hand, and the third page of the ledger in an altar at his back.'},
   {text:'The king takes the ledger. The court is silent as he turns the pages. His hands are steady until the last one.'},
   {who:'King Osric',text:'Every toll. Every year. And on the last page, in Corvane\'s own hand, a name that is not mine. Vance. My chancellor.'},
   {who:'Chancellor Vance',text:'Your majesty, a forger\'s fancy! Guards! These people have come to murder the king! Seize them!'},

@@ -72,7 +72,7 @@ The trumpets sounded over Khemetra. King Rahotep was home, and Ishkander told th
 
 ## 18. The King's Audience
 
-King Rahotep read Ishkander's letter and the dead bandit's ledger, and knew the hand that signed the warrant was not King Osric's. It was Lord Corvane, Warden of the western Crown, who had been taking the tolls for himself. The ledger the party carried was only a copy. The master was written in three pages by Corvane's scribe, Isolde, who fled by sea and hid them on the islands of the Vaast Sea. Then a dying rider fell at the foot of the throne: Corvane's black ship, the Black Heron, lay off Yarrim, and he meant to have the party by the new moon. The king ordered the Sea Gate unsealed.
+King Rahotep read Ishkander's letter and the dead bandit's ledger, and knew the hand that signed the warrant was not King Osric's. It was Lord Corvane, Warden of the western Crown, who had been taking the tolls for himself. The ledger the party carried was only a copy. The master was written in three pages by Corvane's scribe, Isolde, who fled by sea and hid them on the islands of the Narrow Sea. Then a dying rider fell at the foot of the throne: Corvane's black ship, the Black Heron, lay off Yarrim, and he meant to have the party by the new moon. The king ordered the Sea Gate unsealed.
 
 ## 19. The Sea Gate
 
@@ -84,7 +84,7 @@ The king wanted the party out of the city by a way the warden's men would not be
 
 ## 21. Yarrim
 
-At the far end of the tunnel lay Yarrim, a small fishing town on the Vaast Sea, with gulls over the pier and fishing boats moored in the bay. The harbourmaster, Tamsin Kell, was hiding the Dawn Walker, a ship built in secret, from Corvane's men, whose black ship lay off the point. The reason for the voyage was Isolde's three pages: the master ledger was scattered across the islands of the Vaast Sea, and without it the party had only a copy and the word of a dead bandit against a warrant with a king's seal on it.
+At the far end of the tunnel lay Yarrim, a small fishing town on the Narrow Sea, with gulls over the pier and fishing boats moored in the bay. The harbourmaster, Tamsin Kell, was hiding the Dawn Walker, a ship built in secret, from Corvane's men, whose black ship lay off the point. The reason for the voyage was Isolde's three pages: the master ledger was scattered across the islands of the Narrow Sea, and without it the party had only a copy and the word of a dead bandit against a warrant with a king's seal on it.
 
 ## 22. The Dawn Walker
 
@@ -116,15 +116,15 @@ Tam Salvor of Yarrim sold the party diving helms, and below every island there w
 
 ## 29. The Open Sea
 
-The party took the helm of the Dawn Walker and sailed the Vaast Sea itself: a hundred cells of open water between the islands, serpents under the swell, wrecks adrift, and little islands where castaways and old chests wait.
+The party took the helm of the Dawn Walker and sailed the Narrow Sea itself: a hundred cells of open water between the islands, serpents under the swell, wrecks adrift, and little islands where castaways and old chests wait.
 
 ## 30. The Kraken
 
-Between the western lands and the Eastern Lands the Vaast Sea runs deep and cold, and in the middle of it, east of a line nobody had crossed in a hundred years, the Kraken waited. It rose beside the Dawn Walker as the sea turned black, a thousand suckers breaking the surface at once. The party killed it. For the first time in a century the way across the ocean was open, and the harbour boom at Oldhaven could be lifted.
+Between the western lands and the Eastern Lands the Narrow Sea runs deep and cold, and in the middle of it, east of a line nobody had crossed in a hundred years, the Kraken waited. It rose beside the Dawn Walker as the sea turned black, a thousand suckers breaking the surface at once. The party killed it. For the first time in a century the way across the ocean was open, and the harbour boom at Oldhaven could be lifted.
 
 ## 31. Oldhaven, in the Eastern Lands
 
-The Dawn Walker crossed the Vaast Sea to the far shore, to the Eastern Lands, and came at dawn to Oldhaven, the king's city, with the whole master ledger in Isolde's own hand. The royal harbour was a wall of pale stone with every gun turned on the water. The gate would open at noon, and a warrant still stood against four named persons. Here the second part of the story begins: the western lands, where the road began, lie far behind across the ocean.
+The Dawn Walker crossed the Narrow Sea to the far shore, to the Eastern Lands, and came at dawn to Oldhaven, the king's city, with the whole master ledger in Isolde's own hand. The royal harbour was a wall of pale stone with every gun turned on the water. The gate would open at noon, and a warrant still stood against four named persons. Here the second part of the story begins: the western lands, where the road began, lie far behind across the ocean.
 
 ## 32. The Court of King Osric
 
@@ -152,5 +152,5 @@ Strange things walk the levels without warning: the Ferryman of Dust, Mother Mos
 
 ## 38. What is still open
 
-The warrant is torn up and Lord Corvane is dead, but the story does not end at the pardon. The Dawn Walker is the ship of the party, with the whole Vaast Sea around her. Oldhaven, the city of the king, is a stony castle town with a court and a throne. The wanderers keep walking, the Messenger is somewhere in the dark of every level, On the table behind the king, Ishkander's letter lies open with its seal still unbroken, and Osric has said that Corvane was not the only man who wrote letters, so there is more written in the ledger than one reading can hold. Beyond that, nobody has yet said where the road goes from here.
+The warrant is torn up and Lord Corvane is dead, but the story does not end at the pardon. The Dawn Walker is the ship of the party, with the whole Narrow Sea around her. Oldhaven, the city of the king, is a stony castle town with a court and a throne. The wanderers keep walking, the Messenger is somewhere in the dark of every level, On the table behind the king, Ishkander's letter lies open with its seal still unbroken, and Osric has said that Corvane was not the only man who wrote letters, so there is more written in the ledger than one reading can hold. Beyond that, nobody has yet said where the road goes from here.
 
