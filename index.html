@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.144';
+const VERSION='3.145';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4302,7 +4302,7 @@ function drawWorldMap(){
   // you are here
   if(here){const pulse=.5+.5*Math.sin(G.time*4);ctx.strokeStyle=`rgba(150,30,20,${.55+.4*pulse})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(here.x,here.y,17+pulse*3,0,TAU);ctx.stroke();ctx.fillStyle='rgba(150,30,20,.9)';ctx.beginPath();ctx.arc(here.x,here.y-24,3.2,0,TAU);ctx.fill();ctx.beginPath();ctx.moveTo(here.x-4,here.y-22);ctx.lineTo(here.x+4,here.y-22);ctx.lineTo(here.x,here.y-14);ctx.closePath();ctx.fill()}
   // woken teleporters: a small glowing stone by each place that has one
-  const awake=WORLD_LOCS.filter(l=>l.lv.some(teleActive));
+  const awake=WORLD_LOCS.filter(l=>teleLevelsAt(l).length);
   for(const l of awake){const mx=l.x+17,my=l.y-13,pl=.5+.5*Math.sin(G.time*4+l.x);ctx.fillStyle='rgba(150,210,255,'+(.25+.25*pl)+')';ctx.beginPath();ctx.arc(mx,my,9+pl*2,0,TAU);ctx.fill();ctx.fillStyle='#46506a';stroke();ctx.beginPath();ctx.ellipse(mx,my+1,6.5,3.2,0,0,TAU);ctx.fill();ctx.stroke();ctx.strokeStyle='#cfeaff';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(mx,my,3.4,0,TAU);ctx.stroke()}
   ctx.restore();
   for(const l of awake){const sx=240+WV.x+(l.x+17-240)*WV.z,sy=160+WV.y+(l.y-13-160)*WV.z,r=Math.max(10,12*WV.z);btn('wtp_'+l.k,sx-r,sy-r,r*2,r*2)}
@@ -7764,6 +7764,16 @@ function teleSpot(n){
   if(!best)best=far?{x:far[0],y:far[1]}:{x:st.x,y:st.y};
   return L._tele=best;
 }
+/* which place on the world map a level belongs to: the rooms of Khemetra and Ironhill, and any room behind a door, belong to the town round them */
+function teleLocOf(n,d){
+  const L=WORLD_LOCS.find(l=>l.lv.includes(n));if(L)return L;
+  if(n>=199&&n<=270)return WORLD_LOCS.find(l=>l.k==='scoria');
+  if(n>=271&&n<=274)return WORLD_LOCS.find(l=>l.k==='ironhill');
+  if((d||0)>4)return null;
+  const lv=LEVELS[n],p=lv&&lv.portals&&lv.portals[0];
+  return p&&p.to!==undefined&&p.to!==n?teleLocOf(p.to,(d||0)+1):null;
+}
+function teleLevelsAt(loc){return Object.keys(G.flags.teles||{}).map(Number).filter(n=>G.flags.teles[n]&&(loc.lv.includes(n)||teleLocOf(n)===loc))}
 function teleActive(n){return !!(G.flags.teles&&G.flags.teles[n])}
 function teleOn(){return !!(G.tele&&G.P.x===G.tele.x&&G.P.y===G.tele.y&&G.state==='play')}
 function placeTeleporter(){ // called when a level is built: one stone in every map
@@ -7832,7 +7842,7 @@ function openTeleMap(){G.overview=true;G.world=true;G.wv=wvDefault();G.teleMode=
 function teleFromMap(k){
   const loc=WORLD_LOCS.find(l=>l.k===k);if(!loc)return;
   if(!teleOn()){G.wnote={text:'Stand on a woken teleporter to travel.',t:G.time};return}
-  const lv=loc.lv.filter(teleActive);if(!lv.length)return;
+  const lv=teleLevelsAt(loc);if(!lv.length)return;
   const go=lv.filter(v=>v!==LEVEL);
   if(!go.length){G.wnote={text:'You are already here.',t:G.time};return}
   if(go.length===1){teleportTo(go[0]);return}

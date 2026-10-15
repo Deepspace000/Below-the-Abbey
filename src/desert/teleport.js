@@ -25,6 +25,16 @@ function teleSpot(n){
   if(!best)best=far?{x:far[0],y:far[1]}:{x:st.x,y:st.y};
   return L._tele=best;
 }
+/* which place on the world map a level belongs to: the rooms of Khemetra and Ironhill, and any room behind a door, belong to the town round them */
+function teleLocOf(n,d){
+  const L=WORLD_LOCS.find(l=>l.lv.includes(n));if(L)return L;
+  if(n>=199&&n<=270)return WORLD_LOCS.find(l=>l.k==='scoria');
+  if(n>=271&&n<=274)return WORLD_LOCS.find(l=>l.k==='ironhill');
+  if((d||0)>4)return null;
+  const lv=LEVELS[n],p=lv&&lv.portals&&lv.portals[0];
+  return p&&p.to!==undefined&&p.to!==n?teleLocOf(p.to,(d||0)+1):null;
+}
+function teleLevelsAt(loc){return Object.keys(G.flags.teles||{}).map(Number).filter(n=>G.flags.teles[n]&&(loc.lv.includes(n)||teleLocOf(n)===loc))}
 function teleActive(n){return !!(G.flags.teles&&G.flags.teles[n])}
 function teleOn(){return !!(G.tele&&G.P.x===G.tele.x&&G.P.y===G.tele.y&&G.state==='play')}
 function placeTeleporter(){ // called when a level is built: one stone in every map
@@ -93,7 +103,7 @@ function openTeleMap(){G.overview=true;G.world=true;G.wv=wvDefault();G.teleMode=
 function teleFromMap(k){
   const loc=WORLD_LOCS.find(l=>l.k===k);if(!loc)return;
   if(!teleOn()){G.wnote={text:'Stand on a woken teleporter to travel.',t:G.time};return}
-  const lv=loc.lv.filter(teleActive);if(!lv.length)return;
+  const lv=teleLevelsAt(loc);if(!lv.length)return;
   const go=lv.filter(v=>v!==LEVEL);
   if(!go.length){G.wnote={text:'You are already here.',t:G.time};return}
   if(go.length===1){teleportTo(go[0]);return}
