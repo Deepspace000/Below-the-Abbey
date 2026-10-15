@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.150';
+const VERSION='3.151';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -6696,6 +6696,7 @@ function heldMoveId(){
 }
 function update(dt){
   if(!G.overview){if(G.ovInit&&G.ovLevel===LEVEL&&G.mz)(G.ovSaved=G.ovSaved||{})[LEVEL]={mz:G.mz,panX:G.panX,panY:G.panY};G.ovInit=false}
+  if(G.state==='play'&&G.quests&&G.quests.yar2&&G.quests.yar2.st==='done'&&!G.quests.yar3&&QUESTS.yar3){try{qAccept('yar3');msg('The Sea Gate is open. New quest: Salt and Bones. The gate is marked on the map of Khemetra.','#ffe36a')}catch(e){console.error(e)}} // games saved after the key was handed in, before the next quest began by itself
   try{areaAudio();huntTick()}catch(e){}
   burnTick(dt);
   if(LEVEL===44&&G.state==='play')try{khWalkTick(dt)}catch(e){}
