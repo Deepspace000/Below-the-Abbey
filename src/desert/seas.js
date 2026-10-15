@@ -19,6 +19,28 @@ function isleFloors(){
       for(let c=0;c<3;c++)e[i+c]=gr[i+c]*m+sd[i+c]*(1-m);e[i+3]=255}
     FLOORS.isleGrassEdge=e}
 }
+// a bare island is not one flat colour: ragged patches of its own ground (black ash, white sand, red earth, grey rock) lie over the sand
+function isleBarePatch(W,H,fm,h,seed,cx,cy,rx,ry,cov){
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const i=y*W+x;if(fm[i]!=='0'||h[i]<.2)continue;
+    const d=Math.hypot((x-cx)/rx,(y-cy)/ry);if(d>.9)continue;
+    const n=tsmooth(x/9,y/9,seed+60)*.55+tsmooth(x/3.5,y/3.5,seed+61)*.3+tsmooth(x/1.6,y/1.6,seed+62)*.15;
+    if(n+(.9-d)*.5>1.05-cov*.7)fm[i]='5';
+  }
+}
+// things lying about on the beach and inland: driftwood, shells, crabs, rocks, tufts of sea-grass, in clusters, never in a bare sheet
+function isleBeachProps(W,H,fm,h,block,rows,used,scenery,seed,cx,cy,dens,keep){
+  const kinds=['yar_driftwood','yar_shells','uw_rocks','uw_seagrass','yar_crab','uw_seagrass','yar_shells','uw_rocks'];
+  for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){
+    const i=y*W+x;if(block[i]||rows[y][x]!=='.'||h[i]<.1||used.has(x+','+y)||fm[i]==='2')continue;
+    if(keep&&Math.hypot(x-keep[0],y-keep[1])<4)continue;
+    const cl=tsmooth(x/6,y/6,seed+70);if(cl<.45)continue;
+    const r=hash2(x,y,seed+71);if(r>dens*(.4+cl))continue;
+    const k=kinds[(hash2(x,y,seed+72)*kinds.length)|0];if(!IMG[k])continue;
+    const small=k==='uw_rocks'?.45:k==='uw_seagrass'?.8:.8;
+    scenery.push({k,wx:x+.5+(hash2(x,y,seed+73)-.5)*.7,wy:y+.5+(hash2(x,y,seed+74)-.5)*.7,sc:small*(.7+hash2(x,y,seed+75)*.7),decor:{k,walk:true,x,y}});
+  }
+}
 // the grass of an island, as a map: well inside the island, never near the sea, ragged at the edges; then a ring of the edge floor ('5') round it
 function isleGrassMap(W,H,fm,h,seed,GR,cx,cy,rx,ry){
   const g=new Uint8Array(W*H);if(GR<=0)return g;
@@ -50,7 +72,7 @@ const SEA={
     scatter:[['yar_bones',6,0,0,18],['yar_driftwood',6,0,6,20],['yar_shells',6,0,8,20]],
     enemies:[['ghost',4,0,-4,16],['spectre',3,0,2,14],['skel',5,0,0,16]]},
   302:{name:'Cinder Isle',label:'Cinder Isle',cx:50,cy:42,rx:23,ry:21,peak:5.4,pow:1.05,seed:51,diff:21,
-    floors:['isleSand','tombdark','wood','bluesand','bluewater','isleGrassEdge'],hills:[],
+    floors:['isleSand','tombdark','wood','bluesand','bluewater','tombdark'],pf:1,pc:.8,hills:[],
     deco:[['yar_p_ketra',-6,10,{npc:'ci_ketra'}],['uw_buoy',10,16,{npc:'uw_dive_302'}],['yar_tent',-9,12],['yar_runestone',-4,12],['yar_runestone',-8,8],['yar_crystals',-12,2,{npc:'ci_crystal',cat:0}],['yar_crystals',12,4,{npc:'ci_crystal',cat:1}],['yar_crystals',-14,-8,{npc:'ci_crystal',cat:2}],['yar_crystals',10,-12,{npc:'ci_crystal',cat:3}],['yar_crystals',2,14,{npc:'ci_crystal',cat:4}],['yar_crystals',-3,-14,{npc:'ci_crystal',cat:5}],['yar_bones',9,9]],
     scatter:[['yar_bones',4,0,0,16],['yar_shells',4,0,10,20]],
     enemies:[['cinder',1,0,-5,2],['skel',6,0,2,16],['scorpion',4,0,0,16]]},
@@ -89,7 +111,8 @@ function seaBuild(id){
   const plank=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;block[i]=0;h[i]=.08;rk[i]=0;fm[i]='2'}};
   plank(cx,sy-1,cx+1,sy+4);
   const GR=sp.green||0;
-  const GM=isleGrassMap(W,H,fm,h,sp.seed,GR,cx,cy,sp.rx,sp.ry);   // drifts of grass well inland; Cinder Isle stays bare
+  const GM=isleGrassMap(W,H,fm,h,sp.seed,GR,cx,cy,sp.rx,sp.ry);
+  if(sp.pf)isleBarePatch(W,H,fm,h,sp.seed,cx,cy,sp.rx,sp.ry,sp.pc||.5);   // drifts of grass well inland; Cinder Isle stays bare
   const decor=[],scenery=[],used=new Set();
   const put=(k,x,y,o)=>{decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}));used.add(x+','+y)};
   put('yar_ship_dawn',cx,sy+6,{npc:'yr_ship',deco:false});
@@ -105,6 +128,7 @@ function seaBuild(id){
     else if(gm&&r>.4&&r<(gm===1?.78:.62))scenery.push({k:'pgrass'+((hash2(x,y,sp.seed+18)*4)|0),wx:x+.5+(hash2(x,y,sp.seed+22)-.5)*.6,wy:y+.5+(hash2(x,y,sp.seed+23)-.5)*.6,sc:.5+hash2(x,y,sp.seed+19)*.7,decor:{k:'pgrass0',walk:true,x,y}});
     else if(gm&&r>.34&&r<.37)scenery.push({k:'pflw'+((hash2(x,y,sp.seed+20)*6)|0)+'_'+((hash2(x,y,sp.seed+21)*2)|0),wx:x+.5,wy:y+.5,sc:.7,decor:{k:'pflw0_0',walk:true,x,y}});
   }
+  isleBeachProps(W,H,fm,h,block,rows,used,scenery,sp.seed,cx,cy,.16,[cx,sy-2]);
   for(let q=0;q<26;q++){const a=hash2(id,q,91)*TAU,rr=sp.rx*(.55+hash2(id,q,92)*.4),x=cx+Math.cos(a)*rr,y=cy+Math.sin(a)*rr*(sp.ry/sp.rx),cxl=x|0,cyl=y|0;
     if(cxl<2||cyl<2||cxl>=W-2||cyl>=H-2||block[cyl*W+cxl]||used.has(cxl+','+cyl))continue;scenery.push({k:'yar_gull_stand',wx:x,wy:y,sc:.8+hash2(id,q,93)*.4,decor:{k:'yar_gull_stand',walk:true,x:cxl,y:cyl}})}
   const enemies=[];

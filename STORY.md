@@ -118,39 +118,47 @@ Tam Salvor of Yarrim sold the party diving helms, and below every island there w
 
 The party took the helm of the Dawn Walker and sailed the Narrow Sea itself: a hundred cells of open water between the islands, serpents under the swell, wrecks adrift, and little islands where castaways and old chests wait.
 
-## 30. The Kraken
+## 30. The Kraken Guns
 
-Between the western lands and the Eastern Lands the Narrow Sea runs deep and cold, and in the middle of it, east of a line nobody had crossed in a hundred years, the Kraken waited. It rose beside the Dawn Walker as the sea turned black, a thousand suckers breaking the surface at once. The party killed it. For the first time in a century the way across the ocean was open, and the harbour boom at Oldhaven could be lifted.
+With the whole ledger on the chart table, Menkaure showed the party the way to Oldhaven, across the Narrow Sea, and the thing that stands in the middle of it. The Kraken is twenty levels above the party, and nothing they carry can hurt it. The old Crown fleet killed it once, with four magical harpoons called the Kraken guns, which were scattered when the fleet burned. Ketra, Sable Maeve, Brother Aldous and Isolde each know where one lies: the red cliffs of Redcliff, the wreck on Kelpgate Rock, the standing stones of the Hollow Isle and the wreck under Last Light. Every hero needs one in hand.
 
-## 31. Oldhaven, in the Eastern Lands
+## 31. Four Harpoons
+
+The party found all four Kraken guns: the Ember Harpoon on its altar on Redcliff, the Verdigris Harpoon in the flagship on Kelpgate Rock, the Silver Harpoon in the ring of stones on the Hollow Isle and the Beacon Harpoon in the wreck beneath Last Light. Each hero took one. They do huge damage to the Kraken, and next to none to anything else.
+
+## 32. The Kraken
+
+East of the line where the gulls stop, the sea went black and the Kraken rose, a thousand suckers breaking the surface at once. The four harpoons bit into it as nothing else in the world could, and it sank. The harpoons flared white and fell to ash, as they were meant to. For the first time in a century the way across the Narrow Sea was open, and the harbour boom at Oldhaven could be lifted.
+
+## 33. Oldhaven, in the Eastern Lands
 
 The Dawn Walker crossed the Narrow Sea to the far shore, to the Eastern Lands, and came at dawn to Oldhaven, the king's city, with the whole master ledger in Isolde's own hand. The royal harbour was a wall of pale stone with every gun turned on the water. The gate would open at noon, and a warrant still stood against four named persons. Here the second part of the story begins: the western lands, where the road began, lie far behind across the ocean.
 
-## 32. The Court of King Osric
+## 34. The Court of King Osric
 
 At noon the party was brought before King Osric and his court, with the master ledger in their hands.
 
-## 33. The Warrant Torn Up
+## 35. The Warrant Torn Up
 
 The ledger was read in open court, and the king saw whose hand wrote his tolls and his warrants. The chancellor who had stood behind Corvane fell, the warrant was torn in two, and the ransom on four heads was lifted. The road home, so long and so strange, was clear.
 
-## 34. The Village of Yarrim
+## 36. The Village of Yarrim
 
 Yarrim is a hamlet that grew up by itself: one little cobbled road down to a harbour square, three lanes off it, a green behind the inn, and a dirt track at the back past two cottages to the gorge and the tunnel. Its people are small ones, and each has a favour to ask: a telescope stolen by a gull, a census of crabs, a message in a bottle, a left boot that is a right boot, a wedding of two boats, a donkey who will not budge, a thief of nets, a lantern at the bottom of the harbour, and a shanty with no last verse.
 
-## 35. The Singing Shell
+## 37. The Singing Shell
 
 On the Isle of Bells, Brother Aldous told the party of a great spiral shell, a nautilus grown over a thousand years, that broke in four in a storm and sank, one piece beneath each island. The Whorl lies under Saltbarrow, the Lip under the Isle of Bells, the Spire under Cinder Isle and the Pearl-Lining under Last Light, each in a glowing pearl-white clam in a far corner of the reef. The party must dive all four underwater dungeons to bring them up.
 
-## 36. The Nautilus Helm
+## 38. The Nautilus Helm
 
 Aldous laid the four pieces on the stone beside the abbey bell, and they closed together by themselves with a sound like the sea. The shell became a helm, pearl-white inside and rose at the lip: it heals its wearer every round of a battle, brings mana back faster, and lets them breathe under the sea. Far below, in the drowned abbey, something large turned over in its sleep and was quiet.
 
-## 37. The Wandering Monsters
+## 39. The Wandering Monsters
 
 Strange things walk the levels without warning: the Ferryman of Dust, Mother Mossback, Aunt Marrow, the Hollow Bride and others, nine who ask for a favour and six who hunt. The rarest is the Messenger of Death, who writes the letters of his name on the walls, and whose letters kill when all five have been read. The Wandering Monsters page in the main menu keeps a record of each one met.
 
-## 38. What is still open
+## 40. What is still open
 
 The warrant is torn up and Lord Corvane is dead, but the story does not end at the pardon. The Dawn Walker is the ship of the party, with the whole Narrow Sea around her. Oldhaven, the city of the king, is a stony castle town with a court and a throne. The wanderers keep walking, the Messenger is somewhere in the dark of every level, On the table behind the king, Ishkander's letter lies open with its seal still unbroken, and Osric has said that Corvane was not the only man who wrote letters, so there is more written in the ledger than one reading can hold. Beyond that, nobody has yet said where the road goes from here.
 

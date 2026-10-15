@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.111';
+const VERSION='3.113';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -14284,6 +14284,28 @@ function isleFloors(){
       for(let c=0;c<3;c++)e[i+c]=gr[i+c]*m+sd[i+c]*(1-m);e[i+3]=255}
     FLOORS.isleGrassEdge=e}
 }
+// a bare island is not one flat colour: ragged patches of its own ground (black ash, white sand, red earth, grey rock) lie over the sand
+function isleBarePatch(W,H,fm,h,seed,cx,cy,rx,ry,cov){
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const i=y*W+x;if(fm[i]!=='0'||h[i]<.2)continue;
+    const d=Math.hypot((x-cx)/rx,(y-cy)/ry);if(d>.9)continue;
+    const n=tsmooth(x/9,y/9,seed+60)*.55+tsmooth(x/3.5,y/3.5,seed+61)*.3+tsmooth(x/1.6,y/1.6,seed+62)*.15;
+    if(n+(.9-d)*.5>1.05-cov*.7)fm[i]='5';
+  }
+}
+// things lying about on the beach and inland: driftwood, shells, crabs, rocks, tufts of sea-grass, in clusters, never in a bare sheet
+function isleBeachProps(W,H,fm,h,block,rows,used,scenery,seed,cx,cy,dens,keep){
+  const kinds=['yar_driftwood','yar_shells','uw_rocks','uw_seagrass','yar_crab','uw_seagrass','yar_shells','uw_rocks'];
+  for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){
+    const i=y*W+x;if(block[i]||rows[y][x]!=='.'||h[i]<.1||used.has(x+','+y)||fm[i]==='2')continue;
+    if(keep&&Math.hypot(x-keep[0],y-keep[1])<4)continue;
+    const cl=tsmooth(x/6,y/6,seed+70);if(cl<.45)continue;
+    const r=hash2(x,y,seed+71);if(r>dens*(.4+cl))continue;
+    const k=kinds[(hash2(x,y,seed+72)*kinds.length)|0];if(!IMG[k])continue;
+    const small=k==='uw_rocks'?.45:k==='uw_seagrass'?.8:.8;
+    scenery.push({k,wx:x+.5+(hash2(x,y,seed+73)-.5)*.7,wy:y+.5+(hash2(x,y,seed+74)-.5)*.7,sc:small*(.7+hash2(x,y,seed+75)*.7),decor:{k,walk:true,x,y}});
+  }
+}
 // the grass of an island, as a map: well inside the island, never near the sea, ragged at the edges; then a ring of the edge floor ('5') round it
 function isleGrassMap(W,H,fm,h,seed,GR,cx,cy,rx,ry){
   const g=new Uint8Array(W*H);if(GR<=0)return g;
@@ -14315,7 +14337,7 @@ const SEA={
     scatter:[['yar_bones',6,0,0,18],['yar_driftwood',6,0,6,20],['yar_shells',6,0,8,20]],
     enemies:[['ghost',4,0,-4,16],['spectre',3,0,2,14],['skel',5,0,0,16]]},
   302:{name:'Cinder Isle',label:'Cinder Isle',cx:50,cy:42,rx:23,ry:21,peak:5.4,pow:1.05,seed:51,diff:21,
-    floors:['isleSand','tombdark','wood','bluesand','bluewater','isleGrassEdge'],hills:[],
+    floors:['isleSand','tombdark','wood','bluesand','bluewater','tombdark'],pf:1,pc:.8,hills:[],
     deco:[['yar_p_ketra',-6,10,{npc:'ci_ketra'}],['uw_buoy',10,16,{npc:'uw_dive_302'}],['yar_tent',-9,12],['yar_runestone',-4,12],['yar_runestone',-8,8],['yar_crystals',-12,2,{npc:'ci_crystal',cat:0}],['yar_crystals',12,4,{npc:'ci_crystal',cat:1}],['yar_crystals',-14,-8,{npc:'ci_crystal',cat:2}],['yar_crystals',10,-12,{npc:'ci_crystal',cat:3}],['yar_crystals',2,14,{npc:'ci_crystal',cat:4}],['yar_crystals',-3,-14,{npc:'ci_crystal',cat:5}],['yar_bones',9,9]],
     scatter:[['yar_bones',4,0,0,16],['yar_shells',4,0,10,20]],
     enemies:[['cinder',1,0,-5,2],['skel',6,0,2,16],['scorpion',4,0,0,16]]},
@@ -14354,7 +14376,8 @@ function seaBuild(id){
   const plank=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;block[i]=0;h[i]=.08;rk[i]=0;fm[i]='2'}};
   plank(cx,sy-1,cx+1,sy+4);
   const GR=sp.green||0;
-  const GM=isleGrassMap(W,H,fm,h,sp.seed,GR,cx,cy,sp.rx,sp.ry);   // drifts of grass well inland; Cinder Isle stays bare
+  const GM=isleGrassMap(W,H,fm,h,sp.seed,GR,cx,cy,sp.rx,sp.ry);
+  if(sp.pf)isleBarePatch(W,H,fm,h,sp.seed,cx,cy,sp.rx,sp.ry,sp.pc||.5);   // drifts of grass well inland; Cinder Isle stays bare
   const decor=[],scenery=[],used=new Set();
   const put=(k,x,y,o)=>{decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}));used.add(x+','+y)};
   put('yar_ship_dawn',cx,sy+6,{npc:'yr_ship',deco:false});
@@ -14370,6 +14393,7 @@ function seaBuild(id){
     else if(gm&&r>.4&&r<(gm===1?.78:.62))scenery.push({k:'pgrass'+((hash2(x,y,sp.seed+18)*4)|0),wx:x+.5+(hash2(x,y,sp.seed+22)-.5)*.6,wy:y+.5+(hash2(x,y,sp.seed+23)-.5)*.6,sc:.5+hash2(x,y,sp.seed+19)*.7,decor:{k:'pgrass0',walk:true,x,y}});
     else if(gm&&r>.34&&r<.37)scenery.push({k:'pflw'+((hash2(x,y,sp.seed+20)*6)|0)+'_'+((hash2(x,y,sp.seed+21)*2)|0),wx:x+.5,wy:y+.5,sc:.7,decor:{k:'pflw0_0',walk:true,x,y}});
   }
+  isleBeachProps(W,H,fm,h,block,rows,used,scenery,sp.seed,cx,cy,.16,[cx,sy-2]);
   for(let q=0;q<26;q++){const a=hash2(id,q,91)*TAU,rr=sp.rx*(.55+hash2(id,q,92)*.4),x=cx+Math.cos(a)*rr,y=cy+Math.sin(a)*rr*(sp.ry/sp.rx),cxl=x|0,cyl=y|0;
     if(cxl<2||cyl<2||cxl>=W-2||cyl>=H-2||block[cyl*W+cxl]||used.has(cxl+','+cyl))continue;scenery.push({k:'yar_gull_stand',wx:x,wy:y,sc:.8+hash2(id,q,93)*.4,decor:{k:'yar_gull_stand',walk:true,x:cxl,y:cyl}})}
   const enemies=[];
@@ -14750,6 +14774,15 @@ function ohBuild(){
     const spot=(rows[sy]&&rows[sy][sx]==='.')?[sx,sy]:h.front;
     decor.push({k:'sign_'+h.keeper,x:spot[0],y:spot[1],block:false,wd:h.wall,txt:[h.name.toUpperCase(),KNAME[h.keeper]||'']});
   }
+  // the streets are not one cobble: moss in the damp corners, stains and puddles, bare earth, grass at the edges, and flowers and tubs at the doors
+  for(let y=6;y<144;y++)for(let x=6;x<144;x++){const i=y*W+x;if(block[i]||fm[i]!=='0')continue;
+    const n=tsmooth(x/6,y/6,91),m=tsmooth(x/2.5,y/2.5,92),r=hs(x,y,93);
+    if(n>.68&&m>.4)fm[i]='3';else if(n<.24&&m<.6)fm[i]='4';else if(r<.025)fm[i]='2';else if(r>.985)fm[i]='5';
+    // a house wall or the city wall beside it: grass creeps along the foot of it
+    else if((block[i-1]||block[i+1]||block[i-W]||block[i+W])&&m>.62&&r<.5)fm[i]='5';
+  }
+  for(const h of houses){if(hs(h.x0,h.y0,95)>.8)continue;const along=(h.face==='N'||h.face==='S')?[[h.front[0]-1,h.front[1]],[h.front[0]+1,h.front[1]]]:[[h.front[0],h.front[1]-1],[h.front[0],h.front[1]+1]];
+    for(const [tx,ty] of along){if(!free(tx,ty)||hs(tx,ty,96)>.7)continue;used.add(tx+','+ty);const k=hs(tx,ty,97)<.5?'yar_tub':'yar_lavender';if(IMG[k])scenery.push({k,wx:tx+.5,wy:ty+.5,sc:.8+hs(tx,ty,98)*.35,decor:{k,walk:true,x:tx,y:ty}})}}
   /* ---- finish the level, the rooms behind the doors, and the doors of the gate ---- */
   lv.rows=rows.map(r=>r.join(''));
   const fmap=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmap.push(s)}lv.fmap=fmap;
@@ -14805,11 +14838,13 @@ function ohBuildCourt(){
   for(const [x,y] of [[13,9],[21,9],[13,15],[21,15],[13,21],[21,21]])arch(((x+y)&1)?'oh_f_knight2':'oh_f_knight',x,y);
   for(const y of [7,11,15,19,23]){arch('oh_f_pike',3,y);arch('oh_f_pike',31,y)}
   for(const [x,y] of [[15,26],[19,26]])arch('oh_f_xbow',x,y);
-  return {rows,start:{x:17,y:H-3,f:0},decor,lights:[[8,4],[17,5],[26,4],[8,10],[26,10],[8,16],[26,16],[17,12],[17,18],[8,22],[26,22],[17,25]]};
+  // a red carpet from the doors to the thrones, and a stone dais
+  const fmap=rows.map((r,y)=>[...r].map((c,x)=>c==='w'?'0':((x>=16&&x<=18&&y>=3)||(y>=2&&y<=3&&x>=12&&x<=22))?'1':'0').join(''));
+  return {rows,fmap,start:{x:17,y:H-3,f:0},decor,lights:[[8,4],[17,5],[26,4],[8,10],[26,10],[8,16],[26,16],[17,12],[17,18],[8,22],[26,22],[17,25]]};
 }
 KH_LAZY[OH.COURT]=()=>{
   if(LEVELS[OH.COURT])return;const c=ohBuildCourt(),wg=khInteriorWall('palace','kh_ohwall1_0');
-  LEVELS[OH.COURT]={rows:c.rows,start:c.start,enemies:[],items:[],decor:c.decor,day:0,amb:.8,floor:'cobble',ceil:'beam',name:'The Court of King Osric',label:'Royal Court',lights:c.lights,ceilH:2.2,
+  LEVELS[OH.COURT]={rows:c.rows,fmap:c.fmap,floorSet:['cobble','carpet','pale','dirt','mosscobble','stainedcobble'],start:c.start,enemies:[],items:[],decor:c.decor,day:0,amb:.8,floor:'cobble',ceil:'beam',name:'The Court of King Osric',label:'Royal Court',lights:c.lights,ceilH:2.2,
     portals:[{to:OH.ID,x:OH.CX,y:41,f:2,tex:'tgate'}],diff:25,noExtras:true,chars:wg?{w:wg}:undefined};
   LEVEL_NAMES[OH.COURT]='The Court of King Osric';
 };
@@ -15113,7 +15148,9 @@ function quayBuild(){
 for(let i=0;i<10;i++){const id=OQ.ROOM0+i,stub=()=>{quayBuild();if(!LEVELS[id]&&KH_LAZY[id]&&KH_LAZY[id]!==stub)KH_LAZY[id]()};KH_LAZY[id]=stub}
 OQ_HOUSES.forEach((b,k)=>{LEVEL_NAMES[OQ.ROOM0+k]=b.name});
 /* the dogs trot back and forth, and more birds wheel over the quay */
-(function(){const _t=seaTick;seaTick=function(dt){_t(dt);if(LEVEL!==OQ.ID)return;const t=G.time;for(const d of OQ_DOGS){const g=d.dg;if(!g)continue;d.ox=Math.sin(t*g.sx+g.ph)*g.ax;d.oy=Math.cos(t*g.sx*.7+g.ph)*g.ay}}})();
+(function(){const _t=seaTick;seaTick=function(dt){_t(dt);
+  if(LEVEL===SN.ID){const t=G.time;for(const d of G.decor){const s=d.sail;if(s){d.ox=Math.sin(t*s.sp+s.ph)*s.ax;d.oy=Math.cos(t*s.sp*.8+s.ph)*s.ay}}return}
+  if(LEVEL!==OQ.ID)return;const t=G.time;for(const d of OQ_DOGS){const g=d.dg;if(!g)continue;d.ox=Math.sin(t*g.sx+g.ph)*g.ax;d.oy=Math.cos(t*g.sx*.7+g.ph)*g.ay}}})();
 (function(){const _y=yrSprites;yrSprites=function(out){_y(out);if(LEVEL!==OQ.ID)return;const t=G.time,up=IMG.yar_gull_up,dn=IMG.yar_gull_down;if(!up||!dn)return;
   for(let i=0;i<40;i++){const cx=14+hash2(i,1,201)*52,cy=14+hash2(i,2,201)*40,r=2+hash2(i,3,201)*6,sp=.35+hash2(i,4,201)*.5,a=t*sp+i*2.3,img=((t*3.4+i)|0)%2?up:dn;
     out.push({x:cx+Math.cos(a)*r,y:cy+Math.sin(a*1.1)*r*.8,img,w:.32,bob:1.4+(i%5)*.4+Math.sin(t*1.7+i)*.18,decor:{walk:true,k:'yar_gull_fly'}})}}})();
@@ -15409,6 +15446,9 @@ function uwBuild(id){
   chests.forEach(([cx,cy],q)=>{let s=null;for(let r=0;r<8&&!s;r++)for(let yy=-r;yy<=r&&!s;yy++)for(let xx=-r;xx<=r&&!s;xx++){const x=cx+xx,y=cy+yy;if(free(x,y)&&Math.hypot(x-start.x,y-start.y)>8)s=[x,y]}if(s)dc('uw_shellchest',s[0],s[1],{npc:'uw_chest',cat:q,deco:false})});
   const vents=[],vspots=[[start.x-6,start.y-6],[26,66],[84,60],[54,34]];
   for(const [vx,vy] of vspots){let s=null;for(let r=0;r<8&&!s;r++)for(let yy=-r;yy<=r&&!s;yy++)for(let xx=-r;xx<=r&&!s;xx++){const x=vx+xx,y=vy+yy;if(!block[y*W+x]&&rows[y][x]==='.')s=[x,y]}if(s){vents.push(s);used.add(s[0]+','+s[1])}}
+  // a landmark or two ahead of the start, so that each reef opens on its own picture
+  {const LM={reef:['staghorn','brain','staghorn'],abbey:['yar_arch','yar_arch','timber'],vent:['tubes','rocks','tubes'],wreck:['yar_wreck','timber','rocks']}[sp.theme]||[];
+    LM.forEach((k,i)=>{const x=start.x-7+i*7,y=start.y-8-(i%2)*2;if(free(x,y))dc(k.startsWith('yar_')?k:'uw_'+k,x,y,{sc:1.35+(i%2)*.25})})}
   // the dive line up, the prize, and the boss
   dc('uw_buoy',start.x+2,start.y-1,{npc:'uw_up',cat:id,deco:false});
   for(let q=0;q<4;q++){let s=null;for(let r=0;r<10&&!s;r++)for(let yy=-r;yy<=r&&!s;yy++)for(let xx=-r;xx<=r&&!s;xx++){const x=[30,80,50,70][q]+xx,y=[40,30,60,80][q]+yy;if(free(x,y)&&Math.hypot(x-start.x,y-start.y)>10)s=[x,y]}if(s)dc('uw_timber',s[0],s[1],{npc:'uw_oak',cat:q,deco:false})}
@@ -15561,6 +15601,15 @@ function seaBuildOpen(){
   // serpents in the open water, away from the shore and from the ports
   const spots=[];for(let q=0;q<400&&spots.length<18;q++){const x=60+((hash2(q,3,501)*(SN.KRAKEN_X-70))|0),y=30+((hash2(q,4,501)*(H-60))|0);if(block[y*W+x])continue;let ok=true;for(const I of SN_ISLES)if(Math.hypot(x-I.x,y-I.y)<I.r+16)ok=false;for(const s of spots)if(Math.hypot(x-s[0],y-s[1])<50)ok=false;if(ok)spots.push([x,y])}
   for(const [x,y] of spots)enemies.push({t:'seaserpent',x,y});
+  // other ships on the sea, far off and under sail, and flotsam turning in the swell
+  try{oqAlias()}catch(e){}
+  {const waterFree=(x,y)=>x>12&&y>12&&x<W-12&&y<H-12&&!block[y*W+x]&&h[y*W+x]<-.1&&!SN_ISLES.some(I=>Math.hypot(x-I.x,y-I.y)<I.r*1.8+14);
+    let ns=0;for(let q=0;q<400&&ns<16;q++){const x=60+((hash2(q,7,611)*(W-120))|0),y=40+((hash2(q,8,611)*(H-80))|0);if(!waterFree(x,y))continue;
+      const k=['oq_ship0','oq_ship1','oq_ship2','yar_boat_dhow','yar_boat_fish','oq_ship1','yar_boat_dhow'][ns%7];if(!IMG[k])continue;
+      decor.push({k,x,y,block:false,walk:true,deco:true,sc:k.startsWith('oq_')?.55+hash2(q,9,611)*.3:1,sail:{ph:hash2(q,10,611)*TAU,ax:6+hash2(q,11,611)*10,ay:3+hash2(q,12,611)*6,sp:.02+hash2(q,13,611)*.03}});ns++}
+    let nf=0;for(let q=0;q<500&&nf<34;q++){const x=30+((hash2(q,17,612)*(W-60))|0),y=20+((hash2(q,18,612)*(H-40))|0);if(!waterFree(x,y))continue;
+      const k=['oq_fcrate','oq_fbarrel','yar_driftwood','oq_fcrate','yar_driftwood'][nf%5];if(!IMG[k])continue;
+      scenery.push({k,wx:x+.5,wy:y+.5,sc:.7+hash2(q,19,612)*.5,decor:{k,walk:true,x,y}});nf++}}
   // gulls over the islands are made on the fly; here only the level
   const start={x:31,y:322,f:1};
   const lv={rows:rows.map(r=>r.join('')),start,enemies,items:[],decor,scenery,fmap:null,floorSet:['isleSand','lush','wood','bluesand','bluewater','isleGrassEdge'],floor:'isleSand',ceil:'cloud',
@@ -15613,8 +15662,9 @@ function seaTick(dt){
   const kr=G.enemies.find(e=>e.t==='kraken'&&e.hp>0);
   if(P.x>=SN.KRAKEN_X&&!kr&&!G.cut&&!G.talk){
     // the sea goes dark under the ship and the Kraken rises ahead of her
-    let c=null;for(let i=0;i<60&&!c;i++){const a=Math.random()*TAU,d=4+Math.random()*3,x=Math.round(P.x+Math.cos(a)*d),y=Math.round(P.y+Math.sin(a)*d);if(x<2||y<2||x>=SN.W-2||y>=SN.H-2)continue;if(G.grid[y][x]!==0||cellBlocked(x,y)||enemyAt(x,y))continue;c=[x,y]}
-    if(c){addEnemy('kraken',c[0],c[1],true);F.krakenSeen=1;msg('The sea turns black. Something vast rises beside the ship, and a thousand suckers break the surface at once.','#ff8a7a');sfx('screech')}
+    let c=null;for(let i=0;i<80&&!c;i++){const a=(Math.random()-.5)*1.6,d=17+Math.random()*5,x=Math.round(P.x+Math.cos(a)*d),y=Math.round(P.y+Math.sin(a)*d);   // far ahead to the east, so the party can turn and run if it is not ready
+    if(x<2||y<2||x>=SN.W-2||y>=SN.H-2)continue;if(G.grid[y][x]!==0||cellBlocked(x,y)||enemyAt(x,y))continue;c=[x,y]}
+    if(c){addEnemy('kraken',c[0],c[1],true);F.krakenSeen=1;msg('The sea turns black. Far ahead something vast rises out of the water, and a thousand suckers break the surface at once. It is coming. Turn back, if you are not ready.','#ff8a7a');sfx('screech')}
   }
   if(kr&&P.x<SN.KRAKEN_X-12&&Math.hypot(kr.x-P.x,kr.y-P.y)>14){kr.hp=0;kr.dying=.55;msg('The ship slips back west and the great shape sinks into the dark. It will wait.','#9ad0e8')}
 }
@@ -15636,19 +15686,19 @@ function seaEnterHook(n){
 })();
 /* ---- the islands nobody lives on ---- */
 const SN_SPEC={
-  331:{w:56,h:50,fe:['bones','chest','sign'],tier:1,foes:[['uwcrab',2]],note:'A scrap of sand with a dead palm, a pile of weathered bones and a rotted sign.'},
+  331:{pf:'whiteSand',pc:0.35,w:56,h:50,fe:['bones','chest','sign'],tier:1,foes:[['uwcrab',2]],note:'A scrap of sand with a dead palm, a pile of weathered bones and a rotted sign.'},
   332:{w:56,h:50,green:.45,fe:['palms','chest','camp'],tier:1,foes:[['uwcrab',3]],note:'A little cay of white pebbles. Someone has camped here, and left in a hurry.'},
-  333:{w:56,h:50,fe:['bones','wreck','chest'],tier:1,foes:[['uwcrab',2]],note:'A thin spit of sand. Gannets wheel over it, screaming, and the wind smells of fish.'},
+  333:{pf:'whiteSand',pc:0.4,w:56,h:50,fe:['bones','wreck','chest'],tier:1,foes:[['uwcrab',2]],note:'A thin spit of sand. Gannets wheel over it, screaming, and the wind smells of fish.'},
   334:{w:56,h:50,green:.2,fe:['palms','wreck','chest'],tier:2,foes:[['uwcrab',3]],note:'A low sandbar that the tide nearly covers. Half a ship\'s ribs stick out of it.'},
   335:{w:56,h:50,green:.6,fe:['palms','bones','camp'],tier:1,foes:[['uwcrab',2]],note:'A palm and a pile of sand. Whoever chose this island for a camp was desperate.'},
-  336:{w:56,h:50,fe:['bones','chest','arch'],npcs:[['sn_wren','fisher']],tier:2,foes:[['uwcrab',3]],note:'A ledge of black rock, whitened with bird droppings. A stone arch stands on it that nobody built.'},
-  337:{w:84,h:70,fe:['wreck','arch','chest','bones','stones'],tier:2,foes:[['skel',5],['uwcrab',4]],note:'A rocky island of kelp-hung cliffs. A broken ship lies on the rocks, and nothing grows.'},
-  338:{w:84,h:70,fe:['stones','altar','chest','bones','camp'],tier:3,foes:[['skel',6],['scorpion',4]],note:'Red cliffs and red sand. Some old people built an altar here, and it still smells of smoke.'},
-  339:{w:84,h:70,fe:['arch','wreck','bones','chest'],tier:2,foes:[['skel',5],['uwcrab',5]],note:'A hump of black stone at the north-west of the sea, its beaches heaped with wrack.'},
+  336:{pf:'scree',pc:0.5,w:56,h:50,fe:['bones','chest','arch'],npcs:[['sn_wren','fisher']],tier:2,foes:[['uwcrab',3]],note:'A ledge of black rock, whitened with bird droppings. A stone arch stands on it that nobody built.'},
+  337:{pf:'scree',pc:0.6,w:84,h:70,fe:['wreck','arch','chest','bones','stones'],tier:2,foes:[['skel',5],['uwcrab',4]],note:'A rocky island of kelp-hung cliffs. A broken ship lies on the rocks, and nothing grows.'},
+  338:{pf:'redsand2',pc:0.85,w:84,h:70,fe:['stones','altar','chest','bones','camp'],tier:3,foes:[['skel',6],['scorpion',4]],note:'Red cliffs and red sand. Some old people built an altar here, and it still smells of smoke.'},
+  339:{pf:'scree',pc:0.55,w:84,h:70,fe:['arch','wreck','bones','chest'],tier:2,foes:[['skel',5],['uwcrab',5]],note:'A hump of black stone at the north-west of the sea, its beaches heaped with wrack.'},
   340:{w:150,h:130,forest:1,fe:['stones','chest','chest','camp','arch','bones'],tier:3,foes:[['wolf',8],['bandit',6],['archer',3]],note:'A big green island, thick with forest. Birds sing in it, and not all the birdsong is birds.'},
   341:{w:140,h:120,forest:1,fe:['arch','chest','stones','camp','bones','altar'],npcs:[['sn_tobin','peasantM']],tier:3,foes:[['wolf',7],['skel',6],['ghost',3]],note:'A hollow island: forest on the rim and a ring of standing stones in the middle.'},
   342:{w:140,h:120,forest:1,fe:['camp','chest','chest','stones','bones','arch','nest'],tier:4,foes:[['wolf',9],['bandit',7],['archer',4],['spectre',3]],note:'A great island of ash trees and tangled paths. The paths are too straight to be natural.'},
-  343:{w:60,h:54,fe:['altar','chest','bones','arch'],tier:5,foes:[['skel',6]],note:'A tiny island of black glass sand and bleached bone. The sea beyond it is silent.'}
+  343:{pf:'tombdark',pc:0.85,w:60,h:54,fe:['altar','chest','bones','arch'],tier:5,foes:[['skel',6]],note:'A tiny island of black glass sand and bleached bone. The sea beyond it is silent.'}
 };
 function SEA_ARRIVE_ISLE(id){isleBuild(id);const L=LEVELS[id];return {x:L.start.x,y:L.start.y,f:L.start.f}}
 function isleBuild(id){
@@ -15667,6 +15717,7 @@ function isleBuild(id){
   const plank=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;block[i]=0;h[i]=.08;rk[i]=0;fm[i]='2'}};
   plank(cx,sy-1,cx+1,sy+4);
   const GM=isleGrassMap(W,H,fm,h,seed,GR,cx,cy,rx,ry);
+  if(S.pf)isleBarePatch(W,H,fm,h,seed,cx,cy,rx,ry,S.pc||.5);
   const decor=[],scenery=[],enemies=[],used=new Set();
   const free=(x,y)=>x>2&&y>2&&x<W-3&&y<H-3&&!block[y*W+x]&&rows[y][x]==='.'&&!used.has(x+','+y)&&h[y*W+x]>.0;
   const put=(k,x,y,o)=>{decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}));used.add(x+','+y)};
@@ -15696,10 +15747,11 @@ function isleBuild(id){
     else if(gm&&r>.34&&r<.37)scenery.push({k:'pflw'+((hash2(x,y,seed+20)*6)|0)+'_'+((hash2(x,y,seed+21)*2)|0),wx:x+.5,wy:y+.5,sc:.7,decor:{k:'pflw0_0',walk:true,x,y}});
     else if(!gm&&r>.985)scenery.push({k:hash2(x,y,seed+16)<.5?'yar_shells':'yar_driftwood',wx:x+.5,wy:y+.5,sc:.8,decor:{k:'yar_shells',walk:true,x,y}});
   }
+  isleBeachProps(W,H,fm,h,block,rows,used,scenery,seed,cx,cy,.14,[cx,sy-2]);
   for(let q=0;q<S.w/3;q++){const s=spot();if(s)scenery.push({k:'yar_gull_stand',wx:s[0]+.5,wy:s[1]+.5,sc:.9,decor:{k:'yar_gull_stand',walk:true,x:s[0],y:s[1]}})}
   for(const [t,n] of S.foes)for(let q=0;q<n;q++){const s=spot();if(s)enemies.push({t,x:s[0],y:s[1]})}
   const start={x:cx,y:sy-2,f:0};
-  const lv={rows:rows.map(r=>r.join('')),start,enemies,items:[{k:'potion',x:cx+3,y:sy-5}],decor,scenery,floorSet:['sand','dgrass','wood','bluesand','bluewater','pebA'],floor:'sand',ceil:'cloud',
+  const lv={rows:rows.map(r=>r.join('')),start,enemies,items:[{k:'potion',x:cx+3,y:sy-5}],decor,scenery,floorSet:['isleSand','lush','wood','bluesand','bluewater',S.pf||'isleGrassEdge'],floor:'isleSand',ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:I.n[0].toUpperCase()+I.n.slice(1),label:I.n,noExtras:true,diff:18+S.tier*2,tele:{x:start.x,y:start.y},chars:{D:LEVEL41_DATA.chars.D},lights:[],portals:[]};
   const fm2=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fm2.push(s)}lv.fmap=fm2;
   LEVELS[id]=lv;LEVEL_NAMES[id]=lv.name;TERRS[id]=yarTerrain(W,H,h,rk,block);
@@ -15821,7 +15873,7 @@ vq('sd2','Kraken Slayer','Menkaure, the shipwright','Pell has made the Great Har
 const DD1=khQD('The Kraken. Everyone knows it is there and nobody says its name. I can make a harpoon to take it, with wreck-oak for the shaft, but I do not have any. Planks of black oak from the old wrecks, three of them. They are on the sea floor now. You have helms. Bring me wreck-oak.','Timbers stand in the wrecks under every island. The ones with iron nails in them are the right ones.',(n,m)=>`${n} of ${m} planks.`,'Three planks. Black as ink, and not a soft spot in them.','Give me a minute... There. The Great Harpoon. It is yours, for as long as you carry the nerve. Take it to Menkaure.','The Great Harpoon is made. Whatever happens to the Kraken is now between you and the sea.');
 const DD2=khQD('Pell has made a harpoon? Then the east is open to anyone who is brave enough. Past the line, where the gulls stop, the Kraken rises. Kill it, and the east of the sea is ours, and the Dawn Walker can go where she likes.','Go east. When the sea turns black, aim for the head. The tentacles are just for show.',(n,m)=>'The Kraken is in the far east of the sea.','It is dead? Truly?','The Kraken is dead. I have lived my whole life with that thing at the edge of every chart, and it is gone. Take this.','The east is open, and the sea is a little less afraid.');
 repWrap('yr_chandler',()=>qSt('yar6')==='done'&&qSt('sd1')!=='done',"About a harpoon",()=>{const r=qNode('sd1',DD1);return r});
-repWrap('yr_menkaure',()=>G.flags.voyage&&(qSt('sd1')==='done'||qSt('vq4')==='done'),"About the Kraken",()=>qNode('sd2',DD2));
+repWrap('yr_menkaure',()=>G.flags.voyage&&!G.flags.kgGiven&&qSt('sd1')==='done',"About the Kraken",()=>qNode('sd2',DD2));
 // Pell makes the harpoon when the oak is handed in (the quest's own turn-in is not told about the item)
 (function(){const _t=qTurnIn;qTurnIn=function(id){const r=_t(id);if(r&&id==='sd1'){bagAdd(mkItem2('greatharpoon',1));msg('Pell hands over the Great Harpoon.','#ffe36a')}return r}})();
 khNpc('uw_oak','A drowned timber','uw_timber',d=>{
@@ -15953,6 +16005,100 @@ function emHud(){
   _b(id)}})();
 (function(){const _e=yarEnter;yarEnter=function(n){_e(n);try{emEnter(n)}catch(e){console.error(e)}}})();
 
+/* ---- src/desert/krakenquest.js ---- */
+/* ==========================================================================
+   THE KRAKEN GUNS. The Kraken stands between the two coasts of the Narrow Sea, and it is twenty levels above the party: nothing the party
+   carries can hurt it. Four magical harpoons, the Kraken guns of the old Crown fleet, can, and only it. They are scattered over the sea:
+     1 the Ember Harpoon      Redcliff (an altar on red cliffs)           clue from Ketra, the ash-priestess
+     2 the Verdigris Harpoon  Kelpgate Rock (a ship on the rocks)         clue from Sable Maeve
+     3 the Silver Harpoon     the Hollow Isle (a ring of standing stones) clue from Brother Aldous
+     4 the Beacon Harpoon     the wreck under Last Light (a dive)         clue from Isolde
+   Menkaure sets the quest once the third page of the ledger is found. Every hero needs one in hand. Each does huge damage to the Kraken
+   and next to none to anything else. When the Kraken is dead the four crumble away, because they were never meant to outlast it.
+   ========================================================================== */
+const KG_NAMES=['The Ember Harpoon','The Verdigris Harpoon','The Silver Harpoon','The Beacon Harpoon'];
+const KG_DESC=[
+  'A black iron harpoon, its barbed head glowing the red of a banked fire. It is made for one thing, and it is not men, and it is not wolves. Only the Kraken feels it.',
+  'A long bronze harpoon green with the sea, tiny blue runes crawling along the shaft. It is made for one thing: the Kraken. Against everything else it is a stick.',
+  'A silver harpoon with a spiral barb like the inside of a shell, giving off a soft white light. It is made to kill one creature in the world, and it hurts nothing else.',
+  'A dark steel harpoon inlaid with gold, warm to the hand. The old fleet forged four of these to kill the Kraken, and nothing else. When the Kraken is dead they will not last.'
+];
+KG_NAMES.forEach((n,i)=>{ITEMDEF['kharp'+(i+1)]={n,k:'weapon',t:'Sword',ic:'kharp'+(i+1),c:['#e8603c','#5ac8a0','#e0f0ff','#e8c850'][i],dmg:[1,3],hit:.2,kraken:[3000,4400],price:0,rar:1,d:KG_DESC[i],sw:.6}});
+if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push('kharp1','kharp2','kharp3','kharp4');
+ENEMY_DEF.kraken.aboveParty=20;   // twenty levels above the party: attacking it without the guns is the end of the party
+// a Kraken gun in a hero's hand does huge damage to the Kraken, and next to nothing to anything else
+(function(){
+  const _rd=rollDmg;rollDmg=function(h){const r=_rd.apply(this,arguments);try{const w=heroWeapon(h);G._atkW=w&&w.kraken?w:null}catch(e){G._atkW=null}return r};
+  const _he=hurtEnemy;hurtEnemy=function(e,d){
+    const w=G._atkW;G._atkW=null;
+    if(w&&e&&e.t==='kraken'){d=Math.round(w.kraken[0]+Math.random()*(w.kraken[1]-w.kraken[0]));msg('The harpoon bites deep into the Kraken for '+d+'!','#ffd76a');sfx('crit')}
+    return _he.call(this,e,d)};
+})();
+const kgFound=()=>(G.flags.kgFound||(G.flags.kgFound={}));
+const kgCount=()=>Object.keys(kgFound()).length;
+vq('kg0','The Kraken Guns','Menkaure, the shipwright',"The Kraken stands between the two coasts of the Narrow Sea, and nothing the party carries can hurt it. The old Crown fleet killed it once with four magical harpoons, the Kraken guns, which were scattered when the fleet burned. Ketra, Sable Maeve, Brother Aldous and Isolde each know where one lies. Find all four. Every hero needs one in hand, and they work on the Kraken and on nothing else.",4,kgCount,{gold:600,xp:12000});
+const kgQ=(id,n,who,title,desc,rw)=>vq(id,title,who,desc,1,()=>kgFound()[n]?1:0,rw);
+kgQ('kg1',1,'Ketra, the ash-priestess','Smoke on the Red Cliffs',"Ketra says the first Kraken gun, the Ember Harpoon, lies on an altar in the red cliffs of Redcliff, a rock island in the east of the Narrow Sea. Sail there and find it.",{gold:300,xp:4000});
+kgQ('kg2',2,'Sable Maeve','The Admiral\'s Flagship',"Sable Maeve says the Admiral\'s flagship ran aground on Kelpgate Rock, in the south-west of the Narrow Sea, with the second Kraken gun, the Verdigris Harpoon, still in her bow. Sail there and find it.",{gold:300,xp:4000});
+kgQ('kg3',3,'Brother Aldous','The Chaplain\'s Stones',"Brother Aldous says the fleet\'s chaplain buried the third Kraken gun, the Silver Harpoon, inside the ring of standing stones on the Hollow Isle, in the west of the Narrow Sea. Sail there and find it.",{gold:300,xp:4000});
+kgQ('kg4',4,'Isolde','The Beacon Wreck',"Isolde says the fourth Kraken gun, the Beacon Harpoon, went down with the fleet\'s lamp ship in the wreck under Last Light. Put on a Diving Helm each, dive from Last Light, and find it.",{gold:300,xp:4000});
+const KGD={
+ kg1:khQD("The altar in the Redcliff rocks smelled of smoke even when I was a girl: the old fleet burned something there, and I think it was the first Kraken gun being blessed. The Ember Harpoon. Redcliff is the red rock island in the east of the sea. Look by the altar. I cannot give you more than that, and I would not trust anyone who said they could.","Redcliff, east, red cliffs and an old altar. Find the harpoon and carry it back aboard.",(n,m)=>"Redcliff, in the east of the Narrow Sea. The harpoon is at the altar on the red cliffs.","You have it? The Ember Harpoon?","Fire for the fire. I can feel it from here. Take this for the trouble.","The harpoon is yours, and the Kraken will learn what fire is."),
+ kg2:khQD("My Admiral\'s flagship ran aground on Kelpgate Rock when the fleet burned, and the second Kraken gun was lashed in her bow. The Verdigris Harpoon, green as the sea by now. Kelpgate is a hump of kelp-hung rock in the south-west. The ship is still on the rocks, if the sea has left her anything.","Kelpgate Rock, south-west. Look for the wreck on the rocks.",(n,m)=>"Kelpgate Rock, in the south-west of the Narrow Sea. The harpoon is in the wreck of the flagship.","Is that bronze? Green bronze? That is the Verdigris Harpoon.","My Admiral would have wept. I will do it for him. Here, for the trouble.","The harpoon is yours. Make it worth the fleet."),
+ kg3:khQD("The fleet\'s chaplain hid the third Kraken gun, the Silver Harpoon, in the ring of standing stones on the Hollow Isle, west of here. A place that safe and that strange could hold anything. Go and look in the stones, and do not stay there after dark.","The Hollow Isle, west. The harpoon is in the ring of stones.",(n,m)=>"The Hollow Isle, in the west of the Narrow Sea. The harpoon is among the standing stones.","The Silver Harpoon. I can hear it. Does it sing to you?","Then it was not lost after all. Take this, with my thanks, and my blessing on the throw.","The harpoon is yours. Go with it."),
+ kg4:khQD("I copied the fleet\'s accounts in my first year at court. The fourth Kraken gun, the Beacon Harpoon, was in the lamp ship when she went down off Last Light. The wreck is under the island, below the kelp. You will need a Diving Helm each, and something very large lives in the wreck. Dive, and look for the gold.","Dive from Last Light. The harpoon is in the wreck.",(n,m)=>"The wreck under Last Light, below the kelp. The harpoon glints gold.","The Beacon Harpoon! Whole, after all this time.","The last of the four. I will sleep better knowing the fleet is not all lost. Take this.","The harpoon is yours. The Kraken has not much longer.")
+};
+repWrap('ci_ketra',()=>G.flags.kgGiven&&qSt('kg1')!=='done','About the Kraken guns',()=>qNode('kg1',KGD.kg1));
+repWrap('sb_maeve',()=>G.flags.kgGiven&&qSt('kg2')!=='done','About the Kraken guns',()=>qNode('kg2',KGD.kg2));
+repWrap('ib_aldous',()=>G.flags.kgGiven&&qSt('kg3')!=='done','About the Kraken guns',()=>qNode('kg3',KGD.kg3));
+repWrap('ll_isolde',()=>G.flags.kgGiven&&qSt('kg4')!=='done','About the Kraken guns',()=>qNode('kg4',KGD.kg4));
+/* ---- Menkaure speaks to the party once the whole ledger is theirs ---- */
+Object.assign(CUTS,{kgIntro:()=>[
+  {text:'The ledger is whole. Menkaure lays all three pages of it on the chart table of the Dawn Walker and puts a brass dividers on the far side of the Narrow Sea, where nothing is drawn but a mark in the old hand: Oldhaven.'},
+  {who:'Menkaure',text:'That is where the king sits. That is where your warrant was written, and where it can be torn up. And there, in the middle, is the reason nobody has crossed in a hundred years.'},
+  {who:hn(0),text:'The Kraken.'},
+  {who:'Menkaure',text:'I have stood on the pier at Yarrim and listened to old sailors tell me it is a story. It is not a story. It is twenty times what any of you has ever fought. If you sail into its water as you are, it will end this party in a round.'},
+  {who:hn(1),text:'Then how did anyone ever beat it?'},
+  {who:'Menkaure',text:'Once, and only once. The fleet of the old Crown carried four magical harpoons, forged for this and nothing else. The Kraken guns. They bite the Kraken like nothing in the world, and they are no better than sticks against anything else. When the fleet burned, the guns were scattered over this sea.'},
+  {who:hn(2),text:'Where?'},
+  {who:'Menkaure',text:'I do not know. But four people on these islands do: Ketra on Cinder Isle, Sable Maeve on Saltbarrow, Brother Aldous on the Isle of Bells and Isolde at Last Light. Ask each of them. Then sail, and dive, and dig, and bring me four harpoons. One for each of you. Every hero in your hand, or none of you at the helm.'},
+  {text:'Menkaure rolls the chart. Behind him, in the dark of the hold, something long and iron rattles in a crate that will, for now, hold nothing.'}]});
+function kgOffer(){
+  const F=G.flags;if(!F.page3||F.kgGiven||G.cut||G.talk)return;
+  F.kgGiven=1;startCut('kgIntro',()=>{if(qSt('kg0')===null)qAccept('kg0');if(kgCount()>=4&&qReady('kg0'))qTurnIn('kg0');msg('The Kraken guns: ask Ketra, Sable Maeve, Brother Aldous and Isolde where each lies.','#ffe36a')});
+}
+(function(){const _e=yarEnter;yarEnter=function(n){_e(n);try{if(G.flags.page3&&!G.flags.kgGiven&&(n===SN.ID||emIslandLv(n)))later(900,()=>{if(LEVEL===n)kgOffer()})}catch(e){console.error(e)}}})();
+/* ---- the guns themselves: lying where the clues say ---- */
+const KG_AT={338:1,337:2,341:3,323:4};   // the level each gun lies in
+function kgAlias(){for(let i=1;i<=4;i++){const im=IMG['kh_kgharp_'+(i-1)];if(im){IMG['kg_harp'+i]=im;NPC_H['kg_harp'+i]=1.9*im.height/im.width}}}
+function kgPlace(id){
+  kgAlias();const L=LEVELS[id],T=TERRS[id];if(!L||!T)return;const n=KG_AT[id],W=L.rows[0].length,H=L.rows.length;
+  const taken=new Set((L.decor||[]).map(d=>d.x+','+d.y));
+  const want=id===323?[[88,28],[16,28],[88,64]]:null;let spot=null;
+  if(want){for(const [wx,wy] of want)for(let r=0;r<10&&!spot;r++)for(let yy=-r;yy<=r&&!spot;yy++)for(let xx=-r;xx<=r&&!spot;xx++){const x=wx+xx,y=wy+yy,i=y*W+x;if(x>3&&y>3&&x<W-4&&y<H-4&&!T.block[i]&&L.rows[y][x]==='.'&&!taken.has(x+','+y))spot=[x,y]}}
+  else{const cx=W>>1,cy=(H>>1)-4;for(let q=0;q<400&&!spot;q++){const a=hash2(id,q,801)*TAU,r=hash2(id,q+9,801)*.55*Math.min(W,H)/2,x=Math.round(cx+Math.cos(a)*r*1.2),y=Math.round(cy+Math.sin(a)*r),i=y*W+x;if(x>3&&y>3&&x<W-4&&y<H-4&&!T.block[i]&&L.rows[y][x]==='.'&&T.h[i]>.2&&!taken.has(x+','+y)&&Math.hypot(x-cx,y-(H>>1)-4)>6)spot=[x,y]}}
+  if(spot)L.decor.push({k:'kg_harp'+n,x:spot[0],y:spot[1],block:false,walk:true,deco:false,npc:'kg_harp',cat:n});
+}
+(function(){const _ib=isleBuild;isleBuild=function(id){const had=!!LEVELS[id];_ib.apply(this,arguments);if(!had&&KG_AT[id])kgPlace(id)}})();
+(function(){const _ub=uwBuild;uwBuild=function(id){const had=!!LEVELS[id];_ub.apply(this,arguments);if(!had&&KG_AT[id])kgPlace(id)}})();
+for(const id in KG_AT)if(LEVELS[id])kgPlace(+id);
+khNpc('kg_harp','A Kraken gun','kg_harp1',d=>{
+  const F=G.flags,n=d.cat,got=kgFound();
+  if(got[n])return say('Nothing is left here. You took the harpoon.',[BYE]);
+  if(!bagAdd(mkItem2('kharp'+n,1)))return say('A long iron harpoon lies here, glowing very faintly, but your bag is full. Make room for it.',[BYE]);
+  got[n]=1;d.found=true;sfx('key');
+  const left=4-kgCount();
+  if(!left&&qSt('kg0')==='active'&&qReady('kg0'))qTurnIn('kg0');
+  return say(KG_NAMES[n-1]+'. '+KG_DESC[n-1].split('. ')[0]+'. '+(left?left+' of the four still lie out there.':'That is all four. Every hero needs one in hand: equip them, and sail east.'),[BYE])});
+/* ---- the guns are not made to outlast the Kraken ---- */
+(function(){const _t=seaTick;seaTick=function(dt){_t(dt);const F=G.flags;
+  if(F.krakenSlain&&!F.kgGone&&G.state==='play'){F.kgGone=1;let n=0;
+    for(const h of G.heroes)for(const k in h.eq){const it=h.eq[k];if(it&&/^kharp[1-4]$/.test(it.id)){delete h.eq[k];n++}}
+    for(let i=1;i<=4;i++){const c=bagCount('kharp'+i);if(c){bagRemove('kharp'+i,c);n+=c}}
+    try{for(let i=0;i<G.heroes.length;i++)recalcMax(i)}catch(e){}
+    if(n)msg('The four harpoons flare white and fall to ash in your hands. They were never meant to outlast the Kraken.','#ffd9a0')}
+}})();
+
 /* ---- src/desert/story.js ---- */
 /* ==========================================================================
    THE STORY SO FAR. A page in the journal that writes the main story down as it happens: the chapters the party has lived through,
@@ -15989,7 +16135,9 @@ const STORY=[
   {id:'lastlight',c:()=>qSt('vq4')==='done',t:'Last Light',x:'At the end of the chain, Isolde herself sat in a hut by a ruined beacon. The third page lay in the altar at the top of the island, and Lord Corvane had followed the party\'s lamp across half the sea to take it. He did not leave the island.'},
   {id:'dive',c:()=>G.flags.uwSeen&&Object.keys(G.flags.uwSeen).length>0,t:'Under the Sea',x:'Tam Salvor of Yarrim sold the party diving helms, and below every island there was a reef. The water was full of colour and teeth: coral gardens, drowned abbeys, vents that breathe, and a wreck among the kelp. Four minutes of air at a time, and the bubbles at the vents to fill the helms again.'},
   {id:'sea',c:()=>G.flags.seaSeen,t:'The Open Sea',x:'The party took the helm of the Dawn Walker and sailed the Narrow Sea itself: a hundred cells of open water between the islands, serpents under the swell, wrecks adrift, and little islands where castaways and old chests wait.'},
-  {id:'kraken',c:()=>G.flags.krakenSlain,t:'The Kraken',x:'Between the western lands and the Eastern Lands the Narrow Sea runs deep and cold, and in the middle of it, east of a line nobody had crossed in a hundred years, the Kraken waited. It rose beside the Dawn Walker as the sea turned black, a thousand suckers breaking the surface at once. The party killed it. For the first time in a century the way across the ocean was open, and the harbour boom at Oldhaven could be lifted.'},
+  {id:'kgquest',c:()=>G.flags.kgGiven,t:'The Kraken Guns',x:'With the whole ledger on the chart table, Menkaure showed the party the way to Oldhaven, across the Narrow Sea, and the thing that stands in the middle of it. The Kraken is twenty levels above the party, and nothing they carry can hurt it. The old Crown fleet killed it once, with four magical harpoons called the Kraken guns, which were scattered when the fleet burned. Ketra, Sable Maeve, Brother Aldous and Isolde each know where one lies: the red cliffs of Redcliff, the wreck on Kelpgate Rock, the standing stones of the Hollow Isle and the wreck under Last Light. Every hero needs one in hand.'},
+  {id:'kguns',c:()=>(G.flags.kgFound&&Object.keys(G.flags.kgFound).length>=4),t:'Four Harpoons',x:'The party found all four Kraken guns: the Ember Harpoon on its altar on Redcliff, the Verdigris Harpoon in the flagship on Kelpgate Rock, the Silver Harpoon in the ring of stones on the Hollow Isle and the Beacon Harpoon in the wreck beneath Last Light. Each hero took one. They do huge damage to the Kraken, and next to none to anything else.'},
+  {id:'kraken',c:()=>G.flags.krakenSlain,t:'The Kraken',x:'East of the line where the gulls stop, the sea went black and the Kraken rose, a thousand suckers breaking the surface at once. The four harpoons bit into it as nothing else in the world could, and it sank. The harpoons flared white and fell to ash, as they were meant to. For the first time in a century the way across the Narrow Sea was open, and the harbour boom at Oldhaven could be lifted.'},
   {id:'oldhaven',c:()=>G.flags.oldhavenSeen,t:'Oldhaven, in the Eastern Lands',x:'The Dawn Walker crossed the Narrow Sea to the far shore, to the Eastern Lands, and came at dawn to Oldhaven, the king\'s city, with the whole master ledger in Isolde\'s own hand. The royal harbour was a wall of pale stone with every gun turned on the water. The gate would open at noon, and a warrant still stood against four named persons. Here the second part of the story begins: the western lands, where the road began, lie far behind across the ocean.'},
   {id:'court',c:()=>G.flags.courtSeen,t:'The Court of King Osric',x:'At noon the party was brought before King Osric and his court, with the master ledger in their hands.'},
   {id:'pardon',c:()=>G.flags.pardoned,t:'The Warrant Torn Up',x:'The ledger was read in open court, and the king saw whose hand wrote his tolls and his warrants. The chancellor who had stood behind Corvane fell, the warrant was torn in two, and the ransom on four heads was lifted. The road home, so long and so strange, was clear.'}
@@ -16007,6 +16155,8 @@ function storyNext(){ // what to do next, from the chapter the party has reached
   if(F.pardoned)return 'The warrant is torn up and the ransom lifted. The road is yours.';
   if(F.courtSeen)return 'You stand in the court of King Osric. Finish what you started.';
   if(F.oldhavenSeen)return 'Oldhaven. Wait for noon at the quay gate, then carry the master ledger to the king.';
+  if(F.page3&&!F.krakenSlain&&!(F.kgFound&&Object.keys(F.kgFound).length>=4))return 'Find the four Kraken guns, the only things that can hurt the Kraken: ask Ketra, Sable Maeve, Brother Aldous and Isolde where each lies. Then give one to each hero and sail east to Oldhaven.';
+  if(F.page3&&!F.krakenSlain)return 'You have the four Kraken guns. Give one to each hero, sail east across the Narrow Sea and kill the Kraken, so the harbour of Oldhaven can be reached.';
   if(qSt('vq4')==='done'||F.page3)return 'Sail the Dawn Walker east across the Narrow Sea to Oldhaven, the king\'s city, on the far shore, with the whole ledger. The Kraken guards the crossing: kill it, and the harbour boom will lift. (The lands do meet far to the north, but that way is cold, long and slow.)';
   if(qSt('vq3')==='done')return 'Sail to Last Light. Isolde keeps the last page, and Corvane is close behind.';
   if(qSt('vq2')==='done')return 'Sail to Cinder Isle. Ketra the ash-priestess keeps the second page.';

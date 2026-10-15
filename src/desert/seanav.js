@@ -81,6 +81,15 @@ function seaBuildOpen(){
   // serpents in the open water, away from the shore and from the ports
   const spots=[];for(let q=0;q<400&&spots.length<18;q++){const x=60+((hash2(q,3,501)*(SN.KRAKEN_X-70))|0),y=30+((hash2(q,4,501)*(H-60))|0);if(block[y*W+x])continue;let ok=true;for(const I of SN_ISLES)if(Math.hypot(x-I.x,y-I.y)<I.r+16)ok=false;for(const s of spots)if(Math.hypot(x-s[0],y-s[1])<50)ok=false;if(ok)spots.push([x,y])}
   for(const [x,y] of spots)enemies.push({t:'seaserpent',x,y});
+  // other ships on the sea, far off and under sail, and flotsam turning in the swell
+  try{oqAlias()}catch(e){}
+  {const waterFree=(x,y)=>x>12&&y>12&&x<W-12&&y<H-12&&!block[y*W+x]&&h[y*W+x]<-.1&&!SN_ISLES.some(I=>Math.hypot(x-I.x,y-I.y)<I.r*1.8+14);
+    let ns=0;for(let q=0;q<400&&ns<16;q++){const x=60+((hash2(q,7,611)*(W-120))|0),y=40+((hash2(q,8,611)*(H-80))|0);if(!waterFree(x,y))continue;
+      const k=['oq_ship0','oq_ship1','oq_ship2','yar_boat_dhow','yar_boat_fish','oq_ship1','yar_boat_dhow'][ns%7];if(!IMG[k])continue;
+      decor.push({k,x,y,block:false,walk:true,deco:true,sc:k.startsWith('oq_')?.55+hash2(q,9,611)*.3:1,sail:{ph:hash2(q,10,611)*TAU,ax:6+hash2(q,11,611)*10,ay:3+hash2(q,12,611)*6,sp:.02+hash2(q,13,611)*.03}});ns++}
+    let nf=0;for(let q=0;q<500&&nf<34;q++){const x=30+((hash2(q,17,612)*(W-60))|0),y=20+((hash2(q,18,612)*(H-40))|0);if(!waterFree(x,y))continue;
+      const k=['oq_fcrate','oq_fbarrel','yar_driftwood','oq_fcrate','yar_driftwood'][nf%5];if(!IMG[k])continue;
+      scenery.push({k,wx:x+.5,wy:y+.5,sc:.7+hash2(q,19,612)*.5,decor:{k,walk:true,x,y}});nf++}}
   // gulls over the islands are made on the fly; here only the level
   const start={x:31,y:322,f:1};
   const lv={rows:rows.map(r=>r.join('')),start,enemies,items:[],decor,scenery,fmap:null,floorSet:['isleSand','lush','wood','bluesand','bluewater','isleGrassEdge'],floor:'isleSand',ceil:'cloud',
@@ -133,8 +142,9 @@ function seaTick(dt){
   const kr=G.enemies.find(e=>e.t==='kraken'&&e.hp>0);
   if(P.x>=SN.KRAKEN_X&&!kr&&!G.cut&&!G.talk){
     // the sea goes dark under the ship and the Kraken rises ahead of her
-    let c=null;for(let i=0;i<60&&!c;i++){const a=Math.random()*TAU,d=4+Math.random()*3,x=Math.round(P.x+Math.cos(a)*d),y=Math.round(P.y+Math.sin(a)*d);if(x<2||y<2||x>=SN.W-2||y>=SN.H-2)continue;if(G.grid[y][x]!==0||cellBlocked(x,y)||enemyAt(x,y))continue;c=[x,y]}
-    if(c){addEnemy('kraken',c[0],c[1],true);F.krakenSeen=1;msg('The sea turns black. Something vast rises beside the ship, and a thousand suckers break the surface at once.','#ff8a7a');sfx('screech')}
+    let c=null;for(let i=0;i<80&&!c;i++){const a=(Math.random()-.5)*1.6,d=17+Math.random()*5,x=Math.round(P.x+Math.cos(a)*d),y=Math.round(P.y+Math.sin(a)*d);   // far ahead to the east, so the party can turn and run if it is not ready
+    if(x<2||y<2||x>=SN.W-2||y>=SN.H-2)continue;if(G.grid[y][x]!==0||cellBlocked(x,y)||enemyAt(x,y))continue;c=[x,y]}
+    if(c){addEnemy('kraken',c[0],c[1],true);F.krakenSeen=1;msg('The sea turns black. Far ahead something vast rises out of the water, and a thousand suckers break the surface at once. It is coming. Turn back, if you are not ready.','#ff8a7a');sfx('screech')}
   }
   if(kr&&P.x<SN.KRAKEN_X-12&&Math.hypot(kr.x-P.x,kr.y-P.y)>14){kr.hp=0;kr.dying=.55;msg('The ship slips back west and the great shape sinks into the dark. It will wait.','#9ad0e8')}
 }
@@ -156,19 +166,19 @@ function seaEnterHook(n){
 })();
 /* ---- the islands nobody lives on ---- */
 const SN_SPEC={
-  331:{w:56,h:50,fe:['bones','chest','sign'],tier:1,foes:[['uwcrab',2]],note:'A scrap of sand with a dead palm, a pile of weathered bones and a rotted sign.'},
+  331:{pf:'whiteSand',pc:0.35,w:56,h:50,fe:['bones','chest','sign'],tier:1,foes:[['uwcrab',2]],note:'A scrap of sand with a dead palm, a pile of weathered bones and a rotted sign.'},
   332:{w:56,h:50,green:.45,fe:['palms','chest','camp'],tier:1,foes:[['uwcrab',3]],note:'A little cay of white pebbles. Someone has camped here, and left in a hurry.'},
-  333:{w:56,h:50,fe:['bones','wreck','chest'],tier:1,foes:[['uwcrab',2]],note:'A thin spit of sand. Gannets wheel over it, screaming, and the wind smells of fish.'},
+  333:{pf:'whiteSand',pc:0.4,w:56,h:50,fe:['bones','wreck','chest'],tier:1,foes:[['uwcrab',2]],note:'A thin spit of sand. Gannets wheel over it, screaming, and the wind smells of fish.'},
   334:{w:56,h:50,green:.2,fe:['palms','wreck','chest'],tier:2,foes:[['uwcrab',3]],note:'A low sandbar that the tide nearly covers. Half a ship\'s ribs stick out of it.'},
   335:{w:56,h:50,green:.6,fe:['palms','bones','camp'],tier:1,foes:[['uwcrab',2]],note:'A palm and a pile of sand. Whoever chose this island for a camp was desperate.'},
-  336:{w:56,h:50,fe:['bones','chest','arch'],npcs:[['sn_wren','fisher']],tier:2,foes:[['uwcrab',3]],note:'A ledge of black rock, whitened with bird droppings. A stone arch stands on it that nobody built.'},
-  337:{w:84,h:70,fe:['wreck','arch','chest','bones','stones'],tier:2,foes:[['skel',5],['uwcrab',4]],note:'A rocky island of kelp-hung cliffs. A broken ship lies on the rocks, and nothing grows.'},
-  338:{w:84,h:70,fe:['stones','altar','chest','bones','camp'],tier:3,foes:[['skel',6],['scorpion',4]],note:'Red cliffs and red sand. Some old people built an altar here, and it still smells of smoke.'},
-  339:{w:84,h:70,fe:['arch','wreck','bones','chest'],tier:2,foes:[['skel',5],['uwcrab',5]],note:'A hump of black stone at the north-west of the sea, its beaches heaped with wrack.'},
+  336:{pf:'scree',pc:0.5,w:56,h:50,fe:['bones','chest','arch'],npcs:[['sn_wren','fisher']],tier:2,foes:[['uwcrab',3]],note:'A ledge of black rock, whitened with bird droppings. A stone arch stands on it that nobody built.'},
+  337:{pf:'scree',pc:0.6,w:84,h:70,fe:['wreck','arch','chest','bones','stones'],tier:2,foes:[['skel',5],['uwcrab',4]],note:'A rocky island of kelp-hung cliffs. A broken ship lies on the rocks, and nothing grows.'},
+  338:{pf:'redsand2',pc:0.85,w:84,h:70,fe:['stones','altar','chest','bones','camp'],tier:3,foes:[['skel',6],['scorpion',4]],note:'Red cliffs and red sand. Some old people built an altar here, and it still smells of smoke.'},
+  339:{pf:'scree',pc:0.55,w:84,h:70,fe:['arch','wreck','bones','chest'],tier:2,foes:[['skel',5],['uwcrab',5]],note:'A hump of black stone at the north-west of the sea, its beaches heaped with wrack.'},
   340:{w:150,h:130,forest:1,fe:['stones','chest','chest','camp','arch','bones'],tier:3,foes:[['wolf',8],['bandit',6],['archer',3]],note:'A big green island, thick with forest. Birds sing in it, and not all the birdsong is birds.'},
   341:{w:140,h:120,forest:1,fe:['arch','chest','stones','camp','bones','altar'],npcs:[['sn_tobin','peasantM']],tier:3,foes:[['wolf',7],['skel',6],['ghost',3]],note:'A hollow island: forest on the rim and a ring of standing stones in the middle.'},
   342:{w:140,h:120,forest:1,fe:['camp','chest','chest','stones','bones','arch','nest'],tier:4,foes:[['wolf',9],['bandit',7],['archer',4],['spectre',3]],note:'A great island of ash trees and tangled paths. The paths are too straight to be natural.'},
-  343:{w:60,h:54,fe:['altar','chest','bones','arch'],tier:5,foes:[['skel',6]],note:'A tiny island of black glass sand and bleached bone. The sea beyond it is silent.'}
+  343:{pf:'tombdark',pc:0.85,w:60,h:54,fe:['altar','chest','bones','arch'],tier:5,foes:[['skel',6]],note:'A tiny island of black glass sand and bleached bone. The sea beyond it is silent.'}
 };
 function SEA_ARRIVE_ISLE(id){isleBuild(id);const L=LEVELS[id];return {x:L.start.x,y:L.start.y,f:L.start.f}}
 function isleBuild(id){
@@ -187,6 +197,7 @@ function isleBuild(id){
   const plank=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;block[i]=0;h[i]=.08;rk[i]=0;fm[i]='2'}};
   plank(cx,sy-1,cx+1,sy+4);
   const GM=isleGrassMap(W,H,fm,h,seed,GR,cx,cy,rx,ry);
+  if(S.pf)isleBarePatch(W,H,fm,h,seed,cx,cy,rx,ry,S.pc||.5);
   const decor=[],scenery=[],enemies=[],used=new Set();
   const free=(x,y)=>x>2&&y>2&&x<W-3&&y<H-3&&!block[y*W+x]&&rows[y][x]==='.'&&!used.has(x+','+y)&&h[y*W+x]>.0;
   const put=(k,x,y,o)=>{decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}));used.add(x+','+y)};
@@ -216,10 +227,11 @@ function isleBuild(id){
     else if(gm&&r>.34&&r<.37)scenery.push({k:'pflw'+((hash2(x,y,seed+20)*6)|0)+'_'+((hash2(x,y,seed+21)*2)|0),wx:x+.5,wy:y+.5,sc:.7,decor:{k:'pflw0_0',walk:true,x,y}});
     else if(!gm&&r>.985)scenery.push({k:hash2(x,y,seed+16)<.5?'yar_shells':'yar_driftwood',wx:x+.5,wy:y+.5,sc:.8,decor:{k:'yar_shells',walk:true,x,y}});
   }
+  isleBeachProps(W,H,fm,h,block,rows,used,scenery,seed,cx,cy,.14,[cx,sy-2]);
   for(let q=0;q<S.w/3;q++){const s=spot();if(s)scenery.push({k:'yar_gull_stand',wx:s[0]+.5,wy:s[1]+.5,sc:.9,decor:{k:'yar_gull_stand',walk:true,x:s[0],y:s[1]}})}
   for(const [t,n] of S.foes)for(let q=0;q<n;q++){const s=spot();if(s)enemies.push({t,x:s[0],y:s[1]})}
   const start={x:cx,y:sy-2,f:0};
-  const lv={rows:rows.map(r=>r.join('')),start,enemies,items:[{k:'potion',x:cx+3,y:sy-5}],decor,scenery,floorSet:['sand','dgrass','wood','bluesand','bluewater','pebA'],floor:'sand',ceil:'cloud',
+  const lv={rows:rows.map(r=>r.join('')),start,enemies,items:[{k:'potion',x:cx+3,y:sy-5}],decor,scenery,floorSet:['isleSand','lush','wood','bluesand','bluewater',S.pf||'isleGrassEdge'],floor:'isleSand',ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:I.n[0].toUpperCase()+I.n.slice(1),label:I.n,noExtras:true,diff:18+S.tier*2,tele:{x:start.x,y:start.y},chars:{D:LEVEL41_DATA.chars.D},lights:[],portals:[]};
   const fm2=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fm2.push(s)}lv.fmap=fm2;
   LEVELS[id]=lv;LEVEL_NAMES[id]=lv.name;TERRS[id]=yarTerrain(W,H,h,rk,block);

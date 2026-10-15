@@ -188,6 +188,9 @@ function uwBuild(id){
   chests.forEach(([cx,cy],q)=>{let s=null;for(let r=0;r<8&&!s;r++)for(let yy=-r;yy<=r&&!s;yy++)for(let xx=-r;xx<=r&&!s;xx++){const x=cx+xx,y=cy+yy;if(free(x,y)&&Math.hypot(x-start.x,y-start.y)>8)s=[x,y]}if(s)dc('uw_shellchest',s[0],s[1],{npc:'uw_chest',cat:q,deco:false})});
   const vents=[],vspots=[[start.x-6,start.y-6],[26,66],[84,60],[54,34]];
   for(const [vx,vy] of vspots){let s=null;for(let r=0;r<8&&!s;r++)for(let yy=-r;yy<=r&&!s;yy++)for(let xx=-r;xx<=r&&!s;xx++){const x=vx+xx,y=vy+yy;if(!block[y*W+x]&&rows[y][x]==='.')s=[x,y]}if(s){vents.push(s);used.add(s[0]+','+s[1])}}
+  // a landmark or two ahead of the start, so that each reef opens on its own picture
+  {const LM={reef:['staghorn','brain','staghorn'],abbey:['yar_arch','yar_arch','timber'],vent:['tubes','rocks','tubes'],wreck:['yar_wreck','timber','rocks']}[sp.theme]||[];
+    LM.forEach((k,i)=>{const x=start.x-7+i*7,y=start.y-8-(i%2)*2;if(free(x,y))dc(k.startsWith('yar_')?k:'uw_'+k,x,y,{sc:1.35+(i%2)*.25})})}
   // the dive line up, the prize, and the boss
   dc('uw_buoy',start.x+2,start.y-1,{npc:'uw_up',cat:id,deco:false});
   for(let q=0;q<4;q++){let s=null;for(let r=0;r<10&&!s;r++)for(let yy=-r;yy<=r&&!s;yy++)for(let xx=-r;xx<=r&&!s;xx++){const x=[30,80,50,70][q]+xx,y=[40,30,60,80][q]+yy;if(free(x,y)&&Math.hypot(x-start.x,y-start.y)>10)s=[x,y]}if(s)dc('uw_timber',s[0],s[1],{npc:'uw_oak',cat:q,deco:false})}

@@ -184,7 +184,9 @@ function quayBuild(){
 for(let i=0;i<10;i++){const id=OQ.ROOM0+i,stub=()=>{quayBuild();if(!LEVELS[id]&&KH_LAZY[id]&&KH_LAZY[id]!==stub)KH_LAZY[id]()};KH_LAZY[id]=stub}
 OQ_HOUSES.forEach((b,k)=>{LEVEL_NAMES[OQ.ROOM0+k]=b.name});
 /* the dogs trot back and forth, and more birds wheel over the quay */
-(function(){const _t=seaTick;seaTick=function(dt){_t(dt);if(LEVEL!==OQ.ID)return;const t=G.time;for(const d of OQ_DOGS){const g=d.dg;if(!g)continue;d.ox=Math.sin(t*g.sx+g.ph)*g.ax;d.oy=Math.cos(t*g.sx*.7+g.ph)*g.ay}}})();
+(function(){const _t=seaTick;seaTick=function(dt){_t(dt);
+  if(LEVEL===SN.ID){const t=G.time;for(const d of G.decor){const s=d.sail;if(s){d.ox=Math.sin(t*s.sp+s.ph)*s.ax;d.oy=Math.cos(t*s.sp*.8+s.ph)*s.ay}}return}
+  if(LEVEL!==OQ.ID)return;const t=G.time;for(const d of OQ_DOGS){const g=d.dg;if(!g)continue;d.ox=Math.sin(t*g.sx+g.ph)*g.ax;d.oy=Math.cos(t*g.sx*.7+g.ph)*g.ay}}})();
 (function(){const _y=yrSprites;yrSprites=function(out){_y(out);if(LEVEL!==OQ.ID)return;const t=G.time,up=IMG.yar_gull_up,dn=IMG.yar_gull_down;if(!up||!dn)return;
   for(let i=0;i<40;i++){const cx=14+hash2(i,1,201)*52,cy=14+hash2(i,2,201)*40,r=2+hash2(i,3,201)*6,sp=.35+hash2(i,4,201)*.5,a=t*sp+i*2.3,img=((t*3.4+i)|0)%2?up:dn;
     out.push({x:cx+Math.cos(a)*r,y:cy+Math.sin(a*1.1)*r*.8,img,w:.32,bob:1.4+(i%5)*.4+Math.sin(t*1.7+i)*.18,decor:{walk:true,k:'yar_gull_fly'}})}}})();

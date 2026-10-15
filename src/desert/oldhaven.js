@@ -294,6 +294,15 @@ function ohBuild(){
     const spot=(rows[sy]&&rows[sy][sx]==='.')?[sx,sy]:h.front;
     decor.push({k:'sign_'+h.keeper,x:spot[0],y:spot[1],block:false,wd:h.wall,txt:[h.name.toUpperCase(),KNAME[h.keeper]||'']});
   }
+  // the streets are not one cobble: moss in the damp corners, stains and puddles, bare earth, grass at the edges, and flowers and tubs at the doors
+  for(let y=6;y<144;y++)for(let x=6;x<144;x++){const i=y*W+x;if(block[i]||fm[i]!=='0')continue;
+    const n=tsmooth(x/6,y/6,91),m=tsmooth(x/2.5,y/2.5,92),r=hs(x,y,93);
+    if(n>.68&&m>.4)fm[i]='3';else if(n<.24&&m<.6)fm[i]='4';else if(r<.025)fm[i]='2';else if(r>.985)fm[i]='5';
+    // a house wall or the city wall beside it: grass creeps along the foot of it
+    else if((block[i-1]||block[i+1]||block[i-W]||block[i+W])&&m>.62&&r<.5)fm[i]='5';
+  }
+  for(const h of houses){if(hs(h.x0,h.y0,95)>.8)continue;const along=(h.face==='N'||h.face==='S')?[[h.front[0]-1,h.front[1]],[h.front[0]+1,h.front[1]]]:[[h.front[0],h.front[1]-1],[h.front[0],h.front[1]+1]];
+    for(const [tx,ty] of along){if(!free(tx,ty)||hs(tx,ty,96)>.7)continue;used.add(tx+','+ty);const k=hs(tx,ty,97)<.5?'yar_tub':'yar_lavender';if(IMG[k])scenery.push({k,wx:tx+.5,wy:ty+.5,sc:.8+hs(tx,ty,98)*.35,decor:{k,walk:true,x:tx,y:ty}})}}
   /* ---- finish the level, the rooms behind the doors, and the doors of the gate ---- */
   lv.rows=rows.map(r=>r.join(''));
   const fmap=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmap.push(s)}lv.fmap=fmap;
@@ -349,11 +358,13 @@ function ohBuildCourt(){
   for(const [x,y] of [[13,9],[21,9],[13,15],[21,15],[13,21],[21,21]])arch(((x+y)&1)?'oh_f_knight2':'oh_f_knight',x,y);
   for(const y of [7,11,15,19,23]){arch('oh_f_pike',3,y);arch('oh_f_pike',31,y)}
   for(const [x,y] of [[15,26],[19,26]])arch('oh_f_xbow',x,y);
-  return {rows,start:{x:17,y:H-3,f:0},decor,lights:[[8,4],[17,5],[26,4],[8,10],[26,10],[8,16],[26,16],[17,12],[17,18],[8,22],[26,22],[17,25]]};
+  // a red carpet from the doors to the thrones, and a stone dais
+  const fmap=rows.map((r,y)=>[...r].map((c,x)=>c==='w'?'0':((x>=16&&x<=18&&y>=3)||(y>=2&&y<=3&&x>=12&&x<=22))?'1':'0').join(''));
+  return {rows,fmap,start:{x:17,y:H-3,f:0},decor,lights:[[8,4],[17,5],[26,4],[8,10],[26,10],[8,16],[26,16],[17,12],[17,18],[8,22],[26,22],[17,25]]};
 }
 KH_LAZY[OH.COURT]=()=>{
   if(LEVELS[OH.COURT])return;const c=ohBuildCourt(),wg=khInteriorWall('palace','kh_ohwall1_0');
-  LEVELS[OH.COURT]={rows:c.rows,start:c.start,enemies:[],items:[],decor:c.decor,day:0,amb:.8,floor:'cobble',ceil:'beam',name:'The Court of King Osric',label:'Royal Court',lights:c.lights,ceilH:2.2,
+  LEVELS[OH.COURT]={rows:c.rows,fmap:c.fmap,floorSet:['cobble','carpet','pale','dirt','mosscobble','stainedcobble'],start:c.start,enemies:[],items:[],decor:c.decor,day:0,amb:.8,floor:'cobble',ceil:'beam',name:'The Court of King Osric',label:'Royal Court',lights:c.lights,ceilH:2.2,
     portals:[{to:OH.ID,x:OH.CX,y:41,f:2,tex:'tgate'}],diff:25,noExtras:true,chars:wg?{w:wg}:undefined};
   LEVEL_NAMES[OH.COURT]='The Court of King Osric';
 };

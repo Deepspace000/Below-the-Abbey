@@ -3029,5 +3029,33 @@
 "h": 256,
 "kind": "tex",
 "sheet": "oqstone"
+},
+"kgharp_0": {
+"file": "kgharp_0.webp",
+"w": 438,
+"h": 155,
+"kind": "sprite",
+"sheet": "kgharp"
+},
+"kgharp_1": {
+"file": "kgharp_1.webp",
+"w": 437,
+"h": 154,
+"kind": "sprite",
+"sheet": "kgharp"
+},
+"kgharp_2": {
+"file": "kgharp_2.webp",
+"w": 436,
+"h": 147,
+"kind": "sprite",
+"sheet": "kgharp"
+},
+"kgharp_3": {
+"file": "kgharp_3.webp",
+"w": 442,
+"h": 157,
+"kind": "sprite",
+"sheet": "kgharp"
 }
 }
