@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.137';
+const VERSION='3.138';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -13357,7 +13357,7 @@ function yrRide(d,fare){
   startCut('yrRide',()=>{
     const arrive=()=>{
       if(!LEVELS[d.lv]&&KH_LAZY[d.lv])KH_LAZY[d.lv]();
-      const L=LEVELS[d.lv],a=d.at||(L&&L.start)||{x:1,y:1,f:1};
+      const L=LEVELS[d.lv],a=(typeof d.at==='function'?d.at():d.at)||(L&&L.start)||{x:1,y:1,f:1};
       goToLevel(d.lv,{x:a.x,y:a.y,f:a.f!==undefined?a.f:1});
       advanceTime(d.days?d.days*1440:clamp(Math.round(fare*1.2),60,600));
       msg('You step down from the cart in '+d.n+'.','#ffe9a0');
@@ -13366,9 +13366,24 @@ function yrRide(d,fare){
   });
   return null;
 }
+/* every shop of Khemetra, one ride each: the cart sets the party down in the street in front of the door, facing it */
+function yrKhShopRides(){
+  return KH_BUILDINGS.filter(b=>b.room==='shop').map(b=>({n:'Khemetra, '+b.name,lv:44,fare:()=>yrFare(486,56),need:()=>true,
+    at:()=>{const m=b.m,f=b.front;return m&&f?{x:f[0],y:f[1],f:(KH_FACE_F[m.face]+2)%4}:LEVELS[44].start},
+    line:'The donkey trots through the great gate and along the white streets of Khemetra, past stalls and fountains, and stops before '+b.name+'.'}));
+}
+function yrKhShopMenu(page){
+  const all=yrKhShopRides(),per=4,pages=Math.ceil(all.length/per),pg=clamp(page||0,0,pages-1);
+  const o=all.slice(pg*per,pg*per+per).map(r=>{const fare=r.fare();return [r.n.replace('Khemetra, ','')+'  ('+fare+' gold)',()=>yrRide(r,fare)]});
+  if(pg<pages-1)o.push(['More shops...',()=>yrKhShopMenu(pg+1)]);
+  if(pg>0)o.push(['Earlier shops...',()=>yrKhShopMenu(pg-1)]);
+  o.push(['Back',()=>yrDonkeyMenu()]);
+  return say('Which shop in Khemetra? (Page '+(pg+1)+' of '+pages+'.)',o);
+}
 function yrDonkeyMenu(){
   const F=G.flags,here=YR.ID;
   const opts=YR_RIDES.filter(r=>r.lv!==LEVEL&&r.need()).map(r=>{const fare=r.fare();return [r.n+'  ('+fare+' gold)',()=>yrRide(r,fare)]});
+  if(LEVEL!==44)opts.push(['Khemetra: take me to a shop...',()=>yrKhShopMenu(0)]);
   const hidden=YR_RIDES.filter(r=>!r.need()).length;
   const o=opts.slice(0,3);
   if(opts.length>3)o.push(['More places...',()=>{const rest=opts.slice(3);rest.push(['Back',()=>yrDonkeyMenu()]);return say('Where else?',rest)}]);
