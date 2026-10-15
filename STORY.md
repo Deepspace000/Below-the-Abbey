@@ -120,11 +120,11 @@ The party took the helm of the Dawn Walker and sailed the Vaast Sea itself: a hu
 
 ## 30. The Kraken
 
-East of the line where the gulls stop, the sea went black and the Kraken rose. The party killed it, and for the first time in a hundred years the east of the Vaast Sea could be sailed.
+Between the western lands and the Eastern Lands the Vaast Sea runs deep and cold, and in the middle of it, east of a line nobody had crossed in a hundred years, the Kraken waited. It rose beside the Dawn Walker as the sea turned black, a thousand suckers breaking the surface at once. The party killed it. For the first time in a century the way across the ocean was open, and the harbour boom at Oldhaven could be lifted.
 
-## 31. Oldhaven
+## 31. Oldhaven, in the Eastern Lands
 
-The Dawn Walker came home at dawn to Oldhaven, the king's city, with the whole master ledger in Isolde's own hand. The royal harbour was a wall of pale stone with every gun turned on the water. The gate would open at noon, and a warrant still stood against four named persons.
+The Dawn Walker crossed the Vaast Sea to the far shore, to the Eastern Lands, and came at dawn to Oldhaven, the king's city, with the whole master ledger in Isolde's own hand. The royal harbour was a wall of pale stone with every gun turned on the water. The gate would open at noon, and a warrant still stood against four named persons. Here the second part of the story begins: the western lands, where the road began, lie far behind across the ocean.
 
 ## 32. The Court of King Osric
 

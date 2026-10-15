@@ -2,7 +2,7 @@
    THE OPEN SEA. Level 330 is the Vaast Sea itself: 640 by 640 cells of water with the four islands you know, six tiny islands, three bare
    rocky ones and three big forest ones, and about a hundred cells of open water between most of them. The party pilots the Dawn Walker: you
    see the sea over her bow rail, and walking is sailing. Sea serpents hunt in the open water. In the far east, past a line nobody has
-   crossed in living memory, the Kraken waits. Landing buoys mark the way into every island.
+   crossed in living memory, the Kraken waits, between the west shore and the Eastern Lands, where Oldhaven stands. Landing buoys mark the way into every island.
      330 the open sea   331..345 the islands nobody lives on (built as you reach them)
    ========================================================================== */
 const SN={W:640,H:640,ID:330,KRAKEN_X:545,FIRST:331};
@@ -62,6 +62,8 @@ function seaBuildOpen(){
     const r=snHeight(x,y);if(r.h>hh){hh=r.h;land=r.h>-.06}
     // the coast of the mainland, in the west: Yarrim's shore
     if(x<24){const cx=18+4*Math.sin(y*.05)+2*Math.sin(y*.17);const t=cx-x;if(t>0){hh=Math.max(hh,Math.min(.5,t*.07)-.05);land=true}else if(t>-3){hh=Math.max(hh,-.2+(t+3)/3*.15)}}
+    // the east coast, across the whole ocean: the west shore of the Eastern Lands, where Oldhaven stands
+    if(x>600){const ce=634+3*Math.sin(y*.05+1)+2*Math.sin(y*.17);const t=x-ce;if(t>0){hh=Math.max(hh,Math.min(.5,t*.07)-.05);land=true}else if(t>-3){hh=Math.max(hh,-.2+(t+3)/3*.15)}}
     h[i]=hh;rk[i]=clamp((hh-.7)/1.6,0,1);block[i]=(land&&(hh>1.7||hh>-.05))?1:0;
     fm[i]=hh>1.2?'5':hh>.1?(r.isl&&(r.isl.kind==='forest'||r.isl.kind==='green')?'1':'0'):hh>-.06?'3':(hh>-.18?'3':'4');
   }
@@ -72,6 +74,7 @@ function seaBuildOpen(){
   // landing buoys at every island, and the buoy for Yarrim on the west shore
   for(const I of SN_ISLES){let b=SN_BUOY(I);let g=0;while(g++<10&&(b.y>=H-3||block[b.y*W+b.x]))b.y=Math.min(H-3,b.y+1);put('uw_buoy',b.x,b.y,{npc:'sea_land_'+I.lv,deco:false});SN_PORTS[I.lv]={x:b.x,y:Math.min(H-3,b.y+2),f:2}}
   put('uw_buoy',28,322,{npc:'sea_land_290',deco:false});SN_PORTS[290]={x:31,y:322,f:1};
+  put('uw_buoy',622,200,{npc:'sea_land_oh',deco:false});SN_PORTS[304]={x:624,y:200,f:3};   // the harbour of Oldhaven, on the far shore
   // floating wrecks, for the sea quests and for the look of the thing
   const wrecks=[[110,330],[260,230],[350,480],[470,200],[300,380],[200,440],[440,400]];
   wrecks.forEach(([x,y],q)=>{if(!block[y*W+x]){put('yar_wreck',x,y,{npc:'sea_wreck',cat:q,deco:false})}});
@@ -101,6 +104,10 @@ for(const I of SN_ISLES){
   });
 }
 khNpc('sea_land_290','A landing buoy','uw_buoy',()=>say('The buoy marks the harbour of Yarrim, and the smoke of its chimneys over the western hills.',[['Sail in to Yarrim.',()=>{G.flags.seaFrom=290;const a=arriveNearNpc(290,'yr_ship')||{x:3,y:40,f:1};goToLevel(290,a);return null}],['Sail on.',()=>null]]));
+khNpc('sea_land_oh','The harbour buoy of Oldhaven','uw_buoy',()=>{
+  const F=G.flags;
+  if(!F.krakenSlain)return say('A great iron chain boom stretches across the mouth of a harbour on the far shore, and the buoys on it are hung with old rope and bones. Nothing has been through it since the Kraken woke. The gate-keepers will not lift it while the thing lives, and no ship has crossed the deep water in a hundred years.',[BYE]);
+  return say('The boom is down. Beyond the buoy a long grey sea wall runs along the shore, and over it rise the towers of Oldhaven, the king\'s city, in the Eastern Lands.',[['Sail into the harbour of Oldhaven.',()=>{G.flags.seaFrom=304;seaBuild(304);const to=SEA_ARRIVE(304);goToLevel(304,to);return null}],['Sail on.',()=>null]])});
 khNpc('sea_wreck','A drifting wreck','yar_wreck',d=>say('The hull of a wrecked ship rides low in the water, broken-masted and weed-hung. Whatever she was, nothing is left aboard but a few ropes and gulls.',[BYE]));
 
 /* ---- the bow of the ship, and the kraken line ---- */

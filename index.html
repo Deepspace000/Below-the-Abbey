@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.103';
+const VERSION='3.104';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4168,7 +4168,7 @@ const WORLD_LOCS=[
   {k:'cinder',n:'Cinder Isle',sub:'a volcano',lv:[302,322],x:774,y:154,ic:'mountains'},
   {k:'lastlight',n:'Last Light',sub:'a ruined beacon',lv:[303,323],x:850,y:196,ic:'castle'},
   {k:'openSea',n:'The Open Sea',sub:'sail the Dawn Walker',lv:[330,331,332,333,334,335,336,337,338,339,340,341,342,343],x:808,y:262,ic:'rain'},
-  {k:'oldhaven',n:'Oldhaven',sub:"the king's city",lv:[304,305,306,307,308,309,310],x:34,y:170,ic:'castle'}
+  {k:'oldhaven',n:'Oldhaven',sub:"the king's city, across the Vaast Sea",lv:[304,305,306,307,308,309,310],x:1076,y:176,ic:'castle'}
 ];
 const WORLD_ROADS=[['abbey','thornwood','thornwick','gwood'],['gwood','road','tunnel','ironhill'],['ironhill','graves'],['ironhill','mines'],['ironhill','moor','pass','greendale','anaea']];
 function lab(s,x,y,size,col){ctx.save();ctx.font=`bold ${size}px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(200,184,140,.9)';ctx.strokeText(s,x,y);ctx.fillStyle=col;ctx.fillText(s,x,y);ctx.restore()}
@@ -4210,13 +4210,16 @@ function drawWorldMap(){
   // roads
   { // the Vaast Sea: a coast running north to south far in the east, and islands scattered in the water
     const cxo=y=>714+10*Math.sin(y*.045)+6*Math.sin(y*.13+1)+(y>200?-8:0);
-    ctx.save();ctx.beginPath();ctx.moveTo(cxo(-300),-300);for(let y=-300;y<=600;y+=6)ctx.lineTo(cxo(y),y);ctx.lineTo(1500,600);ctx.lineTo(1500,-300);ctx.closePath();
+    ctx.save();ctx.beginPath();ctx.moveTo(cxo(-300),-300);for(let y=-300;y<=600;y+=6)ctx.lineTo(cxo(y),y);const cxe=y=>1046+8*Math.sin(y*.04+2)+5*Math.sin(y*.11);for(let y=600;y>=-300;y-=6)ctx.lineTo(cxe(y),y);ctx.closePath();
     ctx.fillStyle='rgba(78,104,112,.55)';ctx.fill();ctx.clip();
     ctx.strokeStyle='rgba(30,50,58,.3)';ctx.lineWidth=1;
     for(let i=0;i<300;i++){const wx=724+hash2(i,1,17)*420,wy=-260+hash2(i,2,17)*840;ctx.beginPath();ctx.moveTo(wx,wy);ctx.quadraticCurveTo(wx+4,wy-3,wx+8,wy);ctx.quadraticCurveTo(wx+12,wy+3,wx+16,wy);ctx.stroke()}
     ctx.strokeStyle='rgba(235,240,230,.45)';ctx.lineWidth=1.2;for(let k=1;k<=3;k++){ctx.beginPath();for(let y=-300;y<=600;y+=6){const x=cxo(y)+k*5+Math.sin(y*.2+k)*1.5;y===-300?ctx.moveTo(x,y):ctx.lineTo(x,y)}ctx.stroke()} // surf along the shore
     ctx.restore();
     ctx.strokeStyle='rgba(40,34,22,.8)';ctx.lineWidth=1.7;ctx.beginPath();for(let y=-300;y<=600;y+=6){y===-300?ctx.moveTo(cxo(y),y):ctx.lineTo(cxo(y),y)}ctx.stroke();
+    ctx.beginPath();for(let y=-300;y<=600;y+=6){y===-300?ctx.moveTo(cxe(y),y):ctx.lineTo(cxe(y),y)}ctx.stroke();   // the far coast: the Eastern Lands
+    ctx.strokeStyle='rgba(235,240,230,.45)';ctx.lineWidth=1.2;for(let k=1;k<=3;k++){ctx.beginPath();for(let y=-300;y<=600;y+=6){const x=cxe(y)-k*5+Math.sin(y*.2+k)*1.5;y===-300?ctx.moveTo(x,y):ctx.lineTo(x,y)}ctx.stroke()}
+    ctx.font=`italic 17px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.72)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('The Eastern Lands',1180,16);ctx.font=`italic 8px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.55)';ctx.fillText('the far shore of the Vaast Sea',1180,29);
     const ISL=[[772,70,16],[834,112,14],[774,154,13],[850,196,18],[744,14,6],[802,22,7],[902,60,9],[892,152,8],[744,230,10],[822,254,12],[914,232,9],[782,298,8],[872,302,11],[742,112,5],[928,120,7],[958,40,6],[942,182,6],[762,342,9],[842,362,8],[902,362,10],[732,192,4],[966,270,8],[958,110,5],[690,180,3]];
     for(const [ix,iy,ir] of ISL){
       ctx.beginPath();for(let k=0;k<14;k++){const a=k/14*TAU,rr=ir*(.72+.5*hash2(ix+k,iy,19));k?ctx.lineTo(ix+Math.cos(a)*rr*1.2,iy+Math.sin(a)*rr*.85):ctx.moveTo(ix+Math.cos(a)*rr*1.2,iy+Math.sin(a)*rr*.85)}ctx.closePath();
@@ -4225,7 +4228,7 @@ function drawWorldMap(){
       if(ir>=9){ctx.fillStyle='#7a8a5a';ctx.beginPath();ctx.ellipse(ix-ir*.15,iy-ir*.1,ir*.45,ir*.3,0,0,TAU);ctx.fill();if(ir>=12){ctx.strokeStyle='rgba(40,34,22,.7)';ctx.lineWidth=.9;ctx.beginPath();ctx.moveTo(ix-ir*.3,iy+ir*.1);ctx.lineTo(ix,iy-ir*.5);ctx.lineTo(ix+ir*.3,iy+ir*.1);ctx.stroke()}}
     }
     ctx.font=`italic 20px ${FTITLE}`;ctx.fillStyle='rgba(30,44,52,.72)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('The Vaast Sea',836,24);
-    ctx.font=`italic 8px ${FTITLE}`;ctx.fillStyle='rgba(30,44,52,.6)';ctx.fillText('a great ocean, and no charts',836,38);ctx.fillText('the western coast lies on the far side',836,330);
+    ctx.font=`italic 8px ${FTITLE}`;ctx.fillStyle='rgba(30,44,52,.6)';ctx.fillText('a great ocean, and no charts',836,38);ctx.fillText('the Eastern Lands lie on the far side',836,330);
   }
   const by={};WORLD_LOCS.forEach(l=>by[l.k]=l);const QLEFT=questsLeft();
   ctx.strokeStyle='rgba(50,34,18,.75)';ctx.lineWidth=1.5;ctx.setLineDash([2.5,3.5]);
@@ -6884,7 +6887,7 @@ function setWorldZoom(nz,cx,cy){
   const px=240+(cx-240-V.x)/V.z,py=160+(cy-160-V.y)/V.z; // the map point under the cursor stays under it
   V.z=nz;V.x=cx-240-(px-240)*nz;V.y=cy-160-(py-160)*nz;clampWorld();
 }
-function clampWorld(){const V=G.wv;V.x=clamp(V.x,-720*V.z,260*V.z);V.y=clamp(V.y,-170*V.z,170*V.z)}
+function clampWorld(){const V=G.wv;V.x=clamp(V.x,-900*V.z,260*V.z);V.y=clamp(V.y,-170*V.z,170*V.z)}
 cv.addEventListener('pointerdown',e=>{
   e.preventDefault();audioInit();
   if(G.overview&&G.world){
@@ -13266,7 +13269,6 @@ const YR_FARE_ORIGIN=[692,66];   // Yarrim on the map of the far lands
 function yrFare(wx,wy,extra){const d=Math.hypot(wx-YR_FARE_ORIGIN[0],wy-YR_FARE_ORIGIN[1]),half=typeof qSt==='function'&&qSt('yq_donk')==='done'?.5:1;return Math.max(20,Math.round((d*.28+(extra||0))*half/10)*10)}   // Biscuit's friends ride at half fare
 const YR_RIDES=[ // where the donkey goes: the name, the level, where you step down, and what has to have happened
   {n:'Khemetra, by the Sea Gate',lv:44,at:{x:394,y:200,f:3},fare:()=>yrFare(486,56),need:()=>true,line:'The donkey takes the cliff road, round the back of the dunes, and the whole of Khemetra comes slowly up out of the sand: white walls, gold roofs, the long wall.'},
-  {n:'Oldhaven, the king\'s city',lv:305,fare:()=>yrFare(34,170,60),need:()=>G.flags.oldhavenSeen,line:'The road turns and runs along the cliffs above the sea, and there is a long grey line on the horizon that is the sea wall of Oldhaven.'},
   {n:'Anaea, the white town',lv:33,fare:()=>yrFare(402,238),need:()=>G.flags.lvSeen&&G.flags.lvSeen[33],line:'The donkey knows this road. It goes west, and the dunes become scrub, and the scrub becomes a green valley with a white town in it.'},
   {n:'Greendale',lv:32,fare:()=>yrFare(418,186),need:()=>G.flags.lvSeen&&G.flags.lvSeen[32],line:'Past the pass, the land goes green, and the road runs down between hedges to a small, quiet valley.'},
   {n:'Ironhill',lv:13,fare:()=>yrFare(262,112),need:()=>G.flags.lvSeen&&G.flags.lvSeen[13],line:'A long road, a longer afternoon, and then smoke over a castle on a hill.'},
@@ -14237,7 +14239,7 @@ function castOffEnd(){
 }
 function seaDests(){
   const F=G.flags,d=[];
-  d.push([300,'Saltbarrow',true],[301,'The Isle of Bells',qSt('vq1')==='done'],[302,'Cinder Isle',qSt('vq2')==='done'],[303,'Last Light',qSt('vq3')==='done'],[304,'Oldhaven, the king\'s city',qSt('vq4')==='done']);
+  d.push([300,'Saltbarrow',true],[301,'The Isle of Bells',qSt('vq1')==='done'],[302,'Cinder Isle',qSt('vq2')==='done'],[303,'Last Light',qSt('vq3')==='done']);
   return d;
 }
 function seaChart(){
@@ -14423,7 +14425,7 @@ khNpc('ll_altar','The old altar','yar_altar',()=>{
   if(alive)return say('Corvane is still on his feet. The altar will have to wait.',[BYE]);
   F.page3=1;sfx('key');return say('The chain parts under your hand. Inside the chest, wrapped in oilcloth, is a single sheet in a fine copperplate hand: the last page of the master ledger. It names Corvane\'s tolls, year by year, to the last crown.',[BYE])});
 /* Oldhaven Quay: where the story stops, for now */
-sv('vq5','Home Waters','Menkaure, the shipwright','Sail to Oldhaven, the king\'s city, with the master ledger. The gate opens at noon.',1,khFlag('oldhavenSeen'),{gold:1000,xp:5000});
+sv('vq5','Home Waters','Menkaure, the shipwright','Sail the Dawn Walker east across the Vaast Sea to Oldhaven, the king\'s city, on the far shore, with the master ledger. The Kraken waits in the deep water between the two coasts, and the harbour boom will not lift until it is dead. The gate opens at noon.',1,khFlag('oldhavenSeen'),{gold:1000,xp:5000});
 khNpc('oh_herald','A harbour herald','kh_npc3_4',()=>{
   const F=G.flags;
   return say('The king\'s court meets at noon. The gate is barred until then. If you carry a ledger, say so to the gate-captain when it opens. Until then, wait on the quay, and do not touch your swords.',[BYE])});
@@ -15279,7 +15281,7 @@ khNpc('uw_prize','A great chest','uw_shellchest',d=>{
    THE OPEN SEA. Level 330 is the Vaast Sea itself: 640 by 640 cells of water with the four islands you know, six tiny islands, three bare
    rocky ones and three big forest ones, and about a hundred cells of open water between most of them. The party pilots the Dawn Walker: you
    see the sea over her bow rail, and walking is sailing. Sea serpents hunt in the open water. In the far east, past a line nobody has
-   crossed in living memory, the Kraken waits. Landing buoys mark the way into every island.
+   crossed in living memory, the Kraken waits, between the west shore and the Eastern Lands, where Oldhaven stands. Landing buoys mark the way into every island.
      330 the open sea   331..345 the islands nobody lives on (built as you reach them)
    ========================================================================== */
 const SN={W:640,H:640,ID:330,KRAKEN_X:545,FIRST:331};
@@ -15339,6 +15341,8 @@ function seaBuildOpen(){
     const r=snHeight(x,y);if(r.h>hh){hh=r.h;land=r.h>-.06}
     // the coast of the mainland, in the west: Yarrim's shore
     if(x<24){const cx=18+4*Math.sin(y*.05)+2*Math.sin(y*.17);const t=cx-x;if(t>0){hh=Math.max(hh,Math.min(.5,t*.07)-.05);land=true}else if(t>-3){hh=Math.max(hh,-.2+(t+3)/3*.15)}}
+    // the east coast, across the whole ocean: the west shore of the Eastern Lands, where Oldhaven stands
+    if(x>600){const ce=634+3*Math.sin(y*.05+1)+2*Math.sin(y*.17);const t=x-ce;if(t>0){hh=Math.max(hh,Math.min(.5,t*.07)-.05);land=true}else if(t>-3){hh=Math.max(hh,-.2+(t+3)/3*.15)}}
     h[i]=hh;rk[i]=clamp((hh-.7)/1.6,0,1);block[i]=(land&&(hh>1.7||hh>-.05))?1:0;
     fm[i]=hh>1.2?'5':hh>.1?(r.isl&&(r.isl.kind==='forest'||r.isl.kind==='green')?'1':'0'):hh>-.06?'3':(hh>-.18?'3':'4');
   }
@@ -15349,6 +15353,7 @@ function seaBuildOpen(){
   // landing buoys at every island, and the buoy for Yarrim on the west shore
   for(const I of SN_ISLES){let b=SN_BUOY(I);let g=0;while(g++<10&&(b.y>=H-3||block[b.y*W+b.x]))b.y=Math.min(H-3,b.y+1);put('uw_buoy',b.x,b.y,{npc:'sea_land_'+I.lv,deco:false});SN_PORTS[I.lv]={x:b.x,y:Math.min(H-3,b.y+2),f:2}}
   put('uw_buoy',28,322,{npc:'sea_land_290',deco:false});SN_PORTS[290]={x:31,y:322,f:1};
+  put('uw_buoy',622,200,{npc:'sea_land_oh',deco:false});SN_PORTS[304]={x:624,y:200,f:3};   // the harbour of Oldhaven, on the far shore
   // floating wrecks, for the sea quests and for the look of the thing
   const wrecks=[[110,330],[260,230],[350,480],[470,200],[300,380],[200,440],[440,400]];
   wrecks.forEach(([x,y],q)=>{if(!block[y*W+x]){put('yar_wreck',x,y,{npc:'sea_wreck',cat:q,deco:false})}});
@@ -15378,6 +15383,10 @@ for(const I of SN_ISLES){
   });
 }
 khNpc('sea_land_290','A landing buoy','uw_buoy',()=>say('The buoy marks the harbour of Yarrim, and the smoke of its chimneys over the western hills.',[['Sail in to Yarrim.',()=>{G.flags.seaFrom=290;const a=arriveNearNpc(290,'yr_ship')||{x:3,y:40,f:1};goToLevel(290,a);return null}],['Sail on.',()=>null]]));
+khNpc('sea_land_oh','The harbour buoy of Oldhaven','uw_buoy',()=>{
+  const F=G.flags;
+  if(!F.krakenSlain)return say('A great iron chain boom stretches across the mouth of a harbour on the far shore, and the buoys on it are hung with old rope and bones. Nothing has been through it since the Kraken woke. The gate-keepers will not lift it while the thing lives, and no ship has crossed the deep water in a hundred years.',[BYE]);
+  return say('The boom is down. Beyond the buoy a long grey sea wall runs along the shore, and over it rise the towers of Oldhaven, the king\'s city, in the Eastern Lands.',[['Sail into the harbour of Oldhaven.',()=>{G.flags.seaFrom=304;seaBuild(304);const to=SEA_ARRIVE(304);goToLevel(304,to);return null}],['Sail on.',()=>null]])});
 khNpc('sea_wreck','A drifting wreck','yar_wreck',d=>say('The hull of a wrecked ship rides low in the water, broken-masted and weed-hung. Whatever she was, nothing is left aboard but a few ropes and gulls.',[BYE]));
 
 /* ---- the bow of the ship, and the kraken line ---- */
@@ -15607,11 +15616,11 @@ const DPEARL=khQD('Pearls! For the tide-offering, five pearls, white and whole. 
 repWrap('yr_priest',()=>true,"About the pearls",()=>qNode('sc2',DPEARL));
 /* ---- chain D: the Kraken's Price ---- */
 vq('sd1','Wreck-Oak',"Pell, the ship's chandler",'Pell can make a harpoon for the Kraken, if you bring him 3 planks of wreck-oak. Diving timbers under the islands are the only oak that has lasted.',3,()=>Math.min(3,bagCount('wreckoak')),{gold:600,xp:4000},{take:{wreckoak:3}});
-vq('sd2','Kraken Slayer','Menkaure, the shipwright','Pell has made the Great Harpoon. The east of the Vaast Sea is shut by the Kraken. Sail east of the line and kill it, so the east can be sailed.',1,khFlag('krakenSlain'),{gold:3000,xp:20000,items:['potion4']});
+vq('sd2','Kraken Slayer','Menkaure, the shipwright','Pell has made the Great Harpoon. The Kraken stands between the two coasts of the Vaast Sea. Sail east of the line and kill it, and the way across to the Eastern Lands and Oldhaven is open.',1,khFlag('krakenSlain'),{gold:3000,xp:20000,items:['potion4']});
 const DD1=khQD('The Kraken. Everyone knows it is there and nobody says its name. I can make a harpoon to take it, with wreck-oak for the shaft, but I do not have any. Planks of black oak from the old wrecks, three of them. They are on the sea floor now. You have helms. Bring me wreck-oak.','Timbers stand in the wrecks under every island. The ones with iron nails in them are the right ones.',(n,m)=>`${n} of ${m} planks.`,'Three planks. Black as ink, and not a soft spot in them.','Give me a minute... There. The Great Harpoon. It is yours, for as long as you carry the nerve. Take it to Menkaure.','The Great Harpoon is made. Whatever happens to the Kraken is now between you and the sea.');
 const DD2=khQD('Pell has made a harpoon? Then the east is open to anyone who is brave enough. Past the line, where the gulls stop, the Kraken rises. Kill it, and the east of the sea is ours, and the Dawn Walker can go where she likes.','Go east. When the sea turns black, aim for the head. The tentacles are just for show.',(n,m)=>'The Kraken is in the far east of the sea.','It is dead? Truly?','The Kraken is dead. I have lived my whole life with that thing at the edge of every chart, and it is gone. Take this.','The east is open, and the sea is a little less afraid.');
 repWrap('yr_chandler',()=>qSt('yar6')==='done'&&qSt('sd1')!=='done',"About a harpoon",()=>{const r=qNode('sd1',DD1);return r});
-repWrap('yr_menkaure',()=>G.flags.voyage&&qSt('sd1')==='done',"About the Kraken",()=>qNode('sd2',DD2));
+repWrap('yr_menkaure',()=>G.flags.voyage&&(qSt('sd1')==='done'||qSt('vq4')==='done'),"About the Kraken",()=>qNode('sd2',DD2));
 // Pell makes the harpoon when the oak is handed in (the quest's own turn-in is not told about the item)
 (function(){const _t=qTurnIn;qTurnIn=function(id){const r=_t(id);if(r&&id==='sd1'){bagAdd(mkItem2('greatharpoon',1));msg('Pell hands over the Great Harpoon.','#ffe36a')}return r}})();
 khNpc('uw_oak','A drowned timber','uw_timber',d=>{
@@ -15700,8 +15709,8 @@ const STORY=[
   {id:'lastlight',c:()=>qSt('vq4')==='done',t:'Last Light',x:'At the end of the chain, Isolde herself sat in a hut by a ruined beacon. The third page lay in the altar at the top of the island, and Lord Corvane had followed the party\'s lamp across half the sea to take it. He did not leave the island.'},
   {id:'dive',c:()=>G.flags.uwSeen&&Object.keys(G.flags.uwSeen).length>0,t:'Under the Sea',x:'Tam Salvor of Yarrim sold the party diving helms, and below every island there was a reef. The water was full of colour and teeth: coral gardens, drowned abbeys, vents that breathe, and a wreck among the kelp. Four minutes of air at a time, and the bubbles at the vents to fill the helms again.'},
   {id:'sea',c:()=>G.flags.seaSeen,t:'The Open Sea',x:'The party took the helm of the Dawn Walker and sailed the Vaast Sea itself: a hundred cells of open water between the islands, serpents under the swell, wrecks adrift, and little islands where castaways and old chests wait.'},
-  {id:'kraken',c:()=>G.flags.krakenSlain,t:'The Kraken',x:'East of the line where the gulls stop, the sea went black and the Kraken rose. The party killed it, and for the first time in a hundred years the east of the Vaast Sea could be sailed.'},
-  {id:'oldhaven',c:()=>G.flags.oldhavenSeen,t:'Oldhaven',x:'The Dawn Walker came home at dawn to Oldhaven, the king\'s city, with the whole master ledger in Isolde\'s own hand. The royal harbour was a wall of pale stone with every gun turned on the water. The gate would open at noon, and a warrant still stood against four named persons.'},
+  {id:'kraken',c:()=>G.flags.krakenSlain,t:'The Kraken',x:'Between the western lands and the Eastern Lands the Vaast Sea runs deep and cold, and in the middle of it, east of a line nobody had crossed in a hundred years, the Kraken waited. It rose beside the Dawn Walker as the sea turned black, a thousand suckers breaking the surface at once. The party killed it. For the first time in a century the way across the ocean was open, and the harbour boom at Oldhaven could be lifted.'},
+  {id:'oldhaven',c:()=>G.flags.oldhavenSeen,t:'Oldhaven, in the Eastern Lands',x:'The Dawn Walker crossed the Vaast Sea to the far shore, to the Eastern Lands, and came at dawn to Oldhaven, the king\'s city, with the whole master ledger in Isolde\'s own hand. The royal harbour was a wall of pale stone with every gun turned on the water. The gate would open at noon, and a warrant still stood against four named persons. Here the second part of the story begins: the western lands, where the road began, lie far behind across the ocean.'},
   {id:'court',c:()=>G.flags.courtSeen,t:'The Court of King Osric',x:'At noon the party was brought before King Osric and his court, with the master ledger in their hands.'},
   {id:'pardon',c:()=>G.flags.pardoned,t:'The Warrant Torn Up',x:'The ledger was read in open court, and the king saw whose hand wrote his tolls and his warrants. The chancellor who had stood behind Corvane fell, the warrant was torn in two, and the ransom on four heads was lifted. The road home, so long and so strange, was clear.'}
 ];
@@ -15718,7 +15727,7 @@ function storyNext(){ // what to do next, from the chapter the party has reached
   if(F.pardoned)return 'The warrant is torn up and the ransom lifted. The road is yours.';
   if(F.courtSeen)return 'You stand in the court of King Osric. Finish what you started.';
   if(F.oldhavenSeen)return 'Oldhaven. Wait for noon at the quay gate, then carry the master ledger to the king.';
-  if(qSt('vq4')==='done'||F.page3)return 'Take the Dawn Walker to Oldhaven, the king\'s city, with the whole ledger.';
+  if(qSt('vq4')==='done'||F.page3)return 'Sail the Dawn Walker east across the Vaast Sea to Oldhaven, the king\'s city, on the far shore, with the whole ledger. The Kraken guards the crossing: kill it, and the harbour boom will lift.';
   if(qSt('vq3')==='done')return 'Sail to Last Light. Isolde keeps the last page, and Corvane is close behind.';
   if(qSt('vq2')==='done')return 'Sail to Cinder Isle. Ketra the ash-priestess keeps the second page.';
   if(qSt('vq1')==='done')return 'Sail to the Isle of Bells. Brother Aldous keeps the first page.';

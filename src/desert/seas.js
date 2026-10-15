@@ -165,7 +165,7 @@ khNpc('ll_altar','The old altar','yar_altar',()=>{
   if(alive)return say('Corvane is still on his feet. The altar will have to wait.',[BYE]);
   F.page3=1;sfx('key');return say('The chain parts under your hand. Inside the chest, wrapped in oilcloth, is a single sheet in a fine copperplate hand: the last page of the master ledger. It names Corvane\'s tolls, year by year, to the last crown.',[BYE])});
 /* Oldhaven Quay: where the story stops, for now */
-sv('vq5','Home Waters','Menkaure, the shipwright','Sail to Oldhaven, the king\'s city, with the master ledger. The gate opens at noon.',1,khFlag('oldhavenSeen'),{gold:1000,xp:5000});
+sv('vq5','Home Waters','Menkaure, the shipwright','Sail the Dawn Walker east across the Vaast Sea to Oldhaven, the king\'s city, on the far shore, with the master ledger. The Kraken waits in the deep water between the two coasts, and the harbour boom will not lift until it is dead. The gate opens at noon.',1,khFlag('oldhavenSeen'),{gold:1000,xp:5000});
 khNpc('oh_herald','A harbour herald','kh_npc3_4',()=>{
   const F=G.flags;
   return say('The king\'s court meets at noon. The gate is barred until then. If you carry a ledger, say so to the gate-captain when it opens. Until then, wait on the quay, and do not touch your swords.',[BYE])});

@@ -145,7 +145,7 @@ function castOffEnd(){
 }
 function seaDests(){
   const F=G.flags,d=[];
-  d.push([300,'Saltbarrow',true],[301,'The Isle of Bells',qSt('vq1')==='done'],[302,'Cinder Isle',qSt('vq2')==='done'],[303,'Last Light',qSt('vq3')==='done'],[304,'Oldhaven, the king\'s city',qSt('vq4')==='done']);
+  d.push([300,'Saltbarrow',true],[301,'The Isle of Bells',qSt('vq1')==='done'],[302,'Cinder Isle',qSt('vq2')==='done'],[303,'Last Light',qSt('vq3')==='done']);
   return d;
 }
 function seaChart(){

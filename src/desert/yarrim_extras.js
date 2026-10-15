@@ -22,7 +22,6 @@ const YR_FARE_ORIGIN=[692,66];   // Yarrim on the map of the far lands
 function yrFare(wx,wy,extra){const d=Math.hypot(wx-YR_FARE_ORIGIN[0],wy-YR_FARE_ORIGIN[1]),half=typeof qSt==='function'&&qSt('yq_donk')==='done'?.5:1;return Math.max(20,Math.round((d*.28+(extra||0))*half/10)*10)}   // Biscuit's friends ride at half fare
 const YR_RIDES=[ // where the donkey goes: the name, the level, where you step down, and what has to have happened
   {n:'Khemetra, by the Sea Gate',lv:44,at:{x:394,y:200,f:3},fare:()=>yrFare(486,56),need:()=>true,line:'The donkey takes the cliff road, round the back of the dunes, and the whole of Khemetra comes slowly up out of the sand: white walls, gold roofs, the long wall.'},
-  {n:'Oldhaven, the king\'s city',lv:305,fare:()=>yrFare(34,170,60),need:()=>G.flags.oldhavenSeen,line:'The road turns and runs along the cliffs above the sea, and there is a long grey line on the horizon that is the sea wall of Oldhaven.'},
   {n:'Anaea, the white town',lv:33,fare:()=>yrFare(402,238),need:()=>G.flags.lvSeen&&G.flags.lvSeen[33],line:'The donkey knows this road. It goes west, and the dunes become scrub, and the scrub becomes a green valley with a white town in it.'},
   {n:'Greendale',lv:32,fare:()=>yrFare(418,186),need:()=>G.flags.lvSeen&&G.flags.lvSeen[32],line:'Past the pass, the land goes green, and the road runs down between hedges to a small, quiet valley.'},
   {n:'Ironhill',lv:13,fare:()=>yrFare(262,112),need:()=>G.flags.lvSeen&&G.flags.lvSeen[13],line:'A long road, a longer afternoon, and then smoke over a castle on a hill.'},
