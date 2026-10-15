@@ -248,6 +248,7 @@ function khMapLabels(C){
   add('THE PALACE OF KHEMETRA',KH.CX,C.PB.y0+(C.PB.y1-C.PB.y0)*.62,0,{k:'major',col:'#5a2a0a'});
   add('THE CHURCH OF LIGHT',122,190,1,{k:'major',col:'#2a3a5a'});
   add('THE GREAT GATE',KH.CX,C.H-KH.WALL-2,1,{k:'major',col:'#5a2a0a'});
+  add('THE SEA GATE',366,194,1,{k:'major',col:'#1a3a6a'}); // the east gate that leads to the tunnel and Yarrim
   add('The Avenue of the Sun',KH.CX+5.5,318,2,{k:'road',col:'#3a2a16',rot:-Math.PI/2});
   add('Ring Road',KH.CX,246,3,{k:'road',col:'#4a3820'});add('West Road',75,KH.CY+.5,3,{k:'road',col:'#4a3820'});add('East Road',325,KH.CY+.5,3,{k:'road',col:'#4a3820'});
   add('THE COURT OF THE GOLDEN SUN',KH.CX,C.PB.y1+14,1,{k:'major',col:'#7a5a10'});
