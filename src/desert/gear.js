@@ -5,8 +5,9 @@
    and potion shops of Khemetra's Merchants' Quarter and of Ironhill (the buildings are placed in khemetra_build.js and ironhill_shops.js).
    ========================================================================== */
 const GEAR=[];
-function gw(id,n,t,lv,dmg,hit,req,price,col,eff,d,extra){
-  const it=Object.assign({n,k:'weapon',t,ic:t==='Bow'?'bow':t==='Axe'?'axe':t==='Mace'?'mace':'sword',c:col,dmg,hit,req,price,lvl:lv,eff,d:d+` Needs level ${lv}.`,sw:t==='Bow'?.42:.44,gear:1},extra||{});
+function gw(id,n,t,tier,dmg,hit,req,price,col,eff,d,extra){
+  const lv=Math.max(1,tier-10); // weapons ask for ten levels less than their tier (the tier keeps the picture and the price bracket)
+  const it=Object.assign({n,k:'weapon',t,ic:t==='Bow'?'bow':t==='Axe'?'axe':t==='Mace'?'mace':'sword',c:col,dmg,hit,req,price,lvl:lv,tier,eff,d:d+` Needs level ${lv}.`,sw:t==='Bow'?.42:.44,gear:1},extra||{});
   if(t==='Bow')it.ranged=extra&&extra.ranged||4;
   ITEMDEF[id]=it;GEAR.push(id);
 }
@@ -123,8 +124,8 @@ const GEAR_STOCK={
 function gearTintIcons(){
   const TC={5:[[44,34,24],[210,184,150]],15:[[24,28,36],[205,214,228]],25:[[14,26,40],[165,208,238]],35:[[40,18,44],[232,176,242]],45:[[50,14,8],[255,155,105]],55:[[42,38,6],[255,236,124]],60:[[10,42,38],[155,255,232]]};
   const BASE={Sword:{5:'sword',15:'cutlass',25:'greatsword',35:'claymore',45:'claymore',55:'kingslayer',60:'kingslayer'},Axe:{5:'splitaxe',15:'splitaxe',25:'wolfaxe',35:'headsman',45:'headsman',55:'worldaxe',60:'worldaxe'},Mace:{5:'mace',15:'mace',25:'maul',35:'maul',45:'maul',55:'maul',60:'maul'},Bow:{5:'hunterbow',15:'hunterbow',25:'barbedbow',35:'twinbow',45:'warbow',55:'silverbow',60:'silverbow'}};
-  for(const id of TIERW){const d=ITEMDEF[id];if(IMG['icn_'+id])continue;const b=IMG['icn_'+BASE[d.t][d.lvl]];if(!b||typeof pToneMap!=='function')continue;
-    const c=TC[d.lvl],im=pToneMap(b,c[0],c[1],1.6,.9,0);IMG['icn_'+id]=im;IMG['ic_'+id]=im;IMG['it_'+id]=im}
+  for(const id of TIERW){const d=ITEMDEF[id];if(IMG['icn_'+id])continue;const b=IMG['icn_'+BASE[d.t][d.tier]];if(!b||typeof pToneMap!=='function')continue;
+    const c=TC[d.tier],im=pToneMap(b,c[0],c[1],1.6,.9,0);IMG['icn_'+id]=im;IMG['ic_'+id]=im;IMG['it_'+id]=im}
   const T={wyrmfang:['greatsword',[70,44,8],[255,222,120]],thunderaxe:['headsman',[60,12,10],[255,130,100]],skullcrusher:['maul',[10,24,60],[160,208,255]],stormbow:['twinbow',[16,48,20],[190,255,150]],drakehelm:['centurion',[60,16,10],[255,140,100]],wyrmplate:['cuirass',[10,30,50],[150,210,240]],bulwark:['spikeshield',[24,24,30],[200,200,215]]};
   for(const id in T){if(IMG['icn_'+id])continue;const b=IMG['icn_'+T[id][0]];if(!b||typeof pToneMap!=='function')continue;
     const c=pToneMap(b,T[id][1],T[id][2],1.7,.9,0);IMG['icn_'+id]=c;IMG['ic_'+id]=c;IMG['it_'+id]=c}
