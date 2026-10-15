@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.147';
+const VERSION='3.148';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4500,7 +4500,6 @@ function drawQuestRings(ox,oy,cs){
   const fq=G.qFocus&&G.qFocus.lvl===LEVEL?G.qFocus.id:null;
   for(const sp of spots){const k=sp.x+','+sp.y,e=at[k];if(e){if(sp.kind==='ready')e.kind='ready';e.ts.push(sp.t);if(sp.q===fq)e.focus=true}else at[k]={x:sp.x,y:sp.y,kind:sp.kind,ts:[sp.t],focus:sp.q===fq}}
   ctx.save();ctx.lineJoin='round';
-  (spots.away||[]).slice(0,4).forEach((t,i)=>{ctx.font=`italic bold 8.5px ${FUI}`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(236,222,176,.92)';ctx.strokeText('Done, to hand in elsewhere  -  '+t,10,40+i*11);ctx.fillStyle='#1f6a24';ctx.fillText('Done, to hand in elsewhere  -  '+t,10,40+i*11)});
   for(const k in at){
     const a=at[k],cx=ox+(a.x+.5)*cs,cy=oy+(a.y+.5)*cs,r=Math.max(7,Math.min(15,cs*1.15)),col=a.kind==='ready'?'#1f8a2c':'#b02818';
     if(fq&&a.focus){ // the quest picked in the quest log: a big pulsing double ring, and everything else fades back
