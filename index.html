@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.125';
+const VERSION='3.126';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -17203,6 +17203,7 @@ for(const id in QUESTS){const r=QUESTS[id].reward;if(r&&r.gold&&!r._cut){r.gold=
   if(IMG.signblank){const mkSignText=(base,text)=>mkCanvas(base.width,base.height,(x,w,h)=>{x.drawImage(base,0,0);let fs=Math.round(w*.2);x.font=`bold ${fs}px Georgia,serif`;while(x.measureText(text).width>w*.64&&fs>8){fs--;x.font=`bold ${fs}px Georgia,serif`}x.textAlign='center';x.textBaseline='middle';x.lineWidth=Math.max(2,fs*.18);x.strokeStyle='rgba(20,12,6,.9)';x.strokeText(text,w*.5,h*.3);x.fillStyle='#d8cca4';x.fillText(text,w*.5,h*.3)});IMG.sign_thornwick=mkSignText(IMG.signblank,'THORNWICK');IMG.sign_ironhill=mkSignText(IMG.signblank,'IRONHILL')}
   for(const id of [...ART_ITEM_IDS,...DS_ITEM_IDS]){const im=IMG['icn_'+id];if(!im)continue;IMG['ic_'+id]=im;IMG['it_'+id]=im;if(id==='sundisc')for(let q=1;q<=4;q++)IMG['it_sundisc'+q]=im;if(id==='potion')IMG.potion=im;if(id==='key')IMG.key=im}
   try{if(typeof gearTintIcons==='function')gearTintIcons()}catch(e){console.error(e)}
+  for(const k in LEVELS)if(!LEVEL_NAMES[k]&&LEVELS[k]&&LEVELS[k].name)LEVEL_NAMES[k]=LEVELS[k].name; // the Sand Road, the tomb and the mounds named themselves after the table was filled
   reset();buildUIPatterns();crtInit();makeAtmos();try{G.crt=localStorage.getItem('abbeyCRT')!=='0'}catch(e){G.crt=true}gfxLoad();fit();
   addEventListener('pagehide',()=>{if(G.state==='play'&&G.timers.length===0)writeSave('auto')});
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&G.state==='play'&&G.timers.length===0)writeSave('auto')});
