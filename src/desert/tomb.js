@@ -145,7 +145,11 @@ function buildTomb(){
   const keepD=decor.filter(d=>['lever','ventplate','dbones','brazier'].includes(d.k)?floor(d.x,d.y):(floor(d.x,d.y)&&clearOf(d.x,d.y)));
   decor.length=0;decor.push(...keepD);
   const solid=new Set(decor.filter(d=>d.block).map(d=>d.x+','+d.y));
-  const keepE=enemies.filter(e=>floor(e.x,e.y)&&!solid.has(e.x+','+e.y)&&!corr.has(e.x+','+e.y));
+  const keepAll=enemies.filter(e=>floor(e.x,e.y)&&!solid.has(e.x+','+e.y)&&!corr.has(e.x+','+e.y));
+  // the tomb was too crowded: lose 35% of the guards (spread evenly through the list), never Sut himself
+  const guards=keepAll.filter(e=>e.t!=='sut'),cut=Math.round(guards.length*.35),drop=new Set();
+  for(let k=0;k<cut;k++)drop.add(guards[Math.floor((k+.5)*guards.length/cut)]);
+  const keepE=keepAll.filter(e=>!drop.has(e));
   const discCells=new Set(items.filter(i=>/^sundisc/.test(i.k)).map(i=>i.x+','+i.y));
   for(let i=decor.length-1;i>=0;i--){const d=decor[i];if(discCells.has(d.x+','+d.y)&&d.k!=='lever')decor.splice(i,1)}
   const keepI=items.filter(i=>floor(i.x,i.y));
