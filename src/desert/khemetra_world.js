@@ -62,7 +62,7 @@ function khBuildCisterns(){
   const cell=(x,y)=>({k:'bones',x,y,block:false,walk:true});
   for(let i=0;i<40;i++){const x=1+((rng()*(W-2))|0),y=1+((rng()*(H-2))|0);if(free(x,y)&&Math.abs(x-1)+Math.abs(y-H+2)>6)decor.push(cell(x,y))}
   const types=['skel','skel','ghost','scorpion','bat','skel','ghost','mummy'];
-  for(let i=0;i<22;i++){let x,y,t=0;do{x=1+((rng()*(W-2))|0);y=1+((rng()*(H-4))|0);t++}while((!free(x,y)||Math.abs(x-1)+Math.abs(y-H+2)<10)&&t<80);if(free(x,y))enemies.push({t:types[i%types.length],x,y,lvl:16})}
+  for(let i=0;i<13;i++){let x,y,t=0;do{x=1+((rng()*(W-2))|0);y=1+((rng()*(H-4))|0);t++}while((!free(x,y)||Math.abs(x-1)+Math.abs(y-H+2)<10)&&t<80);if(free(x,y))enemies.push({t:types[i%types.length],x,y,lvl:16})}
   for(const [x,y] of [[5,6],[17,5],[30,11],[7,19],[22,22],[34,24]])if(free(x,y))decor.push({k:'chest',x,y,block:true,deco:false});
   for(const [x,y] of [[3,8],[19,3],[27,13],[10,21],[25,24],[37,27]])if(free(x,y))items.push({k:'potion',x,y});
   return {rows,start:{x:1,y:H-2,f:0},decor,enemies,items,W,H};

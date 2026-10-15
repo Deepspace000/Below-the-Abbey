@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.113';
+const VERSION='3.114';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1421,15 +1421,23 @@ function enemyStat(t,lvl){
   const d=ENEMY_DEF[t],lv=lvl||lvlHere(),m=1+.45*(lv-1);
   return {hp:Math.round(d.hp*m),dmg:[Math.max(1,Math.round(d.dmg[0]*(1+.3*(lv-1))*.5)),Math.max(1,Math.round(d.dmg[1]*(1+.3*(lv-1))*.5))],xp:d.xp*lv,gold:d.gold[1]>=100?[d.gold[0],d.gold[1]]:d.gold[1]>20?[Math.round(d.gold[0]*(1+.15*(lv-1))),Math.round(d.gold[1]*(1+.15*(lv-1)))]:[Math.round(d.gold[0]*(1+.2*(lv-1))),Math.round(d.gold[1]*(1+.2*(lv-1)))]}; // bosses pay the gold written for them; only ordinary creatures pay more as they level
 }
-/* catch-up: a creature more than 5 levels below the party is raised to a random 2-5 levels below it; anything within 5 (or higher) is untouched */
+/* scaling: a creature has a base level, the level of its place, raised (once) to 2-5 below the party if the party has outgrown it by more than 5.
+   Within one place the creatures are not all the same level: about two in five stand at that scaled level, a third of them 1-3 levels below it and a
+   quarter 4-7 below, so a fight is a mix of tough and easy ones and the weak die fast. Bosses and the great creatures are never lowered; the great
+   ones always stand a fixed number of levels above the party. */
+const NO_VARY=['boss','gandrick','mayor','overseer','halbrecht','wraith','sut','firelizard','cyclops','pharaohboss','chancellor','corvane','kraken'];
 function rebalanceEnemies(){
   const L=G.heroes.filter(h=>h.alive);if(!L.length)return;
   const pl=Math.floor(L.reduce((n,h)=>n+h.lvl,0)/L.length);
   for(const e of G.enemies){
-    const ap=ENEMY_DEF[e.t]&&ENEMY_DEF[e.t].aboveParty;if(ap&&e.hp>0&&!e.dying){if(e.lvl!==pl+ap){const fr=e.hp/e.maxhp;e.lvl=pl+ap;e.maxhp=enemyStat(e.t,e.lvl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*fr))}continue} // the great creatures always stand a few levels above the party
-    if(e.hp<=0||e.dying||pl-e.lvl<=5)continue;
-    const nl=Math.max(1,pl-(2+Math.floor(Math.random()*4))),frac=e.hp/e.maxhp;
-    e.lvl=nl;e.maxhp=enemyStat(e.t,nl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*frac));
+    const def=ENEMY_DEF[e.t],ap=def&&def.aboveParty;
+    if(ap&&e.hp>0&&!e.dying){if(e.lvl!==pl+ap){const fr=e.hp/e.maxhp;e.lvl=pl+ap;e.maxhp=enemyStat(e.t,e.lvl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*fr))}continue} // the great creatures always stand a few levels above the party
+    if(e.hp<=0||e.dying)continue;
+    if(e.base===undefined)e.base=e.lvl;
+    if(pl-e.base>5)e.base=Math.max(1,pl-(2+Math.floor(Math.random()*4)));   // catch-up, once
+    if(e.vd===undefined){const r=Math.random();e.vd=(def&&(def.boss||NO_VARY.includes(e.t)||/^w_/.test(e.t)))?0:r<.4?0:r<.75?1+Math.floor(Math.random()*3):4+Math.floor(Math.random()*4)}
+    const nl=Math.max(1,e.base-e.vd);
+    if(nl!==e.lvl){const frac=e.hp/e.maxhp;e.lvl=nl;e.maxhp=enemyStat(e.t,nl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*frac))}
   }
 }
 const xpNeed=l=>30*l*(l+1)/2;
@@ -3895,7 +3903,7 @@ function snapshot(){
     bag:G.bag.map(b=>({id:b.id,n:b.n})),gold:G.gold,keys:G.keys,rounds:G.rounds,kills:G.kills,bossDead:G.bossDead,sel:G.sel,lightBoost:G.lightBoost,
     P:{x:G.P.x,y:G.P.y,f:G.P.f},
     grid:LEVEL===1?G.grid.map(r=>r.slice()):[],seen:seenPack(G.seen),
-    enemies:G.enemies.map(e=>({t:e.t,lvl:e.lvl,x:e.x,y:e.y,hp:e.hp,maxhp:e.maxhp,alert:e.alert,chilled:e.chilled||0})),
+    enemies:G.enemies.map(e=>({t:e.t,lvl:e.lvl,base:e.base,vd:e.vd,x:e.x,y:e.y,hp:e.hp,maxhp:e.maxhp,alert:e.alert,chilled:e.chilled||0})),
     items:G.items.map(i=>i.taken?1:0),
     decor:sparseDecor(),
     torches:LIGHTS.map(l=>l.taken?1:0),torchKeys:LIGHTS.filter(l=>l.taken).map(l=>l.key)};
@@ -3911,7 +3919,7 @@ function restoreNow(sv){
   G.P={x:sv.P.x,y:sv.P.y,f:sv.P.f,angT:(sv.P.f-1)*Math.PI/2};G.C={x:sv.P.x,y:sv.P.y,a:G.P.angT};
   {const sr=seenRows(sv.seen);if(LEVEL===1){G.grid=sv.grid;if(sr)G.seen=sr}else if(sr&&sr.length===MH&&sr[0].length===MW)G.seen=sr}
   if(G.grid[G.P.y]===undefined||G.grid[G.P.y][G.P.x]!==0||G.decor.some(d=>d.block&&d.x===G.P.x&&d.y===G.P.y)){G.P={x:START.x,y:START.y,f:START.f,angT:(START.f-1)*Math.PI/2};G.C={x:START.x,y:START.y,a:G.P.angT}}
-  G.enemies=sv.enemies.map((e,i)=>({id:i,t:e.t,lvl:e.lvl||lvlHere(),x:e.x,y:e.y,rx:e.x,ry:e.y,hp:e.hp>0?Math.max(1,Math.ceil(enemyStat(e.t,e.lvl).hp*e.hp/e.maxhp)):e.hp,maxhp:enemyStat(e.t,e.lvl).hp,alert:!!e.alert,chilled:e.chilled||0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100}));
+  G.enemies=sv.enemies.map((e,i)=>({id:i,t:e.t,lvl:e.lvl||lvlHere(),base:e.base,vd:e.vd,x:e.x,y:e.y,rx:e.x,ry:e.y,hp:e.hp>0?Math.max(1,Math.ceil(enemyStat(e.t,e.lvl).hp*e.hp/e.maxhp)):e.hp,maxhp:enemyStat(e.t,e.lvl).hp,alert:!!e.alert,chilled:e.chilled||0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100}));
   rebalanceEnemies();
   if(sv.items.length===G.items.length)G.items.forEach((it,i)=>{it.taken=!!sv.items[i]});
   applySparseDecor(sv.decor);
@@ -10321,7 +10329,7 @@ function khBuildCisterns(){
   const cell=(x,y)=>({k:'bones',x,y,block:false,walk:true});
   for(let i=0;i<40;i++){const x=1+((rng()*(W-2))|0),y=1+((rng()*(H-2))|0);if(free(x,y)&&Math.abs(x-1)+Math.abs(y-H+2)>6)decor.push(cell(x,y))}
   const types=['skel','skel','ghost','scorpion','bat','skel','ghost','mummy'];
-  for(let i=0;i<22;i++){let x,y,t=0;do{x=1+((rng()*(W-2))|0);y=1+((rng()*(H-4))|0);t++}while((!free(x,y)||Math.abs(x-1)+Math.abs(y-H+2)<10)&&t<80);if(free(x,y))enemies.push({t:types[i%types.length],x,y,lvl:16})}
+  for(let i=0;i<13;i++){let x,y,t=0;do{x=1+((rng()*(W-2))|0);y=1+((rng()*(H-4))|0);t++}while((!free(x,y)||Math.abs(x-1)+Math.abs(y-H+2)<10)&&t<80);if(free(x,y))enemies.push({t:types[i%types.length],x,y,lvl:16})}
   for(const [x,y] of [[5,6],[17,5],[30,11],[7,19],[22,22],[34,24]])if(free(x,y))decor.push({k:'chest',x,y,block:true,deco:false});
   for(const [x,y] of [[3,8],[19,3],[27,13],[10,21],[25,24],[37,27]])if(free(x,y))items.push({k:'potion',x,y});
   return {rows,start:{x:1,y:H-2,f:0},decor,enemies,items,W,H};
