@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.134';
+const VERSION='3.135';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -11133,7 +11133,9 @@ function khMapLabels(C){
   const sa=khShuffled(KH_SHOP_A,53),pr=khShuffled(KH_PRAY_N,54),tm=khShuffled(KH_TEMPLE_N,55),bn=khShuffled(KH_BATH_N,56);let a1=0,a2=0,a3=0,a4=0;
   const front=(m,o)=>{const mid=m.cells[(m.cells.length-1)>>1],d=KH_DIRS[m.face];return [mid[0]+.5+d[0]*(o||1.6),mid[1]+.5+d[1]*(o||1.6)]};
   const bnamed=new Set();
-  for(const b of KH_BUILDINGS){if(!b.front||!b.m)continue;bnamed.add(b.m);const col=b.room==='inn'?'#7a1a10':b.room==='prayer'||b.room==='temple'?'#2a3a7a':b.room==='bath'?'#0a5a6a':b.room==='ruin'||b.room==='cellar'?'#5a5448':'#3a2208';const [fx,fy]=front(b.m,1.7);add(b.name,fx,fy,/^(den|urnhouse|ledgerhouse|granary|baths_cellar|home|drumhouse|hs_)/.test(b.id)?7:5,{k:'shop',col})}
+  for(const b of KH_BUILDINGS){if(!b.front||!b.m)continue;bnamed.add(b.m);const col=b.room==='inn'?'#7a1a10':b.room==='prayer'||b.room==='temple'?'#2a3a7a':b.room==='bath'?'#0a5a6a':b.room==='ruin'||b.room==='cellar'?'#5a5448':'#3a2208';const [fx,fy]=front(b.m,1.7);
+    if(b.room==='shop'){(C._shopMarks||(C._shopMarks=[])).push({x:fx,y:fy});add(b.name,fx,fy+1.2,2,{k:'shopm',col:'#5a2a00'});continue} // the shops: a marker on the door and a bigger, darker name that wins over the street names
+    add(b.name,fx,fy,/^(den|urnhouse|ledgerhouse|granary|baths_cellar|home|drumhouse|hs_)/.test(b.id)?7:5,{k:'shop',col})}
   C.modules.forEach((m,i)=>{
     if(bnamed.has(m)||!m.house)return;
     const r=hs(m.cells[0][0],m.cells[0][1],77),k=m.kind;let nm=null,col='#3a2208',pri=7;
@@ -11150,7 +11152,7 @@ function khPlaceLabels(C,cs,ox,oy){
   const key=cs.toFixed(3)+'|'+Math.round(ox)+'|'+Math.round(oy);
   if(C._lk===key)return C._lp;
   if(!C._labels)C._labels=khMapLabels(C);
-  const sizes={dist:[cs*3.6,9,15],major:[cs*2.6,8,12],plaza:[cs*1.9,7,11],pond:[cs*1.5,6.5,9],road:[cs*1.6,7,10],street:[cs*1.5,6.5,9.5],lane:[cs*1.3,6,8.5],tower:[cs*1.3,6.5,9],shop:[cs*1.15,6,9.5],small:[cs*1.2,6,8.5]};
+  const sizes={dist:[cs*3.6,9,15],major:[cs*2.6,8,12],plaza:[cs*1.9,7,11],pond:[cs*1.5,6.5,9],road:[cs*1.6,7,10],street:[cs*1.5,6.5,9.5],lane:[cs*1.3,6,8.5],tower:[cs*1.3,6.5,9],shop:[cs*1.15,6,9.5],shopm:[cs*1.6,7,11],small:[cs*1.2,6,8.5]};
   const cand=[];
   for(const l of C._labels){const sx=ox+l.x*cs,sy=oy+l.y*cs;if(sx<-60||sy<-30||sx>DW+60||sy>DH+30)continue;const z=sizes[l.k]||sizes.shop;cand.push({l,sx,sy,sz:clamp(z[0],z[1],z[2])})}
   cand.sort((a,b)=>a.l.pri-b.l.pri);
@@ -11178,6 +11180,12 @@ function khDrawCityMap(cs,ox,oy){
     const l=c.l;ctx.save();ctx.translate(c.sx,c.sy);if(l.rot)ctx.rotate(l.rot);
     ctx.font=`${l.ital?'italic ':''}bold ${c.sz}px ${FUI}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';
     ctx.lineWidth=Math.max(2,c.sz*.3);ctx.strokeStyle=halo;ctx.strokeText(l.t,0,0);ctx.fillStyle=l.col;ctx.fillText(l.t,0,0);ctx.restore();
+  }
+  for(const m of C._shopMarks||[]){ // a gold coin on the door of every shop
+    const mx=ox+m.x*cs,my=oy+m.y*cs;if(mx<-10||my<-10||mx>DW+10||my>DH+10)continue;const r=clamp(cs*.8,3.2,6.5);
+    ctx.save();ctx.beginPath();ctx.arc(mx,my,r+1.2,0,Math.PI*2);ctx.fillStyle='#3a1c00';ctx.fill();
+    ctx.beginPath();ctx.arc(mx,my,r,0,Math.PI*2);ctx.fillStyle='#ffd23a';ctx.fill();
+    ctx.beginPath();ctx.arc(mx,my,r*.55,0,Math.PI*2);ctx.lineWidth=Math.max(.8,r*.22);ctx.strokeStyle='#a06a00';ctx.stroke();ctx.restore();
   }
   if(typeof drawRumourMarks==='function')drawRumourMarks(ox,oy,cs);
   // the hatch to the cisterns once the vizier has named it
