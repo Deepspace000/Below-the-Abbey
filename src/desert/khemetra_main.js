@@ -61,6 +61,7 @@ khNpc('kh_neferet','Neferet, the royal cartographer','kh_npc6_0',()=>{
 },{q:KH_CART});
 /* ---- the grand vizier, Hotep-Ra ---- */
 khQuest('kh_seal','The Stolen Seal','Hotep-Ra, the grand vizier','The royal seal was stolen by a band that hides in the ruined houses of the old quarter, in the north-west of Khemetra. Recover it from a boarded house.',1,khFlag('khSeal'),{gold:500,xp:1500,items:['ringW']});
+QUESTS.kh_seal.spot=()=>{if(LEVEL!==44)return null;const b=KH_BUILDINGS.find(z=>z.id==='denC');return b&&b.front?{x:b.front[0],y:b.front[1]}:null}; // the boarded house with the chest, for the quest log's map
 khNpc('kh_sealchest','A locked chest','chest',d=>{const F=G.flags;if(qSt('kh_seal')==='active'&&!F.khSeal){F.khSeal=1;sfx('key');return say('Under a pile of stolen silver lies a heavy gold ring with the sun of Khemetra cut into its face. This is the royal seal.',[BYE])}
   return say(F.khSeal?'An empty chest. The stolen silver is gone.':'A chest of stolen silver and pewter. Nothing of the crown is here.',[BYE])});
 khNpc('kh_vizier','Hotep-Ra, the grand vizier','kh_npc3_5',()=>{

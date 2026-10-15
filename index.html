@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.140';
+const VERSION='3.141';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4461,9 +4461,12 @@ function questSpots(){
   for(const id of Object.keys(QUESTS)){
     const st=qSt(id);if(st==='done')continue;const q=QUESTS[id],g=giverOf[id];
     if(st===null)continue; // rings only for quests the party has accepted
+    if(!qReady(id)&&typeof q.spot==='function'){let ps=null;try{ps=q.spot()}catch(e){}if(ps){out.push({x:ps.x,y:ps.y,kind:'goal',t:q.title,q:id});continue}} // a quest may name its own place on this map
     if(qReady(id)){const gg=g||byName(id)||remoteGiver(id);if(gg)out.push({x:gg.x,y:gg.y,kind:'ready',t:'Hand in: '+q.title,q:id});else(out.away=out.away||[]).push(q.title+': see '+q.who)}
     else{let t=[];try{t=q.targets||[]}catch(e){}let any=false;for(const n of t)for(const d of by[n]||[]){out.push({x:d.x,y:d.y,kind:'goal',t:q.title,q:id});any=true}
-      if(!any&&g)out.push({x:g.x,y:g.y,kind:'goal',t:q.title,q:id})}
+      if(!any&&g){out.push({x:g.x,y:g.y,kind:'goal',t:q.title,q:id});any=true}
+      if(!any){const rg=remoteGiver(id);if(rg)out.push({x:rg.x,y:rg.y,kind:'goal',t:q.title,q:id})} // the giver is inside a building: ring its door
+    }
   }
   return out;
 }
@@ -6085,7 +6088,8 @@ const QAREA_ORDER=['Thornwick','The Road to Ironhill','Ironhill','Greyfang Pass'
 function questShow(qid){ // a quest picked in the log: open this level's map on it, with its place circled
   const q=QUESTS[qid];if(!q)return;
   const sp=questSpots().find(z=>z.q===qid);
-  if(!sp){G.qNote={t:G.time,text:`"${q.title}" is not on this map. It belongs to ${QAREA[qid]||'another place'}.`};return}
+  if(!sp){const ar=QAREA[qid]||'another place',here=(LEVELS[LEVEL]&&(LEVELS[LEVEL].label||LEVELS[LEVEL].name)||'').toLowerCase().includes(String(ar).toLowerCase());
+    G.qNote={t:G.time,text:here?`${q.who||'The one who set "'+q.title+'"'} cannot be shown on this map: they are indoors somewhere in ${ar}.`:`"${q.title}" is not on this map. It belongs to ${ar}.`};return}
   G.qFocus={id:qid,lvl:LEVEL};G.menu=false;G.map=false;G.overview=true;G.world=false;G.teleMode=false;
   const mz=clamp(LEVEL===44?1:12,mapFit(),34),[rw,rh]=mapRes();G.mz=mz;G.panX=(DW-rw)/2-((sp.x+.5)*mz+6);G.panY=(DH-rh)/2-((sp.y+.5)*mz+30);G.ovInit=true;G.ovLevel=LEVEL;
 }
@@ -10180,6 +10184,7 @@ khNpc('kh_neferet','Neferet, the royal cartographer','kh_npc6_0',()=>{
 },{q:KH_CART});
 /* ---- the grand vizier, Hotep-Ra ---- */
 khQuest('kh_seal','The Stolen Seal','Hotep-Ra, the grand vizier','The royal seal was stolen by a band that hides in the ruined houses of the old quarter, in the north-west of Khemetra. Recover it from a boarded house.',1,khFlag('khSeal'),{gold:500,xp:1500,items:['ringW']});
+QUESTS.kh_seal.spot=()=>{if(LEVEL!==44)return null;const b=KH_BUILDINGS.find(z=>z.id==='denC');return b&&b.front?{x:b.front[0],y:b.front[1]}:null}; // the boarded house with the chest, for the quest log's map
 khNpc('kh_sealchest','A locked chest','chest',d=>{const F=G.flags;if(qSt('kh_seal')==='active'&&!F.khSeal){F.khSeal=1;sfx('key');return say('Under a pile of stolen silver lies a heavy gold ring with the sun of Khemetra cut into its face. This is the royal seal.',[BYE])}
   return say(F.khSeal?'An empty chest. The stolen silver is gone.':'A chest of stolen silver and pewter. Nothing of the crown is here.',[BYE])});
 khNpc('kh_vizier','Hotep-Ra, the grand vizier','kh_npc3_5',()=>{
