@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.123';
+const VERSION='3.124';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -16997,11 +16997,15 @@ function desertDisc(it){
   const n=+it.k.slice(7);G.flags.discs=(G.flags.discs||0)|(1<<n);it.taken=true;sfx('key');
   const c=sunDiscCount();msg('You lift the golden sun disc: sun disc '+n+' of 4. You have '+c+'.','#ffe070');setSunDoor();
   if(c>=4)msg('All four suns are yours. The great door in the Hall of Eternity will answer them.','#ffe9a0');
-  if(n===4&&!G.flags.disc4Trap){G.flags.disc4Trap=1;msg('The sand stirs all round the pedestal. Bandaged shapes rise out of it!','#e8a090');for(const [x,y] of freeNear(it.x,it.y,3,3))addEnemy('mummy',x,y,true)}
+  if(n===4&&!G.flags.disc4Trap){G.flags.disc4Trap=1;msg('The sand stirs all round the pedestal. Bandaged shapes rise out of it!','#e8a090');for(const [x,y] of freeNear(it.x,it.y,3,thinTombFoes(['mummy','mummy','mummy']).length))addEnemy('mummy',x,y,true)}
+}
+function thinTombFoes(list){ // the Tomb of Sut was too crowded: 35% of the mummies that rise from lids and sand never do (counted across the whole run)
+  if(LEVEL!==42)return list;const F=G.flags;
+  return list.filter(()=>{F.amb42=(F.amb42||0)+.35;if(F.amb42>=1){F.amb42-=1;return false}return true});
 }
 function desertAmbush(d){
-  d.ambushed=true;const spots=freeNear(d.x,d.y,2,d.ambush.length);
-  d.ambush.forEach((t,i)=>{if(spots[i])addEnemy(t,spots[i][0],spots[i][1],true)});
+  d.ambushed=true;const list=thinTombFoes(d.ambush),spots=freeNear(d.x,d.y,2,list.length);
+  list.forEach((t,i)=>{if(spots[i])addEnemy(t,spots[i][0],spots[i][1],true)});
   sfx('screech');msg('The lid grinds aside, and bandaged hands reach out of the dark!','#e8a090');
 }
 function desertLoot(d){
