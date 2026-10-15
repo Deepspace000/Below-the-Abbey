@@ -1,6 +1,6 @@
 /* ==========================================================================
    KHEMETRA: THE DONKEY CARTS. A grey donkey and a canopied cart wait at the foot of the gate stair and in every quarter of
-   the city. For a few coins the driver takes the party to any quarter, any park, the palace, the mosque, the church or the
+   the city. For a few coins the driver takes the party to any quarter, any park, the palace, the mosque, the church, any shop or the
    markets. The longer the ride, the higher the fare.
    ========================================================================== */
 let KH_DEST=[];                     // {n, cat, x, y, f}: every place a cart goes
@@ -60,6 +60,7 @@ function khCartMenu(d0){
     ['To a quarter of the city',()=>page('quarters',list('quarter'),0,top)],
     ['To a park',()=>page('parks',list('park'),0,top)],
     ['To a market',()=>page('markets',list('market'),0,top)],
+    ['To a shop',()=>page('shops',list('shop'),0,top)],
     ['To the palace, the mosque or another landmark',()=>page('landmarks',list('landmark'),0,top)],
     ['Never mind.',()=>null]]);
   return top();
@@ -77,6 +78,7 @@ function khPlaceCarts(C,L,near,add,reachFree){
     const pp=near(KH.CX,243,3,false)||[KH.CX,243];dests.push({n:'The Palace of Khemetra',cat:'landmark',x:pp[0],y:pp[1],f:0});
   }
   for(const id of ['mosque','church','temple1','bath1']){const b=KH_BUILDINGS.find(q=>q.id===id);if(b&&b.front)dests.push({n:b.name,cat:'landmark',x:b.front[0],y:b.front[1],f:KH_FACE_F[b.m?b.m.face:1]})}
+  for(const b of KH_BUILDINGS){if(b.room==='shop'&&b.front&&b.m)dests.push({n:b.name,cat:'shop',x:b.front[0],y:b.front[1],f:(KH_FACE_F[b.m.face]+2)%4})} // every shop: set down in the street in front of its door, facing it
   dests.push({n:'The Great Gate',cat:'landmark',x:KH.CX,y:H-KH.WALL-4,f:0});
   KH_DEST=dests;L.cartDests=dests;
   // a cart at the foot of the gate stair and one in every quarter
