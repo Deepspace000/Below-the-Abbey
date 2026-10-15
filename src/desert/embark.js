@@ -6,9 +6,15 @@
    ========================================================================== */
 const EM={busy:false,near:null,reach:8};
 const emIslandLv=n=>!!SN_BY[n]||n===304;
-function emNearIsle(){ // the island the ship is close to, if any
-  const P=G.P;let best=null,bd=1e9;
-  for(const I of SN_ISLES){const d=Math.hypot(P.x-I.x,P.y-I.y),lim=I.r*(I.kind==='forest'||I.kind==='green'?1.5:1.7)+7;if(d<lim&&d<bd){bd=d;best=I}}
+function emNearIsle(){ // the island whose land is within eight squares of the ship, if any
+  const P=G.P,T=TERRS[SN.ID];if(!T)return null;
+  let best=null,bd=1e9;
+  for(let dy=-8;dy<=8;dy++)for(let dx=-8;dx<=8;dx++){
+    const d=Math.hypot(dx,dy);if(d>8||d>=bd)continue;
+    const x=P.x+dx,y=P.y+dy;if(x<0||y<0||x>=T.W||y>=T.H||!T.block[y*T.W+x])continue;
+    let I=null,id2=1e9;for(const q of SN_ISLES){const dd=Math.hypot(x-q.x,y-q.y);if(dd<q.r*2&&dd<id2){id2=dd;I=q}}
+    if(I){bd=d;best=I}
+  }
   return best;
 }
 function emBuild(lv){if(LEVELS[lv])return;if(lv>=331)isleBuild(lv);else seaBuild(lv)}
