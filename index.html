@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.118';
+const VERSION='3.119';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3102,8 +3102,8 @@ function hudRight(){
   panel(424,104,54,44,false,false);iconRest(451,123,.95);txt('Camp',451,141,7.5,'#c9ba8e','center',true,undefined,48);btn('rest',424,104,54,44);
   panel(424,152,54,52,false,false);
   const pc=countPotions();
-  ctx.globalAlpha=pc>0?1:.4;iconPotion(451,174,1.4);ctx.globalAlpha=1;
-  txt('Potion',451,161,7.5,'#c9ba8e','center',true,undefined,48);txt('x'+pc,451,196,9,'#c9ba8e','center',true,undefined,48);
+  ctx.globalAlpha=(G.potFav?favIndex()>=0:pc>0)?1:.4;if(G.potFav&&ITEMDEF[G.potFav])itemIcon(ITEMDEF[G.potFav],451,174,1.4);else iconPotion(451,174,1.4);ctx.globalAlpha=1;
+  txt('Potion',451,161,7.5,'#c9ba8e','center',true,undefined,48);txt('x'+(G.potFav?G.bag.reduce((a,b)=>a+(b.id===G.potFav?b.n:0),0):pc),451,196,9,'#c9ba8e','center',true,undefined,48);
   btn('potion',424,152,54,52);
   if(G.keys>0)txt('KEY',451,210,7,'#ffd76a','center',true);
   if(G.flags.goldKey)txt('GOLD KEY',451,200,6.5,'#ffe070','center',true);
@@ -3319,7 +3319,7 @@ function drawInventory(){
     panel(x,252,42,62,false,I.tab===id.slice(5));draw();btn(id,x,252,42,62);
   }
   txt('Items',187,306,7,'#c9ba8e','center',true);txt('Hero',231,306,7,'#c9ba8e','center',true);txt('Spells',275,306,7,'#c9ba8e','center',true);txt('Powers',319,306,7,'#c9ba8e','center',true);
-  panel(344,252,58,62,false,false);iconPotion(373,277,1.7);txt('x'+countPotions(),373,304,9,'#c9ba8e','center',true);btn('ipotion',344,252,58,62);
+  panel(344,252,58,62,false,false);if(G.potFav&&ITEMDEF[G.potFav])itemIcon(ITEMDEF[G.potFav],373,277,1.7);else iconPotion(373,277,1.7);txt('x'+(G.potFav?G.bag.reduce((a,b)=>a+(b.id===G.potFav?b.n:0),0):countPotions()),373,304,9,'#c9ba8e','center',true);btn('ipotion',344,252,58,62);
   panel(408,252,66,62,false,false);iconRedX(441,283,1.6);btn('iclose',408,252,66,62);
 }
 function openInv(i){
@@ -3363,7 +3363,7 @@ function invBtn(id){
   if(id==='iunequip'){if(I.sel&&I.sel.src==='slot'&&unequip(hi,I.sel.slot))I.sel=null;return}
   if(id==='iuse'||id==='ipotion'){
     if(!h.alive){msg('The dead cannot drink.');return}
-    if(useHeal(hi,id==='iuse'&&I.sel&&I.sel.src==='bag'?I.sel.i:-1)){
+    if(useHeal(hi,id==='iuse'&&I.sel&&I.sel.src==='bag'?I.sel.i:(id==='ipotion'?favIndex():-1))){
       I.sel=null;
       if(hostileNear()&&!G.acted[hi])heroDone(hi);
     }
@@ -3855,7 +3855,8 @@ function useHeal(hi,idx){
   msg(`${HERO_DEF[hi].name} ${d.k==='food'?'eats':'drinks'} the ${d.n} (+${d.heal} health${d.feed?', +'+d.feed+' hunger':''}).`,'#9ae0a0');addFloat(portraitX(hi)+19,250,'+'+d.heal,'#7fe08a');
   return true;
 }
-function usePotion(i){return useHeal(i,-1)}
+function favIndex(){const f=G.potFav;return f?G.bag.findIndex(b=>b.id===f):-1}
+function usePotion(i){const f=favIndex();return useHeal(i,f>=0?f:-1)}
 function makeCart(){
   IMG.cart=mkCanvas(150,120,(x)=>{
     x.fillStyle='rgba(0,0,0,.4)';x.beginPath();x.ellipse(75,108,60,8,0,0,TAU);x.fill();
@@ -3917,7 +3918,7 @@ function snapshot(){
     party:HERO_DEF.map(d=>({app:d.app,cls:d.clsId,name:d.name,bs:d.str-CLASSES[d.clsId].str,bd:d.dex-CLASSES[d.clsId].dex,bi:d.int-CLASSES[d.clsId].int})),
     heroes:G.heroes.map(h=>({hp:h.hp,max:h.max,base:h.base,mp:h.mp,mpMax:h.mpMax,alive:h.alive,lvl:h.lvl,xp:h.xp,food:h.food,powSel:h.powSel||0,learned:h.learned||[],str:h.str,dex:h.dex,int:h.int,spellSel:h.spellSel,
       eq:Object.fromEntries(Object.entries(h.eq).map(([k,it])=>[k,{id:it.id,n:it.n}]))})),
-    bag:G.bag.map(b=>({id:b.id,n:b.n})),gold:G.gold,keys:G.keys,rounds:G.rounds,kills:G.kills,bossDead:G.bossDead,sel:G.sel,lightBoost:G.lightBoost,
+    bag:G.bag.map(b=>({id:b.id,n:b.n})),potFav:G.potFav||null,gold:G.gold,keys:G.keys,rounds:G.rounds,kills:G.kills,bossDead:G.bossDead,sel:G.sel,lightBoost:G.lightBoost,
     P:{x:G.P.x,y:G.P.y,f:G.P.f},
     grid:LEVEL===1?G.grid.map(r=>r.slice()):[],seen:seenPack(G.seen),
     enemies:G.enemies.map(e=>({t:e.t,lvl:e.lvl,base:e.base,vd:e.vd,x:e.x,y:e.y,hp:e.hp,maxhp:e.maxhp,alert:e.alert,chilled:e.chilled||0})),
@@ -3932,7 +3933,7 @@ function restore(sv){ // the golden city and the rooms in it are built the first
 function restoreNow(sv){
   setParty(sv.party);reset(sv.level||1);
   sv.heroes.forEach((s,i)=>Object.assign(G.heroes[i],{hp:s.hp,max:s.max,base:s.base,mp:s.mp,mpMax:s.mpMax,alive:s.alive,lvl:s.lvl,xp:s.xp,food:s.food===undefined?100:s.food,powSel:s.powSel||0,learned:s.learned||[],str:s.str,dex:s.dex,int:s.int,spellSel:s.spellSel||0,eq:s.eq||{}}));
-  G.aff=sv.aff||[];G.bag=sv.bag;G.gold=sv.gold;G.keys=sv.keys;G.rounds=sv.rounds;G.kills=sv.kills;G.bossDead=!!sv.bossDead;G.sel=sv.sel||0;G.lightBoost=sv.lightBoost||0;
+  G.aff=sv.aff||[];G.bag=sv.bag;G.gold=sv.gold;G.potFav=sv.potFav||null;G.keys=sv.keys;G.rounds=sv.rounds;G.kills=sv.kills;G.bossDead=!!sv.bossDead;G.sel=sv.sel||0;G.lightBoost=sv.lightBoost||0;
   G.P={x:sv.P.x,y:sv.P.y,f:sv.P.f,angT:(sv.P.f-1)*Math.PI/2};G.C={x:sv.P.x,y:sv.P.y,a:G.P.angT};
   {const sr=seenRows(sv.seen);if(LEVEL===1){G.grid=sv.grid;if(sr)G.seen=sr}else if(sr&&sr.length===MH&&sr[0].length===MW)G.seen=sr}
   if(G.grid[G.P.y]===undefined||G.grid[G.P.y][G.P.x]!==0||G.decor.some(d=>d.block&&d.x===G.P.x&&d.y===G.P.y)){G.P={x:START.x,y:START.y,f:START.f,angT:(START.f-1)*Math.PI/2};G.C={x:START.x,y:START.y,a:G.P.angT}}
@@ -6864,7 +6865,7 @@ function peekHit(x,y){
 function dropOk(d,id){
   if(!id)return false;
   if(d.kind==='world')return id.startsWith('hero')||id==='swapoff'||id==='swapalt'||id==='special';
-  if(d.kind==='inv')return d.src==='bag'?(id.startsWith('islot_')||id.startsWith('ihero')):(id.startsWith('ibag')||id.startsWith('islot_'));
+  if(d.kind==='inv')return d.src==='bag'?(id.startsWith('islot_')||id.startsWith('ihero')||(id==='ipotion'&&idef(d.item).k==='potion')):(id.startsWith('ibag')||id.startsWith('islot_'));
   if(d.kind==='loot')return d.src==='bag'?id.startsWith('lbox'):id.startsWith('lbag');
   return false;
 }
@@ -6884,6 +6885,7 @@ function dropItem(d,id){
   }
   if(d.kind==='inv'){
     const I=G.inv,hi=I.hero,h=G.heroes[hi];
+    if(d.src==='bag'&&id==='ipotion'){G.potFav=d.item.id;sfx('equip');msg(`The ${idef(d.item).n} is now the frequent use potion.`);return}
     if(d.src==='bag'){
       let tgt=hi,slot=null;
       if(id.startsWith('islot_'))slot=id.slice(6);else if(id.startsWith('ihero')){tgt=+id.slice(5);slot=autoSlot(tgt,idef(d.item))}else return;
