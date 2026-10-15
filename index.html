@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.148';
+const VERSION='3.149';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -14276,6 +14276,7 @@ const mq=(id,t,who,desc,need,goal,reward,extra)=>{QUESTS[id]=Object.assign({titl
 /* ---- 1. until the king returns ---- */
 mq('mq1','Until the King Returns','Ishkander, the wizard','Ishkander says the king of Khemetra comes home from his summer court in three days. Stay in the city, stay alive, and go to the palace when the trumpets sound. There is a price on your heads, and knives are looking for you.',1,khFlag('kingBack'),{gold:200,xp:800});
 mq('mq2','The King\'s Audience','King Rahotep','King Rahotep has returned and will hear your story in the throne room of the palace.',1,khFlag('audience'),{gold:500,xp:2000});
+QUESTS.mq2.reward.gold=1000;QUESTS.mq2.reward._cut=1; // the king pays 1000 gold for the story, outside the general gold cut
 const DM1=khQD('The king of Khemetra comes home from his summer court in three days, and I have sent word ahead. Until then, stay in the city. Stay awake, too. The warrant that brought you here has a price on it, twenty thousand crowns on each of your heads, and that kind of money buys knives. They have long reach, and Khemetra has a great many doors.','Walk in the open, sleep at an inn, and do not open a door you do not have to. If a stranger in grey comes close, kill him first and ask who he was afterwards.',(n,m)=>'The king is not home yet. Stay alive, and keep your swords close. There will be more of them.','You heard the trumpets? Then the king is home.','He will see you straight away. Say plainly what happened. He values plain speech, and I will be standing at his side.','The king is home. Go to the throne room in the palace. Do not keep a king waiting.','The trumpets have sounded.');
 const DM2=khQD('The throne room is open. King Rahotep waits there.','Go now. Walk straight in.',(n,m)=>'The king is waiting in the throne room.','The audience is over? Then you know now what you are fighting.','Rahotep keeps his word. Go, and see the vizier.','You have spoken with the king. The Sea Gate is the next door.');
 repWrap('kh_ishkander',()=>G.flags.scoriaWizard,'About the king',()=>{
