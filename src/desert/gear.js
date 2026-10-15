@@ -32,6 +32,11 @@ gw('barbedbow','Barbed Bow','Bow',20,[16,24],.06,{dex:18},900,'#a89878',{bleed:[
 gw('twinbow','Twinstring Bow','Bow',30,[24,36],.06,{dex:22},1600,'#8a7a50',{double:.25},'Two strings, two arrows. One shot in four sends a second arrow after the first.',{ranged:4});
 gw('warbow','Steppe Warbow','Bow',40,[36,52],.08,{dex:26},2600,'#c0a070',{pierce:1},'A horn and sinew recurve bow. Its arrows pass through the foe and strike the one behind.',{ranged:5});
 gw('silverbow','Windrunner','Bow',50,[50,72],.15,{dex:30},4200,'#d0d8e8',{bossdmg:.25},'A slim bow of silvered wood, quick and true. Shoots 6 squares; great beasts take a quarter more.',{ranged:6,dbl:.2});
+// master weapons for level 30: the best steel a smith will sell, for a lot of gold
+gw('wyrmfang',"Wyrmfang Sabre",'Sword',30,[34,48],.05,{str:22},2400,'#e8c060',{bleed:[.4,8,4]},'A gold-hilted sabre with a blade ground from a dragon tooth. Two hits in five leave the foe bleeding badly.',{dbl:.1});
+gw('thunderaxe','Thunder Axe','Axe',30,[36,50],-.03,{str:24},2800,'#d86a50',{shock:.2},'A broad red axe that rings like a bell. One hit in five shakes the ground and knocks down every foe within two squares.');
+gw('skullcrusher','Skullcrusher','Mace',30,[32,46],-.02,{str:22},2200,'#7aa0d8',{stun:.2},'A blue-steel war hammer with a head like an anvil. One hit in five knocks the foe senseless for a round.');
+gw('stormbow','Stormstring Bow','Bow',30,[30,44],.08,{dex:22},2400,'#90d878',{double:.3},'A bow strung with something that crackles. Shoots 5 squares, and three shots in ten send a second arrow after the first.',{ranged:5,dbl:.1});
 // helms
 ga('ironcap','head','Iron Cap','Helm',10,3,250,'#9aa0aa',null,'A plain iron cap with a nose guard.',{str:10});
 ga('greathelm','head','Knight\'s Greathelm','Helm',20,4,500,'#b0b4bc',{dodge:.03},'A closed helm with a narrow slit. Blows glance off it.',{str:14});
@@ -67,10 +72,16 @@ if(typeof HEAL_IDS!=='undefined')for(const id of ['healdraught','greaterheal','s
 if(typeof ART_ITEM_IDS!=='undefined')for(const id of GEAR)ART_ITEM_IDS.push(id);
 /* what the shops sell */
 const GEAR_STOCK={
-  sword:()=>['cutlass','greatsword','executioner','claymore','kingslayer','splitaxe','wolfaxe','maul','headsman','worldaxe','hunterbow','barbedbow','twinbow','warbow','silverbow'].map(id=>[id,1]),
+  sword:()=>['cutlass','wyrmfang','thunderaxe','skullcrusher','stormbow','greatsword','executioner','claymore','kingslayer','splitaxe','wolfaxe','maul','headsman','worldaxe','hunterbow','barbedbow','twinbow','warbow','silverbow'].map(id=>[id,1]),
   armour:()=>['ironcap','greathelm','hornhelm','centurion','warlordhelm','brigandine','hauberk','cuirass','lionplate','goldplate','roundshield','kiteshield','spikeshield','towershield','dragonshield'].map(id=>[id,1]),
   potion:()=>[['healdraught',6],['greaterheal',4],['superiorheal',2],['elixir',1],['manadraught',6],['greatermana',4],['supermana',2],['might',3],['swiftness',3],['ironskin',3],['keeneye',3],['antidote',5],['salve',5],['holywater',2],['sleeptea',3]]
 };
+// the new weapons borrow the painted picture of an older one, recoloured, until they have a painting of their own
+function gearTintIcons(){
+  const T={wyrmfang:['greatsword',[70,44,8],[255,222,120]],thunderaxe:['headsman',[60,12,10],[255,130,100]],skullcrusher:['maul',[10,24,60],[160,208,255]],stormbow:['twinbow',[16,48,20],[190,255,150]]};
+  for(const id in T){if(IMG['icn_'+id])continue;const b=IMG['icn_'+T[id][0]];if(!b||typeof pToneMap!=='function')continue;
+    const c=pToneMap(b,T[id][1],T[id][2],1.7,.9,0);IMG['icn_'+id]=c;IMG['ic_'+id]=c;IMG['it_'+id]=c}
+}
 /* what the gear does, in play */
 function gearPas(hi,key){
   const h=G.heroes[hi];if(!h||!h.eq)return 0;let s=0;
