@@ -86,15 +86,7 @@ function desertApplyState(){
   if(G.flags.sutDead)G.grid[1][48]=31;
 }
 function sutDefeated(){G.flags.sutDead=1;G.grid[1][48]=31;sfx('door');startCut('sutDown')}
-ENEMY_DEF.sut.act=function(e){ // when he is hurt, Sut calls the dead of his tomb to stand with him
-  e.calls=(e.calls||0)+1;
-  const mummies=G.enemies.filter(o=>o.hp>0&&o.t==='mummy'&&Math.abs(o.x-e.x)+Math.abs(o.y-e.y)<=14).length;
-  if(e.calls%4===0&&e.hp<e.maxhp*.8&&mummies<5){
-    const spots=freeNear(e.x,e.y,3,2);
-    if(spots.length){for(const [x,y] of spots)addEnemy('mummy',x,y,true);sfx('screech');msg('Sut raises his sceptre, and the dead of his tomb rise at his call!','#ff9a80');return 700}
-  }
-  return 0;
-};
+ENEMY_DEF.sut.act=function(e){return 0}; // Sut fights alone: he no longer calls mummies to stand with him
 Object.assign(CUTS,{
   sutRoom:()=>[
     {text:'The throne room is vast, and its ceiling is lost in a painted night of gold stars. Braziers burn along the pillars. At the far end, on a throne of red stone, a figure that has been sitting very still raises its head.'},

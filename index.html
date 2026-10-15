@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.128';
+const VERSION='3.129';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4069,7 +4069,7 @@ const AREA_STATS={};
 const AREA_WAVES={ // creatures that arrive during play and are not in the map: quest attacks, returning packs, boss fights, traps
   2:['wolf','wolf','wolf','wolf','bandit','bandit','archer','wolf','wolf','wolf','bandit','archer','wolf','wolf','bandit','archer', 'wolf','wolf','wolf','wolf','bandit','bandit','archer'], // the quest's attacks, and the packs that return each visit
   5:['mayor'],10:['ghost','ghost'],42:['mummy','mummy','mummy']}; // the mayor's fight, the lone gravestone, the fourth sun disc's trap
-const AREA_NOTE={19:'plus hunters while you are wanted',22:'plus hunters while you are wanted',42:'Sut also calls more mummies',44:'40 shops, inns and temples, 20 quests, the palace'};
+const AREA_NOTE={19:'plus hunters while you are wanted',22:'plus hunters while you are wanted',42:'Sut fights alone',44:'40 shops, inns and temples, 20 quests, the palace'};
 function areaStats(n){ // what a level holds: creatures and their levels, potions, gold and other items
   if(AREA_STATS[n])return AREA_STATS[n];
   const L=LEVELS[n],o={en:0,lo:0,hi:0,pot:0,gold:0,it:0};if(!L)return o;
@@ -17051,15 +17051,7 @@ function desertApplyState(){
   if(G.flags.sutDead)G.grid[1][48]=31;
 }
 function sutDefeated(){G.flags.sutDead=1;G.grid[1][48]=31;sfx('door');startCut('sutDown')}
-ENEMY_DEF.sut.act=function(e){ // when he is hurt, Sut calls the dead of his tomb to stand with him
-  e.calls=(e.calls||0)+1;
-  const mummies=G.enemies.filter(o=>o.hp>0&&o.t==='mummy'&&Math.abs(o.x-e.x)+Math.abs(o.y-e.y)<=14).length;
-  if(e.calls%4===0&&e.hp<e.maxhp*.8&&mummies<5){
-    const spots=freeNear(e.x,e.y,3,2);
-    if(spots.length){for(const [x,y] of spots)addEnemy('mummy',x,y,true);sfx('screech');msg('Sut raises his sceptre, and the dead of his tomb rise at his call!','#ff9a80');return 700}
-  }
-  return 0;
-};
+ENEMY_DEF.sut.act=function(e){return 0}; // Sut fights alone: he no longer calls mummies to stand with him
 Object.assign(CUTS,{
   sutRoom:()=>[
     {text:'The throne room is vast, and its ceiling is lost in a painted night of gold stars. Braziers burn along the pillars. At the far end, on a throne of red stone, a figure that has been sitting very still raises its head.'},
