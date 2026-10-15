@@ -19,7 +19,8 @@ const LEVEL_RATING={};
 for(const [ls,r] of LEVEL_LADDER)for(const l of ls)LEVEL_RATING[l]=r+3;   // the whole ladder stands three levels higher than the table below
 const autoscaleOn=()=>!G.flags.noScale;
 // the level of a place on the world map: the lowest and highest of its levels that have one
-function locRating(loc){let lo=1e9,hi=-1;for(const v of loc.lv){const r=LEVEL_RATING[v];if(r!==undefined){lo=Math.min(lo,r);hi=Math.max(hi,r)}}return hi<0?null:(lo===hi?String(lo):lo+'-'+hi)}
+function locRating(loc){if(loc.lv.length===1&&loc.lv[0]===1)return '1-3';   // the crypts climb from 1 to 3
+  let lo=1e9,hi=-1;for(const v of loc.lv){const r=LEVEL_RATING[v];if(r!==undefined){lo=Math.min(lo,r);hi=Math.max(hi,r)}}return hi<0?null:(lo===hi?String(lo):lo+'-'+hi)}
 function drawGameplay(){
   BTNS=[];veil(.6);bigPanel(70,24,340,272);
   txt('GAMEPLAY',240,44,14,'#d8c88e','center',true);

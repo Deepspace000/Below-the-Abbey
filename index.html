@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.116';
+const VERSION='3.117';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1426,6 +1426,8 @@ function enemyStat(t,lvl){
    quarter 4-7 below, so a fight is a mix of tough and easy ones and the weak die fast. Bosses and the great creatures are never lowered; the great
    ones always stand a fixed number of levels above the party. */
 const NO_VARY=['boss','gandrick','mayor','overseer','halbrecht','wraith','sut','firelizard','cyclops','pharaohboss','chancellor','corvane','kraken'];
+/* the crypts under the abbey climb from level 1 at the start, to 2 in the middle, to 3 near the Rat King, whatever the mode */
+function crypt1Level(e){if(LEVEL!==1)return 0;if(e.zl===undefined){const d=Math.hypot(e.x-23,e.y-15);e.zl=e.t==='boss'?3:d<=6.5?3:d<=12?2:1}return e.zl}
 function rebalanceEnemies(){
   const L=G.heroes.filter(h=>h.alive);if(!L.length)return;
   const pl=Math.floor(L.reduce((n,h)=>n+h.lvl,0)/L.length);
@@ -1433,13 +1435,13 @@ function rebalanceEnemies(){
     const def=ENEMY_DEF[e.t],ap=def&&def.aboveParty;
     if(G.flags.noScale){ // a fixed world: the place's own level, the great creatures a few above it
       if(e.hp<=0||e.dying)continue;
-      if(e.base===undefined||e.fixed!==LEVEL){e.base=DIFF()+(ap?Math.min(ap,8):0);e.fixed=LEVEL}
+      if(e.base===undefined||e.fixed!==LEVEL){e.base=crypt1Level(e)||(DIFF()+(ap?Math.min(ap,8):0));e.fixed=LEVEL}
       if(e.vd===undefined){const r=Math.random();e.vd=(ap||(def&&(def.boss||NO_VARY.includes(e.t)||/^w_/.test(e.t))))?0:r<.4?0:r<.75?1+Math.floor(Math.random()*3):4+Math.floor(Math.random()*4)}
       const nl=Math.max(1,e.base-e.vd);if(nl!==e.lvl){const frac=e.hp/e.maxhp;e.lvl=nl;e.maxhp=enemyStat(e.t,nl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*frac))}
       continue}
     if(ap&&e.hp>0&&!e.dying){if(e.lvl!==pl+ap){const fr=e.hp/e.maxhp;e.lvl=pl+ap;e.maxhp=enemyStat(e.t,e.lvl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*fr))}continue} // the great creatures always stand a few levels above the party
     if(e.hp<=0||e.dying)continue;
-    if(e.base===undefined)e.base=e.lvl;
+    if(e.base===undefined)e.base=crypt1Level(e)||e.lvl;
     if(pl-e.base>5)e.base=Math.max(1,pl-(2+Math.floor(Math.random()*4)));   // catch-up, once
     if(e.vd===undefined){const r=Math.random();e.vd=(def&&(def.boss||NO_VARY.includes(e.t)||/^w_/.test(e.t)))?0:r<.4?0:r<.75?1+Math.floor(Math.random()*3):4+Math.floor(Math.random()*4)}
     const nl=Math.max(1,e.base-e.vd);
@@ -16138,7 +16140,8 @@ const LEVEL_RATING={};
 for(const [ls,r] of LEVEL_LADDER)for(const l of ls)LEVEL_RATING[l]=r+3;   // the whole ladder stands three levels higher than the table below
 const autoscaleOn=()=>!G.flags.noScale;
 // the level of a place on the world map: the lowest and highest of its levels that have one
-function locRating(loc){let lo=1e9,hi=-1;for(const v of loc.lv){const r=LEVEL_RATING[v];if(r!==undefined){lo=Math.min(lo,r);hi=Math.max(hi,r)}}return hi<0?null:(lo===hi?String(lo):lo+'-'+hi)}
+function locRating(loc){if(loc.lv.length===1&&loc.lv[0]===1)return '1-3';   // the crypts climb from 1 to 3
+  let lo=1e9,hi=-1;for(const v of loc.lv){const r=LEVEL_RATING[v];if(r!==undefined){lo=Math.min(lo,r);hi=Math.max(hi,r)}}return hi<0?null:(lo===hi?String(lo):lo+'-'+hi)}
 function drawGameplay(){
   BTNS=[];veil(.6);bigPanel(70,24,340,272);
   txt('GAMEPLAY',240,44,14,'#d8c88e','center',true);
