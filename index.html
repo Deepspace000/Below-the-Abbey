@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.138';
+const VERSION='3.139';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4461,20 +4461,25 @@ function questSpots(){
   for(const id of Object.keys(QUESTS)){
     const st=qSt(id);if(st==='done')continue;const q=QUESTS[id],g=giverOf[id];
     if(st===null)continue; // rings only for quests the party has accepted
-    if(qReady(id)){const gg=g||byName(id)||remoteGiver(id);if(gg)out.push({x:gg.x,y:gg.y,kind:'ready',t:'Hand in: '+q.title});else(out.away=out.away||[]).push(q.title+': see '+q.who)}
-    else{let t=[];try{t=q.targets||[]}catch(e){}let any=false;for(const n of t)for(const d of by[n]||[]){out.push({x:d.x,y:d.y,kind:'goal',t:q.title});any=true}
-      if(!any&&g)out.push({x:g.x,y:g.y,kind:'goal',t:q.title})}
+    if(qReady(id)){const gg=g||byName(id)||remoteGiver(id);if(gg)out.push({x:gg.x,y:gg.y,kind:'ready',t:'Hand in: '+q.title,q:id});else(out.away=out.away||[]).push(q.title+': see '+q.who)}
+    else{let t=[];try{t=q.targets||[]}catch(e){}let any=false;for(const n of t)for(const d of by[n]||[]){out.push({x:d.x,y:d.y,kind:'goal',t:q.title,q:id});any=true}
+      if(!any&&g)out.push({x:g.x,y:g.y,kind:'goal',t:q.title,q:id})}
   }
   return out;
 }
 function drawQuestRings(ox,oy,cs){
   const spots=questSpots(),pul=.75+.25*Math.sin(G.time*4),at={};
-  for(const sp of spots){const k=sp.x+','+sp.y,e=at[k];if(e){if(sp.kind==='ready')e.kind='ready';e.ts.push(sp.t)}else at[k]={x:sp.x,y:sp.y,kind:sp.kind,ts:[sp.t]}}
+  const fq=G.qFocus&&G.qFocus.lvl===LEVEL?G.qFocus.id:null;
+  for(const sp of spots){const k=sp.x+','+sp.y,e=at[k];if(e){if(sp.kind==='ready')e.kind='ready';e.ts.push(sp.t);if(sp.q===fq)e.focus=true}else at[k]={x:sp.x,y:sp.y,kind:sp.kind,ts:[sp.t],focus:sp.q===fq}}
   ctx.save();ctx.lineJoin='round';
   (spots.away||[]).slice(0,4).forEach((t,i)=>{ctx.font=`italic bold 8.5px ${FUI}`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(236,222,176,.92)';ctx.strokeText('Done, to hand in elsewhere  -  '+t,10,40+i*11);ctx.fillStyle='#1f6a24';ctx.fillText('Done, to hand in elsewhere  -  '+t,10,40+i*11)});
   for(const k in at){
     const a=at[k],cx=ox+(a.x+.5)*cs,cy=oy+(a.y+.5)*cs,r=Math.max(7,Math.min(15,cs*1.15)),col=a.kind==='ready'?'#1f8a2c':'#b02818';
-    ctx.strokeStyle=col;ctx.lineWidth=1.8;ctx.globalAlpha=pul;
+    if(fq&&a.focus){ // the quest picked in the quest log: a big pulsing double ring, and everything else fades back
+      const pr=r*(1.7+.25*Math.sin(G.time*5));ctx.save();ctx.lineWidth=3.4;ctx.strokeStyle='#ffe24a';ctx.shadowColor='#000';ctx.shadowBlur=4;ctx.beginPath();ctx.ellipse(cx,cy,pr,pr*.92,0,0,TAU);ctx.stroke();
+      ctx.lineWidth=1.8;ctx.strokeStyle='#d02010';ctx.beginPath();ctx.ellipse(cx,cy,pr*.72,pr*.66,0,0,TAU);ctx.stroke();ctx.restore()}
+    const faded=fq&&!a.focus;
+    ctx.strokeStyle=col;ctx.lineWidth=1.8;ctx.globalAlpha=faded?.3:pul;
     if(a.kind==='goal')ctx.setLineDash([3,3]);
     ctx.beginPath();for(let i=0;i<=24;i++){const an=i/24*TAU+.2,rr=r*(1+.05*Math.sin(i*2.3+a.x));i?ctx.lineTo(cx+Math.cos(an)*rr,cy+Math.sin(an)*rr*.92):ctx.moveTo(cx+Math.cos(an)*rr,cy+Math.sin(an)*rr*.92)}ctx.stroke();
     if(a.kind!=='goal'){ctx.setLineDash([]);ctx.beginPath();ctx.arc(cx,cy,r*.82,.3,TAU-.5);ctx.stroke()}
@@ -6058,6 +6063,13 @@ function drawTalk(){
 const QAREA={scoria:'Greendale',honey:'Greendale',flowers:'Greendale',apples2:'Greendale',gandrick:'Thornwick',wood:'Thornwick',goats:'Thornwick',wolves:'Thornwick',bandits:'Thornwick',rats:'Thornwick',apples:'Thornwick',cheese:'Thornwick',ale:'Thornwick',fish:'Thornwick',ghosts:'Thornwick',bread:'Thornwick',
   ironhill:'The Road to Ironhill',mines:'Ironhill',overseer:'Ironhill',ore:'Ironhill',pick:'Ironhill',herbs:'Ironhill',wolves2:'Ironhill',bandits2:'Ironhill',graves:'Ironhill',pip:'Ironhill',parcel:'Ironhill',rats2:'Ironhill',escape:'Ironhill',pass:'Greyfang Pass',witch:'The Wilds'};
 const QAREA_ORDER=['Thornwick','The Road to Ironhill','Ironhill','Greyfang Pass','Greendale','The Wilds','Elsewhere'];
+function questShow(qid){ // a quest picked in the log: open this level's map on it, with its place circled
+  const q=QUESTS[qid];if(!q)return;
+  const sp=questSpots().find(z=>z.q===qid);
+  if(!sp){G.qNote={t:G.time,text:`"${q.title}" is not on this map. It belongs to ${QAREA[qid]||'another place'}.`};return}
+  G.qFocus={id:qid,lvl:LEVEL};G.menu=false;G.map=false;G.overview=true;G.world=false;G.teleMode=false;
+  const mz=clamp(LEVEL===44?1:12,mapFit(),34),[rw,rh]=mapRes();G.mz=mz;G.panX=(DW-rw)/2-((sp.x+.5)*mz+6);G.panY=(DH-rh)/2-((sp.y+.5)*mz+30);G.ovInit=true;G.ovLevel=LEVEL;
+}
 function drawQuestLog(){
   BTNS=[];veil(.7);bigPanel(40,12,400,296);
   txt('QUESTS',240,30,14,'#d8c88e','center',true);
@@ -6068,7 +6080,7 @@ function drawQuestLog(){
     rows.push({t:'head',a,y});y+=17;
     for(const id of ids){const q=QUESTS[id],lines=wrapText(q.desc,340,8.5).slice(0,2);rows.push({t:'q',id,lines,y});y+=14+lines.length*11+8}
     y+=6}
-  const top=44,viewH=232,total=y;G.qMax=Math.max(0,total-viewH);G.qs=clamp(G.qs||0,0,G.qMax);
+  const rowBtns=[],top=44,viewH=232,total=y;G.qMax=Math.max(0,total-viewH);G.qs=clamp(G.qs||0,0,G.qMax);
   ctx.save();ctx.beginPath();ctx.rect(46,top,388,viewH);ctx.clip();
   if(!rows.length){txt('No quests yet.',240,130,10,'#a89878','center');txt('Talk to the people of Thornwick.',240,146,9,'#a89878','center')}
   for(const r of rows){
@@ -6078,11 +6090,15 @@ function drawQuestLog(){
     txt(q.title,62,ry+8,10.5,done?'#8a9a78':'#e8d89a','left',true);
     txt(done?'Done':rd?'Ready: see '+q.who:`${qGoal(r.id)} of ${q.need}`,424,ry+8,9,done?'#8a9a78':rd?'#9ae0a0':'#c8b898','right',true);
     r.lines.forEach((l,k)=>txt(l,62,ry+19+k*11,8.5,done?'#6a7a60':'#b8aa88','left'));
+    const rh=14+r.lines.length*11+4,vy=Math.max(ry-2,top),vh=Math.min(ry-2+rh,top+viewH)-vy;if(vh>6)rowBtns.push({id:'qrow_'+r.id,x:46,y:vy,w:388,h:vh,up:true,drag:'quest'});
   }
   ctx.restore();
   if(G.qMax>0){const th=viewH-4,bh=Math.max(20,th*viewH/total),by=top+2+(th-bh)*(G.qs/G.qMax);ctx.fillStyle='rgba(216,200,142,.12)';ctx.fillRect(436,top+2,3,th);ctx.fillStyle='rgba(216,200,142,.6)';ctx.fillRect(436,by,3,bh)}
   btn('qclose',0,0,0,0);BTNS.pop();
   BTNS.push({id:'qarea',x:46,y:top,w:388,h:viewH,up:true,drag:'quest'});
+  for(const b of rowBtns)BTNS.push(b);
+  txt('Tap a quest to circle where it is on the map.',240,38,7.5,'#a89878','center');
+  if(G.qNote&&G.time-G.qNote.t<5)txt(G.qNote.text,240,268,8.5,'#e8a070','center',true,undefined,380);
   btnText('qexit','Close',190,276,100,24);
 }
 CUTS.anaeaArrive=()=>[
@@ -6802,7 +6818,7 @@ function handleBtn(id){
   if(TP)return;
   if(G.cut){cutAdvance();return}
   if(G.talk){talkBtn(id);return}
-  if(G.overview){if(id==='ovexit'){G.overview=false;G.world=false;G.teleMode=false}else if(/^wtp_/.test(id))teleFromMap(id.slice(4));else if(id==='worldback')G.world=false;else if(id==='worldmap'){G.world=true;G.wv=wvDefault()}else if(id==='wzin')setWorldZoom((G.wv?G.wv.z:1)*1.4,240,160);else if(id==='wzout')setWorldZoom((G.wv?G.wv.z:1)/1.4,240,160);else if(id==='wreset')G.wv=wvDefault();else if(id==='wmap'){}
+  if(G.overview){if(id==='ovexit'){G.overview=false;G.world=false;G.teleMode=false;G.qFocus=null}else if(/^wtp_/.test(id))teleFromMap(id.slice(4));else if(id==='worldback')G.world=false;else if(id==='worldmap'){G.world=true;G.wv=wvDefault()}else if(id==='wzin')setWorldZoom((G.wv?G.wv.z:1)*1.4,240,160);else if(id==='wzout')setWorldZoom((G.wv?G.wv.z:1)/1.4,240,160);else if(id==='wreset')G.wv=wvDefault();else if(id==='wmap'){}
     else if(id==='mzin')setMapZoom((G.mz||12)*1.3,DW/2,DH/2);else if(id==='mzout')setMapZoom((G.mz||12)/1.3,DW/2,DH/2);else if(id==='mzfit')setMapZoom(0,DW/2,DH/2);return}
   if(G.saves){savesBtn(id);return}
   if(G.state==='title'){titleBtn(id);return}
@@ -6813,7 +6829,10 @@ function handleBtn(id){
   if(G.inv.open){invBtn(id);return}
   if(G.map){if(id==='mapclose'||id==='map')G.map=false;return}
   if(/^afhud_/.test(id)){G.menu='aff';G.affSel=id.slice(6);G.afs=0;return}
-  if(G.menu==='quests'){if(id==='qexit')G.menu=false;return}
+  if(G.menu==='quests'){
+    if(id==='qexit')G.menu=false;
+    else if(/^qrow_/.test(id))questShow(id.slice(5));
+    return}
   if(G.menu==='spellshop'){spellShopBtn(id);return}
   if(G.menu==='journal'){journalBtn(id);return}
   if(G.menu==='petshop'){petShopBtn(id);return}
