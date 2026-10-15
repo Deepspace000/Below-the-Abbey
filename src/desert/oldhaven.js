@@ -8,6 +8,8 @@
    ========================================================================== */
 for(const n of ['osric','vance','aldwyn','rguard'])loadImg('yar_p_'+n,'assets/yar_p_'+n+'.png');
 Object.assign(NPC_H,{yar_p_osric:1,yar_p_vance:1,yar_p_aldwyn:1,yar_p_rguard:1});
+// every person of Oldhaven stands about a cell tall, so that their faces can be seen from close by (a picture with no height set would be nearly one and a half)
+for(const [pre,n] of [['kh_ohsold1_',6],['kh_ohfolk1_',6],['kh_ohfolk2_',6],['kh_ohcourt1_',6],['kh_oqmen_',6]])for(let i=0;i<n;i++)NPC_H[pre+i]=.98;
 Object.assign(ENEMY_DEF,{
   chancellor:{name:'Chancellor Vance',hp:300,dmg:[11,17],hit:.82,w:.5,img:'yar_p_vance',xp:1600,gold:[400,700],speed:1,verb:'strikes',aboveParty:3},
   rguard:{name:'Royal Guard',hp:120,dmg:[9,14],hit:.78,w:.55,img:'yar_p_rguard',xp:300,gold:[40,90],speed:1,verb:'cuts',aboveParty:1}
