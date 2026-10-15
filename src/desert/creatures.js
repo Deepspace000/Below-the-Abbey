@@ -7,7 +7,7 @@ Object.assign(ENEMY_DEF,{
   nomad:{name:'Desperate Nomad',hp:44,dmg:[5,9],hit:.72,w:.38,img:'nomad',xp:90,gold:[6,22],speed:1,verb:'slashes'},
   nomad2:{name:'Desperate Nomad',hp:44,dmg:[5,9],hit:.72,w:.38,img:'nomad2',xp:90,gold:[6,22],speed:1,verb:'slashes'},
   vulture:{name:'Carrion Vulture',hp:34,dmg:[5,9],hit:.74,w:1.0,img:'vulture',xp:90,gold:[0,0],speed:2,fly:true,verb:'rakes'},
-  dskeleton:{name:'Skeleton',hp:48,dmg:[6,10],hit:.74,w:.68,img:'dskeleton',xp:110,gold:[3,12],speed:1,verb:'slashes',wander:true,roam:22},
+  dskeleton:{name:'Skeleton',hp:48,dmg:[6,10],hit:.74,w:.44,img:'dskeleton',xp:110,gold:[3,12],speed:1,verb:'slashes',wander:true,roam:22},
   cobra:{name:'Cobra',hp:30,dmg:[5,9],hit:.8,w:.8,img:'cobra',xp:100,gold:[2,6],speed:1,verb:'bites'},
   mummy:{name:'Mummy',hp:45,dmg:[6,10],hit:.76,w:.36,img:'mummy',xp:150,gold:[10,30],speed:1,verb:'claws'},
   sut:{name:'Sut, Lord of the Red Desert',hp:110,dmg:[8,13],hit:.82,w:.78,img:'sut',xp:5000,gold:[800,1200],speed:1,verb:'smites',ranged:3,shot:'a bolt of red fire',boss:true}});
