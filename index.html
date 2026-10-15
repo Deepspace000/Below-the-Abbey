@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.109';
+const VERSION='3.110';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1339,7 +1339,7 @@ function sfx(n){
     case 'locked':tone(220,200,.08,'square',.1);tone(180,160,.1,'square',.1,.1);break;
     case 'key':tone(1500,1500,.3,'sine',.15);tone(2000,2000,.35,'sine',.12,.07);break;
     case 'potion':tone(500,900,.25,'sine',.14);tone(700,1200,.3,'sine',.1,.1);break;
-    case 'heal':[523,659,784,1046].forEach((f,i)=>tone(f,f,.5,'sine',.12,i*.09));break;
+    case 'heal':[392,494,587].forEach((f,i)=>tone(f,f*1.004,.34,'sine',.04,i*.1));break;   // a soft three-note shimmer
     case 'fire':nz(.45,.3,'bandpass',3000,300);tone(400,90,.4,'sawtooth',.14);break;
     case 'arrow':nz(.18,.2,'highpass',2200,5200);tone(900,300,.12,'triangle',.08,.12);break;
     case 'growl':tone(95,55,.5,'sawtooth',.14);tone(120,70,.45,'sawtooth',.08,.1);nz(.4,.12,'lowpass',500,200);break;
