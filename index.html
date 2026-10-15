@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.132';
+const VERSION='3.133';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4032,7 +4032,8 @@ function drawInitialFrame(x,y,w,h){
   ctx.restore();
 }
 /* ---------- the title screen's "Go to area": pick any area or dungeon and start there ---------- */
-G.gotoLvl=34;
+G.gotoLvl=34;G.gotoGold=2000;
+const gotoGoldStep=(v,up)=>{const s=v<5000||(!up&&v<=5000)?500:v<50000||(!up&&v<=50000)?5000:25000;return up?Math.min(999999,v+s):Math.max(0,v-s)};
 function gotoList(){
   const out=[],nm=n=>LEVEL_NAMES[n]||(LEVELS[n]&&LEVELS[n].name)||('Level '+n),hd=h=>out.push({h});
   const has=n=>{if(!LEVELS[n]&&n>=289&&n<=312&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();return LEVELS[n]||(typeof KH_LAZY!=='undefined'&&KH_LAZY[n])};
@@ -4059,7 +4060,7 @@ function jumpToLevel(n,target){
   else{let p=null;try{p=JSON.parse(localStorage.getItem('abbeyParty')||'null')}catch(e){}setParty(p||DEFAULT_PARTY);reset();G.state='play'}
   G.heroes.forEach((h,i)=>{while(h.lvl<target){h.xp=xpNeed(h.lvl);levelUp(i)}h.alive=true;h.hp=h.max;h.mp=h.mpMax;h.food=Math.max(h.food||0,100)});
   G.lvlBanners.length=0;G.msgs=[];G.cut=null;G.talk=null;
-  giveJumpGear(Math.min(40,target));
+  giveJumpGear(Math.min(40,target));G.gold=G.gotoGold;
   const F=G.flags;F.townSeen=1;F.abbeyIntroSeen=1;F.gwoodSeen=1;F.gandrickDead=1;F.northGate=1;F.mayorKilled=1;F.mayorDown=1;F.ironRoad=1;F.passDone=1;F.passSeen=1;
   for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};
   const L=LEVELS[n],st=L.start||{x:1,y:1,f:1};
@@ -4092,7 +4093,7 @@ function drawGoto(){
   BTNS=[];veil(.82);bigPanel(24,8,432,304);
   const [lx,ly,lw,lh]=GO_LIST,Ly=gotoLayout();G.gs=clamp(G.gs||0,0,Math.max(0,Ly.total-lh));
   txt('GO TO AREA',240,22,13,'#d8c88e','center',true);
-  txt('Choose where to start. Your party is raised to the level shown. Drag or use the wheel to scroll.',240,37,7.5,'#c8b888','center');
+  txt('Choose where to start. Your party is raised to the level shown and given the gold shown. Drag or use the wheel to scroll.',240,37,7.5,'#c8b888','center');
   BTNS.push({id:'go_listarea',x:lx,y:ly,w:lw,h:lh,up:true,drag:'goto'});
   ctx.save();ctx.beginPath();ctx.rect(lx,ly,lw,lh);ctx.clip();
   for(const {r,y,h} of Ly.rows){
@@ -4107,9 +4108,10 @@ function drawGoto(){
   }
   ctx.restore();
   if(Ly.total>lh){const th=Math.max(16,lh*lh/Ly.total),ty=ly+(lh-th)*(G.gs/(Ly.total-lh));ctx.fillStyle='rgba(216,200,142,.55)';rrect(ctx,lx+lw-5,ty,4,th,2);ctx.fill()}
-  btnText('go_back','Back',36,286,80,20);
-  btnText('go_up','Up',126,286,60,20);btnText('go_dn','Down',192,286,60,20);
-  btnText('go_lm','-',300,286,26,20);txt('Party level '+G.gotoLvl,360,296,9,'#e8dca8','center',true);btnText('go_lp','+',402,286,26,20);
+  btnText('go_back','Back',36,286,58,20);
+  btnText('go_up','Up',100,286,40,20);btnText('go_dn','Down',144,286,48,20);
+  btnText('go_lm','-',200,286,22,20);txt('Party level '+G.gotoLvl,261,296,8.5,'#e8dca8','center',true);btnText('go_lp','+',302,286,22,20);
+  btnText('go_gm','-',334,286,22,20);txt('Gold '+G.gotoGold,396,296,8.5,'#ffe36a','center',true);btnText('go_gp','+',434,286,22,20);
 }
 function gotoBtn(id){
   if(id==='go_up')G.gs=Math.max(0,(G.gs||0)-GO_ROW*3);
@@ -4117,6 +4119,8 @@ function gotoBtn(id){
   else if(id==='go_back')G.state='title';
   else if(id==='go_lm')G.gotoLvl=Math.max(1,G.gotoLvl-2);
   else if(id==='go_lp')G.gotoLvl=Math.min(80,G.gotoLvl+2);
+  else if(id==='go_gm')G.gotoGold=gotoGoldStep(G.gotoGold,false);
+  else if(id==='go_gp')G.gotoGold=gotoGoldStep(G.gotoGold,true);
   else if(/^go_\d+$/.test(id))jumpToLevel(+id.slice(3),G.gotoLvl);
 }
 function drawTitle(){
