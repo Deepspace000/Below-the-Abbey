@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.122';
+const VERSION='3.123';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1608,7 +1608,7 @@ function bestPotionIndex(hi){ // the weakest potion that heals everything that i
 function slotFits(slot,d,hi){
   switch(slot){
     case 'head':return d.k==='head';case 'chest':return d.k==='chest';case 'arms':return d.k==='arms';case 'legs':return d.k==='legs';
-    case 'main':return d.k==='weapon'||d.k==='light';
+    case 'main':return d.k==='weapon'||d.k==='light'||d.k==='potion';
     case 'off':return d.k==='weapon'||d.k==='shield'||d.k==='light'||d.k==='potion';
     case 'alt':return d.k==='weapon'||d.k==='potion';
   }
@@ -1669,7 +1669,7 @@ function swapHand(hi,slot){
 /* ---------- hero stats ---------- */
 const strB=h=>Math.floor(Math.max(0,h.str-8)/4);
 const intB=h=>Math.floor(Math.max(0,h.int-10)/3);
-function heroWeapon(h){const it=h.eq.main;return it&&idef(it).k==='weapon'?idef(it):null}
+function heroWeapon(h){const it=h.eq[h.wslot||'main'];return it&&idef(it).k==='weapon'?idef(it):null}
 function ringSum(h,key){let s=0;for(const k of RING_SLOTS)if(h.eq[k])s+=idef(h.eq[k])[key]||0;return s}
 function heroArmor(h){let a=0;for(const k of ['head','arms','legs','chest','off',...RING_SLOTS]){const it=h.eq[k];if(it)a+=idef(it).armor||0}return a+pasH(h,'armor')}
 function heroDmgRange(h){const w=heroWeapon(h),r=w?w.dmg:(h.unarmed||[1,2]),b=strB(h)+ringSum(h,'dmgb');return [r[0]+b,r[1]+b]}
@@ -2345,9 +2345,9 @@ function act(id){
     case 'fwd':doMove(0);break;case 'right':doMove(1);break;case 'back':doMove(2);break;case 'left':doMove(3);break;
     case 'turnL':doTurn(-1);break;case 'turnR':doTurn(1);break;
     case 'attack':if(G.heroes[i].alive&&heroAttack(i))heroDone(i);break;
-    case 'special':if(G.heroes[i].alive&&heroSpecial(i))heroDone(i);break;
+    case 'special':{const H=G.heroes[i],mi=H.eq.main;if(H.alive&&mi&&idef(mi).k==='potion'){if(drinkPocket(i,'main')&&hostileNear()&&!G.acted[i])heroDone(i)}else if(H.alive&&heroSpecial(i))heroDone(i);break}
     case 'potion':if(G.heroes[i].alive&&usePotion(i))heroDone(i);break;
-    case 'swapoff':case 'swapalt':if(G.heroes[i].alive&&G.heroes[i].eq[id==='swapoff'?'off':'alt']&&idef(G.heroes[i].eq[id==='swapoff'?'off':'alt']).k==='potion'){if(drinkPocket(i,id==='swapoff'?'off':'alt')&&hostileNear()&&!G.acted[i])heroDone(i);break}if(G.heroes[i].alive&&swapHand(i,id==='swapoff'?'off':'alt')&&hostileNear()&&!G.acted[i])heroDone(i);break;
+    case 'swapoff':case 'swapalt':{const sl=id==='swapoff'?'off':'alt',H=G.heroes[i],it=H.eq[sl];if(!H.alive)break;if(it&&idef(it).k==='potion'){if(drinkPocket(i,sl)&&hostileNear()&&!G.acted[i])heroDone(i)}else if(it&&idef(it).k==='weapon'){let ok=false;H.wslot=sl;try{ok=heroAttack(i)}finally{H.wslot=null}if(ok)heroDone(i)}else if(swapHand(i,sl)&&hostileNear()&&!G.acted[i])heroDone(i);break}
     case 'wait':msg('The party waits.','#a09880');endRound();break;
     case 'rest':if(hostileNear()){msg('You cannot rest with enemies close by.','#d09a80');break}if(jp('camp')){G.menu='jp:camp';G.map=false}else restParty(false);break;
     case 'teleport':if(teleOn()&&teleActive(LEVEL))openTeleMap();break;
@@ -3084,8 +3084,9 @@ function drawSpecialBtn(){
   const can=h.alive&&h.mp>=sp.cost&&(!HERO_DEF[hi].caster||sp.spell);ctx.globalAlpha=can?1:.5;
   if(['heal','healx','revive'].includes(curPower(hi).type))iconHeal(225,261,1.15);else if(main)itemIcon(idef(main),225,261,1.1);else classIcon(HERO_DEF[hi].clsId,225,261,1.3);
   ctx.globalAlpha=1;
+  if(main&&idef(main).k==='potion'){txt('Drink',225,235,6.4,'#c9ba8e','center',true,undefined,34);txt('x'+(G.bag.reduce((a,b)=>a+(b.id===main.id?b.n:0),0)+1),225,285,7,'#c9ba8e','center',true,undefined,34)}else
   {const ws=sp.name.split(' ');if(ws.length>1&&sp.name.length>7){txt(ws[0],225,233,6.4,'#c9ba8e','center',true,undefined,34);txt(ws.slice(1).join(' '),225,241,6.4,'#c9ba8e','center',true,undefined,34)}else txt(sp.name,225,235,6.4,'#c9ba8e','center',true,undefined,34)}
-  txt(sp.cost?`${sp.cost} ${HERO_DEF[hi].mpn.slice(0,4).toUpperCase()}`:'',225,285,7,can?'#9ac8ff':'#7a7a80','center',true,undefined,34);
+  if(!(main&&idef(main).k==='potion'))txt(sp.cost?`${sp.cost} ${HERO_DEF[hi].mpn.slice(0,4).toUpperCase()}`:'',225,285,7,can?'#9ac8ff':'#7a7a80','center',true,undefined,34);
   btn('special',206,226,38,72);
   // two small windows to its right: off hand and second weapon (tap to swap into the main hand)
   for(const [slot,y,id] of [['off',226,'swapoff'],['alt',264,'swapalt']]){
@@ -6878,7 +6879,7 @@ function dropItem(d,id){
     const key=h.type==='torch'?'torch':h.ref.k,idx=G.bag.findIndex(b=>b.id===key);
     if(idx<0)return;
     const dfn=ITEMDEF[key],sl0=slot;
-    if((dfn.k==='potion'&&sl0!=='off'&&sl0!=='alt')||dfn.k==='food'||dfn.k==='quest'||(dfn.k==='spell'&&!HERO_DEF[hi].caster))return;
+    if((dfn.k==='potion'&&sl0!=='off'&&sl0!=='alt'&&sl0!=='main')||dfn.k==='food'||dfn.k==='quest'||(dfn.k==='spell'&&!HERO_DEF[hi].caster))return;
     const sl=slot||autoSlot(hi,dfn);
     if(sl&&G.heroes[hi].alive&&(id.startsWith('hero')||slotFits(sl,dfn,hi)))equipTo(hi,sl,idx);
     return;
