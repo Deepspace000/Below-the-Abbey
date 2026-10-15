@@ -10,7 +10,7 @@ const MX=[],MX_POWER={};
    aim: 'front' (the foe ahead, up to 4 squares), ['area',n] (foes within n squares), 'party', 'self', 'dead'
    effects: [kind, ...]  dmg [a,b] | hold n | sleep n | fear n | curse n | bleed n d | poison n d | burn n d | blind n | confuse n | poly kind n | vuln n | slow n
             banish | exec pct [a,b] | steal k | heal [a,b] | healpct p | buff key amt rounds | cleanse | revive pct | feed n | surge */
-function mx(cls,lv,id,name,aim,fx,d,col){MX.push({cls,lv,id,name,aim,fx,d,col,cost:MX_COST[lv],price:MX_PRICE[lv]})}
+function mx(cls,lv,id,name,aim,fx,d,col,price,cost){MX.push({cls,lv,id,name,aim,fx,d,col,cost:cost||MX_COST[lv],price:price||MX_PRICE[lv]})} // price and cost may be given for the grand spells
 mx('Warrior',10,'w10','Intimidating Shout',['area',3],[['fear',4]],'A roar that sends every foe within 3 squares running for 4 rounds.','#e86a50');
 mx('Warrior',20,'w20','Shield Wall',  'party',[['buff','armor',5,8]],'The whole party locks shields: armor +5 for 8 rounds.','#6a9ae8');
 mx('Warrior',30,'w30','Hamstring',    'front',[['dmg',[20,30]],['slow',6],['bleed',6,4]],'A low cut to the legs: damage, slows the foe and leaves it bleeding.','#d04040');
@@ -51,16 +51,19 @@ mx('Mage',20,'m20','Polymorph: Sheep','front',[['poly','sheep',8]],'The foe beco
 mx('Mage',30,'m30','Mirror Images','party',[['buff','dodge',.25,8]],'Ghostly copies of the party draw blows: enemies miss 25% more for 8 rounds.','#90c0ff');
 mx('Mage',40,'m40','Disintegrate','front',[['exec',.2,[90,130]]],'A beam of unmaking: 90-130 damage, and a foe under 20% health is dust.','#90ffb0');
 mx('Mage',50,'m50','Time Stop','all',[['hold',3]],'Time stops for every foe in sight for 3 rounds. The party moves freely.','#a0d0ff');
+mx('Mage',30,'m30b','Arcane Lance','front',[['dmg',[18,26]],['vuln',3]],'A lance of pure force: about 40-55 damage at level 30, and the foe takes more from the next blows.','#80b0ff',2400,16);
 mx('Sorcerer',10,'z10','Wail of Fear',['area',4],[['fear',5]],'A wail that turns the courage of every foe within 4 squares to water.','#c060e0');
 mx('Sorcerer',20,'z20','Polymorph: Cow','front',[['poly','cow',8]],'The foe becomes a placid cow for 8 rounds. Moo.','#d8b890');
 mx('Sorcerer',30,'z30','Wild Surge','front',[['surge']],'Raw chaos: a random mighty effect. Damage, a sheep, a heal, a hold. Anything can happen.','#ff60c0');
 mx('Sorcerer',40,'z40',"Dragon's Breath",['area',3],[['dmg',[34,48]],['burn',5,6]],'A cone of fire: foes within 3 squares take damage and burn for 5 rounds.','#ff6020');
 mx('Sorcerer',50,'z50','Rift of Banishing','front',[['banish']],'Opens a rift that swallows the foe ahead. Great beasts and bosses take a heavy blow instead.','#8040c0');
+mx('Sorcerer',30,'z30b','Chain Lightning',['area',3],[['dmg',[16,24]]],'Lightning leaps between every foe within 3 squares for about 35-50 damage each at level 30.','#a0c0ff',2400,16);
 mx('Priest',10,'c10','Purify','party',[['cleanse'],['heal',[12,20],1]],'Cleanses every affliction on the party and heals everyone for 12-20.','#e8f0ff');
 mx('Priest',20,'c20','Turn Undead',['area',4],[['undead',10,[40,60]]],'Undead within 4 squares flee for 10 rounds or are destroyed. Living foes cower for 2 rounds.','#fff0b0');
 mx('Priest',30,'c30','Sanctuary Ward','party',[['buff','armor',4,10],['buff','dodge',.15,10]],'A sacred ward: armor +4 and enemies miss 15% more for 10 rounds.','#ffe9a0');
 mx('Priest',40,'c40','Divine Wrath',['area',4],[['dmg',[34,50]],['curse',6]],'Light from the heavens strikes every foe within 4 squares, and curses them.','#fffbe0');
 mx('Priest',50,'c50','Resurrection','dead',[['revive',.7],['healpct',.5]],'Raises every fallen hero at 70% health and heals the living for half.','#ffd860');
+mx('Priest',30,'c30b','Smiting Light',['area',3],[['dmg',[16,24]],['curse',4]],'Hallowed light on every foe within 3 squares for about 35-50 damage each at level 30, and it curses them.','#fff4c0',2200,16);
 mx('Monk',10,'k10','Pressure Point','front',[['hold',4]],'A finger on the right spot: the foe ahead cannot move for 4 rounds.','#70e0a0');
 mx('Monk',20,'k20','Wholeness of Body','self',[['heal',[50,70]],['cleanse']],'You heal 50-70 and cleanse every affliction on you.','#70e090');
 mx('Monk',30,'k30','Quivering Palm','front',[['dmg',[30,44]],['bleed',6,5],['curse',6]],'A strike that keeps hurting: damage, bleeding and a weakened foe.','#b060e0');
@@ -72,7 +75,11 @@ mx('Goat',30,'g30','Polymorph: Goat','front',[['poly','goat',10]],'The foe becom
 mx('Goat',40,'g40','Mountain Charge','front',[['dmg',[40,60]],['hold',3]],'A charge from the high peaks: heavy damage and a stunned foe.','#d0a060');
 mx('Goat',50,'g50','Great Stampede',['area',5],[['dmg',[44,64]],['hold',2]],'A spectral herd thunders through every foe within 5 squares.','#e8c880');
 for(const s of MX)MX_POWER[s.id]={lv:s.lv,act:true,cost:s.cost,type:'mx',name:s.name,d:s.d,col:s.col,mx:s.id,aim:s.aim,fx:s.fx,icn:'sp_'+s.id};
-const MX_BY_CLASS={};for(const s of MX)(MX_BY_CLASS[s.cls]=MX_BY_CLASS[s.cls]||[]).push(s);
+function mxTintIcons(){ // the grand spells borrow the painted picture of a higher spell, recoloured, until they have their own
+  const T={m30b:['m40',[10,24,70],[150,200,255]],z30b:['z40',[20,20,70],[190,200,255]],c30b:['c40',[70,56,10],[255,244,170]]};
+  for(const id in T){if(IMG['sp_'+id])continue;const b=IMG['sp_'+T[id][0]];if(!b||typeof pToneMap!=='function')continue;IMG['sp_'+id]=pToneMap(b,T[id][1],T[id][2],1.6,.9,0)}
+}
+const MX_BY_CLASS={};for(const s of MX)(MX_BY_CLASS[s.cls]=MX_BY_CLASS[s.cls]||[]).push(s); for(const k in MX_BY_CLASS)MX_BY_CLASS[k].sort((p,q)=>p.lv-q.lv||p.price-q.price); // the grand spell stands after the ordinary one of its level
 ['sheep','cow','frog'].forEach(n=>{if(typeof loadImg==='function')loadImg(n,'assets/'+n+'.png')});
 for(const s of MX){if(typeof loadImg==='function')loadImg('sp_'+s.id,'assets/sp_'+s.id+'.png')}
 /* a hero's powers: the class powers, then every spell they have memorised */
@@ -264,17 +271,18 @@ function drawSpellShop(){
   txt(`${def.name} the ${def.cls}: ${list.length} spells for sale`,24+4*58+10,50,8,'#d8c88e','left',true,undefined,200);
   txt('A bought spell is memorised and joins the power page.',24+4*58+10,62,7.5,'#a89878','left',false,undefined,210);
   if(G.ssmsg)txt(G.ssmsg,24+4*58+10,80,8,'#e8a070','left',true,undefined,210);
-  const top=106,rh=38;
+  const top=list.length>5?98:106,rh=list.length>5?33:38,cp=list.length>5;
   list.forEach((s,k)=>{
     const y=top+k*rh,known=(h.learned||[]).includes(s.id),open=h.lvl>=s.lv,can=open&&G.gold>=s.price&&!known;
     ctx.save();rrect(ctx,22,y,436,rh-3,5);ctx.fillStyle=known?'rgba(30,50,24,.92)':'rgba(40,18,14,.92)';ctx.fill();ctx.lineWidth=1.4;ctx.strokeStyle=known?'#7ac060':open?'#a88a48':'#5a4a34';ctx.stroke();ctx.restore();
-    const im=IMG['sp_'+s.id];ctx.fillStyle='#120c08';ctx.fillRect(28,y+3,34,34);
-    if(im)ctx.drawImage(im,29,y+4,32,32);else{ctx.fillStyle=s.col;ctx.fillRect(34,y+9,22,22)}
-    ctx.strokeStyle=s.col;ctx.lineWidth=1.2;ctx.strokeRect(28,y+3,34,34);
+    const im=IMG['sp_'+s.id];const is=cp?28:34;ctx.fillStyle='#120c08';ctx.fillRect(28,y+3,is,is);
+    if(im)ctx.drawImage(im,29,y+4,is-2,is-2);else{ctx.fillStyle=s.col;ctx.fillRect(34,y+9,is-12,is-12)}
+    ctx.strokeStyle=s.col;ctx.lineWidth=1.2;ctx.strokeRect(28,y+3,is,is);
     ctx.globalAlpha=open||known?1:.55;
-    txt(s.name,70,y+9,9.5,'#ecdca8','left',true,undefined,200);
-    txt(`Level ${s.lv}  -  ${s.cost} ${def.mpn.slice(0,4).toLowerCase()}`,70,y+19,7,'#9ac8ff','left');
-    wrapText(s.d,310,7.2).slice(0,2).forEach((l,q)=>txt(l,70,y+28+q*8.2,7.2,'#c8bc98','left'));
+    txt(s.name,70,y+9,9.5,'#ecdca8','left',true,undefined,cp?225:200);
+    if(cp){txt(`Lv ${s.lv} - ${s.cost} ${def.mpn.slice(0,4).toLowerCase()}`,300,y+8,7,'#9ac8ff','left');wrapText(s.d,310,7.2).slice(0,2).forEach((l,q)=>txt(l,70,y+16+q*8,7,'#c8bc98','left'))}
+    else{txt(`Level ${s.lv}  -  ${s.cost} ${def.mpn.slice(0,4).toLowerCase()}`,70,y+19,7,'#9ac8ff','left');
+    wrapText(s.d,310,7.2).slice(0,2).forEach((l,q)=>txt(l,70,y+28+q*8.2,7.2,'#c8bc98','left'))}
     ctx.globalAlpha=1;
     if(known)txt('MEMORISED',450,y+13,8,'#9ae0a0','right',true);
     else if(!open)txt(`Needs level ${s.lv}`,450,y+13,8,'#e8905a','right',true);

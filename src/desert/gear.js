@@ -43,18 +43,22 @@ ga('greathelm','head','Knight\'s Greathelm','Helm',20,4,500,'#b0b4bc',{dodge:.03
 ga('hornhelm','head','Horned Helm','Helm',30,5,900,'#8a8a96',{dmgPct:.05},'A horned helm that makes the wearer look twice as angry. All damage +5%.',{str:18});
 ga('centurion','head','Centurion Helm','Helm',40,6,1500,'#c8a050',{crit:.05},'A bronze helm with a red crest. +5% double hits.',{str:22});
 ga('warlordhelm',"Warlord's Helm",'Helm',50,8,2400,'#d8b860',{dodge:.05,dmgPct:.05},'A gold-trimmed helm worn by great captains. Enemies miss 5% more; damage +5%.',{str:26});
+// master armour for level 30, to go with the master weapons
+ga('drakehelm','head','Drakescale Helm','Helm',30,7,2000,'#c8603a',{dmgPct:.08,crit:.04},'A helm of overlapping red scales. All damage +8% and +4% double hits.',{str:22});
 // body armour
 ga('brigandine','chest','Studded Brigandine','Chest',10,5,450,'#7a5a3a',{regen:.15},'Leather studded with iron. Recover a little health every few rounds.');
 ga('hauberk','chest','Steel Hauberk','Chest',20,7,900,'#a0a8b0',{dodge:.03},'A shirt of steel rings. Enemies miss 3% more.');
 ga('cuirass','chest','Plate Cuirass','Chest',30,9,1600,'#b8bcc4',{regen:.2},'A polished steel breastplate. Recover health steadily.');
 ga('lionplate','chest','Lionplate','Chest',40,12,2600,'#b0b4bc',{thorns:3},'Plate with lion-head pauldrons. Every enemy that strikes you takes 3 damage.');
 ga('goldplate','chest','Gilded Plate','Chest',50,15,4000,'#d8b860',{dodge:.06,regen:.3},'Gold-trimmed steel plate. Enemies miss 6% more and wounds close fast.');
+ga('wyrmplate','chest','Wyrmscale Plate','Chest',30,12,2800,'#4a7a9a',{dodge:.05,regen:.25},'Plate hung with the scales of a great wyrm. Enemies miss 5% more and wounds close steadily.',{str:24});
 // shields
 ga('roundshield','shield','Banded Round Shield','Shield',10,3,300,'#8a6238',{dodge:.04},'A round shield with an iron boss. Enemies miss 4% more.',{str:10});
 ga('kiteshield','shield','Kite Shield','Shield',20,4,600,'#c0c8d0',{dodge:.06},'A long shield with a blue stripe. Enemies miss 6% more.',{str:14});
 ga('spikeshield','shield','Spiked Shield','Shield',30,5,1100,'#707078',{thorns:4},'An iron shield bristling with spikes. Every enemy that strikes you takes 4 damage.',{str:18});
 ga('towershield','shield','Lion Tower Shield','Shield',40,7,1800,'#303038',{dodge:.08},'A tall dark shield with a golden lion. Enemies miss 8% more.',{str:22});
 ga('dragonshield','shield','Dragon Shield','Shield',50,9,2800,'#a07840',{dodge:.1,thorns:6},'A huge bronze shield with a dragon. Enemies miss 10% more and take 6 damage for every blow they land.',{str:26});
+ga('bulwark','shield','Bulwark of Ages','Shield',30,8,2200,'#8a8a96',{thorns:6,dodge:.06},'A slab of black iron older than the kingdom. Enemies miss 6% more and take 6 damage for every blow they land.',{str:22});
 // potions and brews
 function gp(id,n,col,price,d,o){ITEMDEF[id]=Object.assign({n,k:'potion',t:'Potion',ic:'potion',c:col,stack:1,price,d,sw:.26},o)}
 gp('healdraught','Healing Draught','#d03a2a',60,'Restores 60 health.',{heal:60});
@@ -73,12 +77,12 @@ if(typeof ART_ITEM_IDS!=='undefined')for(const id of GEAR)ART_ITEM_IDS.push(id);
 /* what the shops sell */
 const GEAR_STOCK={
   sword:()=>['cutlass','wyrmfang','thunderaxe','skullcrusher','stormbow','greatsword','executioner','claymore','kingslayer','splitaxe','wolfaxe','maul','headsman','worldaxe','hunterbow','barbedbow','twinbow','warbow','silverbow'].map(id=>[id,1]),
-  armour:()=>['ironcap','greathelm','hornhelm','centurion','warlordhelm','brigandine','hauberk','cuirass','lionplate','goldplate','roundshield','kiteshield','spikeshield','towershield','dragonshield'].map(id=>[id,1]),
+  armour:()=>['drakehelm','wyrmplate','bulwark','ironcap','greathelm','hornhelm','centurion','warlordhelm','brigandine','hauberk','cuirass','lionplate','goldplate','roundshield','kiteshield','spikeshield','towershield','dragonshield'].map(id=>[id,1]),
   potion:()=>[['healdraught',6],['greaterheal',4],['superiorheal',2],['elixir',1],['manadraught',6],['greatermana',4],['supermana',2],['might',3],['swiftness',3],['ironskin',3],['keeneye',3],['antidote',5],['salve',5],['holywater',2],['sleeptea',3]]
 };
 // the new weapons borrow the painted picture of an older one, recoloured, until they have a painting of their own
 function gearTintIcons(){
-  const T={wyrmfang:['greatsword',[70,44,8],[255,222,120]],thunderaxe:['headsman',[60,12,10],[255,130,100]],skullcrusher:['maul',[10,24,60],[160,208,255]],stormbow:['twinbow',[16,48,20],[190,255,150]]};
+  const T={wyrmfang:['greatsword',[70,44,8],[255,222,120]],thunderaxe:['headsman',[60,12,10],[255,130,100]],skullcrusher:['maul',[10,24,60],[160,208,255]],stormbow:['twinbow',[16,48,20],[190,255,150]],drakehelm:['centurion',[60,16,10],[255,140,100]],wyrmplate:['cuirass',[10,30,50],[150,210,240]],bulwark:['spikeshield',[24,24,30],[200,200,215]]};
   for(const id in T){if(IMG['icn_'+id])continue;const b=IMG['icn_'+T[id][0]];if(!b||typeof pToneMap!=='function')continue;
     const c=pToneMap(b,T[id][1],T[id][2],1.7,.9,0);IMG['icn_'+id]=c;IMG['ic_'+id]=c;IMG['it_'+id]=c}
 }

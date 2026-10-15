@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.126';
+const VERSION='3.128';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -16298,7 +16298,7 @@ const MX=[],MX_POWER={};
    aim: 'front' (the foe ahead, up to 4 squares), ['area',n] (foes within n squares), 'party', 'self', 'dead'
    effects: [kind, ...]  dmg [a,b] | hold n | sleep n | fear n | curse n | bleed n d | poison n d | burn n d | blind n | confuse n | poly kind n | vuln n | slow n
             banish | exec pct [a,b] | steal k | heal [a,b] | healpct p | buff key amt rounds | cleanse | revive pct | feed n | surge */
-function mx(cls,lv,id,name,aim,fx,d,col){MX.push({cls,lv,id,name,aim,fx,d,col,cost:MX_COST[lv],price:MX_PRICE[lv]})}
+function mx(cls,lv,id,name,aim,fx,d,col,price,cost){MX.push({cls,lv,id,name,aim,fx,d,col,cost:cost||MX_COST[lv],price:price||MX_PRICE[lv]})} // price and cost may be given for the grand spells
 mx('Warrior',10,'w10','Intimidating Shout',['area',3],[['fear',4]],'A roar that sends every foe within 3 squares running for 4 rounds.','#e86a50');
 mx('Warrior',20,'w20','Shield Wall',  'party',[['buff','armor',5,8]],'The whole party locks shields: armor +5 for 8 rounds.','#6a9ae8');
 mx('Warrior',30,'w30','Hamstring',    'front',[['dmg',[20,30]],['slow',6],['bleed',6,4]],'A low cut to the legs: damage, slows the foe and leaves it bleeding.','#d04040');
@@ -16339,16 +16339,19 @@ mx('Mage',20,'m20','Polymorph: Sheep','front',[['poly','sheep',8]],'The foe beco
 mx('Mage',30,'m30','Mirror Images','party',[['buff','dodge',.25,8]],'Ghostly copies of the party draw blows: enemies miss 25% more for 8 rounds.','#90c0ff');
 mx('Mage',40,'m40','Disintegrate','front',[['exec',.2,[90,130]]],'A beam of unmaking: 90-130 damage, and a foe under 20% health is dust.','#90ffb0');
 mx('Mage',50,'m50','Time Stop','all',[['hold',3]],'Time stops for every foe in sight for 3 rounds. The party moves freely.','#a0d0ff');
+mx('Mage',30,'m30b','Arcane Lance','front',[['dmg',[18,26]],['vuln',3]],'A lance of pure force: about 40-55 damage at level 30, and the foe takes more from the next blows.','#80b0ff',2400,16);
 mx('Sorcerer',10,'z10','Wail of Fear',['area',4],[['fear',5]],'A wail that turns the courage of every foe within 4 squares to water.','#c060e0');
 mx('Sorcerer',20,'z20','Polymorph: Cow','front',[['poly','cow',8]],'The foe becomes a placid cow for 8 rounds. Moo.','#d8b890');
 mx('Sorcerer',30,'z30','Wild Surge','front',[['surge']],'Raw chaos: a random mighty effect. Damage, a sheep, a heal, a hold. Anything can happen.','#ff60c0');
 mx('Sorcerer',40,'z40',"Dragon's Breath",['area',3],[['dmg',[34,48]],['burn',5,6]],'A cone of fire: foes within 3 squares take damage and burn for 5 rounds.','#ff6020');
 mx('Sorcerer',50,'z50','Rift of Banishing','front',[['banish']],'Opens a rift that swallows the foe ahead. Great beasts and bosses take a heavy blow instead.','#8040c0');
+mx('Sorcerer',30,'z30b','Chain Lightning',['area',3],[['dmg',[16,24]]],'Lightning leaps between every foe within 3 squares for about 35-50 damage each at level 30.','#a0c0ff',2400,16);
 mx('Priest',10,'c10','Purify','party',[['cleanse'],['heal',[12,20],1]],'Cleanses every affliction on the party and heals everyone for 12-20.','#e8f0ff');
 mx('Priest',20,'c20','Turn Undead',['area',4],[['undead',10,[40,60]]],'Undead within 4 squares flee for 10 rounds or are destroyed. Living foes cower for 2 rounds.','#fff0b0');
 mx('Priest',30,'c30','Sanctuary Ward','party',[['buff','armor',4,10],['buff','dodge',.15,10]],'A sacred ward: armor +4 and enemies miss 15% more for 10 rounds.','#ffe9a0');
 mx('Priest',40,'c40','Divine Wrath',['area',4],[['dmg',[34,50]],['curse',6]],'Light from the heavens strikes every foe within 4 squares, and curses them.','#fffbe0');
 mx('Priest',50,'c50','Resurrection','dead',[['revive',.7],['healpct',.5]],'Raises every fallen hero at 70% health and heals the living for half.','#ffd860');
+mx('Priest',30,'c30b','Smiting Light',['area',3],[['dmg',[16,24]],['curse',4]],'Hallowed light on every foe within 3 squares for about 35-50 damage each at level 30, and it curses them.','#fff4c0',2200,16);
 mx('Monk',10,'k10','Pressure Point','front',[['hold',4]],'A finger on the right spot: the foe ahead cannot move for 4 rounds.','#70e0a0');
 mx('Monk',20,'k20','Wholeness of Body','self',[['heal',[50,70]],['cleanse']],'You heal 50-70 and cleanse every affliction on you.','#70e090');
 mx('Monk',30,'k30','Quivering Palm','front',[['dmg',[30,44]],['bleed',6,5],['curse',6]],'A strike that keeps hurting: damage, bleeding and a weakened foe.','#b060e0');
@@ -16360,7 +16363,11 @@ mx('Goat',30,'g30','Polymorph: Goat','front',[['poly','goat',10]],'The foe becom
 mx('Goat',40,'g40','Mountain Charge','front',[['dmg',[40,60]],['hold',3]],'A charge from the high peaks: heavy damage and a stunned foe.','#d0a060');
 mx('Goat',50,'g50','Great Stampede',['area',5],[['dmg',[44,64]],['hold',2]],'A spectral herd thunders through every foe within 5 squares.','#e8c880');
 for(const s of MX)MX_POWER[s.id]={lv:s.lv,act:true,cost:s.cost,type:'mx',name:s.name,d:s.d,col:s.col,mx:s.id,aim:s.aim,fx:s.fx,icn:'sp_'+s.id};
-const MX_BY_CLASS={};for(const s of MX)(MX_BY_CLASS[s.cls]=MX_BY_CLASS[s.cls]||[]).push(s);
+function mxTintIcons(){ // the grand spells borrow the painted picture of a higher spell, recoloured, until they have their own
+  const T={m30b:['m40',[10,24,70],[150,200,255]],z30b:['z40',[20,20,70],[190,200,255]],c30b:['c40',[70,56,10],[255,244,170]]};
+  for(const id in T){if(IMG['sp_'+id])continue;const b=IMG['sp_'+T[id][0]];if(!b||typeof pToneMap!=='function')continue;IMG['sp_'+id]=pToneMap(b,T[id][1],T[id][2],1.6,.9,0)}
+}
+const MX_BY_CLASS={};for(const s of MX)(MX_BY_CLASS[s.cls]=MX_BY_CLASS[s.cls]||[]).push(s); for(const k in MX_BY_CLASS)MX_BY_CLASS[k].sort((p,q)=>p.lv-q.lv||p.price-q.price); // the grand spell stands after the ordinary one of its level
 ['sheep','cow','frog'].forEach(n=>{if(typeof loadImg==='function')loadImg(n,'assets/'+n+'.png')});
 for(const s of MX){if(typeof loadImg==='function')loadImg('sp_'+s.id,'assets/sp_'+s.id+'.png')}
 /* a hero's powers: the class powers, then every spell they have memorised */
@@ -16552,17 +16559,18 @@ function drawSpellShop(){
   txt(`${def.name} the ${def.cls}: ${list.length} spells for sale`,24+4*58+10,50,8,'#d8c88e','left',true,undefined,200);
   txt('A bought spell is memorised and joins the power page.',24+4*58+10,62,7.5,'#a89878','left',false,undefined,210);
   if(G.ssmsg)txt(G.ssmsg,24+4*58+10,80,8,'#e8a070','left',true,undefined,210);
-  const top=106,rh=38;
+  const top=list.length>5?98:106,rh=list.length>5?33:38,cp=list.length>5;
   list.forEach((s,k)=>{
     const y=top+k*rh,known=(h.learned||[]).includes(s.id),open=h.lvl>=s.lv,can=open&&G.gold>=s.price&&!known;
     ctx.save();rrect(ctx,22,y,436,rh-3,5);ctx.fillStyle=known?'rgba(30,50,24,.92)':'rgba(40,18,14,.92)';ctx.fill();ctx.lineWidth=1.4;ctx.strokeStyle=known?'#7ac060':open?'#a88a48':'#5a4a34';ctx.stroke();ctx.restore();
-    const im=IMG['sp_'+s.id];ctx.fillStyle='#120c08';ctx.fillRect(28,y+3,34,34);
-    if(im)ctx.drawImage(im,29,y+4,32,32);else{ctx.fillStyle=s.col;ctx.fillRect(34,y+9,22,22)}
-    ctx.strokeStyle=s.col;ctx.lineWidth=1.2;ctx.strokeRect(28,y+3,34,34);
+    const im=IMG['sp_'+s.id];const is=cp?28:34;ctx.fillStyle='#120c08';ctx.fillRect(28,y+3,is,is);
+    if(im)ctx.drawImage(im,29,y+4,is-2,is-2);else{ctx.fillStyle=s.col;ctx.fillRect(34,y+9,is-12,is-12)}
+    ctx.strokeStyle=s.col;ctx.lineWidth=1.2;ctx.strokeRect(28,y+3,is,is);
     ctx.globalAlpha=open||known?1:.55;
-    txt(s.name,70,y+9,9.5,'#ecdca8','left',true,undefined,200);
-    txt(`Level ${s.lv}  -  ${s.cost} ${def.mpn.slice(0,4).toLowerCase()}`,70,y+19,7,'#9ac8ff','left');
-    wrapText(s.d,310,7.2).slice(0,2).forEach((l,q)=>txt(l,70,y+28+q*8.2,7.2,'#c8bc98','left'));
+    txt(s.name,70,y+9,9.5,'#ecdca8','left',true,undefined,cp?225:200);
+    if(cp){txt(`Lv ${s.lv} - ${s.cost} ${def.mpn.slice(0,4).toLowerCase()}`,300,y+8,7,'#9ac8ff','left');wrapText(s.d,310,7.2).slice(0,2).forEach((l,q)=>txt(l,70,y+16+q*8,7,'#c8bc98','left'))}
+    else{txt(`Level ${s.lv}  -  ${s.cost} ${def.mpn.slice(0,4).toLowerCase()}`,70,y+19,7,'#9ac8ff','left');
+    wrapText(s.d,310,7.2).slice(0,2).forEach((l,q)=>txt(l,70,y+28+q*8.2,7.2,'#c8bc98','left'))}
     ctx.globalAlpha=1;
     if(known)txt('MEMORISED',450,y+13,8,'#9ae0a0','right',true);
     else if(!open)txt(`Needs level ${s.lv}`,450,y+13,8,'#e8905a','right',true);
@@ -16629,18 +16637,22 @@ ga('greathelm','head','Knight\'s Greathelm','Helm',20,4,500,'#b0b4bc',{dodge:.03
 ga('hornhelm','head','Horned Helm','Helm',30,5,900,'#8a8a96',{dmgPct:.05},'A horned helm that makes the wearer look twice as angry. All damage +5%.',{str:18});
 ga('centurion','head','Centurion Helm','Helm',40,6,1500,'#c8a050',{crit:.05},'A bronze helm with a red crest. +5% double hits.',{str:22});
 ga('warlordhelm',"Warlord's Helm",'Helm',50,8,2400,'#d8b860',{dodge:.05,dmgPct:.05},'A gold-trimmed helm worn by great captains. Enemies miss 5% more; damage +5%.',{str:26});
+// master armour for level 30, to go with the master weapons
+ga('drakehelm','head','Drakescale Helm','Helm',30,7,2000,'#c8603a',{dmgPct:.08,crit:.04},'A helm of overlapping red scales. All damage +8% and +4% double hits.',{str:22});
 // body armour
 ga('brigandine','chest','Studded Brigandine','Chest',10,5,450,'#7a5a3a',{regen:.15},'Leather studded with iron. Recover a little health every few rounds.');
 ga('hauberk','chest','Steel Hauberk','Chest',20,7,900,'#a0a8b0',{dodge:.03},'A shirt of steel rings. Enemies miss 3% more.');
 ga('cuirass','chest','Plate Cuirass','Chest',30,9,1600,'#b8bcc4',{regen:.2},'A polished steel breastplate. Recover health steadily.');
 ga('lionplate','chest','Lionplate','Chest',40,12,2600,'#b0b4bc',{thorns:3},'Plate with lion-head pauldrons. Every enemy that strikes you takes 3 damage.');
 ga('goldplate','chest','Gilded Plate','Chest',50,15,4000,'#d8b860',{dodge:.06,regen:.3},'Gold-trimmed steel plate. Enemies miss 6% more and wounds close fast.');
+ga('wyrmplate','chest','Wyrmscale Plate','Chest',30,12,2800,'#4a7a9a',{dodge:.05,regen:.25},'Plate hung with the scales of a great wyrm. Enemies miss 5% more and wounds close steadily.',{str:24});
 // shields
 ga('roundshield','shield','Banded Round Shield','Shield',10,3,300,'#8a6238',{dodge:.04},'A round shield with an iron boss. Enemies miss 4% more.',{str:10});
 ga('kiteshield','shield','Kite Shield','Shield',20,4,600,'#c0c8d0',{dodge:.06},'A long shield with a blue stripe. Enemies miss 6% more.',{str:14});
 ga('spikeshield','shield','Spiked Shield','Shield',30,5,1100,'#707078',{thorns:4},'An iron shield bristling with spikes. Every enemy that strikes you takes 4 damage.',{str:18});
 ga('towershield','shield','Lion Tower Shield','Shield',40,7,1800,'#303038',{dodge:.08},'A tall dark shield with a golden lion. Enemies miss 8% more.',{str:22});
 ga('dragonshield','shield','Dragon Shield','Shield',50,9,2800,'#a07840',{dodge:.1,thorns:6},'A huge bronze shield with a dragon. Enemies miss 10% more and take 6 damage for every blow they land.',{str:26});
+ga('bulwark','shield','Bulwark of Ages','Shield',30,8,2200,'#8a8a96',{thorns:6,dodge:.06},'A slab of black iron older than the kingdom. Enemies miss 6% more and take 6 damage for every blow they land.',{str:22});
 // potions and brews
 function gp(id,n,col,price,d,o){ITEMDEF[id]=Object.assign({n,k:'potion',t:'Potion',ic:'potion',c:col,stack:1,price,d,sw:.26},o)}
 gp('healdraught','Healing Draught','#d03a2a',60,'Restores 60 health.',{heal:60});
@@ -16659,12 +16671,12 @@ if(typeof ART_ITEM_IDS!=='undefined')for(const id of GEAR)ART_ITEM_IDS.push(id);
 /* what the shops sell */
 const GEAR_STOCK={
   sword:()=>['cutlass','wyrmfang','thunderaxe','skullcrusher','stormbow','greatsword','executioner','claymore','kingslayer','splitaxe','wolfaxe','maul','headsman','worldaxe','hunterbow','barbedbow','twinbow','warbow','silverbow'].map(id=>[id,1]),
-  armour:()=>['ironcap','greathelm','hornhelm','centurion','warlordhelm','brigandine','hauberk','cuirass','lionplate','goldplate','roundshield','kiteshield','spikeshield','towershield','dragonshield'].map(id=>[id,1]),
+  armour:()=>['drakehelm','wyrmplate','bulwark','ironcap','greathelm','hornhelm','centurion','warlordhelm','brigandine','hauberk','cuirass','lionplate','goldplate','roundshield','kiteshield','spikeshield','towershield','dragonshield'].map(id=>[id,1]),
   potion:()=>[['healdraught',6],['greaterheal',4],['superiorheal',2],['elixir',1],['manadraught',6],['greatermana',4],['supermana',2],['might',3],['swiftness',3],['ironskin',3],['keeneye',3],['antidote',5],['salve',5],['holywater',2],['sleeptea',3]]
 };
 // the new weapons borrow the painted picture of an older one, recoloured, until they have a painting of their own
 function gearTintIcons(){
-  const T={wyrmfang:['greatsword',[70,44,8],[255,222,120]],thunderaxe:['headsman',[60,12,10],[255,130,100]],skullcrusher:['maul',[10,24,60],[160,208,255]],stormbow:['twinbow',[16,48,20],[190,255,150]]};
+  const T={wyrmfang:['greatsword',[70,44,8],[255,222,120]],thunderaxe:['headsman',[60,12,10],[255,130,100]],skullcrusher:['maul',[10,24,60],[160,208,255]],stormbow:['twinbow',[16,48,20],[190,255,150]],drakehelm:['centurion',[60,16,10],[255,140,100]],wyrmplate:['cuirass',[10,30,50],[150,210,240]],bulwark:['spikeshield',[24,24,30],[200,200,215]]};
   for(const id in T){if(IMG['icn_'+id])continue;const b=IMG['icn_'+T[id][0]];if(!b||typeof pToneMap!=='function')continue;
     const c=pToneMap(b,T[id][1],T[id][2],1.7,.9,0);IMG['icn_'+id]=c;IMG['ic_'+id]=c;IMG['it_'+id]=c}
 }
@@ -17202,7 +17214,7 @@ for(const id in QUESTS){const r=QUESTS[id].reward;if(r&&r.gold&&!r._cut){r.gold=
   }
   if(IMG.signblank){const mkSignText=(base,text)=>mkCanvas(base.width,base.height,(x,w,h)=>{x.drawImage(base,0,0);let fs=Math.round(w*.2);x.font=`bold ${fs}px Georgia,serif`;while(x.measureText(text).width>w*.64&&fs>8){fs--;x.font=`bold ${fs}px Georgia,serif`}x.textAlign='center';x.textBaseline='middle';x.lineWidth=Math.max(2,fs*.18);x.strokeStyle='rgba(20,12,6,.9)';x.strokeText(text,w*.5,h*.3);x.fillStyle='#d8cca4';x.fillText(text,w*.5,h*.3)});IMG.sign_thornwick=mkSignText(IMG.signblank,'THORNWICK');IMG.sign_ironhill=mkSignText(IMG.signblank,'IRONHILL')}
   for(const id of [...ART_ITEM_IDS,...DS_ITEM_IDS]){const im=IMG['icn_'+id];if(!im)continue;IMG['ic_'+id]=im;IMG['it_'+id]=im;if(id==='sundisc')for(let q=1;q<=4;q++)IMG['it_sundisc'+q]=im;if(id==='potion')IMG.potion=im;if(id==='key')IMG.key=im}
-  try{if(typeof gearTintIcons==='function')gearTintIcons()}catch(e){console.error(e)}
+  try{if(typeof gearTintIcons==='function')gearTintIcons()}catch(e){console.error(e)}try{if(typeof mxTintIcons==='function')mxTintIcons()}catch(e){console.error(e)}
   for(const k in LEVELS)if(!LEVEL_NAMES[k]&&LEVELS[k]&&LEVELS[k].name)LEVEL_NAMES[k]=LEVELS[k].name; // the Sand Road, the tomb and the mounds named themselves after the table was filled
   reset();buildUIPatterns();crtInit();makeAtmos();try{G.crt=localStorage.getItem('abbeyCRT')!=='0'}catch(e){G.crt=true}gfxLoad();fit();
   addEventListener('pagehide',()=>{if(G.state==='play'&&G.timers.length===0)writeSave('auto')});
