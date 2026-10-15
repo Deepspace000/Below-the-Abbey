@@ -61,8 +61,8 @@ khNpc('sea_ship_off','The Dawn Walker','yar_ship_dawn',()=>say('The Dawn Walker 
 function emHud(){
   if(G.state!=='play'||G.cut||G.talk||G.menu||(G.inv&&G.inv.open)||G.loot||G.overview||TP)return;
   EM.near=null;
-  if(LEVEL===SN.ID){const I=emNearIsle();if(I&&!hostileNear()){EM.near=I;btnText('disembark','Disembark  ('+I.n+')',110,168,200,22)}}
-  else if(emIslandLv(LEVEL)){const s=emShipPoint();if(s&&Math.hypot(G.P.x-s.x,G.P.y-s.y)<=EM.reach)btnText('embark','Embark',160,168,100,22)}
+  if(LEVEL===SN.ID){const I=emNearIsle();if(I&&!hostileNear()){EM.near=I;btnText('disembark','Disembark',6,180,100,22);txt(I.n,56,174,7.4,'#e8d8a0','center',true)}}
+  else if(emIslandLv(LEVEL)){const s=emShipPoint();if(s&&Math.hypot(G.P.x-s.x,G.P.y-s.y)<=EM.reach)btnText('embark','Embark',6,180,100,22)}
 }
 (function(){const _h=uwHud;uwHud=function(){_h();try{emHud()}catch(e){}}})();
 (function(){const _b=handleBtn;handleBtn=function(id){
