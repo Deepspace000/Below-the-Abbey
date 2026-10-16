@@ -33,18 +33,22 @@ function oakBuild(){
   for(const g of OAK_GLADES)carve(g.x,g.y,g.r);
   for(const [a,b] of OAK_PATHS){const A=G0[a],B=G0[b];let x=A.x,y=A.y;while(x!==B.x||y!==B.y){if(x!==B.x&&(y===B.y||hs(x,y,9)<.5))x+=x<B.x?1:-1;else y+=y<B.y?1:-1;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const xx=x+dx,yy=y+dy;if(xx>0&&yy>0&&xx<W-1&&yy<H-1)rows[yy][xx]='.'}}}
   const open=(x,y)=>x>0&&y>0&&x<W-1&&y<H-1&&rows[y][x]==='.';
+  const carved=new Uint8Array(W*H);for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(rows[y][x]==='.')carved[y*W+x]=1;
   const fm=[];for(let y=0;y<H;y++){fm.push(new Array(W).fill('0'))}
   for(const [a,b] of OAK_PATHS){const A=G0[a],B=G0[b];let x=A.x,y=A.y;while(x!==B.x||y!==B.y){if(x!==B.x&&(y===B.y||hs(x,y,9)<.5))x+=x<B.x?1:-1;else y+=y<B.y?1:-1;fm[y][x]='1'}}
   // the gate back to Oldhaven, in the west edge
-  rows[36][0]='0';rows[36][1]='.';rows[35][1]='.';rows[37][1]='.';
+  rows[36][0]='0';rows[36][1]='.';rows[35][1]='.';rows[37][1]='.'; for(const yy of [35,36,37])carved[yy*W+1]=1;
   const decor=[],items=[],enemies=[],used=new Set();
   const free=(x,y)=>open(x,y)&&!used.has(x+','+y);
   const near=(x,y,rad)=>{for(let r=0;r<=rad;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(free(x+dx,y+dy))return [x+dx,y+dy]}return null};
-  // oaks round the edge of every glade and path
-  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(rows[y][x]!=='T')continue;
-    let nb=false;for(let dy=-1;dy<=1&&!nb;dy++)for(let dx=-1;dx<=1;dx++)if(open(x+dx,y+dy)){nb=true;break}
-    if(!nb)continue;if(hs(x,y,11)<.2)continue;
-    decor.push({k:OAKS[(hs(x,y,12)*5)|0],x,y,block:true,ox:(hs(x,y,13)-.5)*.5,oy:(hs(x,y,14)-.5)*.5,sc:.8+hs(x,y,15)*.4})}
+  // the forest: a thick wall of oaks round every glade and path, so the sky stays open above them (no dark wall behind)
+  const near2=(x,y,r)=>{for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){const xx=x+dx,yy=y+dy;if(xx>0&&yy>0&&xx<W-1&&yy<H-1&&carved[yy*W+xx])return true}return false};
+  const wallCells=[];
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(carved[y*W+x])continue;
+    const d1=near2(x,y,1),d2=!d1&&near2(x,y,2);
+    if(d1||(d2&&hs(x,y,11)<.85)){wallCells.push([x,y]);decor.push({k:OAKS[(hs(x,y,12)*5)|0],x,y,block:true,ox:(hs(x,y,13)-.5)*.5,oy:(hs(x,y,14)-.5)*.5,sc:.8+hs(x,y,15)*.4})}
+    else if(!d2&&hs(x,y,17)<.1)decor.push({k:OAKS[(hs(x,y,12)*5)|0],x,y,block:true,ox:(hs(x,y,13)-.5)*.5,oy:(hs(x,y,14)-.5)*.5,sc:.8+hs(x,y,15)*.4});}
+  for(const [x,y] of wallCells)used.add(x+','+y);
   // a few oaks and bushes standing in the glades
   for(let n=0;n<120;n++){const x=2+((hs(n,1,16)*(W-4))|0),y=2+((hs(n,2,16)*(H-4))|0);if(!free(x,y))continue;
     const gl=OAK_GLADES.find(g=>Math.hypot(x-g.x,y-g.y)<g.r+1);if(gl&&Math.hypot(x-gl.x,y-gl.y)<3)continue;
@@ -59,9 +63,12 @@ function oakBuild(){
   // wolves in the woods, and the Ash Guard camp
   for(let n=0;n<900&&enemies.filter(e=>e.t==='wolf').length<14;n++){const x=10+((hs(n,31,18)*(W-14))|0),y=2+((hs(n,32,18)*(H-4))|0);if(!free(x,y)||Math.hypot(x-6,y-36)<12)continue;used.add(x+','+y);enemies.push({t:'wolf',x,y})}
   {const g=G0.ash;for(let n=0;n<10;n++){const q=near(g.x+((hs(n,41,19)*7-3.5)|0),g.y+((hs(n,42,19)*7-3.5)|0),3);if(!q)continue;used.add(q[0]+','+q[1]);enemies.push({t:'ashguard',x:q[0],y:q[1]})}}
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)rows[y][x]='.';
   const lv={rows:rows.map(r=>r.join('')),start:{x:2,y:36,f:1},enemies,items,decor,fmap:fm.map(r=>r.join('')),floorSet:['ohMeadow','ohGravel','ohLawn','ohMoss'],outdoor:true,day:.98,amb:.9,floor:'ohMeadow',floor2:'ohGravel',ceil:'cloud',name:'The Oakwood',label:'The Oakwood',diff:30,
     portals:[{to:305,x:142,y:73,f:3,tex:'tgate'}]};
   LEVELS[OAK.ID]=lv;LEVEL_NAMES[OAK.ID]='The Oakwood';
+  {const N=W*H,hh=new Float32Array(N).fill(.3),rk=new Float32Array(N),bl=new Uint8Array(N);for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(x===0||y===0||x===W-1||y===H-1)bl[y*W+x]=1;TERRS[OAK.ID]=yarTerrain(W,H,hh,rk,bl)} // a real blue sky above the oaks, as in Oldhaven
+  lv.ceilH=5.2;
 }
 KH_LAZY[OAK.ID]=oakBuild;LEVEL_NAMES[OAK.ID]='The Oakwood';
 {const _f=forestWallFor;forestWallFor=function(n){if(n===OAK.ID&&T_LUSH!==undefined)return T_LUSH;return _f.apply(this,arguments)}}

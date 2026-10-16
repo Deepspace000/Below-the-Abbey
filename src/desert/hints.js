@@ -77,6 +77,10 @@ const QHINT={
   oa7:'Bring 4 pieces of wood from a general store to Master Joss.',
   oa8:'Ysolt keeps the Great Oak in the south-east glade. Answer her three questions honestly.',
   oa9:'Bring Wren to the Great Oak and ask Ysolt to crown her.',
+  ad1:'Bring all six device pieces (the cog, pin, spring, bell, lens and dial) to Captain Aldwyn once Wren is crowned and he has been told.',
+  ad2:'Take the royal cutter home from Captain Aldwyn, then find the Sealed Door in the crypt level where the game began, near the start.',
+  ad3:'Go through the Sealed Door and down the four floors to the Hollow Abbey. Each floor has a stair down at the far end.',
+  ad4:'The Hollow Abbot is in the great room at the bottom. Speak to Brother Sevrin first.',
   shell:'The shell broke in four. Under each of the four islands a pearl-white clam holds a piece in a far corner of the reef. Dive each one, find the clam, and bring the pieces to Brother Aldous.'
 };
 /* a plain fetch or a plain kill count needs no hint; every other quest, and every story quest, gets one */
