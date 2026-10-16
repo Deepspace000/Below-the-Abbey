@@ -265,9 +265,9 @@ function lpBuild(s){
   const BENCH=IMG.kh_ohgard1_3?'kh_ohgard1_3':null;
   for(let y=3;y<H-3;y++){if(wet(y))continue;const g=GY(y),c=xc[y];
     if(g%62===31)lamp(c+(Math.floor(g/62)%2?-3:3),y);
-    if(g%88===44&&BENCH&&!used.has(K(c-3,y))){used.add(K(c-3,y));decor.push({k:BENCH,x:MX(c-3),y,block:false,walk:true,deco:true});
+    if(g%88===44&&BENCH&&!used.has(K(c-3,y))){used.add(K(c-3,y));decor.push({npc:'lp_bench',k:BENCH,x:MX(c-3),y,block:false,walk:true,deco:true});
       const rk=LP_REST_NPC[(hs(g,3,gsd+90)*LP_REST_NPC.length)|0],rkp=KH_KEEPERS[rk[0]];if(rkp&&hs(g,4,gsd+91)<.7&&!used.has(K(c-3,y+1))){used.add(K(c-3,y+1));decor.push({k:khFaceKey(rkp.face),x:MX(c-3),y:y+1,block:false,walk:true,npc:rk[0],sc:rkp.sc||1})}}
-    if(open_(y)&&coast&&g%131===65&&BENCH){const wl=c-6+Math.round(2.2*Math.sin(g*.11)),bx=wl+1;if(!used.has(K(bx,y))&&bx>=3){used.add(K(bx,y));decor.push({k:BENCH,x:MX(bx),y,block:false,walk:true,deco:true});
+    if(open_(y)&&coast&&g%131===65&&BENCH){const wl=c-6+Math.round(2.2*Math.sin(g*.11)),bx=wl+1;if(!used.has(K(bx,y))&&bx>=3){used.add(K(bx,y));decor.push({npc:'lp_bench',k:BENCH,x:MX(bx),y,block:false,walk:true,deco:true});
       const rk3=LP_REST_NPC[(hs(g,5,gsd+92)*LP_REST_NPC.length)|0],kp3=KH_KEEPERS[rk3[0]];if(kp3&&hs(g,6,gsd+93)<.5&&!used.has(K(bx,y+1))){used.add(K(bx,y+1));decor.push({k:khFaceKey(kp3.face),x:MX(bx),y:y+1,block:false,walk:true,npc:rk3[0],sc:kp3.sc||1})}}}
     if(open_(y)&&coast&&g%47===23&&hs(g,7,gsd+80)>=.3){const wl=c-6+Math.round(2.2*Math.sin(g*.11)),bx=wl-8-((hs(g,8,gsd+81)*14)|0),bk=['yar_boat_fish','yar_boat_row','yar_boat_dhow'][(hs(g,9,gsd+82)*3)|0];if(bx>=4&&IMG[bk]){used.add(K(bx,y));decor.push({k:bk,x:MX(bx),y,block:true,deco:true,sc:.9})}}
     if(g%104===52){const q=Math.floor(g/104),sg=q%2?-1:1,x=c+sg*4;if(!used.has(K(x,y))&&!used.has(K(x,y+1))){used.add(K(x,y));used.add(K(x+sg,y+1));used.add(K(x,y+1));
@@ -281,7 +281,7 @@ function lpBuild(s){
     const oaks=cl.side>0?[[cl.cx-2,cy-1],[cl.cx+2,cy+1],[cl.cx,cy-3]]:[[xc[cy]-6,cy-1],[xc[cy]-9,cy+2]];
     oaks.forEach(([x,y],j)=>{if(x<1||used.has(K(x,y)))return;used.add(K(x,y));decor.push({k:OAKS[(j+(GYc%5))%5],x:MX(x),y,block:true,sc:mount?1.3:1.7,ox:0,oy:0})});
     for(let q=0;q<26;q++){const x=(cl.cx||xc[cy]-7)+Math.round((hs(q,GYc,gsd+60)-.5)*9),y=cy+Math.round((hs(q,GYc,gsd+61)-.5)*9);const sc=scenery.length;flower(x,y,.6);void sc}
-    const bx=(cl.cx||xc[cy]-7)+3,by=cy+2;if(BENCH&&!used.has(K(bx,by))){used.add(K(bx,by));decor.push({k:BENCH,x:MX(bx),y:by,block:false,walk:true,deco:true})}
+    const bx=(cl.cx||xc[cy]-7)+3,by=cy+2;if(BENCH&&!used.has(K(bx,by))){used.add(K(bx,by));decor.push({npc:'lp_bench',k:BENCH,x:MX(bx),y:by,block:false,walk:true,deco:true})}
   }
   /* ---- the knights who ride along, and the ends of the stretch ---- */
   const walkers=[],kp=KH_KEEPERS.lp_knight;
@@ -374,3 +374,10 @@ function lpSwapTick(){
 }
 {const _t=seaTick;seaTick=function(dt){_t.apply(this,arguments);try{lpFadeTick(dt);lpSwapTick()}catch(e){console.error(e)}}}
 {const _d=drawTport;drawTport=function(){_d.apply(this,arguments);if(LPF.on&&LPF.a>0){ctx.fillStyle='rgba(0,0,0,'+LPF.a.toFixed(3)+')';ctx.fillRect(0,0,480,320)}}}
+
+/* ---- the benches on the Land Path: the party can sit, and the music of Greendale Forest plays until they stand up ---- */
+khNpc('lp_bench','A wooden bench','kh_ohgard1_3',()=>say('A plain wooden bench beside the path. The view is good, and nobody is in a hurry.',[
+  ['Sit down.',()=>{G.sit={t:G.time+150};G.clock=(G.clock||0)+20;let healed=0;for(const h of G.heroes)if(h.alive!==false&&h.hp>0&&h.hp<h.max){h.hp=Math.min(h.max,h.hp+Math.ceil(h.max*.15));healed=1}
+    msg('The party sits. For a while nobody says anything, and somewhere a gentle tune begins.','#b8e8c0');if(healed)msg('The rest does you good.','#a8d8a8');return null}],
+  ['Walk on.',()=>null]]));
+{const _dsl=desertStep;desertStep=function(x,y){if(G.sit){G.sit=null;msg('You stand up and walk on.','#c8d8c0')}_dsl.apply(this,arguments)}}

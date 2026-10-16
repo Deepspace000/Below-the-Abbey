@@ -340,7 +340,8 @@ function hlDress(c){
   const placedP=[],placedF=[];let cap=999,cnt=0;
   const spaced=(arr,x,y,r)=>!arr.some(q=>Math.max(Math.abs(q[0]-x),Math.abs(q[1]-y))<r);
   const pic=(kk,x,y,wd,ex)=>{if(used.has(key(x,y))||cnt>=cap||!spaced(placedP,x,y,2))return false;used.add(key(x,y));placedP.push([x,y]);cnt++;decor.push(Object.assign({k:kk,x,y,wd,pic:1,block:false,walk:true,deco:true},ex||{}));return true};
-  const flr=(kk,x,y,ex)=>{if(used.has(key(x,y))||cnt>=cap||!spaced(placedF,x,y,2))return false;used.add(key(x,y));placedF.push([x,y]);cnt++;decor.push(Object.assign({k:kk,x,y,block:false,walk:true,deco:true},ex||{}));return true};
+  const narrow=(x,y)=>(isW(x-1,y)&&isW(x+1,y))||(isW(x,y-1)&&isW(x,y+1)); // a cell with walls on two opposite sides is a one-block passage: nothing stands there
+  const flr=(kk,x,y,ex)=>{if(used.has(key(x,y))||narrow(x,y)||cnt>=cap||!spaced(placedF,x,y,2))return false;used.add(key(x,y));placedF.push([x,y]);cnt++;decor.push(Object.assign({k:kk,x,y,block:false,walk:true,deco:true},ex||{}));return true};
   const slots=r=>{const s=[];for(let x=r.x0;x<=r.x1;x++){s.push([x,r.y0,[0,-1]],[x,r.y1,[0,1]])}for(let y=r.y0;y<=r.y1;y++)s.push([r.x0,y,[-1,0]],[r.x1,y,[1,0]]);return shuf(s.filter(([x,y,w])=>isW(x+w[0],y+w[1])&&!used.has(key(x,y))),r.x0+r.y0)};
   const inner=r=>{const s=[];for(let y=r.y0+1;y<=r.y1-1;y++)for(let x=r.x0+1;x<=r.x1-1;x++)if(!used.has(key(x,y)))s.push([x,y]);return shuf(s,r.x1+r.y1)};
   // a table stands in a corner of the room (or, if a lantern has the corner, the cell beside it)
