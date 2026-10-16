@@ -159,10 +159,12 @@ function hlBuild(k){
   const kinds=kk<6?['hlgoblin','hlgoblin','hlslime']:kk<13?['hlgoblin','hlslime','hlorc','hlgoblin']:['hlorc','hlorc','hlgoblin','hlslime'];
   if(!violet)for(let i=0;i<Math.max(5,Math.min(13,Math.round(cells.length/38)));i++){const c=cells[R(900+i*13,cells.length)];if(c&&!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);enemies.push({t:kinds[R(950+i,kinds.length)],x:c[0],y:c[1]})}}
   for(let i=0;i<3&&cells.length;i++){const c=cells[R(100+i*7,cells.length)];if(!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);items.push({k:'potion',x:c[0],y:c[1]})}}
+  OH_STY.hlsecret=Object.assign({},OH_STY.castle2||OH_STY.gold,{zoom:3.6,contrast:2.0,tint:[110,150,255,.0]});const secretCh=violet?'#':ch(TM.make('plain','hlsecret',CH).gid);
+  const dress={k,id,rows,W,H,rooms,myst,far,used,decor,enemies,d,violet,top,R,hs,secretCh,items};hlDress(dress);
   const portals=[{to:k===0?HL.CAV:violet?HL.BASE+HL.N-1:id-1,x:0,y:0,f:2,tex:'tomb'}];
   if(up)portals[1]={to:id+1,x:0,y:0,f:0,tex:'tomb'};
   const lv={rows,start,enemies,items,decor,fmap:(()=>{const f=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];f.push(s)}return f})(),
-    floorSet:['tombslab','sand','tombgold','tombdark','tombred'],floor:'tombslab',ceil:'tomb',name:LEVEL_NAMES[id],label:violet?'The Violet Tower':'The Orange Tower',diff:36+kk,portals,lights,chars,amb:.05,day:0,ceilH:CH,
+    floorSet:['tombslab','sand','tombgold','tombdark','tombred'],floor:'tombslab',ceil:'tomb',name:LEVEL_NAMES[id],label:violet?'The Violet Tower':'The Orange Tower',diff:36+kk,portals,lights,chars,_trig:dress.lv_trig,_man:dress.lv_man,amb:.05,day:0,ceilH:CH,
     mapNames:rooms.map((r,i)=>({t:i===0?'Stair ('+(k+1)+')':r===myst&&!violet?'The Strange Room':r===far&&up?'The Stair Up':top&&r===far?'The Spire':'Hall',x:mid(r)[0],y:r.y0-1,k:'place'})),_up:up,_start:start};
   LEVELS[id]=lv;
 }
@@ -234,3 +236,163 @@ for(const id of [HL.CAV,HL.VIOLET,...Array.from({length:HL.N},(_,k)=>HL.BASE+k)]
   if(n>=HL.BASE&&n<HL.BASE+HL.N)F.hlTop=Math.max(F.hlTop||0,n-HL.BASE+1);
   if(n===HL.VIOLET)F.hlViolet=1}}
 
+
+/* ==========================================================================
+   THE HAUNTED CASTLE. The rulers who lived here went mad, and the rooms show it: gaunt portraits, candles that nobody lit, a cup of poison on a table,
+   coffins, chains, notes and books with dreadful entries, hands that reach out of the wall, a thin man who is never where he was, a voice that calls
+   for help, lights that go out on certain stones, a witch who screams, and a fireplace with a face in it.
+   ========================================================================== */
+for(const n of ['pt0','pt1','pt2','pt3','pt4','pt5','p_candle','p_poison','p_apple','p_window','p_alcove','p_chains','p_mirror','p_coffin','p_cage','p_throne','p_banner','p_armour','p_shelf','p_lectern','p_desk','p_note','p_rack','p_ghost','p_feast','p_tomb','hands','handsA','gent','gentA','witch','witchA','fire','fireA'])loadImg('hl_'+n,'assets/hl_'+n+'.png');
+Object.assign(NPC_H,{hl_pt0:.95,hl_pt1:.95,hl_pt2:.95,hl_pt3:.95,hl_pt4:.95,hl_pt5:.95,hl_p_candle:.8,hl_p_poison:.55,hl_p_apple:.5,hl_p_window:1.4,hl_p_alcove:.8,hl_p_chains:1.3,hl_p_mirror:1.25,hl_p_coffin:.95,hl_p_cage:.8,hl_p_throne:1.05,hl_p_banner:1.3,hl_p_armour:1.0,hl_p_shelf:1.15,hl_p_lectern:.8,hl_p_desk:.6,hl_p_note:.45,hl_p_rack:.4,hl_p_ghost:.9,hl_p_feast:.45,hl_p_tomb:.4,hl_fire:1.0,hl_gent:1.0});
+ENEMY_DEF.hlhands={name:'Clawing Hands',hp:150,dmg:[9,15],hit:.82,w:.95,img:'hl_hands',xp:350,gold:[0,0],speed:1,verb:'rakes',
+  act:e=>{if(Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)===1){enemyAttack(e);return 290}return 220}};
+ENEMY_DEF.hlghost={name:'Wailing Ghost',hp:140,dmg:[8,14],hit:.76,w:.6,img:'hl_p_ghost',xp:650,gold:[0,0],speed:1,fly:true,verb:'chills',aboveParty:1};
+ENEMY_DEF.hlwitch={name:'The Screaming Witch',hp:900,dmg:[14,24],hit:.8,w:.85,img:'hl_witch',xp:6000,gold:[200,520],speed:1,ranged:4,verb:'blasts',
+  act:e=>{if(e.alert){G.hlStrobe=!G.hlStrobe;hlLights(G.hlStrobe);G.shake=.25;if(Math.random()<.5)msg(['The witch SCREAMS. The lights stutter.','"MINE! ALL OF IT MINE!" The torches flash on and off.','The witch shrieks and the whole room flickers.'][(Math.random()*3)|0],'#e0a8ff')}return 0}};
+function hlLights(out){G.hlOut=out;for(const l of LIGHTS)l.out=out}
+const hlLive=()=>{const a=[];G.heroes.forEach((h,i)=>{if(h.alive!==false&&h.hp>0)a.push(i)});return a};
+function hlHurt(hi,d){const h=G.heroes[hi];h.hp-=d;h.hurt=1;G.shake=.3;sfx('hurt');addFloat(portraitX(hi)+19,250,'-'+d,'#ff6a5a');
+  if(h.hp<=0){h.hp=0;h.alive=false;msg(HERO_DEF[hi].name+' has fallen!','#ff8a7a');try{bondFall(hi)}catch(x){}if(G.sel===hi)nextHero()}}
+function hlSpawn(t,x,y){const st=enemyStat(t,lvlHere());G.enemies.push({id:G.enemies.length,t,lvl:lvlHere(),x,y,rx:x,ry:y,hp:st.hp,maxhp:st.hp,alert:true,chilled:0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100})}
+/* ---- notes and books ---- */
+const HL_NOTES=[
+ 'A page torn from a diary. "Day 40. The King no longer eats. He sits at the long table and talks to the empty chairs. I think the chairs answer."',
+ 'A note in a shaking hand. "Do not drink from the golden cup. I did. I am still here, but I am no longer warm."',
+ 'A note. "The Queen smiles all day now. Nobody has seen her blink since the winter."',
+ 'A note. "The portraits were painted from life. The painter did not leave the room afterwards."',
+ 'A note. "I counted the floors. There are twenty, each one smaller than the last. The stair does not go up. It goes in."',
+ 'A note. "The hands in the wall are quick but slow to wake. Do not stop beside them."',
+ 'A note. "The child-king ordered every mirror covered. Then he ordered them uncovered. Then he stopped speaking and only pointed."',
+ 'A note. "If you hear someone calling for help in the dark, do not go. I went. I knew the voice. It was mine."',
+ 'A note. "The lights go out on certain stones. Stand still and count to ten, and they come back."',
+ 'A note. "The witch was a guest. Then she was a prisoner. Now the castle is her guest, and she is a poor host."',
+ 'A note. "Duke Aldric had himself buried alive to see if the dead could rule. They can."',
+ 'A note. "A thin man in a black coat has stood behind me for three days. When I turn, nobody is there. When I stop turning, he is."',
+ 'A note. "Every coffin on this floor is open. I have counted them three times. The number changes."',
+ 'A note. "The wizard at the top is not a ruler. He is the one who locked them all in. Answer him kindly."',
+ 'A note scratched in many hands. "I wrote my name on the wall so I would remember it. In the morning there were a hundred other names, all mine."',
+ 'A note. "Spikes, darts, plates in the floor. The rulers loved a joke. Walk where the dust is thick."',
+ 'A note. "One wall in this hall is the wrong colour. The rulers kept what they loved behind it, and a lever to open it."'];
+const HL_BOOKS=[
+ '"On the Taste of Crowns". A treatise on which rulers tasted best. The margins are full of tiny teeth marks.',
+ '"The Obedient Dead". A manual. Chapter one is how to ask a corpse politely. Chapter two is what to do when it asks you.',
+ '"Portraits, and What They Take". Each sitting takes a little of the sitter\'s face. By the sixth there is none left.',
+ '"Seventy Ways to Poison a Feast". The last page, the one about antidotes, has been torn out.',
+ '"A Gardener\'s Guide to the Hands in Walls". Water them with whispers. Prune with a candle.',
+ '"The Book of Staying". Every page says "Stay." The last page says "You stayed."',
+ '"The King\'s Own Cookbook". Recipes for a feast with one empty plate. The empty plate is always yours.',
+ '"Mirrors, a Warning". Never look into a mirror that looks at you first.',
+ '"On the Count of Stairs". Climb forty steps and the number is forty. Climb them again and it is thirty-nine. Someone is taking them.',
+ '"Lullabies for the Dead". The tune is slow and quiet. Reading it, you notice you are humming it.'];
+HL_NOTES.forEach((t,i)=>khNpc('hl_note'+i,'A pinned note','hl_p_note',()=>say(t,[['Put it back.',()=>null]])));
+HL_BOOKS.forEach((t,i)=>khNpc('hl_book'+i,'An old book','hl_p_lectern',()=>say(t,[['Close the book.',()=>null]])));
+const HL_WARN=['"Turn back. Turn back. The floor above is hungry."','"Do not trust the voice in the dark. It wants company."','"He stands behind you on the stair. Do not look."','"Do not drink what the last ruler poured."','"At the top he asks you what you want. Want nothing."'];
+khNpc('hl_fireplace','A fireplace with a face in it','hl_fire',()=>{const F=HLF();F.fw=((F.fw||0)+1);return say('The fire gutters, and a pale face rises out of the flames. Its mouth moves. '+HL_WARN[(F.fw-1)%HL_WARN.length]+' Then it sinks back into the coals.',[['Step back.',()=>null]])});
+khNpc('hl_poisoncup','A golden cup','hl_p_poison',()=>say('A golden cup on a small table. The liquid inside is green and faintly glowing, and it steams. A skull sits beside it, watching.',[
+  ['Drink it.',()=>{const l=hlLive();if(l.length){const hi=l[0];hlHurt(hi,18);try{afflInflict('poisoned',hi)}catch(e){}msg(HERO_DEF[hi].name+' drinks it, and is poisoned.','#70e070')}return null}],
+  ['Pour it on the floor.',()=>{msg('The green liquid hisses on the stone, and the stone stays black.','#a8d8a8');return null}],['Leave it.',()=>null]]));
+khNpc('hl_poisonapple','A glossy red apple','hl_p_apple',()=>say('One perfect red apple on a silver plate. It is shiny, ripe and cold, and there is a faint green sheen under the skin.',[
+  ['Eat it.',()=>{const l=hlLive();if(l.length){const hi=l[l.length-1];hlHurt(hi,24);try{afflInflict('poisoned',hi)}catch(e){}msg(HERO_DEF[hi].name+' bites the apple and collapses, retching.','#70e070')}return null}],
+  ['Leave it.',()=>null]]));
+khNpc('hl_gent','A thin man in a black coat','hl_gent',()=>yrLines('hl_gent',['"Good evening. You are late. They have been waiting."','"I was here a moment ago. I am always here a moment ago."','"Do you like the portraits? I sat for the fourth one. It took a long time. It is still taking."']));
+/* ---- what the party says to one another ---- */
+const HL_CHAT=[
+ ['Does anyone else feel the walls are listening?','Only the walls. The portraits are doing the watching.','Please do not say that.'],
+ ['Who builds a castle like this and then leaves nobody in it?','Somebody is in it. I just have not seen where.','I do not like how quiet it is. Even the goblins are quiet.'],
+ ['Whoever ruled here was not well. Look at the faces.','Those candles are still lit. Who lights them?','I am choosing not to find out.'],
+ ['Something just breathed behind me.','That was me.','Are you sure?','...Mostly.'],
+ ['How many floors did the note say?','Twenty. Each one smaller than the last.','Then the top is very small, and very close to whatever lives there.']];
+function hlChat(n){const l=hlLive();if(l.length<2)return;HL_CHAT[n%HL_CHAT.length].forEach((t,i)=>later(i*1700,()=>msg(HERO_DEF[l[i%l.length]].name+': "'+t+'"','#c8d8ff')))}
+const HL_WHISPER=['Somewhere above, a chair scrapes across a stone floor.','A cold hand of air brushes the back of your neck.','Far off, somebody is laughing, very softly.','Every candle in the room leans the same way, then straightens.','A whisper in the wall says your name. It sounds like it is smiling.','Something knocks three times from inside the stone.'];
+/* ---- what happens on the stones ---- */
+function hlTrap(t){
+  const L=hlLive();if(!L.length)return;const hi=L[(Math.random()*L.length)|0];
+  if(t.k==='spikes'){msg('A plate clicks under your foot. Spikes shoot up from the floor!','#ffb08a');hlHurt(hi,6+(LEVEL-HL.BASE)*2)}
+  else if(t.k==='darts'){msg('A hiss from the wall. Little poisoned darts fly out!','#b8e8a0');hlHurt(hi,5+(LEVEL-HL.BASE));try{afflInflict('poisoned',hi)}catch(e){}}
+  else if(t.k==='dark'){hlLights(true);G.hlDark=14;msg('The lights gutter and go out. The dark presses in close.','#b8a8d8')}
+  else if(t.k==='chat')hlChat(t.n);
+  else if(t.k==='voice')msg(t.n?'"Please... I am hurt... come closer... please..."':'From somewhere ahead, a faint voice: "Help... help me..."','#d8e8ff');
+  else if(t.k==='ghost'){msg('The voice stops. Then it screams, and a pale shape rushes out of the air!','#e8f0ff');sfx('hit');
+    for(const [dx,dy] of [[0,-1],[1,0],[-1,0],[0,1],[0,-2],[2,0],[-2,0],[0,2]]){const x=G.P.x+dx,y=G.P.y+dy;if(!cellBlocked(x,y)&&!enemyAt(x,y)){hlSpawn('hlghost',x,y);break}}}
+}
+function hlStep(nx,ny){
+  if(LEVEL<HL.BASE||LEVEL>=HL.BASE+HL.N)return;const L=LEVELS[LEVEL];if(!L)return;const F=HLF();F.tr=F.tr||{};
+  for(const t of (L._trig||[])){if(t.x!==nx||t.y!==ny)continue;const key=LEVEL+':'+nx+','+ny;if(F.tr[key])continue;F.tr[key]=1;hlTrap(t)}
+  if(G.hlOut&&!G.hlStrobe){if(--G.hlDark<=0){hlLights(false);msg('The torches flare back to life.','#ffd8a0')}}
+  if(G.hlStrobe!==undefined&&!G.enemies.some(e=>e.t==='hlwitch'&&e.hp>0)){G.hlStrobe=undefined;hlLights(false)} // the witch is dead: the lights stop
+  G.hlSteps=(G.hlSteps||0)+1;if(G.hlSteps%31===0)msg(HL_WHISPER[(G.hlSteps/31|0)%HL_WHISPER.length],'#b8b0d8');
+  const m=L._man;if(m){const d=G.decor.find(q=>q.npc==='hl_gent');if(d){const dist=Math.abs(d.x-nx)+Math.abs(d.y-ny);
+    if(!d.hidden){if(dist<=2){d.hidden=true;m.t=0;msg('The thin man is gone. There was nobody there.','#b8b0d8')}}
+    else if(++m.t>=4){const w=m.wp[(m.i=(m.i+1)%m.wp.length)];if(Math.abs(w[0]-nx)+Math.abs(w[1]-ny)>=4){d.x=w[0];d.y=w[1];d.hidden=false;msg('Someone is standing in the dark ahead, quite still.','#b8b0d8')}}}}
+}
+{const _ds=desertStep;desertStep=function(x,y){_ds.apply(this,arguments);try{hlStep(x,y)}catch(e){console.warn('hlStep',e)}}}
+{const _oe2=ohEnter;ohEnter=function(n){G.hlOut=false;G.hlStrobe=undefined;G.hlSteps=0;_oe2.apply(this,arguments)}}
+/* ---- dressing the rooms ---- */
+function hlDress(c){
+  const {k,rows,W,H,rooms,myst,far,used,decor,enemies,d,violet,top,R,hs,secretCh,items}=c;if(violet)return;
+  const isW=(x,y)=>{const ch=rows[y]&&rows[y][x];return ch!==undefined&&ch!=='.'&&ch!=='0'&&ch!=='1'},isF=(x,y)=>rows[y]&&rows[y][x]==='.';
+  const key=(x,y)=>x+','+y,shuf=(a,s)=>a.map(v=>[hs(v[0]*3+s,v[1]*5+k,41),v]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
+  const pic=(kk,x,y,wd,ex)=>{if(used.has(key(x,y)))return false;used.add(key(x,y));decor.push(Object.assign({k:kk,x,y,wd,pic:1,block:false,walk:true,deco:true},ex||{}));return true};
+  const flr=(kk,x,y,ex)=>{if(used.has(key(x,y)))return false;used.add(key(x,y));decor.push(Object.assign({k:kk,x,y,block:false,walk:true,deco:true},ex||{}));return true};
+  const slots=r=>{const s=[];for(let x=r.x0;x<=r.x1;x++){s.push([x,r.y0,[0,-1]],[x,r.y1,[0,1]])}for(let y=r.y0;y<=r.y1;y++)s.push([r.x0,y,[-1,0]],[r.x1,y,[1,0]]);return shuf(s.filter(([x,y,w])=>isW(x+w[0],y+w[1])&&!used.has(key(x,y))),r.x0+r.y0)};
+  const inner=r=>{const s=[];for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)if(!used.has(key(x,y)))s.push([x,y]);return shuf(s,r.x1+r.y1)};
+  const wallArt=['hl_p_window','hl_p_alcove','hl_p_banner','hl_p_chains'];
+  const note=(r,j)=>{const s=slots(r)[0];if(s)pic('hl_p_note',s[0],s[1],s[2],{npc:'hl_note'+((k*5+j)%HL_NOTES.length),bob:.6})};
+  const themes=['gallery','banquet','crypt','study','prison','throne','haunted'];
+  let manDone=false;
+  rooms.forEach((r,i)=>{
+    if(r===myst||r.x1-r.x0<2||r.y1-r.y0<2)return;
+    const th=r===far&&top?'throne':i===0?'gallery':themes[(k*3+i*2+R(60+i,3))%7],w=r.x1-r.x0+1,h=r.y1-r.y0+1,S=slots(r),I=inner(r);
+    if(th==='gallery'){let j=0;for(const [x,y,wd] of S){if(j>=Math.min(7,w+h))break;if((x+y)%2)continue;pic(j%4===3?wallArt[(k+j)%4]:'hl_pt'+((k+i+j)%6),x,y,wd,{bob:j%4===3?.3:.5});j++}if(I[0])flr('hl_p_candle',I[0][0],I[0][1])}
+    else if(th==='banquet'){if(w>=5&&h>=4)flr('hl_p_feast',(r.x0+r.x1)>>1,(r.y0+r.y1)>>1);else if(I[0])flr('hl_p_feast',I[0][0],I[0][1]);
+      if(I[1])flr('hl_p_candle',I[1][0],I[1][1]);if(I[2])flr('hl_p_poison',I[2][0],I[2][1],{npc:'hl_poisoncup'});if(I[3]&&R(70+i,10)<7)flr('hl_p_apple',I[3][0],I[3][1],{npc:'hl_poisonapple'});
+      let j=0;for(const [x,y,wd] of S){if(j>=4)break;if(j<2)flr('hl_p_armour',x,y);else pic('hl_p_window',x,y,wd,{bob:.35});j++}}
+    else if(th==='crypt'){let j=0;for(const [x,y,wd] of S){if(j>=6)break;if(j<2)flr('hl_p_coffin',x,y);else if(j===2)flr('hl_p_tomb',x,y);else pic(j%2?'hl_p_alcove':'hl_p_chains',x,y,wd,{bob:j%2?.35:.9});j++}
+      note(r,i);if(I[0])enemies.push({t:'hlghost',x:I[0][0],y:I[0][1]})}
+    else if(th==='study'){let j=0;for(const [x,y,wd] of S){if(j>=5)break;if(j<2)flr('hl_p_shelf',x,y,{npc:'hl_book'+((k*3+j+i)%HL_BOOKS.length)});else if(j===2)flr('hl_p_lectern',x,y,{npc:'hl_book'+((k*7+i)%HL_BOOKS.length)});else pic('hl_p_window',x,y,wd,{bob:.35});j++}
+      if(I[0])flr('hl_p_desk',I[0][0],I[0][1],{npc:'hl_note'+((k*3+i+4)%HL_NOTES.length)});if(I[1])flr('hl_p_candle',I[1][0],I[1][1])}
+    else if(th==='prison'){let j=0;for(const [x,y,wd] of S){if(j>=6)break;if(j<2)flr('hl_p_cage',x,y);else if(j===2)flr('hl_p_rack',x,y);else pic(j%2?'hl_p_alcove':'hl_p_chains',x,y,wd,{bob:j%2?.35:.9});j++}note(r,i+3)}
+    else if(th==='throne'){const mx=(r.x0+r.x1)>>1;flr('hl_p_throne',mx,r.y0);for(const dx of [-2,2,-1,1]){if(isW(mx+dx,r.y0-1))pic('hl_p_banner',mx+dx,r.y0,[0,-1],{bob:.35})}
+      flr('hl_p_armour',r.x0,r.y0+1);flr('hl_p_armour',r.x1,r.y0+1);if(I[0])flr('hl_p_candle',I[0][0],I[0][1]);pic('hl_pt'+(k%6),r.x0+1,r.y0,[0,-1],{bob:.9})}
+    else if(th==='haunted'){let j=0;const fp=S[0];if(fp)pic('hl_fire',fp[0],fp[1],fp[2],{npc:'hl_fireplace',bob:0});
+      for(const [x,y,wd] of S.slice(1)){if(j>=4)break;pic(j%2?'hl_p_mirror':'hl_p_window',x,y,wd,{bob:j%2?.1:.35});j++}if(I[0])enemies.push({t:'hlghost',x:I[0][0],y:I[0][1]});
+      if(!manDone&&k%2===1&&I[1]){manDone=true;flr('hl_gent',I[1][0],I[1][1],{npc:'hl_gent'})}}
+  });
+  // secret rooms: one wall in a hall is the wrong colour and has a lever on it. Behind it is a small chamber with a chest
+  {let made=0;const want=1+(k%3===0?1:0),setC=(x,y,ch)=>{rows[y]=rows[y].slice(0,x)+ch+rows[y].slice(x+1)};
+   for(const r of shuf(rooms.filter(q=>q!==myst&&q.x1-q.x0>=2),77)){if(made>=want)break;
+     for(const [x,y,wd] of slots(r)){const px=-wd[1],py=wd[0];let ok=true;
+       for(let t=1;t<=5&&ok;t++)for(let sd=-2;sd<=2&&ok;sd++){const cx=x+wd[0]*t+px*sd,cy=y+wd[1]*t+py*sd;if(cx<1||cy<1||cx>=W-1||cy>=H-1||!isW(cx,cy)||used.has(key(cx,cy)))ok=false}
+       if(!ok)continue;
+       for(let t=2;t<=4;t++)for(let sd=-1;sd<=1;sd++){const cx=x+wd[0]*t+px*sd,cy=y+wd[1]*t+py*sd;setC(cx,cy,'.');used.add(key(cx,cy))}
+       const dx=x+wd[0],dy=y+wd[1];setC(dx,dy,secretCh);used.add(key(dx,dy));
+       decor.push({k:'lever',x,y,wd:[wd[0],wd[1]],opens:[[dx,dy]],idx:made,block:false,deco:true});used.add(key(x,y));
+       const bx=x+wd[0]*4,by=y+wd[1]*4;
+       decor.push({k:'chest',x:bx,y:by,block:true,magic:1});flr('hl_p_candle',x+wd[0]*3+px,y+wd[1]*3+py);flr('hl_p_candle',x+wd[0]*3-px,y+wd[1]*3-py);
+       pic('hl_p_note',bx+px,by+py,[wd[0],wd[1]],{npc:'hl_note16',bob:.6});if(items)items.push({k:'potion',x:x+wd[0]*3,y:y+wd[1]*3});
+       made++;break}}}
+  // the witch: a room of her own on some levels
+  if(k%5===2){const r=rooms.find((q,i)=>i>=2&&q!==myst&&q!==far&&q.x1-q.x0>=3);if(r){const cx=(r.x0+r.x1)>>1,cy=(r.y0+r.y1)>>1;if(!used.has(key(cx,cy))){enemies.push({t:'hlwitch',x:cx,y:cy});used.add(key(cx,cy))}}}
+  // corridors: a picture or a chain now and then, so the passages are not bare
+  const inRoom=(x,y)=>rooms.some(r=>x>=r.x0&&x<=r.x1&&y>=r.y0&&y<=r.y1);
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!isF(x,y)||inRoom(x,y)||used.has(key(x,y))||hs(x*7,y*3,k+88)>.14)continue;
+    const dir=[[0,-1],[0,1],[-1,0],[1,0]].find(([a,b])=>isW(x+a,y+b)&&isF(x-a,y-b));if(!dir)continue;
+    const kinds=['hl_pt'+((x+y+k)%6),'hl_p_chains','hl_p_window','hl_p_alcove','hl_p_banner'],kd=kinds[(x*3+y)%5];pic(kd,x,y,dir,{bob:kd==='hl_p_chains'?.9:kd.startsWith('hl_pt')?.5:.35})}
+  // hands that reach out of a niche in the passage wall
+  const nh=Math.min(5,1+((k/4)|0));let placed=0;
+  const cand=[];for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!isF(x,y)||inRoom(x,y)||used.has(key(x,y))||d[y*W+x]<8)continue;
+    for(const [a,b] of [[0,-1],[0,1],[-1,0],[1,0]]){const nx=x+a,ny=y+b;if(isW(nx,ny)&&isF(x-a,y-b)&&isW(nx+a,ny+b)&&isW(nx+b,ny+a)&&isW(nx-b,ny-a)&&!used.has(key(nx,ny)))cand.push([nx,ny])}}
+  for(const [nx,ny] of shuf(cand,9)){if(placed>=nh)break;if(used.has(key(nx,ny)))continue;rows[ny]=rows[ny].slice(0,nx)+'.'+rows[ny].slice(nx+1);used.add(key(nx,ny));enemies.push({t:'hlhands',x:nx,y:ny});placed++}
+  // the triggers: plates, darkness, a voice, the party talking
+  const trig=[],cells=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(isF(x,y)&&d[y*W+x]>5&&!used.has(key(x,y)))cells.push([x,y]);
+  const pick=i=>cells.length?cells[(hs(i*17,k*3,29)*cells.length)|0]:null;
+  const tp=(kk,i,ex)=>{const c0=pick(i);if(c0)trig.push(Object.assign({k:kk,x:c0[0],y:c0[1]},ex||{}))};
+  for(let i=0;i<2+((k/5)|0);i++)tp(i%2?'darts':'spikes',100+i);
+  for(let i=0;i<1+(k%2);i++)tp('dark',200+i);
+  for(let i=0;i<2;i++)tp('chat',300+i,{n:k+i*2});
+  if(k%3===1){const r=rooms.find((q,i)=>i>=2&&q!==myst&&q.x1-q.x0>=3);if(r){const cs=[];for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)if(isF(x,y)&&d[y*W+x]>=0)cs.push([x,y,d[y*W+x]]);cs.sort((p,q)=>p[2]-q[2]);
+    if(cs.length>=3)trig.push({k:'voice',n:0,x:cs[0][0],y:cs[0][1]},{k:'voice',n:1,x:cs[cs.length>>1][0],y:cs[cs.length>>1][1]},{k:'ghost',x:cs[cs.length-1][0],y:cs[cs.length-1][1]})}}
+  c.lv_trig=trig;
+  const wp=rooms.filter((q,i)=>i>0&&q!==myst).slice(0,3).map(q=>[(q.x0+q.x1)>>1,q.y0]).filter(p=>isF(p[0],p[1]));
+  if(manDone&&wp.length>=2)c.lv_man={i:0,t:0,wp};
+}
