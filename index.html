@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.206';
+const VERSION='3.207';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -17278,7 +17278,7 @@ for(const n of ['pt0','pt1','pt2','pt3','pt4','pt5','p_candle','p_poison','p_app
 Object.assign(NPC_H,{hl_pt0:.95,hl_pt1:.95,hl_pt2:.95,hl_pt3:.95,hl_pt4:.95,hl_pt5:.95,hl_p_candle:.8,hl_p_poison:.55,hl_p_apple:.5,hl_p_window:1.4,hl_p_alcove:.8,hl_p_chains:1.3,hl_p_mirror:1.25,hl_p_coffin:.95,hl_p_cage:.8,hl_p_throne:1.05,hl_p_banner:1.3,hl_p_armour:1.0,hl_p_shelf:1.15,hl_p_lectern:.8,hl_p_desk:.6,hl_p_note:.45,hl_p_rack:.4,hl_p_ghost:.9,hl_p_feast:.45,hl_p_tomb:.4,hl_fire:1.0,hl_gent:1.0});
 ENEMY_DEF.hlhands={name:'Clawing Hands',hp:150,dmg:[9,15],hit:.82,w:.95,img:'hl_hands',xp:350,gold:[0,0],speed:1,verb:'rakes',
   act:e=>{if(Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)===1){enemyAttack(e);return 290}return 220}};
-ENEMY_DEF.hlghost={name:'Wailing Ghost',hp:140,dmg:[8,14],hit:.76,w:.72,img:'hl_p_ghost',xp:650,gold:[0,0],speed:1,fly:true,floatH:.04,glow:.7,verb:'chills',aboveParty:1};
+ENEMY_DEF.hlghost={name:'Wailing Ghost',hp:140,dmg:[8,14],hit:.76,w:.5,img:'hl_p_ghost',xp:650,gold:[0,0],speed:1,fly:true,floatH:.04,glow:.7,verb:'chills',aboveParty:1};
 ENEMY_DEF.hlwitch={name:'The Screaming Witch',hp:900,dmg:[14,24],hit:.8,w:.85,img:'hl_witch',xp:6000,gold:[200,520],speed:1,ranged:4,verb:'blasts',
   act:e=>{if(e.alert){G.hlStrobe=!G.hlStrobe;hlLights(G.hlStrobe);G.shake=.25;if(Math.random()<.5)msg(['The witch SCREAMS. The lights stutter.','"MINE! ALL OF IT MINE!" The torches flash on and off.','The witch shrieks and the whole room flickers.'][(Math.random()*3)|0],'#e0a8ff')}return 0}};
 function hlLights(out){G.hlOut=out;for(const l of LIGHTS)l.out=out}
