@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.204';
+const VERSION='3.205';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2695,7 +2695,7 @@ function spriteList(){
     const def=e.poly?Object.assign({},ENEMY_DEF[e.t],{img:e.poly.img,w:e.poly.w,fly:false}):ENEMY_DEF[e.t];
     const base=IMG[def.img]||(e.t==='boss'?IMG._fbBoss:IMG._fbRat),atk=e.lunge>.2&&e.hp>0&&IMG[def.img+'A'];
     L.push({x:e.rx+.5,y:e.ry+.5,img:atk||base,w:atk?def.w*atk.width/base.width:def.w,e,
-      bob:def.fly?.3+Math.sin(G.time*6+e.seed)*.08:Math.sin(G.time*3+e.seed)*.015,lunge:e.lunge,flash:e.flash,fade:e.hp<=0?e.dying/.55:1,sink:e.hp<=0?1-e.dying/.55:0});
+      bob:def.fly?(def.floatH!==undefined?def.floatH:.3)+Math.sin(G.time*6+e.seed)*.05:Math.sin(G.time*3+e.seed)*.015,lunge:e.lunge,flash:e.flash,fade:e.hp<=0?e.dying/.55:1,sink:e.hp<=0?1-e.dying/.55:0});
   }
   for(const it of G.items)if(!it.taken){const d=ITEMDEF[it.k];L.push({x:it.x+.5,y:it.y+.5,img:IMG['it_'+it.k]||IMG[it.k],w:it.k==='key'?.3:/^sundisc/.test(it.k)?.62:(d?d.sw:.3)*.95,item:it})}
   if(G.flora&&G.flora.length){const px=G.C.x+.5,py=G.C.y+.5;for(const f of G.flora){const dx=f.wx-px,dy=f.wy-py;if(dx*dx+dy*dy>256)continue;const im=IMG[f.k];if(!im)continue;L.push({x:f.wx,y:f.wy,img:im,w:(NPC_H[f.k]?NPC_H[f.k]*im.width/im.height:decorW(f.k))*f.sc,decor:f.decor})}} // lots of tiny tufts: only those within sixteen cells are drawn
@@ -2747,6 +2747,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     for(let k=0;k<nearR.length;k+=3){const ax=wx-nearR[k],ay=wy-nearR[k+1];lt+=nearR[k+2]/(1+1.15*(ax*ax+ay*ay))}
     const trD=(G.day||0)>0&&s.decor&&NOSHADOW.test(s.decor.k)&&LEVEL!==32&&LEVEL!==33&&!GRIM_L(); // woodland trees fade into dark green, not pale haze
     let lum=clamp(.08+(Math.max(baseL(dist),G.day||0,G.amb||0)+lt*.85)*1.05,0,1)*(GRIM_L()?.66:trD?.78:1);
+    if(s.e&&ENEMY_DEF[s.e.t].glow)lum=Math.max(lum,ENEMY_DEF[s.e.t].glow); // a ghost shines a little by its own light
     if(LEVEL===44&&s.decor&&(s.decor.k==='lamp'||s.decor.k==='hlant'||s.decor.k==='cfire'))lum=Math.max(lum,.9); // a lantern or a fire shines by its own light
     const ohL=LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<440),kq0=Math.min(1,Math.max(.05,2*sw/iw)),dyv=(G.day||0)>0,hzv=GRIM_L()?[30,46,32]:ohL&&dyv?[226,228,220]:trD?[40,54,42]:dyv?[132,146,132]:[86,76,62],smS=Math.min(dyv?(ohL?.22:.4):.26,dist*(dyv?(ohL?.018:.04):.03))*(GRIM_L()?.55:.75);
     let SRC,tw,th,HZ=null,hA=0;
@@ -17270,7 +17271,7 @@ for(const n of ['pt0','pt1','pt2','pt3','pt4','pt5','p_candle','p_poison','p_app
 Object.assign(NPC_H,{hl_pt0:.95,hl_pt1:.95,hl_pt2:.95,hl_pt3:.95,hl_pt4:.95,hl_pt5:.95,hl_p_candle:.8,hl_p_poison:.55,hl_p_apple:.5,hl_p_window:1.4,hl_p_alcove:.8,hl_p_chains:1.3,hl_p_mirror:1.25,hl_p_coffin:.95,hl_p_cage:.8,hl_p_throne:1.05,hl_p_banner:1.3,hl_p_armour:1.0,hl_p_shelf:1.15,hl_p_lectern:.8,hl_p_desk:.6,hl_p_note:.45,hl_p_rack:.4,hl_p_ghost:.9,hl_p_feast:.45,hl_p_tomb:.4,hl_fire:1.0,hl_gent:1.0});
 ENEMY_DEF.hlhands={name:'Clawing Hands',hp:150,dmg:[9,15],hit:.82,w:.95,img:'hl_hands',xp:350,gold:[0,0],speed:1,verb:'rakes',
   act:e=>{if(Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)===1){enemyAttack(e);return 290}return 220}};
-ENEMY_DEF.hlghost={name:'Wailing Ghost',hp:140,dmg:[8,14],hit:.76,w:.6,img:'hl_p_ghost',xp:650,gold:[0,0],speed:1,fly:true,verb:'chills',aboveParty:1};
+ENEMY_DEF.hlghost={name:'Wailing Ghost',hp:140,dmg:[8,14],hit:.76,w:.72,img:'hl_p_ghost',xp:650,gold:[0,0],speed:1,fly:true,floatH:.04,glow:.7,verb:'chills',aboveParty:1};
 ENEMY_DEF.hlwitch={name:'The Screaming Witch',hp:900,dmg:[14,24],hit:.8,w:.85,img:'hl_witch',xp:6000,gold:[200,520],speed:1,ranged:4,verb:'blasts',
   act:e=>{if(e.alert){G.hlStrobe=!G.hlStrobe;hlLights(G.hlStrobe);G.shake=.25;if(Math.random()<.5)msg(['The witch SCREAMS. The lights stutter.','"MINE! ALL OF IT MINE!" The torches flash on and off.','The witch shrieks and the whole room flickers.'][(Math.random()*3)|0],'#e0a8ff')}return 0}};
 function hlLights(out){G.hlOut=out;for(const l of LIGHTS)l.out=out}
