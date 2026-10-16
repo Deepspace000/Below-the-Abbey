@@ -40,10 +40,12 @@ make or ask for any picture, and before you push.
 
 ## Workflow
 
-- After every change: bump `VERSION` in `index.html`, commit, push, and give the Pages link
-  (https://deepspace000.github.io/Below-the-Abbey/) together with the full list of start-area links
-  (`?town=khemetracity&lvl=34`, `?town=khemetra&lvl=36`, `?town=reddunes&lvl=36`, `?town=sandroad&lvl=34`,
-  `?town=tomb&lvl=34`, `?town=burrow&lvl=34`, and any area that was added).
+- After every change: bump `VERSION` in `index.html`, commit, push, rebuild the itch.io zip with `python tools/pack_itch.py`
+  (it overwrites the old `itch-build.zip` in this folder every time, so there is only ever one), and give the Pages link
+  (https://deepspace000.github.io/Below-the-Abbey/) together with the start-area links for the LATEST areas, not the old ones:
+  `?town=landpath&lvl=34` (the Land Path), `?town=monastery&lvl=34` (Saint Elen's Monastery), `?town=oakwood&lvl=34` (the Oakwood),
+  `?town=oldhaven&lvl=34` (Oldhaven), `?town=khemetracity&lvl=34`. Replace these with the newest
+  areas whenever a new one is added (register it in the `AREAS` table in `jumpFromUrl`).
 - The desert and city code lives in `src/desert/*.js` and is injected into `index.html` by `python tools/inject.py`. Edit the
   files in `src/desert`, then run the script. Never edit the injected block by hand.
 - Pictures for Khemetra and Yarrim are in `assets/kh` and are listed in `assets/kh/manifest.json`; cut a sheet with
