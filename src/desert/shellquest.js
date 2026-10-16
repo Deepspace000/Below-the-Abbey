@@ -30,3 +30,4 @@ khNpc('uw_shellpc','A glowing clam','uw_clam',d=>{
   if(!bagAdd(mkItem2(id,1)))return say('The clam opens, and there is a piece of shell in it, but your bag is full.',[BYE]);
   F.shellGot[LEVEL]=1;d.found=true;sfx('key');
   return say(`The clam opens like a book, and inside, lying in its own light, is a curved piece of pearl-lined shell: ${SHELL_NAMES[i]}. ${shellHave()} of 4 pieces.`,[BYE])});
+QUESTS.shell.targets=['uw_shellpc','uw_dive_300','uw_dive_301','uw_dive_302','uw_dive_303']; // the glowing clams under the reefs, and the dive lines down to them

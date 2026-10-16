@@ -123,3 +123,10 @@ khNpc('uw_oak','A drowned timber','uw_timber',d=>{
 })();
 /* where each dive quest goes down: the dive line of the island, which the quest log's map circles instead of the quest giver */
 QUESTS.uq1.targets=['uw_dive_300'];QUESTS.uq2.targets=['uw_dive_301'];QUESTS.uq3.targets=['uw_dive_302'];QUESTS.uq4.targets=['uw_dive_303'];
+/* under the water the quest log's map circles the goal itself: the great chest, the black timbers, the clams, the glowing clam */
+{
+  const DIVES=['uw_dive_300','uw_dive_301','uw_dive_302','uw_dive_303'];
+  [['uq1',320],['uq2',321],['uq3',322],['uq4',323]].forEach(([q,lv])=>{QUESTS[q].spot=()=>{if(LEVEL!==lv)return null;const d=G.decor.find(z=>z.npc==='uw_prize'&&!z.found);return d?{x:d.x,y:d.y}:null}});
+  QUESTS.sd1.targets=['uw_oak'].concat(DIVES);
+  QUESTS.sc2.targets=['uw_clam'].concat(DIVES);
+}

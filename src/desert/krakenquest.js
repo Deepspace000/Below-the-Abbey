@@ -90,3 +90,6 @@ khNpc('kg_harp','A Kraken gun','kg_harp1',d=>{
     try{for(let i=0;i<G.heroes.length;i++)recalcMax(i)}catch(e){}
     if(n)msg('The four harpoons flare white and fall to ash in your hands. They were never meant to outlast the Kraken.','#ffd9a0')}
 }})();
+/* where each Kraken gun lies, for the quest log's map; the fourth is under Last Light, so its dive line is circled on the island */
+for(let n=1;n<=4;n++)QUESTS['kg'+n].spot=()=>{const d=G.decor.find(z=>z.npc==='kg_harp'&&z.cat===n&&!z.found);return d?{x:d.x,y:d.y}:null};
+QUESTS.kg4.targets=['uw_dive_303'];

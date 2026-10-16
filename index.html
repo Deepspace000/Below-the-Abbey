@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.164';
+const VERSION='3.165';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -16135,6 +16135,13 @@ khNpc('uw_oak','A drowned timber','uw_timber',d=>{
 })();
 /* where each dive quest goes down: the dive line of the island, which the quest log's map circles instead of the quest giver */
 QUESTS.uq1.targets=['uw_dive_300'];QUESTS.uq2.targets=['uw_dive_301'];QUESTS.uq3.targets=['uw_dive_302'];QUESTS.uq4.targets=['uw_dive_303'];
+/* under the water the quest log's map circles the goal itself: the great chest, the black timbers, the clams, the glowing clam */
+{
+  const DIVES=['uw_dive_300','uw_dive_301','uw_dive_302','uw_dive_303'];
+  [['uq1',320],['uq2',321],['uq3',322],['uq4',323]].forEach(([q,lv])=>{QUESTS[q].spot=()=>{if(LEVEL!==lv)return null;const d=G.decor.find(z=>z.npc==='uw_prize'&&!z.found);return d?{x:d.x,y:d.y}:null}});
+  QUESTS.sd1.targets=['uw_oak'].concat(DIVES);
+  QUESTS.sc2.targets=['uw_clam'].concat(DIVES);
+}
 
 /* ---- src/desert/shellquest.js ---- */
 /* ==========================================================================
@@ -16169,6 +16176,7 @@ khNpc('uw_shellpc','A glowing clam','uw_clam',d=>{
   if(!bagAdd(mkItem2(id,1)))return say('The clam opens, and there is a piece of shell in it, but your bag is full.',[BYE]);
   F.shellGot[LEVEL]=1;d.found=true;sfx('key');
   return say(`The clam opens like a book, and inside, lying in its own light, is a curved piece of pearl-lined shell: ${SHELL_NAMES[i]}. ${shellHave()} of 4 pieces.`,[BYE])});
+QUESTS.shell.targets=['uw_shellpc','uw_dive_300','uw_dive_301','uw_dive_302','uw_dive_303']; // the glowing clams under the reefs, and the dive lines down to them
 
 /* ---- src/desert/embark.js ---- */
 /* ==========================================================================
@@ -16342,6 +16350,9 @@ khNpc('kg_harp','A Kraken gun','kg_harp1',d=>{
     try{for(let i=0;i<G.heroes.length;i++)recalcMax(i)}catch(e){}
     if(n)msg('The four harpoons flare white and fall to ash in your hands. They were never meant to outlast the Kraken.','#ffd9a0')}
 }})();
+/* where each Kraken gun lies, for the quest log's map; the fourth is under Last Light, so its dive line is circled on the island */
+for(let n=1;n<=4;n++)QUESTS['kg'+n].spot=()=>{const d=G.decor.find(z=>z.npc==='kg_harp'&&z.cat===n&&!z.found);return d?{x:d.x,y:d.y}:null};
+QUESTS.kg4.targets=['uw_dive_303'];
 
 /* ---- src/desert/difficulty.js ---- */
 /* ==========================================================================
