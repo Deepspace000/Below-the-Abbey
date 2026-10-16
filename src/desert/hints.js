@@ -68,6 +68,15 @@ const QHINT={
   sg6:'Four families in the city: a young mother, an old man, an egg seller and a washerwoman. Speak to each and tell them to go to the chapel.',
   sg7:'Perrin the baker is on the fair green. Bring her 3 torches for the old tunnel.',
   sg8:'Speak to Captain Aldwyn again once the wall, the people and the tunnel are done. Then kill 10 more Ash Guard on the east road.',
+  oa1:'Speak to Captain Aldwyn at the gate once the siege is over, then take the east road out of the city and through the east gate to the Oakwood. Hale is in the first big glade.',
+  oa2:'Wolves roam the Oakwood. Kill 6, then tell Hale in the woodwarden camp.',
+  oa3:'Acorns lie on the ground in the Oakwood. Pick up 6 and take them to Master Joss in the south-west glade.',
+  oa4:'Bramwick the hedge-wizard is in the middle glade. Herbs lie on the ground in the Oakwood. Bring him 5.',
+  oa5:'Wren is in the woodwarden camp. Speak to her again.',
+  oa6:'The Ash Guard camp is in the north-east glade. Kill 8, then tell Hale.',
+  oa7:'Bring 4 pieces of wood from a general store to Master Joss.',
+  oa8:'Ysolt keeps the Great Oak in the south-east glade. Answer her three questions honestly.',
+  oa9:'Bring Wren to the Great Oak and ask Ysolt to crown her.',
   shell:'The shell broke in four. Under each of the four islands a pearl-white clam holds a piece in a far corner of the reef. Dive each one, find the clam, and bring the pieces to Brother Aldous.'
 };
 /* a plain fetch or a plain kill count needs no hint; every other quest, and every story quest, gets one */

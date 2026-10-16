@@ -273,10 +273,11 @@ function ohBuild(){
     sky.push({x:GX-3,y:144.6,k:'kh_ohtower1_3',w:7,z:tWh-.05,big:1},{x:GX+3,y:144.6,k:'kh_ohtower1_3',w:7,z:tWh-.05,big:1});
   }
   // the east gate: shut for now, a gatehouse at the end of the road that runs out of the city to the east
-  {const EY=73,tp=ch(TM.make('plain','castle',tWh).gid),ts=ch(TM.make('slit','castle',tWh).gid),eg=ch(TM.make('gate',0,gateWh,'kh_ohgate1_0').gid);
+  {const EY=73,tp=ch(TM.make('plain','castle',tWh).gid),ts=ch(TM.make('slit','castle',tWh).gid),eg=pch(3);
     for(let x=144;x<=145;x++){for(let y=EY;y<=EY+1;y++)solid(x,y,eg);for(const ys of [[EY-3,EY-1],[EY+2,EY+4]])for(let y=ys[0];y<=ys[1];y++)solid(x,y,x===144&&y%2===0?ts:tp)}
     sky.push({x:144.6,y:EY-1.5,k:'kh_ohtower1_3',w:7,z:tWh-.05,big:1},{x:144.6,y:EY+3.5,k:'kh_ohtower1_3',w:7,z:tWh-.05,big:1});
     OH.eastGate={x:143,y:EY};
+    lv.portals[3]={to:311,x:2,y:36,f:1,tex:'ohportc',req:'siegeWon',lock:'The east gate is held by the Ash Guard. The captain of the gate can tell you more.'};
   }
   // towers along the wall
   for(let x=14;x<=136;x+=17){if(Math.abs(x-GX)<8)continue;for(const y of [4.5,145])sky.push({x,y,k:hs(x,y,3)<.5?'kh_ohtower1_2':'kh_ohtower1_3',w:5.5,z:WALL-.05,big:1})}
