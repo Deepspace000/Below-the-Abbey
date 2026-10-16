@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.213';
+const VERSION='3.214';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3537,7 +3537,6 @@ function giveTestWeapons(){ // powerful weapons for testing: each hero is handed
   // a full bag cannot take them: make room by dropping the cheapest ordinary things (never quest items)
   while(G.bag.length+want.length>BAGCAP){let bi=-1,bp=1e9;G.bag.forEach((it,i)=>{const d=idef(it);if(!d||d.k==='quest')return;const pr=d.price||0;if(pr<bp){bp=pr;bi=i}});if(bi<0)break;G.bag.splice(bi,1)}
   for(const id of want)bagAdd(mkItem(id));
-  try{localStorage.setItem('abbeyTester','1')}catch(e){} // once a test start has been used, the Orange Tower arms the party too
 }
 function giveJumpGear(target){
   const rich=target>=8;
@@ -17316,7 +17315,7 @@ for(const id of [HL.CAV,HL.VIOLET,...Array.from({length:HL.N},(_,k)=>HL.BASE+k)]
 /* ---- the journal and the hints: what the party has seen of the Hollow Land and the tower ---- */
 {const _oe=ohEnter;ohEnter=function(n){_oe.apply(this,arguments);const F=G.flags;
   if(n===HL.CAV)F.hlSeen=1;
-  if((n===HL.CAV||(n>=HL.BASE&&n<=HL.VIOLET))&&!F.hlArmed){let tester=false;try{tester=localStorage.getItem('abbeyTester')==='1'||/[?&]town=/.test(location.search)}catch(e){}if(tester){giveTestWeapons();F.hlArmed=1;msg('Test weapons are in the party bag, and the party carries the best of them.','#ffe36a')}}
+  if((n===HL.CAV||(n>=HL.BASE&&n<=HL.VIOLET))&&!F.hlArmed){giveTestWeapons();F.hlArmed=1;msg('Powerful weapons are in the party bag, and the party carries the best of them.','#ffe36a')} // the first time the party reaches the Hollow Land
   if(n>=HL.BASE&&n<HL.BASE+HL.N)F.hlTop=Math.max(F.hlTop||0,n-HL.BASE+1);
   if(n===HL.VIOLET)F.hlViolet=1}}
 
