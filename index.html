@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.181';
+const VERSION='3.182';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -17309,9 +17309,36 @@ STORY.push(
   {id:'nautilus',c:()=>qSt('shell')==='done',t:'The Nautilus Helm',x:'Aldous laid the four pieces on the stone beside the abbey bell, and they closed together by themselves with a sound like the sea. The shell became a helm, pearl-white inside and rose at the lip: it heals its wearer every round of a battle, brings mana back faster, and lets them breathe under the sea. Far below, in the drowned abbey, something large turned over in its sleep and was quiet.'},
   {id:'wanderers',c:()=>G.flags.wMet&&Object.keys(G.flags.wMet).length,t:'The Wandering Monsters',x:'Strange things walk the levels without warning: the Ferryman of Dust, Mother Mossback, Aunt Marrow, the Hollow Bride and others, nine who ask for a favour and six who hunt. The rarest is the Messenger of Death, who writes the letters of his name on the walls, and whose letters kill when all five have been read. The Wandering Monsters page in the main menu keeps a record of each one met.'},
   {id:'open',c:()=>G.flags.pardoned,t:'What is still open',x:'Vance and Corvane did not work alone. In the margin of the ledger are six more names: six people at the court and in the city of Oldhaven who took Corvane’s silver or carried Vance’s orders, the other men who wrote letters. King Osric cannot tell which of his own court he can trust, so he has asked the party, who owe the city nothing, to find the six quietly. The Dawn Walker waits at the quay, and the Narrow Sea lies behind.'});
+const OHM=()=>{const m=(G.flags.ohf&&G.flags.ohf.mercy)||{};let a=0,b=0;for(const k in m){if(m[k])a++;else b++}return [a,b]};
+STORY.push(
+  {id:'ohfair',c:()=>qSt('oq0')!==null,t:'The Fair and the Six Names',x:'Captain Aldwyn matched the six initials in the margin of the ledger to six people at the fair of Saint Brannoch, on the green east of the middle of Oldhaven. Each had been paid by Vance in small favours and one odd piece of brass, glass or stone: Hob Tally the weigher, Ewan Marsh the bellringer, Perrin the baker, Pip Jangle the fool, Master Quill the tutor and Sister Ilse. Each was hungry, afraid or in need of something small, a loaf and cheese, two torches and a lantern, a salve, three apples, two scrolls, two flasks of holy water. When it was brought, each told the plain truth, and the party chose mercy or justice for each.'},
+  {id:'ohsix',c:()=>qSt('oq0')==='done',t:'The Pieces',get x(){const [a,b]=OHM();return 'All six had been paid with one piece of a larger thing: a brass cog, a steel pin, a bronze spring, a silver bell, a lens of green glass and a pale dial. The party chose mercy for '+a+' of them and justice for '+b+', and Captain Aldwyn took their word to the king. None of the six was a villain. Vance had simply gone to a great deal of trouble to collect six small things from six small people.'}},
+  {id:'ohsiege',c:()=>G.flags.siege||G.flags.siegeWon,t:'The Siege of Oldhaven',x:'The Ash Guard seized the east gate and held the road beyond it. The city held out. The party cleared the east road, brought bread to the garrison, wood to the mason, herrings to the Cats Guild, sent three pigeons to the north fort, told four families to go to the chapel and lit the old tunnel under the bakery so that bread could pass under the siege lines.'},
+  {id:'ohsiegewon',c:()=>G.flags.siegeWon,t:'The East Gate Retaken',x:'With the wall mended and the people safe, the party led the sortie and killed the last Ash Guard on the east road. The east gate opened again, onto the Oakwood.'},
+  {id:'ohoak',c:()=>G.flags.oak&&G.flags.oak.metHale,t:'The Oakwood',x:'Beyond the east gate lies an old oak forest with six glades. The woodwardens keep it, under Hale. The Oakwrights plant an oak for every one they cut, under Master Joss. A hedge-wizard called Bramwick lives in the middle glade, and a keeper called Ysolt tends the Great Oak in the south-east. The party killed wolves, gathered acorns and herbs, cleared an Ash Guard camp in the north-east glade and roofed the Oakwrights’ hall.'},
+  {id:'ohheir',c:()=>G.flags.oak&&G.flags.oak.heir,t:'The Heir',x:'A young woodwarden named Wren told the party she was King Osric’s granddaughter, raised in the Oakwood because the chancellor could not be trusted. She had a ring with the oak sign of the royal house, and she did not want it. The city was in trouble, and the king was old, so she said she would do what was needed.'},
+  {id:'ohcrown',c:()=>G.flags.heirCrowned,t:'The Oak Crown',x:'At the Great Oak, Ysolt asked three questions: whether to share a loaf with a hungry stranger, how to treat a friend who breaks a rule to protect you, and whether to win by a lie that harms no one you know. The party answered honestly. Wren was crowned with a ring of living oak leaves that does not wilt. Captain Aldwyn was told, and the king would have his granddaughter.'},
+  {id:'ohorrery',c:()=>G.flags.deviceBuilt,t:'The Orrery of Hours',x:'With Wren crowned, Captain Aldwyn read Ishkander’s sealed letter aloud. The six pieces fit together into the Orrery of Hours, which opens a sealed door under the Abbey crypts, where the journey began. The king’s clockmaker fitted the pieces while the party waited. A royal cutter was offered to take the party home.'},
+  {id:'ohdoor',c:()=>G.flags.sealedOpen,t:'The Sealed Door',x:'The party sailed home to the Thornwood and went down into the crypts below the Abbey, to the old stair where the journey began. Near it stood a slab of black iron with a ring of hollows in the middle. The Orrery ticked, the discs turned, and the door ground into the wall. A stair went down into the dark.'},
+  {id:'ohhollow',c:()=>G.flags.reachedBottom,t:'The Four Floors',x:'Four floors lay below the Abbey: the Sealed Stair, the Drowned Cloister, the Ossuary of Brothers and the Hollow Abbey. At the bottom stood Brother Sevrin, the Abbey’s last gardener, who had come down to hide. He told the party that the Hollow Abbot sat in the great room ahead, and that the stair onward was under his seat.'},
+  {id:'ohabbot',c:()=>G.flags.hollowSlain,t:'The Hollow Abbot',x:'The party killed the Hollow Abbot, and the slab over the stair ground aside. Beyond it lies the Hollow Land, the next part of the game. Below the Abbey is in early access, and that is where the road ends for now.'}
+);
 function storyNext(){ // what to do next, from the chapter the party has reached
   const F=G.flags;
-  if(F.pardoned)return 'The warrant is torn up and the ransom lifted. The road is yours.';
+  if(F.hollowSlain)return 'The Hollow Abbot is dead and the stair is open. The Hollow Land is the next part of the game.';
+  if(F.reachedBottom)return 'You are in the Hollow Abbey. Speak to Brother Sevrin, then kill the Hollow Abbot in the great room.';
+  if(F.sealedOpen)return 'Go down the stair behind the Sealed Door, four floors, to the Hollow Abbey.';
+  if(F.homeAbbey)return 'Find the Sealed Door in the crypt level where the game began, and hold up the Orrery.';
+  if(F.deviceBuilt)return 'The Orrery is made. Ask Captain Aldwyn for the royal cutter home.';
+  if(F.heirReported)return 'Bring Captain Aldwyn all six device pieces, so that the clockmaker can fit them into the Orrery.';
+  if(F.heirCrowned)return 'Wren is crowned. Tell Captain Aldwyn at the gate of Oldhaven.';
+  if(F.oak&&F.oak.metHale)return 'In the Oakwood, help Hale and the Oakwrights, find Wren, and have her crowned at the Great Oak by Ysolt.';
+  if(F.siegeWon)return 'The siege is over. Speak to Captain Aldwyn about the east gate and the Oakwood beyond it.';
+  if(F.siege)return 'Oldhaven is under siege. Help Captain Aldwyn and Sergeant Cade, and retake the east gate.';
+  if(F.pardoned&&qSt('oq0')==='done')return 'The six names are settled. Speak to Captain Aldwyn at the gate.';
+  if(F.pardoned&&qSt('oq0')!==null)return 'Find the six names on the fair green, east of the middle of Oldhaven.';
+  if(F.pardoned)return 'The warrant is torn up. Speak to Captain Aldwyn about the six names in the margin of the ledger.';
+  if(false)return 'The warrant is torn up and the ransom lifted. The road is yours.';
   if(F.courtSeen)return 'You stand in the court of King Osric. Finish what you started.';
   if(F.oldhavenSeen)return 'Oldhaven. Wait for noon at the quay gate, then carry the master ledger to the king.';
   if(F.page3&&!F.krakenSlain&&!(F.kgFound&&Object.keys(F.kgFound).length>=4))return 'Find the four Kraken guns, the only things that can hurt the Kraken: ask Ketra, Sable Maeve, Brother Aldous and Isolde where each lies. Then give one to each hero and sail east to Oldhaven.';
