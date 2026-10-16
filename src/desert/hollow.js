@@ -33,6 +33,15 @@ function hlArt(){
   hlTint('kh_ohkeep1_0',255,150,40,.7,'hl_castle');hlTint('kh_ohtower1_0',255,130,50,.55,'hl_tower0');hlTint('kh_ohtower1_2',255,130,50,.55,'hl_tower2');hlTint('kh_ohtower1_3',255,130,50,.55,'hl_tower3');
   hlTint('kh_ohkeep1_0',170,110,255,.5,'hl_castle_v');
 }
+function hlNumKey(n,violet){ // the number of the level, carved large in a slab of the tower's stone, set against the wall of the first room
+  const k='hl_num_'+n+(violet?'v':'');if(IMG[k])return k;const w=256,h=256,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,violet?'#6a5a8a':'#c47a3a');g.addColorStop(1,violet?'#463a62':'#8a4c20');x.fillStyle=g;
+  x.beginPath();x.moveTo(40,h);x.lineTo(40,90);x.quadraticCurveTo(40,20,w/2,12);x.quadraticCurveTo(w-40,20,w-40,90);x.lineTo(w-40,h);x.closePath();x.fill();
+  x.strokeStyle='rgba(20,10,4,.7)';x.lineWidth=6;x.stroke();x.strokeStyle='rgba(255,210,150,.35)';x.lineWidth=2;x.stroke();
+  x.textAlign='center';x.textBaseline='middle';x.font='bold '+(n>9?96:128)+'px Georgia,serif';
+  x.lineWidth=8;x.strokeStyle='rgba(255,225,170,.55)';x.strokeText(String(n),w/2+3,138+3);x.fillStyle='#2a1208';x.fillText(String(n),w/2,138);
+  x.font='bold 22px Georgia,serif';x.fillStyle='rgba(30,14,6,.85)';x.fillText('LEVEL',w/2,52);
+  IMG[k]=c;NPC_H[k]=1.5;return k}
 /* ---- the people who talk about the place ---- */
 const HL_FIGS=[
  ['hl_fig0','A hooded figure by the stair','kh_ohfolk2_3',["Nobody built it. It was always there, and we were put under it.","The torches are never lit by anyone. I have waited a long time to see who lights them. Nobody does.","Climb. Do not look down. The ones who look down start to feel it pulling."]],
@@ -59,7 +68,8 @@ const HL_RIDDLES=[
 for(let k=0;k<HL.N;k++){const R=HL_RIDDLES[k%10],id='hl_riddler'+k;
   khNpc(id,'A wizard with a riddle','kh_ohfolk5_4',()=>{const F=HLF();
     if(F.riddles[k])return say('You have answered me already, and well. Go on.',[BYE]);
-    return say('"'+R[0]+'"',R[1].map((o,i)=>[o,()=>{if(i===R[2]){F.riddles[k]=1;try{giveXP(2500+k*400);G.gold+=150+k*40;G.heroes.forEach(h=>{h.hp=h.max})}catch(e){}msg('The wizard smiles. Your wounds close, and a purse appears.','#e8d890');return say('Yes. It is always that. Take this, and be well.',[BYE])}return say('No. Think about it quietly, and ask me again.',[BYE])}]))})}
+    const rot=k%3,opts=R[1].map((o,i)=>[o,i===R[2]]);const shown=opts.map((_,i)=>opts[(i+rot)%3]);
+    return say('"'+R[0]+'"',shown.map(([o,good])=>[o,()=>{if(good){F.riddles[k]=1;try{giveXP(2500+k*400);G.gold+=150+k*40;G.heroes.forEach(h=>{h.hp=h.max})}catch(e){}msg('The wizard smiles. Your wounds close, and a purse appears.','#e8d890');return say('Yes. It is always that. Take this, and be well.',[BYE])}return say('No. Think about it quietly, and ask me again.',[BYE])}]))})}
 /* ---- the wizard at the top ---- */
 const HL_Q=[
  ['You find a purse full of gold on the road, and its owner is nowhere. What do you do?',['Look for its owner, and give it back.','Keep it. It found you.']],
@@ -112,7 +122,7 @@ function hlBuild(k){
   if(!violet){
     if(mt==='bridge'||mt==='chasm'){ // a void: dark floor, nothing to stand on but a narrow way across
       for(let y=myst.y0;y<=myst.y1;y++)for(let x=myst.x0;x<=myst.x1;x++){fm[y*W+x]='3';
-        const onPath=mt==='bridge'?(y===my||x===mx):(y===myst.y0||x===myst.x0||(y===my&&x===mx));
+        const onPath=y===my||x===mx||(mt==='chasm'&&(y===myst.y0||x===myst.x0));
         if(onPath){pathCell.add(x+','+y);fm[y*W+x]='0'}}
       for(let y=myst.y0;y<=myst.y1;y++)for(let x=myst.x0;x<=myst.x1;x++){if(pathCell.has(x+','+y))continue;
         const nearPath=[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>pathCell.has((x+a)+','+(y+b)));
@@ -123,7 +133,7 @@ function hlBuild(k){
     }
     else if(mt==='sand'){for(let y=myst.y0;y<=myst.y1;y++)for(let x=myst.x0;x<=myst.x1;x++){fm[y*W+x]='1';if(hs(x,y,k+50)<.12&&!(x===mx&&y===my)){used.add(x+','+y);decor.push({k:'bones',x,y,block:false,walk:true,deco:true})}}
       items.push({k:'potion',x:mx+1,y:my});enemies.push({t:'hlslime',x:myst.x1,y:myst.y0})}
-    else if(mt==='statues'){for(let y=myst.y0;y<=myst.y1;y++)for(let x=myst.x0;x<=myst.x1;x++){if(x===mx||y===my||(x+y)%2)continue;used.add(x+','+y);decor.push({k:'statue',x,y,block:true,deco:true})}
+    else if(mt==='statues'){for(let y=myst.y0;y<=myst.y1;y++)for(let x=myst.x0;x<=myst.x1;x++){if(x===mx||y===my||(x+y)%2||(Math.abs(x-myst.x0)+Math.abs(y-myst.y0)<=1))continue;used.add(x+','+y);decor.push({k:'statue',x,y,block:true,deco:true})}
       decor.push({k:'chest',x:myst.x0,y:myst.y0,block:true,magic:1});used.add(myst.x0+','+myst.y0)}
     else if(mt==='pit'){const prev=k>0?HL.BASE+k-1:HL.CAV;
       decor.push({k:'dhatch',x:mx,y:my,block:true,npc:'hl_pit'+k});used.add(mx+','+my);
@@ -140,7 +150,7 @@ function hlBuild(k){
   rooms.forEach((r,i)=>{torch(r.x0,r.y0,i%2);torch(r.x1,r.y0,(i+1)%2);if(r.x1-r.x0>4){torch(r.x0,r.y1,(i+1)%2);torch(r.x1,r.y1,i%2)}});
   let n=0;for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(g[y][x]==='.'&&!pathCell.has(x+','+y)&&(x*3+y*5+k)%11===0&&(g[y-1][x]==='#'||g[y][x-1]==='#'))torch(x,y,(n++)%2);
   // the number of the level, on the stone wall beside the stair
-  if(!violet)decor.push({k:'sign_hl',x:(r0.x0+r0.x1)>>1,y:r0.y0,block:false,wd:[0,-1],txt:['LEVEL '+(k+1),'THE ORANGE TOWER'],sc:2.4});
+  if(!violet){decor.push({k:hlNumKey(k+1),x:(r0.x0+r0.x1)>>1,y:r0.y0,block:false,walk:true,deco:true,sc:1});decor.push({k:hlNumKey(k+1),x:r0.x0,y:r0.y1,block:false,walk:true,deco:true,sc:1})}
   // the strange figures, on a few levels
   const figLv={0:'hl_fig1',3:'hl_fig2',7:'hl_fig3',11:'hl_fig0',15:'hl_fig4'};
   if(figLv[k]&&rooms[2]){const kp=KH_KEEPERS[figLv[k]],[fx,fy]=mid(rooms[2]);if(kp&&!used.has(fx+','+fy)){decor.push({k:khFaceKey(kp.face),x:fx,y:fy,block:true,npc:figLv[k],sc:kp.sc||1});used.add(fx+','+fy)}}
@@ -174,8 +184,8 @@ function hlCavern(){
   // the stairs: steps are painted as lighter floor bands across the path
   for(let y=19;y<=49;y++)for(let x=33;x<=37;x++)if(y%3===0)fm[y*W+x]='2';
   // the gate of the castle, in the north wall under the castle
-  const gt=TM.make('gate',0,3.6,'kh_ohgate1_0');T_DOORS.hlgate=gt.tex;const gc=String.fromCharCode(nextCh++);chars[gc]=31;
-  for(let y=8;y<=9;y++)for(let x=33;x<=37;x++){rows[y][x]=gc;block[y*W+x]=1}
+  OH_STY.hlorange=Object.assign({},OH_STY.castle2||OH_STY.gold,{zoom:2.2,contrast:2.2,tint:[255,170,95,.0]});const gt=TM.make('door','hlorange',3.2);T_DOORS.hlgate=gt.tex;const gc=String.fromCharCode(nextCh++);chars[gc]=31;const fl=ch(TM.make('plain','hlorange',3.2).gid);
+  for(const x of [34,36]){rows[9][x]=fl;block[9*W+x]=1}rows[9][35]=gc;block[9*W+35]=1
   // lights: purple and red torches lining the stairs and the ledge
   const torch=(x,y,c)=>{const key=c?'hl_torch_p':'hl_torch_r';if(!IMG[key]||used.has(x+','+y))return;used.add(x+','+y);decor.push({k:key,x,y,block:false,walk:true,deco:true});lights.push([x,y])};
   for(let y=6;y<=60;y+=3){torch(31,y,(y/3|0)%2);torch(39,y,(y/3|0)%2?0:1)}
@@ -188,7 +198,7 @@ function hlCavern(){
   const place=(id,x,y)=>{const kp=KH_KEEPERS[id];if(kp&&!used.has(x+','+y)){used.add(x+','+y);decor.push({k:khFaceKey(kp.face),x,y,block:false,walk:true,npc:id,sc:kp.sc||1})}};
   place('hl_fig5',36,56);place('hl_fig0',30,38);place('hl_fig3',40,26);
   const lv={rows:rows.map(r=>r.join('')),start:{x:35,y:60,f:0},enemies,items,decor,sky,fmap:fm.map(x=>x).reduce((a,c,i)=>{if(i%W===0)a.push('');a[a.length-1]+=c;return a},[]),
-    floorSet:['tombdark','tombslab','tombgold','tombslab'],floor:'tombdark',ceil:'tomb',name:'The Hollow Land',label:'The Hollow Land',diff:36,portals:[],lights,chars,amb:.42,day:0,ceilH:7,
+    floorSet:['tombdark','tombslab','tombgold','tombslab'],floor:'tombdark',ceil:'tomb',name:'The Hollow Land',label:'The Hollow Land',diff:36,portals:[],lights,chars,amb:.6,day:0,ceilH:7,
     mapNames:[{t:'The Orange Castle',x:35,y:5,k:'place'},{t:'The High Ledge',x:35,y:58,k:'place'},{t:'The Long Stair',x:35,y:34,k:'lane'},{t:'The Castle Gate',x:35,y:12,k:'lane'}]};
   lv.portals[0]={to:360+3,x:0,y:0,f:2,tex:'tomb'};lv.portals[1]={to:HL.BASE,x:0,y:0,f:0,tex:'hlgate'};
   // the stair back down to the Hollow Abbey, hidden in the south wall behind the keeper; the castle gate (portal 1) in the north
@@ -217,3 +227,10 @@ function hlAll(){
   if(abbey&&abbey._down){cav.portals[0].x=abbey._down.x;cav.portals[0].y=abbey._down.y;cav.portals[0].f=2}
 }
 for(const id of [HL.CAV,HL.VIOLET,...Array.from({length:HL.N},(_,k)=>HL.BASE+k)])KH_LAZY[id]=()=>{BELOW.IDS.forEach((_,n)=>belowBuild(n));belowLink();hlAll()};
+
+/* ---- the journal and the hints: what the party has seen of the Hollow Land and the tower ---- */
+{const _oe=ohEnter;ohEnter=function(n){_oe.apply(this,arguments);const F=G.flags;
+  if(n===HL.CAV)F.hlSeen=1;
+  if(n>=HL.BASE&&n<HL.BASE+HL.N)F.hlTop=Math.max(F.hlTop||0,n-HL.BASE+1);
+  if(n===HL.VIOLET)F.hlViolet=1}}
+

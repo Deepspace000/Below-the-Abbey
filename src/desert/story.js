@@ -67,8 +67,17 @@ STORY.push(
   {id:'monring',c:()=>qSt('mq8')==='done',t:'The Abbot’s Ring',x:'In a chest in the old crypts, the party found the plain gold ring of Abbot Aldhelm and brought it back to Abbot Anselm, who put it where it belonged. The old abbot is said to have rested since.'},
   {id:'ohabbot',c:()=>G.flags.hollowSlain,t:'The Hollow Abbot',x:'The party killed the Hollow Abbot, and the slab over the stair ground aside. Beyond it lies the Hollow Land, the next part of the game. Below the Abbey is in early access, and that is where the road ends for now.'}
 );
+STORY.push(
+  {id:'hollowland',c:()=>G.flags.hlSeen,t:'The Hollow Land',x:'Past the Hollow Abbot, the stair came out on a high ledge in a vast underground dark. Far below, lit by red and purple torches that nobody lights, stood a great orange castle with gargoyles on its ledges and narrow walkways jutting from its towers. A long stair led down to its gate.'},
+  {id:'orangetower',c:()=>(G.flags.hlTop||0)>=1,t:'The Orange Tower',x:'The castle has twenty levels, each smaller than the one below it, each with its number carved on the stone beside the stair. On every level there is a strange room in the middle: a wizard with a riddle, a rope bridge over a chasm, a room full of sand, a room of statues, a deep pit that drops the party a floor, a monster, a treasure. Armoured goblins, cave slimes and orcs lurk in the passages.'},
+  {id:'towerwizard',c:()=>(G.flags.hlTop||0)>=20,t:'The Wizard at the Top',x:'At the top of the Orange Tower, in the spire, a wizard waits with three questions. Good will opens the way to the next tower. Greed opens the floor, and the party falls two levels.'},
+  {id:'violettower',c:()=>G.flags.hlViolet,t:'The Violet Tower',x:'All three answers were given with good will. A door opened in the spire, and a stair led across to a second tower, violet this time, the first of the towers beyond. The road goes on from here, in the next part of the game.'}
+);
 function storyNext(){ // what to do next, from the chapter the party has reached
   const F=G.flags;
+  if(F.hlViolet)return 'The way to the Violet Tower is open. The road goes on in the next part of the game.';
+  if((F.hlTop||0)>=1)return 'Climb the Orange Tower, twenty levels, to the wizard in the spire. Answer with good will.';
+  if(F.hlSeen)return 'Walk down the long stair to the castle gate in the Hollow Land.';
   if(LEVEL>=400&&LEVEL<424)return 'You are on the Land Path. Walk north, then west across the mountains, then south. The signs count the kilometres to Yarrim.';
   if(F.hollowSlain)return 'The Hollow Abbot is dead and the stair is open. The Hollow Land is the next part of the game.';
   if(F.reachedBottom)return 'You are in the Hollow Abbey. Speak to Brother Sevrin, then kill the Hollow Abbot in the great room.';
