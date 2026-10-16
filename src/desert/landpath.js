@@ -90,6 +90,7 @@ function lpPeak(k,seed){ // a range of far mountains, with snow on the highest, 
   for(let i=1;i<pts.length-1;i++){const p=pts[i];if(p[1]<h*.5&&p[1]<=pts[i-1][1]&&p[1]<=pts[i+1][1]){x.fillStyle='rgba(248,250,254,.92)';x.beginPath();x.moveTo(p[0],p[1]-1);x.quadraticCurveTo(p[0]-18,p[1]+22,p[0]-46,p[1]+50);x.lineTo(p[0]-20,p[1]+38);x.lineTo(p[0]-6,p[1]+62);x.lineTo(p[0]+12,p[1]+40);x.lineTo(p[0]+30,p[1]+58);x.quadraticCurveTo(p[0]+16,p[1]+22,p[0],p[1]-1);x.closePath();x.fill()}
     x.strokeStyle='rgba(70,88,108,.14)';x.lineWidth=4;x.beginPath();x.moveTo(p[0],p[1]+6);x.lineTo(p[0]+24,h);x.stroke()}
   const hz=x.createLinearGradient(0,h*.35,0,h);hz.addColorStop(0,'rgba(208,224,238,0)');hz.addColorStop(1,'rgba(208,224,238,.9)');x.fillStyle=hz;x.fillRect(0,0,w,h);x.restore();
+  x.globalCompositeOperation='destination-in';const ed=x.createLinearGradient(0,0,w,0);ed.addColorStop(0,'rgba(0,0,0,0)');ed.addColorStop(.18,'rgba(0,0,0,1)');ed.addColorStop(.82,'rgba(0,0,0,1)');ed.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=ed;x.fillRect(0,0,w,h); // the two ends fade out, so the picture has no hard vertical edge
   IMG[k]=c;return k}
 const LP_FALLS=[9,12,14],LP_BRIDGE={}; // the stretches with a waterfall and a rope bridge
 function lpFallsKey(){ // a waterfall: a ribbon of white water falling down a dark rock face, with spray at the foot
