@@ -60,6 +60,14 @@ const QHINT={
   ox4:'Pip Jangle the fool is at the south-west of the fair green. Bring him three apples, from the apple sellers or the stalls.',
   ox5:'Master Quill the tutor is in the south of the fair green. He wants a Frost scroll and a Light scroll. The Scroll House sells them.',
   ox6:'Sister Ilse is at the south-east of the fair green. Bring her two flasks of holy water.',
+  sg1:'Talk to Captain Aldwyn at the gate after the six names are done. The Ash Guard wait on the east road, east of the middle of the city. Kill 6.',
+  sg2:'Sergeant Cade is in the Garrison Hall. Bring him 8 loaves of bread from the bakeries, the Cookshop or the stalls.',
+  sg3:'Dunstan the mason stands in the city centre. Bring him 5 pieces of wood from a general store.',
+  sg4:'Gammer Wick of the Cats Guild stands in the city centre. Bring her 3 herrings.',
+  sg5:'Speak to Rook the falconer, Tobias the crier and Little Ned in the city centre. Each will send a pigeon.',
+  sg6:'Four families in the city: a young mother, an old man, an egg seller and a washerwoman. Speak to each and tell them to go to the chapel.',
+  sg7:'Perrin the baker is on the fair green. Bring her 3 torches for the old tunnel.',
+  sg8:'Speak to Captain Aldwyn again once the wall, the people and the tunnel are done. Then kill 10 more Ash Guard on the east road.',
   shell:'The shell broke in four. Under each of the four islands a pearl-white clam holds a piece in a far corner of the reef. Dive each one, find the clam, and bring the pieces to Brother Aldous.'
 };
 /* a plain fetch or a plain kill count needs no hint; every other quest, and every story quest, gets one */

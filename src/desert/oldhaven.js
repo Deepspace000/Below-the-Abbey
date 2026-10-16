@@ -466,6 +466,8 @@ function ohBuild(){
         for(let n=0;n<6;n++){const sx=106+n*4,sy=84+(n%2)*6,k='kh_stall1_'+n;if(IMG[k]&&free(sx,sy)){dc(k,sx,sy,{block:true,walk:false})}}
         for(let n=0;n<26;n++)crowdAt(OH_FAIR.x0+3+((hs(n,1,79)*(OH_FAIR.x1-OH_FAIR.x0-5))|0),OH_FAIR.y0+3+((hs(n,2,79)*(OH_FAIR.y1-OH_FAIR.y0-5))|0),2);
         if(typeof OH_FAIRFOLK!=='undefined')for(const [id,x,y] of OH_FAIRFOLK)person(id,x,y,3); // the six names of the master ledger
+        if(typeof OH_FAIRFOLK!=='undefined')OH_FAIRFOLK.forEach(([id,x,y],n)=>{const k='kh_stall2_'+n;if(IMG[k])dc(k,x,y<88?y-1:y+1,{block:true,walk:false})}); // each of the six keeps a stall
+        for(let n=0;n<6;n++){const k='kh_stall2_'+n,sx=104+n*4,sy=100;if(IMG[k]&&free(sx,sy))dc(k,sx,sy,{block:true,walk:false})}
         for(let x=104;x<=127;x+=6)for(let y=80;y<=96;y+=8)lamp(x,y);
         if(FCART)for(const [x,y] of [[110,78],[120,92],[124,98],[105,96]])tryDc(FCART,x,y);
         if(HIVES)tryDc(HIVES,126,100);
@@ -617,6 +619,7 @@ function ohBuild(){
   /* ---- the named people: the gate, the square and the doors of the palace ---- */
   const named=[['oh_cap',GX,22],['oh_guardA',GX-3,20],['oh_guardB',GX+3,20],['oh_m1',66,50],['oh_m2',82,50],['oh_w1',64,52],['oh_w2',72,56],['oh_k1',76,56],['oh_o1',84,56],['oh_s1',68,47],['oh_pr',80,48]];
   for(const [id,x,y] of named)person(id,x,y,5);
+  if(typeof OH_SIEGEFOLK!=='undefined')for(const [id,x,y] of OH_SIEGEFOLK)person(id,x,y,5); // the people who help in the siege
   // the king's road is lined with a few guards, not a regiment
   let sn=0;
   for(let y=70;y<=134;y+=14){for(const sx of [OH_ROAD.x0,OH_ROAD.x1]){const id=OH_SOLDIER[(sn++)%OH_SOLDIER.length],kp=KH_KEEPERS[id];if(free(sx,y)&&kp)walk(khFaceKey(kp.face),sx,y,{npc:id,sc:kp.sc})}}
