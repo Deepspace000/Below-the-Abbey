@@ -422,7 +422,7 @@ khInn('oh_inn','Wynn, innkeeper of the King\'s Rest','innkeeper','The King\'s Re
 khShop('oh_smith','Bram, at the Oldhaven Arms','kh_ohfolk1_0','Oldhaven Arms','Swords, axes and plate. All of it made in the shop behind me.','arms');
 khShop('oh_apoth','Maud, the apothecary','kh_ohfolk1_3','The Apothecary','Draughts for the body and tinctures for the mind. Tell me what ails you.','potion');
 khNpc('oh_priest','Sister Margery, of the Chapel','priest',()=>say('Saint Brannoch watched over travellers. I watch over the ones who return. Would you like a blessing before you go to the court?',[['Ask for a blessing.',()=>{try{afflCure('cursed',-1,true)}catch(e){}msg('A calm settles on the party.','#a8d8ff');return say('Go with grace.',[BYE])}],BYE]));
-khNpc('oh_king','King Osric','yar_p_osric',()=>say(G.flags.pardoned?'You have done me and my kingdom a greater service than any lord of mine. Ask what you will. The road is long, and there is more unwritten in that ledger than a single reading can hold.':'Speak, since you came such a long way.',[BYE]));
+khNpc('oh_king','King Osric','yar_p_osric',()=>say(G.flags.pardoned?'You have done me and my kingdom a greater service than any lord of mine. Six names remain in that ledger. Find them, and tell nobody but me.':'Speak, since you came such a long way.',[BYE]));
 khNpc('oh_vance','Chancellor Vance','yar_p_vance',()=>say('Majesty, they are lying, as every forger does.',[BYE]));
 khNpc('oh_halb','Mayor Halbrecht','mayor',()=>say(G.flags.pardoned?'The king has taken me for a liar. A pity. I was so good at it.':'The ledger is a forgery, your majesty! Do not listen!',[BYE]));
 /* ---- the noon gate on the quay, the court, and the end ---- */
@@ -437,28 +437,29 @@ function ohWaitNoon(){const m=G.clock%1440;if(m<720)G.clock+=720-m;G.flags.oldha
 })();
 Object.assign(CUTS,{
  oldhavenCourt:()=>[
-  {text:'The great doors of the Court of Oldhaven open on a long hall of pale stone and blue banners. King Osric sits on a plain silver throne, older than the portraits of him. Chancellor Vance stands at his right hand, smiling, with a scroll in his ink-stained fingers. Mayor Halbrecht of Ironhill waits in chains by the dais.'},
-  {who:'King Osric',text:'So these are the four forgers. You came a very long way to be hanged.'},
-  {who:hn(0),text:'We came to be heard, majesty. We carry the master ledger, in the hand of your own scribe, Isolde.'},
-  {who:'Chancellor Vance',text:'The scribe Isolde is a thief and a liar, your majesty. Whatever these people carry, it was written in a garret by a woman who fled the court with the king\'s silver.'},
-  {who:hn(1),text:'She fled because the man who ordered the tolls was your Warden, Lord Corvane. The tolls, the warrant, the knives sent across the sea. Read the last page, majesty. It names who he paid.'},
+  {text:'The great doors of the Court of Oldhaven open on a long hall of pale stone and blue banners. King Osric sits on a plain silver throne, older than the portraits of him. Chancellor Vance, the king’s chief minister, who keeps the royal seal, stands at his right hand, smiling, with a scroll in his ink-stained fingers. Mayor Halbrecht of Ironhill waits in chains by the dais.'},
+  {who:'King Osric',text:'So these are the four forgers. I am told you came a very long way to be hanged.'},
+  {who:hn(0),text:'We came to be heard, majesty. We carry the master ledger: the account Lord Corvane kept of every toll he took in your name, written out by his own scribe, Isolde.'},
+  {who:'Chancellor Vance',text:'Majesty, the scribe Isolde is a thief who fled this court with the king’s silver. Whatever these people carry was written by a liar. They are the forgers, and the warrant says so.'},
+  {who:hn(1),text:'The warrant is the forgery, majesty. Lord Corvane, your Warden of the Narrow Sea, charged tolls in your name and kept the silver. When we uncovered the crooked mayors on your western road, he sent a warrant against us under your seal: twenty thousand crowns on each of our heads.'},
   {who:'King Osric',text:'Corvane is dead?'},
-  {who:hn(2),text:'He died on an island at the end of the Narrow Sea, with a sword in his hand, and the third page of the ledger in an altar at his back.'},
+  {who:hn(2),text:'He died on an island at the end of the Narrow Sea, sword in hand, with the third page of the ledger in the altar at his back.'},
   {text:'The king takes the ledger. The court is silent as he turns the pages. His hands are steady until the last one.'},
-  {who:'King Osric',text:'Every toll. Every year. And on the last page, in Corvane\'s own hand, a name that is not mine. Vance. My chancellor.'},
-  {who:'Chancellor Vance',text:'Your majesty, a forger\'s fancy! Guards! These people have come to murder the king! Seize them!'},
+  {who:'King Osric',text:'Every toll, every year. And at the foot of the last page, in Corvane’s own hand: "V. keeps the seal. V. gives the word. V. is paid first." My chancellor is Vance. Vance keeps my seal.'},
+  {who:'Chancellor Vance',text:'A forger’s fancy, majesty! Guards! These people have come to murder the king! Seize them!'},
   {text:'Silver armour rings on stone. The guards at the doors draw their swords, and Vance throws off his chain of office. In his chains, Halbrecht begins to laugh.'},
   {who:'King Osric',text:'Guards of the Crown, to me! Those who stand with Vance, die with him!'}
  ],
  oldhavenPardon:()=>[
   {text:'Vance falls on the steps of the dais, and the hall goes quiet. The guards who stood with him lower their swords one by one.'},
-  {who:'King Osric',text:'I have kept faith with the wrong men for twenty years. And four people I called forgers have kept it for me.'},
-  {who:'King Osric',text:'By my seal and my crown, the warrant against you is void, and the ransom on your heads is lifted. Let it be read in every town from Oldhaven to Thornwick. And let Mayor Halbrecht of Ironhill see the inside of the gaol he built for honest people.'},
+  {who:'King Osric',text:'For twenty years I have trusted the wrong man with my seal. And four people I called forgers have shown me.'},
+  {who:'King Osric',text:'Hear it, all of you. The warrant against these four carried my seal, but I never signed it. Vance kept my seal, and Corvane wrote my name. A warrant I did not write is no warrant of mine. By my crown it is void, and the ransom on their heads is lifted. Let it be read in every town from Oldhaven to Thornwick. And let Mayor Halbrecht of Ironhill see the inside of the gaol he built for honest people.'},
   {who:'Mayor Halbrecht',text:'Majesty, I only did what I was told!'},
   {who:'King Osric',text:'Yes. That is what is wrong with you.'},
   {who:hn(0),text:'We ask nothing, majesty, except to walk our own road without a price on it.'},
-  {who:'King Osric',text:'Then it is yours, and the gates of Oldhaven with it. But the road is long, and there is more written in that ledger than one reading can hold. Corvane was not the only man who wrote letters.'},
-  {text:'On the table behind the king, Ishkander\'s letter lies open, the seal still unbroken. The road home is clear. The road onward is not.'}
+  {who:'King Osric',text:'Then it is yours. But hear me. Vance and Corvane did not do this alone. In the margin of the ledger there are six more names: six people, at my court and in my city, who took Corvane’s silver or carried Vance’s orders. Corvane was not the only man who wrote letters. Six others wrote them too, and the ledger holds every one.'},
+  {who:'King Osric',text:'I do not know which of my own court I can trust. You are strangers, you owe this city nothing, and you have already shown you can read a ledger. Find the six. Quietly. Ask nothing the first time.'},
+  {text:'The king hands the party a slip of paper with six lines on it. Each is only a title and a nickname. On the table behind him, Ishkander’s letter lies open, its seal unbroken. The road home is clear. The road onward is a list of six.'}
  ]
 });
 function ohCourtFight(){
@@ -480,3 +481,10 @@ function ohEnter(n){
     if(!F.courtSeen){F.courtSeen=1;if(qSt('vq6')===null)qAccept('vq6');startCut('oldhavenCourt',ohCourtFight)}
   }
 }
+/* the ledger names its master from the first page, so the court is not a surprise: V., someone close to the king */
+const QNOTE={
+  vq2:'The first page of the ledger: tolls, each signed off by the Warden of the Narrow Sea, Lord Corvane. In the margin beside every large payment there is one letter: V.',
+  vq3:'The second page: more tolls, and a list of marines paid to hunt you. In the margin: “V. has sealed the warrant. V. says send the knives.”',
+  vq4:'The third page, in Corvane’s own hand: “V. keeps the seal. V. gives the word. V. is paid first.” Whoever V. is, he sits very close to the king.'
+};
+QUESTS.vq5.desc+=' The pages name Corvane’s master only as “V.”, someone close to the king, so the ledger must go into King Osric’s own hands and no one else’s.';

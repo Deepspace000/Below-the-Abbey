@@ -140,7 +140,7 @@ At noon the party was brought before King Osric and his court, with the master l
 
 ## 35. The Warrant Torn Up
 
-The ledger was read in open court, and the king saw whose hand wrote his tolls and his warrants. The chancellor who had stood behind Corvane fell, the warrant was torn in two, and the ransom on four heads was lifted. The road home, so long and so strange, was clear.
+The ledger was read in open court. It showed that Lord Corvane, Warden of the Narrow Sea, had taken the tolls in the king's name and had the warrant against the party forged, and that at the foot of the last page he named Chancellor Vance, who kept the king's seal and gave the orders. (Each page of the ledger had already marked a payment to "V." in the margin.) Vance drew a sword and fell on the steps of the dais. King Osric tore up the warrant: it carried his seal, but he had never signed it, because Vance held the seal and Corvane wrote his name. The ransom on four heads was lifted.
 
 ## 36. The Village of Yarrim
 
@@ -160,5 +160,4 @@ Strange things walk the levels without warning: the Ferryman of Dust, Mother Mos
 
 ## 40. What is still open
 
-The warrant is torn up and Lord Corvane is dead, but the story does not end at the pardon. The Dawn Walker is the ship of the party, with the whole Narrow Sea around her. Oldhaven, the city of the king, is a stony castle town with a court and a throne. The wanderers keep walking, the Messenger is somewhere in the dark of every level, On the table behind the king, Ishkander's letter lies open with its seal still unbroken, and Osric has said that Corvane was not the only man who wrote letters, so there is more written in the ledger than one reading can hold. Beyond that, nobody has yet said where the road goes from here.
-
+Vance and Corvane did not work alone. In the margin of the ledger are six more names: six people at the court and in the city of Oldhaven who took Corvane's silver or carried Vance's orders, the other men who wrote letters. King Osric cannot tell which of his own court he can trust, so he has asked the party, who owe the city nothing, to find the six quietly. Beyond that the road leads back across the sea to where it began, to the Abbey, and the levels beneath it.
