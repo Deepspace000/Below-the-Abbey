@@ -38,6 +38,7 @@ function hlLootFor(d){
 
 /* ---- hidden doors ---- */
 function secretBump(nx,ny){
+  const TS_=G.hlTrap;if(TS_&&TS_.lv===LEVEL&&TS_.st>=1&&TS_.st<7&&TS_.sealed.some(q=>q[0]===nx&&q[1]===ny)){sfx('locked');msg('Solid stone. There is no door here.','#d09a80');return true}
   const L=LEVELS[LEVEL];if(!L||!L._secrets||!hlIn())return false;
   const s=L._secrets.find(q=>q.x===nx&&q.y===ny);if(!s)return false;
   const F=HLF();F.sec=F.sec||{};const key=LEVEL+':'+nx+','+ny;if(F.sec[key])return false;
@@ -216,3 +217,82 @@ function hlNewFoes(c){
     if(e.t==='hlmimic')e.poly={img:IMG.chest?'chest':'hl_mimic',w:.56,name:'Old Chest',left:99999};
     else if(e.t==='hlshifter')e.poly={img:'kh_ohfolk2_1',w:.5,name:'A pale stranger',left:99999}}
   return _hf.apply(this,arguments)}}
+
+/* ==========================================================================
+   THE TRAP ROOMS. On every third level (3, 6, 9, 12, 15, 18) one room shuts behind the party: the doorways turn to wall, the party searches for
+   a switch and finds none, a laugh starts, the lights flicker and die, a red light comes up, the walls vanish into a black plane, and a horror
+   rises. Kill it and the walls and doors come back. Each room has a different horror and a different conversation.
+   ========================================================================== */
+ITEMDEF.phantomshroud={n:'Phantom Shroud',k:'chest',t:'Chest',ic:'chest',c:'#9ab0d8',armor:12,price:2600,lvl:12,pas:{dodge:.08,regen:.3},rar:1,gear:1,sw:.46,d:'A shroud of pale, cold cloth that was never woven. Enemies miss 8% more, and wounds close steadily. Needs level 12.'};
+for(const [key,name,pic,w,hp,dmg,extra] of [
+  ['hlt0','Hideous Phantom','phantom',.7,500,[18,30],{fly:true,floatH:.15,glow:.8,verb:'chills',relic:'phantomshroud'}],
+  ['hlt1','The Laughing Fool','jester',.85,450,[16,28],{verb:'stabs',speed:2}],
+  ['hlt2','The Red Butcher','butcher',.95,700,[26,42],{verb:'cleaves'}],
+  ['hlt3','The Weeping Matron','banshee',.7,500,[18,30],{fly:true,floatH:.2,glow:.8,ranged:3,shot:'a wail',verb:'wails at'}],
+  ['hlt4','The Pale Lord','vampire',.8,850,[24,38],{verb:'bites'}],
+  ['hlt5','The Singing Horror','choir',.9,1000,[24,40],{verb:'claws'}]])
+  ENEMY_DEF[key]=Object.assign({name,hp,dmg,hit:.88,w,img:'hl_'+pic,xp:12000,gold:[300,700],speed:1,aboveParty:3,boss:true},extra);
+ENEMY_DEF.hlt4.act=e=>{if(Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)===1){enemyAttack(e);e.hp=Math.min(e.maxhp,e.hp+Math.round(e.maxhp*.04));return 290}return 0};
+const HL_TRAPS=[ // one conversation, one laugh and one horror for each trap room
+ {mon:'hlt0',say:['What just happened? The door was right there!','Where is the door? There is only wall.','Everyone search the walls. There has to be a hidden switch.','Nothing here. Nothing here. Nothing.','There is no switch. There is no door. We are shut in.'],
+  laugh:'Somewhere in the dark, someone starts to laugh. Soft at first. Then it will not stop.',rise:'Out of the dark rises a Hideous Phantom, its face a ruin of too many mouths.'},
+ {mon:'hlt1',say:['That was an open doorway a moment ago.','Nobody touched anything. Did anyone touch anything?','Tap the walls. Listen for a hollow sound.','Solid. All of it solid.','Then how did we get in?'],
+  laugh:'A music box starts to play, slow and out of tune, and a high giggle joins it.',rise:'A tall figure in motley unfolds from the shadows: the Laughing Fool.'},
+ {mon:'hlt2',say:['Smell that? Like a cold cellar.','The door. Where is the door?','Hands on the wall, everyone. Feel for a catch.','Nothing. It is smooth as glass.','We are not leaving this way.'],
+  laugh:'A wet chopping sound starts somewhere in the dark, steady as a heartbeat, and a deep laugh rolls under it.',rise:'A huge shape in a bloody apron steps out of the red dark, dragging a cleaver: the Red Butcher.'},
+ {mon:'hlt3',say:['Did the air just get colder?','The door was behind us. It is gone.','Search the walls for a lever or a plate.','I have looked everywhere. There is nothing to find.','Then something wants us in here.'],
+  laugh:'Weeping begins, far off and then very near, and the weeping turns into laughter.',rise:'A woman in white drifts out of the dark and opens her mouth to scream: the Weeping Matron.'},
+ {mon:'hlt4',say:['This is a trap, and we walked right into it.','A door does not simply vanish.','Check the walls. Sconces, stones, anything that moves.','Nothing moves. Nothing at all.','Then we wait for whoever built this.'],
+  laugh:'Slow clapping echoes in the dark, and a cultured voice chuckles.',rise:'A pale lord in a black cloak steps out of nowhere and bows: the Pale Lord.'},
+ {mon:'hlt5',say:['Do you hear singing?','The door is gone. The wall is just wall.','Search every stone.','No switch. No seam. No door.','Whatever put us here is listening.'],
+  laugh:'A choir of a thousand voices begins to sing out of tune, and under it, a laugh.',rise:'The dark gathers itself into a mound of faces, all of them singing: the Singing Horror.'}];
+function hlVoidGid(){
+  if(hlVoidGid.g)return hlVoidGid.g;
+  const c=mkCanvas(64,64,(x,w,h)=>{x.fillStyle='#050205';x.fillRect(0,0,w,h);for(let i=0;i<60;i++){x.fillStyle='rgba(60,10,16,'+(.06+hash2(i,3,9)*.08).toFixed(3)+')';x.fillRect(hash2(i,1,9)*w,hash2(i,2,9)*h,2+hash2(i,4,9)*6,1+hash2(i,5,9)*3)}});
+  const dd=c.getContext('2d').getImageData(0,0,64,64).data,id=addTex(dd,null);const gid=KH_NEXT_GID++;T_TILE[gid]=id;return hlVoidGid.g=gid}
+function hlTrapSay(i,txts){const l=hlLive();if(!l.length)return;msg(HERO_DEF[l[i%l.length]].name+': "'+txts[i]+'"','#c8d8ff')}
+function hlTrapTick(){
+  const L=LEVELS[LEVEL],tr=L&&L._trap;if(!tr||!hlIn())return;const F=HLF();F.trap=F.trap||{};if(F.trap[LEVEL])return;
+  let S=G.hlTrap;if(!S||S.lv!==LEVEL){S=G.hlTrap={lv:LEVEL,st:0,t0:0,old:null,sealed:[],voidCells:[]}}
+  const k=LEVEL-HL.BASE,script=HL_TRAPS[((k/3)|0)%HL_TRAPS.length],t=G.time-S.t0,P=G.P;
+  if(S.st===0){
+    if(P.x>tr.x0&&P.x<tr.x1&&P.y>tr.y0&&P.y<tr.y1&&!G.cut&&!G.talk&&!hostileNear()){ // the party walks in, and the door shuts
+      const vg=hlVoidGid();let wall=null;for(let y=0;y<MH&&!wall;y++)for(let x=0;x<MW;x++)if(G.grid[y][x]>=1000&&G.grid[y][x]!==vg){wall=G.grid[y][x];break}
+      wall=wall||1012;S.wall=wall;
+      for(const [x,y] of tr.doors){if(G.grid[y][x]===0&&!(x===P.x&&y===P.y)){S.sealed.push([x,y]);G.grid[y][x]=wall}}
+      S.st=1;S.t0=G.time;G.shake=.7;sfx('door');sfx('hit');msg('The door slams shut behind you!','#ff9a7a');G.hlStrobe=true}
+    return}
+  if(S.st===1){S.next=S.next||0;const sc=[1.8,4.4,7,9.6,12.4];
+    while(S.next<5&&t>=sc[S.next]){hlTrapSay(S.next,script.say);if(S.next===2)later(900,()=>msg('The party feels along every stone of the wall...','#c8c0a0'));S.next++}
+    if(t>=15){msg(script.laugh,'#ff9a9a');sfx('screech');G.shake=.5;S.st=2;S.t1=G.time}
+    return}
+  if(S.st===2){ // the lights flicker, then go out
+    const tt=G.time-S.t1;if(tt<4){const out=hash2(Math.floor(G.time*11),LEVEL,23)>.4;if(out!==!!G.hlOut)hlLights(out)}
+    else{hlLights(true);S.st=3;S.t2=G.time;msg('The lights die. It is completely dark.','#b8a8d8')}
+    return}
+  if(S.st===3){ // a red light comes up all around
+    if(G.time-S.t2>1.4){S.red={x:P.x+.5,y:P.y+.5,ph:0,key:-9999,taken:false,red:true,free:true,keep:true,kI:3.2,range2:260};LIGHTS.push(S.red);S.st=4;S.t3=G.time;msg('A red light seeps up out of the floor, from all around.','#ff6a5a')}
+    return}
+  if(S.st===4){ // the walls vanish: a black plane
+    if(G.time-S.t3>2.2){const vg=hlVoidGid();S.fm=G.fmap;const rx0=tr.x0-4,rx1=tr.x1+4,ry0=tr.y0-4,ry1=tr.y1+4;
+      for(let y=Math.max(0,ry0);y<=Math.min(MH-1,ry1);y++)for(let x=Math.max(0,rx0);x<=Math.min(MW-1,rx1);x++){const g=G.grid[y][x];if(g>=1000&&g!==vg){S.voidCells.push([x,y,g]);G.grid[y][x]=vg}}
+      if(G.fmap){const a=G.fmap.split('');for(let y=tr.y0;y<=tr.y1;y++)for(let x=tr.x0;x<=tr.x1;x++)a[y*MW+x]='3';G.fmap=a.join('')}
+      S.hid=G.decor.filter(d=>!d.hidden&&d.x>=tr.x0-4&&d.x<=tr.x1+4&&d.y>=tr.y0-4&&d.y<=tr.y1+4);S.hid.forEach(d=>d.hidden=true); // the room's furnishings vanish with its walls
+      S.st=5;S.t4=G.time;G.shake=.8;msg('The walls are gone. There is nothing here but a black plane, and the red glow.','#ff6a5a')}
+    return}
+  if(S.st===5){ // the horror
+    if(G.time-S.t4>2){let q=null;const fv=DIRS[P.f];for(const [dx,dy] of [[fv[0]*2,fv[1]*2],[fv[0]*3,fv[1]*3],[fv[0],fv[1]],[0,-2],[2,0],[-2,0],[0,2],[0,-3],[3,0],[-3,0],[0,3]]){const x=P.x+dx,y=P.y+dy;if(x>tr.x0&&x<tr.x1&&y>tr.y0&&y<tr.y1&&!enemyAt(x,y)){q=[x,y];break}}
+      q=q||[P.x,P.y-1];hlSpawn(script.mon,q[0],q[1]);S.mon=G.enemies[G.enemies.length-1];S.mon.trapMon=true;S.st=6;sfx('screech');G.shake=.9;msg(script.rise,'#ff8a7a')}
+    return}
+  if(S.st===6){ // the horror is dead: everything is as it was
+    if(S.mon&&S.mon.hp<=0){
+      (S.hid||[]).forEach(d=>d.hidden=false);for(const [x,y,g] of S.voidCells)G.grid[y][x]=g;for(const [x,y] of S.sealed)G.grid[y][x]=0;if(S.fm!=null)G.fmap=S.fm;
+      const i=LIGHTS.indexOf(S.red);if(i>=0)LIGHTS.splice(i,1);hlLights(false);G.hlStrobe=undefined;F.trap[LEVEL]=1;S.st=7;G.shake=.4;sfx('door');
+      msg('The dark peels away. The walls are back, and the door stands open.','#ffe9a0')}
+    return}
+}
+/* the red light follows the party, and the screen glows red while the room is black */
+{const _hf2=hlFrame;hlFrame=function(dt){_hf2.apply(this,arguments);try{
+  hlTrapTick();const S=G.hlTrap;if(S&&S.lv===LEVEL&&S.red&&S.st>=4&&S.st<7){S.red.x=G.P.x+.5;S.red.y=G.P.y+.5;S.red.out=false}}catch(e){console.warn('trap',e)}}}
+{const _ui4=ui;ui=function(dt){_ui4.apply(this,arguments);try{const S=G.hlTrap;if(S&&S.lv===LEVEL&&S.st>=4&&S.st<7&&G.state==='play'){ctx.save();const p=.5+.5*Math.sin(G.time*3);ctx.fillStyle='rgba(150,10,14,'+(.14+.08*p).toFixed(3)+')';ctx.fillRect(0,0,DW,DH);
+  const g=ctx.createRadialGradient(DW/2,DH*.5,DH*.2,DW/2,DH*.5,DH*.9);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(40,0,6,.55)');ctx.fillStyle=g;ctx.fillRect(0,0,DW,DH);ctx.restore()}}catch(e){}}}

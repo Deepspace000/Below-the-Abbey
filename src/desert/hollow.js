@@ -164,7 +164,7 @@ function hlBuild(k){
   const portals=[{to:k===0?HL.CAV:violet?HL.BASE+HL.N-1:id-1,x:0,y:0,f:2,tex:'tomb'}];
   if(up)portals[1]={to:id+1,x:0,y:0,f:0,tex:'tomb'};
   const lv={rows,start,enemies,items,decor,fmap:(()=>{const f=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];f.push(s)}return f})(),
-    floorSet:['tombslab','sand','tombgold','tombdark','tombred'],floor:'tombslab',ceil:'tomb',name:LEVEL_NAMES[id],label:violet?'The Violet Tower':'The Orange Tower',diff:36+kk,torchGap:4.4,_secrets:dress.lv_secrets,_roomsInfo:dress.lv_rooms,portals,lights,chars,_trig:dress.lv_trig,_msgr:dress.lv_msgr,_man:dress.lv_man,amb:.05,day:0,ceilH:CH,
+    floorSet:['tombslab','sand','tombgold','tombdark','tombred'],floor:'tombslab',ceil:'tomb',name:LEVEL_NAMES[id],label:violet?'The Violet Tower':'The Orange Tower',diff:36+kk,torchGap:4.4,_secrets:dress.lv_secrets,_trap:dress.lv_trap,_roomsInfo:dress.lv_rooms,portals,lights,chars,_trig:dress.lv_trig,_msgr:dress.lv_msgr,_man:dress.lv_man,amb:.05,day:0,ceilH:CH,
     mapNames:rooms.map((r,i)=>({t:i===0?'Stair ('+(k+1)+')':r===myst&&!violet?'The Strange Room':r===far&&up?(dress.lv_names&&dress.lv_names[i]&&!/Hall$/.test(dress.lv_names[i])?dress.lv_names[i]+' and Stair Up':'The Stair Up'):top&&r===far?'The Spire':(dress.lv_names&&dress.lv_names[i])||'Hall',x:mid(r)[0],y:r.y0-1,k:'place'})),_up:up,_start:start};
   LEVELS[id]=lv;
 }
@@ -250,7 +250,7 @@ ENEMY_DEF.hlhands={name:'Clawing Hands',hp:150,dmg:[9,15],hit:.82,w:.95,img:'hl_
 ENEMY_DEF.hlghost={name:'Wailing Ghost',hp:140,dmg:[8,14],hit:.76,w:.5,img:'hl_p_ghost',xp:650,gold:[0,0],speed:1,fly:true,floatH:.04,glow:.7,verb:'chills',aboveParty:1};
 ENEMY_DEF.hlwitch={name:'The Screaming Witch',hp:400,dmg:[8,14],hit:.7,w:.85,img:'hl_witch',xp:3500,gold:[150,380],speed:1,ranged:4,verb:'blasts',
   act:e=>{if(e.alert){G.shake=.2;if(Math.random()<.5)msg(['The witch SCREAMS. The lights stutter.','"MINE! ALL OF IT MINE!" The torches flash on and off.','The witch shrieks and the whole room flickers.'][(Math.random()*3)|0],'#e0a8ff')}return 0}}; // (the strobe itself runs every frame, in hollow_haunt.js)
-function hlLights(out){G.hlOut=out;for(const l of LIGHTS)l.out=out}
+function hlLights(out){G.hlOut=out;for(const l of LIGHTS)if(!l.keep)l.out=out}
 const hlLive=()=>{const a=[];G.heroes.forEach((h,i)=>{if(h.alive!==false&&h.hp>0)a.push(i)});return a};
 function hlHurt(hi,d){const h=G.heroes[hi];h.hp-=d;h.hurt=1;G.shake=.3;sfx('hurt');addFloat(portraitX(hi)+19,250,'-'+d,'#ff6a5a');
   if(h.hp<=0){h.hp=0;h.alive=false;msg(HERO_DEF[hi].name+' has fallen!','#ff8a7a');try{bondFall(hi)}catch(x){}if(G.sel===hi)nextHero()}}
@@ -456,6 +456,12 @@ function hlDress(c){
   for(let i=0;i<2;i++)tp('chat',300+i,{n:k+i*2});
   if(k%3===1){const r=rooms.find((q,i)=>i>=2&&q!==myst&&q.x1-q.x0>=3);if(r){const cs=[];for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)if(isF(x,y)&&d[y*W+x]>=0)cs.push([x,y,d[y*W+x]]);cs.sort((p,q)=>p[2]-q[2]);
     if(cs.length>=3)trig.push({k:'voice',n:0,x:cs[0][0],y:cs[0][1]},{k:'voice',n:1,x:cs[cs.length>>1][0],y:cs[cs.length>>1][1]},{k:'ghost',x:cs[cs.length-1][0],y:cs[cs.length-1][1]})}}
+  // a trap room on every third level: its doorways are the boundary cells beside the passages that lead in; the room is cleared of creatures
+  if(k%3===2){const tr=rooms.filter((q,i)=>i>=2&&q!==myst&&q!==far&&q.x1-q.x0>=4&&q.y1-q.y0>=3).pop();
+    if(tr){const doors=[];for(let y=tr.y0;y<=tr.y1;y++)for(let x=tr.x0;x<=tr.x1;x++){if(x!==tr.x0&&x!==tr.x1&&y!==tr.y0&&y!==tr.y1)continue;
+        for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if((nx<tr.x0||nx>tr.x1||ny<tr.y0||ny>tr.y1)&&isF(nx,ny)){if(!doors.some(q=>q[0]===x&&q[1]===y))doors.push([x,y])}}}
+      c.lv_trap={x0:tr.x0,y0:tr.y0,x1:tr.x1,y1:tr.y1,doors};
+      for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(e.x>=tr.x0&&e.x<=tr.x1&&e.y>=tr.y0&&e.y<=tr.y1)enemies.splice(i,1)}}}
   c.lv_trig=trig;c.lv_rooms=rooms.map((r,i)=>({x0:r.x0,y0:r.y0,x1:r.x1,y1:r.y1,n:names[i]||''}));
   const wp=rooms.filter((q,i)=>i>0&&q!==myst).slice(0,3).map(q=>[(q.x0+q.x1)>>1,q.y0]).filter(p=>isF(p[0],p[1]));
   if(manDone&&wp.length>=2)c.lv_man={i:0,t:0,wp};
