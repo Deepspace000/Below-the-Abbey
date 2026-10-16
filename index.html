@@ -21,7 +21,9 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.216';
+const VERSION='3.217';
+// a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
+try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3536,7 +3538,7 @@ function giveTestWeapons(){ // powerful weapons for testing: each hero is handed
   const want=['worldblade','starbow','ragnarok','doomhammer','titanaxe','stormbow2','kingslayer','sunderer','mountainmaul','sandstaff','skullcrusher'].filter(id=>ITEMDEF[id]);
   // a full bag cannot take them: make room by dropping the cheapest ordinary things (never quest items)
   while(G.bag.length+want.length>BAGCAP){let bi=-1,bp=1e9;G.bag.forEach((it,i)=>{const d=idef(it);if(!d||d.k==='quest')return;const pr=d.price||0;if(pr<bp){bp=pr;bi=i}});if(bi<0)break;G.bag.splice(bi,1)}
-  for(const id of want)bagAdd(mkItem(id));
+  for(const id of want)if(!bagCount(id))bagAdd(mkItem(id));
 }
 function giveJumpGear(target){
   const rich=target>=8;
