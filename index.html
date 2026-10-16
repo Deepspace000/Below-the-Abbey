@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.210';
+const VERSION='3.211';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -1255,11 +1255,12 @@ function streamLoad(){
   el.src='assets/audio/'+STREAM.list[STREAM.idx]+'.mp3?v='+VERSION;
   const pr=el.play();if(pr&&pr.catch)pr.catch(()=>{STREAM.playing=false});STREAM.playing=true;
 }
+const TITLE_MUSIC=false;
 function areaAudio(){
   if(!AC)return;loadSounds();windTick();try{if(typeof seaSoundTick==='function')seaSoundTick()}catch(e){}try{if(typeof yarSoundTick==='function')yarSoundTick()}catch(e){}streamTick();
   const T={};
   if(G.sit&&G.time>G.sit.t)G.sit=null;
-  if((G.state==='title'||G.state==='create'||G.state==='goto')&&!G.mute)T.music_tavern=.4; // the music of the Prism Cellars plays on the title screen
+  if(TITLE_MUSIC&&(G.state==='title'||G.state==='create'||G.state==='goto')&&!G.mute)T.music_tavern=.4; // the music of the Prism Cellars plays on the title screen (switched off for now: set TITLE_MUSIC to true)
   if(G.state==='play'&&!G.mute){
     if(G.sit){T.music_mithral=.55;loadLazy('music_mithral')}
     if(LEVEL===32){T.music_mithral=.55;loadLazy('music_mithral')}
