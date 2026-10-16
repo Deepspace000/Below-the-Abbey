@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.165';
+const VERSION='3.166';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -15420,14 +15420,14 @@ function gullCry(a){
   if(AC.createStereoPanner){const pn=AC.createStereoPanner();pn.pan.value=pan;out.connect(pn);pn.connect(MASTER)}else out.connect(MASTER);
   let at=t;
   for(let i=0;i<n;i++){
-    const d=.15+Math.random()*.2,f0=base*(1+.12*Math.random()),f1=f0*(.58+.1*Math.random());
+    const d=.27+Math.random()*.34,f0=base*(1+.12*Math.random()),f1=f0*(.58+.1*Math.random());
     const o=AC.createOscillator(),bp=AC.createBiquadFilter(),hp=AC.createBiquadFilter(),g=AC.createGain(),vib=AC.createOscillator(),vg=AC.createGain();
     o.type='sawtooth';o.frequency.setValueAtTime(f0*.85,at);o.frequency.linearRampToValueAtTime(f0*1.1,at+d*.2);o.frequency.exponentialRampToValueAtTime(f1,at+d); // a quick rise and a long fall: "keow"
     vib.frequency.value=34+Math.random()*8;vg.gain.value=f0*.05;vib.connect(vg);vg.connect(o.frequency);
     bp.type='bandpass';bp.frequency.value=f0*1.35;bp.Q.value=1.5;hp.type='highpass';hp.frequency.value=700;
     g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(1,at+.025);g.gain.exponentialRampToValueAtTime(.001,at+d);
     o.connect(hp);hp.connect(bp);bp.connect(g);g.connect(out);o.start(at);vib.start(at);o.stop(at+d+.05);vib.stop(at+d+.05);
-    at+=d+.04+Math.random()*.07;base*=.96;
+    at+=d*.9+.05+Math.random()*.08;base*=.96;
   }
 }
 function rigCreak(v){ // wood and rope working against each other: a slow groan with a stick-and-slip flutter
