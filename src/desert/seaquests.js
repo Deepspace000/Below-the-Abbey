@@ -8,7 +8,8 @@ ITEMDEF.admiralblade={n:"The Admiral's Cutlass",k:'weapon',t:'Sword',ic:'sword',
 ITEMDEF.greatharpoon={n:'The Great Harpoon',k:'weapon',t:'Sword',ic:'sword',c:'#c8d0d8',dmg:[26,36],hit:.06,req:{str:16},price:3200,rar:1,d:'Wreck-oak shaft, a barbed head as long as a forearm, and a coil of line. Made by Pell the chandler to answer the Kraken.',sw:.6};
 const SQ=n=>{const F=G.flags;return F[n]||(F[n]={})};
 /* ---- Tam Salvor and the helms ---- */
-khNpc('yr_diver','Tam Salvor, the helm-maker','kh_yfolk3_4',d=>{
+loadImg('yar_p_diver','assets/yar_p_diver.png');NPC_H.yar_p_diver=.95; // Tam in his own deep sea diving suit, so he is easy to find
+khNpc('yr_diver','Tam Salvor, the helm-maker','yar_p_diver',d=>{
   const F=G.flags;
   return say('Tam Salvor. I make helms for people who want to look at the bottom of things. A Diving Helm is brass, riveted, with a glass visor and a hose to a little bellows. It gives four minutes of air and no more, but there are streams of bubbles on the sea floor, vents, and a hero standing in one breathes freely until the helm is full again. Every one of you needs one, in the helmet slot.',[
     ['Buy diving helms.',()=>{openShop(d,[['divehelm',8]],"Tam Salvor's Helms");return null}],
