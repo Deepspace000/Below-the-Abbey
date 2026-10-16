@@ -55,7 +55,13 @@ function belowBuild(n){
   if(n===3){const [mx,my]=mid(far);enemies.push({t:'hollowabbot',x:mx,y:my+1});decor.push({k:'chest',x:far.x0,y:far.y1,block:true,magic:1})}
   const portals=[{to:n?BELOW.IDS[n-1]:1,x:0,y:0,f:2,tex:'tomb'},{to:n<3?BELOW.IDS[n+1]:BELOW.LAND,x:0,y:0,f:0,tex:'tomb'}];
   if(n===3){portals[1].req='hollowSlain';portals[1].lock='The stair is covered by a slab of black stone. It will not move while the Hollow Abbot lives.'}
-  const lv={rows,start,enemies,items,decor,name:BELOW.NAMES[n],label:'Below the Abbey',diff:34+n*3,portals,lights:[]};
+  // the names the area map writes over the rooms
+  const RN=[['The Stair Up','Pilgrims’ Cells','The Cold Hall','The Old Cistern','The Bone Store','The Lamp Room','The Vault','The Stair Down'],
+    ['The Stair Up','The Flooded Nave','The Monks’ Walk','The Wet Cells','The Drowned Altar','The Sunk Library','The Cistern Door','The Stair Down'],
+    ['The Stair Up','The Brothers’ Niches','The Long Ossuary','The Skull Hall','The Reliquary','The Gravediggers’ Room','The Chapel of Bones','The Stair Down'],
+    ['The Stair Up','The Hollow Cloister','The Dim Chapter House','The Choir Stalls','The Cold Kitchen','The Abbot’s Gallery','The Silent Scriptorium','The Abbot’s Seat']][n];
+  const mapNames=rooms.map((r,i)=>{const [mx,my]=mid(r);const t=r===far?RN[7]:i===0?RN[0]:RN[1+((i-1)%6)];return {t,x:mx,y:r.y0-1,k:'place'}});
+  const lv={rows,start,enemies,items,decor,name:BELOW.NAMES[n],label:'Below the Abbey',diff:34+n*3,portals,lights:[],mapNames};
   LEVELS[id]=lv;LEVEL_NAMES[id]=BELOW.NAMES[n];
   lv._down=down;lv._up=start;
 }
@@ -75,7 +81,7 @@ function landBuild(){
   for(let y=3;y<H-2;y++)for(let x=3;x<W-3;x++)g[y][x]='.';g[H-2][W>>1]='0';
   const kp=KH_KEEPERS.ab_plaque;
   LEVELS[BELOW.LAND]={rows:g.map(r=>r.join('')),start:{x:W>>1,y:H-3,f:0},enemies:[],items:[],decor:kp?[{k:khFaceKey(kp.face),x:W>>1,y:6,block:false,walk:true,npc:'ab_plaque',sc:1}]:[],name:'The Hollow Land',label:'The Hollow Land',diff:40,
-    portals:[{to:BELOW.IDS[3],x:0,y:0,f:2,tex:'tomb'}]};
+    portals:[{to:BELOW.IDS[3],x:0,y:0,f:2,tex:'tomb'}],mapNames:[{t:'The Hollow Land',x:W>>1,y:2,k:'place'},{t:'The Plaque',x:W>>1,y:5,k:'lane'}]};
   LEVEL_NAMES[BELOW.LAND]='The Hollow Land';
 }
 KH_LAZY[BELOW.LAND]=()=>{BELOW.IDS.forEach((_,k)=>belowBuild(k));belowLink();landBuild();const p=LEVELS[BELOW.LAND].portals[0],d=LEVELS[BELOW.IDS[3]]._down;if(d){p.x=d.x;p.y=d.y}};

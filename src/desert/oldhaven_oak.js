@@ -65,7 +65,8 @@ function oakBuild(){
   {const g=G0.ash;for(let n=0;n<10;n++){const q=near(g.x+((hs(n,41,19)*7-3.5)|0),g.y+((hs(n,42,19)*7-3.5)|0),3);if(!q)continue;used.add(q[0]+','+q[1]);enemies.push({t:'ashguard',x:q[0],y:q[1]})}}
   for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)rows[y][x]='.';
   const lv={rows:rows.map(r=>r.join('')),start:{x:2,y:36,f:1},enemies,items,decor,fmap:fm.map(r=>r.join('')),floorSet:['ohMeadow','ohGravel','ohLawn','ohMoss'],outdoor:true,day:.98,amb:.9,floor:'ohMeadow',floor2:'ohGravel',ceil:'cloud',name:'The Oakwood',label:'The Oakwood',diff:30,
-    portals:[{to:305,x:142,y:73,f:3,tex:'tgate'}]};
+    portals:[{to:305,x:142,y:73,f:3,tex:'tgate'}],
+    mapNames:[{t:'The Gate Glade',x:6,y:32,k:'place'},{t:'Woodwarden Camp',x:22,y:15,k:'place'},{t:'Oakwrights’ Yard',x:22,y:49,k:'place'},{t:'Bramwick’s Glade',x:46,y:31,k:'place'},{t:'The Ashen Glade',x:62,y:7,k:'place'},{t:'The Great Oak',x:68,y:48,k:'place'},{t:'The Woodwardens’ Path',x:14,y:28,k:'lane'},{t:'The Oakwrights’ Road',x:14,y:46,k:'lane'},{t:'The Heart Road',x:34,y:36,k:'lane'},{t:'The Great Oak Road',x:57,y:46,k:'lane'},{t:'To Oldhaven',x:4,y:38,k:'lane'}]};
   LEVELS[OAK.ID]=lv;LEVEL_NAMES[OAK.ID]='The Oakwood';
   {const N=W*H,hh=new Float32Array(N).fill(.3),rk=new Float32Array(N),bl=new Uint8Array(N);for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(x===0||y===0||x===W-1||y===H-1)bl[y*W+x]=1;TERRS[OAK.ID]=yarTerrain(W,H,hh,rk,bl)} // a real blue sky above the oaks, as in Oldhaven
   lv.ceilH=5.2;
