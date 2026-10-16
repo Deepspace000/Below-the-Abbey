@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.159';
+const VERSION='3.160';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4485,8 +4485,9 @@ function questSpots(){
     if(!qReady(id)&&typeof q.spot==='function'){let ps=null;try{ps=q.spot()}catch(e){}if(ps){out.push({x:ps.x,y:ps.y,kind:'goal',t:q.title,q:id});continue}} // a quest may name its own place on this map
     if(qReady(id)){const gg=g||byName(id)||remoteGiver(id);if(gg)out.push({x:gg.x,y:gg.y,kind:'ready',t:'Hand in: '+q.title,q:id});else(out.away=out.away||[]).push(q.title+': see '+q.who)}
     else{let t=[];try{t=q.targets||[]}catch(e){}let any=false;for(const n of t)for(const d of by[n]||[]){out.push({x:d.x,y:d.y,kind:'goal',t:q.title,q:id});any=true}
-      if(!any&&g){out.push({x:g.x,y:g.y,kind:'goal',t:q.title,q:id});any=true}
-      if(!any){const rg=remoteGiver(id);if(rg)out.push({x:rg.x,y:rg.y,kind:'goal',t:q.title,q:id})} // the giver is inside a building: ring its door
+      const sea=QAREA[id]==='The Narrow Sea'&&!q.ringGiver; // a sea quest's goal is out on the water or under it, not where the giver stands
+      if(!any&&g&&!sea){out.push({x:g.x,y:g.y,kind:'goal',t:q.title,q:id});any=true}
+      if(!any&&!sea){const rg=remoteGiver(id);if(rg)out.push({x:rg.x,y:rg.y,kind:'goal',t:q.title,q:id})} // the giver is inside a building: ring its door
     }
   }
   return out;
@@ -6120,7 +6121,7 @@ function questShow(qid){ // a quest picked in the log: open this level's map on 
   const q=QUESTS[qid];if(!q)return;
   const sp=questSpots().find(z=>z.q===qid);
   if(!sp){const ar=QAREA[qid]||'another place',here=(LEVELS[LEVEL]&&(LEVELS[LEVEL].label||LEVELS[LEVEL].name)||'').toLowerCase().includes(String(ar).toLowerCase());
-    G.qNote={t:G.time,text:here?`${q.who||'The one who set "'+q.title+'"'} cannot be shown on this map: they are indoors somewhere in ${ar}.`:`"${q.title}" is not on this map. It belongs to ${ar}.`};return}
+    G.qNote={t:G.time,text:QAREA[qid]==='The Narrow Sea'?`"${q.title}" takes you out onto the Narrow Sea. It is not on this map.`:here?`${q.who||'The one who set "'+q.title+'"'} cannot be shown on this map: they are indoors somewhere in ${ar}.`:`"${q.title}" is not on this map. It belongs to ${ar}.`};return}
   G.qFocus={id:qid,lvl:LEVEL};G.menu=false;G.map=false;G.overview=true;G.world=false;G.teleMode=false;
   const mz=clamp(LEVEL===44?1:12,mapFit(),34),[rw,rh]=mapRes();G.mz=mz;G.panX=(DW-rw)/2-((sp.x+.5)*mz+6);G.panY=(DH-rh)/2-((sp.y+.5)*mz+30);G.ovInit=true;G.ovLevel=LEVEL;
 }
@@ -14601,6 +14602,10 @@ const sv=(id,t,who,desc,need,goal,reward,extra)=>vq(id,t,who,desc,need,goal,rewa
 /* Saltbarrow: the pirate queen */
 sv('vq1','The Pirate Queen','Sable Maeve','Sable Maeve wants Corvane\'s marines off her island. Kill 10 of them. They are camped along the north and east shore of Saltbarrow.',10,q=>(G.flags.k_bandit||0)-(q.base||0),{gold:600,xp:3000},{cnt:'k_bandit'});
 const DV1=khQD('Corvane burned my fleet at anchor, and when I would not tell him where you had gone, he left forty marines on my island to wait for you. They are camped around the shore, and every hour I do not move, more of my crew are fed to the sharks. Kill ten of them. Do that, and I will tell you what I know of Isolde.','Mind the archers. They hide in the dunes. And do not drink from the marines\' flasks, whatever the label says.',(n,m)=>`${n} of ${m} of his marines are dead. There are more along the shore.`,'You did it? Ten? Come, sit down.','Isolde. Corvane\'s scribe. She sheltered on the Isle of Bells, in the drowned abbey, before she went on to the rest. Brother Aldous keeps the first page. He will not give it up to a stranger. Ring his bells, all three, and he will know you are not Corvane\'s.','Brother Aldous on the Isle of Bells has the first page. The chart is marked.');
+QUESTS.vq1.spot=()=>{ // the marines: ring the one in the middle of the camp, not Maeve
+  if(LEVEL!==300)return null;const es=G.enemies.filter(e=>e.hp>0&&e.t==='bandit');if(!es.length)return null;
+  const cx=es.reduce((a,e)=>a+e.x,0)/es.length,cy=es.reduce((a,e)=>a+e.y,0)/es.length;let b=es[0],bd=1e9;for(const e of es){const d=(e.x-cx)**2+(e.y-cy)**2;if(d<bd){bd=d;b=e}}return {x:b.x,y:b.y};
+};
 khNpc('sb_maeve','Sable Maeve, pirate queen','yar_p_maeve',()=>qNode('vq1',DV1),{q:'vq1'});
 khNpc('sb_cook','The pirate cook','peasantW',()=>say('The queen\'s grog is not the problem. The problem is that the marines kicked in the barrel. Shoot the ones on the north shore and the rest will run.',[BYE]));
 khNpc('sb_hand','A pirate deckhand','fisher',()=>say('The black ship stood off the reef for two days, sending in small boats. They have a man in grey who does not talk and does not drink. That one frightens me more than all the marines.',[BYE]));
@@ -16079,6 +16084,8 @@ khNpc('uw_oak','A drowned timber','uw_timber',d=>{
   add('sb_maeve',['uq1','sa1','sa2']);add('ib_aldous',['uq2']);add('ci_ketra',['uq3']);add('ll_isolde',['uq4']);
   add('yr_orsa',['sb1','sb2']);add('yr_harbour',['sc1','sc3']);add('yr_priest',['sc2']);add('yr_chandler',['sd1']);add('yr_menkaure',['sd2']);
 })();
+/* where each dive quest goes down: the dive line of the island, which the quest log's map circles instead of the quest giver */
+QUESTS.uq1.targets=['uw_dive_300'];QUESTS.uq2.targets=['uw_dive_301'];QUESTS.uq3.targets=['uw_dive_302'];QUESTS.uq4.targets=['uw_dive_303'];
 
 /* ---- src/desert/shellquest.js ---- */
 /* ==========================================================================

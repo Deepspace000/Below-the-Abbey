@@ -120,3 +120,5 @@ khNpc('uw_oak','A drowned timber','uw_timber',d=>{
   add('sb_maeve',['uq1','sa1','sa2']);add('ib_aldous',['uq2']);add('ci_ketra',['uq3']);add('ll_isolde',['uq4']);
   add('yr_orsa',['sb1','sb2']);add('yr_harbour',['sc1','sc3']);add('yr_priest',['sc2']);add('yr_chandler',['sd1']);add('yr_menkaure',['sd2']);
 })();
+/* where each dive quest goes down: the dive line of the island, which the quest log's map circles instead of the quest giver */
+QUESTS.uq1.targets=['uw_dive_300'];QUESTS.uq2.targets=['uw_dive_301'];QUESTS.uq3.targets=['uw_dive_302'];QUESTS.uq4.targets=['uw_dive_303'];
