@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.168';
+const VERSION='3.169';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4624,7 +4624,7 @@ function drawOverview(){
   btn('ovclose',0,0,0,0);BTNS.pop();
   BTNS.push({id:'maparea',x:0,y:0,w:DW,h:DH,up:true,drag:'map'});
   btnText('worldmap','World map',356,254,116,24);btnText('ovexit','Exit',356,284,116,24);
-  btnText('mzin','+',10,284,30,24);btnText('mzout','\u2212',44,284,30,24);btnText('mzfit','Fit',78,284,44,24);
+  btnText('mzin','+',10,284,30,24);btnText('mzout','\u2212',44,284,30,24);btnText('mzfit','Fit',78,284,44,24);btnText('mzme','You',126,284,44,24);
 }
 /* ==========================================================================
    LEVELS: 1 = the crypts, 2 = the abbey grounds and the forest
@@ -6937,7 +6937,7 @@ function handleBtn(id){
   if(G.cut){cutAdvance();return}
   if(G.talk){talkBtn(id);return}
   if(G.overview){if(id==='ovexit'){G.overview=false;G.world=false;G.teleMode=false;G.qFocus=null}else if(/^wtp_/.test(id))teleFromMap(id.slice(4));else if(id==='worldback')G.world=false;else if(id==='worldmap'){G.world=true;G.wv=wvDefault()}else if(id==='wzin')setWorldZoom((G.wv?G.wv.z:1)*1.4,240,160);else if(id==='wzout')setWorldZoom((G.wv?G.wv.z:1)/1.4,240,160);else if(id==='wreset')G.wv=wvDefault();else if(id==='wmap'){}
-    else if(id==='mzin')setMapZoom((G.mz||12)*1.3,DW/2,DH/2);else if(id==='mzout')setMapZoom((G.mz||12)/1.3,DW/2,DH/2);else if(id==='mzfit')setMapZoom(0,DW/2,DH/2);return}
+    else if(id==='mzin')setMapZoom((G.mz||12)*1.3,DW/2,DH/2);else if(id==='mzout')setMapZoom((G.mz||12)/1.3,DW/2,DH/2);else if(id==='mzfit')setMapZoom(0,DW/2,DH/2);else if(id==='mzme'){const mz=G.mz||12,[rw,rh]=mapRes();G.panX=(DW-rw)/2-((G.C.x+.5)*mz+6);G.panY=(DH-rh)/2-((G.C.y+.5)*mz+30)} /* centre the map on the party, keeping the zoom */return}
   if(G.saves){savesBtn(id);return}
   if(G.state==='title'){titleBtn(id);return}
   if(G.state==='goto'){gotoBtn(id);return}
