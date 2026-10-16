@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.199';
+const VERSION='3.200';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -17085,11 +17085,11 @@ function hlBuild(k){
   if(!violet)for(let i=0;i<Math.max(5,Math.min(13,Math.round(cells.length/38)));i++){const c=cells[R(900+i*13,cells.length)];if(c&&!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);enemies.push({t:kinds[R(950+i,kinds.length)],x:c[0],y:c[1]})}}
   for(let i=0;i<3&&cells.length;i++){const c=cells[R(100+i*7,cells.length)];if(!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);items.push({k:'potion',x:c[0],y:c[1]})}}
   OH_STY.hlsecret=Object.assign({},OH_STY.castle2||OH_STY.gold,{zoom:3.6,contrast:2.0,tint:[110,150,255,.0]});const secretCh=violet?'#':ch(TM.make('plain','hlsecret',CH).gid);
-  const dress={k,id,rows,W,H,rooms,myst,far,used,decor,enemies,d,violet,top,R,hs,secretCh,items};hlDress(dress);
+  const dress={k,id,rows,W,H,rooms,myst,far,used,decor,enemies,d,violet,top,R,hs,secretCh,items,up,start};hlDress(dress);
   const portals=[{to:k===0?HL.CAV:violet?HL.BASE+HL.N-1:id-1,x:0,y:0,f:2,tex:'tomb'}];
   if(up)portals[1]={to:id+1,x:0,y:0,f:0,tex:'tomb'};
   const lv={rows,start,enemies,items,decor,fmap:(()=>{const f=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];f.push(s)}return f})(),
-    floorSet:['tombslab','sand','tombgold','tombdark','tombred'],floor:'tombslab',ceil:'tomb',name:LEVEL_NAMES[id],label:violet?'The Violet Tower':'The Orange Tower',diff:36+kk,portals,lights,chars,_trig:dress.lv_trig,_man:dress.lv_man,amb:.05,day:0,ceilH:CH,
+    floorSet:['tombslab','sand','tombgold','tombdark','tombred'],floor:'tombslab',ceil:'tomb',name:LEVEL_NAMES[id],label:violet?'The Violet Tower':'The Orange Tower',diff:36+kk,portals,lights,chars,_trig:dress.lv_trig,_msgr:dress.lv_msgr,_man:dress.lv_man,amb:.05,day:0,ceilH:CH,
     mapNames:rooms.map((r,i)=>({t:i===0?'Stair ('+(k+1)+')':r===myst&&!violet?'The Strange Room':r===far&&up?'The Stair Up':top&&r===far?'The Spire':'Hall',x:mid(r)[0],y:r.y0-1,k:'place'})),_up:up,_start:start};
   LEVELS[id]=lv;
 }
@@ -17197,7 +17197,8 @@ const HL_NOTES=[
  'A note. "The wizard at the top is not a ruler. He is the one who locked them all in. Answer him kindly."',
  'A note scratched in many hands. "I wrote my name on the wall so I would remember it. In the morning there were a hundred other names, all mine."',
  'A note. "Spikes, darts, plates in the floor. The rulers loved a joke. Walk where the dust is thick."',
- 'A note. "One wall in this hall is the wrong colour. The rulers kept what they loved behind it, and a lever to open it."'];
+ 'A note. "One wall in this hall is the wrong colour. The rulers kept what they loved behind it, and a lever to open it."',
+ 'A note. "Five letters are written in blood on the walls of the last floors. Whoever reads all five does not leave. Stay on the road and let them be."'];
 const HL_BOOKS=[
  '"On the Taste of Crowns". A treatise on which rulers tasted best. The margins are full of tiny teeth marks.',
  '"The Obedient Dead". A manual. Chapter one is how to ask a corpse politely. Chapter two is what to do when it asks you.',
@@ -17211,7 +17212,7 @@ const HL_BOOKS=[
  '"Lullabies for the Dead". The tune is slow and quiet. Reading it, you notice you are humming it.'];
 HL_NOTES.forEach((t,i)=>khNpc('hl_note'+i,'A pinned note','hl_p_note',()=>say(t,[['Put it back.',()=>null]])));
 HL_BOOKS.forEach((t,i)=>khNpc('hl_book'+i,'An old book','hl_p_lectern',()=>say(t,[['Close the book.',()=>null]])));
-const HL_WARN=['"Turn back. Turn back. The floor above is hungry."','"Do not trust the voice in the dark. It wants company."','"He stands behind you on the stair. Do not look."','"Do not drink what the last ruler poured."','"At the top he asks you what you want. Want nothing."'];
+const HL_WARN=['"Turn back. Turn back. The floor above is hungry."','"Do not trust the voice in the dark. It wants company."','"He stands behind you on the stair. Do not look."','"Do not drink what the last ruler poured."','"At the top he asks you what you want. Want nothing."','"Do not read what is written in blood on the high floors."'];
 khNpc('hl_fireplace','A fireplace with a face in it','hl_fire',()=>{const F=HLF();F.fw=((F.fw||0)+1);return say('The fire gutters, and a pale face rises out of the flames. Its mouth moves. '+HL_WARN[(F.fw-1)%HL_WARN.length]+' Then it sinks back into the coals.',[['Step back.',()=>null]])});
 khNpc('hl_poisoncup','A golden cup','hl_p_poison',()=>say('A golden cup on a small table. The liquid inside is green and faintly glowing, and it steams. A skull sits beside it, watching.',[
   ['Drink it.',()=>{const l=hlLive();if(l.length){const hi=l[0];hlHurt(hi,18);try{afflInflict('poisoned',hi)}catch(e){}msg(HERO_DEF[hi].name+' drinks it, and is poisoned.','#70e070')}return null}],
@@ -17250,11 +17251,15 @@ function hlStep(nx,ny){
     if(!d.hidden){if(dist<=2){d.hidden=true;m.t=0;msg('The thin man is gone. There was nobody there.','#b8b0d8')}}
     else if(++m.t>=4){const w=m.wp[(m.i=(m.i+1)%m.wp.length)];if(Math.abs(w[0]-nx)+Math.abs(w[1]-ny)>=4){d.x=w[0];d.y=w[1];d.hidden=false;msg('Someone is standing in the dark ahead, quite still.','#b8b0d8')}}}}
 }
+{const _mp=msgrPlace;msgrPlace=function(){
+  try{const F=G.flags,L=LEVELS[LEVEL];if(L&&L._msgr&&LEVEL>=HL.BASE&&LEVEL<HL.BASE+HL.N){F.msgrLv=F.msgrLv||{};
+    if(!F.msgrLv[LEVEL]){const m=L._msgr;F.msgrSeen={};F.msgrLv[LEVEL]={x:m.x,y:m.y,letters:m.letters.map((q,i)=>({k:MSG_LETTERS[i],x:q.x,y:q.y,wd:q.wd})),state:'lurk',born:G.rounds,hp:null}}}}catch(e){console.warn('hl msgr',e)}
+  return _mp.apply(this,arguments)}}
 {const _ds=desertStep;desertStep=function(x,y){_ds.apply(this,arguments);try{hlStep(x,y)}catch(e){console.warn('hlStep',e)}}}
 {const _oe2=ohEnter;ohEnter=function(n){G.hlOut=false;G.hlStrobe=undefined;G.hlSteps=0;_oe2.apply(this,arguments)}}
 /* ---- dressing the rooms ---- */
 function hlDress(c){
-  const {k,rows,W,H,rooms,myst,far,used,decor,enemies,d,violet,top,R,hs,secretCh,items}=c;if(violet)return;
+  const {k,rows,W,H,rooms,myst,far,used,decor,enemies,d,violet,top,R,hs,secretCh,items,up,start}=c;if(violet)return;
   const isW=(x,y)=>{const ch=rows[y]&&rows[y][x];return ch!==undefined&&ch!=='.'&&ch!=='0'&&ch!=='1'},isF=(x,y)=>rows[y]&&rows[y][x]==='.';
   const key=(x,y)=>x+','+y,shuf=(a,s)=>a.map(v=>[hs(v[0]*3+s,v[1]*5+k,41),v]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
   const pic=(kk,x,y,wd,ex)=>{if(used.has(key(x,y)))return false;used.add(key(x,y));decor.push(Object.assign({k:kk,x,y,wd,pic:1,block:false,walk:true,deco:true},ex||{}));return true};
@@ -17283,8 +17288,9 @@ function hlDress(c){
       for(const [x,y,wd] of S.slice(1)){if(j>=4)break;pic(j%2?'hl_p_mirror':'hl_p_window',x,y,wd,{bob:j%2?.1:.35});j++}if(I[0])enemies.push({t:'hlghost',x:I[0][0],y:I[0][1]});
       if(!manDone&&k%2===1&&I[1]){manDone=true;flr('hl_gent',I[1][0],I[1][1],{npc:'hl_gent'})}}
   });
+  const secretSlots=[];
   // secret rooms: one wall in a hall is the wrong colour and has a lever on it. Behind it is a small chamber with a chest
-  {let made=0;const want=1+(k%3===0?1:0),setC=(x,y,ch)=>{rows[y]=rows[y].slice(0,x)+ch+rows[y].slice(x+1)};
+  {let made=0;const want=1+(k%3===0?1:0)+(k>=HL.N-4?1:0),setC=(x,y,ch)=>{rows[y]=rows[y].slice(0,x)+ch+rows[y].slice(x+1)};
    for(const r of shuf(rooms.filter(q=>q!==myst&&q.x1-q.x0>=2),77)){if(made>=want)break;
      for(const [x,y,wd] of slots(r)){const px=-wd[1],py=wd[0];let ok=true;
        for(let t=1;t<=5&&ok;t++)for(let sd=-2;sd<=2&&ok;sd++){const cx=x+wd[0]*t+px*sd,cy=y+wd[1]*t+py*sd;if(cx<1||cy<1||cx>=W-1||cy>=H-1||!isW(cx,cy)||used.has(key(cx,cy)))ok=false}
@@ -17295,7 +17301,22 @@ function hlDress(c){
        const bx=x+wd[0]*4,by=y+wd[1]*4;
        decor.push({k:'chest',x:bx,y:by,block:true,magic:1});flr('hl_p_candle',x+wd[0]*3+px,y+wd[1]*3+py);flr('hl_p_candle',x+wd[0]*3-px,y+wd[1]*3-py);
        pic('hl_p_note',bx+px,by+py,[wd[0],wd[1]],{npc:'hl_note16',bob:.6});if(items)items.push({k:'potion',x:x+wd[0]*3,y:y+wd[1]*3});
-       made++;break}}}
+       secretSlots.push([bx-px,by-py,[wd[0],wd[1]]]);made++;break}}}
+  // the Messenger of Death waits on the last four floors. His five letters are written where the main way never passes: two in secret chambers, the rest in side rooms and dead ends out of sight of the route to the stair
+  if(k>=HL.N-4&&up){
+    const los=(x0,y0,x1,y1)=>{const n=Math.max(Math.abs(x1-x0),Math.abs(y1-y0));for(let i=1;i<n;i++){const x=Math.round(x0+(x1-x0)*i/n),y=Math.round(y0+(y1-y0)*i/n);if(!isF(x,y))return false}return true};
+    const route=[];{let x=up.x,y=up.y,g=d[y*W+x];route.push([x,y]);for(let n=0;n<400&&g>0;n++){const nb=[[1,0],[-1,0],[0,1],[0,-1]].map(([a,b])=>[x+a,y+b]).find(([a,b])=>a>=0&&b>=0&&a<W&&b<H&&d[b*W+a]===g-1);if(!nb)break;x=nb[0];y=nb[1];g--;route.push([x,y])}}
+    const expo=(x,y)=>route.reduce((n,[a,b])=>n+((a-x)**2+(b-y)**2<=42&&los(a,b,x,y)?1:0),0);
+    const cand=[];for(const r of rooms)for(const sl of slots(r))cand.push([sl[0],sl[1],sl[2],expo(sl[0],sl[1])]);
+    for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!isF(x,y)||used.has(key(x,y)))continue;const wl=[[0,-1],[0,1],[-1,0],[1,0]].filter(([a,b])=>isW(x+a,y+b));if(wl.length>=3){const w=wl[0];cand.push([x,y,w,expo(x,y)])}} // dead ends
+    const chosen=secretSlots.slice(0,2).map(q=>[q[0],q[1],q[2],0]);
+    cand.sort((p,q)=>p[3]-q[3]||hs(p[0],p[1],k)-hs(q[0],q[1],k));
+    for(const q of cand){if(chosen.length>=5)break;if(used.has(key(q[0],q[1]))&&!chosen.some(z=>z===q))continue;if(chosen.every(z=>Math.abs(z[0]-q[0])+Math.abs(z[1]-q[1])>=3))chosen.push(q)}
+    if(chosen.length===5){chosen.forEach(q=>used.add(key(q[0],q[1])));
+      const fc=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(isF(x,y)&&d[y*W+x]>=8&&!used.has(key(x,y)))fc.push([x,y]);
+      const m0=fc.length?fc[(hs(k,3,5)*fc.length)|0]:[start.x,start.y-2];
+      c.lv_msgr={x:m0[0],y:m0[1],letters:chosen.map(q=>({x:q[0],y:q[1],wd:q[2]}))}}
+  }
   // the witch: a room of her own on some levels
   if(k%5===2){const r=rooms.find((q,i)=>i>=2&&q!==myst&&q!==far&&q.x1-q.x0>=3);if(r){const cx=(r.x0+r.x1)>>1,cy=(r.y0+r.y1)>>1;if(!used.has(key(cx,cy))){enemies.push({t:'hlwitch',x:cx,y:cy});used.add(key(cx,cy))}}}
   // corridors: a picture or a chain now and then, so the passages are not bare
