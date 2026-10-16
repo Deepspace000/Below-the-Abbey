@@ -6,7 +6,7 @@
    ========================================================================== */
 const BELOW={IDS:[360,361,362,363],LAND:364,NAMES:['The Sealed Stair','The Drowned Cloister','The Ossuary of Brothers','The Hollow Abbey'],SIZE:[[31,23],[35,25],[39,27],[43,29]]};
 ITEMDEF.orrery={n:'The Orrery of Hours',k:'quest',t:'Quest item',ic:'herb',c:'#e8d070',stack:0,price:0,d:'Six small pieces of brass, glass and stone, fitted together by the king’s clockmaker. A ring of moving discs ticks slowly in your hand. It opens the sealed door under the Abbey.',sw:.4};
-ENEMY_DEF.hollowabbot={name:'The Hollow Abbot',hp:2600,dmg:[26,42],hit:.86,w:1.25,img:'wraith',xp:12000,gold:[900,1400],speed:1,verb:'strikes',aboveParty:4};
+ENEMY_DEF.hollowabbot={name:'The Hollow Abbot',hp:2600,dmg:[26,42],hit:.86,w:.7,img:'skel',xp:12000,gold:[900,1400],speed:1,verb:'strikes',aboveParty:4};
 
 /* ---- the four levels: rooms and passages in the old crypt style ---- */
 function belowBuild(n){
