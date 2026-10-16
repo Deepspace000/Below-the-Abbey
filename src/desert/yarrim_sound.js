@@ -102,7 +102,7 @@ function yarSoundTick(){
   if(!AC||!NB||!MASTER)return;
   const now=AC.currentTime,outdoors=LEVEL===290||LEVEL===291||(LEVEL>=292&&LEVEL<=299);
   const play=G.state==='play'&&!G.mute&&outdoors;
-  yrsWindTick(now,G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===290||LEVEL===300||LEVEL===301||LEVEL===302||LEVEL===303||LEVEL===304));
+  yrsWindTick(now,G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===290||LEVEL===300||LEVEL===301||LEVEL===302||LEVEL===303||LEVEL===304||(LEVEL>=400&&LEVEL<=423)));
   if(!YRS.bus){if(!play||!SNDOPT.music)return;yrsBus()}
   const L=play&&SNDOPT.music?yrsLoudness():{v:0,lp:7000};
   YRS.bus.gain.setTargetAtTime(L.v*.9*SNDOPT.music,now,.9);YRS.lp.frequency.setTargetAtTime(L.lp,now,.5);

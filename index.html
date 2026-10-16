@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.185';
+const VERSION='3.186';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2584,7 +2584,7 @@ function render3D(){
     const wh=TEX[ti].wh||(LEVEL===3&&mx>0&&my>0&&mx<MW-1&&my<MH-1?1.55:CEILH); // Thornwick's houses are one storey under the high sky; the forest round it stays tall
     const skyW=(LEVEL===22&&g===1&&T_SKY[0]!==undefined)||(!!TEX[ti].sky&&!!SKYPAN),tileW=!skyW&&!TEX[ti].h&&wh>2&&(g>=100||g===1||g===2||g===6||(g>=9&&g<=14)||(g>=20&&g<=22)); // tall plain walls repeat their pattern instead of stretching
     const tex=TEX[ti],te=tex.e,wlv=fastW&&perp>4?Math.min(4,Math.floor(Math.log2(TS*perp/F*.7))):0,td=wlv>0&&tex.d&&tex.d.length===TS*TS*4?wallMip(tex,wlv):tex.d; // far facades are read from blurred copies
-    const kd=(LEVEL===44||LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<430))&&g>=100?KH_DOOR[g]:undefined,dg=kd!==undefined&&kd.lvl!==undefined,dgs=dg?(.7+.18*Math.sin(t*2.1+mx*1.7+my*.9))*(1-Math.min(.55,perp*.008)):0; // a doorway that can be entered glows softly, brighter near the threshold
+    const kd=(LEVEL===44||LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<440))&&g>=100?KH_DOOR[g]:undefined,dg=kd!==undefined&&kd.lvl!==undefined,dgs=dg?(.7+.18*Math.sin(t*2.1+mx*1.7+my*.9))*(1-Math.min(.55,perp*.008)):0; // a doorway that can be entered glows softly, brighter near the threshold
     const dist=perp*Math.hypot(rX,rY);
     const lb=Math.max(baseL(dist),lbm);let lt=0;
     const px=hx-(side===0?stx*.03:0),py=hy-(side===1?sty*.03:0);
@@ -2710,7 +2710,7 @@ function spriteList(){
 }
 let SC=ctx; // sprites are painted straight onto the full-size screen, not into the small 3D picture, so they stay sharp
 function drawSprites(cx,cy,dX,dY,pX,pY){
-  const inv=-1/PL,list=spriteList().concat(LEVEL===44&&LEVELS[44].sky?khSkyList(cx,cy,dX,dY):((LEVEL===YR.ID||LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<430))&&LEVELS[LEVEL]&&LEVELS[LEVEL].sky?khSkyList(cx,cy,dX,dY,LEVELS[LEVEL],.6):[])),proj=[],far=LEVEL===44?26:(G.day||0)>0?34:20,far2=far*far,farT=LEVEL===44?26:(G.day||0)>0?33:16; // outdoors the trees stay drawn as far as the walls can be seen
+  const inv=-1/PL,list=spriteList().concat(LEVEL===44&&LEVELS[44].sky?khSkyList(cx,cy,dX,dY):((LEVEL===YR.ID||LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<440))&&LEVELS[LEVEL]&&LEVELS[LEVEL].sky?khSkyList(cx,cy,dX,dY,LEVELS[LEVEL],.6):[])),proj=[],far=LEVEL===44?26:(G.day||0)>0?34:20,far2=far*far,farT=LEVEL===44?26:(G.day||0)>0?33:16; // outdoors the trees stay drawn as far as the walls can be seen
   for(const s of list){
     const rx=s.x-cx,ry=s.y-cy;
     if(rx*rx+ry*ry>(s.sky?60000:far2))continue;
@@ -2744,7 +2744,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     const trD=(G.day||0)>0&&s.decor&&NOSHADOW.test(s.decor.k)&&LEVEL!==32&&LEVEL!==33&&!GRIM_L(); // woodland trees fade into dark green, not pale haze
     let lum=clamp(.08+(Math.max(baseL(dist),G.day||0,G.amb||0)+lt*.85)*1.05,0,1)*(GRIM_L()?.66:trD?.78:1);
     if(LEVEL===44&&s.decor&&(s.decor.k==='lamp'||s.decor.k==='hlant'||s.decor.k==='cfire'))lum=Math.max(lum,.9); // a lantern or a fire shines by its own light
-    const ohL=LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<430),kq0=Math.min(1,Math.max(.05,2*sw/iw)),dyv=(G.day||0)>0,hzv=GRIM_L()?[30,46,32]:ohL&&dyv?[226,228,220]:trD?[40,54,42]:dyv?[132,146,132]:[86,76,62],smS=Math.min(dyv?(ohL?.22:.4):.26,dist*(dyv?(ohL?.018:.04):.03))*(GRIM_L()?.55:.75);
+    const ohL=LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<440),kq0=Math.min(1,Math.max(.05,2*sw/iw)),dyv=(G.day||0)>0,hzv=GRIM_L()?[30,46,32]:ohL&&dyv?[226,228,220]:trD?[40,54,42]:dyv?[132,146,132]:[86,76,62],smS=Math.min(dyv?(ohL?.22:.4):.26,dist*(dyv?(ohL?.018:.04):.03))*(GRIM_L()?.55:.75);
     let SRC,tw,th,HZ=null,hA=0;
     if(!s.flash&&!(s.decor&&s.decor.burn>0)){
       let tier=SPR_TIERS[SPR_TIERS.length-1];for(const t of SPR_TIERS){if(t>=iw*kq0){tier=t;break}}
@@ -4057,13 +4057,14 @@ function gotoList(){
   hd('The open sea and its lonely islands');for(const n of [330,331,332,333,334,335,336,337,338,339,340,341,342,343])if(has(n))out.push({n,name:nm(n)});
   hd('Oldhaven, the city of King Osric');for(const n of [304,305,306,307,308,309,310,311])if(has(n))out.push({n,name:nm(n)});
   hd('The Land Path, from Oldhaven to Yarrim');for(let n=400;n<424;n+=3)if(has(n))out.push({n,name:nm(n)+(n===400?', the beginning':n===421?', near the end':'')});
+  hd('Saint Elen’s Monastery, halfway along the Land Path');for(const n of [430,431,432,433,434])if(has(n))out.push({n,name:nm(n)});
   hd('Below the Abbey, past the sealed door');for(const n of [360,361,362,363,364])if(has(n))out.push({n,name:nm(n)});
     hd('Mounds of the Sand Road');for(let n=BURROW_BASE;n<BURROW_BASE+BURROW_N;n++)if(has(n))out.push({n,name:nm(n)});
   for(const [dl,dname] of DNG_DESERTS){const ids=Object.keys(DNG_INFO).map(Number).filter(n=>DNG_INFO[n].desert===dname).sort((a,b)=>a-b);if(ids.length){hd('Dungeons of '+dname);for(const n of ids)out.push({n,name:nm(n)})}}
   return out;
 }
 function jumpToLevel(n,target){
-  if((((n>=304&&n<=312)||(n>=360&&n<=364)||(n>=400&&n<=423))||(n>=6000&&n<7000))&&typeof KH_READY!=='undefined'&&!KH_READY){khLoadAssets().then(()=>jumpToLevel(n,target));return} // Oldhaven needs its pictures before it is built
+  if((((n>=304&&n<=312)||(n>=360&&n<=364)||(n>=400&&n<=434))||(n>=6000&&n<7000))&&typeof KH_READY!=='undefined'&&!KH_READY){khLoadAssets().then(()=>jumpToLevel(n,target));return} // Oldhaven needs its pictures before it is built
   if((n===44||(n>=199&&n<=274))&&LEVELS[44].stub){khEnter(()=>jumpToLevel(n,target));return}
   if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();
   audioInit();backupAuto();
@@ -4213,12 +4214,13 @@ const WORLD_LOCS=[
   {k:'openSea',n:'The Open Sea',sub:'sail the Dawn Walker',lv:[330,331,332,333,334,335,336,337,338,339,340,341,342,343],x:808,y:262,ic:'rain'},
   {k:'oldhaven',n:'Oldhaven',sub:"the king's city, across the Narrow Sea",lv:[304,305,306,307,308,309,310],x:1170,y:176,ic:'castle'},
   {k:'oakwood',n:'The Oakwood',sub:'old oaks east of Oldhaven',lv:[311],x:1244,y:190,ic:'trees'},
-  {k:'landpath',n:'The Land Path',sub:'a long quiet road, one way',lv:Array.from({length:24},(_,i)=>400+i),x:1130,y:36,ic:'trees'},
+  {k:'monastery',n:'Saint Elen’s',sub:'a mountain monastery',lv:[430,431,432,433,434,6900,6901,6902,6903,6904,6905],x:1074,y:44,ic:'abbey'},
+  {k:'landpath',n:'The Land Path',sub:'a pilgrim way, one way only',lv:Array.from({length:24},(_,i)=>400+i),x:1130,y:36,ic:'trees'},
   {k:'below',n:'Below the Abbey',sub:'past the sealed door',lv:[360,361,362,363,364],x:84,y:268,ic:'cave'}
 ];
-const WORLD_ROADS=[['abbey','thornwood','thornwick','gwood'],['gwood','road','tunnel','ironhill'],['ironhill','graves'],['ironhill','mines'],['ironhill','moor','pass','greendale','anaea'],['oldhaven','oakwood'],['abbey','below'],['oldhaven','landpath','yarrim']];
+const WORLD_ROADS=[['abbey','thornwood','thornwick','gwood'],['gwood','road','tunnel','ironhill'],['ironhill','graves'],['ironhill','mines'],['ironhill','moor','pass','greendale','anaea'],['oldhaven','oakwood'],['abbey','below'],['oldhaven','landpath','yarrim'],['landpath','monastery']];
 function lab(s,x,y,size,col){ctx.save();ctx.font=`bold ${size}px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(200,184,140,.9)';ctx.strokeText(s,x,y);ctx.fillStyle=col;ctx.fillText(s,x,y);ctx.restore()}
-const QWORLD={'Thornwick':'thornwick','The Road to Ironhill':'road','Ironhill':'ironhill','Greyfang Pass':'pass','Greendale':'greendale','The Wilds':'thornwood','Khemetra':'scoria','Yarrim':'yarrim','Oldhaven':'oldhaven','The Oakwood':'oakwood','Below the Abbey':'below'};
+const QWORLD={'Thornwick':'thornwick','The Road to Ironhill':'road','Ironhill':'ironhill','Greyfang Pass':'pass','Greendale':'greendale','The Wilds':'thornwood','Khemetra':'scoria','Yarrim':'yarrim','Oldhaven':'oldhaven','The Oakwood':'oakwood','Below the Abbey':'below','Saint Elen’s Monastery':'monastery'};
 const QWORLD_ID={vq1:'saltbarrow',vq2:'bells',vq3:'cinder',vq4:'lastlight',vq6:'oldhaven',yar7:'yarrim',vq5:'yarrim',colours:'anaea',anaea_shake:'anaea',anaea_fence:'anaea',thornwick_shake:'thornwick',thornwick_fence:'thornwick',ironhill_shake:'ironhill',ironhill_fence:'ironhill',khemetra_shake:'scoria',khemetra_fence:'scoria'};
 function questsLeft(){const o={};for(const id of Object.keys(QUESTS)){if(qSt(id)!=='active')continue;const k=QWORLD_ID[id]||QWORLD[QAREA[id]];if(k)o[k]=(o[k]||0)+1}return o}
 function drawWorldMap(){
@@ -4900,7 +4902,7 @@ function respawnForest(){
 // carry the party, bag, gold and quests into the next level
 function goToLevel(n,entry){
   // Oldhaven is painted with the city's pictures: never build it before they have loaded, or its soldiers come out as peasants and its walls as flat colour
-  if((((n>=304&&n<=312)||(n>=360&&n<=364)||(n>=400&&n<=423))||(n>=6000&&n<7000))&&typeof KH_READY!=='undefined'&&!KH_READY&&!G._khWait){G._khWait=1;try{msg('The harbour comes into view...','#a8d8ff')}catch(e){}khLoadAssets().then(()=>{G._khWait=0;goToLevel(n,entry)}).catch(()=>{G._khWait=0});return}
+  if((((n>=304&&n<=312)||(n>=360&&n<=364)||(n>=400&&n<=434))||(n>=6000&&n<7000))&&typeof KH_READY!=='undefined'&&!KH_READY&&!G._khWait){G._khWait=1;try{msg('The harbour comes into view...','#a8d8ff')}catch(e){}khLoadAssets().then(()=>{G._khWait=0;goToLevel(n,entry)}).catch(()=>{G._khWait=0});return}
   if(n===43||n===62||n===13||(n>=271&&n<=280)||(n>=289&&n<=399)||n>=40000)khLoadAssets(); // the city's pictures arrive in the background while the party walks to its gate
   G.lst[LEVEL]=levelState();
   const keep={heroes:G.heroes,bag:G.bag,gold:G.gold,keys:G.keys,rounds:G.rounds,kills:G.kills,sel:G.sel,bossDead:G.bossDead,flags:G.flags,quests:G.quests,lst:G.lst,clock:G.clock,starveT:G.starveT,aff:G.aff};
@@ -14017,7 +14019,7 @@ function yarSoundTick(){
   if(!AC||!NB||!MASTER)return;
   const now=AC.currentTime,outdoors=LEVEL===290||LEVEL===291||(LEVEL>=292&&LEVEL<=299);
   const play=G.state==='play'&&!G.mute&&outdoors;
-  yrsWindTick(now,G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===290||LEVEL===300||LEVEL===301||LEVEL===302||LEVEL===303||LEVEL===304));
+  yrsWindTick(now,G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===290||LEVEL===300||LEVEL===301||LEVEL===302||LEVEL===303||LEVEL===304||(LEVEL>=400&&LEVEL<=423)));
   if(!YRS.bus){if(!play||!SNDOPT.music)return;yrsBus()}
   const L=play&&SNDOPT.music?yrsLoudness():{v:0,lp:7000};
   YRS.bus.gain.setTargetAtTime(L.v*.9*SNDOPT.music,now,.9);YRS.lp.frequency.setTargetAtTime(L.lp,now,.5);
@@ -14537,7 +14539,7 @@ khNpc('yr_ship','The Dawn Walker','yar_ship_dawn',()=>seaChart());
      300 Saltbarrow (pirates)  301 The Isle of Bells (a drowned abbey)  302 Cinder Isle (a volcano)  303 Last Light (a ruined beacon)
      304 Oldhaven Quay (the harbour of the king's city, where this part of the story ends)
    ========================================================================== */
-const yarSea=n=>n===290||(n>=300&&n<=304)||(n>=320&&n<=323)||(n>=330&&n<=349)||(n>=400&&n<=423);
+const yarSea=n=>n===290||(n>=300&&n<=304)||(n>=320&&n<=323)||(n>=330&&n<=349)||(n>=400&&n<=423)||n===430||n===431;
 const SEA_TINT={305:[.96,.93,.88],300:[1.05,.98,.9],301:[.8,.9,.82],302:[.55,.5,.52],303:[.85,.88,.96],304:[.96,.93,.88]};
 /* the ground of every island is yellow sand: the gold-sand paving washed pale, and a darker one for the rocky slopes */
 function isleFloors(){
@@ -16307,10 +16309,48 @@ LP_PRIESTS.forEach(([id,n,face,line])=>khPray(id,n,face,line,15));
 khNpc('lp_knight','A knight of the Crown','kh_ohsold1_2',()=>yrLines('lp_knight',["The Crown rides the Land Path twice a day. Nothing ever happens. It is the best post in the kingdom.","I ride from the city gate to the mountains and back. The mountains are far. The horse knows the way.","Do not mind us. We are only here so that you can walk in peace."]));
 khNpc('lp_cliff','The edge of the Land Path','gate',()=>say('The path ends here, at the edge of a high cliff. Far below, beyond the last slope of the mountain, lie the roofs and the harbour of Yarrim, and the sea. A steep goat track leads down. It can be climbed down, but it cannot be climbed up again.',[['Go down the goat track.',()=>{G.flags.lpDone=1;msg('The goat track is steep. The land path falls behind and above.','#a8d8ff');goToLevel(290,{x:LPY.x,y:LPY.y,f:LPY.f});return null}],['Stay a while.',()=>null]]));
 const LPY={x:56,y:8,f:2}; // where the goat track comes out, north of Yarrim
+const LPM={SEG:11,Y:300}; // the gate of the monastery, cut into the rock beside the path, halfway along
+let LP_XC={};
+function lpXcOf(s){ // the winding middle of the path, row by row, for stretch s
+  if(LP_XC[s])return LP_XC[s];
+  const leg=LP_LEG(s),mount=leg==='W'||leg==='D',PAD=s===LP.N-1?60:0,H=LP.H+PAD,CX=LP.CX,A=mount?LP.A-1:LP.A,sd=s*37+11,ph1=hash2(sd,1,2),ph2=hash2(sd,3,4),xc=[];
+  for(let y=0;y<H;y++){const yy=y-PAD,HH=LP.H;if(yy<0){xc.push(CX);continue}const t=(HH-1-yy)/(HH-1),env=Math.max(0,Math.min(1,Math.min(yy,HH-1-yy)/44));xc.push(Math.round(CX+env*A*(.62*Math.sin(TAU*(t*6.3+ph1))+.38*Math.sin(TAU*(t*11.7+ph2)))))}
+  return LP_XC[s]=xc}
+const lpWd=(s,y,sg)=>6.5+3*tsmooth(y/7,sg+3,s*37+11+7);
+function lpMonDoor(){const xc=lpXcOf(LPM.SEG);return {x:xc[LPM.Y]+Math.floor(lpWd(LPM.SEG,LPM.Y,1))+8,y:LPM.Y,c:xc[LPM.Y]}}
+/* ---- pilgrims on the way, people resting by the road, and the shrines ---- */
+const LP_PILG=[
+ ['lp_pg1','A pilgrim','kh_ohfolk5_3',["I am walking to the monastery on the mountain. It is eleven days from the coast, and I have enjoyed all of them.","Every step is a prayer, if you are paying attention. I am usually not, but the road forgives me.","Do not hurry. The road is exactly as long as it needs to be."]],
+ ['lp_pg2','A monk on pilgrimage','kh_ohfolk1_4',["Peace to you. I am going to Saint Elen’s. They keep a quiet there that is hard to find anywhere else.","I have taken a vow not to say more than ten words before noon. That was nine.","Leave a little at the shrines, if you can spare it. Someone left a loaf for me once, and I have not forgotten."]],
+ ['lp_pg3','A pilgrim sister','kh_ohfolk5_2',["The road is made of small kindnesses. A shrine, a lamp, a bench. Somebody thought of every one.","I like the evenings best, when the sea goes gold and the lamps are lit.","Walk gently. There is nobody to impress."]],
+ ['lp_pg4','A traveller','kh_ohfolk6_3',["I am not a pilgrim. I just like the walk. Nobody asks me anything here.","There is a monastery halfway where they sing at dusk. I always plan to be there at dusk and I am always late.","The knights nod to me as they ride by. I nod back. That is the whole of our friendship."]],
+ ['lp_pg5','A grey friar','kh_ohfolk2_1',["Salt on the wind, flowers underfoot, oaks overhead. I could not draw a better road.","I carry nothing but a loaf and a blessing. Both are for whoever needs them.","Take the shrine food only if you are truly hungry, and then leave something back."]],
+ ['lp_pg6','A pilgrim with a staff','kh_ohfolk3_3',["I am eighty and this is my third time over the mountain. I will do it again, if I am spared.","The cliff at the end is not a danger. It is a promise that the road finishes.","Sit for a moment. The road will wait. It always does."]]
+];
+LP_PILG.forEach(([id,n,face,lines])=>khNpc(id,n,face,()=>yrLines(id,lines)));
+const LP_REST_NPC=[
+ ['lp_rs1','A pilgrim, resting','kh_ohfolk2_3',["I have been sitting here since the morning. I think I may stay for the afternoon.","My feet have prayed for me enough. I am letting them rest.","Go on, take the bench next to me. Nobody minds."]],
+ ['lp_rs2','A traveller, resting','kh_ohfolk6_3',["If you sit still, the road comes to you. Someone always walks by with a story.","There was a knight here earlier with a very tired horse. We shared an apple.","I will go on once the light changes."]],
+ ['lp_rs3','An old woman, resting','kh_ohfolk3_1',["Sit, child. The sea will not mind you looking at it.","I have walked this road with my husband, and then without him. It is still a good road.","I sit by the lamp because it keeps the dark from being lonely."]],
+ ['lp_rs4','A monk, resting','kh_ohfolk1_4',["Resting is a part of the walk, not a pause in it. That is the third thing they teach novices.","The shrine here is a kind one. Take only what you need, and leave a little.","I shall sit a while and say nothing. You are welcome to do the same."]]
+];
+LP_REST_NPC.forEach(([id,n,face,lines])=>khNpc(id,n,face,()=>yrLines(id,lines)));
+const LP_FOODS=['bread','cheese','apple','herring','pie','ale'];
+khNpc('lp_shrine','A roadside shrine','memorial',d=>{
+  const F=G.flags,T=F.lpSh||(F.lpSh={}),k=LEVEL+'_'+d.y,opts=[];
+  const have=LP_FOODS.find(f=>bagCount(f)>0);
+  if(have)opts.push(['Leave something to eat.',()=>{const j=G.bag.findIndex(b=>b.id===have);if(j>=0)bagTake(j);T[k]=0;try{honourAdd(2,'an offering at a shrine')}catch(e){}msg('You leave it on the stone beside the others.','#c8e8b0');return say('The stone is warm, and the flowers are fresh. A small quiet settles over the road.',[BYE])}]);
+  if(!T[k])opts.push(['Take the food. (It is not yours.)',()=>{T[k]=1;for(let i=0;i<3;i++)bagAdd({id:LP_FOODS[(Math.random()*LP_FOODS.length)|0],n:1});try{honourAdd(-10,'taking from a shrine')}catch(e){}msg('You take what pilgrims left. It does not feel like yours.','#e0a080');return say('You take the loaf and the fruit that other people left for travellers who needed them more. Somewhere behind you, a pilgrim stops walking and says nothing.',[BYE])}]);
+  return say(T[k]?'The stone is bare. The flowers are fresh, but there is no food left. Pilgrims will come and leave more, in time.':'A small shrine of grey stone beside the road. Bread, apples, a wedge of cheese and a bunch of flowers have been left here by people who passed before you, for anyone who might need them. A little candle burns, though nobody is near.',[...opts,['Leave it be.',()=>null]]);
+});
 
 /* ---- pictures: an invisible stone to walk into at the ends of each stretch, and the horse ---- */
 const LP_KM=96,LP_ROWS_KM=(LP.N*LP.H)/LP_KM; // the whole path is 96 kilometres, a sign at every one
 function lpArt(){if(!IMG.lp_gap){const c=document.createElement('canvas');c.width=c.height=8;IMG.lp_gap=c;NPC_H.lp_gap=.1}}
+let LP_HAZE=0;
+function lpHaze(){ // the far edge of the sea: a wall the colour of the horizon, so that it cannot be seen as a wall
+  if(LP_HAZE)return LP_HAZE;const wh=.45,c=mkCanvas(128,Math.round(128*wh),(x,w,h)=>{const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'#bfd4e6');g.addColorStop(.5,'#cddfec');g.addColorStop(1,'#a9c0d0');x.fillStyle=g;x.fillRect(0,0,w,h)});
+  const d=c.getContext('2d').getImageData(0,0,128,Math.round(128*wh)).data,id=addTex(d,null);TEX[id].h=Math.round(128*wh);TEX[id].wh=wh;const gid=KH_NEXT_GID++;T_TILE[gid]=id;return LP_HAZE=gid}
 function lpBoard(k,a,b,bigb){ // a wooden signpost with two lines written on its board
   if(IMG[k])return k;const base=IMG.signblank;if(!base)return null;
   const w=base.width,h=base.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(base,0,0);
@@ -16330,15 +16370,14 @@ function lpBuild(s){
   const OAKS=['ltree0','ltree4','ltree8','ltree12','ltree19'],PINES=['ptree0','ptree1','ptree3','ptree4','ptree9','pjuniper'],FLO=['lflora0','lflora0_1','lflora0_2'];
   const TM=ohTiles(),chars={D:LEVEL41_DATA.chars.D},chMap=new Map();let nextCh=0x300;
   const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
-  const rock=[3.8,4.6,5.4].map(wh=>ch(TM.make('plain','grey',wh).gid)),wdist=(y,sg)=>6.5+3*tsmooth(y/7,sg+3,sd+7);
+  const rock=[3.8,4.6,5.4].map(wh=>ch(TM.make('plain','grey',wh).gid)),wdist=(y,sg)=>lpWd(s,y,sg);
   const rows=[];for(let y=0;y<H;y++)rows.push(new Array(W).fill('.'));
   const fm=new Array(N).fill('0'),h=new Float32Array(N).fill(.3),rk=new Float32Array(N),block=new Uint8Array(N);
   const I=(x,y)=>y*W+MX(x),setC=(x,y,c)=>{rows[y][MX(x)]=c;block[I(x,y)]=1};
   const decor=[],scenery=[],sky=[],lights=[],used=new Set(),carve=new Set();
   const K=(x,y)=>MX(x)+','+y;
   /* the winding centre of the path: 0 at both ends, wandering 10 cells either way in between */
-  const ph1=hs(sd,1,2),ph2=hs(sd,3,4),A=mount?LP.A-1:LP.A;
-  const xc=[];for(let y=0;y<H;y++){const yy=y-Y0,HH=LP.H;if(yy<0){xc.push(CX);continue}const t=(HH-1-yy)/(HH-1),env=Math.max(0,Math.min(1,Math.min(yy,HH-1-yy)/44));xc.push(Math.round(CX+env*A*(.62*Math.sin(TAU*(t*6.3+ph1))+.38*Math.sin(TAU*(t*11.7+ph2)))))}
+  const xc=lpXcOf(s);
   const fe=y=>xc[y]+7+Math.round(1.4*Math.sin(y*.09+s*2));
   /* ---- ground: sea and shore on one side, forest on the other; or mountains on both ---- */
   for(let y=0;y<H;y++){const c=xc[y];
@@ -16358,6 +16397,13 @@ function lpBuild(s){
         if(d>wd){setC(x,y,rock[((x*7+y*3+(hs(x,y,sd+4)*3)|0))%3]);}
       }
     }
+  }
+  if(coast){const hz=ch(lpHaze());for(let y=0;y<H;y++)setC(0,y,hz)} // the sea's far edge fades into the horizon
+  if(s===LPM.SEG){ // the gate of Saint Elen's Monastery, cut into the rock of the pass: a lane through the cliff and an arched door at the end of it
+    const md=lpMonDoor(),Y=md.y,c0=md.c;
+    for(let x=c0+2;x<md.x;x++)for(let y=Y-1;y<=Y+1;y++){rows[y][MX(x)]='.';block[I(x,y)]=0;fm[I(x,y)]='1'}
+    const dt=TM.make('door','castle',3.8),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;KH_DOOR[dgid]={lvl:MON.ID,at:{x:MON.GATE_IN[0],y:MON.GATE_IN[1],f:0}};
+    for(let y=Y-1;y<=Y+1;y++)setC(md.x,y,y===Y?ch(dgid):rock[1]);
   }
   /* ---- the places cut out of the trees: clearings, building yards, the hidden nook ---- */
   const circle=(cx,cy,r)=>{for(let y=Math.max(1,cy-r);y<=Math.min(H-2,cy+r);y++)for(let x=cx-r;x<=cx+r;x++)if(x>0&&x<W-1&&Math.hypot(x-cx,y-cy)<=r+hs(x,y,5)*.8)carve.add(K(x,y))};
@@ -16433,8 +16479,19 @@ function lpBuild(s){
   // a signpost at every kilometre: To Yarrim, and how far
   for(let m=1;m<LP_KM;m++){const done=m*LP_ROWS_KM,y=Math.round(H-1-(done-s*LP.H));if(y<6||y>H-8||wet(y))continue;if(done<s*LP.H||done>=(s+1)*LP.H)continue;const sk=lpSignKey(LP_KM-m);if(!sk)continue;const sx=xc[y]+(m%2?3:-3);if(used.has(K(sx,y)))continue;used.add(K(sx,y));decor.push({k:sk,x:MX(sx),y,block:false,walk:true,deco:true})}
   const BENCH=IMG.kh_ohgard1_3?'kh_ohgard1_3':null;
-  for(let y=60+((hs(sd,51,51)*40)|0);y<H-40;y+=88)if(BENCH&&!wet(y)&&!used.has(K(xc[y]-3,y))){used.add(K(xc[y]-3,y));decor.push({k:BENCH,x:MX(xc[y]-3),y,block:false,walk:true,deco:true})}
-  if(coast)for(const [i,y] of [[0,120],[1,260],[2,350]]){const x=xc[y]-22;if(x>2&&hs(sd,y,60)<.8){decor.push({k:'oq_ship'+((i+s)%3),x:MX(x),y,block:true,deco:true,sc:.55});used.add(K(x,y))}}
+  for(let y=60+((hs(sd,51,51)*40)|0);y<H-40;y+=88)if(BENCH&&!wet(y)&&!used.has(K(xc[y]-3,y))){used.add(K(xc[y]-3,y));decor.push({k:BENCH,x:MX(xc[y]-3),y,block:false,walk:true,deco:true});
+    const rk=LP_REST_NPC[(hs(y,s,sd+90)*LP_REST_NPC.length)|0],rkp=KH_KEEPERS[rk[0]];if(rkp&&hs(y,s,sd+91)<.7&&!used.has(K(xc[y]-3,y+1))){used.add(K(xc[y]-3,y+1));decor.push({k:khFaceKey(rkp.face),x:MX(xc[y]-3),y:y+1,block:false,walk:true,npc:rk[0],sc:rkp.sc||1})}}
+  // benches on the shore, looking out over the sea, with someone sitting on one now and then
+  if(coast)for(let y=100,q=0;y<H-60;y+=131,q++){if(wet(y)||!BENCH)continue;const wl=xc[y]-9+Math.round(2.2*Math.sin(y*.11+s)),bx=wl+1;if(used.has(K(bx,y))||bx<3)continue;used.add(K(bx,y));decor.push({k:BENCH,x:MX(bx),y,block:false,walk:true,deco:true});
+    const rk3=LP_REST_NPC[(q+s)%LP_REST_NPC.length],kp3=KH_KEEPERS[rk3[0]];if(kp3&&hs(y,s,sd+92)<.5&&!used.has(K(bx,y+1))){used.add(K(bx,y+1));decor.push({k:khFaceKey(kp3.face),x:MX(bx),y:y+1,block:false,walk:true,npc:rk3[0],sc:kp3.sc||1})}}
+  // boats sitting on the water
+  if(coast||s===LP.N-1)for(let y=30;y<H-30;y+=47){if(wet(y)||!open_(y)||hs(y,s,sd+80)<.3)continue;const wl=xc[y]-9+Math.round(2.2*Math.sin(y*.11+s)),bx=wl-8-((hs(y,s,sd+81)*14)|0);if(bx<4)continue;const bk=['yar_boat_fish','yar_boat_row','yar_boat_dhow'][(hs(y,s,sd+82)*3)|0];if(!IMG[bk])continue;used.add(K(bx,y));decor.push({k:bk,x:MX(bx),y,block:true,deco:true,sc:.9})}
+  // roadside shrines, with flowers and food left by pilgrims
+  for(let y=70+((hs(sd,52,52)*40)|0),q=0;y<H-60;y+=104,q++){if(wet(y))continue;const sg=(q+s)%2?-1:1,x=xc[y]+sg*5;if(used.has(K(x,y))||used.has(K(x,y+1)))continue;
+    used.add(K(x,y));used.add(K(x+sg,y+1));used.add(K(x,y+1));
+    decor.push({k:'memorial',x:MX(x),y,block:true,npc:'lp_shrine',sc:.9},{k:'flowerpot',x:MX(x+sg),y:y+1,block:false,walk:true,deco:true,sc:.8},{k:IMG.breadbasket?'breadbasket':'flowerpot',x:MX(x),y:y+1,block:false,walk:true,deco:true,sc:.8})}
+  if(s===LPM.SEG){const md=lpMonDoor(),sk=lpBoard('lp_sign_mon','SAINT ELEN’S','monastery 300 m');if(sk){used.add(K(md.c+3,md.y+3));decor.push({k:sk,x:MX(md.c+3),y:md.y+3,block:false,walk:true,deco:true})}lamp(md.x-2,md.y-2);lamp(md.x-2,md.y+2)}
+  // (the tall moored ships of the quay are left out here: from far off they only show as grey slabs against the sea)
   for(const cl of clearings){ // the green spaces, with huge oaks
     if(cl.skip)continue;const cy=cl.y;
     const oaks=cl.side>0?[[cl.cx-2,cy-1],[cl.cx+2,cy+1],[cl.cx,cy-3]]:[[xc[cy]-6,cy-1],[xc[cy]-9,cy+2]];
@@ -16447,6 +16504,10 @@ function lpBuild(s){
   if(kp&&s%2===(leg==='W'?0:1)){const y0=Math.round((100+hs(sd,70,70)*160)*LPK),y1=Math.min(H-30,y0+110);
     for(const j of [0,1]){const kd={k:khFaceKey(kp.face),x:MX(xc[y0]+2),y:y0,block:false,walk:true,npc:'lp_knight',sc:kp.sc||1,lw:walkers.length,lr:'k'},hd={k:IMG.oh_horse?'oh_horse':'ltree0',x:MX(xc[y0]+3),y:y0,block:false,walk:true,deco:true,sc:1,lw:walkers.length,lr:'h'};
       decor.push(kd,hd);walkers.push({kd,hd,y0,y1,t:j*45,dir:j?1:-1,off:j?2:-2})}}
+  // pilgrims and travellers on the way, walking slowly up and down their stretch
+  for(let q=0;q<2;q++){const pg=LP_PILG[(hs(s,q,sd+95)*LP_PILG.length)|0],y0=Math.round(40+hs(s,q+7,sd+96)*(H-240)),y1=Math.min(H-30,y0+90+((hs(q,s,sd+97)*60)|0));
+    if(wet(y0))continue;const kp2=KH_KEEPERS[pg[0]];if(!kp2)continue;const off=q?-2:2,wi=walkers.length,kd2={k:khFaceKey(kp2.face),x:MX(xc[y0]+off),y:y0,block:false,walk:true,npc:pg[0],sc:kp2.sc||1,lw:wi,lr:'k'};
+    decor.push(kd2);walkers.push({y0,y1,t:hs(q,s,sd+98)*(y1-y0),dir:q?1:-1,off,sp:.4+hs(q,s,sd+99)*.2})}
   const enter=(x,y,to,tx,ty,f)=>{for(let dx=-4;dx<=4;dx++)decor.push({k:'lp_gap',x:x+dx,y,block:true,enter:{to,x:tx,y:ty,f}})};
   const north=s<LP.N-1?lpId(s+1):null;
   const mxq=(q,x)=>LP_LEG(q)==='S'?LP.W-1-x:x,hq=q=>LP.H+(q===LP.N-1?60:0);
@@ -16467,7 +16528,7 @@ for(let s=0;s<LP.N;s++)KH_LAZY[LP.BASE+s]=()=>lpBuild(s);
 /* the knights walk the path, up and down their stretch, at the pace of a horse that is in no hurry */
 {const _t=seaTick;seaTick=function(dt){_t(dt);
   if(LEVEL<LP.BASE||LEVEL>=LP.BASE+LP.N)return;const L=LEVELS[LEVEL];if(!L||!L._walk)return;
-  L._walk.forEach(w=>{w.t+=dt*.7*w.dir;const len=w.y1-w.y0;if(w.t>=len){w.t=len;w.dir=-1}if(w.t<=0){w.t=0;w.dir=1}
+  L._walk.forEach(w=>{w.t+=dt*(w.sp||.7)*w.dir;const len=w.y1-w.y0;if(w.t>=len){w.t=len;w.dir=-1}if(w.t<=0){w.t=0;w.dir=1}
     const y=w.y0+w.t,yi=Math.round(y);w.yy=y;w.yi=yi;w.cc=Math.round(CXOF(L,yi))});
   for(const d of G.decor){if(d.lw===undefined)continue;const w=L._walk[d.lw];if(!w)continue;
     const off=d.lr==='k'?w.off:w.off+(w.off>0?1:-1);d.y=w.yi;d.oy=w.yy-w.yi;d.x=w.cc+off}}}
@@ -16478,6 +16539,287 @@ function CXOF(L,y){ // the middle of the path on row y, read back from the map
 {const _oe=ohEnter;ohEnter=function(n){_oe.apply(this,arguments);const F=G.flags;
   if(n>=LP.BASE&&n<LP.BASE+LP.N&&!F.lpSeen){F.lpSeen=1}
   if(n===290&&F.lpDone&&!G.decor.some(d=>d.k==='lp_sign_up')){const k=lpBoard('lp_sign_up','THE LAND PATH','one way only');if(k)G.decor.push({k,x:LPY.x-2,y:LPY.y-1,block:false,walk:true,deco:true})}}}
+
+/* ---- the air: wind off the sea at times, birdsong, birds flying by, bees at the flowers ---- */
+for(let q=0;q<LP.N;q++)WIND_AMT[LP.BASE+q]=LP_LEG(q)==='W'||LP_LEG(q)==='D'?.9:.6; // a breeze from the sea, stronger in the mountains
+WIND_AMT[430]=.3;WIND_AMT[431]=.3;
+const LPS={nextBird:0,nextBee:0,nextBreeze:60,beeNear:0,flo:[],floAt:''};
+const lpOutdoors=()=>(LEVEL>=LP.BASE&&LEVEL<LP.BASE+LP.N)||LEVEL===430||LEVEL===431;
+function lpBeeImg(){if(!IMG.lp_bee){const c=document.createElement('canvas');c.width=c.height=12;const x=c.getContext('2d');x.fillStyle='#e8c030';x.beginPath();x.ellipse(6,6,5,3.4,0,0,TAU);x.fill();x.fillStyle='#2a2010';x.fillRect(4,3,1.6,6);x.fillRect(7.4,3,1.6,6);x.fillStyle='rgba(235,245,255,.7)';x.beginPath();x.ellipse(5,3,2.6,1.6,-.5,0,TAU);x.fill();IMG.lp_bee=c;NPC_H.lp_bee=.07}return IMG.lp_bee}
+{const _ys=yarSoundTick;yarSoundTick=function(){_ys.apply(this,arguments);
+  if(!AC||G.state!=='play'||G.mute||!SNDOPT.amb||!lpOutdoors())return;
+  const t=G.time;
+  if(t>LPS.nextBird){LPS.nextBird=t+2.5+Math.random()*5;const n=3+((Math.random()*4)|0),f0=2400+Math.random()*1500,v=.035*(SNDOPT.amb||1);for(let k=0;k<n;k++){const f=f0*(1+k*.03*(Math.random()-.3));tone(f,f*1.18,.06+Math.random()*.04,'sine',v,k*.11)}}
+  if(LPS.beeNear>0&&t>LPS.nextBee){LPS.nextBee=t+.28;tone(176+Math.random()*14,190,.3,'sawtooth',.012*Math.min(1,LPS.beeNear/2),0);tone(352+Math.random()*20,360,.3,'sine',.004,0)}
+  if(LEVEL>=LP.BASE&&LEVEL<LP.BASE+LP.N&&LP_LEG(LEVEL-LP.BASE)!=='W'&&t>LPS.nextBreeze){LPS.nextBreeze=t+150+Math.random()*180;msg('A breeze comes in off the sea, smelling of salt and clover.','#a8d8ff')}}}
+{const _y=yrSprites;yrSprites=function(out){_y(out);
+  if(!lpOutdoors()||G.state!=='play')return;
+  const t=G.time,up=IMG.yar_gull_up,dn=IMG.yar_gull_down,px=G.C.x,py=G.C.y;
+  if(up&&dn)for(let i=0;i<7;i++){const sp=.9+hash2(i,1,301)*1.2,span=44,ph=(t*sp+hash2(i,2,301)*span)%span,dir=i%2?1:-1,bx=px+(dir>0?ph-span/2:span/2-ph),by=py-5-hash2(i,3,301)*10+Math.sin(t*.6+i)*1.5,img=((t*4+i)|0)%2?up:dn;
+    out.push({x:bx,y:by,img,w:.2,bob:1.5+hash2(i,4,301)*1.2+Math.sin(t*1.3+i)*.2,decor:{walk:true,k:'yar_gull_fly'}})}
+  // bees: a few, circling the flowers nearest to the party
+  const cell=(px|0)+','+(py|0);if(cell!==LPS.floAt){LPS.floAt=cell;LPS.flo=(G.flora||[]).filter(f=>Math.abs(f.wx-px)<7&&Math.abs(f.wy-py)<7&&/^lflora/.test(f.k)).slice(0,6)}
+  LPS.beeNear=0;const bi=lpBeeImg();
+  LPS.flo.forEach((f,i)=>{const a=t*(3+i*.4)+i*2,d=Math.hypot(f.wx-px,f.wy-py);if(d<3)LPS.beeNear+=1;out.push({x:f.wx+Math.cos(a)*.3,y:f.wy+Math.sin(a*1.3)*.3,img:bi,w:.07,bob:.32+Math.sin(a*2)*.08,decor:{walk:true,k:'lp_bee'}})})}}
+
+/* ---- src/desert/monastery.js ---- */
+/* ==========================================================================
+   SAINT ELEN'S MONASTERY, halfway along the Land Path. A gate cut into the rock of the pass leads into green grounds: a church, a cloister
+   with a fountain, a refectory, a scriptorium, a kitchen, a guest house, an infirmary, herb and flower gardens, an orchard, hives and a bell.
+   Friendly monks live there. East of it lies a quiet cemetery with a mausoleum, and below the grounds a cellar and old crypts have a ghost
+   problem. Ten quiet quests. Levels: 430 grounds, 431 cemetery, 432 cellars, 433 old crypts, 434 the mausoleum; rooms from 6900.
+   ========================================================================== */
+const MON={ID:430,CEM:431,CELLAR:432,CRYPT:433,MAUS:434,ROOM0:6900,W:84,H:72,GATE_IN:[42,66],CEM_IN:[4,20]};
+ITEMDEF.abbotring={n:"The Abbot's Ring",k:'quest',t:'Quest item',ic:'herb',c:'#e8d070',stack:0,price:0,d:'A plain gold ring, worn thin, with a small cross cut into it. It lay in a chest in the old crypts below Saint Elen’s. It belonged to the abbot who lies there.',sw:.2};
+ENEMY_DEF.weepingbrother={name:'The Weeping Brother',hp:700,dmg:[16,26],hit:.8,w:.62,img:'ghost',xp:6000,gold:[300,600],speed:1,verb:'wails at',aboveParty:2,fly:true};
+const MONF=()=>{const F=G.flags;return F.mon||(F.mon={met:{},bell:0,rest:0,letter:0})};
+const monq=(id,t,who,desc,need,goal,reward,extra)=>{QUESTS[id]=Object.assign({title:t,who,desc,need,goal,reward},extra||{});QAREA[id]='Saint Elen’s Monastery'};
+if(QAREA_ORDER.indexOf('Saint Elen’s Monastery')<0)QAREA_ORDER.splice(QAREA_ORDER.indexOf('Elsewhere'),0,'Saint Elen’s Monastery');
+
+/* ---- the buildings of the grounds: x0, y0, x1, y1, height of the walls, style, door column, kind, name, keeper ---- */
+const MON_BLD=[
+  {rid:MON.ROOM0,   x0:33,y0:8, x1:49,y1:15,wh:3.8,st:'castle',dx:41,room:'prayer',name:'The Church of Saint Elen',keeper:'mon_chaplain',at:{x:4,y:6,f:0},tower:1},
+  {rid:MON.ROOM0+1, x0:8, y0:22,x1:20,y1:29,wh:2.7,st:'golden',dx:14,room:'hall',name:'The Refectory',keeper:'mon_refec',at:{x:5,y:6,f:0}},
+  {rid:MON.ROOM0+2, x0:62,y0:22,x1:74,y1:29,wh:2.7,st:'cream',dx:68,room:'home',scene:'scholar',name:'The Scriptorium',keeper:'mon_scribe',at:{x:4,y:4,f:0}},
+  {rid:MON.ROOM0+3, x0:8, y0:40,x1:16,y1:45,wh:2.3,st:'cottage',dx:12,room:'home',scene:'warm',name:'The Kitchen',keeper:'mon_cook',at:{x:4,y:4,f:0}},
+  {rid:MON.ROOM0+4, x0:64,y0:38,x1:76,y1:45,wh:2.7,st:'timber',dx:70,room:'inn',name:'The Guest House',keeper:'mon_guest',at:{x:6,y:7,f:0}},
+  {rid:MON.ROOM0+5, x0:24,y0:42,x1:31,y1:47,wh:2.3,st:'cottage',dx:27,room:'home',scene:'healer',name:'The Infirmary',keeper:'mon_infirm',at:{x:4,y:4,f:0}}
+];
+MON_BLD.forEach(b=>LEVEL_NAMES[b.rid]=b.name);
+LEVEL_NAMES[MON.ID]='Saint Elen’s Monastery';LEVEL_NAMES[MON.CEM]='The Quiet Cemetery';LEVEL_NAMES[MON.CELLAR]='The Monastery Cellars';LEVEL_NAMES[MON.CRYPT]='The Old Crypts';LEVEL_NAMES[MON.MAUS]='The Mausoleum';
+/* ---- the monks ---- */
+const monLines=(id,n,face,lines,quest)=>khNpc(id,n,face,()=>{const M=MONF();M.met[id]=1;return yrLines(id,lines)},quest?{q:quest}:undefined);
+monLines('mon_chaplain','Brother Cyprian, the chaplain','kh_ohfolk1_4',["The church is open all day. Sit anywhere. The light is best at about four.","We sing at dawn and at dusk. You are welcome to sing, or to listen, or to sleep in the back pew. All three have been done.","Saint Elen walked here with a goat and a lamp and decided it was far enough."]);
+monLines('mon_refec','Brother Maurus, the refectorian','kh_ohfolk2_2',["Soup at noon and at dusk. There is always enough. The brothers say I over-cook, but nobody has ever left hungry.","Sit anywhere. Nobody counts the bowls.","We eat in silence, mostly, and then there is a long minute of gratitude at the end, which is my favourite part."]);
+monLines('mon_infirm','Brother Osmund, the infirmarian','kh_ohfolk2_1',["Nobody is ill at the moment. It is a good day for an infirmarian, and a dull one.","The remedy for most things is rest and a clean room. The rest is herbs, which Brother Herbert grows.","If your feet hurt, sit. The pilgrims always have sore feet."]);
+monLines('mon_guest_p1','A pilgrim','kh_ohfolk5_3',["I have been here three nights. I said I would stay one.","They do not ask you to leave. That is the whole of their hospitality, and it is a great deal."]);
+monLines('mon_guest_p2','A traveller','kh_ohfolk6_3',["The soup is very good. I believe it is simply onions.","I have not spoken to anyone for two days. This is the first. It was a pleasant conversation."]);
+// the guest house is the one the player rests in
+khNpc('mon_guest','Brother Hilarion, the guest-master','kh_ohfolk2_1',()=>{
+  const M=MONF();M.met.mon_guest=1;
+  const opts=[['Take a quiet hour here, by the fire. (free)',()=>{try{restParty(true)}catch(e){}M.rest=1;msg('You rest by the fire. The monastery bell rings the hour, very quietly.','#a8e8c0');return say('There. Sleep is the best of all the sacraments. Come back whenever you like. The beds are never full.',[BYE])}]];
+  if(qSt('mq10')!=='done')opts.push(['About a quiet hour',()=>qNode('mq10',MOND.mq10)]);
+  return say('Welcome, welcome. The guest house is always open. There is a bed, a bowl of soup and a fire, and nobody will ask you to pay or to pray. Rest, if you like.',[...opts,BYE]);
+},{q:'mq10'});
+
+/* ---- src/desert/monastery_quests.js ---- */
+/* ==========================================================================
+   SAINT ELEN'S MONASTERY, part two: the ten quiet quests, the people who give them, and the generator for the crypts below.
+   ========================================================================== */
+const MON_FOLK={herb:['mon_herb','Brother Herbert, the herbalist','kh_ohfolk2_3'],cook:['mon_cook','Brother Cook','kh_ohfolk2_2'],scribe:['mon_scribe','Brother Scribe','kh_ohfolk5_4'],bees:['mon_bees','Brother Bee-keeper','kh_ohfolk3_3'],
+  cellar:['mon_cellar','Brother Cellarer','kh_ohfolk1_0'],bell:['mon_bellman','Brother Bellringer','kh_ohfolk7_1'],abbot:['mon_abbot','Abbot Anselm','kh_ohfolk2_1'],wilma:['mon_wilma','Sister Wilma, the cemetery gardener','kh_ohfolk5_2']};
+monq('mq1','Meet the Brothers','Abbot Anselm','Abbot Anselm would like you to say good day to four of the brothers: Brother Herbert in the herb garden, Brother Cook in the kitchen, Brother Scribe in the scriptorium and Brother Bee-keeper by the hives.',4,()=>['mon_herb','mon_cook','mon_scribe','mon_bees'].filter(i=>MONF().met[i]).length,{gold:300,xp:3000});
+monq('mq2','Herbs for the Infirmary','Brother Herbert, the herbalist','The infirmary is low on herbs. Pick 6 herbs in the herb garden and bring them to Brother Herbert.',6,()=>Math.min(6,bagCount('herb')),{gold:250,xp:2500});
+monq('mq3','Apples for the Pilgrims','Brother Cook','Brother Cook is making pies for the pilgrims. Bring him 8 apples from the orchard.',8,()=>Math.min(8,bagCount('apple')),{gold:250,xp:2500});
+monq('mq4','A Little Honey','Brother Bee-keeper','Gather 3 honeycombs from near the hives and bring them to the bee-keeper.',3,()=>Math.min(3,bagCount('honeycomb')),{gold:300,xp:3000});
+monq('mq5','Flowers for the Graves','Sister Wilma, the cemetery gardener','Sister Wilma lays a flower on every grave on the feast of Saint Elen. Pick 6 wildflowers in the monastery grounds and bring them to her in the cemetery.',6,()=>Math.min(6,bagCount('wildflower')),{gold:300,xp:3000});
+monq('mq6','The Cold Cellar','Brother Cellarer','Ghosts have come up from the old crypts into the cellars and the brothers cannot keep the wine in peace. Lay 6 of them to rest.',6,q=>(G.flags.k_ghost||0)-(q.base||0),{gold:500,xp:6000},{cnt:'k_ghost'});
+monq('mq7','A Letter for the Cold Spring','Brother Scribe','Take the monastery’s letter to Osk, the innkeeper of the Cold Spring Inn, on the Land Path, a little way along the mountain road.',1,()=>MONF().letter?1:0,{gold:300,xp:3000});
+monq('mq8','The Abbot’s Ring','Abbot Anselm','The ring of the old abbot lies in a chest in the old crypts, below the cellars. Bring it back, so that he can rest.',1,()=>Math.min(1,bagCount('abbotring')),{gold:700,xp:8000});
+monq('mq9','Ring the Bell','Brother Bellringer','The bell has not been rung for three days, because the bell-ringer has a cold. Ring it once, at the foot of the church.',1,()=>MONF().bell?1:0,{gold:200,xp:2000});
+monq('mq10','A Quiet Hour','Brother Hilarion, the guest-master','Take a quiet hour at the guest house. Rest by the fire, and let the brothers look after you.',1,()=>MONF().rest?1:0,{gold:200,xp:2000});
+const MOND={
+ mq1:khQD('Welcome to Saint Elen’s. We have no rules for visitors except to be kind to the bees. If you would like to be useful, say good day to four of the brothers: Herbert in the herb garden, Cook in the kitchen, Scribe in the scriptorium and our bee-keeper by the hives. They are all very friendly.','Four brothers, then. Take your time. Nobody here hurries.',(g,n)=>`${g} of ${n} brothers met.`,'You have met them all? Good. Then you are one of us, for as long as you like. Please take this.','Thank you. Stay for supper.','You have met the brothers.','I have said good day to all four.'),
+ mq2:khQD('Ah, a pair of hands. The infirmary herbs are running low, and the herb garden is in full bloom. Six herbs would last us the month. Just pick them from the beds.','Six herbs, from the garden beds. Mind the bees.',(g,n)=>`${g} of ${n} herbs.`,'Six herbs! The infirmary will smell of summer. Thank you.','Six herbs, and a good morning’s work.','The herbs are in.','Here are six herbs.'),
+ mq3:khQD('Pies for the pilgrims. I have the pastry and the patience, and not an apple in the house. The orchard is full of them. Eight, please.','Eight apples from the orchard. Wait until they are warm from the sun.',(g,n)=>`${g} of ${n} apples.`,'Eight apples. The pilgrims will think it is a feast day. Thank you.','Eight apples, for the pies.','The pies are baking.','Here are eight apples.'),
+ mq4:khQD('The hives are heavy this year. If you could bring me three honeycombs from beside them, we could make candles and a little mead. The bees do not mind, if you move slowly.','Three honeycombs from near the hives. Walk softly.',(g,n)=>`${g} of ${n} honeycombs.`,'Three honeycombs. The candles will smell of clover for a year.','Three honeycombs, and no stings.','The honey is gathered.','Here are three honeycombs.'),
+ mq5:khQD('On the feast of Saint Elen I lay a flower on every grave in the cemetery. Nobody is forgotten here. If you could pick six wildflowers in the grounds and bring them to me, I would be glad of the help.','Six wildflowers. There are plenty on the lawns.',(g,n)=>`${g} of ${n} wildflowers.`,'Six wildflowers. That is six more graves with a flower on them. Thank you.','Six wildflowers.','The graves have their flowers.','Here are six wildflowers.'),
+ mq6:khQD('Something is wrong in the cellars. Ghosts, the brothers say. Not dangerous, just sad, and very cold. They have been wandering up from the old crypts below. If you could lay six of them to rest, we would all sleep better. The hatch is in the herb garden.','Six ghosts. They are in the cellars, below the hatch in the herb garden.',(g,n)=>`${g} of ${n} ghosts laid to rest.`,'The cellar is warm again! The wine is calm. Thank you.','Six ghosts, and a quiet cellar.','The cellar is quiet.','Six of them are at rest.'),
+ mq7:khQD('I have a letter for Osk, the innkeeper of the Cold Spring Inn, along the mountain road. We have written to each other for thirty years and never once met. It is a very good friendship. Would you take it to him?','The Cold Spring Inn is on the Land Path, in the mountains. Take your time.',()=>'Osk at the Cold Spring Inn, on the Land Path.','You have delivered it? He wrote back already? What a man.','Thank you. Thirty years of letters, and one more.','The letter is delivered.','I delivered the letter.'),
+ mq8:khQD('There was an abbot before me, Abbot Aldhelm. His ring was buried with him, but it was moved to a chest in the old crypts, and he has not rested since. If you could find the ring, I would put it where it belongs. The way down is by the cellars, and the crypts are below them.','The old crypts are below the cellars. The ring is in a chest, I believe.',()=>'The ring is in a chest in the old crypts, below the cellars.','The ring! Aldhelm can rest. Thank you, truly.','The abbot’s ring, back where it belongs.','The ring is found.','Here is the ring.'),
+ mq9:khQD('The bell has not rung for three days. The bell-ringer has a cold, and I do not like to ask him. If you could ring it once, at the foot of the church, the whole valley would know that Saint Elen’s is still here.','Just ring it once. It is the bell at the foot of the church.',()=>'Ring the bell at the foot of the church.','You rang it? We heard it in the garden. The bees stopped to listen. Thank you.','The bell rang, and the valley heard it.','The bell has rung.','I rang the bell.'),
+ mq10:khQD('You have walked a long way. Take a quiet hour at the guest house, by the fire. We will look after everything. That is not a request, it is what we do.','Rest by the fire. We will bring soup.',()=>'Rest by the fire in the guest house.','Rested? Good. A quiet hour is the best gift one can give oneself.','A quiet hour, and a full heart.','You are rested.','I have rested.')
+};
+khNpc('mon_herb',MON_FOLK.herb[1],MON_FOLK.herb[2],()=>{const M=MONF();M.met.mon_herb=1;if(qSt('mq2')==='done')return say('The infirmary is well supplied, thanks to you. The herbs are growing back already.',[BYE]);return qNode('mq2',MOND.mq2)},{q:'mq2'});
+khNpc('mon_cook',MON_FOLK.cook[1],MON_FOLK.cook[2],()=>{const M=MONF();M.met.mon_cook=1;if(qSt('mq3')==='done')return say('The pies are in the oven, and the whole kitchen smells like a feast day.',[BYE]);return qNode('mq3',MOND.mq3)},{q:'mq3'});
+khNpc('mon_scribe',MON_FOLK.scribe[1],MON_FOLK.scribe[2],()=>{const M=MONF();M.met.mon_scribe=1;if(qSt('mq7')==='done')return say('Osk wrote back. Of course he did. Thirty years of letters, and I still cannot read his handwriting.',[BYE]);return qNode('mq7',MOND.mq7)},{q:'mq7'});
+khNpc('mon_bees',MON_FOLK.bees[1],MON_FOLK.bees[2],()=>{const M=MONF();M.met.mon_bees=1;if(qSt('mq4')==='done')return say('The bees are quiet today. They know the honey went to a good cause.',[BYE]);return qNode('mq4',MOND.mq4)},{q:'mq4'});
+khNpc('mon_cellar',MON_FOLK.cellar[1],MON_FOLK.cellar[2],()=>{if(qSt('mq6')==='done')return say('The cellar is warm, the wine is calm and the barrels are in their rows. I could kiss you. I will not, but I could.',[BYE]);return qNode('mq6',MOND.mq6)},{q:'mq6'});
+khNpc('mon_bellman',MON_FOLK.bell[1],MON_FOLK.bell[2],()=>{if(qSt('mq9')==='done')return say('I heard it from my bed. It sounded better than when I ring it.',[BYE]);return qNode('mq9',MOND.mq9)},{q:'mq9'});
+khNpc('mon_bell','The monastery bell','memorial',()=>{const M=MONF();
+  const ring=()=>{try{playSmp('church_bell1',.7,1)}catch(e){try{sfx('level')}catch(x){}}M.bell=1;msg('The bell rings out over the grounds, and the valley answers.','#e8d890');return say('A single, clear note rolls out over the gardens, over the wall and down the mountain. Somewhere a bird answers it.',[BYE])};
+  return say('A great bronze bell hangs from an oak frame at the foot of the church, with a rope worn smooth by many hands.',[['Ring the bell.',ring],['Leave it.',()=>null]])});
+khNpc('mon_abbot',MON_FOLK.abbot[1],MON_FOLK.abbot[2],()=>{
+  const nodes=[];
+  if(qSt('mq1')!=='done')return qNode('mq1',MOND.mq1);
+  if(qSt('mq6')==='done'&&qSt('mq8')!=='done')nodes.push(['About the old abbot’s ring',()=>qNode('mq8',MOND.mq8)]);
+  return say('Welcome. You are very welcome. The grounds are open to you, and the church, and the cloister. The cemetery is through the east gate, and the cellars are below the hatch in the herb garden. Take any seat that is empty.',[...nodes,BYE]);
+},{q:['mq1','mq8']});
+khNpc('mon_wilma',MON_FOLK.wilma[1],MON_FOLK.wilma[2],()=>{if(qSt('mq5')==='done')return say('Every grave has its flower. It is the best feast of the year.',[BYE]);return qNode('mq5',MOND.mq5)},{q:'mq5'});
+// delivering the letter: Osk at the Cold Spring Inn
+repWrap('lp_inn1',()=>qSt('mq7')==='active'&&!MONF().letter,'Deliver the monastery’s letter',()=>{MONF().letter=1;msg('You hand over the letter from Saint Elen’s.','#a8e8c0');return say('A letter from Brother Scribe! Thirty years of letters. Tell him I am well, and that my handwriting is as bad as ever. Thank you for bringing it.',[BYE])});
+
+/* ---- the dungeons: rooms and passages in the old crypt style ---- */
+function monCrypt(sp){
+  const W=sp.W,H=sp.H,hs=hash2,R=(i,m)=>(hs(sp.n*31+i,sp.n*7+5,95)*m)|0,g=[];
+  for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
+  const rooms=[],cut=r=>{for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)g[y][x]='.'};
+  rooms.push({x0:(W>>1)-2,y0:H-5,x1:(W>>1)+2,y1:H-3});
+  for(let t=0;t<900&&rooms.length<sp.rooms;t++){const big=sp.boss&&rooms.length===sp.rooms-1,w=big?9:4+R(100+t,4),h=big?7:3+R(200+t,3),x0=1+R(300+t,W-w-2),y0=1+R(400+t,H-h-2);
+    if(rooms.some(r=>x0<=r.x1+2&&x0+w-1>=r.x0-2&&y0<=r.y1+2&&y0+h-1>=r.y0-2))continue;rooms.push({x0,y0,x1:x0+w-1,y1:y0+h-1})}
+  rooms.forEach(cut);const mid=r=>[(r.x0+r.x1)>>1,(r.y0+r.y1)>>1];
+  for(let i=1;i<rooms.length;i++){let bj=0,bd=1e9;const [ax,ay]=mid(rooms[i]);for(let j=0;j<i;j++){const [bx,by]=mid(rooms[j]),d=Math.abs(ax-bx)+Math.abs(ay-by)+R(500+i*9+j,6);if(d<bd){bd=d;bj=j}}
+    const [bx,by]=mid(rooms[bj]),hl=(y,x0,x1)=>{for(let x=Math.min(x0,x1);x<=Math.max(x0,x1);x++)g[y][x]='.'},vl=(x,y0,y1)=>{for(let y=Math.min(y0,y1);y<=Math.max(y0,y1);y++)g[y][x]='.'};
+    if(R(600+i,2)===0){hl(ay,ax,bx);vl(bx,ay,by)}else{vl(ax,ay,by);hl(by,ax,bx)}}
+  const r0=rooms[0],ux=(r0.x0+r0.x1)>>1,uy=r0.y1+1;g[uy][ux]='0';const start={x:ux,y:r0.y1,f:0};
+  const d=new Int16Array(W*H).fill(-1),q=[start.x+start.y*W];d[q[0]]=0;
+  for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H||g[ny][nx]!=='.'||d[ny*W+nx]>=0)continue;d[ny*W+nx]=d[c]+1;q.push(ny*W+nx)}}
+  let far=rooms[rooms.length-1],fd=-1;for(const r of rooms){const [mx,my]=mid(r),v=d[my*W+mx];if(v>fd){fd=v;far=r}}
+  let down=null;if(sp.down){const dxm=(far.x0+far.x1)>>1;g[far.y0-1][dxm]='1';down={x:dxm,y:far.y0}}
+  const rows=g.map((r,y)=>r.map((c,x)=>{if(c!=='#')return c;if(x>0&&g[y][x-1]==='.'&&hs(x,y,70+sp.n)<.07)return '%';if(y>0&&g[y-1][x]==='.'&&hs(x,y,71+sp.n)<.07)return '%';return '#'}).join(''));
+  const decor=[],enemies=[],items=[],used=new Set([start.x+','+start.y]),cells=[];
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(g[y][x]==='.'&&d[y*W+x]>6)cells.push([x,y]);
+  const pickc=i=>{for(let t=0;t<40;t++){const c=cells[R(900+i*13+t,cells.length)];if(c&&!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);return c}}return null};
+  for(let i=0;i<sp.foes;i++){const c=pickc(i);if(c)enemies.push({t:sp.kinds[R(950+i,sp.kinds.length)],x:c[0],y:c[1]})}
+  for(let i=0;i<3;i++){const c=pickc(100+i);if(c)items.push({k:'potion',x:c[0],y:c[1]})}
+  for(let i=0;i<5;i++){const c=pickc(200+i);if(c)decor.push({k:['coffin','barrel','bones','coffin','grave'][i],x:c[0],y:c[1],block:i!==2})}
+  if(sp.boss){const [mx,my]=mid(far);enemies.push({t:sp.boss,x:mx,y:my+1});decor.push({k:'chest',x:far.x0,y:far.y1,block:true,magic:1});if(sp.ring)items.push({k:'abbotring',x:far.x0+1,y:far.y1})}
+  const lv={rows,start,enemies,items,decor,name:sp.name,label:sp.name,diff:sp.diff,portals:[{to:sp.up.to,x:sp.up.x,y:sp.up.y,f:sp.up.f,tex:'tomb'}],lights:[],_down:down};
+  if(sp.down)lv.portals[1]={to:sp.down.to,x:0,y:0,f:0,tex:'tomb'};
+  lv.mapNames=rooms.map((r,i)=>({t:i===0?sp.names[0]:(r===far&&sp.down)?sp.names[7]:sp.names[1+((i-1)%6)],x:mid(r)[0],y:r.y0-1,k:'place'}));
+  return lv;
+}
+
+/* ---- src/desert/monastery_build.js ---- */
+/* ==========================================================================
+   SAINT ELEN'S MONASTERY, part three: the grounds, the cemetery, the cellars, the crypts and the mausoleum.
+   ========================================================================== */
+MON.CEM_IN=[3,20];
+for(const [id,n,face,lines] of [
+  ['mon_novice1','A novice','kh_ohfolk7_1',["I have been here four months. I thought I would miss talking. I do not.","I sweep the cloister every morning. It does not need it. That is the point.","The bees do not mind me. I think they are the only ones who do not mind anyone."]],
+  ['mon_novice2','A novice with a watering can','kh_ohfolk1_5',["The roses here are older than the church. Nobody remembers who planted them.","Watering is the nicest chore. You can see what you did.","Do not step on the lavender. It does not complain, but it remembers."]],
+  ['mon_monk3','A monk, sitting','kh_ohfolk1_4',["I am thinking about nothing in particular. It is a good day for it.","A fountain is a clock that tells you the hour with sound. I have never found a better one.","The orchard is at its best at four. Go and see."]]
+])khNpc(id,n,face,()=>yrLines(id,lines));
+const MON_OAKS=['ltree0','ltree4','ltree8','ltree12','ltree19'];
+function monDungeons(){
+  if(LEVELS[MON.CELLAR])return;
+  const NM=[['The Cellar Stair','The Wine Racks','The Cold Passage','The Barrel Hall','The Cheese Store','The Old Pantry','The Salt Room','The Way Down'],
+    ['The Crypt Stair','The Long Gallery','The Brothers’ Niches','The Weeping Chapel','The Candle Room','The Cold Vault','The Reliquary','The Abbot’s Chamber'],
+    ['The Door','The Quiet Room','The Family Vault','The Little Chapel','The Stone Bench','The Dim Corner','The Lantern Niche','The End']];
+  const cel=monCrypt({n:1,W:31,H:23,rooms:7,foes:14,kinds:['ghost','ghost','ghost','ghost','ghost','bat','rat'],diff:30,name:LEVEL_NAMES[MON.CELLAR],names:NM[0],up:{to:MON.ID,x:30,y:57,f:2},down:{to:MON.CRYPT}});
+  const cry=monCrypt({n:2,W:37,H:25,rooms:8,foes:12,kinds:['ghost','ghost','ghost','spectre','skel'],boss:'weepingbrother',ring:1,diff:33,name:LEVEL_NAMES[MON.CRYPT],names:NM[1],up:{to:MON.CELLAR,x:0,y:0,f:2}});
+  const mau=monCrypt({n:3,W:21,H:15,rooms:3,foes:3,kinds:['ghost'],diff:30,name:LEVEL_NAMES[MON.MAUS],names:NM[2],up:{to:MON.CEM,x:41,y:12,f:2}});
+  cel.portals[1].x=cry.start.x;cel.portals[1].y=cry.start.y;cel.portals[1].f=0;
+  if(cel._down){cry.portals[0].x=cel._down.x;cry.portals[0].y=cel._down.y;cry.portals[0].f=2}
+  LEVELS[MON.CELLAR]=cel;LEVELS[MON.CRYPT]=cry;LEVELS[MON.MAUS]=mau;
+}
+function monBuild(){
+  if(LEVELS[MON.ID])return;
+  if(typeof KH_READY!=='undefined'&&!KH_READY)return;
+  ohAlias();oqAlias();ohArt();ohFloors();ohStyles();isleFloors();lpArt();monDungeons();
+  const hs=(a,b,c)=>hash2(a,b,c),TM=ohTiles(),chars={D:LEVEL41_DATA.chars.D},chMap=new Map();let nextCh=0x300;
+  const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
+  /* ---------- the grounds ---------- */
+  {const W=MON.W,H=MON.H,N=W*H,rows=[];for(let y=0;y<H;y++)rows.push(new Array(W).fill('.'));
+    const fm=new Array(N).fill('2'),h=new Float32Array(N).fill(.3),rk=new Float32Array(N),block=new Uint8Array(N);
+    const decor=[],scenery=[],sky=[],lights=[],items=[],used=new Set();
+    const solid=(x,y,c)=>{rows[y][x]=c;block[y*W+x]=1};
+    const free=(x,y)=>x>3&&y>3&&x<W-4&&y<H-4&&rows[y][x]==='.'&&!used.has(x+','+y);
+    const dc=(k,x,y,o)=>{used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true,deco:true},o||{}))};
+    const tryDc=(k,x,y,o)=>{if(free(x,y)){dc(k,x,y,o);return true}return false};
+    const FLO=['lflora0','lflora0_1','lflora0_2'];
+    const flower=(x,y,sc)=>{if(!free(x,y))return;used.add(x+','+y);const k=FLO[(hs(x,y,5)*3)|0];scenery.push({k,wx:x+.5,wy:y+.5,sc:sc||.6,decor:{k,walk:true,x,y}})};
+    const path=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(rows[y][x]==='.')fm[y*W+x]='1'};
+    const lamp=(x,y)=>{if(tryDc('lamp',x,y))lights.push([x,y])};
+    const person=(id,x,y)=>{const kp=KH_KEEPERS[id];if(!kp)return;for(let r=0;r<4;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(free(x+dx,y+dy)){used.add((x+dx)+','+(y+dy));decor.push({k:khFaceKey(kp.face),x:x+dx,y:y+dy,block:false,walk:true,npc:id,sc:kp.sc||1});return}}};
+    // the outer wall, four thick
+    const wp=ch(TM.make('plain','castle2',2.3).gid),wq=ch(TM.make('plain','castle',2.3).gid);
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(x<4||x>=W-4||y<4||y>=H-4)solid(x,y,(x+y)%5===0?wq:wp);
+    // gravel paths
+    path(41,16,42,67);path(14,34,70,35);path(14,30,15,35);path(68,30,69,35);path(12,46,13,49);path(70,46,71,49);path(12,48,71,49);path(71,34,79,35);path(27,48,28,49);
+    // the gates: south (to the pass) and east (to the cemetery)
+    {const md=lpMonDoor(),dt=TM.make('door','castle',2.6),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;KH_DOOR[dgid]={lvl:LP.BASE+LPM.SEG,at:{x:md.x-1,y:md.y,f:3}};solid(42,H-4,ch(dgid));solid(41,H-4,wq);solid(43,H-4,wq)}
+    {const dt=TM.make('door','castle',2.6),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;KH_DOOR[dgid]={lvl:MON.CEM,at:{x:MON.CEM_IN[0],y:MON.CEM_IN[1],f:1}};solid(W-4,34,ch(dgid))}
+    // the buildings
+    MON_BLD.forEach((b,k)=>{
+      const plain=ch(TM.make('plain',b.st,b.wh).gid),win=ch(TM.make('window',b.st,b.wh).gid),dt=TM.make('door',b.st,b.wh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;KH_DOOR[dgid]={lvl:b.rid,at:b.at};
+      for(let y=b.y0;y<=b.y1;y++)for(let x=b.x0;x<=b.x1;x++){const door=x===b.dx&&y===b.y1;solid(x,y,door?ch(dgid):((x+y)%3===0&&y>b.y0&&y<b.y1)?win:plain);used.add(x+','+y)}
+      sky.push({x:(b.x0+b.x1+1)/2,y:(b.y0+b.y1+1)/2,k:'kh_ohroof1_'+(k%5),w:(b.y1-b.y0+1)+.9,z:b.wh-.03});
+      if(b.tower)sky.push({x:b.x1+1.5,y:b.y0+1.5,k:'kh_ohtower1_2',w:3.8,z:b.wh-.03},{x:b.x0-.5,y:b.y0+1.5,k:'kh_ohtower1_3',w:3.2,z:b.wh-.03});
+      LEVEL_NAMES[b.rid]=b.name;const rid=b.rid,front=[b.dx,b.y1+1];
+      const mk=()=>{if(LEVELS[rid])return;const bb={id:b.room==='inn'?'mon_guest':'mon'+k,name:b.name,room:b.room,keeper:b.keeper,scene:b.scene,wallImg:'kh_ohwall1_'+(k%3),floor:b.room==='hall'?'cobble':'wood'};
+        const R=khRoom(bb,rid,{to:MON.ID,x:front[0],y:front[1],f:2});LEVELS[rid]=R.level};
+      KH_LAZY[rid]=mk;
+      for(let x=b.x0-1;x<=b.x1+1;x++)used.add(x+','+(b.y1+1));
+    });
+    // the cloister lawn: a fountain, benches and a bell
+    if(IMG.kh_ohgard1_0){dc('kh_ohgard1_0',46,31,{block:true,walk:false});lights.push([46,31])}
+    const BENCH=IMG.kh_ohgard1_3?'kh_ohgard1_3':null;
+    if(BENCH)for(const [x,y] of [[44,29],[48,31],[44,33],[37,31],[37,27],[48,27]])tryDc(BENCH,x,y);
+    dc('memorial',38,18,{block:true,walk:false,npc:'mon_bell',sc:.9});
+    // flower beds all over the lawns, hedges beside the paths
+    for(let y=5;y<H-5;y++)for(let x=5;x<W-5;x++){if(!free(x,y)||fm[y*W+x]==='1')continue;
+      const near=(fm[y*W+x+1]==='1'||fm[y*W+x-1]==='1'||fm[(y+1)*W+x]==='1'||fm[(y-1)*W+x]==='1');
+      if(near&&hs(x,y,61)<.55)flower(x,y,.5+hs(x,y,62)*.3);else if(hs(x,y,63)<.05)flower(x,y,.6)}
+    for(let y=17;y<=65;y+=2){if(IMG.lbush0){for(const x of [40,43])if(hs(x,y,64)<.55&&free(x,y))dc('lbush0',x,y,{block:false,walk:true,sc:.9})}}
+    // oaks round the inside of the wall, and a few on the lawns
+    for(let n=0;n<150;n++){const x=5+((hs(n,1,65)*(W-10))|0),y=5+((hs(n,2,65)*(H-10))|0);const edge=x<9||x>W-10||y<9||y>H-10;if(!edge&&hs(n,3,65)>.12)continue;if(!free(x,y)||fm[y*W+x]==='1')continue;
+      used.add(x+','+y);decor.push({k:MON_OAKS[(hs(n,4,65)*5)|0],x,y,block:true,sc:.9+hs(n,5,65)*.5,ox:(hs(n,6,65)-.5)*.4,oy:(hs(n,7,65)-.5)*.4})}
+    // the herb garden: rows of flowers and herbs, with the hatch down to the cellars
+    for(const y of [53,56,59,62])for(let x=9;x<=25;x++)if(hs(x,y,66)<.8)flower(x,y,.65);
+    for(let n=0;n<14;n++){const x=9+((hs(n,1,67)*17)|0),y=53+((hs(n,2,67)*11)|0);if(free(x,y)){used.add(x+','+y);items.push({k:'herb',x,y})}}
+    {const c=LEVELS[MON.CELLAR];if(IMG.dhatch)decor.push({k:'dhatch',x:30,y:56,block:true,deco:true,enter:{to:MON.CELLAR,x:c.start.x,y:c.start.y,f:0}});used.add('30,56')}
+    // the orchard
+    for(let i=0;i<7;i++)for(let j=0;j<3;j++){const x=50+4*i,y=54+5*j;if(free(x,y)){used.add(x+','+y);decor.push({k:MON_OAKS[(i+j)%5],x,y,block:true,sc:1.05,ox:0,oy:0});
+      for(const [dx,dy] of [[1,1],[-1,1]])if(hs(x+dx,y+dy,68)<.3&&free(x+dx,y+dy)){used.add((x+dx)+','+(y+dy));items.push({k:'apple',x:x+dx,y:y+dy})}}}
+    for(let n=0;n<6;n++){const x=50+((hs(n,1,69)*26)|0),y=52+((hs(n,2,69)*12)|0);if(free(x,y)){used.add(x+','+y);items.push({k:'apple',x,y})}}
+    // the apiary
+    if(IMG.kh_ohgard2_0)for(const [x,y] of [[44,56],[46,57],[44,58]])dc('kh_ohgard2_0',x,y,{block:true,walk:false});
+    for(const [x,y] of [[43,59],[45,60],[47,59],[43,55]])if(free(x,y)){used.add(x+','+y);items.push({k:'honeycomb',x,y})}
+    // wildflowers lying about the lawns
+    for(let n=0;n<40&&items.filter(i=>i.k==='wildflower').length<12;n++){const x=6+((hs(n,1,70)*(W-12))|0),y=6+((hs(n,2,70)*(H-12))|0);if(free(x,y)&&fm[y*W+x]!=='1'){used.add(x+','+y);items.push({k:'wildflower',x,y})}}
+    items.push({k:'potion',x:41,y:60});
+    for(let y=20;y<=64;y+=8){lamp(40,y);lamp(43,y)}
+    for(const [x,y] of [[13,31],[69,31],[13,47],[71,47]])lamp(x,y);
+    // the people
+    [['mon_abbot',45,18],['mon_bellman',36,18],['mon_herb',16,56],['mon_bees',45,61],['mon_cellar',32,55],['mon_novice1',40,38],['mon_novice2',22,36],['mon_monk3',47,32],['mon_novice1',55,40]].forEach(([id,x,y])=>person(id,x,y));
+    const lv={rows:rows.map(r=>r.join('')),start:{x:MON.GATE_IN[0],y:MON.GATE_IN[1],f:0},enemies:[],items,decor,scenery,sky,fmap:null,floorSet:['ohMeadow','ohGravel','ohLawn','ohPale','ohMoss'],floor:'ohLawn',ceil:'cloud',day:.98,outdoor:true,amb:.9,
+      name:LEVEL_NAMES[MON.ID],label:'Saint Elen’s',noExtras:false,diff:25,ceilH:5.2,chars,lights,portals:[],
+      mapNames:[{t:'The Church of Saint Elen',x:41,y:7,k:'place'},{t:'The Cloister Garden',x:41,y:27,k:'place'},{t:'The Refectory',x:14,y:21,k:'place'},{t:'The Scriptorium',x:68,y:21,k:'place'},{t:'The Kitchen',x:12,y:39,k:'place'},{t:'The Guest House',x:70,y:37,k:'place'},{t:'The Infirmary',x:27,y:41,k:'place'},{t:'The Herb Garden',x:17,y:51,k:'place'},{t:'The Orchard',x:62,y:51,k:'place'},{t:'The Apiary',x:45,y:54,k:'place'},{t:'To the Cemetery',x:74,y:33,k:'lane'},{t:'The Hatch to the Cellars',x:30,y:55,k:'lane'},{t:'The Gate to the Pass',x:41,y:64,k:'lane'}]};
+    const fmp=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=fm[y*W+x];fmp.push(r)}lv.fmap=fmp;
+    LEVELS[MON.ID]=lv;
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=chars[rows[y][x]];if(c>=30&&c<100)block[y*W+x]=0}
+    TERRS[MON.ID]=yarTerrain(W,H,h,rk,block);
+  }
+  /* ---------- the cemetery ---------- */
+  {const W=52,H=40,rows=[];for(let y=0;y<H;y++)rows.push(new Array(W).fill('.'));
+    const fm=new Array(W*H).fill('2'),h=new Float32Array(W*H).fill(.3),rk=new Float32Array(W*H),block=new Uint8Array(W*H);
+    const decor=[],scenery=[],sky=[],lights=[],items=[],used=new Set();
+    const solid=(x,y,c)=>{rows[y][x]=c;block[y*W+x]=1};
+    const free=(x,y)=>x>2&&y>2&&x<W-3&&y<H-3&&rows[y][x]==='.'&&!used.has(x+','+y);
+    const dc=(k,x,y,o)=>{used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true,deco:true},o||{}))};
+    const FLO=['lflora0','lflora0_1','lflora0_2'];
+    const wp=ch(TM.make('plain','castle2',2.3).gid),wq=ch(TM.make('plain','castle',2.3).gid);
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(x<3||x>=W-3||y<3||y>=H-3)solid(x,y,(x+y)%5===0?wq:wp);
+    {const dt=TM.make('door','castle',2.6),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;KH_DOOR[dgid]={lvl:MON.ID,at:{x:W-4+0,y:34,f:3}};KH_DOOR[dgid].at={x:79,y:34,f:3};solid(2,20,ch(dgid))}
+    // paths
+    for(let x=3;x<=40;x++)for(const y of [20,21])fm[y*W+x]='1';for(let y=12;y<=34;y++)for(const x of [24,25])fm[y*W+x]='1';for(let y=12;y<=20;y++)for(const x of [40,41])fm[y*W+x]='1';
+    // the mausoleum
+    {const mx0=37,mx1=45,my0=5,my1=11,wh=3.4,plain=ch(TM.make('plain','castle',wh).gid),win=ch(TM.make('window','castle',wh).gid),dt=TM.make('door','castle',wh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;
+      const mc=LEVELS[MON.MAUS];KH_DOOR[dgid]={lvl:MON.MAUS,at:{x:mc.start.x,y:mc.start.y,f:0}};
+      for(let y=my0;y<=my1;y++)for(let x=mx0;x<=mx1;x++){solid(x,y,(x===41&&y===my1)?ch(dgid):((x+y)%3===0&&y>my0)?win:plain);used.add(x+','+y)}
+      sky.push({x:41.5,y:8.5,k:'kh_ohroof1_3',w:7.6,z:wh-.03},{x:mx1+1.5,y:my0+1.5,k:'kh_ohtower1_3',w:3.2,z:wh-.03});
+      for(let x=mx0-1;x<=mx1+1;x++)used.add(x+','+(my1+1))}
+    // the graves, in rows, with crosses, yews and flowers between
+    for(let gy=15;gy<=36;gy+=2)for(let gx=6;gx<=48;gx+=2){if(!free(gx,gy)||fm[gy*W+gx]==='1'||fm[gy*W+gx+1]==='1'||fm[gy*W+gx-1]==='1')continue;if(hs(gx,gy,81)<.28)continue;
+      const r=hs(gx,gy,82);used.add(gx+','+gy);decor.push({k:r<.2?'cross':r<.6?'grave':'grave2',x:gx,y:gy,block:true,deco:true,sc:1});
+      if(hs(gx,gy,83)<.4){const k=FLO[(hs(gx,gy,84)*3)|0];scenery.push({k,wx:gx+.5,wy:gy+.8,sc:.45,decor:{k,walk:true,x:gx,y:gy+1}})}}
+    for(let n=0;n<40;n++){const x=4+((hs(n,1,85)*(W-8))|0),y=4+((hs(n,2,85)*(H-8))|0);if(!free(x,y)||fm[y*W+x]==='1')continue;used.add(x+','+y);decor.push({k:hs(n,3,85)<.6?'ltree19':MON_OAKS[(hs(n,4,85)*5)|0],x,y,block:true,sc:.9+hs(n,5,85)*.4,ox:0,oy:0})}
+    const BENCH=IMG.kh_ohgard1_3?'kh_ohgard1_3':null;if(BENCH)for(const [x,y] of [[23,18],[27,18],[23,30],[27,30],[10,22]])if(free(x,y))dc(BENCH,x,y);
+    for(const [x,y] of [[22,19],[28,19],[22,31],[28,31],[39,13],[43,13]])if(free(x,y)){dc('lamp',x,y);lights.push([x,y])}
+    for(let n=0;n<60;n++){const x=4+((hs(n,1,86)*(W-8))|0),y=13+((hs(n,2,86)*(H-17))|0);if(free(x,y)&&hs(n,3,86)<.6){used.add(x+','+y);const k=FLO[(hs(n,4,86)*3)|0];scenery.push({k,wx:x+.5,wy:y+.5,sc:.55,decor:{k,walk:true,x,y}})}}
+    const kw=KH_KEEPERS.mon_wilma;if(kw){for(const [x,y] of [[12,24],[13,25],[14,24]])if(free(x,y)){used.add(x+','+y);decor.push({k:khFaceKey(kw.face),x,y,block:false,walk:true,npc:'mon_wilma',sc:kw.sc||1});break}}
+    const lv={rows:rows.map(r=>r.join('')),start:{x:MON.CEM_IN[0],y:MON.CEM_IN[1],f:1},enemies:[],items,decor,scenery,sky,fmap:null,floorSet:['ohMeadow','ohGravel','ohLawn','ohPale','ohMoss'],floor:'ohLawn',ceil:'cloud',day:.98,outdoor:true,amb:.9,
+      name:LEVEL_NAMES[MON.CEM],label:'The Quiet Cemetery',diff:25,ceilH:5.2,chars,lights,portals:[],
+      mapNames:[{t:'The Mausoleum',x:41,y:4,k:'place'},{t:'The Quiet Cemetery',x:26,y:25,k:'place'},{t:'The Old Graves',x:12,y:16,k:'place'},{t:'The Yew Walk',x:40,y:30,k:'place'},{t:'To the Monastery',x:6,y:19,k:'lane'}]};
+    const fmp=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=fm[y*W+x];fmp.push(r)}lv.fmap=fmp;LEVELS[MON.CEM]=lv;
+    TERRS[MON.CEM]=yarTerrain(W,H,h,rk,block);
+  }
+}
+// built the first time any of them is reached
+for(const id of [MON.ID,MON.CEM])KH_LAZY[id]=()=>monBuild();
+for(const id of [MON.CELLAR,MON.CRYPT,MON.MAUS])KH_LAZY[id]=()=>{monDungeons();if(!LEVELS[MON.ID])monBuild()};
+MON_BLD.forEach(b=>{const stub=()=>{monBuild();if(!LEVELS[b.rid]&&KH_LAZY[b.rid]&&KH_LAZY[b.rid]!==stub)KH_LAZY[b.rid]()};KH_LAZY[b.rid]=stub});
 
 /* ---- src/desert/seasound.js ---- */
 /* ==========================================================================
@@ -17556,6 +17898,9 @@ STORY.push(
   {id:'ohhollow',c:()=>G.flags.reachedBottom,t:'The Four Floors',x:'Four floors lay below the Abbey: the Sealed Stair, the Drowned Cloister, the Ossuary of Brothers and the Hollow Abbey. At the bottom stood Brother Sevrin, the Abbey’s last gardener, who had come down to hide. He told the party that the Hollow Abbot sat in the great room ahead, and that the stair onward was under his seat.'},
   {id:'landpath',c:()=>G.flags.lpSeen,t:'The Land Path',x:'A second gate in the north wall of Oldhaven opens on the Land Path, a quiet road of ninety-six kilometres that runs north up the peninsula with the sea on one side and an old oak forest on the other, turns west across the mountains and comes south to a high cliff above Yarrim. Nothing happens on it. There are flowers on both sides, lamps now and then, wooden signposts that count the kilometres to Yarrim, and now and then a house, an inn or a church with a graveyard. Knights of the Crown ride up and down it twice a day. It goes one way: from Oldhaven to Yarrim.'},
   {id:'landpathend',c:()=>G.flags.lpDone,t:'The Cliff above Yarrim',x:'The path ends at the top of a cliff. A steep goat track leads down to the green slopes north of Yarrim, and the party took it. The track can be climbed down, but not up again, and a wooden sign at the bottom says so.'},
+  {id:'monastery',c:()=>G.flags.mon&&Object.keys(G.flags.mon.met||{}).length||qSt('mq1')!==null,t:'Saint Elen’s Monastery',x:'Halfway along the Land Path, in the mountains, a gate cut into the cliff leads into the green grounds of Saint Elen’s: a church, a cloister with a fountain, a refectory, a scriptorium, a kitchen, a guest house, an infirmary, herb and flower gardens, an orchard and hives. The brothers are friendly and quiet. East of it lies a still cemetery with a mausoleum, and below the grounds a cellar and old crypts have a ghost problem, which the party set out to quiet.'},
+  {id:'monghosts',c:()=>qSt('mq6')==='done',t:'The Cold Cellar',x:'The party went down the hatch in the herb garden and laid the ghosts of the cellar to rest, one by one. They were not dangerous, only sad and very cold. The cellar was warm again by evening.'},
+  {id:'monring',c:()=>qSt('mq8')==='done',t:'The Abbot’s Ring',x:'In a chest in the old crypts, the party found the plain gold ring of Abbot Aldhelm and brought it back to Abbot Anselm, who put it where it belonged. The old abbot is said to have rested since.'},
   {id:'ohabbot',c:()=>G.flags.hollowSlain,t:'The Hollow Abbot',x:'The party killed the Hollow Abbot, and the slab over the stair ground aside. Beyond it lies the Hollow Land, the next part of the game. Below the Abbey is in early access, and that is where the road ends for now.'}
 );
 function storyNext(){ // what to do next, from the chapter the party has reached
@@ -18365,7 +18710,7 @@ function freeNear(x,y,rad,count){
   return out;
 }
 function desertBump(nx,ny,g){
-  if((LEVEL===44||LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<430))&&g>=1000&&khBump(nx,ny,g))return true;
+  if((LEVEL===44||LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<440))&&g>=1000&&khBump(nx,ny,g))return true;
   if(TERR_BLOCK&&TERR_BLOCK[ny*MW+nx]){sfx('bump');msg(yarSea(LEVEL)?(TERRS[LEVEL]&&TERRS[LEVEL].h[ny*MW+nx]>.9?'The rock is too steep to climb.':'The water is too deep to wade.'):'The mountainside is too steep to climb.','#d8c8a0');return true}
   { // the door in the side of a mound: walk into it
     const d=G.decor.find(q=>q.enter&&q.x===nx&&q.y===ny&&!q.found);
@@ -18557,6 +18902,16 @@ const QHINT={
   ad2:'Take the royal cutter home from Captain Aldwyn, then find the Sealed Door in the crypt level where the game began, near the start.',
   ad3:'Go through the Sealed Door and down the four floors to the Hollow Abbey. Each floor has a stair down at the far end.',
   ad4:'The Hollow Abbot is in the great room at the bottom. Speak to Brother Sevrin first.',
+  mq1:'Walk the Land Path to the halfway point, in the mountains. A gate cut into the cliff on the east side leads to Saint Elen’s. Abbot Anselm is in front of the church.',
+  mq2:'Brother Herbert is in the herb garden, south-west of the grounds. Pick 6 herbs from the beds.',
+  mq3:'Brother Cook is in the kitchen, in the south-west. Apples lie in the orchard, in the south-east.',
+  mq4:'The bee-keeper is by the hives, south of the cloister. Honeycombs lie on the ground around them.',
+  mq5:'Wildflowers lie on the lawns of the monastery. Sister Wilma is in the cemetery, through the east gate.',
+  mq6:'The hatch to the cellars is in the herb garden. Kill 6 ghosts, then tell Brother Cellarer.',
+  mq7:'Take the letter to Osk, the innkeeper of the Cold Spring Inn, on the Land Path in the mountains.',
+  mq8:'The ring is in a chest in the old crypts, one floor below the cellars. Speak to the Abbot first.',
+  mq9:'The bell hangs at the foot of the church. Ring it once.',
+  mq10:'Speak to Brother Hilarion in the guest house, in the east, and rest by the fire.',
   shell:'The shell broke in four. Under each of the four islands a pearl-white clam holds a piece in a far corner of the reef. Dive each one, find the clam, and bring the pieces to Brother Aldous.'
 };
 /* a plain fetch or a plain kill count needs no hint; every other quest, and every story quest, gets one */
