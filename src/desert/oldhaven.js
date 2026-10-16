@@ -657,7 +657,8 @@ function ohBuild(){
   }
   OH.houses=houses;
   LEVELS[OH.ID]=lv;LEVEL_NAMES[OH.ID]='Oldhaven';
-  {const hh=new Float32Array(N).fill(.3),rk=new Float32Array(N);TERRS[OH.ID]=yarTerrain(W,H,hh,rk,block)} // flat ground under a real sky
+  {for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=chars[rows[y][x]];if(c>=30&&c<100)block[y*W+x]=0} // a gate is not a rock face
+  const hh=new Float32Array(N).fill(.3),rk=new Float32Array(N);TERRS[OH.ID]=yarTerrain(W,H,hh,rk,block)} // flat ground under a real sky
   const q4=LEVELS[304];if(q4)lv.portals[2].x=q4.start.x,lv.portals[2].y=q4.start.y;
 }
 KH_LAZY[OH.ID]=()=>{seaBuild(304);ohBuild()};LEVEL_NAMES[OH.ID]='Oldhaven';
