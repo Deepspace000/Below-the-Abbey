@@ -233,6 +233,7 @@ for(const id of [HL.CAV,HL.VIOLET,...Array.from({length:HL.N},(_,k)=>HL.BASE+k)]
 /* ---- the journal and the hints: what the party has seen of the Hollow Land and the tower ---- */
 {const _oe=ohEnter;ohEnter=function(n){_oe.apply(this,arguments);const F=G.flags;
   if(n===HL.CAV)F.hlSeen=1;
+  if((n===HL.CAV||(n>=HL.BASE&&n<=HL.VIOLET))&&!F.hlArmed){let tester=false;try{tester=localStorage.getItem('abbeyTester')==='1'||/[?&]town=/.test(location.search)}catch(e){}if(tester&&G.heroes.some(h=>!h.eq.main||h.eq.main.id!==['worldblade','starbow','sandstaff','skullcrusher'][G.heroes.indexOf(h)])){giveTestWeapons();F.hlArmed=1;msg('Test weapons: the party is armed for the castle.','#ffe36a')}}
   if(n>=HL.BASE&&n<HL.BASE+HL.N)F.hlTop=Math.max(F.hlTop||0,n-HL.BASE+1);
   if(n===HL.VIOLET)F.hlViolet=1}}
 
