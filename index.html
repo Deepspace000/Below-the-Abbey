@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.203';
+const VERSION='3.204';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -16684,6 +16684,83 @@ khNpc('lp_bench','A wooden bench','kh_ohgard1_3',()=>say('A plain wooden bench b
     msg('The party sits. For a while nobody says anything, and somewhere a gentle tune begins.','#b8e8c0');if(healed)msg('The rest does you good.','#a8d8a8');return null}],
   ['Walk on.',()=>null]]));
 {const _dsl=desertStep;desertStep=function(x,y){if(G.sit){G.sit=null;msg('You stand up and walk on.','#c8d8c0')}_dsl.apply(this,arguments)}}
+
+/* ==========================================================================
+   THE WHOLE LAND PATH ON ONE MAP. On the path the map screen shows one hand-drawn parchment of the entire 96 km: the sea in the middle, the
+   mountains across the top, the forest on the outer sides, the path with a mark at every eight kilometres, every shrine, house, inn and
+   church, the waterfalls and rope bridges, Saint Elen's Monastery halfway, and where the party is now. It is drawn from the same numbers
+   that build the path, so every mark is where the thing really stands.
+   ========================================================================== */
+const LP_TOT=LP.N*(LP.H-LPOV)+LPOV;
+const LP_MAPV=[[0,385,248],[8/24,385,76],[16/24,105,76],[22/24,105,222],[1,172,250]]; // Oldhaven, the north-east corner, the north-west corner, the foot of the west side, Yarrim
+function lpBase(f){f=Math.max(0,Math.min(1,f));for(let i=1;i<LP_MAPV.length;i++){const a=LP_MAPV[i-1],b=LP_MAPV[i];if(f<=b[0]+1e-9){const t=(f-a[0])/(b[0]-a[0]||1);return[a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t]}}return[LP_MAPV[4][1],LP_MAPV[4][2]]}
+function lpPos(f){const [x,y]=lpBase(f),[x2,y2]=lpBase(f+.002),[x1,y1]=lpBase(f-.002);let nx=-(y2-y1),ny=x2-x1;const l=Math.hypot(nx,ny)||1;nx/=l;ny/=l;const w=Math.sin(f*70)*2.2+Math.sin(f*23+1)*1.6;return[x+nx*w,y+ny*w]}
+const lpGY=(s,row)=>s*(LP.H-LPOV)+(LP.H-1-row);
+function lpDrawMap(){
+  BTNS=[];veil(.95);
+  const ink='#2a1c0e',halo='rgba(236,222,176,.9)',H=hash2;
+  const gr=ctx.createLinearGradient(0,0,0,DH);gr.addColorStop(0,'#c4b284');gr.addColorStop(1,'#a8966a');ctx.fillStyle=gr;ctx.fillRect(0,0,DW,DH);
+  ctx.save();ctx.globalAlpha=.12;for(let i=0;i<120;i++){const a=H(i,1,7),b=H(i,2,7);ctx.fillStyle=i%3?'#5a4630':'#e8dcb0';ctx.beginPath();ctx.ellipse(a*DW,b*DH,6+H(i,3,7)*30,3+H(i,4,7)*14,H(i,5,7)*3,0,TAU);ctx.fill()}ctx.restore();
+  const lab=(t,x,y,sz,col,al)=>{ctx.save();ctx.font=`bold ${sz}px ${FUI}`;ctx.textAlign=al||'center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=3;ctx.strokeStyle=halo;ctx.strokeText(t,x,y);ctx.fillStyle=col||ink;ctx.fillText(t,x,y);ctx.restore()};
+  // the sea in the middle, with a wavy shore and little waves
+  ctx.save();ctx.beginPath();ctx.moveTo(124,300);ctx.lineTo(124,232);ctx.quadraticCurveTo(124,98,150,96);ctx.lineTo(344,96);ctx.quadraticCurveTo(366,98,366,134);ctx.lineTo(366,300);ctx.closePath();
+  ctx.fillStyle='rgba(112,156,176,.55)';ctx.fill();ctx.strokeStyle='rgba(40,70,90,.6)';ctx.lineWidth=1.5;ctx.setLineDash([5,3]);ctx.stroke();ctx.setLineDash([]);ctx.clip();
+  ctx.strokeStyle='rgba(235,245,250,.55)';ctx.lineWidth=1;for(let i=0;i<46;i++){const x=130+H(i,11,3)*230,y=102+H(i,12,3)*196;ctx.beginPath();ctx.moveTo(x-5,y);ctx.quadraticCurveTo(x-2.5,y-3,x,y);ctx.quadraticCurveTo(x+2.5,y+3,x+5,y);ctx.stroke()}
+  ctx.restore();
+  lab('The Inner Sea',245,170,13,'#2c4a60');
+  // mountains across the top, forest on the outer sides
+  for(let i=0;i<20;i++){const x=40+i*21+H(i,1,9)*10,y=48+H(i,2,9)*12,w=14+H(i,3,9)*8,h=16+H(i,4,9)*10;
+    ctx.fillStyle='#8a7a66';ctx.beginPath();ctx.moveTo(x-w,y+h*.4);ctx.lineTo(x,y-h*.6);ctx.lineTo(x+w,y+h*.4);ctx.closePath();ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle='#f0ece0';ctx.beginPath();ctx.moveTo(x-w*.32,y-h*.15);ctx.lineTo(x,y-h*.6);ctx.lineTo(x+w*.32,y-h*.15);ctx.lineTo(x+w*.1,y-h*.05);ctx.lineTo(x-w*.1,y-h*.12);ctx.closePath();ctx.fill()}
+  const tree=(x,y,r)=>{ctx.fillStyle='#4a6a34';ctx.beginPath();ctx.arc(x,y-r*.6,r,0,TAU);ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=.8;ctx.stroke();ctx.fillStyle='#5a3c20';ctx.fillRect(x-.8,y,1.6,r*.7)};
+  for(let i=0;i<46;i++){tree(408+H(i,5,9)*64,100+H(i,6,9)*150,3+H(i,7,9)*2);if(i<38)tree(8+H(i,8,9)*88,104+H(i,9,9)*130,3+H(i,10,9)*2)}
+  lab('The Mountains',330,30,12,'#5a4a38');lab('The Oak Forest',446,262,7,'#2c4a20');lab('The Oak Forest',48,246,7,'#2c4a20');
+  // the path: solid where the party has walked, dashed where it has not
+  const cur=Math.max(0,Math.min(1,(lpGY(LEVEL-LP.BASE,(LEVEL===LP.BASE+LP.N-1?G.C.y-60:G.C.y))+LPOV*0)/LP_TOT)),N=420;
+  const trace=(f0,f1,col,w,dash)=>{ctx.save();ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';ctx.lineJoin='round';ctx.setLineDash(dash||[]);ctx.beginPath();for(let i=0;i<=N;i++){const f=f0+(f1-f0)*i/N,p=lpPos(f);if(i)ctx.lineTo(p[0],p[1]);else ctx.moveTo(p[0],p[1])}ctx.stroke();ctx.restore()};
+  trace(0,1,'rgba(246,232,190,.9)',6);trace(0,cur,'#5a3c1c',2.6);trace(cur,1,'#5a3c1c',1.8,[4,4]);
+  // a mark at every eight kilometres, counted the way the signposts count: to Yarrim
+  for(let m=8;m<LP_KM;m+=8){const [x,y]=lpPos(m/LP_KM),f=m/LP_KM,side=f<8/24?[1,0]:f<16/24?[0,-1]:[-1,0];ctx.fillStyle=ink;ctx.beginPath();ctx.arc(x,y,2,0,TAU);ctx.fill();lab(String(LP_KM-m),x+side[0]*9,y+side[1]*8,7,'#5a3c1c')}
+  // the shrines: a little grey stone every hundred and four steps, with an offering
+  for(let g=52;g<LP_TOT;g+=104){const [x,y]=lpPos(g/LP_TOT),f=g/LP_TOT,sd=(Math.floor(g/104)%2?-1:1)*(f<8/24?1:f<16/24?-1:-1);let ox=0,oy=0;if(f<8/24||f>=16/24)ox=3.2*sd;else oy=3.2*sd;
+    ctx.fillStyle='#8a8a8a';ctx.fillRect(x+ox-1.3,y+oy-1.6,2.6,3.2);ctx.fillStyle='#e8a840';ctx.fillRect(x+ox-.6,y+oy-2.4,1.2,1)}
+  // the places
+  const house=(x,y,kind,s)=>{s=s||1;ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.fillStyle=kind==='church'?'#d8d0c0':'#c8a070';ctx.fillRect(-4,-3,8,6);ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.strokeRect(-4,-3,8,6);
+    ctx.fillStyle=kind==='inn'?'#b04030':kind==='church'?'#6a6a78':'#7a4a2a';ctx.beginPath();ctx.moveTo(-5.5,-3);ctx.lineTo(0,-8);ctx.lineTo(5.5,-3);ctx.closePath();ctx.fill();ctx.stroke();
+    if(kind==='church'){ctx.strokeStyle=ink;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(0,-8);ctx.lineTo(0,-12);ctx.moveTo(-2,-10.4);ctx.lineTo(2,-10.4);ctx.stroke()}
+    if(kind==='inn'){ctx.fillStyle='#f0d070';ctx.fillRect(-1,0,2,3)}ctx.restore()};
+  const SHORT=['Shepherd’s House','The Last Lamp','Long Road Church','Fisherman’s House','Hermit’s House','Quiet Chapel','Cold Spring Inn','Charcoal House','Gardener’s House','St Aldric’s','Wayfarer’s Rest','Beekeeper’s House','The Last House'];
+  for(const [seg,kind,row,name] of LP_BUILD){const nm=SHORT[LP_BUILD.findIndex(b=>b[3]===name)]||name;const f=lpGY(seg,row)/LP_TOT,[x,y]=lpPos(f),east=f<8/24,top=f>=8/24&&f<16/24,off=top?[0,15]:east?[-15,0]:[15,0];
+    // inland, on the forest side: east of the east side, north (mountain) of the top, west of the west side; the sea side is for the inns' boats
+    const sd=east?[16,0]:top?[0,-16]:[-16,0];ctx.strokeStyle='rgba(90,60,30,.6)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+sd[0],y+sd[1]);ctx.stroke();
+    house(x+sd[0],y+sd[1],kind);lab(nm,x+sd[0]*1.0+(east?4:top?0:-4),y+sd[1]+(top?-9:east?0:0),7,kind==='inn'?'#7a2418':ink,east?'left':top?'center':'right')}
+  // waterfalls and rope bridges
+  for(const s of LP_FALLS){const f=lpGY(s,400)/LP_TOT,[x,y]=lpPos(f);ctx.fillStyle='rgba(120,170,200,.95)';ctx.fillRect(x-1.5,y-12,3,9);ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.strokeRect(x-1.5,y-12,3,9);
+    ctx.strokeStyle='#5a3c1c';ctx.beginPath();ctx.moveTo(x-6,y+1);ctx.quadraticCurveTo(x,y+4,x+6,y+1);ctx.stroke();lab('Falls and bridge',x,y-17,6,'#2c4a60')}
+  // Saint Elen's Monastery, halfway, on the shore below the path
+  {const f=lpGY(LPM.SEG,LPM.Y)/LP_TOT,[x,y]=lpPos(f);const mx=x,my=y+34;ctx.strokeStyle='rgba(90,60,30,.7)';ctx.lineWidth=1.5;ctx.setLineDash([2,2]);ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(mx,my-14);ctx.stroke();ctx.setLineDash([]);
+    ctx.save();ctx.translate(mx,my);ctx.fillStyle='#dcd0b0';ctx.fillRect(-12,-5,24,12);ctx.strokeStyle=ink;ctx.lineWidth=1.2;ctx.strokeRect(-12,-5,24,12);ctx.fillStyle='#8a4a2a';ctx.beginPath();ctx.moveTo(-14,-5);ctx.lineTo(-6,-13);ctx.lineTo(2,-5);ctx.closePath();ctx.fill();ctx.stroke();
+    ctx.fillStyle='#c8bca0';ctx.fillRect(5,-14,6,16);ctx.strokeRect(5,-14,6,16);ctx.fillStyle='#8a4a2a';ctx.beginPath();ctx.moveTo(4,-14);ctx.lineTo(8,-21);ctx.lineTo(12,-14);ctx.closePath();ctx.fill();ctx.stroke();
+    ctx.strokeStyle=ink;ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(8,-21);ctx.lineTo(8,-25);ctx.moveTo(6.2,-23.2);ctx.lineTo(9.8,-23.2);ctx.stroke();ctx.restore();
+    lab('SAINT ELEN’S MONASTERY',mx,my+15,9,'#6a1a10');lab('halfway: rest, quests and a quiet reward',mx,my+25,6.5,'#6a1a10');ctx.fillStyle='#d03a2a';ctx.beginPath();ctx.arc(x,y,3.2,0,TAU);ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.stroke()}
+  // the two ends
+  {const [x,y]=lpPos(0);ctx.fillStyle='#c8a070';ctx.fillRect(x-9,y+2,18,9);ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.strokeRect(x-9,y+2,18,9);for(let i=0;i<4;i++)ctx.fillRect(x-9+i*5,y-1,3,3);ctx.strokeRect(x-9,y-1,3,3);lab('OLDHAVEN',x,y+19,9,ink);lab('the north gate',x,y+28,7,'#5a3c1c');
+   const [x2,y2]=lpPos(1);ctx.fillStyle='#8a7a66';ctx.fillRect(x2-14,y2-10,28,10);ctx.strokeStyle=ink;ctx.strokeRect(x2-14,y2-10,28,10);ctx.fillStyle='#c8a070';for(const dx of [-8,0,8]){ctx.fillRect(x2+dx-2,y2+2,5,5);ctx.strokeRect(x2+dx-2,y2+2,5,5)}lab('YARRIM',x2,y2+17,9,ink);lab('the cliff: a way down, none back',x2,y2+26,6.5,'#6a1a10')}
+  // you
+  {const [px,py]=lpPos(cur);ctx.save();ctx.translate(px,py);ctx.fillStyle='#ffe36a';ctx.strokeStyle='#2a1c0e';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(0,0,5.5,0,TAU);ctx.fill();ctx.stroke();ctx.fillStyle='#d03a2a';ctx.beginPath();ctx.arc(0,0,2,0,TAU);ctx.fill();ctx.restore();
+   const km=Math.round(cur*LP_KM);lab('You: '+km+' km from Oldhaven, '+(LP_KM-km)+' to Yarrim',245,228,9,'#6a1a10')}
+  // title, note and legend
+  ctx.save();ctx.font=`22px ${FTITLE}`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle='#2a1c0e';ctx.fillText('The Land Path',10,16);ctx.restore();
+  lab('96 kilometres, Oldhaven to Yarrim',12,33,8,'#5a3c1c','left');
+  const ly=DH-14;ctx.fillStyle='rgba(30,20,10,.82)';ctx.fillRect(0,DH-30,DW,30);
+  txt('Stay on the path: the shrines leave food for the hungry, the inns have beds, and Saint Elen’s Monastery waits halfway.',240,DH-23,8,'#e8dcb0','center',true);
+  const lg=(x,kind,t)=>{house(x,ly-2,kind,.8);txt(t,x+8,ly,7,'#cdbf94','left')};
+  lg(18,'house','House');lg(66,'inn','Inn');lg(104,'church','Church');
+  ctx.fillStyle='#8a8a8a';ctx.fillRect(152,ly-4,3,5);ctx.fillStyle='#e8a840';ctx.fillRect(152.8,ly-5,1.4,1.2);txt('Shrine (food)',162,ly,7,'#cdbf94','left');
+  ctx.fillStyle='rgba(120,170,200,.95)';ctx.fillRect(232,ly-5,3,8);txt('Waterfall',240,ly,7,'#cdbf94','left');txt('Small numbers: km to Yarrim',290,ly,7,'#cdbf94','left');
+  btnText('worldmap','World map',328,5,80,20);btnText('ovexit','Exit',414,5,60,20);
+}
+{const _do=drawOverview;drawOverview=function(){if(LEVEL>=LP.BASE&&LEVEL<LP.BASE+LP.N){lpDrawMap();return}return _do.apply(this,arguments)}}
 
 /* ---- src/desert/monastery.js ---- */
 /* ==========================================================================
