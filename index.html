@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.161';
+const VERSION='3.164';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4307,6 +4307,9 @@ function drawWorldMap(){
   }
   // you are here
   if(here){const pulse=.5+.5*Math.sin(G.time*4);ctx.strokeStyle=`rgba(150,30,20,${.55+.4*pulse})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(here.x,here.y,17+pulse*3,0,TAU);ctx.stroke();ctx.fillStyle='rgba(150,30,20,.9)';ctx.beginPath();ctx.arc(here.x,here.y-24,3.2,0,TAU);ctx.fill();ctx.beginPath();ctx.moveTo(here.x-4,here.y-22);ctx.lineTo(here.x+4,here.y-22);ctx.lineTo(here.x,here.y-14);ctx.closePath();ctx.fill()}
+  if(G.qFocus&&G.qFocus.loc){const fl=WORLD_LOCS.find(z=>z.k===G.qFocus.loc); // the place of the quest picked in the log
+    if(fl){const pu=.5+.5*Math.sin(G.time*5),pr=22+pu*4;ctx.save();ctx.lineWidth=3.2;ctx.strokeStyle='#e0b020';ctx.beginPath();ctx.arc(fl.x,fl.y,pr,0,TAU);ctx.stroke();ctx.lineWidth=1.8;ctx.strokeStyle='#b02818';ctx.beginPath();ctx.arc(fl.x,fl.y,pr*.72,0,TAU);ctx.stroke();
+      ctx.font=`italic bold 9px ${FUI}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(236,222,176,.95)';const ttl=(QUESTS[G.qFocus.id]||{}).title||'';ctx.strokeText(ttl,fl.x,fl.y+pr+9);ctx.fillStyle='#b02818';ctx.fillText(ttl,fl.x,fl.y+pr+9);ctx.restore()}}
   // woken teleporters: a small glowing stone by each place that has one
   const awake=WORLD_LOCS.filter(l=>teleLevelsAt(l).length);
   for(const l of awake){const mx=l.x+17,my=l.y-13,pl=.5+.5*Math.sin(G.time*4+l.x);ctx.fillStyle='rgba(150,210,255,'+(.25+.25*pl)+')';ctx.beginPath();ctx.arc(mx,my,9+pl*2,0,TAU);ctx.fill();ctx.fillStyle='#46506a';stroke();ctx.beginPath();ctx.ellipse(mx,my+1,6.5,3.2,0,0,TAU);ctx.fill();ctx.stroke();ctx.strokeStyle='#cfeaff';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(mx,my,3.4,0,TAU);ctx.stroke()}
@@ -4490,6 +4493,7 @@ function questSpots(){
       if(!any&&!sea){const rg=remoteGiver(id);if(rg)out.push({x:rg.x,y:rg.y,kind:'goal',t:q.title,q:id})} // the giver is inside a building: ring its door
     }
   }
+  if(G.qFocus&&G.qFocus.lvl===LEVEL&&!out.some(z=>z.q===G.qFocus.id)){const e=questFocusSpot(G.qFocus.id);if(e)out.push(e)}
   return out;
 }
 /* the screen rectangles taken by quest rings and their words, so that no other name is written over them */
@@ -6117,13 +6121,57 @@ function drawTalk(){
 const QAREA={scoria:'Greendale',honey:'Greendale',flowers:'Greendale',apples2:'Greendale',gandrick:'Thornwick',wood:'Thornwick',goats:'Thornwick',wolves:'Thornwick',bandits:'Thornwick',rats:'Thornwick',apples:'Thornwick',cheese:'Thornwick',ale:'Thornwick',fish:'Thornwick',ghosts:'Thornwick',bread:'Thornwick',
   ironhill:'The Road to Ironhill',mines:'Ironhill',overseer:'Ironhill',ore:'Ironhill',pick:'Ironhill',herbs:'Ironhill',wolves2:'Ironhill',bandits2:'Ironhill',graves:'Ironhill',pip:'Ironhill',parcel:'Ironhill',rats2:'Ironhill',escape:'Ironhill',pass:'Greyfang Pass',witch:'The Wilds'};
 const QAREA_ORDER=['Thornwick','The Road to Ironhill','Ironhill','Greyfang Pass','Greendale','The Wilds','Elsewhere'];
-function questShow(qid){ // a quest picked in the log: open this level's map on it, with its place circled
+/* ---- where a quest is, wherever it is: on this level, behind a door, out on the sea, or in another town ---- */
+function npcLevelOf(id){for(const lv in LEVELS){const L=LEVELS[lv];if(L&&L.decor&&L.decor.some(d=>d.npc===id))return +lv}return null}
+function giverLevelOf(qid){
+  for(const n in QGIVER)if([].concat(QGIVER[n]||[]).includes(qid)){const l=npcLevelOf(n);if(l!==null)return l}
+  const who=(QUESTS[qid].who||'').split(',')[0].trim();
+  if(who)for(const lv in LEVELS){const L=LEVELS[lv];if(L&&L.decor&&L.decor.some(d=>d.npc&&NPCS[d.npc]&&NPCS[d.npc].name&&NPCS[d.npc].name.split(',')[0].trim()===who))return +lv}
+  return null;
+}
+function questTargetLevel(qid){ // the level where the quest's business is: its goal if it has one, else its giver
+  const q=QUESTS[qid];if(!q)return null;
+  try{if(typeof q.goalLevel==='function')return q.goalLevel();if(q.goalLevel!==undefined)return q.goalLevel}catch(e){}
+  if(/^wq_/.test(qid)){const rec=((G.flags&&G.flags.wRec)||{})[qid.slice(3)];if(rec)return rec.lv} // a wandering soul: where the party met them
+  for(const n of q.targets||[]){const m=/^uw_dive_(\d+)$/.exec(n);if(m)return +m[1];const l=npcLevelOf(n);if(l!==null)return l}
+  if(typeof SN_ISLES!=='undefined'){const d=(q.desc||'').toLowerCase();for(const I of SN_ISLES){const nm=I.n.toLowerCase().replace(/^the /,'');if(nm.length>3&&d.includes(nm))return I.lv}}
+  return giverLevelOf(qid);
+}
+function questDoorTo(lvl,depth){ // the square on this level in front of the door that leads (perhaps through other rooms) to level lvl
+  const L=LEVELS[lvl];if(!L)return null;const p=(L.portals||[]).find(p=>p&&p.to===LEVEL);if(p)return {x:p.x,y:p.y};if((depth||0)>=3)return null;
+  for(const q of L.portals||[])if(q&&q.to!==lvl&&LEVELS[q.to]&&q.to!==undefined){const d=questDoorTo(q.to,(depth||0)+1);if(d)return d}return null;
+}
+function questFocusSpot(qid){ // a place on THIS level for the picked quest when it is not ringed in the usual way
+  const q=QUESTS[qid],Lt=questTargetLevel(qid);if(!q||Lt===null)return null;
+  if(Lt===LEVEL){ // on this very level: the giver, so that even a finished quest can be shown
+    const ids=[];for(const n in QGIVER)if([].concat(QGIVER[n]||[]).includes(qid))ids.push(n);
+    const who=(q.who||'').split(',')[0].trim(),d=G.decor.find(z=>!z.found&&z.npc&&(ids.includes(z.npc)||(NPCS[z.npc]&&NPCS[z.npc].name&&NPCS[z.npc].name.split(',')[0].trim()===who)));
+    return d?{x:d.x,y:d.y,kind:'goal',t:q.title,q:qid}:null;
+  }
+  if(typeof SN!=='undefined'&&LEVEL===SN.ID&&typeof SN_ISLES!=='undefined'){ // on the open sea: the island the quest belongs to
+    const isl=typeof UW!=='undefined'&&UW[Lt]?UW[Lt].island:Lt,I=SN_ISLES.find(i=>i.lv===isl||i.lv===Lt);if(I)return {x:I.x,y:I.y,kind:'goal',t:q.title,q:qid};
+  }
+  const d=questDoorTo(Lt);return d?{x:d.x,y:d.y,kind:'goal',t:q.title,q:qid}:null;
+}
+function questWorldLoc(qid){ // the place on the world map: of the quest's level, or failing that of its area
+  const Lt=questTargetLevel(qid);let l=Lt!==null&&typeof teleLocOf==='function'?teleLocOf(typeof UW!=='undefined'&&UW[Lt]?UW[Lt].island:Lt):null;
+  if(!l){const a=QAREA[qid]||'';l=WORLD_LOCS.find(z=>z.n===a)||(a==='The Narrow Sea'?WORLD_LOCS.find(z=>z.k==='saltbarrow'):null)}
+  return l||null;
+}
+function questShow(qid){ // a quest picked in the log: show where it is, whatever kind of place that is
   const q=QUESTS[qid];if(!q)return;
+  G.qFocus={id:qid,lvl:LEVEL,loc:null};
   const sp=questSpots().find(z=>z.q===qid);
-  if(!sp){const ar=QAREA[qid]||'another place',here=(LEVELS[LEVEL]&&(LEVELS[LEVEL].label||LEVELS[LEVEL].name)||'').toLowerCase().includes(String(ar).toLowerCase());
-    G.qNote={t:G.time,text:QAREA[qid]==='The Narrow Sea'?`"${q.title}" takes you out onto the Narrow Sea. It is not on this map.`:here?`${q.who||'The one who set "'+q.title+'"'} cannot be shown on this map: they are indoors somewhere in ${ar}.`:`"${q.title}" is not on this map. It belongs to ${ar}.`};return}
-  G.qFocus={id:qid,lvl:LEVEL};G.menu=false;G.map=false;G.overview=true;G.world=false;G.teleMode=false;
-  const mz=clamp(LEVEL===44?1:12,mapFit(),34),[rw,rh]=mapRes();G.mz=mz;G.panX=(DW-rw)/2-((sp.x+.5)*mz+6);G.panY=(DH-rh)/2-((sp.y+.5)*mz+30);G.ovInit=true;G.ovLevel=LEVEL;
+  if(sp){ // on this level's own map: centred, with its place circled
+    G.menu=false;G.map=false;G.overview=true;G.world=false;G.teleMode=false;
+    const mz=clamp(LEVEL===44?1:12,mapFit(),34),[rw,rh]=mapRes();G.mz=mz;G.panX=(DW-rw)/2-((sp.x+.5)*mz+6);G.panY=(DH-rh)/2-((sp.y+.5)*mz+30);G.ovInit=true;G.ovLevel=LEVEL;return;
+  }
+  const loc=questWorldLoc(qid); // somewhere else: the map of the whole land, with that place circled
+  if(loc){
+    G.qFocus.loc=loc.k;G.menu=false;G.map=false;G.overview=true;G.world=true;G.teleMode=false;G.qNote=null;
+    const z=1.6;G.wv={z,x:clamp(-(loc.x-240)*z,-1000*z,260*z),y:clamp(-(loc.y-160)*z,-170*z,260*z)};G._wvT=G.time;return; // _wvT: the map was only just opened, so it is not re-centred on the party
+  }
+  G.qFocus=null;G.qNote={t:G.time,text:`"${q.title}" cannot be placed on a map yet.`};
 }
 // the quests that carry the story from place to place: Thornwick to Ironhill, over the pass, Khemetra, Yarrim and the Narrow Sea
 const MAIN_QUESTS=new Set(['gandrick','ironhill','mines','overseer','escape','pass','scoria','kh_c1','kh_c2','kh_c3','kh_c4','kh_c5','kh_c6','kh_c7','kh_seal','kh_sea','mq1','mq2','yar2','yar3','yar4','yar5','yar6','yar7','vq1','vq2','vq3','vq4','vq5','vq6']);
