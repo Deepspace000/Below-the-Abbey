@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.223';
+const VERSION='3.224';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -16224,7 +16224,7 @@ repWrap('oh_cap',()=>!!G.flags.heirCrowned&&!G.flags.heirReported,'About the hei
    Four quests: the Orrery, the way home, the four floors, the Hollow Abbot.
    ========================================================================== */
 const BELOW={IDS:[360,361,362,363],LAND:364,NAMES:['The Sealed Stair','The Drowned Cloister','The Ossuary of Brothers','The Hollow Abbey'],SIZE:[[31,23],[35,25],[39,27],[43,29]]};
-ITEMDEF.orrery={n:'The Orrery of Hours',k:'quest',t:'Quest item',ic:'herb',c:'#e8d070',stack:0,price:0,d:'Six small pieces of brass, glass and stone, fitted together by the king’s clockmaker. A ring of moving discs ticks slowly in your hand. It opens the sealed door under the Abbey.',sw:.4};
+ITEMDEF.orrery={n:'The Orrery of Hours',k:'quest',t:'Quest item',ic:'herb',c:'#e8d070',stack:0,price:0,d:'Six small pieces of brass, glass and stone, fitted together by the king’s clockmaker. An orrery is a clockwork model of the heavens, rings and little discs that turn the way the stars turn. A ring of moving discs ticks slowly in your hand. It opens the sealed door under the Abbey.',sw:.4};
 ENEMY_DEF.hollowabbot={name:'The Hollow Abbot',hp:2600,dmg:[26,42],hit:.86,w:.7,img:'skel',xp:12000,gold:[900,1400],speed:1,verb:'strikes',aboveParty:4};
 
 /* ---- the four levels: rooms and passages in the old crypt style ---- */
@@ -16315,7 +16315,7 @@ adq('ad2','Home to the Abbey','The Sealed Door','A royal cutter takes the party 
 adq('ad3','The Four Floors','Brother Sevrin','Behind the sealed door a stair goes down four floors. Reach the bottom, the Hollow Abbey, and speak to Brother Sevrin.',1,()=>G.flags.reachedBottom?1:0,{gold:2000,xp:20000});
 adq('ad4','The Hollow Abbot','Brother Sevrin','The Hollow Abbot sits at the bottom of the Hollow Abbey, and the stair onward is under his seat. Kill him.',1,q=>(G.flags.k_hollowabbot||0)-(q.base||0),{gold:8000,xp:80000},{cnt:'k_hollowabbot'});
 const ADD={
- ad1:khQD('The king has read Ishkander’s letter, and so have I. The six pieces you carry fit together into a device called the Orrery of Hours. It opens a sealed door beneath the Abbey where you started. Ishkander says the door must be opened by us, and not by Vance’s masters. I have a clockmaker who can fit it together right now. Bring me all six pieces.','Six pieces: the cog, the pin, the spring, the bell, the lens and the dial. Bring them all.',(g,n)=>`The pieces: you hold ${g} of ${n}.`,'All six pieces! Here, give them to the clockmaker. It will take a minute.','The clockmaker has fitted the Orrery. It ticks. It is yours. When you are ready, a royal cutter will take you home.','The Orrery is made.','Here are all six pieces.')
+ ad1:khQD('The king has read Ishkander’s letter, and so have I. The six pieces you carry fit together into a device called the Orrery of Hours. An orrery is a clockwork model of the heavens: rings and little discs that turn the way the stars turn. The old builders made the door to open only when such a model is set in its ring of hollows. It opens a sealed door beneath the Abbey where you started. Ishkander says the door must be opened by us, and not by Vance’s masters. I have a clockmaker who can fit it together right now. Bring me all six pieces.','Six pieces: the cog, the pin, the spring, the bell, the lens and the dial. Bring them all.',(g,n)=>`The pieces: you hold ${g} of ${n}.`,'All six pieces! Here, give them to the clockmaker. It will take a minute.','The clockmaker has fitted the Orrery. It ticks. It is yours. When you are ready, a royal cutter will take you home.','The Orrery is made.','Here are all six pieces.')
 };
 repWrap('oh_cap',()=>!!G.flags.heirReported&&qSt('ad1')!=='done','About Ishkander’s letter',()=>qNode('ad1',ADD.ad1));
 repWrap('oh_cap',()=>qSt('ad1')==='done'&&!G.flags.homeAbbey,'Take the royal cutter home',()=>say('A royal cutter, with a crew of eight and a good wind, will have you at the Thornwood in a day. The Abbey is a quiet place, and I do not know what waits under it. Are you ready?',[['Sail home.',()=>{G.flags.homeAbbey=1;msg('The royal cutter carries the party home to the Abbey.','#a8d8ff');goToLevel(1,{x:3,y:18,f:0});return null}],['Not yet.',()=>null]]));
@@ -16327,7 +16327,7 @@ repWrap('oh_cap',()=>qSt('ad1')==='done'&&!G.flags.homeAbbey,'Take the royal cut
 /* ---- the sealed door, Brother Sevrin and the plaque ---- */
 khNpc('ab_door','The Sealed Door','gate',()=>{
   const F=G.flags;
-  if(qSt('ad2')==='active'&&qReady('ad2')){const rw=rewardText('ad2');qTurnIn('ad2');return say('The door is a slab of black iron, with a ring of hollows in the middle. You have the Orrery. Reward: '+rw+'.',[['Hold up the Orrery.',()=>{F.sealedOpen=1;qAccept('ad3');msg('The Orrery ticks. The door grinds open.','#e8d070');return say('The discs turn and the door grinds into the wall. A stair runs down into the dark, and the air that comes up is cold.',[['Go down.',()=>{goToLevel(BELOW.IDS[0]);return null}],BYE])}],BYE])}
+  if(qSt('ad2')==='active'&&qReady('ad2')){const rw=rewardText('ad2');qTurnIn('ad2');return say('The door is a slab of black iron, with a ring of hollows in the middle, set out like the rings of an orrery. You have the Orrery. Reward: '+rw+'.',[['Hold up the Orrery.',()=>{F.sealedOpen=1;qAccept('ad3');msg('The Orrery ticks. The door grinds open.','#e8d070');return say('The discs turn and the door grinds into the wall. A stair runs down into the dark, and the air that comes up is cold.',[['Go down.',()=>{goToLevel(BELOW.IDS[0]);return null}],BYE])}],BYE])}
   if(!F.sealedOpen)return say('A slab of black iron with a ring of hollows in the middle. It needs the Orrery of Hours.',[BYE]);
   return say('The stair runs down into the dark.',[['Go down.',()=>{goToLevel(BELOW.IDS[0]);return null}],BYE]);
 },{q:'ad2'});
@@ -17472,14 +17472,15 @@ function hlDress(c){
   cap=999;
   const secretSlots=[];
   // secret rooms: a small chamber with a chest behind a wall. One wall in a hall is the wrong colour and has a lever on it; one bookshelf has a red book that swings it aside.
+  const letterId={4:0,9:1,14:2}[k]===undefined?-1:{4:0,9:1,14:2}[k];let letterDone=false; // Vance's letters wait in the secret rooms of levels 5, 10 and 15
   const chamberAt=(x,y,wd)=>{const px=-wd[1],py=wd[0];
     for(let t=1;t<=5;t++)for(let sd=-2;sd<=2;sd++){const cx=x+wd[0]*t+px*sd,cy=y+wd[1]*t+py*sd;if(cx<1||cy<1||cx>=W-1||cy>=H-1||!isW(cx,cy)||used.has(key(cx,cy)))return null}
     const setC=(cx,cy,ch)=>{rows[cy]=rows[cy].slice(0,cx)+ch+rows[cy].slice(cx+1)};
     for(let t=2;t<=4;t++)for(let sd=-1;sd<=1;sd++){const cx=x+wd[0]*t+px*sd,cy=y+wd[1]*t+py*sd;setC(cx,cy,'.');used.add(key(cx,cy))}
     const dx=x+wd[0],dy=y+wd[1];setC(dx,dy,secretCh);used.add(key(dx,dy));
     const bx=x+wd[0]*4,by=y+wd[1]*4;
-    decor.push({k:'chest',x:bx,y:by,block:true,magic:1,secret:true});flr('hl_p_candle',x+wd[0]*3+px,y+wd[1]*3+py);flr('hl_p_candle',x+wd[0]*3-px,y+wd[1]*3-py);
-    pic('hl_p_note',bx+px,by+py,[wd[0],wd[1]],{npc:'hl_note16',bob:.6});if(items)items.push({k:'potion',x:x+wd[0]*3,y:y+wd[1]*3});
+    decor.push({k:'chest',x:bx,y:by,block:true,magic:1,secret:true});decor.push({k:'hl_p_candle',x:x+wd[0]*3+px,y:y+wd[1]*3+py,block:false,walk:true,deco:true},{k:'hl_p_candle',x:x+wd[0]*3-px,y:y+wd[1]*3-py,block:false,walk:true,deco:true});
+    decor.push({k:'hl_p_note',x:bx+px,y:by+py,wd:[wd[0],wd[1]],pic:1,block:false,walk:true,deco:true,npc:(letterId>=0&&!letterDone)?'hl_vance'+letterId:'hl_note16',bob:.6});if(letterId>=0)letterDone=true;if(items)items.push({k:'potion',x:x+wd[0]*3,y:y+wd[1]*3});
     secretSlots.push([bx-px,by-py,[wd[0],wd[1]]]);return {dx,dy};
   };
   {let made=0;const want=1+(k%3===0?1:0)+(k>=HL.N-4?1:0);
@@ -17491,6 +17492,7 @@ function hlDress(c){
    for(const r of shuf(rooms.filter(q=>q!==myst&&q.x1-q.x0>=2),91)){if(sh>=wantSh)break;
      for(const [x,y,wd] of slots(r)){const ch=chamberAt(x,y,wd);if(!ch)continue;
        decor.push({k:'hl_p_shelf',x,y,block:false,walk:true,deco:true,npc:'hl_shelfdoor',opens:[[ch.dx,ch.dy]],idx:100+sh});used.add(key(x,y));sh++;break}}}
+  if(letterId>=0&&!letterDone){const lr=far||rooms[rooms.length-1];for(const [x,y,wd] of slots(lr)){if(pic('hl_p_note',x,y,wd,{npc:'hl_vance'+letterId,bob:.6})){letterDone=true;break}}}
   // the Messenger of Death waits on the last four floors. His five letters are written where the main way never passes: two in secret chambers, the rest in side rooms and dead ends out of sight of the route to the stair
   if(k>=HL.N-4&&up){
     const los=(x0,y0,x1,y1)=>{const n=Math.max(Math.abs(x1-x0),Math.abs(y1-y0));for(let i=1;i<n;i++){const x=Math.round(x0+(x1-x0)*i/n),y=Math.round(y0+(y1-y0)*i/n);if(!isF(x,y))return false}return true};
@@ -17886,6 +17888,32 @@ function hlScramble(name,seed){
     let out='',k=0;for(const ch of name){out+=ch===' '?' ':a[k++]}
     out=out.toLowerCase().replace(/(^|\s)(\S)/g,(m,sp,c)=>sp+c.toUpperCase());if(out!==name)return out}
   return name.split('').reverse().join('')}
+
+/* ==========================================================================
+   THE HOLLOW COURT. Who Vance's masters were. After the Hollow Abbot, Brother Sevrin asks the party to find three letters Vance wrote to the
+   dead court, hidden in the secret rooms of the Orange Tower (levels 5, 10, 15). Then the party climbs to the wizard in the spire, who tells
+   the truth: the court of the Hollow Land, ruled by the Pale Sovereign, bought Corvane and Vance with silver, and the party opened the door itself.
+   ========================================================================== */
+const HL_VANCE=[
+ 'A folded letter, signed only with a V. "My lord. The silver from the Narrow Sea tolls comes up each quarter on Corvane’s ships. Corvane thinks it buys him a crown. He does not know whose servant he has become. Send me more men like him."',
+ 'A folded letter, signed V. "My lord. The chancellor’s seal is mine. The king signs what I set before him and sees nothing. I have hidden six pieces of the key in six hands across the Eastern Lands, so that only your servants will find them and open the door."',
+ 'A folded letter, signed V. "My lord. The Abbot grows old and the seal grows thin. When the door opens, send the court’s riders east. I will have the king’s guard sent to the sea gates. Be patient a little longer."'];
+HL_VANCE.forEach((t,i)=>khNpc('hl_vance'+i,'A hidden letter','hl_p_note',()=>{const F=HLF();F.hcLet=F.hcLet||{};const first=!F.hcLet[i];F.hcLet[i]=1;if(first)msg('You read the letter, and keep it.','#e8d070');return say(t,[['Put it away.',()=>null]])}));
+QUESTS.hc1={title:'Vance’s Letters',who:'Brother Sevrin',desc:'Brother Sevrin says Vance wrote letters to someone in the Hollow Land. Three of them are hidden in secret rooms of the Orange Tower, on levels 5, 10 and 15: look for the wall of the wrong colour with a wooden lever, and the bookshelf with a red book. Read all three.',need:3,goal:()=>{const c=(G.flags.hl&&G.flags.hl.hcLet)||{};return (c[0]?1:0)+(c[1]?1:0)+(c[2]?1:0)},reward:{gold:6000,xp:60000}};
+QUESTS.hc2={title:'The Question at the Top',who:'The Wizard at the top of the tower',desc:'Climb the Orange Tower, twenty levels, to the wizard in the spire, and answer his three questions with good will. He knows who Vance served.',need:1,goal:()=>(G.flags.hl&&G.flags.hl.towerOpen)?1:0,reward:{gold:12000,xp:120000}};
+QAREA.hc1=QAREA.hc2='Below the Abbey';
+{const R=NPCS.ab_sevrin.root,nr=d=>{
+  if(qSt('ad4')==='done'&&qSt('hc1')===null)return say('The Abbot kept a lid on something, I think, and now the lid is off. Long ago a court of dead rulers was shut away under the Abbey, in the Hollow Land below. Vance was never the master of Corvane’s silver. Someone below was. Vance must have written to them. Three of his letters lie hidden in the secret rooms of the tower the court built. Will you find them?',[['We will find the letters.',()=>{qAccept('hc1');return say('Look on levels 5, 10 and 15. The rooms are hidden: a wall of the wrong colour with a lever on it, or a bookshelf with one red book out of line. Come back when you have read all three.',[BYE])}],['Not now.',()=>null]]);
+  if(qSt('hc1')==='active'){if(qReady('hc1')){const rw=rewardText('hc1');qTurnIn('hc1');qAccept('hc2');return say('So the silver went up to the court, and Vance spent it to open the door from outside. You opened it yourselves instead. That is why it is still a stair and not a flood. Reward: '+rw+'. One more thing. At the top of the tower there is a wizard who knows the rest. Answer his questions with good will.',[BYE])}
+    return say('Three letters. Levels 5, 10 and 15 of the tower, in the hidden rooms.',[BYE])}
+  if(qSt('hc2')==='active')return say('Go up to the wizard in the spire, and answer him with good will.',[BYE]);
+  return R(d)};
+  NPCS.ab_sevrin.root=nr;KH_KEEPERS.ab_sevrin.root=nr;QGIVER.ab_sevrin=['ad3','ad4','hc1']}
+{const R=NPCS.hl_wizard.root,nr=d=>{const F=HLF();
+  if(qSt('hc2')==='active'&&F.towerOpen&&qReady('hc2')){const rw=rewardText('hc2');qTurnIn('hc2');F.hcRevealed=1;
+    return say('You answered with good will, so I will tell you the truth. I am the wizard who shut the court of the Hollow Land under the Abbey, long ago. They were ruled by the first king, whom they call the Pale Sovereign. He wanted to rule past his own death, and the others followed him. I made seven locks, and the Abbey kept the last. Vance was the Sovereign’s hand above, and Corvane was Vance’s tool. The silver bought the pieces of the key. You opened the door yourselves, and that is the only reason the court is not loose in the Eastern Lands tonight. The Sovereign waits in the Violet Tower. Reward: '+rw+'.',[BYE])}
+  return R(d)};
+  NPCS.hl_wizard.root=nr;KH_KEEPERS.hl_wizard.root=nr;QGIVER.hl_wizard='hc2'}
 
 /* ---- src/desert/seasound.js ---- */
 /* ==========================================================================
@@ -18959,7 +18987,7 @@ STORY.push(
   {id:'ohoak',c:()=>G.flags.oak&&G.flags.oak.metHale,t:'The Oakwood',x:'Beyond the east gate lies an old oak forest with six glades. The woodwardens keep it, under Hale. The Oakwrights plant an oak for every one they cut, under Master Joss. A hedge-wizard called Bramwick lives in the middle glade, and a keeper called Ysolt tends the Great Oak in the south-east. The party killed wolves, gathered acorns and herbs, cleared an Ash Guard camp in the north-east glade and roofed the Oakwrights’ hall.'},
   {id:'ohheir',c:()=>G.flags.oak&&G.flags.oak.heir,t:'The Heir',x:'A young woodwarden named Wren told the party she was King Osric’s granddaughter, raised in the Oakwood because the chancellor could not be trusted. She had a ring with the oak sign of the royal house, and she did not want it. The city was in trouble, and the king was old, so she said she would do what was needed.'},
   {id:'ohcrown',c:()=>G.flags.heirCrowned,t:'The Oak Crown',x:'At the Great Oak, Ysolt asked three questions: whether to share a loaf with a hungry stranger, how to treat a friend who breaks a rule to protect you, and whether to win by a lie that harms no one you know. The party answered honestly. Wren was crowned with a ring of living oak leaves that does not wilt. Captain Aldwyn was told, and the king would have his granddaughter.'},
-  {id:'ohorrery',c:()=>G.flags.deviceBuilt,t:'The Orrery of Hours',x:'With Wren crowned, Captain Aldwyn read Ishkander’s sealed letter aloud. The six pieces fit together into the Orrery of Hours, which opens a sealed door under the Abbey crypts, where the journey began. The king’s clockmaker fitted the pieces while the party waited. A royal cutter was offered to take the party home.'},
+  {id:'ohorrery',c:()=>G.flags.deviceBuilt,t:'The Orrery of Hours',x:'With Wren crowned, Captain Aldwyn read Ishkander’s sealed letter aloud. The six pieces fit together into the Orrery of Hours, a clockwork model of the heavens, which opens a sealed door under the Abbey crypts, where the journey began. The king’s clockmaker fitted the pieces while the party waited. A royal cutter was offered to take the party home.'},
   {id:'ohdoor',c:()=>G.flags.sealedOpen,t:'The Sealed Door',x:'The party sailed home to the Thornwood and went down into the crypts below the Abbey, to the old stair where the journey began. Near it stood a slab of black iron with a ring of hollows in the middle. The Orrery ticked, the discs turned, and the door ground into the wall. A stair went down into the dark.'},
   {id:'ohhollow',c:()=>G.flags.reachedBottom,t:'The Four Floors',x:'Four floors lay below the Abbey: the Sealed Stair, the Drowned Cloister, the Ossuary of Brothers and the Hollow Abbey. At the bottom stood Brother Sevrin, the Abbey’s last gardener, who had come down to hide. He told the party that the Hollow Abbot sat in the great room ahead, and that the stair onward was under his seat.'},
   {id:'landpath',c:()=>G.flags.lpSeen,t:'The Land Path',x:'A second gate in the north wall of Oldhaven opens on the Land Path, a quiet road of ninety-six kilometres that runs north up the peninsula with the sea on one side and an old oak forest on the other, turns west across the mountains and comes south to a high cliff above Yarrim. Nothing happens on it. There are flowers on both sides, lamps now and then, wooden signposts that count the kilometres to Yarrim, and now and then a house, an inn or a church with a graveyard. Knights of the Crown ride up and down it twice a day. It goes one way: from Oldhaven to Yarrim.'},
@@ -18975,9 +19003,17 @@ STORY.push(
   {id:'towerwizard',c:()=>(G.flags.hlTop||0)>=20,t:'The Wizard at the Top',x:'At the top of the Orange Tower, in the spire, a wizard waits with three questions. Good will opens the way to the next tower. Greed opens the floor, and the party falls two levels.'},
   {id:'violettower',c:()=>G.flags.hlViolet,t:'The Violet Tower',x:'All three answers were given with good will. A door opened in the spire, and a stair led across to a second tower, violet this time, the first of the towers beyond. The road goes on from here, in the next part of the game.'}
 );
+STORY.push(
+  {id:'hollowcourt',c:()=>qSt('hc1')!==null,t:'The Hollow Court',x:'Brother Sevrin told the party what the Hollow Abbot was guarding. Long ago a court of dead rulers was shut under the Abbey, and the Abbey kept the door. Vance, the chancellor, was never the master of Corvane’s silver. He answered to someone in the Hollow Land, and he spent the silver to open the door from outside.'},
+  {id:'vanceletters',c:()=>qSt('hc1')==='done',t:'Vance’s Letters',x:'In the hidden rooms of the Orange Tower the party found three letters from Vance to his lord. Corvane’s silver went up to the Hollow Land every quarter. Vance used the king’s seal and the king saw nothing. He hid six pieces of the key in six hands, so that only the court’s servants would open the door, and he asked the court to send its riders east when it opened.'},
+  {id:'wizardreveal',c:()=>qSt('hc2')==='done',t:'The Wizard’s Answer',x:'At the top of the Orange Tower the wizard told the party the truth. He shut the court of the Hollow Land under the Abbey long ago, ruled by the first king, whom they call the Pale Sovereign, who wanted to rule past his own death. Vance was the Sovereign’s hand above, Corvane was Vance’s tool, and the silver bought the pieces of the key. The party opened the door themselves, and that is the only reason the court is not loose in the Eastern Lands. The Sovereign waits in the Violet Tower.'});
 function storyNext(){ // what to do next, from the chapter the party has reached
   const F=G.flags;
   if(F.hlViolet)return 'The way to the Violet Tower is open. The road goes on in the next part of the game.';
+  if(qSt('hc2')==='done')return 'You know who Vance served: the Pale Sovereign, in the Violet Tower. The road goes on in the next part of the game.';
+  if(qSt('hc2')==='active')return 'Climb the Orange Tower, twenty levels, to the wizard in the spire. Answer with good will, and he will tell you who Vance served.';
+  if(qSt('hc1')==='active')return 'Find the three letters Vance wrote to the Hollow Court, hidden in secret rooms of the Orange Tower on levels 5, 10 and 15.';
+  if(qSt('ad4')==='done'&&qSt('hc1')===null)return 'Speak to Brother Sevrin again, in the Hollow Abbey.';
   if((F.hlTop||0)>=1)return 'Climb the Orange Tower, twenty levels, to the wizard in the spire. Answer with good will.';
   if(F.hlSeen)return 'Walk down the long stair to the castle gate in the Hollow Land.';
   if(LEVEL>=400&&LEVEL<424)return 'You are on the Land Path. Walk north, then west across the mountains, then south. The signs count the kilometres to Yarrim.';

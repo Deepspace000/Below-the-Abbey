@@ -386,14 +386,15 @@ function hlDress(c){
   cap=999;
   const secretSlots=[];
   // secret rooms: a small chamber with a chest behind a wall. One wall in a hall is the wrong colour and has a lever on it; one bookshelf has a red book that swings it aside.
+  const letterId={4:0,9:1,14:2}[k]===undefined?-1:{4:0,9:1,14:2}[k];let letterDone=false; // Vance's letters wait in the secret rooms of levels 5, 10 and 15
   const chamberAt=(x,y,wd)=>{const px=-wd[1],py=wd[0];
     for(let t=1;t<=5;t++)for(let sd=-2;sd<=2;sd++){const cx=x+wd[0]*t+px*sd,cy=y+wd[1]*t+py*sd;if(cx<1||cy<1||cx>=W-1||cy>=H-1||!isW(cx,cy)||used.has(key(cx,cy)))return null}
     const setC=(cx,cy,ch)=>{rows[cy]=rows[cy].slice(0,cx)+ch+rows[cy].slice(cx+1)};
     for(let t=2;t<=4;t++)for(let sd=-1;sd<=1;sd++){const cx=x+wd[0]*t+px*sd,cy=y+wd[1]*t+py*sd;setC(cx,cy,'.');used.add(key(cx,cy))}
     const dx=x+wd[0],dy=y+wd[1];setC(dx,dy,secretCh);used.add(key(dx,dy));
     const bx=x+wd[0]*4,by=y+wd[1]*4;
-    decor.push({k:'chest',x:bx,y:by,block:true,magic:1,secret:true});flr('hl_p_candle',x+wd[0]*3+px,y+wd[1]*3+py);flr('hl_p_candle',x+wd[0]*3-px,y+wd[1]*3-py);
-    pic('hl_p_note',bx+px,by+py,[wd[0],wd[1]],{npc:'hl_note16',bob:.6});if(items)items.push({k:'potion',x:x+wd[0]*3,y:y+wd[1]*3});
+    decor.push({k:'chest',x:bx,y:by,block:true,magic:1,secret:true});decor.push({k:'hl_p_candle',x:x+wd[0]*3+px,y:y+wd[1]*3+py,block:false,walk:true,deco:true},{k:'hl_p_candle',x:x+wd[0]*3-px,y:y+wd[1]*3-py,block:false,walk:true,deco:true});
+    decor.push({k:'hl_p_note',x:bx+px,y:by+py,wd:[wd[0],wd[1]],pic:1,block:false,walk:true,deco:true,npc:(letterId>=0&&!letterDone)?'hl_vance'+letterId:'hl_note16',bob:.6});if(letterId>=0)letterDone=true;if(items)items.push({k:'potion',x:x+wd[0]*3,y:y+wd[1]*3});
     secretSlots.push([bx-px,by-py,[wd[0],wd[1]]]);return {dx,dy};
   };
   {let made=0;const want=1+(k%3===0?1:0)+(k>=HL.N-4?1:0);
@@ -405,6 +406,7 @@ function hlDress(c){
    for(const r of shuf(rooms.filter(q=>q!==myst&&q.x1-q.x0>=2),91)){if(sh>=wantSh)break;
      for(const [x,y,wd] of slots(r)){const ch=chamberAt(x,y,wd);if(!ch)continue;
        decor.push({k:'hl_p_shelf',x,y,block:false,walk:true,deco:true,npc:'hl_shelfdoor',opens:[[ch.dx,ch.dy]],idx:100+sh});used.add(key(x,y));sh++;break}}}
+  if(letterId>=0&&!letterDone){const lr=far||rooms[rooms.length-1];for(const [x,y,wd] of slots(lr)){if(pic('hl_p_note',x,y,wd,{npc:'hl_vance'+letterId,bob:.6})){letterDone=true;break}}}
   // the Messenger of Death waits on the last four floors. His five letters are written where the main way never passes: two in secret chambers, the rest in side rooms and dead ends out of sight of the route to the stair
   if(k>=HL.N-4&&up){
     const los=(x0,y0,x1,y1)=>{const n=Math.max(Math.abs(x1-x0),Math.abs(y1-y0));for(let i=1;i<n;i++){const x=Math.round(x0+(x1-x0)*i/n),y=Math.round(y0+(y1-y0)*i/n);if(!isF(x,y))return false}return true};
