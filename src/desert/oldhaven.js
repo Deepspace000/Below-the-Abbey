@@ -243,6 +243,7 @@ function ohPickType(h,rich,w){
 }
 function ohBuild(){
   if(LEVELS[OH.ID])return;
+  if(typeof KH_READY!=='undefined'&&!KH_READY)return; // wait for the pictures (see quayBuild)
   ohAlias();ohArt();ohFloors();ohStyles();
   const W=OH.W,H=OH.H,N=W*H,hs=(a,b,c)=>hash2(a,b,c);
   const TM=ohTiles(),chars={D:LEVEL41_DATA.chars.D},chMap=new Map();let nextCh=0x300;

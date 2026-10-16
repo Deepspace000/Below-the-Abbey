@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.174';
+const VERSION='3.175';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4061,6 +4061,7 @@ function gotoList(){
   return out;
 }
 function jumpToLevel(n,target){
+  if(((n>=304&&n<=312)||(n>=6000&&n<7000))&&typeof KH_READY!=='undefined'&&!KH_READY){khLoadAssets().then(()=>jumpToLevel(n,target));return} // Oldhaven needs its pictures before it is built
   if((n===44||(n>=199&&n<=274))&&LEVELS[44].stub){khEnter(()=>jumpToLevel(n,target));return}
   if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();
   audioInit();backupAuto();
@@ -4893,7 +4894,9 @@ function respawnForest(){
 }
 // carry the party, bag, gold and quests into the next level
 function goToLevel(n,entry){
-  if(n===43||n===62||n===13||(n>=271&&n<=280)||(n>=289&&n<=312)||n>=40000)khLoadAssets(); // the city's pictures arrive in the background while the party walks to its gate
+  // Oldhaven is painted with the city's pictures: never build it before they have loaded, or its soldiers come out as peasants and its walls as flat colour
+  if(((n>=304&&n<=312)||(n>=6000&&n<7000))&&typeof KH_READY!=='undefined'&&!KH_READY&&!G._khWait){G._khWait=1;try{msg('The harbour comes into view...','#a8d8ff')}catch(e){}khLoadAssets().then(()=>{G._khWait=0;goToLevel(n,entry)}).catch(()=>{G._khWait=0});return}
+  if(n===43||n===62||n===13||(n>=271&&n<=280)||(n>=289&&n<=399)||n>=40000)khLoadAssets(); // the city's pictures arrive in the background while the party walks to its gate
   G.lst[LEVEL]=levelState();
   const keep={heroes:G.heroes,bag:G.bag,gold:G.gold,keys:G.keys,rounds:G.rounds,kills:G.kills,sel:G.sel,bossDead:G.bossDead,flags:G.flags,quests:G.quests,lst:G.lst,clock:G.clock,starveT:G.starveT,aff:G.aff};
   reset(n);Object.assign(G,keep);
@@ -14986,6 +14989,7 @@ function ohPickType(h,rich,w){
 }
 function ohBuild(){
   if(LEVELS[OH.ID])return;
+  if(typeof KH_READY!=='undefined'&&!KH_READY)return; // wait for the pictures (see quayBuild)
   ohAlias();ohArt();ohFloors();ohStyles();
   const W=OH.W,H=OH.H,N=W*H,hs=(a,b,c)=>hash2(a,b,c);
   const TM=ohTiles(),chars={D:LEVEL41_DATA.chars.D},chMap=new Map();let nextCh=0x300;
@@ -15629,6 +15633,7 @@ const OQ_PIERS=[[10,12,54],[22,24,58],[39,41,62],[55,57,56],[68,70,50]]; // x0, 
 let OQ_DOGS=[];
 function quayBuild(){
   if(LEVELS[OQ.ID])return;
+  if(typeof KH_READY!=='undefined'&&!KH_READY)return; // the pictures are not loaded yet: building now would turn the soldiers into peasants (goToLevel waits for them and builds then)
   ohAlias();oqAlias();isleFloors();oqFloor();
   const W=OQ.W,H=OQ.H,N=W*H,hs=(a,b,c)=>hash2(a,b,c);
   const TM=ohTiles(),chars={D:LEVEL41_DATA.chars.D},chMap=new Map();let nextCh=0x300;

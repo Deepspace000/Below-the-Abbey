@@ -60,6 +60,7 @@ const OQ_PIERS=[[10,12,54],[22,24,58],[39,41,62],[55,57,56],[68,70,50]]; // x0, 
 let OQ_DOGS=[];
 function quayBuild(){
   if(LEVELS[OQ.ID])return;
+  if(typeof KH_READY!=='undefined'&&!KH_READY)return; // the pictures are not loaded yet: building now would turn the soldiers into peasants (goToLevel waits for them and builds then)
   ohAlias();oqAlias();isleFloors();oqFloor();
   const W=OQ.W,H=OQ.H,N=W*H,hs=(a,b,c)=>hash2(a,b,c);
   const TM=ohTiles(),chars={D:LEVEL41_DATA.chars.D},chMap=new Map();let nextCh=0x300;
