@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.169';
+const VERSION='3.170';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3887,8 +3887,8 @@ function makeCart(){
   wornSprite(IMG.cart,59,1.6);
 }
 
-function getScroll(d){if(d==='goto')return G.gs||0;if(d==='quest')return G.qs||0;if(d==='aff')return G.afs||0;if(d==='rum')return G.rs||0;if(d==='map')return{x:G.panX||0,y:G.panY||0};if(d==='lbag')return G.loot?G.loot.sl:0;if(d==='lbox')return G.loot?G.loot.sr:0;return G.inv.scroll}
-function setScroll(d,v){if(d==='goto'){G.gs=clamp(v,0,gotoMax());return}if(d==='quest'){G.qs=clamp(v,0,G.qMax||0);return}if(d==='aff'){G.afs=clamp(v,0,G.afMax||0);return}if(d==='rum'){G.rs=Math.max(0,v);return}if(d==='map'){return}if(d==='lbag'&&G.loot)G.loot.sl=clamp(v,0,maxScroll());else if(d==='lbox'&&G.loot)G.loot.sr=clamp(v,0,lootMaxScroll(Math.max(9,G.loot.decor.contents.length)));else G.inv.scroll=clamp(v,0,maxScroll())}
+function getScroll(d){if(d==='goto')return G.gs||0;if(d==='quest')return G.qs||0;if(d==='stats')return G.sts||0;if(d==='stats2')return G.sts2||0;if(d==='aff')return G.afs||0;if(d==='rum')return G.rs||0;if(d==='map')return{x:G.panX||0,y:G.panY||0};if(d==='lbag')return G.loot?G.loot.sl:0;if(d==='lbox')return G.loot?G.loot.sr:0;return G.inv.scroll}
+function setScroll(d,v){if(d==='goto'){G.gs=clamp(v,0,gotoMax());return}if(d==='quest'){G.qs=clamp(v,0,G.qMax||0);return}if(d==='stats'){G.sts=clamp(v,0,G.stMax||0);return}if(d==='stats2'){G.sts2=clamp(v,0,G.stMax2||0);return}if(d==='aff'){G.afs=clamp(v,0,G.afMax||0);return}if(d==='rum'){G.rs=Math.max(0,v);return}if(d==='map'){return}if(d==='lbag'&&G.loot)G.loot.sl=clamp(v,0,maxScroll());else if(d==='lbox'&&G.loot)G.loot.sr=clamp(v,0,lootMaxScroll(Math.max(9,G.loot.decor.contents.length)));else G.inv.scroll=clamp(v,0,maxScroll())}
 /* ==========================================================================
    SAVE / LOAD  (autosave + three manual slots, a backup of the previous run)
    ========================================================================== */
@@ -6186,7 +6186,7 @@ function drawQuestLog(){
     rows.push({t:'head',a,y});y+=17;
     for(const id of ids){const q=QUESTS[id],lines=wrapText(q.desc,340,8.5).slice(0,2);rows.push({t:'q',id,lines,y});y+=14+lines.length*11+8}
     y+=6}
-  const rowBtns=[],top=44,viewH=232,total=y;G.qMax=Math.max(0,total-viewH);G.qs=clamp(G.qs||0,0,G.qMax);
+  const rowBtns=[],hintBtns=[],top=44,viewH=232,total=y;G.qMax=Math.max(0,total-viewH);G.qs=clamp(G.qs||0,0,G.qMax);
   ctx.save();ctx.beginPath();ctx.rect(46,top,388,viewH);ctx.clip();
   if(!rows.length){txt('No quests yet.',240,130,10,'#a89878','center');txt('Talk to the people of Thornwick.',240,146,9,'#a89878','center')}
   for(const r of rows){
@@ -6200,12 +6200,15 @@ function drawQuestLog(){
     txt(done?'Done':rd?'Ready: see '+q.who:`${qGoal(r.id)} of ${q.need}`,424,ry+8,9,done?'#8a9a78':rd?'#9ae0a0':'#c8b898','right',true);
     r.lines.forEach((l,k)=>txt(l,62,ry+19+k*11,8.5,done?'#6a7a60':'#b8aa88','left'));
     const rh=14+r.lines.length*11+4,vy=Math.max(ry-2,top),vh=Math.min(ry-2+rh,top+viewH)-vy;if(vh>6)rowBtns.push({id:'qrow_'+r.id,x:46,y:vy,w:388,h:vh,up:true,drag:'quest'});
+    if(typeof questHasHint==='function'&&questHasHint(r.id)){const hy=ry+rh-17;if(hy>top&&hy+12<top+viewH){panel(394,hy,38,12,false,false);txt('Hint',413,hy+6.5,7.5,'#9ac8ff','center',true);hintBtns.push({id:'qhint_'+r.id,x:394,y:hy,w:38,h:12,up:true,drag:'quest'})}}
   }
   ctx.restore();
   if(G.qMax>0){const th=viewH-4,bh=Math.max(20,th*viewH/total),by=top+2+(th-bh)*(G.qs/G.qMax);ctx.fillStyle='rgba(216,200,142,.12)';ctx.fillRect(436,top+2,3,th);ctx.fillStyle='rgba(216,200,142,.6)';ctx.fillRect(436,by,3,bh)}
   btn('qclose',0,0,0,0);BTNS.pop();
   BTNS.push({id:'qarea',x:46,y:top,w:388,h:viewH,up:true,drag:'quest'});
   for(const b of rowBtns)BTNS.push(b);
+  for(const b of hintBtns)BTNS.push(b);
+  if(G.qHint&&QUESTS[G.qHint.id]&&typeof questHint==='function'){const ht=questHint(G.qHint.id),ls=wrapText(ht,360,8).slice(0,5),bh=ls.length*10+24;ctx.save();rrect(ctx,48,274-bh,384,bh,6);ctx.fillStyle='rgba(12,20,34,.97)';ctx.fill();ctx.lineWidth=1.4;ctx.strokeStyle='#6aa0d8';ctx.stroke();ctx.restore();txt('HINT: '+QUESTS[G.qHint.id].title,58,274-bh+9,8.5,'#9ac8ff','left',true,undefined,360);ls.forEach((l,i)=>txt(l,58,274-bh+21+i*10,8,'#d8e4f0','left'));BTNS.push({id:'qhintx',x:48,y:274-bh,w:384,h:bh})}
   txt('Tap a quest to circle where it is on the map.',240,38,7.5,'#a89878','center');
   if(G.qNote&&G.time-G.qNote.t<5)txt(G.qNote.text,240,268,8.5,'#e8a070','center',true,undefined,380);
   btnText('qexit','Close',190,276,100,24);
@@ -6717,6 +6720,7 @@ function drawAch(){
 }
 function drawMenu(){
   if(G.menu==='quests'){drawQuestLog();return}
+  if(G.menu==='stats'){drawStats();return}
   if(G.menu==='ach'){drawAch();return}
   if(G.menu==='wander'){drawWanderers();return}
   if(G.menu==='gameplay'){drawGameplay();return}
@@ -6735,11 +6739,11 @@ function drawMenu(){
   btnText('mute','Sound',100,126,130,24);btnText('gfx','Graphics',250,126,130,24);
   btnText('savemenu','Save / Load',100,153,130,24);btnText('overview','Level layout',250,153,130,24);
   btnText('newparty','New party',100,180,130,24);btnText('restart','Restart game',250,180,130,24);
-  btnText('quittitle','Quit to title',100,207,130,22);btnText('wander','Wandering Monsters',250,207,130,22);btnText('gameplay','Gameplay',170,234,140,24);
+  btnText('quittitle','Quit to title',100,207,130,22);btnText('wander','Wandering Monsters',250,207,130,22);btnText('gameplay','Gameplay',100,234,130,24);btnText('stats','Stats',250,234,130,24);
   const L=['W / S: forward and back   A / D: step sideways   Q / E: turn   (arrow keys work too)','Space: attack   X: special   P: potion   Z: wait   R: rest','1-4: choose hero   I: inventory   J: quests   M: map   Esc: menu',
     'Tap a portrait to open that hero\'s inventory.','Tap people, goats, torches and items in the view.','You can also walk into a person to talk to them.','Heroes act once per round, then the monsters move.'];
-  txt('Version '+VERSION,240,236,8,'#b8a880','center'); // just under the buttons
-  L.forEach((s,i)=>txt(s,240,248+i*9,7.8,'#d8c9a0','center'));
+  txt('Version '+VERSION,376,24,7.5,'#b8a880','right');
+  L.forEach((s,i)=>txt(s,240,266+i*7.6,7.2,'#d8c9a0','center'));
   btn('menuclose',0,0,DW,DH); BTNS.unshift(BTNS.pop());
 }
 function drawFullMap(){
@@ -6781,6 +6785,7 @@ function heldMoveId(){
 function update(dt){
   if(!G.overview){if(G.ovInit&&G.ovLevel===LEVEL&&G.mz)(G.ovSaved=G.ovSaved||{})[LEVEL]={mz:G.mz,panX:G.panX,panY:G.panY};G.ovInit=false}
   if(G.state==='play'&&G.quests&&G.quests.yar2&&G.quests.yar2.st==='done'&&!G.quests.yar3&&QUESTS.yar3){try{qAccept('yar3');msg('The Sea Gate is open. New quest: Salt and Bones. The gate is marked on the map of Khemetra.','#ffe36a')}catch(e){console.error(e)}} // games saved after the key was handed in, before the next quest began by itself
+  try{statTick(dt)}catch(e){console.error(e)}
   try{areaAudio();huntTick()}catch(e){}
   burnTick(dt);
   if(LEVEL===44&&G.state==='play')try{khWalkTick(dt)}catch(e){}
@@ -6947,7 +6952,10 @@ function handleBtn(id){
   if(G.inv.open){invBtn(id);return}
   if(G.map){if(id==='mapclose'||id==='map')G.map=false;return}
   if(/^afhud_/.test(id)){G.menu='aff';G.affSel=id.slice(6);G.afs=0;return}
+  if(G.menu==='stats'){statsBtn(id);return}
   if(G.menu==='quests'){
+    if(id==='qhintx'){G.qHint=null;return}
+    if(/^qhint_/.test(id)){const qid=id.slice(6);G.qHint={id:qid};const S=ST();S.hints++;S.hintQ[qid]=(S.hintQ[qid]||0)+1;return}
     if(id==='qexit')G.menu=false;
     else if(/^qrow_/.test(id))questShow(id.slice(5));
     return}
@@ -6978,6 +6986,7 @@ function handleBtn(id){
     else if(id==='mute'){G.menu='snd'}
     else if(id==='wander'){G.menu='wander';G.wsel=0}
     else if(id==='gameplay'){G.menu='gameplay'}
+    else if(id==='stats'){G.menu='stats';G.sts=0;G.sts2=0}
     else if(id==='gfx'){G.menu='gfx'}
     else if(id==='savemenu'){openSaves('menu')}
     else if(id==='overview'){G.menu=false;G.overview=true}
@@ -7111,6 +7120,7 @@ cv.addEventListener('wheel',e=>{
   if(G.state==='goto'){G.gs=clamp((G.gs||0)+e.deltaY*.5,0,gotoMax());e.preventDefault();return}
   if(G.loot){const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*DW,d=x<156?'lbag':'lbox';setScroll(d,getScroll(d)+e.deltaY*.5);e.preventDefault();return}
   if(G.menu==='quests'){G.qs=clamp((G.qs||0)+e.deltaY*.5,0,G.qMax||0);e.preventDefault();return}
+  if(G.menu==='stats'){if(e.clientX<window.innerWidth*.5)G.sts2=clamp((G.sts2||0)+e.deltaY*.5,0,G.stMax2||0);else G.sts=clamp((G.sts||0)+e.deltaY*.5,0,G.stMax||0);e.preventDefault();return}
   if(G.menu==='aff'){G.afs=clamp((G.afs||0)+e.deltaY*.5,0,G.afMax||0);e.preventDefault();return}
   if(G.menu==='jp:rumour'||G.menu==='jp:story'){G.rs=Math.max(0,(G.rs||0)+e.deltaY*.5);e.preventDefault();return}
   if(G.overview&&!G.world){const [wx,wy]=toDesign(e);setMapZoom((G.mz||12)*Math.exp(-e.deltaY*.0016),wx,wy);e.preventDefault();return}
@@ -17371,6 +17381,176 @@ function tombStory(){
 const goldCut=g=>g<=80?g:Math.round((80+(g-80)*.2)/5)*5;
 for(const id in QUESTS){const r=QUESTS[id].reward;if(r&&r.gold&&!r._cut){r.gold=goldCut(r.gold);r._cut=1}}
 
+/* ---- src/desert/hints.js ---- */
+/* ==========================================================================
+   QUEST HINTS. Every quest that is more than a plain fetch or a plain kill count has a Hint button in the quest log. A hint says what to do
+   next: the written ones below for the story quests, and for the rest one made from what the quest says and where it is. A quest that is
+   ready to hand in always says who to take it to. Each hint pressed is counted on the stats page.
+   ========================================================================== */
+const QHINT={
+  gandrick:'Leave Thornwick by the east gate and follow the trail into Gandrick\'s Wood, fighting the wolves and bandits. His cave is at the far east end of the wood. Tap the quest to see it on the map.',
+  goats:'The goats hide in the lanes and yards of Thornwick. Walk right up to one, or tap it, to find it. There are five.',
+  ghosts:'The haunted house is on the north side of the main street in Thornwick. Take a torch inside and fight the ghosts.',
+  ironhill:'Take the road north-east out of Thornwick to Ironhill. The mayor is inside the castle at the top of the town.',
+  mines:'The old mines are east of Ironhill castle. Go in and clear 8 of the undead, rats and bats.',
+  overseer:'The Mine Overseer waits in the deepest room of the Ironhill mines. He hits hard, so rest and heal before you open the last door.',
+  pip:'Pip is out on Ironhill Moor, near the wolves. Walk the moor until you find him, then tell him to go home.',
+  parcel:'Farmer Eadric lives on Ironhill Moor. Deliver the parcel to him first, then go back to Dorn.',
+  pass:'Leave the moor to the east and cross Greyfang Pass, following the dashed red line on the map of the pass. Hunters are close behind, so keep moving.',
+  colours:'In Anaea, find the dilapidated door on the south side of the main street, near the middle of town. It leads down to the sealed cellar.',
+  scoria:'Take the east gate of Anaea and follow the road north into the desert, to Khemetra. Ishkander the wizard is the one to find there.',
+  escape:'You are in the castle dungeons. Bribe the jailer, fight your way past the guards, and deal with Halbrecht.',
+  kh_c1:'The Catacomb of Whispering Sands is a little dungeon on the Sand Road, north-east of Anaea. The Compass of Dawn lies at the end of it.',
+  kh_c2:'Look for the mounds in the Red Dunes, beyond the Tomb of Sut. The Shrine of the Sleeping Sphinx is a little dungeon under one of them.',
+  kh_c3:'The Shrine of the Copper Serpent is a little dungeon in the Blue Dunes. The amulet lies at the end of it.',
+  kh_c4:'The Undercroft of the Sand Mother is a little dungeon in the Golden Erg. The Astrolabe is in its deepest room.',
+  kh_c5:'The Barrow of the Pale Cartographer is a little dungeon in the Violet Erg. The Jade Scarab lies at the far end.',
+  kh_c6:'The Sepulchre of the Twin Suns is a little dungeon in the White Dunes. The Lens is kept in its deepest chamber.',
+  kh_c7:'The Barrow of the Last Oasis is a little dungeon in the Flatlands. The Ankh Key waits at the end of it.',
+  kh_seal:'The thieves hide in the ruined houses of the Old Quarter, north-west in Khemetra. The seal is in a chest in the Boarded House, and its door is circled on the map.',
+  kh_sea:'Follow the tunnel to the Narrow Sea. Once the Sea Gate in Khemetra\'s east wall is open you can walk straight through it to Yarrim.',
+  yar2:'The key is in an old bronze chest in the cisterns beneath the Potters Market in north-west Khemetra. The hatch opens once the vizier has named it. Take a lantern, and bring the key back to Hotep-Ra.',
+  yar3:'Go through the Sea Gate in the east wall of Khemetra (it is circled on the map) and kill 8 skeletons in the tunnel beyond. Then tell Menkaure.',
+  yar4:'Walk the beach of Yarrim, north and south of the pier. Four crates lie in the sand. Tell Tamsin Kell, the harbourmaster, when you have all four.',
+  yar5:'The Net Loft is in Yarrim, east of the harbourmaster\'s office. Go inside and kill 6 rats, then tell Tamsin Kell.',
+  yar6:'Torches are sold at Wen\'s Trading Post in Yarrim and in the general stores of Khemetra. Take 3 of them to Orsa at the Yarrim Light.',
+  yar7:'Walk to the end of the pier in Yarrim and speak to Menkaure beside the Dawn Walker.',
+  mq1:'Stay in Khemetra for three days and stay out of trouble: rest at an inn if you must. When the trumpets sound, go to the palace.',
+  mq2:'Go into the palace at the head of the Avenue of the Sun. The throne room is inside, and the king will hear your story.',
+  vq1:'The marines camp along the north and east shore of Saltbarrow. Kill 10 of them, then tell Sable Maeve.',
+  vq2:'The three bells hang in the drowned abbey on the Isle of Bells. Ring each one, then fight what wakes. Brother Aldous waits at the altar.',
+  vq3:'Climb the slopes of Cinder Isle for 3 cinder crystals and destroy the Cinder Guardian that walks them. Take them to Ketra.',
+  vq4:'Isolde\'s altar is at the top of Last Light. Fetch the third page from it, and be ready for Corvane\'s ship.',
+  vq5:'Sail the Dawn Walker east from the islands toward Oldhaven. The Kraken lies in the deep water between the coasts, and the harbour boom will not lift until it is dead. The gate opens at noon.',
+  vq6:'At noon the party is brought before King Osric. Give him the master ledger and make him read it.',
+  uq1:'Buy a Diving Helm for each hero from Tam Salvor on the pier at Yarrim. Dive from the red-and-white buoy on Saltbarrow, kill the Reef Warden and open the great chest.',
+  uq2:'Dive from the buoy on the Isle of Bells into the Drowned Abbey. The great chest lies past the boss. You need a Diving Helm each.',
+  uq3:'Dive from the buoy on Cinder Isle to the Vent Gardens. Stand in a vent to breathe freely, kill the guardian and open the great chest.',
+  uq4:'Dive from the buoy at Last Light to the wreck among the kelp, kill what circles it and open the great chest.',
+  sa1:'Corvane\'s victims left their logs in wrecks: drifting hulls out on the Narrow Sea and wrecked ships on the islands. Find 3 and take the news to Maeve.',
+  sa2:'Kill the Kraken first. Then sail far east to Leviathan\'s Rest and open the cache under the black altar.',
+  sb1:'Orsa\'s sons are on the Narrow Sea: Tobin on a big forest island, Wren on a rock far out. Ask the sailors, then sail to them.',
+  sb2:'Bring both boys home to Yarrim once you have found them.',
+  sd2:'Take the Great Harpoon you were given and find the Kraken in the deep water between the two coasts.',
+  kg0:'Four people each know where a Kraken gun lies: Ketra, Sable Maeve, Brother Aldous and Isolde. Ask each, then fetch all four. Every hero needs one.',
+  kg1:'The Ember Harpoon lies on an altar in the red cliffs of Redcliff, a rock island in the east of the Narrow Sea.',
+  kg2:'Sail to Kelpgate Rock in the south-west of the Narrow Sea. The Verdigris Harpoon is in the bow of the grounded flagship.',
+  kg3:'Sail to the Hollow Isle in the west of the Narrow Sea. The Silver Harpoon is buried inside the ring of standing stones.',
+  kg4:'Dive from Last Light, a Diving Helm on every hero, and search the lamp ship wreck for the Beacon Harpoon.',
+  shell:'The shell broke in four. Under each of the four islands a pearl-white clam holds a piece in a far corner of the reef. Dive each one, find the clam, and bring the pieces to Brother Aldous.'
+};
+/* a plain fetch or a plain kill count needs no hint; every other quest, and every story quest, gets one */
+function questHasHint(id){
+  const q=QUESTS[id];if(!q||qSt(id)==='done'||qSt(id)===null)return false;
+  if(QHINT[id]||(typeof MAIN_QUESTS!=='undefined'&&MAIN_QUESTS.has(id)))return true;
+  const src=String(q.goal||'');
+  return !(q.cnt||/bagCount|k_\w+|[Kk]ills/.test(src));
+}
+function questHint(id){
+  const q=QUESTS[id];if(!q)return '';
+  if(qReady(id)){
+    const where=typeof questTargetLevel==='function'?questTargetLevel(id):null;
+    return `You have done what ${q.who||'the quest giver'} asked. Go back and hand it in. Tap the quest to see where on the map.`;
+  }
+  if(QHINT[id])return QHINT[id];
+  // made from the quest itself: where it is, and what it asks
+  let place='';try{const Lt=questTargetLevel(id);if(Lt!==null&&LEVEL_NAMES[Lt])place=LEVEL_NAMES[Lt];else if(QAREA[id])place=QAREA[id]}catch(e){}
+  const first=(q.desc||'').split(/(?<=[.!?])\s+/)[0];
+  return `${place?'Look in '+place+'. ':''}${first} If you forget what was asked, talk to ${q.who||'the quest giver'} again. Tap the quest to see where it is on the map.`.replace(/\s+/g,' ');
+}
+
+/* ---- src/desert/stats.js ---- */
+/* ==========================================================================
+   THE STATS PAGE. A tally of the whole adventure, kept in the save (G.flags.stats): gold earned and spent, steps, time, kills of every
+   kind of monster, potions drunk, shops visited, quests taken and finished, hints used and more. Gold, steps and time are counted each
+   frame; the rest by wrapping the game's own functions once, at start-up (statInstall, called before the game begins).
+   ========================================================================== */
+function ST(){
+  const F=G.flags||(G.flags={});
+  return F.stats||(F.stats={gE:0,gS:0,gP:0,steps:0,sea:0,sec:0,drinks:0,deaths:0,dmg:0,big:0,hints:0,hintQ:{},shops:{},shopVisits:0,tele:0,rides:0,talks:0,rests:0,chests:0,lootGold:0});
+}
+const stN=n=>Math.round(n).toLocaleString('en-GB');
+function statTick(dt){
+  if(!G.state||G.state!=='play'||!G.heroes)return;
+  const S=ST();S.sec+=Math.min(.25,dt);
+  if(G._stGold!==undefined){const d=G.gold-G._stGold;if(d>0)S.gE+=d;else if(d<0)S.gS-=d}
+  G._stGold=G.gold;if(G.gold>S.gP)S.gP=G.gold;
+  const p=G._stPos;
+  if(p&&p.l===LEVEL&&(p.x!==G.P.x||p.y!==G.P.y)&&Math.abs(p.x-G.P.x)+Math.abs(p.y-G.P.y)<=2){if(typeof SN!=='undefined'&&LEVEL===SN.ID)S.sea++;else S.steps++}
+  G._stPos={l:LEVEL,x:G.P.x,y:G.P.y};
+  if(G._stAl)G.heroes.forEach((h,i)=>{if(G._stAl[i]&&!h.alive)S.deaths++});
+  G._stAl=G.heroes.map(h=>h.alive);
+}
+let ST_DONE=false;
+function statInstall(){ // wrap the game's own functions, once
+  if(ST_DONE)return;ST_DONE=true;
+  const wrap=(name,fn)=>{try{const o=window[name]||eval(name);if(typeof o!=='function')return;const w=fn(o);eval(name+'=w')}catch(e){console.error('stats',name,e)}};
+  wrap('hurtEnemy',o=>function(e,d){const hp0=e.hp,r=o.apply(this,arguments);try{const S=ST(),dealt=Math.max(0,Math.min(hp0,d));S.dmg+=dealt;if(dealt>S.big)S.big=dealt}catch(x){}return r});
+  wrap('useHeal',o=>function(){const r=o.apply(this,arguments);if(r)try{ST().drinks++}catch(x){}return r});
+  wrap('openShop',o=>function(d,stock,name){try{const S=ST(),k=name||'a shop';S.shops[k]=(S.shops[k]||0)+1;S.shopVisits++}catch(x){}return o.apply(this,arguments)});
+  wrap('teleportTo',o=>function(n){const was=!!TP,r=o.apply(this,arguments);if(!was&&TP)try{ST().tele++}catch(x){}return r});
+  wrap('yrRide',o=>function(d,fare){const g=G.gold,r=o.apply(this,arguments);if(G.gold<g)try{ST().rides++}catch(x){}return r});
+  wrap('khRide',o=>function(d,fare){const g=G.gold,r=o.apply(this,arguments);if(G.gold<g)try{ST().rides++}catch(x){}return r});
+  wrap('startTalk',o=>function(){try{ST().talks++}catch(x){}return o.apply(this,arguments)});
+  wrap('restParty',o=>function(){try{ST().rests++}catch(x){}return o.apply(this,arguments)});
+  wrap('openLoot',o=>function(d){try{if(d&&!d.shop)ST().chests++}catch(x){}return o.apply(this,arguments)});
+  wrap('restoreNow',o=>function(){const r=o.apply(this,arguments);G._stGold=undefined;G._stPos=undefined;G._stAl=undefined;return r});
+}
+/* ---- the numbers ---- */
+function statKills(){ // [name, count] for every kind of monster the party has killed, most first
+  const F=G.flags||{},out=[];
+  for(const k in F){
+    if(k.slice(0,2)!=='k_')continue;const t=k.slice(2),d=ENEMY_DEF[t];
+    if(!d||t==='dskeleton')continue; // the desert skeleton is counted inside the skeleton's tally
+    const n=F[k]|0;if(n>0)out.push([d.name,n,t]);
+  }
+  // a name shared by two kinds (a wolf and a desert wolf) is listed once
+  const m={};for(const [nm,n] of out)m[nm]=(m[nm]||0)+n;
+  return Object.keys(m).map(nm=>[nm,m[nm]]).sort((a,b)=>b[1]-a[1]);
+}
+function statTime(sec){const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60);return h?`${h} h ${m} min`:`${m} min`}
+function statSections(){
+  const S=ST(),F=G.flags||{},qs=G.quests||{},ids=Object.keys(qs),done=ids.filter(i=>qs[i].st==='done').length;
+  const A=typeof achList==='function'?achList():{got:0,total:0},main=typeof MAIN_QUESTS!=='undefined'?[...MAIN_QUESTS].filter(i=>qs[i]&&qs[i].st==='done').length:0,mainAll=typeof MAIN_QUESTS!=='undefined'?MAIN_QUESTS.size:0;
+  const kills=G.kills||statKills().reduce((a,b)=>a+b[1],0),lv=G.heroes?Math.max(...G.heroes.map(h=>h.lvl)):1;
+  const seen=Object.keys(F.lvSeen||{}).length,shopsDistinct=Object.keys(S.shops).length;
+  return [
+    ['GOLD',[['Gold earned',stN(S.gE)],['Gold spent',stN(S.gS)],['Gold now',stN(G.gold)],['Biggest purse',stN(S.gP)]]],
+    ['THE ROAD',[['Steps on land',stN(S.steps)],['Cells sailed',stN(S.sea)],['Days passed',stN((G.clock||0)/1440)],['Time played',statTime(S.sec)],['Places visited',stN(seen)],['Dungeons explored',`${A.got} of ${A.total}`],['Teleporters woken',stN(Object.keys(F.teles||{}).length)],['Teleports taken',stN(S.tele)],['Donkey rides',stN(S.rides)]]],
+    ['QUESTS',[['Quests taken',stN(ids.length)],['Quests completed',`${done} of ${ids.length}`],['Main quests done',`${main} of ${mainAll}`],['Hints used',stN(S.hints)]]],
+    ['TOWNS AND TRADE',[['Shops visited',stN(shopsDistinct)],['Shop visits',stN(S.shopVisits)],['Conversations',stN(S.talks)],['Chests and boxes opened',stN(S.chests)],['Times rested',stN(S.rests)]]],
+    ['BATTLE',[['Monsters killed',stN(kills)],['Kinds of monster',stN(statKills().length)],['Damage dealt',stN(S.dmg)],['Biggest hit',stN(S.big)],['Potions drunk',stN(S.drinks)],['Heroes fallen',stN(S.deaths)],['Highest hero level',stN(lv)]]]
+  ];
+}
+/* ---- the page ---- */
+function drawStats(){
+  BTNS=[];veil(.72);bigPanel(14,6,452,308);
+  txt('STATS',240,21,14,'#d8c88e','center',true);
+  const secs=statSections();let y=36-(G.sts2||0);
+  const lt=secs.reduce((a,[h,r])=>a+14+r.length*11+5,0);G.stMax2=Math.max(0,lt-250);G.sts2=clamp(G.sts2||0,0,G.stMax2);y=36-G.sts2;
+  ctx.save();ctx.beginPath();ctx.rect(20,30,226,254);ctx.clip();
+  for(const [head,rows] of secs){
+    txt(head,26,y+4,8.5,'#c8a860','left',true);ctx.fillStyle='rgba(200,168,96,.35)';ctx.fillRect(26,y+9,212,1);y+=14;
+    for(const [k,v] of rows){txt(k,30,y+3,8,'#c8bc98','left');txt(String(v),236,y+3,8.5,'#ecdca8','right',true);y+=11}
+    y+=5;
+  }
+  ctx.restore();
+  if(G.stMax2>0){const th=250,bh=Math.max(18,th*250/lt),by=32+(th-bh)*(G.sts2/G.stMax2);ctx.fillStyle='rgba(216,200,142,.12)';ctx.fillRect(244,32,3,th);ctx.fillStyle='rgba(216,200,142,.6)';ctx.fillRect(244,by,3,bh)}
+  BTNS.push({id:'st_left',x:20,y:30,w:226,h:254,up:true,drag:'stats2'});
+  // the right-hand column: every kind of monster killed, and how many
+  const kills=statKills(),top=50,vh=232,rh=12,total=kills.length*rh;
+  G.stMax=Math.max(0,total-vh);G.sts=clamp(G.sts||0,0,G.stMax);
+  txt('MONSTERS SLAIN',356,21+14,9,'#c8a860','center',true);ctx.fillStyle='rgba(200,168,96,.35)';ctx.fillRect(254,43,204,1);
+  ctx.save();ctx.beginPath();ctx.rect(254,top-2,206,vh+2);ctx.clip();
+  if(!kills.length)txt('None yet.',356,top+20,8.5,'#a89878','center');
+  kills.forEach(([nm,n],i)=>{const yy=top+i*rh-G.sts;if(yy<top-12||yy>top+vh+4)return;txt(nm,260,yy+5,8,'#c8bc98','left',false,undefined,140);txt(stN(n),454,yy+5,8.5,'#ecdca8','right',true)});
+  ctx.restore();
+  if(G.stMax>0){const th=vh-4,bh=Math.max(18,th*vh/total),by=top+2+(th-bh)*(G.sts/G.stMax);ctx.fillStyle='rgba(216,200,142,.12)';ctx.fillRect(460,top+2,3,th);ctx.fillStyle='rgba(216,200,142,.6)';ctx.fillRect(460,by,3,bh)}
+  BTNS.push({id:'st_list',x:254,y:top,w:206,h:vh,up:true,drag:'stats'});
+  btnText('st_close','Close',190,288,100,22);
+}
+function statsBtn(id){if(id==='st_close'||id==='menu'||id==='menuclose2')G.menu=true}
+
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
 (async function boot(){
@@ -17492,6 +17672,7 @@ for(const id in QUESTS){const r=QUESTS[id].reward;if(r&&r.gold&&!r._cut){r.gold=
   for(const id of [...ART_ITEM_IDS,...DS_ITEM_IDS]){const im=IMG['icn_'+id];if(!im)continue;IMG['ic_'+id]=im;IMG['it_'+id]=im;if(id==='sundisc')for(let q=1;q<=4;q++)IMG['it_sundisc'+q]=im;if(id==='potion')IMG.potion=im;if(id==='key')IMG.key=im}
   try{if(typeof gearTintIcons==='function')gearTintIcons()}catch(e){console.error(e)}try{if(typeof mxTintIcons==='function')mxTintIcons()}catch(e){console.error(e)}
   for(const k in LEVELS)if(!LEVEL_NAMES[k]&&LEVELS[k]&&LEVELS[k].name)LEVEL_NAMES[k]=LEVELS[k].name; // the Sand Road, the tomb and the mounds named themselves after the table was filled
+  try{if(typeof statInstall==='function')statInstall()}catch(e){console.error(e)}
   reset();buildUIPatterns();crtInit();makeAtmos();try{G.crt=localStorage.getItem('abbeyCRT')!=='0'}catch(e){G.crt=true}gfxLoad();fit();
   addEventListener('pagehide',()=>{if(G.state==='play'&&G.timers.length===0)writeSave('auto')});
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&G.state==='play'&&G.timers.length===0)writeSave('auto')});
