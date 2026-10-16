@@ -53,6 +53,13 @@ const QHINT={
   kg2:'Sail to Kelpgate Rock in the south-west of the Narrow Sea. The Verdigris Harpoon is in the bow of the grounded flagship.',
   kg3:'Sail to the Hollow Isle in the west of the Narrow Sea. The Silver Harpoon is buried inside the ring of standing stones.',
   kg4:'Dive from Last Light, a Diving Helm on every hero, and search the lamp ship wreck for the Beacon Harpoon.',
+  oq0:'Take the east road from the middle of Oldhaven to the fair green. Six people have stalls there: the weigher, the bellringer, the baker, the fool, the tutor and the quiet sister. Talk to each one.',
+  ox1:'Hob Tally the weigher has his scales at the north-west of the fair green. Bring him a loaf of bread, a piece of cheese and a herring from the stalls or the Cookshop.',
+  ox2:'Ewan Marsh the bellringer stands at the north side of the fair green. He wants two torches and a lantern. Pack and Lantern in the city sells them.',
+  ox3:'Perrin the baker is at the north-east of the fair green. Buy a salve and an antidote from the Apothecary and bring them to her.',
+  ox4:'Pip Jangle the fool is at the south-west of the fair green. Bring him three apples, from the apple sellers or the stalls.',
+  ox5:'Master Quill the tutor is in the south of the fair green. He wants a Frost scroll and a Light scroll. The Scroll House sells them.',
+  ox6:'Sister Ilse is at the south-east of the fair green. Bring her two flasks of holy water.',
   shell:'The shell broke in four. Under each of the four islands a pearl-white clam holds a piece in a far corner of the reef. Dive each one, find the clam, and bring the pieces to Brother Aldous.'
 };
 /* a plain fetch or a plain kill count needs no hint; every other quest, and every story quest, gets one */

@@ -465,6 +465,7 @@ function ohBuild(){
         for(let y=OH_FAIR.y0+5;y<=OH_FAIR.y1-5;y+=6){tree('oak',OH_FAIR.x0+1,y);tree('oak',OH_FAIR.x1-1,y)}
         for(let n=0;n<6;n++){const sx=106+n*4,sy=84+(n%2)*6,k='kh_stall1_'+n;if(IMG[k]&&free(sx,sy)){dc(k,sx,sy,{block:true,walk:false})}}
         for(let n=0;n<26;n++)crowdAt(OH_FAIR.x0+3+((hs(n,1,79)*(OH_FAIR.x1-OH_FAIR.x0-5))|0),OH_FAIR.y0+3+((hs(n,2,79)*(OH_FAIR.y1-OH_FAIR.y0-5))|0),2);
+        if(typeof OH_FAIRFOLK!=='undefined')for(const [id,x,y] of OH_FAIRFOLK)person(id,x,y,3); // the six names of the master ledger
         for(let x=104;x<=127;x+=6)for(let y=80;y<=96;y+=8)lamp(x,y);
         if(FCART)for(const [x,y] of [[110,78],[120,92],[124,98],[105,96]])tryDc(FCART,x,y);
         if(HIVES)tryDc(HIVES,126,100);
