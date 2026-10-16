@@ -150,7 +150,7 @@ function hlBuild(k){
   const torch=(x,y,c)=>{if(!IMG.lamp||used.has(x+','+y)||pathCell.has(x+','+y))return;used.add(x+','+y);decor.push({k:'lamp',x,y,block:false,walk:true,deco:true});lights.push([x,y,c?1:0])};
   rooms.forEach((r,i)=>{if(r.x1-r.x0<3||r.y1-r.y0<3)return;torch(r.x0,r.y0,i%2);torch(r.x1,r.y0,(i+1)%2);if(r.x1-r.x0>4&&r.y1-r.y0>3){torch(r.x0,r.y1,(i+1)%2);torch(r.x1,r.y1,i%2)}});
   // the number of the level, on the stone wall beside the stair
-  if(!violet){decor.push({k:hlNumKey(k+1),x:(r0.x0+r0.x1)>>1,y:r0.y0,block:false,walk:true,deco:true,sc:1});decor.push({k:hlNumKey(k+1),x:r0.x0,y:r0.y1,block:false,walk:true,deco:true,sc:1})}
+  // (the level number is a painted stone plaque now, hung on the wall of the first room by hlDress)
   // the strange figures, on a few levels
   const figLv={0:'hl_fig1',3:'hl_fig2',7:'hl_fig3',11:'hl_fig0',15:'hl_fig4'};
   if(figLv[k]&&rooms[2]){const kp=KH_KEEPERS[figLv[k]],[fx,fy]=mid(rooms[2]);if(kp&&!used.has(fx+','+fy)){decor.push({k:khFaceKey(kp.face),x:fx,y:fy,block:true,npc:figLv[k],sc:kp.sc||1});used.add(fx+','+fy)}}
@@ -164,8 +164,8 @@ function hlBuild(k){
   const portals=[{to:k===0?HL.CAV:violet?HL.BASE+HL.N-1:id-1,x:0,y:0,f:2,tex:'tomb'}];
   if(up)portals[1]={to:id+1,x:0,y:0,f:0,tex:'tomb'};
   const lv={rows,start,enemies,items,decor,fmap:(()=>{const f=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];f.push(s)}return f})(),
-    floorSet:['tombslab','sand','tombgold','tombdark','tombred'],floor:'tombslab',ceil:'tomb',name:LEVEL_NAMES[id],label:violet?'The Violet Tower':'The Orange Tower',diff:36+kk,portals,lights,chars,_trig:dress.lv_trig,_msgr:dress.lv_msgr,_man:dress.lv_man,amb:.05,day:0,ceilH:CH,
-    mapNames:rooms.map((r,i)=>({t:i===0?'Stair ('+(k+1)+')':r===myst&&!violet?'The Strange Room':r===far&&up?'The Stair Up':top&&r===far?'The Spire':'Hall',x:mid(r)[0],y:r.y0-1,k:'place'})),_up:up,_start:start};
+    floorSet:['tombslab','sand','tombgold','tombdark','tombred'],floor:'tombslab',ceil:'tomb',name:LEVEL_NAMES[id],label:violet?'The Violet Tower':'The Orange Tower',diff:36+kk,torchGap:4.4,_secrets:dress.lv_secrets,_roomsInfo:dress.lv_rooms,portals,lights,chars,_trig:dress.lv_trig,_msgr:dress.lv_msgr,_man:dress.lv_man,amb:.05,day:0,ceilH:CH,
+    mapNames:rooms.map((r,i)=>({t:i===0?'Stair ('+(k+1)+')':r===myst&&!violet?'The Strange Room':r===far&&up?(dress.lv_names&&dress.lv_names[i]&&!/Hall$/.test(dress.lv_names[i])?dress.lv_names[i]+' and Stair Up':'The Stair Up'):top&&r===far?'The Spire':(dress.lv_names&&dress.lv_names[i])||'Hall',x:mid(r)[0],y:r.y0-1,k:'place'})),_up:up,_start:start};
   LEVELS[id]=lv;
 }
 function hlCavern(){
@@ -248,8 +248,8 @@ Object.assign(NPC_H,{hl_pt0:.95,hl_pt1:.95,hl_pt2:.95,hl_pt3:.95,hl_pt4:.95,hl_p
 ENEMY_DEF.hlhands={name:'Clawing Hands',hp:150,dmg:[9,15],hit:.82,w:.95,img:'hl_hands',xp:350,gold:[0,0],speed:1,verb:'rakes',
   act:e=>{if(Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)===1){enemyAttack(e);return 290}return 220}};
 ENEMY_DEF.hlghost={name:'Wailing Ghost',hp:140,dmg:[8,14],hit:.76,w:.5,img:'hl_p_ghost',xp:650,gold:[0,0],speed:1,fly:true,floatH:.04,glow:.7,verb:'chills',aboveParty:1};
-ENEMY_DEF.hlwitch={name:'The Screaming Witch',hp:900,dmg:[14,24],hit:.8,w:.85,img:'hl_witch',xp:6000,gold:[200,520],speed:1,ranged:4,verb:'blasts',
-  act:e=>{if(e.alert){G.hlStrobe=!G.hlStrobe;hlLights(G.hlStrobe);G.shake=.25;if(Math.random()<.5)msg(['The witch SCREAMS. The lights stutter.','"MINE! ALL OF IT MINE!" The torches flash on and off.','The witch shrieks and the whole room flickers.'][(Math.random()*3)|0],'#e0a8ff')}return 0}};
+ENEMY_DEF.hlwitch={name:'The Screaming Witch',hp:400,dmg:[8,14],hit:.7,w:.85,img:'hl_witch',xp:3500,gold:[150,380],speed:1,ranged:4,verb:'blasts',
+  act:e=>{if(e.alert){G.shake=.2;if(Math.random()<.5)msg(['The witch SCREAMS. The lights stutter.','"MINE! ALL OF IT MINE!" The torches flash on and off.','The witch shrieks and the whole room flickers.'][(Math.random()*3)|0],'#e0a8ff')}return 0}}; // (the strobe itself runs every frame, in hollow_haunt.js)
 function hlLights(out){G.hlOut=out;for(const l of LIGHTS)l.out=out}
 const hlLive=()=>{const a=[];G.heroes.forEach((h,i)=>{if(h.alive!==false&&h.hp>0)a.push(i)});return a};
 function hlHurt(hi,d){const h=G.heroes[hi];h.hp-=d;h.hurt=1;G.shake=.3;sfx('hurt');addFloat(portraitX(hi)+19,250,'-'+d,'#ff6a5a');
@@ -350,14 +350,20 @@ function hlDress(c){
     for(const [x,y] of cs)for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx>=r.x0&&nx<=r.x1&&ny>=r.y0&&ny<=r.y1&&flr(kk,nx,ny,ex))return true}return false};
   const wallArt=['hl_p_window','hl_p_alcove','hl_p_banner','hl_p_chains'];
   const note=(r,j)=>{for(const sl of slots(r))if(pic('hl_p_note',sl[0],sl[1],sl[2],{npc:'hl_note'+((k*5+j)%HL_NOTES.length),bob:.6}))break};
-  const themes=['gallery','banquet','crypt','study','prison','throne','haunted'];
+  const themes=['gallery','banquet','crypt','study','prison','throne','haunted'],THNAME={gallery:'Gallery of Rulers',banquet:'Banquet Hall',crypt:'The Crypt',study:'The Study',prison:'The Cells',throne:'Throne Hall',haunted:'The Haunted Room'},names=[];
+  // the number of the level: a painted stone plaque with the number chiselled into it, on the wall of the first room
+  {const r0=rooms[0],mx0=(r0.x0+r0.x1)>>1,my0=(r0.y0+r0.y1)>>1,pk='hl_plq'+(k+1);
+   if(isW(mx0,r0.y0-1))pic(pk,mx0,r0.y0,[0,-1],{bob:.3});
+   else if(isW(r0.x0-1,my0))pic(pk,r0.x0,my0,[-1,0],{bob:.3});
+   if(isW(r0.x0-1,my0)&&!used.has(key(r0.x0,my0)))pic(pk,r0.x0,my0,[-1,0],{bob:.3});else if(isW(r0.x1+1,my0)&&!used.has(key(r0.x1,my0)))pic(pk,r0.x1,my0,[1,0],{bob:.3})}
+  if(!decor.some(q=>/^hl_plq/.test(q.k))){const r0=rooms[0];for(const [x,y,wd] of slots(r0)){if(pic('hl_plq'+(k+1),x,y,wd,{bob:.3}))break}}
   let manDone=false;
   rooms.forEach((r,i)=>{
     if(r===myst||r.x1-r.x0<2||r.y1-r.y0<2)return;
     const th=r===far&&top?'throne':i===0?'gallery':themes[(k*3+i*2+R(60+i,3))%7],w=r.x1-r.x0+1,h=r.y1-r.y0+1,S=slots(r),I=inner(r);
-    cap=Math.max(3,Math.min(8,(w*h/6)|0));cnt=0;
+    cap=Math.max(3,Math.min(9,(w*h/6)|0));cnt=0;names[i]=THNAME[th]||'Hall';
     const walls=(n,fn)=>{let j=0;for(const [x,y,wd] of S){if(j>=n)break;if(fn(x,y,wd,j))j++}};
-    if(th==='gallery'){walls(4,(x,y,wd,j)=>pic(j%4===3?wallArt[(k+j)%4]:'hl_pt'+((k+i+j)%6),x,y,wd,{bob:j%4===3?.3:.5}));corner(r,'hl_p_candle')}
+    if(th==='gallery'){walls(6,(x,y,wd,j)=>pic(j%4===3?wallArt[(k+j)%4]:'hl_pt'+((k+i+j)%6),x,y,wd,{bob:j%4===3?.3:.5}));corner(r,'hl_p_candle')}
     else if(th==='banquet'){if(w>=5&&h>=4)flr('hl_p_feast',(r.x0+r.x1)>>1,(r.y0+r.y1)>>1);corner(r,'hl_p_candle');corner(r,'hl_p_poison',{npc:'hl_poisoncup'});if(R(70+i,10)<7)corner(r,'hl_p_apple',{npc:'hl_poisonapple'});
       walls(2,(x,y,wd,j)=>pic('hl_p_window',x,y,wd,{bob:.35}));for(const [x,y] of S){if(flr('hl_p_armour',x,y))break}}
     else if(th==='crypt'){walls(2,(x,y)=>flr('hl_p_coffin',x,y));for(const [x,y] of S)if(flr('hl_p_tomb',x,y))break;walls(2,(x,y,wd,j)=>pic(j%2?'hl_p_alcove':'hl_p_chains',x,y,wd,{bob:j%2?.35:.9}));note(r,i);if(I[0])enemies.push({t:'hlghost',x:I[0][0],y:I[0][1]})}
@@ -371,6 +377,11 @@ function hlDress(c){
       for(const [x,y,wd] of S.slice(1)){if(j>=3)break;if(pic(j%2?'hl_p_mirror':'hl_p_window',x,y,wd,{bob:j%2?.1:.35}))j++}
       if(I[0])enemies.push({t:'hlghost',x:I[0][0],y:I[0][1]});
       if(!manDone&&k%2===1&&I[1]){manDone=true;flr('hl_gent',I[1][0],I[1][1],{npc:'hl_gent'})}}
+    // more portraits, claw marks on some walls and mirrors for the bogeyman, in any hall
+    const extra=(kk,bobv)=>{for(const [x,y,wd] of slots(r))if(pic(kk,x,y,wd,{bob:bobv}))return true;return false};
+    if(th!=='gallery'&&R(80+i,10)<6)extra('hl_pt'+((k*2+i)%6),.5);
+    if(R(85+i,10)<7)extra('hl_claw'+((k+i*2)%6),.5);
+    if(th!=='haunted'&&R(90+i,10)<5)extra('hl_p_mirror',.1);
   });
   cap=999;
   const secretSlots=[];
@@ -405,13 +416,24 @@ function hlDress(c){
   // a ruler waits in the last hall of levels 4, 9, 14 and 19
   {const ru=HL_RULERS.find(q=>q[0]===k);if(ru&&far&&!top){const cx=(far.x0+far.x1)>>1,cy=(far.y0+far.y1)>>1+0;let bx=cx,by=cy;if(used.has(key(bx,by))){const c2=[[cx,cy+1],[cx+1,cy],[cx-1,cy],[cx,cy-1]].find(([x,y])=>isF(x,y)&&!used.has(key(x,y)));if(c2){bx=c2[0];by=c2[1]}}
     if(!used.has(key(bx,by))){enemies.push({t:ru[1],x:bx,y:by});used.add(key(bx,by))}}}
+  // hidden doors: a wall that looks like any other but opens when you walk into it. It joins two passages that are far apart by the usual way. The map shows them.
+  {const sec=[],cand2=[];for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!isW(x,y))continue;
+     for(const [a,b] of [[1,0],[0,1]]){const ax=x-a,ay=y-b,bx=x+a,by=y+b;if(isF(ax,ay)&&isF(bx,by)&&d[ay*W+ax]>=0&&d[by*W+bx]>=0&&Math.abs(d[ay*W+ax]-d[by*W+bx])>=6&&isW(x+b,y+a)&&isW(x-b,y-a))cand2.push([x,y,Math.abs(d[ay*W+ax]-d[by*W+bx])])}}
+   if(!cand2.length){for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!isW(x,y))continue;for(const [a,b] of [[1,0],[0,1]]){const ax=x-a,ay=y-b,bx=x+a,by=y+b;if(isF(ax,ay)&&isF(bx,by)&&(ax!==bx||ay!==by)&&Math.abs(d[ay*W+ax]-d[by*W+bx])>=2&&isW(x+b,y+a)&&isW(x-b,y-a))cand2.push([x,y,1])}}}
+   cand2.sort((p,q)=>hs(p[0],p[1],k+55)-hs(q[0],q[1],k+55));const want=Math.min(3,1+((k/6)|0));
+   for(const q of cand2){if(sec.length>=want)break;if(sec.every(z=>Math.abs(z[0]-q[0])+Math.abs(z[1]-q[1])>=8)&&!used.has(key(q[0],q[1])))sec.push(q)}
+   c.lv_secrets=sec.map(q=>({x:q[0],y:q[1]}));c.lv_names=names}
   // the witch: a room of her own on some levels
   if(k%5===2){const r=rooms.find((q,i)=>i>=2&&q!==myst&&q!==far&&q.x1-q.x0>=3);if(r){const cx=(r.x0+r.x1)>>1,cy=(r.y0+r.y1)>>1;if(!used.has(key(cx,cy))){enemies.push({t:'hlwitch',x:cx,y:cy});used.add(key(cx,cy))}}}
   // corridors: a picture or a chain now and then, so the passages are not bare
   const inRoom=(x,y)=>rooms.some(r=>x>=r.x0&&x<=r.x1&&y>=r.y0&&y<=r.y1);
-  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!isF(x,y)||inRoom(x,y)||used.has(key(x,y))||hs(x*7,y*3,k+88)>.08)continue;
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!isF(x,y)||inRoom(x,y)||used.has(key(x,y))||hs(x*7,y*3,k+88)>.12)continue;
     const dir=[[0,-1],[0,1],[-1,0],[1,0]].find(([a,b])=>isW(x+a,y+b)&&isF(x-a,y-b));if(!dir)continue;
-    const kinds=['hl_pt'+((x+y+k)%6),'hl_p_chains','hl_p_window','hl_p_alcove','hl_p_banner'],kd=kinds[(x*3+y)%5];pic(kd,x,y,dir,{bob:kd==='hl_p_chains'?.9:kd.startsWith('hl_pt')?.5:.35})}
+    const kinds=['hl_pt'+((x+y+k)%6),'hl_pt'+((x*2+y+k)%6),'hl_p_chains','hl_p_window','hl_pt'+((x+y*3+k)%6),'hl_p_alcove','hl_p_banner','hl_claw'+((x+y)%6),'hl_p_mirror','hl_claw'+((x*3+y+k)%6)],kd=kinds[(x*3+y)%10];pic(kd,x,y,dir,{bob:kd==='hl_p_chains'?.9:/^hl_(pt|claw)/.test(kd)?.5:kd==='hl_p_mirror'?.1:.35})}
+  // claw marks: at least a few on every level, wherever there is a bare wall
+  {let n=G_claws();const want=3+((k/5)|0),spots=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!isF(x,y)||used.has(key(x,y)))continue;const dir=[[0,-1],[0,1],[-1,0],[1,0]].find(([a,b])=>isW(x+a,y+b));if(dir)spots.push([x,y,dir])}
+   for(const [x,y,dir] of shuf(spots,23)){if(n>=want)break;if(pic('hl_claw'+((x*3+y*5+k)%6),x,y,dir,{bob:.5}))n++}
+   function G_claws(){return decor.filter(q=>/^hl_claw/.test(q.k)).length}}
   // hands that reach out of a niche in the passage wall
   const nh=Math.min(5,1+((k/4)|0));let placed=0;
   const cand=[];for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!isF(x,y)||inRoom(x,y)||used.has(key(x,y))||d[y*W+x]<8)continue;
@@ -426,7 +448,7 @@ function hlDress(c){
   for(let i=0;i<2;i++)tp('chat',300+i,{n:k+i*2});
   if(k%3===1){const r=rooms.find((q,i)=>i>=2&&q!==myst&&q.x1-q.x0>=3);if(r){const cs=[];for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)if(isF(x,y)&&d[y*W+x]>=0)cs.push([x,y,d[y*W+x]]);cs.sort((p,q)=>p[2]-q[2]);
     if(cs.length>=3)trig.push({k:'voice',n:0,x:cs[0][0],y:cs[0][1]},{k:'voice',n:1,x:cs[cs.length>>1][0],y:cs[cs.length>>1][1]},{k:'ghost',x:cs[cs.length-1][0],y:cs[cs.length-1][1]})}}
-  c.lv_trig=trig;
+  c.lv_trig=trig;c.lv_rooms=rooms.map((r,i)=>({x0:r.x0,y0:r.y0,x1:r.x1,y1:r.y1,n:names[i]||''}));
   const wp=rooms.filter((q,i)=>i>0&&q!==myst).slice(0,3).map(q=>[(q.x0+q.x1)>>1,q.y0]).filter(p=>isF(p[0],p[1]));
   if(manDone&&wp.length>=2)c.lv_man={i:0,t:0,wp};
 }
