@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.166';
+const VERSION='3.167';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -6144,6 +6144,7 @@ function questDoorTo(lvl,depth){ // the square on this level in front of the doo
 function questFocusSpot(qid){ // a place on THIS level for the picked quest when it is not ringed in the usual way
   const q=QUESTS[qid],Lt=questTargetLevel(qid);if(!q||Lt===null)return null;
   if(Lt===LEVEL){ // on this very level: the giver, so that even a finished quest can be shown
+    if(QAREA[qid]==='The Narrow Sea'&&!q.ringGiver&&!qReady(qid)&&qSt(qid)!=='done')return null; // a sea quest is not at the giver's feet
     const ids=[];for(const n in QGIVER)if([].concat(QGIVER[n]||[]).includes(qid))ids.push(n);
     const who=(q.who||'').split(',')[0].trim(),d=G.decor.find(z=>!z.found&&z.npc&&(ids.includes(z.npc)||(NPCS[z.npc]&&NPCS[z.npc].name&&NPCS[z.npc].name.split(',')[0].trim()===who)));
     return d?{x:d.x,y:d.y,kind:'goal',t:q.title,q:qid}:null;
@@ -16142,6 +16143,17 @@ QUESTS.uq1.targets=['uw_dive_300'];QUESTS.uq2.targets=['uw_dive_301'];QUESTS.uq3
   QUESTS.sd1.targets=['uw_oak'].concat(DIVES);
   QUESTS.sc2.targets=['uw_clam'].concat(DIVES);
 }
+/* the ships' logbooks: circle the nearest wreck that still has one, out on the sea or on the island you are on; never the giver */
+QUESTS.sa1.goalLevel=()=>SN.ID;
+QUESTS.sa1.spot=()=>{
+  const L=SQ('saLogs');let best=null,bd=1e9;
+  for(const d of G.decor){
+    if(d.found)continue;
+    const open=(d.npc==='sea_wreck'&&!L['f'+d.cat])||(d.npc==='isle_wreck'&&!L['i'+d.cat]);if(!open)continue;
+    const q=(d.x-G.P.x)**2+(d.y-G.P.y)**2;if(q<bd){bd=q;best=d}
+  }
+  return best?{x:best.x,y:best.y}:null;
+};
 
 /* ---- src/desert/shellquest.js ---- */
 /* ==========================================================================

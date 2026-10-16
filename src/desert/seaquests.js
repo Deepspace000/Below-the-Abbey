@@ -130,3 +130,14 @@ QUESTS.uq1.targets=['uw_dive_300'];QUESTS.uq2.targets=['uw_dive_301'];QUESTS.uq3
   QUESTS.sd1.targets=['uw_oak'].concat(DIVES);
   QUESTS.sc2.targets=['uw_clam'].concat(DIVES);
 }
+/* the ships' logbooks: circle the nearest wreck that still has one, out on the sea or on the island you are on; never the giver */
+QUESTS.sa1.goalLevel=()=>SN.ID;
+QUESTS.sa1.spot=()=>{
+  const L=SQ('saLogs');let best=null,bd=1e9;
+  for(const d of G.decor){
+    if(d.found)continue;
+    const open=(d.npc==='sea_wreck'&&!L['f'+d.cat])||(d.npc==='isle_wreck'&&!L['i'+d.cat]);if(!open)continue;
+    const q=(d.x-G.P.x)**2+(d.y-G.P.y)**2;if(q<bd){bd=q;best=d}
+  }
+  return best?{x:best.x,y:best.y}:null;
+};
