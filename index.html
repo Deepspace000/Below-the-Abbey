@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.207';
+const VERSION='3.208';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -3528,6 +3528,10 @@ function giveJumpGear(target){
     else if(h.dex>h.str){set('main','bow');set('alt','dagger');set('head','cap');set('chest','jerkin');set('legs','leggings');set('arms','bracers');set('r0','ringS');set('r1','ringV')}
     else{set('main',rich?(i%2?'ironblade':'wardblade'):'sword');set('off','shield');set('head','helm');set('chest','jerkin');set('legs','leggings');set('arms','bracers');set('r0','ringW');set('r1',rich?'ringM':'ringV')}
   });
+  // powerful weapons for testing: each hero gets the best blade, bow or hammer they can wield (a mage has the best staff there is), and a few more go in the bag
+  {const POW=['worldblade','starbow','sandstaff','skullcrusher'];
+   G.heroes.forEach((h,i)=>{const id=POW[i];if(!id||!ITEMDEF[id])return;if(h.eq.main&&h.eq.main.id!==id)bagAdd(h.eq.main);h.eq.main=mkItem(id)});
+   for(const id of ['ragnarok','doomhammer','titanaxe','stormbow2','kingslayer'])if(ITEMDEF[id]&&!bagCount(id))bagAdd(mkItem(id))}
   for(const [id,n] of [['potion',6],['torch',4],['bread',4],['cheese',3],['apple',3]])for(let k=0;k<n;k++)bagAdd(mkItem(id));
   if(!bagCount('lantern'))bagAdd(mkItem('lantern'));
   G.gold=Math.max(G.gold,rich?900:200);
