@@ -337,32 +337,40 @@ function hlDress(c){
   const {k,rows,W,H,rooms,myst,far,used,decor,enemies,d,violet,top,R,hs,secretCh,items,up,start}=c;if(violet)return;
   const isW=(x,y)=>{const ch=rows[y]&&rows[y][x];return ch!==undefined&&ch!=='.'&&ch!=='0'&&ch!=='1'},isF=(x,y)=>rows[y]&&rows[y][x]==='.';
   const key=(x,y)=>x+','+y,shuf=(a,s)=>a.map(v=>[hs(v[0]*3+s,v[1]*5+k,41),v]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
-  const pic=(kk,x,y,wd,ex)=>{if(used.has(key(x,y)))return false;used.add(key(x,y));decor.push(Object.assign({k:kk,x,y,wd,pic:1,block:false,walk:true,deco:true},ex||{}));return true};
-  const flr=(kk,x,y,ex)=>{if(used.has(key(x,y)))return false;used.add(key(x,y));decor.push(Object.assign({k:kk,x,y,block:false,walk:true,deco:true},ex||{}));return true};
+  const placedP=[],placedF=[];let cap=999,cnt=0;
+  const spaced=(arr,x,y,r)=>!arr.some(q=>Math.max(Math.abs(q[0]-x),Math.abs(q[1]-y))<r);
+  const pic=(kk,x,y,wd,ex)=>{if(used.has(key(x,y))||cnt>=cap||!spaced(placedP,x,y,2))return false;used.add(key(x,y));placedP.push([x,y]);cnt++;decor.push(Object.assign({k:kk,x,y,wd,pic:1,block:false,walk:true,deco:true},ex||{}));return true};
+  const flr=(kk,x,y,ex)=>{if(used.has(key(x,y))||cnt>=cap||!spaced(placedF,x,y,2))return false;used.add(key(x,y));placedF.push([x,y]);cnt++;decor.push(Object.assign({k:kk,x,y,block:false,walk:true,deco:true},ex||{}));return true};
   const slots=r=>{const s=[];for(let x=r.x0;x<=r.x1;x++){s.push([x,r.y0,[0,-1]],[x,r.y1,[0,1]])}for(let y=r.y0;y<=r.y1;y++)s.push([r.x0,y,[-1,0]],[r.x1,y,[1,0]]);return shuf(s.filter(([x,y,w])=>isW(x+w[0],y+w[1])&&!used.has(key(x,y))),r.x0+r.y0)};
-  const inner=r=>{const s=[];for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)if(!used.has(key(x,y)))s.push([x,y]);return shuf(s,r.x1+r.y1)};
+  const inner=r=>{const s=[];for(let y=r.y0+1;y<=r.y1-1;y++)for(let x=r.x0+1;x<=r.x1-1;x++)if(!used.has(key(x,y)))s.push([x,y]);return shuf(s,r.x1+r.y1)};
+  // a table stands in a corner of the room (or, if a lantern has the corner, the cell beside it)
+  const corner=(r,kk,ex)=>{const cs=shuf([[r.x0,r.y0],[r.x1,r.y0],[r.x0,r.y1],[r.x1,r.y1]],r.x0+r.y1);for(const [x,y] of cs)if(flr(kk,x,y,ex))return true;
+    for(const [x,y] of cs)for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx>=r.x0&&nx<=r.x1&&ny>=r.y0&&ny<=r.y1&&flr(kk,nx,ny,ex))return true}return false};
   const wallArt=['hl_p_window','hl_p_alcove','hl_p_banner','hl_p_chains'];
-  const note=(r,j)=>{const s=slots(r)[0];if(s)pic('hl_p_note',s[0],s[1],s[2],{npc:'hl_note'+((k*5+j)%HL_NOTES.length),bob:.6})};
+  const note=(r,j)=>{for(const sl of slots(r))if(pic('hl_p_note',sl[0],sl[1],sl[2],{npc:'hl_note'+((k*5+j)%HL_NOTES.length),bob:.6}))break};
   const themes=['gallery','banquet','crypt','study','prison','throne','haunted'];
   let manDone=false;
   rooms.forEach((r,i)=>{
     if(r===myst||r.x1-r.x0<2||r.y1-r.y0<2)return;
     const th=r===far&&top?'throne':i===0?'gallery':themes[(k*3+i*2+R(60+i,3))%7],w=r.x1-r.x0+1,h=r.y1-r.y0+1,S=slots(r),I=inner(r);
-    if(th==='gallery'){let j=0;for(const [x,y,wd] of S){if(j>=Math.min(7,w+h))break;if((x+y)%2)continue;pic(j%4===3?wallArt[(k+j)%4]:'hl_pt'+((k+i+j)%6),x,y,wd,{bob:j%4===3?.3:.5});j++}if(I[0])flr('hl_p_candle',I[0][0],I[0][1])}
-    else if(th==='banquet'){if(w>=5&&h>=4)flr('hl_p_feast',(r.x0+r.x1)>>1,(r.y0+r.y1)>>1);else if(I[0])flr('hl_p_feast',I[0][0],I[0][1]);
-      if(I[1])flr('hl_p_candle',I[1][0],I[1][1]);if(I[2])flr('hl_p_poison',I[2][0],I[2][1],{npc:'hl_poisoncup'});if(I[3]&&R(70+i,10)<7)flr('hl_p_apple',I[3][0],I[3][1],{npc:'hl_poisonapple'});
-      let j=0;for(const [x,y,wd] of S){if(j>=4)break;if(j<2)flr('hl_p_armour',x,y);else pic('hl_p_window',x,y,wd,{bob:.35});j++}}
-    else if(th==='crypt'){let j=0;for(const [x,y,wd] of S){if(j>=6)break;if(j<2)flr('hl_p_coffin',x,y);else if(j===2)flr('hl_p_tomb',x,y);else pic(j%2?'hl_p_alcove':'hl_p_chains',x,y,wd,{bob:j%2?.35:.9});j++}
-      note(r,i);if(I[0])enemies.push({t:'hlghost',x:I[0][0],y:I[0][1]})}
-    else if(th==='study'){let j=0;for(const [x,y,wd] of S){if(j>=5)break;if(j<2)flr('hl_p_shelf',x,y,{npc:'hl_book'+((k*3+j+i)%HL_BOOKS.length)});else if(j===2)flr('hl_p_lectern',x,y,{npc:'hl_book'+((k*7+i)%HL_BOOKS.length)});else pic('hl_p_window',x,y,wd,{bob:.35});j++}
-      if(I[0])flr('hl_p_desk',I[0][0],I[0][1],{npc:'hl_note'+((k*3+i+4)%HL_NOTES.length)});if(I[1])flr('hl_p_candle',I[1][0],I[1][1])}
-    else if(th==='prison'){let j=0;for(const [x,y,wd] of S){if(j>=6)break;if(j<2)flr('hl_p_cage',x,y);else if(j===2)flr('hl_p_rack',x,y);else pic(j%2?'hl_p_alcove':'hl_p_chains',x,y,wd,{bob:j%2?.35:.9});j++}note(r,i+3)}
-    else if(th==='throne'){const mx=(r.x0+r.x1)>>1;flr('hl_p_throne',mx,r.y0);for(const dx of [-2,2,-1,1]){if(isW(mx+dx,r.y0-1))pic('hl_p_banner',mx+dx,r.y0,[0,-1],{bob:.35})}
-      flr('hl_p_armour',r.x0,r.y0+1);flr('hl_p_armour',r.x1,r.y0+1);if(I[0])flr('hl_p_candle',I[0][0],I[0][1]);pic('hl_pt'+(k%6),r.x0+1,r.y0,[0,-1],{bob:.9})}
-    else if(th==='haunted'){let j=0;const fp=S[0];if(fp)pic('hl_fire',fp[0],fp[1],fp[2],{npc:'hl_fireplace',bob:0});
-      for(const [x,y,wd] of S.slice(1)){if(j>=4)break;pic(j%2?'hl_p_mirror':'hl_p_window',x,y,wd,{bob:j%2?.1:.35});j++}if(I[0])enemies.push({t:'hlghost',x:I[0][0],y:I[0][1]});
+    cap=Math.max(3,Math.min(8,(w*h/6)|0));cnt=0;
+    const walls=(n,fn)=>{let j=0;for(const [x,y,wd] of S){if(j>=n)break;if(fn(x,y,wd,j))j++}};
+    if(th==='gallery'){walls(4,(x,y,wd,j)=>pic(j%4===3?wallArt[(k+j)%4]:'hl_pt'+((k+i+j)%6),x,y,wd,{bob:j%4===3?.3:.5}));corner(r,'hl_p_candle')}
+    else if(th==='banquet'){if(w>=5&&h>=4)flr('hl_p_feast',(r.x0+r.x1)>>1,(r.y0+r.y1)>>1);corner(r,'hl_p_candle');corner(r,'hl_p_poison',{npc:'hl_poisoncup'});if(R(70+i,10)<7)corner(r,'hl_p_apple',{npc:'hl_poisonapple'});
+      walls(2,(x,y,wd,j)=>pic('hl_p_window',x,y,wd,{bob:.35}));for(const [x,y] of S){if(flr('hl_p_armour',x,y))break}}
+    else if(th==='crypt'){walls(2,(x,y)=>flr('hl_p_coffin',x,y));for(const [x,y] of S)if(flr('hl_p_tomb',x,y))break;walls(2,(x,y,wd,j)=>pic(j%2?'hl_p_alcove':'hl_p_chains',x,y,wd,{bob:j%2?.35:.9}));note(r,i);if(I[0])enemies.push({t:'hlghost',x:I[0][0],y:I[0][1]})}
+    else if(th==='study'){let n=0;for(const [x,y] of S){if(n>=2)break;if(flr('hl_p_shelf',x,y,{npc:'hl_book'+((k*3+n+i)%HL_BOOKS.length)}))n++}
+      for(const [x,y] of S)if(flr('hl_p_lectern',x,y,{npc:'hl_book'+((k*7+i)%HL_BOOKS.length)}))break;
+      corner(r,'hl_p_desk',{npc:'hl_note'+((k*3+i+4)%HL_NOTES.length)});corner(r,'hl_p_candle');walls(1,(x,y,wd)=>pic('hl_p_window',x,y,wd,{bob:.35}))}
+    else if(th==='prison'){walls(2,(x,y)=>flr('hl_p_cage',x,y));for(const [x,y] of S)if(flr('hl_p_rack',x,y))break;walls(2,(x,y,wd,j)=>pic(j%2?'hl_p_alcove':'hl_p_chains',x,y,wd,{bob:j%2?.35:.9}));note(r,i+3)}
+    else if(th==='throne'){const mx=(r.x0+r.x1)>>1;flr('hl_p_throne',mx,r.y0);for(const dx of [-2,2]){if(isW(mx+dx,r.y0-1))pic('hl_p_banner',mx+dx,r.y0,[0,-1],{bob:.35})}
+      flr('hl_p_armour',r.x0,r.y0+1);flr('hl_p_armour',r.x1,r.y0+1);corner(r,'hl_p_candle');pic('hl_pt'+(k%6),r.x0+1,r.y0,[0,-1],{bob:.9})}
+    else if(th==='haunted'){const fp=S[0];if(fp)pic('hl_fire',fp[0],fp[1],fp[2],{npc:'hl_fireplace',bob:0});let j=0;
+      for(const [x,y,wd] of S.slice(1)){if(j>=3)break;if(pic(j%2?'hl_p_mirror':'hl_p_window',x,y,wd,{bob:j%2?.1:.35}))j++}
+      if(I[0])enemies.push({t:'hlghost',x:I[0][0],y:I[0][1]});
       if(!manDone&&k%2===1&&I[1]){manDone=true;flr('hl_gent',I[1][0],I[1][1],{npc:'hl_gent'})}}
   });
+  cap=999;
   const secretSlots=[];
   // secret rooms: one wall in a hall is the wrong colour and has a lever on it. Behind it is a small chamber with a chest
   {let made=0;const want=1+(k%3===0?1:0)+(k>=HL.N-4?1:0),setC=(x,y,ch)=>{rows[y]=rows[y].slice(0,x)+ch+rows[y].slice(x+1)};
@@ -396,7 +404,7 @@ function hlDress(c){
   if(k%5===2){const r=rooms.find((q,i)=>i>=2&&q!==myst&&q!==far&&q.x1-q.x0>=3);if(r){const cx=(r.x0+r.x1)>>1,cy=(r.y0+r.y1)>>1;if(!used.has(key(cx,cy))){enemies.push({t:'hlwitch',x:cx,y:cy});used.add(key(cx,cy))}}}
   // corridors: a picture or a chain now and then, so the passages are not bare
   const inRoom=(x,y)=>rooms.some(r=>x>=r.x0&&x<=r.x1&&y>=r.y0&&y<=r.y1);
-  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!isF(x,y)||inRoom(x,y)||used.has(key(x,y))||hs(x*7,y*3,k+88)>.14)continue;
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!isF(x,y)||inRoom(x,y)||used.has(key(x,y))||hs(x*7,y*3,k+88)>.08)continue;
     const dir=[[0,-1],[0,1],[-1,0],[1,0]].find(([a,b])=>isW(x+a,y+b)&&isF(x-a,y-b));if(!dir)continue;
     const kinds=['hl_pt'+((x+y+k)%6),'hl_p_chains','hl_p_window','hl_p_alcove','hl_p_banner'],kd=kinds[(x*3+y)%5];pic(kd,x,y,dir,{bob:kd==='hl_p_chains'?.9:kd.startsWith('hl_pt')?.5:.35})}
   // hands that reach out of a niche in the passage wall
