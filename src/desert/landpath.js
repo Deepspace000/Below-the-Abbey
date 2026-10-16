@@ -91,6 +91,23 @@ function lpPeak(k,seed){ // a range of far mountains, with snow on the highest, 
     x.strokeStyle='rgba(70,88,108,.14)';x.lineWidth=4;x.beginPath();x.moveTo(p[0],p[1]+6);x.lineTo(p[0]+24,h);x.stroke()}
   const hz=x.createLinearGradient(0,h*.35,0,h);hz.addColorStop(0,'rgba(208,224,238,0)');hz.addColorStop(1,'rgba(208,224,238,.9)');x.fillStyle=hz;x.fillRect(0,0,w,h);x.restore();
   IMG[k]=c;return k}
+const LP_FALLS=[9,12,14],LP_BRIDGE={}; // the stretches with a waterfall and a rope bridge
+function lpFallsKey(){ // a waterfall: a ribbon of white water falling down a dark rock face, with spray at the foot
+  const k='lp_falls';if(IMG[k])return k;const w=256,h=768,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+  const rg=x.createLinearGradient(0,0,0,h);rg.addColorStop(0,'#3d4a46');rg.addColorStop(1,'#2a3330');x.fillStyle=rg;
+  x.beginPath();x.moveTo(18,0);for(let y=0;y<=h;y+=24)x.lineTo(14+hash2(y,1,3)*18,y);x.lineTo(40,h);x.lineTo(w-40,h);for(let y=h;y>=0;y-=24)x.lineTo(w-14-hash2(y,2,3)*18,y);x.closePath();x.fill();
+  for(let i=0;i<40;i++){x.fillStyle='rgba(20,28,26,'+(.12+hash2(i,4,3)*.2)+')';x.fillRect(20+hash2(i,5,3)*(w-60),hash2(i,6,3)*h,6+hash2(i,7,3)*18,10+hash2(i,8,3)*40)}
+  const wg=x.createLinearGradient(0,0,0,h);wg.addColorStop(0,'rgba(210,232,244,.82)');wg.addColorStop(.7,'rgba(240,248,252,.95)');wg.addColorStop(1,'rgba(255,255,255,.98)');x.fillStyle=wg;
+  x.beginPath();x.moveTo(w/2-26,0);x.lineTo(w/2+26,0);for(let y=0;y<=h-60;y+=30)x.lineTo(w/2+26+y*.05+Math.sin(y*.05)*3,y);x.lineTo(w/2+62,h-30);x.lineTo(w/2-62,h-30);for(let y=h-60;y>=0;y-=30)x.lineTo(w/2-26-y*.05-Math.sin(y*.05)*3,y);x.closePath();x.fill();
+  for(let i=0;i<46;i++){const px=w/2-40+hash2(i,9,3)*80,py=hash2(i,10,3)*(h-90);x.strokeStyle='rgba(255,255,255,'+(.25+hash2(i,11,3)*.4)+')';x.lineWidth=1.5+hash2(i,12,3)*2.5;x.beginPath();x.moveTo(px,py);x.lineTo(px+(hash2(i,13,3)-.5)*4,py+30+hash2(i,14,3)*70);x.stroke();}
+  for(let i=0;i<26;i++){x.fillStyle='rgba(255,255,255,'+(.08+hash2(i,15,3)*.12)+')';x.beginPath();x.ellipse(w/2+(hash2(i,16,3)-.5)*170,h-30-hash2(i,17,3)*80,26+hash2(i,18,3)*30,12+hash2(i,19,3)*20,0,0,TAU);x.fill()}
+  IMG[k]=c;NPC_H[k]=6.2;return k}
+function lpRailKey(){ // a post with a rope looped to the next one, for the rope bridge
+  const k='lp_rail';if(IMG[k])return k;const w=128,h=128,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+  x.fillStyle='#6a5236';x.fillRect(w/2-7,22,14,100);x.fillStyle='#4a3822';x.fillRect(w/2-7,22,4,100);x.fillStyle='#8a6e48';x.fillRect(w/2-9,18,18,8);
+  x.strokeStyle='#c8b080';x.lineWidth=4;for(const [y0,y1] of [[38,52],[64,80]]){x.beginPath();x.moveTo(w/2-7,y0);x.quadraticCurveTo(w/4,y1,2,y0-4);x.stroke();x.beginPath();x.moveTo(w/2+7,y0);x.quadraticCurveTo(w*.75,y1,w-2,y0-4);x.stroke()}
+  x.strokeStyle='rgba(60,44,24,.5)';x.lineWidth=1.2;for(let i=0;i<20;i++){x.beginPath();x.moveTo(6+i*5,40+hash2(i,1,4)*4);x.lineTo(9+i*5,44+hash2(i,2,4)*4);x.stroke()}
+  IMG[k]=c;NPC_H[k]=.8;return k}
 let LP_HAZE=0;
 function lpHaze(){ // the far edge of the sea: a wall the colour of the horizon, so that it cannot be seen as a wall
   if(LP_HAZE)return LP_HAZE;const wh=.45,c=mkCanvas(128,Math.round(128*wh),(x,w,h)=>{const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'#bfd4e6');g.addColorStop(.5,'#cddfec');g.addColorStop(1,'#a9c0d0');x.fillStyle=g;x.fillRect(0,0,w,h)});
@@ -141,7 +158,7 @@ function lpBuild(s){
         // the mountains: a pass between tall grey cliffs, with heather, rock and pines in it
         const sg=x<c?-1:1,wd=wdist(y,sg);
         fm[i]=d<=1?'1':d>wd-3?'6':wd>11?'0':'5';h[i]=.3;
-        if(d>wd+7){setC(x,y,rockAt(x,y,sg));}
+        if(d>wd+7){setC(x,y,'T');} // the far slope: a wall of dark forest, not rock
       }
     }
   }
@@ -157,6 +174,16 @@ function lpBuild(s){
     for(let q=0;q<4;q++){const y=60+((hs(sd,q,31)*(H-160))|0);if(wet(y))continue;for(const sg of [-1,1]){if(hs(y,sg,sd+32)<.5)continue;const wd=lpWd(s,y,sg);if(wd<12)continue;const cx0=xc[y]+sg*Math.round(wd*.6),r=Math.min(6,Math.floor((wd-5)*.45));
       for(let yy=y-r*2;yy<=y+r*2;yy++)for(let xx=cx0-r;xx<=cx0+r;xx++){if(yy<2||yy>=H-2||xx<1||xx>=W-1||Math.abs(xx-xc[yy])<4)continue;if(((xx-cx0)/r)**2+((yy-y)/(r*2))**2<=1&&rows[yy][MX(xx)]==='.'){fm[I(xx,yy)]='4';h[I(xx,yy)]=-.2;block[I(xx,yy)]=1}}}}
     if(s%3===1){const sgn=s%2?1:-1;for(let y=40;y<H-40;y++){if(wet(y))continue;const x=xc[y]+sgn*3+Math.round(1.5*Math.sin(y*.15));if(rows[y][MX(x)]==='.'&&!block[I(x,y)]){fm[I(x,y)]='4';h[I(x,y)]=.05}}}
+    // a waterfall at the foot of the slope, a stream running from its pool across the path, and a rope bridge over the stream
+    if(LP_FALLS.includes(s)){let by=0,bw=0;for(let y=130;y<H-130;y+=2){if(s===LPM.SEG&&Math.abs(y-LPM.Y)<34)continue;const w=lpWd(s,y,1)+lpWd(s,y,-1);if(w>bw){bw=w;by=y}}
+      const sg=lpWd(s,by,1)>=lpWd(s,by,-1)?1:-1,c=xc[by],xr=c+Math.floor(lpWd(s,by,1))+2,xl=c-Math.floor(lpWd(s,by,-1))-2,fx=sg>0?xr+1:xl-1,pk=sg>0?xr:xl;
+      for(let x=xl;x<=xr;x++)for(let y=by-1;y<=by+2;y++)carve.add(K(x,y));
+      for(let x=xl;x<=xr;x++)for(let y=by;y<=by+1;y++){if(rows[y][MX(x)]!=='.')continue;const i=I(x,y),deck=Math.abs(x-c)<=1;fm[i]=deck?'7':'4';h[i]=deck?.3:-.12;block[i]=deck?0:1}
+      for(let y=by-2;y<=by+3;y++)for(let x=pk-2;x<=pk+2;x++)if(x>0&&x<W-1&&y>0&&Math.hypot(x-pk,y-by-.5)<=2.6&&rows[y][MX(x)]==='.'){fm[I(x,y)]='4';h[I(x,y)]=-.2;block[I(x,y)]=1;carve.add(K(x,y))}
+      const fk=lpFallsKey(),rk=lpRailKey();
+      if(fk)decor.push({k:fk,x:MX(fx),y:by,block:true,deco:true,sc:1,kname:'falls'});
+      if(rk)for(const dx of [-2,2])for(const dy of [0,1])decor.push({k:rk,x:MX(c+dx),y:by+dy,block:true,deco:true,sc:1});
+      used.add(K(fx,by));LP_BRIDGE[s]={y:by,x:c}}
     // far peaks with snow on them, standing behind the cliffs
     for(let q=0,y=20+((hs(sd,40,40)*40)|0);y<H-20;y+=75,q++)for(const sg of [-1,1]){const pk=lpPeak('lp_peak'+((q+(sg>0?1:0)+s)%6),(q+(sg>0?1:0)+s)%6);if(pk)sky.push({x:xc[y]+sg*(52+((hs(y,sg,sd+41)*26)|0)),y,k:pk,w:96,z:3,big:1})}
   }
@@ -273,7 +300,7 @@ function lpBuild(s){
   enter(MX(CX),H-2,s>0?lpId(s-1):OH.ID,s>0?mxq(s-1,CX):100,s>0?4:7,2);
   function lpId(q){return LP.BASE+q}
   for(let y=H-4;y<H-1;y++)for(let x=CX-6;x<=CX+6;x++)used.add(K(x,y));
-  const lv={rows:rows.map(r=>r.join('')),start:{x:MX(CX),y:H-5,f:0},enemies:[],items:[],decor,scenery,sky,fmap:null,floorSet:['ohMeadow','ohGravel','ohLawn','bluesand','bluewater','ohMoss','isleSandDk'],floor:'ohMeadow',ceil:'cloud',
+  const lv={rows:rows.map(r=>r.join('')),start:{x:MX(CX),y:H-5,f:0},enemies:[],items:[],decor,scenery,sky,fmap:null,floorSet:['ohMeadow','ohGravel','ohLawn','bluesand','bluewater','ohMoss','isleSandDk','wood'],floor:'ohMeadow',ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:LEVEL_NAMES[id],label:'The Land Path',noExtras:true,diff:25,ceilH:5.2,chars,lights,portals:[],_walk:walkers};
   if(tele)lv.tele=tele;else lv.noTele=true;
   lv.mapNames=[{t:s===0?'The Land Gate':'The Land Path',x:MX(CX),y:H-10,k:'lane'}];
@@ -318,3 +345,10 @@ function lpBeeImg(){if(!IMG.lp_bee){const c=document.createElement('canvas');c.w
   const cell=(px|0)+','+(py|0);if(cell!==LPS.floAt){LPS.floAt=cell;LPS.flo=(G.flora||[]).filter(f=>Math.abs(f.wx-px)<7&&Math.abs(f.wy-py)<7&&/^lflora/.test(f.k)).slice(0,6)}
   LPS.beeNear=0;const bi=lpBeeImg();
   LPS.flo.forEach((f,i)=>{const a=t*(3+i*.4)+i*2,d=Math.hypot(f.wx-px,f.wy-py);if(d<3)LPS.beeNear+=1;out.push({x:f.wx+Math.cos(a)*.3,y:f.wy+Math.sin(a*1.3)*.3,img:bi,w:.07,bob:.32+Math.sin(a*2)*.08,decor:{walk:true,k:'lp_bee'}})})}}
+
+{const _f=forestWallFor;forestWallFor=function(n){if(n>=400&&n<=423&&T_LUSH!==undefined)return T_LUSH;return _f.apply(this,arguments)}}
+{const _ys2=yarSoundTick;yarSoundTick=function(){_ys2.apply(this,arguments);
+  if(!AC||G.state!=='play'||G.mute||!SNDOPT.amb||!(LEVEL>=LP.BASE&&LEVEL<LP.BASE+LP.N)||!G.P)return;
+  const t=G.time;if(t<(LPS.nextFall||0))return;
+  const f=G.decor.find(d=>d.kname==='falls'&&Math.abs(d.x-G.P.x)<14&&Math.abs(d.y-G.P.y)<14);if(!f)return;
+  LPS.nextFall=t+.22;const near=1-Math.min(1,Math.hypot(f.x-G.P.x,f.y-G.P.y)/14);nz(.34,.05*near*(SNDOPT.amb||1),'bandpass',1100+Math.random()*300,1500,0)}}
