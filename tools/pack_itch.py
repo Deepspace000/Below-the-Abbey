@@ -55,6 +55,10 @@ html = html[:i] + SHIM + html[i:]
 GO = "items.push(['tgoto','Go to area']);"
 assert GO in html
 html = html.replace(GO, '')
+# the powerful test weapons are for the Pages build only: the itch.io build never hands them out
+TW = 'function giveTestWeapons(){'
+assert TW in html
+html = html.replace(TW, TW + 'return;')
 open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8', newline='').write(html)
 n = 0
 z = zipfile.ZipFile(os.path.join(ROOT, 'itch-build.zip'), 'w', zipfile.ZIP_STORED)
