@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.195';
+const VERSION='3.196';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -6912,7 +6912,7 @@ function makeAtmos(){
   PAPERP=ctx.createPattern(mkCanvas(256,256,(x)=>{
     x.fillStyle='#ffffff';x.fillRect(0,0,256,256);
     for(let i=0;i<46;i++){const px=Math.random()*256,py=Math.random()*256,r=8+Math.random()*34,a=.06+Math.random()*.22;
-      const g=x.createRadialGradient(px,py,0,px,py,r);g.addColorStop(0,`rgba(150,104,56,${a})`);g.addColorStop(.7,`rgba(150,104,56,${a*.4})`);g.addColorStop(1,'rgba(150,104,56,0)');x.fillStyle=g;x.fillRect(px-r,py-r,r*2,r*2)}
+      for(const ox of [-256,0,256])for(const oy of [-256,0,256]){const qx=px+ox,qy=py+oy;if(qx<-r||qx>256+r||qy<-r||qy>256+r)continue;const g=x.createRadialGradient(qx,qy,0,qx,qy,r);g.addColorStop(0,`rgba(150,104,56,${a})`);g.addColorStop(.7,`rgba(150,104,56,${a*.4})`);g.addColorStop(1,'rgba(150,104,56,0)');x.fillStyle=g;x.fillRect(qx-r,qy-r,r*2,r*2)}} // each stain is also drawn across the tile's edges, so that the repeating tile has no seam: a seam showed as a thin vertical line in the sky
     // (the faint ring stains that used to be drawn here showed up as circles in the sky, and have been taken out)
     x.strokeStyle='rgba(120,100,70,.14)';x.lineWidth=.5;
     for(let i=0;i<70;i++){const px=Math.random()*256,py=Math.random()*256,a=Math.random()*6.28,l=3+Math.random()*10;x.beginPath();x.moveTo(px,py);x.lineTo(px+Math.cos(a)*l,py+Math.sin(a)*l);x.stroke()}
@@ -16293,7 +16293,9 @@ khNpc('ab_plaque','A plaque','gate',()=>say('THE HOLLOW LAND. The road continues
    west) 8 to 15, S (coast, going south, drawn the other way round so the sea is still on the right hand west) 16 to 21, D (the high pass
    and the descent) 22 and 23. Each leg is a stretch of the same kind of country. The 13 buildings are rooms numbered from 6800.
    ========================================================================== */
-const LP={BASE:400,N:24,ROOM0:6800,W:104,H:560,CX:76,A:10},LPK=LP.H/400; // 24 stretches of 560 rows is about 13,000 steps
+const LPOV=160,LPT=72; // two neighbouring stretches share their last and first 160 rows exactly, and the party is carried from one to the other 72 rows from the end, where the end cannot be seen
+const LP={BASE:400,N:24,ROOM0:6800,W:104,H:800,CX:76,A:10},LPK=LP.H/400;
+const LP_LEG_SD={N:1011,W:2022,S:3033,D:4044}; // 24 stretches of 560 rows is about 13,000 steps
 const LP_LEG=s=>s<8?'N':s<16?'W':s<22?'S':'D';
 const LP_BUILD=[ // [segment, kind, row, name, keeper id]
   [1,'house',250,"The Shepherd’s House",'lp_r0'],[3,'inn',150,'The Last Lamp','lp_inn0'],[5,'church',280,'The Church of the Long Road','lp_pr0'],[6,'house',110,"The Fisherman’s House",'lp_r1'],
@@ -16328,15 +16330,16 @@ khNpc('lp_cliff','The edge of the Land Path','gate',()=>say('The path ends here,
 const LPY={x:56,y:8,f:2}; // where the goat track comes out, north of Yarrim
 const LPM={SEG:11,Y:300}; // the gate of the monastery, cut into the rock beside the path, halfway along
 let LP_XC={};
-function lpXcOf(s){ // the middle of the path, row by row: dead straight, with two or three slow bends, so that a grid walk is easy
+function lpXcOf(s){ // the middle of the path, row by row: dead straight, with three slow bends in the part of a stretch that no other stretch shares
   if(LP_XC[s])return LP_XC[s];
   const leg=LP_LEG(s),mount=leg==='W'||leg==='D',PAD=s===LP.N-1?60:0,H=LP.H+PAD,CX=LP.CX,A=(mount?LP.A-1:LP.A)*.8,sd=s*37+11,HH=LP.H,xc=[],rnd=i=>hash2(sd,i,77);
-  const bends=[[170+rnd(1)*90,(rnd(3)-.5)*2*A],[340+rnd(2)*80,(rnd(4)-.5)*2*A],[HH-120,0]],L=46,sm=t=>t*t*(3-2*t);
+  const bends=[[240+rnd(1)*100,(rnd(3)-.5)*2*A],[420+rnd(2)*100,(rnd(4)-.5)*2*A],[560,0]],L=60,sm=t=>t*t*(3-2*t);
   for(let y=0;y<H;y++){const yy=y-PAD;if(yy<0){xc.push(CX);continue}const u=HH-1-yy;let off=0;
     for(const [c,target] of bends){const t=Math.max(0,Math.min(1,(u-(c-L/2))/L));off=off+(target-off)*sm(t)}
     xc.push(Math.round(CX+off))}
   return LP_XC[s]=xc}
-const lpWd=(s,y,sg)=>5+2*tsmooth(y/7,sg+3,s*37+11+7)+9*Math.max(0,tsmooth(y/50,sg+21,s*37+11+9)-.5)*2.2; // the pass is a narrow gorge in places and opens out into green valleys in others
+const lpWdG=(gy,sg,leg)=>5+2*tsmooth(gy/7,sg+3,LP_LEG_SD[leg]+7)+9*Math.max(0,tsmooth(gy/50,sg+21,LP_LEG_SD[leg]+9)-.5)*2.2; // the pass is a narrow gorge in places and opens out into green valleys in others, by distance along the whole path so that neighbouring stretches agree
+const lpWd=(s,y,sg)=>lpWdG(s*(LP.H-LPOV)+(LP.H-1-y),sg,LP_LEG(s));
 function lpMonDoor(){const xc=lpXcOf(LPM.SEG);return {x:xc[LPM.Y]+Math.floor(lpWd(LPM.SEG,LPM.Y,1))+8,y:LPM.Y,c:xc[LPM.Y]}}
 /* ---- pilgrims on the way, people resting by the road, and the shrines ---- */
 const LP_PILG=[
@@ -16365,7 +16368,7 @@ khNpc('lp_shrine','A roadside shrine','memorial',d=>{
 });
 
 /* ---- pictures: an invisible stone to walk into at the ends of each stretch, and the horse ---- */
-const LP_KM=96,LP_ROWS_KM=(LP.N*LP.H)/LP_KM; // the whole path is 96 kilometres, a sign at every one
+const LP_KM=96,LP_ROWS_KM=(LP.N*(LP.H-LPOV)+LPOV)/LP_KM; // the whole path is 96 kilometres, a sign at every one
 function lpArt(){if(!IMG.lp_gap){const c=document.createElement('canvas');c.width=c.height=8;IMG.lp_gap=c;NPC_H.lp_gap=.1}}
 function lpPeak(k,seed){ // a range of far mountains, with snow on the highest, fading into haze at its foot
   if(IMG[k])return k;const w=640,h=260,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d'),pts=[];
@@ -16412,7 +16415,7 @@ function lpBuild(s){
   const id=LP.BASE+s;if(LEVELS[id])return;
   if(typeof KH_READY!=='undefined'&&!KH_READY)return;
   ohAlias();oqAlias();ohArt();ohFloors();ohStyles();isleFloors();lpArt();
-  const PAD=s===LP.N-1?60:0,W=LP.W,H=LP.H+PAD,Y0=PAD,N=W*H,CX=LP.CX,leg=LP_LEG(s),mir=leg==='S',MX=x=>mir?W-1-x:x,hs=(a,b,c)=>hash2(a,b,c),sd=s*37+11;
+  const PAD=s===LP.N-1?60:0,W=LP.W,H=LP.H+PAD,Y0=PAD,N=W*H,CX=LP.CX,leg=LP_LEG(s),mir=leg==='S',MX=x=>mir?W-1-x:x,hs=(a,b,c)=>hash2(a,b,c),sd=s*37+11,gsd=LP_LEG_SD[leg],OV=LPOV,GY=y=>s*(LP.H-OV)+(LP.H-1-(y-Y0)),safeLo=Y0+OV+20,safeHi=H-OV-20;
   const mount=leg==='W'||leg==='D',coast=!mount,open_=y=>coast||(s===LP.N-1&&y<64+Y0);
   const wet=y=>s===LP.N-1&&y<=Y0+5; // the sea beyond the cliff // the last stretch opens out onto a green terrace above the sea
   const OAKS=['ltree0','ltree4','ltree8','ltree12','ltree19'],PINES=['ptree0','ptree5','ptree6','ptree0','ptree5','ptree2','ptree7','ltree2'],FLO=['lflora0','lflora0_1','lflora0_2'];
@@ -16421,7 +16424,7 @@ function lpBuild(s){
   const sty=(n,o)=>{OH_STY[n]=Object.assign({},OH_STY.castle2||OH_STY.gold,o)};
   sty('lprock1',{zoom:2.6,contrast:2.8,tint:[132,152,134,.0]});sty('lprock2',{zoom:2.2,contrast:2.4,tint:[128,146,150,.0]});sty('lprock3',{zoom:3,contrast:3,tint:[140,152,128,.0]});
   const rockTiles=[];if(mount)for(const st of ['lprock1','lprock2','lprock3'])for(const wh of [3.6,4.6,5.6,6.8])rockTiles.push(ch(TM.make('plain',st,wh).gid));
-  const rockAt=(x,y,sg)=>{const hh=Math.min(3,Math.floor(tsmooth(y/11,sg+11,sd+21)*4)),st=Math.min(2,Math.floor(tsmooth(y/37,sg+17,sd+23)*3.99));return rockTiles[st*4+hh]},wdist=(y,sg)=>lpWd(s,y,sg);
+  const rockAt=(x,y,sg)=>{const hh=Math.min(3,Math.floor(tsmooth(GY(y)/11,sg+11,gsd+21)*4)),st=Math.min(2,Math.floor(tsmooth(GY(y)/37,sg+17,gsd+23)*3.99));return rockTiles[st*4+hh]},wdist=(y,sg)=>lpWdG(GY(y),sg,leg);
   const rows=[];for(let y=0;y<H;y++)rows.push(new Array(W).fill('.'));
   const fm=new Array(N).fill('0'),h=new Float32Array(N).fill(.3),rk=new Float32Array(N),block=new Uint8Array(N);
   const I=(x,y)=>y*W+MX(x),setC=(x,y,c)=>{rows[y][MX(x)]=c;block[I(x,y)]=1};
@@ -16429,18 +16432,18 @@ function lpBuild(s){
   const K=(x,y)=>MX(x)+','+y;
   /* the winding centre of the path: 0 at both ends, wandering 10 cells either way in between */
   const xc=lpXcOf(s);
-  const fe=y=>xc[y]+5+Math.round(1.2*Math.sin(y*.09+s*2));
+  const fe=y=>xc[y]+5+Math.round(1.2*Math.sin(GY(y)*.09));
   /* ---- ground: sea and shore on one side, forest on the other; or mountains on both ---- */
   for(let y=0;y<H;y++){const c=xc[y];
     for(let x=0;x<W;x++){const i=I(x,y),d=Math.abs(x-c);
       if(open_(y)){
-        const wl=c-6+Math.round(2.2*Math.sin(y*.11+s)),ws=wl-3;
+        const wl=c-6+Math.round(2.2*Math.sin(GY(y)*.11)),ws=wl-3;
         if(s===LP.N-1&&y<=Y0+5){fm[i]='4';h[i]=-.2;block[i]=1}
-        else if(x<ws){fm[i]='4';h[i]=-.2+.03*(tsmooth(x/6,y/6,77)-.5);block[i]=1}
+        else if(x<ws){fm[i]='4';h[i]=-.2+.03*(tsmooth(x/6,GY(y)/6,77)-.5);block[i]=1}
         else if(x<wl){fm[i]='3';h[i]=.12}
         else if(d<=1){fm[i]='1';h[i]=.3}
-        else if(x>=fe(y)){fm[i]='0';h[i]=.3+.06*tsmooth(x/5,y/5,sd)}
-        else{fm[i]='0';h[i]=.3+.05*(tsmooth(x/5,y/5,sd+3)-.5)}
+        else if(x>=fe(y)){fm[i]='0';h[i]=.3+.06*tsmooth(x/5,GY(y)/5,gsd)}
+        else{fm[i]='0';h[i]=.3+.05*(tsmooth(x/5,GY(y)/5,gsd+3)-.5)}
       }else{
         // the mountains: a pass between tall grey cliffs, with heather, rock and pines in it
         const sg=x<c?-1:1,wd=wdist(y,sg);
@@ -16458,12 +16461,12 @@ function lpBuild(s){
   }
   if(mount){
     // tarns in the wide valleys, and a stream beside the path in some stretches
-    for(let q=0;q<4;q++){const y=60+((hs(sd,q,31)*(H-160))|0);if(wet(y))continue;for(const sg of [-1,1]){if(hs(y,sg,sd+32)<.5)continue;const wd=lpWd(s,y,sg);if(wd<12)continue;const cx0=xc[y]+sg*Math.round(wd*.6),r=Math.min(6,Math.floor((wd-5)*.45));
+    for(let q=0;q<4;q++){const y=safeLo+((hs(sd,q,31)*(safeHi-safeLo))|0);if(wet(y))continue;for(const sg of [-1,1]){if(hs(GY(y),sg,gsd+32)<.5)continue;const wd=wdist(y,sg);if(wd<12)continue;const cx0=xc[y]+sg*Math.round(wd*.6),r=Math.min(6,Math.floor((wd-5)*.45));
       for(let yy=y-r*2;yy<=y+r*2;yy++)for(let xx=cx0-r;xx<=cx0+r;xx++){if(yy<2||yy>=H-2||xx<1||xx>=W-1||Math.abs(xx-xc[yy])<4)continue;if(((xx-cx0)/r)**2+((yy-y)/(r*2))**2<=1&&rows[yy][MX(xx)]==='.'){fm[I(xx,yy)]='4';h[I(xx,yy)]=-.2;block[I(xx,yy)]=1}}}}
-    if(s%3===1){const sgn=s%2?1:-1;for(let y=40;y<H-40;y++){if(wet(y))continue;const x=xc[y]+sgn*3+Math.round(1.5*Math.sin(y*.15));if(rows[y][MX(x)]==='.'&&!block[I(x,y)]){fm[I(x,y)]='4';h[I(x,y)]=.05}}}
+    if(s%3===1){const sgn=s%2?1:-1;for(let y=safeLo;y<safeHi;y++){if(wet(y))continue;const x=xc[y]+sgn*3+Math.round(1.5*Math.sin(y*.15));if(rows[y][MX(x)]==='.'&&!block[I(x,y)]){fm[I(x,y)]='4';h[I(x,y)]=.05}}}
     // a waterfall at the foot of the slope, a stream running from its pool across the path, and a rope bridge over the stream
-    if(LP_FALLS.includes(s)){let by=0,bw=0;for(let y=130;y<H-130;y+=2){if(s===LPM.SEG&&Math.abs(y-LPM.Y)<34)continue;const w=lpWd(s,y,1)+lpWd(s,y,-1);if(w>bw){bw=w;by=y}}
-      const sg=lpWd(s,by,1)>=lpWd(s,by,-1)?1:-1,c=xc[by],xr=c+Math.floor(lpWd(s,by,1))+2,xl=c-Math.floor(lpWd(s,by,-1))-2,fx=sg>0?xr+1:xl-1,pk=sg>0?xr:xl;
+    if(LP_FALLS.includes(s)){let by=0,bw=0;for(let y=safeLo+10;y<safeHi-10;y+=2){if(s===LPM.SEG&&Math.abs(y-LPM.Y)<34)continue;const w=wdist(y,1)+wdist(y,-1);if(w>bw){bw=w;by=y}}
+      const sg=wdist(by,1)>=wdist(by,-1)?1:-1,c=xc[by],xr=c+Math.floor(wdist(by,1))+2,xl=c-Math.floor(wdist(by,-1))-2,fx=sg>0?xr+1:xl-1,pk=sg>0?xr:xl;
       for(let x=xl;x<=xr;x++)for(let y=by-1;y<=by+2;y++)carve.add(K(x,y));
       for(let x=xl;x<=xr;x++)for(let y=by;y<=by+1;y++){if(rows[y][MX(x)]!=='.')continue;const i=I(x,y),deck=Math.abs(x-c)<=1;fm[i]=deck?'7':'4';h[i]=deck?.3:-.12;block[i]=deck?0:1}
       for(let y=by-2;y<=by+3;y++)for(let x=pk-2;x<=pk+2;x++)if(x>0&&x<W-1&&y>0&&Math.hypot(x-pk,y-by-.5)<=2.6&&rows[y][MX(x)]==='.'){fm[I(x,y)]='4';h[I(x,y)]=-.2;block[I(x,y)]=1;carve.add(K(x,y))}
@@ -16471,19 +16474,18 @@ function lpBuild(s){
       if(fk)decor.push({k:fk,x:MX(fx),y:by,block:true,deco:true,sc:1,kname:'falls'});
       if(rk)for(const dx of [-2,2])for(const dy of [0,1])decor.push({k:rk,x:MX(c+dx),y:by+dy,block:true,deco:true,sc:1});
       used.add(K(fx,by));LP_BRIDGE[s]={y:by,x:c}}
-    // far peaks with snow on them, standing behind the cliffs
-    for(let q=0,y=20+((hs(sd,40,40)*40)|0);y<H-20;y+=75,q++)for(const sg of [-1,1]){const pk=lpPeak('lp_peak'+((q+(sg>0?1:0)+s)%6),(q+(sg>0?1:0)+s)%6);if(pk)sky.push({x:xc[y]+sg*(52+((hs(y,sg,sd+41)*26)|0)),y,k:pk,w:96,z:3,big:1})}
+    // far peaks with snow on them, standing behind the cliffs, placed by distance along the whole path
+    for(let y=2;y<H-2;y++){const g=GY(y);if(g%75!==37)continue;const q=Math.floor(g/75);for(const sg of [-1,1]){const pk=lpPeak('lp_peak'+((q+(sg>0?1:0))%6),(q+(sg>0?1:0))%6);if(pk)sky.push({x:xc[y]+sg*(52+((hs(g,sg,gsd+41)*26)|0)),y,k:pk,w:96,z:3,big:1})}}
   }
   /* ---- the places cut out of the trees: clearings, building yards, the hidden nook ---- */
   const circle=(cx,cy,r)=>{for(let y=Math.max(1,cy-r);y<=Math.min(H-2,cy+r);y++)for(let x=cx-r;x<=cx+r;x++)if(x>0&&x<W-1&&Math.hypot(x-cx,y-cy)<=r+hs(x,y,5)*.8)carve.add(K(x,y))};
   const lane=(x0,x1,y,hw)=>{for(let x=Math.min(x0,x1);x<=Math.max(x0,x1);x++)for(let yy=y-(hw||0);yy<=y+(hw||0);yy++)carve.add(K(x,yy))};
   const clearings=[];
-  for(let k=0;k<6;k++){const y=70+k*92+((hs(sd,k,6)*30)|0);if(y<30||y>H-40)continue;const side=(k+s)%2?-1:1;clearings.push({y,side})}
-  const blds=[];LP_BUILD.forEach((b,i)=>{if(b[0]===s)blds.push({i,kind:b[1],y:Math.round(b[2]*LPK),name:b[3],keeper:b[4]})});
+  for(let y=2;y<H-2;y++){const g=GY(y),b=Math.floor(g/92);if(g!==b*92+46+((hs(b,7,gsd)*20)|0))continue;clearings.push({y,side:b%2?-1:1,safe:y>=safeLo&&y<safeHi})}
+  const blds=[];LP_BUILD.forEach((b,i)=>{if(b[0]===s)blds.push({i,kind:b[1],y:Math.max(safeLo+12,Math.min(safeHi-12,Math.round(b[2]*LPK))),name:b[3],keeper:b[4]})});
   const taken=y=>blds.some(b=>Math.abs(b.y-y)<22)||(LP_TELE.includes(s)&&Math.abs(teleY-y)<14);
-  const teleY=Math.round((120+hs(sd,9,9)*150)*LPK);
-  for(const c of clearings){if(taken(c.y)||c.side<0){c.skip=c.side<0?false:true}
-    if(c.skip&&c.side>0)continue;
+  const teleY=safeLo+30+((hs(sd,9,9)*(safeHi-safeLo-60))|0);
+  for(const c of clearings){if(c.safe&&taken(c.y)){c.skip=true;continue}
     if(c.side>0){const cx=xc[c.y]+16;circle(cx,c.y,6);lane(fe(c.y)-1,cx,c.y,1);c.cx=cx}}
   /* ---- buildings ---- */
   const styles=['cottage','timber','golden','cream'];
@@ -16524,67 +16526,61 @@ function lpBuild(s){
       const dd=x-f,ck=K(x,y);if(carve.has(ck)||used.has(ck))continue;
       const near1=ring1.has(ck),near2=ring2.has(ck);
       const dens=near1?1:near2?.85:dd<2?1:dd<3?.82:dd<4?.6:dd<7?.3:.22;
-      if(hs(x,y,sd+12)<dens){const o=hs(x,y,sd+13),a=hs(x,y,sd+14)-.5,b=hs(x,y,sd+15)-.5;
-        decor.push({k:OAKS[(o*5)|0],x:MX(x),y,block:near1||near2||dd<4,ox:a*.5*(mir?-1:1),oy:b*.5,sc:.8+hs(x,y,sd+16)*.45})}
+      if(hs(x,GY(y),gsd+12)<dens){const o=hs(x,GY(y),gsd+13),a=hs(x,GY(y),gsd+14)-.5,b=hs(x,GY(y),gsd+15)-.5;
+        decor.push({k:OAKS[(o*5)|0],x:MX(x),y,block:near1||near2||dd<4,ox:a*.5*(mir?-1:1),oy:b*.5,sc:.8+hs(x,GY(y),gsd+16)*.45})}
     }
   }
   if(mount){ // the pass: wooded slopes of pines on both sides, boulders in the meadows between, and rock only far back where nobody can see it
     for(let y=1;y<H-1;y++){if(open_(y))continue;const c=xc[y];for(const sg of [-1,1]){const wd=Math.floor(wdist(y,sg));
       for(let dx=3;dx<wd+7;dx++){const x=c+sg*dx;if(x<1||x>=W-1||used.has(K(x,y))||carve.has(K(x,y)))continue;
-        const slope=dx>=wd,r=hs(x,y,sd+30),p=slope?(dx<wd+3?1:dx<wd+5?.8:.5):(dx>=wd-3?.2:.04);
-        if(r<p){const o=hs(x,y,sd+31);used.add(K(x,y));const kk=!slope&&o<.22?'boulder':!slope&&o<.34?'rocks':PINES[(hs(x,y,sd+35)*PINES.length)|0];
-          decor.push({k:kk,x:MX(x),y,block:slope&&dx<wd+5||(!slope&&(kk==='boulder'||kk==='rocks')),ox:(hs(x,y,sd+32)-.5)*.5,oy:(hs(x,y,sd+33)-.5)*.5,sc:slope?1.0+hs(x,y,sd+34)*.7:.8+hs(x,y,sd+34)*.6})}}}}
+        const slope=dx>=wd,r=hs(x,GY(y),gsd+30),p=slope?(dx<wd+3?1:dx<wd+5?.8:.5):(dx>=wd-3?.2:.04);
+        if(r<p){const o=hs(x,GY(y),gsd+31);used.add(K(x,y));const kk=!slope&&o<.22?'boulder':!slope&&o<.34?'rocks':PINES[(hs(x,GY(y),gsd+35)*PINES.length)|0];
+          decor.push({k:kk,x:MX(x),y,block:slope&&dx<wd+5||(!slope&&(kk==='boulder'||kk==='rocks')),ox:(hs(x,GY(y),gsd+32)-.5)*.5,oy:(hs(x,GY(y),gsd+33)-.5)*.5,sc:slope?1.0+hs(x,GY(y),gsd+34)*.7:.8+hs(x,GY(y),gsd+34)*.6})}}}}
   }
   /* ---- flowers along the path, lamps, benches, rocks on the shore, clearings with huge oaks ---- */
-  const flower=(x,y,sc)=>{if(x<1||x>=W-1||used.has(K(x,y)))return;const k=FLO[(hs(x,y,sd+40)*3)|0];scenery.push({k,wx:MX(x)+.5,wy:y+.5,sc:sc||.55,decor:{k,walk:true,x:MX(x),y}})};
+  const flower=(x,y,sc)=>{if(x<1||x>=W-1||used.has(K(x,y)))return;const k=FLO[(hs(x,GY(y),gsd+40)*3)|0];scenery.push({k,wx:MX(x)+.5,wy:y+.5,sc:sc||.55,decor:{k,walk:true,x:MX(x),y}})};
   for(let y=2;y<H-2;y++){if(wet(y))continue;const c=xc[y];
     for(const sg of [-1,1]){
-      if(hs(y,sg+2,sd+41)<.65)flower(c+sg*2+((hs(y,sg,sd+42)*2)|0)*sg,y,.5+hs(y,sg,sd+43)*.25);
-      if(hs(y,sg+5,sd+44)<.45)flower(c+sg*(4+((hs(y,sg,sd+45)*3)|0)),y,.5+hs(y,sg,sd+46)*.3);
+      if(hs(GY(y),sg+2,gsd+41)<.65)flower(c+sg*2+((hs(GY(y),sg,gsd+42)*2)|0)*sg,y,.5+hs(GY(y),sg,gsd+43)*.25);
+      if(hs(GY(y),sg+5,gsd+44)<.45)flower(c+sg*(4+((hs(GY(y),sg,gsd+45)*3)|0)),y,.5+hs(GY(y),sg,gsd+46)*.3);
     }
-    if(hs(y,7,sd+47)<.22)flower(c+((hs(y,8,sd+48)*12-6)|0),y,.55);
-    if(open_(y)&&hs(y,9,sd+49)<.04){const x=c-6-3+Math.round(2.2*Math.sin(y*.11+s))+1;if(!used.has(K(x,y))&&x>1){used.add(K(x,y));decor.push({k:'rocks',x:MX(x),y,block:true,deco:true,sc:.7+hs(y,10,sd)*.4})}}
+    if(hs(GY(y),7,gsd+47)<.22)flower(c+((hs(GY(y),8,gsd+48)*12-6)|0),y,.55);
+    if(open_(y)&&hs(GY(y),9,gsd+49)<.04){const x=c-6-3+Math.round(2.2*Math.sin(GY(y)*.11))+1;if(!used.has(K(x,y))&&x>1){used.add(K(x,y));decor.push({k:'rocks',x:MX(x),y,block:true,deco:true,sc:.7+hs(GY(y),10,gsd)*.4})}}
   }
   const lamp=(x,y)=>{if(used.has(K(x,y))||x<1||x>=W-1)return;used.add(K(x,y));decor.push({k:'lamp',x:MX(x),y,block:false,walk:true,deco:true});lights.push([MX(x),y])};
-  for(let y=34+((hs(sd,50,50)*26)|0);y<H-34;y+=62)if(!wet(y))lamp(xc[y]+(Math.floor(y/62)%2?-3:3),y);
-  // a signpost at every kilometre: To Yarrim, and how far
-  for(let m=1;m<LP_KM;m++){const done=m*LP_ROWS_KM,y=Math.round(H-1-(done-s*LP.H));if(y<6||y>H-8||wet(y))continue;if(done<s*LP.H||done>=(s+1)*LP.H)continue;const sk=lpSignKey(LP_KM-m);if(!sk)continue;const sx=xc[y]+(m%2?3:-3);if(used.has(K(sx,y)))continue;used.add(K(sx,y));decor.push({k:sk,x:MX(sx),y,block:false,walk:true,deco:true})}
   const BENCH=IMG.kh_ohgard1_3?'kh_ohgard1_3':null;
-  for(let y=60+((hs(sd,51,51)*40)|0);y<H-40;y+=88)if(BENCH&&!wet(y)&&!used.has(K(xc[y]-3,y))){used.add(K(xc[y]-3,y));decor.push({k:BENCH,x:MX(xc[y]-3),y,block:false,walk:true,deco:true});
-    const rk=LP_REST_NPC[(hs(y,s,sd+90)*LP_REST_NPC.length)|0],rkp=KH_KEEPERS[rk[0]];if(rkp&&hs(y,s,sd+91)<.7&&!used.has(K(xc[y]-3,y+1))){used.add(K(xc[y]-3,y+1));decor.push({k:khFaceKey(rkp.face),x:MX(xc[y]-3),y:y+1,block:false,walk:true,npc:rk[0],sc:rkp.sc||1})}}
-  // benches on the shore, looking out over the sea, with someone sitting on one now and then
-  if(coast)for(let y=100,q=0;y<H-60;y+=131,q++){if(wet(y)||!BENCH)continue;const wl=xc[y]-6+Math.round(2.2*Math.sin(y*.11+s)),bx=wl+1;if(used.has(K(bx,y))||bx<3)continue;used.add(K(bx,y));decor.push({k:BENCH,x:MX(bx),y,block:false,walk:true,deco:true});
-    const rk3=LP_REST_NPC[(q+s)%LP_REST_NPC.length],kp3=KH_KEEPERS[rk3[0]];if(kp3&&hs(y,s,sd+92)<.5&&!used.has(K(bx,y+1))){used.add(K(bx,y+1));decor.push({k:khFaceKey(kp3.face),x:MX(bx),y:y+1,block:false,walk:true,npc:rk3[0],sc:kp3.sc||1})}}
-  // boats sitting on the water
-  if(coast||s===LP.N-1)for(let y=30;y<H-30;y+=47){if(wet(y)||!open_(y)||hs(y,s,sd+80)<.3)continue;const wl=xc[y]-6+Math.round(2.2*Math.sin(y*.11+s)),bx=wl-8-((hs(y,s,sd+81)*14)|0);if(bx<4)continue;const bk=['yar_boat_fish','yar_boat_row','yar_boat_dhow'][(hs(y,s,sd+82)*3)|0];if(!IMG[bk])continue;used.add(K(bx,y));decor.push({k:bk,x:MX(bx),y,block:true,deco:true,sc:.9})}
-  // roadside shrines, with flowers and food left by pilgrims
-  for(let y=70+((hs(sd,52,52)*40)|0),q=0;y<H-60;y+=104,q++){if(wet(y))continue;const sg=(q+s)%2?-1:1,x=xc[y]+sg*4;if(used.has(K(x,y))||used.has(K(x,y+1)))continue;
-    used.add(K(x,y));used.add(K(x+sg,y+1));used.add(K(x,y+1));
-    decor.push({k:'memorial',x:MX(x),y,block:true,npc:'lp_shrine',sc:.9},{k:'flowerpot',x:MX(x+sg),y:y+1,block:false,walk:true,deco:true,sc:.8},{k:IMG.breadbasket?'breadbasket':'flowerpot',x:MX(x),y:y+1,block:false,walk:true,deco:true,sc:.8})}
+  for(let y=3;y<H-3;y++){if(wet(y))continue;const g=GY(y),c=xc[y];
+    if(g%62===31)lamp(c+(Math.floor(g/62)%2?-3:3),y);
+    if(g%88===44&&BENCH&&!used.has(K(c-3,y))){used.add(K(c-3,y));decor.push({k:BENCH,x:MX(c-3),y,block:false,walk:true,deco:true});
+      const rk=LP_REST_NPC[(hs(g,3,gsd+90)*LP_REST_NPC.length)|0],rkp=KH_KEEPERS[rk[0]];if(rkp&&hs(g,4,gsd+91)<.7&&!used.has(K(c-3,y+1))){used.add(K(c-3,y+1));decor.push({k:khFaceKey(rkp.face),x:MX(c-3),y:y+1,block:false,walk:true,npc:rk[0],sc:rkp.sc||1})}}
+    if(open_(y)&&coast&&g%131===65&&BENCH){const wl=c-6+Math.round(2.2*Math.sin(g*.11)),bx=wl+1;if(!used.has(K(bx,y))&&bx>=3){used.add(K(bx,y));decor.push({k:BENCH,x:MX(bx),y,block:false,walk:true,deco:true});
+      const rk3=LP_REST_NPC[(hs(g,5,gsd+92)*LP_REST_NPC.length)|0],kp3=KH_KEEPERS[rk3[0]];if(kp3&&hs(g,6,gsd+93)<.5&&!used.has(K(bx,y+1))){used.add(K(bx,y+1));decor.push({k:khFaceKey(kp3.face),x:MX(bx),y:y+1,block:false,walk:true,npc:rk3[0],sc:kp3.sc||1})}}}
+    if(open_(y)&&coast&&g%47===23&&hs(g,7,gsd+80)>=.3){const wl=c-6+Math.round(2.2*Math.sin(g*.11)),bx=wl-8-((hs(g,8,gsd+81)*14)|0),bk=['yar_boat_fish','yar_boat_row','yar_boat_dhow'][(hs(g,9,gsd+82)*3)|0];if(bx>=4&&IMG[bk]){used.add(K(bx,y));decor.push({k:bk,x:MX(bx),y,block:true,deco:true,sc:.9})}}
+    if(g%104===52){const q=Math.floor(g/104),sg=q%2?-1:1,x=c+sg*4;if(!used.has(K(x,y))&&!used.has(K(x,y+1))){used.add(K(x,y));used.add(K(x+sg,y+1));used.add(K(x,y+1));
+      decor.push({k:'memorial',x:MX(x),y,block:true,npc:'lp_shrine',sc:.9},{k:'flowerpot',x:MX(x+sg),y:y+1,block:false,walk:true,deco:true,sc:.8},{k:IMG.breadbasket?'breadbasket':'flowerpot',x:MX(x),y:y+1,block:false,walk:true,deco:true,sc:.8})}}
+    for(let m=1;m<LP_KM;m++){if(Math.round(m*LP_ROWS_KM)!==g)continue;const sk=lpSignKey(LP_KM-m);if(!sk)continue;const sx=c+(m%2?3:-3);if(used.has(K(sx,y)))continue;used.add(K(sx,y));decor.push({k:sk,x:MX(sx),y,block:false,walk:true,deco:true})} // a signpost at every kilometre: To Yarrim, and how far
+  }
   if(s===LPM.SEG){const md=lpMonDoor(),sk=lpBoard('lp_sign_mon','SAINT ELEN’S','monastery 300 m');if(sk){used.add(K(md.c+3,md.y+3));decor.push({k:sk,x:MX(md.c+3),y:md.y+3,block:false,walk:true,deco:true})}lamp(md.x-2,md.y-2);lamp(md.x-2,md.y+2)}
   // (the tall moored ships of the quay are left out here: from far off they only show as grey slabs against the sea)
   for(const cl of clearings){ // the green spaces, with huge oaks
-    if(cl.skip)continue;const cy=cl.y;
+    if(cl.skip)continue;const cy=cl.y,GYc=GY(cy);
     const oaks=cl.side>0?[[cl.cx-2,cy-1],[cl.cx+2,cy+1],[cl.cx,cy-3]]:[[xc[cy]-6,cy-1],[xc[cy]-9,cy+2]];
-    oaks.forEach(([x,y],j)=>{if(x<1||used.has(K(x,y)))return;used.add(K(x,y));decor.push({k:OAKS[(j+s)%5],x:MX(x),y,block:true,sc:mount?1.3:1.7,ox:0,oy:0})});
-    for(let q=0;q<26;q++){const x=(cl.cx||xc[cy]-7)+Math.round((hs(q,cy,sd+60)-.5)*9),y=cy+Math.round((hs(q,cy,sd+61)-.5)*9);const sc=scenery.length;flower(x,y,.6);void sc}
+    oaks.forEach(([x,y],j)=>{if(x<1||used.has(K(x,y)))return;used.add(K(x,y));decor.push({k:OAKS[(j+(GYc%5))%5],x:MX(x),y,block:true,sc:mount?1.3:1.7,ox:0,oy:0})});
+    for(let q=0;q<26;q++){const x=(cl.cx||xc[cy]-7)+Math.round((hs(q,GYc,gsd+60)-.5)*9),y=cy+Math.round((hs(q,GYc,gsd+61)-.5)*9);const sc=scenery.length;flower(x,y,.6);void sc}
     const bx=(cl.cx||xc[cy]-7)+3,by=cy+2;if(BENCH&&!used.has(K(bx,by))){used.add(K(bx,by));decor.push({k:BENCH,x:MX(bx),y:by,block:false,walk:true,deco:true})}
   }
   /* ---- the knights who ride along, and the ends of the stretch ---- */
   const walkers=[],kp=KH_KEEPERS.lp_knight;
-  if(kp&&s%2===(leg==='W'?0:1)){const y0=Math.round((100+hs(sd,70,70)*160)*LPK),y1=Math.min(H-30,y0+110);
+  if(kp&&s%2===(leg==='W'?0:1)){const y0=safeLo+20+((hs(sd,70,70)*(safeHi-safeLo-200))|0),y1=Math.min(safeHi-10,y0+110);
     for(const j of [0,1]){const kd={k:khFaceKey(kp.face),x:MX(xc[y0]+2),y:y0,block:false,walk:true,npc:'lp_knight',sc:kp.sc||1,lw:walkers.length,lr:'k'},hd={k:IMG.oh_horse?'oh_horse':'ltree0',x:MX(xc[y0]+3),y:y0,block:false,walk:true,deco:true,sc:1,lw:walkers.length,lr:'h'};
       decor.push(kd,hd);walkers.push({kd,hd,y0,y1,t:j*45,dir:j?1:-1,off:j?2:-2})}}
   // pilgrims and travellers on the way, walking slowly up and down their stretch
-  for(let q=0;q<2;q++){const pg=LP_PILG[(hs(s,q,sd+95)*LP_PILG.length)|0],y0=Math.round(40+hs(s,q+7,sd+96)*(H-240)),y1=Math.min(H-30,y0+90+((hs(q,s,sd+97)*60)|0));
+  for(let q=0;q<2;q++){const pg=LP_PILG[(hs(s,q,sd+95)*LP_PILG.length)|0],y0=safeLo+10+((hs(s,q+7,sd+96)*(safeHi-safeLo-170))|0),y1=Math.min(safeHi-5,y0+90+((hs(q,s,sd+97)*60)|0));
     if(wet(y0))continue;const kp2=KH_KEEPERS[pg[0]];if(!kp2)continue;const off=q?-2:2,wi=walkers.length,kd2={k:khFaceKey(kp2.face),x:MX(xc[y0]+off),y:y0,block:false,walk:true,npc:pg[0],sc:kp2.sc||1,lw:wi,lr:'k'};
     decor.push(kd2);walkers.push({y0,y1,t:hs(q,s,sd+98)*(y1-y0),dir:q?1:-1,off,sp:.4+hs(q,s,sd+99)*.2})}
   const enter=(x,y,to,tx,ty,f)=>{for(let dx=-4;dx<=4;dx++)decor.push({k:'lp_gap',x:x+dx,y,block:true,enter:{to,x:tx,y:ty,f}})};
-  const north=s<LP.N-1?lpId(s+1):null;
-  const mxq=(q,x)=>LP_LEG(q)==='S'?LP.W-1-x:x,hq=q=>LP.H+(q===LP.N-1?60:0);
-  if(north!==null)enter(MX(CX),1,north,mxq(s+1,CX),hq(s+1)-5,0);
-  else{decor.push({k:'lp_gap',x:MX(CX),y:Y0+7,block:true,npc:'lp_cliff'})}
-  enter(MX(CX),H-2,s>0?lpId(s-1):OH.ID,s>0?mxq(s-1,CX):100,s>0?4:7,2);
+  if(s===LP.N-1)decor.push({k:'lp_gap',x:MX(CX),y:Y0+7,block:true,npc:'lp_cliff'});
+  if(s===0)enter(MX(CX),H-2,OH.ID,100,7,2);
   function lpId(q){return LP.BASE+q}
   for(let y=H-4;y<H-1;y++)for(let x=CX-6;x<=CX+6;x++)used.add(K(x,y));
   const lv={rows:rows.map(r=>r.join('')),start:{x:MX(CX),y:H-5,f:0},enemies:[],items:[],decor,scenery,sky,fmap:null,floorSet:['ohMeadow','ohGravel','ohLawn','bluesand','bluewater','ohMoss','isleSandDk','wood'],floor:'ohMeadow',ceil:'cloud',
@@ -16639,6 +16635,31 @@ function lpBeeImg(){if(!IMG.lp_bee){const c=document.createElement('canvas');c.w
   const t=G.time;if(t<(LPS.nextFall||0))return;
   const f=G.decor.find(d=>d.kname==='falls'&&Math.abs(d.x-G.P.x)<14&&Math.abs(d.y-G.P.y)<14);if(!f)return;
   LPS.nextFall=t+.22;const near=1-Math.min(1,Math.hypot(f.x-G.P.x,f.y-G.P.y)/14);nz(.34,.05*near*(SNDOPT.amb||1),'bandpass',1100+Math.random()*300,1500,0)}}
+
+/* ---- one unbroken road: when the party gets 72 rows from the end of a stretch, it is carried into the next (or the last) stretch at exactly the same place along the road. The two stretches share 160 rows, so the carrying cannot be seen. ---- */
+const LPF={on:0,a:0,go:null,ph:0};
+function lpFadeTick(dt){
+  if(!LPF.on)return;
+  if(!LPF.ph){LPF.a=Math.min(1,LPF.a+dt/.45);if(LPF.a>=1){LPF.ph=1;const g=LPF.go;LPF.go=null;if(g)g()}}
+  else{LPF.a=Math.max(0,LPF.a-dt/.7);if(LPF.a<=0){LPF.on=0;LPF.ph=0;G._lpSwap=0}}
+}
+function lpSwapTick(){
+  if(LEVEL<LP.BASE||LEVEL>=LP.BASE+LP.N||G.state!=='play'||G.cut||G.talk||G._lpSwap||!G.P)return;
+  if(Math.abs(G.C.x-G.P.x)>.06||Math.abs(G.C.y-G.P.y)>.06)return; // only between steps
+  const s=LEVEL-LP.BASE,Y0=s===LP.N-1?60:0,H=LP.H+Y0,ry=G.P.y-Y0;let t=-1;
+  if(s<LP.N-1&&ry<=LPT)t=s+1;else if(s>0&&G.P.y>=H-LPT)t=s-1;
+  if(t<0)return;
+  if(!LEVELS[LP.BASE+t]&&KH_LAZY[LP.BASE+t])KH_LAZY[LP.BASE+t]();
+  const T0=t===LP.N-1?60:0,gy=s*(LP.H-LPOV)+(LP.H-1-(G.P.y-Y0)),y2=T0+(LP.H-1)-(gy-t*(LP.H-LPOV));
+  const lg=LP_LEG(s)==='S'?LP.W-1-G.P.x:G.P.x,x2=LP_LEG(t)==='S'?LP.W-1-lg:lg;
+  G._lpSwap=1;const f=G.P.f,go=()=>{goToLevel(LP.BASE+t,{x:x2,y:Math.round(y2),f});try{G.lvlBanners=[];if(G.msgs)G.msgs.length=0}catch(e){}};
+  if(LP_LEG(s)!==LP_LEG(t)){LPF.on=1;LPF.a=0;LPF.go=go;return} // where the country itself changes (coast to mountains and back) the carrying is hidden by a short fade
+  go();G._lpSwap=0;
+  // get the next stretch ready while the party walks, so that crossing into it is quick
+  setTimeout(()=>{const n=LEVEL-LP.BASE+1;if(LEVEL>=LP.BASE&&LEVEL<LP.BASE+LP.N-1&&!LEVELS[LP.BASE+n]&&KH_LAZY[LP.BASE+n])KH_LAZY[LP.BASE+n]()},1500);
+}
+{const _t=seaTick;seaTick=function(dt){_t.apply(this,arguments);try{lpFadeTick(dt);lpSwapTick()}catch(e){console.error(e)}}}
+{const _d=drawTport;drawTport=function(){_d.apply(this,arguments);if(LPF.on&&LPF.a>0){ctx.fillStyle='rgba(0,0,0,'+LPF.a.toFixed(3)+')';ctx.fillRect(0,0,480,320)}}}
 
 /* ---- src/desert/monastery.js ---- */
 /* ==========================================================================
@@ -16908,6 +16929,7 @@ MON_BLD.forEach(b=>{const stub=()=>{monBuild();if(!LEVELS[b.rid]&&KH_LAZY[b.rid]
    Levels: 364 the ledge and the way down, 440 to 459 the orange tower (levels 1 to 20), 460 the foot of the violet tower.
    ========================================================================== */
 const HL={CAV:364,BASE:440,N:20,VIOLET:460};
+loadImg('hl_castle_art','assets/hl_castle.png'); // the great orange castle: ornate and gothic, with gargoyles and walkways jutting from its towers
 ENEMY_DEF.hlgoblin={name:'Armoured Goblin',hp:120,dmg:[10,17],hit:.74,w:.46,img:'hl_goblin',xp:420,gold:[12,45],speed:1,aboveParty:1};
 ENEMY_DEF.hlslime={name:'Cave Slime',hp:180,dmg:[7,13],hit:.7,w:.6,img:'hl_slime',xp:380,gold:[0,10],speed:1,aboveParty:0};
 ENEMY_DEF.hlorc={name:'Orc',hp:320,dmg:[17,28],hit:.78,w:.74,img:'hl_orc',xp:900,gold:[40,110],speed:1,aboveParty:2};
@@ -17082,8 +17104,8 @@ function hlCavern(){
   for(let y=6;y<=60;y+=3){torch(31,y,(y/3|0)%2);torch(39,y,(y/3|0)%2?0:1)}
   for(let x=10;x<=60;x+=6)torch(x,54,x/6%2);
   // the castle: a great orange castle at the foot of the stairs, with towers, behind the gate wall, and torches of two colours along its foot
-  sky.push({x:35,y:5.5,k:'hl_castle',w:58,z:0,big:1});
-  for(const [x,y,k,w] of [[8,4,'hl_tower3',14],[62,4,'hl_tower3',14],[20,3.5,'hl_tower0',9],[50,3.5,'hl_tower0',9],[14,5.5,'hl_tower2',8],[56,5.5,'hl_tower2',8]])sky.push({x,y,k,w,z:0,big:1});
+  sky.push({x:35,y:6,k:IMG.hl_castle_art?'hl_castle_art':'hl_castle',w:62,z:0,big:1});
+  if(!IMG.hl_castle_art)for(const [x,y,k,w] of [[8,4,'hl_tower3',14],[62,4,'hl_tower3',14]])sky.push({x,y,k,w,z:0,big:1});
   for(let x=6;x<=64;x+=4)torch(x,11,(x/4|0)%2);
   // people and a stair-keeper
   const place=(id,x,y)=>{const kp=KH_KEEPERS[id];if(kp&&!used.has(x+','+y)){used.add(x+','+y);decor.push({k:khFaceKey(kp.face),x,y,block:false,walk:true,npc:id,sc:kp.sc||1})}};

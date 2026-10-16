@@ -6,6 +6,7 @@
    Levels: 364 the ledge and the way down, 440 to 459 the orange tower (levels 1 to 20), 460 the foot of the violet tower.
    ========================================================================== */
 const HL={CAV:364,BASE:440,N:20,VIOLET:460};
+loadImg('hl_castle_art','assets/hl_castle.png'); // the great orange castle: ornate and gothic, with gargoyles and walkways jutting from its towers
 ENEMY_DEF.hlgoblin={name:'Armoured Goblin',hp:120,dmg:[10,17],hit:.74,w:.46,img:'hl_goblin',xp:420,gold:[12,45],speed:1,aboveParty:1};
 ENEMY_DEF.hlslime={name:'Cave Slime',hp:180,dmg:[7,13],hit:.7,w:.6,img:'hl_slime',xp:380,gold:[0,10],speed:1,aboveParty:0};
 ENEMY_DEF.hlorc={name:'Orc',hp:320,dmg:[17,28],hit:.78,w:.74,img:'hl_orc',xp:900,gold:[40,110],speed:1,aboveParty:2};
@@ -180,8 +181,8 @@ function hlCavern(){
   for(let y=6;y<=60;y+=3){torch(31,y,(y/3|0)%2);torch(39,y,(y/3|0)%2?0:1)}
   for(let x=10;x<=60;x+=6)torch(x,54,x/6%2);
   // the castle: a great orange castle at the foot of the stairs, with towers, behind the gate wall, and torches of two colours along its foot
-  sky.push({x:35,y:5.5,k:'hl_castle',w:58,z:0,big:1});
-  for(const [x,y,k,w] of [[8,4,'hl_tower3',14],[62,4,'hl_tower3',14],[20,3.5,'hl_tower0',9],[50,3.5,'hl_tower0',9],[14,5.5,'hl_tower2',8],[56,5.5,'hl_tower2',8]])sky.push({x,y,k,w,z:0,big:1});
+  sky.push({x:35,y:6,k:IMG.hl_castle_art?'hl_castle_art':'hl_castle',w:62,z:0,big:1});
+  if(!IMG.hl_castle_art)for(const [x,y,k,w] of [[8,4,'hl_tower3',14],[62,4,'hl_tower3',14]])sky.push({x,y,k,w,z:0,big:1});
   for(let x=6;x<=64;x+=4)torch(x,11,(x/4|0)%2);
   // people and a stair-keeper
   const place=(id,x,y)=>{const kp=KH_KEEPERS[id];if(kp&&!used.has(x+','+y)){used.add(x+','+y);decor.push({k:khFaceKey(kp.face),x,y,block:false,walk:true,npc:id,sc:kp.sc||1})}};
