@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.215';
+const VERSION='3.216';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -17483,6 +17483,9 @@ function hlDress(c){
       const m0=fc.length?fc[(hs(k,3,5)*fc.length)|0]:[start.x,start.y-2];
       c.lv_msgr={x:m0[0],y:m0[1],letters:chosen.map(q=>({x:q[0],y:q[1],wd:q[2]}))}}
   }
+  // a ruler waits in the last hall of levels 4, 9, 14 and 19
+  {const ru=HL_RULERS.find(q=>q[0]===k);if(ru&&far&&!top){const cx=(far.x0+far.x1)>>1,cy=(far.y0+far.y1)>>1+0;let bx=cx,by=cy;if(used.has(key(bx,by))){const c2=[[cx,cy+1],[cx+1,cy],[cx-1,cy],[cx,cy-1]].find(([x,y])=>isF(x,y)&&!used.has(key(x,y)));if(c2){bx=c2[0];by=c2[1]}}
+    if(!used.has(key(bx,by))){enemies.push({t:ru[1],x:bx,y:by});used.add(key(bx,by))}}}
   // the witch: a room of her own on some levels
   if(k%5===2){const r=rooms.find((q,i)=>i>=2&&q!==myst&&q!==far&&q.x1-q.x0>=3);if(r){const cx=(r.x0+r.x1)>>1,cy=(r.y0+r.y1)>>1;if(!used.has(key(cx,cy))){enemies.push({t:'hlwitch',x:cx,y:cy});used.add(key(cx,cy))}}}
   // corridors: a picture or a chain now and then, so the passages are not bare
@@ -17508,6 +17511,29 @@ function hlDress(c){
   const wp=rooms.filter((q,i)=>i>0&&q!==myst).slice(0,3).map(q=>[(q.x0+q.x1)>>1,q.y0]).filter(p=>isF(p[0],p[1]));
   if(manDone&&wp.length>=2)c.lv_man={i:0,t:0,wp};
 }
+
+/* ==========================================================================
+   THE FOUR RULERS. Four twisted dead rulers, one on levels 4, 9, 14 and 19 of the Orange Tower, each in the last hall of its level. Each carries a relic
+   far stronger than anything sold in a shop, and drops it when it falls.
+   ========================================================================== */
+for(const n of ['boss0','boss0A','boss1','boss1A','boss2','boss2A','boss3','boss3A'])loadImg('hl_'+n,'assets/hl_'+n+'.png');
+const HL_RULERS=[ // [level index, enemy, picture width, relic]
+  [3,'hlboss0'],[8,'hlboss1'],[13,'hlboss2'],[18,'hlboss3']];
+ENEMY_DEF.hlboss0={name:'The Gaunt King',hp:700,dmg:[30,48],hit:.86,w:.8,img:'hl_boss0',xp:30000,gold:[400,900],speed:1,verb:'cleaves',boss:true,glow:.55,aboveParty:3,relic:'crownbreaker'};
+ENEMY_DEF.hlboss1={name:'The Smiling Queen',hp:620,dmg:[26,44],hit:.9,w:.8,img:'hl_boss1',xp:30000,gold:[400,900],speed:1,verb:'shoots',ranged:5,boss:true,glow:.55,aboveParty:3,relic:'veilpiercer'};
+ENEMY_DEF.hlboss2={name:'The Poison Duke',hp:820,dmg:[28,46],hit:.84,w:.8,img:'hl_boss2',xp:30000,gold:[400,900],speed:1,verb:'crushes',boss:true,glow:.55,aboveParty:3,relic:'dukesgavel'};
+ENEMY_DEF.hlboss3={name:'The Hollow Child-King',hp:660,dmg:[26,46],hit:.88,w:.72,img:'hl_boss3',xp:30000,gold:[400,900],speed:1,verb:'blasts',ranged:4,boss:true,glow:.55,aboveParty:3,relic:'hollowscepter'};
+ITEMDEF.crownbreaker={n:'Crownbreaker',k:'weapon',t:'Sword',ic:'sword',c:'#a8202e',dmg:[112,160],hit:.15,req:{str:30},lvl:28,price:12000,rar:1,eff:{exec:[.35,3],bossdmg:.5},dbl:.15,sw:.44,d:'The sword of the Gaunt King. Against a foe under 35% health it deals triple damage, and bosses take 50% more. Needs level 28.'};
+ITEMDEF.veilpiercer={n:'Veilpiercer',k:'weapon',t:'Bow',ic:'bow',c:'#9a6ae0',dmg:[100,146],hit:.16,req:{dex:30},lvl:28,price:12000,rar:1,ranged:6,eff:{pierce:1,double:.3},dbl:.15,sw:.42,d:'The bone bow of the Smiling Queen. Shoots 6 squares, its arrows pass through to the foe behind, and three shots in ten send a second arrow. Needs level 28.'};
+ITEMDEF.dukesgavel={n:"The Duke's Gavel",k:'weapon',t:'Mace',ic:'mace',c:'#6aa04a',dmg:[118,168],hit:-.02,req:{str:24},lvl:28,price:12000,rar:1,eff:{stun:.3,vuln:[.3,4],shock:.15},sw:.44,d:'The spiked mace of the Poison Duke. Three hits in ten stun the foe, and the same number crack its guard for four rounds. Needs level 28.'};
+ITEMDEF.hollowscepter={n:'Hollow Scepter',k:'weapon',t:'Staff',ic:'staff',c:'#e0c050',dmg:[50,80],magic:35,req:{int:28},lvl:28,price:12000,rar:1,eff:{bossdmg:.3},sw:.44,d:'The scepter of the Hollow Child-King. Adds 35 to the power of spells, and bosses take 30% more from its blows. Needs level 28.'};
+function hlRelic(e,def){
+  const id=def.relic,F=HLF();F.relics=F.relics||{};if(F.relics[id])return;F.relics[id]=1;
+  if(bagAdd(mkItem(id)))msg(def.name+' falls, and '+ITEMDEF[id].n+' is yours!','#e090f0');
+  else{G.items.push({k:id,x:e.x,y:e.y,taken:false});msg(def.name+' falls and drops '+ITEMDEF[id].n+'. Your bag is full, so it lies on the floor.','#e090f0')}
+  sfx('win');
+}
+{const _he=hurtEnemy;hurtEnemy=function(e,dmg){const def=ENEMY_DEF[e.t],was=e.hp>0;_he.apply(this,arguments);if(was&&e.hp<=0&&def&&def.relic)hlRelic(e,def)}}
 
 /* ---- src/desert/seasound.js ---- */
 /* ==========================================================================
