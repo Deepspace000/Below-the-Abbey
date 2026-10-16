@@ -9,7 +9,7 @@
 for(const n of ['osric','vance','aldwyn','rguard'])loadImg('yar_p_'+n,'assets/yar_p_'+n+'.png');
 Object.assign(NPC_H,{yar_p_osric:1,yar_p_vance:1,yar_p_aldwyn:1,yar_p_rguard:1});
 // every person of Oldhaven stands about a cell tall, so that their faces can be seen from close by (a picture with no height set would be nearly one and a half)
-for(const [pre,n] of [['kh_ohsold1_',6],['kh_ohfolk1_',6],['kh_ohfolk2_',6],['kh_ohcourt1_',6],['kh_oqmen_',6]])for(let i=0;i<n;i++)NPC_H[pre+i]=.98;
+for(const [pre,n] of [['kh_ohsold1_',6],['kh_ohfolk1_',6],['kh_ohfolk2_',6],['kh_ohfolk3_',6],['kh_ohfolk4_',6],['kh_ohfolk5_',6],['kh_ohfolk6_',6],['kh_ohfolk7_',6],['kh_ohcourt1_',6],['kh_oqmen_',6]])for(let i=0;i<n;i++)NPC_H[pre+i]=.98;
 Object.assign(ENEMY_DEF,{
   chancellor:{name:'Chancellor Vance',hp:300,dmg:[11,17],hit:.82,w:.5,img:'yar_p_vance',xp:1600,gold:[400,700],speed:1,verb:'strikes',aboveParty:3},
   rguard:{name:'Royal Guard',hp:120,dmg:[9,14],hit:.78,w:.55,img:'yar_p_rguard',xp:300,gold:[40,90],speed:1,verb:'cuts',aboveParty:1}
@@ -31,13 +31,22 @@ const OH_STY={
   castle:{plain:'kh_ohwall1_2',win:'kh_ohwall1_4',door:'kh_ohwall1_5',slit:'kh_ohwall1_3',tint:[255,232,188,.1]},
   castle2:{plain:'kh_ohwall1_0',win:'kh_ohwall1_4',door:'kh_ohwall1_5',slit:'kh_ohwall1_3',tint:[255,226,178,.12]}
 };
+/* the painted sheets, in the order their six pictures were drawn: plain, plain variant, upper window, shop window, door, small window */
+function ohStyles(){
+  const sheet=(name,n,fb,extra)=>{if(!IMG['kh_'+n+'_0'])return;OH_STY[name]=Object.assign({plain:'kh_'+n+'_0',alt:'kh_'+n+'_1',win:'kh_'+n+'_2',shop:'kh_'+n+'_3',door:'kh_'+n+'_4',win2:'kh_'+n+'_5',slit:'kh_ohwall1_3'},extra||{})};
+  sheet('timber','ohwall2');sheet('golden','ohwall3');sheet('brick','ohwall4');sheet('cottage','ohwall5');
+  if(IMG.kh_ohwall6_0){OH_STY.fort={plain:'kh_ohwall6_0',alt:'kh_ohwall6_1',slit:'kh_ohwall6_2',win:'kh_ohwall6_3',win2:'kh_ohwall6_3',shop:'kh_ohwall6_3',door:'kh_ohwall6_5',banner:'kh_ohwall6_4'}}
+  for(const k of ['timber','golden','brick','cottage','fort'])if(!OH_STY[k])OH_STY[k]=OH_STY[{timber:'cream',golden:'gold',brick:'rose',cottage:'honey',fort:'castle'}[k]];
+  // the castle styles use the painted fort sheet when it is there
+  OH_STY.castle=OH_STY.fort;OH_STY.castle2=OH_STY.fort;
+}
 /* ---- the stone: wall pictures stood up into tall tiles, a door or a window in each ---- */
 function ohTiles(){
   const C={};
   const make=(kind,pat,wh,img)=>{
     const key=kind+'|'+pat+'|'+wh+'|'+(img||'');if(C[key])return C[key];
-    const S=typeof pat==='string'?OH_STY[pat]:{plain:'kh_ohwall1_'+pat,win:'kh_ohwall1_4',door:'kh_ohwall1_5',slit:'kh_ohwall1_3'};
-    const Hp=Math.round(128*wh),pi=IMG[S.plain]||IMG.kh_ohwall1_0,units=Math.ceil(wh);
+    let S=typeof pat==='string'?OH_STY[pat]:{plain:'kh_ohwall1_'+pat,win:'kh_ohwall1_4',door:'kh_ohwall1_5',slit:'kh_ohwall1_3'};
+    if(!S)S=OH_STY.gold;const Hp=Math.round(128*wh),pi=IMG[S.plain]||IMG.kh_ohwall1_0,units=Math.ceil(wh);
     const c=mkCanvas(128,Hp,(x,w,h)=>{
       x.fillStyle='#8a8478';x.fillRect(0,0,w,h);
       for(let u=0;u<units;u++){
@@ -45,7 +54,9 @@ function ohTiles(){
         if(u===0&&kind==='door')im=IMG[S.door];
         else if(u===0&&kind==='gate')im=IMG[img];
         else if(u===0&&kind==='shopfront')im=IMG[S.shop||S.win];
+        else if(u===1&&kind==='window2')im=IMG[S.win2||S.win];
         else if(u===1&&(kind==='window'||kind==='shopfront'||kind==='door'))im=IMG[S.win];
+        else if(kind==='plain2')im=IMG[S.alt||S.plain];
         else if(u===1&&kind==='slit')im=IMG[S.slit];
         else if(u===2&&kind==='window'&&wh>=2.9)im=IMG[S.win];
         if(im)x.drawImage(im,0,0,im.width,im.height,0,h-(u+1)*128,128,128);
@@ -53,7 +64,7 @@ function ohTiles(){
       if(S.tint&&kind!=='gate'){x.globalCompositeOperation='multiply';x.fillStyle='rgb('+S.tint[0]+','+S.tint[1]+','+S.tint[2]+')';x.fillRect(0,0,w,h);
         if(S.tint[3]){x.globalCompositeOperation='screen';x.fillStyle='rgba(255,238,205,'+S.tint[3]+')';x.fillRect(0,0,w,h)}x.globalCompositeOperation='source-over'}
     });
-    const d=c.getContext('2d').getImageData(0,0,128,Hp).data,id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;
+    const d=c.getContext('2d').getImageData(0,0,128,Hp).data,id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;if(wh>=2.5&&(pat==='castle'||pat==='castle2'||pat==='fort')&&kind!=='gate')TEX[id].cren=.3; // castle walls carry battlements
     const gid=KH_NEXT_GID++;T_TILE[gid]=id;
     return C[key]={gid,tex:id};
   };
@@ -81,9 +92,43 @@ const OH_FOLK=[
   {id:'oh_f_clerk',n:'A court clerk',face:'kh_ohfolk2_4',sc:1,lines:["I count things for the Crown. Today I have counted forty-one crates of nothing, in a very detailed ledger.","The court roll is closed to the public. I have never seen that done before.","I have a quill for lying and a quill for truth. The ink is the same."]},
   {id:'oh_f_maid',n:'A serving maid',face:'kh_ohfolk2_5',sc:1,lines:["Three jugs for the soldiers, one for the sergeant, and a very small one for the cat.","I have served ale to knights, thieves and a bishop. The bishop tipped best.","Mind the stairs. The last drunk is still on them."]}
 ];
+/* thirty more people of the town: children and elders, craftsfolk, gentry and clergy, street life, servants and the watch */
+const OH_FOLK2=[
+  {id:'oh_g_girl',n:'Mina, a little girl',face:'kh_ohfolk3_0',sc:.74,lines:["This is Dolly. She is not allowed in the fountain, but she goes in anyway.","I can count to a hundred. One, two, three, four. It takes a long time.","Mama says not to talk to strangers. But you have a nice hat. Well, one of you."]},
+  {id:'oh_g_eggs',n:'An old egg seller',face:'kh_ohfolk3_1',sc:.96,lines:["Eggs, fresh this morning. The hens are in a bad mood, so they are very good eggs.","Twelve eggs for a penny, and I will tell you which hen laid which.","The queen's cook buys my eggs. The queen's cook pays late. The eggs do not mind."]},
+  {id:'oh_g_hoop',n:'A boy with a hoop',face:'kh_ohfolk3_2',sc:.78,lines:["I can roll it all the way from the gate to the fountain without it falling. Watch.","The hoop came off a barrel. The barrel is still in the cellar, and nobody has noticed yet.","If you see my sister, I was never here."]},
+  {id:'oh_g_oldman',n:'An old man',face:'kh_ohfolk3_3',sc:1,lines:["I remember when this street was all mud. Now it is cobbles, and my knees prefer the mud.","I fought in the old wars. I mostly remember the food, which was terrible.","Sit with me a while. Everyone is in a hurry, and nobody gets there any sooner."]},
+  {id:'oh_g_mother',n:'A young mother',face:'kh_ohfolk3_4',sc:1,lines:["He only sleeps when the bells are ringing. Please keep your voices down.","My husband is on the wall tonight. I am told that is an honour. It is also very cold.","Is it true some people on the quay sailed across the whole sea? With a baby on board I would have turned back at the first wave."]},
+  {id:'oh_g_tavern',n:'A jolly tavern keeper',face:'kh_ohfolk3_5',sc:1.04,lines:["Best ale this side of the sea, and the worst jokes. Try the ale first.","I have been told I laugh too loudly. I was told it by customers who then stayed another hour.","A full mug is the oldest peace treaty there is."]},
+  {id:'oh_c_carp',n:'A carpenter',face:'kh_ohfolk4_0',sc:1.04,lines:["Measure twice, cut once, and swear quietly. That is the whole trade.","These planks are oak. Oak from the east forest, where the trees are older than the city.","I am building a stage for the fair. Do not lean on it. Not yet."]},
+  {id:'oh_c_mason',n:'A stonemason',face:'kh_ohfolk4_1',sc:1,lines:["Every stone in that wall was cut by hand. Some of them by my grandfather.","The castle needs a new battlement every spring. The weather bites, and the pigeons help.","A good mason never says a wall is finished. He says it is standing, for now."]},
+  {id:'oh_c_weaver',n:'A weaver',face:'kh_ohfolk4_2',sc:1,lines:["Wool from the western hills, spun by me, woven by me, and sold by my husband, who gets all the credit.","A loose thread is a story that has not finished yet.","I am weaving blue and white for the king's banner. It is the third banner this year. The wind is very hard on them."]},
+  {id:'oh_c_tanner',n:'A tanner',face:'kh_ohfolk4_3',sc:1.02,lines:["Yes, I smell. Everyone in the trade smells. Stand upwind and we will get along.","Good leather takes a year to make. Bad leather takes a week, and shows.","If you need a belt, I make a very good belt. If you need a friend, try the baker."]},
+  {id:'oh_c_potter',n:'A potter',face:'kh_ohfolk4_4',sc:1,lines:["I made this jug this morning. It already has a crack. That is how you know it is honest work.","Clay is easy. It is the fire that is difficult.","The best pots in the city come from the kiln by the north wall. They are mine, in case that was not clear."]},
+  {id:'oh_c_cooper',n:'A cooper',face:'kh_ohfolk4_5',sc:1,lines:["A barrel holds ale, fish, nails, or secrets. It is not my business which.","Forty staves and three hoops, and not one of them is allowed to leak.","The tavern next door buys a barrel a day. They do not return the empties. I have stopped counting."]},
+  {id:'oh_n_lady',n:'A lady in blue',face:'kh_ohfolk5_0',sc:1.06,lines:["This hat is a great trial. It must be carried, not worn, and nobody warned me.","The court is a lovely place if you enjoy listening very carefully to nothing.","Blue and white are the colours of Oldhaven. I wear them whether I am in a good mood or not."]},
+  {id:'oh_n_squire',n:'A young squire',face:'kh_ohfolk5_1',sc:1.02,lines:["I carry the helmet. One day I will wear the helmet. Today I carry it, and it is very heavy.","My knight says courage is going forward when you are afraid. I have a great deal of practice.","Is it true the tournament is to be held at the fair? I would give a year of my life to see it."]},
+  {id:'oh_n_nun',n:'A nun',face:'kh_ohfolk5_2',sc:1,lines:["Peace be upon this street, and upon the cat that sits in the middle of it.","We bake bread for the poor on the chapel steps. You are welcome to a loaf, whoever you are.","Saint Brannoch welcomed every traveller. I try to do the same, and to ask no questions until they have eaten."]},
+  {id:'oh_n_friar',n:'A wandering friar',face:'kh_ohfolk5_3',sc:1.06,lines:["I walk from town to town with a stick and no purse. People give me bread. It is a very good arrangement.","I have heard confession in three cities and one hay barn. The hay barn was the most honest.","The road east goes through the oak forest. Go with a friend, or a very large dog."]},
+  {id:'oh_n_scholar',n:'A scholar',face:'kh_ohfolk5_4',sc:1,lines:["I am copying a book about the stars. The stars have not changed, but the spelling has.","Ink is a wonderful thing. It is also on my sleeve, my collar, and my cat.","I am told some people carried a ledger across the sea. I would give a great deal to read it. Please do not tell the chancellor's clerks."]},
+  {id:'oh_n_wool',n:'A wool merchant',face:'kh_ohfolk5_5',sc:1.02,lines:["Wool is the gold of this kingdom, and I am a very comfortable man.","The fur collar is a necessity. It is cold on the quay. I tell my wife it is cold on the quay.","If you want to buy anything, I know a man. If you want to sell anything, I am the man."]},
+  {id:'oh_s_minstrel',n:'A minstrel',face:'kh_ohfolk6_0',sc:1.02,lines:["I know four hundred songs. Three hundred and ninety of them are about a girl and a river.","A song for a penny, two songs for a groat, and the rest of the night for a meal.","The lute has seven strings and I can play on five of them. The audience cannot tell."]},
+  {id:'oh_s_jester',n:'A travelling jester',face:'kh_ohfolk6_1',sc:1.02,lines:["Why did the knight sit on the roof? Because he had heard the drawbridge was down. I will explain it later.","I am not the king's fool. I am the fool of everyone who gives me an apple.","Hold this stick. No, the other end. Now you are part of the show."]},
+  {id:'oh_s_flower',n:'A flower seller',face:'kh_ohfolk6_2',sc:.9,lines:["Roses, roses! Red for friends and pink for sweethearts and yellow for people who owe you money!","Take a flower. It is only a penny, and it will make somebody cross very happy.","These came from the castle gardens. The gardener does not know. Please do not tell the gardener."]},
+  {id:'oh_s_apple',n:'An apple seller',face:'kh_ohfolk6_3',sc:1,lines:["Apples from the walled orchard, sweet as the day is long. A penny each, and one more if you smile.","Do not eat the green ones. I am not telling you why.","The knights eat three each, and they never pay. That is why I sell to the rest of you."]},
+  {id:'oh_s_crier',n:'The town crier',face:'kh_ohfolk6_4',sc:.96,lines:["Hear ye, hear ye! The fair of Saint Brannoch comes to the green, to the sound of drums and the smell of sausages!","Oyez! A lost cat, grey, answers to Biscuit. Reward of one fish.","I have been told I am very loud. I was told it by people who then thanked me for the news."]},
+  {id:'oh_s_falconer',n:'A falconer',face:'kh_ohfolk6_5',sc:1.02,lines:["She is called Windsor. She has killed forty-one pigeons and one hat.","Do not wave your arms near her. She thinks everything that moves is dinner.","The king hunts every autumn in the east forest. Windsor does the real work."]},
+  {id:'oh_v_gardener',n:'A gardener',face:'kh_ohfolk7_0',sc:1.02,lines:["I trim the hedges in the ward. They grow back overnight out of spite.","Roses need patience, water, and a gardener who never says anything unkind about them.","If you must walk on the grass, walk where the grass is already dead. Nobody will notice."]},
+  {id:'oh_v_page',n:'A page boy',face:'kh_ohfolk7_1',sc:.9,lines:["I carry messages for the court. I am not allowed to read them. I read them anyway.","If you see a lord wearing blue, please tell him his dinner is cold. He will be glad.","I run from the keep to the gate forty times a day. I am the fastest page in Oldhaven. I think."]},
+  {id:'oh_v_wash',n:'A washerwoman',face:'kh_ohfolk7_2',sc:1,lines:["Sheets for the inn, shirts for the guard, and a very small pair of stockings for the squire's cat.","You can tell everything about a man by his shirt. I will not say what.","The water in the fountain is not for washing. I wash in the fountain."]},
+  {id:'oh_v_stable',n:'A stable boy',face:'kh_ohfolk7_3',sc:.92,lines:["Forty horses and one of me. They all want breakfast at the same time.","The big grey bites. The little brown kicks. The old mare is perfect, and I love her.","If you need a horse for the east road, ask me, not the stable master. I know which ones are lazy."]},
+  {id:'oh_v_archer',n:'A woodland archer',face:'kh_ohfolk7_4',sc:1.04,lines:["I came in from the oak forest this morning. The deer are thick this year, and so are the wolves.","A longbow is taller than a man and pulls like a mule. I would not trade it for a horse.","The forest is a lovely place. Keep to the paths, and be polite to the trees."]},
+  {id:'oh_v_watch',n:'A town watchman',face:'kh_ohfolk7_5',sc:1.04,lines:["I walk the lanes at night with a lantern and a club. Mostly I use the lantern.","Lock your door, put out your fire, and say good evening to the cat. That is my whole advice.","There is a lot of coming and going in the lanes these days. I write it all down. Somebody should."]}
+];
+OH_FOLK.push(...OH_FOLK2);
 OH_FOLK.forEach(f=>khNpc(f.id,f.n,f.face,()=>yrLines(f.id,f.lines),{sc:f.sc}));
 const OH_FOLKBY=Object.fromEntries(OH_FOLK.map(f=>[f.id,f]));
-const OH_CROWD=['oh_f_baker','oh_f_noble','oh_f_lady','oh_f_monk','oh_f_boy','oh_f_fishwife','oh_f_friar','oh_f_cook','oh_f_beggar','oh_f_clerk','oh_f_maid','oh_f_smith'];
+const OH_CROWD=['oh_f_baker','oh_f_noble','oh_f_lady','oh_f_monk','oh_f_boy','oh_f_fishwife','oh_f_friar','oh_f_cook','oh_f_beggar','oh_f_clerk','oh_f_maid','oh_f_smith',...OH_FOLK2.map(f=>f.id),...OH_FOLK2.map(f=>f.id)];
 const OH_SOLDIER=['oh_f_pike','oh_f_pike','oh_f_xbow','oh_f_pike','oh_f_knight','oh_f_xbow','oh_f_pike','oh_f_knight2'];
 
 /* ---- the houses: what is inside each, by who lives there ---- */
@@ -141,7 +186,8 @@ const OH_ART={
 function ohArt(){
   for(const k in OH_ART)for(const [n,h] of OH_ART[k]){if(IMG[n])NPC_H[n]=NPC_H[n]===undefined||k==='oak'||k==='orchard'||k==='willow'?h:NPC_H[n]}
   NPC_H.ltree0=3.6;NPC_H.ltree4=3.8;NPC_H.ltree8=3.4;NPC_H.ltree12=3.7;NPC_H.ltree19=3.2;NPC_H.ltree17=2.6;NPC_H.ltree18=2.7;
-  NPC_H.kh_city2_1=1.7;IMG.oh_well=IMG.kh_city1_1;NPC_H.oh_well=1.5;IMG.oh_pergola=IMG.kh_city2_4;NPC_H.oh_pergola=2.4;IMG.oh_topiary=IMG.kh_city2_1;NPC_H.oh_topiary=1.7;NPC_H.kh_city2_4=2.4;NPC_H.kh_city2_5=.55;NPC_H.kh_city1_1=1.5;NPC_H.kh_city2_3=.9;NPC_H.lflora0=.55;NPC_H.lflora0_1=.55;NPC_H.lflora0_2=.55;NPC_H.lbush0=.8;NPC_H.lbush0_1=.8;
+  NPC_H.kh_city2_1=1.7;Object.assign(NPC_H,{kh_ohgard1_0:1.7,kh_ohgard1_1:.95,kh_ohgard1_2:2.3,kh_ohgard1_3:.62,kh_ohgard1_4:1.0,kh_ohgard1_5:.95,kh_ohgard2_0:1.15,kh_ohgard2_1:.95,kh_ohgard2_2:1.35,kh_ohgard2_3:.7,kh_ohgard2_4:.75});
+  IMG.oh_well=IMG.kh_city1_1;NPC_H.oh_well=1.5;IMG.oh_pergola=IMG.kh_city2_4;NPC_H.oh_pergola=2.4;IMG.oh_topiary=IMG.kh_city2_1;NPC_H.oh_topiary=1.7;NPC_H.kh_city2_4=2.4;NPC_H.kh_city2_5=.55;NPC_H.kh_city1_1=1.5;NPC_H.kh_city2_3=.9;NPC_H.lflora0=.55;NPC_H.lflora0_1=.55;NPC_H.lflora0_2=.55;NPC_H.lbush0=.8;NPC_H.lbush0_1=.8;
   for(let i=0;i<6;i++)NPC_H['kh_stall1_'+i]=1.5;for(const i of [0,1,3])NPC_H['kh_stall2_'+i]=.8;NPC_H.kh_stall2_2=.9;
   // the roofs: painted gables in several colours, some warmed up from the grey ones
   const tint=(src,name,rgb,lift)=>{if(IMG[name]||!IMG[src])return;const im=IMG[src];
@@ -158,17 +204,22 @@ const OH_ROOF={};
 function ohFloors(){
   const warm=(src,name,m,add)=>{if(FLOORS[name]||!FLOORS[src])return;const s=FLOORS[src],d=new Uint8ClampedArray(s.length);
     for(let i=0;i<s.length;i+=4){d[i]=s[i]*m[0]+add[0];d[i+1]=s[i+1]*m[1]+add[1];d[i+2]=s[i+2]*m[2]+add[2];d[i+3]=255}FLOORS[name]=d};
+  const paint=(name,k)=>{const im=IMG['kh_ohfloor1_'+k];if(im&&!FLOORS[name])FLOORS[name]=dsPaintedTex(im)};
+  // painted ground: golden cobbles, flagstones, gravel, lawn and meadow
+  paint('ohCobble',3);paint('ohPale',1);paint('ohMoss',0);paint('ohGravel',2);paint('ohLawn',4);paint('ohMeadow',5);
+  // fallbacks from the old floors, lightened and warmed
   warm('cobble','ohCobble',[1.5,1.42,1.2],[26,20,8]);warm('pale','ohPale',[1.2,1.15,1.0],[28,22,10]);warm('mosscobble','ohMoss',[1.4,1.45,1.15],[18,20,6]);
-  warm('dirt','ohGravel',[1.35,1.28,1.08],[34,28,12]);warm('stainedcobble','ohStain',[1.45,1.36,1.15],[24,18,8]);warm('lush','ohLawn',[1.2,1.28,.95],[10,22,0]);
+  warm('dirt','ohGravel',[1.35,1.28,1.08],[34,28,12]);warm('lush','ohLawn',[1.2,1.28,.95],[10,22,0]);warm('lush','ohMeadow',[1.2,1.28,.95],[10,22,0]);
 }
+
 /* the house types: what the walls are made of, how tall, what roofs they take */
 const OH_TYPES={
-  timber:{sty:['cream','cream','honey'],wh:[2.5,2.9],roofs:['terra','shingle','red','brown']},
-  merchant:{sty:['gold','honey','gold'],wh:[2.9,3.3],roofs:['slate','plum','sage','terra']},
-  townhouse:{sty:['rose','gold','cream'],wh:[3.3,3.7],roofs:['slate','terra','plum']},
-  cottage:{sty:['honey','cream','honey'],wh:[2.0,2.3],roofs:['thatch','moss','shingle','thatch']},
-  guild:{sty:['gold','grey','gold'],wh:[3.3,3.6],roofs:['slate','sage'],tower:1},
-  almshouse:{sty:['cream','gold'],wh:[2.2,2.5],roofs:['terra','brown','moss']}
+  timber:{sty:['timber','timber','timber'],wh:[2.5,2.9],roofs:['terra','shingle','red','brown']},
+  merchant:{sty:['golden','golden','timber'],wh:[2.9,3.3],roofs:['slate','plum','sage','terra']},
+  townhouse:{sty:['brick','brick','golden'],wh:[3.3,3.7],roofs:['slate','terra','plum']},
+  cottage:{sty:['cottage','cottage','timber'],wh:[2.0,2.3],roofs:['thatch','moss','shingle','thatch']},
+  guild:{sty:['golden','brick','golden'],wh:[3.3,3.6],roofs:['slate','sage'],tower:1},
+  almshouse:{sty:['cottage','golden'],wh:[2.2,2.5],roofs:['terra','brown','moss']}
 };
 function ohPickType(h,rich,w){
   const r=hash2(h.x0,h.y0,51);
@@ -179,7 +230,7 @@ function ohPickType(h,rich,w){
 }
 function ohBuild(){
   if(LEVELS[OH.ID])return;
-  ohAlias();ohArt();ohFloors();
+  ohAlias();ohArt();ohFloors();ohStyles();
   const W=OH.W,H=OH.H,N=W*H,hs=(a,b,c)=>hash2(a,b,c);
   const TM=ohTiles(),chars={D:LEVEL41_DATA.chars.D},chMap=new Map();let nextCh=0x300;
   const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
@@ -187,7 +238,7 @@ function ohBuild(){
   const block=new Uint8Array(N),fm=new Array(N).fill('0');
   const solid=(x,y,c)=>{rows[y][x]=c;block[y*W+x]=1};
   const sky=[],decor=[],scenery=[],lights=[],used=new Set();
-  const lv={rows:null,start:{x:OH.CX,y:141,f:0},enemies:[],items:[],decor,scenery,sky,fmap:null,floorSet:['ohCobble','ohPale','ohLawn','ohMoss','ohGravel','ohStain'],floor:'ohCobble',ceil:'cloud',
+  const lv={rows:null,start:{x:OH.CX,y:141,f:0},enemies:[],items:[],decor,scenery,sky,fmap:null,floorSet:['ohCobble','ohPale','ohLawn','ohMoss','ohGravel','ohMeadow'],floor:'ohCobble',ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:'Oldhaven',label:'Oldhaven',noExtras:true,diff:25,tele:{x:OH.CX,y:138},ceilH:5.2,chars,lights,portals:[]};
   const setF=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)fm[y*W+x]=f};
   /* ---- the curtain wall: two squares thick, arrow slits in its face, towers along it ---- */
@@ -226,6 +277,7 @@ function ohBuild(){
   OH.near=near;OH.free=free;
   const person=(id,x,y,rad)=>{const kp=KH_KEEPERS[id];if(!kp)return null;const q=near(x,y,rad||3);if(!q)return null;walk(khFaceKey(kp.face),q[0],q[1],{npc:id,sc:kp.sc||1});return q};
   const pick=(arr,a,b,c)=>arr[(hs(a,b,c)*arr.length)|0];
+  const P=k=>IMG['kh_'+k]?'kh_'+k:null,FOUNT=P('ohgard1_0')||'fountain',BENCH=P('ohgard1_3')||'yar_bench',ARBOUR=P('ohgard1_2'),HEDGE=P('ohgard1_1'),SUNDIAL=P('ohgard1_4'),FCART=P('ohgard1_5'),HIVES=P('ohgard2_0'),RBARREL=P('ohgard2_1'),WASH=P('ohgard2_2'),WBARROW=P('ohgard2_3'),HERBS=P('ohgard2_4');
   const art=(name,a,b,c)=>{const l=OH_ART[name].filter(([n])=>IMG[n]);return l.length?pick(l,a,b,c)[0]:null};
   const solidDc=(k,x,y,o)=>{if(k&&free(x,y)){dc(k,x,y,Object.assign({block:true,walk:false},o||{}));return true}return false}; // a tree or a plant you walk round
   const tree=(name,x,y)=>solidDc(art(name,x,y,61),x,y);
@@ -258,11 +310,15 @@ function ohBuild(){
     sky.push({x:GX,y:14,k:'kh_ohkeep1_0',w:34,z:gh-.3,big:1});
     for(const [x0,x1] of [[53,61],[87,95]]){ // the long halls beside the keep
       for(let y=9;y<=15;y++)for(let x=x0;x<=x1;x++)solid(x,y,y===15?(x%3===1?cw:cp):cp);
-      sky.push({x:(x0+x1+1)/2,y:12,k:'kh_ohroof1_1',w:x1-x0+1.6,z:3.6-.03,big:1});
+      if(IMG.kh_ohcast2_5)sky.push({x:(x0+x1+1)/2,y:12,k:'kh_ohcast2_5',w:9,z:3.6-.03,big:1});else sky.push({x:(x0+x1+1)/2,y:12,k:'kh_ohroof1_1',w:x1-x0+1.6,z:3.6-.03,big:1});
     }
     for(const [x,y,k,w] of [[CS.x0+.6,CS.y0+.6,'kh_ohtower1_3',10],[CS.x1+.6,CS.y0+.6,'kh_ohtower1_3',10],[CS.x0+.6,CS.y1+.6,'kh_ohtower1_3',10],[CS.x1+.6,CS.y1+.6,'kh_ohtower1_3',10],
       [GX-4,CS.y1+.5,'kh_ohtower1_3',8],[GX+4,CS.y1+.5,'kh_ohtower1_3',8],[kx0+1,ky1,'kh_ohtower1_0',5],[kx1,ky1,'kh_ohtower1_1',5],[kx0+1,ky0+1,'kh_ohtower1_4',4.4],[kx1,ky0+1,'kh_ohtower1_5',4.4],[CS.x0+12,CS.y0+1,'kh_ohtower1_2',5],[CS.x1-12,CS.y0+1,'kh_ohtower1_2',5],[CS.x0+.6,26,'kh_ohtower1_2',5.5],[CS.x1+.6,26,'kh_ohtower1_2',5.5]])
       sky.push({x,y,k,w,z:cWh-.05,big:1});
+    // the painted gatehouse stands over the gate passage, and spires and round towers stand along the ward wall
+    if(IMG.kh_ohcast2_2)sky.push({x:GX,y:CS.y1-.2,k:'kh_ohcast2_2',w:19,z:0,big:1});
+    if(IMG.kh_ohcast2_6)for(const [x,y] of [[CS.x0+8,CS.y0+1],[CS.x1-8,CS.y0+1],[CS.x0+1,CS.y1-9],[CS.x1+.5,CS.y1-9]])sky.push({x,y,k:'kh_ohcast2_6',w:2.6,z:cWh-.05,big:1});
+    if(IMG.kh_ohcast2_4)for(const [x,y] of [[CS.x0+.6,CS.y1-6],[CS.x1+.6,CS.y1-6],[CS.x0+.6,CS.y0+8],[CS.x1+.6,CS.y0+8]])sky.push({x,y,k:'kh_ohcast2_4',w:4.4,z:cWh-.05,big:1});
     // the gatehouse: its towers stand in the wall either side of the gate passage
     for(let y=CS.y1-1;y<=CS.y1;y++)for(const xs of [[GX-4,GX-2],[GX+2,GX+4]])for(let x=xs[0];x<=xs[1];x++)solid(x,y,ch(TM.make('plain','castle',4.4).gid));
     for(const x of [GX-2,GX+2]){tryDc('oh_banner',x,CS.y1-2)}
@@ -278,16 +334,16 @@ function ohBuild(){
       if(kind==='rose'){
         for(let y=y0+2;y<y1-1;y+=2)for(const x of [x0+2,x1-2]){tree('bush',x,y)}
         for(let y=y0+2;y<y1-1;y+=2)for(const x of [cx-2,cx+2])if(free(x,y))flowers(x,y,1.1);
-        tryDc('fountain',cx,cy,{block:true,walk:false});
-        for(const [dx,dy] of [[-1,-2],[1,2]])tryDc('yar_bench',cx+dx,cy+dy);
+        tryDc(FOUNT,cx,cy,{block:true,walk:false});
+        for(const [dx,dy] of [[-1,-2],[1,2]])tryDc(BENCH,cx+dx,cy+dy);
       }else if(kind==='cloister'){
         tryDc('oh_well',cx,cy,{block:true,walk:false});
         tree('oak',cx-3,cy-2);tree('oak',cx+3,cy+2);
-        for(const [dx,dy] of [[-2,0],[2,0]])tryDc('yar_bench',cx+dx,cy+dy);
+        for(const [dx,dy] of [[-2,0],[2,0]])tryDc(BENCH,cx+dx,cy+dy);
         for(const x of [x0+2,x1-2])for(const y of [y0+2,y1-2])flowers(x,y,1.1);
       }else{ // a little orchard
         for(let y=y0+2;y<=y1-2;y+=3)for(let x=x0+2;x<=x1-2;x+=3){if(x===cx||y===cy)continue;tree('orchard',x,y)}
-        tryDc('yar_bench',cx+1,cy+1);
+        tryDc(BENCH,cx+1,cy+1);
       }
     };
     wallGarden(54,23,69,36,[69,29,69,30],'rose');          // the rose garden, open towards the gravel walk
@@ -298,7 +354,7 @@ function ohBuild(){
     for(let y=22;y<=38;y+=4){tree('topiary',GX-3,y);tree('topiary',GX+3,y)}
     for(const [x,y] of [[52,30],[96,30],[60,38],[88,38],[66,38],[82,38],[71,21],[77,21],[52,22],[96,22],[52,37],[96,37]])tree('oak',x,y);
     for(let y=21;y<=37;y+=2){flowers(GX-2,y);flowers(GX+2,y)}
-    for(const x of [GX-9,GX+9])for(const y of [24,30,35])tryDc('yar_bench',x,y);
+    for(const x of [GX-9,GX+9])for(const y of [24,30,35])tryDc(BENCH,x,y);
     for(let y=22;y<=38;y+=4){lamp(GX-1,y+1);lamp(GX+1,y+1)}
     // the ward's people: knights, courtiers, gardeners, pages
     const wardNpc=['oh_f_knight','oh_f_knight2','oh_f_lady','oh_f_noble','oh_f_maid','oh_f_clerk','oh_f_banner','oh_f_pike'];
@@ -308,11 +364,11 @@ function ohBuild(){
   /* ---- the great square before the castle: a fountain, oaks round the edge, flower beds, benches ---- */
   const SQ={x0:60,y0:43,x1:88,y1:58};
   setF(SQ.x0,SQ.y0,SQ.x1,SQ.y1,'1');setF(OH_AVE.x0,43,OH_AVE.x1,43,'1');
-  dc('fountain',GX,51,{block:true,walk:false});
+  dc(FOUNT,GX,51,{block:true,walk:false});
   for(const [dx,dy] of [[-3,0],[3,0],[0,-3],[0,3],[-3,-3],[3,-3],[-3,3],[3,3]])flowers(GX+dx,51+dy,1.15);
   for(const x of [SQ.x0+1,SQ.x1-1])for(const y of [45,51,57])tree('oak',x,y);
   for(const x of [66,82])for(const y of [45,57])tree('oak',x,y);
-  for(const [x,y] of [[67,50],[81,50],[67,52],[81,52],[GX-5,48],[GX+5,48],[GX-5,54],[GX+5,54]])tryDc('yar_bench',x,y);
+  for(const [x,y] of [[67,50],[81,50],[67,52],[81,52],[GX-5,48],[GX+5,48],[GX-5,54],[GX+5,54]])tryDc(BENCH,x,y);
   for(const [x,y] of [[SQ.x0,47],[SQ.x0,55],[SQ.x1,47],[SQ.x1,55],[GX-6,44],[GX+6,44],[GX-6,57],[GX+6,57]])lamp(x,y);
   for(const [x,y] of [[SQ.x0+3,44],[SQ.x1-3,44],[SQ.x0+3,57],[SQ.x1-3,57]])tryDc('oh_banner',x,y);
   /* ---- the king's road: cobble in the middle, lawns either side with oaks in a row, hedges and beds, crossing streets of cobble ---- */
@@ -320,7 +376,7 @@ function ohBuild(){
   for(const cy of OH_CROSS)if(cy>59)setF(OH_AVE.x0,cy-.5,OH_AVE.x1,cy+.5,'0');
   const onCross=y=>OH_CROSS.some(c=>y>=c-1.5&&y<=c+1.5);
   for(let y=62;y<=140;y+=5){if(onCross(y))continue;tree('oak',71,y);tree('oak',77,y+2)}
-  for(let y=64;y<=138;y+=6){if(onCross(y)||onCross(y+1))continue;flowers(69,y);flowers(79,y);if(hs(y,1,67)<.5)tryDc('yar_bench',68,y+2);else tryDc('yar_bench',80,y+2)}
+  for(let y=64;y<=138;y+=6){if(onCross(y)||onCross(y+1))continue;flowers(69,y);flowers(79,y);if(hs(y,1,67)<.5)tryDc(BENCH,68,y+2);else tryDc(BENCH,80,y+2)}
   for(let y=61;y<=140;y+=8){if(onCross(y))continue;tree('topiary',OH_ROAD.x0-1,y);tree('topiary',OH_ROAD.x1+1,y)}
   for(let y=66;y<=140;y+=8){lamp(OH_ROAD.x0-1,y+3);lamp(OH_ROAD.x1+1,y+3)}
   for(let y=70;y<=134;y+=16){tryDc('oh_banner',OH_ROAD.x0-1,y);tryDc('oh_banner',OH_ROAD.x1+1,y+8)}
@@ -367,13 +423,16 @@ function ohBuild(){
     if(kind==='orchard'){
       for(let y=y0+1;y<=y1-1;y+=3)for(let x=x0+1;x<=x1-1;x+=3)if(!(Math.abs(x-cx)<=1)&&!(Math.abs(y-cy)<=0))tree('orchard',x,y);
       for(let x=x0;x<=x1;x++)for(const y of [y0,y1])if(hs(x,y,75)<.45)tree('bush',x,y);
-      tryDc('yar_bench',cx,cy);
+      if(SUNDIAL)tryDc(SUNDIAL,cx+((hs(x0,y0,91)<.5)?1:-1),cy,{block:true,walk:false});else tryDc(BENCH,cx,cy);
+      if(HIVES)tryDc(HIVES,x1-1,y0+1,{block:true,walk:false});
     }else{ // a public garden: a pond or a fountain, paths, beds, an arbour and oaks
       for(let x=x0;x<=x1;x++)fm[cy*W+x]='4';for(let y=y0;y<=y1;y++)fm[y*W+cx]='4';
-      if(hs(x0,y0,76)<.5)dc('fountain',cx,cy,{block:true,walk:false});else dc('oh_well',cx,cy,{block:true,walk:false});
+      if(hs(x0,y0,76)<.5)dc(FOUNT,cx,cy,{block:true,walk:false});else dc('oh_well',cx,cy,{block:true,walk:false});
       for(const [dx,dy] of [[-3,-3],[3,3],[-3,3],[3,-3]])tree(((dx+dy)&1)?'oak':'topiary',cx+dx,cy+dy);
-      for(const [dx,dy] of [[-2,0],[2,0],[0,2],[0,-2]])tryDc('yar_bench',cx+dx,cy+dy);
+      for(const [dx,dy] of [[-2,0],[2,0],[0,2],[0,-2]])tryDc(BENCH,cx+dx,cy+dy);
       for(let n=0;n<10;n++)flowers(x0+1+((hs(n,x0,77)*(x1-x0-1))|0),y0+1+((hs(n,y0,77)*(y1-y0-1))|0),1.1);
+      if(HEDGE)for(const y of [y0,y1])for(let x=x0;x<=x1;x+=2){if(Math.abs(x-cx)<=1)continue;solidDc(HEDGE,x,y,{sc:1})}
+      if(ARBOUR){tryDc(ARBOUR,cx,y0,{block:false});tryDc(ARBOUR,cx,y1,{block:false})}
       tryDc('oh_pergola',x0+2,y0+1,{block:false});
     }
     for(let n=0;n<4;n++)crowdAt(x0+2+((hs(n,x0,78)*(x1-x0-3))|0),y0+2+((hs(n,y0,78)*(y1-y0-3))|0),2);
@@ -393,6 +452,8 @@ function ohBuild(){
         for(let n=0;n<6;n++){const sx=106+n*4,sy=84+(n%2)*6,k='kh_stall1_'+n;if(IMG[k]&&free(sx,sy)){dc(k,sx,sy,{block:true,walk:false})}}
         for(let n=0;n<26;n++)crowdAt(OH_FAIR.x0+3+((hs(n,1,79)*(OH_FAIR.x1-OH_FAIR.x0-5))|0),OH_FAIR.y0+3+((hs(n,2,79)*(OH_FAIR.y1-OH_FAIR.y0-5))|0),2);
         for(let x=104;x<=127;x+=6)for(let y=80;y<=96;y+=8)lamp(x,y);
+        if(FCART)for(const [x,y] of [[110,78],[120,92],[124,98],[105,96]])tryDc(FCART,x,y);
+        if(HIVES)tryDc(HIVES,126,100);
       }
       return;
     }
@@ -401,6 +462,7 @@ function ohBuild(){
       for(let n=0;n<8;n++){const k='kh_stall1_'+(n%6),sx=b.x0+2+(n%4)*3,sy=b.y0+2+((n/4)|0)*6;if(IMG[k]&&free(sx,sy))dc(k,sx,sy,{block:true,walk:false})}
       for(const [x,y,k] of [[b.x0+1,b.y0+4,'kh_stall2_3'],[b.x1-1,b.y0+4,'kh_stall2_0'],[b.x0+6,b.y1-1,'kh_stall2_1'],[b.x1-2,b.y1-1,'kh_stall2_2']])if(IMG[k])tryDc(k,x,y);
       dc('oh_well',(b.x0+b.x1)>>1,b.y0+4,{block:true,walk:false});
+      if(FCART){tryDc(FCART,b.x0+5,b.y1-3);tryDc(FCART,b.x1-4,b.y0+8)}
       for(let x=b.x0+1;x<=b.x1;x+=4)tree('oak',x,b.y1);
       for(let n=0;n<14;n++)crowdAt(b.x0+((hs(n,1,80)*(b.x1-b.x0))|0),b.y0+((hs(n,2,80)*(b.y1-b.y0))|0),2);
       return;
@@ -473,7 +535,7 @@ function ohBuild(){
   // build the walls of each house
   for(const h of houses){
     const wh=h.wh,sty=h.sty,front=(x,y)=>h.face==='N'?y===h.y0:h.face==='S'?y===h.y1:h.face==='E'?x===h.x1:x===h.x0;
-    const plain=ch(TM.make('plain',sty,wh).gid),win=ch(TM.make(h.sp&&h.sp.room!=='prayer'?'shopfront':'window',sty,wh).gid),side=ch(TM.make('window',sty,wh).gid);
+    const plain=ch(TM.make('plain',sty,wh).gid),plain2=ch(TM.make('plain2',sty,wh).gid),win=ch(TM.make(h.sp&&h.sp.room!=='prayer'?'shopfront':'window',sty,wh).gid),side=ch(TM.make('window',sty,wh).gid),side2=ch(TM.make('window2',sty,wh).gid);
     const dtile=TM.make('door',sty,wh);
     const dgid=KH_NEXT_GID++;T_TILE[dgid]=dtile.tex;
     const mid=h.room==='inn'?[6,7]:h.room==='hall'?[5,6]:h.room==='shop'?[5,6]:h.room==='prayer'?[4,6]:[3,4];h.at={x:mid[0],y:mid[1],f:0};
@@ -482,7 +544,7 @@ function ohBuild(){
       let c;
       if(x===h.door[0]&&y===h.door[1])c=ch(dgid);
       else if(front(x,y))c=win;
-      else c=((x+y)%3===0)?side:plain;
+      else c=((x+y)%3===0)?((x*2+y)%2?side:side2):((x*3+y)%4===1?plain2:plain);
       solid(x,y,c);
     }
     // the roof: a painted gable on top of the walls, and now and then a tower standing over the house
@@ -501,12 +563,16 @@ function ohBuild(){
   for(const g of gardensOf){
     if(g.court){
       const [x0,y0,x1,y1,i,j]=g.court,cx=(x0+x1)>>1,cy=(y0+y1)>>1,kind=(hs(i,j,90)*5)|0;
-      if(kind===0){tree('oak',cx,cy);for(const [dx,dy] of [[-2,1],[2,-1]])tryDc('yar_bench',cx+dx,cy+dy)}
+      if(kind===0){tree('oak',cx,cy);for(const [dx,dy] of [[-2,1],[2,-1]])tryDc(BENCH,cx+dx,cy+dy)}
       else if(kind===1){tryDc('oh_well',cx,cy,{block:true,walk:false});for(const [dx,dy] of [[-2,-1],[2,1],[0,2]])flowers(cx+dx,cy+dy,1.15)}
       else if(kind===2){for(let y=y0;y<=y1;y+=2)for(let x=x0;x<=x1;x+=2)if(hs(x,y,91)<.6)tree('orchard',x,y)}
-      else if(kind===3){tree('willow',cx,cy);for(let n=0;n<6;n++)flowers(x0+((hs(n,i,92)*(x1-x0+1))|0),y0+((hs(n,j,92)*(y1-y0+1))|0),1.1);tryDc('yar_bench',cx+2,cy)}
-      else{tryDc('fountain',cx,cy,{block:true,walk:false});for(const [dx,dy] of [[-2,0],[2,0]])tryDc('oh_topiary',cx+dx,cy+dy);for(let n=0;n<6;n++)flowers(x0+((hs(n,i,93)*(x1-x0+1))|0),y0+((hs(n,j,93)*(y1-y0+1))|0),1.1)}
+      else if(kind===3){tree('willow',cx,cy);for(let n=0;n<6;n++)flowers(x0+((hs(n,i,92)*(x1-x0+1))|0),y0+((hs(n,j,92)*(y1-y0+1))|0),1.1);tryDc(BENCH,cx+2,cy)}
+      else{tryDc(FOUNT,cx,cy,{block:true,walk:false});for(const [dx,dy] of [[-2,0],[2,0]])tryDc('oh_topiary',cx+dx,cy+dy);for(let n=0;n<6;n++)flowers(x0+((hs(n,i,93)*(x1-x0+1))|0),y0+((hs(n,j,93)*(y1-y0+1))|0),1.1)}
       for(let x=x0;x<=x1;x++)for(const y of [y0,y1])if(hs(x,y,94)<.25)flowers(x,y);
+      if(WASH&&hs(i,j,98)<.35)tryDc(WASH,x0+1,y1-1,{block:false});
+      if(WBARROW&&hs(i,j,99)<.3)tryDc(WBARROW,x1-1,y1-1,{block:false});
+      if(RBARREL&&hs(i,j,100)<.4)tryDc(RBARREL,x1,y0+1,{block:false});
+      if(HERBS&&hs(i,j,101)<.3)tryDc(HERBS,x0+1,y0+1,{block:false});
       for(let n=0;n<3;n++)crowdAt(cx+((hs(n,i,96)*5-2)|0),cy+((hs(n,j,96)*4-2)|0),2);
     }else if(g.lane){
       const [x0,y,x1,,i,j]=g.lane;for(let x=x0+1;x<x1;x+=4)if(hs(x,j,89)<.55)flowers(x,y,1)
@@ -517,7 +583,7 @@ function ohBuild(){
       const x0=px-2,x1=px+3,y0=py-3,y1=py+4;setF(x0,y0,x1,y1,'1');
       if(hs(px,py,97)<.5)tree('oak',px-2,py-3);else dc('oh_well',px-2,py-2,{block:true,walk:false});
       tree('oak',px+3,py+4);
-      for(const [x,y] of [[px-2,py+3],[px+3,py-3]])tryDc('yar_bench',x,y);
+      for(const [x,y] of [[px-2,py+3],[px+3,py-3]])tryDc(BENCH,x,y);
       flowers(px-2,py+4,1.1);flowers(px+3,py-2,1.1);
       crowdAt(px,py,2);crowdAt(px+1,py+1,2);
     }
@@ -551,9 +617,10 @@ function ohBuild(){
     decor.push({k:'sign_'+h.keeper,x:spot[0],y:spot[1],block:false,wd:h.wall,txt:[h.name.toUpperCase(),KNAME[h.keeper]||'']});
   }
   // the streets are not one cobble: moss in the damp corners, stains, bare earth, grass at the foot of the walls
-  for(let y=6;y<144;y++)for(let x=6;x<144;x++){const i=y*W+x;if(block[i]||fm[i]!=='0')continue;
+  for(let y=6;y<144;y++)for(let x=6;x<144;x++){const i=y*W+x;if(fm[i]==='2'&&tsmooth(x/4.5,y/4.5,95)>.64){fm[i]='5';continue} // flowering meadow in patches on the lawns
+    if(block[i]||fm[i]!=='0')continue;
     const n=tsmooth(x/6,y/6,91),m=tsmooth(x/2.5,y/2.5,92),r=hs(x,y,93);
-    if(n>.7&&m>.4)fm[i]='3';else if(n<.2&&m<.6)fm[i]='5';else if(r<.02)fm[i]='4';
+    if(n>.72&&m>.4)fm[i]='3';else if(r<.012)fm[i]='4';
     else if((block[i-1]||block[i+1]||block[i-W]||block[i+W])&&m>.62&&r<.35)fm[i]='2';
   }
   /* ---- finish the level, the rooms behind the doors, and the doors of the gate ---- */

@@ -3057,5 +3057,600 @@
 "h": 157,
 "kind": "sprite",
 "sheet": "kgharp"
+},
+"ohwall2_0": {
+"file": "ohwall2_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall2"
+},
+"ohwall2_1": {
+"file": "ohwall2_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall2"
+},
+"ohwall2_2": {
+"file": "ohwall2_2.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall2"
+},
+"ohwall2_3": {
+"file": "ohwall2_3.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall2"
+},
+"ohwall2_4": {
+"file": "ohwall2_4.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall2"
+},
+"ohwall2_5": {
+"file": "ohwall2_5.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall2"
+},
+"ohwall3_0": {
+"file": "ohwall3_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall3"
+},
+"ohwall3_1": {
+"file": "ohwall3_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall3"
+},
+"ohwall3_2": {
+"file": "ohwall3_2.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall3"
+},
+"ohwall3_3": {
+"file": "ohwall3_3.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall3"
+},
+"ohwall3_4": {
+"file": "ohwall3_4.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall3"
+},
+"ohwall3_5": {
+"file": "ohwall3_5.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall3"
+},
+"ohwall4_0": {
+"file": "ohwall4_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall4"
+},
+"ohwall4_1": {
+"file": "ohwall4_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall4"
+},
+"ohwall4_2": {
+"file": "ohwall4_2.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall4"
+},
+"ohwall4_3": {
+"file": "ohwall4_3.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall4"
+},
+"ohwall4_4": {
+"file": "ohwall4_4.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall4"
+},
+"ohwall4_5": {
+"file": "ohwall4_5.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall4"
+},
+"ohwall5_0": {
+"file": "ohwall5_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall5"
+},
+"ohwall5_1": {
+"file": "ohwall5_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall5"
+},
+"ohwall5_2": {
+"file": "ohwall5_2.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall5"
+},
+"ohwall5_3": {
+"file": "ohwall5_3.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall5"
+},
+"ohwall5_4": {
+"file": "ohwall5_4.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall5"
+},
+"ohwall5_5": {
+"file": "ohwall5_5.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall5"
+},
+"ohwall6_0": {
+"file": "ohwall6_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall6"
+},
+"ohwall6_1": {
+"file": "ohwall6_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall6"
+},
+"ohwall6_2": {
+"file": "ohwall6_2.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall6"
+},
+"ohwall6_3": {
+"file": "ohwall6_3.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall6"
+},
+"ohwall6_4": {
+"file": "ohwall6_4.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall6"
+},
+"ohwall6_5": {
+"file": "ohwall6_5.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohwall6"
+},
+"ohfloor1_0": {
+"file": "ohfloor1_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohfloor1"
+},
+"ohfloor1_1": {
+"file": "ohfloor1_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohfloor1"
+},
+"ohfloor1_2": {
+"file": "ohfloor1_2.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohfloor1"
+},
+"ohfloor1_3": {
+"file": "ohfloor1_3.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohfloor1"
+},
+"ohfloor1_4": {
+"file": "ohfloor1_4.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohfloor1"
+},
+"ohfloor1_5": {
+"file": "ohfloor1_5.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ohfloor1"
+},
+"ohcast2_0": {
+"file": "ohcast2_0.webp",
+"w": 700,
+"h": 183,
+"kind": "sprite",
+"sheet": "ohcast2"
+},
+"ohcast2_1": {
+"file": "ohcast2_1.webp",
+"w": 700,
+"h": 173,
+"kind": "sprite",
+"sheet": "ohcast2"
+},
+"ohcast2_2": {
+"file": "ohcast2_2.webp",
+"w": 700,
+"h": 467,
+"kind": "sprite",
+"sheet": "ohcast2"
+},
+"ohcast2_3": {
+"file": "ohcast2_3.webp",
+"w": 700,
+"h": 222,
+"kind": "sprite",
+"sheet": "ohcast2"
+},
+"ohcast2_4": {
+"file": "ohcast2_4.webp",
+"w": 302,
+"h": 700,
+"kind": "sprite",
+"sheet": "ohcast2"
+},
+"ohcast2_5": {
+"file": "ohcast2_5.webp",
+"w": 541,
+"h": 700,
+"kind": "sprite",
+"sheet": "ohcast2"
+},
+"ohcast2_6": {
+"file": "ohcast2_6.webp",
+"w": 171,
+"h": 700,
+"kind": "sprite",
+"sheet": "ohcast2"
+},
+"ohfolk3_0": {
+"file": "ohfolk3_0.webp",
+"w": 165,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk3"
+},
+"ohfolk3_1": {
+"file": "ohfolk3_1.webp",
+"w": 239,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk3"
+},
+"ohfolk3_2": {
+"file": "ohfolk3_2.webp",
+"w": 293,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk3"
+},
+"ohfolk3_3": {
+"file": "ohfolk3_3.webp",
+"w": 248,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk3"
+},
+"ohfolk3_4": {
+"file": "ohfolk3_4.webp",
+"w": 180,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk3"
+},
+"ohfolk3_5": {
+"file": "ohfolk3_5.webp",
+"w": 269,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk3"
+},
+"ohfolk4_0": {
+"file": "ohfolk4_0.webp",
+"w": 361,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk4"
+},
+"ohfolk4_1": {
+"file": "ohfolk4_1.webp",
+"w": 220,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk4"
+},
+"ohfolk4_2": {
+"file": "ohfolk4_2.webp",
+"w": 209,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk4"
+},
+"ohfolk4_3": {
+"file": "ohfolk4_3.webp",
+"w": 262,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk4"
+},
+"ohfolk4_4": {
+"file": "ohfolk4_4.webp",
+"w": 194,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk4"
+},
+"ohfolk4_5": {
+"file": "ohfolk4_5.webp",
+"w": 240,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk4"
+},
+"ohfolk5_0": {
+"file": "ohfolk5_0.webp",
+"w": 246,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk5"
+},
+"ohfolk5_1": {
+"file": "ohfolk5_1.webp",
+"w": 206,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk5"
+},
+"ohfolk5_2": {
+"file": "ohfolk5_2.webp",
+"w": 173,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk5"
+},
+"ohfolk5_3": {
+"file": "ohfolk5_3.webp",
+"w": 226,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk5"
+},
+"ohfolk5_4": {
+"file": "ohfolk5_4.webp",
+"w": 191,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk5"
+},
+"ohfolk5_5": {
+"file": "ohfolk5_5.webp",
+"w": 210,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk5"
+},
+"ohfolk6_0": {
+"file": "ohfolk6_0.webp",
+"w": 261,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk6"
+},
+"ohfolk6_1": {
+"file": "ohfolk6_1.webp",
+"w": 256,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk6"
+},
+"ohfolk6_2": {
+"file": "ohfolk6_2.webp",
+"w": 243,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk6"
+},
+"ohfolk6_3": {
+"file": "ohfolk6_3.webp",
+"w": 306,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk6"
+},
+"ohfolk6_4": {
+"file": "ohfolk6_4.webp",
+"w": 323,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk6"
+},
+"ohfolk6_5": {
+"file": "ohfolk6_5.webp",
+"w": 282,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk6"
+},
+"ohfolk7_0": {
+"file": "ohfolk7_0.webp",
+"w": 225,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk7"
+},
+"ohfolk7_1": {
+"file": "ohfolk7_1.webp",
+"w": 173,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk7"
+},
+"ohfolk7_2": {
+"file": "ohfolk7_2.webp",
+"w": 267,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk7"
+},
+"ohfolk7_3": {
+"file": "ohfolk7_3.webp",
+"w": 289,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk7"
+},
+"ohfolk7_4": {
+"file": "ohfolk7_4.webp",
+"w": 298,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk7"
+},
+"ohfolk7_5": {
+"file": "ohfolk7_5.webp",
+"w": 278,
+"h": 512,
+"kind": "sprite",
+"sheet": "ohfolk7"
+},
+"ohgard1_0": {
+"file": "ohgard1_0.webp",
+"w": 525,
+"h": 479,
+"kind": "sprite",
+"sheet": "ohgard1"
+},
+"ohgard1_1": {
+"file": "ohgard1_1.webp",
+"w": 605,
+"h": 271,
+"kind": "sprite",
+"sheet": "ohgard1"
+},
+"ohgard1_2": {
+"file": "ohgard1_2.webp",
+"w": 452,
+"h": 535,
+"kind": "sprite",
+"sheet": "ohgard1"
+},
+"ohgard1_3": {
+"file": "ohgard1_3.webp",
+"w": 511,
+"h": 300,
+"kind": "sprite",
+"sheet": "ohgard1"
+},
+"ohgard2_0": {
+"file": "ohgard2_0.webp",
+"w": 588,
+"h": 456,
+"kind": "sprite",
+"sheet": "ohgard2"
+},
+"ohgard2_1": {
+"file": "ohgard2_1.webp",
+"w": 294,
+"h": 534,
+"kind": "sprite",
+"sheet": "ohgard2"
+},
+"ohgard2_2": {
+"file": "ohgard2_2.webp",
+"w": 618,
+"h": 497,
+"kind": "sprite",
+"sheet": "ohgard2"
+},
+"ohgard2_3": {
+"file": "ohgard2_3.webp",
+"w": 609,
+"h": 343,
+"kind": "sprite",
+"sheet": "ohgard2"
+},
+"ohgard1_4": {
+"file": "ohgard1_4.webp",
+"w": 212,
+"h": 488,
+"kind": "sprite",
+"sheet": "ohgard1"
+},
+"ohgard1_5": {
+"file": "ohgard1_5.webp",
+"w": 649,
+"h": 379,
+"kind": "sprite",
+"sheet": "ohgard1"
+},
+"ohgard2_4": {
+"file": "ohgard2_4.webp",
+"w": 500,
+"h": 421,
+"kind": "sprite",
+"sheet": "ohgard2"
+},
+"ohgard2_5": {
+"file": "ohgard2_5.webp",
+"w": 359,
+"h": 510,
+"kind": "sprite",
+"sheet": "ohgard2"
 }
 }
