@@ -1,0 +1,218 @@
+/* ==========================================================================
+   THE HOLLOW LAND. Below the Abbey, past the Hollow Abbot, the stair comes out on a high ledge in a vast underground dark. Far below, lit by red
+   and purple torches, stands a great orange castle. Stairs lead down to its gate. Inside, 20 levels climb to a spire, each smaller than the one
+   below, each with a number on the stone, a mystery room, labyrinthine passages and armoured goblins, slimes and orcs. At the top a wizard asks
+   three questions. Answered with good will, they open the way to the next tower (violet). Answered with greed, the party falls down two levels.
+   Levels: 364 the ledge and the way down, 440 to 459 the orange tower (levels 1 to 20), 460 the foot of the violet tower.
+   ========================================================================== */
+const HL={CAV:364,BASE:440,N:20,VIOLET:460};
+ENEMY_DEF.hlgoblin={name:'Armoured Goblin',hp:120,dmg:[10,17],hit:.74,w:.46,img:'hl_goblin',xp:420,gold:[12,45],speed:1,aboveParty:1};
+ENEMY_DEF.hlslime={name:'Cave Slime',hp:180,dmg:[7,13],hit:.7,w:.6,img:'hl_slime',xp:380,gold:[0,10],speed:1,aboveParty:0};
+ENEMY_DEF.hlorc={name:'Orc',hp:320,dmg:[17,28],hit:.78,w:.74,img:'hl_orc',xp:900,gold:[40,110],speed:1,aboveParty:2};
+LEVEL_NAMES[HL.CAV]='The Hollow Land';
+for(let k=0;k<HL.N;k++)LEVEL_NAMES[HL.BASE+k]='The Orange Tower, level '+(k+1);
+LEVEL_NAMES[HL.VIOLET]='The Foot of the Violet Tower';
+const HLF=()=>{const F=G.flags;return F.hl||(F.hl={riddles:{},falls:0})};
+function hlTint(src,r,g,b,a,name){ // a copy of a picture washed with a colour, for the goblins, the slimes, the orcs and the torches
+  if(IMG[name])return IMG[name];const im=IMG[src];if(!im)return null;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');
+  x.drawImage(im,0,0);x.globalCompositeOperation='source-atop';x.fillStyle='rgba('+r+','+g+','+b+','+a+')';x.fillRect(0,0,c.width,c.height);return IMG[name]=c}
+function hlArt(){
+  if(IMG.hl_orc)return;
+  hlTint('bandit',90,170,60,.52,'hl_goblin');hlTint('skel',70,150,70,.45,'hl_goblin_sk');
+  hlTint('cyclops',70,150,60,.5,'hl_orc');NPC_H.hl_orc=1.1;
+  // a slime: a green heap with eyes, drawn in code since no painted one exists yet
+  {const c=document.createElement('canvas');c.width=200;c.height=170;const x=c.getContext('2d');
+   const g=x.createRadialGradient(100,100,10,100,100,95);g.addColorStop(0,'rgba(150,240,110,.95)');g.addColorStop(1,'rgba(40,130,60,.9)');x.fillStyle=g;
+   x.beginPath();x.moveTo(8,160);x.bezierCurveTo(0,90,50,30,100,26);x.bezierCurveTo(150,30,200,90,192,160);x.bezierCurveTo(160,170,40,170,8,160);x.fill();
+   x.fillStyle='rgba(255,255,255,.35)';x.beginPath();x.ellipse(70,70,22,12,-.5,0,TAU);x.fill();
+   x.fillStyle='#10300c';for(const ex of [76,124]){x.beginPath();x.ellipse(ex,96,11,15,0,0,TAU);x.fill();x.fillStyle='#fff';x.beginPath();x.arc(ex-3,91,4,0,TAU);x.fill();x.fillStyle='#10300c'}
+   IMG.hl_slime=c}
+  const lamp=IMG.lamp;
+  if(lamp){hlTint('lamp',255,60,40,.62,'hl_torch_r');hlTint('lamp',170,70,255,.62,'hl_torch_p');NPC_H.hl_torch_r=NPC_H.hl_torch_p=1.5}
+  hlTint('kh_ohkeep1_0',255,150,40,.7,'hl_castle');hlTint('kh_ohtower1_0',255,130,50,.55,'hl_tower0');hlTint('kh_ohtower1_2',255,130,50,.55,'hl_tower2');hlTint('kh_ohtower1_3',255,130,50,.55,'hl_tower3');
+  hlTint('kh_ohkeep1_0',170,110,255,.5,'hl_castle_v');
+}
+/* ---- the people who talk about the place ---- */
+const HL_FIGS=[
+ ['hl_fig0','A hooded figure by the stair','kh_ohfolk2_3',["Nobody built it. It was always there, and we were put under it.","The torches are never lit by anyone. I have waited a long time to see who lights them. Nobody does.","Climb. Do not look down. The ones who look down start to feel it pulling."]],
+ ['hl_fig1','A grey friar, very old','kh_ohfolk2_1',["Each floor is smaller than the last. They say that at the top there is room for only one question.","I came up eleven floors, and then came down ten. I am not sure that I am the same person.","The rooms in the middle of each floor are not rooms. They are tests, and nobody tells you what for."]],
+ ['hl_fig2','A woman with an empty lantern','kh_ohfolk3_1',["The dark here is not an absence of light. It is a presence. Feel how it leans on the torches.","My lantern went out on the third floor. The torches did not mind. They give light to anyone, and ask for nothing.","Be careful what you want, in the tower. It listens."]],
+ ['hl_fig3','A pale scholar','kh_ohfolk5_4',["The numbers on the stones are not counting up. They are counting down. To something.","The goblins are not evil. They are afraid of the wizard. So is everything else.","He asks three questions. They are not hard. That is the trouble."]],
+ ['hl_fig4','A very small man, sitting','kh_ohfolk3_3',["I have been on the nineteenth floor for a year. I like it. It is quiet, and the stair is just there.","Slimes do not hate you. They only want to be near warmth. So do I.","At the top, they say, one fall is a lesson and two falls is a habit."]],
+ ['hl_fig5','The keeper of the stair','kh_ohfolk6_1',["Welcome to the Hollow Land. Below is the Abbey, and above is the tower, and in between there is only the dark and the torches.","Walk down the steps to the castle gate. The tower is called the Orange Tower, though there will be others.","Do not fear the torches, red or purple. They burn for the lost."]]
+];
+HL_FIGS.forEach(([id,n,face,lines])=>khNpc(id,n,face,()=>yrLines(id,lines)));
+/* ---- the riddles ---- */
+const HL_RIDDLES=[
+ ['I have no voice, yet I answer every call. What am I?',['An echo','A bell','A wolf'],0],
+ ['The more of me you take, the more you leave behind. What am I?',['Footsteps','Gold','Bread'],0],
+ ['I am lighter than a feather, yet no one can hold me for long. What am I?',['A breath','A stone','A coin'],0],
+ ['I fall without breaking, and break without falling. What am I?',['Night and day','A glass','A leaf'],0],
+ ['What has roots nobody sees, and is taller than the trees?',['A mountain','An oak','A tower'],0],
+ ['I speak only when spoken to, and then I vanish. What am I?',['Silence','A shadow','A ghost'],0],
+ ['What can you keep, only after you have given it?',['Your word','A coin','A secret key'],0],
+ ['I have a heart that does not beat, and many rooms but no one lives in me. What am I?',['A tower','A crypt','A hive'],0],
+ ['What is always coming, but never arrives?',['Tomorrow','A guest','A ship'],0],
+ ['I shine without a flame, and warm nobody. What am I?',['The moon','A gem','A mirror'],0]
+];
+for(let k=0;k<HL.N;k++){const R=HL_RIDDLES[k%10],id='hl_riddler'+k;
+  khNpc(id,'A wizard with a riddle','kh_ohfolk5_4',()=>{const F=HLF();
+    if(F.riddles[k])return say('You have answered me already, and well. Go on.',[BYE]);
+    return say('"'+R[0]+'"',R[1].map((o,i)=>[o,()=>{if(i===R[2]){F.riddles[k]=1;try{giveXP(2500+k*400);G.gold+=150+k*40;G.heroes.forEach(h=>{h.hp=h.max})}catch(e){}msg('The wizard smiles. Your wounds close, and a purse appears.','#e8d890');return say('Yes. It is always that. Take this, and be well.',[BYE])}return say('No. Think about it quietly, and ask me again.',[BYE])}]))})}
+/* ---- the wizard at the top ---- */
+const HL_Q=[
+ ['You find a purse full of gold on the road, and its owner is nowhere. What do you do?',['Look for its owner, and give it back.','Keep it. It found you.']],
+ ['A friend asks you to carry a burden for a day, and offers you nothing for it. What do you do?',['Carry it, gladly.','Ask what is in it for you.']],
+ ['You may take one thing from this tower. What is it?',['Nothing. I came to see it.','The greatest treasure it holds.']]
+];
+khNpc('hl_wizard','The Wizard at the top of the tower','kh_ohfolk5_4',()=>{
+  const F=HLF();
+  if(F.towerOpen)return say('The way to the next tower is open. Go in peace.',[['Go to the violet tower.',()=>{goToLevel(HL.VIOLET);return null}],BYE]);
+  const ask=n=>{const q=HL_Q[n];return say(`Question ${n+1}. ${q[0]}`,[[q[1][0],()=>{if(n===2){F.towerOpen=1;try{giveXP(60000)}catch(e){}msg('The wizard bows. A door opens in the wall of the spire.','#e8d890');return say('You came with good will, all three times. A door opens, and a stair leads across to the violet tower. Go on.',[['Go to the violet tower.',()=>{goToLevel(HL.VIOLET);return null}],BYE])}return ask(n+1)}],
+    [q[1][1],()=>{F.falls++;msg('The floor drops away.','#ff9a7a');later(400,()=>{G.cut=null;goToLevel(HL.BASE+HL.N-3,{x:HLX[HL.N-3].x,y:HLX[HL.N-3].y,f:0});msg('You fall two levels, and land hard in the dark.','#ff9a7a')});return null}]])};
+  return say('Climb a long way, did you? Then answer me three questions, and answer them honestly. Good will opens the door. Greed opens the floor.',[['I am ready.',()=>ask(0)],BYE]);
+});
+khNpc('hl_violet','A plaque at the foot of the violet tower','gate',()=>say('THE VIOLET TOWER. The road goes on, above and beyond. This is as far as the Hollow Land goes for now. Below the Abbey is in early access. Thank you for climbing.',[['Go back down.',()=>{goToLevel(HL.BASE+HL.N-1,{x:HLX[HL.N-1].x,y:HLX[HL.N-1].y,f:0});return null}],BYE]));
+const HLX=[]; // where each level's stair down arrives
+/* ---- the mystery rooms ---- */
+const HL_MYST=['riddle','bridge','sand','statues','pit','monster','chasm','treasure'];
+/* ---- building ---- */
+function hlBuild(k){
+  const id=k<HL.N?HL.BASE+k:HL.VIOLET;if(LEVELS[id])return;
+  const top=k===HL.N-1,violet=k>=HL.N,kk=Math.min(k,HL.N-1);
+  const W=violet?19:Math.max(19,Math.round(61-kk*2.3)),H=violet?13:Math.max(15,Math.round(43-kk*1.6)),hs=hash2,R=(i,m)=>(hs(k*31+i,k*7+5,97)*m)|0;
+  const TM=ohTiles(),chars={D:LEVEL41_DATA.chars.D},chMap=new Map();let nextCh=0x300;
+  const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
+  const sty=violet?'hlviolet':'hlorange';
+  OH_STY[sty]=Object.assign({},OH_STY.castle2||OH_STY.gold,{zoom:2.2,contrast:2.2,tint:violet?[190,150,255,.0]:[255,170,95,.0]});
+  const CH=1.5+kk*.13,wall=ch(TM.make('plain',sty,CH).gid),wall2=ch(TM.make('slit',sty,CH).gid);
+  const g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
+  const rooms=[],cut=r=>{for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)g[y][x]='.'};
+  const nrooms=violet?3:Math.max(4,11-Math.floor(kk/2.5)),ms=Math.max(5,7-Math.floor(kk/8));
+  rooms.push({x0:(W>>1)-2,y0:H-5,x1:(W>>1)+2,y1:H-3});
+  for(let t=0;t<1500&&rooms.length<nrooms;t++){const first=rooms.length===1,w=first?ms:3+R(100+t,Math.max(2,5-Math.floor(kk/6))),h=first?ms:3+R(200+t,3),x0=1+R(300+t,W-w-2),y0=1+R(400+t,H-h-2);
+    if(rooms.some(r=>x0<=r.x1+2&&x0+w-1>=r.x0-2&&y0<=r.y1+2&&y0+h-1>=r.y0-2))continue;rooms.push({x0,y0,x1:x0+w-1,y1:y0+h-1})}
+  rooms.forEach(cut);const mid=r=>[(r.x0+r.x1)>>1,(r.y0+r.y1)>>1];
+  const hl=(y,x0,x1)=>{for(let x=Math.min(x0,x1);x<=Math.max(x0,x1);x++)g[y][x]='.'},vl=(x,y0,y1)=>{for(let y=Math.min(y0,y1);y<=Math.max(y0,y1);y++)g[y][x]='.'};
+  const link=(a,b,s)=>{const [ax,ay]=mid(a),[bx,by]=mid(b);if(R(600+s,2)===0){hl(ay,ax,bx);vl(bx,ay,by)}else{vl(ax,ay,by);hl(by,ax,bx)}};
+  for(let i=1;i<rooms.length;i++){let bj=0,bd=1e9;const [ax,ay]=mid(rooms[i]);for(let j=0;j<i;j++){const [bx,by]=mid(rooms[j]),d=Math.abs(ax-bx)+Math.abs(ay-by)+R(500+i*9+j,6);if(d<bd){bd=d;bj=j}}link(rooms[i],rooms[bj],i)}
+  for(let e=0;e<2+(kk>>2);e++){const i=R(700+e,rooms.length),j=R(710+e,rooms.length);if(i!==j)link(rooms[i],rooms[j],40+e)} // loops, so that the way is a labyrinth
+  // the stair in, and the stair up in the furthest room
+  const r0=rooms[0],ux=(r0.x0+r0.x1)>>1,uy=r0.y1+1;g[uy][ux]='0';const start={x:ux,y:r0.y1,f:0};
+  const d=new Int16Array(W*H).fill(-1),q=[start.x+start.y*W];d[q[0]]=0;
+  for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H||g[ny][nx]!=='.'||d[ny*W+nx]>=0)continue;d[ny*W+nx]=d[c]+1;q.push(ny*W+nx)}}
+  let far=rooms[rooms.length-1],fd=-1;rooms.forEach((r,i)=>{if(i<2)return;const [mx,my]=mid(r),v=d[my*W+mx];if(v>fd){fd=v;far=r}});
+  let up=null;if(!violet&&!top){const dxm=(far.x0+far.x1)>>1;g[far.y0-1][dxm]='1';up={x:dxm,y:far.y0}}
+  const rows=g.map((r,y)=>r.map((c,x)=>c==='#'?((x*7+y*3)%9===0?wall2:wall):c).join(''));
+  const decor=[],enemies=[],items=[],lights=[],used=new Set([start.x+','+start.y]),fm=new Array(W*H).fill('0');
+  const blockAt=(x,y)=>{used.add(x+','+y);decor.push({k:'lp_gap',x,y,block:true,deco:true})};
+  const myst=rooms[1],mt=violet?'':HL_MYST[(k*5+2)%8],[mx,my]=mid(myst);
+  const pathCell=new Set();
+  if(!violet){
+    if(mt==='bridge'||mt==='chasm'){ // a void: dark floor, nothing to stand on but a narrow way across
+      for(let y=myst.y0;y<=myst.y1;y++)for(let x=myst.x0;x<=myst.x1;x++){fm[y*W+x]='3';
+        const onPath=mt==='bridge'?(y===my||x===mx):(y===myst.y0||x===myst.x0||(y===my&&x===mx));
+        if(onPath){pathCell.add(x+','+y);fm[y*W+x]='0'}}
+      for(let y=myst.y0;y<=myst.y1;y++)for(let x=myst.x0;x<=myst.x1;x++){if(pathCell.has(x+','+y))continue;
+        const nearPath=[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>pathCell.has((x+a)+','+(y+b)));
+        if(mt==='bridge'&&nearPath&&IMG.lp_rail){used.add(x+','+y);decor.push({k:'lp_rail',x,y,block:true,deco:true})}else blockAt(x,y)}
+      if(mt==='chasm'){decor.push({k:'chest',x:myst.x1,y:myst.y1,block:true,magic:1});used.add(myst.x1+','+myst.y1);pathCell.add(myst.x1+','+myst.y1);
+        for(let y=myst.y0;y<=myst.y1;y++){pathCell.add(myst.x1+','+y)}for(let x=myst.x0;x<=myst.x1;x++)pathCell.add(x+','+myst.y1)}
+      else items.push({k:'potion',x:mx,y:my});
+    }
+    else if(mt==='sand'){for(let y=myst.y0;y<=myst.y1;y++)for(let x=myst.x0;x<=myst.x1;x++){fm[y*W+x]='1';if(hs(x,y,k+50)<.12&&!(x===mx&&y===my)){used.add(x+','+y);decor.push({k:'bones',x,y,block:false,walk:true,deco:true})}}
+      items.push({k:'potion',x:mx+1,y:my});enemies.push({t:'hlslime',x:myst.x1,y:myst.y0})}
+    else if(mt==='statues'){for(let y=myst.y0;y<=myst.y1;y++)for(let x=myst.x0;x<=myst.x1;x++){if(x===mx||y===my||(x+y)%2)continue;used.add(x+','+y);decor.push({k:'statue',x,y,block:true,deco:true})}
+      decor.push({k:'chest',x:myst.x0,y:myst.y0,block:true,magic:1});used.add(myst.x0+','+myst.y0)}
+    else if(mt==='pit'){const prev=k>0?HL.BASE+k-1:HL.CAV;
+      decor.push({k:'dhatch',x:mx,y:my,block:true,npc:'hl_pit'+k});used.add(mx+','+my);
+      khNpc('hl_pit'+k,'A deep pit','dhatch',()=>say('A pit in the floor, round and black. You cannot see the bottom. Cold air breathes up out of it, and something far below is listening.',[['Jump in.',()=>{msg('You fall.','#ff9a7a');later(300,()=>{G.cut=null;goToLevel(prev,prev===HL.CAV?{x:34,y:6,f:2}:{x:HLX[k-1].x,y:HLX[k-1].y,f:0})});return null}],['Step back.',()=>null]]))}
+    else if(mt==='monster'){enemies.push({t:'hlorc',x:mx,y:my},{t:'hlorc',x:myst.x1,y:myst.y0});decor.push({k:'chest',x:myst.x0,y:myst.y1,block:true,magic:1});used.add(myst.x0+','+myst.y1)}
+    else if(mt==='treasure'){decor.push({k:'chest',x:mx,y:my,block:true,magic:1},{k:'chest',x:myst.x0,y:myst.y0,block:true,magic:1});used.add(mx+','+my);used.add(myst.x0+','+myst.y0);for(const [a,b] of [[myst.x1,myst.y1],[myst.x1,myst.y0]])items.push({k:'potion',x:a,y:b})}
+    else if(mt==='riddle'){const kp=KH_KEEPERS['hl_riddler'+k];if(kp){decor.push({k:khFaceKey(kp.face),x:mx,y:my,block:true,npc:'hl_riddler'+k,sc:kp.sc||1});used.add(mx+','+my)}}
+  }
+  // the top: the wizard, in the spire room
+  if(top){const [fx,fy]=mid(far),kp=KH_KEEPERS.hl_wizard;if(kp){decor.push({k:khFaceKey(kp.face),x:fx,y:fy,block:true,npc:'hl_wizard',sc:kp.sc||1});used.add(fx+','+fy)}}
+  if(violet){const kp=KH_KEEPERS.hl_violet;decor.push({k:khFaceKey(kp.face),x:mx,y:my+1,block:true,npc:'hl_violet',sc:1})}
+  // torches, red and purple, lighting the way: in the rooms and along the passages
+  const torch=(x,y,c)=>{const key=c?'hl_torch_p':'hl_torch_r';if(!IMG[key]||used.has(x+','+y))return;used.add(x+','+y);decor.push({k:key,x,y,block:false,walk:true,deco:true});lights.push([x,y])};
+  rooms.forEach((r,i)=>{torch(r.x0,r.y0,i%2);torch(r.x1,r.y0,(i+1)%2);if(r.x1-r.x0>4){torch(r.x0,r.y1,(i+1)%2);torch(r.x1,r.y1,i%2)}});
+  let n=0;for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(g[y][x]==='.'&&!pathCell.has(x+','+y)&&(x*3+y*5+k)%11===0&&(g[y-1][x]==='#'||g[y][x-1]==='#'))torch(x,y,(n++)%2);
+  // the number of the level, on the stone wall beside the stair
+  if(!violet)decor.push({k:'sign_hl',x:(r0.x0+r0.x1)>>1,y:r0.y0,block:false,wd:[0,-1],txt:['LEVEL '+(k+1),'THE ORANGE TOWER'],sc:2.4});
+  // the strange figures, on a few levels
+  const figLv={0:'hl_fig1',3:'hl_fig2',7:'hl_fig3',11:'hl_fig0',15:'hl_fig4'};
+  if(figLv[k]&&rooms[2]){const kp=KH_KEEPERS[figLv[k]],[fx,fy]=mid(rooms[2]);if(kp&&!used.has(fx+','+fy)){decor.push({k:khFaceKey(kp.face),x:fx,y:fy,block:true,npc:figLv[k],sc:kp.sc||1});used.add(fx+','+fy)}}
+  // the foes: armoured goblins, slimes, orcs
+  const cells=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(g[y][x]==='.'&&d[y*W+x]>6&&!used.has(x+','+y)&&!(x>=myst.x0&&x<=myst.x1&&y>=myst.y0&&y<=myst.y1))cells.push([x,y]);
+  const kinds=kk<6?['hlgoblin','hlgoblin','hlslime']:kk<13?['hlgoblin','hlslime','hlorc','hlgoblin']:['hlorc','hlorc','hlgoblin','hlslime'];
+  if(!violet)for(let i=0;i<Math.max(5,Math.min(13,Math.round(cells.length/38)));i++){const c=cells[R(900+i*13,cells.length)];if(c&&!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);enemies.push({t:kinds[R(950+i,kinds.length)],x:c[0],y:c[1]})}}
+  for(let i=0;i<3&&cells.length;i++){const c=cells[R(100+i*7,cells.length)];if(!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);items.push({k:'potion',x:c[0],y:c[1]})}}
+  const portals=[{to:k===0?HL.CAV:violet?HL.BASE+HL.N-1:id-1,x:0,y:0,f:2,tex:'tomb'}];
+  if(up)portals[1]={to:id+1,x:0,y:0,f:0,tex:'tomb'};
+  const lv={rows,start,enemies,items,decor,fmap:(()=>{const f=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];f.push(s)}return f})(),
+    floorSet:['tombslab','sand','tombgold','tombdark','tombred'],floor:'tombslab',ceil:'tomb',name:LEVEL_NAMES[id],label:violet?'The Violet Tower':'The Orange Tower',diff:36+kk,portals,lights,chars,amb:.05,day:0,ceilH:CH,
+    mapNames:rooms.map((r,i)=>({t:i===0?'Stair ('+(k+1)+')':r===myst&&!violet?'The Strange Room':r===far&&up?'The Stair Up':top&&r===far?'The Spire':'Hall',x:mid(r)[0],y:r.y0-1,k:'place'})),_up:up,_start:start};
+  LEVELS[id]=lv;
+}
+function hlCavern(){
+  if(LEVELS[HL.CAV])return;
+  const W=71,H=64,rows=[],hs=hash2,N=W*H,h=new Float32Array(N),rk=new Float32Array(N),block=new Uint8Array(N);
+  const TM=ohTiles(),chars={D:LEVEL41_DATA.chars.D},chMap=new Map();let nextCh=0x300;
+  const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
+  OH_STY.hlrock={...(OH_STY.castle2||OH_STY.gold),zoom:2.6,contrast:2.6,tint:[120,96,84,.0]};
+  const rock=[3.2,4.4,5.6].map(wh=>ch(TM.make('plain','hlrock',wh).gid));
+  for(let y=0;y<H;y++)rows.push(new Array(W).fill('.'));
+  const fm=new Array(N).fill('3'),decor=[],lights=[],items=[],enemies=[],sky=[],used=new Set();
+  // a high ledge in the south (y 50 to 62) with stairs down, in broad flights, to a floor far below at the north (y 12 to 20), and the gate
+  const haze=(()=>{const c=mkCanvas(128,58,(x,w,h)=>{const gr=x.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#1a1218');gr.addColorStop(1,'#0c080c');x.fillStyle=gr;x.fillRect(0,0,w,h)});const d=c.getContext('2d').getImageData(0,0,128,58).data,id=addTex(d,null);TEX[id].h=58;TEX[id].wh=.45;const gid=KH_NEXT_GID++;T_TILE[gid]=id;return ch(gid)})();
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,lim=y<14?33:y<48?20:30;
+    if(y<2){rows[y][x]=haze;block[i]=1;continue}
+    if(x<3||x>=W-3||y>=H-2||Math.abs(x-35)>lim){rows[y][x]=rock[(x*5+y*3)%3];block[i]=1;continue}
+    h[i]=y>=50?3.6:y<=18?.2:Math.max(.2,3.6-(50-y)*.107);fm[i]=y>=22&&y<=48&&Math.abs(x-35)<=2?'1':y>=50?'0':'3'}
+  // the stairs: steps are painted as lighter floor bands across the path
+  for(let y=19;y<=49;y++)for(let x=33;x<=37;x++)if(y%3===0)fm[y*W+x]='2';
+  // the gate of the castle, in the north wall under the castle
+  const gt=TM.make('gate',0,3.6,'kh_ohgate1_0');T_DOORS.hlgate=gt.tex;const gc=String.fromCharCode(nextCh++);chars[gc]=31;
+  for(let y=8;y<=9;y++)for(let x=33;x<=37;x++){rows[y][x]=gc;block[y*W+x]=1}
+  // lights: purple and red torches lining the stairs and the ledge
+  const torch=(x,y,c)=>{const key=c?'hl_torch_p':'hl_torch_r';if(!IMG[key]||used.has(x+','+y))return;used.add(x+','+y);decor.push({k:key,x,y,block:false,walk:true,deco:true});lights.push([x,y])};
+  for(let y=6;y<=60;y+=3){torch(31,y,(y/3|0)%2);torch(39,y,(y/3|0)%2?0:1)}
+  for(let x=10;x<=60;x+=6)torch(x,54,x/6%2);
+  // the castle: a great orange castle at the foot of the stairs, with towers, behind the gate wall, and torches of two colours along its foot
+  sky.push({x:35,y:5.5,k:'hl_castle',w:58,z:0,big:1});
+  for(const [x,y,k,w] of [[8,4,'hl_tower3',14],[62,4,'hl_tower3',14],[20,3.5,'hl_tower0',9],[50,3.5,'hl_tower0',9],[14,5.5,'hl_tower2',8],[56,5.5,'hl_tower2',8]])sky.push({x,y,k,w,z:0,big:1});
+  for(let x=6;x<=64;x+=4)torch(x,11,(x/4|0)%2);
+  // people and a stair-keeper
+  const place=(id,x,y)=>{const kp=KH_KEEPERS[id];if(kp&&!used.has(x+','+y)){used.add(x+','+y);decor.push({k:khFaceKey(kp.face),x,y,block:false,walk:true,npc:id,sc:kp.sc||1})}};
+  place('hl_fig5',36,56);place('hl_fig0',30,38);place('hl_fig3',40,26);
+  const lv={rows:rows.map(r=>r.join('')),start:{x:35,y:60,f:0},enemies,items,decor,sky,fmap:fm.map(x=>x).reduce((a,c,i)=>{if(i%W===0)a.push('');a[a.length-1]+=c;return a},[]),
+    floorSet:['tombdark','tombslab','tombgold','tombslab'],floor:'tombdark',ceil:'tomb',name:'The Hollow Land',label:'The Hollow Land',diff:36,portals:[],lights,chars,amb:.42,day:0,ceilH:7,
+    mapNames:[{t:'The Orange Castle',x:35,y:5,k:'place'},{t:'The High Ledge',x:35,y:58,k:'place'},{t:'The Long Stair',x:35,y:34,k:'lane'},{t:'The Castle Gate',x:35,y:12,k:'lane'}]};
+  lv.portals[0]={to:360+3,x:0,y:0,f:2,tex:'tomb'};lv.portals[1]={to:HL.BASE,x:0,y:0,f:0,tex:'hlgate'};
+  // the stair back down to the Hollow Abbey, hidden in the south wall behind the keeper; the castle gate (portal 1) in the north
+  rows[H-2][35]='0';lv.rows=rows.map(r=>r.join(''));
+  LEVELS[HL.CAV]=lv;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=chars[rows[y][x]];if(c!==undefined&&c>=30&&c<100)block[y*W+x]=0}
+  TERRS[HL.CAV]=yarTerrain(W,H,h,rk,block);
+}
+function hlAll(){
+  if(typeof KH_READY!=='undefined'&&!KH_READY)return;
+  if(LEVELS[HL.BASE+HL.N-1]&&LEVELS[HL.CAV])return;
+  ohAlias();oqAlias();ohArt();ohFloors();ohStyles();isleFloors();lpArt();hlArt();
+  hlCavern();for(let k=0;k<HL.N;k++)hlBuild(k);hlBuild(HL.N);
+  // portals that go up and down: where each lands
+  for(let k=0;k<HL.N;k++){const L=LEVELS[HL.BASE+k];HLX[k]={x:L._up?L._up.x:L._start.x,y:L._up?L._up.y:L._start.y}}
+  HLX[HL.N]=HLX[HL.N-1];
+  const cav=LEVELS[HL.CAV];
+  for(let k=0;k<HL.N;k++){const L=LEVELS[HL.BASE+k],nx=LEVELS[k<HL.N-1?HL.BASE+k+1:HL.VIOLET];
+    if(L.portals[1]&&k<HL.N-1){L.portals[1].x=nx._start.x;L.portals[1].y=nx._start.y;L.portals[1].f=0}
+    const dn=k===0?cav:LEVELS[HL.BASE+k-1];
+    if(k===0){L.portals[0].x=cav.start.x;L.portals[0].y=cav.start.y-2*0;L.portals[0].f=2;cav.portals[1].x=L._start.x;cav.portals[1].y=L._start.y;cav.portals[1].f=0}
+    else{L.portals[0].x=dn._up.x;L.portals[0].y=dn._up.y;L.portals[0].f=2}}
+  const vl=LEVELS[HL.VIOLET];vl.portals[0].x=LEVELS[HL.BASE+HL.N-1]._start.x;vl.portals[0].y=LEVELS[HL.BASE+HL.N-1]._start.y;vl.portals[0].f=0;
+  cav.portals[0].x=LEVELS[363]._start?LEVELS[363]._start.x:cav.portals[0].x;
+  const abbey=LEVELS[363];if(abbey&&abbey.portals[1]){abbey.portals[1].x=cav.start.x;abbey.portals[1].y=cav.start.y;abbey.portals[1].f=0}
+  if(abbey&&abbey._down){cav.portals[0].x=abbey._down.x;cav.portals[0].y=abbey._down.y;cav.portals[0].f=2}
+}
+for(const id of [HL.CAV,HL.VIOLET,...Array.from({length:HL.N},(_,k)=>HL.BASE+k)])KH_LAZY[id]=()=>{BELOW.IDS.forEach((_,n)=>belowBuild(n));belowLink();hlAll()};
