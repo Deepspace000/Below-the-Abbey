@@ -82,4 +82,8 @@ repWrap('oh_sergeant',()=>qSt('sg1')==='done'&&qSt('sg2')!=='done','About the br
 repWrap('oh_sergeant',()=>qSt('sg1')==='done'&&qSt('sg6')!=='done','About the families',()=>qNode('sg6',SGD.sg6));
 repWrap('oh_x_baker',()=>qSt('sg1')==='done'&&qSt('ox3')==='done'&&qSt('sg7')!=='done','About the tunnel',()=>qNode('sg7',SGD.sg7));
 // the siege ends when the sortie is handed in
-{const _qt=qTurnIn;qTurnIn=function(id){const r=_qt.apply(this,arguments);if(id==='sg8'){G.flags.siegeWon=1;G.flags.siege=0;msg('The east gate is open again. The siege of Oldhaven is over.','#a8e8a0')}return r}}
+/* the six of the fair, remembered: each one spared (mercy) comes to the wall with a gift when the siege ends; each one punished (justice) sends the garrison a fine's worth of gold */
+function ohSixRemember(){const m=(G.flags.ohf&&G.flags.ohf.mercy)||{};let a=0,b=0;for(const k in m){if(m[k])a++;else b++}
+  if(a){G.gold+=a*150;msg(`${a} of the six you spared come to the wall with gifts: ${a*150} gold.`,'#a8e8a0');if(a>=4)try{honourAdd(5,'the six speak for you')}catch(e){}}
+  if(b){const x=b*400;giveXP(x);msg(`The ${b} you held to account are made an example of. The garrison trusts your word: ${x} experience.`,'#e0c880')}}
+{const _qt=qTurnIn;qTurnIn=function(id){const r=_qt.apply(this,arguments);if(id==='sg8'){ohSixRemember();G.flags.siegeWon=1;G.flags.siege=0;msg('The east gate is open again. The siege of Oldhaven is over.','#a8e8a0')}return r}}

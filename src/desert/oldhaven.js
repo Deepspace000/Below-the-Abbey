@@ -473,6 +473,10 @@ function ohBuild(){
         for(let n=0;n<6;n++){const sx=106+n*4,sy=84+(n%2)*6,k='kh_stall1_'+n;if(IMG[k]&&free(sx,sy)){dc(k,sx,sy,{block:true,walk:false})}}
         for(let n=0;n<26;n++)crowdAt(OH_FAIR.x0+3+((hs(n,1,79)*(OH_FAIR.x1-OH_FAIR.x0-5))|0),OH_FAIR.y0+3+((hs(n,2,79)*(OH_FAIR.y1-OH_FAIR.y0-5))|0),2);
         if(typeof OH_FAIRFOLK!=='undefined')for(const [id,x,y] of OH_FAIRFOLK)person(id,x,y,3); // the six names of the master ledger
+        // the fair dressed: straight banners on tall poles round the green, more stalls along the east side, and entertainers and onlookers
+        for(let x=104;x<=127;x+=4){for(const y of [77,100])if(free(x,y)&&IMG['kh_oqflags_0']){dc('oq_flag'+((x/4|0)%2?0:4),x,y,{block:false})}}
+        for(let n=0;n<6;n++){const k='kh_stall1_'+((n+3)%6),sx=105+n*4,sy=88;if(IMG[k]&&free(sx,sy))dc(k,sx,sy,{block:true,walk:false})}
+        for(const [id,x,y] of [['oh_s_minstrel',115,87],['oh_s_jester',111,89],['oh_s_falconer',121,86],['oh_s_flower',108,86],['oh_s_apple',118,90],['oh_s_crier',113,78]])person(id,x,y,2);
         if(typeof OH_FAIRFOLK!=='undefined')OH_FAIRFOLK.forEach(([id,x,y],n)=>{const k='kh_stall2_'+n;if(IMG[k])dc(k,x,y<88?y-1:y+1,{block:true,walk:false})}); // each of the six keeps a stall
         for(let n=0;n<6;n++){const k='kh_stall2_'+n,sx=104+n*4,sy=100;if(IMG[k]&&free(sx,sy))dc(k,sx,sy,{block:true,walk:false})}
         for(let x=104;x<=127;x+=6)for(let y=80;y<=96;y+=8)lamp(x,y);
