@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.186';
+const VERSION='3.187';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -16316,7 +16316,7 @@ function lpXcOf(s){ // the winding middle of the path, row by row, for stretch s
   const leg=LP_LEG(s),mount=leg==='W'||leg==='D',PAD=s===LP.N-1?60:0,H=LP.H+PAD,CX=LP.CX,A=mount?LP.A-1:LP.A,sd=s*37+11,ph1=hash2(sd,1,2),ph2=hash2(sd,3,4),xc=[];
   for(let y=0;y<H;y++){const yy=y-PAD,HH=LP.H;if(yy<0){xc.push(CX);continue}const t=(HH-1-yy)/(HH-1),env=Math.max(0,Math.min(1,Math.min(yy,HH-1-yy)/44));xc.push(Math.round(CX+env*A*(.62*Math.sin(TAU*(t*6.3+ph1))+.38*Math.sin(TAU*(t*11.7+ph2)))))}
   return LP_XC[s]=xc}
-const lpWd=(s,y,sg)=>6.5+3*tsmooth(y/7,sg+3,s*37+11+7);
+const lpWd=(s,y,sg)=>6.5+3*tsmooth(y/7,sg+3,s*37+11+7)+9*Math.max(0,tsmooth(y/50,sg+21,s*37+11+9)-.45)*2.2; // the pass is a narrow gorge in places and opens out into green valleys in others
 function lpMonDoor(){const xc=lpXcOf(LPM.SEG);return {x:xc[LPM.Y]+Math.floor(lpWd(LPM.SEG,LPM.Y,1))+8,y:LPM.Y,c:xc[LPM.Y]}}
 /* ---- pilgrims on the way, people resting by the road, and the shrines ---- */
 const LP_PILG=[
@@ -16347,6 +16347,16 @@ khNpc('lp_shrine','A roadside shrine','memorial',d=>{
 /* ---- pictures: an invisible stone to walk into at the ends of each stretch, and the horse ---- */
 const LP_KM=96,LP_ROWS_KM=(LP.N*LP.H)/LP_KM; // the whole path is 96 kilometres, a sign at every one
 function lpArt(){if(!IMG.lp_gap){const c=document.createElement('canvas');c.width=c.height=8;IMG.lp_gap=c;NPC_H.lp_gap=.1}}
+function lpPeak(k,seed){ // a range of far mountains, with snow on the highest, fading into haze at its foot
+  if(IMG[k])return k;const w=640,h=260,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d'),pts=[];
+  const N=22;for(let i=0;i<=N;i++){const px=i*w/N,hh=(.28+.6*Math.pow(hash2(i,seed,3),1.3))*(1-.25*Math.abs(Math.sin(i*.7+seed)));pts.push([px,h-hh*h*.95])}
+  x.beginPath();x.moveTo(0,h);x.lineTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length-1;i++){const mx=(pts[i][0]+pts[i+1][0])/2,my=(pts[i][1]+pts[i+1][1])/2;x.quadraticCurveTo(pts[i][0],pts[i][1],mx,my)}x.lineTo(w,pts[pts.length-1][1]);x.lineTo(w,h);x.closePath();
+  const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'#8196ab');g.addColorStop(.6,'#a3b6c6');g.addColorStop(1,'#c3d3df');x.fillStyle=g;x.fill();
+  x.save();x.clip();
+  for(let i=1;i<pts.length-1;i++){const p=pts[i];if(p[1]<h*.5&&p[1]<=pts[i-1][1]&&p[1]<=pts[i+1][1]){x.fillStyle='rgba(248,250,254,.92)';x.beginPath();x.moveTo(p[0],p[1]-1);x.quadraticCurveTo(p[0]-18,p[1]+22,p[0]-46,p[1]+50);x.lineTo(p[0]-20,p[1]+38);x.lineTo(p[0]-6,p[1]+62);x.lineTo(p[0]+12,p[1]+40);x.lineTo(p[0]+30,p[1]+58);x.quadraticCurveTo(p[0]+16,p[1]+22,p[0],p[1]-1);x.closePath();x.fill()}
+    x.strokeStyle='rgba(70,88,108,.14)';x.lineWidth=4;x.beginPath();x.moveTo(p[0],p[1]+6);x.lineTo(p[0]+24,h);x.stroke()}
+  const hz=x.createLinearGradient(0,h*.35,0,h);hz.addColorStop(0,'rgba(208,224,238,0)');hz.addColorStop(1,'rgba(208,224,238,.9)');x.fillStyle=hz;x.fillRect(0,0,w,h);x.restore();
+  IMG[k]=c;return k}
 let LP_HAZE=0;
 function lpHaze(){ // the far edge of the sea: a wall the colour of the horizon, so that it cannot be seen as a wall
   if(LP_HAZE)return LP_HAZE;const wh=.45,c=mkCanvas(128,Math.round(128*wh),(x,w,h)=>{const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'#bfd4e6');g.addColorStop(.5,'#cddfec');g.addColorStop(1,'#a9c0d0');x.fillStyle=g;x.fillRect(0,0,w,h)});
@@ -16367,10 +16377,13 @@ function lpBuild(s){
   const PAD=s===LP.N-1?60:0,W=LP.W,H=LP.H+PAD,Y0=PAD,N=W*H,CX=LP.CX,leg=LP_LEG(s),mir=leg==='S',MX=x=>mir?W-1-x:x,hs=(a,b,c)=>hash2(a,b,c),sd=s*37+11;
   const mount=leg==='W'||leg==='D',coast=!mount,open_=y=>coast||(s===LP.N-1&&y<64+Y0);
   const wet=y=>s===LP.N-1&&y<=Y0+5; // the sea beyond the cliff // the last stretch opens out onto a green terrace above the sea
-  const OAKS=['ltree0','ltree4','ltree8','ltree12','ltree19'],PINES=['ptree0','ptree1','ptree3','ptree4','ptree9','pjuniper'],FLO=['lflora0','lflora0_1','lflora0_2'];
+  const OAKS=['ltree0','ltree4','ltree8','ltree12','ltree19'],PINES=['ptree0','ptree5','ptree6','ptree0','ptree5','ptree2','ptree7','ltree2'],FLO=['lflora0','lflora0_1','lflora0_2'];
   const TM=ohTiles(),chars={D:LEVEL41_DATA.chars.D},chMap=new Map();let nextCh=0x300;
   const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
-  const rock=[3.8,4.6,5.4].map(wh=>ch(TM.make('plain','grey',wh).gid)),wdist=(y,sg)=>lpWd(s,y,sg);
+  const sty=(n,o)=>{OH_STY[n]=Object.assign({},OH_STY.castle2||OH_STY.gold,o)};
+  sty('lprock1',{zoom:2.6,contrast:2.8,tint:[132,152,134,.0]});sty('lprock2',{zoom:2.2,contrast:2.4,tint:[128,146,150,.0]});sty('lprock3',{zoom:3,contrast:3,tint:[140,152,128,.0]});
+  const rockTiles=[];if(mount)for(const st of ['lprock1','lprock2','lprock3'])for(const wh of [3.6,4.6,5.6,6.8])rockTiles.push(ch(TM.make('plain',st,wh).gid));
+  const rockAt=(x,y,sg)=>{const hh=Math.min(3,Math.floor(tsmooth(y/11,sg+11,sd+21)*4)),st=Math.min(2,Math.floor(tsmooth(y/37,sg+17,sd+23)*3.99));return rockTiles[st*4+hh]},wdist=(y,sg)=>lpWd(s,y,sg);
   const rows=[];for(let y=0;y<H;y++)rows.push(new Array(W).fill('.'));
   const fm=new Array(N).fill('0'),h=new Float32Array(N).fill(.3),rk=new Float32Array(N),block=new Uint8Array(N);
   const I=(x,y)=>y*W+MX(x),setC=(x,y,c)=>{rows[y][MX(x)]=c;block[I(x,y)]=1};
@@ -16393,8 +16406,8 @@ function lpBuild(s){
       }else{
         // the mountains: a pass between tall grey cliffs, with heather, rock and pines in it
         const sg=x<c?-1:1,wd=wdist(y,sg);
-        fm[i]=d<=1?'1':d>wd-3?'6':'5';h[i]=.3;
-        if(d>wd){setC(x,y,rock[((x*7+y*3+(hs(x,y,sd+4)*3)|0))%3]);}
+        fm[i]=d<=1?'1':d>wd-3?'6':wd>11?'0':'5';h[i]=.3;
+        if(d>wd+7){setC(x,y,rockAt(x,y,sg));}
       }
     }
   }
@@ -16404,6 +16417,14 @@ function lpBuild(s){
     for(let x=c0+2;x<md.x;x++)for(let y=Y-1;y<=Y+1;y++){rows[y][MX(x)]='.';block[I(x,y)]=0;fm[I(x,y)]='1'}
     const dt=TM.make('door','castle',3.8),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;KH_DOOR[dgid]={lvl:MON.ID,at:{x:MON.GATE_IN[0],y:MON.GATE_IN[1],f:0}};
     for(let y=Y-1;y<=Y+1;y++)setC(md.x,y,y===Y?ch(dgid):rock[1]);
+  }
+  if(mount){
+    // tarns in the wide valleys, and a stream beside the path in some stretches
+    for(let q=0;q<4;q++){const y=60+((hs(sd,q,31)*(H-160))|0);if(wet(y))continue;for(const sg of [-1,1]){if(hs(y,sg,sd+32)<.5)continue;const wd=lpWd(s,y,sg);if(wd<12)continue;const cx0=xc[y]+sg*Math.round(wd*.6),r=Math.min(6,Math.floor((wd-5)*.45));
+      for(let yy=y-r*2;yy<=y+r*2;yy++)for(let xx=cx0-r;xx<=cx0+r;xx++){if(yy<2||yy>=H-2||xx<1||xx>=W-1||Math.abs(xx-xc[yy])<4)continue;if(((xx-cx0)/r)**2+((yy-y)/(r*2))**2<=1&&rows[yy][MX(xx)]==='.'){fm[I(xx,yy)]='4';h[I(xx,yy)]=-.2;block[I(xx,yy)]=1}}}}
+    if(s%3===1){const sgn=s%2?1:-1;for(let y=40;y<H-40;y++){if(wet(y))continue;const x=xc[y]+sgn*3+Math.round(1.5*Math.sin(y*.15));if(rows[y][MX(x)]==='.'&&!block[I(x,y)]){fm[I(x,y)]='4';h[I(x,y)]=.05}}}
+    // far peaks with snow on them, standing behind the cliffs
+    for(let q=0,y=20+((hs(sd,40,40)*40)|0);y<H-20;y+=75,q++)for(const sg of [-1,1]){const pk=lpPeak('lp_peak'+((q+(sg>0?1:0)+s)%6),(q+(sg>0?1:0)+s)%6);if(pk)sky.push({x:xc[y]+sg*(52+((hs(y,sg,sd+41)*26)|0)),y,k:pk,w:96,z:3,big:1})}
   }
   /* ---- the places cut out of the trees: clearings, building yards, the hidden nook ---- */
   const circle=(cx,cy,r)=>{for(let y=Math.max(1,cy-r);y<=Math.min(H-2,cy+r);y++)for(let x=cx-r;x<=cx+r;x++)if(x>0&&x<W-1&&Math.hypot(x-cx,y-cy)<=r+hs(x,y,5)*.8)carve.add(K(x,y))};
@@ -16459,10 +16480,12 @@ function lpBuild(s){
         decor.push({k:OAKS[(o*5)|0],x:MX(x),y,block:near1||near2||dd<4,ox:a*.5*(mir?-1:1),oy:b*.5,sc:.8+hs(x,y,sd+16)*.45})}
     }
   }
-  if(mount){ // the pass: pines and boulders against the cliffs, a few rocks beside the path
-    for(let y=1;y<H-1;y++){if(open_(y))continue;const c=xc[y];for(const sg of [-1,1]){const wd=Math.floor(wdist(y,sg));for(let dx=3;dx<wd;dx++){const x=c+sg*dx;if(x<1||x>=W-1||used.has(K(x,y)))continue;
-      const r=hs(x,y,sd+30),near=dx>=wd-3,p=near?.34:.045;
-      if(r<p){used.add(K(x,y));const b2=r<p*.2?'boulder':r<p*.35?'rocks':PINES[(hs(x,y,sd+31)*PINES.length)|0];decor.push({k:b2,x:MX(x),y,block:near,ox:(hs(x,y,sd+32)-.5)*.5,oy:(hs(x,y,sd+33)-.5)*.5,sc:.8+hs(x,y,sd+34)*.6})}}}}
+  if(mount){ // the pass: wooded slopes of pines on both sides, boulders in the meadows between, and rock only far back where nobody can see it
+    for(let y=1;y<H-1;y++){if(open_(y))continue;const c=xc[y];for(const sg of [-1,1]){const wd=Math.floor(wdist(y,sg));
+      for(let dx=3;dx<wd+7;dx++){const x=c+sg*dx;if(x<1||x>=W-1||used.has(K(x,y))||carve.has(K(x,y)))continue;
+        const slope=dx>=wd,r=hs(x,y,sd+30),p=slope?(dx<wd+3?1:dx<wd+5?.8:.5):(dx>=wd-3?.2:.04);
+        if(r<p){const o=hs(x,y,sd+31);used.add(K(x,y));const kk=!slope&&o<.22?'boulder':!slope&&o<.34?'rocks':PINES[(hs(x,y,sd+35)*PINES.length)|0];
+          decor.push({k:kk,x:MX(x),y,block:slope&&dx<wd+5||(!slope&&(kk==='boulder'||kk==='rocks')),ox:(hs(x,y,sd+32)-.5)*.5,oy:(hs(x,y,sd+33)-.5)*.5,sc:slope?1.0+hs(x,y,sd+34)*.7:.8+hs(x,y,sd+34)*.6})}}}}
   }
   /* ---- flowers along the path, lamps, benches, rocks on the shore, clearings with huge oaks ---- */
   const flower=(x,y,sc)=>{if(x<1||x>=W-1||used.has(K(x,y)))return;const k=FLO[(hs(x,y,sd+40)*3)|0];scenery.push({k,wx:MX(x)+.5,wy:y+.5,sc:sc||.55,decor:{k,walk:true,x:MX(x),y}})};
