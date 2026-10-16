@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.180';
+const VERSION='3.181';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -4055,13 +4055,14 @@ function gotoList(){
   hd('The Islands of the Narrow Sea');for(const n of [300,301,302,303])if(has(n))out.push({n,name:nm(n)});
   hd('Under the sea');for(const n of [320,321,322,323])if(has(n))out.push({n,name:nm(n)});
   hd('The open sea and its lonely islands');for(const n of [330,331,332,333,334,335,336,337,338,339,340,341,342,343])if(has(n))out.push({n,name:nm(n)});
-  hd('Oldhaven, the city of King Osric');for(const n of [304,305,306,307,308,309,310])if(has(n))out.push({n,name:nm(n)});
+  hd('Oldhaven, the city of King Osric');for(const n of [304,305,306,307,308,309,310,311])if(has(n))out.push({n,name:nm(n)});
+  hd('Below the Abbey, past the sealed door');for(const n of [360,361,362,363,364])if(has(n))out.push({n,name:nm(n)});
     hd('Mounds of the Sand Road');for(let n=BURROW_BASE;n<BURROW_BASE+BURROW_N;n++)if(has(n))out.push({n,name:nm(n)});
   for(const [dl,dname] of DNG_DESERTS){const ids=Object.keys(DNG_INFO).map(Number).filter(n=>DNG_INFO[n].desert===dname).sort((a,b)=>a-b);if(ids.length){hd('Dungeons of '+dname);for(const n of ids)out.push({n,name:nm(n)})}}
   return out;
 }
 function jumpToLevel(n,target){
-  if(((n>=304&&n<=312)||(n>=6000&&n<7000))&&typeof KH_READY!=='undefined'&&!KH_READY){khLoadAssets().then(()=>jumpToLevel(n,target));return} // Oldhaven needs its pictures before it is built
+  if((((n>=304&&n<=312)||(n>=360&&n<=364))||(n>=6000&&n<7000))&&typeof KH_READY!=='undefined'&&!KH_READY){khLoadAssets().then(()=>jumpToLevel(n,target));return} // Oldhaven needs its pictures before it is built
   if((n===44||(n>=199&&n<=274))&&LEVELS[44].stub){khEnter(()=>jumpToLevel(n,target));return}
   if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();
   audioInit();backupAuto();
@@ -4895,7 +4896,7 @@ function respawnForest(){
 // carry the party, bag, gold and quests into the next level
 function goToLevel(n,entry){
   // Oldhaven is painted with the city's pictures: never build it before they have loaded, or its soldiers come out as peasants and its walls as flat colour
-  if(((n>=304&&n<=312)||(n>=6000&&n<7000))&&typeof KH_READY!=='undefined'&&!KH_READY&&!G._khWait){G._khWait=1;try{msg('The harbour comes into view...','#a8d8ff')}catch(e){}khLoadAssets().then(()=>{G._khWait=0;goToLevel(n,entry)}).catch(()=>{G._khWait=0});return}
+  if((((n>=304&&n<=312)||(n>=360&&n<=364))||(n>=6000&&n<7000))&&typeof KH_READY!=='undefined'&&!KH_READY&&!G._khWait){G._khWait=1;try{msg('The harbour comes into view...','#a8d8ff')}catch(e){}khLoadAssets().then(()=>{G._khWait=0;goToLevel(n,entry)}).catch(()=>{G._khWait=0});return}
   if(n===43||n===62||n===13||(n>=271&&n<=280)||(n>=289&&n<=399)||n>=40000)khLoadAssets(); // the city's pictures arrive in the background while the party walks to its gate
   G.lst[LEVEL]=levelState();
   const keep={heroes:G.heroes,bag:G.bag,gold:G.gold,keys:G.keys,rounds:G.rounds,kills:G.kills,sel:G.sel,bossDead:G.bossDead,flags:G.flags,quests:G.quests,lst:G.lst,clock:G.clock,starveT:G.starveT,aff:G.aff};
@@ -16129,6 +16130,7 @@ ENEMY_DEF.hollowabbot={name:'The Hollow Abbot',hp:2600,dmg:[26,42],hit:.86,w:1.2
 /* ---- the four levels: rooms and passages in the old crypt style ---- */
 function belowBuild(n){
   const id=BELOW.IDS[n];if(LEVELS[id])return;
+  if(typeof KH_READY!=='undefined'&&!KH_READY)return; // Brother Sevrin's picture is not loaded yet (goToLevel waits for it)
   const [W,H]=BELOW.SIZE[n],hs=(a,b,c)=>hash2(a,b,c),R=(i,m)=>(hs(n*31+i,n*7+5,93)*m)|0;
   const g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
   const rooms=[],cut=r=>{for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)g[y][x]='.'};

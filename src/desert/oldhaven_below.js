@@ -11,6 +11,7 @@ ENEMY_DEF.hollowabbot={name:'The Hollow Abbot',hp:2600,dmg:[26,42],hit:.86,w:1.2
 /* ---- the four levels: rooms and passages in the old crypt style ---- */
 function belowBuild(n){
   const id=BELOW.IDS[n];if(LEVELS[id])return;
+  if(typeof KH_READY!=='undefined'&&!KH_READY)return; // Brother Sevrin's picture is not loaded yet (goToLevel waits for it)
   const [W,H]=BELOW.SIZE[n],hs=(a,b,c)=>hash2(a,b,c),R=(i,m)=>(hs(n*31+i,n*7+5,93)*m)|0;
   const g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
   const rooms=[],cut=r=>{for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)g[y][x]='.'};
