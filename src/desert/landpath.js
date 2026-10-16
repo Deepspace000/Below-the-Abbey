@@ -7,7 +7,7 @@
    west) 8 to 15, S (coast, going south, drawn the other way round so the sea is still on the right hand west) 16 to 21, D (the high pass
    and the descent) 22 and 23. Each leg is a stretch of the same kind of country. The 13 buildings are rooms numbered from 6800.
    ========================================================================== */
-const LP={BASE:400,N:24,ROOM0:6800,W:96,H:560,CX:64,A:10},LPK=LP.H/400; // 24 stretches of 560 rows is about 13,000 steps
+const LP={BASE:400,N:24,ROOM0:6800,W:104,H:560,CX:76,A:10},LPK=LP.H/400; // 24 stretches of 560 rows is about 13,000 steps
 const LP_LEG=s=>s<8?'N':s<16?'W':s<22?'S':'D';
 const LP_BUILD=[ // [segment, kind, row, name, keeper id]
   [1,'house',250,"The Shepherd’s House",'lp_r0'],[3,'inn',150,'The Last Lamp','lp_inn0'],[5,'church',280,'The Church of the Long Road','lp_pr0'],[6,'house',110,"The Fisherman’s House",'lp_r1'],
