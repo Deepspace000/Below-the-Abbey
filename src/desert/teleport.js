@@ -38,7 +38,8 @@ function teleLevelsAt(loc){return Object.keys(G.flags.teles||{}).map(Number).fil
 function teleActive(n){return !!(G.flags.teles&&G.flags.teles[n])}
 function teleOn(){return !!(G.tele&&G.P.x===G.tele.x&&G.P.y===G.tele.y&&G.state==='play')}
 function placeTeleporter(){ // called when a level is built: one stone in every map
-  const sp=teleSpot(LEVEL);G.tele=null;if(!sp)return;
+  G.tele=null;if(LEVELS[LEVEL]&&LEVELS[LEVEL].noTele)return; // the Land Path has only a few, hidden
+  const sp=teleSpot(LEVEL);if(!sp)return;
   for(const d of G.decor)if(d.block&&!d.npc&&d.x===sp.x&&d.y===sp.y){d.found=true;d.block=false}
   G.decor.push({k:'teleporter',x:sp.x,y:sp.y,block:false,walk:true,loot:false,shop:false,tele:true});
   G.tele={x:sp.x,y:sp.y,n:LEVEL};

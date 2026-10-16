@@ -279,6 +279,12 @@ function ohBuild(){
     OH.eastGate={x:143,y:EY};
     lv.portals[3]={to:311,x:2,y:36,f:1,tex:'ohportc',req:'siegeWon',lock:'The east gate is held by the Ash Guard. The captain of the gate can tell you more.'};
   }
+  // the Land Gate: a second gate, in the north wall, at the top of the street east of the castle, where the long path begins
+  {const tp=ch(TM.make('plain','castle',tWh).gid),ts=ch(TM.make('slit','castle',tWh).gid),lg=pch(4);
+    for(let y=4;y<=5;y++){for(let x=100;x<=101;x++)solid(x,y,lg);for(const xs of [[96,99],[102,105]])for(let x=xs[0];x<=xs[1];x++)solid(x,y,y===5&&x%2===0?ts:tp)}
+    sky.push({x:98.5,y:5.6,k:'kh_ohtower1_3',w:7,z:tWh-.05,big:1},{x:103.5,y:5.6,k:'kh_ohtower1_3',w:7,z:tWh-.05,big:1});
+    lv.portals[4]={to:LP.BASE,x:LP.CX,y:LP.H-5,f:0,tex:'ohportc'};
+  }
   // towers along the wall
   for(let x=14;x<=136;x+=17){if(Math.abs(x-GX)<8)continue;for(const y of [4.5,145])sky.push({x,y,k:hs(x,y,3)<.5?'kh_ohtower1_2':'kh_ohtower1_3',w:5.5,z:WALL-.05,big:1})}
   for(let y=16;y<=134;y+=17){if(Math.abs(y-73)<6)continue;sky.push({x:4.5,y,k:hs(4.5,y,4)<.5?'kh_ohtower1_2':'kh_ohtower1_3',w:5.5,z:WALL-.05,big:1});sky.push({x:145,y,k:hs(145,y,4)<.5?'kh_ohtower1_2':'kh_ohtower1_3',w:5.5,z:WALL-.05,big:1})}
@@ -645,7 +651,7 @@ function ohBuild(){
   /* ---- finish the level, the rooms behind the doors, and the doors of the gate ---- */
   lv.rows=rows.map(r=>r.join(''));
   const fmap=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmap.push(s)}lv.fmap=fmap;
-  lv.mapNames=[{t:'Castle of King Osric',x:OH.CX,y:14,k:'place'},{t:'The Castle Ward',x:OH.CX,y:30,k:'place'},{t:'The Great Square',x:OH.CX,y:51,k:'place'},{t:"King's Road",x:OH.CX,y:100,k:'lane'},{t:'Portcullis Gate',x:OH.CX,y:141,k:'place'},
+  lv.mapNames=[{t:'The Land Gate',x:100,y:9,k:'place'},{t:'Castle of King Osric',x:OH.CX,y:14,k:'place'},{t:'The Castle Ward',x:OH.CX,y:30,k:'place'},{t:'The Great Square',x:OH.CX,y:51,k:'place'},{t:"King's Road",x:OH.CX,y:100,k:'lane'},{t:'Portcullis Gate',x:OH.CX,y:141,k:'place'},
     {t:'Old Town',x:26,y:70,k:'place'},{t:'Market Square',x:108,y:51,k:'place'},{t:'Fair Green',x:115,y:88,k:'place'},{t:'Chapel Close',x:40,y:66,k:'place'},{t:'East Road',x:134,y:73,k:'lane'},{t:'Garrison Quarter',x:26,y:112,k:'place'},{t:'Lantern Street',x:26,y:25,k:'lane'},{t:'Smiths Quarter',x:122,y:112,k:'place'}];
   for(const h of houses){
     const id=h.id;LEVEL_NAMES[id]=h.name;
