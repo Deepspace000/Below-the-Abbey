@@ -73,12 +73,15 @@ const LP_REST_NPC=[
 ];
 LP_REST_NPC.forEach(([id,n,face,lines])=>khNpc(id,n,face,()=>yrLines(id,lines)));
 const LP_FOODS=['bread','cheese','apple','herring','pie','ale'];
+const lpEat=()=>{let n=0;for(const h of G.heroes){if(h.alive===false||h.hp<=0||(h.food>=90&&h.hp>=h.max))continue;const f=LP_FOODS.find(x=>ITEMDEF[x]&&ITEMDEF[x].k==='food'&&bagCount(x)>0);if(!f)break;
+    bagTake(G.bag.findIndex(b=>b.id===f));const d=ITEMDEF[f];h.hp=Math.min(h.max,h.hp+(d.heal||0));h.food=Math.min(100,(h.food||0)+(d.feed||0));n++}
+  msg(n?'The party eats what was left at the shrine, standing in the road.':'Nobody is hungry or hurt.','#a8d8a0');sfx('step');return null};
 khNpc('lp_shrine','A roadside shrine','memorial',d=>{
   const F=G.flags,T=F.lpSh||(F.lpSh={}),k=LEVEL+'_'+d.y,opts=[];
   const have=LP_FOODS.find(f=>bagCount(f)>0);
   if(have)opts.push(['Leave something to eat.',()=>{const j=G.bag.findIndex(b=>b.id===have);if(j>=0)bagTake(j);T[k]=0;try{honourAdd(2,'an offering at a shrine')}catch(e){}msg('You leave it on the stone beside the others.','#c8e8b0');return say('The stone is warm, and the flowers are fresh. A small quiet settles over the road.',[BYE])}]);
-  if(!T[k])opts.push(['Take the food. (It is not yours.)',()=>{T[k]=1;for(let i=0;i<3;i++)bagAdd({id:LP_FOODS[(Math.random()*LP_FOODS.length)|0],n:1});try{honourAdd(-10,'taking from a shrine')}catch(e){}msg('You take what pilgrims left. It does not feel like yours.','#e0a080');return say('You take the loaf and the fruit that other people left for travellers who needed them more. Somewhere behind you, a pilgrim stops walking and says nothing.',[BYE])}]);
-  return say(T[k]?'The stone is bare. The flowers are fresh, but there is no food left. Pilgrims will come and leave more, in time.':'A small shrine of grey stone beside the road. Bread, apples, a wedge of cheese and a bunch of flowers have been left here by people who passed before you, for anyone who might need them. A little candle burns, though nobody is near.',[...opts,['Leave it be.',()=>null]]);
+  if(!T[k])opts.push(['Take.',()=>{T[k]=1;for(let i=0;i<3;i++)bagAdd({id:LP_FOODS[(Math.random()*LP_FOODS.length)|0],n:1});try{honourAdd(-10,'taking from a shrine')}catch(e){}msg('You take what pilgrims left. It does not feel like yours.','#e0a080');return say('You take the loaf and the fruit that other people left for travellers who needed them more. Somewhere behind you, a pilgrim stops walking and says nothing.',[['Eat some now.',lpEat],['Keep it for later.',()=>null]])}]);
+  return say(T[k]?'The stone is bare. The flowers are fresh, but there is no food left. Pilgrims will come and leave more, in time.':'A small shrine of grey stone beside the road. Bread, apples, a wedge of cheese and a bunch of flowers have been left here by people who passed before you, for anyone who might need them. Take what you need, and it will be on your conscience. A little candle burns, though nobody is near.',[...opts,['Leave it be.',()=>null]]);
 });
 
 /* ---- pictures: an invisible stone to walk into at the ends of each stretch, and the horse ---- */
