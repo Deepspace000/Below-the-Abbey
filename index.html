@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.167';
+const VERSION='3.168';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -6441,10 +6441,18 @@ function drawQuestMarks(ox,oy,cs,big,rad){ // rad: only the marks within that ma
 function drawMinimap(x,y,w,h){
   ctx.save();ctx.fillStyle='#0b0907';ctx.fillRect(x,y,w,h);
   ctx.beginPath();ctx.rect(x+2,y+2,w-4,h-4);ctx.clip();
+  if(typeof SN!=='undefined'&&LEVEL===SN.ID&&typeof SN_ISLES!=='undefined'){ // sailing: the sea, the islands about you, and your ship
+    const sc=1.1,sx=x+w/2-(G.C.x+.5)*sc,sy=y+h/2-(G.C.y+.5)*sc,KC={sand:'#d0b878',green:'#5a9448',volcano:'#a05a3a',rock:'#8a8a90',tiny:'#d0b878',forest:'#3e7038'};
+    const wg=ctx.createLinearGradient(x,y,x,y+h);wg.addColorStop(0,'#2a5a7c');wg.addColorStop(1,'#16384f');ctx.fillStyle=wg;ctx.fillRect(x+2,y+2,w-4,h-4);
+    for(const I of SN_ISLES){const ix=sx+I.x*sc,iy=sy+I.y*sc,ir=Math.max(1.6,I.r*sc);if(ix<x-ir||ix>x+w+ir||iy<y-ir||iy>y+h+ir)continue;ctx.fillStyle=KC[I.kind]||'#d0b878';ctx.strokeStyle='rgba(0,0,0,.45)';ctx.lineWidth=.8;ctx.beginPath();ctx.arc(ix,iy,ir,0,TAU);ctx.fill();ctx.stroke()}
+    const cx=x+w/2,cy=y+h/2;ctx.save();ctx.translate(cx,cy);ctx.rotate(G.C.a+Math.PI/2);ctx.fillStyle='#fff2a0';ctx.strokeStyle='#000';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(5,6);ctx.lineTo(0,3);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
+    drawQuestMarks(sx,sy,sc,false,Math.ceil(w/sc/2)+1);
+  }else{
   const cs=4.6,ox=x+w/2-(G.C.x+.5)*cs,oy=y+h/2-(G.C.y+.5)*cs;
   drawMapCells(ox,oy,cs);drawQuestMarks(ox,oy,cs,false,Math.ceil(w/cs/2)+1);
   for(const it of G.items)if(!it.taken&&G.seen[it.y][it.x]){ctx.fillStyle=it.k==='key'?'#ffd76a':'#c8b078';ctx.fillRect(ox+(it.x+.5)*cs-1,oy+(it.y+.5)*cs-1,2.2,2.2)}
   for(const e of G.enemies)if(e.hp>0&&Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)<=7&&hasLOS(e.x,e.y,G.P.x,G.P.y)){ctx.fillStyle='#e03a2a';ctx.beginPath();ctx.arc(ox+(e.rx+.5)*cs,oy+(e.ry+.5)*cs,cs*.5,0,TAU);ctx.fill()}
+  }
   const vg=ctx.createRadialGradient(x+w/2,y+h/2,h*.25,x+w/2,y+h/2,w*.62);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.6)');ctx.fillStyle=vg;ctx.fillRect(x,y,w,h);
   ctx.restore();
   ctx.lineWidth=2;ctx.strokeStyle=goldG(x,y,w,h);rrect(ctx,x+1,y+1,w-2,h-2,4);ctx.stroke();wornEdge(x+1,y+1,w-2,h-2,4);
