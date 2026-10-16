@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.220';
+const VERSION='3.221';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2302,7 +2302,7 @@ function burnTick(dt){
 }
 function pullLever(d){
   if(d.pulled){msg('The lever is already pulled.','#c8b898');return}
-  d.pulled=true;G.flags['lv'+LEVEL+'_'+d.idx]=1;sfx('door');G.shake=.3;
+  d.pulled=true;d.pullT=G.time;G.flags['lv'+LEVEL+'_'+d.idx]=1;sfx('door');G.shake=.3;
   for(const [x,y] of d.opens)if(G.grid[y]&&G.grid[y][x]>0)G.grid[y][x]=0;
   msg('You pull the lever. Somewhere, stone grinds open.','#ffe9a0');
 }
@@ -2709,7 +2709,7 @@ function spriteList(){
   for(const d of (LEVEL===44&&G.khB?khNearDecor(cam.x,cam.y):G.decor)){if(d.found)continue;if(d.hidden)continue;if(G.decor.length>250&&((d.x-cam.x)*(d.x-cam.x)+(d.y-cam.y)*(d.y-cam.y))>1300)continue;const k=(d.wind&&IMG[d.k+'f'])?(Math.sin(G.C.a)<0?d.k+'f':d.k):(d.lk&&IMG[d.lk])?d.lk:(d.k==='grave'&&IMG.grave2&&hash2(d.x,d.y,5)>.5)?'grave2':d.k;if(d.wd&&d.txt){L.push({x:d.x+.5+d.wd[0]*.1,y:d.y+.5+d.wd[1]*.1,img:shopSign(d),w:.8*(d.sc||1),bob:.3,hang:[d.wd[0],d.wd[1]],decor:d});continue}
     if(d.pic&&d.wd&&IMG[d.k]){const im=(d.lk&&IMG[d.lk])?IMG[d.lk]:IMG[d.k],hh=NPC_H[d.k]||.6;L.push({x:d.x+.5+d.wd[0]*.47,y:d.y+.5+d.wd[1]*.47,img:im,w:hh*im.width/im.height,bob:d.bob===undefined?.45:d.bob,flat:[d.wd[0],d.wd[1]],pic:1,decor:d});continue}
     if(d.msgr&&IMG[d.k]){L.push({x:d.x+.5+d.wd[0]*.46,y:d.y+.5+d.wd[1]*.46,img:IMG[d.k],w:.55,bob:.45,flat:[d.wd[0],d.wd[1]],decor:d});continue}
-    if(d.k==='lever'){L.push({x:d.x+.5+d.wd[0]*.43,y:d.y+.5+d.wd[1]*.43,img:IMG.lever,w:.26,bob:.36,flat:[d.wd[0],d.wd[1]],decor:d});continue}
+    if(d.k==='lever'){const lk=IMG.hl_lever0?(d.pulled?((G.time-(d.pullT||0))<.14?'hl_lever1':'hl_lever2'):'hl_lever0'):'lever',li=IMG[lk]||IMG.lever;L.push({x:d.x+.5+d.wd[0]*.43,y:d.y+.5+d.wd[1]*.43,img:li,w:.34,bob:.34,flat:[d.wd[0],d.wd[1]],decor:d});continue} // a lever: old wood, with its off, halfway and on pictures
     if(d.wd&&d.k.startsWith('branch')){L.push({x:d.x+.5+d.wd[0]*.1,y:d.y+.5+d.wd[1]*.1,img:IMG[d.k],w:.8,bob:d.bob||.4,hang:[d.wd[0],d.wd[1]],decor:d});continue}
     L.push({x:d.x+.5+(d.ox||0),y:d.y+.5+(d.oy||0),img:(LEVEL>=33&&LEVEL<=38&&d.npc&&VIVID_KEYS.has(k))?vividImg(k,d):(k==='brazier'?IMG['brazier'+(((G.time*7+d.x*3+d.y)|0)&3)]:k==='teleporter'?IMG['tele'+(teleActive(LEVEL)?1+(((G.time*5)|0)&3):0)]:IMG[k]),w:(NPC_H[k]&&IMG[k]?NPC_H[k]*IMG[k].width/IMG[k].height:decorW(k))*(d.sc||1),drop:DROP[k]||(/^[glp]tree/.test(k)?.05:/^kh_int/.test(k)?.035:0),bob:d.bob||0,decor:d})}
   if(LEVEL===44&&LEVELS[44].walkers)khWalkSprites(LEVELS[44],cam.x,cam.y,L);
@@ -2752,7 +2752,8 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     for(let k=0;k<nearR.length;k+=3){const ax=wx-nearR[k],ay=wy-nearR[k+1];lt+=nearR[k+2]/(1+1.15*(ax*ax+ay*ay))}
     const trD=(G.day||0)>0&&s.decor&&NOSHADOW.test(s.decor.k)&&LEVEL!==32&&LEVEL!==33&&!GRIM_L(); // woodland trees fade into dark green, not pale haze
     let lum=clamp(.08+(Math.max(baseL(dist),G.day||0,G.amb||0)+lt*.85)*1.05,0,1)*(GRIM_L()?.66:trD?.78:1);
-    if(s.e&&ENEMY_DEF[s.e.t].glow)lum=Math.max(lum,ENEMY_DEF[s.e.t].glow); // a ghost shines a little by its own light
+    if(s.e&&ENEMY_DEF[s.e.t].glow)lum=Math.max(lum,ENEMY_DEF[s.e.t].glow);
+    if(s.decor&&s.decor.k==='lever')lum=Math.max(lum,.62); // a lever catches a little light, so it can be found in a dark hall // a ghost shines a little by its own light
     if(LEVEL===44&&s.decor&&(s.decor.k==='lamp'||s.decor.k==='hlant'||s.decor.k==='cfire'))lum=Math.max(lum,.9); // a lantern or a fire shines by its own light
     const ohL=LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<440),kq0=Math.min(1,Math.max(.05,2*sw/iw)),dyv=(G.day||0)>0,hzv=GRIM_L()?[30,46,32]:ohL&&dyv?[226,228,220]:trD?[40,54,42]:dyv?[132,146,132]:[86,76,62],smS=Math.min(dyv?(ohL?.22:.4):.26,dist*(dyv?(ohL?.018:.04):.03))*(GRIM_L()?.55:.75);
     let SRC,tw,th,HZ=null,hA=0;
@@ -17470,19 +17471,26 @@ function hlDress(c){
   });
   cap=999;
   const secretSlots=[];
-  // secret rooms: one wall in a hall is the wrong colour and has a lever on it. Behind it is a small chamber with a chest
-  {let made=0;const want=1+(k%3===0?1:0)+(k>=HL.N-4?1:0),setC=(x,y,ch)=>{rows[y]=rows[y].slice(0,x)+ch+rows[y].slice(x+1)};
+  // secret rooms: a small chamber with a chest behind a wall. One wall in a hall is the wrong colour and has a lever on it; one bookshelf has a red book that swings it aside.
+  const chamberAt=(x,y,wd)=>{const px=-wd[1],py=wd[0];
+    for(let t=1;t<=5;t++)for(let sd=-2;sd<=2;sd++){const cx=x+wd[0]*t+px*sd,cy=y+wd[1]*t+py*sd;if(cx<1||cy<1||cx>=W-1||cy>=H-1||!isW(cx,cy)||used.has(key(cx,cy)))return null}
+    const setC=(cx,cy,ch)=>{rows[cy]=rows[cy].slice(0,cx)+ch+rows[cy].slice(cx+1)};
+    for(let t=2;t<=4;t++)for(let sd=-1;sd<=1;sd++){const cx=x+wd[0]*t+px*sd,cy=y+wd[1]*t+py*sd;setC(cx,cy,'.');used.add(key(cx,cy))}
+    const dx=x+wd[0],dy=y+wd[1];setC(dx,dy,secretCh);used.add(key(dx,dy));
+    const bx=x+wd[0]*4,by=y+wd[1]*4;
+    decor.push({k:'chest',x:bx,y:by,block:true,magic:1,secret:true});flr('hl_p_candle',x+wd[0]*3+px,y+wd[1]*3+py);flr('hl_p_candle',x+wd[0]*3-px,y+wd[1]*3-py);
+    pic('hl_p_note',bx+px,by+py,[wd[0],wd[1]],{npc:'hl_note16',bob:.6});if(items)items.push({k:'potion',x:x+wd[0]*3,y:y+wd[1]*3});
+    secretSlots.push([bx-px,by-py,[wd[0],wd[1]]]);return {dx,dy};
+  };
+  {let made=0;const want=1+(k%3===0?1:0)+(k>=HL.N-4?1:0);
    for(const r of shuf(rooms.filter(q=>q!==myst&&q.x1-q.x0>=2),77)){if(made>=want)break;
-     for(const [x,y,wd] of slots(r)){const px=-wd[1],py=wd[0];let ok=true;
-       for(let t=1;t<=5&&ok;t++)for(let sd=-2;sd<=2&&ok;sd++){const cx=x+wd[0]*t+px*sd,cy=y+wd[1]*t+py*sd;if(cx<1||cy<1||cx>=W-1||cy>=H-1||!isW(cx,cy)||used.has(key(cx,cy)))ok=false}
-       if(!ok)continue;
-       for(let t=2;t<=4;t++)for(let sd=-1;sd<=1;sd++){const cx=x+wd[0]*t+px*sd,cy=y+wd[1]*t+py*sd;setC(cx,cy,'.');used.add(key(cx,cy))}
-       const dx=x+wd[0],dy=y+wd[1];setC(dx,dy,secretCh);used.add(key(dx,dy));
-       decor.push({k:'lever',x,y,wd:[wd[0],wd[1]],opens:[[dx,dy]],idx:made,block:false,deco:true});used.add(key(x,y));
-       const bx=x+wd[0]*4,by=y+wd[1]*4;
-       decor.push({k:'chest',x:bx,y:by,block:true,magic:1});flr('hl_p_candle',x+wd[0]*3+px,y+wd[1]*3+py);flr('hl_p_candle',x+wd[0]*3-px,y+wd[1]*3-py);
-       pic('hl_p_note',bx+px,by+py,[wd[0],wd[1]],{npc:'hl_note16',bob:.6});if(items)items.push({k:'potion',x:x+wd[0]*3,y:y+wd[1]*3});
-       secretSlots.push([bx-px,by-py,[wd[0],wd[1]]]);made++;break}}}
+     for(const [x,y,wd] of slots(r)){const ch=chamberAt(x,y,wd);if(!ch)continue;
+       decor.push({k:'lever',x,y,wd:[wd[0],wd[1]],opens:[[ch.dx,ch.dy]],idx:made,block:false,deco:true});used.add(key(x,y));made++;break}}
+   // the bookshelf: tap it, pull the red book, and it swings aside
+   let sh=0;const wantSh=k<12?1:2;
+   for(const r of shuf(rooms.filter(q=>q!==myst&&q.x1-q.x0>=2),91)){if(sh>=wantSh)break;
+     for(const [x,y,wd] of slots(r)){const ch=chamberAt(x,y,wd);if(!ch)continue;
+       decor.push({k:'hl_p_shelf',x,y,block:false,walk:true,deco:true,npc:'hl_shelfdoor',opens:[[ch.dx,ch.dy]],idx:100+sh});used.add(key(x,y));sh++;break}}}
   // the Messenger of Death waits on the last four floors. His five letters are written where the main way never passes: two in secret chambers, the rest in side rooms and dead ends out of sight of the route to the stair
   if(k>=HL.N-4&&up){
     const los=(x0,y0,x1,y1)=>{const n=Math.max(Math.abs(x1-x0),Math.abs(y1-y0));for(let i=1;i<n;i++){const x=Math.round(x0+(x1-x0)*i/n),y=Math.round(y0+(y1-y0)*i/n);if(!isF(x,y))return false}return true};
@@ -17508,6 +17516,7 @@ function hlDress(c){
    cand2.sort((p,q)=>hs(p[0],p[1],k+55)-hs(q[0],q[1],k+55));const want=Math.min(3,1+((k/6)|0));
    for(const q of cand2){if(sec.length>=want)break;if(sec.every(z=>Math.abs(z[0]-q[0])+Math.abs(z[1]-q[1])>=8)&&!used.has(key(q[0],q[1])))sec.push(q)}
    c.lv_secrets=sec.map(q=>({x:q[0],y:q[1]}));c.lv_names=names}
+  if(typeof hlNewFoes==='function')hlNewFoes(c); // the new horrors, every second level from the third
   // the witch: a room of her own on some levels
   if(k%5===2){const r=rooms.find((q,i)=>i>=2&&q!==myst&&q!==far&&q.x1-q.x0>=3);if(r){const cx=(r.x0+r.x1)>>1,cy=(r.y0+r.y1)>>1;if(!used.has(key(cx,cy))){enemies.push({t:'hlwitch',x:cx,y:cy});used.add(key(cx,cy))}}}
   // corridors: a picture or a chain now and then, so the passages are not bare
@@ -17569,6 +17578,7 @@ function hlRelic(e,def){
    ========================================================================== */
 for(let n=1;n<=20;n++){loadImg('hl_plq'+n,'assets/hl_plq'+n+'.png');NPC_H['hl_plq'+n]=1.2}
 for(let n=0;n<6;n++){loadImg('hl_claw'+n,'assets/hl_claw'+n+'.png');NPC_H['hl_claw'+n]=.62}
+for(let n=0;n<3;n++)loadImg('hl_lever'+n,'assets/hl_lever'+n+'.png'); // the wooden lever: off, halfway, on
 loadImg('hl_bogey','assets/hl_bogey.png');loadImg('hl_bogeyA','assets/hl_bogeyA.png');NPC_H.hl_bogey=1.9;
 if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push('crownbreaker','veilpiercer','dukesgavel','hollowscepter'); // their pictures are painted (assets/icn_<id>.png)
 const hlIn=()=>LEVEL>=HL.BASE&&LEVEL<HL.BASE+HL.N;
@@ -17576,6 +17586,15 @@ const hlIn=()=>LEVEL>=HL.BASE&&LEVEL<HL.BASE+HL.N;
 /* ---- treasure: the chests of the castle hold potions, gear, rings and gold, more of it the higher the level ---- */
 function hlLootFor(d){
   if(d.k!=='chest'||!hlIn())return null;
+  if(d.secret){ // the hidden rooms hold moderate weapons, around the level of the party, never elite
+    const plvl=Math.round(G.heroes.reduce((n,h)=>n+h.lvl,0)/Math.max(1,G.heroes.length)),r2=i=>hash2(d.x,d.y,500+i+LEVEL),it2=[];
+    let pool=(typeof GEAR!=='undefined'?GEAR:[]).filter(id=>{const t=ITEMDEF[id];return t&&t.k==='weapon'&&t.lvl&&t.lvl<=plvl&&t.lvl>=plvl-9&&!t.rar});
+    if(!pool.length)pool=(typeof GEAR!=='undefined'?GEAR:[]).filter(id=>{const t=ITEMDEF[id];return t&&t.k==='weapon'&&t.lvl&&t.lvl<=plvl});
+    const types=[...new Set(pool.map(id=>ITEMDEF[id].t))].sort((a,b)=>r2(a.length)-r2(b.length));
+    for(const ty of types.slice(0,3)){const c=pool.filter(id=>ITEMDEF[id].t===ty);it2.push({id:c[Math.floor(r2(c.length+ty.length)*c.length)],n:1})}
+    for(const id of ['superiorheal','greatermana']){if(ITEMDEF[id])it2.push({id,n:1})}
+    it2.push({id:['ringV','ringW','ringS','ringM'][Math.floor(r2(7)*4)],n:1});
+    d.gold=150+(LEVEL-HL.BASE)*40+Math.floor(r2(9)*120);return it2}
   const k=LEVEL-HL.BASE,r=i=>hash2(d.x,d.y,300+i+LEVEL*3),items=[],add=(id,n)=>{if(ITEMDEF[id])items.push({id,n:ITEMDEF[id].stack?(n||1):1})};
   const pots=['healdraught','greaterheal','superiorheal','elixir','manadraught','greatermana','supermana'];
   const pick=(a,i)=>a[Math.floor(r(i)*a.length)];
@@ -17609,12 +17628,18 @@ function hlMirrorImg(){
   x.fillStyle='rgba(255,255,255,1)';x.shadowColor='rgba(210,225,255,1)';x.shadowBlur=10;for(const ex of [.455,.545]){x.beginPath();x.arc(fx+fw*ex,fy+fh*.115,Math.max(2.4,c.width*.02),0,TAU);x.fill()}
   IMG.hl_p_mirror_b=c;return true;
 }
+khNpc('hl_shelfdoor','A bookshelf','hl_p_shelf',d=>{
+  if(d.pulled)return say('The shelf has swung aside, and a small room waits behind it.',[BYE]);
+  return say('A tall bookshelf, dusty and crowded. One book sits a little out of line: a red spine with no title.',[['Pull the red book.',()=>{hlShelfOpen(d);return null}],['Leave it.',()=>null]])});
+function hlShelfOpen(d){const F=HLF();F.sec=F.sec||{};F.sec['sh'+LEVEL+':'+d.x+','+d.y]=1;d.pulled=true;d.found=true;for(const [x,y] of d.opens||[])if(G.grid[y]&&G.grid[y][x]>0)G.grid[y][x]=0;
+  sfx('door');G.shake=.3;msg('The bookshelf swings aside. A hidden room lies behind it.','#ffe9a0')}
 function hlFrame(dt){
   if(G.state!=='play'||!hlIn())return;const L=LEVELS[LEVEL];
   // opened hidden doors stay open (the level is rebuilt each visit)
   {const F=HLF();if(F.sec&&L._secrets)for(const s of L._secrets)if(F.sec[LEVEL+':'+s.x+','+s.y]&&G.grid[s.y]&&G.grid[s.y][s.x]!==0)G.grid[s.y][s.x]=0}
+  {const F=HLF();if(F.sec)for(const d of G.decor){if(d.npc==='hl_shelfdoor'&&!d.pulled&&F.sec['sh'+LEVEL+':'+d.x+','+d.y]){d.pulled=true;d.found=true;for(const [x,y] of d.opens||[])if(G.grid[y]&&G.grid[y][x]>0)G.grid[y][x]=0}}}
   // a lever or a picture on a wall that has opened (a hidden door, a secret chamber) goes with the wall
-  for(const d of G.decor){if(d.found||!d.wd||!(d.pic||d.k==='lever'))continue;const wx=d.x+d.wd[0],wy=d.y+d.wd[1];if(G.grid[wy]&&G.grid[wy][wx]===0)d.found=true}
+  for(const d of G.decor){if(d.found||!d.wd||!(d.pic||d.k==='lever'))continue;const wx=d.x+d.wd[0],wy=d.y+d.wd[1];if(G.grid[wy]&&G.grid[wy][wx]===0&&!(d.k==='lever'&&d.pullT&&G.time-d.pullT<.7))d.found=true}
   // the screaming witch makes the lights stutter on and off, quickly, while she is awake and near
   const wit=G.enemies.find(e=>e.t==='hlwitch'&&e.hp>0&&e.alert);
   if(wit&&Math.abs(wit.x-G.P.x)+Math.abs(wit.y-G.P.y)<=10){
@@ -17718,6 +17743,52 @@ function hlDrawMap(cs,ox,oy){
     rows.forEach(([c,t],i)=>{const rx=x+8+(i%2)*98,ry=y+11+((i/2)|0)*17;ctx.fillStyle=c;ctx.strokeStyle=ink;ctx.lineWidth=.8;ctx.fillRect(rx,ry-4,8,9);ctx.strokeRect(rx,ry-4,8,9);txt(t,rx+12,ry,i===0?5.6:6.6,'#2a1c0e','left',true)})}
 }
 {const _dtb=drawTownBody;drawTownBody=function(cs,ox,oy){if(hlIn()){hlDrawMap(cs,ox,oy);return}return _dtb.apply(this,arguments)}}
+
+/* ==========================================================================
+   THE ABOMINATIONS. Every second level from the third, new horrors join the castle's creatures, and the ones that came before keep coming: the mad
+   jester (3), chest mimics and raving madmen (5), wights and the murdered peasants (7), the butcher and phantoms (9), the headless knight and
+   banshees (11), vampires and demented dukes (13), werewolves and skeleton warlords (15), shape shifters and the writhing choir (17), the flesh
+   abomination (19). Each has a painted picture and an attacking picture (assets/hl_<name>.png and hl_<name>A.png).
+   ========================================================================== */
+const HL_MON=[ // [key, name, picture, width, hp, damage, hit, speed, xp, extras]
+  ['hljester','Mad Jester','jester',.65,150,[9,16],.8,2,700,{verb:'stabs'}],
+  ['hlmimic','Chest Mimic','mimic',.56,280,[14,26],.85,1,900,{verb:'bites',mimic:1}],
+  ['hlmadman','Raving Madman','madman',.44,120,[8,22],.75,1,550,{verb:'hacks'}],
+  ['hlwight','Wight','wight',.62,240,[14,24],.82,1,1100,{verb:'drains'}],
+  ['hlvictim','Murdered Peasant','victim',.53,90,[6,11],.72,1,350,{verb:'stabs'}],
+  ['hlbutcher','The Butcher','butcher',.74,520,[20,34],.82,1,2000,{verb:'cleaves'}],
+  ['hlphantom','Phantom','phantom',.45,200,[12,20],.8,1,1000,{verb:'chills',fly:true,floatH:.15,glow:.7}],
+  ['hlheadless','Headless Knight','headless',.65,460,[22,34],.82,1,1800,{verb:'flails'}],
+  ['hlbanshee','Banshee','banshee',.54,210,[10,18],.85,1,1100,{verb:'wails at',fly:true,floatH:.2,glow:.7,ranged:3,shot:'a wail'}],
+  ['hlvampire','Vampire','vampire',.66,400,[16,28],.85,1,1700,{verb:'bites',vamp:1}],
+  ['hlduke','Demented Duke','duke',.53,340,[14,26],.8,1,1500,{verb:'strikes'}],
+  ['hlwerewolf','Werewolf','werewolf',.73,440,[18,30],.85,2,1900,{verb:'mauls'}],
+  ['hlwarlord','Skeleton Warlord','warlord',1.24,620,[24,38],.83,1,2400,{verb:'cleaves'}],
+  ['hlshifter','Shape Shifter','shifter',.45,380,[16,28],.85,1,1700,{verb:'tears',shifter:1}],
+  ['hlchoir','The Writhing Choir','choir',.69,520,[14,24],.8,1,1900,{verb:'claws'}],
+  ['hlabom','Flesh Abomination','abom',1.15,950,[24,40],.84,1,3000,{verb:'hacks',regen:1}]];
+for(const m of HL_MON){loadImg('hl_'+m[2],'assets/hl_'+m[2]+'.png');loadImg('hl_'+m[2]+'A','assets/hl_'+m[2]+'A.png');
+  const ex=m[9],def={name:m[1],hp:m[4],dmg:m[5],hit:m[6],w:m[3],img:'hl_'+m[2],xp:m[8],gold:[Math.round(m[4]/10),Math.round(m[4]/4)],speed:m[7],verb:ex.verb,aboveParty:1};
+  if(ex.fly){def.fly=true;def.floatH=ex.floatH;def.glow=ex.glow}if(ex.ranged){def.ranged=ex.ranged;def.shot=ex.shot}
+  if(ex.mimic)def.act=e=>{if(Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)<=1){if(e.poly){e.poly=null;msg('The chest opens its mouth: it was a mimic!','#ff9a7a');sfx('screech')}enemyAttack(e);return 290}return 250}; // it keeps still, a chest, until someone is beside it
+  if(ex.shifter)def.act=e=>{if(Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)<=2&&e.poly){e.poly=null;msg('The stranger’s skin splits and ripples. It was a shape shifter!','#ff9a7a');sfx('screech')}return 0};
+  if(ex.vamp)def.act=e=>{if(Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)===1){enemyAttack(e);e.hp=Math.min(e.maxhp,e.hp+Math.round(e.maxhp*.05));return 290}return 0}; // each bite heals it a little
+  if(ex.regen)def.act=e=>{if(e.hp>0&&e.hp<e.maxhp)e.hp=Math.min(e.maxhp,e.hp+Math.max(1,Math.round(e.maxhp*.02)));return 0}; // it knits itself back together
+  ENEMY_DEF[m[0]]=def}
+if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^hljester$/,'shaken',.3],[/^hlwight$/,'graverot',.3],[/^hlphantom$/,'haunted',.35],[/^hlbanshee$/,'shaken',.4],[/^hlbutcher$/,'bleeding',.4],[/^hlvampire$/,'bleeding',.3],[/^hlwerewolf$/,'bleeding',.3],[/^hlabom$/,'poisoned',.3],[/^hlvictim$/,'fever',.1],[/^hlmadman$/,'bleeding',.15]);
+const HL_NEW=[[2,'hljester'],[4,'hlmimic'],[4,'hlmadman'],[6,'hlwight'],[6,'hlvictim'],[8,'hlbutcher'],[8,'hlphantom'],[10,'hlheadless'],[10,'hlbanshee'],[12,'hlvampire'],[12,'hlduke'],[14,'hlwerewolf'],[14,'hlwarlord'],[16,'hlshifter'],[16,'hlchoir'],[18,'hlabom']];
+function hlNewFoes(c){
+  const {k,enemies,used,rows,d,W,H,hs,violet}=c;if(violet)return;
+  const cells=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(rows[y][x]==='.'&&d[y*W+x]>6&&!used.has(x+','+y))cells.push([x,y]);
+  HL_NEW.forEach(([ik,t],n)=>{if(ik>k||!cells.length)return;let cnt=ik===k?3:(hs(k,n,61)<.55?1:0);if(t==='hlvictim'&&cnt)cnt+=ik===k?2:1;
+    for(let i=0;i<cnt;i++){const q=cells[Math.floor(hs(k*7+i,n*13,62)*cells.length)];if(q&&!used.has(q[0]+','+q[1])){used.add(q[0]+','+q[1]);enemies.push({t,x:q[0],y:q[1]})}}});
+}
+/* a mimic looks like a chest and a shape shifter like a stranger, until they are close */
+{const _hf=hlFrame;hlFrame=function(dt){
+  if(G.state==='play'&&hlIn())for(const e of G.enemies){if(e.hp<=0||e.poly!==undefined)continue;
+    if(e.t==='hlmimic')e.poly={img:IMG.chest?'chest':'hl_mimic',w:.56,name:'Old Chest',left:99999};
+    else if(e.t==='hlshifter')e.poly={img:'kh_ohfolk2_1',w:.5,name:'A pale stranger',left:99999}}
+  return _hf.apply(this,arguments)}}
 
 /* ---- src/desert/seasound.js ---- */
 /* ==========================================================================

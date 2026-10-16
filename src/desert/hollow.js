@@ -385,19 +385,26 @@ function hlDress(c){
   });
   cap=999;
   const secretSlots=[];
-  // secret rooms: one wall in a hall is the wrong colour and has a lever on it. Behind it is a small chamber with a chest
-  {let made=0;const want=1+(k%3===0?1:0)+(k>=HL.N-4?1:0),setC=(x,y,ch)=>{rows[y]=rows[y].slice(0,x)+ch+rows[y].slice(x+1)};
+  // secret rooms: a small chamber with a chest behind a wall. One wall in a hall is the wrong colour and has a lever on it; one bookshelf has a red book that swings it aside.
+  const chamberAt=(x,y,wd)=>{const px=-wd[1],py=wd[0];
+    for(let t=1;t<=5;t++)for(let sd=-2;sd<=2;sd++){const cx=x+wd[0]*t+px*sd,cy=y+wd[1]*t+py*sd;if(cx<1||cy<1||cx>=W-1||cy>=H-1||!isW(cx,cy)||used.has(key(cx,cy)))return null}
+    const setC=(cx,cy,ch)=>{rows[cy]=rows[cy].slice(0,cx)+ch+rows[cy].slice(cx+1)};
+    for(let t=2;t<=4;t++)for(let sd=-1;sd<=1;sd++){const cx=x+wd[0]*t+px*sd,cy=y+wd[1]*t+py*sd;setC(cx,cy,'.');used.add(key(cx,cy))}
+    const dx=x+wd[0],dy=y+wd[1];setC(dx,dy,secretCh);used.add(key(dx,dy));
+    const bx=x+wd[0]*4,by=y+wd[1]*4;
+    decor.push({k:'chest',x:bx,y:by,block:true,magic:1,secret:true});flr('hl_p_candle',x+wd[0]*3+px,y+wd[1]*3+py);flr('hl_p_candle',x+wd[0]*3-px,y+wd[1]*3-py);
+    pic('hl_p_note',bx+px,by+py,[wd[0],wd[1]],{npc:'hl_note16',bob:.6});if(items)items.push({k:'potion',x:x+wd[0]*3,y:y+wd[1]*3});
+    secretSlots.push([bx-px,by-py,[wd[0],wd[1]]]);return {dx,dy};
+  };
+  {let made=0;const want=1+(k%3===0?1:0)+(k>=HL.N-4?1:0);
    for(const r of shuf(rooms.filter(q=>q!==myst&&q.x1-q.x0>=2),77)){if(made>=want)break;
-     for(const [x,y,wd] of slots(r)){const px=-wd[1],py=wd[0];let ok=true;
-       for(let t=1;t<=5&&ok;t++)for(let sd=-2;sd<=2&&ok;sd++){const cx=x+wd[0]*t+px*sd,cy=y+wd[1]*t+py*sd;if(cx<1||cy<1||cx>=W-1||cy>=H-1||!isW(cx,cy)||used.has(key(cx,cy)))ok=false}
-       if(!ok)continue;
-       for(let t=2;t<=4;t++)for(let sd=-1;sd<=1;sd++){const cx=x+wd[0]*t+px*sd,cy=y+wd[1]*t+py*sd;setC(cx,cy,'.');used.add(key(cx,cy))}
-       const dx=x+wd[0],dy=y+wd[1];setC(dx,dy,secretCh);used.add(key(dx,dy));
-       decor.push({k:'lever',x,y,wd:[wd[0],wd[1]],opens:[[dx,dy]],idx:made,block:false,deco:true});used.add(key(x,y));
-       const bx=x+wd[0]*4,by=y+wd[1]*4;
-       decor.push({k:'chest',x:bx,y:by,block:true,magic:1});flr('hl_p_candle',x+wd[0]*3+px,y+wd[1]*3+py);flr('hl_p_candle',x+wd[0]*3-px,y+wd[1]*3-py);
-       pic('hl_p_note',bx+px,by+py,[wd[0],wd[1]],{npc:'hl_note16',bob:.6});if(items)items.push({k:'potion',x:x+wd[0]*3,y:y+wd[1]*3});
-       secretSlots.push([bx-px,by-py,[wd[0],wd[1]]]);made++;break}}}
+     for(const [x,y,wd] of slots(r)){const ch=chamberAt(x,y,wd);if(!ch)continue;
+       decor.push({k:'lever',x,y,wd:[wd[0],wd[1]],opens:[[ch.dx,ch.dy]],idx:made,block:false,deco:true});used.add(key(x,y));made++;break}}
+   // the bookshelf: tap it, pull the red book, and it swings aside
+   let sh=0;const wantSh=k<12?1:2;
+   for(const r of shuf(rooms.filter(q=>q!==myst&&q.x1-q.x0>=2),91)){if(sh>=wantSh)break;
+     for(const [x,y,wd] of slots(r)){const ch=chamberAt(x,y,wd);if(!ch)continue;
+       decor.push({k:'hl_p_shelf',x,y,block:false,walk:true,deco:true,npc:'hl_shelfdoor',opens:[[ch.dx,ch.dy]],idx:100+sh});used.add(key(x,y));sh++;break}}}
   // the Messenger of Death waits on the last four floors. His five letters are written where the main way never passes: two in secret chambers, the rest in side rooms and dead ends out of sight of the route to the stair
   if(k>=HL.N-4&&up){
     const los=(x0,y0,x1,y1)=>{const n=Math.max(Math.abs(x1-x0),Math.abs(y1-y0));for(let i=1;i<n;i++){const x=Math.round(x0+(x1-x0)*i/n),y=Math.round(y0+(y1-y0)*i/n);if(!isF(x,y))return false}return true};
@@ -423,6 +430,7 @@ function hlDress(c){
    cand2.sort((p,q)=>hs(p[0],p[1],k+55)-hs(q[0],q[1],k+55));const want=Math.min(3,1+((k/6)|0));
    for(const q of cand2){if(sec.length>=want)break;if(sec.every(z=>Math.abs(z[0]-q[0])+Math.abs(z[1]-q[1])>=8)&&!used.has(key(q[0],q[1])))sec.push(q)}
    c.lv_secrets=sec.map(q=>({x:q[0],y:q[1]}));c.lv_names=names}
+  if(typeof hlNewFoes==='function')hlNewFoes(c); // the new horrors, every second level from the third
   // the witch: a room of her own on some levels
   if(k%5===2){const r=rooms.find((q,i)=>i>=2&&q!==myst&&q!==far&&q.x1-q.x0>=3);if(r){const cx=(r.x0+r.x1)>>1,cy=(r.y0+r.y1)>>1;if(!used.has(key(cx,cy))){enemies.push({t:'hlwitch',x:cx,y:cy});used.add(key(cx,cy))}}}
   // corridors: a picture or a chain now and then, so the passages are not bare

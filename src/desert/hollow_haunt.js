@@ -5,6 +5,7 @@
    ========================================================================== */
 for(let n=1;n<=20;n++){loadImg('hl_plq'+n,'assets/hl_plq'+n+'.png');NPC_H['hl_plq'+n]=1.2}
 for(let n=0;n<6;n++){loadImg('hl_claw'+n,'assets/hl_claw'+n+'.png');NPC_H['hl_claw'+n]=.62}
+for(let n=0;n<3;n++)loadImg('hl_lever'+n,'assets/hl_lever'+n+'.png'); // the wooden lever: off, halfway, on
 loadImg('hl_bogey','assets/hl_bogey.png');loadImg('hl_bogeyA','assets/hl_bogeyA.png');NPC_H.hl_bogey=1.9;
 if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push('crownbreaker','veilpiercer','dukesgavel','hollowscepter'); // their pictures are painted (assets/icn_<id>.png)
 const hlIn=()=>LEVEL>=HL.BASE&&LEVEL<HL.BASE+HL.N;
@@ -12,6 +13,15 @@ const hlIn=()=>LEVEL>=HL.BASE&&LEVEL<HL.BASE+HL.N;
 /* ---- treasure: the chests of the castle hold potions, gear, rings and gold, more of it the higher the level ---- */
 function hlLootFor(d){
   if(d.k!=='chest'||!hlIn())return null;
+  if(d.secret){ // the hidden rooms hold moderate weapons, around the level of the party, never elite
+    const plvl=Math.round(G.heroes.reduce((n,h)=>n+h.lvl,0)/Math.max(1,G.heroes.length)),r2=i=>hash2(d.x,d.y,500+i+LEVEL),it2=[];
+    let pool=(typeof GEAR!=='undefined'?GEAR:[]).filter(id=>{const t=ITEMDEF[id];return t&&t.k==='weapon'&&t.lvl&&t.lvl<=plvl&&t.lvl>=plvl-9&&!t.rar});
+    if(!pool.length)pool=(typeof GEAR!=='undefined'?GEAR:[]).filter(id=>{const t=ITEMDEF[id];return t&&t.k==='weapon'&&t.lvl&&t.lvl<=plvl});
+    const types=[...new Set(pool.map(id=>ITEMDEF[id].t))].sort((a,b)=>r2(a.length)-r2(b.length));
+    for(const ty of types.slice(0,3)){const c=pool.filter(id=>ITEMDEF[id].t===ty);it2.push({id:c[Math.floor(r2(c.length+ty.length)*c.length)],n:1})}
+    for(const id of ['superiorheal','greatermana']){if(ITEMDEF[id])it2.push({id,n:1})}
+    it2.push({id:['ringV','ringW','ringS','ringM'][Math.floor(r2(7)*4)],n:1});
+    d.gold=150+(LEVEL-HL.BASE)*40+Math.floor(r2(9)*120);return it2}
   const k=LEVEL-HL.BASE,r=i=>hash2(d.x,d.y,300+i+LEVEL*3),items=[],add=(id,n)=>{if(ITEMDEF[id])items.push({id,n:ITEMDEF[id].stack?(n||1):1})};
   const pots=['healdraught','greaterheal','superiorheal','elixir','manadraught','greatermana','supermana'];
   const pick=(a,i)=>a[Math.floor(r(i)*a.length)];
@@ -45,12 +55,18 @@ function hlMirrorImg(){
   x.fillStyle='rgba(255,255,255,1)';x.shadowColor='rgba(210,225,255,1)';x.shadowBlur=10;for(const ex of [.455,.545]){x.beginPath();x.arc(fx+fw*ex,fy+fh*.115,Math.max(2.4,c.width*.02),0,TAU);x.fill()}
   IMG.hl_p_mirror_b=c;return true;
 }
+khNpc('hl_shelfdoor','A bookshelf','hl_p_shelf',d=>{
+  if(d.pulled)return say('The shelf has swung aside, and a small room waits behind it.',[BYE]);
+  return say('A tall bookshelf, dusty and crowded. One book sits a little out of line: a red spine with no title.',[['Pull the red book.',()=>{hlShelfOpen(d);return null}],['Leave it.',()=>null]])});
+function hlShelfOpen(d){const F=HLF();F.sec=F.sec||{};F.sec['sh'+LEVEL+':'+d.x+','+d.y]=1;d.pulled=true;d.found=true;for(const [x,y] of d.opens||[])if(G.grid[y]&&G.grid[y][x]>0)G.grid[y][x]=0;
+  sfx('door');G.shake=.3;msg('The bookshelf swings aside. A hidden room lies behind it.','#ffe9a0')}
 function hlFrame(dt){
   if(G.state!=='play'||!hlIn())return;const L=LEVELS[LEVEL];
   // opened hidden doors stay open (the level is rebuilt each visit)
   {const F=HLF();if(F.sec&&L._secrets)for(const s of L._secrets)if(F.sec[LEVEL+':'+s.x+','+s.y]&&G.grid[s.y]&&G.grid[s.y][s.x]!==0)G.grid[s.y][s.x]=0}
+  {const F=HLF();if(F.sec)for(const d of G.decor){if(d.npc==='hl_shelfdoor'&&!d.pulled&&F.sec['sh'+LEVEL+':'+d.x+','+d.y]){d.pulled=true;d.found=true;for(const [x,y] of d.opens||[])if(G.grid[y]&&G.grid[y][x]>0)G.grid[y][x]=0}}}
   // a lever or a picture on a wall that has opened (a hidden door, a secret chamber) goes with the wall
-  for(const d of G.decor){if(d.found||!d.wd||!(d.pic||d.k==='lever'))continue;const wx=d.x+d.wd[0],wy=d.y+d.wd[1];if(G.grid[wy]&&G.grid[wy][wx]===0)d.found=true}
+  for(const d of G.decor){if(d.found||!d.wd||!(d.pic||d.k==='lever'))continue;const wx=d.x+d.wd[0],wy=d.y+d.wd[1];if(G.grid[wy]&&G.grid[wy][wx]===0&&!(d.k==='lever'&&d.pullT&&G.time-d.pullT<.7))d.found=true}
   // the screaming witch makes the lights stutter on and off, quickly, while she is awake and near
   const wit=G.enemies.find(e=>e.t==='hlwitch'&&e.hp>0&&e.alert);
   if(wit&&Math.abs(wit.x-G.P.x)+Math.abs(wit.y-G.P.y)<=10){
@@ -154,3 +170,49 @@ function hlDrawMap(cs,ox,oy){
     rows.forEach(([c,t],i)=>{const rx=x+8+(i%2)*98,ry=y+11+((i/2)|0)*17;ctx.fillStyle=c;ctx.strokeStyle=ink;ctx.lineWidth=.8;ctx.fillRect(rx,ry-4,8,9);ctx.strokeRect(rx,ry-4,8,9);txt(t,rx+12,ry,i===0?5.6:6.6,'#2a1c0e','left',true)})}
 }
 {const _dtb=drawTownBody;drawTownBody=function(cs,ox,oy){if(hlIn()){hlDrawMap(cs,ox,oy);return}return _dtb.apply(this,arguments)}}
+
+/* ==========================================================================
+   THE ABOMINATIONS. Every second level from the third, new horrors join the castle's creatures, and the ones that came before keep coming: the mad
+   jester (3), chest mimics and raving madmen (5), wights and the murdered peasants (7), the butcher and phantoms (9), the headless knight and
+   banshees (11), vampires and demented dukes (13), werewolves and skeleton warlords (15), shape shifters and the writhing choir (17), the flesh
+   abomination (19). Each has a painted picture and an attacking picture (assets/hl_<name>.png and hl_<name>A.png).
+   ========================================================================== */
+const HL_MON=[ // [key, name, picture, width, hp, damage, hit, speed, xp, extras]
+  ['hljester','Mad Jester','jester',.65,150,[9,16],.8,2,700,{verb:'stabs'}],
+  ['hlmimic','Chest Mimic','mimic',.56,280,[14,26],.85,1,900,{verb:'bites',mimic:1}],
+  ['hlmadman','Raving Madman','madman',.44,120,[8,22],.75,1,550,{verb:'hacks'}],
+  ['hlwight','Wight','wight',.62,240,[14,24],.82,1,1100,{verb:'drains'}],
+  ['hlvictim','Murdered Peasant','victim',.53,90,[6,11],.72,1,350,{verb:'stabs'}],
+  ['hlbutcher','The Butcher','butcher',.74,520,[20,34],.82,1,2000,{verb:'cleaves'}],
+  ['hlphantom','Phantom','phantom',.45,200,[12,20],.8,1,1000,{verb:'chills',fly:true,floatH:.15,glow:.7}],
+  ['hlheadless','Headless Knight','headless',.65,460,[22,34],.82,1,1800,{verb:'flails'}],
+  ['hlbanshee','Banshee','banshee',.54,210,[10,18],.85,1,1100,{verb:'wails at',fly:true,floatH:.2,glow:.7,ranged:3,shot:'a wail'}],
+  ['hlvampire','Vampire','vampire',.66,400,[16,28],.85,1,1700,{verb:'bites',vamp:1}],
+  ['hlduke','Demented Duke','duke',.53,340,[14,26],.8,1,1500,{verb:'strikes'}],
+  ['hlwerewolf','Werewolf','werewolf',.73,440,[18,30],.85,2,1900,{verb:'mauls'}],
+  ['hlwarlord','Skeleton Warlord','warlord',1.24,620,[24,38],.83,1,2400,{verb:'cleaves'}],
+  ['hlshifter','Shape Shifter','shifter',.45,380,[16,28],.85,1,1700,{verb:'tears',shifter:1}],
+  ['hlchoir','The Writhing Choir','choir',.69,520,[14,24],.8,1,1900,{verb:'claws'}],
+  ['hlabom','Flesh Abomination','abom',1.15,950,[24,40],.84,1,3000,{verb:'hacks',regen:1}]];
+for(const m of HL_MON){loadImg('hl_'+m[2],'assets/hl_'+m[2]+'.png');loadImg('hl_'+m[2]+'A','assets/hl_'+m[2]+'A.png');
+  const ex=m[9],def={name:m[1],hp:m[4],dmg:m[5],hit:m[6],w:m[3],img:'hl_'+m[2],xp:m[8],gold:[Math.round(m[4]/10),Math.round(m[4]/4)],speed:m[7],verb:ex.verb,aboveParty:1};
+  if(ex.fly){def.fly=true;def.floatH=ex.floatH;def.glow=ex.glow}if(ex.ranged){def.ranged=ex.ranged;def.shot=ex.shot}
+  if(ex.mimic)def.act=e=>{if(Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)<=1){if(e.poly){e.poly=null;msg('The chest opens its mouth: it was a mimic!','#ff9a7a');sfx('screech')}enemyAttack(e);return 290}return 250}; // it keeps still, a chest, until someone is beside it
+  if(ex.shifter)def.act=e=>{if(Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)<=2&&e.poly){e.poly=null;msg('The stranger’s skin splits and ripples. It was a shape shifter!','#ff9a7a');sfx('screech')}return 0};
+  if(ex.vamp)def.act=e=>{if(Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)===1){enemyAttack(e);e.hp=Math.min(e.maxhp,e.hp+Math.round(e.maxhp*.05));return 290}return 0}; // each bite heals it a little
+  if(ex.regen)def.act=e=>{if(e.hp>0&&e.hp<e.maxhp)e.hp=Math.min(e.maxhp,e.hp+Math.max(1,Math.round(e.maxhp*.02)));return 0}; // it knits itself back together
+  ENEMY_DEF[m[0]]=def}
+if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^hljester$/,'shaken',.3],[/^hlwight$/,'graverot',.3],[/^hlphantom$/,'haunted',.35],[/^hlbanshee$/,'shaken',.4],[/^hlbutcher$/,'bleeding',.4],[/^hlvampire$/,'bleeding',.3],[/^hlwerewolf$/,'bleeding',.3],[/^hlabom$/,'poisoned',.3],[/^hlvictim$/,'fever',.1],[/^hlmadman$/,'bleeding',.15]);
+const HL_NEW=[[2,'hljester'],[4,'hlmimic'],[4,'hlmadman'],[6,'hlwight'],[6,'hlvictim'],[8,'hlbutcher'],[8,'hlphantom'],[10,'hlheadless'],[10,'hlbanshee'],[12,'hlvampire'],[12,'hlduke'],[14,'hlwerewolf'],[14,'hlwarlord'],[16,'hlshifter'],[16,'hlchoir'],[18,'hlabom']];
+function hlNewFoes(c){
+  const {k,enemies,used,rows,d,W,H,hs,violet}=c;if(violet)return;
+  const cells=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(rows[y][x]==='.'&&d[y*W+x]>6&&!used.has(x+','+y))cells.push([x,y]);
+  HL_NEW.forEach(([ik,t],n)=>{if(ik>k||!cells.length)return;let cnt=ik===k?3:(hs(k,n,61)<.55?1:0);if(t==='hlvictim'&&cnt)cnt+=ik===k?2:1;
+    for(let i=0;i<cnt;i++){const q=cells[Math.floor(hs(k*7+i,n*13,62)*cells.length)];if(q&&!used.has(q[0]+','+q[1])){used.add(q[0]+','+q[1]);enemies.push({t,x:q[0],y:q[1]})}}});
+}
+/* a mimic looks like a chest and a shape shifter like a stranger, until they are close */
+{const _hf=hlFrame;hlFrame=function(dt){
+  if(G.state==='play'&&hlIn())for(const e of G.enemies){if(e.hp<=0||e.poly!==undefined)continue;
+    if(e.t==='hlmimic')e.poly={img:IMG.chest?'chest':'hl_mimic',w:.56,name:'Old Chest',left:99999};
+    else if(e.t==='hlshifter')e.poly={img:'kh_ohfolk2_1',w:.5,name:'A pale stranger',left:99999}}
+  return _hf.apply(this,arguments)}}
