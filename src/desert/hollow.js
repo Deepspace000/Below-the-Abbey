@@ -462,7 +462,7 @@ function hlDress(c){
         for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if((nx<tr.x0||nx>tr.x1||ny<tr.y0||ny>tr.y1)&&isF(nx,ny)){if(!doors.some(q=>q[0]===x&&q[1]===y))doors.push([x,y])}}}
       c.lv_trap={x0:tr.x0,y0:tr.y0,x1:tr.x1,y1:tr.y1,doors};
       for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(e.x>=tr.x0&&e.x<=tr.x1&&e.y>=tr.y0&&e.y<=tr.y1)enemies.splice(i,1)}}}
-  c.lv_trig=trig;c.lv_rooms=rooms.map((r,i)=>({x0:r.x0,y0:r.y0,x1:r.x1,y1:r.y1,n:names[i]||''}));
+  c.lv_trig=trig;c.lv_rooms=rooms.map((r,i)=>({x0:r.x0,y0:r.y0,x1:r.x1,y1:r.y1,n:r===myst?'The Strange Room':(names[i]||'')}));
   const wp=rooms.filter((q,i)=>i>0&&q!==myst).slice(0,3).map(q=>[(q.x0+q.x1)>>1,q.y0]).filter(p=>isF(p[0],p[1]));
   if(manDone&&wp.length>=2)c.lv_man={i:0,t:0,wp};
 }

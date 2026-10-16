@@ -66,6 +66,8 @@ function hlFrame(dt){
   // opened hidden doors stay open (the level is rebuilt each visit)
   {const F=HLF();if(F.sec&&L._secrets)for(const s of L._secrets)if(F.sec[LEVEL+':'+s.x+','+s.y]&&G.grid[s.y]&&G.grid[s.y][s.x]!==0)G.grid[s.y][s.x]=0}
   {const F=HLF();if(F.sec)for(const d of G.decor){if(d.npc==='hl_shelfdoor'&&!d.pulled&&F.sec['sh'+LEVEL+':'+d.x+','+d.y]){d.pulled=true;d.found=true;for(const [x,y] of d.opens||[])if(G.grid[y]&&G.grid[y][x]>0)G.grid[y][x]=0}}}
+  // the rooms the party has been in (their names are scrambled on the map until then)
+  {const F=HLF();F.seenRooms=F.seenRooms||{};(L._roomsInfo||[]).forEach((r,i)=>{if(G.P.x>=r.x0&&G.P.x<=r.x1&&G.P.y>=r.y0&&G.P.y<=r.y1)F.seenRooms[LEVEL+':'+i]=1})}
   // a lever or a picture on a wall that has opened (a hidden door, a secret chamber) goes with the wall
   for(const d of G.decor){if(d.found||!d.wd||!(d.pic||d.k==='lever'))continue;const wx=d.x+d.wd[0],wy=d.y+d.wd[1];if(G.grid[wy]&&G.grid[wy][wx]===0&&!(d.k==='lever'&&d.pullT&&G.time-d.pullT<.7))d.found=true}
   // the screaming witch makes the lights stutter on and off, quickly, while she is awake and near
@@ -163,7 +165,8 @@ function hlDrawMap(cs,ox,oy){
   // creatures
   for(const e of G.enemies){if(e.hp<=0)continue;const def=ENEMY_DEF[e.t],cx=ox+(e.x+.5)*cs,cy=oy+(e.y+.5)*cs;ctx.fillStyle='#b8302a';ctx.strokeStyle=def&&def.boss?'#ffd060':'#120c08';ctx.lineWidth=def&&def.boss?2:1;ctx.beginPath();ctx.arc(cx,cy,Math.max(2.2,cs*(def&&def.boss?.5:.3)),0,TAU);ctx.fill();ctx.stroke()}
   // the rooms' names
-  for(const r of (L._roomsInfo||[])){if(!r.n||cs<4)continue;const cx=ox+((r.x0+r.x1+1)/2)*cs,cy=oy+(r.y0+.8)*cs;lab(r.n,cx,cy,Math.max(7,Math.min(10,cs*1.2)),'#3a1c0c')}
+  {const F=HLF(),seen=F.seenRooms||{};(L._roomsInfo||[]).forEach((r,i)=>{if(!r.n||cs<4)return;const cx=ox+((r.x0+r.x1+1)/2)*cs,cy=oy+(r.y0+.8)*cs,known=!!seen[LEVEL+':'+i];
+    lab(known?r.n:hlScramble(r.n,LEVEL*31+i),cx,cy,Math.max(7,Math.min(10,cs*1.2)),known?'#3a1c0c':'#6a5a7a')})}
   ctx.restore();
   // the key
   {const x=8,y=206,w=196,h=70;ctx.save();ctx.fillStyle='rgba(226,212,168,.94)';rrect(ctx,x,y,w,h,5);ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=1.2;rrect(ctx,x,y,w,h,5);ctx.stroke();ctx.restore();
@@ -296,3 +299,11 @@ function hlTrapTick(){
   hlTrapTick();const S=G.hlTrap;if(S&&S.lv===LEVEL&&S.red&&S.st>=4&&S.st<7){S.red.x=G.P.x+.5;S.red.y=G.P.y+.5;S.red.out=false}}catch(e){console.warn('trap',e)}}}
 {const _ui4=ui;ui=function(dt){_ui4.apply(this,arguments);try{const S=G.hlTrap;if(S&&S.lv===LEVEL&&S.st>=4&&S.st<7&&G.state==='play'){ctx.save();const p=.5+.5*Math.sin(G.time*3);ctx.fillStyle='rgba(150,10,14,'+(.14+.08*p).toFixed(3)+')';ctx.fillRect(0,0,DW,DH);
   const g=ctx.createRadialGradient(DW/2,DH*.5,DH*.2,DW/2,DH*.5,DH*.9);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(40,0,6,.55)');ctx.fillStyle=g;ctx.fillRect(0,0,DW,DH);ctx.restore()}}catch(e){}}}
+
+/* a room's name on the map is its letters mixed up until the party has walked into it */
+function hlScramble(name,seed){
+  const letters=name.replace(/ /g,'').split(''),n=letters.length;
+  for(let tries=0;tries<6;tries++){const a=letters.slice();for(let i=n-1;i>0;i--){const j=Math.floor(hash2(seed+tries*7,i,19)*(i+1));const t=a[i];a[i]=a[j];a[j]=t}
+    let out='',k=0;for(const ch of name){out+=ch===' '?' ':a[k++]}
+    out=out.toLowerCase().replace(/(^|\s)(\S)/g,(m,sp,c)=>sp+c.toUpperCase());if(out!==name)return out}
+  return name.split('').reverse().join('')}
