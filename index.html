@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.171';
+const VERSION='3.172';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -2488,8 +2488,8 @@ function render3D(){
   const D=vimg.data;
   const day=G.day||0,lbm=Math.max(day,G.amb||0),fd=G.fl||(day?GRASSD:FLOORD),cd=G.cl||(day?SKYD:CEILD);
   const uwL=typeof uwLv==='function'&&uwLv(LEVEL); // under the sea
-  const desertLv=LEVEL===41||LEVEL===43||LEVEL===44||LEVEL>=60&&LEVEL<=64||yarSea(LEVEL),dsBio=LEVEL===41?clamp(rdBiome(G.C.x|0,G.C.y|0)*1.3,0,1):1,mix3=(a,b)=>[a[0]+(b[0]-a[0])*dsBio,a[1]+(b[1]-a[1])*dsBio,a[2]+(b[2]-a[2])*dsBio];
-  const skyLv=LEVEL===22,lushLv=LEVEL===32||LEVEL===33,grimLv=GRIM_L(),rainLv=LEVEL===10,mossLv=LEVEL===39,hzr0=desertLv?(uwL?[40,124,154]:yarSea(LEVEL)?[214,230,244]:LEVEL===64?[236,224,196]:LEVEL===63?[238,242,250]:LEVEL===62?[226,204,242]:LEVEL===61?[244,226,172]:LEVEL===60?[196,214,240]:LEVEL===43?[238,200,166]:mix3([170,200,160],[242,226,190])):skyLv?[176,192,216]:rainLv?[58,72,82]:mossLv?[70,104,70]:grimLv?[30,46,32]:lushLv?[170,200,160]:day?[132,146,132]:[86,76,62],hzc0=desertLv?(uwL?[58,140,168]:yarSea(LEVEL)?[176,204,230]:LEVEL===64?[216,198,160]:LEVEL===63?[214,226,244]:LEVEL===62?[196,160,222]:LEVEL===61?[232,200,128]:LEVEL===60?[172,196,232]:LEVEL===43?[218,172,136]:mix3([140,176,130],[228,210,168])):mossLv?[48,76,50]:rainLv?[48,60,70]:grimLv?[26,40,28]:lushLv?[140,176,130]:skyLv?[150,172,208]:day?[110,124,112]:[69,61,50],hzmax0=desertLv?(LEVEL===44?.36:.5+.22*dsBio):skyLv?(.42-.26*ALTN):mossLv?.34:lushLv?.34:grimLv?.36:rainLv?.34:day?.55:.32,hzrate0=desertLv?(LEVEL===44?.02:.03):skyLv?.05:mossLv?.05:lushLv?.04:grimLv?.034:rainLv?.036:day?.07:.042;
+  const desertLv=LEVEL===41||LEVEL===43||LEVEL===44||LEVEL===305||LEVEL>=60&&LEVEL<=64||yarSea(LEVEL),dsBio=LEVEL===41?clamp(rdBiome(G.C.x|0,G.C.y|0)*1.3,0,1):1,mix3=(a,b)=>[a[0]+(b[0]-a[0])*dsBio,a[1]+(b[1]-a[1])*dsBio,a[2]+(b[2]-a[2])*dsBio];
+  const skyLv=LEVEL===22,lushLv=LEVEL===32||LEVEL===33,grimLv=GRIM_L(),rainLv=LEVEL===10,mossLv=LEVEL===39,hzr0=desertLv?(uwL?[40,124,154]:LEVEL===305?[236,232,214]:yarSea(LEVEL)?[214,230,244]:LEVEL===64?[236,224,196]:LEVEL===63?[238,242,250]:LEVEL===62?[226,204,242]:LEVEL===61?[244,226,172]:LEVEL===60?[196,214,240]:LEVEL===43?[238,200,166]:mix3([170,200,160],[242,226,190])):skyLv?[176,192,216]:rainLv?[58,72,82]:mossLv?[70,104,70]:grimLv?[30,46,32]:lushLv?[170,200,160]:day?[132,146,132]:[86,76,62],hzc0=desertLv?(uwL?[58,140,168]:LEVEL===305?[206,220,200]:yarSea(LEVEL)?[176,204,230]:LEVEL===64?[216,198,160]:LEVEL===63?[214,226,244]:LEVEL===62?[196,160,222]:LEVEL===61?[232,200,128]:LEVEL===60?[172,196,232]:LEVEL===43?[218,172,136]:mix3([140,176,130],[228,210,168])):mossLv?[48,76,50]:rainLv?[48,60,70]:grimLv?[26,40,28]:lushLv?[140,176,130]:skyLv?[150,172,208]:day?[110,124,112]:[69,61,50],hzmax0=desertLv?(LEVEL===44?.36:LEVEL===305?.3:LEVEL===304?.42:.5+.22*dsBio):skyLv?(.42-.26*ALTN):mossLv?.34:lushLv?.34:grimLv?.36:rainLv?.34:day?.55:.32,hzrate0=desertLv?(LEVEL===44?.02:LEVEL===305?.014:LEVEL===304?.02:.03):skyLv?.05:mossLv?.05:lushLv?.04:grimLv?.034:rainLv?.036:day?.07:.042;
   // the desert sky follows the clock; a sandstorm thickens the air and tints it
   const SK=desertLv&&!uwL?skyTod((G.clock%1440)/60):null,ST=desertLv?STORM.a:0,stm=(v,c)=>v+(c-v)*ST;
   const stormC=SK?[206*Math.min(1,SK.k[0]*1.1+.05),166*Math.min(1,SK.k[1]*1.1+.05),112*Math.min(1,SK.k[2]*1.1+.05)]:null;
@@ -2742,7 +2742,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     const trD=(G.day||0)>0&&s.decor&&NOSHADOW.test(s.decor.k)&&LEVEL!==32&&LEVEL!==33&&!GRIM_L(); // woodland trees fade into dark green, not pale haze
     let lum=clamp(.08+(Math.max(baseL(dist),G.day||0,G.amb||0)+lt*.85)*1.05,0,1)*(GRIM_L()?.66:trD?.78:1);
     if(LEVEL===44&&s.decor&&(s.decor.k==='lamp'||s.decor.k==='hlant'||s.decor.k==='cfire'))lum=Math.max(lum,.9); // a lantern or a fire shines by its own light
-    const kq0=Math.min(1,Math.max(.05,2*sw/iw)),dyv=(G.day||0)>0,hzv=GRIM_L()?[30,46,32]:trD?[40,54,42]:dyv?[132,146,132]:[86,76,62],smS=Math.min(dyv?.4:.26,dist*(dyv?.04:.03))*(GRIM_L()?.55:.75);
+    const ohL=LEVEL===305||LEVEL===304,kq0=Math.min(1,Math.max(.05,2*sw/iw)),dyv=(G.day||0)>0,hzv=GRIM_L()?[30,46,32]:ohL&&dyv?[226,228,220]:trD?[40,54,42]:dyv?[132,146,132]:[86,76,62],smS=Math.min(dyv?(ohL?.22:.4):.26,dist*(dyv?(ohL?.018:.04):.03))*(GRIM_L()?.55:.75);
     let SRC,tw,th,HZ=null,hA=0;
     if(!s.flash&&!(s.decor&&s.decor.burn>0)){
       let tier=SPR_TIERS[SPR_TIERS.length-1];for(const t of SPR_TIERS){if(t>=iw*kq0){tier=t;break}}
@@ -6794,7 +6794,7 @@ function update(dt){
   try{tpTick(dt)}catch(e){console.error(e);TP=null}
   try{if(typeof uwTick==='function')uwTick(dt);if(typeof seaTick==='function')seaTick(dt)}catch(e){console.error(e)}
   G.time+=dt;try{if(G.pharFlash>0)G.pharFlash-=dt;stormTick(dt);birdTick(dt);caravanTick(dt);if(G.flags)(G.flags.lvSeen=G.flags.lvSeen||{})[LEVEL]=1}catch(e){}
-  if(G.dayBase>0){const hr=(G.clock%1440)/60,dsl=LEVEL===43||LEVEL===44||(LEVEL>=60&&LEVEL<=64)||LEVEL===41||yarSea(LEVEL);G.day=Math.max(.16,G.dayBase*clamp(.66+.5*Math.cos((hr-12)/24*TAU),dsl?(LEVEL===44?.4:.3):G.hasLamps?.2:.5,1));if(typeof weatherNow==='function'){const wn=weatherNow();if(wn&&wn.dark<1)G.day=Math.max(.14,G.day*wn.dark)}}
+  if(G.dayBase>0){const hr=(G.clock%1440)/60,dsl=LEVEL===43||LEVEL===44||LEVEL===305||(LEVEL>=60&&LEVEL<=64)||LEVEL===41||yarSea(LEVEL);G.day=Math.max(.16,G.dayBase*clamp(.66+.5*Math.cos((hr-12)/24*TAU),dsl?(LEVEL===44?.4:.3):G.hasLamps?.2:.5,1));if(typeof weatherNow==='function'){const wn=weatherNow();if(wn&&wn.dark<1)G.day=Math.max(.14,G.day*wn.dark)}}
   // timers
   if(!G.cut)for(let i=0;i<G.timers.length;){const t=G.timers[i];if(G.time>=t.t){G.timers.splice(i,1);t.fn()}else i++}
   // camera easing
@@ -14762,24 +14762,37 @@ vq('vq6','The Court of King Osric','King Osric','At noon the party is brought be
 const OH_PROP={horse:['ohprops1_1',1.45],banner:['ohprops1_2',2.6],ballista:['ohprops1_4',1.05],rack:['ohprops1_5',1.05],balls:['ohprops1_6',.5],barrel:['ohprops1_7',.62],treb:['ohtreb1_0',2.3]};
 function ohAlias(){for(const k in OH_PROP){const [n,h]=OH_PROP[k],im=IMG['kh_'+n];if(im){IMG['oh_'+k]=im;NPC_H['oh_'+k]=h}}}
 
+/* the wall styles: which painted picture each part is cut from, and the warm tint laid over it */
+const OH_STY={
+  gold:{plain:'kh_ohwall1_2',win:'kh_ohwall1_4',door:'kh_ohwall1_5',slit:'kh_ohwall1_3',tint:[255,236,196,.08]},
+  honey:{plain:'kh_ohwall1_2',win:'kh_ohwall1_4',door:'kh_ohwall1_5',slit:'kh_ohwall1_3',tint:[255,208,146,.04]},
+  cream:{plain:'kh_ohwall1_2',win:'kh_ohwall1_4',door:'kh_ohwall1_5',slit:'kh_ohwall1_3',tint:[255,246,228,.4]},
+  rose:{plain:'kh_ohwall1_2',win:'kh_ohwall1_4',door:'kh_ohwall1_5',slit:'kh_ohwall1_3',tint:[255,184,156,.06]},
+  grey:{plain:'kh_ohwall1_0',win:'kh_ohwall1_4',door:'kh_ohwall1_5',slit:'kh_ohwall1_3',tint:[255,234,200,.14]},
+  castle:{plain:'kh_ohwall1_2',win:'kh_ohwall1_4',door:'kh_ohwall1_5',slit:'kh_ohwall1_3',tint:[255,232,188,.1]},
+  castle2:{plain:'kh_ohwall1_0',win:'kh_ohwall1_4',door:'kh_ohwall1_5',slit:'kh_ohwall1_3',tint:[255,226,178,.12]}
+};
 /* ---- the stone: wall pictures stood up into tall tiles, a door or a window in each ---- */
 function ohTiles(){
   const C={};
   const make=(kind,pat,wh,img)=>{
     const key=kind+'|'+pat+'|'+wh+'|'+(img||'');if(C[key])return C[key];
-    const Hp=Math.round(128*wh),pi=IMG['kh_ohwall1_'+pat]||IMG.kh_ohwall1_0,units=Math.ceil(wh);
+    const S=typeof pat==='string'?OH_STY[pat]:{plain:'kh_ohwall1_'+pat,win:'kh_ohwall1_4',door:'kh_ohwall1_5',slit:'kh_ohwall1_3'};
+    const Hp=Math.round(128*wh),pi=IMG[S.plain]||IMG.kh_ohwall1_0,units=Math.ceil(wh);
     const c=mkCanvas(128,Hp,(x,w,h)=>{
-      x.fillStyle='#6e6e6e';x.fillRect(0,0,w,h);
+      x.fillStyle='#8a8478';x.fillRect(0,0,w,h);
       for(let u=0;u<units;u++){
         let im=pi;
-        if(u===0&&kind==='door')im=IMG.kh_ohwall1_5;
+        if(u===0&&kind==='door')im=IMG[S.door];
         else if(u===0&&kind==='gate')im=IMG[img];
-        else if(u===0&&kind==='shopfront')im=IMG.kh_ohwall1_4;
-        else if(u===1&&(kind==='window'||kind==='shopfront'||kind==='door'))im=IMG.kh_ohwall1_4;
-        else if(u===1&&kind==='slit')im=IMG.kh_ohwall1_3;
-        else if(u===2&&kind==='window'&&wh>=2.9)im=IMG.kh_ohwall1_4;
+        else if(u===0&&kind==='shopfront')im=IMG[S.shop||S.win];
+        else if(u===1&&(kind==='window'||kind==='shopfront'||kind==='door'))im=IMG[S.win];
+        else if(u===1&&kind==='slit')im=IMG[S.slit];
+        else if(u===2&&kind==='window'&&wh>=2.9)im=IMG[S.win];
         if(im)x.drawImage(im,0,0,im.width,im.height,0,h-(u+1)*128,128,128);
       }
+      if(S.tint&&kind!=='gate'){x.globalCompositeOperation='multiply';x.fillStyle='rgb('+S.tint[0]+','+S.tint[1]+','+S.tint[2]+')';x.fillRect(0,0,w,h);
+        if(S.tint[3]){x.globalCompositeOperation='screen';x.fillStyle='rgba(255,238,205,'+S.tint[3]+')';x.fillRect(0,0,w,h)}x.globalCompositeOperation='source-over'}
     });
     const d=c.getContext('2d').getImageData(0,0,128,Hp).data,id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;
     const gid=KH_NEXT_GID++;T_TILE[gid]=id;
@@ -14829,25 +14842,85 @@ const OH_POOR=['worker','soldier','children','potter','spartan','messy','warm','
 
 /* ---- the shops and special doors: each is put on the lot nearest where it should be ---- */
 const OH_SPECIAL=[
-  {id:307,name:"The King's Rest",room:'inn',keeper:'oh_inn',want:[66,72],floor:'wood',pat:0},
-  {id:308,name:'Oldhaven Arms',room:'shop',keeper:'oh_smith',want:[90,74],floor:'cobble',pat:0},
-  {id:309,name:'The Apothecary',room:'shop',keeper:'oh_apoth',want:[38,68],floor:'wood',pat:1},
-  {id:310,name:'The Chapel of Saint Brannoch',room:'prayer',keeper:'oh_priest',want:[104,66],floor:'cobble',pat:0,chapel:true},
-  {name:"The Armourer's Yard",room:'shop',keeper:'oh_armour',want:[88,104],floor:'cobble',pat:0},
-  {name:"The King's Bakery",room:'shop',keeper:'oh_bakery',want:[56,90],floor:'wood',pat:0},
-  {name:'The Scroll House',room:'shop',keeper:'oh_scrolls',want:[28,48],floor:'wood',pat:1},
-  {name:'Pack and Lantern',room:'shop',keeper:'oh_pack',want:[68,102],floor:'wood',pat:0},
-  {name:'The Gilded Lance',room:'inn',keeper:'oh_inn2',want:[120,88],floor:'wood',pat:0},
-  {name:'The Cookshop',room:'shop',keeper:'oh_cookshop',want:[110,124],floor:'wood',pat:0},
-  {name:'The Garrison Hall',room:'hall',keeper:'oh_sergeant',want:[28,100],floor:'cobble',pat:1},
-  {name:"The Herbwife's Cottage",room:'shop',keeper:'oh_herbs',want:[20,128],floor:'wood',pat:0},
-  {name:'The Oldhaven Baths',room:'bath',keeper:'oh_bath',want:[76,58],pat:0,scene:'bath_grand'},
-  {name:'The Glover and Tailor',room:'shop',keeper:'oh_tailor',want:[126,56],floor:'wood',pat:0}
+  {id:307,name:"The King's Rest",room:'inn',keeper:'oh_inn',want:[63,66],floor:'wood',pat:0},
+  {id:308,name:'Oldhaven Arms',room:'shop',keeper:'oh_smith',want:[92,80],floor:'cobble',pat:0},
+  {id:309,name:'The Apothecary',room:'shop',keeper:'oh_apoth',want:[44,50],floor:'wood',pat:1},
+  {id:310,name:'The Chapel of Saint Brannoch',room:'prayer',keeper:'oh_priest',want:[40,66],floor:'cobble',pat:0,chapel:true},
+  {name:"The Armourer's Yard",room:'shop',keeper:'oh_armour',want:[92,96],floor:'cobble',pat:0},
+  {name:"The King's Bakery",room:'shop',keeper:'oh_bakery',want:[56,80],floor:'wood',pat:0},
+  {name:'The Scroll House',room:'shop',keeper:'oh_scrolls',want:[28,26],floor:'wood',pat:1},
+  {name:'Pack and Lantern',room:'shop',keeper:'oh_pack',want:[62,100],floor:'wood',pat:0},
+  {name:'The Gilded Lance',room:'inn',keeper:'oh_inn2',want:[122,66],floor:'wood',pat:0},
+  {name:'The Cookshop',room:'shop',keeper:'oh_cookshop',want:[110,112],floor:'wood',pat:0},
+  {name:'The Garrison Hall',room:'hall',keeper:'oh_sergeant',want:[26,112],floor:'cobble',pat:1},
+  {name:"The Herbwife's Cottage",room:'shop',keeper:'oh_herbs',want:[12,66],floor:'wood',pat:0},
+  {name:'The Oldhaven Baths',room:'bath',keeper:'oh_bath',want:[100,64],pat:0,scene:'bath_grand'},
+  {name:'The Glover and Tailor',room:'shop',keeper:'oh_tailor',want:[124,50],floor:'wood',pat:0}
 ];
 
+/* ---- the plan of the city: eight columns of blocks and ten rows, two-square streets between them, the king's road down the middle ---- */
+const OH_XC=[[6,16],[19,31],[34,46],[49,64],[84,99],[102,114],[117,129],[132,143]];
+const OH_YR=[[6,17],[20,31],[34,41],[44,57],[60,72],[75,87],[90,102],[105,117],[120,132],[135,143]];
+const OH_AVE={x0:67,x1:81},OH_ROAD={x0:73,x1:75},OH_CASTLE={x0:49,y0:6,x1:99,y1:41},OH_FAIR={x0:102,y0:75,x1:129,y1:102};
+const OH_CROSS=[18.5,32.5,42.5,58.5,73.5,88.5,103.5,118.5,133.5]; // the middle of each east-west street
+/* floors: 0 cobble street, 1 pale plaza stone, 2 lawn, 3 mossy cobble, 4 gravel and earth, 5 stained cobble */
+/* the painted pictures of the greenery and the street, with the old pieces to fall back on */
+const OH_ART={
+  oak:[['ltree0',3.6],['ltree4',3.8],['ltree8',3.4],['ltree12',3.7],['ltree19',3.2],['ltree0',4.2],['ltree4',3.1]],
+  orchard:[['ltree17',2.6],['ltree19',2.5],['ltree17',2.3]],
+  willow:[['ltree8',3.2],['ltree4',3.4]],
+  cypress:[['ltree19',2.8],['ltree0',3.0]],
+  topiary:[['kh_city2_1',1.7]],
+  bush:[['lbush0',.8],['lbush0_1',.8],['lbush0_2',.8]],
+  bed:[['lflora0',.55],['lflora0_1',.55],['lflora0_2',.55],['kh_city2_5',.55]],
+  box:[['kh_city2_5',.55]],
+  pergola:[['kh_city2_4',2.4]],
+  well:[['kh_city1_1',1.5]],
+  pot:[['kh_city2_3',.9]],
+  tub:[['yar_tub',.55],['yar_lavender',.55]]
+};
+function ohArt(){
+  for(const k in OH_ART)for(const [n,h] of OH_ART[k]){if(IMG[n])NPC_H[n]=NPC_H[n]===undefined||k==='oak'||k==='orchard'||k==='willow'?h:NPC_H[n]}
+  NPC_H.ltree0=3.6;NPC_H.ltree4=3.8;NPC_H.ltree8=3.4;NPC_H.ltree12=3.7;NPC_H.ltree19=3.2;NPC_H.ltree17=2.6;NPC_H.ltree18=2.7;
+  NPC_H.kh_city2_1=1.7;IMG.oh_well=IMG.kh_city1_1;NPC_H.oh_well=1.5;IMG.oh_pergola=IMG.kh_city2_4;NPC_H.oh_pergola=2.4;IMG.oh_topiary=IMG.kh_city2_1;NPC_H.oh_topiary=1.7;NPC_H.kh_city2_4=2.4;NPC_H.kh_city2_5=.55;NPC_H.kh_city1_1=1.5;NPC_H.kh_city2_3=.9;NPC_H.lflora0=.55;NPC_H.lflora0_1=.55;NPC_H.lflora0_2=.55;NPC_H.lbush0=.8;NPC_H.lbush0_1=.8;
+  for(let i=0;i<6;i++)NPC_H['kh_stall1_'+i]=1.5;for(const i of [0,1,3])NPC_H['kh_stall2_'+i]=.8;NPC_H.kh_stall2_2=.9;
+  // the roofs: painted gables in several colours, some warmed up from the grey ones
+  const tint=(src,name,rgb,lift)=>{if(IMG[name]||!IMG[src])return;const im=IMG[src];
+    const c=mkCanvas(im.width,im.height,(x,w,h)=>{x.drawImage(im,0,0);x.globalCompositeOperation='multiply';x.fillStyle=`rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;x.fillRect(0,0,w,h);
+      if(lift){x.globalCompositeOperation='screen';x.fillStyle=`rgba(255,235,200,${lift})`;x.fillRect(0,0,w,h)}x.globalCompositeOperation='destination-in';x.drawImage(im,0,0)});
+    IMG[name]=c};
+  tint('kh_ohroof1_2','oh_rf_terra2',[255,206,170],.08);tint('kh_ohroof1_0','oh_rf_plum',[240,196,190],.18);tint('kh_ohroof1_1','oh_rf_sage',[200,255,215],.1);
+  tint('kh_ohroof1_4','oh_rf_thatch',[255,236,170],.38);tint('kh_ohroof1_3','oh_rf_moss',[225,255,210],.25);tint('kh_ohroof1_0','oh_rf_brown',[255,215,170],.3);
+  OH_ROOF.terra=IMG.oh_rf_terra2?'oh_rf_terra2':'kh_ohroof1_2';OH_ROOF.red='kh_ohroof1_2';OH_ROOF.slate='kh_ohroof1_1';OH_ROOF.plum=IMG.oh_rf_plum?'oh_rf_plum':'kh_ohroof1_0';
+  OH_ROOF.sage=IMG.oh_rf_sage?'oh_rf_sage':'kh_ohroof1_1';OH_ROOF.shingle='kh_ohroof1_4';OH_ROOF.thatch=IMG.oh_rf_thatch?'oh_rf_thatch':'kh_ohroof1_4';OH_ROOF.moss=IMG.oh_rf_moss?'oh_rf_moss':'kh_ohroof1_3';OH_ROOF.brown=IMG.oh_rf_brown?'oh_rf_brown':'kh_ohroof1_0';
+}
+const OH_ROOF={};
+/* sunlit paving: the old floors, lightened and warmed, so the streets are honey-coloured stone and the lawns bright green */
+function ohFloors(){
+  const warm=(src,name,m,add)=>{if(FLOORS[name]||!FLOORS[src])return;const s=FLOORS[src],d=new Uint8ClampedArray(s.length);
+    for(let i=0;i<s.length;i+=4){d[i]=s[i]*m[0]+add[0];d[i+1]=s[i+1]*m[1]+add[1];d[i+2]=s[i+2]*m[2]+add[2];d[i+3]=255}FLOORS[name]=d};
+  warm('cobble','ohCobble',[1.5,1.42,1.2],[26,20,8]);warm('pale','ohPale',[1.2,1.15,1.0],[28,22,10]);warm('mosscobble','ohMoss',[1.4,1.45,1.15],[18,20,6]);
+  warm('dirt','ohGravel',[1.35,1.28,1.08],[34,28,12]);warm('stainedcobble','ohStain',[1.45,1.36,1.15],[24,18,8]);warm('lush','ohLawn',[1.2,1.28,.95],[10,22,0]);
+}
+/* the house types: what the walls are made of, how tall, what roofs they take */
+const OH_TYPES={
+  timber:{sty:['cream','cream','honey'],wh:[2.5,2.9],roofs:['terra','shingle','red','brown']},
+  merchant:{sty:['gold','honey','gold'],wh:[2.9,3.3],roofs:['slate','plum','sage','terra']},
+  townhouse:{sty:['rose','gold','cream'],wh:[3.3,3.7],roofs:['slate','terra','plum']},
+  cottage:{sty:['honey','cream','honey'],wh:[2.0,2.3],roofs:['thatch','moss','shingle','thatch']},
+  guild:{sty:['gold','grey','gold'],wh:[3.3,3.6],roofs:['slate','sage'],tower:1},
+  almshouse:{sty:['cream','gold'],wh:[2.2,2.5],roofs:['terra','brown','moss']}
+};
+function ohPickType(h,rich,w){
+  const r=hash2(h.x0,h.y0,51);
+  if(w>=8&&r<.55)return 'guild';
+  if(w<=4)return r<.55?'townhouse':'cottage';
+  if(rich)return r<.4?'merchant':r<.7?'timber':r<.85?'townhouse':'guild';
+  return r<.34?'cottage':r<.64?'timber':r<.82?'almshouse':'merchant';
+}
 function ohBuild(){
   if(LEVELS[OH.ID])return;
-  ohAlias();
+  ohAlias();ohArt();ohFloors();
   const W=OH.W,H=OH.H,N=W*H,hs=(a,b,c)=>hash2(a,b,c);
   const TM=ohTiles(),chars={D:LEVEL41_DATA.chars.D},chMap=new Map();let nextCh=0x300;
   const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
@@ -14855,10 +14928,11 @@ function ohBuild(){
   const block=new Uint8Array(N),fm=new Array(N).fill('0');
   const solid=(x,y,c)=>{rows[y][x]=c;block[y*W+x]=1};
   const sky=[],decor=[],scenery=[],lights=[],used=new Set();
-  const lv={rows:null,start:{x:OH.CX,y:141,f:0},enemies:[],items:[],decor,scenery,sky,fmap:null,floorSet:['cobble','pale','dirt','mosscobble','stainedcobble','lush'],floor:'cobble',ceil:'cloud',
+  const lv={rows:null,start:{x:OH.CX,y:141,f:0},enemies:[],items:[],decor,scenery,sky,fmap:null,floorSet:['ohCobble','ohPale','ohLawn','ohMoss','ohGravel','ohStain'],floor:'ohCobble',ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:'Oldhaven',label:'Oldhaven',noExtras:true,diff:25,tele:{x:OH.CX,y:138},ceilH:5.2,chars,lights,portals:[]};
+  const setF=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)fm[y*W+x]=f};
   /* ---- the curtain wall: two squares thick, arrow slits in its face, towers along it ---- */
-  const WALL=3.2,wPlain=ch(TM.make('plain',0,WALL).gid),wSlit=ch(TM.make('slit',0,WALL).gid),wDark=ch(TM.make('plain',1,WALL).gid);
+  const WALL=3.2,wPlain=ch(TM.make('plain','castle',WALL).gid),wSlit=ch(TM.make('slit','castle',WALL).gid),wDark=ch(TM.make('plain','castle2',WALL).gid);
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){
     if(x>=6&&x<=143&&y>=6&&y<=143)continue;
     const face=x===5||y===5||x===144||y===144;
@@ -14869,60 +14943,247 @@ function ohBuild(){
   const GX=OH.CX,gateWh=3.4,tWh=4.6;
   {const pg=TM.make('gate',0,gateWh,'kh_ohgate1_0');T_DOORS.ohportc=pg.tex;const gc=pch(2);
     for(let y=144;y<=145;y++)for(let x=GX-1;x<=GX+1;x++)solid(x,y,gc);
-    const tp=ch(TM.make('plain',0,tWh).gid),ts=ch(TM.make('slit',0,tWh).gid);
+    const tp=ch(TM.make('plain','castle',tWh).gid),ts=ch(TM.make('slit','castle',tWh).gid);
     for(let y=144;y<=145;y++)for(const xs of [[GX-4,GX-2],[GX+2,GX+4]])for(let x=xs[0];x<=xs[1];x++)solid(x,y,y===144&&x%2===0?ts:tp);
     lv.portals[2]={to:304,x:0,y:0,f:2,tex:'ohportc'};
     sky.push({x:GX-3,y:144.6,k:'kh_ohtower1_3',w:7,z:tWh-.05,big:1},{x:GX+3,y:144.6,k:'kh_ohtower1_3',w:7,z:tWh-.05,big:1});
   }
+  // the east gate: shut for now, a gatehouse at the end of the road that runs out of the city to the east
+  {const EY=73,tp=ch(TM.make('plain','castle',tWh).gid),ts=ch(TM.make('slit','castle',tWh).gid),eg=ch(TM.make('gate',0,gateWh,'kh_ohgate1_0').gid);
+    for(let x=144;x<=145;x++){for(let y=EY;y<=EY+1;y++)solid(x,y,eg);for(const ys of [[EY-3,EY-1],[EY+2,EY+4]])for(let y=ys[0];y<=ys[1];y++)solid(x,y,x===144&&y%2===0?ts:tp)}
+    sky.push({x:144.6,y:EY-1.5,k:'kh_ohtower1_3',w:7,z:tWh-.05,big:1},{x:144.6,y:EY+3.5,k:'kh_ohtower1_3',w:7,z:tWh-.05,big:1});
+    OH.eastGate={x:143,y:EY};
+  }
   // towers along the wall
   for(let x=14;x<=136;x+=17){if(Math.abs(x-GX)<8)continue;for(const y of [4.5,145])sky.push({x,y,k:hs(x,y,3)<.5?'kh_ohtower1_2':'kh_ohtower1_3',w:5.5,z:WALL-.05,big:1})}
-  for(let y=16;y<=134;y+=17)for(const x of [4.5,145])sky.push({x,y,k:hs(x,y,4)<.5?'kh_ohtower1_2':'kh_ohtower1_3',w:5.5,z:WALL-.05,big:1});
+  for(let y=16;y<=134;y+=17){if(Math.abs(y-73)<6)continue;sky.push({x:4.5,y,k:hs(4.5,y,4)<.5?'kh_ohtower1_2':'kh_ohtower1_3',w:5.5,z:WALL-.05,big:1});sky.push({x:145,y,k:hs(145,y,4)<.5?'kh_ohtower1_2':'kh_ohtower1_3',w:5.5,z:WALL-.05,big:1})}
   for(const [x,y] of [[4.5,4.5],[145,4.5],[4.5,145],[145,145]])sky.push({x,y,k:'kh_ohtower1_3',w:9,z:WALL-.05,big:1});
-  /* ---- the castle: a great mass of tall wall behind the square, the keep standing over it, a double door in the middle ---- */
-  const CAS={x0:58,y0:6,x1:90,y1:39},cWh=3.8;
-  {const cp=ch(TM.make('plain',0,cWh).gid),cw=ch(TM.make('window',0,cWh).gid),cs=ch(TM.make('slit',0,cWh).gid),cd=ch(TM.make('plain',1,cWh).gid);
-    const gh=4.6,gp=ch(TM.make('plain',0,gh).gid),gs=ch(TM.make('slit',0,gh).gid);
-    for(let y=CAS.y0;y<=CAS.y1;y++)for(let x=CAS.x0;x<=CAS.x1;x++){
-      let c=cp;
-      if(y===CAS.y1)c=(x>=GX-5&&x<=GX+5)?(x%2===0?gs:gp):(x%3===0?cw:(x%7===0?cs:cp));
-      else if(x===CAS.x0||x===CAS.x1)c=y%3===0?cs:cp;
-      else if((x*5+y*3)%13===0)c=cd;
-      solid(x,y,c);
+  /* ---- helpers for everything that stands about ---- */
+  const free=(x,y)=>x>5&&y>5&&x<144&&y<144&&rows[y][x]==='.'&&!block[y*W+x]&&!used.has(x+','+y);
+  const dc=(k,x,y,o)=>{used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true,deco:true},o||{}))};
+  const tryDc=(k,x,y,o)=>{if(free(x,y)){dc(k,x,y,o);return true}return false};
+  const walk=(k,x,y,o)=>{used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true},o||{}))};
+  const near=(x,y,rad)=>{for(let r=0;r<=rad;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(free(x+dx,y+dy))return [x+dx,y+dy]}return null};
+  OH.near=near;OH.free=free;
+  const person=(id,x,y,rad)=>{const kp=KH_KEEPERS[id];if(!kp)return null;const q=near(x,y,rad||3);if(!q)return null;walk(khFaceKey(kp.face),q[0],q[1],{npc:id,sc:kp.sc||1});return q};
+  const pick=(arr,a,b,c)=>arr[(hs(a,b,c)*arr.length)|0];
+  const art=(name,a,b,c)=>{const l=OH_ART[name].filter(([n])=>IMG[n]);return l.length?pick(l,a,b,c)[0]:null};
+  const solidDc=(k,x,y,o)=>{if(k&&free(x,y)){dc(k,x,y,Object.assign({block:true,walk:false},o||{}));return true}return false}; // a tree or a plant you walk round
+  const tree=(name,x,y)=>solidDc(art(name,x,y,61),x,y);
+  const flowers=(x,y,sc)=>{const k=art('bed',x,y,62);if(k&&free(x,y)){used.add(x+','+y);scenery.push({k,wx:x+.5,wy:y+.5,sc:sc||1,decor:{k,walk:true,x,y}})}};
+  const lamp=(x,y)=>{if(tryDc('lamp',x,y))lights.push([x,y])};
+  const crowdAt=(x,y,rad,pool)=>{const aid=pick(pool||OH_CROWD,x,y,63),kp=KH_KEEPERS[aid];const q=near(x,y,rad||2);if(q&&kp)walk(khFaceKey(kp.face),q[0],q[1],{npc:aid,sc:kp.sc||1})};
+  /* a hedge or a low wall round a garden, with gaps to walk in by */
+  const hedge=(x0,y0,x1,y1,gaps,ch2)=>{
+    const g=(x,y)=>gaps.some(([a,b])=>a===x&&b===y);
+    for(let x=x0;x<=x1;x++)for(const y of [y0,y1])if(!g(x,y)&&free(x,y))solidDc(ch2||art('bush',x,y,64),x,y,{sc:1.3});
+    for(let y=y0+1;y<y1;y++)for(const x of [x0,x1])if(!g(x,y)&&free(x,y))solidDc(ch2||art('bush',x,y,65),x,y,{sc:1.3});
+  };
+  /* ---- the castle: an inner curtain wall with corner towers, a gatehouse, and inside it lawns, gardens and the keep ---- */
+  const CS=OH_CASTLE;
+  {const cWh=3.6,cp=ch(TM.make('plain','castle',cWh).gid),cs=ch(TM.make('slit','castle',cWh).gid),cd=ch(TM.make('plain','castle2',cWh).gid),cw=ch(TM.make('window','castle',cWh).gid);
+    for(let y=CS.y0;y<=CS.y1;y++)for(let x=CS.x0;x<=CS.x1;x++){
+      const edge=x<=CS.x0+1||x>=CS.x1-1||y<=CS.y0+1||y>=CS.y1-1;
+      if(!edge)continue;
+      if(y>=CS.y1-1&&x>=GX-1&&x<=GX+1)continue; // the gate passage
+      solid(x,y,(x+y)%5===0?cs:(x*3+y*5)%11===0?cd:cp);
     }
-    const pc=pch(1);const pd=TM.make('gate',0,gh,'kh_ohgate1_1');T_DOORS.ohpalace=pd.tex;
-    for(let x=GX-1;x<=GX+1;x++)solid(x,CAS.y1,pc);
+    setF(CS.x0+2,CS.y0+2,CS.x1-2,CS.y1-2,'2'); // the whole ward is lawn
+    setF(GX-1,CS.y1-1,GX+1,CS.y1,'0');setF(GX-1,20,GX+1,CS.y1-2,'4'); // gravel from the gate to the palace
+    // the keep and its two halls
+    const kx0=63,kx1=85,ky0=8,ky1=19,gh=4.4,gp=ch(TM.make('plain','castle',gh).gid),gs=ch(TM.make('slit','castle',gh).gid),gw=ch(TM.make('window','castle',gh).gid);
+    for(let y=ky0;y<=ky1;y++)for(let x=kx0;x<=kx1;x++)solid(x,y,y===ky1?((x%3===0)?gw:x%7===0?gs:gp):((x*5+y*3)%13===0?gs:gp));
+    const pc=pch(1),pd=TM.make('gate',0,gh,'kh_ohgate1_1');T_DOORS.ohpalace=pd.tex;
+    for(let x=GX-1;x<=GX+1;x++)solid(x,ky1,pc);
     lv.portals[1]={to:OH.COURT,x:17,y:27,f:0,tex:'ohpalace',req:'courtOpen',lock:'The great doors of the palace are shut. The gate-captain, Aldwyn, can tell you when the court sits.'};
-    // the keep, the towers of the castle and the long spires on its wings
-    sky.push({x:GX,y:22,k:'kh_ohkeep1_0',w:36,z:cWh-.3,big:1});
-    for(const [x,y,k,w] of [[CAS.x0+1.5,CAS.y1-1.5,'kh_ohtower1_3',9],[CAS.x1-.5,CAS.y1-1.5,'kh_ohtower1_3',9],[CAS.x0+1.5,CAS.y0+2,'kh_ohtower1_3',9],[CAS.x1-.5,CAS.y0+2,'kh_ohtower1_3',9],
-      [GX-8,CAS.y1-1,'kh_ohtower1_2',5],[GX+8,CAS.y1-1,'kh_ohtower1_2',5],[66,26,'kh_ohtower1_0',4.4],[82,26,'kh_ohtower1_1',4.4],[62,16,'kh_ohtower1_4',3.8],[86,16,'kh_ohtower1_5',3.8],[74,10,'kh_ohtower1_0',5.2]])
+    sky.push({x:GX,y:14,k:'kh_ohkeep1_0',w:34,z:gh-.3,big:1});
+    for(const [x0,x1] of [[53,61],[87,95]]){ // the long halls beside the keep
+      for(let y=9;y<=15;y++)for(let x=x0;x<=x1;x++)solid(x,y,y===15?(x%3===1?cw:cp):cp);
+      sky.push({x:(x0+x1+1)/2,y:12,k:'kh_ohroof1_1',w:x1-x0+1.6,z:3.6-.03,big:1});
+    }
+    for(const [x,y,k,w] of [[CS.x0+.6,CS.y0+.6,'kh_ohtower1_3',10],[CS.x1+.6,CS.y0+.6,'kh_ohtower1_3',10],[CS.x0+.6,CS.y1+.6,'kh_ohtower1_3',10],[CS.x1+.6,CS.y1+.6,'kh_ohtower1_3',10],
+      [GX-4,CS.y1+.5,'kh_ohtower1_3',8],[GX+4,CS.y1+.5,'kh_ohtower1_3',8],[kx0+1,ky1,'kh_ohtower1_0',5],[kx1,ky1,'kh_ohtower1_1',5],[kx0+1,ky0+1,'kh_ohtower1_4',4.4],[kx1,ky0+1,'kh_ohtower1_5',4.4],[CS.x0+12,CS.y0+1,'kh_ohtower1_2',5],[CS.x1-12,CS.y0+1,'kh_ohtower1_2',5],[CS.x0+.6,26,'kh_ohtower1_2',5.5],[CS.x1+.6,26,'kh_ohtower1_2',5.5]])
       sky.push({x,y,k,w,z:cWh-.05,big:1});
+    // the gatehouse: its towers stand in the wall either side of the gate passage
+    for(let y=CS.y1-1;y<=CS.y1;y++)for(const xs of [[GX-4,GX-2],[GX+2,GX+4]])for(let x=xs[0];x<=xs[1];x++)solid(x,y,ch(TM.make('plain','castle',4.4).gid));
+    for(const x of [GX-2,GX+2]){tryDc('oh_banner',x,CS.y1-2)}
+    /* the walled gardens of the ward */
+    const wallGarden=(x0,y0,x1,y1,gap,kind)=>{
+      const wl=ch(TM.make('plain','castle',1.7).gid),isG=(x,y)=>(gap[0]===x&&gap[1]===y)||(gap[2]===x&&gap[3]===y);
+      for(let x=x0;x<=x1;x++)for(const y of [y0,y1])if(!isG(x,y))solid(x,y,wl);
+      for(let y=y0+1;y<y1;y++)for(const x of [x0,x1])if(!isG(x,y))solid(x,y,wl);
+      const cx=(x0+x1)>>1,cy=(y0+y1)>>1;
+      fm[gap[1]*W+gap[0]]='4';fm[gap[3]*W+gap[2]]='4';
+      // gravel cross paths
+      for(let x=x0+1;x<x1;x++)fm[cy*W+x]='4';for(let y=y0+1;y<y1;y++)fm[y*W+cx]='4';
+      if(kind==='rose'){
+        for(let y=y0+2;y<y1-1;y+=2)for(const x of [x0+2,x1-2]){tree('bush',x,y)}
+        for(let y=y0+2;y<y1-1;y+=2)for(const x of [cx-2,cx+2])if(free(x,y))flowers(x,y,1.1);
+        tryDc('fountain',cx,cy,{block:true,walk:false});
+        for(const [dx,dy] of [[-1,-2],[1,2]])tryDc('yar_bench',cx+dx,cy+dy);
+      }else if(kind==='cloister'){
+        tryDc('oh_well',cx,cy,{block:true,walk:false});
+        tree('oak',cx-3,cy-2);tree('oak',cx+3,cy+2);
+        for(const [dx,dy] of [[-2,0],[2,0]])tryDc('yar_bench',cx+dx,cy+dy);
+        for(const x of [x0+2,x1-2])for(const y of [y0+2,y1-2])flowers(x,y,1.1);
+      }else{ // a little orchard
+        for(let y=y0+2;y<=y1-2;y+=3)for(let x=x0+2;x<=x1-2;x+=3){if(x===cx||y===cy)continue;tree('orchard',x,y)}
+        tryDc('yar_bench',cx+1,cy+1);
+      }
+    };
+    wallGarden(54,23,69,36,[69,29,69,30],'rose');          // the rose garden, open towards the gravel walk
+    wallGarden(79,23,94,36,[79,29,79,30],'cloister');      // the cloister garden
+    wallGarden(53,18,60,21,[60,19,60,20],'orchard');       // little walled gardens tucked in the corners
+    wallGarden(88,18,95,21,[88,19,88,20],'orchard');
+    // lawn and walk: topiary along the gravel, oaks in the corners of the ward, flower beds
+    for(let y=22;y<=38;y+=4){tree('topiary',GX-3,y);tree('topiary',GX+3,y)}
+    for(const [x,y] of [[52,30],[96,30],[60,38],[88,38],[66,38],[82,38],[71,21],[77,21],[52,22],[96,22],[52,37],[96,37]])tree('oak',x,y);
+    for(let y=21;y<=37;y+=2){flowers(GX-2,y);flowers(GX+2,y)}
+    for(const x of [GX-9,GX+9])for(const y of [24,30,35])tryDc('yar_bench',x,y);
+    for(let y=22;y<=38;y+=4){lamp(GX-1,y+1);lamp(GX+1,y+1)}
+    // the ward's people: knights, courtiers, gardeners, pages
+    const wardNpc=['oh_f_knight','oh_f_knight2','oh_f_lady','oh_f_noble','oh_f_maid','oh_f_clerk','oh_f_banner','oh_f_pike'];
+    for(const [x,y] of [[GX-2,21],[GX+2,21],[GX-2,38],[GX+2,38]])crowdAt(x,y,1,['oh_f_knight','oh_f_pike','oh_f_knight2']);
+    for(let n=0;n<14;n++)crowdAt(54+((hs(n,1,66)*42)|0),22+((hs(n,2,66)*16)|0),3,hs(n,3,66)<.45?OH_SOLDIER:wardNpc);
   }
-  /* ---- the square before the castle, the king's road down to the gate, and the paving ---- */
-  const PLZ={x0:56,y0:40,x1:92,y1:61};
-  for(let y=PLZ.y0;y<=PLZ.y1;y++)for(let x=PLZ.x0;x<=PLZ.x1;x++)fm[y*W+x]='1';
-  for(let y=PLZ.y1+1;y<=143;y++)for(let x=OH.CX-2;x<=OH.CX+2;x++)fm[y*W+x]='1';
-  for(let y=40;y<=43;y++)for(let x=OH.CX-4;x<=OH.CX+4;x++)fm[y*W+x]='1';
-  /* ---- the blocks of houses between the streets: three houses apart, terraced, a door on every one ---- */
-  const XB=[[6,16],[20,34],[38,52],[56,71],[77,92],[96,110],[114,128],[132,142]],YB=[[10,22],[26,40],[44,58],[62,76],[80,94],[98,112],[116,130],[134,143]];
-  const houses=[],gardens=[];
-  const row=(x0,x1,y0,y1,face)=>{const w=x1-x0+1,n=Math.max(1,Math.round(w/6)),b=Math.floor(w/n),ex=w-b*n;let x=x0;for(let i=0;i<n;i++){const ww=b+(i<ex?1:0);houses.push({x0:x,x1:x+ww-1,y0,y1,face});x+=ww}};
-  const col=(x0,x1,y0,y1,face)=>{const h=y1-y0+1,n=Math.max(1,Math.round(h/6)),b=Math.floor(h/n),ex=h-b*n;let y=y0;for(let i=0;i<n;i++){const hh=b+(i<ex?1:0);houses.push({x0,x1,y0:y,y1:y+hh-1,face});y+=hh}};
-  XB.forEach(([bx0,bx1],i)=>YB.forEach(([by0,by1],j)=>{
-    if(bx1>=56&&bx0<=92&&by0<=61)return;                                  // the castle and the square
-    if(hs(i,j,5)<.06&&i!==3&&i!==4){gardens.push([bx0,by0,bx1,by1]);return}  // now and then a block is a walled garden
-    let rx0=bx0,rx1=bx1;
-    if(i===3&&j>=3){col(66,71,by0,by1,'E');rx1=65}
-    if(i===4&&j>=3){col(77,82,by0,by1,'W');rx0=83}
-    const hgt=by1-by0+1;
-    if(j===7){row(rx0,rx1,by0,by0+6,'N');return}
-    const dt=hgt>>1;
-    row(rx0,rx1,by0,by0+dt-1,'N');row(rx0,rx1,by0+dt,by1,'S');
+  /* ---- the great square before the castle: a fountain, oaks round the edge, flower beds, benches ---- */
+  const SQ={x0:60,y0:43,x1:88,y1:58};
+  setF(SQ.x0,SQ.y0,SQ.x1,SQ.y1,'1');setF(OH_AVE.x0,43,OH_AVE.x1,43,'1');
+  dc('fountain',GX,51,{block:true,walk:false});
+  for(const [dx,dy] of [[-3,0],[3,0],[0,-3],[0,3],[-3,-3],[3,-3],[-3,3],[3,3]])flowers(GX+dx,51+dy,1.15);
+  for(const x of [SQ.x0+1,SQ.x1-1])for(const y of [45,51,57])tree('oak',x,y);
+  for(const x of [66,82])for(const y of [45,57])tree('oak',x,y);
+  for(const [x,y] of [[67,50],[81,50],[67,52],[81,52],[GX-5,48],[GX+5,48],[GX-5,54],[GX+5,54]])tryDc('yar_bench',x,y);
+  for(const [x,y] of [[SQ.x0,47],[SQ.x0,55],[SQ.x1,47],[SQ.x1,55],[GX-6,44],[GX+6,44],[GX-6,57],[GX+6,57]])lamp(x,y);
+  for(const [x,y] of [[SQ.x0+3,44],[SQ.x1-3,44],[SQ.x0+3,57],[SQ.x1-3,57]])tryDc('oh_banner',x,y);
+  /* ---- the king's road: cobble in the middle, lawns either side with oaks in a row, hedges and beds, crossing streets of cobble ---- */
+  setF(OH_AVE.x0,59,OH_AVE.x1,143,'2');setF(OH_ROAD.x0,59,OH_ROAD.x1,143,'0');
+  for(const cy of OH_CROSS)if(cy>59)setF(OH_AVE.x0,cy-.5,OH_AVE.x1,cy+.5,'0');
+  const onCross=y=>OH_CROSS.some(c=>y>=c-1.5&&y<=c+1.5);
+  for(let y=62;y<=140;y+=5){if(onCross(y))continue;tree('oak',71,y);tree('oak',77,y+2)}
+  for(let y=64;y<=138;y+=6){if(onCross(y)||onCross(y+1))continue;flowers(69,y);flowers(79,y);if(hs(y,1,67)<.5)tryDc('yar_bench',68,y+2);else tryDc('yar_bench',80,y+2)}
+  for(let y=61;y<=140;y+=8){if(onCross(y))continue;tree('topiary',OH_ROAD.x0-1,y);tree('topiary',OH_ROAD.x1+1,y)}
+  for(let y=66;y<=140;y+=8){lamp(OH_ROAD.x0-1,y+3);lamp(OH_ROAD.x1+1,y+3)}
+  for(let y=70;y<=134;y+=16){tryDc('oh_banner',OH_ROAD.x0-1,y);tryDc('oh_banner',OH_ROAD.x1+1,y+8)}
+  /* ---- the blocks ---- */
+  const houses=[],gardensOf=[];let nextSp=0;
+  const typeOf=(i,j)=>{
+    if((i===3||i===4)&&j<=2)return 'castle';
+    if((i===3||i===4)&&j===3)return 'park';
+    if(i===2&&j===4)return 'chapel';
+    if(i===5&&j===3)return 'market';
+    if(i>=5&&i<=6&&j>=5&&j<=6)return 'fair';
+    const r=hs(i,j,71);
+    if(j===9)return 'houses';
+    if(r<.09)return 'orchard';if(r<.17)return 'garden';
+    return 'houses';
+  };
+  // little plazas where some streets cross: the four blocks round the crossing each cut off a corner
+  const notch=new Map(); // "i,j" -> {tl,tr,bl,br}
+  const nt=(i,j,c)=>{const k=i+','+j;(notch.get(k)||notch.set(k,{}).get(k))[c]=1};
+  for(let a=0;a<7;a++)for(let b=0;b<9;b++){
+    if(a===3)continue; // the avenue is between columns 3 and 4
+    if(hs(a,b,72)>.42)continue;
+    if([typeOf(a,b),typeOf(a+1,b),typeOf(a,b+1),typeOf(a+1,b+1)].some(t=>t!=='houses'))continue;
+    nt(a,b,'br');nt(a+1,b,'bl');nt(a,b+1,'tr');nt(a+1,b+1,'tl');
+    const px=(OH_XC[a][1]+OH_XC[a+1][0])>>1,py=(OH_YR[b][1]+OH_YR[b+1][0])>>1;
+    gardensOf.push({plaza:[px,py,a,b]});
+  }
+  const split=(len,seed)=>{ // house widths along a row, 4 to 7 squares, and where a lane goes through
+    const out=[];let rest=len,n=0;
+    while(rest>0){let w=4+((hs(seed,n,73)*4)|0);if(rest-w<4)w=rest;out.push(w);rest-=w;n++}
+    return out;
+  };
+  const lanes=[];
+  const addRow=(x0,x1,y0,y1,face,seed,gap)=>{ // a terrace of houses, with a lane 2 wide through it if gap is set
+    const L=x1-x0+1;let parts=[[x0,x1]];
+    if(gap&&L>=9){const lw=3+((hs(seed,9,73)*(L-8))|0);parts=[[x0,x0+lw-1],[x0+lw+2,x1]];lanes.push([x0+lw,y0,x0+lw+1,y1])}
+    for(const [a,b] of parts){const ws=split(b-a+1,seed+a);let x=a;for(const w of ws){houses.push({x0:x,x1:x+w-1,y0,y1,face});x+=w}}
+  };
+  const addCol=(x0,x1,y0,y1,face,seed)=>{const hh=y1-y0+1,ws=split(hh,seed);let y=y0;for(const w of ws){houses.push({x0,x1,y0:y,y1:y+w-1,face});y+=w}};
+  const lawnBlock=(b,kind)=>{
+    const {x0,y0,x1,y1}=b;setF(x0,y0,x1,y1,'2');
+    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(hs(x,y,74)<.04)fm[y*W+x]='3';
+    const cx=(x0+x1)>>1,cy=(y0+y1)>>1;
+    if(kind==='orchard'){
+      for(let y=y0+1;y<=y1-1;y+=3)for(let x=x0+1;x<=x1-1;x+=3)if(!(Math.abs(x-cx)<=1)&&!(Math.abs(y-cy)<=0))tree('orchard',x,y);
+      for(let x=x0;x<=x1;x++)for(const y of [y0,y1])if(hs(x,y,75)<.45)tree('bush',x,y);
+      tryDc('yar_bench',cx,cy);
+    }else{ // a public garden: a pond or a fountain, paths, beds, an arbour and oaks
+      for(let x=x0;x<=x1;x++)fm[cy*W+x]='4';for(let y=y0;y<=y1;y++)fm[y*W+cx]='4';
+      if(hs(x0,y0,76)<.5)dc('fountain',cx,cy,{block:true,walk:false});else dc('oh_well',cx,cy,{block:true,walk:false});
+      for(const [dx,dy] of [[-3,-3],[3,3],[-3,3],[3,-3]])tree(((dx+dy)&1)?'oak':'topiary',cx+dx,cy+dy);
+      for(const [dx,dy] of [[-2,0],[2,0],[0,2],[0,-2]])tryDc('yar_bench',cx+dx,cy+dy);
+      for(let n=0;n<10;n++)flowers(x0+1+((hs(n,x0,77)*(x1-x0-1))|0),y0+1+((hs(n,y0,77)*(y1-y0-1))|0),1.1);
+      tryDc('oh_pergola',x0+2,y0+1,{block:false});
+    }
+    for(let n=0;n<4;n++)crowdAt(x0+2+((hs(n,x0,78)*(x1-x0-3))|0),y0+2+((hs(n,y0,78)*(y1-y0-3))|0),2);
+  };
+  OH_XC.forEach((XC0,i)=>OH_YR.forEach((YR0,j)=>{
+    let [bx0,bx1]=XC0,[by0,by1]=YR0;
+    const t=typeOf(i,j);if(t==='castle')return;
+    if(i===0)bx0+=2;if(i===7)bx1-=2;if(j===0)by0+=2;if(j===9)by1-=2; // a street runs along the foot of the city wall
+    const b={x0:bx0,y0:by0,x1:bx1,y1:by1};
+    if(t==='park'){const x0=i===3?49:89,x1=i===3?59:99;lawnBlock({x0,x1,y0:44,y1:57},'garden');return}
+    if(t==='orchard'||t==='garden'){lawnBlock(b,t);return}
+    if(t==='fair'){
+      if(i===5&&j===5){setF(OH_FAIR.x0,OH_FAIR.y0,OH_FAIR.x1,OH_FAIR.y1,'2');OH.fair=OH_FAIR;
+        // the green stays open for the fair: oaks round the edge, a few stalls and the folk of the town
+        for(let x=OH_FAIR.x0;x<=OH_FAIR.x1;x+=6){tree('oak',x,OH_FAIR.y0+1);tree('oak',x,OH_FAIR.y1-1)}
+        for(let y=OH_FAIR.y0+5;y<=OH_FAIR.y1-5;y+=6){tree('oak',OH_FAIR.x0+1,y);tree('oak',OH_FAIR.x1-1,y)}
+        for(let n=0;n<6;n++){const sx=106+n*4,sy=84+(n%2)*6,k='kh_stall1_'+n;if(IMG[k]&&free(sx,sy)){dc(k,sx,sy,{block:true,walk:false})}}
+        for(let n=0;n<26;n++)crowdAt(OH_FAIR.x0+3+((hs(n,1,79)*(OH_FAIR.x1-OH_FAIR.x0-5))|0),OH_FAIR.y0+3+((hs(n,2,79)*(OH_FAIR.y1-OH_FAIR.y0-5))|0),2);
+        for(let x=104;x<=127;x+=6)for(let y=80;y<=96;y+=8)lamp(x,y);
+      }
+      return;
+    }
+    if(t==='market'){
+      setF(b.x0,b.y0,b.x1,b.y1,'1');
+      for(let n=0;n<8;n++){const k='kh_stall1_'+(n%6),sx=b.x0+2+(n%4)*3,sy=b.y0+2+((n/4)|0)*6;if(IMG[k]&&free(sx,sy))dc(k,sx,sy,{block:true,walk:false})}
+      for(const [x,y,k] of [[b.x0+1,b.y0+4,'kh_stall2_3'],[b.x1-1,b.y0+4,'kh_stall2_0'],[b.x0+6,b.y1-1,'kh_stall2_1'],[b.x1-2,b.y1-1,'kh_stall2_2']])if(IMG[k])tryDc(k,x,y);
+      dc('oh_well',(b.x0+b.x1)>>1,b.y0+4,{block:true,walk:false});
+      for(let x=b.x0+1;x<=b.x1;x+=4)tree('oak',x,b.y1);
+      for(let n=0;n<14;n++)crowdAt(b.x0+((hs(n,1,80)*(b.x1-b.x0))|0),b.y0+((hs(n,2,80)*(b.y1-b.y0))|0),2);
+      return;
+    }
+    if(t==='chapel'){ // the close of the chapel: a lawn with yews and oaks, the chapel in the middle
+      setF(b.x0,b.y0,b.x1,b.y1,'2');
+      const cw=9,cd=5,cx0=((b.x0+b.x1)>>1)-4,cy0=b.y0+5;
+      houses.push({x0:cx0,x1:cx0+cw-1,y0:cy0,y1:cy0+cd-1,face:'S',chapel:1,type:'guild'});
+      for(let x=b.x0;x<=b.x1;x+=3)tree('cypress',x,b.y0);
+      for(const [x,y] of [[b.x0+1,b.y0+3],[b.x1-1,b.y0+3],[b.x0+1,b.y1-1],[b.x1-1,b.y1-1],[b.x0+2,b.y1-4],[b.x1-2,b.y1-4]])tree('oak',x,y);
+      for(let y=cy0+cd+2;y<=b.y1-1;y+=2){flowers(cx0+2,y);flowers(cx0+cw-3,y)}
+      for(const [x,y] of [[cx0-2,cy0+2],[cx0+cw+1,cy0+2]])for(let q=0;q<3;q++)tree('cypress',x,y+q*2);
+      const fx=(b.x0+b.x1)>>1;setF(fx,cy0+cd,fx,b.y1,'4');setF(fx-1,cy0+cd,fx+1,cy0+cd,'4');
+      for(let n=0;n<3;n++)crowdAt(fx,b.y1-3-n,2,['oh_f_monk','oh_f_friar','oh_f_lady']);
+      return;
+    }
+    // blocks of houses: a ring round a green courtyard, or two terraces with a back lane
+    const cut=notch.get(i+','+j)||{},w=bx1-bx0+1,h=by1-by0+1,seed=i*31+j*7;
+    const cl=cut.tl?2:0,cr=cut.tr?2:0,bl=cut.bl?2:0,brr=cut.br?2:0;
+    if(h>=10&&w>=11){
+      const dN=3+(hs(i,j,81)<.4?1:0),dS=3+(hs(i,j,82)<.4?1:0),dW=3,dE=3;
+      addRow(bx0+cl,bx1-cr,by0,by0+dN-1,'N',seed,true);
+      addRow(bx0+bl,bx1-brr,by1-dS+1,by1,'S',seed+1,hs(i,j,85)<.5);
+      addCol(bx0,bx0+dW-1,by0+dN,by1-dS,'W',seed+2);
+      addCol(bx1-dE+1,bx1,by0+dN,by1-dS,'E',seed+3);
+      const cx0=bx0+dW,cx1=bx1-dE+0,cy0=by0+dN,cy1=by1-dS; // the courtyard
+      setF(cx0,cy0,cx1,cy1,'2');
+      gardensOf.push({court:[cx0,cy0,cx1,cy1,i,j]});
+    }else{
+      const dN=(h-1)>>1,dS=h-1-dN;
+      addRow(bx0+cl,bx1-cr,by0,by0+dN-1,'N',seed,true);
+      addRow(bx0+bl,bx1-brr,by1-dS+1,by1,'S',seed+1,hs(i,j,88)<.5);
+      const ly=by0+dN;setF(bx0,ly,bx1,ly,'4'); // the back lane between the terraces
+      gardensOf.push({lane:[bx0,ly,bx1,ly,i,j]});
+    }
   }));
   houses.forEach((h,k)=>{
-    h.k=k;h.wh=[2.3,2.5,2.7,2.9][(hs(h.x0,h.y0,11)*4)|0];
-    h.pat=hs(h.x0,h.y0,12)<.78?0:1;
-    const w=h.x1-h.x0+1,d=h.y1-h.y0+1;h.w=(h.face==='N'||h.face==='S')?w:d;
+    h.k=k;const w=h.x1-h.x0+1,d=h.y1-h.y0+1;h.w=(h.face==='N'||h.face==='S')?w:d;
+    const dist=Math.hypot((h.x0+h.x1)/2-OH.CX,(h.y0+h.y1)/2-60),rich=dist<40||hs(h.x0,h.y0,14)<.12;
+    h.type=h.type||ohPickType(h,rich,h.w);const T=OH_TYPES[h.type];
+    h.wh=Math.round((T.wh[0]+hs(h.x0,h.y0,11)*(T.wh[1]-T.wh[0]))*10)/10;
+    h.sty=pick(T.sty,h.x0,h.y0,12);h.rich=rich;
     const ci=(h.face==='N'||h.face==='S')?h.x0+((w-1)>>1)+(w>=6&&hs(h.x0,h.y0,13)<.5?1:0):h.y0+((d-1)>>1)+(d>=6&&hs(h.x0,h.y0,13)<.5?1:0);
     if(h.face==='N'){h.door=[ci,h.y0];h.front=[ci,h.y0-1];h.out=0;h.wall=[0,1]}
     else if(h.face==='S'){h.door=[ci,h.y1];h.front=[ci,h.y1+1];h.out=2;h.wall=[0,-1]}
@@ -14931,18 +15192,20 @@ function ohBuild(){
   });
   // which house is which: the shops go to the lot nearest where each belongs
   const taken=new Set(),spec=[];
+  const chapelH=houses.find(h=>h.chapel);
+  if(chapelH){const sp=OH_SPECIAL.find(s=>s.chapel);taken.add(chapelH.k);chapelH.sp=sp;spec.push(chapelH)}
   for(const sp of OH_SPECIAL){
+    if(sp.chapel)continue;
     let best=null,bd=1e9;
-    for(const h of houses){if(taken.has(h.k))continue;const dx=(h.x0+h.x1)/2-sp.want[0],dy=(h.y0+h.y1)/2-sp.want[1],dd=dx*dx+dy*dy;if(dd<bd){bd=dd;best=h}}
-    if(best){taken.add(best.k);best.sp=sp;spec.push(best)}
+    for(const h of houses){if(taken.has(h.k)||h.w<5)continue;const dx=(h.x0+h.x1)/2-sp.want[0],dy=(h.y0+h.y1)/2-sp.want[1],dd=dx*dx+dy*dy;if(dd<bd){bd=dd;best=h}}
+    if(best){taken.add(best.k);best.sp=sp;spec.push(best);if(best.type==='townhouse'||best.type==='cottage')best.type='timber'}
   }
   let homeN=0;
   for(const h of houses){
     h.id=h.sp&&h.sp.id?h.sp.id:OH.HOME+(homeN++);
-    const d2=Math.hypot((h.x0+h.x1)/2-OH.CX,(h.y0+h.y1)/2-60);
     if(h.sp){h.name=h.sp.name;h.room=h.sp.room;h.keeper=h.sp.keeper;h.floor=h.sp.floor;h.wpat=h.sp.pat;h.scene=h.sp.scene}
     else{
-      const rich=d2<44||hs(h.x0,h.y0,14)<.12,pick=(rich?OH_RICH:OH_POOR),sc=pick[(hs(h.x0,h.y0,15)*pick.length)|0];
+      const pickS=(h.rich?OH_RICH:OH_POOR),sc=pickS[(hs(h.x0,h.y0,15)*pickS.length)|0];
       h.scene=sc;h.name=OH_SCENES[sc].n;h.room='home';h.floor=(sc==='soldier'||sc==='spartan'||sc==='potter')?'cobble':'wood';h.wpat=hs(h.x0,h.y0,16)<.7?0:1;
       const res=OH_SCENES[sc].res;h.keeper=hs(h.x0,h.y0,17)<.72?res[(hs(h.x0,h.y0,18)*res.length)|0]:null;
       if(hs(h.x0,h.y0,19)<.06)h.gold=25+((hs(h.x0,h.y0,20)*60)|0);
@@ -14950,9 +15213,9 @@ function ohBuild(){
   }
   // build the walls of each house
   for(const h of houses){
-    const wh=h.wh,pat=h.pat,front=(x,y)=>h.face==='N'?y===h.y0:h.face==='S'?y===h.y1:h.face==='E'?x===h.x1:x===h.x0;
-    const plain=ch(TM.make('plain',pat,wh).gid),win=ch(TM.make(h.sp&&h.sp.room!=='prayer'?'shopfront':'window',pat,wh).gid),side=ch(TM.make('window',pat,wh).gid);
-    const dtile=TM.make('door',pat,wh);
+    const wh=h.wh,sty=h.sty,front=(x,y)=>h.face==='N'?y===h.y0:h.face==='S'?y===h.y1:h.face==='E'?x===h.x1:x===h.x0;
+    const plain=ch(TM.make('plain',sty,wh).gid),win=ch(TM.make(h.sp&&h.sp.room!=='prayer'?'shopfront':'window',sty,wh).gid),side=ch(TM.make('window',sty,wh).gid);
+    const dtile=TM.make('door',sty,wh);
     const dgid=KH_NEXT_GID++;T_TILE[dgid]=dtile.tex;
     const mid=h.room==='inn'?[6,7]:h.room==='hall'?[5,6]:h.room==='shop'?[5,6]:h.room==='prayer'?[4,6]:[3,4];h.at={x:mid[0],y:mid[1],f:0};
     KH_DOOR[dgid]={lvl:h.id,at:h.at};
@@ -14964,91 +15227,81 @@ function ohBuild(){
       solid(x,y,c);
     }
     // the roof: a painted gable on top of the walls, and now and then a tower standing over the house
-    const rk=hs(h.x0,h.y0,21),rr=rk<.34?0:rk<.58?1:rk<.72?2:rk<.84?3:4;
-    sky.push({x:(h.x0+h.x1+1)/2,y:(h.y0+h.y1+1)/2,k:'kh_ohroof1_'+rr,w:h.w+.5,z:wh-.03});
+    const T=OH_TYPES[h.type],rk=pick(T.roofs,h.x0,h.y0,21),rimg=OH_ROOF[rk]||'kh_ohroof1_2';
+    sky.push({x:(h.x0+h.x1+1)/2,y:(h.y0+h.y1+1)/2,k:rimg,w:h.w+.5,z:wh-.03});
     const tk=hs(h.x0,h.y0,22);
-    if(tk<.14)sky.push({x:(h.x0+h.x1+1)/2+(hs(h.x0,h.y0,23)-.5)*2,y:(h.y0+h.y1+1)/2,k:'kh_ohtower1_'+[0,1,4,5][(hs(h.x0,h.y0,24)*4)|0],w:2.8,z:wh-.03});
-    else if(tk>.97)sky.push({x:(h.x0+h.x1+1)/2,y:(h.y0+h.y1+1)/2,k:'kh_ohtower1_2',w:3.6,z:wh-.03});
+    if(T.tower||tk<.06)sky.push({x:(h.x0+h.x1+1)/2+(hs(h.x0,h.y0,23)-.5)*2,y:(h.y0+h.y1+1)/2,k:'kh_ohtower1_'+[0,1,4,5][(hs(h.x0,h.y0,24)*4)|0],w:2.8,z:wh-.03});
+    // window boxes and tubs at the door
+    if(hs(h.x0,h.y0,95)<.7){const along=(h.face==='N'||h.face==='S')?[[h.front[0]-1,h.front[1]],[h.front[0]+1,h.front[1]]]:[[h.front[0],h.front[1]-1],[h.front[0],h.front[1]+1]];
+      for(const [tx,ty] of along){if(!free(tx,ty)||hs(tx,ty,96)>.6)continue;const k=hs(tx,ty,97)<.5?'yar_tub':art('box',tx,ty,98)||'yar_lavender';if(IMG[k]){used.add(tx+','+ty);scenery.push({k,wx:tx+.5,wy:ty+.5,sc:.85+hs(tx,ty,99)*.3,decor:{k,walk:true,x:tx,y:ty}})}}}
   }
-  // the walled gardens: a green court with a well, benches and flowers
-  for(const [x0,y0,x1,y1] of gardens){
-    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)fm[y*W+x]='5';
-    const wp=ch(TM.make('plain',0,1.8).gid);
-    for(let x=x0;x<=x1;x++){solid(x,y0,wp);solid(x,y1,wp)}for(let y=y0;y<=y1;y++){solid(x0,y,wp);solid(x1,y,wp)}
-    const gx=(x0+x1)>>1;rows[y1][gx]='.';block[y1*W+gx]=0;
-  }
-  const free=(x,y)=>x>5&&y>5&&x<144&&y<144&&rows[y][x]==='.'&&!block[y*W+x]&&!used.has(x+','+y);
-  const dc=(k,x,y,o)=>{used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true,deco:true},o||{}))};
-  const tryDc=(k,x,y,o)=>{if(free(x,y)){dc(k,x,y,o);return true}return false};
-  const walk=(k,x,y,o)=>{used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true},o||{}))};
-  const near=(x,y,rad)=>{for(let r=0;r<=rad;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(free(x+dx,y+dy))return [x+dx,y+dy]}return null};
-  OH.near=near;OH.free=free;
-  const person=(id,x,y,rad)=>{const kp=KH_KEEPERS[id];if(!kp)return null;const q=near(x,y,rad||3);if(!q)return null;walk(khFaceKey(kp.face),q[0],q[1],{npc:id,sc:kp.sc||1});return q};
-  for(const [x0,y0,x1,y1] of gardens){
-    const cx=(x0+x1)>>1,cy=(y0+y1)>>1;tryDc('well',cx,cy,{block:true,walk:false});
-    for(const [dx,dy] of [[-3,0],[3,0],[0,-2],[0,2]])tryDc('yar_bench',cx+dx,cy+dy);
-    for(let n=0;n<14;n++){const x=x0+1+((hs(n,x0,30)*(x1-x0-1))|0),y=y0+1+((hs(n,y0,31)*(y1-y0-1))|0);if(free(x,y))scenery.push({k:hs(n,3,32)<.5?'yar_tub':'yar_lavender',wx:x+.5,wy:y+.5,sc:.9,decor:{k:'yar_tub',walk:true,x,y}})}
-    person(OH_CROWD[(hs(x0,y0,33)*OH_CROWD.length)|0],cx+1,cy+1);
-  }
-  /* ---- the lanterns: iron posts along every street, beside the road and never in it ---- */
-  const inCastle=(x,y)=>x>=56&&x<=92&&y<=61;
-  const lamp=(x,y)=>{if(!inCastle(x,y)&&tryDc('lamp',x,y))lights.push([x,y])};
-  const VSC=[18,36,54,94,112,130],HSC=[8,24,42,60,78,96,114,132];
-  for(const c of HSC)for(let x=9+((c*3)%5);x<=141;x+=8)lamp(x,c-1);
-  for(const c of VSC)for(let y=12+((c*3)%5);y<=140;y+=8)lamp(c+1,y);
-  for(let y=64;y<=140;y+=6){lamp(OH.CX-3,y+2);lamp(OH.CX+3,y+2)}
-  /* ---- the square: a fountain, trebuchets and warhorses on display, soldiers, people milling about ---- */
-  const fx0=OH.CX,fy0=51;
-  dc('fountain',fx0,fy0,{block:true,walk:false});
-  for(const [x,y] of [[57,41],[91,41],[57,60],[91,60],[66,51],[82,51]])dc('well',x,y,{block:false,walk:true});
-  for(const [x,y] of [[61,46],[87,46],[61,56],[87,56],[71,139],[77,139]]){if(!tryDc('oh_treb',x,y))continue;tryDc('oh_balls',x+(x<74?1:-1),y);if(y<100)tryDc('oh_barrel',x+(x<74?2:-2),y)}
-  for(const [x,y] of [[65,44],[83,44],[65,58],[83,58],[69,47],[79,47],[69,56],[79,56]])dc('oh_ballista',x,y,{});
-  for(const [x,y] of [[60,43],[88,43],[60,59],[88,59],[63,50],[85,50]])dc('oh_rack',x,y,{});
-  for(const [x,y] of [[62,42],[66,42],[82,42],[86,42],[64,53],[84,53],[68,59],[80,59],[62,50],[86,50],[72,46],[76,46]])dc('oh_horse',x,y,{});
-  for(let x=58;x<=90;x+=6)dc('oh_banner',x,40,{});
-  for(let x=60;x<=88;x+=4){if(Math.abs(x-OH.CX)<3)continue;lamp(x,41);lamp(x,59)}
-  // the king's road: soldiers lining both sides, banners, warhorses and trebuchets down its length
-  let sn=0;
-  for(let y=63;y<=140;y+=3){
-    for(const sx of [OH.CX-2,OH.CX+2]){
-      const id=OH_SOLDIER[(sn++)%OH_SOLDIER.length];const kp=KH_KEEPERS[id];
-      if(free(sx,y))walk(khFaceKey(kp.face),sx,y,{npc:id,sc:kp.sc});
+  // the lanes between houses
+  const lane=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(!block[y*W+x])fm[y*W+x]='4'};
+  for(const [a,b,c,d] of lanes){lane(a,b,c,d);for(let x=a;x<=c;x++)for(let y=b-1;y<=d+1;y++)used.add(x+','+y)} // keep the lanes and their mouths clear
+  /* ---- courtyards, back lanes and the little plazas ---- */
+  for(const g of gardensOf){
+    if(g.court){
+      const [x0,y0,x1,y1,i,j]=g.court,cx=(x0+x1)>>1,cy=(y0+y1)>>1,kind=(hs(i,j,90)*5)|0;
+      if(kind===0){tree('oak',cx,cy);for(const [dx,dy] of [[-2,1],[2,-1]])tryDc('yar_bench',cx+dx,cy+dy)}
+      else if(kind===1){tryDc('oh_well',cx,cy,{block:true,walk:false});for(const [dx,dy] of [[-2,-1],[2,1],[0,2]])flowers(cx+dx,cy+dy,1.15)}
+      else if(kind===2){for(let y=y0;y<=y1;y+=2)for(let x=x0;x<=x1;x+=2)if(hs(x,y,91)<.6)tree('orchard',x,y)}
+      else if(kind===3){tree('willow',cx,cy);for(let n=0;n<6;n++)flowers(x0+((hs(n,i,92)*(x1-x0+1))|0),y0+((hs(n,j,92)*(y1-y0+1))|0),1.1);tryDc('yar_bench',cx+2,cy)}
+      else{tryDc('fountain',cx,cy,{block:true,walk:false});for(const [dx,dy] of [[-2,0],[2,0]])tryDc('oh_topiary',cx+dx,cy+dy);for(let n=0;n<6;n++)flowers(x0+((hs(n,i,93)*(x1-x0+1))|0),y0+((hs(n,j,93)*(y1-y0+1))|0),1.1)}
+      for(let x=x0;x<=x1;x++)for(const y of [y0,y1])if(hs(x,y,94)<.25)flowers(x,y);
+      for(let n=0;n<3;n++)crowdAt(cx+((hs(n,i,96)*5-2)|0),cy+((hs(n,j,96)*4-2)|0),2);
+    }else if(g.lane){
+      const [x0,y,x1,,i,j]=g.lane;for(let x=x0+1;x<x1;x+=4)if(hs(x,j,89)<.55)flowers(x,y,1)
+      tryDc('yar_tub',x0+((x1-x0)>>1),y);
+    }else if(g.plaza){
+      const [px,py]=g.plaza;
+      // the plaza: a well or a great oak, benches and beds on the cut corners, lamps
+      const x0=px-2,x1=px+3,y0=py-3,y1=py+4;setF(x0,y0,x1,y1,'1');
+      if(hs(px,py,97)<.5)tree('oak',px-2,py-3);else dc('oh_well',px-2,py-2,{block:true,walk:false});
+      tree('oak',px+3,py+4);
+      for(const [x,y] of [[px-2,py+3],[px+3,py-3]])tryDc('yar_bench',x,y);
+      flowers(px-2,py+4,1.1);flowers(px+3,py-2,1.1);
+      crowdAt(px,py,2);crowdAt(px+1,py+1,2);
     }
   }
-  for(let y=68;y<=136;y+=12){dc('oh_banner',OH.CX-2,y);dc('oh_banner',OH.CX+2,y+6)}
-  for(let y=72;y<=132;y+=20){tryDc('oh_horse',OH.CX-1,y);tryDc('oh_horse',OH.CX+1,y+10);tryDc('oh_rack',OH.CX+2,y+4);tryDc('oh_rack',OH.CX-2,y+14)}
-  // the named people: the gate, the square and the doors of the palace
-  const named=[['oh_cap',OH.CX,42],['oh_guardA',OH.CX-3,40],['oh_guardB',OH.CX+3,40],['oh_g1',OH.CX-3,140],['oh_g2',OH.CX+3,140],['oh_m1',66,48],['oh_m2',82,48],['oh_w1',64,50],['oh_w2',72,56],['oh_k1',76,56],['oh_o1',84,56],['oh_s1',68,45],['oh_pr',80,46]];
+  /* ---- lamps along every street ---- */
+  const inCastle=(x,y)=>x>=CS.x0&&x<=CS.x1&&y<=CS.y1;
+  for(const cy of OH_CROSS)for(let x=9+((cy*3)|0)%5;x<=141;x+=8){if(x>=OH_AVE.x0-1&&x<=OH_AVE.x1+1)continue;lamp(x,Math.floor(cy-.5))}
+  for(const cx of [17.5,32.5,47.5,65.5,82.5,100.5,115.5,130.5])for(let y=12+(((cx*3)|0)%5);y<=140;y+=8)if(!inCastle(cx|0,y))lamp(Math.floor(cx-.5),y);
+  /* ---- the gate: the king's road starts in a small square of its own, with the guards ---- */
+  setF(66,135,82,143,'1');setF(GX-1,135,GX+1,143,'0');
+  for(const [x,y] of [[GX-3,139],[GX+3,139]])for(const q of [0,2,4])tryDc('oh_banner',x,y-q*1.0|0);
+  for(const [id,x,y] of [['oh_g1',GX-3,140],['oh_g2',GX+3,140]])person(id,x,y,2);
+  for(const x of [GX-4,GX+4])for(const y of [136,142])tree('topiary',x,y);
+  /* ---- the east road: out of the east gate and across the city to the fair green ---- */
+  setF(OH_FAIR.x1+1,73,143,74,'4');
+  /* ---- the named people: the gate, the square and the doors of the palace ---- */
+  const named=[['oh_cap',GX,22],['oh_guardA',GX-3,20],['oh_guardB',GX+3,20],['oh_m1',66,50],['oh_m2',82,50],['oh_w1',64,52],['oh_w2',72,56],['oh_k1',76,56],['oh_o1',84,56],['oh_s1',68,47],['oh_pr',80,48]];
   for(const [id,x,y] of named)person(id,x,y,5);
-  // a crowd in the square and in the streets, and soldiers everywhere
-  let pn=0;
-  for(let n=0;n<56;n++){const x=57+((hs(n,1,40)*35)|0),y=44+((hs(n,2,40)*16)|0);
-    const arr=hs(n,3,40)<.28?OH_SOLDIER:OH_CROWD,aid=arr[(hs(n,5,40)*arr.length)|0];const q=near(x,y,2);if(q&&!(Math.abs(q[0]-fx0)<2&&Math.abs(q[1]-fy0)<2)){const kp=KH_KEEPERS[aid];walk(khFaceKey(kp.face),q[0],q[1],{npc:aid,sc:kp.sc});pn++}}
-  for(let n=0;n<110;n++){const x=8+((hs(n,1,41)*134)|0),y=8+((hs(n,2,41)*134)|0);if(inCastle(x,y))continue;
-    const arr=hs(n,3,41)<.3?OH_SOLDIER:OH_CROWD,aid=arr[(hs(n,4,41)*arr.length)|0];
-    // only on a street: a cell with a house wall or the square close by in neither
-    const q=free(x,y)?[x,y]:near(x,y,1);if(q){const kp=KH_KEEPERS[aid];walk(khFaceKey(kp.face),q[0],q[1],{npc:aid,sc:kp.sc})}}
+  // the king's road is lined with a few guards, not a regiment
+  let sn=0;
+  for(let y=70;y<=134;y+=14){for(const sx of [OH_ROAD.x0,OH_ROAD.x1]){const id=OH_SOLDIER[(sn++)%OH_SOLDIER.length],kp=KH_KEEPERS[id];if(free(sx,y)&&kp)walk(khFaceKey(kp.face),sx,y,{npc:id,sc:kp.sc})}}
+  // people in the streets and the square
+  for(let n=0;n<54;n++){const x=60+((hs(n,1,40)*29)|0),y=44+((hs(n,2,40)*14)|0);if(Math.abs(x-GX)<2&&Math.abs(y-51)<2)continue;crowdAt(x,y,2,hs(n,3,40)<.18?OH_SOLDIER:OH_CROWD)}
+  for(let n=0;n<190;n++){const x=8+((hs(n,1,41)*134)|0),y=8+((hs(n,2,41)*134)|0);if(inCastle(x,y))continue;
+    const q=free(x,y)?[x,y]:near(x,y,1);if(!q)continue;const arr=hs(n,3,41)<.12?OH_SOLDIER:OH_CROWD,aid=arr[(hs(n,4,41)*arr.length)|0],kp=KH_KEEPERS[aid];walk(khFaceKey(kp.face),q[0],q[1],{npc:aid,sc:kp.sc})}
   // signs on the shops
   const KNAME={oh_bath:'Marta, bath keeper',oh_inn:'Wynn, innkeeper',oh_smith:'Bram, smith',oh_apoth:'Maud, apothecary',oh_priest:'Sister Margery',oh_armour:'Ser Gawen',oh_bakery:'Hild, baker',oh_scrolls:'Osbern, scribe',oh_pack:'Tilda',oh_inn2:'Dame Hester',oh_cookshop:'Pol',oh_sergeant:'Sergeant Cade',oh_herbs:'Old Ysolt',oh_tailor:'Fenwick'};
   for(const h of spec){
     const horizontal=h.face==='N'||h.face==='S',sx=horizontal?h.front[0]+1:h.front[0],sy=horizontal?h.front[1]:h.front[1]+1;
-    const spot=(rows[sy]&&rows[sy][sx]==='.')?[sx,sy]:h.front;
+    const spot=(rows[sy]&&rows[sy][sx]==='.'&&!used.has(sx+','+sy))?[sx,sy]:h.front;
     decor.push({k:'sign_'+h.keeper,x:spot[0],y:spot[1],block:false,wd:h.wall,txt:[h.name.toUpperCase(),KNAME[h.keeper]||'']});
   }
-  // the streets are not one cobble: moss in the damp corners, stains and puddles, bare earth, grass at the edges, and flowers and tubs at the doors
+  // the streets are not one cobble: moss in the damp corners, stains, bare earth, grass at the foot of the walls
   for(let y=6;y<144;y++)for(let x=6;x<144;x++){const i=y*W+x;if(block[i]||fm[i]!=='0')continue;
     const n=tsmooth(x/6,y/6,91),m=tsmooth(x/2.5,y/2.5,92),r=hs(x,y,93);
-    if(n>.68&&m>.4)fm[i]='3';else if(n<.24&&m<.6)fm[i]='4';else if(r<.025)fm[i]='2';else if(r>.985)fm[i]='5';
-    // a house wall or the city wall beside it: grass creeps along the foot of it
-    else if((block[i-1]||block[i+1]||block[i-W]||block[i+W])&&m>.62&&r<.5)fm[i]='5';
+    if(n>.7&&m>.4)fm[i]='3';else if(n<.2&&m<.6)fm[i]='5';else if(r<.02)fm[i]='4';
+    else if((block[i-1]||block[i+1]||block[i-W]||block[i+W])&&m>.62&&r<.35)fm[i]='2';
   }
-  for(const h of houses){if(hs(h.x0,h.y0,95)>.8)continue;const along=(h.face==='N'||h.face==='S')?[[h.front[0]-1,h.front[1]],[h.front[0]+1,h.front[1]]]:[[h.front[0],h.front[1]-1],[h.front[0],h.front[1]+1]];
-    for(const [tx,ty] of along){if(!free(tx,ty)||hs(tx,ty,96)>.7)continue;used.add(tx+','+ty);const k=hs(tx,ty,97)<.5?'yar_tub':'yar_lavender';if(IMG[k])scenery.push({k,wx:tx+.5,wy:ty+.5,sc:.8+hs(tx,ty,98)*.35,decor:{k,walk:true,x:tx,y:ty}})}}
   /* ---- finish the level, the rooms behind the doors, and the doors of the gate ---- */
   lv.rows=rows.map(r=>r.join(''));
   const fmap=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmap.push(s)}lv.fmap=fmap;
-  lv.mapNames=[{t:'Castle of King Osric',x:OH.CX,y:24,k:'place'},{t:'The Great Square',x:OH.CX,y:51,k:'place'},{t:"King's Road",x:OH.CX,y:100,k:'lane'},{t:'Portcullis Gate',x:OH.CX,y:141,k:'place'},
-    {t:'Old Town',x:26,y:70,k:'place'},{t:'Tanners Row',x:120,y:110,k:'place'},{t:'Garrison Quarter',x:28,y:104,k:'place'},{t:'Lantern Street',x:36,y:30,k:'lane'},{t:'Smiths Quarter',x:112,y:60,k:'place'}];
+  lv.mapNames=[{t:'Castle of King Osric',x:OH.CX,y:14,k:'place'},{t:'The Castle Ward',x:OH.CX,y:30,k:'place'},{t:'The Great Square',x:OH.CX,y:51,k:'place'},{t:"King's Road",x:OH.CX,y:100,k:'lane'},{t:'Portcullis Gate',x:OH.CX,y:141,k:'place'},
+    {t:'Old Town',x:26,y:70,k:'place'},{t:'Market Square',x:108,y:51,k:'place'},{t:'Fair Green',x:115,y:88,k:'place'},{t:'Chapel Close',x:40,y:66,k:'place'},{t:'East Road',x:134,y:73,k:'lane'},{t:'Garrison Quarter',x:26,y:112,k:'place'},{t:'Lantern Street',x:26,y:25,k:'lane'},{t:'Smiths Quarter',x:122,y:112,k:'place'}];
   for(const h of houses){
     const id=h.id;LEVEL_NAMES[id]=h.name;
     KH_LAZY[id]=()=>{
@@ -15059,6 +15312,7 @@ function ohBuild(){
   }
   OH.houses=houses;
   LEVELS[OH.ID]=lv;LEVEL_NAMES[OH.ID]='Oldhaven';
+  {const hh=new Float32Array(N).fill(.3),rk=new Float32Array(N);TERRS[OH.ID]=yarTerrain(W,H,hh,rk,block)} // flat ground under a real sky
   const q4=LEVELS[304];if(q4)lv.portals[2].x=q4.start.x,lv.portals[2].y=q4.start.y;
 }
 KH_LAZY[OH.ID]=()=>{seaBuild(304);ohBuild()};LEVEL_NAMES[OH.ID]='Oldhaven';
@@ -15248,7 +15502,7 @@ const OQ_PIC={ // key -> [sheet picture, width in cells]  (the height follows th
 };
 function oqAlias(){for(const k in OQ_PIC){const [n,w]=OQ_PIC[k],im=IMG[n];if(im){IMG['oq_'+k]=im;NPC_H['oq_'+k]=w*im.height/im.width}}}
 function oqFloor(){ // smooth pale stone for the quay
-  if(FLOORS.quayStone)return;const im=IMG.kh_oqstone_0;FLOORS.quayStone=im?dsPaintedTex(im):(FLOORS.pale||FLOORS.cobble);
+  if(FLOORS.quayStone)return;const im=IMG.kh_oqstone_0;{const q=im?dsPaintedTex(im):(FLOORS.pale||FLOORS.cobble),d=new Uint8ClampedArray(q.length);for(let i=0;i<q.length;i+=4){d[i]=q[i]*1.2+30;d[i+1]=q[i+1]*1.15+24;d[i+2]=q[i+2]*1.0+10;d[i+3]=255}FLOORS.quayStone=d}
 }
 function oqFace(id,fb){return (typeof KH_KEEPERS!=='undefined'&&KH_KEEPERS[id]&&KH_KEEPERS[id].face)||fb}
 
@@ -15308,13 +15562,13 @@ function quayBuild(){
     else{h[i]=-.2+.03*(tsmooth(x/6,y/6,77)-.5);fm[i]='4';block[i]=1}
   }
   /* ---- the city wall, the castle behind it and the gate between two towers ---- */
-  const WALL=3.4,wPlain=ch(TM.make('plain',0,WALL).gid),wSlit=ch(TM.make('slit',0,WALL).gid),wDark=ch(TM.make('plain',1,WALL).gid);
+  const WALL=3.4,wPlain=ch(TM.make('plain','castle',WALL).gid),wSlit=ch(TM.make('slit','castle',WALL).gid),wDark=ch(TM.make('plain','castle2',WALL).gid);
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){
     if(y<=9||((x<6||x>73)&&y<=SHORE+1)){const face=y===9||x===5||x===74;solid(x,y,face&&(x+y)%4===0?wSlit:(x*7+y*3)%11===0?wDark:wPlain)}
   }
   const GX=OQ.CX,tWh=4.6;
   {const pg=TM.make('gate',0,3.4,'kh_ohgate1_0');T_DOORS.oqportc=pg.tex;const gc=String.fromCharCode(nextCh++);chars[gc]=31;
-    const tp=ch(TM.make('plain',0,tWh).gid),ts=ch(TM.make('slit',0,tWh).gid);
+    const tp=ch(TM.make('plain','castle',tWh).gid),ts=ch(TM.make('slit','castle',tWh).gid);
     for(let y=8;y<=9;y++){for(let x=GX-1;x<=GX+1;x++)solid(x,y,gc);for(const xs of [[GX-5,GX-2],[GX+2,GX+5]])for(let x=xs[0];x<=xs[1];x++)solid(x,y,y===9&&x%2===0?ts:tp)}
     sky.push({x:GX-3.5,y:9.6,k:'kh_ohtower1_3',w:7,z:tWh-.05,big:1},{x:GX+3.5,y:9.6,k:'kh_ohtower1_3',w:7,z:tWh-.05,big:1});
     sky.push({x:GX-3.5,y:9.6,k:'kh_oqflags_0',w:2.6,z:tWh+7.2,big:1},{x:GX+3.5,y:9.6,k:'kh_oqflags_3',w:2.4,z:tWh+7.2,big:1});
@@ -15326,8 +15580,8 @@ function quayBuild(){
   /* ---- the buildings along the sides: six of them, all different, each with a door that opens ---- */
   OQ_HOUSES.forEach((b,k)=>{
     const w=b.x1-b.x0+1,d=b.y1-b.y0+1,front=(x,y)=>b.face==='E'?x===b.x1:x===b.x0,ym=b.y0+(d>>1);
-    const plain=ch(TM.make('plain',b.pat,b.wh).gid),win=ch(TM.make(b.sp?'shopfront':'window',b.pat,b.wh).gid),side=ch(TM.make('window',b.pat,b.wh).gid);
-    const dtile=TM.make('door',b.pat,b.wh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dtile.tex;
+    const ST=['gold','cream','honey','gold','cream','honey'][k%6];const plain=ch(TM.make('plain',ST,b.wh).gid),win=ch(TM.make(b.sp?'shopfront':'window',ST,b.wh).gid),side=ch(TM.make('window',ST,b.wh).gid);
+    const dtile=TM.make('door',ST,b.wh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dtile.tex;
     b.id=OQ.ROOM0+k;b.door=b.face==='E'?[b.x1,ym]:[b.x0,ym];b.front=b.face==='E'?[b.x1+1,ym]:[b.x0-1,ym];b.out=b.face==='E'?1:3;b.wall=b.face==='E'?[-1,0]:[1,0];
     const st=b.room==='inn'?[6,7]:b.room==='hall'?[5,6]:[5,6];KH_DOOR[dgid]={lvl:b.id,at:{x:st[0],y:st[1],f:0}};
     for(let y=b.y0;y<=b.y1;y++)for(let x=b.x0;x<=b.x1;x++){

@@ -15,7 +15,7 @@ const OQ_PIC={ // key -> [sheet picture, width in cells]  (the height follows th
 };
 function oqAlias(){for(const k in OQ_PIC){const [n,w]=OQ_PIC[k],im=IMG[n];if(im){IMG['oq_'+k]=im;NPC_H['oq_'+k]=w*im.height/im.width}}}
 function oqFloor(){ // smooth pale stone for the quay
-  if(FLOORS.quayStone)return;const im=IMG.kh_oqstone_0;FLOORS.quayStone=im?dsPaintedTex(im):(FLOORS.pale||FLOORS.cobble);
+  if(FLOORS.quayStone)return;const im=IMG.kh_oqstone_0;{const q=im?dsPaintedTex(im):(FLOORS.pale||FLOORS.cobble),d=new Uint8ClampedArray(q.length);for(let i=0;i<q.length;i+=4){d[i]=q[i]*1.2+30;d[i+1]=q[i+1]*1.15+24;d[i+2]=q[i+2]*1.0+10;d[i+3]=255}FLOORS.quayStone=d}
 }
 function oqFace(id,fb){return (typeof KH_KEEPERS!=='undefined'&&KH_KEEPERS[id]&&KH_KEEPERS[id].face)||fb}
 
@@ -75,13 +75,13 @@ function quayBuild(){
     else{h[i]=-.2+.03*(tsmooth(x/6,y/6,77)-.5);fm[i]='4';block[i]=1}
   }
   /* ---- the city wall, the castle behind it and the gate between two towers ---- */
-  const WALL=3.4,wPlain=ch(TM.make('plain',0,WALL).gid),wSlit=ch(TM.make('slit',0,WALL).gid),wDark=ch(TM.make('plain',1,WALL).gid);
+  const WALL=3.4,wPlain=ch(TM.make('plain','castle',WALL).gid),wSlit=ch(TM.make('slit','castle',WALL).gid),wDark=ch(TM.make('plain','castle2',WALL).gid);
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){
     if(y<=9||((x<6||x>73)&&y<=SHORE+1)){const face=y===9||x===5||x===74;solid(x,y,face&&(x+y)%4===0?wSlit:(x*7+y*3)%11===0?wDark:wPlain)}
   }
   const GX=OQ.CX,tWh=4.6;
   {const pg=TM.make('gate',0,3.4,'kh_ohgate1_0');T_DOORS.oqportc=pg.tex;const gc=String.fromCharCode(nextCh++);chars[gc]=31;
-    const tp=ch(TM.make('plain',0,tWh).gid),ts=ch(TM.make('slit',0,tWh).gid);
+    const tp=ch(TM.make('plain','castle',tWh).gid),ts=ch(TM.make('slit','castle',tWh).gid);
     for(let y=8;y<=9;y++){for(let x=GX-1;x<=GX+1;x++)solid(x,y,gc);for(const xs of [[GX-5,GX-2],[GX+2,GX+5]])for(let x=xs[0];x<=xs[1];x++)solid(x,y,y===9&&x%2===0?ts:tp)}
     sky.push({x:GX-3.5,y:9.6,k:'kh_ohtower1_3',w:7,z:tWh-.05,big:1},{x:GX+3.5,y:9.6,k:'kh_ohtower1_3',w:7,z:tWh-.05,big:1});
     sky.push({x:GX-3.5,y:9.6,k:'kh_oqflags_0',w:2.6,z:tWh+7.2,big:1},{x:GX+3.5,y:9.6,k:'kh_oqflags_3',w:2.4,z:tWh+7.2,big:1});
@@ -93,8 +93,8 @@ function quayBuild(){
   /* ---- the buildings along the sides: six of them, all different, each with a door that opens ---- */
   OQ_HOUSES.forEach((b,k)=>{
     const w=b.x1-b.x0+1,d=b.y1-b.y0+1,front=(x,y)=>b.face==='E'?x===b.x1:x===b.x0,ym=b.y0+(d>>1);
-    const plain=ch(TM.make('plain',b.pat,b.wh).gid),win=ch(TM.make(b.sp?'shopfront':'window',b.pat,b.wh).gid),side=ch(TM.make('window',b.pat,b.wh).gid);
-    const dtile=TM.make('door',b.pat,b.wh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dtile.tex;
+    const ST=['gold','cream','honey','gold','cream','honey'][k%6];const plain=ch(TM.make('plain',ST,b.wh).gid),win=ch(TM.make(b.sp?'shopfront':'window',ST,b.wh).gid),side=ch(TM.make('window',ST,b.wh).gid);
+    const dtile=TM.make('door',ST,b.wh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dtile.tex;
     b.id=OQ.ROOM0+k;b.door=b.face==='E'?[b.x1,ym]:[b.x0,ym];b.front=b.face==='E'?[b.x1+1,ym]:[b.x0-1,ym];b.out=b.face==='E'?1:3;b.wall=b.face==='E'?[-1,0]:[1,0];
     const st=b.room==='inn'?[6,7]:b.room==='hall'?[5,6]:[5,6];KH_DOOR[dgid]={lvl:b.id,at:{x:st[0],y:st[1],f:0}};
     for(let y=b.y0;y<=b.y1;y++)for(let x=b.x0;x<=b.x1;x++){
