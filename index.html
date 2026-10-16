@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.189';
+const VERSION='3.190';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -12650,15 +12650,15 @@ function petDismiss(id){const L=petsData(),i=L.findIndex(p=>p.id===id);if(i>=0){
 function petsTick(){
   if(!petsData().length||G.state!=='play'||G.cut||G.talk||G.menu)return;
   const F=G.flags,pets=petsData();F.petT=(F.petT||0)+1;
-  const has=id=>pets.find(p=>p.id===id),day=dayNum();
-  if(F.petT%45===0){const p=pets[(Math.random()*pets.length)|0],L=PETS[p.id].lines;msg(L[(Math.random()*L.length)|0].replace('{n}',p.name+' the '+PETS[p.id].n.toLowerCase()),'#d8d0a0')}
+  const has=id=>pets.find(p=>p.id===id),day=dayNum(),quiet=LEVEL>=400&&LEVEL<440; // on the Land Path and at the monastery the animals say nothing
+  if(!quiet&&F.petT%45===0){const p=pets[(Math.random()*pets.length)|0],L=PETS[p.id].lines;msg(L[(Math.random()*L.length)|0].replace('{n}',p.name+' the '+PETS[p.id].n.toLowerCase()),'#d8d0a0')}
   // the first time each day: rumours from the parrot, scraps from the rat, a forecast from the frog
-  if(F.petDay!==day){F.petDay=day;
+  if(!quiet&&F.petDay!==day){F.petDay=day;
     const pa=has('parrot');if(pa){msg(`${pa.name} the parrot squawks: "${rumourFor('town').replace('They say: ','')}"`,'#e8d890')}
     const ra=has('rat');if(ra&&Math.random()<.5){if(Math.random()<.5){const g=rnd(3,12);G.gold+=g;msg(`${ra.name} the rat drops ${g} gold at your feet, very pleased with itself.`,'#ffe9a0')}else if(bagAdd(mkItem('bread')))msg(`${ra.name} the rat has found a loaf of bread. Nobody asks where.`,'#e8d890')}
   }
   const fr=has('frog'),blk=Math.floor(G.clock/480);
-  if(fr&&F.frogB!==blk&&wxRegionOf(LEVEL)){F.frogB=blk;const w=weatherAhead(1);if(w&&w.id!=='clear')msg(`${fr.name} the frog croaks and stares at the sky. ${w.n} is on its way.`,'#a8d0e8')}
+  if(!quiet&&fr&&F.frogB!==blk&&wxRegionOf(LEVEL)){F.frogB=blk;const w=weatherAhead(1);if(w&&w.id!=='clear')msg(`${fr.name} the frog croaks and stares at the sky. ${w.n} is on its way.`,'#a8d0e8')}
   // the parrot's warning
   const pa2=has('parrot');
   if(pa2&&LEVEL===44&&!afflHas('masked')&&G.rounds-(F.parrotW||-99)>40){
@@ -12677,7 +12677,7 @@ function petEnter(n){
   const goat=pets.find(p=>p.id==='goat'),dog=pets.find(p=>p.id==='dog'),bird=pets.find(p=>p.id==='bird');
   const nose=goat||dog;
   if(nose&&typeof KH_GOLD!=='undefined'&&KH_GOLD[n]&&!G.flags['kg'+n])later(500,()=>msg(`${nose.name} the ${PETS[nose.id].n.toLowerCase()} ${nose.id==='goat'?'paws at a corner of the room and bleats at a loose stone':'sniffs the floor and whines at a corner'}. There is something here.`,'#ffe9a0'));
-  if(bird&&Math.random()<.12&&LEVELS[n]&&LEVELS[n].outdoor){const g=rnd(3,12);later(600,()=>{G.gold+=g;msg(`${bird.name} the songbird drops a shiny coin at your feet. ${g} gold.`,'#ffe9a0')})}
+  if(bird&&!(n>=400&&n<440)&&Math.random()<.12&&LEVELS[n]&&LEVELS[n].outdoor){const g=rnd(3,12);later(600,()=>{G.gold+=g;msg(`${bird.name} the songbird drops a shiny coin at your feet. ${g} gold.`,'#ffe9a0')})}
 }
 /* the duck adds to a forage */
 function petForage(){
@@ -16431,7 +16431,7 @@ function lpBuild(s){
       }
     }
   }
-  if(coast){const hz=ch(lpHaze());for(let y=0;y<H;y++)setC(0,y,hz)} // the sea's far edge fades into the horizon
+  {const hz=ch(lpHaze());for(let y=0;y<H;y++){setC(0,y,hz);setC(W-1,y,hz)}for(let x=0;x<W;x++){setC(x,0,hz);setC(x,H-1,hz)}} // every edge of the map is a low wall the colour of the horizon, so that none of them ever shows as a great wall
   if(s===LPM.SEG){ // the gate of Saint Elen's Monastery, cut into the rock of the pass: a lane through the cliff and an arched door at the end of it
     const md=lpMonDoor(),Y=md.y,c0=md.c;
     for(let x=c0+2;x<md.x;x++)for(let y=Y-1;y<=Y+1;y++){rows[y][MX(x)]='.';block[I(x,y)]=0;fm[I(x,y)]='1'}

@@ -162,7 +162,7 @@ function lpBuild(s){
       }
     }
   }
-  if(coast){const hz=ch(lpHaze());for(let y=0;y<H;y++)setC(0,y,hz)} // the sea's far edge fades into the horizon
+  {const hz=ch(lpHaze());for(let y=0;y<H;y++){setC(0,y,hz);setC(W-1,y,hz)}for(let x=0;x<W;x++){setC(x,0,hz);setC(x,H-1,hz)}} // every edge of the map is a low wall the colour of the horizon, so that none of them ever shows as a great wall
   if(s===LPM.SEG){ // the gate of Saint Elen's Monastery, cut into the rock of the pass: a lane through the cliff and an arched door at the end of it
     const md=lpMonDoor(),Y=md.y,c0=md.c;
     for(let x=c0+2;x<md.x;x++)for(let y=Y-1;y<=Y+1;y++){rows[y][MX(x)]='.';block[I(x,y)]=0;fm[I(x,y)]='1'}
