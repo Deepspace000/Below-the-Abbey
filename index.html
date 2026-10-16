@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.197';
+const VERSION='3.198';
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
 const DW=480, DH=320;
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
@@ -245,7 +245,7 @@ function exitTex(baseD){
 // a living flame: swaying, ragged tongues, white-hot core fading to red, redrawn for every frame
 const FLAME_FRAMES=8,flameMemo={};
 function flameRamp(I,red){
-  const st=red?[[0,[96,8,6]],[.25,[200,26,14]],[.5,[255,96,70]],[.8,[255,200,170]],[1,[255,240,230]]]
+  const st=red===2?[[0,[40,10,90]],[.25,[110,30,190]],[.5,[170,90,255]],[.8,[220,180,255]],[1,[246,236,255]]]:red?[[0,[96,8,6]],[.25,[200,26,14]],[.5,[255,96,70]],[.8,[255,200,170]],[1,[255,240,230]]]
               :[[0,[170,30,8]],[.25,[240,84,14]],[.5,[255,150,30]],[.8,[255,214,96]],[1,[255,250,214]]];
   for(let i=1;i<st.length;i++)if(I<=st[i][0]){const t=(I-st[i-1][0])/(st[i][0]-st[i-1][0]),p=st[i-1][1],q=st[i][1];return [p[0]+(q[0]-p[0])*t,p[1]+(q[1]-p[1])*t,p[2]+(q[2]-p[2])*t]}
   return st[st.length-1][1];
@@ -274,7 +274,7 @@ function flameEmissive(f,red){
 let FLAMES=[],GLOWS=[];
 const TORCH_OUT=.14,TORCH_RISE=.5,TORCH_ZA=-.2; // how far a wall torch stands out from the wall, and how much higher its head is than where it is fixed, in cells
 function makeFlames(){
-  for(const red of [false,true]){
+  for(const red of [false,true,2]){ // orange, red and (in the Hollow Land) purple
     for(let f=0;f<FLAME_FRAMES;f++){
       const c=document.createElement('canvas');c.width=64;c.height=96;
       const x=c.getContext('2d'),id=x.createImageData(64,96),D=id.data,seed=red?91:47,ph=hash2(f,3,seed)*6;
@@ -291,7 +291,7 @@ function makeFlames(){
       x.putImageData(id,0,0);FLAMES.push(c);
     }
     const gc=document.createElement('canvas');gc.width=gc.height=64;const gx=gc.getContext('2d'),gg=gx.createRadialGradient(32,32,2,32,32,32);
-    gg.addColorStop(0,red?'rgba(255,70,40,.8)':'rgba(255,170,60,.75)');gg.addColorStop(.5,red?'rgba(200,30,15,.3)':'rgba(230,110,30,.28)');gg.addColorStop(1,'rgba(0,0,0,0)');
+    gg.addColorStop(0,red===2?'rgba(170,80,255,.8)':red?'rgba(255,70,40,.8)':'rgba(255,170,60,.75)');gg.addColorStop(.5,red===2?'rgba(110,30,200,.3)':red?'rgba(200,30,15,.3)':'rgba(230,110,30,.28)');gg.addColorStop(1,'rgba(0,0,0,0)');
     gx.fillStyle=gg;gx.fillRect(0,0,64,64);GLOWS.push(gc);
   }
 }
@@ -2497,7 +2497,7 @@ function render3D(){
   const hzr=(SK?hzr0.map((v,i)=>stm(v*SK.k[i],stormC[i])):hzr0).slice(),hzc=SK?hzc0.map((v,i)=>stm(v*SK.k[i],stormC[i]*.92)):hzc0;
   let hzmax=SK?stm(hzmax0,.97):hzmax0,hzrate=SK?hzrate0+.16*ST:hzrate0;if(uwL){hzmax=.68;hzrate=.042}
   {const WXN=typeof weatherNow==='function'?weatherNow():null;if(WXN&&WXN.fog){hzrate+=WXN.fog;hzmax=Math.max(hzmax,WXN.haze);for(let i=0;i<3;i++)hzr[i]+=(WXN.col[i]-hzr[i])*WXN.mix}} // rain, fog, snow and heat thicken the air
-  const tbR=uwL?.84:SK?SK.g[0]:1,tbG=uwL?1:SK?SK.g[1]*.94:.94,tbB=uwL?1.12:SK?SK.g[2]*.84:.84, ttR=1.3,ttG=.88,ttB=.5;
+  const tbR=uwL?.84:SK?SK.g[0]:1,tbG=uwL?1:SK?SK.g[1]*.94:.94,tbB=uwL?1.12:SK?SK.g[2]*.84:.84, ttR=(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?.85:1.3,ttG=(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?.28:.88,ttB=(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?1.5:.5; // in the Hollow Land the warm lights glow purple
   const ovcLv=LEVEL===2||LEVEL===3||LEVEL===7||LEVEL===10||LEVEL===19||LEVEL===20,SKP=uwL?uwPan():ovcLv&&SKYOVC?SKYOVC:SKYPAN; // the early open areas sit under a heavy moving overcast
   const skyPan=(skyLv||ovcLv||desertLv||LEVEL===3||LEVEL===13||LEVEL===32||LEVEL===33)&&SKP?(()=>{for(let x=0;x<VW;x++){const cm=2*x/VW-1;UCOL[x]=((((Math.atan2(dY+pY*cm,dX+pX*cm)/TAU)%1)+1)%1*1024+t*(ovcLv?11:7))%1024|0}return true})():false; // the sky is one panorama on walls and ceiling alike
   const fmp=G.fmap,fd2=G.fl2,fd3=G.fl3,fd4=G.fl4,fd5=G.fl5,fd6=G.fl6,lmp=G.lmap,lmN=lmp?clamp(1.2-(G.day||0)*1.35,0,1)*.95:0;
@@ -2639,7 +2639,7 @@ function render3D(){
   vctx.save();vctx.globalCompositeOperation='lighter';
   for(const h of G.hits){
     if(h.type!=='torch'||h.ty<.4)continue;
-    const L=h.L,w=.42*F/h.ty,hh=w*1.5,base=HH-(CEILH*.5+TORCH_ZA+TORCH_RISE-EYE)*F/h.ty,fi=(Math.floor(t*10)+((L.key*7)&7))&7,ri=L.red?1:0;
+    const L=h.L,w=.42*F/h.ty,hh=w*1.5,base=HH-(CEILH*.5+TORCH_ZA+TORCH_RISE-EYE)*F/h.ty,fi=(Math.floor(t*10)+((L.key*7)&7))&7,ri=L.red?1:((LEVEL===364||(LEVEL>=440&&LEVEL<=460))?2:0);
     vctx.globalAlpha=.5+.12*Math.sin(t*13+L.ph);vctx.drawImage(GLOWS[ri],h.sx-w*1.7,base-hh*.4-w*1.7,w*3.4,w*3.4);
     vctx.globalAlpha=1;vctx.drawImage(FLAMES[ri*8+fi],h.sx-w/2,base-hh*.94,w,hh);
   }
@@ -3017,11 +3017,11 @@ function setupLights(){
   const out=[];
   for(const c of cands){const gap=zoneAt(c[3],c[4])[4];if(!out.some(t=>Math.hypot(t[0]-c[0],t[1]-c[1])<gap))out.push(c)}
   for(const [x,y,f,nx,ny] of out){
-    const d=DIRS[f],key=(y*MW+x)*4+f,red=!!zoneAt(nx,ny)[5];
+    const d=DIRS[f],key=(y*MW+x)*4+f,red=(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?hash2(x,y,31)<.5:!!zoneAt(nx,ny)[5]; // the wall torches of the Hollow Land burn red or purple
     torchAt.set(key,red?2:1);
     LIGHTS.push({x:x+.5+d[0]*(.5+TORCH_OUT),y:y+.5+d[1]*(.5+TORCH_OUT),ph:hash2(x,y,5)*6.28,key,taken:false,red});
   }
-  if(G.extraLights)for(const [x,y] of G.extraLights)LIGHTS.push({x:x+.5,y:y+.5,ph:hash2(x,y,9)*6.28,key:-1-LIGHTS.length,taken:false,red:false,free:true});
+  if(G.extraLights)for(const [x,y,rd] of G.extraLights)LIGHTS.push({x:x+.5,y:y+.5,ph:hash2(x,y,9)*6.28,key:-1-LIGHTS.length,taken:false,red:!!rd,free:true});
 }
 function setLightLevel(l){
   RANGE=(5.2+2.6*l)*((G.day||0)>0?1.2:1);const amp=.66+.3*l;
@@ -16929,10 +16929,11 @@ MON_BLD.forEach(b=>{const stub=()=>{monBuild();if(!LEVELS[b.rid]&&KH_LAZY[b.rid]
    Levels: 364 the ledge and the way down, 440 to 459 the orange tower (levels 1 to 20), 460 the foot of the violet tower.
    ========================================================================== */
 const HL={CAV:364,BASE:440,N:20,VIOLET:460};
+for(const n of ['hl_goblin','hl_goblinA','hl_slime','hl_slimeA','hl_orc','hl_orcA'])loadImg(n,'assets/'+n+'.png'); // the new creatures, painted
 loadImg('hl_castle_art','assets/hl_castle.png'); // the great orange castle: ornate and gothic, with gargoyles and walkways jutting from its towers
-ENEMY_DEF.hlgoblin={name:'Armoured Goblin',hp:120,dmg:[10,17],hit:.74,w:.46,img:'hl_goblin',xp:420,gold:[12,45],speed:1,aboveParty:1};
-ENEMY_DEF.hlslime={name:'Cave Slime',hp:180,dmg:[7,13],hit:.7,w:.6,img:'hl_slime',xp:380,gold:[0,10],speed:1,aboveParty:0};
-ENEMY_DEF.hlorc={name:'Orc',hp:320,dmg:[17,28],hit:.78,w:.74,img:'hl_orc',xp:900,gold:[40,110],speed:1,aboveParty:2};
+ENEMY_DEF.hlgoblin={name:'Armoured Goblin',hp:120,dmg:[10,17],hit:.74,w:.5,img:'hl_goblin',xp:420,gold:[12,45],speed:1,aboveParty:1};
+ENEMY_DEF.hlslime={name:'Cave Slime',hp:180,dmg:[7,13],hit:.7,w:.78,img:'hl_slime',xp:380,gold:[0,10],speed:1,aboveParty:0};
+ENEMY_DEF.hlorc={name:'Orc Brute',hp:320,dmg:[17,28],hit:.78,w:.7,img:'hl_orc',xp:900,gold:[40,110],speed:1,aboveParty:2};
 LEVEL_NAMES[HL.CAV]='The Hollow Land';
 for(let k=0;k<HL.N;k++)LEVEL_NAMES[HL.BASE+k]='The Orange Tower, level '+(k+1);
 LEVEL_NAMES[HL.VIOLET]='The Foot of the Violet Tower';
@@ -16941,11 +16942,10 @@ function hlTint(src,r,g,b,a,name){ // a copy of a picture washed with a colour, 
   if(IMG[name])return IMG[name];const im=IMG[src];if(!im)return null;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');
   x.drawImage(im,0,0);x.globalCompositeOperation='source-atop';x.fillStyle='rgba('+r+','+g+','+b+','+a+')';x.fillRect(0,0,c.width,c.height);return IMG[name]=c}
 function hlArt(){
-  if(IMG.hl_orc)return;
-  hlTint('bandit',90,170,60,.52,'hl_goblin');hlTint('skel',70,150,70,.45,'hl_goblin_sk');
-  hlTint('cyclops',70,150,60,.5,'hl_orc');NPC_H.hl_orc=1.1;
+  if(IMG.hl_castle)return;
+  if(!IMG.hl_orc){hlTint('bandit',90,170,60,.52,'hl_goblin');hlTint('cyclops',70,150,60,.5,'hl_orc')} // (stand-ins, only if the painted creatures are not loaded)
   // a slime: a green heap with eyes, drawn in code since no painted one exists yet
-  {const c=document.createElement('canvas');c.width=200;c.height=170;const x=c.getContext('2d');
+  if(!IMG.hl_slime){const c=document.createElement('canvas');c.width=200;c.height=170;const x=c.getContext('2d');
    const g=x.createRadialGradient(100,100,10,100,100,95);g.addColorStop(0,'rgba(150,240,110,.95)');g.addColorStop(1,'rgba(40,130,60,.9)');x.fillStyle=g;
    x.beginPath();x.moveTo(8,160);x.bezierCurveTo(0,90,50,30,100,26);x.bezierCurveTo(150,30,200,90,192,160);x.bezierCurveTo(160,170,40,170,8,160);x.fill();
    x.fillStyle='rgba(255,255,255,.35)';x.beginPath();x.ellipse(70,70,22,12,-.5,0,TAU);x.fill();
@@ -17069,9 +17069,9 @@ function hlBuild(k){
   if(top){const [fx,fy]=mid(far),kp=KH_KEEPERS.hl_wizard;if(kp){decor.push({k:khFaceKey(kp.face),x:fx,y:fy,block:true,npc:'hl_wizard',sc:kp.sc||1});used.add(fx+','+fy)}}
   if(violet){const kp=KH_KEEPERS.hl_violet;decor.push({k:khFaceKey(kp.face),x:mx,y:my+1,block:true,npc:'hl_violet',sc:1})}
   // torches, red and purple, lighting the way: in the rooms and along the passages
-  const torch=(x,y,c)=>{const key=c?'hl_torch_p':'hl_torch_r';if(!IMG[key]||used.has(x+','+y))return;used.add(x+','+y);decor.push({k:key,x,y,block:false,walk:true,deco:true});lights.push([x,y])};
-  rooms.forEach((r,i)=>{torch(r.x0,r.y0,i%2);torch(r.x1,r.y0,(i+1)%2);if(r.x1-r.x0>4){torch(r.x0,r.y1,(i+1)%2);torch(r.x1,r.y1,i%2)}});
-  let n=0;for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(g[y][x]==='.'&&!pathCell.has(x+','+y)&&(x*3+y*5+k)%11===0&&(g[y-1][x]==='#'||g[y][x-1]==='#'))torch(x,y,(n++)%2);
+  // lanterns stand only in the open: the corners of the broad rooms, never in a one-block passage. They are plain iron lanterns, and the LIGHT they give glows red or purple (the wall torches in the passages burn red or purple too)
+  const torch=(x,y,c)=>{if(!IMG.lamp||used.has(x+','+y)||pathCell.has(x+','+y))return;used.add(x+','+y);decor.push({k:'lamp',x,y,block:false,walk:true,deco:true});lights.push([x,y,c?1:0])};
+  rooms.forEach((r,i)=>{if(r.x1-r.x0<3||r.y1-r.y0<3)return;torch(r.x0,r.y0,i%2);torch(r.x1,r.y0,(i+1)%2);if(r.x1-r.x0>4&&r.y1-r.y0>3){torch(r.x0,r.y1,(i+1)%2);torch(r.x1,r.y1,i%2)}});
   // the number of the level, on the stone wall beside the stair
   if(!violet){decor.push({k:hlNumKey(k+1),x:(r0.x0+r0.x1)>>1,y:r0.y0,block:false,walk:true,deco:true,sc:1});decor.push({k:hlNumKey(k+1),x:r0.x0,y:r0.y1,block:false,walk:true,deco:true,sc:1})}
   // the strange figures, on a few levels
@@ -17110,7 +17110,7 @@ function hlCavern(){
   OH_STY.hlorange=Object.assign({},OH_STY.castle2||OH_STY.gold,{zoom:2.2,contrast:2.2,tint:[255,170,95,.0]});const gt=TM.make('door','hlorange',3.2);T_DOORS.hlgate=gt.tex;const gc=String.fromCharCode(nextCh++);chars[gc]=31;const fl=ch(TM.make('plain','hlorange',3.2).gid);
   for(const x of [34,36]){rows[9][x]=fl;block[9*W+x]=1}rows[9][35]=gc;block[9*W+35]=1
   // lights: purple and red torches lining the stairs and the ledge
-  const torch=(x,y,c)=>{const key=c?'hl_torch_p':'hl_torch_r';if(!IMG[key]||used.has(x+','+y))return;used.add(x+','+y);decor.push({k:key,x,y,block:false,walk:true,deco:true});lights.push([x,y])};
+  const torch=(x,y,c)=>{if(!IMG.lamp||used.has(x+','+y))return;used.add(x+','+y);decor.push({k:'lamp',x,y,block:false,walk:true,deco:true});lights.push([x,y,c?1:0])};
   for(let y=6;y<=60;y+=3){torch(31,y,(y/3|0)%2);torch(39,y,(y/3|0)%2?0:1)}
   for(let x=10;x<=60;x+=6)torch(x,54,x/6%2);
   // the castle: a great orange castle at the foot of the stairs, with towers, behind the gate wall, and torches of two colours along its foot

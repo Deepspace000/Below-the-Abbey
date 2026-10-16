@@ -6,10 +6,11 @@
    Levels: 364 the ledge and the way down, 440 to 459 the orange tower (levels 1 to 20), 460 the foot of the violet tower.
    ========================================================================== */
 const HL={CAV:364,BASE:440,N:20,VIOLET:460};
+for(const n of ['hl_goblin','hl_goblinA','hl_slime','hl_slimeA','hl_orc','hl_orcA'])loadImg(n,'assets/'+n+'.png'); // the new creatures, painted
 loadImg('hl_castle_art','assets/hl_castle.png'); // the great orange castle: ornate and gothic, with gargoyles and walkways jutting from its towers
-ENEMY_DEF.hlgoblin={name:'Armoured Goblin',hp:120,dmg:[10,17],hit:.74,w:.46,img:'hl_goblin',xp:420,gold:[12,45],speed:1,aboveParty:1};
-ENEMY_DEF.hlslime={name:'Cave Slime',hp:180,dmg:[7,13],hit:.7,w:.6,img:'hl_slime',xp:380,gold:[0,10],speed:1,aboveParty:0};
-ENEMY_DEF.hlorc={name:'Orc',hp:320,dmg:[17,28],hit:.78,w:.74,img:'hl_orc',xp:900,gold:[40,110],speed:1,aboveParty:2};
+ENEMY_DEF.hlgoblin={name:'Armoured Goblin',hp:120,dmg:[10,17],hit:.74,w:.5,img:'hl_goblin',xp:420,gold:[12,45],speed:1,aboveParty:1};
+ENEMY_DEF.hlslime={name:'Cave Slime',hp:180,dmg:[7,13],hit:.7,w:.78,img:'hl_slime',xp:380,gold:[0,10],speed:1,aboveParty:0};
+ENEMY_DEF.hlorc={name:'Orc Brute',hp:320,dmg:[17,28],hit:.78,w:.7,img:'hl_orc',xp:900,gold:[40,110],speed:1,aboveParty:2};
 LEVEL_NAMES[HL.CAV]='The Hollow Land';
 for(let k=0;k<HL.N;k++)LEVEL_NAMES[HL.BASE+k]='The Orange Tower, level '+(k+1);
 LEVEL_NAMES[HL.VIOLET]='The Foot of the Violet Tower';
@@ -18,11 +19,10 @@ function hlTint(src,r,g,b,a,name){ // a copy of a picture washed with a colour, 
   if(IMG[name])return IMG[name];const im=IMG[src];if(!im)return null;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');
   x.drawImage(im,0,0);x.globalCompositeOperation='source-atop';x.fillStyle='rgba('+r+','+g+','+b+','+a+')';x.fillRect(0,0,c.width,c.height);return IMG[name]=c}
 function hlArt(){
-  if(IMG.hl_orc)return;
-  hlTint('bandit',90,170,60,.52,'hl_goblin');hlTint('skel',70,150,70,.45,'hl_goblin_sk');
-  hlTint('cyclops',70,150,60,.5,'hl_orc');NPC_H.hl_orc=1.1;
+  if(IMG.hl_castle)return;
+  if(!IMG.hl_orc){hlTint('bandit',90,170,60,.52,'hl_goblin');hlTint('cyclops',70,150,60,.5,'hl_orc')} // (stand-ins, only if the painted creatures are not loaded)
   // a slime: a green heap with eyes, drawn in code since no painted one exists yet
-  {const c=document.createElement('canvas');c.width=200;c.height=170;const x=c.getContext('2d');
+  if(!IMG.hl_slime){const c=document.createElement('canvas');c.width=200;c.height=170;const x=c.getContext('2d');
    const g=x.createRadialGradient(100,100,10,100,100,95);g.addColorStop(0,'rgba(150,240,110,.95)');g.addColorStop(1,'rgba(40,130,60,.9)');x.fillStyle=g;
    x.beginPath();x.moveTo(8,160);x.bezierCurveTo(0,90,50,30,100,26);x.bezierCurveTo(150,30,200,90,192,160);x.bezierCurveTo(160,170,40,170,8,160);x.fill();
    x.fillStyle='rgba(255,255,255,.35)';x.beginPath();x.ellipse(70,70,22,12,-.5,0,TAU);x.fill();
@@ -146,9 +146,9 @@ function hlBuild(k){
   if(top){const [fx,fy]=mid(far),kp=KH_KEEPERS.hl_wizard;if(kp){decor.push({k:khFaceKey(kp.face),x:fx,y:fy,block:true,npc:'hl_wizard',sc:kp.sc||1});used.add(fx+','+fy)}}
   if(violet){const kp=KH_KEEPERS.hl_violet;decor.push({k:khFaceKey(kp.face),x:mx,y:my+1,block:true,npc:'hl_violet',sc:1})}
   // torches, red and purple, lighting the way: in the rooms and along the passages
-  const torch=(x,y,c)=>{const key=c?'hl_torch_p':'hl_torch_r';if(!IMG[key]||used.has(x+','+y))return;used.add(x+','+y);decor.push({k:key,x,y,block:false,walk:true,deco:true});lights.push([x,y])};
-  rooms.forEach((r,i)=>{torch(r.x0,r.y0,i%2);torch(r.x1,r.y0,(i+1)%2);if(r.x1-r.x0>4){torch(r.x0,r.y1,(i+1)%2);torch(r.x1,r.y1,i%2)}});
-  let n=0;for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(g[y][x]==='.'&&!pathCell.has(x+','+y)&&(x*3+y*5+k)%11===0&&(g[y-1][x]==='#'||g[y][x-1]==='#'))torch(x,y,(n++)%2);
+  // lanterns stand only in the open: the corners of the broad rooms, never in a one-block passage. They are plain iron lanterns, and the LIGHT they give glows red or purple (the wall torches in the passages burn red or purple too)
+  const torch=(x,y,c)=>{if(!IMG.lamp||used.has(x+','+y)||pathCell.has(x+','+y))return;used.add(x+','+y);decor.push({k:'lamp',x,y,block:false,walk:true,deco:true});lights.push([x,y,c?1:0])};
+  rooms.forEach((r,i)=>{if(r.x1-r.x0<3||r.y1-r.y0<3)return;torch(r.x0,r.y0,i%2);torch(r.x1,r.y0,(i+1)%2);if(r.x1-r.x0>4&&r.y1-r.y0>3){torch(r.x0,r.y1,(i+1)%2);torch(r.x1,r.y1,i%2)}});
   // the number of the level, on the stone wall beside the stair
   if(!violet){decor.push({k:hlNumKey(k+1),x:(r0.x0+r0.x1)>>1,y:r0.y0,block:false,walk:true,deco:true,sc:1});decor.push({k:hlNumKey(k+1),x:r0.x0,y:r0.y1,block:false,walk:true,deco:true,sc:1})}
   // the strange figures, on a few levels
@@ -187,7 +187,7 @@ function hlCavern(){
   OH_STY.hlorange=Object.assign({},OH_STY.castle2||OH_STY.gold,{zoom:2.2,contrast:2.2,tint:[255,170,95,.0]});const gt=TM.make('door','hlorange',3.2);T_DOORS.hlgate=gt.tex;const gc=String.fromCharCode(nextCh++);chars[gc]=31;const fl=ch(TM.make('plain','hlorange',3.2).gid);
   for(const x of [34,36]){rows[9][x]=fl;block[9*W+x]=1}rows[9][35]=gc;block[9*W+35]=1
   // lights: purple and red torches lining the stairs and the ledge
-  const torch=(x,y,c)=>{const key=c?'hl_torch_p':'hl_torch_r';if(!IMG[key]||used.has(x+','+y))return;used.add(x+','+y);decor.push({k:key,x,y,block:false,walk:true,deco:true});lights.push([x,y])};
+  const torch=(x,y,c)=>{if(!IMG.lamp||used.has(x+','+y))return;used.add(x+','+y);decor.push({k:'lamp',x,y,block:false,walk:true,deco:true});lights.push([x,y,c?1:0])};
   for(let y=6;y<=60;y+=3){torch(31,y,(y/3|0)%2);torch(39,y,(y/3|0)%2?0:1)}
   for(let x=10;x<=60;x+=6)torch(x,54,x/6%2);
   // the castle: a great orange castle at the foot of the stairs, with towers, behind the gate wall, and torches of two colours along its foot
