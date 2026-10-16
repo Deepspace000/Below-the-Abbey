@@ -51,6 +51,10 @@ fetch('pack.json').then(function(r){return r.json()}).then(function(P){var bl=[]
 html = open(os.path.join(ROOT, 'index.html'), encoding='utf-8', newline='').read()
 i = html.index('<head>') + len('<head>')
 html = html[:i] + SHIM + html[i:]
+# the itch.io build has no "Go to area" button on the title screen (the debug jump stays on the Pages build)
+GO = "items.push(['tgoto','Go to area']);"
+assert GO in html
+html = html.replace(GO, '')
 open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8', newline='').write(html)
 n = 0
 z = zipfile.ZipFile(os.path.join(ROOT, 'itch-build.zip'), 'w', zipfile.ZIP_STORED)
