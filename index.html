@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.268';
+const VERSION='3.269';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -3625,6 +3625,7 @@ function startGame(){
   backupAuto();const C=G.cr;setParty(C.party);
   try{localStorage.setItem('abbeyParty',JSON.stringify(C.party))}catch(e){}
   reset();G.state='play';audioInit();
+  G.flags.autoScaleOn=C.scale?1:0; // the choice made with the party: a fixed world, or one that scales
   msg('You wake in the crypts below the abbey. Something is scratching in the dark...');
 }
 function drawCover(img,x,y,w,h){
@@ -3755,18 +3756,29 @@ function drawCreate(){
   // illuminated corners on the main frames
   illum(4,4,308,150,11);illum(318,160,160,96,4);illum(4,158,308,98,21);
   if(C.choose){ // the first thing a new game asks: use the ready-made party, or make your own
-    BTNS=[];ctx.fillStyle='rgba(4,3,2,.92)';ctx.fillRect(0,0,DW,DH);inset(30,16,420,288);
-    txt('Choose your party',240,38,19,'#e8d8a0','center',true);
-    DEFAULT_PARTY.forEach((p,i)=>{const x=52+i*96,y=56;ctx.fillStyle='rgba(10,8,6,.9)';ctx.fillRect(x,y,76,86);ctx.save();ctx.beginPath();ctx.rect(x,y,76,86);ctx.clip();drawCover(IMG['pt'+p.app],x,y,76,86);ctx.restore();ctx.lineWidth=1.6;ctx.strokeStyle=goldG(x,y,76,86);roughStrokeRect(x,y,76,86);
-      txt(p.name,x+38,y+99,11,'#f0e4b4','center',true);txt(CLASSES[p.cls].name,x+38,y+112,9,'#cdbf94','center')});
-    txt('A warrior, a thief, a mage and a priest, ready to go.',240,186,9,'#cdbf94','center');
-    panel(46,204,124,64,false,false);txt('Ready-made',108,226,13,'#e0b848','center',true);txt('Start at once',108,244,9,'#a89878','center');btn('cr_pick_def',46,204,124,64);
-    panel(178,204,124,64,false,false);txt('Random party',240,226,13,'#e0b848','center',true);txt('Look, then start',240,244,9,'#a89878','center');btn('cr_pick_rand',178,204,124,64);
-    panel(310,204,124,64,false,false);txt('Make my own',372,226,13,'#c8a040','center',true);txt('Faces, names, classes',372,244,9,'#a89878','center');btn('cr_pick_own',310,204,124,64);
+    BTNS=[];ctx.fillStyle='rgba(4,3,2,.92)';ctx.fillRect(0,0,DW,DH);inset(30,10,420,296);
+    txt('Choose your party',240,28,17,'#e8d8a0','center',true);
+    DEFAULT_PARTY.forEach((p,i)=>{const x=52+i*96,y=42,w=76,h=64;ctx.fillStyle='rgba(10,8,6,.9)';ctx.fillRect(x,y,w,h);ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();drawCover(IMG['pt'+p.app],x,y,w,h);ctx.restore();ctx.lineWidth=1.6;ctx.strokeStyle=goldG(x,y,w,h);roughStrokeRect(x,y,w,h);
+      txt(p.name,x+38,y+h+10,10,'#f0e4b4','center',true);txt(CLASSES[p.cls].name,x+38,y+h+21,8.5,'#cdbf94','center')});
+    txt('A warrior, a thief, a mage and a priest, ready to go.',240,141,8.5,'#cdbf94','center');
+    panel(46,150,124,46,false,false);txt('Ready-made',108,166,12,'#e0b848','center',true);txt('Start at once',108,181,8.5,'#a89878','center');btn('cr_pick_def',46,150,124,46);
+    panel(178,150,124,46,false,false);txt('Random party',240,166,12,'#e0b848','center',true);txt('Look, then start',240,181,8.5,'#a89878','center');btn('cr_pick_rand',178,150,124,46);
+    panel(310,150,124,46,false,false);txt('Make my own',372,166,12,'#c8a040','center',true);txt('Faces, names, classes',372,181,8.5,'#a89878','center');btn('cr_pick_own',310,150,124,46);
+    // how the world levels: fixed places, or creatures that grow with the party
+    txt('How should the world level?',240,210,12,'#e8d8a0','center',true);
+    for(const [i,t,l] of [[0,'Traditional',['Every place has its own level.','Sometimes you must come back','later, stronger, for a challenge.']],[1,'Scaled',['Creatures grow with your party.','A smoother, slightly easier','game, for the casual player.']]]){
+      const x=46+i*196,y=218,w=192,h=62,on=!!C.scale===!!i;
+      ctx.fillStyle=on?'rgba(70,52,18,.9)':'rgba(22,19,16,.85)';rrect(ctx,x,y,w,h,4);ctx.fill();ctx.lineWidth=on?2.4:1.2;ctx.strokeStyle=on?'#ffe36a':goldG(x,y,w,h);rrect(ctx,x,y,w,h,4);ctx.stroke();
+      txt((on?'* ':'')+t,x+w/2,y+11,11.5,on?'#ffe9a0':'#c8a040','center',true);
+      l.forEach((q,j)=>txt(q,x+w/2,y+25+j*11,8.5,on?'#e8dcb4':'#a89878','center'));
+      btn('cr_sc'+i,x,y,w,h)}
+    txt('You can change this at any time: Menu, Settings, Gameplay.',240,292,8.5,'#a89878','center');
   }
 }
 function crBtn(id){
   const C=G.cr,cur=C.cur;C.note='';
+  if(id==='cr_sc0'){C.scale=false;return}
+  if(id==='cr_sc1'){C.scale=true;return}
   if(id==='cr_pick_def'){C.party=DEFAULT_PARTY.map(p=>Object.assign({},p));C.choose=false;startGame();return}
   if(id==='cr_pick_own'){C.choose=false;return}
   if(id==='cr_pick_rand'){crRandomParty();return}
