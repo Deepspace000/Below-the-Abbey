@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.247';
+const VERSION='3.248';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2701,13 +2701,24 @@ function shopSign(d){
     if(d.txt[1])line(d.txt[1],h*.84,h*.1,'italic','#b0a47e');
   });
 }
+/* creatures fit the window: seen from the next square, one taller than about .9 of a wall is cut off at the top. Only the truly huge ones are allowed to be bigger. */
+const HUGE_FOES=['kraken','uwgiant','uwmega','uweelboss','uwgulper','cyclops','cinder','firelizard','sut'],FIT_MAX=.9,fitCache=new Map();
+function fitScale(t,def,base){
+  if(!base||HUGE_FOES.includes(t))return 1;
+  const key=def.img+'|'+def.w+'|'+(def.fly?def.floatH:'g');let v=fitCache.get(key);
+  if(v===undefined){
+    const A=IMG[def.img+'A'],h0=def.w*base.height/base.width,h1=A?def.w*A.width/base.width*A.height/A.width:0,h=Math.max(h0,h1),fl=def.fly?(def.floatH!==undefined?def.floatH:.3):0;
+    v=h>0?Math.min(1,Math.max(.3,(FIT_MAX-fl)/h)):1;if(IMG[def.img])fitCache.set(key,v)}
+  return v;
+}
 function spriteList(){
   const L=[];
   for(const e of G.enemies){
     if(e.hp<=0&&e.dying<=0)continue;
     const def=e.poly?Object.assign({},ENEMY_DEF[e.t],{img:e.poly.img,w:e.poly.w,fly:false}):ENEMY_DEF[e.t];
     const base=IMG[def.img]||(e.t==='boss'?IMG._fbBoss:IMG._fbRat),atk=e.lunge>.2&&e.hp>0&&IMG[def.img+'A'];
-    L.push({x:e.rx+.5,y:e.ry+.5,img:atk||base,w:atk?def.w*atk.width/base.width:def.w,e,
+    const fs=fitScale(e.poly?e.poly.img:e.t,def,base);
+    L.push({x:e.rx+.5,y:e.ry+.5,img:atk||base,w:(atk?def.w*atk.width/base.width:def.w)*fs,e,
       bob:def.fly?(def.floatH!==undefined?def.floatH:.3)+Math.sin(G.time*6+e.seed)*.05:Math.sin(G.time*3+e.seed)*.015,lunge:e.lunge,flash:e.flash,fade:e.hp<=0?e.dying/.55:1,sink:e.hp<=0?1-e.dying/.55:0});
   }
   for(const it of G.items)if(!it.taken){const d=ITEMDEF[it.k];L.push({x:it.x+.5,y:it.y+.5,img:IMG['it_'+it.k]||IMG[it.k],w:it.k==='key'?.3:/^sundisc/.test(it.k)?.62:(d?d.sw:.3)*.95,item:it})}
