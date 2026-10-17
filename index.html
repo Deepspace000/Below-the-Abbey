@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.238';
+const VERSION='3.239';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1499,7 +1499,7 @@ function reset(n){
   G.timers=[];G.msgs=[];G.floats=[];G.shake=0;G.lockT=0;G.hold=null;G.queued=null;G.menu=false;G.map=false;G.hits=[];
   G.inv={open:false,tab:'inv',hero:0,sel:null,scroll:0};
   G.enemies=ENEMY_SPAWNS.map((s,i)=>{const st=enemyStat(s.t,s.lvl);return {id:i,t:s.t,lvl:s.lvl||lvlHere(),x:s.x,y:s.y,rx:s.x,ry:s.y,hp:st.hp,maxhp:st.hp,alert:false,chilled:0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100}});
-  G.items=ITEM_SPAWNS.map(s=>({k:s.k==='potion'?potionFor(hash2(s.x,s.y,LEVEL+7)):s.k,x:s.x,y:s.y,taken:false}));
+  G.items=ITEM_SPAWNS.map(s=>({k:s.k==='potion'?potionFor(hash2(s.x,s.y,LEVEL+7)):s.k==='hlfood'?hlFoodFor(hash2(s.x,s.y,LEVEL+9)):s.k,x:s.x,y:s.y,taken:false}));
   G.decor=DECOR_SPAWNS.map(s=>{const o={k:s.k,x:s.x,y:s.y,block:!!s.block,loot:CONTAINERS.includes(s.k),shop:s.k==='cart'};if(s.deco){o.loot=false;o.shop=false}if(s.npc){o.npc=s.npc;o.loot=false;o.shop=false;if(s.goat)o.goat=s.goat}if(s.sc)o.sc=s.sc;if(s.walk)o.walk=true;if(s.wd)o.wd=s.wd;if(s.txt)o.txt=s.txt;if(s.bob)o.bob=s.bob;if(s.ox!==undefined){o.ox=s.ox;o.oy=s.oy}if(s.opens){o.opens=s.opens;o.idx=s.idx}if(s.lockedBy)o.lockedBy=s.lockedBy;if(s.secret)o.secret=true;for(const kk of ['ambush','hidden','trap','frame','goldAmt','enter','magic','cat','scar','hatch','kname','kl','lk','glow','red','lit','deco','wind','lw','lr','pic'])if(s[kk]!==undefined)o[kk]=s[kk];return o});
   applyLevers();clearDoorFronts();
   G.decor.forEach(d=>{if(!d.npc&&(d.k==='grave'||d.k==='grave2'||d.k==='cross')){d.npc='epitaph';d.loot=false}});
@@ -6572,12 +6572,12 @@ function drawEnemyPlate(){
   const e=f.e,def=ENEMY_DEF[e.t];
   // name plate
   ctx.save();
-  ctx.fillStyle='rgba(8,6,4,.78)';rrect(ctx,26,4,150,22,5);ctx.fill();
-  ctx.lineWidth=1.6;ctx.strokeStyle=goldG(26,4,150,22);rrect(ctx,26,4,150,22,5);ctx.stroke();
+  ctx.fillStyle='rgba(8,6,4,.78)';rrect(ctx,26,4,170,22,5);ctx.fill();
+  ctx.lineWidth=1.6;ctx.strokeStyle=goldG(26,4,170,22);rrect(ctx,26,4,170,22,5);ctx.stroke();
   ctx.restore();
-  txt((e.poly?e.poly.name:def.name).toUpperCase(),34,15,11,'#d0c298','left',true,undefined,94);txt('Lv '+e.lvl,150,15,8.5,'#c8b898','right');
-  {const ms=mxPlate(e);if(ms)txt(ms,182,15,8,'#e8c878','left',true)}
-  chevron(163,15,6,-Math.PI/2,false);
+  txt((e.poly?e.poly.name:def.name).toUpperCase(),34,15,11,'#d0c298','left',true,undefined,100);txt('Lv '+e.lvl,172,15,8.5,'#c8b898','right');
+  {const ms=mxPlate(e);if(ms)txt(ms,202,15,8,'#e8c878','left',true)}
+  chevron(185,15,6,-Math.PI/2,false);
   // vertical hp bar
   const bx=8,by=40,bw=13,bh=150,fr=Math.max(0,e.hp/e.maxhp);
   ctx.fillStyle='rgba(10,4,4,.8)';ctx.fillRect(bx,by,bw,bh);
@@ -6585,7 +6585,7 @@ function drawEnemyPlate(){
   ctx.fillStyle=g;ctx.fillRect(bx,by+bh*(1-fr),bw,bh*fr);
   ctx.strokeStyle=goldG(bx,by,bw,bh);ctx.lineWidth=1.6;roughStrokeRect(bx,by,bw,bh);
   txt(String(Math.max(0,e.hp)),bx+bw/2,by+bh+10,9,'#f0d0c0','center',true);
-  if(f.k>1)txt(`${f.k} tiles`,182,27,8,'#b8a888','left');
+  if(f.k>1)txt(`${f.k} tiles`,202,27,8,'#b8a888','left');
   drawCompare(e,def);
 }
 /* a scale that sets the creature against the party: level, health, and a rough fight rating */
@@ -17267,6 +17267,7 @@ function hlBuild(k){
   const kinds=kk<6?['hlgoblin','hlgoblin','hlslime']:kk<13?['hlgoblin','hlslime','hlorc','hlgoblin']:['hlorc','hlorc','hlgoblin','hlslime'];
   if(!violet)for(let i=0;i<Math.max(5,Math.min(13,Math.round(cells.length/38)));i++){const c=cells[R(900+i*13,cells.length)];if(c&&!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);enemies.push({t:kinds[R(950+i,kinds.length)],x:c[0],y:c[1]})}}
   for(let i=0;i<10&&cells.length;i++){const c=cells[R(100+i*7,cells.length)];if(!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);items.push({k:'potion',x:c[0],y:c[1]})}}
+  for(let i=0;i<6&&cells.length;i++){const c=cells[R(300+i*11,cells.length)];if(!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);items.push({k:'hlfood',x:c[0],y:c[1]})}}
   OH_STY.hlsecret=Object.assign({},OH_STY.castle2||OH_STY.gold,{zoom:3.6,contrast:2.0,tint:[110,150,255,.0]});const secretCh=violet?'#':ch(TM.make('plain','hlsecret',CH).gid);
   const dress={k,id,rows,W,H,rooms,myst,far,used,decor,enemies,d,violet,top,R,hs,secretCh,items,up,start};hlDress(dress);
   const portals=[{to:k===0?HL.CAV:violet?HL.BASE+HL.N-1:id-1,x:0,y:0,f:2,tex:'tomb'}];
@@ -17624,10 +17625,11 @@ function hlLootFor(d){
     const types=[...new Set(pool.map(id=>ITEMDEF[id].t))].sort((a,b)=>r2(a.length)-r2(b.length));
     for(const ty of types.slice(0,3)){const c=pool.filter(id=>ITEMDEF[id].t===ty);it2.push({id:c[Math.floor(r2(c.length+ty.length)*c.length)],n:1})}
     it2.push({id:potionFor(r2(30)),n:1},{id:potionFor(r2(31)),n:1});if(ITEMDEF.greatermana)it2.push({id:'greatermana',n:1})
-    it2.push({id:['ringV','ringW','ringS','ringM'][Math.floor(r2(7)*4)],n:1});
+    it2.push({id:['ringV','ringW','ringS','ringM'][Math.floor(r2(7)*4)],n:1},{id:hlFoodFor(r2(40)),n:1});
     d.gold=150+(LEVEL-HL.BASE)*40+Math.floor(r2(9)*120);return it2}
   const k=LEVEL-HL.BASE,r=i=>hash2(d.x,d.y,300+i+LEVEL*3),items=[],add=(id,n)=>{if(ITEMDEF[id])items.push({id,n:ITEMDEF[id].stack?(n||1):1})};
   const pick=(a,i)=>a[Math.floor(r(i)*a.length)];
+  for(let q=0;q<3;q++)add(hlFoodFor(r(60+q)),1);
   for(let q=0;q<4;q++)add(potionFor(r(q)),1+(r(q+9)<.5?1:0)); // healing fit for the party's level, plenty of it
   for(let q=0;q<2;q++)add(['manadraught','greatermana','supermana'][Math.min(2,((k/7)|0)+(r(q+14)<.4?1:0))],1);
   // gear: something for each level, from the shop tiers (the chest at the top holds the best)
@@ -17951,6 +17953,22 @@ ENEMY_DEF.hlbogey={name:'The Bogeyman',hp:380,dmg:[16,28],hit:.86,w:1.1,img:'hl_
 {const _ai=afflInflict;afflInflict=function(id,hi,quiet){ // the mask: no fear, no haunting
   if((id==='shaken'||id==='haunted')&&hi!==undefined&&hi!==-1){const h=G.heroes[hi];if(h&&h.eq&&h.eq.head&&h.eq.head.id==='bogeymask')return false}
   return _ai.apply(this,arguments)}}
+
+/* ==========================================================================
+   STRANGE FOOD. The castle's kitchens left odd things behind. They look dreadful, but they are ordinary food: they fill hunger and heal a little.
+   ========================================================================== */
+const HL_FOOD=[ // [id, name, colour, health, hunger, price, description]
+ ['mysterymeat','Mystery Meat','#8a7a6a',14,60,10,'A grey slab in gravy. Nobody knows what it was, and the cook is long gone.'],
+ ['lychee','Eyeball Lychees','#e8d8d0',10,40,8,'Peeled lychees that look very much like eyeballs. They stare back. They taste sweet.'],
+ ['goblintongue','Goblin Tongues','#5a8a3a',12,50,9,'A bundle of long green tongues, tied with string. Chewy, and salty.'],
+ ['bogeylinks','Bogeyman Sausage','#b8b0a8',18,70,14,'A pale lumpy sausage with a face on it. It tastes of pepper and sage.'],
+ ['ghostsushi','Ghostly Sushi','#9ae8ff',16,55,14,'Pale glowing rolls that are cold to the touch. They taste of fresh fish.'],
+ ['pickledtoes','Pickled Toes','#8aa860',12,50,9,'A jar of pickled toes. Sour, crunchy, and best not to look.'],
+ ['eyesoup','Eyeball Soup','#7a9a3a',20,80,16,'Murky green broth with eyes floating in it. Warm and thick, like pea soup.'],
+ ['batwings','Fried Bat Wings','#a8582a',14,55,10,'Bat wings fried on a skewer. They crunch like crackling.']];
+for(const [id,n,c,heal,feed,price,d] of HL_FOOD)ITEMDEF[id]={n,k:'food',t:'Meal',ic:'bread',c,heal,feed,stack:1,price,d:'Meal. Fills '+feed+' hunger and restores '+heal+' health. '+d,sw:.3};
+if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push(...HL_FOOD.map(f=>f[0]));
+function hlFoodFor(u){return HL_FOOD[Math.floor(u*HL_FOOD.length)%HL_FOOD.length][0]}
 
 /* ---- src/desert/seasound.js ---- */
 /* ==========================================================================

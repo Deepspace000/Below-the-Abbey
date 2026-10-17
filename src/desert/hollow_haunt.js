@@ -20,10 +20,11 @@ function hlLootFor(d){
     const types=[...new Set(pool.map(id=>ITEMDEF[id].t))].sort((a,b)=>r2(a.length)-r2(b.length));
     for(const ty of types.slice(0,3)){const c=pool.filter(id=>ITEMDEF[id].t===ty);it2.push({id:c[Math.floor(r2(c.length+ty.length)*c.length)],n:1})}
     it2.push({id:potionFor(r2(30)),n:1},{id:potionFor(r2(31)),n:1});if(ITEMDEF.greatermana)it2.push({id:'greatermana',n:1})
-    it2.push({id:['ringV','ringW','ringS','ringM'][Math.floor(r2(7)*4)],n:1});
+    it2.push({id:['ringV','ringW','ringS','ringM'][Math.floor(r2(7)*4)],n:1},{id:hlFoodFor(r2(40)),n:1});
     d.gold=150+(LEVEL-HL.BASE)*40+Math.floor(r2(9)*120);return it2}
   const k=LEVEL-HL.BASE,r=i=>hash2(d.x,d.y,300+i+LEVEL*3),items=[],add=(id,n)=>{if(ITEMDEF[id])items.push({id,n:ITEMDEF[id].stack?(n||1):1})};
   const pick=(a,i)=>a[Math.floor(r(i)*a.length)];
+  for(let q=0;q<3;q++)add(hlFoodFor(r(60+q)),1);
   for(let q=0;q<4;q++)add(potionFor(r(q)),1+(r(q+9)<.5?1:0)); // healing fit for the party's level, plenty of it
   for(let q=0;q<2;q++)add(['manadraught','greatermana','supermana'][Math.min(2,((k/7)|0)+(r(q+14)<.4?1:0))],1);
   // gear: something for each level, from the shop tiers (the chest at the top holds the best)
@@ -347,3 +348,19 @@ ENEMY_DEF.hlbogey={name:'The Bogeyman',hp:380,dmg:[16,28],hit:.86,w:1.1,img:'hl_
 {const _ai=afflInflict;afflInflict=function(id,hi,quiet){ // the mask: no fear, no haunting
   if((id==='shaken'||id==='haunted')&&hi!==undefined&&hi!==-1){const h=G.heroes[hi];if(h&&h.eq&&h.eq.head&&h.eq.head.id==='bogeymask')return false}
   return _ai.apply(this,arguments)}}
+
+/* ==========================================================================
+   STRANGE FOOD. The castle's kitchens left odd things behind. They look dreadful, but they are ordinary food: they fill hunger and heal a little.
+   ========================================================================== */
+const HL_FOOD=[ // [id, name, colour, health, hunger, price, description]
+ ['mysterymeat','Mystery Meat','#8a7a6a',14,60,10,'A grey slab in gravy. Nobody knows what it was, and the cook is long gone.'],
+ ['lychee','Eyeball Lychees','#e8d8d0',10,40,8,'Peeled lychees that look very much like eyeballs. They stare back. They taste sweet.'],
+ ['goblintongue','Goblin Tongues','#5a8a3a',12,50,9,'A bundle of long green tongues, tied with string. Chewy, and salty.'],
+ ['bogeylinks','Bogeyman Sausage','#b8b0a8',18,70,14,'A pale lumpy sausage with a face on it. It tastes of pepper and sage.'],
+ ['ghostsushi','Ghostly Sushi','#9ae8ff',16,55,14,'Pale glowing rolls that are cold to the touch. They taste of fresh fish.'],
+ ['pickledtoes','Pickled Toes','#8aa860',12,50,9,'A jar of pickled toes. Sour, crunchy, and best not to look.'],
+ ['eyesoup','Eyeball Soup','#7a9a3a',20,80,16,'Murky green broth with eyes floating in it. Warm and thick, like pea soup.'],
+ ['batwings','Fried Bat Wings','#a8582a',14,55,10,'Bat wings fried on a skewer. They crunch like crackling.']];
+for(const [id,n,c,heal,feed,price,d] of HL_FOOD)ITEMDEF[id]={n,k:'food',t:'Meal',ic:'bread',c,heal,feed,stack:1,price,d:'Meal. Fills '+feed+' hunger and restores '+heal+' health. '+d,sw:.3};
+if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push(...HL_FOOD.map(f=>f[0]));
+function hlFoodFor(u){return HL_FOOD[Math.floor(u*HL_FOOD.length)%HL_FOOD.length][0]}

@@ -160,6 +160,7 @@ function hlBuild(k){
   const kinds=kk<6?['hlgoblin','hlgoblin','hlslime']:kk<13?['hlgoblin','hlslime','hlorc','hlgoblin']:['hlorc','hlorc','hlgoblin','hlslime'];
   if(!violet)for(let i=0;i<Math.max(5,Math.min(13,Math.round(cells.length/38)));i++){const c=cells[R(900+i*13,cells.length)];if(c&&!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);enemies.push({t:kinds[R(950+i,kinds.length)],x:c[0],y:c[1]})}}
   for(let i=0;i<10&&cells.length;i++){const c=cells[R(100+i*7,cells.length)];if(!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);items.push({k:'potion',x:c[0],y:c[1]})}}
+  for(let i=0;i<6&&cells.length;i++){const c=cells[R(300+i*11,cells.length)];if(!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);items.push({k:'hlfood',x:c[0],y:c[1]})}}
   OH_STY.hlsecret=Object.assign({},OH_STY.castle2||OH_STY.gold,{zoom:3.6,contrast:2.0,tint:[110,150,255,.0]});const secretCh=violet?'#':ch(TM.make('plain','hlsecret',CH).gid);
   const dress={k,id,rows,W,H,rooms,myst,far,used,decor,enemies,d,violet,top,R,hs,secretCh,items,up,start};hlDress(dress);
   const portals=[{to:k===0?HL.CAV:violet?HL.BASE+HL.N-1:id-1,x:0,y:0,f:2,tex:'tomb'}];
