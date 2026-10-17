@@ -92,7 +92,7 @@ const HL_MYST=['riddle','bridge','sand','statues','pit','monster','chasm','treas
 function hlBuild(k){
   const id=k<HL.N?HL.BASE+k:HL.VIOLET;if(LEVELS[id])return;
   const top=k===HL.N-1,violet=k>=HL.N,kk=Math.min(k,HL.N-1);
-  const W=violet?19:Math.max(19,Math.round(61-kk*2.3)),H=violet?13:Math.max(15,Math.round(43-kk*1.6)),hs=hash2,R=(i,m)=>(hs(k*31+i,k*7+5,97)*m)|0;
+  const W=violet?19:Math.max(14,Math.round(kk<=9?61-kk*3.45:30-(kk-9)*1.75)),H=violet?13:Math.max(13,Math.round(kk<=9?43-kk*2.45:21-(kk-9)*1.05)),hs=hash2,R=(i,m)=>(hs(k*31+i,k*7+5,97)*m)|0;
   const TM=ohTiles(),chars={D:LEVEL41_DATA.chars.D},chMap=new Map();let nextCh=0x300;
   const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
   const sty=violet?'hlviolet':'hlorange';
