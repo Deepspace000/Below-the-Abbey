@@ -41,10 +41,10 @@ function bathEnter(n){
   const b=bathScan(n);if(!b)return;
   if(G.decor.some(d=>d.k==='sign_bath'))return;
   // a big board standing in the street in front of the door, flat to anyone walking up to it
-  G.decor.push({k:'sign_bath',x:b.ox,y:b.oy,block:false,wd:[Math.abs(b.wd[1]),Math.abs(b.wd[0])],sc:2,txt:[T.name.toUpperCase(),'Hot baths, 10 gold']});
+  if(!(G.tele&&G.tele.x===b.ox&&G.tele.y===b.oy))G.decor.push({k:'sign_bath',x:b.ox,y:b.oy,block:false,wd:[Math.abs(b.wd[1]),Math.abs(b.wd[0])],sc:2,txt:[T.name.toUpperCase(),'Hot baths, 10 gold']});
   // and one hung out over the street from the wall beside the door, for anyone walking along it
   const p0=Math.abs(b.wd[1]),p1=Math.abs(b.wd[0]);
-  for(const [qx,qy] of [[b.ox+p0,b.oy+p1],[b.ox-p0,b.oy-p1]])if(G.grid[qy][qx]===0&&!G.decor.some(d=>d.block&&d.x===qx&&d.y===qy)&&G.grid[qy+b.wd[1]][qx+b.wd[0]]>0){G.decor.push({k:'sign_bath',x:qx,y:qy,block:false,wd:b.wd,sc:1.4,txt:[T.name.toUpperCase(),T.who]});break}
+  for(const [qx,qy] of [[b.ox+p0,b.oy+p1],[b.ox-p0,b.oy-p1]])if(!(G.tele&&G.tele.x===qx&&G.tele.y===qy)&&G.grid[qy][qx]===0&&!G.decor.some(d=>d.block&&d.x===qx&&d.y===qy)&&G.grid[qy+b.wd[1]][qx+b.wd[0]]>0){G.decor.push({k:'sign_bath',x:qx,y:qy,block:false,wd:b.wd,sc:1.4,txt:[T.name.toUpperCase(),T.who]});break}
 }
 function bathBuild(n,lv,fx,fy,ff){ // a locked-house number that is really the bathhouse door
   const T=BATH_TOWN[lv],b=G.flags.bathDoors2&&G.flags.bathDoors2[lv];if(!T||!b||lockedKey(lv,b.x,b.y)!==n)return false;

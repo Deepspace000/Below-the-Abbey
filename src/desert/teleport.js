@@ -37,10 +37,22 @@ function teleLocOf(n,d){
 function teleLevelsAt(loc){return Object.keys(G.flags.teles||{}).map(Number).filter(n=>G.flags.teles[n]&&(loc.lv.includes(n)||teleLocOf(n)===loc))}
 function teleActive(n){return !!(G.flags.teles&&G.flags.teles[n])}
 function teleOn(){return !!(G.tele&&G.P.x===G.tele.x&&G.P.y===G.tele.y&&G.state==='play')}
+/* nothing else may stand on the teleporter's square: whatever is there moves to the nearest free square, or is removed if the room is too full */
+function clearTeleSquare(sp){
+  const L=LEVELS[LEVEL],rows=L&&L.rows;if(!rows)return;
+  const taken=(x,y)=>G.decor.some(d=>d.x===x&&d.y===y&&!d.found)||G.items.some(i=>!i.taken&&i.x===x&&i.y===y)||G.enemies.some(e=>e.hp>0&&e.x===x&&e.y===y)||(x===sp.x&&y===sp.y);
+  const free=(x,y)=>rows[y]&&rows[y][x]==='.'&&G.grid[y]&&G.grid[y][x]===0&&!taken(x,y)&&!(L.portals||[]).some(p=>Math.abs(p.x-x)+Math.abs(p.y-y)<2);
+  const spot=()=>{for(let r=1;r<=3;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=sp.x+dx,y=sp.y+dy;if(free(x,y))return [x,y]}return null};
+  for(const d of G.decor){if(d.x!==sp.x||d.y!==sp.y||d.tele||d.found)continue;
+    if(d.npc&&!d.deco&&d.block){const q=spot();if(q){d.x=q[0];d.y=q[1]}else{d.found=true;d.block=false;d.hidden=true}continue}
+    const q=spot();if(q){d.x=q[0];d.y=q[1]}else{d.found=true;d.block=false;d.hidden=true;d.deco=true}}
+  for(const i of G.items)if(!i.taken&&i.x===sp.x&&i.y===sp.y){const q=spot();if(q){i.x=q[0];i.y=q[1]}else i.taken=true}
+  for(const e of G.enemies)if(e.hp>0&&e.x===sp.x&&e.y===sp.y){const q=spot();if(q){e.x=q[0];e.y=q[1];e.rx=q[0];e.ry=q[1]}}
+}
 function placeTeleporter(){ // called when a level is built: one stone in every map
   G.tele=null;if(LEVELS[LEVEL]&&LEVELS[LEVEL].noTele)return; // the Pilgrim’s Path has only a few, hidden
   const sp=teleSpot(LEVEL);if(!sp)return;
-  for(const d of G.decor)if(d.block&&!d.npc&&d.x===sp.x&&d.y===sp.y){d.found=true;d.block=false}
+  clearTeleSquare(sp);
   G.decor.push({k:'teleporter',x:sp.x,y:sp.y,block:false,walk:true,loot:false,shop:false,tele:true});
   G.tele={x:sp.x,y:sp.y,n:LEVEL};
 }
