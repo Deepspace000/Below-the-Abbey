@@ -187,7 +187,7 @@ function khRoom(b,lvl,back){
   const raw=(k,x,y,o)=>decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}));
   const npc=(id,x,y,extra)=>{const kp=KH_KEEPERS[id];if(!kp)return;if(typeof KH_NPC_H!=='undefined'&&KH_NPC_H[kp.face]&&!NPC_H[kp.face])NPC_H[kp.face]=KH_NPC_H[kp.face]; // a keeper has her proper height even before the golden city has been visited
   decor.push(Object.assign({k:kp.face,x,y,block:true,npc:id,sc:kp.sc||1},extra||{}))};
-  R.build({put,raw,npc,mid,W,H});
+  R.build({put,raw,npc,mid,W,H,has:(x,y)=>decor.some(d=>d.x===x&&d.y===y)});
   const wall=khInteriorWall(b.room,b.wallImg);
   const level={rows,start:{x:mid,y:H-2,f:0},enemies:(R.enemies||[]).map(e=>({t:e[0],x:e[1],y:e[2],lvl:e[3]})),items:R.items||[],decor,day:0,amb:R.amb||.66,
     floor:b.floor||R.floor||'kh1',ceil:'beam',name:b.name,label:b.name,lights:R.lights||[],portals:[{to:back.to,x:back.x,y:back.y,f:back.f,tex:'in'}],diff:16,khRoom:b.id,scene:b.scene||KH_SCENE_OF[b.id],

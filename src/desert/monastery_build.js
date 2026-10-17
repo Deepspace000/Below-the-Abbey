@@ -29,6 +29,38 @@ function monChapelTpl(b){return {w:11,h:15,floor:'kh2',amb:.8,noExtras:true,ligh
   for(const y of [5,9])raw('mi_chand',5,y,{block:false,walk:true,bob:2.15});
   npc(b.keeper,6,4);
 }}}
+/* the nave of the church: the chapel's furnishings on a grander plan */
+function monChurchTpl(b){return {w:15,h:21,floor:'kh2',amb:.8,noExtras:true,lights:[[4,2],[10,2],[7,6],[7,11],[7,16],[2,8],[12,8],[2,14],[12,14]],build:({raw,npc})=>{
+  const pic=(n,x,y,wd,bob)=>raw(n,x,y,{pic:1,wd,block:false,walk:true,bob:bob||0});
+  pic('mw_rose',7,1,[0,-1],2.5);pic('mw_glass',4,1,[0,-1],.8);pic('mw_glass',10,1,[0,-1],.8);pic('mw_banner',2,1,[0,-1],.8);pic('mw_banner',12,1,[0,-1],.8);
+  for(const y of [3,7,11,15]){pic('mw_glass',1,y,[-1,0],.7);pic('mw_glass',13,y,[1,0],.7)}
+  for(const y of [5,9,13,17]){pic('mw_banner',1,y,[-1,0],.8);pic('mw_banner',13,y,[1,0],.8)}
+  raw('mi_altar',7,2,{block:true});raw('mi_angel',5,2,{block:true});raw('mi_angel',9,2,{block:true});
+  raw('mi_saint',3,3,{block:true});raw('mi_saint',11,3,{block:true});raw('mi_candel',6,2,{block:true});raw('mi_candel',8,2,{block:true});
+  raw('mi_lectern',6,4,{block:true});
+  for(const y of [8,10,12,14,16,18])for(const x of [2,3,4,5,9,10,11,12])raw('mi_pew',x,y,{block:true});
+  for(const [x,y] of [[1,7],[13,7],[1,11],[13,11],[1,15],[13,15]])raw('mi_candel',x,y,{block:true});
+  raw('mi_font',13,19,{block:true});raw('mw_cross',1,19,{block:true});
+  for(const y of [6,11,16])raw('mi_chand',7,y,{block:false,walk:true,bob:3.1});
+  npc(b.keeper,8,4);
+}}}
+/* the scriptorium: shelves of books along the wall, lecterns with open books, candelabra for the evenings */
+function monScriptTpl(b){return {w:11,h:8,amb:.7,noExtras:true,lights:[[2,2],[8,2],[5,4],[3,6],[7,6]],build:({put,raw,npc,mid,has})=>{
+  for(const x of [2,3,4,6,7,8])put('shelf',x,1);
+  for(const [x,y] of [[2,4],[4,4],[6,4],[8,4],[3,6],[7,6]])raw('mi_lectern',x,y,{block:true});
+  raw('mi_candel',1,3,{block:true});raw('mi_candel',9,3,{block:true});raw('mi_candel',1,6,{block:true});raw('mi_candel',9,6,{block:true});
+  npc(b.keeper,mid,2);
+}}}
+/* the other rooms: the plain furnishings stay, and painted windows, banners, candelabra and a chandelier are added */
+function monWrapTpl(room){return bb=>{
+  const base={hall:khRoomHall,home:khRoomHome,inn:khRoomInn,prayer:khRoomPrayer}[room](bb);
+  return Object.assign({},base,{build:h=>{base.build(h);const {raw,has,W,H,mid}=h;
+    const pic=(n,x,y,wd,bob)=>{if(!has(x,y))raw(n,x,y,{pic:1,wd,block:false,walk:true,bob:bob||0})};
+    for(let x=2;x<=W-3;x+=3)pic('mw_shutter',x,1,[0,-1],.7);
+    for(let y=3;y<=H-4;y+=3){pic('mw_banner',1,y,[-1,0],.1);pic('mw_banner',W-2,y,[1,0],.1)}
+    for(const [x,y] of [[1,H-3],[W-2,H-3]])if(!has(x,y))raw('mi_candel',x,y,{block:true});
+    if(!has(mid,3))raw('mi_chand',mid,3,{block:false,walk:true,bob:1.5});
+  }})}}
 function monFacade(b,k,decor){
   const y=b.y1+1,P=(n,x,bob)=>decor.push({k:'mw_'+n,x,y,wd:[0,-1],pic:1,block:false,walk:true,deco:true,bob:bob||0});
   const clear=x=>Math.abs(x-b.dx)>=2;
@@ -104,8 +136,8 @@ function monBuild(){
       if(b.chapel)sky.push({x:(b.x0+b.x1+1)/2,y:(b.y0+b.y1+1)/2,k:'kh_ohtower1_4',w:3.6,z:b.wh-.03},{x:b.x0-.3,y:b.y0+1.2,k:'kh_ohtower1_0',w:1.9,z:b.wh-.03},{x:b.x1+1.3,y:b.y0+1.2,k:'kh_ohtower1_0',w:1.9,z:b.wh-.03},{x:b.x0-.3,y:b.y1-.2,k:'kh_ohtower1_4',w:1.4,z:b.wh-.03},{x:b.x1+1.3,y:b.y1-.2,k:'kh_ohtower1_4',w:1.4,z:b.wh-.03});
       if(b.tower)sky.push({x:b.x1+1.4,y:b.y0+1.5,k:'kh_ohtower1_4',w:2.1,z:b.wh-.03},{x:b.x0-.4,y:b.y0+1.5,k:'kh_ohtower1_0',w:1.9,z:b.wh-.03}); // the church: a spired bell tower and a slate cone turret
       LEVEL_NAMES[b.rid]=b.name;const rid=b.rid,front=[b.dx,b.y1+1];
-      const mk=()=>{if(LEVELS[rid])return;const bb={id:b.room==='inn'?'mon_guest':'mon'+k,name:b.name,room:b.room,keeper:b.keeper,scene:b.scene,wallImg:'kh_ohwall1_'+(k%3),floor:b.room==='hall'?'cobble':'wood',tpl:b.chapel?monChapelTpl:undefined};
-        const R=khRoom(bb,rid,{to:MON.ID,x:front[0],y:front[1],f:2});if(b.chapel)R.level.ceilH=3.4;LEVELS[rid]=R.level};
+      const mk=()=>{if(LEVELS[rid])return;const bb={id:b.room==='inn'?'mon_guest':'mon'+k,name:b.name,room:b.room,keeper:b.keeper,scene:b.scene,wallImg:'kh_ohwall1_'+(k%3),floor:b.room==='hall'?'cobble':'wood',tpl:b.chapel?monChapelTpl:b.church?monChurchTpl:b.script?(bb=>{const t=monScriptTpl(bb),old=t.build;return Object.assign({},t,{build:h=>{old(h);const {raw,has,W,H,mid}=h;for(let y=3;y<=H-4;y+=3){if(!has(1,y))raw('mw_banner',1,y,{pic:1,wd:[-1,0],block:false,walk:true,bob:.1});if(!has(W-2,y))raw('mw_banner',W-2,y,{pic:1,wd:[1,0],block:false,walk:true,bob:.1})}for(const x of [3,7])raw('mw_shutter',x,H-1>1?1:1,{pic:1,wd:[0,-1],block:false,walk:true,bob:1.2});raw('mi_chand',mid,4,{block:false,walk:true,bob:1.5})}})}):monWrapTpl(b.room)};
+        const R=khRoom(bb,rid,{to:MON.ID,x:front[0],y:front[1],f:2});R.level.ceilH=b.chapel?3.4:b.church?4.4:2.6;LEVELS[rid]=R.level};
       KH_LAZY[rid]=mk;
       for(let x=b.x0-1;x<=b.x1+1;x++)used.add(x+','+(b.y1+1));
     });

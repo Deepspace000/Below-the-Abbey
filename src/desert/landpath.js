@@ -99,7 +99,12 @@ function lpPeak(k,seed){ // a range of far mountains, with snow on the highest, 
   x.globalCompositeOperation='destination-in';const ed=x.createLinearGradient(0,0,w,0);ed.addColorStop(0,'rgba(0,0,0,0)');ed.addColorStop(.18,'rgba(0,0,0,1)');ed.addColorStop(.82,'rgba(0,0,0,1)');ed.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=ed;x.fillRect(0,0,w,h); // the two ends fade out, so the picture has no hard vertical edge
   IMG[k]=c;return k}
 const LP_FALLS=[9,12,14],LP_BRIDGE={}; // the stretches with a waterfall and a rope bridge
-function lpFallsKey(){ // a waterfall: a ribbon of white water falling down a dark rock face, with spray at the foot
+/* the waterfalls are painted: a wet rock cliff with the water falling down it, spray and ferns at the foot (four kinds; each stretch with a fall has its own) */
+for(let q=0;q<4;q++)loadImg('lpf_'+q,'assets/lpf_'+q+'.png');
+{const H6=6.0;for(let q=0;q<4;q++)NPC_H['lpf_'+q]=H6}
+const LP_FALL_KIND={9:0,12:3,14:0}; // only the plain single falls: no stepped or double ones
+function lpFallsKey(s){const k='lpf_'+((LP_FALL_KIND[s]!==undefined?LP_FALL_KIND[s]:s%4));return IMG[k]?k:lpFallsKeyOld()}
+function lpFallsKeyOld(){ // the drawn fall, kept only for the moment before the painted ones have loaded
   const k='lp_falls';if(IMG[k])return k;const w=256,h=768,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
   const rg=x.createLinearGradient(0,0,0,h);rg.addColorStop(0,'#3d4a46');rg.addColorStop(1,'#2a3330');x.fillStyle=rg;
   x.beginPath();x.moveTo(18,0);for(let y=0;y<=h;y+=24)x.lineTo(14+hash2(y,1,3)*18,y);x.lineTo(40,h);x.lineTo(w-40,h);for(let y=h;y>=0;y-=24)x.lineTo(w-14-hash2(y,2,3)*18,y);x.closePath();x.fill();
@@ -187,7 +192,7 @@ function lpBuild(s){
       for(let x=xl;x<=xr;x++)for(let y=by-1;y<=by+2;y++)carve.add(K(x,y));
       for(let x=xl;x<=xr;x++)for(let y=by;y<=by+1;y++){if(rows[y][MX(x)]!=='.')continue;const i=I(x,y),deck=Math.abs(x-c)<=1;fm[i]=deck?'7':'4';h[i]=deck?.3:-.12;block[i]=deck?0:1}
       for(let y=by-2;y<=by+3;y++)for(let x=pk-2;x<=pk+2;x++)if(x>0&&x<W-1&&y>0&&Math.hypot(x-pk,y-by-.5)<=2.6&&rows[y][MX(x)]==='.'){fm[I(x,y)]='4';h[I(x,y)]=-.2;block[I(x,y)]=1;carve.add(K(x,y))}
-      const fk=lpFallsKey(),rk=lpRailKey();
+      const fk=lpFallsKey(s),rk=lpRailKey();
       if(fk)decor.push({k:fk,x:MX(fx),y:by,block:true,deco:true,sc:1,kname:'falls'});
       if(rk)for(const dx of [-2,2])for(const dy of [0,1])decor.push({k:rk,x:MX(c+dx),y:by+dy,block:true,deco:true,sc:1});
       used.add(K(fx,by));LP_BRIDGE[s]={y:by,x:c}}
