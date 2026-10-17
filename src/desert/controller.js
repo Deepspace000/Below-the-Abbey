@@ -96,8 +96,8 @@ addEventListener('keydown',e=>{if(!e.isTrusted)return;PAD.act=false});
 function drawSettingsMenu(){
   BTNS=[];veil(.6);bigPanel(110,40,260,232);
   txt('SETTINGS',240,62,14,'#d8c88e','center',true);
-  btnText('mute','Sound',140,82,200,28);btnText('gfx','Graphics',140,116,200,28);btnText('gameplay','Gameplay',140,150,200,28);btnText('padpage','Controller',140,184,200,28);
-  btnText('menuback','Back',170,226,140,28);
+  btnText('mute','Sound',140,74,200,26);btnText('gfx','Graphics',140,104,200,26);btnText('gameplay','Gameplay',140,134,200,26);btnText('padpage','Controller',140,164,200,26);btnText('keyspage','Keyboard',140,194,200,26);
+  btnText('menuback','Back',170,230,140,28);
   btn('menuclose',0,0,DW,DH);BTNS.unshift(BTNS.pop());
 }
 function drawMoreMenu(){

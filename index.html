@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.317';
+const VERSION='3.318';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -3313,6 +3313,7 @@ function drawInventory(){
       txt(dk.name,46,y+10,8,'#b8a888','left',false,undefined,60);
       txt(sp.name,46,y+23,9.5,hk.alive?'#d2c9b2':'#7a6a60','left',true,undefined,62);
       txt(!hk.alive?'Fallen':sp.cost?`${sp.cost} ${dk.mpn.toLowerCase()}  (${hk.mp})`:'free',46,y+37,7.5,hk.alive&&hk.mp>=sp.cost?'#9ac8ff':'#9a7a7a','left',false,undefined,62);
+      btn('ihero'+k,10,y,140,46);
       ctx.save();ctx.globalAlpha=can?1:.45;panel(108,y+13,38,22,false,false);txt('Use',127,y+24,9,'#d8c88e','center',true);ctx.restore();
       btn('ipow'+k,108,y+13,38,22);
     }
@@ -6922,7 +6923,7 @@ function drawMenu(){
   btnText('more','More',150,184,180,26);
   ctx.fillStyle='rgba(216,200,142,.35)';ctx.fillRect(120,222,240,1);
   btnText('quittitle','Exit game',160,230,160,26);
-  const L=['W / S: forward, back    A / D: step sideways    Q / E: turn    Space: attack','1-4: choose hero    I: inventory    J: quests    M: map    Esc: menu','Controller: Settings, then Controller, shows every button.'];
+  const L=['W / S: forward, back    A / D: step sideways    Q / E: turn    Space: attack','1-4: choose hero    I: inventory    J: quests    M: map    H: heal    ?: all shortcuts','Controller: Settings, then Controller, shows every button.'];
   txt('Version '+VERSION,376,24,7.5,'#b8a880','right');
   L.forEach((t,i)=>txt(t,240,272+i*9,7.4,'#d8c9a0','center'));
   btn('menuclose',0,0,DW,DH); BTNS.unshift(BTNS.pop());
@@ -20623,8 +20624,8 @@ addEventListener('keydown',e=>{if(!e.isTrusted)return;PAD.act=false});
 function drawSettingsMenu(){
   BTNS=[];veil(.6);bigPanel(110,40,260,232);
   txt('SETTINGS',240,62,14,'#d8c88e','center',true);
-  btnText('mute','Sound',140,82,200,28);btnText('gfx','Graphics',140,116,200,28);btnText('gameplay','Gameplay',140,150,200,28);btnText('padpage','Controller',140,184,200,28);
-  btnText('menuback','Back',170,226,140,28);
+  btnText('mute','Sound',140,74,200,26);btnText('gfx','Graphics',140,104,200,26);btnText('gameplay','Gameplay',140,134,200,26);btnText('padpage','Controller',140,164,200,26);btnText('keyspage','Keyboard',140,194,200,26);
+  btnText('menuback','Back',170,230,140,28);
   btn('menuclose',0,0,DW,DH);BTNS.unshift(BTNS.pop());
 }
 function drawMoreMenu(){
@@ -21209,6 +21210,68 @@ function sndMiss(){if(!AC||G.mute||!SNDOPT.combat)return;SFXM=SNDOPT.combat;
   nz(.3,.22,'bandpass',350,1700);nz(.3,.18,'bandpass',1700,300,.14);tone(260,140,.28,'sine',.05,.02);nz(.05,.07,'highpass',3000,5000,.34)}
 {const _s3=sfx;sfx=function(n){if(n==='miss'&&AC&&!G.mute)return sndMiss();return _s3.apply(this,arguments)}}
 {const _ha2=heroAttack;heroAttack=function(i){try{const w=heroWeapon(G.heroes[i]);if(w&&w.ranged>1)BOW_T=performance.now()}catch(e){}return _ha2.apply(this,arguments)}}
+
+/* ---- src/desert/shortcuts.js ---- */
+/* ==========================================================================
+   KEYBOARD SHORTCUTS. Every main action has a key. The Keyboard page (Settings, Keyboard, or the ? key) lists them all. Keys 1 to 4 choose the hero, in the world
+   and in the inventory (including the Powers tab). This listener runs before the main one and only takes the keys it owns.
+   ========================================================================== */
+const SHORTCUTS=[ // [group, key shown, what it does]
+ ['Moving','W / Up','Forward'],['Moving','S / Down','Back'],['Moving','A','Step left'],['Moving','D','Step right'],['Moving','Q / Left','Turn left'],['Moving','E / Right','Turn right'],
+ ['Fighting','Space / Enter','Attack'],['Fighting','X','Special attack or spell'],['Fighting','H / P','Drink a healing potion'],['Fighting','Z','Wait a turn'],['Fighting','R','Rest and camp'],
+ ['Heroes','1 2 3 4','Choose a hero (also in the inventory)'],
+ ['Screens','I','Items (the bag)'],['Screens','C','Hero sheet'],['Screens','B','Spell book'],['Screens','K','Powers'],['Screens','J','Quests'],['Screens','L','Journal'],
+ ['Screens','F','Afflictions'],['Screens','U','Collection'],['Screens','M / O','Map of this level'],['Screens','T','Teleport stones'],['Screens','Esc','Menu, or close a screen'],
+ ['Exploring','G','Dig with a shovel'],['Exploring','N','Catch a butterfly'],['Exploring','F5','Quick save'],['Exploring','? / F1','This page'],
+ ['In the bag','E','Equip or use the chosen item'],['In the bag','U','Unequip the chosen item'],['In the bag','S','Sort the bag'],['In the bag','X / Enter','Use hero power (Powers)']];
+const keyBusy=()=>G.state!=='play'||G.cut||G.talk||G.saves||(typeof TP!=='undefined'&&TP);
+function keyHero(i){const h=G.heroes[i];if(!h)return;if(G.inv.open){G.inv.hero=i;G.inv.sel=null;if(h.alive)G.sel=i}else if(h.alive)G.sel=i}
+function keyTab(t){if(!G.inv.open){if(G.menu||G.map||G.loot||G.overview)return;openInv(G.sel)}G.inv.tab=t;G.inv.sel=null}
+function keyScreen(m){if(G.inv.open)G.inv.open=false;G.overview=false;G.map=false;G.menu=G.menu===m?false:m;if(m==='aff')G.afs=0}
+addEventListener('keydown',e=>{
+  if(e.ctrlKey||e.metaKey||e.altKey||keyBusy())return;
+  const k=e.key,lk=k.length===1?k.toLowerCase():k;let used=true;
+  const free=!G.loot&&!G.map&&!G.menu&&!G.inv.open&&!G.overview;
+  if(k==='?'||k==='F1'){G.inv.open=false;G.overview=false;G.map=false;G.menu=G.menu==='keys'?false:'keys'}
+  else if(G.menu&&((lk==='l'&&G.menu==='journal')||(lk==='f'&&G.menu==='aff')||(lk==='u'&&G.menu==='collection'))){G.menu=false}
+  else if(G.menu){used=false} // a menu is open: leave the other keys to it
+  else if(k>='1'&&k<='4'&&(G.inv.open||free)){keyHero(+k-1)}
+  else if(G.inv.open){
+    const I=G.inv;
+    if(lk==='c')keyTab('char');else if(lk==='b')keyTab('spell');else if(lk==='k')keyTab('powers');
+    else if(lk==='s'){invBtn('isort')}else if(lk==='u'){if(I.sel&&I.sel.src==='slot')invBtn('iunequip')}
+    else if(lk==='e'){if(I.sel){const it=selItem(),d=it?idef(it):null;invBtn(I.sel.src==='slot'?'iunequip':(d&&(d.k==='potion'||d.k==='food'))?'iuse':'iequip')}}
+    else if(I.tab==='powers'&&(lk==='x'||k==='Enter')){handleBtn('ipow'+I.hero)}
+    else used=false;
+  }
+  else if(!free){used=false}
+  else if(lk==='h')act('potion');
+  else if(lk==='c')keyTab('char');else if(lk==='b')keyTab('spell');else if(lk==='k')keyTab('powers');
+  else if(lk==='l')keyScreen('journal');else if(lk==='f')keyScreen('aff');else if(lk==='u'){G.menuBack='more';keyScreen('collection')}
+  else if(lk==='g'){if(canDigHere())doDig();else msg('Nothing to dig here.','#a89878')}
+  else if(lk==='n'){try{bfCatch()}catch(x){}}
+  else used=false;
+  if(used){e.preventDefault();e.stopImmediatePropagation()}
+},true);
+/* ---- the Keyboard page ---- */
+function drawKeysPage(){
+  BTNS=[];veil(.86);bigPanel(8,6,464,308);
+  txt('KEYBOARD SHORTCUTS',240,22,14,'#d8c88e','center',true);
+  const cols=[['Moving','Fighting','Heroes','In the bag'],['Screens','Exploring']];
+  cols.forEach((col,ci)=>{let y=38;const x=22+ci*232;
+    for(const g of col){txt(g.toUpperCase(),x,y+4,8.5,'#e8c870','left',true);ctx.fillStyle='rgba(216,200,142,.35)';ctx.fillRect(x,y+10,216,1);y+=17;
+      for(const [,key,what] of SHORTCUTS.filter(s=>s[0]===g)){ctx.save();rrect(ctx,x,y-6,72,12,3);ctx.fillStyle='rgba(60,46,24,.95)';ctx.fill();ctx.lineWidth=1;ctx.strokeStyle='#8a7448';ctx.stroke();ctx.restore();
+        txt(key,x+36,y,7.8,'#f0e4b4','center',true,undefined,68);txt(what,x+78,y,7.6,'#d8cba4','left',false,undefined,138);y+=11.5}
+      y+=5}});
+  txt('Esc closes the screen you are in.',360,274,7.6,'#a89878','center');
+  btnText('menuback','Back',310,284,100,22);
+  btn('menuclose',0,0,DW,DH);BTNS.unshift(BTNS.pop());
+}
+{const _d=drawMenu;drawMenu=function(){if(G.menu==='keys'){drawKeysPage();return}return _d.apply(this,arguments)}}
+{const _h=handleBtn;handleBtn=function(id){
+  if(G.menu==='keys'&&!G.cut&&!G.talk){if(id==='menuback'||id==='menuclose'||id==='menu')G.menu='settings';return}
+  if(G.menu==='settings'&&id==='keyspage'){G.menu='keys';return}
+  return _h.apply(this,arguments)}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
