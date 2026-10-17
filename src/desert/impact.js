@@ -11,21 +11,23 @@ let IMP_QUIET=0; // the old synthesised hit and hurt sounds stay silent while a 
 {const _s=sfx;sfx=function(n){if((n==='hit'||n==='hurt')&&IMP_QUIET>G.time-.25&&AC)return;return _s.apply(this,arguments)}}
 const AFFL_TINT={poisoned:['#58d048','#1a6a14'],foodpoison:['#a0d040','#4a6a10'],bleeding:['#d01830','#6a0814'],fever:['#f09a30','#9a4a10'],frostbitten:['#8ad0f0','#2a6a9a'],haunted:['#a88ae8','#4a3a8a'],cursed:['#9a4ab8','#4a1a60'],graverot:['#8a9a40','#3a4a14'],tomblung:['#a0a890','#4a5040'],stung:['#e8c040','#8a6a10'],sunstroke:['#f0d860','#a08a20'],shaken:['#d8cccc','#7a6a6a'],sleepless:['#6a7ad0','#2a3a7a'],hangover:['#c8a860','#6a5a24'],fleas:['#b08060','#5a3a24'],poorly:['#80b890','#305a40'],dehydrated:['#d8b078','#8a6a34'],sandblind:['#e0b870','#8a6a30'],exhausted:['#a8a8b8','#505060']};
 function impTint(hi){const o=afflList().filter(e=>(e.hi===hi||e.hi===-1)&&AFFL_TINT[e.id]);if(!o.length)return ['#e83a2a','#8a1410'];const p=o.find(e=>e.id==='poisoned')||o[0];return AFFL_TINT[p.id]}
-function drawSplat(cx,cy,R,n,tint,seed,alpha){
+function drawSplat(cx,cy,R,n,tint,seed,alpha,sub){
   ctx.save();ctx.globalAlpha=alpha;let s=(seed*7919+13)%2147483647||13;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
   const g=ctx.createRadialGradient(cx-R*.1,cy-R*.15,R*.1,cx,cy,R*1.3);g.addColorStop(0,tint[0]);g.addColorStop(1,tint[1]);
   ctx.beginPath();for(let i=0;i<=26;i++){const a=i/26*TAU,rr=R*(1+(rnd()-.5)*.55);const px=cx+Math.cos(a)*rr,py=cy+Math.sin(a)*rr;i?ctx.lineTo(px,py):ctx.moveTo(px,py)}ctx.closePath();
   ctx.fillStyle=g;ctx.fill();ctx.lineWidth=1.4;ctx.strokeStyle='rgba(30,4,4,.9)';ctx.stroke();
   for(let i=0;i<7;i++){const a=rnd()*TAU,d=R*1.05+rnd()*R*.45;ctx.beginPath();ctx.arc(cx+Math.cos(a)*d,cy+Math.sin(a)*d,1+rnd()*2,0,TAU);ctx.fillStyle=tint[1];ctx.fill();ctx.stroke()}
   ctx.fillStyle='rgba(255,255,255,.28)';ctx.beginPath();ctx.ellipse(cx-R*.35,cy-R*.4,R*.3,R*.17,-.5,0,TAU);ctx.fill();
-  ctx.font=`bold ${Math.round(R*.95)}px Georgia,serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=3;ctx.strokeStyle='rgba(30,4,4,.95)';ctx.strokeText(n,cx,cy+1);ctx.fillStyle='#fff4e8';ctx.fillText(n,cx,cy+1);ctx.restore()}
+  ctx.font=`bold ${Math.round(R*.95)}px Georgia,serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=3;ctx.strokeStyle='rgba(30,4,4,.95)';ctx.strokeText(n,cx,cy+1);ctx.fillStyle='#fff4e8';ctx.fillText(n,cx,cy+1);
+  if(sub){ctx.font='bold 7px Georgia,serif';const sw=ctx.measureText(sub).width,sx=Math.max(sw/2+3,Math.min(477-sw/2,cx));ctx.lineWidth=2.4;ctx.strokeStyle='rgba(40,20,0,.95)';ctx.strokeText(sub,sx,cy+R*1.35+4);ctx.fillStyle='#ffe870';ctx.fillText(sub,sx,cy+R*1.35+4)}
+  ctx.restore()}
 const HSPL=[],HEAL=[];
 const GOLD_TINT=['#fff070','#c88a10'];
 {const _af=addFloat;addFloat=function(x,y,text,col,hcrit){
   const T=String(text);
   if(/^\+\d+$/.test(T)&&y>=240){ // a heal on a hero: the part of the red that is healed turns ice blue, then drains away
     let bi=0,bd=1e9;for(let i=0;i<4;i++){const dx=Math.abs(portraitX(i)+19-x);if(dx<bd){bd=dx;bi=i}}const h=G.heroes[bi];
-    if(h&&bd<24){const amt=+T.slice(1);if(hcrit){HSPL[bi]={t:0,n:'+'+amt,tint:GOLD_TINT,seed:amt*13+bi};IMP_QUIET=G.time}const oldM=clamp(1-(h.hp-amt)/h.max,0,1),newM=clamp(1-h.hp/h.max,0,1);if(oldM>newM+.005)HEAL[bi]={t:0,oldM,newM}}}
+    if(h&&bd<24){const amt=+T.slice(1);if(hcrit){HSPL[bi]={t:0,n:'+'+amt,tint:GOLD_TINT,seed:amt*13+bi,sub:'CRITICAL 1.75x'};IMP_QUIET=G.time}const oldM=clamp(1-(h.hp-amt)/h.max,0,1),newM=clamp(1-h.hp/h.max,0,1);if(oldM>newM+.005)HEAL[bi]={t:0,oldM,newM}}}
   if(col==='#ffd76a'&&/^\d+$/.test(T)){ // a hit on a creature: a splat where it stands, and a thump
     const d=+T,crit=!!G._critFlag;G._critFlag=false;const big=d>=40||crit;IMP_QUIET=G.time;impPlay(big,crit?.9:1,big?.95:.8);G.floats.push({x,y,text:T,col,t:0,splat:1,crit,R:crit?Math.min(19,10+d*.1):Math.min(15,7+d*.1),seed:d*31+Math.floor(x)});return}
   if(col==='#ff6a5a'&&/^-\d+$/.test(T)){ // a hit on a hero: a splat on the portrait, coloured by what ails them
@@ -33,8 +35,8 @@ const GOLD_TINT=['#fff070','#c88a10'];
     const d=-T;IMP_QUIET=G.time;impPlay(d>=15,.82,.95);HSPL[bi]={t:0,n:String(d),tint:impTint(bi),seed:d*17+bi};return}
   return _af.apply(this,arguments)}}
 {const _df=drawFloats;drawFloats=function(dt){
-  for(let i=G.floats.length-1;i>=0;i--){const f=G.floats[i];if(!f.splat)continue;f.t+=dt;if(f.t>.75){G.floats.splice(i,1);continue}
-    drawSplat(f.x+(f.seed%7-3)*3,f.y+24+f.t*8,f.R*(1+(f.t<.1?.2:0)),f.text,f.crit?GOLD_TINT:['#e83a2a','#8a1410'],f.seed,clamp(1.2-f.t*1.6,0,1))} // low on the body, drifting down, gone before it could reach the face
+  for(let i=G.floats.length-1;i>=0;i--){const f=G.floats[i];if(!f.splat)continue;f.t+=dt;if(f.t>(f.crit?1:.75)){G.floats.splice(i,1);continue}
+    drawSplat(f.x+(f.seed%7-3)*3,f.y+24+f.t*8,f.R*(1+(f.t<.1?.2:0)),f.text,f.crit?GOLD_TINT:['#e83a2a','#8a1410'],f.seed,clamp(1.2-f.t*1.6,0,1),f.crit?'CRITICAL  1.5x damage':null)} // low on the body, drifting down, gone before it could reach the face
   const keep=G.floats.filter(f=>f.splat);G.floats=G.floats.filter(f=>!f.splat);_df.apply(this,arguments);G.floats=G.floats.concat(keep)}}
 {const _ui=ui;ui=function(dt){_ui.apply(this,arguments);try{if(G.state!=='play'||G.inv.open)return;
   // a heal in progress: the healed band shows the old red, turns ice blue, then fades as the red settles lower
@@ -50,7 +52,7 @@ const GOLD_TINT=['#fff070','#c88a10'];
     ctx.save();ctx.beginPath();ctx.rect(x,y0,w,hh);ctx.clip();const g=ctx.createLinearGradient(0,y0+hh-fh,0,y0+hh);g.addColorStop(0,'rgba(190,20,16,.40)');g.addColorStop(1,'rgba(120,6,6,.62)');ctx.fillStyle=g;ctx.fillRect(x,y0+hh-fh,w,fh);
     ctx.fillStyle='rgba(255,90,70,.55)';ctx.fillRect(x,y0+hh-fh,w,1.2);ctx.restore()}
   for(let i=0;i<4;i++){const h=HSPL[i];if(!h)continue;h.t+=dt||.016;if(h.t>1.6){HSPL[i]=null;continue}
-    drawSplat(portraitX(i)+19,(G.state==='play'?268:232)-Math.min(h.t,.3)*6,10+Math.max(0,.25-h.t)*24,h.n,h.tint,h.seed,clamp(1.9-h.t,0,1))}}catch(e){}}}
+    drawSplat(portraitX(i)+19,(G.state==='play'?268:232)-Math.min(h.t,.3)*6,10+Math.max(0,.25-h.t)*24,h.n,h.tint,h.seed,clamp(1.9-h.t,0,1),h.sub)}}catch(e){}}}
 /* ==========================================================================
    BOWS AND SPELLS. A bow twangs and its arrow whooshes away (with a streak across the view), and a spell that hits bursts on its target: a fiery explosion with a deep boom, or
    a shatter of ice. The thump of the hit follows.
