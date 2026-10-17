@@ -4,7 +4,7 @@
    Yarrim. It is only a way of walking: no quests and no fights, just flowers, lamps, a few houses, inns and churches, and a quiet that
    lasts about an hour. It goes one way: from Oldhaven to Yarrim. The cliff at the end can only be climbed down.
    24 levels of 72 by 400 cells (400 to 423), built when first reached; the legs: N (coast, going north) 0 to 7, W (the mountains, going
-   west) 8 to 15, S (coast, going south, drawn the other way round so the sea is still on the right hand west) 16 to 21, D (the high pass
+   west) 8 to 15, S (coast, going south, the sea still on the left hand) 16 to 21, D (the high pass
    and the descent) 22 and 23. Each leg is a stretch of the same kind of country. The 13 buildings are rooms numbered from 6800.
    ========================================================================== */
 const LPOV=160,LPT=72; // two neighbouring stretches share their last and first 160 rows exactly, and the party is carried from one to the other 72 rows from the end, where the end cannot be seen
@@ -132,7 +132,7 @@ function lpBuild(s){
   const id=LP.BASE+s;if(LEVELS[id])return;
   if(typeof KH_READY!=='undefined'&&!KH_READY)return;
   ohAlias();oqAlias();ohArt();ohFloors();ohStyles();isleFloors();lpArt();
-  const PAD=s===LP.N-1?60:0,W=LP.W,H=LP.H+PAD,Y0=PAD,N=W*H,CX=LP.CX,leg=LP_LEG(s),mir=leg==='S',MX=x=>mir?W-1-x:x,hs=(a,b,c)=>hash2(a,b,c),sd=s*37+11,gsd=LP_LEG_SD[leg],OV=LPOV,GY=y=>s*(LP.H-OV)+(LP.H-1-(y-Y0)),safeLo=Y0+OV+20,safeHi=H-OV-20;
+  const PAD=s===LP.N-1?60:0,W=LP.W,H=LP.H+PAD,Y0=PAD,N=W*H,CX=LP.CX,leg=LP_LEG(s),mir=false,MX=x=>mir?W-1-x:x,hs=(a,b,c)=>hash2(a,b,c),sd=s*37+11,gsd=LP_LEG_SD[leg],OV=LPOV,GY=y=>s*(LP.H-OV)+(LP.H-1-(y-Y0)),safeLo=Y0+OV+20,safeHi=H-OV-20;
   const mount=leg==='W'||leg==='D',coast=!mount,open_=y=>coast||(s===LP.N-1&&y<64+Y0);
   const wet=y=>s===LP.N-1&&y<=Y0+5; // the sea beyond the cliff // the last stretch opens out onto a green terrace above the sea
   const OAKS=['ltree0','ltree4','ltree8','ltree12','ltree19'],PINES=['ptree0','ptree5','ptree6','ptree0','ptree5','ptree2','ptree7','ltree2'],FLO=['lflora0','lflora0_1','lflora0_2'];
@@ -368,7 +368,7 @@ function lpSwapTick(){
   if(t<0)return;
   if(!LEVELS[LP.BASE+t]&&KH_LAZY[LP.BASE+t])KH_LAZY[LP.BASE+t]();
   const T0=t===LP.N-1?60:0,gy=s*(LP.H-LPOV)+(LP.H-1-(G.P.y-Y0)),y2=T0+(LP.H-1)-(gy-t*(LP.H-LPOV));
-  const lg=LP_LEG(s)==='S'?LP.W-1-G.P.x:G.P.x,x2=LP_LEG(t)==='S'?LP.W-1-lg:lg;
+  const x2=G.P.x; // no stretch is mirrored, so the party keeps its place across the side of the road
   G._lpSwap=1;const f=G.P.f,go=()=>{goToLevel(LP.BASE+t,{x:x2,y:Math.round(y2),f});try{G.lvlBanners=[];if(G.msgs)G.msgs.length=0}catch(e){}};
   if(LP_LEG(s)!==LP_LEG(t)){LPF.on=1;LPF.a=0;LPF.go=go;return} // where the country itself changes (coast to mountains and back) the carrying is hidden by a short fade
   go();G._lpSwap=0;
