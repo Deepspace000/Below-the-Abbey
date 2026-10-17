@@ -60,7 +60,7 @@ function teleportTo(n){
   const sp=teleSpot(n);if(!sp||!teleActive(n)){msg('The stone does not answer.','#d09a80');return}
   const L=LEVELS[n];let f=0;for(let k=0;k<4;k++){const c=(L.rows[sp.y+DIRS[k][1]]||'')[sp.x+DIRS[k][0]];if(c==='.'){f=k;break}}
   G.teleMode=false;G.overview=false;G.world=false;
-  TP={ph:'out',t:0,n,sp,f,name:L.label||L.name};
+  TP={ph:'out',t:0,n,sp,f,name:L.teleName||L.label||L.name};
   sfx('level');
 }
 const TP_OUT=1.2,TP_BLACK=.45,TP_IN=1.3,TP_NAME=3.4;
@@ -109,7 +109,7 @@ function teleFromMap(k){
   if(!go.length){G.wnote={text:'You are already here.',t:G.time};return}
   if(go.length===1){teleportTo(go[0]);return}
   G.overview=false;G.world=false;G.teleMode=false;
-  G.talk={d:{k:'teleporter'},n:{name:'Teleporter'},node:say('Which stone in '+loc.n+'?',go.map(v=>[(LEVELS[v]&&(LEVELS[v].label||LEVELS[v].name))||LEVEL_NAMES[v]||'Level '+v,()=>{teleportTo(v);return null}]).concat([['Stay here.',()=>null]])),t:G.time,btns:[]};G.hold=null;G.queued=null;
+  G.talk={d:{k:'teleporter'},n:{name:'Teleporter'},node:say('Which stone in '+loc.n+'?',go.map(v=>[(LEVELS[v]&&(LEVELS[v].teleName||LEVELS[v].label||LEVELS[v].name))||LEVEL_NAMES[v]||'Level '+v,()=>{teleportTo(v);return null}]).concat([['Stay here.',()=>null]])),t:G.time,btns:[]};G.hold=null;G.queued=null;
 }
 /* the stone itself, painted: a round dais of old grey stone with a ring of runes that wakes to a pale blue light */
 function dsTeleStone(frame){

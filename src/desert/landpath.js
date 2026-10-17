@@ -16,7 +16,8 @@ const LP_BUILD=[ // [segment, kind, row, name, keeper id]
   [9,'house',200,"The Hermit’s House",'lp_r2'],[11,'church',300,'The Chapel of the Quiet','lp_pr1'],[13,'inn',160,'The Cold Spring Inn','lp_inn1'],[15,'house',90,"The Charcoal-Burner’s House",'lp_r3'],
   [17,'house',270,"The Gardener’s House",'lp_r4'],[18,'church',200,"Saint Aldric’s by the Sea",'lp_pr2'],[19,'inn',320,"The Wayfarer’s Rest",'lp_inn2'],[20,'house',120,"The Beekeeper’s House",'lp_r5'],[22,'house',300,"The Last House",'lp_r6']
 ];
-const LP_TELE=[3,9,14,19]; // segments with a hidden stone teleporter in the forest (or the mountain rocks)
+const LP_TELE=[]; // (the old hidden stones are gone: a stone stands beside every fifth signpost instead)
+const LP_TELE_OLD=[3,9,14,19]; // segments with a hidden stone teleporter in the forest (or the mountain rocks)
 const LP_ROOM=(i)=>LP.ROOM0+i;
 for(let i=0;i<LP_BUILD.length;i++)LEVEL_NAMES[LP_ROOM(i)]=LP_BUILD[i][3];
 for(let s=0;s<LP.N;s++)LEVEL_NAMES[LP.BASE+s]=LP_LEG(s)==='W'?'The Pilgrim’s Path, over the mountains':LP_LEG(s)==='D'?'The Pilgrim’s Path, the high pass':'The Pilgrim’s Path';
@@ -259,7 +260,7 @@ function lpBuild(s){
     decor.push({k:'lamp',x:MX(x0-2),y:y0-1,block:false,walk:true,deco:true});lights.push([MX(x0-2),y0-1]);used.add(K(x0-2,y0-1));
   }
   /* ---- the hidden nook with a teleporter ---- */
-  let tele=null;
+  let tele=null,stoneKm=null;
   if(LP_TELE.includes(s)){
     const c=xc[teleY],ex=c+20;lane(fe(teleY)-1,ex+1,teleY,0);circle(ex,teleY,2);tele={x:MX(ex),y:teleY};
     for(let x=fe(teleY);x<=ex;x++)if(hs(x,teleY,sd+20)<.5&&x%2===0)scenery.push({k:FLO[x%3],wx:MX(x)+.5,wy:teleY+.5,sc:.5,decor:{k:FLO[x%3],walk:true,x:MX(x),y:teleY}});
@@ -305,7 +306,9 @@ function lpBuild(s){
     if(open_(y)&&coast&&g%47===23&&hs(g,7,gsd+80)>=.3){const wl=c-6+Math.round(2.2*Math.sin(g*.11)),bx=wl-8-((hs(g,8,gsd+81)*14)|0),bk=['yar_boat_fish','yar_boat_row','yar_boat_dhow'][(hs(g,9,gsd+82)*3)|0];if(bx>=4&&IMG[bk]){used.add(K(bx,y));decor.push({k:bk,x:MX(bx),y,block:true,deco:true,sc:.9})}}
     if(g%104===52){const q=Math.floor(g/104),sg=q%2?-1:1,x=c+sg*4;if(!used.has(K(x,y))&&!used.has(K(x,y+1))){used.add(K(x,y));used.add(K(x+sg,y+1));used.add(K(x,y+1));
       decor.push({k:'memorial',x:MX(x),y,block:true,npc:'lp_shrine',sc:.9},{k:'flowerpot',x:MX(x+sg),y:y+1,block:false,walk:true,deco:true,sc:.8},{k:IMG.breadbasket?'breadbasket':'flowerpot',x:MX(x),y:y+1,block:false,walk:true,deco:true,sc:.8})}}
-    for(let m=1;m<LP_KM;m++){if(Math.round(m*LP_ROWS_KM)!==g)continue;const sk=lpSignKey(LP_KM-m);if(!sk)continue;const sx=c+(m%2?3:-3);if(used.has(K(sx,y)))continue;used.add(K(sx,y));decor.push({k:sk,x:MX(sx),y,block:false,walk:true,deco:true})} // a signpost at every kilometre: To Yarrim, and how far
+    for(let m=1;m<LP_KM;m++){if(Math.round(m*LP_ROWS_KM)!==g)continue;const sk=lpSignKey(LP_KM-m);if(!sk)continue;let dx=null;for(const q of (m%2?[3,4,-3,-4]:[-3,-4,3,4]))if(!used.has(K(c+q,y))){dx=q;break} // the usual side of the road, or the next free place
+      if(dx===null)continue;const sx=c+dx;used.add(K(sx,y));decor.push({k:sk,x:MX(sx),y,block:false,walk:true,deco:true});
+      if((LP_KM-m)%5===0&&!tele&&s!==LP.N-1){let ex=sx-Math.sign(dx),ey=y;if(used.has(K(ex,ey))){ey=y+1;if(used.has(K(ex,ey)))ey=y-1}used.add(K(ex,ey));tele={x:MX(ex),y:ey};stoneKm=LP_KM-m}} // a stone teleporter right beside the sign, every five kilometres // a signpost at every kilometre: To Yarrim, and how far
   }
   if(s===LPM.SEG){const md=lpMonDoor(),sk=lpBoard('lp_sign_mon','SAINT ELEN’S','monastery 300 m');if(sk){used.add(K(md.c+3,md.y+3));decor.push({k:sk,x:MX(md.c+3),y:md.y+3,block:false,walk:true,deco:true})}lamp(md.x-2,md.y-2);lamp(md.x-2,md.y+2)}
   // (the tall moored ships of the quay are left out here: from far off they only show as grey slabs against the sea)
@@ -332,7 +335,8 @@ function lpBuild(s){
   for(let y=H-4;y<H-1;y++)for(let x=CX-6;x<=CX+6;x++)used.add(K(x,y));
   const lv={rows:rows.map(r=>r.join('')),start:{x:MX(CX),y:H-5,f:0},enemies:[],items:[],decor,scenery,sky,fmap:null,floorSet:['ohMeadow','ohGravel','ohLawn','bluesand','bluewater','ohMoss','isleSandDk','wood'],floor:'ohMeadow',ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:LEVEL_NAMES[id],label:'The Pilgrim’s Path',noExtras:true,diff:25,ceilH:5.2,chars,lights,portals:[],_walk:walkers};
-  if(tele)lv.tele=tele;else lv.noTele=true;
+  if(s===LP.N-1){tele={x:MX(CX+2),y:Y0+12};stoneKm=0} // the last stone stands by the cliff above Yarrim
+  if(tele){lv.tele=tele;lv._stoneKm=stoneKm;lv.teleName='The Pilgrim’s Path, '+(stoneKm?stoneKm+' km to Yarrim':'the cliff above Yarrim')}else lv.noTele=true;
   lv.mapNames=[{t:s===0?'The Land Gate':'The Pilgrim’s Path',x:MX(CX),y:H-10,k:'lane'}];
   const fmap=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=fm[y*W+x];fmap.push(r)}lv.fmap=fmap;
   LEVELS[id]=lv;TERRS[id]=yarTerrain(W,H,h,rk,block);

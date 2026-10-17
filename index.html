@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.290';
+const VERSION='3.293';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -6880,6 +6880,7 @@ function drawAch(){
   const A=achList(),per=30,pages=Math.max(1,Math.ceil(A.out.length/per));G.achPage=clamp(G.achPage||0,0,pages-1);
   txt('ACHIEVEMENTS',240,24,13,'#d8c88e','center',true);
   txt(`Dungeons visited: ${A.got} of ${A.total}`,240,40,9.5,'#e8d890','center',true);
+  if(typeof ppCount==='function'&&ppCount()>0)txt(`Pilgrim’s Path stones lit: ${ppCount()} of 20`+(G.flags.lpAbbot?'   Completed':''),240,50,8.5,'#a8d8ff','center',true);
   const page=A.out.slice(G.achPage*per,G.achPage*per+per);
   page.forEach((r,i)=>{const col=i<15?0:1,row=i%15,x=44+col*208,y=58+row*15.5;
     if(r.h)txt(r.h,x,y,8.5,'#c8a860','left',true,undefined,196);
@@ -8088,7 +8089,7 @@ function teleportTo(n){
   const sp=teleSpot(n);if(!sp||!teleActive(n)){msg('The stone does not answer.','#d09a80');return}
   const L=LEVELS[n];let f=0;for(let k=0;k<4;k++){const c=(L.rows[sp.y+DIRS[k][1]]||'')[sp.x+DIRS[k][0]];if(c==='.'){f=k;break}}
   G.teleMode=false;G.overview=false;G.world=false;
-  TP={ph:'out',t:0,n,sp,f,name:L.label||L.name};
+  TP={ph:'out',t:0,n,sp,f,name:L.teleName||L.label||L.name};
   sfx('level');
 }
 const TP_OUT=1.2,TP_BLACK=.45,TP_IN=1.3,TP_NAME=3.4;
@@ -8137,7 +8138,7 @@ function teleFromMap(k){
   if(!go.length){G.wnote={text:'You are already here.',t:G.time};return}
   if(go.length===1){teleportTo(go[0]);return}
   G.overview=false;G.world=false;G.teleMode=false;
-  G.talk={d:{k:'teleporter'},n:{name:'Teleporter'},node:say('Which stone in '+loc.n+'?',go.map(v=>[(LEVELS[v]&&(LEVELS[v].label||LEVELS[v].name))||LEVEL_NAMES[v]||'Level '+v,()=>{teleportTo(v);return null}]).concat([['Stay here.',()=>null]])),t:G.time,btns:[]};G.hold=null;G.queued=null;
+  G.talk={d:{k:'teleporter'},n:{name:'Teleporter'},node:say('Which stone in '+loc.n+'?',go.map(v=>[(LEVELS[v]&&(LEVELS[v].teleName||LEVELS[v].label||LEVELS[v].name))||LEVEL_NAMES[v]||'Level '+v,()=>{teleportTo(v);return null}]).concat([['Stay here.',()=>null]])),t:G.time,btns:[]};G.hold=null;G.queued=null;
 }
 /* the stone itself, painted: a round dais of old grey stone with a ring of runes that wakes to a pale blue light */
 function dsTeleStone(frame){
@@ -16471,7 +16472,8 @@ const LP_BUILD=[ // [segment, kind, row, name, keeper id]
   [9,'house',200,"The Hermit’s House",'lp_r2'],[11,'church',300,'The Chapel of the Quiet','lp_pr1'],[13,'inn',160,'The Cold Spring Inn','lp_inn1'],[15,'house',90,"The Charcoal-Burner’s House",'lp_r3'],
   [17,'house',270,"The Gardener’s House",'lp_r4'],[18,'church',200,"Saint Aldric’s by the Sea",'lp_pr2'],[19,'inn',320,"The Wayfarer’s Rest",'lp_inn2'],[20,'house',120,"The Beekeeper’s House",'lp_r5'],[22,'house',300,"The Last House",'lp_r6']
 ];
-const LP_TELE=[3,9,14,19]; // segments with a hidden stone teleporter in the forest (or the mountain rocks)
+const LP_TELE=[]; // (the old hidden stones are gone: a stone stands beside every fifth signpost instead)
+const LP_TELE_OLD=[3,9,14,19]; // segments with a hidden stone teleporter in the forest (or the mountain rocks)
 const LP_ROOM=(i)=>LP.ROOM0+i;
 for(let i=0;i<LP_BUILD.length;i++)LEVEL_NAMES[LP_ROOM(i)]=LP_BUILD[i][3];
 for(let s=0;s<LP.N;s++)LEVEL_NAMES[LP.BASE+s]=LP_LEG(s)==='W'?'The Pilgrim’s Path, over the mountains':LP_LEG(s)==='D'?'The Pilgrim’s Path, the high pass':'The Pilgrim’s Path';
@@ -16714,7 +16716,7 @@ function lpBuild(s){
     decor.push({k:'lamp',x:MX(x0-2),y:y0-1,block:false,walk:true,deco:true});lights.push([MX(x0-2),y0-1]);used.add(K(x0-2,y0-1));
   }
   /* ---- the hidden nook with a teleporter ---- */
-  let tele=null;
+  let tele=null,stoneKm=null;
   if(LP_TELE.includes(s)){
     const c=xc[teleY],ex=c+20;lane(fe(teleY)-1,ex+1,teleY,0);circle(ex,teleY,2);tele={x:MX(ex),y:teleY};
     for(let x=fe(teleY);x<=ex;x++)if(hs(x,teleY,sd+20)<.5&&x%2===0)scenery.push({k:FLO[x%3],wx:MX(x)+.5,wy:teleY+.5,sc:.5,decor:{k:FLO[x%3],walk:true,x:MX(x),y:teleY}});
@@ -16760,7 +16762,9 @@ function lpBuild(s){
     if(open_(y)&&coast&&g%47===23&&hs(g,7,gsd+80)>=.3){const wl=c-6+Math.round(2.2*Math.sin(g*.11)),bx=wl-8-((hs(g,8,gsd+81)*14)|0),bk=['yar_boat_fish','yar_boat_row','yar_boat_dhow'][(hs(g,9,gsd+82)*3)|0];if(bx>=4&&IMG[bk]){used.add(K(bx,y));decor.push({k:bk,x:MX(bx),y,block:true,deco:true,sc:.9})}}
     if(g%104===52){const q=Math.floor(g/104),sg=q%2?-1:1,x=c+sg*4;if(!used.has(K(x,y))&&!used.has(K(x,y+1))){used.add(K(x,y));used.add(K(x+sg,y+1));used.add(K(x,y+1));
       decor.push({k:'memorial',x:MX(x),y,block:true,npc:'lp_shrine',sc:.9},{k:'flowerpot',x:MX(x+sg),y:y+1,block:false,walk:true,deco:true,sc:.8},{k:IMG.breadbasket?'breadbasket':'flowerpot',x:MX(x),y:y+1,block:false,walk:true,deco:true,sc:.8})}}
-    for(let m=1;m<LP_KM;m++){if(Math.round(m*LP_ROWS_KM)!==g)continue;const sk=lpSignKey(LP_KM-m);if(!sk)continue;const sx=c+(m%2?3:-3);if(used.has(K(sx,y)))continue;used.add(K(sx,y));decor.push({k:sk,x:MX(sx),y,block:false,walk:true,deco:true})} // a signpost at every kilometre: To Yarrim, and how far
+    for(let m=1;m<LP_KM;m++){if(Math.round(m*LP_ROWS_KM)!==g)continue;const sk=lpSignKey(LP_KM-m);if(!sk)continue;let dx=null;for(const q of (m%2?[3,4,-3,-4]:[-3,-4,3,4]))if(!used.has(K(c+q,y))){dx=q;break} // the usual side of the road, or the next free place
+      if(dx===null)continue;const sx=c+dx;used.add(K(sx,y));decor.push({k:sk,x:MX(sx),y,block:false,walk:true,deco:true});
+      if((LP_KM-m)%5===0&&!tele&&s!==LP.N-1){let ex=sx-Math.sign(dx),ey=y;if(used.has(K(ex,ey))){ey=y+1;if(used.has(K(ex,ey)))ey=y-1}used.add(K(ex,ey));tele={x:MX(ex),y:ey};stoneKm=LP_KM-m}} // a stone teleporter right beside the sign, every five kilometres // a signpost at every kilometre: To Yarrim, and how far
   }
   if(s===LPM.SEG){const md=lpMonDoor(),sk=lpBoard('lp_sign_mon','SAINT ELEN’S','monastery 300 m');if(sk){used.add(K(md.c+3,md.y+3));decor.push({k:sk,x:MX(md.c+3),y:md.y+3,block:false,walk:true,deco:true})}lamp(md.x-2,md.y-2);lamp(md.x-2,md.y+2)}
   // (the tall moored ships of the quay are left out here: from far off they only show as grey slabs against the sea)
@@ -16787,7 +16791,8 @@ function lpBuild(s){
   for(let y=H-4;y<H-1;y++)for(let x=CX-6;x<=CX+6;x++)used.add(K(x,y));
   const lv={rows:rows.map(r=>r.join('')),start:{x:MX(CX),y:H-5,f:0},enemies:[],items:[],decor,scenery,sky,fmap:null,floorSet:['ohMeadow','ohGravel','ohLawn','bluesand','bluewater','ohMoss','isleSandDk','wood'],floor:'ohMeadow',ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:LEVEL_NAMES[id],label:'The Pilgrim’s Path',noExtras:true,diff:25,ceilH:5.2,chars,lights,portals:[],_walk:walkers};
-  if(tele)lv.tele=tele;else lv.noTele=true;
+  if(s===LP.N-1){tele={x:MX(CX+2),y:Y0+12};stoneKm=0} // the last stone stands by the cliff above Yarrim
+  if(tele){lv.tele=tele;lv._stoneKm=stoneKm;lv.teleName='The Pilgrim’s Path, '+(stoneKm?stoneKm+' km to Yarrim':'the cliff above Yarrim')}else lv.noTele=true;
   lv.mapNames=[{t:s===0?'The Land Gate':'The Pilgrim’s Path',x:MX(CX),y:H-10,k:'lane'}];
   const fmap=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=fm[y*W+x];fmap.push(r)}lv.fmap=fmap;
   LEVELS[id]=lv;TERRS[id]=yarTerrain(W,H,h,rk,block);
@@ -19873,6 +19878,41 @@ function armourLeech(i,d){const f=pas(i,'lifesteal');if(f>0){const h=G.heroes[i]
 function armourSecondWind(t){
   const h=G.heroes[t],f=pas(t,'secondWind');if(!h||!h.alive||f<=0||h.hp>=h.max*.25||(h.swT!==undefined&&G.rounds<h.swT))return;
   h.swT=G.rounds+30;const n=Math.round(h.max*f);h.hp=Math.min(h.max,h.hp+n);sfx('heal');msg(`${HERO_DEF[t].name} catches a second wind (+${n}).`,'#ffe9a0');addFloat(portraitX(t)+19,250,'+'+n,'#ffe9a0')}
+
+/* ---- src/desert/pilgrim.js ---- */
+/* ==========================================================================
+   THE PILGRIM'S PATH, COMPLETED. A stone teleporter stands beside every fifth signpost (95, 90 ... 5 km to Yarrim) and another by the cliff above
+   Yarrim: twenty in all. When the party has woken every one, an achievement comes up, with 1000 gold and the armour of a powerful abbot in the
+   backpack: a mitre, a chasuble of plate, cuffs and robe-hem greaves, with a set bonus. Any class may wear it.
+   ========================================================================== */
+const PP_KMS=[95,90,85,80,75,70,65,60,55,50,45,40,35,30,25,20,15,10,5,0];
+function ppCount(){const f=(G.flags&&G.flags.lpKm)||{};return PP_KMS.filter(k=>f[k]).length}
+const PP_SET=[ // [id, slot, name, type, picture, armour, effects, what it is]
+ ['pp_h','head','Abbot’s Mitre of the Pilgrim’s Path','Helm','head',22,{ward:12,secondWind:.5},'A tall white and gold mitre with a blue gem and a golden cross.'],
+ ['pp_c','chest','Abbot’s Chasuble Plate','Chest','chest',40,{regen:.9,dodge:.08},'Plate cut like the vestment of an abbot, with a long red and gold stole.'],
+ ['pp_a','arms','Abbot’s Embroidered Cuffs','Arms','arms',14,{lifesteal:.1,dmgPct:.12},'Wide cuffs of white and gold plate, sewn with small golden crosses.'],
+ ['pp_l','legs','Abbot’s Pilgrim Greaves','Legs','legs',18,{mpRegen:.6,hungerSlow:.5},'Greaves like the hem of a robe, with golden pilgrim sandals.']];
+const PP_BONUS={ward:10,regen:1.2,secondWind:.5,dmgPct:.15,dodge:.08};
+{const btxt=Object.keys(PP_BONUS).map(k=>ARM_TXT[k](PP_BONUS[k])).join(' ');
+ ARM_SET_OF.abbot={name:'Abbot of the Pilgrim’s Path',bonus:PP_BONUS,btxt,lv:1,key:'abbot'};
+ for(const [id,slot,n,ty,ic,armor,pas,what] of PP_SET){
+   ITEMDEF[id]={n,k:slot,t:ty,ic,c:'#e8d890',armor,price:9000,lvl:1,pas,set:'abbot',rar:1,
+     d:`${what} ${Object.keys(pas).map(k=>ARM_TXT[k](pas[k])).join(' ')} Set bonus (all four): ward 10, regeneration, second wind, +15% damage, dodging. Any class.`,sw:slot==='chest'?.46:.38,gear:1}}
+ if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push(...PP_SET.map(q=>q[0]))}
+CUTS.pilgrimDone=()=>[{text:'ACHIEVEMENT. You have completed the pilgrim’s path.'},{text:'Look for a reward in your backpack...'}];
+function ppReward(){
+  const F=G.flags;if(F.lpAbbot)return;F.lpAbbot=1;G.gold+=1000;
+  for(const [id] of PP_SET){if(!bagAdd(mkItem(id)))G.items.push({k:id,x:G.P.x,y:G.P.y,taken:false})}
+  msg('Achievement: You have completed the pilgrim’s path. Look for a reward in your backpack... (1000 gold and the armour of an abbot)','#ffe36a');sfx('win');
+  startCut('pilgrimDone');
+}
+function ppStep(nx,ny){
+  const L=LEVELS[LEVEL];if(!L||L._stoneKm===undefined||L._stoneKm===null||!G.tele||nx!==G.tele.x||ny!==G.tele.y)return;
+  const F=G.flags;F.lpKm=F.lpKm||{};
+  if(!F.lpKm[L._stoneKm]){F.lpKm[L._stoneKm]=1;msg(`Pilgrim stone lit: ${ppCount()} of 20.`,'#a8d8ff')}
+  if(!F.lpAbbot&&ppCount()>=PP_KMS.length)ppReward();
+}
+{const _ts=teleStep;teleStep=function(nx,ny){_ts.apply(this,arguments);try{ppStep(nx,ny)}catch(e){console.error(e)}}}
 
 /* ---- src/desert/new_shops.js ---- */
 /* ==========================================================================
