@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.301';
+const VERSION='3.303';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2656,9 +2656,9 @@ function render3D(){
   // wall torches: an iron plate on the wall and a wooden stick that runs out to the cloth-wrapped head under the flame
   for(const h of G.hits){
     const L=h.L;if(h.type!=='torch'||h.ty<.4||L.key<0)continue;
-    const dd=DIRS[L.key&3],ax=L.x-dd[0]*TORCH_OUT,ay=L.y-dd[1]*TORCH_OUT,rx=ax-cx,ry=ay-cy,t2=(-1/PL)*(-pY*rx+pX*ry),x2=(-1/PL)*(dY*rx-dX*ry);
+    const dd=DIRS[L.key&3],OO=L.o!==undefined?L.o:TORCH_OUT,ax=L.x-dd[0]*OO,ay=L.y-dd[1]*OO,rx=ax-cx,ry=ay-cy,t2=(-1/PL)*(-pY*rx+pX*ry),x2=(-1/PL)*(dY*rx-dX*ry);
     if(t2<.25)continue;
-    const sx2=VW/2*(1+x2/t2),zA=CEILH*.5+TORCH_ZA,y2=HH-(zA-EYE)*F/t2,y1=HH-(zA+TORCH_RISE-EYE)*F/h.ty,w1=.11*F/h.ty,w2=.075*F/t2;
+    const sx2=VW/2*(1+x2/t2),zA=CEILH*.5+TORCH_ZA,y2=HH-(zA-EYE)*F/t2,y1=HH-(zA+(L.nar?TORCH_RISE*.55:TORCH_RISE)-EYE)*F/h.ty,w1=(L.nar?.075:.11)*F/h.ty,w2=.075*F/t2;
     const lit=clamp(.8+.3*Math.max(0,1-h.ty/6),.6,1.2);
     vctx.save();vctx.globalAlpha=1;
     vctx.fillStyle='rgb('+((64*lit)|0)+','+((58*lit)|0)+','+((50*lit)|0)+')'; // the iron plate fixed to the wall
@@ -2784,7 +2784,10 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     if(s.e){s.e.sx=scrX;s.e.sy=top+sh*.45}
     {const xa=Math.max(0,Math.floor(left)),xb=Math.min(VW-1,Math.ceil(left+sw));if(xb<xa||ty>(s.sky?400:farT))continue;let any=s.decor&&SKYLINE.test(s.decor.k);for(let xx=xa;xx<=xb&&!any;xx+=2)if(zbuf[xx]>ty){any=true;break}if(!any&&!(s.pic&&!TERR_NOW))continue} // skip hidden sprites
     let anyVis=false;
-    if(!TERR_NOW&&!s.hang&&!s.pic&&!(s.decor&&(NOSHADOW.test(s.decor.k)||SKYLINE.test(s.decor.k)||/^pgrass|^pflw/.test(s.decor.k)||s.decor.k==='hlant'||s.decor.k==='cfire'))&&!(s.e&&ENEMY_DEF[s.e.t].fly)){SC.save();const tr=s.decor&&NOSHADOW.test(s.decor.k);SC.globalAlpha=(s.fade!==undefined?Math.max(0,Math.min(1,s.fade)):1)*(tr?.5:.36);SC.fillStyle='#000';SC.beginPath();if(s.decor&&/^kh_int/.test(s.decor.lk||"")){const sy=Math.max(2,sw*.035);SC.fillRect(scrX-sw*.46,bottom-sy*.5,sw*.92,sy)}else{SC.ellipse(scrX,bottom,sw*(tr?.24:.34),Math.max(1.2,sw*(tr?.06:.055)),0,0,TAU);SC.fill()}SC.restore()}
+    if(!TERR_NOW&&!s.hang&&!s.pic&&!(s.decor&&(NOSHADOW.test(s.decor.k)||SKYLINE.test(s.decor.k)||/^pgrass|^pflw/.test(s.decor.k)||s.decor.k==='hlant'||s.decor.k==='cfire'))&&!(s.e&&ENEMY_DEF[s.e.t].fly)){SC.save();const tr=s.decor&&NOSHADOW.test(s.decor.k);SC.globalAlpha=(s.fade!==undefined?Math.max(0,Math.min(1,s.fade)):1)*(tr?.5:.36);SC.fillStyle='#000';SC.beginPath();if(s.decor&&/^kh_int/.test(s.decor.lk||"")){const sy=Math.max(2,sw*.035);SC.fillRect(scrX-sw*.46,bottom-sy*.5,sw*.92,sy)}else{{ // a shadow is clipped to the columns where nothing nearer stands in front: it never paints over a wall or a trunk in front of it
+        const xa2=Math.max(0,Math.floor(scrX-sw*.36)),xb2=Math.min(VW-1,Math.ceil(scrX+sw*.36));SC.save();SC.beginPath();let st=-1;
+        for(let xx=xa2;xx<=xb2+1;xx++){const vis=xx<=xb2&&zbuf[xx]>ty;if(vis&&st<0)st=xx;else if(!vis&&st>=0){SC.rect(st,0,xx-st,4000);st=-1}}
+        SC.clip();SC.beginPath();SC.ellipse(scrX,bottom,sw*(tr?.24:.34),Math.max(1.2,sw*(tr?.06:.055)),0,0,TAU);SC.fill();SC.restore()}}SC.restore()}
     // lighting
     const wx=s.x,wy=s.y,dist=Math.hypot(wx-cx,wy-cy);
     let lt=0;for(let k=0;k<nearL.length;k+=3){const ax=wx-nearL[k],ay=wy-nearL[k+1];lt+=nearL[k+2]/(1+1.15*(ax*ax+ay*ay))}
@@ -3079,7 +3082,8 @@ function setupLights(){
   for(const [x,y,f,nx,ny] of out){
     const d=DIRS[f],key=(y*MW+x)*4+f,red=(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?hash2(x,y,31)<((G.grid[ny][nx-1]>0&&G.grid[ny][nx+1]>0)||(G.grid[ny-1][nx]>0&&G.grid[ny+1][nx]>0)?.88:.5):!!zoneAt(nx,ny)[5]; // the wall torches of the Hollow Land burn red or purple
     torchAt.set(key,red?2:1);
-    LIGHTS.push({x:x+.5+d[0]*(.5+TORCH_OUT),y:y+.5+d[1]*(.5+TORCH_OUT),ph:hash2(x,y,5)*6.28,key,taken:false,red});
+    const nar=(G.grid[ny][nx-1]>0&&G.grid[ny][nx+1]>0)||(G.grid[ny-1][nx]>0&&G.grid[ny+1][nx]>0),O=nar?.035:TORCH_OUT; // in a one-square passage the torch lies flat to the wall instead of standing out into the way
+    LIGHTS.push({x:x+.5+d[0]*(.5+O),y:y+.5+d[1]*(.5+O),ph:hash2(x,y,5)*6.28,key,taken:false,red,o:O,nar});
   }
   if(G.extraLights)for(const [x,y,rd] of G.extraLights)LIGHTS.push({x:x+.5,y:y+.5,ph:hash2(x,y,9)*6.28,key:-1-LIGHTS.length,taken:false,red:!!rd,free:true});
 }
@@ -3195,7 +3199,7 @@ function drawSlot(x,y,w,round,sel,it,label){
   ctx.restore();
   if(it){
     const d=idef(it);itemIcon(d,x+w/2,y+w/2,w/38);
-    if(it.n>1){txt(String(it.n),x+w-4,y+w-6,9,'#fff','right',true)}
+    if(it.n>1){txt(String(it.n),x+5,y+9,9,'#fff','left',true)}
   }else if(label)txt(label,x+w/2,y+w/2,6.5,'rgba(220,200,160,.4)','center');
 }
 function selItem(){
@@ -4736,7 +4740,6 @@ function drawOverview(){
     txt(name,ox+(x1+x2+1)/2*cs,oy+(y1+y2+1)/2*cs+1,7,'#f0e4b4','center',true);
   }
   for(const d of G.decor){ctx.fillStyle=d.k==='cart'?'#d8b040':d.k==='coffin'?'#aaaab4':d.k==='barrel'?'#8a5a2a':'#d8d0b0';ctx.fillRect(ox+d.x*cs+2.5,oy+d.y*cs+2.5,cs-5.6,cs-5.6)}
-  for(const L of LIGHTS){ctx.fillStyle=L.taken?'rgba(255,255,255,.2)':L.red?'#ff4a30':'#ffb040';ctx.beginPath();ctx.arc(ox+L.x*cs,oy+L.y*cs,2.4,0,TAU);ctx.fill()}
   for(const it of G.items){ctx.fillStyle=it.taken?'rgba(255,255,255,.25)':it.k==='key'?'#ffd76a':(ITEMDEF[it.k]&&ITEMDEF[it.k].rar)?'#e070e8':'#e8e0d0';
     const lt=it.k==='key'?'K':(ITEMDEF[it.k]?KIND_LETTER[ITEMDEF[it.k].k]:/^sundisc/.test(it.k)?'*':'?')||'?';txt(lt,ox+(it.x+.5)*cs,oy+(it.y+.5)*cs+.5,7.5,ctx.fillStyle,'center',true)}
   for(const e of G.enemies){if(e.hp<=0)continue;const gl=enemyGlyph(e.t);ctx.fillStyle=gl[0];
@@ -4762,7 +4765,7 @@ function drawOverview(){
     if(rare)R.push(()=>row('Magic item','#e070e8','*'));
     const dot=(label,c)=>R.push(()=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(lx+6,ly-1,3,0,TAU);ctx.fill();txt(label,lx+16,ly,8,'#cdbf94','left');ly+=LS});
     const sq=(label,c)=>R.push(()=>{ctx.fillStyle=c;ctx.fillRect(lx+2,ly-5,8,8);txt(label,lx+16,ly,8,'#cdbf94','left');ly+=LS});
-    if(LIGHTS.some(l=>!l.red))dot('Torch','#ffb040');if(LIGHTS.some(l=>l.red))dot('Red torch','#ff4a30');
+
     let hasDoor=false,hasLock=false,hasExit=false,hasGate=false;
     for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const g=G.grid[y][x];if(g===3||(g>=15&&g<=19))hasDoor=true;else if(g===4||g>=200)hasLock=true;else if(g===5)hasExit=true;else if(g===7||(g>=30&&g<100))hasGate=true}
     if(hasDoor)sq('Door','#a8702e');if(hasLock)sq('Locked door','#c03a2a');if(hasExit)sq('Exit stairs','#7ab0f0');if(hasGate)sq(LEVEL>=41?'Cave, stairs or gate':'Gate or exit','#d8b060');
