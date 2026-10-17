@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.312';
+const VERSION='3.313';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1800,7 +1800,7 @@ function heroAttack(i){
     const d0=DIRS[G.P.f];for(const k of [1,0,2]){const x=G.P.x+d0[0]*k,y=G.P.y+d0[1]*k,nd=G.decor.find(d=>d.npc&&d.walk&&!d.found&&d.x===x&&d.y===y);if(nd){startTalk(nd);return false}}
     msg(range>1?'No target in range.':'There is nothing within reach.');return false}
   const en=ENEMY_DEF[f.e.t].name,verb=range>1?'shoots':'hits';
-  if(Math.random()<heroHitPct(i,ENEMY_DEF[f.e.t].fly)){const r=rollDmg(h);msg(`${def.name} ${verb} the ${en} for ${r.d}${r.crit?' (critical hit! x1.5)':''}.`,r.crit?'#ffd76a':undefined);hurtEnemy(f.e,r.d);try{if(typeof armourLeech==='function')armourLeech(i,r.d)}catch(x){}try{if(w&&w.eff)weaponProc(i,f.e,r.d,w,f.k)}catch(x){console.error(x)}}
+  if(Math.random()<heroHitPct(i,ENEMY_DEF[f.e.t].fly)){const r=rollDmg(h);msg(`${def.name} ${verb} the ${en} for ${r.d}${r.crit?' (critical! x1.5)':''}.`,r.crit?'#ffd76a':undefined);hurtEnemy(f.e,r.d);try{if(typeof armourLeech==='function')armourLeech(i,r.d)}catch(x){}try{if(w&&w.eff)weaponProc(i,f.e,r.d,w,f.k)}catch(x){console.error(x)}}
   else{msg(`${def.name} misses.`,'#a09880');sfx('miss');f.e.alert=true}
   return true;
 }
