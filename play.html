@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.226';
+const VERSION='3.227';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -5703,10 +5703,12 @@ function speechLines(lines){
   return lines;
 }
 function startCut(id,end){G.cut={id,i:0,t:G.time,lines:speechLines(CUTS[id]()),end};G.hold=null;G.queued=null}
+const cutCps=C=>C&&C.id==='campMoment'?170:48; // the little scene after a camp choice types fast, and one tap ends it, so the camp page is soon usable again
 function cutAdvance(){
   const C=G.cut;if(!C)return;
-  const ln=C.lines[C.i],full=ln.text.length,shown=Math.floor((G.time-C.t)*48);
-  if(shown<full){C.t=G.time-full/48-.02;return}   // finish the line first
+  if(C.id==='campMoment'){G.cut=null;if(C.end)C.end();return}
+  const ln=C.lines[C.i],full=ln.text.length,shown=Math.floor((G.time-C.t)*cutCps(C));
+  if(shown<full){C.t=G.time-full/cutCps(C)-.02;return}   // finish the line first
   C.i++;C.t=G.time;
   if(C.i>=C.lines.length){const e=C.end;G.cut=null;if(e)e()}
 }
@@ -5759,7 +5761,7 @@ function drawScenePic(){
   const im=IMG[C.pic];
   if(im){const r=Math.max(DW/im.width,DH/im.height),w=im.width*r,h=im.height*r;ctx.drawImage(im,(DW-w)/2,(DH-h)/2,w,h)}
   const g=ctx.createLinearGradient(0,DH-110,0,DH);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.55)');ctx.fillStyle=g;ctx.fillRect(0,DH-110,DW,110);
-  const shown=Math.min(ln.text.length,Math.floor((G.time-C.t)*48)),bx=24,bw=DW-48,lines=wrapText(ln.text,bw-26,10.5),bh=lines.length*13.5+36,by=DH-bh-12;
+  const shown=Math.min(ln.text.length,Math.floor((G.time-C.t)*cutCps(C))),bx=24,bw=DW-48,lines=wrapText(ln.text,bw-26,10.5),bh=lines.length*13.5+36,by=DH-bh-12;
   ctx.fillStyle='rgba(12,9,5,.9)';rrect(ctx,bx,by,bw,bh,4);ctx.fill();
   ctx.lineWidth=2.2;ctx.strokeStyle=goldG(bx,by,bw,bh);rrect(ctx,bx,by,bw,bh,4);ctx.stroke();wornEdge(bx,by,bw,bh,4);illum(bx,by,bw,bh,31);
   txt(ln.title.toUpperCase(),bx+13,by+14,10,'#d8c88e','left',true,undefined,bw-26);
@@ -5770,7 +5772,7 @@ function drawScenePic(){
 }
 function drawCut(){
   const C=G.cut;if(!C)return;const ln=C.lines[C.i];if(!ln)return;
-  const shown=Math.min(ln.text.length,Math.floor((G.time-C.t)*48));
+  const shown=Math.min(ln.text.length,Math.floor((G.time-C.t)*cutCps(C)));
   const bx=30,by=34,bw=360,lines=wrapText(ln.text,bw-26,10.5),bh=Math.max(70,lines.length*13.5+34);
   ctx.save();
   ctx.fillStyle='rgba(12,9,5,.9)';rrect(ctx,bx,by,bw,bh,4);ctx.fill();
