@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.281';
+const VERSION='3.282';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -4341,7 +4341,7 @@ const WORLD_LOCS=[
   {k:'below',n:'Below the Abbey',sub:'past the sealed door',lv:[360,361,362,363],x:112,y:284,ic:'cave'},
   {k:'orangecastle',n:'The Orange Spire',sub:'in the Hollow Land',lv:[364,440,441,442,443,444,445,446,447,448,449,450,451,452,453,454,455,456,457,458,459,460],x:24,y:254,ic:'orangecastle'}
 ];
-const WORLD_ROADS=[['abbey','thornwood','thornwick','gwood'],['gwood','road','tunnel','ironhill'],['ironhill','graves'],['ironhill','mines'],['ironhill','moor','pass','greendale','anaea'],['oldhaven','oakwood'],['abbey','below'],['below','orangecastle'],['oldhaven','landpath','yarrim']];
+const WORLD_ROADS=[['abbey','thornwood','thornwick','gwood'],['gwood','road','tunnel','ironhill'],['ironhill','graves'],['ironhill','mines'],['ironhill','moor','pass','greendale','anaea'],['oldhaven','oakwood'],['abbey','below'],['below','orangecastle'],['oldhaven','yarrim']];
 function lab(s,x,y,size,col){ctx.save();ctx.font=`bold ${size}px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(200,184,140,.9)';ctx.strokeText(s,x,y);ctx.fillStyle=col;ctx.fillText(s,x,y);ctx.restore()}
 const QWORLD={'Thornwick':'thornwick','The Road to Ironhill':'road','Ironhill':'ironhill','Greyfang Pass':'pass','Greendale':'greendale','The Wilds':'thornwood','Khemetra':'scoria','Yarrim':'yarrim','Oldhaven':'oldhaven','The Oakwood':'oakwood','Below the Abbey':'below','Saint Elen’s Monastery':'monastery'};
 const QWORLD_ID={vq1:'saltbarrow',vq2:'bells',vq3:'cinder',vq4:'lastlight',vq6:'oldhaven',yar7:'yarrim',vq5:'yarrim',colours:'anaea',anaea_shake:'anaea',anaea_fence:'anaea',thornwick_shake:'thornwick',thornwick_fence:'thornwick',ironhill_shake:'ironhill',ironhill_fence:'ironhill',khemetra_shake:'scoria',khemetra_fence:'scoria'};
