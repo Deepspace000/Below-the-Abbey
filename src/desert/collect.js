@@ -144,8 +144,8 @@ function drawHand(cx,cy,s,col){ctx.save();ctx.translate(cx,cy);ctx.scale(s,s);ct
 {const _r=restore;restore=function(sv){try{for(const id in (((sv||{}).flags||{}).bottles||{})){const b=sv.flags.bottles[id];if(!QUESTS[id])QUESTS[id]={title:'Message in a Bottle',who:'A message in a bottle',desc:`Dig ${b.dy} squares ${b.ns} and ${b.dx} squares ${b.ew} of the bottle's place on ${b.nm}. Reward: ${b.rw} gold and a jewel.`,need:1,goal:()=>(((G.flags.bottles||{})[id]||{}).done?1:0),reward:{gold:0}};QAREA[id]=b.nm}}catch(e){console.error(e)}return _r.apply(this,arguments)}}
 /* ---------- the Collection menu ---------- */
 function drawCollMenu(){
-  BTNS=[];veil(.6);bigPanel(110,30,260,262);txt('COLLECTION',240,52,14,'#d8c88e','center',true);
+  BTNS=[];veil(.6);bigPanel(110,16,260,288);txt('COLLECTION',240,38,14,'#d8c88e','center',true);
   const row=(id,name,kind)=>{const C=COLL[kind],it=C.items(),d=collData(kind);let n=0;for(const q of it)if(d[q.id]&&(d[q.id].f||d[q.id].s))n++;return [id,name+'   '+n+'/'+it.length]};
-  [row('cl_gems','Jewel Hunter','gems'),row('cl_bf','Butterfly Catching','bf'),row('cl_herb','Herb Collecting','herb'),row('cl_treasure','Treasure','treasure')].forEach(([id,t],i)=>btnText(id,t,130,70+i*34,220,28));
-  btnText('cl_back','Back',170,232,140,28);btn('menuclose',0,0,DW,DH);BTNS.unshift(BTNS.pop());
+  [row('cl_gems','Jewel Hunter','gems'),row('cl_bf','Butterfly Catching','bf'),row('cl_herb','Herb Collecting','herb'),row('cl_treasure','Treasure','treasure'),row('cl_shrines','Shrine Logbook','shrines')].forEach(([id,t],i)=>btnText(id,t,130,52+i*32,220,27));
+  btnText('cl_back','Back',170,226,140,28);btn('menuclose',0,0,DW,DH);BTNS.unshift(BTNS.pop());
 }

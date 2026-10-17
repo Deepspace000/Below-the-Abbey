@@ -21,6 +21,7 @@ function dcPlace(n){
   for(let y=4;y<H-4;y+=2)for(let x=4;x<W-4;x+=2){const i=y*W+x;if(dist[i]<25||blocked[i])continue;
     let mh=99;for(const [hx,hy] of hz){const d=Math.max(Math.abs(hx-x),Math.abs(hy-y));if(d<mh){mh=d;if(mh<10)break}}if(mh<10)continue;
     let open=0;for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++)if(blocked[(y+dy)*W+x+dx])open++; // the more rock and scrub round it, the more tucked away
+    if(typeof terrH==='function'){const h0=terrH(x+.5,y+.5);let fl=true;for(const [dx,dy] of [[2,0],[-2,0],[0,2],[0,-2]])if(Math.abs(terrH(x+dx+.5,y+dy+.5)-h0)>.4){fl=false;break}if(!fl)continue}
     cand.push([x,y,Math.min(mh,24)+open*.3+hash2(x,y,n+7)*4])}
   cand.sort((a,b)=>b[2]-a[2]);
   const picked=[];

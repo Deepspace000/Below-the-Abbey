@@ -72,7 +72,7 @@ function drawColl(kind){
 }
 function collBtn(id){
   if(id==='cl_back'){G.menu=menuBack();return}
-  if(id==='cl_gems'||id==='cl_bf'||id==='cl_herb'||id==='cl_treasure'){G.menuBack='collection';G.menu=id.slice(3);G.collSel=undefined;return}
+  if(id==='cl_gems'||id==='cl_bf'||id==='cl_herb'||id==='cl_treasure'||id==='cl_shrines'){G.menuBack='collection';G.menu=id.slice(3);G.collSel=undefined;return}
   if(id==='coll_back'||id==='menu'||id==='menuclose'){G.collSel=undefined;G.menu=menuBack();return}
   const m=id.match(/^coll_(\d+)$/);if(m)G.collSel=+m[1];
 }
