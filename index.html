@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.244';
+const VERSION='3.245';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1606,7 +1606,7 @@ const countPotions=()=>G.bag.reduce((a,b)=>a+(HEAL_IDS.includes(b.id)?b.n:0),0);
 const partyLevel=()=>G.heroes&&G.heroes.length?Math.max(...G.heroes.map(h=>h.lvl)):1;
 const POTION_LADDER=[['potion',1],['healdraught',8],['potion2',20],['greaterheal',30],['potion3',40],['superiorheal',45],['potion4',50],['potion5',65],['potion6',100],['potion7',140]];
 function potionFor(roll){ // the healing potions that turn up fit the party's level: stronger ones as it climbs, and past level 60 nothing weaker than a Very Strong one
-  const L=partyLevel();let open=POTION_LADDER.filter(([id,m])=>L>=m&&ITEMDEF[id]).map(o=>o[0]);
+  const L=Math.max(partyLevel(),(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[LEVEL])||0);let open=POTION_LADDER.filter(([id,m])=>L>=m&&ITEMDEF[id]).map(o=>o[0]);
   if(L>60){const hi=open.filter(id=>ITEMDEF[id].heal>=210);if(hi.length>=2)open=hi}
   if(open.length<2)return 'potion';
   return roll<.55?open[open.length-1]:open[open.length-2];
