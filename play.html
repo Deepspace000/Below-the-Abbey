@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.269';
+const VERSION='3.270';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -3766,11 +3766,11 @@ function drawCreate(){
     panel(310,150,124,46,false,false);txt('Make my own',372,166,12,'#c8a040','center',true);txt('Faces, names, classes',372,181,8.5,'#a89878','center');btn('cr_pick_own',310,150,124,46);
     // how the world levels: fixed places, or creatures that grow with the party
     txt('How should the world level?',240,210,12,'#e8d8a0','center',true);
-    for(const [i,t,l] of [[0,'Traditional',['Every place has its own level.','Sometimes you must come back','later, stronger, for a challenge.']],[1,'Scaled',['Creatures grow with your party.','A smoother, slightly easier','game, for the casual player.']]]){
+    for(const [i,t,l] of [[0,'Traditional',['Every place has its own level.','Sometimes you must come back later,','stronger, if you initially find a','new level or boss a bit hard.']],[1,'Scaled',['Creatures grow with your party.','A smoother, slightly easier','game, for the casual player.']]]){
       const x=46+i*196,y=218,w=192,h=62,on=!!C.scale===!!i;
       ctx.fillStyle=on?'rgba(70,52,18,.9)':'rgba(22,19,16,.85)';rrect(ctx,x,y,w,h,4);ctx.fill();ctx.lineWidth=on?2.4:1.2;ctx.strokeStyle=on?'#ffe36a':goldG(x,y,w,h);rrect(ctx,x,y,w,h,4);ctx.stroke();
       txt((on?'* ':'')+t,x+w/2,y+11,11.5,on?'#ffe9a0':'#c8a040','center',true);
-      l.forEach((q,j)=>txt(q,x+w/2,y+25+j*11,8.5,on?'#e8dcb4':'#a89878','center'));
+      l.forEach((q,j)=>txt(q,x+w/2,y+24+j*9.5,8.5,on?'#e8dcb4':'#a89878','center'));
       btn('cr_sc'+i,x,y,w,h)}
     txt('You can change this at any time: Menu, Settings, Gameplay.',240,292,8.5,'#a89878','center');
   }
