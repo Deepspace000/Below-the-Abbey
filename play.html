@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.232';
+const VERSION='3.235';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -4272,9 +4272,10 @@ const WORLD_LOCS=[
   {k:'oakwood',n:'The Oakwood',sub:'old oaks east of Oldhaven',lv:[311],x:1244,y:190,ic:'trees'},
   {k:'monastery',n:'Saint Elen’s',sub:'a mountain monastery',lv:[430,431,432,433,434,6900,6901,6902,6903,6904,6905],x:1074,y:44,ic:'abbey'},
   {k:'landpath',n:'The Land Path',sub:'a pilgrim way, one way only',lv:Array.from({length:24},(_,i)=>400+i),x:1130,y:36,ic:'trees'},
-  {k:'below',n:'Below the Abbey',sub:'past the sealed door',lv:[360,361,362,363,364,440,441,442,443,444,445,446,447,448,449,450,451,452,453,454,455,456,457,458,459,460],x:84,y:268,ic:'cave'}
+  {k:'below',n:'Below the Abbey',sub:'past the sealed door',lv:[360,361,362,363],x:84,y:268,ic:'cave'},
+  {k:'orangecastle',n:'The Orange Castle',sub:'in the Hollow Land',lv:[364,440,441,442,443,444,445,446,447,448,449,450,451,452,453,454,455,456,457,458,459,460],x:24,y:254,ic:'orangecastle'}
 ];
-const WORLD_ROADS=[['abbey','thornwood','thornwick','gwood'],['gwood','road','tunnel','ironhill'],['ironhill','graves'],['ironhill','mines'],['ironhill','moor','pass','greendale','anaea'],['oldhaven','oakwood'],['abbey','below'],['oldhaven','landpath','yarrim'],['landpath','monastery']];
+const WORLD_ROADS=[['abbey','thornwood','thornwick','gwood'],['gwood','road','tunnel','ironhill'],['ironhill','graves'],['ironhill','mines'],['ironhill','moor','pass','greendale','anaea'],['oldhaven','oakwood'],['abbey','below'],['below','orangecastle'],['oldhaven','landpath','yarrim'],['landpath','monastery']];
 function lab(s,x,y,size,col){ctx.save();ctx.font=`bold ${size}px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(200,184,140,.9)';ctx.strokeText(s,x,y);ctx.fillStyle=col;ctx.fillText(s,x,y);ctx.restore()}
 const QWORLD={'Thornwick':'thornwick','The Road to Ironhill':'road','Ironhill':'ironhill','Greyfang Pass':'pass','Greendale':'greendale','The Wilds':'thornwood','Khemetra':'scoria','Yarrim':'yarrim','Oldhaven':'oldhaven','The Oakwood':'oakwood','Below the Abbey':'below','Saint Elen’s Monastery':'monastery'};
 const QWORLD_ID={vq1:'saltbarrow',vq2:'bells',vq3:'cinder',vq4:'lastlight',vq6:'oldhaven',yar7:'yarrim',vq5:'yarrim',colours:'anaea',anaea_shake:'anaea',anaea_fence:'anaea',thornwick_shake:'thornwick',thornwick_fence:'thornwick',ironhill_shake:'ironhill',ironhill_fence:'ironhill',khemetra_shake:'scoria',khemetra_fence:'scoria'};
@@ -4351,6 +4352,13 @@ function drawWorldMap(){
     town:(x,y)=>{for(const [dx,dy,s] of [[-9,2,1],[0,-1,1.15],[9,3,.9]]){const px=x+dx,py=y+dy;ctx.fillStyle='#8a7a5c';stroke();ctx.fillRect(px-5*s,py-3*s,10*s,8*s);ctx.strokeRect(px-5*s,py-3*s,10*s,8*s);ctx.fillStyle='#5a3a26';ctx.beginPath();ctx.moveTo(px-6.5*s,py-3*s);ctx.lineTo(px,py-9*s);ctx.lineTo(px+6.5*s,py-3*s);ctx.closePath();ctx.fill();ctx.stroke()}},
     castle:(x,y)=>{stroke();ctx.fillStyle='#7a766a';ctx.fillRect(x-14,y-4,28,13);ctx.strokeRect(x-14,y-4,28,13);for(const dx of [-14,8]){ctx.fillRect(x+dx,y-12,6,21);ctx.strokeRect(x+dx,y-12,6,21);ctx.fillRect(x+dx-1,y-14,8,3);ctx.strokeRect(x+dx-1,y-14,8,3)}ctx.fillStyle=ink;ctx.fillRect(x-3,y+1,6,8);ctx.beginPath();ctx.moveTo(x,y-4);ctx.lineTo(x,y-16);ctx.stroke();ctx.fillStyle='#9a2a22';ctx.beginPath();ctx.moveTo(x,y-16);ctx.lineTo(x+8,y-13);ctx.lineTo(x,y-10);ctx.closePath();ctx.fill();
       for(const [dx,dy] of [[-24,6],[22,7]]){ctx.fillStyle='#8a7a5c';ctx.fillRect(x+dx-4,y+dy-2,8,6);ctx.strokeRect(x+dx-4,y+dy-2,8,6)}},
+    orangecastle:(x,y)=>{stroke(); // a great orange castle: a tall keep between four cone-roofed towers, with a flag
+      ctx.fillStyle='#c8782e';ctx.fillRect(x-17,y-2,34,12);ctx.strokeRect(x-17,y-2,34,12);
+      ctx.fillRect(x-6,y-16,12,16);ctx.strokeRect(x-6,y-16,12,16);
+      for(const [dx,h2] of [[-21,17],[-12,12],[8,12],[17,17]]){ctx.fillStyle='#d8883a';ctx.fillRect(x+dx-3,y-h2+2,6,h2+4);ctx.strokeRect(x+dx-3,y-h2+2,6,h2+4);ctx.fillStyle='#5a3a30';ctx.beginPath();ctx.moveTo(x+dx-4.5,y-h2+2);ctx.lineTo(x+dx,y-h2-6);ctx.lineTo(x+dx+4.5,y-h2+2);ctx.closePath();ctx.fill();ctx.stroke()}
+      ctx.fillStyle='#5a3a30';ctx.beginPath();ctx.moveTo(x-7,y-16);ctx.lineTo(x,y-26);ctx.lineTo(x+7,y-16);ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.beginPath();ctx.moveTo(x,y-26);ctx.lineTo(x,y-33);ctx.stroke();ctx.fillStyle='#b03030';ctx.beginPath();ctx.moveTo(x,y-33);ctx.lineTo(x+7,y-31);ctx.lineTo(x,y-29);ctx.closePath();ctx.fill();
+      ctx.fillStyle=ink;ctx.fillRect(x-3,y+2,6,8);ctx.fillStyle='#f0a040';for(const dx of [-12,0,12])ctx.fillRect(x+dx-1,y-12,2,3)},
     abbey:(x,y)=>{stroke();ctx.fillStyle='#8a867a';ctx.fillRect(x-12,y-2,24,10);ctx.strokeRect(x-12,y-2,24,10);ctx.fillRect(x-4,y-14,8,14);ctx.strokeRect(x-4,y-14,8,14);ctx.beginPath();ctx.moveTo(x-5,y-14);ctx.lineTo(x,y-20);ctx.lineTo(x+5,y-14);ctx.stroke();ctx.fillStyle=ink;ctx.fillRect(x-1,y-26,2,7);ctx.fillRect(x-3,y-24,6,2);ctx.fillRect(x-2,y+2,4,6)},
     cave:(x,y)=>{stroke();ctx.fillStyle='#6a6458';ctx.beginPath();ctx.moveTo(x-12,y+7);ctx.lineTo(x-7,y-7);ctx.lineTo(x+2,y-10);ctx.lineTo(x+11,y-3);ctx.lineTo(x+13,y+7);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#17110a';ctx.beginPath();ctx.moveTo(x-5,y+7);ctx.quadraticCurveTo(x-5,y-3,x+1,y-3);ctx.quadraticCurveTo(x+7,y-3,x+7,y+7);ctx.closePath();ctx.fill()},
     mine:(x,y)=>{ICONS.cave(x,y);stroke();ctx.beginPath();ctx.moveTo(x+8,y-14);ctx.lineTo(x+16,y-6);ctx.moveTo(x+4,y-10);ctx.quadraticCurveTo(x+11,y-18,x+19,y-10);ctx.stroke()},
@@ -4363,8 +4371,8 @@ function drawWorldMap(){
     const v=visited(l);ctx.globalAlpha=v?1:.5;
     ICONS[l.ic](l.x,l.y);
     ctx.globalAlpha=1;
-    const big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey';
-    lab(l.n,l.x,l.y+(l.ic==='castle'?24:l.ic==='mountains'?20:18),big?10:8.5,v?'#1c1208':'#5a4a30');
+    const big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle';
+    lab(l.n,l.x,l.y+(l.ic==='castle'||l.ic==='orangecastle'?24:l.ic==='mountains'?20:18),big?10:8.5,v?'#1c1208':'#5a4a30');
     if(l.sub)lab(l.sub,l.x,l.y+29,7,'#4a3a22');
     if(!G.flags.autoScaleOn&&typeof locRating==='function'){const lr=locRating(l);if(lr)lab('Lv '+lr,l.x+2,l.y-31,8,'#7a1a10')}   // only when autoscaling is off
     const nq=QLEFT[l.k]||0;
@@ -6556,12 +6564,12 @@ function drawEnemyPlate(){
   const e=f.e,def=ENEMY_DEF[e.t];
   // name plate
   ctx.save();
-  ctx.fillStyle='rgba(8,6,4,.78)';rrect(ctx,4,4,138,22,5);ctx.fill();
-  ctx.lineWidth=1.6;ctx.strokeStyle=goldG(4,4,138,22);rrect(ctx,4,4,138,22,5);ctx.stroke();
+  ctx.fillStyle='rgba(8,6,4,.78)';rrect(ctx,26,4,150,22,5);ctx.fill();
+  ctx.lineWidth=1.6;ctx.strokeStyle=goldG(26,4,150,22);rrect(ctx,26,4,150,22,5);ctx.stroke();
   ctx.restore();
-  txt((e.poly?e.poly.name:def.name).toUpperCase(),14,15,11,'#d0c298','left',true);txt('Lv '+e.lvl,114,15,8.5,'#c8b898','right');
-  {const ms=mxPlate(e);if(ms)txt(ms,148,15,8,'#e8c878','left',true)}
-  chevron(130,15,6,-Math.PI/2,false);
+  txt((e.poly?e.poly.name:def.name).toUpperCase(),34,15,11,'#d0c298','left',true,undefined,94);txt('Lv '+e.lvl,150,15,8.5,'#c8b898','right');
+  {const ms=mxPlate(e);if(ms)txt(ms,182,15,8,'#e8c878','left',true)}
+  chevron(163,15,6,-Math.PI/2,false);
   // vertical hp bar
   const bx=8,by=40,bw=13,bh=150,fr=Math.max(0,e.hp/e.maxhp);
   ctx.fillStyle='rgba(10,4,4,.8)';ctx.fillRect(bx,by,bw,bh);
@@ -6569,7 +6577,7 @@ function drawEnemyPlate(){
   ctx.fillStyle=g;ctx.fillRect(bx,by+bh*(1-fr),bw,bh*fr);
   ctx.strokeStyle=goldG(bx,by,bw,bh);ctx.lineWidth=1.6;roughStrokeRect(bx,by,bw,bh);
   txt(String(Math.max(0,e.hp)),bx+bw/2,by+bh+10,9,'#f0d0c0','center',true);
-  if(f.k>1)txt(`${f.k} tiles`,150,15,9,'#b8a888','left');
+  if(f.k>1)txt(`${f.k} tiles`,182,27,8,'#b8a888','left');
   drawCompare(e,def);
 }
 /* a scale that sets the creature against the party: level, health, and a rough fight rating */
@@ -7224,6 +7232,8 @@ cv.addEventListener('wheel',e=>{
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 const KEYMAP={ArrowUp:'fwd',w:'fwd',W:'fwd',ArrowDown:'back',s:'back',S:'back',ArrowLeft:'turnL',q:'turnL',Q:'turnL',ArrowRight:'turnR',e:'turnR',E:'turnR',a:'left',A:'left',d:'right',D:'right',' ':'attack',Enter:'attack',x:'special',X:'special',p:'potion',P:'potion',z:'wait',Z:'wait',r:'rest',R:'rest',t:'teleport',T:'teleport'};
 addEventListener('keydown',e=>{
+  if(e.key==='F5'&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault(); // F5 quicksaves instead of reloading the page
+    if(G.state==='play'&&!G.cut&&!G.talk&&!TP&&!e.repeat)handleBtn('qsave');return}
   if(e.ctrlKey||e.metaKey||e.altKey)return;
   audioInit();
   if(TP){e.preventDefault();return}
@@ -17760,6 +17770,7 @@ function hlDrawMap(cs,ox,oy){
   {const F=HLF(),seen=F.seenRooms||{};(L._roomsInfo||[]).forEach((r,i)=>{if(!r.n||cs<4)return;const cx=ox+((r.x0+r.x1+1)/2)*cs,cy=oy+(r.y0+.8)*cs,known=!!seen[LEVEL+':'+i];
     lab(known?r.n:hlScramble(r.n,LEVEL*31+i),cx,cy,Math.max(7,Math.min(10,cs*1.2)),known?'#3a1c0c':'#6a5a7a')})}
   ctx.restore();
+  if(!G.flags.autoScaleOn&&LEVEL_RATING[LEVEL])lab('Creatures: level '+LEVEL_RATING[LEVEL],404,40,9,'#7a1a10');   // the level of this floor, in the fixed world
   // the key
   {const x=8,y=206,w=196,h=70;ctx.save();ctx.fillStyle='rgba(226,212,168,.94)';rrect(ctx,x,y,w,h,5);ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=1.2;rrect(ctx,x,y,w,h,5);ctx.stroke();ctx.restore();
     const rows=[['#b07a3a','Hidden door: walk into the wall'],['#e8c870','Stairs up'],['#e0b030','Chest'],['#c8a040','Portrait'],['#a8cce4','Mirror'],['#e0402e','Wall torch']];
