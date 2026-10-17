@@ -20,20 +20,21 @@ function drawSplat(cx,cy,R,n,tint,seed,alpha){
   ctx.fillStyle='rgba(255,255,255,.28)';ctx.beginPath();ctx.ellipse(cx-R*.35,cy-R*.4,R*.3,R*.17,-.5,0,TAU);ctx.fill();
   ctx.font=`bold ${Math.round(R*.95)}px Georgia,serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=3;ctx.strokeStyle='rgba(30,4,4,.95)';ctx.strokeText(n,cx,cy+1);ctx.fillStyle='#fff4e8';ctx.fillText(n,cx,cy+1);ctx.restore()}
 const HSPL=[],HEAL=[];
-{const _af=addFloat;addFloat=function(x,y,text,col){
+const GOLD_TINT=['#fff070','#c88a10'];
+{const _af=addFloat;addFloat=function(x,y,text,col,hcrit){
   const T=String(text);
   if(/^\+\d+$/.test(T)&&y>=240){ // a heal on a hero: the part of the red that is healed turns ice blue, then drains away
     let bi=0,bd=1e9;for(let i=0;i<4;i++){const dx=Math.abs(portraitX(i)+19-x);if(dx<bd){bd=dx;bi=i}}const h=G.heroes[bi];
-    if(h&&bd<24){const amt=+T.slice(1),oldM=clamp(1-(h.hp-amt)/h.max,0,1),newM=clamp(1-h.hp/h.max,0,1);if(oldM>newM+.005)HEAL[bi]={t:0,oldM,newM}}}
+    if(h&&bd<24){const amt=+T.slice(1);if(hcrit){HSPL[bi]={t:0,n:'+'+amt,tint:GOLD_TINT,seed:amt*13+bi};IMP_QUIET=G.time}const oldM=clamp(1-(h.hp-amt)/h.max,0,1),newM=clamp(1-h.hp/h.max,0,1);if(oldM>newM+.005)HEAL[bi]={t:0,oldM,newM}}}
   if(col==='#ffd76a'&&/^\d+$/.test(T)){ // a hit on a creature: a splat where it stands, and a thump
-    const d=+T,big=d>=40;IMP_QUIET=G.time;impPlay(big,1,big?.9:.8);G.floats.push({x,y,text:T,col,t:0,splat:1,R:Math.min(15,7+d*.1),seed:d*31+Math.floor(x)});return}
+    const d=+T,crit=!!G._critFlag;G._critFlag=false;const big=d>=40||crit;IMP_QUIET=G.time;impPlay(big,crit?.9:1,big?.95:.8);G.floats.push({x,y,text:T,col,t:0,splat:1,crit,R:crit?Math.min(19,10+d*.1):Math.min(15,7+d*.1),seed:d*31+Math.floor(x)});return}
   if(col==='#ff6a5a'&&/^-\d+$/.test(T)){ // a hit on a hero: a splat on the portrait, coloured by what ails them
     let bi=0,bd=1e9;for(let i=0;i<4;i++){const dx=Math.abs(portraitX(i)+19-x);if(dx<bd){bd=dx;bi=i}}
     const d=-T;IMP_QUIET=G.time;impPlay(d>=15,.82,.95);HSPL[bi]={t:0,n:String(d),tint:impTint(bi),seed:d*17+bi};return}
   return _af.apply(this,arguments)}}
 {const _df=drawFloats;drawFloats=function(dt){
   for(let i=G.floats.length-1;i>=0;i--){const f=G.floats[i];if(!f.splat)continue;f.t+=dt;if(f.t>.75){G.floats.splice(i,1);continue}
-    drawSplat(f.x+(f.seed%7-3)*3,f.y+24+f.t*8,f.R*(1+(f.t<.1?.2:0)),f.text,['#e83a2a','#8a1410'],f.seed,clamp(1.2-f.t*1.6,0,1))} // low on the body, drifting down, gone before it could reach the face
+    drawSplat(f.x+(f.seed%7-3)*3,f.y+24+f.t*8,f.R*(1+(f.t<.1?.2:0)),f.text,f.crit?GOLD_TINT:['#e83a2a','#8a1410'],f.seed,clamp(1.2-f.t*1.6,0,1))} // low on the body, drifting down, gone before it could reach the face
   const keep=G.floats.filter(f=>f.splat);G.floats=G.floats.filter(f=>!f.splat);_df.apply(this,arguments);G.floats=G.floats.concat(keep)}}
 {const _ui=ui;ui=function(dt){_ui.apply(this,arguments);try{if(G.state!=='play'||G.inv.open)return;
   // a heal in progress: the healed band shows the old red, turns ice blue, then fades as the red settles lower
