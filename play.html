@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.261';
+const VERSION='3.263';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -4340,6 +4340,10 @@ function drawWorldMap(){
     ctx.font=`italic 17px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.72)';ctx.fillText('The Sea Lands',652,16);ctx.font=`italic 8px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.55)';ctx.fillText('the country along the coast',652,29);ctx.restore();
   }
   // faint hand-drawn coast and old survey marks, to show where the lands are still blank
+  ctx.strokeStyle='rgba(60,44,26,.28)';ctx.lineWidth=1.2;ctx.setLineDash([3,4]);
+  ctx.beginPath();ctx.moveTo(30,288);for(let i=0;i<=24;i++)ctx.lineTo(30+i*18,284+Math.sin(i*1.3)*5+Math.cos(i*.7)*3);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(34,60);for(let i=0;i<=8;i++)ctx.lineTo(34+i*8,60-i*5+Math.sin(i)*3);ctx.stroke();
+  ctx.setLineDash([]);
   ctx.font=`italic 9px ${FTITLE}`;ctx.fillStyle='rgba(60,44,26,.34)';ctx.textAlign='center';ctx.textBaseline='middle';
   for(const [t,x,y] of [['Uncharted',70,100],['Uncharted',250,50],['Unknown seas',150,285]])ctx.fillText(t,x,y);
   // roads
@@ -4369,8 +4373,8 @@ function drawWorldMap(){
   }
   const by={};WORLD_LOCS.forEach(l=>by[l.k]=l);const QLEFT=questsLeft();
   ctx.strokeStyle='rgba(50,34,18,.75)';ctx.lineWidth=1.5;ctx.setLineDash([2.5,3.5]);
-  // (the dotted roads between the places are no longer drawn)
-  ctx.setLineDash([]);
+  for(const r of WORLD_ROADS){ctx.beginPath();r.forEach((k,i)=>{const l=by[k];if(i===0)ctx.moveTo(l.x,l.y);else ctx.lineTo(l.x,l.y)});ctx.stroke()}
+  ctx.beginPath();ctx.moveTo(402,238);ctx.lineTo(466,228);ctx.lineTo(500,196);ctx.lineTo(506,136);ctx.lineTo(498,96);ctx.lineTo(486,56);ctx.stroke();ctx.setLineDash([]);
   lab('the road east, then north',470,236,7.5,'#3a2a16');
   if(G.flags.voyage){ctx.strokeStyle='rgba(30,70,110,.8)';ctx.lineWidth=1.5;ctx.beginPath();['yarrim','saltbarrow','bells','cinder','lastlight'].forEach((k,i)=>{const l=by[k];i?ctx.lineTo(l.x,l.y):ctx.moveTo(l.x,l.y)});ctx.stroke();ctx.setLineDash([])}
   const visited=l=>l.lv.some(v=>v===LEVEL||G.lst[v]),here=WORLD_LOCS.find(l=>l.lv.includes(LEVEL));
