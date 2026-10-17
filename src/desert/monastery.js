@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SAINT ELEN'S MONASTERY, halfway along the Land Path. A gate cut into the rock of the pass leads into green grounds: a church, a cloister
+   SAINT ELEN'S MONASTERY, halfway along the Pilgrim’s Path. A gate cut into the rock of the pass leads into green grounds: a church, a cloister
    with a fountain, a refectory, a scriptorium, a kitchen, a guest house, an infirmary, herb and flower gardens, an orchard, hives and a bell.
    Friendly monks live there. East of it lies a quiet cemetery with a mausoleum, and below the grounds a cellar and old crypts have a ghost
    problem. Ten quiet quests. Levels: 430 grounds, 431 cemetery, 432 cellars, 433 old crypts, 434 the mausoleum; rooms from 6900.

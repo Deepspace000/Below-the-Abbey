@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.257';
+const VERSION='3.259';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -4137,8 +4137,8 @@ function gotoList(){
   hd('Under the sea');for(const n of [320,321,322,323])if(has(n))out.push({n,name:nm(n)});
   hd('The open sea and its lonely islands');for(const n of [330,331,332,333,334,335,336,337,338,339,340,341,342,343])if(has(n))out.push({n,name:nm(n)});
   hd('Oldhaven, the city of King Osric');for(const n of [304,305,306,307,308,309,310,311])if(has(n))out.push({n,name:nm(n)});
-  hd('The Land Path, from Oldhaven to Yarrim');for(let n=400;n<424;n+=3)if(has(n))out.push({n,name:nm(n)+(n===400?', the beginning':n===421?', near the end':'')});
-  hd('Saint Elen’s Monastery, halfway along the Land Path');for(const n of [430,431,432,433,434])if(has(n))out.push({n,name:nm(n)});
+  hd('The Pilgrim’s Path, from Oldhaven to Yarrim');for(let n=400;n<424;n+=3)if(has(n))out.push({n,name:nm(n)+(n===400?', the beginning':n===421?', near the end':'')});
+  hd('Saint Elen’s Monastery, halfway along the Pilgrim’s Path');for(const n of [430,431,432,433,434])if(has(n))out.push({n,name:nm(n)});
   hd('Below the Abbey, past the sealed door');for(const n of [360,361,362,363,364,440,441,445,450,455,459,460])if(has(n))out.push({n,name:nm(n)});
     hd('Mounds of the Sand Road');for(let n=BURROW_BASE;n<BURROW_BASE+BURROW_N;n++)if(has(n))out.push({n,name:nm(n)});
   for(const [dl,dname] of DNG_DESERTS){const ids=Object.keys(DNG_INFO).map(Number).filter(n=>DNG_INFO[n].desert===dname).sort((a,b)=>a-b);if(ids.length){hd('Dungeons of '+dname);for(const n of ids)out.push({n,name:nm(n)})}}
@@ -4303,12 +4303,12 @@ const WORLD_LOCS=[
   {k:'openSea',n:'The Open Sea',sub:'sail the Dawn Walker',lv:[330,331,332,333,334,335,336,337,338,339,340,341,342,343],x:808,y:262,ic:'rain'},
   {k:'oldhaven',n:'Oldhaven',sub:"the king's city, across the Narrow Sea",lv:[304,305,306,307,308,309,310],x:1170,y:176,ic:'castle'},
   {k:'oakwood',n:'The Oakwood',sub:'old oaks east of Oldhaven',lv:[311],x:1244,y:190,ic:'trees'},
-  {k:'monastery',n:'Saint Elen’s',sub:'a mountain monastery',lv:[430,431,432,433,434,6900,6901,6902,6903,6904,6905,6906],x:1336,y:44,ic:'abbey'},
-  {k:'landpath',n:'The Land Path',sub:'a pilgrim way, one way only',lv:Array.from({length:24},(_,i)=>400+i),x:1130,y:36,ic:'trees'},
+  {k:'monastery',n:'Saint Elen’s',sub:'a mountain monastery',lv:[430,431,432,433,434,6900,6901,6902,6903,6904,6905,6906],x:930,y:-184,ic:'abbey'},
+  {k:'landpath',n:'The Pilgrim’s Path',sub:'a pilgrim way, one way only',lv:Array.from({length:24},(_,i)=>400+i),x:1130,y:36,ic:'trees'},
   {k:'below',n:'Below the Abbey',sub:'past the sealed door',lv:[360,361,362,363],x:84,y:268,ic:'cave'},
   {k:'orangecastle',n:'The Orange Spire',sub:'in the Hollow Land',lv:[364,440,441,442,443,444,445,446,447,448,449,450,451,452,453,454,455,456,457,458,459,460],x:24,y:254,ic:'orangecastle'}
 ];
-const WORLD_ROADS=[['abbey','thornwood','thornwick','gwood'],['gwood','road','tunnel','ironhill'],['ironhill','graves'],['ironhill','mines'],['ironhill','moor','pass','greendale','anaea'],['oldhaven','oakwood'],['abbey','below'],['below','orangecastle'],['oldhaven','landpath','yarrim'],['landpath','monastery']];
+const WORLD_ROADS=[['abbey','thornwood','thornwick','gwood'],['gwood','road','tunnel','ironhill'],['ironhill','graves'],['ironhill','mines'],['ironhill','moor','pass','greendale','anaea'],['oldhaven','oakwood'],['abbey','below'],['below','orangecastle'],['oldhaven','landpath','yarrim']];
 function lab(s,x,y,size,col){ctx.save();ctx.font=`bold ${size}px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(200,184,140,.9)';ctx.strokeText(s,x,y);ctx.fillStyle=col;ctx.fillText(s,x,y);ctx.restore()}
 const QWORLD={'Thornwick':'thornwick','The Road to Ironhill':'road','Ironhill':'ironhill','Greyfang Pass':'pass','Greendale':'greendale','The Wilds':'thornwood','Khemetra':'scoria','Yarrim':'yarrim','Oldhaven':'oldhaven','The Oakwood':'oakwood','Below the Abbey':'below','Saint Elen’s Monastery':'monastery'};
 const QWORLD_ID={vq1:'saltbarrow',vq2:'bells',vq3:'cinder',vq4:'lastlight',vq6:'oldhaven',yar7:'yarrim',vq5:'yarrim',colours:'anaea',anaea_shake:'anaea',anaea_fence:'anaea',thornwick_shake:'thornwick',thornwick_fence:'thornwick',ironhill_shake:'ironhill',ironhill_fence:'ironhill',khemetra_shake:'scoria',khemetra_fence:'scoria'};
@@ -4360,7 +4360,7 @@ function drawWorldMap(){
     ctx.beginPath();for(let y=yN;y<=600;y+=6){y===yN?ctx.moveTo(cxe(y),y):ctx.lineTo(cxe(y),y)}ctx.stroke();   // the far coast: the Eastern Lands
     ctx.strokeStyle='rgba(235,240,230,.45)';ctx.lineWidth=1.2;for(let k=1;k<=3;k++){ctx.beginPath();for(let y=yN;y<=600;y+=6){const x=cxe(y)-k*5+Math.sin(y*.2+k)*1.5;y===yN?ctx.moveTo(x,y):ctx.lineTo(x,y)}ctx.stroke()}
     ctx.font=`italic 17px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.72)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('The Eastern Lands',1230,16);ctx.font=`italic 8px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.55)';ctx.fillText('the far shore of the Narrow Sea',1230,29);
-    ctx.font=`italic 9px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.5)';ctx.fillText('the lands meet here, far to the north: the long way round',930,-170);ctx.strokeStyle='rgba(50,34,18,.55)';ctx.lineWidth=1.4;ctx.setLineDash([2.5,3.5]);ctx.beginPath();ctx.moveTo(692,66);ctx.lineTo(704,-120);ctx.lineTo(930,-184);ctx.lineTo(1150,-120);ctx.lineTo(1170,176);ctx.stroke();ctx.setLineDash([]);
+    ctx.font=`italic 9px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.5)';ctx.fillText('the lands meet here, far to the north: the long way round',930,-138);ctx.strokeStyle='rgba(50,34,18,.55)';ctx.lineWidth=1.4;ctx.setLineDash([2.5,3.5]);ctx.beginPath();ctx.moveTo(692,66);ctx.lineTo(704,-120);ctx.lineTo(930,-184);ctx.lineTo(1150,-120);ctx.lineTo(1170,176);ctx.stroke();ctx.setLineDash([]);
     const ISL=[[772,70,16],[834,112,14],[774,154,13],[850,196,18],[744,14,6],[802,22,7],[902,60,9],[892,152,8],[744,230,10],[822,254,12],[914,232,9],[782,298,8],[872,302,11],[742,112,5],[928,120,7],[958,40,6],[942,182,6],[762,342,9],[842,362,8],[902,362,10],[732,192,4],[966,270,8],[958,110,5],[690,180,3]];
     for(const [ix,iy,ir] of ISL){
       ctx.beginPath();for(let k=0;k<14;k++){const a=k/14*TAU,rr=ir*(.72+.5*hash2(ix+k,iy,19));k?ctx.lineTo(ix+Math.cos(a)*rr*1.2,iy+Math.sin(a)*rr*.85):ctx.moveTo(ix+Math.cos(a)*rr*1.2,iy+Math.sin(a)*rr*.85)}ctx.closePath();
@@ -8016,7 +8016,7 @@ function teleLevelsAt(loc){return Object.keys(G.flags.teles||{}).map(Number).fil
 function teleActive(n){return !!(G.flags.teles&&G.flags.teles[n])}
 function teleOn(){return !!(G.tele&&G.P.x===G.tele.x&&G.P.y===G.tele.y&&G.state==='play')}
 function placeTeleporter(){ // called when a level is built: one stone in every map
-  G.tele=null;if(LEVELS[LEVEL]&&LEVELS[LEVEL].noTele)return; // the Land Path has only a few, hidden
+  G.tele=null;if(LEVELS[LEVEL]&&LEVELS[LEVEL].noTele)return; // the Pilgrim’s Path has only a few, hidden
   const sp=teleSpot(LEVEL);if(!sp)return;
   for(const d of G.decor)if(d.block&&!d.npc&&d.x===sp.x&&d.y===sp.y){d.found=true;d.block=false}
   G.decor.push({k:'teleporter',x:sp.x,y:sp.y,block:false,walk:true,loot:false,shop:false,tele:true});
@@ -12776,7 +12776,7 @@ function petDismiss(id){const L=petsData(),i=L.findIndex(p=>p.id===id);if(i>=0){
 function petsTick(){
   if(!petsData().length||G.state!=='play'||G.cut||G.talk||G.menu)return;
   const F=G.flags,pets=petsData();F.petT=(F.petT||0)+1;
-  const has=id=>pets.find(p=>p.id===id),day=dayNum(),quiet=LEVEL>=400&&LEVEL<440; // on the Land Path and at the monastery the animals say nothing
+  const has=id=>pets.find(p=>p.id===id),day=dayNum(),quiet=LEVEL>=400&&LEVEL<440; // on the Pilgrim’s Path and at the monastery the animals say nothing
   if(!quiet&&F.petT%45===0){const p=pets[(Math.random()*pets.length)|0],L=PETS[p.id].lines;msg(L[(Math.random()*L.length)|0].replace('{n}',p.name+' the '+PETS[p.id].n.toLowerCase()),'#d8d0a0')}
   // the first time each day: rumours from the parrot, scraps from the rat, a forecast from the frog
   if(!quiet&&F.petDay!==day){F.petDay=day;
@@ -16422,7 +16422,7 @@ const LP_BUILD=[ // [segment, kind, row, name, keeper id]
 const LP_TELE=[3,9,14,19]; // segments with a hidden stone teleporter in the forest (or the mountain rocks)
 const LP_ROOM=(i)=>LP.ROOM0+i;
 for(let i=0;i<LP_BUILD.length;i++)LEVEL_NAMES[LP_ROOM(i)]=LP_BUILD[i][3];
-for(let s=0;s<LP.N;s++)LEVEL_NAMES[LP.BASE+s]=LP_LEG(s)==='W'?'The Land Path, over the mountains':LP_LEG(s)==='D'?'The Land Path, the high pass':'The Land Path';
+for(let s=0;s<LP.N;s++)LEVEL_NAMES[LP.BASE+s]=LP_LEG(s)==='W'?'The Pilgrim’s Path, over the mountains':LP_LEG(s)==='D'?'The Pilgrim’s Path, the high pass':'The Pilgrim’s Path';
 /* ---- the people ---- */
 const LP_RES=[
   ['lp_r0','A shepherd','kh_ohfolk7_0',["Sheep do not care who is king. It is the best thing about them.","I walk the same road every morning, and the sea has never once looked the same.","Stay as long as you like. There is bread, and nobody to tell it to."]],
@@ -16442,8 +16442,8 @@ const LP_PRIESTS=[['lp_pr0','Father Elric, of the Long Road','kh_ohfolk2_1','The
  ['lp_pr1','Sister Wynn, of the Quiet','kh_ohfolk5_2','The Chapel of the Quiet. Nobody speaks here, not even the bell. Light a lamp if you like.'],
  ['lp_pr2','Brother Alder, of the sea church','kh_ohfolk1_4','Saint Aldric watched the sea for sixty years, and nothing happened, and he said it was the best sixty years of his life.']];
 LP_PRIESTS.forEach(([id,n,face,line])=>khPray(id,n,face,line,15));
-khNpc('lp_knight','A knight of the Crown','kh_ohsold1_2',()=>yrLines('lp_knight',["The Crown rides the Land Path twice a day. Nothing ever happens. It is the best post in the kingdom.","I ride from the city gate to the mountains and back. The mountains are far. The horse knows the way.","Do not mind us. We are only here so that you can walk in peace."]));
-khNpc('lp_cliff','The edge of the Land Path','gate',()=>say('The path ends here, at the edge of a high cliff. Far below, beyond the last slope of the mountain, lie the roofs and the harbour of Yarrim, and the sea. A steep goat track leads down. It can be climbed down, but it cannot be climbed up again.',[['Go down the goat track.',()=>{G.flags.lpDone=1;msg('The goat track is steep. The land path falls behind and above.','#a8d8ff');goToLevel(290,{x:LPY.x,y:LPY.y,f:LPY.f});return null}],['Stay a while.',()=>null]]));
+khNpc('lp_knight','A knight of the Crown','kh_ohsold1_2',()=>yrLines('lp_knight',["The Crown rides the Pilgrim’s Path twice a day. Nothing ever happens. It is the best post in the kingdom.","I ride from the city gate to the mountains and back. The mountains are far. The horse knows the way.","Do not mind us. We are only here so that you can walk in peace."]));
+khNpc('lp_cliff','The edge of the Pilgrim’s Path','gate',()=>say('The path ends here, at the edge of a high cliff. Far below, beyond the last slope of the mountain, lie the roofs and the harbour of Yarrim, and the sea. A steep goat track leads down. It can be climbed down, but it cannot be climbed up again.',[['Go down the goat track.',()=>{G.flags.lpDone=1;msg('The goat track is steep. The pilgrim’s path falls behind and above.','#a8d8ff');goToLevel(290,{x:LPY.x,y:LPY.y,f:LPY.f});return null}],['Stay a while.',()=>null]]));
 const LPY={x:56,y:8,f:2}; // where the goat track comes out, north of Yarrim
 const LPM={SEG:11,Y:300}; // the gate of the monastery, cut into the rock beside the path, halfway along
 let LP_XC={};
@@ -16704,9 +16704,9 @@ function lpBuild(s){
   function lpId(q){return LP.BASE+q}
   for(let y=H-4;y<H-1;y++)for(let x=CX-6;x<=CX+6;x++)used.add(K(x,y));
   const lv={rows:rows.map(r=>r.join('')),start:{x:MX(CX),y:H-5,f:0},enemies:[],items:[],decor,scenery,sky,fmap:null,floorSet:['ohMeadow','ohGravel','ohLawn','bluesand','bluewater','ohMoss','isleSandDk','wood'],floor:'ohMeadow',ceil:'cloud',
-    day:.98,outdoor:true,amb:.9,name:LEVEL_NAMES[id],label:'The Land Path',noExtras:true,diff:25,ceilH:5.2,chars,lights,portals:[],_walk:walkers};
+    day:.98,outdoor:true,amb:.9,name:LEVEL_NAMES[id],label:'The Pilgrim’s Path',noExtras:true,diff:25,ceilH:5.2,chars,lights,portals:[],_walk:walkers};
   if(tele)lv.tele=tele;else lv.noTele=true;
-  lv.mapNames=[{t:s===0?'The Land Gate':'The Land Path',x:MX(CX),y:H-10,k:'lane'}];
+  lv.mapNames=[{t:s===0?'The Land Gate':'The Pilgrim’s Path',x:MX(CX),y:H-10,k:'lane'}];
   const fmap=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=fm[y*W+x];fmap.push(r)}lv.fmap=fmap;
   LEVELS[id]=lv;TERRS[id]=yarTerrain(W,H,h,rk,block);
 }
@@ -16781,7 +16781,7 @@ function lpSwapTick(){
 {const _t=seaTick;seaTick=function(dt){_t.apply(this,arguments);try{lpFadeTick(dt);lpSwapTick()}catch(e){console.error(e)}}}
 {const _d=drawTport;drawTport=function(){_d.apply(this,arguments);if(LPF.on&&LPF.a>0){ctx.fillStyle='rgba(0,0,0,'+LPF.a.toFixed(3)+')';ctx.fillRect(0,0,480,320)}}}
 
-/* ---- the benches on the Land Path: the party can sit, and the music of Greendale Forest plays until they stand up ---- */
+/* ---- the benches on the Pilgrim’s Path: the party can sit, and the music of Greendale Forest plays until they stand up ---- */
 khNpc('lp_bench','A wooden bench','kh_ohgard1_3',()=>say('A plain wooden bench beside the path. The view is good, and nobody is in a hurry.',[
   ['Sit down.',()=>{G.sit={t:G.time+150};G.clock=(G.clock||0)+20;let healed=0;for(const h of G.heroes)if(h.alive!==false&&h.hp>0&&h.hp<h.max){h.hp=Math.min(h.max,h.hp+Math.ceil(h.max*.15));healed=1}
     msg('The party sits. For a while nobody says anything, and somewhere a gentle tune begins.','#b8e8c0');if(healed)msg('The rest does you good.','#a8d8a8');return null}],
@@ -16860,7 +16860,7 @@ function lpDrawMap(){
   {const [px,py]=lpPos(cur);ctx.save();ctx.translate(px,py);ctx.fillStyle='#ffe36a';ctx.strokeStyle='#2a1c0e';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(0,0,5.5,0,TAU);ctx.fill();ctx.stroke();ctx.fillStyle='#d03a2a';ctx.beginPath();ctx.arc(0,0,2,0,TAU);ctx.fill();ctx.restore();
    const km=Math.round(cur*LP_KM);lab('You: '+km+' km from Oldhaven, '+(LP_KM-km)+' to Yarrim',245,228,9,'#6a1a10')}
   // title, note and legend
-  ctx.save();ctx.font=`22px ${FTITLE}`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle='#2a1c0e';ctx.fillText('The Land Path',10,16);ctx.restore();
+  ctx.save();ctx.font=`22px ${FTITLE}`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle='#2a1c0e';ctx.fillText('The Pilgrim’s Path',10,16);ctx.restore();
   lab('96 kilometres, Oldhaven to Yarrim',12,33,8,'#5a3c1c','left');
   const ly=DH-14;ctx.fillStyle='rgba(30,20,10,.82)';ctx.fillRect(0,DH-30,DW,30);
   txt('Stay on the path: the shrines leave food for the hungry, the inns have beds, and Saint Elen’s Monastery waits halfway.',240,DH-23,8,'#e8dcb0','center',true);
@@ -16874,7 +16874,7 @@ function lpDrawMap(){
 
 /* ---- src/desert/monastery.js ---- */
 /* ==========================================================================
-   SAINT ELEN'S MONASTERY, halfway along the Land Path. A gate cut into the rock of the pass leads into green grounds: a church, a cloister
+   SAINT ELEN'S MONASTERY, halfway along the Pilgrim’s Path. A gate cut into the rock of the pass leads into green grounds: a church, a cloister
    with a fountain, a refectory, a scriptorium, a kitchen, a guest house, an infirmary, herb and flower gardens, an orchard, hives and a bell.
    Friendly monks live there. East of it lies a quiet cemetery with a mausoleum, and below the grounds a cellar and old crypts have a ghost
    problem. Ten quiet quests. Levels: 430 grounds, 431 cemetery, 432 cellars, 433 old crypts, 434 the mausoleum; rooms from 6900.
@@ -16926,7 +16926,7 @@ monq('mq3','Apples for the Pilgrims','Brother Cook','Brother Cook is making pies
 monq('mq4','A Little Honey','Brother Bee-keeper','Gather 3 honeycombs from near the hives and bring them to the bee-keeper.',3,()=>Math.min(3,bagCount('honeycomb')),{gold:300,xp:3000});
 monq('mq5','Flowers for the Graves','Sister Wilma, the cemetery gardener','Sister Wilma lays a flower on every grave on the feast of Saint Elen. Pick 6 wildflowers in the monastery grounds and bring them to her in the cemetery.',6,()=>Math.min(6,bagCount('wildflower')),{gold:300,xp:3000});
 monq('mq6','The Cold Cellar','Brother Cellarer','Ghosts have come up from the old crypts into the cellars and the brothers cannot keep the wine in peace. Lay 6 of them to rest.',6,q=>(G.flags.k_ghost||0)-(q.base||0),{gold:500,xp:6000},{cnt:'k_ghost'});
-monq('mq7','A Letter for the Cold Spring','Brother Scribe','Take the monastery’s letter to Osk, the innkeeper of the Cold Spring Inn, on the Land Path, a little way along the mountain road.',1,()=>MONF().letter?1:0,{gold:300,xp:3000});
+monq('mq7','A Letter for the Cold Spring','Brother Scribe','Take the monastery’s letter to Osk, the innkeeper of the Cold Spring Inn, on the Pilgrim’s Path, a little way along the mountain road.',1,()=>MONF().letter?1:0,{gold:300,xp:3000});
 monq('mq8','The Abbot’s Ring','Abbot Anselm','The ring of the old abbot lies in a chest in the old crypts, below the cellars. Bring it back, so that he can rest.',1,()=>Math.min(1,bagCount('abbotring')),{gold:700,xp:8000});
 monq('mq9','Ring the Bell','Brother Bellringer','The bell has not been rung for three days, because the bell-ringer has a cold. Ring it once, at the foot of the church.',1,()=>MONF().bell?1:0,{gold:200,xp:2000});
 monq('mq10','A Quiet Hour','Brother Hilarion, the guest-master','Take a quiet hour at the guest house. Rest by the fire, and let the brothers look after you.',1,()=>MONF().rest?1:0,{gold:200,xp:2000});
@@ -16937,7 +16937,7 @@ const MOND={
  mq4:khQD('The hives are heavy this year. If you could bring me three honeycombs from beside them, we could make candles and a little mead. The bees do not mind, if you move slowly.','Three honeycombs from near the hives. Walk softly.',(g,n)=>`${g} of ${n} honeycombs.`,'Three honeycombs. The candles will smell of clover for a year.','Three honeycombs, and no stings.','The honey is gathered.','Here are three honeycombs.'),
  mq5:khQD('On the feast of Saint Elen I lay a flower on every grave in the cemetery. Nobody is forgotten here. If you could pick six wildflowers in the grounds and bring them to me, I would be glad of the help.','Six wildflowers. There are plenty on the lawns.',(g,n)=>`${g} of ${n} wildflowers.`,'Six wildflowers. That is six more graves with a flower on them. Thank you.','Six wildflowers.','The graves have their flowers.','Here are six wildflowers.'),
  mq6:khQD('Something is wrong in the cellars. Ghosts, the brothers say. Not dangerous, just sad, and very cold. They have been wandering up from the old crypts below. If you could lay six of them to rest, we would all sleep better. The hatch is in the herb garden.','Six ghosts. They are in the cellars, below the hatch in the herb garden.',(g,n)=>`${g} of ${n} ghosts laid to rest.`,'The cellar is warm again! The wine is calm. Thank you.','Six ghosts, and a quiet cellar.','The cellar is quiet.','Six of them are at rest.'),
- mq7:khQD('I have a letter for Osk, the innkeeper of the Cold Spring Inn, along the mountain road. We have written to each other for thirty years and never once met. It is a very good friendship. Would you take it to him?','The Cold Spring Inn is on the Land Path, in the mountains. Take your time.',()=>'Osk at the Cold Spring Inn, on the Land Path.','You have delivered it? He wrote back already? What a man.','Thank you. Thirty years of letters, and one more.','The letter is delivered.','I delivered the letter.'),
+ mq7:khQD('I have a letter for Osk, the innkeeper of the Cold Spring Inn, along the mountain road. We have written to each other for thirty years and never once met. It is a very good friendship. Would you take it to him?','The Cold Spring Inn is on the Pilgrim’s Path, in the mountains. Take your time.',()=>'Osk at the Cold Spring Inn, on the Pilgrim’s Path.','You have delivered it? He wrote back already? What a man.','Thank you. Thirty years of letters, and one more.','The letter is delivered.','I delivered the letter.'),
  mq8:khQD('There was an abbot before me, Abbot Aldhelm. His ring was buried with him, but it was moved to a chest in the old crypts, and he has not rested since. If you could find the ring, I would put it where it belongs. The way down is by the cellars, and the crypts are below them.','The old crypts are below the cellars. The ring is in a chest, I believe.',()=>'The ring is in a chest in the old crypts, below the cellars.','The ring! Aldhelm can rest. Thank you, truly.','The abbot’s ring, back where it belongs.','The ring is found.','Here is the ring.'),
  mq9:khQD('The bell has not rung for three days. The bell-ringer has a cold, and I do not like to ask him. If you could ring it once, at the foot of the church, the whole valley would know that Saint Elen’s is still here.','Just ring it once. It is the bell at the foot of the church.',()=>'Ring the bell at the foot of the church.','You rang it? We heard it in the garden. The bees stopped to listen. Thank you.','The bell rang, and the valley heard it.','The bell has rung.','I rang the bell.'),
  mq10:khQD('You have walked a long way. Take a quiet hour at the guest house, by the fire. We will look after everything. That is not a request, it is what we do.','Rest by the fire. We will bring soup.',()=>'Rest by the fire in the guest house.','Rested? Good. A quiet hour is the best gift one can give oneself.','A quiet hour, and a full heart.','You are rested.','I have rested.')
@@ -19130,9 +19130,9 @@ STORY.push(
   {id:'ohorrery',c:()=>G.flags.deviceBuilt,t:'The Orrery of Hours',x:'With Wren crowned, Captain Aldwyn read Ishkander’s sealed letter aloud. The six pieces fit together into the Orrery of Hours, a clockwork model of the heavens, which opens a sealed door under the Abbey crypts, where the journey began. The king’s clockmaker fitted the pieces while the party waited. A royal cutter was offered to take the party home.'},
   {id:'ohdoor',c:()=>G.flags.sealedOpen,t:'The Sealed Door',x:'The party sailed home to the Thornwood and went down into the crypts below the Abbey, to the old stair where the journey began. Near it stood a slab of black iron with a ring of hollows in the middle. The Orrery ticked, the discs turned, and the door ground into the wall. A stair went down into the dark.'},
   {id:'ohhollow',c:()=>G.flags.reachedBottom,t:'The Four Floors',x:'Four floors lay below the Abbey: the Sealed Stair, the Drowned Cloister, the Ossuary of Brothers and the Hollow Abbey. At the bottom stood Brother Sevrin, the Abbey’s last gardener, who had come down to hide. He told the party that the Hollow Abbot sat in the great room ahead, and that the stair onward was under his seat.'},
-  {id:'landpath',c:()=>G.flags.lpSeen,t:'The Land Path',x:'A second gate in the north wall of Oldhaven opens on the Land Path, a quiet road of ninety-six kilometres that runs north up the peninsula with the sea on one side and an old oak forest on the other, turns west across the mountains and comes south to a high cliff above Yarrim. Nothing happens on it. There are flowers on both sides, lamps now and then, wooden signposts that count the kilometres to Yarrim, and now and then a house, an inn or a church with a graveyard. Knights of the Crown ride up and down it twice a day. It goes one way: from Oldhaven to Yarrim.'},
+  {id:'landpath',c:()=>G.flags.lpSeen,t:'The Pilgrim’s Path',x:'A second gate in the north wall of Oldhaven opens on the Pilgrim’s Path, a quiet road of ninety-six kilometres that runs north up the peninsula with the sea on one side and an old oak forest on the other, turns west across the mountains and comes south to a high cliff above Yarrim. Nothing happens on it. There are flowers on both sides, lamps now and then, wooden signposts that count the kilometres to Yarrim, and now and then a house, an inn or a church with a graveyard. Knights of the Crown ride up and down it twice a day. It goes one way: from Oldhaven to Yarrim.'},
   {id:'landpathend',c:()=>G.flags.lpDone,t:'The Cliff above Yarrim',x:'The path ends at the top of a cliff. A steep goat track leads down to the green slopes north of Yarrim, and the party took it. The track can be climbed down, but not up again, and a wooden sign at the bottom says so.'},
-  {id:'monastery',c:()=>G.flags.mon&&Object.keys(G.flags.mon.met||{}).length||qSt('mq1')!==null,t:'Saint Elen’s Monastery',x:'Halfway along the Land Path, in the mountains, a gate cut into the cliff leads into the green grounds of Saint Elen’s: a church, a cloister with a fountain, a refectory, a scriptorium, a kitchen, a guest house, an infirmary, herb and flower gardens, an orchard and hives. The brothers are friendly and quiet. East of it lies a still cemetery with a mausoleum, and below the grounds a cellar and old crypts have a ghost problem, which the party set out to quiet.'},
+  {id:'monastery',c:()=>G.flags.mon&&Object.keys(G.flags.mon.met||{}).length||qSt('mq1')!==null,t:'Saint Elen’s Monastery',x:'Halfway along the Pilgrim’s Path, in the mountains, a gate cut into the cliff leads into the green grounds of Saint Elen’s: a church, a cloister with a fountain, a refectory, a scriptorium, a kitchen, a guest house, an infirmary, herb and flower gardens, an orchard and hives. The brothers are friendly and quiet. East of it lies a still cemetery with a mausoleum, and below the grounds a cellar and old crypts have a ghost problem, which the party set out to quiet.'},
   {id:'monghosts',c:()=>qSt('mq6')==='done',t:'The Cold Cellar',x:'The party went down the hatch in the herb garden and laid the ghosts of the cellar to rest, one by one. They were not dangerous, only sad and very cold. The cellar was warm again by evening.'},
   {id:'monring',c:()=>qSt('mq8')==='done',t:'The Abbot’s Ring',x:'In a chest in the old crypts, the party found the plain gold ring of Abbot Aldhelm and brought it back to Abbot Anselm, who put it where it belonged. The old abbot is said to have rested since.'},
   {id:'ohabbot',c:()=>G.flags.hollowSlain,t:'The Hollow Abbot',x:'The party killed the Hollow Abbot, and the slab over the stair ground aside. Beyond it lies the Hollow Land, the next part of the game. Below the Abbey is in early access, and that is where the road ends for now.'}
@@ -19156,7 +19156,7 @@ function storyNext(){ // what to do next, from the chapter the party has reached
   if(qSt('ad4')==='done'&&qSt('hc1')===null)return 'Speak to Brother Sevrin again, in the Hollow Abbey.';
   if((F.hlTop||0)>=1)return 'Climb the Orange Spire, twenty levels, to the wizard in the spire. Answer with good will.';
   if(F.hlSeen)return 'Walk down the long stair to the castle gate in the Hollow Land.';
-  if(LEVEL>=400&&LEVEL<424)return 'You are on the Land Path. Walk north, then west across the mountains, then south. The signs count the kilometres to Yarrim.';
+  if(LEVEL>=400&&LEVEL<424)return 'You are on the Pilgrim’s Path. Walk north, then west across the mountains, then south. The signs count the kilometres to Yarrim.';
   if(F.hollowSlain)return 'The Hollow Abbot is dead and the stair is open. The Hollow Land is the next part of the game.';
   if(F.reachedBottom)return 'You are in the Hollow Abbey. Speak to Brother Sevrin, then kill the Hollow Abbot in the great room.';
   if(F.sealedOpen)return 'Go down the stair behind the Sealed Door, four floors, to the Hollow Abbey.';
@@ -20208,13 +20208,13 @@ const QHINT={
   ad2:'Take the royal cutter home from Captain Aldwyn, then find the Sealed Door in the crypt level where the game began, near the start.',
   ad3:'Go through the Sealed Door and down the four floors to the Hollow Abbey. Each floor has a stair down at the far end.',
   ad4:'The Hollow Abbot is in the great room at the bottom. Speak to Brother Sevrin first.',
-  mq1:'Walk the Land Path to the halfway point, in the mountains. A gate cut into the cliff on the east side leads to Saint Elen’s. Abbot Anselm is in front of the church.',
+  mq1:'Walk the Pilgrim’s Path to the halfway point, in the mountains. A gate cut into the cliff on the east side leads to Saint Elen’s. Abbot Anselm is in front of the church.',
   mq2:'Brother Herbert is in the herb garden, south-west of the grounds. Pick 6 herbs from the beds.',
   mq3:'Brother Cook is in the kitchen, in the south-west. Apples lie in the orchard, in the south-east.',
   mq4:'The bee-keeper is by the hives, south of the cloister. Honeycombs lie on the ground around them.',
   mq5:'Wildflowers lie on the lawns of the monastery. Sister Wilma is in the cemetery, through the east gate.',
   mq6:'The hatch to the cellars is in the herb garden. Kill 6 ghosts, then tell Brother Cellarer.',
-  mq7:'Take the letter to Osk, the innkeeper of the Cold Spring Inn, on the Land Path in the mountains.',
+  mq7:'Take the letter to Osk, the innkeeper of the Cold Spring Inn, on the Pilgrim’s Path in the mountains.',
   mq8:'The ring is in a chest in the old crypts, one floor below the cellars. Speak to the Abbot first.',
   mq9:'The bell hangs at the foot of the church. Ring it once.',
   mq10:'Speak to Brother Hilarion in the guest house, in the east, and rest by the fire.',

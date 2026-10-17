@@ -40,7 +40,7 @@ function petDismiss(id){const L=petsData(),i=L.findIndex(p=>p.id===id);if(i>=0){
 function petsTick(){
   if(!petsData().length||G.state!=='play'||G.cut||G.talk||G.menu)return;
   const F=G.flags,pets=petsData();F.petT=(F.petT||0)+1;
-  const has=id=>pets.find(p=>p.id===id),day=dayNum(),quiet=LEVEL>=400&&LEVEL<440; // on the Land Path and at the monastery the animals say nothing
+  const has=id=>pets.find(p=>p.id===id),day=dayNum(),quiet=LEVEL>=400&&LEVEL<440; // on the Pilgrim’s Path and at the monastery the animals say nothing
   if(!quiet&&F.petT%45===0){const p=pets[(Math.random()*pets.length)|0],L=PETS[p.id].lines;msg(L[(Math.random()*L.length)|0].replace('{n}',p.name+' the '+PETS[p.id].n.toLowerCase()),'#d8d0a0')}
   // the first time each day: rumours from the parrot, scraps from the rat, a forecast from the frog
   if(!quiet&&F.petDay!==day){F.petDay=day;

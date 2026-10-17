@@ -19,7 +19,7 @@ const LP_BUILD=[ // [segment, kind, row, name, keeper id]
 const LP_TELE=[3,9,14,19]; // segments with a hidden stone teleporter in the forest (or the mountain rocks)
 const LP_ROOM=(i)=>LP.ROOM0+i;
 for(let i=0;i<LP_BUILD.length;i++)LEVEL_NAMES[LP_ROOM(i)]=LP_BUILD[i][3];
-for(let s=0;s<LP.N;s++)LEVEL_NAMES[LP.BASE+s]=LP_LEG(s)==='W'?'The Land Path, over the mountains':LP_LEG(s)==='D'?'The Land Path, the high pass':'The Land Path';
+for(let s=0;s<LP.N;s++)LEVEL_NAMES[LP.BASE+s]=LP_LEG(s)==='W'?'The Pilgrim’s Path, over the mountains':LP_LEG(s)==='D'?'The Pilgrim’s Path, the high pass':'The Pilgrim’s Path';
 /* ---- the people ---- */
 const LP_RES=[
   ['lp_r0','A shepherd','kh_ohfolk7_0',["Sheep do not care who is king. It is the best thing about them.","I walk the same road every morning, and the sea has never once looked the same.","Stay as long as you like. There is bread, and nobody to tell it to."]],
@@ -39,8 +39,8 @@ const LP_PRIESTS=[['lp_pr0','Father Elric, of the Long Road','kh_ohfolk2_1','The
  ['lp_pr1','Sister Wynn, of the Quiet','kh_ohfolk5_2','The Chapel of the Quiet. Nobody speaks here, not even the bell. Light a lamp if you like.'],
  ['lp_pr2','Brother Alder, of the sea church','kh_ohfolk1_4','Saint Aldric watched the sea for sixty years, and nothing happened, and he said it was the best sixty years of his life.']];
 LP_PRIESTS.forEach(([id,n,face,line])=>khPray(id,n,face,line,15));
-khNpc('lp_knight','A knight of the Crown','kh_ohsold1_2',()=>yrLines('lp_knight',["The Crown rides the Land Path twice a day. Nothing ever happens. It is the best post in the kingdom.","I ride from the city gate to the mountains and back. The mountains are far. The horse knows the way.","Do not mind us. We are only here so that you can walk in peace."]));
-khNpc('lp_cliff','The edge of the Land Path','gate',()=>say('The path ends here, at the edge of a high cliff. Far below, beyond the last slope of the mountain, lie the roofs and the harbour of Yarrim, and the sea. A steep goat track leads down. It can be climbed down, but it cannot be climbed up again.',[['Go down the goat track.',()=>{G.flags.lpDone=1;msg('The goat track is steep. The land path falls behind and above.','#a8d8ff');goToLevel(290,{x:LPY.x,y:LPY.y,f:LPY.f});return null}],['Stay a while.',()=>null]]));
+khNpc('lp_knight','A knight of the Crown','kh_ohsold1_2',()=>yrLines('lp_knight',["The Crown rides the Pilgrim’s Path twice a day. Nothing ever happens. It is the best post in the kingdom.","I ride from the city gate to the mountains and back. The mountains are far. The horse knows the way.","Do not mind us. We are only here so that you can walk in peace."]));
+khNpc('lp_cliff','The edge of the Pilgrim’s Path','gate',()=>say('The path ends here, at the edge of a high cliff. Far below, beyond the last slope of the mountain, lie the roofs and the harbour of Yarrim, and the sea. A steep goat track leads down. It can be climbed down, but it cannot be climbed up again.',[['Go down the goat track.',()=>{G.flags.lpDone=1;msg('The goat track is steep. The pilgrim’s path falls behind and above.','#a8d8ff');goToLevel(290,{x:LPY.x,y:LPY.y,f:LPY.f});return null}],['Stay a while.',()=>null]]));
 const LPY={x:56,y:8,f:2}; // where the goat track comes out, north of Yarrim
 const LPM={SEG:11,Y:300}; // the gate of the monastery, cut into the rock beside the path, halfway along
 let LP_XC={};
@@ -301,9 +301,9 @@ function lpBuild(s){
   function lpId(q){return LP.BASE+q}
   for(let y=H-4;y<H-1;y++)for(let x=CX-6;x<=CX+6;x++)used.add(K(x,y));
   const lv={rows:rows.map(r=>r.join('')),start:{x:MX(CX),y:H-5,f:0},enemies:[],items:[],decor,scenery,sky,fmap:null,floorSet:['ohMeadow','ohGravel','ohLawn','bluesand','bluewater','ohMoss','isleSandDk','wood'],floor:'ohMeadow',ceil:'cloud',
-    day:.98,outdoor:true,amb:.9,name:LEVEL_NAMES[id],label:'The Land Path',noExtras:true,diff:25,ceilH:5.2,chars,lights,portals:[],_walk:walkers};
+    day:.98,outdoor:true,amb:.9,name:LEVEL_NAMES[id],label:'The Pilgrim’s Path',noExtras:true,diff:25,ceilH:5.2,chars,lights,portals:[],_walk:walkers};
   if(tele)lv.tele=tele;else lv.noTele=true;
-  lv.mapNames=[{t:s===0?'The Land Gate':'The Land Path',x:MX(CX),y:H-10,k:'lane'}];
+  lv.mapNames=[{t:s===0?'The Land Gate':'The Pilgrim’s Path',x:MX(CX),y:H-10,k:'lane'}];
   const fmap=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=fm[y*W+x];fmap.push(r)}lv.fmap=fmap;
   LEVELS[id]=lv;TERRS[id]=yarTerrain(W,H,h,rk,block);
 }
@@ -378,7 +378,7 @@ function lpSwapTick(){
 {const _t=seaTick;seaTick=function(dt){_t.apply(this,arguments);try{lpFadeTick(dt);lpSwapTick()}catch(e){console.error(e)}}}
 {const _d=drawTport;drawTport=function(){_d.apply(this,arguments);if(LPF.on&&LPF.a>0){ctx.fillStyle='rgba(0,0,0,'+LPF.a.toFixed(3)+')';ctx.fillRect(0,0,480,320)}}}
 
-/* ---- the benches on the Land Path: the party can sit, and the music of Greendale Forest plays until they stand up ---- */
+/* ---- the benches on the Pilgrim’s Path: the party can sit, and the music of Greendale Forest plays until they stand up ---- */
 khNpc('lp_bench','A wooden bench','kh_ohgard1_3',()=>say('A plain wooden bench beside the path. The view is good, and nobody is in a hurry.',[
   ['Sit down.',()=>{G.sit={t:G.time+150};G.clock=(G.clock||0)+20;let healed=0;for(const h of G.heroes)if(h.alive!==false&&h.hp>0&&h.hp<h.max){h.hp=Math.min(h.max,h.hp+Math.ceil(h.max*.15));healed=1}
     msg('The party sits. For a while nobody says anything, and somewhere a gentle tune begins.','#b8e8c0');if(healed)msg('The rest does you good.','#a8d8a8');return null}],
@@ -457,7 +457,7 @@ function lpDrawMap(){
   {const [px,py]=lpPos(cur);ctx.save();ctx.translate(px,py);ctx.fillStyle='#ffe36a';ctx.strokeStyle='#2a1c0e';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(0,0,5.5,0,TAU);ctx.fill();ctx.stroke();ctx.fillStyle='#d03a2a';ctx.beginPath();ctx.arc(0,0,2,0,TAU);ctx.fill();ctx.restore();
    const km=Math.round(cur*LP_KM);lab('You: '+km+' km from Oldhaven, '+(LP_KM-km)+' to Yarrim',245,228,9,'#6a1a10')}
   // title, note and legend
-  ctx.save();ctx.font=`22px ${FTITLE}`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle='#2a1c0e';ctx.fillText('The Land Path',10,16);ctx.restore();
+  ctx.save();ctx.font=`22px ${FTITLE}`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle='#2a1c0e';ctx.fillText('The Pilgrim’s Path',10,16);ctx.restore();
   lab('96 kilometres, Oldhaven to Yarrim',12,33,8,'#5a3c1c','left');
   const ly=DH-14;ctx.fillStyle='rgba(30,20,10,.82)';ctx.fillRect(0,DH-30,DW,30);
   txt('Stay on the path: the shrines leave food for the hungry, the inns have beds, and Saint Elen’s Monastery waits halfway.',240,DH-23,8,'#e8dcb0','center',true);
