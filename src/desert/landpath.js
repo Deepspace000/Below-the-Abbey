@@ -101,9 +101,30 @@ function lpPeak(k,seed){ // a range of far mountains, with snow on the highest, 
 const LP_FALLS=[9,12,14],LP_BRIDGE={}; // the stretches with a waterfall and a rope bridge
 /* the waterfalls are painted: a wet rock cliff with the water falling down it, spray and ferns at the foot (four kinds; each stretch with a fall has its own) */
 for(let q=0;q<4;q++)loadImg('lpf_'+q,'assets/lpf_'+q+'.png');
-{const H6=6.0;for(let q=0;q<4;q++)NPC_H['lpf_'+q]=H6}
+{const H6=5.2;for(let q=0;q<4;q++)NPC_H['lpf_'+q]=H6}
+/* the water of a painted fall runs: six frames, with the bright water sliding down the face (the foam at the foot stays still) */
+function lpFallFrames(k){
+  const im=IMG[k];if(!im||IMG[k+'_f0'])return;const w=im.width,h=im.height,c0=document.createElement('canvas');c0.width=w;c0.height=h;const x0=c0.getContext('2d');x0.drawImage(im,0,0);
+  const src=x0.getImageData(0,0,w,h),sd=src.data,isW=i=>{const r=sd[i],g=sd[i+1],b=sd[i+2];return sd[i+3]>200&&b>165&&g>160&&r>135&&b>=r},yMax=Math.floor(h*.74);
+  for(let f=0;f<6;f++){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d'),out=x.createImageData(w,h),od=out.data;od.set(sd);const sh=f*9;
+    for(let y=0;y<yMax;y++){const sy=(((y-sh)%yMax)+yMax)%yMax;for(let xx=0;xx<w;xx++){const i=(y*w+xx)*4;if(!isW(i))continue;const j=(sy*w+xx)*4;if(isW(j)){od[i]=sd[j];od[i+1]=sd[j+1];od[i+2]=sd[j+2]}}}
+    x.putImageData(out,0,0);IMG[k+'_f'+f]=c}
+}
+/* the single houses: a real room, and the furnishing of whoever lives there (a shepherd, a fisherman, a hermit, a charcoal-burner, a gardener, a beekeeper) */
+const LP_HOME_SET={0:'warm',3:'fisher',4:'scholar',7:'soldier',8:'healer',11:'potter',12:'warm'};
+const LP_HOME_PROPS={ // [picture, x, y]: barrels and crates for the shepherd, fisherman and charcoal-burner, books and candles for the hermit, pots for the gardener, hives for the beekeeper
+  0:[['barrel',1,4],['crate',6,4],['flowerpot',2,4],['breadbasket',5,4]],
+  3:[['barrel',1,4],['barrel',2,4],['crate',6,4],['crate',6,3]],
+  4:[['mi_lectern',2,4],['mi_candel',6,4],['mi_candel',1,3]],
+  7:[['crate',1,4],['crate',2,4],['barrel',6,4],['crate',6,3]],
+  8:[['flowerpot',1,4],['flowerpot',2,4],['flowerpot',5,4],['flowerpot',6,4],['breadbasket',6,3]],
+  11:[['kh_ohgard2_0',1,4],['kh_ohgard2_0',6,4],['flowerpot',2,4],['flowerpot',5,4]],
+  12:[['mi_candel',1,4],['flowerpot',6,4],['breadbasket',5,4]]};
+function lpHomeTpl(i){return bb=>{const base=khRoomHome(bb);return Object.assign({},base,{build:h=>{base.build(h);const {raw,has,W}=h;
+  for(const [k,x,y] of (LP_HOME_PROPS[i]||[]))if(!has(x,y)&&IMG[k])raw(k,x,y,{block:true,deco:true});
+  for(const x of [2,5])if(!has(x,1)&&IMG.mw_shutter)raw('mw_shutter',x,1,{pic:1,wd:[0,-1],block:false,walk:true,bob:.75})}})}}
 const LP_FALL_KIND={9:0,12:3,14:0}; // only the plain single falls: no stepped or double ones
-function lpFallsKey(s){const k='lpf_'+((LP_FALL_KIND[s]!==undefined?LP_FALL_KIND[s]:s%4));return IMG[k]?k:lpFallsKeyOld()}
+function lpFallsKey(s){const k='lpf_'+((LP_FALL_KIND[s]!==undefined?LP_FALL_KIND[s]:s%4));if(IMG[k]){try{lpFallFrames(k)}catch(e){console.error(e)}return k}return lpFallsKeyOld()}
 function lpFallsKeyOld(){ // the drawn fall, kept only for the moment before the painted ones have loaded
   const k='lp_falls';if(IMG[k])return k;const w=256,h=768,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
   const rg=x.createLinearGradient(0,0,0,h);rg.addColorStop(0,'#3d4a46');rg.addColorStop(1,'#2a3330');x.fillStyle=rg;
@@ -193,7 +214,7 @@ function lpBuild(s){
       for(let x=xl;x<=xr;x++)for(let y=by;y<=by+1;y++){if(rows[y][MX(x)]!=='.')continue;const i=I(x,y),deck=Math.abs(x-c)<=1;fm[i]=deck?'7':'4';h[i]=deck?.3:-.12;block[i]=deck?0:1}
       for(let y=by-2;y<=by+3;y++)for(let x=pk-2;x<=pk+2;x++)if(x>0&&x<W-1&&y>0&&Math.hypot(x-pk,y-by-.5)<=2.6&&rows[y][MX(x)]==='.'){fm[I(x,y)]='4';h[I(x,y)]=-.2;block[I(x,y)]=1;carve.add(K(x,y))}
       const fk=lpFallsKey(s),rk=lpRailKey();
-      if(fk)decor.push({k:fk,x:MX(fx),y:by,block:true,deco:true,sc:1,kname:'falls'});
+      if(fk)decor.push({k:fk,x:MX(fx),y:by,block:true,deco:true,sc:1,kname:'falls',fr:/^lpf_/.test(fk)?7:0});
       if(rk)for(const dx of [-2,2])for(const dy of [0,1])decor.push({k:rk,x:MX(c+dx),y:by+dy,block:true,deco:true,sc:1});
       used.add(K(fx,by));LP_BRIDGE[s]={y:by,x:c}}
     // far peaks with snow on them, standing behind the cliffs, placed by distance along the whole path
@@ -219,7 +240,9 @@ function lpBuild(s){
     KH_DOOR[dgid]={lvl:rid,at:kind==='inn'?{x:6,y:7,f:0}:kind==='church'?{x:4,y:6,f:0}:{x:4,y:4,f:0}};
     circle(x0+((wB-1)>>1),b.y,kind==='church'?10:7);lane(fe(b.y)-1,x0-1,ym,1);
     for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const door=x===x0&&y===ym;setC(x,y,door?ch(dgid):((x+y)%2===0&&x!==x1&&y!==y0)?win:plain);fm[I(x,y)]='2'}
-    const cxm=W-(x0+x1+1)/2,cx0=mir?cxm:(x0+x1+1)/2;sky.push({x:cx0,y:(y0+y1+1)/2,k:'kh_ohroof1_'+(b.i%5),w:dB+.7,z:wh-.03});
+    const cxm=W-(x0+x1+1)/2,cx0=mir?cxm:(x0+x1+1)/2;if(kind!=='house')sky.push({x:cx0,y:(y0+y1+1)/2,k:'kh_ohroof1_'+(b.i%5),w:dB+.7,z:wh-.03}); // the little houses have no roof sprite: it never sat right from every side
+    else{ // instead the face of the house is dressed: a shuttered window and climbing roses either side of the door
+      decor.push({k:'mw_shutter',x:MX(x0-1),y:y0,wd:[mir?-1:1,0],pic:1,block:false,walk:true,deco:true,bob:.8},{k:'mw_ivy',x:MX(x0-1),y:y1,wd:[mir?-1:1,0],pic:1,block:false,walk:true,deco:true,bob:0})}
     if(kind==='church'){sky.push({x:mir?W-(x1+1.5):x1+1.5,y:y0+1,k:'kh_ohtower1_'+(2+(b.i%2)),w:3.4,z:wh-.03});
       // the churchyard behind the church: graves in rows, an iron fence, a few crosses
       for(let gy=y0-1;gy<=y1+1;gy+=2)for(let gx=x1+4;gx<=x1+10;gx+=2){if(hs(gx,gy,sd+8)<.82){const k=hs(gx,gy,sd+9)<.25?'cross':hs(gx,gy,sd+9)<.6?'grave':'grave2';decor.push({k,x:MX(gx),y:gy,block:true,deco:true,sc:1});used.add(K(gx,gy))}}
@@ -228,8 +251,10 @@ function lpBuild(s){
     }
     for(let y=y0-1;y<=y1+1;y++)for(let x=x0-1;x<=x1+1;x++)used.add(K(x,y));
     LEVEL_NAMES[rid]=b.name;
-    KH_LAZY[rid]=()=>{if(LEVELS[rid])return;const room=kind==='inn'?'inn':kind==='church'?'prayer':'home',bb={id:'lp'+b.i,name:b.name,room,keeper:b.keeper,scene:kind==='house'?['warm','fisher','scholar','healer','potter','warm','soldier'][b.i%7]:undefined,wallImg:'kh_ohwall1_'+(b.i%3),floor:'wood'};
-      const R=khRoom(bb,rid,{to:id,x:MX(front[0]),y:front[1],f:mir?1:3});LEVELS[rid]=R.level};
+    KH_LAZY[rid]=()=>{if(LEVELS[rid])return;const room=kind==='inn'?'inn':kind==='church'?'prayer':'home',bb={id:'lp'+b.i,name:b.name,room,keeper:b.keeper,scene:kind==='house'?LP_HOME_SET[b.i]||'warm':undefined,wallImg:'kh_ohwall1_'+(b.i%3),floor:'wood'};
+      if(kind==='house')bb.tpl=lpHomeTpl(b.i);
+      const R=khRoom(bb,rid,{to:id,x:MX(front[0]),y:front[1],f:mir?1:3});if(kind==='house'){delete R.level.scene;R.level.ceilH=2.2} // a real room at once: no picture of the house front
+      LEVELS[rid]=R.level};
     // the trail from the door to the path, flowers by the door and a lamp
     decor.push({k:'lamp',x:MX(x0-2),y:y0-1,block:false,walk:true,deco:true});lights.push([MX(x0-2),y0-1]);used.add(K(x0-2,y0-1));
   }

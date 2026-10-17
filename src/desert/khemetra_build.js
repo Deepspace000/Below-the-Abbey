@@ -106,7 +106,7 @@ const KH_LEVEL_SKIP=new Set([199,260,261,266,270,271,272,273,274]);
 function khNextLevel(){
   let n=KH_LEVEL_NEXT++;
   while(KH_LEVEL_SKIP.has(n)||(n>=281&&n<289))n=KH_LEVEL_NEXT++;
-  if(n>=289)n=KH_HOUSE_NEXT++;   // out of room in the old range: the house numbers go on from 1000
+  if(n>=289)n=khHouseId();   // out of room in the old range: the house numbers go on from 1000
   return n;
 }
 /* choose, for each building, a stretch of street front of the right sort and far from its own kind */
@@ -297,7 +297,9 @@ function decor_urn(raw){raw('urn',5,2,{npc:'kh_urn'})}
 
 /* ---- every other house, shop and prayer house with a clear way up to its front door: a door, and a picture of the room behind it ----
    The room is only built the first time the party walks in (KH_LAZY, called from loadLevel), so a thousand doors cost nothing. */
-const KH_LAZY={},KH_GOLD={};let KH_HOUSE_NEXT=1000; // KH_GOLD: the gold waiting in a house, by level number
+const KH_LAZY={},KH_GOLD={};let KH_HOUSE_NEXT=1000;
+/* a house number that no other part of the game uses: Oldhaven, its quay, the Pilgrim's Path and the monastery keep their rooms in 6000 to 6999, and a Khemetra house must never take over one of theirs */
+function khHouseId(){let n=KH_HOUSE_NEXT++;while((n>=6000&&n<7000)||KH_LAZY[n]||LEVELS[n])n=KH_HOUSE_NEXT++;return n} // KH_GOLD: the gold waiting in a house, by level number
 const KH_SCENE_NAME={warm:'A Warm House',wizard:"A Wizard's House",empty:'An Empty House',worker:"A Worker's House",noble:"A Nobleman's House",spartan:'A Spartan House',messy:'A Messy House',dark:'A Dark House',magic:'A Magical House',ruined:'A Ruined House',scholar:"A Scholar's House",musician:"A Musician's House",merchant:"A Merchant's House",healer:"A Healer's House",cats:"A Cat Lover's House",fisher:"A Fisherman's House",boarded:'A Boarded-up House',taxman:"A Tax Collector's House",potter:"A Potter's House",soldier:"A Soldier's House",priest:"A Priest's House",children:"A Children's House",bath_grand:'A Bathhouse',bath_hammam:'A Hammam'};
 const KH_SHOP_NAME={merchant:'A Closed Shop',potter:"A Potter's Workshop",healer:"A Healer's Shop",scholar:"A Scribe's Shop",empty:'An Empty Shop',taxman:'A Tax Office',fisher:"A Fishmonger's Shop",musician:'A Music Shop',boarded:'A Boarded-up Shop'};
 function khPickScene(m){
@@ -324,7 +326,7 @@ function khMakeHouseDoors(C){
   C._hoards=hoards;
   for(const m of C.modules){
     if(!eligible(m))continue;
-    const hoard=hoards.get(m),scene=hoard?hoard.scene:khPickScene(m),shop=m.kind==='shop'&&!hoard,lvl=KH_HOUSE_NEXT++,mid=m.cells[(m.cells.length-1)>>1],d=KH_DIRS[m.face];
+    const hoard=hoards.get(m),scene=hoard?hoard.scene:khPickScene(m),shop=m.kind==='shop'&&!hoard,lvl=khHouseId(),mid=m.cells[(m.cells.length-1)>>1],d=KH_DIRS[m.face];
     const front=[mid[0]+d[0],mid[1]+d[1]],ff=KH_FACE_F[m.face];
     const name=(shop?KH_SHOP_NAME[scene]:KH_SCENE_NAME[scene])||KH_SCENE_NAME.warm;
     m.lvl=lvl;m.doorCells=m.cells.length===2?m.cells:[mid];m.at={x:4,y:4,f:0};m.house=true;m.hscene=shop?undefined:scene;
