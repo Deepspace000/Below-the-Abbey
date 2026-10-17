@@ -26,14 +26,14 @@ const HSPL=[],HEAL=[];
     let bi=0,bd=1e9;for(let i=0;i<4;i++){const dx=Math.abs(portraitX(i)+19-x);if(dx<bd){bd=dx;bi=i}}const h=G.heroes[bi];
     if(h&&bd<24){const amt=+T.slice(1),oldM=clamp(1-(h.hp-amt)/h.max,0,1),newM=clamp(1-h.hp/h.max,0,1);if(oldM>newM+.005)HEAL[bi]={t:0,oldM,newM}}}
   if(col==='#ffd76a'&&/^\d+$/.test(T)){ // a hit on a creature: a splat where it stands, and a thump
-    const d=+T,big=d>=40;IMP_QUIET=G.time;impPlay(big,1,big?.9:.8);G.floats.push({x,y,text:T,col,t:0,splat:1,R:Math.min(24,11+d*.25),seed:d*31+Math.floor(x)});return}
+    const d=+T,big=d>=40;IMP_QUIET=G.time;impPlay(big,1,big?.9:.8);G.floats.push({x,y,text:T,col,t:0,splat:1,R:Math.min(15,7+d*.1),seed:d*31+Math.floor(x)});return}
   if(col==='#ff6a5a'&&/^-\d+$/.test(T)){ // a hit on a hero: a splat on the portrait, coloured by what ails them
     let bi=0,bd=1e9;for(let i=0;i<4;i++){const dx=Math.abs(portraitX(i)+19-x);if(dx<bd){bd=dx;bi=i}}
     const d=-T;IMP_QUIET=G.time;impPlay(d>=15,.82,.95);HSPL[bi]={t:0,n:String(d),tint:impTint(bi),seed:d*17+bi};return}
   return _af.apply(this,arguments)}}
 {const _df=drawFloats;drawFloats=function(dt){
-  for(let i=G.floats.length-1;i>=0;i--){const f=G.floats[i];if(!f.splat)continue;f.t+=dt;if(f.t>1.1){G.floats.splice(i,1);continue}
-    drawSplat(f.x,f.y-4-f.t*10,f.R*(1+Math.min(.25,f.t*2)*(f.t<.12?1:0)),f.text,['#e83a2a','#8a1410'],f.seed,clamp(1.5-f.t,0,1))}
+  for(let i=G.floats.length-1;i>=0;i--){const f=G.floats[i];if(!f.splat)continue;f.t+=dt;if(f.t>.75){G.floats.splice(i,1);continue}
+    drawSplat(f.x+(f.seed%7-3)*3,f.y+24+f.t*8,f.R*(1+(f.t<.1?.2:0)),f.text,['#e83a2a','#8a1410'],f.seed,clamp(1.2-f.t*1.6,0,1))} // low on the body, drifting down, gone before it could reach the face
   const keep=G.floats.filter(f=>f.splat);G.floats=G.floats.filter(f=>!f.splat);_df.apply(this,arguments);G.floats=G.floats.concat(keep)}}
 {const _ui=ui;ui=function(dt){_ui.apply(this,arguments);try{if(G.state!=='play'||G.inv.open)return;
   // a heal in progress: the healed band shows the old red, turns ice blue, then fades as the red settles lower
