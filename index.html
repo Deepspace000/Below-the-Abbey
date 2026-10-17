@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.243';
+const VERSION='3.244';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -3333,8 +3333,8 @@ function drawInventory(){
     else if(d.k==='quest'){label=null}
     else{label='Equip';id='iequip'}
     const dk=I.sel.src==='bag'?'b'+I.sel.i:'s'+I.sel.slot,sure=I.dropKey===dk;
-    if(label){btnText(id,label,rx+6,176,70,26);btnText('idrop',sure?'Sure?':'Discard',rx+80,176,70,26)}
-    else btnText('idrop',sure?'Sure?':'Discard',rx+22,176,112,26);
+    if(label){btnText(id,label,rx+6,171,70,26);btnText('idrop',sure?'Sure?':'Discard',rx+80,171,70,26)}
+    else btnText('idrop',sure?'Sure?':'Discard',rx+22,171,112,26);
   }else{
     txt(def.name,rx+rw/2,20,13,heroSpeech(hi),'center',true);
     txt(`${def.cls}  Level ${h.lvl}`,rx+rw/2,38,10,'#c8b898','center');
@@ -3345,9 +3345,9 @@ function drawInventory(){
     txt(`STR ${h.str}   DEX ${h.dex}   INT ${h.int}`,rx+rw/2,160,9,'#d8c9a0','center');
   }
   { // the hunger bar stays in view whatever is selected
-    const bx=rx+8,bw=rw-16,by=204,fr=clamp(h.food/100,0,1),low=h.food<25;
+    const bx=rx+8,bw=rw-16,by=199,fr=clamp(h.food/100,0,1),low=h.food<25;
     ctx.fillStyle='#141006';ctx.fillRect(bx,by,bw,8);ctx.fillStyle=low?'#d8683a':'#a8b858';ctx.fillRect(bx,by,bw*fr,8);ctx.strokeStyle='#8a7448';ctx.lineWidth=1;roughStrokeRect(bx,by,bw,8);
-    txt(`Hunger ${Math.round(h.food)}%`+(h.food<=0?'  Starving':low?'  Hungry':''),rx+rw/2,208.5,6.5,'#f4ecd4','center',true);
+    txt(`Hunger ${Math.round(h.food)}%`+(h.food<=0?'  Starving':low?'  Hungry':''),rx+rw/2,203.5,6.5,'#f4ecd4','center',true);
   }
   // gold and sort
   ctx.fillStyle='rgba(8,6,4,.8)';rrect(ctx,rx,212,rw,28,5);ctx.fill();ctx.strokeStyle=goldG(rx,212,rw,28);ctx.lineWidth=1.6;rrect(ctx,rx,212,rw,28,5);ctx.stroke();
@@ -3355,7 +3355,7 @@ function drawInventory(){
   panel(rx+4,216,46,20,false,false);txt('Sort',rx+27,226,8.5,'#c9ba8e','center',true);btn('isort',rx+4,216,46,20);
 
   /* ---- bottom bar ---- */
-  drawPortraits(250,hi,'ihero');
+  drawPortraits(238,hi,'ihero');
   for(const [id,x,draw] of [['itab_inv',166,()=>iconBackpack(187,276,1.05)],['itab_char',210,()=>iconFace(hi,231,276,1.05)],['itab_spell',254,()=>iconBook(275,276,1.05)],['itab_powers',298,()=>iconPowers(319,276,1.05)]]){
     panel(x,252,42,62,false,I.tab===id.slice(5));draw();btn(id,x,252,42,62);
   }
