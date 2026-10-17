@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.256';
+const VERSION='3.257';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -4303,7 +4303,7 @@ const WORLD_LOCS=[
   {k:'openSea',n:'The Open Sea',sub:'sail the Dawn Walker',lv:[330,331,332,333,334,335,336,337,338,339,340,341,342,343],x:808,y:262,ic:'rain'},
   {k:'oldhaven',n:'Oldhaven',sub:"the king's city, across the Narrow Sea",lv:[304,305,306,307,308,309,310],x:1170,y:176,ic:'castle'},
   {k:'oakwood',n:'The Oakwood',sub:'old oaks east of Oldhaven',lv:[311],x:1244,y:190,ic:'trees'},
-  {k:'monastery',n:'Saint Elen’s',sub:'a mountain monastery',lv:[430,431,432,433,434,6900,6901,6902,6903,6904,6905,6906],x:1200,y:66,ic:'abbey'},
+  {k:'monastery',n:'Saint Elen’s',sub:'a mountain monastery',lv:[430,431,432,433,434,6900,6901,6902,6903,6904,6905,6906],x:1256,y:20,ic:'abbey'},
   {k:'landpath',n:'The Land Path',sub:'a pilgrim way, one way only',lv:Array.from({length:24},(_,i)=>400+i),x:1130,y:36,ic:'trees'},
   {k:'below',n:'Below the Abbey',sub:'past the sealed door',lv:[360,361,362,363],x:84,y:268,ic:'cave'},
   {k:'orangecastle',n:'The Orange Spire',sub:'in the Hollow Land',lv:[364,440,441,442,443,444,445,446,447,448,449,450,451,452,453,454,455,456,457,458,459,460],x:24,y:254,ic:'orangecastle'}
