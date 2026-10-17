@@ -13,7 +13,7 @@ if(QAREA_ORDER.indexOf('Saint Elen’s Monastery')<0)QAREA_ORDER.splice(QAREA_OR
 
 /* ---- the buildings of the grounds: x0, y0, x1, y1, height of the walls, style, door column, kind, name, keeper ---- */
 const MON_BLD=[
-  {rid:MON.ROOM0,   x0:33,y0:8, x1:49,y1:15,wh:3.8,st:'castle',dx:41,room:'prayer',name:'The Church of Saint Elen',keeper:'mon_chaplain',at:{x:4,y:6,f:0},tower:1},
+  {rid:MON.ROOM0,   x0:33,y0:8, x1:49,y1:15,wh:3.8,st:'cream',dx:41,room:'prayer',name:'The Church of Saint Elen',keeper:'mon_chaplain',at:{x:4,y:6,f:0},tower:1},
   {rid:MON.ROOM0+1, x0:8, y0:22,x1:20,y1:29,wh:2.7,st:'golden',dx:14,room:'hall',name:'The Refectory',keeper:'mon_refec',at:{x:5,y:6,f:0}},
   {rid:MON.ROOM0+2, x0:62,y0:22,x1:74,y1:29,wh:2.7,st:'cream',dx:68,room:'home',scene:'scholar',name:'The Scriptorium',keeper:'mon_scribe',at:{x:4,y:4,f:0}},
   {rid:MON.ROOM0+3, x0:8, y0:40,x1:16,y1:45,wh:2.3,st:'cottage',dx:12,room:'home',scene:'warm',name:'The Kitchen',keeper:'mon_cook',at:{x:4,y:4,f:0}},

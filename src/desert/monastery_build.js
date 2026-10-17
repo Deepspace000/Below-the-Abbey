@@ -51,8 +51,8 @@ function monBuild(){
     MON_BLD.forEach((b,k)=>{
       const plain=ch(TM.make('plain',b.st,b.wh).gid),win=ch(TM.make('window',b.st,b.wh).gid),dt=TM.make('door',b.st,b.wh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;KH_DOOR[dgid]={lvl:b.rid,at:b.at};
       for(let y=b.y0;y<=b.y1;y++)for(let x=b.x0;x<=b.x1;x++){const door=x===b.dx&&y===b.y1;solid(x,y,door?ch(dgid):((x+y)%3===0&&y>b.y0&&y<b.y1)?win:plain);used.add(x+','+y)}
-      sky.push({x:(b.x0+b.x1+1)/2,y:(b.y0+b.y1+1)/2,k:'kh_ohroof1_'+(k%5),w:(b.y1-b.y0+1)+.9,z:b.wh-.03});
-      if(b.tower)sky.push({x:b.x1+1.5,y:b.y0+1.5,k:'kh_ohtower1_2',w:3.8,z:b.wh-.03},{x:b.x0-.5,y:b.y0+1.5,k:'kh_ohtower1_3',w:3.2,z:b.wh-.03});
+      sky.push({x:(b.x0+b.x1+1)/2,y:(b.y0+b.y1+1)/2,k:'kh_ohroof1_'+[0,0,0,2,2,2][k],w:(b.y1-b.y0+1)+.9,z:b.wh-.03}); // grey slate on the stone buildings, red clay tile on the cottages
+      if(b.tower)sky.push({x:b.x1+1.4,y:b.y0+1.5,k:'kh_ohtower1_4',w:2.1,z:b.wh-.03},{x:b.x0-.4,y:b.y0+1.5,k:'kh_ohtower1_0',w:1.9,z:b.wh-.03}); // the church: a spired bell tower and a slate cone turret
       LEVEL_NAMES[b.rid]=b.name;const rid=b.rid,front=[b.dx,b.y1+1];
       const mk=()=>{if(LEVELS[rid])return;const bb={id:b.room==='inn'?'mon_guest':'mon'+k,name:b.name,room:b.room,keeper:b.keeper,scene:b.scene,wallImg:'kh_ohwall1_'+(k%3),floor:b.room==='hall'?'cobble':'wood'};
         const R=khRoom(bb,rid,{to:MON.ID,x:front[0],y:front[1],f:2});LEVELS[rid]=R.level};
@@ -112,10 +112,10 @@ function monBuild(){
     // paths
     for(let x=3;x<=40;x++)for(const y of [20,21])fm[y*W+x]='1';for(let y=12;y<=34;y++)for(const x of [24,25])fm[y*W+x]='1';for(let y=12;y<=20;y++)for(const x of [40,41])fm[y*W+x]='1';
     // the mausoleum
-    {const mx0=37,mx1=45,my0=5,my1=11,wh=3.4,plain=ch(TM.make('plain','castle',wh).gid),win=ch(TM.make('window','castle',wh).gid),dt=TM.make('door','castle',wh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;
+    {const mx0=37,mx1=45,my0=5,my1=11,wh=3.4,plain=ch(TM.make('plain','cream',wh).gid),win=ch(TM.make('window','cream',wh).gid),dt=TM.make('door','cream',wh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;
       const mc=LEVELS[MON.MAUS];KH_DOOR[dgid]={lvl:MON.MAUS,at:{x:mc.start.x,y:mc.start.y,f:0}};
       for(let y=my0;y<=my1;y++)for(let x=mx0;x<=mx1;x++){solid(x,y,(x===41&&y===my1)?ch(dgid):((x+y)%3===0&&y>my0)?win:plain);used.add(x+','+y)}
-      sky.push({x:41.5,y:8.5,k:'kh_ohroof1_3',w:7.6,z:wh-.03},{x:mx1+1.5,y:my0+1.5,k:'kh_ohtower1_3',w:3.2,z:wh-.03});
+      sky.push({x:41.5,y:8.5,k:'kh_ohroof1_3',w:7.6,z:wh-.03},{x:mx1+1.2,y:my0+1.4,k:'kh_ohtower1_0',w:1.6,z:wh-.03});
       for(let x=mx0-1;x<=mx1+1;x++)used.add(x+','+(my1+1))}
     // the graves, in rows, with crosses, yews and flowers between
     for(let gy=15;gy<=36;gy+=2)for(let gx=6;gx<=48;gx+=2){if(!free(gx,gy)||fm[gy*W+gx]==='1'||fm[gy*W+gx+1]==='1'||fm[gy*W+gx-1]==='1')continue;if(hs(gx,gy,81)<.28)continue;
