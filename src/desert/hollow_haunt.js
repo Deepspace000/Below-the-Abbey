@@ -174,6 +174,7 @@ function hlDrawMap(cs,ox,oy){
     lab(known?r.n:hlScramble(r.n,LEVEL*31+i),cx,cy,Math.max(7,Math.min(10,cs*1.2)),known?'#3a1c0c':'#6a5a7a')})}
   ctx.restore();
   if(!G.flags.autoScaleOn&&LEVEL_RATING[LEVEL])lab('Creatures: level '+LEVEL_RATING[LEVEL],404,40,9,'#7a1a10');   // the level of this floor, in the fixed world
+  {const k=LEVEL-HL.BASE,t=k>=0&&k<20?'The Orange Tower, level '+(k+1):LEVEL===HL.CAV?'The Hollow Land':'The Orange Tower';ctx.save();ctx.fillStyle='rgba(226,212,168,.94)';rrect(ctx,150,10,180,22,5);ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=1.2;rrect(ctx,150,10,180,22,5);ctx.stroke();ctx.restore();lab(t,240,21,12,'#3a1c0c')}
   // the key
   {const x=8,y=206,w=196,h=70;ctx.save();ctx.fillStyle='rgba(226,212,168,.94)';rrect(ctx,x,y,w,h,5);ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=1.2;rrect(ctx,x,y,w,h,5);ctx.stroke();ctx.restore();
     const rows=[['#b07a3a','Hidden door: walk into the wall'],['#e8c870','Stairs up'],['#e0b030','Chest'],['#c8a040','Portrait'],['#a8cce4','Mirror'],['#e0402e','Wall torch']];
