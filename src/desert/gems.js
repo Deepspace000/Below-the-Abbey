@@ -53,12 +53,14 @@ function drawColl(kind){
   const C=COLL[kind],items=C.items(),d=collData(kind);
   let kinds=0,F=0,S=0,Gd=0;for(const it of items){const o=d[it.id];if(o&&(o.f||o.s))kinds++;if(o){F+=o.f;S+=o.s;Gd+=o.g}}
   txt(C.title,240,20,14,'#d8c88e','center',true);
-  txt(`${kinds} of ${items.length} kinds found    ${F} found    ${S} sold for ${Gd} gold`,240,35,8.5,'#e8d890','center',true);
+  if(kind==='treasure'){const T=collData('treasure');txt(`${kinds} of ${items.length} finds    ${(T._digs||0)} digs    ${(T._gold||0)} gold in coins dug up`,240,35,8.5,'#e8d890','center',true)}
+  else txt(`${kinds} of ${items.length} kinds found    ${F} found    ${S} sold for ${Gd} gold`,240,35,8.5,'#e8d890','center',true);
   const cols=items.length>30?10:items.length>20?8:6,cw=Math.floor(432/cols),ch=items.length>30?44:items.length>20?52:50,x0=24+(432-cw*cols)/2,y0=44;
   items.forEach((it,i)=>{const cx=x0+(i%cols)*cw,cy=y0+Math.floor(i/cols)*ch,o=d[it.id],got=o&&(o.f||o.s),sel=G.collSel===i;
     ctx.fillStyle=sel?'rgba(70,52,18,.9)':'rgba(22,19,16,.82)';rrect(ctx,cx+1,cy,cw-2,ch-3,3);ctx.fill();ctx.lineWidth=sel?1.8:1;ctx.strokeStyle=sel?'#ffe36a':'#5a4a2c';rrect(ctx,cx+1,cy,cw-2,ch-3,3);ctx.stroke();
     const im=IMG['icn_'+it.id];
     if(im){ctx.save();if(!got){ctx.globalAlpha=.22;ctx.filter='brightness(0)'}const s=items.length>30?28:30;ctx.drawImage(im,cx+(cw-s)/2,cy+1,s,s);ctx.restore()}
+    else if(ITEMDEF[it.id]||it.glyph){ctx.save();if(!got){ctx.globalAlpha=.22;ctx.filter='brightness(0)'}itemIconOn(ctx,ITEMDEF[it.id]||{ic:it.glyph,c:'#e8c050'},cx+cw/2,cy+16,.9);ctx.restore()}
     txt(got?it.name:'? ? ?',cx+cw/2,cy+(items.length>30?32:34),5.8,got?'#e8dcb4':'#6a5a40','center',false,undefined,cw-4);
     if(got)txt(`found ${o.f}  sold ${o.s}`,cx+cw/2,cy+(items.length>30?39:42),5.3,'#a8d890','center',false,undefined,cw-4);
     btn('coll_'+i,cx,cy,cw,ch)});
@@ -70,7 +72,7 @@ function drawColl(kind){
 }
 function collBtn(id){
   if(id==='cl_back'){G.menu=menuBack();return}
-  if(id==='cl_gems'||id==='cl_bf'||id==='cl_herb'){G.menuBack='collection';G.menu=id.slice(3);G.collSel=undefined;return}
+  if(id==='cl_gems'||id==='cl_bf'||id==='cl_herb'||id==='cl_treasure'){G.menuBack='collection';G.menu=id.slice(3);G.collSel=undefined;return}
   if(id==='coll_back'||id==='menu'||id==='menuclose'){G.collSel=undefined;G.menu=menuBack();return}
   const m=id.match(/^coll_(\d+)$/);if(m)G.collSel=+m[1];
 }

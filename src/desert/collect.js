@@ -23,7 +23,8 @@ if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push('butterflycage',...BFLIES
 /* the log pages */
 COLL.bf={title:'BUTTERFLY CATCHING',noun:'butterfly',items:()=>BFLIES.map(b=>({id:'bf_'+b[0],name:b[1],value:b[2]})),blurb:'Buy a butterfly cage from a trader. When a butterfly is on your square, the catch hand lights up.'};
 COLL.herb={title:'HERB COLLECTING',noun:'herb',items:()=>HERBS.map(h=>({id:'herb_'+h[0],name:h[1],value:Math.max(1,Math.floor(h[2]*.4))})),blurb:'Herbs grow on the ground in the open lands. Walk over one to pick it.'};
-COLL_KIND.herb_='herb';
+COLL_KIND.herb_='herb';COLL_KIND.odd_='treasure';
+COLL.treasure={title:'TREASURE',noun:'find',items:()=>[{id:'coins',name:'Coins',glyph:'bones',value:20},{id:'odd_boot',name:'Old Boots',value:1},...ODDITIES.map((o,i)=>({id:'odd_'+i,name:o[0].replace(/^An? /,''),value:o[1]})),{id:'weapon',name:'Buried Weapons',glyph:'sword',value:0},{id:'bottle',name:'Messages in Bottles',value:0}],blurb:'Dig with a shovel on an empty square. Gems you dig up are logged in the Jewel Hunter.'};
 /* ---------- placing herbs on empty ground ---------- */
 function herbPlace(n,late){
   const L=LEVELS[n];if(!L||L._herbs||!L.rows||!(L.outdoor||L.day>0)||L.khRoom)return;L._herbs=1;
@@ -55,7 +56,7 @@ function shovelIcons(){if(typeof pToneMap!=='function'||!IMG.icn_pick)return;for
 /* ---------- digging ---------- */
 const ODDITIES=[['A Bent Spoon',2],['A Clay Pipe',3],['A Glass Eye',9],['A Tarnished Locket',14],['A Chipped Doll',4],['A Bone Die',3],['A Rusted Horseshoe',2],['A Bronze Button',2],['A Cracked Teacup',3],['A Wooden Whistle',4],['A Bag of Marbles',6],['An Old Tooth',1]];
 ODDITIES.forEach(([n,p],i)=>{ITEMDEF['odd_'+i]={n,k:'quest',t:'Oddity',ic:'bones',c:'#a89878',stack:1,price:Math.ceil(p/.4),d:'Dug up out of the ground. Somebody lost it, or hid it, or threw it away.',sw:.2}});
-ITEMDEF.oldboot={n:'An Old Boot',k:'quest',t:'Junk',ic:'bones',c:'#6a4a30',stack:1,price:1,d:'A left boot, with a hole in the sole. There is no right one.',sw:.3};
+ITEMDEF.odd_boot={n:'An Old Boot',k:'quest',t:'Junk',ic:'bones',c:'#6a4a30',stack:1,price:1,d:'A left boot, with a hole in the sole. There is no right one.',sw:.3};
 ITEMDEF.bottle={n:'A Message in a Bottle',k:'quest',t:'Quest item',ic:'potion',c:'#a8d8c8',stack:0,price:1,d:'A sealed green bottle with a note inside. See the Quests page.',sw:.3};
 const dugKey=()=>LEVEL+':'+G.P.x+':'+G.P.y;
 function canDigHere(){
@@ -67,15 +68,16 @@ function canDigHere(){
 }
 function digReward(sh){
   const F=G.flags,L=LEVELS[LEVEL],pl=partyLevel(),r=Math.random(),give=id=>{if(!bagAdd(mkItem(id))){G.items.push({k:id,x:G.P.x,y:G.P.y,taken:false});msg('Your bag is full: it lies on the ground.','#d09a80')}try{collFound(id)}catch(e){}};
-  if(r<.34){const g=10+Math.floor(Math.random()*21);G.gold+=g;msg(`Under the dirt: ${g} gold coins.`,'#ffe36a');sfx('key');return}
+  if(r<.34){const g=10+Math.floor(Math.random()*21);G.gold+=g;{const T=collData('treasure');T._gold=(T._gold||0)+g;const o=T.coins||(T.coins={f:0,s:0,g:0});o.f++}msg(`Under the dirt: ${g} gold coins.`,'#ffe36a');sfx('key');return}
   if(r<.54){const gem=GEM_BY_VALUE[Math.min(39,Math.floor(Math.pow(Math.random(),1.4)*40))];give('gem_'+gem[0]);msg(`A glint in the dirt: a ${gem[1]}!`,'#a8e8ff');sfx('level');return}
-  if(r<.62){give('oldboot');msg('You dig up an old boot.','#c8b898');return}
+  if(r<.62){give('odd_boot');msg('You dig up an old boot.','#c8b898');return}
   if(r<.78){const i=Math.floor(Math.random()*ODDITIES.length);give('odd_'+i);msg(`You dig up ${ODDITIES[i][0].toLowerCase()}.`,'#c8b898');return}
-  if(r<.9){const best=Math.random()<.04;let id;
+  if(r<.9){const best=Math.random()<.04;{const T=collData('treasure'),o=T.weapon||(T.weapon={f:0,s:0,g:0});o.f++}let id;
     if(best){id=['worldblade','starbow','ragnarok','doomhammer','sunderer','titanaxe','mountainmaul','stormbow2','kingslayer'].filter(i=>ITEMDEF[i])[Math.floor(Math.random()*9)]||'kingslayer'}
     else{const pool=(typeof GEAR!=='undefined'?GEAR:[]).filter(i=>ITEMDEF[i]&&ITEMDEF[i].k==='weapon'&&!ITEMDEF[i].rar&&(ITEMDEF[i].lvl||1)<=pl+6&&(ITEMDEF[i].lvl||1)>=pl-25);id=pool.length?pool[Math.floor(Math.random()*pool.length)]:'dagger'}
     give(id);msg(best?`A weapon of great power lies buried here: ${ITEMDEF[id].n}!`:`You unearth a buried weapon: ${ITEMDEF[id].n}.`,best?'#ffd76a':'#e0d8b8');sfx(best?'level':'equip');return}
   // a message in a bottle: it leads to a greater reward, buried elsewhere on this level
+  {const T=collData('treasure'),o=T.bottle||(T.bottle={f:0,s:0,g:0});o.f++}
   F.bottles=F.bottles||{};const tries=300;let spot=null;const x0=G.P.x,y0=G.P.y,rows=L.rows;
   for(let t=0;t<tries&&!spot;t++){const a=Math.random()*Math.PI*2,d=10+Math.random()*14,x=Math.round(x0+Math.cos(a)*d),y=Math.round(y0+Math.sin(a)*d);
     if(x<2||y<2||y>=rows.length-2||x>=rows[0].length-2||rows[y][x]!=='.'||G.decor.some(q=>q.x===x&&q.y===y)||G.items.some(q=>q.x===x&&q.y===y))continue;spot={x,y}}
@@ -96,7 +98,7 @@ function bottleCheck(){ // digging on the marked square
 function doDig(){
   if(!canDigHere())return;const sh=bestShovel(),F=G.flags;F.dug=F.dug||{};
   if(F.dug[dugKey()]){msg('This ground has been turned over already.','#c8b898');return}
-  F.dug[dugKey()]=1;sfx('step');advanceTime(5);
+  F.dug[dugKey()]=1;{const T=collData('treasure');T._digs=(T._digs||0)+1}sfx('step');advanceTime(5);
   if(bottleCheck())return;
   if(Math.random()*100<sh[2])digReward(sh);else msg(['You dig. Only dirt.','You dig a neat hole. Nothing in it.','A worm, and a stone, and nothing else.'][Math.floor(Math.random()*3)],'#a89878');
 }
@@ -142,8 +144,8 @@ function drawHand(cx,cy,s,col){ctx.save();ctx.translate(cx,cy);ctx.scale(s,s);ct
 {const _r=restore;restore=function(sv){try{for(const id in (((sv||{}).flags||{}).bottles||{})){const b=sv.flags.bottles[id];if(!QUESTS[id])QUESTS[id]={title:'Message in a Bottle',who:'A message in a bottle',desc:`Dig ${b.dy} squares ${b.ns} and ${b.dx} squares ${b.ew} of the bottle's place on ${b.nm}. Reward: ${b.rw} gold and a jewel.`,need:1,goal:()=>(((G.flags.bottles||{})[id]||{}).done?1:0),reward:{gold:0}};QAREA[id]=b.nm}}catch(e){console.error(e)}return _r.apply(this,arguments)}}
 /* ---------- the Collection menu ---------- */
 function drawCollMenu(){
-  BTNS=[];veil(.6);bigPanel(110,40,260,236);txt('COLLECTION',240,62,14,'#d8c88e','center',true);
+  BTNS=[];veil(.6);bigPanel(110,30,260,262);txt('COLLECTION',240,52,14,'#d8c88e','center',true);
   const row=(id,name,kind)=>{const C=COLL[kind],it=C.items(),d=collData(kind);let n=0;for(const q of it)if(d[q.id]&&(d[q.id].f||d[q.id].s))n++;return [id,name+'   '+n+'/'+it.length]};
-  [row('cl_gems','Jewel Hunter','gems'),row('cl_bf','Butterfly Catching','bf'),row('cl_herb','Herb Collecting','herb')].forEach(([id,t],i)=>btnText(id,t,130,80+i*34,220,28));
-  btnText('cl_back','Back',170,200,140,28);btn('menuclose',0,0,DW,DH);BTNS.unshift(BTNS.pop());
+  [row('cl_gems','Jewel Hunter','gems'),row('cl_bf','Butterfly Catching','bf'),row('cl_herb','Herb Collecting','herb'),row('cl_treasure','Treasure','treasure')].forEach(([id,t],i)=>btnText(id,t,130,70+i*34,220,28));
+  btnText('cl_back','Back',170,232,140,28);btn('menuclose',0,0,DW,DH);BTNS.unshift(BTNS.pop());
 }

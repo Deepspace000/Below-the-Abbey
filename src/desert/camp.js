@@ -223,7 +223,7 @@ journalPage({id:'craft',title:'Crafting and Herbalism',
   draw(){
     jFrame('Crafting and herbalism');
     txt('Brewing takes half an hour and needs a quiet moment. Forage at camp for herbs. Recipes are taught by healers, alchemists, priests and the witch.',40,42,7.6,'#a89878','left',false,undefined,400);
-    RECIPES.forEach((r,k)=>{
+    RECIPES.filter(r=>!r.herb).forEach((r,k)=>{
       const known=recData()[r.id],ok=canCraft(r),y=62+k*28;
       ctx.save();rrect(ctx,36,y,408,25,4);ctx.fillStyle=known?'rgba(40,28,18,.92)':'rgba(24,18,14,.8)';ctx.fill();ctx.lineWidth=1.2;ctx.strokeStyle=ok?'#9ac870':known?'#a88a48':'#4a4034';ctx.stroke();ctx.restore();
       txt(known?r.n:'???',44,y+8,9,known?'#ecdca8':'#6a6050','left',true);
