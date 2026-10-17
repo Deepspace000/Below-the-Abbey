@@ -74,6 +74,7 @@ function desertLoot(d){
   if(/^vase\d$/.test(d.k)){d.gold=d.goldAmt||(10+Math.floor(r(1)*40)+lv);if(r(2)<.2)add(potionFor(r(12)),1);else if(!d.plain&&r(3)<.12)add(pick(rings));return items}
   if(d.k==='treasure'){d.gold=d.goldAmt||(180+Math.floor(r(1)*220)+lv*8);add(potionFor(r(12)),1);add(potionFor(r(13)),1);if(d.plain){}else if(r(2)<.55)add(pick(DS_MAGIC_TOMB));else add(pick(rings));return items}
   if(d.k==='offering'){d.gold=d.goldAmt||(30+Math.floor(r(1)*40));add(potionFor(r(12)),1);return items}
+  if(d.k==='chest'&&typeof armourDrop==='function'&&r(14)<.5){const ar=armourDrop(r(15));if(ar)add(ar,1)}
   if(d.k==='chest'){d.gold=d.goldAmt||(130+Math.floor(r(1)*160)+lv*3);add(potionFor(r(12)),1);add(potionFor(r(13)),1);if(d.magic)add(d.magic);else if(r(2)<.45)add(pick(DS_MAGIC_TOMB));else add(pick(rings));return items}
   return null;
 }

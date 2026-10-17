@@ -32,6 +32,7 @@ function hlLootFor(d){
   if(gear.length){add(pick(gear,20));if(r(21)<.5+k/40)add(pick(gear,22))}
   add(pick(['ringV','ringW','ringS','ringM'],30));
   add(foodFor?foodFor(r(31)):'bread',2);
+  if(typeof armourDrop==='function'){for(let q=0;q<2;q++){const a=armourDrop(r(70+q));if(a)add(a,1)}}
   d.gold=200+k*55+Math.floor(r(40)*180);
   return items;
 }
