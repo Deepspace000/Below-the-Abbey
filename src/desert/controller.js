@@ -101,11 +101,11 @@ function drawSettingsMenu(){
   btn('menuclose',0,0,DW,DH);BTNS.unshift(BTNS.pop());
 }
 function drawMoreMenu(){
-  BTNS=[];veil(.6);bigPanel(110,28,260,264);
-  txt('MORE',240,50,14,'#d8c88e','center',true);
-  btnText('ach','Achievements',140,68,200,26);btnText('stats','Stats',140,98,200,26);btnText('wander','Wandering Monsters',140,128,200,26);
-  btnText('newparty','New party',140,158,200,26);btnText('restart','Restart game',140,188,200,26);
-  btnText('menuback','Back',170,242,140,28);
+  BTNS=[];veil(.6);bigPanel(110,12,260,296);
+  txt('MORE',240,30,14,'#d8c88e','center',true);
+  btnText('ach','Achievements',140,44,200,26);btnText('stats','Stats',140,72,200,26);btnText('collection','Collection',140,100,200,26);btnText('wander','Wandering Monsters',140,128,200,26);
+  btnText('newparty','New party',140,156,200,26);btnText('restart','Restart game',140,184,200,26);
+  btnText('menuback','Back',170,256,140,28);
   btn('menuclose',0,0,DW,DH);BTNS.unshift(BTNS.pop());
 }
 /* ---- the Controller page: the pad, and what each button does ---- */
