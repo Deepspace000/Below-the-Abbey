@@ -82,13 +82,15 @@ function hlFrame(dt){
   const M=G.mir&&G.mir.lv===LEVEL?G.mir:(G.mir={lv:LEVEL,cool:0,act:null,last:null,scare:null});
   const v=DIRS[G.P.f];let look=null;
   if(!G.cut&&!G.talk&&!G.menu&&camSettled()){
-    for(const d of G.decor){if(d.k!=='hl_p_mirror'||!d.wd||d.found)continue;if(d.wd[0]!==v[0]||d.wd[1]!==v[1])continue;
+    const FM=HLF();FM.mir=FM.mir||{};
+    for(const d of G.decor){if(d.k!=='hl_p_mirror'||!d.wd||d.found)continue;if(FM.mir[LEVEL+':'+d.x+','+d.y])continue;if(d.wd[0]!==v[0]||d.wd[1]!==v[1])continue; // each mirror does this once
       const dx=d.x-G.P.x,dy=d.y-G.P.y,n=dx*v[0]+dy*v[1];if(n<0||n>3||dx*v[1]-dy*v[0]!==0)continue;
       let clear=true;for(let i=1;i<n;i++){const cx=G.P.x+v[0]*i,cy=G.P.y+v[1]*i;if(!G.grid[cy]||G.grid[cy][cx]!==0){clear=false;break}}
       if(clear){look=d;break}}
   }
   if(look!==M.last){M.last=look;
     if(look&&!M.act&&G.time>M.cool){
+      HLF().mir[LEVEL+':'+look.x+','+look.y]=1; // this mirror has had its one look, whether or not he came
       if(Math.random()<.8&&hlMirrorImg()){ // eight times in ten, he is there
         const bx=G.P.x-v[0],by=G.P.y-v[1];
         if(G.grid[by]&&G.grid[by][bx]===0&&!enemyAt(bx,by)){
