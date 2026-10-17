@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.236';
+const VERSION='3.237';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -3334,7 +3334,6 @@ function drawInventory(){
     const dk=I.sel.src==='bag'?'b'+I.sel.i:'s'+I.sel.slot,sure=I.dropKey===dk;
     if(label){btnText(id,label,rx+6,176,70,26);btnText('idrop',sure?'Sure?':'Discard',rx+80,176,70,26)}
     else btnText('idrop',sure?'Sure?':'Discard',rx+22,176,112,26);
-    if(sure)txt('Tap again to throw it away',rx+rw/2,203,7.5,'#e8905a','center');
   }else{
     txt(def.name,rx+rw/2,20,13,heroSpeech(hi),'center',true);
     txt(`${def.cls}  Level ${h.lvl}`,rx+rw/2,38,10,'#c8b898','center');
@@ -3343,7 +3342,11 @@ function drawInventory(){
     let ly=92;
     if(!(typeof afflHeroPanel==='function'&&afflHeroPanel(hi,rx,rw)))for(const s of ['Tap an item to see it.','Tap a slot to equip it there,','or use the Equip button.','Drag the bag to scroll.']){txt(s,rx+rw/2,ly,8.5,'#a89878','center');ly+=13}
     txt(`STR ${h.str}   DEX ${h.dex}   INT ${h.int}`,rx+rw/2,160,9,'#d8c9a0','center');
-    txt(`Hunger ${Math.round(h.food)}%`+(h.food<=0?'  Starving':h.food<25?'  Hungry':''),rx+rw/2,176,9,h.food<25?'#e8905a':'#d8c9a0','center');
+  }
+  { // the hunger bar stays in view whatever is selected
+    const bx=rx+8,bw=rw-16,by=204,fr=clamp(h.food/100,0,1),low=h.food<25;
+    ctx.fillStyle='#141006';ctx.fillRect(bx,by,bw,8);ctx.fillStyle=low?'#d8683a':'#a8b858';ctx.fillRect(bx,by,bw*fr,8);ctx.strokeStyle='#8a7448';ctx.lineWidth=1;roughStrokeRect(bx,by,bw,8);
+    txt(`Hunger ${Math.round(h.food)}%`+(h.food<=0?'  Starving':low?'  Hungry':''),rx+rw/2,208.5,6.5,'#f4ecd4','center',true);
   }
   // gold and sort
   ctx.fillStyle='rgba(8,6,4,.8)';rrect(ctx,rx,212,rw,28,5);ctx.fill();ctx.strokeStyle=goldG(rx,212,rw,28);ctx.lineWidth=1.6;rrect(ctx,rx,212,rw,28,5);ctx.stroke();
