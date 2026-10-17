@@ -19,9 +19,12 @@ function drawSplat(cx,cy,R,n,tint,seed,alpha){
   for(let i=0;i<7;i++){const a=rnd()*TAU,d=R*1.05+rnd()*R*.45;ctx.beginPath();ctx.arc(cx+Math.cos(a)*d,cy+Math.sin(a)*d,1+rnd()*2,0,TAU);ctx.fillStyle=tint[1];ctx.fill();ctx.stroke()}
   ctx.fillStyle='rgba(255,255,255,.28)';ctx.beginPath();ctx.ellipse(cx-R*.35,cy-R*.4,R*.3,R*.17,-.5,0,TAU);ctx.fill();
   ctx.font=`bold ${Math.round(R*.95)}px Georgia,serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=3;ctx.strokeStyle='rgba(30,4,4,.95)';ctx.strokeText(n,cx,cy+1);ctx.fillStyle='#fff4e8';ctx.fillText(n,cx,cy+1);ctx.restore()}
-const HSPL=[];
+const HSPL=[],HEAL=[];
 {const _af=addFloat;addFloat=function(x,y,text,col){
   const T=String(text);
+  if(/^\+\d+$/.test(T)&&y>=240){ // a heal on a hero: the part of the red that is healed turns ice blue, then drains away
+    let bi=0,bd=1e9;for(let i=0;i<4;i++){const dx=Math.abs(portraitX(i)+19-x);if(dx<bd){bd=dx;bi=i}}const h=G.heroes[bi];
+    if(h&&bd<24){const amt=+T.slice(1),oldM=clamp(1-(h.hp-amt)/h.max,0,1),newM=clamp(1-h.hp/h.max,0,1);if(oldM>newM+.005)HEAL[bi]={t:0,oldM,newM}}}
   if(col==='#ffd76a'&&/^\d+$/.test(T)){ // a hit on a creature: a splat where it stands, and a thump
     const d=+T,big=d>=40;IMP_QUIET=G.time;impPlay(big,1,big?.9:.8);G.floats.push({x,y,text:T,col,t:0,splat:1,R:Math.min(24,11+d*.25),seed:d*31+Math.floor(x)});return}
   if(col==='#ff6a5a'&&/^-\d+$/.test(T)){ // a hit on a hero: a splat on the portrait, coloured by what ails them
@@ -33,6 +36,14 @@ const HSPL=[];
     drawSplat(f.x,f.y-4-f.t*10,f.R*(1+Math.min(.25,f.t*2)*(f.t<.12?1:0)),f.text,['#e83a2a','#8a1410'],f.seed,clamp(1.5-f.t,0,1))}
   const keep=G.floats.filter(f=>f.splat);G.floats=G.floats.filter(f=>!f.splat);_df.apply(this,arguments);G.floats=G.floats.concat(keep)}}
 {const _ui=ui;ui=function(dt){_ui.apply(this,arguments);try{if(G.state!=='play'||G.inv.open)return;
+  // a heal in progress: the healed band shows the old red, turns ice blue, then fades as the red settles lower
+  for(let i=0;i<4;i++){const e=HEAL[i];if(!e)continue;e.t+=dt||.016;if(e.t>1.5){HEAL[i]=null;continue}
+    const x=portraitX(i),y0=232,w=38,hh=58,top=y0+hh-e.oldM*hh,bot=y0+hh-e.newM*hh,k=clamp(e.t/.45,0,1),fade=e.t<.55?1:clamp(1-(e.t-.55)/.9,0,1);
+    ctx.save();ctx.beginPath();ctx.rect(x,y0,w,hh);ctx.clip();const rr=190+(130-190)*k,gg=20+(225-20)*k,bb=16+(255-16)*k;
+    ctx.globalAlpha=fade;ctx.fillStyle=`rgba(${rr|0},${gg|0},${bb|0},.78)`;ctx.fillRect(x,top,w,bot-top);
+    ctx.fillStyle=`rgba(210,245,255,${.55*k})`;ctx.fillRect(x,top,w,1.4);
+    if(e.t>.3&&e.t<.9){ctx.globalAlpha=.5*(1-Math.abs(e.t-.6)/.3);ctx.fillStyle='#e8fbff';for(let q=0;q<5;q++)ctx.fillRect(x+4+((q*7+Math.floor(e.t*20)*3)%30),top+((q*5)%Math.max(2,bot-top)),1.5,1.5)}
+    ctx.restore()}
   // the portrait fills with red from the bottom as a hero is hurt: the state of the party at a glance
   for(let i=0;i<4;i++){const h=G.heroes[i];if(!h||!h.alive||G.cut&&0)continue;const miss=clamp(1-h.hp/h.max,0,1);if(miss<=.01)continue;const x=portraitX(i),y0=232,w=38,hh=58,fh=hh*miss;
     ctx.save();ctx.beginPath();ctx.rect(x,y0,w,hh);ctx.clip();const g=ctx.createLinearGradient(0,y0+hh-fh,0,y0+hh);g.addColorStop(0,'rgba(190,20,16,.40)');g.addColorStop(1,'rgba(120,6,6,.62)');ctx.fillStyle=g;ctx.fillRect(x,y0+hh-fh,w,fh);
