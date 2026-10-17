@@ -51,3 +51,39 @@ const GOLD_TINT=['#fff070','#c88a10'];
     ctx.fillStyle='rgba(255,90,70,.55)';ctx.fillRect(x,y0+hh-fh,w,1.2);ctx.restore()}
   for(let i=0;i<4;i++){const h=HSPL[i];if(!h)continue;h.t+=dt||.016;if(h.t>1.6){HSPL[i]=null;continue}
     drawSplat(portraitX(i)+19,(G.state==='play'?268:232)-Math.min(h.t,.3)*6,10+Math.max(0,.25-h.t)*24,h.n,h.tint,h.seed,clamp(1.9-h.t,0,1))}}catch(e){}}}
+/* ==========================================================================
+   BOWS AND SPELLS. A bow twangs and its arrow whooshes away (with a streak across the view), and a spell that hits bursts on its target: a fiery explosion with a deep boom, or
+   a shatter of ice. The thump of the hit follows.
+   ========================================================================== */
+function sndBow(){if(!AC||G.mute||!SNDOPT.combat)return;SFXM=SNDOPT.combat;tone(240,150,.2,'triangle',.22);tone(620,330,.11,'sine',.14);tone(120,90,.12,'sine',.18,.01);nz(.32,.2,'bandpass',500,4200);nz(.12,.12,'highpass',2500,6000)}
+function sndBoom(frost){if(!AC||G.mute||!SNDOPT.combat)return;SFXM=SNDOPT.combat;
+  if(frost){tone(110,45,.35,'sine',.3);[3136,3951,4699,5274].forEach((f,i)=>tone(f,f*.97,.28,'sine',.07,.02+i*.035));nz(.25,.22,'highpass',3500,7000);return}
+  tone(90,30,.55,'sine',.5);tone(160,50,.35,'sawtooth',.12);nz(.6,.55,'lowpass',2200,90);nz(.35,.25,'bandpass',900,200);for(let i=0;i<4;i++)nz(.08,.12,'highpass',2500,6000)}
+const FXS=[];
+{const _ha=heroAttack;heroAttack=function(i){let shot=null;try{const w=heroWeapon(G.heroes[i]);if(w&&w.ranged>1){const f=frontEnemy(w.ranged);if(f){shot=f.e;sndBow();FXS.push({kind:'arrow',t:0,x0:210,y0:206,e:f.e})}}}catch(e){}return _ha.apply(this,arguments)}}
+let SPELL_KIND=null,SPELL_T=0;
+{const _s2=sfx;sfx=function(n){if((n==='fire'||n==='frost')&&G.state==='play'&&!G.cut){SPELL_KIND=n;SPELL_T=performance.now()}return _s2.apply(this,arguments)}}
+{const _af2=addFloat;addFloat=function(x,y,text,col,hc){
+  if(col==='#ffd76a'&&/^\d+$/.test(String(text))&&SPELL_KIND&&performance.now()-SPELL_T<700){const frost=SPELL_KIND==='frost';SPELL_KIND=null;
+    FXS.push({kind:frost?'ice':'blast',t:0,x,y,seed:Math.floor(x*7+y)});sndBoom(frost)}
+  return _af2.apply(this,arguments)}}
+{const _ui3=ui;ui=function(dt){_ui3.apply(this,arguments);try{if(G.state!=='play'||G.inv.open)return;const d=dt||.016;
+  for(let i=FXS.length-1;i>=0;i--){const f=FXS[i];f.t+=d;
+    if(f.kind==='arrow'){const T=.16;if(f.t>T+.05){FXS.splice(i,1);continue}const e=f.e,tx=e&&e.sx?e.sx:210,ty=e&&e.sy?e.sy:100,p=clamp(f.t/T,0,1),x1=f.x0+(tx-f.x0)*p,y1=f.y0+(ty-f.y0)*p,x0=f.x0+(tx-f.x0)*Math.max(0,p-.35),y0=f.y0+(ty-f.y0)*Math.max(0,p-.35);
+      ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();ctx.lineCap='round';ctx.strokeStyle='rgba(230,220,190,.85)';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();
+      ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=4;ctx.globalAlpha=.4;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();ctx.restore();continue}
+    const T=.6;if(f.t>T){FXS.splice(i,1);continue}const p=f.t/T,cx=f.x,cy=f.y+8;let s=(f.seed*7919+5)%2147483647||5;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
+    ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();ctx.globalCompositeOperation='lighter';
+    if(f.kind==='blast'){const R=10+p*38,a=1-p;let g=ctx.createRadialGradient(cx,cy,0,cx,cy,R);g.addColorStop(0,`rgba(255,250,200,${a})`);g.addColorStop(.35,`rgba(255,170,40,${a*.9})`);g.addColorStop(1,'rgba(200,40,0,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,R,0,TAU);ctx.fill();
+      ctx.strokeStyle=`rgba(255,200,120,${a*.8})`;ctx.lineWidth=2.5*(1-p)+.5;ctx.beginPath();ctx.arc(cx,cy,R*1.15,0,TAU);ctx.stroke();
+      for(let k=0;k<14;k++){const an=rnd()*TAU,dd=R*(.5+rnd()*.9);ctx.fillStyle=`rgba(255,${150+rnd()*90|0},40,${a})`;ctx.beginPath();ctx.arc(cx+Math.cos(an)*dd,cy+Math.sin(an)*dd-p*8,1+rnd()*2.4*(1-p),0,TAU);ctx.fill()}}
+    else{const R=8+p*30,a=1-p;let g=ctx.createRadialGradient(cx,cy,0,cx,cy,R);g.addColorStop(0,`rgba(235,252,255,${a})`);g.addColorStop(.5,`rgba(120,200,255,${a*.7})`);g.addColorStop(1,'rgba(60,120,220,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,R,0,TAU);ctx.fill();
+      for(let k=0;k<12;k++){const an=k/12*TAU+rnd()*.3,d1=R*(.3+p*.9),d2=d1+6+rnd()*9;ctx.strokeStyle=`rgba(200,240,255,${a})`;ctx.lineWidth=1.8;ctx.beginPath();ctx.moveTo(cx+Math.cos(an)*d1,cy+Math.sin(an)*d1);ctx.lineTo(cx+Math.cos(an)*d2,cy+Math.sin(an)*d2);ctx.stroke()}}
+    ctx.restore()}}catch(e){}}}
+/* a miss: a lazy swing through empty air, a rising and falling whoosh with no thump at all; a missed arrow thunks into the wall behind instead */
+let BOW_T=0;
+function sndMiss(){if(!AC||G.mute||!SNDOPT.combat)return;SFXM=SNDOPT.combat;
+  if(performance.now()-BOW_T<400){tone(170,80,.09,'triangle',.22,.05);nz(.05,.2,'bandpass',1800,700,.05);tone(90,60,.12,'sine',.12,.06);return} // an arrow into the wall
+  nz(.3,.22,'bandpass',350,1700);nz(.3,.18,'bandpass',1700,300,.14);tone(260,140,.28,'sine',.05,.02);nz(.05,.07,'highpass',3000,5000,.34)}
+{const _s3=sfx;sfx=function(n){if(n==='miss'&&AC&&!G.mute)return sndMiss();return _s3.apply(this,arguments)}}
+{const _ha2=heroAttack;heroAttack=function(i){try{const w=heroWeapon(G.heroes[i]);if(w&&w.ranged>1)BOW_T=performance.now()}catch(e){}return _ha2.apply(this,arguments)}}
