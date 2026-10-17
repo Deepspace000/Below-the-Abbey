@@ -11,9 +11,27 @@
   html,body{margin:0;height:100%;background:#050403;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
   canvas{position:absolute;left:0;top:0;image-rendering:auto;touch-action:none;border-radius:2.6% / 4%}
   #glass{position:absolute;pointer-events:none;border-radius:2.6% / 4%;box-shadow:inset 0 0 70px rgba(0,0,0,.7),inset 0 0 14px rgba(0,0,0,.9);background:radial-gradient(ellipse at 28% 18%,rgba(255,255,255,.06),rgba(255,255,255,0) 42%),linear-gradient(115deg,rgba(255,255,255,.035) 0%,rgba(255,255,255,0) 30%)}
+  #loading{position:fixed;inset:0;z-index:50;background:radial-gradient(ellipse at 50% 40%,#1a140c 0%,#050403 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#d6c594;font-family:'IM Fell English',Georgia,serif;transition:opacity .6s ease;text-align:center;padding:0 16px}
+  #loading.gone{opacity:0;pointer-events:none}
+  #loading .ld-t{font-family:'UnifrakturCook','IM Fell English SC',Georgia,serif;font-size:min(11vw,64px);letter-spacing:.02em;text-shadow:0 2px 0 #000,0 0 18px rgba(214,165,80,.25)}
+  #loading .ld-s{font-size:min(4vw,18px);color:#b8a880;font-style:italic}
+  #loading .ld-bar{width:min(70vw,360px);height:10px;border:1.5px solid #8a7448;border-radius:6px;background:#120d07;overflow:hidden;box-shadow:inset 0 0 6px #000}
+  #loading .ld-bar i{display:block;height:100%;width:3%;background:linear-gradient(#e8c870,#a8863a);border-radius:5px;transition:width .25s ease}
+  #loading .ld-n{font-size:min(3.4vw,14px);color:#9a8a68;min-height:2.4em;max-width:min(86vw,520px)}
+  #loading .ld-n b{color:#e8905a;font-weight:normal}
 </style>
 </head>
 <body>
+<div id="loading"><div class="ld-t">Below the Abbey</div><div class="ld-s">Loading the world&hellip;</div><div class="ld-bar"><i id="ldfill"></i></div><div class="ld-n" id="ldnote"></div></div>
+<script>
+window.LOAD={t:0,d:0};
+function ldUpdate(){var f=document.getElementById('ldfill');if(f&&LOAD.t)f.style.width=Math.max(3,Math.min(96,Math.round(LOAD.d/LOAD.t*100)))+'%'}
+function ldHide(){var e=document.getElementById('loading');if(!e)return;var f=document.getElementById('ldfill');if(f)f.style.width='100%';e.classList.add('gone');setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e)},800)}
+function ldNote(t){var n=document.getElementById('ldnote');if(n)n.innerHTML=t}
+setTimeout(function(){if(!window.__ready)ldNote('Still loading. The first visit downloads all the pictures, so please wait a little.')},12000);
+addEventListener('error',function(e){if(window.__ready)return;ldNote('<b>Something went wrong while loading:</b><br>'+String(e.message||'a file would not load').slice(0,160)+'<br>Try reloading the page.')});
+addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNote('<b>Something went wrong while loading:</b><br>'+String((e.reason&&e.reason.message)||e.reason||'').slice(0,160)+'<br>Try reloading the page.')});
+</script>
 <canvas id="c" width="960" height="640"></canvas><div id="glass"></div><svg width="0" height="0" style="position:absolute"><filter id="sharpL" color-interpolation-filters="sRGB"><feConvolveMatrix order="3" kernelMatrix="0 -.25 0 -.25 2 -.25 0 -.25 0" preserveAlpha="true"/></filter><filter id="sharpH" color-interpolation-filters="sRGB"><feConvolveMatrix order="3" kernelMatrix="0 -.6 0 -.6 3.4 -.6 0 -.6 0" preserveAlpha="true"/></filter></svg>
 <script>
 'use strict';
@@ -21,7 +39,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.263';
+const VERSION='3.264';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -857,7 +875,7 @@ let DECOR_SPAWNS=[
    ART: monster / portrait images (with graceful fallbacks)
    ========================================================================== */
 const IMG={};
-function loadImg(name,src){return new Promise(res=>{const i=new Image();i.onload=()=>{IMG[name]=i;res()};i.onerror=()=>res();i.src=src+'?v='+VERSION})}
+function loadImg(name,src){LOAD.t++;return new Promise(res=>{const i=new Image();i.onload=()=>{IMG[name]=i;LOAD.d++;ldUpdate();res()};i.onerror=()=>{LOAD.d++;ldUpdate();res()};i.src=src+'?v='+VERSION})}
 function mkCanvas(w,h,fn){const c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'),w,h);return c}
 function fallbackRat(big){
   return mkCanvas(220,150,(x,w,h)=>{
@@ -20629,6 +20647,7 @@ function drawPadPage(){
   window.__ready=true;
   try{jumpFromUrl()}catch(e){console.error(e)}
   requestAnimationFrame(frame);
+  ldHide();
 })();
 </script>
 </body>
