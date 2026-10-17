@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.270';
+const VERSION='3.272';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -4336,7 +4336,7 @@ const WORLD_LOCS=[
   {k:'oakwood',n:'The Oakwood',sub:'old oaks east of Oldhaven',lv:[311],x:1244,y:190,ic:'trees'},
   {k:'monastery',n:'Saint Elen’s',sub:'a mountain monastery',lv:[430,431,432,433,434,6900,6901,6902,6903,6904,6905,6906],x:930,y:-184,ic:'abbey'},
   {k:'landpath',n:'The Pilgrim’s Path',sub:'a pilgrim way, one way only',lv:Array.from({length:24},(_,i)=>400+i),x:1130,y:36,ic:'trees'},
-  {k:'below',n:'Below the Abbey',sub:'past the sealed door',lv:[360,361,362,363],x:84,y:268,ic:'cave'},
+  {k:'below',n:'Below the Abbey',sub:'past the sealed door',lv:[360,361,362,363],x:112,y:284,ic:'cave'},
   {k:'orangecastle',n:'The Orange Spire',sub:'in the Hollow Land',lv:[364,440,441,442,443,444,445,446,447,448,449,450,451,452,453,454,455,456,457,458,459,460],x:24,y:254,ic:'orangecastle'}
 ];
 const WORLD_ROADS=[['abbey','thornwood','thornwick','gwood'],['gwood','road','tunnel','ironhill'],['ironhill','graves'],['ironhill','mines'],['ironhill','moor','pass','greendale','anaea'],['oldhaven','oakwood'],['abbey','below'],['below','orangecastle'],['oldhaven','landpath','yarrim']];
@@ -4436,9 +4436,12 @@ function drawWorldMap(){
     ICONS[l.ic](l.x,l.y);
     ctx.globalAlpha=1;
     const big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle';
-    lab(l.n,l.x,l.y+(l.ic==='castle'||l.ic==='orangecastle'?24:l.ic==='mountains'?20:18),big?10:8.5,v?'#1c1208':'#5a4a30');
+    {const lr=(!G.flags.autoScaleOn&&typeof locRating==='function')?locRating(l):null,ny=l.y+(l.ic==='castle'||l.ic==='orangecastle'?24:l.ic==='mountains'?20:18),nsz=big?10:8.5,ncol=v?'#1c1208':'#5a4a30';
+      if(lr){ // the level stands on the same line, right beside the name, so it is clear which place it belongs to
+        ctx.save();ctx.font=`bold ${nsz}px ${FUI}`;const w1=ctx.measureText(l.n).width;ctx.font=`bold 8px ${FUI}`;const t2='Lv '+lr,w2=ctx.measureText(t2).width;ctx.restore();
+        const gap=5,x0=l.x-(w1+gap+w2)/2;lab(l.n,x0+w1/2,ny,nsz,ncol);lab(t2,x0+w1+gap+w2/2,ny,8,'#7a1a10')}
+      else lab(l.n,l.x,ny,nsz,ncol)}
     if(l.sub)lab(l.sub,l.x,l.y+(l.ic==='orangecastle'?35:29),7,'#4a3a22');
-    if(!G.flags.autoScaleOn&&typeof locRating==='function'){const lr=locRating(l);if(lr)lab('Lv '+lr,l.x+2,l.y-31,8,'#7a1a10')}   // only when autoscaling is off
     const nq=QLEFT[l.k]||0;
     if(nq){ctx.fillStyle='#b02818';const left=l.k==='scoria'; // Khemetra's dots stand to the left of the city: below it is the Red Dunes
       for(let i=0;i<nq;i++){const row=(i/14)|0,inRow=Math.min(14,nq-row*14),col=i%14;ctx.beginPath();if(left)ctx.arc(l.x-34-(inRow-1-col)*3.4,l.y-10+row*3.4,1.15,0,TAU);else ctx.arc(l.x+(col-(inRow-1)/2)*3.4,l.y+(l.sub?38:29)+row*3.4,1.15,0,TAU);ctx.fill()}}
