@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.245';
+const VERSION='3.246';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1446,13 +1446,14 @@ function rebalanceEnemies(){
     if(def&&def.partyLevel&&e.hp>0&&!e.dying){if(e.lvl!==pl){const fr=e.hp/e.maxhp;e.lvl=pl;e.maxhp=enemyStat(e.t,pl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*fr))}continue} // a creature that is always the party's own level
     if(!G.flags.autoScaleOn){ // a fixed world (the default): the place's own level, the great creatures a few above it
       if(e.hp<=0||e.dying)continue;
-      if(e.base===undefined||e.fixed!==LEVEL){e.base=crypt1Level(e)||(DIFF()+(ap?Math.min(ap,8):0));e.fixed=LEVEL}
+      if(e.base===undefined||e.fixed!==LEVEL||e.am){e.base=crypt1Level(e)||(DIFF()+(ap?Math.min(ap,8):0));e.fixed=LEVEL;e.vd=undefined;e.am=0}
       if(e.vd===undefined){const r=Math.random();e.vd=(ap||(def&&(def.boss||NO_VARY.includes(e.t)||/^w_/.test(e.t))))?0:r<.4?0:r<.75?1+Math.floor(Math.random()*3):4+Math.floor(Math.random()*4)}
       const nl=Math.max(1,e.base-e.vd);if(nl!==e.lvl){const frac=e.hp/e.maxhp;e.lvl=nl;e.maxhp=enemyStat(e.t,nl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*frac))}
       continue}
     if(ap&&e.hp>0&&!e.dying){if(e.lvl!==pl+ap){const fr=e.hp/e.maxhp;e.lvl=pl+ap;e.maxhp=enemyStat(e.t,e.lvl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*fr))}continue} // the great creatures always stand a few levels above the party
     if(e.hp<=0||e.dying)continue;
-    if(e.base===undefined)e.base=crypt1Level(e)||e.lvl;
+    if(e.base===undefined||!e.am){ // autoscaling was just switched on: every creature starts again from the level the place had before the fixed world
+      const L0=LEVELS[LEVEL]||{};e.base=crypt1Level(e)||((L0.diff||LEVEL)+(L0.lvlBonus||0));e.vd=undefined;e.am=1}
     if(pl-e.base>5)e.base=Math.max(1,pl-(2+Math.floor(Math.random()*4)));   // catch-up, once
     if(e.vd===undefined){const r=Math.random();e.vd=(def&&(def.boss||NO_VARY.includes(e.t)||/^w_/.test(e.t)))?0:r<.4?0:r<.75?1+Math.floor(Math.random()*3):4+Math.floor(Math.random()*4)}
     const nl=Math.max(1,e.base-e.vd);
