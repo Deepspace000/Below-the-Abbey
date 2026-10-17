@@ -16,7 +16,7 @@ const LEVEL_LADDER=[ // [levels of the game that make up a place, its level]
 ];
 const LEVEL_RATING={};
 for(const [ls,r] of LEVEL_LADDER)for(const l of ls)LEVEL_RATING[l]=Math.round(1+(r-1)*1.5)+3;   // each place stands three levels above the one before it (the table is in steps of two), and the whole ladder three levels higher
-// the ladder goes on after Oldhaven: the four floors below the Abbey, the Hollow Land, then each floor of the Orange Tower and the foot of the Violet Tower, each three levels above the one before
+// the ladder goes on after Oldhaven: the four floors below the Abbey, the Hollow Land, then each floor of the Orange Spire and the foot of the Violet Tower, each three levels above the one before
 {const top=Math.max(...Object.values(LEVEL_RATING));
  for(let i=0;i<4;i++)LEVEL_RATING[360+i]=top+3+3*i;
  LEVEL_RATING[364]=top+15;

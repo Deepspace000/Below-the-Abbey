@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.239';
+const VERSION='3.242';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -3578,9 +3578,9 @@ function jumpFromUrl(){
   const F=G.flags,sq=T=>q.get('at')==='square'?{x:25,y:T.gate_y,f:1}:{x:T.start.x,y:T.start.y,f:1}; // &at=square lands in the middle of the town
   if(town==='abbey'||town==='thornwood'){F.townSeen=0;delete F.abbeyIntroSeen;G.bossDead=true;goToLevel(2);G.state='play';G.menu=false;return}
   F.townSeen=1;F.abbeyIntroSeen=1;F.gwoodSeen=1;
-  const AREAS={hollowland:[364,35,60,0],orangetower:[440,30,38,0],oldhaven:[305,74,141,0],oakwood:[311,2,36,1],landpath:[400,76,555,0],pilgrim:[400,76,555,0],monastery:[430,42,66,0],bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],khemetracity:[44,201,379,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
+  const AREAS={hollowland:[364,35,60,0],orangetower:[440,30,38,0],orangeboss:[443,48,7,0],oldhaven:[305,74,141,0],oakwood:[311,2,36,1],landpath:[400,76,555,0],pilgrim:[400,76,555,0],monastery:[430,42,66,0],bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],khemetracity:[44,201,379,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
   if(!AREAS[town]&&town.length>=4){const m=Object.keys(AREAS).filter(k=>k.startsWith(town)||town.startsWith(k));if(m.length===1)town=m[0]} // near-misses like whitedune find the right area
-  if(AREAS[town]&&town!=='thornwood'){const [lv,ax,ay,af]=AREAS[town];F.gandrickDead=1;F.northGate=1;F.mayorKilled=1;F.mayorDown=1;F.ironRoad=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};if(lv===44&&LEVELS[44].stub){khEnter(()=>{goToLevel(lv,{x:ax,y:ay,f:af});G.state='play';G.menu=false});return}goToLevel(lv,{x:ax,y:ay,f:af});G.state='play';G.menu=false;return}
+  if(AREAS[town]&&town!=='thornwood'){const [lv,ax,ay,af]=AREAS[town];F.gandrickDead=1;F.northGate=1;F.mayorKilled=1;F.mayorDown=1;F.ironRoad=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};if(lv===44&&LEVELS[44].stub){khEnter(()=>{goToLevel(lv,{x:ax,y:ay,f:af});G.state='play';G.menu=false});return}goToLevel(lv,{x:ax,y:ay,f:af});if(town==='orangeboss'){let tries=0;const iv=setInterval(()=>{const b=LEVEL===lv&&!TP&&G.enemies.find(e=>e.t==='hlboss0');if(b){clearInterval(iv);G.P.x=b.x;G.P.y=b.y+3;G.P.f=0;G.P.angT=undefined}else if(++tries>100)clearInterval(iv)},100)}G.state='play';G.menu=false;return}
   if(town==='greendale'||town==='anaea'){F.passDone=1;F.passSeen=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};goToLevel(town==='anaea'?33:32,town==='anaea'?sq(ANAEAJ):{x:2,y:36,f:1});G.state='play';G.menu=false;return}
   if(town==='ironhill'){F.gandrickDead=1;F.northGate=1;F.mayorDown=1;F.mayorKilled=1;F.ironRoad=1;F.finale=1;F.halbrecht=1;F.roadSeen=1;F.tunnelSeen=1;
     for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};
@@ -4281,7 +4281,7 @@ const WORLD_LOCS=[
   {k:'monastery',n:'Saint Elen’s',sub:'a mountain monastery',lv:[430,431,432,433,434,6900,6901,6902,6903,6904,6905],x:1074,y:44,ic:'abbey'},
   {k:'landpath',n:'The Land Path',sub:'a pilgrim way, one way only',lv:Array.from({length:24},(_,i)=>400+i),x:1130,y:36,ic:'trees'},
   {k:'below',n:'Below the Abbey',sub:'past the sealed door',lv:[360,361,362,363],x:84,y:268,ic:'cave'},
-  {k:'orangecastle',n:'The Orange Castle',sub:'in the Hollow Land',lv:[364,440,441,442,443,444,445,446,447,448,449,450,451,452,453,454,455,456,457,458,459,460],x:24,y:254,ic:'orangecastle'}
+  {k:'orangecastle',n:'The Orange Spire',sub:'in the Hollow Land',lv:[364,440,441,442,443,444,445,446,447,448,449,450,451,452,453,454,455,456,457,458,459,460],x:24,y:254,ic:'orangecastle'}
 ];
 const WORLD_ROADS=[['abbey','thornwood','thornwick','gwood'],['gwood','road','tunnel','ironhill'],['ironhill','graves'],['ironhill','mines'],['ironhill','moor','pass','greendale','anaea'],['oldhaven','oakwood'],['abbey','below'],['below','orangecastle'],['oldhaven','landpath','yarrim'],['landpath','monastery']];
 function lab(s,x,y,size,col){ctx.save();ctx.font=`bold ${size}px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(200,184,140,.9)';ctx.strokeText(s,x,y);ctx.fillStyle=col;ctx.fillText(s,x,y);ctx.restore()}
@@ -4381,7 +4381,7 @@ function drawWorldMap(){
     ctx.globalAlpha=1;
     const big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle';
     lab(l.n,l.x,l.y+(l.ic==='castle'||l.ic==='orangecastle'?24:l.ic==='mountains'?20:18),big?10:8.5,v?'#1c1208':'#5a4a30');
-    if(l.sub)lab(l.sub,l.x,l.y+29,7,'#4a3a22');
+    if(l.sub)lab(l.sub,l.x,l.y+(l.ic==='orangecastle'?35:29),7,'#4a3a22');
     if(!G.flags.autoScaleOn&&typeof locRating==='function'){const lr=locRating(l);if(lr)lab('Lv '+lr,l.x+2,l.y-31,8,'#7a1a10')}   // only when autoscaling is off
     const nq=QLEFT[l.k]||0;
     if(nq){ctx.fillStyle='#b02818';const left=l.k==='scoria'; // Khemetra's dots stand to the left of the city: below it is the Red Dunes
@@ -17107,19 +17107,19 @@ MON_BLD.forEach(b=>{const stub=()=>{monBuild();if(!LEVELS[b.rid]&&KH_LAZY[b.rid]
 /* ---- src/desert/hollow.js ---- */
 /* ==========================================================================
    THE HOLLOW LAND. Below the Abbey, past the Hollow Abbot, the stair comes out on a high ledge in a vast underground dark. Far below, lit by red
-   and purple torches, stands a great orange castle. Stairs lead down to its gate. Inside, 20 levels climb to a spire, each smaller than the one
+   and purple torches, stands a great orange spire. Stairs lead down to its gate. Inside, 20 levels climb to a spire, each smaller than the one
    below, each with a number on the stone, a mystery room, labyrinthine passages and armoured goblins, slimes and orcs. At the top a wizard asks
    three questions. Answered with good will, they open the way to the next tower (violet). Answered with greed, the party falls down two levels.
-   Levels: 364 the ledge and the way down, 440 to 459 the orange tower (levels 1 to 20), 460 the foot of the violet tower.
+   Levels: 364 the ledge and the way down, 440 to 459 the orange spire (levels 1 to 20), 460 the foot of the violet tower.
    ========================================================================== */
 const HL={CAV:364,BASE:440,N:20,VIOLET:460};
 for(const n of ['hl_goblin','hl_goblinA','hl_slime','hl_slimeA','hl_orc','hl_orcA'])loadImg(n,'assets/'+n+'.png'); // the new creatures, painted
-loadImg('hl_castle_art','assets/hl_castle.png'); // the great orange castle: ornate and gothic, with gargoyles and walkways jutting from its towers
+loadImg('hl_castle_art','assets/hl_castle.png'); // the great orange spire: ornate and gothic, with gargoyles and walkways jutting from its towers
 ENEMY_DEF.hlgoblin={name:'Armoured Goblin',hp:120,dmg:[10,17],hit:.74,w:.5,img:'hl_goblin',xp:420,gold:[12,45],speed:1,aboveParty:1};
 ENEMY_DEF.hlslime={name:'Cave Slime',hp:180,dmg:[7,13],hit:.7,w:.78,img:'hl_slime',xp:380,gold:[0,10],speed:1,aboveParty:0};
 ENEMY_DEF.hlorc={name:'Orc Brute',hp:320,dmg:[17,28],hit:.78,w:.7,img:'hl_orc',xp:900,gold:[40,110],speed:1,aboveParty:2};
 LEVEL_NAMES[HL.CAV]='The Hollow Land';
-for(let k=0;k<HL.N;k++)LEVEL_NAMES[HL.BASE+k]='The Orange Tower, level '+(k+1);
+for(let k=0;k<HL.N;k++)LEVEL_NAMES[HL.BASE+k]='The Orange Spire, level '+(k+1);
 LEVEL_NAMES[HL.VIOLET]='The Foot of the Violet Tower';
 const HL_POWER=new Set(['crownbreaker','veilpiercer','dukesgavel','hollowscepter','worldblade','starbow','ragnarok','doomhammer','titanaxe','stormbow2','kingslayer','sunderer','mountainmaul','sandstaff','skullcrusher']);
 const HLF=()=>{const F=G.flags;return F.hl||(F.hl={riddles:{},falls:0})};
@@ -17157,7 +17157,7 @@ const HL_FIGS=[
  ['hl_fig2','A woman with an empty lantern','kh_ohfolk3_1',["The dark here is not an absence of light. It is a presence. Feel how it leans on the torches.","My lantern went out on the third floor. The torches did not mind. They give light to anyone, and ask for nothing.","Be careful what you want, in the tower. It listens."]],
  ['hl_fig3','A pale scholar','kh_ohfolk5_4',["The numbers on the stones are not counting up. They are counting down. To something.","The goblins are not evil. They are afraid of the wizard. So is everything else.","He asks three questions. They are not hard. That is the trouble."]],
  ['hl_fig4','A very small man, sitting','kh_ohfolk3_3',["I have been on the nineteenth floor for a year. I like it. It is quiet, and the stair is just there.","Slimes do not hate you. They only want to be near warmth. So do I.","At the top, they say, one fall is a lesson and two falls is a habit."]],
- ['hl_fig5','The keeper of the stair','kh_ohfolk6_1',["Welcome to the Hollow Land. Below is the Abbey, and above is the tower, and in between there is only the dark and the torches.","Walk down the steps to the castle gate. The tower is called the Orange Tower, though there will be others.","Do not fear the torches, red or purple. They burn for the lost."]]
+ ['hl_fig5','The keeper of the stair','kh_ohfolk6_1',["Welcome to the Hollow Land. Below is the Abbey, and above is the tower, and in between there is only the dark and the torches.","Walk down the steps to the castle gate. The tower is called the Orange Spire, though there will be others.","Do not fear the torches, red or purple. They burn for the lost."]]
 ];
 HL_FIGS.forEach(([id,n,face,lines])=>khNpc(id,n,face,()=>yrLines(id,lines)));
 /* ---- the riddles ---- */
@@ -17273,7 +17273,7 @@ function hlBuild(k){
   const portals=[{to:k===0?HL.CAV:violet?HL.BASE+HL.N-1:id-1,x:0,y:0,f:2,tex:'tomb'}];
   if(up)portals[1]={to:id+1,x:0,y:0,f:0,tex:'tomb'};
   const lv={rows,start,enemies,items,decor,fmap:(()=>{const f=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];f.push(s)}return f})(),
-    floorSet:['tombslab','sand','tombgold','tombdark','tombred'],floor:'tombslab',ceil:'tomb',name:LEVEL_NAMES[id],label:violet?'The Violet Tower':'The Orange Tower',diff:36+kk,torchGap:4.4,_secrets:dress.lv_secrets,_trap:dress.lv_trap,_roomsInfo:dress.lv_rooms,portals,lights,chars,_trig:dress.lv_trig,_msgr:dress.lv_msgr,_man:dress.lv_man,amb:.05,day:0,ceilH:CH,
+    floorSet:['tombslab','sand','tombgold','tombdark','tombred'],floor:'tombslab',ceil:'tomb',name:LEVEL_NAMES[id],label:violet?'The Violet Tower':'The Orange Spire',diff:36+kk,torchGap:4.4,_secrets:dress.lv_secrets,_trap:dress.lv_trap,_roomsInfo:dress.lv_rooms,portals,lights,chars,_trig:dress.lv_trig,_msgr:dress.lv_msgr,_man:dress.lv_man,amb:.05,day:0,ceilH:CH,
     mapNames:rooms.map((r,i)=>({t:i===0?'Stair ('+(k+1)+')':r===myst&&!violet?'The Strange Room':r===far&&up?(dress.lv_names&&dress.lv_names[i]&&!/Hall$/.test(dress.lv_names[i])?dress.lv_names[i]+' and Stair Up':'The Stair Up'):top&&r===far?'The Spire':(dress.lv_names&&dress.lv_names[i])||'Hall',x:mid(r)[0],y:r.y0-1,k:'place'})),_up:up,_start:start};
   LEVELS[id]=lv;
 }
@@ -17301,7 +17301,7 @@ function hlCavern(){
   const torch=(x,y,c)=>{if(!IMG.lamp||used.has(x+','+y))return;used.add(x+','+y);decor.push({k:'lamp',x,y,block:false,walk:true,deco:true});lights.push([x,y,c?1:0])};
   for(let y=6;y<=60;y+=3){torch(31,y,(y/3|0)%2);torch(39,y,(y/3|0)%2?0:1)}
   for(let x=10;x<=60;x+=6)torch(x,54,x/6%2);
-  // the castle: a great orange castle at the foot of the stairs, with towers, behind the gate wall, and torches of two colours along its foot
+  // the castle: a great orange spire at the foot of the stairs, with towers, behind the gate wall, and torches of two colours along its foot
   sky.push({x:35,y:6,k:IMG.hl_castle_art?'hl_castle_art':'hl_castle',w:62,z:0,big:1});
   if(!IMG.hl_castle_art)for(const [x,y,k,w] of [[8,4,'hl_tower3',14],[62,4,'hl_tower3',14]])sky.push({x,y,k,w,z:0,big:1});
   for(let x=6;x<=64;x+=4)torch(x,11,(x/4|0)%2);
@@ -17310,7 +17310,7 @@ function hlCavern(){
   place('hl_fig5',36,56);place('hl_fig0',30,38);place('hl_fig3',40,26);
   const lv={rows:rows.map(r=>r.join('')),start:{x:35,y:60,f:0},enemies,items,decor,sky,fmap:fm.map(x=>x).reduce((a,c,i)=>{if(i%W===0)a.push('');a[a.length-1]+=c;return a},[]),
     floorSet:['tombdark','tombslab','tombgold','tombslab'],floor:'tombdark',ceil:'tomb',name:'The Hollow Land',label:'The Hollow Land',diff:36,portals:[],lights,chars,amb:.6,day:0,ceilH:7,
-    mapNames:[{t:'The Orange Castle',x:35,y:5,k:'place'},{t:'The High Ledge',x:35,y:58,k:'place'},{t:'The Long Stair',x:35,y:34,k:'lane'},{t:'The Castle Gate',x:35,y:12,k:'lane'}]};
+    mapNames:[{t:'The Orange Spire',x:35,y:5,k:'place'},{t:'The High Ledge',x:35,y:58,k:'place'},{t:'The Long Stair',x:35,y:34,k:'lane'},{t:'The Castle Gate',x:35,y:12,k:'lane'}]};
   lv.portals[0]={to:360+3,x:0,y:0,f:2,tex:'tomb'};lv.portals[1]={to:HL.BASE,x:0,y:0,f:0,tex:'hlgate'};
   // the stair back down to the Hollow Abbey, hidden in the south wall behind the keeper; the castle gate (portal 1) in the north
   rows[H-2][35]='0';lv.rows=rows.map(r=>r.join(''));
@@ -17580,7 +17580,7 @@ function hlDress(c){
 }
 
 /* ==========================================================================
-   THE FOUR RULERS. Four twisted dead rulers, one on levels 4, 9, 14 and 19 of the Orange Tower, each in the last hall of its level. Each carries a relic
+   THE FOUR RULERS. Four twisted dead rulers, one on levels 4, 9, 14 and 19 of the Orange Spire, each in the last hall of its level. Each carries a relic
    far stronger than anything sold in a shop, and drops it when it falls.
    ========================================================================== */
 for(const n of ['boss0','boss0A','boss1','boss1A','boss2','boss2A','boss3','boss3A'])loadImg('hl_'+n,'assets/hl_'+n+'.png');
@@ -17780,7 +17780,7 @@ function hlDrawMap(cs,ox,oy){
     lab(known?r.n:hlScramble(r.n,LEVEL*31+i),cx,cy,Math.max(7,Math.min(10,cs*1.2)),known?'#3a1c0c':'#6a5a7a')})}
   ctx.restore();
   if(!G.flags.autoScaleOn&&LEVEL_RATING[LEVEL])lab('Creatures: level '+LEVEL_RATING[LEVEL],404,40,9,'#7a1a10');   // the level of this floor, in the fixed world
-  {const k=LEVEL-HL.BASE,t=k>=0&&k<20?'The Orange Tower, level '+(k+1):LEVEL===HL.CAV?'The Hollow Land':'The Orange Tower';ctx.save();ctx.fillStyle='rgba(226,212,168,.94)';rrect(ctx,150,10,180,22,5);ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=1.2;rrect(ctx,150,10,180,22,5);ctx.stroke();ctx.restore();lab(t,240,21,12,'#3a1c0c')}
+  {const k=LEVEL-HL.BASE,t=k>=0&&k<20?'The Orange Spire, level '+(k+1):LEVEL===HL.CAV?'The Hollow Land':'The Orange Spire';ctx.save();ctx.fillStyle='rgba(226,212,168,.94)';rrect(ctx,150,10,180,22,5);ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=1.2;rrect(ctx,150,10,180,22,5);ctx.stroke();ctx.restore();lab(t,240,21,12,'#3a1c0c')}
   // the key
   {const x=8,y=206,w=196,h=70;ctx.save();ctx.fillStyle='rgba(226,212,168,.94)';rrect(ctx,x,y,w,h,5);ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=1.2;rrect(ctx,x,y,w,h,5);ctx.stroke();ctx.restore();
     const rows=[['#b07a3a','Hidden door: walk into the wall'],['#e8c870','Stairs up'],['#e0b030','Chest'],['#c8a040','Portrait'],['#a8cce4','Mirror'],['#e0402e','Wall torch']];
@@ -17923,7 +17923,7 @@ function hlScramble(name,seed){
 
 /* ==========================================================================
    THE HOLLOW COURT. Who Vance's masters were. After the Hollow Abbot, Brother Sevrin asks the party to find three letters Vance wrote to the
-   dead court, hidden in the secret rooms of the Orange Tower (levels 5, 10, 15). Then the party climbs to the wizard in the spire, who tells
+   dead court, hidden in the secret rooms of the Orange Spire (levels 5, 10, 15). Then the party climbs to the wizard in the spire, who tells
    the truth: the court of the Hollow Land, ruled by the Pale Sovereign, bought Corvane and Vance with silver, and the party opened the door itself.
    ========================================================================== */
 const HL_VANCE=[
@@ -17931,8 +17931,8 @@ const HL_VANCE=[
  'A folded letter, signed V. "My lord. The chancellor’s seal is mine. The king signs what I set before him and sees nothing. I have hidden six pieces of the key in six hands across the Eastern Lands, so that only your servants will find them and open the door."',
  'A folded letter, signed V. "My lord. The Abbot grows old and the seal grows thin. When the door opens, send the court’s riders east. I will have the king’s guard sent to the sea gates. Be patient a little longer."'];
 HL_VANCE.forEach((t,i)=>khNpc('hl_vance'+i,'A hidden letter','hl_p_note',()=>{const F=HLF();F.hcLet=F.hcLet||{};const first=!F.hcLet[i];F.hcLet[i]=1;if(first)msg('You read the letter, and keep it.','#e8d070');return say(t,[['Put it away.',()=>null]])}));
-QUESTS.hc1={title:'Vance’s Letters',who:'Brother Sevrin',desc:'Brother Sevrin says Vance wrote letters to someone in the Hollow Land. Three of them are hidden in secret rooms of the Orange Tower, on levels 5, 10 and 15: look for the wall of the wrong colour with a wooden lever, and the bookshelf with a red book. Read all three.',need:3,goal:()=>{const c=(G.flags.hl&&G.flags.hl.hcLet)||{};return (c[0]?1:0)+(c[1]?1:0)+(c[2]?1:0)},reward:{gold:6000,xp:60000}};
-QUESTS.hc2={title:'The Question at the Top',who:'The Wizard at the top of the tower',desc:'Climb the Orange Tower, twenty levels, to the wizard in the spire, and answer his three questions with good will. He knows who Vance served.',need:1,goal:()=>(G.flags.hl&&G.flags.hl.towerOpen)?1:0,reward:{gold:12000,xp:120000}};
+QUESTS.hc1={title:'Vance’s Letters',who:'Brother Sevrin',desc:'Brother Sevrin says Vance wrote letters to someone in the Hollow Land. Three of them are hidden in secret rooms of the Orange Spire, on levels 5, 10 and 15: look for the wall of the wrong colour with a wooden lever, and the bookshelf with a red book. Read all three.',need:3,goal:()=>{const c=(G.flags.hl&&G.flags.hl.hcLet)||{};return (c[0]?1:0)+(c[1]?1:0)+(c[2]?1:0)},reward:{gold:6000,xp:60000}};
+QUESTS.hc2={title:'The Question at the Top',who:'The Wizard at the top of the tower',desc:'Climb the Orange Spire, twenty levels, to the wizard in the spire, and answer his three questions with good will. He knows who Vance served.',need:1,goal:()=>(G.flags.hl&&G.flags.hl.towerOpen)?1:0,reward:{gold:12000,xp:120000}};
 QAREA.hc1=QAREA.hc2='Below the Abbey';
 {const R=NPCS.ab_sevrin.root,nr=d=>{
   if(qSt('ad4')==='done'&&qSt('hc1')===null)return say('The Abbot kept a lid on something, I think, and now the lid is off. Long ago a court of dead rulers was shut away under the Abbey, in the Hollow Land below. Vance was never the master of Corvane’s silver. Someone below was. Vance must have written to them. Three of his letters lie hidden in the secret rooms of the tower the court built. Will you find them?',[['We will find the letters.',()=>{qAccept('hc1');return say('Look on levels 5, 10 and 15. The rooms are hidden: a wall of the wrong colour with a lever on it, or a bookshelf with one red book out of line. Come back when you have read all three.',[BYE])}],['Not now.',()=>null]]);
@@ -18956,7 +18956,7 @@ const LEVEL_LADDER=[ // [levels of the game that make up a place, its level]
 ];
 const LEVEL_RATING={};
 for(const [ls,r] of LEVEL_LADDER)for(const l of ls)LEVEL_RATING[l]=Math.round(1+(r-1)*1.5)+3;   // each place stands three levels above the one before it (the table is in steps of two), and the whole ladder three levels higher
-// the ladder goes on after Oldhaven: the four floors below the Abbey, the Hollow Land, then each floor of the Orange Tower and the foot of the Violet Tower, each three levels above the one before
+// the ladder goes on after Oldhaven: the four floors below the Abbey, the Hollow Land, then each floor of the Orange Spire and the foot of the Violet Tower, each three levels above the one before
 {const top=Math.max(...Object.values(LEVEL_RATING));
  for(let i=0;i<4;i++)LEVEL_RATING[360+i]=top+3+3*i;
  LEVEL_RATING[364]=top+15;
@@ -19058,23 +19058,23 @@ STORY.push(
   {id:'ohabbot',c:()=>G.flags.hollowSlain,t:'The Hollow Abbot',x:'The party killed the Hollow Abbot, and the slab over the stair ground aside. Beyond it lies the Hollow Land, the next part of the game. Below the Abbey is in early access, and that is where the road ends for now.'}
 );
 STORY.push(
-  {id:'hollowland',c:()=>G.flags.hlSeen,t:'The Hollow Land',x:'Past the Hollow Abbot, the stair came out on a high ledge in a vast underground dark. Far below, lit by red and purple torches that nobody lights, stood a great orange castle with gargoyles on its ledges and narrow walkways jutting from its towers. A long stair led down to its gate.'},
-  {id:'orangetower',c:()=>(G.flags.hlTop||0)>=1,t:'The Orange Tower',x:'The castle has twenty levels, each smaller than the one below it, each with its number carved on the stone beside the stair. On every level there is a strange room in the middle: a wizard with a riddle, a rope bridge over a chasm, a room full of sand, a room of statues, a deep pit that drops the party a floor, a monster, a treasure. Armoured goblins, cave slimes and orcs lurk in the passages.'},
-  {id:'towerwizard',c:()=>(G.flags.hlTop||0)>=20,t:'The Wizard at the Top',x:'At the top of the Orange Tower, in the spire, a wizard waits with three questions. Good will opens the way to the next tower. Greed opens the floor, and the party falls two levels.'},
+  {id:'hollowland',c:()=>G.flags.hlSeen,t:'The Hollow Land',x:'Past the Hollow Abbot, the stair came out on a high ledge in a vast underground dark. Far below, lit by red and purple torches that nobody lights, stood a great orange spire with gargoyles on its ledges and narrow walkways jutting from its towers. A long stair led down to its gate.'},
+  {id:'orangetower',c:()=>(G.flags.hlTop||0)>=1,t:'The Orange Spire',x:'The castle has twenty levels, each smaller than the one below it, each with its number carved on the stone beside the stair. On every level there is a strange room in the middle: a wizard with a riddle, a rope bridge over a chasm, a room full of sand, a room of statues, a deep pit that drops the party a floor, a monster, a treasure. Armoured goblins, cave slimes and orcs lurk in the passages.'},
+  {id:'towerwizard',c:()=>(G.flags.hlTop||0)>=20,t:'The Wizard at the Top',x:'At the top of the Orange Spire, in the spire, a wizard waits with three questions. Good will opens the way to the next tower. Greed opens the floor, and the party falls two levels.'},
   {id:'violettower',c:()=>G.flags.hlViolet,t:'The Violet Tower',x:'All three answers were given with good will. A door opened in the spire, and a stair led across to a second tower, violet this time, the first of the towers beyond. The road goes on from here, in the next part of the game.'}
 );
 STORY.push(
   {id:'hollowcourt',c:()=>qSt('hc1')!==null,t:'The Hollow Court',x:'Brother Sevrin told the party what the Hollow Abbot was guarding. Long ago a court of dead rulers was shut under the Abbey, and the Abbey kept the door. Vance, the chancellor, was never the master of Corvane’s silver. He answered to someone in the Hollow Land, and he spent the silver to open the door from outside.'},
-  {id:'vanceletters',c:()=>qSt('hc1')==='done',t:'Vance’s Letters',x:'In the hidden rooms of the Orange Tower the party found three letters from Vance to his lord. Corvane’s silver went up to the Hollow Land every quarter. Vance used the king’s seal and the king saw nothing. He hid six pieces of the key in six hands, so that only the court’s servants would open the door, and he asked the court to send its riders east when it opened.'},
-  {id:'wizardreveal',c:()=>qSt('hc2')==='done',t:'The Wizard’s Answer',x:'At the top of the Orange Tower the wizard told the party the truth. He shut the court of the Hollow Land under the Abbey long ago, ruled by the first king, whom they call the Pale Sovereign, who wanted to rule past his own death. Vance was the Sovereign’s hand above, Corvane was Vance’s tool, and the silver bought the pieces of the key. The party opened the door themselves, and that is the only reason the court is not loose in the Eastern Lands. The Sovereign waits in the Violet Tower.'});
+  {id:'vanceletters',c:()=>qSt('hc1')==='done',t:'Vance’s Letters',x:'In the hidden rooms of the Orange Spire the party found three letters from Vance to his lord. Corvane’s silver went up to the Hollow Land every quarter. Vance used the king’s seal and the king saw nothing. He hid six pieces of the key in six hands, so that only the court’s servants would open the door, and he asked the court to send its riders east when it opened.'},
+  {id:'wizardreveal',c:()=>qSt('hc2')==='done',t:'The Wizard’s Answer',x:'At the top of the Orange Spire the wizard told the party the truth. He shut the court of the Hollow Land under the Abbey long ago, ruled by the first king, whom they call the Pale Sovereign, who wanted to rule past his own death. Vance was the Sovereign’s hand above, Corvane was Vance’s tool, and the silver bought the pieces of the key. The party opened the door themselves, and that is the only reason the court is not loose in the Eastern Lands. The Sovereign waits in the Violet Tower.'});
 function storyNext(){ // what to do next, from the chapter the party has reached
   const F=G.flags;
   if(F.hlViolet)return 'The way to the Violet Tower is open. The road goes on in the next part of the game.';
   if(qSt('hc2')==='done')return 'You know who Vance served: the Pale Sovereign, in the Violet Tower. The road goes on in the next part of the game.';
-  if(qSt('hc2')==='active')return 'Climb the Orange Tower, twenty levels, to the wizard in the spire. Answer with good will, and he will tell you who Vance served.';
-  if(qSt('hc1')==='active')return 'Find the three letters Vance wrote to the Hollow Court, hidden in secret rooms of the Orange Tower on levels 5, 10 and 15.';
+  if(qSt('hc2')==='active')return 'Climb the Orange Spire, twenty levels, to the wizard in the spire. Answer with good will, and he will tell you who Vance served.';
+  if(qSt('hc1')==='active')return 'Find the three letters Vance wrote to the Hollow Court, hidden in secret rooms of the Orange Spire on levels 5, 10 and 15.';
   if(qSt('ad4')==='done'&&qSt('hc1')===null)return 'Speak to Brother Sevrin again, in the Hollow Abbey.';
-  if((F.hlTop||0)>=1)return 'Climb the Orange Tower, twenty levels, to the wizard in the spire. Answer with good will.';
+  if((F.hlTop||0)>=1)return 'Climb the Orange Spire, twenty levels, to the wizard in the spire. Answer with good will.';
   if(F.hlSeen)return 'Walk down the long stair to the castle gate in the Hollow Land.';
   if(LEVEL>=400&&LEVEL<424)return 'You are on the Land Path. Walk north, then west across the mountains, then south. The signs count the kilometres to Yarrim.';
   if(F.hollowSlain)return 'The Hollow Abbot is dead and the stair is open. The Hollow Land is the next part of the game.';

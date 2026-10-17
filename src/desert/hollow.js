@@ -1,18 +1,18 @@
 /* ==========================================================================
    THE HOLLOW LAND. Below the Abbey, past the Hollow Abbot, the stair comes out on a high ledge in a vast underground dark. Far below, lit by red
-   and purple torches, stands a great orange castle. Stairs lead down to its gate. Inside, 20 levels climb to a spire, each smaller than the one
+   and purple torches, stands a great orange spire. Stairs lead down to its gate. Inside, 20 levels climb to a spire, each smaller than the one
    below, each with a number on the stone, a mystery room, labyrinthine passages and armoured goblins, slimes and orcs. At the top a wizard asks
    three questions. Answered with good will, they open the way to the next tower (violet). Answered with greed, the party falls down two levels.
-   Levels: 364 the ledge and the way down, 440 to 459 the orange tower (levels 1 to 20), 460 the foot of the violet tower.
+   Levels: 364 the ledge and the way down, 440 to 459 the orange spire (levels 1 to 20), 460 the foot of the violet tower.
    ========================================================================== */
 const HL={CAV:364,BASE:440,N:20,VIOLET:460};
 for(const n of ['hl_goblin','hl_goblinA','hl_slime','hl_slimeA','hl_orc','hl_orcA'])loadImg(n,'assets/'+n+'.png'); // the new creatures, painted
-loadImg('hl_castle_art','assets/hl_castle.png'); // the great orange castle: ornate and gothic, with gargoyles and walkways jutting from its towers
+loadImg('hl_castle_art','assets/hl_castle.png'); // the great orange spire: ornate and gothic, with gargoyles and walkways jutting from its towers
 ENEMY_DEF.hlgoblin={name:'Armoured Goblin',hp:120,dmg:[10,17],hit:.74,w:.5,img:'hl_goblin',xp:420,gold:[12,45],speed:1,aboveParty:1};
 ENEMY_DEF.hlslime={name:'Cave Slime',hp:180,dmg:[7,13],hit:.7,w:.78,img:'hl_slime',xp:380,gold:[0,10],speed:1,aboveParty:0};
 ENEMY_DEF.hlorc={name:'Orc Brute',hp:320,dmg:[17,28],hit:.78,w:.7,img:'hl_orc',xp:900,gold:[40,110],speed:1,aboveParty:2};
 LEVEL_NAMES[HL.CAV]='The Hollow Land';
-for(let k=0;k<HL.N;k++)LEVEL_NAMES[HL.BASE+k]='The Orange Tower, level '+(k+1);
+for(let k=0;k<HL.N;k++)LEVEL_NAMES[HL.BASE+k]='The Orange Spire, level '+(k+1);
 LEVEL_NAMES[HL.VIOLET]='The Foot of the Violet Tower';
 const HL_POWER=new Set(['crownbreaker','veilpiercer','dukesgavel','hollowscepter','worldblade','starbow','ragnarok','doomhammer','titanaxe','stormbow2','kingslayer','sunderer','mountainmaul','sandstaff','skullcrusher']);
 const HLF=()=>{const F=G.flags;return F.hl||(F.hl={riddles:{},falls:0})};
@@ -50,7 +50,7 @@ const HL_FIGS=[
  ['hl_fig2','A woman with an empty lantern','kh_ohfolk3_1',["The dark here is not an absence of light. It is a presence. Feel how it leans on the torches.","My lantern went out on the third floor. The torches did not mind. They give light to anyone, and ask for nothing.","Be careful what you want, in the tower. It listens."]],
  ['hl_fig3','A pale scholar','kh_ohfolk5_4',["The numbers on the stones are not counting up. They are counting down. To something.","The goblins are not evil. They are afraid of the wizard. So is everything else.","He asks three questions. They are not hard. That is the trouble."]],
  ['hl_fig4','A very small man, sitting','kh_ohfolk3_3',["I have been on the nineteenth floor for a year. I like it. It is quiet, and the stair is just there.","Slimes do not hate you. They only want to be near warmth. So do I.","At the top, they say, one fall is a lesson and two falls is a habit."]],
- ['hl_fig5','The keeper of the stair','kh_ohfolk6_1',["Welcome to the Hollow Land. Below is the Abbey, and above is the tower, and in between there is only the dark and the torches.","Walk down the steps to the castle gate. The tower is called the Orange Tower, though there will be others.","Do not fear the torches, red or purple. They burn for the lost."]]
+ ['hl_fig5','The keeper of the stair','kh_ohfolk6_1',["Welcome to the Hollow Land. Below is the Abbey, and above is the tower, and in between there is only the dark and the torches.","Walk down the steps to the castle gate. The tower is called the Orange Spire, though there will be others.","Do not fear the torches, red or purple. They burn for the lost."]]
 ];
 HL_FIGS.forEach(([id,n,face,lines])=>khNpc(id,n,face,()=>yrLines(id,lines)));
 /* ---- the riddles ---- */
@@ -166,7 +166,7 @@ function hlBuild(k){
   const portals=[{to:k===0?HL.CAV:violet?HL.BASE+HL.N-1:id-1,x:0,y:0,f:2,tex:'tomb'}];
   if(up)portals[1]={to:id+1,x:0,y:0,f:0,tex:'tomb'};
   const lv={rows,start,enemies,items,decor,fmap:(()=>{const f=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];f.push(s)}return f})(),
-    floorSet:['tombslab','sand','tombgold','tombdark','tombred'],floor:'tombslab',ceil:'tomb',name:LEVEL_NAMES[id],label:violet?'The Violet Tower':'The Orange Tower',diff:36+kk,torchGap:4.4,_secrets:dress.lv_secrets,_trap:dress.lv_trap,_roomsInfo:dress.lv_rooms,portals,lights,chars,_trig:dress.lv_trig,_msgr:dress.lv_msgr,_man:dress.lv_man,amb:.05,day:0,ceilH:CH,
+    floorSet:['tombslab','sand','tombgold','tombdark','tombred'],floor:'tombslab',ceil:'tomb',name:LEVEL_NAMES[id],label:violet?'The Violet Tower':'The Orange Spire',diff:36+kk,torchGap:4.4,_secrets:dress.lv_secrets,_trap:dress.lv_trap,_roomsInfo:dress.lv_rooms,portals,lights,chars,_trig:dress.lv_trig,_msgr:dress.lv_msgr,_man:dress.lv_man,amb:.05,day:0,ceilH:CH,
     mapNames:rooms.map((r,i)=>({t:i===0?'Stair ('+(k+1)+')':r===myst&&!violet?'The Strange Room':r===far&&up?(dress.lv_names&&dress.lv_names[i]&&!/Hall$/.test(dress.lv_names[i])?dress.lv_names[i]+' and Stair Up':'The Stair Up'):top&&r===far?'The Spire':(dress.lv_names&&dress.lv_names[i])||'Hall',x:mid(r)[0],y:r.y0-1,k:'place'})),_up:up,_start:start};
   LEVELS[id]=lv;
 }
@@ -194,7 +194,7 @@ function hlCavern(){
   const torch=(x,y,c)=>{if(!IMG.lamp||used.has(x+','+y))return;used.add(x+','+y);decor.push({k:'lamp',x,y,block:false,walk:true,deco:true});lights.push([x,y,c?1:0])};
   for(let y=6;y<=60;y+=3){torch(31,y,(y/3|0)%2);torch(39,y,(y/3|0)%2?0:1)}
   for(let x=10;x<=60;x+=6)torch(x,54,x/6%2);
-  // the castle: a great orange castle at the foot of the stairs, with towers, behind the gate wall, and torches of two colours along its foot
+  // the castle: a great orange spire at the foot of the stairs, with towers, behind the gate wall, and torches of two colours along its foot
   sky.push({x:35,y:6,k:IMG.hl_castle_art?'hl_castle_art':'hl_castle',w:62,z:0,big:1});
   if(!IMG.hl_castle_art)for(const [x,y,k,w] of [[8,4,'hl_tower3',14],[62,4,'hl_tower3',14]])sky.push({x,y,k,w,z:0,big:1});
   for(let x=6;x<=64;x+=4)torch(x,11,(x/4|0)%2);
@@ -203,7 +203,7 @@ function hlCavern(){
   place('hl_fig5',36,56);place('hl_fig0',30,38);place('hl_fig3',40,26);
   const lv={rows:rows.map(r=>r.join('')),start:{x:35,y:60,f:0},enemies,items,decor,sky,fmap:fm.map(x=>x).reduce((a,c,i)=>{if(i%W===0)a.push('');a[a.length-1]+=c;return a},[]),
     floorSet:['tombdark','tombslab','tombgold','tombslab'],floor:'tombdark',ceil:'tomb',name:'The Hollow Land',label:'The Hollow Land',diff:36,portals:[],lights,chars,amb:.6,day:0,ceilH:7,
-    mapNames:[{t:'The Orange Castle',x:35,y:5,k:'place'},{t:'The High Ledge',x:35,y:58,k:'place'},{t:'The Long Stair',x:35,y:34,k:'lane'},{t:'The Castle Gate',x:35,y:12,k:'lane'}]};
+    mapNames:[{t:'The Orange Spire',x:35,y:5,k:'place'},{t:'The High Ledge',x:35,y:58,k:'place'},{t:'The Long Stair',x:35,y:34,k:'lane'},{t:'The Castle Gate',x:35,y:12,k:'lane'}]};
   lv.portals[0]={to:360+3,x:0,y:0,f:2,tex:'tomb'};lv.portals[1]={to:HL.BASE,x:0,y:0,f:0,tex:'hlgate'};
   // the stair back down to the Hollow Abbey, hidden in the south wall behind the keeper; the castle gate (portal 1) in the north
   rows[H-2][35]='0';lv.rows=rows.map(r=>r.join(''));
@@ -473,7 +473,7 @@ function hlDress(c){
 }
 
 /* ==========================================================================
-   THE FOUR RULERS. Four twisted dead rulers, one on levels 4, 9, 14 and 19 of the Orange Tower, each in the last hall of its level. Each carries a relic
+   THE FOUR RULERS. Four twisted dead rulers, one on levels 4, 9, 14 and 19 of the Orange Spire, each in the last hall of its level. Each carries a relic
    far stronger than anything sold in a shop, and drops it when it falls.
    ========================================================================== */
 for(const n of ['boss0','boss0A','boss1','boss1A','boss2','boss2A','boss3','boss3A'])loadImg('hl_'+n,'assets/hl_'+n+'.png');

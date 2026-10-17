@@ -175,7 +175,7 @@ function hlDrawMap(cs,ox,oy){
     lab(known?r.n:hlScramble(r.n,LEVEL*31+i),cx,cy,Math.max(7,Math.min(10,cs*1.2)),known?'#3a1c0c':'#6a5a7a')})}
   ctx.restore();
   if(!G.flags.autoScaleOn&&LEVEL_RATING[LEVEL])lab('Creatures: level '+LEVEL_RATING[LEVEL],404,40,9,'#7a1a10');   // the level of this floor, in the fixed world
-  {const k=LEVEL-HL.BASE,t=k>=0&&k<20?'The Orange Tower, level '+(k+1):LEVEL===HL.CAV?'The Hollow Land':'The Orange Tower';ctx.save();ctx.fillStyle='rgba(226,212,168,.94)';rrect(ctx,150,10,180,22,5);ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=1.2;rrect(ctx,150,10,180,22,5);ctx.stroke();ctx.restore();lab(t,240,21,12,'#3a1c0c')}
+  {const k=LEVEL-HL.BASE,t=k>=0&&k<20?'The Orange Spire, level '+(k+1):LEVEL===HL.CAV?'The Hollow Land':'The Orange Spire';ctx.save();ctx.fillStyle='rgba(226,212,168,.94)';rrect(ctx,150,10,180,22,5);ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=1.2;rrect(ctx,150,10,180,22,5);ctx.stroke();ctx.restore();lab(t,240,21,12,'#3a1c0c')}
   // the key
   {const x=8,y=206,w=196,h=70;ctx.save();ctx.fillStyle='rgba(226,212,168,.94)';rrect(ctx,x,y,w,h,5);ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=1.2;rrect(ctx,x,y,w,h,5);ctx.stroke();ctx.restore();
     const rows=[['#b07a3a','Hidden door: walk into the wall'],['#e8c870','Stairs up'],['#e0b030','Chest'],['#c8a040','Portrait'],['#a8cce4','Mirror'],['#e0402e','Wall torch']];
@@ -318,7 +318,7 @@ function hlScramble(name,seed){
 
 /* ==========================================================================
    THE HOLLOW COURT. Who Vance's masters were. After the Hollow Abbot, Brother Sevrin asks the party to find three letters Vance wrote to the
-   dead court, hidden in the secret rooms of the Orange Tower (levels 5, 10, 15). Then the party climbs to the wizard in the spire, who tells
+   dead court, hidden in the secret rooms of the Orange Spire (levels 5, 10, 15). Then the party climbs to the wizard in the spire, who tells
    the truth: the court of the Hollow Land, ruled by the Pale Sovereign, bought Corvane and Vance with silver, and the party opened the door itself.
    ========================================================================== */
 const HL_VANCE=[
@@ -326,8 +326,8 @@ const HL_VANCE=[
  'A folded letter, signed V. "My lord. The chancellor’s seal is mine. The king signs what I set before him and sees nothing. I have hidden six pieces of the key in six hands across the Eastern Lands, so that only your servants will find them and open the door."',
  'A folded letter, signed V. "My lord. The Abbot grows old and the seal grows thin. When the door opens, send the court’s riders east. I will have the king’s guard sent to the sea gates. Be patient a little longer."'];
 HL_VANCE.forEach((t,i)=>khNpc('hl_vance'+i,'A hidden letter','hl_p_note',()=>{const F=HLF();F.hcLet=F.hcLet||{};const first=!F.hcLet[i];F.hcLet[i]=1;if(first)msg('You read the letter, and keep it.','#e8d070');return say(t,[['Put it away.',()=>null]])}));
-QUESTS.hc1={title:'Vance’s Letters',who:'Brother Sevrin',desc:'Brother Sevrin says Vance wrote letters to someone in the Hollow Land. Three of them are hidden in secret rooms of the Orange Tower, on levels 5, 10 and 15: look for the wall of the wrong colour with a wooden lever, and the bookshelf with a red book. Read all three.',need:3,goal:()=>{const c=(G.flags.hl&&G.flags.hl.hcLet)||{};return (c[0]?1:0)+(c[1]?1:0)+(c[2]?1:0)},reward:{gold:6000,xp:60000}};
-QUESTS.hc2={title:'The Question at the Top',who:'The Wizard at the top of the tower',desc:'Climb the Orange Tower, twenty levels, to the wizard in the spire, and answer his three questions with good will. He knows who Vance served.',need:1,goal:()=>(G.flags.hl&&G.flags.hl.towerOpen)?1:0,reward:{gold:12000,xp:120000}};
+QUESTS.hc1={title:'Vance’s Letters',who:'Brother Sevrin',desc:'Brother Sevrin says Vance wrote letters to someone in the Hollow Land. Three of them are hidden in secret rooms of the Orange Spire, on levels 5, 10 and 15: look for the wall of the wrong colour with a wooden lever, and the bookshelf with a red book. Read all three.',need:3,goal:()=>{const c=(G.flags.hl&&G.flags.hl.hcLet)||{};return (c[0]?1:0)+(c[1]?1:0)+(c[2]?1:0)},reward:{gold:6000,xp:60000}};
+QUESTS.hc2={title:'The Question at the Top',who:'The Wizard at the top of the tower',desc:'Climb the Orange Spire, twenty levels, to the wizard in the spire, and answer his three questions with good will. He knows who Vance served.',need:1,goal:()=>(G.flags.hl&&G.flags.hl.towerOpen)?1:0,reward:{gold:12000,xp:120000}};
 QAREA.hc1=QAREA.hc2='Below the Abbey';
 {const R=NPCS.ab_sevrin.root,nr=d=>{
   if(qSt('ad4')==='done'&&qSt('hc1')===null)return say('The Abbot kept a lid on something, I think, and now the lid is off. Long ago a court of dead rulers was shut away under the Abbey, in the Hollow Land below. Vance was never the master of Corvane’s silver. Someone below was. Vance must have written to them. Three of his letters lie hidden in the secret rooms of the tower the court built. Will you find them?',[['We will find the letters.',()=>{qAccept('hc1');return say('Look on levels 5, 10 and 15. The rooms are hidden: a wall of the wrong colour with a lever on it, or a bookshelf with one red book out of line. Come back when you have read all three.',[BYE])}],['Not now.',()=>null]]);
