@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.242';
+const VERSION='3.243';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1355,6 +1355,7 @@ function sfx(n){
     case 'rattle':for(let i=0;i<4;i++)nz(.05,.25,'bandpass',2600+i*300,1200,i*.06);tone(180,120,.2,'square',.05);break;
     case 'screech':tone(3400,1600,.18,'sawtooth',.07);tone(2800,3600,.12,'triangle',.08,.08);break;
     case 'equip':nz(.08,.22,'bandpass',1800,900);tone(260,200,.08,'square',.06);break;
+    case 'tele':tone(180,300,1.1,'sine',.06);tone(360,450,.9,'sine',.03,.1);tone(540,540,.8,'sine',.015,.25);break; // a soft rising swell for travelling by stone
     case 'level':[523,659,784,1046,1318].forEach((f,i)=>tone(f,f,.45,'triangle',.12,i*.1));break;
     case 'win':[392,523,659,784,1046].forEach((f,i)=>tone(f,f,.9,'triangle',.12,i*.18));break;
     case 'lose':[330,277,233,196].forEach((f,i)=>tone(f,f*.97,.9,'triangle',.14,i*.3));break;
@@ -8012,7 +8013,7 @@ function teleportTo(n){
   const L=LEVELS[n];let f=0;for(let k=0;k<4;k++){const c=(L.rows[sp.y+DIRS[k][1]]||'')[sp.x+DIRS[k][0]];if(c==='.'){f=k;break}}
   G.teleMode=false;G.overview=false;G.world=false;
   TP={ph:'out',t:0,n,sp,f,name:L.label||L.name};
-  sfx('level');
+  sfx('tele');
 }
 const TP_OUT=1.2,TP_BLACK=.45,TP_IN=1.3,TP_NAME=3.4;
 function tpTick(dt){
@@ -8021,7 +8022,7 @@ function tpTick(dt){
     TP.ph='black';TP.t=0;
     const q=TP;goToLevel(q.n,{x:q.sp.x,y:q.sp.y,f:q.f});TP=q; // goToLevel starts a new level; the effect carries on over it
     G.msgs=[];
-  }else if(TP.ph==='black'&&TP.t>=TP_BLACK){TP.ph='in';TP.t=0;sfx('level')}
+  }else if(TP.ph==='black'&&TP.t>=TP_BLACK){TP.ph='in';TP.t=0;sfx('tele')}
   else if(TP.ph==='in'&&TP.t>=TP_NAME)TP=null;
 }
 function tpSwirl(a,rot,tight){
