@@ -340,7 +340,7 @@ QAREA.hc1=QAREA.hc2='Below the Abbey';
 
 /* ---- the bogeyman himself: a fight every time, at the party's own level, and a mask when he first falls ---- */
 ITEMDEF.bogeymask={n:'Bogeyman Mask',k:'head',t:'Helm',ic:'head',c:'#d8d0c0',armor:8,price:3200,lvl:10,pas:{dodge:.05,dmgPct:.04},rar:1,gear:1,sw:.38,d:'A hollow bone-white mask with two empty eyes, taken from the bogeyman. Armour 8, enemies miss 5% more, damage +4%. Its wearer cannot be shaken or haunted. Needs level 10.'};
-ENEMY_DEF.hlbogey={name:'The Bogeyman',hp:380,dmg:[16,28],hit:.86,w:1.1,img:'hl_bogey',xp:2500,gold:[80,200],speed:1,verb:'claws',aboveParty:0,glow:.45,relic:'bogeymask'};
+ENEMY_DEF.hlbogey={name:'The Bogeyman',hp:380,dmg:[16,28],hit:.86,w:1.1,img:'hl_bogey',xp:2500,gold:[80,200],speed:1,verb:'claws',aboveParty:0,partyLevel:true,glow:.45,relic:'bogeymask'};
 {const _ai=afflInflict;afflInflict=function(id,hi,quiet){ // the mask: no fear, no haunting
   if((id==='shaken'||id==='haunted')&&hi!==undefined&&hi!==-1){const h=G.heroes[hi];if(h&&h.eq&&h.eq.head&&h.eq.head.id==='bogeymask')return false}
   return _ai.apply(this,arguments)}}

@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.228';
+const VERSION='3.229';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1439,7 +1439,8 @@ function rebalanceEnemies(){
   const pl=Math.floor(L.reduce((n,h)=>n+h.lvl,0)/L.length);
   for(const e of G.enemies){
     const def=ENEMY_DEF[e.t],ap=def&&def.aboveParty;
-    if(G.flags.noScale){ // a fixed world: the place's own level, the great creatures a few above it
+    if(def&&def.partyLevel&&e.hp>0&&!e.dying){if(e.lvl!==pl){const fr=e.hp/e.maxhp;e.lvl=pl;e.maxhp=enemyStat(e.t,pl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*fr))}continue} // a creature that is always the party's own level
+    if(!G.flags.autoScaleOn){ // a fixed world (the default): the place's own level, the great creatures a few above it
       if(e.hp<=0||e.dying)continue;
       if(e.base===undefined||e.fixed!==LEVEL){e.base=crypt1Level(e)||(DIFF()+(ap?Math.min(ap,8):0));e.fixed=LEVEL}
       if(e.vd===undefined){const r=Math.random();e.vd=(ap||(def&&(def.boss||NO_VARY.includes(e.t)||/^w_/.test(e.t))))?0:r<.4?0:r<.75?1+Math.floor(Math.random()*3):4+Math.floor(Math.random()*4)}
@@ -4365,7 +4366,7 @@ function drawWorldMap(){
     const big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey';
     lab(l.n,l.x,l.y+(l.ic==='castle'?24:l.ic==='mountains'?20:18),big?10:8.5,v?'#1c1208':'#5a4a30');
     if(l.sub)lab(l.sub,l.x,l.y+29,7,'#4a3a22');
-    if(G.flags.noScale&&typeof locRating==='function'){const lr=locRating(l);if(lr)lab('Lv '+lr,l.x+2,l.y-31,8,'#7a1a10')}   // only when autoscaling is off
+    if(!G.flags.autoScaleOn&&typeof locRating==='function'){const lr=locRating(l);if(lr)lab('Lv '+lr,l.x+2,l.y-31,8,'#7a1a10')}   // only when autoscaling is off
     const nq=QLEFT[l.k]||0;
     if(nq){ctx.fillStyle='#b02818';const left=l.k==='scoria'; // Khemetra's dots stand to the left of the city: below it is the Red Dunes
       for(let i=0;i<nq;i++){const row=(i/14)|0,inRow=Math.min(14,nq-row*14),col=i%14;ctx.beginPath();if(left)ctx.arc(l.x-34-(inRow-1-col)*3.4,l.y-10+row*3.4,1.15,0,TAU);else ctx.arc(l.x+(col-(inRow-1)/2)*3.4,l.y+(l.sub?38:29)+row*3.4,1.15,0,TAU);ctx.fill()}}
@@ -4867,7 +4868,7 @@ addPOIs();
 for(const k in MINIDEFS){const M=MINIDEFS[k];if(M.portals)LEVELS[k].portals=M.portals;LEVELS[k].diff=M.diff||4}
 
 const WALLCH={a:9,b:10,c:11,p:12,w:13,v:14,h:15,k:16,i:17,g:18,r:19,d:20,e:21,f:22,'0':30,'1':31,'2':32,'3':33,'4':34,'5':35,'6':36,'7':37,'8':38,'9':39};
-const DIFF=()=>(G.flags.noScale&&typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[LEVEL]!==undefined)?LEVEL_RATING[LEVEL]:((LEVELS[LEVEL]&&LEVELS[LEVEL].diff)||LEVEL);   // with autoscaling off a place has the fixed level of the ladder
+const DIFF=()=>(!G.flags.autoScaleOn&&typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[LEVEL]!==undefined)?LEVEL_RATING[LEVEL]:((LEVELS[LEVEL]&&LEVELS[LEVEL].diff)||LEVEL);   // with autoscaling off a place has the fixed level of the ladder
 function forestExtras(L){
   if(L._xd)return L._xd;
   const rows=L.rows,H=rows.length,W=rows[0].length,out=[];
@@ -17925,7 +17926,7 @@ QAREA.hc1=QAREA.hc2='Below the Abbey';
 
 /* ---- the bogeyman himself: a fight every time, at the party's own level, and a mask when he first falls ---- */
 ITEMDEF.bogeymask={n:'Bogeyman Mask',k:'head',t:'Helm',ic:'head',c:'#d8d0c0',armor:8,price:3200,lvl:10,pas:{dodge:.05,dmgPct:.04},rar:1,gear:1,sw:.38,d:'A hollow bone-white mask with two empty eyes, taken from the bogeyman. Armour 8, enemies miss 5% more, damage +4%. Its wearer cannot be shaken or haunted. Needs level 10.'};
-ENEMY_DEF.hlbogey={name:'The Bogeyman',hp:380,dmg:[16,28],hit:.86,w:1.1,img:'hl_bogey',xp:2500,gold:[80,200],speed:1,verb:'claws',aboveParty:0,glow:.45,relic:'bogeymask'};
+ENEMY_DEF.hlbogey={name:'The Bogeyman',hp:380,dmg:[16,28],hit:.86,w:1.1,img:'hl_bogey',xp:2500,gold:[80,200],speed:1,verb:'claws',aboveParty:0,partyLevel:true,glow:.45,relic:'bogeymask'};
 {const _ai=afflInflict;afflInflict=function(id,hi,quiet){ // the mask: no fear, no haunting
   if((id==='shaken'||id==='haunted')&&hi!==undefined&&hi!==-1){const h=G.heroes[hi];if(h&&h.eq&&h.eq.head&&h.eq.head.id==='bogeymask')return false}
   return _ai.apply(this,arguments)}}
@@ -18900,10 +18901,9 @@ QUESTS.kg4.targets=['uw_dive_303'];
 /* ---- src/desert/difficulty.js ---- */
 /* ==========================================================================
    GAMEPLAY: AUTOSCALING AND THE LADDER OF LEVELS.
-   By default the world scales to the party (see rebalanceEnemies). In Menu > Gameplay autoscaling can be turned off. Then every place has
-   a fixed level, a ladder that rises by about two levels for each place the story leads to, creatures stand at that level (with the usual
+   By default the world is fixed: every place has its own level, a ladder that rises by about three levels for each place the story leads to, creatures stand at that level (with the usual
    mix of some lower), the great creatures stand a few levels above it, and the world map shows each place's level.
-   The ladder only applies with autoscaling off; with it on, the places keep their old difficulty and the party is met by scaled creatures.
+   In Menu > Gameplay autoscaling can be turned on (G.flags.autoScaleOn): then the world scales to the party (see rebalanceEnemies), and the places keep their old difficulty.
    ========================================================================== */
 const LEVEL_LADDER=[ // [levels of the game that make up a place, its level]
   [[1],1],[[2,23],3],[[3,4,5,6,9,12,29],3],[[7,25],5],[[8],7],[[10,24],9],[[11],11],
@@ -18916,8 +18916,8 @@ const LEVEL_LADDER=[ // [levels of the game that make up a place, its level]
   [[304],61],[[305,307,308,309,310],62],[[306],63]
 ];
 const LEVEL_RATING={};
-for(const [ls,r] of LEVEL_LADDER)for(const l of ls)LEVEL_RATING[l]=r+3;   // the whole ladder stands three levels higher than the table below
-const autoscaleOn=()=>!G.flags.noScale;
+for(const [ls,r] of LEVEL_LADDER)for(const l of ls)LEVEL_RATING[l]=Math.round(1+(r-1)*1.5)+3;   // each place stands three levels above the one before it (the table is in steps of two), and the whole ladder three levels higher
+const autoscaleOn=()=>!!G.flags.autoScaleOn;
 // the level of a place on the world map: the lowest and highest of its levels that have one
 function locRating(loc){if(loc.lv.length===1&&loc.lv[0]===1)return '1-3';   // the crypts climb from 1 to 3
   let lo=1e9,hi=-1;for(const v of loc.lv){const r=LEVEL_RATING[v];if(r!==undefined){lo=Math.min(lo,r);hi=Math.max(hi,r)}}return hi<0?null:(lo===hi?String(lo):lo+'-'+hi)}
@@ -18930,7 +18930,7 @@ function drawGameplay(){
     'Creatures scale to the party. A party that has outgrown a place meets its creatures raised to within a few levels of itself, and the great creatures always stand above the party.',
     'Turn autoscaling off for a fixed world: every place has its own level, rising as the story goes on, and each level is shown on the world map. You will meet creatures that are too strong for you, and too weak.'
   ]:[
-    'The world is fixed. Every place has its own level, rising by about two for each place the story leads to, and the level of each place is shown on the world map.',
+    'The world is fixed. Every place has its own level, rising by about three for each place the story leads to, and the level of each place is shown on the world map.',
     'Creatures stand at the level of the place (some a little lower, as ever), and the great creatures a few levels above it. If a place is too hard for the party, go elsewhere and come back stronger.'
   ];
   let y=110;for(const p of lines){for(const l of wrapText(p,300,8.4)){txt(l,240,y,8.4,'#cdbf94','center');y+=11}y+=8}
@@ -18939,7 +18939,7 @@ function drawGameplay(){
   btnText('gp_back','Back',190,260,100,24);
 }
 (function(){const _b=handleBtn;handleBtn=function(id){
-  if(G.menu==='gameplay'){if(id==='gp_back'||id==='menu')G.menu=true;else if(id==='gp_scale'){G.flags.noScale=G.flags.noScale?0:1;try{rebalanceEnemies()}catch(e){}msg(G.flags.noScale?'Autoscaling is off. The world is fixed.':'Autoscaling is on.','#e8d8a0')}return}
+  if(G.menu==='gameplay'){if(id==='gp_back'||id==='menu')G.menu=true;else if(id==='gp_scale'){G.flags.autoScaleOn=G.flags.autoScaleOn?0:1;try{rebalanceEnemies()}catch(e){}msg(G.flags.autoScaleOn?'Autoscaling is on.':'Autoscaling is off. The world is fixed.','#e8d8a0')}return}
   _b(id)}})();
 
 /* ---- src/desert/story.js ---- */
