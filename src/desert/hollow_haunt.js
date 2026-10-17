@@ -19,14 +19,13 @@ function hlLootFor(d){
     if(!pool.length)pool=(typeof GEAR!=='undefined'?GEAR:[]).filter(id=>{const t=ITEMDEF[id];return t&&t.k==='weapon'&&t.lvl&&t.lvl<=plvl});
     const types=[...new Set(pool.map(id=>ITEMDEF[id].t))].sort((a,b)=>r2(a.length)-r2(b.length));
     for(const ty of types.slice(0,3)){const c=pool.filter(id=>ITEMDEF[id].t===ty);it2.push({id:c[Math.floor(r2(c.length+ty.length)*c.length)],n:1})}
-    for(const id of ['superiorheal','greatermana']){if(ITEMDEF[id])it2.push({id,n:1})}
+    it2.push({id:potionFor(r2(30)),n:1},{id:potionFor(r2(31)),n:1});if(ITEMDEF.greatermana)it2.push({id:'greatermana',n:1})
     it2.push({id:['ringV','ringW','ringS','ringM'][Math.floor(r2(7)*4)],n:1});
     d.gold=150+(LEVEL-HL.BASE)*40+Math.floor(r2(9)*120);return it2}
   const k=LEVEL-HL.BASE,r=i=>hash2(d.x,d.y,300+i+LEVEL*3),items=[],add=(id,n)=>{if(ITEMDEF[id])items.push({id,n:ITEMDEF[id].stack?(n||1):1})};
-  const pots=['healdraught','greaterheal','superiorheal','elixir','manadraught','greatermana','supermana'];
   const pick=(a,i)=>a[Math.floor(r(i)*a.length)];
-  const hi=Math.min(pots.length-1,2+((k/4)|0));
-  for(let q=0;q<3;q++)add(pots[Math.min(hi,Math.floor(r(q)*(hi+1)))],1+(r(q+9)<.4?1:0));
+  for(let q=0;q<4;q++)add(potionFor(r(q)),1+(r(q+9)<.5?1:0)); // healing fit for the party's level, plenty of it
+  for(let q=0;q<2;q++)add(['manadraught','greatermana','supermana'][Math.min(2,((k/7)|0)+(r(q+14)<.4?1:0))],1);
   // gear: something for each level, from the shop tiers (the chest at the top holds the best)
   const gear=(typeof GEAR!=='undefined'?GEAR:[]).filter(id=>ITEMDEF[id]&&ITEMDEF[id].tier&&ITEMDEF[id].tier>=25+k&&ITEMDEF[id].tier<=40+k*1.5);
   if(gear.length){add(pick(gear,20));if(r(21)<.5+k/40)add(pick(gear,22))}

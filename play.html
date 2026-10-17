@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.235';
+const VERSION='3.236';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -996,6 +996,9 @@ const ITEMDEF={
   potion2:{n:'Strong Healing Potion',k:'potion',t:'Potion',ic:'potion',c:'#e0601c',heal:90,stack:1,price:75,minLvl:20,d:'Restores 90 health. Seen from level 20.',sw:.28},
   potion3:{n:'Very Strong Healing Potion',k:'potion',t:'Potion',ic:'potion',c:'#d8a020',heal:210,stack:1,price:180,minLvl:40,d:'Restores 210 health. Seen from level 40.',sw:.3},
   potion4:{n:'Ultra Healing Potion',k:'potion',t:'Potion',ic:'potion',c:'#e8e0ff',heal:450,stack:1,price:420,minLvl:50,d:'Restores 450 health. Seen from level 50.',sw:.32},
+  potion5:{n:'Supreme Healing Potion',k:'potion',t:'Potion',ic:'potion',c:'#9ae8ff',heal:900,stack:1,price:900,minLvl:65,d:'Restores 900 health. Seen from level 65.',sw:.34},
+  potion6:{n:'Mythic Healing Potion',k:'potion',t:'Potion',ic:'potion',c:'#d8a0ff',heal:1800,stack:1,price:1800,minLvl:100,d:'Restores 1800 health. Seen from level 100.',sw:.36},
+  potion7:{n:'Divine Healing Potion',k:'potion',t:'Potion',ic:'potion',c:'#fff2a0',heal:3500,stack:1,price:3600,minLvl:140,d:'Restores 3500 health. Seen from level 140.',sw:.38},
   bread:{n:'Loaf of Bread',k:'food',t:'Meal',ic:'bread',c:'#b8873c',heal:16,feed:70,stack:1,price:4,sw:.3},
   cheese:{n:'Hard Cheese',k:'food',t:'Snack',ic:'cheese',c:'#d8b840',heal:8,feed:40,stack:1,price:5,sw:.3},
   dates:{n:'Dates',k:'food',t:'Snack',ic:'nuts',c:'#6a3a1a',heal:6,feed:45,stack:1,price:3,sw:.3},
@@ -1597,15 +1600,17 @@ function bagAdd(it){
   G.bag.push(it);return true;
 }
 function bagTake(i){const it=G.bag[i];if(it.n>1){it.n--;return {id:it.id,n:1}}G.bag.splice(i,1);return it}
-const HEAL_IDS=['potion','potion2','potion3','potion4'];
+const HEAL_IDS=['potion','potion2','potion3','potion4','potion5','potion6','potion7'];
 const countPotions=()=>G.bag.reduce((a,b)=>a+(HEAL_IDS.includes(b.id)?b.n:0),0);
 const partyLevel=()=>G.heroes&&G.heroes.length?Math.max(...G.heroes.map(h=>h.lvl)):1;
-function potionFor(roll){ // better potions turn up only once the party is strong enough for them
-  const L=partyLevel(),open=HEAL_IDS.filter(id=>!ITEMDEF[id].minLvl||L>=ITEMDEF[id].minLvl);
+const POTION_LADDER=[['potion',1],['healdraught',8],['potion2',20],['greaterheal',30],['potion3',40],['superiorheal',45],['potion4',50],['potion5',65],['potion6',100],['potion7',140]];
+function potionFor(roll){ // the healing potions that turn up fit the party's level: stronger ones as it climbs, and past level 60 nothing weaker than a Very Strong one
+  const L=partyLevel();let open=POTION_LADDER.filter(([id,m])=>L>=m&&ITEMDEF[id]).map(o=>o[0]);
+  if(L>60){const hi=open.filter(id=>ITEMDEF[id].heal>=210);if(hi.length>=2)open=hi}
   if(open.length<2)return 'potion';
   return roll<.55?open[open.length-1]:open[open.length-2];
 }
-function potionStockRows(){const L=partyLevel();return [['potion2',2],['potion3',2],['potion4',1]].filter(([id])=>L>=ITEMDEF[id].minLvl)}
+function potionStockRows(){const L=partyLevel();return [['potion2',2],['potion3',2],['potion4',1],['potion5',1],['potion6',1],['potion7',1]].filter(([id])=>L>=ITEMDEF[id].minLvl)}
 function bestPotionIndex(hi){ // the weakest potion that heals everything that is missing, or else the strongest
   const h=G.heroes[hi],need=h.max-h.hp;let best=-1;
   G.bag.forEach((b,i)=>{const d=idef(b);if(!HEAL_IDS.includes(b.id))return;if(best<0){best=i;return}const e=idef(G.bag[best]);
@@ -17258,7 +17263,7 @@ function hlBuild(k){
   const cells=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(g[y][x]==='.'&&d[y*W+x]>6&&!used.has(x+','+y)&&!(x>=myst.x0&&x<=myst.x1&&y>=myst.y0&&y<=myst.y1))cells.push([x,y]);
   const kinds=kk<6?['hlgoblin','hlgoblin','hlslime']:kk<13?['hlgoblin','hlslime','hlorc','hlgoblin']:['hlorc','hlorc','hlgoblin','hlslime'];
   if(!violet)for(let i=0;i<Math.max(5,Math.min(13,Math.round(cells.length/38)));i++){const c=cells[R(900+i*13,cells.length)];if(c&&!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);enemies.push({t:kinds[R(950+i,kinds.length)],x:c[0],y:c[1]})}}
-  for(let i=0;i<3&&cells.length;i++){const c=cells[R(100+i*7,cells.length)];if(!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);items.push({k:'potion',x:c[0],y:c[1]})}}
+  for(let i=0;i<10&&cells.length;i++){const c=cells[R(100+i*7,cells.length)];if(!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);items.push({k:'potion',x:c[0],y:c[1]})}}
   OH_STY.hlsecret=Object.assign({},OH_STY.castle2||OH_STY.gold,{zoom:3.6,contrast:2.0,tint:[110,150,255,.0]});const secretCh=violet?'#':ch(TM.make('plain','hlsecret',CH).gid);
   const dress={k,id,rows,W,H,rooms,myst,far,used,decor,enemies,d,violet,top,R,hs,secretCh,items,up,start};hlDress(dress);
   const portals=[{to:k===0?HL.CAV:violet?HL.BASE+HL.N-1:id-1,x:0,y:0,f:2,tex:'tomb'}];
@@ -17615,14 +17620,13 @@ function hlLootFor(d){
     if(!pool.length)pool=(typeof GEAR!=='undefined'?GEAR:[]).filter(id=>{const t=ITEMDEF[id];return t&&t.k==='weapon'&&t.lvl&&t.lvl<=plvl});
     const types=[...new Set(pool.map(id=>ITEMDEF[id].t))].sort((a,b)=>r2(a.length)-r2(b.length));
     for(const ty of types.slice(0,3)){const c=pool.filter(id=>ITEMDEF[id].t===ty);it2.push({id:c[Math.floor(r2(c.length+ty.length)*c.length)],n:1})}
-    for(const id of ['superiorheal','greatermana']){if(ITEMDEF[id])it2.push({id,n:1})}
+    it2.push({id:potionFor(r2(30)),n:1},{id:potionFor(r2(31)),n:1});if(ITEMDEF.greatermana)it2.push({id:'greatermana',n:1})
     it2.push({id:['ringV','ringW','ringS','ringM'][Math.floor(r2(7)*4)],n:1});
     d.gold=150+(LEVEL-HL.BASE)*40+Math.floor(r2(9)*120);return it2}
   const k=LEVEL-HL.BASE,r=i=>hash2(d.x,d.y,300+i+LEVEL*3),items=[],add=(id,n)=>{if(ITEMDEF[id])items.push({id,n:ITEMDEF[id].stack?(n||1):1})};
-  const pots=['healdraught','greaterheal','superiorheal','elixir','manadraught','greatermana','supermana'];
   const pick=(a,i)=>a[Math.floor(r(i)*a.length)];
-  const hi=Math.min(pots.length-1,2+((k/4)|0));
-  for(let q=0;q<3;q++)add(pots[Math.min(hi,Math.floor(r(q)*(hi+1)))],1+(r(q+9)<.4?1:0));
+  for(let q=0;q<4;q++)add(potionFor(r(q)),1+(r(q+9)<.5?1:0)); // healing fit for the party's level, plenty of it
+  for(let q=0;q<2;q++)add(['manadraught','greatermana','supermana'][Math.min(2,((k/7)|0)+(r(q+14)<.4?1:0))],1);
   // gear: something for each level, from the shop tiers (the chest at the top holds the best)
   const gear=(typeof GEAR!=='undefined'?GEAR:[]).filter(id=>ITEMDEF[id]&&ITEMDEF[id].tier&&ITEMDEF[id].tier>=25+k&&ITEMDEF[id].tier<=40+k*1.5);
   if(gear.length){add(pick(gear,20));if(r(21)<.5+k/40)add(pick(gear,22))}
@@ -19911,11 +19915,11 @@ function desertLoot(d){
   if(LEVEL<41)return null;
   const r=k=>hash2(d.x,d.y,100+k),items=[],add=(id,n)=>{if(ITEMDEF[id])items.push({id,n:ITEMDEF[id].stack?(n||1):1})};
   const lv=LEVELS[LEVEL].diff||15,pick=a=>a[Math.floor(r(9)*a.length)],rings=['ringM','ringS','ringW','ringV'];
-  if(d.k==='sarcoph'||d.k==='sarcophU'){d.gold=d.goldAmt||(60+Math.floor(r(1)*70)+lv*4);if(r(2)<.5)add('potion',1+(r(3)<.4?1:0));if(r(4)<.22)add(pick(DS_MAGIC_TOMB));else if(r(5)<.3)add(pick(rings));return items}
-  if(/^vase\d$/.test(d.k)){d.gold=d.goldAmt||(10+Math.floor(r(1)*40)+lv);if(r(2)<.2)add('potion',1);else if(!d.plain&&r(3)<.12)add(pick(rings));return items}
-  if(d.k==='treasure'){d.gold=d.goldAmt||(180+Math.floor(r(1)*220)+lv*8);add('potion',2);if(d.plain){}else if(r(2)<.55)add(pick(DS_MAGIC_TOMB));else add(pick(rings));return items}
-  if(d.k==='offering'){d.gold=d.goldAmt||(30+Math.floor(r(1)*40));add('potion',1);return items}
-  if(d.k==='chest'){d.gold=d.goldAmt||(130+Math.floor(r(1)*160)+lv*3);add('potion',2);if(d.magic)add(d.magic);else if(r(2)<.45)add(pick(DS_MAGIC_TOMB));else add(pick(rings));return items}
+  if(d.k==='sarcoph'||d.k==='sarcophU'){d.gold=d.goldAmt||(60+Math.floor(r(1)*70)+lv*4);if(r(2)<.5)add(potionFor(r(12)),1+(r(3)<.4?1:0));if(r(4)<.22)add(pick(DS_MAGIC_TOMB));else if(r(5)<.3)add(pick(rings));return items}
+  if(/^vase\d$/.test(d.k)){d.gold=d.goldAmt||(10+Math.floor(r(1)*40)+lv);if(r(2)<.2)add(potionFor(r(12)),1);else if(!d.plain&&r(3)<.12)add(pick(rings));return items}
+  if(d.k==='treasure'){d.gold=d.goldAmt||(180+Math.floor(r(1)*220)+lv*8);add(potionFor(r(12)),1);add(potionFor(r(13)),1);if(d.plain){}else if(r(2)<.55)add(pick(DS_MAGIC_TOMB));else add(pick(rings));return items}
+  if(d.k==='offering'){d.gold=d.goldAmt||(30+Math.floor(r(1)*40));add(potionFor(r(12)),1);return items}
+  if(d.k==='chest'){d.gold=d.goldAmt||(130+Math.floor(r(1)*160)+lv*3);add(potionFor(r(12)),1);add(potionFor(r(13)),1);if(d.magic)add(d.magic);else if(r(2)<.45)add(pick(DS_MAGIC_TOMB));else add(pick(rings));return items}
   return null;
 }
 function desertApplyState(){
