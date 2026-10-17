@@ -21,7 +21,7 @@
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.250';
+const VERSION='3.256';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -3968,8 +3968,8 @@ function makeCart(){
   wornSprite(IMG.cart,59,1.6);
 }
 
-function getScroll(d){if(d==='goto')return G.gs||0;if(d==='quest')return G.qs||0;if(d==='stats')return G.sts||0;if(d==='stats2')return G.sts2||0;if(d==='aff')return G.afs||0;if(d==='rum')return G.rs||0;if(d==='map')return{x:G.panX||0,y:G.panY||0};if(d==='lbag')return G.loot?G.loot.sl:0;if(d==='lbox')return G.loot?G.loot.sr:0;return G.inv.scroll}
-function setScroll(d,v){if(d==='goto'){G.gs=clamp(v,0,gotoMax());return}if(d==='quest'){G.qs=clamp(v,0,G.qMax||0);return}if(d==='stats'){G.sts=clamp(v,0,G.stMax||0);return}if(d==='stats2'){G.sts2=clamp(v,0,G.stMax2||0);return}if(d==='aff'){G.afs=clamp(v,0,G.afMax||0);return}if(d==='rum'){G.rs=Math.max(0,v);return}if(d==='map'){return}if(d==='lbag'&&G.loot)G.loot.sl=clamp(v,0,maxScroll());else if(d==='lbox'&&G.loot)G.loot.sr=clamp(v,0,lootMaxScroll(Math.max(9,G.loot.decor.contents.length)));else G.inv.scroll=clamp(v,0,maxScroll())}
+function getScroll(d){if(d==='saves')return G.svs||0;if(d==='goto')return G.gs||0;if(d==='quest')return G.qs||0;if(d==='stats')return G.sts||0;if(d==='stats2')return G.sts2||0;if(d==='aff')return G.afs||0;if(d==='rum')return G.rs||0;if(d==='map')return{x:G.panX||0,y:G.panY||0};if(d==='lbag')return G.loot?G.loot.sl:0;if(d==='lbox')return G.loot?G.loot.sr:0;return G.inv.scroll}
+function setScroll(d,v){if(d==='saves'){G.svs=clamp(v,0,G.svMax||0);return}if(d==='goto'){G.gs=clamp(v,0,gotoMax());return}if(d==='quest'){G.qs=clamp(v,0,G.qMax||0);return}if(d==='stats'){G.sts=clamp(v,0,G.stMax||0);return}if(d==='stats2'){G.sts2=clamp(v,0,G.stMax2||0);return}if(d==='aff'){G.afs=clamp(v,0,G.afMax||0);return}if(d==='rum'){G.rs=Math.max(0,v);return}if(d==='map'){return}if(d==='lbag'&&G.loot)G.loot.sl=clamp(v,0,maxScroll());else if(d==='lbox'&&G.loot)G.loot.sr=clamp(v,0,lootMaxScroll(Math.max(9,G.loot.decor.contents.length)));else G.inv.scroll=clamp(v,0,maxScroll())}
 /* ==========================================================================
    SAVE / LOAD  (autosave + three manual slots, a backup of the previous run)
    ========================================================================== */
@@ -4051,13 +4051,15 @@ function refreshSaves(){
     return {k,label,sv:sv?{t:sv.t,area:(LEVELS[sv.level||1]||LEVELS[1]).label||LEVEL_NAMES[sv.level||1],party:sv.party,lvl:Math.max(...sv.heroes.map(h=>h.lvl)),rounds:sv.rounds,gold:sv.gold,alive:sv.heroes.filter(h=>h.alive).length}:null};
   });
 }
-function openSaves(mode){G.saves={mode,confirm:null,note:'',noteT:0,rows:[]};refreshSaves()}
+function openSaves(mode){G.svs=0;G.saves={mode,confirm:null,note:'',noteT:0,rows:[]};refreshSaves()}
 function titleBtn(id){
   audioInit();
   if(id==='tnew'){crInit();G.state='create'}
   else if(id==='tcont'){const sv=readSave('auto')||readSave('prev');if(sv)restore(sv)}
   else if(id==='tload')openSaves('title');
   else if(id==='tgoto'){G.state='goto';G.gs=0}
+  else if(id==='tsettings'){G.menuBack=null;G.menu='settings'}
+  else if(id==='texit'){try{window.close()}catch(e){}G.titleNote={t:G.time}} // a page the script did not open cannot always close itself: then the note says so
 }
 function importSaveFile(){
   const inp=document.createElement('input');inp.type='file';inp.accept='.json,application/json';
@@ -4228,9 +4230,10 @@ function drawTitle(){
   txtS('grid-movement, turn-based fantasy rpg',210,142,10,'#d8c9a0','center');
   const any=SAVE_SLOTS.some(([k])=>hasSave(k)),items=[];
   if(hasSave('auto')||hasSave('prev'))items.push(['tcont','Continue']);
-  items.push(['tnew','New game']);if(any)items.push(['tload','Load game']);items.push(['tgoto','Go to area']);
-  items.forEach(([id,label],i)=>btnText(id,label,140,162+i*29,140,26));
-  txt('Version '+VERSION,210,306,11,'#b8a880','center',true);
+  items.push(['tnew','New game']);if(any)items.push(['tload','Load game']);items.push(['tgoto','Go to area']);items.push(['tsettings','Settings'],['texit','Exit to desktop']);
+  items.forEach(([id,label],i)=>btnText(id,label,140,150+i*24,140,21));
+  if(G.titleNote&&G.time-G.titleNote.t<5)txt('Close this window or tab to leave the game.',210,298,9,'#e8c878','center',true);
+  txt('Version '+VERSION,210,310,10,'#b8a880','center',true);
   ctx.restore();
 }
 function drawSaves(){
@@ -4238,24 +4241,31 @@ function drawSaves(){
   veil(.82);bigPanel(34,8,412,304);
   ctx.save();ctx.font=`26px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='#000';
   const title=S.mode==='title'?'Load Game':'Save and Load';ctx.strokeText(title,240,28);ctx.fillStyle='#d8c88e';ctx.fillText(title,240,28);ctx.restore();
+  // the list scrolls: rows are 40 high, the window shows about six of them
+  const VY=34,VH=250,svMax=Math.max(0,S.rows.length*40+2-VH);G.svMax=svMax;G.svs=clamp(G.svs||0,0,svMax);
+  ctx.save();ctx.beginPath();ctx.rect(40,VY,400,VH);ctx.clip();
+  BTNS.push({id:'sv_area',x:40,y:VY,w:400,h:VH,up:true,drag:'saves'});
+  const sb=(id,x,y,w,h)=>{if(y>=VY&&y+h<=VY+VH)BTNS.push({id,x,y,w,h,up:true,drag:'saves'})};
   S.rows.forEach((r,i)=>{
-    const y=36+i*40,h=37;
-    ctx.fillStyle='rgba(30,26,20,.85)';rrect(ctx,44,y,392,h,3);ctx.fill();ctx.lineWidth=1.4;ctx.strokeStyle='#6a5a38';rrect(ctx,44,y,392,h,3);ctx.stroke();
+    const y=36+i*40-G.svs,h=37;if(y+h<VY||y>VY+VH)return;
+    ctx.fillStyle='rgba(30,26,20,.85)';rrect(ctx,44,y,386,h,3);ctx.fill();ctx.lineWidth=1.4;ctx.strokeStyle='#6a5a38';rrect(ctx,44,y,386,h,3);ctx.stroke();
     txt(r.label,52,y+10,10,'#d8c88e','left',true);
     if(r.sv){
       r.sv.party.forEach((p,j)=>{ctx.save();ctx.beginPath();ctx.rect(52+j*30,y+14,27,20);ctx.clip();drawCover(IMG['pt'+p.app],52+j*30,y+14,27,20);ctx.restore();ctx.strokeStyle='#5a4c30';ctx.lineWidth=1;roughStrokeRect(52+j*30,y+14,27,20)});
-      txt((r.sv.area?r.sv.area+':  ':'')+r.sv.party.map(p=>p.name).join(', '),176,y+11,9,'#cdbf94','left',false,undefined,250);
-      txt(`Level ${r.sv.lvl}   Round ${r.sv.rounds}   Gold ${r.sv.gold}   ${r.sv.alive}/4 alive`,176,y+22,8.5,'#a89878','left');
+      txt((r.sv.area?r.sv.area+':  ':'')+r.sv.party.map(p=>p.name).join(', '),176,y+11,9,'#cdbf94','left',false,undefined,148);
+      txt(`Level ${r.sv.lvl}   Round ${r.sv.rounds}   Gold ${r.sv.gold}   ${r.sv.alive}/4 alive`,176,y+22,8.5,'#a89878','left',false,undefined,148);
       let when='';try{when=new Date(r.sv.t).toLocaleString([], {dateStyle:'medium',timeStyle:'short'})}catch(e){when=new Date(r.sv.t).toLocaleString()}
-      txt(when,176,y+32,8,'#7a6a48','left');
+      txt(when,176,y+32,8,'#7a6a48','left',false,undefined,148);
     }else txt('(empty)',176,y+21,10,'#6a5a40','left');
     const can=!!r.sv;
-    panel(332,y+2,48,16,false,false);ctx.globalAlpha=can?1:.4;txt('Load',356,y+10,9,'#cdbf94','center',true);ctx.globalAlpha=1;btn('sv_load_'+r.k,332,y+2,48,16);
-    if(S.mode==='menu'&&r.k!=='auto'&&r.k!=='prev'&&r.k!=='prev2'){panel(384,y+2,48,16,false,false);txt('Save',408,y+10,9,'#cdbf94','center',true);btn('sv_save_'+r.k,384,y+2,48,16)}
-    if(can){panel(332,y+20,100,15,false,false);txt(S.confirm===r.k?'Sure? Tap again':'Erase',382,y+27.5,8.5,S.confirm===r.k?'#e07a5a':'#8a7a58','center',true);btn('sv_del_'+r.k,332,y+20,100,15)}
+    panel(332,y+2,48,16,false,false);ctx.globalAlpha=can?1:.4;txt('Load',356,y+10,9,'#cdbf94','center',true);ctx.globalAlpha=1;sb('sv_load_'+r.k,332,y+2,48,16);
+    if(S.mode==='menu'&&r.k!=='auto'&&r.k!=='prev'&&r.k!=='prev2'){panel(382,y+2,46,16,false,false);txt('Save',405,y+10,9,'#cdbf94','center',true);sb('sv_save_'+r.k,382,y+2,46,16)}
+    if(can){panel(332,y+20,96,15,false,false);txt(S.confirm===r.k?'Sure? Tap again':'Erase',380,y+27.5,8.5,S.confirm===r.k?'#e07a5a':'#8a7a58','center',true);sb('sv_del_'+r.k,332,y+20,96,15)}
   });
-  if(S.note&&G.time-S.noteT<4)txt(S.note,240,282,10,'#d8c88e','center',true);
-  btnText('sv_import','Import file',50,290,110,18);btnText('sv_close','Close',190,290,100,18);
+  ctx.restore();
+  if(svMax>0){const th=Math.max(20,VH*VH/(VH+svMax)),ty=VY+(VH-th)*(G.svs/svMax);ctx.fillStyle='rgba(20,14,8,.7)';ctx.fillRect(434,VY,4,VH);ctx.fillStyle='#a8905a';ctx.fillRect(434,ty,4,th)}
+  if(S.note&&G.time-S.noteT<4)txt(S.note,240,292,9,'#d8c88e','center',true);
+  btnText('sv_import','Import file',50,294,110,16);btnText('sv_close','Close',330,294,100,16);
 }
 
 const ZONE_LABELS=[['Start crypt',1,15,5,19],['Armoury',7,17,10,19],['Rat hall',1,5,8,9],['Closet',11,3,13,5],['Bat hall',15,2,24,9],['Skeleton crypt',13,13,19,19],["Rat King's lair",21,11,26,19]];
@@ -4293,7 +4303,7 @@ const WORLD_LOCS=[
   {k:'openSea',n:'The Open Sea',sub:'sail the Dawn Walker',lv:[330,331,332,333,334,335,336,337,338,339,340,341,342,343],x:808,y:262,ic:'rain'},
   {k:'oldhaven',n:'Oldhaven',sub:"the king's city, across the Narrow Sea",lv:[304,305,306,307,308,309,310],x:1170,y:176,ic:'castle'},
   {k:'oakwood',n:'The Oakwood',sub:'old oaks east of Oldhaven',lv:[311],x:1244,y:190,ic:'trees'},
-  {k:'monastery',n:'Saint Elen’s',sub:'a mountain monastery',lv:[430,431,432,433,434,6900,6901,6902,6903,6904,6905],x:1074,y:44,ic:'abbey'},
+  {k:'monastery',n:'Saint Elen’s',sub:'a mountain monastery',lv:[430,431,432,433,434,6900,6901,6902,6903,6904,6905,6906],x:1200,y:66,ic:'abbey'},
   {k:'landpath',n:'The Land Path',sub:'a pilgrim way, one way only',lv:Array.from({length:24},(_,i)=>400+i),x:1130,y:36,ic:'trees'},
   {k:'below',n:'Below the Abbey',sub:'past the sealed door',lv:[360,361,362,363],x:84,y:268,ic:'cave'},
   {k:'orangecastle',n:'The Orange Spire',sub:'in the Hollow Land',lv:[364,440,441,442,443,444,445,446,447,448,449,450,451,452,453,454,455,456,457,458,459,460],x:24,y:254,ic:'orangecastle'}
@@ -6704,7 +6714,7 @@ function ui(dt){
   // overlays
   if(G.saves)drawSaves();
   else if(G.overview){if(G.world)drawWorldMap();else drawOverview()}
-  else if(G.state==='title')drawTitle();
+  else if(G.state==='title'&&!G.menu)drawTitle();
   else if(G.state==='goto')drawGoto();
   else if(G.state==='create')drawCreate();
   else if(G.loot)drawLoot();
@@ -7056,7 +7066,7 @@ function handleBtn(id){
   if(G.overview){if(id==='ovexit'){G.overview=false;G.world=false;G.teleMode=false;G.qFocus=null}else if(/^wtp_/.test(id))teleFromMap(id.slice(4));else if(id==='worldback')G.world=false;else if(id==='worldmap'){G.world=true;G.wv=wvDefault()}else if(id==='wzin')setWorldZoom((G.wv?G.wv.z:1)*1.4,240,160);else if(id==='wzout')setWorldZoom((G.wv?G.wv.z:1)/1.4,240,160);else if(id==='wreset')G.wv=wvDefault();else if(id==='wmap'){}
     else if(id==='mzin')setMapZoom((G.mz||12)*1.3,DW/2,DH/2);else if(id==='mzout')setMapZoom((G.mz||12)/1.3,DW/2,DH/2);else if(id==='mzfit')setMapZoom(0,DW/2,DH/2);else if(id==='mzme'){const mz=G.mz||12,[rw,rh]=mapRes();G.panX=(DW-rw)/2-((G.C.x+.5)*mz+6);G.panY=(DH-rh)/2-((G.C.y+.5)*mz+30)} /* centre the map on the party, keeping the zoom */return}
   if(G.saves){savesBtn(id);return}
-  if(G.state==='title'){titleBtn(id);return}
+  if(G.state==='title'&&!G.menu){titleBtn(id);return}
   if(G.state==='goto'){gotoBtn(id);return}
   if(G.state==='create'){crBtn(id);return}
   if(G.state==='win'||G.state==='dead'){if(id==='endload')loadRecent();else if(id==='endmenu'){G.state='title'}return}
@@ -7078,7 +7088,7 @@ function handleBtn(id){
   if(G.menu==='aff'){if(id==='afexit')G.menu=false;else if(id==='afprev')afflNav(-1);else if(id==='afnext')afflNav(1);else if(/^af_/.test(id))G.affSel=id.slice(3);return}
   if(G.menu==='settings'||G.menu==='more'||G.menu==='pad'){
     const m=G.menu;
-    if(id==='menuback'||id==='menuclose'||id==='menu'){G.menu=m==='pad'?'settings':true;return}
+    if(id==='menuback'||id==='menuclose'||id==='menu'){G.menu=m==='pad'?'settings':(G.state==='title'?false:true);return}
     if(m==='settings'){if(id==='mute'){G.menuBack='settings';G.menu='snd'}else if(id==='gfx'){G.menuBack='settings';G.menu='gfx'}else if(id==='gameplay'){G.menuBack='settings';G.menu='gameplay'}else if(id==='padpage')G.menu='pad';return}
     if(m==='more'){
       if(id==='ach'){G.menuBack='more';G.menu='ach';G.achPage=0}else if(id==='stats'){G.menuBack='more';G.menu='stats';G.sts=0;G.sts2=0}else if(id==='wander'){G.menuBack='more';G.menu='wander';G.wsel=0}
@@ -7242,6 +7252,7 @@ addEventListener('pointerup',ptrEnd);
 addEventListener('pointerup',e=>{if(G.pts){delete G.pts[e.pointerId];if(Object.keys(G.pts).length<2)G.pinch=0}if(!G.pts||!Object.keys(G.pts).length)G.wdrag=null});
 addEventListener('pointercancel',e=>{G.hold=null;PTR=null;G.drag=null;if(G.pts){delete G.pts[e.pointerId];G.pinch=0}});
 cv.addEventListener('wheel',e=>{
+  if(G.saves){G.svs=clamp((G.svs||0)+e.deltaY*.5,0,G.svMax||0);e.preventDefault();return}
   if(G.state==='goto'){G.gs=clamp((G.gs||0)+e.deltaY*.5,0,gotoMax());e.preventDefault();return}
   if(G.loot){const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*DW,d=x<156?'lbag':'lbox';setScroll(d,getScroll(d)+e.deltaY*.5);e.preventDefault();return}
   if(G.menu==='quests'){G.qs=clamp((G.qs||0)+e.deltaY*.5,0,G.qMax||0);e.preventDefault();return}
@@ -7263,6 +7274,7 @@ addEventListener('keydown',e=>{
   if(G.cut){if(e.key==='Enter'||e.key===' '||e.key==='Escape')cutAdvance();e.preventDefault();return}
   if(G.talk){if(e.key==='Escape')G.talk=null;else if(e.key==='Enter'||e.key===' ')talkBtn('tkskip');else if(e.key>='1'&&e.key<='4')talkBtn('tk'+(+e.key-1));e.preventDefault();return}
   if(G.saves){if(e.key==='Escape')G.saves=null;e.preventDefault();return}
+  if(G.state==='title'&&G.menu){if(e.key==='Escape'){G.menu=false}e.preventDefault();return}
   if(G.state==='title'){titleBtn(hasSave('auto')||hasSave('prev')?'tcont':'tnew');e.preventDefault();return}
   if(G.state==='create'){if(e.key==='Enter'){crBtn(G.cr.choose?'cr_pick_def':G.cr.step==='done'?'cr_start':'cr_ok');e.preventDefault()}return}
   if(G.state==='win'||G.state==='dead'){if(e.key==='Enter'||e.key===' ')loadRecent();return}
@@ -16881,13 +16893,15 @@ const MON_BLD=[
   {rid:MON.ROOM0+2, x0:62,y0:22,x1:74,y1:29,wh:2.7,st:'cream',dx:68,room:'home',scene:'scholar',name:'The Scriptorium',keeper:'mon_scribe',at:{x:4,y:4,f:0}},
   {rid:MON.ROOM0+3, x0:8, y0:40,x1:16,y1:45,wh:2.3,st:'cottage',dx:12,room:'home',scene:'warm',name:'The Kitchen',keeper:'mon_cook',at:{x:4,y:4,f:0}},
   {rid:MON.ROOM0+4, x0:64,y0:38,x1:76,y1:45,wh:2.7,st:'timber',dx:70,room:'inn',name:'The Guest House',keeper:'mon_guest',at:{x:6,y:7,f:0}},
-  {rid:MON.ROOM0+5, x0:24,y0:42,x1:31,y1:47,wh:2.3,st:'cottage',dx:27,room:'home',scene:'healer',name:'The Infirmary',keeper:'mon_infirm',at:{x:4,y:4,f:0}}
+  {rid:MON.ROOM0+5, x0:24,y0:42,x1:31,y1:47,wh:2.3,st:'cottage',dx:27,room:'home',scene:'healer',name:'The Infirmary',keeper:'mon_infirm',at:{x:4,y:4,f:0}},
+  {rid:MON.ROOM0+6, x0:54,y0:6,x1:66,y1:13,wh:4.6,st:'cream',dx:60,room:'prayer',name:'The Chapel of the Lamps',keeper:'mon_sister',at:{x:5,y:13,f:0},chapel:1}
 ];
 MON_BLD.forEach(b=>LEVEL_NAMES[b.rid]=b.name);
 LEVEL_NAMES[MON.ID]='Saint Elen’s Monastery';LEVEL_NAMES[MON.CEM]='The Quiet Cemetery';LEVEL_NAMES[MON.CELLAR]='The Monastery Cellars';LEVEL_NAMES[MON.CRYPT]='The Old Crypts';LEVEL_NAMES[MON.MAUS]='The Mausoleum';
 /* ---- the monks ---- */
 const monLines=(id,n,face,lines,quest)=>khNpc(id,n,face,()=>{const M=MONF();M.met[id]=1;return yrLines(id,lines)},quest?{q:quest}:undefined);
 monLines('mon_chaplain','Brother Cyprian, the chaplain','kh_ohfolk1_4',["The church is open all day. Sit anywhere. The light is best at about four.","We sing at dawn and at dusk. You are welcome to sing, or to listen, or to sleep in the back pew. All three have been done.","Saint Elen walked here with a goat and a lamp and decided it was far enough."]);
+monLines('mon_sister','Sister Agnes, keeper of the lamps','kh_ohfolk2_3',["Every lamp in the chapel is lit by hand, at dusk, by me. It takes an hour. It is the best hour of my day.","The glass was brought from the coast in straw, piece by piece. Not one pane cracked. We say that is the saint's doing.","Sit in any pew. Look up. Most people forget to look up.","The angel at the back was gilded by a pilgrim who wished to pay for a bed and had no coin. We gave her the bed anyway."]);
 monLines('mon_refec','Brother Maurus, the refectorian','kh_ohfolk2_2',["Soup at noon and at dusk. There is always enough. The brothers say I over-cook, but nobody has ever left hungry.","Sit anywhere. Nobody counts the bowls.","We eat in silence, mostly, and then there is a long minute of gratitude at the end, which is my favourite part."]);
 monLines('mon_infirm','Brother Osmund, the infirmarian','kh_ohfolk2_1',["Nobody is ill at the moment. It is a good day for an infirmarian, and a dull one.","The remedy for most things is rest and a clean room. The rest is herbs, which Brother Herbert grows.","If your feet hurt, sit. The pilgrims always have sore feet."]);
 monLines('mon_guest_p1','A pilgrim','kh_ohfolk5_3',["I have been here three nights. I said I would stay one.","They do not ask you to leave. That is the whole of their hospitality, and it is a great deal."]);
@@ -16983,6 +16997,53 @@ function monCrypt(sp){
    SAINT ELEN'S MONASTERY, part three: the grounds, the cemetery, the cellars, the crypts and the mausoleum.
    ========================================================================== */
 MON.CEM_IN=[3,20];
+/* painted ornaments for the fronts of the buildings: stained glass, a rose window, banners, ivy and roses, shuttered windows, a saint in a niche */
+for(const n of ['glass','rose','banner','ivy','shutter','statue','cross','grille'])loadImg('mw_'+n,'assets/mw_'+n+'.png');
+Object.assign(NPC_H,{mw_glass:2.3,mw_rose:1.5,mw_banner:2.1,mw_ivy:2.0,mw_shutter:.95,mw_statue:1.3,mw_cross:1.3,mw_grille:.95});
+for(const n of ['pew','altar','saint','candel','font','lectern','chand','angel'])loadImg('mi_'+n,'assets/mi_'+n+'.png');
+Object.assign(NPC_H,{mi_pew:.55,mi_altar:.95,mi_saint:1.75,mi_candel:1.6,mi_font:.8,mi_lectern:1.0,mi_chand:.95,mi_angel:1.75});
+/* inside the chapel: an aisle of little pews, an altar with saints and angels, coloured windows down both walls, candelabra and chandeliers */
+function monChapelTpl(b){return {w:11,h:15,floor:'kh2',amb:.8,noExtras:true,lights:[[3,2],[7,2],[5,5],[5,9],[2,6],[8,6],[2,10],[8,10],[5,12]],build:({raw,npc,mid})=>{
+  const pic=(n,x,y,wd,bob)=>raw(n,x,y,{pic:1,wd,block:false,walk:true,bob:bob||0});
+  // the north wall: a great rose window over the altar, coloured glass beside it
+  pic('mw_rose',5,1,[0,-1],1.9);pic('mw_glass',3,1,[0,-1],.7);pic('mw_glass',7,1,[0,-1],.7);pic('mw_banner',1,1,[0,-1],.7);pic('mw_banner',9,1,[0,-1],.7);
+  // the long walls: tall stained glass, and banners between
+  for(const y of [3,7,11]){pic('mw_glass',1,y,[-1,0],.6);pic('mw_glass',9,y,[1,0],.6)}
+  for(const y of [5,9]){pic('mw_banner',1,y,[-1,0],.7);pic('mw_banner',9,y,[1,0],.7)}
+  // the worship area: the altar, two angels and two saints, candelabra either side
+  raw('mi_altar',5,2,{block:true});
+  raw('mi_angel',3,2,{block:true});raw('mi_angel',7,2,{block:true});
+  raw('mi_saint',2,3,{block:true});raw('mi_saint',8,3,{block:true});
+  raw('mi_candel',4,2,{block:true});raw('mi_candel',6,2,{block:true});
+  raw('mi_lectern',4,4,{block:true});
+  // little pews down both sides of the aisle
+  for(const y of [6,8,10,12]){raw('mi_pew',2,y,{block:true});raw('mi_pew',3,y,{block:true});raw('mi_pew',7,y,{block:true});raw('mi_pew',8,y,{block:true})}
+  raw('mi_candel',1,6,{block:true});raw('mi_candel',9,6,{block:true});raw('mi_candel',1,10,{block:true});raw('mi_candel',9,10,{block:true});
+  raw('mi_font',9,13,{block:true});raw('mw_cross',1,13,{block:true});
+  // chandeliers hang over the aisle
+  for(const y of [5,9])raw('mi_chand',5,y,{block:false,walk:true,bob:2.15});
+  npc(b.keeper,6,4);
+}}}
+function monFacade(b,k,decor){
+  const y=b.y1+1,P=(n,x,bob)=>decor.push({k:'mw_'+n,x,y,wd:[0,-1],pic:1,block:false,walk:true,deco:true,bob:bob||0});
+  const clear=x=>Math.abs(x-b.dx)>=2;
+  if(b.chapel){ // the chapel: stained glass, banners, a rose window over the door, roses on the corners
+    for(const x of [b.dx-4,b.dx+4])P('glass',x,.7);
+    for(const x of [b.dx-2,b.dx+2])P('banner',x,.7);
+    P('rose',b.dx,3.1);P('ivy',b.x0,0);P('ivy',b.x1,0);P('statue',b.dx-3,.4);P('statue',b.dx+3,.4);
+    return}
+  if(k===0){ // the church: tall stained glass, banners between, a rose window over the door, saints in niches, roses on the corners
+    for(const x of [b.dx-6,b.dx+6])P('glass',x,.5);
+    for(const x of [b.dx-4,b.dx+4])P('banner',x,.6);
+    P('rose',b.dx,2.2);
+    P('statue',b.dx-2,.4);P('statue',b.dx+2,.4);
+    P('ivy',b.x0,0);P('ivy',b.x1,0);
+    return}
+  const step=k===1||k===2?3:2;
+  for(let x=b.x0+1;x<=b.x1-1;x+=step){if(!clear(x))continue;P(k===5&&x===b.x0+1?'statue':k===3&&(x-b.x0)%4===1?'grille':'shutter',x,k===5&&x===b.x0+1?.3:.8)}
+  P('ivy',b.x0,0);if(k!==3)P('ivy',b.x1,0);
+  if(k===4||k===2)P('banner',b.dx+3>b.x1?b.dx-3:b.dx+3,.5);
+}
 for(const [id,n,face,lines] of [
   ['mon_novice1','A novice','kh_ohfolk7_1',["I have been here four months. I thought I would miss talking. I do not.","I sweep the cloister every morning. It does not need it. That is the point.","The bees do not mind me. I think they are the only ones who do not mind anyone."]],
   ['mon_novice2','A novice with a watering can','kh_ohfolk1_5',["The roses here are older than the church. Nobody remembers who planted them.","Watering is the nicest chore. You can see what you did.","Do not step on the lavender. It does not complain, but it remembers."]],
@@ -17024,7 +17085,7 @@ function monBuild(){
     const wp=ch(TM.make('plain','castle2',2.3).gid),wq=ch(TM.make('plain','castle',2.3).gid);
     for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(x<4||x>=W-4||y<4||y>=H-4)solid(x,y,(x+y)%5===0?wq:wp);
     // gravel paths
-    path(41,16,42,67);path(14,34,70,35);path(14,30,15,35);path(68,30,69,35);path(12,46,13,49);path(70,46,71,49);path(12,48,71,49);path(71,34,79,35);path(27,48,28,49);
+    path(41,16,42,67);path(14,34,70,35);path(14,30,15,35);path(68,30,69,35);path(12,46,13,49);path(70,46,71,49);path(12,48,71,49);path(71,34,79,35);path(27,48,28,49);path(42,17,61,17);path(60,14,61,17);
     // the gates: south (to the pass) and east (to the cemetery)
     {const md=lpMonDoor(),dt=TM.make('door','castle',2.6),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;KH_DOOR[dgid]={lvl:LP.BASE+LPM.SEG,at:{x:md.x-1,y:md.y,f:3}};solid(42,H-4,ch(dgid));solid(41,H-4,wq);solid(43,H-4,wq)}
     {const dt=TM.make('door','castle',2.6),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;KH_DOOR[dgid]={lvl:MON.CEM,at:{x:MON.CEM_IN[0],y:MON.CEM_IN[1],f:1}};solid(W-4,34,ch(dgid))}
@@ -17032,11 +17093,14 @@ function monBuild(){
     MON_BLD.forEach((b,k)=>{
       const plain=ch(TM.make('plain',b.st,b.wh).gid),win=ch(TM.make('window',b.st,b.wh).gid),dt=TM.make('door',b.st,b.wh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;KH_DOOR[dgid]={lvl:b.rid,at:b.at};
       for(let y=b.y0;y<=b.y1;y++)for(let x=b.x0;x<=b.x1;x++){const door=x===b.dx&&y===b.y1;solid(x,y,door?ch(dgid):((x+y)%3===0&&y>b.y0&&y<b.y1)?win:plain);used.add(x+','+y)}
-      sky.push({x:(b.x0+b.x1+1)/2,y:(b.y0+b.y1+1)/2,k:'kh_ohroof1_'+[0,0,0,2,2,2][k],w:(b.y1-b.y0+1)+.9,z:b.wh-.03}); // grey slate on the stone buildings, red clay tile on the cottages
+      sky.push({x:(b.x0+b.x1+1)/2,y:(b.y0+b.y1+1)/2,k:'kh_ohroof1_'+[0,0,0,2,2,2,0][k],w:(b.y1-b.y0+1)+.9,z:b.wh-.03}); // grey slate on the stone buildings, red clay tile on the cottages
+      monFacade(b,k,decor);
+      for(const dx of [-1,1])decor.push({k:'flowerpot',x:b.dx+dx,y:b.y1+1,block:false,walk:true,deco:true,sc:.8});
+      if(b.chapel)sky.push({x:(b.x0+b.x1+1)/2,y:(b.y0+b.y1+1)/2,k:'kh_ohtower1_4',w:3.6,z:b.wh-.03},{x:b.x0-.3,y:b.y0+1.2,k:'kh_ohtower1_0',w:1.9,z:b.wh-.03},{x:b.x1+1.3,y:b.y0+1.2,k:'kh_ohtower1_0',w:1.9,z:b.wh-.03},{x:b.x0-.3,y:b.y1-.2,k:'kh_ohtower1_4',w:1.4,z:b.wh-.03},{x:b.x1+1.3,y:b.y1-.2,k:'kh_ohtower1_4',w:1.4,z:b.wh-.03});
       if(b.tower)sky.push({x:b.x1+1.4,y:b.y0+1.5,k:'kh_ohtower1_4',w:2.1,z:b.wh-.03},{x:b.x0-.4,y:b.y0+1.5,k:'kh_ohtower1_0',w:1.9,z:b.wh-.03}); // the church: a spired bell tower and a slate cone turret
       LEVEL_NAMES[b.rid]=b.name;const rid=b.rid,front=[b.dx,b.y1+1];
-      const mk=()=>{if(LEVELS[rid])return;const bb={id:b.room==='inn'?'mon_guest':'mon'+k,name:b.name,room:b.room,keeper:b.keeper,scene:b.scene,wallImg:'kh_ohwall1_'+(k%3),floor:b.room==='hall'?'cobble':'wood'};
-        const R=khRoom(bb,rid,{to:MON.ID,x:front[0],y:front[1],f:2});LEVELS[rid]=R.level};
+      const mk=()=>{if(LEVELS[rid])return;const bb={id:b.room==='inn'?'mon_guest':'mon'+k,name:b.name,room:b.room,keeper:b.keeper,scene:b.scene,wallImg:'kh_ohwall1_'+(k%3),floor:b.room==='hall'?'cobble':'wood',tpl:b.chapel?monChapelTpl:undefined};
+        const R=khRoom(bb,rid,{to:MON.ID,x:front[0],y:front[1],f:2});if(b.chapel)R.level.ceilH=3.4;LEVELS[rid]=R.level};
       KH_LAZY[rid]=mk;
       for(let x=b.x0-1;x<=b.x1+1;x++)used.add(x+','+(b.y1+1));
     });
@@ -17073,7 +17137,7 @@ function monBuild(){
     [['mon_abbot',45,18],['mon_bellman',36,18],['mon_herb',16,56],['mon_bees',45,61],['mon_cellar',32,55],['mon_novice1',40,38],['mon_novice2',22,36],['mon_monk3',47,32],['mon_novice1',55,40]].forEach(([id,x,y])=>person(id,x,y));
     const lv={rows:rows.map(r=>r.join('')),start:{x:MON.GATE_IN[0],y:MON.GATE_IN[1],f:0},enemies:[],items,decor,scenery,sky,fmap:null,floorSet:['ohMeadow','ohGravel','ohLawn','ohPale','ohMoss'],floor:'ohLawn',ceil:'cloud',day:.98,outdoor:true,amb:.9,
       name:LEVEL_NAMES[MON.ID],label:'Saint Elen’s',noExtras:false,diff:25,ceilH:5.2,chars,lights,portals:[],
-      mapNames:[{t:'The Church of Saint Elen',x:41,y:7,k:'place'},{t:'The Cloister Garden',x:41,y:27,k:'place'},{t:'The Refectory',x:14,y:21,k:'place'},{t:'The Scriptorium',x:68,y:21,k:'place'},{t:'The Kitchen',x:12,y:39,k:'place'},{t:'The Guest House',x:70,y:37,k:'place'},{t:'The Infirmary',x:27,y:41,k:'place'},{t:'The Herb Garden',x:17,y:51,k:'place'},{t:'The Orchard',x:62,y:51,k:'place'},{t:'The Apiary',x:45,y:54,k:'place'},{t:'To the Cemetery',x:74,y:33,k:'lane'},{t:'The Hatch to the Cellars',x:30,y:55,k:'lane'},{t:'The Gate to the Pass',x:41,y:64,k:'lane'}]};
+      mapNames:[{t:'The Church of Saint Elen',x:41,y:7,k:'place'},{t:'The Chapel of the Lamps',x:60,y:5,k:'place'},{t:'The Cloister Garden',x:41,y:27,k:'place'},{t:'The Refectory',x:14,y:21,k:'place'},{t:'The Scriptorium',x:68,y:21,k:'place'},{t:'The Kitchen',x:12,y:39,k:'place'},{t:'The Guest House',x:70,y:37,k:'place'},{t:'The Infirmary',x:27,y:41,k:'place'},{t:'The Herb Garden',x:17,y:51,k:'place'},{t:'The Orchard',x:62,y:51,k:'place'},{t:'The Apiary',x:45,y:54,k:'place'},{t:'To the Cemetery',x:74,y:33,k:'lane'},{t:'The Hatch to the Cellars',x:30,y:55,k:'lane'},{t:'The Gate to the Pass',x:41,y:64,k:'lane'}]};
     const fmp=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=fm[y*W+x];fmp.push(r)}lv.fmap=fmp;
     LEVELS[MON.ID]=lv;
     for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=chars[rows[y][x]];if(c>=30&&c<100)block[y*W+x]=0}
@@ -20383,42 +20447,52 @@ function drawMoreMenu(){
 function drawPadPage(){
   BTNS=[];veil(.86);bigPanel(8,6,464,308);
   txt('CONTROLLER',240,22,14,'#d8c88e','center',true);
-  const cx=240,cy=150;
-  // the pad itself, straight on
-  ctx.save();
-  const body=()=>{ctx.beginPath();ctx.moveTo(cx-70,cy-34);ctx.quadraticCurveTo(cx,cy-52,cx+70,cy-34);ctx.quadraticCurveTo(cx+104,cy-26,cx+110,cy+30);ctx.quadraticCurveTo(cx+114,cy+72,cx+92,cy+72);ctx.quadraticCurveTo(cx+76,cy+70,cx+62,cy+36);ctx.quadraticCurveTo(cx,cy+30,cx-62,cy+36);ctx.quadraticCurveTo(cx-76,cy+70,cx-92,cy+72);ctx.quadraticCurveTo(cx-114,cy+72,cx-110,cy+30);ctx.quadraticCurveTo(cx-104,cy-26,cx-70,cy-34);ctx.closePath()};
-  const g=ctx.createLinearGradient(0,cy-50,0,cy+74);g.addColorStop(0,'#58534c');g.addColorStop(1,'#2e2b27');body();ctx.fillStyle=g;ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#120c08';ctx.stroke();
-  // shoulder buttons and triggers
-  for(const s of [-1,1]){ctx.fillStyle='#46423c';ctx.strokeStyle='#120c08';ctx.lineWidth=1.4;ctx.beginPath();ctx.roundRect(cx+s*72-22,cy-48,44,10,4);ctx.fill();ctx.stroke();ctx.fillStyle='#3a3732';ctx.beginPath();ctx.roundRect(cx+s*72-17,cy-60,34,12,5);ctx.fill();ctx.stroke()}
-  const stick=(x,y,c)=>{ctx.fillStyle='#1a1816';ctx.beginPath();ctx.arc(x,y,15,0,TAU);ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=1.6;ctx.stroke();ctx.fillStyle='#34312c';ctx.beginPath();ctx.arc(x,y,10,0,TAU);ctx.fill();ctx.strokeStyle='#120c08';ctx.lineWidth=1;ctx.stroke()};
-  stick(cx-62,cy-10,'#e8c870');stick(cx+30,cy+24,'#c8c0a8');
-  // D-pad
-  ctx.fillStyle='#1a1816';ctx.fillRect(cx-36,cy+17,9,27);ctx.fillRect(cx-45,cy+26,27,9);ctx.strokeStyle='#8a8070';ctx.lineWidth=1.2;ctx.strokeRect(cx-36,cy+17,9,27);ctx.strokeRect(cx-45,cy+26,27,9);
-  // face buttons: A below, B right, X left, Y above
-  const fb=(x,y,c,l)=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,8,0,TAU);ctx.fill();ctx.strokeStyle='#120c08';ctx.lineWidth=1.2;ctx.stroke();txt(l,x,y+.5,8,'#120c08','center',true)};
-  fb(cx+62,cy-18,'#e0c030','Y');fb(cx+46,cy-8,'#4a7ad0','X');fb(cx+78,cy-8,'#d04a38','B');fb(cx+62,cy+2,'#4aa05a','A');
-  // back, start
-  ctx.fillStyle='#8a8070';ctx.beginPath();ctx.roundRect(cx-16,cy-12,10,5,2);ctx.fill();ctx.beginPath();ctx.roundRect(cx+6,cy-12,10,5,2);ctx.fill();
+  const cx=240,cy=132,S=1.2,P=(x,y)=>[cx+x*S,cy+y*S]; // the pad is drawn in its own small space (0,0 is its middle) and scaled up, so every button sits on the body
+  ctx.save();ctx.translate(cx,cy);ctx.scale(S,S);
+  const dark='#120c08',ol=1.4/S*1.2;
+  // the triggers and bumpers, behind the body
+  for(const sg of [-1,1]){
+    ctx.fillStyle='#34312c';ctx.strokeStyle=dark;ctx.lineWidth=ol;ctx.beginPath();ctx.roundRect(sg*70-20,-62,40,16,6);ctx.fill();ctx.stroke();
+    ctx.fillStyle='#4a463f';ctx.beginPath();ctx.roundRect(sg*70-26,-52,52,12,5);ctx.fill();ctx.stroke()}
+  // the body: broad middle, two rounded grips
+  const body=()=>{ctx.beginPath();ctx.moveTo(-78,-38);ctx.quadraticCurveTo(0,-54,78,-38);ctx.quadraticCurveTo(100,-30,106,10);ctx.quadraticCurveTo(114,60,92,76);ctx.quadraticCurveTo(70,82,58,46);ctx.quadraticCurveTo(0,38,-58,46);ctx.quadraticCurveTo(-70,82,-92,76);ctx.quadraticCurveTo(-114,60,-106,10);ctx.quadraticCurveTo(-100,-30,-78,-38);ctx.closePath()};
+  {const g=ctx.createLinearGradient(0,-54,0,80);g.addColorStop(0,'#6a655c');g.addColorStop(.5,'#4a463f');g.addColorStop(1,'#2a2723');body();ctx.fillStyle=g;ctx.fill();ctx.lineWidth=ol*1.4;ctx.strokeStyle=dark;ctx.stroke();
+   ctx.save();body();ctx.clip();ctx.fillStyle='rgba(255,255,255,.1)';ctx.beginPath();ctx.ellipse(0,-34,84,14,0,0,TAU);ctx.fill();ctx.restore()}
+  // the guide button
+  ctx.fillStyle='#1a1816';ctx.beginPath();ctx.arc(0,-24,8,0,TAU);ctx.fill();ctx.strokeStyle='#8a8070';ctx.lineWidth=ol;ctx.stroke();ctx.fillStyle='#8ac078';ctx.beginPath();ctx.arc(0,-24,3.4,0,TAU);ctx.fill();
+  // the two sticks
+  const stick=(x,y,c)=>{ctx.fillStyle='#16140f';ctx.beginPath();ctx.arc(x,y,16,0,TAU);ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=ol*1.2;ctx.stroke();ctx.fillStyle='#3a3732';ctx.beginPath();ctx.arc(x,y,11,0,TAU);ctx.fill();ctx.strokeStyle=dark;ctx.lineWidth=ol;ctx.stroke();ctx.fillStyle='rgba(255,255,255,.12)';ctx.beginPath();ctx.arc(x-2,y-2,6,0,TAU);ctx.fill()};
+  stick(-58,-12,'#e8c870');stick(28,22,'#c8c0a8');
+  // the D-pad: a cross in a round dish
+  ctx.fillStyle='#16140f';ctx.beginPath();ctx.arc(-30,22,17,0,TAU);ctx.fill();ctx.strokeStyle=dark;ctx.lineWidth=ol;ctx.stroke();
+  ctx.fillStyle='#2e2b27';ctx.strokeStyle='#8a8070';ctx.lineWidth=ol;ctx.fillRect(-34,8,8,28);ctx.fillRect(-44,18,28,8);ctx.strokeRect(-34,8,8,28);ctx.strokeRect(-44,18,28,8);
+  // the face buttons: Y above, X left, B right, A below
+  const fb=(x,y,c,l)=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,8.5,0,TAU);ctx.fill();ctx.strokeStyle=dark;ctx.lineWidth=ol;ctx.stroke();ctx.fillStyle='rgba(255,255,255,.22)';ctx.beginPath();ctx.arc(x-2,y-2.5,3.5,0,TAU);ctx.fill()};
+  fb(60,-30,'#e0c030');fb(45,-14,'#4a7ad0');fb(75,-14,'#d04a38');fb(60,2,'#4aa05a');
+  // back and start, small and either side of the guide button
+  ctx.fillStyle='#9a9080';ctx.strokeStyle=dark;ctx.lineWidth=ol;ctx.beginPath();ctx.roundRect(-22,-10,11,6,3);ctx.fill();ctx.stroke();ctx.beginPath();ctx.roundRect(11,-10,11,6,3);ctx.fill();ctx.stroke();
   ctx.restore();
+  // the letters on the face buttons, drawn upright and unscaled
+  for(const [x,y,l] of [[60,-30,'Y'],[45,-14,'X'],[75,-14,'B'],[60,2,'A']]){const q=P(x,y);txt(l,q[0],q[1]+.5,9,'#120c08','center',true)}
   // the notes: two columns, each with a thin line to its part of the pad
-  const note=(label,what,side,y,px,py)=>{
-    const lx=side==='L'?112:368,al=side==='L'?'right':'left';
+  const note=(label,what,side,y,pt)=>{
+    const lx=side==='L'?112:368,al=side==='L'?'right':'left',[px,py]=P(pt[0],pt[1]);
     txt(label,lx,y,9.5,'#e8c870',al,true);txt(what,lx,y+11,8,'#cdbf94',al);
     ctx.strokeStyle='rgba(216,200,142,.55)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(side==='L'?118:362,y+4);ctx.lineTo(px,py);ctx.stroke();
     ctx.fillStyle='#e8c870';ctx.beginPath();ctx.arc(px,py,2,0,TAU);ctx.fill()};
-  note('Left bumper','Turn left','L',56,cx-72,cy-43);
-  note('Left trigger','Previous hero','L',84,cx-72,cy-54);
-  note('Left stick','Walk, step sideways','L',122,cx-62,cy-10);
-  note('D-pad','Forward, back, turn','L',164,cx-41,cy+30);
-  note('Back','Map','L',204,cx-11,cy-9);
-  note('Right bumper','Turn right','R',56,cx+72,cy-43);
-  note('Right trigger','Next hero','R',84,cx+72,cy-54);
-  note('Y','Inventory','R',112,cx+62,cy-18);
-  note('X','Special attack','R',138,cx+46,cy-8);
-  note('B','Wait a round','R',164,cx+78,cy-8);
-  note('A','Attack, talk, use','R',190,cx+62,cy+2);
-  note('Start','Menu','R',216,cx+11,cy-9);
-  note('Right stick','Turn','R',240,cx+30,cy+24);
+  note('Left bumper','Turn left','L',56,[-80,-46]);
+  note('Left trigger','Previous hero','L',84,[-80,-58]);
+  note('Left stick','Walk, step sideways','L',122,[-58,-12]);
+  note('D-pad','Forward, back, turn','L',164,[-30,22]);
+  note('Back','Map','L',204,[-16,-7]);
+  note('Right bumper','Turn right','R',56,[80,-46]);
+  note('Right trigger','Next hero','R',84,[80,-58]);
+  note('Y','Inventory','R',112,[60,-30]);
+  note('X','Special attack','R',138,[45,-14]);
+  note('B','Wait a round','R',164,[75,-14]);
+  note('A','Attack, talk, use','R',190,[60,2]);
+  note('Start','Menu','R',216,[16,-7]);
+  note('Right stick','Turn','R',240,[28,22]);
   txt('Stick presses: left stick potion, right stick rest',240,226,8,'#a89878','center');
   txt('In menus, dialogue and shops: D-pad jumps between buttons, the left stick moves a pointer, A presses, B goes back.',240,262,8,'#cdbf94','center');
   txt('Any standard pad works. Press a button once to wake it.',240,273,8,'#a89878','center');

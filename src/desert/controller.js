@@ -112,42 +112,52 @@ function drawMoreMenu(){
 function drawPadPage(){
   BTNS=[];veil(.86);bigPanel(8,6,464,308);
   txt('CONTROLLER',240,22,14,'#d8c88e','center',true);
-  const cx=240,cy=150;
-  // the pad itself, straight on
-  ctx.save();
-  const body=()=>{ctx.beginPath();ctx.moveTo(cx-70,cy-34);ctx.quadraticCurveTo(cx,cy-52,cx+70,cy-34);ctx.quadraticCurveTo(cx+104,cy-26,cx+110,cy+30);ctx.quadraticCurveTo(cx+114,cy+72,cx+92,cy+72);ctx.quadraticCurveTo(cx+76,cy+70,cx+62,cy+36);ctx.quadraticCurveTo(cx,cy+30,cx-62,cy+36);ctx.quadraticCurveTo(cx-76,cy+70,cx-92,cy+72);ctx.quadraticCurveTo(cx-114,cy+72,cx-110,cy+30);ctx.quadraticCurveTo(cx-104,cy-26,cx-70,cy-34);ctx.closePath()};
-  const g=ctx.createLinearGradient(0,cy-50,0,cy+74);g.addColorStop(0,'#58534c');g.addColorStop(1,'#2e2b27');body();ctx.fillStyle=g;ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#120c08';ctx.stroke();
-  // shoulder buttons and triggers
-  for(const s of [-1,1]){ctx.fillStyle='#46423c';ctx.strokeStyle='#120c08';ctx.lineWidth=1.4;ctx.beginPath();ctx.roundRect(cx+s*72-22,cy-48,44,10,4);ctx.fill();ctx.stroke();ctx.fillStyle='#3a3732';ctx.beginPath();ctx.roundRect(cx+s*72-17,cy-60,34,12,5);ctx.fill();ctx.stroke()}
-  const stick=(x,y,c)=>{ctx.fillStyle='#1a1816';ctx.beginPath();ctx.arc(x,y,15,0,TAU);ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=1.6;ctx.stroke();ctx.fillStyle='#34312c';ctx.beginPath();ctx.arc(x,y,10,0,TAU);ctx.fill();ctx.strokeStyle='#120c08';ctx.lineWidth=1;ctx.stroke()};
-  stick(cx-62,cy-10,'#e8c870');stick(cx+30,cy+24,'#c8c0a8');
-  // D-pad
-  ctx.fillStyle='#1a1816';ctx.fillRect(cx-36,cy+17,9,27);ctx.fillRect(cx-45,cy+26,27,9);ctx.strokeStyle='#8a8070';ctx.lineWidth=1.2;ctx.strokeRect(cx-36,cy+17,9,27);ctx.strokeRect(cx-45,cy+26,27,9);
-  // face buttons: A below, B right, X left, Y above
-  const fb=(x,y,c,l)=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,8,0,TAU);ctx.fill();ctx.strokeStyle='#120c08';ctx.lineWidth=1.2;ctx.stroke();txt(l,x,y+.5,8,'#120c08','center',true)};
-  fb(cx+62,cy-18,'#e0c030','Y');fb(cx+46,cy-8,'#4a7ad0','X');fb(cx+78,cy-8,'#d04a38','B');fb(cx+62,cy+2,'#4aa05a','A');
-  // back, start
-  ctx.fillStyle='#8a8070';ctx.beginPath();ctx.roundRect(cx-16,cy-12,10,5,2);ctx.fill();ctx.beginPath();ctx.roundRect(cx+6,cy-12,10,5,2);ctx.fill();
+  const cx=240,cy=132,S=1.2,P=(x,y)=>[cx+x*S,cy+y*S]; // the pad is drawn in its own small space (0,0 is its middle) and scaled up, so every button sits on the body
+  ctx.save();ctx.translate(cx,cy);ctx.scale(S,S);
+  const dark='#120c08',ol=1.4/S*1.2;
+  // the triggers and bumpers, behind the body
+  for(const sg of [-1,1]){
+    ctx.fillStyle='#34312c';ctx.strokeStyle=dark;ctx.lineWidth=ol;ctx.beginPath();ctx.roundRect(sg*70-20,-62,40,16,6);ctx.fill();ctx.stroke();
+    ctx.fillStyle='#4a463f';ctx.beginPath();ctx.roundRect(sg*70-26,-52,52,12,5);ctx.fill();ctx.stroke()}
+  // the body: broad middle, two rounded grips
+  const body=()=>{ctx.beginPath();ctx.moveTo(-78,-38);ctx.quadraticCurveTo(0,-54,78,-38);ctx.quadraticCurveTo(100,-30,106,10);ctx.quadraticCurveTo(114,60,92,76);ctx.quadraticCurveTo(70,82,58,46);ctx.quadraticCurveTo(0,38,-58,46);ctx.quadraticCurveTo(-70,82,-92,76);ctx.quadraticCurveTo(-114,60,-106,10);ctx.quadraticCurveTo(-100,-30,-78,-38);ctx.closePath()};
+  {const g=ctx.createLinearGradient(0,-54,0,80);g.addColorStop(0,'#6a655c');g.addColorStop(.5,'#4a463f');g.addColorStop(1,'#2a2723');body();ctx.fillStyle=g;ctx.fill();ctx.lineWidth=ol*1.4;ctx.strokeStyle=dark;ctx.stroke();
+   ctx.save();body();ctx.clip();ctx.fillStyle='rgba(255,255,255,.1)';ctx.beginPath();ctx.ellipse(0,-34,84,14,0,0,TAU);ctx.fill();ctx.restore()}
+  // the guide button
+  ctx.fillStyle='#1a1816';ctx.beginPath();ctx.arc(0,-24,8,0,TAU);ctx.fill();ctx.strokeStyle='#8a8070';ctx.lineWidth=ol;ctx.stroke();ctx.fillStyle='#8ac078';ctx.beginPath();ctx.arc(0,-24,3.4,0,TAU);ctx.fill();
+  // the two sticks
+  const stick=(x,y,c)=>{ctx.fillStyle='#16140f';ctx.beginPath();ctx.arc(x,y,16,0,TAU);ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=ol*1.2;ctx.stroke();ctx.fillStyle='#3a3732';ctx.beginPath();ctx.arc(x,y,11,0,TAU);ctx.fill();ctx.strokeStyle=dark;ctx.lineWidth=ol;ctx.stroke();ctx.fillStyle='rgba(255,255,255,.12)';ctx.beginPath();ctx.arc(x-2,y-2,6,0,TAU);ctx.fill()};
+  stick(-58,-12,'#e8c870');stick(28,22,'#c8c0a8');
+  // the D-pad: a cross in a round dish
+  ctx.fillStyle='#16140f';ctx.beginPath();ctx.arc(-30,22,17,0,TAU);ctx.fill();ctx.strokeStyle=dark;ctx.lineWidth=ol;ctx.stroke();
+  ctx.fillStyle='#2e2b27';ctx.strokeStyle='#8a8070';ctx.lineWidth=ol;ctx.fillRect(-34,8,8,28);ctx.fillRect(-44,18,28,8);ctx.strokeRect(-34,8,8,28);ctx.strokeRect(-44,18,28,8);
+  // the face buttons: Y above, X left, B right, A below
+  const fb=(x,y,c,l)=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,8.5,0,TAU);ctx.fill();ctx.strokeStyle=dark;ctx.lineWidth=ol;ctx.stroke();ctx.fillStyle='rgba(255,255,255,.22)';ctx.beginPath();ctx.arc(x-2,y-2.5,3.5,0,TAU);ctx.fill()};
+  fb(60,-30,'#e0c030');fb(45,-14,'#4a7ad0');fb(75,-14,'#d04a38');fb(60,2,'#4aa05a');
+  // back and start, small and either side of the guide button
+  ctx.fillStyle='#9a9080';ctx.strokeStyle=dark;ctx.lineWidth=ol;ctx.beginPath();ctx.roundRect(-22,-10,11,6,3);ctx.fill();ctx.stroke();ctx.beginPath();ctx.roundRect(11,-10,11,6,3);ctx.fill();ctx.stroke();
   ctx.restore();
+  // the letters on the face buttons, drawn upright and unscaled
+  for(const [x,y,l] of [[60,-30,'Y'],[45,-14,'X'],[75,-14,'B'],[60,2,'A']]){const q=P(x,y);txt(l,q[0],q[1]+.5,9,'#120c08','center',true)}
   // the notes: two columns, each with a thin line to its part of the pad
-  const note=(label,what,side,y,px,py)=>{
-    const lx=side==='L'?112:368,al=side==='L'?'right':'left';
+  const note=(label,what,side,y,pt)=>{
+    const lx=side==='L'?112:368,al=side==='L'?'right':'left',[px,py]=P(pt[0],pt[1]);
     txt(label,lx,y,9.5,'#e8c870',al,true);txt(what,lx,y+11,8,'#cdbf94',al);
     ctx.strokeStyle='rgba(216,200,142,.55)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(side==='L'?118:362,y+4);ctx.lineTo(px,py);ctx.stroke();
     ctx.fillStyle='#e8c870';ctx.beginPath();ctx.arc(px,py,2,0,TAU);ctx.fill()};
-  note('Left bumper','Turn left','L',56,cx-72,cy-43);
-  note('Left trigger','Previous hero','L',84,cx-72,cy-54);
-  note('Left stick','Walk, step sideways','L',122,cx-62,cy-10);
-  note('D-pad','Forward, back, turn','L',164,cx-41,cy+30);
-  note('Back','Map','L',204,cx-11,cy-9);
-  note('Right bumper','Turn right','R',56,cx+72,cy-43);
-  note('Right trigger','Next hero','R',84,cx+72,cy-54);
-  note('Y','Inventory','R',112,cx+62,cy-18);
-  note('X','Special attack','R',138,cx+46,cy-8);
-  note('B','Wait a round','R',164,cx+78,cy-8);
-  note('A','Attack, talk, use','R',190,cx+62,cy+2);
-  note('Start','Menu','R',216,cx+11,cy-9);
-  note('Right stick','Turn','R',240,cx+30,cy+24);
+  note('Left bumper','Turn left','L',56,[-80,-46]);
+  note('Left trigger','Previous hero','L',84,[-80,-58]);
+  note('Left stick','Walk, step sideways','L',122,[-58,-12]);
+  note('D-pad','Forward, back, turn','L',164,[-30,22]);
+  note('Back','Map','L',204,[-16,-7]);
+  note('Right bumper','Turn right','R',56,[80,-46]);
+  note('Right trigger','Next hero','R',84,[80,-58]);
+  note('Y','Inventory','R',112,[60,-30]);
+  note('X','Special attack','R',138,[45,-14]);
+  note('B','Wait a round','R',164,[75,-14]);
+  note('A','Attack, talk, use','R',190,[60,2]);
+  note('Start','Menu','R',216,[16,-7]);
+  note('Right stick','Turn','R',240,[28,22]);
   txt('Stick presses: left stick potion, right stick rest',240,226,8,'#a89878','center');
   txt('In menus, dialogue and shops: D-pad jumps between buttons, the left stick moves a pointer, A presses, B goes back.',240,262,8,'#cdbf94','center');
   txt('Any standard pad works. Press a button once to wake it.',240,273,8,'#a89878','center');

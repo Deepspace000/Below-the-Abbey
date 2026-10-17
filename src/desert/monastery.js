@@ -18,13 +18,15 @@ const MON_BLD=[
   {rid:MON.ROOM0+2, x0:62,y0:22,x1:74,y1:29,wh:2.7,st:'cream',dx:68,room:'home',scene:'scholar',name:'The Scriptorium',keeper:'mon_scribe',at:{x:4,y:4,f:0}},
   {rid:MON.ROOM0+3, x0:8, y0:40,x1:16,y1:45,wh:2.3,st:'cottage',dx:12,room:'home',scene:'warm',name:'The Kitchen',keeper:'mon_cook',at:{x:4,y:4,f:0}},
   {rid:MON.ROOM0+4, x0:64,y0:38,x1:76,y1:45,wh:2.7,st:'timber',dx:70,room:'inn',name:'The Guest House',keeper:'mon_guest',at:{x:6,y:7,f:0}},
-  {rid:MON.ROOM0+5, x0:24,y0:42,x1:31,y1:47,wh:2.3,st:'cottage',dx:27,room:'home',scene:'healer',name:'The Infirmary',keeper:'mon_infirm',at:{x:4,y:4,f:0}}
+  {rid:MON.ROOM0+5, x0:24,y0:42,x1:31,y1:47,wh:2.3,st:'cottage',dx:27,room:'home',scene:'healer',name:'The Infirmary',keeper:'mon_infirm',at:{x:4,y:4,f:0}},
+  {rid:MON.ROOM0+6, x0:54,y0:6,x1:66,y1:13,wh:4.6,st:'cream',dx:60,room:'prayer',name:'The Chapel of the Lamps',keeper:'mon_sister',at:{x:5,y:13,f:0},chapel:1}
 ];
 MON_BLD.forEach(b=>LEVEL_NAMES[b.rid]=b.name);
 LEVEL_NAMES[MON.ID]='Saint Elen’s Monastery';LEVEL_NAMES[MON.CEM]='The Quiet Cemetery';LEVEL_NAMES[MON.CELLAR]='The Monastery Cellars';LEVEL_NAMES[MON.CRYPT]='The Old Crypts';LEVEL_NAMES[MON.MAUS]='The Mausoleum';
 /* ---- the monks ---- */
 const monLines=(id,n,face,lines,quest)=>khNpc(id,n,face,()=>{const M=MONF();M.met[id]=1;return yrLines(id,lines)},quest?{q:quest}:undefined);
 monLines('mon_chaplain','Brother Cyprian, the chaplain','kh_ohfolk1_4',["The church is open all day. Sit anywhere. The light is best at about four.","We sing at dawn and at dusk. You are welcome to sing, or to listen, or to sleep in the back pew. All three have been done.","Saint Elen walked here with a goat and a lamp and decided it was far enough."]);
+monLines('mon_sister','Sister Agnes, keeper of the lamps','kh_ohfolk2_3',["Every lamp in the chapel is lit by hand, at dusk, by me. It takes an hour. It is the best hour of my day.","The glass was brought from the coast in straw, piece by piece. Not one pane cracked. We say that is the saint's doing.","Sit in any pew. Look up. Most people forget to look up.","The angel at the back was gilded by a pilgrim who wished to pay for a bed and had no coin. We gave her the bed anyway."]);
 monLines('mon_refec','Brother Maurus, the refectorian','kh_ohfolk2_2',["Soup at noon and at dusk. There is always enough. The brothers say I over-cook, but nobody has ever left hungry.","Sit anywhere. Nobody counts the bowls.","We eat in silence, mostly, and then there is a long minute of gratitude at the end, which is my favourite part."]);
 monLines('mon_infirm','Brother Osmund, the infirmarian','kh_ohfolk2_1',["Nobody is ill at the moment. It is a good day for an infirmarian, and a dull one.","The remedy for most things is rest and a clean room. The rest is herbs, which Brother Herbert grows.","If your feet hurt, sit. The pilgrims always have sore feet."]);
 monLines('mon_guest_p1','A pilgrim','kh_ohfolk5_3',["I have been here three nights. I said I would stay one.","They do not ask you to leave. That is the whole of their hospitality, and it is a great deal."]);

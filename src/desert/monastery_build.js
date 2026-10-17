@@ -2,6 +2,53 @@
    SAINT ELEN'S MONASTERY, part three: the grounds, the cemetery, the cellars, the crypts and the mausoleum.
    ========================================================================== */
 MON.CEM_IN=[3,20];
+/* painted ornaments for the fronts of the buildings: stained glass, a rose window, banners, ivy and roses, shuttered windows, a saint in a niche */
+for(const n of ['glass','rose','banner','ivy','shutter','statue','cross','grille'])loadImg('mw_'+n,'assets/mw_'+n+'.png');
+Object.assign(NPC_H,{mw_glass:2.3,mw_rose:1.5,mw_banner:2.1,mw_ivy:2.0,mw_shutter:.95,mw_statue:1.3,mw_cross:1.3,mw_grille:.95});
+for(const n of ['pew','altar','saint','candel','font','lectern','chand','angel'])loadImg('mi_'+n,'assets/mi_'+n+'.png');
+Object.assign(NPC_H,{mi_pew:.55,mi_altar:.95,mi_saint:1.75,mi_candel:1.6,mi_font:.8,mi_lectern:1.0,mi_chand:.95,mi_angel:1.75});
+/* inside the chapel: an aisle of little pews, an altar with saints and angels, coloured windows down both walls, candelabra and chandeliers */
+function monChapelTpl(b){return {w:11,h:15,floor:'kh2',amb:.8,noExtras:true,lights:[[3,2],[7,2],[5,5],[5,9],[2,6],[8,6],[2,10],[8,10],[5,12]],build:({raw,npc,mid})=>{
+  const pic=(n,x,y,wd,bob)=>raw(n,x,y,{pic:1,wd,block:false,walk:true,bob:bob||0});
+  // the north wall: a great rose window over the altar, coloured glass beside it
+  pic('mw_rose',5,1,[0,-1],1.9);pic('mw_glass',3,1,[0,-1],.7);pic('mw_glass',7,1,[0,-1],.7);pic('mw_banner',1,1,[0,-1],.7);pic('mw_banner',9,1,[0,-1],.7);
+  // the long walls: tall stained glass, and banners between
+  for(const y of [3,7,11]){pic('mw_glass',1,y,[-1,0],.6);pic('mw_glass',9,y,[1,0],.6)}
+  for(const y of [5,9]){pic('mw_banner',1,y,[-1,0],.7);pic('mw_banner',9,y,[1,0],.7)}
+  // the worship area: the altar, two angels and two saints, candelabra either side
+  raw('mi_altar',5,2,{block:true});
+  raw('mi_angel',3,2,{block:true});raw('mi_angel',7,2,{block:true});
+  raw('mi_saint',2,3,{block:true});raw('mi_saint',8,3,{block:true});
+  raw('mi_candel',4,2,{block:true});raw('mi_candel',6,2,{block:true});
+  raw('mi_lectern',4,4,{block:true});
+  // little pews down both sides of the aisle
+  for(const y of [6,8,10,12]){raw('mi_pew',2,y,{block:true});raw('mi_pew',3,y,{block:true});raw('mi_pew',7,y,{block:true});raw('mi_pew',8,y,{block:true})}
+  raw('mi_candel',1,6,{block:true});raw('mi_candel',9,6,{block:true});raw('mi_candel',1,10,{block:true});raw('mi_candel',9,10,{block:true});
+  raw('mi_font',9,13,{block:true});raw('mw_cross',1,13,{block:true});
+  // chandeliers hang over the aisle
+  for(const y of [5,9])raw('mi_chand',5,y,{block:false,walk:true,bob:2.15});
+  npc(b.keeper,6,4);
+}}}
+function monFacade(b,k,decor){
+  const y=b.y1+1,P=(n,x,bob)=>decor.push({k:'mw_'+n,x,y,wd:[0,-1],pic:1,block:false,walk:true,deco:true,bob:bob||0});
+  const clear=x=>Math.abs(x-b.dx)>=2;
+  if(b.chapel){ // the chapel: stained glass, banners, a rose window over the door, roses on the corners
+    for(const x of [b.dx-4,b.dx+4])P('glass',x,.7);
+    for(const x of [b.dx-2,b.dx+2])P('banner',x,.7);
+    P('rose',b.dx,3.1);P('ivy',b.x0,0);P('ivy',b.x1,0);P('statue',b.dx-3,.4);P('statue',b.dx+3,.4);
+    return}
+  if(k===0){ // the church: tall stained glass, banners between, a rose window over the door, saints in niches, roses on the corners
+    for(const x of [b.dx-6,b.dx+6])P('glass',x,.5);
+    for(const x of [b.dx-4,b.dx+4])P('banner',x,.6);
+    P('rose',b.dx,2.2);
+    P('statue',b.dx-2,.4);P('statue',b.dx+2,.4);
+    P('ivy',b.x0,0);P('ivy',b.x1,0);
+    return}
+  const step=k===1||k===2?3:2;
+  for(let x=b.x0+1;x<=b.x1-1;x+=step){if(!clear(x))continue;P(k===5&&x===b.x0+1?'statue':k===3&&(x-b.x0)%4===1?'grille':'shutter',x,k===5&&x===b.x0+1?.3:.8)}
+  P('ivy',b.x0,0);if(k!==3)P('ivy',b.x1,0);
+  if(k===4||k===2)P('banner',b.dx+3>b.x1?b.dx-3:b.dx+3,.5);
+}
 for(const [id,n,face,lines] of [
   ['mon_novice1','A novice','kh_ohfolk7_1',["I have been here four months. I thought I would miss talking. I do not.","I sweep the cloister every morning. It does not need it. That is the point.","The bees do not mind me. I think they are the only ones who do not mind anyone."]],
   ['mon_novice2','A novice with a watering can','kh_ohfolk1_5',["The roses here are older than the church. Nobody remembers who planted them.","Watering is the nicest chore. You can see what you did.","Do not step on the lavender. It does not complain, but it remembers."]],
@@ -43,7 +90,7 @@ function monBuild(){
     const wp=ch(TM.make('plain','castle2',2.3).gid),wq=ch(TM.make('plain','castle',2.3).gid);
     for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(x<4||x>=W-4||y<4||y>=H-4)solid(x,y,(x+y)%5===0?wq:wp);
     // gravel paths
-    path(41,16,42,67);path(14,34,70,35);path(14,30,15,35);path(68,30,69,35);path(12,46,13,49);path(70,46,71,49);path(12,48,71,49);path(71,34,79,35);path(27,48,28,49);
+    path(41,16,42,67);path(14,34,70,35);path(14,30,15,35);path(68,30,69,35);path(12,46,13,49);path(70,46,71,49);path(12,48,71,49);path(71,34,79,35);path(27,48,28,49);path(42,17,61,17);path(60,14,61,17);
     // the gates: south (to the pass) and east (to the cemetery)
     {const md=lpMonDoor(),dt=TM.make('door','castle',2.6),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;KH_DOOR[dgid]={lvl:LP.BASE+LPM.SEG,at:{x:md.x-1,y:md.y,f:3}};solid(42,H-4,ch(dgid));solid(41,H-4,wq);solid(43,H-4,wq)}
     {const dt=TM.make('door','castle',2.6),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;KH_DOOR[dgid]={lvl:MON.CEM,at:{x:MON.CEM_IN[0],y:MON.CEM_IN[1],f:1}};solid(W-4,34,ch(dgid))}
@@ -51,11 +98,14 @@ function monBuild(){
     MON_BLD.forEach((b,k)=>{
       const plain=ch(TM.make('plain',b.st,b.wh).gid),win=ch(TM.make('window',b.st,b.wh).gid),dt=TM.make('door',b.st,b.wh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;KH_DOOR[dgid]={lvl:b.rid,at:b.at};
       for(let y=b.y0;y<=b.y1;y++)for(let x=b.x0;x<=b.x1;x++){const door=x===b.dx&&y===b.y1;solid(x,y,door?ch(dgid):((x+y)%3===0&&y>b.y0&&y<b.y1)?win:plain);used.add(x+','+y)}
-      sky.push({x:(b.x0+b.x1+1)/2,y:(b.y0+b.y1+1)/2,k:'kh_ohroof1_'+[0,0,0,2,2,2][k],w:(b.y1-b.y0+1)+.9,z:b.wh-.03}); // grey slate on the stone buildings, red clay tile on the cottages
+      sky.push({x:(b.x0+b.x1+1)/2,y:(b.y0+b.y1+1)/2,k:'kh_ohroof1_'+[0,0,0,2,2,2,0][k],w:(b.y1-b.y0+1)+.9,z:b.wh-.03}); // grey slate on the stone buildings, red clay tile on the cottages
+      monFacade(b,k,decor);
+      for(const dx of [-1,1])decor.push({k:'flowerpot',x:b.dx+dx,y:b.y1+1,block:false,walk:true,deco:true,sc:.8});
+      if(b.chapel)sky.push({x:(b.x0+b.x1+1)/2,y:(b.y0+b.y1+1)/2,k:'kh_ohtower1_4',w:3.6,z:b.wh-.03},{x:b.x0-.3,y:b.y0+1.2,k:'kh_ohtower1_0',w:1.9,z:b.wh-.03},{x:b.x1+1.3,y:b.y0+1.2,k:'kh_ohtower1_0',w:1.9,z:b.wh-.03},{x:b.x0-.3,y:b.y1-.2,k:'kh_ohtower1_4',w:1.4,z:b.wh-.03},{x:b.x1+1.3,y:b.y1-.2,k:'kh_ohtower1_4',w:1.4,z:b.wh-.03});
       if(b.tower)sky.push({x:b.x1+1.4,y:b.y0+1.5,k:'kh_ohtower1_4',w:2.1,z:b.wh-.03},{x:b.x0-.4,y:b.y0+1.5,k:'kh_ohtower1_0',w:1.9,z:b.wh-.03}); // the church: a spired bell tower and a slate cone turret
       LEVEL_NAMES[b.rid]=b.name;const rid=b.rid,front=[b.dx,b.y1+1];
-      const mk=()=>{if(LEVELS[rid])return;const bb={id:b.room==='inn'?'mon_guest':'mon'+k,name:b.name,room:b.room,keeper:b.keeper,scene:b.scene,wallImg:'kh_ohwall1_'+(k%3),floor:b.room==='hall'?'cobble':'wood'};
-        const R=khRoom(bb,rid,{to:MON.ID,x:front[0],y:front[1],f:2});LEVELS[rid]=R.level};
+      const mk=()=>{if(LEVELS[rid])return;const bb={id:b.room==='inn'?'mon_guest':'mon'+k,name:b.name,room:b.room,keeper:b.keeper,scene:b.scene,wallImg:'kh_ohwall1_'+(k%3),floor:b.room==='hall'?'cobble':'wood',tpl:b.chapel?monChapelTpl:undefined};
+        const R=khRoom(bb,rid,{to:MON.ID,x:front[0],y:front[1],f:2});if(b.chapel)R.level.ceilH=3.4;LEVELS[rid]=R.level};
       KH_LAZY[rid]=mk;
       for(let x=b.x0-1;x<=b.x1+1;x++)used.add(x+','+(b.y1+1));
     });
@@ -92,7 +142,7 @@ function monBuild(){
     [['mon_abbot',45,18],['mon_bellman',36,18],['mon_herb',16,56],['mon_bees',45,61],['mon_cellar',32,55],['mon_novice1',40,38],['mon_novice2',22,36],['mon_monk3',47,32],['mon_novice1',55,40]].forEach(([id,x,y])=>person(id,x,y));
     const lv={rows:rows.map(r=>r.join('')),start:{x:MON.GATE_IN[0],y:MON.GATE_IN[1],f:0},enemies:[],items,decor,scenery,sky,fmap:null,floorSet:['ohMeadow','ohGravel','ohLawn','ohPale','ohMoss'],floor:'ohLawn',ceil:'cloud',day:.98,outdoor:true,amb:.9,
       name:LEVEL_NAMES[MON.ID],label:'Saint Elen’s',noExtras:false,diff:25,ceilH:5.2,chars,lights,portals:[],
-      mapNames:[{t:'The Church of Saint Elen',x:41,y:7,k:'place'},{t:'The Cloister Garden',x:41,y:27,k:'place'},{t:'The Refectory',x:14,y:21,k:'place'},{t:'The Scriptorium',x:68,y:21,k:'place'},{t:'The Kitchen',x:12,y:39,k:'place'},{t:'The Guest House',x:70,y:37,k:'place'},{t:'The Infirmary',x:27,y:41,k:'place'},{t:'The Herb Garden',x:17,y:51,k:'place'},{t:'The Orchard',x:62,y:51,k:'place'},{t:'The Apiary',x:45,y:54,k:'place'},{t:'To the Cemetery',x:74,y:33,k:'lane'},{t:'The Hatch to the Cellars',x:30,y:55,k:'lane'},{t:'The Gate to the Pass',x:41,y:64,k:'lane'}]};
+      mapNames:[{t:'The Church of Saint Elen',x:41,y:7,k:'place'},{t:'The Chapel of the Lamps',x:60,y:5,k:'place'},{t:'The Cloister Garden',x:41,y:27,k:'place'},{t:'The Refectory',x:14,y:21,k:'place'},{t:'The Scriptorium',x:68,y:21,k:'place'},{t:'The Kitchen',x:12,y:39,k:'place'},{t:'The Guest House',x:70,y:37,k:'place'},{t:'The Infirmary',x:27,y:41,k:'place'},{t:'The Herb Garden',x:17,y:51,k:'place'},{t:'The Orchard',x:62,y:51,k:'place'},{t:'The Apiary',x:45,y:54,k:'place'},{t:'To the Cemetery',x:74,y:33,k:'lane'},{t:'The Hatch to the Cellars',x:30,y:55,k:'lane'},{t:'The Gate to the Pass',x:41,y:64,k:'lane'}]};
     const fmp=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=fm[y*W+x];fmp.push(r)}lv.fmap=fmp;
     LEVELS[MON.ID]=lv;
     for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=chars[rows[y][x]];if(c>=30&&c<100)block[y*W+x]=0}
