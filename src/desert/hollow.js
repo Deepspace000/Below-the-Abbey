@@ -14,6 +14,7 @@ ENEMY_DEF.hlorc={name:'Orc Brute',hp:320,dmg:[17,28],hit:.78,w:.7,img:'hl_orc',x
 LEVEL_NAMES[HL.CAV]='The Hollow Land';
 for(let k=0;k<HL.N;k++)LEVEL_NAMES[HL.BASE+k]='The Orange Tower, level '+(k+1);
 LEVEL_NAMES[HL.VIOLET]='The Foot of the Violet Tower';
+const HL_POWER=new Set(['crownbreaker','veilpiercer','dukesgavel','hollowscepter','worldblade','starbow','ragnarok','doomhammer','titanaxe','stormbow2','kingslayer','sunderer','mountainmaul','sandstaff','skullcrusher']);
 const HLF=()=>{const F=G.flags;return F.hl||(F.hl={riddles:{},falls:0})};
 function hlTint(src,r,g,b,a,name){ // a copy of a picture washed with a colour, for the goblins, the slimes, the orcs and the torches
   if(IMG[name])return IMG[name];const im=IMG[src];if(!im)return null;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');
@@ -233,7 +234,8 @@ for(const id of [HL.CAV,HL.VIOLET,...Array.from({length:HL.N},(_,k)=>HL.BASE+k)]
 /* ---- the journal and the hints: what the party has seen of the Hollow Land and the tower ---- */
 {const _oe=ohEnter;ohEnter=function(n){_oe.apply(this,arguments);const F=G.flags;
   if(n===HL.CAV)F.hlSeen=1;
-  if((n===HL.CAV||(n>=HL.BASE&&n<=HL.VIOLET))&&!F.hlArmed){giveTestWeapons();F.hlArmed=1;msg('The relics of the four rulers and the other powerful weapons are in the party bag, and the party carries the relics.','#ffe36a')} // the first time the party reaches the Hollow Land
+  const lacks=G.heroes.some(h=>!h.eq.main||!HL_POWER.has(h.eq.main.id)); // (on the ledge and on level 1 the party is armed again if any hero lacks a powerful weapon, so an old saved game gets them too)
+  if(((n===HL.CAV||n===HL.BASE)&&lacks)||(n>=HL.BASE&&n<=HL.VIOLET&&!F.hlArmed)){if(giveTestWeapons()){F.hlArmed=1;msg('The relics of the four rulers and the other powerful weapons are in the party bag, and the party carries the relics.','#ffe36a')}} // the first time the party reaches the Hollow Land
   if(n>=HL.BASE&&n<HL.BASE+HL.N)F.hlTop=Math.max(F.hlTop||0,n-HL.BASE+1);
   if(n===HL.VIOLET)F.hlViolet=1}}
 
