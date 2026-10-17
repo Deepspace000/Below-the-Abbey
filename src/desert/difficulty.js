@@ -24,6 +24,18 @@ for(const [ls,r] of LEVEL_LADDER){if(r===21){for(const l of ls)LEVEL_RATING[l]=3
  LEVEL_RATING[364]=top+15;
  for(let k=0;k<20;k++)LEVEL_RATING[440+k]=top+18+3*k;
  LEVEL_RATING[460]=top+18+60}
+/* the levels of the later places, set by hand: Greendale and Anaea have no enemies, so the road after the moor climbs slowly */
+{const set=(ls,v)=>{for(const l of ls)LEVEL_RATING[l]=v};
+ set([41,50,51,52,53,54,55,56,57,58,59],36);   // the Sand Road
+ set([42],39);set([43],41);                     // the Tomb of Sut, the Red Dunes
+ set([260],43);set([44,199,261],44);set([266],45);for(let n=199;n<=274;n++)if(n!==260&&n!==266&&n!==261)LEVEL_RATING[n]=44; // Khemetra
+ set([60,61,62,63,64],45);                      // the other deserts
+ set([289,290,291,292,293,294,295,296,297,298,299],48); // Yarrim
+ set([300,301,302,303],49);set([320,321,322,323,330,331,332,333,334,335,336,337,338,339,340,341,342,343],50); // the islands and the sea
+ set([304,305,306,307,308,309,310,311],55);     // Oldhaven and the Oakwood
+ set([360],56);set([361],57);set([362],58);set([363],58);   // the Abbey, revisited
+ LEVEL_RATING[364]=58;for(let k=0;k<20;k++)LEVEL_RATING[440+k]=Math.round(58+7*k/19);LEVEL_RATING[460]=65; // the Hollow Land and the Orange Spire, 58 to 65
+}
 const autoscaleOn=()=>!!G.flags.autoScaleOn;
 // the level of a place on the world map: the lowest and highest of its levels that have one
 function locRating(loc){if(loc.lv.length===1&&loc.lv[0]===1)return '1-3';   // the crypts climb from 1 to 3
