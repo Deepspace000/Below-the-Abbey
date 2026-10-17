@@ -36,6 +36,8 @@ for(const [ls,r] of LEVEL_LADDER){if(r===21){for(const l of ls)LEVEL_RATING[l]=3
  set([360],56);set([361],57);set([362],58);set([363],58);   // the Abbey, revisited
  LEVEL_RATING[364]=58;for(let k=0;k<20;k++)LEVEL_RATING[440+k]=Math.round(58+7*k/19);LEVEL_RATING[460]=65; // the Hollow Land and the Orange Spire, 58 to 65
 }
+/* humanoid creatures always carry gold when they fall */
+for(const k of ['bandit','archer','hunter','hitman','guard','nomad','nomad2','assassin','rguard','ashguard','pservant','hlgoblin','hlorc','hljester','hlmadman','hlvictim','hlduke','hlbutcher','hlheadless','skel','dskeleton','hlwarlord','hlwight','hlvampire','w_candleknight','mummy'])if(ENEMY_DEF[k])ENEMY_DEF[k].humanoid=true;
 const autoscaleOn=()=>!!G.flags.autoScaleOn;
 // the level of a place on the world map: the lowest and highest of its levels that have one
 function locRating(loc){if(loc.lv.length===1&&loc.lv[0]===1)return '1-3';   // the crypts climb from 1 to 3
