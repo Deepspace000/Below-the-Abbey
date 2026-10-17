@@ -7,7 +7,7 @@ for(let n=1;n<=20;n++){loadImg('hl_plq'+n,'assets/hl_plq'+n+'.png');NPC_H['hl_pl
 for(let n=0;n<6;n++){loadImg('hl_claw'+n,'assets/hl_claw'+n+'.png');NPC_H['hl_claw'+n]=.62}
 for(let n=0;n<3;n++)loadImg('hl_lever'+n,'assets/hl_lever'+n+'.png'); // the wooden lever: off, halfway, on
 loadImg('hl_bogey','assets/hl_bogey.png');loadImg('hl_bogeyA','assets/hl_bogeyA.png');NPC_H.hl_bogey=1.9;
-if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push('crownbreaker','veilpiercer','dukesgavel','hollowscepter'); // their pictures are painted (assets/icn_<id>.png)
+if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push('crownbreaker','veilpiercer','dukesgavel','hollowscepter','bogeymask'); // their pictures are painted (assets/icn_<id>.png)
 const hlIn=()=>LEVEL>=HL.BASE&&LEVEL<HL.BASE+HL.N;
 
 /* ---- treasure: the chests of the castle hold potions, gear, rings and gold, more of it the higher the level ---- */
