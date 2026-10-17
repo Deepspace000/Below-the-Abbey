@@ -16,6 +16,8 @@ const LEVEL_LADDER=[ // [levels of the game that make up a place, its level]
 ];
 const LEVEL_RATING={};
 for(const [ls,r] of LEVEL_LADDER)for(const l of ls)LEVEL_RATING[l]=Math.round(1+(r-1)*1.5)+3;   // each place stands three levels above the one before it (the table is in steps of two), and the whole ladder three levels higher
+LEVEL_RATING[20]-=2; // the Burial Ground stands two levels lower than the ladder gave it
+for(const [ls,r] of LEVEL_LADDER){if(r===21){for(const l of ls)LEVEL_RATING[l]=30}else if(r>21){for(const l of ls)LEVEL_RATING[l]-=3}} // Ironhill Moor is level 30, and every place after it three levels lower
 // the ladder goes on after Oldhaven: the four floors below the Abbey, the Hollow Land, then each floor of the Orange Spire and the foot of the Violet Tower, each three levels above the one before
 {const top=Math.max(...Object.values(LEVEL_RATING));
  for(let i=0;i<4;i++)LEVEL_RATING[360+i]=top+3+3*i;
