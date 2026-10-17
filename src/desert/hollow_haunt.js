@@ -49,11 +49,14 @@ function secretBump(nx,ny){
 function hlMirrorImg(){
   if(IMG.hl_p_mirror_b)return true;const m=IMG.hl_p_mirror,b=IMG.hl_bogey;if(!m||!b)return false;
   const c=document.createElement('canvas');c.width=m.width;c.height=m.height;const x=c.getContext('2d');x.drawImage(m,0,0);
-  // the glass shows a tall figure standing behind the viewer: a pale outline of the bogeyman, and two small white eyes
-  const fh=c.height*.7,fw=fh*b.width/b.height,fx=(c.width-fw)/2,fy=c.height*.16;
+  // the glass of the mirror: an arched pane. The figure is drawn only inside it, so it is only seen in the mirror.
+  const gl=c.width*.221,gr=c.width*.786,gt=c.height*.138,gb=c.height*.80,gh=gb-gt;
+  x.save();x.beginPath();x.moveTo(gl,gb);x.lineTo(gl,gt+gh*.13);x.quadraticCurveTo((gl+gr)/2,gt-gh*.1,gr,gt+gh*.13);x.lineTo(gr,gb);x.closePath();x.clip();
+  const fh=gh*.98,fw=fh*b.width/b.height,fx=(gl+gr)/2-fw/2,fy=gt+gh*.04;
   const t=document.createElement('canvas');t.width=Math.ceil(fw);t.height=Math.ceil(fh);const tx=t.getContext('2d');tx.drawImage(b,0,0,fw,fh);tx.globalCompositeOperation='source-in';tx.fillStyle='#c2b8e8';tx.fillRect(0,0,fw,fh);
-  x.globalCompositeOperation='lighter';x.globalAlpha=.62;x.drawImage(t,fx,fy);x.globalAlpha=1;x.globalCompositeOperation='source-over';
+  x.globalCompositeOperation='lighter';x.globalAlpha=.85;x.drawImage(t,fx,fy);x.globalAlpha=1;x.globalCompositeOperation='source-over';
   x.fillStyle='rgba(255,255,255,1)';x.shadowColor='rgba(210,225,255,1)';x.shadowBlur=10;for(const ex of [.455,.545]){x.beginPath();x.arc(fx+fw*ex,fy+fh*.115,Math.max(2.4,c.width*.02),0,TAU);x.fill()}
+  x.restore();
   IMG.hl_p_mirror_b=c;return true;
 }
 khNpc('hl_shelfdoor','A bookshelf','hl_p_shelf',d=>{
@@ -96,6 +99,7 @@ function hlFrame(dt){
   if(M.act){const a=M.act,opp=(a.f+2)%4;
     if(!a.done&&G.P.f===opp&&camSettled()&&Math.abs(a.bog.x-G.P.x)+Math.abs(a.bog.y-G.P.y)<=3){ // the party turns round: he is right there
       a.done=true;M.scare={t:G.time};G.shake=.9;sfx('screech');sfx('hit');msg('THE BOGEYMAN IS RIGHT BEHIND YOU!','#ff6a5a');
+      {const plvl=Math.round(G.heroes.reduce((n,h)=>n+h.lvl,0)/Math.max(1,G.heroes.length));hlSpawn('hlbogey',a.bog.x,a.bog.y,plvl);const be=G.enemies[G.enemies.length-1];be.alert=true;be.lunge=1}
       const l=hlLive();if(l.length&&Math.random()<.6){try{afflInflict('shaken',l[(Math.random()*l.length)|0],true)}catch(e){}}
       a.d.lk=null;a.bog.found=true;M.cool=G.time+25}
     else if(!a.done&&(G.time-a.t>16||Math.abs(a.d.x-G.P.x)+Math.abs(a.d.y-G.P.y)>9)){a.d.lk=null;a.bog.found=true;M.cool=G.time+15;a.done=true}
@@ -333,3 +337,10 @@ QAREA.hc1=QAREA.hc2='Below the Abbey';
     return say('You answered with good will, so I will tell you the truth. I am the wizard who shut the court of the Hollow Land under the Abbey, long ago. They were ruled by the first king, whom they call the Pale Sovereign. He wanted to rule past his own death, and the others followed him. I made seven locks, and the Abbey kept the last. Vance was the Sovereign’s hand above, and Corvane was Vance’s tool. The silver bought the pieces of the key. You opened the door yourselves, and that is the only reason the court is not loose in the Eastern Lands tonight. The Sovereign waits in the Violet Tower. Reward: '+rw+'.',[BYE])}
   return R(d)};
   NPCS.hl_wizard.root=nr;KH_KEEPERS.hl_wizard.root=nr;QGIVER.hl_wizard='hc2'}
+
+/* ---- the bogeyman himself: a fight every time, at the party's own level, and a mask when he first falls ---- */
+ITEMDEF.bogeymask={n:'Bogeyman Mask',k:'head',t:'Helm',ic:'head',c:'#d8d0c0',armor:8,price:3200,lvl:10,pas:{dodge:.05,dmgPct:.04},rar:1,gear:1,sw:.38,d:'A hollow bone-white mask with two empty eyes, taken from the bogeyman. Armour 8, enemies miss 5% more, damage +4%. Its wearer cannot be shaken or haunted. Needs level 10.'};
+ENEMY_DEF.hlbogey={name:'The Bogeyman',hp:380,dmg:[16,28],hit:.86,w:1.1,img:'hl_bogey',xp:2500,gold:[80,200],speed:1,verb:'claws',aboveParty:0,glow:.45,relic:'bogeymask'};
+{const _ai=afflInflict;afflInflict=function(id,hi,quiet){ // the mask: no fear, no haunting
+  if((id==='shaken'||id==='haunted')&&hi!==undefined&&hi!==-1){const h=G.heroes[hi];if(h&&h.eq&&h.eq.head&&h.eq.head.id==='bogeymask')return false}
+  return _ai.apply(this,arguments)}}

@@ -152,7 +152,7 @@ function campMoment(id,hi){
   const f=info.found&&info.found.length?'Back at the fire with '+info.found.join(', ')+'.':'Back at the fire with empty hands, and a good story about a thorn.';
   const lines=parts.map(t=>({text:t.replace(/\{f\}/g,f).replace(/\{n\}/g,n).replace(/\{o\}/g,o).replace(/\{p\}/g,p)}));
   if(id==='tend'&&info.n!==undefined)lines.push({text:info.n?`${info.n===1?'One':'Some'} of the sick feel better. The fever breaks, or the cough eases.`:'Nothing is cured yet, but rest and care will do more tomorrow.'});
-  G._campLines=lines;startCut('campMoment');
+  G._campLines=lines;const back=G.menu;G.menu=false;startCut('campMoment',()=>{if(back)G.menu=back}); // the camp page is drawn over the little scene, so the scene is shown first, and the camp page comes back when it ends
 }
 Object.assign(CUTS,{campMoment:()=>G._campLines||[{text:'The hour passes quietly.'}]});
 journalPage({id:'camp',title:'Camp and Bonds',

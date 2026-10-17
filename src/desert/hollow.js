@@ -256,7 +256,7 @@ function hlLights(out){G.hlOut=out;for(const l of LIGHTS)if(!l.keep)l.out=out}
 const hlLive=()=>{const a=[];G.heroes.forEach((h,i)=>{if(h.alive!==false&&h.hp>0)a.push(i)});return a};
 function hlHurt(hi,d){const h=G.heroes[hi];h.hp-=d;h.hurt=1;G.shake=.3;sfx('hurt');addFloat(portraitX(hi)+19,250,'-'+d,'#ff6a5a');
   if(h.hp<=0){h.hp=0;h.alive=false;msg(HERO_DEF[hi].name+' has fallen!','#ff8a7a');try{bondFall(hi)}catch(x){}if(G.sel===hi)nextHero()}}
-function hlSpawn(t,x,y){const st=enemyStat(t,lvlHere());G.enemies.push({id:G.enemies.length,t,lvl:lvlHere(),x,y,rx:x,ry:y,hp:st.hp,maxhp:st.hp,alert:true,chilled:0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100})}
+function hlSpawn(t,x,y,lv){const L0=lv||lvlHere(),st=enemyStat(t,L0);G.enemies.push({id:G.enemies.length,t,lvl:L0,x,y,rx:x,ry:y,hp:st.hp,maxhp:st.hp,alert:true,chilled:0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100})}
 /* ---- notes and books ---- */
 const HL_NOTES=[
  'A page torn from a diary. "Day 40. The King no longer eats. He sits at the long table and talks to the empty chairs. I think the chairs answer."',
