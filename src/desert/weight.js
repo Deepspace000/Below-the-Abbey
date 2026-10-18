@@ -43,7 +43,7 @@ let WT_CAP=100;
 function invRecalc(){
   if(!G.heroes||!G.heroes.length)return;const cs=invCombinedStr();let slots=36+Math.round(cs*.5)+invParty('bagb'),cap=20+cs*1.6+invParty('wtb');
   try{if(hasCompanion('donkey')){slots+=12;cap+=30}if(hasCompanion('llama')){slots+=10;cap+=20}}catch(e){}
-  BAGCAP=Math.max(slots,G.bag.length);WT_CAP=cap;G.overload=packWeight()>cap}
+  BAGCAP=Math.max(slots,G.bag.length);WT_CAP=cap;const was=G.overload;G.overload=packWeight()>cap;if(G.overload&&!was&&G.state==='play')msg('The party is overloaded: it moves at half speed and fights worse. Drop something.','#e0a080');else if(!G.overload&&was&&G.state==='play')msg('The party can walk at full speed again.','#a8d8a0')}
 petsApply=function(){invRecalc()};
 /* ---------- the stat rings: strength, dexterity, intelligence and mana change the hero while the ring is worn ---------- */
 function ringApply(h){
@@ -52,7 +52,9 @@ function ringApply(h){
   const dm=want.mp-had.mp;if(dm){h.mpMax=Math.max(1,h.mpMax+dm);h.mp=dm>0?Math.min(h.mpMax,h.mp+dm):Math.min(h.mp,h.mpMax)}
   h._rs=want}
 {const _rm=recalcMax;recalcMax=function(hi){try{ringApply(G.heroes[hi])}catch(e){}return _rm.apply(this,arguments)}}
-{const _u=update;update=function(dt){if(G.state==='play'&&G.heroes&&G.heroes.length&&G.time>=(G._invT||0)){G._invT=G.time+.5;try{for(const h of G.heroes)ringApply(h);invRecalc()}catch(e){}}return _u.apply(this,arguments)}}
+{const _u=update;update=function(dt){if(G.state==='play'&&G.heroes&&G.heroes.length){if(G.time>=(G._invT||0)){G._invT=G.time+.5;try{for(const h of G.heroes)ringApply(h);invRecalc()}catch(e){}}
+    else{const o=packWeight()>WT_CAP;if(o!==!!G.overload){G.overload=o;msg(o?'The party is overloaded: it moves at half speed and fights worse. Drop something.':'The party can walk at full speed again.',o?'#e0a080':'#a8d8a0')}}} // the moment the load drops under the limit the party speeds up again
+  return _u.apply(this,arguments)}}
 /* ---------- the limit: nothing more can be lifted from the floor, a chest or a shop once the pack is full by weight ---------- */
 {const _ba=bagAdd;bagAdd=function(it){
   if((G.loot||G._wtPick)&&it&&it.id){const w=itemWeight(it.id)*(it.n||1)*wtMul();if(packWeight()+w>WT_CAP+.001){G._heavy=1;return false}}

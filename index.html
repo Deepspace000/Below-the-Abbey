@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.411';
+const VERSION='3.412';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -6999,7 +6999,7 @@ function update(dt){
   const C=G.C,P=G.P;
   // the camera glides at one steady speed. While a move key is held the next step is taken the instant the camera
   // arrives, with the unused part of the frame carried into it, so there is never a pause or a stutter between steps
-  let budget=Math.min(dt,.05)*5.2;
+  let budget=Math.min(dt,.05)*5.2*(G.overload?.5:1); // an overloaded party walks at half speed
   for(let guard=0;guard<4;guard++){
     const dx=P.x-C.x,dy=P.y-C.y,dist=Math.abs(dx)+Math.abs(dy);
     if(dist>1e-5){const m=Math.min(budget,dist);C.x+=clamp(dx,-m,m);C.y+=clamp(dy,-m,m);budget-=m}
@@ -22387,7 +22387,7 @@ let WT_CAP=100;
 function invRecalc(){
   if(!G.heroes||!G.heroes.length)return;const cs=invCombinedStr();let slots=36+Math.round(cs*.5)+invParty('bagb'),cap=20+cs*1.6+invParty('wtb');
   try{if(hasCompanion('donkey')){slots+=12;cap+=30}if(hasCompanion('llama')){slots+=10;cap+=20}}catch(e){}
-  BAGCAP=Math.max(slots,G.bag.length);WT_CAP=cap;G.overload=packWeight()>cap}
+  BAGCAP=Math.max(slots,G.bag.length);WT_CAP=cap;const was=G.overload;G.overload=packWeight()>cap;if(G.overload&&!was&&G.state==='play')msg('The party is overloaded: it moves at half speed and fights worse. Drop something.','#e0a080');else if(!G.overload&&was&&G.state==='play')msg('The party can walk at full speed again.','#a8d8a0')}
 petsApply=function(){invRecalc()};
 /* ---------- the stat rings: strength, dexterity, intelligence and mana change the hero while the ring is worn ---------- */
 function ringApply(h){
@@ -22396,7 +22396,9 @@ function ringApply(h){
   const dm=want.mp-had.mp;if(dm){h.mpMax=Math.max(1,h.mpMax+dm);h.mp=dm>0?Math.min(h.mpMax,h.mp+dm):Math.min(h.mp,h.mpMax)}
   h._rs=want}
 {const _rm=recalcMax;recalcMax=function(hi){try{ringApply(G.heroes[hi])}catch(e){}return _rm.apply(this,arguments)}}
-{const _u=update;update=function(dt){if(G.state==='play'&&G.heroes&&G.heroes.length&&G.time>=(G._invT||0)){G._invT=G.time+.5;try{for(const h of G.heroes)ringApply(h);invRecalc()}catch(e){}}return _u.apply(this,arguments)}}
+{const _u=update;update=function(dt){if(G.state==='play'&&G.heroes&&G.heroes.length){if(G.time>=(G._invT||0)){G._invT=G.time+.5;try{for(const h of G.heroes)ringApply(h);invRecalc()}catch(e){}}
+    else{const o=packWeight()>WT_CAP;if(o!==!!G.overload){G.overload=o;msg(o?'The party is overloaded: it moves at half speed and fights worse. Drop something.':'The party can walk at full speed again.',o?'#e0a080':'#a8d8a0')}}} // the moment the load drops under the limit the party speeds up again
+  return _u.apply(this,arguments)}}
 /* ---------- the limit: nothing more can be lifted from the floor, a chest or a shop once the pack is full by weight ---------- */
 {const _ba=bagAdd;bagAdd=function(it){
   if((G.loot||G._wtPick)&&it&&it.id){const w=itemWeight(it.id)*(it.n||1)*wtMul();if(packWeight()+w>WT_CAP+.001){G._heavy=1;return false}}
