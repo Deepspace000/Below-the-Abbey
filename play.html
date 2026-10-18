@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.362';
+const VERSION='3.364';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -21575,6 +21575,7 @@ function pfPrep(n){
   const isTree=d=>!d.npc&&/^[lp]tree\d/.test(d.k),trees=new Map(); // blocking trees and the soft, walk-through ones that fill out the woods
   for(const d of L.decor)if(isTree(d)){const k=d.x+','+d.y;if(!trees.has(k))trees.set(k,[]);trees.get(k).push(d)}
   if(trees.size<400)return;
+  if(L.sky)L.sky=L.sky.filter(e=>!/^lp_peak/.test(e.k)); // the old flat peak pictures stood out from the edge of the map like cards: the painted mountains in the sky replace them
   const blk=new Set(L.decor.filter(d=>d.block&&isTree(d)).map(d=>d.x+','+d.y));
   const walk=(x,y)=>x>=3&&y>=3&&x<W-6&&y<H-3&&L.rows[y][x]==='.';
   const clear=new Set(),trails=[],st=L.start||{x:0,y:0};
@@ -21784,14 +21785,19 @@ function pfMtData(){
 function pfMountains(D,dX,dY,pX,pY,hzr,lbm){
   if(!(typeof LP!=='undefined'&&LEVEL>=LP.BASE&&LEVEL<LP.BASE+LP.N))return;
   const M=pfMtData();if(!M)return;
-  const Hm=Math.round(VH*.34),y0=HH-Hm,br=Math.min(1,.8*(lbm||1)+.08),hz=hzr||[200,214,228];
+  const Hm=Math.round(VH*.34),br=Math.min(1,.8*(lbm||1)+.08),hz=hzr||[200,214,228];
   for(let x=0;x<VW;x++){
     const cm=2*x/VW-1,a=Math.atan2(dY+pY*cm,dX+pX*cm);let ang=((a%TAU)+TAU)%TAU;if(ang>Math.PI)ang-=TAU; // 0 is due east, the deep end of the woods
     if(ang<-1.45||ang>1.45)continue;
-    const im=ang<0?M[0]:M[1],u=Math.min(im.w-1,Math.max(0,((ang<0?ang+1.45:ang)/1.45*(im.w-1))|0));
-    for(let yy=0;yy<Hm;yy++){const y=y0+yy;if(y<0||y>=VH)continue;const r=Math.min(im.h-1,(yy/Hm*im.h)|0),i=(r*im.w+u)*4,al=im.d[i+3]/255;if(al<.02)continue;
-      const o=(y*VW+x)*4,f=.85*al; // a little haze over the far range
-      D[o]=D[o]*(1-f)+(im.d[i]*br*.8+hz[0]*.2)*f;D[o+1]=D[o+1]*(1-f)+(im.d[i+1]*br*.8+hz[1]*.2)*f;D[o+2]=D[o+2]*(1-f)+(im.d[i+2]*br*.8+hz[2]*.2)*f}}}
+    const e=Math.abs(ang),sm=e<.85?1:Math.max(0,1-(e-.85)/.6),tp=sm*sm*(3-2*sm),Hx=Math.max(4,Math.round(Hm*(.3+.7*tp))); // the range tapers down and fades out at its north and south ends, instead of stopping at a straight edge
+    const wt0=Math.max(0,Math.min(1,(ang+.4)/.8)),wt=wt0*wt0*(3-2*wt0); // the two ranges are crossfaded over the middle, so there is no seam where they meet
+    const u0=Math.min(M[0].w-1,Math.max(0,((ang+1.45)/1.45*(M[0].w-1))|0)),u1=Math.min(M[1].w-1,Math.max(0,(ang/1.45*(M[1].w-1))|0));
+    for(let yy=0;yy<Hx;yy++){const y=HH-Hx+yy;if(y<0||y>=VH)continue;
+      const r0=Math.min(M[0].h-1,(yy/Hx*M[0].h)|0),r1=Math.min(M[1].h-1,(yy/Hx*M[1].h)|0),i0=(r0*M[0].w+u0)*4,i1=(r1*M[1].w+u1)*4,a0=M[0].d[i0+3]/255*(1-wt),a1=M[1].d[i1+3]/255*wt,at=a0+a1;
+      const al=Math.min(1,at*Math.min(1,tp*1.6)*1.08);if(al<.02)continue;
+      const cr=(M[0].d[i0]*a0+M[1].d[i1]*a1)/at,cg=(M[0].d[i0+1]*a0+M[1].d[i1+1]*a1)/at,cb=(M[0].d[i0+2]*a0+M[1].d[i1+2]*a1)/at;
+      const o=(y*VW+x)*4,f=al; // a little haze over the far range
+      D[o]=D[o]*(1-f)+(cr*br*.8+hz[0]*.2)*f;D[o+1]=D[o+1]*(1-f)+(cg*br*.8+hz[1]*.2)*f;D[o+2]=D[o+2]*(1-f)+(cb*br*.8+hz[2]*.2)*f}}}
 
 /* ---- src/desert/wilds.js ---- */
 /* ==========================================================================
