@@ -156,7 +156,6 @@ function wdBuild(id){
   if(cave){kind=P.cave[1];name=P.cave[2]}
   else{const r=hash2(id,9,731);kind=r<.72?'empty':r<.9?'treasure':'slime';name=WD_RUIN_NAMES[(hash2(id,8,732)*WD_RUIN_NAMES.length)|0]}
   const gold=120+Math.round(diff*5);
-  if(hash2(id,6,764)<.5){const c=pick(75);if(c)decor.push({k:'chest',x:c[0],y:c[1],block:true,food:pfFood(id)})} // some hold a little food in a chest
   if(cave){
     decor.push(...[1].map(()=>{const b=pick(1)||[sx,sy-1];return {k:'bones',x:b[0],y:b[1],block:false}}));
     if(kind==='treasure'||kind==='bears'||kind==='wolvestreasure'){decor.push({k:'chest',x:far[0],y:far[1],block:true,goldAmt:gold+80});const c=pick(2);if(c)items.push({k:'potion',x:c[0],y:c[1]})}
@@ -175,7 +174,9 @@ function wdBuild(id){
     const nh=6+((hash2(id,3,741)*5)|0);for(let i=0;i<nh;i++){const c=pick(60+i);if(!c)break;const h=HERBS[(hash2(id,i,742)*HERBS.length)|0];items.push({k:'herb_'+h[0],x:c[0],y:c[1]})}
     if(kind==='treasure'){decor.push({k:'chest',x:far[0],y:far[1],block:true,goldAmt:gold});const c=pick(80);if(c)items.push({k:'potion',x:c[0],y:c[1]})}
     if(kind==='slime'){for(let i=0;i<4;i++){const c=pick(90+i);if(c)enemies.push({t:'slime',x:c[0],y:c[1]})}}
+    try{pfRuinProps(g,W,H,sx,sy,[[far[0],far[1]]],used,decor,items,enemies,id)}catch(e){console.error(e)} // broken statues, columns and brickwork, throughout
   }
+  if(hash2(id,6,764)<.5)pfFoodChest(g,W,H,sx,sy,decor,items,used,id); // some hold a little food in a chest
   const T=wdTiles(cave?'cave':'ruin',cave?2.6:2.8,tint,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(cave?2.6:2.8);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:ent.f}};
   const chars={'#':T.wall};chars[door]=dgid;
   if(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[P.n])LEVEL_RATING[id]=LEVEL_RATING[P.n];

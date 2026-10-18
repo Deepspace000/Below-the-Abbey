@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.397';
+const VERSION='3.398';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -21810,6 +21810,13 @@ PF_FUG.forEach(f=>{
   khNpc('pf_f'+f.id,f.who,f.face,()=>qNode(f.id,khQD(f.offer,f.accept,(g,n)=>`${g} of ${n} ${f.what}.`,`You have the ${f.what}? Oh, thank you.`,f.thanks,f.after,'Here they are.')),{q:f.id});
 });
 function pfFood(sd){const all=['bread','cheese','apple','nuts','dates','herring','sausage','pie'],n=2+((hash2(sd,4,762)*2)|0),o=[];for(let i=0;i<n;i++){const f=all[(hash2(sd,i,763)*all.length)|0];if(!o.includes(f))o.push(f)}return o}
+function pfFoodChest(g,W,H,sx,sy,decor,items,used,sd){ // a chest of food on a square that blocks nobody's way to anything else
+  const key=(x,y)=>x+','+y,base=new Set(decor.filter(d=>d.block).map(d=>key(d.x,d.y))),targets=items.map(i=>[i.x,i.y]).concat(decor.filter(d=>d.block||d.npc).map(d=>[d.x,d.y]));
+  const cells=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(g[y][x]==='.'&&!used.has(key(x,y))&&!base.has(key(x,y))&&Math.abs(x-sx)+Math.abs(y-sy)>3)cells.push([x,y]);
+  cells.sort((a,b)=>hash2(a[0],a[1],sd+765)-hash2(b[0],b[1],sd+765));
+  for(const [cx,cy] of cells.slice(0,60)){const seen=new Set([key(sx,sy)]),q=[[sx,sy]];for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const k=key(x+dx,y+dy);if(g[y+dy]&&g[y+dy][x+dx]==='.'&&!base.has(k)&&k!==key(cx,cy)&&!seen.has(k)){seen.add(k);q.push([x+dx,y+dy])}}}
+    if(targets.every(([tx,ty])=>seen.has(key(tx,ty))||base.has(key(tx,ty))&&[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>seen.has(key(tx+dx,ty+dy))))){used.add(key(cx,cy));decor.push({k:'chest',x:cx,y:cy,block:true,food:pfFood(sd)});return true}}
+  return false}
 function pfCaveBuild(ci){
   const W=23,H=19,kind=PF_KINDS[ci],hs=hash2,sd=ci*17+5,g=[];
   for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
@@ -21831,7 +21838,7 @@ function pfCaveBuild(ci){
   else if(kind==='wolves'){for(let i=0;i<4;i++){const c=pick(20+i);if(c)enemies.push({t:'wolf',x:c[0],y:c[1]})}const c=pick(30);if(c)items.push({k:'potion',x:c[0],y:c[1]});decor.push({k:'bones',x:far[0],y:far[1],block:false})}
   else if(kind==='outcast'){const oi=PF_KINDS.slice(0,ci).filter(k=>k==='outcast').length%4,kp=KH_KEEPERS['pf_out'+oi];if(kp)decor.push({k:khFaceKey(kp.face),x:far[0],y:far[1],block:false,walk:true,npc:'pf_out'+oi,sc:1});const c=pick(40);if(c)decor.push({k:'barrel',x:c[0],y:c[1],block:true})}
   else if(kind==='fugitive'){const fi=PF_KINDS.slice(0,ci).filter(k=>k==='fugitive').length%3,id='pf_f'+PF_FUG[fi].id,kp=KH_KEEPERS[id];if(kp)decor.push({k:khFaceKey(kp.face),x:far[0],y:far[1],block:false,walk:true,npc:id,sc:1});const c=pick(50);if(c)decor.push({k:'barrel',x:c[0],y:c[1],block:true})}
-  if(hs(sd,3,761)<.55){const c=pick(70);if(c)decor.push({k:'chest',x:c[0],y:c[1],block:true,food:pfFood(sd)})} // a little food in a chest, in some of them
+  if(hs(sd,3,761)<.55)pfFoodChest(g,W,H,8,H-3,decor,items,used,sd); // a little food in a chest, in some of them
   if(!PF_ENT[ci]){const sn=LP.BASE+PF_SEGS[ci];try{if(!LEVELS[sn]&&KH_LAZY[sn])KH_LAZY[sn]();pfPrep(sn)}catch(e){console.error(e)}}
   const ent=PF_ENT[ci]||{n:LP.BASE+PF_SEGS[ci],x:80,y:300};
   const rk=pfRockGid(2.6,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(2.6);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:3}};
@@ -21955,6 +21962,48 @@ function pfCrosses(n){
       if(L.decor.some(d=>d.x===x&&d.y===y&&!d.hidden&&!d.pfCut&&!/^(l|p|pt_)/.test(d.k)))continue;
       for(const d of L.decor)if(d.x===x&&d.y===y&&/^([lp]tree\d|pt_)/.test(d.k)){d.block=false;d.hidden=true;d.pfCut=1}
       L.decor.push({k:'lpcross',x,y,block:true,deco:true,sc:1});break}}}
+/* ---------- the abandoned halls of the wild dungeons: broken statues, snapped columns and tumbled brickwork, green with moss and vines ---------- */
+for(const n of ['ds_dpillar0','ds_dpillar1','ds_druinstairs'])loadImg(n,'assets/'+n+'.png');
+function pfRuinArt(){
+  if(IMG.rs_col0||!IMG.statue||!IMG.ds_dpillar0||!IMG.ds_dpillar1||!IMG.ds_druinstairs)return;
+  const H9=(a,b,c)=>hash2(a,b,c+900);
+  const cut=(im,sx,sy,sw,sh,grey)=>{const c=document.createElement('canvas');c.width=sw;c.height=sh;const x=c.getContext('2d');x.drawImage(im,sx,sy,sw,sh,0,0,sw,sh);
+    if(grey){try{const d=x.getImageData(0,0,sw,sh),p=d.data;for(let i=0;i<p.length;i+=4){if(p[i+3]<10)continue;const l=p[i]*.3+p[i+1]*.59+p[i+2]*.11;p[i]=Math.min(255,l*.9+10);p[i+1]=Math.min(255,l*.9+9);p[i+2]=Math.min(255,l*.84+8)}x.putImageData(d,0,0)}catch(e){}}return c};
+  const snap=(c,frac,seed)=>{const x=c.getContext('2d'),w=c.width,h=c.height;x.globalCompositeOperation='destination-out';x.beginPath();x.moveTo(0,0);x.lineTo(w,0);let y=h*frac;const n=7;for(let i=n;i>=0;i--){y=h*frac+(H9(seed,i,1)-.5)*h*.12;x.lineTo(w*i/n,y)}x.closePath();x.fill();x.globalCompositeOperation='source-over'};
+  const green=(c,seed,vines)=>{const x=c.getContext('2d'),w=c.width,h=c.height;x.save();x.globalCompositeOperation='source-atop';
+    for(let i=0;i<340;i++){const a=H9(seed,i,2),b=H9(seed,i,3),low=Math.pow(b,.7),r=2+H9(seed,i,4)*w*.05;x.fillStyle=`rgba(${40+((H9(seed,i,5)*40)|0)},${95+((H9(seed,i,6)*70)|0)},${30+((H9(seed,i,7)*30)|0)},${.4+H9(seed,i,8)*.45})`;x.beginPath();x.ellipse(a*w,(1-low*.85)*h,r,r*.6,H9(seed,i,9)*3,0,6.283);x.fill()}
+    x.restore();
+    for(let v=0;v<vines;v++){let px=(.1+H9(seed,v,10)*.8)*w,py=h*(.05+H9(seed,v,11)*.25);x.strokeStyle='rgba(38,82,28,.92)';x.lineWidth=2+H9(seed,v,12)*2.5;x.beginPath();x.moveTo(px,py);const len=h*(.3+H9(seed,v,13)*.5);for(let t=1;t<=14;t++){px+=Math.sin(t*.9+v*3)*w*.035;py+=len/14;x.lineTo(px,py)}x.stroke();
+      x.save();x.globalCompositeOperation='source-atop';x.restore();
+      for(let t=0;t<9;t++){const lx=px+(H9(seed,v*20+t,14)-.5)*w*.12-(H9(seed,v,15)-.5)*w*.2,ly=py-len*t/9*(H9(seed,t,16)*.6+.4);x.fillStyle=`rgba(${55+((H9(seed,t,17)*30)|0)},${120+((H9(seed,t,18)*60)|0)},${40},.9)`;x.beginPath();x.ellipse(lx,ly,w*.028,w*.017,H9(seed,t,19)*3,0,6.283);x.fill()}}
+    return c};
+  const S=IMG.statue,P0=IMG.ds_dpillar0,P1=IMG.ds_dpillar1,B=IMG.ds_druinstairs;
+  IMG.rs_statue0=green(cut(S,0,0,S.width,S.height,0),1,3);
+  {const c=cut(S,0,0,S.width,S.height,0);snap(c,.28,2);IMG.rs_statue1=green(c,2,2)}
+  IMG.rs_col0=green(cut(P0,0,0,P0.width,P0.height,1),3,3);
+  {const c=cut(P1,0,0,P1.width,P1.height,1);snap(c,.5,4);IMG.rs_col1=green(c,4,3)}
+  IMG.rs_brick0=green(cut(B,0,50,150,250,1),5,3);
+  IMG.rs_brick1=green(cut(B,170,30,149,270,1),6,3);
+  {const c=cut(B,40,150,240,150,1);snap(c,.2,7);IMG.rs_brick2=green(c,7,2)}
+  Object.assign(NPC_H,{rs_statue0:2.1,rs_statue1:1.6,rs_col0:1.7,rs_col1:1.2,rs_brick0:1.5,rs_brick1:1.7,rs_brick2:.8})}
+function pfRuinProps(g,W,H,sx,sy,keepCells,used,decor,items,enemies,id){
+  pfRuinArt();if(!IMG.rs_col0)return;
+  const key=(x,y)=>x+','+y,open=new Set();for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(g[y][x]==='.')open.add(key(x,y));
+  const targets=[...keepCells];for(const it of items)targets.push([it.x,it.y]);for(const d of decor)if(d.k!=='bones'&&d.block!==false||d.npc)targets.push([d.x,d.y]);
+  const blocked=new Set(),base=new Set(decor.filter(d=>d.block).map(d=>key(d.x,d.y))),reach=()=>{const seen=new Set([key(sx,sy)]),q=[[sx,sy]];for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const k=key(x+dx,y+dy);if(open.has(k)&&!blocked.has(k)&&!base.has(k)&&!seen.has(k)){seen.add(k);q.push([x+dx,y+dy])}}}return seen};
+  // the shortest ways from the door to everything worth reaching: nothing stands on them
+  const prev=new Map([[key(sx,sy),null]]),q=[[sx,sy]];for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const k=key(x+dx,y+dy);if(open.has(k)&&!prev.has(k)){prev.set(k,key(x,y));q.push([x+dx,y+dy])}}}
+  const route=new Set();for(const [tx,ty] of targets){let k=key(tx,ty);while(k&&!route.has(k)){route.add(k);k=prev.get(k)}}
+  for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)route.add(key(sx+dx,sy+dy));
+  const cand=[...open].filter(k=>!route.has(k)&&!used.has(k)).sort((a,b)=>hash2(+a.split(',')[0],+a.split(',')[1],id)-hash2(+b.split(',')[0],+b.split(',')[1],id));
+  const want=22+((hash2(id,1,771)*10)|0),KINDS=['rs_statue0','rs_statue1','rs_col0','rs_col1','rs_col1','rs_brick0','rs_brick1','rs_brick2','rs_brick2'],placed=[];
+  for(const k of cand){if(placed.length>=want)break;const [x,y]=k.split(',').map(Number);
+    if(placed.some(p=>Math.abs(p[0]-x)+Math.abs(p[1]-y)<2))continue; // spread out, throughout the halls
+    blocked.add(k);const r=reach();let ok=true;for(const [tx,ty] of targets){const kk=key(tx,ty);if(!(r.has(kk)||base.has(kk)&&[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>r.has(key(tx+dx,ty+dy))))){ok=false;break}}
+    if(!ok){blocked.delete(k);continue}
+    placed.push([x,y]);const h=hash2(x,y,772);
+    for(let i=decor.length-1;i>=0;i--)if(decor[i].x===x&&decor[i].y===y&&decor[i].k!=='chest')decor.splice(i,1);
+    decor.push({k:KINDS[(h*KINDS.length)|0],x,y,block:true,sc:.9+hash2(x,y,773)*.3,ox:(hash2(x,y,774)-.5)*.3,oy:(hash2(x,y,775)-.5)*.3})}}
 
 /* ---- src/desert/wilds.js ---- */
 /* ==========================================================================
@@ -22115,7 +22164,6 @@ function wdBuild(id){
   if(cave){kind=P.cave[1];name=P.cave[2]}
   else{const r=hash2(id,9,731);kind=r<.72?'empty':r<.9?'treasure':'slime';name=WD_RUIN_NAMES[(hash2(id,8,732)*WD_RUIN_NAMES.length)|0]}
   const gold=120+Math.round(diff*5);
-  if(hash2(id,6,764)<.5){const c=pick(75);if(c)decor.push({k:'chest',x:c[0],y:c[1],block:true,food:pfFood(id)})} // some hold a little food in a chest
   if(cave){
     decor.push(...[1].map(()=>{const b=pick(1)||[sx,sy-1];return {k:'bones',x:b[0],y:b[1],block:false}}));
     if(kind==='treasure'||kind==='bears'||kind==='wolvestreasure'){decor.push({k:'chest',x:far[0],y:far[1],block:true,goldAmt:gold+80});const c=pick(2);if(c)items.push({k:'potion',x:c[0],y:c[1]})}
@@ -22134,7 +22182,9 @@ function wdBuild(id){
     const nh=6+((hash2(id,3,741)*5)|0);for(let i=0;i<nh;i++){const c=pick(60+i);if(!c)break;const h=HERBS[(hash2(id,i,742)*HERBS.length)|0];items.push({k:'herb_'+h[0],x:c[0],y:c[1]})}
     if(kind==='treasure'){decor.push({k:'chest',x:far[0],y:far[1],block:true,goldAmt:gold});const c=pick(80);if(c)items.push({k:'potion',x:c[0],y:c[1]})}
     if(kind==='slime'){for(let i=0;i<4;i++){const c=pick(90+i);if(c)enemies.push({t:'slime',x:c[0],y:c[1]})}}
+    try{pfRuinProps(g,W,H,sx,sy,[[far[0],far[1]]],used,decor,items,enemies,id)}catch(e){console.error(e)} // broken statues, columns and brickwork, throughout
   }
+  if(hash2(id,6,764)<.5)pfFoodChest(g,W,H,sx,sy,decor,items,used,id); // some hold a little food in a chest
   const T=wdTiles(cave?'cave':'ruin',cave?2.6:2.8,tint,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(cave?2.6:2.8);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:ent.f}};
   const chars={'#':T.wall};chars[door]=dgid;
   if(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[P.n])LEVEL_RATING[id]=LEVEL_RATING[P.n];
