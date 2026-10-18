@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.347';
+const VERSION='3.348';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1393,7 +1393,7 @@ const CLASSES=[
  {name:'Paladin',icon:'shield',hp:32,mp:10,mpn:'Mana',hit:.85,str:13,dex:7,int:8,grow:{hp:5,mp:1,a:'str',b:'int'},
   desc:'A holy knight. Fights well and is deadly against the undead.',sp:{name:'Smite',cost:4,type:'melee',m:1,a:4,undead:1,d:'Weapon damage plus 4, doubled against skeletons.'}},
  {name:'Ranger',icon:'arrow',hp:26,mp:10,mpn:'Stamina',hit:.88,str:10,dex:13,int:7,grow:{hp:4,mp:1,a:'dex',b:'str'},
-  desc:'A woodland hunter. Quick, tough enough, and lethal with a bow.',sp:{name:'Aimed Shot',cost:3,type:'shot',range:3,m:2,d:'A careful shot that never misses: double weapon damage, up to 3 tiles away.'}},
+  desc:'A woodland hunter. Quick, tough enough, and lethal with a bow. Reads the woods: hidden caves and ruins show on the map from much further away.',sp:{name:'Aimed Shot',cost:3,type:'shot',range:3,m:2,d:'A careful shot that never misses: double weapon damage, up to 3 tiles away.'}},
  {name:'Archer',icon:'bow',hp:22,mp:12,mpn:'Stamina',hit:.9,str:8,dex:15,int:6,grow:{hp:3,mp:1,a:'dex',b:'str'},
   desc:'A bowman who strikes from behind the front line.',sp:{name:'Volley',cost:4,type:'volley',range:4,m:1,d:'Two arrows that never miss, each at full weapon damage, up to 4 tiles away.'}},
  {name:'Thief',icon:'dagger',hp:24,mp:12,mpn:'Stamina',hit:.92,str:8,dex:14,int:6,grow:{hp:4,mp:1,a:'dex',b:'str'},
@@ -21787,8 +21787,18 @@ function wdThicket(L,n,x,y,id){ // dead twisted trees grow across the way: the g
   (L._wdMarks=L._wdMarks||[]).push({x,y,id})}
 /* ---------- a ? on the map for every place not yet visited, as soon as the party looks towards it ---------- */
 const wdRevealed=()=>{const F=G.flags;return F.wdSeen||(F.wdSeen={})};
-{const _u=ui;ui=function(dt){try{if(G.state==='play'&&!G.cut){const L=LEVELS[LEVEL];if(L&&L._wdMarks){const R=wdRevealed(),f=DIRS[G.P.f]||[0,-1];
-  for(const m of L._wdMarks){if(R[LEVEL+':'+m.id])continue;const dx=m.x-G.P.x,dy=m.y-G.P.y,dd=Math.hypot(dx,dy);if(dd>15||dd<.5)continue;if((dx*f[0]+dy*f[1])/dd>=.62)R[LEVEL+':'+m.id]=1}}}}catch(e){}return _u.apply(this,arguments)}}
+/* sharp eyes: a Ranger in the party, a Scout, and the herb trades (Healer, Alchemist) all spot hidden places from further away, and over a wider angle */
+function wdSharp(){
+  let range=15,cone=.62;
+  try{
+    if(G.heroes.some((h,i)=>h.alive&&HERO_DEF[i].cls==='Ranger')){range+=10;cone=.4}
+    const sc=typeof profPerk==='function'?profPerk('scout'):0,hb=Math.max(typeof profPerk==='function'?profPerk('healer'):0,typeof profPerk==='function'?profPerk('alchemist'):0);
+    if(sc){range+=2*sc;cone-=.04*sc}
+    if(hb){range+=1.5*hb;cone-=.02*hb}
+  }catch(e){}
+  return {range:Math.min(range,34),cone:Math.max(.15,cone)}}
+{const _u=ui;ui=function(dt){try{if(G.state==='play'&&!G.cut){const L=LEVELS[LEVEL];if(L&&L._wdMarks){const R=wdRevealed(),f=DIRS[G.P.f]||[0,-1],sk=wdSharp();
+  for(const m of L._wdMarks){if(R[LEVEL+':'+m.id])continue;const dx=m.x-G.P.x,dy=m.y-G.P.y,dd=Math.hypot(dx,dy);if(dd>sk.range||dd<.5)continue;if((dx*f[0]+dy*f[1])/dd>=sk.cone)R[LEVEL+':'+m.id]=1}}}}catch(e){}return _u.apply(this,arguments)}}
 {const _dq=drawQuestMarks;drawQuestMarks=function(ox,oy,cs,big,rad){_dq.apply(this,arguments);
   try{const L=LEVELS[LEVEL];if(!L||!L._wdMarks)return;const seen=(G.flags&&G.flags.lvSeen)||{};
     const R=wdRevealed();for(const m of L._wdMarks){if(seen[m.id]||!R[LEVEL+':'+m.id])continue;if(rad&&(Math.abs(m.x-G.C.x)>rad||Math.abs(m.y-G.C.y)>rad))continue;

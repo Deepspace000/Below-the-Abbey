@@ -72,8 +72,18 @@ function wdThicket(L,n,x,y,id){ // dead twisted trees grow across the way: the g
   (L._wdMarks=L._wdMarks||[]).push({x,y,id})}
 /* ---------- a ? on the map for every place not yet visited, as soon as the party looks towards it ---------- */
 const wdRevealed=()=>{const F=G.flags;return F.wdSeen||(F.wdSeen={})};
-{const _u=ui;ui=function(dt){try{if(G.state==='play'&&!G.cut){const L=LEVELS[LEVEL];if(L&&L._wdMarks){const R=wdRevealed(),f=DIRS[G.P.f]||[0,-1];
-  for(const m of L._wdMarks){if(R[LEVEL+':'+m.id])continue;const dx=m.x-G.P.x,dy=m.y-G.P.y,dd=Math.hypot(dx,dy);if(dd>15||dd<.5)continue;if((dx*f[0]+dy*f[1])/dd>=.62)R[LEVEL+':'+m.id]=1}}}}catch(e){}return _u.apply(this,arguments)}}
+/* sharp eyes: a Ranger in the party, a Scout, and the herb trades (Healer, Alchemist) all spot hidden places from further away, and over a wider angle */
+function wdSharp(){
+  let range=15,cone=.62;
+  try{
+    if(G.heroes.some((h,i)=>h.alive&&HERO_DEF[i].cls==='Ranger')){range+=10;cone=.4}
+    const sc=typeof profPerk==='function'?profPerk('scout'):0,hb=Math.max(typeof profPerk==='function'?profPerk('healer'):0,typeof profPerk==='function'?profPerk('alchemist'):0);
+    if(sc){range+=2*sc;cone-=.04*sc}
+    if(hb){range+=1.5*hb;cone-=.02*hb}
+  }catch(e){}
+  return {range:Math.min(range,34),cone:Math.max(.15,cone)}}
+{const _u=ui;ui=function(dt){try{if(G.state==='play'&&!G.cut){const L=LEVELS[LEVEL];if(L&&L._wdMarks){const R=wdRevealed(),f=DIRS[G.P.f]||[0,-1],sk=wdSharp();
+  for(const m of L._wdMarks){if(R[LEVEL+':'+m.id])continue;const dx=m.x-G.P.x,dy=m.y-G.P.y,dd=Math.hypot(dx,dy);if(dd>sk.range||dd<.5)continue;if((dx*f[0]+dy*f[1])/dd>=sk.cone)R[LEVEL+':'+m.id]=1}}}}catch(e){}return _u.apply(this,arguments)}}
 {const _dq=drawQuestMarks;drawQuestMarks=function(ox,oy,cs,big,rad){_dq.apply(this,arguments);
   try{const L=LEVELS[LEVEL];if(!L||!L._wdMarks)return;const seen=(G.flags&&G.flags.lvSeen)||{};
     const R=wdRevealed();for(const m of L._wdMarks){if(seen[m.id]||!R[LEVEL+':'+m.id])continue;if(rad&&(Math.abs(m.x-G.C.x)>rad||Math.abs(m.y-G.C.y)>rad))continue;
