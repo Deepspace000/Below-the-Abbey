@@ -6,7 +6,7 @@ const SHORTCUTS=[ // [group, key shown, what it does]
  ['Moving','W / Up','Forward'],['Moving','S / Down','Back'],['Moving','A','Step left'],['Moving','D','Step right'],['Moving','Q / Left','Turn left'],['Moving','E / Right','Turn right'],
  ['Fighting','Space / Enter','Attack'],['Fighting','X','Special attack or spell'],['Fighting','H / P','Drink a healing potion'],['Fighting','Z','Wait a turn'],['Fighting','R','Rest and camp'],
  ['Heroes','1 2 3 4','Choose a hero (also in the inventory)'],
- ['Screens','I','Items (the bag)'],['Screens','C','Character sheet'],['Screens','B','Spell book'],['Screens','K','Powers'],['Screens','J','Quests'],['Screens','L','Journal'],
+ ['Screens','I','Items (the bag)'],['Screens','C','Character sheet'],['Screens','B','Spell book'],['Screens','K','Powers'],['Screens','J','Quests'],['Screens','L','Journal / Abilities'],
  ['Screens','F','Afflictions'],['Screens','U','Collection'],['Screens','M / O','Map of this level'],['Screens','T','Teleport stones'],['Screens','Esc','Menu, or close a screen'],
  ['Exploring','G','Dig with a shovel'],['Exploring','N','Catch a butterfly'],['Exploring','F5','Quick save'],['Exploring','? / F1','This page'],
  ['In the bag','E','Equip or use the chosen item'],['In the bag','U','Unequip the chosen item'],['In the bag','S','Sort the bag'],['In the bag','X / Enter','Use hero power (Powers)'],['In the bag','Y','Herbal Remedies page']];

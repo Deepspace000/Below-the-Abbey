@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.333';
+const VERSION='3.334';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -6921,7 +6921,7 @@ function drawMenu(){
   BTNS=[];veil(.6);bigPanel(90,12,300,296);
   txt('MENU',240,32,15,'#d8c88e','center',true);
   btnText('resume','Resume',150,46,180,30);
-  const rows=[['quests',anyQuestReady()?'Quests  *':'Quests','journal',typeof journalNote==='function'&&journalNote()?'Journal  !':'Journal'],
+  const rows=[['quests',anyQuestReady()?'Quests  *':'Quests','journal',typeof journalNote==='function'&&journalNote()?'Journal/Abilities  !':'Journal/Abilities'],
     ['aff',afflList().some(e=>AFFL[e.id]&&AFFL[e.id].kind!=='good')?'Afflictions  !':'Afflictions','overview','Level layout'],['savemenu','Save / Load','settings','Settings']];
   rows.forEach((r,i)=>{btnText(r[0],r[1],100,88+i*32,130,26);btnText(r[2],r[3],250,88+i*32,130,26)});
   btnText('more','More',150,184,180,26);
@@ -11714,7 +11714,7 @@ function journalPage(p){JOURNAL.push(p);JOURNAL.sort((a,b)=>(JORDER.indexOf(a.id
 const jp=id=>JOURNAL.find(p=>p.id===id);
 function drawJournal(){
   BTNS=[];veil(.72);bigPanel(24,8,432,304);
-  txt('JOURNAL',240,25,14,'#d8c88e','center',true);
+  txt('JOURNAL / ABILITIES',240,25,14,'#d8c88e','center',true);
   const cw=204,ch=46,gx=14,x0=36,y0=38;
   JOURNAL.forEach((p,k)=>{
     const x=x0+(k%2)*(cw+gx),y=y0+Math.floor(k/2)*(ch+4),note=p.note?p.note():'';
@@ -21249,7 +21249,7 @@ const SHORTCUTS=[ // [group, key shown, what it does]
  ['Moving','W / Up','Forward'],['Moving','S / Down','Back'],['Moving','A','Step left'],['Moving','D','Step right'],['Moving','Q / Left','Turn left'],['Moving','E / Right','Turn right'],
  ['Fighting','Space / Enter','Attack'],['Fighting','X','Special attack or spell'],['Fighting','H / P','Drink a healing potion'],['Fighting','Z','Wait a turn'],['Fighting','R','Rest and camp'],
  ['Heroes','1 2 3 4','Choose a hero (also in the inventory)'],
- ['Screens','I','Items (the bag)'],['Screens','C','Character sheet'],['Screens','B','Spell book'],['Screens','K','Powers'],['Screens','J','Quests'],['Screens','L','Journal'],
+ ['Screens','I','Items (the bag)'],['Screens','C','Character sheet'],['Screens','B','Spell book'],['Screens','K','Powers'],['Screens','J','Quests'],['Screens','L','Journal / Abilities'],
  ['Screens','F','Afflictions'],['Screens','U','Collection'],['Screens','M / O','Map of this level'],['Screens','T','Teleport stones'],['Screens','Esc','Menu, or close a screen'],
  ['Exploring','G','Dig with a shovel'],['Exploring','N','Catch a butterfly'],['Exploring','F5','Quick save'],['Exploring','? / F1','This page'],
  ['In the bag','E','Equip or use the chosen item'],['In the bag','U','Unequip the chosen item'],['In the bag','S','Sort the bag'],['In the bag','X / Enter','Use hero power (Powers)'],['In the bag','Y','Herbal Remedies page']];

@@ -8,7 +8,7 @@ function journalPage(p){JOURNAL.push(p);JOURNAL.sort((a,b)=>(JORDER.indexOf(a.id
 const jp=id=>JOURNAL.find(p=>p.id===id);
 function drawJournal(){
   BTNS=[];veil(.72);bigPanel(24,8,432,304);
-  txt('JOURNAL',240,25,14,'#d8c88e','center',true);
+  txt('JOURNAL / ABILITIES',240,25,14,'#d8c88e','center',true);
   const cw=204,ch=46,gx=14,x0=36,y0=38;
   JOURNAL.forEach((p,k)=>{
     const x=x0+(k%2)*(cw+gx),y=y0+Math.floor(k/2)*(ch+4),note=p.note?p.note():'';
