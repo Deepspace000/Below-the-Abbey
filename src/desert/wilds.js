@@ -20,6 +20,8 @@ const WD_CAVE0=7200,WD_RUIN0=8000;
 WD_CAVES.forEach((c,i)=>LEVEL_NAMES[WD_CAVE0+i]=c[2]);
 const WD_ENT={}; // interior id -> {n,x,y,f}: where its door stands in the outdoor map
 const wdRuinId=(n,k)=>WD_RUIN0+n*8+k;
+/* the levels where a door tile can be walked into: every cave and ruin, and every outdoor map that has an entrance to one */
+function wdDoorLevel(n){return n>=7100||WD_OUT.includes(n)}
 const wdIsLP=n=>typeof LP!=='undefined'&&n>=LP.BASE&&n<LP.BASE+LP.N;
 const wdCount=n=>{const r=hash2(n,3,4401);return wdIsLP(n)?1+(r>.6?1:0):1+Math.floor(r*4)};
 /* ---------- styles and tiles ---------- */
@@ -57,7 +59,7 @@ function wdPlace(L,n,id,kind,tint,seed){
   L.chars=L.chars||{};
   const wh=L.ceilH||5,T=wdTiles(kind,Math.min(wh,3.4),tint,false),rc=String.fromCharCode(0x3a0+(id%64)),dc=String.fromCharCode(0x3e0+(id%64));
   L.chars[rc]=T.wall;
-  const dgid=KH_NEXT_GID++;T_TILE[dgid]=T.door.tex;KH_DOOR[dgid]={lvl:id,at:{x:8,y:12,f:0}};L.chars[dc]=dgid;
+  const dgid=KH_NEXT_GID++;T_TILE[dgid]=T.door.tex;KH_DOOR[dgid]={lvl:id,at:kind==='cave'?{x:8,y:12,f:0}:{x:13,y:18,f:0}};L.chars[dc]=dgid; // where the party stands just inside: the cave's start, or the ruin's
   for(let dy=0;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)wdSetRow(L,x+dx,y+dy,(dy===2&&dx===0)?dc:rc);
   // the trees round the little building are made invisible, and a dry thicket grows across the door
   for(const d of L.decor)if(!d.npc&&!d.loot&&!d.shop&&!d.enter&&d.x>=x-3&&d.x<=x+3&&d.y>=y-1&&d.y<=y+4&&!(d.x===x&&d.y===y+3)){d.block=false;d.sc=.0001;d.pfCut=1}
@@ -160,7 +162,7 @@ function wdBuild(id){
   const chars={'#':T.wall};chars[door]=dgid;
   if(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[P.n])LEVEL_RATING[id]=LEVEL_RATING[P.n];
   LEVEL_NAMES[id]=name;
-  return {rows:g.map(r=>r.join('')),start:{x:sx,y:sy,f:0},enemies,items,decor,chars,day:0,name,label:name,diff,ceilH:cave?2.6:2.9,torchGap:1e9,portals:[],lights:[],mapNames:[{t:name,x:sx,y:H-1,k:'place'}]}}
+  return {rows:g.map(r=>r.join('')),start:{x:sx,y:sy,f:0},enemies,items,decor,chars,day:0,name,label:name,diff,ceilH:cave?2.6:2.9,torchGap:1e9,noTele:true,portals:[],lights:[],mapNames:[{t:name,x:sx,y:H-1,k:'place'}]}}
 /* every place gets a lazy builder */
 for(let i=0;i<WD_CAVES.length;i++)KH_LAZY[WD_CAVE0+i]=((id)=>()=>{if(!LEVELS[id])LEVELS[id]=wdBuild(id)})(WD_CAVE0+i);
 for(const n of [...WD_OUT,...Array.from({length:24},(_,i)=>400+i)])for(let k=0;k<4;k++){const id=wdRuinId(n,k);KH_LAZY[id]=((i)=>()=>{if(!LEVELS[i])LEVELS[i]=wdBuild(i)})(id)}
@@ -194,3 +196,15 @@ for(const [lv,npc,img] of [[3,'tw_woodsman','peasantM'],[13,'ih_scout','huntress
   let best=null,bd=1e9;for(let y=1;y<L.rows.length-1;y++)for(let x=1;x<L.rows[0].length-1;x++){if(L.rows[y][x]!=='.'||taken.has(x+','+y)||near(x,y))continue;const d=Math.abs(x-(st.x+6))+Math.abs(y-st.y);if(d<bd&&d>=3){bd=d;best=[x,y]}}
   if(best)L.decor.push({k:img,x:best[0],y:best[1],block:true,npc});
 }
+
+/* the world map opens centred on the party: along the Pilgrim's Path (by how far along it they stand, even from inside a cave or ruin), or on the place a cave or ruin belongs to */
+function wvCentre(){
+  try{
+    let n=LEVEL,row=G.P.y;
+    if(n>=7100){
+      if(n<7120){const ci=n-7100;n=LP.BASE+PF_SEGS[ci];row=(PF_ENT[ci]||{}).y||400}
+      else{const P=wdParent(n),e=WD_ENT[LEVEL];n=P.n;if(e)row=e.y}}
+    if(wdIsLP(n)){const f=lpGY(n-LP.BASE,row)/LP_TOT,Q=k=>WORLD_LOCS.find(q=>q.k===k),O=Q('oldhaven'),C=Q('landpath'),Y=Q('yarrim');if(O&&C&&Y){const a=(1-f)*(1-f),b=2*f*(1-f),c=f*f;return [a*O.x+b*C.x+c*Y.x,a*O.y+b*C.y+c*Y.y]}return C?[C.x,C.y]:null} // how far along the path the party stands, on a curve from Oldhaven through the Path's mark to Yarrim
+    if(LEVEL>=7100){const l=WORLD_LOCS.find(q=>q.lv.includes(n));return l?[l.x,l.y]:null}
+  }catch(e){}
+  return null}

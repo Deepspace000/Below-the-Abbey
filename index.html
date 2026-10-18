@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.348';
+const VERSION='3.353';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2624,7 +2624,7 @@ function render3D(){
     const wh=TEX[ti].wh||(LEVEL===3&&mx>0&&my>0&&mx<MW-1&&my<MH-1?1.55:CEILH); // Thornwick's houses are one storey under the high sky; the forest round it stays tall
     const skyW=(LEVEL===22&&g===1&&T_SKY[0]!==undefined)||(!!TEX[ti].sky&&!!SKYPAN),tileW=!skyW&&!TEX[ti].h&&wh>2&&(g>=100||g===1||g===2||g===6||(g>=9&&g<=14)||(g>=20&&g<=22)); // tall plain walls repeat their pattern instead of stretching
     const tex=TEX[ti],te=tex.e,wlv=fastW&&perp>4?Math.min(4,Math.floor(Math.log2(TS*perp/F*.7))):0,td=wlv>0&&tex.d&&tex.d.length===TS*TS*4?wallMip(tex,wlv):tex.d; // far facades are read from blurred copies
-    const kd=(LEVEL===44||LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<440))&&g>=100?KH_DOOR[g]:undefined,dg=kd!==undefined&&kd.lvl!==undefined,dgs=dg?(.7+.18*Math.sin(t*2.1+mx*1.7+my*.9))*(1-Math.min(.55,perp*.008)):0; // a doorway that can be entered glows softly, brighter near the threshold
+    const kd=(LEVEL===44||LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<440)||(typeof wdDoorLevel==='function'&&wdDoorLevel(LEVEL)))&&g>=100?KH_DOOR[g]:undefined,dg=kd!==undefined&&kd.lvl!==undefined,dgs=dg?(.7+.18*Math.sin(t*2.1+mx*1.7+my*.9))*(1-Math.min(.55,perp*.008)):0; // a doorway that can be entered glows softly, brighter near the threshold
     const dist=perp*Math.hypot(rX,rY);
     const lb=Math.max(baseL(dist),lbm);let lt=0;
     const px=hx-(side===0?stx*.03:0),py=hy-(side===1?sty*.03:0);
@@ -7269,7 +7269,7 @@ function drawDragGhost(){
   if(d.hover){ctx.strokeStyle='#ffe36a';ctx.lineWidth=2;rrect(ctx,d.hover.x-1,d.hover.y-1,d.hover.w+2,d.hover.h+2,4);ctx.stroke()}
   ctx.globalAlpha=.92;if(def)itemIcon(def,d.x,d.y,1.5);ctx.globalAlpha=1;
 }
-const wvDefault=()=>{const z=.85,l=typeof WORLD_LOCS!=='undefined'?WORLD_LOCS.find(q=>q.lv.includes(LEVEL)):null;if(!l)return {z,x:-30,y:0};   // the map opens with the party in the middle of it
+const wvDefault=()=>{const z=.85,wc=typeof wvCentre==='function'?wvCentre():null;if(wc)return {z,x:clamp(-(wc[0]-240)*z,-1000*z,260*z),y:clamp(-(wc[1]-160)*z,-170*z,260*z)};const l=typeof WORLD_LOCS!=='undefined'?WORLD_LOCS.find(q=>q.lv.includes(LEVEL)):null;if(!l)return {z,x:-30,y:0};   // the map opens with the party in the middle of it
   return {z,x:clamp(-(l.x-240)*z,-1000*z,260*z),y:clamp(-(l.y-160)*z,-170*z,260*z)}};
 function setWorldZoom(nz,cx,cy){
   const V=G.wv||(G.wv=wvDefault());nz=clamp(nz,.6,5);
@@ -20268,7 +20268,7 @@ function freeNear(x,y,rad,count){
   return out;
 }
 function desertBump(nx,ny,g){
-  if((LEVEL===44||LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<440))&&g>=1000&&khBump(nx,ny,g))return true;
+  if((LEVEL===44||LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<440)||(typeof wdDoorLevel==='function'&&wdDoorLevel(LEVEL)))&&g>=1000&&khBump(nx,ny,g))return true;
   if(TERR_BLOCK&&TERR_BLOCK[ny*MW+nx]){sfx('bump');msg(yarSea(LEVEL)?(TERRS[LEVEL]&&TERRS[LEVEL].h[ny*MW+nx]>.9?'The rock is too steep to climb.':'The water is too deep to wade.'):'The mountainside is too steep to climb.','#d8c8a0');return true}
   { // the door in the side of a mound: walk into it
     const d=G.decor.find(q=>q.enter&&q.x===nx&&q.y===ny&&!q.found);
@@ -21673,7 +21673,7 @@ function pfCaveBuild(ci){
   const ent=PF_ENT[ci]||{n:LP.BASE+PF_SEGS[ci],x:80,y:300};
   const rk=pfRockGid(2.6,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=T_DOORS.cave;KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:3}};
   const chars={'#':rk};chars[door]=dgid;
-  return {rows:g.map(r=>r.join('')),start:{x:8,y:H-3,f:0},enemies,items,decor,chars,day:0,name:PF_NAMES[ci],label:PF_NAMES[ci],diff,ceilH:2.6,torchGap:1e9,portals:[],lights:[],
+  return {rows:g.map(r=>r.join('')),start:{x:8,y:H-3,f:0},enemies,items,decor,chars,day:0,name:PF_NAMES[ci],label:PF_NAMES[ci],diff,ceilH:2.6,torchGap:1e9,noTele:true,portals:[],lights:[],
     mapNames:[{t:PF_NAMES[ci],x:8,y:H-1,k:'place'}]};
 }
 for(let i=0;i<PF_CAVES;i++)KH_LAZY[PF_CAVE0+i]=((ci)=>()=>{if(!LEVELS[PF_CAVE0+ci]){const lv=pfCaveBuild(ci);LEVELS[PF_CAVE0+ci]=lv}})(i);
@@ -21735,6 +21735,8 @@ const WD_CAVE0=7200,WD_RUIN0=8000;
 WD_CAVES.forEach((c,i)=>LEVEL_NAMES[WD_CAVE0+i]=c[2]);
 const WD_ENT={}; // interior id -> {n,x,y,f}: where its door stands in the outdoor map
 const wdRuinId=(n,k)=>WD_RUIN0+n*8+k;
+/* the levels where a door tile can be walked into: every cave and ruin, and every outdoor map that has an entrance to one */
+function wdDoorLevel(n){return n>=7100||WD_OUT.includes(n)}
 const wdIsLP=n=>typeof LP!=='undefined'&&n>=LP.BASE&&n<LP.BASE+LP.N;
 const wdCount=n=>{const r=hash2(n,3,4401);return wdIsLP(n)?1+(r>.6?1:0):1+Math.floor(r*4)};
 /* ---------- styles and tiles ---------- */
@@ -21772,7 +21774,7 @@ function wdPlace(L,n,id,kind,tint,seed){
   L.chars=L.chars||{};
   const wh=L.ceilH||5,T=wdTiles(kind,Math.min(wh,3.4),tint,false),rc=String.fromCharCode(0x3a0+(id%64)),dc=String.fromCharCode(0x3e0+(id%64));
   L.chars[rc]=T.wall;
-  const dgid=KH_NEXT_GID++;T_TILE[dgid]=T.door.tex;KH_DOOR[dgid]={lvl:id,at:{x:8,y:12,f:0}};L.chars[dc]=dgid;
+  const dgid=KH_NEXT_GID++;T_TILE[dgid]=T.door.tex;KH_DOOR[dgid]={lvl:id,at:kind==='cave'?{x:8,y:12,f:0}:{x:13,y:18,f:0}};L.chars[dc]=dgid; // where the party stands just inside: the cave's start, or the ruin's
   for(let dy=0;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)wdSetRow(L,x+dx,y+dy,(dy===2&&dx===0)?dc:rc);
   // the trees round the little building are made invisible, and a dry thicket grows across the door
   for(const d of L.decor)if(!d.npc&&!d.loot&&!d.shop&&!d.enter&&d.x>=x-3&&d.x<=x+3&&d.y>=y-1&&d.y<=y+4&&!(d.x===x&&d.y===y+3)){d.block=false;d.sc=.0001;d.pfCut=1}
@@ -21875,7 +21877,7 @@ function wdBuild(id){
   const chars={'#':T.wall};chars[door]=dgid;
   if(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[P.n])LEVEL_RATING[id]=LEVEL_RATING[P.n];
   LEVEL_NAMES[id]=name;
-  return {rows:g.map(r=>r.join('')),start:{x:sx,y:sy,f:0},enemies,items,decor,chars,day:0,name,label:name,diff,ceilH:cave?2.6:2.9,torchGap:1e9,portals:[],lights:[],mapNames:[{t:name,x:sx,y:H-1,k:'place'}]}}
+  return {rows:g.map(r=>r.join('')),start:{x:sx,y:sy,f:0},enemies,items,decor,chars,day:0,name,label:name,diff,ceilH:cave?2.6:2.9,torchGap:1e9,noTele:true,portals:[],lights:[],mapNames:[{t:name,x:sx,y:H-1,k:'place'}]}}
 /* every place gets a lazy builder */
 for(let i=0;i<WD_CAVES.length;i++)KH_LAZY[WD_CAVE0+i]=((id)=>()=>{if(!LEVELS[id])LEVELS[id]=wdBuild(id)})(WD_CAVE0+i);
 for(const n of [...WD_OUT,...Array.from({length:24},(_,i)=>400+i)])for(let k=0;k<4;k++){const id=wdRuinId(n,k);KH_LAZY[id]=((i)=>()=>{if(!LEVELS[i])LEVELS[i]=wdBuild(i)})(id)}
@@ -21909,6 +21911,18 @@ for(const [lv,npc,img] of [[3,'tw_woodsman','peasantM'],[13,'ih_scout','huntress
   let best=null,bd=1e9;for(let y=1;y<L.rows.length-1;y++)for(let x=1;x<L.rows[0].length-1;x++){if(L.rows[y][x]!=='.'||taken.has(x+','+y)||near(x,y))continue;const d=Math.abs(x-(st.x+6))+Math.abs(y-st.y);if(d<bd&&d>=3){bd=d;best=[x,y]}}
   if(best)L.decor.push({k:img,x:best[0],y:best[1],block:true,npc});
 }
+
+/* the world map opens centred on the party: along the Pilgrim's Path (by how far along it they stand, even from inside a cave or ruin), or on the place a cave or ruin belongs to */
+function wvCentre(){
+  try{
+    let n=LEVEL,row=G.P.y;
+    if(n>=7100){
+      if(n<7120){const ci=n-7100;n=LP.BASE+PF_SEGS[ci];row=(PF_ENT[ci]||{}).y||400}
+      else{const P=wdParent(n),e=WD_ENT[LEVEL];n=P.n;if(e)row=e.y}}
+    if(wdIsLP(n)){const f=lpGY(n-LP.BASE,row)/LP_TOT,Q=k=>WORLD_LOCS.find(q=>q.k===k),O=Q('oldhaven'),C=Q('landpath'),Y=Q('yarrim');if(O&&C&&Y){const a=(1-f)*(1-f),b=2*f*(1-f),c=f*f;return [a*O.x+b*C.x+c*Y.x,a*O.y+b*C.y+c*Y.y]}return C?[C.x,C.y]:null} // how far along the path the party stands, on a curve from Oldhaven through the Path's mark to Yarrim
+    if(LEVEL>=7100){const l=WORLD_LOCS.find(q=>q.lv.includes(n));return l?[l.x,l.y]:null}
+  }catch(e){}
+  return null}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
