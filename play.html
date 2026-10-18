@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.322';
+const VERSION='3.323';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -4364,7 +4364,8 @@ function drawWorldMap(){
   ctx.save();
   rrect(ctx,x0,y0,w,h,6);ctx.clip();
   const g=ctx.createLinearGradient(0,y0,0,y0+h);g.addColorStop(0,'#bcaa7e');g.addColorStop(1,'#9e8c64');ctx.fillStyle=g;ctx.fillRect(x0,y0,w,h);
-  ctx.globalAlpha=.13;for(let i=0;i<110;i++){const a=hash2(i,1,7),b=hash2(i,2,7);ctx.fillStyle=i%3?'#5a4630':'#e8dcb0';ctx.beginPath();ctx.ellipse(x0+a*w,y0+b*h,6+hash2(i,3,7)*30,3+hash2(i,4,7)*14,hash2(i,5,7)*3,0,TAU);ctx.fill()}ctx.globalAlpha=1;
+  { // a faint painted mountain view far behind the lands: it moves a little as the map is dragged, so the map feels deep
+    const im=IMG.wm_mtn;if(im&&im.width){const WV0=G.wv||{x:0,y:0,z:1},sc=Math.max(w*1.5/im.width,h*1.5/im.height),iw=im.width*sc,ih=im.height*sc,px=(w-iw)/2+clamp(WV0.x*.12,-(iw-w)/2,(iw-w)/2),py=(h-ih)/2+clamp(WV0.y*.12,-(ih-h)/2,(ih-h)/2);ctx.globalAlpha=.34;ctx.drawImage(im,x0+px,y0+py,iw,ih);ctx.globalAlpha=1}}
   if(G._wvT===undefined||G.time-G._wvT>.5)G.wv=wvDefault();G._wvT=G.time;   // newly opened: centre on the party
   const WV=G.wv||(G.wv=wvDefault());
   ctx.save();ctx.translate(240+WV.x,160+WV.y);ctx.scale(WV.z,WV.z);ctx.translate(-240,-160); // the lands themselves can be dragged and zoomed
@@ -4383,13 +4384,6 @@ function drawWorldMap(){
     ctx.font=`italic 17px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.72)';ctx.fillText('The Sea Lands',652,16);ctx.font=`italic 8px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.55)';ctx.fillText('the country along the coast',652,29);
     ctx.font=`italic 15px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.72)';ctx.fillText('The Hollow Lands',-6,206);ctx.font=`italic 8px ${FTITLE}`;ctx.fillStyle='rgba(50,36,18,.55)';ctx.fillText('under the Abbey',-6,219);ctx.restore();
   }
-  // faint hand-drawn coast and old survey marks, to show where the lands are still blank
-  ctx.strokeStyle='rgba(60,44,26,.28)';ctx.lineWidth=1.2;ctx.setLineDash([3,4]);
-  ctx.beginPath();ctx.moveTo(30,288);for(let i=0;i<=24;i++)ctx.lineTo(30+i*18,284+Math.sin(i*1.3)*5+Math.cos(i*.7)*3);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(34,60);for(let i=0;i<=8;i++)ctx.lineTo(34+i*8,60-i*5+Math.sin(i)*3);ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.font=`italic 9px ${FTITLE}`;ctx.fillStyle='rgba(60,44,26,.34)';ctx.textAlign='center';ctx.textBaseline='middle';
-  for(const [t,x,y] of [['Uncharted',70,100],['Uncharted',250,50],['Unknown seas',150,285]])ctx.fillText(t,x,y);
   // roads
   { // the Narrow Sea: a coast running north to south far in the east, and islands scattered in the water
     const cxo=y=>714+10*Math.sin(y*.045)+6*Math.sin(y*.13+1)+(y>200?-8:0);
@@ -21414,6 +21408,10 @@ const PFX_LEN={slash:.5,spin:.7,claw:.5,heal:.8,rise:1.1,aura:.9,holy:.8,fire:.7
   for(let i=PFX.length-1;i>=0;i--){const f=PFX[i];f.t+=d;if(f.t<0)continue;const T=PFX_LEN[f.k]||.6;if(f.t>T){PFX.splice(i,1);continue}
     const p=f.t/T;let s=(f.seed*7919+5)%2147483647||5;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
     ctx.save();if(!f.hud){ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip()}ctx.globalCompositeOperation='lighter';pfxDraw(f,p,rnd);ctx.restore()}}catch(e){}}}
+
+/* ---- src/desert/worldback.js ---- */
+/* the faint painted mountain view behind the world map (drawn by drawWorldMap, with a little parallax when the map is dragged) */
+loadImg('wm_mtn','assets/wm_mountains.jpg');
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
