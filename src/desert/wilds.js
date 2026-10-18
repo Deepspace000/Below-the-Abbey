@@ -188,10 +188,15 @@ function wdBuild(id){
     if(kind==='fugitive'){person('pf_hunted');const c=pick(3);if(c)decor.push({k:'barrel',x:c[0],y:c[1],block:true})}
   }else{
     // overgrown: trees, bushes and flowers growing in the halls, all of them passable; and herbs everywhere
-    cells.forEach(([a,b],i)=>{if(used.has(a+','+b)||(a===sx&&b>=sy-1))return;const r=hash2(a,b,740+id%9);
-      if(r<.09)decor.push({k:r<.045?'pt_birch':'pt_willow',x:a,y:b,block:false,walk:true,sc:.62+hash2(a,b,745)*.3});
-      else if(r<.2)decor.push({k:'lflora0'+(r<.14?'':r<.17?'_1':'_2'),x:a,y:b,block:false,walk:true,deco:true,sc:.9});
-      else if(r<.24)decor.push({k:'lbush0',x:a,y:b,block:false,walk:true,sc:.8})});
+    pfVineArt();const inRoom=(a,b)=>(R.rooms||[]).some(q=>a>=q.x0&&a<=q.x1&&b>=q.y0&&b<=q.y1),FL=['pflw0_0','pflw1_0','pflw2_1','pflw3_0','pflw4_1','pflw5_0'],GR=['pgrass0','pgrass1','pgrass2','pgrass3'],THIN=['ptree1','ptree4','ptree2','ptree7','ptree9','ptree4'];
+    cells.forEach(([a,b],i)=>{if(used.has(a+','+b)||(a===sx&&b>=sy-1))return;const r=hash2(a,b,740+id%9),pt=tsmooth(a/3.1,b/3.1,id%89+3),room=inRoom(a,b);
+      // growth gathers in patches, the way it does in a dark ruin: thin pale saplings only in the rooms, ferns and bushes, tufts of grass through the flags, the odd flower
+      if(room&&r<.06&&pt>.5)decor.push({k:THIN[(hash2(a,b,741)*THIN.length)|0],x:a,y:b,block:false,walk:true,sc:.45+hash2(a,b,745)*.3,ox:(hash2(a,b,746)-.5)*.6,oy:(hash2(a,b,747)-.5)*.6});
+      else if(r<.2&&pt>.4)decor.push({k:hash2(a,b,742)<.5?'lbush0'+(hash2(a,b,743)<.5?'':'_2'):'pbracken',x:a,y:b,block:false,walk:true,sc:.6+hash2(a,b,748)*.5,ox:(hash2(a,b,749)-.5)*.7,oy:(hash2(a,b,750)-.5)*.7});
+      else if(r<.45&&pt>.3)decor.push({k:GR[(hash2(a,b,751)*4)|0],x:a,y:b,block:false,walk:true,deco:true,sc:1+hash2(a,b,752)*1.4,ox:(hash2(a,b,753)-.5)*.8,oy:(hash2(a,b,754)-.5)*.8});
+      else if(r<.5&&pt>.55)decor.push({k:FL[(hash2(a,b,755)*FL.length)|0],x:a,y:b,block:false,walk:true,deco:true,sc:.9+hash2(a,b,756)*.8,ox:(hash2(a,b,757)-.5)*.8,oy:(hash2(a,b,758)-.5)*.8});
+      if(hash2(a,b,759)<.2)decor.push({k:'rs_vine'+((hash2(a,b,760)*3)|0),x:a,y:b,block:false,walk:true,deco:true,bob:1.4,sc:.8+hash2(a,b,761)*.5,ox:(hash2(a,b,762)-.5)*.7,oy:(hash2(a,b,763)-.5)*.7}); // vines hanging from the roof
+    });
     const nh=6+((hash2(id,3,741)*5)|0);for(let i=0;i<nh;i++){const c=pick(60+i);if(!c)break;const h=HERBS[(hash2(id,i,742)*HERBS.length)|0];items.push({k:'herb_'+h[0],x:c[0],y:c[1]})}
     if(kind==='treasure'){decor.push({k:'chest',x:far[0],y:far[1],block:true,goldAmt:gold});const c=pick(80);if(c)items.push({k:'potion',x:c[0],y:c[1]})}
     if(kind==='slime'){for(let i=0;i<4;i++){const c=pick(90+i);if(c)enemies.push({t:'slime',x:c[0],y:c[1]})}}

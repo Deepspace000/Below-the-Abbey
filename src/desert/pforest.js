@@ -449,3 +449,10 @@ function pfRuinProps(g,W,H,sx,sy,keepCells,used,decor,items,enemies,id){
     placed.push([x,y]);const h=hash2(x,y,772);
     for(let i=decor.length-1;i>=0;i--)if(decor[i].x===x&&decor[i].y===y&&decor[i].k!=='chest')decor.splice(i,1);
     decor.push({k:KINDS[(h*KINDS.length)|0],x,y,block:true,sc:.9+hash2(x,y,773)*.3,ox:(hash2(x,y,774)-.5)*.3,oy:(hash2(x,y,775)-.5)*.3})}}
+
+function pfVineArt(){ // long strands of ivy and root hanging from the ceiling
+  if(IMG.rs_vine0)return;
+  for(let v=0;v<3;v++){const w=110,h=300,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d'),H=(a,b)=>hash2(a,b,950+v);
+    for(let k=0;k<5+v;k++){let px=10+H(k,1)*(w-20);const len=h*(.45+H(k,2)*.55);x.strokeStyle=`rgba(${22+((H(k,3)*14)|0)},${40+((H(k,4)*30)|0)},${18},.95)`;x.lineWidth=1.5+H(k,5)*2;x.beginPath();x.moveTo(px,0);for(let t=1;t<=18;t++){px+=Math.sin(t*.6+k*2+v)*3;x.lineTo(px,len*t/18)}x.stroke();
+      for(let t=0;t<14;t++){const ly=len*(t/14),lx=px-(1-t/14)*0+Math.sin(ly*.034+k*2+v)*3*18*.0+0;x.fillStyle=`rgba(${34+((H(k*20+t,6)*26)|0)},${70+((H(k*20+t,7)*50)|0)},${24},.92)`;x.beginPath();x.ellipse(10+H(k,1)*(w-20)+Math.sin(ly*.033+k*2+v)*14+(H(k*20+t,8)-.5)*8,ly,3+H(k*20+t,9)*5,2+H(k*20+t,10)*3,H(k*20+t,11)*3,0,6.283);x.fill()}}
+    IMG['rs_vine'+v]=c;NPC_H['rs_vine'+v]=1.5}}
