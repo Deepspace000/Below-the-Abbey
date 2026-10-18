@@ -139,6 +139,7 @@ function pfDense(n){
   {const st=L.start||{x:0,y:0};occ.add(st.x+','+st.y);if(L.tele)for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)occ.add((L.tele.x+dx)+','+(L.tele.y+dy))}
   const keep=new Set(),yards=[]; // the little open yards in front of hidden doors
   for(const q of L._wd||[]){const yd=[];for(let dy=-1;dy<=4;dy++)for(let dx=-3;dx<=3;dx++){const k=(q.x+dx)+','+(q.y+dy);keep.add(k);if(dy>=3)yd.push([q.x+dx,q.y+dy])}yards.push(yd)}
+  {const ci=PF_SEGS.indexOf(s);if(ci>=0&&PF_ENT[ci]&&PF_ENT[ci].n===n)keep.add(PF_ENT[ci].x+','+PF_ENT[ci].y)} // the square in front of a cave door stays clear
   const pick=(a,r)=>a[Math.min(a.length-1,(r*a.length)|0)];
   const blob=(x,gy)=>{ // a little round clearing, three to five squares across, ragged at the edge
     const bx=Math.floor(x/8),by=Math.floor(gy/8);
@@ -155,6 +156,11 @@ function pfDense(n){
     let pS=hedge?.85:depth<1?.85:depth<2?.78:depth<3?.66:depth<4?.52:depth<5?.42:PF_SOLID; // a wall of trunks along the road, loosening as it goes deeper
     if(!hedge&&depth>=5)pS=Math.max(.1,Math.min(.72,pS+(tsmooth(x/6,gy/6,9301)-.5)*.9)); // thickets and airy stretches
     return hs(x,gy,9302)<pS?1:2};
+  { // straight east from each cross: a row of walk-through trees and short grass runs from the road to the cave or wild dungeon, so walking straight on always arrives
+    const ci=PF_SEGS.indexOf(s),runs=[];
+    if(ci>=0&&PF_ENT[ci]&&PF_ENT[ci].n===n)runs.push([PF_ENT[ci].y,PF_ENT[ci].x-1]);
+    for(const q of L._wd||[])runs.push([q.y+3,q.x-4]);
+    for(const [y,x1] of runs)for(let x=zs[y];x<=x1;x++)if(elig(x,y))paths.add(x+','+y)}
   const flo=L.scenery||(L.scenery=[]);
   const flower=(x,y,gy,seed,sc,set)=>{const a=set||PF_FLO,k=pick(a,hs(x,gy,seed+1));flo.push({k,wx:x+.12+hs(x,gy,seed+2)*.76,wy:y+.12+hs(x,gy,seed+3)*.76,sc,decor:{k,walk:true,x,y}})};
   const dress=(d,x,y,gy,soft)=>{ // what grows on this square
