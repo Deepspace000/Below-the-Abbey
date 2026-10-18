@@ -87,14 +87,14 @@ function luckSay(){
 function luckPas(key){const v=luckVal();return key==='crit'?v*.005:key==='goldPct'?v*.02:key==='dodge'?v*.003:0}
 /* ---------------------------------------------------------------- the road: caravans, night thieves and bards ---------------------------------------------------------------- */
 function worldEventsTick(min){
-  if(G.state!=='play'||G.cut||G.talk||G.menu)return;
+  if(G.state!=='play'||G.cut||G.talk||G.menu||LEVEL>=7100)return; // never in a cave or a wild dungeon
   const F=G.flags,E=F.ev||(F.ev={clock:G.clock,last:-9999}),t=repTownOf(LEVEL),reg=wxRegionOf(LEVEL),hour=(G.clock%1440)/60;
   E.clock+=min;
   luckSay();
   if(E.clock<90||G.clock-E.last<240||G.decor.some(d=>d.ev))return; // events are rare
   E.clock=0;
   const luck=luckVal();
-  if(t&&hour>=18&&hour<24&&Math.random()<.35)return evSpawn('ev_bard',['peasantM','peasantW','drunk'][(Math.random()*3)|0],'A travelling bard has set up near the square. A small crowd gathers.');
+  if(t&&hour>=18&&hour<24&&Math.random()<.35)return evSpawn('ev_bard',IMG.ev_bard?'ev_bard':'peasantW','Tamsin Larkwhistle, the travelling bard, has set up near the square. A small crowd gathers.');
   if(!t&&reg&&hour>=7&&hour<19&&Math.random()<.28+Math.max(0,luck)*.01)return evSpawn('ev_trader','peasantM','A passing merchant has pulled his cart off the road and hung out a sign: wares for sale.');
 }
 function evSpawn(npc,face,text){
@@ -118,14 +118,22 @@ function worldRest(inn){
 }
 khNpc('ev_trader','A passing merchant','peasantM',d=>say('A traveller\'s prices on a traveller\'s road. I carry what the road demands: food, light, cures and the odd bargain.',[['Show me your cart.',()=>{
   openShop(d,[['bread',6],['cheese',4],['water',6],['torch',4],['antidote',3],['salve',3],['healdraught',3],['manadraught',2],['holywater',1],['sleeptea',2]],'The Passing Cart');return null}],['Any news from the road?',()=>say(typeof rumourFor==='function'?rumourFor('road'):'The road is long and the news is stale.',[BYE])],BYE]));
-khNpc('ev_bard','A travelling bard','peasantW',d=>{
-  const F=G.flags,day=dayNum();
-  if(F.bardDay===day)return say('I have sung you my best for today. Come back tomorrow; I know a hundred more.',[BYE]);
-  return say('A song for the weary! A ballad, a drinking song, a lament, or the tale of the goat who ate the tax roll. I do requests. Coins are welcome.',[
-    ['Hear a song (5 gold)',()=>{if(G.gold<5)return say('Five gold. Even bards have to eat.',[BYE]);G.gold-=5;F.bardDay=day;afflInflict('wellrested',-1,true);luckAdd(1);return say('A bright, rolling song about a dragon who went on a diet. The party laughs for the first time in days. Spirits rise.',[BYE])}],
-    ['Tip generously (25 gold)',()=>{if(G.gold<25)return say('That is a kind thought, and I can hear in your purse that you cannot afford it.',[BYE]);G.gold-=25;F.bardDay=day;luckAdd(2,'a generous tip');honourAdd(1);const t=repTownOf(LEVEL);if(t)repAdd(t,2,'you tipped the bard');afflInflict('wellrested',-1,true);return say('He bows to the ground and sings a long song that mentions you all by name. Half the square joins in.',[BYE])}],
-    ['Do you know anything useful?',()=>say(typeof rumourFor==='function'?rumourFor('town'):'Only songs, I am afraid. But songs travel, and so does gossip.',[BYE])],BYE]);
-});
+loadImg('ev_bard','assets/ev_bard.png');NPC_H.ev_bard=1.25;
+const BARD_SONGS=[ // what Tamsin sings, one for each evening
+  ['The Ballad of the Goat and the Tax Roll','A long, rolling ballad about a goat who ate every page of the tax roll, and the three tax men who followed her for a year to get it back, one bite at a time. The square laughs until it cries.'],
+  ['The Dragon Who Went on a Diet','A bright song about a dragon who stopped eating knights for the good of her scales. It ends badly for the knights, and very well for the baker.'],
+  ['Saint Elen’s Lament','A slow, clear lament for the pilgrims who walk the long road and do not come back the same. Nobody speaks when it ends. Somebody blows their nose.'],
+  ['The Drowned Bell of Oldhaven','A cold, lovely song about a bell that still rings under the harbour on the nights before a storm. Tamsin plays it very quietly, and the lamps seem to dim.'],
+  ['Three Crows at the Crossroads','A quick, wicked drinking song about three crows who sell the same road to three travellers. The chorus is shouted by everyone who knows it, and a few who do not.'],
+  ['The Lantern in the Oak','A gentle tune about a lantern someone left in an old oak, and every traveller who has sat beneath it since. It is the one she plays last.']];
+khNpc('ev_bard','Tamsin Larkwhistle, bard','ev_bard',d=>{
+  const F=G.flags,day=dayNum(),song=BARD_SONGS[day%BARD_SONGS.length];
+  if(F.bardDay===day)return say('I have sung you my best for tonight. Come back tomorrow evening; I know a good many more, and I never sing the same one twice running.',[BYE]);
+  return say('Tamsin Larkwhistle, at your service, and at the service of anyone with a coin and a quiet minute! I walk the roads for the songs, and the roads walk me for the dinners. Tonight it is “'+song[0]+'”. Five gold, or whatever you can spare.',[
+    ['Hear the song (5 gold)',()=>{if(G.gold<5)return say('Five gold. Even bards have to eat, I am afraid.',[BYE]);G.gold-=5;F.bardDay=day;afflInflict('wellrested',-1,true);luckAdd(1);return say(song[1]+' The party feels rested, and a little braver.',[BYE])}],
+    ['Tip generously (25 gold)',()=>{if(G.gold<25)return say('That is a kind thought, and I can hear in your purse that you cannot afford it.',[BYE]);G.gold-=25;F.bardDay=day;luckAdd(2,'a generous tip');honourAdd(1);const t=repTownOf(LEVEL);if(t)repAdd(t,2,'you tipped the bard');afflInflict('wellrested',-1,true);return say('Tamsin bows so low her feather brushes the stones, and sings “'+song[0]+'” twice, once for the square and once for you. Then she adds a verse that mentions each of you by name.',[BYE])}],
+    ['Heard anything on the road?',()=>say(typeof rumourFor==='function'?rumourFor('town'):'Only songs, I am afraid. But songs travel, and so does gossip.',[BYE])],BYE]);
+},{sc:1});
 journalPage({id:'wx',title:'Weather and Seasons',
   summary:()=>{const w=weatherNow();return `${seasonOf()}, day ${dayNum()+1}. ${w?'Now: '+w.n+'.':'Indoors or underground: no weather here.'} Open for the forecast and what each kind of weather does.`},
   note:()=>0,
