@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.382';
+const VERSION='3.383';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2301,7 +2301,7 @@ function doMove(rel){ // rel: 0 forward, 1 right, 2 back, 3 left
   if(g>0&&typeof secretBump==='function'&&secretBump(nx,ny))return; // a hidden door in the castle opens when the party walks into it
   const bd=g>0?null:G.decor.find(d=>d.block&&d.x===nx&&d.y===ny);
   if(g>0||bd){sfx('bump');G.shake=.12;
-    if(bd&&LEVEL>=400&&LEVEL<424&&/^[lp]tree\d/.test(bd.k)&&(G.flags.pfTreeHint||0)<3&&G.time-(G._treeMsgT||-99)>5){G._treeMsgT=G.time;G.flags.pfTreeHint=(G.flags.pfTreeHint||0)+1;msg('A solid trunk blocks the way. Willows, birches and ferns can be walked through, but oaks and firs cannot.','#c8d8a0')} // the rule of the thick woods, told the first few times
+    if(bd&&LEVEL>=400&&LEVEL<424&&/^[lp]tree\d/.test(bd.k)&&(G.flags.pfTreeHint||0)<3&&G.time-(G._treeMsgT||-99)>5){G._treeMsgT=G.time;G.flags.pfTreeHint=(G.flags.pfTreeHint||0)+1;msg('A solid trunk blocks the way. Willows, birches, ferns and about half of the oaks can be walked through, but firs and the other oaks cannot.','#c8d8a0')} // the rule of the thick woods, told the first few times
     return}
   const e=enemyAt(nx,ny);
   if(e){msg(`The ${ENEMY_DEF[e.t].name} blocks the way!`);sfx('bump');return}
@@ -22125,7 +22125,7 @@ function wdPrep(n){
 /* ---------- the word in town: a woodsman in Thornwick and a scout in Ironhill talk about the hidden places ---------- */
 const WD_TALK=[
  "Walk the woods slowly, and keep an eye on the dead trees. Where a few of them stand twisted across nothing at all, there is usually a reason. Burn them down with a torch or a lantern and you may find a door.",
- "The woods along the sea are thick, and you will not walk straight through them. Willows, birches and ferns give way as you push into them. Oaks and firs do not, so you have to look for a way round. Grassy tracks run in from the road every so often, and some of them wind a long way.",
+ "The woods along the sea are thick, and you will not walk straight through them. Willows, birches and ferns give way as you push into them, and so do about half of the oaks. Firs and the other oaks do not, so you have to look for a way round. Grassy tracks run in from the road every so often, and some of them wind a long way.",
  "Behind some of those thickets there are caves. Wolves, bears, sometimes a poor soul who has been driven out of a village and has nowhere else to go. A few of them have a little treasure, and a few have a quest, if you are kind.",
  "And the old ruins, grown over with vines. Most are empty, and dark as the inside of a boot. Some have a chest. Some have been taken by slimes, so do not go in with an empty health bar. But the herbs! The herbs in those halls are the best I have ever seen.",
  "Once you have seen a spot, a little question mark turns up on your map. It means a place is there, and could be anything. It goes away once you have been inside."];
