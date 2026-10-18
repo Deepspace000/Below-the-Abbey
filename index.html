@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.399';
+const VERSION='3.400';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -16597,7 +16597,8 @@ const LP_FOODS=['bread','cheese','apple','herring','pie','ale'];
 const lpEat=()=>{let n=0;for(const h of G.heroes){if(h.alive===false||h.hp<=0||(h.food>=90&&h.hp>=h.max))continue;const f=LP_FOODS.find(x=>ITEMDEF[x]&&ITEMDEF[x].k==='food'&&bagCount(x)>0);if(!f)break;
     bagTake(G.bag.findIndex(b=>b.id===f));const d=ITEMDEF[f];h.hp=Math.min(h.max,h.hp+(d.heal||0));h.food=Math.min(100,(h.food||0)+(d.feed||0));n++}
   msg(n?'The party eats what was left at the shrine, standing in the road.':'Nobody is hungry or hurt.','#a8d8a0');sfx('step');return null};
-khNpc('lp_shrine','A roadside shrine','memorial',d=>{
+for(let i=0;i<6;i++){loadImg('lpsh_'+i,'assets/lpsh_'+i+'.png');NPC_H['lpsh_'+i]=1.9} // the pilgrims' shrines of the Path, painted for it
+khNpc('lp_shrine','A pilgrims’ shrine','memorial',d=>{
   const F=G.flags,T=F.lpSh||(F.lpSh={}),k=LEVEL+'_'+d.y,opts=[];
   const have=LP_FOODS.find(f=>bagCount(f)>0);
   if(have)opts.push(['Leave something to eat.',()=>{const j=G.bag.findIndex(b=>b.id===have);if(j>=0)bagTake(j);T[k]=0;try{honourAdd(2,'an offering at a shrine')}catch(e){}msg('You leave it on the stone beside the others.','#c8e8b0');return say('The stone is warm, and the flowers are fresh. A small quiet settles over the road.',[BYE])}]);
@@ -16824,8 +16825,8 @@ function lpBuild(s){
     if(open_(y)&&coast&&g%131===65&&BENCH){const wl=c-6+Math.round(2.2*Math.sin(g*.11)),bx=wl+1;if(!used.has(K(bx,y))&&bx>=3){used.add(K(bx,y));decor.push({npc:'lp_bench',k:BENCH,x:MX(bx),y,block:false,walk:true,deco:true});
       const rk3=LP_REST_NPC[(hs(g,5,gsd+92)*LP_REST_NPC.length)|0],kp3=KH_KEEPERS[rk3[0]];if(kp3&&hs(g,6,gsd+93)<.5&&!used.has(K(bx,y+1))){used.add(K(bx,y+1));decor.push({k:khFaceKey(kp3.face),x:MX(bx),y:y+1,block:false,walk:true,npc:rk3[0],sc:kp3.sc||1})}}}
     if(open_(y)&&coast&&g%47===23&&hs(g,7,gsd+80)>=.3){const wl=c-6+Math.round(2.2*Math.sin(g*.11)),bx=wl-8-((hs(g,8,gsd+81)*14)|0),bk=['yar_boat_fish','yar_boat_row','yar_boat_dhow'][(hs(g,9,gsd+82)*3)|0];if(bx>=4&&IMG[bk]){used.add(K(bx,y));decor.push({k:bk,x:MX(bx),y,block:true,deco:true,sc:.9})}}
-    if(g%104===52){const q=Math.floor(g/104),sg=q%2?-1:1,x=c+sg*4;if(!used.has(K(x,y))&&!used.has(K(x,y+1))){used.add(K(x,y));used.add(K(x+sg,y+1));used.add(K(x,y+1));
-      decor.push({k:'memorial',x:MX(x),y,block:true,npc:'lp_shrine',sc:.9},{k:'flowerpot',x:MX(x+sg),y:y+1,block:false,walk:true,deco:true,sc:.8},{k:IMG.breadbasket?'breadbasket':'flowerpot',x:MX(x),y:y+1,block:false,walk:true,deco:true,sc:.8})}}
+    for(let m=1;m<LP_KM/2;m++){if(Math.round(m*2*LP_ROWS_KM)+14!==g)continue; // a new pilgrims' shrine on the left of the road (west) every two kilometres, with food left on it
+      for(const dx of [-4,-5,-3]){const x=c+dx;if(x<2||used.has(K(x,y))||rows[y][MX(x)]!=='.'||block[I(x,y)])continue;used.add(K(x,y));decor.push({k:'lpsh_'+((m*5+s)%6),x:MX(x),y,block:true,npc:'lp_shrine',sc:1});break}}
     for(let m=1;m<LP_KM;m++){if(Math.round(m*LP_ROWS_KM)!==g)continue;const sk=lpSignKey(LP_KM-m);if(!sk)continue;let dx=null;for(const q of (m%2?[3,4,-3,-4]:[-3,-4,3,4]))if(!used.has(K(c+q,y))){dx=q;break} // the usual side of the road, or the next free place
       if(dx===null)continue;const sx=c+dx;used.add(K(sx,y));decor.push({k:sk,x:MX(sx),y,block:false,walk:true,deco:true});
       if((LP_KM-m)%5===0&&!tele&&s!==LP.N-1){let ex=sx-Math.sign(dx),ey=y;if(used.has(K(ex,ey))){ey=y+1;if(used.has(K(ex,ey)))ey=y-1}used.add(K(ex,ey));tele={x:MX(ex),y:ey};stoneKm=LP_KM-m}} // a stone teleporter right beside the sign, every five kilometres // a signpost at every kilometre: To Yarrim, and how far
@@ -21843,7 +21844,7 @@ function pfCaveBuild(ci){
   const ent=PF_ENT[ci]||{n:LP.BASE+PF_SEGS[ci],x:80,y:300};
   const rk=pfRockGid(2.6,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(2.6,'cave',[255,255,255]);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:3}};
   const chars={'#':rk};chars[door]=dgid;
-  return {rows:g.map(r=>r.join('')),start:{x:8,y:H-3,f:0},enemies,items,decor,chars,day:0,name:PF_NAMES[ci],label:PF_NAMES[ci],diff,ceilH:2.6,torchGap:1e9,noTele:true,portals:[],lights:[],
+  return {rows:g.map(r=>r.join('')),start:{x:8,y:H-3,f:0},enemies,items,decor,chars,day:0,floor:'scree',name:PF_NAMES[ci],label:PF_NAMES[ci],diff,ceilH:2.6,torchGap:1e9,noTele:true,portals:[],lights:[],
     mapNames:[{t:PF_NAMES[ci],x:8,y:H-1,k:'place'}]};
 }
 for(let i=0;i<PF_CAVES;i++)KH_LAZY[PF_CAVE0+i]=((ci)=>()=>{if(!LEVELS[PF_CAVE0+ci]){const lv=pfCaveBuild(ci);LEVELS[PF_CAVE0+ci]=lv}})(i);
@@ -22056,8 +22057,10 @@ function wdExitTile(wh,kind,tint){ // the arch of daylight is set in the same wa
   const key=wh+(kind||'')+(tint?tint.join('_'):'');if(WD_EXIT[key])return WD_EXIT[key];const im=IMG.pf_exit,Hp=Math.round(128*wh),wl=kind==='ruin'?IMG.pf_ruinwall:IMG.pf_rock,tn=wdTone(kind||'cave',tint||[255,255,255],true);
   const c=mkCanvas(128,Hp,(x,w,h)=>{
     if(wl&&wl.width&&kind){for(let yy=0;yy<h;yy+=128)x.drawImage(wl,0,0,wl.width,wl.height,0,yy,128,128);x.globalCompositeOperation='multiply';x.fillStyle=`rgb(${tn[0]},${tn[1]},${tn[2]})`;x.fillRect(0,0,w,h);x.globalCompositeOperation='source-over'}else{x.fillStyle='#1a1814';x.fillRect(0,0,w,h)}
-    if(im&&im.width){const sx=w/256,sy=h/665;x.save();x.beginPath();x.moveTo(30*sx,545*sy);x.lineTo(28*sx,330*sy);x.quadraticCurveTo(34*sx,205*sy,128*sx,198*sy);x.quadraticCurveTo(222*sx,205*sy,228*sx,330*sy);x.lineTo(226*sx,545*sy);x.closePath();x.clip();x.drawImage(im,0,0,im.width,im.height,0,0,w,h);x.restore();
-      x.strokeStyle='rgba(8,7,5,.75)';x.lineWidth=7;x.beginPath();x.moveTo(30*sx,545*sy);x.lineTo(28*sx,330*sy);x.quadraticCurveTo(34*sx,205*sy,128*sx,198*sy);x.quadraticCurveTo(222*sx,205*sy,228*sx,330*sy);x.lineTo(226*sx,545*sy);x.stroke()} // a dark worn rim all round the opening
+    if(im&&im.width){const sx=w/256,k=h*.9/370,Y=v=>h*.1+(v-190)*k,r=im.height/665; // the opening runs right down to the floor
+      const path=()=>{x.beginPath();x.moveTo(30*sx,Y(572));x.lineTo(28*sx,Y(330));x.quadraticCurveTo(34*sx,Y(205),128*sx,Y(198));x.quadraticCurveTo(222*sx,Y(205),228*sx,Y(330));x.lineTo(226*sx,Y(572))};
+      x.save();path();x.closePath();x.clip();x.drawImage(im,0,190*r,im.width,375*r,0,h*.1,w,h*.9);x.restore();
+      x.strokeStyle='rgba(8,7,5,.75)';x.lineWidth=7;path();x.stroke()} // a dark worn rim all round the opening
     else{x.fillStyle='#c8d8a0';x.fillRect(w*.2,h*.3,w*.6,h*.25)}});
   const d=c.getContext('2d').getImageData(0,0,128,Hp).data,id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;
   const e=new Uint8ClampedArray(d.length); // the bright part of the picture gives off its own light, so the way out shines in the dark
@@ -22203,7 +22206,7 @@ function wdBuild(id){
   const chars={'#':T.wall};chars[door]=dgid;
   if(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[P.n])LEVEL_RATING[id]=LEVEL_RATING[P.n];
   LEVEL_NAMES[id]=name;
-  return {rows:g.map(r=>r.join('')),start:{x:sx,y:sy,f:0},enemies,items,decor,chars,day:0,name,label:name,diff,ceilH:cave?2.6:2.9,torchGap:1e9,noTele:true,portals:[],lights:[],mapNames:[{t:name,x:sx,y:H-1,k:'place'}]}}
+  return {rows:g.map(r=>r.join('')),start:{x:sx,y:sy,f:0},enemies,items,decor,chars,day:0,floor:cave?'scree':'mosscobble',name,label:name,diff,ceilH:cave?2.6:2.9,torchGap:1e9,noTele:true,portals:[],lights:[],mapNames:[{t:name,x:sx,y:H-1,k:'place'}]}}
 /* every place gets a lazy builder */
 for(let i=0;i<WD_CAVES.length;i++)KH_LAZY[WD_CAVE0+i]=((id)=>()=>{if(!LEVELS[id])LEVELS[id]=wdBuild(id)})(WD_CAVE0+i);
 for(const n of [...WD_OUT,...Array.from({length:24},(_,i)=>400+i)])for(let k=0;k<4;k++){const id=wdRuinId(n,k);KH_LAZY[id]=((i)=>()=>{if(!LEVELS[i])LEVELS[i]=wdBuild(i)})(id)}

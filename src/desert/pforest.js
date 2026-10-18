@@ -281,7 +281,7 @@ function pfCaveBuild(ci){
   const ent=PF_ENT[ci]||{n:LP.BASE+PF_SEGS[ci],x:80,y:300};
   const rk=pfRockGid(2.6,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(2.6,'cave',[255,255,255]);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:3}};
   const chars={'#':rk};chars[door]=dgid;
-  return {rows:g.map(r=>r.join('')),start:{x:8,y:H-3,f:0},enemies,items,decor,chars,day:0,name:PF_NAMES[ci],label:PF_NAMES[ci],diff,ceilH:2.6,torchGap:1e9,noTele:true,portals:[],lights:[],
+  return {rows:g.map(r=>r.join('')),start:{x:8,y:H-3,f:0},enemies,items,decor,chars,day:0,floor:'scree',name:PF_NAMES[ci],label:PF_NAMES[ci],diff,ceilH:2.6,torchGap:1e9,noTele:true,portals:[],lights:[],
     mapNames:[{t:PF_NAMES[ci],x:8,y:H-1,k:'place'}]};
 }
 for(let i=0;i<PF_CAVES;i++)KH_LAZY[PF_CAVE0+i]=((ci)=>()=>{if(!LEVELS[PF_CAVE0+ci]){const lv=pfCaveBuild(ci);LEVELS[PF_CAVE0+ci]=lv}})(i);

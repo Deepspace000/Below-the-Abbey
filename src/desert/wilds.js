@@ -41,8 +41,10 @@ function wdExitTile(wh,kind,tint){ // the arch of daylight is set in the same wa
   const key=wh+(kind||'')+(tint?tint.join('_'):'');if(WD_EXIT[key])return WD_EXIT[key];const im=IMG.pf_exit,Hp=Math.round(128*wh),wl=kind==='ruin'?IMG.pf_ruinwall:IMG.pf_rock,tn=wdTone(kind||'cave',tint||[255,255,255],true);
   const c=mkCanvas(128,Hp,(x,w,h)=>{
     if(wl&&wl.width&&kind){for(let yy=0;yy<h;yy+=128)x.drawImage(wl,0,0,wl.width,wl.height,0,yy,128,128);x.globalCompositeOperation='multiply';x.fillStyle=`rgb(${tn[0]},${tn[1]},${tn[2]})`;x.fillRect(0,0,w,h);x.globalCompositeOperation='source-over'}else{x.fillStyle='#1a1814';x.fillRect(0,0,w,h)}
-    if(im&&im.width){const sx=w/256,sy=h/665;x.save();x.beginPath();x.moveTo(30*sx,545*sy);x.lineTo(28*sx,330*sy);x.quadraticCurveTo(34*sx,205*sy,128*sx,198*sy);x.quadraticCurveTo(222*sx,205*sy,228*sx,330*sy);x.lineTo(226*sx,545*sy);x.closePath();x.clip();x.drawImage(im,0,0,im.width,im.height,0,0,w,h);x.restore();
-      x.strokeStyle='rgba(8,7,5,.75)';x.lineWidth=7;x.beginPath();x.moveTo(30*sx,545*sy);x.lineTo(28*sx,330*sy);x.quadraticCurveTo(34*sx,205*sy,128*sx,198*sy);x.quadraticCurveTo(222*sx,205*sy,228*sx,330*sy);x.lineTo(226*sx,545*sy);x.stroke()} // a dark worn rim all round the opening
+    if(im&&im.width){const sx=w/256,k=h*.9/370,Y=v=>h*.1+(v-190)*k,r=im.height/665; // the opening runs right down to the floor
+      const path=()=>{x.beginPath();x.moveTo(30*sx,Y(572));x.lineTo(28*sx,Y(330));x.quadraticCurveTo(34*sx,Y(205),128*sx,Y(198));x.quadraticCurveTo(222*sx,Y(205),228*sx,Y(330));x.lineTo(226*sx,Y(572))};
+      x.save();path();x.closePath();x.clip();x.drawImage(im,0,190*r,im.width,375*r,0,h*.1,w,h*.9);x.restore();
+      x.strokeStyle='rgba(8,7,5,.75)';x.lineWidth=7;path();x.stroke()} // a dark worn rim all round the opening
     else{x.fillStyle='#c8d8a0';x.fillRect(w*.2,h*.3,w*.6,h*.25)}});
   const d=c.getContext('2d').getImageData(0,0,128,Hp).data,id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;
   const e=new Uint8ClampedArray(d.length); // the bright part of the picture gives off its own light, so the way out shines in the dark
@@ -188,7 +190,7 @@ function wdBuild(id){
   const chars={'#':T.wall};chars[door]=dgid;
   if(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[P.n])LEVEL_RATING[id]=LEVEL_RATING[P.n];
   LEVEL_NAMES[id]=name;
-  return {rows:g.map(r=>r.join('')),start:{x:sx,y:sy,f:0},enemies,items,decor,chars,day:0,name,label:name,diff,ceilH:cave?2.6:2.9,torchGap:1e9,noTele:true,portals:[],lights:[],mapNames:[{t:name,x:sx,y:H-1,k:'place'}]}}
+  return {rows:g.map(r=>r.join('')),start:{x:sx,y:sy,f:0},enemies,items,decor,chars,day:0,floor:cave?'scree':'mosscobble',name,label:name,diff,ceilH:cave?2.6:2.9,torchGap:1e9,noTele:true,portals:[],lights:[],mapNames:[{t:name,x:sx,y:H-1,k:'place'}]}}
 /* every place gets a lazy builder */
 for(let i=0;i<WD_CAVES.length;i++)KH_LAZY[WD_CAVE0+i]=((id)=>()=>{if(!LEVELS[id])LEVELS[id]=wdBuild(id)})(WD_CAVE0+i);
 for(const n of [...WD_OUT,...Array.from({length:24},(_,i)=>400+i)])for(let k=0;k<4;k++){const id=wdRuinId(n,k);KH_LAZY[id]=((i)=>()=>{if(!LEVELS[i])LEVELS[i]=wdBuild(i)})(id)}

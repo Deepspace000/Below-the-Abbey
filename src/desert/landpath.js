@@ -78,7 +78,8 @@ const LP_FOODS=['bread','cheese','apple','herring','pie','ale'];
 const lpEat=()=>{let n=0;for(const h of G.heroes){if(h.alive===false||h.hp<=0||(h.food>=90&&h.hp>=h.max))continue;const f=LP_FOODS.find(x=>ITEMDEF[x]&&ITEMDEF[x].k==='food'&&bagCount(x)>0);if(!f)break;
     bagTake(G.bag.findIndex(b=>b.id===f));const d=ITEMDEF[f];h.hp=Math.min(h.max,h.hp+(d.heal||0));h.food=Math.min(100,(h.food||0)+(d.feed||0));n++}
   msg(n?'The party eats what was left at the shrine, standing in the road.':'Nobody is hungry or hurt.','#a8d8a0');sfx('step');return null};
-khNpc('lp_shrine','A roadside shrine','memorial',d=>{
+for(let i=0;i<6;i++){loadImg('lpsh_'+i,'assets/lpsh_'+i+'.png');NPC_H['lpsh_'+i]=1.9} // the pilgrims' shrines of the Path, painted for it
+khNpc('lp_shrine','A pilgrims’ shrine','memorial',d=>{
   const F=G.flags,T=F.lpSh||(F.lpSh={}),k=LEVEL+'_'+d.y,opts=[];
   const have=LP_FOODS.find(f=>bagCount(f)>0);
   if(have)opts.push(['Leave something to eat.',()=>{const j=G.bag.findIndex(b=>b.id===have);if(j>=0)bagTake(j);T[k]=0;try{honourAdd(2,'an offering at a shrine')}catch(e){}msg('You leave it on the stone beside the others.','#c8e8b0');return say('The stone is warm, and the flowers are fresh. A small quiet settles over the road.',[BYE])}]);
@@ -305,8 +306,8 @@ function lpBuild(s){
     if(open_(y)&&coast&&g%131===65&&BENCH){const wl=c-6+Math.round(2.2*Math.sin(g*.11)),bx=wl+1;if(!used.has(K(bx,y))&&bx>=3){used.add(K(bx,y));decor.push({npc:'lp_bench',k:BENCH,x:MX(bx),y,block:false,walk:true,deco:true});
       const rk3=LP_REST_NPC[(hs(g,5,gsd+92)*LP_REST_NPC.length)|0],kp3=KH_KEEPERS[rk3[0]];if(kp3&&hs(g,6,gsd+93)<.5&&!used.has(K(bx,y+1))){used.add(K(bx,y+1));decor.push({k:khFaceKey(kp3.face),x:MX(bx),y:y+1,block:false,walk:true,npc:rk3[0],sc:kp3.sc||1})}}}
     if(open_(y)&&coast&&g%47===23&&hs(g,7,gsd+80)>=.3){const wl=c-6+Math.round(2.2*Math.sin(g*.11)),bx=wl-8-((hs(g,8,gsd+81)*14)|0),bk=['yar_boat_fish','yar_boat_row','yar_boat_dhow'][(hs(g,9,gsd+82)*3)|0];if(bx>=4&&IMG[bk]){used.add(K(bx,y));decor.push({k:bk,x:MX(bx),y,block:true,deco:true,sc:.9})}}
-    if(g%104===52){const q=Math.floor(g/104),sg=q%2?-1:1,x=c+sg*4;if(!used.has(K(x,y))&&!used.has(K(x,y+1))){used.add(K(x,y));used.add(K(x+sg,y+1));used.add(K(x,y+1));
-      decor.push({k:'memorial',x:MX(x),y,block:true,npc:'lp_shrine',sc:.9},{k:'flowerpot',x:MX(x+sg),y:y+1,block:false,walk:true,deco:true,sc:.8},{k:IMG.breadbasket?'breadbasket':'flowerpot',x:MX(x),y:y+1,block:false,walk:true,deco:true,sc:.8})}}
+    for(let m=1;m<LP_KM/2;m++){if(Math.round(m*2*LP_ROWS_KM)+14!==g)continue; // a new pilgrims' shrine on the left of the road (west) every two kilometres, with food left on it
+      for(const dx of [-4,-5,-3]){const x=c+dx;if(x<2||used.has(K(x,y))||rows[y][MX(x)]!=='.'||block[I(x,y)])continue;used.add(K(x,y));decor.push({k:'lpsh_'+((m*5+s)%6),x:MX(x),y,block:true,npc:'lp_shrine',sc:1});break}}
     for(let m=1;m<LP_KM;m++){if(Math.round(m*LP_ROWS_KM)!==g)continue;const sk=lpSignKey(LP_KM-m);if(!sk)continue;let dx=null;for(const q of (m%2?[3,4,-3,-4]:[-3,-4,3,4]))if(!used.has(K(c+q,y))){dx=q;break} // the usual side of the road, or the next free place
       if(dx===null)continue;const sx=c+dx;used.add(K(sx,y));decor.push({k:sk,x:MX(sx),y,block:false,walk:true,deco:true});
       if((LP_KM-m)%5===0&&!tele&&s!==LP.N-1){let ex=sx-Math.sign(dx),ey=y;if(used.has(K(ex,ey))){ey=y+1;if(used.has(K(ex,ey)))ey=y-1}used.add(K(ex,ey));tele={x:MX(ex),y:ey};stoneKm=LP_KM-m}} // a stone teleporter right beside the sign, every five kilometres // a signpost at every kilometre: To Yarrim, and how far
