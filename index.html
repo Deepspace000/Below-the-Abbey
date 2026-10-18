@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.325';
+const VERSION='3.326';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -3403,7 +3403,10 @@ function drawInventory(){
   }
   for(const [l,kk,x] of [['Items','I',187],['Character','C',231],['Spells','B',275],['Powers','K',319]]){txt(l,x,299,7,'#c9ba8e','center',true,undefined,40);txt('['+kk+']',x,309,7,'#e8c870','center',true)}
   txt('1-4 hero   E equip   U unequip   S sort',394,204,6.6,'#a89878','center');
-  panel(344,252,58,62,false,false);if(G.potFav&&ITEMDEF[G.potFav])itemIcon(ITEMDEF[G.potFav],373,277,1.7);else iconPotion(373,277,1.7);txt('x'+(G.potFav?G.bag.reduce((a,b)=>a+(b.id===G.potFav?b.n:0),0):countPotions()),373,304,9,'#c9ba8e','center',true);btn('ipotion',344,252,58,62);
+  panel(344,252,58,62,false,false);if(G.potFav&&ITEMDEF[G.potFav])itemIcon(ITEMDEF[G.potFav],373,271,1.3);else iconPotion(373,271,1.3);txt('x'+(G.potFav?G.bag.reduce((a,b)=>a+(b.id===G.potFav?b.n:0),0):countPotions()),373,287,8.5,'#c9ba8e','center',true);btn('ipotion',344,252,58,36);
+  for(let q=0;q<2;q++){const bx=347+q*28,bid=(G.potBack||[])[q];ctx.fillStyle='rgba(20,14,10,.8)';ctx.fillRect(bx,291,24,20);ctx.strokeStyle=bid?'#8a7448':'#4a3e2a';ctx.lineWidth=1;ctx.strokeRect(bx+.5,291.5,23,19);
+    if(bid&&ITEMDEF[bid]){itemIcon(ITEMDEF[bid],bx+12,301,.72);txt('x'+G.bag.reduce((a,b)=>a+(b.id===bid?b.n:0),0),bx+22,309,6,'#e8dcb4','right',true)}else txt('+',bx+12,302,9,'#5a4a30','center',true);btn('ipotb'+q,bx,291,24,20)}
+  txt('Backups',373,316,5.6,'#8a7a58','center');
   panel(408,252,66,62,false,false);iconRedX(441,283,1.6);btn('iclose',408,252,66,62);
 }
 function openInv(i){
@@ -3445,6 +3448,7 @@ function invBtn(id){
     I.sel=null;I.dropKey=null;sfx('equip');msg(`Discarded ${name}.`,'#c8b898');return;
   }
   if(id==='iunequip'){if(I.sel&&I.sel.src==='slot'&&unequip(hi,I.sel.slot))I.sel=null;return}
+  if(id.startsWith('ipotb')){const q=+id.slice(5);G.potBack=G.potBack||[null,null];if(G.potBack[q]){G.potBack[q]=null;sfx('equip')}else msg('Drag a potion from the bag onto this slot to make it a backup.','#a89878');return}
   if(id==='iuse'||id==='ipotion'){
     if(!h.alive){msg('The dead cannot drink.');return}
     if(useHeal(hi,id==='iuse'&&I.sel&&I.sel.src==='bag'?I.sel.i:(id==='ipotion'?favIndex():-1))){
@@ -4050,7 +4054,7 @@ function snapshot(){
     party:HERO_DEF.map(d=>({app:d.app,cls:d.clsId,name:d.name,bs:d.str-CLASSES[d.clsId].str,bd:d.dex-CLASSES[d.clsId].dex,bi:d.int-CLASSES[d.clsId].int})),
     heroes:G.heroes.map(h=>({hp:h.hp,max:h.max,base:h.base,mp:h.mp,mpMax:h.mpMax,alive:h.alive,lvl:h.lvl,xp:h.xp,food:h.food,powSel:h.powSel||0,learned:h.learned||[],str:h.str,dex:h.dex,int:h.int,spellSel:h.spellSel,
       eq:Object.fromEntries(Object.entries(h.eq).map(([k,it])=>[k,{id:it.id,n:it.n}]))})),
-    bag:G.bag.map(b=>({id:b.id,n:b.n})),potFav:G.potFav||null,gold:G.gold,keys:G.keys,rounds:G.rounds,kills:G.kills,bossDead:G.bossDead,sel:G.sel,lightBoost:G.lightBoost,
+    bag:G.bag.map(b=>({id:b.id,n:b.n})),potFav:G.potFav||null,potBack:G.potBack||[null,null],gold:G.gold,keys:G.keys,rounds:G.rounds,kills:G.kills,bossDead:G.bossDead,sel:G.sel,lightBoost:G.lightBoost,
     P:{x:G.P.x,y:G.P.y,f:G.P.f},
     grid:LEVEL===1?G.grid.map(r=>r.slice()):[],seen:seenPack(G.seen),
     enemies:G.enemies.map(e=>({t:e.t,lvl:e.lvl,base:e.base,vd:e.vd,x:e.x,y:e.y,hp:e.hp,maxhp:e.maxhp,alert:e.alert,chilled:e.chilled||0})),
@@ -4065,7 +4069,7 @@ function restore(sv){ // the golden city and the rooms in it are built the first
 function restoreNow(sv){
   setParty(sv.party);reset(sv.level||1);
   sv.heroes.forEach((s,i)=>Object.assign(G.heroes[i],{hp:s.hp,max:s.max,base:s.base,mp:s.mp,mpMax:s.mpMax,alive:s.alive,lvl:s.lvl,xp:s.xp,food:s.food===undefined?100:s.food,powSel:s.powSel||0,learned:s.learned||[],str:s.str,dex:s.dex,int:s.int,spellSel:s.spellSel||0,eq:s.eq||{}}));
-  G.aff=sv.aff||[];G.bag=sv.bag;G.gold=sv.gold;G.potFav=sv.potFav||null;G.keys=sv.keys;G.rounds=sv.rounds;G.kills=sv.kills;G.bossDead=!!sv.bossDead;G.sel=sv.sel||0;G.lightBoost=sv.lightBoost||0;
+  G.aff=sv.aff||[];G.bag=sv.bag;G.gold=sv.gold;G.potFav=sv.potFav||null;G.potBack=sv.potBack||[null,null];G.keys=sv.keys;G.rounds=sv.rounds;G.kills=sv.kills;G.bossDead=!!sv.bossDead;G.sel=sv.sel||0;G.lightBoost=sv.lightBoost||0;
   G.P={x:sv.P.x,y:sv.P.y,f:sv.P.f,angT:(sv.P.f-1)*Math.PI/2};G.C={x:sv.P.x,y:sv.P.y,a:G.P.angT};
   {const sr=seenRows(sv.seen);if(LEVEL===1){G.grid=sv.grid;if(sr)G.seen=sr}else if(sr&&sr.length===MH&&sr[0].length===MW)G.seen=sr}
   if(G.grid[G.P.y]===undefined||G.grid[G.P.y][G.P.x]!==0||G.decor.some(d=>d.block&&d.x===G.P.x&&d.y===G.P.y)){G.P={x:START.x,y:START.y,f:START.f,angT:(START.f-1)*Math.PI/2};G.C={x:START.x,y:START.y,a:G.P.angT}}
@@ -7211,7 +7215,7 @@ function peekHit(x,y){
 function dropOk(d,id){
   if(!id)return false;
   if(d.kind==='world')return id.startsWith('hero')||id==='swapoff'||id==='swapalt'||id==='special';
-  if(d.kind==='inv')return d.src==='bag'?(id.startsWith('islot_')||id.startsWith('ihero')||(id==='ipotion'&&idef(d.item).k==='potion')):(id.startsWith('ibag')||id.startsWith('islot_'));
+  if(d.kind==='inv')return d.src==='bag'?(id.startsWith('islot_')||id.startsWith('ihero')||((id==='ipotion'||id.startsWith('ipotb'))&&idef(d.item).k==='potion')):(id.startsWith('ibag')||id.startsWith('islot_'));
   if(d.kind==='loot')return d.src==='bag'?id.startsWith('lbox'):id.startsWith('lbag');
   return false;
 }
@@ -7231,6 +7235,7 @@ function dropItem(d,id){
   }
   if(d.kind==='inv'){
     const I=G.inv,hi=I.hero,h=G.heroes[hi];
+    if(d.src==='bag'&&id.startsWith('ipotb')){const q=+id.slice(5);G.potBack=G.potBack||[null,null];if(d.item.id===G.potFav){msg('That is already the frequent use potion.');return}G.potBack[q]=d.item.id;sfx('equip');msg(`The ${idef(d.item).n} is now a backup potion. It takes over when the frequent use potion runs out.`);return}
     if(d.src==='bag'&&id==='ipotion'){G.potFav=d.item.id;sfx('equip');msg(`The ${idef(d.item).n} is now the frequent use potion.`);return}
     if(d.src==='bag'){
       let tgt=hi,slot=null;
@@ -21412,6 +21417,19 @@ const PFX_LEN={slash:.5,spin:.7,claw:.5,heal:.8,rise:1.1,aura:.9,holy:.8,fire:.7
 /* ---- src/desert/worldback.js ---- */
 /* the faint painted mountain view behind the world map (drawn by drawWorldMap, with a little parallax when the map is dragged) */
 loadImg('wm_mtn','assets/wm_mountains.jpg');
+
+/* ---- src/desert/potslots.js ---- */
+/* ==========================================================================
+   BACKUP POTION SLOTS. The frequent use potion (H, or the Potion button) is followed by two backups, set in the inventory by dragging a potion on to a small slot.
+   When the frequent use potion runs out, the first backup that is still in the bag takes its place.
+   ========================================================================== */
+function potBagCount(id){return G.bag.reduce((a,b)=>a+(b.id===id?b.n:0),0)}
+function potPromote(){
+  if(!G.potFav||potBagCount(G.potFav)>0)return;
+  G.potBack=G.potBack||[null,null];
+  for(let q=0;q<G.potBack.length;q++){const id=G.potBack[q];if(id&&ITEMDEF[id]&&potBagCount(id)>0){G.potBack[q]=null;G.potFav=id;msg(`The ${ITEMDEF[id].n} is now the frequent use potion.`,'#a8e0a0');return}}
+}
+{const _u=ui;ui=function(){try{if(G.state==='play'&&G.bag)potPromote()}catch(e){}return _u.apply(this,arguments)}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
