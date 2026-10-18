@@ -156,6 +156,8 @@ function wdForage(id,cave,pick,items){
   const nf=3+((hash2(id,7,780)*3)|0);for(let i=0;i<nf;i++){const c=pick(120+i);if(!c)break;items.push({k:WD_FORAGE[(hash2(id,i,781)*WD_FORAGE.length)|0][0],x:c[0],y:c[1]})}
   if(hash2(id,9,784)<.4&&typeof GEM_BY_VALUE!=='undefined'){const base=Math.min(34,6+Math.round(55*.35)),ng=1+((hash2(id,10,785)*2)|0);for(let i=0;i<ng;i++){const c=pick(160+i);if(!c)break;const gm=GEM_BY_VALUE[Math.min(GEM_BY_VALUE.length-1,base+((hash2(id,i,786)*6)|0))];items.push({k:'gem_'+gm[0],x:c[0],y:c[1]})}} // and now and then a gem
   if(cave){const nh=2+((hash2(id,8,782)*3)|0);for(let i=0;i<nh;i++){const c=pick(140+i);if(!c)break;const h=HERBS[(hash2(id,i,783)*Math.min(HERBS.length,16))|0];items.push({k:'herb_'+h[0],x:c[0],y:c[1]})}}}
+{const _lf=lootFor;lootFor=function(d){const r=_lf.apply(this,arguments); // a chest in a cave or wild dungeon holds at most one piece of armour or weapon
+  if(LEVEL>=7100&&Array.isArray(r)){let g=0;return r.filter(it=>{const k=ITEMDEF[it.id]&&ITEMDEF[it.id].k;return ['weapon','shield','head','chest','arms','legs'].includes(k)?++g<=1:true})}return r}}
 /* the whole Pilgrim's Path stands at level 55, like Oldhaven */
 for(let n=400;n<424;n++)LEVEL_RATING[n]=55;
 /* ---------- the interiors ---------- */
