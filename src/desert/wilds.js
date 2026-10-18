@@ -50,6 +50,18 @@ function wdExitTile(wh,kind,tint){ // the arch of daylight is set in the same wa
   const e=new Uint8ClampedArray(d.length); // the bright part of the picture gives off its own light, so the way out shines in the dark
   for(let i=0;i<d.length;i+=4){const lum=d[i]*.3+d[i+1]*.59+d[i+2]*.11;e[i]=d[i];e[i+1]=d[i+1];e[i+2]=d[i+2];e[i+3]=Math.max(0,Math.min(1,(lum-80)/80))*255}
   TEX[id].e=e;return WD_EXIT[key]=id}
+const WD_DOOR={};
+function wdDoorTile(wh,tint){ // the door of a ruin: a dark arched doorway cut into the very same wall, so the stone around it matches
+  const key=wh+tint.join('_');if(WD_DOOR[key])return WD_DOOR[key];const wl=IMG.pf_ruinwall,dr=IMG.pf_ruindoor,Hp=Math.round(128*wh),tn=wdTone('ruin',tint,false);
+  const c=mkCanvas(128,Hp,(x,w,h)=>{
+    x.fillStyle='#222';x.fillRect(0,0,w,h);if(wl&&wl.width){x.filter='contrast(1.35)';for(let yy=0;yy<h;yy+=128)x.drawImage(wl,0,0,wl.width,wl.height,0,yy,128,128);x.filter='none'}
+    x.globalCompositeOperation='multiply';x.fillStyle=`rgb(${tn[0]},${tn[1]},${tn[2]})`;x.fillRect(0,0,w,h);x.globalCompositeOperation='source-over';
+    const dw=60,dh=Math.min(h*.62,150),dx=(w-dw)/2,dy=h-dh,r=dw/2,path=()=>{x.beginPath();x.moveTo(dx,h);x.lineTo(dx,dy+r);x.arc(dx+r,dy+r,r,Math.PI,0);x.lineTo(dx+dw,h);x.closePath()};
+    x.save();path();x.clip();x.fillStyle='#050403';x.fillRect(dx,dy,dw,dh);
+    if(dr&&dr.width){x.globalAlpha=.55;x.drawImage(dr,100,105,52,151,dx,dy+6,dw,dh-6);x.globalAlpha=1}
+    const g=x.createLinearGradient(0,dy,0,h);g.addColorStop(0,'rgba(0,0,0,.55)');g.addColorStop(1,'rgba(0,0,0,.1)');x.fillStyle=g;x.fillRect(dx,dy,dw,dh);x.restore();
+    x.strokeStyle='rgba(10,9,7,.8)';x.lineWidth=5;path();x.stroke();x.strokeStyle='rgba(60,70,50,.5)';x.lineWidth=2;x.beginPath();x.arc(dx+r,dy+r,r+5,Math.PI,0);x.stroke()}); // a dark rim, and a little green along the arch
+  const d=c.getContext('2d').getImageData(0,0,128,Hp).data,id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;return WD_DOOR[key]=id}
 /* ---------- placing an entrance ---------- */
 function wdSetRow(L,x,y,c){const r=L.rows[y];if(r&&x>=0&&x<r.length)L.rows[y]=r.slice(0,x)+c+r.slice(x+1)}
 const wdTreeKey=d=>/^([glp]?tree\d|pt_)/.test(d.k)&&!d.npc;
@@ -78,9 +90,9 @@ function wdSpot(L,n,seed){
 function wdPlace(L,n,id,kind,tint,seed){
   const sp=wdSpot(L,n,seed);if(!sp)return false;const [x,y]=sp;
   L.chars=L.chars||{};
-  const wh=L.ceilH||5,T=wdTiles(kind,wdIsLP(n)?Math.min(wh,5.2):Math.min(wh,3.4),tint,false),rc=String.fromCharCode(0x3a0+(id%64)),dc=String.fromCharCode(0x3e0+(id%64));
+  const wh=L.ceilH||5,T=wdTiles(kind,wdIsLP(n)?Math.min(wh,3.3):Math.min(wh,3.4),tint,false),rc=String.fromCharCode(0x3a0+(id%64)),dc=String.fromCharCode(0x3e0+(id%64));
   L.chars[rc]=T.wall;
-  const dgid=KH_NEXT_GID++;T_TILE[dgid]=T.door.tex;KH_DOOR[dgid]={lvl:id,at:kind==='cave'?{x:8,y:16,f:0}:{x:16,y:22,f:0}};L.chars[dc]=dgid; // where the party stands just inside: the cave's start, or the ruin's
+  const dgid=KH_NEXT_GID++;T_TILE[dgid]=(kind==='ruin'&&IMG.pf_ruinwall)?wdDoorTile(Math.min(wh,wdIsLP(n)?3.3:3.4),tint):T.door.tex;KH_DOOR[dgid]={lvl:id,at:kind==='cave'?{x:8,y:16,f:0}:{x:16,y:22,f:0},noGlow:kind==='ruin'};L.chars[dc]=dgid; // where the party stands just inside: the cave's start, or the ruin's
   if(wdIsLP(n)){ // on the Pilgrim's Path the door faces west, towards the road: walking east from a cross, the party comes straight up to it
     for(let dy=-2;dy<=2;dy++)for(let dx=0;dx<=3;dx++)if((L.rows[y+dy]||'')[x+dx]==='.')wdSetRow(L,x+dx,y+dy,(dy===0&&dx===0)?dc:rc);
     for(const d of L.decor)if(!d.npc&&!d.loot&&!d.shop&&!d.enter&&d.x>=x-1&&d.x<=x+4&&d.y>=y-3&&d.y<=y+3&&!(d.x===x-1&&d.y===y)){d.block=false;d.sc=.0001;d.pfCut=1}

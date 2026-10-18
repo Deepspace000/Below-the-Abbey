@@ -400,7 +400,7 @@ function pfCrosses(n){
   const ci=PF_SEGS.indexOf(s);if(ci>=0&&PF_ENT[ci]&&PF_ENT[ci].n===n)rows.push(PF_ENT[ci].y);
   for(const q of L._wd||[])rows.push(q.w?q.y:q.y+3);
   for(const y of rows){const a=L.fmap[y]&&L.fmap[y].indexOf('1');if(!(a>=0))continue;
-    for(const x of [a+4,a+3,a+5]){if(L.rows[y][x]!=='.'||L.fmap[y][x]==='1')continue;
+    for(const x of [a+3,a+4,a+5]){if(L.rows[y][x]!=='.'||L.fmap[y][x]==='1')continue;
       if(L.decor.some(d=>d.x===x&&d.y===y&&!d.hidden&&!d.pfCut&&!/^(l|p|pt_)/.test(d.k)))continue;
       for(const d of L.decor)if(d.x===x&&d.y===y&&/^([lp]tree\d|pt_)/.test(d.k)){d.block=false;d.hidden=true;d.pfCut=1}
       L.decor.push({k:'lpcross',x,y,block:true,deco:true,sc:1});break}}}

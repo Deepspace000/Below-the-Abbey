@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.400';
+const VERSION='3.401';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2629,7 +2629,7 @@ function render3D(){
     const wh=TEX[ti].wh||(LEVEL===3&&mx>0&&my>0&&mx<MW-1&&my<MH-1?1.55:CEILH); // Thornwick's houses are one storey under the high sky; the forest round it stays tall
     const skyW=(LEVEL===22&&g===1&&T_SKY[0]!==undefined)||(!!TEX[ti].sky&&!!SKYPAN),tileW=!skyW&&!TEX[ti].h&&wh>2&&(g>=100||g===1||g===2||g===6||(g>=9&&g<=14)||(g>=20&&g<=22)); // tall plain walls repeat their pattern instead of stretching
     const tex=TEX[ti],te=tex.e,wlv=fastW&&perp>4?Math.min(4,Math.floor(Math.log2(TS*perp/F*.7))):0,td=wlv>0&&tex.d&&tex.d.length===TS*TS*4?wallMip(tex,wlv):tex.d; // far facades are read from blurred copies
-    const kd=(LEVEL===44||LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<440)||(typeof wdDoorLevel==='function'&&wdDoorLevel(LEVEL)))&&g>=100?KH_DOOR[g]:undefined,dg=kd!==undefined&&kd.lvl!==undefined,dgs=dg?(.7+.18*Math.sin(t*2.1+mx*1.7+my*.9))*(1-Math.min(.55,perp*.008)):0; // a doorway that can be entered glows softly, brighter near the threshold
+    const kd=(LEVEL===44||LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<440)||(typeof wdDoorLevel==='function'&&wdDoorLevel(LEVEL)))&&g>=100?KH_DOOR[g]:undefined,dg=kd!==undefined&&kd.lvl!==undefined&&!kd.noGlow,dgs=dg?(.7+.18*Math.sin(t*2.1+mx*1.7+my*.9))*(1-Math.min(.55,perp*.008)):0; // a doorway that can be entered glows softly, brighter near the threshold
     const dist=perp*Math.hypot(rX,rY);
     const lb=Math.max(baseL(dist),lbm);let lt=0;
     const px=hx-(side===0?stx*.03:0),py=hy-(side===1?sty*.03:0);
@@ -16827,7 +16827,7 @@ function lpBuild(s){
     if(open_(y)&&coast&&g%47===23&&hs(g,7,gsd+80)>=.3){const wl=c-6+Math.round(2.2*Math.sin(g*.11)),bx=wl-8-((hs(g,8,gsd+81)*14)|0),bk=['yar_boat_fish','yar_boat_row','yar_boat_dhow'][(hs(g,9,gsd+82)*3)|0];if(bx>=4&&IMG[bk]){used.add(K(bx,y));decor.push({k:bk,x:MX(bx),y,block:true,deco:true,sc:.9})}}
     for(let m=1;m<LP_KM/2;m++){if(Math.round(m*2*LP_ROWS_KM)+14!==g)continue; // a new pilgrims' shrine on the left of the road (west) every two kilometres, with food left on it
       for(const dx of [-4,-5,-3]){const x=c+dx;if(x<2||used.has(K(x,y))||rows[y][MX(x)]!=='.'||block[I(x,y)])continue;used.add(K(x,y));decor.push({k:'lpsh_'+((m*5+s)%6),x:MX(x),y,block:true,npc:'lp_shrine',sc:1});break}}
-    for(let m=1;m<LP_KM;m++){if(Math.round(m*LP_ROWS_KM)!==g)continue;const sk=lpSignKey(LP_KM-m);if(!sk)continue;let dx=null;for(const q of (m%2?[3,4,-3,-4]:[-3,-4,3,4]))if(!used.has(K(c+q,y))){dx=q;break} // the usual side of the road, or the next free place
+    for(let m=1;m<LP_KM;m++){if(Math.round(m*LP_ROWS_KM)!==g)continue;const sk=lpSignKey(LP_KM-m);if(!sk)continue;let dx=null;for(const q of [-3,-4,-5,-6])if(!used.has(K(c+q,y))){dx=q;break} // the usual side of the road, or the next free place
       if(dx===null)continue;const sx=c+dx;used.add(K(sx,y));decor.push({k:sk,x:MX(sx),y,block:false,walk:true,deco:true});
       if((LP_KM-m)%5===0&&!tele&&s!==LP.N-1){let ex=sx-Math.sign(dx),ey=y;if(used.has(K(ex,ey))){ey=y+1;if(used.has(K(ex,ey)))ey=y-1}used.add(K(ex,ey));tele={x:MX(ex),y:ey};stoneKm=LP_KM-m}} // a stone teleporter right beside the sign, every five kilometres // a signpost at every kilometre: To Yarrim, and how far
   }
@@ -21963,7 +21963,7 @@ function pfCrosses(n){
   const ci=PF_SEGS.indexOf(s);if(ci>=0&&PF_ENT[ci]&&PF_ENT[ci].n===n)rows.push(PF_ENT[ci].y);
   for(const q of L._wd||[])rows.push(q.w?q.y:q.y+3);
   for(const y of rows){const a=L.fmap[y]&&L.fmap[y].indexOf('1');if(!(a>=0))continue;
-    for(const x of [a+4,a+3,a+5]){if(L.rows[y][x]!=='.'||L.fmap[y][x]==='1')continue;
+    for(const x of [a+3,a+4,a+5]){if(L.rows[y][x]!=='.'||L.fmap[y][x]==='1')continue;
       if(L.decor.some(d=>d.x===x&&d.y===y&&!d.hidden&&!d.pfCut&&!/^(l|p|pt_)/.test(d.k)))continue;
       for(const d of L.decor)if(d.x===x&&d.y===y&&/^([lp]tree\d|pt_)/.test(d.k)){d.block=false;d.hidden=true;d.pfCut=1}
       L.decor.push({k:'lpcross',x,y,block:true,deco:true,sc:1});break}}}
@@ -22066,6 +22066,18 @@ function wdExitTile(wh,kind,tint){ // the arch of daylight is set in the same wa
   const e=new Uint8ClampedArray(d.length); // the bright part of the picture gives off its own light, so the way out shines in the dark
   for(let i=0;i<d.length;i+=4){const lum=d[i]*.3+d[i+1]*.59+d[i+2]*.11;e[i]=d[i];e[i+1]=d[i+1];e[i+2]=d[i+2];e[i+3]=Math.max(0,Math.min(1,(lum-80)/80))*255}
   TEX[id].e=e;return WD_EXIT[key]=id}
+const WD_DOOR={};
+function wdDoorTile(wh,tint){ // the door of a ruin: a dark arched doorway cut into the very same wall, so the stone around it matches
+  const key=wh+tint.join('_');if(WD_DOOR[key])return WD_DOOR[key];const wl=IMG.pf_ruinwall,dr=IMG.pf_ruindoor,Hp=Math.round(128*wh),tn=wdTone('ruin',tint,false);
+  const c=mkCanvas(128,Hp,(x,w,h)=>{
+    x.fillStyle='#222';x.fillRect(0,0,w,h);if(wl&&wl.width){x.filter='contrast(1.35)';for(let yy=0;yy<h;yy+=128)x.drawImage(wl,0,0,wl.width,wl.height,0,yy,128,128);x.filter='none'}
+    x.globalCompositeOperation='multiply';x.fillStyle=`rgb(${tn[0]},${tn[1]},${tn[2]})`;x.fillRect(0,0,w,h);x.globalCompositeOperation='source-over';
+    const dw=60,dh=Math.min(h*.62,150),dx=(w-dw)/2,dy=h-dh,r=dw/2,path=()=>{x.beginPath();x.moveTo(dx,h);x.lineTo(dx,dy+r);x.arc(dx+r,dy+r,r,Math.PI,0);x.lineTo(dx+dw,h);x.closePath()};
+    x.save();path();x.clip();x.fillStyle='#050403';x.fillRect(dx,dy,dw,dh);
+    if(dr&&dr.width){x.globalAlpha=.55;x.drawImage(dr,100,105,52,151,dx,dy+6,dw,dh-6);x.globalAlpha=1}
+    const g=x.createLinearGradient(0,dy,0,h);g.addColorStop(0,'rgba(0,0,0,.55)');g.addColorStop(1,'rgba(0,0,0,.1)');x.fillStyle=g;x.fillRect(dx,dy,dw,dh);x.restore();
+    x.strokeStyle='rgba(10,9,7,.8)';x.lineWidth=5;path();x.stroke();x.strokeStyle='rgba(60,70,50,.5)';x.lineWidth=2;x.beginPath();x.arc(dx+r,dy+r,r+5,Math.PI,0);x.stroke()}); // a dark rim, and a little green along the arch
+  const d=c.getContext('2d').getImageData(0,0,128,Hp).data,id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;return WD_DOOR[key]=id}
 /* ---------- placing an entrance ---------- */
 function wdSetRow(L,x,y,c){const r=L.rows[y];if(r&&x>=0&&x<r.length)L.rows[y]=r.slice(0,x)+c+r.slice(x+1)}
 const wdTreeKey=d=>/^([glp]?tree\d|pt_)/.test(d.k)&&!d.npc;
@@ -22094,9 +22106,9 @@ function wdSpot(L,n,seed){
 function wdPlace(L,n,id,kind,tint,seed){
   const sp=wdSpot(L,n,seed);if(!sp)return false;const [x,y]=sp;
   L.chars=L.chars||{};
-  const wh=L.ceilH||5,T=wdTiles(kind,wdIsLP(n)?Math.min(wh,5.2):Math.min(wh,3.4),tint,false),rc=String.fromCharCode(0x3a0+(id%64)),dc=String.fromCharCode(0x3e0+(id%64));
+  const wh=L.ceilH||5,T=wdTiles(kind,wdIsLP(n)?Math.min(wh,3.3):Math.min(wh,3.4),tint,false),rc=String.fromCharCode(0x3a0+(id%64)),dc=String.fromCharCode(0x3e0+(id%64));
   L.chars[rc]=T.wall;
-  const dgid=KH_NEXT_GID++;T_TILE[dgid]=T.door.tex;KH_DOOR[dgid]={lvl:id,at:kind==='cave'?{x:8,y:16,f:0}:{x:16,y:22,f:0}};L.chars[dc]=dgid; // where the party stands just inside: the cave's start, or the ruin's
+  const dgid=KH_NEXT_GID++;T_TILE[dgid]=(kind==='ruin'&&IMG.pf_ruinwall)?wdDoorTile(Math.min(wh,wdIsLP(n)?3.3:3.4),tint):T.door.tex;KH_DOOR[dgid]={lvl:id,at:kind==='cave'?{x:8,y:16,f:0}:{x:16,y:22,f:0},noGlow:kind==='ruin'};L.chars[dc]=dgid; // where the party stands just inside: the cave's start, or the ruin's
   if(wdIsLP(n)){ // on the Pilgrim's Path the door faces west, towards the road: walking east from a cross, the party comes straight up to it
     for(let dy=-2;dy<=2;dy++)for(let dx=0;dx<=3;dx++)if((L.rows[y+dy]||'')[x+dx]==='.')wdSetRow(L,x+dx,y+dy,(dy===0&&dx===0)?dc:rc);
     for(const d of L.decor)if(!d.npc&&!d.loot&&!d.shop&&!d.enter&&d.x>=x-1&&d.x<=x+4&&d.y>=y-3&&d.y<=y+3&&!(d.x===x-1&&d.y===y)){d.block=false;d.sc=.0001;d.pfCut=1}

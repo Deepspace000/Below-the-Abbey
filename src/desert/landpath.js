@@ -308,7 +308,7 @@ function lpBuild(s){
     if(open_(y)&&coast&&g%47===23&&hs(g,7,gsd+80)>=.3){const wl=c-6+Math.round(2.2*Math.sin(g*.11)),bx=wl-8-((hs(g,8,gsd+81)*14)|0),bk=['yar_boat_fish','yar_boat_row','yar_boat_dhow'][(hs(g,9,gsd+82)*3)|0];if(bx>=4&&IMG[bk]){used.add(K(bx,y));decor.push({k:bk,x:MX(bx),y,block:true,deco:true,sc:.9})}}
     for(let m=1;m<LP_KM/2;m++){if(Math.round(m*2*LP_ROWS_KM)+14!==g)continue; // a new pilgrims' shrine on the left of the road (west) every two kilometres, with food left on it
       for(const dx of [-4,-5,-3]){const x=c+dx;if(x<2||used.has(K(x,y))||rows[y][MX(x)]!=='.'||block[I(x,y)])continue;used.add(K(x,y));decor.push({k:'lpsh_'+((m*5+s)%6),x:MX(x),y,block:true,npc:'lp_shrine',sc:1});break}}
-    for(let m=1;m<LP_KM;m++){if(Math.round(m*LP_ROWS_KM)!==g)continue;const sk=lpSignKey(LP_KM-m);if(!sk)continue;let dx=null;for(const q of (m%2?[3,4,-3,-4]:[-3,-4,3,4]))if(!used.has(K(c+q,y))){dx=q;break} // the usual side of the road, or the next free place
+    for(let m=1;m<LP_KM;m++){if(Math.round(m*LP_ROWS_KM)!==g)continue;const sk=lpSignKey(LP_KM-m);if(!sk)continue;let dx=null;for(const q of [-3,-4,-5,-6])if(!used.has(K(c+q,y))){dx=q;break} // the usual side of the road, or the next free place
       if(dx===null)continue;const sx=c+dx;used.add(K(sx,y));decor.push({k:sk,x:MX(sx),y,block:false,walk:true,deco:true});
       if((LP_KM-m)%5===0&&!tele&&s!==LP.N-1){let ex=sx-Math.sign(dx),ey=y;if(used.has(K(ex,ey))){ey=y+1;if(used.has(K(ex,ey)))ey=y-1}used.add(K(ex,ey));tele={x:MX(ex),y:ey};stoneKm=LP_KM-m}} // a stone teleporter right beside the sign, every five kilometres // a signpost at every kilometre: To Yarrim, and how far
   }
