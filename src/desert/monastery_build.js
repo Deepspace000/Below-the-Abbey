@@ -6,7 +6,7 @@ MON.CEM_IN=[3,20];
 for(const n of ['glass','rose','banner','ivy','shutter','statue','cross','grille'])loadImg('mw_'+n,'assets/mw_'+n+'.png');
 Object.assign(NPC_H,{mw_glass:2.3,mw_rose:1.5,mw_banner:2.1,mw_ivy:2.0,mw_shutter:.95,mw_statue:1.3,mw_cross:1.3,mw_grille:.95});
 for(const n of ['pew','altar','saint','candel','font','lectern','chand','angel'])loadImg('mi_'+n,'assets/mi_'+n+'.png');
-Object.assign(NPC_H,{mi_pew:.55,mi_altar:.95,mi_saint:1.75,mi_candel:1.6,mi_font:.8,mi_lectern:1.0,mi_chand:.95,mi_angel:1.75});
+Object.assign(NPC_H,{mi_pew:.55,mi_altar:.95,mi_saint:1.75,mi_candel:1.6,mi_font:.8,mi_lectern:.5,mi_chand:.95,mi_angel:1.75});
 /* inside the chapel: an aisle of little pews, an altar with saints and angels, coloured windows down both walls, candelabra and chandeliers */
 function monChapelTpl(b){return {w:11,h:15,floor:'kh2',amb:.8,noExtras:true,lights:[[3,2],[7,2],[5,5],[5,9],[2,6],[8,6],[2,10],[8,10],[5,12]],build:({raw,npc,mid})=>{
   const pic=(n,x,y,wd,bob)=>raw(n,x,y,{pic:1,wd,block:false,walk:true,bob:bob||0});
