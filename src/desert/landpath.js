@@ -310,7 +310,8 @@ function lpBuild(s){
       if(dx===null)continue;const sx=c+dx;used.add(K(sx,y));decor.push({k:sk,x:MX(sx),y,block:false,walk:true,deco:true});
       if((LP_KM-m)%5===0&&!tele&&s!==LP.N-1){let ex=sx-Math.sign(dx),ey=y;if(used.has(K(ex,ey))){ey=y+1;if(used.has(K(ex,ey)))ey=y-1}used.add(K(ex,ey));tele={x:MX(ex),y:ey};stoneKm=LP_KM-m}} // a stone teleporter right beside the sign, every five kilometres // a signpost at every kilometre: To Yarrim, and how far
   }
-  if(s===LPM.SEG){const md=lpMonDoor(),sk=lpBoard('lp_sign_mon','SAINT ELEN’S','monastery 300 m');if(sk){used.add(K(md.c+3,md.y+3));decor.push({k:sk,x:MX(md.c+3),y:md.y+3,block:false,walk:true,deco:true})}lamp(md.x-2,md.y-2);lamp(md.x-2,md.y+2)}
+  if(s===LPM.SEG){const md=lpMonDoor(),sk=lpBoard('lp_sign_mon','SAINT ELEN’S','monastery 300 m');if(sk){used.add(K(md.c+3,md.y+3));decor.push({k:sk,x:MX(md.c+3),y:md.y+3,block:false,walk:true,deco:true})}lamp(md.x-2,md.y-2);lamp(md.x-2,md.y+2);
+    for(let q=decor.length-1;q>=0;q--){const d=decor[q];if(d.block&&!d.npc&&!d.enter&&d.x>=md.c&&d.x<=md.x-1&&Math.abs(d.y-md.y)<=1)decor.splice(q,1)}} // the way from the road to the monastery gate is open: no trees across it
   // (the tall moored ships of the quay are left out here: from far off they only show as grey slabs against the sea)
   for(const cl of clearings){ // the green spaces, with huge oaks
     if(cl.skip)continue;const cy=cl.y,GYc=GY(cy);
