@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.410';
+const VERSION='3.411';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -3372,7 +3372,6 @@ function drawInventory(){
     if(mx>0){const th=Math.max(24,BAGH*BAGH/(bagRows()*BPITCH));ctx.fillStyle=goldG(tx,BAGY,6,BAGH);ctx.fillRect(tx,BAGY+(BAGH-th)*sc/mx,6,th)}
     BTNS.push({id:'ibagarea',x:BAGX,y:BAGY,w:BCOLS*BPITCH,h:BAGH,up:true,drag:true});
     BTNS.unshift(BTNS.pop()); // area under the cells
-    if(typeof packWeight==='function'){const pw=packWeight();txt(`Pack ${pw.toFixed(1)} / ${Math.round(WT_CAP)} kg   ${G.bag.length}/${BAGCAP} slots`,BAGX,BAGY+BAGH+3,7,G.overload?'#e08060':'#a89878','left')}
   }
 
   /* ---- right: item card or hero summary ---- */
@@ -3403,7 +3402,8 @@ function drawInventory(){
   }
   // gold and sort
   ctx.fillStyle='rgba(8,6,4,.8)';rrect(ctx,rx,212,rw,28,5);ctx.fill();ctx.strokeStyle=goldG(rx,212,rw,28);ctx.lineWidth=1.6;rrect(ctx,rx,212,rw,28,5);ctx.stroke();
-  drawCoin(rx+rw-86,226,8);txt(String(G.gold),rx+rw-10,226,12,'#d8c88e','right',true);
+  drawCoin(rx+rw-86,220,7);txt(String(G.gold),rx+rw-10,220,11,'#d8c88e','right',true);
+  if(typeof packWeight==='function')txt(`${packWeight().toFixed(1)} / ${Math.round(WT_CAP)} kg   ${G.bag.length}/${BAGCAP}`,rx+rw-10,233,7,G.overload?'#e08060':'#a89878','right'); // how much the party carries: weight, and pack slots
   panel(rx+4,216,46,20,false,false);txt('Sort',rx+27,226,8.5,'#c9ba8e','center',true);btn('isort',rx+4,216,46,20);
 
   /* ---- bottom bar ---- */
