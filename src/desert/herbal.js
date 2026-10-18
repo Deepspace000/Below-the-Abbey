@@ -36,7 +36,10 @@ const HERBAL_COMBOS={};for(const r of HERBAL_RECIPES())HERBAL_COMBOS[herbComboKe
 const HERBARIUMS=['oh_herbs','oh_apoth','kh_healer','kh_nefer','kh_greenflask','kh_senet','kh_alchemist','ih_alchemist','mon_herb','mon_infirm','ab_healer','yr_herbs','yr_healer'];
 for(const npc of HERBARIUMS){if(!NPCS[npc])continue;
   repWrap(npc,()=>HERBAL_RECIPES().some(r=>!recData()[r.id]),'Learn herbal remedies (the herbarium)',()=>herbariumTalk(npc));}
+const herbLearned=()=>!!(G.flags&&G.flags.herbalism)||HERBAL_RECIPES().some(r=>recData()[r.id]); // the skill of herbalism: taught at any herbarium
+const HERB_STARTERS=['h_rem_feverfew','h_rem_poultice','h_rem_calm']; // the first lesson teaches the skill and three simple remedies, free
 function herbariumTalk(npc){
+  if(!G.flags.herbalism&&!HERBAL_RECIPES().some(r=>recData()[r.id]))return say('You have the look of people who pick things up off the ground and wonder. Let me teach you herbalism: how to gather, dry and brew. It costs nothing to begin. I will show you three simple remedies to start, and a herbarium can teach you the rest.',[['Teach us, please.',()=>{G.flags.herbalism=1;const nm=[];for(const id of HERB_STARTERS){if(!recData()[id]){recData()[id]=1;const r=RECIPES.find(x=>x.id===id);if(r)nm.push(r.n)}}sfx('level');msg('You learn herbalism. A Herbal Remedies page is now in the Journal/Abilities, and a shortcut in the party window (Y).','#ffe9a0');return say(`Feverfew tea, comfrey poultice and lavender calming tea: ${nm.join(', ')}. Pick herbs in the open lands, mix them on your Herbal Remedies page, and brew at camp. Come back when you want to learn more.`,[BYE])}],BYE]);
   const unk=HERBAL_RECIPES().filter(r=>!recData()[r.id]);
   if(!unk.length)return say('You know every remedy I know. Go and pick herbs, and brew at camp. It is much cheaper than a church.',[BYE]);
   const opts=unk.slice(0,4).map(r=>[`${r.n} (${r.price} gold)`,()=>{if(G.gold<r.price)return say(`That costs ${r.price} gold.`,[BYE]);G.gold-=r.price;recData()[r.id]=1;sfx('key');msg(`You learn the ${r.n.toLowerCase()}. It is on the Herbal Remedies page of the journal.`,'#ffe9a0');return say(`${r.n}: ${Object.keys(r.in).map(k=>ITEMDEF[k].n).join(' and ')}. Brew it at camp. It is on your Herbal Remedies page.`,[BYE])}]);
@@ -87,6 +90,6 @@ journalPage({id:'herbs',title:'Herbal Remedies',
 /* ---------- the Treasure page of the Collection: everything dug up ---------- */
 /* ---------- a way in from the party inventory: the Herbal Remedies page lives in the journal, so the inventory has a button for it ---------- */
 {const _ui=ui;ui=function(dt){const r=_ui.apply(this,arguments);
-  try{if(G.state==='play'&&G.inv.open&&!G.inv.sel&&(G.inv.tab==='inv'||!G.inv.tab)){btnText('invherbs','Herbal Remedies',344,166,100,20)}}catch(e){}
+  try{if(G.state==='play'&&G.inv.open&&!G.inv.sel&&(G.inv.tab==='inv'||!G.inv.tab)&&herbLearned()){btnText('invherbs','Herbal Remedies',344,166,100,20)}}catch(e){}
   return r}}
-{const _h=handleBtn;handleBtn=function(id){if(id==='invherbs'&&G.inv.open&&!G.talk&&!G.cut){G.inv.open=false;G.overview=false;G.map=false;G.menu='jp:herbs';return}return _h.apply(this,arguments)}}
+{const _h=handleBtn;handleBtn=function(id){if(id==='invherbs'&&G.inv.open&&!G.talk&&!G.cut){if(!herbLearned()){msg('Learn herbalism first: a herbarium will teach you.','#a89878');return}G.inv.open=false;G.overview=false;G.map=false;G.menu='jp:herbs';return}return _h.apply(this,arguments)}}
