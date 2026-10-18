@@ -71,10 +71,10 @@ function pfPrep(n){
     for(const b of targets){const key=Math.min(i,nodes.indexOf(b))+'-'+Math.max(i,nodes.indexOf(b));if(done.has(key))continue;done.add(key);weave(a[0],a[1],b[0],b[1],s*7000+i*13+nodes.indexOf(b))}});
   const fmS=Array.isArray(L.fmap)?L.fmap:null,nearRoad=(x,y)=>{if(!fmS)return false;for(let dy=-3;dy<=3;dy++){const r=fmS[y+dy];if(!r)continue;for(let dx=-3;dx<=3;dx++){const f=r[x+dx];if(f==='1'||f==='3')return true}}return false}; // the road is the floor type '1', and its edge '3'
   const edgeMemo=new Map(),edgeAt=y=>{if(edgeMemo.has(y))return edgeMemo.get(y);let m=W;for(let dy=-2;dy<=2;dy++)for(let x=56;x<m;x++)if(blk.has(x+','+(y+dy))){m=x;break}edgeMemo.set(y,m);return m}; // where the trees begin on a row
-  // each clearing is a round of open ground about 10 squares across, about a quarter full of trees: solid ones, and soft ones you can walk through (never on a path)
+  // each clearing is a round of open ground about 6 squares across, about a third full of trees: solid ones, and soft ones you can walk through (never on a path)
   for(const [cx,cy] of deepNodes){const OAKS=['ltree0','ltree4','ltree8','ltree12','ltree19'],disc=[],mine=[];
-    for(let dy=-5;dy<=5;dy++)for(let dx=-5;dx<=5;dx++){if(dx*dx+dy*dy>26)continue;const x=cx+dx,y=cy+dy;if(!walk(x,y))continue;cut(x,y);if(!cellsAll.has(x+','+y))disc.push([x,y])}
-    const want=Math.round((disc.length+0)*.25);let placed=0;
+    for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){if(dx*dx+dy*dy>11)continue;const x=cx+dx,y=cy+dy;if(!walk(x,y))continue;cut(x,y);if(!cellsAll.has(x+','+y))disc.push([x,y])}
+    const want=Math.round(disc.length*.32);let placed=0;
     for(let t=0;t<disc.length*3&&placed<want;t++){const q=disc[(hs(cx*7+t,cy,640+t)*disc.length)|0],x=q[0],y=q[1];
       if(x<edgeAt(y)+4||nearRoad(x,y))continue; // never out on the road or its verge: only back in the forest
       if(Math.abs(x-cx)+Math.abs(y-cy)<1||cellsAll.has(x+','+y)||cellsAll.has((x+1)+','+y)&&cellsAll.has((x-1)+','+y))continue; // keep the middle and the paths clear
