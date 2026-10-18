@@ -218,3 +218,7 @@ function pfOld(n){
   for(const a of nodes)for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)dig(a[0]+dx,a[1]+dy); // each clearing is a little round of open ground
   L._pfOldCells=dug;
 }
+/* the painted mountains stand just inside the edge of the map, so they would balloon as the party walks up to them: they are scaled with distance, to look the same as they do from far off */
+{const _ks=khSkyList;khSkyList=function(cx,cy){const out=_ks.apply(this,arguments);
+  try{const a=IMG.pf_range0,b=IMG.pf_range1;for(const e of out){if(e.img!==a&&e.img!==b)continue;const d=Math.hypot(e.x-cx,e.y-cy),f=Math.max(.2,Math.min(1,d/34));e.w*=f;e.bob*=f}}catch(x){}
+  return out}}

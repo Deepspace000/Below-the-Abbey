@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.358';
+const VERSION='3.359';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -21773,6 +21773,10 @@ function pfOld(n){
   for(const a of nodes)for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)dig(a[0]+dx,a[1]+dy); // each clearing is a little round of open ground
   L._pfOldCells=dug;
 }
+/* the painted mountains stand just inside the edge of the map, so they would balloon as the party walks up to them: they are scaled with distance, to look the same as they do from far off */
+{const _ks=khSkyList;khSkyList=function(cx,cy){const out=_ks.apply(this,arguments);
+  try{const a=IMG.pf_range0,b=IMG.pf_range1;for(const e of out){if(e.img!==a&&e.img!==b)continue;const d=Math.hypot(e.x-cx,e.y-cy),f=Math.max(.2,Math.min(1,d/34));e.w*=f;e.bob*=f}}catch(x){}
+  return out}}
 
 /* ---- src/desert/wilds.js ---- */
 /* ==========================================================================
