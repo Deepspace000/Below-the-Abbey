@@ -29,7 +29,8 @@ function pfPrep(n){
      L.decor.push({k:keys[(hs(x,y,681)*keys.length)|0],x,y,block:true,pfEdge:1,sc:.3+hs(x,y,682)*.14,ox:(hs(x,y,683)-.5)*.5,oy:(hs(x,y,684)-.5)*.4})}} // kept low, so the mountains show over the tops
   const walk=(x,y)=>x>=3&&y>=3&&x<W-6&&y<H-3&&L.rows[y][x]==='.';
   const clear=new Set(),trails=[],st=L.start||{x:0,y:0};
-  const cut=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const l=trees.get((x+dx)+','+(y+dy));if(l)for(const d of l)clear.add(d)}};
+  const dense=/^[NS]$/.test(LP_LEG(s)),zs=dense?pfZone(L):null,elig=dense?pfElig(L,zs):null; // along the sea the whole east side is thick forest (pfDense): trails there are made of trees you can walk through, so nothing is cut away
+  const cut=dense?()=>{}:(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const l=trees.get((x+dx)+','+(y+dy));if(l)for(const d of l)clear.add(d)}};
   const carve=(x0,y0,dx,dy,len,seed,cells)=>{ // a winding trail, two squares wide, that stops at rock or water
     let x=x0,y=y0;
     for(let i=0;i<len;i++){
@@ -40,7 +41,9 @@ function pfPrep(n){
     }};
   for(let y=150,k=0;y<H-150;k++,y+=15+((hs(s,k,601)*9)|0)){ // a way into the woods about every 100 metres
     if(Math.abs(y-st.y)<8)continue;
-    let e=-1;for(let x=56;x<W-8;x++){if(blk.has(x+','+y)){e=x;break}}
+    let e=-1;
+    if(dense){const z=zs[y];if(z>=60&&elig(z,y)&&elig(z,y+1))e=z}
+    else for(let x=56;x<W-8;x++){if(blk.has(x+','+y)){e=x;break}}
     if(e<60||!walk(e-1,y))continue;
     const cells=[];carve(e-1,y,1,0,14+((hs(s,k,602)*24)|0),s*1000+k,cells);
     if(cells.length<6)continue;
@@ -62,14 +65,14 @@ function pfPrep(n){
       x+=mx;y+=my}
     return true};
   const deepNodes=[];
-  const nodes=trails.filter(t=>!t.side).flatMap(t=>[t.cells[t.cells.length-1],t.cells[(t.cells.length*.5)|0]]);
-  for(let y=150,k=0;y<H-150;y+=16,k++)for(let q=0;q<2;q++){ // clearings deep in the trees
+  const nodes=trails.filter(t=>!t.side).flatMap(t=>dense?[t.cells[t.cells.length-1]]:[t.cells[t.cells.length-1],t.cells[(t.cells.length*.5)|0]]);
+  for(let y=150,k=0;!dense&&y<H-150;y+=16,k++)for(let q=0;q<2;q++){ // clearings deep in the trees (in the thick woods the open places come from pfDense)
     const x=(W*.72+hs(s,k*3+q,630)*(W*.22))|0,yy=y+((hs(s,k*3+q,631)*10)|0);
     if(walk(x,yy)&&walk(x+1,yy+1)&&(blk.has(x+','+yy)||trees.has(x+','+yy)||[[2,0],[-2,0],[0,2],[0,-2]].some(([a,b])=>blk.has((x+a)+','+(yy+b))))){nodes.push([x,yy]);deepNodes.push([x,yy]);cellsAll.add(x+','+yy);cut(x,yy);cut(x+1,yy+1);cut(x-1,yy);cut(x,yy-1)}}
   const trailNodes=trails.filter(t=>!t.side).map(t=>t.cells[t.cells.length-1]),dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
   const done=new Set();
   nodes.forEach((a,i)=>{
-    const near=nodes.map((b,j)=>[j,dist(a,b)]).filter(([j,d])=>j!==i&&d>3&&d<36).sort((p,q)=>p[1]-q[1]).slice(0,2);
+    const near=nodes.map((b,j)=>[j,dist(a,b)]).filter(([j,d])=>j!==i&&d>3&&d<36).sort((p,q)=>p[1]-q[1]).slice(0,dense?1:2);
     const tn=trailNodes.filter(b=>b!==a).map(b=>[b,dist(a,b)]).sort((p,q)=>p[1]-q[1])[0];
     const targets=near.map(([j])=>nodes[j]);if(tn&&tn[1]<60)targets.push(tn[0]);
     for(const b of targets){const key=Math.min(i,nodes.indexOf(b))+'-'+Math.max(i,nodes.indexOf(b));if(done.has(key))continue;done.add(key);weave(a[0],a[1],b[0],b[1],s*7000+i*13+nodes.indexOf(b))}});
@@ -85,7 +88,7 @@ function pfPrep(n){
       if(mine.some(m=>Math.abs(m[0]-x)<=1&&Math.abs(m[1]-y)<=1))continue; // spaced out: no two trees side by side
       mine.push([x,y]);
       const soft=hs(x,y,670)<.4;L.decor.push({k:soft?(hs(x,y,671)<.5?'pt_birch':'pt_willow'):OAKS[(hs(x,y,672)*5)|0],x,y,block:!soft,walk:soft||undefined,pfNew:1,sc:soft?.8+hs(x,y,673)*.3:.85+hs(x,y,674)*.4});placed++}}
-  L._pfTools={cells:cellsAll,weave,walk,cut};
+  L._pfTools={cells:cellsAll,weave,walk,cut};L._pfPaths=cellsAll; // the squares of every trail and weaving path: pfDense fills them with trees you can walk through
   // wolves: now and then one waits deep on a trail
   L.enemies=L.enemies||[];
   trails.forEach((t,i)=>{if(t.side||i%8!==3||t.cells.length<16)return;const c=t.cells[(t.cells.length*.8)|0];if(Math.abs(c[1]-st.y)>30)L.enemies.push({t:'wolf',x:c[0],y:c[1]})});
@@ -104,6 +107,98 @@ function pfPrep(n){
   }
   for(const d of clear){d.block=false;d.sc=.0001;d.pfCut=1} // the trees on a trail are made invisible, not removed, so saved decor keeps its places in the list
   L.enemies=L.enemies.filter(e=>e.t!=='wolf'||(L.rows[e.y]&&L.rows[e.y][e.x]==='.'));
+}
+/* ---------- the thick woods along the sea: the whole east side is forest, with only a sliver of it open ---------- */
+function pfZone(L){ // the first column of the woods on every row: four squares east of the middle of the road (the first road square is the one west of the middle)
+  if(L._pfZs)return L._pfZs;
+  const H=L.rows.length,W=L.rows[0].length,zs=new Int16Array(H).fill(-1);
+  for(let y=0;y<H;y++){const a=L.fmap[y].indexOf('1');if(a>=0&&a+5<=W-8)zs[y]=a+5}
+  return L._pfZs=zs}
+function pfElig(L,zs){const W=L.rows[0].length,H=L.rows.length,cv=L._carve;return (x,y)=>y>=2&&y<H-3&&zs[y]>=0&&x>=zs[y]&&x<=W-6&&L.rows[y][x]==='.'&&L.fmap[y][x]==='0'&&!(cv&&cv.has(x+','+y))}
+const PF_OAKS=['ltree0','ltree4','ltree8','ltree12','ltree19'],PF_FIRS=['ltree2','ltree6','ltree10','ltree14'],PF_ODDS=['ltree20','ltree21','ltree17','ltree18','ltree16'],
+  PF_WILLOWS=['ltree3','ltree7','ltree11','ltree15','pt_willow'],PF_BUSHES=['lbush0','lbush0_1','lbush0_2'],PF_FLO=['lflora0','lflora0_1','lflora0_2'];
+const PF_BLOB=.84,PF_SOLID=.3; // how many little clearings, and how many of the trees deep in the woods are solid
+function pfBarkAll(){ // the firs are painted with a pink trunk: it is made bark brown, once, the first time the thick woods are built
+  if(pfBarkAll.done)return;pfBarkAll.done=1;
+  for(const k of ['ltree2','ltree6','ltree10','ltree14']){try{
+    const im=IMG[k];if(!im||!im.width||im._bark)continue;
+    const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);
+    const d=x.getImageData(0,0,c.width,c.height),p=d.data;
+    for(let i=0;i<p.length;i+=4){if(p[i+3]<40)continue;const r=p[i],g=p[i+1],b=p[i+2];if(r>130&&b>80&&g<120&&r-g>60&&b-g>25){const l=r*.3+g*.59+b*.11;p[i]=Math.min(255,l*1.05+14);p[i+1]=l*.74+7;p[i+2]=l*.5+3}}
+    x.putImageData(d,0,0);c._bark=1;IMG[k]=c;
+  }catch(e){}}}
+/* Every square of the woods is a clearing (about one in seven), a trunk that stops the party, or a tree it can walk through: willows, birches and bushes you push through, while oaks and firs stand fast.
+   The trails are made of walk-through trees too, so no tree is ever cut away. */
+function pfDense(n){
+  const L=LEVELS[n];if(!L||L._pfD||!L.rows||!L.decor||!Array.isArray(L.fmap))return;
+  const s=n-LP.BASE;if(!/^[NS]$/.test(LP_LEG(s)))return;L._pfD=1;pfBarkAll();
+  const W=L.rows[0].length,H=L.rows.length,hs=hash2,zs=pfZone(L),elig=pfElig(L,zs),cv=L._carve||new Set(),paths=L._pfPaths||new Set(),gyOf=y=>lpGY(s,y);
+  const isTree=d=>!d.npc&&/^([lp]tree\d|pt_)/.test(d.k),pool=new Map(),occ=new Set(),occB=new Set();
+  for(const d of L.decor){const k=d.x+','+d.y;if(isTree(d)){let l=pool.get(k);if(!l)pool.set(k,l=[]);l.push(d)}else if(!d.pfCut){occ.add(k);if(d.block)occB.add(k)}}
+  for(const e of L.enemies||[])occ.add(e.x+','+e.y);for(const i of L.items||[])occ.add(i.x+','+i.y);
+  {const st=L.start||{x:0,y:0};occ.add(st.x+','+st.y);if(L.tele)for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)occ.add((L.tele.x+dx)+','+(L.tele.y+dy))}
+  const keep=new Set(),yards=[]; // the little open yards in front of hidden doors
+  for(const q of L._wd||[]){const yd=[];for(let dy=-1;dy<=4;dy++)for(let dx=-3;dx<=3;dx++){const k=(q.x+dx)+','+(q.y+dy);keep.add(k);if(dy>=3)yd.push([q.x+dx,q.y+dy])}yards.push(yd)}
+  const pick=(a,r)=>a[Math.min(a.length-1,(r*a.length)|0)];
+  const blob=(x,gy)=>{ // a little round clearing, three to five squares across, ragged at the edge
+    const bx=Math.floor(x/8),by=Math.floor(gy/8);
+    for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++){const X=bx+i,Y=by+j;if(hs(X,Y,9201)>=PF_BLOB)continue;
+      const cx=(X+hs(X,Y,9202))*8,cy=(Y+hs(X,Y,9203))*8,r=1.2+hs(X,Y,9204)*1.8,d=Math.hypot(x+.5-cx,(gy+.5-cy)*(.75+hs(X,Y,9205)*.5))+(hs(x,gy,9206)-.5)*1.1;
+      if(d<r)return true}
+    return false};
+  const nearCarve=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if((dx||dy)&&cv.has((x+dx)+','+(y+dy)))return true;return false};
+  const cls=(x,y,gy)=>{ // 0 open, 1 a trunk that blocks the way, 2 a tree to walk through
+    const k=x+','+y,depth=x-zs[y];
+    if(paths.has(k))return 2;
+    const hedge=nearCarve(x,y);
+    if(!hedge&&depth>=3&&x<=W-10&&blob(x,gy))return 0;
+    let pS=hedge?.85:depth<1?.85:depth<2?.78:depth<3?.66:depth<4?.52:depth<5?.42:PF_SOLID; // a wall of trunks along the road, loosening as it goes deeper
+    if(!hedge&&depth>=5)pS=Math.max(.1,Math.min(.72,pS+(tsmooth(x/6,gy/6,9301)-.5)*.9)); // thickets and airy stretches
+    return hs(x,gy,9302)<pS?1:2};
+  const flo=L.scenery||(L.scenery=[]);
+  const flower=(x,y,gy,seed,sc,set)=>{const a=set||PF_FLO,k=pick(a,hs(x,gy,seed+1));flo.push({k,wx:x+.12+hs(x,gy,seed+2)*.76,wy:y+.12+hs(x,gy,seed+3)*.76,sc,decor:{k,walk:true,x,y}})};
+  const dress=(d,x,y,gy,soft)=>{ // what grows on this square
+    const r1=hs(x,gy,9310),r2=hs(x,gy,9311),r3=hs(x,gy,9312),r4=hs(x,gy,9313);let k,sc;
+    if(soft){k=r1<.10?pick(PF_BUSHES,r2):r1<.56?pick(PF_WILLOWS,r2):'pt_birch';sc=k==='pt_birch'?.85+r4*.35:k[1]==='b'?.85+r4*.35:.8+r4*.35}
+    else{const stand=tsmooth(x/5,gy/5,9320);k=r1<.06?pick(PF_ODDS,r2):stand<.5?pick(PF_OAKS,r2):r3<.75?pick(PF_FIRS,r2):pick(PF_OAKS,r2);sc=(PF_FIRS.indexOf(k)>=0?.85:.75)+r4*.3}
+    d.k=k;d.x=x;d.y=y;d.block=!soft;d.walk=soft?true:undefined;d.sc=sc;d.ox=(r2-.5)*.5;d.oy=(r3-.5)*.5;d.pfD=1;delete d.hidden;delete d.pfCut;return d};
+  const gone=d=>{d.block=false;d.hidden=true;d.pfCut=1;d.walk=undefined};
+  const cellD=new Map(),add=[];let nOpen=0,nSolid=0,nSoft=0;
+  for(let y=2;y<H-3;y++){const z=zs[y];if(z<0)continue;const gy=gyOf(y);
+    for(let x=z;x<=W-6;x++){
+      const k=x+','+y,pl=pool.get(k),el=elig(x,y)&&!occ.has(k)&&!keep.has(k),c=el?cls(x,y,gy):0;
+      if(c===0){
+        if(pl)for(const d of pl)gone(d);
+        if(el){nOpen++;if(hs(x,gy,9330)<.75)flower(x,y,gy,9330,.6+hs(x,gy,9334)*.45);if(hs(x,gy,9335)<.45)flower(x,y,gy,9335,.55+hs(x,gy,9339)*.4);if(hs(x,gy,9340)<.1)flower(x,y,gy,9340,.9+hs(x,gy,9344)*.3,PF_BUSHES)}
+        else if(!pl&&!occ.has(k)&&keep.has(k)&&L.rows[y][x]==='.'&&hs(x,gy,9330)<.45)flower(x,y,gy,9330,.6+hs(x,gy,9334)*.4); // flowers in the yards of the hidden doors
+        continue}
+      let d=pl&&pl[0];if(d){for(let i=1;i<pl.length;i++)gone(pl[i])}else{d={};add.push(d)}
+      dress(d,x,y,gy,c===2);cellD.set(k,d);if(c===2)nSoft++;else nSolid++;
+      const p=paths.has(k);
+      if(hs(x,gy,9350)<(p?.4:c===2?.18:.08))flower(x,y,gy,9350,.6+hs(x,gy,9354)*.4);
+      if(c===2&&d.k[1]!=='b'&&hs(x,gy,9360)<.07)flower(x,y,gy,9360,.9+hs(x,gy,9364)*.3,PF_BUSHES);
+    }}
+  // every little door in the woods can be reached: where the trees are too thick, a way of walk-through trees is made to it
+  const heap=[],push=(c,i)=>{heap.push([c,i]);let a=heap.length-1;while(a>0){const p=(a-1)>>1;if(heap[p][0]<=heap[a][0])break;const t=heap[p];heap[p]=heap[a];heap[a]=t;a=p}},
+    pop=()=>{const t=heap[0],l=heap.pop();if(heap.length){heap[0]=l;let a=0;for(;;){let b=a*2+1;if(b>=heap.length)break;if(b+1<heap.length&&heap[b+1][0]<heap[b][0])b++;if(heap[a][0]<=heap[b][0])break;const q=heap[a];heap[a]=heap[b];heap[b]=q;a=b}}return t};
+  let nMade=0;
+  const connect=(srcs,cy)=>{
+    const y0=Math.max(2,cy-70),y1=Math.min(H-4,cy+70),hh=y1-y0+1,dist=new Int32Array(W*hh).fill(1e9),prev=new Int32Array(W*hh).fill(-1);heap.length=0;
+    for(const [sx,sy] of srcs){if(sy<y0||sy>y1||L.rows[sy][sx]!=='.')continue;const i=(sy-y0)*W+sx;dist[i]=0;push(0,i)}
+    let goal=-1;
+    while(heap.length){const [c,i]=pop();if(c>dist[i])continue;const x=i%W,y=y0+((i/W)|0),k=x+','+y;
+      if((x<zs[y]||paths.has(k))&&!keep.has(k)){goal=i;break}
+      for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(nx<3||nx>W-7||ny<y0||ny>y1||L.rows[ny][nx]!=='.')continue;
+        const nk=nx+','+ny;if(occB.has(nk)&&!keep.has(nk))continue;const d=cellD.get(nk),ni=(ny-y0)*W+nx,nc=c+(d&&d.block?6:1);if(nc<dist[ni]){dist[ni]=nc;prev[ni]=i;push(nc,ni)}}}
+    if(goal<0)return;
+    for(let i=goal;i>=0;i=prev[i]){const x=i%W,y=y0+((i/W)|0),k=x+','+y,d=cellD.get(k);paths.add(k);if(d&&d.block){dress(d,x,y,gyOf(y),true);nMade++;nSolid--;nSoft++}if(!keep.has(k)&&hs(x,gyOf(y),9370)<.3)flower(x,y,gyOf(y),9370,.6+hs(x,gyOf(y),9374)*.4)}};
+  for(const yd of yards)connect(yd,yd[0][1]-4);
+  for(const d of add)L.decor.push(d);
+  { // the trails and weaving paths are short grass, without the meadow's flowers, so they can be followed with the eye: a grassy way in among the trunks
+    const byRow=new Map();
+    for(const k of paths){const i=k.indexOf(','),x=+k.slice(0,i),y=+k.slice(i+1);if(L.fmap[y]&&L.fmap[y][x]==='0'){let a=byRow.get(y);if(!a)byRow.set(y,a=[]);a.push(x)}}
+    for(const [y,xs] of byRow){const r=L.fmap[y].split('');for(const x of xs)r[x]='2';L.fmap[y]=r.join('')}}
+  L._pfDStat={open:nOpen,solid:nSolid,soft:nSoft,made:nMade,paths:paths.size};
 }
 loadImg('pf_rock','assets/pf_rock.jpg');loadImg('pf_slope','assets/pf_slope.jpg');loadImg('pf_range0','assets/pf_range0.png');loadImg('pf_range1','assets/pf_range1.png');
 function pfRockGid(wh,inside){ // a rough, dark, painted cave rock wall of the given height
@@ -180,7 +275,7 @@ const WD_KIND={ // h: height in the world, spd: squares a second, flee: how clos
   deer:{f:['doe','stag'],h:1.0,spd:1.5,flee:5,wt:1},bee:{f:['bee0','bee1'],h:.075,spd:1.1,flee:0,wt:2,fly:1}};
 const wdFree=(x,y,kind)=>{const c=Math.floor(x),d=Math.floor(y);const L=LEVELS[LEVEL];if(!(L&&L.rows[d]&&L.rows[d][c]==='.'&&!cellBlocked(c,d)))return false;
   const fm=G.fmap;if(typeof fm==='string'){const f=fm[d*MW+c];if(kind==='bee')return f!=='4'; // bees may cross the road, but not the water
-    return f==='0'} // animals keep to the grass and the woods: not the road, the shore or the water
+    return f==='0'||f==='2'} // animals keep to the grass and the woods (and the grassy trails): not the road, the shore or the water
   return true};
 function wdTick(dt){
   const L=LEVELS[LEVEL];

@@ -188,14 +188,17 @@ function wdPrep(n){
   const cnt=(WD_OUT.includes(n)||wdIsLP(n))?wdCount(n):0;
   for(let k=0;k<cnt;k++){const id=wdRuinId(n,k),tint=WD_TINTS[(hash2(id,5,730)*WD_TINTS.length)|0];wdPlace(L,n,id,'ruin',tint,id)}
   // soft trees that grow only along the sides of the path: the party can walk right through them
-  if(wdIsLP(n)||WD_OUT.includes(n)){let c=0;const trees=L.decor.filter(d=>d.block&&/^[lp]tree\d/.test(d.k)&&!d.pfCut);const occupied=new Set(L.decor.map(d=>d.x+','+d.y));
+  const lpDense=wdIsLP(n)&&/^[NS]$/.test(LP_LEG(n-LP.BASE)); // along the sea the woods are thick, and full of walk-through trees already (pfDense)
+  if((wdIsLP(n)||WD_OUT.includes(n))&&!lpDense){let c=0;const trees=L.decor.filter(d=>d.block&&/^[lp]tree\d/.test(d.k)&&!d.pfCut);const occupied=new Set(L.decor.map(d=>d.x+','+d.y));
     for(const d of trees){if(c>=180)break;const x=d.x-1,y=d.y;if(hash2(d.x,d.y,750)>.035)continue;if(L.rows[y]&&L.rows[y][x]==='.'&&!occupied.has(x+','+y)&&L.rows[y][x-1]==='.'){occupied.add(x+','+y);L.decor.push({k:hash2(d.x,d.y,751)<.5?'pt_birch':'pt_willow',x,y,block:false,walk:true,sc:.75+hash2(d.x,d.y,752)*.35});c++}}}
+  if(lpDense&&typeof pfDense==='function')try{pfDense(n)}catch(e){console.error(e)} // last, once every cave and ruin has its place
 }
 {const _ll=loadLevel;loadLevel=function(n){try{if(wdIsLP(n)&&!LEVELS[n]&&KH_LAZY[n])KH_LAZY[n]();wdPrep(n)}catch(x){console.error(x)}return _ll.apply(this,arguments)}}
 {const _g=goToLevel;goToLevel=function(n,e){try{if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]()}catch(x){console.error(x)}return _g.apply(this,arguments)}}
 /* ---------- the word in town: a woodsman in Thornwick and a scout in Ironhill talk about the hidden places ---------- */
 const WD_TALK=[
  "Walk the woods slowly, and keep an eye on the dead trees. Where a few of them stand twisted across nothing at all, there is usually a reason. Burn them down with a torch or a lantern and you may find a door.",
+ "The woods along the sea are thick, and you will not walk straight through them. Willows, birches and ferns give way as you push into them. Oaks and firs do not, so you have to look for a way round. Grassy tracks run in from the road every so often, and some of them wind a long way.",
  "Behind some of those thickets there are caves. Wolves, bears, sometimes a poor soul who has been driven out of a village and has nowhere else to go. A few of them have a little treasure, and a few have a quest, if you are kind.",
  "And the old ruins, grown over with vines. Most are empty, and dark as the inside of a boot. Some have a chest. Some have been taken by slimes, so do not go in with an empty health bar. But the herbs! The herbs in those halls are the best I have ever seen.",
  "Once you have seen a spot, a little question mark turns up on your map. It means a place is there, and could be anything. It goes away once you have been inside."];
