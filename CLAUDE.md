@@ -43,7 +43,7 @@ make or ask for any picture, and before you push.
 - After every change: bump `VERSION` in `index.html`, commit, push, rebuild the itch.io zip with `python tools/pack_itch.py`
   (it overwrites the old `itch-build.zip` in this folder every time, so there is only ever one), and give the Pages link
   (https://deepspace000.github.io/Below-the-Abbey/) together with the start-area links for the LATEST areas, not the old ones:
-  `?town=hollowland&lvl=34` (the Hollow Land and its castle), `?town=orangetower&lvl=34` (the Orange Spire, level 1), `?town=landpath&lvl=34` (the Pilgrim’s Path), `?town=monastery&lvl=34` (Saint Elen's Monastery), `?town=oakwood&lvl=34` (the Oakwood),
+  `?town=hollowland&lvl=34` (the Hollow Land and its castle), `?town=orangetower&lvl=34` (the Orange Spire, level 1), `?town=landpath&lvl=34` (the Pilgrim’s Path), `?town=monasterygate&lvl=34` (outside the monastery, at the statue and the lane to the gate), `?town=monastery&lvl=34` (Saint Elen's Monastery), `?town=oakwood&lvl=34` (the Oakwood),
   `?town=oldhaven&lvl=34` (Oldhaven), `?town=khemetracity&lvl=34`. Replace these with the newest
   areas whenever a new one is added (register it in the `AREAS` table in `jumpFromUrl`).
 - The desert and city code lives in `src/desert/*.js` and is injected into `index.html` by `python tools/inject.py`. Edit the
