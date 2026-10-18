@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.413';
+const VERSION='3.414';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -3628,12 +3628,18 @@ function jumpFromUrl(){
   const target=Math.max(1,Math.min(40,parseInt(q.get('lvl')||'8',10)||8));
   backupAuto();
   const sv=readSave('auto')||readSave('prev');
-  if(sv&&!['oldhaven','oakwood','landpath','pilgrim','monastery','monasterygate','hollowland','orangetower','orangeboss'].includes(town)){restore(sv)}
+  if(sv&&!['oldhaven','oakwood','landpath','pilgrim','monastery','monasterygate','hollowland','orangetower','orangeboss','kraken'].includes(town)){restore(sv)}
   else{let p=null;try{p=JSON.parse(localStorage.getItem('abbeyParty')||'null')}catch(e){}setParty(p||DEFAULT_PARTY);reset();G.state='play'}
   G.heroes.forEach((h,i)=>{while(h.lvl<target){h.xp=xpNeed(h.lvl);levelUp(i)}h.alive=true;h.hp=h.max;h.mp=h.mpMax;h.food=Math.max(h.food||0,100)});
   G.lvlBanners.length=0;G.msgs=[];G.cut=null;G.talk=null;
   if(q.get('gear')!=='0')giveJumpGear(target);
   const F=G.flags,sq=T=>q.get('at')==='square'?{x:25,y:T.gate_y,f:1}:{x:T.start.x,y:T.start.y,f:1}; // &at=square lands in the middle of the town
+  if(town==='kraken'){ // a party with all four Kraken harpoons in hand, put on the open sea at the Kraken line, facing east
+    F.townSeen=1;F.abbeyIntroSeen=1;F.gwoodSeen=1;F.gandrickDead=1;F.northGate=1;F.mayorKilled=1;F.mayorDown=1;F.ironRoad=1;F.passDone=1;F.voyage=1;F.page3=1;F.kgGiven=1;F.krakenSlain=0;F.kgGone=0;F.kgFound={1:1,2:1,3:1,4:1};
+    for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};
+    G.heroes.forEach((h,i)=>{h.eq=h.eq||{};h.eq.main={id:'kharp'+(i+1),n:1};try{recalcMax(i)}catch(e){}});
+    goToLevel(330,{x:546,y:300,f:1});G.state='play';G.menu=false;
+    msg('The party stands at the Kraken line with all four Kraken harpoons. Walk east.','#ffe36a');return}
   if(town==='abbey'||town==='thornwood'){F.townSeen=0;delete F.abbeyIntroSeen;G.bossDead=true;goToLevel(2);G.state='play';G.menu=false;return}
   F.townSeen=1;F.abbeyIntroSeen=1;F.gwoodSeen=1;
   const AREAS={hollowland:[364,35,60,0],orangetower:[440,30,38,0],orangeboss:[443,48,7,0],oldhaven:[305,74,141,0],oakwood:[311,2,36,1],landpath:[400,76,555,0],monasterygate:[411,73,306,0],pilgrim:[400,76,555,0],monastery:[430,42,66,0],bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],khemetracity:[44,201,379,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
@@ -4608,7 +4614,7 @@ function drawTownBody(cs,ox,oy){
     else if(d.k==='noticeboard'){ctx.fillStyle='#6a4a28';ctx.strokeStyle=ink;ctx.lineWidth=.9;ctx.fillRect(cx-cs*.3,cy-cs*.22,cs*.6,cs*.4);ctx.strokeRect(cx-cs*.3,cy-cs*.22,cs*.6,cs*.4)}
     else if(d.k==='lamp'){ctx.fillStyle='#f0c860';ctx.strokeStyle=ink;ctx.lineWidth=.8;ctx.beginPath();ctx.arc(cx,cy,Math.max(1.6,cs*.14),0,TAU);ctx.fill();ctx.stroke()}
   }
-  for(const m of (L0&&L0.mapNames)||[]){addL(m.t,ox+m.x*cs,oy+m.y*cs,Math.max(7,Math.min(11,cs*(m.k==='place'?.7:.55))),m.k==='place'?'#1c1208':'#4a2e14',m.k==='place'?3:8,m.k==='place'?2.5:14)}
+  for(const m of (L0&&L0.mapNames)||[]){if(m.k==='sea'){addL(m.t,ox+m.x*cs,oy+m.y*cs+(m.dy||0),m.big?11:8.5,'#14202a',m.pri||(m.big?5:4),0);continue}addL(m.t,ox+m.x*cs,oy+m.y*cs,Math.max(7,Math.min(11,cs*(m.k==='place'?.7:.55))),m.k==='place'?'#1c1208':'#4a2e14',m.k==='place'?3:8,m.k==='place'?2.5:14)}
   // people you can talk to
   for(const d of G.decor){
     if(d.found||!d.npc||MAP_PROPS.has(d.k)||d.k.startsWith('sign_')||d.k.startsWith('flora')||d.k.startsWith('tree'))continue;
@@ -4719,7 +4725,7 @@ function drawQuestRings(ox,oy,cs){
   }
   ctx.restore();
 }
-function mapFit(){const [rw,rh]=mapRes();return Math.max(LEVEL===44?.4:2.5,Math.min((DW-12-rw)/MW,(DH-40-rh)/MH))}
+function mapFit(){const [rw,rh]=mapRes();return Math.max(LEVEL===44||LEVEL===330?.4:2.5,Math.min((DW-12-rw)/MW,(DH-40-rh)/MH))}
 function mapOrigin(cs){ // where cell (0,0) sits, honouring the pan; a map smaller than the screen is centred
   const w=MW*cs,h=MH*cs,[rw,rh]=mapRes();
   G.panMinX=Math.min(0,DW-12-rw-w);G.panMinY=Math.min(0,DH-36-rh-h);
@@ -4739,7 +4745,7 @@ function enemyGlyph(t){
 }
 function drawOverview(){
   BTNS=[];veil(.95);
-  if(!G.ovInit||G.ovLevel!==LEVEL){G.mz=clamp(LEVEL===44?1:12,mapFit(),34);const [rw,rh]=mapRes();G.panX=(DW-rw)/2-((G.C.x+.5)*G.mz+6);G.panY=(DH-rh)/2-((G.C.y+.5)*G.mz+30);const sv=G.ovSaved&&G.ovSaved[LEVEL];if(sv){G.mz=clamp(sv.mz,mapFit(),34);G.panX=sv.panX;G.panY=sv.panY} /* the map reopens as it was left: same zoom, same place */G.ovInit=true;G.ovLevel=LEVEL}
+  if(!G.ovInit||G.ovLevel!==LEVEL){G.mz=clamp(LEVEL===330?0:LEVEL===44?1:12,mapFit(),34);const [rw,rh]=mapRes();G.panX=(DW-rw)/2-((G.C.x+.5)*G.mz+6);G.panY=(DH-rh)/2-((G.C.y+.5)*G.mz+30);const sv=G.ovSaved&&G.ovSaved[LEVEL];if(sv){G.mz=clamp(sv.mz,mapFit(),34);G.panX=sv.panX;G.panY=sv.panY} /* the map reopens as it was left: same zoom, same place */G.ovInit=true;G.ovLevel=LEVEL}
   const cs=G.mz,[ox,oy]=mapOrigin(cs);
   ctx.save();ctx.font=`24px ${FTITLE}`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle='#d8c88e';ctx.fillText(`Level ${LEVEL}: ${LEVEL_NAMES[LEVEL]}`,8,15);ctx.restore();
   const TOWN=drawnMap(LEVEL);
@@ -6351,7 +6357,7 @@ function questShow(qid){ // a quest picked in the log: show where it is, whateve
   const sp=questSpots().find(z=>z.q===qid);
   if(sp){ // on this level's own map: centred, with its place circled
     G.menu=false;G.map=false;G.overview=true;G.world=false;G.teleMode=false;
-    const mz=clamp(LEVEL===44?1:12,mapFit(),34),[rw,rh]=mapRes();G.mz=mz;G.panX=(DW-rw)/2-((sp.x+.5)*mz+6);G.panY=(DH-rh)/2-((sp.y+.5)*mz+30);G.ovInit=true;G.ovLevel=LEVEL;return;
+    const mz=clamp(LEVEL===330?0:LEVEL===44?1:12,mapFit(),34),[rw,rh]=mapRes();G.mz=mz;G.panX=(DW-rw)/2-((sp.x+.5)*mz+6);G.panY=(DH-rh)/2-((sp.y+.5)*mz+30);G.ovInit=true;G.ovLevel=LEVEL;return;
   }
   const loc=questWorldLoc(qid); // somewhere else: the map of the whole land, with that place circled
   if(loc){
@@ -18732,6 +18738,8 @@ function seaBuildOpen(){
   const lv={rows:rows.map(r=>r.join('')),start,enemies,items:[],decor,scenery,fmap:null,floorSet:['isleSand','lush','wood','bluesand','bluewater','isleGrassEdge'],floor:'isleSand',ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:'The Narrow Sea',label:'The Narrow Sea',noExtras:true,diff:22,tele:{x:start.x,y:start.y},chars:{D:LEVEL41_DATA.chars.D},lights:[],portals:[]};
   const fmapR=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmapR.push(s)}lv.fmap=fmapR;
+  // the names of everything on the sea, for the local map, which opens zoomed all the way out
+  lv.mapNames=SN_ISLES.map(I=>({t:I.n[0].toUpperCase()+I.n.slice(1),x:I.x,y:I.y+(I.lv===340?-46:I.r>=20?0:I.lv===343?-12:I.r+5),k:'sea',big:I.r>=20,pri:I.r>=20?7:5})).concat([{t:'Yarrim',x:30,y:322,k:'sea',big:1},{t:'Oldhaven',x:770,y:200,k:'sea',big:1},{t:'The Kraken waters',x:SN.KRAKEN_X+85,y:150,k:'sea',pri:1},{t:'The Narrow Sea',x:400,y:105,k:'sea',big:1}]);
   LEVELS[SN.ID]=lv;LEVEL_NAMES[SN.ID]='The Narrow Sea';TERRS[SN.ID]=yarTerrain(W,H,h,rk,block);
 }
 KH_LAZY[SN.ID]=seaBuildOpen;LEVEL_NAMES[SN.ID]='The Narrow Sea';

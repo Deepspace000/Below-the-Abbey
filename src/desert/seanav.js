@@ -95,6 +95,8 @@ function seaBuildOpen(){
   const lv={rows:rows.map(r=>r.join('')),start,enemies,items:[],decor,scenery,fmap:null,floorSet:['isleSand','lush','wood','bluesand','bluewater','isleGrassEdge'],floor:'isleSand',ceil:'cloud',
     day:.98,outdoor:true,amb:.9,name:'The Narrow Sea',label:'The Narrow Sea',noExtras:true,diff:22,tele:{x:start.x,y:start.y},chars:{D:LEVEL41_DATA.chars.D},lights:[],portals:[]};
   const fmapR=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmapR.push(s)}lv.fmap=fmapR;
+  // the names of everything on the sea, for the local map, which opens zoomed all the way out
+  lv.mapNames=SN_ISLES.map(I=>({t:I.n[0].toUpperCase()+I.n.slice(1),x:I.x,y:I.y+(I.lv===340?-46:I.r>=20?0:I.lv===343?-12:I.r+5),k:'sea',big:I.r>=20,pri:I.r>=20?7:5})).concat([{t:'Yarrim',x:30,y:322,k:'sea',big:1},{t:'Oldhaven',x:770,y:200,k:'sea',big:1},{t:'The Kraken waters',x:SN.KRAKEN_X+85,y:150,k:'sea',pri:1},{t:'The Narrow Sea',x:400,y:105,k:'sea',big:1}]);
   LEVELS[SN.ID]=lv;LEVEL_NAMES[SN.ID]='The Narrow Sea';TERRS[SN.ID]=yarTerrain(W,H,h,rk,block);
 }
 KH_LAZY[SN.ID]=seaBuildOpen;LEVEL_NAMES[SN.ID]='The Narrow Sea';
