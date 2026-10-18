@@ -69,9 +69,13 @@ function wdSpot(L,n,seed){
 function wdPlace(L,n,id,kind,tint,seed){
   const sp=wdSpot(L,n,seed);if(!sp)return false;const [x,y]=sp;
   L.chars=L.chars||{};
-  const wh=L.ceilH||5,T=wdTiles(kind,Math.min(wh,3.4),tint,false),rc=String.fromCharCode(0x3a0+(id%64)),dc=String.fromCharCode(0x3e0+(id%64));
+  const wh=L.ceilH||5,T=wdTiles(kind,wdIsLP(n)?Math.min(wh,5.2):Math.min(wh,3.4),tint,false),rc=String.fromCharCode(0x3a0+(id%64)),dc=String.fromCharCode(0x3e0+(id%64));
   L.chars[rc]=T.wall;
   const dgid=KH_NEXT_GID++;T_TILE[dgid]=T.door.tex;KH_DOOR[dgid]={lvl:id,at:kind==='cave'?{x:8,y:12,f:0}:{x:13,y:18,f:0}};L.chars[dc]=dgid; // where the party stands just inside: the cave's start, or the ruin's
+  if(wdIsLP(n)){ // on the Pilgrim's Path the door faces west, towards the road: walking east from a cross, the party comes straight up to it
+    for(let dy=-2;dy<=2;dy++)for(let dx=0;dx<=3;dx++)if((L.rows[y+dy]||'')[x+dx]==='.')wdSetRow(L,x+dx,y+dy,(dy===0&&dx===0)?dc:rc);
+    for(const d of L.decor)if(!d.npc&&!d.loot&&!d.shop&&!d.enter&&d.x>=x-1&&d.x<=x+4&&d.y>=y-3&&d.y<=y+3&&!(d.x===x-1&&d.y===y)){d.block=false;d.sc=.0001;d.pfCut=1}
+    wdThicket(L,n,x-1,y,id);(L._wd=L._wd||[]).push({x,y,id,w:1});WD_ENT[id]={n,x:x-1,y,f:3};return true}
   for(let dy=0;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)wdSetRow(L,x+dx,y+dy,(dy===2&&dx===0)?dc:rc);
   // the trees round the little building are made invisible, and a dry thicket grows across the door
   for(const d of L.decor)if(!d.npc&&!d.loot&&!d.shop&&!d.enter&&d.x>=x-3&&d.x<=x+3&&d.y>=y-1&&d.y<=y+4&&!(d.x===x&&d.y===y+3)){d.block=false;d.sc=.0001;d.pfCut=1}

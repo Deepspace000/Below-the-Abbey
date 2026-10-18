@@ -101,7 +101,8 @@ function pfPrep(n){
         let ok=walk(xe,ye);for(let dy=-1;dy<=1&&ok;dy++)for(let dx=1;dx<=3;dx++)if(!walk(xe+dx,ye+dy)||L.decor.some(d=>d.npc&&Math.abs(d.x-(xe+dx))<2&&Math.abs(d.y-(ye+dy))<2))ok=false;
         if(!ok)continue;
         for(let dy=-1;dy<=1;dy++)for(let dx=1;dx<=3;dx++){cut(xe+dx,ye+dy);cut(xe+dx+1,ye+dy)}
-        for(let dy=-1;dy<=1;dy++)for(let dx=1;dx<=3;dx++)pfSet(L,xe+dx,ye+dy,rock);
+        for(let dy=-2;dy<=2;dy++)for(let dx=1;dx<=4;dx++)if(Math.abs(dy)<=1&&dx<=3||(L.rows[ye+dy]||'')[xe+dx]==='.')pfSet(L,xe+dx,ye+dy,rock); // a big rock, five squares tall, with the cave mouth in its face
+        for(let dy=-3;dy<=3;dy++)for(let dx=1;dx<=5;dx++)cut(xe+dx,ye+dy);
         pfSet(L,xe+1,ye,pfDoor(L,ci));PF_ENT[ci]={n,x:xe,y:ye};L._cave=ci;if(typeof wdThicket==='function')wdThicket(L,n,xe,ye,PF_CAVE0+ci);break placing}
     }
   }
@@ -138,7 +139,7 @@ function pfDense(n){
   for(const e of L.enemies||[])occ.add(e.x+','+e.y);for(const i of L.items||[])occ.add(i.x+','+i.y);
   {const st=L.start||{x:0,y:0};occ.add(st.x+','+st.y);if(L.tele)for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)occ.add((L.tele.x+dx)+','+(L.tele.y+dy))}
   const keep=new Set(),yards=[]; // the little open yards in front of hidden doors
-  for(const q of L._wd||[]){const yd=[];for(let dy=-1;dy<=4;dy++)for(let dx=-3;dx<=3;dx++){const k=(q.x+dx)+','+(q.y+dy);keep.add(k);if(dy>=3)yd.push([q.x+dx,q.y+dy])}yards.push(yd)}
+  for(const q of L._wd||[]){const yd=[];if(q.w){for(let dy=-2;dy<=2;dy++)for(let dx=-4;dx<=0;dx++)keep.add((q.x+dx)+','+(q.y+dy));for(let dy=-1;dy<=1;dy++)yd.push([q.x-1,q.y+dy])}else for(let dy=-1;dy<=4;dy++)for(let dx=-3;dx<=3;dx++){const k=(q.x+dx)+','+(q.y+dy);keep.add(k);if(dy>=3)yd.push([q.x+dx,q.y+dy])}yards.push(yd)}
   {const ci=PF_SEGS.indexOf(s);if(ci>=0&&PF_ENT[ci]&&PF_ENT[ci].n===n)keep.add(PF_ENT[ci].x+','+PF_ENT[ci].y)} // the square in front of a cave door stays clear
   const pick=(a,r)=>a[Math.min(a.length-1,(r*a.length)|0)];
   const blob=(x,gy)=>{ // a little round clearing, three to five squares across, ragged at the edge
@@ -150,17 +151,19 @@ function pfDense(n){
   const nearCarve=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if((dx||dy)&&cv.has((x+dx)+','+(y+dy)))return true;return false};
   const cls=(x,y,gy)=>{ // 0 open, 1 a trunk that blocks the way, 2 a tree to walk through
     const k=x+','+y,depth=x-zs[y];
+    if(lane.has(k))return 0;
     if(paths.has(k))return 2;
     const hedge=nearCarve(x,y);
     if(!hedge&&depth>=3&&x<=W-10&&blob(x,gy))return 0;
     let pS=hedge?.85:depth<1?.85:depth<2?.78:depth<3?.66:depth<4?.52:depth<5?.42:PF_SOLID; // a wall of trunks along the road, loosening as it goes deeper
     if(!hedge&&depth>=5)pS=Math.max(.1,Math.min(.72,pS+(tsmooth(x/6,gy/6,9301)-.5)*.9)); // thickets and airy stretches
     return hs(x,gy,9302)<pS?1:2};
+  const lane=new Set(); // the middle three rows of each way are open ground, so the door can be seen from the cross
   { // straight east from each cross: a row of walk-through trees and short grass runs from the road to the cave or wild dungeon, so walking straight on always arrives
     const ci=PF_SEGS.indexOf(s),runs=[];
     if(ci>=0&&PF_ENT[ci]&&PF_ENT[ci].n===n)runs.push([PF_ENT[ci].y,PF_ENT[ci].x-1]);
-    for(const q of L._wd||[])runs.push([q.y+3,q.x-4]);
-    for(const [y,x1] of runs)for(let dy=-1;dy<=1;dy++)for(let x=zs[y+dy]>=0?zs[y+dy]:zs[y];x<=x1;x++)if(elig(x,y+dy))paths.add(x+','+(y+dy))} // three squares wide, so the cross itself never stands in the way
+    for(const q of L._wd||[])runs.push(q.w?[q.y,q.x-2]:[q.y+3,q.x-4]);
+    for(const [y,x1] of runs)for(let dy=-2;dy<=2;dy++)for(let x=zs[y+dy]>=0?zs[y+dy]:zs[y];x<=x1;x++)if(elig(x,y+dy)){paths.add(x+','+(y+dy));if(Math.abs(dy)<=1)lane.add(x+','+(y+dy))}} // three squares wide, so the cross itself never stands in the way
   const flo=L.scenery||(L.scenery=[]);
   const flower=(x,y,gy,seed,sc,set)=>{const a=set||PF_FLO,k=pick(a,hs(x,gy,seed+1));flo.push({k,wx:x+.12+hs(x,gy,seed+2)*.76,wy:y+.12+hs(x,gy,seed+3)*.76,sc,decor:{k,walk:true,x,y}})};
   const dress=(d,x,y,gy,soft)=>{ // what grows on this square
@@ -382,7 +385,7 @@ function pfCrosses(n){
   const L=LEVELS[n];if(!L||L._pfX||!L.rows||!L.fmap)return;L._pfX=1;pfMossCross();if(!IMG.lpcross)return;
   const s=n-LP.BASE,rows=[];
   const ci=PF_SEGS.indexOf(s);if(ci>=0&&PF_ENT[ci]&&PF_ENT[ci].n===n)rows.push(PF_ENT[ci].y);
-  for(const q of L._wd||[])rows.push(q.y+3);
+  for(const q of L._wd||[])rows.push(q.w?q.y:q.y+3);
   for(const y of rows){const a=L.fmap[y]&&L.fmap[y].indexOf('1');if(!(a>=0))continue;
     for(const x of [a+4,a+3,a+5]){if(L.rows[y][x]!=='.'||L.fmap[y][x]==='1')continue;
       if(L.decor.some(d=>d.x===x&&d.y===y&&!d.hidden&&!d.pfCut&&!/^(l|p|pt_)/.test(d.k)))continue;
