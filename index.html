@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.326';
+const VERSION='3.327';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -4330,7 +4330,7 @@ const WORLD_LOCS=[
   {k:'graves',n:'Burial Ground',lv:[20],x:206,y:92,ic:'graves'},
   {k:'mines',n:'Ironhill Mines',lv:[18],x:316,y:90,ic:'mine'},
   {k:'moor',n:'Ironhill Moor',lv:[19,26,28],x:324,y:136,ic:'moor'},
-  {k:'pass',n:'Greyfang Pass',lv:[22,27],x:390,y:136,ic:'mountains'},
+  {k:'pass',n:'Greyfang Pass',lv:[22,27],x:390,y:136,ic:'mountains',above:1},
   {k:'greendale',n:'Greendale',lv:[32],x:418,y:186,ic:'trees'},
   {k:'anaea',n:'Anaea',sub:'white stone',lv:[33,34,35,36,37,38],x:402,y:238,ic:'town'},
   {k:'sandroad',n:'The Sand Road',sub:'forest to dunes',lv:[41,50,51,52,53,54,55,56,57,58,59],x:486,y:220,ic:'dunes'},
@@ -4448,10 +4448,10 @@ function drawWorldMap(){
     ICONS[l.ic](l.x,l.y);
     ctx.globalAlpha=1;
     const big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle';
-    {const lr=(!G.flags.autoScaleOn&&typeof locRating==='function')?locRating(l):null,ny0=l.y+(l.ic==='castle'||l.ic==='orangecastle'?24:l.ic==='mountains'?20:18),nsz=big?10:8.5,ncol=v?'#1c1208':'#5a4a30';
+    {const lr=(!G.flags.autoScaleOn&&typeof locRating==='function')?locRating(l):null,ny0=l.above?l.y-22:l.y+(l.ic==='castle'||l.ic==='orangecastle'?24:l.ic==='mountains'?20:18),nsz=big?10:8.5,ncol=v?'#1c1208':'#5a4a30';
       // the size of the name line (with its level beside it) and of the line under it
       ctx.save();ctx.font=`bold ${nsz}px ${FUI}`;const w1=ctx.measureText(l.n).width;ctx.font=`bold 8px ${FUI}`;const t2=lr?'Lv '+lr:'',w2=lr?ctx.measureText(t2).width:0;ctx.font=`bold 7px ${FUI}`;const sw=l.sub?ctx.measureText(l.sub).width:0;ctx.restore();
-      const gap=lr?5:0,wt=w1+gap+w2,subY=l.y+(l.ic==='orangecastle'||l.ic==='castle'?35:29);
+      const gap=lr?5:0,wt=w1+gap+w2,subY=l.above?l.y-13:l.y+(l.ic==='orangecastle'||l.ic==='castle'?35:29);
       // a label that would land on another place's label slides up or down until it is clear
       const rects=dy=>{const r=[[l.x-wt/2-2,ny0+dy-7,wt+4,14]];if(l.sub)r.push([l.x-sw/2-2,subY+dy-5,sw+4,10]);return r};
       const hit=(a,b)=>a[0]<b[0]+b[2]&&a[0]+a[2]>b[0]&&a[1]<b[1]+b[3]&&a[1]+a[3]>b[1];
