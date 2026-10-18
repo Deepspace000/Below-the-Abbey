@@ -156,8 +156,10 @@ function wdForage(id,cave,pick,items){
   const nf=3+((hash2(id,7,780)*3)|0);for(let i=0;i<nf;i++){const c=pick(120+i);if(!c)break;items.push({k:WD_FORAGE[(hash2(id,i,781)*WD_FORAGE.length)|0][0],x:c[0],y:c[1]})}
   if(hash2(id,9,784)<.4&&typeof GEM_BY_VALUE!=='undefined'){const base=Math.min(34,6+Math.round(55*.35)),ng=1+((hash2(id,10,785)*2)|0);for(let i=0;i<ng;i++){const c=pick(160+i);if(!c)break;const gm=GEM_BY_VALUE[Math.min(GEM_BY_VALUE.length-1,base+((hash2(id,i,786)*6)|0))];items.push({k:'gem_'+gm[0],x:c[0],y:c[1]})}} // and now and then a gem
   if(cave){const nh=2+((hash2(id,8,782)*3)|0);for(let i=0;i<nh;i++){const c=pick(140+i);if(!c)break;const h=HERBS[(hash2(id,i,783)*Math.min(HERBS.length,16))|0];items.push({k:'herb_'+h[0],x:c[0],y:c[1]})}}}
-{const _lf=lootFor;lootFor=function(d){const r=_lf.apply(this,arguments); // a chest in a cave or wild dungeon holds at most one piece of armour or weapon
-  if(LEVEL>=7100&&Array.isArray(r)){let g=0;return r.filter(it=>{const k=ITEMDEF[it.id]&&ITEMDEF[it.id].k;return ['weapon','shield','head','chest','arms','legs'].includes(k)?++g<=1:true})}return r}}
+{const _lf=lootFor;lootFor=function(d){const r=_lf.apply(this,arguments); // caves and wild dungeons: armour in about four places in ten, one piece (mid tier, and now and then a powerful one), never more; no other armour or weapons
+  if(LEVEL>=7100&&Array.isArray(r)&&d.k==='chest'){const GEAR=['weapon','shield','head','chest','arms','legs'],out=r.filter(it=>!GEAR.includes(ITEMDEF[it.id]&&ITEMDEF[it.id].k));
+    if((d.gear||!d.food&&hash2(LEVEL,3,790)<.4)&&typeof ARM_IDS!=='undefined'){const hi=hash2(LEVEL,4,792)<.22,pool=ARM_IDS.filter(id=>ITEMDEF[id]&&(hi?(ITEMDEF[id].lvl===50||ITEMDEF[id].lvl===60):(ITEMDEF[id].lvl===30||ITEMDEF[id].lvl===40)));if(pool.length)out.push({id:pool[(hash2(d.x,d.y,791)*pool.length)|0],n:1})}
+    return out}return r}}
 /* the whole Pilgrim's Path stands at level 55, like Oldhaven */
 for(let n=400;n<424;n++)LEVEL_RATING[n]=55;
 /* ---------- the interiors ---------- */
@@ -227,6 +229,7 @@ function wdBuild(id){
     if(kind==='slime'){for(let i=0;i<4;i++){const c=pick(90+i);if(c)enemies.push({t:'slime',x:c[0],y:c[1]})}}
     try{pfRuinProps(g,W,H,sx,sy,[[far[0],far[1]]],used,decor,items,enemies,id)}catch(e){console.error(e)} // broken statues, columns and brickwork, throughout
   }
+  if(hash2(id,12,795)<.4&&!decor.some(d=>d.k==='chest'))pfFoodChest(g,W,H,sx,sy,decor,items,used,id+7,{gear:1,food:null}); // armour in about four dungeons in ten
   if(hash2(id,6,764)<.5)pfFoodChest(g,W,H,sx,sy,decor,items,used,id); // some hold a little food in a chest
   const T=wdTiles(cave?'cave':'ruin',cave?2.6:2.8,tint,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(cave?2.6:2.8,cave?'cave':'ruin',tint);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:ent.f}};
   const chars={'#':T.wall};chars[door]=dgid;

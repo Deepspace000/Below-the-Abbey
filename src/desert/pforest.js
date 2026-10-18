@@ -248,12 +248,12 @@ PF_FUG.forEach(f=>{
   khNpc('pf_f'+f.id,f.who,f.face,()=>qNode(f.id,khQD(f.offer,f.accept,(g,n)=>`${g} of ${n} ${f.what}.`,`You have the ${f.what}? Oh, thank you.`,f.thanks,f.after,'Here they are.')),{q:f.id});
 });
 function pfFood(sd){const all=['bread','cheese','apple','nuts','dates','herring','sausage','pie'],n=2+((hash2(sd,4,762)*2)|0),o=[];for(let i=0;i<n;i++){const f=all[(hash2(sd,i,763)*all.length)|0];if(!o.includes(f))o.push(f)}return o}
-function pfFoodChest(g,W,H,sx,sy,decor,items,used,sd){ // a chest of food on a square that blocks nobody's way to anything else
+function pfFoodChest(g,W,H,sx,sy,decor,items,used,sd,extra){ // a chest of food on a square that blocks nobody's way to anything else
   const key=(x,y)=>x+','+y,base=new Set(decor.filter(d=>d.block).map(d=>key(d.x,d.y))),targets=items.map(i=>[i.x,i.y]).concat(decor.filter(d=>d.block||d.npc).map(d=>[d.x,d.y]));
   const cells=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(g[y][x]==='.'&&!used.has(key(x,y))&&!base.has(key(x,y))&&Math.abs(x-sx)+Math.abs(y-sy)>3)cells.push([x,y]);
   cells.sort((a,b)=>hash2(a[0],a[1],sd+765)-hash2(b[0],b[1],sd+765));
-  for(const [cx,cy] of cells.slice(0,60)){const seen=new Set([key(sx,sy)]),q=[[sx,sy]];for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const k=key(x+dx,y+dy);if(g[y+dy]&&g[y+dy][x+dx]==='.'&&!base.has(k)&&k!==key(cx,cy)&&!seen.has(k)){seen.add(k);q.push([x+dx,y+dy])}}}
-    if(targets.every(([tx,ty])=>seen.has(key(tx,ty))||base.has(key(tx,ty))&&[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>seen.has(key(tx+dx,ty+dy))))){used.add(key(cx,cy));decor.push({k:'chest',x:cx,y:cy,block:true,food:pfFood(sd)});return true}}
+  for(const [cx,cy] of cells.slice(0,260)){const seen=new Set([key(sx,sy)]),q=[[sx,sy]];for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const k=key(x+dx,y+dy);if(g[y+dy]&&g[y+dy][x+dx]==='.'&&!base.has(k)&&k!==key(cx,cy)&&!seen.has(k)){seen.add(k);q.push([x+dx,y+dy])}}}
+    if(targets.every(([tx,ty])=>seen.has(key(tx,ty))||base.has(key(tx,ty))&&[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>seen.has(key(tx+dx,ty+dy))))){used.add(key(cx,cy));decor.push(Object.assign({k:'chest',x:cx,y:cy,block:true,food:pfFood(sd)},extra||{}));return true}}
   return false}
 function pfCaveBuild(ci){
   const W=23,H=19,kind=PF_KINDS[ci],hs=hash2,sd=ci*17+5,g=[];
@@ -277,6 +277,7 @@ function pfCaveBuild(ci){
   else if(kind==='wolves'){for(let i=0;i<4;i++){const c=pick(20+i);if(c)enemies.push({t:'wolf',x:c[0],y:c[1]})}const c=pick(30);if(c)items.push({k:'potion',x:c[0],y:c[1]});decor.push({k:'bones',x:far[0],y:far[1],block:false})}
   else if(kind==='outcast'){const oi=PF_KINDS.slice(0,ci).filter(k=>k==='outcast').length%4,kp=KH_KEEPERS['pf_out'+oi];if(kp)decor.push({k:khFaceKey(kp.face),x:far[0],y:far[1],block:false,walk:true,npc:'pf_out'+oi,sc:1});const c=pick(40);if(c)decor.push({k:'barrel',x:c[0],y:c[1],block:true})}
   else if(kind==='fugitive'){const fi=PF_KINDS.slice(0,ci).filter(k=>k==='fugitive').length%3,id='pf_f'+PF_FUG[fi].id,kp=KH_KEEPERS[id];if(kp)decor.push({k:khFaceKey(kp.face),x:far[0],y:far[1],block:false,walk:true,npc:id,sc:1});const c=pick(50);if(c)decor.push({k:'barrel',x:c[0],y:c[1],block:true})}
+  if(hs(sd,12,795)<.4&&!decor.some(d=>d.k==='chest'))pfFoodChest(g,W,H,8,H-3,decor,items,used,sd+7,{gear:1,food:null}); // armour in about four caves in ten
   if(hs(sd,3,761)<.55)pfFoodChest(g,W,H,8,H-3,decor,items,used,sd); // a little food in a chest, in some of them
   { // a barrel must never wall off part of the cave: if something could not be reached, the barrels stand aside
     const bl=new Set(decor.filter(d=>d.block).map(d=>d.x+','+d.y)),seen=new Set(['8,'+(H-3)]),q=[[8,H-3]];

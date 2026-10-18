@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.407';
+const VERSION='3.408';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1520,7 +1520,7 @@ function reset(n){
   G.inv={open:false,tab:'inv',hero:0,sel:null,scroll:0};
   G.enemies=ENEMY_SPAWNS.map((s,i)=>{const st=enemyStat(s.t,s.lvl);return {id:i,t:s.t,lvl:s.lvl||lvlHere(),x:s.x,y:s.y,rx:s.x,ry:s.y,hp:st.hp,maxhp:st.hp,alert:false,chilled:0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100}});
   G.items=ITEM_SPAWNS.map(s=>({k:s.k==='potion'?potionFor(hash2(s.x,s.y,LEVEL+7)):s.k==='hlfood'?hlFoodFor(hash2(s.x,s.y,LEVEL+9)):s.k,x:s.x,y:s.y,taken:false}));
-  G.decor=DECOR_SPAWNS.map(s=>{const o={k:s.k,x:s.x,y:s.y,block:!!s.block,loot:CONTAINERS.includes(s.k),shop:s.k==='cart'};if(s.deco){o.loot=false;o.shop=false}if(s.npc){o.npc=s.npc;o.loot=false;o.shop=false;if(s.goat)o.goat=s.goat}if(s.sc)o.sc=s.sc;if(s.walk)o.walk=true;if(s.wd)o.wd=s.wd;if(s.txt)o.txt=s.txt;if(s.bob)o.bob=s.bob;if(s.ox!==undefined){o.ox=s.ox;o.oy=s.oy}if(s.opens){o.opens=s.opens;o.idx=s.idx}if(s.lockedBy)o.lockedBy=s.lockedBy;if(s.secret)o.secret=true;for(const kk of ['ambush','hidden','trap','frame','goldAmt','food','enter','magic','cat','scar','hatch','kname','kl','lk','glow','red','lit','deco','wind','lw','lr','pic','fr'])if(s[kk]!==undefined)o[kk]=s[kk];return o});
+  G.decor=DECOR_SPAWNS.map(s=>{const o={k:s.k,x:s.x,y:s.y,block:!!s.block,loot:CONTAINERS.includes(s.k),shop:s.k==='cart'};if(s.deco){o.loot=false;o.shop=false}if(s.npc){o.npc=s.npc;o.loot=false;o.shop=false;if(s.goat)o.goat=s.goat}if(s.sc)o.sc=s.sc;if(s.walk)o.walk=true;if(s.wd)o.wd=s.wd;if(s.txt)o.txt=s.txt;if(s.bob)o.bob=s.bob;if(s.ox!==undefined){o.ox=s.ox;o.oy=s.oy}if(s.opens){o.opens=s.opens;o.idx=s.idx}if(s.lockedBy)o.lockedBy=s.lockedBy;if(s.secret)o.secret=true;for(const kk of ['ambush','hidden','trap','frame','goldAmt','food','gear','enter','magic','cat','scar','hatch','kname','kl','lk','glow','red','lit','deco','wind','lw','lr','pic','fr'])if(s[kk]!==undefined)o[kk]=s[kk];return o});
   applyLevers();clearDoorFronts();
   G.decor.forEach(d=>{if(!d.npc&&(d.k==='grave'||d.k==='grave2'||d.k==='cross')){d.npc='epitaph';d.loot=false}});
   G.decor.forEach(d=>{if(d.npc&&!/^(lockedgate|gate|fence|lever|hatch)/.test(d.k)){d.block=false;d.walk=true}}); // the party walks through every person and creature; tap them or press attack to speak
@@ -21819,12 +21819,12 @@ PF_FUG.forEach(f=>{
   khNpc('pf_f'+f.id,f.who,f.face,()=>qNode(f.id,khQD(f.offer,f.accept,(g,n)=>`${g} of ${n} ${f.what}.`,`You have the ${f.what}? Oh, thank you.`,f.thanks,f.after,'Here they are.')),{q:f.id});
 });
 function pfFood(sd){const all=['bread','cheese','apple','nuts','dates','herring','sausage','pie'],n=2+((hash2(sd,4,762)*2)|0),o=[];for(let i=0;i<n;i++){const f=all[(hash2(sd,i,763)*all.length)|0];if(!o.includes(f))o.push(f)}return o}
-function pfFoodChest(g,W,H,sx,sy,decor,items,used,sd){ // a chest of food on a square that blocks nobody's way to anything else
+function pfFoodChest(g,W,H,sx,sy,decor,items,used,sd,extra){ // a chest of food on a square that blocks nobody's way to anything else
   const key=(x,y)=>x+','+y,base=new Set(decor.filter(d=>d.block).map(d=>key(d.x,d.y))),targets=items.map(i=>[i.x,i.y]).concat(decor.filter(d=>d.block||d.npc).map(d=>[d.x,d.y]));
   const cells=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(g[y][x]==='.'&&!used.has(key(x,y))&&!base.has(key(x,y))&&Math.abs(x-sx)+Math.abs(y-sy)>3)cells.push([x,y]);
   cells.sort((a,b)=>hash2(a[0],a[1],sd+765)-hash2(b[0],b[1],sd+765));
-  for(const [cx,cy] of cells.slice(0,60)){const seen=new Set([key(sx,sy)]),q=[[sx,sy]];for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const k=key(x+dx,y+dy);if(g[y+dy]&&g[y+dy][x+dx]==='.'&&!base.has(k)&&k!==key(cx,cy)&&!seen.has(k)){seen.add(k);q.push([x+dx,y+dy])}}}
-    if(targets.every(([tx,ty])=>seen.has(key(tx,ty))||base.has(key(tx,ty))&&[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>seen.has(key(tx+dx,ty+dy))))){used.add(key(cx,cy));decor.push({k:'chest',x:cx,y:cy,block:true,food:pfFood(sd)});return true}}
+  for(const [cx,cy] of cells.slice(0,260)){const seen=new Set([key(sx,sy)]),q=[[sx,sy]];for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const k=key(x+dx,y+dy);if(g[y+dy]&&g[y+dy][x+dx]==='.'&&!base.has(k)&&k!==key(cx,cy)&&!seen.has(k)){seen.add(k);q.push([x+dx,y+dy])}}}
+    if(targets.every(([tx,ty])=>seen.has(key(tx,ty))||base.has(key(tx,ty))&&[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>seen.has(key(tx+dx,ty+dy))))){used.add(key(cx,cy));decor.push(Object.assign({k:'chest',x:cx,y:cy,block:true,food:pfFood(sd)},extra||{}));return true}}
   return false}
 function pfCaveBuild(ci){
   const W=23,H=19,kind=PF_KINDS[ci],hs=hash2,sd=ci*17+5,g=[];
@@ -21848,6 +21848,7 @@ function pfCaveBuild(ci){
   else if(kind==='wolves'){for(let i=0;i<4;i++){const c=pick(20+i);if(c)enemies.push({t:'wolf',x:c[0],y:c[1]})}const c=pick(30);if(c)items.push({k:'potion',x:c[0],y:c[1]});decor.push({k:'bones',x:far[0],y:far[1],block:false})}
   else if(kind==='outcast'){const oi=PF_KINDS.slice(0,ci).filter(k=>k==='outcast').length%4,kp=KH_KEEPERS['pf_out'+oi];if(kp)decor.push({k:khFaceKey(kp.face),x:far[0],y:far[1],block:false,walk:true,npc:'pf_out'+oi,sc:1});const c=pick(40);if(c)decor.push({k:'barrel',x:c[0],y:c[1],block:true})}
   else if(kind==='fugitive'){const fi=PF_KINDS.slice(0,ci).filter(k=>k==='fugitive').length%3,id='pf_f'+PF_FUG[fi].id,kp=KH_KEEPERS[id];if(kp)decor.push({k:khFaceKey(kp.face),x:far[0],y:far[1],block:false,walk:true,npc:id,sc:1});const c=pick(50);if(c)decor.push({k:'barrel',x:c[0],y:c[1],block:true})}
+  if(hs(sd,12,795)<.4&&!decor.some(d=>d.k==='chest'))pfFoodChest(g,W,H,8,H-3,decor,items,used,sd+7,{gear:1,food:null}); // armour in about four caves in ten
   if(hs(sd,3,761)<.55)pfFoodChest(g,W,H,8,H-3,decor,items,used,sd); // a little food in a chest, in some of them
   { // a barrel must never wall off part of the cave: if something could not be reached, the barrels stand aside
     const bl=new Set(decor.filter(d=>d.block).map(d=>d.x+','+d.y)),seen=new Set(['8,'+(H-3)]),q=[[8,H-3]];
@@ -22192,8 +22193,10 @@ function wdForage(id,cave,pick,items){
   const nf=3+((hash2(id,7,780)*3)|0);for(let i=0;i<nf;i++){const c=pick(120+i);if(!c)break;items.push({k:WD_FORAGE[(hash2(id,i,781)*WD_FORAGE.length)|0][0],x:c[0],y:c[1]})}
   if(hash2(id,9,784)<.4&&typeof GEM_BY_VALUE!=='undefined'){const base=Math.min(34,6+Math.round(55*.35)),ng=1+((hash2(id,10,785)*2)|0);for(let i=0;i<ng;i++){const c=pick(160+i);if(!c)break;const gm=GEM_BY_VALUE[Math.min(GEM_BY_VALUE.length-1,base+((hash2(id,i,786)*6)|0))];items.push({k:'gem_'+gm[0],x:c[0],y:c[1]})}} // and now and then a gem
   if(cave){const nh=2+((hash2(id,8,782)*3)|0);for(let i=0;i<nh;i++){const c=pick(140+i);if(!c)break;const h=HERBS[(hash2(id,i,783)*Math.min(HERBS.length,16))|0];items.push({k:'herb_'+h[0],x:c[0],y:c[1]})}}}
-{const _lf=lootFor;lootFor=function(d){const r=_lf.apply(this,arguments); // a chest in a cave or wild dungeon holds at most one piece of armour or weapon
-  if(LEVEL>=7100&&Array.isArray(r)){let g=0;return r.filter(it=>{const k=ITEMDEF[it.id]&&ITEMDEF[it.id].k;return ['weapon','shield','head','chest','arms','legs'].includes(k)?++g<=1:true})}return r}}
+{const _lf=lootFor;lootFor=function(d){const r=_lf.apply(this,arguments); // caves and wild dungeons: armour in about four places in ten, one piece (mid tier, and now and then a powerful one), never more; no other armour or weapons
+  if(LEVEL>=7100&&Array.isArray(r)&&d.k==='chest'){const GEAR=['weapon','shield','head','chest','arms','legs'],out=r.filter(it=>!GEAR.includes(ITEMDEF[it.id]&&ITEMDEF[it.id].k));
+    if((d.gear||!d.food&&hash2(LEVEL,3,790)<.4)&&typeof ARM_IDS!=='undefined'){const hi=hash2(LEVEL,4,792)<.22,pool=ARM_IDS.filter(id=>ITEMDEF[id]&&(hi?(ITEMDEF[id].lvl===50||ITEMDEF[id].lvl===60):(ITEMDEF[id].lvl===30||ITEMDEF[id].lvl===40)));if(pool.length)out.push({id:pool[(hash2(d.x,d.y,791)*pool.length)|0],n:1})}
+    return out}return r}}
 /* the whole Pilgrim's Path stands at level 55, like Oldhaven */
 for(let n=400;n<424;n++)LEVEL_RATING[n]=55;
 /* ---------- the interiors ---------- */
@@ -22263,6 +22266,7 @@ function wdBuild(id){
     if(kind==='slime'){for(let i=0;i<4;i++){const c=pick(90+i);if(c)enemies.push({t:'slime',x:c[0],y:c[1]})}}
     try{pfRuinProps(g,W,H,sx,sy,[[far[0],far[1]]],used,decor,items,enemies,id)}catch(e){console.error(e)} // broken statues, columns and brickwork, throughout
   }
+  if(hash2(id,12,795)<.4&&!decor.some(d=>d.k==='chest'))pfFoodChest(g,W,H,sx,sy,decor,items,used,id+7,{gear:1,food:null}); // armour in about four dungeons in ten
   if(hash2(id,6,764)<.5)pfFoodChest(g,W,H,sx,sy,decor,items,used,id); // some hold a little food in a chest
   const T=wdTiles(cave?'cave':'ruin',cave?2.6:2.8,tint,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(cave?2.6:2.8,cave?'cave':'ruin',tint);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:ent.f}};
   const chars={'#':T.wall};chars[door]=dgid;
