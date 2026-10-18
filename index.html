@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.364';
+const VERSION='3.366';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -21575,6 +21575,8 @@ function pfPrep(n){
   const isTree=d=>!d.npc&&/^[lp]tree\d/.test(d.k),trees=new Map(); // blocking trees and the soft, walk-through ones that fill out the woods
   for(const d of L.decor)if(isTree(d)){const k=d.x+','+d.y;if(!trees.has(k))trees.set(k,[]);trees.get(k).push(d)}
   if(trees.size<400)return;
+  {L.chars=L.chars||{};const cc=String.fromCharCode(0x2c2);L.chars[cc]=pfSlopeGid(3.6); // the east edge is a painted forested mountainside, not a bare wall
+   for(let y=0;y<H;y++)for(let x=W-3;x<W;x++)pfSet(L,x,y,cc)}
   if(L.sky)L.sky=L.sky.filter(e=>!/^lp_peak/.test(e.k)); // the old flat peak pictures stood out from the edge of the map like cards: the painted mountains in the sky replace them
   const blk=new Set(L.decor.filter(d=>d.block&&isTree(d)).map(d=>d.x+','+d.y));
   const walk=(x,y)=>x>=3&&y>=3&&x<W-6&&y<H-3&&L.rows[y][x]==='.';
@@ -21648,11 +21650,14 @@ function pfPrep(n){
   for(const d of clear){d.block=false;d.sc=.0001;d.pfCut=1} // the trees on a trail are made invisible, not removed, so saved decor keeps its places in the list
   L.enemies=L.enemies.filter(e=>e.t!=='wolf'||(L.rows[e.y]&&L.rows[e.y][e.x]==='.'));
 }
-loadImg('pf_rock','assets/pf_rock.jpg');loadImg('pf_range0','assets/pf_range0.png');loadImg('pf_range1','assets/pf_range1.png');
+loadImg('pf_rock','assets/pf_rock.jpg');loadImg('pf_slope','assets/pf_slope.jpg');loadImg('pf_range0','assets/pf_range0.png');loadImg('pf_range1','assets/pf_range1.png');
 function pfRockGid(wh,inside){ // a rough, dark, painted cave rock wall of the given height
   const k=inside?'pfrockin':'pfrock';
   if(!OH_STY[k])OH_STY[k]=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:'pf_rock',zoom:1,contrast:1.25,tint:inside?[190,186,182,0]:[250,246,240,0]});
   return ohTiles().make('plain',k,wh).gid}
+function pfSlopeGid(wh){ // the forested mountainside that closes the east end of the woods
+  if(!OH_STY.pfslope)OH_STY.pfslope=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:'pf_slope',zoom:1,contrast:1.1,tint:[236,240,236,0]});
+  return ohTiles().make('plain','pfslope',wh).gid}
 function pfRock(L){ // the rough rock face of a cave mouth
   L.chars=L.chars||{};if(L._pfRock)return L._pfRock;
   const gid=pfRockGid(L.ceilH||5.2),c=String.fromCharCode(0x2c0);L.chars[c]=gid;return L._pfRock=c}
@@ -21780,7 +21785,8 @@ function pfOld(n){
 let PF_MT=null;
 function pfMtData(){
   if(PF_MT)return PF_MT;const out=[];
-  for(const k of ['pf_range0','pf_range1']){const im=IMG[k];if(!im||!im.width)return null;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);out.push({w:im.width,h:im.height,d:x.getImageData(0,0,im.width,im.height).data})}
+  for(const k of ['pf_range0','pf_range1']){const im=IMG[k];if(!im||!im.width)return null;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);const id=x.getImageData(0,0,im.width,im.height),d=id.data;for(let i=0;i<d.length;i+=4){const r=d[i],g=d[i+1],b=d[i+2];if(r>g+14&&b>g+14){d[i]=Math.min(r,g+8);d[i+2]=Math.min(b,g+12)}} // take the last pink of the keyed-out background out of the mist
+    out.push({w:im.width,h:im.height,d})}
   return PF_MT=out}
 function pfMountains(D,dX,dY,pX,pY,hzr,lbm){
   if(!(typeof LP!=='undefined'&&LEVEL>=LP.BASE&&LEVEL<LP.BASE+LP.N))return;
