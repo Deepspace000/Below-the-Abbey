@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.408';
+const VERSION='3.409';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1387,11 +1387,11 @@ const HERO_DEF=[{},{},{},{}];
 /* ---------- classes: twelve occupations ---------- */
 const CLASSES=[
  {name:'Warrior',icon:'helm',hp:34,mp:10,mpn:'Stamina',hit:.85,str:14,dex:8,int:4,grow:{hp:6,mp:1,a:'str',b:'dex'},
-  desc:'A trained soldier. Tough, strong and good in a straight fight.',sp:{name:'Power Strike',cost:4,type:'melee',m:2,a:2,d:'A crushing blow: double weapon damage plus 2.'}},
+  desc:'A trained soldier. Tough, strong and good in a straight fight. Strength lets the whole party carry more.',sp:{name:'Power Strike',cost:4,type:'melee',m:2,a:2,d:'A crushing blow: double weapon damage plus 2.'}},
  {name:'Barbarian',icon:'axe',hp:40,mp:8,mpn:'Stamina',hit:.8,str:16,dex:7,int:3,grow:{hp:7,mp:1,a:'str',b:'dex'},
-  desc:'A wild fighter from the hills. The most health and the hardest hits, but clumsy.',sp:{name:'Rage Blow',cost:5,type:'melee',m:2.5,a:0,d:'A wild swing for two and a half times weapon damage.'}},
+  desc:'A wild fighter from the hills. The most health and the hardest hits, but clumsy. Strength lets the whole party carry more.',sp:{name:'Rage Blow',cost:5,type:'melee',m:2.5,a:0,d:'A wild swing for two and a half times weapon damage.'}},
  {name:'Paladin',icon:'shield',hp:32,mp:10,mpn:'Mana',hit:.85,str:13,dex:7,int:8,grow:{hp:5,mp:1,a:'str',b:'int'},
-  desc:'A holy knight. Fights well and is deadly against the undead.',sp:{name:'Smite',cost:4,type:'melee',m:1,a:4,undead:1,d:'Weapon damage plus 4, doubled against skeletons.'}},
+  desc:'A holy knight. Fights well and is deadly against the undead. Strength lets the whole party carry more.',sp:{name:'Smite',cost:4,type:'melee',m:1,a:4,undead:1,d:'Weapon damage plus 4, doubled against skeletons.'}},
  {name:'Ranger',icon:'arrow',hp:26,mp:10,mpn:'Stamina',hit:.88,str:10,dex:13,int:7,grow:{hp:4,mp:1,a:'dex',b:'str'},
   desc:'A woodland hunter. Quick, tough enough, and lethal with a bow. Reads the woods: hidden caves and ruins show on the map from much further away.',sp:{name:'Aimed Shot',cost:3,type:'shot',range:3,m:2,d:'A careful shot that never misses: double weapon damage, up to 3 tiles away.'}},
  {name:'Archer',icon:'bow',hp:22,mp:12,mpn:'Stamina',hit:.9,str:8,dex:15,int:6,grow:{hp:3,mp:1,a:'dex',b:'str'},
@@ -1405,11 +1405,11 @@ const CLASSES=[
  {name:'Sorcerer',icon:'flame',hp:18,mp:16,mpn:'Mana',hit:.78,str:5,dex:7,int:15,grow:{hp:3,mp:2,a:'int',b:'dex'},caster:1,
   desc:'Born with the gift. More mana and stronger spells than a mage.',sp:{name:'Spell',cost:0,type:'spell',bonus:2,d:'Casts the active spell with +2 damage.'}},
  {name:'Priest',icon:'cross',hp:26,mp:12,mpn:'Mana',hit:.85,str:10,dex:8,int:10,grow:{hp:5,mp:2,a:'int',b:'str'},
-  desc:'A healer of the faithful. Keeps the party alive.',sp:{name:'Heal',cost:4,type:'heal',d:'Heals the most wounded ally for 8-12, and far more as the priest grows in level.'}},
+  desc:'A healer of the faithful. Keeps the party alive. Strength lets the whole party carry more.',sp:{name:'Heal',cost:4,type:'heal',d:'Heals the most wounded ally for 8-12, and far more as the priest grows in level.'}},
  {name:'Monk',icon:'fist',hp:28,mp:10,mpn:'Stamina',hit:.9,str:11,dex:12,int:8,grow:{hp:5,mp:1,a:'dex',b:'str'},unarmed:[3,5],
-  desc:'A disciplined fighter who needs no weapon.',sp:{name:'Palm Strike',cost:3,type:'melee',m:2,a:0,d:'A focused strike for double damage. Strong even unarmed.'}},
+  desc:'A disciplined fighter who needs no weapon. Strength lets the whole party carry more.',sp:{name:'Palm Strike',cost:3,type:'melee',m:2,a:0,d:'A focused strike for double damage. Strong even unarmed.'}},
  {name:'Goat',icon:'horns',hp:30,mp:8,mpn:'Stamina',hit:.82,str:12,dex:10,int:5,grow:{hp:6,mp:1,a:'str',b:'dex'},unarmed:[2,5],
-  desc:'A stubborn goat. Butts hard, eats anything, and answers to no one.',sp:{name:'Headbutt',cost:3,type:'butt',d:'A hard butt for 5-10 damage that leaves the foe dazed for a turn.'}}
+  desc:'A stubborn goat. Butts hard, eats anything, and answers to no one. Strength lets the whole party carry more.',sp:{name:'Headbutt',cost:3,type:'butt',d:'A hard butt for 5-10 damage that leaves the foe dazed for a turn.'}}
 ];
 const NPORT=70;
 const NAME_POOL=['Aldric','Brannoc','Cedric','Dorin','Edric','Fenwick','Garrick','Hugo','Ivor','Joran','Kellan','Lothar','Osric','Piers','Rowan','Tobias','Wulfric','Vesna','Mira','Thessaly','Elspeth','Rowena','Isolde','Brigid','Maud','Sigrid','Yara','Wenna','Agnes','Eadlyn','Hilda','Odette','Petra','Sorcha','Una'];
@@ -1705,7 +1705,7 @@ function heroWeapon(h){const it=h.eq[h.wslot||'main'];return it&&idef(it).k==='w
 function ringSum(h,key){let s=0;for(const k of RING_SLOTS)if(h.eq[k])s+=idef(h.eq[k])[key]||0;return s}
 function heroArmor(h){let a=0;for(const k of ['head','arms','legs','chest','off',...RING_SLOTS]){const it=h.eq[k];if(it)a+=idef(it).armor||0}return a+pasH(h,'armor')}
 function heroDmgRange(h){const w=heroWeapon(h),r=w?w.dmg:(h.unarmed||[1,2]),b=strB(h)+ringSum(h,'dmgb');return [r[0]+b,r[1]+b]}
-function heroHitPct(hi,fly){const h=G.heroes[hi],w=heroWeapon(h);let c=HERO_DEF[hi].hit+(w?w.hit||0:-.1)+(h.dex-8)*.006+ringSum(h,'hitb')+pas(hi,'hitPct');if(fly)c-=.2;return clamp(c,.2,.97)}
+function heroHitPct(hi,fly){const h=G.heroes[hi],w=heroWeapon(h);let c=HERO_DEF[hi].hit+(w?w.hit||0:-.1)+(h.dex-8)*.006+ringSum(h,'hitb')+pas(hi,'hitPct')-(G.overload?.1:0);if(fly)c-=.2;return clamp(c,.2,.97)}
 function magicBonus(h){let m=0;for(const k of ['main','off','alt']){const it=h.eq[k];if(it)m+=idef(it).magic||0}return m}
 function heroLight(h){let l=0;for(const k of ['main','off']){const it=h.eq[k];if(it&&idef(it).k==='light')l=Math.max(l,idef(it).light)}return l}
 function partyLight(){let l=0;for(const h of G.heroes)if(h.alive)l=Math.max(l,heroLight(h));return l}
@@ -3227,10 +3227,14 @@ function statLines(d){
   if(d.dbl)L.push([`${Math.round(d.dbl*100)}% to double damage`,'#d8c88e']);
   if(d.magic)L.push([`Spell power +${d.magic}`,'#9ac8ff']);
   if(d.hp)L.push([`Max health +${d.hp}`,'#e8e0d0']);
+  if(d.str)L.push([`Strength +${d.str}`,'#e8e0d0']);if(d.dex)L.push([`Dexterity +${d.dex}`,'#e8e0d0']);if(d.int)L.push([`Intelligence +${d.int}`,'#e8e0d0']);
+  if(d.mpb)L.push([`Max mana +${d.mpb}`,'#9ac8ff']);if(d.profb)L.push([`Profession rank +${d.profb}`,'#a8e0a0']);
+  if(d.bagb)L.push([`Pack slots +${d.bagb}`,'#d8c88e']);if(d.wtb)L.push([`Carry +${d.wtb} kg`,'#d8c88e']);if(d.wtp)L.push([`Items weigh ${Math.round(d.wtp*100)}% less`,'#d8c88e']);
   if(d.heal)L.push([`Heals ${d.heal} health`,'#9ae0a0']);
   if(d.feed)L.push([`Fills ${d.feed} hunger`,'#e8c890']);
   if(d.light)L.push([d.light>1?'Wide steady light':'Gives light',"#ffd090"]);
   if(d.spell){const S=SPELLS[d.spell];L.push([`Cost ${S.cost} mana`,'#9ac8ff']);if(S.dmg)L.push([`Damage ${S.dmg[0]}-${S.dmg[1]}`,'#e8e0d0']);if(S.range)L.push([`Range ${S.range} tiles`,'#e8e0d0'])}
+  if(typeof itemWeightDef==='function'&&d.k!=='quest')L.push([`Weight ${itemWeightDef(d)} kg`,'#a89878']);
   return L;
 }
 function drawItemCard(it,hi,x,y,w){
@@ -3368,6 +3372,7 @@ function drawInventory(){
     if(mx>0){const th=Math.max(24,BAGH*BAGH/(bagRows()*BPITCH));ctx.fillStyle=goldG(tx,BAGY,6,BAGH);ctx.fillRect(tx,BAGY+(BAGH-th)*sc/mx,6,th)}
     BTNS.push({id:'ibagarea',x:BAGX,y:BAGY,w:BCOLS*BPITCH,h:BAGH,up:true,drag:true});
     BTNS.unshift(BTNS.pop()); // area under the cells
+    if(typeof packWeight==='function'){const pw=packWeight();txt(`Pack ${pw.toFixed(1)} / ${Math.round(WT_CAP)} kg   ${G.bag.length}/${BAGCAP} slots`,BAGX,BAGY+BAGH+3,7,G.overload?'#e08060':'#a89878','left')}
   }
 
   /* ---- right: item card or hero summary ---- */
@@ -4057,7 +4062,7 @@ function seenRows(s){
 function snapshot(){
   return {v:1,gv:VERSION,t:Date.now(),lvl:LEVEL,level:LEVEL,aff:G.aff||[],flags:G.flags,quests:G.quests,lst:G.lst,clock:G.clock,
     party:HERO_DEF.map(d=>({app:d.app,cls:d.clsId,name:d.name,bs:d.str-CLASSES[d.clsId].str,bd:d.dex-CLASSES[d.clsId].dex,bi:d.int-CLASSES[d.clsId].int})),
-    heroes:G.heroes.map(h=>({hp:h.hp,max:h.max,base:h.base,mp:h.mp,mpMax:h.mpMax,alive:h.alive,lvl:h.lvl,xp:h.xp,food:h.food,powSel:h.powSel||0,learned:h.learned||[],str:h.str,dex:h.dex,int:h.int,spellSel:h.spellSel,
+    heroes:G.heroes.map(h=>({rs:h._rs||null,hp:h.hp,max:h.max,base:h.base,mp:h.mp,mpMax:h.mpMax,alive:h.alive,lvl:h.lvl,xp:h.xp,food:h.food,powSel:h.powSel||0,learned:h.learned||[],str:h.str,dex:h.dex,int:h.int,spellSel:h.spellSel,
       eq:Object.fromEntries(Object.entries(h.eq).map(([k,it])=>[k,{id:it.id,n:it.n}]))})),
     bag:G.bag.map(b=>({id:b.id,n:b.n})),potFav:G.potFav||null,potBack:G.potBack||[null,null],gold:G.gold,keys:G.keys,rounds:G.rounds,kills:G.kills,bossDead:G.bossDead,sel:G.sel,lightBoost:G.lightBoost,
     P:{x:G.P.x,y:G.P.y,f:G.P.f},
@@ -4073,7 +4078,7 @@ function restore(sv){ // the golden city and the rooms in it are built the first
 }
 function restoreNow(sv){
   setParty(sv.party);reset(sv.level||1);
-  sv.heroes.forEach((s,i)=>Object.assign(G.heroes[i],{hp:s.hp,max:s.max,base:s.base,mp:s.mp,mpMax:s.mpMax,alive:s.alive,lvl:s.lvl,xp:s.xp,food:s.food===undefined?100:s.food,powSel:s.powSel||0,learned:s.learned||[],str:s.str,dex:s.dex,int:s.int,spellSel:s.spellSel||0,eq:s.eq||{}}));
+  sv.heroes.forEach((s,i)=>Object.assign(G.heroes[i],{_rs:s.rs||null,hp:s.hp,max:s.max,base:s.base,mp:s.mp,mpMax:s.mpMax,alive:s.alive,lvl:s.lvl,xp:s.xp,food:s.food===undefined?100:s.food,powSel:s.powSel||0,learned:s.learned||[],str:s.str,dex:s.dex,int:s.int,spellSel:s.spellSel||0,eq:s.eq||{}}));
   G.aff=sv.aff||[];G.bag=sv.bag;G.gold=sv.gold;G.potFav=sv.potFav||null;G.potBack=sv.potBack||[null,null];G.keys=sv.keys;G.rounds=sv.rounds;G.kills=sv.kills;G.bossDead=!!sv.bossDead;G.sel=sv.sel||0;G.lightBoost=sv.lightBoost||0;
   G.P={x:sv.P.x,y:sv.P.y,f:sv.P.f,angT:(sv.P.f-1)*Math.PI/2};G.C={x:sv.P.x,y:sv.P.y,a:G.P.angT};
   {const sr=seenRows(sv.seen);if(LEVEL===1){G.grid=sv.grid;if(sr)G.seen=sr}else if(sr&&sr.length===MH&&sr[0].length===MW)G.seen=sr}
@@ -12555,9 +12560,10 @@ function profRank(hi){const p=profOf(hi);if(!p)return 0;let r=1;for(let k=1;k<5;
 function profXP(trade,n){
   G.heroes.forEach((h,i)=>{const p=profOf(i);if(!p||p.id!==trade||!h.alive)return;const b=profRank(i);p.xp+=n||1;const a=profRank(i);if(a>b)msg(`${HERO_DEF[i].name} is now a rank ${a} ${TRADES[trade].n}.`,'#ffe9a0')});
 }
-function profPerk(trade){let r=0;G.heroes.forEach((h,i)=>{const p=profOf(i);if(p&&p.id===trade&&h.alive)r=Math.max(r,profRank(i))});return r}
+const profEff=i=>{const r=profRank(i);return r?Math.min(7,r+(typeof ringSum==='function'?ringSum(G.heroes[i],'profb'):0)):0}; // the rank in use: the earned rank plus any profession rings
+function profPerk(trade){let r=0;G.heroes.forEach((h,i)=>{const p=profOf(i);if(p&&p.id===trade&&h.alive)r=Math.max(r,profEff(i))});return r}
 function profPas(hi,key){
-  const p=profOf(hi);if(!p||!G.heroes[hi].alive)return 0;const r=profRank(hi);
+  const p=profOf(hi);if(!p||!G.heroes[hi].alive)return 0;const r=profEff(hi);
   switch(p.id){
     case 'healer':return key==='healPct'?.06*r:0;
     case 'smith':return key==='dmgPct'?.02*r:0;
@@ -22334,6 +22340,74 @@ function wvCentre(){
 
 /* a word on the way in: the exit is behind the party, and glows */
 {const _g=goToLevel;goToLevel=function(n,e){const r=_g.apply(this,arguments);try{if(n>=7100&&G.state==='play')msg('The way out is the bright arch behind you.','#e8e0a0')}catch(x){}return r}}
+
+/* ---- src/desert/weight.js ---- */
+/* ==========================================================================
+   RINGS AND WEIGHT. A wide range of rings (strength, dexterity, intelligence, mana, health, armour, damage, profession rank, and carrying), and a weight
+   system: every item weighs something, the party can carry a weight that grows with the heroes' combined strength, and the number of pack slots grows with it too.
+   Over the limit the party fights worse, and cannot lift anything more from the floor, a chest or a shop.
+   ========================================================================== */
+const RINGS=[ // [id, name, colour, bonuses, price, tier, description]
+ ['ringOx','Ring of the Ox','#b8783a',{str:2},180,1,'A heavy brass ring. Adds 2 Strength.'],
+ ['ringFox','Ring of the Fox','#d8883a',{dex:2},180,1,'A thin copper ring that fits like a second skin. Adds 2 Dexterity.'],
+ ['ringOwl','Ring of the Owl','#a8a8d8',{int:2},180,1,'A silver ring with two tiny round eyes. Adds 2 Intelligence.'],
+ ['ringWell','Ring of the Well','#4a8ad8',{mpb:8},170,1,'A blue ring that is always a little cool. Adds 8 to maximum mana.'],
+ ['ringBear','Ring of the Bear','#a86040',{hp:12},200,1,'A thick ring cut with claw marks. Adds 12 to maximum health.'],
+ ['ringMule','Ring of the Pack Mule','#8a7a58',{bagb:8,wtb:15},260,1,'A plain leather-wrapped ring. Adds 8 pack slots and lets the party carry 15 kg more.'],
+ ['ringPorter','Ring of the Porter','#9a8a68',{wtb:20},220,1,'An iron ring worn smooth by rope. Lets the party carry 20 kg more.'],
+ ['ringCraft','Ring of the Craftsman','#d8c060',{profb:1},420,2,'A ring of fine gold wire. Adds 1 rank to the wearer’s profession.'],
+ ['ringBulwark','Ring of the Bulwark','#7090b8',{armor:3},300,2,'A broad steel ring like a tiny shield. Adds 3 armor.'],
+ ['ringLion','Ring of the Lion','#e0a030',{dmgb:3},340,2,'A golden ring with a mane of fine lines. Adds 3 to melee damage.'],
+ ['ringHawk','Ring of the Hawk','#68b868',{hitb:.1},300,2,'A green ring with a sharp little beak. Adds 10% to hit chance.'],
+ ['ringDuel','Ring of the Duellist','#c85a70',{dbl:.06},380,2,'A red ring that tingles in a fight. Adds 6% to double damage.'],
+ ['ringFeather','Ring of the Featherweight','#e8e8d8',{wtp:.15},380,2,'A pale ring that seems to weigh nothing. Everything the party carries weighs 15% less.'],
+ ['ringMoon','Ring of the Moon','#8a8ae8',{mpb:18},480,2,'A ring of pale silver with a crescent. Adds 18 to maximum mana.'],
+ ['ringTitan','Ring of the Titan','#c8783a',{str:4},560,3,'A massive bronze ring. Adds 4 Strength.'],
+ ['ringWind','Ring of the Wind','#a8d8e8',{dex:4},560,3,'A light ring that hums in a breeze. Adds 4 Dexterity.'],
+ ['ringSage','Ring of the Sage','#c8a8f0',{int:4},560,3,'A violet ring with a thousand tiny letters. Adds 4 Intelligence.'],
+ ['ringOak','Ring of the Oak','#6a8a3a',{hp:24},580,3,'A green ring of living wood that never dries. Adds 24 to maximum health.'],
+ ['ringHaul','Ring of the Great Haul','#b89858',{bagb:16,wtb:30},700,3,'A ring on a golden chain-link band. Adds 16 pack slots and lets the party carry 30 kg more.'],
+ ['ringChampion','Ring of the Champion','#f0d060',{str:1,dex:1,int:1},650,3,'A gold ring set with three small stones. Adds 1 to Strength, Dexterity and Intelligence.'],
+ ['ringMaster','Ring of the Master Hand','#f0e8a0',{profb:2},900,4,'A ring that only a master of a trade is given. Adds 2 ranks to the wearer’s profession.']];
+for(const [id,n,c,b,price,tier,d] of RINGS)ITEMDEF[id]=Object.assign({n,k:'ring',t:'Ring',ic:'ring',c,price,rar:1,d,sw:.2},b);
+/* ---------- what everything weighs, in kilograms ---------- */
+const WT_KIND={weapon:2.5,shield:3,head:1.5,chest:6,arms:1.5,legs:2.5,ring:.1,potion:.5,food:.4,spell:.2,quest:.15,light:1};
+function itemWeightDef(d){
+  if(!d)return .3;if(d.wt!==undefined)return d.wt;
+  if(d.k==='weapon'&&d.dmg)return Math.round(Math.min(8,1+(d.dmg[0]+d.dmg[1])/2*.12)*10)/10;
+  if(d.k==='chest'||d.k==='head'||d.k==='arms'||d.k==='legs'||d.k==='shield')return Math.round(((WT_KIND[d.k]||2)+(d.armor||0)*.5)*10)/10;
+  if(d.k==='quest'&&/^(gem_|herb_|bf_)/.test(d.id||''))return .1;
+  return WT_KIND[d.k]!==undefined?WT_KIND[d.k]:.4}
+function itemWeight(id){const d=ITEMDEF[id];if(!d)return .3;if(/^(gem_|herb_|bf_)/.test(id))return .1;return itemWeightDef(d)}
+const wtMul=()=>1-Math.min(.5,invParty('wtp'));
+function packWeight(){let w=0;for(const it of G.bag)w+=itemWeight(it.id)*(it.n||1);return w*wtMul()}
+function invCombinedStr(){let s=0;for(const h of G.heroes)if(h.alive!==false)s+=h.str;return s}
+function invParty(key){let s=0;for(const h of G.heroes)if(h.alive!==false)s+=ringSum(h,key);return s}
+let WT_CAP=100;
+function invRecalc(){
+  if(!G.heroes||!G.heroes.length)return;const cs=invCombinedStr();let slots=36+Math.round(cs*.5)+invParty('bagb'),cap=20+cs*1.6+invParty('wtb');
+  try{if(hasCompanion('donkey')){slots+=12;cap+=30}if(hasCompanion('llama')){slots+=10;cap+=20}}catch(e){}
+  BAGCAP=Math.max(slots,G.bag.length);WT_CAP=cap;G.overload=packWeight()>cap}
+petsApply=function(){invRecalc()};
+/* ---------- the stat rings: strength, dexterity, intelligence and mana change the hero while the ring is worn ---------- */
+function ringApply(h){
+  if(!h||!h.eq)return;const want={str:ringSum(h,'str'),dex:ringSum(h,'dex'),int:ringSum(h,'int'),mp:ringSum(h,'mpb')},had=h._rs||{str:0,dex:0,int:0,mp:0};
+  for(const k of ['str','dex','int']){const dl=want[k]-had[k];if(dl)h[k]+=dl}
+  const dm=want.mp-had.mp;if(dm){h.mpMax=Math.max(1,h.mpMax+dm);h.mp=dm>0?Math.min(h.mpMax,h.mp+dm):Math.min(h.mp,h.mpMax)}
+  h._rs=want}
+{const _rm=recalcMax;recalcMax=function(hi){try{ringApply(G.heroes[hi])}catch(e){}return _rm.apply(this,arguments)}}
+{const _u=update;update=function(dt){if(G.state==='play'&&G.heroes&&G.heroes.length&&G.time>=(G._invT||0)){G._invT=G.time+.5;try{for(const h of G.heroes)ringApply(h);invRecalc()}catch(e){}}return _u.apply(this,arguments)}}
+/* ---------- the limit: nothing more can be lifted from the floor, a chest or a shop once the pack is full by weight ---------- */
+{const _ba=bagAdd;bagAdd=function(it){
+  if((G.loot||G._wtPick)&&it&&it.id){const w=itemWeight(it.id)*(it.n||1)*wtMul();if(packWeight()+w>WT_CAP+.001){G._heavy=1;return false}}
+  G._heavy=0;return _ba.apply(this,arguments)}}
+{const _pk=pickup;pickup=function(it){G._wtPick=1;try{return _pk.apply(this,arguments)}finally{G._wtPick=0}}}
+{const _msg=msg;msg=function(t,c){if(G._heavy&&t==='Your bag is full.'){G._heavy=0;t='That is too heavy for the party to carry. Drop something first.'}return _msg.call(this,t,c)}}
+/* ---------- rings turn up in chests: the better ones as the place gets harder ---------- */
+function ringFor(u,rate){const tier=rate>=50?4:rate>=38?3:rate>=22?2:1,pool=RINGS.filter(r=>r[5]<=tier&&(r[5]===tier||u>.5||r[5]>=tier-1));return pool[Math.floor(u*pool.length)%pool.length][0]}
+{const BASIC=['ringV','ringM','ringW','ringS'],_lf=lootFor;lootFor=function(d){const r=_lf.apply(this,arguments);
+  if(Array.isArray(r))for(const it of r)if(BASIC.includes(it.id)&&hash2(d.x,d.y,801)<.75)it.id=ringFor(hash2(d.x,d.y,802),typeof DIFF==='function'?DIFF():20);
+  return r}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

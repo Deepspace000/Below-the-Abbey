@@ -34,9 +34,10 @@ function profRank(hi){const p=profOf(hi);if(!p)return 0;let r=1;for(let k=1;k<5;
 function profXP(trade,n){
   G.heroes.forEach((h,i)=>{const p=profOf(i);if(!p||p.id!==trade||!h.alive)return;const b=profRank(i);p.xp+=n||1;const a=profRank(i);if(a>b)msg(`${HERO_DEF[i].name} is now a rank ${a} ${TRADES[trade].n}.`,'#ffe9a0')});
 }
-function profPerk(trade){let r=0;G.heroes.forEach((h,i)=>{const p=profOf(i);if(p&&p.id===trade&&h.alive)r=Math.max(r,profRank(i))});return r}
+const profEff=i=>{const r=profRank(i);return r?Math.min(7,r+(typeof ringSum==='function'?ringSum(G.heroes[i],'profb'):0)):0}; // the rank in use: the earned rank plus any profession rings
+function profPerk(trade){let r=0;G.heroes.forEach((h,i)=>{const p=profOf(i);if(p&&p.id===trade&&h.alive)r=Math.max(r,profEff(i))});return r}
 function profPas(hi,key){
-  const p=profOf(hi);if(!p||!G.heroes[hi].alive)return 0;const r=profRank(hi);
+  const p=profOf(hi);if(!p||!G.heroes[hi].alive)return 0;const r=profEff(hi);
   switch(p.id){
     case 'healer':return key==='healPct'?.06*r:0;
     case 'smith':return key==='dmgPct'?.02*r:0;
