@@ -311,6 +311,7 @@ function lpBuild(s){
       if((LP_KM-m)%5===0&&!tele&&s!==LP.N-1){let ex=sx-Math.sign(dx),ey=y;if(used.has(K(ex,ey))){ey=y+1;if(used.has(K(ex,ey)))ey=y-1}used.add(K(ex,ey));tele={x:MX(ex),y:ey};stoneKm=LP_KM-m}} // a stone teleporter right beside the sign, every five kilometres // a signpost at every kilometre: To Yarrim, and how far
   }
   if(s===LPM.SEG){const md=lpMonDoor(),sk=lpBoard('lp_sign_mon','SAINT ELEN’S','monastery 300 m');if(sk){used.add(K(md.c+3,md.y+3));decor.push({k:sk,x:MX(md.c+3),y:md.y+3,block:false,walk:true,deco:true})}lamp(md.x-2,md.y-2);lamp(md.x-2,md.y+2);
+    decor.push({k:'mi_saint',x:md.c+4,y:md.y-2,block:true,npc:'lp_elen',sc:2.3}); // a great stone statue of Saint Elen beside the road, where the lane to the monastery leaves it
     for(let q=decor.length-1;q>=0;q--){const d=decor[q];if(d.block&&!d.npc&&!d.enter&&d.x>=md.c&&d.x<=md.x-1&&Math.abs(d.y-md.y)<=1)decor.splice(q,1)}} // the way from the road to the monastery gate is open: no trees across it
   // (the tall moored ships of the quay are left out here: from far off they only show as grey slabs against the sea)
   for(const cl of clearings){ // the green spaces, with huge oaks
@@ -503,3 +504,6 @@ function lpDrawMap(){
   btnText('worldmap','World map',328,5,80,20);btnText('ovexit','Exit',414,5,60,20);
 }
 {const _do=drawOverview;drawOverview=function(){if(LEVEL>=LP.BASE&&LEVEL<LP.BASE+LP.N){lpDrawMap();return}return _do.apply(this,arguments)}}
+
+/* the great statue of Saint Elen beside the road, at the lane to the monastery gate */
+khNpc('lp_elen','The Statue of Saint Elen','gate',()=>say('A great stone saint, twice the height of a man, stands at the side of the road with her hands held out toward the mountain. The stone is dark with rain and soft with moss. At her feet someone has cut a line of letters: THE WAY TO SAINT ELEN’S LEAVES THE ROAD HERE. Beyond her, a lane runs between the trees to a gate in the rock.',[BYE]));
