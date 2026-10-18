@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.374';
+const VERSION='3.380';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2277,6 +2277,7 @@ function doMove(rel){ // rel: 0 forward, 1 right, 2 back, 3 left
   if(nx<0||ny<0||nx>=MW||ny>=MH){sfx('bump');return}
   if(G.slowT>0&&Math.random()<.5){G.slowT--;sfx('bump');msg('You struggle against the dead hands. You are slowed.','#e8c870');if(hostileNear())later(300,endRound);else endRound();return}
   const g=G.grid[ny][nx];
+  if(LEVEL<41&&g>=1000&&typeof wdDoorLevel==='function'&&wdDoorLevel(LEVEL)&&khBump(nx,ny,g))return; // the doors of the caves and ruins hidden in the older forests
   if(LEVEL>=41&&desertBump(nx,ny,g))return;
   if(g===3){G.grid[ny][nx]=0;sfx('door');msg('You push the door open.');later(260,endRound);return}
   if(g===4){
@@ -21579,6 +21580,10 @@ function pfPrep(n){
    for(let y=0;y<H;y++)for(let x=W-3;x<W;x++)pfSet(L,x,y,cc)}
   if(L.sky)L.sky=L.sky.filter(e=>!/^lp_peak/.test(e.k)); // the old flat peak pictures stood out from the edge of the map like cards: the painted mountains in the sky replace them
   const blk=new Set(L.decor.filter(d=>d.block&&isTree(d)).map(d=>d.x+','+d.y));
+  {const keys=[...new Set(L.decor.filter(d=>d.block&&isTree(d)).map(d=>d.k))]; // a line of solid trees runs along the east edge: it explains why the party cannot go on, and the mountains rise over it
+   if(keys.length)for(let y=2;y<H-2;y++)for(const [x,ph] of [[W-5,0],[W-4,1]]){
+     if(L.rows[y][x]!=='.')continue;if(ph&&((y+((hs(x,y,680)*2)|0))%2))continue;
+     L.decor.push({k:keys[(hs(x,y,681)*keys.length)|0],x,y,block:true,pfEdge:1,sc:.3+hs(x,y,682)*.14,ox:(hs(x,y,683)-.5)*.5,oy:(hs(x,y,684)-.5)*.4})}} // kept low, so the mountains show over the tops
   const walk=(x,y)=>x>=3&&y>=3&&x<W-6&&y<H-3&&L.rows[y][x]==='.';
   const clear=new Set(),trails=[],st=L.start||{x:0,y:0};
   const cut=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const l=trees.get((x+dx)+','+(y+dy));if(l)for(const d of l)clear.add(d)}};
@@ -21717,7 +21722,7 @@ function pfCaveBuild(ci){
   else if(kind==='fugitive'){const fi=PF_KINDS.slice(0,ci).filter(k=>k==='fugitive').length%3,id='pf_f'+PF_FUG[fi].id,kp=KH_KEEPERS[id];if(kp)decor.push({k:khFaceKey(kp.face),x:far[0],y:far[1],block:false,walk:true,npc:id,sc:1});const c=pick(50);if(c)decor.push({k:'barrel',x:c[0],y:c[1],block:true})}
   if(!PF_ENT[ci]){const sn=LP.BASE+PF_SEGS[ci];try{if(!LEVELS[sn]&&KH_LAZY[sn])KH_LAZY[sn]();pfPrep(sn)}catch(e){console.error(e)}}
   const ent=PF_ENT[ci]||{n:LP.BASE+PF_SEGS[ci],x:80,y:300};
-  const rk=pfRockGid(2.6,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=T_DOORS.cave;KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:3}};
+  const rk=pfRockGid(2.6,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(2.6);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:3}};
   const chars={'#':rk};chars[door]=dgid;
   return {rows:g.map(r=>r.join('')),start:{x:8,y:H-3,f:0},enemies,items,decor,chars,day:0,name:PF_NAMES[ci],label:PF_NAMES[ci],diff,ceilH:2.6,torchGap:1e9,noTele:true,portals:[],lights:[],
     mapNames:[{t:PF_NAMES[ci],x:8,y:H-1,k:'place'}]};
@@ -21794,11 +21799,12 @@ function pfMtData(){
   if(PF_MT)return PF_MT;const out=[];
   for(const k of ['pf_range0','pf_range1']){const im=IMG[k];if(!im||!im.width)return null;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);const id=x.getImageData(0,0,im.width,im.height),d=id.data;for(let i=0;i<d.length;i+=4){const r=d[i],g=d[i+1],b=d[i+2];if(r>g+14&&b>g+14){d[i]=Math.min(r,g+8);d[i+2]=Math.min(b,g+12)}} // take the last pink of the keyed-out background out of the mist
     out.push({w:im.width,h:im.height,d})}
+  const sl=IMG.pf_slope;if(sl&&sl.width){const c=document.createElement('canvas');c.width=sl.width;c.height=sl.height;const x=c.getContext('2d');x.drawImage(sl,0,0);out.slope={w:sl.width,h:sl.height,d:x.getImageData(0,0,sl.width,sl.height).data}}
   return PF_MT=out}
 function pfMountains(D,dX,dY,pX,pY,hzr,lbm){
   if(!(typeof LP!=='undefined'&&LEVEL>=LP.BASE&&LEVEL<LP.BASE+LP.N))return;
   const M=pfMtData();if(!M)return;
-  const Hm=Math.round(VH*.34),br=Math.min(1,.8*(lbm||1)+.08),hz=hzr||[200,214,228];
+  const Hm=Math.round(VH*.44),br=Math.min(1,.8*(lbm||1)+.08),hz=hzr||[200,214,228];
   for(let x=0;x<VW;x++){
     const cm=2*x/VW-1,a=Math.atan2(dY+pY*cm,dX+pX*cm);let ang=((a%TAU)+TAU)%TAU;if(ang>Math.PI)ang-=TAU; // 0 is due east, the deep end of the woods
     if(ang<-1.45||ang>1.45)continue;
@@ -21810,7 +21816,13 @@ function pfMountains(D,dX,dY,pX,pY,hzr,lbm){
       const al=Math.min(1,at*Math.min(1,tp*1.6)*1.08);if(al<.02)continue;
       const cr=(M[0].d[i0]*a0+M[1].d[i1]*a1)/at,cg=(M[0].d[i0+1]*a0+M[1].d[i1+1]*a1)/at,cb=(M[0].d[i0+2]*a0+M[1].d[i1+2]*a1)/at;
       const o=(y*VW+x)*4,f=al; // a little haze over the far range
-      D[o]=D[o]*(1-f)+(cr*br*.8+hz[0]*.2)*f;D[o+1]=D[o+1]*(1-f)+(cg*br*.8+hz[1]*.2)*f;D[o+2]=D[o+2]*(1-f)+(cb*br*.8+hz[2]*.2)*f}}}
+      D[o]=D[o]*(1-f)+(cr*br*.8+hz[0]*.2)*f;D[o+1]=D[o+1]*(1-f)+(cg*br*.8+hz[1]*.2)*f;D[o+2]=D[o+2]*(1-f)+(cb*br*.8+hz[2]*.2)*f}
+    // below the horizon the mountains stand on forest: wherever the land ends at the edge of the map, painted woods fill the gap, so it never reads as water
+    const S=M.slope,tb=Math.min(1,tp*1.6);
+    if(S&&tb>.02){const u=((((ang+1.6)/.34)%1+1)%1*S.w)|0;
+      for(let y=HH;y<VH;y++){const dy=y-HH,v=(((dy*1.7+6*Math.sin(ang*9))%S.h)+S.h)%S.h|0,i=(v*S.w+u)*4,ramp=Math.min(1,.4+dy/9)*tb,haze=Math.max(.06,.5-dy/48),o=(y*VW+x)*4;
+        D[o]=D[o]*(1-ramp)+(S.d[i]*br*.95*(1-haze)+hz[0]*haze)*ramp;D[o+1]=D[o+1]*(1-ramp)+(S.d[i+1]*br*.95*(1-haze)+hz[1]*haze)*ramp;D[o+2]=D[o+2]*(1-ramp)+(S.d[i+2]*br*.95*(1-haze)+hz[2]*haze)*ramp}}
+  }}
 
 /* ---- src/desert/wilds.js ---- */
 /* ==========================================================================
@@ -21846,6 +21858,16 @@ function wdStyle(kind,tint,dark){
     OH_STY[key]=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:c?'pf_rock':'pf_ruinwall',door:c?'pf_cavemouth':'pf_ruindoor',win:c?'pf_rock':'pf_ruinwall',alt:c?'pf_rock':'pf_ruinwall',zoom:1,contrast:1.15,tint:[tint[0]*f|0,tint[1]*f|0,tint[2]*f|0,0]})}
   return key}
 function wdTiles(kind,wh,tint,dark){const TM=ohTiles(),k=wdStyle(kind,tint,dark);return {wall:TM.make('plain',k,wh).gid,door:TM.make('door',k,wh)}}
+/* ---------- the way out, seen from inside: a bright arch of daylight in the dark rock, so it can be found ---------- */
+loadImg('pf_exit','assets/pf_exit.jpg');
+const WD_EXIT={};
+function wdExitTile(wh){
+  if(WD_EXIT[wh])return WD_EXIT[wh];const im=IMG.pf_exit,Hp=Math.round(128*wh);
+  const c=mkCanvas(128,Hp,(x,w,h)=>{if(im&&im.width)x.drawImage(im,0,0,im.width,im.height,0,0,w,h);else{x.fillStyle='#c8d8a0';x.fillRect(0,0,w,h)}});
+  const d=c.getContext('2d').getImageData(0,0,128,Hp).data,id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;
+  const e=new Uint8ClampedArray(d.length); // the bright part of the picture gives off its own light, so the way out shines in the dark
+  for(let i=0;i<d.length;i+=4){const lum=d[i]*.3+d[i+1]*.59+d[i+2]*.11;e[i]=d[i];e[i+1]=d[i+1];e[i+2]=d[i+2];e[i+3]=Math.max(0,Math.min(1,(lum-80)/80))*255}
+  TEX[id].e=e;return WD_EXIT[wh]=id}
 /* ---------- placing an entrance ---------- */
 function wdSetRow(L,x,y,c){const r=L.rows[y];if(r&&x>=0&&x<r.length)L.rows[y]=r.slice(0,x)+c+r.slice(x+1)}
 const wdTreeKey=d=>/^([glp]?tree\d|pt_)/.test(d.k)&&!d.npc;
@@ -21975,7 +21997,7 @@ function wdBuild(id){
     if(kind==='treasure'){decor.push({k:'chest',x:far[0],y:far[1],block:true,goldAmt:gold});const c=pick(80);if(c)items.push({k:'potion',x:c[0],y:c[1]})}
     if(kind==='slime'){for(let i=0;i<4;i++){const c=pick(90+i);if(c)enemies.push({t:'slime',x:c[0],y:c[1]})}}
   }
-  const T=wdTiles(cave?'cave':'ruin',cave?2.6:2.8,tint,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=T.door.tex;KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:ent.f}};
+  const T=wdTiles(cave?'cave':'ruin',cave?2.6:2.8,tint,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(cave?2.6:2.8);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:ent.f}};
   const chars={'#':T.wall};chars[door]=dgid;
   if(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[P.n])LEVEL_RATING[id]=LEVEL_RATING[P.n];
   LEVEL_NAMES[id]=name;
@@ -22026,6 +22048,9 @@ function wvCentre(){
     if(LEVEL>=7100){const l=WORLD_LOCS.find(q=>q.lv.includes(n));return l?[l.x,l.y]:null}
   }catch(e){}
   return null}
+
+/* a word on the way in: the exit is behind the party, and glows */
+{const _g=goToLevel;goToLevel=function(n,e){const r=_g.apply(this,arguments);try{if(n>=7100&&G.state==='play')msg('The way out is the bright arch behind you.','#e8e0a0')}catch(x){}return r}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

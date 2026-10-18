@@ -31,6 +31,16 @@ function wdStyle(kind,tint,dark){
     OH_STY[key]=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:c?'pf_rock':'pf_ruinwall',door:c?'pf_cavemouth':'pf_ruindoor',win:c?'pf_rock':'pf_ruinwall',alt:c?'pf_rock':'pf_ruinwall',zoom:1,contrast:1.15,tint:[tint[0]*f|0,tint[1]*f|0,tint[2]*f|0,0]})}
   return key}
 function wdTiles(kind,wh,tint,dark){const TM=ohTiles(),k=wdStyle(kind,tint,dark);return {wall:TM.make('plain',k,wh).gid,door:TM.make('door',k,wh)}}
+/* ---------- the way out, seen from inside: a bright arch of daylight in the dark rock, so it can be found ---------- */
+loadImg('pf_exit','assets/pf_exit.jpg');
+const WD_EXIT={};
+function wdExitTile(wh){
+  if(WD_EXIT[wh])return WD_EXIT[wh];const im=IMG.pf_exit,Hp=Math.round(128*wh);
+  const c=mkCanvas(128,Hp,(x,w,h)=>{if(im&&im.width)x.drawImage(im,0,0,im.width,im.height,0,0,w,h);else{x.fillStyle='#c8d8a0';x.fillRect(0,0,w,h)}});
+  const d=c.getContext('2d').getImageData(0,0,128,Hp).data,id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;
+  const e=new Uint8ClampedArray(d.length); // the bright part of the picture gives off its own light, so the way out shines in the dark
+  for(let i=0;i<d.length;i+=4){const lum=d[i]*.3+d[i+1]*.59+d[i+2]*.11;e[i]=d[i];e[i+1]=d[i+1];e[i+2]=d[i+2];e[i+3]=Math.max(0,Math.min(1,(lum-80)/80))*255}
+  TEX[id].e=e;return WD_EXIT[wh]=id}
 /* ---------- placing an entrance ---------- */
 function wdSetRow(L,x,y,c){const r=L.rows[y];if(r&&x>=0&&x<r.length)L.rows[y]=r.slice(0,x)+c+r.slice(x+1)}
 const wdTreeKey=d=>/^([glp]?tree\d|pt_)/.test(d.k)&&!d.npc;
@@ -160,7 +170,7 @@ function wdBuild(id){
     if(kind==='treasure'){decor.push({k:'chest',x:far[0],y:far[1],block:true,goldAmt:gold});const c=pick(80);if(c)items.push({k:'potion',x:c[0],y:c[1]})}
     if(kind==='slime'){for(let i=0;i<4;i++){const c=pick(90+i);if(c)enemies.push({t:'slime',x:c[0],y:c[1]})}}
   }
-  const T=wdTiles(cave?'cave':'ruin',cave?2.6:2.8,tint,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=T.door.tex;KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:ent.f}};
+  const T=wdTiles(cave?'cave':'ruin',cave?2.6:2.8,tint,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(cave?2.6:2.8);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:ent.f}};
   const chars={'#':T.wall};chars[door]=dgid;
   if(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[P.n])LEVEL_RATING[id]=LEVEL_RATING[P.n];
   LEVEL_NAMES[id]=name;
@@ -211,3 +221,6 @@ function wvCentre(){
     if(LEVEL>=7100){const l=WORLD_LOCS.find(q=>q.lv.includes(n));return l?[l.x,l.y]:null}
   }catch(e){}
   return null}
+
+/* a word on the way in: the exit is behind the party, and glows */
+{const _g=goToLevel;goToLevel=function(n,e){const r=_g.apply(this,arguments);try{if(n>=7100&&G.state==='play')msg('The way out is the bright arch behind you.','#e8e0a0')}catch(x){}return r}}

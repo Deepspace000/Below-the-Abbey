@@ -23,6 +23,10 @@ function pfPrep(n){
    for(let y=0;y<H;y++)for(let x=W-3;x<W;x++)pfSet(L,x,y,cc)}
   if(L.sky)L.sky=L.sky.filter(e=>!/^lp_peak/.test(e.k)); // the old flat peak pictures stood out from the edge of the map like cards: the painted mountains in the sky replace them
   const blk=new Set(L.decor.filter(d=>d.block&&isTree(d)).map(d=>d.x+','+d.y));
+  {const keys=[...new Set(L.decor.filter(d=>d.block&&isTree(d)).map(d=>d.k))]; // a line of solid trees runs along the east edge: it explains why the party cannot go on, and the mountains rise over it
+   if(keys.length)for(let y=2;y<H-2;y++)for(const [x,ph] of [[W-5,0],[W-4,1]]){
+     if(L.rows[y][x]!=='.')continue;if(ph&&((y+((hs(x,y,680)*2)|0))%2))continue;
+     L.decor.push({k:keys[(hs(x,y,681)*keys.length)|0],x,y,block:true,pfEdge:1,sc:.3+hs(x,y,682)*.14,ox:(hs(x,y,683)-.5)*.5,oy:(hs(x,y,684)-.5)*.4})}} // kept low, so the mountains show over the tops
   const walk=(x,y)=>x>=3&&y>=3&&x<W-6&&y<H-3&&L.rows[y][x]==='.';
   const clear=new Set(),trails=[],st=L.start||{x:0,y:0};
   const cut=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const l=trees.get((x+dx)+','+(y+dy));if(l)for(const d of l)clear.add(d)}};
@@ -161,7 +165,7 @@ function pfCaveBuild(ci){
   else if(kind==='fugitive'){const fi=PF_KINDS.slice(0,ci).filter(k=>k==='fugitive').length%3,id='pf_f'+PF_FUG[fi].id,kp=KH_KEEPERS[id];if(kp)decor.push({k:khFaceKey(kp.face),x:far[0],y:far[1],block:false,walk:true,npc:id,sc:1});const c=pick(50);if(c)decor.push({k:'barrel',x:c[0],y:c[1],block:true})}
   if(!PF_ENT[ci]){const sn=LP.BASE+PF_SEGS[ci];try{if(!LEVELS[sn]&&KH_LAZY[sn])KH_LAZY[sn]();pfPrep(sn)}catch(e){console.error(e)}}
   const ent=PF_ENT[ci]||{n:LP.BASE+PF_SEGS[ci],x:80,y:300};
-  const rk=pfRockGid(2.6,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=T_DOORS.cave;KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:3}};
+  const rk=pfRockGid(2.6,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(2.6);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:3}};
   const chars={'#':rk};chars[door]=dgid;
   return {rows:g.map(r=>r.join('')),start:{x:8,y:H-3,f:0},enemies,items,decor,chars,day:0,name:PF_NAMES[ci],label:PF_NAMES[ci],diff,ceilH:2.6,torchGap:1e9,noTele:true,portals:[],lights:[],
     mapNames:[{t:PF_NAMES[ci],x:8,y:H-1,k:'place'}]};
@@ -238,11 +242,12 @@ function pfMtData(){
   if(PF_MT)return PF_MT;const out=[];
   for(const k of ['pf_range0','pf_range1']){const im=IMG[k];if(!im||!im.width)return null;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);const id=x.getImageData(0,0,im.width,im.height),d=id.data;for(let i=0;i<d.length;i+=4){const r=d[i],g=d[i+1],b=d[i+2];if(r>g+14&&b>g+14){d[i]=Math.min(r,g+8);d[i+2]=Math.min(b,g+12)}} // take the last pink of the keyed-out background out of the mist
     out.push({w:im.width,h:im.height,d})}
+  const sl=IMG.pf_slope;if(sl&&sl.width){const c=document.createElement('canvas');c.width=sl.width;c.height=sl.height;const x=c.getContext('2d');x.drawImage(sl,0,0);out.slope={w:sl.width,h:sl.height,d:x.getImageData(0,0,sl.width,sl.height).data}}
   return PF_MT=out}
 function pfMountains(D,dX,dY,pX,pY,hzr,lbm){
   if(!(typeof LP!=='undefined'&&LEVEL>=LP.BASE&&LEVEL<LP.BASE+LP.N))return;
   const M=pfMtData();if(!M)return;
-  const Hm=Math.round(VH*.34),br=Math.min(1,.8*(lbm||1)+.08),hz=hzr||[200,214,228];
+  const Hm=Math.round(VH*.44),br=Math.min(1,.8*(lbm||1)+.08),hz=hzr||[200,214,228];
   for(let x=0;x<VW;x++){
     const cm=2*x/VW-1,a=Math.atan2(dY+pY*cm,dX+pX*cm);let ang=((a%TAU)+TAU)%TAU;if(ang>Math.PI)ang-=TAU; // 0 is due east, the deep end of the woods
     if(ang<-1.45||ang>1.45)continue;
@@ -254,4 +259,10 @@ function pfMountains(D,dX,dY,pX,pY,hzr,lbm){
       const al=Math.min(1,at*Math.min(1,tp*1.6)*1.08);if(al<.02)continue;
       const cr=(M[0].d[i0]*a0+M[1].d[i1]*a1)/at,cg=(M[0].d[i0+1]*a0+M[1].d[i1+1]*a1)/at,cb=(M[0].d[i0+2]*a0+M[1].d[i1+2]*a1)/at;
       const o=(y*VW+x)*4,f=al; // a little haze over the far range
-      D[o]=D[o]*(1-f)+(cr*br*.8+hz[0]*.2)*f;D[o+1]=D[o+1]*(1-f)+(cg*br*.8+hz[1]*.2)*f;D[o+2]=D[o+2]*(1-f)+(cb*br*.8+hz[2]*.2)*f}}}
+      D[o]=D[o]*(1-f)+(cr*br*.8+hz[0]*.2)*f;D[o+1]=D[o+1]*(1-f)+(cg*br*.8+hz[1]*.2)*f;D[o+2]=D[o+2]*(1-f)+(cb*br*.8+hz[2]*.2)*f}
+    // below the horizon the mountains stand on forest: wherever the land ends at the edge of the map, painted woods fill the gap, so it never reads as water
+    const S=M.slope,tb=Math.min(1,tp*1.6);
+    if(S&&tb>.02){const u=((((ang+1.6)/.34)%1+1)%1*S.w)|0;
+      for(let y=HH;y<VH;y++){const dy=y-HH,v=(((dy*1.7+6*Math.sin(ang*9))%S.h)+S.h)%S.h|0,i=(v*S.w+u)*4,ramp=Math.min(1,.4+dy/9)*tb,haze=Math.max(.06,.5-dy/48),o=(y*VW+x)*4;
+        D[o]=D[o]*(1-ramp)+(S.d[i]*br*.95*(1-haze)+hz[0]*haze)*ramp;D[o+1]=D[o+1]*(1-ramp)+(S.d[i+1]*br*.95*(1-haze)+hz[1]*haze)*ramp;D[o+2]=D[o+2]*(1-ramp)+(S.d[i+2]*br*.95*(1-haze)+hz[2]*haze)*ramp}}
+  }}
