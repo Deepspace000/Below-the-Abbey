@@ -27,20 +27,27 @@ const wdCount=n=>{const r=hash2(n,3,4401);return wdIsLP(n)?(n-LP.BASE<9?2:1):1+M
 /* ---------- styles and tiles ---------- */
 function wdStyle(kind,tint,dark){
   const key='wd_'+kind+'_'+tint.join('_')+(dark?'d':'');
-  if(!OH_STY[key]){const c=kind==='cave',f=dark?.78:1;
-    OH_STY[key]=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:c?'pf_rock':'pf_ruinwall',door:c?'pf_cavemouth':'pf_ruindoor',win:c?'pf_rock':'pf_ruinwall',alt:c?'pf_rock':'pf_ruinwall',zoom:1,contrast:1.15,tint:[tint[0]*f|0,tint[1]*f|0,tint[2]*f|0,0]})}
+  if(!OH_STY[key]){const c=kind==='cave',tn=wdTone(kind,tint,dark);
+    OH_STY[key]=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:c?'pf_rock':'pf_ruinwall',door:c?'pf_cavemouth':'pf_ruindoor',win:c?'pf_rock':'pf_ruinwall',alt:c?'pf_rock':'pf_ruinwall',zoom:1,contrast:c?1.15:1.35,tint:[tn[0],tn[1],tn[2],0]})}
   return key}
+function wdTone(kind,tint,dark){ // the colour a wall is multiplied by: ruins are old, dark and nearly grey; caves keep their tint
+  if(kind==='cave'){const f=dark?.78:1;return [tint[0]*f|0,tint[1]*f|0,tint[2]*f|0]}
+  const g=(tint[0]+tint[1]+tint[2])/3,f=dark?.58:.64;return [(tint[0]*.3+g*.7)*f|0,(tint[1]*.3+g*.7)*f|0,(tint[2]*.3+g*.7)*.92*f|0]}
 function wdTiles(kind,wh,tint,dark){const TM=ohTiles(),k=wdStyle(kind,tint,dark);return {wall:TM.make('plain',k,wh).gid,door:TM.make('door',k,wh)}}
 /* ---------- the way out, seen from inside: a bright arch of daylight in the dark rock, so it can be found ---------- */
 loadImg('pf_exit','assets/pf_exit.jpg');
 const WD_EXIT={};
-function wdExitTile(wh){
-  if(WD_EXIT[wh])return WD_EXIT[wh];const im=IMG.pf_exit,Hp=Math.round(128*wh);
-  const c=mkCanvas(128,Hp,(x,w,h)=>{if(im&&im.width)x.drawImage(im,0,0,im.width,im.height,0,0,w,h);else{x.fillStyle='#c8d8a0';x.fillRect(0,0,w,h)}});
+function wdExitTile(wh,kind,tint){ // the arch of daylight is set in the same wall as the rest of the room, so it does not look pasted on
+  const key=wh+(kind||'')+(tint?tint.join('_'):'');if(WD_EXIT[key])return WD_EXIT[key];const im=IMG.pf_exit,Hp=Math.round(128*wh),wl=kind==='ruin'?IMG.pf_ruinwall:IMG.pf_rock,tn=wdTone(kind||'cave',tint||[255,255,255],true);
+  const c=mkCanvas(128,Hp,(x,w,h)=>{
+    if(wl&&wl.width&&kind){for(let yy=0;yy<h;yy+=128)x.drawImage(wl,0,0,wl.width,wl.height,0,yy,128,128);x.globalCompositeOperation='multiply';x.fillStyle=`rgb(${tn[0]},${tn[1]},${tn[2]})`;x.fillRect(0,0,w,h);x.globalCompositeOperation='source-over'}else{x.fillStyle='#1a1814';x.fillRect(0,0,w,h)}
+    if(im&&im.width){const sx=w/256,sy=h/665;x.save();x.beginPath();x.moveTo(30*sx,545*sy);x.lineTo(28*sx,330*sy);x.quadraticCurveTo(34*sx,205*sy,128*sx,198*sy);x.quadraticCurveTo(222*sx,205*sy,228*sx,330*sy);x.lineTo(226*sx,545*sy);x.closePath();x.clip();x.drawImage(im,0,0,im.width,im.height,0,0,w,h);x.restore();
+      x.strokeStyle='rgba(8,7,5,.75)';x.lineWidth=7;x.beginPath();x.moveTo(30*sx,545*sy);x.lineTo(28*sx,330*sy);x.quadraticCurveTo(34*sx,205*sy,128*sx,198*sy);x.quadraticCurveTo(222*sx,205*sy,228*sx,330*sy);x.lineTo(226*sx,545*sy);x.stroke()} // a dark worn rim all round the opening
+    else{x.fillStyle='#c8d8a0';x.fillRect(w*.2,h*.3,w*.6,h*.25)}});
   const d=c.getContext('2d').getImageData(0,0,128,Hp).data,id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;
   const e=new Uint8ClampedArray(d.length); // the bright part of the picture gives off its own light, so the way out shines in the dark
   for(let i=0;i<d.length;i+=4){const lum=d[i]*.3+d[i+1]*.59+d[i+2]*.11;e[i]=d[i];e[i+1]=d[i+1];e[i+2]=d[i+2];e[i+3]=Math.max(0,Math.min(1,(lum-80)/80))*255}
-  TEX[id].e=e;return WD_EXIT[wh]=id}
+  TEX[id].e=e;return WD_EXIT[key]=id}
 /* ---------- placing an entrance ---------- */
 function wdSetRow(L,x,y,c){const r=L.rows[y];if(r&&x>=0&&x<r.length)L.rows[y]=r.slice(0,x)+c+r.slice(x+1)}
 const wdTreeKey=d=>/^([glp]?tree\d|pt_)/.test(d.k)&&!d.npc;
@@ -177,7 +184,7 @@ function wdBuild(id){
     try{pfRuinProps(g,W,H,sx,sy,[[far[0],far[1]]],used,decor,items,enemies,id)}catch(e){console.error(e)} // broken statues, columns and brickwork, throughout
   }
   if(hash2(id,6,764)<.5)pfFoodChest(g,W,H,sx,sy,decor,items,used,id); // some hold a little food in a chest
-  const T=wdTiles(cave?'cave':'ruin',cave?2.6:2.8,tint,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(cave?2.6:2.8);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:ent.f}};
+  const T=wdTiles(cave?'cave':'ruin',cave?2.6:2.8,tint,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(cave?2.6:2.8,cave?'cave':'ruin',tint);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:ent.f}};
   const chars={'#':T.wall};chars[door]=dgid;
   if(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[P.n])LEVEL_RATING[id]=LEVEL_RATING[P.n];
   LEVEL_NAMES[id]=name;

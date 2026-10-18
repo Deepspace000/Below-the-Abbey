@@ -279,7 +279,7 @@ function pfCaveBuild(ci){
   if(hs(sd,3,761)<.55)pfFoodChest(g,W,H,8,H-3,decor,items,used,sd); // a little food in a chest, in some of them
   if(!PF_ENT[ci]){const sn=LP.BASE+PF_SEGS[ci];try{if(!LEVELS[sn]&&KH_LAZY[sn])KH_LAZY[sn]();pfPrep(sn)}catch(e){console.error(e)}}
   const ent=PF_ENT[ci]||{n:LP.BASE+PF_SEGS[ci],x:80,y:300};
-  const rk=pfRockGid(2.6,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(2.6);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:3}};
+  const rk=pfRockGid(2.6,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(2.6,'cave',[255,255,255]);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:3}};
   const chars={'#':rk};chars[door]=dgid;
   return {rows:g.map(r=>r.join('')),start:{x:8,y:H-3,f:0},enemies,items,decor,chars,day:0,name:PF_NAMES[ci],label:PF_NAMES[ci],diff,ceilH:2.6,torchGap:1e9,noTele:true,portals:[],lights:[],
     mapNames:[{t:PF_NAMES[ci],x:8,y:H-1,k:'place'}]};
@@ -386,9 +386,13 @@ function pfMossCross(){
   if(IMG.lpcross||!IMG.cross||!IMG.cross.width)return;
   const im=IMG.cross,w=im.width,h=im.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(im,0,0);
   x.globalCompositeOperation='source-atop';
-  for(let i=0;i<520;i++){const a=hash2(i,1,911),b=hash2(i,2,911),low=Math.pow(b,.6); // moss gathers low down and on the upper arms
-    x.fillStyle=`rgba(${40+((hash2(i,3,911)*40)|0)},${130+((hash2(i,4,911)*70)|0)},${30+((hash2(i,5,911)*30)|0)},${.55+hash2(i,6,911)*.4})`;
-    x.beginPath();x.ellipse(a*w,low*h,3+hash2(i,7,911)*(w*.07),2+hash2(i,8,911)*(h*.03),hash2(i,9,911)*3,0,6.283);x.fill()}
+  const blob=(n,seed,base,rr,aa,sz)=>{for(let i=0;i<n;i++){const a=hash2(i,1,seed),b=hash2(i,2,seed),low=Math.pow(b,.55); // moss gathers low down and along the arms
+      x.fillStyle=`rgba(${base[0]+((hash2(i,3,seed)*rr[0])|0)},${base[1]+((hash2(i,4,seed)*rr[1])|0)},${base[2]+((hash2(i,5,seed)*rr[2])|0)},${aa[0]+hash2(i,6,seed)*aa[1]})`;
+      x.beginPath();x.ellipse(a*w,low*h,sz[0]+hash2(i,7,seed)*(w*sz[1]),sz[0]*.7+hash2(i,8,seed)*(h*sz[2]),hash2(i,9,seed)*3,0,6.283);x.fill()}};
+  blob(190,911,[22,48,18],[26,30,14],[.55,.35],[3,.07,.03]); // deep, dark green underneath
+  blob(260,912,[46,84,30],[34,40,18],[.45,.4],[2,.05,.02]); // the body of the moss
+  blob(150,913,[96,128,56],[40,40,20],[.3,.3],[1,.018,.008]); // a few pale tufts catching the light
+  blob(80,914,[14,22,10],[10,10,6],[.35,.3],[2,.04,.02]); // damp, dark stains between
   IMG.lpcross=c;NPC_H.lpcross=2.4}
 function pfCrosses(n){
   const L=LEVELS[n];if(!L||L._pfX||!L.rows||!L.fmap)return;L._pfX=1;pfMossCross();if(!IMG.lpcross)return;
@@ -406,16 +410,19 @@ function pfRuinArt(){
   if(IMG.rs_col0||!IMG.statue||!IMG.ds_dpillar0||!IMG.ds_dpillar1||!IMG.ds_druinstairs)return;
   const H9=(a,b,c)=>hash2(a,b,c+900);
   const cut=(im,sx,sy,sw,sh,grey)=>{const c=document.createElement('canvas');c.width=sw;c.height=sh;const x=c.getContext('2d');x.drawImage(im,sx,sy,sw,sh,0,0,sw,sh);
-    if(grey){try{const d=x.getImageData(0,0,sw,sh),p=d.data;for(let i=0;i<p.length;i+=4){if(p[i+3]<10)continue;const l=p[i]*.3+p[i+1]*.59+p[i+2]*.11;p[i]=Math.min(255,l*.9+10);p[i+1]=Math.min(255,l*.9+9);p[i+2]=Math.min(255,l*.84+8)}x.putImageData(d,0,0)}catch(e){}}return c};
+    if(grey){try{const d=x.getImageData(0,0,sw,sh),p=d.data;for(let i=0;i<p.length;i+=4){if(p[i+3]<10)continue;const l=p[i]*.3+p[i+1]*.59+p[i+2]*.11;p[i]=Math.min(255,l*.62+6);p[i+1]=Math.min(255,l*.62+6);p[i+2]=Math.min(255,l*.56+5)}x.putImageData(d,0,0)}catch(e){}}return c};
   const snap=(c,frac,seed)=>{const x=c.getContext('2d'),w=c.width,h=c.height;x.globalCompositeOperation='destination-out';x.beginPath();x.moveTo(0,0);x.lineTo(w,0);let y=h*frac;const n=7;for(let i=n;i>=0;i--){y=h*frac+(H9(seed,i,1)-.5)*h*.12;x.lineTo(w*i/n,y)}x.closePath();x.fill();x.globalCompositeOperation='source-over'};
   const green=(c,seed,vines)=>{const x=c.getContext('2d'),w=c.width,h=c.height;x.save();x.globalCompositeOperation='source-atop';
-    for(let i=0;i<340;i++){const a=H9(seed,i,2),b=H9(seed,i,3),low=Math.pow(b,.7),r=2+H9(seed,i,4)*w*.05;x.fillStyle=`rgba(${40+((H9(seed,i,5)*40)|0)},${95+((H9(seed,i,6)*70)|0)},${30+((H9(seed,i,7)*30)|0)},${.4+H9(seed,i,8)*.45})`;x.beginPath();x.ellipse(a*w,(1-low*.85)*h,r,r*.6,H9(seed,i,9)*3,0,6.283);x.fill()}
+    for(let i=0;i<140;i++){const ax=H9(seed,i,20),ay=H9(seed,i,21);x.fillStyle=`rgba(6,6,5,${.18+H9(seed,i,22)*.3})`;x.beginPath();x.ellipse(ax*w,ay*h,2+H9(seed,i,23)*w*.04,3+H9(seed,i,24)*h*.1,0,0,6.283);x.fill()} // soot and old rain streaks
+    for(let i=0;i<30;i++){const ax=H9(seed,i,25)*w;x.fillStyle='rgba(8,8,6,.22)';x.fillRect(ax,0,1+H9(seed,i,26)*3,h)} // long dark streaks down the stone
+    for(let i=0;i<340;i++){const a=H9(seed,i,2),b=H9(seed,i,3),low=Math.pow(b,.7),r=2+H9(seed,i,4)*w*.05;x.fillStyle=`rgba(${24+((H9(seed,i,5)*26)|0)},${52+((H9(seed,i,6)*44)|0)},${20+((H9(seed,i,7)*18)|0)},${.35+H9(seed,i,8)*.4})`;x.beginPath();x.ellipse(a*w,(1-low*.85)*h,r,r*.6,H9(seed,i,9)*3,0,6.283);x.fill()}
     x.restore();
-    for(let v=0;v<vines;v++){let px=(.1+H9(seed,v,10)*.8)*w,py=h*(.05+H9(seed,v,11)*.25);x.strokeStyle='rgba(38,82,28,.92)';x.lineWidth=2+H9(seed,v,12)*2.5;x.beginPath();x.moveTo(px,py);const len=h*(.3+H9(seed,v,13)*.5);for(let t=1;t<=14;t++){px+=Math.sin(t*.9+v*3)*w*.035;py+=len/14;x.lineTo(px,py)}x.stroke();
+    for(let v=0;v<vines;v++){let px=(.1+H9(seed,v,10)*.8)*w,py=h*(.05+H9(seed,v,11)*.25);x.strokeStyle='rgba(22,46,18,.92)';x.lineWidth=2+H9(seed,v,12)*2.5;x.beginPath();x.moveTo(px,py);const len=h*(.3+H9(seed,v,13)*.5);for(let t=1;t<=14;t++){px+=Math.sin(t*.9+v*3)*w*.035;py+=len/14;x.lineTo(px,py)}x.stroke();
       x.save();x.globalCompositeOperation='source-atop';x.restore();
-      for(let t=0;t<9;t++){const lx=px+(H9(seed,v*20+t,14)-.5)*w*.12-(H9(seed,v,15)-.5)*w*.2,ly=py-len*t/9*(H9(seed,t,16)*.6+.4);x.fillStyle=`rgba(${55+((H9(seed,t,17)*30)|0)},${120+((H9(seed,t,18)*60)|0)},${40},.9)`;x.beginPath();x.ellipse(lx,ly,w*.028,w*.017,H9(seed,t,19)*3,0,6.283);x.fill()}}
+      for(let t=0;t<9;t++){const lx=px+(H9(seed,v*20+t,14)-.5)*w*.12-(H9(seed,v,15)-.5)*w*.2,ly=py-len*t/9*(H9(seed,t,16)*.6+.4);x.fillStyle=`rgba(${34+((H9(seed,t,17)*22)|0)},${72+((H9(seed,t,18)*40)|0)},${26},.9)`;x.beginPath();x.ellipse(lx,ly,w*.028,w*.017,H9(seed,t,19)*3,0,6.283);x.fill()}}
     return c};
   const S=IMG.statue,P0=IMG.ds_dpillar0,P1=IMG.ds_dpillar1,B=IMG.ds_druinstairs;
+  const dim=c=>{const x=c.getContext('2d');x.save();x.globalCompositeOperation='source-atop';x.fillStyle='rgba(10,10,8,.18)';x.fillRect(0,0,c.width,c.height);x.restore();return c};
   IMG.rs_statue0=green(cut(S,0,0,S.width,S.height,0),1,3);
   {const c=cut(S,0,0,S.width,S.height,0);snap(c,.28,2);IMG.rs_statue1=green(c,2,2)}
   IMG.rs_col0=green(cut(P0,0,0,P0.width,P0.height,1),3,3);
