@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.385';
+const VERSION='3.386';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -16582,7 +16582,8 @@ const LP_PILG=[
  ['lp_pg3','A pilgrim sister','kh_ohfolk5_2',["The road is made of small kindnesses. A shrine, a lamp, a bench. Somebody thought of every one.","I like the evenings best, when the sea goes gold and the lamps are lit.","Walk gently. There is nobody to impress."]],
  ['lp_pg4','A traveller','kh_ohfolk6_3',["I am not a pilgrim. I just like the walk. Nobody asks me anything here.","There is a monastery halfway where they sing at dusk. I always plan to be there at dusk and I am always late.","The knights nod to me as they ride by. I nod back. That is the whole of our friendship."]],
  ['lp_pg5','A grey friar','kh_ohfolk2_1',["Salt on the wind, flowers underfoot, oaks overhead. I could not draw a better road.","I carry nothing but a loaf and a blessing. Both are for whoever needs them.","Take the shrine food only if you are truly hungry, and then leave something back."]],
- ['lp_pg6','A pilgrim with a staff','kh_ohfolk3_3',["I am eighty and this is my third time over the mountain. I will do it again, if I am spared.","The cliff at the end is not a danger. It is a promise that the road finishes.","Sit for a moment. The road will wait. It always does."]]
+ ['lp_pg6','A pilgrim with a staff','kh_ohfolk3_3',["I am eighty and this is my third time over the mountain. I will do it again, if I am spared.","The cliff at the end is not a danger. It is a promise that the road finishes.","Sit for a moment. The road will wait. It always does."]],
+ ['lp_pg7','A wondering walker','kh_ohfolk4_2',["I think the crosses indicate something... not sure what.","The old ones, green with moss, by the roadside. Someone put them there on purpose. I just cannot say why."]]
 ];
 LP_PILG.forEach(([id,n,face,lines])=>khNpc(id,n,face,()=>yrLines(id,lines)));
 const LP_REST_NPC=[
@@ -16846,7 +16847,7 @@ function lpBuild(s){
     for(const j of [0,1]){const kd={k:khFaceKey(kp.face),x:MX(xc[y0]+2),y:y0,block:false,walk:true,npc:'lp_knight',sc:kp.sc||1,lw:walkers.length,lr:'k'},hd={k:IMG.oh_horse?'oh_horse':'ltree0',x:MX(xc[y0]+3),y:y0,block:false,walk:true,deco:true,sc:1,lw:walkers.length,lr:'h'};
       decor.push(kd,hd);walkers.push({kd,hd,y0,y1,t:j*45,dir:j?1:-1,off:j?2:-2})}}
   // pilgrims and travellers on the way, walking slowly up and down their stretch
-  for(let q=0;q<2;q++){const pg=LP_PILG[(hs(s,q,sd+95)*LP_PILG.length)|0],y0=safeLo+10+((hs(s,q+7,sd+96)*(safeHi-safeLo-170))|0),y1=Math.min(safeHi-5,y0+90+((hs(q,s,sd+97)*60)|0));
+  for(let q=0;q<2;q++){const pg=(q===0&&s%3===1)?LP_PILG[6]:LP_PILG[(hs(s,q,sd+95)*(LP_PILG.length-1))|0],y0=safeLo+10+((hs(s,q+7,sd+96)*(safeHi-safeLo-170))|0),y1=Math.min(safeHi-5,y0+90+((hs(q,s,sd+97)*60)|0));
     if(wet(y0))continue;const kp2=KH_KEEPERS[pg[0]];if(!kp2)continue;const off=q?-2:2,wi=walkers.length,kd2={k:khFaceKey(kp2.face),x:MX(xc[y0]+off),y:y0,block:false,walk:true,npc:pg[0],sc:kp2.sc||1,lw:wi,lr:'k'};
     decor.push(kd2);walkers.push({y0,y1,t:hs(q,s,sd+98)*(y1-y0),dir:q?1:-1,off,sp:.4+hs(q,s,sd+99)*.2})}
   const enter=(x,y,to,tx,ty,f)=>{for(let dx=-4;dx<=4;dx++)decor.push({k:'lp_gap',x:x+dx,y,block:true,enter:{to,x:tx,y:ty,f}})};
