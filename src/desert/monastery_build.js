@@ -97,7 +97,26 @@ function monDungeons(){
   const mau=monCrypt({n:3,W:21,H:15,rooms:3,foes:3,kinds:['ghost'],diff:30,name:LEVEL_NAMES[MON.MAUS],names:NM[2],up:{to:MON.CEM,x:41,y:12,f:2}});
   cel.portals[1].x=cry.start.x;cel.portals[1].y=cry.start.y;cel.portals[1].f=0;
   if(cel._down){cry.portals[0].x=cel._down.x;cry.portals[0].y=cel._down.y;cry.portals[0].f=2}
+  for(const L of [cel,cry,mau])monUnblock(L);
   LEVELS[MON.CELLAR]=cel;LEVELS[MON.CRYPT]=cry;LEVELS[MON.MAUS]=mau;
+}
+/* a coffin or barrel must never stand in a doorway or corridor: any blocking piece that cuts the level in two is moved to a nearby square where it cuts nothing */
+function monUnblock(L){
+  const rows=L.rows,H=rows.length,W=rows[0].length,st=L.start;if(!st)return;
+  const walk=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&rows[y][x]!=='#'&&rows[y][x]!=='%';
+  const reach=bl=>{const seen=new Set([st.x+','+st.y]),q=[[st.x,st.y]];for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy,k=nx+','+ny;if(seen.has(k)||!walk(nx,ny)||bl.has(k))continue;seen.add(k);q.push([nx,ny])}}return seen.size};
+  const blockers=(L.decor||[]).filter(d=>d.block);
+  for(const d of blockers){
+    const others=new Set(blockers.filter(o=>o!==d).map(o=>o.x+','+o.y)),base=reach(others),open=n=>n.has(d.x+','+d.y);
+    const withIt=new Set(others);withIt.add(d.x+','+d.y);
+    if(reach(withIt)>=base-1)continue; // it blocks nothing (it only covers its own square)
+    let done=false;
+    for(let r=1;r<=6&&!done;r++)for(let dy=-r;dy<=r&&!done;dy++)for(let dx=-r;dx<=r&&!done;dx++){
+      if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const nx=d.x+dx,ny=d.y+dy;
+      if(!walk(nx,ny)||rows[ny][nx]!=='.'||(nx===st.x&&ny===st.y))continue;
+      if((L.decor||[]).some(o=>o.x===nx&&o.y===ny)||(L.enemies||[]).some(e=>e.x===nx&&e.y===ny)||(L.items||[]).some(i=>i.x===nx&&i.y===ny))continue;
+      const t=new Set(others);t.add(nx+','+ny);if(reach(t)>=base-1){d.x=nx;d.y=ny;done=true}}
+  }
 }
 function monBuild(){
   if(LEVELS[MON.ID])return;

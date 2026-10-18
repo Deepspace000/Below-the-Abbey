@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.328';
+const VERSION='3.330';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -6876,18 +6876,21 @@ function patrolStep(e,def){ // a creature that walks the land, and charges when 
 /* ---------- achievements: the dungeons you have been into ---------- */
 function achList(){
   const seen=(G.flags&&G.flags.lvSeen)||{},out=[];let total=0,got=0;
-  const add=(head,arr)=>{if(!arr.length)return;out.push({h:head});for(const [n,name] of arr){const s=!!seen[n];total++;if(s)got++;out.push({n:name,s})}};
+  let totalB=0,gotB=0;
+  const add=(head,arr,bld)=>{if(!arr.length)return;out.push({h:head});for(const [n,name] of arr){const s=!!seen[n];if(bld){totalB++;if(s)gotB++}else{total++;if(s)got++}out.push({n:name,s})}};
   for(const [dl,dname] of DNG_DESERTS)add(dname,Object.keys(DNG_INFO).filter(n=>DNG_INFO[n].desert===dname).map(n=>[+n,DNG_INFO[n].name]));
   const bur=[];for(let k=0;k<BURROW_N;k++)bur.push([BURROW_BASE+k,LEVEL_NAMES[BURROW_BASE+k]]);add('Mounds of the Sand Road',bur);
   const oth=[];for(const k of Object.keys(LEVELS)){const n=+k,L=LEVELS[n];if(!L||L.outdoor||!LEVEL_NAMES[n]||(DNG_INFO[n])||(n>=BURROW_BASE&&n<BURROW_BASE+BURROW_N))continue;oth.push([n,LEVEL_NAMES[n]])}
-  add('Other dungeons',oth);
-  return {out,total,got};
+  const isB=(n,name)=>{const L=LEVELS[n];if(L&&L.khRoom)return true;return /(store|house|goat|forge|anvil|gilded hen|crust|goods|chapel|church|town hall|temple of|castle$|inn|tavern|shop|hut|bakery|smithy|cottage|refectory|scriptorium|kitchen|infirmary|guest|school|library|market|barracks|palace|mansion)/i.test(name)&&!/dungeon|crypt|tomb|vault|cellar|cave|den|mine|hollow|pyramid|catacomb/i.test(name)};
+  add('Other dungeons',oth.filter(o=>!isB(o[0],o[1])));
+  add('Buildings',oth.filter(o=>isB(o[0],o[1])),true);
+  return {out,total,got,totalB,gotB};
 }
 function drawAch(){
   BTNS=[];veil(.7);bigPanel(24,8,432,304);
   const A=achList(),per=30,pages=Math.max(1,Math.ceil(A.out.length/per));G.achPage=clamp(G.achPage||0,0,pages-1);
   txt('ACHIEVEMENTS',240,24,13,'#d8c88e','center',true);
-  txt(`Dungeons visited: ${A.got} of ${A.total}`,240,40,9.5,'#e8d890','center',true);
+  txt(`Dungeons visited: ${A.got} of ${A.total}      Buildings visited: ${A.gotB} of ${A.totalB}`,240,40,9.5,'#e8d890','center',true);
   if(G.flags&&G.flags.shrines&&Object.keys(G.flags.shrines).length)txt(`Old shrines visited: ${Object.keys(G.flags.shrines).length} of 16`+(G.flags.shrinesDone?'   Keeper of the Old Shrines':''),240,59,8.5,'#e8d890','center',true);
   if(typeof ppCount==='function'&&ppCount()>0)txt(`Pilgrim’s Path stones lit: ${ppCount()} of 20`+(G.flags.lpAbbot?'   Completed':''),240,50,8.5,'#a8d8ff','center',true);
   const page=A.out.slice(G.achPage*per,G.achPage*per+per);
@@ -17204,7 +17207,26 @@ function monDungeons(){
   const mau=monCrypt({n:3,W:21,H:15,rooms:3,foes:3,kinds:['ghost'],diff:30,name:LEVEL_NAMES[MON.MAUS],names:NM[2],up:{to:MON.CEM,x:41,y:12,f:2}});
   cel.portals[1].x=cry.start.x;cel.portals[1].y=cry.start.y;cel.portals[1].f=0;
   if(cel._down){cry.portals[0].x=cel._down.x;cry.portals[0].y=cel._down.y;cry.portals[0].f=2}
+  for(const L of [cel,cry,mau])monUnblock(L);
   LEVELS[MON.CELLAR]=cel;LEVELS[MON.CRYPT]=cry;LEVELS[MON.MAUS]=mau;
+}
+/* a coffin or barrel must never stand in a doorway or corridor: any blocking piece that cuts the level in two is moved to a nearby square where it cuts nothing */
+function monUnblock(L){
+  const rows=L.rows,H=rows.length,W=rows[0].length,st=L.start;if(!st)return;
+  const walk=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&rows[y][x]!=='#'&&rows[y][x]!=='%';
+  const reach=bl=>{const seen=new Set([st.x+','+st.y]),q=[[st.x,st.y]];for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy,k=nx+','+ny;if(seen.has(k)||!walk(nx,ny)||bl.has(k))continue;seen.add(k);q.push([nx,ny])}}return seen.size};
+  const blockers=(L.decor||[]).filter(d=>d.block);
+  for(const d of blockers){
+    const others=new Set(blockers.filter(o=>o!==d).map(o=>o.x+','+o.y)),base=reach(others),open=n=>n.has(d.x+','+d.y);
+    const withIt=new Set(others);withIt.add(d.x+','+d.y);
+    if(reach(withIt)>=base-1)continue; // it blocks nothing (it only covers its own square)
+    let done=false;
+    for(let r=1;r<=6&&!done;r++)for(let dy=-r;dy<=r&&!done;dy++)for(let dx=-r;dx<=r&&!done;dx++){
+      if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const nx=d.x+dx,ny=d.y+dy;
+      if(!walk(nx,ny)||rows[ny][nx]!=='.'||(nx===st.x&&ny===st.y))continue;
+      if((L.decor||[]).some(o=>o.x===nx&&o.y===ny)||(L.enemies||[]).some(e=>e.x===nx&&e.y===ny)||(L.items||[]).some(i=>i.x===nx&&i.y===ny))continue;
+      const t=new Set(others);t.add(nx+','+ny);if(reach(t)>=base-1){d.x=nx;d.y=ny;done=true}}
+  }
 }
 function monBuild(){
   if(LEVELS[MON.ID])return;
@@ -21430,6 +21452,31 @@ function potPromote(){
   for(let q=0;q<G.potBack.length;q++){const id=G.potBack[q];if(id&&ITEMDEF[id]&&potBagCount(id)>0){G.potBack[q]=null;G.potFav=id;msg(`The ${ITEMDEF[id].n} is now the frequent use potion.`,'#a8e0a0');return}}
 }
 {const _u=ui;ui=function(){try{if(G.state==='play'&&G.bag)potPromote()}catch(e){}return _u.apply(this,arguments)}}
+
+/* ---- src/desert/monmusic.js ---- */
+/* ==========================================================================
+   MONASTERY MUSIC. Inside the buildings of Saint Elen's (church, chapel, refectory, scriptorium, kitchen, guest house, infirmary) a Gregorian chant plays, and serene
+   music plays in the grounds. Each fades in and out as the party goes through a door. The chant is "Chant" by christislord (CC0, opengameart.org); the grounds
+   music is "Another August" by cynicmusic, The Cynic Project (CC0, cynicmusic.com, pixelsphere.org).
+   ========================================================================== */
+const MM={chant:null,calm:null,vc:0,vg:0};
+function mmEl(src){const a=new Audio(src+'?v='+VERSION);a.loop=true;a.volume=0;a.preload='auto';return a}
+function mmTarget(){
+  if(G.state!=='play'||G.mute||!SNDOPT.music)return [0,0];
+  const n=LEVEL;
+  if(n>=MON.ROOM0&&n<=MON.ROOM0+6)return [.6,0];
+  if(n===MON.ID)return [0,.5];
+  return [0,0];
+}
+{const _u=ui;ui=function(dt){try{
+  const [tc,tg]=mmTarget(),d=Math.min(.1,dt||.016)*.45;
+  if(tc>0&&!MM.chant)MM.chant=mmEl('assets/snd/chant.mp3');
+  if(tg>0&&!MM.calm)MM.calm=mmEl('assets/snd/august.mp3');
+  MM.vc+=clamp(tc-MM.vc,-d,d);MM.vg+=clamp(tg-MM.vg,-d,d);
+  for(const [el,v] of [[MM.chant,MM.vc],[MM.calm,MM.vg]]){if(!el)continue;
+    if(v>.005){el.volume=clamp(v*(SNDOPT.music||1),0,1);if(el.paused){const p=el.play();if(p&&p.catch)p.catch(()=>{})}}
+    else if(!el.paused){el.pause()}}
+}catch(e){}return _u.apply(this,arguments)}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
