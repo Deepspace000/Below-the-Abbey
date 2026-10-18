@@ -165,3 +165,19 @@ function wdPrep(n){
 }
 {const _ll=loadLevel;loadLevel=function(n){try{if(wdIsLP(n)&&!LEVELS[n]&&KH_LAZY[n])KH_LAZY[n]();wdPrep(n)}catch(x){console.error(x)}return _ll.apply(this,arguments)}}
 {const _g=goToLevel;goToLevel=function(n,e){try{if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]()}catch(x){console.error(x)}return _g.apply(this,arguments)}}
+/* ---------- the word in town: a woodsman in Thornwick and a scout in Ironhill talk about the hidden places ---------- */
+const WD_TALK=[
+ "Walk the woods slowly, and keep an eye on the dead trees. Where a few of them stand twisted across nothing at all, there is usually a reason. Burn them down with a torch or a lantern and you may find a door.",
+ "Behind some of those thickets there are caves. Wolves, bears, sometimes a poor soul who has been driven out of a village and has nowhere else to go. A few of them have a little treasure, and a few have a quest, if you are kind.",
+ "And the old ruins, grown over with vines. Most are empty, and dark as the inside of a boot. Some have a chest. Some have been taken by slimes, so do not go in with an empty health bar. But the herbs! The herbs in those halls are the best I have ever seen.",
+ "Once you have seen a spot, a little question mark turns up on your map. It means a place is there, and could be anything. It goes away once you have been inside."];
+function wdTalkNode(i){return say(WD_TALK[i],[i<WD_TALK.length-1?['Go on.',()=>wdTalkNode(i+1)]:['Thank you. We will look.',()=>null],BYE])}
+NPCS.tw_woodsman={name:'A woodsman',img:'peasantM',root:()=>wdTalkNode(0)};NPCS_BY['A woodsman']=NPCS.tw_woodsman;
+NPCS.ih_scout={name:'A scout of the Ironhill watch',img:'huntress',root:()=>wdTalkNode(0)};NPCS_BY['A scout of the Ironhill watch']=NPCS.ih_scout;
+for(const [lv,npc,img] of [[3,'tw_woodsman','peasantM'],[13,'ih_scout','huntress']]){
+  const L=LEVELS[lv];if(!L||!L.rows||L._wdNpc)continue;L._wdNpc=1;
+  const taken=new Set((L.decor||[]).filter(d=>d.block||d.npc||d.enter).map(d=>d.x+','+d.y)),st=L.start||{x:2,y:2};
+  const near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const c=(L.rows[y+dy]||'')[x+dx];if(c&&c!=='.')return true}return false};
+  let best=null,bd=1e9;for(let y=1;y<L.rows.length-1;y++)for(let x=1;x<L.rows[0].length-1;x++){if(L.rows[y][x]!=='.'||taken.has(x+','+y)||near(x,y))continue;const d=Math.abs(x-(st.x+6))+Math.abs(y-st.y);if(d<bd&&d>=3){bd=d;best=[x,y]}}
+  if(best)L.decor.push({k:img,x:best[0],y:best[1],block:true,npc});
+}
