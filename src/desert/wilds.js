@@ -40,12 +40,14 @@ function wdSpot(L,n,seed){
   for(const d of L.decor){if(wdTreeKey(d))trees.set(d.x+','+d.y,1);else if(!d.pfCut&&(d.npc||d.loot||d.shop||d.enter||d.k==='lever'))other.push(d)} // anything else (rocks, stumps, flowers, bushes) is cleared away
   const near=(x,y,r)=>{for(const o of other)if(Math.abs(o.x-x)<=r&&Math.abs(o.y-y)<=r)return true;for(const e of (L.enemies||[]))if(Math.abs(e.x-x)<=r&&Math.abs(e.y-y)<=r)return true;for(const i of (L.items||[]))if(Math.abs(i.x-x)<=r&&Math.abs(i.y-y)<=r)return true;return false};
   const x0=lp?80:4,x1=lp?W-14:W-5,y0=lp?150:4,y1=lp?H-150:H-8;
+  const tb=typeof terrFor==='function'?terrFor(n):null,hAt=(x,y)=>tb&&tb.h?tb.h[y*tb.W+x]:0; // on hills the little building must stand on flat ground, or a bright line of sky shows under its wall
   let best=null,bs=-1;
   for(let t=0;t<700;t++){
     const x=x0+((hash2(t,seed,4410)*(x1-x0))|0),y=y0+((hash2(t,seed,4411)*(y1-y0))|0);
     if(!lp&&Math.abs(x-st.x)+Math.abs(y-st.y)<24)continue;
     if(lp&&Math.abs(y-st.y)<50)continue;
     let ok=true;
+    if(tb&&tb.h){let lo=9,hi=-9;for(let dy=-1;dy<=4;dy++)for(let dx=-3;dx<=3;dx++){const v=hAt(x+dx,y+dy);if(v<lo)lo=v;if(v>hi)hi=v}if(hi-lo>.1)continue}
     for(let dy=0;dy<=3&&ok;dy++)for(let dx=-2;dx<=2;dx++){const c=(L.rows[y+dy]||'')[x+dx];if(c!=='.'){ok=false;break}}
     if(!ok||near(x,y+1,3)||(L._wd||[]).some(q=>Math.abs(q.x-x)<8&&Math.abs(q.y-y)<8))continue;
     for(const [dx,dy] of [[-3,1],[3,1],[-2,4],[2,4]]){const c=(L.rows[y+dy]||'')[x+dx];if(c&&c!=='.'&&/[0-9]/.test(c))ok=false}

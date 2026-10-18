@@ -19,8 +19,6 @@ function pfPrep(n){
   const isTree=d=>!d.npc&&/^[lp]tree\d/.test(d.k),trees=new Map(); // blocking trees and the soft, walk-through ones that fill out the woods
   for(const d of L.decor)if(isTree(d)){const k=d.x+','+d.y;if(!trees.has(k))trees.set(k,[]);trees.get(k).push(d)}
   if(trees.size<400)return;
-  {const sk=L.sky=L.sky||[]; // the deep end of the woods rises into painted mountains along the edge of the map (a sprite has to stand inside the map to be drawn)
-   for(let y=8,q=0;y<H;y+=26,q++)sk.push({x:W-3+((hs(s,q,650)*2)|0),y:y+((hs(s,q,651)*10)|0),k:q%2?'pf_range1':'pf_range0',w:44+((hs(s,q,652)*18)|0),z:1,big:1})}
   const blk=new Set(L.decor.filter(d=>d.block&&isTree(d)).map(d=>d.x+','+d.y));
   const walk=(x,y)=>x>=3&&y>=3&&x<W-6&&y<H-3&&L.rows[y][x]==='.';
   const clear=new Set(),trails=[],st=L.start||{x:0,y:0};
@@ -163,7 +161,10 @@ const WDC=[];
 const WD_KIND={ // h: height in the world, spd: squares a second, flee: how close the party can come
   squirrel:{f:['sq0','sq1'],h:.34,spd:2.6,flee:3.4,wt:2},rabbit:{f:['rb0','rb1'],h:.36,spd:2.2,flee:3.6,wt:2,hop:1},
   deer:{f:['doe','stag'],h:1.0,spd:1.5,flee:5,wt:1},bee:{f:['bee0','bee1'],h:.075,spd:1.1,flee:0,wt:2,fly:1}};
-const wdFree=(x,y)=>{const c=Math.floor(x),d=Math.floor(y);const L=LEVELS[LEVEL];return L&&L.rows[d]&&L.rows[d][c]==='.'&&!cellBlocked(c,d)};
+const wdFree=(x,y,kind)=>{const c=Math.floor(x),d=Math.floor(y);const L=LEVELS[LEVEL];if(!(L&&L.rows[d]&&L.rows[d][c]==='.'&&!cellBlocked(c,d)))return false;
+  const fm=G.fmap;if(typeof fm==='string'){const f=fm[d*MW+c];if(kind==='bee')return f!=='4'; // bees may cross the road, but not the water
+    return f==='0'} // animals keep to the grass and the woods: not the road, the shore or the water
+  return true};
 function wdTick(dt){
   const L=LEVELS[LEVEL];
   if(!L||LEVEL<LP.BASE||LEVEL>=LP.BASE+LP.N||G.state!=='play'||G.cut){WDC.length=0;return}
@@ -173,13 +174,13 @@ function wdTick(dt){
   if(G._wdT>.9&&WDC.length<9){G._wdT=0;
     const kinds=Object.keys(WD_KIND),tot=kinds.reduce((a,k)=>a+WD_KIND[k].wt,0);let u=Math.random()*tot,kind=kinds[0];for(const k of kinds){u-=WD_KIND[k].wt;if(u<=0){kind=k;break}}
     for(let t=0;t<24;t++){const a=Math.random()*Math.PI*2,r=6+Math.random()*7,x=px+Math.cos(a)*r,y=py+Math.sin(a)*r;
-      if(wdFree(x,y)){const K=WD_KIND[kind];WDC.push({lvl:LEVEL,kind,x,y,tx:x,ty:y,t:Math.random()*2,ph:Math.random()*6.28,e:{t:'critter',x:Math.floor(x),y:Math.floor(y),hp:1},fi:kind==='deer'?(Math.random()<.5?0:1):0});break}}}
+      if(wdFree(x,y,kind)){const K=WD_KIND[kind];WDC.push({lvl:LEVEL,kind,x,y,tx:x,ty:y,t:Math.random()*2,ph:Math.random()*6.28,e:{t:'critter',x:Math.floor(x),y:Math.floor(y),hp:1},fi:kind==='deer'?(Math.random()<.5?0:1):0});break}}}
   for(const c of WDC){const K=WD_KIND[c.kind];c.t-=dt;c.ph+=dt*(K.fly?30:K.hop?9:7);
     const dp=Math.hypot(c.x-px,c.y-py);let fleeing=false;
     if(K.flee&&dp<K.flee){fleeing=true;const a=Math.atan2(c.y-py,c.x-px)+(Math.random()-.5)*.8;c.tx=c.x+Math.cos(a)*3;c.ty=c.y+Math.sin(a)*3;c.t=.5}
     else if(c.t<=0||Math.hypot(c.tx-c.x,c.ty-c.y)<.2){c.t=(K.fly?.6:1.2)+Math.random()*2.2;const rest=!K.fly&&Math.random()<.45;if(rest){c.tx=c.x;c.ty=c.y}else{const a=Math.random()*Math.PI*2,r=1+Math.random()*(K.fly?3:4);c.tx=c.x+Math.cos(a)*r;c.ty=c.y+Math.sin(a)*r}}
     const dx=c.tx-c.x,dy=c.ty-c.y,dl=Math.hypot(dx,dy);c.moving=dl>.15;
-    if(c.moving){const sp=K.spd*(fleeing?1.7:1)*dt,nx=c.x+dx/dl*sp,ny=c.y+dy/dl*sp;if(wdFree(nx,ny)){c.x=nx;c.y=ny}else c.t=0}
+    if(c.moving){const sp=K.spd*(fleeing?1.7:1)*dt,nx=c.x+dx/dl*sp,ny=c.y+dy/dl*sp;if(wdFree(nx,ny,c.kind)){c.x=nx;c.y=ny}else c.t=0}
     c.e.x=Math.floor(c.x);c.e.y=Math.floor(c.y)}
 }
 {const _sl=spriteList;let last=performance.now();spriteList=function(){const L=_sl.apply(this,arguments);try{const now=performance.now(),dt=Math.min(.1,(now-last)/1000);last=now;wdTick(dt);
@@ -218,7 +219,20 @@ function pfOld(n){
   for(const a of nodes)for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)dig(a[0]+dx,a[1]+dy); // each clearing is a little round of open ground
   L._pfOldCells=dug;
 }
-/* the painted mountains stand just inside the edge of the map, so they would balloon as the party walks up to them: they are scaled with distance, to look the same as they do from far off */
-{const _ks=khSkyList;khSkyList=function(cx,cy){const out=_ks.apply(this,arguments);
-  try{const a=IMG.pf_range0,b=IMG.pf_range1;for(const e of out){if(e.img!==a&&e.img!==b)continue;const d=Math.hypot(e.x-cx,e.y-cy),f=Math.max(.2,Math.min(1,d/34));e.w*=f;e.bob*=f}}catch(x){}
-  return out}}
+/* ---------- the mountains at the east end of the woods: two painted ranges laid on the sky, behind the land, fixed to the compass so they never drift or swell ---------- */
+let PF_MT=null;
+function pfMtData(){
+  if(PF_MT)return PF_MT;const out=[];
+  for(const k of ['pf_range0','pf_range1']){const im=IMG[k];if(!im||!im.width)return null;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);out.push({w:im.width,h:im.height,d:x.getImageData(0,0,im.width,im.height).data})}
+  return PF_MT=out}
+function pfMountains(D,dX,dY,pX,pY,hzr,lbm){
+  if(!(typeof LP!=='undefined'&&LEVEL>=LP.BASE&&LEVEL<LP.BASE+LP.N))return;
+  const M=pfMtData();if(!M)return;
+  const Hm=Math.round(VH*.34),y0=HH-Hm,br=Math.min(1,.8*(lbm||1)+.08),hz=hzr||[200,214,228];
+  for(let x=0;x<VW;x++){
+    const cm=2*x/VW-1,a=Math.atan2(dY+pY*cm,dX+pX*cm);let ang=((a%TAU)+TAU)%TAU;if(ang>Math.PI)ang-=TAU; // 0 is due east, the deep end of the woods
+    if(ang<-1.45||ang>1.45)continue;
+    const im=ang<0?M[0]:M[1],u=Math.min(im.w-1,Math.max(0,((ang<0?ang+1.45:ang)/1.45*(im.w-1))|0));
+    for(let yy=0;yy<Hm;yy++){const y=y0+yy;if(y<0||y>=VH)continue;const r=Math.min(im.h-1,(yy/Hm*im.h)|0),i=(r*im.w+u)*4,al=im.d[i+3]/255;if(al<.02)continue;
+      const o=(y*VW+x)*4,f=.85*al; // a little haze over the far range
+      D[o]=D[o]*(1-f)+(im.d[i]*br*.8+hz[0]*.2)*f;D[o+1]=D[o+1]*(1-f)+(im.d[i+1]*br*.8+hz[1]*.2)*f;D[o+2]=D[o+2]*(1-f)+(im.d[i+2]*br*.8+hz[2]*.2)*f}}}
