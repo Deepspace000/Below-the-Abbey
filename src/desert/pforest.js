@@ -19,8 +19,8 @@ function pfPrep(n){
   const isTree=d=>!d.npc&&/^[lp]tree\d/.test(d.k),trees=new Map(); // blocking trees and the soft, walk-through ones that fill out the woods
   for(const d of L.decor)if(isTree(d)){const k=d.x+','+d.y;if(!trees.has(k))trees.set(k,[]);trees.get(k).push(d)}
   if(trees.size<400)return;
-  {L.chars=L.chars||{};const cc=String.fromCharCode(0x2c1);L.chars[cc]=pfRockGid(6.8); // the deep end of the woods ends in a tall rock wall, not sky
-   for(let y=0;y<H;y++)for(let x=W-3;x<W;x++)pfSet(L,x,y,cc)}
+  {const sk=L.sky=L.sky||[]; // the deep end of the woods rises into painted mountains along the edge of the map (a sprite has to stand inside the map to be drawn)
+   for(let y=8,q=0;y<H;y+=26,q++)sk.push({x:W-3+((hs(s,q,650)*2)|0),y:y+((hs(s,q,651)*10)|0),k:q%2?'pf_range1':'pf_range0',w:44+((hs(s,q,652)*18)|0),z:1,big:1})}
   const blk=new Set(L.decor.filter(d=>d.block&&isTree(d)).map(d=>d.x+','+d.y));
   const walk=(x,y)=>x>=3&&y>=3&&x<W-6&&y<H-3&&L.rows[y][x]==='.';
   const clear=new Set(),trails=[],st=L.start||{x:0,y:0};
@@ -56,10 +56,11 @@ function pfPrep(n){
         if(mx&&walk(x,y+Math.sign(dy||1))){mx=0;my=Math.sign(dy||1)}else if(my&&walk(x+Math.sign(dx||1),y)){my=0;mx=Math.sign(dx||1)}else break}
       x+=mx;y+=my}
     return true};
+  const deepNodes=[];
   const nodes=trails.filter(t=>!t.side).flatMap(t=>[t.cells[t.cells.length-1],t.cells[(t.cells.length*.5)|0]]);
   for(let y=150,k=0;y<H-150;y+=16,k++)for(let q=0;q<2;q++){ // clearings deep in the trees
     const x=(W*.72+hs(s,k*3+q,630)*(W*.22))|0,yy=y+((hs(s,k*3+q,631)*10)|0);
-    if(walk(x,yy)&&walk(x+1,yy+1)&&(blk.has(x+','+yy)||trees.has(x+','+yy)||[[2,0],[-2,0],[0,2],[0,-2]].some(([a,b])=>blk.has((x+a)+','+(yy+b))))){nodes.push([x,yy]);cellsAll.add(x+','+yy);cut(x,yy);cut(x+1,yy+1);cut(x-1,yy);cut(x,yy-1)}}
+    if(walk(x,yy)&&walk(x+1,yy+1)&&(blk.has(x+','+yy)||trees.has(x+','+yy)||[[2,0],[-2,0],[0,2],[0,-2]].some(([a,b])=>blk.has((x+a)+','+(yy+b))))){nodes.push([x,yy]);deepNodes.push([x,yy]);cellsAll.add(x+','+yy);cut(x,yy);cut(x+1,yy+1);cut(x-1,yy);cut(x,yy-1)}}
   const trailNodes=trails.filter(t=>!t.side).map(t=>t.cells[t.cells.length-1]),dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
   const done=new Set();
   nodes.forEach((a,i)=>{
@@ -67,6 +68,11 @@ function pfPrep(n){
     const tn=trailNodes.filter(b=>b!==a).map(b=>[b,dist(a,b)]).sort((p,q)=>p[1]-q[1])[0];
     const targets=near.map(([j])=>nodes[j]);if(tn&&tn[1]<60)targets.push(tn[0]);
     for(const b of targets){const key=Math.min(i,nodes.indexOf(b))+'-'+Math.max(i,nodes.indexOf(b));if(done.has(key))continue;done.add(key);weave(a[0],a[1],b[0],b[1],s*7000+i*13+nodes.indexOf(b))}});
+  // a few trees stand in each clearing: some solid ones round the edge (never on a path), and soft ones you can walk through
+  for(const [cx,cy] of deepNodes){const OAKS=['ltree0','ltree4','ltree8','ltree12','ltree19'];let placed=0;
+    for(let t=0;t<30&&placed<5;t++){const a=hs(s*91+cx,cy,640+t)*6.283,r=2+hs(cx,cy,660+t)*1.6,x=Math.round(cx+Math.cos(a)*r),y=Math.round(cy+Math.sin(a)*r);
+      if(!walk(x,y)||cellsAll.has(x+','+y)||cellsAll.has(x+','+(y-1)))continue;
+      const soft=placed>=3;L.decor.push({k:soft?(hs(x,y,670)<.5?'pt_birch':'pt_willow'):OAKS[(hs(x,y,671)*5)|0],x,y,block:!soft,walk:soft||undefined,sc:soft?.8+hs(x,y,672)*.3:.85+hs(x,y,673)*.4});placed++}}
   L._pfTools={cells:cellsAll,weave,walk,cut};
   // wolves: now and then one waits deep on a trail
   L.enemies=L.enemies||[];
@@ -87,7 +93,7 @@ function pfPrep(n){
   for(const d of clear){d.block=false;d.sc=.0001;d.pfCut=1} // the trees on a trail are made invisible, not removed, so saved decor keeps its places in the list
   L.enemies=L.enemies.filter(e=>e.t!=='wolf'||(L.rows[e.y]&&L.rows[e.y][e.x]==='.'));
 }
-loadImg('pf_rock','assets/pf_rock.jpg');
+loadImg('pf_rock','assets/pf_rock.jpg');loadImg('pf_range0','assets/pf_range0.png');loadImg('pf_range1','assets/pf_range1.png');
 function pfRockGid(wh,inside){ // a rough, dark, painted cave rock wall of the given height
   const k=inside?'pfrockin':'pfrock';
   if(!OH_STY[k])OH_STY[k]=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:'pf_rock',zoom:1,contrast:1.25,tint:inside?[190,186,182,0]:[250,246,240,0]});
