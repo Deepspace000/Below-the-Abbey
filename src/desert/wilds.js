@@ -70,10 +70,13 @@ function wdThicket(L,n,x,y,id){ // dead twisted trees grow across the way: the g
   const k=['gtree0','gtree3','gtree6','gtree4'];
   L.decor.push({k:k[(hash2(x,y,760)*4)|0],x,y,block:true,sc:1.05,ox:-.18,oy:0},{k:k[(hash2(x,y,761)*4)|0],x,y,block:true,sc:.95,ox:.2,oy:.06});
   (L._wdMarks=L._wdMarks||[]).push({x,y,id})}
-/* ---------- a ? on the map for every place not yet visited ---------- */
+/* ---------- a ? on the map for every place not yet visited, as soon as the party looks towards it ---------- */
+const wdRevealed=()=>{const F=G.flags;return F.wdSeen||(F.wdSeen={})};
+{const _u=ui;ui=function(dt){try{if(G.state==='play'&&!G.cut){const L=LEVELS[LEVEL];if(L&&L._wdMarks){const R=wdRevealed(),f=DIRS[G.P.f]||[0,-1];
+  for(const m of L._wdMarks){if(R[LEVEL+':'+m.id])continue;const dx=m.x-G.P.x,dy=m.y-G.P.y,dd=Math.hypot(dx,dy);if(dd>15||dd<.5)continue;if((dx*f[0]+dy*f[1])/dd>=.62)R[LEVEL+':'+m.id]=1}}}}catch(e){}return _u.apply(this,arguments)}}
 {const _dq=drawQuestMarks;drawQuestMarks=function(ox,oy,cs,big,rad){_dq.apply(this,arguments);
   try{const L=LEVELS[LEVEL];if(!L||!L._wdMarks)return;const seen=(G.flags&&G.flags.lvSeen)||{};
-    for(const m of L._wdMarks){if(seen[m.id]||!G.seen[m.y]||!G.seen[m.y][m.x])continue;if(rad&&(Math.abs(m.x-G.C.x)>rad||Math.abs(m.y-G.C.y)>rad))continue;
+    const R=wdRevealed();for(const m of L._wdMarks){if(seen[m.id]||!R[LEVEL+':'+m.id])continue;if(rad&&(Math.abs(m.x-G.C.x)>rad||Math.abs(m.y-G.C.y)>rad))continue;
       const cx=ox+(m.x+.5)*cs,cy=oy+(m.y+.5)*cs;ctx.save();ctx.strokeStyle='#c8c0a8';ctx.fillStyle='rgba(40,34,24,.85)';ctx.lineWidth=big?1.4:1;ctx.beginPath();ctx.arc(cx,cy,cs*.8,0,TAU);ctx.fill();ctx.stroke();
       txt('?',cx,cy+.5,big?Math.max(8,cs*.95):Math.max(5,cs*.9),'#e8e0c0','center',true);ctx.restore()}}catch(e){}}}
 /* ---------- the people of the caves ---------- */
