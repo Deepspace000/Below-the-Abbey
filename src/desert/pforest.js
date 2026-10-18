@@ -117,7 +117,7 @@ function pfZone(L){ // the first column of the woods on every row: four squares 
 function pfElig(L,zs){const W=L.rows[0].length,H=L.rows.length,cv=L._carve;return (x,y)=>y>=2&&y<H-3&&zs[y]>=0&&x>=zs[y]&&x<=W-6&&L.rows[y][x]==='.'&&L.fmap[y][x]==='0'&&!(cv&&cv.has(x+','+y))}
 const PF_OAKS=['ltree0','ltree4','ltree8','ltree12','ltree19'],PF_FIRS=['ltree2','ltree6','ltree10','ltree14'],PF_ODDS=['ltree20','ltree21','ltree17','ltree18','ltree16'],
   PF_WILLOWS=['ltree3','ltree7','ltree11','ltree15','pt_willow'],PF_BUSHES=['lbush0','lbush0_1','lbush0_2'],PF_FLO=['lflora0','lflora0_1','lflora0_2'];
-const PF_BLOB=.84,PF_SOLID=.3; // how many little clearings, and how many of the trees deep in the woods are solid
+const PF_BLOB=.84,PF_SOLID=.3,PF_OAKPASS=.5; // PF_OAKPASS: the share of oaks you can walk through // how many little clearings, and how many of the trees deep in the woods are solid
 function pfBarkAll(){ // the firs are painted with a pink trunk: it is made bark brown, once, the first time the thick woods are built
   if(pfBarkAll.done)return;pfBarkAll.done=1;
   for(const k of ['ltree2','ltree6','ltree10','ltree14']){try{
@@ -161,7 +161,8 @@ function pfDense(n){
     const r1=hs(x,gy,9310),r2=hs(x,gy,9311),r3=hs(x,gy,9312),r4=hs(x,gy,9313);let k,sc;
     if(soft){k=r1<.10?pick(PF_BUSHES,r2):r1<.56?pick(PF_WILLOWS,r2):'pt_birch';sc=k==='pt_birch'?.85+r4*.35:k[1]==='b'?.85+r4*.35:.8+r4*.35}
     else{const stand=tsmooth(x/5,gy/5,9320);k=r1<.06?pick(PF_ODDS,r2):stand<.5?pick(PF_OAKS,r2):r3<.75?pick(PF_FIRS,r2):pick(PF_OAKS,r2);sc=(PF_FIRS.indexOf(k)>=0?.85:.75)+r4*.3}
-    d.k=k;d.x=x;d.y=y;d.block=!soft;d.walk=soft?true:undefined;d.sc=sc;d.ox=(r2-.5)*.5;d.oy=(r3-.5)*.5;d.pfD=1;delete d.hidden;delete d.pfCut;return d};
+    const pass=soft||(PF_OAKS.indexOf(k)>=0&&hs(x,gy,9314)<PF_OAKPASS); // some oaks can be walked through too
+    d.k=k;d.x=x;d.y=y;d.block=!pass;d.walk=pass?true:undefined;d.sc=sc;d.ox=(r2-.5)*.5;d.oy=(r3-.5)*.5;d.pfD=1;delete d.hidden;delete d.pfCut;return d};
   const gone=d=>{d.block=false;d.hidden=true;d.pfCut=1;d.walk=undefined};
   const cellD=new Map(),add=[];let nOpen=0,nSolid=0,nSoft=0;
   for(let y=2;y<H-3;y++){const z=zs[y];if(z<0)continue;const gy=gyOf(y);
