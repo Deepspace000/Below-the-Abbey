@@ -23,8 +23,7 @@ const wdRuinId=(n,k)=>WD_RUIN0+n*8+k;
 /* the levels where a door tile can be walked into: every cave and ruin, and every outdoor map that has an entrance to one */
 function wdDoorLevel(n){return n>=7100||WD_OUT.includes(n)}
 const wdIsLP=n=>typeof LP!=='undefined'&&n>=LP.BASE&&n<LP.BASE+LP.N;
-const WD_LPSEG=[0,1,2,3,6,9,12,15,18,21]; // ten wild dungeons on the Pilgrim's Path, spread along it with a few more near the start
-const wdCount=n=>{const r=hash2(n,3,4401);return wdIsLP(n)?(WD_LPSEG.includes(n-LP.BASE)?1:0):1+Math.floor(r*4)};
+const wdCount=n=>{const r=hash2(n,3,4401);return wdIsLP(n)?(n-LP.BASE<9?2:1):1+Math.floor(r*4)};
 /* ---------- styles and tiles ---------- */
 function wdStyle(kind,tint,dark){
   const key='wd_'+kind+'_'+tint.join('_')+(dark?'d':'');

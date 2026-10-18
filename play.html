@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.386';
+const VERSION='3.387';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -21971,8 +21971,7 @@ const wdRuinId=(n,k)=>WD_RUIN0+n*8+k;
 /* the levels where a door tile can be walked into: every cave and ruin, and every outdoor map that has an entrance to one */
 function wdDoorLevel(n){return n>=7100||WD_OUT.includes(n)}
 const wdIsLP=n=>typeof LP!=='undefined'&&n>=LP.BASE&&n<LP.BASE+LP.N;
-const WD_LPSEG=[0,1,2,3,6,9,12,15,18,21]; // ten wild dungeons on the Pilgrim's Path, spread along it with a few more near the start
-const wdCount=n=>{const r=hash2(n,3,4401);return wdIsLP(n)?(WD_LPSEG.includes(n-LP.BASE)?1:0):1+Math.floor(r*4)};
+const wdCount=n=>{const r=hash2(n,3,4401);return wdIsLP(n)?(n-LP.BASE<9?2:1):1+Math.floor(r*4)};
 /* ---------- styles and tiles ---------- */
 function wdStyle(kind,tint,dark){
   const key='wd_'+kind+'_'+tint.join('_')+(dark?'d':'');
