@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.366';
+const VERSION='3.368';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -21625,11 +21625,15 @@ function pfPrep(n){
     const tn=trailNodes.filter(b=>b!==a).map(b=>[b,dist(a,b)]).sort((p,q)=>p[1]-q[1])[0];
     const targets=near.map(([j])=>nodes[j]);if(tn&&tn[1]<60)targets.push(tn[0]);
     for(const b of targets){const key=Math.min(i,nodes.indexOf(b))+'-'+Math.max(i,nodes.indexOf(b));if(done.has(key))continue;done.add(key);weave(a[0],a[1],b[0],b[1],s*7000+i*13+nodes.indexOf(b))}});
-  // a few trees stand in each clearing: some solid ones round the edge (never on a path), and soft ones you can walk through
-  for(const [cx,cy] of deepNodes){const OAKS=['ltree0','ltree4','ltree8','ltree12','ltree19'];let placed=0;
-    for(let t=0;t<30&&placed<5;t++){const a=hs(s*91+cx,cy,640+t)*6.283,r=2+hs(cx,cy,660+t)*1.6,x=Math.round(cx+Math.cos(a)*r),y=Math.round(cy+Math.sin(a)*r);
-      if(!walk(x,y)||cellsAll.has(x+','+y)||cellsAll.has(x+','+(y-1)))continue;
-      const soft=placed>=3;L.decor.push({k:soft?(hs(x,y,670)<.5?'pt_birch':'pt_willow'):OAKS[(hs(x,y,671)*5)|0],x,y,block:!soft,walk:soft||undefined,sc:soft?.8+hs(x,y,672)*.3:.85+hs(x,y,673)*.4});placed++}}
+  // each clearing is a round of open ground about 10 squares across, about a quarter full of trees: solid ones, and soft ones you can walk through (never on a path)
+  for(const [cx,cy] of deepNodes){const OAKS=['ltree0','ltree4','ltree8','ltree12','ltree19'],disc=[],mine=[];
+    for(let dy=-5;dy<=5;dy++)for(let dx=-5;dx<=5;dx++){if(dx*dx+dy*dy>26)continue;const x=cx+dx,y=cy+dy;if(!walk(x,y))continue;cut(x,y);if(!cellsAll.has(x+','+y))disc.push([x,y])}
+    const want=Math.round((disc.length+0)*.25);let placed=0;
+    for(let t=0;t<disc.length*3&&placed<want;t++){const q=disc[(hs(cx*7+t,cy,640+t)*disc.length)|0],x=q[0],y=q[1];
+      if(Math.abs(x-cx)+Math.abs(y-cy)<1||cellsAll.has(x+','+y)||cellsAll.has((x+1)+','+y)&&cellsAll.has((x-1)+','+y))continue; // keep the middle and the paths clear
+      if(mine.some(m=>Math.abs(m[0]-x)<=1&&Math.abs(m[1]-y)<=1))continue; // spaced out: no two trees side by side
+      mine.push([x,y]);
+      const soft=hs(x,y,670)<.4;L.decor.push({k:soft?(hs(x,y,671)<.5?'pt_birch':'pt_willow'):OAKS[(hs(x,y,672)*5)|0],x,y,block:!soft,walk:soft||undefined,pfNew:1,sc:soft?.8+hs(x,y,673)*.3:.85+hs(x,y,674)*.4});placed++}}
   L._pfTools={cells:cellsAll,weave,walk,cut};
   // wolves: now and then one waits deep on a trail
   L.enemies=L.enemies||[];
