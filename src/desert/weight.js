@@ -25,7 +25,7 @@ const RINGS=[ // [id, name, colour, bonuses, price, tier, description]
  ['ringHaul','Ring of the Great Haul','#b89858',{bagb:16,wtb:30},700,3,'A ring on a golden chain-link band. Adds 16 pack slots and lets the party carry 30 kg more.'],
  ['ringChampion','Ring of the Champion','#f0d060',{str:1,dex:1,int:1},650,3,'A gold ring set with three small stones. Adds 1 to Strength, Dexterity and Intelligence.'],
  ['ringMaster','Ring of the Master Hand','#f0e8a0',{profb:2},900,4,'A ring that only a master of a trade is given. Adds 2 ranks to the wearer’s profession.']];
-for(const [id,n,c,b,price,tier,d] of RINGS)ITEMDEF[id]=Object.assign({n,k:'ring',t:'Ring',ic:'ring',c,price,rar:1,d,sw:.2},b);
+for(const [id,n,c,b,price,tier,d] of RINGS)ITEMDEF[id]=Object.assign({n,k:'ring',t:'Ring',ic:'ring',c,price:Math.round(price*1.8/10)*10,rar:1,d,sw:.2},b); // rings are dear
 /* ---------- what everything weighs, in kilograms ---------- */
 const WT_KIND={weapon:2.5,shield:3,head:1.5,chest:6,arms:1.5,legs:2.5,ring:.1,potion:.5,food:.4,spell:.2,quest:.15,light:1};
 function itemWeightDef(d){
@@ -64,3 +64,10 @@ function ringFor(u,rate){const tier=rate>=50?4:rate>=38?3:rate>=22?2:1,pool=RING
 {const BASIC=['ringV','ringM','ringW','ringS'],_lf=lootFor;lootFor=function(d){const r=_lf.apply(this,arguments);
   if(Array.isArray(r))for(const it of r)if(BASIC.includes(it.id)&&hash2(d.x,d.y,801)<.75)it.id=ringFor(hash2(d.x,d.y,802),typeof DIFF==='function'?DIFF():20);
   return r}}
+
+/* ---------- rings for sale: the armourers, the scroll sellers, the traders and the general stores, each with its own kind, and the better ones as the party grows ---------- */
+{const SH={armour:['ringOx','ringBear','ringBulwark','ringTitan','ringOak','ringChampion'],armour2:['ringFox','ringHawk','ringDuel','ringLion','ringWind','ringChampion'],
+  scroll:['ringOwl','ringWell','ringMoon','ringSage','ringCraft','ringMaster'],trader:['ringMule','ringPorter','ringFeather','ringHaul'],general:['ringMule','ringPorter','ringFeather','ringCraft'],sword:['ringLion','ringDuel','ringHawk']};
+  for(const k in SH){const f=KH_STOCK[k];if(!f)continue;const ids=SH[k];
+    KH_STOCK[k]=function(){const base=typeof f==='function'?f.apply(this,arguments):f,L=partyLevel(),tier=L>=45?4:L>=30?3:L>=15?2:1,extra=RINGS.filter(r=>ids.includes(r[0])&&r[5]<=tier).map(r=>[r[0],1]);
+      return (Array.isArray(base)?base:[]).filter(e=>!(ITEMDEF[e[0]]&&ITEMDEF[e[0]].k==='ring'&&/^ring[VMWS]$/.test(e[0]))).concat(extra)}}}
