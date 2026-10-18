@@ -16,7 +16,7 @@ function mmTarget(){
   const [tc,tg]=mmTarget(),d=Math.min(.1,dt||.016)*.45;
   if(tc>0&&!MM.chant)MM.chant=mmEl('assets/snd/chant.mp3');
   if(tg>0&&!MM.calm)MM.calm=mmEl('assets/snd/august.mp3');
-  MM.vc+=clamp(tc-MM.vc,-d,d);MM.vg+=clamp(tg-MM.vg,-d,d);
+  MM.vc+=clamp(tc-MM.vc,-d,Math.min(d,Math.min(.1,dt||.016)*.18)); // the chant fades in over about 3.3 seconds, and out over about 1.3MM.vg+=clamp(tg-MM.vg,-d,d);
   for(const [el,v] of [[MM.chant,MM.vc],[MM.calm,MM.vg]]){if(!el)continue;
     if(v>.005){el.volume=clamp(v*(SNDOPT.music||1),0,1);if(el.paused){const p=el.play();if(p&&p.catch)p.catch(()=>{})}}
     else if(!el.paused){el.pause()}}

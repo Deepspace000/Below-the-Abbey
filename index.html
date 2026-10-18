@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.330';
+const VERSION='3.331';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -21472,7 +21472,7 @@ function mmTarget(){
   const [tc,tg]=mmTarget(),d=Math.min(.1,dt||.016)*.45;
   if(tc>0&&!MM.chant)MM.chant=mmEl('assets/snd/chant.mp3');
   if(tg>0&&!MM.calm)MM.calm=mmEl('assets/snd/august.mp3');
-  MM.vc+=clamp(tc-MM.vc,-d,d);MM.vg+=clamp(tg-MM.vg,-d,d);
+  MM.vc+=clamp(tc-MM.vc,-d,Math.min(d,Math.min(.1,dt||.016)*.18)); // the chant fades in over about 3.3 seconds, and out over about 1.3MM.vg+=clamp(tg-MM.vg,-d,d);
   for(const [el,v] of [[MM.chant,MM.vc],[MM.calm,MM.vg]]){if(!el)continue;
     if(v>.005){el.volume=clamp(v*(SNDOPT.music||1),0,1);if(el.paused){const p=el.play();if(p&&p.catch)p.catch(()=>{})}}
     else if(!el.paused){el.pause()}}
