@@ -377,10 +377,10 @@ function pfMossCross(){
   if(IMG.lpcross||!IMG.cross||!IMG.cross.width)return;
   const im=IMG.cross,w=im.width,h=im.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(im,0,0);
   x.globalCompositeOperation='source-atop';
-  for(let i=0;i<260;i++){const a=hash2(i,1,911),b=hash2(i,2,911),low=Math.pow(b,.6); // moss gathers low down and on the upper arms
-    x.fillStyle=`rgba(${50+((hash2(i,3,911)*40)|0)},${92+((hash2(i,4,911)*50)|0)},${36+((hash2(i,5,911)*24)|0)},${.35+hash2(i,6,911)*.35})`;
+  for(let i=0;i<520;i++){const a=hash2(i,1,911),b=hash2(i,2,911),low=Math.pow(b,.6); // moss gathers low down and on the upper arms
+    x.fillStyle=`rgba(${40+((hash2(i,3,911)*40)|0)},${130+((hash2(i,4,911)*70)|0)},${30+((hash2(i,5,911)*30)|0)},${.55+hash2(i,6,911)*.4})`;
     x.beginPath();x.ellipse(a*w,low*h,3+hash2(i,7,911)*(w*.07),2+hash2(i,8,911)*(h*.03),hash2(i,9,911)*3,0,6.283);x.fill()}
-  IMG.lpcross=c;NPC_H.lpcross=1.5}
+  IMG.lpcross=c;NPC_H.lpcross=2.4}
 function pfCrosses(n){
   const L=LEVELS[n];if(!L||L._pfX||!L.rows||!L.fmap)return;L._pfX=1;pfMossCross();if(!IMG.lpcross)return;
   const s=n-LP.BASE,rows=[];
