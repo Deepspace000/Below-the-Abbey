@@ -85,3 +85,8 @@ journalPage({id:'herbs',title:'Herbal Remedies',
   }
 });
 /* ---------- the Treasure page of the Collection: everything dug up ---------- */
+/* ---------- a way in from the party inventory: the Herbal Remedies page lives in the journal, so the inventory has a button for it ---------- */
+{const _ui=ui;ui=function(dt){const r=_ui.apply(this,arguments);
+  try{if(G.state==='play'&&G.inv.open&&!G.inv.sel&&(G.inv.tab==='inv'||!G.inv.tab)){btnText('invherbs','Herbal Remedies',344,166,100,20)}}catch(e){}
+  return r}}
+{const _h=handleBtn;handleBtn=function(id){if(id==='invherbs'&&G.inv.open&&!G.talk&&!G.cut){G.inv.open=false;G.overview=false;G.map=false;G.menu='jp:herbs';return}return _h.apply(this,arguments)}}
