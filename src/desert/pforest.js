@@ -160,7 +160,7 @@ function pfDense(n){
     const ci=PF_SEGS.indexOf(s),runs=[];
     if(ci>=0&&PF_ENT[ci]&&PF_ENT[ci].n===n)runs.push([PF_ENT[ci].y,PF_ENT[ci].x-1]);
     for(const q of L._wd||[])runs.push([q.y+3,q.x-4]);
-    for(const [y,x1] of runs)for(let x=zs[y];x<=x1;x++)if(elig(x,y))paths.add(x+','+y)}
+    for(const [y,x1] of runs)for(let dy=-1;dy<=1;dy++)for(let x=zs[y+dy]>=0?zs[y+dy]:zs[y];x<=x1;x++)if(elig(x,y+dy))paths.add(x+','+(y+dy))} // three squares wide, so the cross itself never stands in the way
   const flo=L.scenery||(L.scenery=[]);
   const flower=(x,y,gy,seed,sc,set)=>{const a=set||PF_FLO,k=pick(a,hs(x,gy,seed+1));flo.push({k,wx:x+.12+hs(x,gy,seed+2)*.76,wy:y+.12+hs(x,gy,seed+3)*.76,sc,decor:{k,walk:true,x,y}})};
   const dress=(d,x,y,gy,soft)=>{ // what grows on this square
