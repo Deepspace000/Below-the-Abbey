@@ -19,7 +19,7 @@ function pfPrep(n){
   const isTree=d=>!d.npc&&/^[lp]tree\d/.test(d.k),trees=new Map(); // blocking trees and the soft, walk-through ones that fill out the woods
   for(const d of L.decor)if(isTree(d)){const k=d.x+','+d.y;if(!trees.has(k))trees.set(k,[]);trees.get(k).push(d)}
   if(trees.size<400)return;
-  {L.chars=L.chars||{};const cc=String.fromCharCode(0x2c2);L.chars[cc]=pfSlopeGid(3.6); // the east edge is a painted forested mountainside, not a bare wall
+  {L.chars=L.chars||{};const cc=String.fromCharCode(0x2c2);L.chars[cc]=pfSlopeGid(.7); // the east edge is only a low strip of painted forest at the foot of the mountains, so the mountains show above it, with no wall in front
    for(let y=0;y<H;y++)for(let x=W-3;x<W;x++)pfSet(L,x,y,cc)}
   if(L.sky)L.sky=L.sky.filter(e=>!/^lp_peak/.test(e.k)); // the old flat peak pictures stood out from the edge of the map like cards: the painted mountains in the sky replace them
   const blk=new Set(L.decor.filter(d=>d.block&&isTree(d)).map(d=>d.x+','+d.y));
