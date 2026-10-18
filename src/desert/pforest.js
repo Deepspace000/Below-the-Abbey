@@ -53,7 +53,7 @@ function pfPrep(n){
         if(!ok)continue;
         for(let dy=-1;dy<=1;dy++)for(let dx=1;dx<=3;dx++){cut(xe+dx,ye+dy);cut(xe+dx+1,ye+dy)}
         for(let dy=-1;dy<=1;dy++)for(let dx=1;dx<=3;dx++)pfSet(L,xe+dx,ye+dy,rock);
-        pfSet(L,xe+1,ye,pfDoor(L,ci));PF_ENT[ci]={n,x:xe,y:ye};L._cave=ci;break placing}
+        pfSet(L,xe+1,ye,pfDoor(L,ci));PF_ENT[ci]={n,x:xe,y:ye};L._cave=ci;if(typeof wdThicket==='function')wdThicket(L,n,xe,ye,PF_CAVE0+ci);break placing}
     }
   }
   for(const d of clear){d.block=false;d.sc=.0001;d.pfCut=1} // the trees on a trail are made invisible, not removed, so saved decor keeps its places in the list
