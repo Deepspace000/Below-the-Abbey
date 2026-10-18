@@ -255,15 +255,43 @@ journalPage({id:'trade',title:'Skills and Trades',
       else txt('No trade yet',44,y+21,8.5,'#8a7a60','left');
       btnText('tr_'+i,p?'Change':'Take up',392,y+5,46,21);
     });
+    if(TRC!==null){ // asking first: changing a trade costs 100 gold
+      const i=TRC,cur=profOf(i),idx=cur?TRADE_IDS.indexOf(cur.id):-1,nx=TRADES[TRADE_IDS[(idx+1)%TRADE_IDS.length]];
+      btn('tr_block',0,0,DW,DH);
+      ctx.save();ctx.fillStyle='rgba(0,0,0,.62)';ctx.fillRect(0,0,DW,DH);ctx.restore();
+      bigPanel(110,100,260,110);
+      txt('Change trade?',240,120,11,'#d8c88e','center',true);
+      wrapText(`${HERO_DEF[i].name} gives up ${TRADES[cur.id].n}${cur.xp?' (the experience is kept if ever taken up again)':''} and becomes a ${nx.n}. It costs 100 gold. You have ${G.gold}.`,230,8).forEach((l,q)=>txt(l,240,138+q*10,8,'#e2d8bc','center'));
+      btnText('tr_yes','Pay 100 gold',130,178,110,22);btnText('tr_no','Keep it',250,178,100,22);
+    }
   },
   click(id){
-    const m=/^tr_(\d)$/.exec(id);if(!m)return;const i=+m[1],P=profData(),cur=P[i];
-    const idx=cur?TRADE_IDS.indexOf(cur.id):-1,nextId=TRADE_IDS[(idx+1)%TRADE_IDS.length];
-    if(cur&&G.gold<100){msg('Changing trade costs 100 gold.','#d09a80');return}
-    if(cur)G.gold-=100;
-    P[i]={id:nextId,xp:cur&&cur.id===nextId?cur.xp:0};sfx('equip');msg(`${HERO_DEF[i].name} takes up the trade of ${TRADES[nextId].n.toLowerCase()}.`,'#ffe9a0');
+    if(id==='tr_no'||id==='tr_block'){TRC=null;return}
+    if(id==='tr_yes'&&TRC!==null){const i=TRC;TRC=null;trChange(i);return}
+    const m=/^tr_(\d)$/.exec(id);if(!m)return;const i=+m[1],cur=profData()[i];
+    if(cur){if(G.gold<100){msg('Changing trade costs 100 gold.','#d09a80');return}TRC=i;return} // ask before spending the 100 gold
+    trChange(i);
   }
 });
+let TRC=null; // the hero whose trade change is waiting for a yes
+function trChange(i){
+  const P=profData(),cur=P[i],idx=cur?TRADE_IDS.indexOf(cur.id):-1,nextId=TRADE_IDS[(idx+1)%TRADE_IDS.length];
+  if(cur&&G.gold<100){msg('Changing trade costs 100 gold.','#d09a80');return}
+  if(cur)G.gold-=100;
+  P[i]={id:nextId,xp:cur&&cur.id===nextId?cur.xp:0};sfx('equip');msg(`${HERO_DEF[i].name} takes up the trade of ${TRADES[nextId].n.toLowerCase()}.`,'#ffe9a0');
+}
+/* ---------- certain quests teach a trade: a hero who holds that trade gains experience when the quest is handed in ---------- */
+const TRADE_QUESTS={
+  healer:['herbs','kh_herbs','kh_j_herb','wq_thistlewick','mq2','oa4','mq5'],
+  smith:['ore','pick','kh_ore','kh_boots','sg3','mines','overseer'],
+  scout:['goats','pip','wolves','wolves2','kh_cats','kh_dogs','yq_crab','oa2','sc1','pass'],
+  cook:['bread','cheese','honey','kh_j_bread','kh_j_cheese','kh_j_nuts','kh_wedding','kh_dates','kh_q29','kh_q35','sg2','mq4','oa3'],
+  alchemist:['witch','wq_thistlewick','oa4','wq_marrow','mq6'],
+  merchant:['ale','apples','apples2','parcel','kh_parcel','kh_tax','kh_q25','kh_q39','kh_j_dates','kh_j_ale','kh_urn']
+};
+{const _qt=qTurnIn;qTurnIn=function(id){const was=G.quests[id]&&G.quests[id].st,r=_qt.apply(this,arguments);
+  try{if(was!=='done'&&G.quests[id]&&G.quests[id].st==='done')for(const t in TRADE_QUESTS)if(TRADE_QUESTS[t].includes(id)&&G.heroes.some((h,i)=>{const p=profOf(i);return p&&p.id===t&&h.alive})){profXP(t,12);msg(`The work teaches the party something of the ${TRADES[t].n.toLowerCase()}'s trade.`,TRADES[t].col)}}catch(e){}
+  return r}}
 (function(){ // Kal sets up in Ironhill, near the south wall
   const L=LEVELS[13];if(!L||!L.rows||L._kal)return;L._kal=1;
   const taken=new Set((L.decor||[]).filter(d=>d.block||d.npc).map(d=>d.x+','+d.y));let best=null,bd=1e9;
