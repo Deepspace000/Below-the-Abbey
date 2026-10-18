@@ -362,3 +362,23 @@ function pfMountains(D,dX,dY,pX,pY,hzr,lbm){
       for(let y=HH;y<VH;y++){const dy=y-HH,v=(((dy*1.7+6*Math.sin(ang*9))%S.h)+S.h)%S.h|0,i=(v*S.w+u)*4,ramp=Math.min(1,.4+dy/9)*tb,haze=Math.max(.06,.5-dy/48),o=(y*VW+x)*4;
         D[o]=D[o]*(1-ramp)+(S.d[i]*br*.95*(1-haze)+hz[0]*haze)*ramp;D[o+1]=D[o+1]*(1-ramp)+(S.d[i+1]*br*.95*(1-haze)+hz[1]*haze)*ramp;D[o+2]=D[o+2]*(1-ramp)+(S.d[i+2]*br*.95*(1-haze)+hz[2]*haze)*ramp}}
   }}
+/* ---------- the mossy crosses: every cave and wild dungeon on the Pilgrim's Path has a moss-covered stone cross beside the road, on the same row as its entrance, so
+   going straight east from the cross leads to it. Nothing tells the player; an old soldier in Oldhaven knows. ---------- */
+function pfMossCross(){
+  if(IMG.lpcross||!IMG.cross||!IMG.cross.width)return;
+  const im=IMG.cross,w=im.width,h=im.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(im,0,0);
+  x.globalCompositeOperation='source-atop';
+  for(let i=0;i<260;i++){const a=hash2(i,1,911),b=hash2(i,2,911),low=Math.pow(b,.6); // moss gathers low down and on the upper arms
+    x.fillStyle=`rgba(${50+((hash2(i,3,911)*40)|0)},${92+((hash2(i,4,911)*50)|0)},${36+((hash2(i,5,911)*24)|0)},${.35+hash2(i,6,911)*.35})`;
+    x.beginPath();x.ellipse(a*w,low*h,3+hash2(i,7,911)*(w*.07),2+hash2(i,8,911)*(h*.03),hash2(i,9,911)*3,0,6.283);x.fill()}
+  IMG.lpcross=c;NPC_H.lpcross=1.5}
+function pfCrosses(n){
+  const L=LEVELS[n];if(!L||L._pfX||!L.rows||!L.fmap)return;L._pfX=1;pfMossCross();if(!IMG.lpcross)return;
+  const s=n-LP.BASE,rows=[];
+  const ci=PF_SEGS.indexOf(s);if(ci>=0&&PF_ENT[ci]&&PF_ENT[ci].n===n)rows.push(PF_ENT[ci].y);
+  for(const q of L._wd||[])rows.push(q.y+3);
+  for(const y of rows){const a=L.fmap[y]&&L.fmap[y].indexOf('1');if(!(a>=0))continue;
+    for(const x of [a+4,a+3,a+5]){if(L.rows[y][x]!=='.'||L.fmap[y][x]==='1')continue;
+      if(L.decor.some(d=>d.x===x&&d.y===y&&!d.hidden&&!d.pfCut&&!/^(l|p|pt_)/.test(d.k)))continue;
+      for(const d of L.decor)if(d.x===x&&d.y===y&&/^([lp]tree\d|pt_)/.test(d.k)){d.block=false;d.hidden=true;d.pfCut=1}
+      L.decor.push({k:'lpcross',x,y,block:true,deco:true,sc:1});break}}}

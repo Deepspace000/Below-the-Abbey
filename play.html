@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.384';
+const VERSION='3.385';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -15760,7 +15760,7 @@ khNpc('oh_m2','A baker','kh_ohfolk1_1',()=>say('Fresh rolls. Not for sale to any
 khNpc('oh_w1','A fishwife','kh_ohfolk2_0',()=>say('The chancellor has been buying silence in this city for years. Everyone knows. Nobody says. Here, in the lane, anyone can say anything, because it is all very quiet.',[BYE]));
 khNpc('oh_w2','A porter','kh_ohfolk1_0',()=>say('The king is old, and the chancellor is clever. That is all you need to know about Oldhaven.',[BYE]));
 khNpc('oh_k1','A child','kh_ohfolk1_5',()=>say('Is it true that the Dawn Walker has a gull figurehead? My brother says it has a lady. I say it is a gull.',[BYE]));
-khNpc('oh_o1','An old soldier','kh_ohsold1_3',()=>say('Osric was a good king, once. The old kind, who knew the names of his captains. Then he grew tired, and let the clever ones sign for him.',[BYE]));
+khNpc('oh_o1','An old soldier','kh_ohsold1_3',()=>say('Osric was a good king, once. The old kind, who knew the names of his captains. Then he grew tired, and let the clever ones sign for him.',[['Anything else, old soldier?',()=>say('Aye. If you ever take the big walk, the long road to Yarrim, keep an eye out for old stone crosses by the roadside, green with moss. Turn east when you see the crosses, and walk straight on. That is all I will say.',[BYE])],BYE]));
 khNpc('oh_s1','A city scribe','kh_ohfolk2_4',()=>say('I keep the court roll. Today the chancellor ordered the roll closed to the public. I have never heard that order before. I find it interesting.',[BYE]));
 khNpc('oh_pr','A brother of the chapel','kh_ohfolk1_4',()=>say('Oldhaven has a chapel for every kind of sinner. Mine is for the tired ones.',[['Do pilgrims leave from here?',()=>say('From the north gate, yes. The Pilgrim’s Path runs ninety-six kilometres up the coast, over the mountains and down to Yarrim. There is a shrine every few kilometres, and Saint Elen’s Monastery halfway. It is a walk, not a quest. Nobody has ever fought anything on it.',[BYE])],BYE]));
 khShop('oh_shop1','Bram, the smith','smith',"Oldhaven Arms",'Steel, oil and a hot fire. Whatever the court says about you, steel does not ask.','arms');
@@ -21923,6 +21923,26 @@ function pfMountains(D,dX,dY,pX,pY,hzr,lbm){
       for(let y=HH;y<VH;y++){const dy=y-HH,v=(((dy*1.7+6*Math.sin(ang*9))%S.h)+S.h)%S.h|0,i=(v*S.w+u)*4,ramp=Math.min(1,.4+dy/9)*tb,haze=Math.max(.06,.5-dy/48),o=(y*VW+x)*4;
         D[o]=D[o]*(1-ramp)+(S.d[i]*br*.95*(1-haze)+hz[0]*haze)*ramp;D[o+1]=D[o+1]*(1-ramp)+(S.d[i+1]*br*.95*(1-haze)+hz[1]*haze)*ramp;D[o+2]=D[o+2]*(1-ramp)+(S.d[i+2]*br*.95*(1-haze)+hz[2]*haze)*ramp}}
   }}
+/* ---------- the mossy crosses: every cave and wild dungeon on the Pilgrim's Path has a moss-covered stone cross beside the road, on the same row as its entrance, so
+   going straight east from the cross leads to it. Nothing tells the player; an old soldier in Oldhaven knows. ---------- */
+function pfMossCross(){
+  if(IMG.lpcross||!IMG.cross||!IMG.cross.width)return;
+  const im=IMG.cross,w=im.width,h=im.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(im,0,0);
+  x.globalCompositeOperation='source-atop';
+  for(let i=0;i<260;i++){const a=hash2(i,1,911),b=hash2(i,2,911),low=Math.pow(b,.6); // moss gathers low down and on the upper arms
+    x.fillStyle=`rgba(${50+((hash2(i,3,911)*40)|0)},${92+((hash2(i,4,911)*50)|0)},${36+((hash2(i,5,911)*24)|0)},${.35+hash2(i,6,911)*.35})`;
+    x.beginPath();x.ellipse(a*w,low*h,3+hash2(i,7,911)*(w*.07),2+hash2(i,8,911)*(h*.03),hash2(i,9,911)*3,0,6.283);x.fill()}
+  IMG.lpcross=c;NPC_H.lpcross=1.5}
+function pfCrosses(n){
+  const L=LEVELS[n];if(!L||L._pfX||!L.rows||!L.fmap)return;L._pfX=1;pfMossCross();if(!IMG.lpcross)return;
+  const s=n-LP.BASE,rows=[];
+  const ci=PF_SEGS.indexOf(s);if(ci>=0&&PF_ENT[ci]&&PF_ENT[ci].n===n)rows.push(PF_ENT[ci].y);
+  for(const q of L._wd||[])rows.push(q.y+3);
+  for(const y of rows){const a=L.fmap[y]&&L.fmap[y].indexOf('1');if(!(a>=0))continue;
+    for(const x of [a+4,a+3,a+5]){if(L.rows[y][x]!=='.'||L.fmap[y][x]==='1')continue;
+      if(L.decor.some(d=>d.x===x&&d.y===y&&!d.hidden&&!d.pfCut&&!/^(l|p|pt_)/.test(d.k)))continue;
+      for(const d of L.decor)if(d.x===x&&d.y===y&&/^([lp]tree\d|pt_)/.test(d.k)){d.block=false;d.hidden=true;d.pfCut=1}
+      L.decor.push({k:'lpcross',x,y,block:true,deco:true,sc:1});break}}}
 
 /* ---- src/desert/wilds.js ---- */
 /* ==========================================================================
@@ -21950,7 +21970,8 @@ const wdRuinId=(n,k)=>WD_RUIN0+n*8+k;
 /* the levels where a door tile can be walked into: every cave and ruin, and every outdoor map that has an entrance to one */
 function wdDoorLevel(n){return n>=7100||WD_OUT.includes(n)}
 const wdIsLP=n=>typeof LP!=='undefined'&&n>=LP.BASE&&n<LP.BASE+LP.N;
-const wdCount=n=>{const r=hash2(n,3,4401);return wdIsLP(n)?1+(r>.6?1:0):1+Math.floor(r*4)};
+const WD_LPSEG=[0,1,2,3,6,9,12,15,18,21]; // ten wild dungeons on the Pilgrim's Path, spread along it with a few more near the start
+const wdCount=n=>{const r=hash2(n,3,4401);return wdIsLP(n)?(WD_LPSEG.includes(n-LP.BASE)?1:0):1+Math.floor(r*4)};
 /* ---------- styles and tiles ---------- */
 function wdStyle(kind,tint,dark){
   const key='wd_'+kind+'_'+tint.join('_')+(dark?'d':'');
@@ -22119,6 +22140,7 @@ function wdPrep(n){
   if((wdIsLP(n)||WD_OUT.includes(n))&&!lpDense){let c=0;const trees=L.decor.filter(d=>d.block&&/^[lp]tree\d/.test(d.k)&&!d.pfCut);const occupied=new Set(L.decor.map(d=>d.x+','+d.y));
     for(const d of trees){if(c>=180)break;const x=d.x-1,y=d.y;if(hash2(d.x,d.y,750)>.035)continue;if(L.rows[y]&&L.rows[y][x]==='.'&&!occupied.has(x+','+y)&&L.rows[y][x-1]==='.'){occupied.add(x+','+y);L.decor.push({k:hash2(d.x,d.y,751)<.5?'pt_birch':'pt_willow',x,y,block:false,walk:true,sc:.75+hash2(d.x,d.y,752)*.35});c++}}}
   if(lpDense&&typeof pfDense==='function')try{pfDense(n)}catch(e){console.error(e)} // last, once every cave and ruin has its place
+  if(wdIsLP(n)&&typeof pfCrosses==='function')try{pfCrosses(n)}catch(e){console.error(e)}
 }
 {const _ll=loadLevel;loadLevel=function(n){try{if(wdIsLP(n)&&!LEVELS[n]&&KH_LAZY[n])KH_LAZY[n]();wdPrep(n)}catch(x){console.error(x)}return _ll.apply(this,arguments)}}
 {const _g=goToLevel;goToLevel=function(n,e){try{if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]()}catch(x){console.error(x)}return _g.apply(this,arguments)}}

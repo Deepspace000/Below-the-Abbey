@@ -23,7 +23,8 @@ const wdRuinId=(n,k)=>WD_RUIN0+n*8+k;
 /* the levels where a door tile can be walked into: every cave and ruin, and every outdoor map that has an entrance to one */
 function wdDoorLevel(n){return n>=7100||WD_OUT.includes(n)}
 const wdIsLP=n=>typeof LP!=='undefined'&&n>=LP.BASE&&n<LP.BASE+LP.N;
-const wdCount=n=>{const r=hash2(n,3,4401);return wdIsLP(n)?1+(r>.6?1:0):1+Math.floor(r*4)};
+const WD_LPSEG=[0,1,2,3,6,9,12,15,18,21]; // ten wild dungeons on the Pilgrim's Path, spread along it with a few more near the start
+const wdCount=n=>{const r=hash2(n,3,4401);return wdIsLP(n)?(WD_LPSEG.includes(n-LP.BASE)?1:0):1+Math.floor(r*4)};
 /* ---------- styles and tiles ---------- */
 function wdStyle(kind,tint,dark){
   const key='wd_'+kind+'_'+tint.join('_')+(dark?'d':'');
@@ -192,6 +193,7 @@ function wdPrep(n){
   if((wdIsLP(n)||WD_OUT.includes(n))&&!lpDense){let c=0;const trees=L.decor.filter(d=>d.block&&/^[lp]tree\d/.test(d.k)&&!d.pfCut);const occupied=new Set(L.decor.map(d=>d.x+','+d.y));
     for(const d of trees){if(c>=180)break;const x=d.x-1,y=d.y;if(hash2(d.x,d.y,750)>.035)continue;if(L.rows[y]&&L.rows[y][x]==='.'&&!occupied.has(x+','+y)&&L.rows[y][x-1]==='.'){occupied.add(x+','+y);L.decor.push({k:hash2(d.x,d.y,751)<.5?'pt_birch':'pt_willow',x,y,block:false,walk:true,sc:.75+hash2(d.x,d.y,752)*.35});c++}}}
   if(lpDense&&typeof pfDense==='function')try{pfDense(n)}catch(e){console.error(e)} // last, once every cave and ruin has its place
+  if(wdIsLP(n)&&typeof pfCrosses==='function')try{pfCrosses(n)}catch(e){console.error(e)}
 }
 {const _ll=loadLevel;loadLevel=function(n){try{if(wdIsLP(n)&&!LEVELS[n]&&KH_LAZY[n])KH_LAZY[n]();wdPrep(n)}catch(x){console.error(x)}return _ll.apply(this,arguments)}}
 {const _g=goToLevel;goToLevel=function(n,e){try{if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]()}catch(x){console.error(x)}return _g.apply(this,arguments)}}
