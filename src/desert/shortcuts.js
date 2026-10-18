@@ -58,3 +58,10 @@ function drawKeysPage(){
   if(G.menu==='keys'&&!G.cut&&!G.talk){if(id==='menuback'||id==='menuclose'||id==='menu')G.menu='settings';return}
   if(G.menu==='settings'&&id==='keyspage'){G.menu='keys';return}
   return _h.apply(this,arguments)}}
+/* ---- painted worn icons for the bottom tabs of the inventory (replace the drawn backpack, book and powers) ---- */
+for(const n of ['backpack','spell','power'])loadImg('ui_'+n,'assets/icn_ui_'+n+'.png');
+function paintedTab(n,cx,cy,s){const im=IMG['ui_'+n];if(!im||!im.width)return false;const w=40*s;ctx.save();ctx.drawImage(im,cx-w/2,cy-w/2-1,w,w);ctx.restore();return true}
+{const _a=iconBackpack,_b=iconBook,_c=iconPowers;
+ iconBackpack=function(cx,cy,s){if(!paintedTab('backpack',cx,cy,s))_a.apply(this,arguments)};
+ iconBook=function(cx,cy,s){if(!paintedTab('spell',cx,cy,s))_b.apply(this,arguments)};
+ iconPowers=function(cx,cy,s){if(!paintedTab('power',cx,cy,s))_c.apply(this,arguments)}}

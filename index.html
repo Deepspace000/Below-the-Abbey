@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.319';
+const VERSION='3.320';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1405,7 +1405,7 @@ const CLASSES=[
  {name:'Sorcerer',icon:'flame',hp:18,mp:16,mpn:'Mana',hit:.78,str:5,dex:7,int:15,grow:{hp:3,mp:2,a:'int',b:'dex'},caster:1,
   desc:'Born with the gift. More mana and stronger spells than a mage.',sp:{name:'Spell',cost:0,type:'spell',bonus:2,d:'Casts the active spell with +2 damage.'}},
  {name:'Priest',icon:'cross',hp:26,mp:12,mpn:'Mana',hit:.85,str:10,dex:8,int:10,grow:{hp:5,mp:2,a:'int',b:'str'},
-  desc:'A healer of the faithful. Keeps the party alive.',sp:{name:'Heal',cost:4,type:'heal',d:'Heals the most wounded ally for 8-12.'}},
+  desc:'A healer of the faithful. Keeps the party alive.',sp:{name:'Heal',cost:4,type:'heal',d:'Heals the most wounded ally for 8-12, and far more as the priest grows in level.'}},
  {name:'Monk',icon:'fist',hp:28,mp:10,mpn:'Stamina',hit:.9,str:11,dex:12,int:8,grow:{hp:5,mp:1,a:'dex',b:'str'},unarmed:[3,5],
   desc:'A disciplined fighter who needs no weapon.',sp:{name:'Palm Strike',cost:3,type:'melee',m:2,a:0,d:'A focused strike for double damage. Strong even unarmed.'}},
  {name:'Goat',icon:'horns',hp:30,mp:8,mpn:'Stamina',hit:.82,str:12,dex:10,int:5,grow:{hp:6,mp:1,a:'str',b:'dex'},unarmed:[2,5],
@@ -1848,11 +1848,12 @@ function heroSpecial(i){
   let best=-1,bf=2;
   for(const j of livingHeroes()){const fr=G.heroes[j].hp/G.heroes[j].max;if(fr<1&&fr<bf){bf=fr;best=j}}
   if(best<0){msg('Everyone is already healthy.');return false}
-  h.mp-=sp.cost;const amt=Math.round((rnd(8,12)+Math.floor(Math.max(0,h.int-8)/3))*(1+pas(i,'healPct'))),tg=G.heroes[best];tg.hp=Math.min(tg.max,tg.hp+amt);const hc=healCrit(tg,amt);
+  h.mp-=sp.cost;const amt=Math.round((rnd(8,12)+Math.floor(Math.max(0,h.int-8)/3)+priestHealBonus(h))*(1+pas(i,'healPct'))),tg=G.heroes[best];tg.hp=Math.min(tg.max,tg.hp+amt);const hc=healCrit(tg,amt);
   sfx('heal');msg(`${def.name} heals ${HERO_DEF[best].name} for ${amt+hc}.${hc?' A critical heal!':''}`,hc?'#ffe36a':'#9ae0a0');addFloat(portraitX(best)+19,250,'+'+(amt+hc),'#7fe08a',hc?1:0);
   return true;
 }
 const portraitX=i=>6+i*40;
+const priestHealBonus=h=>Math.round(h.lvl*1.2+h.lvl*h.lvl/30); // a priest's heal grows with level: about +35 at 20, +66 at 30, +310 at 80
 /* ==========================================================================
    POWERS: every class gains a power at levels 1, 10, 20, 30, 40, 50, 60, 70 and 80.
    Some are passive (always on), some are active (used from the Special button or the Powers tab).
@@ -19535,7 +19536,7 @@ function mxApplyParty(hi,fx,P){
     G.buffs.push({name:P.name,b:key,amt:fx[2],left:fx[3],hi:self?hi:-1});
   }else if(k==='heal'){
     const who=fx[2]?livingHeroes():(()=>{const l=livingHeroes().filter(j=>G.heroes[j].hp<G.heroes[j].max);if(!l.length)return livingHeroes().slice(0,1);let b=l[0];for(const j of l)if(G.heroes[j].hp/G.heroes[j].max<G.heroes[b].hp/G.heroes[b].max)b=j;return [b]})();
-    for(const j of (P&&P.aim==='self'?[hi]:who)){const g=G.heroes[j],a=Math.round((rnd(fx[1][0],fx[1][1])+Math.floor(Math.max(0,G.heroes[hi].int-8)/3))*(1+pas(hi,'healPct')));g.hp=Math.min(g.max,g.hp+a);if(typeof addFloat==='function')addFloat(portraitX(j)+19,250,'+'+a,'#7fe08a')}
+    for(const j of (P&&P.aim==='self'?[hi]:who)){const g=G.heroes[j],a=Math.round((rnd(fx[1][0],fx[1][1])+Math.floor(Math.max(0,G.heroes[hi].int-8)/3)+(HERO_DEF[hi].cls==='Priest'?priestHealBonus(G.heroes[hi])/2:0))*(1+pas(hi,'healPct')));g.hp=Math.min(g.max,g.hp+a);if(typeof addFloat==='function')addFloat(portraitX(j)+19,250,'+'+a,'#7fe08a')}
     sfx('heal');
   }else if(k==='healpct'){for(const j of livingHeroes()){const g=G.heroes[j];g.hp=Math.min(g.max,g.hp+Math.round(g.max*fx[1]));if(typeof addFloat==='function')addFloat(portraitX(j)+19,250,'+',' #7fe08a'.trim())}sfx('heal')}
   else if(k==='cleanse'){
@@ -21273,6 +21274,13 @@ function drawKeysPage(){
   if(G.menu==='keys'&&!G.cut&&!G.talk){if(id==='menuback'||id==='menuclose'||id==='menu')G.menu='settings';return}
   if(G.menu==='settings'&&id==='keyspage'){G.menu='keys';return}
   return _h.apply(this,arguments)}}
+/* ---- painted worn icons for the bottom tabs of the inventory (replace the drawn backpack, book and powers) ---- */
+for(const n of ['backpack','spell','power'])loadImg('ui_'+n,'assets/icn_ui_'+n+'.png');
+function paintedTab(n,cx,cy,s){const im=IMG['ui_'+n];if(!im||!im.width)return false;const w=40*s;ctx.save();ctx.drawImage(im,cx-w/2,cy-w/2-1,w,w);ctx.restore();return true}
+{const _a=iconBackpack,_b=iconBook,_c=iconPowers;
+ iconBackpack=function(cx,cy,s){if(!paintedTab('backpack',cx,cy,s))_a.apply(this,arguments)};
+ iconBook=function(cx,cy,s){if(!paintedTab('spell',cx,cy,s))_b.apply(this,arguments)};
+ iconPowers=function(cx,cy,s){if(!paintedTab('power',cx,cy,s))_c.apply(this,arguments)}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
