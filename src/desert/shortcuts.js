@@ -9,7 +9,7 @@ const SHORTCUTS=[ // [group, key shown, what it does]
  ['Screens','I','Items (the bag)'],['Screens','C','Character sheet'],['Screens','B','Spell book'],['Screens','K','Powers'],['Screens','J','Quests'],['Screens','L','Journal'],
  ['Screens','F','Afflictions'],['Screens','U','Collection'],['Screens','M / O','Map of this level'],['Screens','T','Teleport stones'],['Screens','Esc','Menu, or close a screen'],
  ['Exploring','G','Dig with a shovel'],['Exploring','N','Catch a butterfly'],['Exploring','F5','Quick save'],['Exploring','? / F1','This page'],
- ['In the bag','E','Equip or use the chosen item'],['In the bag','U','Unequip the chosen item'],['In the bag','S','Sort the bag'],['In the bag','X / Enter','Use hero power (Powers)']];
+ ['In the bag','E','Equip or use the chosen item'],['In the bag','U','Unequip the chosen item'],['In the bag','S','Sort the bag'],['In the bag','X / Enter','Use hero power (Powers)'],['In the bag','Y','Herbal Remedies page']];
 const keyBusy=()=>G.state!=='play'||G.cut||G.talk||G.saves||(typeof TP!=='undefined'&&TP);
 function keyHero(i){const h=G.heroes[i];if(!h)return;if(G.inv.open){G.inv.hero=i;G.inv.sel=null;if(h.alive)G.sel=i}else if(h.alive)G.sel=i}
 function keyTab(t){if(!G.inv.open){if(G.menu||G.map||G.loot||G.overview)return;openInv(G.sel)}G.inv.tab=t;G.inv.sel=null}
@@ -25,6 +25,7 @@ addEventListener('keydown',e=>{
   else if(G.inv.open){
     const I=G.inv;
     if(lk==='c')keyTab('char');else if(lk==='b')keyTab('spell');else if(lk==='k')keyTab('powers');
+    else if(lk==='y'){handleBtn('invherbs')}
     else if(lk==='s'){invBtn('isort')}else if(lk==='u'){if(I.sel&&I.sel.src==='slot')invBtn('iunequip')}
     else if(lk==='e'){if(I.sel){const it=selItem(),d=it?idef(it):null;invBtn(I.sel.src==='slot'?'iunequip':(d&&(d.k==='potion'||d.k==='food'))?'iuse':'iequip')}}
     else if(I.tab==='powers'&&(lk==='x'||k==='Enter')){handleBtn('ipow'+I.hero)}
