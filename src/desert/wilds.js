@@ -247,6 +247,14 @@ for(const [lv,npc,img] of [[3,'tw_woodsman','peasantM'],[13,'ih_scout','huntress
   if(best)L.decor.push({k:img,x:best[0],y:best[1],block:true,npc});
 }
 
+/* the way out of every cave and wild dungeon is always on the map, seen or not */
+{const _dq2=drawQuestMarks;drawQuestMarks=function(ox,oy,cs,big,rad){_dq2.apply(this,arguments);
+  try{if(LEVEL<7100||!G.start&&!START)return;const L=LEVELS[LEVEL];if(!L||!L.start)return;const ex=L.start.x,ey=L.start.y+1;
+    if(G.seen&&G.seen[ey]){for(let dy=-1;dy<=0;dy++)for(let dx=-1;dx<=1;dx++)if(G.seen[ey+dy]&&G.seen[ey+dy][ex+dx]!==undefined)G.seen[ey+dy][ex+dx]=1}
+    if(rad&&(Math.abs(ex-G.C.x)>rad||Math.abs(ey-G.C.y)>rad))return;
+    const cx=ox+(ex+.5)*cs,cy=oy+(ey+.5)*cs,r=Math.max(cs*.95,big?7:4);ctx.save();ctx.fillStyle='rgba(22,40,18,.92)';ctx.strokeStyle='#e8d890';ctx.lineWidth=big?1.8:1.2;ctx.beginPath();ctx.arc(cx,cy,r,0,TAU);ctx.fill();ctx.stroke();
+    ctx.fillStyle='#f4ecb0';ctx.beginPath();ctx.moveTo(cx-r*.38,cy+r*.5);ctx.lineTo(cx-r*.38,cy-r*.1);ctx.arc(cx,cy-r*.1,r*.38,Math.PI,0);ctx.lineTo(cx+r*.38,cy+r*.5);ctx.closePath();ctx.fill(); // a little arch
+    if(big)txt('Exit',cx,cy+r+7,8,'#f4ecb0','center',true);ctx.restore()}catch(e){}}}
 /* the world map opens centred on the party: along the Pilgrim's Path (by how far along it they stand, even from inside a cave or ruin), or on the place a cave or ruin belongs to */
 function wvCentre(){
   try{
