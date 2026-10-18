@@ -15,7 +15,7 @@ for(const [k,n,v] of BFLIES)ITEMDEF['bf_'+k]={n,k:'quest',t:'Butterfly',ic:'herb
 const HERBS=[ // [key, name, price, minimum level of the place]
  ['sage','Sage',5,0],['thyme','Thyme',5,0],['rosemary','Rosemary',5,0],['mint','Mint',5,0],['lavender','Lavender',5,0],['chamomile','Chamomile',5,0],['marigold','Marigold',5,0],['dandelion','Dandelion',5,0],['nettle','Nettle',5,0],['yarrow','Yarrow',5,0],
  ['comfrey','Comfrey',5,0],['foxglove','Foxglove',8,8],['nightshade','Nightshade',8,8],['wolfsbane','Wolfsbane',8,8],['mandrake','Mandrake',12,15],
- ['sunleaf','Sunleaf',12,20],['moonpetal','Moonpetal',12,20],['bloodmoss','Bloodmoss',12,20],['ghostcap','Ghostcap',12,25],['dragonstongue',"Dragon's Tongue",20,30],
+ ['feverfew','Feverfew',5,0],['valerian','Valerian',8,5],['burdock','Burdock',8,8],['elderflower','Elderflower',8,10],['sunleaf','Sunleaf',12,20],['moonpetal','Moonpetal',12,20],['bloodmoss','Bloodmoss',12,20],['ghostcap','Ghostcap',12,25],['dragonstongue',"Dragon's Tongue",20,30],
  ['silverleaf','Silverleaf',20,38],['frostbloom','Frostbloom',20,38],['emberroot','Emberroot',25,45],['dreamthistle','Dreamthistle',25,45]];
 for(const [k,n,p] of HERBS)ITEMDEF['herb_'+k]={n,k:'quest',t:'Herb',ic:'herb',c:'#6a9a58',stack:1,price:p,d:`A picked ${n.toLowerCase()}. It is logged in the Collection, and sells at the usual herb price.`,sw:.3};
 ITEMDEF.butterflycage={n:'Butterfly Cage',k:'quest',t:'Tool',ic:'herb',c:'#a0804a',stack:0,price:20,d:'A little cage of fine wire. With it in the bag, butterflies can be caught: a hand appears when one is near, and the best hand in the party tries.',sw:.3};

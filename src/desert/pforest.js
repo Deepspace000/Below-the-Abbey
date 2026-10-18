@@ -271,12 +271,17 @@ function pfCaveBuild(ci){
   const seg=LEVELS[LP.BASE+PF_SEGS[ci]],diff=55;
   {const bc=pick(1)||[9,10];decor.push({k:'bones',x:bc[0],y:bc[1],block:false})}
   const gold=220+ci*30;
+  wdForage(1000+ci,true,pick,items);
   if(kind==='treasure'){decor.push({k:'chest',x:far[0],y:far[1],block:true,goldAmt:gold});const c=pick(2);if(c)items.push({k:'potion',x:c[0],y:c[1]});const b=pick(3);if(b)decor.push({k:'barrel',x:b[0],y:b[1],block:true})}
   else if(kind==='gems'){const base=Math.min(34,6+Math.round(diff*.35));for(let i=0;i<6;i++){const c=pick(10+i);if(!c)break;const gm=GEM_BY_VALUE[Math.min(39,base+((hs(sd,i,710)*6)|0))];items.push({k:'gem_'+gm[0],x:c[0],y:c[1]})}}
   else if(kind==='wolves'){for(let i=0;i<4;i++){const c=pick(20+i);if(c)enemies.push({t:'wolf',x:c[0],y:c[1]})}const c=pick(30);if(c)items.push({k:'potion',x:c[0],y:c[1]});decor.push({k:'bones',x:far[0],y:far[1],block:false})}
   else if(kind==='outcast'){const oi=PF_KINDS.slice(0,ci).filter(k=>k==='outcast').length%4,kp=KH_KEEPERS['pf_out'+oi];if(kp)decor.push({k:khFaceKey(kp.face),x:far[0],y:far[1],block:false,walk:true,npc:'pf_out'+oi,sc:1});const c=pick(40);if(c)decor.push({k:'barrel',x:c[0],y:c[1],block:true})}
   else if(kind==='fugitive'){const fi=PF_KINDS.slice(0,ci).filter(k=>k==='fugitive').length%3,id='pf_f'+PF_FUG[fi].id,kp=KH_KEEPERS[id];if(kp)decor.push({k:khFaceKey(kp.face),x:far[0],y:far[1],block:false,walk:true,npc:id,sc:1});const c=pick(50);if(c)decor.push({k:'barrel',x:c[0],y:c[1],block:true})}
   if(hs(sd,3,761)<.55)pfFoodChest(g,W,H,8,H-3,decor,items,used,sd); // a little food in a chest, in some of them
+  { // a barrel must never wall off part of the cave: if something could not be reached, the barrels stand aside
+    const bl=new Set(decor.filter(d=>d.block).map(d=>d.x+','+d.y)),seen=new Set(['8,'+(H-3)]),q=[[8,H-3]];
+    for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const k=(x+dx)+','+(y+dy);if(g[y+dy]&&g[y+dy][x+dx]==='.'&&!bl.has(k)&&!seen.has(k)){seen.add(k);q.push([x+dx,y+dy])}}}
+    if(items.some(it=>!seen.has(it.x+','+it.y))||enemies.some(e=>!seen.has(e.x+','+e.y)))for(const d of decor)if(d.k==='barrel')d.block=false}
   if(!PF_ENT[ci]){const sn=LP.BASE+PF_SEGS[ci];try{if(!LEVELS[sn]&&KH_LAZY[sn])KH_LAZY[sn]();pfPrep(sn)}catch(e){console.error(e)}}
   const ent=PF_ENT[ci]||{n:LP.BASE+PF_SEGS[ci],x:80,y:300};
   const rk=pfRockGid(2.6,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(2.6,'cave',[255,255,255]);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:3}};

@@ -136,6 +136,26 @@ khNpc('pf_exile','An exiled noble','pf_exile',()=>qNode('pf5',khQD('You find me 
 monq('pf5','A Pie for the Exile','An exiled noble','A baron in exile lives in a cave beyond the Greyfang Pass. He would love one hot pie.',1,()=>Math.min(1,bagCount('pie')),{gold:500,xp:5000},{take:{pie:1}});QAREA.pf5='The Pilgrim’s Path';
 khNpc('pf_hunted','A hunted man','kh_ohfolk2_3',()=>qNode('pf6',khQD('Do not shout. Please. There are three of them, with dogs, and they are two days behind me. I have a purse and a bad knee. If you could spare a healing potion, I would give you every coin I have, and a warning about the road.','One potion. Bless you.',(g,n)=>`${g} of ${n} potions.`,'A potion! My knee thanks you. Here, take the purse.','One potion, one grateful man.','I will move on at dusk. Tell no one.','Here is a potion.')),{q:'pf6'});
 monq('pf6','A Potion for the Hunted Man','A hunted man','A man hides in a hole by the Ironhill Road. He needs a healing potion for his knee.',1,()=>Math.min(1,bagCount('potion')),{gold:450,xp:4500},{take:{potion:1}});QAREA.pf6='The Pilgrim’s Path';
+/* ---------- what grows wild in the dark: mushrooms, moss, figs, potatoes and the rest, found on the floor of the caves and ruins ---------- */
+const WD_FORAGE=[ // [id, name, colour, health, hunger, price, description]
+ ['cavemushroom','Cave Mushrooms','#d8d0b8',8,45,4,'Pale mushrooms that grow where no light reaches. Earthy and mild, and fine to eat.'],
+ ['chanterelle','Chanterelles','#e0a830',10,50,6,'Golden, frilled mushrooms with a smell like apricots. A forager’s prize.'],
+ ['puffball','Puffball','#eeeadc',9,50,4,'A round white mushroom, as big as a fist. Fried, it tastes like soft cheese.'],
+ ['edmoss','Edible Moss','#88a070',6,35,3,'Grey-green reindeer moss. Chewy and bitter, but people have survived whole winters on it.'],
+ ['figs','Wild Figs','#7a4a6a',10,45,5,'Small, sweet figs from a tree growing out of a wall. One is split, and honey-red inside.'],
+ ['potato','Wild Potatoes','#a08860',12,60,4,'Small, knobbly potatoes dug from the dirt. Eaten raw they are poor, but they fill you up.'],
+ ['wildgarlic','Wild Garlic','#8ab860',6,35,3,'A bunch of broad leaves and white flowers that smell strongly of garlic.'],
+ ['blackberries','Blackberries','#3a2a4a',8,40,3,'Ripe blackberries on a leaf, still warm from the air.'],
+ ['chestnuts','Sweet Chestnuts','#8a5a30',11,55,5,'Glossy sweet chestnuts, one still in its spiky husk. Good eaten as they are.'],
+ ['watercress','Watercress','#5a9a4a',7,30,3,'Peppery cress picked from a cold, clean trickle of water.'],
+ ['rosehips','Rosehips','#c0402a',7,35,3,'Red rosehips on a twig. Tart, and full of the stuff that keeps you well.'],
+ ['truffle','Truffle','#2a2018',16,60,24,'A dark, knobbly truffle with a rich, deep smell. Rare, and worth a good deal.']];
+for(const [id,n,c,heal,feed,price,d] of WD_FORAGE)ITEMDEF[id]={n,k:'food',t:'Snack',ic:'nuts',c,heal,feed,stack:1,price,d:'Snack. Fills '+feed+' hunger and restores '+heal+' health. '+d,sw:.3};
+if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push(...WD_FORAGE.map(f=>f[0])); // their pictures are painted (assets/icn_<id>.png)
+function wdForage(id,cave,pick,items){
+  const nf=3+((hash2(id,7,780)*3)|0);for(let i=0;i<nf;i++){const c=pick(120+i);if(!c)break;items.push({k:WD_FORAGE[(hash2(id,i,781)*WD_FORAGE.length)|0][0],x:c[0],y:c[1]})}
+  if(hash2(id,9,784)<.4&&typeof GEM_BY_VALUE!=='undefined'){const base=Math.min(34,6+Math.round(55*.35)),ng=1+((hash2(id,10,785)*2)|0);for(let i=0;i<ng;i++){const c=pick(160+i);if(!c)break;const gm=GEM_BY_VALUE[Math.min(GEM_BY_VALUE.length-1,base+((hash2(id,i,786)*6)|0))];items.push({k:'gem_'+gm[0],x:c[0],y:c[1]})}} // and now and then a gem
+  if(cave){const nh=2+((hash2(id,8,782)*3)|0);for(let i=0;i<nh;i++){const c=pick(140+i);if(!c)break;const h=HERBS[(hash2(id,i,783)*Math.min(HERBS.length,16))|0];items.push({k:'herb_'+h[0],x:c[0],y:c[1]})}}}
 /* the whole Pilgrim's Path stands at level 55, like Oldhaven */
 for(let n=400;n<424;n++)LEVEL_RATING[n]=55;
 /* ---------- the interiors ---------- */
@@ -179,6 +199,7 @@ function wdBuild(id){
   if(cave){kind=P.cave[1];name=P.cave[2]}
   else{const r=hash2(id,9,731);kind=r<.72?'empty':r<.9?'treasure':'slime';name=WD_RUIN_NAMES[(hash2(id,8,732)*WD_RUIN_NAMES.length)|0]}
   const gold=120+Math.round(diff*5);
+  wdForage(id,cave,pick,items);
   if(cave){
     decor.push(...[1].map(()=>{const b=pick(1)||[sx,sy-1];return {k:'bones',x:b[0],y:b[1],block:false}}));
     if(kind==='treasure'||kind==='bears'||kind==='wolvestreasure'){decor.push({k:'chest',x:far[0],y:far[1],block:true,goldAmt:gold+80});const c=pick(2);if(c)items.push({k:'potion',x:c[0],y:c[1]})}
@@ -199,7 +220,7 @@ function wdBuild(id){
       else if(r<.5&&pt>.55)decor.push({k:FL[(hash2(a,b,755)*FL.length)|0],x:a,y:b,block:false,walk:true,deco:true,sc:.9+hash2(a,b,756)*.8,ox:(hash2(a,b,757)-.5)*.8,oy:(hash2(a,b,758)-.5)*.8});
       if(hash2(a,b,759)<.2)decor.push({k:'rs_vine'+((hash2(a,b,760)*3)|0),x:a,y:b,block:false,walk:true,deco:true,bob:1.4,sc:.8+hash2(a,b,761)*.5,ox:(hash2(a,b,762)-.5)*.7,oy:(hash2(a,b,763)-.5)*.7}); // vines hanging from the roof
     });
-    const nh=6+((hash2(id,3,741)*5)|0);for(let i=0;i<nh;i++){const c=pick(60+i);if(!c)break;const h=HERBS[(hash2(id,i,742)*HERBS.length)|0];items.push({k:'herb_'+h[0],x:c[0],y:c[1]})}
+    const nh=9+((hash2(id,3,741)*5)|0);for(let i=0;i<nh;i++){const c=pick(60+i);if(!c)break;const h=HERBS[(hash2(id,i,742)*HERBS.length)|0];items.push({k:'herb_'+h[0],x:c[0],y:c[1]})}
     if(kind==='treasure'){decor.push({k:'chest',x:far[0],y:far[1],block:true,goldAmt:gold});const c=pick(80);if(c)items.push({k:'potion',x:c[0],y:c[1]})}
     if(kind==='slime'){for(let i=0;i<4;i++){const c=pick(90+i);if(c)enemies.push({t:'slime',x:c[0],y:c[1]})}}
     try{pfRuinProps(g,W,H,sx,sy,[[far[0],far[1]]],used,decor,items,enemies,id)}catch(e){console.error(e)} // broken statues, columns and brickwork, throughout
