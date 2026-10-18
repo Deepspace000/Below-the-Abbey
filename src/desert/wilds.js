@@ -198,7 +198,7 @@ function wdPrep(n){
 /* ---------- the word in town: a woodsman in Thornwick and a scout in Ironhill talk about the hidden places ---------- */
 const WD_TALK=[
  "Walk the woods slowly, and keep an eye on the dead trees. Where a few of them stand twisted across nothing at all, there is usually a reason. Burn them down with a torch or a lantern and you may find a door.",
- "The woods along the sea are thick, and you will not walk straight through them. Willows, birches and ferns give way as you push into them, and so do about half of the oaks. Firs and the other oaks do not, so you have to look for a way round. Grassy tracks run in from the road every so often, and some of them wind a long way.",
+ "The woods along the sea are thick, and you will not walk straight through them. Willows, birches and ferns give way as you push into them, and so do most of the firs and about half of the oaks. The rest do not, so you have to look for a way round. Grassy tracks run in from the road every so often, and some of them wind a long way.",
  "Behind some of those thickets there are caves. Wolves, bears, sometimes a poor soul who has been driven out of a village and has nowhere else to go. A few of them have a little treasure, and a few have a quest, if you are kind.",
  "And the old ruins, grown over with vines. Most are empty, and dark as the inside of a boot. Some have a chest. Some have been taken by slimes, so do not go in with an empty health bar. But the herbs! The herbs in those halls are the best I have ever seen.",
  "Once you have seen a spot, a little question mark turns up on your map. It means a place is there, and could be anything. It goes away once you have been inside."];

@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.383';
+const VERSION='3.384';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2301,7 +2301,7 @@ function doMove(rel){ // rel: 0 forward, 1 right, 2 back, 3 left
   if(g>0&&typeof secretBump==='function'&&secretBump(nx,ny))return; // a hidden door in the castle opens when the party walks into it
   const bd=g>0?null:G.decor.find(d=>d.block&&d.x===nx&&d.y===ny);
   if(g>0||bd){sfx('bump');G.shake=.12;
-    if(bd&&LEVEL>=400&&LEVEL<424&&/^[lp]tree\d/.test(bd.k)&&(G.flags.pfTreeHint||0)<3&&G.time-(G._treeMsgT||-99)>5){G._treeMsgT=G.time;G.flags.pfTreeHint=(G.flags.pfTreeHint||0)+1;msg('A solid trunk blocks the way. Willows, birches, ferns and about half of the oaks can be walked through, but firs and the other oaks cannot.','#c8d8a0')} // the rule of the thick woods, told the first few times
+    if(bd&&LEVEL>=400&&LEVEL<424&&/^[lp]tree\d/.test(bd.k)&&(G.flags.pfTreeHint||0)<3&&G.time-(G._treeMsgT||-99)>5){G._treeMsgT=G.time;G.flags.pfTreeHint=(G.flags.pfTreeHint||0)+1;msg('A solid trunk blocks the way. Willows, birches, ferns, most firs and about half of the oaks can be walked through, but the rest cannot.','#c8d8a0')} // the rule of the thick woods, told the first few times
     return}
   const e=enemyAt(nx,ny);
   if(e){msg(`The ${ENEMY_DEF[e.t].name} blocks the way!`);sfx('bump');return}
@@ -21678,7 +21678,7 @@ function pfZone(L){ // the first column of the woods on every row: four squares 
 function pfElig(L,zs){const W=L.rows[0].length,H=L.rows.length,cv=L._carve;return (x,y)=>y>=2&&y<H-3&&zs[y]>=0&&x>=zs[y]&&x<=W-6&&L.rows[y][x]==='.'&&L.fmap[y][x]==='0'&&!(cv&&cv.has(x+','+y))}
 const PF_OAKS=['ltree0','ltree4','ltree8','ltree12','ltree19'],PF_FIRS=['ltree2','ltree6','ltree10','ltree14'],PF_ODDS=['ltree20','ltree21','ltree17','ltree18','ltree16'],
   PF_WILLOWS=['ltree3','ltree7','ltree11','ltree15','pt_willow'],PF_BUSHES=['lbush0','lbush0_1','lbush0_2'],PF_FLO=['lflora0','lflora0_1','lflora0_2'];
-const PF_BLOB=.84,PF_SOLID=.3,PF_OAKPASS=.5; // PF_OAKPASS: the share of oaks you can walk through // how many little clearings, and how many of the trees deep in the woods are solid
+const PF_BLOB=.84,PF_SOLID=.3,PF_OAKPASS=.5,PF_FIRPASS=.8; // PF_OAKPASS: the share of oaks you can walk through // how many little clearings, and how many of the trees deep in the woods are solid
 function pfBarkAll(){ // the firs are painted with a pink trunk: it is made bark brown, once, the first time the thick woods are built
   if(pfBarkAll.done)return;pfBarkAll.done=1;
   for(const k of ['ltree2','ltree6','ltree10','ltree14']){try{
@@ -21722,7 +21722,7 @@ function pfDense(n){
     const r1=hs(x,gy,9310),r2=hs(x,gy,9311),r3=hs(x,gy,9312),r4=hs(x,gy,9313);let k,sc;
     if(soft){k=r1<.10?pick(PF_BUSHES,r2):r1<.56?pick(PF_WILLOWS,r2):'pt_birch';sc=k==='pt_birch'?.85+r4*.35:k[1]==='b'?.85+r4*.35:.8+r4*.35}
     else{const stand=tsmooth(x/5,gy/5,9320);k=r1<.06?pick(PF_ODDS,r2):stand<.5?pick(PF_OAKS,r2):r3<.75?pick(PF_FIRS,r2):pick(PF_OAKS,r2);sc=(PF_FIRS.indexOf(k)>=0?.85:.75)+r4*.3}
-    const pass=soft||(PF_OAKS.indexOf(k)>=0&&hs(x,gy,9314)<PF_OAKPASS); // some oaks can be walked through too
+    const pass=soft||(PF_OAKS.indexOf(k)>=0&&hs(x,gy,9314)<PF_OAKPASS)||(PF_FIRS.indexOf(k)>=0&&hs(x,gy,9315)<PF_FIRPASS); // some oaks can be walked through too
     d.k=k;d.x=x;d.y=y;d.block=!pass;d.walk=pass?true:undefined;d.sc=sc;d.ox=(r2-.5)*.5;d.oy=(r3-.5)*.5;d.pfD=1;delete d.hidden;delete d.pfCut;return d};
   const gone=d=>{d.block=false;d.hidden=true;d.pfCut=1;d.walk=undefined};
   const cellD=new Map(),add=[];let nOpen=0,nSolid=0,nSoft=0;
@@ -22125,7 +22125,7 @@ function wdPrep(n){
 /* ---------- the word in town: a woodsman in Thornwick and a scout in Ironhill talk about the hidden places ---------- */
 const WD_TALK=[
  "Walk the woods slowly, and keep an eye on the dead trees. Where a few of them stand twisted across nothing at all, there is usually a reason. Burn them down with a torch or a lantern and you may find a door.",
- "The woods along the sea are thick, and you will not walk straight through them. Willows, birches and ferns give way as you push into them, and so do about half of the oaks. Firs and the other oaks do not, so you have to look for a way round. Grassy tracks run in from the road every so often, and some of them wind a long way.",
+ "The woods along the sea are thick, and you will not walk straight through them. Willows, birches and ferns give way as you push into them, and so do most of the firs and about half of the oaks. The rest do not, so you have to look for a way round. Grassy tracks run in from the road every so often, and some of them wind a long way.",
  "Behind some of those thickets there are caves. Wolves, bears, sometimes a poor soul who has been driven out of a village and has nowhere else to go. A few of them have a little treasure, and a few have a quest, if you are kind.",
  "And the old ruins, grown over with vines. Most are empty, and dark as the inside of a boot. Some have a chest. Some have been taken by slimes, so do not go in with an empty health bar. But the herbs! The herbs in those halls are the best I have ever seen.",
  "Once you have seen a spot, a little question mark turns up on your map. It means a place is there, and could be anything. It goes away once you have been inside."];
