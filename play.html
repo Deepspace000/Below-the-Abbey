@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.353';
+const VERSION='3.355';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -21573,7 +21573,10 @@ function pfPrep(n){
   const W=L.rows[0].length,H=L.rows.length,s=n-LP.BASE,hs=hash2;
   const isTree=d=>!d.npc&&/^[lp]tree\d/.test(d.k),trees=new Map(); // blocking trees and the soft, walk-through ones that fill out the woods
   for(const d of L.decor)if(isTree(d)){const k=d.x+','+d.y;if(!trees.has(k))trees.set(k,[]);trees.get(k).push(d)}
-  if(trees.size<400)return;const blk=new Set(L.decor.filter(d=>d.block&&isTree(d)).map(d=>d.x+','+d.y));
+  if(trees.size<400)return;
+  {L.chars=L.chars||{};const cc=String.fromCharCode(0x2c1);L.chars[cc]=pfRockGid(6.8); // the deep end of the woods ends in a tall rock wall, not sky
+   for(let y=0;y<H;y++)for(let x=W-3;x<W;x++)pfSet(L,x,y,cc)}
+  const blk=new Set(L.decor.filter(d=>d.block&&isTree(d)).map(d=>d.x+','+d.y));
   const walk=(x,y)=>x>=3&&y>=3&&x<W-6&&y<H-3&&L.rows[y][x]==='.';
   const clear=new Set(),trails=[],st=L.start||{x:0,y:0};
   const cut=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const l=trees.get((x+dx)+','+(y+dy));if(l)for(const d of l)clear.add(d)}};
@@ -21585,7 +21588,7 @@ function pfPrep(n){
       if(i%3===2){const r=hs(seed,i,610);if(dx!==0)y+=r<.3?-1:r<.6?1:0;else x+=r<.3?-1:r<.6?1:0}
       x+=dx;y+=dy;
     }};
-  for(let y=150,k=0;y<H-150;k++,y+=22+((hs(s,k,601)*12)|0)){
+  for(let y=150,k=0;y<H-150;k++,y+=15+((hs(s,k,601)*9)|0)){ // a way into the woods about every 100 metres
     if(Math.abs(y-st.y)<8)continue;
     let e=-1;for(let x=56;x<W-8;x++){if(blk.has(x+','+y)){e=x;break}}
     if(e<60||!walk(e-1,y))continue;
@@ -21595,6 +21598,31 @@ function pfPrep(n){
     if(hs(s,k,603)<.5&&cells.length>12){ // a side trail
       const m=cells[(cells.length*.55)|0],sgn=hs(s,k,604)<.5?-1:1,c2=[];carve(m[0],m[1]+(sgn>0?2:-1),0,sgn,6+((hs(s,k,605)*8)|0),s*1000+k+500,c2);if(c2.length)trails.push({y:m[1],cells:c2,side:1})}
   }
+  // a weaving network: clearings through the depth of the woods, joined to each other and to the trails by winding paths, so the whole forest can be wandered
+  const cellsAll=new Set();for(const t of trails)for(const c of t.cells){cellsAll.add(c[0]+','+c[1]);cellsAll.add(c[0]+','+(c[1]+1))}
+  const weave=(ax,ay,bx,by,seed)=>{
+    let x=ax,y=ay;
+    for(let i=0;i<520&&(Math.abs(bx-x)>1||Math.abs(by-y)>1);i++){
+      if(!walk(x,y)){break}
+      cellsAll.add(x+','+y);cut(x,y);if(walk(x,y+1)){cellsAll.add(x+','+(y+1));cut(x,y+1)}
+      const dx=bx-x,dy=by-y,r=hs(seed,i,620);let mx=0,my=0;
+      if(Math.abs(dx)>=Math.abs(dy)){mx=Math.sign(dx);if(r<.3&&dy)my=Math.sign(dy);else if(r<.45)my=r<.375?-1:1}else{my=Math.sign(dy);if(r<.3&&dx)mx=Math.sign(dx);else if(r<.45)mx=r<.375?-1:1}
+      if(!walk(x+mx,y+my)){ // blocked: try going round
+        if(mx&&walk(x,y+Math.sign(dy||1))){mx=0;my=Math.sign(dy||1)}else if(my&&walk(x+Math.sign(dx||1),y)){my=0;mx=Math.sign(dx||1)}else break}
+      x+=mx;y+=my}
+    return true};
+  const nodes=trails.filter(t=>!t.side).flatMap(t=>[t.cells[t.cells.length-1],t.cells[(t.cells.length*.5)|0]]);
+  for(let y=150,k=0;y<H-150;y+=16,k++)for(let q=0;q<2;q++){ // clearings deep in the trees
+    const x=(W*.72+hs(s,k*3+q,630)*(W*.22))|0,yy=y+((hs(s,k*3+q,631)*10)|0);
+    if(walk(x,yy)&&walk(x+1,yy+1)&&(blk.has(x+','+yy)||trees.has(x+','+yy)||[[2,0],[-2,0],[0,2],[0,-2]].some(([a,b])=>blk.has((x+a)+','+(yy+b))))){nodes.push([x,yy]);cellsAll.add(x+','+yy);cut(x,yy);cut(x+1,yy+1);cut(x-1,yy);cut(x,yy-1)}}
+  const trailNodes=trails.filter(t=>!t.side).map(t=>t.cells[t.cells.length-1]),dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+  const done=new Set();
+  nodes.forEach((a,i)=>{
+    const near=nodes.map((b,j)=>[j,dist(a,b)]).filter(([j,d])=>j!==i&&d>3&&d<36).sort((p,q)=>p[1]-q[1]).slice(0,2);
+    const tn=trailNodes.filter(b=>b!==a).map(b=>[b,dist(a,b)]).sort((p,q)=>p[1]-q[1])[0];
+    const targets=near.map(([j])=>nodes[j]);if(tn&&tn[1]<60)targets.push(tn[0]);
+    for(const b of targets){const key=Math.min(i,nodes.indexOf(b))+'-'+Math.max(i,nodes.indexOf(b));if(done.has(key))continue;done.add(key);weave(a[0],a[1],b[0],b[1],s*7000+i*13+nodes.indexOf(b))}});
+  L._pfTools={cells:cellsAll,weave,walk,cut};
   // wolves: now and then one waits deep on a trail
   L.enemies=L.enemies||[];
   trails.forEach((t,i)=>{if(t.side||i%8!==3||t.cells.length<16)return;const c=t.cells[(t.cells.length*.8)|0];if(Math.abs(c[1]-st.y)>30)L.enemies.push({t:'wolf',x:c[0],y:c[1]})});
@@ -21711,6 +21739,34 @@ function wdTick(dt){
     else{key=K.f[Math.floor(c.ph/3.14)%2];bob=.5+Math.sin(c.ph*.13)*.14+Math.sin(c.ph*.07+1)*.1}
     const im=IMG['cr_'+key];if(!im||!im.width)continue;
     L.push({x:c.x,y:c.y,img:im,w:K.h*im.width/im.height,bob,e:c.e,fade:1})}}catch(e){console.error(e)}return L}}
+/* ---------- the older forests (Thornwood, Gandrick's Wood, the Ironhill Road, the Moor, Greendale): their walls of trees are cut through by winding paths ---------- */
+const PF_OLD=[2,7,10,19,32];
+function pfOld(n){
+  const L=LEVELS[n];if(!L||L._pfOld||!L.rows)return;L._pfOld=1;
+  const W=L.rows[0].length,H=L.rows.length,hs=hash2;
+  const ch=(x,y)=>(L.rows[y]||'')[x];
+  const can=(x,y)=>x>=3&&y>=3&&x<W-3&&y<H-3&&(ch(x,y)==='T'||ch(x,y)==='.');
+  const nearDoor=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const c=ch(x+dx,y+dy);if(c&&c!=='.'&&c!=='T'&&/[0-9]/.test(c))return true}return false};
+  const dug=new Set(),open=[];
+  const dig=(x,y)=>{if(!can(x,y)||nearDoor(x,y))return false;if(ch(x,y)==='T')pfSet(L,x,y,'.');dug.add(x+','+y);return true};
+  const weave=(ax,ay,bx,by,seed)=>{let x=ax,y=ay;
+    for(let i=0;i<300&&(Math.abs(bx-x)>0||Math.abs(by-y)>0);i++){
+      if(!dig(x,y))break;
+      const dx=bx-x,dy=by-y,r=hs(seed,i,810);let mx=0,my=0;
+      if(Math.abs(dx)>=Math.abs(dy)){mx=Math.sign(dx);if(r<.3&&dy)my=Math.sign(dy);else if(r<.42)my=r<.36?-1:1}else{my=Math.sign(dy);if(r<.3&&dx)mx=Math.sign(dx);else if(r<.42)mx=r<.36?-1:1}
+      if(!can(x+mx,y+my)){if(mx&&can(x,y+Math.sign(dy||1))){mx=0;my=Math.sign(dy||1)}else if(my&&can(x+Math.sign(dx||1),y)){my=0;mx=Math.sign(dx||1)}else break}
+      x+=mx;y+=my}};
+  // ways in: open squares at the edge of the trees, a little over 100 metres apart
+  const ent=[];for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(ch(x,y)!=='.')continue;
+    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]])if(ch(x+dx,y+dy)==='T'&&ch(x+2*dx,y+2*dy)==='T'&&hs(x,y,801)<.35&&!ent.some(e=>Math.abs(e[0]-x)+Math.abs(e[1]-y)<10)){ent.push([x,y,dx,dy]);break}}
+  // clearings deep in the trees
+  const nodes=[];for(let y=5;y<H-5;y+=7)for(let x=5;x<W-5;x+=7){const nx=x+((hs(x,y,802)*5)|0)-2,ny=y+((hs(x,y,803)*5)|0)-2;let all=true;for(let dy=-1;dy<=1&&all;dy++)for(let dx=-1;dx<=1;dx++)if(ch(nx+dx,ny+dy)!=='T'){all=false;break}if(all)nodes.push([nx,ny])}
+  const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]),all=[...nodes];
+  for(const e of ent){const near=nodes.map(b=>[b,dist(e,b)]).filter(([b,d])=>d<22).sort((p,q)=>p[1]-q[1])[0];if(near)weave(e[0],e[1],near[0][0],near[0][1],e[0]*31+e[1])}
+  nodes.forEach((a,i)=>{const near=nodes.map((b,j)=>[j,dist(a,b)]).filter(([j,d])=>j!==i&&d<16).sort((p,q)=>p[1]-q[1]).slice(0,2);for(const [j] of near)if(j>i||!nodes[j])weave(a[0],a[1],nodes[j][0],nodes[j][1],i*17+j)});
+  for(const a of nodes)for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)dig(a[0]+dx,a[1]+dy); // each clearing is a little round of open ground
+  L._pfOldCells=dug;
+}
 
 /* ---- src/desert/wilds.js ---- */
 /* ==========================================================================
@@ -21885,6 +21941,7 @@ for(const n of [...WD_OUT,...Array.from({length:24},(_,i)=>400+i)])for(let k=0;k
 function wdPrep(n){
   const L=LEVELS[n];if(!L||L._wdDone||!L.rows||!L.decor)return;L._wdDone=1;
   if(typeof pfPrep==='function'&&wdIsLP(n))try{pfPrep(n)}catch(e){}
+  if(typeof PF_OLD!=='undefined'&&PF_OLD.includes(n))try{pfOld(n)}catch(e){console.error(e)}
   const caves=WD_CAVES.map((c,i)=>[c,i]).filter(([c])=>c[0]===n);
   for(const [c,i] of caves)wdPlace(L,n,WD_CAVE0+i,'cave',[255,255,255],WD_CAVE0+i);
   const cnt=(WD_OUT.includes(n)||wdIsLP(n))?wdCount(n):0;

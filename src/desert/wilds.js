@@ -170,6 +170,7 @@ for(const n of [...WD_OUT,...Array.from({length:24},(_,i)=>400+i)])for(let k=0;k
 function wdPrep(n){
   const L=LEVELS[n];if(!L||L._wdDone||!L.rows||!L.decor)return;L._wdDone=1;
   if(typeof pfPrep==='function'&&wdIsLP(n))try{pfPrep(n)}catch(e){}
+  if(typeof PF_OLD!=='undefined'&&PF_OLD.includes(n))try{pfOld(n)}catch(e){console.error(e)}
   const caves=WD_CAVES.map((c,i)=>[c,i]).filter(([c])=>c[0]===n);
   for(const [c,i] of caves)wdPlace(L,n,WD_CAVE0+i,'cave',[255,255,255],WD_CAVE0+i);
   const cnt=(WD_OUT.includes(n)||wdIsLP(n))?wdCount(n):0;
