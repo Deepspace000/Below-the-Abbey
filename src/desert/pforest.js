@@ -222,7 +222,7 @@ function pfRock(L){ // the rough rock face of a cave mouth
   L.chars=L.chars||{};if(L._pfRock)return L._pfRock;
   const gid=pfRockGid(L.ceilH||5.2),c=String.fromCharCode(0x2c0);L.chars[c]=gid;return L._pfRock=c}
 function pfDoor(L,ci){ // the door into the cave: a dark opening in the rock
-  L.chars=L.chars||{};const dgid=KH_NEXT_GID++;T_TILE[dgid]=T_DOORS.cave;KH_DOOR[dgid]={lvl:PF_CAVE0+ci,at:{x:8,y:12,f:0}};
+  L.chars=L.chars||{};const dgid=KH_NEXT_GID++;T_TILE[dgid]=T_DOORS.cave;KH_DOOR[dgid]={lvl:PF_CAVE0+ci,at:{x:8,y:16,f:0}};
   const c=String.fromCharCode(0x2d0+ci);L.chars[c]=dgid;return c}
 {const _ll=loadLevel;loadLevel=function(n){try{if(n>=LP.BASE&&n<LP.BASE+LP.N){if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();pfPrep(n)}}catch(x){console.error(x)}return _ll.apply(this,arguments)}}
 {const _g=goToLevel;goToLevel=function(n,e){try{if(n>=LP.BASE&&n<LP.BASE+LP.N-0){if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();pfPrep(n)}}catch(x){console.error(x)}return _g.apply(this,arguments)}}
@@ -247,13 +247,14 @@ PF_FUG.forEach(f=>{
   monq(f.id,f.title,f.who,`${f.who.split(',')[0]} hides in a cave in the woods of the Pilgrim’s Path. Bring ${f.need} ${f.what}.`,f.need,()=>Math.min(f.need,bagCount(f.item)),f.reward,{take:{[f.item]:f.need}});QAREA[f.id]='The Pilgrim’s Path';
   khNpc('pf_f'+f.id,f.who,f.face,()=>qNode(f.id,khQD(f.offer,f.accept,(g,n)=>`${g} of ${n} ${f.what}.`,`You have the ${f.what}? Oh, thank you.`,f.thanks,f.after,'Here they are.')),{q:f.id});
 });
+function pfFood(sd){const all=['bread','cheese','apple','nuts','dates','herring','sausage','pie'],n=2+((hash2(sd,4,762)*2)|0),o=[];for(let i=0;i<n;i++){const f=all[(hash2(sd,i,763)*all.length)|0];if(!o.includes(f))o.push(f)}return o}
 function pfCaveBuild(ci){
-  const W=17,H=15,kind=PF_KINDS[ci],hs=hash2,sd=ci*17+5,g=[];
+  const W=23,H=19,kind=PF_KINDS[ci],hs=hash2,sd=ci*17+5,g=[];
   for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
   let x=8,y=H-3;const cells=[];
   const carve=(a,b)=>{if(a>=2&&b>=2&&a<=W-3&&b<=H-3&&g[b][a]==='#'){g[b][a]='.';cells.push([a,b])}};
   carve(x,y);
-  for(let i=0;i<190;i++){const r=hs(sd,i,701);if(r<.45)y--;else if(r<.6)y++;else if(r<.8)x--;else x++;x=Math.max(2,Math.min(W-3,x));y=Math.max(2,Math.min(H-3,y));carve(x,y);if(hs(sd,i,702)<.1){carve(x+1,y);carve(x,y+1);carve(x+1,y+1)}}
+  for(let i=0;i<330;i++){const r=hs(sd,i,701);if(r<.45)y--;else if(r<.6)y++;else if(r<.8)x--;else x++;x=Math.max(2,Math.min(W-3,x));y=Math.max(2,Math.min(H-3,y));carve(x,y);if(hs(sd,i,702)<.1){carve(x+1,y);carve(x,y+1);carve(x+1,y+1)}}
   const door=String.fromCharCode(0x2f0);g[H-2][8]=door;g[H-3][8]='.';
   const d=new Int16Array(W*H).fill(-1),q=[8+(H-3)*W];d[q[0]]=0;
   for(let i=0;i<q.length;i++){const c=q[i],cx=c%W,cy=(c/W)|0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=cx+dx,ny=cy+dy;if(nx<0||ny<0||nx>=W||ny>=H||g[ny][nx]!=='.'||d[ny*W+nx]>=0)continue;d[ny*W+nx]=d[c]+1;q.push(ny*W+nx)}}
@@ -268,6 +269,7 @@ function pfCaveBuild(ci){
   else if(kind==='wolves'){for(let i=0;i<4;i++){const c=pick(20+i);if(c)enemies.push({t:'wolf',x:c[0],y:c[1]})}const c=pick(30);if(c)items.push({k:'potion',x:c[0],y:c[1]});decor.push({k:'bones',x:far[0],y:far[1],block:false})}
   else if(kind==='outcast'){const oi=PF_KINDS.slice(0,ci).filter(k=>k==='outcast').length%4,kp=KH_KEEPERS['pf_out'+oi];if(kp)decor.push({k:khFaceKey(kp.face),x:far[0],y:far[1],block:false,walk:true,npc:'pf_out'+oi,sc:1});const c=pick(40);if(c)decor.push({k:'barrel',x:c[0],y:c[1],block:true})}
   else if(kind==='fugitive'){const fi=PF_KINDS.slice(0,ci).filter(k=>k==='fugitive').length%3,id='pf_f'+PF_FUG[fi].id,kp=KH_KEEPERS[id];if(kp)decor.push({k:khFaceKey(kp.face),x:far[0],y:far[1],block:false,walk:true,npc:id,sc:1});const c=pick(50);if(c)decor.push({k:'barrel',x:c[0],y:c[1],block:true})}
+  if(hs(sd,3,761)<.55){const c=pick(70);if(c)decor.push({k:'chest',x:c[0],y:c[1],block:true,food:pfFood(sd)})} // a little food in a chest, in some of them
   if(!PF_ENT[ci]){const sn=LP.BASE+PF_SEGS[ci];try{if(!LEVELS[sn]&&KH_LAZY[sn])KH_LAZY[sn]();pfPrep(sn)}catch(e){console.error(e)}}
   const ent=PF_ENT[ci]||{n:LP.BASE+PF_SEGS[ci],x:80,y:300};
   const rk=pfRockGid(2.6,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(2.6);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:3}};

@@ -71,7 +71,7 @@ function wdPlace(L,n,id,kind,tint,seed){
   L.chars=L.chars||{};
   const wh=L.ceilH||5,T=wdTiles(kind,wdIsLP(n)?Math.min(wh,5.2):Math.min(wh,3.4),tint,false),rc=String.fromCharCode(0x3a0+(id%64)),dc=String.fromCharCode(0x3e0+(id%64));
   L.chars[rc]=T.wall;
-  const dgid=KH_NEXT_GID++;T_TILE[dgid]=T.door.tex;KH_DOOR[dgid]={lvl:id,at:kind==='cave'?{x:8,y:12,f:0}:{x:13,y:18,f:0}};L.chars[dc]=dgid; // where the party stands just inside: the cave's start, or the ruin's
+  const dgid=KH_NEXT_GID++;T_TILE[dgid]=T.door.tex;KH_DOOR[dgid]={lvl:id,at:kind==='cave'?{x:8,y:16,f:0}:{x:16,y:22,f:0}};L.chars[dc]=dgid; // where the party stands just inside: the cave's start, or the ruin's
   if(wdIsLP(n)){ // on the Pilgrim's Path the door faces west, towards the road: walking east from a cross, the party comes straight up to it
     for(let dy=-2;dy<=2;dy++)for(let dx=0;dx<=3;dx++)if((L.rows[y+dy]||'')[x+dx]==='.')wdSetRow(L,x+dx,y+dy,(dy===0&&dx===0)?dc:rc);
     for(const d of L.decor)if(!d.npc&&!d.loot&&!d.shop&&!d.enter&&d.x>=x-1&&d.x<=x+4&&d.y>=y-3&&d.y<=y+3&&!(d.x===x-1&&d.y===y)){d.block=false;d.sc=.0001;d.pfCut=1}
@@ -123,13 +123,13 @@ function wdRun(rows,W,H,sd,cells,pick,kind){return null}
 function wdCaveRows(sd,W,H){
   const g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));let x=8,y=H-3;const cells=[];
   const carve=(a,b)=>{if(a>=2&&b>=2&&a<=W-3&&b<=H-3&&g[b][a]==='#'){g[b][a]='.';cells.push([a,b])}};carve(x,y);
-  for(let i=0;i<190;i++){const r=hash2(sd,i,701);if(r<.45)y--;else if(r<.6)y++;else if(r<.8)x--;else x++;x=Math.max(2,Math.min(W-3,x));y=Math.max(2,Math.min(H-3,y));carve(x,y);if(hash2(sd,i,702)<.1){carve(x+1,y);carve(x,y+1);carve(x+1,y+1)}}
+  for(let i=0;i<330;i++){const r=hash2(sd,i,701);if(r<.45)y--;else if(r<.6)y++;else if(r<.8)x--;else x++;x=Math.max(2,Math.min(W-3,x));y=Math.max(2,Math.min(H-3,y));carve(x,y);if(hash2(sd,i,702)<.1){carve(x+1,y);carve(x,y+1);carve(x+1,y+1)}}
   return {g,cells}}
 function wdRuinRows(sd,W,H){
   const g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));const rooms=[],cells=[];
   const cut=r=>{for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)if(g[y][x]==='#'){g[y][x]='.';cells.push([x,y])}};
   rooms.push({x0:(W>>1)-3,y0:H-6,x1:(W>>1)+3,y1:H-3});
-  for(let t=0;t<600&&rooms.length<5;t++){const w=4+((hash2(sd,t,720)*4)|0),h=3+((hash2(sd,t,721)*3)|0),x0=1+((hash2(sd,t,722)*(W-w-2))|0),y0=1+((hash2(sd,t,723)*(H-h-8))|0);
+  for(let t=0;t<600&&rooms.length<8;t++){const w=4+((hash2(sd,t,720)*4)|0),h=3+((hash2(sd,t,721)*3)|0),x0=1+((hash2(sd,t,722)*(W-w-2))|0),y0=1+((hash2(sd,t,723)*(H-h-8))|0);
     if(rooms.some(r=>x0<=r.x1+2&&x0+w-1>=r.x0-2&&y0<=r.y1+2&&y0+h-1>=r.y0-2))continue;rooms.push({x0,y0,x1:x0+w-1,y1:y0+h-1})}
   rooms.forEach(cut);const mid=r=>[(r.x0+r.x1)>>1,(r.y0+r.y1)>>1];
   for(let i=1;i<rooms.length;i++){let bj=0,bd=1e9;const [ax,ay]=mid(rooms[i]);for(let j=0;j<i;j++){const [bx,by]=mid(rooms[j]),d=Math.abs(ax-bx)+Math.abs(ay-by);if(d<bd){bd=d;bj=j}}
@@ -137,7 +137,7 @@ function wdRuinRows(sd,W,H){
     if(hash2(sd,i,724)<.5){hl(ay,ax,bx);vl(bx,ay,by)}else{vl(ax,ay,by);hl(by,ax,bx)}}
   return {g,cells,rooms}}
 function wdBuild(id){
-  const P=wdParent(id),cave=!!P.cave,W=cave?17:27,H=cave?15:21,sd=id*13+7;
+  const P=wdParent(id),cave=!!P.cave,W=cave?23:33,H=cave?19:25,sd=id*13+7;
   const parentL=LEVELS[P.n]||(KH_LAZY[P.n]&&(KH_LAZY[P.n](),LEVELS[P.n]));
   if(!WD_ENT[id]){try{wdPrep(P.n)}catch(e){console.error(e)}}
   const ent=WD_ENT[id]||{n:P.n,x:(parentL&&parentL.start&&parentL.start.x)||2,y:(parentL&&parentL.start&&parentL.start.y)||2,f:2};
@@ -156,6 +156,7 @@ function wdBuild(id){
   if(cave){kind=P.cave[1];name=P.cave[2]}
   else{const r=hash2(id,9,731);kind=r<.72?'empty':r<.9?'treasure':'slime';name=WD_RUIN_NAMES[(hash2(id,8,732)*WD_RUIN_NAMES.length)|0]}
   const gold=120+Math.round(diff*5);
+  if(hash2(id,6,764)<.5){const c=pick(75);if(c)decor.push({k:'chest',x:c[0],y:c[1],block:true,food:pfFood(id)})} // some hold a little food in a chest
   if(cave){
     decor.push(...[1].map(()=>{const b=pick(1)||[sx,sy-1];return {k:'bones',x:b[0],y:b[1],block:false}}));
     if(kind==='treasure'||kind==='bears'||kind==='wolvestreasure'){decor.push({k:'chest',x:far[0],y:far[1],block:true,goldAmt:gold+80});const c=pick(2);if(c)items.push({k:'potion',x:c[0],y:c[1]})}

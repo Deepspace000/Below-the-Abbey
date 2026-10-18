@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.395';
+const VERSION='3.396';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1520,7 +1520,7 @@ function reset(n){
   G.inv={open:false,tab:'inv',hero:0,sel:null,scroll:0};
   G.enemies=ENEMY_SPAWNS.map((s,i)=>{const st=enemyStat(s.t,s.lvl);return {id:i,t:s.t,lvl:s.lvl||lvlHere(),x:s.x,y:s.y,rx:s.x,ry:s.y,hp:st.hp,maxhp:st.hp,alert:false,chilled:0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100}});
   G.items=ITEM_SPAWNS.map(s=>({k:s.k==='potion'?potionFor(hash2(s.x,s.y,LEVEL+7)):s.k==='hlfood'?hlFoodFor(hash2(s.x,s.y,LEVEL+9)):s.k,x:s.x,y:s.y,taken:false}));
-  G.decor=DECOR_SPAWNS.map(s=>{const o={k:s.k,x:s.x,y:s.y,block:!!s.block,loot:CONTAINERS.includes(s.k),shop:s.k==='cart'};if(s.deco){o.loot=false;o.shop=false}if(s.npc){o.npc=s.npc;o.loot=false;o.shop=false;if(s.goat)o.goat=s.goat}if(s.sc)o.sc=s.sc;if(s.walk)o.walk=true;if(s.wd)o.wd=s.wd;if(s.txt)o.txt=s.txt;if(s.bob)o.bob=s.bob;if(s.ox!==undefined){o.ox=s.ox;o.oy=s.oy}if(s.opens){o.opens=s.opens;o.idx=s.idx}if(s.lockedBy)o.lockedBy=s.lockedBy;if(s.secret)o.secret=true;for(const kk of ['ambush','hidden','trap','frame','goldAmt','enter','magic','cat','scar','hatch','kname','kl','lk','glow','red','lit','deco','wind','lw','lr','pic','fr'])if(s[kk]!==undefined)o[kk]=s[kk];return o});
+  G.decor=DECOR_SPAWNS.map(s=>{const o={k:s.k,x:s.x,y:s.y,block:!!s.block,loot:CONTAINERS.includes(s.k),shop:s.k==='cart'};if(s.deco){o.loot=false;o.shop=false}if(s.npc){o.npc=s.npc;o.loot=false;o.shop=false;if(s.goat)o.goat=s.goat}if(s.sc)o.sc=s.sc;if(s.walk)o.walk=true;if(s.wd)o.wd=s.wd;if(s.txt)o.txt=s.txt;if(s.bob)o.bob=s.bob;if(s.ox!==undefined){o.ox=s.ox;o.oy=s.oy}if(s.opens){o.opens=s.opens;o.idx=s.idx}if(s.lockedBy)o.lockedBy=s.lockedBy;if(s.secret)o.secret=true;for(const kk of ['ambush','hidden','trap','frame','goldAmt','food','enter','magic','cat','scar','hatch','kname','kl','lk','glow','red','lit','deco','wind','lw','lr','pic','fr'])if(s[kk]!==undefined)o[kk]=s[kk];return o});
   applyLevers();clearDoorFronts();
   G.decor.forEach(d=>{if(!d.npc&&(d.k==='grave'||d.k==='grave2'||d.k==='cross')){d.npc='epitaph';d.loot=false}});
   G.decor.forEach(d=>{if(d.npc&&!/^(lockedgate|gate|fence|lever|hatch)/.test(d.k)){d.block=false;d.walk=true}}); // the party walks through every person and creature; tap them or press attack to speak
@@ -3879,7 +3879,7 @@ function lootFor(d){
 }
 function openLoot(d){
   if(d.lockedBy&&!G.flags[d.lockedBy]){sfx('locked');msg(d.lockedBy==='nymphGift'?'Living vines bind the chest shut. The nymph is watching you.':'The chest is sealed by dark magic. Something guards it.',d.lockedBy==='nymphGift'?'#b8e8a0':'#b8d8f0');return}
-  if(!d.contents)d.contents=d.shop?SHOP_STOCK.map(([id,n])=>({id,n})):lootFor(d);
+  if(!d.contents)d.contents=d.shop?SHOP_STOCK.map(([id,n])=>({id,n})):d.food?d.food.map(f=>({id:f,n:1})):lootFor(d); // a food chest holds only food
   G.loot={decor:d,shop:!!d.shop,name:d.shop?(d.shopName||"Peddler's Cart"):DS_LOOTNAME[d.k]||(d.k==='coffin'?'Stone coffin':d.k==='crate'?'Wooden crate':d.k==='chest'?'Old chest':'Barrel'),sel:null,sl:0,sr:0,t:G.time};
   G.hold=null;
   if(!d.shop&&d.gold&&!d.goldTaken){d.goldTaken=true;const gc=typeof goldCut==='function'?goldCut(d.gold):d.gold;G.gold+=gc;msg(`You find ${gc} gold.`,'#ffe9a0');sfx('key')}else sfx('equip');
@@ -21784,7 +21784,7 @@ function pfRock(L){ // the rough rock face of a cave mouth
   L.chars=L.chars||{};if(L._pfRock)return L._pfRock;
   const gid=pfRockGid(L.ceilH||5.2),c=String.fromCharCode(0x2c0);L.chars[c]=gid;return L._pfRock=c}
 function pfDoor(L,ci){ // the door into the cave: a dark opening in the rock
-  L.chars=L.chars||{};const dgid=KH_NEXT_GID++;T_TILE[dgid]=T_DOORS.cave;KH_DOOR[dgid]={lvl:PF_CAVE0+ci,at:{x:8,y:12,f:0}};
+  L.chars=L.chars||{};const dgid=KH_NEXT_GID++;T_TILE[dgid]=T_DOORS.cave;KH_DOOR[dgid]={lvl:PF_CAVE0+ci,at:{x:8,y:16,f:0}};
   const c=String.fromCharCode(0x2d0+ci);L.chars[c]=dgid;return c}
 {const _ll=loadLevel;loadLevel=function(n){try{if(n>=LP.BASE&&n<LP.BASE+LP.N){if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();pfPrep(n)}}catch(x){console.error(x)}return _ll.apply(this,arguments)}}
 {const _g=goToLevel;goToLevel=function(n,e){try{if(n>=LP.BASE&&n<LP.BASE+LP.N-0){if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();pfPrep(n)}}catch(x){console.error(x)}return _g.apply(this,arguments)}}
@@ -21809,13 +21809,14 @@ PF_FUG.forEach(f=>{
   monq(f.id,f.title,f.who,`${f.who.split(',')[0]} hides in a cave in the woods of the Pilgrim’s Path. Bring ${f.need} ${f.what}.`,f.need,()=>Math.min(f.need,bagCount(f.item)),f.reward,{take:{[f.item]:f.need}});QAREA[f.id]='The Pilgrim’s Path';
   khNpc('pf_f'+f.id,f.who,f.face,()=>qNode(f.id,khQD(f.offer,f.accept,(g,n)=>`${g} of ${n} ${f.what}.`,`You have the ${f.what}? Oh, thank you.`,f.thanks,f.after,'Here they are.')),{q:f.id});
 });
+function pfFood(sd){const all=['bread','cheese','apple','nuts','dates','herring','sausage','pie'],n=2+((hash2(sd,4,762)*2)|0),o=[];for(let i=0;i<n;i++){const f=all[(hash2(sd,i,763)*all.length)|0];if(!o.includes(f))o.push(f)}return o}
 function pfCaveBuild(ci){
-  const W=17,H=15,kind=PF_KINDS[ci],hs=hash2,sd=ci*17+5,g=[];
+  const W=23,H=19,kind=PF_KINDS[ci],hs=hash2,sd=ci*17+5,g=[];
   for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
   let x=8,y=H-3;const cells=[];
   const carve=(a,b)=>{if(a>=2&&b>=2&&a<=W-3&&b<=H-3&&g[b][a]==='#'){g[b][a]='.';cells.push([a,b])}};
   carve(x,y);
-  for(let i=0;i<190;i++){const r=hs(sd,i,701);if(r<.45)y--;else if(r<.6)y++;else if(r<.8)x--;else x++;x=Math.max(2,Math.min(W-3,x));y=Math.max(2,Math.min(H-3,y));carve(x,y);if(hs(sd,i,702)<.1){carve(x+1,y);carve(x,y+1);carve(x+1,y+1)}}
+  for(let i=0;i<330;i++){const r=hs(sd,i,701);if(r<.45)y--;else if(r<.6)y++;else if(r<.8)x--;else x++;x=Math.max(2,Math.min(W-3,x));y=Math.max(2,Math.min(H-3,y));carve(x,y);if(hs(sd,i,702)<.1){carve(x+1,y);carve(x,y+1);carve(x+1,y+1)}}
   const door=String.fromCharCode(0x2f0);g[H-2][8]=door;g[H-3][8]='.';
   const d=new Int16Array(W*H).fill(-1),q=[8+(H-3)*W];d[q[0]]=0;
   for(let i=0;i<q.length;i++){const c=q[i],cx=c%W,cy=(c/W)|0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=cx+dx,ny=cy+dy;if(nx<0||ny<0||nx>=W||ny>=H||g[ny][nx]!=='.'||d[ny*W+nx]>=0)continue;d[ny*W+nx]=d[c]+1;q.push(ny*W+nx)}}
@@ -21830,6 +21831,7 @@ function pfCaveBuild(ci){
   else if(kind==='wolves'){for(let i=0;i<4;i++){const c=pick(20+i);if(c)enemies.push({t:'wolf',x:c[0],y:c[1]})}const c=pick(30);if(c)items.push({k:'potion',x:c[0],y:c[1]});decor.push({k:'bones',x:far[0],y:far[1],block:false})}
   else if(kind==='outcast'){const oi=PF_KINDS.slice(0,ci).filter(k=>k==='outcast').length%4,kp=KH_KEEPERS['pf_out'+oi];if(kp)decor.push({k:khFaceKey(kp.face),x:far[0],y:far[1],block:false,walk:true,npc:'pf_out'+oi,sc:1});const c=pick(40);if(c)decor.push({k:'barrel',x:c[0],y:c[1],block:true})}
   else if(kind==='fugitive'){const fi=PF_KINDS.slice(0,ci).filter(k=>k==='fugitive').length%3,id='pf_f'+PF_FUG[fi].id,kp=KH_KEEPERS[id];if(kp)decor.push({k:khFaceKey(kp.face),x:far[0],y:far[1],block:false,walk:true,npc:id,sc:1});const c=pick(50);if(c)decor.push({k:'barrel',x:c[0],y:c[1],block:true})}
+  if(hs(sd,3,761)<.55){const c=pick(70);if(c)decor.push({k:'chest',x:c[0],y:c[1],block:true,food:pfFood(sd)})} // a little food in a chest, in some of them
   if(!PF_ENT[ci]){const sn=LP.BASE+PF_SEGS[ci];try{if(!LEVELS[sn]&&KH_LAZY[sn])KH_LAZY[sn]();pfPrep(sn)}catch(e){console.error(e)}}
   const ent=PF_ENT[ci]||{n:LP.BASE+PF_SEGS[ci],x:80,y:300};
   const rk=pfRockGid(2.6,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(2.6);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:3}};
@@ -22028,7 +22030,7 @@ function wdPlace(L,n,id,kind,tint,seed){
   L.chars=L.chars||{};
   const wh=L.ceilH||5,T=wdTiles(kind,wdIsLP(n)?Math.min(wh,5.2):Math.min(wh,3.4),tint,false),rc=String.fromCharCode(0x3a0+(id%64)),dc=String.fromCharCode(0x3e0+(id%64));
   L.chars[rc]=T.wall;
-  const dgid=KH_NEXT_GID++;T_TILE[dgid]=T.door.tex;KH_DOOR[dgid]={lvl:id,at:kind==='cave'?{x:8,y:12,f:0}:{x:13,y:18,f:0}};L.chars[dc]=dgid; // where the party stands just inside: the cave's start, or the ruin's
+  const dgid=KH_NEXT_GID++;T_TILE[dgid]=T.door.tex;KH_DOOR[dgid]={lvl:id,at:kind==='cave'?{x:8,y:16,f:0}:{x:16,y:22,f:0}};L.chars[dc]=dgid; // where the party stands just inside: the cave's start, or the ruin's
   if(wdIsLP(n)){ // on the Pilgrim's Path the door faces west, towards the road: walking east from a cross, the party comes straight up to it
     for(let dy=-2;dy<=2;dy++)for(let dx=0;dx<=3;dx++)if((L.rows[y+dy]||'')[x+dx]==='.')wdSetRow(L,x+dx,y+dy,(dy===0&&dx===0)?dc:rc);
     for(const d of L.decor)if(!d.npc&&!d.loot&&!d.shop&&!d.enter&&d.x>=x-1&&d.x<=x+4&&d.y>=y-3&&d.y<=y+3&&!(d.x===x-1&&d.y===y)){d.block=false;d.sc=.0001;d.pfCut=1}
@@ -22080,13 +22082,13 @@ function wdRun(rows,W,H,sd,cells,pick,kind){return null}
 function wdCaveRows(sd,W,H){
   const g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));let x=8,y=H-3;const cells=[];
   const carve=(a,b)=>{if(a>=2&&b>=2&&a<=W-3&&b<=H-3&&g[b][a]==='#'){g[b][a]='.';cells.push([a,b])}};carve(x,y);
-  for(let i=0;i<190;i++){const r=hash2(sd,i,701);if(r<.45)y--;else if(r<.6)y++;else if(r<.8)x--;else x++;x=Math.max(2,Math.min(W-3,x));y=Math.max(2,Math.min(H-3,y));carve(x,y);if(hash2(sd,i,702)<.1){carve(x+1,y);carve(x,y+1);carve(x+1,y+1)}}
+  for(let i=0;i<330;i++){const r=hash2(sd,i,701);if(r<.45)y--;else if(r<.6)y++;else if(r<.8)x--;else x++;x=Math.max(2,Math.min(W-3,x));y=Math.max(2,Math.min(H-3,y));carve(x,y);if(hash2(sd,i,702)<.1){carve(x+1,y);carve(x,y+1);carve(x+1,y+1)}}
   return {g,cells}}
 function wdRuinRows(sd,W,H){
   const g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));const rooms=[],cells=[];
   const cut=r=>{for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)if(g[y][x]==='#'){g[y][x]='.';cells.push([x,y])}};
   rooms.push({x0:(W>>1)-3,y0:H-6,x1:(W>>1)+3,y1:H-3});
-  for(let t=0;t<600&&rooms.length<5;t++){const w=4+((hash2(sd,t,720)*4)|0),h=3+((hash2(sd,t,721)*3)|0),x0=1+((hash2(sd,t,722)*(W-w-2))|0),y0=1+((hash2(sd,t,723)*(H-h-8))|0);
+  for(let t=0;t<600&&rooms.length<8;t++){const w=4+((hash2(sd,t,720)*4)|0),h=3+((hash2(sd,t,721)*3)|0),x0=1+((hash2(sd,t,722)*(W-w-2))|0),y0=1+((hash2(sd,t,723)*(H-h-8))|0);
     if(rooms.some(r=>x0<=r.x1+2&&x0+w-1>=r.x0-2&&y0<=r.y1+2&&y0+h-1>=r.y0-2))continue;rooms.push({x0,y0,x1:x0+w-1,y1:y0+h-1})}
   rooms.forEach(cut);const mid=r=>[(r.x0+r.x1)>>1,(r.y0+r.y1)>>1];
   for(let i=1;i<rooms.length;i++){let bj=0,bd=1e9;const [ax,ay]=mid(rooms[i]);for(let j=0;j<i;j++){const [bx,by]=mid(rooms[j]),d=Math.abs(ax-bx)+Math.abs(ay-by);if(d<bd){bd=d;bj=j}}
@@ -22094,7 +22096,7 @@ function wdRuinRows(sd,W,H){
     if(hash2(sd,i,724)<.5){hl(ay,ax,bx);vl(bx,ay,by)}else{vl(ax,ay,by);hl(by,ax,bx)}}
   return {g,cells,rooms}}
 function wdBuild(id){
-  const P=wdParent(id),cave=!!P.cave,W=cave?17:27,H=cave?15:21,sd=id*13+7;
+  const P=wdParent(id),cave=!!P.cave,W=cave?23:33,H=cave?19:25,sd=id*13+7;
   const parentL=LEVELS[P.n]||(KH_LAZY[P.n]&&(KH_LAZY[P.n](),LEVELS[P.n]));
   if(!WD_ENT[id]){try{wdPrep(P.n)}catch(e){console.error(e)}}
   const ent=WD_ENT[id]||{n:P.n,x:(parentL&&parentL.start&&parentL.start.x)||2,y:(parentL&&parentL.start&&parentL.start.y)||2,f:2};
@@ -22113,6 +22115,7 @@ function wdBuild(id){
   if(cave){kind=P.cave[1];name=P.cave[2]}
   else{const r=hash2(id,9,731);kind=r<.72?'empty':r<.9?'treasure':'slime';name=WD_RUIN_NAMES[(hash2(id,8,732)*WD_RUIN_NAMES.length)|0]}
   const gold=120+Math.round(diff*5);
+  if(hash2(id,6,764)<.5){const c=pick(75);if(c)decor.push({k:'chest',x:c[0],y:c[1],block:true,food:pfFood(id)})} // some hold a little food in a chest
   if(cave){
     decor.push(...[1].map(()=>{const b=pick(1)||[sx,sy-1];return {k:'bones',x:b[0],y:b[1],block:false}}));
     if(kind==='treasure'||kind==='bears'||kind==='wolvestreasure'){decor.push({k:'chest',x:far[0],y:far[1],block:true,goldAmt:gold+80});const c=pick(2);if(c)items.push({k:'potion',x:c[0],y:c[1]})}
