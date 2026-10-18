@@ -136,6 +136,8 @@ khNpc('pf_exile','An exiled noble','pf_exile',()=>qNode('pf5',khQD('You find me 
 monq('pf5','A Pie for the Exile','An exiled noble','A baron in exile lives in a cave beyond the Greyfang Pass. He would love one hot pie.',1,()=>Math.min(1,bagCount('pie')),{gold:500,xp:5000},{take:{pie:1}});QAREA.pf5='The Pilgrim’s Path';
 khNpc('pf_hunted','A hunted man','kh_ohfolk2_3',()=>qNode('pf6',khQD('Do not shout. Please. There are three of them, with dogs, and they are two days behind me. I have a purse and a bad knee. If you could spare a healing potion, I would give you every coin I have, and a warning about the road.','One potion. Bless you.',(g,n)=>`${g} of ${n} potions.`,'A potion! My knee thanks you. Here, take the purse.','One potion, one grateful man.','I will move on at dusk. Tell no one.','Here is a potion.')),{q:'pf6'});
 monq('pf6','A Potion for the Hunted Man','A hunted man','A man hides in a hole by the Ironhill Road. He needs a healing potion for his knee.',1,()=>Math.min(1,bagCount('potion')),{gold:450,xp:4500},{take:{potion:1}});QAREA.pf6='The Pilgrim’s Path';
+/* the whole Pilgrim's Path stands at level 55, like Oldhaven */
+for(let n=400;n<424;n++)LEVEL_RATING[n]=55;
 /* ---------- the interiors ---------- */
 function wdParent(id){ // the outdoor map and kind of an interior id
   if(id>=WD_CAVE0&&id<WD_CAVE0+WD_CAVES.length){const c=WD_CAVES[id-WD_CAVE0];return {n:c[0],cave:c}}
@@ -162,7 +164,7 @@ function wdBuild(id){
   const parentL=LEVELS[P.n]||(KH_LAZY[P.n]&&(KH_LAZY[P.n](),LEVELS[P.n]));
   if(!WD_ENT[id]){try{wdPrep(P.n)}catch(e){console.error(e)}}
   const ent=WD_ENT[id]||{n:P.n,x:(parentL&&parentL.start&&parentL.start.x)||2,y:(parentL&&parentL.start&&parentL.start.y)||2,f:2};
-  const diff=(parentL&&parentL.diff)||(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[P.n])||20;
+  const diff=wdIsLP(P.n)?55:(parentL&&parentL.diff)||(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[P.n])||20;
   const tint=cave?[255,255,255]:WD_TINTS[(hash2(id,5,730)*WD_TINTS.length)|0];
   const R=cave?wdCaveRows(sd,W,H):wdRuinRows(sd,W,H),g=R.g,cells=R.cells;
   const door=String.fromCharCode(0x2f0);let sx,sy;

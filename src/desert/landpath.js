@@ -338,7 +338,7 @@ function lpBuild(s){
   function lpId(q){return LP.BASE+q}
   for(let y=H-4;y<H-1;y++)for(let x=CX-6;x<=CX+6;x++)used.add(K(x,y));
   const lv={rows:rows.map(r=>r.join('')),start:{x:MX(CX),y:H-5,f:0},enemies:[],items:[],decor,scenery,sky,fmap:null,floorSet:['ohMeadow','ohGravel','ohLawn','bluesand','bluewater','ohMoss','isleSandDk','wood'],floor:'ohMeadow',ceil:'cloud',
-    day:.98,outdoor:true,amb:.9,name:LEVEL_NAMES[id],label:'The Pilgrim’s Path',noExtras:true,diff:25,ceilH:5.2,chars,lights,portals:[],_walk:walkers,_carve:carve}; // _carve: the yards, lanes and green spaces cut out of the trees, so the dense woods leave them open
+    day:.98,outdoor:true,amb:.9,name:LEVEL_NAMES[id],label:'The Pilgrim’s Path',noExtras:true,diff:55,ceilH:5.2,chars,lights,portals:[],_walk:walkers,_carve:carve}; // _carve: the yards, lanes and green spaces cut out of the trees, so the dense woods leave them open
   if(s===LP.N-1){tele={x:MX(CX+2),y:Y0+12};stoneKm=0} // the last stone stands by the cliff above Yarrim
   if(tele){lv.tele=tele;lv._stoneKm=stoneKm;lv.teleName='The Pilgrim’s Path, '+(stoneKm?stoneKm+' km to Yarrim':'the cliff above Yarrim')}else lv.noTele=true;
   lv.mapNames=[{t:s===0?'The Land Gate':'The Pilgrim’s Path',x:MX(CX),y:H-10,k:'lane'}];

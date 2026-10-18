@@ -268,7 +268,7 @@ function pfCaveBuild(ci){
   const open=cells.filter(([a,b])=>d[b*W+a]>3).sort((a,b)=>d[b[1]*W+b[0]]-d[a[1]*W+a[0]]);
   const used=new Set(['8,'+(H-3)]),pick=i=>{for(let t=0;t<open.length;t++){const c=open[(i*7+t*3)%open.length];if(!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);return c}}return null};
   const far=open[0]||[8,H-4],decor=[],enemies=[],items=[];used.add(far[0]+','+far[1]);
-  const seg=LEVELS[LP.BASE+PF_SEGS[ci]],diff=(seg&&seg.diff)||25;
+  const seg=LEVELS[LP.BASE+PF_SEGS[ci]],diff=55;
   {const bc=pick(1)||[9,10];decor.push({k:'bones',x:bc[0],y:bc[1],block:false})}
   const gold=220+ci*30;
   if(kind==='treasure'){decor.push({k:'chest',x:far[0],y:far[1],block:true,goldAmt:gold});const c=pick(2);if(c)items.push({k:'potion',x:c[0],y:c[1]});const b=pick(3);if(b)decor.push({k:'barrel',x:b[0],y:b[1],block:true})}

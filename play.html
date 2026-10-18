@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.404';
+const VERSION='3.405';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -16865,7 +16865,7 @@ function lpBuild(s){
   function lpId(q){return LP.BASE+q}
   for(let y=H-4;y<H-1;y++)for(let x=CX-6;x<=CX+6;x++)used.add(K(x,y));
   const lv={rows:rows.map(r=>r.join('')),start:{x:MX(CX),y:H-5,f:0},enemies:[],items:[],decor,scenery,sky,fmap:null,floorSet:['ohMeadow','ohGravel','ohLawn','bluesand','bluewater','ohMoss','isleSandDk','wood'],floor:'ohMeadow',ceil:'cloud',
-    day:.98,outdoor:true,amb:.9,name:LEVEL_NAMES[id],label:'The Pilgrim’s Path',noExtras:true,diff:25,ceilH:5.2,chars,lights,portals:[],_walk:walkers,_carve:carve}; // _carve: the yards, lanes and green spaces cut out of the trees, so the dense woods leave them open
+    day:.98,outdoor:true,amb:.9,name:LEVEL_NAMES[id],label:'The Pilgrim’s Path',noExtras:true,diff:55,ceilH:5.2,chars,lights,portals:[],_walk:walkers,_carve:carve}; // _carve: the yards, lanes and green spaces cut out of the trees, so the dense woods leave them open
   if(s===LP.N-1){tele={x:MX(CX+2),y:Y0+12};stoneKm=0} // the last stone stands by the cliff above Yarrim
   if(tele){lv.tele=tele;lv._stoneKm=stoneKm;lv.teleName='The Pilgrim’s Path, '+(stoneKm?stoneKm+' km to Yarrim':'the cliff above Yarrim')}else lv.noTele=true;
   lv.mapNames=[{t:s===0?'The Land Gate':'The Pilgrim’s Path',x:MX(CX),y:H-10,k:'lane'}];
@@ -21839,7 +21839,7 @@ function pfCaveBuild(ci){
   const open=cells.filter(([a,b])=>d[b*W+a]>3).sort((a,b)=>d[b[1]*W+b[0]]-d[a[1]*W+a[0]]);
   const used=new Set(['8,'+(H-3)]),pick=i=>{for(let t=0;t<open.length;t++){const c=open[(i*7+t*3)%open.length];if(!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);return c}}return null};
   const far=open[0]||[8,H-4],decor=[],enemies=[],items=[];used.add(far[0]+','+far[1]);
-  const seg=LEVELS[LP.BASE+PF_SEGS[ci]],diff=(seg&&seg.diff)||25;
+  const seg=LEVELS[LP.BASE+PF_SEGS[ci]],diff=55;
   {const bc=pick(1)||[9,10];decor.push({k:'bones',x:bc[0],y:bc[1],block:false})}
   const gold=220+ci*30;
   if(kind==='treasure'){decor.push({k:'chest',x:far[0],y:far[1],block:true,goldAmt:gold});const c=pick(2);if(c)items.push({k:'potion',x:c[0],y:c[1]});const b=pick(3);if(b)decor.push({k:'barrel',x:b[0],y:b[1],block:true})}
@@ -22167,6 +22167,8 @@ khNpc('pf_exile','An exiled noble','pf_exile',()=>qNode('pf5',khQD('You find me 
 monq('pf5','A Pie for the Exile','An exiled noble','A baron in exile lives in a cave beyond the Greyfang Pass. He would love one hot pie.',1,()=>Math.min(1,bagCount('pie')),{gold:500,xp:5000},{take:{pie:1}});QAREA.pf5='The Pilgrim’s Path';
 khNpc('pf_hunted','A hunted man','kh_ohfolk2_3',()=>qNode('pf6',khQD('Do not shout. Please. There are three of them, with dogs, and they are two days behind me. I have a purse and a bad knee. If you could spare a healing potion, I would give you every coin I have, and a warning about the road.','One potion. Bless you.',(g,n)=>`${g} of ${n} potions.`,'A potion! My knee thanks you. Here, take the purse.','One potion, one grateful man.','I will move on at dusk. Tell no one.','Here is a potion.')),{q:'pf6'});
 monq('pf6','A Potion for the Hunted Man','A hunted man','A man hides in a hole by the Ironhill Road. He needs a healing potion for his knee.',1,()=>Math.min(1,bagCount('potion')),{gold:450,xp:4500},{take:{potion:1}});QAREA.pf6='The Pilgrim’s Path';
+/* the whole Pilgrim's Path stands at level 55, like Oldhaven */
+for(let n=400;n<424;n++)LEVEL_RATING[n]=55;
 /* ---------- the interiors ---------- */
 function wdParent(id){ // the outdoor map and kind of an interior id
   if(id>=WD_CAVE0&&id<WD_CAVE0+WD_CAVES.length){const c=WD_CAVES[id-WD_CAVE0];return {n:c[0],cave:c}}
@@ -22193,7 +22195,7 @@ function wdBuild(id){
   const parentL=LEVELS[P.n]||(KH_LAZY[P.n]&&(KH_LAZY[P.n](),LEVELS[P.n]));
   if(!WD_ENT[id]){try{wdPrep(P.n)}catch(e){console.error(e)}}
   const ent=WD_ENT[id]||{n:P.n,x:(parentL&&parentL.start&&parentL.start.x)||2,y:(parentL&&parentL.start&&parentL.start.y)||2,f:2};
-  const diff=(parentL&&parentL.diff)||(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[P.n])||20;
+  const diff=wdIsLP(P.n)?55:(parentL&&parentL.diff)||(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[P.n])||20;
   const tint=cave?[255,255,255]:WD_TINTS[(hash2(id,5,730)*WD_TINTS.length)|0];
   const R=cave?wdCaveRows(sd,W,H):wdRuinRows(sd,W,H),g=R.g,cells=R.cells;
   const door=String.fromCharCode(0x2f0);let sx,sy;
