@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.396';
+const VERSION='3.397';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -21725,7 +21725,7 @@ function pfDense(n){
     const ci=PF_SEGS.indexOf(s),runs=[];
     if(ci>=0&&PF_ENT[ci]&&PF_ENT[ci].n===n)runs.push([PF_ENT[ci].y,PF_ENT[ci].x-1]);
     for(const q of L._wd||[])runs.push(q.w?[q.y,q.x-2]:[q.y+3,q.x-4]);
-    for(const [y,x1] of runs)for(let dy=-2;dy<=2;dy++)for(let x=zs[y+dy]>=0?zs[y+dy]:zs[y];x<=x1;x++)if(elig(x,y+dy)){paths.add(x+','+(y+dy));if(Math.abs(dy)<=1)lane.add(x+','+(y+dy))}} // three squares wide, so the cross itself never stands in the way
+    for(const [y,x1] of runs)for(let dy=-2;dy<=2;dy++)for(let x=zs[y+dy]>=0?zs[y+dy]:zs[y];x<=x1;x++)if(elig(x,y+dy)){paths.add(x+','+(y+dy))}} // three squares wide, so the cross itself never stands in the way
   const flo=L.scenery||(L.scenery=[]);
   const flower=(x,y,gy,seed,sc,set)=>{const a=set||PF_FLO,k=pick(a,hs(x,gy,seed+1));flo.push({k,wx:x+.12+hs(x,gy,seed+2)*.76,wy:y+.12+hs(x,gy,seed+3)*.76,sc,decor:{k,walk:true,x,y}})};
   const dress=(d,x,y,gy,soft)=>{ // what grows on this square
