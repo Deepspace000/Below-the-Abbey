@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.414';
+const VERSION='3.415';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -21257,17 +21257,18 @@ const GOLD_TINT=['#fff070','#c88a10'];
   for(let i=G.floats.length-1;i>=0;i--){const f=G.floats[i];if(!f.splat)continue;f.t+=dt;if(f.t>(f.crit?1:.75)){G.floats.splice(i,1);continue}
     drawSplat(f.x+(f.seed%7-3)*3,f.y+24+f.t*8,f.R*(1+(f.t<.1?.2:0)),f.text,f.crit?GOLD_TINT:['#e83a2a','#8a1410'],f.seed,clamp(1.2-f.t*1.6,0,1),f.crit?'CRITICAL  1.5x damage':null)} // low on the body, drifting down, gone before it could reach the face
   const keep=G.floats.filter(f=>f.splat);G.floats=G.floats.filter(f=>!f.splat);_df.apply(this,arguments);G.floats=G.floats.concat(keep)}}
-{const _ui=ui;ui=function(dt){_ui.apply(this,arguments);try{if(G.state!=='play'||G.inv.open||G.menu||G.overview||G.map)return; // the portraits are only on screen in the main view
+{const _ui=ui;ui=function(dt){_ui.apply(this,arguments);try{if(G.state!=='play'||G.menu||G.overview||G.map)return; // the portraits are on screen in the main view and in the inventory (a little lower there)
+  const PY=G.inv.open?238:232;
   // a heal in progress: the healed band shows the old red, turns ice blue, then fades as the red settles lower
   for(let i=0;i<4;i++){const e=HEAL[i];if(!e)continue;e.t+=dt||.016;if(e.t>1.5){HEAL[i]=null;continue}
-    const x=portraitX(i),y0=232,w=38,hh=58,top=y0+hh-e.oldM*hh,bot=y0+hh-e.newM*hh,k=clamp(e.t/.45,0,1),fade=e.t<.55?1:clamp(1-(e.t-.55)/.9,0,1);
+    const x=portraitX(i),y0=PY,w=38,hh=58,top=y0+hh-e.oldM*hh,bot=y0+hh-e.newM*hh,k=clamp(e.t/.45,0,1),fade=e.t<.55?1:clamp(1-(e.t-.55)/.9,0,1);
     ctx.save();ctx.beginPath();ctx.rect(x,y0,w,hh);ctx.clip();const rr=190+(130-190)*k,gg=20+(225-20)*k,bb=16+(255-16)*k;
     ctx.globalAlpha=fade;ctx.fillStyle=`rgba(${rr|0},${gg|0},${bb|0},.78)`;ctx.fillRect(x,top,w,bot-top);
     ctx.fillStyle=`rgba(210,245,255,${.55*k})`;ctx.fillRect(x,top,w,1.4);
     if(e.t>.3&&e.t<.9){ctx.globalAlpha=.5*(1-Math.abs(e.t-.6)/.3);ctx.fillStyle='#e8fbff';for(let q=0;q<5;q++)ctx.fillRect(x+4+((q*7+Math.floor(e.t*20)*3)%30),top+((q*5)%Math.max(2,bot-top)),1.5,1.5)}
     ctx.restore()}
   // the portrait fills with red from the bottom as a hero is hurt: the state of the party at a glance
-  for(let i=0;i<4;i++){const h=G.heroes[i];if(!h||!h.alive||G.cut&&0)continue;const miss=clamp(1-h.hp/h.max,0,1);if(miss<=.01)continue;const x=portraitX(i),y0=232,w=38,hh=58,fh=hh*miss;
+  for(let i=0;i<4;i++){const h=G.heroes[i];if(!h||!h.alive||G.cut&&0)continue;const miss=clamp(1-h.hp/h.max,0,1);if(miss<=.01)continue;const x=portraitX(i),y0=PY,w=38,hh=58,fh=hh*miss;
     ctx.save();ctx.beginPath();ctx.rect(x,y0,w,hh);ctx.clip();const g=ctx.createLinearGradient(0,y0+hh-fh,0,y0+hh);g.addColorStop(0,'rgba(190,20,16,.40)');g.addColorStop(1,'rgba(120,6,6,.62)');ctx.fillStyle=g;ctx.fillRect(x,y0+hh-fh,w,fh);
     ctx.fillStyle='rgba(255,90,70,.55)';ctx.fillRect(x,y0+hh-fh,w,1.2);ctx.restore()}
   for(let i=0;i<4;i++){const h=HSPL[i];if(!h)continue;h.t+=dt||.016;if(h.t>1.6){HSPL[i]=null;continue}
