@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.415';
+const VERSION='3.417';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -15872,7 +15872,22 @@ const OQ_PIC={ // key -> [sheet picture, width in cells]  (the height follows th
   stall:['kh_oqstuff_0',1.5],fcrate:['kh_oqstuff_1',.58],fbarrel:['kh_oqstuff_2',.42],frack:['kh_oqstuff_3',1.0],fbasket:['kh_oqstuff_4',.55],fnet:['kh_oqstuff_5',.9],
   rope:['kh_oqstuff_6',.6],anchor:['kh_oqstuff_7',.7],cargo:['kh_oqstuff_8',.66],sacks:['kh_oqstuff_9',.45],bollard:['kh_oqstuff_10',.38],lantern:['kh_oqstuff_11',.4]
 };
-function oqAlias(){for(const k in OQ_PIC){const [n,w]=OQ_PIC[k],im=IMG[n];if(im){IMG['oq_'+k]=im;NPC_H['oq_'+k]=w*im.height/im.width}}}
+function oqAlias(){
+  for(let i=0;i<4;i++){const im=IMG['kh_oqgarg_'+i];if(im){IMG['oq_garg'+i]=im;NPC_H['oq_garg'+i]=2.2}}for(const k in OQ_PIC){const [n,w]=OQ_PIC[k],im=IMG[n];if(im){IMG['oq_'+k]=im;NPC_H['oq_'+k]=w*im.height/im.width}}
+  for(let f=0;f<5;f++){const im=IMG['kh_oqflags_'+f];if(im&&!IMG['oq_lflag'+f]){IMG['oq_lflag'+f]=oqLongFlag(im);NPC_H['oq_lflag'+f]=3.9}}}
+/* the flags of Oldhaven: a small cloth at the very top of a long pole (the painted flags are cut down and set on a stretched pole) */
+function oqLongFlag(im){const w=im.width,h=im.height,s=.5,sw=Math.round(w*s),sh=Math.round(h*s),H=Math.round(sh+h*1.35),pw=Math.max(3,Math.round(w*.05));
+  return mkCanvas(sw,H,x=>{x.imageSmoothingQuality='high';x.drawImage(im,0,h*.62,pw,h*.38,0,sh*.5,Math.max(2,pw*s),H-sh*.5);x.drawImage(im,0,0,w,h,0,0,sw,sh)})}
+/* one stone for the whole quay: every wall, window and the gate itself is brought to the same grimy grey-brown, darker toward the foot and streaked with soot */
+function oqGrime(lo,hi){
+  for(let g=lo;g<hi;g++){const ti=T_TILE[g];if(ti===undefined)continue;const t=TEX[ti];if(!t||!t.d||t._grim)continue;t._grim=1;
+    const d=t.d,w=128,h=t.h||128;if(d.length!==w*h*4)continue;
+    for(let y=0;y<h;y++){const fy=y/h;for(let x=0;x<w;x++){
+      const i=(y*w+x)*4,r=d[i],gg=d[i+1],b=d[i+2],lum=.3*r+.59*gg+.11*b;
+      const n=hash2(x>>1,y>>2,333)*.5+hash2(x>>3,y>>3,334)*.5,streak=hash2(x>>2,7,335)<.35?Math.pow(fy,1.4)*.3:0;
+      const k=(.72-.12*n-streak)*(.8+.2*(1-fy));
+      d[i]=r*.15+lum*k*1.04*.85;d[i+1]=gg*.15+lum*k*.98*.85;d[i+2]=b*.15+lum*k*.9*.85}}}
+}
 function oqFloor(){ // smooth pale stone for the quay
   if(FLOORS.quayStone)return;const im=IMG.kh_oqstone_0;{const q=im?dsPaintedTex(im):(FLOORS.pale||FLOORS.cobble),d=new Uint8ClampedArray(q.length);for(let i=0;i<q.length;i+=4){d[i]=q[i]*1.2+30;d[i+1]=q[i+1]*1.15+24;d[i+2]=q[i+2]*1.0+10;d[i+3]=255}FLOORS.quayStone=d}
 }
@@ -15895,10 +15910,16 @@ const OQ_WORK=['oq_sailor','oq_docker','oq_deckhand','oq_oldfisher','oq_fisher1'
 const OQ_BUYERS=['oh_f_noble','oh_f_clerk','oh_f_monk','oh_f_friar','oh_f_lady','oh_n_scholar','oh_n_wool','oh_v_watch'];
 
 /* ---- the shops of the quay ---- */
-KH_STOCK.fishmonger=()=>[['herring',18],['bread',10],['cheese',8],['pie',6],['ale',8],['water',12],['sausage',6]];
-khShop('oq_fm1','Marta, the fishwife','kh_ohfolk2_0',"Marta's Fish Stall",'Herring, mackerel and whatever the boats got. If it is still moving, it is fresh. If it is not, it is smoked.','fishmonger');
-khShop('oq_fm2','Big Hobb, the fishmonger','kh_ohfolk1_0',"Hobb's Stall",'Three hundred herring on ice, and I know every one of them by name. Buy two and I will introduce you.','fishmonger');
-khShop('oq_fm3','Pol, the quay cook','kh_ohfolk2_2','The Quay Kitchen','Fried fish in a paper cone, a heel of bread and a splash of vinegar. The soldiers eat first, then everyone else.','fishmonger');
+/* the quay sells fish: each stall has its own catch, and the Fish Hall has the lot */
+const OQ_FISH={mackerel:['Smoked Mackerel',22,80,9],sardines:['Pickled Sardines',14,60,5],crab:['Boiled Crab',28,85,12],haddock:['Smoked Haddock',24,85,10],saltcod:['Salt Cod',18,90,7],eel:['Jellied Eel',20,70,8],oysters:['Plate of Oysters',26,60,14],friedfish:['Fried Fish in a Cone',30,90,11],chowder:['Bowl of Fish Chowder',36,100,13]};
+for(const k in OQ_FISH){const [n,heal,feed,price]=OQ_FISH[k];if(!ITEMDEF[k])ITEMDEF[k]={n,k:'food',t:'Meal',ic:'herring',c:'#b8c0c8',heal,feed,stack:1,price,sw:.3}}
+KH_STOCK.fish1=()=>[['herring',16],['mackerel',14],['sardines',16],['crab',8],['oysters',6],['bread',8]];
+KH_STOCK.fish2=()=>[['herring',16],['haddock',12],['saltcod',14],['eel',10],['oysters',6],['ale',6]];
+KH_STOCK.fish3=()=>[['friedfish',18],['chowder',12],['herring',10],['mackerel',8],['bread',10],['water',10]];
+KH_STOCK.fishmonger=()=>[['herring',20],['mackerel',14],['sardines',14],['haddock',12],['saltcod',12],['crab',8],['eel',10],['oysters',8],['chowder',10],['bread',8]];
+khShop('oq_fm1','Marta, the fishwife','kh_ohfolk2_0',"Marta's Fish Stall",'Herring, mackerel and whatever the boats got. If it is still moving, it is fresh. If it is not, it is smoked.','fish1');
+khShop('oq_fm2','Big Hobb, the fishmonger','kh_ohfolk1_0',"Hobb's Stall",'Three hundred herring on ice, and I know every one of them by name. Buy two and I will introduce you.','fish2');
+khShop('oq_fm3','Pol, the quay cook','kh_ohfolk2_2','The Quay Kitchen','Fried fish in a paper cone, a heel of bread and a splash of vinegar. The soldiers eat first, then everyone else.','fish3');
 khShop('oq_fishhall','Warrick, of the Fish Hall','kh_oqmen_4',"The Fishmonger's Hall",'Every boat on the quay sells to me, and I sell to the castle. If the king eats fish today, it came through that door.','fishmonger');
 khShop('oq_chandler','Tilda, ship chandler','kh_ohfolk1_5','The Anchor and Rope','Rope, tar, torches and lanterns. Everything a ship needs and a good deal that a party does.','general');
 khShop('oq_armoury',"Ser Aldred, the ship's armourer",'kh_ohsold1_3',"The Ship's Armoury",'Cutlasses, boarding axes and round shields. Bring a blade you are fond of and I will find you a better one.','arms');
@@ -15921,7 +15942,7 @@ function quayBuild(){
   if(LEVELS[OQ.ID])return;
   if(typeof KH_READY!=='undefined'&&!KH_READY)return; // the pictures are not loaded yet: building now would turn the soldiers into peasants (goToLevel waits for them and builds then)
   ohAlias();oqAlias();isleFloors();oqFloor();
-  const W=OQ.W,H=OQ.H,N=W*H,hs=(a,b,c)=>hash2(a,b,c);
+  const W=OQ.W,H=OQ.H,N=W*H,hs=(a,b,c)=>hash2(a,b,c),G0=KH_NEXT_GID;
   const TM=ohTiles(),chars={D:LEVEL41_DATA.chars.D},chMap=new Map();let nextCh=0x300;
   const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
   const rows=[];for(let y=0;y<H;y++)rows.push(new Array(W).fill('.'));
@@ -15939,19 +15960,19 @@ function quayBuild(){
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){
     if(y<=9||((x<6||x>73)&&y<=SHORE+1)){const face=y===9||x===5||x===74;solid(x,y,face&&(x+y)%4===0?wSlit:(x*7+y*3)%11===0?wDark:wPlain)}
   }
-  const GX=OQ.CX,tWh=6.4;
+  const GX=OQ.CX,tWh=4.8;
   // the great gate: a tall gatehouse, three squares of portcullis between two wings of dressed stone with arrow slits, and a great round tower at each end
   {const pg=TM.make('gate',0,tWh,'kh_ohgate1_0');T_DOORS.oqportc=pg.tex;const gc=String.fromCharCode(nextCh++);chars[gc]=31;
     const tp=ch(TM.make('plain','castle',tWh).gid),ts=ch(TM.make('slit','castle',tWh).gid),td=ch(TM.make('plain','castle2',tWh).gid);
-    for(let y=8;y<=10;y++){for(let x=GX-1;x<=GX+1;x++)solid(x,y,y===10?gc:tp);
-      for(const xs of [[GX-9,GX-2],[GX+2,GX+9]])for(let x=xs[0];x<=xs[1];x++)solid(x,y,y===10&&x%2===0?ts:(x+y)%5===0?td:tp)}
-    sky.push({x:GX-8,y:10.6,k:'kh_ohtower1_3',w:9,z:tWh-.05,big:1},{x:GX+8,y:10.6,k:'kh_ohtower1_3',w:9,z:tWh-.05,big:1});
-    sky.push({x:GX-8,y:10.6,k:'kh_oqflags_0',w:2.2,z:tWh+9,big:1},{x:GX+8,y:10.6,k:'kh_oqflags_0',w:2.2,z:tWh+9,big:1},{x:GX,y:10.6,k:'kh_oqflags_0',w:3,z:tWh+3.4,big:1});
+    for(let y=8;y<=9;y++){for(let x=GX-1;x<=GX+1;x++)solid(x,y,gc);   // the gate stands in the line of the wall, it does not stick out into the quay
+      for(const xs of [[GX-6,GX-2],[GX+2,GX+6]])for(let x=xs[0];x<=xs[1];x++)solid(x,y,y===9&&x%2===0?ts:(x+y)%5===0?td:tp)}
+    sky.push({x:GX-6,y:9.6,k:'kh_ohtower1_3',w:8,z:tWh-.05,big:1},{x:GX+6,y:9.6,k:'kh_ohtower1_3',w:8,z:tWh-.05,big:1});
+    sky.push({x:GX-6,y:9.6,k:'oq_lflag0',w:1.2,z:tWh+8.6,big:1},{x:GX+6,y:9.6,k:'oq_lflag0',w:1.2,z:tWh+8.6,big:1});
   }
   // the castle looming over the gate: the keep, great round towers and long spires, all standing on the wall
   sky.push({x:GX,y:4,k:'kh_ohkeep1_0',w:62,z:WALL-.4,big:1});
   for(const [x,y,k,w] of [[14,6,'kh_ohtower1_3',9],[66,6,'kh_ohtower1_3',9],[26,5,'kh_ohtower1_0',5.4],[54,5,'kh_ohtower1_1',5.4],[32,6,'kh_ohtower1_2',5],[48,6,'kh_ohtower1_2',5],[8,7,'kh_ohtower1_4',4],[72,7,'kh_ohtower1_5',4],[20,3,'kh_ohtower1_0',6],[60,3,'kh_ohtower1_1',6]])sky.push({x,y,k,w,z:WALL-.05,big:1});
-  for(const [x,y,w,f] of [[40,1,5.6,0],[14,6,3.2,0],[66,6,3.2,0],[26,5,2.4,0],[54,5,2.4,0]])sky.push({x,y,k:'kh_oqflags_'+f,w,z:WALL+(f===0?24:11),big:1});
+  for(const [x,y,w] of [[40,1,3],[14,6,1.8],[66,6,1.8],[26,5,1.4],[54,5,1.4]])sky.push({x,y,k:'oq_lflag0',w,z:WALL+26,big:1});
   /* ---- the buildings along the sides: six of them, all different, each with a door that opens ---- */
   OQ_HOUSES.forEach((b,k)=>{
     const w=b.x1-b.x0+1,d=b.y1-b.y0+1,front=(x,y)=>b.face==='E'?x===b.x1:x===b.x0,ym=b.y0+(d>>1);
@@ -15964,7 +15985,7 @@ function quayBuild(){
       solid(x,y,c);fm[y*W+x]='1';
     }
     sky.push({x:(b.x0+b.x1+1)/2,y:(b.y0+b.y1+1)/2,k:'kh_ohroof1_'+b.roof,w:d+.6,z:b.wh-.03});
-    if(b.tower)sky.push({x:(b.x0+b.x1+1)/2+2,y:b.y0+2,k:'kh_ohtower1_2',w:3.6,z:b.wh-.03},{x:(b.x0+b.x1+1)/2+2,y:b.y0+2,k:'kh_oqflags_1',w:2.4,z:b.wh+7.6});
+    if(b.tower)sky.push({x:(b.x0+b.x1+1)/2+2,y:b.y0+2,k:'kh_ohtower1_2',w:3.6,z:b.wh-.03},{x:(b.x0+b.x1+1)/2+2,y:b.y0+2,k:'oq_lflag1',w:1.5,z:b.wh+8.4});
     else if(k===0||k===2)sky.push({x:b.x0+2.5,y:(b.y0+b.y1)/2,k:'kh_ohtower1_'+(k?4:5),w:2.6,z:b.wh-.03});
     LEVEL_NAMES[b.id]=b.name;
   });
@@ -15978,7 +15999,7 @@ function quayBuild(){
   const walk=(k,x,y,o)=>{used.add(x+','+y);const d=Object.assign({k,x,y,block:false,walk:true},o||{});decor.push(d);return d};
   const near=(x,y,rad)=>{for(let r=0;r<=rad;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(free(x+dx,y+dy)||onPier(x+dx,y+dy))return [x+dx,y+dy]}return null};
   const person=(id,x,y,rad)=>{const kp=KH_KEEPERS[id];if(!kp)return null;const q=near(x,y,rad||3);if(!q)return null;walk(khFaceKey(kp.face),q[0],q[1],{npc:id,sc:kp.sc||1});return q};
-  const flag=(x,y,k)=>tryDc('oq_flag'+(k===undefined?[0,4,2,4][(hs(x,y,5)*4)|0]:k),x,y);
+  const flag=(x,y,k)=>tryDc('oq_lflag'+(k===undefined?[0,4,2,4][(hs(x,y,5)*4)|0]:k),x,y);
   // ships in the water: the Dawn Walker at the end of the long pier, and the big ships moored between the piers
   decor.push({k:'yar_ship_dawn',x:OQ.CX,y:65,block:true,deco:false,npc:'yr_ship'});used.add(OQ.CX+',65');
   const SHIPS=[['oq_ship0',17,51,1],['oq_ship1',31,55,1],['oq_ship2',47,52,1],['oq_ship0',63,46,.9],['oq_ship2',76,57,.8],['oq_ship1',6,60,.85],['oq_ship2',16,66,.8],['oq_ship0',55,67,.8],['oq_ship1',70,63,.85],['oq_ship2',26,66,.7]];
@@ -16001,7 +16022,7 @@ function quayBuild(){
     dc('oq_stall',sx,sy,{block:true,walk:false});
     if(id==='oq_fm3b'){person('oh_f_baker',sx,sy-1,1)}else person(id,sx,sy-1,1);
     for(const [dx,dy,k] of [[-2,0,'oq_fcrate'],[-2,1,'oq_fbasket'],[2,1,'oq_fbarrel'],[0,2,'oq_fnet']])tryDc(k,sx+dx,sy+dy);
-    for(let q=0;q<7;q++){const a=hs(sx,sy,q+60)*TAU,r=2+hs(sx,sy,q+70)*3,id2=OQ_BUYERS[((hs(sx,sy+q,81)*OQ_BUYERS.length)|0)],kp=KH_KEEPERS[id2];const p=near(Math.round(sx+Math.cos(a)*r),Math.round(sy+3+Math.sin(a)*r*.7),2);if(p&&kp)walk(khFaceKey(kp.face),p[0],p[1],{npc:id2,sc:kp.sc||1})}
+    for(let q=0;q<3;q++){const a=hs(sx,sy,q+60)*TAU,r=2+hs(sx,sy,q+70)*3,id2=OQ_BUYERS[((hs(sx,sy+q,81)*OQ_BUYERS.length)|0)],kp=KH_KEEPERS[id2];const p=near(Math.round(sx+Math.cos(a)*r),Math.round(sy+3+Math.sin(a)*r*.7),2);if(p&&kp)walk(khFaceKey(kp.face),p[0],p[1],{npc:id2,sc:kp.sc||1})}
   }
   // crates, barrels and sacks are stored against the walls: along the foot of the city wall, and against the sides of the buildings away from their doors
   {const STOR=['oq_fcrate','oq_cargo','oq_fbarrel','oq_sacks','oq_fcrate','oq_cargo','oq_fbarrel'];
@@ -16011,16 +16032,18 @@ function quayBuild(){
   // the people: soldiers everywhere, the harbour folk, fishermen, sailors, dockers and captains
   let sn=0;const sold=()=>OH_SOLDIER[(sn++)%OH_SOLDIER.length];
   const soldier=(x,y)=>{const id=sold(),kp=KH_KEEPERS[id];const q=near(x,y,1);if(q&&kp)walk(khFaceKey(kp.face),q[0],q[1],{npc:id,sc:kp.sc})};
-  for(const x of [35,37,39,41,43,45]){soldier(x,11);}
-  for(let x=24;x<=57;x+=4)soldier(x,SHORE-1);
-  for(let x=28;x<=52;x+=8)soldier(x,12);
-  for(const [x,y] of [[24,16],[24,22],[24,28],[56,13],[56,22],[56,29],[34,20],[46,20],[40,22],[36,28],[44,28]])soldier(x,y);
-  for(const [x0,x1,y1] of OQ_PIERS){soldier(x0+1,SHORE+3);soldier(x0+1,y1-2)}
+  // soldiers stand together, in squads of two or three, not one to a square: the gate, the edge of the quay, the plaza and the central pier
+  const squad=(x,y,n)=>{for(let k=0;k<n;k++)soldier(x+(k%2),y+(k>>1))};
+  squad(35,12,3);squad(44,12,3);squad(28,SHORE-1,2);squad(52,SHORE-1,2);squad(33,22,3);squad(47,22,3);squad(OQ.CX+1,SHORE+4,2);
   const named=[['oh_herald',39,12],['oh_guard',37,11],['oh_guard',43,11],['oh_guard2',36,12],['oh_guard2',44,12],['oq_harbourm',39,31],['oq_captain',42,33]];
   for(const [id,x,y] of named)person(id,x,y,3);
-  for(let q=0;q<46;q++){const x=23+((hs(q,11,95)*36)|0),y=11+((hs(q,12,95)*23)|0),id=hs(q,13,95)<.38?OQ_WORK[(hs(q,14,95)*OQ_WORK.length)|0]:hs(q,13,95)<.74?OH_SOLDIER[(hs(q,16,95)*OH_SOLDIER.length)|0]:OQ_BUYERS[(hs(q,15,95)*OQ_BUYERS.length)|0];person(id,x,y,2)}
-  for(const [x0,x1,y1] of OQ_PIERS)for(let q=0;q<4;q++){const id=OQ_WORK[(hs(x0,q,96)*OQ_WORK.length)|0];person(id,x0+((q&1)?1:0),SHORE+4+q*Math.max(3,((y1-SHORE-6)/4)|0),2)}
+  for(let q=0;q<16;q++){const x=23+((hs(q,11,95)*36)|0),y=11+((hs(q,12,95)*23)|0),id=hs(q,13,95)<.38?OQ_WORK[(hs(q,14,95)*OQ_WORK.length)|0]:hs(q,13,95)<.74?OH_SOLDIER[(hs(q,16,95)*OH_SOLDIER.length)|0]:OQ_BUYERS[(hs(q,15,95)*OQ_BUYERS.length)|0];person(id,x,y,2)}
+  for(const [x0,x1,y1] of OQ_PIERS.slice(1,4))for(let q=0;q<2;q++){const id=OQ_WORK[(hs(x0,q,96)*OQ_WORK.length)|0];person(id,x0+((q&1)?1:0),SHORE+4+q*Math.max(3,((y1-SHORE-6)/4)|0),2)}
   OQ_DOGS=[];
+  // flags either side of the gate, on tall poles, and gargoyles crouching along the top of the gatehouse and on plinths at the way in, to herald the city ahead
+  for(const dx of [-3,3,-7,7])tryDc('oq_lflag'+(dx<0?0:3),GX+dx,11);
+  [-6,-4.6,-3.2,-2,2,3.2,4.6,6].forEach((dx,i)=>{if(IMG['kh_oqgarg_'+(i%4)])sky.push({x:GX+dx,y:9.2,k:'kh_oqgarg_'+(i%4),w:2.3,z:tWh,big:1})});
+  for(const [dx,k] of [[-5,0],[5,1],[-9,2],[9,3]])tryDc('oq_garg'+k,GX+dx,12);
   // signs on the doors that open
   for(const b of OQ_HOUSES){const sx=b.front[0],sy=b.front[1]+1;decor.push({k:'sign_'+b.keeper,x:sx,y:sy,block:false,wd:b.wall,txt:[b.name.toUpperCase(),'']});}
   /* ---- the level ---- */
@@ -16030,6 +16053,7 @@ function quayBuild(){
   lv.portals[1]={to:305,x:74,y:141,f:0,tex:'oqportc',req:'oldhavenOpen',lock:'The great gate of Oldhaven is barred until noon. Speak to the herald.'};
   lv.mapNames=[{t:'The Gate of Oldhaven',x:40,y:12,k:'place'},{t:'Fish Market',x:26,y:21,k:'place'},{t:'The Great Quay',x:40,y:28,k:'place'},{t:'Customs House',x:65,y:13,k:'lane'},{t:'The Piers',x:40,y:50,k:'place'}];
   const fmap=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmap.push(s)}lv.fmap=fmap;
+  oqGrime(G0,KH_NEXT_GID);   // one grimy stone for every wall, window and gate
   LEVELS[OQ.ID]=lv;LEVEL_NAMES[OQ.ID]='Oldhaven Quay';for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=chars[rows[y][x]];if(c>=30&&c<100)block[y*W+x]=0} // a doorway is not a rock face
   TERRS[OQ.ID]=yarTerrain(W,H,h,rk,block);
   OQ_HOUSES.forEach((b,k)=>{

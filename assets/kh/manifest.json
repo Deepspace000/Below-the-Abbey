@@ -3652,5 +3652,33 @@
 "h": 510,
 "kind": "sprite",
 "sheet": "ohgard2"
+},
+"oqgarg_0": {
+"file": "oqgarg_0.webp",
+"w": 334,
+"h": 451,
+"kind": "sprite",
+"sheet": "oqgarg"
+},
+"oqgarg_1": {
+"file": "oqgarg_1.webp",
+"w": 297,
+"h": 455,
+"kind": "sprite",
+"sheet": "oqgarg"
+},
+"oqgarg_2": {
+"file": "oqgarg_2.webp",
+"w": 349,
+"h": 448,
+"kind": "sprite",
+"sheet": "oqgarg"
+},
+"oqgarg_3": {
+"file": "oqgarg_3.webp",
+"w": 306,
+"h": 453,
+"kind": "sprite",
+"sheet": "oqgarg"
 }
 }
