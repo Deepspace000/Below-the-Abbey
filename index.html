@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.433';
+const VERSION='3.434';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -4079,7 +4079,7 @@ function snapshot(){
     torches:LIGHTS.map(l=>l.taken?1:0),torchKeys:LIGHTS.filter(l=>l.taken).map(l=>l.key)};
 }
 function restore(sv){ // the golden city and the rooms in it are built the first time they are needed
-  const l=sv.level||1;if(l===44||(l>=199&&l<=270)||(l>=1000&&l<30000)||(l>=271&&l<=280)||(l>=289&&l<=312)||(l>=360&&l<=364)||(l>=400&&l<=434)||(l>=440&&l<=460)||l>=40000)if((!LEVELS[l]&&!(typeof KH_LAZY!=='undefined'&&KH_LAZY[l]))||LEVELS[44].stub){khThen(()=>restoreNow(sv));return}
+  const l=sv.level||1;if(l===44||(l>=199&&l<=270)||(l>=1000&&l<30000)||(l>=271&&l<=280)||(l>=289&&l<=312)||(l>=360&&l<=364)||(l>=400&&l<=434)||(l>=440&&l<=474)||l>=40000)if((!LEVELS[l]&&!(typeof KH_LAZY!=='undefined'&&KH_LAZY[l]))||LEVELS[44].stub){khThen(()=>restoreNow(sv));return}
   restoreNow(sv);
 }
 function restoreNow(sv){
@@ -4209,7 +4209,7 @@ function gotoList(){
   return out;
 }
 function jumpToLevel(n,target){
-  if((((n>=304&&n<=312)||(n>=360&&n<=364)||(n>=400&&n<=434)||(n>=440&&n<=460))||(n>=6000&&n<9000))&&typeof KH_READY!=='undefined'&&!KH_READY){khLoadAssets().then(()=>jumpToLevel(n,target));return} // Oldhaven needs its pictures before it is built
+  if((((n>=304&&n<=312)||(n>=360&&n<=364)||(n>=400&&n<=434)||(n>=440&&n<=474))||(n>=6000&&n<9000))&&typeof KH_READY!=='undefined'&&!KH_READY){khLoadAssets().then(()=>jumpToLevel(n,target));return} // Oldhaven needs its pictures before it is built
   if((n===44||(n>=199&&n<=274))&&LEVELS[44].stub){khEnter(()=>jumpToLevel(n,target));return}
   if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();
   audioInit();backupAuto();
@@ -22985,7 +22985,11 @@ function hgsBoss(){
   }
   return _g.apply(this,arguments)}}
 /* the Go to area menu is a way round the seal (it restores a save and jumps), so it is never blocked */
-{const _j=jumpToLevel;jumpToLevel=function(){HGS.jump=1;try{return _j.apply(this,arguments)}finally{HGS.jump=0}}}
+{const _j=jumpToLevel;jumpToLevel=function(n,target){
+  // Go to area first restores the autosave; a save in the spire or the grasslands needs the city pictures loaded before it can be rebuilt, or the jump fails
+  let sv=null;try{sv=readSave('auto')||readSave('prev')}catch(e){}const l=sv&&sv.level;
+  if(l>=440&&l<=474&&((typeof KH_READY!=='undefined'&&!KH_READY)||(LEVELS[44]&&LEVELS[44].stub))){khThen(()=>jumpToLevel(n,target));return}
+  HGS.jump=1;try{return _j.apply(this,arguments)}finally{HGS.jump=0}}}
 
 /* ---- src/desert/maps_common.js ---- */
 /* ==========================================================================

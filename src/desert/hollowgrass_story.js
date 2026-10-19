@@ -46,4 +46,8 @@ function hgsBoss(){
   }
   return _g.apply(this,arguments)}}
 /* the Go to area menu is a way round the seal (it restores a save and jumps), so it is never blocked */
-{const _j=jumpToLevel;jumpToLevel=function(){HGS.jump=1;try{return _j.apply(this,arguments)}finally{HGS.jump=0}}}
+{const _j=jumpToLevel;jumpToLevel=function(n,target){
+  // Go to area first restores the autosave; a save in the spire or the grasslands needs the city pictures loaded before it can be rebuilt, or the jump fails
+  let sv=null;try{sv=readSave('auto')||readSave('prev')}catch(e){}const l=sv&&sv.level;
+  if(l>=440&&l<=474&&((typeof KH_READY!=='undefined'&&!KH_READY)||(LEVELS[44]&&LEVELS[44].stub))){khThen(()=>jumpToLevel(n,target));return}
+  HGS.jump=1;try{return _j.apply(this,arguments)}finally{HGS.jump=0}}}
