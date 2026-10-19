@@ -38,10 +38,12 @@ function hgsBoss(){
 {const _g=goToLevel;goToLevel=function(n,entry){
   const F=G.flags;
   if(n===HL.BASE+18)try{hgsBoss()}catch(e){console.error(e)}
-  if(F&&F.hlSealed){
+  if(F&&F.hlSealed&&!HGS.jump){
     const inSpire=LEVEL>=HL.BASE&&LEVEL<=HL.VIOLET;
     if(inSpire&&(n<LEVEL||n<HL.BASE)&&n!==HG.ID){msg('The way down is solid stone. The spell has sealed the spire.','#e8a8ff');return}
     if(LEVEL===HL.CAV&&n>=HL.BASE&&n<=HL.VIOLET){msg('The gate of the Orange Spire is sealed by a spell. There is no latch and no seam.','#e8a8ff');return}
     if(n===HL.BASE+HL.N-1)try{if(!LEVELS[n]&&KH_LAZY[n])KH_LAZY[n]();hgsPatchTop()}catch(e){}
   }
   return _g.apply(this,arguments)}}
+/* the Go to area menu is a way round the seal (it restores a save and jumps), so it is never blocked */
+{const _j=jumpToLevel;jumpToLevel=function(){HGS.jump=1;try{return _j.apply(this,arguments)}finally{HGS.jump=0}}}
