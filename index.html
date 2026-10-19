@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.422';
+const VERSION='3.423';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2404,7 +2404,7 @@ function act(id){
    ========================================================================== */
 let HH=105,EYE=.5;const VW=420,VH=210,PL=.75,F=(VW/2)/PL,EYE0=.5,AMB=.05;
 let CEILH=1.0; // height of the ceiling and the walls, in cells: low in dungeons, higher indoors, high outside (set when a level loads)
-const GRIM_L=()=>LEVEL===2||LEVEL===7;
+const GRIM_L=()=>LEVEL===2||LEVEL===7||LEVEL===470;
 function ceilFor(n,L){if(L.ceilH)return L.ceilH;if(L.outdoor||(L.day||0)>0||n===22)return 3.4; // the open sky is high, above the tallest trees
   if(DUNGEON_LEVELS.includes(n))return 1.0;return L.amb?1.22:1.05}
 let RANGE=5.2;
@@ -2612,7 +2612,7 @@ function render3D(){
       if(mx<0||my<0||mx>=MW||my>=MH){g=1;break}
       g=grid[my][mx];if(g>0)break;
     }
-    if(g===0&&(LEVEL===41||LEVEL===43||LEVEL>=60&&LEVEL<=64||yarSea(LEVEL))){if(TERR_NOW)terrMarch(x,rX,rY,TFAR);zbuf[x]=99;wtop[x]=-1e9;continue} // open desert: no wall to be found, only the horizon
+    if(g===0&&(LEVEL===41||LEVEL===43||LEVEL>=60&&LEVEL<=64||yarSea(LEVEL)||LEVEL===470)){if(TERR_NOW)terrMarch(x,rX,rY,TFAR);zbuf[x]=99;wtop[x]=-1e9;continue} // open desert: no wall to be found, only the horizon
     let perp=side===0?sdx-ddx:sdy-ddy;if(perp<.05)perp=.05;
     zbuf[x]=perp;
     const hx=cx+rX*perp,hy=cy+rY*perp;
@@ -3628,7 +3628,7 @@ function jumpFromUrl(){
   const target=Math.max(1,Math.min(40,parseInt(q.get('lvl')||'8',10)||8));
   backupAuto();
   const sv=readSave('auto')||readSave('prev');
-  if(sv&&!['oldhaven','oakwood','landpath','pilgrim','monastery','monasterygate','hollowland','orangetower','orangeboss','kraken'].includes(town)){restore(sv)}
+  if(sv&&!['oldhaven','oakwood','landpath','pilgrim','monastery','monasterygate','hollowland','orangetower','orangeboss','hollowgrass','kraken'].includes(town)){restore(sv)}
   else{let p=null;try{p=JSON.parse(localStorage.getItem('abbeyParty')||'null')}catch(e){}setParty(p||DEFAULT_PARTY);reset();G.state='play'}
   G.heroes.forEach((h,i)=>{while(h.lvl<target){h.xp=xpNeed(h.lvl);levelUp(i)}h.alive=true;h.hp=h.max;h.mp=h.mpMax;h.food=Math.max(h.food||0,100)});
   G.lvlBanners.length=0;G.msgs=[];G.cut=null;G.talk=null;
@@ -3642,7 +3642,7 @@ function jumpFromUrl(){
     msg('The party stands at the Kraken line with all four Kraken harpoons. Walk east.','#ffe36a');return}
   if(town==='abbey'||town==='thornwood'){F.townSeen=0;delete F.abbeyIntroSeen;G.bossDead=true;goToLevel(2);G.state='play';G.menu=false;return}
   F.townSeen=1;F.abbeyIntroSeen=1;F.gwoodSeen=1;
-  const AREAS={hollowland:[364,35,60,0],orangetower:[440,30,38,0],orangeboss:[443,48,7,0],oldhaven:[305,74,141,0],oakwood:[311,2,36,1],landpath:[400,76,555,0],monasterygate:[411,73,306,0],pilgrim:[400,76,555,0],monastery:[430,42,66,0],bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],khemetracity:[44,201,379,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
+  const AREAS={hollowgrass:[470,75,142,0],hollowland:[364,35,60,0],orangetower:[440,30,38,0],orangeboss:[443,48,7,0],oldhaven:[305,74,141,0],oakwood:[311,2,36,1],landpath:[400,76,555,0],monasterygate:[411,73,306,0],pilgrim:[400,76,555,0],monastery:[430,42,66,0],bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],khemetracity:[44,201,379,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
   if(!AREAS[town]&&town.length>=4){const m=Object.keys(AREAS).filter(k=>k.startsWith(town)||town.startsWith(k));if(m.length===1)town=m[0]} // near-misses like whitedune find the right area
   if(AREAS[town]&&town!=='thornwood'){const [lv,ax,ay,af]=AREAS[town];F.gandrickDead=1;F.northGate=1;F.mayorKilled=1;F.mayorDown=1;F.ironRoad=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};if(lv===44&&LEVELS[44].stub){khEnter(()=>{goToLevel(lv,{x:ax,y:ay,f:af});G.state='play';G.menu=false});return}goToLevel(lv,{x:ax,y:ay,f:af});if(town==='orangeboss'){let tries=0;const iv=setInterval(()=>{const b=LEVEL===lv&&!TP&&G.enemies.find(e=>e.t==='hlboss0');if(b){clearInterval(iv);G.P.x=b.x;G.P.y=b.y+3;G.P.f=0;G.P.angT=undefined}else if(++tries>100)clearInterval(iv)},100)}G.state='play';G.menu=false;return}
   if(town==='greendale'||town==='anaea'){F.passDone=1;F.passSeen=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};goToLevel(town==='anaea'?33:32,town==='anaea'?sq(ANAEAJ):{x:2,y:36,f:1});G.state='play';G.menu=false;return}
@@ -5074,7 +5074,7 @@ function respawnForest(){
 // carry the party, bag, gold and quests into the next level
 function goToLevel(n,entry){
   // Oldhaven is painted with the city's pictures: never build it before they have loaded, or its soldiers come out as peasants and its walls as flat colour
-  if((((n>=304&&n<=312)||(n>=360&&n<=364)||(n>=400&&n<=434)||(n>=440&&n<=460))||(n>=6000&&n<7000))&&typeof KH_READY!=='undefined'&&!KH_READY&&!G._khWait){G._khWait=1;try{msg('The harbour comes into view...','#a8d8ff')}catch(e){}khLoadAssets().then(()=>{G._khWait=0;goToLevel(n,entry)}).catch(()=>{G._khWait=0});return}
+  if((((n>=304&&n<=312)||(n>=360&&n<=364)||(n>=400&&n<=434)||(n>=440&&n<=474))||(n>=6000&&n<7000))&&typeof KH_READY!=='undefined'&&!KH_READY&&!G._khWait){G._khWait=1;try{msg('The harbour comes into view...','#a8d8ff')}catch(e){}khLoadAssets().then(()=>{G._khWait=0;goToLevel(n,entry)}).catch(()=>{G._khWait=0});return}
   if(n===43||n===62||n===13||(n>=271&&n<=280)||(n>=289&&n<=399)||n>=40000)khLoadAssets(); // the city's pictures arrive in the background while the party walks to its gate
   G.lst[LEVEL]=levelState();
   const keep={heroes:G.heroes,bag:G.bag,gold:G.gold,keys:G.keys,rounds:G.rounds,kills:G.kills,sel:G.sel,bossDead:G.bossDead,flags:G.flags,quests:G.quests,lst:G.lst,clock:G.clock,starveT:G.starveT,aff:G.aff};
@@ -9831,7 +9831,6 @@ function khSkyList(cx,cy,dX,dY,L,minD2){
     if(d2>lim||d2<md)continue;
     const dot=rx*dX+ry*dY;if(dot<=0)continue;
     if(Math.abs(rx*dY-ry*dX)>dot*1.1+e.w*.6)continue;
-    if(LEVEL===304&&e.y>9&&e.y<10&&e.w>=5&&(dot<16||(dot<45&&Math.abs(rx*dY-ry*dX)<dot*.2)))continue; /* the great round towers at the ends of the gate are flat pictures: close up they stand over the gate wall like a huge slab, so they only show from far back */ if(LEVEL===304&&(e.w>=30?Math.abs(rx*dY-ry*dX)>dot*.6:e.w/(dot*1.3)>.4&&Math.abs(rx*dY-ry*dX)>dot*.25))continue; // on the quay any flat roof or tower picture that is wide on screen and off to one side, and the 62 wide keep seen from the side, looks like a wall jutting out, so they are left out unless the camera faces them
     const img=IMG[e.k];if(!img)continue;
     out.push({x:e.x,y:e.y,img,w:e.w,bob:e.z,decor:KH_SKYD,sky:true,smallSky:!e.big});
   }
@@ -22451,6 +22450,385 @@ function ringFor(u,rate){const tier=rate>=50?4:rate>=38?3:rate>=22?2:1,pool=RING
   for(const k in SH){const f=KH_STOCK[k];if(!f)continue;const ids=SH[k];
     KH_STOCK[k]=function(){const base=typeof f==='function'?f.apply(this,arguments):f,L=partyLevel(),tier=L>=45?4:L>=30?3:L>=15?2:1,extra=RINGS.filter(r=>ids.includes(r[0])&&r[5]<=tier).map(r=>[r[0],1]);
       return (Array.isArray(base)?base:[]).filter(e=>!(ITEMDEF[e[0]]&&ITEMDEF[e[0]].k==='ring'&&/^ring[VMWS]$/.test(e[0]))).concat(extra)}}}
+
+/* ---- src/desert/hollowgrass.js ---- */
+/* ==========================================================================
+   THE HOLLOW GRASSLANDS. A wide dark grassland under a sky that is never lit, with the wind always in it. Strange rocks sit on the low hills, the
+   little villages are white round houses behind spiked wooden fences, and on the hills the insectivores sit in wait. Four beehive dungeons lie scattered
+   over it. The people are frog-like and speak a tongue the party cannot follow until it has found the four books in the hives (see hollowgrass_talk.js).
+   Levels: 470 the grassland, 471 to 474 the four hives. The way in is a spiked gate at the east end of the high ledge in the Hollow Land (level 364).
+   ========================================================================== */
+const HG={ID:470,HIVES:[471,472,473,474],W:150,H:150,DIFF:40,START:{x:75,y:142}};
+const HG_TOWNS=[{k:'exsce',n:'Exsce',x:75,y:106},{k:'ulb',n:'Ulb',x:26,y:84},{k:'glorm',n:'Glorm',x:124,y:82},{k:'wexsh',n:'Wexsh',x:42,y:36},{k:'nibb',n:'Nibb',x:112,y:30}];
+const HG_HIVE_AT=[[22,122],[128,116],[76,58],[80,12]];
+const HG_HIVE_NAMES=['The Hush Hive','The Droning Hive','The Amber Hive','The Queen’s Hive'];
+for(let i=0;i<10;i++){loadImg('hg_ins'+i,'assets/hg_ins'+i+'.png');loadImg('hg_ins'+i+'A','assets/hg_ins'+i+'A.png')}
+for(const n of ['hg_frog0','hg_frog1','hg_swarm0','hg_swarm1','hg_swarm0A','hg_swarm1A','hg_larva','hg_larvaA','hg_wasp','hg_waspA','hg_golem','hg_golemA','hg_queen','hg_queenA','hg_house0','hg_house1','hg_palisade','hg_gate','hg_rock0','hg_rock1','hg_hive','hg_well','hg_chestwax','hg_chestweed','hg_chestjelly','hg_waxbarrel','hg_jar','hg_lectern','hg_eggs','hg_wizard','hg_npc0','hg_npc1','hg_npc3','hg_npc4','hg_npc5','hg_npc6'])loadImg(n,'assets/'+n+'.png');
+Object.assign(NPC_H,{hg_frog0:1.0,hg_frog1:1.0,hg_house0:1.8,hg_house1:2.3,hg_palisade:1.45,hg_gate:2.1,hg_rock0:3.0,hg_rock1:2.2,hg_hive:3.2,hg_well:1.3,hg_chestwax:.62,hg_chestweed:.62,hg_chestjelly:.62,hg_waxbarrel:.95,hg_jar:1.1,hg_lectern:1.1,hg_eggs:.95,hg_wizard:1.35,hg_npc0:1.35,hg_npc1:1.25,hg_npc3:1.0,hg_npc4:1.4,hg_npc5:1.3,hg_npc6:1.3});
+CONTAINERS.push('hg_chestwax','hg_chestweed','hg_chestjelly','hg_waxbarrel','hg_jar');
+LEVEL_NAMES[HG.ID]='The Hollow Grasslands';HG.HIVES.forEach((id,i)=>LEVEL_NAMES[id]=HG_HIVE_NAMES[i]);
+LEVEL_RATING[HG.ID]=HG.DIFF;HG.HIVES.forEach((id,i)=>LEVEL_RATING[id]=HG.DIFF+i*2);
+WORLD_LOCS.push({k:'hollowgrass',n:'The Hollow Grasslands',sub:'a dark grassland beyond the Hollow Land',lv:[470,471,472,473,474],x:-6,y:290,ic:'trees'});
+WIND_AMT[HG.ID]=1; // the wind is always in the grass
+/* ---------- the creatures ---------- */
+const HG_INS=[['Mire Tick',30,[3,6],.9],['Reed Skitter',38,[4,7],1.1],['Pond Stalker',48,[5,9],1.35],['Barbed Lurker',60,[6,11],1.6],['Gulping Mantis',74,[7,13],1.9],['Dusk Weaver',90,[8,15],2.2],['Glass-Eyed Hunter',110,[10,18],2.6],['Hollow Crawler',135,[11,20],3.0],['Spindle Tyrant',165,[13,23],3.5],['The Great Insectivore',210,[15,28],4.2]];
+HG_INS.forEach((r,i)=>{ENEMY_DEF['hgins'+i]={name:r[0],hp:r[1],dmg:r[2],hit:.72+i*.012,w:r[3],img:'hg_ins'+i,xp:70+i*50,gold:[0,0],speed:1,verb:i<5?'bites':'impales',aboveParty:0,kind:'insectivore'}});
+Object.assign(ENEMY_DEF,{
+  hgswarm0:{name:'Biter Swarm',hp:26,dmg:[3,6],hit:.7,w:1.3,img:'hg_swarm0',xp:55,gold:[0,0],speed:2,fly:true,wander:true,verb:'stings',kind:'swarm'},
+  hgswarm1:{name:'Moth Cloud',hp:22,dmg:[3,5],hit:.68,w:1.3,img:'hg_swarm1',xp:50,gold:[0,0],speed:2,fly:true,wander:true,verb:'bites',kind:'swarm'},
+  hglarva:{name:'Hive Grub',hp:55,dmg:[5,9],hit:.72,w:1.3,img:'hg_larva',xp:90,gold:[0,6],speed:1,verb:'gnaws'},
+  hgwasp:{name:'Hive Guard',hp:62,dmg:[6,11],hit:.78,w:.85,img:'hg_wasp',xp:120,gold:[2,12],speed:1,verb:'stabs'},
+  hggolem:{name:'Wax Golem',hp:110,dmg:[8,15],hit:.74,w:1.45,img:'hg_golem',xp:170,gold:[4,16],speed:1,verb:'pounds'},
+  hgboss1:{name:'Captain of the Hush Hive',hp:200,dmg:[10,18],hit:.82,w:1.25,img:'hg_wasp',xp:280,gold:[60,120],speed:1,verb:'spears',boss:true,aboveParty:2},
+  hgboss2:{name:'The Droning Warden',hp:300,dmg:[12,21],hit:.82,w:2.1,img:'hg_golem',xp:420,gold:[80,150],speed:1,verb:'crushes',boss:true,aboveParty:3},
+  hgboss3:{name:'The Mother Grub',hp:360,dmg:[13,23],hit:.82,w:2.4,img:'hg_larva',xp:560,gold:[100,180],speed:1,verb:'devours',boss:true,aboveParty:3},
+  hgboss4:{name:'The Hive Queen',hp:480,dmg:[16,28],hit:.85,w:2.3,img:'hg_queen',xp:900,gold:[150,260],speed:1,verb:'stings',boss:true,aboveParty:4}});
+for(const k of ['hgboss1','hgboss2','hgboss3','hgboss4'])if(typeof NO_VARY!=='undefined')NO_VARY.push(k);
+/* ---------- foods, books, weapons and armour ---------- */
+const HG_FOOD=[ // [id, name, colour, health, hunger, price, description]
+ ['hgcomb','Hive Honeycomb','#e8b030',16,60,12,'A lump of golden comb, still dripping. Thick, sweet and chewy.'],
+ ['hgjelly','Royal Jelly','#f0e0a0',26,90,30,'A small jar of pale, tingling jelly from the queen’s own cells. It tastes of flowers and pepper.'],
+ ['hggrubs','Fried Hive Grubs','#c8a860',14,70,10,'A plate of grubs fried in wax. They crunch, and taste like roasted nuts.'],
+ ['hgkelp','Pickled Pond Kelp','#4a5a38',12,50,8,'A tied bundle of kelp pickled in brine. Salty, sour and slippery.'],
+ ['hgroot','Water-Lily Root','#d8d0b8',10,55,6,'A pale, starchy root dug out of the pond mud. Mild, like a potato.'],
+ ['hgpond','Cloudy Pond Water','#78b890',8,25,7,'A flask of cloudy green water that glows faintly. The locals drink it. It tastes of pennies.']];
+for(const [id,n,c,heal,feed,price,d] of HG_FOOD)ITEMDEF[id]={n,k:'food',t:'Meal',ic:'bread',c,heal,feed,stack:1,price,d:'Meal. Fills '+feed+' hunger and restores '+heal+' health. '+d,sw:.3};
+ITEMDEF.hgreed={n:'Reed Bundle',k:'quest',t:'Reeds',ic:'ore',c:'#6a8a4a',stack:1,price:4,d:'A bundle of tall pond reeds, tied with a strip of bark. The villagers use them for roofs and rope.',sw:.2};
+ITEMDEF.hgegg={n:'Amber Egg',k:'quest',t:'Treasure',ic:'ore',c:'#e0a030',stack:1,price:140,d:'A hard, glowing egg-shaped lump of amber. A shop pays about 140 gold for it.',sw:.3};
+ITEMDEF.hgcrystal=Object.assign({},ITEMDEF.hgegg,{n:'Honey Crystal',d:'A crystal of honey hardened over many years. A shop pays about 140 gold for it.'});
+const HG_BOOKS=[['The Primer of Ripples','#8a6a3a','A thin book of simple pictures and the words that go with them, written in the speech of the grasslands. Reading it, the party will follow a little of what the folk say.'],
+ ['The Book of Small Courtesies','#7a6a4a','Greetings, thanks and the ordinary things people say to one another, written out in the grassland tongue.'],
+ ['The Grammar of the Deep Water','#5a6a58','A heavy book that explains how the grassland tongue is put together. With it, most of what the folk say can be followed.'],
+ ['The Queen’s Dictionary','#b88a30','A great book of every word in the grassland tongue, kept by the Hive Queen. With it, the party can follow everything the folk say.']];
+HG_BOOKS.forEach((b,i)=>{ITEMDEF['hgbook'+(i+1)]={n:b[0],k:'quest',t:'Book',ic:'ore',c:b[1],stack:0,price:0,d:b[2],sw:.6}});
+gw('hgsting','Stinger Blade','Sword',40,[34,48],.04,{str:24},2400,'#c89030',{bleed:[.3,6,3]},'A short blade made from the stinger of a giant hive insect. Three hits in ten leave the foe bleeding.');
+gw('hgmandible','Mandible Axe','Axe',40,[38,54],-.02,{str:26},2600,'#8a7a40',{cleave:1},'An axe with a blade of serrated chitin. Every hit also cuts the foe standing behind the first.');
+gw('hgbarb','Barbed Chitin Spear','Sword',35,[28,40],.06,{str:22},1700,'#7a6a3a',{stun:.15},'A long spear with a barbed tip. One hit in seven knocks the foe senseless for a round.');
+ga('hgcarapace','shield','Carapace Shield','Shield',30,14,1100,'#8a8a3a',{thorns:5},'A round shield of overlapping beetle shells. Every enemy that strikes you takes 5 damage.');
+ARM_SET_OF.hgchit={name:'Chitin Warden',bonus:{thorns:6,ward:3},btxt:'Every enemy that strikes you takes 6 damage, and every blow on you is 3 lighter.',lv:35,key:'hgchit'};
+[['h','head','Chitin Helm','head',.55,'dodge'],['c','chest','Chitin Cuirass','chest',1,'ward'],['a','arms','Chitin Gauntlets','arms',.35,'thorns'],['l','legs','Chitin Greaves','legs',.45,'dodge']].forEach(([sx,slot,nm,ic,f,k])=>{
+  const id='ar_hgchit_'+sx,t=3.5,v=k==='dodge'?.05:k==='ward'?5:7,pas={};pas[k]=v;
+  ITEMDEF[id]={n:nm,k:slot,t:slot==='head'?'Helm':slot==='chest'?'Chest':slot==='arms'?'Arms':'Legs',ic,c:'#8a7a3a',armor:Math.max(2,Math.round(19*f)),price:Math.round(1000*f),lvl:35,pas,set:'hgchit',tier:35,
+    d:(k==='dodge'?'Enemies miss 5% more.':k==='ward'?'Every blow on you is 5 lighter.':'Every enemy that strikes you takes 7 damage.')+' Set: Chitin Warden. All four pieces give: '+ARM_SET_OF.hgchit.btxt+' Needs level 35.',sw:slot==='head'?.38:slot==='chest'?.46:.4,gear:1};
+  GEAR.push(id);ARM_IDS.push(id);void t});
+const HG_GEAR=['hgsting','hgmandible','hgbarb','hgcarapace','ar_hgchit_h','ar_hgchit_c','ar_hgchit_a','ar_hgchit_l'];
+if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push(...HG_FOOD.map(f=>f[0]),'hgreed','hgegg','hgcrystal','hgbook1','hgbook2','hgbook3','hgbook4',...HG_GEAR);
+/* chests, barrels and jars in the grasslands and the hives: foods first, a potion, a little gold, and the chitin gear now and then */
+{const _lf=lootFor;lootFor=function(d){
+  if(LEVEL>=HG.ID&&LEVEL<=HG.HIVES[3]&&d&&/^hg_(chest|waxbarrel|jar)/.test(d.k)){
+    const r=k=>hash2(d.x,d.y,900+k),it=[],add=(id,n)=>it.push({id,n:ITEMDEF[id]&&ITEMDEF[id].stack?(n||1):1}),chest=/chest/.test(d.k),F=HG_FOOD.map(f=>f[0]);
+    add(F[(r(1)*F.length)|0],2+((r(2)*3)|0));if(r(3)<.6)add(F[(r(4)*F.length)|0],2);
+    if(r(5)<.5)add(potionFor(r(6)));
+    if(chest&&r(7)<.4)add(HG_GEAR[(r(8)*HG_GEAR.length)|0]);
+    if(r(9)<.2)add('hgcrystal');
+    d.gold=chest?60+Math.floor(r(10)*180):10+Math.floor(r(11)*50);return it}
+  return _lf.apply(this,arguments)}}
+/* ---------- the walls of the hives: honeycomb, drawn in code ---------- */
+function hgWaxTex(){
+  if(IMG.hg_wax)return;
+  IMG.hg_wax=mkCanvas(128,128,(x,w,h)=>{
+    x.fillStyle='#3a2208';x.fillRect(0,0,w,h);const R=15,hh=R*Math.sqrt(3);
+    for(let r=-1;r<9;r++)for(let c=-1;c<9;c++){const cx=c*R*1.5+8,cy=r*hh+(c%2?hh/2:0)+6,v=hash2(c+9,r+9,61),sh=Math.floor(185+v*60);
+      x.beginPath();for(let k=0;k<6;k++){const a=k*Math.PI/3;x.lineTo(cx+(R-1.5)*Math.cos(a),cy+(R-1.5)*Math.sin(a))}x.closePath();
+      const gr=x.createRadialGradient(cx-3,cy-4,2,cx,cy,R);gr.addColorStop(0,`rgb(${sh+50},${sh-10},${Math.floor(30+v*30)})`);gr.addColorStop(1,`rgb(${sh-50},${sh-90},18)`);x.fillStyle=gr;x.fill()}
+    x.fillStyle='rgba(255,200,80,.18)';for(let i=0;i<9;i++)x.fillRect(hash2(i,1,62)*w,hash2(i,2,62)*h,2,12+hash2(i,3,62)*30)}); // the odd drip of honey
+}
+/* ---------- the four hives ---------- */
+function hgHive(i){
+  const id=HG.HIVES[i];if(LEVELS[id])return;hgWaxTex();
+  const W=62,H=62,sd=id*11+5,hs=hash2,g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
+  OH_STY.hgwax=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:'hg_wax',door:'hg_wax',win:'hg_wax',alt:'hg_wax',zoom:1,contrast:1.05,tint:[255,255,255,0]});
+  const TM=ohTiles(),wall=TM.make('plain','hgwax',2.7).gid,door=String.fromCharCode(0x2f0),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(2.7,'cave',[255,200,120]);KH_DOOR[dgid]={lvl:HG.ID,at:{x:HG_HIVE_AT[i][0],y:HG_HIVE_AT[i][1]+2,f:2}};
+  const chars={'#':wall};chars[door]=dgid;
+  // the cells of the hive: centres on a staggered lattice, joined by short tunnels
+  const cols=6,rowsN=7,cell=(c,r)=>({c,r,x:Math.round(6+c*9+(r%2?4.5:0)),y:Math.round(6+r*8.2),on:false}),nodes=[];
+  for(let r=0;r<rowsN;r++)for(let c=0;c<cols;c++)nodes.push(cell(c,r));
+  const at=(c,r)=>nodes.find(n=>n.c===c&&n.r===r);
+  const nbrs=n=>{const o=[[n.c-1,n.r],[n.c+1,n.r]],e=n.r%2?[0,1]:[-1,0];for(const dr of [-1,1])for(const dc of e)o.push([n.c+dc,n.r+dr]);return o.map(([c,r])=>at(c,r)).filter(Boolean)};
+  const keep=n=>hs(n.c,n.r,sd)<.82||(n.c===2&&n.r===rowsN-1);
+  const start=at(2,rowsN-1);start.on=true;const q=[start],edges=[],dist=new Map([[start,0]]);
+  for(let k=0;k<q.length;k++){const n=q[k];for(const m of nbrs(n)){if(!keep(m))continue;if(!m.on){m.on=true;dist.set(m,dist.get(n)+1);q.push(m);edges.push([n,m])}else if(hs(n.c*7+m.c,n.r*5+m.r,sd+1)<.3&&!edges.some(e=>(e[0]===n&&e[1]===m)||(e[0]===m&&e[1]===n)))edges.push([n,m])}}
+  const rad=n=>(hs(n.c,n.r,sd+2)<.35?2.5:3.4);
+  for(const n of q){const R=rad(n);for(let y=Math.floor(n.y-R);y<=n.y+R;y++)for(let x=Math.floor(n.x-R);x<=n.x+R;x++)if(x>1&&y>1&&x<W-2&&y<H-2&&Math.hypot(x-n.x,y-n.y)<=R)g[y][x]='.'}
+  for(const [a,b] of edges){let x=a.x,y=a.y;const sx=Math.sign(b.x-a.x),sy=Math.sign(b.y-a.y);while(x!==b.x||y!==b.y){if(x!==b.x&&(y===b.y||hs(x,y,sd+3)<.5))x+=sx;else y+=sy;for(const [ox,oy] of [[0,0],[1,0],[0,1]]){const xx=x+ox,yy=y+oy;if(xx>1&&yy>1&&xx<W-2&&yy<H-2)g[yy][xx]='.'}}}
+  // the way out: the door in the wall below the first cell
+  const sx=start.x,sy=start.y+Math.floor(rad(start))-0;let doorY=sy;while(g[doorY+1]&&g[doorY+1][sx]==='.')doorY++;g[doorY+1][sx]=door;
+  const sp={x:sx,y:doorY};
+  // far cell: the boss room
+  let far=start,fd=-1;for(const n of q){if(dist.get(n)>fd){fd=dist.get(n);far=n}}
+  const used=new Set([sp.x+','+sp.y]),cells=[];for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++)if(g[y][x]==='.'&&Math.hypot(x-sp.x,y-sp.y)>7)cells.push([x,y]);
+  const pick=k=>{for(let t=0;t<80;t++){const c=cells[(hs(k,t,sd+4)*cells.length)|0];if(c&&!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);return c}}return null};
+  const inFar=(x,y)=>Math.hypot(x-far.x,y-far.y)<=rad(far)+1;
+  const decor=[],enemies=[],items=[],lights=[];
+  for(const n of q){lights.push([n.x,n.y]);if(n!==start)decor.push({k:'hg_eggs',x:n.x,y:n.y,block:false,walk:true,deco:true,sc:.9})}
+  const kinds=[['hglarva','hgswarm0'],['hglarva','hgwasp','hgswarm0','hgswarm1'],['hgwasp','hggolem','hgswarm1','hglarva'],['hgwasp','hggolem','hglarva','hgswarm0','hgswarm1']][i];
+  const nFoe=12+i*4;for(let k=0;k<nFoe;k++){const c=pick(100+k);if(c&&!inFar(c[0],c[1])||(c&&k%3===0))enemies.push({t:kinds[(hs(k,i,sd+5)*kinds.length)|0],x:c[0],y:c[1]})}
+  const bossT='hgboss'+(i+1);enemies.push({t:bossT,x:far.x,y:far.y+1});
+  decor.push({k:'hg_lectern',x:far.x,y:far.y-2,block:true});items.push({k:'hgbook'+(i+1),x:far.x+1,y:far.y-2});used.add(far.x+','+(far.y-2));used.add((far.x+1)+','+(far.y-2));
+  const CH=['hg_chestwax','hg_chestweed','hg_chestjelly'];
+  for(let k=0;k<4+i;k++){const c=pick(200+k);if(c)decor.push({k:CH[(hs(k,i,sd+6)*3)|0],x:c[0],y:c[1],block:true})}
+  for(let k=0;k<9;k++){const c=pick(300+k);if(c)decor.push({k:k%2?'hg_waxbarrel':'hg_jar',x:c[0],y:c[1],block:true})}
+  for(let k=0;k<26;k++){const c=pick(400+k);if(c)decor.push({k:'hg_eggs',x:c[0],y:c[1],block:true,sc:.7+hs(k,3,sd+7)*.4})}
+  for(let k=0;k<12;k++){const c=pick(500+k);if(c)items.push({k:['hgcomb','hgcomb','hgjelly','hggrubs'][k%4],x:c[0],y:c[1]})}
+  const lv={rows:g.map(r=>r.join('')),start:{x:sp.x,y:sp.y-1,f:0},enemies,items,decor,chars,day:0,floor:'wood',name:HG_HIVE_NAMES[i],label:HG_HIVE_NAMES[i],diff:HG.DIFF+i*2,ceilH:2.7,torchGap:1e9,noTele:true,portals:[],lights,
+    mapNames:[{t:HG_HIVE_NAMES[i],x:sp.x,y:H-1,k:'place'},{t:i===3?'The Queen’s Cell':'The Heart of the Hive',x:far.x,y:far.y-4,k:'place'}]};
+  LEVELS[id]=lv;
+}
+
+/* ---- src/desert/hollowgrass_land.js ---- */
+/* ==========================================================================
+   THE HOLLOW GRASSLANDS, part two: the grassland itself (level 470), its five villages, the creatures on the hills, and the way in from the Hollow Land.
+   ========================================================================== */
+function hgBuild(){
+  if(LEVELS[HG.ID])return;
+  if(typeof KH_READY!=='undefined'&&!KH_READY)return;
+  ohAlias();oqAlias();ohArt();ohFloors();ohStyles();isleFloors();
+  const W=HG.W,H=HG.H,N=W*H,hs=hash2,sd=4701,I=(x,y)=>y*W+x,K=(x,y)=>x+','+y;
+  const TM=ohTiles(),chars={D:LEVEL41_DATA.chars.D},chMap=new Map();let nextCh=0x300;
+  const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
+  if(!IMG.hg_dark)IMG.hg_dark=mkCanvas(128,128,(x,w,h)=>{const gr=x.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#0c110c');gr.addColorStop(1,'#1a2218');x.fillStyle=gr;x.fillRect(0,0,w,h);for(let i=0;i<260;i++){x.fillStyle=`rgba(${30+hash2(i,1,5)*30|0},${44+hash2(i,2,5)*34|0},${30+hash2(i,3,5)*24|0},.35)`;x.fillRect(hash2(i,4,5)*w,hash2(i,5,5)*h,2+hash2(i,6,5)*7,3+hash2(i,7,5)*12)}});
+  OH_STY.hgrock=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:'hg_dark',win:'hg_dark',alt:'hg_dark',door:'hg_dark',zoom:1,contrast:1,tint:[255,255,255,0]});
+  const rock=[ch(TM.make('plain','hgrock',5.4).gid)];
+  const rows=[],fm=new Array(N).fill('0'),h=new Float32Array(N),rk=new Float32Array(N),block=new Uint8Array(N);
+  for(let y=0;y<H;y++)rows.push(new Array(W).fill('.'));
+  const decor=[],enemies=[],items=[],lights=[],used=new Set();
+  const near=(x,y,list,r)=>list.some(p=>Math.hypot(x-p[0],y-p[1])<r);
+  const towns=HG_TOWNS.map(t=>[t.x,t.y]),hives=HG_HIVE_AT,keepOut=[...towns,...hives,[HG.START.x,HG.START.y]];
+  // the land: low rolling hills, flat round the villages, a rock wall all round
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=I(x,y);
+    if(x<2||y<2||x>=W-2||y>=H-2){rows[y][x]=rock[0];block[i]=1;h[i]=.5;continue}
+    let v=.3+tsmooth(x/17,y/17,sd)*.75+tsmooth(x/6,y/6,sd+3)*.16;
+    for(const t of towns){const d=Math.hypot(x-t[0],y-t[1]);if(d<16)v=v*Math.max(0,(d-12)/4)+.38*(1-Math.max(0,(d-12)/4))}
+    for(const p of [[HG.START.x,HG.START.y],...hives]){const d=Math.hypot(x-p[0],y-p[1]);if(d<7)v=v*Math.max(0,(d-4)/3)+.38*(1-Math.max(0,(d-4)/3))}
+    h[i]=v;fm[i]=tsmooth(x/9,y/9,sd+7)>.72?'5':tsmooth(x/7,y/7,sd+9)>.7?'2':'0'}
+  // the dirt tracks that join the villages and the hives
+  const track=(a,b)=>{let x=a[0],y=a[1];const w=hs(a[0],b[1],sd+11);while(Math.abs(x-b[0])+Math.abs(y-b[1])>0){const dx=b[0]-x,dy=b[1]-y;if(dx!==0&&(dy===0||Math.abs(dx)>Math.abs(dy)*(.6+w)&&hs(x,y,sd+12)<.7))x+=Math.sign(dx);else y+=Math.sign(dy);
+      for(const [ox,oy] of [[0,0],[1,0]]){const xx=x+ox;if(xx>2&&xx<W-3&&y>2&&y<H-3&&fm[I(xx,y)]!=='1')fm[I(xx,y)]='1'}}};
+  const T=HG_TOWNS;track([HG.START.x,HG.START.y-3],[T[0].x,T[0].y+10]);track([T[0].x,T[0].y-10],[T[1].x+10,T[1].y]);track([T[0].x,T[0].y-10],[T[2].x-10,T[2].y]);track([T[1].x,T[1].y-10],[T[3].x,T[3].y+10]);track([T[2].x,T[2].y-10],[T[4].x,T[4].y+10]);track([T[3].x+10,T[3].y],[T[4].x-10,T[4].y]);
+  hives.forEach((p,i)=>track([p[0],p[1]+3],[[T[1].x,T[1].y+10],[T[2].x,T[2].y+10],[T[0].x,T[0].y-10],[T[4].x,T[4].y-10]][i]));
+  // the villages: a loose grid of lanes, white round houses between them, a spiked wooden fence all round with a gap at the north and the south
+  const R=10;
+  towns.forEach(([cx,cy],ti)=>{
+    for(let d=-R;d<=R;d++)for(const l of [-5,0,5]){for(const [x,y] of [[cx+l,cy+d],[cx+d,cy+l]])if(x>2&&y>2&&x<W-3&&y<H-3)fm[I(x,y)]='1'}
+    for(const [x,y] of [[cx,cy-R-1],[cx,cy-R-2],[cx,cy+R+1],[cx,cy+R+2]])fm[I(x,y)]='1';
+    for(let t=-R;t<=R;t++)for(const [x,y,gap] of [[cx+t,cy-R,Math.abs(t)<=1],[cx+t,cy+R,Math.abs(t)<=1],[cx-R,cy+t,false],[cx+R,cy+t,false]]){if(gap)continue;used.add(K(x,y));decor.push({k:'hg_palisade',x,y,block:true,sc:1,ox:(hs(x,y,sd+20)-.5)*.3})}
+    for(const [x,y] of [[cx-2,cy-R+1],[cx+2,cy-R+1],[cx-2,cy+R-1],[cx+2,cy+R-1]]){decor.push({k:'lamp',x,y,block:false,walk:true,deco:true});lights.push([x,y]);used.add(K(x,y))}
+    // houses in the blocks between the lanes, apart from the four round the little square
+    for(const bx of [-8,-3,2,7])for(const by of [-8,-3,2,7]){
+      if((bx===-3||bx===2)&&(by===-3||by===2))continue;
+      if(hs(cx+bx,cy+by,sd+21)<.18)continue;const x=cx+bx,y=cy+by,k='hg_house'+((hs(x,y,sd+22)<.5)?0:1);
+      decor.push({k,x,y,block:true,ox:.5,sc:1+(hs(x,y,sd+23)-.5)*.12},{k,x:x+1,y,block:true,sc:.0001});used.add(K(x,y));used.add(K(x+1,y))}
+    decor.push({k:'hg_well',x:cx+2,y:cy+2,block:true});used.add(K(cx+2,cy+2));lights.push([cx+2,cy+2]);
+    // the people of the village (see hollowgrass_talk.js), and the rest of the square
+    try{hgPopulate(ti,cx,cy,decor,used)}catch(e){console.error(e)}
+  });
+  // the rocks on the low hills
+  let nr=0;for(let t=0;t<900&&nr<46;t++){const x=6+((hs(t,1,sd+30)*(W-12))|0),y=6+((hs(t,2,sd+30)*(H-12))|0);
+    if(used.has(K(x,y))||near(x,y,keepOut,18)||h[I(x,y)]<.7)continue;used.add(K(x,y));nr++;decor.push({k:'hg_rock'+(hs(x,y,sd+31)<.55?0:1),x,y,block:true,sc:.9+hs(x,y,sd+32)*.9,ox:(hs(x,y,sd+33)-.5)*.6})}
+  // the insectivores: they sit on the hills and wait; the further from the start, the bigger
+  const place=(t,x,y)=>{used.add(K(x,y));enemies.push({t,x,y})};
+  let ni=0;for(let t=0;t<2600&&ni<80;t++){const x=6+((hs(t,3,sd+40)*(W-12))|0),y=6+((hs(t,4,sd+40)*(H-12))|0);
+    if(used.has(K(x,y))||near(x,y,towns,17)||near(x,y,[[HG.START.x,HG.START.y]],14)||h[I(x,y)]<(t<1400?.78:.5))continue;
+    const d=Math.hypot(x-HG.START.x,(y-HG.START.y)*.9),u=Math.pow(Math.min(1,Math.max(0,d/140+(hs(x,y,sd+41)-.5)*.35)),1.4),tier=Math.min(9,Math.floor(u*10));
+    if(ni%9===8&&tier<8)continue;place('hgins'+tier,x,y);ni++}
+  // by every hive entrance, a big one sits and guards it
+  hives.forEach((p,i)=>{for(const [dx,dy] of [[-5,4],[5,4]]){const x=p[0]+dx,y=p[1]+dy;if(!used.has(K(x,y)))place('hgins'+(5+i),x,y)}});
+  // swarms drift over the open grass
+  let ns=0;for(let t=0;t<600&&ns<18;t++){const x=8+((hs(t,5,sd+50)*(W-16))|0),y=8+((hs(t,6,sd+50)*(H-16))|0);if(used.has(K(x,y))||near(x,y,keepOut,15))continue;place(ns%2?'hgswarm1':'hgswarm0',x,y);ns++}
+  // the gentle frog-whales graze about and do no harm
+  let nf=0;for(let t=0;t<600&&nf<30;t++){const x=6+((hs(t,7,sd+60)*(W-12))|0),y=6+((hs(t,8,sd+60)*(H-12))|0);if(used.has(K(x,y))||near(x,y,keepOut,10))continue;used.add(K(x,y));nf++;
+    decor.push({k:'hg_frog'+(nf%2),x,y,block:true,npc:'hg_frogbeast',sc:.9+hs(x,y,sd+61)*.5,bob:.2})}
+  // grass, bracken and things to pick
+  const GR=['pgrass0','pgrass1','pgrass2','pgrass3'].filter(k=>IMG[k]);let ng=0;
+  if(GR.length)for(let t=0;t<2400&&ng<760;t++){const x=3+((hs(t,9,sd+70)*(W-6))|0),y=3+((hs(t,10,sd+70)*(H-6))|0);if(used.has(K(x,y))||fm[I(x,y)]==='1')continue;ng++;
+    decor.push({k:GR[(hs(x,y,sd+71)*GR.length)|0],x,y,block:false,walk:true,deco:true,sc:1+hs(x,y,sd+72)*1.5,ox:(hs(x,y,sd+73)-.5)*.8,oy:(hs(x,y,sd+74)-.5)*.8})}
+  const pickable=(id,n,seed)=>{let c=0;for(let t=0;t<2000&&c<n;t++){const x=6+((hs(t,11,seed)*(W-12))|0),y=6+((hs(t,12,seed)*(H-12))|0);if(used.has(K(x,y))||near(x,y,towns,13)||fm[I(x,y)]==='1')continue;used.add(K(x,y));items.push({k:id,x,y});c++}};
+  pickable('hgreed',36,sd+80);pickable('hgroot',30,sd+81);pickable('hgpond',14,sd+82);pickable('hgkelp',16,sd+83);pickable('hgegg',6,sd+84);
+  // wax chests lie out in the grass here and there
+  for(let t=0,c=0;t<800&&c<10;t++){const x=8+((hs(t,13,sd+90)*(W-16))|0),y=8+((hs(t,14,sd+90)*(H-16))|0);if(used.has(K(x,y))||near(x,y,towns,14)||near(x,y,[[HG.START.x,HG.START.y]],12))continue;used.add(K(x,y));c++;decor.push({k:['hg_chestweed','hg_chestwax','hg_chestjelly'][c%3],x,y,block:true})}
+  // the hives
+  hives.forEach((p,i)=>{decor.push({k:'hg_hive',x:p[0],y:p[1],block:true,enter:{to:HG.HIVES[i],x:0,y:0,f:0},sc:1.05});used.add(K(p[0],p[1]));lights.push([p[0],p[1]+2]);fm[I(p[0],p[1]+1)]='1';fm[I(p[0],p[1]+2)]='1'});
+  // the gate in the south, back to the Hollow Land
+  decor.push({k:'hg_gate',x:HG.START.x,y:HG.H-4,block:true,enter:{to:HL.CAV,x:61,y:57,f:3}});
+  // the wizard, a little way up the track, who will come to meet the party (see hollowgrass_talk.js)
+  decor.push({k:'hg_wizard',x:HG.START.x,y:HG.START.y-9,block:false,walk:true,npc:'hg_aldous0',sc:1,hgIntro:1});
+  const fmap=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=fm[I(x,y)];fmap.push(r)}
+  const lv={rows:rows.map(r=>r.join('')),start:{x:HG.START.x,y:HG.START.y,f:0},enemies,items,decor,scenery:[],sky:[],fmap,floorSet:['ohMeadow','ohGravel','ohLawn','bluesand','bluewater','ohMoss','isleSandDk','wood'],floor:'ohMeadow',ceil:'cloud',
+    day:.16,outdoor:true,amb:.5,name:LEVEL_NAMES[HG.ID],label:'The Hollow Grasslands',noExtras:true,diff:HG.DIFF,ceilH:5.2,chars,lights,portals:[],noTele:true,
+    mapNames:[...HG_TOWNS.map(t=>({t:t.n,x:t.x,y:t.y-R-2,k:'place'})),...HG_HIVE_NAMES.map((n,i)=>({t:n,x:HG_HIVE_AT[i][0],y:HG_HIVE_AT[i][1]-3,k:'place'}))]};
+  LEVELS[HG.ID]=lv;TERRS[HG.ID]=yarTerrain(W,H,h,rk,block);
+  // the doors of the hives know where they stand
+  hives.forEach((p,i)=>{hgHive(i);const hv=LEVELS[HG.HIVES[i]],d=decor.find(q=>q.enter&&q.k==='hg_hive'&&q.x===p[0]&&q.y===p[1]);if(d){d.enter.x=hv.start.x;d.enter.y=hv.start.y;d.enter.f=0}});
+}
+KH_LAZY[HG.ID]=hgBuild;HG.HIVES.forEach((id,i)=>{KH_LAZY[id]=()=>{hgBuild();hgHive(i)}});
+/* the way in: a spiked gate at the east end of the high ledge in the Hollow Land. The grassland is built the first time the ledge is, so the gate opens at once. */
+{const _hc=hlCavern;hlCavern=function(){_hc.apply(this,arguments);const L=LEVELS[HL.CAV];if(L&&!L._hg){L._hg=1;L.decor.push({k:'hg_gate',x:63,y:57,block:true,enter:{to:HG.ID,x:HG.START.x,y:HG.START.y,f:0}});L.mapNames.push({t:'The Gate to the Grasslands',x:61,y:58,k:'lane'});try{hgBuild()}catch(e){console.error(e)}}}}
+
+/* ---- src/desert/hollowgrass_talk.js ---- */
+/* ==========================================================================
+   THE HOLLOW GRASSLANDS, part three: the grassland tongue, the wizard Aldous Wend, the people of the five villages and their twenty quests.
+   The party starts out understanding none of it. Each of the four books (found in the four hives) raises G.flags.hgLang by one, and a quest from a villager
+   can only be taken once the party's understanding has reached the quest's tier. What the villagers say otherwise is shown as it sounds: some words clear,
+   the rest a gurgle of syllables.
+   ========================================================================== */
+const hgLvl=()=>G.flags.hgLang||0;
+const HG_SYL=['gl','blu','oo','ub','wl','ex','sk','gur','eel','bb','lo','mm','sh','rup','ee','og','pl','orr','ik','nub'];
+function hgGarble(text,l){
+  if(l>=4)return text;
+  return text.replace(/[A-Za-z’']+/g,w=>{
+    const key=w.toLowerCase();let s=0;for(let i=0;i<key.length;i++)s=(s*31+key.charCodeAt(i))|0;
+    if(hash2(s,key.length,77)<l/4)return w; // this word the party knows
+    let o='',n=Math.max(1,Math.round(key.length/2.6)),i=0;while(n-->0){o+=HG_SYL[(hash2(s,key.length*13+i,78)*HG_SYL.length)|0];i++}
+    return w[0]===w[0].toUpperCase()&&w[0]!==w[0].toLowerCase()?o[0].toUpperCase()+o.slice(1):o});
+}
+const hgFoot=l=>l>=4?'':'  ['+['You cannot understand a word of it.','You catch a word here and there.','You follow some of it, but not enough.','You follow most of it, but not all.'][l]+']';
+/* ---------- the quests ---------- */
+const HG_TIERREW=[null,{gold:150,xp:2500},{gold:350,xp:5000,items:['hgjelly']},{gold:600,xp:8000,items:['hgjelly','hgjelly']},{gold:900,xp:12000}];
+const HG_Q={}; // quest id -> data
+function hgq(id,tier,title,who,kind,what,n,plural,desc,offer,accept,extra){
+  const rew=Object.assign({},HG_TIERREW[tier]);if(extra&&extra.item)rew.items=(rew.items||[]).concat(extra.item);
+  const q={title,who,desc,need:n,reward:rew};
+  if(kind==='kill'){q.cnt='k_'+what;q.goal=cq('k_'+what)}else{q.goal=()=>Math.min(n,bagCount(what));q.take={};q.take[what]=n}
+  QUESTS[id]=q;QAREA[id]='The Hollow Grasslands';HG_Q[id]={tier,who,plural,offer,accept};
+}
+// town 0, Exsce
+hgq('hgq1',1,'Reed Bundles','Mother Glubba','item','hgreed',6,'reed bundles','Mother Glubba of Exsce needs 6 bundles of pond reeds to mend her roof. They grow in the long grass of the grasslands.','My roof has more holes than roof, and the rains come sideways here. Six bundles of reeds would mend it. They grow in the grass, out on the plain. Please.','Six bundles. Be quick, the drips are on my bed.');
+hgq('hgq2',2,'Biter Swarms','Guard Skroop','kill','hgswarm0',4,'biter swarms','Guard Skroop of Exsce wants 4 swarms of biting insects driven off.','The biters come in clouds off the hills and they take the thin ones first. Four swarms gone, and my watch will sleep. Hit them as they come, and keep moving.','Four clouds. The grass is full of them.');
+hgq('hgq3',3,'Honey for the Healer','Healer Wibb','item','hgcomb',3,'honeycombs','Healer Wibb of Exsce needs 3 honeycombs from the beehive dungeons, for a medicine.','The cure for the shaking sickness is a paste of honey, and the only honey is in the hives. Three combs, still fresh. I would not ask if I had another way.','Three combs from the hives. Mind the wasps.');
+hgq('hgq4',4,'The Great One','Elder Ubbo','kill','hgins9',1,'Great Insectivores','Elder Ubbo of Exsce wants the Great Insectivore killed, the one as big as a house.','Every village has lost someone to the great one on the high hills, the one as big as a house. It has sat there since my grandfather’s time. If it could be killed, the whole grassland would breathe. I know it is a great thing to ask.','The Great One. May the pond be with you.');
+// town 1, Ulb
+hgq('hgq5',1,'Roots from the Mud','Granny Murrp','item','hgroot',5,'water-lily roots','Granny Murrp of Ulb wants 5 water-lily roots, dug out of the pond mud.','My knees are too old to dig, and the roots are best fresh. Five of the pale ones, from the mud by the ponds. I will make you a stew you will remember.','Five roots, the pale ones. Not the grey.');
+hgq('hgq6',2,'Moth Clouds','Guard Plonk','kill','hgswarm1',4,'moth clouds','Guard Plonk of Ulb wants 4 clouds of pale biting moths cleared from the grass.','The pale moths are worse than the biters. They come at dusk, and there is no dusk here, so they come all the time. Four clouds of them, if you can bear it.','Four of the pale clouds. Keep your mouth shut.');
+hgq('hgq7',3,'The Gulping Ones','Elder Orrl','kill','hgins4',2,'Gulping Mantises','Elder Orrl of Ulb wants 2 Gulping Mantises killed on the hills near the village.','Two gulping ones sit on the hills above Ulb, and the herders will not take the flocks out. They are bigger than a man and quicker than they look. Two of them dead, and the hills are ours again.','Two of the gulping ones. Take care on the slopes.');
+hgq('hgq8',4,'The Hollow Crawlers','Healer Neeb','kill','hgins6',2,'Glass-Eyed Hunters','Healer Neeb of Ulb wants 2 Glass-Eyed Hunters killed. They hunt at the edge of the village.','I tend the ones who come back from the hills, and I am tired of what I find. Two of the glass-eyed hunters have taken the high road. If you can end them, I will have fewer wounds to tend.','Two glass-eyed hunters. You are brave, or foolish. We need both.');
+// town 2, Glorm
+hgq('hgq9',1,'Small Pests','Little Sploo','kill','hgins0',3,'Mire Ticks','Little Sploo of Glorm wants 3 Mire Ticks cleared from the ponds, so that the children can play.','There are ticks in my pond, with legs like needles! Three of them. Please make them go away, and I will tell nobody you were scared of them.','Three ticks. Look in the wet places.');
+hgq('hgq10',2,'The Barbed Ones','Guard Drub','kill','hgins2',3,'Pond Stalkers','Guard Drub of Glorm wants 3 Pond Stalkers killed on the track.','The stalkers sit at the bends in the track and wait for the carts. Three of them dead and the carts will run on time. They are not clever, but they are patient.','Three stalkers. They sit still, so you get the first strike.');
+hgq('hgq11',3,'Dusk Weavers','Elder Mowl','kill','hgins5',2,'Dusk Weavers','Elder Mowl of Glorm wants 2 Dusk Weavers killed. They spin their webs between the hill rocks.','The weavers have strung their webs between the rocks, and anything that touches them is gone by morning. Two of them, and the rocks are free. Do not touch the threads.','Two weavers. Keep to the open ground.');
+hgq('hgq12',4,'The Hollow Crawlers','Merchant Gruff','kill','hgins7',2,'Hollow Crawlers','Merchant Gruff of Glorm wants 2 Hollow Crawlers killed, so that his caravans can go north.','My caravans will not go north. Two crawlers the size of carts sit on the north road, and every driver I hire quits. Kill them and the road opens, and I pay in coin.','Two crawlers on the north road. May your blades be sharp.');
+// town 3, Wexsh
+hgq('hgq13',1,'Reed-Skitters','Elder Wuul','kill','hgins1',3,'Reed Skitters','Elder Wuul of Wexsh wants 3 Reed Skitters killed in the grass round the village.','They are only small, but they eat the thatch, and the thatch is all we have. Three skitters dead and the roofs will last the season. Look in the tall grass.','Three skitters. They are fast, but there is no brain in them.');
+hgq('hgq14',2,'The Barbed Lurkers','Mama Plibb','kill','hgins3',3,'Barbed Lurkers','Mama Plibb of Wexsh wants 3 Barbed Lurkers killed on the hills.','My boy went up the hill for a lost lamb and came back with a leg full of barbs. Three of the lurkers on that hill must die. Please. I have only my thanks, and a little coin.','Three lurkers on the hill. Go with care.');
+hgq('hgq15',3,'The Hive Guards','Guard Ploom','kill','hgwasp',6,'hive guards','Guard Ploom of Wexsh wants 6 of the great wasps that guard the hives killed.','The wasps that guard the hives are the reason we cannot reach the honey. Six of them, in the hives themselves. It is a hard thing, and I would go myself if I had the legs for it.','Six hive guards. Their lances go through a shield.');
+hgq('hgq16',4,'The Spindle Tyrant','Healer Fleek','kill','hgins8',1,'Spindle Tyrants','Healer Fleek of Wexsh wants the Spindle Tyrant killed. It sits on the far hill.','A tall one sits on the far hill, with legs like spears, and it has taken three of my patients before I could reach them. One death, and the hill is quiet. It is the biggest thing but one.','The Spindle Tyrant. Come back alive.');
+// town 4, Nibb
+hgq('hgq17',1,'Cloudy Water','Aunt Bleb','item','hgpond',4,'flasks of pond water','Aunt Bleb of Nibb wants 4 flasks of the cloudy pond water, for the festival.','The festival needs the glowing water, the cloudy kind, from the deep ponds. Four flasks. We always run short, because the young ones drink it.','Four flasks of the glowing water. Not from the shallows.');
+hgq('hgq18',2,'Pickled Kelp','Little Bibb','item','hgkelp',6,'bundles of pickled kelp','Little Bibb of Nibb wants 6 bundles of pickled kelp, for the festival feast.','I am doing the feast! Nobody else would. I need six bundles of pickled kelp, and I do not know how to pickle. If you find some, bring it to me, and I will give you a very good reward.','Six bundles. Do not eat them on the way.');
+hgq('hgq19',3,'Royal Jelly','Healer Slup','item','hgjelly',2,'jars of royal jelly','Healer Slup of Nibb wants 2 jars of royal jelly from the hives.','Royal jelly will mend what my herbs cannot. The queens make it, deep in the hives, and the chests there hold a little. Two jars. I cannot pay much, but the village will remember.','Two jars of royal jelly. You will find them in the chests of the hives.');
+hgq('hgq20',4,'Wax Golems','Guard Grull','kill','hggolem',4,'wax golems','Guard Grull of Nibb wants 4 wax golems killed in the hives.','The hives are full of golems of wax, made by the queen to walk her halls. They have started to wander out. Four of them gone and the village is safe. Hit them hard, they are brittle.','Four golems. Hit them hard, they crack.');
+// the four books
+const HG_BOOKQ=[['The Primer of Ripples','The Hush Hive'],['The Book of Small Courtesies','The Droning Hive'],['The Grammar of the Deep Water','The Amber Hive'],['The Queen’s Dictionary','The Queen’s Hive']];
+HG_BOOKQ.forEach((b,i)=>{const id='hgb'+(i+1);QUESTS[id]={title:'The Book: '+b[0],who:'Aldous Wend',desc:'Aldous Wend, in Exsce, wants '+b[0]+' brought to him from '+b[1]+'. Each book teaches the party more of the grassland tongue.',need:1,goal:()=>Math.min(1,bagCount(id.replace('hgb','hgbook'))),take:{[id.replace('hgb','hgbook')]:1},reward:{gold:500*(i+1),xp:6000*(i+1)}};QAREA[id]='The Hollow Grasslands'});
+QAREA_ORDER.splice(QAREA_ORDER.indexOf('Elsewhere'),0,'The Hollow Grasslands');
+function hgQD(id){const Q=HG_Q[id],nm=Q.who.replace(/^(Mother|Guard|Healer|Elder|Granny|Little|Merchant|Mama|Aunt) /,'');
+  return khQD(Q.offer,Q.accept,(g,n)=>`${g} of ${n} ${Q.plural}.`,'You have done it! I could not understand a word of your language, and yet here you are, with exactly what I asked for. The grassland has strange friends.','Thank you, truly. The pond will remember you, and so will I.','Thank you again. Everyone here knows what you did.','Here it is.')}
+const HGQD={};for(const id in HG_Q)HGQD[id]=hgQD(id);
+const HG_QOF={};
+/* ---------- the villagers ---------- */
+function hgNative(id,name,img,chat,qid,o){
+  o=o||{};
+  const root=()=>{const F=G.flags,l=hgLvl();
+    if(qid){const st=qSt(qid),Q=HG_Q[qid];
+      if(st==='active'||st==='done'||l>=Q.tier)return qNode(qid,HGQD[qid]);
+      return say(hgGarble(Q.offer,l)+hgFoot(l)+(l>0?'  [You are not sure enough of the tongue to promise anything.]':''),[BYE])}
+    const k='hgc_'+id,i=(F[k]||0)%chat.length;F[k]=i+1;
+    return say(hgGarble(chat[i],l)+hgFoot(l),chat.length>1?[['Listen again.',()=>NPCS[id].root()],BYE]:[BYE])};
+  khNpc(id,name,img,o.root||root,{q:qid||undefined,sc:o.sc});
+  if(qid)HG_QOF[id]={tier:HG_Q[qid].tier};
+}
+const HG_STOCK=[['hgcomb',6],['hgkelp',6],['hgroot',6],['hgpond',4],['hgjelly',3],['hggrubs',5],['potion',4],['hgbarb',1],['hgcarapace',1]];
+function hgMerchant(id,name,img,greet){
+  hgNative(id,name,img,[greet],null,{root:()=>{const l=hgLvl();
+    return say(hgGarble(greet,l)+hgFoot(l),[['Trade (pointing at things).',()=>{openShop(G.talk.d,HG_STOCK,name);return null}],BYE])}})}
+function hgHealer(id,name,img,greet){
+  hgNative(id,name,img,[greet],null,{root:()=>{const l=hgLvl();
+    return say(hgGarble(greet,l)+hgFoot(l),[['Be tended (40 gold).',()=>{if(G.gold<40)return say('You cannot pay forty gold. The healer shrugs, kindly.',[BYE]);G.gold-=40;restParty(false);return say('Cool, damp hands and a green paste. Everyone feels better.',[BYE])}],BYE])}})}
+// [id, name, picture, position from the middle of the village, quest, what they say, scale]
+const HG_FOLK=[
+ [['hgn_glubba','Mother Glubba','hg_npc1',[-2,0],'hgq1',['The pond is high this year, and so are the prices.','Do not step on the reeds, little ones sleep in them.']],
+  ['hgn_skroop','Guard Skroop','hg_npc4',[0,-8],'hgq2',['The gate is open to the honest and shut to the biters. Mostly.']],
+  ['hgn_wibb','Healer Wibb','hg_npc6',[5,3],'hgq3',['A cough, a limp and a fever, the same as every morning.']],
+  ['hgn_ubbo','Elder Ubbo','hg_npc0',[0,-2],'hgq4',['Sit, sit. The pond has been here longer than we have, and it will be here after.']],
+  ['hgn_brollo','Brollo, the trader','hg_npc5',[5,-2],null,['Honey, kelp, roots and a few good things from the hives. Look as long as you like.'],'merchant'],
+  ['hgn_pip','Pip','hg_npc3',[-5,3],null,['Have you seen the big ones on the hills? I have! From very far away!','I am not afraid of anything. Except the moths. And spiders.'],'child'],
+  ['hg_aldous','Aldous Wend, wizard','hg_wizard',[2,0],null,null,'wizard']],
+ [['hgn_murrp','Granny Murrp','hg_npc1',[-2,0],'hgq5',['The mud gives and the mud takes. You have to know which day it is.']],
+  ['hgn_plonk','Guard Plonk','hg_npc4',[0,8],'hgq6',['Quiet watch tonight. Or no. It is always the same watch.']],
+  ['hgn_orrl','Elder Orrl','hg_npc0',[0,-2],'hgq7',['We came here when the water rose. We stayed because it did not fall.']],
+  ['hgn_neeb','Healer Neeb','hg_npc6',[5,3],'hgq8',['I can mend a leg. I cannot mend a fright.']],
+  ['hgn_bibb','Bibb','hg_npc3',[-5,-3],null,['I found a shell! It is a whole one! Do you want it? You cannot have it.']],
+  ['hgn_lorr','Lorr, the herder','hg_npc4',[5,-2],null,['The flocks are quiet today. The hills are not.','I have lost three sheep this year. The hills have eaten them.']]],
+ [['hgn_sploo','Little Sploo','hg_npc3',[-2,0],'hgq9',['I am the bravest in Glorm. I am the smallest, but the bravest.']],
+  ['hgn_drub','Guard Drub','hg_npc4',[0,-8],'hgq10',['Nothing gets past me. Except the biters. And the moths. And the mud.']],
+  ['hgn_mowl','Elder Mowl','hg_npc0',[0,-2],'hgq11',['In my day the hills were quiet and the water was warm. In my day, I was not so old.']],
+  ['hgn_gruff','Merchant Gruff','hg_npc5',[5,3],'hgq12',['Trade is slow. The roads are bad. The crawlers eat the caravans.']],
+  ['hgn_sprell','Sprell, the baker','hg_npc1',[-5,3],null,['Kelp bread, hot! Water-lily bread, hot! Moth-wing bread, I do not recommend.']],
+  ['hgn_gleb','Gleb, the healer','hg_npc6',[5,-3],null,['Bring me a cut and I will bring you a scar. Bring me a scar and I will bring you a story.']]],
+ [['hgn_wuul','Elder Wuul','hg_npc0',[0,-2],'hgq13',['Wexsh is the oldest village. It is also the smallest, which is a coincidence.']],
+  ['hgn_plibb','Mama Plibb','hg_npc1',[-2,0],'hgq14',['My boy is clever. He gets it from his father, who was not.']],
+  ['hgn_ploom','Guard Ploom','hg_npc4',[0,8],'hgq15',['I have guarded this gate for twenty years and nothing has come in. This is the only reason I am still here.']],
+  ['hgn_fleek','Healer Fleek','hg_npc6',[5,3],'hgq16',['The old ones say the grassland was a pond once. I believe them.']],
+  ['hgn_snorr','Snorr, the trader','hg_npc5',[-5,-3],null,['I trade in what people want. People want kelp, mostly.'],'merchant'],
+  ['hgn_wimm','Wimm','hg_npc3',[5,-2],null,['One day I will go to the hives and bring back a whole honeycomb. One day. Not today.']]],
+ [['hgn_bleb','Aunt Bleb','hg_npc1',[-2,0],'hgq17',['The festival is the best night of the year. Though it is always night.']],
+  ['hgn_bibbn','Little Bibb','hg_npc3',[0,-2],'hgq18',['I am cooking the feast! I am doing the whole feast! By myself! Alone!']],
+  ['hgn_slup','Healer Slup','hg_npc6',[5,3],'hgq19',['The queens make the best medicine in the world, and nobody can get it.']],
+  ['hgn_grull','Guard Grull','hg_npc4',[0,8],'hgq20',['The north gate is mine. I like the north gate. It is quiet. Mostly.']],
+  ['hgn_oom','Elder Oom','hg_npc0',[5,-2],null,['I remember the last time the sky was lit. I was very small. It was very bright. I did not like it.']],
+  ['hgn_trundle','Trundle, the trader','hg_npc5',[-5,3],null,['Everything has a price. Even a kind word. Especially a kind word.'],'merchant']]];
+for(const town of HG_FOLK)for(const f of town){const [id,nm,img,p,qid,chat,role]=f;
+  if(role==='wizard')continue;
+  if(role==='merchant')hgMerchant(id,nm,img,chat[0]);
+  else if(/Healer|healer/.test(nm)&&!qid)hgHealer(id,nm,img,chat[0]);
+  else hgNative(id,nm,img,chat,qid,{sc:role==='child'?.8:undefined})}
+function hgPopulate(ti,cx,cy,decor,used){
+  for(const f of HG_FOLK[ti]){const [id,nm,img,p,qid,chat,role]=f,x=cx+p[0],y=cy+p[1];
+    if(role==='wizard'){decor.push({k:'hg_wizard',x,y,block:false,walk:true,npc:'hg_aldous',sc:1});continue}
+    decor.push({k:img,x,y,block:false,walk:true,npc:id,sc:role==='child'?.8:1});used.add(x+','+y)}
+  // the extra merchants and healers of the larger villages
+  if(ti===2||ti===3||ti===4){}
+}
+/* ---------- the frog-whales: harmless ---------- */
+const HG_FROGLINES=['A great damp creature, something between a whale and a frog, sits chewing reeds. It looks at you with huge, gentle eyes and does not move.','The frog-whale burps, softly, and goes back to its reeds. It is plainly harmless.','The great round creature turns one slow eye towards you, decides that you are not interesting, and sighs through its wide mouth.','A frog-whale sits in the grass, glistening. Small insects land on it and it ignores them. It is warm to the touch.'];
+khNpc('hg_frogbeast','A frog-whale','hg_frog0',()=>say(HG_FROGLINES[(G.flags.hgFrog=(G.flags.hgFrog||0)+1)%HG_FROGLINES.length],[BYE]));
+/* ---------- Aldous Wend ---------- */
+khNpc('hg_aldous0','Aldous Wend, wizard','hg_wizard',()=>{
+  const l1=say('Well met, travellers! Do not be alarmed. I am Aldous Wend, a wizard, and I have been waiting a long while for someone with sensible boots. You have come through the gate into the Hollow Grasslands, where the sky is never lit and the wind never stops.',[['Go on.',()=>l2]]);
+  const l2=say('The people who live here are good people, but they speak in the gurgle and click of the deep ponds, and no stranger can follow it. You will hear them, and read what they say, and understand none of it. They cannot ask you for help, and you cannot give it.',[['Go on.',()=>l3]]);
+  const l3=say('I can. There is a village a little way north along the track, called Exsce. Meet me there, by the well. I will give you four tasks, and each one will teach you more of their tongue. Mind the hills on the way: there are things in the long grass that sit and wait. Walk on the track, and do not go near the high ground.',[['We will meet you in Exsce.',()=>{const F=G.flags;F.hgIntro=1;const d=G.decor.find(q=>q.npc==='hg_aldous0');if(d){d.hidden=true;d.npc=undefined;d.block=false}msg('Aldous Wend has asked you to meet him in the village of Exsce, a little way north.','#ffe36a');return null}]]);
+  return l1;
+},{sc:1});
+const HG_HINTS=['The Hush Hive lies to the west, a day’s walk from Exsce, in the low hills. It is the smallest of the four, and the quietest. The grubs in it are slow.','The Droning Hive lies far to the east, beyond Glorm. The wasps there are many and they never sleep, so go well rested.','The Amber Hive lies north of Exsce, beyond the high hills, in rocky ground. Its guardian is made of wax. It is slow, but it hits hard.','The Queen’s Hive lies in the far north, past Nibb, at the top of the grassland. The queen keeps her great dictionary there. Go last, and go ready.'];
+khNpc('hg_aldous','Aldous Wend, wizard','hg_wizard',()=>{
+  const F=G.flags,lv=hgLvl(),nextId='hgb'+(lv+1),nextOk=lv<4&&(qSt(nextId)===null||qSt(nextId)==='active'||qSt(nextId)==='done');
+  const opts=[];
+  if(!F.hgMetAldous){F.hgMetAldous=1;return say('There you are, and with your boots, too! This is Exsce, the nearest of the five villages: Exsce, Ulb, Glorm, Wexsh and Nibb. You cannot understand a word they say, and that is a thing I mean to mend. I need four books. Each is kept in one of the four beehives that lie about the grassland, and each will teach you more of their tongue than the last.',[['Tell me about the first book.',()=>qNode('hgb1',HG_BD.hgb1)],BYE])}
+  if(lv<4)opts.push(['About the next book.',()=>qNode(nextId,HG_BD[nextId])]);
+  opts.push(['Where are the hives?',()=>say('There are four. '+HG_HINTS.join(' '),[BYE])]);
+  opts.push(['How do I learn their tongue?',()=>say('Bring me the books, one by one. The first gives you a handful of words, the second most of the courtesies, the third nearly all of it, and the fourth, the queen’s own dictionary, the whole language. At each step more of what the villagers say will make sense, and the villagers will begin to ask you for things. They have twenty tasks between them, five for each stage of your learning. Until you know the tongue you cannot agree to them.',[BYE])]);
+  opts.push(BYE);
+  return say(lv>=4?'You speak the grassland tongue as well as any of them now. I am almost jealous. Go and find the villagers: they have a great many tasks for someone who can understand them.':lv===0?'The villagers will not make sense to you yet. Bring me the first book from the Hush Hive, and they will.':'You understand more of them now, do you not? Good. Bring me the next book and you will understand them better still.',opts)
+},{sc:1,q:['hgb1','hgb2','hgb3','hgb4']});
+const HG_BD={};
+[['hgb1','The first book is The Primer of Ripples, in the Hush Hive, to the west. It is a book of simple words. The Hush Hive is the quietest of them, but the grubs bite and the guard wasps are not friendly. Find the lectern in the heart of the hive, and bring me what is on it.','The Hush Hive, to the west. The book is on a lectern in the heart of the hive.','The Primer! Look at the state of it. Oh, you did well, you really did. Here: let me say something to you in the old tongue. There. Did you catch a word? That is the beginning.','Take this for your trouble. And go and find the villagers: they will make a little more sense now.','The Primer of Ripples is at its home.','Here is the Primer of Ripples.'],
+ ['hgb2','The second book is The Book of Small Courtesies, in the Droning Hive, far to the east. The wasps there are many, and the golems are patient. Do not fight in the open halls if you can fight in a doorway.','The Droning Hive, far to the east. The book is in the heart of the hive.','The Courtesies! Good. Now you will be able to say thank you, which is most of the language. Do you hear it? Now you will be able to follow most of what people say when they are being polite.','A fine piece of work. Go and be polite to somebody.','The Book of Small Courtesies is at its home.','Here is The Book of Small Courtesies.'],
+ ['hgb3','The third book is The Grammar of the Deep Water, in the Amber Hive, north of Exsce. The hive is full of wax, and a great golem of wax stands in its heart. It will take more than a sword to break it.','The Amber Hive, north of Exsce, beyond the high hills. The book is in the heart of the hive.','The Grammar! This is a very big book. Now the sentences will make sense, and not only the words. You will soon hear them properly.','Brilliant. Nearly there. One more, and it is the hardest.','The Grammar of the Deep Water is at its home.','Here is The Grammar of the Deep Water.'],
+ ['hgb4','The last is the Queen’s Dictionary, in the Queen’s Hive, at the far north of the grassland. The queen herself guards it. She is large, and she is not welcoming. I do not ask lightly.','The Queen’s Hive, in the far north. The dictionary is in the heart of the hive, where the queen sits.','The Dictionary! The queen’s own! You have done something very few have done. Now there is no word in the grassland that you cannot follow. Go. Be understood.','You have all four. I am proud of you. Go and help them, they need it.','The Queen’s Dictionary is at its home.','Here is the Queen’s Dictionary.']
+].forEach(([id,offer,accept,ready,thanks,after,turn])=>{HG_BD[id]=khQD(offer,accept,()=>QUESTS[id].desc,ready,thanks,after,turn)});
+/* a book handed in raises the party's understanding of the tongue */
+{const _t=qTurnIn;qTurnIn=function(id){const ok=_t.apply(this,arguments),m=/^hgb(\d)$/.exec(id);
+  if(ok&&m){const n=+m[1];if((G.flags.hgLang||0)<n){G.flags.hgLang=n;msg(n>=4?'You can now understand everything the people of the grassland say.':'You understand more of the grassland tongue. '+['','A word here and there is clear.','Some of what they say is clear now.','Most of what they say is clear now.'][n],'#a8e8c0')}}
+  return ok}}
+/* the gold ! over a villager is only shown once the party knows enough of the tongue to take the quest */
+{const _qm=questMark;questMark=function(d){const r=_qm.apply(this,arguments);if(r===1&&d&&d.npc&&HG_QOF[d.npc]&&HG_QOF[d.npc].tier>hgLvl())return 0;return r}}
+/* the wizard comes to meet the party at the start, and the first look at the land */
+{const _u=update;update=function(dt){
+  if(LEVEL===HG.ID&&G.state==='play'&&G.decor&&!G.flags.hgIntro&&!G.talk){const d=G.decor.find(q=>q.npc==='hg_aldous0'&&!q.hidden);
+    if(d){const dx=G.P.x-d.x,dy=G.P.y-d.y,dist=Math.hypot(dx,dy);G._hgT=(G._hgT||0)-dt;
+      if(dist>2.6){if(G._hgT<=0){G._hgT=.35;const sx=Math.abs(dx)>=Math.abs(dy)?Math.sign(dx):0,sy=sx?0:Math.sign(dy),nx=d.x+sx,ny=d.y+sy;if(!G.decor.some(q=>q!==d&&q.block&&q.x===nx&&q.y===ny)){d.x=nx;d.y=ny}}}
+      else startTalk(d)}}
+  return _u.apply(this,arguments)}}
+{const _oe=ohEnter;ohEnter=function(n){_oe.apply(this,arguments);if(n===HG.ID&&!G.flags.hgSeen){G.flags.hgSeen=1;msg('Wind hisses through the long grass. The sky above is dark, and it does not look as if it was ever lit.','#b8c8d8')}}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
