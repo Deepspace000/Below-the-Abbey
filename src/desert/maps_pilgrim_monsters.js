@@ -45,13 +45,10 @@ function mpPilgKraken(x,a,b,s){const ink=MPL.INK,P1='#7a3a5e',P2='#4e2442',PK='#
     x.fillStyle=PK;x.strokeStyle=ink;x.lineWidth=.3;for(let i=2;i<P.length-1;i+=2){const q=mpPilgNrm(P,i),w=(w0+(w1-w0)*i/(P.length-1))/2,r=Math.max(.35,w*.28);x.beginPath();x.arc(P[i][0]-q[0]*w*.3,P[i][1]-q[1]*w*.3,r,0,TAU);x.fill();x.stroke()}
     if(up){const e=P[P.length-1],f=P[P.length-3],sg=e[0]<f[0]?-1:1;x.strokeStyle=ink;x.lineWidth=1.1;x.beginPath();x.moveTo(e[0],e[1]);x.quadraticCurveTo(e[0]+sg*3.4,e[1]-3,e[0]+sg*.4,e[1]-5.4);x.stroke()}}
   /* the mantle: a tall dark head with fins, mottled skin and a ridge of spines */
-  x.fillStyle=P2;x.strokeStyle=ink;x.lineWidth=.9;
-  x.beginPath();x.moveTo(-10,-14);x.quadraticCurveTo(-26,-24,-13,-33);x.quadraticCurveTo(-8,-31,-9,-27);x.closePath();x.fill();x.stroke();
-  x.beginPath();x.moveTo(10,-14);x.quadraticCurveTo(26,-24,13,-33);x.quadraticCurveTo(8,-31,9,-27);x.closePath();x.fill();x.stroke();
-  x.fillStyle=P1;x.beginPath();x.moveTo(-13,2);x.bezierCurveTo(-19,-14,-12,-34,0,-47);x.bezierCurveTo(12,-34,19,-14,13,2);x.bezierCurveTo(6,5,-6,5,-13,2);x.closePath();x.fill();x.stroke();
-  x.save();x.clip();x.fillStyle='rgba(30,10,30,.3)';x.fillRect(2,-50,16,60);x.fillStyle='rgba(30,10,30,.45)';for(let i=0;i<40;i++){x.beginPath();x.arc(-12+hash2(i,1,71)*24,-44+hash2(i,2,71)*44,.5+hash2(i,3,71)*1.3,0,TAU);x.fill()}
+  x.fillStyle=P1;x.beginPath();x.moveTo(-12,2);x.bezierCurveTo(-27,-8,-25,-44,0,-45);x.bezierCurveTo(25,-44,27,-8,12,2);x.bezierCurveTo(6,5,-6,5,-12,2);x.closePath();x.fill();x.stroke();
+  x.save();x.clip();x.fillStyle='rgba(30,10,30,.3)';x.fillRect(2,-50,16,60);x.fillStyle='rgba(30,10,30,.45)';for(let i=0;i<40;i++){x.beginPath();x.arc(-12+hash2(i,1,71)*24,-42+hash2(i,2,71)*42,.5+hash2(i,3,71)*1.3,0,TAU);x.fill()}
   x.strokeStyle='rgba(216,168,176,.5)';x.lineWidth=.4;for(let k=0;k<9;k++){x.beginPath();x.moveTo(-12+k*3,-40+Math.abs(k-4)*3.2);x.quadraticCurveTo(-11+k*3,-20,-10+k*3,-2);x.stroke()}x.restore();
-  x.fillStyle=MPL.VERM;x.strokeStyle=ink;x.lineWidth=.45;for(let i=0;i<5;i++){const yy=-44+i*6;x.beginPath();x.moveTo(-2,yy);x.lineTo(0,yy-4.4);x.lineTo(2,yy);x.closePath();x.fill();x.stroke()}
+  x.fillStyle='#9a5a7e';x.strokeStyle=ink;x.lineWidth=.35;for(const [bx,by,br] of [[-9,-34,2.2],[-3,-40,2.4],[5,-38,2.1],[11,-30,2],[-14,-26,1.8],[0,-30,1.6],[14,-20,1.6],[-6,-24,1.5]]){x.beginPath();x.arc(bx,by,br,0,TAU);x.fill();x.stroke()}
   /* the eyes: big yellow, slit pupils, heavy angry brows, and a hooked beak below */
   for(const sg of [-1,1]){x.fillStyle='#f2d030';x.strokeStyle=ink;x.lineWidth=.7;x.beginPath();x.ellipse(sg*6.6,-17,4.2,3,sg*.25,0,TAU);x.fill();x.stroke();
     x.fillStyle=ink;x.beginPath();x.ellipse(sg*6.4,-17,.8,2.5,sg*.25,0,TAU);x.fill();

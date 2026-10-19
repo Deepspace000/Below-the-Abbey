@@ -106,7 +106,7 @@ function mpPilgDraw(c,x,L,api){
   x.strokeStyle='#5a7a3a';x.lineWidth=.55;for(let i=0;i<40;i++){const f=.88+H(i,1,66)*.1,p=mpPilgOff(f,19+H(i,2,66)*3);for(let k=0;k<3;k++){x.beginPath();x.moveTo(p[0]+k-1,p[1]+1);x.lineTo(p[0]+k*1.4-1.4,p[1]-3-H(i,k,67)*2);x.stroke()}}
   /* ships, the sea monster, the name of the sea */
   mpPilgShip(x,226,146,1.15,false,MPL.VERM);mpPilgShip(x,238,196,.8,true,MPL.LAPIS);mpPilgShip(x,300,120,.8,true,MPL.VERM);mpPilgShip(x,200,240,.65,false,MPL.VERM);
-  mpPilgSerpent(x,194,222,.9);mpPilgKraken(x,290,284,.72);
+  mpPilgSerpent(x,196,222,.62);mpPilgKraken(x,284,277,.62);
   for(const [px,py] of [[270,155],[190,128],[255,238]]){x.strokeStyle='rgba(30,60,100,.7)';x.lineWidth=.6;x.beginPath();x.arc(px,py,5,0,TAU*.75);x.stroke();x.beginPath();x.arc(px,py,2.6,0,TAU*.75);x.stroke()}
   labs.push(()=>mpPilgSpaced(x,'THE NARROW SEA',237,172,13,'#1c3a5a',2.4));
   T&&0;
