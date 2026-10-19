@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.417';
+const VERSION='3.419';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -9831,6 +9831,7 @@ function khSkyList(cx,cy,dX,dY,L,minD2){
     if(d2>lim||d2<md)continue;
     const dot=rx*dX+ry*dY;if(dot<=0)continue;
     if(Math.abs(rx*dY-ry*dX)>dot*1.1+e.w*.6)continue;
+    if(LEVEL===304&&e.big&&((d2<110&&Math.abs(rx*dY-ry*dX)>dot*.3)||(e.w>=30&&Math.abs(rx*dY-ry*dX)>dot*.6)))continue; // on the quay a big flat tower close by and off to the side, or the 62 wide keep seen from the side, looks like a wall jutting out, so they are left out unless the camera faces them
     const img=IMG[e.k];if(!img)continue;
     out.push({x:e.x,y:e.y,img,w:e.w,bob:e.z,decor:KH_SKYD,sky:true,smallSky:!e.big});
   }
@@ -15960,7 +15961,7 @@ function quayBuild(){
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){
     if(y<=9||((x<6||x>73)&&y<=SHORE+1)){const face=y===9||x===5||x===74;solid(x,y,face&&(x+y)%4===0?wSlit:(x*7+y*3)%11===0?wDark:wPlain)}
   }
-  const GX=OQ.CX,tWh=4.8;
+  const GX=OQ.CX,tWh=WALL;
   // the great gate: a tall gatehouse, three squares of portcullis between two wings of dressed stone with arrow slits, and a great round tower at each end
   {const pg=TM.make('gate',0,tWh,'kh_ohgate1_0');T_DOORS.oqportc=pg.tex;const gc=String.fromCharCode(nextCh++);chars[gc]=31;
     const tp=ch(TM.make('plain','castle',tWh).gid),ts=ch(TM.make('slit','castle',tWh).gid),td=ch(TM.make('plain','castle2',tWh).gid);
