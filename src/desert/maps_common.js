@@ -105,7 +105,7 @@ function mplPaint(c,S,area,X,Y,foot){
 
 /* ---- fog of war: a drifting cloud over the parts of an outdoor map the party has not walked near. It is soft and see-through, so the edges of the land still show. ---- */
 /* which levels have fog: the outdoor ones, except Greendale (no enemies, nothing to fear) and the Pilgrim's Path, which stay clear */
-function mplFogOn(L){return !!(L&&L.outdoor&&L.rows&&LEVEL!==32&&!(LEVEL>=400&&LEVEL<=434)&&!(G.flags&&G.flags.noFog))}
+function mplFogOn(L){return !!(L&&L.outdoor&&L.rows&&LEVEL!==32&&LEVEL!==44&&!(LEVEL>=400&&LEVEL<=434)&&!(G.flags&&G.flags.noFog))}
 const MPLF={arr:{},flags:null,ver:0,t:0,cache:null,sig:'',tex:null};
 function mplFogArr(){
   if(MPLF.flags!==G.flags){MPLF.arr={};MPLF.flags=G.flags;MPLF.cache=null}

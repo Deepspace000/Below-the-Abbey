@@ -59,8 +59,10 @@ function hgBuild(){
   // swarms drift over the open grass
   let ns=0;for(let t=0;t<600&&ns<18;t++){const x=8+((hs(t,5,sd+50)*(W-16))|0),y=8+((hs(t,6,sd+50)*(H-16))|0);if(used.has(K(x,y))||near(x,y,keepOut,15))continue;place(ns%2?'hgswarm1':'hgswarm0',x,y);ns++}
   // the gentle frog-whales graze about and do no harm
-  let nf=0;for(let t=0;t<600&&nf<30;t++){const x=6+((hs(t,7,sd+60)*(W-12))|0),y=6+((hs(t,8,sd+60)*(H-12))|0);if(used.has(K(x,y))||near(x,y,keepOut,12)||used.has(K(x-1,y))||used.has(K(x+1,y))||used.has(K(x,y-1)))continue;used.add(K(x,y));nf++;
-    decor.push({k:'hg_frog'+(nf%2),x,y,block:true,npc:'hg_frogbeast',sc:.95+hs(x,y,sd+61)*.45},{k:'hg_frog0',x:x-1,y,block:true,sc:.0001},{k:'hg_frog0',x:x+1,y,block:true,sc:.0001},{k:'hg_frog0',x,y:y-1,block:true,sc:.0001});used.add(K(x-1,y));used.add(K(x+1,y));used.add(K(x,y-1))}
+  // they stand out in the open field, never on or beside a path (floor type 1)
+  const fmNear=(x,y,r)=>{for(let j=-r;j<=r;j+=2)for(let i=-r;i<=r;i+=2){const xx=x+i,yy=y+j;if(xx>=0&&yy>=0&&xx<W&&yy<H&&fm[I(xx,yy)]==='1')return true}return false};
+  let nf=0;for(let t=0;t<600&&nf<30;t++){const x=6+((hs(t,7,sd+60)*(W-12))|0),y=6+((hs(t,8,sd+60)*(H-12))|0);if(used.has(K(x,y))||near(x,y,keepOut,12)||fmNear(x,y,6)||used.has(K(x-1,y))||used.has(K(x+1,y))||used.has(K(x,y-1)))continue;used.add(K(x,y));nf++;
+    decor.push({k:'hg_frog'+(nf%2),x,y,block:true,npc:'hg_frogbeast',sc:.95+hs(x,y,sd+61)*.45,bob:-.5},{k:'hg_frog0',x:x-1,y,block:true,sc:.0001},{k:'hg_frog0',x:x+1,y,block:true,sc:.0001},{k:'hg_frog0',x,y:y-1,block:true,sc:.0001});used.add(K(x-1,y));used.add(K(x+1,y));used.add(K(x,y-1))}
   // grass, bracken and things to pick
   const GR=['pgrass0','pgrass1','pgrass2','pgrass3'].filter(k=>IMG[k]);let ng=0;
   if(GR.length)for(let t=0;t<2400&&ng<760;t++){const x=3+((hs(t,9,sd+70)*(W-6))|0),y=3+((hs(t,10,sd+70)*(H-6))|0);if(used.has(K(x,y))||fm[I(x,y)]==='1')continue;ng++;

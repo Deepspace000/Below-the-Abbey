@@ -549,26 +549,68 @@ drawWorldMap=function(){if(mpWorldM.dead)return mpWorldOld.apply(this,arguments)
 
 /* ---------- clouds: hand-drawn map clouds that drift slowly across the map. Dragging the map sends them away faster than the land, and new ones drift in from the opposite edge. ---------- */
 const mpWorldCl={list:[],spr:null,t:0,px:null,py:null,pz:null};
+/* the kinds of cloud: [name, width, height, how it is built, size range, share of the sky] */
+const MPW_CK=[['plain',420,210,'heap',[.8,1.2],24],['small',200,200,'small',[.55,.95],20],['thin',540,110,'thin',[.9,1.4],18],['tower',460,470,'tower',[1.3,1.8],10],['wisp',440,120,'wisp',[.8,1.3],14],['twin',400,200,'twin',[.9,1.3],8],['pair',290,150,'pair',[.55,.9],6]];
 function mpWorldCloudSprites(){
+  // puffy cumulus in the manner of old chart-makers: a heap of round puffs with a scalloped base, curling spirals in the billows, cross-hatched shade, stipple and a white highlight
   const out=[];
-  for(let v=0;v<6;v++){
-    const W=300,Hh=150,c=document.createElement('canvas');c.width=W;c.height=Hh;const x=c.getContext('2d'),H=hash2;
-    const n=5+(v%3),puffs=[];for(let i=0;i<n;i++){const u=(i+.5)/n,px=W*(.14+.72*u)+(H(i,v,81)-.5)*14,rr=(Hh*.2+Hh*.16*Math.sin(u*Math.PI)+H(i,v,82)*9),py=Hh*.66-Math.sin(u*Math.PI)*Hh*.2-H(i,v,83)*8;puffs.push([px,py,rr])}
+  MPW_CK.forEach(([nm,W,Hh,kind],v)=>{
+    const c=document.createElement('canvas');c.width=W;c.height=Hh;const x=c.getContext('2d'),H=hash2,puffs=[],base=Hh*(kind==='tower'?.9:kind==='thin'?.7:kind==='small'?.82:.78);
+    const row=(n,x0,x1,rBase,rVar,lift,k,seed,hump)=>{for(let q=0;q<n;q++){const u=(q+.5)/n,s=hump?Math.sin(u*Math.PI):1,rv=.45+1.15*Math.pow(H(q,v,seed+3),1.3),r=Hh*(rBase+rVar*s)*rv+H(q,v,seed)*3;puffs.push([W*(x0+(x1-x0)*u)+(H(q,v,seed+1)-.5)*16,base-r*.8-lift-s*Hh*(hump||0)-H(q,v,seed+2)*9,r,k])}};
+    const scallops=(n,x0,x1,r)=>{for(let q=0;q<n;q++){const u=n>1?q/(n-1):.5;puffs.push([W*(x0+(x1-x0)*u)+(H(q,v,97)-.5)*9,base-Hh*.055,Hh*r*(.55+1.1*H(q,v,98)),2])}};
+    if(kind==='heap'){row(8+(v%2),.1,.9,.13,.11,0,0,91,.07);row(6,.17,.83,.09,.08,Hh*.2,1,94,.1);scallops(11,.1,.9,.06)}
+    else if(kind==='small'){row(3,.3,.7,.15,.1,0,0,91,.06);row(2,.4,.6,.1,.06,Hh*.13,1,94,.06);scallops(5,.32,.68,.06)}
+    else if(kind==='thin'){row(24,.05,.95,.15,.06,0,0,91,.04);scallops(22,.08,.92,.06)}
+    else if(kind==='tower'){row(7,.14,.86,.09,.09,0,0,91,.05);row(6,.2,.8,.09,.08,Hh*.15,1,94,.08);row(5,.26,.74,.08,.07,Hh*.3,1,191,.1);row(3,.36,.64,.07,.05,Hh*.44,1,294,.06);scallops(10,.14,.86,.045)}
+    else if(kind==='twin'){row(4,.06,.46,.14,.13,0,0,91,.08);row(4,.54,.94,.12,.12,0,0,191,.1);row(5,.4,.62,.07,.06,0,1,94,.05);row(2,.12,.38,.09,.06,Hh*.22,1,294,.05);scallops(11,.06,.94,.055)}
+    else if(kind==='pair'){row(3,.12,.42,.14,.1,0,0,91,.06);row(3,.58,.88,.16,.1,Hh*.05,0,191,.06);scallops(3,.16,.38,.05);scallops(3,.62,.84,.05)}
+    const df=kind==='tower'?2.2:(kind==='plain'||kind==='twin')?1.1:kind==='thin'?.5:.7;
+    {let sd=300;for(const [px,py,rr,k] of puffs.slice()){if(k>=2||rr<10)continue;sd++;const nb=Math.round(1.4*df*H(1,sd,3)+df*.8);
+      for(let j=0;j<nb;j++){const a2=Math.PI*(1.0+1.0*H(j,sd,4)),br=rr*(.16+.16*H(j,sd,5)),bx=px+Math.cos(a2)*rr*.95,by=py+Math.sin(a2)*rr*.95;if(puffs.some(o=>o[0]!==px&&Math.hypot(o[0]-bx,o[1]-by)<o[2]-1))continue;puffs.push([bx,by,br,3])}}} // small billows on the outline, part of the same silhouette
+    puffs.sort((a,b)=>a[3]-b[3]);
     x.lineJoin='round';x.lineCap='round';
-    // the outline: every puff in thick ink, then every puff filled a little smaller, so only the outer edge of the cloud is inked
-    x.strokeStyle='#5a4228';x.lineWidth=3.2;for(const [px,py,rr] of puffs){x.beginPath();x.arc(px,py,rr,0,Math.PI*2);x.stroke()}
-    x.fillStyle='#f4eed8';for(const [px,py,rr] of puffs){x.beginPath();x.arc(px,py,rr-1.4,0,Math.PI*2);x.fill()}
-    // a soft shade along the underside, curls inside the puffs, and a few hatch strokes below
-    x.fillStyle='rgba(120,100,70,.16)';for(const [px,py,rr] of puffs){x.beginPath();x.ellipse(px,py+rr*.38,rr*.8,rr*.5,0,0,Math.PI);x.fill()}
-    x.strokeStyle='rgba(90,66,40,.55)';x.lineWidth=1.6;for(let i=0;i<puffs.length;i+=1){const [px,py,rr]=puffs[i];if(H(i,v,84)<.7){x.beginPath();x.arc(px+rr*.1,py-rr*.12,rr*.5,Math.PI*1.05,Math.PI*1.75);x.stroke();x.beginPath();x.arc(px+rr*.1,py-rr*.12,rr*.28,Math.PI*1.1,Math.PI*1.7);x.stroke()}}
-    x.strokeStyle='rgba(90,66,40,.5)';x.lineWidth=1.5;for(let k=0;k<4;k++){const yy=Hh*.9+k*5-2,xx=W*(.28+.1*k+(H(k,v,85)-.5)*.1),ln=W*(.14+.1*H(k,v,86));x.beginPath();x.moveTo(xx,yy);x.lineTo(xx+ln,yy);x.stroke()}
-    out.push(c)}
+    if(kind==='wisp'){ // thin streaks of high cloud, each ending in a curl, with a few short hatch ticks
+      x.strokeStyle='#4e3a22';
+      for(let k=0;k<4;k++){const y0=Hh*(.2+.18*k),xa=W*(.05+.12*H(k,v,30)),xb=W*(.62+.3*H(k,v,31)),amp=Hh*(.05+.05*H(k,v,32)),cr=Hh*(.06+.05*H(k,v,33));
+        x.lineWidth=2.6-k*.25;x.beginPath();x.moveTo(xa,y0);x.bezierCurveTo(xa+(xb-xa)*.3,y0-amp,xa+(xb-xa)*.65,y0+amp,xb,y0);
+        for(let a=0;a<Math.PI*3.2;a+=.18){const rad=cr*(1-a/(Math.PI*3.5));x.lineTo(xb+Math.sin(a)*rad*1.1,y0+cr-Math.cos(a)*rad)}x.stroke();
+        x.strokeStyle='rgba(255,255,255,.7)';x.lineWidth=1;x.beginPath();x.moveTo(xa+8,y0+3);x.bezierCurveTo(xa+(xb-xa)*.3,y0-amp+3,xa+(xb-xa)*.65,y0+amp+3,xb-8,y0+3);x.stroke();x.strokeStyle='#4e3a22';
+        x.lineWidth=1;for(let q=0;q<5;q++){const tx=xa+(xb-xa)*(.2+.14*q);x.beginPath();x.moveTo(tx,y0+5);x.lineTo(tx+4,y0+11);x.stroke()}}
+      out.push(c);return}
+    x.strokeStyle='#4e3a22';x.lineWidth=3.6;for(const [px,py,rr] of puffs){x.beginPath();x.arc(px,py,rr,0,Math.PI*2);x.stroke()}
+    const g=x.createLinearGradient(0,Hh*.05,0,Hh*.9);g.addColorStop(0,'#fdfaf0');g.addColorStop(.55,'#f1ead3');g.addColorStop(1,'#cfc7ad');
+    x.fillStyle=g;for(const [px,py,rr] of puffs){x.beginPath();x.arc(px,py,rr-1.6,0,Math.PI*2);x.fill()}
+    // each billow: a crescent of cross-hatching on its lower right, a lighter patch on its sunny side, a white highlight on its upper left
+    for(const [px,py,rr,k] of puffs){if(k>=2||rr<9)continue;
+      x.save();x.beginPath();x.arc(px,py,rr-2,0,Math.PI*2);x.clip();
+      x.strokeStyle='rgba(84,62,38,.42)';x.lineWidth=1.05;
+      for(let h=-rr;h<rr*1.6;h+=4.2){x.beginPath();x.moveTo(px+rr*.15+h*.6,py+rr*.9);x.lineTo(px+rr*.15+h*.6+rr*.7,py+rr*.9-rr*.9);x.stroke()}
+      const sg=x.createRadialGradient(px-rr*.3,py-rr*.35,rr*.05,px-rr*.3,py-rr*.35,rr*1.05);sg.addColorStop(0,'rgba(253,250,240,1)');sg.addColorStop(.7,'rgba(246,240,222,.96)');sg.addColorStop(1,'rgba(246,240,222,0)');x.fillStyle=sg;x.fillRect(px-rr,py-rr,rr*2,rr*2);x.restore();
+      x.strokeStyle='rgba(255,255,255,.9)';x.lineWidth=2.2;x.beginPath();x.arc(px,py,rr*.78,Math.PI*1.08,Math.PI*1.42);x.stroke()}
+    // more hand-work, most of all on the big clouds: brow lines inside each billow, small extra bumps on the outline, stipple in the shade and cross-hatching low down
+    {let sd=300;
+     for(const [px,py,rr,k] of puffs.slice()){if(k>=2||rr<10)continue;sd++;
+      x.save();x.beginPath();x.arc(px,py,rr-2,0,Math.PI*2);x.clip();
+      x.strokeStyle='rgba(78,58,34,.5)';x.lineWidth=1.1;
+      for(let b=0;b<Math.ceil(df);b++){x.beginPath();x.arc(px+rr*.04*b,py+rr*.04*b,rr*(.86-.15*b),Math.PI*(1.04+.06*b),Math.PI*(1.52-.05*b));x.stroke()}
+      x.fillStyle='rgba(78,58,34,.55)';const nd=Math.round(rr*.5*df);for(let d=0;d<nd;d++){const a2=H(d,sd,1)*Math.PI*.9-.1,rd=rr*(.35+.55*H(d,sd,2));x.beginPath();x.arc(px+Math.cos(a2)*rd,py+Math.sin(a2)*rd,.9,0,Math.PI*2);x.fill()}
+      if(df>1.5&&py>base-Hh*.5){x.strokeStyle='rgba(84,62,38,.3)';x.lineWidth=.9;for(let h2=-rr;h2<rr*1.6;h2+=5){x.beginPath();x.moveTo(px-rr*.1+h2*.6,py+rr*.9);x.lineTo(px-rr*.1+h2*.6-rr*.7,py+rr*.9-rr*.9);x.stroke()}}
+      x.restore();
+      }}
+    // spiral curls in a few of the big billows
+    x.strokeStyle='rgba(78,58,34,.78)';x.lineWidth=1.5;
+    const spirals=puffs.filter(q=>(q[3]===0&&q[2]>Hh*.12)),every=kind==='tower'?2:3;
+    if(kind!=='thin')spirals.forEach((q,i)=>{if(i%every!==v%every)return;const [px,py,rr]=q,cx=px+rr*.12,cy=py+rr*.05,dir=i%2?1:-1;x.beginPath();for(let a=0;a<Math.PI*3.4;a+=.16){const rad=rr*.06+a*rr*.075,xx=cx+Math.cos(a*dir+i)*rad,yy=cy+Math.sin(a*dir+i)*rad;a?x.lineTo(xx,yy):x.moveTo(xx,yy)}x.stroke()});
+    // stipple under the base, and wavy wind-lines drifting off it
+    x.fillStyle='rgba(78,58,34,.6)';for(let i=0;i<Math.round(W/16);i++){x.beginPath();x.arc(W*(.14+.72*H(i,v,100)),base+Hh*(.02+.1*H(i,v,101)),1.1,0,Math.PI*2);x.fill()}
+    x.strokeStyle='rgba(78,58,34,.55)';x.lineWidth=1.5;for(let k=0;k<3;k++){const yy=base+Hh*(.1+.05*k),xx=W*(.22+.12*k+(H(k,v,102)-.5)*.1);x.beginPath();x.moveTo(xx,yy);x.bezierCurveTo(xx+30,yy-5,xx+60,yy+5,xx+95+k*12,yy);x.stroke()}
+    out.push(c)});
   return out}
 function mpWorldClouds(WV){
-  const S=mpWorldCl,now=performance.now()/1000,dt=Math.min(.1,S.t?now-S.t:0);S.t=now;
+  const S=mpWorldCl,now=performance.now()/1000,dt=Math.min(.1,S.t?now-S.t:0);S.t=now;S.on=now;
   if(!S.spr)S.spr=mpWorldCloudSprites();
   const H=hash2,X0=-130,X1=610,Y0=-90,Y1=410,spawn=(side,k)=>{ // a new cloud, entering from one edge
-    const v=(Math.random()*6)|0,sc=.5+Math.random()*.7,w=300*sc*.62,h=150*sc*.62,c={v,sc,w,h,vx:3+Math.random()*3.5,vy:(Math.random()-.5)*1.6,a:.55+Math.random()*.2,ph:Math.random()*6};
+    let v=0;{let r=Math.random()*100;for(let q=0;q<MPW_CK.length;q++){r-=MPW_CK[q][5];if(r<=0){v=q;break}}}const ck=MPW_CK[v],sc=ck[4][0]+Math.random()*(ck[4][1]-ck[4][0]),w=ck[1]*sc*.5,h=ck[2]*sc*.5,c={v,sc,w,h,vx:3+Math.random()*3.5,vy:(Math.random()-.5)*1.6,a:.55+Math.random()*.2,ph:Math.random()*6};
     if(side==='l'){c.x=X0+Math.random()*30;c.y=Y0+Math.random()*(Y1-Y0)}else if(side==='r'){c.x=X1-Math.random()*30;c.y=Y0+Math.random()*(Y1-Y0)}else if(side==='t'){c.x=X0+Math.random()*(X1-X0);c.y=Y0+Math.random()*30}else{c.x=X0+Math.random()*(X1-X0);c.y=Y1-Math.random()*30}
     if(k){c.x=X0+Math.random()*(X1-X0);c.y=Y0+Math.random()*(Y1-Y0)}return c};
   if(!S.list.length)for(let i=0;i<15;i++)S.list.push(spawn('l',true));
@@ -578,12 +620,33 @@ function mpWorldClouds(WV){
   const wind=.12+.14*Math.sin(now*.02);
   const arrive=Math.hypot(dx,dy)>.4?(Math.abs(dx)>Math.abs(dy)?(dx>0?'l':'r'):(dy>0?'t':'b')):'l';
   for(let i=0;i<S.list.length;i++){const c=S.list[i];
-    c.x+=Math.cos(wind)*c.vx*dt+dx*1.8;c.y+=(Math.sin(wind)*c.vx+c.vy)*dt+dy*1.8;
+    if(S.drag&&S.drag.c===c){c.lift=Math.min(1,(c.lift||0)+dt*8);continue} // a cloud held in the hand does not drift
+    c.lift=Math.max(0,(c.lift||0)-dt*5);const fk=Math.pow(.35,dt);c.fx=(c.fx||0)*fk;c.fy=(c.fy||0)*fk; // a cloud let go keeps its flick, slowing back to the wind
+    c.x+=(Math.cos(wind)*c.vx+c.fx)*dt+dx*1.8;c.y+=(Math.sin(wind)*c.vx+c.vy+c.fy)*dt+dy*1.8;
     if(c.x<X0-80||c.x>X1+80||c.y<Y0-60||c.y>Y1+60){S.list[i]=spawn(c.x>X1?'l':c.x<X0?'r':c.y>Y1?'t':'b',false);if(arrive!=='l'&&Math.random()<.7)S.list[i]=spawn(arrive,false)}}
   // the soft shadows on the land, then the clouds
   ctx.save();
   for(const c of S.list){const zz=.75+.35*WV.z,w=c.w*zz,h=c.h*zz,e=Math.min(1,Math.max(0,Math.min(c.x+60-14,466+60-c.x,c.y+40-14,306+40-c.y)/70));if(e<=0)continue;
-    ctx.globalAlpha=e*.16;ctx.fillStyle='#3a2a14';ctx.beginPath();ctx.ellipse(c.x+w*.12+10,c.y+h*.5+16,w*.42,h*.2,0,0,Math.PI*2);ctx.fill()}
+    const lf=c.lift||0;ctx.globalAlpha=e*(.16-.05*lf);ctx.fillStyle='#3a2a14';ctx.beginPath();ctx.ellipse(c.x+w*.12+10+10*lf,c.y+h*.5+16+14*lf,w*.42*(1+.1*lf),h*.2*(1+.1*lf),0,0,Math.PI*2);ctx.fill()}
   for(const c of S.list){const zz=.75+.35*WV.z,w=c.w*zz,h=c.h*zz,e=Math.min(1,Math.max(0,Math.min(c.x+60-14,466+60-c.x,c.y+40-14,306+40-c.y)/70));if(e<=0)continue;
-    ctx.globalAlpha=e*c.a;ctx.drawImage(S.spr[c.v],c.x-w/2,c.y-h*.6,w,h)}
+    const lf=c.lift||0,k=1+.07*lf;ctx.globalAlpha=Math.min(1,e*(c.a+.25*lf));ctx.drawImage(S.spr[c.v],c.x-w*k/2,c.y-h*.6*k-6*lf,w*k,h*k)}
   ctx.restore()}
+
+/* ---- the clouds can be picked up and moved: press on one and drag; let go and it keeps drifting the way it was thrown ---- */
+mpWorldCl.drag=null;
+function mpWorldCloudAt(px,py){
+  const S=mpWorldCl;if(!S.list.length||!G.overview||!G.world||performance.now()/1000-(S.on||0)>.3)return null;
+  for(let i=S.list.length-1;i>=0;i--){const c=S.list[i],zz=.75+.35*(G.wv?G.wv.z:1),w=c.w*zz,h=c.h*zz;
+    if(((px-c.x)/(w*.5))**2+((py-(c.y-h*.12))/(h*.36))**2<1)return c}
+  return null}
+cv.addEventListener('pointerdown',e=>{
+  const [x,y]=toDesign(e),c=mpWorldCloudAt(x,y);if(!c||mpWorldCl.drag)return;
+  mpWorldCl.drag={c,id:e.pointerId,ox:c.x-x,oy:c.y-y,pts:[[performance.now(),x,y]]};c.vx=c.vx||4;
+  e.stopImmediatePropagation();e.preventDefault()},true);
+addEventListener('pointermove',e=>{
+  const D=mpWorldCl.drag;if(!D||e.pointerId!==D.id)return;const [x,y]=toDesign(e);D.c.x=x+D.ox;D.c.y=y+D.oy;D.pts.push([performance.now(),x,y]);if(D.pts.length>6)D.pts.shift()});
+function mpWorldCloudDrop(e){
+  const D=mpWorldCl.drag;if(!D||(e&&e.pointerId!==D.id))return;mpWorldCl.drag=null;
+  const a=D.pts[0],b=D.pts[D.pts.length-1],dt=(b[0]-a[0])/1000;
+  if(dt>.01&&dt<.4){D.c.fx=Math.max(-320,Math.min(320,(b[1]-a[1])/dt*.5));D.c.fy=Math.max(-320,Math.min(320,(b[2]-a[2])/dt*.5))}}
+addEventListener('pointerup',mpWorldCloudDrop);addEventListener('pointercancel',mpWorldCloudDrop);
