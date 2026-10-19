@@ -36,3 +36,14 @@ Level data: `LEVELS[id]` has `rows` (array of strings; '.' open, other chars wal
    `goToLevel(<id>,{x:<cx>,y:<cy>,f:0}); G.state='play'; G.menu=false; G.overview=true; render3D(); ctx.setTransform(2,0,0,2,0,0); ui(.016); await fetch('http://localhost:<port>/name.jpg',{method:'POST',body:ctx.canvas.toDataURL('image/jpeg',.92))` (fix the paren). Use the level's `LEVELS[id].start` for x,y. The pane may be hidden, so screenshots of the pane can be stale; this canvas POST is reliable.
 5. After editing, reload the page (navigate again) because the map is cached; wait for `G.lst` again. Iterate until it looks beautiful, check text is readable and nothing important overlaps, and check the party arrow sits in the right place.
 6. Check the console for errors (`read_console_messages`, only errors).
+
+## Added since the first round
+- `mplInstall` now also gives your map zoom/pan (+, -, Fit, Me, wheel, pinch, drag) and, for outdoor levels, a soft cloud fog of war, automatically. Do not add your own. Your `draw(c,x,L,api)` still paints the whole sheet at 480x320 logical size (the sheet is rendered at 3x, so text and lines are sharp when zoomed).
+- Big terrain levels (the deserts are 100 to 250 cells across): sample the grid (one mark per few cells) and keep the draw under about 200 ms; it is drawn once and cached.
+- The world map is being restyled by another session in `src/desert/maps_world.js`; leave it alone.
+
+## Reveal mode (dungeons and the Orange Spire)
+`mplInstall({..., reveal:true})` covers everything the party has not walked near with parchment (like the old plain map), using `G.seen`. Use it for dungeon and maze levels so exploring still matters; the sheet you draw is the whole plan, the game hides the unexplored part. Never mark secret doors or secret chambers; the Orange Spire's hidden doors are shown only once found (see `hlDrawMap` in index.html and the castle map code in src/desert/hollow_haunt.js for how found secrets are tracked; keep that behaviour by drawing them dynamically only if you must, otherwise leave them out).
+
+## Oldhaven sections
+Level 305 is painted by several artists on one shared sheet: see src/desert/maps_oldhaven.js. You paint ONLY your own part of the city, clipped to your cell box plus about 2 cells (use `x.save(); x.beginPath(); x.rect(...); x.clip();` with fit.X / fit.Y), by pushing a section object onto MPOH with your order number. Order 0 (the base artist) paints the sea, coast, city wall ring, main roads, title, key, notes and compass; sections paint buildings, courts, gardens, markets, trees, small streets and labels. Share one palette: warm stone (#d8cfb8, #c8bca0), terracotta and slate roofs, lapis and vermilion accents, ink #2a1a0c, gold #c9a227. Section artists do not touch the sheet outside their box, and do not draw titles or borders.

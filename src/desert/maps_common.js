@@ -71,6 +71,7 @@ function mplInstall(cfg){
       try{mplParchment(x,cfg.tint);cfg.draw(c,x,LEVELS[LEVEL],{parchment:mplParchment,border:mplBorder,title:mplTitle,compass:mplCompass,text:mplText,notes:mplNotes,panel:mplPanel,fit:mplFit,I:MPLI,wrap:mplWrap});mplBorder(x)}catch(e){console.error(e)}
       MPL.CACHE[key]=c}
     const L=LEVELS[LEVEL],a=cfg.fit?cfg.fit(L):mplFit(L.rows[0].length,L.rows.length);
+    MPL.reveal=!!cfg.reveal;
     mplPaint(c,MPL.S,MPL.AREA,cx=>a.X(cx),cy=>a.Y(cy),cfg.foot)}}
 /* ---- zoom and pan: the same controls as the plain map (+ and - buttons, Fit, mouse wheel, pinch, drag), drawn from the large cached sheet so it stays sharp ---- */
 const MPLZ={max:6};
@@ -85,8 +86,8 @@ function mplPaint(c,S,area,X,Y,foot){
   ctx.imageSmoothingQuality='high';ctx.drawImage(c,0,0,DW,DH);
   const sx0=area.x-G.panX/z,sy0=area.y-G.panY/z;
   if(z>1.001){ctx.save();ctx.beginPath();ctx.rect(area.x,area.y,area.w,area.h);ctx.clip();ctx.drawImage(c,sx0*S,sy0*S,area.w/z*S,area.h/z*S,area.x,area.y,area.w,area.h);ctx.restore()}
-  const FL=LEVELS[LEVEL],fg=mplFogOn(FL)?mplFogFor(area,X,Y,FL):null;
-  if(fg){ctx.save();ctx.beginPath();ctx.rect(area.x,area.y,area.w,area.h);ctx.clip();ctx.globalAlpha=.82;ctx.imageSmoothingQuality='high';ctx.drawImage(fg.cv,(sx0-area.x)*fg.fs,(sy0-area.y)*fg.fs,area.w/z*fg.fs,area.h/z*fg.fs,area.x,area.y,area.w,area.h);ctx.restore()}
+  const FL=LEVELS[LEVEL],fg=MPL.reveal?mplFogFor(area,X,Y,FL,true):mplFogOn(FL)?mplFogFor(area,X,Y,FL):null;
+  if(fg){ctx.save();ctx.beginPath();ctx.rect(area.x,area.y,area.w,area.h);ctx.clip();ctx.globalAlpha=fg.dense?.97:.82;ctx.imageSmoothingQuality='high';ctx.drawImage(fg.cv,(sx0-area.x)*fg.fs,(sy0-area.y)*fg.fs,area.w/z*fg.fs,area.h/z*fg.fs,area.x,area.y,area.w,area.h);ctx.restore()}
   const px=area.x+(X(G.C.x+.5)-sx0)*z,py=area.y+(Y(G.C.y+.5)-sy0)*z;
   if(px>area.x-4&&px<area.x+area.w+4&&py>area.y-4&&py<area.y+area.h+4){ctx.save();ctx.translate(px,py);ctx.rotate((G.C.a||0)+Math.PI/2);ctx.fillStyle='#ffe36a';ctx.strokeStyle='#2a1a0c';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(5,6);ctx.lineTo(0,3);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore()}
   ctx.fillStyle='rgba(30,22,16,.85)';ctx.fillRect(0,DH-17,DW,17);txt(foot||'You are the yellow arrow.',DW/2+50,DH-8.5,7.5,'#e0d8bc','center',true);
@@ -131,8 +132,13 @@ function mplCloudTex(){
 function mplTile(x,y,P,o){const x0=Math.floor(x),y0=Math.floor(y),fx=x-x0,fy=y-y0,sx=fx*fx*(3-2*fx),sy=fy*fy*(3-2*fy),m=Math.round(P),h=(i,j)=>hash2(((i%m)+m)%m,((j%m)+m)%m,91+o);
   return (h(x0,y0)*(1-sx)+h(x0+1,y0)*sx)*(1-sy)+(h(x0,y0+1)*(1-sx)+h(x0+1,y0+1)*sx)*sy}
 /* the cloud sheet for this level and view: rebuilt when the explored ground changes */
-function mplFogFor(area,X,Y,L){
-  const a=mplFogArr();if(!a)return null;const W=L.rows[0].length,H=L.rows.length,fs=2,key=LEVEL+':'+MPLF.ver+':'+area.x+area.w;
+function mplFogFor(area,X,Y,L,seenMode){
+  const W=L.rows[0].length,H=L.rows.length,fs=2;let a,key;
+  if(seenMode){a=new Uint8Array(W*H);let n=0;for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(G.seen&&G.seen[y]&&G.seen[y][x]){a[y*W+x]=1;n++}
+    // what has been walked past, and the rooms beside the way, show; the rest of a dungeon stays covered
+    const b=new Uint8Array(a);for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(a[y*W+x])for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const xx=x+dx,yy=y+dy;if(xx>=0&&yy>=0&&xx<W&&yy<H)b[yy*W+xx]=1}
+    a=b;key=LEVEL+':seen:'+n+':'+area.x+area.w}
+  else{a=mplFogArr();if(!a)return null;key=LEVEL+':'+MPLF.ver+':'+area.x+area.w}
   if(MPLF.cache&&MPLF.cache.key===key)return MPLF.cache;
   const fw=Math.ceil(area.w*fs),fh=Math.ceil(area.h*fs),cv=document.createElement('canvas');cv.width=fw;cv.height=fh;const x=cv.getContext('2d');
   const m=document.createElement('canvas');m.width=W;m.height=H;const mx=m.getContext('2d'),id=mx.createImageData(W,H);
@@ -142,5 +148,5 @@ function mplFogFor(area,X,Y,L){
   const bx=(X(0)-area.x)*fs,by=(Y(0)-area.y)*fs,bw=(X(W)-X(0))*fs,bh=(Y(H)-Y(0))*fs,sm=document.createElement('canvas');sm.width=Math.ceil(fw/4);sm.height=Math.ceil(fh/4);const sx=sm.getContext('2d');sx.imageSmoothingEnabled=true;
   sx.drawImage(m,bx/4,by/4,bw/4,bh/4);const sm2=document.createElement('canvas');sm2.width=Math.ceil(fw/8);sm2.height=Math.ceil(fh/8);const s2=sm2.getContext('2d');s2.imageSmoothingEnabled=true;s2.drawImage(sm,0,0,sm2.width,sm2.height);
   sx.clearRect(0,0,sm.width,sm.height);sx.drawImage(sm2,0,0,sm.width,sm.height);x.drawImage(sm,0,0,fw,fh);
-  x.globalCompositeOperation='source-in';x.fillStyle=x.createPattern(mplCloudTex(),'repeat');x.fillRect(0,0,fw,fh);
-  return MPLF.cache={key,cv,fs}}
+  x.globalCompositeOperation='source-in';x.fillStyle=seenMode?'#cdbb8e':x.createPattern(mplCloudTex(),'repeat');x.fillRect(0,0,fw,fh);
+  return MPLF.cache={key,cv,fs,dense:!!seenMode}}
