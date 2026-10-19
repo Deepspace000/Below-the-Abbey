@@ -77,6 +77,7 @@ function mpplDraw(){
   const g=mpplGeo();if(!g)return;
   mpplZones(g);
   if(LEVEL!==44&&typeof drawQuestRings==='function'){ctx.save();ctx.beginPath();ctx.rect(g.A.x,g.A.y,g.A.w,g.A.h);ctx.clip();try{drawQuestRings(g.ox,g.oy,Math.max(g.cs,.9))}catch(e){console.error(e)}ctx.restore()}
+  if(typeof wdDrawMarks==='function'){ctx.save();ctx.beginPath();ctx.rect(g.A.x,g.A.y,g.A.w,g.A.h);ctx.clip();wdDrawMarks(g.ox,g.oy,Math.max(g.cs,1.4),true);ctx.restore()} // the ? of hidden caves and ruins the party has spotted
   mpplTrail(g);mpplPinsDraw(g);
   if(MPPL.pin){mpplHalo('Tap the map to drop a pin. Tap a pin to take it away.',g.A.x+g.A.w/2,g.A.y+g.A.h-8,7,'#5a1a10')}}
 function mpplButtons(){

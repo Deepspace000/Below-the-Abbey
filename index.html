@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.448';
+const VERSION='3.449';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -22202,11 +22202,15 @@ function wdSharp(){
   return {range:Math.min(range,34),cone:Math.max(.15,cone)}}
 {const _u=ui;ui=function(dt){try{if(G.state==='play'&&!G.cut){const L=LEVELS[LEVEL];if(L&&L._wdMarks){const R=wdRevealed(),f=DIRS[G.P.f]||[0,-1],sk=wdSharp();
   for(const m of L._wdMarks){if(R[LEVEL+':'+m.id])continue;const dx=m.x-G.P.x,dy=m.y-G.P.y,dd=Math.hypot(dx,dy);if(dd>sk.range||dd<.5)continue;if((dx*f[0]+dy*f[1])/dd>=sk.cone)R[LEVEL+':'+m.id]=1}}}}catch(e){}return _u.apply(this,arguments)}}
-{const _dq=drawQuestMarks;drawQuestMarks=function(ox,oy,cs,big,rad){_dq.apply(this,arguments);
+/* the ? marks of the places the party has spotted. On the minimap a place that is further away than the little window shows is drawn on its edge, in the direction of the place, so it can be steered to. */
+function wdDrawMarks(ox,oy,cs,big,rad){
   try{const L=LEVELS[LEVEL];if(!L||!L._wdMarks)return;const seen=(G.flags&&G.flags.lvSeen)||{};
-    const R=wdRevealed();for(const m of L._wdMarks){if(seen[m.id]||!R[LEVEL+':'+m.id])continue;if(rad&&(Math.abs(m.x-G.C.x)>rad||Math.abs(m.y-G.C.y)>rad))continue;
-      const cx=ox+(m.x+.5)*cs,cy=oy+(m.y+.5)*cs;ctx.save();ctx.strokeStyle='#c8c0a8';ctx.fillStyle='rgba(40,34,24,.85)';ctx.lineWidth=big?1.4:1;ctx.beginPath();ctx.arc(cx,cy,cs*.8,0,TAU);ctx.fill();ctx.stroke();
-      txt('?',cx,cy+.5,big?Math.max(8,cs*.95):Math.max(5,cs*.9),'#e8e0c0','center',true);ctx.restore()}}catch(e){}}}
+    const R=wdRevealed();for(const m of L._wdMarks){if(seen[m.id]||!R[LEVEL+':'+m.id])continue;
+      let mx=m.x,my=m.y,edge=false;
+      if(rad){const dx=m.x-G.C.x,dy=m.y-G.C.y,lx=Math.max(1,rad-2.8),ly=Math.max(1,rad*.66-1.4),k=Math.min(1,lx/Math.max(.01,Math.abs(dx)),ly/Math.max(.01,Math.abs(dy)));if(k<1){mx=G.C.x+dx*k;my=G.C.y+dy*k;edge=true}}
+      const cx=ox+(mx+.5)*cs,cy=oy+(my+.5)*cs,r=edge?Math.max(3.2,cs*.72):cs*.8;ctx.save();ctx.strokeStyle='#c8c0a8';ctx.fillStyle='rgba(40,34,24,.9)';ctx.lineWidth=big?1.4:1;ctx.beginPath();ctx.arc(cx,cy,r,0,TAU);ctx.fill();ctx.stroke();
+      txt('?',cx,cy+.5,big?Math.max(8,cs*.95):Math.max(5,r*1.25),'#e8e0c0','center',true);ctx.restore()}}catch(e){}}
+{const _dq=drawQuestMarks;drawQuestMarks=function(ox,oy,cs,big,rad){_dq.apply(this,arguments);wdDrawMarks(ox,oy,cs,big,rad)}}
 /* ---------- the people of the caves ---------- */
 khNpc('pf_witch','The Cave Witch','pf_witch',()=>qNode('pf4',khQD('Well, well. A visitor through my thicket, and with a torch, no less. I am not a bad witch. I am a busy one. My cauldron is empty, and the herbs in the woods are not picking themselves. Bring me four herbs and I will not turn you into anything.','Four herbs. Any four. Do not bring me dandelions.',(g,n)=>`${g} of ${n} herbs.`,'Four herbs! They will do. They will do nicely.','Four herbs, picked well enough.','The cauldron is bubbling. Go on, shoo.','Here are four herbs.'),{q:'pf4'}),{q:'pf4',sc:1});
 monq('pf4','Herbs for the Cave Witch','The Cave Witch','The witch of the hollow wants four herbs from the woods for her cauldron.',4,()=>Math.min(4,bagCount('herb')),{gold:400,xp:4000},{take:{herb:4}});QAREA.pf4='The Pilgrim’s Path';
@@ -31612,6 +31616,7 @@ function mpplDraw(){
   const g=mpplGeo();if(!g)return;
   mpplZones(g);
   if(LEVEL!==44&&typeof drawQuestRings==='function'){ctx.save();ctx.beginPath();ctx.rect(g.A.x,g.A.y,g.A.w,g.A.h);ctx.clip();try{drawQuestRings(g.ox,g.oy,Math.max(g.cs,.9))}catch(e){console.error(e)}ctx.restore()}
+  if(typeof wdDrawMarks==='function'){ctx.save();ctx.beginPath();ctx.rect(g.A.x,g.A.y,g.A.w,g.A.h);ctx.clip();wdDrawMarks(g.ox,g.oy,Math.max(g.cs,1.4),true);ctx.restore()} // the ? of hidden caves and ruins the party has spotted
   mpplTrail(g);mpplPinsDraw(g);
   if(MPPL.pin){mpplHalo('Tap the map to drop a pin. Tap a pin to take it away.',g.A.x+g.A.w/2,g.A.y+g.A.h-8,7,'#5a1a10')}}
 function mpplButtons(){
