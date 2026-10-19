@@ -141,7 +141,7 @@ function mpPilgDraw(c,x,L,api){
     x.fillStyle=MPL.VERM;x.strokeStyle=ink;x.lineWidth=.9;x.beginPath();x.arc(hx,hy,3.3,0,TAU);x.fill();x.stroke();x.fillStyle=MPL.GOLD2;x.beginPath();x.arc(hx,hy,1.1,0,TAU);x.fill();
     mpPilgShip(x,hx-72,hy+40,.7,false,MPL.VERM);
     labs.push(()=>mpPilgSpaced(x,'SAINT ELEN’S MONASTERY',hx,hy+71,6.8,'#6a1a10',.9,FUI));
-    labs.push(()=>T(x,'halfway: rest, quests and a quiet reward',hx,hy+78,5.4,'#6a1a10'))}
+    }
   /* ---- mountains across the north, with a falcon ---- */
   for(let r=0;r<2;r++){const base=r?72:63,sc0=r?1.15:1.7,step=r?15:21;for(let i=0;i<24;i++){const a=A.x-4+i*step+(H(i,r,70)-.5)*8,b=base+(H(i,r,71)-.5)*4,sc=sc0*(.82+H(i,r,72)*.4);if(a>A.x+A.w+8)continue;
       MPLI.mountain(x,a,b,sc);x.strokeStyle='rgba(42,26,12,.55)';x.lineWidth=.4;for(let k=0;k<7;k++){const u=a+1+k*1.1*sc,v=b-5.8*sc+k*.7*sc;x.beginPath();x.moveTo(u,v);x.lineTo(u+(2.6+k*.3)*sc,v+(1.7+k*.3)*sc);x.stroke()}}}
@@ -217,7 +217,7 @@ function mpPilgDraw(c,x,L,api){
     for(let i=0;i<7;i++){MPLI.house(x,cx0-26+i*8.6,cy0+24+(i%2)*1.4,.6,['#a85a2a','#b8321e','#8a4a2a','#6a6a78'][i%4])}
     MPLI.church(x,cx0+34,cy0+24,.55);mpPilgShip(x,cx0-18,cy0+34,.5,false,MPL.LAPIS);
     mpPilgBanner(x,cx0,cy0,MPL.VERM,false);
-    lab('YARRIM',cx0,cy0+38,8,ink);lab('the cliff: a way down, none back',cx0+34,cy0+7,5.6,'#6a1a10','left');lab('0 km',cx0-12,cy0-8,5.6,'#6a1a10','right')}
+    lab('YARRIM',cx0,cy0+38,8,ink);lab('0 km',cx0-12,cy0-8,5.6,'#6a1a10','right')}
   /* ---- pilgrims walking the road ---- */
   [[.035,'#6a3a2a'],[.12,'#2f5a8a'],[.24,'#7a2a2a'],[.305,'#5a5a30'],[.43,'#6a3a2a'],[.5,'#3a3a6a'],[.62,'#7a2a2a'],[.7,'#2f5a8a'],[.83,'#5a5a30'],[.93,'#6a3a2a']].forEach(([f,col],i)=>{const p=mpPilgP(f),n=mpPilgIn(f);mpPilgFolk(x,p[0]+n[0]*(i%2?-.8:.8),p[1]+n[1]*(i%2?-.8:.8)+1.4,col)});
   labs.forEach(fn=>fn());

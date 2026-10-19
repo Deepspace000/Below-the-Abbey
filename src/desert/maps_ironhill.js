@@ -125,5 +125,5 @@ draw(c,x,L,api){
   mpIronhillSlag(x,kx,ky[5]+3,.5,5);api.text(x,'Slag heap',kx+9,ky[5],5.6,'#2a1a0c','left');
   x.save();x.fillStyle=MPL.GOLD;x.strokeStyle=MPL.INK;x.lineWidth=.6;x.fillRect(kx-1.6,ky[6]-1.6,3.2,3.2);x.strokeRect(kx-1.6,ky[6]-1.6,3.2,3.2);x.restore();api.text(x,'Door',kx+9,ky[6],5.6,'#2a1a0c','left');
   api.compass(x,436,150,13);
-  api.panel(x,392,176,84,50);api.notes(x,['Blue is the fountain in the square. Grey clouds are smoke.'],398,187,74,6,4);
+  api.notes(x,['Blue is the fountain in the square. Grey clouds are smoke.'],398,187,74,6,4);
 }});

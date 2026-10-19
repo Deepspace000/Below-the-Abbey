@@ -495,7 +495,7 @@ function mpKhemKey(x){
     ['A shop door',(g)=>{g.fillStyle='#ffd23a';g.beginPath();g.arc(0,0,1.1,0,6.3);g.fill();g.strokeStyle=MPKH.ink;g.lineWidth=.2;g.stroke();g.strokeStyle='#a06a00';g.lineWidth=.22;g.beginPath();g.arc(0,0,.55,0,6.3);g.stroke()}]];
   rows.forEach(([t,fn],i)=>{const y=b+21+i*9.6;x.save();x.translate(a+10,y);x.scale(2.1,2.1);fn(x);x.restore();x.font=`bold 5.2px ${ff}`;x.textAlign='left';x.textBaseline='middle';x.fillStyle='#3a2208';x.fillText(t,a+20,y+.3)});
   x.restore()}
-function mpKhemNotes(x){
+function mpKhemNotes(x){return 84; // no notes to the player on the maps
   const a=15,b=84,w=71;const notes=['Khemetra is a walled city, 400 squares across. Its wall has round towers and two gates.','The Great Gate in the south wall opens on the desert road. The Sea Gate in the east wall leads to the tunnel to Yarrim.','The Palace of Khemetra stands at the centre, with the Court of the Golden Sun before it.','The Beggars\' Quarter in the east is not safe. The Old Quarter in the north west is mostly ruins.','Zoom in to read the streets, lanes and shops.'];
   const ff=mpKhemFont();x.save();x.font=`5.5px ${ff}`;let lines=0;const wrapped=notes.map(n=>{const l=mplWrap(x,n,w-14,5.5);lines+=l.length;return l});
   const h=lines*6.5+notes.length*2.4+6;mpKhemPanel(x,a,b,w,h);let y=b+8;
@@ -569,7 +569,7 @@ function mpKhemDraw(c,x,L){
     let c=MPKH.cache;
     if(!c){c=document.createElement('canvas');c.width=DW*MPKH.S;c.height=DH*MPKH.S;const x=c.getContext('2d');x.scale(MPKH.S,MPKH.S);try{mpKhemDraw(c,x,LEVELS[LEVEL])}catch(e){console.error(e)}MPKH.cache=c}
     const F=MPKH.F;MPL.reveal=false;
-    mplPaint(c,MPKH.S,MPL.AREA,cx=>F.X(cx),cy=>F.Y(cy),'You are the yellow arrow. Gold coins mark shops; red rings mark people who need help.');
+    mplPaint(c,MPKH.S,MPL.AREA,cx=>F.X(cx),cy=>F.Y(cy),'');
     // the live marks go over the painting: quest rings, donkey rides, rumours and the cistern hatch
     const A=MPL.AREA,z=mplZoom(),sx0=A.x-G.panX/z,sy0=A.y-G.panY/z,cs=F.s*z,ox=A.x+(F.X(0)-sx0)*z,oy=A.y+(F.Y(0)-sy0)*z;
     ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();

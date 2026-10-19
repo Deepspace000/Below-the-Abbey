@@ -167,6 +167,6 @@ function mpOs444Draw(c,x,L,api){
       x.restore();api.text(x,t,ix+11,ry,5.8,'#3a1408','left')});
     function stairKey(ix,ry,up){x.fillStyle='#e6d2a4';x.fillRect(ix-4,ry-4,8,8);x.strokeRect(ix-4,ry-4,8,8);x.beginPath();for(let q=1;q<4;q++){x.moveTo(ix-4,ry-4+q*2);x.lineTo(ix+4,ry-4+q*2)}x.stroke();x.fillStyle=VERM;x.beginPath();if(up){x.moveTo(ix,ry-3);x.lineTo(ix+2.6,ry+1);x.lineTo(ix-2.6,ry+1)}else{x.moveTo(ix,ry+3);x.lineTo(ix+2.6,ry-1);x.lineTo(ix-2.6,ry-1)}x.closePath();x.fill();x.stroke()}}
   {const notes=['You arrive by the stair at the bottom of the plan.','A long hall runs east and west across the middle of the floor.','Halls, a study, cells and two crypts open off it.','The stair up is at the far north end, down a narrow corridor.','Torches and candles light the halls.'];
-    api.panel(x,392,34,84,150);api.notes(x,notes,397,46,74,6,3.5)}
+    api.notes(x,notes,397,46,74,6,3.5)}
 }
 mplInstall({name:'os444',levels:[444],reveal:true,draw:mpOs444Draw});

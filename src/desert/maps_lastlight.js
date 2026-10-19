@@ -147,6 +147,6 @@ draw(c,x,L,api){
   mpLastLightStair(x,kx,ky[6]+3,6,.8);api.text(x,'Stair',kx+9,ky[6],5.6,'#2a1a0c','left');
   mpLastLightCottage(x,kx,ky[7],.7);api.text(x,'Hut',kx+9,ky[7],5.6,'#2a1a0c','left');
   api.compass(x,436,178,13);
-  api.panel(x,392,206,84,56);api.notes(x,['Dotted lines are reefs under the water. Take care near the south east corner.'],398,217,74,6,4);
+  api.notes(x,['Dotted lines are reefs under the water. Take care near the south east corner.'],398,217,74,6,4);
   mpLastLightGull(x,30,270,1.3);mpLastLightGull(x,46,276,1);mpLastLightGull(x,62,268,1.1);
 }});

@@ -140,7 +140,7 @@ draw(c,x,L,api){
     ['Carpet',()=>{x.fillStyle=MPL.VERM;x.fillRect(kx+9,ky+186,6,8);x.strokeStyle=MPL.GOLD;x.lineWidth=.8;x.strokeRect(kx+9,ky+186,6,8)}]];
   const gaps=[21,34,53,70,93,106,120,133,148,162,176,190];
   ki.forEach((r,i)=>{r[1]();api.text(x,r[0],kx+24,ky+gaps[i],6.2,'#3a2a1c','left')});
-  const nx=391,nw=84;api.panel(x,nx-2,50,nw,150);api.text(x,'NOTES',nx+nw/2-2,58,7,MPL.LAPIS);
+  const nx=391,nw=84;api.panel(x,nx-2,50,nw,150);
   mplNotes(x,['The party arrives at the stair in the south.','The stair up is behind the throne in the north.','Only some rooms have names.','Torches and candles light the rooms.'],nx+3,69,nw-9,6.2,4);
   api.compass(x,436,242,15);
 }});

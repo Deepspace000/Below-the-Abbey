@@ -113,7 +113,7 @@ draw(c,x,L,api){
     ['Bookshelf',()=>MPOS454I.shelf(x,kx+11,ky+149,12)],['Fireplace',()=>mpOs454Wall(x,kx+11,ky+158,0,1,()=>MPOS454I.hearth(x,11))]];
   const gy=[21,34,49,62,76,90,101,113,125,137,150,159];
   kr.forEach((r,i)=>{r[1]();api.text(x,r[0],kx+25,ky+gy[i],6.4,'#3a2a1c','left')});
-  const nx=392,nw=82;api.panel(x,nx-2,50,nw,176);api.text(x,'NOTES',nx+nw/2-2,58,7,'#7a2a14');
+  const nx=392,nw=82;api.panel(x,nx-2,50,nw,176);
   mplNotes(x,['The stair down is in the south, where you arrive.','The stair up is in the north west corner, beside the cells.','Lanterns burn in the corners of the larger rooms.','Portraits and a numbered stone hang by the stair.'],nx+3,69,nw-9,6.2,4);
   api.compass(x,435,254,15);
   I.tower(x,435,283,.8)}});

@@ -26,7 +26,7 @@ function mpGravesLantern(x,a,b,s,glow){s=s||1;x.save();if(glow){const g=x.create
 /* the shared margin furniture */
 function mpGravesMargin(x,api,title,sub,notes,key){
   api.title(x,title,sub);api.compass(x,436,262,12);
-  api.panel(x,8,52,78,118);api.notes(x,notes,13,62,68,6.2,4);
+  api.notes(x,notes,13,62,68,6.2,4);
   api.panel(x,392,34,84,18+key.length*12);let y=45;
   api.text(x,'Key',434,y,7.4,MPL.VERM,'center');y+=11;
   for(const k of key){k.icon(402,y);api.text(x,k.t,412,y,6,'#3a2a1c','left');y+=k.dy||12}}

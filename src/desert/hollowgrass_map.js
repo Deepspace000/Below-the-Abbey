@@ -48,22 +48,21 @@ function hgmDraw(){
     for(const bx of [-8,-3,2,7])for(const by of [-8,-3,2,7]){if((bx===-3||bx===2)&&(by===-3||by===2))continue;if(H(t.x+bx,t.y+by,50)<.18)continue;const hx=cx+(bx+.5)*S,hy=cy+(by+.5)*S;x.fillStyle='#f2eee4';x.strokeStyle=ink;x.lineWidth=.7;x.fillRect(hx-1.5,hy-1,3,3.2);x.strokeRect(hx-1.5,hy-1,3,3.2);x.fillStyle=pastel[(bx*3+by*5+ti+40)%4];x.beginPath();x.moveTo(hx-1.9,hy-1);x.quadraticCurveTo(hx-1,hy-4,hx,hy-5.4);x.quadraticCurveTo(hx+1,hy-4,hx+1.9,hy-1);x.closePath();x.fill();x.stroke()}
     x.fillStyle='#88b4cc';x.beginPath();x.arc(cx+2.5*S,cy+2.5*S,1.5,0,Math.PI*2);x.fill();x.strokeStyle=ink;x.stroke();x.restore();
     lab(t.n.toUpperCase(),cx,cy-r-6,ti===0?9.5:8,ti===0?'#2a1a50':ink);
-    lab(['wizard waits at the well','weavers of reeds','traders on the east road','the old village','the northern festival'][ti],cx,cy+r+6,6.2,'#5a3c1c')});
+    });
   // the four hives
   HG_HIVE_AT.forEach((p,i)=>{const a=PX(p[0]),b=PY(p[1]);x.save();x.translate(a,b);for(let k=0;k<4;k++){x.fillStyle=k%2?'#d89c30':'#e8b848';x.strokeStyle=ink;x.lineWidth=.9;x.beginPath();x.ellipse(0,3-k*3.1,8-k*1.5,3.4,0,0,Math.PI*2);x.fill();x.stroke()}
     x.fillStyle='#2a1c0e';x.beginPath();x.ellipse(0,5.5,2.2,1.7,0,0,Math.PI*2);x.fill();x.strokeStyle='rgba(120,70,10,.7)';x.lineWidth=.5;for(let k=-1;k<=1;k++){x.beginPath();x.arc(k*2.8,-.4,1.1,0,Math.PI*2);x.stroke()}
     x.fillStyle='#d03a2a';x.strokeStyle=ink;x.lineWidth=.8;x.beginPath();x.arc(10,-8,3.6,0,Math.PI*2);x.fill();x.stroke();x.restore();x.save();x.font=`bold 7px ${FUI}`;x.textAlign='center';x.textBaseline='middle';x.fillStyle='#fff6e0';x.fillText(String(i+1),a+10,b-7.6);x.restore();
-    lab(HG_HIVE_NAMES[i].toUpperCase(),a,b+14,7.2,'#6a1a10');lab('book '+(i+1)+' of 4',a,b+21.5,6,'#6a1a10')});
+    lab(HG_HIVE_NAMES[i].toUpperCase(),a,b+14,7.2,'#6a1a10')});
   // the gate in the south, the start, and the way back
   {const a=PX(HG.START.x),b=PY(HG.H-4);x.save();x.translate(a,b);x.strokeStyle=ink;x.fillStyle='#d8d0bc';x.lineWidth=1;x.fillRect(-7,-5,14,6);x.strokeRect(-7,-5,14,6);for(let k=-6;k<=6;k+=2){x.beginPath();x.moveTo(k,-5);x.lineTo(k,-8);x.stroke()}x.restore();
-    lab('THE SPIKED GATE',a,b+8,7.2,ink);lab('back to the Hollow Land',a,b+15,6,'#5a3c1c')}
+    lab('THE SPIKED GATE',a,b+8,7.2,ink)}
   // the compass
   {const a=OX+S*140,b=OY+S*12;x.save();x.translate(a,b);x.strokeStyle=ink;x.fillStyle='#e8e4d2';x.lineWidth=1;x.beginPath();x.arc(0,0,9,0,Math.PI*2);x.fill();x.stroke();x.fillStyle=ink;x.beginPath();x.moveTo(0,-13);x.lineTo(3,0);x.lineTo(0,-2.5);x.lineTo(-3,0);x.closePath();x.fill();x.beginPath();x.moveTo(0,13);x.lineTo(2,0);x.lineTo(-2,0);x.closePath();x.strokeStyle=ink;x.stroke();x.restore();lab('N',a,b-17,8,ink)}
   // title, notes and legend
   x.save();x.font=`18px ${FTITLE}`;x.textAlign='left';x.textBaseline='middle';x.fillStyle=ink;x.fillText('The Hollow',8,14);x.fillText('Grasslands',8,32);x.restore();
   lab('a cavern inside the earth',9,48,7,'#5a3c1c','left');lab('levels 66 to 70',9,59,7,'#5a3c1c','left');
   const notes=['No sky here: the roof of rock is lost in the dark, and the wind never stops.','The folk speak a tongue no stranger knows. Four books in the four hives teach it, one step at a time.','Insectivores sit on the hills. The further from the gate, the bigger they grow.','Keep to the tracks, and the frog-whales will do you no harm.'];
-  notes.forEach((n,i)=>{const w=wrapText(n,102,6.6);w.forEach((l,j)=>lab(l,9,74+i*34+j*8.6,6.4,'#3a2a1c','left'))});
   // legend, right
   const lx=366,ly0=70;x.fillStyle=ink;x.font=`bold 8px ${FUI}`;x.textAlign='left';x.fillText('KEY',lx,ly0-10);
   const key=(i,t,draw)=>{const yy=ly0+i*17;draw(lx+8,yy);lab(t,lx+20,yy,6.6,'#3a2a1c','left')};
@@ -81,6 +80,6 @@ function hgmDraw(){
 }
 function hgmOverview(){
   if(!HGM.cv)HGM.cv=hgmDraw();
-  MPL.reveal=false;if(HGM.cv)mplPaint(HGM.cv,3,{x:112,y:38,w:252,h:254},cx=>HGM.ox+cx*HGM.s,cy=>HGM.oy+cy*HGM.s,'Exsce, the village nearest the gate, is where the wizard waits.');
+  MPL.reveal=false;if(HGM.cv)mplPaint(HGM.cv,3,{x:112,y:38,w:252,h:254},cx=>HGM.ox+cx*HGM.s,cy=>HGM.oy+cy*HGM.s,'You are the yellow arrow.');
 }
 {const _do=drawOverview;drawOverview=function(){if(LEVEL===HG.ID&&LEVELS[HG.ID]&&!G.world&&!G.teleMode){hgmOverview();return}return _do.apply(this,arguments)}}

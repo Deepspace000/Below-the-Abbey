@@ -46,7 +46,7 @@ function mpThornwoodDraw23(c,x,L,api){
   x.fillStyle=MPL.VERM;x.strokeStyle=MPT_INK;x.lineWidth=.8;const ax=f.X(5.5),ay=f.Y(8.9);x.beginPath();x.moveTo(ax-4,ay);x.lineTo(ax+4,ay);x.lineTo(ax,ay+5);x.closePath();x.fill();x.stroke();
   api.title(x,"Wolves' Den",'A cave under the Thornwood');
   api.compass(x,46,264,13);
-  api.panel(x,6,56,82,108);api.notes(x,['A cave of wolves under the thorny wood.','Four wolves lair here. Two rooms are joined by a short passage.','Bones lie in three places.','A chest sits in the top right corner.'],11,66,72);
+  api.notes(x,['A cave of wolves under the thorny wood.','Four wolves lair here. Two rooms are joined by a short passage.','Bones lie in three places.','A chest sits in the top right corner.'],11,66,72);
   api.panel(x,394,40,80,64);api.text(x,'Key',434,49,8,MPL.VERM);
   x.fillStyle='#c4aa72';x.fillRect(401,58,10,7);x.strokeStyle=MPT_INK;x.strokeRect(401,58,10,7);api.text(x,'Floor',416,62,6.5,MPT_INK,'left');
   api.I.skull(x,406,76,1);api.text(x,'Bones',416,76,6.5,MPT_INK,'left');
@@ -136,6 +136,6 @@ function mpThornwoodDraw(c,x,L,api){
     api.text(x,t,418,ky+1,6.5,MPT_INK,'left')});
   // small flourishes: ravens over the wood
   x.save();x.strokeStyle=MPT_INK;x.lineWidth=1;x.lineCap='round';for(const [a,b] of [[394,150],[420,160],[448,148]]){x.beginPath();x.moveTo(a-5,b);x.quadraticCurveTo(a-2.5,b-4,a,b);x.quadraticCurveTo(a+2.5,b-4,a+5,b);x.stroke()}x.restore();
-  api.panel(x,394,176,80,100);api.notes(x,['Brambles snag the careless in the forest.','Graves stand in the abbey yard and one lonely shrine in the south.'],399,186,70,6.2,4)}
+  api.notes(x,['Brambles snag the careless in the forest.','Graves stand in the abbey yard and one lonely shrine in the south.'],399,186,70,6.2,4)}
 mplInstall({name:'thornwood',levels:[2,23],draw:mpThornwoodDraw,foot:'You are the yellow arrow. Thorns grow thick off the trails.',tint:[-8,-4,-12],
   fit:L=>mplFit(L.rows[0].length,L.rows.length,L.rows.length<12?10:4)});

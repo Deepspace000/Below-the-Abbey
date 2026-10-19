@@ -290,10 +290,8 @@ MPOH.push({order:0,name:'base',paint(x,L,api,fit){
   // text on the water
   api.text(x,'NARROW SEA',48,118,7,MPL.LAPIS,'center');
   // left note
-  mpOhBaseScroll(x,8,238,90,60);x.save();api.panel(x,8,238,90,60);x.restore();
   api.notes(x,["King's Road runs from the Portcullis Gate north to the Great Square and the castle. The Land Gate road leads out to the Pilgrim's Path."],14,247,80,5.9,3);
   // right notes
-  mpOhBaseScroll(x,387,12,88,126);x.save();api.panel(x,387,12,88,126);x.restore();
   api.notes(x,["Oldhaven is the king's walled city on the Narrow Sea. The castle stands at the north end.","Three gates pierce the wall: the Portcullis Gate to the quay, the Land Gate in the north and the East Gate.","The East Gate is held by the Ash Guard. Its captain can tell you more."],392,21,77,5.9,4);
   // key
   {const ka=387,kb=186,kw=88,kh=112;mpOhBaseScroll(x,ka,kb,kw,kh);api.panel(x,ka,kb,kw,kh);api.text(x,'KEY',ka+kw/2,kb+8,7,MPL.VERM,'center');

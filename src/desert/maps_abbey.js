@@ -89,7 +89,7 @@ draw(c,x,L,api){
     ['Torch',()=>mpAbbeyTorch(x,kx+12,ky+96,.8)]];
   const gaps=[19.5,33,47,62,73,85,98];
   rowsK.forEach((r,i)=>{r[1]();api.text(x,r[0],kx+25,ky+gaps[i]+(i===3?0:0),6.4,'#3a2a1c','left')});
-  const nx=391,nw=84;api.panel(x,nx-2,50,nw,176);api.text(x,'NOTES',nx+nw/2-2,58,7,MPL.LAPIS);
+  const nx=391,nw=84;api.panel(x,nx-2,50,nw,176);
   mplNotes(x,['The party starts in the south west cell.','Rats nest in the Rat Run and the passages.','Four coffins stand in the Crypt of Coffins.','The Rat King waits behind the iron gate. The stair down is on his east wall.'],nx+3,69,nw-9,6.2,4);
   api.compass(x,46,246,15);
   I.cross(x,46,276,.9);

@@ -54,9 +54,12 @@ const MPLI={
 /* fit a W x H cell grid into the framed area: returns {s, ox, oy, X(cx), Y(cy)} */
 function mplFit(W,H,pad){pad=pad||4;const A=MPL.AREA,s=Math.min((A.w-2*pad)/W,(A.h-2*pad)/H),ox=A.x+(A.w-W*s)/2,oy=A.y+(A.h-H*s)/2;return {s,ox,oy,X:c=>ox+c*s,Y:c=>oy+c*s}}
 /* a ruled box for the key, notes, etc. in the side margins */
-function mplPanel(x,a,b,w,h){x.save();x.fillStyle='rgba(240,230,196,.55)';x.fillRect(a,b,w,h);x.strokeStyle=MPL.GOLD;x.lineWidth=1.2;x.strokeRect(a,b,w,h);x.strokeStyle=MPL.INK;x.lineWidth=.5;x.strokeRect(a+1.8,b+1.8,w-3.6,h-3.6);x.restore()}
+function mplPanel(x,a,b,w,h){const S=x.canvas.width/DW;let snap=null;try{snap=x.getImageData(Math.round((a-2)*S),Math.round((b-2)*S),Math.round((w+4)*S),Math.round((h+4)*S))}catch(e){}(MPL.pan=MPL.pan||[]).push({x,a,b,w,h,S,snap});x.save();x.fillStyle='rgba(240,230,196,.55)';x.fillRect(a,b,w,h);x.strokeStyle=MPL.GOLD;x.lineWidth=1.2;x.strokeRect(a,b,w,h);x.strokeStyle=MPL.INK;x.lineWidth=.5;x.strokeRect(a+1.8,b+1.8,w-3.6,h-3.6);x.restore()}
 /* notes in a side margin: lines wrapped to w, starting at (a,b); returns the y after the last */
-function mplNotes(x,notes,a,b,w,sz,gap){sz=sz||6.4;gap=gap||5;for(const n of notes){for(const l of mplWrap(x,n,w,sz)){mplText(x,l,a,b,sz,'#3a2a1c','left');b+=sz+2.4}b+=gap}return b}
+/* a panel that was meant to hold notes is taken away again (the picture under it is put back) */
+function mplUnpanel(x,a,b){const L=MPL.pan||[];for(let i=L.length-1;i>=0;i--){const p=L[i];if(p.x===x&&a>=p.a-3&&a<=p.a+p.w&&b>=p.b-12&&b<=p.b+p.h){if(p.snap)x.putImageData(p.snap,Math.round((p.a-2)*p.S),Math.round((p.b-2)*p.S));L.splice(i,1);return}}}
+/* the maps carry no notes to the player: this keeps the layout arithmetic and draws nothing */
+function mplNotes(x,notes,a,b,w,sz,gap){mplUnpanel(x,a,b);sz=sz||6.4;gap=gap||5;for(const n of notes){for(const l of mplWrap(x,n,w,sz))b+=sz+2.4;b+=gap}return b}
 /* install: draws the cached sheet for the listed levels in place of the plain map, with the party's arrow and the buttons on top.
    cfg = {name, levels:[ids], draw(c,x,L,api), fit(L)->mplFit result (optional; must match what draw() used, so the arrow lands right), foot, tint}
    draw(c,x,L,api) paints everything except the border (added after) onto context x (480x320). api = {parchment,border,title,compass,text,notes,panel,fit,I,wrap}.
@@ -66,6 +69,8 @@ function mplNotes(x,notes,a,b,w,sz,gap){sz=sz||6.4;gap=gap||5;for(const n of not
 const MPMG={by:{}};
 function mpmgAdd(levels,fn){for(const l of levels)(MPMG.by[l]=MPMG.by[l]||[]).push(fn)}
 function mpmgDraw(x,lv){const L=LEVELS[lv];for(const fn of (MPMG.by[lv]||[])){x.save();try{fn(x,L)}catch(e){console.error('marginalia',lv,e)}x.restore()}}
+/* the foot line says only who the arrow is; the kind of hint that used to follow it is left out (the Pilgrim's Path distances and Khemetra's legend stay) */
+function mplFoot(f){return f&&/ km /.test(f)?f:''}
 function mplInstall(cfg){
   const _do=drawOverview;
   drawOverview=function(){
@@ -96,7 +101,7 @@ function mplPaint(c,S,area,X,Y,foot){
   Object.assign(MPL.view,{z,sx0,sy0});if(typeof mpplDraw==='function')try{mpplDraw()}catch(e){console.error('mpplDraw',e)}
   const px=area.x+(X(G.C.x+.5)-sx0)*z,py=area.y+(Y(G.C.y+.5)-sy0)*z;
   if(px>area.x-4&&px<area.x+area.w+4&&py>area.y-4&&py<area.y+area.h+4){ctx.save();ctx.translate(px,py);ctx.rotate((G.C.a||0)+Math.PI/2);ctx.fillStyle='#ffe36a';ctx.strokeStyle='#2a1a0c';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(5,6);ctx.lineTo(0,3);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore()}
-  ctx.fillStyle='rgba(30,22,16,.85)';ctx.fillRect(0,DH-17,DW,17);txt(foot||'You are the yellow arrow.',238,DH-8.5,7.5,'#e0d8bc','left',true,undefined,236);
+  ctx.fillStyle='rgba(30,22,16,.85)';ctx.fillRect(0,DH-17,DW,17);txt(mplFoot(foot),238,DH-8.5,7.5,'#e0d8bc','left',true,undefined,236);
   MPL.me=()=>{const cxs=X(G.C.x+.5),cys=Y(G.C.y+.5);G.panX=(area.w/2)-(cxs-area.x)*z;G.panY=(area.h/2)-(cys-area.y)*z;G.panX=Math.max(G.panMinX,Math.min(0,G.panX));G.panY=Math.max(G.panMinY,Math.min(0,G.panY))};
   btnText('mzin','+',22,303,18,17);btnText('mzout','-',42,303,18,17);btnText('mzfit','Fit',62,303,28,17);btnText('mplme','Me',92,303,26,17);
   if(typeof mpplButtons==='function')try{mpplButtons()}catch(e){console.error('mpplButtons',e)}

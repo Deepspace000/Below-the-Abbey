@@ -69,7 +69,7 @@ function mpIronroadRoad(c,x,L,api){
   api.title(x,'The Ironhill Road','a wet, muddy road across the heath');api.compass(x,434,62,13);
   api.notes(x,['The road runs from Gandrick\'s Wood in the west to the tunnel in the east.','It rains here all day, so the ruts are full of puddles.','Wolves roam the heath. Their tracks cross the road.'],10,64,74,6.4,5);
   mpIronroadKey(x,api,[[(a,b)=>{x.fillStyle='#946c42';x.fillRect(a-5,b-2,10,4)},'Road'],[(a,b)=>I.pine(x,a,b+3,.6),'Forest'],[(a,b)=>mpIronroadLamp(x,a,b+4,.55),'Lantern'],[(a,b)=>{x.fillStyle='rgba(120,150,176,.9)';x.beginPath();x.ellipse(a,b,4,2,0,0,6.3);x.fill()},'Puddle'],[(a,b)=>I.cross(x,a,b,.7),'Grave']],104);
-  T(x,'Rain, mud and wolves',435,236,6,'#5a3a1c')}
+  }
 
 function mpIronroadHut(c,x,L,api){
   const F=mplFit(9,7,6),s=F.s,X=F.X,Y=F.Y,I=api.I,H=mpIronroadH,A=MPL.AREA;
@@ -140,5 +140,5 @@ function mpIronroadTunnel(c,x,L,api){
 
 mplInstall({name:'ironroad',levels:[10,24,11],
   fit(L){return LEVEL===24?mplFit(9,7,6):LEVEL===11?mplFit(32,20,0):mplFit(48,30,0)},
-  foot:'You are the yellow arrow. Rain, mud and wolves.',tint:[-6,-2,4],
+  foot:'',tint:[-6,-2,4],
   draw(c,x,L,api){if(LEVEL===24)mpIronroadHut(c,x,L,api);else if(LEVEL===11)mpIronroadTunnel(c,x,L,api);else mpIronroadRoad(c,x,L,api)}});

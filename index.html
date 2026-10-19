@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.455';
+const VERSION='3.456';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -22900,22 +22900,21 @@ function hgmDraw(){
     for(const bx of [-8,-3,2,7])for(const by of [-8,-3,2,7]){if((bx===-3||bx===2)&&(by===-3||by===2))continue;if(H(t.x+bx,t.y+by,50)<.18)continue;const hx=cx+(bx+.5)*S,hy=cy+(by+.5)*S;x.fillStyle='#f2eee4';x.strokeStyle=ink;x.lineWidth=.7;x.fillRect(hx-1.5,hy-1,3,3.2);x.strokeRect(hx-1.5,hy-1,3,3.2);x.fillStyle=pastel[(bx*3+by*5+ti+40)%4];x.beginPath();x.moveTo(hx-1.9,hy-1);x.quadraticCurveTo(hx-1,hy-4,hx,hy-5.4);x.quadraticCurveTo(hx+1,hy-4,hx+1.9,hy-1);x.closePath();x.fill();x.stroke()}
     x.fillStyle='#88b4cc';x.beginPath();x.arc(cx+2.5*S,cy+2.5*S,1.5,0,Math.PI*2);x.fill();x.strokeStyle=ink;x.stroke();x.restore();
     lab(t.n.toUpperCase(),cx,cy-r-6,ti===0?9.5:8,ti===0?'#2a1a50':ink);
-    lab(['wizard waits at the well','weavers of reeds','traders on the east road','the old village','the northern festival'][ti],cx,cy+r+6,6.2,'#5a3c1c')});
+    });
   // the four hives
   HG_HIVE_AT.forEach((p,i)=>{const a=PX(p[0]),b=PY(p[1]);x.save();x.translate(a,b);for(let k=0;k<4;k++){x.fillStyle=k%2?'#d89c30':'#e8b848';x.strokeStyle=ink;x.lineWidth=.9;x.beginPath();x.ellipse(0,3-k*3.1,8-k*1.5,3.4,0,0,Math.PI*2);x.fill();x.stroke()}
     x.fillStyle='#2a1c0e';x.beginPath();x.ellipse(0,5.5,2.2,1.7,0,0,Math.PI*2);x.fill();x.strokeStyle='rgba(120,70,10,.7)';x.lineWidth=.5;for(let k=-1;k<=1;k++){x.beginPath();x.arc(k*2.8,-.4,1.1,0,Math.PI*2);x.stroke()}
     x.fillStyle='#d03a2a';x.strokeStyle=ink;x.lineWidth=.8;x.beginPath();x.arc(10,-8,3.6,0,Math.PI*2);x.fill();x.stroke();x.restore();x.save();x.font=`bold 7px ${FUI}`;x.textAlign='center';x.textBaseline='middle';x.fillStyle='#fff6e0';x.fillText(String(i+1),a+10,b-7.6);x.restore();
-    lab(HG_HIVE_NAMES[i].toUpperCase(),a,b+14,7.2,'#6a1a10');lab('book '+(i+1)+' of 4',a,b+21.5,6,'#6a1a10')});
+    lab(HG_HIVE_NAMES[i].toUpperCase(),a,b+14,7.2,'#6a1a10')});
   // the gate in the south, the start, and the way back
   {const a=PX(HG.START.x),b=PY(HG.H-4);x.save();x.translate(a,b);x.strokeStyle=ink;x.fillStyle='#d8d0bc';x.lineWidth=1;x.fillRect(-7,-5,14,6);x.strokeRect(-7,-5,14,6);for(let k=-6;k<=6;k+=2){x.beginPath();x.moveTo(k,-5);x.lineTo(k,-8);x.stroke()}x.restore();
-    lab('THE SPIKED GATE',a,b+8,7.2,ink);lab('back to the Hollow Land',a,b+15,6,'#5a3c1c')}
+    lab('THE SPIKED GATE',a,b+8,7.2,ink)}
   // the compass
   {const a=OX+S*140,b=OY+S*12;x.save();x.translate(a,b);x.strokeStyle=ink;x.fillStyle='#e8e4d2';x.lineWidth=1;x.beginPath();x.arc(0,0,9,0,Math.PI*2);x.fill();x.stroke();x.fillStyle=ink;x.beginPath();x.moveTo(0,-13);x.lineTo(3,0);x.lineTo(0,-2.5);x.lineTo(-3,0);x.closePath();x.fill();x.beginPath();x.moveTo(0,13);x.lineTo(2,0);x.lineTo(-2,0);x.closePath();x.strokeStyle=ink;x.stroke();x.restore();lab('N',a,b-17,8,ink)}
   // title, notes and legend
   x.save();x.font=`18px ${FTITLE}`;x.textAlign='left';x.textBaseline='middle';x.fillStyle=ink;x.fillText('The Hollow',8,14);x.fillText('Grasslands',8,32);x.restore();
   lab('a cavern inside the earth',9,48,7,'#5a3c1c','left');lab('levels 66 to 70',9,59,7,'#5a3c1c','left');
   const notes=['No sky here: the roof of rock is lost in the dark, and the wind never stops.','The folk speak a tongue no stranger knows. Four books in the four hives teach it, one step at a time.','Insectivores sit on the hills. The further from the gate, the bigger they grow.','Keep to the tracks, and the frog-whales will do you no harm.'];
-  notes.forEach((n,i)=>{const w=wrapText(n,102,6.6);w.forEach((l,j)=>lab(l,9,74+i*34+j*8.6,6.4,'#3a2a1c','left'))});
   // legend, right
   const lx=366,ly0=70;x.fillStyle=ink;x.font=`bold 8px ${FUI}`;x.textAlign='left';x.fillText('KEY',lx,ly0-10);
   const key=(i,t,draw)=>{const yy=ly0+i*17;draw(lx+8,yy);lab(t,lx+20,yy,6.6,'#3a2a1c','left')};
@@ -22933,7 +22932,7 @@ function hgmDraw(){
 }
 function hgmOverview(){
   if(!HGM.cv)HGM.cv=hgmDraw();
-  MPL.reveal=false;if(HGM.cv)mplPaint(HGM.cv,3,{x:112,y:38,w:252,h:254},cx=>HGM.ox+cx*HGM.s,cy=>HGM.oy+cy*HGM.s,'Exsce, the village nearest the gate, is where the wizard waits.');
+  MPL.reveal=false;if(HGM.cv)mplPaint(HGM.cv,3,{x:112,y:38,w:252,h:254},cx=>HGM.ox+cx*HGM.s,cy=>HGM.oy+cy*HGM.s,'You are the yellow arrow.');
 }
 {const _do=drawOverview;drawOverview=function(){if(LEVEL===HG.ID&&LEVELS[HG.ID]&&!G.world&&!G.teleMode){hgmOverview();return}return _do.apply(this,arguments)}}
 
@@ -23052,9 +23051,12 @@ const MPLI={
 /* fit a W x H cell grid into the framed area: returns {s, ox, oy, X(cx), Y(cy)} */
 function mplFit(W,H,pad){pad=pad||4;const A=MPL.AREA,s=Math.min((A.w-2*pad)/W,(A.h-2*pad)/H),ox=A.x+(A.w-W*s)/2,oy=A.y+(A.h-H*s)/2;return {s,ox,oy,X:c=>ox+c*s,Y:c=>oy+c*s}}
 /* a ruled box for the key, notes, etc. in the side margins */
-function mplPanel(x,a,b,w,h){x.save();x.fillStyle='rgba(240,230,196,.55)';x.fillRect(a,b,w,h);x.strokeStyle=MPL.GOLD;x.lineWidth=1.2;x.strokeRect(a,b,w,h);x.strokeStyle=MPL.INK;x.lineWidth=.5;x.strokeRect(a+1.8,b+1.8,w-3.6,h-3.6);x.restore()}
+function mplPanel(x,a,b,w,h){const S=x.canvas.width/DW;let snap=null;try{snap=x.getImageData(Math.round((a-2)*S),Math.round((b-2)*S),Math.round((w+4)*S),Math.round((h+4)*S))}catch(e){}(MPL.pan=MPL.pan||[]).push({x,a,b,w,h,S,snap});x.save();x.fillStyle='rgba(240,230,196,.55)';x.fillRect(a,b,w,h);x.strokeStyle=MPL.GOLD;x.lineWidth=1.2;x.strokeRect(a,b,w,h);x.strokeStyle=MPL.INK;x.lineWidth=.5;x.strokeRect(a+1.8,b+1.8,w-3.6,h-3.6);x.restore()}
 /* notes in a side margin: lines wrapped to w, starting at (a,b); returns the y after the last */
-function mplNotes(x,notes,a,b,w,sz,gap){sz=sz||6.4;gap=gap||5;for(const n of notes){for(const l of mplWrap(x,n,w,sz)){mplText(x,l,a,b,sz,'#3a2a1c','left');b+=sz+2.4}b+=gap}return b}
+/* a panel that was meant to hold notes is taken away again (the picture under it is put back) */
+function mplUnpanel(x,a,b){const L=MPL.pan||[];for(let i=L.length-1;i>=0;i--){const p=L[i];if(p.x===x&&a>=p.a-3&&a<=p.a+p.w&&b>=p.b-12&&b<=p.b+p.h){if(p.snap)x.putImageData(p.snap,Math.round((p.a-2)*p.S),Math.round((p.b-2)*p.S));L.splice(i,1);return}}}
+/* the maps carry no notes to the player: this keeps the layout arithmetic and draws nothing */
+function mplNotes(x,notes,a,b,w,sz,gap){mplUnpanel(x,a,b);sz=sz||6.4;gap=gap||5;for(const n of notes){for(const l of mplWrap(x,n,w,sz))b+=sz+2.4;b+=gap}return b}
 /* install: draws the cached sheet for the listed levels in place of the plain map, with the party's arrow and the buttons on top.
    cfg = {name, levels:[ids], draw(c,x,L,api), fit(L)->mplFit result (optional; must match what draw() used, so the arrow lands right), foot, tint}
    draw(c,x,L,api) paints everything except the border (added after) onto context x (480x320). api = {parchment,border,title,compass,text,notes,panel,fit,I,wrap}.
@@ -23064,6 +23066,8 @@ function mplNotes(x,notes,a,b,w,sz,gap){sz=sz||6.4;gap=gap||5;for(const n of not
 const MPMG={by:{}};
 function mpmgAdd(levels,fn){for(const l of levels)(MPMG.by[l]=MPMG.by[l]||[]).push(fn)}
 function mpmgDraw(x,lv){const L=LEVELS[lv];for(const fn of (MPMG.by[lv]||[])){x.save();try{fn(x,L)}catch(e){console.error('marginalia',lv,e)}x.restore()}}
+/* the foot line says only who the arrow is; the kind of hint that used to follow it is left out (the Pilgrim's Path distances and Khemetra's legend stay) */
+function mplFoot(f){return f&&/ km /.test(f)?f:''}
 function mplInstall(cfg){
   const _do=drawOverview;
   drawOverview=function(){
@@ -23094,7 +23098,7 @@ function mplPaint(c,S,area,X,Y,foot){
   Object.assign(MPL.view,{z,sx0,sy0});if(typeof mpplDraw==='function')try{mpplDraw()}catch(e){console.error('mpplDraw',e)}
   const px=area.x+(X(G.C.x+.5)-sx0)*z,py=area.y+(Y(G.C.y+.5)-sy0)*z;
   if(px>area.x-4&&px<area.x+area.w+4&&py>area.y-4&&py<area.y+area.h+4){ctx.save();ctx.translate(px,py);ctx.rotate((G.C.a||0)+Math.PI/2);ctx.fillStyle='#ffe36a';ctx.strokeStyle='#2a1a0c';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(5,6);ctx.lineTo(0,3);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore()}
-  ctx.fillStyle='rgba(30,22,16,.85)';ctx.fillRect(0,DH-17,DW,17);txt(foot||'You are the yellow arrow.',238,DH-8.5,7.5,'#e0d8bc','left',true,undefined,236);
+  ctx.fillStyle='rgba(30,22,16,.85)';ctx.fillRect(0,DH-17,DW,17);txt(mplFoot(foot),238,DH-8.5,7.5,'#e0d8bc','left',true,undefined,236);
   MPL.me=()=>{const cxs=X(G.C.x+.5),cys=Y(G.C.y+.5);G.panX=(area.w/2)-(cxs-area.x)*z;G.panY=(area.h/2)-(cys-area.y)*z;G.panX=Math.max(G.panMinX,Math.min(0,G.panX));G.panY=Math.max(G.panMinY,Math.min(0,G.panY))};
   btnText('mzin','+',22,303,18,17);btnText('mzout','-',42,303,18,17);btnText('mzfit','Fit',62,303,28,17);btnText('mplme','Me',92,303,26,17);
   if(typeof mpplButtons==='function')try{mpplButtons()}catch(e){console.error('mpplButtons',e)}
@@ -23273,7 +23277,7 @@ draw(c,x,L,api){
     ['Torch',()=>mpAbbeyTorch(x,kx+12,ky+96,.8)]];
   const gaps=[19.5,33,47,62,73,85,98];
   rowsK.forEach((r,i)=>{r[1]();api.text(x,r[0],kx+25,ky+gaps[i]+(i===3?0:0),6.4,'#3a2a1c','left')});
-  const nx=391,nw=84;api.panel(x,nx-2,50,nw,176);api.text(x,'NOTES',nx+nw/2-2,58,7,MPL.LAPIS);
+  const nx=391,nw=84;api.panel(x,nx-2,50,nw,176);
   mplNotes(x,['The party starts in the south west cell.','Rats nest in the Rat Run and the passages.','Four coffins stand in the Crypt of Coffins.','The Rat King waits behind the iron gate. The stair down is on his east wall.'],nx+3,69,nw-9,6.2,4);
   api.compass(x,46,246,15);
   I.cross(x,46,276,.9);
@@ -23328,7 +23332,7 @@ function mpThornwoodDraw23(c,x,L,api){
   x.fillStyle=MPL.VERM;x.strokeStyle=MPT_INK;x.lineWidth=.8;const ax=f.X(5.5),ay=f.Y(8.9);x.beginPath();x.moveTo(ax-4,ay);x.lineTo(ax+4,ay);x.lineTo(ax,ay+5);x.closePath();x.fill();x.stroke();
   api.title(x,"Wolves' Den",'A cave under the Thornwood');
   api.compass(x,46,264,13);
-  api.panel(x,6,56,82,108);api.notes(x,['A cave of wolves under the thorny wood.','Four wolves lair here. Two rooms are joined by a short passage.','Bones lie in three places.','A chest sits in the top right corner.'],11,66,72);
+  api.notes(x,['A cave of wolves under the thorny wood.','Four wolves lair here. Two rooms are joined by a short passage.','Bones lie in three places.','A chest sits in the top right corner.'],11,66,72);
   api.panel(x,394,40,80,64);api.text(x,'Key',434,49,8,MPL.VERM);
   x.fillStyle='#c4aa72';x.fillRect(401,58,10,7);x.strokeStyle=MPT_INK;x.strokeRect(401,58,10,7);api.text(x,'Floor',416,62,6.5,MPT_INK,'left');
   api.I.skull(x,406,76,1);api.text(x,'Bones',416,76,6.5,MPT_INK,'left');
@@ -23418,7 +23422,7 @@ function mpThornwoodDraw(c,x,L,api){
     api.text(x,t,418,ky+1,6.5,MPT_INK,'left')});
   // small flourishes: ravens over the wood
   x.save();x.strokeStyle=MPT_INK;x.lineWidth=1;x.lineCap='round';for(const [a,b] of [[394,150],[420,160],[448,148]]){x.beginPath();x.moveTo(a-5,b);x.quadraticCurveTo(a-2.5,b-4,a,b);x.quadraticCurveTo(a+2.5,b-4,a+5,b);x.stroke()}x.restore();
-  api.panel(x,394,176,80,100);api.notes(x,['Brambles snag the careless in the forest.','Graves stand in the abbey yard and one lonely shrine in the south.'],399,186,70,6.2,4)}
+  api.notes(x,['Brambles snag the careless in the forest.','Graves stand in the abbey yard and one lonely shrine in the south.'],399,186,70,6.2,4)}
 mplInstall({name:'thornwood',levels:[2,23],draw:mpThornwoodDraw,foot:'You are the yellow arrow. Thorns grow thick off the trails.',tint:[-8,-4,-12],
   fit:L=>mplFit(L.rows[0].length,L.rows.length,L.rows.length<12?10:4)});
 
@@ -23839,7 +23843,7 @@ function mpIronroadRoad(c,x,L,api){
   api.title(x,'The Ironhill Road','a wet, muddy road across the heath');api.compass(x,434,62,13);
   api.notes(x,['The road runs from Gandrick\'s Wood in the west to the tunnel in the east.','It rains here all day, so the ruts are full of puddles.','Wolves roam the heath. Their tracks cross the road.'],10,64,74,6.4,5);
   mpIronroadKey(x,api,[[(a,b)=>{x.fillStyle='#946c42';x.fillRect(a-5,b-2,10,4)},'Road'],[(a,b)=>I.pine(x,a,b+3,.6),'Forest'],[(a,b)=>mpIronroadLamp(x,a,b+4,.55),'Lantern'],[(a,b)=>{x.fillStyle='rgba(120,150,176,.9)';x.beginPath();x.ellipse(a,b,4,2,0,0,6.3);x.fill()},'Puddle'],[(a,b)=>I.cross(x,a,b,.7),'Grave']],104);
-  T(x,'Rain, mud and wolves',435,236,6,'#5a3a1c')}
+  }
 
 function mpIronroadHut(c,x,L,api){
   const F=mplFit(9,7,6),s=F.s,X=F.X,Y=F.Y,I=api.I,H=mpIronroadH,A=MPL.AREA;
@@ -23910,7 +23914,7 @@ function mpIronroadTunnel(c,x,L,api){
 
 mplInstall({name:'ironroad',levels:[10,24,11],
   fit(L){return LEVEL===24?mplFit(9,7,6):LEVEL===11?mplFit(32,20,0):mplFit(48,30,0)},
-  foot:'You are the yellow arrow. Rain, mud and wolves.',tint:[-6,-2,4],
+  foot:'',tint:[-6,-2,4],
   draw(c,x,L,api){if(LEVEL===24)mpIronroadHut(c,x,L,api);else if(LEVEL===11)mpIronroadTunnel(c,x,L,api);else mpIronroadRoad(c,x,L,api)}});
 
 /* ---- src/desert/maps_ironhill.js ---- */
@@ -24041,7 +24045,7 @@ draw(c,x,L,api){
   mpIronhillSlag(x,kx,ky[5]+3,.5,5);api.text(x,'Slag heap',kx+9,ky[5],5.6,'#2a1a0c','left');
   x.save();x.fillStyle=MPL.GOLD;x.strokeStyle=MPL.INK;x.lineWidth=.6;x.fillRect(kx-1.6,ky[6]-1.6,3.2,3.2);x.strokeRect(kx-1.6,ky[6]-1.6,3.2,3.2);x.restore();api.text(x,'Door',kx+9,ky[6],5.6,'#2a1a0c','left');
   api.compass(x,436,150,13);
-  api.panel(x,392,176,84,50);api.notes(x,['Blue is the fountain in the square. Grey clouds are smoke.'],398,187,74,6,4);
+  api.notes(x,['Blue is the fountain in the square. Grey clouds are smoke.'],398,187,74,6,4);
 }});
 
 /* ---- src/desert/maps_gravesmines.js ---- */
@@ -24073,7 +24077,7 @@ function mpGravesLantern(x,a,b,s,glow){s=s||1;x.save();if(glow){const g=x.create
 /* the shared margin furniture */
 function mpGravesMargin(x,api,title,sub,notes,key){
   api.title(x,title,sub);api.compass(x,436,262,12);
-  api.panel(x,8,52,78,118);api.notes(x,notes,13,62,68,6.2,4);
+  api.notes(x,notes,13,62,68,6.2,4);
   api.panel(x,392,34,84,18+key.length*12);let y=45;
   api.text(x,'Key',434,y,7.4,MPL.VERM,'center');y+=11;
   for(const k of key){k.icon(402,y);api.text(x,k.t,412,y,6,'#3a2a1c','left');y+=k.dy||12}}
@@ -26596,7 +26600,7 @@ draw(c,x,L,api){
   mpLastLightStair(x,kx,ky[6]+3,6,.8);api.text(x,'Stair',kx+9,ky[6],5.6,'#2a1a0c','left');
   mpLastLightCottage(x,kx,ky[7],.7);api.text(x,'Hut',kx+9,ky[7],5.6,'#2a1a0c','left');
   api.compass(x,436,178,13);
-  api.panel(x,392,206,84,56);api.notes(x,['Dotted lines are reefs under the water. Take care near the south east corner.'],398,217,74,6,4);
+  api.notes(x,['Dotted lines are reefs under the water. Take care near the south east corner.'],398,217,74,6,4);
   mpLastLightGull(x,30,270,1.3);mpLastLightGull(x,46,276,1);mpLastLightGull(x,62,268,1.1);
 }});
 
@@ -26904,10 +26908,8 @@ MPOH.push({order:0,name:'base',paint(x,L,api,fit){
   // text on the water
   api.text(x,'NARROW SEA',48,118,7,MPL.LAPIS,'center');
   // left note
-  mpOhBaseScroll(x,8,238,90,60);x.save();api.panel(x,8,238,90,60);x.restore();
   api.notes(x,["King's Road runs from the Portcullis Gate north to the Great Square and the castle. The Land Gate road leads out to the Pilgrim's Path."],14,247,80,5.9,3);
   // right notes
-  mpOhBaseScroll(x,387,12,88,126);x.save();api.panel(x,387,12,88,126);x.restore();
   api.notes(x,["Oldhaven is the king's walled city on the Narrow Sea. The castle stands at the north end.","Three gates pierce the wall: the Portcullis Gate to the quay, the Land Gate in the north and the East Gate.","The East Gate is held by the Ash Guard. Its captain can tell you more."],392,21,77,5.9,4);
   // key
   {const ka=387,kb=186,kw=88,kh=112;mpOhBaseScroll(x,ka,kb,kw,kh);api.panel(x,ka,kb,kw,kh);api.text(x,'KEY',ka+kw/2,kb+8,7,MPL.VERM,'center');
@@ -28822,7 +28824,7 @@ function mpOs444Draw(c,x,L,api){
       x.restore();api.text(x,t,ix+11,ry,5.8,'#3a1408','left')});
     function stairKey(ix,ry,up){x.fillStyle='#e6d2a4';x.fillRect(ix-4,ry-4,8,8);x.strokeRect(ix-4,ry-4,8,8);x.beginPath();for(let q=1;q<4;q++){x.moveTo(ix-4,ry-4+q*2);x.lineTo(ix+4,ry-4+q*2)}x.stroke();x.fillStyle=VERM;x.beginPath();if(up){x.moveTo(ix,ry-3);x.lineTo(ix+2.6,ry+1);x.lineTo(ix-2.6,ry+1)}else{x.moveTo(ix,ry+3);x.lineTo(ix+2.6,ry-1);x.lineTo(ix-2.6,ry-1)}x.closePath();x.fill();x.stroke()}}
   {const notes=['You arrive by the stair at the bottom of the plan.','A long hall runs east and west across the middle of the floor.','Halls, a study, cells and two crypts open off it.','The stair up is at the far north end, down a narrow corridor.','Torches and candles light the halls.'];
-    api.panel(x,392,34,84,150);api.notes(x,notes,397,46,74,6,3.5)}
+    api.notes(x,notes,397,46,74,6,3.5)}
 }
 mplInstall({name:'os444',levels:[444],reveal:true,draw:mpOs444Draw});
 
@@ -28969,7 +28971,7 @@ draw(c,x,L,api){
     ['Carpet',()=>{x.fillStyle=MPL.VERM;x.fillRect(kx+9,ky+186,6,8);x.strokeStyle=MPL.GOLD;x.lineWidth=.8;x.strokeRect(kx+9,ky+186,6,8)}]];
   const gaps=[21,34,53,70,93,106,120,133,148,162,176,190];
   ki.forEach((r,i)=>{r[1]();api.text(x,r[0],kx+24,ky+gaps[i],6.2,'#3a2a1c','left')});
-  const nx=391,nw=84;api.panel(x,nx-2,50,nw,150);api.text(x,'NOTES',nx+nw/2-2,58,7,MPL.LAPIS);
+  const nx=391,nw=84;api.panel(x,nx-2,50,nw,150);
   mplNotes(x,['The party arrives at the stair in the south.','The stair up is behind the throne in the north.','Only some rooms have names.','Torches and candles light the rooms.'],nx+3,69,nw-9,6.2,4);
   api.compass(x,436,242,15);
 }});
@@ -29100,7 +29102,7 @@ function mpOs446Draw(c,x,L,api){
   {const lines=api.wrap(x,'The Study, the Gallery of Rulers, the Banquet Hall and the Cells',76,6.4);let y=45;for(const l of lines){api.text(x,l,10,y,6.2,'#5a3a1c','left');y+=8}}
   const key=[['Stair down',(a,b)=>mpOs446Stair(x,a,b,.7,false)],['Stair up',(a,b)=>mpOs446Stair(x,a,b,.7,true)],['Arrival stone',(a,b)=>mpOs446Stone(x,a,b,.8,7)],['Doorway',(a,b)=>mpOs446Door(x,a,b,8,false)],['Standing lamp',(a,b)=>mpOs446Lamp(x,a,b+1,.9,false,false)],['Candle',(a,b)=>mpOs446Candle(x,a,b,.9)],['Hearth',(a,b)=>mpOs446Hearth(x,a,b,.8)],['Mirror',(a,b)=>mpOs446Mirror(x,a,b,.9)],['Portrait',(a,b)=>mpOs446Portrait(x,a,b,.9)],['Window',(a,b)=>mpOs446Window(x,a,b,.8)],['Bookcase',(a,b)=>mpOs446Shelf(x,a,b,.8)],['Rug',(a,b)=>{x.fillStyle='#b8321e';x.strokeStyle=MPL.GOLD;x.lineWidth=.8;x.fillRect(a-4,b-2.4,8,4.8);x.strokeRect(a-3.2,b-1.8,6.4,3.6)}]];
   api.panel(x,6,78,82,18+key.length*13.2);api.text(x,'Key',47,88,7.4,MPL.VERM,'center');let ky=100;for(const [t,f] of key){f(18,ky);api.text(x,t,29,ky,6.2,'#3a2a1c','left');ky+=13.2}
-  api.panel(x,392,34,84,150);api.notes(x,['Floor 7 of the Orange Spire, a haunted castle.','You arrive on the stair in the south. The stair up is at the far end, in the north east.','Long halls link the rooms. Doorways are marked in gold.','Only the parts you have walked through show on the map.'],397,45,74,6.1,4);
+  api.notes(x,['Floor 7 of the Orange Spire, a haunted castle.','You arrive on the stair in the south. The stair up is at the far end, in the north east.','Long halls link the rooms. Doorways are marked in gold.','Only the parts you have walked through show on the map.'],397,45,74,6.1,4);
   api.compass(x,436,262,12);
   /* small flourishes: bats over the margins */
   for(const [bx,by] of [[400,206],[452,224],[104,276]]){x.strokeStyle=MPL.INK;x.lineWidth=1;x.beginPath();x.moveTo(bx-5,by);x.quadraticCurveTo(bx-2,by-4,bx,by);x.quadraticCurveTo(bx+2,by-4,bx+5,by);x.stroke()}
@@ -29945,7 +29947,7 @@ draw(c,x,L,api){
     ['Bookshelf',()=>MPOS454I.shelf(x,kx+11,ky+149,12)],['Fireplace',()=>mpOs454Wall(x,kx+11,ky+158,0,1,()=>MPOS454I.hearth(x,11))]];
   const gy=[21,34,49,62,76,90,101,113,125,137,150,159];
   kr.forEach((r,i)=>{r[1]();api.text(x,r[0],kx+25,ky+gy[i],6.4,'#3a2a1c','left')});
-  const nx=392,nw=82;api.panel(x,nx-2,50,nw,176);api.text(x,'NOTES',nx+nw/2-2,58,7,'#7a2a14');
+  const nx=392,nw=82;api.panel(x,nx-2,50,nw,176);
   mplNotes(x,['The stair down is in the south, where you arrive.','The stair up is in the north west corner, beside the cells.','Lanterns burn in the corners of the larger rooms.','Portraits and a numbered stone hang by the stair.'],nx+3,69,nw-9,6.2,4);
   api.compass(x,435,254,15);
   I.tower(x,435,283,.8)}});
@@ -31115,7 +31117,7 @@ function mpKhemKey(x){
     ['A shop door',(g)=>{g.fillStyle='#ffd23a';g.beginPath();g.arc(0,0,1.1,0,6.3);g.fill();g.strokeStyle=MPKH.ink;g.lineWidth=.2;g.stroke();g.strokeStyle='#a06a00';g.lineWidth=.22;g.beginPath();g.arc(0,0,.55,0,6.3);g.stroke()}]];
   rows.forEach(([t,fn],i)=>{const y=b+21+i*9.6;x.save();x.translate(a+10,y);x.scale(2.1,2.1);fn(x);x.restore();x.font=`bold 5.2px ${ff}`;x.textAlign='left';x.textBaseline='middle';x.fillStyle='#3a2208';x.fillText(t,a+20,y+.3)});
   x.restore()}
-function mpKhemNotes(x){
+function mpKhemNotes(x){return 84; // no notes to the player on the maps
   const a=15,b=84,w=71;const notes=['Khemetra is a walled city, 400 squares across. Its wall has round towers and two gates.','The Great Gate in the south wall opens on the desert road. The Sea Gate in the east wall leads to the tunnel to Yarrim.','The Palace of Khemetra stands at the centre, with the Court of the Golden Sun before it.','The Beggars\' Quarter in the east is not safe. The Old Quarter in the north west is mostly ruins.','Zoom in to read the streets, lanes and shops.'];
   const ff=mpKhemFont();x.save();x.font=`5.5px ${ff}`;let lines=0;const wrapped=notes.map(n=>{const l=mplWrap(x,n,w-14,5.5);lines+=l.length;return l});
   const h=lines*6.5+notes.length*2.4+6;mpKhemPanel(x,a,b,w,h);let y=b+8;
@@ -31189,7 +31191,7 @@ function mpKhemDraw(c,x,L){
     let c=MPKH.cache;
     if(!c){c=document.createElement('canvas');c.width=DW*MPKH.S;c.height=DH*MPKH.S;const x=c.getContext('2d');x.scale(MPKH.S,MPKH.S);try{mpKhemDraw(c,x,LEVELS[LEVEL])}catch(e){console.error(e)}MPKH.cache=c}
     const F=MPKH.F;MPL.reveal=false;
-    mplPaint(c,MPKH.S,MPL.AREA,cx=>F.X(cx),cy=>F.Y(cy),'You are the yellow arrow. Gold coins mark shops; red rings mark people who need help.');
+    mplPaint(c,MPKH.S,MPL.AREA,cx=>F.X(cx),cy=>F.Y(cy),'');
     // the live marks go over the painting: quest rings, donkey rides, rumours and the cistern hatch
     const A=MPL.AREA,z=mplZoom(),sx0=A.x-G.panX/z,sy0=A.y-G.panY/z,cs=F.s*z,ox=A.x+(F.X(0)-sx0)*z,oy=A.y+(F.Y(0)-sy0)*z;
     ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();
@@ -31401,7 +31403,7 @@ function mpPilgDraw(c,x,L,api){
     x.fillStyle=MPL.VERM;x.strokeStyle=ink;x.lineWidth=.9;x.beginPath();x.arc(hx,hy,3.3,0,TAU);x.fill();x.stroke();x.fillStyle=MPL.GOLD2;x.beginPath();x.arc(hx,hy,1.1,0,TAU);x.fill();
     mpPilgShip(x,hx-72,hy+40,.7,false,MPL.VERM);
     labs.push(()=>mpPilgSpaced(x,'SAINT ELEN’S MONASTERY',hx,hy+71,6.8,'#6a1a10',.9,FUI));
-    labs.push(()=>T(x,'halfway: rest, quests and a quiet reward',hx,hy+78,5.4,'#6a1a10'))}
+    }
   /* ---- mountains across the north, with a falcon ---- */
   for(let r=0;r<2;r++){const base=r?72:63,sc0=r?1.15:1.7,step=r?15:21;for(let i=0;i<24;i++){const a=A.x-4+i*step+(H(i,r,70)-.5)*8,b=base+(H(i,r,71)-.5)*4,sc=sc0*(.82+H(i,r,72)*.4);if(a>A.x+A.w+8)continue;
       MPLI.mountain(x,a,b,sc);x.strokeStyle='rgba(42,26,12,.55)';x.lineWidth=.4;for(let k=0;k<7;k++){const u=a+1+k*1.1*sc,v=b-5.8*sc+k*.7*sc;x.beginPath();x.moveTo(u,v);x.lineTo(u+(2.6+k*.3)*sc,v+(1.7+k*.3)*sc);x.stroke()}}}
@@ -31477,7 +31479,7 @@ function mpPilgDraw(c,x,L,api){
     for(let i=0;i<7;i++){MPLI.house(x,cx0-26+i*8.6,cy0+24+(i%2)*1.4,.6,['#a85a2a','#b8321e','#8a4a2a','#6a6a78'][i%4])}
     MPLI.church(x,cx0+34,cy0+24,.55);mpPilgShip(x,cx0-18,cy0+34,.5,false,MPL.LAPIS);
     mpPilgBanner(x,cx0,cy0,MPL.VERM,false);
-    lab('YARRIM',cx0,cy0+38,8,ink);lab('the cliff: a way down, none back',cx0+34,cy0+7,5.6,'#6a1a10','left');lab('0 km',cx0-12,cy0-8,5.6,'#6a1a10','right')}
+    lab('YARRIM',cx0,cy0+38,8,ink);lab('0 km',cx0-12,cy0-8,5.6,'#6a1a10','right')}
   /* ---- pilgrims walking the road ---- */
   [[.035,'#6a3a2a'],[.12,'#2f5a8a'],[.24,'#7a2a2a'],[.305,'#5a5a30'],[.43,'#6a3a2a'],[.5,'#3a3a6a'],[.62,'#7a2a2a'],[.7,'#2f5a8a'],[.83,'#5a5a30'],[.93,'#6a3a2a']].forEach(([f,col],i)=>{const p=mpPilgP(f),n=mpPilgIn(f);mpPilgFolk(x,p[0]+n[0]*(i%2?-.8:.8),p[1]+n[1]*(i%2?-.8:.8)+1.4,col)});
   labs.forEach(fn=>fn());
@@ -31622,7 +31624,7 @@ function mpplDraw(){
     ctx.restore()}}
   if(typeof wdDrawMarks==='function'){ctx.save();ctx.beginPath();ctx.rect(g.A.x,g.A.y,g.A.w,g.A.h);ctx.clip();wdDrawMarks(g.ox,g.oy,Math.max(g.cs,1.4),true);ctx.restore()} // the ? of hidden caves and ruins the party has spotted
   mpplTrail(g);mpplPinsDraw(g);
-  if(MPPL.pin){mpplHalo('Tap the map to drop a pin. Tap a pin to take it away.',g.A.x+g.A.w/2,g.A.y+g.A.h-8,7,'#5a1a10')}}
+  }
 function mpplButtons(){
   if(!mpplGeo())return;
   btnText('mppin',MPPL.pin?'Pin*':'Pin',122,303,30,17);btnText('mpzone',mpplOff()?'Zones off':'Zones',154,303,mpplOff()?46:36,17);
