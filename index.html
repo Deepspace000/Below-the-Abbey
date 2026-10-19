@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.440';
+const VERSION='3.441';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -31113,6 +31113,7 @@ function mpWorldDraw(){
   const awake=WORLD_LOCS.filter(l=>teleLevelsAt(l).length);
   for(const l of awake){const mx=l.x+17,my=l.y-13,pl=.5+.5*Math.sin(G.time*4+l.x);ctx.fillStyle='rgba(150,210,255,'+(.25+.25*pl)+')';ctx.beginPath();ctx.arc(mx,my,9+pl*2,0,TAU);ctx.fill();ctx.fillStyle='#46506a';ctx.strokeStyle=ink;ctx.lineWidth=1.1;ctx.beginPath();ctx.ellipse(mx,my+1,6.5,3.2,0,0,TAU);ctx.fill();ctx.stroke();ctx.strokeStyle='#cfeaff';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(mx,my,3.4,0,TAU);ctx.stroke()}
   ctx.restore();
+  try{mpWorldClouds(WV)}catch(e){}
   for(const l of awake){const sx=240+WV.x+(l.x+17-240)*WV.z,sy=160+WV.y+(l.y-13-160)*WV.z,r=Math.max(10,12*WV.z);btn('wtp_'+l.k,sx-r,sy-r,r*2,r*2)}
   // the frame, vignette, title and compass; then the key
   ctx.drawImage(M.over,0,0,DW,DH);
@@ -31126,6 +31127,47 @@ function mpWorldDraw(){
 }
 const mpWorldOld=drawWorldMap;
 drawWorldMap=function(){if(mpWorldM.dead)return mpWorldOld.apply(this,arguments);try{mpWorldDraw()}catch(e){console.error('world map failed',e);mpWorldM.dead=true;try{ctx.restore();ctx.restore();ctx.restore()}catch(e2){}return mpWorldOld.apply(this,arguments)}};
+
+/* ---------- clouds: hand-drawn map clouds that drift slowly across the map. Dragging the map sends them away faster than the land, and new ones drift in from the opposite edge. ---------- */
+const mpWorldCl={list:[],spr:null,t:0,px:null,py:null,pz:null};
+function mpWorldCloudSprites(){
+  const out=[];
+  for(let v=0;v<6;v++){
+    const W=300,Hh=150,c=document.createElement('canvas');c.width=W;c.height=Hh;const x=c.getContext('2d'),H=hash2;
+    const n=5+(v%3),puffs=[];for(let i=0;i<n;i++){const u=(i+.5)/n,px=W*(.14+.72*u)+(H(i,v,81)-.5)*14,rr=(Hh*.2+Hh*.16*Math.sin(u*Math.PI)+H(i,v,82)*9),py=Hh*.66-Math.sin(u*Math.PI)*Hh*.2-H(i,v,83)*8;puffs.push([px,py,rr])}
+    x.lineJoin='round';x.lineCap='round';
+    // the outline: every puff in thick ink, then every puff filled a little smaller, so only the outer edge of the cloud is inked
+    x.strokeStyle='#5a4228';x.lineWidth=3.2;for(const [px,py,rr] of puffs){x.beginPath();x.arc(px,py,rr,0,Math.PI*2);x.stroke()}
+    x.fillStyle='#f4eed8';for(const [px,py,rr] of puffs){x.beginPath();x.arc(px,py,rr-1.4,0,Math.PI*2);x.fill()}
+    // a soft shade along the underside, curls inside the puffs, and a few hatch strokes below
+    x.fillStyle='rgba(120,100,70,.16)';for(const [px,py,rr] of puffs){x.beginPath();x.ellipse(px,py+rr*.38,rr*.8,rr*.5,0,0,Math.PI);x.fill()}
+    x.strokeStyle='rgba(90,66,40,.55)';x.lineWidth=1.6;for(let i=0;i<puffs.length;i+=1){const [px,py,rr]=puffs[i];if(H(i,v,84)<.7){x.beginPath();x.arc(px+rr*.1,py-rr*.12,rr*.5,Math.PI*1.05,Math.PI*1.75);x.stroke();x.beginPath();x.arc(px+rr*.1,py-rr*.12,rr*.28,Math.PI*1.1,Math.PI*1.7);x.stroke()}}
+    x.strokeStyle='rgba(90,66,40,.5)';x.lineWidth=1.5;for(let k=0;k<4;k++){const yy=Hh*.9+k*5-2,xx=W*(.28+.1*k+(H(k,v,85)-.5)*.1),ln=W*(.14+.1*H(k,v,86));x.beginPath();x.moveTo(xx,yy);x.lineTo(xx+ln,yy);x.stroke()}
+    out.push(c)}
+  return out}
+function mpWorldClouds(WV){
+  const S=mpWorldCl,now=performance.now()/1000,dt=Math.min(.1,S.t?now-S.t:0);S.t=now;
+  if(!S.spr)S.spr=mpWorldCloudSprites();
+  const H=hash2,X0=-130,X1=610,Y0=-90,Y1=410,spawn=(side,k)=>{ // a new cloud, entering from one edge
+    const v=(Math.random()*6)|0,sc=.5+Math.random()*.7,w=300*sc*.62,h=150*sc*.62,c={v,sc,w,h,vx:3+Math.random()*3.5,vy:(Math.random()-.5)*1.6,a:.55+Math.random()*.2,ph:Math.random()*6};
+    if(side==='l'){c.x=X0+Math.random()*30;c.y=Y0+Math.random()*(Y1-Y0)}else if(side==='r'){c.x=X1-Math.random()*30;c.y=Y0+Math.random()*(Y1-Y0)}else if(side==='t'){c.x=X0+Math.random()*(X1-X0);c.y=Y0+Math.random()*30}else{c.x=X0+Math.random()*(X1-X0);c.y=Y1-Math.random()*30}
+    if(k){c.x=X0+Math.random()*(X1-X0);c.y=Y0+Math.random()*(Y1-Y0)}return c};
+  if(!S.list.length)for(let i=0;i<15;i++)S.list.push(spawn('l',true));
+  // how far the map was dragged (or zoomed) since the last frame: the clouds, being higher up, move with it and then some
+  let dx=0,dy=0;if(S.px!==null&&S.pz===WV.z&&dt>0){dx=WV.x-S.px;dy=WV.y-S.py;if(Math.abs(dx)>300||Math.abs(dy)>300){dx=0;dy=0}}else if(S.pz!==null&&S.pz!==WV.z){dx=(WV.x-S.px)*.5;dy=(WV.y-S.py)*.5}
+  S.px=WV.x;S.py=WV.y;S.pz=WV.z;
+  const wind=.12+.14*Math.sin(now*.02);
+  const arrive=Math.hypot(dx,dy)>.4?(Math.abs(dx)>Math.abs(dy)?(dx>0?'l':'r'):(dy>0?'t':'b')):'l';
+  for(let i=0;i<S.list.length;i++){const c=S.list[i];
+    c.x+=Math.cos(wind)*c.vx*dt+dx*1.8;c.y+=(Math.sin(wind)*c.vx+c.vy)*dt+dy*1.8;
+    if(c.x<X0-80||c.x>X1+80||c.y<Y0-60||c.y>Y1+60){S.list[i]=spawn(c.x>X1?'l':c.x<X0?'r':c.y>Y1?'t':'b',false);if(arrive!=='l'&&Math.random()<.7)S.list[i]=spawn(arrive,false)}}
+  // the soft shadows on the land, then the clouds
+  ctx.save();
+  for(const c of S.list){const zz=.75+.35*WV.z,w=c.w*zz,h=c.h*zz,e=Math.min(1,Math.max(0,Math.min(c.x+60-14,466+60-c.x,c.y+40-14,306+40-c.y)/70));if(e<=0)continue;
+    ctx.globalAlpha=e*.16;ctx.fillStyle='#3a2a14';ctx.beginPath();ctx.ellipse(c.x+w*.12+10,c.y+h*.5+16,w*.42,h*.2,0,0,Math.PI*2);ctx.fill()}
+  for(const c of S.list){const zz=.75+.35*WV.z,w=c.w*zz,h=c.h*zz,e=Math.min(1,Math.max(0,Math.min(c.x+60-14,466+60-c.x,c.y+40-14,306+40-c.y)/70));if(e<=0)continue;
+    ctx.globalAlpha=e*c.a;ctx.drawImage(S.spr[c.v],c.x-w/2,c.y-h*.6,w,h)}
+  ctx.restore()}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
