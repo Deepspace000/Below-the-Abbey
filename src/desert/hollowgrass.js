@@ -4,7 +4,7 @@
    over it. The people are frog-like and speak a tongue the party cannot follow until it has found the four books in the hives (see hollowgrass_talk.js).
    Levels: 470 the grassland, 471 to 474 the four hives. The way in is a spiked gate at the east end of the high ledge in the Hollow Land (level 364).
    ========================================================================== */
-const HG={ID:470,HIVES:[471,472,473,474],W:150,H:150,DIFF:40,START:{x:75,y:142}};
+const HG={ID:470,HIVES:[471,472,473,474],W:150,H:150,DIFF:66,START:{x:75,y:142}};
 const HG_TOWNS=[{k:'exsce',n:'Exsce',x:75,y:106},{k:'ulb',n:'Ulb',x:26,y:84},{k:'glorm',n:'Glorm',x:124,y:82},{k:'wexsh',n:'Wexsh',x:42,y:36},{k:'nibb',n:'Nibb',x:112,y:30}];
 const HG_HIVE_AT=[[22,122],[128,116],[76,58],[80,12]];
 const HG_HIVE_NAMES=['The Hush Hive','The Droning Hive','The Amber Hive','The Queen’s Hive'];
@@ -13,7 +13,7 @@ for(const n of ['hg_frog0','hg_frog1','hg_swarm0','hg_swarm1','hg_swarm0A','hg_s
 Object.assign(NPC_H,{hg_frog0:1.0,hg_frog1:1.0,hg_house0:3.1,hg_house1:2.5,hg_house2:3.4,hg_arch:2.6,hg_lamp:2.2,hg_pillar:2.4,hg_tower0:5,hg_tower1:5,hg_tower2:5,hg_tower3:5,hg_palisade:1.6,hg_gate:2.1,hg_rock0:3.0,hg_rock1:2.2,hg_hive:3.2,hg_well:1.7,hg_chestwax:.62,hg_chestweed:.62,hg_chestjelly:.62,hg_waxbarrel:.95,hg_jar:1.1,hg_lectern:1.1,hg_eggs:.95,hg_wizard:1.35,hg_npc0:1.35,hg_npc1:1.25,hg_npc3:1.0,hg_npc4:1.4,hg_npc5:1.3,hg_npc6:1.3});
 CONTAINERS.push('hg_chestwax','hg_chestweed','hg_chestjelly','hg_waxbarrel','hg_jar');
 LEVEL_NAMES[HG.ID]='The Hollow Grasslands';HG.HIVES.forEach((id,i)=>LEVEL_NAMES[id]=HG_HIVE_NAMES[i]);
-LEVEL_RATING[HG.ID]=HG.DIFF;HG.HIVES.forEach((id,i)=>LEVEL_RATING[id]=HG.DIFF+i*2);
+LEVEL_RATING[HG.ID]=HG.DIFF;HG.HIVES.forEach((id,i)=>LEVEL_RATING[id]=HG.DIFF+i+1);
 WORLD_LOCS.push({k:'hollowgrass',n:'The Hollow Grasslands',sub:'a dark grassland beyond the Hollow Land',lv:[470,471,472,473,474],x:-6,y:290,ic:'trees'});
 WIND_AMT[HG.ID]=1; // the wind is always in the grass
 /* ---------- the creatures ---------- */
@@ -47,15 +47,15 @@ const HG_BOOKS=[['The Primer of Ripples','#8a6a3a','A thin book of simple pictur
  ['The Grammar of the Deep Water','#5a6a58','A heavy book that explains how the grassland tongue is put together. With it, most of what the folk say can be followed.'],
  ['The Queen’s Dictionary','#b88a30','A great book of every word in the grassland tongue, kept by the Hive Queen. With it, the party can follow everything the folk say.']];
 HG_BOOKS.forEach((b,i)=>{ITEMDEF['hgbook'+(i+1)]={n:b[0],k:'quest',t:'Book',ic:'ore',c:b[1],stack:0,price:0,d:b[2],sw:.6}});
-gw('hgsting','Stinger Blade','Sword',40,[34,48],.04,{str:24},2400,'#c89030',{bleed:[.3,6,3]},'A short blade made from the stinger of a giant hive insect. Three hits in ten leave the foe bleeding.');
-gw('hgmandible','Mandible Axe','Axe',40,[38,54],-.02,{str:26},2600,'#8a7a40',{cleave:1},'An axe with a blade of serrated chitin. Every hit also cuts the foe standing behind the first.');
-gw('hgbarb','Barbed Chitin Spear','Sword',35,[28,40],.06,{str:22},1700,'#7a6a3a',{stun:.15},'A long spear with a barbed tip. One hit in seven knocks the foe senseless for a round.');
-ga('hgcarapace','shield','Carapace Shield','Shield',30,14,1100,'#8a8a3a',{thorns:5},'A round shield of overlapping beetle shells. Every enemy that strikes you takes 5 damage.');
-ARM_SET_OF.hgchit={name:'Chitin Warden',bonus:{thorns:6,ward:3},btxt:'Every enemy that strikes you takes 6 damage, and every blow on you is 3 lighter.',lv:35,key:'hgchit'};
+gw('hgsting','Stinger Blade','Sword',70,[62,86],.04,{str:34},5200,'#c89030',{bleed:[.3,6,3]},'A short blade made from the stinger of a giant hive insect. Three hits in ten leave the foe bleeding.');
+gw('hgmandible','Mandible Axe','Axe',70,[68,92],-.02,{str:36},5600,'#8a7a40',{cleave:1},'An axe with a blade of serrated chitin. Every hit also cuts the foe standing behind the first.');
+gw('hgbarb','Barbed Chitin Spear','Sword',64,[52,72],.06,{str:32},3800,'#7a6a3a',{stun:.15},'A long spear with a barbed tip. One hit in seven knocks the foe senseless for a round.');
+ga('hgcarapace','shield','Carapace Shield','Shield',60,26,2400,'#8a8a3a',{thorns:9},'A round shield of overlapping beetle shells. Every enemy that strikes you takes 9 damage.');
+ARM_SET_OF.hgchit={name:'Chitin Warden',bonus:{thorns:10,ward:6},btxt:'Every enemy that strikes you takes 10 damage, and every blow on you is 6 lighter.',lv:65,key:'hgchit'};
 [['h','head','Chitin Helm','head',.55,'dodge'],['c','chest','Chitin Cuirass','chest',1,'ward'],['a','arms','Chitin Gauntlets','arms',.35,'thorns'],['l','legs','Chitin Greaves','legs',.45,'dodge']].forEach(([sx,slot,nm,ic,f,k])=>{
-  const id='ar_hgchit_'+sx,t=3.5,v=k==='dodge'?.05:k==='ward'?5:7,pas={};pas[k]=v;
-  ITEMDEF[id]={n:nm,k:slot,t:slot==='head'?'Helm':slot==='chest'?'Chest':slot==='arms'?'Arms':'Legs',ic,c:'#8a7a3a',armor:Math.max(2,Math.round(19*f)),price:Math.round(1000*f),lvl:35,pas,set:'hgchit',tier:35,
-    d:(k==='dodge'?'Enemies miss 5% more.':k==='ward'?'Every blow on you is 5 lighter.':'Every enemy that strikes you takes 7 damage.')+' Set: Chitin Warden. All four pieces give: '+ARM_SET_OF.hgchit.btxt+' Needs level 35.',sw:slot==='head'?.38:slot==='chest'?.46:.4,gear:1};
+  const id='ar_hgchit_'+sx,t=3.5,v=k==='dodge'?.07:k==='ward'?9:12,pas={};pas[k]=v;
+  ITEMDEF[id]={n:nm,k:slot,t:slot==='head'?'Helm':slot==='chest'?'Chest':slot==='arms'?'Arms':'Legs',ic,c:'#8a7a3a',armor:Math.max(2,Math.round(34*f)),price:Math.round(2200*f),lvl:65,pas,set:'hgchit',tier:65,
+    d:(k==='dodge'?'Enemies miss 7% more.':k==='ward'?'Every blow on you is 9 lighter.':'Every enemy that strikes you takes 12 damage.')+' Set: Chitin Warden. All four pieces give: '+ARM_SET_OF.hgchit.btxt+' Needs level 65.',sw:slot==='head'?.38:slot==='chest'?.46:.4,gear:1};
   GEAR.push(id);ARM_IDS.push(id);void t});
 const HG_GEAR=['hgsting','hgmandible','hgbarb','hgcarapace','ar_hgchit_h','ar_hgchit_c','ar_hgchit_a','ar_hgchit_l'];
 if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push(...HG_FOOD.map(f=>f[0]),'hgreed','hgegg','hgcrystal','hgbook1','hgbook2','hgbook3','hgbook4',...HG_GEAR);
@@ -116,7 +116,7 @@ function hgHive(i){
   for(let k=0;k<9;k++){const c=pick(300+k);if(c)decor.push({k:k%2?'hg_waxbarrel':'hg_jar',x:c[0],y:c[1],block:true})}
   for(let k=0;k<26;k++){const c=pick(400+k);if(c)decor.push({k:'hg_eggs',x:c[0],y:c[1],block:true,sc:.7+hs(k,3,sd+7)*.4})}
   for(let k=0;k<12;k++){const c=pick(500+k);if(c)items.push({k:['hgcomb','hgcomb','hgjelly','hggrubs'][k%4],x:c[0],y:c[1]})}
-  const lv={rows:g.map(r=>r.join('')),start:{x:sp.x,y:sp.y-1,f:0},enemies,items,decor,chars,day:0,floor:'wood',name:HG_HIVE_NAMES[i],label:HG_HIVE_NAMES[i],diff:HG.DIFF+i*2,ceilH:2.7,torchGap:1e9,noTele:true,portals:[],lights,
+  const lv={rows:g.map(r=>r.join('')),start:{x:sp.x,y:sp.y-1,f:0},enemies,items,decor,chars,day:0,floor:'wood',name:HG_HIVE_NAMES[i],label:HG_HIVE_NAMES[i],diff:HG.DIFF+i+1,ceilH:2.7,torchGap:1e9,noTele:true,portals:[],lights,
     mapNames:[{t:HG_HIVE_NAMES[i],x:sp.x,y:H-1,k:'place'},{t:i===3?'The Queen’s Cell':'The Heart of the Hive',x:far.x,y:far.y-4,k:'place'}]};
   LEVELS[id]=lv;
 }

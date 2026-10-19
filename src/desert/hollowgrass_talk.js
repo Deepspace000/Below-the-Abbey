@@ -16,7 +16,7 @@ function hgGarble(text,l){
 }
 const hgFoot=l=>l>=4?'':'  ['+['You cannot understand a word of it.','You catch a word here and there.','You follow some of it, but not enough.','You follow most of it, but not all.'][l]+']';
 /* ---------- the quests ---------- */
-const HG_TIERREW=[null,{gold:150,xp:2500},{gold:350,xp:5000,items:['hgjelly']},{gold:600,xp:8000,items:['hgjelly','hgjelly']},{gold:900,xp:12000}];
+const HG_TIERREW=[null,{gold:300,xp:5000},{gold:700,xp:10000,items:['hgjelly']},{gold:1200,xp:16000,items:['hgjelly','hgjelly']},{gold:1800,xp:24000}];
 const HG_Q={}; // quest id -> data
 function hgq(id,tier,title,who,kind,what,n,plural,desc,offer,accept,extra){
   const rew=Object.assign({},HG_TIERREW[tier]);if(extra&&extra.item)rew.items=(rew.items||[]).concat(extra.item);
