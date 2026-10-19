@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.424';
+const VERSION='3.425';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2533,7 +2533,7 @@ function render3D(){
   const day=G.day||0,lbm=Math.max(day,G.amb||0),fd=G.fl||(day?GRASSD:FLOORD),cd=G.cl||(day?SKYD:CEILD);
   const uwL=typeof uwLv==='function'&&uwLv(LEVEL); // under the sea
   const desertLv=LEVEL===41||LEVEL===43||LEVEL===44||LEVEL===305||LEVEL>=60&&LEVEL<=64||yarSea(LEVEL),dsBio=LEVEL===41?clamp(rdBiome(G.C.x|0,G.C.y|0)*1.3,0,1):1,mix3=(a,b)=>[a[0]+(b[0]-a[0])*dsBio,a[1]+(b[1]-a[1])*dsBio,a[2]+(b[2]-a[2])*dsBio];
-  const skyLv=LEVEL===22,lushLv=LEVEL===32||LEVEL===33,grimLv=GRIM_L(),rainLv=LEVEL===10,mossLv=LEVEL===39,hzr0=desertLv?(uwL?[40,124,154]:LEVEL===305?[236,232,214]:yarSea(LEVEL)?[214,230,244]:LEVEL===64?[236,224,196]:LEVEL===63?[238,242,250]:LEVEL===62?[226,204,242]:LEVEL===61?[244,226,172]:LEVEL===60?[196,214,240]:LEVEL===43?[238,200,166]:mix3([170,200,160],[242,226,190])):skyLv?[176,192,216]:rainLv?[58,72,82]:mossLv?[70,104,70]:LEVEL===470?[88,120,150]:grimLv?[30,46,32]:lushLv?[170,200,160]:day?[132,146,132]:[86,76,62],hzc0=desertLv?(uwL?[58,140,168]:LEVEL===305?[206,220,200]:yarSea(LEVEL)?[176,204,230]:LEVEL===64?[216,198,160]:LEVEL===63?[214,226,244]:LEVEL===62?[196,160,222]:LEVEL===61?[232,200,128]:LEVEL===60?[172,196,232]:LEVEL===43?[218,172,136]:mix3([140,176,130],[228,210,168])):mossLv?[48,76,50]:rainLv?[48,60,70]:LEVEL===470?[64,92,120]:grimLv?[26,40,28]:lushLv?[140,176,130]:skyLv?[150,172,208]:day?[110,124,112]:[69,61,50],hzmax0=desertLv?(LEVEL===44?.36:LEVEL===305?.3:LEVEL===304?.42:.5+.22*dsBio):skyLv?(.42-.26*ALTN):mossLv?.34:lushLv?.34:LEVEL===470?.7:grimLv?.36:rainLv?.34:day?.55:.32,hzrate0=desertLv?(LEVEL===44?.02:LEVEL===305?.014:LEVEL===304?.02:.03):skyLv?.05:mossLv?.05:lushLv?.04:LEVEL===470?.045:grimLv?.034:rainLv?.036:day?.07:.042;
+  const skyLv=LEVEL===22,lushLv=LEVEL===32||LEVEL===33,grimLv=GRIM_L(),rainLv=LEVEL===10,mossLv=LEVEL===39,hzr0=desertLv?(uwL?[40,124,154]:LEVEL===305?[236,232,214]:yarSea(LEVEL)?[214,230,244]:LEVEL===64?[236,224,196]:LEVEL===63?[238,242,250]:LEVEL===62?[226,204,242]:LEVEL===61?[244,226,172]:LEVEL===60?[196,214,240]:LEVEL===43?[238,200,166]:mix3([170,200,160],[242,226,190])):skyLv?[176,192,216]:rainLv?[58,72,82]:mossLv?[70,104,70]:LEVEL===470?[40,58,82]:grimLv?[30,46,32]:lushLv?[170,200,160]:day?[132,146,132]:[86,76,62],hzc0=desertLv?(uwL?[58,140,168]:LEVEL===305?[206,220,200]:yarSea(LEVEL)?[176,204,230]:LEVEL===64?[216,198,160]:LEVEL===63?[214,226,244]:LEVEL===62?[196,160,222]:LEVEL===61?[232,200,128]:LEVEL===60?[172,196,232]:LEVEL===43?[218,172,136]:mix3([140,176,130],[228,210,168])):mossLv?[48,76,50]:rainLv?[48,60,70]:LEVEL===470?[30,44,64]:grimLv?[26,40,28]:lushLv?[140,176,130]:skyLv?[150,172,208]:day?[110,124,112]:[69,61,50],hzmax0=desertLv?(LEVEL===44?.36:LEVEL===305?.3:LEVEL===304?.42:.5+.22*dsBio):skyLv?(.42-.26*ALTN):mossLv?.34:lushLv?.34:LEVEL===470?.5:grimLv?.36:rainLv?.34:day?.55:.32,hzrate0=desertLv?(LEVEL===44?.02:LEVEL===305?.014:LEVEL===304?.02:.03):skyLv?.05:mossLv?.05:lushLv?.04:LEVEL===470?.03:grimLv?.034:rainLv?.036:day?.07:.042;
   // the desert sky follows the clock; a sandstorm thickens the air and tints it
   const SK=desertLv&&!uwL?skyTod((G.clock%1440)/60):null,ST=desertLv?STORM.a:0,stm=(v,c)=>v+(c-v)*ST;
   const stormC=SK?[206*Math.min(1,SK.k[0]*1.1+.05),166*Math.min(1,SK.k[1]*1.1+.05),112*Math.min(1,SK.k[2]*1.1+.05)]:null;
@@ -2806,7 +2806,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     if(s.e&&ENEMY_DEF[s.e.t].glow)lum=Math.max(lum,ENEMY_DEF[s.e.t].glow);
     if(s.decor&&s.decor.k==='lever')lum=Math.max(lum,.62); // a lever catches a little light, so it can be found in a dark hall // a ghost shines a little by its own light
     if(LEVEL===44&&s.decor&&(s.decor.k==='lamp'||s.decor.k==='hlant'||s.decor.k==='cfire'))lum=Math.max(lum,.9); // a lantern or a fire shines by its own light
-    const ohL=LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<440),kq0=Math.min(1,Math.max(.05,2*sw/iw)),dyv=(G.day||0)>0,hzv=GRIM_L()?(LEVEL===470?[70,98,126]:[30,46,32]):ohL&&dyv?[226,228,220]:trD?[40,54,42]:dyv?[132,146,132]:[86,76,62],smS=Math.min(dyv?(ohL?.22:.4):.26,dist*(dyv?(ohL?.018:.04):.03))*(GRIM_L()?.55:.75);
+    const ohL=LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<440),kq0=Math.min(1,Math.max(.05,2*sw/iw)),dyv=(G.day||0)>0,hzv=GRIM_L()?(LEVEL===470?[26,38,56]:[30,46,32]):ohL&&dyv?[226,228,220]:trD?[40,54,42]:dyv?[132,146,132]:[86,76,62],smS=Math.min(dyv?(ohL?.22:.4):.26,dist*(dyv?(ohL?.018:.04):.03))*(GRIM_L()?.55:.75);
     let SRC,tw,th,HZ=null,hA=0;
     if(!s.flash&&!(s.decor&&s.decor.burn>0)){
       let tier=SPR_TIERS[SPR_TIERS.length-1];for(const t of SPR_TIERS){if(t>=iw*kq0){tier=t;break}}
@@ -22669,9 +22669,9 @@ KH_LAZY[HG.ID]=hgBuild;HG.HIVES.forEach((id,i)=>{KH_LAZY[id]=()=>{hgBuild();hgHi
 {const _w=drawWeatherFx;drawWeatherFx=function(){_w.apply(this,arguments);if(LEVEL!==HG.ID)return;
   const t=G.time||0;ctx.save();
   ctx.globalCompositeOperation='multiply';ctx.globalAlpha=.62;ctx.fillStyle='rgb(150,184,228)';ctx.fillRect(0,0,420,210);
-  ctx.globalCompositeOperation='screen';ctx.globalAlpha=1;ctx.fillStyle='rgba(60,92,134,.17)';ctx.fillRect(0,0,420,210);
+  ctx.globalCompositeOperation='screen';ctx.globalAlpha=1;ctx.fillStyle='rgba(60,92,134,.07)';ctx.fillRect(0,0,420,210);
   for(let i=0;i<5;i++){const y=88+i*10,a=.05+.03*Math.sin(t*.3+i),x=((t*(4+i*1.5)+i*97)%560)-130,g=ctx.createLinearGradient(x,0,x+340,0);
-    g.addColorStop(0,'rgba(190,215,240,0)');g.addColorStop(.5,'rgba(190,215,240,'+(a*1.7).toFixed(3)+')');g.addColorStop(1,'rgba(190,215,240,0)');ctx.fillStyle=g;ctx.fillRect(x,y,340,8)}
+    g.addColorStop(0,'rgba(190,215,240,0)');g.addColorStop(.5,'rgba(190,215,240,'+(a*.8).toFixed(3)+')');g.addColorStop(1,'rgba(190,215,240,0)');ctx.fillStyle=g;ctx.fillRect(x,y,340,8)}
   ctx.fillStyle='rgba(205,232,255,.5)';for(let i=0;i<26;i++){const x=((i*53+t*(3+i%4))%440)-10,y=70+((i*37)%120)+Math.sin(t*.7+i)*5,r=.7+(i%3)*.4;ctx.fillRect(x,y,r,r)}
   ctx.restore()}}
 

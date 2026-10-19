@@ -91,8 +91,8 @@ KH_LAZY[HG.ID]=hgBuild;HG.HIVES.forEach((id,i)=>{KH_LAZY[id]=()=>{hgBuild();hgHi
 {const _w=drawWeatherFx;drawWeatherFx=function(){_w.apply(this,arguments);if(LEVEL!==HG.ID)return;
   const t=G.time||0;ctx.save();
   ctx.globalCompositeOperation='multiply';ctx.globalAlpha=.62;ctx.fillStyle='rgb(150,184,228)';ctx.fillRect(0,0,420,210);
-  ctx.globalCompositeOperation='screen';ctx.globalAlpha=1;ctx.fillStyle='rgba(60,92,134,.17)';ctx.fillRect(0,0,420,210);
+  ctx.globalCompositeOperation='screen';ctx.globalAlpha=1;ctx.fillStyle='rgba(60,92,134,.07)';ctx.fillRect(0,0,420,210);
   for(let i=0;i<5;i++){const y=88+i*10,a=.05+.03*Math.sin(t*.3+i),x=((t*(4+i*1.5)+i*97)%560)-130,g=ctx.createLinearGradient(x,0,x+340,0);
-    g.addColorStop(0,'rgba(190,215,240,0)');g.addColorStop(.5,'rgba(190,215,240,'+(a*1.7).toFixed(3)+')');g.addColorStop(1,'rgba(190,215,240,0)');ctx.fillStyle=g;ctx.fillRect(x,y,340,8)}
+    g.addColorStop(0,'rgba(190,215,240,0)');g.addColorStop(.5,'rgba(190,215,240,'+(a*.8).toFixed(3)+')');g.addColorStop(1,'rgba(190,215,240,0)');ctx.fillStyle=g;ctx.fillRect(x,y,340,8)}
   ctx.fillStyle='rgba(205,232,255,.5)';for(let i=0;i<26;i++){const x=((i*53+t*(3+i%4))%440)-10,y=70+((i*37)%120)+Math.sin(t*.7+i)*5,r=.7+(i%3)*.4;ctx.fillRect(x,y,r,r)}
   ctx.restore()}}
