@@ -77,6 +77,12 @@ function mpplDraw(){
   const g=mpplGeo();if(!g)return;
   mpplZones(g);
   if(LEVEL!==44&&typeof drawQuestRings==='function'){ctx.save();ctx.beginPath();ctx.rect(g.A.x,g.A.y,g.A.w,g.A.h);ctx.clip();try{drawQuestRings(g.ox,g.oy,Math.max(g.cs,.9))}catch(e){console.error(e)}ctx.restore()}
+  // hidden caves and ruins the party has been inside are named on the map where they really are
+  {const L=LEVELS[LEVEL],seen=(G.flags&&G.flags.lvSeen)||{};if(L&&L._wdMarks){ctx.save();ctx.beginPath();ctx.rect(g.A.x,g.A.y,g.A.w,g.A.h);ctx.clip();
+    for(const m of L._wdMarks){if(!seen[m.id]||!LEVEL_NAMES[m.id])continue;const x=g.ox+(m.x+.5)*g.cs,y=g.oy+(m.y+.5)*g.cs;
+      ctx.fillStyle='#3a2a1c';ctx.strokeStyle='#e8dcb0';ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,Math.max(2.4,g.cs*.5),0,TAU);ctx.fill();ctx.stroke();
+      mpplHalo(LEVEL_NAMES[m.id],x,y+Math.max(7,g.cs*.9),Math.max(6.5,Math.min(8.5,g.cs*.9)),'#3a1c10')}
+    ctx.restore()}}
   if(typeof wdDrawMarks==='function'){ctx.save();ctx.beginPath();ctx.rect(g.A.x,g.A.y,g.A.w,g.A.h);ctx.clip();wdDrawMarks(g.ox,g.oy,Math.max(g.cs,1.4),true);ctx.restore()} // the ? of hidden caves and ruins the party has spotted
   mpplTrail(g);mpplPinsDraw(g);
   if(MPPL.pin){mpplHalo('Tap the map to drop a pin. Tap a pin to take it away.',g.A.x+g.A.w/2,g.A.y+g.A.h-8,7,'#5a1a10')}}

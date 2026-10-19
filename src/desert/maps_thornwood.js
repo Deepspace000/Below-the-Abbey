@@ -113,7 +113,7 @@ function mpThornwoodDraw(c,x,L,api){
   {const px=f.X(5.5),py=f.Y(12.6);api.I.tower(x,px,py,.9);x.strokeStyle=MPT_INK;x.lineWidth=.8;x.beginPath();x.moveTo(px-1.6,py-9.8);x.lineTo(px,py-14.6);x.lineTo(px+1.8,py-9.8);x.stroke()}
   x.restore();
   // 7. a river-like trail does not exist here; place names, hand lettered with a pale halo
-  const names=[['Abbey Ruins',8,4.5,7.4,'#3a1c10'],['Chapel',4,17.6,5.6,'#3a1c10'],['Graveyard',9.6,13.4,6,'#3a1c10'],["Wolves' Den",24,5.4,7.2,'#3a1c10'],['Gallows Shrine',24,32.2,7,'#3a1c10'],["Witch's Hollow",41,35.4,7.6,'#3a1c10'],['Bandit Camp',46.5,8.4,7,'#3a1c10']];
+  const names=[['Abbey Ruins',8,4.5,7.4,'#3a1c10'],['Chapel',4,17.6,5.6,'#3a1c10'],['Graveyard',9.6,13.4,6,'#3a1c10'],["Wolves' Den",24,5.4,7.2,'#3a1c10'],['Gallows Shrine',24,32.2,7,'#3a1c10'],["Witch's Hut",41,35.4,7.6,'#3a1c10'],['Bandit Camp',46.5,8.4,7,'#3a1c10']];
   // simple glyphs on the places that have no building: a camp tent, a hollow ring of stones, the shrine
   {const px=f.X(48.5),py=f.Y(11);for(const dx of [-3,3]){x.fillStyle=dx<0?'#a8643a':'#7a4a2a';x.strokeStyle=MPT_INK;x.lineWidth=.7;x.beginPath();x.moveTo(px+dx-4,py+2);x.lineTo(px+dx,py-4.6);x.lineTo(px+dx+4,py+2);x.closePath();x.fill();x.stroke()}
    x.fillStyle=MPL.VERM;x.beginPath();x.arc(px+.3,py+3.2,1.3,0,6.3);x.fill();
@@ -126,7 +126,7 @@ function mpThornwoodDraw(c,x,L,api){
   api.title(x,'Thornwood','A grim forest of thorns and graves');
   api.compass(x,46,268,13);
   api.panel(x,6,54,82,150);
-  api.notes(x,['A dark forest of twisted thorn trees.','Wolves den under rock in the north. Bandits camp in the east.','A witch keeps a hollow in the south east.','An old abbey lies ruined in the west, with its graveyard.','Follow the pale dirt trails.'],11,64,72,6.2,4);
+  api.notes(x,['A dark forest of twisted thorn trees.','Wolves den under rock in the north. Bandits camp in the east.','A witch keeps a hut in the south east.','An old abbey lies ruined in the west, with its graveyard.','Follow the pale dirt trails.'],11,64,72,6.2,4);
   api.panel(x,394,40,80,96);api.text(x,'Key',434,49,8,MPL.VERM);
   const key=[['tree','Thorn tree'],['bram','Bramble'],['grave','Grave'],['wall','Abbey wall'],['trail','Trail']];
   key.forEach(([k,t],i)=>{const kx=406,ky=63+i*14;
