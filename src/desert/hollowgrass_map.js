@@ -36,7 +36,7 @@ function hgmDraw(){
     if(/tower/.test(d.k)){x.fillStyle='#c8803a';x.strokeStyle=ink;x.lineWidth=.8;x.beginPath();x.moveTo(a-2,b+1);x.lineTo(a-1,b-6);x.lineTo(a,b-9);x.lineTo(a+1,b-6);x.lineTo(a+2.2,b+1);x.closePath();x.fill();x.stroke()}
     else{x.fillStyle='#9a9a98';x.strokeStyle=ink;x.lineWidth=.8;x.beginPath();x.moveTo(a-3,b+1.5);x.quadraticCurveTo(a-3,b-4,a-.5,b-5);x.quadraticCurveTo(a+2,b-6,a+3,b+1.5);x.closePath();x.fill();x.stroke();x.fillStyle=ink;x.beginPath();x.ellipse(a,b-1.5,.9,1.3,0,0,Math.PI*2);x.fill()}}
   // the frog-whales, grazing
-  for(const d of L.decor){if(!/^hg_frog/.test(d.k))continue;const a=PX(d.x),b=PY(d.y);x.fillStyle='#8a9a78';x.strokeStyle=ink;x.lineWidth=.7;x.beginPath();x.ellipse(a,b,3.4,2.4,0,0,Math.PI*2);x.fill();x.stroke();x.fillStyle='#e8ecd8';x.beginPath();x.arc(a-1.2,b-1.6,.9,0,Math.PI*2);x.arc(a+1.2,b-1.6,.9,0,Math.PI*2);x.fill();x.strokeStyle=ink;x.beginPath();x.moveTo(a-1.6,b+.6);x.quadraticCurveTo(a,b+1.6,a+1.6,b+.6);x.stroke()}
+  for(const d of L.decor){if(!/^hg_frog/.test(d.k))continue;const a=PX(d.x),b=PY(d.y);x.fillStyle='#8a9a78';x.strokeStyle=ink;x.lineWidth=.7;x.beginPath();x.ellipse(a,b,5.4,3.8,0,0,Math.PI*2);x.fill();x.stroke();x.fillStyle='#e8ecd8';x.beginPath();x.arc(a-1.8,b-2.4,1.3,0,Math.PI*2);x.arc(a+1.8,b-2.4,1.3,0,Math.PI*2);x.fill();x.strokeStyle=ink;x.beginPath();x.moveTo(a-2.4,b+.9);x.quadraticCurveTo(a,b+2.4,a+2.4,b+.9);x.stroke()}
   // the insectivores: a spider mark, bigger the bigger the beast
   for(const e of L.enemies){const m=/^hgins(\d)$/.exec(e.t);if(!m)continue;const t=+m[1],a=PX(e.x),b=PY(e.y),r=1.1+t*.32;x.strokeStyle='#4a1810';x.lineWidth=.6+t*.05;x.beginPath();for(const k of [-1,1])for(let j=0;j<4;j++){const ang=(-.9+j*.6)*k+(k<0?Math.PI:0);x.moveTo(a,b);x.lineTo(a+Math.cos(ang)*r*2,b+Math.sin(ang)*r*1.3-r*.4)}x.stroke();
     x.fillStyle='#6a2418';x.beginPath();x.ellipse(a,b,r*.8,r*.65,0,0,Math.PI*2);x.fill();x.fillStyle='#e8ecd8';x.beginPath();x.arc(a-r*.3,b-r*.2,Math.max(.4,r*.2),0,Math.PI*2);x.arc(a+r*.3,b-r*.2,Math.max(.4,r*.2),0,Math.PI*2);x.fill()}
@@ -88,4 +88,4 @@ function hgmOverview(){
   txt('You are the yellow arrow. Exsce, the village nearest the gate, is where the wizard waits.',DW/2,DH-9,7.5,'#e0dcc4','center',true);
   btnText('worldmap','World map',328,5,80,20);btnText('ovexit','Exit',414,5,60,20);
 }
-{const _do=drawOverview;drawOverview=function(){if(LEVEL===HG.ID&&LEVELS[HG.ID]){hgmOverview();return}return _do.apply(this,arguments)}}
+{const _do=drawOverview;drawOverview=function(){if(LEVEL===HG.ID&&LEVELS[HG.ID]&&!G.world&&!G.teleMode){hgmOverview();return}return _do.apply(this,arguments)}}
