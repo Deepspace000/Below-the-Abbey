@@ -11,6 +11,12 @@ function khSkyList(cx,cy,dX,dY,L,minD2){
     if(d2>lim||d2<md)continue;
     const dot=rx*dX+ry*dY;if(dot<=0)continue;
     if(Math.abs(rx*dY-ry*dX)>dot*1.1+e.w*.6)continue;
+    if(LEVEL===304){ /* the quay: flat tower, roof and keep pictures that fill the screen or stand off to one side look like a huge wall jutting out, so they are left out */
+      const lat=Math.abs(rx*dY-ry*dX);
+      if(e.y>9&&e.y<10&&e.w>=5&&(dot<16||(dot<45&&lat<dot*.2)))continue;
+      if(e.w>=30?lat>dot*.6:(e.w/(dot*1.3)>.4&&lat>dot*.25))continue;
+      if(e.w/(dot*1.3)>.8)continue;
+    }
     const img=IMG[e.k];if(!img)continue;
     out.push({x:e.x,y:e.y,img,w:e.w,bob:e.z,decor:KH_SKYD,sky:true,smallSky:!e.big});
   }

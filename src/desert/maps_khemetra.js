@@ -558,7 +558,7 @@ function mpKhemDraw(c,x,L){
     const put=(t,a,b,col)=>{x.lineWidth=1;x.strokeStyle='rgba(248,238,204,.9)';x.strokeText(t,a,b);x.fillStyle=col;x.fillText(t,a,b)};
     put('The Desert Road',F.ox+(KH.CX+1)*F.s+30,F.oy+400*F.s+9,'#5a3408');put('THE GREAT GATE',F.ox+(KH.CX+1)*F.s+2,F.oy+400*F.s+3.6,'#4a1a08');put('THE SEA GATE',F.ox+400*F.s+16,F.oy+200.5*F.s-7,'#1a3a6a');put('To the Sea Tunnel and Yarrim',F.ox+400*F.s+16,F.oy+200.5*F.s+8,'#1a3a6a');
     x.restore()}catch(e){console.error(e)}
-  try{mpKhemAreaFrame(x);mpKhemFrieze(x);mpmgDraw(x,44);mpKhemBorder(x);mpKhemTitle(x);mpKhemCompass(x,431,60,18);mpKhemKey(x);const yb=mpKhemNotes(x);mpKhemMargins(x,yb+4)}catch(e){console.error(e)}
+  try{mpKhemAreaFrame(x);mpKhemFrieze(x);mpKhemBorder(x);mpKhemTitle(x);mpKhemCompass(x,431,60,18);mpKhemKey(x);const yb=mpKhemNotes(x);mpKhemMargins(x,yb+4);mpmgDraw(x,44)}catch(e){console.error(e)}
   info.ms=Math.round(performance.now()-t0);MPKH.info=info}
 /* the sheet is built at 6 times the screen size (the shared installer builds at 3), so the install is done here in the same way */
 (function(){
