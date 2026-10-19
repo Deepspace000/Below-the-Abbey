@@ -1,0 +1,269 @@
+<section class="chapter" id="ch06">
+<style>
+.mapwrap{position:relative;margin:.4em 0 .5em;border:3.5pt solid #000;line-height:0}
+.mapwrap img{width:100%;display:block}
+.mapwrap span{position:absolute;transform:translate(-50%,-50%);font-family:Arial,Helvetica,sans-serif;font-weight:700;white-space:nowrap;line-height:1.1;color:#2a1a08;text-shadow:0 0 2px #f4ead0,0 0 2px #f4ead0,0 0 3px #f4ead0,0 0 3px #f4ead0}
+.mapwrap span.d{font-size:6.6pt;letter-spacing:.06em;text-transform:uppercase;background:rgba(244,234,208,.6);padding:1px 3px}
+.mapwrap span.p{font-size:5.4pt;font-style:italic}
+.sprs{display:grid;grid-template-columns:repeat(4,1fr);gap:.08in;margin:.5em 0 .7em;break-inside:avoid}
+.spr{border:.75pt solid #000;padding:.05in .04in;text-align:center;background:#fff;font-size:7.4pt;line-height:1.2;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.spr img{height:.75in;max-width:100%;object-fit:contain;display:block;margin-bottom:.04in}
+.spr b{font-family:Arial,sans-serif;font-size:7pt}
+.spr span{display:block;font-style:italic;color:#333}
+.sprs.three{grid-template-columns:repeat(3,1fr)}
+.sprs.three .spr img{height:.9in}
+.chapter td.n,.chapter th.n{text-align:right;white-space:nowrap}
+.chapter table.t{break-inside:auto}.chapter table.t tr{break-inside:avoid}
+.tall img{max-height:2.0in;width:auto;margin:0 auto}
+.cap2 img{height:2.1in;width:auto;margin:0 auto}
+</style>
+<h1><span class="no">Chapter 6</span>Guide to the Lands: Khemetra and the Desert</h1>
+<div class="deck">Sand roads, golden walls, sleeping sphinxes and a harbour at the end of a tunnel: a traveller's guide to the south and the east.</div>
+
+<div class="cols dropcap">
+<p>South of Anaea the green of Greendale thins out, and then it stops. The road you take from the east gate is the oldest in the south: it runs through a narrow forest, turns north between palms, and walks you out into the great sands. Everything in this chapter lies beyond that point. It is a country of long dunes and short tempers, of tombs that were sealed before anyone wrote down their names, and, at the end of it, of Khemetra, the Golden City, where four hundred thousand people have never heard of you.</p>
+<p>This guide goes in the order you will most likely travel: the Sand Road and its buried chambers, the Tomb of Sut, the Red Dunes, the far deserts and their pyramid, then the city itself, district by district, and last the little harbour town of Yarrim on the Narrow Sea. Each entry gives you the level of the place (the number shown on the world map when autoscaling is off), who lives there and what they sell or ask, what hunts you, and what is worth finding.</p>
+<p>Keep your water full and your torches fuller. The deserts are wide, the creatures are spaced far apart, and a party that wanders into the Red Dunes at level 30 will meet things that were not expecting company.</p>
+</div>
+
+<figure class="shot full"><img src="img/shots/ch06_t_41.png"><figcaption>The Sand Road, a few steps out of Anaea. The forest is thick here. It will not stay that way.</figcaption></figure>
+<h2 id="ch06-glance">The lands at a glance</h2>
+<table class="t">
+<tr><th>Place</th><th class="n">Level</th><th>You reach it from</th><th>What is there</th></tr>
+<tr><td><a href="#ch06-sand-road">The Sand Road</a></td><td class="n">36</td><td>Anaea, east gate</td><td>Dunes, five little dungeons, the buried chambers, the way to the tomb</td></tr>
+<tr><td><a href="#ch06-burrows">The Buried Chambers</a></td><td class="n">36</td><td>Mounds on the Sand Road</td><td>Ten small dungeons, each ending in a chest</td></tr>
+<tr><td><a href="#ch06-tomb">The Tomb of Sut</a></td><td class="n">39</td><td>The cliff at the north of the Sand Road</td><td>Four wings, four sun discs, Sut himself</td></tr>
+<tr><td><a href="#ch06-red">The Red Dunes</a></td><td class="n">41</td><td>The door behind Sut</td><td>Ten little dungeons, obelisks, the road to Khemetra</td></tr>
+<tr><td><a href="#ch06-far">Blue Dunes</a></td><td class="n">45</td><td>A low cave off the Sand Road</td><td>An oasis, ten little dungeons</td></tr>
+<tr><td><a href="#ch06-far">Golden Erg</a></td><td class="n">45</td><td>East of the Blue Dunes</td><td>Three oases, seven dungeons, the Golden Pyramid</td></tr>
+<tr><td><a href="#ch06-far">Violet Erg</a></td><td class="n">45</td><td>South of the Golden Erg</td><td>Seven dungeons, Cinderback</td></tr>
+<tr><td><a href="#ch06-far">White Dunes</a></td><td class="n">45</td><td>South of the Blue Dunes</td><td>Five dungeons, the Wandering Cyclops</td></tr>
+<tr><td><a href="#ch06-far">The Flatlands</a></td><td class="n">45</td><td>East of the White Dunes</td><td>Eight dungeons, two oases</td></tr>
+<tr><td><a href="#ch06-khemetra">Khemetra</a></td><td class="n">44</td><td>North of the Red Dunes</td><td>A walled city of shops, temples, homes and quests</td></tr>
+<tr><td><a href="#ch06-below">Palace, Cisterns, Sea Tunnel</a></td><td class="n">43 to 45</td><td>Inside the city</td><td>The throne room, a maze under the Potters Market, a wizard</td></tr>
+<tr><td><a href="#ch06-yarrim">Yarrim</a></td><td class="n">48</td><td>The Sea Gate Tunnel, east of the city</td><td>A fishing town, a lighthouse, a pier</td></tr>
+</table>
+
+<h2 id="ch06-sand-road">The Sand Road</h2>
+<div class="cols">
+<p>The road leaves Anaea through a forest that looks, for the first mile, very like Greendale. Then the trees thin, palms take over, the palms give out, and you are walking through a desert of real dunes: the ground rises and falls under your feet, and what lies beyond the next crest is a matter of faith. At the far north of the land stands a cliff, and in the cliff is the door to the Tomb of Sut. Between the road and the cliff, sphinxes lie in pairs on either side of the way.</p>
+<p>The Sand Road is a fixed place with a fixed level of 36. It is not a gentle place. Desert wolves hunt in packs, scorpions lie under the sand, and carrion vultures turn overhead. The nomads of the road are described in the game as desperate, and they act like it.</p>
+<h3>Who walks here</h3>
+<p>Nobody sells anything on the open sand, with one exception. Now and then (about one visit in four) a trading caravan crosses an open desert: one to four camels in a line, a rider or a load on each, and a few nomads on foot behind. They walk their route and stop when you come close. Speak to the caravan trader and you can buy water, dates, bread, cheese and apples. Caravans are found on the Sand Road, the Red Dunes and all five of the far deserts.</p>
+</div>
+
+<div class="pair"><figure class="shot"><img src="img/shots/ch06_a_41sphinx.png"><figcaption>Sphinxes flank the way to the north.</figcaption></figure><figure class="shot"><img src="img/shots/ch06_a_41hatch.png"><figcaption>A hatch half buried in the sand: one of the little dungeons.</figcaption></figure></div>
+<div class="sprs"><div class="spr"><img src="../assets/scorpion.png"><b>Giant Scorpion</b><span>Sand Road, Red Dunes, every desert</span></div><div class="spr"><img src="../assets/ds_dwolf.png"><b>Desert Wolf</b><span>hunts in packs</span></div><div class="spr"><img src="../assets/ds_vulture.png"><b>Carrion Vulture</b><span>circles the open sand</span></div><div class="spr"><img src="../assets/nomad.png"><b>Desperate Nomad</b><span>armed and hungry</span></div></div>
+<div class="box"><h3>What to find on the Sand Road</h3>
+<ul class="tick">
+<li>Eleven mounds (burrows) in the dunes. These lead down to the buried chambers, below.</li>
+<li>Five little dungeons, each with its own way in: a hatch, a small crypt, a ruin with stairs, a mound with a door, a larger crypt.</li>
+<li>Obelisks marching in pairs up the road, and the two sphinxes at the head of it.</li>
+<li>A low cave in the east wall of the road, leading out into the Blue Dunes.</li>
+</ul></div>
+<h2 id="ch06-burrows">The Buried Chambers</h2>
+
+<div class="float-r"><figure class="shot"><img src="img/shots/ch06_t_100.png"><figcaption>The dark passages of a little dungeon.</figcaption></figure></div>
+
+<div class="cols">
+<p>The mounds in the dunes are the doors to ten small dungeons, each a handful of chambers joined by corridors, with creatures in the rooms, vases and treasure on the floor, and a chest at the far end holding a piece of magic gear. Each chamber has its own plan, so no two are alike. All ten stand at level 36.</p>
+<p>There are five kinds, each used twice. Expect to visit more than one: a good deal of the early kit of the south comes out of these chests.</p>
+</div>
+<table class="t">
+<tr><th>Chamber</th><th>What lives there</th></tr>
+<tr><td>The Scorpion Nest</td><td>Scorpions, and the sting that goes with them. The place is all dry husks and clicking in the dark.</td></tr>
+<tr><td>The Mummy Vault</td><td>Mummies, who may ambush you.</td></tr>
+<tr><td>The Nomads' Hideout</td><td>Nomads and desert wolves together.</td></tr>
+<tr><td>The Wolf Den</td><td>Desert wolves, six of them.</td></tr>
+<tr><td>The Sunken Shrine</td><td>A mixed company: scorpions, mummies and nomads.</td></tr>
+</table>
+<p class="hint"><b>Hint:</b> The stings and the dust of these places can leave the party afflicted. Carry antidotes and salve, and do not go down tired.</p>
+
+<h2 id="ch06-tomb">The Tomb of Sut</h2>
+<div class="cols">
+<p>The cliff at the head of the Sand Road hides a cave full of sand, and the cave leads down into the Hall of Eternity. Four wings open off it, and each guards a golden sun disc: the Hall of Embers, the Crypt of Sarcophagi, the Chamber of Switches and the Sand Pit. When all four discs sit in the sockets of the great door, the way opens to the throne room of Sut, Lord of the Red Desert.</p>
+<p>The tomb is level 39, a step up from the road. Skeletons, mummies, cobras and the odd scorpion keep the corridors. The walls are carved with hieroglyphs, the ceilings glitter like a night sky, and braziers burn in every hall, which is the only reason you can see the statues of Anubis staring down at you.</p>
+<p>When Sut falls, a door appears in the north wall, and it opens on a second desert.</p>
+</div>
+
+<div class="pair"><figure class="shot"><img src="img/shots/ch06_t_42.png"><figcaption>The first corridor of the tomb.</figcaption></figure><figure class="shot"><img src="img/shots/ch06_a_42anubis.png"><figcaption>Anubis statues and burning braziers in a great hall.</figcaption></figure></div>
+<div class="cols"><p>Sut himself is a great creature, painted in red and gold, and he waits at the far end of the tomb. You will see him down the long hall before you reach him. Go in with full healing and the best gear you have, and see <a href="#ch08">Chapter 8</a> for the harder questions about the tomb.</p>
+<p class="hint"><b>Hint:</b> The tomb air gives a lingering cough called Tomb Dust. It is not deadly, but it wears the party down over a long visit. Do the wings one at a time and come out to rest in between.</p></div>
+<div class="pair"><figure class="shot"><img src="img/shots/ch06_c_sut.png"><figcaption>The long hall to the throne room of Sut.</figcaption></figure><figure class="art tall"><img src="../assets/sut.png"><figcaption>Sut, Lord of the Red Desert.</figcaption></figure></div>
+<h2 id="ch06-red">The Red Dunes</h2>
+<div class="cols">
+<p>Through the door behind Sut lies a second desert, with red sand, red rock and old ruins. The last stretch of the road is an old paved way, and far ahead to the north a city rises over the horizon. That city is Khemetra.</p>
+<p>The Red Dunes are level 41. The wolves and scorpions of the Sand Road are here too, with more skeletons, mummies, and two kinds of nomad. Ten little dungeons lie scattered across the sand, among them the Shrine of the Sleeping Sphinx, the Barrow of the Burning Moon and the Reliquary of the Veiled Queen. Obelisks stand in pairs along the old road, and a second pair of sphinxes watches the way to the city.</p>
+</div>
+
+<div class="pair"><figure class="shot"><img src="img/shots/ch06_a_43obel.png"><figcaption>Obelisks along the old road.</figcaption></figure><figure class="shot"><img src="img/shots/ch06_a_43sphinx.png"><figcaption>The sphinxes at the head of the road, and beyond them the wall of Khemetra.</figcaption></figure></div>
+<div class="sprs three"><div class="spr"><img src="../assets/ds_dskeleton.png"><b>Skeleton</b><span>tomb and dunes</span></div><div class="spr"><img src="../assets/mummy.png"><b>Mummy</b><span>tombs and the Red Dunes</span></div><div class="spr"><img src="../assets/ds_cobra.png"><b>Cobra</b><span>the Tomb of Sut</span></div></div>
+<h2 id="ch06-far">The Far Deserts</h2>
+<div class="cols">
+<p>A low cave in the east wall of the Sand Road leads out to the Blue Dunes, and from there the sand goes on in every direction. Five far deserts lie beyond it, each linked to the next by a low cave. All five stand at level 45, and every one is wide, quiet and sparsely populated: the creatures live a long way apart, so you may walk for minutes before anything notices you. That is not always a comfort.</p>
+<p>Each desert has oases, rings of old ruins, bones, and a number of little dungeons whose entrances are hatches, spires, crypts and stairs. The royal cartographer in Khemetra will send you into one dungeon in each of seven deserts, from the Sand Road to the Flatlands. Ask Neferet at the palace.</p>
+</div>
+
+<table class="t">
+<tr><th>Desert</th><th>Size</th><th>Water</th><th class="n">Dungeons</th><th>Great creature</th></tr>
+<tr><td>The Blue Dunes</td><td>220 by 220</td><td>One oasis, with food and water</td><td class="n">10</td><td>none</td></tr>
+<tr><td>The Golden Erg</td><td>300 by 300</td><td>Three oases</td><td class="n">7</td><td>none, but the Golden Pyramid stands here</td></tr>
+<tr><td>The Violet Erg</td><td>300 by 300</td><td>Three oases</td><td class="n">7</td><td>Cinderback, the Fire Lizard</td></tr>
+<tr><td>The White Dunes</td><td>250 by 250</td><td>Three oases</td><td class="n">5</td><td>The Wandering Cyclops</td></tr>
+<tr><td>The Flatlands</td><td>250 by 250</td><td>Two oases</td><td class="n">8</td><td>none</td></tr>
+</table>
+<div class="pair"><figure class="shot"><img src="img/shots/ch06_a_60oasis.png"><figcaption>The oasis of the Blue Dunes: palms, reeds and a pool.</figcaption></figure><figure class="shot"><img src="img/shots/ch06_a_61oasis.png"><figcaption>An oasis in the Golden Erg.</figcaption></figure></div>
+<h3>The Golden Pyramid</h3>
+<div class="cols">
+<p>In the Golden Erg stands a real pyramid, raised out of the sand, with a doorway in its south face. Inside is a labyrinth of golden walls. At the heart of it, behind every turning, lies a chest holding a thousand gold. The Undying Pharaoh walks the maze, ten levels above your party. He warns you when he is near, hunts you down the passages, and can warp from one part of the labyrinth to another. His servants patrol too, and their grip slows you.</p>
+<p>The pyramid has no level of its own on the world map: the Pharaoh sets his own, by yours. Do not go in below your best.</p>
+</div>
+<figure class="shot full"><img src="img/shots/ch06_a_61pyr.png"><figcaption>The Golden Pyramid, and its doorway in the south face.</figcaption></figure>
+<div class="sprs three"><div class="spr"><img src="../assets/ds_pharaohboss.png"><b>The Undying Pharaoh</b><span>the Golden Pyramid</span></div><div class="spr"><img src="../assets/ds_pservant.png"><b>Pharaoh's Servant</b><span>patrols the maze</span></div><div class="spr"><img src="../assets/ds_firelizard.png"><b>Cinderback, the Fire Lizard</b><span>Violet Erg</span></div></div>
+<div class="float-r"><figure class="shot"><img src="img/shots/ch06_c_lizard.png"><figcaption>Cinderback, far ahead across the Violet Erg.</figcaption></figure></div>
+<h3>The great creatures of the sand</h3>
+<p><b>Cinderback, the Fire Lizard</b>, lies in the south of the Violet Erg. He stands at level 40, breathes a gout of flame from a distance, carries 400 gold, and drops a piece of magic gear when he falls. <b>The Wandering Cyclops</b> patrols the White Dunes at level 44, clubs rather than shoots, carries 500 gold, and drops magic gear of his own. Neither is hard to recognise.</p>
+<h3>Little dungeons of the deserts</h3>
+<p>There are fifty-two of them, numbered in the game from 100, and the Achievements page keeps count. A few hold a creature; most hold only a coffin. Here are some you are likely to be sent to.</p>
+<table class="t">
+<tr><th>Dungeon</th><th>Desert</th><th>The way in</th></tr>
+<tr><td>Catacomb of Whispering Sands</td><td>Sand Road</td><td>A mound with a door</td></tr>
+<tr><td>Shrine of the Sleeping Sphinx</td><td>Red Dunes</td><td>A mound with a door</td></tr>
+<tr><td>Shrine of the Copper Serpent</td><td>Blue Dunes</td><td>A ruin with stairs</td></tr>
+<tr><td>Undercroft of the Sand Mother</td><td>Golden Erg</td><td>Stairs going down</td></tr>
+<tr><td>Barrow of the Pale Cartographer</td><td>Violet Erg</td><td>A hole in a great tree</td></tr>
+<tr><td>Sepulchre of the Twin Suns</td><td>White Dunes</td><td>A hatch</td></tr>
+<tr><td>Barrow of the Last Oasis</td><td>Flatlands</td><td>A hatch</td></tr>
+</table>
+<h2 id="ch06-khemetra">Khemetra, the Golden City</h2>
+<div class="cols">
+<p>Khemetra is the largest place in the game. It is a walled city, four hundred cells by four hundred, of white houses trimmed with gold, laid out round a palace whose spire seems to stand in the sky. A great avenue, nine cells wide, runs from the south gate to the palace court. Cross roads run east and west, a ring road circles the palace, and between them every kind of street, lane and dead end has been bitten into the blocks. There are lawns with palms and ponds, squares full of stalls, and a crowd that goes about its business whether you are watching or not.</p>
+<p>The city stands at level 44, and for most of it you are in no danger at all: the streets belong to guards, porters, children and cats. The danger is in particular corners, named below. When you walk into a quarter for the first time, a line of news tells you where you are.</p>
+</div>
+
+<figure class="shot full"><img src="img/shots/ch06_b_gate.png"><figcaption>Inside the south gate. Walk straight on and you reach the palace.</figcaption></figure>
+<div class="pair"><figure class="shot"><img src="img/shots/ch06_b_avenue.png"><figcaption>The great avenue, with the palace at the far end.</figcaption></figure><figure class="shot"><img src="img/shots/ch06_b_court.png"><figcaption>The Court of the Golden Sun, in front of the palace.</figcaption></figure></div>
+<h3>The map of Khemetra</h3>
+<div class="mapwrap"><img src="img/ch06_khemetra_map.jpg"><span class="d" style="left:16.25%;top:5.50%">The Old Quarter</span><span class="d" style="left:85.25%;top:5.00%">The Temple District</span><span class="d" style="left:85.25%;top:93.50%">The Bathhouse Quarter</span><span class="d" style="left:13.25%;top:93.50%">The Weavers' Quarter</span><span class="d" style="left:49.25%;top:68.00%">The Merchants' Quarter</span><span class="d" style="left:18.00%;top:37.50%">The Garden District</span><span class="d" style="left:55.00%;top:9.50%">The Noble Quarter</span><span class="d" style="left:80.75%;top:40.00%">The Craftsmen's Quarter</span><span class="d" style="left:86.50%;top:64.25%">The Beggars' Quarter</span><span class="p" style="left:50.00%;top:48.00%">Palace of Khemetra</span><span class="p" style="left:50.00%;top:57.25%">Court of the Golden Sun</span><span class="p" style="left:28.00%;top:75.00%">Spice Market</span><span class="p" style="left:72.00%;top:75.00%">Cloth Market</span><span class="p" style="left:50.00%;top:80.00%">Grand Bazaar</span><span class="p" style="left:27.00%;top:27.50%">Potters Market</span><span class="p" style="left:73.00%;top:27.50%">Fruit Market</span><span class="p" style="left:25.00%;top:50.00%">Fountain Garden</span><span class="p" style="left:75.00%;top:50.00%">Palm Garden</span><span class="p" style="left:50.00%;top:25.00%">Moon Garden</span><span class="p" style="left:82.50%;top:15.00%">Temple Court</span><span class="p" style="left:82.50%;top:85.00%">Court of Baths</span><span class="p" style="left:15.00%;top:82.50%">Weavers Square</span><span class="p" style="left:15.00%;top:15.00%">Old Square</span><span class="p" style="left:50.00%;top:97.25%">South Gate</span><span class="p" style="left:96.25%;top:50.00%">Sea Gate</span></div>
+<p class="center small"><i>The city as the in-game map draws it. The gold dots on the in-game map mark every shop door; on your own map the names fill in as you zoom in.</i></p>
+<h2 id="ch06-districts">The quarters of the city</h2>
+<table class="t">
+<tr><th>Quarter</th><th>What it is like</th><th>Look for</th></tr>
+<tr><td>The Noble Quarter</td><td>North of the palace.</td><td>Nefer's Philtres, Silk and Linen, the Sun Forge, the Moon Garden</td></tr>
+<tr><td>The Temple District</td><td>North-east.</td><td>The Great Mosque, the Temples of the Sun and of Bastet, the House of the Guiding Star, the House of Seven Scrolls, the Sleeping Sphinx</td></tr>
+<tr><td>The Craftsmen's Quarter</td><td>East of the palace.</td><td>Menkaure's Shipwrights, the Golden Crust Bakery, the Palm Garden</td></tr>
+<tr><td>The Beggars' Quarter</td><td>On the east side. The houses lean together and eyes watch from the shadows. <b>Thieves and brigands lurk here.</b></td><td>Trouble</td></tr>
+<tr><td>The Bathhouse Quarter</td><td>South-east.</td><td>The Court Baths, the Blue Hammam, the Bath Cellar, the Gilded Camel, the Court of Baths</td></tr>
+<tr><td>The Merchants' Quarter</td><td>South of the palace, round the Grand Bazaar.</td><td>The Wizard's Emporium, the Gilded Blade, the Iron Aegis, the Alchemist's Cellar, Kal's Menagerie, the Silver Quill</td></tr>
+<tr><td>The Weavers' Quarter</td><td>South-west.</td><td>The Green Flask, Dates and Dreams, the Guard's Armoury, the Wanderer's Pack</td></tr>
+<tr><td>The Garden District</td><td>West.</td><td>The Spice Garden, the church, the Fountain Garden</td></tr>
+<tr><td>The Pilgrims' Way</td><td>A narrow strip in the north-west.</td><td>The House of Eternal Life, the Potters Market</td></tr>
+<tr><td>The Old Quarter</td><td>North-west. <b>Half the houses have fallen in.</b> Dogs and the restless dead keep it now.</td><td>The Old Granary, ruined and boarded houses, the Hollow Hand, the Moon and Mint</td></tr>
+</table>
+
+<h2 id="ch06-palace">The Palace of Khemetra</h2>
+<div class="float-r"><figure class="art"><img src="../assets/kh/palace_0.webp"><figcaption>The palace, as painted for the game.</figcaption></figure></div>
+<p>Four hundred thousand souls and one door that matters. The palace stands in the middle of the city behind its court of white marble and gold leaf, and the guards at the gate do not blink. Walk up the avenue and into the front, and you come to the great hall: statues of kings (some of them real), braziers, guards, a page, a herald, and four nobles waiting about for something to happen. They are Lady Meret, Lord Sobek, Lady Tiye and Lord Anen, and all four will talk.</p>
+<p>Three rooms open off the hall by their own doorways:</p>
+<ul class="tick">
+<li><b>The throne room.</b> The throne is empty at first. The guards will tell you the king is away at his summer court, and that the vizier answers for him.</li>
+<li><b>The map room, to the west.</b> The royal cartographer, <b>Neferet</b>, keeps every map of every desert here. She sends travellers to find the seven pieces of the Instrument of Dawn, one for each of seven little dungeons.</li>
+<li><b>The vizier's study, to the east.</b> <b>Hotep-Ra, the grand vizier</b>, will not give a stranger the wizard's hiding place, but he has a task for those who serve the city: the royal seal was stolen by a gang that hides in the ruined houses of the Old Quarter.</li>
+</ul>
+
+<div class="pair"><figure class="shot"><img src="img/shots/ch06_b_i_hall.png"><figcaption>The great hall of the palace.</figcaption></figure><figure class="shot"><img src="img/shots/ch06_b_i_throne.png"><figcaption>The throne room.</figcaption></figure></div>
+<figure class="shot"><img src="img/shots/ch06_b_i_maproom.png"><figcaption>The map room: tables, rolled maps and Neferet.</figcaption></figure>
+<h2 id="ch06-below">Under the City, and Out to Sea</h2>
+<div class="cols">
+<p><b>The Cisterns beneath Khemetra</b> (level 43) are a maze of narrow stone passages under the Potters Market, with six chambers cut into the walls. Skeletons, ghosts, scorpions, bats and a single mummy keep them: thirteen creatures in all, more than enough in the dark. Chests and potions lie in the chambers, and at the far corner of the maze a way leads up to a study.</p>
+<p><b>Ishkander's Study</b> (level 44) is a small room of bookcases, candles and cushions. The wizard Ishkander has lived here for ten years, and visitors are rare. The grand vizier will tell you how to find the hatch once you have earned it.</p>
+<p><b>The Tunnel to the Narrow Sea</b> (level 45) is a short, bright cave that ends at the shore. It is reached from the east of the Violet Erg. A second tunnel, behind the Sea Gate in the east wall of Khemetra, leads to Yarrim, below.</p>
+</div>
+<div class="pair"><figure class="shot"><img src="img/shots/ch06_b_i_cistern.png"><figcaption>A passage in the cisterns.</figcaption></figure><figure class="shot"><img src="img/shots/ch06_b_i_ishk.png"><figcaption>Ishkander's study, at the end of the maze.</figcaption></figure></div>
+<h2 id="ch06-shops">Shops of the Golden City</h2>
+<p>Almost every shop in Khemetra is a door in a street front, with a keeper behind a counter. Gold dots on the city map mark them. Here are the ones worth a walk.</p>
+<table class="t"><tr><th>Shop</th><th>Keeper</th><th>Sells</th><th>Quarter</th></tr><tr><td>The Wizard's Emporium</td><td>Zahir, the court wizard</td><td>Spells</td><td>Merchants' Quarter</td></tr><tr><td>The Gilded Blade</td><td>Hakim, the swordsmith</td><td>Swords. "I sell nothing magic, and I need nothing magic."</td><td>Merchants' Quarter</td></tr><tr><td>The Iron Aegis</td><td>Nadira, the armourer</td><td>Helms, plate and shields, fitted by strength and standing</td><td>Merchants' Quarter</td></tr><tr><td>The Alchemist's Cellar</td><td>Ptah-Em, the alchemist</td><td>Draughts to heal and restore, brews of might and speed, cures</td><td>Merchants' Quarter</td></tr><tr><td>Kal's Menagerie</td><td>Kal, the animal trader</td><td>Pets: goats, llamas, frogs, ducks, cats, dogs, parrots, snakes, songbirds. Up to three follow you</td><td>Merchants' Quarter</td></tr><tr><td>The Sun Forge</td><td>Khaset, the smith</td><td>Daggers, swords, maces, axes, bows, staves</td><td>Noble Quarter</td></tr><tr><td>The Guard's Armoury</td><td>Sergeant Ahmose</td><td>Caps, helms, shields, jerkins, leggings, bracers</td><td>Weavers' Quarter</td></tr><tr><td>Nefer's Philtres</td><td>Nefer, the potion seller</td><td>Potions, antidotes, salves, holy water, sleeping tea</td><td>Noble Quarter</td></tr><tr><td>The Green Flask</td><td>Tamit</td><td>Potions, antidotes, salves, holy water, sleeping tea</td><td>Weavers' Quarter</td></tr><tr><td>Old Senet's Remedies</td><td>Old Senet, the healer</td><td>Potions, antidotes, salves, holy water, sleeping tea</td><td>Bathhouse Quarter</td></tr><tr><td>The Silver Quill</td><td>Iry</td><td>Scrolls of fire, frost and light; rings</td><td>Merchants' Quarter</td></tr><tr><td>House of Seven Scrolls</td><td>Wenis</td><td>Scrolls and rings</td><td>Temple District</td></tr><tr><td>The Golden Crust Bakery</td><td>Merit, the baker</td><td>Bread, cheese, dates, nuts, ale, pies, roast, honeycomb and more</td><td>Craftsmen's Quarter</td></tr><tr><td>Dates and Dreams</td><td>Hapu, the date seller</td><td>Bread, cheese, dates, nuts, ale, pies, roast, honeycomb and more</td><td>Weavers' Quarter</td></tr><tr><td>The Spice Garden</td><td>Perneb, the spice merchant</td><td>Bread, cheese, dates, nuts, ale, pies, roast, honeycomb and more</td><td>Garden District</td></tr><tr><td>Hapi's Pantry</td><td>Hapi</td><td>Bread, cheese, dates, nuts, ale, pies, roast, honeycomb and more</td><td>Old Quarter</td></tr><tr><td>Silk and Linen</td><td>Qadir, the cloth trader</td><td>Torches, lanterns, food, water, herbs, ore</td><td>Noble Quarter</td></tr><tr><td>The Wanderer's Pack</td><td>Zahra</td><td>Torches, lanterns, food, water</td><td>Weavers' Quarter</td></tr></table>
+<div class="pair"><figure class="shot"><img src="img/shots/ch06_b_bazaar.png"><figcaption>The Grand Bazaar, with the palace in the distance.</figcaption></figure><figure class="shot"><img src="img/shots/ch06_b_cloth.png"><figcaption>The Cloth Market. Stalls, shoppers and the odd rabbit.</figcaption></figure></div>
+<div class="pair"><figure class="shot"><img src="img/shots/ch06_b_f_wizard.png"><figcaption>The Wizard's Emporium, on the Grand Bazaar.</figcaption></figure><figure class="shot"><img src="img/shots/ch06_b_f_blade.png"><figcaption>The Gilded Blade: the sign hangs over the door.</figcaption></figure></div>
+<p>Zahir sells spells, every one of them real, and no one has ever been turned into a frog by accident (he says). Close by the swordsmith will sell you steel for every level of customer, from the first blade to the last. Nadira and her Iron Aegis fit helms and plate by strength and standing, so a heavy piece may need a stronger arm than you have yet.</p>
+<p>Prices are fair and the keepers are friendly, but gold does not last. A few of the favours below pay better than the shops charge.</p>
+<h2 id="ch06-rest">Inns, Prayer Houses, Temples and Baths</h2>
+<div class="cols">
+<p>A tired party has a good many places to rest in Khemetra, and all are for sale. <b>Inns</b> rent a bed (the whole party rests). <b>Prayer houses</b> and <b>temples</b> heal the party for a small offering. <b>Baths</b> rest and refresh it for ten gold.</p>
+</div>
+<table class="t">
+<tr><th>Place</th><th>Keeper</th><th class="n">Gold</th><th>What you get</th></tr>
+<tr><td>The Gilded Camel</td><td>Hasan, innkeeper</td><td class="n">25</td><td>A bed, hot baths, a cook who can make a lamb disappear</td></tr>
+<tr><td>The Sleeping Sphinx</td><td>Dalila, innkeeper</td><td class="n">20</td><td>A bed. They never close</td></tr>
+<tr><td>The Moon and Mint</td><td>Rashid, innkeeper</td><td class="n">30</td><td>A bed, and the tea is free</td></tr>
+<tr><td>House of the Rising Sun</td><td>Priestess Nebet</td><td class="n">15</td><td>The party is healed</td></tr>
+<tr><td>House of the Guiding Star</td><td>Brother Omari</td><td class="n">15</td><td>The party is healed</td></tr>
+<tr><td>House of Eternal Life</td><td>Priestess Hana</td><td class="n">15</td><td>The party is healed</td></tr>
+<tr><td>House of the New Moon</td><td>Brother Pasha</td><td class="n">15</td><td>The party is healed</td></tr>
+<tr><td>Temple of the Sun</td><td>Acolyte Tuya</td><td class="n">20</td><td>The party is healed</td></tr>
+<tr><td>Temple of Bastet</td><td>High Priest Omari</td><td class="n">20</td><td>The party is healed. The cats are holy</td></tr>
+<tr><td>The Great Mosque</td><td>Imam Qadir</td><td class="n">20</td><td>The party is healed. Open to every traveller</td></tr>
+<tr><td>The Church of Light</td><td>Father Idris</td><td class="n">20</td><td>The party is healed. The bell rings for every traveller who comes home</td></tr>
+<tr><td>The Court Baths</td><td>Isis, attendant</td><td class="n">10</td><td>Rest and refresh. Weapons are left at the door</td></tr>
+<tr><td>The Blue Hammam</td><td>Dedi, keeper</td><td class="n">10</td><td>Rest and refresh. The oldest bath in the city</td></tr>
+</table>
+<div class="pair"><figure class="art"><img src="../assets/kh/mosque1_0.webp"><figcaption>The Great Mosque of Khemetra.</figcaption></figure><figure class="art"><img src="../assets/kh/church_0.webp"><figcaption>The Church of Light.</figcaption></figure></div>
+<div class="pair"><figure class="shot"><img src="img/shots/ch06_b_f_temple1.png"><figcaption>The Temple of the Sun, in the Temple District.</figcaption></figure><figure class="shot"><img src="img/shots/ch06_b_f_temple2.png"><figcaption>The Temple of Bastet: the cat goddess watches the door.</figcaption></figure></div>
+<h2 id="ch06-work">Work, Contracts and Favours</h2>
+<div class="cols">
+<p>Khemetra has more quests than any other place. Sixty-three of them in the game's log are filed under the city, and the best way to meet them is simply to walk the streets and talk to people.</p>
+<p>The three <b>work houses</b> (the Labourers' Hall, the Day Hire House and the Porters' Guild) hand out errands: fetch eight jars of water for the labourers (40 gold), six loaves for the dawn crew (36), three lanterns for the Porters (150). The goods are for sale in the markets. The <b>Contract House</b> and the <b>Bounty Board</b> sell contracts for a small fee: ten skeletons (260 gold), ten scorpions or cobras (300) or eight mummies (380). Kill them anywhere in the deserts.</p>
+</div>
+<table class="t">
+<tr><th>Quest</th><th>Who asks</th></tr>
+<tr><td>A Feast for the Bride</td><td>Mother Sabah</td></tr>
+<tr><td>Lanterns for the Moon Festival</td><td>Hapi the Festival Master</td></tr>
+<tr><td>The Lost Cats</td><td>Old Dalila</td></tr>
+<tr><td>The Missing Ledger</td><td>Tax Official Usi</td></tr>
+<tr><td>A Drum for Yara</td><td>Yara the musician</td></tr>
+<tr><td>The Singing Well</td><td>Hapuseneb, the well keeper</td></tr>
+<tr><td>The Cat Who Would Be King</td><td>Sacristan Nefertari</td></tr>
+<tr><td>The Goat Who Ate the Tax Roll</td><td>Clerk Senu</td></tr>
+<tr><td>A Hundred Dates for a Camel</td><td>Qadir, the camel master</td></tr>
+<tr><td>The Puppet Show</td><td>Zaza, the puppeteer</td></tr>
+<tr><td>The Tax on Sneezes</td><td>Tax Collector Ptah</td></tr>
+<tr><td>Nuts for the Moon Squirrels</td><td>Zeb, the merchant</td></tr>
+</table>
+<h2 id="ch06-houses">Houses, Ruins and Dangerous Corners</h2>
+<div class="cols">
+<p>You can walk up to almost any house in Khemetra and open its door. Sixteen ordinary ones have a painted picture of their room: a warm house with a fire and a pot of stew, a wizard's house with skulls and star charts, a magical house with glowing hieroglyphs, a cat lover's house with a small shrine to Bastet. Others hold a person with something to ask: a quiet house, a merchant's, a scholar's, a musician's. Some hold something worse.</p>
+<p>The ruined parts of the city are marked by their names. In the Old Quarter, the <b>Ruined House</b> and the <b>Collapsed House</b> hold three skeletons each, and the <b>Abandoned House</b> holds two skeletons and two bats. The <b>Old Granary</b> is full of rats (eight, and two bats), and its keeper Gebu would like them gone. The <b>Boarded House</b> hides three bandits and an archer. They call themselves the Hollow Hand. The <b>Bath Cellar</b> holds four ghosts.</p>
+</div>
+<div class="pair"><figure class="art"><img src="../assets/sc_wizard.jpg"><figcaption>"A wizard's house. There are skulls and star charts on every shelf, and a flask is boiling by itself."</figcaption></figure><figure class="art"><img src="../assets/sc_bath_hammam.jpg"><figcaption>"The walls are blue and white tile, and the dome has small holes that let in the light."</figcaption></figure></div>
+<div class="pair"><figure class="shot"><img src="img/shots/ch06_b_templecourt.png"><figcaption>The Temple Court, white marble under a heavy sky.</figcaption></figure><figure class="shot"><img src="img/shots/ch06_b_palm.png"><figcaption>The Palm Garden: lawns, benches and passers-by.</figcaption></figure></div>
+<div class="box"><h3>Rules of the city</h3>
+<ul class="tick">
+<li>The Beggars' Quarter and the Old Quarter are the only parts of the city that will hurt you. Go in prepared.</li>
+<li>The inns, prayer houses and baths are cheap. Use them before a hard room, not after.</li>
+<li>Almost any market sells water. Buy a lot before the deserts.</li>
+<li>Talk to everyone twice. The first time you get the gossip, and the second, sometimes, the favour.</li>
+</ul></div>
+<h2 id="ch06-yarrim">Yarrim, on the Narrow Sea</h2>
+<div class="cols">
+<p>Once the Sea Gate in the east wall of Khemetra has been unsealed, a tunnel runs out through the rock to the shore, and at the end of it lies Yarrim: a fishing town of about twenty tiny cottages, each its own colour, round one-cell cobbled lanes, a harbour square at the root of a long pier, and a lighthouse. Gulls are everywhere. The sea is real ground, with a beach that slopes into it, islands of rock and sand, and boats moored in the water. At anchor off the beach rides the <i>Dawn Walker</i>.</p>
+<p>Yarrim is level 48, and a peaceful place: the tunnel is full of the drowned dead (ten skeletons, Menkaure would like them cleared) and the Net Loft has rats (eight). Everything else is a conversation.</p>
+</div>
+<figure class="shot full"><img src="img/shots/ch06_c_yar3.png"><figcaption>The pier at Yarrim. The Dawn Walker is at anchor beyond it.</figcaption></figure>
+<div class="pair"><figure class="shot"><img src="img/shots/ch06_c_yar1.png"><figcaption>The road into Yarrim, between the cottages.</figcaption></figure><figure class="shot"><img src="img/shots/ch06_c_yarlight.png"><figcaption>Inside the Yarrim Light.</figcaption></figure></div>
+<table class="t">
+<tr><th>Place</th><th>Keeper</th><th>What they offer</th></tr>
+<tr><td>The Drowned Lantern</td><td>Bessa, innkeeper</td><td>A bed for 20 gold. A shanty drifts out of the door</td></tr>
+<tr><td>The Harbourmaster's Office</td><td>Tamsin Kell</td><td>Errands: the crab census, washed-up crates, rats in the Net Loft</td></tr>
+<tr><td>Selk's Ship Dealing</td><td>Selk, the ship dealer</td><td>Ships. See <a href="#ch07">Chapter 7</a></td></tr>
+<tr><td>Wen's Trading Post</td><td>Wen, the trader</td><td>Torches, lanterns, potions, antidotes, salves, bread, water, dates, herring, ale, dagger, bow, cap, jerkin</td></tr>
+<tr><td>Brine and Rope</td><td>Pell, the ship's chandler</td><td>Rope, tar, lamps, oil, torches, a good sharp knife</td></tr>
+<tr><td>Corran's Fish Stall</td><td>Corran, the fishmonger</td><td>Herring, fresh when the boats come in</td></tr>
+<tr><td>The Chapel of the Tides</td><td>Brother Haldane</td><td>A chapel you can enter</td></tr>
+<tr><td>Old Maren's House</td><td>Old Maren</td><td>A cottage you can enter</td></tr>
+<tr><td>The Yarrim Light</td><td>Orsa, keeper</td><td>A dark lamp, and a favour</td></tr>
+</table>
+<div class="cols"><p>The people of Yarrim have small and curious troubles, and nine of them are worth a morning each: <b>The Admiral's Telescope</b> (Pell), <b>The Great Crab Census</b> (Tamsin Kell), <b>A Message in a Bottle</b> (Wink, a child), <b>Wen's Left Boot</b>, <b>The Wedding of the Boats</b> (Selk), <b>Biscuit Won't Budge</b> (Hamid and his donkey), <b>The Net Thief of the Night Tide</b> (Nell), <b>The Drowned Lantern</b> (Bessa) and <b>The Shanty With No Last Verse</b> (Rafe, the fiddler).</p>
+<p>The larger story continues from the vizier and Menkaure the shipwright, and the road beyond Yarrim goes to sea: turn to <a href="#ch07">Chapter 7</a>.</p></div>
+<div class="pair"><figure class="art tall"><img src="../assets/yar_ship_dawn.png"><figcaption>The Dawn Walker.</figcaption></figure><figure class="art tall"><img src="../assets/yar_p_diver.png"><figcaption>Tam Salvor, in his diving suit.</figcaption></figure></div>
+<p class="hint"><b>Hint:</b> The nine small quests in Yarrim pay in gold and experience and do not need a hard fight. They are a pleasant place to rest a party that has just walked the whole length of the desert.</p>
+</section>

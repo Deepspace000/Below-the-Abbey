@@ -1,0 +1,282 @@
+<section class="chapter" id="ch02">
+<h1><span class="no">Chapter 2</span>Your Party and Combat</h1>
+<div class="deck">Four heroes go down into the dark. This is how they fight, how they fall, and how they get up again.</div>
+<h2 id="ch02-party">Your Party</h2>
+<div class="cols dropcap">
+<p>You never play a lone adventurer in Below the Abbey. You steer a party of four, and the party lives or dies together. Their faces stand in a row along the bottom of the screen. Under each face are four thin bars: <b>health</b> in red, <b>stamina or mana</b> in blue, <b>experience</b> in yellow and <b>hunger</b> in brown. The small badge in the corner of a face is the hero's level, and the health bar carries the numbers, such as 34/34.</p>
+<p>The first two portraits are your <b>front line</b> and the last two are your <b>back line</b>. When an enemy chooses whom to strike, a hero in the front line is three times as likely to be picked as one in the back. Keep your frail spell casters and healers at the back, as the ready-made party does.</p>
+<p>Tap a portrait to choose which hero acts (in the pack screen you may also press <span class="kbd">1</span> to <span class="kbd">4</span>). A darkened face means the hero has already acted this round. A face crossed with a red cross means the hero has fallen.</p>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.1in;margin:.6em 0">
+<figure class="art" style="margin:0"><img src="../assets/pt/0.png" alt=""><figcaption><b>Aldric</b><br>Warrior</figcaption></figure>
+<figure class="art" style="margin:0"><img src="../assets/pt/1.png" alt=""><figcaption><b>Vesna</b><br>Thief</figcaption></figure>
+<figure class="art" style="margin:0"><img src="../assets/pt/2.png" alt=""><figcaption><b>Orrin</b><br>Mage</figcaption></figure>
+<figure class="art" style="margin:0"><img src="../assets/pt/3.png" alt=""><figcaption><b>Thessaly</b><br>Priest</figcaption></figure>
+</div>
+<p class="center small"><i>The ready-made party: a warrior, a thief, a mage and a priest, ready to go.</i></p>
+<div class="cols">
+<h3 id="ch02-make">Making your own</h3>
+<p>On a new game you choose <b>Ready-made</b> (the four above), <b>Random party</b> (look, then start) or <b>Make my own</b>. Making your own means, for each hero, choosing a face from seventy portraits, a name, one of twelve occupations, and then spreading <b>3 free stat points</b> over Strength, Dexterity and Intelligence. The same screen asks how the world should level: see <a href="#ch02-scaling">Party Level and the World</a>.</p>
+</div>
+<h2 id="ch02-classes">The Twelve Occupations</h2>
+<p>Every hero has one occupation. It sets their starting health, whether they run on <b>stamina</b> or <b>mana</b>, their three stats, their basic chance to hit, and what they gain at each level. These are the real level 1 numbers, before any gear.</p>
+<table class="t"><tr><th>Class</th><th>Health</th><th>Pool</th><th>STR</th><th>DEX</th><th>INT</th><th>Hit</th><th>Each level</th></tr>
+<tr><td><b>Warrior</b></td><td>34</td><td>10 Stamina</td><td>14</td><td>8</td><td>4</td><td>85%</td><td class="small">+6 health, +1 stamina, +1 STR, and +1 DEX every second level</td></tr>
+<tr><td><b>Barbarian</b></td><td>40</td><td>8 Stamina</td><td>16</td><td>7</td><td>3</td><td>80%</td><td class="small">+7 health, +1 stamina, +1 STR, and +1 DEX every second level</td></tr>
+<tr><td><b>Paladin</b></td><td>32</td><td>10 Mana</td><td>13</td><td>7</td><td>8</td><td>85%</td><td class="small">+5 health, +1 mana, +1 STR, and +1 INT every second level</td></tr>
+<tr><td><b>Ranger</b></td><td>26</td><td>10 Stamina</td><td>10</td><td>13</td><td>7</td><td>88%</td><td class="small">+4 health, +1 stamina, +1 DEX, and +1 STR every second level</td></tr>
+<tr><td><b>Archer</b></td><td>22</td><td>12 Stamina</td><td>8</td><td>15</td><td>6</td><td>90%</td><td class="small">+3 health, +1 stamina, +1 DEX, and +1 STR every second level</td></tr>
+<tr><td><b>Thief</b></td><td>24</td><td>12 Stamina</td><td>8</td><td>14</td><td>6</td><td>92%</td><td class="small">+4 health, +1 stamina, +1 DEX, and +1 STR every second level</td></tr>
+<tr><td><b>Assassin</b></td><td>22</td><td>12 Stamina</td><td>9</td><td>14</td><td>7</td><td>90%</td><td class="small">+3 health, +1 stamina, +1 DEX, and +1 INT every second level</td></tr>
+<tr><td><b>Mage</b></td><td>16</td><td>14 Mana</td><td>4</td><td>8</td><td>14</td><td>80%</td><td class="small">+3 health, +2 mana, +1 INT, and +1 DEX every second level</td></tr>
+<tr><td><b>Sorcerer</b></td><td>18</td><td>16 Mana</td><td>5</td><td>7</td><td>15</td><td>78%</td><td class="small">+3 health, +2 mana, +1 INT, and +1 DEX every second level</td></tr>
+<tr><td><b>Priest</b></td><td>26</td><td>12 Mana</td><td>10</td><td>8</td><td>10</td><td>85%</td><td class="small">+5 health, +2 mana, +1 INT, and +1 STR every second level</td></tr>
+<tr><td><b>Monk</b></td><td>28</td><td>10 Stamina</td><td>11</td><td>12</td><td>8</td><td>90%</td><td class="small">+5 health, +1 stamina, +1 DEX, and +1 STR every second level</td></tr>
+<tr><td><b>Goat</b></td><td>30</td><td>8 Stamina</td><td>12</td><td>10</td><td>5</td><td>82%</td><td class="small">+6 health, +1 stamina, +1 STR, and +1 DEX every second level</td></tr>
+</table>
+<p class="small"><i>Stamina and mana work the same way: both pay for powers and both come back at the same rate. The names only tell you what kind of effort the power costs. Warriors, Barbarians, Rangers, Archers, Thieves, Assassins, Monks and the Goat use stamina. Paladins, Mages, Sorcerers and Priests use mana.</i></p>
+<h2 id="ch02-stats">Strength, Dexterity, Intelligence</h2>
+<div class="cols">
+<p>Each hero has three stats. Every one of them has a plain job in the rules.</p>
+<h4>STRENGTH</h4><p>Adds <b>1 to weapon damage for every 4 points above 8</b>. Heavy weapons and armour demand it: the Rusty Sword and the Iron Helm want STR 8, the Hand Axe wants 10. The party's <b>combined Strength</b> also sets how much you can carry: <b>20 kg plus 1.6 kg for every point</b> of combined Strength, and 36 pack slots plus half a slot per point. Go over the limit and the party is overloaded: it walks at half speed and every hero loses 10 points of hit chance.</p>
+<h4>DEXTERITY</h4><p>Adds <b>0.6% to hit chance for every point above 8</b> (and takes it away below 8). Bows ask for it (the Short Bow wants DEX 8). It is the first stat of the Ranger, Archer, Thief, Assassin and Monk.</p>
+<h4>INTELLIGENCE</h4><p>Adds <b>1 spell damage for every 3 points above 10</b>, and adds 1 to every heal for each 3 points above 8. A staff wants INT 6.</p>
+<h4>HEALTH</h4><p>When it reaches nothing, the hero falls. Rings and armour can add to it, and so can some powers.</p>
+<h4>ARMOUR</h4><p>Armour does not soak up damage. Instead every point of armour takes <b>3%</b> off an enemy's chance to hit that hero.</p>
+</div>
+<h2 id="ch02-levels">Levels and Experience</h2>
+<div class="cols dropcap">
+<p>Heroes earn experience (XP) from every creature the party kills. Each living hero receives the <b>full</b> amount: it is not divided among the four. A hero who has fallen earns nothing, so keep everyone on their feet.</p>
+<p>A creature is worth its base XP times its own level, but one far below the party is worth less: <b>6% less for every level</b> the party average stands above it, never dropping below 30% of the full reward. The fat rewards are in the creatures that stand at or above your level.</p>
+<p>The XP needed for the next level is <b>15 x L x (L + 1)</b>, where L is the hero's current level. The bar restarts at zero each level.</p>
+<p>When a hero levels up, a gold banner lists exactly what rose. They gain the health and stamina or mana shown in the table above, <b>+1 to their first stat</b> every level and <b>+1 to their second</b> every second level. They are healed by one and a half times their health gain, and their mana or stamina is refilled. Any new power is announced on the banner too.</p>
+</div>
+<table class="t" style="width:70%;margin-left:auto;margin-right:auto"><tr><th>To reach level</th><th>XP needed</th><th>To reach level</th><th>XP needed</th></tr><tr><td>2</td><td>30</td><td>7</td><td>840</td></tr><tr><td>3</td><td>90</td><td>8</td><td>1080</td></tr><tr><td>4</td><td>180</td><td>9</td><td>1350</td></tr><tr><td>5</td><td>300</td><td>10</td><td>1650</td></tr><tr><td>6</td><td>450</td><td>11</td><td>1980</td></tr></table>
+<p class="center small"><i>Each figure is the XP for that one level, counted from the last.</i></p>
+<figure class="shot" style="width:80%;margin-left:auto;margin-right:auto"><img src="img/shots/ch02_levelup_v.png" alt=""><figcaption>Two heroes have just earned a level. The banner shows each stat that rose and by how much, and the message line repeats the news.</figcaption></figure>
+<h2 id="ch02-sheet">The Character Sheet</h2>
+<p>Open the pack screen with <span class="kbd">I</span> and tap the face tab, or press <span class="kbd">C</span>. The sheet lists the chosen hero's level, experience (with the XP still to go), health, stamina or mana, the three stats, armour, damage range, hit chance and the party's gold. The paper doll to the left shows what the hero wears and wields. The four tabs along the bottom are <b>Items</b> <span class="kbd">I</span>, <b>Character</b> <span class="kbd">C</span>, <b>Spells</b> <span class="kbd">B</span> and <b>Powers</b> <span class="kbd">K</span>. Tap another face to read another hero.</p>
+<figure class="shot" style="width:80%;margin-left:auto;margin-right:auto"><img src="img/shots/ch02_charsheet.png" alt=""><figcaption>Aldric's sheet just after his first level. Stamina 10 to 11, Strength 14 to 15 and Dexterity 8 to 9 are shown in gold because they rose.</figcaption></figure>
+<h2 id="ch02-powers">Powers and Abilities</h2>
+<div class="cols">
+<p>Every occupation owns nine powers, and each one is waiting on a level. They come at levels <b>1, 10, 20, 30, 40, 50, 60, 70 and 80</b>. The first is the hero's <b>special</b> and is there from the start. Some of the others are <b>passive</b>: always on, nothing to press. The rest are <b>active</b>: they cost stamina or mana and are used on demand. The last, at level 80, is a passive capstone.</p>
+<p>Press <span class="kbd">K</span> in the pack screen for the <b>Powers</b> page. The left-hand list shows the whole party and what each hero has set. The middle list shows every power of the chosen hero, locked ones greyed with the level they open at. Tap one to read it. For an active power you may choose <b>Set as special</b>, which puts it on the special button beside Attack, or <b>Use now</b>.</p>
+<p>The <b>special button</b> shows the power's name and cost. A hero without enough stamina or mana cannot use it. Every hero regains <b>1 point of stamina or mana at the end of each round</b>, and a full rest refills the pool.</p>
+</div>
+<figure class="shot" style="width:80%;margin-left:auto;margin-right:auto"><img src="img/shots/ch02_powers_warrior.png" alt=""><figcaption>The Powers page. Aldric is level 30, so Power Strike, Iron Skin, Cleave and Battle Cry are open. Cleave is selected: two swings that never miss, 5 stamina.</figcaption></figure>
+<figure class="shot" style="width:70%;margin-left:auto;margin-right:auto"><img src="img/shots/ch02_spells.png" alt=""><figcaption>The Spells page of the mage: Firebolt, Frost Shard and Light.</figcaption></figure>
+<h3 id="ch02-mage">Scrolls: the Mage and Sorcerer</h3>
+<div class="cols">
+<p>The Mage and the Sorcerer do not have a fixed first power. Their special is <b>Spell</b>: it casts whichever spell scroll is active in the Spells tab (<span class="kbd">B</span>). The Sorcerer adds +2 to the damage. Spell scrolls go into the four spell slots, and only these two occupations can use them. The Mage begins with the Firebolt scroll.</p>
+<dl class="def"><dt>Firebolt</dt><dd data-k="4 mana, range 3">6 to 10 damage, plus 1 for every 3 points of INT above 10, plus the magic of a staff, plus +2 for a Sorcerer.</dd><dt>Frost Shard</dt><dd data-k="3 mana, range 3">4 to 7 damage (same bonuses) and the target is frozen stiff for its next turn.</dd><dt>Light</dt><dd data-k="2 mana">Conjures a glowing orb: the party sees much further for 40 rounds.</dd></dl>
+<p>A staff such as the Gnarled Staff adds 2 to the power of spells. The Mage, like everyone, also swings a weapon with the Attack button when mana runs dry.</p>
+</div>
+<h2 id="ch02-lists">The Powers of Each Occupation</h2>
+<p>These lists are taken straight from the game. In each, the label at the left gives the level the power opens at and what it costs. &ldquo;Critical hit&rdquo; means a blow that lands for 1.5 times damage (see <a href="#ch02-combat">How Combat Works</a>). Where a power says &ldquo;weapon damage&rdquo;, it means the hero's normal damage roll with the weapon in hand.</p>
+<h3>Warrior</h3>
+<dl class="def">
+<dt>Power Strike</dt><dd data-k="Lv 1, 4 stam.">A crushing blow: double weapon damage plus 2.</dd>
+<dt>Iron Skin</dt><dd data-k="Lv 10, passive">Armor +2.</dd>
+<dt>Cleave</dt><dd data-k="Lv 20, 5 stam.">Two heavy swings that never miss, each at 1.2 times weapon damage.</dd>
+<dt>Battle Cry</dt><dd data-k="Lv 30, 6 stam.">The whole party deals 25% more damage for 8 rounds.</dd>
+<dt>Veteran</dt><dd data-k="Lv 40, passive">Max health +15 and +5% to hit.</dd>
+<dt>Shield Wall</dt><dd data-k="Lv 50, 6 stam.">The whole party gains +4 armor for 8 rounds.</dd>
+<dt>Executioner</dt><dd data-k="Lv 60, passive">+10% chance of a critical hit.</dd>
+<dt>Titan&#x27;s Fury</dt><dd data-k="Lv 70, 10 stam.">Four times weapon damage plus 4.</dd>
+<dt>Warlord</dt><dd data-k="Lv 80, passive">Max health +30, all damage +10%.</dd>
+</dl>
+<h3>Thief</h3>
+<dl class="def">
+<dt>Twin Stab</dt><dd data-k="Lv 1, 3 stam.">Two attacks that never miss: double weapon damage in total.</dd>
+<dt>Nimble</dt><dd data-k="Lv 10, passive">Enemies miss 8% more often.</dd>
+<dt>Smoke Bomb</dt><dd data-k="Lv 20, 4 stam.">Every enemy within 3 tiles is stunned for a turn.</dd>
+<dt>Lucky</dt><dd data-k="Lv 30, passive">Enemies drop 30% more gold.</dd>
+<dt>Flurry</dt><dd data-k="Lv 40, 5 stam.">Three attacks that never miss, each at full weapon damage.</dd>
+<dt>Shadow Step</dt><dd data-k="Lv 50, passive">+10% chance of a critical hit and enemies miss 5% more often.</dd>
+<dt>Death Mark</dt><dd data-k="Lv 60, 6 stam.">Three and a half times weapon damage.</dd>
+<dt>Master Thief</dt><dd data-k="Lv 70, passive">All damage +20% and 50% more gold.</dd>
+<dt>Ghost</dt><dd data-k="Lv 80, passive">Enemies miss 10% more often and +10% chance of a critical hit.</dd>
+</dl>
+<h3>Mage</h3>
+<dl class="def">
+<dt>Spell</dt><dd data-k="Lv 1, spell">Casts the active spell chosen in the spell tab.</dd>
+<dt>Arcane Mind</dt><dd data-k="Lv 10, passive">Spell damage +15%.</dd>
+<dt>Mage Armor</dt><dd data-k="Lv 20, 4 mana">The whole party gains +3 armor for 8 rounds.</dd>
+<dt>Mana Well</dt><dd data-k="Lv 30, passive">Recover 1 mana every 3 rounds.</dd>
+<dt>Fireball</dt><dd data-k="Lv 40, 8 mana">Fire hits every enemy within 3 tiles for 14-20.</dd>
+<dt>Spell Mastery</dt><dd data-k="Lv 50, passive">Spell damage +25%.</dd>
+<dt>Chain Lightning</dt><dd data-k="Lv 60, 9 mana">Lightning hits every enemy within 4 tiles for 12-18.</dd>
+<dt>Meteor</dt><dd data-k="Lv 70, 14 mana">A meteor hits every enemy within 4 tiles for 28-40.</dd>
+<dt>Archmage</dt><dd data-k="Lv 80, passive">Spell damage +30% and recover 1 mana every 3 rounds.</dd>
+</dl>
+<h3>Priest</h3>
+<dl class="def">
+<dt>Heal</dt><dd data-k="Lv 1, 4 mana">Heals the most wounded ally for 8-12, and far more as the priest grows in level.</dd>
+<dt>Faith</dt><dd data-k="Lv 10, passive">Healing is 20% stronger.</dd>
+<dt>Blessing</dt><dd data-k="Lv 20, 5 mana">The whole party deals 20% more damage for 8 rounds.</dd>
+<dt>Mend</dt><dd data-k="Lv 30, 7 mana">Heals every living ally for 6-10.</dd>
+<dt>Sanctuary</dt><dd data-k="Lv 40, passive">Armor +3 and max health +8.</dd>
+<dt>Revive</dt><dd data-k="Lv 50, 12 mana">Raises one fallen ally with 40% health.</dd>
+<dt>Greater Heal</dt><dd data-k="Lv 60, 8 mana">Heals the most wounded ally for 24-34.</dd>
+<dt>Divine Intervention</dt><dd data-k="Lv 70, 16 mana">Heals every living ally for 35% of their maximum health.</dd>
+<dt>Saint</dt><dd data-k="Lv 80, passive">Healing is 30% stronger and max health +20.</dd>
+</dl>
+<h3>The other eight occupations</h3>
+<p class="small">Powers marked (p) are passive. All the others are active, and their cost and effect are on the Powers page in the game. The special at level 1 comes first.</p>
+<table class="t"><tr><th>Class</th><th>Powers, in order of level (1, 10, 20, 30, 40, 50, 60, 70, 80)</th></tr>
+<tr><td><b>Barbarian</b></td><td class="small">Rage Blow, Thick Hide (p), Bloodlust, Berserker (p), Savage Roar, Unbreakable (p), Whirlwind, Avatar of Ruin, Primal Rage (p)</td></tr>
+<tr><td><b>Paladin</b></td><td class="small">Smite, Blessed Armor (p), Lay on Hands, Undead Bane (p), Divine Shield, Crusader (p), Holy Wrath, Judgment, Aura of Light (p)</td></tr>
+<tr><td><b>Ranger</b></td><td class="small">Aimed Shot, Keen Eyes (p), Pinning Shot, Woodcraft (p), Rapid Fire, Deadeye (p), Hunter&#x27;s Mark, Arrow Storm, Master of the Wild (p)</td></tr>
+<tr><td><b>Archer</b></td><td class="small">Volley, Steady Aim (p), Piercing Shot, Quick Draw (p), Triple Shot, Eagle Eye (p), Arrow Rain, Perfect Shot, Legendary Marksman (p)</td></tr>
+<tr><td><b>Assassin</b></td><td class="small">Backstab, Poise (p), Vanish, Cold Blood (p), Nerve Strike, Shadowblade (p), Assassinate, Death&#x27;s Embrace (p), Angel of Death (p)</td></tr>
+<tr><td><b>Sorcerer</b></td><td class="small">Spell, Innate Power (p), Siphon, Wild Magic (p), Frost Nova, Overchannel (p), Lightning Storm, Cataclysm, Living Storm (p)</td></tr>
+<tr><td><b>Monk</b></td><td class="small">Palm Strike, Inner Calm (p), Flurry of Blows, Iron Body (p), Stunning Fist, Ki Mastery (p), Dragon Kick, Perfect Harmony (p), Enlightenment (p)</td></tr>
+<tr><td><b>Goat</b></td><td class="small">Headbutt, Tough Hide (p), Stubborn (p), Charge, Surefooted (p), Scavenger (p), Rampage, Legend of the Mountain, Mountain King (p)</td></tr>
+</table>
+<h2 id="ch02-wizard">The Wizard's Spells</h2>
+<div class="cols">
+<p>Any hero, of any occupation, can learn more. Two wizards sell spells: <b>Zahir, the court wizard</b> in Khemetra, and <b>Corvin, the hedge wizard</b> in Ironhill. Each class is offered five spells fitted to its trade, at levels 10, 20, 30, 40 and 50. A hero must have reached the level before the spell can be bought.</p>
+<table class="t"><tr><th>Spell level</th><th>Price</th><th>Cost to cast</th></tr><tr><td>10</td><td>500 gold</td><td>6</td></tr><tr><td>20</td><td>1000 gold</td><td>9</td></tr><tr><td>30</td><td>1500 gold</td><td>12</td></tr><tr><td>40</td><td>2000 gold</td><td>15</td></tr><tr><td>50</td><td>2500 gold</td><td>18</td></tr></table>
+<p>A bought spell is memorised by that hero alone, and it joins the end of their Powers page. Mages, Sorcerers and Priests are also offered one extra &ldquo;grand&rdquo; spell at level 30: Arcane Lance and Chain Lightning for 2400 gold, Smiting Light for 2200, each costing 16 to cast.</p>
+<p>Wizard spells do things that ordinary powers do not: they hold, put to sleep, scare, blind, curse and confuse enemies, set them on fire, turn them into sheep and cows, or send them to the rift. Bosses and the mightiest creatures shrug off the hold, sleep, fear, confuse and polymorph effects (half the time they resist them outright).</p>
+</div>
+<table class="t"><tr><th>Class</th><th>Spells at levels 10, 20, 30, 40, 50 (and the grand spell)</th></tr>
+<tr><td><b>Warrior</b></td><td class="small">Intimidating Shout, Shield Wall, Hamstring, Battle Standard, Warlord&#x27;s Challenge</td></tr>
+<tr><td><b>Thief</b></td><td class="small">Pickpocket, Smoke Bomb, Venom Blade, Befuddle, Master Heist</td></tr>
+<tr><td><b>Mage</b></td><td class="small">Hold Person, Polymorph: Sheep, Mirror Images, Disintegrate, Time Stop, Arcane Lance</td></tr>
+<tr><td><b>Priest</b></td><td class="small">Purify, Turn Undead, Sanctuary Ward, Divine Wrath, Resurrection, Smiting Light</td></tr>
+</table>
+<p class="small">Each spell is described in the shop. Two examples: Mage Hold Person freezes the foe ahead for 5 rounds; Priest Resurrection raises every fallen hero at 70% health.</p>
+<p class="pull">There is no guard stance and no flee button. The only way out of a fight is to win it, or to walk away.</p>
+<h2 id="ch02-combat">How Combat Works</h2>
+<div class="cols dropcap">
+<p>Combat is turn based. Nothing happens until you act, and nothing moves while you think. The game works in <b>rounds</b>, and a round has two halves: first your four heroes, then the enemies.</p>
+</div>
+<h3 id="ch02-round">A round, step by step</h3>
+<ol><li><b>Choose a hero</b> and give them an action. Press <span class="kbd">Space</span> to Attack, <span class="kbd">X</span> for the special power, <span class="kbd">P</span> to drink the favourite potion, or tap the off-hand and second-weapon windows beside the special button to use what they hold.</li><li><b>Each living hero acts once.</b> When a hero has acted, their face darkens and the next hero who can still act is chosen. You may act in any order by tapping a face.</li><li>As soon as the last hero has acted, <b>every enemy takes its turn</b>, one after another.</li><li>Then the round ends: every hero recovers 1 stamina or mana, timed powers and buffs count down one round, and a new round begins.</li></ol>
+<p>Every step you take is a round too, worth one minute on the party clock, and enemies near you take their turn after it. Turning on the spot costs a minute but gives them no turn. Press <span class="kbd">Z</span> or tap <b>Wait</b> to pass the whole round without acting: every hero skips, and the enemies move. The game has no separate guard stance and no flee button. To avoid a fight, back away and shut a door, or simply walk out of the creature's sight.</p>
+<figure class="shot" style="width:80%;margin-left:auto;margin-right:auto"><img src="img/shots/ch02_hurt.png" alt=""><figcaption>A rat has bitten Aldric for 7. His face is washed red, a number floats up from it, his health reads 13/34, and the message line names the biter. On the foe's plate the verdict reads Deadly because this rat is level 8.</figcaption></figure>
+<h3 id="ch02-blows">Reading the blows</h3>
+<p>Every blow leaves a mark you can read. A <b>gold number</b> pops up over a foe that is hit. A <b>red number</b> floats up from the portrait of a hero who is hurt, and the portrait is washed red for a moment before it fades. A <b>green plus number</b> marks a heal. The Attack and special buttons flash a little picture of the blow: a slash, a thud, an arrow, a burst of magic or a holy cross. And the message line at the foot of the view always spells it out, with names and numbers.</p>
+<h3 id="ch02-reach">Who can be hit, and from where</h3>
+<div class="cols">
+<p>Your heroes strike the creature <b>straight ahead</b>. A sword, axe, mace, dagger or fist reaches 1 tile. A bow reaches further: the Short Bow shoots up to <b>3 tiles</b>, and the Nymph's Bow up to 5. A bow hits the first enemy in line within its reach, even one standing next to you. If nothing is in reach, the game says so and the turn is not spent.</p>
+<p>Enemies, however, can attack from any side. Messages tell you when a blow comes <b>from the side</b> or <b>from behind</b>. Move to face the foe that matters, and mind your back in a corridor.</p>
+</div>
+<h3 id="ch02-hit">Hit chance, damage and critical hits</h3>
+<div class="cols">
+<p><b>Hit chance.</b> A hero's chance to hit is: the occupation's base (see the table), plus the weapon's own bonus (a Dagger +4%, a Hand Axe -5%, a bare fist -10%), plus 0.6% for each point of DEX above 8, plus rings and passives. It is never below <b>20%</b> or above <b>97%</b>. Against flying creatures such as bats, subtract 20 points. An overloaded party loses 10. You can read your number on the character sheet.</p>
+<p>The special powers of most occupations <b>never miss</b>: Power Strike, Twin Stab and the like do not roll to hit at all.</p>
+<p><b>Damage.</b> A weapon has a damage range, such as 3 to 5 for the Rusty Sword. The game rolls inside the range, then adds the Strength bonus (1 per 4 STR above 8) and any ring bonus. A bare fist does 1 to 2 (the Monk 3 to 5 and the Goat 2 to 5). Special powers multiply the roll: Power Strike is double plus 2, the Barbarian's Rage Blow two and a half times.</p>
+<p><b>Critical hits.</b> Every weapon has a small chance of a critical hit, worked out from its price: 1% for the cheapest, rising to a ceiling of 30% for the finest, plus whatever the weapon, rings and passive powers add. A critical hit does <b>1.5 times</b> damage, and the message line says <i>(critical! x1.5)</i>. A priest's heal can crit too: about one heal in eight is a critical heal, 75% stronger.</p>
+</div>
+<div class="pair"><figure class="shot"><img src="img/shots/ch02_crit_v.png" alt=""><figcaption>A critical hit: a burst on the foe and the words CRITICAL 1.5x damage.</figcaption></figure><figure class="shot"><img src="img/shots/ch02_miss_v.png" alt=""><figcaption>A miss. The message line simply says that Vesna misses.</figcaption></figure></div>
+<h3 id="ch02-ranged">Bows and spells</h3>
+<div class="cols">
+<p>A hero with a bow in hand shoots instead of swinging, at any foe up to the bow's reach, with a small bonus to hit (the Short Bow +2%). The Ranger and Archer's powers are all about the bow: Aimed Shot never misses and reaches 3 tiles, Volley fires two arrows that never miss up to 4 tiles. Archers and rangers can therefore hurt a foe before it reaches the party.</p>
+<p>A spell is cast the same way, from the special button: Firebolt and Frost Shard reach 3 tiles and, like a bow, hit the first enemy in line. A spell has no hit roll. If no foe is in its path, the cast is cancelled and nothing is spent.</p>
+</div>
+<div class="pair"><figure class="shot"><img src="img/shots/ch02_fire_v.png" alt=""><figcaption>Orrin's Firebolt, cast at a foe 2 tiles away. A fire orb bursts on the rat and the number 9 floats up. The message says Firebolt hits for 9.</figcaption></figure><figure class="shot"><img src="img/shots/ch02_heal_v.png" alt=""><figcaption>Thessaly's Heal. A holy cross glows, Aldric is healed for 9, and a green number floats over his portrait.</figcaption></figure></div>
+<h3 id="ch02-healing">Healing in a fight</h3>
+<p>The Priest's <b>Heal</b> (4 mana) restores 8 to 12 health to the <b>most wounded</b> living ally, plus 1 for each 3 points of INT above 8, plus a bonus that grows with the priest's level. Heal fails with a message if everyone is already healthy. Healing potions are an action too: the <b>Potion</b> button on the right drinks the potion shown on it (your favourite if you have chosen one, otherwise the best) on the chosen hero (the Healing Potion restores 30 health, the Strong one 90 from level 20, and bigger ones come later). Drinking uses the hero's turn.</p>
+<h2 id="ch02-enemies">The Enemy's Turn</h2>
+<div class="cols dropcap">
+<p>Most creatures start <b>unaware</b>. Some patrol, some stand still. A creature notices the party if you come within about 6 tiles and it can see you or reach you quickly, or the moment it is hurt or missed. Once <b>alert</b>, it walks straight at you by the shortest way, one tile at a time.</p>
+<p>Fast creatures (bats and wolves among them) get <b>two moves</b> in a turn. Bats flutter about at random about one move in three. Archers and bounty hunters shoot from 2 tiles away. A frozen or stunned creature loses its next turn. The Barbarian's Savage Roar, the Thief's Smoke Bomb and a Sorcerer's Frost Nova can do this to several at once.</p>
+<p>When a creature reaches the tile next to you, it <b>attacks</b>. It chooses one living hero. A hero in the front line is three times as likely to be picked as one in the back.</p>
+<p>The creature's chance to hit is its own accuracy, less <b>3% for each point of the hero's armour</b>, less any dodge bonus, never under 10% or over 95%. A hit does damage inside its range and the hero's portrait washes red.</p>
+</div>
+<h3 id="ch02-numbers">What the creatures are made of</h3>
+<p>A creature has a level, and its level sets its strength: <b>health grows by 45% of the base for each level above 1</b>, and <b>damage by 30%</b> (and the result is then halved). Its XP grows in step. Here are the real numbers for a few of the creatures of the first crypts and roads. The accuracy is the creature's own, before your armour is counted.</p>
+<table class="t"><tr><th>Creature</th><th>Accuracy</th><th>Level 1</th><th>Level 3</th><th>Level 5</th><th>Level 10</th></tr>
+<tr><td><b>Black Rat</b></td><td>70%</td><td>50 HP, hits 2-4<br>40 XP</td><td>95 HP, hits 2-6<br>120 XP</td><td>140 HP, hits 3-8<br>200 XP</td><td>253 HP, hits 6-13<br>400 XP</td></tr>
+<tr><td><b>Cave Bat</b></td><td>62%</td><td>40 HP, hits 1-3<br>32 XP</td><td>76 HP, hits 2-4<br>96 XP</td><td>112 HP, hits 2-6<br>160 XP</td><td>202 HP, hits 4-9<br>320 XP</td></tr>
+<tr><td><b>Skeleton</b></td><td>72%</td><td>80 HP, hits 3-6<br>80 XP</td><td>152 HP, hits 5-10<br>240 XP</td><td>224 HP, hits 7-13<br>400 XP</td><td>404 HP, hits 11-22<br>800 XP</td></tr>
+<tr><td><b>Grey Wolf</b></td><td>72%</td><td>36 HP, hits 2-3<br>40 XP</td><td>68 HP, hits 2-5<br>120 XP</td><td>101 HP, hits 3-7<br>200 XP</td><td>182 HP, hits 6-11<br>400 XP</td></tr>
+<tr><td><b>Bandit</b></td><td>72%</td><td>44 HP, hits 2-4<br>60 XP</td><td>84 HP, hits 2-6<br>180 XP</td><td>123 HP, hits 3-8<br>300 XP</td><td>222 HP, hits 6-13<br>600 XP</td></tr>
+<tr><td><b>Bandit Archer</b></td><td>66%</td><td>32 HP, hits 2-3<br>50 XP</td><td>61 HP, hits 2-5<br>150 XP</td><td>90 HP, hits 3-7<br>250 XP</td><td>162 HP, hits 6-11<br>500 XP</td></tr>
+<tr><td><b>Rat King</b></td><td>80%</td><td>224 HP, hits 5-8<br>500 XP</td><td>426 HP, hits 7-12<br>1500 XP</td><td>627 HP, hits 10-17<br>2500 XP</td><td>1131 HP, hits 17-28<br>5000 XP</td></tr>
+</table>
+<p class="small"><i>Rat King: the boss of the first crypt, always level 3 there. The Cave Bat and Grey Wolf move twice per turn; the Bandit Archer shoots from 2 tiles.</i></p>
+<div class="trio">
+<figure class="art"><img src="../assets/rat.png" alt="" style="background:#e8e4d8;padding:4pt;height:1.1in;object-fit:contain"><figcaption>Black Rat</figcaption></figure>
+<figure class="art"><img src="../assets/skel.png" alt="" style="background:#e8e4d8;padding:4pt;height:1.1in;object-fit:contain"><figcaption>Skeleton</figcaption></figure>
+<figure class="art"><img src="../assets/boss.png" alt="" style="background:#e8e4d8;padding:4pt;height:1.1in;object-fit:contain"><figcaption>The Rat King</figcaption></figure>
+</div>
+<h3 id="ch02-plate">Read the foe before you swing</h3>
+<p>Whenever a creature stands in line ahead, up to 4 tiles away, its <b>plate</b> appears at the top of the view. It shows the creature's name and level, and a tall red bar at the left holds its health as a number. The small panel beneath compares the foe with your party: <b>level</b> for each, <b>health</b> for each, and a gauge that gives the fight a verdict of <b>Trivial, Easy, Fair fight, Hard</b> or <b>Deadly</b>, with a guess of how many rounds the party needs to win. A creature one level above the party is never rated worse than Hard; only a creature two levels above or more is ever Deadly.</p>
+<h3 id="ch02-mercy">Mercy</h3>
+<p>A beaten bandit may beg. When a bandit is down to about a fifth of his health, there is a fair chance he throws down his weapon. If you let him be, after three rounds he thanks you, hands over a little gold and runs, and may tell you a rumour. Strike a man who has surrendered and the game remembers it: your honour and luck fall, and word spreads in the nearest town.</p>
+<h2 id="ch02-afflictions">Afflictions and Status Effects</h2>
+<div class="cols dropcap">
+<p>Damp crypts, cold nights, wolves, snakes and bad pies all leave their mark. An <b>affliction</b> belongs to one hero (a few strike the whole party) and appears as a tiny picture in the corner of their face. Most take a few points off Strength, Dexterity or Intelligence until they are cured, and the stat is given back the moment they end. A stat cannot be lowered below 1. The same affliction is not put on a hero twice: a second dose only renews the first.</p>
+<p>Poison, bleeding and a few others <b>drain health every round</b> for a set number of rounds. They can cripple, but they cannot kill: a hero's health never drops below 1 from an affliction. A few conditions are good ones and show with a green frame.</p>
+<p>Open <b>Menu</b> and the <b>Afflictions and States</b> page to read about every one. It tells you how it feels, how you catch it and how it is cured. The list marks each affliction that is on a hero now, or that you have met before.</p>
+</div>
+<figure class="shot" style="width:80%;margin-left:auto;margin-right:auto"><img src="img/shots/ch02_trouble.png" alt=""><figcaption>A party in trouble. The four little pictures over the first faces are afflictions. Aldric is nearly dead (6/160), Vesna's hunger bar is low, and Thessaly lies fallen under the red cross.</figcaption></figure>
+<h3 id="ch02-catch">How the party catches things</h3>
+<p>A creature's hit can pass something on. These are the real odds:</p>
+<table class="t"><tr><th>Struck by</th><th>May catch (chance per hit that lands)</th></tr><tr><td>Black Rat, Rat King</td><td>Fever 12%</td></tr><tr><td>Cave Bat</td><td>Fever 6%</td></tr><tr><td>Wolf</td><td>Bleeding 20%, Flea-bitten 4%</td></tr><tr><td>Bandit, Bandit Archer</td><td>Bleeding 10%</td></tr><tr><td>Bounty hunter, hitman, guard, vulture</td><td>Bleeding 8%</td></tr><tr><td>Skeleton</td><td>Grave Rot 12%</td></tr><tr><td>Ghost, spectre, wraith</td><td>Haunted 30%, Shaken 15%</td></tr><tr><td>Scorpion</td><td>Venom-stung 35%</td></tr><tr><td>Cobra</td><td>Venom-stung 40%</td></tr><tr><td>Spider, viper, asp</td><td>Poisoned 35%</td></tr><tr><td>Mummy</td><td>Cursed 10%</td></tr></table>
+<p>Some places do it too: the cold crypts and tombs breed Grave Rot and Tomb Dust, damp caves bring Fever, and a witch's hut can lay a curse. In the open desert the sun, thirst, night cold and sandstorms bring Sunstroke, Dehydration, Frostbite and Sand-blindness. About 40 hours without a night's rest leaves the whole party <b>Exhausted</b>.</p>
+<table class="t"><tr><th></th><th>Affliction and effect</th><th>Caught from</th><th>Cure</th></tr>
+<tr><td style="width:.3in"><img src="../assets/af_poisoned.png" alt="" style="width:.3in;height:.3in"></td><td><b>Poisoned</b><br><span class="small">loses 2 health every round for 40 rounds</span></td><td class="small">Spider bites, poisoned darts and tainted blades.</td><td class="small">An antidote from a potion seller, or a healer. It also fades by itself after a while.</td></tr>
+<tr><td style="width:.3in"><img src="../assets/af_bleeding.png" alt="" style="width:.3in;height:.3in"></td><td><b>Bleeding</b><br><span class="small">loses 1 health every round for 60 rounds</span></td><td class="small">Wolf bites and bandit blades.</td><td class="small">Rest, a cleansing salve, or a healer.</td></tr>
+<tr><td style="width:.3in"><img src="../assets/af_stung.png" alt="" style="width:.3in;height:.3in"></td><td><b>Venom-stung</b><br><span class="small">-3 DEX, loses 1 health every round for 25 rounds</span></td><td class="small">Scorpion stings and cobra fangs.</td><td class="small">An antidote from a potion seller, or a healer.</td></tr>
+<tr><td style="width:.3in"><img src="../assets/af_fever.png" alt="" style="width:.3in;height:.3in"></td><td><b>Fever</b><br><span class="small">-3 STR</span></td><td class="small">Foul water in the cisterns, the bites of rats and bats.</td><td class="small">Rest three times. A cleansing salve from a potion seller will shorten it.</td></tr>
+<tr><td style="width:.3in"><img src="../assets/af_graverot.png" alt="" style="width:.3in;height:.3in"></td><td><b>Grave Rot</b><br><span class="small">-3 STR</span></td><td class="small">Skeletons and the damp of ancient crypts.</td><td class="small">Resting does not help. A cleansing salve, or a healer.</td></tr>
+<tr><td style="width:.3in"><img src="../assets/af_tomblung.png" alt="" style="width:.3in;height:.3in"></td><td><b>Tomb Dust</b><br><span class="small">-1 STR, -1 DEX</span></td><td class="small">Breathing the air of sealed tombs and pyramids.</td><td class="small">A long soak in a bathhouse clears the chest.</td></tr>
+<tr><td style="width:.3in"><img src="../assets/af_haunted.png" alt="" style="width:.3in;height:.3in"></td><td><b>Haunted</b><br><span class="small">-3 INT</span></td><td class="small">The touch of ghosts and spectres.</td><td class="small">A priest at a church, holy water, or laying the restless dead to rest (the Haunted Cellar quest).</td></tr>
+<tr><td style="width:.3in"><img src="../assets/af_shaken.png" alt="" style="width:.3in;height:.3in"></td><td><b>Shaken</b><br><span class="small">-2 INT, -1 DEX</span></td><td class="small">Dark and sinister houses, ghosts, and terrible bosses.</td><td class="small">Rest twice, or pray at a church.</td></tr>
+<tr><td style="width:.3in"><img src="../assets/af_cursed.png" alt="" style="width:.3in;height:.3in"></td><td><b>Cursed</b><br><span class="small">-3 DEX, whole party</span></td><td class="small">Opening cursed treasure, disturbing tombs, and the touch of the pharaoh&#x27;s dead.</td><td class="small">Visit a church or a temple. The Church of Light in Khemetra will lift it.</td></tr>
+<tr><td style="width:.3in"><img src="../assets/af_sleepless.png" alt="" style="width:.3in;height:.3in"></td><td><b>Sleepless</b><br><span class="small">-2 INT</span></td><td class="small">Nights in haunted or sinister places.</td><td class="small">A cup of sleeping tea, a healer, or a prayer at a church. It also wears off after two days.</td></tr>
+<tr><td style="width:.3in"><img src="../assets/af_exhausted.png" alt="" style="width:.3in;height:.3in"></td><td><b>Exhausted</b><br><span class="small">-2 STR, -2 DEX, whole party</span></td><td class="small">Going about forty hours without a night&#x27;s rest.</td><td class="small">Rest. One good night puts it right.</td></tr>
+<tr><td style="width:.3in"><img src="../assets/af_poorly.png" alt="" style="width:.3in;height:.3in"></td><td><b>Poorly</b><br><span class="small">-2 STR, -2 DEX</span></td><td class="small">A night in the temple cells of Khemetra.</td><td class="small">It passes after three days, or after three rests. A healer can cure it for a fee.</td></tr>
+<tr><td style="width:.3in"><img src="../assets/af_frostbitten.png" alt="" style="width:.3in;height:.3in"></td><td><b>Frostbitten</b><br><span class="small">-2 DEX</span></td><td class="small">Spending the cold hours of the night out in the open desert.</td><td class="small">Rest in a warm place. One rest is enough.</td></tr>
+<tr><td style="width:.3in"><img src="../assets/af_sunstroke.png" alt="" style="width:.3in;height:.3in"></td><td><b>Sunstroke</b><br><span class="small">-2 STR, -2 INT</span></td><td class="small">Marching through the open dunes at midday.</td><td class="small">Rest in the shade, or wash in a bathhouse.</td></tr>
+<tr><td style="width:.3in"><img src="../assets/af_dehydrated.png" alt="" style="width:.3in;height:.3in"></td><td><b>Dehydrated</b><br><span class="small">-2 STR</span></td><td class="small">Crossing the open desert without a drink.</td><td class="small">Reach the city: its fountains, inns and baths have water. Resting also helps.</td></tr>
+<tr><td style="width:.3in"><img src="../assets/af_sandblind.png" alt="" style="width:.3in;height:.3in"></td><td><b>Sand-blinded</b><br><span class="small">-2 DEX</span></td><td class="small">Sandstorms in the open desert.</td><td class="small">Wash your eyes in a bathhouse, or rest a night.</td></tr>
+<tr><td style="width:.3in"><img src="../assets/af_fleas.png" alt="" style="width:.3in;height:.3in"></td><td><b>Flea-bitten</b><br><span class="small">-1 DEX, -1 INT</span></td><td class="small">Filthy houses and the crowded lanes of the Beggars&#x27; Quarter.</td><td class="small">A good scrub in a bathhouse.</td></tr>
+<tr><td style="width:.3in"><img src="../assets/af_foodpoison.png" alt="" style="width:.3in;height:.3in"></td><td><b>Food Poisoning</b><br><span class="small">-3 STR, loses 1 health every round for 10 rounds</span></td><td class="small">Old or spoiled food.</td><td class="small">Rest, or an antidote.</td></tr>
+<tr><td style="width:.3in"><img src="../assets/af_hangover.png" alt="" style="width:.3in;height:.3in"></td><td><b>Hangover</b><br><span class="small">-2 INT, -1 DEX</span></td><td class="small">Strong ale at an inn.</td><td class="small">Rest.</td></tr>
+</table>
+<p class="hint"><b>Healers:</b> a potion seller sells an <i>Antidote</i> (for poison, venom and food poisoning) and a <i>Cleansing Salve</i> (wounds, fever, grave rot). Churches lift curses and hauntings, bathhouses wash away sand, dust and fleas, and the camp action <i>Tend the sick</i> gives a chance to ease the rest.</p>
+<p><b>Good states</b> wear a green frame: <i>Well Rested</i> (+1 STR, +1 DEX, a day, from a proper night at an inn), <i>Well Fed</i> (+2 STR, a day, from a hot meal or a camp stew), <i>Blessed</i> (+1 to all three stats for the whole party, two days, from visiting a church or temple) and <i>Masked</i> (twelve hours). <i>Warned by the Watch</i> is a mark from the city guard for walking into houses; it fades in two days.</p>
+<figure class="shot" style="width:70%;margin-left:auto;margin-right:auto"><img src="img/shots/ch02_afflpage.png" alt=""><figcaption>The Afflictions and States page, open on Poisoned (Menu, then Afflictions).</figcaption></figure>
+<h2 id="ch02-rest">Resting and Camping</h2>
+<div class="cols dropcap">
+<p>Press <span class="kbd">R</span> or tap <b>Camp</b>. You cannot rest with enemies close by. The Camp page offers <b>Rest the night</b>, which takes <b>8 hours</b> of game time, and a handful of other things to do by the fire.</p>
+<p>A night's rest <b>heals every hero to full health</b>, refills stamina and mana, cures whatever a night cures (see the table), and <b>raises any fallen hero</b> with half their health. It also costs food: eight hours take about a third of a full hunger bar. If a hero is starving, they heal only to half, so eat first.</p>
+<p>Sleeping out in the wild is not safe. Each night in camp away from the towns carries about a <b>14% chance</b> that thieves take 5 to 13% of your gold, and about <b>8%</b> that bandits raid the camp. A scout among you, a cat, a dog or a duck, or good luck, lowers the odds.</p>
+<p>A bed at an inn costs a little gold (15 to 25 in the inns of the north). An inn night does everything a camp night does, tops every hero's hunger up to at least 70, and grants <b>Well Rested</b> and <b>Well Fed</b>. There is a one in eight chance of a hangover afterwards.</p>
+</div>
+<h3 id="ch02-camp">Around the fire</h3>
+<p>The Camp page also lists activities. <b>Each hero gets one choice a day</b> (resting is for all and uses none). Tap a face to choose who acts.</p>
+<dl class="def"><dt>Cook a hearty meal</dt><dd data-k="1 hour, 2 food">Two food items make a stew for the party: <b>Well Fed</b> (+2 Strength) for a day, and hunger filled by 40 for everyone (more with a cook's skill).</dd><dt>Sharpen and mend</dt><dd data-k="30 minutes">The whole party deals 6% more damage for the next 400 rounds (a smith does it better).</dd><dt>Tend the sick</dt><dd data-k="2 hours">Each affliction a healer can ease has a 35% chance of cure (a healer improves it). Others are brought a step closer to ending.</dd><dt>Tell stories</dt><dd data-k="1 hour">Friendships grow, grudges cool, luck rises a little.</dd><dt>Spar</dt><dd data-k="1 hour">Two heroes drill and grow closer, and the whole party earns 8 XP.</dd><dt>Forage</dt><dd data-k="1 hour">Outdoors only. Herbs and reagents, and in the desert water.</dd></dl>
+<div class="box"><h3>Friends and rivals</h3><p class="small" style="margin:0">Under the camp list, the page shows how each pair of heroes feels about each other. <b>Friends</b> (bond of 5 or more) dodge a little more, and if a friend falls they fight on in a fury: <b>+30% damage for 10 rounds</b>. <b>Rivals</b> (bond of -5 or less) hit 3% harder to prove a point, but lose 1% of their aim.</p></div>
+<div class="pair"><figure class="shot"><img src="img/shots/ch02_camp.png" alt=""><figcaption>The Camp and Bonds page. The activities are at the top; the bonds between your four heroes, in bars, below.</figcaption></figure><figure class="shot"><img src="img/shots/ch02_bag.png" alt=""><figcaption>The pack: potions, bread, cheese and an apple.</figcaption></figure></div>
+<h2 id="ch02-hunger">Hunger and Food</h2>
+<div class="cols">
+<p>Each hero has a hunger bar from 100 down to 0. It empties at a steady rate of <b>25 points every 6 hours</b>, so a full bar lasts a whole day of game time. Walking, fighting and resting all pass the clock.</p>
+<p>Below 25 the bar turns orange and the game says that the hero is <b>hungry</b>. At 0 the hero is <b>starving</b>: they lose 1 health every 20 minutes (never the last point), and a night's rest heals them only to half. Eating fixes all of it. Some powers slow the hunger: the Ranger's Woodcraft by 25%, the Monk's Inner Calm and the Goat's Tough Hide by 30%, the Goat's Scavenger by 50%.</p>
+<p>Food also heals. Eat from the pack: choose the hero, the food and use it. When a hero is both unhurt and nearly full, the game tells you they are not hungry or hurt.</p>
+</div>
+<table class="t"><tr><th>Food</th><th>Kind</th><th>Health</th><th>Hunger filled</th></tr><tr><td>Apple, Hazelnuts</td><td>Snack</td><td>6</td><td>40</td></tr><tr><td>Hard Cheese, Mug of Ale</td><td>Snack</td><td>8</td><td>40</td></tr><tr><td>Loaf of Bread, Salt Herring</td><td>Meal</td><td>16</td><td>70</td></tr><tr><td>Smoked Sausage</td><td>Meal</td><td>18</td><td>70</td></tr><tr><td>Bowl of Pottage</td><td>Meal</td><td>20</td><td>70</td></tr><tr><td>Meat Pie</td><td>Big meal</td><td>32</td><td>100</td></tr><tr><td>Roast Mutton</td><td>Big meal</td><td>36</td><td>100</td></tr></table>
+<p class="hint"><b>Beware:</b> a mug of ale carries a one in four chance of a <i>hangover</i>, and herring, sausage, pottage, pie and roast each carry a one in fourteen chance of <i>food poisoning</i>.</p>
+<h2 id="ch02-fall">When a Hero Falls</h2>
+<div class="cols dropcap">
+<p>When a hero's health reaches 0, they <b>fall</b>. Their face is dimmed and crossed with a red cross, and the message line says so. They cannot act, cannot be chosen by enemies and earn no experience. The rest of the party fights on. Falling is not final, and there are four ways back.</p>
+<ul class="tick"><li><b>Rest.</b> Any night, in camp or at an inn, raises every fallen hero with half their maximum health.</li><li><b>The Priest's Revive</b> (a level 50 power, 12 mana) raises one fallen ally at 40% health.</li><li><b>Resurrection</b>, the Priest's level 50 wizard spell, raises every fallen hero at 70% and heals the living by half.</li><li><b>Friends</b> do not forget: a friend of the fallen fights on in a fury for 10 rounds.</li></ul>
+<p>If <b>all four</b> heroes fall, the game ends with <i>The Party Has Fallen</i>. The screen shows creatures slain, rounds fought, survivors, gold and the level of each hero. You may load your most recent save or return to the menu. Save before a boss.</p>
+</div>
+<h2 id="ch02-scaling">Party Level and the World</h2>
+<div class="cols">
+<p>Every creature has a level, and level drives everything in the table above. The game offers two ways to set the levels, chosen when you start and changeable at any time under <b>Menu, Settings, Gameplay</b>.</p>
+<h3>Traditional (the default)</h3>
+<p>Every place has its own level, and the levels climb from place to place as the story leads you on. The world map shows each place's level. If a place is too hard, come back later, stronger. The great creatures stand a few levels above their place. The first crypt climbs from level 1 at the start to 2 in the middle and 3 near the Rat King, in either mode.</p>
+<h3>Scaled</h3>
+<p>Creatures grow with your party, for a smoother and slightly easier game. If your party outgrows a creature by more than 5 levels, it is raised to between 2 and 5 levels below you, once. Great creatures always stand a fixed number of levels above the party.</p>
+<h3>A mixed crowd</h3>
+<p>In either mode creatures in one place are not all at one level. About <b>two in five</b> stand at the place's full level, about 35% stand 1 to 3 below, and a quarter stand 4 to 7 below, so each fight is a mix of tough and easy foes, and the weak ones die fast. Bosses and the great creatures are never lowered.</p>
+</div>
+<div class="box tint"><h3>The party's own level</h3><p class="small" style="margin:0">When the game needs a single number for your party, it takes the <b>average level of the living heroes</b>. That is the level the foe's plate compares against, the level that cuts XP for weak creatures, and the level the Scaled world follows. A fallen hero does not count.</p></div>
+</section>

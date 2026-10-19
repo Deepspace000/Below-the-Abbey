@@ -42,6 +42,9 @@ for r, d, f in os.walk(os.path.join(ROOT, 'assets')):
         rel = os.path.relpath(p, ROOT)
         os.makedirs(os.path.dirname(os.path.join(OUT, rel)), exist_ok=True)
         shutil.copy2(p, os.path.join(OUT, rel))
+# the printed manual, opened from the More page of the menu
+MAN = os.path.join(ROOT, 'Below-the-Abbey-manual.pdf')
+if os.path.exists(MAN): shutil.copy2(MAN, os.path.join(OUT, 'Below-the-Abbey-manual.pdf'))
 SHIM = """<script>(function(){var map={},ready=false,q=[];var d=Object.getOwnPropertyDescriptor(HTMLImageElement.prototype,'src');
 function norm(v){if(typeof v!=='string')return null;var s=v.split('?')[0].split('#')[0],i=s.indexOf('assets/');return i>=0?s.slice(i):null}
 Object.defineProperty(HTMLImageElement.prototype,'src',{configurable:true,enumerable:true,get:function(){return d.get.call(this)},set:function(v){var k=norm(v);if(!k||k.indexOf('assets/audio/')===0){d.set.call(this,v);return}if(!ready){q.push([this,v,k]);return}d.set.call(this,map[k]||v)}});

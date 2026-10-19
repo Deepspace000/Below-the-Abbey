@@ -3,3 +3,9 @@ assets/detailed/
 itch-build/
 itch-build.zip
 screenshots/
+
+manual/_preview/
+manual/_pass*.pdf
+manual/book.html
+manual/__pycache__/
+manual/_preview_*.html

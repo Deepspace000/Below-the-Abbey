@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.456';
+const VERSION='3.457';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -20432,6 +20432,16 @@ function tombStory(){
    ========================================================================== */
 const goldCut=g=>g<=80?g:Math.round((80+(g-80)*.2)/5)*5;
 for(const id in QUESTS){const r=QUESTS[id].reward;if(r&&r.gold&&!r._cut){r.gold=goldCut(r.gold);r._cut=1}}
+
+/* ---- src/desert/manualmenu.js ---- */
+/* ==========================================================================
+   THE GAME MANUAL. A button on the More page opens the printed booklet (Below-the-Abbey-manual.pdf, beside the game) in a new tab.
+   ========================================================================== */
+const MANUAL_FILE='Below-the-Abbey-manual.pdf';
+(function(){const _d=drawMoreMenu;drawMoreMenu=function(){_d();btnText('manualpdf','Game manual (PDF)',140,212,200,26)}})();
+(function(){const _b=handleBtn;handleBtn=function(id){
+  if(id==='manualpdf'&&G.menu==='more'){try{window.open(MANUAL_FILE,'_blank')}catch(e){}msg('The manual opens in a new tab.','#a8d8ff');return}
+  _b(id)}})();
 
 /* ---- src/desert/hints.js ---- */
 /* ==========================================================================
