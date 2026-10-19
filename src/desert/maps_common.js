@@ -70,8 +70,32 @@ function mplInstall(cfg){
     if(!c){c=document.createElement('canvas');c.width=DW*MPL.S;c.height=DH*MPL.S;const x=c.getContext('2d');x.scale(MPL.S,MPL.S);
       try{mplParchment(x,cfg.tint);cfg.draw(c,x,LEVELS[LEVEL],{parchment:mplParchment,border:mplBorder,title:mplTitle,compass:mplCompass,text:mplText,notes:mplNotes,panel:mplPanel,fit:mplFit,I:MPLI,wrap:mplWrap});mplBorder(x)}catch(e){console.error(e)}
       MPL.CACHE[key]=c}
-    ctx.imageSmoothingQuality='high';ctx.drawImage(c,0,0,DW,DH);
-    const L=LEVELS[LEVEL],a=cfg.fit?cfg.fit(L):mplFit(L.rows[0].length,L.rows.length),px=a.X(G.C.x+.5),py=a.Y(G.C.y+.5);
-    ctx.save();ctx.translate(px,py);ctx.rotate((G.C.a||0)+Math.PI/2);ctx.fillStyle='#ffe36a';ctx.strokeStyle='#2a1a0c';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(5,6);ctx.lineTo(0,3);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
-    ctx.fillStyle='rgba(30,22,16,.85)';ctx.fillRect(0,DH-17,DW,17);txt(cfg.foot||'You are the yellow arrow.',DW/2,DH-8.5,7.5,'#e0d8bc','center',true);
-    btnText('worldmap','World map',328,5,80,20);btnText('ovexit','Exit',414,5,60,20)}}
+    const L=LEVELS[LEVEL],a=cfg.fit?cfg.fit(L):mplFit(L.rows[0].length,L.rows.length);
+    mplPaint(c,MPL.S,MPL.AREA,cx=>a.X(cx),cy=>a.Y(cy),cfg.foot)}}
+/* ---- zoom and pan: the same controls as the plain map (+ and - buttons, Fit, mouse wheel, pinch, drag), drawn from the large cached sheet so it stays sharp ---- */
+const MPLZ={max:6};
+const mplZoom=()=>Math.max(1,Math.min(MPLZ.max,(G.mz||12)/12));
+/* paints sheet c (drawn at S times the screen size) with the current zoom and pan inside `area`, the party's arrow (X,Y give the party's place on the sheet), the buttons and the foot line */
+function mplPaint(c,S,area,X,Y,foot){
+  BTNS=[];veil(.95);
+  if(G.mplLv!==LEVEL||G.mplKey!==c){G.mplLv=LEVEL;G.mplKey=c;G.mz=12;G.panX=0;G.panY=0}
+  const z=mplZoom();G.panMinX=-area.w*(z-1);G.panMinY=-area.h*(z-1);G.panX=Math.max(G.panMinX,Math.min(0,G.panX||0));G.panY=Math.max(G.panMinY,Math.min(0,G.panY||0));
+  MPL.view={lv:LEVEL,area};
+  BTNS.push({id:'mplarea',x:area.x,y:area.y,w:area.w,h:area.h,up:true,drag:'map'});
+  ctx.imageSmoothingQuality='high';ctx.drawImage(c,0,0,DW,DH);
+  const sx0=area.x-G.panX/z,sy0=area.y-G.panY/z;
+  if(z>1.001){ctx.save();ctx.beginPath();ctx.rect(area.x,area.y,area.w,area.h);ctx.clip();ctx.drawImage(c,sx0*S,sy0*S,area.w/z*S,area.h/z*S,area.x,area.y,area.w,area.h);ctx.restore()}
+  const px=area.x+(X(G.C.x+.5)-sx0)*z,py=area.y+(Y(G.C.y+.5)-sy0)*z;
+  if(px>area.x-4&&px<area.x+area.w+4&&py>area.y-4&&py<area.y+area.h+4){ctx.save();ctx.translate(px,py);ctx.rotate((G.C.a||0)+Math.PI/2);ctx.fillStyle='#ffe36a';ctx.strokeStyle='#2a1a0c';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(5,6);ctx.lineTo(0,3);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore()}
+  ctx.fillStyle='rgba(30,22,16,.85)';ctx.fillRect(0,DH-17,DW,17);txt(foot||'You are the yellow arrow.',DW/2+50,DH-8.5,7.5,'#e0d8bc','center',true);
+  MPL.me=()=>{const cxs=X(G.C.x+.5),cys=Y(G.C.y+.5);G.panX=(area.w/2)-(cxs-area.x)*z;G.panY=(area.h/2)-(cys-area.y)*z;G.panX=Math.max(G.panMinX,Math.min(0,G.panX));G.panY=Math.max(G.panMinY,Math.min(0,G.panY))};
+  btnText('mzin','+',22,303,18,17);btnText('mzout','-',42,303,18,17);btnText('mzfit','Fit',62,303,28,17);btnText('mplme','Me',92,303,26,17);
+  btnText('worldmap','World map',328,5,80,20);btnText('ovexit','Exit',414,5,60,20)}
+/* while one of these maps is open, zooming (buttons, wheel, pinch) zooms the framed drawing about the point under the pointer */
+{const _s=setMapZoom;setMapZoom=function(ncs,ax,ay){
+  const V=MPL.view;if(!V||!G.overview||G.world||V.lv!==LEVEL)return _s.apply(this,arguments);
+  const A=V.area,z0=mplZoom(),z1=ncs<=0?1:Math.max(1,Math.min(MPLZ.max,ncs/12));
+  ax=Math.max(A.x,Math.min(A.x+A.w,ax));ay=Math.max(A.y,Math.min(A.y+A.h,ay));
+  const sx=A.x+(-G.panX+(ax-A.x))/z0,sy=A.y+(-G.panY+(ay-A.y))/z0;G.mz=z1*12;
+  G.panX=Math.max(-A.w*(z1-1),Math.min(0,(ax-A.x)-(sx-A.x)*z1));G.panY=Math.max(-A.h*(z1-1),Math.min(0,(ay-A.y)-(sy-A.y)*z1))}}
+{const _h=handleBtn;handleBtn=function(id){if(id==='mplme'&&MPL.view&&G.overview&&!G.world){if(MPL.me)MPL.me();return}return _h.apply(this,arguments)}}

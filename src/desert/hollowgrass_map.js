@@ -79,13 +79,7 @@ function hgmDraw(){
   return c;
 }
 function hgmOverview(){
-  BTNS=[];veil(.95);
   if(!HGM.cv)HGM.cv=hgmDraw();
-  if(HGM.cv){ctx.imageSmoothingQuality='high';ctx.drawImage(HGM.cv,0,0,DW,DH)}
-  const px=HGM.ox+(G.C.x+.5)*HGM.s,py=HGM.oy+(G.C.y+.5)*HGM.s;
-  ctx.save();ctx.translate(px,py);ctx.rotate((G.C.a||0)+Math.PI/2);ctx.fillStyle='#ffe36a';ctx.strokeStyle='#241a12';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(5,6);ctx.lineTo(0,3);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
-  ctx.fillStyle='rgba(30,22,16,.85)';ctx.fillRect(0,DH-18,DW,18);
-  txt('You are the yellow arrow. Exsce, the village nearest the gate, is where the wizard waits.',DW/2,DH-9,7.5,'#e0dcc4','center',true);
-  btnText('worldmap','World map',328,5,80,20);btnText('ovexit','Exit',414,5,60,20);
+  if(HGM.cv)mplPaint(HGM.cv,3,{x:112,y:38,w:252,h:254},cx=>HGM.ox+cx*HGM.s,cy=>HGM.oy+cy*HGM.s,'Exsce, the village nearest the gate, is where the wizard waits.');
 }
 {const _do=drawOverview;drawOverview=function(){if(LEVEL===HG.ID&&LEVELS[HG.ID]&&!G.world&&!G.teleMode){hgmOverview();return}return _do.apply(this,arguments)}}
