@@ -59,17 +59,6 @@ function mpPilgShip(x,a,b,s,fl,col){const ink=MPL.INK;x.save();x.translate(a,b);
   x.beginPath();x.moveTo(.6,-15);x.quadraticCurveTo(7,-10,6,-3);x.lineTo(.6,-2.6);x.closePath();x.fill();x.stroke();
   x.strokeStyle=col;x.lineWidth=1;x.beginPath();x.moveTo(-4.4,-12);x.lineTo(-4.4,-4.4);x.moveTo(-7.4,-8);x.lineTo(-1.8,-8);x.stroke();
   x.fillStyle=col;x.beginPath();x.moveTo(0,-17);x.lineTo(5,-16);x.lineTo(0,-14.6);x.closePath();x.fill();x.restore()}
-function mpPilgMonster(x,a,b,s){const ink=MPL.INK;x.save();x.translate(a,b);x.scale(s,s);x.lineJoin='round';x.lineCap='round';
-  x.strokeStyle='rgba(235,245,250,.75)';x.lineWidth=.9;for(const [dx,dy,w] of [[-4,5,10],[10,6,12],[24,5,10],[40,4,8]]){x.beginPath();x.moveTo(dx-w/2,dy);x.quadraticCurveTo(dx-w/4,dy-1.8,dx,dy);x.quadraticCurveTo(dx+w/4,dy+1.8,dx+w/2,dy);x.stroke()}
-  for(const k of [0,1,2]){x.fillStyle='#3f7f68';x.strokeStyle=ink;x.lineWidth=.8;x.beginPath();x.arc(8+k*14,3,5.2-k*.5,Math.PI,0);x.closePath();x.fill();x.stroke();
-    x.strokeStyle='rgba(20,60,40,.7)';x.lineWidth=.5;for(let j=-2;j<=2;j++){x.beginPath();x.arc(8+k*14+j*2,3-1.5,1.2,0,Math.PI);x.stroke()}
-    x.fillStyle=MPL.VERM;x.strokeStyle=ink;x.lineWidth=.5;x.beginPath();x.moveTo(8+k*14-1.6,3-5);x.lineTo(8+k*14,3-8.4);x.lineTo(8+k*14+1.6,3-5);x.closePath();x.fill();x.stroke()}
-  x.strokeStyle=ink;x.lineWidth=6.4;x.beginPath();x.moveTo(3,2);x.bezierCurveTo(-4,0,-9,-6,-7,-15);x.stroke();
-  x.strokeStyle='#3f7f68';x.lineWidth=4.4;x.beginPath();x.moveTo(3,2);x.bezierCurveTo(-4,0,-9,-6,-7,-15);x.stroke();
-  x.strokeStyle=ink;x.lineWidth=5;x.beginPath();x.moveTo(36,2);x.bezierCurveTo(44,2,48,-3,46,-8);x.stroke();x.strokeStyle='#3f7f68';x.lineWidth=3;x.beginPath();x.moveTo(36,2);x.bezierCurveTo(44,2,48,-3,46,-8);x.stroke();
-  x.fillStyle='#3f7f68';x.strokeStyle=ink;x.lineWidth=.8;x.beginPath();x.ellipse(-9.4,-17,5,3,-.5,0,6.3);x.fill();x.stroke();
-  x.fillStyle='#fff6d0';x.beginPath();x.arc(-8.6,-18.2,1,0,6.3);x.fill();x.fillStyle=ink;x.beginPath();x.arc(-8.6,-18.2,.45,0,6.3);x.fill();
-  x.strokeStyle=MPL.VERM;x.lineWidth=.8;x.beginPath();x.moveTo(-13.6,-16.4);x.lineTo(-17,-15.4);x.moveTo(-15.4,-15.9);x.lineTo(-17,-17);x.stroke();x.restore()}
 function mpPilgBanner(x,a,b,col,fl){const ink=MPL.INK;x.save();x.translate(a,b);x.strokeStyle=ink;x.lineWidth=.7;x.beginPath();x.moveTo(0,0);x.lineTo(0,-11);x.stroke();
   x.fillStyle=col;x.beginPath();x.moveTo(0,-11);x.quadraticCurveTo(3.4*(fl?-1:1),-12.4,6.4*(fl?-1:1),-10.8);x.lineTo(4.4*(fl?-1:1),-8.6);x.lineTo(6.4*(fl?-1:1),-6.6);x.quadraticCurveTo(3.4*(fl?-1:1),-8,0,-6.4);x.closePath();x.fill();x.stroke();
   x.fillStyle=MPL.GOLD2;x.beginPath();x.arc(0,-11.4,.9,0,6.3);x.fill();x.restore()}
@@ -116,8 +105,8 @@ function mpPilgDraw(c,x,L,api){
   x.strokeStyle='rgba(120,92,50,.6)';x.lineWidth=.5;for(let i=0;i<70;i++){const a=190+H(i,1,65)*140,b=262+H(i,2,65)*28;if(pip(a,b))continue;const w=4+H(i,3,65)*6;x.beginPath();x.moveTo(a-w,b);x.quadraticCurveTo(a,b-w*.4,a+w,b);x.stroke()}
   x.strokeStyle='#5a7a3a';x.lineWidth=.55;for(let i=0;i<40;i++){const f=.88+H(i,1,66)*.1,p=mpPilgOff(f,19+H(i,2,66)*3);for(let k=0;k<3;k++){x.beginPath();x.moveTo(p[0]+k-1,p[1]+1);x.lineTo(p[0]+k*1.4-1.4,p[1]-3-H(i,k,67)*2);x.stroke()}}
   /* ships, the sea monster, the name of the sea */
-  mpPilgShip(x,226,146,1.15,false,MPL.VERM);mpPilgShip(x,292,198,.95,true,MPL.LAPIS);mpPilgShip(x,186,200,.85,false,MPL.LAPIS);mpPilgShip(x,300,120,.8,true,MPL.VERM);mpPilgShip(x,200,240,.65,false,MPL.VERM);
-  mpPilgMonster(x,222,216,.95);
+  mpPilgShip(x,226,146,1.15,false,MPL.VERM);mpPilgShip(x,238,196,.8,true,MPL.LAPIS);mpPilgShip(x,300,120,.8,true,MPL.VERM);mpPilgShip(x,200,240,.65,false,MPL.VERM);
+  mpPilgSerpent(x,194,222,.9);mpPilgKraken(x,290,284,.72);
   for(const [px,py] of [[270,155],[190,128],[255,238]]){x.strokeStyle='rgba(30,60,100,.7)';x.lineWidth=.6;x.beginPath();x.arc(px,py,5,0,TAU*.75);x.stroke();x.beginPath();x.arc(px,py,2.6,0,TAU*.75);x.stroke()}
   labs.push(()=>mpPilgSpaced(x,'THE NARROW SEA',237,172,13,'#1c3a5a',2.4));
   T&&0;
