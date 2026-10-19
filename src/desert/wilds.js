@@ -299,5 +299,3 @@ function wvCentre(){
   }catch(e){}
   return null}
 
-/* a word on the way in: the exit is behind the party, and glows */
-{const _g=goToLevel;goToLevel=function(n,e){const r=_g.apply(this,arguments);try{if(n>=7100&&G.state==='play')msg('The way out is the bright arch behind you.','#e8e0a0')}catch(x){}return r}}
