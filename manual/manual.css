@@ -92,3 +92,10 @@ figure.shot img{filter:grayscale(1) brightness(1.18) contrast(1.08)}
 .atlas figure.map img{width:4.75in;margin:0 auto;border:2.5pt solid #000}
 .atlas figure.map figcaption{margin-top:.1em}
 .clear{clear:both}
+/* the colour cover: the painted picture in a gold-white frame on a black page, with the manual title under it */
+.cover{display:block;text-align:center;box-sizing:border-box;padding:.55in .3in;background:#0b0b0b}
+.cover::before{content:'';position:absolute;inset:.22in;border:1pt solid #d9b45a;outline:3pt double #d9b45a;outline-offset:3pt}
+.cover .cv-top{display:none}
+.cover img{width:5.4in;height:auto;margin:1.45in auto 0;border:3pt solid #d9b45a;object-fit:contain}
+.cover .cv-bot{font-family:'OldEnglish',serif;color:#f1dba0;font-size:30pt;margin-top:.45in;line-height:1}
+.cover .cv-sub{font-family:'Times New Roman',serif;font-style:italic;color:#d8d0b8;font-size:12pt;margin-top:.15in}

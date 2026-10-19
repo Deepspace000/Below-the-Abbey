@@ -10,7 +10,7 @@ CATALOG = os.path.join(os.path.dirname(HERE), 'item_catalog.pdf')
 def cover_html():
     for n in ('cover.png', 'cover.jpg', 'cover.jpeg', 'cover.webp'):
         if os.path.exists(os.path.join(HERE, n)):
-            return '<div class="cover" id="cover"><img src="%s"></div>' % n
+            return ('<div class="cover" id="cover"><div class="cv-top">Instruction Manual</div><img src="%s"><div class="cv-bot">The Instruction Manual</div><div class="cv-sub">Grid-movement, turn-based RPG</div></div>' % n)
     return '<div class="cover" id="cover" style="display:flex;align-items:center;justify-content:center;color:#fff;font-family:OldEnglish;font-size:48pt;text-align:center">Below the Abbey<br>(cover goes here)</div>'
 HEROES = {'ch01': 'img/shots/ch01_pickup.png', 'ch02': 'img/shots/ch02_crit_v.png', 'ch03': 'img/shots/ch03_inv_set.png', 'ch04': 'img/shots/ch04_lv290.png',
           'ch05': 'img/shots/ch05_path_start.png', 'ch06': 'img/shots/ch06_c_yar3.png', 'ch07': 'img/shots/ch07_sea_greenmantle.png', 'ch08': 'img/shots/ch08_b_burn.png'}
