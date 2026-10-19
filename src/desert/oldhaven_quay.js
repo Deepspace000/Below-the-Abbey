@@ -101,7 +101,7 @@ function quayBuild(){
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){
     if(y<=9||((x<6||x>73)&&y<=SHORE+1)){const face=y===9||x===5||x===74;solid(x,y,face&&(x+y)%4===0?wSlit:(x*7+y*3)%11===0?wDark:wPlain)}
   }
-  const GX=OQ.CX,tWh=4.8;
+  const GX=OQ.CX,tWh=WALL;
   // the great gate: a tall gatehouse, three squares of portcullis between two wings of dressed stone with arrow slits, and a great round tower at each end
   {const pg=TM.make('gate',0,tWh,'kh_ohgate1_0');T_DOORS.oqportc=pg.tex;const gc=String.fromCharCode(nextCh++);chars[gc]=31;
     const tp=ch(TM.make('plain','castle',tWh).gid),ts=ch(TM.make('slit','castle',tWh).gid),td=ch(TM.make('plain','castle2',tWh).gid);
