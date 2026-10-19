@@ -120,3 +120,5 @@ function hgHive(i){
     mapNames:[{t:HG_HIVE_NAMES[i],x:sp.x,y:H-1,k:'place'},{t:i===3?'The Queen’s Cell':'The Heart of the Hive',x:far.x,y:far.y-4,k:'place'}]};
   LEVELS[id]=lv;
 }
+/* the door out of a hive can be walked into, like the door of a cave */
+{const _wd=wdDoorLevel;wdDoorLevel=function(n){return _wd.apply(this,arguments)||(n>=HG.HIVES[0]&&n<=HG.HIVES[3])}}
