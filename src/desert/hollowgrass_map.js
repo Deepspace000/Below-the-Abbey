@@ -56,7 +56,7 @@ function hgmDraw(){
     lab(HG_HIVE_NAMES[i].toUpperCase(),a,b+14,7.2,'#6a1a10');lab('book '+(i+1)+' of 4',a,b+21.5,6,'#6a1a10')});
   // the gate in the south, the start, and the way back
   {const a=PX(HG.START.x),b=PY(HG.H-4);x.save();x.translate(a,b);x.strokeStyle=ink;x.fillStyle='#d8d0bc';x.lineWidth=1;x.fillRect(-7,-5,14,6);x.strokeRect(-7,-5,14,6);for(let k=-6;k<=6;k+=2){x.beginPath();x.moveTo(k,-5);x.lineTo(k,-8);x.stroke()}x.restore();
-    lab('THE SPIKED GATE',a,b+8,7.2,ink);lab('back to the Hollow Land',a,b+15,6,'#5a3c1c');lab('the wizard meets you here',PX(HG.START.x),PY(HG.START.y)-8,6,'#2a1a50')}
+    lab('THE SPIKED GATE',a,b+8,7.2,ink);lab('back to the Hollow Land',a,b+15,6,'#5a3c1c')}
   // the compass
   {const a=OX+S*140,b=OY+S*12;x.save();x.translate(a,b);x.strokeStyle=ink;x.fillStyle='#e8e4d2';x.lineWidth=1;x.beginPath();x.arc(0,0,9,0,Math.PI*2);x.fill();x.stroke();x.fillStyle=ink;x.beginPath();x.moveTo(0,-13);x.lineTo(3,0);x.lineTo(0,-2.5);x.lineTo(-3,0);x.closePath();x.fill();x.beginPath();x.moveTo(0,13);x.lineTo(2,0);x.lineTo(-2,0);x.closePath();x.strokeStyle=ink;x.stroke();x.restore();lab('N',a,b-17,8,ink)}
   // title, notes and legend
