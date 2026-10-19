@@ -5,7 +5,7 @@
 const HGM={cv:null,s:1.6,ox:120,oy:46};
 function hgmDraw(){
   const L=LEVELS[HG.ID];if(!L)return null;
-  const c=document.createElement('canvas');c.width=DW;c.height=DH;const x=c.getContext('2d'),H=hash2,ink='#241a12',halo='rgba(226,222,200,.9)',S=HGM.s,OX=HGM.ox,OY=HGM.oy,PX=a=>OX+a*S,PY=a=>OY+a*S;
+  const c=document.createElement('canvas');c.width=DW*3;c.height=DH*3;const x=c.getContext('2d');x.scale(3,3);const H=hash2,ink='#241a12',halo='rgba(226,222,200,.9)',S=HGM.s,OX=HGM.ox,OY=HGM.oy,PX=a=>OX+a*S,PY=a=>OY+a*S;
   // the parchment, cold and old
   const gr=x.createLinearGradient(0,0,0,DH);gr.addColorStop(0,'#c9c6ad');gr.addColorStop(1,'#a9aa94');x.fillStyle=gr;x.fillRect(0,0,DW,DH);
   x.save();x.globalAlpha=.13;for(let i=0;i<150;i++){x.fillStyle=i%3?'#4a5a60':'#ecf0dc';x.beginPath();x.ellipse(H(i,1,7)*DW,H(i,2,7)*DH,6+H(i,3,7)*30,3+H(i,4,7)*14,H(i,5,7)*3,0,Math.PI*2);x.fill()}x.restore();
@@ -81,7 +81,7 @@ function hgmDraw(){
 function hgmOverview(){
   BTNS=[];veil(.95);
   if(!HGM.cv)HGM.cv=hgmDraw();
-  if(HGM.cv)ctx.drawImage(HGM.cv,0,0);
+  if(HGM.cv){ctx.imageSmoothingQuality='high';ctx.drawImage(HGM.cv,0,0,DW,DH)}
   const px=HGM.ox+(G.C.x+.5)*HGM.s,py=HGM.oy+(G.C.y+.5)*HGM.s;
   ctx.save();ctx.translate(px,py);ctx.rotate((G.C.a||0)+Math.PI/2);ctx.fillStyle='#ffe36a';ctx.strokeStyle='#241a12';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(5,6);ctx.lineTo(0,3);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
   ctx.fillStyle='rgba(30,22,16,.85)';ctx.fillRect(0,DH-18,DW,18);

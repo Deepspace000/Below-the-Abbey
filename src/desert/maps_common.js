@@ -6,7 +6,7 @@
    The screen is DW x DH (480 x 320). The framed drawing area is MPL.AREA = {x:92,y:30,w:296,h:262}; the left and right margins (0..92 and 388..480) are for the
    title, notes and key. See hollowgrass_map.js for a finished example in a different (older) style.
    ========================================================================== */
-const MPL={AREA:{x:92,y:30,w:296,h:262},INK:'#2a1a0c',GOLD:'#c9a227',GOLD2:'#f0d878',LAPIS:'#274a9a',VERM:'#b8321e',VERD:'#3a7a5a',CACHE:{}};
+const MPL={AREA:{x:92,y:30,w:296,h:262},INK:'#2a1a0c',GOLD:'#c9a227',GOLD2:'#f0d878',LAPIS:'#274a9a',VERM:'#b8321e',VERD:'#3a7a5a',CACHE:{},S:3};
 /* aged vellum with stains, optionally tinted ([r,g,b] added, e.g. cool or warm) */
 function mplParchment(x,tint){
   tint=tint||[0,0,0];const g=x.createLinearGradient(0,0,0,DH),f=(a,b,c)=>`rgb(${Math.max(0,Math.min(255,a+tint[0]))},${Math.max(0,Math.min(255,b+tint[1]))},${Math.max(0,Math.min(255,c+tint[2]))})`;
@@ -67,10 +67,10 @@ function mplInstall(cfg){
     if(!cfg.levels.includes(LEVEL)||G.world||G.teleMode||!LEVELS[LEVEL])return _do.apply(this,arguments);
     BTNS=[];veil(.95);
     const key=LEVEL+':'+cfg.name;let c=MPL.CACHE[key];
-    if(!c){c=document.createElement('canvas');c.width=DW;c.height=DH;const x=c.getContext('2d');
+    if(!c){c=document.createElement('canvas');c.width=DW*MPL.S;c.height=DH*MPL.S;const x=c.getContext('2d');x.scale(MPL.S,MPL.S);
       try{mplParchment(x,cfg.tint);cfg.draw(c,x,LEVELS[LEVEL],{parchment:mplParchment,border:mplBorder,title:mplTitle,compass:mplCompass,text:mplText,notes:mplNotes,panel:mplPanel,fit:mplFit,I:MPLI,wrap:mplWrap});mplBorder(x)}catch(e){console.error(e)}
       MPL.CACHE[key]=c}
-    ctx.drawImage(c,0,0);
+    ctx.imageSmoothingQuality='high';ctx.drawImage(c,0,0,DW,DH);
     const L=LEVELS[LEVEL],a=cfg.fit?cfg.fit(L):mplFit(L.rows[0].length,L.rows.length),px=a.X(G.C.x+.5),py=a.Y(G.C.y+.5);
     ctx.save();ctx.translate(px,py);ctx.rotate((G.C.a||0)+Math.PI/2);ctx.fillStyle='#ffe36a';ctx.strokeStyle='#2a1a0c';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(5,6);ctx.lineTo(0,3);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
     ctx.fillStyle='rgba(30,22,16,.85)';ctx.fillRect(0,DH-17,DW,17);txt(cfg.foot||'You are the yellow arrow.',DW/2,DH-8.5,7.5,'#e0d8bc','center',true);
