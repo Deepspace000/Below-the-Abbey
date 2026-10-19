@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.428';
+const VERSION='3.429';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -22456,15 +22456,15 @@ function ringFor(u,rate){const tier=rate>=50?4:rate>=38?3:rate>=22?2:1,pool=RING
    THE HOLLOW GRASSLANDS. A wide dark grassland inside the earth, under a roof of rock, with the wind always in it. Strange rocks sit on the low hills, the
    little villages are white round houses behind spiked wooden fences, and on the hills the insectivores sit in wait. Four beehive dungeons lie scattered
    over it. The people are frog-like and speak a tongue the party cannot follow until it has found the four books in the hives (see hollowgrass_talk.js).
-   Levels: 470 the grassland, 471 to 474 the four hives. The way in is a spiked gate at the east end of the high ledge in the Hollow Land (level 364).
+   Levels: 470 the grassland, 471 to 474 the four hives. The way in is the portal at the top of the Orange Spire, opened when the last ruler dies (hollowgrass_story.js); the way out is the spiked gate in the south, onto the ledge of the Hollow Land (level 364).
    ========================================================================== */
 const HG={ID:470,HIVES:[471,472,473,474],W:150,H:150,DIFF:66,START:{x:75,y:142}};
-const HG_TOWNS=[{k:'exsce',n:'Exsce',x:75,y:106},{k:'ulb',n:'Ulb',x:26,y:84},{k:'glorm',n:'Glorm',x:124,y:82},{k:'wexsh',n:'Wexsh',x:42,y:36},{k:'nibb',n:'Nibb',x:112,y:30}];
-const HG_HIVE_AT=[[22,122],[128,116],[76,58],[80,12]];
+const HG_TOWNS=[{k:'exsce',n:'Exsce',x:75,y:78},{k:'ulb',n:'Ulb',x:26,y:100},{k:'glorm',n:'Glorm',x:124,y:98},{k:'wexsh',n:'Wexsh',x:40,y:40},{k:'nibb',n:'Nibb',x:112,y:34}];
+const HG_HIVE_AT=[[22,128],[128,124],[76,48],[80,12]];
 const HG_HIVE_NAMES=['The Hush Hive','The Droning Hive','The Amber Hive','The Queen’s Hive'];
 for(let i=0;i<10;i++){loadImg('hg_ins'+i,'assets/hg_ins'+i+'.png');loadImg('hg_ins'+i+'A','assets/hg_ins'+i+'A.png')}
 for(const n of ['hg_frog0','hg_frog1','hg_swarm0','hg_swarm1','hg_swarm0A','hg_swarm1A','hg_larva','hg_larvaA','hg_wasp','hg_waspA','hg_golem','hg_golemA','hg_queen','hg_queenA','hg_house0','hg_house1','hg_house2','hg_arch','hg_lamp','hg_pillar','hg_tower0','hg_tower1','hg_tower2','hg_tower3','hg_tower4','hg_tower5','hg_tower6','hg_tower7','hg_palisade','hg_gate','hg_rock0','hg_rock1','hg_hive','hg_well','hg_chestwax','hg_chestweed','hg_chestjelly','hg_waxbarrel','hg_jar','hg_lectern','hg_eggs','hg_wizard','hg_npc0','hg_npc1','hg_npc3','hg_npc4','hg_npc5','hg_npc6'])loadImg(n,'assets/'+n+'.png');
-Object.assign(NPC_H,{hg_frog0:1.0,hg_frog1:1.0,hg_house0:3.1,hg_house1:2.5,hg_house2:3.4,hg_arch:2.6,hg_lamp:2.2,hg_pillar:2.4,hg_tower0:5,hg_tower1:5,hg_tower2:5,hg_tower3:5,hg_palisade:1.6,hg_gate:2.1,hg_rock0:3.0,hg_rock1:2.2,hg_hive:3.2,hg_well:1.7,hg_chestwax:.62,hg_chestweed:.62,hg_chestjelly:.62,hg_waxbarrel:.95,hg_jar:1.1,hg_lectern:1.1,hg_eggs:.95,hg_wizard:1.35,hg_npc0:1.35,hg_npc1:1.25,hg_npc3:1.0,hg_npc4:1.4,hg_npc5:1.3,hg_npc6:1.3});
+Object.assign(NPC_H,{hg_frog0:1.0,hg_frog1:1.0,hg_house0:3.1,hg_house1:2.5,hg_house2:3.4,hg_arch:3.6,hg_lamp:2.2,hg_pillar:2.4,hg_tower0:5,hg_tower1:5,hg_tower2:5,hg_tower3:5,hg_palisade:1.6,hg_gate:2.1,hg_rock0:3.0,hg_rock1:2.2,hg_hive:2.8,hg_well:1.7,hg_chestwax:.62,hg_chestweed:.62,hg_chestjelly:.62,hg_waxbarrel:.95,hg_jar:1.1,hg_lectern:1.1,hg_eggs:.95,hg_wizard:1.35,hg_npc0:1.35,hg_npc1:1.25,hg_npc3:1.0,hg_npc4:1.4,hg_npc5:1.3,hg_npc6:1.3});
 CONTAINERS.push('hg_chestwax','hg_chestweed','hg_chestjelly','hg_waxbarrel','hg_jar');
 LEVEL_NAMES[HG.ID]='The Hollow Grasslands';HG.HIVES.forEach((id,i)=>LEVEL_NAMES[id]=HG_HIVE_NAMES[i]);
 LEVEL_RATING[HG.ID]=HG.DIFF;HG.HIVES.forEach((id,i)=>LEVEL_RATING[id]=HG.DIFF+i+1);
@@ -22610,9 +22610,10 @@ function hgBuild(){
   const R=10;
   towns.forEach(([cx,cy],ti)=>{
     for(let d=-R;d<=R;d++)for(const l of [-5,0,5]){for(const [x,y] of [[cx+l,cy+d],[cx+d,cy+l]])if(x>2&&y>2&&x<W-3&&y<H-3)fm[I(x,y)]='1'}
-    for(const [x,y] of [[cx,cy-R-1],[cx,cy-R-2],[cx,cy+R+1],[cx,cy+R+2]])fm[I(x,y)]='1';
+    for(const dx of [-1,0,1])for(const dy of [1,2,3])for(const sg of [-1,1])fm[I(cx+dx,cy+sg*(R+dy))]='1';
+    for(const dx of [-1,0,1])for(const sg of [-1,1])fm[I(cx+dx,cy+sg*R)]='1';
     for(let t=-R;t<=R;t++)for(const [x,y,gap] of [[cx+t,cy-R,Math.abs(t)<=1],[cx+t,cy+R,Math.abs(t)<=1],[cx-R,cy+t,false],[cx+R,cy+t,false]]){if(gap)continue;used.add(K(x,y));decor.push({k:'hg_palisade',x,y,block:true,sc:1,ox:(hs(x,y,sd+20)-.5)*.3})}
-    for(const [x,y] of [[cx-2,cy-R+1],[cx+2,cy-R+1],[cx-2,cy+R-1],[cx+2,cy+R-1]]){decor.push({k:'hg_lamp',x,y,block:false,walk:true,deco:true});lights.push([x,y]);used.add(K(x,y))}
+    for(const [x,y] of [[cx-2,cy-R-1],[cx+2,cy-R-1],[cx-2,cy+R+1],[cx+2,cy+R+1],[cx-2,cy-R+1],[cx+2,cy-R+1],[cx-2,cy+R-1],[cx+2,cy+R-1]]){decor.push({k:'hg_lamp',x,y,block:false,walk:true,deco:true});lights.push([x,y]);used.add(K(x,y))}
     // houses in the blocks between the lanes, apart from the four round the little square
     for(const bx of [-8,-3,2,7])for(const by of [-8,-3,2,7]){
       if((bx===-3||bx===2)&&(by===-3||by===2))continue;
@@ -22647,7 +22648,7 @@ function hgBuild(){
   // wax chests lie out in the grass here and there
   for(let t=0,c=0;t<800&&c<10;t++){const x=8+((hs(t,13,sd+90)*(W-16))|0),y=8+((hs(t,14,sd+90)*(H-16))|0);if(used.has(K(x,y))||near(x,y,towns,14)||near(x,y,[[HG.START.x,HG.START.y]],12))continue;used.add(K(x,y));c++;decor.push({k:['hg_chestweed','hg_chestwax','hg_chestjelly'][c%3],x,y,block:true})}
   // the hives
-  hives.forEach((p,i)=>{decor.push({k:'hg_hive',x:p[0],y:p[1],block:true,enter:{to:HG.HIVES[i],x:0,y:0,f:0},sc:1.05});used.add(K(p[0],p[1]));lights.push([p[0],p[1]+2]);fm[I(p[0],p[1]+1)]='1';fm[I(p[0],p[1]+2)]='1'});
+  hives.forEach((p,i)=>{decor.push({k:'hg_hive',x:p[0],y:p[1],block:true,enter:{to:HG.HIVES[i],x:0,y:0,f:0},sc:1.05,bob:-.75});used.add(K(p[0],p[1]));lights.push([p[0],p[1]+2]);fm[I(p[0],p[1]+1)]='1';fm[I(p[0],p[1]+2)]='1'});
   // the gate in the south, back to the Hollow Land
   decor.push({k:'hg_gate',x:HG.START.x,y:HG.H-4,block:true,enter:{to:HL.CAV,x:61,y:57,f:3}});
   // the wizard, a little way up the track, who will come to meet the party (see hollowgrass_talk.js)
@@ -22663,8 +22664,7 @@ function hgBuild(){
   hives.forEach((p,i)=>{hgHive(i);const hv=LEVELS[HG.HIVES[i]],d=decor.find(q=>q.enter&&q.k==='hg_hive'&&q.x===p[0]&&q.y===p[1]);if(d){d.enter.x=hv.start.x;d.enter.y=hv.start.y;d.enter.f=0}});
 }
 KH_LAZY[HG.ID]=hgBuild;HG.HIVES.forEach((id,i)=>{KH_LAZY[id]=()=>{hgBuild();hgHive(i)}});
-/* the way in: a spiked gate at the east end of the high ledge in the Hollow Land. The grassland is built the first time the ledge is, so the gate opens at once. */
-{const _hc=hlCavern;hlCavern=function(){_hc.apply(this,arguments);const L=LEVELS[HL.CAV];if(L&&!L._hg){L._hg=1;L.decor.push({k:'hg_gate',x:63,y:57,block:true,enter:{to:HG.ID,x:HG.START.x,y:HG.START.y,f:0}});L.mapNames.push({t:'The Gate to the Grasslands',x:61,y:58,k:'lane'});try{hgBuild()}catch(e){console.error(e)}}}}
+/* the way in is the portal at the top of the Orange Spire (hollowgrass_story.js), once the last ruler is dead; the spiked gate in the south leads back out onto the high ledge of the Hollow Land */
 /* the cold: a blue-grey grade over the whole view, bands of mist drifting along the horizon, and a few pale motes of light that hang in the air */
 {const _w=drawWeatherFx;drawWeatherFx=function(){_w.apply(this,arguments);if(LEVEL!==HG.ID)return;
   const t=G.time||0;ctx.save();
@@ -22804,12 +22804,12 @@ const HG_FROGLINES=['A great damp creature, something between a whale and a frog
 khNpc('hg_frogbeast','A frog-whale','hg_frog0',()=>say(HG_FROGLINES[(G.flags.hgFrog=(G.flags.hgFrog||0)+1)%HG_FROGLINES.length],[BYE]));
 /* ---------- Aldous Wend ---------- */
 khNpc('hg_aldous0','Aldous Wend, wizard','hg_wizard',()=>{
-  const l1=say('Well met, travellers! Do not be alarmed. I am Aldous Wend, a wizard, and I have been waiting a long while for someone with sensible boots. You have come through the gate into the Hollow Grasslands, a great cavern inside the earth, where the roof is lost in the dark and the wind never stops.',[['Go on.',()=>l2]]);
+  const l1=say('Well met, travellers! Do not be alarmed. I am Aldous Wend, a wizard, and I have been waiting a long while for someone with sensible boots. You have come through the portal into the Hollow Grasslands, a great cavern inside the earth, where the roof is lost in the dark and the wind never stops.',[['Go on.',()=>l2]]);
   const l2=say('The people who live here are good people, but they speak in the gurgle and click of the deep ponds, and no stranger can follow it. You will hear them, and read what they say, and understand none of it. They cannot ask you for help, and you cannot give it.',[['Go on.',()=>l3]]);
-  const l3=say('I can. There is a village a little way north along the track, called Exsce. Meet me there, by the well. I will give you four tasks, and each one will teach you more of their tongue. Mind the hills on the way: there are things in the long grass that sit and wait. Walk on the track, and do not go near the high ground.',[['We will meet you in Exsce.',()=>{const F=G.flags;F.hgIntro=1;const d=G.decor.find(q=>q.npc==='hg_aldous0');if(d){d.hidden=true;d.npc=undefined;d.block=false}msg('Aldous Wend has asked you to meet him in the village of Exsce, a little way north.','#ffe36a');return null}]]);
+  const l3=say('I can. There is a village a good walk north along the track, called Exsce. Meet me there, by the well; follow the dirt track and go in at the arch in the fence. I will give you four tasks, and each one will teach you more of their tongue. Mind the hills on the way: there are things in the long grass that sit and wait. Walk on the track, and do not go near the high ground.',[['We will meet you in Exsce.',()=>{const F=G.flags;F.hgIntro=1;const d=G.decor.find(q=>q.npc==='hg_aldous0');if(d){d.hidden=true;d.npc=undefined;d.block=false}msg('Aldous Wend has asked you to meet him in the village of Exsce, a good walk north along the track.','#ffe36a');return null}]]);
   return l1;
 },{sc:1});
-const HG_HINTS=['The Hush Hive lies to the west, a day’s walk from Exsce, in the low hills. It is the smallest of the four, and the quietest. The grubs in it are slow.','The Droning Hive lies far to the east, beyond Glorm. The wasps there are many and they never sleep, so go well rested.','The Amber Hive lies north of Exsce, beyond the high hills, in rocky ground. Its guardian is made of wax. It is slow, but it hits hard.','The Queen’s Hive lies in the far north, past Nibb, at the top of the grassland. The queen keeps her great dictionary there. Go last, and go ready.'];
+const HG_HINTS=['The Hush Hive lies to the west, a long walk south-west of Exsce, in the low hills. It is the smallest of the four, and the quietest. The grubs in it are slow.','The Droning Hive lies far to the east, beyond Glorm. The wasps there are many and they never sleep, so go well rested.','The Amber Hive lies north of Exsce, beyond the high hills, in rocky ground. Its guardian is made of wax. It is slow, but it hits hard.','The Queen’s Hive lies in the far north, past Nibb, at the top of the grassland. The queen keeps her great dictionary there. Go last, and go ready.'];
 khNpc('hg_aldous','Aldous Wend, wizard','hg_wizard',()=>{
   const F=G.flags,lv=hgLvl(),nextId='hgb'+(lv+1),nextOk=lv<4&&(qSt(nextId)===null||qSt(nextId)==='active'||qSt(nextId)==='done');
   const opts=[];
@@ -22933,6 +22933,55 @@ function hgmOverview(){
   btnText('worldmap','World map',328,5,80,20);btnText('ovexit','Exit',414,5,60,20);
 }
 {const _do=drawOverview;drawOverview=function(){if(LEVEL===HG.ID&&LEVELS[HG.ID]){hgmOverview();return}return _do.apply(this,arguments)}}
+
+/* ---- src/desert/hollowgrass_story.js ---- */
+/* ==========================================================================
+   THE WAY TO THE HOLLOW GRASSLANDS. When the Hollow Child-King, the last ruler (floor 19 of the Orange Spire), is destroyed, the spell in the walls closes
+   round the party. The Child-King's dust rises, laughs and is gone, and the Orange Spire is sealed: no stair goes down, and its gate cannot be opened from the
+   Hollow Land. The party is thrown up to the top of the spire, where a portal hangs in the room of the wizard. It is the only way out, and it leads to the
+   Hollow Grasslands. From there the spiked gate in the south leads back out onto the high ledge of the Hollow Land.
+   ========================================================================== */
+const HGS={sealed:()=>!!(G.flags&&G.flags.hlSealed)};
+khNpc('hl_banish','The Hollow Child-King','hl_boss3',()=>{
+  const n4=say('The whole spire shudders. Every stair below the party turns to solid stone, and the great gate far below closes with a sound like a bell. The Orange Spire is sealed. The spell lifts the party up the last stair, to the room at the top.',[['Go on.',()=>{hgsBanish();return null}]]);
+  const n3=say('"A king cannot die in his own tower. You have only killed what I left behind. The wizard at the top, the stairs, the gate, the ledge: all of it is shut now, and I am free. Go down into the Hollow Lands, little heroes. It is the only way out."',[['Go on.',()=>n4]]);
+  const n2=say('The Child-King\'s body falls to dust, and the dust rises and laughs. A ring of cold light has closed round the party, and nobody can lift a hand. The voice is the Child-King\'s, and it comes from everywhere.',[['Go on.',()=>n3]]);
+  return say('The Hollow Child-King falls, and he is smiling. The walls of the hall begin to hum, and the hum rises into a note that goes through the bones.',[['Go on.',()=>n2]])});
+function hgsBanish(){
+  const F=G.flags;F.hlSealed=1;try{giveXP(60000)}catch(e){}
+  msg('The Orange Spire is sealed.','#e8a8ff');
+  const top=HL.BASE+HL.N-1;
+  if(!LEVELS[top]&&KH_LAZY[top])KH_LAZY[top]();
+  hgsPatchTop();
+  const x=HLX[HL.N-1]||{x:2,y:2};
+  later(300,()=>{G.cut=null;goToLevel(top,{x:x.x,y:x.y,f:0});msg('The party stands at the top of the spire. Where the wizard stood, dark air turns slowly, and it is the only way out.','#e8a8ff')})}
+/* at the top, the wizard is gone and a portal hangs in his place */
+khNpc('hg_portal','A portal','tele0',()=>say('A slow wheel of dark air hangs where the wizard stood. It smells of wet grass and cold stone, and a wind comes out of it. Below the wind, very faintly, there is a sound like bees.',[['Step into the portal.',()=>{try{hgBuild()}catch(e){console.error(e)}goToLevel(HG.ID,{x:HG.START.x,y:HG.START.y,f:0});return null}],['Stay.',()=>null]]));
+function hgsPatchTop(){
+  const L=LEVELS[HL.BASE+HL.N-1];if(!L||L._hgp)return;L._hgp=1;
+  for(const d of L.decor)if(d.npc==='hl_wizard'){d.k='tele0';d.npc='hg_portal';d.block=true;d.sc=1.4}
+  if(typeof IMG!=='undefined'&&!IMG.tele0)for(const d of L.decor)if(d.npc==='hg_portal')d.k='lamp'}
+/* the last ruler's death starts it */
+{const _he=hurtEnemy;hurtEnemy=function(e,dmg){const was=e.hp>0&&e.t==='hlboss3'&&!(G.flags&&G.flags.hlSealed);_he.apply(this,arguments);
+  if(was&&e.hp<=0){later(2200,()=>{G.talk=null;G.cut=null;startTalk({npc:'hl_banish',x:e.x,y:e.y})})}}}
+/* the last ruler: floor 19 of the spire never got its ruler, so he is put in the hall farthest from the stair up */
+function hgsBoss(){
+  const id=HL.BASE+18;if(!LEVELS[id]&&KH_LAZY[id])KH_LAZY[id]();const L=LEVELS[id];if(!L||L._hgBoss||L.enemies.some(e=>e.t==='hlboss3'))return;L._hgBoss=1;
+  const W=L.rows[0].length,H=L.rows.length,s=L._start||L.start,d=new Int16Array(W*H).fill(-1),q=[s.x+s.y*W],occ=new Set(L.decor.filter(z=>z.block).map(z=>z.x+','+z.y).concat(L.enemies.map(z=>z.x+','+z.y)));d[q[0]]=0;
+  for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H||L.rows[ny][nx]!=='.'||d[ny*W+nx]>=0)continue;d[ny*W+nx]=d[c]+1;q.push(ny*W+nx)}}
+  let best=null,bd=-1;for(const c of q){const x=c%W,y=(c/W)|0;if(occ.has(x+','+y))continue;if(d[c]>bd){bd=d[c];best=[x,y]}}
+  if(best)L.enemies.push({t:'hlboss3',x:best[0],y:best[1]})}
+/* the spire is sealed: nothing goes down, and the gate will not open from outside */
+{const _g=goToLevel;goToLevel=function(n,entry){
+  const F=G.flags;
+  if(n===HL.BASE+18)try{hgsBoss()}catch(e){console.error(e)}
+  if(F&&F.hlSealed){
+    const inSpire=LEVEL>=HL.BASE&&LEVEL<=HL.VIOLET;
+    if(inSpire&&(n<LEVEL||n<HL.BASE)&&n!==HG.ID){msg('The way down is solid stone. The spell has sealed the spire.','#e8a8ff');return}
+    if(LEVEL===HL.CAV&&n>=HL.BASE&&n<=HL.VIOLET){msg('The gate of the Orange Spire is sealed by a spell. There is no latch and no seam.','#e8a8ff');return}
+    if(n===HL.BASE+HL.N-1)try{if(!LEVELS[n]&&KH_LAZY[n])KH_LAZY[n]();hgsPatchTop()}catch(e){}
+  }
+  return _g.apply(this,arguments)}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

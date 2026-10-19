@@ -32,9 +32,10 @@ function hgBuild(){
   const R=10;
   towns.forEach(([cx,cy],ti)=>{
     for(let d=-R;d<=R;d++)for(const l of [-5,0,5]){for(const [x,y] of [[cx+l,cy+d],[cx+d,cy+l]])if(x>2&&y>2&&x<W-3&&y<H-3)fm[I(x,y)]='1'}
-    for(const [x,y] of [[cx,cy-R-1],[cx,cy-R-2],[cx,cy+R+1],[cx,cy+R+2]])fm[I(x,y)]='1';
+    for(const dx of [-1,0,1])for(const dy of [1,2,3])for(const sg of [-1,1])fm[I(cx+dx,cy+sg*(R+dy))]='1';
+    for(const dx of [-1,0,1])for(const sg of [-1,1])fm[I(cx+dx,cy+sg*R)]='1';
     for(let t=-R;t<=R;t++)for(const [x,y,gap] of [[cx+t,cy-R,Math.abs(t)<=1],[cx+t,cy+R,Math.abs(t)<=1],[cx-R,cy+t,false],[cx+R,cy+t,false]]){if(gap)continue;used.add(K(x,y));decor.push({k:'hg_palisade',x,y,block:true,sc:1,ox:(hs(x,y,sd+20)-.5)*.3})}
-    for(const [x,y] of [[cx-2,cy-R+1],[cx+2,cy-R+1],[cx-2,cy+R-1],[cx+2,cy+R-1]]){decor.push({k:'hg_lamp',x,y,block:false,walk:true,deco:true});lights.push([x,y]);used.add(K(x,y))}
+    for(const [x,y] of [[cx-2,cy-R-1],[cx+2,cy-R-1],[cx-2,cy+R+1],[cx+2,cy+R+1],[cx-2,cy-R+1],[cx+2,cy-R+1],[cx-2,cy+R-1],[cx+2,cy+R-1]]){decor.push({k:'hg_lamp',x,y,block:false,walk:true,deco:true});lights.push([x,y]);used.add(K(x,y))}
     // houses in the blocks between the lanes, apart from the four round the little square
     for(const bx of [-8,-3,2,7])for(const by of [-8,-3,2,7]){
       if((bx===-3||bx===2)&&(by===-3||by===2))continue;
@@ -69,7 +70,7 @@ function hgBuild(){
   // wax chests lie out in the grass here and there
   for(let t=0,c=0;t<800&&c<10;t++){const x=8+((hs(t,13,sd+90)*(W-16))|0),y=8+((hs(t,14,sd+90)*(H-16))|0);if(used.has(K(x,y))||near(x,y,towns,14)||near(x,y,[[HG.START.x,HG.START.y]],12))continue;used.add(K(x,y));c++;decor.push({k:['hg_chestweed','hg_chestwax','hg_chestjelly'][c%3],x,y,block:true})}
   // the hives
-  hives.forEach((p,i)=>{decor.push({k:'hg_hive',x:p[0],y:p[1],block:true,enter:{to:HG.HIVES[i],x:0,y:0,f:0},sc:1.05});used.add(K(p[0],p[1]));lights.push([p[0],p[1]+2]);fm[I(p[0],p[1]+1)]='1';fm[I(p[0],p[1]+2)]='1'});
+  hives.forEach((p,i)=>{decor.push({k:'hg_hive',x:p[0],y:p[1],block:true,enter:{to:HG.HIVES[i],x:0,y:0,f:0},sc:1.05,bob:-.75});used.add(K(p[0],p[1]));lights.push([p[0],p[1]+2]);fm[I(p[0],p[1]+1)]='1';fm[I(p[0],p[1]+2)]='1'});
   // the gate in the south, back to the Hollow Land
   decor.push({k:'hg_gate',x:HG.START.x,y:HG.H-4,block:true,enter:{to:HL.CAV,x:61,y:57,f:3}});
   // the wizard, a little way up the track, who will come to meet the party (see hollowgrass_talk.js)
@@ -85,8 +86,7 @@ function hgBuild(){
   hives.forEach((p,i)=>{hgHive(i);const hv=LEVELS[HG.HIVES[i]],d=decor.find(q=>q.enter&&q.k==='hg_hive'&&q.x===p[0]&&q.y===p[1]);if(d){d.enter.x=hv.start.x;d.enter.y=hv.start.y;d.enter.f=0}});
 }
 KH_LAZY[HG.ID]=hgBuild;HG.HIVES.forEach((id,i)=>{KH_LAZY[id]=()=>{hgBuild();hgHive(i)}});
-/* the way in: a spiked gate at the east end of the high ledge in the Hollow Land. The grassland is built the first time the ledge is, so the gate opens at once. */
-{const _hc=hlCavern;hlCavern=function(){_hc.apply(this,arguments);const L=LEVELS[HL.CAV];if(L&&!L._hg){L._hg=1;L.decor.push({k:'hg_gate',x:63,y:57,block:true,enter:{to:HG.ID,x:HG.START.x,y:HG.START.y,f:0}});L.mapNames.push({t:'The Gate to the Grasslands',x:61,y:58,k:'lane'});try{hgBuild()}catch(e){console.error(e)}}}}
+/* the way in is the portal at the top of the Orange Spire (hollowgrass_story.js), once the last ruler is dead; the spiked gate in the south leads back out onto the high ledge of the Hollow Land */
 /* the cold: a blue-grey grade over the whole view, bands of mist drifting along the horizon, and a few pale motes of light that hang in the air */
 {const _w=drawWeatherFx;drawWeatherFx=function(){_w.apply(this,arguments);if(LEVEL!==HG.ID)return;
   const t=G.time||0;ctx.save();

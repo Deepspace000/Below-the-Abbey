@@ -2,15 +2,15 @@
    THE HOLLOW GRASSLANDS. A wide dark grassland inside the earth, under a roof of rock, with the wind always in it. Strange rocks sit on the low hills, the
    little villages are white round houses behind spiked wooden fences, and on the hills the insectivores sit in wait. Four beehive dungeons lie scattered
    over it. The people are frog-like and speak a tongue the party cannot follow until it has found the four books in the hives (see hollowgrass_talk.js).
-   Levels: 470 the grassland, 471 to 474 the four hives. The way in is a spiked gate at the east end of the high ledge in the Hollow Land (level 364).
+   Levels: 470 the grassland, 471 to 474 the four hives. The way in is the portal at the top of the Orange Spire, opened when the last ruler dies (hollowgrass_story.js); the way out is the spiked gate in the south, onto the ledge of the Hollow Land (level 364).
    ========================================================================== */
 const HG={ID:470,HIVES:[471,472,473,474],W:150,H:150,DIFF:66,START:{x:75,y:142}};
-const HG_TOWNS=[{k:'exsce',n:'Exsce',x:75,y:106},{k:'ulb',n:'Ulb',x:26,y:84},{k:'glorm',n:'Glorm',x:124,y:82},{k:'wexsh',n:'Wexsh',x:42,y:36},{k:'nibb',n:'Nibb',x:112,y:30}];
-const HG_HIVE_AT=[[22,122],[128,116],[76,58],[80,12]];
+const HG_TOWNS=[{k:'exsce',n:'Exsce',x:75,y:78},{k:'ulb',n:'Ulb',x:26,y:100},{k:'glorm',n:'Glorm',x:124,y:98},{k:'wexsh',n:'Wexsh',x:40,y:40},{k:'nibb',n:'Nibb',x:112,y:34}];
+const HG_HIVE_AT=[[22,128],[128,124],[76,48],[80,12]];
 const HG_HIVE_NAMES=['The Hush Hive','The Droning Hive','The Amber Hive','The Queen’s Hive'];
 for(let i=0;i<10;i++){loadImg('hg_ins'+i,'assets/hg_ins'+i+'.png');loadImg('hg_ins'+i+'A','assets/hg_ins'+i+'A.png')}
 for(const n of ['hg_frog0','hg_frog1','hg_swarm0','hg_swarm1','hg_swarm0A','hg_swarm1A','hg_larva','hg_larvaA','hg_wasp','hg_waspA','hg_golem','hg_golemA','hg_queen','hg_queenA','hg_house0','hg_house1','hg_house2','hg_arch','hg_lamp','hg_pillar','hg_tower0','hg_tower1','hg_tower2','hg_tower3','hg_tower4','hg_tower5','hg_tower6','hg_tower7','hg_palisade','hg_gate','hg_rock0','hg_rock1','hg_hive','hg_well','hg_chestwax','hg_chestweed','hg_chestjelly','hg_waxbarrel','hg_jar','hg_lectern','hg_eggs','hg_wizard','hg_npc0','hg_npc1','hg_npc3','hg_npc4','hg_npc5','hg_npc6'])loadImg(n,'assets/'+n+'.png');
-Object.assign(NPC_H,{hg_frog0:1.0,hg_frog1:1.0,hg_house0:3.1,hg_house1:2.5,hg_house2:3.4,hg_arch:2.6,hg_lamp:2.2,hg_pillar:2.4,hg_tower0:5,hg_tower1:5,hg_tower2:5,hg_tower3:5,hg_palisade:1.6,hg_gate:2.1,hg_rock0:3.0,hg_rock1:2.2,hg_hive:3.2,hg_well:1.7,hg_chestwax:.62,hg_chestweed:.62,hg_chestjelly:.62,hg_waxbarrel:.95,hg_jar:1.1,hg_lectern:1.1,hg_eggs:.95,hg_wizard:1.35,hg_npc0:1.35,hg_npc1:1.25,hg_npc3:1.0,hg_npc4:1.4,hg_npc5:1.3,hg_npc6:1.3});
+Object.assign(NPC_H,{hg_frog0:1.0,hg_frog1:1.0,hg_house0:3.1,hg_house1:2.5,hg_house2:3.4,hg_arch:3.6,hg_lamp:2.2,hg_pillar:2.4,hg_tower0:5,hg_tower1:5,hg_tower2:5,hg_tower3:5,hg_palisade:1.6,hg_gate:2.1,hg_rock0:3.0,hg_rock1:2.2,hg_hive:2.8,hg_well:1.7,hg_chestwax:.62,hg_chestweed:.62,hg_chestjelly:.62,hg_waxbarrel:.95,hg_jar:1.1,hg_lectern:1.1,hg_eggs:.95,hg_wizard:1.35,hg_npc0:1.35,hg_npc1:1.25,hg_npc3:1.0,hg_npc4:1.4,hg_npc5:1.3,hg_npc6:1.3});
 CONTAINERS.push('hg_chestwax','hg_chestweed','hg_chestjelly','hg_waxbarrel','hg_jar');
 LEVEL_NAMES[HG.ID]='The Hollow Grasslands';HG.HIVES.forEach((id,i)=>LEVEL_NAMES[id]=HG_HIVE_NAMES[i]);
 LEVEL_RATING[HG.ID]=HG.DIFF;HG.HIVES.forEach((id,i)=>LEVEL_RATING[id]=HG.DIFF+i+1);
