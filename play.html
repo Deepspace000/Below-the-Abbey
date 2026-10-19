@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.425';
+const VERSION='3.426';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -22453,7 +22453,7 @@ function ringFor(u,rate){const tier=rate>=50?4:rate>=38?3:rate>=22?2:1,pool=RING
 
 /* ---- src/desert/hollowgrass.js ---- */
 /* ==========================================================================
-   THE HOLLOW GRASSLANDS. A wide dark grassland under a sky that is never lit, with the wind always in it. Strange rocks sit on the low hills, the
+   THE HOLLOW GRASSLANDS. A wide dark grassland inside the earth, under a roof of rock, with the wind always in it. Strange rocks sit on the low hills, the
    little villages are white round houses behind spiked wooden fences, and on the hills the insectivores sit in wait. Four beehive dungeons lie scattered
    over it. The people are frog-like and speak a tongue the party cannot follow until it has found the four books in the hives (see hollowgrass_talk.js).
    Levels: 470 the grassland, 471 to 474 the four hives. The way in is a spiked gate at the east end of the high ledge in the Hollow Land (level 364).
@@ -22655,8 +22655,8 @@ function hgBuild(){
   const fmap=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=fm[I(x,y)];fmap.push(r)}
     // tall strange towers stand all round the edge of the land, far off, fading into the mist
   const sky=[];for(let i=0;i<34;i++){const f=(i+hs(i,1,sd+95)*.6)/34*4,e=Math.floor(f),u=f-e,m=6+hs(i,2,sd+96)*6,x=e===0?3+u*(W-6):e===2?W-3-u*(W-6):e===1?W-m:m,y=e===0?m:e===2?H-m:e===1?3+u*(H-6):H-3-u*(H-6),k='hg_tower'+(hs(i,3,sd+97)<.4?(hs(i,4,sd+98)*4)|0:4+((hs(i,5,sd+99)*4)|0));sky.push({x,y,k,w:7+hs(i,6,sd+100)*9,z:0,big:1})}
-  const lv={rows:rows.map(r=>r.join('')),start:{x:HG.START.x,y:HG.START.y,f:0},enemies,items,decor,scenery:[],sky,fmap,floorSet:['ohMeadow','ohGravel','ohLawn','bluesand','bluewater','ohMoss','isleSandDk','wood'],floor:'ohMeadow',ceil:'cloud',
-    day:.16,outdoor:true,amb:.5,name:LEVEL_NAMES[HG.ID],label:'The Hollow Grasslands',noExtras:true,diff:HG.DIFF,ceilH:5.2,chars,lights,portals:[],noTele:true,
+  const lv={rows:rows.map(r=>r.join('')),start:{x:HG.START.x,y:HG.START.y,f:0},enemies,items,decor,scenery:[],sky,fmap,floorSet:['ohMeadow','ohGravel','ohLawn','bluesand','bluewater','ohMoss','isleSandDk','wood'],floor:'ohMeadow',ceil:'tomb',
+    day:0,outdoor:true,amb:.58,name:LEVEL_NAMES[HG.ID],label:'The Hollow Grasslands',noExtras:true,diff:HG.DIFF,ceilH:9,chars,lights,portals:[],noTele:true,
     mapNames:[...HG_TOWNS.map(t=>({t:t.n,x:t.x,y:t.y-R-2,k:'place'})),...HG_HIVE_NAMES.map((n,i)=>({t:n,x:HG_HIVE_AT[i][0],y:HG_HIVE_AT[i][1]-3,k:'place'}))]};
   LEVELS[HG.ID]=lv;TERRS[HG.ID]=yarTerrain(W,H,h,rk,block);
   // the doors of the hives know where they stand
@@ -22781,11 +22781,11 @@ const HG_FOLK=[
   ['hgn_fleek','Healer Fleek','hg_npc6',[5,3],'hgq16',['The old ones say the grassland was a pond once. I believe them.']],
   ['hgn_snorr','Snorr, the trader','hg_npc5',[-5,-3],null,['I trade in what people want. People want kelp, mostly.'],'merchant'],
   ['hgn_wimm','Wimm','hg_npc3',[5,-2],null,['One day I will go to the hives and bring back a whole honeycomb. One day. Not today.']]],
- [['hgn_bleb','Aunt Bleb','hg_npc1',[-2,0],'hgq17',['The festival is the best night of the year. Though it is always night.']],
+ [['hgn_bleb','Aunt Bleb','hg_npc1',[-2,0],'hgq17',['The festival is the best night of the year. Though it is always dark.']],
   ['hgn_bibbn','Little Bibb','hg_npc3',[0,-2],'hgq18',['I am cooking the feast! I am doing the whole feast! By myself! Alone!']],
   ['hgn_slup','Healer Slup','hg_npc6',[5,3],'hgq19',['The queens make the best medicine in the world, and nobody can get it.']],
   ['hgn_grull','Guard Grull','hg_npc4',[0,8],'hgq20',['The north gate is mine. I like the north gate. It is quiet. Mostly.']],
-  ['hgn_oom','Elder Oom','hg_npc0',[5,-2],null,['I remember the last time the sky was lit. I was very small. It was very bright. I did not like it.']],
+  ['hgn_oom','Elder Oom','hg_npc0',[5,-2],null,['I remember when the roof glowed, long ago. I was very small. It was very bright. I did not like it.']],
   ['hgn_trundle','Trundle, the trader','hg_npc5',[-5,3],null,['Everything has a price. Even a kind word. Especially a kind word.'],'merchant']]];
 for(const town of HG_FOLK)for(const f of town){const [id,nm,img,p,qid,chat,role]=f;
   if(role==='wizard')continue;
@@ -22804,7 +22804,7 @@ const HG_FROGLINES=['A great damp creature, something between a whale and a frog
 khNpc('hg_frogbeast','A frog-whale','hg_frog0',()=>say(HG_FROGLINES[(G.flags.hgFrog=(G.flags.hgFrog||0)+1)%HG_FROGLINES.length],[BYE]));
 /* ---------- Aldous Wend ---------- */
 khNpc('hg_aldous0','Aldous Wend, wizard','hg_wizard',()=>{
-  const l1=say('Well met, travellers! Do not be alarmed. I am Aldous Wend, a wizard, and I have been waiting a long while for someone with sensible boots. You have come through the gate into the Hollow Grasslands, where the sky is never lit and the wind never stops.',[['Go on.',()=>l2]]);
+  const l1=say('Well met, travellers! Do not be alarmed. I am Aldous Wend, a wizard, and I have been waiting a long while for someone with sensible boots. You have come through the gate into the Hollow Grasslands, a great cavern inside the earth, where the roof is lost in the dark and the wind never stops.',[['Go on.',()=>l2]]);
   const l2=say('The people who live here are good people, but they speak in the gurgle and click of the deep ponds, and no stranger can follow it. You will hear them, and read what they say, and understand none of it. They cannot ask you for help, and you cannot give it.',[['Go on.',()=>l3]]);
   const l3=say('I can. There is a village a little way north along the track, called Exsce. Meet me there, by the well. I will give you four tasks, and each one will teach you more of their tongue. Mind the hills on the way: there are things in the long grass that sit and wait. Walk on the track, and do not go near the high ground.',[['We will meet you in Exsce.',()=>{const F=G.flags;F.hgIntro=1;const d=G.decor.find(q=>q.npc==='hg_aldous0');if(d){d.hidden=true;d.npc=undefined;d.block=false}msg('Aldous Wend has asked you to meet him in the village of Exsce, a little way north.','#ffe36a');return null}]]);
   return l1;
@@ -22839,7 +22839,7 @@ const HG_BD={};
       if(dist>2.6){if(G._hgT<=0){G._hgT=.35;const sx=Math.abs(dx)>=Math.abs(dy)?Math.sign(dx):0,sy=sx?0:Math.sign(dy),nx=d.x+sx,ny=d.y+sy;if(!G.decor.some(q=>q!==d&&q.block&&q.x===nx&&q.y===ny)){d.x=nx;d.y=ny}}}
       else startTalk(d)}}
   return _u.apply(this,arguments)}}
-{const _oe=ohEnter;ohEnter=function(n){_oe.apply(this,arguments);if(n===HG.ID&&!G.flags.hgSeen){G.flags.hgSeen=1;msg('Wind hisses through the long grass. The sky above is dark, and it does not look as if it was ever lit.','#b8c8d8')}}}
+{const _oe=ohEnter;ohEnter=function(n){_oe.apply(this,arguments);if(n===HG.ID&&!G.flags.hgSeen){G.flags.hgSeen=1;msg('Wind hisses through the long grass. You are inside the earth: a vast cavern, with a roof lost in the dark overhead.','#b8c8d8')}}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

@@ -77,8 +77,8 @@ function hgBuild(){
   const fmap=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=fm[I(x,y)];fmap.push(r)}
     // tall strange towers stand all round the edge of the land, far off, fading into the mist
   const sky=[];for(let i=0;i<34;i++){const f=(i+hs(i,1,sd+95)*.6)/34*4,e=Math.floor(f),u=f-e,m=6+hs(i,2,sd+96)*6,x=e===0?3+u*(W-6):e===2?W-3-u*(W-6):e===1?W-m:m,y=e===0?m:e===2?H-m:e===1?3+u*(H-6):H-3-u*(H-6),k='hg_tower'+(hs(i,3,sd+97)<.4?(hs(i,4,sd+98)*4)|0:4+((hs(i,5,sd+99)*4)|0));sky.push({x,y,k,w:7+hs(i,6,sd+100)*9,z:0,big:1})}
-  const lv={rows:rows.map(r=>r.join('')),start:{x:HG.START.x,y:HG.START.y,f:0},enemies,items,decor,scenery:[],sky,fmap,floorSet:['ohMeadow','ohGravel','ohLawn','bluesand','bluewater','ohMoss','isleSandDk','wood'],floor:'ohMeadow',ceil:'cloud',
-    day:.16,outdoor:true,amb:.5,name:LEVEL_NAMES[HG.ID],label:'The Hollow Grasslands',noExtras:true,diff:HG.DIFF,ceilH:5.2,chars,lights,portals:[],noTele:true,
+  const lv={rows:rows.map(r=>r.join('')),start:{x:HG.START.x,y:HG.START.y,f:0},enemies,items,decor,scenery:[],sky,fmap,floorSet:['ohMeadow','ohGravel','ohLawn','bluesand','bluewater','ohMoss','isleSandDk','wood'],floor:'ohMeadow',ceil:'tomb',
+    day:0,outdoor:true,amb:.58,name:LEVEL_NAMES[HG.ID],label:'The Hollow Grasslands',noExtras:true,diff:HG.DIFF,ceilH:9,chars,lights,portals:[],noTele:true,
     mapNames:[...HG_TOWNS.map(t=>({t:t.n,x:t.x,y:t.y-R-2,k:'place'})),...HG_HIVE_NAMES.map((n,i)=>({t:n,x:HG_HIVE_AT[i][0],y:HG_HIVE_AT[i][1]-3,k:'place'}))]};
   LEVELS[HG.ID]=lv;TERRS[HG.ID]=yarTerrain(W,H,h,rk,block);
   // the doors of the hives know where they stand

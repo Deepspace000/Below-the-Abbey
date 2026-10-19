@@ -103,11 +103,11 @@ const HG_FOLK=[
   ['hgn_fleek','Healer Fleek','hg_npc6',[5,3],'hgq16',['The old ones say the grassland was a pond once. I believe them.']],
   ['hgn_snorr','Snorr, the trader','hg_npc5',[-5,-3],null,['I trade in what people want. People want kelp, mostly.'],'merchant'],
   ['hgn_wimm','Wimm','hg_npc3',[5,-2],null,['One day I will go to the hives and bring back a whole honeycomb. One day. Not today.']]],
- [['hgn_bleb','Aunt Bleb','hg_npc1',[-2,0],'hgq17',['The festival is the best night of the year. Though it is always night.']],
+ [['hgn_bleb','Aunt Bleb','hg_npc1',[-2,0],'hgq17',['The festival is the best night of the year. Though it is always dark.']],
   ['hgn_bibbn','Little Bibb','hg_npc3',[0,-2],'hgq18',['I am cooking the feast! I am doing the whole feast! By myself! Alone!']],
   ['hgn_slup','Healer Slup','hg_npc6',[5,3],'hgq19',['The queens make the best medicine in the world, and nobody can get it.']],
   ['hgn_grull','Guard Grull','hg_npc4',[0,8],'hgq20',['The north gate is mine. I like the north gate. It is quiet. Mostly.']],
-  ['hgn_oom','Elder Oom','hg_npc0',[5,-2],null,['I remember the last time the sky was lit. I was very small. It was very bright. I did not like it.']],
+  ['hgn_oom','Elder Oom','hg_npc0',[5,-2],null,['I remember when the roof glowed, long ago. I was very small. It was very bright. I did not like it.']],
   ['hgn_trundle','Trundle, the trader','hg_npc5',[-5,3],null,['Everything has a price. Even a kind word. Especially a kind word.'],'merchant']]];
 for(const town of HG_FOLK)for(const f of town){const [id,nm,img,p,qid,chat,role]=f;
   if(role==='wizard')continue;
@@ -126,7 +126,7 @@ const HG_FROGLINES=['A great damp creature, something between a whale and a frog
 khNpc('hg_frogbeast','A frog-whale','hg_frog0',()=>say(HG_FROGLINES[(G.flags.hgFrog=(G.flags.hgFrog||0)+1)%HG_FROGLINES.length],[BYE]));
 /* ---------- Aldous Wend ---------- */
 khNpc('hg_aldous0','Aldous Wend, wizard','hg_wizard',()=>{
-  const l1=say('Well met, travellers! Do not be alarmed. I am Aldous Wend, a wizard, and I have been waiting a long while for someone with sensible boots. You have come through the gate into the Hollow Grasslands, where the sky is never lit and the wind never stops.',[['Go on.',()=>l2]]);
+  const l1=say('Well met, travellers! Do not be alarmed. I am Aldous Wend, a wizard, and I have been waiting a long while for someone with sensible boots. You have come through the gate into the Hollow Grasslands, a great cavern inside the earth, where the roof is lost in the dark and the wind never stops.',[['Go on.',()=>l2]]);
   const l2=say('The people who live here are good people, but they speak in the gurgle and click of the deep ponds, and no stranger can follow it. You will hear them, and read what they say, and understand none of it. They cannot ask you for help, and you cannot give it.',[['Go on.',()=>l3]]);
   const l3=say('I can. There is a village a little way north along the track, called Exsce. Meet me there, by the well. I will give you four tasks, and each one will teach you more of their tongue. Mind the hills on the way: there are things in the long grass that sit and wait. Walk on the track, and do not go near the high ground.',[['We will meet you in Exsce.',()=>{const F=G.flags;F.hgIntro=1;const d=G.decor.find(q=>q.npc==='hg_aldous0');if(d){d.hidden=true;d.npc=undefined;d.block=false}msg('Aldous Wend has asked you to meet him in the village of Exsce, a little way north.','#ffe36a');return null}]]);
   return l1;
@@ -161,4 +161,4 @@ const HG_BD={};
       if(dist>2.6){if(G._hgT<=0){G._hgT=.35;const sx=Math.abs(dx)>=Math.abs(dy)?Math.sign(dx):0,sy=sx?0:Math.sign(dy),nx=d.x+sx,ny=d.y+sy;if(!G.decor.some(q=>q!==d&&q.block&&q.x===nx&&q.y===ny)){d.x=nx;d.y=ny}}}
       else startTalk(d)}}
   return _u.apply(this,arguments)}}
-{const _oe=ohEnter;ohEnter=function(n){_oe.apply(this,arguments);if(n===HG.ID&&!G.flags.hgSeen){G.flags.hgSeen=1;msg('Wind hisses through the long grass. The sky above is dark, and it does not look as if it was ever lit.','#b8c8d8')}}}
+{const _oe=ohEnter;ohEnter=function(n){_oe.apply(this,arguments);if(n===HG.ID&&!G.flags.hgSeen){G.flags.hgSeen=1;msg('Wind hisses through the long grass. You are inside the earth: a vast cavern, with a roof lost in the dark overhead.','#b8c8d8')}}}

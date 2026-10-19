@@ -1,5 +1,5 @@
 /* ==========================================================================
-   THE HOLLOW GRASSLANDS. A wide dark grassland under a sky that is never lit, with the wind always in it. Strange rocks sit on the low hills, the
+   THE HOLLOW GRASSLANDS. A wide dark grassland inside the earth, under a roof of rock, with the wind always in it. Strange rocks sit on the low hills, the
    little villages are white round houses behind spiked wooden fences, and on the hills the insectivores sit in wait. Four beehive dungeons lie scattered
    over it. The people are frog-like and speak a tongue the party cannot follow until it has found the four books in the hives (see hollowgrass_talk.js).
    Levels: 470 the grassland, 471 to 474 the four hives. The way in is a spiked gate at the east end of the high ledge in the Hollow Land (level 364).
