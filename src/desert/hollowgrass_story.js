@@ -46,8 +46,11 @@ function hgsBoss(){
   }
   return _g.apply(this,arguments)}}
 /* the Go to area menu is a way round the seal (it restores a save and jumps), so it is never blocked */
-{const _j=jumpToLevel;jumpToLevel=function(n,target){
-  // Go to area first restores the autosave; a save in the spire or the grasslands needs the city pictures loaded before it can be rebuilt, or the jump fails
-  let sv=null;try{sv=readSave('auto')||readSave('prev')}catch(e){}const l=sv&&sv.level;
-  if(l>=440&&l<=474&&((typeof KH_READY!=='undefined'&&!KH_READY)||(LEVELS[44]&&LEVELS[44].stub))){khThen(()=>jumpToLevel(n,target));return}
-  HGS.jump=1;try{return _j.apply(this,arguments)}finally{HGS.jump=0}}}
+{const _j=jumpToLevel;jumpToLevel=function(n,target,prepped){
+  // Go to area first restores the autosave. Whatever level that save is in, the city pictures are loaded first so the restore is never left half done,
+  // and if the restore still fails (an old or damaged save), the jump goes ahead with a fresh party instead of doing nothing.
+  if(!prepped&&((typeof KH_READY!=='undefined'&&!KH_READY)||(LEVELS[44]&&LEVELS[44].stub))){if(HGS.prep)return;HGS.prep=1;khPrepare().then(()=>{HGS.prep=0;jumpToLevel(n,target,1)}).catch(e=>{console.error(e);HGS.prep=0;jumpToLevel(n,target,1)});return}
+  HGS.jump=1;
+  try{return _j.call(this,n,target)}
+  catch(e){console.error('Go to area: the save could not be restored, starting fresh',e);const rs=readSave;readSave=()=>null;try{return _j.call(this,n,target)}catch(e2){console.error(e2)}finally{readSave=rs}}
+  finally{HGS.jump=0}}}
