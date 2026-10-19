@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.437';
+const VERSION='3.438';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -23076,6 +23076,8 @@ function mplPaint(c,S,area,X,Y,foot){
   ctx.imageSmoothingQuality='high';ctx.drawImage(c,0,0,DW,DH);
   const sx0=area.x-G.panX/z,sy0=area.y-G.panY/z;
   if(z>1.001){ctx.save();ctx.beginPath();ctx.rect(area.x,area.y,area.w,area.h);ctx.clip();ctx.drawImage(c,sx0*S,sy0*S,area.w/z*S,area.h/z*S,area.x,area.y,area.w,area.h);ctx.restore()}
+  const FL=LEVELS[LEVEL],fg=mplFogOn(FL)?mplFogFor(area,X,Y,FL):null;
+  if(fg){ctx.save();ctx.beginPath();ctx.rect(area.x,area.y,area.w,area.h);ctx.clip();ctx.globalAlpha=.82;ctx.imageSmoothingQuality='high';ctx.drawImage(fg.cv,(sx0-area.x)*fg.fs,(sy0-area.y)*fg.fs,area.w/z*fg.fs,area.h/z*fg.fs,area.x,area.y,area.w,area.h);ctx.restore()}
   const px=area.x+(X(G.C.x+.5)-sx0)*z,py=area.y+(Y(G.C.y+.5)-sy0)*z;
   if(px>area.x-4&&px<area.x+area.w+4&&py>area.y-4&&py<area.y+area.h+4){ctx.save();ctx.translate(px,py);ctx.rotate((G.C.a||0)+Math.PI/2);ctx.fillStyle='#ffe36a';ctx.strokeStyle='#2a1a0c';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(5,6);ctx.lineTo(0,3);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore()}
   ctx.fillStyle='rgba(30,22,16,.85)';ctx.fillRect(0,DH-17,DW,17);txt(foot||'You are the yellow arrow.',DW/2+50,DH-8.5,7.5,'#e0d8bc','center',true);
@@ -23090,6 +23092,49 @@ function mplPaint(c,S,area,X,Y,foot){
   const sx=A.x+(-G.panX+(ax-A.x))/z0,sy=A.y+(-G.panY+(ay-A.y))/z0;G.mz=z1*12;
   G.panX=Math.max(-A.w*(z1-1),Math.min(0,(ax-A.x)-(sx-A.x)*z1));G.panY=Math.max(-A.h*(z1-1),Math.min(0,(ay-A.y)-(sy-A.y)*z1))}}
 {const _h=handleBtn;handleBtn=function(id){if(id==='mplme'&&MPL.view&&G.overview&&!G.world){if(MPL.me)MPL.me();return}return _h.apply(this,arguments)}}
+
+/* ---- fog of war: a drifting cloud over the parts of an outdoor map the party has not walked near. It is soft and see-through, so the edges of the land still show. ---- */
+/* which levels have fog: the outdoor ones, except Greendale (no enemies, nothing to fear) and the Pilgrim's Path, which stay clear */
+function mplFogOn(L){return !!(L&&L.outdoor&&L.rows&&LEVEL!==32&&!(LEVEL>=400&&LEVEL<=434)&&!(G.flags&&G.flags.noFog))}
+const MPLF={arr:{},flags:null,ver:0,t:0,cache:null,sig:'',tex:null};
+function mplFogArr(){
+  if(MPLF.flags!==G.flags){MPLF.arr={};MPLF.flags=G.flags;MPLF.cache=null}
+  const L=LEVELS[LEVEL];if(!L||!L.rows)return null;const W=L.rows[0].length,H=L.rows.length;let a=MPLF.arr[LEVEL];
+  if(!a||a.length!==W*H){a=new Uint8Array(W*H);const s=G.flags&&G.flags.mplFog&&G.flags.mplFog[LEVEL];
+    if(s){try{const b=atob(s);for(let i=0;i<a.length;i++)a[i]=(b.charCodeAt(i>>3)>>(i&7))&1}catch(e){}}MPLF.arr[LEVEL]=a}
+  return a}
+function mplFogSave(a){let s='';for(let i=0;i<a.length;i+=8){let v=0;for(let k=0;k<8&&i+k<a.length;k++)if(a[i+k])v|=1<<k;s+=String.fromCharCode(v)}
+  const F=G.flags;if(!F)return;F.mplFog=F.mplFog||{};F.mplFog[LEVEL]=btoa(s)}
+/* every moment the party is on an outdoor level, the ground round it counts as explored */
+{const _u=update;update=function(dt){
+  if(G.state==='play'&&G.P&&G.flags){const L=LEVELS[LEVEL];
+    if(mplFogOn(L)&&G.time>=MPLF.t){MPLF.t=G.time+.25;
+      const a=mplFogArr();if(a){const W=L.rows[0].length,H=L.rows.length,px=Math.round(G.C?G.C.x:G.P.x),py=Math.round(G.C?G.C.y:G.P.y),R=8;let ch=0;
+        for(let y=Math.max(0,py-R);y<=Math.min(H-1,py+R);y++)for(let x=Math.max(0,px-R);x<=Math.min(W-1,px+R);x++)if(!a[y*W+x]&&Math.hypot(x-px,y-py)<=R){a[y*W+x]=1;ch++}
+        if(ch){MPLF.ver++;MPLF.dirty=LEVEL}}}
+    if(MPLF.dirty&&G.time>=(MPLF.sv||0)){MPLF.sv=G.time+3;const a=MPLF.arr[MPLF.dirty];if(a&&MPLF.dirty===LEVEL)mplFogSave(a);MPLF.dirty=0}}
+  return _u.apply(this,arguments)}}
+function mplCloudTex(){
+  if(MPLF.tex)return MPLF.tex;const N=256,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),d=x.createImageData(N,N);
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){let v=0,a=1,f=1/48;for(let o=0;o<4;o++){v+=a*mplTile(i*f,j*f,N*f,o);a*=.5;f*=2}v/=1.875;const w=Math.max(0,Math.min(1,(v-.28)*1.7)),k=(j*N+i)*4;
+    d.data[k]=196+w*50;d.data[k+1]=208+w*40;d.data[k+2]=224+w*28;d.data[k+3]=130+w*125}
+  x.putImageData(d,0,0);return MPLF.tex=c}
+function mplTile(x,y,P,o){const x0=Math.floor(x),y0=Math.floor(y),fx=x-x0,fy=y-y0,sx=fx*fx*(3-2*fx),sy=fy*fy*(3-2*fy),m=Math.round(P),h=(i,j)=>hash2(((i%m)+m)%m,((j%m)+m)%m,91+o);
+  return (h(x0,y0)*(1-sx)+h(x0+1,y0)*sx)*(1-sy)+(h(x0,y0+1)*(1-sx)+h(x0+1,y0+1)*sx)*sy}
+/* the cloud sheet for this level and view: rebuilt when the explored ground changes */
+function mplFogFor(area,X,Y,L){
+  const a=mplFogArr();if(!a)return null;const W=L.rows[0].length,H=L.rows.length,fs=2,key=LEVEL+':'+MPLF.ver+':'+area.x+area.w;
+  if(MPLF.cache&&MPLF.cache.key===key)return MPLF.cache;
+  const fw=Math.ceil(area.w*fs),fh=Math.ceil(area.h*fs),cv=document.createElement('canvas');cv.width=fw;cv.height=fh;const x=cv.getContext('2d');
+  const m=document.createElement('canvas');m.width=W;m.height=H;const mx=m.getContext('2d'),id=mx.createImageData(W,H);
+  for(let i=0;i<W*H;i++){id.data[i*4+3]=a[i]?0:255;id.data[i*4]=255}mx.putImageData(id,0,0);
+  x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';
+  // the mask is blown up with smoothing and blurred twice, so the edge of the cloud is a soft drift and not a row of squares
+  const bx=(X(0)-area.x)*fs,by=(Y(0)-area.y)*fs,bw=(X(W)-X(0))*fs,bh=(Y(H)-Y(0))*fs,sm=document.createElement('canvas');sm.width=Math.ceil(fw/4);sm.height=Math.ceil(fh/4);const sx=sm.getContext('2d');sx.imageSmoothingEnabled=true;
+  sx.drawImage(m,bx/4,by/4,bw/4,bh/4);const sm2=document.createElement('canvas');sm2.width=Math.ceil(fw/8);sm2.height=Math.ceil(fh/8);const s2=sm2.getContext('2d');s2.imageSmoothingEnabled=true;s2.drawImage(sm,0,0,sm2.width,sm2.height);
+  sx.clearRect(0,0,sm.width,sm.height);sx.drawImage(sm2,0,0,sm.width,sm.height);x.drawImage(sm,0,0,fw,fh);
+  x.globalCompositeOperation='source-in';x.fillStyle=x.createPattern(mplCloudTex(),'repeat');x.fillRect(0,0,fw,fh);
+  return MPLF.cache={key,cv,fs}}
 
 /* ---- src/desert/maps_abbey.js ---- */
 /* Area map for the abbey crypts (level 1): an illuminated cutaway floor plan. See maps_common.js. Names start with mpAbbey. */
