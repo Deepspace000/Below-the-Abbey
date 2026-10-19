@@ -34,19 +34,19 @@ function hgBuild(){
     for(let d=-R;d<=R;d++)for(const l of [-5,0,5]){for(const [x,y] of [[cx+l,cy+d],[cx+d,cy+l]])if(x>2&&y>2&&x<W-3&&y<H-3)fm[I(x,y)]='1'}
     for(const [x,y] of [[cx,cy-R-1],[cx,cy-R-2],[cx,cy+R+1],[cx,cy+R+2]])fm[I(x,y)]='1';
     for(let t=-R;t<=R;t++)for(const [x,y,gap] of [[cx+t,cy-R,Math.abs(t)<=1],[cx+t,cy+R,Math.abs(t)<=1],[cx-R,cy+t,false],[cx+R,cy+t,false]]){if(gap)continue;used.add(K(x,y));decor.push({k:'hg_palisade',x,y,block:true,sc:1,ox:(hs(x,y,sd+20)-.5)*.3})}
-    for(const [x,y] of [[cx-2,cy-R+1],[cx+2,cy-R+1],[cx-2,cy+R-1],[cx+2,cy+R-1]]){decor.push({k:'lamp',x,y,block:false,walk:true,deco:true});lights.push([x,y]);used.add(K(x,y))}
+    for(const [x,y] of [[cx-2,cy-R+1],[cx+2,cy-R+1],[cx-2,cy+R-1],[cx+2,cy+R-1]]){decor.push({k:'hg_lamp',x,y,block:false,walk:true,deco:true});lights.push([x,y]);used.add(K(x,y))}
     // houses in the blocks between the lanes, apart from the four round the little square
     for(const bx of [-8,-3,2,7])for(const by of [-8,-3,2,7]){
       if((bx===-3||bx===2)&&(by===-3||by===2))continue;
-      if(hs(cx+bx,cy+by,sd+21)<.18)continue;const x=cx+bx,y=cy+by,k='hg_house'+((hs(x,y,sd+22)<.5)?0:1);
+      if(hs(cx+bx,cy+by,sd+21)<.18)continue;const x=cx+bx,y=cy+by,k='hg_house'+((hs(x,y,sd+22)*3)|0);
       decor.push({k,x,y,block:true,ox:.5,sc:1+(hs(x,y,sd+23)-.5)*.12},{k,x:x+1,y,block:true,sc:.0001});used.add(K(x,y));used.add(K(x+1,y))}
-    decor.push({k:'hg_well',x:cx+2,y:cy+2,block:true});used.add(K(cx+2,cy+2));lights.push([cx+2,cy+2]);
+    decor.push({k:'hg_arch',x:cx,y:cy-R,block:false,walk:true,deco:true},{k:'hg_arch',x:cx,y:cy+R,block:false,walk:true,deco:true},{k:'hg_pillar',x:cx-2,y:cy+2,block:true},{k:'hg_well',x:cx+2,y:cy+2,block:true});used.add(K(cx-2,cy+2));used.add(K(cx+2,cy+2));lights.push([cx+2,cy+2]);
     // the people of the village (see hollowgrass_talk.js), and the rest of the square
     try{hgPopulate(ti,cx,cy,decor,used)}catch(e){console.error(e)}
   });
   // the rocks on the low hills
   let nr=0;for(let t=0;t<900&&nr<46;t++){const x=6+((hs(t,1,sd+30)*(W-12))|0),y=6+((hs(t,2,sd+30)*(H-12))|0);
-    if(used.has(K(x,y))||near(x,y,keepOut,18)||h[I(x,y)]<.7)continue;used.add(K(x,y));nr++;decor.push({k:'hg_rock'+(hs(x,y,sd+31)<.55?0:1),x,y,block:true,sc:.9+hs(x,y,sd+32)*.9,ox:(hs(x,y,sd+33)-.5)*.6})}
+    if(used.has(K(x,y))||near(x,y,keepOut,18)||h[I(x,y)]<.7)continue;used.add(K(x,y));nr++;const pin=hs(x,y,sd+34)<.5;decor.push({k:pin?'hg_tower'+((hs(x,y,sd+35)*4)|0):'hg_rock'+(hs(x,y,sd+31)<.55?0:1),x,y,block:true,sc:pin?.8+hs(x,y,sd+32)*.5:.9+hs(x,y,sd+32)*.9,ox:(hs(x,y,sd+33)-.5)*.6})}
   // the insectivores: they sit on the hills and wait; the further from the start, the bigger
   const place=(t,x,y)=>{used.add(K(x,y));enemies.push({t,x,y})};
   let ni=0;for(let t=0;t<2600&&ni<80;t++){const x=6+((hs(t,3,sd+40)*(W-12))|0),y=6+((hs(t,4,sd+40)*(H-12))|0);
@@ -75,7 +75,9 @@ function hgBuild(){
   // the wizard, a little way up the track, who will come to meet the party (see hollowgrass_talk.js)
   decor.push({k:'hg_wizard',x:HG.START.x,y:HG.START.y-9,block:false,walk:true,npc:'hg_aldous0',sc:1,hgIntro:1});
   const fmap=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=fm[I(x,y)];fmap.push(r)}
-  const lv={rows:rows.map(r=>r.join('')),start:{x:HG.START.x,y:HG.START.y,f:0},enemies,items,decor,scenery:[],sky:[],fmap,floorSet:['ohMeadow','ohGravel','ohLawn','bluesand','bluewater','ohMoss','isleSandDk','wood'],floor:'ohMeadow',ceil:'cloud',
+    // tall strange towers stand all round the edge of the land, far off, fading into the mist
+  const sky=[];for(let i=0;i<34;i++){const f=(i+hs(i,1,sd+95)*.6)/34*4,e=Math.floor(f),u=f-e,m=6+hs(i,2,sd+96)*6,x=e===0?3+u*(W-6):e===2?W-3-u*(W-6):e===1?W-m:m,y=e===0?m:e===2?H-m:e===1?3+u*(H-6):H-3-u*(H-6),k='hg_tower'+(hs(i,3,sd+97)<.4?(hs(i,4,sd+98)*4)|0:4+((hs(i,5,sd+99)*4)|0));sky.push({x,y,k,w:7+hs(i,6,sd+100)*9,z:0,big:1})}
+  const lv={rows:rows.map(r=>r.join('')),start:{x:HG.START.x,y:HG.START.y,f:0},enemies,items,decor,scenery:[],sky,fmap,floorSet:['ohMeadow','ohGravel','ohLawn','bluesand','bluewater','ohMoss','isleSandDk','wood'],floor:'ohMeadow',ceil:'cloud',
     day:.16,outdoor:true,amb:.5,name:LEVEL_NAMES[HG.ID],label:'The Hollow Grasslands',noExtras:true,diff:HG.DIFF,ceilH:5.2,chars,lights,portals:[],noTele:true,
     mapNames:[...HG_TOWNS.map(t=>({t:t.n,x:t.x,y:t.y-R-2,k:'place'})),...HG_HIVE_NAMES.map((n,i)=>({t:n,x:HG_HIVE_AT[i][0],y:HG_HIVE_AT[i][1]-3,k:'place'}))]};
   LEVELS[HG.ID]=lv;TERRS[HG.ID]=yarTerrain(W,H,h,rk,block);
@@ -85,3 +87,12 @@ function hgBuild(){
 KH_LAZY[HG.ID]=hgBuild;HG.HIVES.forEach((id,i)=>{KH_LAZY[id]=()=>{hgBuild();hgHive(i)}});
 /* the way in: a spiked gate at the east end of the high ledge in the Hollow Land. The grassland is built the first time the ledge is, so the gate opens at once. */
 {const _hc=hlCavern;hlCavern=function(){_hc.apply(this,arguments);const L=LEVELS[HL.CAV];if(L&&!L._hg){L._hg=1;L.decor.push({k:'hg_gate',x:63,y:57,block:true,enter:{to:HG.ID,x:HG.START.x,y:HG.START.y,f:0}});L.mapNames.push({t:'The Gate to the Grasslands',x:61,y:58,k:'lane'});try{hgBuild()}catch(e){console.error(e)}}}}
+/* the cold: a blue-grey grade over the whole view, bands of mist drifting along the horizon, and a few pale motes of light that hang in the air */
+{const _w=drawWeatherFx;drawWeatherFx=function(){_w.apply(this,arguments);if(LEVEL!==HG.ID)return;
+  const t=G.time||0;ctx.save();
+  ctx.globalCompositeOperation='multiply';ctx.globalAlpha=.62;ctx.fillStyle='rgb(150,184,228)';ctx.fillRect(0,0,420,210);
+  ctx.globalCompositeOperation='screen';ctx.globalAlpha=1;ctx.fillStyle='rgba(60,92,134,.17)';ctx.fillRect(0,0,420,210);
+  for(let i=0;i<5;i++){const y=88+i*10,a=.05+.03*Math.sin(t*.3+i),x=((t*(4+i*1.5)+i*97)%560)-130,g=ctx.createLinearGradient(x,0,x+340,0);
+    g.addColorStop(0,'rgba(190,215,240,0)');g.addColorStop(.5,'rgba(190,215,240,'+(a*1.7).toFixed(3)+')');g.addColorStop(1,'rgba(190,215,240,0)');ctx.fillStyle=g;ctx.fillRect(x,y,340,8)}
+  ctx.fillStyle='rgba(205,232,255,.5)';for(let i=0;i<26;i++){const x=((i*53+t*(3+i%4))%440)-10,y=70+((i*37)%120)+Math.sin(t*.7+i)*5,r=.7+(i%3)*.4;ctx.fillRect(x,y,r,r)}
+  ctx.restore()}}

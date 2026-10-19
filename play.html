@@ -39,7 +39,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.423';
+const VERSION='3.424';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2533,7 +2533,7 @@ function render3D(){
   const day=G.day||0,lbm=Math.max(day,G.amb||0),fd=G.fl||(day?GRASSD:FLOORD),cd=G.cl||(day?SKYD:CEILD);
   const uwL=typeof uwLv==='function'&&uwLv(LEVEL); // under the sea
   const desertLv=LEVEL===41||LEVEL===43||LEVEL===44||LEVEL===305||LEVEL>=60&&LEVEL<=64||yarSea(LEVEL),dsBio=LEVEL===41?clamp(rdBiome(G.C.x|0,G.C.y|0)*1.3,0,1):1,mix3=(a,b)=>[a[0]+(b[0]-a[0])*dsBio,a[1]+(b[1]-a[1])*dsBio,a[2]+(b[2]-a[2])*dsBio];
-  const skyLv=LEVEL===22,lushLv=LEVEL===32||LEVEL===33,grimLv=GRIM_L(),rainLv=LEVEL===10,mossLv=LEVEL===39,hzr0=desertLv?(uwL?[40,124,154]:LEVEL===305?[236,232,214]:yarSea(LEVEL)?[214,230,244]:LEVEL===64?[236,224,196]:LEVEL===63?[238,242,250]:LEVEL===62?[226,204,242]:LEVEL===61?[244,226,172]:LEVEL===60?[196,214,240]:LEVEL===43?[238,200,166]:mix3([170,200,160],[242,226,190])):skyLv?[176,192,216]:rainLv?[58,72,82]:mossLv?[70,104,70]:grimLv?[30,46,32]:lushLv?[170,200,160]:day?[132,146,132]:[86,76,62],hzc0=desertLv?(uwL?[58,140,168]:LEVEL===305?[206,220,200]:yarSea(LEVEL)?[176,204,230]:LEVEL===64?[216,198,160]:LEVEL===63?[214,226,244]:LEVEL===62?[196,160,222]:LEVEL===61?[232,200,128]:LEVEL===60?[172,196,232]:LEVEL===43?[218,172,136]:mix3([140,176,130],[228,210,168])):mossLv?[48,76,50]:rainLv?[48,60,70]:grimLv?[26,40,28]:lushLv?[140,176,130]:skyLv?[150,172,208]:day?[110,124,112]:[69,61,50],hzmax0=desertLv?(LEVEL===44?.36:LEVEL===305?.3:LEVEL===304?.42:.5+.22*dsBio):skyLv?(.42-.26*ALTN):mossLv?.34:lushLv?.34:grimLv?.36:rainLv?.34:day?.55:.32,hzrate0=desertLv?(LEVEL===44?.02:LEVEL===305?.014:LEVEL===304?.02:.03):skyLv?.05:mossLv?.05:lushLv?.04:grimLv?.034:rainLv?.036:day?.07:.042;
+  const skyLv=LEVEL===22,lushLv=LEVEL===32||LEVEL===33,grimLv=GRIM_L(),rainLv=LEVEL===10,mossLv=LEVEL===39,hzr0=desertLv?(uwL?[40,124,154]:LEVEL===305?[236,232,214]:yarSea(LEVEL)?[214,230,244]:LEVEL===64?[236,224,196]:LEVEL===63?[238,242,250]:LEVEL===62?[226,204,242]:LEVEL===61?[244,226,172]:LEVEL===60?[196,214,240]:LEVEL===43?[238,200,166]:mix3([170,200,160],[242,226,190])):skyLv?[176,192,216]:rainLv?[58,72,82]:mossLv?[70,104,70]:LEVEL===470?[88,120,150]:grimLv?[30,46,32]:lushLv?[170,200,160]:day?[132,146,132]:[86,76,62],hzc0=desertLv?(uwL?[58,140,168]:LEVEL===305?[206,220,200]:yarSea(LEVEL)?[176,204,230]:LEVEL===64?[216,198,160]:LEVEL===63?[214,226,244]:LEVEL===62?[196,160,222]:LEVEL===61?[232,200,128]:LEVEL===60?[172,196,232]:LEVEL===43?[218,172,136]:mix3([140,176,130],[228,210,168])):mossLv?[48,76,50]:rainLv?[48,60,70]:LEVEL===470?[64,92,120]:grimLv?[26,40,28]:lushLv?[140,176,130]:skyLv?[150,172,208]:day?[110,124,112]:[69,61,50],hzmax0=desertLv?(LEVEL===44?.36:LEVEL===305?.3:LEVEL===304?.42:.5+.22*dsBio):skyLv?(.42-.26*ALTN):mossLv?.34:lushLv?.34:LEVEL===470?.7:grimLv?.36:rainLv?.34:day?.55:.32,hzrate0=desertLv?(LEVEL===44?.02:LEVEL===305?.014:LEVEL===304?.02:.03):skyLv?.05:mossLv?.05:lushLv?.04:LEVEL===470?.045:grimLv?.034:rainLv?.036:day?.07:.042;
   // the desert sky follows the clock; a sandstorm thickens the air and tints it
   const SK=desertLv&&!uwL?skyTod((G.clock%1440)/60):null,ST=desertLv?STORM.a:0,stm=(v,c)=>v+(c-v)*ST;
   const stormC=SK?[206*Math.min(1,SK.k[0]*1.1+.05),166*Math.min(1,SK.k[1]*1.1+.05),112*Math.min(1,SK.k[2]*1.1+.05)]:null;
@@ -2541,7 +2541,7 @@ function render3D(){
   const hzr=(SK?hzr0.map((v,i)=>stm(v*SK.k[i],stormC[i])):hzr0).slice(),hzc=SK?hzc0.map((v,i)=>stm(v*SK.k[i],stormC[i]*.92)):hzc0;
   let hzmax=SK?stm(hzmax0,.97):hzmax0,hzrate=SK?hzrate0+.16*ST:hzrate0;if(uwL){hzmax=.68;hzrate=.042}
   {const WXN=typeof weatherNow==='function'?weatherNow():null;if(WXN&&WXN.fog){hzrate+=WXN.fog;hzmax=Math.max(hzmax,WXN.haze);for(let i=0;i<3;i++)hzr[i]+=(WXN.col[i]-hzr[i])*WXN.mix}} // rain, fog, snow and heat thicken the air
-  const tbR=uwL?.84:SK?SK.g[0]:1,tbG=uwL?1:SK?SK.g[1]*.94:.94,tbB=uwL?1.12:SK?SK.g[2]*.84:.84, ttR=(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?.85:1.3,ttG=(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?.28:.88,ttB=(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?1.5:.5; // in the Hollow Land the warm lights glow purple
+  const tbR=uwL?.84:SK?SK.g[0]:1,tbG=uwL?1:SK?SK.g[1]*.94:.94,tbB=uwL?1.12:SK?SK.g[2]*.84:.84, ttR=LEVEL===470?.5:(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?.85:1.3,ttG=LEVEL===470?.95:(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?.28:.88,ttB=LEVEL===470?1.5:(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?1.5:.5; // in the Hollow Land the warm lights glow purple
   const ovcLv=LEVEL===2||LEVEL===3||LEVEL===7||LEVEL===10||LEVEL===19||LEVEL===20,SKP=uwL?uwPan():ovcLv&&SKYOVC?SKYOVC:SKYPAN; // the early open areas sit under a heavy moving overcast
   const skyPan=(skyLv||ovcLv||desertLv||LEVEL===3||LEVEL===13||LEVEL===32||LEVEL===33)&&SKP?(()=>{for(let x=0;x<VW;x++){const cm=2*x/VW-1;UCOL[x]=((((Math.atan2(dY+pY*cm,dX+pX*cm)/TAU)%1)+1)%1*1024+t*(ovcLv?11:7))%1024|0}return true})():false; // the sky is one panorama on walls and ceiling alike
   const fmp=G.fmap,fd2=G.fl2,fd3=G.fl3,fd4=G.fl4,fd5=G.fl5,fd6=G.fl6,lmp=G.lmap,lmN=lmp?clamp(1.2-(G.day||0)*1.35,0,1)*.95:0;
@@ -2767,7 +2767,7 @@ function spriteList(){
 }
 let SC=ctx; // sprites are painted straight onto the full-size screen, not into the small 3D picture, so they stay sharp
 function drawSprites(cx,cy,dX,dY,pX,pY){
-  const inv=-1/PL,list=spriteList().concat(LEVEL===44&&LEVELS[44].sky?khSkyList(cx,cy,dX,dY):((LEVEL===YR.ID||LEVEL===305||LEVEL===304||LEVEL===364||(LEVEL>=400&&LEVEL<440))&&LEVELS[LEVEL]&&LEVELS[LEVEL].sky?khSkyList(cx,cy,dX,dY,LEVELS[LEVEL],.6):[])),proj=[],far=LEVEL===44?26:(G.day||0)>0?34:20,far2=far*far,farT=LEVEL===44?26:(G.day||0)>0?33:16; // outdoors the trees stay drawn as far as the walls can be seen
+  const inv=-1/PL,list=spriteList().concat(LEVEL===44&&LEVELS[44].sky?khSkyList(cx,cy,dX,dY):((LEVEL===YR.ID||LEVEL===305||LEVEL===304||LEVEL===364||LEVEL===470||(LEVEL>=400&&LEVEL<440))&&LEVELS[LEVEL]&&LEVELS[LEVEL].sky?khSkyList(cx,cy,dX,dY,LEVELS[LEVEL],.6):[])),proj=[],far=LEVEL===44?26:(G.day||0)>0?34:20,far2=far*far,farT=LEVEL===44?26:(G.day||0)>0?33:16; // outdoors the trees stay drawn as far as the walls can be seen
   for(const s of list){
     const rx=s.x-cx,ry=s.y-cy;
     if(rx*rx+ry*ry>(s.sky?60000:far2))continue;
@@ -2806,7 +2806,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     if(s.e&&ENEMY_DEF[s.e.t].glow)lum=Math.max(lum,ENEMY_DEF[s.e.t].glow);
     if(s.decor&&s.decor.k==='lever')lum=Math.max(lum,.62); // a lever catches a little light, so it can be found in a dark hall // a ghost shines a little by its own light
     if(LEVEL===44&&s.decor&&(s.decor.k==='lamp'||s.decor.k==='hlant'||s.decor.k==='cfire'))lum=Math.max(lum,.9); // a lantern or a fire shines by its own light
-    const ohL=LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<440),kq0=Math.min(1,Math.max(.05,2*sw/iw)),dyv=(G.day||0)>0,hzv=GRIM_L()?[30,46,32]:ohL&&dyv?[226,228,220]:trD?[40,54,42]:dyv?[132,146,132]:[86,76,62],smS=Math.min(dyv?(ohL?.22:.4):.26,dist*(dyv?(ohL?.018:.04):.03))*(GRIM_L()?.55:.75);
+    const ohL=LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<440),kq0=Math.min(1,Math.max(.05,2*sw/iw)),dyv=(G.day||0)>0,hzv=GRIM_L()?(LEVEL===470?[70,98,126]:[30,46,32]):ohL&&dyv?[226,228,220]:trD?[40,54,42]:dyv?[132,146,132]:[86,76,62],smS=Math.min(dyv?(ohL?.22:.4):.26,dist*(dyv?(ohL?.018:.04):.03))*(GRIM_L()?.55:.75);
     let SRC,tw,th,HZ=null,hA=0;
     if(!s.flash&&!(s.decor&&s.decor.burn>0)){
       let tier=SPR_TIERS[SPR_TIERS.length-1];for(const t of SPR_TIERS){if(t>=iw*kq0){tier=t;break}}
@@ -22463,8 +22463,8 @@ const HG_TOWNS=[{k:'exsce',n:'Exsce',x:75,y:106},{k:'ulb',n:'Ulb',x:26,y:84},{k:
 const HG_HIVE_AT=[[22,122],[128,116],[76,58],[80,12]];
 const HG_HIVE_NAMES=['The Hush Hive','The Droning Hive','The Amber Hive','The Queen’s Hive'];
 for(let i=0;i<10;i++){loadImg('hg_ins'+i,'assets/hg_ins'+i+'.png');loadImg('hg_ins'+i+'A','assets/hg_ins'+i+'A.png')}
-for(const n of ['hg_frog0','hg_frog1','hg_swarm0','hg_swarm1','hg_swarm0A','hg_swarm1A','hg_larva','hg_larvaA','hg_wasp','hg_waspA','hg_golem','hg_golemA','hg_queen','hg_queenA','hg_house0','hg_house1','hg_palisade','hg_gate','hg_rock0','hg_rock1','hg_hive','hg_well','hg_chestwax','hg_chestweed','hg_chestjelly','hg_waxbarrel','hg_jar','hg_lectern','hg_eggs','hg_wizard','hg_npc0','hg_npc1','hg_npc3','hg_npc4','hg_npc5','hg_npc6'])loadImg(n,'assets/'+n+'.png');
-Object.assign(NPC_H,{hg_frog0:1.0,hg_frog1:1.0,hg_house0:1.8,hg_house1:2.3,hg_palisade:1.45,hg_gate:2.1,hg_rock0:3.0,hg_rock1:2.2,hg_hive:3.2,hg_well:1.3,hg_chestwax:.62,hg_chestweed:.62,hg_chestjelly:.62,hg_waxbarrel:.95,hg_jar:1.1,hg_lectern:1.1,hg_eggs:.95,hg_wizard:1.35,hg_npc0:1.35,hg_npc1:1.25,hg_npc3:1.0,hg_npc4:1.4,hg_npc5:1.3,hg_npc6:1.3});
+for(const n of ['hg_frog0','hg_frog1','hg_swarm0','hg_swarm1','hg_swarm0A','hg_swarm1A','hg_larva','hg_larvaA','hg_wasp','hg_waspA','hg_golem','hg_golemA','hg_queen','hg_queenA','hg_house0','hg_house1','hg_house2','hg_arch','hg_lamp','hg_pillar','hg_tower0','hg_tower1','hg_tower2','hg_tower3','hg_tower4','hg_tower5','hg_tower6','hg_tower7','hg_palisade','hg_gate','hg_rock0','hg_rock1','hg_hive','hg_well','hg_chestwax','hg_chestweed','hg_chestjelly','hg_waxbarrel','hg_jar','hg_lectern','hg_eggs','hg_wizard','hg_npc0','hg_npc1','hg_npc3','hg_npc4','hg_npc5','hg_npc6'])loadImg(n,'assets/'+n+'.png');
+Object.assign(NPC_H,{hg_frog0:1.0,hg_frog1:1.0,hg_house0:3.1,hg_house1:2.5,hg_house2:3.4,hg_arch:2.6,hg_lamp:2.2,hg_pillar:2.4,hg_tower0:5,hg_tower1:5,hg_tower2:5,hg_tower3:5,hg_palisade:1.6,hg_gate:2.1,hg_rock0:3.0,hg_rock1:2.2,hg_hive:3.2,hg_well:1.7,hg_chestwax:.62,hg_chestweed:.62,hg_chestjelly:.62,hg_waxbarrel:.95,hg_jar:1.1,hg_lectern:1.1,hg_eggs:.95,hg_wizard:1.35,hg_npc0:1.35,hg_npc1:1.25,hg_npc3:1.0,hg_npc4:1.4,hg_npc5:1.3,hg_npc6:1.3});
 CONTAINERS.push('hg_chestwax','hg_chestweed','hg_chestjelly','hg_waxbarrel','hg_jar');
 LEVEL_NAMES[HG.ID]='The Hollow Grasslands';HG.HIVES.forEach((id,i)=>LEVEL_NAMES[id]=HG_HIVE_NAMES[i]);
 LEVEL_RATING[HG.ID]=HG.DIFF;HG.HIVES.forEach((id,i)=>LEVEL_RATING[id]=HG.DIFF+i*2);
@@ -22612,19 +22612,19 @@ function hgBuild(){
     for(let d=-R;d<=R;d++)for(const l of [-5,0,5]){for(const [x,y] of [[cx+l,cy+d],[cx+d,cy+l]])if(x>2&&y>2&&x<W-3&&y<H-3)fm[I(x,y)]='1'}
     for(const [x,y] of [[cx,cy-R-1],[cx,cy-R-2],[cx,cy+R+1],[cx,cy+R+2]])fm[I(x,y)]='1';
     for(let t=-R;t<=R;t++)for(const [x,y,gap] of [[cx+t,cy-R,Math.abs(t)<=1],[cx+t,cy+R,Math.abs(t)<=1],[cx-R,cy+t,false],[cx+R,cy+t,false]]){if(gap)continue;used.add(K(x,y));decor.push({k:'hg_palisade',x,y,block:true,sc:1,ox:(hs(x,y,sd+20)-.5)*.3})}
-    for(const [x,y] of [[cx-2,cy-R+1],[cx+2,cy-R+1],[cx-2,cy+R-1],[cx+2,cy+R-1]]){decor.push({k:'lamp',x,y,block:false,walk:true,deco:true});lights.push([x,y]);used.add(K(x,y))}
+    for(const [x,y] of [[cx-2,cy-R+1],[cx+2,cy-R+1],[cx-2,cy+R-1],[cx+2,cy+R-1]]){decor.push({k:'hg_lamp',x,y,block:false,walk:true,deco:true});lights.push([x,y]);used.add(K(x,y))}
     // houses in the blocks between the lanes, apart from the four round the little square
     for(const bx of [-8,-3,2,7])for(const by of [-8,-3,2,7]){
       if((bx===-3||bx===2)&&(by===-3||by===2))continue;
-      if(hs(cx+bx,cy+by,sd+21)<.18)continue;const x=cx+bx,y=cy+by,k='hg_house'+((hs(x,y,sd+22)<.5)?0:1);
+      if(hs(cx+bx,cy+by,sd+21)<.18)continue;const x=cx+bx,y=cy+by,k='hg_house'+((hs(x,y,sd+22)*3)|0);
       decor.push({k,x,y,block:true,ox:.5,sc:1+(hs(x,y,sd+23)-.5)*.12},{k,x:x+1,y,block:true,sc:.0001});used.add(K(x,y));used.add(K(x+1,y))}
-    decor.push({k:'hg_well',x:cx+2,y:cy+2,block:true});used.add(K(cx+2,cy+2));lights.push([cx+2,cy+2]);
+    decor.push({k:'hg_arch',x:cx,y:cy-R,block:false,walk:true,deco:true},{k:'hg_arch',x:cx,y:cy+R,block:false,walk:true,deco:true},{k:'hg_pillar',x:cx-2,y:cy+2,block:true},{k:'hg_well',x:cx+2,y:cy+2,block:true});used.add(K(cx-2,cy+2));used.add(K(cx+2,cy+2));lights.push([cx+2,cy+2]);
     // the people of the village (see hollowgrass_talk.js), and the rest of the square
     try{hgPopulate(ti,cx,cy,decor,used)}catch(e){console.error(e)}
   });
   // the rocks on the low hills
   let nr=0;for(let t=0;t<900&&nr<46;t++){const x=6+((hs(t,1,sd+30)*(W-12))|0),y=6+((hs(t,2,sd+30)*(H-12))|0);
-    if(used.has(K(x,y))||near(x,y,keepOut,18)||h[I(x,y)]<.7)continue;used.add(K(x,y));nr++;decor.push({k:'hg_rock'+(hs(x,y,sd+31)<.55?0:1),x,y,block:true,sc:.9+hs(x,y,sd+32)*.9,ox:(hs(x,y,sd+33)-.5)*.6})}
+    if(used.has(K(x,y))||near(x,y,keepOut,18)||h[I(x,y)]<.7)continue;used.add(K(x,y));nr++;const pin=hs(x,y,sd+34)<.5;decor.push({k:pin?'hg_tower'+((hs(x,y,sd+35)*4)|0):'hg_rock'+(hs(x,y,sd+31)<.55?0:1),x,y,block:true,sc:pin?.8+hs(x,y,sd+32)*.5:.9+hs(x,y,sd+32)*.9,ox:(hs(x,y,sd+33)-.5)*.6})}
   // the insectivores: they sit on the hills and wait; the further from the start, the bigger
   const place=(t,x,y)=>{used.add(K(x,y));enemies.push({t,x,y})};
   let ni=0;for(let t=0;t<2600&&ni<80;t++){const x=6+((hs(t,3,sd+40)*(W-12))|0),y=6+((hs(t,4,sd+40)*(H-12))|0);
@@ -22653,7 +22653,9 @@ function hgBuild(){
   // the wizard, a little way up the track, who will come to meet the party (see hollowgrass_talk.js)
   decor.push({k:'hg_wizard',x:HG.START.x,y:HG.START.y-9,block:false,walk:true,npc:'hg_aldous0',sc:1,hgIntro:1});
   const fmap=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=fm[I(x,y)];fmap.push(r)}
-  const lv={rows:rows.map(r=>r.join('')),start:{x:HG.START.x,y:HG.START.y,f:0},enemies,items,decor,scenery:[],sky:[],fmap,floorSet:['ohMeadow','ohGravel','ohLawn','bluesand','bluewater','ohMoss','isleSandDk','wood'],floor:'ohMeadow',ceil:'cloud',
+    // tall strange towers stand all round the edge of the land, far off, fading into the mist
+  const sky=[];for(let i=0;i<34;i++){const f=(i+hs(i,1,sd+95)*.6)/34*4,e=Math.floor(f),u=f-e,m=6+hs(i,2,sd+96)*6,x=e===0?3+u*(W-6):e===2?W-3-u*(W-6):e===1?W-m:m,y=e===0?m:e===2?H-m:e===1?3+u*(H-6):H-3-u*(H-6),k='hg_tower'+(hs(i,3,sd+97)<.4?(hs(i,4,sd+98)*4)|0:4+((hs(i,5,sd+99)*4)|0));sky.push({x,y,k,w:7+hs(i,6,sd+100)*9,z:0,big:1})}
+  const lv={rows:rows.map(r=>r.join('')),start:{x:HG.START.x,y:HG.START.y,f:0},enemies,items,decor,scenery:[],sky,fmap,floorSet:['ohMeadow','ohGravel','ohLawn','bluesand','bluewater','ohMoss','isleSandDk','wood'],floor:'ohMeadow',ceil:'cloud',
     day:.16,outdoor:true,amb:.5,name:LEVEL_NAMES[HG.ID],label:'The Hollow Grasslands',noExtras:true,diff:HG.DIFF,ceilH:5.2,chars,lights,portals:[],noTele:true,
     mapNames:[...HG_TOWNS.map(t=>({t:t.n,x:t.x,y:t.y-R-2,k:'place'})),...HG_HIVE_NAMES.map((n,i)=>({t:n,x:HG_HIVE_AT[i][0],y:HG_HIVE_AT[i][1]-3,k:'place'}))]};
   LEVELS[HG.ID]=lv;TERRS[HG.ID]=yarTerrain(W,H,h,rk,block);
@@ -22663,6 +22665,15 @@ function hgBuild(){
 KH_LAZY[HG.ID]=hgBuild;HG.HIVES.forEach((id,i)=>{KH_LAZY[id]=()=>{hgBuild();hgHive(i)}});
 /* the way in: a spiked gate at the east end of the high ledge in the Hollow Land. The grassland is built the first time the ledge is, so the gate opens at once. */
 {const _hc=hlCavern;hlCavern=function(){_hc.apply(this,arguments);const L=LEVELS[HL.CAV];if(L&&!L._hg){L._hg=1;L.decor.push({k:'hg_gate',x:63,y:57,block:true,enter:{to:HG.ID,x:HG.START.x,y:HG.START.y,f:0}});L.mapNames.push({t:'The Gate to the Grasslands',x:61,y:58,k:'lane'});try{hgBuild()}catch(e){console.error(e)}}}}
+/* the cold: a blue-grey grade over the whole view, bands of mist drifting along the horizon, and a few pale motes of light that hang in the air */
+{const _w=drawWeatherFx;drawWeatherFx=function(){_w.apply(this,arguments);if(LEVEL!==HG.ID)return;
+  const t=G.time||0;ctx.save();
+  ctx.globalCompositeOperation='multiply';ctx.globalAlpha=.62;ctx.fillStyle='rgb(150,184,228)';ctx.fillRect(0,0,420,210);
+  ctx.globalCompositeOperation='screen';ctx.globalAlpha=1;ctx.fillStyle='rgba(60,92,134,.17)';ctx.fillRect(0,0,420,210);
+  for(let i=0;i<5;i++){const y=88+i*10,a=.05+.03*Math.sin(t*.3+i),x=((t*(4+i*1.5)+i*97)%560)-130,g=ctx.createLinearGradient(x,0,x+340,0);
+    g.addColorStop(0,'rgba(190,215,240,0)');g.addColorStop(.5,'rgba(190,215,240,'+(a*1.7).toFixed(3)+')');g.addColorStop(1,'rgba(190,215,240,0)');ctx.fillStyle=g;ctx.fillRect(x,y,340,8)}
+  ctx.fillStyle='rgba(205,232,255,.5)';for(let i=0;i<26;i++){const x=((i*53+t*(3+i%4))%440)-10,y=70+((i*37)%120)+Math.sin(t*.7+i)*5,r=.7+(i%3)*.4;ctx.fillRect(x,y,r,r)}
+  ctx.restore()}}
 
 /* ---- src/desert/hollowgrass_talk.js ---- */
 /* ==========================================================================
