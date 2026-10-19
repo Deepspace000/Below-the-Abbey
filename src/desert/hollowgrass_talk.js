@@ -156,9 +156,9 @@ const HG_BD={};
 {const _qm=questMark;questMark=function(d){const r=_qm.apply(this,arguments);if(r===1&&d&&d.npc&&HG_QOF[d.npc]&&HG_QOF[d.npc].tier>hgLvl())return 0;return r}}
 /* the wizard comes to meet the party at the start, and the first look at the land */
 {const _u=update;update=function(dt){
-  if(LEVEL===HG.ID&&G.state==='play'&&G.decor&&!G.flags.hgIntro&&!G.talk){const d=G.decor.find(q=>q.npc==='hg_aldous0'&&!q.hidden);
+  if(LEVEL===HG.ID&&G.state==='play'&&G.decor&&!G.flags.hgIntro&&!G.talk&&!G.menu&&!G.overview&&!G.cut&&!G.loot&&!G.inv.open){const d=G.decor.find(q=>q.npc==='hg_aldous0'&&!q.hidden);
     if(d){const dx=G.P.x-d.x,dy=G.P.y-d.y,dist=Math.hypot(dx,dy);G._hgT=(G._hgT||0)-dt;
       if(dist>2.6){if(G._hgT<=0){G._hgT=.35;const sx=Math.abs(dx)>=Math.abs(dy)?Math.sign(dx):0,sy=sx?0:Math.sign(dy),nx=d.x+sx,ny=d.y+sy;if(!G.decor.some(q=>q!==d&&q.block&&q.x===nx&&q.y===ny)){d.x=nx;d.y=ny}}}
-      else startTalk(d)}}
+      else{G.flags.hgIntro=1;startTalk(d)}}} // the welcome starts once; if it is closed early the wizard can still be talked to
   return _u.apply(this,arguments)}}
 {const _oe=ohEnter;ohEnter=function(n){_oe.apply(this,arguments);if(n===HG.ID&&!G.flags.hgSeen){G.flags.hgSeen=1;msg('Wind hisses through the long grass. You are inside the earth: a vast cavern, with a roof lost in the dark overhead.','#b8c8d8')}}}
