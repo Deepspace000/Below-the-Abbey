@@ -9,18 +9,20 @@
 | Dungeons | 112 (74 underground) | about 165 (about 95 underground) | 288 (258 underground) |
 | Named areas (towns, wilds, dungeons, sea) | about 175 (173 distinct) | about 230 | 359 (195 distinct names) |
 
-Gear (one column; the first column is the owner's pasted figure, the second is counted today)
+Gear (17 October counted from the v3.283 build, 19 October is the owner's pasted figure, 20 October counted today)
 
-| | Pasted | 20 October 2026 |
-|---|---|---|
-| Weapons | 77 | 80 |
-| Rings | 29 | 29 |
-| Helms | 23 | 25 |
-| Body armour | 21 | 22 |
-| Arm armour | 13 | 14 |
-| Leg armour | 13 | 14 |
-| Shields | 8 | 9 |
-| Lights (torch and lantern) | 2 | 2 |
+| | 17 October 2026 | 19 October 2026 | 20 October 2026 |
+|---|---|---|---|
+| Weapons | 77 | 77 | 80 |
+| Rings | 8 | 29 | 29 |
+| Helms | 23 | 23 | 25 |
+| Body armour | 20 | 21 | 22 |
+| Arm armour | 12 | 13 | 14 |
+| Leg armour | 12 | 13 | 14 |
+| Shields | 8 | 8 | 9 |
+| Lights (torch and lantern) | 2 | 2 | 2 |
+
+On 17 October the Warlord's Helm was filed under the wrong kind (a bug, fixed in v3.458), so the game counted 22 helms; it is counted here as a helm, giving 23.
 
 ## How each number was counted
 
