@@ -452,7 +452,7 @@ function lpDrawMap(){
   {const [hx,hy]=lpPos(lpGY(LPM.SEG,LPM.Y)/LP_TOT); // a headland running out into the sea, where the monastery stands
    ctx.beginPath();ctx.moveTo(hx-84,hy-8);ctx.quadraticCurveTo(hx-86,hy+64,hx,hy+66);ctx.quadraticCurveTo(hx+86,hy+64,hx+84,hy-8);ctx.closePath();ctx.fillStyle='#bba978';ctx.fill();ctx.strokeStyle='rgba(40,70,90,.6)';ctx.lineWidth=1.5;ctx.setLineDash([5,3]);ctx.stroke();ctx.setLineDash([]);
    for(let i=0;i<7;i++){const x=hx-70+H(i,31,3)*140,y=hy+8+H(i,32,3)*50;ctx.fillStyle='#6a8a46';ctx.beginPath();ctx.arc(x,y,2,0,TAU);ctx.fill()}}
-  lab('The Inner Sea',245,170,13,'#2c4a60');
+  lab('The Narrow Sea',245,170,13,'#2c4a60');
   // mountains across the top, forest on the outer sides
   for(let i=0;i<20;i++){const x=40+i*21+H(i,1,9)*10,y=48+H(i,2,9)*12,w=14+H(i,3,9)*8,h=16+H(i,4,9)*10;
     ctx.fillStyle='#8a7a66';ctx.beginPath();ctx.moveTo(x-w,y+h*.4);ctx.lineTo(x,y-h*.6);ctx.lineTo(x+w,y+h*.4);ctx.closePath();ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=1;ctx.stroke();

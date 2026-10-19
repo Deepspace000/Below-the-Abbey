@@ -93,7 +93,7 @@ function mpPilgDraw(c,x,L,api){
   const R=[],RI=[];for(let i=0;i<=500;i++){R.push(mpPilgP(i/500));RI.push(mpPilgIn(i/500))}
   const near=(a,b)=>{let m=1e9,k=0;for(let i=0;i<R.length;i+=2){const d=(R[i][0]-a)*(R[i][0]-a)+(R[i][1]-b)*(R[i][1]-b);if(d<m){m=d;k=i}}const n=RI[k];return {d:Math.sqrt(m),out:((a-R[k][0])*n[0]+(b-R[k][1])*n[1])<0,k}};
   const S=[];for(let i=0;i<=100;i++){const f=i/100;S.push(mpPilgOff(f,23+3*Math.sin(f*55)))}
-  S.push([200,243],[228,257],[268,262],[306,258],[328,250]);
+  S.push([196,300],[228,318],[268,320],[306,318],[330,300]);/* no south shore: the Narrow Sea runs on past the edge of the map */
   const pip=(a,b)=>{let ins=false;for(let i=0,j=S.length-1;i<S.length;j=i++){const pi=S[i],pj=S[j];if((pi[1]>b)!==(pj[1]>b)&&a<(pj[0]-pi[0])*(b-pi[1])/(pj[1]-pi[1])+pi[0])ins=!ins}return ins};
   const labs=[],lab=(t,a,b,sz,col,al)=>labs.push(()=>T(x,t,a,b,sz,col,al));
   const fMon=lpGY(LPM.SEG,LPM.Y)/LP_TOT,M=mpPilgP(fMon);
@@ -103,7 +103,7 @@ function mpPilgDraw(c,x,L,api){
   x.lineCap='round';x.strokeStyle='rgba(70,100,52,.7)';x.lineWidth=.5;
   for(let i=0;i<1100;i++){const a=A.x+H(i,1,62)*A.w,b=A.y+H(i,2,62)*A.h;if(pip(a,b))continue;x.beginPath();x.moveTo(a-1.2,b);x.lineTo(a,b-2);x.lineTo(a+1.2,b);x.moveTo(a,b);x.lineTo(a,b-1.4);x.stroke()}
   x.strokeStyle='rgba(90,70,40,.45)';x.lineWidth=.6;for(let i=0;i<40;i++){const a=A.x+H(i,1,63)*A.w,b=A.y+70+H(i,2,63)*(A.h-80);if(pip(a,b)||pip(a+10,b))continue;const w=6+H(i,3,63)*8;x.beginPath();x.moveTo(a-w,b);x.quadraticCurveTo(a,b-w*.5,a+w,b);x.stroke()}
-  /* ---- the Inner Sea ---- */
+  /* ---- the Narrow Sea ---- */
   x.save();x.beginPath();mpPilgSmooth(x,S);const g=x.createRadialGradient(237,170,10,237,170,150);g.addColorStop(0,'rgba(60,112,150,.78)');g.addColorStop(1,'rgba(96,150,164,.66)');x.fillStyle=g;x.fill();x.clip();
   x.beginPath();mpPilgSmooth(x,S);for(const [w,al] of [[18,.16],[11,.2],[5,.26]]){x.lineWidth=w;x.strokeStyle=`rgba(206,236,230,${al})`;x.stroke()}
   x.strokeStyle='rgba(30,60,110,.13)';x.lineWidth=.5;for(let k=0;k<16;k++){const an=k*TAU/16;x.beginPath();x.moveTo(237,175);x.lineTo(237+Math.cos(an)*170,175+Math.sin(an)*170);x.stroke()}
@@ -119,7 +119,7 @@ function mpPilgDraw(c,x,L,api){
   mpPilgShip(x,226,146,1.15,false,MPL.VERM);mpPilgShip(x,292,198,.95,true,MPL.LAPIS);mpPilgShip(x,186,200,.85,false,MPL.LAPIS);mpPilgShip(x,300,120,.8,true,MPL.VERM);mpPilgShip(x,200,240,.65,false,MPL.VERM);
   mpPilgMonster(x,222,216,.95);
   for(const [px,py] of [[270,155],[190,128],[255,238]]){x.strokeStyle='rgba(30,60,100,.7)';x.lineWidth=.6;x.beginPath();x.arc(px,py,5,0,TAU*.75);x.stroke();x.beginPath();x.arc(px,py,2.6,0,TAU*.75);x.stroke()}
-  labs.push(()=>mpPilgSpaced(x,'THE INNER SEA',237,172,13,'#1c3a5a',2.4));
+  labs.push(()=>mpPilgSpaced(x,'THE NARROW SEA',237,172,13,'#1c3a5a',2.4));
   T&&0;
   /* ---- the headland and Saint Elen's Monastery, halfway ---- */
   {const hx=M[0],hy=M[1];const HL=[[hx-52,hy-2],[hx-54,hy+16],[hx-46,hy+38],[hx-26,hy+58],[hx,hy+64],[hx+26,hy+58],[hx+46,hy+38],[hx+54,hy+16],[hx+52,hy-2]];
