@@ -61,6 +61,11 @@ function mplNotes(x,notes,a,b,w,sz,gap){sz=sz||6.4;gap=gap||5;for(const n of not
    cfg = {name, levels:[ids], draw(c,x,L,api), fit(L)->mplFit result (optional; must match what draw() used, so the arrow lands right), foot, tint}
    draw(c,x,L,api) paints everything except the border (added after) onto context x (480x320). api = {parchment,border,title,compass,text,notes,panel,fit,I,wrap}.
    The sheet is built once per level and kept in MPL.CACHE. */
+/* ---- marginalia: small pen-and-ink drolleries in the margins of the parchment (monsters, beasts, folk at work), added by the marginalia_*.js files.
+   mpmgAdd(levels, fn(x, L)) registers a drawing for those levels; fn paints onto the 480x320 sheet context x (sheet coordinates, before the border is added). ---- */
+const MPMG={by:{}};
+function mpmgAdd(levels,fn){for(const l of levels)(MPMG.by[l]=MPMG.by[l]||[]).push(fn)}
+function mpmgDraw(x,lv){const L=LEVELS[lv];for(const fn of (MPMG.by[lv]||[])){x.save();try{fn(x,L)}catch(e){console.error('marginalia',lv,e)}x.restore()}}
 function mplInstall(cfg){
   const _do=drawOverview;
   drawOverview=function(){
@@ -68,7 +73,7 @@ function mplInstall(cfg){
     BTNS=[];veil(.95);
     const key=LEVEL+':'+cfg.name;let c=MPL.CACHE[key];
     if(!c){c=document.createElement('canvas');c.width=DW*MPL.S;c.height=DH*MPL.S;const x=c.getContext('2d');x.scale(MPL.S,MPL.S);
-      try{mplParchment(x,cfg.tint);cfg.draw(c,x,LEVELS[LEVEL],{parchment:mplParchment,border:mplBorder,title:mplTitle,compass:mplCompass,text:mplText,notes:mplNotes,panel:mplPanel,fit:mplFit,I:MPLI,wrap:mplWrap});mplBorder(x)}catch(e){console.error(e)}
+      try{mplParchment(x,cfg.tint);cfg.draw(c,x,LEVELS[LEVEL],{parchment:mplParchment,border:mplBorder,title:mplTitle,compass:mplCompass,text:mplText,notes:mplNotes,panel:mplPanel,fit:mplFit,I:MPLI,wrap:mplWrap});mpmgDraw(x,LEVEL);mplBorder(x)}catch(e){console.error(e)}
       MPL.CACHE[key]=c}
     const L=LEVELS[LEVEL],a=cfg.fit?cfg.fit(L):mplFit(L.rows[0].length,L.rows.length);
     MPL.reveal=!!cfg.reveal;
@@ -81,18 +86,20 @@ function mplPaint(c,S,area,X,Y,foot){
   BTNS=[];veil(.95);
   if(G.mplLv!==LEVEL||G.mplKey!==c){G.mplLv=LEVEL;G.mplKey=c;G.mz=12;G.panX=0;G.panY=0}
   const z=mplZoom();G.panMinX=-area.w*(z-1);G.panMinY=-area.h*(z-1);G.panX=Math.max(G.panMinX,Math.min(0,G.panX||0));G.panY=Math.max(G.panMinY,Math.min(0,G.panY||0));
-  MPL.view={lv:LEVEL,area};
+  MPL.view={lv:LEVEL,area,X,Y,z:0,sx0:0,sy0:0};
   BTNS.push({id:'mplarea',x:area.x,y:area.y,w:area.w,h:area.h,up:true,drag:'map'});
   ctx.imageSmoothingQuality='high';ctx.drawImage(c,0,0,DW,DH);
   const sx0=area.x-G.panX/z,sy0=area.y-G.panY/z;
   if(z>1.001){ctx.save();ctx.beginPath();ctx.rect(area.x,area.y,area.w,area.h);ctx.clip();ctx.drawImage(c,sx0*S,sy0*S,area.w/z*S,area.h/z*S,area.x,area.y,area.w,area.h);ctx.restore()}
   const FL=LEVELS[LEVEL],fg=MPL.reveal?mplFogFor(area,X,Y,FL,true):mplFogOn(FL)?mplFogFor(area,X,Y,FL):null;
-  if(fg){ctx.save();ctx.beginPath();ctx.rect(area.x,area.y,area.w,area.h);ctx.clip();ctx.globalAlpha=fg.dense?.97:.82;ctx.imageSmoothingQuality='high';ctx.drawImage(fg.cv,(sx0-area.x)*fg.fs,(sy0-area.y)*fg.fs,area.w/z*fg.fs,area.h/z*fg.fs,area.x,area.y,area.w,area.h);ctx.restore()}
+  if(fg){ctx.save();ctx.beginPath();ctx.rect(area.x,area.y,area.w,area.h);ctx.clip();ctx.globalAlpha=1;ctx.imageSmoothingQuality='high';ctx.drawImage(fg.cv,(sx0-area.x)*fg.fs,(sy0-area.y)*fg.fs,area.w/z*fg.fs,area.h/z*fg.fs,area.x,area.y,area.w,area.h);ctx.restore()}
+  Object.assign(MPL.view,{z,sx0,sy0});if(typeof mpplDraw==='function')try{mpplDraw()}catch(e){console.error('mpplDraw',e)}
   const px=area.x+(X(G.C.x+.5)-sx0)*z,py=area.y+(Y(G.C.y+.5)-sy0)*z;
   if(px>area.x-4&&px<area.x+area.w+4&&py>area.y-4&&py<area.y+area.h+4){ctx.save();ctx.translate(px,py);ctx.rotate((G.C.a||0)+Math.PI/2);ctx.fillStyle='#ffe36a';ctx.strokeStyle='#2a1a0c';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(5,6);ctx.lineTo(0,3);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore()}
-  ctx.fillStyle='rgba(30,22,16,.85)';ctx.fillRect(0,DH-17,DW,17);txt(foot||'You are the yellow arrow.',DW/2+50,DH-8.5,7.5,'#e0d8bc','center',true);
+  ctx.fillStyle='rgba(30,22,16,.85)';ctx.fillRect(0,DH-17,DW,17);txt(foot||'You are the yellow arrow.',238,DH-8.5,7.5,'#e0d8bc','left',true,undefined,236);
   MPL.me=()=>{const cxs=X(G.C.x+.5),cys=Y(G.C.y+.5);G.panX=(area.w/2)-(cxs-area.x)*z;G.panY=(area.h/2)-(cys-area.y)*z;G.panX=Math.max(G.panMinX,Math.min(0,G.panX));G.panY=Math.max(G.panMinY,Math.min(0,G.panY))};
   btnText('mzin','+',22,303,18,17);btnText('mzout','-',42,303,18,17);btnText('mzfit','Fit',62,303,28,17);btnText('mplme','Me',92,303,26,17);
+  if(typeof mpplButtons==='function')try{mpplButtons()}catch(e){console.error('mpplButtons',e)}
   btnText('worldmap','World map',328,5,80,20);btnText('ovexit','Exit',414,5,60,20)}
 /* while one of these maps is open, zooming (buttons, wheel, pinch) zooms the framed drawing about the point under the pointer */
 {const _s=setMapZoom;setMapZoom=function(ncs,ax,ay){
@@ -105,7 +112,7 @@ function mplPaint(c,S,area,X,Y,foot){
 
 /* ---- fog of war: a drifting cloud over the parts of an outdoor map the party has not walked near. It is soft and see-through, so the edges of the land still show. ---- */
 /* which levels have fog: the outdoor ones, except Greendale (no enemies, nothing to fear) and the Pilgrim's Path, which stay clear */
-function mplFogOn(L){return !!(L&&L.outdoor&&L.rows&&LEVEL!==32&&LEVEL!==44&&!(LEVEL>=400&&LEVEL<=434)&&!(G.flags&&G.flags.noFog))}
+function mplFogOn(L){return !!(L&&L.outdoor&&L.rows&&LEVEL!==32&&LEVEL!==44&&![3,13,33,290,300,301,302,303,304,305].includes(LEVEL)&&!(LEVEL>=400&&LEVEL<=434)&&!(G.flags&&G.flags.noFog))}
 const MPLF={arr:{},flags:null,ver:0,t:0,cache:null,sig:'',tex:null};
 function mplFogArr(){
   if(MPLF.flags!==G.flags){MPLF.arr={};MPLF.flags=G.flags;MPLF.cache=null}
@@ -131,6 +138,28 @@ function mplCloudTex(){
   x.putImageData(d,0,0);return MPLF.tex=c}
 function mplTile(x,y,P,o){const x0=Math.floor(x),y0=Math.floor(y),fx=x-x0,fy=y-y0,sx=fx*fx*(3-2*fx),sy=fy*fy*(3-2*fy),m=Math.round(P),h=(i,j)=>hash2(((i%m)+m)%m,((j%m)+m)%m,91+o);
   return (h(x0,y0)*(1-sx)+h(x0+1,y0)*sx)*(1-sy)+(h(x0,y0+1)*(1-sx)+h(x0+1,y0+1)*sx)*sy}
+/* outdoor fog of war: a solid bank of the same hand-drawn clouds as the world map, over the ground the party has not walked near. */
+function mplFogClouds(a,W,H,area,X,Y){
+  const fs=4,fw=Math.ceil(area.w*fs),fh=Math.ceil(area.h*fs),cv=document.createElement('canvas');cv.width=fw;cv.height=fh;const x=cv.getContext('2d');
+  const x0=X(0),y0=Y(0),cs=X(1)-x0,bx=(x0-area.x)*fs,by=(y0-area.y)*fs;
+  // the solid ground of the bank: every unexplored cell, a little blurred at the edge
+  const m=document.createElement('canvas');m.width=W;m.height=H;const mx=m.getContext('2d'),id=mx.createImageData(W,H);
+  for(let i=0;i<W*H;i++){id.data[i*4]=212;id.data[i*4+1]=203;id.data[i*4+2]=178;id.data[i*4+3]=a[i]?0:255}mx.putImageData(id,0,0);
+  x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.drawImage(m,bx,by,W*cs*fs,H*cs*fs);
+  if(!MPLF.spr&&typeof mpWorldCloudSprites==='function'){try{const all=mpWorldCloudSprites();MPLF.spr=[0,1,5,6].map(k=>all[k]).filter(Boolean)}catch(e){MPLF.spr=[]}}
+  const spr=MPLF.spr||[];if(!spr.length)return cv;
+  const cov=(cx,cy)=>cx>=0&&cy>=0&&cx<W&&cy<H&&!a[cy*W+cx];
+  const near=(cx,cy,r)=>{for(let k=0;k<8;k++){const an=k*Math.PI/4;if(!cov(Math.round(cx+Math.cos(an)*r),Math.round(cy+Math.sin(an)*r)))return true}return false};
+  const items=[],st=9;
+  for(let gy=0;gy*st<area.h+st;gy++)for(let gx=0;gx*st<area.w+st;gx++){
+    const px=area.x+gx*st+(hash2(gx,gy,401)-.5)*st*1.1,py=area.y+gy*st+(hash2(gx,gy,402)-.5)*st*1.1,cx=Math.floor((px-x0)/cs),cy=Math.floor((py-y0)/cs);
+    if(!cov(cx,cy))continue;
+    const edge=near(cx,cy,Math.max(1.5,10/cs));let w=(edge?22:52)*(.7+.6*hash2(gx,gy,403));
+    if(!edge&&near(cx,cy,w*.4/cs))w*=.5;
+    items.push([py,px,w,Math.floor(hash2(gx,gy,404)*spr.length),hash2(gx,gy,405)<.5])}
+  items.sort((p,q)=>p[0]-q[0]);
+  for(const [py,px,w,k,fl] of items){const sp=spr[k],h=w*sp.height/sp.width;x.save();x.translate((px-area.x)*fs,(py-area.y)*fs);if(fl)x.scale(-1,1);x.drawImage(sp,-w*fs/2,-h*fs*.62,w*fs,h*fs);x.restore()}
+  return cv}
 /* the cloud sheet for this level and view: rebuilt when the explored ground changes */
 function mplFogFor(area,X,Y,L,seenMode){
   const W=L.rows[0].length,H=L.rows.length,fs=2;let a,key;
@@ -140,6 +169,9 @@ function mplFogFor(area,X,Y,L,seenMode){
     a=b;key=LEVEL+':seen:'+n+':'+area.x+area.w}
   else{a=mplFogArr();if(!a)return null;key=LEVEL+':'+MPLF.ver+':'+area.x+area.w}
   if(MPLF.cache&&MPLF.cache.key===key)return MPLF.cache;
+  if(!seenMode){ // outdoor fog: banks of hand-drawn clouds, solid. While walking it is only redrawn about once a second.
+    const c0=MPLF.cache;if(c0&&c0.lv===LEVEL&&c0.aw===area.x+area.w&&G.time-c0.t<1&&G.time>=c0.t)return c0;
+    const cv=mplFogClouds(a,W,H,area,X,Y);return MPLF.cache={key,cv,fs:4,dense:false,lv:LEVEL,aw:area.x+area.w,t:G.time}}
   const fw=Math.ceil(area.w*fs),fh=Math.ceil(area.h*fs),cv=document.createElement('canvas');cv.width=fw;cv.height=fh;const x=cv.getContext('2d');
   const m=document.createElement('canvas');m.width=W;m.height=H;const mx=m.getContext('2d'),id=mx.createImageData(W,H);
   for(let i=0;i<W*H;i++){id.data[i*4+3]=a[i]?0:255;id.data[i*4]=255}mx.putImageData(id,0,0);

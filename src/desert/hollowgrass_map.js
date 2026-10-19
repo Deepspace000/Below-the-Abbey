@@ -76,10 +76,11 @@ function hgmDraw(){
   key(6,'Frog-whale (harmless)',(a,b)=>{x.fillStyle='#8a9a78';x.strokeStyle=ink;x.lineWidth=.7;x.beginPath();x.ellipse(a,b,3.4,2.4,0,0,Math.PI*2);x.fill();x.stroke();x.fillStyle='#e8ecd8';x.beginPath();x.arc(a-1.2,b-1.4,.9,0,Math.PI*2);x.arc(a+1.2,b-1.4,.9,0,Math.PI*2);x.fill()});
   key(7,'Insectivore (small to huge)',(a,b)=>{for(const [dx,t] of [[-4,0],[0,4],[4.6,9]]){const r=1.1+t*.32;x.fillStyle='#6a2418';x.beginPath();x.ellipse(a+dx,b,r*.8,r*.65,0,0,Math.PI*2);x.fill()}});
   key(8,'Red number: book in that hive',(a,b)=>{x.fillStyle='#d03a2a';x.strokeStyle=ink;x.lineWidth=.8;x.beginPath();x.arc(a,b,3.2,0,Math.PI*2);x.fill();x.stroke()});
+  mpmgDraw(x,470);
   return c;
 }
 function hgmOverview(){
   if(!HGM.cv)HGM.cv=hgmDraw();
-  if(HGM.cv)mplPaint(HGM.cv,3,{x:112,y:38,w:252,h:254},cx=>HGM.ox+cx*HGM.s,cy=>HGM.oy+cy*HGM.s,'Exsce, the village nearest the gate, is where the wizard waits.');
+  MPL.reveal=false;if(HGM.cv)mplPaint(HGM.cv,3,{x:112,y:38,w:252,h:254},cx=>HGM.ox+cx*HGM.s,cy=>HGM.oy+cy*HGM.s,'Exsce, the village nearest the gate, is where the wizard waits.');
 }
 {const _do=drawOverview;drawOverview=function(){if(LEVEL===HG.ID&&LEVELS[HG.ID]&&!G.world&&!G.teleMode){hgmOverview();return}return _do.apply(this,arguments)}}

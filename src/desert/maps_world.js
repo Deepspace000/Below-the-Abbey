@@ -550,7 +550,7 @@ drawWorldMap=function(){if(mpWorldM.dead)return mpWorldOld.apply(this,arguments)
 /* ---------- clouds: hand-drawn map clouds that drift slowly across the map. Dragging the map sends them away faster than the land, and new ones drift in from the opposite edge. ---------- */
 const mpWorldCl={list:[],spr:null,t:0,px:null,py:null,pz:null};
 /* the kinds of cloud: [name, width, height, how it is built, size range, share of the sky] */
-const MPW_CK=[['plain',420,210,'heap',[.8,1.2],24],['small',200,200,'small',[.55,.95],20],['thin',540,110,'thin',[.9,1.4],18],['tower',460,470,'tower',[1.3,1.8],10],['wisp',440,120,'wisp',[.8,1.3],14],['twin',400,200,'twin',[.9,1.3],8],['pair',290,150,'pair',[.55,.9],6]];
+const MPW_CK=[['plain',420,210,'heap',[.6,.9],24],['small',200,200,'small',[.45,.75],20],['thin',540,110,'thin',[.65,1.0],18],['tower',460,470,'tower',[.8,1.05],10],['wisp',440,120,'wisp',[.65,1.0],14],['twin',400,200,'twin',[.7,1.0],8],['pair',290,150,'pair',[.45,.7],6]];
 function mpWorldCloudSprites(){
   // puffy cumulus in the manner of old chart-makers: a heap of round puffs with a scalloped base, curling spirals in the billows, cross-hatched shade, stipple and a white highlight
   const out=[];

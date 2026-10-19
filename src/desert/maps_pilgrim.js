@@ -254,10 +254,10 @@ function mpPilgDraw(c,x,L,api){
   T(x,'pilgrims on the road',434,ky+24,5.4,'#5a3a1c')}
 function mpPilgOverview(){
   if(!MPPILG.cv){const c=document.createElement('canvas');c.width=DW*MPL.S;c.height=DH*MPL.S;const x=c.getContext('2d');x.scale(MPL.S,MPL.S);
-    try{mplParchment(x);mpPilgDraw(c,x,LEVELS[LEVEL],{parchment:mplParchment,border:mplBorder,title:mplTitle,compass:mplCompass,text:mplText,notes:mplNotes,panel:mplPanel,fit:mplFit,I:MPLI,wrap:mplWrap});mplBorder(x)}catch(e){console.error(e)}
+    try{mplParchment(x);mpPilgDraw(c,x,LEVELS[LEVEL],{parchment:mplParchment,border:mplBorder,title:mplTitle,compass:mplCompass,text:mplText,notes:mplNotes,panel:mplPanel,fit:mplFit,I:MPLI,wrap:mplWrap});mpmgDraw(x,LEVEL);mplBorder(x)}catch(e){console.error(e)}
     MPPILG.cv=c}
   const A=MPL.AREA,cur=mpPilgCur(),me=mpPilgP(cur),km=Math.round(cur*LP_KM);
-  mplPaint(MPPILG.cv,MPL.S,A,()=>-9999,()=>-9999,'You are '+km+' km from Oldhaven and '+(LP_KM-km)+' km from Yarrim.');
+  MPL.reveal=false;mplPaint(MPPILG.cv,MPL.S,A,()=>-9999,()=>-9999,'You are '+km+' km from Oldhaven and '+(LP_KM-km)+' km from Yarrim.');
   MPL.reveal=false;
   const z=mplZoom(),sx0=A.x-G.panX/z,sy0=A.y-G.panY/z,S=p=>[A.x+(p[0]-sx0)*z,A.y+(p[1]-sy0)*z];
   MPL.me=()=>{G.panX=(A.w/2)-(me[0]-A.x)*z;G.panY=(A.h/2)-(me[1]-A.y)*z;G.panX=Math.max(G.panMinX,Math.min(0,G.panX));G.panY=Math.max(G.panMinY,Math.min(0,G.panY))};
