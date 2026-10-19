@@ -1,4 +1,12 @@
-Below the Abbey: update 3.456
+Below the Abbey: update 3.457
+
+The manual
+
+* Below the Abbey now has a printed manual, in the style of the booklets that came in the box of the old games: a 186 page illustrated PDF with a black letter title, a clickable contents page and a black and white screenshot in a heavy black frame on almost every page.
+* Chapter 1 explains the screen, the controls, the menu, the maps and your first ten minutes, with a keyboard and mouse quick reference. Chapter 2 covers your party, the twelve occupations, powers, combat, afflictions, resting and hunger. Chapter 3 covers the inventory, gear, trade, herbs and scrolls.
+* Chapter 4 tells the history of the land, with a who's who and a timeline (the later parts are marked as spoilers). Chapters 5, 6 and 7 are travel guides to the home lands, the deserts and Khemetra, and the seas, Oldhaven and the east. Chapter 8 is the bestiary and a hint guide with three levels of hint for every place and quest.
+* The new illuminated area maps fill an atlas at the end of each guide chapter, and the gear catalog (every weapon, armour piece and ring, sorted white, green, blue, red, purple and orange) is the appendix.
+* In the game, the More page of the menu has a new Game manual (PDF) button that opens the manual in a new tab. It is also on the itch.io page to download.
 
 The Hollow Grasslands
 

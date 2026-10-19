@@ -82,7 +82,7 @@ ga('ironcap','head','Iron Cap','Helm',10,3,250,'#9aa0aa',null,'A plain iron cap 
 ga('greathelm','head','Knight\'s Greathelm','Helm',20,4,500,'#b0b4bc',{dodge:.03},'A closed helm with a narrow slit. Blows glance off it.',{str:14});
 ga('hornhelm','head','Horned Helm','Helm',30,5,900,'#8a8a96',{dmgPct:.05},'A horned helm that makes the wearer look twice as angry. All damage +5%.',{str:18});
 ga('centurion','head','Centurion Helm','Helm',40,6,1500,'#c8a050',{crit:.05},'A bronze helm with a red crest. +5% double hits.',{str:22});
-ga('warlordhelm',"Warlord's Helm",'Helm',50,8,2400,'#d8b860',{dodge:.05,dmgPct:.05},'A gold-trimmed helm worn by great captains. Enemies miss 5% more; damage +5%.',{str:26});
+ga('warlordhelm','head',"Warlord's Helm",'Helm',50,8,2400,'#d8b860',{dodge:.05,dmgPct:.05},'A gold-trimmed helm worn by great captains. Enemies miss 5% more; damage +5%.',{str:26});
 // master armour for level 30, to go with the master weapons
 ga('drakehelm','head','Drakescale Helm','Helm',30,7,2000,'#c8603a',{dmgPct:.08,crit:.04},'A helm of overlapping red scales. All damage +8% and +4% double hits.',{str:22});
 // body armour
