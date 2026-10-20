@@ -11,3 +11,5 @@ manual/__pycache__/
 manual/_preview_*.html
 
 itch-manual/
+
+tools/butler/
