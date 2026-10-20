@@ -27,6 +27,7 @@
    window, window_mid; band, band_low; door_round, door_arch, door_small; pillar, pillar_low; secret; roof_pink, roof_aqua; hedge.
    hgtlTaper('a') returns [rail,low,mid,full,cap] chars of one tint, for stepped tapers.
 
+   API additions (ENGINE2): hgtlTube, hgtlPool, hgtlStairsToNowhere (see the end of this file; data contract in hgt_engine.js, sections 7 to 9)
    API (all builders take B first; x,y are cell coords; h are heights in game units)
      hgtlNew(W,H,seed)                       new builder, all open at height 0
      hgtlR(B,a,b,k)                          seeded random 0..1 (hash2 with B.seed)
@@ -83,7 +84,7 @@ function hgtlTaper(t){return ['_rail','_low','_mid','',"_cap"].map(s=>HGTL_CHARS
 
 /* ---------- builder and primitives ---------- */
 function hgtlNew(W,H,seed){const rows=[];for(let y=0;y<H;y++)rows.push(new Array(W).fill('.'));
-  return {W,H,seed:seed|0,rows,h:new Float32Array(W*H),kind:new Uint8Array(W*H),decor:[],portals:[],lights:[],names:[],doors:[],stairs:[],lintels:[],secrets:[],ignore:new Set(),start:null,occ:new Set()}}
+  return {W,H,seed:seed|0,rows,h:new Float32Array(W*H),kind:new Uint8Array(W*H),decor:[],portals:[],lights:[],names:[],doors:[],stairs:[],lintels:[],secrets:[],ignore:new Set(),start:null,occ:new Set(),lid:null,water:null,wl:null,dive:{},tubes:[],pools:[],nowhere:[]}}
 function hgtlR(B,a,b,k){return hash2(a,b,B.seed+(k|0))}
 function hgtlXf(x,y,dir){const f=HGTL.DIRS[dir&3],r=HGTL.DIRS[(dir+1)&3];return (u,v)=>[x+r[0]*u+f[0]*v,y+r[1]*u+f[1]*v]}
 function hgtlIn(B,x,y){return x>=0&&y>=0&&x<B.W&&y<B.H}
@@ -253,7 +254,7 @@ function hgtlLampRow(B,x,y,dir,len,gap){const f=HGTL.DIRS[dir&3];gap=gap||3;for(
 /* returns a LEVELS entry. opts {name,label,start,diff,ceilH,chars,extra}. rows hold the placeholder chars until hgtlBindChars is called */
 function hgtlAssemble(B,opts){opts=opts||{};const st=opts.start||B.start||{x:1,y:1,f:0};
   const lv=Object.assign({rows:B.rows.map(r=>r.join('')),chars:Object.assign({},opts.chars||{}),start:{x:st.x,y:st.y,f:st.f|0},enemies:[],items:[],decor:B.decor,scenery:[],portals:B.portals,lights:B.lights,
-    mapNames:B.names.map(n=>Object.assign({},n)),terrace:{h:B.h},outdoor:true,day:0,name:opts.name||'Town',label:opts.label||opts.name||'Town',diff:opts.diff||1,noTele:true,hgtl:{kind:B.kind,doors:B.doors,secrets:B.secrets,lintels:B.lintels,W:B.W,H:B.H}},opts.extra||{});
+    mapNames:B.names.map(n=>Object.assign({},n)),terrace:Object.assign({h:B.h},B.lid?{lid:B.lid}:{},B.water?{water:B.water,wl:B.wl}:{},Object.keys(B.dive).length?{dive:B.dive}:{}),outdoor:true,day:0,name:opts.name||'Town',label:opts.label||opts.name||'Town',diff:opts.diff||1,noTele:true,hgtl:{kind:B.kind,doors:B.doors,secrets:B.secrets,lintels:B.lintels,W:B.W,H:B.H}},opts.extra||{});
   if(opts.ceilH)lv.ceilH=opts.ceilH;return lv}
 /* map: {placeholderChar:newChar}; applies to lv.rows and keeps lv.chars keyed by the new chars */
 function hgtlBindChars(lv,map){lv.rows=lv.rows.map(r=>{let o='';for(const ch of r)o+=(map[ch]!==undefined?map[ch]:ch);return o});return lv}
@@ -268,7 +269,8 @@ function hgtlValidate(B,sx,sy){const st=B.start||{x:sx,y:sy};sx=sx===undefined?s
   for(const d of B.doors){if(!hgtlIsOpen(B,d.ax,d.ay)||!r.seen[d.ay*B.W+d.ax])out.doorsBad.push({x:d.x,y:d.y,ax:d.ax,ay:d.ay})}
   for(const run of B.stairs){for(let i=1;i<run.cells.length;i++){const a=run.cells[i-1],b=run.cells[i],dh=Math.abs(hgtlH(B,b[0],b[1])-hgtlH(B,a[0],a[1]));
     if(dh>HGTL.CLIMB+1e-6)out.steep.push({x:b[0],y:b[1],dh,run:run.kind});else if(dh>HGTL.STEP_MAX+.02)out.warnings.push('step '+dh.toFixed(2)+' at '+b[0]+','+b[1]+' ('+run.kind+')')}}
-  out.ok=!out.unreachable.length&&!out.doorsBad.length&&!out.steep.length;return out}
+  hgtlValidateExtra(B,r,out);
+  out.ok=!out.unreachable.length&&!out.doorsBad.length&&!out.steep.length&&!out.tubesBad.length&&!out.poolsBad.length;return out}
 
 /* ---------- debug image ---------- */
 function hgtlDebugImage(B,opts){opts=opts||{};const S=opts.scale||6,cv=document.createElement('canvas');cv.width=B.W*S;cv.height=B.H*S;const x=cv.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,cv.width,cv.height);
@@ -341,3 +343,114 @@ function hgtlSampleTown(seed){const B=hgtlNew(120,120,seed===undefined?7:seed),W
   hgtlPlantBed(B,56,56,8,8,{density:.1,h:0});
   hgtlSetStart(B,60,66,0);
   return B}
+
+
+/* ==========================================================================
+   COVERED TUBES, POOLS AND STAIRS THAT GO NOWHERE (ENGINE2). The engine side is described in hgt_engine.js (sections 7 to 9).
+   B.lid    Float32Array(W*H)  clearance of the ceiling above the floor of a cell, 0 = open sky. Made by hgtlTube.
+   B.water  Uint8Array(W*H)    0 dry, 1 shallow (wade), 2 deep (swim);   B.wl  Float32Array(W*H)  absolute height of the water surface.   Made by hgtlPool.
+   B.dive   {'x,y':{to,x,y,f}}  deep cells that lead down to another level.
+   ========================================================================== */
+function hgtlEnsureLid(B){if(!B.lid)B.lid=new Float32Array(B.W*B.H);return B.lid}
+function hgtlEnsureWater(B){if(!B.water){B.water=new Uint8Array(B.W*B.H);B.wl=new Float32Array(B.W*B.H)}return B.water}
+/* hgtlTube(B,x0,y0,x1,y1,opts): a walk-through covered passage from (x0,y0) to (x1,y1) (straight, or one bend: along x first, then along y). Both ends are open mouths.
+   opts {width:1 (the cells across), lid:2.4 (clearance at the edges), peak: lid+.8 (clearance in the middle of a wide tube: a stepped vault; width>=3 only, or profile:'flat'),
+         profile:'vault'|'flat', h: floor height at the start (default the ground there), rise: floor rise per cell (a covered stair), wall: char or role for the side walls (default nacre_c_mid, 3.4 high),
+         lampEvery:3 (a light in the tube every n cells, 0 = none)}
+   Side walls stand on the floor height beside them; keep opts.lid (and peak) <= the wall height (3.4 for the default wall, 6 for a nacre_x char).
+   Returns {cells:[[x,y]..], lid, peak, mouths:[[x,y],[x,y]], mouthSet:Set, wall, w}. */
+function hgtlTube(B,x0,y0,x1,y1,opts){opts=opts||{};
+  const lid0=opts.lid!==undefined?opts.lid:2.4,w=Math.max(1,opts.width||1),vault=(opts.profile||(w>=3?'vault':'flat'))==='vault'&&w>=3,peak=opts.peak!==undefined?opts.peak:lid0+.8,
+    wallCh=opts.wall?(HGTL_CHARS[opts.wall]||opts.wall):HGTL_CHARS.nacre_c_mid,h0=opts.h!==undefined?opts.h:hgtlH(B,x0,y0),rise=opts.rise||0,le=opts.lampEvery===undefined?3:opts.lampEvery,L=hgtlEnsureLid(B);
+  const path=[],sx=Math.sign(x1-x0),sy=Math.sign(y1-y0);let x=x0,y=y0;
+  path.push([x,y,x1!==x0?0:1]);
+  while(x!==x1){x+=sx;path.push([x,y,0])}
+  while(y!==y1){y+=sy;path.push([x,y,1])}
+  const lo=-((w-1)>>1),hi=w>>1,cells=new Map(),K=(a,b)=>a+','+b,lat=ax=>ax===0?[0,1]:[1,0];
+  const clr=u=>{if(!vault)return lid0;const c=(w-1)/2,t=Math.max(0,Math.min(1,1-Math.abs(u-lo-c)/(c+.001)));return lid0+(peak-lid0)*Math.min(1,t*1.4)};
+  const put=(cx,cy,hh,lv,i)=>{if(!hgtlIn(B,cx,cy))return;const k=K(cx,cy);if(!cells.has(k))cells.set(k,{x:cx,y:cy,h:hh,lid:lv,i})};
+  path.forEach((c,i)=>{const l=lat(c[2]);for(let u=lo;u<=hi;u++)put(c[0]+l[0]*u,c[1]+l[1]*u,h0+rise*i,clr(u),i)});
+  for(let k=1;k<path.length;k++)if(path[k][2]!==path[k-1][2]){const bx=path[k-1][0],by=path[k-1][1];for(let v=lo;v<=hi;v++)for(let u=lo;u<=hi;u++)put(bx+u,by+v,h0+rise*(k-1),lid0,k-1)} // the square at a bend
+  const n=path.length,first=path[0],last=path[n-1],back=n>1?[Math.sign(first[0]-path[1][0]),Math.sign(first[1]-path[1][1])]:[-1,0],fwd=n>1?[Math.sign(last[0]-path[n-2][0]),Math.sign(last[1]-path[n-2][1])]:[1,0],mouth=new Set();
+  for(const [c,dv] of [[first,back],[last,fwd]]){const l=dv[0]!==0?[0,1]:[1,0];for(let u=lo;u<=hi;u++)mouth.add(K(c[0]+dv[0]+l[0]*u,c[1]+dv[1]+l[1]*u))} // the cells just beyond each end stay as they are
+  for(const c of cells.values()){hgtlOpen(B,c.x,c.y,c.h,HGTL.K.ALLEY);L[c.y*B.W+c.x]=c.lid}
+  for(const c of cells.values())for(const d of HGTL.DIRS){const nx=c.x+d[0],ny=c.y+d[1];if(!hgtlIn(B,nx,ny)||cells.has(K(nx,ny))||mouth.has(K(nx,ny)))continue;
+    const cur=B.rows[ny][nx];if(cur!=='.'&&(HGTL_WH[cur]===undefined||HGTL_WH[cur]>=c.lid+.01))continue; // a wall that is tall enough is already there
+    hgtlWall(B,nx,ny,wallCh,c.h)}
+  if(le>0)path.forEach((c,i)=>{if(i%le===1||(n<3&&i===0))hgtlLight(B,c[0],c[1])});
+  const info={cells:[...cells.values()].map(c=>[c.x,c.y]),lid:lid0,peak:vault?peak:lid0,mouths:[[first[0],first[1]],[last[0],last[1]]],mouthSet:mouth,wall:wallCh,w};
+  B.tubes.push(info);return info}
+
+/* hgtlPool(B,x,y,w,d,opts): a pool of open cells. The rim stays at the height around it; the bed is sunk below it. Shallow cells (water 1) are waded, deep cells (water 2) are swum.
+   opts {rim: height of the surrounding ground (default the ground at x,y), shallow:1 (the width of the shallow ring), deep:false (all shallow), deepRect:[x,y,w,d] (default the inside of the ring),
+         shallowDepth:.3 (bed below the rim), deepDepth:.8, lead:{to,x,y,f,ret:{x,y,f}} (the deep centre leads down to that level, needs diving helms; x,y,f = where the party arrives; ret = the shallow cell the rescue brings them back to, default the west edge of the pool), leadAll:true (every deep cell leads),
+         bath:true (a deep dead end with nothing below, so the validator accepts it), lamps:true (four lamps at the corners)}
+   Returns {x,y,w,d,rim,cells,deep:[[x,y]..],centre:[x,y],lead,bath,surface}. The surface is rim - .06 for every cell. */
+function hgtlPool(B,x,y,w,d,opts){opts=opts||{};
+  const rim=opts.rim!==undefined?opts.rim:hgtlH(B,x,y),sh=opts.shallow===undefined?1:opts.shallow,sd=opts.shallowDepth===undefined?.3:opts.shallowDepth,dd=opts.deepDepth===undefined?.8:opts.deepDepth;hgtlEnsureWater(B);
+  const dr=opts.deep===false?null:(opts.deepRect||[x+sh,y+sh,w-2*sh,d-2*sh]),cells=[],deep=[];
+  for(let j=0;j<d;j++)for(let i=0;i<w;i++){const cx=x+i,cy=y+j;if(!hgtlIn(B,cx,cy))continue;
+    const isDeep=!!dr&&dr[2]>0&&dr[3]>0&&cx>=dr[0]&&cy>=dr[1]&&cx<dr[0]+dr[2]&&cy<dr[1]+dr[3];
+    hgtlOpen(B,cx,cy,rim-(isDeep?dd:sd),HGTL.K.COURT);B.water[cy*B.W+cx]=isDeep?2:1;B.wl[cy*B.W+cx]=rim-.06;cells.push([cx,cy]);if(isDeep)deep.push([cx,cy])}
+  const centre=[x+(w>>1),y+(d>>1)];let lead=false;
+  if(opts.lead&&deep.length){lead=true;const mid=deep.find(c=>c[0]===centre[0]&&c[1]===centre[1])||deep[(deep.length-1)>>1],list=opts.leadAll?deep:[mid];
+    const ret=opts.lead.ret||{x:x,y:y+(d>>1),f:1};for(const c of list)B.dive[c[0]+','+c[1]]={to:opts.lead.to,x:opts.lead.x,y:opts.lead.y,f:opts.lead.f|0,ret:{x:ret.x,y:ret.y,f:ret.f|0}}}
+  if(opts.lamps)for(const c of [[x-1,y-1],[x+w,y-1],[x-1,y+d],[x+w,y+d]])if(hgtlIsOpen(B,c[0],c[1])){hgtlDecor(B,'hg_lamp',c[0],c[1],{walk:true,deco:true});hgtlLight(B,c[0],c[1])}
+  const info={x,y,w,d,rim,cells,deep,centre,lead,bath:!!opts.bath,surface:rim-.06};B.pools.push(info);return info}
+
+/* hgtlStairsToNowhere(B,x,y,dir,variant,opts): stairs that lead to nothing. x,y is the first step, dir the way it climbs (0 north, 1 east, 2 south, 3 west).
+   variant 'wall'   a flight that ends at a blank wall;
+           'chair'  a flight to a small railed platform with one chair and one lamp;
+           'arch'   a flight to a closed ornate arch between two pillars (the arch is a wall: it does not open);
+           'window' a flight to a wall with one window, and a light at the top;
+           'loop'   a ring of steps that rises and falls back to its own start (x,y is the north-west corner of the ring, opts.size 6, entered at the middle of its south side).
+   opts {len:12, width:2, rise:.26, h0: start height (default the ground at x,y), tint:'a'..'d' (the wall tint)}. Returns {variant, cells, top:{x,y,h}}. Registered in B.nowhere. */
+function hgtlStairsToNowhere(B,x,y,dir,variant,opts){opts=opts||{};variant=variant||'wall';
+  const h0=opts.h0!==undefined?opts.h0:hgtlH(B,x,y),rise=opts.rise||HGTL.STEP,tint=opts.tint||'c',f=HGTL.DIRS[dir&3],r=HGTL.DIRS[(dir+1)&3];
+  const nac=HGTL_CHARS['nacre_'+tint],rail=HGTL_CHARS['nacre_'+tint+'_rail'],at=(v,u)=>[x+f[0]*v+r[0]*u,y+f[1]*v+r[1]*u];
+  let info;
+  if(variant==='loop'){
+    const s=opts.size||6,P=4*(s-1),ring=[];
+    for(let i=0;i<s;i++)ring.push([x+i,y+s-1]);                         // the south side, west to east
+    for(let j=s-2;j>=0;j--)ring.push([x+s-1,y+j]);                      // up the east side
+    for(let i=s-2;i>=0;i--)ring.push([x+i,y]);                          // along the north side to the west
+    for(let j=1;j<=s-2;j++)ring.push([x,y+j]);                          // down the west side
+    const k0=ring.findIndex(c=>c[0]===x+(s>>1)&&c[1]===y+s-1),rot=ring.slice(k0).concat(ring.slice(0,k0)),cells=[];
+    for(let a=1;a<s-1;a++)for(let b=1;b<s-1;b++)hgtlWall(B,x+a,y+b,nac,h0);
+    rot.forEach((c,i)=>{hgtlOpen(B,c[0],c[1],h0+rise*Math.min(i,P-i),HGTL.K.STAIR);cells.push([c[0],c[1]])});
+    hgtlRegRun(B,cells.concat([cells[0]]),h0,rise,'loop');
+    const pk=rot[P>>1];info={variant,cells,top:{x:pk[0],y:pk[1],h:h0+rise*(P>>1)}};
+  }else{
+    const n=opts.len||12,w=opts.width||2,fl=hgtlStairsStraight(B,x,y,dir,n,h0,rise,{width:w,rail:'nacre_'+tint+'_rail'}),top=fl.h,cells=[];
+    for(let v=0;v<n;v++)for(let u=0;u<w;u++)cells.push(at(v,u));
+    const land=depth=>{for(let v=n;v<n+depth;v++){for(let u=0;u<w;u++)hgtlOpen(B,...at(v,u),top,HGTL.K.PLAT);for(const u of [-1,w])hgtlWall(B,...at(v,u),rail,top)}};
+    const block=(v0,depth,ch)=>{for(let v=v0;v<v0+depth;v++)for(let u=-1;u<=w;u++)hgtlWall(B,...at(v,u),ch,top)};
+    if(variant==='wall'){land(1);block(n+1,2,nac)}
+    else if(variant==='window'){land(1);block(n+1,2,nac);for(let u=0;u<w;u++)hgtlWall(B,...at(n+1,u),HGTL_CHARS.window,top);hgtlLight(B,...at(n,0))}
+    else if(variant==='arch'){land(2);block(n+3,2,nac);for(let u=0;u<w;u++)hgtlWall(B,...at(n+2,u),HGTL_CHARS.door_arch,top);for(const u of [-1,w])hgtlWall(B,...at(n+2,u),HGTL_CHARS.pillar,top);hgtlLight(B,...at(n+1,0))}
+    else if(variant==='chair'){const pd=4;land(pd);for(let u=-1;u<=w;u++)hgtlWall(B,...at(n+pd,u),rail,top);
+      const cu=w>>1,lu=cu===0?w-1:0,cp=at(n+pd-1,cu),lp=at(n+pd-1,lu),chair=(typeof IMG!=='undefined'&&IMG.hgt_chair)?'hgt_chair':'bench';
+      hgtlDecor(B,chair,cp[0],cp[1],{block:true});
+      if(lp[0]!==cp[0]||lp[1]!==cp[1]){hgtlDecor(B,'hg_lamp',lp[0],lp[1],{walk:true,deco:true});hgtlLight(B,lp[0],lp[1])}else hgtlLight(B,cp[0],cp[1])}
+    else throw new Error('hgtlStairsToNowhere: unknown variant '+variant);
+    info={variant,cells,top:{x:at(n,0)[0],y:at(n,0)[1],h:top}};
+  }
+  B.nowhere.push(Object.assign({x,y,dir},info));return info}
+
+/* validation of tubes and pools, called by hgtlValidate. out.tubesBad: tube cells with a lid lower than 1.3 or not reachable. out.poolsBad: a pool that cannot be reached, or a lead with no cell.
+   Warnings: a tube cell open to the side, a side wall lower than the lid (the sky shows above it), a deep pool that leads nowhere and is not marked bath:true. */
+function hgtlValidateExtra(B,r,out){out.tubesBad=[];out.poolsBad=[];const W=B.W,K=(a,b)=>a+','+b,inTube=new Set();
+  for(const t of B.tubes)for(const c of t.cells)inTube.add(K(c[0],c[1]));
+  for(const t of B.tubes){let open=0,low=0,o1=null,l1=null;
+    for(const [cx,cy] of t.cells){const i=cy*W+cx,lidv=B.lid?B.lid[i]:0;
+      if(!r.seen[i]||lidv<1.3)out.tubesBad.push({x:cx,y:cy,lid:lidv,reached:!!r.seen[i]});
+      for(const d of HGTL.DIRS){const nx=cx+d[0],ny=cy+d[1];if(!hgtlIn(B,nx,ny)||inTube.has(K(nx,ny))||t.mouthSet.has(K(nx,ny)))continue;
+        const ch=B.rows[ny][nx];
+        if(ch==='.'){open++;o1=o1||[nx,ny]}else if(HGTL_WH[ch]!==undefined&&HGTL_WH[ch]+1e-6<lidv){low++;l1=l1||[nx,ny]}}}
+    const c0=t.cells[0];
+    if(open)out.warnings.push('tube from '+c0[0]+','+c0[1]+': '+open+' side cells are open (first at '+o1+')');
+    if(low)out.warnings.push('tube from '+c0[0]+','+c0[1]+': '+low+' side walls are lower than the lid (first at '+l1+'), the sky shows over them')}
+  for(const p of B.pools){let seen=0;for(const [cx,cy] of p.cells)if(r.seen[cy*W+cx])seen++;
+    if(!seen)out.poolsBad.push({x:p.x,y:p.y,why:'unreachable'});
+    if(p.deep.length){if(p.lead){if(!p.deep.some(c=>B.dive[K(c[0],c[1])]))out.poolsBad.push({x:p.x,y:p.y,why:'lead has no cell'})}else if(!p.bath)out.warnings.push('deep pool at '+p.x+','+p.y+' leads nowhere (give it lead or bath:true)')}}
+  for(const k in B.dive){const d=B.dive[k];if(d.to===undefined||d.x===undefined)out.poolsBad.push({x:k,why:'dive target incomplete'})}}

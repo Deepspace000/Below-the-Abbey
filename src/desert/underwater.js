@@ -5,7 +5,7 @@
    a sunlit sea that drifts and refracts; fish and schools of fish swim overhead and across the reef. Some creatures bite, some do not.
    A Potion of the Gill gives every hero the dive for good.
    ========================================================================== */
-const uwLv=n=>n>=320&&n<=323;
+const uwLv=n=>(n>=320&&n<=323)||(typeof HGTE!=='undefined'&&HGTE.wet.has(n)); // the four reefs, and the submerged rooms of the Hollow Grasslands cities (hgt_engine.js)
 const UW_MAX=240; // seconds of air
 for(const n of ['staghorn','brain','kelp','seafan','anemone','rocks','tubes','clam','seagrass','amphora','softcoral','timber','vent0','vent1','buoy','shellchest','bow'])loadImg('uw_'+n,'assets/uw_'+n+'.png');
 for(const n of ['bsard','bgold','btang'])for(const f of [0,1])loadImg('uw_'+n+'_'+f,'assets/uw_'+n+'_'+f+'.png'); // whole schools seen from below
@@ -120,6 +120,7 @@ function uwTick(dt){
   }else U.drown=0;
 }
 function uwSurface(){
+  if(typeof HGTE!=='undefined'&&HGTE.wet.has(LEVEL)){const r=HGTE.wetReturn(LEVEL);G.uw=null;if(r)goToLevel(r.to,{x:r.x,y:r.y,f:r.f|0});return}   // a submerged room: back to the pool surface in the city
   const L=UW[LEVEL];if(!L)return;
   G.uw=null;goToLevel(L.island,SEA_ARRIVE(L.island));
 }

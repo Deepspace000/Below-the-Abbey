@@ -44,6 +44,32 @@
    5. SAVES. A save made in a level 480..489 or 4850..4949 restores through Continue and through Go to area (hgtAny is in every KH_READY / restore range list).
         Keep builders deterministic (same level every time) because only the party position and the usual level state (items taken, decor found) are saved.
    6. TEST: goToLevel(480) from the console, or the link  ?town=hgtest&lvl=34  (level 480 test level: plaza, straight stair, spiral tower, sunken court with a door to 4850).
+   7. COVERED TUBES (walk-through passages with a real ceiling). Add to the terrace object:      terrace.lid = Float32Array(W*H)
+        lid[y*W+x] = clearance of the ceiling above the FLOOR of that open cell (so the ceiling is at terrace.h + lid). 0 = open to the sky. Typical 2.0 to 2.6; a vault is a wide tube whose
+        middle cells have a bigger lid than its edge cells (stepped). The cell stays an ordinary open '.' cell: walking, the step rule, decor, lights and the validator treat it as before.
+        - The ceiling picture is the painted tile ds 'hgt_tube_ceiling' (assets/ds_tex_hgt_tube_ceiling.png, or assets/ds_ceil_hgt_tube_ceiling.png); until it exists a placeholder is used.
+          A lit seam runs along every cell border of the ceiling. Look keys: tubeSeam [r,g,b] (default [150,235,255]), tubeGlow (self light of the ceiling, default .22).
+        - Seen from below the ceiling covers sky, roof and far skyline; a lid that drops (a lower cell after a higher one) shows a face. Walls nearer than a ceiling are drawn over it, walls
+          beyond it are cut off by it. Seen from above (the eye higher than the lid, for example on a tower) the lid is a solid slab with a top and edges, drawn with the same picture.
+        - THE SIDE WALLS ARE THE BUILDER'S JOB: wall cells beside the tube must be at least as tall as the lid (their foot = the floor beside them), or the sky shows over them. Both ends of the tube are
+          open cells (mouths). hgtlTube(B,x0,y0,x1,y1,opts) in hgt_lib.js does all of this (side walls, vault, lights) and hgtlValidate checks it.
+   8. POOLS (swim and wade). Add to the terrace object:      terrace.water = Uint8Array(W*H)   0 dry, 1 shallow (wade), 2 deep (swim)
+                                                             terrace.wl    = Float32Array(W*H) absolute height of the water SURFACE of every water cell (default if wl is missing: bed+.22 shallow, bed+1.2 deep)
+                                                             terrace.dive  = { 'x,y': {to:levelId, x, y, f} }  deep (or any) cells that lead down to another level
+        The bed of a water cell is its terrace.h as always, so the step rule is unchanged: keep neighbouring beds within .55 (rim to shallow bed .3, shallow to deep bed .5 are fine).
+        - The surface is a luminous translucent sheet with moving ripples and glints; the bed shows through, tinted by depth. Water cells are ordinary open cells: everything walks in them.
+        - Shallow: the eye is .08 lower than usual, nothing is slowed. Deep: the eye is .22 under the surface (the party swims), the view turns blue-green with fog and a tint, the surface seen
+          from below is a bright moving ceiling, the first step into deep water says so once. Swimming at the surface needs no helm and has no air limit.
+        - terrace.dive cells (put on deep cells): going DOWN needs the diving helms (uwSuited() of underwater.js). Without them the cell cannot be entered and the party is told
+          'The water is too deep to breathe in. A diving helm would let you go down.' With them, stepping on one goes to that level at x,y,f after a quarter second. A dive entry is
+          {to,x,y,f,ret:{x,y,f}}: ret is the shallow cell beside the pool where the rescue brings the party back (stored in G.flags.hgtRet[to] on the way down, so it survives a save). Build the level it leads to with HGTE.wetLook(id) (see 9) and give it a door tile
+          that leads back up (KH_DOOR[gid]={lvl:cityId, at:{x,y,f}} with x,y a cell beside the pool). hgtlPool(B,x,y,w,d,{lead:{to,x,y,f}}) fills all of these arrays.
+   9. WET ROOMS (a submerged interior). HGTE.wetLook(id) gives an interior level (4850..4949) the under-water look: aqua haze, tint and overlay with drifting light shafts and bubbles. The interior is
+        a normal flat room. A look key wet:[r,g,b,alpha] adds the overlay to any look. The same look is used automatically for the eye of a party swimming in a deep pool.
+      HGTE.wetLook(id) also makes the room a REAL underwater level (uwLv is true for it): the air counter G.uw counts down, vents refill it, drowning hurts, and the 14 second
+        'hauled up' rescue returns the party to ret in the city (see HGTE.wetReturn). Give the room a vent: UWS[id]={vents:[[x,y]],swim:[]}. Walking out through the door back to the city also ends the air counter.
+      STAIRS TO NOWHERE need no engine support: hgtlStairsToNowhere(B,x,y,dir,'wall'|'chair'|'arch'|'window'|'loop',opts) in hgt_lib.js builds them (see its comment).
+      TEST LEVEL 485 (?town=hgtesttwo&lvl=34): a tube between two towers, a bent vaulted tube, a pool with a deep end leading to the submerged room 4859, and every stairs-to-nowhere variant.
    ========================================================================== */
 var HGT=(typeof HGT==='undefined')?{}:HGT; // other files add to it; never redeclare it
 HGT.ID0=480;HGT.IDN=489;HGT.INT0=4850;HGT.INTN=4949;
@@ -86,11 +112,12 @@ function hgtRegister(id,build){
      motes         number of drifting light motes in the air (0 = none). default 46      moteCol  [r,g,b] default [255,226,170]
      pano          1 = paint the far skyline panorama behind the terrain (0 = plain dark roof). panoGain brightness, panoTint [r,g,b], panoDrift slow drift in pixels per second. defaults 1 / 1 / [1,1,1] / 2
      vignette      0..1   darkening of the view corners. default .4          grade  [r,g,b,alpha] multiply overlay colour over the whole view. default [255,244,252,.18]
+     tubeSeam [r,g,b] / tubeGlow   the lit seams and self light of covered-tube ceilings (section 7). defaults [150,235,255] / .22        wet [r,g,b,alpha]  water overlay with light shafts and bubbles (section 9). default none
 */
 HGTE.look={};
 HGTE.lookDefaults={ambient:.56,haze:.42,hazeRate:.02,hazeCol:[150,122,206],roofHaze:[60,50,110],tint:[.95,1,1.1],lamp:[1.0,.75,.4],wallGain:.8,wallSat:1.6,wallAO:.3,
   floorGain:.7,floorContrast:1.7,floorPivot:130,floorTint:[1,.95,.98],floorSat:1.3,riserGain:.8,lipGain:1.5,lipW:.09,footAO:.5,edgeW:.12,roofGain:.65,roofTint:[.8,.85,1.25],
-  starMask:511,starGain:.9,motes:46,moteCol:[255,226,170],vignette:.4,grade:[255,244,252,.18],pano:1,panoGain:1,panoTint:[1,1,1],panoDrift:2};
+  starMask:511,starGain:.9,motes:46,moteCol:[255,226,170],vignette:.4,grade:[255,244,252,.18],pano:1,panoGain:1,panoTint:[1,1,1],panoDrift:2,tubeSeam:[150,235,255],tubeGlow:.22,wet:null};
 /* the painted far skyline (assets/hgt_pano.jpg, a seamless panorama of far towers with lit windows under the cavern roof). It replaces the roof and the empty far ground on terraced levels. */
 HGTE.pano=null;
 function hgtPanoLoad(){if(HGTE._pl)return;HGTE._pl=1;const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);HGTE.pano={w:im.width,h:im.height,d:x.getImageData(0,0,im.width,im.height).data,hr:190,rs:1.2}};im.src='assets/hgt_pano.jpg'}
@@ -109,6 +136,13 @@ function hgtLookFor(id){const o=HGTE.look[id]||null,m=hgtLookMem[id];if(m&&m.o==
   ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;
   if(K.vignette>0){if(!hgtLook.vg){const c=document.createElement('canvas');c.width=420;c.height=210;const x=c.getContext('2d'),g=x.createRadialGradient(210,105,70,210,105,260);g.addColorStop(0,'rgba(8,4,24,0)');g.addColorStop(.6,'rgba(8,4,24,.35)');g.addColorStop(1,'rgba(8,4,24,1)');x.fillStyle=g;x.fillRect(0,0,420,210);hgtLook.vg=c}
     ctx.globalAlpha=K.vignette;ctx.drawImage(hgtLook.vg,0,0);ctx.globalAlpha=1}
+  if(K.wet){ // under water: a blue-green wash, slow shafts of light and rising bubbles (light effects only)
+    const w=K.wet;ctx.globalAlpha=w[3];ctx.fillStyle='rgb('+w[0]+','+w[1]+','+w[2]+')';ctx.fillRect(0,0,420,210);
+    ctx.globalCompositeOperation='lighter';
+    for(let i=0;i<6;i++){const x=((i*83+t*(3+i*.9))%500)-40,a=.025+.02*Math.sin(t*.7+i*2.1);ctx.globalAlpha=Math.max(0,a);ctx.fillStyle='rgb(150,240,235)';ctx.fillRect(x,0,10+i*4,210)}
+    ctx.globalAlpha=.5;ctx.strokeStyle='rgb(190,250,250)';ctx.lineWidth=.8;
+    for(let i=0;i<14;i++){const x=(i*61.7+Math.sin(t*.9+i)*5)%420,y=215-((t*(16+i%5*5)+i*41)%235),r=1+(i%3)*.8;ctx.beginPath();ctx.arc(x,y,r,0,6.283);ctx.stroke()}
+    ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over'}
   if(K.motes>0){ctx.globalCompositeOperation='lighter';const mc=K.moteCol;
     for(let i=0;i<K.motes;i++){const sp=.6+(i%5)*.35,x=((i*89.3+t*(2+i%4)+Math.sin(t*.5*sp+i)*9)%440+440)%440-10,y=((i*47.7+t*(1.5+(i%3))*(i%2?-1:1)+Math.cos(t*.4*sp+i*2)*7)%230+230)%230-10,tw=.35+.65*Math.max(0,Math.sin(t*(1.1+i%4*.5)+i*1.7)),r=.6+(i%4)*.45;
       ctx.fillStyle='rgba('+mc[0]+','+mc[1]+','+mc[2]+','+(.5*tw).toFixed(3)+')';ctx.fillRect(x,y,r,r);
@@ -177,4 +211,96 @@ hgtRegister(4850,id=>{
   for(let y=1;y<Hh-1;y++)for(let x=1;x<W-1;x++)g[y][x]='.';
   g[0][4]='d';
   return {rows:g.map(r=>r.join('')),chars:{'#':wall,'d':back},start:{x:4,y:2,f:2},enemies:[],items:[],decor:[],lights:[[4,3]],portals:[],floor:'wood',day:0,amb:.2,ceilH:2.7,noTele:true,noExtras:true,name:'The Sunken Room',label:'The Sunken Room',mapNames:[]};
+});
+
+
+/* ==========================================================================
+   ENGINE2: covered tubes, pools, wet rooms, and the test level 485 (see sections 7 to 9 of the header). Prefix hgte2.
+   ========================================================================== */
+/* the ceiling picture of a tube. The painted tile ds 'hgt_tube_ceiling' replaces this placeholder when it exists (artpack.js looks the name up in DS_TEXREG). */
+if(DS_TEXREG.hgt_tube_ceiling===undefined){
+  const d=new Uint8ClampedArray(128*128*4);
+  for(let y=0;y<128;y++)for(let x=0;x<128;x++){const o=(y*128+x)*4,rib=(x%64<3||y%64<3)?.82:1,n=((x*7+y*13)%11)/110;d[o]=(196+n*60)*rib;d[o+1]=(186+n*60)*rib;d[o+2]=(214+n*60)*rib;d[o+3]=255}
+  DS_TEXREG.hgt_tube_ceiling=addTex(d,null);
+}
+/* a wet room: an interior level with the under-water look (aqua haze, tint, overlay of shafts and bubbles). No air limit: it is only a look. */
+HGTE.wet=new Set();                                  // the submerged rooms: real underwater levels (uwLv in underwater.js)
+HGTE.wetReturn=function(id){const r=G.flags.hgtRet&&G.flags.hgtRet[id];return r||null};
+HGTE.wetLook=function(id,over){HGTE.wet.add(id);HGTE.look[id]=Object.assign({ambient:.6,haze:.72,hazeRate:.05,hazeCol:[30,118,138],roofHaze:[18,64,84],tint:[.8,1,1.12],lamp:[.9,.95,.8],grade:[190,255,255,.25],motes:0,vignette:.45,wet:[16,110,126,.3],pano:0},over||{});return HGTE.look[id]};
+/* is the party swimming (standing on a deep cell of the level it is in)? */
+HGTE.swimming=function(id){
+  if(typeof G==='undefined'||!G.P||id!==LEVEL)return false;
+  const L=LEVELS[id],T=L&&L.terrace;if(!T||!T.water)return false;
+  return T.water[G.P.y*L.rows[0].length+G.P.x]===2;
+};
+{ // swimming changes the look of the level: the same keys as a wet room
+  const _lf=hgtLookFor,mem=new Map();
+  hgtLookFor=function(id){
+    const v=_lf(id);if(!HGTE.swimming(id))return v;
+    let s=mem.get(v);if(!s){s=Object.assign({},v,{hazeCol:[30,118,138],roofHaze:[18,64,84],haze:.74,hazeRate:.055,tint:[.8,1,1.12],ambient:Math.max(v.ambient,.62),lamp:[.9,.95,.8],grade:[190,255,255,.25],motes:0,vignette:Math.max(v.vignette,.5),wet:[16,110,126,.3]});mem.set(v,s)}
+    return s;
+  };
+}
+/* after every step in a city: say so once when the party swims, and follow a dive cell down to its level */
+{ const _ds=desertStep;
+  desertStep=function(nx,ny){
+    _ds.apply(this,arguments);
+    if(!hgtAny(LEVEL))return;
+    const L=LEVELS[LEVEL],T=L&&L.terrace;if(!T)return;
+    if(T.water){const deep=T.water[ny*L.rows[0].length+nx]===2;if(deep&&HGTE._deepLv!==LEVEL){msg('The water is deep. The party swims.','#a8e0e8')}HGTE._deepLv=deep?LEVEL:0}
+    const d=T.dive&&T.dive[nx+','+ny];
+    if(d&&typeof uwSuited==='function'&&uwSuited()){const lv=LEVEL;later(250,()=>{if(LEVEL===lv&&G.P.x===nx&&G.P.y===ny){(G.flags.hgtRet=G.flags.hgtRet||{})[d.to]={to:lv,x:d.ret?d.ret.x:nx,y:d.ret?d.ret.y:ny,f:d.ret?d.ret.f:0};sfx('door');goToLevel(d.to,{x:d.x,y:d.y,f:d.f|0})}})}
+  };
+}
+
+/* ---------- the test level 485: a tube between two towers, a bent vaulted tube, a pool with a deep end that leads to a submerged room, every stairs-to-nowhere variant ---------- */
+LEVEL_NAMES[485]='The Covered Terraces';LEVEL_NAMES[4859]='The Submerged Room';
+HGTE.look[485]={ambient:.62,haze:.3,hazeRate:.016,motes:40};
+const HGTE2={tint:{a:'hgt_wp',b:'hgt_wa',c:'hgt_wc',d:'hgt_wl'},bands:{a:'hgt_wb0',b:'hgt_wb1',c:'hgt_wb2',d:'hgt_wb3'}};
+function hgte2Gid(ch){ // a painted wall tile for a library placeholder char
+  const role=HGTL_ROLE[ch],wh=HGTL_WH[ch],m=/^nacre_([abcd])/.exec(role);
+  if(role==='door_arch')return hgtaDoorTile('hgt_d2','hgt_wl',wh);                       // a closed ornate arch: the door picture without a link
+  if(role==='window'||role==='window_mid')return hgtaWallTile('hgt_wa',wh,{base:'hgt_ww1'});            // the window is at eye level
+  if(role==='pillar'||role==='pillar_low')return hgtaWallTile('hgt_wc',wh,{mid:'hgt_wb2'});
+  const t=m?m[1]:'c';return hgtaWallTile(HGTE2.tint[t],wh,{top:wh>=2.5?HGTE2.bands[t]:HGTE2.tint[t]});
+}
+hgtRegister(485,id=>{
+  const W=64,H=56,B=hgtlNew(W,H,485),C=HGTL_CHARS;
+  hgtlBorder(B,C.nacre_a,0);
+  // tube A: three cells wide, vaulted, from x 6 to x 42 on y 38, with a round tower on each side of its middle
+  hgtlTower(B,24,31,9,9,{shape:'round',chars:hgtlTaper('b').slice(1,4),h:0});
+  hgtlTower(B,24,45,9,9,{shape:'round',chars:hgtlTaper('d').slice(1,4),h:0});
+  hgtlTube(B,6,38,42,38,{width:3,lid:2.4,peak:3.2});
+  // tube B: a narrower flat tube with a bend, in the north-east
+  hgtlTube(B,44,10,58,22,{width:2,lid:2.3});
+  // the pool, 13 by 9, shallow ring two cells wide, the deep centre leads to the submerged room
+  hgtlPool(B,6,6,13,9,{shallow:2,lead:{to:4859,x:6,y:2,f:2,ret:{x:7,y:10,f:1}},lamps:true});
+  // stairs that go nowhere
+  hgtlStairsToNowhere(B,22,25,0,'wall',{tint:'a'});
+  hgtlStairsToNowhere(B,27,25,0,'window',{tint:'b'});
+  hgtlStairsToNowhere(B,32,25,0,'arch',{tint:'d'});
+  hgtlStairsToNowhere(B,37,25,0,'chair',{tint:'c'});
+  hgtlStairsToNowhere(B,44,28,0,'loop',{tint:'b'});
+  for(const [x,y] of [[10,46],[4,40],[4,30],[50,40],[60,30]])hgtlLight(B,x,y);
+  for(const [x,y] of [[10,48],[12,48],[50,44],[52,44],[40,46],[3,44]])hgtlDecor(B,'hg_lamp',x,y,{walk:true,deco:true});
+  hgtlSetStart(B,10,50,0);
+  const val=hgtlValidate(B);HGTE.lastValidate485=val;
+  const L=hgtlAssemble(B,{name:'The Covered Terraces',label:'The Covered Terraces',start:B.start});
+  const map={},chars={};
+  for(const row of L.rows)for(const ch of row)if(ch!=='.'&&map[ch]===undefined){const gid=hgte2Gid(ch),nc=hgtaChar(gid);map[ch]=nc;chars[nc]=gid}
+  hgtlBindChars(L,map);L.chars=chars;
+  const fm=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++){const i=y*W+x,k=B.kind[i];r+=B.water&&B.water[i]?'3':(B.lid&&B.lid[i]>0)?'4':(k===HGTL.K.STAIR||k===HGTL.K.PLAT)?'1':'0'}fm.push(r)}
+  Object.assign(L,{fmap:fm,floorSet:['hgt_f0','hgt_f4','hgt_f2','hgt_f3','hgt_f5','hgt_f1'],floor:'hgt_f0',ceil:'tomb',ceilH:3,day:0,outdoor:true,amb:.72,noExtras:true,noTele:true,diff:66});
+  L.terrace.riser=hgtaWallTile('hgt_wc',1);
+  return L;
+});
+hgtRegister(4859,id=>{
+  const W=13,Hh=9,wall=hgtaWallTile('hgt_wa',3,{top:'hgt_wb1'}),back=hgtaDoorTile('hgt_d1','hgt_wa',3,{lvl:485,at:{x:7,y:10,f:1}}),g=[];
+  for(let y=0;y<Hh;y++)g.push(new Array(W).fill('#'));
+  for(let y=1;y<Hh-1;y++)for(let x=1;x<W-1;x++)g[y][x]='.';
+  g[0][6]='d';
+  const cw=hgtaChar(wall),cd=hgtaChar(back);
+  const decor=[3,9].flatMap(x=>[['hgt_reeds',x,5],['hgt_crystalgrass',x+1,6]]).map(([k,x,y])=>({k,x,y,block:false,walk:true,deco:true}));
+  HGTE.wetLook(4859);UWS[4859]={vents:[[6,6]],swim:[]};
+  return {rows:g.map(r=>r.join('').replace(/#/g,cw).replace(/d/g,cd)),chars:{[cw]:wall,[cd]:back},start:{x:6,y:2,f:2},enemies:[],items:[],decor,lights:[[3,4],[9,4],[6,6]],portals:[],floor:'hgt_f3',day:0,amb:.5,ceilH:3,noTele:true,noExtras:true,name:'The Submerged Room',label:'The Submerged Room',mapNames:[]};
 });
