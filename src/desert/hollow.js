@@ -385,6 +385,8 @@ function hlDress(c){
     if(th!=='gallery'&&R(80+i,10)<6)extra('hl_pt'+((k*2+i)%6),.5);
     if(R(85+i,10)<7)extra('hl_claw'+((k+i*2)%6),.5);
     if(th!=='haunted'&&R(90+i,10)<5)extra('hl_p_mirror',.1);
+    // more tall pointed windows looking out on the dark: two in most halls, three in the wide ones, spaced along the walls
+    {let nw=(th==='crypt'||th==='prison'?1:2)+(w>=7?1:0),sx=0;for(const [x,y,wd] of slots(r)){if(nw<=0)break;if((sx++&1)===0&&pic('hl_p_window',x,y,wd,{bob:.35}))nw--}}
   });
   cap=999;
   const secretSlots=[];
