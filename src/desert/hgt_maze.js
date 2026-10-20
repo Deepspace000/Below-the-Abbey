@@ -260,16 +260,19 @@ function hgtzDist(B,sx,sy){const W=B.W,d=new Int32Array(B.W*B.H).fill(-1);if(!hg
 function hgtzSolve(B,from,to){const d=hgtzDist(B,from.x,from.y);return d[to.y*B.W+to.x]}
 function hgtzDeadEnds(B,cells){const o=[];for(const [x,y] of cells){let n=0;for(const dd of HGTL.DIRS)if(hgtlIsOpen(B,x+dd[0],y+dd[1])&&Math.abs(hgtlH(B,x+dd[0],y+dd[1])-hgtlH(B,x,y))<=HGTL.CLIMB)n++;if(n===1)o.push([x,y])}return o}
 
+const HGTZ_PETS=['hgtb_pinkbulb','hgtb_lilacmoth','hgtb_lanternbeetle','hgtb_pearlslug','hgtb_amberpup','hgtb_creamjelly','hgtb_jadeeel','hgtb_fishfly','hgtb_creammoth','hgtb_pups'];
 function hgtzPlaceReward(C,wx,wy,reward){const B=C.B,o=C.o,R=C.R;
+  if(reward==='lamp')reward='chest'; // a lamp alone is no reward: the centre holds a chest, the lamps stand round it
   if(reward==='chest'){const ks=Array.isArray(o.chestKey)?o.chestKey:(o.chestKey?[o.chestKey]:HGTZ.K.chest);hgtlDecor(B,ks[(R()*ks.length)|0],wx,wy,{block:true,sc:.95});B.occ.add(wx+','+wy)}
-  else if(reward==='creature'){hgtlDecor(B,o.creature||HGTZ.K.creature,wx,wy,{block:true,sc:.25,txt:'It watches you and does not move.'});B.occ.add(wx+','+wy)}
+  else if(reward==='creature'){const pk=o.creature||(typeof IMG!=='undefined'&&IMG.hgtb_pinkbulb?HGTZ_PETS[(R()*HGTZ_PETS.length)|0]:null);
+    if(pk)hgtlDecor(B,pk,wx,wy,{block:true,sc:1,txt:'It watches you and does not move.'});else hgtlDecor(B,HGTZ.K.creature,wx,wy,{block:true,sc:.25,txt:'It watches you and does not move.'});B.occ.add(wx+','+wy)}
   else if(reward==='shrine'){hgtlDecor(B,HGTZ.K.obelisk,wx,wy,{block:true,sc:.9});B.occ.add(wx+','+wy)}
   else hgtlDecor(B,HGTZ.K.lamp,wx,wy,{block:false,walk:true,deco:true,sc:1.1});
   hgtlLight(B,wx,wy)}
 /* the chamber: ring corridor, reward inside */
 function hgtzChamber(C,Z,out){const o=C.o,R=C.R,q=Z.cbox;if(!q)return;const S=q.S,fl=Z.fl,B=C.B;
   const cx=q.x0+((S-1)>>1),cy=q.y0+((S-1)>>1);
-  const reward=o.reward;
+  const reward=o.reward;out.boxC=C.T(cx,cy);out.boxS=S;
   // chamber wall ring is already walls; inside: ring corridor (cells at the box edge) and an inner box S-2
   const inner=(x,y)=>x>q.x0&&y>q.y0&&x<q.x0+S-1&&y<q.y0+S-1;
   if(reward==='view'){
@@ -302,7 +305,7 @@ function hgtzChamberDoors(Z){const L=Z.L,q=Z.chamber,out=[];if(!q)return out;
 function hgtzViewSin(need){for(const S of [3,5,7,9])if(hgtzSpiralCells(S).length*.3>=need)return S;return 9}
 
 /* main entry */
-function hgtzMaze(B,x,y,w,h,opts){
+function hgtzMaze0(B,x,y,w,h,opts){
   const o=Object.assign({},opts||{});const kd=HGTZ_KIND[o.kind||'tall']||HGTZ_KIND.tall;o.kind=o.kind||'tall';
   for(const k in kd)if(o[k]===undefined)o[k]=kd[k];
   if(o.kind==='tri')return hgtzTri(B,x,y,w,h,o);
@@ -406,7 +409,7 @@ function hgtzFinish(C,Z,out){const B=C.B,o=C.o,R=C.R;
   return out}
 
 /* engine tubes: lv.terrace.lid[y*W+x] = ceiling height above the floor for covered cells (0 = open sky). */
-function hgtzApplyLids(B,lv,h){if(!B.tube||!lv||!lv.terrace)return;const lid=new Float32Array(B.W*B.H);for(const [x,y] of B.tube)lid[y*B.W+x]=h||B.tubeH||2.4;lv.terrace.lid=lid}
+function hgtzApplyLids(B,lv,h){if(!lv||!lv.terrace||(!B.tube&&!B.lid))return;const lid=new Float32Array(B.W*B.H);if(B.lid)lid.set(B.lid);for(const [x,y] of (B.tube||[]))lid[y*B.W+x]=h||B.tubeH||2.4;lv.terrace.lid=lid}
 
 /* ---------- three levels ---------- */
 function hgtzTri(B,x,y,w,h,o){
@@ -560,3 +563,70 @@ function hgtzMapOverview(){if(!HGTZ_NM.cv)HGTZ_NM.cv=hgtzMapDraw();MPL.reveal=fa
 if(typeof drawOverview==='function'&&typeof mplFogOn==='function'){
   {const _do=drawOverview;drawOverview=function(){if(LEVEL===HGTZ_ID&&LEVELS[HGTZ_ID]&&!G.world&&!G.teleMode){hgtzMapOverview();return}return _do.apply(this,arguments)}}
   {const _f=mplFogOn;mplFogOn=function(L){if(LEVEL===HGTZ_ID)return false;return _f.apply(this,arguments)}}}
+
+var HGTZ_LOG=(typeof HGTZ_LOG==='undefined')?[]:HGTZ_LOG;
+function hgtzMaze(B,x,y,w,h,opts){const out=hgtzMaze0(B,x,y,w,h,opts);
+    HGTZ_LOG.push({B,out,x,y,w,h});return out}
+
+/* ==========================================================================
+   MAZE DRESSING: every maze gets (1) a BEACON: four tall glowing spires round the centre chamber, visible over the walls from far away;
+   (2) a lit GATE: an arch on the entry cell, two tall glowing pillars either side, lamps, and a floor runner leading in from the street;
+   (3) one wall STYLE per maze (hgtzStyle, a tile callback for the cities), and a chest, creature or shrine at the centre.
+   hgtzDress(B, m, {setFloor:(x,y,digit)=>..., floor:digit}) is called automatically by hgtzMaze (spires and gate) and may be called again by a city
+   after its own street is built (it only adds what is missing and writes the runner through setFloor, which defaults to B.fm).
+   ========================================================================== */
+const HGTZ_STYLES={
+  tall:[['mosaic','filigree'],['script','map'],['tessel','quilt'],['crayon','crosshatch']],
+  sunken:[['portholes','ringbubbles'],['rings','bubbles'],['medallions','portholes']],
+  raised:[['quilt','tessel'],['mosaic','script'],['wavylilac','crosshatch']],
+  shell:[['scales','medallions'],['scales','rings'],['medallions','ringbubbles']],
+  tri:[['constellation','confetti'],['pointillist','dotsyellow']],
+  tube:[['loopsmint','doodleaqua']]};
+const hgtzQ=v=>Math.max(.5,Math.round(v*5)/5);
+/* a tile callback with ONE wall picture per maze (walls) and a second for posts and borders; n picks the style from the kind's list */
+function hgtzStyle(n,over){over=over||{};
+  return function(role,wh,info){const kind=info&&info.kind||'tall';if(kind==='hedge')return undefined;
+    if(!(role==='wall'||role==='border'||role==='post'||role==='rail'||role==='lit'||role==='chamber'||role==='pillar'))return undefined;
+    const list=over[kind]||HGTZ_STYLES[kind]||HGTZ_STYLES.tall,pair=list[(((n|0)%list.length)+list.length)%list.length];
+    if(kind==='tube'&&typeof hgtaPic==='function'&&hgtaPic('hgtb_tube')&&(role==='wall'||role==='post'||role==='border'))return hgtaChar(hgtaWallTile('hgtb_tube',hgtzQ(wh)));
+    const rn=q=>q.indexOf('hgt')===0?q:'hgt_w2_'+q,t1=rn(pair[0]),t2=rn(pair[1]);if(!hgtaPic(t1))return undefined;
+    if(role==='lit')return hgtaChar(hgtaWallTile('hgt_wb3',hgtzQ(wh)));
+    if(role==='chamber')return hgtaChar(hgtaWallTile('hgt_wb2',hgtzQ(wh),{top:'hgt_wb3'}));
+    if(role==='post'||role==='border'||role==='pillar')return hgtaChar(hgtaWallTile(hgtaPic(t2)?t2:t1,hgtzQ(wh)));
+    return hgtaChar(hgtaWallTile(t1,hgtzQ(wh)))}}
+function hgtzInRect(m,x,y){const r=m.rect;return !r||(x>=r.x&&y>=r.y&&x<r.x+r.w&&y<r.y+r.h)}
+function hgtzHasDecor(B,k,x,y){for(const d of B.decor)if(d.x===x&&d.y===y&&d.k===k)return true;return false}
+function hgtzDecorAt(B,x,y){for(const d of B.decor)if(d.x===x&&d.y===y)return d;return null}
+function hgtzDress(B,m,o){o=o||{};if(!m||!m.entry||!m.approach||m.kind==='indoor'||typeof hgtaWallTile!=='function'||!hgtzReal())return;
+  const W=B.W,ex=m.entry.x,ey=m.entry.y,ax=m.approach.x,ay=m.approach.y,dx=ex-ax,dy=ey-ay,lx=dy?1:0,ly=dx?1:0,seed=(B.seed*31+ex*7+ey*13)|0,sd=Math.abs(seed)%4;
+  const gp=n=>hgtaPic('hgt_w2_'+n)?'hgt_w2_'+n:'hgt_wb3';
+  const glow=[[gp('bandjade'),gp('portlilac'),'hgt_wb3'],[gp('bandjade'),gp('dotsyellow'),'hgt_wb3'],[gp('bandjade'),gp('ringbubbles'),'hgt_wb3'],[gp('bandjade'),gp('medallions'),'hgt_wb3']][sd];
+  const base=hgtlH(B,ax,ay);
+  // beacon: four spires on the posts at the corners of the chamber wall ring (or round the centre cell when there is no chamber)
+  if(!m._beacon){m._beacon=true;
+    let cx,cy,r;if(m.boxC){cx=m.boxC[0];cy=m.boxC[1];r=((m.boxS-1)>>1)+1}else if(m.centre){cx=m.centre.x;cy=m.centre.y;r=1}
+    if(cx!==undefined){m.spires=[];
+      for(const [sx,sy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){const x=cx+sx*r,y=cy+sy*r;if(!hgtlIn(B,x,y)||B.rows[y][x]==='.'||!hgtzInRect(m,x,y))continue;
+        const foot=B.h[y*W+x],top=base+(m.kind==='tall'?(m.wallH||4.5)+8:13),T=hgtzQ(Math.max(8,top-foot));
+        hgtlWall(B,x,y,hgtaChar(hgtaWallTile(glow[1],T,{base:glow[0],mid:glow[1],top:glow[2]})),foot);m.spires.push([x,y,T])}
+      if(m.spires.length)hgtlLight(B,cx,cy)}}
+  // gate: pillars either side of the entry cell, an arch on it
+  if(!m._gate){m._gate=true;
+    for(const sg of [-1,1])for(const k of [1,2]){const x=ex+lx*sg*k,y=ey+ly*sg*k;if(!hgtlIn(B,x,y)||B.rows[y][x]==='.'||!hgtzInRect(m,x,y))continue;
+      const foot=B.h[y*W+x],top=base+(m.kind==='tall'?(m.wallH||4.5)+(k===1?2.6:1.4):(k===1?5.6:4)),T=hgtzQ(Math.max(3,top-foot));
+      hgtlWall(B,x,y,hgtaChar(hgtaWallTile(glow[1],T,{base:glow[0],top:glow[2]})),foot)}
+    if(!hgtzHasDecor(B,'hgt_arch',ex,ey))hgtlDecor(B,'hgt_arch',ex,ey,{walk:true,deco:true,sc:1.6});
+    hgtlLight(B,ex,ey);
+    if(o.porch!==false){const lid=hgtlEnsureLid(B);lid[ey*W+ex]=o.porchH||3}} // the entry cell is a covered doorway under the lit pillars
+  // lamps beside the approach and a runner of the maze floor leading out from the gate along the lane
+  const set=o.setFloor||((x,y,d)=>{if(!B.fm)B.fm=new Uint8Array(B.W*B.H);B.fm[y*W+x]=d}),digit=o.floor!==undefined?o.floor:(m.floorDigit!==undefined?m.floorDigit:5);
+  const okc=(x,y)=>hgtlIsOpen(B,x,y)&&Math.abs(hgtlH(B,x,y)-base)<.3&&B.kind[y*W+x]!==HGTL.K.STAIR;
+  m.runner=m.runner||[];m.runnerDigit=digit;
+  for(let k=0;k<=8;k++){const x=ax-dx*k,y=ay-dy*k;if(!okc(x,y)){if(k>0)break;else continue}
+    try{set(x,y,digit)}catch(e){}m.runner.push([x,y]);
+    if(k%3===1)hgtlLight(B,x,y);
+    if(k===0||k===4||k===8)for(const sg of [-1,1]){const px=x+lx*sg,py=y+ly*sg;if(!okc(px,py)||B.occ.has(px+','+py))continue;const dd=hgtzDecorAt(B,px,py);if(dd&&!(dd.walk&&dd.deco))continue;
+      if(!dd){hgtlDecor(B,'hgt_lamppost',px,py,{walk:true,deco:true,sc:1.15});hgtlLight(B,px,py)}}}
+  return m}
+/* the automatic hook: every maze made by hgtzMaze gets its spires and gate */
+{const _h=hgtzMaze;hgtzMaze=function(B,x,y,w,h,opts){const m=_h.apply(this,arguments);if(m&&m.entry){m.floorDigit=(opts&&opts.floor!==undefined)?opts.floor:(HGTZ_KIND[(opts&&opts.kind)||'tall']||{}).floor;try{hgtzDress(B,m,{floor:m.floorDigit})}catch(e){console.error('hgtzDress',e)}}return m}}

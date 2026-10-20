@@ -243,7 +243,7 @@ function hgtxglormBuild(id){
   const W2=['rings','scales','quilt','medallions','polkapink','loopsmint','wavylilac','bubbles','ringbubbles','polkaaqua'];
   const mazeTile=(role,wh,info)=>{if(role==='wall'||role==='border'||role==='post'||role==='rail'||role==='lit'||role==='chamber'||role==='pillar'){const nm=W2[(((info&&info.band)||0)%W2.length+W2.length)%W2.length];return hgtaChar(hgtaWallTile('hgt_w2_'+nm,Math.max(.5,Math.round(wh*5)/5)))}return undefined};
   const MZ=[];
-  const grand=hgtzMaze(B,90,88,25,17,{algo:'backtracker',kind:'sunken',side:'W',base:-CD,depth:2.4,seed:4831,reward:'chest',braid:.12,secret:true,tile:mazeTile});
+  const grand=hgtzMaze(B,90,88,25,17,{algo:'backtracker',kind:'sunken',side:'W',base:-CD,depth:2.4,seed:4831,reward:'chest',braid:.12,secret:true,tile:hgtzStyle(4831)});
   MZ.push(grand);reserve(88,86,116,106);
   named('The Grand Maze',102,86,'place');
   /* ---------- the south gate, the gate avenue, the plaza ---------- */
@@ -370,7 +370,7 @@ function hgtxglormBuild(id){
   /* mazes of different kinds on the free ground of the districts */
   const MZS=[['hedge','prim',17,17,[0,2,4],'chest'],['tall','kruskal',17,17,[1,3,5],'view'],['tube','wilson',15,15,[2,5,3],'lamp'],['raised','prim',17,15,[3,4,1],'creature'],['shell','circular',17,17,[0,1,2,3],'shrine'],['tall','chartres',17,17,[4,5,2],'chest']];
   MZS.forEach(([kind,algo,w,h,ord,reward],i)=>{const p=spot(w,h,ord);if(!p)return;const side=['S','N','W','E'][i&3];
-    try{const m=hgtzMaze(B,p.x,p.y,w,h,{kind,algo,side,seed:4840+i,reward,secret:i%2===0,tile:mazeTile,wallH:kind==='tall'?4.2:undefined});MZ.push(m);named((kind==='hedge'?'Hedge maze':kind==='tube'?'Tube maze':kind==='raised'?'Raised maze':kind==='shell'?'Shell maze':'Tall maze'),p.x+(w>>1),p.y-1,'small')}catch(e){console.error('maze',kind,e)}});
+    try{const m=hgtzMaze(B,p.x,p.y,w,h,{kind,algo,side,seed:4840+i,reward,secret:i%2===0,tile:hgtzStyle(4840+i),wallH:kind==='tall'?4.2:undefined});MZ.push(m);named((kind==='hedge'?'Hedge maze':kind==='tube'?'Tube maze':kind==='raised'?'Raised maze':kind==='shell'?'Shell maze':'Tall maze'),p.x+(w>>1),p.y-1,'small')}catch(e){console.error('maze',kind,e)}});
   /* pools: wade at the rim, swim in the middle */
   const POOLS=[];
   for(const [ord,w,d] of [[[4,5],12,8],[[5,4],12,8],[[0,1],10,7],[[1,0],10,7]]){const p=spot(w,d,ord);if(!p)continue;
@@ -458,7 +458,7 @@ function hgtxglormBuild(id){
   for(const [x,y,k] of [[66,131,'hgtb_stall_coral_fruit'],[84,131,'hgtb_stall_teal_fish'],[66,133,'hgtb_stall_yellow_bread'],[84,133,'hgtb_stall_navy_books'],[75,127,'hgtb_stall_navy_books'],[75,137,'hgtb_stall_teal_fish']])prop(k,x,y,{sc:.95});
   for(let x=67;x<=83;x+=2){hover(x,130,2+((x>>1)&1)*.6,1.1)}
   /* ---------- lanterns over the whole city: a lit grid so that from any height the city glows ---------- */
-  for(let y=6;y<H-4;y+=5)for(let x=6;x<W-4;x+=5){if(!isO(x,y)||inMz(x,y)||B.occ.has(x+','+y))continue;const g=ground(x,y);hgtlDecor(B,'hgt_hanglamp',x,y,{block:false,walk:true,deco:true,bob:2.6,sc:1.5});if(((x+y)%10)===0||g<-1)hgtlLight(B,x,y)}
+  for(let y=6;y<H-4;y+=7)for(let x=6;x<W-4;x+=7){if(!isO(x,y)||inMz(x,y)||B.occ.has(x+','+y))continue;const g=ground(x,y);hgtlDecor(B,'hgt_hanglamp',x,y,{block:false,walk:true,deco:true,bob:2.6,sc:1.5});if(((x+y)%10)===0||g<-1)hgtlLight(B,x,y)}
   /* tall slender spires on the houses: pearl finials stand beside the doorsteps */
   for(const h of houseList)if(R(h.x,h.y,97)<.5&&isO(h.x-1,h.y+h.d)){hgtlDecor(B,'hgt_finial',h.x-1,h.y+h.d,{block:false,walk:true,deco:true,sc:1.5});hgtlLight(B,h.x-1,h.y+h.d)}
   /* the canyon of the porters' stair: a stall in every alcove beside the steps, wares between them, and the traders' folk on every landing */
@@ -546,6 +546,8 @@ function hgtxglormBuild(id){
       if(k%2===1){hgtlDecor(B,'hgtb_lamp_hanging',sx0+2,y,{block:false,walk:true,deco:true,bob:1.9,sc:1.3});hgtlLight(B,sx0+2,y)}}
     for(const x of [sx0-1,sx0+5]){lamp(x,wt+1);hgtlLight(B,x,wt)}
     for(let k=1;k<=6;k+=2){for(const x of [72,77]){hgtlDecor(B,'hgtb_lamp_bracket',x,wt-k,{block:false,walk:true,deco:true,bob:1.4,sc:1.1});hgtlLight(B,x,wt-k)}}}
+  /* lit treads: a light on every tread of every flight, at both edges and the middle */
+  for(let t=0;t<=5;t++){const wt=WT(t),west=t%2===0,sx0=west?XW(t+1):XE(t+1)-4;for(let k=1;k<=6;k++)for(const x of [sx0,sx0+2,sx0+4])hgtlLight(B,x,wt-k)}
   /* the foot of every flight: lamp pools, a bright mushroom glow on the lowest treads and landings */
   for(let t=0;t<=5;t++){const wt=WT(t),west=t%2===0,sx0=west?XW(t+1):XE(t+1)-4,GL=['hgtb_plant_glowshrooms','hgtb_plant_lacecoral','hgtb_plant_orbbush'];
     for(let k=1;k<=3;k++)for(const x of [sx0,sx0+1,sx0+3,sx0+4]){if((x+k)%2===0)plant(x,wt-k,1.6,1,GL[(x+k+t)%3]);hgtlLight(B,x,wt-k);hgtlLight(B,x,wt-k)}
@@ -553,10 +555,10 @@ function hgtxglormBuild(id){
     for(const x of [sx0-1,sx0+5]){lamp(x,wt+2);lamp(x,wt);hgtlLight(B,x,wt+1);hgtlLight(B,x,wt+1)}
     for(const x of [73,76,72,77]){plant(x,wt+1,1.5,1,GL[(x+t)%3]);hgtlLight(B,74,wt+1)}}
   /* a canopy of lanterns and bunting over the whole bazaar court, hung above the aisles */
-  for(const y of [69,74,79,94,99,104])for(let x=38;x<=112;x+=3){if(x>=66&&x<=84&&y>=80)continue;if(!isO(x,y)||inMz(x,y))continue;
-    hgtlDecor(B,(x/3|0)%2?'hgtb_deco_lanterns':'hgtb_lamp_hanging',x,y,{block:false,walk:true,deco:true,bob:3+((x+y)%3)*.3,sc:1.6});
-    if((x/3|0)%2===0)hgtlDecor(B,'hgtb_deco_bunting',x+1,y,{block:false,walk:true,deco:true,bob:2.7,sc:1.8});if((x/3|0)%4===0)hgtlLight(B,x,y)}
-  for(let y=70;y<=104;y+=6)for(const x of [36,113])hgtlDecor(B,'hgtb_deco_lanterns',x,y,{block:false,walk:true,deco:true,bob:3.2,sc:1.8});
+  for(const y of [69,75,94,100])for(let x=38;x<=112;x+=4){if(x>=66&&x<=84&&y>=80)continue;if(!isO(x,y)||inMz(x,y))continue;
+    hgtlDecor(B,(x/3|0)%2?'hgtb_deco_lanterns':'hgtb_lamp_hanging',x,y,{block:false,walk:true,deco:true,bob:1.9+((x+y)%3)*.25,sc:1.5});
+    if((x/3|0)%2===0)hgtlDecor(B,'hgtb_deco_bunting',x+1,y,{block:false,walk:true,deco:true,bob:1.7,sc:1.6});if((x/3|0)%4===0)hgtlLight(B,x,y)}
+  for(let y=70;y<=104;y+=6)for(const x of [36,113])hgtlDecor(B,'hgtb_deco_lanterns',x,y,{block:false,walk:true,deco:true,bob:2.2,sc:1.6});
   hgtlSetStart(B,75,144,0);
   /* ---------- finish: walls made by the library (placeholder characters) become my wall columns, standing on the ground ---------- */
   {const TM={a:'p',b:'a',c:'c',d:'l'};
@@ -576,10 +578,10 @@ function hgtxglormBuild(id){
   {const LV=['hgtb_lamp_tall','hgtb_lamp_vine','hgt_lamppost','hgtb_lamp_bare','hgtb_lamp_short','hgtb_lamp_tall'],HV=['hgt_hanglamp','hgtb_lamp_hanging','hgtb_deco_lanterns','hgt_hanglamp'];
    for(const d of B.decor){const hv=R(d.x,d.y,99);if(d.k==='hgt_lamppost')d.k=LV[(hv*LV.length)|0];else if(d.k==='hgt_hanglamp')d.k=HV[(hv*HV.length)|0]}}
   const fm=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++){const i=I(x,y),k=B.kind[i];let f=FL[i];if(!f){f=k===G.STAIR?1:k===G.PLAT||k===G.PLAZA?3:k===G.COURT||k===G.TERRACE?2:k===G.ALLEY?4:(((x/6)|0)+((y/6)|0))%3===0?3:((((x/6)|0)+((y/6)|0))%3===1&&((x%6===0||y%6===0))?4:0)}r+=f}fm.push(r)}
-  const lv=hgtlAssemble(B,{name:'Glorm',label:'Glorm',diff:HG.DIFF,start:B.start,extra:{fmap:fm,floorSet:['hgtb_f_terrazzo','hgt_f4','hgtb_f_diamonds','hgtb_f_marble','hgtb_f_shellflags','hgtb_f_mossy'],floor:'hgtb_f_terrazzo',ceil:'tomb',ceilH:9,amb:.9,noExtras:true}});
+  const lv=hgtlAssemble(B,{name:'Glorm',label:'Glorm',diff:HG.DIFF,start:B.start,extra:{fmap:fm,floorSet:['hgtb_f_terrazzo','hgtb_f_planks','hgtb_f_diamonds','hgtb_f_marble','hgtb_f_shellflags','hgtb_f_mossy'],floor:'hgtb_f_terrazzo',ceil:'tomb',ceilH:9,amb:.9,noExtras:true}});
   const chars={};for(const c in hgtaChars)chars[c]=hgtaChars[c];lv.chars=chars;
-  {const RB='saturate(1.3) brightness(1.12) contrast(1.05)',rs=['hgt_wp','hgt_wa','hgt_wl','hgt_wc'].map(n=>mkTile(n,1,{boost:RB})),rg=new Int32Array(W*H);
-    for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=I(x,y);rg[i]=rs[(B.kind[i]===G.COURT||B.kind[i]===G.TERRACE)?1:((x>>3)+(y>>3)*3)&3]}
+  {const RB='saturate(1.3) brightness(1.12) contrast(1.05)',rs=['hgt_wp','hgt_wa','hgt_wl','hgt_wc','hgt_w3_shop_pink'].map(n=>mkTile(n,1,{boost:RB})),rg=new Int32Array(W*H);
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=I(x,y);rg[i]=B.kind[i]===G.STAIR?rs[4]:rs[(B.kind[i]===G.COURT||B.kind[i]===G.TERRACE)?1:((x>>3)+(y>>3)*3)&3]}
     lv.terrace.riser=rs[3];lv.terrace.rg=rg}
   lv.hgtxB=B;lv.hgtxDoors=doorsOut;lv.hgtxShops=shopList;lv.hgtxHouses=houseList;lv.hgtxMz=MZ;lv.hgtxRoost=ROOST;
   return lv;

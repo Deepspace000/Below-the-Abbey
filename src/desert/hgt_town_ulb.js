@@ -170,7 +170,7 @@ function build(id){
   // --- the Warp Pit: the double helix wound downward, west side of the court; its floor is the door to the Warp Cellar
   const pitH=qz(getH(54,60),Q);flatten(49,55,59,65,pitH,3,0);
   curSty=7;
-  const pit=hgtxulbHelix(B,{open,wall,wallH,door,dec,light,rg,fm,occ,I,ok,isOpen,getH,toInt,h:pitH,cx:54,cy:60,R0:5.8,P:5,rc:2.2,rise:-.2,lw:.75,arms:2,tints:['a','a'],core:true,coreH:t=>[pitH-t+.4,pitH-t+2.4],coreR:.7,doorTo:{id:4886,tint:'l'},wallSpec:'wdC'});
+  const pit=hgtxulbHelix(B,{open,wall,wallH,door,dec,light,rg,fm,occ,I,ok,isOpen,getH,toInt,h:pitH,cx:54,cy:60,R0:5.8,P:5,rc:2.2,rise:-.2,lw:.75,arms:2,tints:['a','a'],core:true,coreH:t=>[pitH-t+.4,pitH-t+2.4],coreR:.7,coreTint:'a',topFix:pitH+.35,doorTo:{id:4886,tint:'a'},wallSpec:'wdC'});
   U.DEV.pit=pit;if(pit.door)links[4886]={x:pit.door.ax,y:pit.door.ay,f:pit.door.face};if(spire.door)links[4885]={x:spire.door.ax,y:spire.door.ay,f:spire.door.face};
   // --- towers and the rest of the kit, west side
   const nwTower=sqspiral(6,5,11,.17,'p');
@@ -197,11 +197,13 @@ function build(id){
    hgtlName(B,14,98,'The Stair Garden','place')}
   /* mazes: the Grand Maze in the north, and five smaller ones of different kinds */
   const MZP=['hgt_w3_relief_pink','hgt_w3_relief_aqua','hgt_w3_fresco_cream','hgt_w3_scroll_aqua','hgt_w3_balcony_cream','hgt_w3_arcade_cream','hgt_w2_rings','hgt_w3_fresco_amber'];
-  const mazeTile=n=>(role,wh,info)=>{if(role==='wall'||role==='border'||role==='post'){if(info&&info.kind==='hedge'){try{const bg=hgtaWallTile('hgt_wc',wh),vg=typeof hgtwVineTile==='function'?hgtwVineTile(bg,'hgt_vine_wisteria',{mode:'climb',h:wh,seed:(info.wx|0)*7+(info.wy|0)}):bg;return hgtaChar(vg)}catch(e){return undefined}}const p=MZP[(n+((info&&info.band)|0))%MZP.length],pd=hgtaPic(p)?p:'hgt_wp';return hgtaChar(hgtaWallTile(pd,wh,wh>=2.5?{top:'hgt_wb'+(n%4)}:{}))}if(role==='rail'||role==='lit'){return hgtaChar(hgtaWallTile('hgt_w3_balcony_cream',wh,{top:'hgt_w3_cornice_cream'}))}return undefined};
+  const ULBSTYLE={tall:[['hgt_w3_relief_pink','hgt_w3_balcony_cream'],['hgt_w3_fresco_cream','hgt_w3_scroll_aqua']],raised:[['hgt_w3_relief_aqua','hgt_w3_arcade_cream']],sunken:[['hgt_w3_fresco_amber','hgt_w3_scroll_aqua']]};
+  const mazeTile=n=>(role,wh,info)=>{if(role==='wall'||role==='border'||role==='post'){if(info&&info.kind==='hedge'){try{const bg=hgtaWallTile('hgt_wc',wh),vg=typeof hgtwVineTile==='function'?hgtwVineTile(bg,'hgt_vine_wisteria',{mode:'climb',h:wh,seed:(info.wx|0)*7+(info.wy|0)}):bg;return hgtaChar(vg)}catch(e){return undefined}}return hgtzStyle(n,ULBSTYLE)(role,wh,info)}if(role==='rail'||role==='lit'){return hgtaChar(hgtaWallTile('hgt_w3_balcony_cream',wh,{top:'hgt_w3_cornice_cream'}))}return undefined};
   const mazeAt=(x,y,w,hh,opts,name,n)=>{const h0=qz(T_(x+(w>>1),y+(hh>>1)),Q);flatten(x,y,x+w-1,y+hh-1,h0,3,0);
     for(let j=y;j<y+hh;j++)for(let i=x;i<x+w;i++){wk[I(i,j)]=0;wdoor.delete(I(i,j))}
     const m=hgtzMaze(B,x,y,w,hh,Object.assign({base:h0,seed:x*7+y*3+n,tile:mazeTile(n),floor:opts.kind==='hedge'?4:3},opts));
     if(B.fm)for(let j=y;j<y+hh;j++)for(let i=x;i<x+w;i++){const v=B.fm[j*W+i];if(v)fm[I(i,j)]=String(v)}
+    for(const [rx,ry] of (m.runner||[]))fm[I(rx,ry)]=String(m.runnerDigit);
     mark(x-3,y-3,x+w+2,y+hh+2);hgtlName(B,x+(w>>1),y-1,name,'place');spots.mazes.push({name,x,y,w,h:hh,m,base:h0});return m};
   const gmz=mazeAt(26,3,33,33,{kind:'tall',algo:'braid',wallH:5,braid:.5,reward:'view',secret:true,side:'S'},'The Grand Maze',0);
   mazeAt(104,14,21,21,{kind:'hedge',algo:'backtracker',reward:'creature',secret:true,side:'W'},'The Hedge Maze',1);
@@ -293,6 +295,7 @@ function build(id){
    for(const x of [93,100,107])stall(x,8)}
   {const mx=spots.market.x,my=spots.market.y;for(let i=-6;i<=6;i+=3)for(const dy of [-4,4]){lamp(mx+i,my+dy,{});light(mx+i,my+dy)}
    for(let i=-7;i<=7;i++)for(const dy of [-3,3])if(rnd(mx+i,my+dy,190)<.5){plant(mx+i,my+dy,['hgtb_plant_glowshrooms','hgtb_plant_lupin','hgt_lightvine','hgtb_plant_potvine'][(rnd(mx+i,my+dy,191)*4)|0]);light(mx+i,my+dy)}
+   for(const rr of [3,5,7])for(let a=0;a<8;a++){const lx=Math.round(mx+rr*1.4*Math.cos(a*.785+rr)),ly=Math.round(my+rr*.9*Math.sin(a*.785+rr));if(isOpen(lx,ly)&&!B.decor.some(d=>d.x===lx&&d.y===ly&&d.block)){dec('hgtb_lamp_hanging',lx,ly,{walk:true,deco:true,bob:1.7,sc:1.2});light(lx,ly)}}
    for(const [dx,dy] of [[-7,-5],[7,-5],[-7,5],[7,5]])dec('hgtb_deco_banner',mx+dx,my+dy,{walk:true,deco:true,bob:.4,sc:1.3});
    for(let i=-7;i<=7;i+=2)for(let j=-5;j<=5;j+=2)if(isOpen(mx+i,my+j))light(mx+i,my+j);
    for(let i=-6;i<=6;i+=4)for(const dy of [-2,2])if(isOpen(mx+i,my+dy))dec('hgtb_lamp_short',mx+i,my+dy,{walk:true,deco:true,sc:1.1})}
@@ -606,13 +609,13 @@ function hgtxulbHelix(B,o){
     if(hi<-1e8)for(const d of nb8){const c=lane.get((i+d[0])+','+(j+d[1]));if(c){if(c.h<lo)lo=c.h;if(c.h>hi){hi=c.h;arm=c.arm}}}
     if(hi<-1e8)continue;
     if(r>R0+lw+.05&&hi-lo<.3)continue;
-    const wh=Math.abs(hi-lo)+.35,wl=Math.min(lo,hi),sp=o.wallSpec||'wdC';
+    const wl=Math.min(lo,hi),wh=o.topFix!==undefined?Math.max(.5,o.topFix-wl):Math.abs(hi-lo)+.35,sp=o.wallSpec||'wdC';
     wallH(i,j,tints[arm%tints.length],sp,wh,wl);
     o.occ[I(i,j)]=1;gapWalls.push({i,j,lo,hi,arm});
   }
   const ch=typeof o.coreH==='function'?o.coreH(top):o.coreH,coreCells=[],isPlat=(a,b)=>plat.some(p=>p[0]===a&&p[1]===b),faceTo=(dx,dy)=>HGTL.DIRS.findIndex(d=>d[0]===dx&&d[1]===dy);
   if(o.core){const cr=o.coreR||2.3;for(let j=Math.floor(cy-cr-1);j<=Math.ceil(cy+cr+1);j++)for(let i=Math.floor(cx-cr-1);i<=Math.ceil(cx+cr+1);i++){const r=Math.hypot(i-cx,j-cy);
-    if(r<=cr){wallH(i,j,'l','bbb',r<=1.2?ch[1]:ch[0],top);o.occ[I(i,j)]=1;coreCells.push([i,j])}}}
+    if(r<=cr){wallH(i,j,o.coreTint||'l','bbb',r<=1.2?ch[1]:ch[0],top);o.occ[I(i,j)]=1;coreCells.push([i,j])}}}
   // a door in the foot of the column of looms (coreDoor) or in a wall at the bottom of the pit (doorTo)
   let doorRec=null;
   const tryDoor=(cells,spec,tint,wh)=>{for(const c of cells){for(const d of HGTL.DIRS){if(isPlat(c[0]+d[0],c[1]+d[1])){const q=o.toInt(spec.id);o.door(c[0],c[1],faceTo(d[0],d[1]),tint,wh,spec.id,q.tx,q.ty,q.tf);doorRec={x:c[0],y:c[1],ax:c[0]+d[0],ay:c[1]+d[1],face:faceTo(d[0],d[1])};return true}}}return false};

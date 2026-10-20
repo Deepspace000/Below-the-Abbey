@@ -179,7 +179,7 @@ function assemble(B){
   nm('The Conservatory Spiral',CX,CY);nm('Root Well',RW.cx,RW.cy-11);nm('Grand Maze',45,33);nm('Hedge Maze',41,58);nm('Sunken Maze',41,76);nm('Tube Maze',107,33);nm('Raised Maze',109,58);nm('Shell Maze',109,76);
   nm('Willow Pond',43,96);nm('Hill of Balconies',17,75);nm('Spire Quarter',60,16);nm('Sunken Gardens',130,75);nm('Gate Quarter',75,129);nm('South Gate',CX,H-4);nm('North Gate',CX,4);nm('The Belvedere',4,72);nm('Fish Tanks',84,40);nm('Ravine of Lamps',59,19);
   L.mapNames=B.names.map(n=>Object.assign({},n));
-  const FS=[['hgtb_f_pearlbands','hgt_f0'],['hgtb_f_shellflags','hgt_f5'],['hgtb_f_terrazzo','hgt_f2'],['hgtb_f_waves','hgt_f3'],['hgtb_f_gutter','hgt_f4'],['hgt_f7','hgt_f7']].map(a=>FLOORS[a[0]]?a[0]:a[1]);L.floorSet=FS;L.floor=FS[0];L.ceil='tomb';L.ceilH=3;L.amb=1;L.noExtras=true;L.noTele=true;L.sky=skyTowers();
+  const FS=[['hgtb_f_pearlbands','hgt_f0'],['hgtb_f_shellflags','hgt_f5'],['hgtb_f_terrazzo','hgt_f2'],['hgtb_f_mossy','hgt_f3'],['hgtb_f_gutter','hgt_f4'],['hgt_f7','hgt_f7']].map(a=>FLOORS[a[0]]?a[0]:a[1]);L.floorSet=FS;L.floor=FS[0];L.ceil='tomb';L.ceilH=3;L.amb=1;L.noExtras=true;L.noTele=true;L.sky=skyTowers();
   return L}
 // library placeholder characters (HGTL_CHARS roles) get painted wall tiles here
 const roleChar={};
@@ -523,7 +523,7 @@ function buildRoom(key){
   for(let i=decorL.length-1;i>=0;i--){const q=decorL[i];if(rows[q.y]&&rows[q.y][q.x]!=='.')decorL.splice(i,1)}
   const fa=nm_=>FLOORS[nm_]?nm_:'hgt_f5',f0=fa(R.floorPref||RFLOOR[(R.id*3)%RFLOOR.length]),f1=fa(RFLOOR[(R.id*3+4)%RFLOOR.length]),f2=fa(['hgtb_f_mandala','hgtb_f_rosette','hgtb_f_lotus','hgtb_f_star'][R.id%4]),my2=Math.max(2,(d>>1)-1),fmI=[];
   for(let y=0;y<d;y++){let q='';for(let x=0;x<w;x++)q+=(Math.abs(x-cx)<=1&&Math.abs(y-my2)<=1)?'2':(x===1||y===1||x===w-2||y===d-2)?'1':'0';fmI.push(q)}
-  return {rows:rows.map(r=>r.join('')),chars,start:{x:cx,y:d-2,f:0},enemies:[],items,decor:decorL,lights,portals:[],floor:f0,floorSet:[f0,f1,f2,f0,f0,f0],fmap:fmI,day:0,amb:.62,ceil:'beam',ceilH:2.7,noTele:true,noExtras:true,diff:66,name:R.name,label:R.name,mapNames:[]}}
+  return {rows:rows.map(r=>r.join('')),chars,start:{x:cx,y:d-2,f:0},enemies:[],items,decor:decorL,lights,portals:[],floor:f0,floorSet:[f0,f1,f2,f0,f0,f0],fmap:fmI,day:0,amb:.62,ceil:(R.kind==='glass'?'canopy':R.kind==='guard'?'gloom':'beam'),ceilH:2.7,noTele:true,noExtras:true,diff:66,name:R.name,label:R.name,mapNames:[]}}
 for(const k in ROOMS)if(!ROOMS[k].ext)hgtRegister(ROOMS[k].id,()=>k==='tankroom'?buildTankRoom():buildRoom(k));
 for(const k in ROOMS)LEVEL_NAMES[ROOMS[k].id]=ROOMS[k].name;
 try{HGTE.wetLook(ROOMS.cistern.id);if(typeof UWS!=='undefined')UWS[ROOMS.cistern.id]={vents:[[3,4],[7,4]],swim:[]}}catch(e){console.error('hgt wet',e)}
@@ -664,7 +664,7 @@ function laneLights(B,xs,y0,y1){
     light(B,xs[1],y)}}
 function sunkenLane(B,xs,y0,y1,depth,seed){
   for(let y=y0;y<=y1;y++){const k=Math.min(y-y0,y1-y),d=Math.min(depth,.52*(k+1));
-    for(const x of xs){O(B,x,y,-d,k<3?K.STAIR:K.COURT);fl(B,x,y,k<3?4:(x===xs[1]?3:2))}}
+    for(const x of xs){O(B,x,y,-d,k<3?K.STAIR:K.COURT);fl(B,x,y,k<3?4:(x===xs[1]?1:2))}}
   for(let y=y0+4;y<=y1-4;y++){if(hs(xs[0],y,160+seed)<.5)plant(B,['giantcap','mushrooms','fern','bulbflower','shellflower','lightvine'][(hs(xs[1],y,161+seed)*6)|0],hs(y,3,162+seed)<.5?xs[0]:xs[xs.length-1],y,.8+hs(y,4,163)*.6);if((y-y0)%3===1){light(B,xs[1],y);if((y-y0)%6===1)lampPost(B,xs[0],y);else plant(B,'crystalgrass',xs[xs.length-1],y,1.1)}}}
 // a humpback bridge of steps over the Ravine of the Lamps, from the east side of one stair tower to the west side of the next
 function skyBridge(B,info){
@@ -788,8 +788,9 @@ function closeStreets(B){
 function carveClear(B,x,y,w,h){B.decor=B.decor.filter(d=>!(d.x>=x&&d.x<x+w&&d.y>=y&&d.y<y+h));B.lights=B.lights.filter(l=>!(l[0]>=x&&l[0]<x+w&&l[1]>=y&&l[1]<y+h))}
 function mazeAt(B,info,x,y,w,h,o){carveClear(B,x-1,y-1,w+2,h+2);
   const tint=['m','n','o','q','r','s'];
-  const m=hgtzMaze(B,x,y,w,h,Object.assign({tile:(role,wh,inf)=>o.kind==='hedge'?undefined:wallGid(tint[((inf&&inf.band)|0)%6],Math.round(wh*2)/2,1)},o));
+  const m=hgtzMaze(B,x,y,w,h,Object.assign({tile:o.kind==='hedge'?undefined:hgtzStyle(o.seed||0)},o));
   if(B.fm)for(const [cx,cy] of m.cells)fl(B,cx,cy,B.fm[cy*W+cx]);
+  for(const [rx,ry] of (m.runner||[]))fl(B,rx,ry,m.runnerDigit);
   for(const [cx,cy] of m.cells){if(!isO(B,cx,cy)||B.kind[cy*W+cx]===K.STAIR)continue;const r=hs(cx,cy,230);if(r<.18)fl(B,cx,cy,(cx+cy)%2?1:3);else if(r<.26)plant(B,['mushrooms','crystalgrass','fern','shellflower'][(r*100|0)%4],cx,cy,.9);if(r>.96)light(B,cx,cy)}
   (info.mazes=info.mazes||[]).push({x,y,w,h,kind:o.kind,algo:o.algo,reward:o.reward,centre:m.centre});glowAt(B,m.centre.x,m.centre.y);return m}
 function bigMazes(B,info){

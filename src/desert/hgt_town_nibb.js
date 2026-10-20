@@ -192,7 +192,8 @@ function build(){
   const W2=['hgt_w3_relief_pink','hgt_w3_relief_aqua','hgt_w3_fresco_cream','hgt_w3_fresco_amber','hgt_w3_scroll_aqua','hgt_w3_scroll_pink','hgt_w3_reed_lilac','hgt_w3_arcade_cream','hgt_w2_rings','hgt_w2_doodleaqua'];
   const mazeTile=(role,wh,info)=>{if(info&&info.kind==='shell'&&(role==='wall'||role==='border'||role==='post'))return hgtaChar(mkTile(['hgt_w2_loopsmint'],qwh(wh)));if(role==='wall'||role==='border'||role==='post'){const bi=info?(((info.wx/6)|0)+((info.wy/6)|0)):0;return hgtaChar(mkTile([W2[Math.abs(bi)%W2.length]],qwh(wh)))}};
   B.links=B.links||{};B.mazes=[];B.nowhere=[];B.pools2=[];B.tanksList=[];B.bridges=[];
-  const mz=(x,y,w,h,o)=>{try{const m=hgtzMaze(B,x,y,w,h,Object.assign({base:hAt(x,y),seed:x*31+y,tile:mazeTile},o));B.mazes.push({m,kind:o.kind,x,y,w,h});
+  const NIBBSTYLE={tall:[['hgt_w3_fresco_amber','hgt_w3_scroll_pink'],['hgt_w3_reed_lilac','hgt_w3_arcade_cream']],raised:[['hgt_w3_relief_aqua','hgt_w3_fresco_cream']],sunken:[['hgt_w3_scroll_aqua','hgt_w3_relief_pink']]};
+  const mz=(x,y,w,h,o)=>{try{const m=hgtzMaze(B,x,y,w,h,Object.assign({base:hAt(x,y),seed:x*31+y,tile:hgtzStyle(x*31+y+((o.kind||'').length),NIBBSTYLE)},o));B.mazes.push({m,kind:o.kind,x,y,w,h});
       for(let j=y-1;j<=y+h;j++)for(let i=x-1;i<=x+w;i++)if(inB(i,j)){B.occ.add(i+','+j);B.res[I(i,j)]=3}return m}catch(e){console.error('nibb maze',o.kind,e);return null}};
   // the Grand Maze: a hedge maze in the north-west corner with a lookout stair at its heart
   for(const s of [31,29,25]){if(flatOK(6,6,s,s,0,49)){mz(6,6,s,s,{kind:'hedge',algo:'backtracker',reward:'view',secret:true,side:'S',lampEvery:8});B.grand={x:6,y:6,s};{const ap=B.mazes[0].m.approach;if(ap)claim(ap.x-2,ap.y,5,9,0)}break}}
@@ -428,7 +429,9 @@ function build(){
      dec('hgtb_deco_lanterns',c.ax,c.ay,{sc:1.2});B.lights.push([c.ax,c.ay],[c.ax,c.ay+2])}
    for(const c of B.sunken){const [x0,y0,x1,y1]=c.bbox;
      for(let x=x0+1;x<=x1-1;x++)if(isO(x,c.ay)&&!B.occ.has(x+','+c.ay)&&Math.abs(x-c.ax)>1){B.occ.add(x+','+c.ay);dec(x%2?'hgtb_lamp_bracket':'hgt_balcony',x,c.ay,{bob:x%2?1.4:1.9,sc:1.2});B.lights.push([x,c.ay])}
-     for(let y=c.ay;y<=y1;y+=2)B.lights.push([c.ax,y],[c.ax+1,y])}
+     for(let y=c.ay;y<=y1;y+=2)B.lights.push([c.ax,y],[c.ax+1,y])
+     for(let y=y0-2;y<=y1;y+=2)for(const x of [x0-1,x0]){if(isO(x,y)&&!B.occ.has(x+','+y)){B.occ.add(x+','+y);dec(y%4?'hgtb_lamp_bracket':'hgtb_lampwhite',x,y,{bob:y%4?1.6:0,sc:1.2});B.lights.push([x,y])}}
+     for(let x=x0;x<=x1;x+=2){B.lights.push([x,y1],[x,y1-2])}}
    const g=B.mazes[0]&&B.mazes[0].m,gb=B.grand;
    if(g&&gb){const ap=g.approach||{x:gb.x+(gb.s>>1),y:gb.y+gb.s};
      dec('hgt_vine_wreatharch',ap.x,ap.y,{sc:2.2});dec('hgt_obelisk',ap.x-2,ap.y,{sc:2.4});dec('hgt_obelisk',ap.x+2,ap.y,{sc:2.4});B.lights.push([ap.x,ap.y],[ap.x-2,ap.y],[ap.x+2,ap.y]);
@@ -446,6 +449,10 @@ function build(){
    for(let x=116;x<=134;x+=3)for(const [dy,bob] of [[33,2.4],[36,3.2],[39,2.6]]){if(isO(x,dy)&&!B.occ.has(x+','+dy)){dec('hgt_hanglamp',x,dy,{bob,sc:1.7});if(x%2)B.lights.push([x,dy])}}
    for(const [x,y,bb,sc] of [[119,32,2.4,3],[131,32,2.4,3],[112,29,2.6,2.6],[126,43,2.6,2.6],[120,43,2.8,2.4],[132,43,2.8,2.4]])dec(bellKind(),x,y,{bob:bb,sc});
    for(let x=108;x<=134;x+=4)for(const y of [28,42]){dec('hgt_hanglamp',x,y,{bob:2.8,sc:1.8});if(x%8===0)B.lights.push([x,y])}
+   // lanterns and bells all over the court, so they show from every way in
+   for(let y=7;y<=45;y+=3)for(let x=102;x<=143;x+=3){if(!isO(x,y)||Math.hypot(x-WL.cx,y-WL.cy)<8||(x>=116&&x<=132&&y<=29))continue;const v=hs(x,y,160);
+     if(v<.6)dec('hgt_hanglamp',x,y,{bob:2.2+v*1.6,sc:1.5+v});else if(v<.8)dec(bellKind(),x,y,{bob:2.4+v,sc:2.2+v})}
+   for(const [x,y] of [[101,33],[101,38],[104,44],[110,45],[118,44]])if(isO(x,y)){dec(bellKind(),x,y,{bob:2.6,sc:3});dec('hgt_hanglamp',x+1,y,{bob:2.4,sc:2});B.lights.push([x,y])}
    dec(bellKind(),125,34,{bob:2.2,sc:3.4});dec(bellKind(),121,37,{bob:2.6,sc:2.4});dec(bellKind(),129,37,{bob:2.6,sc:2.4});
    for(const x of [118,125,132]){dec('hgtb_deco_banner',x,32,{sc:1.7});dec('hgtb_lamp_tall',x+1,32,{sc:1.3});B.lights.push([x,32])}}
 
