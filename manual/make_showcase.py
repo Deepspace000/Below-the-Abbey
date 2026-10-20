@@ -3,7 +3,11 @@ import os, pymupdf
 from PIL import Image
 HERE = os.path.dirname(os.path.abspath(__file__)); PDF = os.path.join(os.path.dirname(HERE), 'Below-the-Abbey-manual.pdf'); OUT = os.path.join(HERE, 'showcase'); os.makedirs(OUT, exist_ok=True)
 d = pymupdf.open(PDF)
-SP = {'contents': (2, 3), 'chapter1': (4, 5), 'gear_tiers': (43, 44), 'whos_who': (66, 67), 'history_map': (58, 59), 'atlas': (87, 88), 'bestiary': (139, 140), 'desert': (94, 95)}
+N = {k: v['page'] + 1 for k, v in d.resolve_names().items()}
+def at(key, off=0): return N[key] + off
+SP = {'contents': (2, 3), 'chapter1': (at('ch01'), at('ch01', 1)), 'gear_tiers': (at('ch03-tiers'), at('ch03-tiers', 1)), 'whos_who': (at('ch04-whos'), at('ch04-whos', 1)),
+      'history_map': (at('ch04-map'), at('ch04-map', 1)), 'atlas': (at('ch05-atlas-h'), at('ch05-atlas-h', 1)), 'bestiary': (at('ch08-bestiary'), at('ch08-bestiary', 1)), 'desert': (at('ch06'), at('ch06', 1))}
+print(SP)
 for name, (a, b) in SP.items():
     ims = []
     for p in (a, b):

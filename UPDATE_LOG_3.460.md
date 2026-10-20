@@ -1,8 +1,8 @@
-Below the Abbey: update 3.457
+Below the Abbey: update 3.460
 
 The manual
 
-* Below the Abbey now has a printed manual, in the style of the booklets that came in the box of the old games: a 186 page illustrated PDF with a black letter title, a clickable contents page and a black and white screenshot in a heavy black frame on almost every page.
+* Below the Abbey now has a printed manual, in the style of the booklets that came in the box of the old games: a 207 page illustrated PDF with a black letter title, a clickable contents page and a black and white screenshot in a heavy black frame on almost every page.
 * Chapter 1 explains the screen, the controls, the menu, the maps and your first ten minutes, with a keyboard and mouse quick reference. Chapter 2 covers your party, the twelve occupations, powers, combat, afflictions, resting and hunger. Chapter 3 covers the inventory, gear, trade, herbs and scrolls.
 * Chapter 4 tells the history of the land, with a who's who and a timeline (the later parts are marked as spoilers). Chapters 5, 6 and 7 are travel guides to the home lands, the deserts and Khemetra, and the seas, Oldhaven and the east. Chapter 8 is the bestiary and a hint guide with three levels of hint for every place and quest.
 * The new illuminated area maps fill an atlas at the end of each guide chapter, and the gear catalog (every weapon, armour piece and ring, sorted white, green, blue, red, purple and orange) is the appendix.
@@ -43,6 +43,7 @@ Illuminated area maps
 * Quest rings show on the map, and the quest you pick in the quest log gets a dotted trail from the party to its place.
 * A Pin button lets you drop your own pins on a map (flag, skull, chest, camp, star or mark). Tap the map to place one, tap a pin to take it away.
 * A question mark shows on the area maps, and on the edge of the minimap, for hidden caves and ruins the party has spotted, so you can steer towards them.
+* Small painted goats, llamas and ducks, in the style of medieval manuscript margins, sit in the margins of the maps, two or three to a map.
 * The maps carry no notes, hints or descriptions for the player, and the foot line only says who the arrow is.
 * On the Thornwood map the labelled hollow in the south east is the Witch's Hut, and visited caves and ruins are named where they really are.
 
@@ -69,3 +70,4 @@ Interface
 Painted art
 
 * Painted art for the whole Hollow Grasslands: frog-folk, houses, towers, insects, hives, chests and the wizard. Also the weather icons, the Attack icon, the Oldhaven gargoyles and the shady character.
+

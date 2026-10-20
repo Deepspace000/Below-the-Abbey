@@ -1,0 +1,362 @@
+{
+ "goat_0": {
+  "file": "goat_0.webp",
+  "w": 159,
+  "h": 261,
+  "tags": [
+   "goat"
+  ]
+ },
+ "goat_1": {
+  "file": "goat_1.webp",
+  "w": 175,
+  "h": 259,
+  "tags": [
+   "goat"
+  ]
+ },
+ "goat_2": {
+  "file": "goat_2.webp",
+  "w": 149,
+  "h": 250,
+  "tags": [
+   "goat"
+  ]
+ },
+ "goat_3": {
+  "file": "goat_3.webp",
+  "w": 167,
+  "h": 256,
+  "tags": [
+   "goat"
+  ]
+ },
+ "goat_4": {
+  "file": "goat_4.webp",
+  "w": 171,
+  "h": 276,
+  "tags": [
+   "goat"
+  ]
+ },
+ "goat_5": {
+  "file": "goat_5.webp",
+  "w": 149,
+  "h": 275,
+  "tags": [
+   "goat"
+  ]
+ },
+ "llama_0": {
+  "file": "llama_0.webp",
+  "w": 154,
+  "h": 259,
+  "tags": [
+   "llama"
+  ]
+ },
+ "llama_1": {
+  "file": "llama_1.webp",
+  "w": 153,
+  "h": 259,
+  "tags": [
+   "llama"
+  ]
+ },
+ "llama_2": {
+  "file": "llama_2.webp",
+  "w": 152,
+  "h": 250,
+  "tags": [
+   "llama"
+  ]
+ },
+ "llama_3": {
+  "file": "llama_3.webp",
+  "w": 167,
+  "h": 274,
+  "tags": [
+   "llama"
+  ]
+ },
+ "llama_4": {
+  "file": "llama_4.webp",
+  "w": 168,
+  "h": 273,
+  "tags": [
+   "llama"
+  ]
+ },
+ "llama_5": {
+  "file": "llama_5.webp",
+  "w": 165,
+  "h": 260,
+  "tags": [
+   "llama"
+  ]
+ },
+ "duck_0": {
+  "file": "duck_0.webp",
+  "w": 154,
+  "h": 255,
+  "tags": [
+   "duck"
+  ]
+ },
+ "duck_1": {
+  "file": "duck_1.webp",
+  "w": 182,
+  "h": 261,
+  "tags": [
+   "duck"
+  ]
+ },
+ "duck_2": {
+  "file": "duck_2.webp",
+  "w": 153,
+  "h": 241,
+  "tags": [
+   "duck"
+  ]
+ },
+ "duck_3": {
+  "file": "duck_3.webp",
+  "w": 241,
+  "h": 275,
+  "tags": [
+   "duck"
+  ]
+ },
+ "duck_4": {
+  "file": "duck_4.webp",
+  "w": 176,
+  "h": 231,
+  "tags": [
+   "duck"
+  ]
+ },
+ "duck_5": {
+  "file": "duck_5.webp",
+  "w": 166,
+  "h": 272,
+  "tags": [
+   "duck"
+  ]
+ },
+ "deco_0": {
+  "file": "deco_0.webp",
+  "w": 138,
+  "h": 211,
+  "tags": [
+   "deco"
+  ]
+ },
+ "deco_1": {
+  "file": "deco_1.webp",
+  "w": 140,
+  "h": 218,
+  "tags": [
+   "deco"
+  ]
+ },
+ "deco_2": {
+  "file": "deco_2.webp",
+  "w": 141,
+  "h": 218,
+  "tags": [
+   "deco"
+  ]
+ },
+ "deco_3": {
+  "file": "deco_3.webp",
+  "w": 127,
+  "h": 199,
+  "tags": [
+   "deco"
+  ]
+ },
+ "deco_4": {
+  "file": "deco_4.webp",
+  "w": 206,
+  "h": 75,
+  "tags": [
+   "deco"
+  ]
+ },
+ "deco_5": {
+  "file": "deco_5.webp",
+  "w": 155,
+  "h": 166,
+  "tags": [
+   "deco"
+  ]
+ },
+ "deco_6": {
+  "file": "deco_6.webp",
+  "w": 168,
+  "h": 318,
+  "tags": [
+   "deco"
+  ]
+ },
+ "deco_7": {
+  "file": "deco_7.webp",
+  "w": 172,
+  "h": 137,
+  "tags": [
+   "deco"
+  ]
+ },
+ "deco_8": {
+  "file": "deco_8.webp",
+  "w": 175,
+  "h": 197,
+  "tags": [
+   "deco"
+  ]
+ },
+ "theme_0": {
+  "file": "theme_0.webp",
+  "w": 172,
+  "h": 162,
+  "tags": [
+   "theme"
+  ]
+ },
+ "theme_1": {
+  "file": "theme_1.webp",
+  "w": 175,
+  "h": 156,
+  "tags": [
+   "theme"
+  ]
+ },
+ "theme_2": {
+  "file": "theme_2.webp",
+  "w": 168,
+  "h": 215,
+  "tags": [
+   "theme"
+  ]
+ },
+ "theme_3": {
+  "file": "theme_3.webp",
+  "w": 172,
+  "h": 214,
+  "tags": [
+   "theme"
+  ]
+ },
+ "theme_4": {
+  "file": "theme_4.webp",
+  "w": 176,
+  "h": 184,
+  "tags": [
+   "theme"
+  ]
+ },
+ "theme_5": {
+  "file": "theme_5.webp",
+  "w": 162,
+  "h": 223,
+  "tags": [
+   "theme"
+  ]
+ },
+ "theme_6": {
+  "file": "theme_6.webp",
+  "w": 167,
+  "h": 197,
+  "tags": [
+   "theme"
+  ]
+ },
+ "theme_7": {
+  "file": "theme_7.webp",
+  "w": 179,
+  "h": 197,
+  "tags": [
+   "theme"
+  ]
+ },
+ "theme_8": {
+  "file": "theme_8.webp",
+  "w": 173,
+  "h": 216,
+  "tags": [
+   "theme"
+  ]
+ },
+ "scene_0": {
+  "file": "scene_0.webp",
+  "w": 176,
+  "h": 154,
+  "tags": [
+   "scene"
+  ]
+ },
+ "scene_1": {
+  "file": "scene_1.webp",
+  "w": 179,
+  "h": 132,
+  "tags": [
+   "scene"
+  ]
+ },
+ "scene_2": {
+  "file": "scene_2.webp",
+  "w": 170,
+  "h": 141,
+  "tags": [
+   "scene"
+  ]
+ },
+ "scene_3": {
+  "file": "scene_3.webp",
+  "w": 166,
+  "h": 222,
+  "tags": [
+   "scene"
+  ]
+ },
+ "scene_4": {
+  "file": "scene_4.webp",
+  "w": 184,
+  "h": 193,
+  "tags": [
+   "scene"
+  ]
+ },
+ "scene_5": {
+  "file": "scene_5.webp",
+  "w": 170,
+  "h": 155,
+  "tags": [
+   "scene"
+  ]
+ },
+ "scene_6": {
+  "file": "scene_6.webp",
+  "w": 174,
+  "h": 160,
+  "tags": [
+   "scene"
+  ]
+ },
+ "scene_7": {
+  "file": "scene_7.webp",
+  "w": 181,
+  "h": 174,
+  "tags": [
+   "scene"
+  ]
+ },
+ "scene_8": {
+  "file": "scene_8.webp",
+  "w": 173,
+  "h": 215,
+  "tags": [
+   "scene"
+  ]
+ }
+}

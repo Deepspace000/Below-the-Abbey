@@ -29,7 +29,7 @@ figure img{display:block;width:100%;height:auto}
 figure.shot img{filter:grayscale(1) contrast(1.05);border:3.5pt solid #000;background:#000}
 figure.art img{border:.75pt solid #000}
 figure.bw img{filter:grayscale(1) contrast(1.05)}
-figure.full{margin-left:-.55in;margin-right:-.55in}
+figure.full{margin-left:0;margin-right:0}
 figure.full img{border-left:0;border-right:0}
 figcaption{font-style:italic;font-size:8.2pt;text-align:center;margin-top:.25em;line-height:1.25}
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:.12in;margin:.5em 0 .7em;break-inside:avoid}

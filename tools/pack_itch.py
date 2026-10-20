@@ -1,7 +1,7 @@
 """Build an itch.io upload: index.html + a few big packs of the pictures + the audio. itch.io allows at most 1000 files in an HTML5 zip,
 and the game has about 1500 pictures, so the pictures are glued into packs and handed to the page as blob URLs (see the shim below).
 Usage: python tools/pack_itch.py   ->  itch-build/ and itch-build.zip"""
-import os, json, shutil, zipfile, mimetypes
+import os, sys, json, shutil, zipfile, mimetypes
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, 'itch-build')
 if os.path.isdir(OUT): shutil.rmtree(OUT)
@@ -62,12 +62,22 @@ html = html.replace(TW, TW + 'return;')
 # the manual is a separate download on the itch page, so the menu button for it is hidden in this build
 MF = "const MANUAL_FILE='Below-the-Abbey-manual.pdf';"
 assert MF in html
-html = html.replace(MF, "const MANUAL_FILE='';")
+WITH_MANUAL = '--manual' in sys.argv   # python tools/pack_itch.py --manual : the manual PDF goes into the zip too (itch-build-with-manual.zip) and the menu button stays
+if WITH_MANUAL:
+    MAN = os.path.join(ROOT, 'Below-the-Abbey-manual.pdf')
+    if os.path.exists(MAN): shutil.copy2(MAN, os.path.join(OUT, 'manual', 'Below-the-Abbey-manual.pdf')) if os.makedirs(os.path.join(OUT, 'manual'), exist_ok=True) is None else None
+    html = html.replace(MF, "const MANUAL_FILE='manual/Below-the-Abbey-manual.pdf';")
+else:
+    html = html.replace(MF, "const MANUAL_FILE='';")
 open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8', newline='').write(html)
 n = 0
-z = zipfile.ZipFile(os.path.join(ROOT, 'itch-build.zip'), 'w', zipfile.ZIP_STORED)
+ZIPNAME = 'itch-build-with-manual.zip' if WITH_MANUAL else 'itch-build.zip'
+z = zipfile.ZipFile(os.path.join(ROOT, ZIPNAME), 'w', zipfile.ZIP_STORED)
+allf = []
 for r, d, f in os.walk(OUT):
-    for x in f:
-        p = os.path.join(r, x); z.write(p, os.path.relpath(p, OUT)); n += 1
+    for x in f: allf.append(os.path.join(r, x))
+# index.html first, then pack.json, then the packs and assets, the manual PDF last
+allf.sort(key=lambda p: (0 if os.path.basename(p) == 'index.html' else 1 if os.path.basename(p) == 'pack.json' else 3 if p.endswith('.pdf') else 2, p))
+for p in allf: z.write(p, os.path.relpath(p, OUT)); n += 1
 z.close()
-print('files in the zip:', n, 'size MB:', round(os.path.getsize(os.path.join(ROOT, 'itch-build.zip')) / 1e6))
+print(ZIPNAME, 'files in the zip:', n, 'size MB:', round(os.path.getsize(os.path.join(ROOT, ZIPNAME)) / 1e6))
