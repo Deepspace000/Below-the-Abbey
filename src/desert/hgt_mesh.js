@@ -320,7 +320,7 @@ function hgtmPartBound(P){ // centre and radius of a fixed part in its node's ow
   return [cx,cy,cz,Math.sqrt(r2)];
 }
 const HVB=new Float64Array(8),HRW=new Int16Array(VW+4);const PXB=new Int32Array(8);/* PERF_MESH6: true = the one-frame-in-three picture of tiny models is OFF (it showed as a visible change between frames) */
-var PERF_SPR=false,PERF_MESH=false,PERF_MESH2=false,PERF_MESH3=false,PERF_MESH4=false,PERF_MESH5=false,PERF_MESH6=true,PERF_MESH7=false,PERF_MESH8=false;   // true: no hidden-column shortcut in the model pass (for comparing)
+var PERF_SPR=false,PERF_MESH=false,PERF_MESH2=false,PERF_MESH3=false,PERF_MESH4=false,PERF_MESH5=false,PERF_MESH6=true,PERF_MESH7=false,PERF_MESH8=false,PERF_MESH9=false;   // true: no hidden-column shortcut in the model pass (for comparing)
 function hgtmPartVerts(P,Mx,vo,isc,cx,cy,cz,dX,dY){
   const lp=P.lpos,ln=P.lnor,uvA=P.uv,col=P.col,cr=col[0]/255,cg=col[1]/255,cb=col[2]/255,gl=P.glow,vc=P.vcol,dbl=P.dbl,K=hgtmTmpK,NEAR=.12,F_=F,HH_=HH,hw=VW/2,nv=P.nv;
   let minx=HVB[0],maxx=HVB[1],miny=HVB[2],maxy=HVB[3],behind=HVB[4]!==0,zmin=HVB[5];
@@ -364,6 +364,14 @@ function hgtmLodPart(P,lv){
   return P[key]={nv:Q.nv,lpos:Q.lpos,lnor:Q.lnor,uv:Q.uv,tr:Q.tr,nt:Q.nt};
 }
 function hgtmRenderMesh(I,cam,slotIx){
+  // a model that came out empty (hidden) is not tried again for the next two frames while the eye has hardly moved
+  if(I._nz>0&&!PERF_MESH9){const mx=cam.cx-I._nx,my=cam.cy-I._ny,da=cam.dX*I._nd1+cam.dY*I._nd2;
+    if(mx*mx+my*my<.012&&da>.9995&&G.time-I._nt<.08&&Math.abs(cam.cz-I._nz2)<.05){I._nz--;return null}I._nz=0}
+  const e=hgtmRenderMesh1(I,cam,slotIx);
+  if(!e&&!PERF_MESH9){I._nz=2;I._nx=cam.cx;I._ny=cam.cy;I._nd1=cam.dX;I._nd2=cam.dY;I._nt=G.time;I._nz2=cam.cz}
+  return e;
+}
+function hgtmRenderMesh1(I,cam,slotIx){
   if(PERF_MESH7||!(I.zc>0))return hgtmRenderMesh0(I,cam,slotIx);
   const px=F*I.M.rad*I.sc/I.zc;let lv=I._lodv===undefined?0:I._lodv;
   while(lv<2&&px<HGTM_LODPX[lv+1]*.9)lv++;

@@ -197,7 +197,7 @@ function build(id){
    hgtlName(B,14,98,'The Stair Garden','place')}
   /* mazes: the Grand Maze in the north, and five smaller ones of different kinds */
   const MZP=['hgt_w3_relief_pink','hgt_w3_relief_aqua','hgt_w3_fresco_cream','hgt_w3_scroll_aqua','hgt_w3_balcony_cream','hgt_w3_arcade_cream','hgt_w2_rings','hgt_w3_fresco_amber'];
-  const ULBSTYLE={tall:[['hgt_w3_relief_pink','hgt_w3_balcony_cream'],['hgt_w3_fresco_cream','hgt_w3_scroll_aqua']],raised:[['hgt_w3_relief_aqua','hgt_w3_arcade_cream']],sunken:[['hgt_w3_fresco_amber','hgt_w3_scroll_aqua']]};
+  const ULBSTYLE={tall:[['hgt_w3_relief_pink','hgt_w3_balcony_cream'],['hgt_w3_fresco_cream','hgt_w3_scroll_aqua']],raised:[['hgt_w3_relief_aqua','hgt_w3_arcade_cream']]};
   const mazeTile=n=>(role,wh,info)=>{if(role==='wall'||role==='border'||role==='post'){if(info&&info.kind==='hedge'){try{const bg=hgtaWallTile('hgt_wc',wh),vg=typeof hgtwVineTile==='function'?hgtwVineTile(bg,'hgt_vine_wisteria',{mode:'climb',h:wh,seed:(info.wx|0)*7+(info.wy|0)}):bg;return hgtaChar(vg)}catch(e){return undefined}}return hgtzStyle(n,ULBSTYLE)(role,wh,info)}if(role==='rail'||role==='lit'){return hgtaChar(hgtaWallTile('hgt_w3_balcony_cream',wh,{top:'hgt_w3_cornice_cream'}))}return undefined};
   const mazeAt=(x,y,w,hh,opts,name,n)=>{const h0=qz(T_(x+(w>>1),y+(hh>>1)),Q);flatten(x,y,x+w-1,y+hh-1,h0,3,0);
     for(let j=y;j<y+hh;j++)for(let i=x;i<x+w;i++){wk[I(i,j)]=0;wdoor.delete(I(i,j))}

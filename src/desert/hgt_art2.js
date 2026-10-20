@@ -83,6 +83,9 @@
        furn_chandelier_lantern 1.0 (hangs from the ceiling).
      EDGE SCENERY (2048x868 RGBA, seamless left-right, parallax strips, bottom filled solid): hgtb_edge_near (dark indigo terraced cliffs, a cave ceiling with stalactites on top, rim light),
        hgtb_edge_mid (dusky violet terraces and spires with many small lit windows), hgtb_edge_far (pale hazy, little detail). Sky above the rock is transparent.
+   ROUND 9 STILT-WALKER SHELL SET (painted pearl and lacquer shell, same family as the w3 shell walls; 512x512 tex, seamless both ways): hgtb_stilt_leg_shell (long vertical nacre ridges with gold lines
+     and pearl studs, for the legs), hgtb_stilt_joint_shell (horizontal carved scallop and pearl bands, for joint rings), hgtb_stilt_knee_shell (overlapping iridescent shell plates for knee caps),
+     hgtb_stilt_foot_shell (carved radiating shell fans for the foot pads). Use as tex:'art_tex_<name>', texMax:512. hgt_giants.js uses leg_shell on the legs and foot_shell on the feet.
    ========================================================================== */
 const HGTB_PETS=[['hgtb_pinkbulb',.45],['hgtb_lilacmoth',.75],['hgtb_lanternbeetle',.55],['hgtb_pearlslug',.4],['hgtb_aquawhale',1.5],['hgtb_jadefinmoth',.8],['hgtb_spindleray',.75],['hgtb_amberpup',.35],
   ['hgtb_fishbeetle',.8],['hgtb_creamjelly',.9],['hgtb_jadeeel',.6],['hgtb_fishfly',.7],['hgtb_peachwhale',1.9],['hgtb_creammoth',.5],['hgtb_pups',.4],['hgtb_spindlespider',.7]];

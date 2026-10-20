@@ -285,7 +285,7 @@ HGTE.swimming=function(id){
     _ds.apply(this,arguments);
     if(!hgtAny(LEVEL))return;
     const L=LEVELS[LEVEL],T=L&&L.terrace;if(!T)return;
-    if(T.water){const deep=T.water[ny*L.rows[0].length+nx]===2;if(deep&&HGTE._deepLv!==LEVEL){msg('The water is deep. The party swims.','#a8e0e8')}HGTE._deepLv=deep?LEVEL:0}
+    if(T.water){const deep=T.water[ny*L.rows[0].length+nx]===2;HGTE._deepLv=deep?LEVEL:0}
     const d=T.dive&&T.dive[nx+','+ny];
     if(d&&typeof uwSuited==='function'&&uwSuited()){const lv=LEVEL;later(250,()=>{if(LEVEL===lv&&G.P.x===nx&&G.P.y===ny){(G.flags.hgtRet=G.flags.hgtRet||{})[d.to]={to:lv,x:d.ret?d.ret.x:nx,y:d.ret?d.ret.y:ny,f:d.ret?d.ret.f:0};sfx('door');goToLevel(d.to,{x:d.x,y:d.y,f:d.f|0})}})}
   };

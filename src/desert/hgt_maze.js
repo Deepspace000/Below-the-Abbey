@@ -607,7 +607,7 @@ function hgtzDress(B,m,o){o=o||{};if(!m||!m.entry||!m.approach||m.kind==='indoor
     let cx,cy,r;if(m.boxC){cx=m.boxC[0];cy=m.boxC[1];r=((m.boxS-1)>>1)+1}else if(m.centre){cx=m.centre.x;cy=m.centre.y;r=1}
     if(cx!==undefined){m.spires=[];
       for(const [sx,sy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){const x=cx+sx*r,y=cy+sy*r;if(!hgtlIn(B,x,y)||B.rows[y][x]==='.'||!hgtzInRect(m,x,y))continue;
-        const foot=B.h[y*W+x],top=base+(m.kind==='tall'?(m.wallH||4.5)+8:13),T=hgtzQ(Math.max(8,top-foot));
+        const foot=B.h[y*W+x],top=base+(m.kind==='tall'?(m.wallH||4.5)+12:18),T=hgtzQ(Math.max(8,top-foot));
         hgtlWall(B,x,y,hgtaChar(hgtaWallTile(glow[1],T,{base:glow[0],mid:glow[1],top:glow[2]})),foot);m.spires.push([x,y,T])}
       if(m.spires.length)hgtlLight(B,cx,cy)}}
   // gate: pillars either side of the entry cell, an arch on it
