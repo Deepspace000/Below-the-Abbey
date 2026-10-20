@@ -123,7 +123,7 @@ draw(c,x,L,api){
   x.restore();
   /* margins */
   api.title(x,'The Orange Spire, Floor 6','',12,12);
-  mplText(x,'Throne Hall, banquet halls,',12,44,6.4,'#5a3a1c','left');mplText(x,'cells and two galleries',12,52,6.4,'#5a3a1c','left');
+  {let ty=44;for(const l of api.wrap(x,hlMapSub(L),76,6.4)){mplText(x,l,12,ty,6.4,'#5a3a1c','left');ty+=8}}
   const kx=5,ky=62;api.panel(x,kx,ky,84,196);api.text(x,'KEY',kx+42,ky+9,7,MPL.LAPIS);
   const ks=7,ki=[
     ['Stair up',()=>mpOs445Stair(x,a=>kx+8+a,b=>ky+b,0,17,ks+1,true)],
@@ -141,6 +141,6 @@ draw(c,x,L,api){
   const gaps=[21,34,53,70,93,106,120,133,148,162,176,190];
   ki.forEach((r,i)=>{r[1]();api.text(x,r[0],kx+24,ky+gaps[i],6.2,'#3a2a1c','left')});
   const nx=391,nw=84;api.panel(x,nx-2,50,nw,150);
-  mplNotes(x,['The party arrives at the stair in the south.','The stair up is behind the throne in the north.','Only some rooms have names.','Torches and candles light the rooms.'],nx+3,69,nw-9,6.2,4);
+  mplNotes(x,hlMapNotes(L,['Only some rooms have names.','Torches and candles light the rooms.']),nx+3,69,nw-9,6.2,4);
   api.compass(x,436,242,15);
 }});

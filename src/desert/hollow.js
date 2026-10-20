@@ -1,7 +1,7 @@
 /* ==========================================================================
    THE HOLLOW LAND. Below the Abbey, past the Hollow Abbot, the stair comes out on a high ledge in a vast underground dark. Far below, lit by red
-   and purple torches, stands a great orange spire. Stairs lead down to its gate. Inside, 20 levels climb to a spire, each smaller than the one
-   below, each with a number on the stone, a mystery room, labyrinthine passages and armoured goblins, slimes and orcs. At the top a wizard asks
+   and purple torches, stands a great orange spire. Stairs lead down to its gate. Inside, 20 levels climb to a spire. The first has one room, the second
+   two, and so on up to ten rooms on the tenth; then the rooms fall away again, down to one room on the nineteenth. The top level has two rooms with a small labyrinth between them. Each level has a number on the stone, a strange place and armoured goblins, slimes and orcs. At the top a wizard asks
    three questions. Answered with good will, they open the way to the next tower (violet). Answered with greed, the party falls down two levels.
    Levels: 364 the ledge and the way down, 440 to 459 the orange spire (levels 1 to 20), 460 the foot of the violet tower.
    ========================================================================== */
@@ -46,7 +46,7 @@ function hlNumKey(n,violet){ // the number of the level, carved large in a slab 
 /* ---- the people who talk about the place ---- */
 const HL_FIGS=[
  ['hl_fig0','A hooded figure by the stair','kh_ohfolk2_3',["Nobody built it. It was always there, and we were put under it.","The torches are never lit by anyone. I have waited a long time to see who lights them. Nobody does.","Climb. Do not look down. The ones who look down start to feel it pulling."]],
- ['hl_fig1','A grey friar, very old','kh_ohfolk2_1',["Each floor is smaller than the last. They say that at the top there is room for only one question.","I came up eleven floors, and then came down ten. I am not sure that I am the same person.","The rooms in the middle of each floor are not rooms. They are tests, and nobody tells you what for."]],
+ ['hl_fig1','A grey friar, very old','kh_ohfolk2_1',["The rooms grow in number for ten floors, and then they fall away again. They say that at the top there is room for only one question.","I came up eleven floors, and then came down ten. I am not sure that I am the same person.","The rooms in the middle of each floor are not rooms. They are tests, and nobody tells you what for."]],
  ['hl_fig2','A woman with an empty lantern','kh_ohfolk3_1',["The dark here is not an absence of light. It is a presence. Feel how it leans on the torches.","My lantern went out on the third floor. The torches did not mind. They give light to anyone, and ask for nothing.","Be careful what you want, in the tower. It listens."]],
  ['hl_fig3','A pale scholar','kh_ohfolk5_4',["The numbers on the stones are not counting up. They are counting down. To something.","The goblins are not evil. They are afraid of the wizard. So is everything else.","He asks three questions. They are not hard. That is the trouble."]],
  ['hl_fig4','A very small man, sitting','kh_ohfolk3_3',["I have been on the nineteenth floor for a year. I like it. It is quiet, and the stair is just there.","Slimes do not hate you. They only want to be near warmth. So do I.","At the top, they say, one fall is a lesson and two falls is a habit."]],
@@ -89,36 +89,100 @@ const HLX=[]; // where each level's stair down arrives
 /* ---- the mystery rooms ---- */
 const HL_MYST=['riddle','bridge','sand','statues','pit','monster','chasm','treasure'];
 /* ---- building ---- */
+/* ---- the floors of the spire. Floor f has as many rooms as its number, up to floor 10 (ten rooms), and then the rooms fall away again: floor 11 has nine, floor 18 has two and floor 19 has one, like floor 1.
+   The top floor, 20, has two rooms with a small labyrinth of one-square passages between them. The rooms stand in a coarse grid of places (the first at the south edge, the stair up in a room of the top row,
+   toward the north) and are joined by plain passages: a tree, and on the larger floors a loop or two. ---- */
+const hlRoomCount=f=>f<=10?f:f<=19?20-f:2;
+const HL_GRID={2:[1,2],3:[2,2],4:[2,2],5:[3,2],6:[3,2],7:[3,3],8:[3,3],9:[3,3],10:[4,3]}; // columns and rows of the grid of room places, by the number of rooms
+function hlMaze(R,cw,ch,base){ // a perfect maze of cw x ch cells in (2cw+1) x (2ch+1) tiles, entered at the bottom and left at the top, both in column cw>>1; of 40 tries, the one whose way through is nearest to 70 steps (about 35 cells of the 81), so that it is a real walk but a short one
+  const TW=2*cw+1,TH=2*ch+1,ex=cw>>1;let best=null;
+  for(let tr=0;tr<40;tr++){const t=new Uint8Array(TW*TH),vis=new Uint8Array(cw*ch),st=[[ex,ch-1]];vis[(ch-1)*cw+ex]=1;t[(2*(ch-1)+1)*TW+2*ex+1]=1;let n=0;
+    while(st.length){const [x,y]=st[st.length-1],nb=[[1,0],[-1,0],[0,1],[0,-1]].map(([a,b])=>[x+a,y+b,a,b]).filter(([a,b])=>a>=0&&b>=0&&a<cw&&b<ch&&!vis[b*cw+a]);
+      if(!nb.length){st.pop();continue}const [nx,ny,a,b]=nb[R(base+tr*997+(n++),nb.length)];vis[ny*cw+nx]=1;t[(2*y+1+b)*TW+2*x+1+a]=1;t[(2*ny+1)*TW+2*nx+1]=1;st.push([nx,ny])}
+    const d=new Int16Array(TW*TH).fill(-1),q=[(2*(ch-1)+1)*TW+2*ex+1];d[q[0]]=0;
+    for(let i=0;i<q.length;i++){const c=q[i],x=c%TW,y=(c/TW)|0;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=TW||ny>=TH||!t[ny*TW+nx]||d[ny*TW+nx]>=0)continue;d[ny*TW+nx]=d[c]+1;q.push(ny*TW+nx)}}
+    const len=d[TW+2*ex+1];if(!best||Math.abs(len-70)<Math.abs(best.len-70))best={t,len,TW,TH}}
+  return best}
+function hlPlan(k,R){ // the plan of floor k+1: the grid g (walls '#', floor '.'), its size, the rooms (the first at the south edge) and the room with the stair up
+  const f=k+1,top=k===HL.N-1,n=hlRoomCount(f);let W,H,g;
+  const mk=()=>{g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'))};
+  const cut=r=>{for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)g[y][x]='.'};
+  const mid=r=>[(r.x0+r.x1)>>1,(r.y0+r.y1)>>1];
+  const hl=(y,xa,xb)=>{for(let x=Math.min(xa,xb);x<=Math.max(xa,xb);x++)g[y][x]='.'},vl=(x,ya,yb)=>{for(let y=Math.min(ya,yb);y<=Math.max(ya,yb);y++)g[y][x]='.'};
+  const nookOf=r=>{const x0=R(3,2)===0?r.x0:r.x1-2;return {x0,y0:r.y0,x1:x0+2,y1:r.y0+2}}; // an alcove in a top corner of the first room, where a floor has no spare room for the strange one
+  if(top){ // two rooms, and between them the labyrinth: 9 x 9 cells of one-square passages, in 19 x 19 tiles
+    const m=hlMaze(R,9,9,3000),mx0=3,my0=10,r0={x0:8,y0:29,x1:16,y1:33},r1={x0:7,y0:2,x1:17,y1:8};W=25;H=36;mk();cut(r0);cut(r1);
+    for(let ty=0;ty<m.TH;ty++)for(let tx=0;tx<m.TW;tx++)if(m.t[ty*m.TW+tx])g[my0+ty][mx0+tx]='.';
+    g[my0+m.TH-1][12]='.';g[my0][12]='.';g[my0-1][12]='.'; // the way in from the first room, and the way out to the last
+    return {W,H,g,rooms:[r0,r1],far:r1,n,nook:nookOf(r0),maze:{x0:mx0,y0:my0,x1:mx0+m.TW-1,y1:my0+m.TH-1,len:m.len}}}
+  if(n===1){ // one room: floors 1 and 19. The stair in is in the south wall, the stair up in the north wall
+    const w=f===1?11:13,h=f===1?7:9;W=w+14;H=h+12;mk();const x0=(W-w)>>1,y1=H-3,r={x0,y0:y1-h+1,x1:x0+w-1,y1};cut(r);
+    return {W,H,g,rooms:[r],far:r,n,nook:nookOf(r)}}
+  const [C,Rw]=HL_GRID[n],A=n<=3,maxW=A?9:8,maxH=7,px=maxW+4,py=maxH+4,mg=n===2?4:0;W=C*px+2*mg;H=Rw*py;mk();
+  const c0=C>>1,occ=new Map(),sl=[],par=[],kf=(c,r)=>c+','+r;
+  const add=(c,r,p)=>{occ.set(kf(c,r),sl.length);sl.push([c,r]);par.push(p)};
+  const freeN=(c,r)=>[[c,r-1],[c-1,r],[c+1,r],[c,r+1]].filter(([a,b])=>a>=0&&b>=0&&a<C&&b<Rw&&!occ.has(kf(a,b)));
+  add(c0,Rw-1,-1);
+  if(n>=3){const fn=freeN(c0,Rw-1).filter(q=>q[1]===Rw-1),q=fn[R(11,fn.length)];add(q[0],q[1],0)} // the strange room, beside the first
+  for(let r=Rw-2;r>=0;r--)add(c0,r,r===Rw-2?0:sl.length-1); // the way north, to the top row
+  for(let t=0;sl.length<n&&t<200;t++){let p=sl.length-1;if(!freeN(sl[p][0],sl[p][1]).length||R(20+t,100)>=65){const ps=sl.map((_,i)=>i).filter(i=>freeN(sl[i][0],sl[i][1]).length);p=ps[R(40+t,ps.length)]}
+    const fn=freeN(sl[p][0],sl[p][1]),q=fn[R(60+t,fn.length)];add(q[0],q[1],p)}
+  const E=[];for(let i=1;i<sl.length;i++)E.push([i,par[i]]);
+  const isE=(a,b)=>E.some(e=>(e[0]===a&&e[1]===b)||(e[0]===b&&e[1]===a)),pairs=[];
+  for(let i=0;i<sl.length;i++)for(let j=i+1;j<sl.length;j++)if(Math.abs(sl[i][0]-sl[j][0])+Math.abs(sl[i][1]-sl[j][1])===1&&!isE(i,j))pairs.push([i,j]);
+  for(let t=0,want=n>=9?2:n>=6?1:0;t<want&&pairs.length;t++)E.push(pairs.splice(R(80+t,pairs.length),1)[0]); // a loop or two, on the larger floors only
+  const ms=n===3?7:Math.max(5,7-Math.floor(k/8)),rooms=[];
+  sl.forEach(([c,r],i)=>{let w,h;
+    if(i===0){w=A?9:7;h=A?5:4}else if(i===1&&n>=3){w=h=ms}else{w=A?7+R(100+i,3):5+R(100+i,4);h=A?5+R(200+i,3):4+R(200+i,3)}
+    const ox=mg+c*px+2,oy=r*py+2,x0=i===0?ox+((maxW-w)>>1):ox+R(300+i,maxW-w+1),y0=i===0?H-2-h:oy+R(400+i,maxH-h+1);
+    rooms.push({x0,y0,x1:x0+w-1,y1:y0+h-1})});
+  rooms.forEach(cut);
+  E.forEach(([i,j],t)=>{const a=rooms[i],b=rooms[j]; // each passage leaves a room at the middle of its wall, so the strange room's bridges and paths meet it
+    if(sl[i][0]!==sl[j][0]){const Lr=sl[i][0]<sl[j][0]?a:b,Rr=Lr===a?b:a,ya=mid(Lr)[1],yb=mid(Rr)[1],lo=Lr.x1+2,hi=Rr.x0-2,xm=lo<=hi?lo+R(500+t,hi-lo+1):Lr.x1+1;hl(ya,Lr.x1,xm);vl(xm,ya,yb);hl(yb,xm,Rr.x0)}
+    else{const U=sl[i][1]<sl[j][1]?a:b,D=U===a?b:a,xa=mid(U)[0],xb=mid(D)[0],lo=U.y1+2,hi=D.y0-2,ym=lo<=hi?lo+R(500+t,hi-lo+1):U.y1+1;vl(xa,U.y1,ym);hl(ym,xa,xb);vl(xb,ym,D.y0)}});
+  const adj=sl.map(()=>[]);E.forEach(([a,b])=>{adj[a].push(b);adj[b].push(a)});
+  const dd=sl.map(()=>-1),qq=[0];dd[0]=0;for(let i=0;i<qq.length;i++)for(const j of adj[qq[i]])if(dd[j]<0){dd[j]=dd[qq[i]]+1;qq.push(j)}
+  let fi=-1;for(let i=n>=3?2:1;i<sl.length;i++)if(sl[i][1]===0&&(fi<0||dd[i]>dd[fi]))fi=i; // the stair up: the farthest room of the top row
+  return {W,H,g,rooms,far:rooms[fi],n,nook:n<3?nookOf(rooms[0]):null}}
+/* ---- what the parchment maps (maps_os440.js to maps_os459.js) say about the plan of a floor, taken from the real level data ---- */
+const HL_WORDS=['no','one','two','three','four','five','six','seven','eight','nine','ten'];
+function hlMapSub(L){const n=L._nrooms||1,w=HL_WORDS[n].charAt(0).toUpperCase()+HL_WORDS[n].slice(1);
+  return L._maze?'Two rooms with a labyrinth between them':w+(n===1?' room and a strange alcove':n===2?' rooms and a strange alcove':' rooms, one of them strange')}
+function hlMapNotes(L,extra){const f=LEVEL-HL.BASE+1,n=L._nrooms||1,W=L.rows[0].length,up=L._up,side=!up?'':up.x<W/3?'on the left':up.x>W*2/3?'on the right':'in the middle';
+  return ['Floor '+f+' of 20. '+(L._maze?'It has two rooms, with a small labyrinth between them.':n===1?'It has a single room.':'It has '+HL_WORDS[n]+' rooms.'),
+    'You arrive by the stair at the bottom of this plan. '+(L._maze?'There is no stair up. The wizard waits in the room at the top, beyond the labyrinth.':n===1?'The stair up is in the wall opposite, in the same room.':'The stair up is in a room at the top, '+side+'.')].concat(extra||['Rooms you have not yet walked past stay covered.'])}
+const hlInStrange=(L,k)=>{const r=(L._roomsInfo||[]).find(q=>q.n==='The Strange Room')||L._nook;return !!r&&k.x>=r.x0&&k.x<=r.x1&&k.y>=r.y0&&k.y<=r.y1}; // is a thing inside the strange room (or the alcove): the maps leave its chests out
 function hlBuild(k){
   const id=k<HL.N?HL.BASE+k:HL.VIOLET;if(LEVELS[id])return;
-  const top=k===HL.N-1,violet=k>=HL.N,kk=Math.min(k,HL.N-1);
-  const W=violet?19:Math.max(14,Math.round(kk<=9?61-kk*3.45:30-(kk-9)*1.75)),H=violet?13:Math.max(13,Math.round(kk<=9?43-kk*2.45:21-(kk-9)*1.05)),hs=hash2,R=(i,m)=>(hs(k*31+i,k*7+5,97)*m)|0;
+  const top=k===HL.N-1,violet=k>=HL.N,kk=Math.min(k,HL.N-1),hs=hash2,R=(i,m)=>(hs(k*31+i,k*7+5,97)*m)|0;
+  const plan=violet?null:hlPlan(k,R),W=violet?19:plan.W,H=violet?13:plan.H; // every floor has its own plan (hlPlan); the foot of the violet tower keeps its three random rooms
   const TM=ohTiles(),chars={D:LEVEL41_DATA.chars.D},chMap=new Map();let nextCh=0x300;
   const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
   const sty=violet?'hlviolet':'hlorange';
   OH_STY[sty]=Object.assign({},OH_STY.castle2||OH_STY.gold,{zoom:2.2,contrast:2.2,tint:violet?[190,150,255,.0]:[255,170,95,.0]});
   const CH=1.5+kk*.13,wall=ch(TM.make('plain',sty,CH).gid),wall2=ch(TM.make('slit',sty,CH).gid);
-  const g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
-  const rooms=[],cut=r=>{for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)g[y][x]='.'};
-  const nrooms=violet?3:Math.max(4,11-Math.floor(kk/2.5)),ms=Math.max(5,7-Math.floor(kk/8));
+  const g=violet?[]:plan.g;if(violet)for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
+  const rooms=violet?[]:plan.rooms,cut=r=>{for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)g[y][x]='.'},mid=r=>[(r.x0+r.x1)>>1,(r.y0+r.y1)>>1];
+  if(violet){const nrooms=3,ms=Math.max(5,7-Math.floor(kk/8));
   rooms.push({x0:(W>>1)-2,y0:H-5,x1:(W>>1)+2,y1:H-3});
   for(let t=0;t<1500&&rooms.length<nrooms;t++){const first=rooms.length===1,w=first?ms:3+R(100+t,Math.max(2,5-Math.floor(kk/6))),h=first?ms:3+R(200+t,3),x0=1+R(300+t,W-w-2),y0=1+R(400+t,H-h-2);
     if(rooms.some(r=>x0<=r.x1+2&&x0+w-1>=r.x0-2&&y0<=r.y1+2&&y0+h-1>=r.y0-2))continue;rooms.push({x0,y0,x1:x0+w-1,y1:y0+h-1})}
-  rooms.forEach(cut);const mid=r=>[(r.x0+r.x1)>>1,(r.y0+r.y1)>>1];
+  rooms.forEach(cut);
   const hl=(y,x0,x1)=>{for(let x=Math.min(x0,x1);x<=Math.max(x0,x1);x++)g[y][x]='.'},vl=(x,y0,y1)=>{for(let y=Math.min(y0,y1);y<=Math.max(y0,y1);y++)g[y][x]='.'};
   const link=(a,b,s)=>{const [ax,ay]=mid(a),[bx,by]=mid(b);if(R(600+s,2)===0){hl(ay,ax,bx);vl(bx,ay,by)}else{vl(ax,ay,by);hl(by,ax,bx)}};
   for(let i=1;i<rooms.length;i++){let bj=0,bd=1e9;const [ax,ay]=mid(rooms[i]);for(let j=0;j<i;j++){const [bx,by]=mid(rooms[j]),d=Math.abs(ax-bx)+Math.abs(ay-by)+R(500+i*9+j,6);if(d<bd){bd=d;bj=j}}link(rooms[i],rooms[bj],i)}
-  for(let e=0;e<2+(kk>>2);e++){const i=R(700+e,rooms.length),j=R(710+e,rooms.length);if(i!==j)link(rooms[i],rooms[j],40+e)} // loops, so that the way is a labyrinth
+  for(let e=0;e<2+(kk>>2);e++){const i=R(700+e,rooms.length),j=R(710+e,rooms.length);if(i!==j)link(rooms[i],rooms[j],40+e)} // loops (the foot of the violet tower only)
+  }
   // the stair in, and the stair up in the furthest room
   const r0=rooms[0],ux=(r0.x0+r0.x1)>>1,uy=r0.y1+1;g[uy][ux]='0';const start={x:ux,y:r0.y1,f:0};
   const d=new Int16Array(W*H).fill(-1),q=[start.x+start.y*W];d[q[0]]=0;
   for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H||g[ny][nx]!=='.'||d[ny*W+nx]>=0)continue;d[ny*W+nx]=d[c]+1;q.push(ny*W+nx)}}
-  let far=rooms[rooms.length-1],fd=-1;rooms.forEach((r,i)=>{if(i<2)return;const [mx,my]=mid(r),v=d[my*W+mx];if(v>fd){fd=v;far=r}});
+  let far=violet?rooms[rooms.length-1]:plan.far,fd=-1;if(violet)rooms.forEach((r,i)=>{if(i<2)return;const [mx,my]=mid(r),v=d[my*W+mx];if(v>fd){fd=v;far=r}});
   let up=null;if(!violet&&!top){const dxm=(far.x0+far.x1)>>1;g[far.y0-1][dxm]='1';up={x:dxm,y:far.y0}}
   const rows=g.map((r,y)=>r.map((c,x)=>c==='#'?((x*7+y*3)%9===0?wall2:wall):c).join(''));
   const decor=[],enemies=[],items=[],lights=[],used=new Set([start.x+','+start.y]),fm=new Array(W*H).fill('0');
   const blockAt=(x,y)=>{used.add(x+','+y);decor.push({k:'lp_gap',x,y,block:true,deco:true})};
-  const myst=rooms[1],mt=violet?'':HL_MYST[(k*5+2)%8],[mx,my]=mid(myst);
+  const myst=(plan&&plan.nook)||rooms[1],mt=violet?'':HL_MYST[(k*5+2)%8],[mx,my]=mid(myst); // (floors with fewer than three rooms have no spare room: the strange place is an alcove in a corner of the first room)
   const pathCell=new Set();
   if(!violet){
     if(mt==='bridge'||mt==='chasm'){ // a void: dark floor, nothing to stand on but a narrow way across
@@ -154,20 +218,22 @@ function hlBuild(k){
   // (the level number is a painted stone plaque now, hung on the wall of the first room by hlDress)
   // the strange figures, on a few levels
   const figLv={0:'hl_fig1',3:'hl_fig2',7:'hl_fig3',11:'hl_fig0',15:'hl_fig4'};
-  if(figLv[k]&&rooms[2]){const kp=KH_KEEPERS[figLv[k]],[fx,fy]=mid(rooms[2]);if(kp&&!used.has(fx+','+fy)){decor.push({k:khFaceKey(kp.face),x:fx,y:fy,block:true,npc:figLv[k],sc:kp.sc||1});used.add(fx+','+fy)}}
+  const fr=rooms[2]||(plan&&plan.n===1?rooms[0]:null); // (a floor with one room puts the figure in that room)
+  if(figLv[k]&&fr){const kp=KH_KEEPERS[figLv[k]],[fx,fy]=mid(fr);if(kp&&!used.has(fx+','+fy)){decor.push({k:khFaceKey(kp.face),x:fx,y:fy,block:true,npc:figLv[k],sc:kp.sc||1});used.add(fx+','+fy)}}
   // the foes: armoured goblins, slimes, orcs
   const cells=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(g[y][x]==='.'&&d[y*W+x]>6&&!used.has(x+','+y)&&!(x>=myst.x0&&x<=myst.x1&&y>=myst.y0&&y<=myst.y1))cells.push([x,y]);
   const kinds=kk<6?['hlgoblin','hlgoblin','hlslime']:kk<13?['hlgoblin','hlslime','hlorc','hlgoblin']:['hlorc','hlorc','hlgoblin','hlslime'];
-  if(!violet)for(let i=0;i<Math.max(5,Math.min(13,Math.round(cells.length/38)));i++){const c=cells[R(900+i*13,cells.length)];if(c&&!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);enemies.push({t:kinds[R(950+i,kinds.length)],x:c[0],y:c[1]})}}
-  for(let i=0;i<10&&cells.length;i++){const c=cells[R(100+i*7,cells.length)];if(!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);items.push({k:'potion',x:c[0],y:c[1]})}}
-  for(let i=0;i<6&&cells.length;i++){const c=cells[R(300+i*11,cells.length)];if(!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);items.push({k:'hlfood',x:c[0],y:c[1]})}}
+  // (fewer foes on the small floors)
+  if(!violet)for(let i=0,nF=top?6:Math.max(3,Math.min(13,Math.round(1.5+plan.n*1.1)));i<nF;i++){const c=cells[R(900+i*13,cells.length)];if(c&&!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);enemies.push({t:kinds[R(950+i,kinds.length)],x:c[0],y:c[1]})}}
+  for(let i=0,nP=Math.max(4,Math.round(10*Math.min(1,((plan?plan.n:6)+2)/8)));i<nP&&cells.length;i++){const c=cells[R(100+i*7,cells.length)];if(!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);items.push({k:'potion',x:c[0],y:c[1]})}}
+  for(let i=0,nQ=Math.max(2,Math.round(6*Math.min(1,((plan?plan.n:6)+2)/8)));i<nQ&&cells.length;i++){const c=cells[R(300+i*11,cells.length)];if(!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);items.push({k:'hlfood',x:c[0],y:c[1]})}}
   OH_STY.hlsecret=Object.assign({},OH_STY.castle2||OH_STY.gold,{zoom:3.6,contrast:2.0,tint:[110,150,255,.0]});const secretCh=violet?'#':ch(TM.make('plain','hlsecret',CH).gid);
-  const dress={k,id,rows,W,H,rooms,myst,far,used,decor,enemies,d,violet,top,R,hs,secretCh,items,up,start};hlDress(dress);
+  const dress={k,id,rows,W,H,rooms,myst,far,used,decor,enemies,d,violet,top,R,hs,secretCh,items,up,start,esc:violet?1:top?.5:Math.min(1,plan.n/7)};hlDress(dress); // esc: how much of the usual horrors a small floor gets
   const portals=[{to:k===0?HL.CAV:violet?HL.BASE+HL.N-1:id-1,x:0,y:0,f:2,tex:'tomb'}];
   if(up)portals[1]={to:id+1,x:0,y:0,f:0,tex:'tomb'};
   const lv={rows,start,enemies,items,decor,fmap:(()=>{const f=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];f.push(s)}return f})(),
     floorSet:['tombslab','sand','tombgold','tombdark','tombred'],floor:'tombslab',ceil:'tomb',name:LEVEL_NAMES[id],label:violet?'The Violet Tower':'The Orange Spire',diff:36+kk,torchGap:4.4,_secrets:dress.lv_secrets,_trap:dress.lv_trap,_roomsInfo:dress.lv_rooms,portals,lights,chars,_trig:dress.lv_trig,_msgr:dress.lv_msgr,_man:dress.lv_man,amb:.05,day:0,ceilH:CH,
-    mapNames:rooms.map((r,i)=>({t:i===0?'Stair ('+(k+1)+')':r===myst&&!violet?'The Strange Room':r===far&&up?(dress.lv_names&&dress.lv_names[i]&&!/Hall$/.test(dress.lv_names[i])?dress.lv_names[i]+' and Stair Up':'The Stair Up'):top&&r===far?'The Spire':(dress.lv_names&&dress.lv_names[i])||'Hall',x:mid(r)[0],y:r.y0-1,k:'place'})),_up:up,_start:start};
+    mapNames:rooms.map((r,i)=>({t:i===0?'Stair ('+(k+1)+')'+(r===far&&up?' and Stair Up':''):r===myst&&!violet?'The Strange Room':r===far&&up?(dress.lv_names&&dress.lv_names[i]&&!/Hall$/.test(dress.lv_names[i])?dress.lv_names[i]+' and Stair Up':'The Stair Up'):top&&r===far?'The Spire':(dress.lv_names&&dress.lv_names[i])||'Hall',x:mid(r)[0],y:r.y0-1,k:'place'})).concat(plan&&plan.maze?[{t:'The Labyrinth',x:(plan.maze.x0+plan.maze.x1)>>1,y:(plan.maze.y0+plan.maze.y1)>>1,k:'place'}]:[]),_up:up,_start:start,_nook:plan&&plan.nook,_maze:plan&&plan.maze,_nrooms:rooms.length};
   LEVELS[id]=lv;
 }
 function hlCavern(){
@@ -264,7 +330,7 @@ const HL_NOTES=[
  'A note in a shaking hand. "Do not drink from the golden cup. I did. I am still here, but I am no longer warm."',
  'A note. "The Queen smiles all day now. Nobody has seen her blink since the winter."',
  'A note. "The portraits were painted from life. The painter did not leave the room afterwards."',
- 'A note. "I counted the floors. There are twenty, each one smaller than the last. The stair does not go up. It goes in."',
+ 'A note. "I counted the floors. There are twenty. Each floor has as many rooms as its number, up to the tenth, and then the rooms begin to go again. The stair does not go up. It goes in."',
  'A note. "The hands in the wall are quick but slow to wake. Do not stop beside them."',
  'A note. "The child-king ordered every mirror covered. Then he ordered them uncovered. Then he stopped speaking and only pointed."',
  'A note. "If you hear someone calling for help in the dark, do not go. I went. I knew the voice. It was mine."',
@@ -306,7 +372,7 @@ const HL_CHAT=[
  ['Who builds a castle like this and then leaves nobody in it?','Somebody is in it. I just have not seen where.','I do not like how quiet it is. Even the goblins are quiet.'],
  ['Whoever ruled here was not well. Look at the faces.','Those candles are still lit. Who lights them?','I am choosing not to find out.'],
  ['Something just breathed behind me.','That was me.','Are you sure?','...Mostly.'],
- ['How many floors did the note say?','Twenty. Each one smaller than the last.','Then the top is very small, and very close to whatever lives there.']];
+ ['How many floors did the note say?','Twenty. The rooms grow in number up to the tenth floor, and then they dwindle.','Then the top is small, and very close to whatever lives there.']];
 function hlChat(n){const l=hlLive();if(l.length<2)return;HL_CHAT[n%HL_CHAT.length].forEach((t,i)=>later(i*1700,()=>msg(HERO_DEF[l[i%l.length]].name+': "'+t+'"','#c8d8ff')))}
 const HL_WHISPER=['Somewhere above, a chair scrapes across a stone floor.','A cold hand of air brushes the back of your neck.','Far off, somebody is laughing, very softly.','Every candle in the room leans the same way, then straightens.','A whisper in the wall says your name. It sounds like it is smiling.','Something knocks three times from inside the stone.'];
 /* ---- what happens on the stones ---- */
@@ -338,7 +404,7 @@ function hlStep(nx,ny){
 {const _oe2=ohEnter;ohEnter=function(n){G.hlOut=false;G.hlStrobe=undefined;G.hlSteps=0;_oe2.apply(this,arguments)}}
 /* ---- dressing the rooms ---- */
 function hlDress(c){
-  const {k,rows,W,H,rooms,myst,far,used,decor,enemies,d,violet,top,R,hs,secretCh,items,up,start}=c;if(violet)return;
+  const {k,rows,W,H,rooms,myst,far,used,decor,enemies,d,violet,top,R,hs,secretCh,items,up,start,esc=1}=c;if(violet)return;
   const isW=(x,y)=>{const ch=rows[y]&&rows[y][x];return ch!==undefined&&ch!=='.'&&ch!=='0'&&ch!=='1'},isF=(x,y)=>rows[y]&&rows[y][x]==='.';
   const key=(x,y)=>x+','+y,shuf=(a,s)=>a.map(v=>[hs(v[0]*3+s,v[1]*5+k,41),v]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
   const placedP=[],placedF=[];let cap=999,cnt=0;
@@ -428,7 +494,7 @@ function hlDress(c){
       c.lv_msgr={x:m0[0],y:m0[1],letters:chosen.map(q=>({x:q[0],y:q[1],wd:q[2]}))}}
   }
   // a ruler waits in the last hall of levels 4, 9, 14 and 19
-  {const ru=HL_RULERS.find(q=>q[0]===k);if(ru&&far&&!top){const cx=(far.x0+far.x1)>>1,cy=(far.y0+far.y1)>>1+0;let bx=cx,by=cy;if(used.has(key(bx,by))){const c2=[[cx,cy+1],[cx+1,cy],[cx-1,cy],[cx,cy-1]].find(([x,y])=>isF(x,y)&&!used.has(key(x,y)));if(c2){bx=c2[0];by=c2[1]}}
+  {const ru=HL_RULERS.find(q=>q[0]===k);if(ru&&far&&!top){const cx=(far.x0+far.x1)>>1,cy=rooms.length===1?far.y0+2:(far.y0+far.y1)>>1;let bx=cx,by=cy;if(used.has(key(bx,by))){const c2=[[cx,cy+1],[cx+1,cy],[cx-1,cy],[cx,cy-1]].find(([x,y])=>isF(x,y)&&!used.has(key(x,y)));if(c2){bx=c2[0];by=c2[1]}}
     if(!used.has(key(bx,by))){enemies.push({t:ru[1],x:bx,y:by});used.add(key(bx,by))}}}
   // hidden doors: a wall that looks like any other but opens when you walk into it. It joins two passages that are far apart by the usual way. The map shows them.
   {const sec=[],cand2=[];for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!isW(x,y))continue;
@@ -450,7 +516,7 @@ function hlDress(c){
    for(const [x,y,dir] of shuf(spots,23)){if(n>=want)break;if(pic('hl_claw'+((x*3+y*5+k)%6),x,y,dir,{bob:.5}))n++}
    function G_claws(){return decor.filter(q=>/^hl_claw/.test(q.k)).length}}
   // hands that reach out of a niche in the passage wall
-  const nh=Math.min(5,1+((k/4)|0));let placed=0;
+  const nh=Math.round(Math.min(5,1+((k/4)|0))*esc);let placed=0;
   const cand=[];for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!isF(x,y)||inRoom(x,y)||used.has(key(x,y))||d[y*W+x]<8)continue;
     for(const [a,b] of [[0,-1],[0,1],[-1,0],[1,0]]){const nx=x+a,ny=y+b;if(isW(nx,ny)&&isF(x-a,y-b)&&isW(nx+a,ny+b)&&isW(nx+b,ny+a)&&isW(nx-b,ny-a)&&!used.has(key(nx,ny)))cand.push([nx,ny])}}
   for(const [nx,ny] of shuf(cand,9)){if(placed>=nh)break;if(used.has(key(nx,ny)))continue;rows[ny]=rows[ny].slice(0,nx)+'.'+rows[ny].slice(nx+1);used.add(key(nx,ny));enemies.push({t:'hlhands',x:nx,y:ny});placed++}
@@ -458,7 +524,7 @@ function hlDress(c){
   const trig=[],cells=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(isF(x,y)&&d[y*W+x]>5&&!used.has(key(x,y)))cells.push([x,y]);
   const pick=i=>cells.length?cells[(hs(i*17,k*3,29)*cells.length)|0]:null;
   const tp=(kk,i,ex)=>{const c0=pick(i);if(c0)trig.push(Object.assign({k:kk,x:c0[0],y:c0[1]},ex||{}))};
-  for(let i=0;i<2+((k/5)|0);i++)tp(i%2?'darts':'spikes',100+i);
+  for(let i=0,nt=Math.max(1,Math.round((2+((k/5)|0))*esc));i<nt;i++)tp(i%2?'darts':'spikes',100+i);
   for(let i=0;i<1+(k%2);i++)tp('dark',200+i);
   for(let i=0;i<2;i++)tp('chat',300+i,{n:k+i*2});
   if(k%3===1){const r=rooms.find((q,i)=>i>=2&&q!==myst&&q.x1-q.x0>=3);if(r){const cs=[];for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)if(isF(x,y)&&d[y*W+x]>=0)cs.push([x,y,d[y*W+x]]);cs.sort((p,q)=>p[2]-q[2]);

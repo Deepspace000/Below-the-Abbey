@@ -1,6 +1,6 @@
 /* Orange Spire map, floor 2 = level 441. Hand-inked plan from the real rows, decor, lights and room data. Nothing secret is drawn:
    hidden doors stay plain wall, the strange room is only named, and levers, trap spots, notes and enemies are left out. */
-const mpOs441Rm=(L,k)=>{const r=(L._roomsInfo||[]).find(r=>r.n==='The Strange Room');return r&&k.x>=r.x0&&k.x<=r.x1&&k.y>=r.y0&&k.y<=r.y1};
+const mpOs441Rm=(L,k)=>hlInStrange(L,k);
 function mpOs441Icon(c,k,a,b,s,L){
   const INK=MPL.INK,GOLD=MPL.GOLD,line=(w,col)=>{c.lineWidth=w;c.strokeStyle=col||INK};
   c.save();c.lineJoin='round';c.lineCap='round';
@@ -86,7 +86,7 @@ mplInstall({name:'os441',levels:[441],reveal:true,draw(cv,x,L,api){
     if(!place(nm,cx,Y(r.y0)-s*.62,5.4))if(!place(nm,cx,Y(r.y1+1)+s*.7,5.4))place(nm,cx,Y(r.y0)-s*1.5,5.4)}
   // ---- title, key, notes, compass ----
   api.title(x,'The Orange Spire, Floor 2',null,10,8);
-  api.text(x,'Gallery, cells, study, banquet and throne halls',14,36,5.6,'#5a3a1c','left');
+  api.text(x,hlMapSub(L),14,36,5.6,'#5a3a1c','left');
   api.panel(x,6,48,82,112);api.text(x,'KEY',47,56,6.4,MPL.LAPIS);
   const ky=[['stair','Stairs'],['stone','Level stone'],['rug','Rug'],['door','Door frame'],['torch','Torch or candle'],['hl_pt0','Portrait'],['hl_p_mirror','Mirror'],['hl_p_window','Window'],['hl_p_banner','Banner'],['chest','Chest']];
   ky.forEach(([k,t],n)=>{const yy=66+n*9.2,ix=17;if(k==='stair')mpOs441Stair(x,ix,yy,5,false);else if(k==='stone'){x.fillStyle='#8a8478';x.strokeStyle=INK;x.lineWidth=.6;x.beginPath();x.arc(ix,yy,2.8,0,6.3);x.fill();x.stroke()}
@@ -94,6 +94,6 @@ mplInstall({name:'os441',levels:[441],reveal:true,draw(cv,x,L,api){
     else if(k==='door'){x.strokeStyle=MPL.GOLD;x.lineWidth=1;x.beginPath();x.moveTo(ix-4,yy);x.lineTo(ix+4,yy);x.stroke();x.fillStyle=MPL.GOLD;x.beginPath();x.arc(ix-4,yy,1,0,6.3);x.arc(ix+4,yy,1,0,6.3);x.fill()}
     else if(k==='torch'){x.fillStyle='#ffb83a';x.strokeStyle=INK;x.lineWidth=.4;x.beginPath();x.moveTo(ix,yy-3.5);x.quadraticCurveTo(ix+2,yy,ix,yy+2);x.quadraticCurveTo(ix-2,yy,ix,yy-3.5);x.fill();x.stroke()}
     else mpOs441Icon(x,k,ix,yy,7.5,L);api.text(x,t,28,yy,5.6,'#3a2a1c','left')});
-  api.notes(x,['Floor 2 of 20. Each floor of the spire is smaller than the one below it.','You arrive by the stair at the bottom of this plan. The stair up is at the far top left.','Rooms you have not yet walked past stay covered.'],394,50,76,5.8,3);
+  api.notes(x,hlMapNotes(L),394,50,76,5.8,3);
   api.compass(x,436,250,13);
 }});

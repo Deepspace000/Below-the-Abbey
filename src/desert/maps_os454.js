@@ -101,7 +101,7 @@ draw(c,x,L,api){
     let cy=Y((r.y0+r.y1+1)/2)-(lines.length-1)*3.6;
     for(const l of lines){api.text(x,l,cx,cy,6.4,i===0?'#5a0e0a':'#2a1a0c');cy+=7.2}});
   /* title, key, notes, compass: the same layout on every floor of the spire */
-  api.title(x,'The Orange Spire, Floor 15','The Cells, the Haunted Room, the Studies and a Strange Room');
+  api.title(x,'The Orange Spire, Floor 15',hlMapSub(L));
   const kx=6,ky=60,kw=82;api.panel(x,kx,ky,kw,166);api.text(x,'KEY',kx+kw/2,ky+8,7,'#7a2a14');
   const kr=[['Spire wall',()=>{x.fillStyle='#c47a3a';x.fillRect(kx+5,ky+17,12,8);x.strokeStyle='rgba(58,28,44,.7)';x.lineWidth=.6;for(let k=0;k<14;k+=2.6){x.beginPath();x.moveTo(kx+5+k,ky+17);x.lineTo(kx+k-1,ky+25);x.stroke()}x.strokeStyle=INK;x.strokeRect(kx+5,ky+17,12,8)}],
     ['Doorway',()=>{x.strokeStyle=INK;x.lineWidth=2.6;x.beginPath();x.moveTo(kx+11,ky+30);x.lineTo(kx+11,ky+40);x.stroke();x.strokeStyle=P.GOLD;x.lineWidth=1.5;x.stroke();x.fillStyle=P.GOLD2;x.fillRect(kx+9.5,ky+29,3,2);x.fillRect(kx+9.5,ky+39,3,2)}],
@@ -114,6 +114,6 @@ draw(c,x,L,api){
   const gy=[21,34,49,62,76,90,101,113,125,137,150,159];
   kr.forEach((r,i)=>{r[1]();api.text(x,r[0],kx+25,ky+gy[i],6.4,'#3a2a1c','left')});
   const nx=392,nw=82;api.panel(x,nx-2,50,nw,176);
-  mplNotes(x,['The stair down is in the south, where you arrive.','The stair up is in the north west corner, beside the cells.','Lanterns burn in the corners of the larger rooms.','Portraits and a numbered stone hang by the stair.'],nx+3,69,nw-9,6.2,4);
+  mplNotes(x,hlMapNotes(L,['Lanterns burn in the corners of the larger rooms.','Portraits and a numbered stone hang by the stair.']),nx+3,69,nw-9,6.2,4);
   api.compass(x,435,254,15);
   I.tower(x,435,283,.8)}});

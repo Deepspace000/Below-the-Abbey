@@ -153,7 +153,7 @@ function mpOs442Draw(c,x,L,api){
     const tw=40-19*1.55,top=base-20*bh;x.fillStyle='#6a3a6a';x.strokeStyle=INK;x.lineWidth=.8;x.beginPath();x.moveTo(cx-tw/2-1,top);x.lineTo(cx,top-13);x.lineTo(cx+tw/2+1,top);x.closePath();x.fill();x.stroke();
     x.strokeStyle=INK;x.lineWidth=.8;x.beginPath();x.moveTo(cx,top-13);x.lineTo(cx,top-19);x.stroke();x.fillStyle=VERM;x.beginPath();x.moveTo(cx,top-19);x.lineTo(cx+7,top-17);x.lineTo(cx,top-15);x.fill();
     x.restore();api.text(x,'Floor '+FL+' of 20',cx,base+8,6.2,'#3a1830','center')}
-  api.notes(x,['Each floor of the spire is smaller than the floor below it.','You arrive by the stair down. The stair up is at the far end.','Torches burn red and violet. Gold bars mark doorways.','Rooms fill in on this map as you walk through them.'],396,130,72,6.2,3);
+  api.notes(x,hlMapNotes(L,['Torches burn red and violet. Gold bars mark doorways.','Rooms fill in on this map as you walk through them.']),396,130,72,6.2,3);
   api.compass(x,434,272,10);
 }
 mplInstall({name:'os442',levels:[442],reveal:true,draw:mpOs442Draw});

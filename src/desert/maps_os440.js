@@ -43,15 +43,15 @@ function mpOs440Draw(c,x,L,api){
   /* the party can reach: from the start, over open cells. Hidden doors count as wall, so secret chambers stay solid stone. */
   const reach=new Uint8Array(W*H),st=[[L._start.x,L._start.y]];reach[L._start.y*W+L._start.x]=1;
   while(st.length){const [px,py]=st.pop();for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=px+dx,ny=py+dy;if(nx<0||ny<0||nx>=W||ny>=H||reach[ny*W+nx]||!isOpen(nx,ny))continue;reach[ny*W+nx]=1;st.push([nx,ny])}}
-  for(const q of [[30,41],[13,17]])if(isOpen(q[0],q[1]))reach[q[1]*W+q[0]]=1;
   const floor=(cx,cy)=>cx>=0&&cy>=0&&cx<W&&cy<H&&!!reach[cy*W+cx];
   const X=F.X,Y=F.Y;
   x.save();
   /* the stone mass: warm orange-brown wash over the whole plan, with violet and plum shade */
   x.beginPath();x.rect(X(0),Y(0),W*s,H*s);x.clip();
   x.fillStyle=MPOS440_WARM;x.fillRect(X(0),Y(0),W*s,H*s);
-  for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){if(floor(cx,cy))continue;const h=mpOs440H(cx,cy,1);
-    x.fillStyle=h<.3?'rgba(138,76,32,.5)':h<.55?'rgba(90,50,90,.2)':h<.8?'rgba(230,160,90,.22)':'rgba(70,35,60,.28)';x.fillRect(X(cx),Y(cy),s+.4,s+.4)}
+  const nb=s>6?Math.round(s/4.5):1,bs=s/nb; // (on a small floor the cells are large: the stone is shaded in finer blocks)
+  for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){if(floor(cx,cy))continue;for(let bj=0;bj<nb;bj++)for(let bi=0;bi<nb;bi++){const h=mpOs440H(cx*nb+bi,cy*nb+bj,1);
+    x.fillStyle=h<.3?'rgba(138,76,32,.5)':h<.55?'rgba(90,50,90,.2)':h<.8?'rgba(230,160,90,.22)':'rgba(70,35,60,.28)';x.fillRect(X(cx)+bi*bs,Y(cy)+bj*bs,bs+.4,bs+.4)}}
   /* coursed stone on the mass, and hatching beside every floor */
   x.strokeStyle='rgba(74,40,24,.22)';x.lineWidth=.4;x.beginPath();
   for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){if(floor(cx,cy))continue;const X0=X(cx),Y0=Y(cy),off=(cy&1)?s*.5:0;x.moveTo(X0,Y0+s);x.lineTo(X0+s,Y0+s);x.moveTo(X0+off+s*.3,Y0);x.lineTo(X0+off+s*.3,Y0+s)}
@@ -81,9 +81,9 @@ function mpOs440Draw(c,x,L,api){
   x.fillStyle=MPOS440_DARK;x.strokeStyle=MPL.INK;x.lineWidth=.6;for(let i=0;i<W;i+=2){for(const yy of [Y(0)-2.2,Y(H)]){x.fillRect(X(i)+.4,yy,s*.9,2.2);x.strokeRect(X(i)+.4,yy,s*.9,2.2)}}
   for(let j=0;j<H;j+=2){for(const xx of [X(0)-2.2,X(W)]){x.fillRect(xx,Y(j)+.4,2.2,s*.9);x.strokeRect(xx,Y(j)+.4,2.2,s*.9)}}x.restore();
   /* stairs */
-  mpOs440Stair(x,X(30.5),Y(41.5),s,false);mpOs440Stair(x,X(13.5),Y(17.5),s,true);
+  for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){const q=ch(cx,cy);if(q==='0'||q==='1')mpOs440Stair(x,X(cx+.5),Y(cy+.5),Math.min(s,10),q==='1')}
   /* furniture and decoration, only what is in plain sight */
-  const sz=s*.78;
+  const sz=Math.min(s*.78,4.6);
   const at=d=>[X(d.x+.5),Y(d.y+.5)];
   for(const d of L.decor){if(!floor(d.x,d.y))continue;const [a,b]=at(d),k=d.k;
     if(k==='hl_plq1')mpOs440Plaque(x,a,b,sz,'1');
@@ -109,10 +109,10 @@ function mpOs440Draw(c,x,L,api){
   /* room names, above each room */
   for(const m of L.mapNames){const t=m.t;api.text(x,t,X(m.x+.5),Y(m.y+.5)-.5,5.4,'#3a1a28','center')}
   /* margins */
-  api.title(x,'The Orange Spire, Floor 1','Banquet halls, a throne hall and a crypt');
+  api.title(x,'The Orange Spire, Floor 1',hlMapSub(L));
   api.compass(x,436,262,12);
   api.panel(x,8,52,78,128);
-  api.notes(x,['The first floor of a haunted castle in the Hollow Land.','You arrive by the stair at the south end. The stair up is in the west, in the study.','Halls are lit by lanterns and candles.','Each floor above is smaller than this one.'],13,62,68,6.2,4);
+  api.notes(x,hlMapNotes(L,['Halls are lit by lanterns and candles.']),13,62,68,6.2,4);
   const key=[['Stair down',(a,b)=>mpOs440Stair(x,a,b,6,false)],['Stair up',(a,b)=>mpOs440Stair(x,a,b,6,true)],['Lantern',(a,b)=>mpOs440Lantern(x,a,b,1.4,false)],['Candle',(a,b)=>mpOs440Candle(x,a,b,1.6)],['Fireplace',(a,b)=>mpOs440Fire(x,a,b,1.5)],['Window',(a,b)=>mpOs440Window(x,a,b,1.5)],['Mirror',(a,b)=>mpOs440Mirror(x,a,b,1.5)],['Plaque',(a,b)=>mpOs440Plaque(x,a,b,1.5)],['Claw marks',(a,b)=>mpOs440Claw(x,a,b,1.5)],['Shelf',(a,b)=>mpOs440Shelf(x,a,b,1.5)],['Table',(a,b)=>mpOs440Feast(x,a,b,1.3)],['Coffin',(a,b)=>mpOs440Coffin(x,a,b,1.3)],['Throne',(a,b)=>mpOs440Throne(x,a,b,1.3)]];
   api.panel(x,392,34,84,20+key.length*11.5);api.text(x,'Key',434,45,7.4,MPL.VERM,'center');let yy=56;
   for(const [t,f] of key){f(404,yy);api.text(x,t,414,yy,6,'#3a2a1c','left');yy+=11.5}

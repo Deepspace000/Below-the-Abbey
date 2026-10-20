@@ -52,7 +52,7 @@ const MPLI={
   cross(x,a,b,s){s=s||1;x.strokeStyle=MPL.INK;x.lineWidth=1.4*s;x.beginPath();x.moveTo(a,b-5*s);x.lineTo(a,b+4*s);x.moveTo(a-2.6*s,b-2*s);x.lineTo(a+2.6*s,b-2*s);x.stroke()},
   star(x,a,b,s,col){s=s||1;x.fillStyle=col||MPL.GOLD;x.strokeStyle=MPL.INK;x.lineWidth=.7;x.beginPath();for(let k=0;k<10;k++){const r=(k%2?1.8:4.2)*s,an=-Math.PI/2+k*Math.PI/5;k?x.lineTo(a+Math.cos(an)*r,b+Math.sin(an)*r):x.moveTo(a+Math.cos(an)*r,b+Math.sin(an)*r)}x.closePath();x.fill();x.stroke()}};
 /* fit a W x H cell grid into the framed area: returns {s, ox, oy, X(cx), Y(cy)} */
-function mplFit(W,H,pad){pad=pad||4;const A=MPL.AREA,s=Math.min((A.w-2*pad)/W,(A.h-2*pad)/H),ox=A.x+(A.w-W*s)/2,oy=A.y+(A.h-H*s)/2;return {s,ox,oy,X:c=>ox+c*s,Y:c=>oy+c*s}}
+function mplFit(W,H,pad){pad=pad||(LEVEL>=440&&LEVEL<=459?14:4);const A=MPL.AREA,s=Math.min((A.w-2*pad)/W,(A.h-2*pad)/H,LEVEL>=440&&LEVEL<=459?9:1e9),ox=A.x+(A.w-W*s)/2,oy=A.y+(A.h-H*s)/2;return {s,ox,oy,X:c=>ox+c*s,Y:c=>oy+c*s}}
 /* a ruled box for the key, notes, etc. in the side margins */
 function mplPanel(x,a,b,w,h){const S=x.canvas.width/DW;let snap=null;try{snap=x.getImageData(Math.round((a-2)*S),Math.round((b-2)*S),Math.round((w+4)*S),Math.round((h+4)*S))}catch(e){}(MPL.pan=MPL.pan||[]).push({x,a,b,w,h,S,snap});x.save();x.fillStyle='rgba(240,230,196,.55)';x.fillRect(a,b,w,h);x.strokeStyle=MPL.GOLD;x.lineWidth=1.2;x.strokeRect(a,b,w,h);x.strokeStyle=MPL.INK;x.lineWidth=.5;x.strokeRect(a+1.8,b+1.8,w-3.6,h-3.6);x.restore()}
 /* notes in a side margin: lines wrapped to w, starting at (a,b); returns the y after the last */

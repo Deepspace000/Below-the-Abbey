@@ -22,7 +22,7 @@ ITEMDEF.gillpotion={n:'Potion of the Gill',k:'potion',t:'Potion',ic:'gillpotion'
 ITEMDEF.pearl={n:'Pearl',k:'quest',t:'Pearl',ic:'pearl',c:'#f0f0ff',stack:1,price:140,d:'A round white pearl, milky and faintly pink, taken from a giant clam. A priest would pay in blessings. A jeweller would pay in gold.',sw:.2};
 if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push('divehelm','gillpotion','pearl');
 function gillDrink(hi){const F=G.flags;F.gill=1;sfx('potion');msg(`${HERO_DEF[hi].name} drinks the Potion of the Gill. The whole party feels the sea open to them: from now on they can dive without helms.`,'#80f0d0')}
-function uwSuited(){const F=G.flags;if(F.gill)return true;const live=G.heroes.filter(h=>h.alive);return live.length>0&&live.every(h=>h.eq&&h.eq.head&&idef(h.eq.head).dive)}
+function uwSuited(){const F=G.flags;if(F.gill)return true;return G.heroes.some(h=>h.alive&&h.eq&&h.eq.head&&idef(h.eq.head).dive)} // somebody wears a helm: enough to go down (a hero without one drowns, see divehelms.js)
 function uwWho(){return G.flags.gill?'':G.heroes.filter(h=>h.alive&&!(h.eq&&h.eq.head&&idef(h.eq.head).dive)).map((h,i)=>HERO_DEF[G.heroes.indexOf(h)].name).join(', ')}
 
 /* ---- the creatures that bite, and the big ones ---- */
@@ -230,9 +230,9 @@ const UW_NAMES={300:'Saltbarrow',301:'the Isle of Bells',302:'Cinder Isle',303:'
 for(const id of [300,301,302,303]){
   khNpc('uw_dive_'+id,'A dive line','uw_buoy',()=>{
     const F=G.flags,tg=id+20;
-    if(uwSuited())return say(`A weathered line runs from a red-and-white buoy down into the clear water off ${UW_NAMES[id]}. Far below, a reef glitters.`,[['Dive.',()=>{G.uw=null;goToLevel(tg,SEA_ARRIVE_UW(tg));return null}],['Not now.',()=>null]]);
+    if(uwSuited())return say(`A weathered line runs from a red-and-white buoy down into the clear water off ${UW_NAMES[id]}. Far below, a reef glitters.${typeof uwBareNames==='function'&&uwBareNames()?' Without a helm, '+uwBareNames()+' would start to drown down there.':''}`,[['Dive.',()=>{G.uw=null;goToLevel(tg,SEA_ARRIVE_UW(tg));return null}],['Not now.',()=>null]]);
     const who=uwWho();
-    return say(`A line runs from a buoy down into the water off ${UW_NAMES[id]}, and far below something glitters. To dive, every hero must wear a Diving Helm in the helmet slot, which gives four minutes of air at a time. They are made by Tam Salvor in Yarrim.${who?' Not yet wearing one: '+who+'.':''}`,[BYE]);
+    return say(`A line runs from a buoy down into the water off ${UW_NAMES[id]}, and far below something glitters. To dive, at least one hero must wear a Diving Helm in the helmet slot, which gives four minutes of air at a time. Any hero without a helm will start to drown. They are made by Tam Salvor in Yarrim.${who?' Not yet wearing one: '+who+'.':''}`,[BYE]);
   });
 }
 function SEA_ARRIVE_UW(id){uwBuild(id);const L=LEVELS[id];return {x:L.start.x,y:L.start.y,f:L.start.f}}

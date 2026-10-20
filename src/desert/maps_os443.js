@@ -128,5 +128,5 @@ mplInstall({name:'os443',levels:[443],reveal:true,draw(c,x,L,api){
   api.panel(x,5,ky,82,13+keys.length*12.6);api.text(x,'KEY',46,ky+8,6.6,MPL.VERM);
   keys.forEach(([k,t],q)=>{const cy=ky+22+q*12.6;mpOs443KeyIcon(x,9,15,cy,k);api.text(x,t,25,cy,6.2,'#3a2a1c','left')});
   api.panel(x,392,34,84,120);
-  api.notes(x,['The Orange Spire has 20 floors, and each one is smaller than the floor below it.','You come in by the stair down, at the bottom of this plan.','The stair up is in the room at the top right.','Stone plaques by each stair give the floor number.'],396,44,72,6.2,4);
+  api.notes(x,hlMapNotes(L,['Stone plaques by each stair give the floor number.']),396,44,72,6.2,4);
   api.compass(x,434,236,17)}});

@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.483';
+const VERSION='3.484';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -3671,9 +3671,9 @@ function jumpFromUrl(){
     msg('The party stands at the Kraken line with all four Kraken harpoons. Walk east.','#ffe36a');return}
   if(town==='abbey'||town==='thornwood'){F.townSeen=0;delete F.abbeyIntroSeen;G.bossDead=true;goToLevel(2);G.state='play';G.menu=false;return}
   F.townSeen=1;F.abbeyIntroSeen=1;F.gwoodSeen=1;
-  const AREAS={hgtest:[480,10,20,0],hgtrooms:[4960,14,4,2],hgtmaze:[486,106,216,0],hgttank:[487,30,45,0],hgtesttwo:[485,10,50,0],ulb:[482,75,3,2],nibb:[484,75,146,0],exsce:[481,75,147,0],glorm:[483,75,144,0],hollowgrass:[470,75,142,0],hollowland:[364,35,60,0],orangetower:[440,30,38,0],orangeboss:[443,48,7,0],oldhaven:[305,74,141,0],oakwood:[311,2,36,1],landpath:[400,76,555,0],monasterygate:[411,73,306,0],pilgrim:[400,76,555,0],monastery:[430,42,66,0],bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],khemetracity:[44,201,379,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
+  const AREAS={hgtest:[480,10,20,0],hgtrooms:[4960,14,4,2],hgtmaze:[486,106,216,0],hgttank:[487,30,45,0],hgtesttwo:[485,10,50,0],ulb:[482,75,3,2],nibb:[484,75,146,0],exsce:[481,75,147,0],glorm:[483,75,144,0],hollowgrass:[470,75,142,0],hollowland:[364,35,60,0],orangetower:[440,12,14,0],orangeboss:[443,17,19,0],oldhaven:[305,74,141,0],oakwood:[311,2,36,1],landpath:[400,76,555,0],monasterygate:[411,73,306,0],pilgrim:[400,76,555,0],monastery:[430,42,66,0],bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],khemetracity:[44,201,379,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
   if(!AREAS[town]&&town.length>=4){const m=Object.keys(AREAS).filter(k=>k.startsWith(town)||town.startsWith(k));if(m.length===1)town=m[0]} // near-misses like whitedune find the right area
-  if(AREAS[town]&&town!=='thornwood'){const [lv,ax,ay,af]=AREAS[town];F.gandrickDead=1;F.northGate=1;F.mayorKilled=1;F.mayorDown=1;F.ironRoad=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};if(lv===44&&LEVELS[44].stub){khEnter(()=>{goToLevel(lv,{x:ax,y:ay,f:af});G.state='play';G.menu=false});return}goToLevel(lv,{x:ax,y:ay,f:af});if(town==='orangeboss'){let tries=0;const iv=setInterval(()=>{const b=LEVEL===lv&&!TP&&G.enemies.find(e=>e.t==='hlboss0');if(b){clearInterval(iv);G.P.x=b.x;G.P.y=b.y+3;G.P.f=0;G.P.angT=undefined}else if(++tries>100)clearInterval(iv)},100)}G.state='play';G.menu=false;return}
+  if(AREAS[town]&&town!=='thornwood'){const [lv,ax,ay,af]=AREAS[town];F.gandrickDead=1;F.northGate=1;F.mayorKilled=1;F.mayorDown=1;F.ironRoad=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};if(lv===44&&LEVELS[44].stub){khEnter(()=>{goToLevel(lv,{x:ax,y:ay,f:af});G.state='play';G.menu=false});return}goToLevel(lv,{x:ax,y:ay,f:af});if(town==='orangeboss'){let tries=0;const iv=setInterval(()=>{const b=LEVEL===lv&&!TP&&G.enemies.find(e=>e.t==='hlboss0');if(b){clearInterval(iv);let py=b.y+3;while(py>b.y+1&&!(G.grid[py]&&G.grid[py][b.x]===0))py--;G.P.x=b.x;G.P.y=py;G.P.f=0;G.P.angT=-Math.PI/2;G.C={x:G.P.x,y:G.P.y,a:G.P.angT}}else if(++tries>100)clearInterval(iv)},100)}G.state='play';G.menu=false;return}
   if(town==='greendale'||town==='anaea'){F.passDone=1;F.passSeen=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};goToLevel(town==='anaea'?33:32,town==='anaea'?sq(ANAEAJ):{x:2,y:36,f:1});G.state='play';G.menu=false;return}
   if(town==='ironhill'){F.gandrickDead=1;F.northGate=1;F.mayorDown=1;F.mayorKilled=1;F.ironRoad=1;F.finale=1;F.halbrecht=1;F.roadSeen=1;F.tunnelSeen=1;
     for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};
@@ -17774,8 +17774,8 @@ MON_BLD.forEach(b=>{const stub=()=>{monBuild();if(!LEVELS[b.rid]&&KH_LAZY[b.rid]
 /* ---- src/desert/hollow.js ---- */
 /* ==========================================================================
    THE HOLLOW LAND. Below the Abbey, past the Hollow Abbot, the stair comes out on a high ledge in a vast underground dark. Far below, lit by red
-   and purple torches, stands a great orange spire. Stairs lead down to its gate. Inside, 20 levels climb to a spire, each smaller than the one
-   below, each with a number on the stone, a mystery room, labyrinthine passages and armoured goblins, slimes and orcs. At the top a wizard asks
+   and purple torches, stands a great orange spire. Stairs lead down to its gate. Inside, 20 levels climb to a spire. The first has one room, the second
+   two, and so on up to ten rooms on the tenth; then the rooms fall away again, down to one room on the nineteenth. The top level has two rooms with a small labyrinth between them. Each level has a number on the stone, a strange place and armoured goblins, slimes and orcs. At the top a wizard asks
    three questions. Answered with good will, they open the way to the next tower (violet). Answered with greed, the party falls down two levels.
    Levels: 364 the ledge and the way down, 440 to 459 the orange spire (levels 1 to 20), 460 the foot of the violet tower.
    ========================================================================== */
@@ -17820,7 +17820,7 @@ function hlNumKey(n,violet){ // the number of the level, carved large in a slab 
 /* ---- the people who talk about the place ---- */
 const HL_FIGS=[
  ['hl_fig0','A hooded figure by the stair','kh_ohfolk2_3',["Nobody built it. It was always there, and we were put under it.","The torches are never lit by anyone. I have waited a long time to see who lights them. Nobody does.","Climb. Do not look down. The ones who look down start to feel it pulling."]],
- ['hl_fig1','A grey friar, very old','kh_ohfolk2_1',["Each floor is smaller than the last. They say that at the top there is room for only one question.","I came up eleven floors, and then came down ten. I am not sure that I am the same person.","The rooms in the middle of each floor are not rooms. They are tests, and nobody tells you what for."]],
+ ['hl_fig1','A grey friar, very old','kh_ohfolk2_1',["The rooms grow in number for ten floors, and then they fall away again. They say that at the top there is room for only one question.","I came up eleven floors, and then came down ten. I am not sure that I am the same person.","The rooms in the middle of each floor are not rooms. They are tests, and nobody tells you what for."]],
  ['hl_fig2','A woman with an empty lantern','kh_ohfolk3_1',["The dark here is not an absence of light. It is a presence. Feel how it leans on the torches.","My lantern went out on the third floor. The torches did not mind. They give light to anyone, and ask for nothing.","Be careful what you want, in the tower. It listens."]],
  ['hl_fig3','A pale scholar','kh_ohfolk5_4',["The numbers on the stones are not counting up. They are counting down. To something.","The goblins are not evil. They are afraid of the wizard. So is everything else.","He asks three questions. They are not hard. That is the trouble."]],
  ['hl_fig4','A very small man, sitting','kh_ohfolk3_3',["I have been on the nineteenth floor for a year. I like it. It is quiet, and the stair is just there.","Slimes do not hate you. They only want to be near warmth. So do I.","At the top, they say, one fall is a lesson and two falls is a habit."]],
@@ -17863,36 +17863,100 @@ const HLX=[]; // where each level's stair down arrives
 /* ---- the mystery rooms ---- */
 const HL_MYST=['riddle','bridge','sand','statues','pit','monster','chasm','treasure'];
 /* ---- building ---- */
+/* ---- the floors of the spire. Floor f has as many rooms as its number, up to floor 10 (ten rooms), and then the rooms fall away again: floor 11 has nine, floor 18 has two and floor 19 has one, like floor 1.
+   The top floor, 20, has two rooms with a small labyrinth of one-square passages between them. The rooms stand in a coarse grid of places (the first at the south edge, the stair up in a room of the top row,
+   toward the north) and are joined by plain passages: a tree, and on the larger floors a loop or two. ---- */
+const hlRoomCount=f=>f<=10?f:f<=19?20-f:2;
+const HL_GRID={2:[1,2],3:[2,2],4:[2,2],5:[3,2],6:[3,2],7:[3,3],8:[3,3],9:[3,3],10:[4,3]}; // columns and rows of the grid of room places, by the number of rooms
+function hlMaze(R,cw,ch,base){ // a perfect maze of cw x ch cells in (2cw+1) x (2ch+1) tiles, entered at the bottom and left at the top, both in column cw>>1; of 40 tries, the one whose way through is nearest to 70 steps (about 35 cells of the 81), so that it is a real walk but a short one
+  const TW=2*cw+1,TH=2*ch+1,ex=cw>>1;let best=null;
+  for(let tr=0;tr<40;tr++){const t=new Uint8Array(TW*TH),vis=new Uint8Array(cw*ch),st=[[ex,ch-1]];vis[(ch-1)*cw+ex]=1;t[(2*(ch-1)+1)*TW+2*ex+1]=1;let n=0;
+    while(st.length){const [x,y]=st[st.length-1],nb=[[1,0],[-1,0],[0,1],[0,-1]].map(([a,b])=>[x+a,y+b,a,b]).filter(([a,b])=>a>=0&&b>=0&&a<cw&&b<ch&&!vis[b*cw+a]);
+      if(!nb.length){st.pop();continue}const [nx,ny,a,b]=nb[R(base+tr*997+(n++),nb.length)];vis[ny*cw+nx]=1;t[(2*y+1+b)*TW+2*x+1+a]=1;t[(2*ny+1)*TW+2*nx+1]=1;st.push([nx,ny])}
+    const d=new Int16Array(TW*TH).fill(-1),q=[(2*(ch-1)+1)*TW+2*ex+1];d[q[0]]=0;
+    for(let i=0;i<q.length;i++){const c=q[i],x=c%TW,y=(c/TW)|0;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=TW||ny>=TH||!t[ny*TW+nx]||d[ny*TW+nx]>=0)continue;d[ny*TW+nx]=d[c]+1;q.push(ny*TW+nx)}}
+    const len=d[TW+2*ex+1];if(!best||Math.abs(len-70)<Math.abs(best.len-70))best={t,len,TW,TH}}
+  return best}
+function hlPlan(k,R){ // the plan of floor k+1: the grid g (walls '#', floor '.'), its size, the rooms (the first at the south edge) and the room with the stair up
+  const f=k+1,top=k===HL.N-1,n=hlRoomCount(f);let W,H,g;
+  const mk=()=>{g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'))};
+  const cut=r=>{for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)g[y][x]='.'};
+  const mid=r=>[(r.x0+r.x1)>>1,(r.y0+r.y1)>>1];
+  const hl=(y,xa,xb)=>{for(let x=Math.min(xa,xb);x<=Math.max(xa,xb);x++)g[y][x]='.'},vl=(x,ya,yb)=>{for(let y=Math.min(ya,yb);y<=Math.max(ya,yb);y++)g[y][x]='.'};
+  const nookOf=r=>{const x0=R(3,2)===0?r.x0:r.x1-2;return {x0,y0:r.y0,x1:x0+2,y1:r.y0+2}}; // an alcove in a top corner of the first room, where a floor has no spare room for the strange one
+  if(top){ // two rooms, and between them the labyrinth: 9 x 9 cells of one-square passages, in 19 x 19 tiles
+    const m=hlMaze(R,9,9,3000),mx0=3,my0=10,r0={x0:8,y0:29,x1:16,y1:33},r1={x0:7,y0:2,x1:17,y1:8};W=25;H=36;mk();cut(r0);cut(r1);
+    for(let ty=0;ty<m.TH;ty++)for(let tx=0;tx<m.TW;tx++)if(m.t[ty*m.TW+tx])g[my0+ty][mx0+tx]='.';
+    g[my0+m.TH-1][12]='.';g[my0][12]='.';g[my0-1][12]='.'; // the way in from the first room, and the way out to the last
+    return {W,H,g,rooms:[r0,r1],far:r1,n,nook:nookOf(r0),maze:{x0:mx0,y0:my0,x1:mx0+m.TW-1,y1:my0+m.TH-1,len:m.len}}}
+  if(n===1){ // one room: floors 1 and 19. The stair in is in the south wall, the stair up in the north wall
+    const w=f===1?11:13,h=f===1?7:9;W=w+14;H=h+12;mk();const x0=(W-w)>>1,y1=H-3,r={x0,y0:y1-h+1,x1:x0+w-1,y1};cut(r);
+    return {W,H,g,rooms:[r],far:r,n,nook:nookOf(r)}}
+  const [C,Rw]=HL_GRID[n],A=n<=3,maxW=A?9:8,maxH=7,px=maxW+4,py=maxH+4,mg=n===2?4:0;W=C*px+2*mg;H=Rw*py;mk();
+  const c0=C>>1,occ=new Map(),sl=[],par=[],kf=(c,r)=>c+','+r;
+  const add=(c,r,p)=>{occ.set(kf(c,r),sl.length);sl.push([c,r]);par.push(p)};
+  const freeN=(c,r)=>[[c,r-1],[c-1,r],[c+1,r],[c,r+1]].filter(([a,b])=>a>=0&&b>=0&&a<C&&b<Rw&&!occ.has(kf(a,b)));
+  add(c0,Rw-1,-1);
+  if(n>=3){const fn=freeN(c0,Rw-1).filter(q=>q[1]===Rw-1),q=fn[R(11,fn.length)];add(q[0],q[1],0)} // the strange room, beside the first
+  for(let r=Rw-2;r>=0;r--)add(c0,r,r===Rw-2?0:sl.length-1); // the way north, to the top row
+  for(let t=0;sl.length<n&&t<200;t++){let p=sl.length-1;if(!freeN(sl[p][0],sl[p][1]).length||R(20+t,100)>=65){const ps=sl.map((_,i)=>i).filter(i=>freeN(sl[i][0],sl[i][1]).length);p=ps[R(40+t,ps.length)]}
+    const fn=freeN(sl[p][0],sl[p][1]),q=fn[R(60+t,fn.length)];add(q[0],q[1],p)}
+  const E=[];for(let i=1;i<sl.length;i++)E.push([i,par[i]]);
+  const isE=(a,b)=>E.some(e=>(e[0]===a&&e[1]===b)||(e[0]===b&&e[1]===a)),pairs=[];
+  for(let i=0;i<sl.length;i++)for(let j=i+1;j<sl.length;j++)if(Math.abs(sl[i][0]-sl[j][0])+Math.abs(sl[i][1]-sl[j][1])===1&&!isE(i,j))pairs.push([i,j]);
+  for(let t=0,want=n>=9?2:n>=6?1:0;t<want&&pairs.length;t++)E.push(pairs.splice(R(80+t,pairs.length),1)[0]); // a loop or two, on the larger floors only
+  const ms=n===3?7:Math.max(5,7-Math.floor(k/8)),rooms=[];
+  sl.forEach(([c,r],i)=>{let w,h;
+    if(i===0){w=A?9:7;h=A?5:4}else if(i===1&&n>=3){w=h=ms}else{w=A?7+R(100+i,3):5+R(100+i,4);h=A?5+R(200+i,3):4+R(200+i,3)}
+    const ox=mg+c*px+2,oy=r*py+2,x0=i===0?ox+((maxW-w)>>1):ox+R(300+i,maxW-w+1),y0=i===0?H-2-h:oy+R(400+i,maxH-h+1);
+    rooms.push({x0,y0,x1:x0+w-1,y1:y0+h-1})});
+  rooms.forEach(cut);
+  E.forEach(([i,j],t)=>{const a=rooms[i],b=rooms[j]; // each passage leaves a room at the middle of its wall, so the strange room's bridges and paths meet it
+    if(sl[i][0]!==sl[j][0]){const Lr=sl[i][0]<sl[j][0]?a:b,Rr=Lr===a?b:a,ya=mid(Lr)[1],yb=mid(Rr)[1],lo=Lr.x1+2,hi=Rr.x0-2,xm=lo<=hi?lo+R(500+t,hi-lo+1):Lr.x1+1;hl(ya,Lr.x1,xm);vl(xm,ya,yb);hl(yb,xm,Rr.x0)}
+    else{const U=sl[i][1]<sl[j][1]?a:b,D=U===a?b:a,xa=mid(U)[0],xb=mid(D)[0],lo=U.y1+2,hi=D.y0-2,ym=lo<=hi?lo+R(500+t,hi-lo+1):U.y1+1;vl(xa,U.y1,ym);hl(ym,xa,xb);vl(xb,ym,D.y0)}});
+  const adj=sl.map(()=>[]);E.forEach(([a,b])=>{adj[a].push(b);adj[b].push(a)});
+  const dd=sl.map(()=>-1),qq=[0];dd[0]=0;for(let i=0;i<qq.length;i++)for(const j of adj[qq[i]])if(dd[j]<0){dd[j]=dd[qq[i]]+1;qq.push(j)}
+  let fi=-1;for(let i=n>=3?2:1;i<sl.length;i++)if(sl[i][1]===0&&(fi<0||dd[i]>dd[fi]))fi=i; // the stair up: the farthest room of the top row
+  return {W,H,g,rooms,far:rooms[fi],n,nook:n<3?nookOf(rooms[0]):null}}
+/* ---- what the parchment maps (maps_os440.js to maps_os459.js) say about the plan of a floor, taken from the real level data ---- */
+const HL_WORDS=['no','one','two','three','four','five','six','seven','eight','nine','ten'];
+function hlMapSub(L){const n=L._nrooms||1,w=HL_WORDS[n].charAt(0).toUpperCase()+HL_WORDS[n].slice(1);
+  return L._maze?'Two rooms with a labyrinth between them':w+(n===1?' room and a strange alcove':n===2?' rooms and a strange alcove':' rooms, one of them strange')}
+function hlMapNotes(L,extra){const f=LEVEL-HL.BASE+1,n=L._nrooms||1,W=L.rows[0].length,up=L._up,side=!up?'':up.x<W/3?'on the left':up.x>W*2/3?'on the right':'in the middle';
+  return ['Floor '+f+' of 20. '+(L._maze?'It has two rooms, with a small labyrinth between them.':n===1?'It has a single room.':'It has '+HL_WORDS[n]+' rooms.'),
+    'You arrive by the stair at the bottom of this plan. '+(L._maze?'There is no stair up. The wizard waits in the room at the top, beyond the labyrinth.':n===1?'The stair up is in the wall opposite, in the same room.':'The stair up is in a room at the top, '+side+'.')].concat(extra||['Rooms you have not yet walked past stay covered.'])}
+const hlInStrange=(L,k)=>{const r=(L._roomsInfo||[]).find(q=>q.n==='The Strange Room')||L._nook;return !!r&&k.x>=r.x0&&k.x<=r.x1&&k.y>=r.y0&&k.y<=r.y1}; // is a thing inside the strange room (or the alcove): the maps leave its chests out
 function hlBuild(k){
   const id=k<HL.N?HL.BASE+k:HL.VIOLET;if(LEVELS[id])return;
-  const top=k===HL.N-1,violet=k>=HL.N,kk=Math.min(k,HL.N-1);
-  const W=violet?19:Math.max(14,Math.round(kk<=9?61-kk*3.45:30-(kk-9)*1.75)),H=violet?13:Math.max(13,Math.round(kk<=9?43-kk*2.45:21-(kk-9)*1.05)),hs=hash2,R=(i,m)=>(hs(k*31+i,k*7+5,97)*m)|0;
+  const top=k===HL.N-1,violet=k>=HL.N,kk=Math.min(k,HL.N-1),hs=hash2,R=(i,m)=>(hs(k*31+i,k*7+5,97)*m)|0;
+  const plan=violet?null:hlPlan(k,R),W=violet?19:plan.W,H=violet?13:plan.H; // every floor has its own plan (hlPlan); the foot of the violet tower keeps its three random rooms
   const TM=ohTiles(),chars={D:LEVEL41_DATA.chars.D},chMap=new Map();let nextCh=0x300;
   const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
   const sty=violet?'hlviolet':'hlorange';
   OH_STY[sty]=Object.assign({},OH_STY.castle2||OH_STY.gold,{zoom:2.2,contrast:2.2,tint:violet?[190,150,255,.0]:[255,170,95,.0]});
   const CH=1.5+kk*.13,wall=ch(TM.make('plain',sty,CH).gid),wall2=ch(TM.make('slit',sty,CH).gid);
-  const g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
-  const rooms=[],cut=r=>{for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)g[y][x]='.'};
-  const nrooms=violet?3:Math.max(4,11-Math.floor(kk/2.5)),ms=Math.max(5,7-Math.floor(kk/8));
+  const g=violet?[]:plan.g;if(violet)for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
+  const rooms=violet?[]:plan.rooms,cut=r=>{for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)g[y][x]='.'},mid=r=>[(r.x0+r.x1)>>1,(r.y0+r.y1)>>1];
+  if(violet){const nrooms=3,ms=Math.max(5,7-Math.floor(kk/8));
   rooms.push({x0:(W>>1)-2,y0:H-5,x1:(W>>1)+2,y1:H-3});
   for(let t=0;t<1500&&rooms.length<nrooms;t++){const first=rooms.length===1,w=first?ms:3+R(100+t,Math.max(2,5-Math.floor(kk/6))),h=first?ms:3+R(200+t,3),x0=1+R(300+t,W-w-2),y0=1+R(400+t,H-h-2);
     if(rooms.some(r=>x0<=r.x1+2&&x0+w-1>=r.x0-2&&y0<=r.y1+2&&y0+h-1>=r.y0-2))continue;rooms.push({x0,y0,x1:x0+w-1,y1:y0+h-1})}
-  rooms.forEach(cut);const mid=r=>[(r.x0+r.x1)>>1,(r.y0+r.y1)>>1];
+  rooms.forEach(cut);
   const hl=(y,x0,x1)=>{for(let x=Math.min(x0,x1);x<=Math.max(x0,x1);x++)g[y][x]='.'},vl=(x,y0,y1)=>{for(let y=Math.min(y0,y1);y<=Math.max(y0,y1);y++)g[y][x]='.'};
   const link=(a,b,s)=>{const [ax,ay]=mid(a),[bx,by]=mid(b);if(R(600+s,2)===0){hl(ay,ax,bx);vl(bx,ay,by)}else{vl(ax,ay,by);hl(by,ax,bx)}};
   for(let i=1;i<rooms.length;i++){let bj=0,bd=1e9;const [ax,ay]=mid(rooms[i]);for(let j=0;j<i;j++){const [bx,by]=mid(rooms[j]),d=Math.abs(ax-bx)+Math.abs(ay-by)+R(500+i*9+j,6);if(d<bd){bd=d;bj=j}}link(rooms[i],rooms[bj],i)}
-  for(let e=0;e<2+(kk>>2);e++){const i=R(700+e,rooms.length),j=R(710+e,rooms.length);if(i!==j)link(rooms[i],rooms[j],40+e)} // loops, so that the way is a labyrinth
+  for(let e=0;e<2+(kk>>2);e++){const i=R(700+e,rooms.length),j=R(710+e,rooms.length);if(i!==j)link(rooms[i],rooms[j],40+e)} // loops (the foot of the violet tower only)
+  }
   // the stair in, and the stair up in the furthest room
   const r0=rooms[0],ux=(r0.x0+r0.x1)>>1,uy=r0.y1+1;g[uy][ux]='0';const start={x:ux,y:r0.y1,f:0};
   const d=new Int16Array(W*H).fill(-1),q=[start.x+start.y*W];d[q[0]]=0;
   for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H||g[ny][nx]!=='.'||d[ny*W+nx]>=0)continue;d[ny*W+nx]=d[c]+1;q.push(ny*W+nx)}}
-  let far=rooms[rooms.length-1],fd=-1;rooms.forEach((r,i)=>{if(i<2)return;const [mx,my]=mid(r),v=d[my*W+mx];if(v>fd){fd=v;far=r}});
+  let far=violet?rooms[rooms.length-1]:plan.far,fd=-1;if(violet)rooms.forEach((r,i)=>{if(i<2)return;const [mx,my]=mid(r),v=d[my*W+mx];if(v>fd){fd=v;far=r}});
   let up=null;if(!violet&&!top){const dxm=(far.x0+far.x1)>>1;g[far.y0-1][dxm]='1';up={x:dxm,y:far.y0}}
   const rows=g.map((r,y)=>r.map((c,x)=>c==='#'?((x*7+y*3)%9===0?wall2:wall):c).join(''));
   const decor=[],enemies=[],items=[],lights=[],used=new Set([start.x+','+start.y]),fm=new Array(W*H).fill('0');
   const blockAt=(x,y)=>{used.add(x+','+y);decor.push({k:'lp_gap',x,y,block:true,deco:true})};
-  const myst=rooms[1],mt=violet?'':HL_MYST[(k*5+2)%8],[mx,my]=mid(myst);
+  const myst=(plan&&plan.nook)||rooms[1],mt=violet?'':HL_MYST[(k*5+2)%8],[mx,my]=mid(myst); // (floors with fewer than three rooms have no spare room: the strange place is an alcove in a corner of the first room)
   const pathCell=new Set();
   if(!violet){
     if(mt==='bridge'||mt==='chasm'){ // a void: dark floor, nothing to stand on but a narrow way across
@@ -17928,20 +17992,22 @@ function hlBuild(k){
   // (the level number is a painted stone plaque now, hung on the wall of the first room by hlDress)
   // the strange figures, on a few levels
   const figLv={0:'hl_fig1',3:'hl_fig2',7:'hl_fig3',11:'hl_fig0',15:'hl_fig4'};
-  if(figLv[k]&&rooms[2]){const kp=KH_KEEPERS[figLv[k]],[fx,fy]=mid(rooms[2]);if(kp&&!used.has(fx+','+fy)){decor.push({k:khFaceKey(kp.face),x:fx,y:fy,block:true,npc:figLv[k],sc:kp.sc||1});used.add(fx+','+fy)}}
+  const fr=rooms[2]||(plan&&plan.n===1?rooms[0]:null); // (a floor with one room puts the figure in that room)
+  if(figLv[k]&&fr){const kp=KH_KEEPERS[figLv[k]],[fx,fy]=mid(fr);if(kp&&!used.has(fx+','+fy)){decor.push({k:khFaceKey(kp.face),x:fx,y:fy,block:true,npc:figLv[k],sc:kp.sc||1});used.add(fx+','+fy)}}
   // the foes: armoured goblins, slimes, orcs
   const cells=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(g[y][x]==='.'&&d[y*W+x]>6&&!used.has(x+','+y)&&!(x>=myst.x0&&x<=myst.x1&&y>=myst.y0&&y<=myst.y1))cells.push([x,y]);
   const kinds=kk<6?['hlgoblin','hlgoblin','hlslime']:kk<13?['hlgoblin','hlslime','hlorc','hlgoblin']:['hlorc','hlorc','hlgoblin','hlslime'];
-  if(!violet)for(let i=0;i<Math.max(5,Math.min(13,Math.round(cells.length/38)));i++){const c=cells[R(900+i*13,cells.length)];if(c&&!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);enemies.push({t:kinds[R(950+i,kinds.length)],x:c[0],y:c[1]})}}
-  for(let i=0;i<10&&cells.length;i++){const c=cells[R(100+i*7,cells.length)];if(!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);items.push({k:'potion',x:c[0],y:c[1]})}}
-  for(let i=0;i<6&&cells.length;i++){const c=cells[R(300+i*11,cells.length)];if(!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);items.push({k:'hlfood',x:c[0],y:c[1]})}}
+  // (fewer foes on the small floors)
+  if(!violet)for(let i=0,nF=top?6:Math.max(3,Math.min(13,Math.round(1.5+plan.n*1.1)));i<nF;i++){const c=cells[R(900+i*13,cells.length)];if(c&&!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);enemies.push({t:kinds[R(950+i,kinds.length)],x:c[0],y:c[1]})}}
+  for(let i=0,nP=Math.max(4,Math.round(10*Math.min(1,((plan?plan.n:6)+2)/8)));i<nP&&cells.length;i++){const c=cells[R(100+i*7,cells.length)];if(!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);items.push({k:'potion',x:c[0],y:c[1]})}}
+  for(let i=0,nQ=Math.max(2,Math.round(6*Math.min(1,((plan?plan.n:6)+2)/8)));i<nQ&&cells.length;i++){const c=cells[R(300+i*11,cells.length)];if(!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);items.push({k:'hlfood',x:c[0],y:c[1]})}}
   OH_STY.hlsecret=Object.assign({},OH_STY.castle2||OH_STY.gold,{zoom:3.6,contrast:2.0,tint:[110,150,255,.0]});const secretCh=violet?'#':ch(TM.make('plain','hlsecret',CH).gid);
-  const dress={k,id,rows,W,H,rooms,myst,far,used,decor,enemies,d,violet,top,R,hs,secretCh,items,up,start};hlDress(dress);
+  const dress={k,id,rows,W,H,rooms,myst,far,used,decor,enemies,d,violet,top,R,hs,secretCh,items,up,start,esc:violet?1:top?.5:Math.min(1,plan.n/7)};hlDress(dress); // esc: how much of the usual horrors a small floor gets
   const portals=[{to:k===0?HL.CAV:violet?HL.BASE+HL.N-1:id-1,x:0,y:0,f:2,tex:'tomb'}];
   if(up)portals[1]={to:id+1,x:0,y:0,f:0,tex:'tomb'};
   const lv={rows,start,enemies,items,decor,fmap:(()=>{const f=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];f.push(s)}return f})(),
     floorSet:['tombslab','sand','tombgold','tombdark','tombred'],floor:'tombslab',ceil:'tomb',name:LEVEL_NAMES[id],label:violet?'The Violet Tower':'The Orange Spire',diff:36+kk,torchGap:4.4,_secrets:dress.lv_secrets,_trap:dress.lv_trap,_roomsInfo:dress.lv_rooms,portals,lights,chars,_trig:dress.lv_trig,_msgr:dress.lv_msgr,_man:dress.lv_man,amb:.05,day:0,ceilH:CH,
-    mapNames:rooms.map((r,i)=>({t:i===0?'Stair ('+(k+1)+')':r===myst&&!violet?'The Strange Room':r===far&&up?(dress.lv_names&&dress.lv_names[i]&&!/Hall$/.test(dress.lv_names[i])?dress.lv_names[i]+' and Stair Up':'The Stair Up'):top&&r===far?'The Spire':(dress.lv_names&&dress.lv_names[i])||'Hall',x:mid(r)[0],y:r.y0-1,k:'place'})),_up:up,_start:start};
+    mapNames:rooms.map((r,i)=>({t:i===0?'Stair ('+(k+1)+')'+(r===far&&up?' and Stair Up':''):r===myst&&!violet?'The Strange Room':r===far&&up?(dress.lv_names&&dress.lv_names[i]&&!/Hall$/.test(dress.lv_names[i])?dress.lv_names[i]+' and Stair Up':'The Stair Up'):top&&r===far?'The Spire':(dress.lv_names&&dress.lv_names[i])||'Hall',x:mid(r)[0],y:r.y0-1,k:'place'})).concat(plan&&plan.maze?[{t:'The Labyrinth',x:(plan.maze.x0+plan.maze.x1)>>1,y:(plan.maze.y0+plan.maze.y1)>>1,k:'place'}]:[]),_up:up,_start:start,_nook:plan&&plan.nook,_maze:plan&&plan.maze,_nrooms:rooms.length};
   LEVELS[id]=lv;
 }
 function hlCavern(){
@@ -18038,7 +18104,7 @@ const HL_NOTES=[
  'A note in a shaking hand. "Do not drink from the golden cup. I did. I am still here, but I am no longer warm."',
  'A note. "The Queen smiles all day now. Nobody has seen her blink since the winter."',
  'A note. "The portraits were painted from life. The painter did not leave the room afterwards."',
- 'A note. "I counted the floors. There are twenty, each one smaller than the last. The stair does not go up. It goes in."',
+ 'A note. "I counted the floors. There are twenty. Each floor has as many rooms as its number, up to the tenth, and then the rooms begin to go again. The stair does not go up. It goes in."',
  'A note. "The hands in the wall are quick but slow to wake. Do not stop beside them."',
  'A note. "The child-king ordered every mirror covered. Then he ordered them uncovered. Then he stopped speaking and only pointed."',
  'A note. "If you hear someone calling for help in the dark, do not go. I went. I knew the voice. It was mine."',
@@ -18080,7 +18146,7 @@ const HL_CHAT=[
  ['Who builds a castle like this and then leaves nobody in it?','Somebody is in it. I just have not seen where.','I do not like how quiet it is. Even the goblins are quiet.'],
  ['Whoever ruled here was not well. Look at the faces.','Those candles are still lit. Who lights them?','I am choosing not to find out.'],
  ['Something just breathed behind me.','That was me.','Are you sure?','...Mostly.'],
- ['How many floors did the note say?','Twenty. Each one smaller than the last.','Then the top is very small, and very close to whatever lives there.']];
+ ['How many floors did the note say?','Twenty. The rooms grow in number up to the tenth floor, and then they dwindle.','Then the top is small, and very close to whatever lives there.']];
 function hlChat(n){const l=hlLive();if(l.length<2)return;HL_CHAT[n%HL_CHAT.length].forEach((t,i)=>later(i*1700,()=>msg(HERO_DEF[l[i%l.length]].name+': "'+t+'"','#c8d8ff')))}
 const HL_WHISPER=['Somewhere above, a chair scrapes across a stone floor.','A cold hand of air brushes the back of your neck.','Far off, somebody is laughing, very softly.','Every candle in the room leans the same way, then straightens.','A whisper in the wall says your name. It sounds like it is smiling.','Something knocks three times from inside the stone.'];
 /* ---- what happens on the stones ---- */
@@ -18112,7 +18178,7 @@ function hlStep(nx,ny){
 {const _oe2=ohEnter;ohEnter=function(n){G.hlOut=false;G.hlStrobe=undefined;G.hlSteps=0;_oe2.apply(this,arguments)}}
 /* ---- dressing the rooms ---- */
 function hlDress(c){
-  const {k,rows,W,H,rooms,myst,far,used,decor,enemies,d,violet,top,R,hs,secretCh,items,up,start}=c;if(violet)return;
+  const {k,rows,W,H,rooms,myst,far,used,decor,enemies,d,violet,top,R,hs,secretCh,items,up,start,esc=1}=c;if(violet)return;
   const isW=(x,y)=>{const ch=rows[y]&&rows[y][x];return ch!==undefined&&ch!=='.'&&ch!=='0'&&ch!=='1'},isF=(x,y)=>rows[y]&&rows[y][x]==='.';
   const key=(x,y)=>x+','+y,shuf=(a,s)=>a.map(v=>[hs(v[0]*3+s,v[1]*5+k,41),v]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
   const placedP=[],placedF=[];let cap=999,cnt=0;
@@ -18202,7 +18268,7 @@ function hlDress(c){
       c.lv_msgr={x:m0[0],y:m0[1],letters:chosen.map(q=>({x:q[0],y:q[1],wd:q[2]}))}}
   }
   // a ruler waits in the last hall of levels 4, 9, 14 and 19
-  {const ru=HL_RULERS.find(q=>q[0]===k);if(ru&&far&&!top){const cx=(far.x0+far.x1)>>1,cy=(far.y0+far.y1)>>1+0;let bx=cx,by=cy;if(used.has(key(bx,by))){const c2=[[cx,cy+1],[cx+1,cy],[cx-1,cy],[cx,cy-1]].find(([x,y])=>isF(x,y)&&!used.has(key(x,y)));if(c2){bx=c2[0];by=c2[1]}}
+  {const ru=HL_RULERS.find(q=>q[0]===k);if(ru&&far&&!top){const cx=(far.x0+far.x1)>>1,cy=rooms.length===1?far.y0+2:(far.y0+far.y1)>>1;let bx=cx,by=cy;if(used.has(key(bx,by))){const c2=[[cx,cy+1],[cx+1,cy],[cx-1,cy],[cx,cy-1]].find(([x,y])=>isF(x,y)&&!used.has(key(x,y)));if(c2){bx=c2[0];by=c2[1]}}
     if(!used.has(key(bx,by))){enemies.push({t:ru[1],x:bx,y:by});used.add(key(bx,by))}}}
   // hidden doors: a wall that looks like any other but opens when you walk into it. It joins two passages that are far apart by the usual way. The map shows them.
   {const sec=[],cand2=[];for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!isW(x,y))continue;
@@ -18224,7 +18290,7 @@ function hlDress(c){
    for(const [x,y,dir] of shuf(spots,23)){if(n>=want)break;if(pic('hl_claw'+((x*3+y*5+k)%6),x,y,dir,{bob:.5}))n++}
    function G_claws(){return decor.filter(q=>/^hl_claw/.test(q.k)).length}}
   // hands that reach out of a niche in the passage wall
-  const nh=Math.min(5,1+((k/4)|0));let placed=0;
+  const nh=Math.round(Math.min(5,1+((k/4)|0))*esc);let placed=0;
   const cand=[];for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!isF(x,y)||inRoom(x,y)||used.has(key(x,y))||d[y*W+x]<8)continue;
     for(const [a,b] of [[0,-1],[0,1],[-1,0],[1,0]]){const nx=x+a,ny=y+b;if(isW(nx,ny)&&isF(x-a,y-b)&&isW(nx+a,ny+b)&&isW(nx+b,ny+a)&&isW(nx-b,ny-a)&&!used.has(key(nx,ny)))cand.push([nx,ny])}}
   for(const [nx,ny] of shuf(cand,9)){if(placed>=nh)break;if(used.has(key(nx,ny)))continue;rows[ny]=rows[ny].slice(0,nx)+'.'+rows[ny].slice(nx+1);used.add(key(nx,ny));enemies.push({t:'hlhands',x:nx,y:ny});placed++}
@@ -18232,7 +18298,7 @@ function hlDress(c){
   const trig=[],cells=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(isF(x,y)&&d[y*W+x]>5&&!used.has(key(x,y)))cells.push([x,y]);
   const pick=i=>cells.length?cells[(hs(i*17,k*3,29)*cells.length)|0]:null;
   const tp=(kk,i,ex)=>{const c0=pick(i);if(c0)trig.push(Object.assign({k:kk,x:c0[0],y:c0[1]},ex||{}))};
-  for(let i=0;i<2+((k/5)|0);i++)tp(i%2?'darts':'spikes',100+i);
+  for(let i=0,nt=Math.max(1,Math.round((2+((k/5)|0))*esc));i<nt;i++)tp(i%2?'darts':'spikes',100+i);
   for(let i=0;i<1+(k%2);i++)tp('dark',200+i);
   for(let i=0;i<2;i++)tp('chat',300+i,{n:k+i*2});
   if(k%3===1){const r=rooms.find((q,i)=>i>=2&&q!==myst&&q.x1-q.x0>=3);if(r){const cs=[];for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)if(isF(x,y)&&d[y*W+x]>=0)cs.push([x,y,d[y*W+x]]);cs.sort((p,q)=>p[2]-q[2]);
@@ -18492,9 +18558,9 @@ for(const m of HL_MON){loadImg('hl_'+m[2],'assets/hl_'+m[2]+'.png');loadImg('hl_
 if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^hljester$/,'shaken',.3],[/^hlwight$/,'graverot',.3],[/^hlphantom$/,'haunted',.35],[/^hlbanshee$/,'shaken',.4],[/^hlbutcher$/,'bleeding',.4],[/^hlvampire$/,'bleeding',.3],[/^hlwerewolf$/,'bleeding',.3],[/^hlabom$/,'poisoned',.3],[/^hlvictim$/,'fever',.1],[/^hlmadman$/,'bleeding',.15]);
 const HL_NEW=[[2,'hljester'],[4,'hlmimic'],[4,'hlmadman'],[6,'hlwight'],[6,'hlvictim'],[8,'hlbutcher'],[8,'hlphantom'],[10,'hlheadless'],[10,'hlbanshee'],[12,'hlvampire'],[12,'hlduke'],[14,'hlwerewolf'],[14,'hlwarlord'],[16,'hlshifter'],[16,'hlchoir'],[18,'hlabom']];
 function hlNewFoes(c){
-  const {k,enemies,used,rows,d,W,H,hs,violet}=c;if(violet)return;
+  const {k,enemies,used,rows,d,W,H,hs,violet,esc=1}=c;if(violet)return; // esc: a small floor gets fewer of them
   const cells=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(rows[y][x]==='.'&&d[y*W+x]>6&&!used.has(x+','+y))cells.push([x,y]);
-  HL_NEW.forEach(([ik,t],n)=>{if(ik>k||!cells.length)return;let cnt=ik===k?3:(hs(k,n,61)<.55?1:0);if(t==='hlvictim'&&cnt)cnt+=ik===k?2:1;
+  HL_NEW.forEach(([ik,t],n)=>{if(ik>k||!cells.length)return;let cnt=ik===k?Math.max(1,Math.round(3*esc)):(hs(k,n,61)<.55*esc?1:0);if(t==='hlvictim'&&cnt)cnt+=Math.round((ik===k?2:1)*esc);
     for(let i=0;i<cnt;i++){const q=cells[Math.floor(hs(k*7+i,n*13,62)*cells.length)];if(q&&!used.has(q[0]+','+q[1])){used.add(q[0]+','+q[1]);enemies.push({t,x:q[0],y:q[1]})}}});
 }
 /* a mimic looks like a chest and a shape shifter like a stranger, until they are close */
@@ -18763,7 +18829,7 @@ ITEMDEF.gillpotion={n:'Potion of the Gill',k:'potion',t:'Potion',ic:'gillpotion'
 ITEMDEF.pearl={n:'Pearl',k:'quest',t:'Pearl',ic:'pearl',c:'#f0f0ff',stack:1,price:140,d:'A round white pearl, milky and faintly pink, taken from a giant clam. A priest would pay in blessings. A jeweller would pay in gold.',sw:.2};
 if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push('divehelm','gillpotion','pearl');
 function gillDrink(hi){const F=G.flags;F.gill=1;sfx('potion');msg(`${HERO_DEF[hi].name} drinks the Potion of the Gill. The whole party feels the sea open to them: from now on they can dive without helms.`,'#80f0d0')}
-function uwSuited(){const F=G.flags;if(F.gill)return true;const live=G.heroes.filter(h=>h.alive);return live.length>0&&live.every(h=>h.eq&&h.eq.head&&idef(h.eq.head).dive)}
+function uwSuited(){const F=G.flags;if(F.gill)return true;return G.heroes.some(h=>h.alive&&h.eq&&h.eq.head&&idef(h.eq.head).dive)} // somebody wears a helm: enough to go down (a hero without one drowns, see divehelms.js)
 function uwWho(){return G.flags.gill?'':G.heroes.filter(h=>h.alive&&!(h.eq&&h.eq.head&&idef(h.eq.head).dive)).map((h,i)=>HERO_DEF[G.heroes.indexOf(h)].name).join(', ')}
 
 /* ---- the creatures that bite, and the big ones ---- */
@@ -18971,9 +19037,9 @@ const UW_NAMES={300:'Saltbarrow',301:'the Isle of Bells',302:'Cinder Isle',303:'
 for(const id of [300,301,302,303]){
   khNpc('uw_dive_'+id,'A dive line','uw_buoy',()=>{
     const F=G.flags,tg=id+20;
-    if(uwSuited())return say(`A weathered line runs from a red-and-white buoy down into the clear water off ${UW_NAMES[id]}. Far below, a reef glitters.`,[['Dive.',()=>{G.uw=null;goToLevel(tg,SEA_ARRIVE_UW(tg));return null}],['Not now.',()=>null]]);
+    if(uwSuited())return say(`A weathered line runs from a red-and-white buoy down into the clear water off ${UW_NAMES[id]}. Far below, a reef glitters.${typeof uwBareNames==='function'&&uwBareNames()?' Without a helm, '+uwBareNames()+' would start to drown down there.':''}`,[['Dive.',()=>{G.uw=null;goToLevel(tg,SEA_ARRIVE_UW(tg));return null}],['Not now.',()=>null]]);
     const who=uwWho();
-    return say(`A line runs from a buoy down into the water off ${UW_NAMES[id]}, and far below something glitters. To dive, every hero must wear a Diving Helm in the helmet slot, which gives four minutes of air at a time. They are made by Tam Salvor in Yarrim.${who?' Not yet wearing one: '+who+'.':''}`,[BYE]);
+    return say(`A line runs from a buoy down into the water off ${UW_NAMES[id]}, and far below something glitters. To dive, at least one hero must wear a Diving Helm in the helmet slot, which gives four minutes of air at a time. Any hero without a helm will start to drown. They are made by Tam Salvor in Yarrim.${who?' Not yet wearing one: '+who+'.':''}`,[BYE]);
   });
 }
 function SEA_ARRIVE_UW(id){uwBuild(id);const L=LEVELS[id];return {x:L.start.x,y:L.start.y,f:L.start.f}}
@@ -19749,7 +19815,7 @@ STORY.push(
 );
 STORY.push(
   {id:'hollowland',c:()=>G.flags.hlSeen,t:'The Hollow Land',x:'Past the Hollow Abbot, the stair came out on a high ledge in a vast underground dark. Far below, lit by red and purple torches that nobody lights, stood a great orange spire with gargoyles on its ledges and narrow walkways jutting from its towers. A long stair led down to its gate.'},
-  {id:'orangetower',c:()=>(G.flags.hlTop||0)>=1,t:'The Orange Spire',x:'The castle has twenty levels, each smaller than the one below it, each with its number carved on the stone beside the stair. On every level there is a strange room in the middle: a wizard with a riddle, a rope bridge over a chasm, a room full of sand, a room of statues, a deep pit that drops the party a floor, a monster, a treasure. Armoured goblins, cave slimes and orcs lurk in the passages.'},
+  {id:'orangetower',c:()=>(G.flags.hlTop||0)>=1,t:'The Orange Spire',x:'The castle has twenty levels, each with its number carved on the stone beside the stair. The first has one room, the second two, and so on up to ten rooms on the tenth; then the rooms fall away again, down to one room on the nineteenth. The top level has two rooms with a small labyrinth between them. Every level has a strange place, a room (or, on the smallest levels, an alcove in the first room): a wizard with a riddle, a rope bridge over a chasm, a room full of sand, a room of statues, a deep pit that drops the party a floor, a monster, a treasure. Armoured goblins, cave slimes and orcs lurk in the passages.'},
   {id:'towerwizard',c:()=>(G.flags.hlTop||0)>=20,t:'The Wizard at the Top',x:'At the top of the Orange Spire, in the spire, a wizard waits with three questions. Good will opens the way to the next tower. Greed opens the floor, and the party falls two levels.'},
   {id:'violettower',c:()=>G.flags.hlViolet,t:'The Violet Tower',x:'All three answers were given with good will. A door opened in the spire, and a stair led across to a second tower, violet this time, the first of the towers beyond. The road goes on from here, in the next part of the game.'}
 );
@@ -28560,6 +28626,37 @@ function hgttPlace(){
   L.decor.push(d);if(typeof G!=='undefined'&&G.decor&&G.decor!==L.decor&&LEVEL===481){G.decor.push(d);if(typeof buildDecorMap==='function')buildDecorMap()}}
 {const _u=update;update=function(dt){try{if(LEVEL===481&&G.state==='play')hgttPlace()}catch(e){console.error('hgtt',e)}return _u.apply(this,arguments)}}
 
+/* ---- src/desert/divehelms.js ---- */
+/* ==========================================================================
+   DIVING WITH SOME HELMS. A dive needs at least one hero in a Diving Helm or a Bubble Helm. A hero without one can still go down, but drowns:
+   from the moment the party is under water that hero loses health every two seconds (about 4 percent of the maximum), which is not paused
+   by anything except the stream of bubbles at a vent, and the hero is lost when the health runs out. The party's four minutes of air for the
+   helmed heroes work as before. (uwSuited, in underwater.js, now means "somebody wears a helm": it is the gate on every dive line and pool.)
+   ========================================================================== */
+const uwHelmed=h=>!!(h&&h.eq&&h.eq.head&&idef(h.eq.head).dive);
+function uwBare(){if(G.flags.gill)return [];const o=[];G.heroes.forEach((h,i)=>{if(h.alive&&!uwHelmed(h))o.push(i)});return o}
+function uwBareNames(){return uwBare().map(i=>HERO_DEF[i].name).join(', ')}
+ITEMDEF.bubblehelm.price=800;
+ITEMDEF.bubblehelm.d='One great glass bubble with a brass collar that fits over the head. Worn in the helmet slot it lets a hero breathe underwater for four minutes. Air comes back from bubble vents. A hero without a helm who goes under the water starts to drown.';
+ITEMDEF.divehelm.d=(ITEMDEF.divehelm.d||'').replace(/ ?A hero without a helm.*$/,'')+' A hero without a helm who goes under the water starts to drown.';
+(function(){const _t=uwTick;uwTick=function(dt){
+  _t(dt);
+  if(!uwLv(LEVEL)||G.state!=='play'||G.cut||G.talk||G.menu||(G.inv&&G.inv.open)||G.loot||!G.uw)return;
+  const bare=uwBare();if(!bare.length){G.uw.bareT=0;return}
+  if(G.uw.vent){G.uw.bareT=0;return}                       // the bubbles from a vent keep everyone alive
+  G.uw.bareT=(G.uw.bareT||0)+dt;
+  if(G.uw.bareT<2)return;G.uw.bareT=0;
+  let hurt=false;
+  for(const i of bare){const h=G.heroes[i];if(!h.alive)continue;
+    const d=Math.max(2,Math.round(h.max*.04));h.hp-=d;h.hurt=1;hurt=true;
+    try{addFloat(portraitX(i)+19,250,'-'+d,'#6ac8ff')}catch(e){}
+    if(h.hp<=0){h.hp=0;h.alive=false;msg(HERO_DEF[i].name+' has drowned!','#ff8a7a');try{bondFall(i)}catch(e){}if(G.sel===i)nextHero()}
+    else if(!(G.uw.bareWarn=G.uw.bareWarn||{})[i]||h.hp<h.max*.3&&!G.uw.bareWarn['l'+i]){const low=h.hp<h.max*.3;G.uw.bareWarn[low?'l'+i:i]=1;msg(HERO_DEF[i].name+(low?' is nearly drowned!':' is drowning without a helm.'),'#ff9070')}}
+  if(hurt){sfx('hurt');G.shake=.2}
+  if(!livingHeroes().length){later(700,()=>{G.state='dead';sfx('lose')})}
+}})();
+(function(){const _e=uwEnterHook;uwEnterHook=function(n){_e(n);try{if(uwLv(n)&&G.uw){const b=uwBareNames();if(b)msg('Without a helm, '+b+' will start to drown. Air bubbles from a vent keep everyone breathing.','#ff9070')}}catch(e){}}})();
+
 /* ---- src/desert/hgt_rooms.js ---- */
 /* ==========================================================================
    HOLLOW GRASSLANDS ROOMS: SPHERE ROOMS AND STAR ROOMS (prefix hgtr / HGTR). Interior levels 4960 to 4999 for the cities (and a test lobby).
@@ -32542,7 +32639,7 @@ const MPLI={
   cross(x,a,b,s){s=s||1;x.strokeStyle=MPL.INK;x.lineWidth=1.4*s;x.beginPath();x.moveTo(a,b-5*s);x.lineTo(a,b+4*s);x.moveTo(a-2.6*s,b-2*s);x.lineTo(a+2.6*s,b-2*s);x.stroke()},
   star(x,a,b,s,col){s=s||1;x.fillStyle=col||MPL.GOLD;x.strokeStyle=MPL.INK;x.lineWidth=.7;x.beginPath();for(let k=0;k<10;k++){const r=(k%2?1.8:4.2)*s,an=-Math.PI/2+k*Math.PI/5;k?x.lineTo(a+Math.cos(an)*r,b+Math.sin(an)*r):x.moveTo(a+Math.cos(an)*r,b+Math.sin(an)*r)}x.closePath();x.fill();x.stroke()}};
 /* fit a W x H cell grid into the framed area: returns {s, ox, oy, X(cx), Y(cy)} */
-function mplFit(W,H,pad){pad=pad||4;const A=MPL.AREA,s=Math.min((A.w-2*pad)/W,(A.h-2*pad)/H),ox=A.x+(A.w-W*s)/2,oy=A.y+(A.h-H*s)/2;return {s,ox,oy,X:c=>ox+c*s,Y:c=>oy+c*s}}
+function mplFit(W,H,pad){pad=pad||(LEVEL>=440&&LEVEL<=459?14:4);const A=MPL.AREA,s=Math.min((A.w-2*pad)/W,(A.h-2*pad)/H,LEVEL>=440&&LEVEL<=459?9:1e9),ox=A.x+(A.w-W*s)/2,oy=A.y+(A.h-H*s)/2;return {s,ox,oy,X:c=>ox+c*s,Y:c=>oy+c*s}}
 /* a ruled box for the key, notes, etc. in the side margins */
 function mplPanel(x,a,b,w,h){const S=x.canvas.width/DW;let snap=null;try{snap=x.getImageData(Math.round((a-2)*S),Math.round((b-2)*S),Math.round((w+4)*S),Math.round((h+4)*S))}catch(e){}(MPL.pan=MPL.pan||[]).push({x,a,b,w,h,S,snap});x.save();x.fillStyle='rgba(240,230,196,.55)';x.fillRect(a,b,w,h);x.strokeStyle=MPL.GOLD;x.lineWidth=1.2;x.strokeRect(a,b,w,h);x.strokeStyle=MPL.INK;x.lineWidth=.5;x.strokeRect(a+1.8,b+1.8,w-3.6,h-3.6);x.restore()}
 /* notes in a side margin: lines wrapped to w, starting at (a,b); returns the y after the last */
@@ -37675,15 +37772,15 @@ function mpOs440Draw(c,x,L,api){
   /* the party can reach: from the start, over open cells. Hidden doors count as wall, so secret chambers stay solid stone. */
   const reach=new Uint8Array(W*H),st=[[L._start.x,L._start.y]];reach[L._start.y*W+L._start.x]=1;
   while(st.length){const [px,py]=st.pop();for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=px+dx,ny=py+dy;if(nx<0||ny<0||nx>=W||ny>=H||reach[ny*W+nx]||!isOpen(nx,ny))continue;reach[ny*W+nx]=1;st.push([nx,ny])}}
-  for(const q of [[30,41],[13,17]])if(isOpen(q[0],q[1]))reach[q[1]*W+q[0]]=1;
   const floor=(cx,cy)=>cx>=0&&cy>=0&&cx<W&&cy<H&&!!reach[cy*W+cx];
   const X=F.X,Y=F.Y;
   x.save();
   /* the stone mass: warm orange-brown wash over the whole plan, with violet and plum shade */
   x.beginPath();x.rect(X(0),Y(0),W*s,H*s);x.clip();
   x.fillStyle=MPOS440_WARM;x.fillRect(X(0),Y(0),W*s,H*s);
-  for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){if(floor(cx,cy))continue;const h=mpOs440H(cx,cy,1);
-    x.fillStyle=h<.3?'rgba(138,76,32,.5)':h<.55?'rgba(90,50,90,.2)':h<.8?'rgba(230,160,90,.22)':'rgba(70,35,60,.28)';x.fillRect(X(cx),Y(cy),s+.4,s+.4)}
+  const nb=s>6?Math.round(s/4.5):1,bs=s/nb; // (on a small floor the cells are large: the stone is shaded in finer blocks)
+  for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){if(floor(cx,cy))continue;for(let bj=0;bj<nb;bj++)for(let bi=0;bi<nb;bi++){const h=mpOs440H(cx*nb+bi,cy*nb+bj,1);
+    x.fillStyle=h<.3?'rgba(138,76,32,.5)':h<.55?'rgba(90,50,90,.2)':h<.8?'rgba(230,160,90,.22)':'rgba(70,35,60,.28)';x.fillRect(X(cx)+bi*bs,Y(cy)+bj*bs,bs+.4,bs+.4)}}
   /* coursed stone on the mass, and hatching beside every floor */
   x.strokeStyle='rgba(74,40,24,.22)';x.lineWidth=.4;x.beginPath();
   for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){if(floor(cx,cy))continue;const X0=X(cx),Y0=Y(cy),off=(cy&1)?s*.5:0;x.moveTo(X0,Y0+s);x.lineTo(X0+s,Y0+s);x.moveTo(X0+off+s*.3,Y0);x.lineTo(X0+off+s*.3,Y0+s)}
@@ -37713,9 +37810,9 @@ function mpOs440Draw(c,x,L,api){
   x.fillStyle=MPOS440_DARK;x.strokeStyle=MPL.INK;x.lineWidth=.6;for(let i=0;i<W;i+=2){for(const yy of [Y(0)-2.2,Y(H)]){x.fillRect(X(i)+.4,yy,s*.9,2.2);x.strokeRect(X(i)+.4,yy,s*.9,2.2)}}
   for(let j=0;j<H;j+=2){for(const xx of [X(0)-2.2,X(W)]){x.fillRect(xx,Y(j)+.4,2.2,s*.9);x.strokeRect(xx,Y(j)+.4,2.2,s*.9)}}x.restore();
   /* stairs */
-  mpOs440Stair(x,X(30.5),Y(41.5),s,false);mpOs440Stair(x,X(13.5),Y(17.5),s,true);
+  for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){const q=ch(cx,cy);if(q==='0'||q==='1')mpOs440Stair(x,X(cx+.5),Y(cy+.5),Math.min(s,10),q==='1')}
   /* furniture and decoration, only what is in plain sight */
-  const sz=s*.78;
+  const sz=Math.min(s*.78,4.6);
   const at=d=>[X(d.x+.5),Y(d.y+.5)];
   for(const d of L.decor){if(!floor(d.x,d.y))continue;const [a,b]=at(d),k=d.k;
     if(k==='hl_plq1')mpOs440Plaque(x,a,b,sz,'1');
@@ -37741,10 +37838,10 @@ function mpOs440Draw(c,x,L,api){
   /* room names, above each room */
   for(const m of L.mapNames){const t=m.t;api.text(x,t,X(m.x+.5),Y(m.y+.5)-.5,5.4,'#3a1a28','center')}
   /* margins */
-  api.title(x,'The Orange Spire, Floor 1','Banquet halls, a throne hall and a crypt');
+  api.title(x,'The Orange Spire, Floor 1',hlMapSub(L));
   api.compass(x,436,262,12);
   api.panel(x,8,52,78,128);
-  api.notes(x,['The first floor of a haunted castle in the Hollow Land.','You arrive by the stair at the south end. The stair up is in the west, in the study.','Halls are lit by lanterns and candles.','Each floor above is smaller than this one.'],13,62,68,6.2,4);
+  api.notes(x,hlMapNotes(L,['Halls are lit by lanterns and candles.']),13,62,68,6.2,4);
   const key=[['Stair down',(a,b)=>mpOs440Stair(x,a,b,6,false)],['Stair up',(a,b)=>mpOs440Stair(x,a,b,6,true)],['Lantern',(a,b)=>mpOs440Lantern(x,a,b,1.4,false)],['Candle',(a,b)=>mpOs440Candle(x,a,b,1.6)],['Fireplace',(a,b)=>mpOs440Fire(x,a,b,1.5)],['Window',(a,b)=>mpOs440Window(x,a,b,1.5)],['Mirror',(a,b)=>mpOs440Mirror(x,a,b,1.5)],['Plaque',(a,b)=>mpOs440Plaque(x,a,b,1.5)],['Claw marks',(a,b)=>mpOs440Claw(x,a,b,1.5)],['Shelf',(a,b)=>mpOs440Shelf(x,a,b,1.5)],['Table',(a,b)=>mpOs440Feast(x,a,b,1.3)],['Coffin',(a,b)=>mpOs440Coffin(x,a,b,1.3)],['Throne',(a,b)=>mpOs440Throne(x,a,b,1.3)]];
   api.panel(x,392,34,84,20+key.length*11.5);api.text(x,'Key',434,45,7.4,MPL.VERM,'center');let yy=56;
   for(const [t,f] of key){f(404,yy);api.text(x,t,414,yy,6,'#3a2a1c','left');yy+=11.5}
@@ -37754,7 +37851,7 @@ mplInstall({name:'os440',levels:[440],reveal:true,draw:mpOs440Draw});
 /* ---- src/desert/maps_os441.js ---- */
 /* Orange Spire map, floor 2 = level 441. Hand-inked plan from the real rows, decor, lights and room data. Nothing secret is drawn:
    hidden doors stay plain wall, the strange room is only named, and levers, trap spots, notes and enemies are left out. */
-const mpOs441Rm=(L,k)=>{const r=(L._roomsInfo||[]).find(r=>r.n==='The Strange Room');return r&&k.x>=r.x0&&k.x<=r.x1&&k.y>=r.y0&&k.y<=r.y1};
+const mpOs441Rm=(L,k)=>hlInStrange(L,k);
 function mpOs441Icon(c,k,a,b,s,L){
   const INK=MPL.INK,GOLD=MPL.GOLD,line=(w,col)=>{c.lineWidth=w;c.strokeStyle=col||INK};
   c.save();c.lineJoin='round';c.lineCap='round';
@@ -37840,7 +37937,7 @@ mplInstall({name:'os441',levels:[441],reveal:true,draw(cv,x,L,api){
     if(!place(nm,cx,Y(r.y0)-s*.62,5.4))if(!place(nm,cx,Y(r.y1+1)+s*.7,5.4))place(nm,cx,Y(r.y0)-s*1.5,5.4)}
   // ---- title, key, notes, compass ----
   api.title(x,'The Orange Spire, Floor 2',null,10,8);
-  api.text(x,'Gallery, cells, study, banquet and throne halls',14,36,5.6,'#5a3a1c','left');
+  api.text(x,hlMapSub(L),14,36,5.6,'#5a3a1c','left');
   api.panel(x,6,48,82,112);api.text(x,'KEY',47,56,6.4,MPL.LAPIS);
   const ky=[['stair','Stairs'],['stone','Level stone'],['rug','Rug'],['door','Door frame'],['torch','Torch or candle'],['hl_pt0','Portrait'],['hl_p_mirror','Mirror'],['hl_p_window','Window'],['hl_p_banner','Banner'],['chest','Chest']];
   ky.forEach(([k,t],n)=>{const yy=66+n*9.2,ix=17;if(k==='stair')mpOs441Stair(x,ix,yy,5,false);else if(k==='stone'){x.fillStyle='#8a8478';x.strokeStyle=INK;x.lineWidth=.6;x.beginPath();x.arc(ix,yy,2.8,0,6.3);x.fill();x.stroke()}
@@ -37848,7 +37945,7 @@ mplInstall({name:'os441',levels:[441],reveal:true,draw(cv,x,L,api){
     else if(k==='door'){x.strokeStyle=MPL.GOLD;x.lineWidth=1;x.beginPath();x.moveTo(ix-4,yy);x.lineTo(ix+4,yy);x.stroke();x.fillStyle=MPL.GOLD;x.beginPath();x.arc(ix-4,yy,1,0,6.3);x.arc(ix+4,yy,1,0,6.3);x.fill()}
     else if(k==='torch'){x.fillStyle='#ffb83a';x.strokeStyle=INK;x.lineWidth=.4;x.beginPath();x.moveTo(ix,yy-3.5);x.quadraticCurveTo(ix+2,yy,ix,yy+2);x.quadraticCurveTo(ix-2,yy,ix,yy-3.5);x.fill();x.stroke()}
     else mpOs441Icon(x,k,ix,yy,7.5,L);api.text(x,t,28,yy,5.6,'#3a2a1c','left')});
-  api.notes(x,['Floor 2 of 20. Each floor of the spire is smaller than the one below it.','You arrive by the stair at the bottom of this plan. The stair up is at the far top left.','Rooms you have not yet walked past stay covered.'],394,50,76,5.8,3);
+  api.notes(x,hlMapNotes(L),394,50,76,5.8,3);
   api.compass(x,436,250,13);
 }});
 
@@ -38008,7 +38105,7 @@ function mpOs442Draw(c,x,L,api){
     const tw=40-19*1.55,top=base-20*bh;x.fillStyle='#6a3a6a';x.strokeStyle=INK;x.lineWidth=.8;x.beginPath();x.moveTo(cx-tw/2-1,top);x.lineTo(cx,top-13);x.lineTo(cx+tw/2+1,top);x.closePath();x.fill();x.stroke();
     x.strokeStyle=INK;x.lineWidth=.8;x.beginPath();x.moveTo(cx,top-13);x.lineTo(cx,top-19);x.stroke();x.fillStyle=VERM;x.beginPath();x.moveTo(cx,top-19);x.lineTo(cx+7,top-17);x.lineTo(cx,top-15);x.fill();
     x.restore();api.text(x,'Floor '+FL+' of 20',cx,base+8,6.2,'#3a1830','center')}
-  api.notes(x,['Each floor of the spire is smaller than the floor below it.','You arrive by the stair down. The stair up is at the far end.','Torches burn red and violet. Gold bars mark doorways.','Rooms fill in on this map as you walk through them.'],396,130,72,6.2,3);
+  api.notes(x,hlMapNotes(L,['Torches burn red and violet. Gold bars mark doorways.','Rooms fill in on this map as you walk through them.']),396,130,72,6.2,3);
   api.compass(x,434,272,10);
 }
 mplInstall({name:'os442',levels:[442],reveal:true,draw:mpOs442Draw});
@@ -38144,7 +38241,7 @@ mplInstall({name:'os443',levels:[443],reveal:true,draw(c,x,L,api){
   api.panel(x,5,ky,82,13+keys.length*12.6);api.text(x,'KEY',46,ky+8,6.6,MPL.VERM);
   keys.forEach(([k,t],q)=>{const cy=ky+22+q*12.6;mpOs443KeyIcon(x,9,15,cy,k);api.text(x,t,25,cy,6.2,'#3a2a1c','left')});
   api.panel(x,392,34,84,120);
-  api.notes(x,['The Orange Spire has 20 floors, and each one is smaller than the floor below it.','You come in by the stair down, at the bottom of this plan.','The stair up is in the room at the top right.','Stone plaques by each stair give the floor number.'],396,44,72,6.2,4);
+  api.notes(x,hlMapNotes(L,['Stone plaques by each stair give the floor number.']),396,44,72,6.2,4);
   api.compass(x,434,236,17)}});
 
 /* ---- src/desert/maps_os444.js ---- */
@@ -38303,7 +38400,7 @@ function mpOs444Draw(c,x,L,api){
     x.restore()}
 
   // ---- title, key, notes, compass ----
-  api.title(x,'The Orange Spire, Floor 5','Gallery, halls, cells and crypts');
+  api.title(x,'The Orange Spire, Floor 5',hlMapSub(L));
   api.compass(x,436,262,12);
   {const rows=[['door','Door'],['sconce','Torch or candle sconce'],['rug','Rug'],['plaque','Plaque or portrait'],['coffin','Coffin or tomb'],['down','Stair down'],['up','Stair up']];
     const ph=14+rows.length*12;api.panel(x,8,66,80,ph);api.text(x,'Key',48,75,7,'#3a1408');
@@ -38316,8 +38413,7 @@ function mpOs444Draw(c,x,L,api){
       else{stairKey(ix,ry,k==='up')}
       x.restore();api.text(x,t,ix+11,ry,5.8,'#3a1408','left')});
     function stairKey(ix,ry,up){x.fillStyle='#e6d2a4';x.fillRect(ix-4,ry-4,8,8);x.strokeRect(ix-4,ry-4,8,8);x.beginPath();for(let q=1;q<4;q++){x.moveTo(ix-4,ry-4+q*2);x.lineTo(ix+4,ry-4+q*2)}x.stroke();x.fillStyle=VERM;x.beginPath();if(up){x.moveTo(ix,ry-3);x.lineTo(ix+2.6,ry+1);x.lineTo(ix-2.6,ry+1)}else{x.moveTo(ix,ry+3);x.lineTo(ix+2.6,ry-1);x.lineTo(ix-2.6,ry-1)}x.closePath();x.fill();x.stroke()}}
-  {const notes=['You arrive by the stair at the bottom of the plan.','A long hall runs east and west across the middle of the floor.','Halls, a study, cells and two crypts open off it.','The stair up is at the far north end, down a narrow corridor.','Torches and candles light the halls.'];
-    api.notes(x,notes,397,46,74,6,3.5)}
+  {api.notes(x,hlMapNotes(L,['Torches and candles light the halls.']),397,46,74,6,3.5)}
 }
 mplInstall({name:'os444',levels:[444],reveal:true,draw:mpOs444Draw});
 
@@ -38447,7 +38543,7 @@ draw(c,x,L,api){
   x.restore();
   /* margins */
   api.title(x,'The Orange Spire, Floor 6','',12,12);
-  mplText(x,'Throne Hall, banquet halls,',12,44,6.4,'#5a3a1c','left');mplText(x,'cells and two galleries',12,52,6.4,'#5a3a1c','left');
+  {let ty=44;for(const l of api.wrap(x,hlMapSub(L),76,6.4)){mplText(x,l,12,ty,6.4,'#5a3a1c','left');ty+=8}}
   const kx=5,ky=62;api.panel(x,kx,ky,84,196);api.text(x,'KEY',kx+42,ky+9,7,MPL.LAPIS);
   const ks=7,ki=[
     ['Stair up',()=>mpOs445Stair(x,a=>kx+8+a,b=>ky+b,0,17,ks+1,true)],
@@ -38465,7 +38561,7 @@ draw(c,x,L,api){
   const gaps=[21,34,53,70,93,106,120,133,148,162,176,190];
   ki.forEach((r,i)=>{r[1]();api.text(x,r[0],kx+24,ky+gaps[i],6.2,'#3a2a1c','left')});
   const nx=391,nw=84;api.panel(x,nx-2,50,nw,150);
-  mplNotes(x,['The party arrives at the stair in the south.','The stair up is behind the throne in the north.','Only some rooms have names.','Torches and candles light the rooms.'],nx+3,69,nw-9,6.2,4);
+  mplNotes(x,hlMapNotes(L,['Only some rooms have names.','Torches and candles light the rooms.']),nx+3,69,nw-9,6.2,4);
   api.compass(x,436,242,15);
 }});
 
@@ -38543,7 +38639,7 @@ function mpOs446Draw(c,x,L,api){
     x.fillStyle=MPL.GOLD2;const lw=ww>hh;for(let k=1;k<(lw?w*2:h*2);k++){const t=k*s/2,mx=lw?a+t:a+ww/2,my=lw?b+hh/2:b+t;x.beginPath();x.moveTo(mx,my-1.7);x.lineTo(mx+1.4,my);x.lineTo(mx,my+1.7);x.lineTo(mx-1.4,my);x.closePath();x.fill()}
     x.strokeStyle=MPL.GOLD;x.lineWidth=.5;x.beginPath();if(lw){for(let yy=b+1;yy<b+hh;yy+=1.6){x.moveTo(a-1.4,yy);x.lineTo(a,yy);x.moveTo(a+ww,yy);x.lineTo(a+ww+1.4,yy)}}else{for(let xx=a+1;xx<a+ww;xx+=1.6){x.moveTo(xx,b-1.4);x.lineTo(xx,b);x.moveTo(xx,b+hh);x.lineTo(xx,b+hh+1.4)}}x.stroke();
     x.strokeStyle=MPL.INK;x.lineWidth=.4;x.strokeRect(a,b,ww,hh);x.restore()};
-  rug(19.2,15.1,3.6,1.8);rug(20.25,3.1,1.5,1.8);rug(19.9,23.5,1.2,1.7);rug(8.6,18.6,2.8,1.4);
+  for(const r of rooms){const w=r.x1-r.x0+1,h=r.y1-r.y0+1;if(r.n==='The Strange Room'||w<5||h<4)continue;rug(r.x0+1.3,(r.y0+r.y1+1)/2-.7,w-2.6,1.4)} // (a rug along the middle of each larger room)
   /* ---- inked edges: every floor boundary twice, a heavy line and a lighter offset line, both wobbly ---- */
   for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){if(!fl(cx,cy))continue;const X0=X(cx),Y0=Y(cy),sd=cx*97+cy*13;
     for(const [dx,dy,a,b,c2,d] of [[0,-1,X0,Y0,X0+s,Y0],[0,1,X0,Y0+s,X0+s,Y0+s],[-1,0,X0,Y0,X0,Y0+s],[1,0,X0+s,Y0,X0+s,Y0+s]]){if(fl(cx+dx,cy+dy))continue;
@@ -38584,18 +38680,18 @@ function mpOs446Draw(c,x,L,api){
     else if(/^hl_claw/.test(k))onWall(cx,cy,()=>mpOs446Claws(x,0,-.8,s*.13))}
   /* ---- names: from mapNames, set where the rooms are ---- */
   const nm=(L.mapNames||[]).filter(n=>fl(n.x,n.y)||n.t==='The Stair Up'||n.t==='The Strange Room'||/^Stair/.test(n.t));
-  const put={'Stair (7)':[20.5,22.1,5.4],'The Strange Room':[6.5,5.1,6.2],'The Stair Up':[34.8,1.4,5.6],'The Study':[21,1.4,5.8],'Gallery of Rulers':[20.9,13.3,6],'Banquet Hall':[9.5,17.1,6],'The Cells':[30.5,9.6,6],'The Haunted Room':[13.5,1.3,5.6]};
-  let hr=0;for(const n of nm){let p=put[n.t]||[n.x+.5,n.y+.5,6];if(n.t==='The Haunted Room'){p=hr++?[10.5,22.5,5.6]:[13.5,1.3,5.6]}api.text(x,n.t,X(p[0]),Y(p[1]),p[2],MPL.VERM,'center')}
+  const put={}; // (the names stand where mapNames puts them: the rooms are different on every floor)
+  let hr=0;for(const n of nm){let p=put[n.t]||[n.x+.5,n.y+.5,6];api.text(x,n.t,X(p[0]),Y(p[1]),p[2],MPL.VERM,'center')}
   /* ---- crenellated outer edge of the spire ---- */
   x.save();x.fillStyle='#8a4c20';x.strokeStyle=MPL.INK;x.lineWidth=.6;for(let i=0;i<W;i+=1){for(const yy of [F.oy-1.6,F.oy+H*s]){x.fillRect(X(i)+s*.15,yy,s*.7,1.6);x.strokeRect(X(i)+s*.15,yy,s*.7,1.6)}}
   for(let j=0;j<H;j++){for(const xx of [F.ox-1.6,F.ox+W*s]){x.fillRect(xx,Y(j)+s*.15,1.6,s*.7);x.strokeRect(xx,Y(j)+s*.15,1.6,s*.7)}}x.restore();
   mpOs446Line(x,F.ox,F.oy,F.ox+W*s,F.oy,1.6,MPL.INK,901,.5);mpOs446Line(x,F.ox,F.oy+H*s,F.ox+W*s,F.oy+H*s,1.6,MPL.INK,902,.5);mpOs446Line(x,F.ox,F.oy,F.ox,F.oy+H*s,1.6,MPL.INK,903,.5);mpOs446Line(x,F.ox+W*s,F.oy,F.ox+W*s,F.oy+H*s,1.6,MPL.INK,904,.5);
   /* ---- margins: title, key (left); notes and compass (right) ---- */
   api.title(x,'The Orange Spire, Floor 7','');
-  {const lines=api.wrap(x,'The Study, the Gallery of Rulers, the Banquet Hall and the Cells',76,6.4);let y=45;for(const l of lines){api.text(x,l,10,y,6.2,'#5a3a1c','left');y+=8}}
+  {const lines=api.wrap(x,hlMapSub(L),76,6.4);let y=45;for(const l of lines){api.text(x,l,10,y,6.2,'#5a3a1c','left');y+=8}}
   const key=[['Stair down',(a,b)=>mpOs446Stair(x,a,b,.7,false)],['Stair up',(a,b)=>mpOs446Stair(x,a,b,.7,true)],['Arrival stone',(a,b)=>mpOs446Stone(x,a,b,.8,7)],['Doorway',(a,b)=>mpOs446Door(x,a,b,8,false)],['Standing lamp',(a,b)=>mpOs446Lamp(x,a,b+1,.9,false,false)],['Candle',(a,b)=>mpOs446Candle(x,a,b,.9)],['Hearth',(a,b)=>mpOs446Hearth(x,a,b,.8)],['Mirror',(a,b)=>mpOs446Mirror(x,a,b,.9)],['Portrait',(a,b)=>mpOs446Portrait(x,a,b,.9)],['Window',(a,b)=>mpOs446Window(x,a,b,.8)],['Bookcase',(a,b)=>mpOs446Shelf(x,a,b,.8)],['Rug',(a,b)=>{x.fillStyle='#b8321e';x.strokeStyle=MPL.GOLD;x.lineWidth=.8;x.fillRect(a-4,b-2.4,8,4.8);x.strokeRect(a-3.2,b-1.8,6.4,3.6)}]];
   api.panel(x,6,78,82,18+key.length*13.2);api.text(x,'Key',47,88,7.4,MPL.VERM,'center');let ky=100;for(const [t,f] of key){f(18,ky);api.text(x,t,29,ky,6.2,'#3a2a1c','left');ky+=13.2}
-  api.notes(x,['Floor 7 of the Orange Spire, a haunted castle.','You arrive on the stair in the south. The stair up is at the far end, in the north east.','Long halls link the rooms. Doorways are marked in gold.','Only the parts you have walked through show on the map.'],397,45,74,6.1,4);
+  api.notes(x,hlMapNotes(L,['Long halls link the rooms. Doorways are marked in gold.','Only the parts you have walked through show on the map.']),397,45,74,6.1,4);
   api.compass(x,436,262,12);
   /* small flourishes: bats over the margins */
   for(const [bx,by] of [[400,206],[452,224],[104,276]]){x.strokeStyle=MPL.INK;x.lineWidth=1;x.beginPath();x.moveTo(bx-5,by);x.quadraticCurveTo(bx-2,by-4,bx,by);x.quadraticCurveTo(bx+2,by-4,bx+5,by);x.stroke()}
@@ -38605,7 +38701,7 @@ mplInstall({name:'os446',levels:[446],reveal:true,draw:mpOs446Draw,foot:'You are
 /* ---- src/desert/maps_os447.js ---- */
 /* Orange Spire map, floor 8 = level 447. Hand-inked plan from the real rows, decor, lights and room data. Nothing secret is drawn:
    hidden doors stay plain wall, the strange room is only named, and levers, trap spots, notes and enemies are left out. */
-const mpOs447Rm=(L,k)=>{const r=(L._roomsInfo||[]).find(r=>r.n==='The Strange Room');return r&&k.x>=r.x0&&k.x<=r.x1&&k.y>=r.y0&&k.y<=r.y1};
+const mpOs447Rm=(L,k)=>hlInStrange(L,k);
 function mpOs447Icon(c,k,a,b,s,L){
   const INK=MPL.INK,GOLD=MPL.GOLD,line=(w,col)=>{c.lineWidth=w;c.strokeStyle=col||INK};
   c.save();c.lineJoin='round';c.lineCap='round';
@@ -38693,7 +38789,7 @@ mplInstall({name:'os447',levels:[447],reveal:true,draw(cv,x,L,api){
   const A=MPL.AREA;for(let i=0;i<rooms.length;i++){const r=rooms[i];if(!r.n||!flo(r.x0,r.y0))continue;const hs2=su&&su.x>=r.x0&&su.x<=r.x1&&su.y>=r.y0-1&&su.y<=r.y1,nm=hs2?r.n+' and Stair Up':r.n;x.font=`bold 5.4px ${FUI}`;const w=x.measureText(nm).width;let cx=X((r.x0+r.x1+1)/2);cx=Math.max(A.x+w/2+3,Math.min(A.x+A.w-w/2-3,cx));api.text(x,nm,cx,Y(r.y0)-s*(hs2&&su.y<r.y0?1.7:.62),5.4,'#3a1c0c')}
   // ---- title, key, notes, compass ----
   api.title(x,'The Orange Spire, Floor 8',null,10,8);
-  api.text(x,'Galleries, studies, banquet and throne halls',14,36,5.6,'#5a3a1c','left');
+  api.text(x,hlMapSub(L),14,36,5.6,'#5a3a1c','left');
   api.panel(x,6,48,82,112);api.text(x,'KEY',47,56,6.4,MPL.LAPIS);
   const ky=[['stair','Stairs'],['stone','Level stone'],['rug','Rug'],['door','Door frame'],['torch','Torch or candle'],['hl_pt0','Portrait'],['hl_p_mirror','Mirror'],['hl_p_window','Window'],['hl_p_banner','Banner'],['chest','Chest']];
   ky.forEach(([k,t],n)=>{const yy=66+n*9.2,ix=17;if(k==='stair')mpOs447Stair(x,ix,yy,5,false);else if(k==='stone'){x.fillStyle='#8a8478';x.strokeStyle=INK;x.lineWidth=.6;x.beginPath();x.arc(ix,yy,2.8,0,6.3);x.fill();x.stroke()}
@@ -38701,14 +38797,14 @@ mplInstall({name:'os447',levels:[447],reveal:true,draw(cv,x,L,api){
     else if(k==='door'){x.strokeStyle=MPL.GOLD;x.lineWidth=1;x.beginPath();x.moveTo(ix-4,yy);x.lineTo(ix+4,yy);x.stroke();x.fillStyle=MPL.GOLD;x.beginPath();x.arc(ix-4,yy,1,0,6.3);x.arc(ix+4,yy,1,0,6.3);x.fill()}
     else if(k==='torch'){x.fillStyle='#ffb83a';x.strokeStyle=INK;x.lineWidth=.4;x.beginPath();x.moveTo(ix,yy-3.5);x.quadraticCurveTo(ix+2,yy,ix,yy+2);x.quadraticCurveTo(ix-2,yy,ix,yy-3.5);x.fill();x.stroke()}
     else mpOs447Icon(x,k,ix,yy,7.5,L);api.text(x,t,28,yy,5.6,'#3a2a1c','left')});
-  api.notes(x,['Floor 8 of 20. Each floor of the spire is smaller than the one below it.','You arrive by the stair at the bottom of this plan. The stair up is at the top, in the study.','Rooms you have not yet walked past stay covered.'],394,50,76,5.8,3);
+  api.notes(x,hlMapNotes(L),394,50,76,5.8,3);
   api.compass(x,436,250,13);
 }});
 
 /* ---- src/desert/maps_os448.js ---- */
 /* Orange Spire map, floor 9 = level 448. Hand-inked plan from the real rows, decor, lights and room data. Nothing secret is drawn:
    hidden doors stay plain wall, the strange room is only named, and levers, trap spots, notes and enemies are left out. */
-const mpOs448Rm=(L,k)=>{const r=(L._roomsInfo||[]).find(r=>r.n==='The Strange Room');return r&&k.x>=r.x0&&k.x<=r.x1&&k.y>=r.y0&&k.y<=r.y1};
+const mpOs448Rm=(L,k)=>hlInStrange(L,k);
 function mpOs448Icon(c,k,a,b,s,L){
   const INK=MPL.INK,GOLD=MPL.GOLD,line=(w,col)=>{c.lineWidth=w;c.strokeStyle=col||INK};
   c.save();c.lineJoin='round';c.lineCap='round';
@@ -38796,7 +38892,7 @@ mplInstall({name:'os448',levels:[448],reveal:true,draw(cv,x,L,api){
   const A=MPL.AREA;for(let i=0;i<rooms.length;i++){const r=rooms[i];if(!r.n||!flo(r.x0,r.y0))continue;const nm=su&&su.x>=r.x0&&su.x<=r.x1&&su.y>=r.y0-1&&su.y<=r.y1?r.n+' and Stair Up':r.n;const hi=nm!==r.n;x.font=`bold 5.4px ${FUI}`;const w=x.measureText(nm).width;let cx=X((r.x0+r.x1+1)/2);cx=Math.max(A.x+w/2+3,Math.min(A.x+A.w-w/2-3,cx));api.text(x,nm,cx,Y(r.y0)-s*(hi?1.7:.62),5.4,'#3a1c0c')}
   // ---- title, key, notes, compass ----
   api.title(x,'The Orange Spire, Floor 9',null,10,8);
-  api.text(x,'Gallery of Rulers, cells, studies and banquet halls',14,36,5.6,'#5a3a1c','left');
+  api.text(x,hlMapSub(L),14,36,5.6,'#5a3a1c','left');
   api.panel(x,6,48,82,112);api.text(x,'KEY',47,56,6.4,MPL.LAPIS);
   const ky=[['stair','Stairs'],['stone','Level stone'],['rug','Rug'],['door','Door frame'],['torch','Torch or candle'],['hl_pt0','Portrait'],['hl_p_mirror','Mirror'],['hl_p_window','Window'],['hl_p_banner','Banner'],['chest','Chest']];
   ky.forEach(([k,t],n)=>{const yy=66+n*9.2,ix=17;if(k==='stair')mpOs448Stair(x,ix,yy,5,false);else if(k==='stone'){x.fillStyle='#8a8478';x.strokeStyle=INK;x.lineWidth=.6;x.beginPath();x.arc(ix,yy,2.8,0,6.3);x.fill();x.stroke()}
@@ -38804,14 +38900,14 @@ mplInstall({name:'os448',levels:[448],reveal:true,draw(cv,x,L,api){
     else if(k==='door'){x.strokeStyle=MPL.GOLD;x.lineWidth=1;x.beginPath();x.moveTo(ix-4,yy);x.lineTo(ix+4,yy);x.stroke();x.fillStyle=MPL.GOLD;x.beginPath();x.arc(ix-4,yy,1,0,6.3);x.arc(ix+4,yy,1,0,6.3);x.fill()}
     else if(k==='torch'){x.fillStyle='#ffb83a';x.strokeStyle=INK;x.lineWidth=.4;x.beginPath();x.moveTo(ix,yy-3.5);x.quadraticCurveTo(ix+2,yy,ix,yy+2);x.quadraticCurveTo(ix-2,yy,ix,yy-3.5);x.fill();x.stroke()}
     else mpOs448Icon(x,k,ix,yy,7.5,L);api.text(x,t,28,yy,5.6,'#3a2a1c','left')});
-  api.notes(x,['Floor 9 of 20. Each floor of the spire is smaller than the one below it.','You arrive by the stair at the bottom of this plan. The stair up is at the far top left.','Rooms you have not yet walked past stay covered.'],394,50,76,5.8,3);
+  api.notes(x,hlMapNotes(L),394,50,76,5.8,3);
   api.compass(x,436,250,13);
 }});
 
 /* ---- src/desert/maps_os449.js ---- */
 /* Orange Spire map, floor 10 = level 449. Hand-inked plan from the real rows, decor, lights and room data. Nothing secret is drawn:
    hidden doors stay plain wall, the strange room is only named, and levers, trap spots, notes and enemies are left out. */
-const mpOs449Rm=(L,k)=>{const r=(L._roomsInfo||[]).find(r=>r.n==='The Strange Room');return r&&k.x>=r.x0&&k.x<=r.x1&&k.y>=r.y0&&k.y<=r.y1};
+const mpOs449Rm=(L,k)=>hlInStrange(L,k);
 function mpOs449Icon(c,k,a,b,s,L){
   const INK=MPL.INK,GOLD=MPL.GOLD,line=(w,col)=>{c.lineWidth=w;c.strokeStyle=col||INK};
   c.save();c.lineJoin='round';c.lineCap='round';
@@ -38899,7 +38995,7 @@ mplInstall({name:'os449',levels:[449],reveal:true,draw(cv,x,L,api){
   const A=MPL.AREA;for(let i=0;i<rooms.length;i++){const r=rooms[i];if(!r.n||!flo(r.x0,r.y0))continue;const hs2=su&&su.x>=r.x0&&su.x<=r.x1&&su.y>=r.y0-1&&su.y<=r.y1,nm=hs2?r.n+' and Stair Up':r.n;x.font=`bold 5.4px ${FUI}`;const w=x.measureText(nm).width;let cx=X((r.x0+r.x1+1)/2);cx=Math.max(A.x+w/2+3,Math.min(A.x+A.w-w/2-3,cx));api.text(x,nm,cx,Y(r.y0)-s*(hs2&&su.y<r.y0?1.7:.62),5.4,'#3a1c0c')}
   // ---- title, key, notes, compass ----
   api.title(x,'The Orange Spire, Floor 10',null,10,8);
-  api.text(x,'Cells, galleries, a study and a throne hall',14,36,5.6,'#5a3a1c','left');
+  api.text(x,hlMapSub(L),14,36,5.6,'#5a3a1c','left');
   api.panel(x,6,48,82,112);api.text(x,'KEY',47,56,6.4,MPL.LAPIS);
   const ky=[['stair','Stairs'],['stone','Level stone'],['rug','Rug'],['door','Door frame'],['torch','Torch or candle'],['hl_pt0','Portrait'],['hl_p_cage','Cage'],['hl_p_window','Window'],['hl_p_banner','Banner'],['chest','Chest']];
   ky.forEach(([k,t],n)=>{const yy=66+n*9.2,ix=17;if(k==='stair')mpOs449Stair(x,ix,yy,5,false);else if(k==='stone'){x.fillStyle='#8a8478';x.strokeStyle=INK;x.lineWidth=.6;x.beginPath();x.arc(ix,yy,2.8,0,6.3);x.fill();x.stroke()}
@@ -38907,14 +39003,14 @@ mplInstall({name:'os449',levels:[449],reveal:true,draw(cv,x,L,api){
     else if(k==='door'){x.strokeStyle=MPL.GOLD;x.lineWidth=1;x.beginPath();x.moveTo(ix-4,yy);x.lineTo(ix+4,yy);x.stroke();x.fillStyle=MPL.GOLD;x.beginPath();x.arc(ix-4,yy,1,0,6.3);x.arc(ix+4,yy,1,0,6.3);x.fill()}
     else if(k==='torch'){x.fillStyle='#ffb83a';x.strokeStyle=INK;x.lineWidth=.4;x.beginPath();x.moveTo(ix,yy-3.5);x.quadraticCurveTo(ix+2,yy,ix,yy+2);x.quadraticCurveTo(ix-2,yy,ix,yy-3.5);x.fill();x.stroke()}
     else mpOs449Icon(x,k,ix,yy,7.5,L);api.text(x,t,28,yy,5.6,'#3a2a1c','left')});
-  api.notes(x,['Floor 10 of 20. Each floor of the spire is smaller than the one below it.','You arrive by the stair at the bottom of this plan. The stair up is at the top left, in the throne hall.','Rooms you have not yet walked past stay covered.'],394,50,76,5.8,3);
+  api.notes(x,hlMapNotes(L),394,50,76,5.8,3);
   api.compass(x,436,250,13);
 }});
 
 /* ---- src/desert/maps_os450.js ---- */
 /* Orange Spire map, floor 11 = level 450. Hand-inked plan from the real rows, decor, lights and room data. Nothing secret is drawn:
    hidden doors stay plain wall, the strange room is only named, and levers, trap spots, notes and enemies are left out. */
-const mpOs450Rm=(L,k)=>{const r=(L._roomsInfo||[]).find(r=>r.n==='The Strange Room');return r&&k.x>=r.x0&&k.x<=r.x1&&k.y>=r.y0&&k.y<=r.y1};
+const mpOs450Rm=(L,k)=>hlInStrange(L,k);
 function mpOs450Icon(c,k,a,b,s,L){
   const INK=MPL.INK,GOLD=MPL.GOLD,line=(w,col)=>{c.lineWidth=w;c.strokeStyle=col||INK};
   c.save();c.lineJoin='round';c.lineCap='round';
@@ -39002,7 +39098,7 @@ mplInstall({name:'os450',levels:[450],reveal:true,draw(cv,x,L,api){
   const A=MPL.AREA;for(let i=0;i<rooms.length;i++){const r=rooms[i];if(!r.n||!flo(r.x0,r.y0))continue;const nm=r.n;const sup=su&&su.x>=r.x0&&su.x<=r.x1&&su.y===r.y0-1;x.font=`bold 5.4px ${FUI}`;const w=x.measureText(nm).width;let cx=X((r.x0+r.x1+1)/2);cx=Math.max(A.x+w/2+3,Math.min(A.x+A.w-w/2-3,cx));api.text(x,nm,cx,Y(r.y0)+(sup?s*.5:-s*.62),5.4,'#3a1c0c')}
   // ---- title, key, notes, compass ----
   api.title(x,'The Orange Spire, Floor 11',null,10,8);
-  {const nm=[...new Set((L.mapNames||[]).map(m=>m.t).filter(t=>t&&!/^Stair|Strange/.test(t)))].slice(0,3).join(', ');api.text(x,nm||'Halls and passages',14,36,5.6,'#5a3a1c','left')}
+  api.text(x,hlMapSub(L),14,36,5.6,'#5a3a1c','left');
   api.panel(x,6,48,82,112);api.text(x,'KEY',47,56,6.4,MPL.LAPIS);
   const ky=[['stair','Stairs'],['stone','Level stone'],['rug','Rug'],['door','Door frame'],['torch','Torch or candle'],['hl_pt0','Portrait'],['hl_p_mirror','Mirror'],['hl_p_window','Window'],['hl_p_banner','Banner'],['chest','Chest']];
   ky.forEach(([k,t],n)=>{const yy=66+n*9.2,ix=17;if(k==='stair')mpOs450Stair(x,ix,yy,5,false);else if(k==='stone'){x.fillStyle='#8a8478';x.strokeStyle=INK;x.lineWidth=.6;x.beginPath();x.arc(ix,yy,2.8,0,6.3);x.fill();x.stroke()}
@@ -39010,14 +39106,14 @@ mplInstall({name:'os450',levels:[450],reveal:true,draw(cv,x,L,api){
     else if(k==='door'){x.strokeStyle=MPL.GOLD;x.lineWidth=1;x.beginPath();x.moveTo(ix-4,yy);x.lineTo(ix+4,yy);x.stroke();x.fillStyle=MPL.GOLD;x.beginPath();x.arc(ix-4,yy,1,0,6.3);x.arc(ix+4,yy,1,0,6.3);x.fill()}
     else if(k==='torch'){x.fillStyle='#ffb83a';x.strokeStyle=INK;x.lineWidth=.4;x.beginPath();x.moveTo(ix,yy-3.5);x.quadraticCurveTo(ix+2,yy,ix,yy+2);x.quadraticCurveTo(ix-2,yy,ix,yy-3.5);x.fill();x.stroke()}
     else mpOs450Icon(x,k,ix,yy,7.5,L);api.text(x,t,28,yy,5.6,'#3a2a1c','left')});
-  api.notes(x,['Floor 11 of 20. Each floor of the spire is smaller than the one below it.','You arrive by the stair at the bottom of this plan. The stair up is at the far end of the floor.','Rooms you have not yet walked past stay covered.'],394,50,76,5.8,3);
+  api.notes(x,hlMapNotes(L),394,50,76,5.8,3);
   api.compass(x,436,250,13);
 }});
 
 /* ---- src/desert/maps_os451.js ---- */
 /* Orange Spire map, floor 12 = level 451. Hand-inked plan from the real rows, decor, lights and room data. Nothing secret is drawn:
    hidden doors stay plain wall, the strange room is only named, and levers, trap spots, notes and enemies are left out. */
-const mpOs451Rm=(L,k)=>{const r=(L._roomsInfo||[]).find(r=>r.n==='The Strange Room');return r&&k.x>=r.x0&&k.x<=r.x1&&k.y>=r.y0&&k.y<=r.y1};
+const mpOs451Rm=(L,k)=>hlInStrange(L,k);
 function mpOs451Icon(c,k,a,b,s,L){
   const INK=MPL.INK,GOLD=MPL.GOLD,line=(w,col)=>{c.lineWidth=w;c.strokeStyle=col||INK};
   c.save();c.lineJoin='round';c.lineCap='round';
@@ -39105,7 +39201,7 @@ mplInstall({name:'os451',levels:[451],reveal:true,draw(cv,x,L,api){
   const A=MPL.AREA;for(let i=0;i<rooms.length;i++){const r=rooms[i];if(!r.n||!flo(r.x0,r.y0))continue;const hasUp=su&&su.x>=r.x0&&su.x<=r.x1&&su.y>=r.y0-1&&su.y<=r.y1,nm=hasUp?r.n+' and Stair Up':r.n;x.font=`bold 5.4px ${FUI}`;const w=x.measureText(nm).width;let cx=X((r.x0+r.x1+1)/2);cx=Math.max(A.x+w/2+3,Math.min(A.x+A.w-w/2-3,cx));api.text(x,nm,cx,(hasUp&&su.y<r.y0?Y(su.y):Y(r.y0))-s*.62,5.4,'#3a1c0c')}
   // ---- title, key, notes, compass ----
   api.title(x,'The Orange Spire, Floor 12',null,10,8);
-  {const nm=[...new Set((L.mapNames||[]).map(m=>m.t).filter(t=>t&&!/^Stair|Strange/.test(t)))].slice(0,3).join(', ');api.text(x,nm||'Halls and passages',14,36,5.6,'#5a3a1c','left')}
+  api.text(x,hlMapSub(L),14,36,5.6,'#5a3a1c','left');
   api.panel(x,6,48,82,112);api.text(x,'KEY',47,56,6.4,MPL.LAPIS);
   const ky=[['stair','Stairs'],['stone','Level stone'],['rug','Rug'],['door','Door frame'],['torch','Torch or candle'],['hl_pt0','Portrait'],['hl_p_mirror','Mirror'],['hl_p_window','Window'],['hl_p_banner','Banner'],['chest','Chest']];
   ky.forEach(([k,t],n)=>{const yy=66+n*9.2,ix=17;if(k==='stair')mpOs451Stair(x,ix,yy,5,false);else if(k==='stone'){x.fillStyle='#8a8478';x.strokeStyle=INK;x.lineWidth=.6;x.beginPath();x.arc(ix,yy,2.8,0,6.3);x.fill();x.stroke()}
@@ -39113,14 +39209,14 @@ mplInstall({name:'os451',levels:[451],reveal:true,draw(cv,x,L,api){
     else if(k==='door'){x.strokeStyle=MPL.GOLD;x.lineWidth=1;x.beginPath();x.moveTo(ix-4,yy);x.lineTo(ix+4,yy);x.stroke();x.fillStyle=MPL.GOLD;x.beginPath();x.arc(ix-4,yy,1,0,6.3);x.arc(ix+4,yy,1,0,6.3);x.fill()}
     else if(k==='torch'){x.fillStyle='#ffb83a';x.strokeStyle=INK;x.lineWidth=.4;x.beginPath();x.moveTo(ix,yy-3.5);x.quadraticCurveTo(ix+2,yy,ix,yy+2);x.quadraticCurveTo(ix-2,yy,ix,yy-3.5);x.fill();x.stroke()}
     else mpOs451Icon(x,k,ix,yy,7.5,L);api.text(x,t,28,yy,5.6,'#3a2a1c','left')});
-  api.notes(x,['Floor 12 of 20. Each floor of the spire is smaller than the one below it.','You arrive by the stair at the bottom of this plan. The stair up is at the far end of the floor.','Rooms you have not yet walked past stay covered.'],394,50,76,5.8,3);
+  api.notes(x,hlMapNotes(L),394,50,76,5.8,3);
   api.compass(x,436,250,13);
 }});
 
 /* ---- src/desert/maps_os452.js ---- */
 /* Orange Spire map, floor 13 = level 452. Hand-inked plan from the real rows, decor, lights and room data. Nothing secret is drawn:
    hidden doors stay plain wall, the strange room is only named, and levers, trap spots, notes and enemies are left out. */
-const mpOs452Rm=(L,k)=>{const r=(L._roomsInfo||[]).find(r=>r.n==='The Strange Room');return r&&k.x>=r.x0&&k.x<=r.x1&&k.y>=r.y0&&k.y<=r.y1};
+const mpOs452Rm=(L,k)=>hlInStrange(L,k);
 function mpOs452Icon(c,k,a,b,s,L){
   const INK=MPL.INK,GOLD=MPL.GOLD,line=(w,col)=>{c.lineWidth=w;c.strokeStyle=col||INK};
   c.save();c.lineJoin='round';c.lineCap='round';
@@ -39209,7 +39305,7 @@ mplInstall({name:'os452',levels:[452],reveal:true,draw(cv,x,L,api){
   const A=MPL.AREA;for(let i=0;i<rooms.length;i++){const r=rooms[i];if(!r.n||!flo(r.x0,r.y0))continue;const nm=su&&su.x>=r.x0&&su.x<=r.x1&&su.y>=r.y0-1&&su.y<=r.y1?r.n+' and Stair Up':r.n;const hi=nm!==r.n;x.font=`bold 5.4px ${FUI}`;const w=x.measureText(nm).width;let cx=X((r.x0+r.x1+1)/2);cx=Math.max(A.x+w/2+3,Math.min(A.x+A.w-w/2-3,cx));api.text(x,nm,cx,Y(r.y0)-s*(hi?1.7:.62),5.4,'#3a1c0c')}
   // ---- title, key, notes, compass ----
   api.title(x,'The Orange Spire, Floor 13',null,10,8);
-  api.text(x,'A study, a crypt and haunted rooms',14,36,5.6,'#5a3a1c','left');
+  api.text(x,hlMapSub(L),14,36,5.6,'#5a3a1c','left');
   api.panel(x,6,48,82,112);api.text(x,'KEY',47,56,6.4,MPL.LAPIS);
   const ky=[['stair','Stairs'],['stone','Level stone'],['rug','Rug'],['door','Door frame'],['torch','Torch or candle'],['hl_p_mirror','Mirror'],['hl_p_window','Window'],['hl_p_coffin','Coffin'],['hl_p_shelf','Bookshelf'],['hl_fire','Fireplace']];
   ky.forEach(([k,t],n)=>{const yy=66+n*9.2,ix=17;if(k==='stair')mpOs452Stair(x,ix,yy,5,false);else if(k==='stone'){x.fillStyle='#8a8478';x.strokeStyle=INK;x.lineWidth=.6;x.beginPath();x.arc(ix,yy,2.8,0,6.3);x.fill();x.stroke()}
@@ -39217,14 +39313,14 @@ mplInstall({name:'os452',levels:[452],reveal:true,draw(cv,x,L,api){
     else if(k==='door'){x.strokeStyle=MPL.GOLD;x.lineWidth=1;x.beginPath();x.moveTo(ix-4,yy);x.lineTo(ix+4,yy);x.stroke();x.fillStyle=MPL.GOLD;x.beginPath();x.arc(ix-4,yy,1,0,6.3);x.arc(ix+4,yy,1,0,6.3);x.fill()}
     else if(k==='torch'){x.fillStyle='#ffb83a';x.strokeStyle=INK;x.lineWidth=.4;x.beginPath();x.moveTo(ix,yy-3.5);x.quadraticCurveTo(ix+2,yy,ix,yy+2);x.quadraticCurveTo(ix-2,yy,ix,yy-3.5);x.fill();x.stroke()}
     else mpOs452Icon(x,k,ix,yy,7.5,L);api.text(x,t,28,yy,5.6,'#3a2a1c','left')});
-  api.notes(x,['Floor 13 of 20. Each floor of the spire is smaller than the one below it.','You arrive by the stair at the bottom of this plan. The stair up is at the far top left.','Rooms you have not yet walked past stay covered.'],394,50,76,5.8,3);
+  api.notes(x,hlMapNotes(L),394,50,76,5.8,3);
   api.compass(x,436,250,13);
 }});
 
 /* ---- src/desert/maps_os453.js ---- */
 /* Orange Spire map, floor 14 = level 453. Hand-inked plan from the real rows, decor, lights and room data. Nothing secret is drawn:
    hidden doors stay plain wall, the strange room is only named, and levers, trap spots, notes and enemies are left out. */
-const mpOs453Rm=(L,k)=>{const r=(L._roomsInfo||[]).find(r=>r.n==='The Strange Room');return r&&k.x>=r.x0&&k.x<=r.x1&&k.y>=r.y0&&k.y<=r.y1};
+const mpOs453Rm=(L,k)=>hlInStrange(L,k);
 function mpOs453Icon(c,k,a,b,s,L){
   const INK=MPL.INK,GOLD=MPL.GOLD,line=(w,col)=>{c.lineWidth=w;c.strokeStyle=col||INK};
   c.save();c.lineJoin='round';c.lineCap='round';
@@ -39312,7 +39408,7 @@ mplInstall({name:'os453',levels:[453],reveal:true,draw(cv,x,L,api){
   const A=MPL.AREA;for(let i=0;i<rooms.length;i++){const r=rooms[i];if(!r.n||!flo(r.x0,r.y0))continue;const nm=su&&su.x>=r.x0&&su.x<=r.x1&&su.y>=r.y0-1&&su.y<=r.y1?r.n+' and Stair Up':r.n;x.font=`bold 5.4px ${FUI}`;const w=x.measureText(nm).width;let cx=X((r.x0+r.x1+1)/2);cx=Math.max(A.x+w/2+3,Math.min(A.x+A.w-w/2-3,cx));api.text(x,nm,cx,Y(r.y0)-s*.62,5.4,'#3a1c0c')}
   // ---- title, key, notes, compass ----
   api.title(x,'The Orange Spire, Floor 14',null,10,8);
-  {const nm=[...new Set((L.mapNames||[]).map(m=>m.t).filter(t=>t&&!/^Stair|Strange/.test(t)))].slice(0,3).join(', ');api.text(x,nm||'Halls and passages',14,36,5.6,'#5a3a1c','left')}
+  api.text(x,hlMapSub(L),14,36,5.6,'#5a3a1c','left');
   api.panel(x,6,48,82,112);api.text(x,'KEY',47,56,6.4,MPL.LAPIS);
   const ky=[['stair','Stairs'],['stone','Level stone'],['rug','Rug'],['door','Door frame'],['torch','Torch or candle'],['hl_pt0','Portrait'],['hl_p_mirror','Mirror'],['hl_p_window','Window'],['hl_p_banner','Banner'],['chest','Chest']];
   ky.forEach(([k,t],n)=>{const yy=66+n*9.2,ix=17;if(k==='stair')mpOs453Stair(x,ix,yy,5,false);else if(k==='stone'){x.fillStyle='#8a8478';x.strokeStyle=INK;x.lineWidth=.6;x.beginPath();x.arc(ix,yy,2.8,0,6.3);x.fill();x.stroke()}
@@ -39320,7 +39416,7 @@ mplInstall({name:'os453',levels:[453],reveal:true,draw(cv,x,L,api){
     else if(k==='door'){x.strokeStyle=MPL.GOLD;x.lineWidth=1;x.beginPath();x.moveTo(ix-4,yy);x.lineTo(ix+4,yy);x.stroke();x.fillStyle=MPL.GOLD;x.beginPath();x.arc(ix-4,yy,1,0,6.3);x.arc(ix+4,yy,1,0,6.3);x.fill()}
     else if(k==='torch'){x.fillStyle='#ffb83a';x.strokeStyle=INK;x.lineWidth=.4;x.beginPath();x.moveTo(ix,yy-3.5);x.quadraticCurveTo(ix+2,yy,ix,yy+2);x.quadraticCurveTo(ix-2,yy,ix,yy-3.5);x.fill();x.stroke()}
     else mpOs453Icon(x,k,ix,yy,7.5,L);api.text(x,t,28,yy,5.6,'#3a2a1c','left')});
-  api.notes(x,['Floor 14 of 20. Each floor of the spire is smaller than the one below it.','You arrive by the stair at the bottom of this plan. The stair up is at the far end of the floor.','Rooms you have not yet walked past stay covered.'],394,50,76,5.8,3);
+  api.notes(x,hlMapNotes(L),394,50,76,5.8,3);
   api.compass(x,436,250,13);
 }});
 
@@ -39428,7 +39524,7 @@ draw(c,x,L,api){
     let cy=Y((r.y0+r.y1+1)/2)-(lines.length-1)*3.6;
     for(const l of lines){api.text(x,l,cx,cy,6.4,i===0?'#5a0e0a':'#2a1a0c');cy+=7.2}});
   /* title, key, notes, compass: the same layout on every floor of the spire */
-  api.title(x,'The Orange Spire, Floor 15','The Cells, the Haunted Room, the Studies and a Strange Room');
+  api.title(x,'The Orange Spire, Floor 15',hlMapSub(L));
   const kx=6,ky=60,kw=82;api.panel(x,kx,ky,kw,166);api.text(x,'KEY',kx+kw/2,ky+8,7,'#7a2a14');
   const kr=[['Spire wall',()=>{x.fillStyle='#c47a3a';x.fillRect(kx+5,ky+17,12,8);x.strokeStyle='rgba(58,28,44,.7)';x.lineWidth=.6;for(let k=0;k<14;k+=2.6){x.beginPath();x.moveTo(kx+5+k,ky+17);x.lineTo(kx+k-1,ky+25);x.stroke()}x.strokeStyle=INK;x.strokeRect(kx+5,ky+17,12,8)}],
     ['Doorway',()=>{x.strokeStyle=INK;x.lineWidth=2.6;x.beginPath();x.moveTo(kx+11,ky+30);x.lineTo(kx+11,ky+40);x.stroke();x.strokeStyle=P.GOLD;x.lineWidth=1.5;x.stroke();x.fillStyle=P.GOLD2;x.fillRect(kx+9.5,ky+29,3,2);x.fillRect(kx+9.5,ky+39,3,2)}],
@@ -39441,14 +39537,14 @@ draw(c,x,L,api){
   const gy=[21,34,49,62,76,90,101,113,125,137,150,159];
   kr.forEach((r,i)=>{r[1]();api.text(x,r[0],kx+25,ky+gy[i],6.4,'#3a2a1c','left')});
   const nx=392,nw=82;api.panel(x,nx-2,50,nw,176);
-  mplNotes(x,['The stair down is in the south, where you arrive.','The stair up is in the north west corner, beside the cells.','Lanterns burn in the corners of the larger rooms.','Portraits and a numbered stone hang by the stair.'],nx+3,69,nw-9,6.2,4);
+  mplNotes(x,hlMapNotes(L,['Lanterns burn in the corners of the larger rooms.','Portraits and a numbered stone hang by the stair.']),nx+3,69,nw-9,6.2,4);
   api.compass(x,435,254,15);
   I.tower(x,435,283,.8)}});
 
 /* ---- src/desert/maps_os455.js ---- */
 /* Orange Spire map, floor 16 = level 455. Hand-inked plan from the real rows, decor, lights and room data. Nothing secret is drawn:
    hidden doors stay plain wall, the strange room is only named, and levers, trap spots, notes and enemies are left out. */
-const mpOs455Rm=(L,k)=>{const r=(L._roomsInfo||[]).find(r=>r.n==='The Strange Room');return r&&k.x>=r.x0&&k.x<=r.x1&&k.y>=r.y0&&k.y<=r.y1};
+const mpOs455Rm=(L,k)=>hlInStrange(L,k);
 function mpOs455Icon(c,k,a,b,s,L){
   const INK=MPL.INK,GOLD=MPL.GOLD,line=(w,col)=>{c.lineWidth=w;c.strokeStyle=col||INK};
   c.save();c.lineJoin='round';c.lineCap='round';
@@ -39536,7 +39632,7 @@ mplInstall({name:'os455',levels:[455],reveal:true,draw(cv,x,L,api){
   const A=MPL.AREA;for(let i=0;i<rooms.length;i++){const r=rooms[i];if(!r.n||!flo(r.x0,r.y0))continue;const nm=su&&su.x>=r.x0&&su.x<=r.x1&&su.y>=r.y0&&su.y<=r.y1?r.n+' and Stair Up':r.n;x.font=`bold 5.4px ${FUI}`;const w=x.measureText(nm).width;let cx=X((r.x0+r.x1+1)/2);cx=Math.max(A.x+w/2+3,Math.min(A.x+A.w-w/2-3,cx));api.text(x,nm,cx,Y(r.y0)-s*.62,5.4,'#3a1c0c')}
   // ---- title, key, notes, compass ----
   api.title(x,'The Orange Spire, Floor 16',null,10,8);
-  {const nm=[...new Set((L.mapNames||[]).map(m=>m.t).filter(t=>t&&!/^Stair|Strange/.test(t)))].slice(0,3).join(', ');api.text(x,nm||'Halls and passages',14,36,5.6,'#5a3a1c','left')}
+  api.text(x,hlMapSub(L),14,36,5.6,'#5a3a1c','left');
   api.panel(x,6,48,82,112);api.text(x,'KEY',47,56,6.4,MPL.LAPIS);
   const ky=[['stair','Stairs'],['stone','Level stone'],['rug','Rug'],['door','Door frame'],['torch','Torch or candle'],['hl_pt0','Portrait'],['hl_p_mirror','Mirror'],['hl_p_window','Window'],['hl_p_banner','Banner'],['chest','Chest']];
   ky.forEach(([k,t],n)=>{const yy=66+n*9.2,ix=17;if(k==='stair')mpOs455Stair(x,ix,yy,5,false);else if(k==='stone'){x.fillStyle='#8a8478';x.strokeStyle=INK;x.lineWidth=.6;x.beginPath();x.arc(ix,yy,2.8,0,6.3);x.fill();x.stroke()}
@@ -39544,14 +39640,14 @@ mplInstall({name:'os455',levels:[455],reveal:true,draw(cv,x,L,api){
     else if(k==='door'){x.strokeStyle=MPL.GOLD;x.lineWidth=1;x.beginPath();x.moveTo(ix-4,yy);x.lineTo(ix+4,yy);x.stroke();x.fillStyle=MPL.GOLD;x.beginPath();x.arc(ix-4,yy,1,0,6.3);x.arc(ix+4,yy,1,0,6.3);x.fill()}
     else if(k==='torch'){x.fillStyle='#ffb83a';x.strokeStyle=INK;x.lineWidth=.4;x.beginPath();x.moveTo(ix,yy-3.5);x.quadraticCurveTo(ix+2,yy,ix,yy+2);x.quadraticCurveTo(ix-2,yy,ix,yy-3.5);x.fill();x.stroke()}
     else mpOs455Icon(x,k,ix,yy,7.5,L);api.text(x,t,28,yy,5.6,'#3a2a1c','left')});
-  api.notes(x,['Floor 16 of 20. Each floor of the spire is smaller than the one below it.','You arrive by the stair at the bottom of this plan. The stair up is at the far end of the floor.','Rooms you have not yet walked past stay covered.'],394,50,76,5.8,3);
+  api.notes(x,hlMapNotes(L),394,50,76,5.8,3);
   api.compass(x,436,250,13);
 }});
 
 /* ---- src/desert/maps_os456.js ---- */
 /* Orange Spire map, floor 12 = level 456. Hand-inked plan from the real rows, decor, lights and room data. Nothing secret is drawn:
    hidden doors stay plain wall, the strange room is only named, and levers, trap spots, notes and enemies are left out. */
-const mpOs456Rm=(L,k)=>{const r=(L._roomsInfo||[]).find(r=>r.n==='The Strange Room');return r&&k.x>=r.x0&&k.x<=r.x1&&k.y>=r.y0&&k.y<=r.y1};
+const mpOs456Rm=(L,k)=>hlInStrange(L,k);
 function mpOs456Icon(c,k,a,b,s,L){
   const INK=MPL.INK,GOLD=MPL.GOLD,line=(w,col)=>{c.lineWidth=w;c.strokeStyle=col||INK};
   c.save();c.lineJoin='round';c.lineCap='round';
@@ -39639,7 +39735,7 @@ mplInstall({name:'os456',levels:[456],reveal:true,draw(cv,x,L,api){
   const A=MPL.AREA;for(let i=0;i<rooms.length;i++){const r=rooms[i];if(!r.n||!flo(r.x0,r.y0))continue;let nm2=0;const nm=su&&su.x>=r.x0&&su.x<=r.x1&&su.y>=r.y0&&su.y<=r.y1?r.n+' and Stair Up':r.n;x.font=`bold 5.4px ${FUI}`;const w=x.measureText(nm).width;let cx=X((r.x0+r.x1+1)/2);if(su&&su.y===r.y0-1&&su.x>=r.x0&&su.x<=r.x1){cx=X(su.x+1.7)+w/2;nm2=1}cx=Math.max(A.x+w/2+3,Math.min(A.x+A.w-w/2-3,cx));api.text(x,nm,cx,Y(r.y0)-s*(nm2?.5:.62),5.4,'#3a1c0c')}
   // ---- title, key, notes, compass ----
   api.title(x,'The Orange Spire, Floor 17',null,10,8);
-  {const nm=[...new Set((L.mapNames||[]).map(m=>m.t).filter(t=>t&&!/^Stair|Strange/.test(t)))].slice(0,3).join(', ');api.text(x,nm||'Halls and passages',14,36,5.6,'#5a3a1c','left')}
+  api.text(x,hlMapSub(L),14,36,5.6,'#5a3a1c','left');
   api.panel(x,6,48,82,112);api.text(x,'KEY',47,56,6.4,MPL.LAPIS);
   const ky=[['stair','Stairs'],['stone','Level stone'],['rug','Rug'],['door','Door frame'],['torch','Torch or candle'],['hl_pt0','Portrait'],['hl_p_mirror','Mirror'],['hl_p_window','Window'],['hl_p_banner','Banner'],['chest','Chest']];
   ky.forEach(([k,t],n)=>{const yy=66+n*9.2,ix=17;if(k==='stair')mpOs456Stair(x,ix,yy,5,false);else if(k==='stone'){x.fillStyle='#8a8478';x.strokeStyle=INK;x.lineWidth=.6;x.beginPath();x.arc(ix,yy,2.8,0,6.3);x.fill();x.stroke()}
@@ -39647,14 +39743,14 @@ mplInstall({name:'os456',levels:[456],reveal:true,draw(cv,x,L,api){
     else if(k==='door'){x.strokeStyle=MPL.GOLD;x.lineWidth=1;x.beginPath();x.moveTo(ix-4,yy);x.lineTo(ix+4,yy);x.stroke();x.fillStyle=MPL.GOLD;x.beginPath();x.arc(ix-4,yy,1,0,6.3);x.arc(ix+4,yy,1,0,6.3);x.fill()}
     else if(k==='torch'){x.fillStyle='#ffb83a';x.strokeStyle=INK;x.lineWidth=.4;x.beginPath();x.moveTo(ix,yy-3.5);x.quadraticCurveTo(ix+2,yy,ix,yy+2);x.quadraticCurveTo(ix-2,yy,ix,yy-3.5);x.fill();x.stroke()}
     else mpOs456Icon(x,k,ix,yy,7.5,L);api.text(x,t,28,yy,5.6,'#3a2a1c','left')});
-  api.notes(x,['Floor 17 of 20. Each floor of the spire is smaller than the one below it.','You arrive by the stair at the bottom of this plan. The stair up is at the far end of the floor.','Rooms you have not yet walked past stay covered.'],394,50,76,5.8,3);
+  api.notes(x,hlMapNotes(L),394,50,76,5.8,3);
   api.compass(x,436,250,13);
 }});
 
 /* ---- src/desert/maps_os457.js ---- */
 /* Orange Spire map, floor 18 = level 457. Hand-inked plan from the real rows, decor, lights and room data. Nothing secret is drawn:
    hidden doors stay plain wall, the strange room is only named, and levers, trap spots, notes and enemies are left out. */
-const mpOs457Rm=(L,k)=>{const r=(L._roomsInfo||[]).find(r=>r.n==='The Strange Room');return r&&k.x>=r.x0&&k.x<=r.x1&&k.y>=r.y0&&k.y<=r.y1};
+const mpOs457Rm=(L,k)=>hlInStrange(L,k);
 function mpOs457Icon(c,k,a,b,s,L){
   const INK=MPL.INK,GOLD=MPL.GOLD,line=(w,col)=>{c.lineWidth=w;c.strokeStyle=col||INK};
   c.save();c.lineJoin='round';c.lineCap='round';
@@ -39744,7 +39840,7 @@ mplInstall({name:'os457',levels:[457],reveal:true,draw(cv,x,L,api){
   const A=MPL.AREA;for(let i=0;i<rooms.length;i++){const r=rooms[i];if(!r.n||!flo(r.x0,r.y0))continue;const hs2=su&&su.x>=r.x0&&su.x<=r.x1&&su.y>=r.y0-1&&su.y<=r.y1,nm=hs2?r.n+' and Stair Up':r.n;x.font=`bold 5.4px ${FUI}`;const w=x.measureText(nm).width;let cx=X((r.x0+r.x1+1)/2);cx=Math.max(A.x+w/2+3,Math.min(A.x+A.w-w/2-3,cx));api.text(x,nm,cx,Y(r.y0)-s*(hs2&&su.y<r.y0?1.7:.62),5.4,'#3a1c0c')}
   // ---- title, key, notes, compass ----
   api.title(x,'The Orange Spire, Floor 18',null,10,8);
-  api.text(x,'Gallery of Rulers, the Crypt, a Strange Room',14,36,5.6,'#5a3a1c','left');
+  api.text(x,hlMapSub(L),14,36,5.6,'#5a3a1c','left');
   api.panel(x,6,48,82,112);api.text(x,'KEY',47,56,6.4,MPL.LAPIS);
   const ky=[['stair','Stairs'],['stone','Level stone'],['rug','Rug'],['door','Door frame'],['torch','Torch or candle'],['hl_pt0','Portrait'],['hl_p_mirror','Mirror'],['hl_p_coffin','Coffin'],['hl_p_tomb','Tomb']];
   ky.forEach(([k,t],n)=>{const yy=66+n*9.2,ix=17;if(k==='stair')mpOs457Stair(x,ix,yy,5,false);else if(k==='stone'){x.fillStyle='#8a8478';x.strokeStyle=INK;x.lineWidth=.6;x.beginPath();x.arc(ix,yy,2.8,0,6.3);x.fill();x.stroke()}
@@ -39752,14 +39848,14 @@ mplInstall({name:'os457',levels:[457],reveal:true,draw(cv,x,L,api){
     else if(k==='door'){x.strokeStyle=MPL.GOLD;x.lineWidth=1;x.beginPath();x.moveTo(ix-4,yy);x.lineTo(ix+4,yy);x.stroke();x.fillStyle=MPL.GOLD;x.beginPath();x.arc(ix-4,yy,1,0,6.3);x.arc(ix+4,yy,1,0,6.3);x.fill()}
     else if(k==='torch'){x.fillStyle='#ffb83a';x.strokeStyle=INK;x.lineWidth=.4;x.beginPath();x.moveTo(ix,yy-3.5);x.quadraticCurveTo(ix+2,yy,ix,yy+2);x.quadraticCurveTo(ix-2,yy,ix,yy-3.5);x.fill();x.stroke()}
     else mpOs457Icon(x,k,ix,yy,7.5,L);api.text(x,t,28,yy,5.6,'#3a2a1c','left')});
-  api.notes(x,['Floor 18 of 20. Each floor of the spire is smaller than the one below it.','You arrive by the stair at the bottom of this plan. The stair up is in the crypt, at the top right.','Rooms you have not yet walked past stay covered.'],394,50,76,5.8,3);
+  api.notes(x,hlMapNotes(L),394,50,76,5.8,3);
   api.compass(x,436,250,13);
 }});
 
 /* ---- src/desert/maps_os458.js ---- */
 /* Orange Spire map, floor 19 = level 458. Hand-inked plan from the real rows, decor, lights and room data. Nothing secret is drawn:
    hidden doors stay plain wall, the strange room is only named, and levers, trap spots, notes and enemies are left out. */
-const mpOs458Rm=(L,k)=>{const r=(L._roomsInfo||[]).find(r=>r.n==='The Strange Room');return r&&k.x>=r.x0&&k.x<=r.x1&&k.y>=r.y0&&k.y<=r.y1};
+const mpOs458Rm=(L,k)=>hlInStrange(L,k);
 function mpOs458Icon(c,k,a,b,s,L){
   const INK=MPL.INK,GOLD=MPL.GOLD,line=(w,col)=>{c.lineWidth=w;c.strokeStyle=col||INK};
   c.save();c.lineJoin='round';c.lineCap='round';
@@ -39849,7 +39945,7 @@ mplInstall({name:'os458',levels:[458],reveal:true,draw(cv,x,L,api){
   const A=MPL.AREA;for(let i=0;i<rooms.length;i++){const r=rooms[i];if(!r.n||!flo(r.x0,r.y0))continue;const hs2=su&&su.x>=r.x0&&su.x<=r.x1&&su.y>=r.y0-1&&su.y<=r.y1,nm=hs2?r.n+' and Stair Up':r.n;x.font=`bold 5.4px ${FUI}`;const w=x.measureText(nm).width;let cx=X((r.x0+r.x1+1)/2);cx=Math.max(A.x+w/2+3,Math.min(A.x+A.w-w/2-3,cx));api.text(x,nm,cx,Y(r.y0)-s*(hs2&&su.y<r.y0?1.7:.62),5.4,'#3a1c0c')}
   // ---- title, key, notes, compass ----
   api.title(x,'The Orange Spire, Floor 19',null,10,8);
-  api.text(x,'Gallery of Rulers, the Study, a Strange Room',14,36,5.6,'#5a3a1c','left');
+  api.text(x,hlMapSub(L),14,36,5.6,'#5a3a1c','left');
   api.panel(x,6,48,82,98);api.text(x,'KEY',47,56,6.4,MPL.LAPIS);
   const ky=[['stair','Stairs'],['stone','Level stone'],['rug','Rug'],['door','Door frame'],['torch','Torch or candle'],['hl_pt0','Portrait'],['hl_p_candle','Candle stand'],['hl_claw4','Claw marks']];
   ky.forEach(([k,t],n)=>{const yy=66+n*9.2,ix=17;if(k==='stair')mpOs458Stair(x,ix,yy,5,false);else if(k==='stone'){x.fillStyle='#8a8478';x.strokeStyle=INK;x.lineWidth=.6;x.beginPath();x.arc(ix,yy,2.8,0,6.3);x.fill();x.stroke()}
@@ -39857,14 +39953,14 @@ mplInstall({name:'os458',levels:[458],reveal:true,draw(cv,x,L,api){
     else if(k==='door'){x.strokeStyle=MPL.GOLD;x.lineWidth=1;x.beginPath();x.moveTo(ix-4,yy);x.lineTo(ix+4,yy);x.stroke();x.fillStyle=MPL.GOLD;x.beginPath();x.arc(ix-4,yy,1,0,6.3);x.arc(ix+4,yy,1,0,6.3);x.fill()}
     else if(k==='torch'){x.fillStyle='#ffb83a';x.strokeStyle=INK;x.lineWidth=.4;x.beginPath();x.moveTo(ix,yy-3.5);x.quadraticCurveTo(ix+2,yy,ix,yy+2);x.quadraticCurveTo(ix-2,yy,ix,yy-3.5);x.fill();x.stroke()}
     else mpOs458Icon(x,k,ix,yy,7.5,L);api.text(x,t,28,yy,5.6,'#3a2a1c','left')});
-  api.notes(x,['Floor 19 of 20. Each floor of the spire is smaller than the one below it.','You arrive by the stair at the bottom of this plan. The stair up is in the Study, at the left.','Rooms you have not yet walked past stay covered.'],394,50,76,5.8,3);
+  api.notes(x,hlMapNotes(L),394,50,76,5.8,3);
   api.compass(x,436,250,13);
 }});
 
 /* ---- src/desert/maps_os459.js ---- */
 /* Orange Spire map, floor 20 = level 459 (the top). Hand-inked plan from the real rows, decor, lights and room data. Nothing secret is drawn:
    hidden doors stay plain wall, the top room is only named, no figure, and levers, trap spots, notes and enemies are left out. */
-const mpOs459Rm=(L,k)=>{const r=(L._roomsInfo||[]).find(r=>r.n==='The Strange Room');return r&&k.x>=r.x0&&k.x<=r.x1&&k.y>=r.y0&&k.y<=r.y1};
+const mpOs459Rm=(L,k)=>hlInStrange(L,k);
 const mpOs459Nm=n=>n==='The Strange Room'?'The Spire Room':n;
 function mpOs459Icon(c,k,a,b,s,L){
   const INK=MPL.INK,GOLD=MPL.GOLD,line=(w,col)=>{c.lineWidth=w;c.strokeStyle=col||INK};
@@ -39954,7 +40050,7 @@ mplInstall({name:'os459',levels:[459],reveal:true,draw(cv,x,L,api){
   const A=MPL.AREA;for(let i=0;i<rooms.length;i++){const r=rooms[i];if(!r.n||!flo(r.x0,r.y0))continue;const hs2=false,nm=mpOs459Nm(r.n);x.font=`bold 5.4px ${FUI}`;const w=x.measureText(nm).width;let cx=X((r.x0+r.x1+1)/2);cx=Math.max(A.x+w/2+3,Math.min(A.x+A.w-w/2-3,cx));api.text(x,nm,cx,Y(r.y0)-s*(hs2&&su.y<r.y0?1.7:.62),5.4,'#3a1c0c')}
   // ---- title, key, notes, compass ----
   api.title(x,'The Orange Spire, Floor 20',null,10,8);
-  api.text(x,'The Gallery of Rulers and the Spire Room',14,36,5.6,'#5a3a1c','left');
+  api.text(x,hlMapSub(L),14,36,5.6,'#5a3a1c','left');
   api.panel(x,6,48,82,78);api.text(x,'KEY',47,56,6.4,MPL.LAPIS);
   const ky=[['stair','Stairs'],['stone','Numbered stone'],['rug','Rug'],['door','Door frame'],['torch','Torch or candle'],['hl_p_candle','Candle stand'],['hl_claw4','Claw marks']];
   ky.forEach(([k,t],n)=>{const yy=66+n*9.2,ix=17;if(k==='stair')mpOs459Stair(x,ix,yy,5,false);else if(k==='stone'){x.fillStyle='#8a8478';x.strokeStyle=INK;x.lineWidth=.6;x.beginPath();x.arc(ix,yy,2.8,0,6.3);x.fill();x.stroke()}
@@ -39962,7 +40058,7 @@ mplInstall({name:'os459',levels:[459],reveal:true,draw(cv,x,L,api){
     else if(k==='door'){x.strokeStyle=MPL.GOLD;x.lineWidth=1;x.beginPath();x.moveTo(ix-4,yy);x.lineTo(ix+4,yy);x.stroke();x.fillStyle=MPL.GOLD;x.beginPath();x.arc(ix-4,yy,1,0,6.3);x.arc(ix+4,yy,1,0,6.3);x.fill()}
     else if(k==='torch'){x.fillStyle='#ffb83a';x.strokeStyle=INK;x.lineWidth=.4;x.beginPath();x.moveTo(ix,yy-3.5);x.quadraticCurveTo(ix+2,yy,ix,yy+2);x.quadraticCurveTo(ix-2,yy,ix,yy-3.5);x.fill();x.stroke()}
     else mpOs459Icon(x,k,ix,yy,7.5,L);api.text(x,t,28,yy,5.6,'#3a2a1c','left')});
-  api.notes(x,['Floor 20 of 20, the top. This is the smallest floor of the spire.','You arrive by the stair at the bottom of this plan. There is no stair up. A short passage leads to the Spire Room.','Rooms you have not yet walked past stay covered.'],394,50,76,5.8,3);
+  api.notes(x,hlMapNotes(L),394,50,76,5.8,3);
   api.compass(x,436,250,13);
 }});
 

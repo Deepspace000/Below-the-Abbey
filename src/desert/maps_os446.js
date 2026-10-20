@@ -71,7 +71,7 @@ function mpOs446Draw(c,x,L,api){
     x.fillStyle=MPL.GOLD2;const lw=ww>hh;for(let k=1;k<(lw?w*2:h*2);k++){const t=k*s/2,mx=lw?a+t:a+ww/2,my=lw?b+hh/2:b+t;x.beginPath();x.moveTo(mx,my-1.7);x.lineTo(mx+1.4,my);x.lineTo(mx,my+1.7);x.lineTo(mx-1.4,my);x.closePath();x.fill()}
     x.strokeStyle=MPL.GOLD;x.lineWidth=.5;x.beginPath();if(lw){for(let yy=b+1;yy<b+hh;yy+=1.6){x.moveTo(a-1.4,yy);x.lineTo(a,yy);x.moveTo(a+ww,yy);x.lineTo(a+ww+1.4,yy)}}else{for(let xx=a+1;xx<a+ww;xx+=1.6){x.moveTo(xx,b-1.4);x.lineTo(xx,b);x.moveTo(xx,b+hh);x.lineTo(xx,b+hh+1.4)}}x.stroke();
     x.strokeStyle=MPL.INK;x.lineWidth=.4;x.strokeRect(a,b,ww,hh);x.restore()};
-  rug(19.2,15.1,3.6,1.8);rug(20.25,3.1,1.5,1.8);rug(19.9,23.5,1.2,1.7);rug(8.6,18.6,2.8,1.4);
+  for(const r of rooms){const w=r.x1-r.x0+1,h=r.y1-r.y0+1;if(r.n==='The Strange Room'||w<5||h<4)continue;rug(r.x0+1.3,(r.y0+r.y1+1)/2-.7,w-2.6,1.4)} // (a rug along the middle of each larger room)
   /* ---- inked edges: every floor boundary twice, a heavy line and a lighter offset line, both wobbly ---- */
   for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){if(!fl(cx,cy))continue;const X0=X(cx),Y0=Y(cy),sd=cx*97+cy*13;
     for(const [dx,dy,a,b,c2,d] of [[0,-1,X0,Y0,X0+s,Y0],[0,1,X0,Y0+s,X0+s,Y0+s],[-1,0,X0,Y0,X0,Y0+s],[1,0,X0+s,Y0,X0+s,Y0+s]]){if(fl(cx+dx,cy+dy))continue;
@@ -112,18 +112,18 @@ function mpOs446Draw(c,x,L,api){
     else if(/^hl_claw/.test(k))onWall(cx,cy,()=>mpOs446Claws(x,0,-.8,s*.13))}
   /* ---- names: from mapNames, set where the rooms are ---- */
   const nm=(L.mapNames||[]).filter(n=>fl(n.x,n.y)||n.t==='The Stair Up'||n.t==='The Strange Room'||/^Stair/.test(n.t));
-  const put={'Stair (7)':[20.5,22.1,5.4],'The Strange Room':[6.5,5.1,6.2],'The Stair Up':[34.8,1.4,5.6],'The Study':[21,1.4,5.8],'Gallery of Rulers':[20.9,13.3,6],'Banquet Hall':[9.5,17.1,6],'The Cells':[30.5,9.6,6],'The Haunted Room':[13.5,1.3,5.6]};
-  let hr=0;for(const n of nm){let p=put[n.t]||[n.x+.5,n.y+.5,6];if(n.t==='The Haunted Room'){p=hr++?[10.5,22.5,5.6]:[13.5,1.3,5.6]}api.text(x,n.t,X(p[0]),Y(p[1]),p[2],MPL.VERM,'center')}
+  const put={}; // (the names stand where mapNames puts them: the rooms are different on every floor)
+  let hr=0;for(const n of nm){let p=put[n.t]||[n.x+.5,n.y+.5,6];api.text(x,n.t,X(p[0]),Y(p[1]),p[2],MPL.VERM,'center')}
   /* ---- crenellated outer edge of the spire ---- */
   x.save();x.fillStyle='#8a4c20';x.strokeStyle=MPL.INK;x.lineWidth=.6;for(let i=0;i<W;i+=1){for(const yy of [F.oy-1.6,F.oy+H*s]){x.fillRect(X(i)+s*.15,yy,s*.7,1.6);x.strokeRect(X(i)+s*.15,yy,s*.7,1.6)}}
   for(let j=0;j<H;j++){for(const xx of [F.ox-1.6,F.ox+W*s]){x.fillRect(xx,Y(j)+s*.15,1.6,s*.7);x.strokeRect(xx,Y(j)+s*.15,1.6,s*.7)}}x.restore();
   mpOs446Line(x,F.ox,F.oy,F.ox+W*s,F.oy,1.6,MPL.INK,901,.5);mpOs446Line(x,F.ox,F.oy+H*s,F.ox+W*s,F.oy+H*s,1.6,MPL.INK,902,.5);mpOs446Line(x,F.ox,F.oy,F.ox,F.oy+H*s,1.6,MPL.INK,903,.5);mpOs446Line(x,F.ox+W*s,F.oy,F.ox+W*s,F.oy+H*s,1.6,MPL.INK,904,.5);
   /* ---- margins: title, key (left); notes and compass (right) ---- */
   api.title(x,'The Orange Spire, Floor 7','');
-  {const lines=api.wrap(x,'The Study, the Gallery of Rulers, the Banquet Hall and the Cells',76,6.4);let y=45;for(const l of lines){api.text(x,l,10,y,6.2,'#5a3a1c','left');y+=8}}
+  {const lines=api.wrap(x,hlMapSub(L),76,6.4);let y=45;for(const l of lines){api.text(x,l,10,y,6.2,'#5a3a1c','left');y+=8}}
   const key=[['Stair down',(a,b)=>mpOs446Stair(x,a,b,.7,false)],['Stair up',(a,b)=>mpOs446Stair(x,a,b,.7,true)],['Arrival stone',(a,b)=>mpOs446Stone(x,a,b,.8,7)],['Doorway',(a,b)=>mpOs446Door(x,a,b,8,false)],['Standing lamp',(a,b)=>mpOs446Lamp(x,a,b+1,.9,false,false)],['Candle',(a,b)=>mpOs446Candle(x,a,b,.9)],['Hearth',(a,b)=>mpOs446Hearth(x,a,b,.8)],['Mirror',(a,b)=>mpOs446Mirror(x,a,b,.9)],['Portrait',(a,b)=>mpOs446Portrait(x,a,b,.9)],['Window',(a,b)=>mpOs446Window(x,a,b,.8)],['Bookcase',(a,b)=>mpOs446Shelf(x,a,b,.8)],['Rug',(a,b)=>{x.fillStyle='#b8321e';x.strokeStyle=MPL.GOLD;x.lineWidth=.8;x.fillRect(a-4,b-2.4,8,4.8);x.strokeRect(a-3.2,b-1.8,6.4,3.6)}]];
   api.panel(x,6,78,82,18+key.length*13.2);api.text(x,'Key',47,88,7.4,MPL.VERM,'center');let ky=100;for(const [t,f] of key){f(18,ky);api.text(x,t,29,ky,6.2,'#3a2a1c','left');ky+=13.2}
-  api.notes(x,['Floor 7 of the Orange Spire, a haunted castle.','You arrive on the stair in the south. The stair up is at the far end, in the north east.','Long halls link the rooms. Doorways are marked in gold.','Only the parts you have walked through show on the map.'],397,45,74,6.1,4);
+  api.notes(x,hlMapNotes(L,['Long halls link the rooms. Doorways are marked in gold.','Only the parts you have walked through show on the map.']),397,45,74,6.1,4);
   api.compass(x,436,262,12);
   /* small flourishes: bats over the margins */
   for(const [bx,by] of [[400,206],[452,224],[104,276]]){x.strokeStyle=MPL.INK;x.lineWidth=1;x.beginPath();x.moveTo(bx-5,by);x.quadraticCurveTo(bx-2,by-4,bx,by);x.quadraticCurveTo(bx+2,by-4,bx+5,by);x.stroke()}
