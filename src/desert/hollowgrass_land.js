@@ -90,7 +90,7 @@ function hgBuild(){
 KH_LAZY[HG.ID]=hgBuild;HG.HIVES.forEach((id,i)=>{KH_LAZY[id]=()=>{hgBuild();hgHive(i)}});
 /* the way in is the portal at the top of the Orange Spire (hollowgrass_story.js), once the last ruler is dead; the spiked gate in the south leads back out onto the high ledge of the Hollow Land */
 /* the cold: a blue-grey grade over the whole view, bands of mist drifting along the horizon, and a few pale motes of light that hang in the air */
-{const _w=drawWeatherFx;drawWeatherFx=function(){_w.apply(this,arguments);if(LEVEL!==HG.ID)return;
+{const _w=drawWeatherFx;drawWeatherFx=function(){_w.apply(this,arguments);if(LEVEL!==HG.ID&&!hgtLook(LEVEL))return;
   const t=G.time||0;ctx.save();
   ctx.globalCompositeOperation='multiply';ctx.globalAlpha=.62;ctx.fillStyle='rgb(150,184,228)';ctx.fillRect(0,0,420,210);
   ctx.globalCompositeOperation='screen';ctx.globalAlpha=1;ctx.fillStyle='rgba(60,92,134,.07)';ctx.fillRect(0,0,420,210);

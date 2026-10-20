@@ -25,6 +25,7 @@ const TERR_SPEC={
 };
 const MTN_BAND=14,MTN_BLOCK=1.7; // mountains rise over the last fourteen cells before a sky wall; above this height they cannot be climbed
 function terrFor(n){
+  { const L0=LEVELS[n]; if(L0&&L0.terrace)return terrTerraced(n,L0); }   // a terraced town level (see hgt_engine.js): per-cell heights, no dunes
   if(TERRS[n]!==undefined)return TERRS[n];
   const spec=TERR_SPEC[n],L=LEVELS[n];if(!spec||!L)return TERRS[n]=null;
   const rows=L.rows,H=rows.length,W=rows[0].length,h=new Float32Array(W*H),open=new Uint8Array(W*H);
@@ -92,11 +93,13 @@ function terrFor(n){
 function terrRock(){const t=TEX[LEVEL===43?DS_TEXREG.cliffR:DS_TEXREG.cliffY];return {d:t&&t.d,tint:yarSea(LEVEL)?(SEA_TINT[LEVEL]||[.84,.9,.97]):LEVEL===60?[.8,.92,1.22]:LEVEL===61?[1.22,1.06,.7]:LEVEL===62?[1,.8,1.25]:LEVEL===63?[1.12,1.14,1.2]:[1,1,1]}}
 // where a rock or a tree really meets the ground: the lowest point under its width, so it never hangs over a slope
 function terrFoot(s,cx,cy){
+  if(TERR_NOW&&TERR_NOW.terr)return terrH(s.x,s.y);   // on a terrace a thing stands on the step it is in
   const rx=s.x-cx,ry=s.y-cy,dl=Math.hypot(rx,ry)||1,px=-ry/dl,py=rx/dl,hw=(s.w||1)*.4;
   return Math.min(terrH(s.x,s.y),terrH(s.x+px*hw,s.y+py*hw),terrH(s.x-px*hw,s.y-py*hw));
 }
 function terrH(x,y){
   const T=TERR_NOW;if(!T)return 0;
+  if(T.terr){const ix=x<0?0:x>=T.W?T.W-1:x|0,iy=y<0?0:y>=T.H?T.H-1:y|0;return T.h[iy*T.W+ix]}   // terraced: every cell is one flat step
   const gx=clamp(x-.5,0,T.W-1.001),gy=clamp(y-.5,0,T.H-1.001),ix=gx|0,iy=gy|0,fx=gx-ix,fy=gy-iy,i=iy*T.W+ix,h=T.h;
   return (h[i]*(1-fx)+h[i+1]*fx)*(1-fy)+(h[i+T.W]*(1-fx)+h[i+T.W+1]*fx)*fy;
 }
@@ -139,4 +142,111 @@ function terrMarch(x,rX,rY,tmax){
   }
   const yv=Math.max(0,Math.min(VH,Math.ceil(yb)));
   for(let k=lastK+1;k<YBK;k++)YB[base+k]=yv;
+}
+
+/* ==========================================================================
+   TERRACED GROUND (the strange cities of the Hollow Grasslands, levels 480 to 489). A level with L.terrace={h:Float32Array(W*H)}
+   has one flat height per cell. Ground is drawn cell by cell along each screen column (an exact grid walk, so every tread is as deep as it
+   really is), a cell that is higher than the one in front shows its riser, and walls (any cell that is not '.') stand on the height of
+   their own cell and are drawn from far to near, so a tall tower is seen over a low house. See hgt_engine.js for the data contract.
+   ========================================================================== */
+let TERR_STEP=null;                    // set when the level is terraced: the party and the creatures cannot climb more than TERR_MAXSTEP between two cells
+const TERR_MAXSTEP=.55;
+function terrStepOK(x0,y0,x1,y1){const T=TERR_STEP;if(!T)return true;if(x1<0||y1<0||x1>=T.W||y1>=T.H||x0<0||y0<0||x0>=T.W||y0>=T.H)return true;return Math.abs(T.h[y1*T.W+x1]-T.h[y0*T.W+x0])<=TERR_MAXSTEP+1e-4}
+function terrTerraced(n,L){
+  const t=L.terrace,c=TERRS[n];if(c&&c.src===t&&c.rev===(t.rev||0))return c;
+  const rows=L.rows,H=rows.length,W=rows[0].length,N=W*H,h=t.h instanceof Float32Array?t.h:Float32Array.from(t.h||[]);
+  if(h.length!==N){console.error('terrace.h has the wrong size for level '+n);return TERRS[n]=null}
+  const chars=L.chars||{},whOf=ch=>{const g=chars[ch];if(g!==undefined&&g>=100&&T_TILE[g]!==undefined&&TEX[T_TILE[g]])return TEX[T_TILE[g]].wh||(L.ceilH||CEILH);return L.ceilH||CEILH};
+  let zmax=-1e9;
+  for(let y=0;y<H;y++){const r=rows[y];for(let x=0;x<W;x++){const i=y*W+x,wall=r[x]!=='.'&&r[x]!=='t',z=h[i]+(wall?whOf(r[x]):0);if(z>zmax)zmax=z}}
+  const s=new Float32Array(N);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const i=y*W+x,hc=h[i],hw=x>0?h[i-1]:hc,hn=y>0?h[i-W]:hc;
+    // light from the north-west: a tread higher than the ones to its west and north catches it; every other tread is a little darker, so a stair reads as steps
+    const v=.84+clamp((hc-(hw+hn)*.5)*.9,-.2,.14)+(((Math.round(hc/.18))&1)?.05:-.03)+clamp(hc*.012,-.08,.08);
+    s[i]=clamp(v,.5,1.2);
+  }
+  if(t.s&&t.s.length===N)for(let i=0;i<N;i++)s[i]=t.s[i];
+  const roof=t.roof!==undefined?t.roof:Math.max(zmax+2.5,6);
+  return TERRS[n]={W,H,h,s,rk:new Float32Array(N),block:new Uint8Array(N),terr:true,src:t,rev:t.rev||0,zmax,roof,riser:t.riser,rg:t.rg||null};
+}
+// the camera eases between the heights of neighbouring cells (about a quarter of a second)
+let TZ=null,TZL=-1,TZT=0;
+function terrCam(cx,cy,t){
+  const tg=terrH(cx,cy);
+  if(TZ===null||TZL!==LEVEL||t<TZT||t-TZT>.5)TZ=tg;
+  else TZ+=(tg-TZ)*(1-Math.exp(-Math.min(.1,t-TZT)/.09));
+  TZL=LEVEL;TZT=t;return TZ;
+}
+// below the horizon, whatever the ground does not reach is haze
+function terrBack(D,hzr,hzmax,lbm){
+  const sk=hzmax*(lbm*.55+.05),r=hzr[0]*sk,g=hzr[1]*sk,b=hzr[2]*sk;
+  for(let y=Math.max(0,HH-1);y<VH;y++){let o=y*VW*4;for(let x=0;x<VW;x++,o+=4){D[o]=r;D[o+1]=g;D[o+2]=b}}
+}
+const THN=24,THX=new Int16Array(THN),THC=new Int16Array(THN),THS=new Uint8Array(THN),THG=new Int32Array(THN),THP=new Float32Array(THN),THB=new Float32Array(THN),THF=new Float32Array(THN);
+// one screen column: walks the grid, paints the ground, and lists the walls that can be seen (nearest first) in TH*; returns how many
+function terrTerrace(x,rX,rY){
+  const T=TERR_NOW,W=T.W,Hh=T.H,h=T.h,sh=T.s,C=TC,D=C.D,cx=C.cx,cy=C.cy,cz=CAMZ,grid=G.grid,fm=C.fmp,fds=C.fds,hz=C.hzr,hzmax=C.hzmax,hzrate=C.hzrate,lbm=C.lbm,nl=C.nl,nn=C.nn,tbR=C.tbR,tbG=C.tbG,tbB=C.tbB,ttR=C.ttR,ttG=C.ttG,ttB=C.ttB,HHv=HH,Fv=F,TSv=TS,TSm=TS-1;
+  const rl=Math.hypot(rX,rY),base=x*YBK;
+  let mx=Math.floor(cx),my=Math.floor(cy);
+  const ddx=Math.abs(1/rX),ddy=Math.abs(1/rY);
+  let stx,sty,sdx,sdy;
+  if(rX<0){stx=-1;sdx=(cx-mx)*ddx}else{stx=1;sdx=(mx+1-cx)*ddx}
+  if(rY<0){sty=-1;sdy=(cy-my)*ddy}else{sty=1;sdy=(my+1-cy)*ddy}
+  let yb=VH,tIn=0,side=0,nh=0,lastK=-1,slopeMax=-1e9,tStop=70,hprev=-1e9,first=true;
+  for(let guard=0;guard<150;guard++){
+    const tOut=Math.min(sdx,sdy),inside=mx>=0&&my>=0&&mx<W&&my<Hh,i=inside?my*W+mx:(Math.min(Hh-1,Math.max(0,my))*W+Math.min(W-1,Math.max(0,mx)));
+    const g=inside?grid[my][mx]:1;
+    if(!first&&g>0){ // a wall: remember it if its top could be seen above the walls nearer than it
+      const foot=h[i];let wh=CEILH;if(g>=100){const tt=T_TILE[g];if(tt!==undefined&&TEX[tt])wh=TEX[tt].wh||CEILH}
+      const slope=(foot+wh-cz)/Math.max(tIn,.05);
+      if(slope>slopeMax&&nh<THN){THX[nh]=mx;THC[nh]=my;THS[nh]=side;THG[nh]=g;THP[nh]=tIn;THB[nh]=yb;THF[nh]=foot;nh++;slopeMax=slope;
+        if(slope>0){const ts=(T.zmax-cz)/slope;if(ts<tStop)tStop=ts}}
+      hprev=-1e9;
+    }else{
+      const hc0=h[i],hc=first?Math.min(hc0,cz-.05):hc0,fcc=(fm&&inside)?fm.charCodeAt(i):48,fdd=fds[fcc-48]||fds[0],cellShade=sh[i];
+      if(!first&&hprev>-1e8&&hc>hprev){ // the riser: the face of this step that looks at the camera
+        const yTop=HHv-(hc-cz)*Fv/tIn,yBot=HHv-(hprev-cz)*Fv/tIn,ys=Math.max(0,Math.ceil(yTop)),ye=Math.min(Math.ceil(yb),Math.ceil(yBot),VH);
+        if(ye>ys){
+          let rtd=null,rth=TSv;{const rg=(T.rg&&T.rg[i])||T.riser,tt=rg?T_TILE[rg]:undefined,tx=tt!==undefined?TEX[tt]:null;if(tx&&tx.d){rtd=tx.d;rth=tx.h||TSv}} // the face of a step has its own wall picture when the level gives one
+          const px=cx+rX*tIn,py=cy+rY*tIn,along=side===0?py:px,u=((along-Math.floor(along))*TSv)&TSm,dist=tIn*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv;
+          let lt=0;for(let k=0;k<nn;k+=3){const ax=px-nl[k],ay=py-nl[k+1];lt+=nl[k+2]/(1+1.15*(ax*ax+ay*ay+.44))}
+          const lb=Math.max(baseL(dist),lbm),sk=(lb*.55+lt*.45+.05)*smv,rs=side===0?(stx>0?.9:.58):(sty>0?1:.68),kR=(lb*tbR+lt*ttR)*rs,kG=(lb*tbG+lt*ttG)*rs,kB=(lb*tbB+lt*ttB)*rs;
+          let o=(ys*VW+x)*4;
+          for(let y=ys;y<ye;y++,o+=VW*4){
+            const z=cz-(y+.5-HHv)*tIn/Fv;let v=((hc-z)*TSv)|0,td=fdd;
+            if(rtd){v=v%rth;td=rtd}else v&=TSm;
+            const ti=(v*TSv+u)*4;
+            D[o]=td[ti]*kR*iv+hz[0]*sk;D[o+1]=td[ti+1]*kG*iv+hz[1]*sk;D[o+2]=td[ti+2]*kB*iv+hz[2]*sk;
+          }
+        }
+        if(yTop<yb)yb=yTop;
+      }
+      if(hc<cz){ // the top of the step
+        const k1=(cz-hc)*Fv,yFar=HHv+k1/tOut,yNear=HHv+k1/Math.max(tIn,.001),ys=Math.max(0,Math.ceil(yFar)),ye=Math.min(Math.ceil(yb),Math.ceil(yNear),VH);
+        if(ye>ys){
+          let o=(ys*VW+x)*4;
+          for(let y=ys;y<ye;y++,o+=VW*4){
+            const t=k1/(y+.5-HHv),px=cx+rX*t,py=cy+rY*t,u=(((px-mx)*TSv)|0)&TSm,v=(((py-my)*TSv)|0)&TSm,ti=(v*TSv+u)*4,dist=t*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv;
+            let lt=0;for(let k=0;k<nn;k+=3){const ax=px-nl[k],ay=py-nl[k+1];lt+=nl[k+2]/(1+1.15*(ax*ax+ay*ay+.44))}
+            const lb=Math.max(baseL(dist),lbm),sk=(lb*.55+lt*.45+.05)*smv,kR=(lb*tbR+lt*ttR)*cellShade,kG=(lb*tbG+lt*ttG)*cellShade,kB=(lb*tbB+lt*ttB)*cellShade;
+            D[o]=fdd[ti]*kR*iv+hz[0]*sk;D[o+1]=fdd[ti+1]*kG*iv+hz[1]*sk;D[o+2]=fdd[ti+2]*kB*iv+hz[2]*sk;
+          }
+        }
+        if(yFar<yb)yb=yFar;
+      }else{const yT=HHv-(hc-cz)*Fv/Math.max(tIn,.001);if(yT<yb)yb=yT}
+      hprev=hc0;
+    }
+    first=false;
+    const kb=Math.min(YBK-1,(tOut*YBS)|0),yv=Math.max(0,Math.min(VH,Math.ceil(yb)));
+    for(let k=lastK+1;k<=kb;k++)YB[base+k]=yv;
+    if(kb>lastK)lastK=kb;
+    if(!inside||yb<=0||tOut>tStop)break;
+    if(sdx<sdy){sdx+=ddx;mx+=stx;side=0}else{sdy+=ddy;my+=sty;side=1}
+    tIn=tOut;
+  }
+  const yv=Math.max(0,Math.min(VH,Math.ceil(yb)));
+  for(let k=lastK+1;k<YBK;k++)YB[base+k]=yv;
+  return nh;
 }

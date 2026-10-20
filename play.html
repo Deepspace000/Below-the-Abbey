@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.464';
+const VERSION='3.465';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1605,7 +1605,7 @@ function bfs(e){
       const nx=x+DIRS[k][0],ny=y+DIRS[k][1],ni=ny*MW+nx;
       if(nx<0||ny<0||nx>=MW||ny>=MH||dist[ni]>=0)continue;
       const isP=nx===G.P.x&&ny===G.P.y;
-      if(!isP&&(cellBlocked(nx,ny)||occupied.has(ni)))continue;
+      if(!isP&&(cellBlocked(nx,ny)||occupied.has(ni)))continue;if(!terrStepOK(x,y,nx,ny))continue;
       dist[ni]=dd+1;first[ni]=dd===0?ny*MW+nx:first[y*MW+x];q.push([nx,ny]);
     }
   }
@@ -2236,7 +2236,7 @@ function enemyAct(e){
     if(dist()===1){enemyAttack(e);return dur+290}
     let moved=false;
     if(def.fly&&Math.random()<.3){ // bats flutter about
-      const opts=DIRS.map(d=>[e.x+d[0],e.y+d[1]]).filter(([x,y])=>!cellBlocked(x,y)&&!enemyAt(x,y)&&!(x===G.P.x&&y===G.P.y));
+      const opts=DIRS.map(d=>[e.x+d[0],e.y+d[1]]).filter(([x,y])=>!cellBlocked(x,y)&&terrStepOK(e.x,e.y,x,y)&&!enemyAt(x,y)&&!(x===G.P.x&&y===G.P.y));
       if(opts.length){const o=opts[rnd(0,opts.length-1)];e.x=o[0];e.y=o[1];moved=true}
     }else{
       const path=bfs(e);
@@ -2304,6 +2304,7 @@ function doMove(rel){ // rel: 0 forward, 1 right, 2 back, 3 left
   if(g>0||bd){sfx('bump');G.shake=.12;
     if(bd&&LEVEL>=400&&LEVEL<424&&/^[lp]tree\d/.test(bd.k)&&(G.flags.pfTreeHint||0)<3&&G.time-(G._treeMsgT||-99)>5){G._treeMsgT=G.time;G.flags.pfTreeHint=(G.flags.pfTreeHint||0)+1;msg('A solid trunk blocks the way. Willows, birches, ferns, most firs and about half of the oaks can be walked through, but the rest cannot.','#c8d8a0')} // the rule of the thick woods, told the first few times
     return}
+  if(TERR_STEP&&!terrStepOK(G.P.x,G.P.y,nx,ny)){sfx('bump');G.shake=.08;msg(TERR_STEP.h[ny*MW+nx]>TERR_STEP.h[G.P.y*MW+G.P.x]?'The step ahead is too high to climb.':'The drop ahead is too steep to climb down.','#d8c8a0');return}
   const e=enemyAt(nx,ny);
   if(e){msg(`The ${ENEMY_DEF[e.t].name} blocks the way!`);sfx('bump');return}
   G.P.x=nx;G.P.y=ny;sfx('step');reveal();
@@ -2405,7 +2406,7 @@ function act(id){
    ========================================================================== */
 let HH=105,EYE=.5;const VW=420,VH=210,PL=.75,F=(VW/2)/PL,EYE0=.5,AMB=.05;
 let CEILH=1.0; // height of the ceiling and the walls, in cells: low in dungeons, higher indoors, high outside (set when a level loads)
-const GRIM_L=()=>LEVEL===2||LEVEL===7||LEVEL===470;
+const GRIM_L=()=>LEVEL===2||LEVEL===7||LEVEL===470||hgtLook(LEVEL);
 function ceilFor(n,L){if(L.ceilH)return L.ceilH;if(L.outdoor||(L.day||0)>0||n===22)return 3.4; // the open sky is high, above the tallest trees
   if(DUNGEON_LEVELS.includes(n))return 1.0;return L.amb?1.22:1.05}
 let RANGE=5.2;
@@ -2534,7 +2535,8 @@ function render3D(){
   const day=G.day||0,lbm=Math.max(day,G.amb||0),fd=G.fl||(day?GRASSD:FLOORD),cd=G.cl||(day?SKYD:CEILD);
   const uwL=typeof uwLv==='function'&&uwLv(LEVEL); // under the sea
   const desertLv=LEVEL===41||LEVEL===43||LEVEL===44||LEVEL===305||LEVEL>=60&&LEVEL<=64||yarSea(LEVEL),dsBio=LEVEL===41?clamp(rdBiome(G.C.x|0,G.C.y|0)*1.3,0,1):1,mix3=(a,b)=>[a[0]+(b[0]-a[0])*dsBio,a[1]+(b[1]-a[1])*dsBio,a[2]+(b[2]-a[2])*dsBio];
-  const skyLv=LEVEL===22,lushLv=LEVEL===32||LEVEL===33,grimLv=GRIM_L(),rainLv=LEVEL===10,mossLv=LEVEL===39,hzr0=desertLv?(uwL?[40,124,154]:LEVEL===305?[236,232,214]:yarSea(LEVEL)?[214,230,244]:LEVEL===64?[236,224,196]:LEVEL===63?[238,242,250]:LEVEL===62?[226,204,242]:LEVEL===61?[244,226,172]:LEVEL===60?[196,214,240]:LEVEL===43?[238,200,166]:mix3([170,200,160],[242,226,190])):skyLv?[176,192,216]:rainLv?[58,72,82]:mossLv?[70,104,70]:LEVEL===470?[40,58,82]:grimLv?[30,46,32]:lushLv?[170,200,160]:day?[132,146,132]:[86,76,62],hzc0=desertLv?(uwL?[58,140,168]:LEVEL===305?[206,220,200]:yarSea(LEVEL)?[176,204,230]:LEVEL===64?[216,198,160]:LEVEL===63?[214,226,244]:LEVEL===62?[196,160,222]:LEVEL===61?[232,200,128]:LEVEL===60?[172,196,232]:LEVEL===43?[218,172,136]:mix3([140,176,130],[228,210,168])):mossLv?[48,76,50]:rainLv?[48,60,70]:LEVEL===470?[30,44,64]:grimLv?[26,40,28]:lushLv?[140,176,130]:skyLv?[150,172,208]:day?[110,124,112]:[69,61,50],hzmax0=desertLv?(LEVEL===44?.36:LEVEL===305?.3:LEVEL===304?.42:.5+.22*dsBio):skyLv?(.42-.26*ALTN):mossLv?.34:lushLv?.34:LEVEL===470?.5:grimLv?.36:rainLv?.34:day?.55:.32,hzrate0=desertLv?(LEVEL===44?.02:LEVEL===305?.014:LEVEL===304?.02:.03):skyLv?.05:mossLv?.05:lushLv?.04:LEVEL===470?.03:grimLv?.034:rainLv?.036:day?.07:.042;
+  const HGL=LEVEL===470||hgtLook(LEVEL); // the cold cavern look of the Hollow Grasslands and its cities
+  const skyLv=LEVEL===22,lushLv=LEVEL===32||LEVEL===33,grimLv=GRIM_L(),rainLv=LEVEL===10,mossLv=LEVEL===39,hzr0=desertLv?(uwL?[40,124,154]:LEVEL===305?[236,232,214]:yarSea(LEVEL)?[214,230,244]:LEVEL===64?[236,224,196]:LEVEL===63?[238,242,250]:LEVEL===62?[226,204,242]:LEVEL===61?[244,226,172]:LEVEL===60?[196,214,240]:LEVEL===43?[238,200,166]:mix3([170,200,160],[242,226,190])):skyLv?[176,192,216]:rainLv?[58,72,82]:mossLv?[70,104,70]:HGL?[40,58,82]:grimLv?[30,46,32]:lushLv?[170,200,160]:day?[132,146,132]:[86,76,62],hzc0=desertLv?(uwL?[58,140,168]:LEVEL===305?[206,220,200]:yarSea(LEVEL)?[176,204,230]:LEVEL===64?[216,198,160]:LEVEL===63?[214,226,244]:LEVEL===62?[196,160,222]:LEVEL===61?[232,200,128]:LEVEL===60?[172,196,232]:LEVEL===43?[218,172,136]:mix3([140,176,130],[228,210,168])):mossLv?[48,76,50]:rainLv?[48,60,70]:HGL?[30,44,64]:grimLv?[26,40,28]:lushLv?[140,176,130]:skyLv?[150,172,208]:day?[110,124,112]:[69,61,50],hzmax0=desertLv?(LEVEL===44?.36:LEVEL===305?.3:LEVEL===304?.42:.5+.22*dsBio):skyLv?(.42-.26*ALTN):mossLv?.34:lushLv?.34:HGL?.5:grimLv?.36:rainLv?.34:day?.55:.32,hzrate0=desertLv?(LEVEL===44?.02:LEVEL===305?.014:LEVEL===304?.02:.03):skyLv?.05:mossLv?.05:lushLv?.04:HGL?.03:grimLv?.034:rainLv?.036:day?.07:.042;
   // the desert sky follows the clock; a sandstorm thickens the air and tints it
   const SK=desertLv&&!uwL?skyTod((G.clock%1440)/60):null,ST=desertLv?STORM.a:0,stm=(v,c)=>v+(c-v)*ST;
   const stormC=SK?[206*Math.min(1,SK.k[0]*1.1+.05),166*Math.min(1,SK.k[1]*1.1+.05),112*Math.min(1,SK.k[2]*1.1+.05)]:null;
@@ -2542,22 +2544,22 @@ function render3D(){
   const hzr=(SK?hzr0.map((v,i)=>stm(v*SK.k[i],stormC[i])):hzr0).slice(),hzc=SK?hzc0.map((v,i)=>stm(v*SK.k[i],stormC[i]*.92)):hzc0;
   let hzmax=SK?stm(hzmax0,.97):hzmax0,hzrate=SK?hzrate0+.16*ST:hzrate0;if(uwL){hzmax=.68;hzrate=.042}
   {const WXN=typeof weatherNow==='function'?weatherNow():null;if(WXN&&WXN.fog){hzrate+=WXN.fog;hzmax=Math.max(hzmax,WXN.haze);for(let i=0;i<3;i++)hzr[i]+=(WXN.col[i]-hzr[i])*WXN.mix}} // rain, fog, snow and heat thicken the air
-  const tbR=uwL?.84:SK?SK.g[0]:1,tbG=uwL?1:SK?SK.g[1]*.94:.94,tbB=uwL?1.12:SK?SK.g[2]*.84:.84, ttR=LEVEL===470?.5:(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?.85:1.3,ttG=LEVEL===470?.95:(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?.28:.88,ttB=LEVEL===470?1.5:(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?1.5:.5; // in the Hollow Land the warm lights glow purple
+  const tbR=uwL?.84:SK?SK.g[0]:1,tbG=uwL?1:SK?SK.g[1]*.94:.94,tbB=uwL?1.12:SK?SK.g[2]*.84:.84, ttR=HGL?.5:(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?.85:1.3,ttG=HGL?.95:(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?.28:.88,ttB=HGL?1.5:(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?1.5:.5; // in the Hollow Land the warm lights glow purple
   const ovcLv=LEVEL===2||LEVEL===3||LEVEL===7||LEVEL===10||LEVEL===19||LEVEL===20,SKP=uwL?uwPan():ovcLv&&SKYOVC?SKYOVC:SKYPAN; // the early open areas sit under a heavy moving overcast
   const skyPan=(skyLv||ovcLv||desertLv||LEVEL===3||LEVEL===13||LEVEL===32||LEVEL===33)&&SKP?(()=>{for(let x=0;x<VW;x++){const cm=2*x/VW-1;UCOL[x]=((((Math.atan2(dY+pY*cm,dX+pX*cm)/TAU)%1)+1)%1*1024+t*(ovcLv?11:7))%1024|0}return true})():false; // the sky is one panorama on walls and ceiling alike
   const fmp=G.fmap,fd2=G.fl2,fd3=G.fl3,fd4=G.fl4,fd5=G.fl5,fd6=G.fl6,lmp=G.lmap,lmN=lmp?clamp(1.2-(G.day||0)*1.35,0,1)*.95:0;
-  TERR_NOW=desertLv&&skyPan?terrFor(LEVEL):null;CAMZ=EYE; // real hills: the camera rides the ground, the ground is marched column by column, the sky is painted behind it
-  if(TERR_NOW){CAMZ=terrH(cx,cy)+EYE;TC={wat:yarSea(LEVEL)&&!uwL,uw:uwL,tm:t,D,cx,cy,fmp,fds:[fd,fd2||fd,fd3||fd,fd4||fd,fd5||fd,fd6||fd],hzr,hzmax,hzrate,lbm,tbR,tbG,tbB,rock:terrRock()};
-    if(SK)paintDesertSky(D,SKP,UCOL,SK,ST,stormC,dX,dY,pX,pY,t);
+  TERR_NOW=desertLv&&skyPan?terrFor(LEVEL):(LEVELS[LEVEL]&&LEVELS[LEVEL].terrace?terrFor(LEVEL):null);CAMZ=EYE;const TERRACE=!!(TERR_NOW&&TERR_NOW.terr); // real hills: the camera rides the ground, the ground is marched column by column, the sky is painted behind it
+  if(TERR_NOW){CAMZ=(TERRACE?terrCam(cx,cy,t):terrH(cx,cy))+EYE;TC={nl,nn,ttR,ttG,ttB,wat:yarSea(LEVEL)&&!uwL,uw:uwL,tm:t,D,cx,cy,fmp,fds:[fd,fd2||fd,fd3||fd,fd4||fd,fd5||fd,fd6||fd],hzr,hzmax,hzrate,lbm,tbR,tbG,tbB,rock:terrRock()};
+    if(TERRACE)terrBack(D,hzr,hzmax,lbm);else if(SK)paintDesertSky(D,SKP,UCOL,SK,ST,stormC,dX,dY,pX,pY,t);
     else{const WOB=uwL?new Float32Array(VW):null;if(WOB)for(let x=0;x<VW;x++)WOB[x]=Math.sin(t*.7+x*.05)*4+Math.sin(t*.43+x*.021)*3; // the light moves and bends
     for(let y=0;y<VH;y++){const v0=y-HH+150,o=y*VW*4;for(let x=0;x<VW;x++){const v=clamp(WOB?v0+WOB[x]:v0,0,255)|0,i=(v*1024+UCOL[x])*4,io=o+x*4;D[io]=SKP[i]*lbm*tbR;D[io+1]=SKP[i+1]*lbm*tbG;D[io+2]=SKP[i+2]*lbm*tbB}}}}
-  if(TERR_NOW&&typeof pfMountains==='function')pfMountains(D,dX,dY,pX,pY,hzr,lbm); // the painted mountains at the east end of the Pilgrim's Path woods, laid on the sky behind everything
+  if(TERR_NOW&&!TERRACE&&typeof pfMountains==='function')pfMountains(D,dX,dY,pX,pY,hzr,lbm); // the painted mountains at the east end of the Pilgrim's Path woods, laid on the sky behind everything
   // floor + ceiling (the ceiling is its own plane, CEILH above the floor); a daylit sky needs no lamp light, and indoors only the nearest few lights reach the ceiling
   const ncl=day>.5?0:Math.min(nn,12),nrcl=day>.5?0:Math.min(nrn,6);
   const fastF=LEVEL===44;
   const FLM=fastF?[fd,fd2||fd,fd3||fd,fd4||fd,fd5||fd,fd6||fd].map(floorMips):null; // each paving picture and its smaller, blurrier copies
-  for(let y=HH,yEnd=TERR_NOW?HH:Math.max(VH,2*HH);y<yEnd;y++){
-    const doF=y<VH,yci=2*HH-1-y,doC=yci>=0,p=y-HH+.5,rd=EYE*F/p,rdc=(CEILH-EYE)*F/p;
+  for(let y=HH,yEnd=(TERR_NOW&&!TERRACE)?HH:Math.max(VH,2*HH);y<yEnd;y++){
+    const doF=y<VH&&!TERRACE,yci=2*HH-1-y,doC=yci>=0,p=y-HH+.5,rd=EYE*F/p,rdc=(TERRACE?TERR_NOW.roof-CAMZ:CEILH-EYE)*F/p;
     let fx=cx+rd*(dX-pX),fy=cy+rd*(dY-pY),gx=cx+rdc*(dX-pX),gy=cy+rdc*(dY-pY);
     const sx=rd*2*pX/VW,sy=rd*2*pY/VW,sxc=rdc*2*pX/VW,syc=rdc*2*pY/VW;
     const yo=(y*VW)*4,yc=(Math.max(0,yci)*VW)*4;
@@ -2607,17 +2609,22 @@ function render3D(){
     let stx,sty,sdx,sdy;
     if(rX<0){stx=-1;sdx=(cx-mx)*ddx}else{stx=1;sdx=(mx+1-cx)*ddx}
     if(rY<0){sty=-1;sdy=(cy-my)*ddy}else{sty=1;sdy=(my+1-cy)*ddy}
-    let side=0,g=0,guard=0;
+    let side=0,g=0,guard=0,nHit=1;
+    if(TERRACE){nHit=terrTerrace(x,rX,rY);if(nHit===0){zbuf[x]=99;wtop[x]=-1e9;continue}} // terraced town: the ground is walked cell by cell and every wall that can be seen is listed, nearest first
+    else{
     while(guard++<64){
       if(sdx<sdy){sdx+=ddx;mx+=stx;side=0}else{sdy+=ddy;my+=sty;side=1}
       if(mx<0||my<0||mx>=MW||my>=MH){g=1;break}
       g=grid[my][mx];if(g>0)break;
     }
-    if(g===0&&(LEVEL===41||LEVEL===43||LEVEL>=60&&LEVEL<=64||yarSea(LEVEL)||LEVEL===470)){if(TERR_NOW)terrMarch(x,rX,rY,TFAR);zbuf[x]=99;wtop[x]=-1e9;continue} // open desert: no wall to be found, only the horizon
-    let perp=side===0?sdx-ddx:sdy-ddy;if(perp<.05)perp=.05;
+    if(g===0&&(LEVEL===41||LEVEL===43||LEVEL>=60&&LEVEL<=64||yarSea(LEVEL)||HGL)){if(TERR_NOW)terrMarch(x,rX,rY,TFAR);zbuf[x]=99;wtop[x]=-1e9;continue} // open desert: no wall to be found, only the horizon
+    }
+    for(let hi=nHit-1;hi>=0;hi--){ // walls far to near, so a tall tower shows over a low house
+    if(TERRACE){mx=THX[hi];my=THC[hi];side=THS[hi];g=THG[hi]}
+    let perp=TERRACE?THP[hi]:(side===0?sdx-ddx:sdy-ddy);if(perp<.05)perp=.05;
     zbuf[x]=perp;
     const hx=cx+rX*perp,hy=cy+rY*perp;
-    if(TERR_NOW)terrMarch(x,rX,rY,Math.min(TFAR,perp));
+    if(TERR_NOW&&!TERRACE)terrMarch(x,rX,rY,Math.min(TFAR,perp));
     let wx=side===0?hy:hx;wx-=Math.floor(wx);
     let tx=(wx*TS)|0;
     if((side===0&&rX>0)||(side===1&&rY<0))tx=TS-1-tx;
@@ -2637,10 +2644,10 @@ function render3D(){
     for(let k=0;k<nn;k+=3){const ax=px-nl[k],ay=py-nl[k+1];lt+=nl[k+2]/(1+1.15*(ax*ax+ay*ay))}
     for(let k=0,j=0;k<nn;k+=3,j++){const ax=px-nl[k],ay=py-nl[k+1];wd2[j]=ax*ax+ay*ay}
     for(let k=0,j=0;k<nrn;k+=3,j++){const ax=px-nr[k],ay=py-nr[k+1];wr2[j]=ax*ax+ay*ay}
-    const eyeR=TERR_NOW?CAMZ-terrH(hx,hy):EYE,unit=F/perp,lineH=wh*unit,y0=HH-(wh-eyeR)*unit,yBot=HH+eyeR*unit;let yT=y0;
+    const eyeR=TERRACE?CAMZ-THF[hi]:TERR_NOW?CAMZ-terrH(hx,hy):EYE,unit=F/perp,lineH=wh*unit,y0=HH-(wh-eyeR)*unit,yBot=HH+eyeR*unit;let yT=y0;
     if(tex.cren&&((wx*2)%1)>.55)yT=y0+tex.cren*unit; // a battlement: every other stretch of the wall top is a gap between two merlons
     wtop[x]=yT;
-    const ds=Math.max(0,Math.ceil(yT)),de=Math.min(VH-1,Math.floor(yBot));
+    const ds=Math.max(0,Math.ceil(yT)),de=Math.min(TERRACE?Math.ceil(THB[hi])-1:VH-1,Math.floor(yBot));
     if(skyW&&SKYPAN){ if(TERR_NOW)continue; // one panoramic sky, not a tile on every wall: the picture is read by the direction of the ray, and it drifts
       const u=UCOL[x],kr=lbm*tbR,kg=lbm*tbG,kb=lbm*tbB;
       for(let y=ds;y<=de;y++){const v=clamp(y-HH+150,0,255)|0,i=(v*1024+u)*4,o=(y*VW+x)*4;D[o]=SKYPAN[i]*kr;D[o+1]=SKYPAN[i+1]*kg;D[o+2]=SKYPAN[i+2]*kb}
@@ -2660,6 +2667,7 @@ function render3D(){
       if(dg){const vp=Math.max(0,Math.min(1,(y-y0)/(yBot-y0))),u=kd.n===2?((kd.lf?kd.i:1-kd.i)+tx/TS)/2:.5+(tx/TS-.5)*.55,hw=(u-.5)/.17,f=dgs*Math.exp(-hw*hw)*(vp<.3?0:Math.min(1,(vp-.3)/.25))*.55;R+=170*f;Gc+=108*f;B+=30*f} // only the doorway itself: a warm pool of light on and round the door
       D[o]=R;D[o+1]=Gc;D[o+2]=B;
     }
+    } // next wall of this column
   }
   vctx.putImageData(vimg,0,0);
   for(const L of LIGHTS){const h=L._h;if(!L.taken&&h&&h.col>=0&&h.ty<=zbuf[h.col]+.45)G.hits.push(h)}
@@ -2670,16 +2678,9 @@ function render3D(){
     if(t2<.25)continue;
     const sx2=VW/2*(1+x2/t2),zA=CEILH*.5+TORCH_ZA,y2=HH-(zA-EYE)*F/t2,y1=HH-(zA+(L.nar?TORCH_RISE*.55:TORCH_RISE)-EYE)*F/h.ty,w1=(L.nar?.075:.11)*F/h.ty,w2=.075*F/t2;
     const lit=clamp(.8+.3*Math.max(0,1-h.ty/6),.6,1.2);
-    vctx.save();vctx.globalAlpha=1;
-    vctx.fillStyle='rgb('+((64*lit)|0)+','+((58*lit)|0)+','+((50*lit)|0)+')'; // the iron plate fixed to the wall
-    vctx.beginPath();vctx.ellipse(sx2,y2,.11*F/t2,.075*F/t2,0,0,TAU);vctx.fill();
-    const g=vctx.createLinearGradient(sx2,y2,h.sx,y1);g.addColorStop(0,'rgb('+((98*lit)|0)+','+((64*lit)|0)+','+((34*lit)|0)+')');g.addColorStop(1,'rgb('+((176*lit)|0)+','+((112*lit)|0)+','+((52*lit)|0)+')');
-    vctx.fillStyle=g;vctx.beginPath();vctx.moveTo(sx2-w2/2,y2);vctx.lineTo(sx2+w2/2,y2);vctx.lineTo(h.sx+w1/2,y1);vctx.lineTo(h.sx-w1/2,y1);vctx.closePath();vctx.fill();
-    const mx=(sx2+h.sx)/2,my=(y2+y1)/2,mw=(w1+w2)/2*1.25; // an iron band round the middle of the stick
-    vctx.fillStyle='rgb('+((44*lit)|0)+','+((40*lit)|0)+','+((36*lit)|0)+')';vctx.fillRect(mx-mw/2,my-.014*F/h.ty,mw,.03*F/h.ty);vctx.strokeStyle='rgba(255,210,140,.35)';vctx.lineWidth=Math.max(1,.012*F/h.ty);vctx.beginPath();vctx.moveTo(sx2-w2*.2,y2);vctx.lineTo(h.sx-w1*.2,y1);vctx.stroke(); // a lit edge along the stick
-    const hw=.13*F/h.ty,hh=.1*F/h.ty; // the head: cloth wound round the end, charred and glowing underneath the flame
-    vctx.fillStyle='rgb('+((78*lit)|0)+','+((52*lit)|0)+','+((28*lit)|0)+')';vctx.beginPath();vctx.ellipse(h.sx,y1,hw/2,hh/2,0,0,TAU);vctx.fill();vctx.strokeStyle='rgba(30,18,8,.8)';vctx.lineWidth=Math.max(1,.01*F/h.ty);vctx.stroke();
-    vctx.fillStyle=L.red?'rgba(190,40,20,.7)':'rgba(230,110,30,.7)';vctx.beginPath();vctx.ellipse(h.sx,y1-hh*.25,hw*.38,hh*.28,0,0,TAU);vctx.fill();
+    // the torch itself is a painted picture of an old, worn torch in its iron bracket (assets/wtorch0..3.png), one of four chosen by the torch's place
+    {const im=IMG['wtorch'+((Math.imul(L.key,2654435761)>>>9)&3)];
+      if(im&&im.width){const top=y1-.1*F/h.ty,bot=y2+.07*F/t2,hs=Math.max(4,bot-top),ws=hs*im.width/im.height*1.15,cxm=(h.sx*.65+sx2*.35);vctx.imageSmoothingEnabled=true;vctx.drawImage(im,cxm-ws/2,top,ws,hs)}}
     vctx.restore();
   }
   vctx.save();vctx.globalCompositeOperation='lighter';
@@ -2768,7 +2769,7 @@ function spriteList(){
 }
 let SC=ctx; // sprites are painted straight onto the full-size screen, not into the small 3D picture, so they stay sharp
 function drawSprites(cx,cy,dX,dY,pX,pY){
-  const inv=-1/PL,list=spriteList().concat(LEVEL===44&&LEVELS[44].sky?khSkyList(cx,cy,dX,dY):((LEVEL===YR.ID||LEVEL===305||LEVEL===304||LEVEL===364||LEVEL===470||(LEVEL>=400&&LEVEL<440))&&LEVELS[LEVEL]&&LEVELS[LEVEL].sky?khSkyList(cx,cy,dX,dY,LEVELS[LEVEL],.6):[])),proj=[],far=LEVEL===44?26:(G.day||0)>0?34:20,far2=far*far,farT=LEVEL===44?26:(G.day||0)>0?33:16; // outdoors the trees stay drawn as far as the walls can be seen
+  const inv=-1/PL,list=spriteList().concat(LEVEL===44&&LEVELS[44].sky?khSkyList(cx,cy,dX,dY):((LEVEL===YR.ID||LEVEL===305||LEVEL===304||LEVEL===364||LEVEL===470||hgtLook(LEVEL)||(LEVEL>=400&&LEVEL<440))&&LEVELS[LEVEL]&&LEVELS[LEVEL].sky?khSkyList(cx,cy,dX,dY,LEVELS[LEVEL],.6):[])),proj=[],far=LEVEL===44?26:(G.day||0)>0?34:20,far2=far*far,farT=LEVEL===44?26:(G.day||0)>0?33:16; // outdoors the trees stay drawn as far as the walls can be seen
   for(const s of list){
     const rx=s.x-cx,ry=s.y-cy;
     if(rx*rx+ry*ry>(s.sky?60000:far2))continue;
@@ -2807,7 +2808,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     if(s.e&&ENEMY_DEF[s.e.t].glow)lum=Math.max(lum,ENEMY_DEF[s.e.t].glow);
     if(s.decor&&s.decor.k==='lever')lum=Math.max(lum,.62); // a lever catches a little light, so it can be found in a dark hall // a ghost shines a little by its own light
     if(LEVEL===44&&s.decor&&(s.decor.k==='lamp'||s.decor.k==='hlant'||s.decor.k==='cfire'))lum=Math.max(lum,.9); // a lantern or a fire shines by its own light
-    const ohL=LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<440),kq0=Math.min(1,Math.max(.05,2*sw/iw)),dyv=(G.day||0)>0,hzv=GRIM_L()?(LEVEL===470?[26,38,56]:[30,46,32]):ohL&&dyv?[226,228,220]:trD?[40,54,42]:dyv?[132,146,132]:[86,76,62],smS=Math.min(dyv?(ohL?.22:.4):.26,dist*(dyv?(ohL?.018:.04):.03))*(GRIM_L()?.55:.75);
+    const ohL=LEVEL===305||LEVEL===304||(LEVEL>=400&&LEVEL<440),kq0=Math.min(1,Math.max(.05,2*sw/iw)),dyv=(G.day||0)>0,hzv=GRIM_L()?(LEVEL===470||hgtLook(LEVEL)?[26,38,56]:[30,46,32]):ohL&&dyv?[226,228,220]:trD?[40,54,42]:dyv?[132,146,132]:[86,76,62],smS=Math.min(dyv?(ohL?.22:.4):.26,dist*(dyv?(ohL?.018:.04):.03))*(GRIM_L()?.55:.75);
     let SRC,tw,th,HZ=null,hA=0;
     if(!s.flash&&!(s.decor&&s.decor.burn>0)){
       let tier=SPR_TIERS[SPR_TIERS.length-1];for(const t of SPR_TIERS){if(t>=iw*kq0){tier=t;break}}
@@ -3643,7 +3644,7 @@ function jumpFromUrl(){
     msg('The party stands at the Kraken line with all four Kraken harpoons. Walk east.','#ffe36a');return}
   if(town==='abbey'||town==='thornwood'){F.townSeen=0;delete F.abbeyIntroSeen;G.bossDead=true;goToLevel(2);G.state='play';G.menu=false;return}
   F.townSeen=1;F.abbeyIntroSeen=1;F.gwoodSeen=1;
-  const AREAS={hollowgrass:[470,75,142,0],hollowland:[364,35,60,0],orangetower:[440,30,38,0],orangeboss:[443,48,7,0],oldhaven:[305,74,141,0],oakwood:[311,2,36,1],landpath:[400,76,555,0],monasterygate:[411,73,306,0],pilgrim:[400,76,555,0],monastery:[430,42,66,0],bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],khemetracity:[44,201,379,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
+  const AREAS={hgtest:[480,10,20,0],hollowgrass:[470,75,142,0],hollowland:[364,35,60,0],orangetower:[440,30,38,0],orangeboss:[443,48,7,0],oldhaven:[305,74,141,0],oakwood:[311,2,36,1],landpath:[400,76,555,0],monasterygate:[411,73,306,0],pilgrim:[400,76,555,0],monastery:[430,42,66,0],bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],khemetracity:[44,201,379,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
   if(!AREAS[town]&&town.length>=4){const m=Object.keys(AREAS).filter(k=>k.startsWith(town)||town.startsWith(k));if(m.length===1)town=m[0]} // near-misses like whitedune find the right area
   if(AREAS[town]&&town!=='thornwood'){const [lv,ax,ay,af]=AREAS[town];F.gandrickDead=1;F.northGate=1;F.mayorKilled=1;F.mayorDown=1;F.ironRoad=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};if(lv===44&&LEVELS[44].stub){khEnter(()=>{goToLevel(lv,{x:ax,y:ay,f:af});G.state='play';G.menu=false});return}goToLevel(lv,{x:ax,y:ay,f:af});if(town==='orangeboss'){let tries=0;const iv=setInterval(()=>{const b=LEVEL===lv&&!TP&&G.enemies.find(e=>e.t==='hlboss0');if(b){clearInterval(iv);G.P.x=b.x;G.P.y=b.y+3;G.P.f=0;G.P.angT=undefined}else if(++tries>100)clearInterval(iv)},100)}G.state='play';G.menu=false;return}
   if(town==='greendale'||town==='anaea'){F.passDone=1;F.passSeen=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};goToLevel(town==='anaea'?33:32,town==='anaea'?sq(ANAEAJ):{x:2,y:36,f:1});G.state='play';G.menu=false;return}
@@ -4080,7 +4081,7 @@ function snapshot(){
     torches:LIGHTS.map(l=>l.taken?1:0),torchKeys:LIGHTS.filter(l=>l.taken).map(l=>l.key)};
 }
 function restore(sv){ // the golden city and the rooms in it are built the first time they are needed
-  const l=sv.level||1;if(l===44||(l>=199&&l<=270)||(l>=1000&&l<30000)||(l>=271&&l<=280)||(l>=289&&l<=312)||(l>=360&&l<=364)||(l>=400&&l<=434)||(l>=440&&l<=474)||l>=40000)if((!LEVELS[l]&&!(typeof KH_LAZY!=='undefined'&&KH_LAZY[l]))||LEVELS[44].stub){khThen(()=>restoreNow(sv));return}
+  const l=sv.level||1;if(l===44||(l>=199&&l<=270)||(l>=1000&&l<30000)||(l>=271&&l<=280)||(l>=289&&l<=312)||(l>=360&&l<=364)||(l>=400&&l<=434)||(l>=440&&l<=474)||hgtAny(l)||l>=40000)if((!LEVELS[l]&&!(typeof KH_LAZY!=='undefined'&&KH_LAZY[l]))||LEVELS[44].stub){khThen(()=>restoreNow(sv));return}
   restoreNow(sv);
 }
 function restoreNow(sv){
@@ -4204,13 +4205,14 @@ function gotoList(){
   hd('The Pilgrim’s Path, from Oldhaven to Yarrim');for(let n=400;n<424;n+=3)if(has(n))out.push({n,name:nm(n)+(n===400?', the beginning':n===421?', near the end':'')});
   hd('Saint Elen’s Monastery, halfway along the Pilgrim’s Path');if(has(411))out.push({n:411,name:'The road outside the monastery (the statue)'});for(const n of [430,431,6900,6901,6902,6903,6904,6905,6906,432,433,434])if(has(n))out.push({n,name:nm(n)});
   hd('Caves hidden in the woods of the Pilgrim’s Path');for(let n=7100;n<7120;n++)if(has(n))out.push({n,name:nm(n)});hd('Caves in the older forests');for(let n=7200;n<7207;n++)if(has(n))out.push({n,name:nm(n)});
+  if(typeof hgtGotoList==='function')hgtGotoList(hd,has,nm,out);
   hd('Below the Abbey, past the sealed door');for(const n of [360,361,362,363,364,440,441,445,450,455,459,460])if(has(n))out.push({n,name:nm(n)});
     hd('Mounds of the Sand Road');for(let n=BURROW_BASE;n<BURROW_BASE+BURROW_N;n++)if(has(n))out.push({n,name:nm(n)});
   for(const [dl,dname] of DNG_DESERTS){const ids=Object.keys(DNG_INFO).map(Number).filter(n=>DNG_INFO[n].desert===dname).sort((a,b)=>a-b);if(ids.length){hd('Dungeons of '+dname);for(const n of ids)out.push({n,name:nm(n)})}}
   return out;
 }
 function jumpToLevel(n,target){
-  if((((n>=304&&n<=312)||(n>=360&&n<=364)||(n>=400&&n<=434)||(n>=440&&n<=474))||(n>=6000&&n<9000))&&typeof KH_READY!=='undefined'&&!KH_READY){khLoadAssets().then(()=>jumpToLevel(n,target));return} // Oldhaven needs its pictures before it is built
+  if((((n>=304&&n<=312)||(n>=360&&n<=364)||(n>=400&&n<=434)||(n>=440&&n<=474)||hgtAny(n))||(n>=6000&&n<9000))&&typeof KH_READY!=='undefined'&&!KH_READY){khLoadAssets().then(()=>jumpToLevel(n,target));return} // Oldhaven needs its pictures before it is built
   if((n===44||(n>=199&&n<=274))&&LEVELS[44].stub){khEnter(()=>jumpToLevel(n,target));return}
   if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();
   audioInit();backupAuto();
@@ -5019,7 +5021,7 @@ function loadLevel(n){
   if(!LEVELS[n]&&n>=40000&&typeof makeLockedHouse==='function')makeLockedHouse(n);
   if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n](); // the room behind an ordinary door in Khemetra is built when first entered
   const L=LEVELS[n]||LEVELS[1];
-  G._cb=undefined;LEVEL=n;CEILH=ceilFor(n,L);MAPROWS=L.rows;MW=MAPROWS[0].length;MH=MAPROWS.length;START=L.start;ENEMY_SPAWNS=L.enemies;ITEM_SPAWNS=L.items;DECOR_SPAWNS=forestExtras(L).length?L.decor.concat(forestExtras(L)):L.decor;if(typeof terrFor==='function'){terrFor(n);TERR_BLOCK=TERRS[n]?TERRS[n].block:null}G.flora=(L.scenery||[]).concat((n===32||n===41)?pathEdgeDecor(L):[]);
+  G._cb=undefined;LEVEL=n;CEILH=ceilFor(n,L);MAPROWS=L.rows;MW=MAPROWS[0].length;MH=MAPROWS.length;START=L.start;ENEMY_SPAWNS=L.enemies;ITEM_SPAWNS=L.items;DECOR_SPAWNS=forestExtras(L).length?L.decor.concat(forestExtras(L)):L.decor;if(typeof terrFor==='function'){terrFor(n);TERR_BLOCK=TERRS[n]?TERRS[n].block:null;TERR_STEP=TERRS[n]&&TERRS[n].terr?TERRS[n]:null}G.flora=(L.scenery||[]).concat((n===32||n===41)?pathEdgeDecor(L):[]);
   G.day=L.day!==undefined?L.day:(L.outdoor?.98:0);G.dayBase=G.day;G.amb=L.amb||0;G.fl=L.floor?FLOORS[L.floor]:null;G.cl=L.ceil?CEILS[L.ceil]:null;G.portals=L.portals||[];G.fmap=L.fmap?L.fmap.join(''):null;G.fl2=L.fmap?(FLOORS[L.floor2]||FLOORS.grass):null;G.fl3=L.fmap?(FLOORS.dirt||FLOORS.grass):null;G.fl4=L.fmap?(FLOORS.mosscobble||FLOORS.cobble):null;G.fl5=L.fmap?(FLOORS.stainedcobble||FLOORS.cobble):null;G.fl6=L.fmap?(FLOORS.wetcobble||FLOORS.cobble):null;if(L.floorSet){const F2=L.floorSet.map(nm=>FLOORS[nm]);G.fl=F2[0];G.fl2=F2[1];G.fl3=F2[2];G.fl4=F2[3];G.fl5=F2[4];G.fl6=F2[5]}G.extraLights=L.lights||null;
   setLightLevel(G.lightLevel||0);
 }
@@ -5075,7 +5077,7 @@ function respawnForest(){
 // carry the party, bag, gold and quests into the next level
 function goToLevel(n,entry){
   // Oldhaven is painted with the city's pictures: never build it before they have loaded, or its soldiers come out as peasants and its walls as flat colour
-  if((((n>=304&&n<=312)||(n>=360&&n<=364)||(n>=400&&n<=434)||(n>=440&&n<=474))||(n>=6000&&n<7000))&&typeof KH_READY!=='undefined'&&!KH_READY&&!G._khWait){G._khWait=1;try{msg('The harbour comes into view...','#a8d8ff')}catch(e){}khLoadAssets().then(()=>{G._khWait=0;goToLevel(n,entry)}).catch(()=>{G._khWait=0});return}
+  if((((n>=304&&n<=312)||(n>=360&&n<=364)||(n>=400&&n<=434)||(n>=440&&n<=474)||hgtAny(n))||(n>=6000&&n<7000))&&typeof KH_READY!=='undefined'&&!KH_READY&&!G._khWait){G._khWait=1;try{msg('The harbour comes into view...','#a8d8ff')}catch(e){}khLoadAssets().then(()=>{G._khWait=0;goToLevel(n,entry)}).catch(()=>{G._khWait=0});return}
   if(n===43||n===62||n===13||(n>=271&&n<=280)||(n>=289&&n<=399)||n>=40000)khLoadAssets(); // the city's pictures arrive in the background while the party walks to its gate
   G.lst[LEVEL]=levelState();
   const keep={heroes:G.heroes,bag:G.bag,gold:G.gold,keys:G.keys,rounds:G.rounds,kills:G.kills,sel:G.sel,bossDead:G.bossDead,flags:G.flags,quests:G.quests,lst:G.lst,clock:G.clock,starveT:G.starveT,aff:G.aff};
@@ -6885,7 +6887,7 @@ function patrolStep(e,def){ // a creature that walks the land, and charges when 
   }
   if(e.tgt){
     let best=null,bd=Math.abs(e.x-e.tgt.x)+Math.abs(e.y-e.tgt.y);
-    const opts=DIRS.map(d=>[e.x+d[0],e.y+d[1]]).filter(([x,y])=>!cellBlocked(x,y)&&!enemyAt(x,y)&&!(x===G.P.x&&y===G.P.y));
+    const opts=DIRS.map(d=>[e.x+d[0],e.y+d[1]]).filter(([x,y])=>!cellBlocked(x,y)&&terrStepOK(e.x,e.y,x,y)&&!enemyAt(x,y)&&!(x===G.P.x&&y===G.P.y));
     for(const o of opts){const d=Math.abs(o[0]-e.tgt.x)+Math.abs(o[1]-e.tgt.y);if(d<bd||(d===bd&&!best&&Math.random()<.3)){bd=d;best=o}}
     if(best){e.x=best[0];e.y=best[1];return 130}
     e.tgt=null;
@@ -7350,7 +7352,8 @@ cv.addEventListener('wheel',e=>{
   if(G.inv.open){G.inv.scroll=clamp(G.inv.scroll+e.deltaY*.5,0,maxScroll());e.preventDefault()}
 },{passive:false});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
-loadImg('hud_attack','assets/hud_attack.png'); // the painted crossed swords on the Attack button
+loadImg('hud_attack','assets/hud_attack.png');for(let q=0;q<4;q++)loadImg('wtorch'+q,'assets/wtorch'+q+'.png'); // the painted wall torches
+ // the painted crossed swords on the Attack button
 const KEYMAP={ArrowUp:'fwd',w:'fwd',W:'fwd',ArrowDown:'back',s:'back',S:'back',ArrowLeft:'turnL',q:'turnL',Q:'turnL',ArrowRight:'turnR',e:'turnR',E:'turnR',a:'left',A:'left',d:'right',D:'right',' ':'attack',Enter:'attack',x:'special',X:'special',p:'potion',P:'potion',z:'wait',Z:'wait',r:'rest',R:'rest',t:'teleport',T:'teleport'};
 addEventListener('keydown',e=>{
   if(e.key==='F5'&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault(); // F5 quicksaves instead of reloading the page
@@ -7386,7 +7389,7 @@ addEventListener('resize',fit);fit();
 /*@@DESERT:BEGIN@@*/
 /* ---- src/desert/artlist.js ---- */
 /* written by tools/inject.py */
-const DS_PAINTED=['assassin', 'assassinA', 'bat', 'batA', 'bear', 'bearA', 'brazier0', 'brazier1', 'brazier2', 'brazier3', 'camelpE', 'camelpW', 'camelrE', 'camelrW', 'ceil_tomb', 'cobra', 'cobraA', 'cvnomadA', 'cvnomadB', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'dplant0', 'dplant1', 'dplant2', 'dplant3', 'dpyrgate', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dskeleton', 'dskeletonA', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_seabed1', 'floor_seabed2', 'floor_seabed3', 'floor_seabed4', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'messenger', 'messengerA', 'msgr_A', 'msgr_D', 'msgr_E', 'msgr_H', 'msgr_T', 'offering', 'pharaohboss', 'pharaohbossA', 'pservant', 'pservantA', 'rrock0', 'rrock1', 'rrock2', 'shady', 'skel', 'skelA', 'skybirdA', 'skybirdB', 'slime', 'slimeA', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'tex_yarblue', 'tex_yarcoral', 'tex_yardoor', 'tex_yardoor2', 'tex_yardoor3', 'tex_yardoor4', 'tex_yardoor5', 'tex_yardoor6', 'tex_yardoor7', 'tex_yardrift', 'tex_yargreen', 'tex_yarnet', 'tex_yarpink', 'tex_yarrose', 'tex_yarwall', 'tex_yaryellow', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA', 'w_candleknight', 'w_candleknightA', 'w_crowncrab', 'w_crowncrabA', 'w_ferryman', 'w_ferrymanA', 'w_glassstag', 'w_glassstagA', 'w_hollowbride', 'w_hollowbrideA', 'w_manyeyedox', 'w_manyeyedoxA', 'w_marrow', 'w_marrowA', 'w_mossback', 'w_mossbackA', 'w_rattlebones', 'w_rattlebonesA', 'w_saltwife', 'w_saltwifeA', 'w_thistlewick', 'w_thistlewickA', 'w_toll', 'w_tollA', 'w_unfinished', 'w_unfinishedA', 'w_weatherhound', 'w_weatherhoundA'];
+const DS_PAINTED=['assassin', 'assassinA', 'bat', 'batA', 'bear', 'bearA', 'brazier0', 'brazier1', 'brazier2', 'brazier3', 'camelpE', 'camelpW', 'camelrE', 'camelrW', 'ceil_tomb', 'cobra', 'cobraA', 'cvnomadA', 'cvnomadB', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'dplant0', 'dplant1', 'dplant2', 'dplant3', 'dpyrgate', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dskeleton', 'dskeletonA', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_seabed1', 'floor_seabed2', 'floor_seabed3', 'floor_seabed4', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'messenger', 'messengerA', 'msgr_A', 'msgr_D', 'msgr_E', 'msgr_H', 'msgr_T', 'offering', 'pharaohboss', 'pharaohbossA', 'pservant', 'pservantA', 'rrock0', 'rrock1', 'rrock2', 'shady', 'skel', 'skelA', 'skybirdA', 'skybirdB', 'slime', 'slimeA', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_hgt_d0', 'tex_hgt_d1', 'tex_hgt_d2', 'tex_hgt_d3', 'tex_hgt_wa', 'tex_hgt_wb0', 'tex_hgt_wb1', 'tex_hgt_wb2', 'tex_hgt_wb3', 'tex_hgt_wc', 'tex_hgt_wl', 'tex_hgt_wp', 'tex_hgt_ww0', 'tex_hgt_ww1', 'tex_hgt_ww2', 'tex_hgt_ww3', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'tex_yarblue', 'tex_yarcoral', 'tex_yardoor', 'tex_yardoor2', 'tex_yardoor3', 'tex_yardoor4', 'tex_yardoor5', 'tex_yardoor6', 'tex_yardoor7', 'tex_yardrift', 'tex_yargreen', 'tex_yarnet', 'tex_yarpink', 'tex_yarrose', 'tex_yarwall', 'tex_yaryellow', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA', 'w_candleknight', 'w_candleknightA', 'w_crowncrab', 'w_crowncrabA', 'w_ferryman', 'w_ferrymanA', 'w_glassstag', 'w_glassstagA', 'w_hollowbride', 'w_hollowbrideA', 'w_manyeyedox', 'w_manyeyedoxA', 'w_marrow', 'w_marrowA', 'w_mossback', 'w_mossbackA', 'w_rattlebones', 'w_rattlebonesA', 'w_saltwife', 'w_saltwifeA', 'w_thistlewick', 'w_thistlewickA', 'w_toll', 'w_tollA', 'w_unfinished', 'w_unfinishedA', 'w_weatherhound', 'w_weatherhoundA'];
 
 /* ---- src/desert/artpack.js ---- */
 /* ==========================================================================
@@ -9314,6 +9317,7 @@ const TERR_SPEC={
 };
 const MTN_BAND=14,MTN_BLOCK=1.7; // mountains rise over the last fourteen cells before a sky wall; above this height they cannot be climbed
 function terrFor(n){
+  { const L0=LEVELS[n]; if(L0&&L0.terrace)return terrTerraced(n,L0); }   // a terraced town level (see hgt_engine.js): per-cell heights, no dunes
   if(TERRS[n]!==undefined)return TERRS[n];
   const spec=TERR_SPEC[n],L=LEVELS[n];if(!spec||!L)return TERRS[n]=null;
   const rows=L.rows,H=rows.length,W=rows[0].length,h=new Float32Array(W*H),open=new Uint8Array(W*H);
@@ -9381,11 +9385,13 @@ function terrFor(n){
 function terrRock(){const t=TEX[LEVEL===43?DS_TEXREG.cliffR:DS_TEXREG.cliffY];return {d:t&&t.d,tint:yarSea(LEVEL)?(SEA_TINT[LEVEL]||[.84,.9,.97]):LEVEL===60?[.8,.92,1.22]:LEVEL===61?[1.22,1.06,.7]:LEVEL===62?[1,.8,1.25]:LEVEL===63?[1.12,1.14,1.2]:[1,1,1]}}
 // where a rock or a tree really meets the ground: the lowest point under its width, so it never hangs over a slope
 function terrFoot(s,cx,cy){
+  if(TERR_NOW&&TERR_NOW.terr)return terrH(s.x,s.y);   // on a terrace a thing stands on the step it is in
   const rx=s.x-cx,ry=s.y-cy,dl=Math.hypot(rx,ry)||1,px=-ry/dl,py=rx/dl,hw=(s.w||1)*.4;
   return Math.min(terrH(s.x,s.y),terrH(s.x+px*hw,s.y+py*hw),terrH(s.x-px*hw,s.y-py*hw));
 }
 function terrH(x,y){
   const T=TERR_NOW;if(!T)return 0;
+  if(T.terr){const ix=x<0?0:x>=T.W?T.W-1:x|0,iy=y<0?0:y>=T.H?T.H-1:y|0;return T.h[iy*T.W+ix]}   // terraced: every cell is one flat step
   const gx=clamp(x-.5,0,T.W-1.001),gy=clamp(y-.5,0,T.H-1.001),ix=gx|0,iy=gy|0,fx=gx-ix,fy=gy-iy,i=iy*T.W+ix,h=T.h;
   return (h[i]*(1-fx)+h[i+1]*fx)*(1-fy)+(h[i+T.W]*(1-fx)+h[i+T.W+1]*fx)*fy;
 }
@@ -9428,6 +9434,113 @@ function terrMarch(x,rX,rY,tmax){
   }
   const yv=Math.max(0,Math.min(VH,Math.ceil(yb)));
   for(let k=lastK+1;k<YBK;k++)YB[base+k]=yv;
+}
+
+/* ==========================================================================
+   TERRACED GROUND (the strange cities of the Hollow Grasslands, levels 480 to 489). A level with L.terrace={h:Float32Array(W*H)}
+   has one flat height per cell. Ground is drawn cell by cell along each screen column (an exact grid walk, so every tread is as deep as it
+   really is), a cell that is higher than the one in front shows its riser, and walls (any cell that is not '.') stand on the height of
+   their own cell and are drawn from far to near, so a tall tower is seen over a low house. See hgt_engine.js for the data contract.
+   ========================================================================== */
+let TERR_STEP=null;                    // set when the level is terraced: the party and the creatures cannot climb more than TERR_MAXSTEP between two cells
+const TERR_MAXSTEP=.55;
+function terrStepOK(x0,y0,x1,y1){const T=TERR_STEP;if(!T)return true;if(x1<0||y1<0||x1>=T.W||y1>=T.H||x0<0||y0<0||x0>=T.W||y0>=T.H)return true;return Math.abs(T.h[y1*T.W+x1]-T.h[y0*T.W+x0])<=TERR_MAXSTEP+1e-4}
+function terrTerraced(n,L){
+  const t=L.terrace,c=TERRS[n];if(c&&c.src===t&&c.rev===(t.rev||0))return c;
+  const rows=L.rows,H=rows.length,W=rows[0].length,N=W*H,h=t.h instanceof Float32Array?t.h:Float32Array.from(t.h||[]);
+  if(h.length!==N){console.error('terrace.h has the wrong size for level '+n);return TERRS[n]=null}
+  const chars=L.chars||{},whOf=ch=>{const g=chars[ch];if(g!==undefined&&g>=100&&T_TILE[g]!==undefined&&TEX[T_TILE[g]])return TEX[T_TILE[g]].wh||(L.ceilH||CEILH);return L.ceilH||CEILH};
+  let zmax=-1e9;
+  for(let y=0;y<H;y++){const r=rows[y];for(let x=0;x<W;x++){const i=y*W+x,wall=r[x]!=='.'&&r[x]!=='t',z=h[i]+(wall?whOf(r[x]):0);if(z>zmax)zmax=z}}
+  const s=new Float32Array(N);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const i=y*W+x,hc=h[i],hw=x>0?h[i-1]:hc,hn=y>0?h[i-W]:hc;
+    // light from the north-west: a tread higher than the ones to its west and north catches it; every other tread is a little darker, so a stair reads as steps
+    const v=.84+clamp((hc-(hw+hn)*.5)*.9,-.2,.14)+(((Math.round(hc/.18))&1)?.05:-.03)+clamp(hc*.012,-.08,.08);
+    s[i]=clamp(v,.5,1.2);
+  }
+  if(t.s&&t.s.length===N)for(let i=0;i<N;i++)s[i]=t.s[i];
+  const roof=t.roof!==undefined?t.roof:Math.max(zmax+2.5,6);
+  return TERRS[n]={W,H,h,s,rk:new Float32Array(N),block:new Uint8Array(N),terr:true,src:t,rev:t.rev||0,zmax,roof,riser:t.riser,rg:t.rg||null};
+}
+// the camera eases between the heights of neighbouring cells (about a quarter of a second)
+let TZ=null,TZL=-1,TZT=0;
+function terrCam(cx,cy,t){
+  const tg=terrH(cx,cy);
+  if(TZ===null||TZL!==LEVEL||t<TZT||t-TZT>.5)TZ=tg;
+  else TZ+=(tg-TZ)*(1-Math.exp(-Math.min(.1,t-TZT)/.09));
+  TZL=LEVEL;TZT=t;return TZ;
+}
+// below the horizon, whatever the ground does not reach is haze
+function terrBack(D,hzr,hzmax,lbm){
+  const sk=hzmax*(lbm*.55+.05),r=hzr[0]*sk,g=hzr[1]*sk,b=hzr[2]*sk;
+  for(let y=Math.max(0,HH-1);y<VH;y++){let o=y*VW*4;for(let x=0;x<VW;x++,o+=4){D[o]=r;D[o+1]=g;D[o+2]=b}}
+}
+const THN=24,THX=new Int16Array(THN),THC=new Int16Array(THN),THS=new Uint8Array(THN),THG=new Int32Array(THN),THP=new Float32Array(THN),THB=new Float32Array(THN),THF=new Float32Array(THN);
+// one screen column: walks the grid, paints the ground, and lists the walls that can be seen (nearest first) in TH*; returns how many
+function terrTerrace(x,rX,rY){
+  const T=TERR_NOW,W=T.W,Hh=T.H,h=T.h,sh=T.s,C=TC,D=C.D,cx=C.cx,cy=C.cy,cz=CAMZ,grid=G.grid,fm=C.fmp,fds=C.fds,hz=C.hzr,hzmax=C.hzmax,hzrate=C.hzrate,lbm=C.lbm,nl=C.nl,nn=C.nn,tbR=C.tbR,tbG=C.tbG,tbB=C.tbB,ttR=C.ttR,ttG=C.ttG,ttB=C.ttB,HHv=HH,Fv=F,TSv=TS,TSm=TS-1;
+  const rl=Math.hypot(rX,rY),base=x*YBK;
+  let mx=Math.floor(cx),my=Math.floor(cy);
+  const ddx=Math.abs(1/rX),ddy=Math.abs(1/rY);
+  let stx,sty,sdx,sdy;
+  if(rX<0){stx=-1;sdx=(cx-mx)*ddx}else{stx=1;sdx=(mx+1-cx)*ddx}
+  if(rY<0){sty=-1;sdy=(cy-my)*ddy}else{sty=1;sdy=(my+1-cy)*ddy}
+  let yb=VH,tIn=0,side=0,nh=0,lastK=-1,slopeMax=-1e9,tStop=70,hprev=-1e9,first=true;
+  for(let guard=0;guard<150;guard++){
+    const tOut=Math.min(sdx,sdy),inside=mx>=0&&my>=0&&mx<W&&my<Hh,i=inside?my*W+mx:(Math.min(Hh-1,Math.max(0,my))*W+Math.min(W-1,Math.max(0,mx)));
+    const g=inside?grid[my][mx]:1;
+    if(!first&&g>0){ // a wall: remember it if its top could be seen above the walls nearer than it
+      const foot=h[i];let wh=CEILH;if(g>=100){const tt=T_TILE[g];if(tt!==undefined&&TEX[tt])wh=TEX[tt].wh||CEILH}
+      const slope=(foot+wh-cz)/Math.max(tIn,.05);
+      if(slope>slopeMax&&nh<THN){THX[nh]=mx;THC[nh]=my;THS[nh]=side;THG[nh]=g;THP[nh]=tIn;THB[nh]=yb;THF[nh]=foot;nh++;slopeMax=slope;
+        if(slope>0){const ts=(T.zmax-cz)/slope;if(ts<tStop)tStop=ts}}
+      hprev=-1e9;
+    }else{
+      const hc0=h[i],hc=first?Math.min(hc0,cz-.05):hc0,fcc=(fm&&inside)?fm.charCodeAt(i):48,fdd=fds[fcc-48]||fds[0],cellShade=sh[i];
+      if(!first&&hprev>-1e8&&hc>hprev){ // the riser: the face of this step that looks at the camera
+        const yTop=HHv-(hc-cz)*Fv/tIn,yBot=HHv-(hprev-cz)*Fv/tIn,ys=Math.max(0,Math.ceil(yTop)),ye=Math.min(Math.ceil(yb),Math.ceil(yBot),VH);
+        if(ye>ys){
+          let rtd=null,rth=TSv;{const rg=(T.rg&&T.rg[i])||T.riser,tt=rg?T_TILE[rg]:undefined,tx=tt!==undefined?TEX[tt]:null;if(tx&&tx.d){rtd=tx.d;rth=tx.h||TSv}} // the face of a step has its own wall picture when the level gives one
+          const px=cx+rX*tIn,py=cy+rY*tIn,along=side===0?py:px,u=((along-Math.floor(along))*TSv)&TSm,dist=tIn*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv;
+          let lt=0;for(let k=0;k<nn;k+=3){const ax=px-nl[k],ay=py-nl[k+1];lt+=nl[k+2]/(1+1.15*(ax*ax+ay*ay+.44))}
+          const lb=Math.max(baseL(dist),lbm),sk=(lb*.55+lt*.45+.05)*smv,rs=side===0?(stx>0?.9:.58):(sty>0?1:.68),kR=(lb*tbR+lt*ttR)*rs,kG=(lb*tbG+lt*ttG)*rs,kB=(lb*tbB+lt*ttB)*rs;
+          let o=(ys*VW+x)*4;
+          for(let y=ys;y<ye;y++,o+=VW*4){
+            const z=cz-(y+.5-HHv)*tIn/Fv;let v=((hc-z)*TSv)|0,td=fdd;
+            if(rtd){v=v%rth;td=rtd}else v&=TSm;
+            const ti=(v*TSv+u)*4;
+            D[o]=td[ti]*kR*iv+hz[0]*sk;D[o+1]=td[ti+1]*kG*iv+hz[1]*sk;D[o+2]=td[ti+2]*kB*iv+hz[2]*sk;
+          }
+        }
+        if(yTop<yb)yb=yTop;
+      }
+      if(hc<cz){ // the top of the step
+        const k1=(cz-hc)*Fv,yFar=HHv+k1/tOut,yNear=HHv+k1/Math.max(tIn,.001),ys=Math.max(0,Math.ceil(yFar)),ye=Math.min(Math.ceil(yb),Math.ceil(yNear),VH);
+        if(ye>ys){
+          let o=(ys*VW+x)*4;
+          for(let y=ys;y<ye;y++,o+=VW*4){
+            const t=k1/(y+.5-HHv),px=cx+rX*t,py=cy+rY*t,u=(((px-mx)*TSv)|0)&TSm,v=(((py-my)*TSv)|0)&TSm,ti=(v*TSv+u)*4,dist=t*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv;
+            let lt=0;for(let k=0;k<nn;k+=3){const ax=px-nl[k],ay=py-nl[k+1];lt+=nl[k+2]/(1+1.15*(ax*ax+ay*ay+.44))}
+            const lb=Math.max(baseL(dist),lbm),sk=(lb*.55+lt*.45+.05)*smv,kR=(lb*tbR+lt*ttR)*cellShade,kG=(lb*tbG+lt*ttG)*cellShade,kB=(lb*tbB+lt*ttB)*cellShade;
+            D[o]=fdd[ti]*kR*iv+hz[0]*sk;D[o+1]=fdd[ti+1]*kG*iv+hz[1]*sk;D[o+2]=fdd[ti+2]*kB*iv+hz[2]*sk;
+          }
+        }
+        if(yFar<yb)yb=yFar;
+      }else{const yT=HHv-(hc-cz)*Fv/Math.max(tIn,.001);if(yT<yb)yb=yT}
+      hprev=hc0;
+    }
+    first=false;
+    const kb=Math.min(YBK-1,(tOut*YBS)|0),yv=Math.max(0,Math.min(VH,Math.ceil(yb)));
+    for(let k=lastK+1;k<=kb;k++)YB[base+k]=yv;
+    if(kb>lastK)lastK=kb;
+    if(!inside||yb<=0||tOut>tStop)break;
+    if(sdx<sdy){sdx+=ddx;mx+=stx;side=0}else{sdy+=ddy;my+=sty;side=1}
+    tIn=tOut;
+  }
+  const yv=Math.max(0,Math.min(VH,Math.ceil(yb)));
+  for(let k=lastK+1;k<YBK;k++)YB[base+k]=yv;
+  return nh;
 }
 
 /* ---- src/desert/khemetra_map.js ---- */
@@ -23074,7 +23187,7 @@ function hgBuild(){
 KH_LAZY[HG.ID]=hgBuild;HG.HIVES.forEach((id,i)=>{KH_LAZY[id]=()=>{hgBuild();hgHive(i)}});
 /* the way in is the portal at the top of the Orange Spire (hollowgrass_story.js), once the last ruler is dead; the spiked gate in the south leads back out onto the high ledge of the Hollow Land */
 /* the cold: a blue-grey grade over the whole view, bands of mist drifting along the horizon, and a few pale motes of light that hang in the air */
-{const _w=drawWeatherFx;drawWeatherFx=function(){_w.apply(this,arguments);if(LEVEL!==HG.ID)return;
+{const _w=drawWeatherFx;drawWeatherFx=function(){_w.apply(this,arguments);if(LEVEL!==HG.ID&&!hgtLook(LEVEL))return;
   const t=G.time||0;ctx.save();
   ctx.globalCompositeOperation='multiply';ctx.globalAlpha=.62;ctx.fillStyle='rgb(150,184,228)';ctx.fillRect(0,0,420,210);
   ctx.globalCompositeOperation='screen';ctx.globalAlpha=1;ctx.fillStyle='rgba(60,92,134,.07)';ctx.fillRect(0,0,420,210);
@@ -23393,6 +23506,545 @@ function hgsBoss(){
   try{return _j.call(this,n,target)}
   catch(e){console.error('Go to area: the save could not be restored, starting fresh',e);const rs=readSave;readSave=()=>null;try{return _j.call(this,n,target)}catch(e2){console.error(e2)}finally{readSave=rs}}
   finally{HGS.jump=0}}}
+
+/* ---- src/desert/hgt_engine.js ---- */
+/* ==========================================================================
+   HOLLOW GRASSLANDS CITIES: THE TERRACED ENGINE (prefix hgte / HGT). Levels 480 to 489 are town levels with REAL HEIGHTS.
+
+   DATA CONTRACT FOR LEVEL BUILDERS (read this before building a city)
+   ---------------------------------------------------------------------------------------------------------------------
+   1. Register a builder. Call, at file load:   hgtRegister(id, build)       (id 480..489; interiors 4850..4949)
+        build(id) must RETURN a level object (do not assign LEVELS yourself). It runs lazily the first time the level is entered,
+        after the pictures have loaded (KH_READY), with ohAlias/ohArt/ohFloors/ohStyles already done. It also sets LEVEL_NAMES[id].
+        The level object is the normal one, plus the terrace:
+          { rows:[string x H], chars:{ch:gid}, start:{x,y,f}, enemies:[], items:[], decor:[], lights:[[x,y],..], portals:[],
+            terrace:{ h:Float32Array(W*H) },       // REQUIRED for 480..489. Index y*W+x. Optional: roof (number), s (Float32Array shade), rev (bump to rebuild),
+                                               // riser (gid of a wall tile: the picture of the vertical face of every step; default is the floor picture, which looks wrong on tall cliffs),
+                                               // rg (Int32Array(W*H) of gids: a different riser picture for single cells, 0 = use riser)
+            name, label, mapNames:[], fmap:[strings of '0'..'5'], floorSet:[6 FLOORS names], floor, ceil:'tomb', ceilH,
+            day:0, outdoor:true, amb:.58, noExtras:true, noTele:true, diff, sky:[...] }
+        The look of level 470 (cold light, haze, purple torch tint, rock roof, cold overlay) is applied to 480..489 and 4850..4949 automatically
+        (hgtLook). HGTE.cold.add(id) adds any other level id to the look.
+   2. HEIGHTS. Unit = one cell width. Eye height is 0.5 above the ground of the cell, a normal wall is ceilH high. terrace.h[y*W+x] is the height of the
+        walking surface of that cell, in the same units; negative = sunken. Every cell is ONE flat step (nearest neighbour, no slopes).
+        - Open cells ('.') are walked; they are drawn at their height, and a higher neighbour shows a riser face (the front of the step).
+        - A WALL cell is any char other than '.' (and 't'). Its terrace.h value is the height of its FOOT; the wall rises from there by its tile height
+          (TEX[T_TILE[gid]].wh). So a tower is a block of wall cells whose foot is the ground height they stand on, and a stairwell wall column of height 8
+          on ground 3 reaches 11. Set h for wall cells to the ground height of the building foot (the ground beside it), never 0 by default on a raised site.
+        - STEP RULE: the party, creatures and walkers can move between two neighbouring cells only when |h1-h0| <= 0.55 (terrStepOK). Stairs of
+          0.2 to 0.3 per cell work; cliffs and pit edges block (message: step too high / drop too steep). Only the four neighbours count (no diagonals).
+        - Decor, items, enemies and lights stand at the height of the cell they are in (terrFoot). A decor's x,y must be an open cell.
+        - The camera eases between cell heights in about a quarter second. The roof (rock ceiling) is at terrace.roof, default max(top of tallest wall + 2.5, 6).
+          Do not make any wall taller than the roof.
+        - Walls are drawn far to near, so a tall tower shows over a low house in front of it. At most 24 wall hits per screen column are kept.
+   3. WALL TILES. A wall char needs a gid: chars[ch]=gid, where T_TILE[gid]=texture id and TEX[id].wh is the wall height in cells (TEX[id].h = pixel height = 128*wh,
+        the picture is mapped 1:1 so 128 pixels = 1 cell of height). Two ways:
+          a) painted pictures:  const TM=ohTiles(); const gid=TM.make(kind,styleName,wh).gid;   // kind 'plain','door','window','slit','gwin','window2','plain2'
+             styleName is a key of OH_STY (the art agent adds styles: OH_STY.name={plain:'imgKey',win:'imgKey',door:..., zoom, contrast, tint:[r,g,b,a]}).
+          b) plain placeholder:  const gid=HGTE.tile(wh,[r,g,b]);                     // flat colour, a faint band per cell of height
+        HGTE.doorTile(wh,[r,g,b],toLevel,{x,y,f}) makes a placeholder DOOR tile (see 4).
+        Several heights = several gids (a house of 2.7, a tower of 8, a stairwell column of 8 are three gids). A wall of height 8 is a tile 1024 px tall.
+   4. DOORS AND PORTALS. Both work exactly as in the Hollow Grasslands hives.
+        a) Door in a wall: a wall char whose gid is a door tile: KH_DOOR[gid]={lvl:interiorId, at:{x,y,f}} (f: 0 north, 1 east, 2 south, 3 west = the way the party faces
+           on arrival). Walking into the door cell from an open neighbour (that passes the step rule) enters the level. The door cell's foot height is its terrace.h,
+           so a doorstep is simply an open cell next to it. The door glows softly (wdDoorLevel is true for these levels).
+           In the interior, put the matching door tile (KH_DOOR[gid2]={lvl:cityId, at:{x,y,f}} with x,y the street cell in front of the outside door).
+        b) Enter-portal decor: decor:[{k:'hg_hive',x,y,block:true,enter:{to:id,x,y,f}}] : walking into a blocking decor with `enter` goes there.
+        c) Digit portals ('0'..'9' chars with L.portals[i]) also work as in other levels.
+   5. SAVES. A save made in a level 480..489 or 4850..4949 restores through Continue and through Go to area (hgtAny is in every KH_READY / restore range list).
+        Keep builders deterministic (same level every time) because only the party position and the usual level state (items taken, decor found) are saved.
+   6. TEST: goToLevel(480) from the console, or the link  ?town=hgtest&lvl=34  (level 480 test level: plaza, straight stair, spiral tower, sunken court with a door to 4850).
+   ========================================================================== */
+var HGT=(typeof HGT==='undefined')?{}:HGT; // other files add to it; never redeclare it
+HGT.ID0=480;HGT.IDN=489;HGT.INT0=4850;HGT.INTN=4949;
+const HGTE={cold:new Set(),builders:{}};
+const hgtAny=n=>(n>=480&&n<=489)||(n>=4850&&n<=4949);
+const hgtLook=n=>hgtAny(n)||HGTE.cold.has(n); // the look of level 470 (the cold cavern) without being level 470
+const hgtIsTown=n=>n>=480&&n<=489;
+function hgtPrep(){ohAlias();oqAlias();ohArt();ohFloors();ohStyles();isleFloors()}
+function hgtRegister(id,build){
+  HGTE.builders[id]=build;
+  KH_LAZY[id]=()=>{
+    if(LEVELS[id])return;
+    if(typeof KH_READY!=='undefined'&&!KH_READY)return;
+    hgtPrep();
+    const L=build(id);if(!L)return;
+    if(hgtIsTown(id)&&!L.terrace){console.error('hgt level '+id+' has no terrace');return}
+    if(L.terrace&&!(L.terrace.h instanceof Float32Array))L.terrace.h=Float32Array.from(L.terrace.h);
+    if(!L.name)L.name=LEVEL_NAMES[id]||('Level '+id);
+    LEVELS[id]=L;LEVEL_NAMES[id]=L.name;if(LEVEL_RATING[id]===undefined)LEVEL_RATING[id]=(typeof HG!=='undefined'?HG.DIFF:66);
+  };
+}
+/* plain placeholder tiles: a flat colour (the art agent supplies the painted shell textures later) */
+function hgtTex(wh,rgb,door){
+  const Hp=Math.round(128*wh),d=new Uint8ClampedArray(128*Hp*4);
+  for(let y=0;y<Hp;y++){const unit=Math.floor((Hp-1-y)/128),k=unit%2?.93:1;
+    for(let x=0;x<128;x++){let r=rgb[0]*k,g=rgb[1]*k,b=rgb[2]*k;
+      if(door&&unit===0&&x>=36&&x<92&&y>=Hp-100){r=28;g=20;b=14}  // a dark doorway, one cell high
+      const o=(y*128+x)*4;d[o]=r;d[o+1]=g;d[o+2]=b;d[o+3]=255}}
+  const id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;return id;
+}
+HGTE.tile=function(wh,rgb){const gid=KH_NEXT_GID++;T_TILE[gid]=hgtTex(wh,rgb||[200,190,180],false);return gid};
+HGTE.doorTile=function(wh,rgb,lvl,at){const gid=KH_NEXT_GID++;T_TILE[gid]=hgtTex(wh,rgb||[200,190,180],true);KH_DOOR[gid]={lvl,at};return gid};
+{const _wd=wdDoorLevel;wdDoorLevel=function(n){return _wd.apply(this,arguments)||hgtAny(n)}}
+function hgtGotoList(hd,has,nm,out){
+  hd('The strange cities of the Hollow Grasslands');
+  for(let n=480;n<=489;n++)if(has(n))out.push({n,name:nm(n)});
+  for(let n=4850;n<4870;n++)if(has(n))out.push({n,name:nm(n)});
+}
+LEVEL_NAMES[480]='The Test Terraces';LEVEL_NAMES[4850]='The Sunken Room';
+
+/* ---------- the test level 480: a plaza, a straight stair of 12 steps up to a platform, a tower with a spiral stair to a lookout, a stair of 6 steps down into a sunken court with a door ---------- */
+function hgtBuildTest(){
+  const W=48,H=44,N=W*H,I=(x,y)=>y*W+x,h=new Float32Array(N),rows=[];
+  for(let y=0;y<H;y++)rows.push(new Array(W).fill('.'));
+  const wallLow=HGTE.tile(3,[150,150,170]),tower=HGTE.tile(8,[225,190,200]),court=HGTE.tile(2.7,[215,150,150]);
+  const door=HGTE.doorTile(2.7,[215,150,150],4850,{x:4,y:2,f:2}); // the room beyond is built below; it arrives at its own door
+  const chars={'#':wallLow,'W':tower,'c':court,'d':door};
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(x<1||y<1||x>=W-1||y>=H-1)rows[y][x]='#';
+  // the stair: 12 steps of 0.25 going north from the plaza (x 11 to 13, y 33 down to 22) to a platform at 3.0
+  for(let k=1;k<=12;k++)for(let x=11;x<=13;x++)h[I(x,34-k)]=.25*k;
+  for(let y=15;y<=21;y++)for(let x=8;x<=16;x++)h[I(x,y)]=3;
+  // the tower: 3 by 3 wall cells of height 8 at 29..31, 27..29 (foot 0), and a spiral of steps round it: the outer ring first, then the inner ring
+  const cx=30,cy=28,rc=d=>{ // clockwise from the south middle: west along the bottom, north up the west side, east along the top, south down the east side, back to the middle
+    const o=[];for(let x=cx;x>=cx-d;x--)o.push([x,cy+d]);for(let y=cy+d-1;y>=cy-d;y--)o.push([cx-d,y]);for(let x=cx-d+1;x<=cx+d;x++)o.push([x,cy-d]);for(let y=cy-d+1;y<=cy+d;y++)o.push([cx+d,y]);for(let x=cx+d-1;x>cx;x--)o.push([x,cy+d]);return o};
+  for(let y=cy-1;y<=cy+1;y++)for(let x=cx-1;x<=cx+1;x++)rows[y][x]='W';
+  const r3=rc(3).slice(0,23),r2=rc(2);let step=0;
+  for(const [x,y] of r3){step++;h[I(x,y)]=.18*step}
+  // the inner ring starts beside the last outer cell and goes on climbing; the last four cells are the flat lookout
+  const last=r3[r3.length-1];let start=0,bd=1e9;r2.forEach(([x,y],i)=>{const d=Math.abs(x-last[0])+Math.abs(y-last[1]);if(d<bd){bd=d;start=i}});
+  const ord=[];for(let i=0;i<14;i++)ord.push(r2[(start+i)%r2.length]);
+  ord.forEach(([x,y],i)=>{step++;h[I(x,y)]=.18*(i>=10?step-(i-10):step)});
+  // the sunken court: open pit at -1.5 (x 41 to 45, y 10 to 20), six steps down from the east end of the plaza lane (x 35 to 40 at y 14 to 16)
+  for(let y=10;y<=20;y++)for(let x=41;x<=45;x++)h[I(x,y)]=-1.5;
+  for(let k=1;k<=6;k++)for(let y=14;y<=16;y++)h[I(34+k,y)]=-.25*k;
+  for(let y=10;y<=20;y++)h[I(46,y)]=-1.5; // the court wall (foot -1.5)
+  for(let y=10;y<=20;y++)rows[y][46]='c';rows[15][46]='d';
+  for(let x=41;x<=45;x++){rows[9][x]='c';h[I(x,9)]=-1.5;rows[21][x]='c';h[I(x,21)]=-1.5}
+  // a few things that stand on the steps
+  const decor=[{k:'hg_pillar',x:12,y:18,block:true},{k:'hg_lamp',x:9,y:16,block:false,walk:true,deco:true},{k:'hg_lamp',x:15,y:16,block:false,walk:true,deco:true},{k:'hg_lamp',x:8,y:36,block:false,walk:true,deco:true},{k:'hg_lamp',x:43,y:12,block:false,walk:true,deco:true},{k:'hg_well',x:43,y:18,block:true}];
+  const lights=[[9,16],[15,16],[8,36],[43,12],[12,30],[27,31]];
+  const fm=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=(x>=8&&x<=16&&y>=15&&y<=21)||(h[I(x,y)]<0)?'2':((x>=10&&x<=14&&y>=22&&y<=35)?'1':'0');fm.push(r)}
+  const L={rows:rows.map(r=>r.join('')),chars,start:{x:12,y:38,f:0},enemies:[],items:[],decor,lights,portals:[],scenery:[],terrace:{h,riser:HGTE.tile(1,[205,195,175])},fmap:fm,
+    floorSet:['ohMeadow','ohGravel','ohLawn','bluesand','bluewater','ohMoss'],floor:'ohMeadow',ceil:'tomb',ceilH:3,day:0,outdoor:true,amb:.58,noExtras:true,noTele:true,diff:66,
+    name:'The Test Terraces',label:'The Test Terraces',mapNames:[]};
+  return L;
+}
+hgtRegister(480,hgtBuildTest);
+// the room behind the court door: a plain flat room with the door back out
+hgtRegister(4850,id=>{
+  const wall=HGTE.tile(2.7,[215,150,150]),back=HGTE.doorTile(2.7,[215,150,150],480,{x:45,y:15,f:3}),W=9,Hh=7,g=[];
+  for(let y=0;y<Hh;y++)g.push(new Array(W).fill('#'));
+  for(let y=1;y<Hh-1;y++)for(let x=1;x<W-1;x++)g[y][x]='.';
+  g[0][4]='d';
+  return {rows:g.map(r=>r.join('')),chars:{'#':wall,'d':back},start:{x:4,y:2,f:2},enemies:[],items:[],decor:[],lights:[[4,3]],portals:[],floor:'wood',day:0,amb:.2,ceilH:2.7,noTele:true,noExtras:true,name:'The Sunken Room',label:'The Sunken Room',mapNames:[]};
+});
+
+/* ---- src/desert/hgt_lib.js ---- */
+/* hgt_lib.js  (prefix hgtl)  Library of builders for the four terraced towns of the Hollow Grasslands (levels 480 to 483).
+   Pure functions on a builder object. Nothing here touches the renderer, the DOM (except hgtlDebugImage) or LEVELS.
+
+   DATA CONTRACT (as in tools/HGT_BRIEF.md)
+     B = hgtlNew(W,H,seed)   B.rows[y][x]  char, '.' = open (walkable) cell, anything else = wall cell
+                             B.h[y*W+x]    Float32Array, ground height of the cell (open cell floor, wall cell foot)
+                             B.decor []    decor entries {k,x,y,block,walk,deco,sc,...} (kinds come from HGTL_DECOR)
+                             B.portals []  {x,y,to,tx,ty,f,tex} one per door that leads to an interior level
+                             B.lights  []  [x,y] glitter and lamp light spots
+                             B.names   []  {t,x,y,k} map names
+                             B.doors   []  {x,y,face,ax,ay,to}  door cell, direction it faces, the open cell in front of it
+                             B.stairs  []  {cells:[[x,y],..],h0,rise,kind} ordered runs, used by the validator
+                             B.kind    Uint8Array  0 ground, 1 stair, 2 platform or balcony, 3 bridge, 4 sunken court, 5 plaza, 6 alley, 7 terrace
+                             B.secrets []  [x,y] cells of hidden nooks (designers may add a marker)
+                             B.lintels []  {x,y,axis,h} gateways: open cell under an arch (a walk-through arch decor stands on it)
+                             B.ignore  Set of 'x,y' open cells the validator should not report
+                             B.start   {x,y,f} set it before validating (hgtlSetStart)
+   Rules the library keeps: a step between two neighbouring open cells is at most HGTL.CLIMB (0.55, the engine climb rule);
+   comfortable stairs rise HGTL.STEP (0.26) per cell and never more than HGTL.STEP_MAX (0.3). A wall cell stands on B.h of its cell.
+   Walls cannot overhang: a wall is a solid column. Bulbs and lean are made with raised pedestals and stepped taper (see below).
+   Directions: dir 0 = north (y-1), 1 = east, 2 = south, 3 = west. Local frames: hgtlXf(x,y,dir)(u,v): v goes forward in dir,
+   u goes to the right of forward (north: u is east).
+
+   WALL CHARS   HGTL_CHARS maps a role name to a placeholder char; HGTL_WH gives that role's nominal wall height. The art agent
+   replaces the textures by binding chars once: hgtlBindChars(level, {oldChar:newChar,...}) or hgtlRoleMap.
+   Roles: nacre_a..nacre_d (pearl pink, aqua, cream, lilac) each with _cap (11), (6), _mid (3.4), _low (1.7), _rail (0.7);
+   window, window_mid; band, band_low; door_round, door_arch, door_small; pillar, pillar_low; secret; roof_pink, roof_aqua; hedge.
+   hgtlTaper('a') returns [rail,low,mid,full,cap] chars of one tint, for stepped tapers.
+
+   API (all builders take B first; x,y are cell coords; h are heights in game units)
+     hgtlNew(W,H,seed)                       new builder, all open at height 0
+     hgtlR(B,a,b,k)                          seeded random 0..1 (hash2 with B.seed)
+     hgtlXf(x,y,dir)                         local frame function (u,v)->[x,y]
+     hgtlOpen(B,x,y,h,kind) / hgtlWall(B,x,y,ch,h) / hgtlH(B,x,y) / hgtlIsOpen(B,x,y)   primitive cell setters and getters
+     hgtlFill(B,x,y,w,d,h,kind)              open rect at height h (ground, plaza, platform)
+     hgtlBlock(B,x,y,w,d,ch,h)               wall rect
+     hgtlBorder(B,ch,h)                      wall ring round the whole map
+     hgtlStairsStraight(B,x,y,dir,len,h0,rise,opts)   straight flight, opts {width,landingEvery,landingLen,rail}; returns {x,y,h} of the next cell
+     hgtlStairsPath(B,cells,h0,rise,opts)    stairs along any 4-connected cell list
+     hgtlStairsCurved(B,cx,cy,r,a0,a1,h0,rise,opts)   arc of stairs (angles in radians, 0 = east, pi/2 = south), opts {width}
+     hgtlSpiralStairs(B,x,y,size,h0,rise,opts)  stairs spiralling inward up a stepped conical tower, opts {gap,helix,wall,core}; returns {paths,entries,ends,top}
+     hgtlTower(B,cx,cy,w,d,opts)             round or square tower with stepped taper and optional lean: opts {shape,chars,h,lean,window,windowP}
+     hgtlHouse(B,x,y,w,d,face,opts)          wall block with a round door facing face; opts {tint,ch,h,to,tx,ty,f,windowP}
+     hgtlBulbHouse(B,x,y,dir,opts)           9 by 9 bulb house on a balcony pedestal with front stairs and a door (centre x,y)
+     hgtlGateway(B,x,y,axis,opts)            open passage cell flanked by pillars with an arch on it; axis 0 = walks north-south, 1 = east-west
+     hgtlPlatform(B,x,y,w,d,h,opts)          balcony or lookout, opts {rail:ch,sides:'NESW'}
+     hgtlTerrace(B,x,y,w,d,dir,h0,rise)      broad flight of terrace steps (a row of cells per step)
+     hgtlAmphitheatre(B,cx,cy,r0,r1,h0,rise,opts)  rings of seats rising outward, opts {a0,a1}
+     hgtlBridge(B,x0,y0,x1,y1,opts)          bridge of steps from (x0,y0) to (x1,y1) (straight or one bend), rising and falling; opts {rail,hump,h0,h1,width}
+     hgtlSunkenCourt(B,x,y,dir,w,d,depth,opts)  court reached by steps down; opts {h0,stairW,house,parapet,tint,to,fountain,plants}
+     hgtlSunkenHouse(B,x,y,dir,depth,opts)   small sunken yard with a house door at the bottom
+     hgtlNiche(B,x,y,dir,len,h,opts)         alcove off a path, opts {secret,chest,rise}
+     hgtlAlley(B,x0,y0,x1,y1,h,opts)         narrow lane cut through walls (one bend), opts {width,rise,lamps}
+     hgtlPlaza(B,x,y,w,d,h,opts)             paved open space, opts {fountain,lamps,plants}
+     hgtlPlantBed(B,x,y,w,d,opts)            glitter plants on open cells, opts {density,lightP}
+     hgtlLampRow(B,x,y,dir,len,gap)          lamps along a line, each is a light
+     hgtlDoor(B,x,y,face,opts)               turn an existing wall cell into a round door; registers the portal when opts.to is set
+     hgtlName(B,x,y,t,k)                     add a map name
+     hgtlSetStart(B,x,y,f)
+     hgtlAssemble(B,opts)                    returns the LEVELS entry {rows,chars,start,decor,portals,lights,mapNames,terrace:{h},outdoor:true,...}
+     hgtlBindChars(lv,map)                   rewrite placeholder chars in rows and chars to the art agent's chars
+     hgtlReach(B,sx,sy)                      flood fill with the climb rule; returns {seen,count}
+     hgtlValidate(B,sx,sy)                   {ok,unreachable:[[x,y]],doorsBad:[],steep:[],warnings:[]}
+     hgtlDebugImage(B,opts)                  canvas, 6 px per cell, false colours (height bands, walls dark, stairs hatched, doors red)
+     hgtlPost(canvas,port,name)              POST the canvas as jpeg to the screenshot receiver
+     hgtlExampleSpire(B,x,y,seed) / hgtlExampleBulbHouse(B,x,y,seed) / hgtlExampleSunkenCourt(B,x,y,seed)   three sample structures
+     hgtlSampleTown(seed)                    a 120 by 120 test town built from the library
+   Owner rule: no SVG or code-drawn art ships. This file is pure data; hgtlDebugImage is a designer tool only and is never drawn in the game.
+   Pushed decor kinds are named in HGTL_DECOR so the art agent can rename them in one place. */
+
+const HGTL={STEP:.26,STEP_MAX:.3,CLIMB:.55,DIRS:[[0,-1],[1,0],[0,1],[-1,0]],
+  K:{GROUND:0,STAIR:1,PLAT:2,BRIDGE:3,COURT:4,PLAZA:5,ALLEY:6,TERRACE:7}};
+const HGTL_DECOR={lamp:'hgt_lamp',glitter:'hgt_glitter',fountain:'hgt_fountain',arch:'hgt_arch',chest:'hgt_chest',bench:'hgt_bench',urn:'hgt_urn',spire:'hgt_spire'};
+const HGTL_CHARS={},HGTL_WH={},HGTL_ROLE={};
+(function(){
+  const pool='ABCEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';let n=0;
+  const add=(role,wh)=>{const c=pool[n++];HGTL_CHARS[role]=c;HGTL_WH[c]=wh;HGTL_ROLE[c]=role};
+  for(const t of ['a','b','c','d']){add('nacre_'+t+'_cap',11);add('nacre_'+t,6);add('nacre_'+t+'_mid',3.4);add('nacre_'+t+'_low',1.7);add('nacre_'+t+'_rail',.7)}
+  add('window',6);add('window_mid',3.4);add('band',6);add('band_low',1.7);add('door_round',3.4);add('door_arch',3.4);add('door_small',2.4);
+  add('pillar',7);add('pillar_low',2);add('secret',3.4);add('roof_pink',2.4);add('roof_aqua',2.4);add('hedge',1.2);
+})();
+function hgtlTaper(t){return ['_rail','_low','_mid','',"_cap"].map(s=>HGTL_CHARS['nacre_'+t+s])}
+
+/* ---------- builder and primitives ---------- */
+function hgtlNew(W,H,seed){const rows=[];for(let y=0;y<H;y++)rows.push(new Array(W).fill('.'));
+  return {W,H,seed:seed|0,rows,h:new Float32Array(W*H),kind:new Uint8Array(W*H),decor:[],portals:[],lights:[],names:[],doors:[],stairs:[],lintels:[],secrets:[],ignore:new Set(),start:null,occ:new Set()}}
+function hgtlR(B,a,b,k){return hash2(a,b,B.seed+(k|0))}
+function hgtlXf(x,y,dir){const f=HGTL.DIRS[dir&3],r=HGTL.DIRS[(dir+1)&3];return (u,v)=>[x+r[0]*u+f[0]*v,y+r[1]*u+f[1]*v]}
+function hgtlIn(B,x,y){return x>=0&&y>=0&&x<B.W&&y<B.H}
+function hgtlIsOpen(B,x,y){return hgtlIn(B,x,y)&&B.rows[y][x]==='.'}
+function hgtlH(B,x,y){return hgtlIn(B,x,y)?B.h[y*B.W+x]:0}
+function hgtlOpen(B,x,y,h,kind){if(!hgtlIn(B,x,y))return false;B.rows[y][x]='.';if(h!==undefined&&h!==null)B.h[y*B.W+x]=h;B.kind[y*B.W+x]=kind|0;return true}
+function hgtlWall(B,x,y,ch,h){if(!hgtlIn(B,x,y))return false;B.rows[y][x]=ch;if(h!==undefined&&h!==null)B.h[y*B.W+x]=h;B.kind[y*B.W+x]=0;return true}
+function hgtlFill(B,x,y,w,d,h,kind){for(let j=0;j<d;j++)for(let i=0;i<w;i++)hgtlOpen(B,x+i,y+j,h,kind)}
+function hgtlBlock(B,x,y,w,d,ch,h){for(let j=0;j<d;j++)for(let i=0;i<w;i++)hgtlWall(B,x+i,y+j,ch,h)}
+function hgtlBorder(B,ch,h){for(let x=0;x<B.W;x++){hgtlWall(B,x,0,ch,h);hgtlWall(B,x,B.H-1,ch,h)}for(let y=0;y<B.H;y++){hgtlWall(B,0,y,ch,h);hgtlWall(B,B.W-1,y,ch,h)}}
+function hgtlName(B,x,y,t,k){B.names.push({t,x,y,k:k||'place'})}
+function hgtlSetStart(B,x,y,f){B.start={x,y,f:f|0}}
+function hgtlDecor(B,k,x,y,o){B.decor.push(Object.assign({k,x,y,block:false},o||{}))}
+function hgtlLight(B,x,y){B.lights.push([x,y])}
+function hgtlRegRun(B,cells,h0,rise,kind){B.stairs.push({cells,h0,rise,kind:kind||'stairs'})}
+
+/* ---------- stairs ---------- */
+/* heights along an ordered 4-connected cell list: cell i is at h0+(i+1)*rise; flat cells (landings) repeat the last height */
+function hgtlStairsPath(B,cells,h0,rise,opts){opts=opts||{};let h=h0;const out=[];
+  cells.forEach((c,i)=>{const flat=c[2]===1;if(!flat)h+=rise;hgtlOpen(B,c[0],c[1],h,HGTL.K.STAIR);out.push([c[0],c[1]])});
+  hgtlRegRun(B,out,h0,rise,'path');return {x:cells.length?cells[cells.length-1][0]:0,y:cells.length?cells[cells.length-1][1]:0,h}}
+function hgtlStairsStraight(B,x,y,dir,len,h0,rise,opts){opts=opts||{};const f=HGTL.DIRS[dir&3],r=HGTL.DIRS[(dir+1)&3],w=opts.width||1,le=opts.landingEvery||0,ll=opts.landingLen||2;
+  let h=h0,px=x,py=y,rising=0,flatLeft=0;const lanes=[];for(let l=0;l<w;l++)lanes.push([]);
+  for(let i=0;i<len;i++){let flat=false;if(flatLeft>0){flat=true;flatLeft--}else if(le&&rising>=le){flat=true;flatLeft=ll-1;rising=0}else rising++;
+    if(!flat)h+=rise;
+    for(let l=0;l<w;l++){const cx=px+r[0]*l,cy=py+r[1]*l;hgtlOpen(B,cx,cy,h,flat?HGTL.K.PLAT:HGTL.K.STAIR);lanes[l].push([cx,cy])}
+    if(opts.rail){const rc=HGTL_CHARS[opts.rail]||opts.rail;for(const s of [-1,w]){const cx=px+r[0]*s,cy=py+r[1]*s;if(hgtlIsOpen(B,cx,cy)&&B.kind[cy*B.W+cx]===0)hgtlWall(B,cx,cy,rc,h)}}
+    px+=f[0];py+=f[1]}
+  lanes.forEach(l=>hgtlRegRun(B,l,h0,rise,'straight'));return {x:px,y:py,h}}
+function hgtlStairsCurved(B,cx,cy,r,a0,a1,h0,rise,opts){opts=opts||{};const w=opts.width||1,cells=new Map();const arc=Math.abs(a1-a0)*r,N=Math.max(1,Math.ceil(arc));
+  const lanes=[];
+  for(let l=0;l<w;l++){const rr=r+l,lane=[];let px=null,py=null;const da=(a1-a0)>0?1:-1;
+    for(let a=a0;da>0?a<=a1+1e-9:a>=a1-1e-9;a+=da*(.4/rr)){const x=Math.round(cx+rr*Math.cos(a)),y=Math.round(cy+rr*Math.sin(a));if(x===px&&y===py)continue;
+      if(px!==null&&x!==px&&y!==py){const m1=[x,py],m2=[px,y],d1=Math.abs(Math.hypot(m1[0]-cx,m1[1]-cy)-rr),d2=Math.abs(Math.hypot(m2[0]-cx,m2[1]-cy)-rr),m=d1<=d2?m1:m2;lane.push(m)}
+      lane.push([x,y]);px=x;py=y}
+    lanes.push(lane)}
+  const hOf=(x,y)=>{let a=Math.atan2(y-cy,x-cx);let t=(a-a0)/(a1-a0);t=((t%1)+1)%1;if(Math.abs(a-a0)<1e-9)t=0;const da=a1-a0;let tt=(a-a0);if(da>0){while(tt<-1e-6)tt+=Math.PI*2}else{while(tt>1e-6)tt-=Math.PI*2}t=tt/da;t=Math.max(0,Math.min(1,t));return h0+rise*(1+Math.floor(t*(N-1)+1e-6))};
+  let endH=h0,end=null;
+  lanes.forEach(lane=>{const ord=[];lane.forEach(c=>{const hh=hOf(c[0],c[1]);hgtlOpen(B,c[0],c[1],hh,HGTL.K.STAIR);ord.push([c[0],c[1]]);if(hh>=endH){endH=hh;end=c}});hgtlRegRun(B,ord,h0,rise,'curved')});
+  return {x:end?end[0]:cx,y:end?end[1]:cy,h:endH}}
+
+/* square spiral of stairs climbing inward through a size x size box; the cells between lanes become low walls (gap 1)
+   opts {gap:1|0, helix:false, wall:char (default nacre_a_low), core:char or null (tall spire cells at the middle)} */
+function hgtlSpiralStairs(B,x,y,size,h0,rise,opts){opts=opts||{};const gap=opts.gap===undefined?1:opts.gap,x1=x+size-1,y1=y+size-1,vis=new Set(),K=(a,b)=>a+','+b,inBox=(a,b)=>a>=x&&b>=y&&a<=x1&&b<=y1;
+  const mk=(sx,sy,d)=>({x:sx,y:sy,d,p:[[sx,sy]],alive:true});
+  const ws=[mk(x,y,1)];if(opts.helix)ws.push(mk(x1,y1,3));
+  ws.forEach(w=>vis.add(K(w.x,w.y)));
+  const can=(w,nx,ny)=>{if(!inBox(nx,ny)||vis.has(K(nx,ny)))return false;if(!gap)return true;for(const dd of HGTL.DIRS){const ax=nx+dd[0],ay=ny+dd[1];if(ax===w.x&&ay===w.y)continue;if(vis.has(K(ax,ay)))return false}return true};
+  let any=true,guard=0;
+  while(any&&guard++<20000){any=false;for(const w of ws){if(!w.alive)continue;let moved=false;
+    for(let t=0;t<2&&!moved;t++){const d=(w.d+t)&3,dd=HGTL.DIRS[d],nx=w.x+dd[0],ny=w.y+dd[1];if(can(w,nx,ny)){w.d=d;w.x=nx;w.y=ny;vis.add(K(nx,ny));w.p.push([nx,ny]);moved=true}}
+    if(moved)any=true;else w.alive=false}}
+  const cellH=new Map();
+  const paths=ws.map(w=>{let h=h0;w.p.forEach(c=>{h+=rise;hgtlOpen(B,c[0],c[1],h,HGTL.K.STAIR);cellH.set(K(c[0],c[1]),h)});hgtlRegRun(B,w.p.map(c=>[c[0],c[1]]),h0,rise,'spiral');return w.p});
+  const top=Math.max(...[...cellH.values()]);
+  const wallCh=opts.wall||HGTL_CHARS.nacre_a_low;
+  if(wallCh!==null){for(let j=y;j<=y1;j++)for(let i=x;i<=x1;i++){if(vis.has(K(i,j)))continue;let m=1e9;for(const dd of HGTL.DIRS){const v=cellH.get(K(i+dd[0],j+dd[1]));if(v!==undefined&&v<m)m=v}
+    if(m===1e9){for(const dd of [[1,1],[1,-1],[-1,1],[-1,-1]]){const v=cellH.get(K(i+dd[0],j+dd[1]));if(v!==undefined&&v<m)m=v}}
+    hgtlWall(B,i,j,wallCh,m===1e9?top:m)}}
+  return {paths,entries:ws.map(w=>w.p[0]),ends:ws.map(w=>w.p[w.p.length-1]),top,cellH}}
+
+/* ---------- towers and houses ---------- */
+/* chars run from the outer ring (short) to the middle (tall): a stepped taper. opts {shape:'round'|'square', chars, h, lean:[lx,ly] 0..1, window:ch, windowP} */
+function hgtlTower(B,cx,cy,w,d,opts){opts=opts||{};const round=(opts.shape||'round')==='round',chars=opts.chars||hgtlTaper('a').slice(1),n=chars.length,lean=opts.lean||[0,0];
+  const h=opts.h!==undefined?opts.h:hgtlH(B,cx,cy),x0=cx-(w>>1),y0=cy-(d>>1),inside=(i,j)=>{if(!round)return i>=0&&j>=0&&i<w&&j<d;const u=(i+.5-w/2)/(w/2),v=(j+.5-d/2)/(d/2);return u*u+v*v<=1.02};
+  const cells=[];
+  for(let j=0;j<d;j++)for(let i=0;i<w;i++){if(!inside(i,j))continue;let u=(i+.5-w/2)/(w/2),v=(j+.5-d/2)/(d/2),band;
+    if(round)band=1-Math.hypot(u,v);else band=Math.min(i,j,w-1-i,d-1-j)/(Math.min(w,d)/2);
+    band+=(lean[0]*u+lean[1]*v)*.5;let k=Math.floor(band*n);k=Math.max(0,Math.min(n-1,k));
+    let ch=chars[k];const edge=!inside(i-1,j)||!inside(i+1,j)||!inside(i,j-1)||!inside(i,j+1);
+    if(opts.window&&edge&&k>=1&&hgtlR(B,x0+i,y0+j,31)<(opts.windowP||.25))ch=opts.window;
+    hgtlWall(B,x0+i,y0+j,ch,h);cells.push([x0+i,y0+j])}
+  return cells}
+function hgtlDoor(B,x,y,face,opts){opts=opts||{};const dd=HGTL.DIRS[face&3];hgtlWall(B,x,y,opts.ch||HGTL_CHARS.door_round);
+  const door={x,y,face:face&3,ax:x+dd[0],ay:y+dd[1],to:opts.to===undefined?null:opts.to};B.doors.push(door);
+  if(opts.to!==undefined&&opts.to!==null)B.portals.push({x,y,to:opts.to,tx:opts.tx||0,ty:opts.ty||0,f:opts.f||0,tex:opts.tex||'hgt_door'});return door}
+function hgtlHouse(B,x,y,w,d,face,opts){opts=opts||{};const t=opts.tint||'abcd'[(hgtlR(B,x,y,5)*4)|0],ch=opts.ch||HGTL_CHARS['nacre_'+t+'_mid'],h=opts.h!==undefined?opts.h:hgtlH(B,x,y);
+  for(let j=0;j<d;j++)for(let i=0;i<w;i++){const edge=i===0||j===0||i===w-1||j===d-1;let c=ch;if(edge&&hgtlR(B,x+i,y+j,41)<(opts.windowP===undefined?.22:opts.windowP))c=HGTL_CHARS.window_mid;hgtlWall(B,x+i,y+j,c,h)}
+  if(opts.roof)for(let j=0;j<d;j++)for(let i=0;i<w;i++)if(!(i===0||j===0||i===w-1||j===d-1))hgtlWall(B,x+i,y+j,HGTL_CHARS[opts.roof],h);
+  const f=face&3,dx=f===1?w-1:f===3?0:(w>>1),dy=f===2?d-1:f===0?0:(d>>1);
+  return hgtlDoor(B,x+dx,y+dy,f,{to:opts.to,tx:opts.tx,ty:opts.ty,f:opts.f})}
+
+/* a bulb house: tall middle core and spire, a wide ring of mid wall standing on a balcony pedestal at ledge height, stairs up to the balcony at the front.
+   Centre (x,y), front faces dir, footprint 9 by 9 plus the stairs. opts {tint,ledge,to,tx,ty,f}. Returns {door,balcony:h,stairs end} */
+function hgtlBulbHouse(B,x,y,dir,opts){opts=opts||{};const t=opts.tint||'abcd'[(hgtlR(B,x,y,7)*4)|0],tp=hgtlTaper(t),c=hgtlXf(x,y,dir),h0=opts.h0!==undefined?opts.h0:hgtlH(B,x,y);
+  const ledge=opts.ledge||(1.2+hgtlR(B,x,y,8)*1.4),n=Math.max(1,Math.ceil(ledge/HGTL.STEP)-1),hb=h0+ledge;
+  for(let v=-4;v<=4;v++)for(let u=-4;u<=4;u++){const cd=Math.max(Math.abs(u),Math.abs(v)),[px,py]=c(u,v);
+    if(cd<=1){hgtlWall(B,px,py,u===0&&v===0?tp[4]:tp[3],hb)}
+    else if(cd===2){hgtlWall(B,px,py,hgtlR(B,px,py,9)<.3?HGTL_CHARS.window_mid:tp[2],hb)}
+    else if(cd===3){hgtlOpen(B,px,py,hb,HGTL.K.PLAT)}
+    else{hgtlWall(B,px,py,tp[0],hb)}}
+  const run=[];for(let j=0;j<n;j++){const [px,py]=c(0,4+j);hgtlOpen(B,px,py,hb-(j+1)*ledge/(n+1),HGTL.K.STAIR);run.push([px,py]);
+    for(const s of [-1,1]){const [rx,ry]=c(s,4+j);if(hgtlIsOpen(B,rx,ry)&&B.kind[ry*B.W+rx]===0)hgtlWall(B,rx,ry,tp[0],hb-(j+1)*ledge/(n+1))}}
+  run.reverse();hgtlRegRun(B,run,h0,ledge/(n+1),'bulb');
+  const [dx,dy]=c(0,2),face=dir&3;const door=hgtlDoor(B,dx,dy,face,{to:opts.to,tx:opts.tx,ty:opts.ty,f:opts.f});
+  return {door,hb,ground:h0,stairLen:n}}
+
+/* ---------- arches, platforms, terraces ---------- */
+/* open passage cell with pillars either side and an arch decor over it. axis 0 = the passage runs north-south, 1 = east-west; opts {width,pillar,h} */
+function hgtlGateway(B,x,y,axis,opts){opts=opts||{};const w=opts.width||1,pc=opts.pillar||HGTL_CHARS.pillar,h=opts.h!==undefined?opts.h:hgtlH(B,x,y),lat=axis===0?[1,0]:[0,1];
+  for(let i=0;i<w;i++){const px=x+lat[0]*i,py=y+lat[1]*i;hgtlOpen(B,px,py,h,0);hgtlDecor(B,HGTL_DECOR.arch,px,py,{walk:true,deco:true});B.lintels.push({x:px,y:py,axis,h})}
+  hgtlWall(B,x-lat[0],y-lat[1],pc,h);hgtlWall(B,x+lat[0]*w,y+lat[1]*w,pc,h)}
+/* opts {rail:char role or char, sides:'NESW' string of sides that get a low wall (default none)} */
+function hgtlPlatform(B,x,y,w,d,h,opts){opts=opts||{};hgtlFill(B,x,y,w,d,h,HGTL.K.PLAT);const rc=opts.rail?(HGTL_CHARS[opts.rail]||opts.rail):null,s=opts.sides||'';
+  if(rc){for(let i=0;i<w;i++){if(s.includes('N'))hgtlWall(B,x+i,y,rc,h);if(s.includes('S'))hgtlWall(B,x+i,y+d-1,rc,h)}for(let j=0;j<d;j++){if(s.includes('W'))hgtlWall(B,x,y+j,rc,h);if(s.includes('E'))hgtlWall(B,x+w-1,y+j,rc,h)}}}
+/* broad steps: a row of cells (width w across) per step, starting at (x,y), running d rows in dir; each row rise higher */
+function hgtlTerrace(B,x,y,w,d,dir,h0,rise){const f=HGTL.DIRS[dir&3],r=HGTL.DIRS[(dir+1)&3],lanes=[];for(let i=0;i<w;i++)lanes.push([]);
+  for(let j=0;j<d;j++)for(let i=0;i<w;i++){const px=x+f[0]*j+r[0]*i,py=y+f[1]*j+r[1]*i;hgtlOpen(B,px,py,h0+rise*(j+1),HGTL.K.TERRACE);lanes[i].push([px,py])}
+  lanes.forEach(l=>hgtlRegRun(B,l,h0,rise,'terrace'));return h0+rise*d}
+/* seats rise outward from the stage (dist<r0 at h0). opts {a0,a1} restrict to an angle range (0 = east, pi/2 = south) */
+function hgtlAmphitheatre(B,cx,cy,r0,r1,h0,rise,opts){opts=opts||{};const a0=opts.a0,a1=opts.a1;
+  for(let j=Math.floor(cy-r1);j<=Math.ceil(cy+r1);j++)for(let i=Math.floor(cx-r1);i<=Math.ceil(cx+r1);i++){const dd=Math.hypot(i-cx,j-cy);if(dd>=r1)continue;
+    if(a0!==undefined){let a=Math.atan2(j-cy,i-cx)-a0;a=((a%(Math.PI*2))+Math.PI*2)%(Math.PI*2);if(a>(a1-a0))continue}
+    hgtlOpen(B,i,j,dd<r0?h0:h0+rise*(1+Math.floor(dd-r0)),dd<r0?HGTL.K.PLAZA:HGTL.K.TERRACE)}}
+
+/* ---------- bridges ---------- */
+/* steps from (x0,y0) to (x1,y1) with at most one bend (horizontal first). Heights go from h0 up to a hump and down to h1.
+   opts {h0,h1,hump,rail,width}. The end cells should already be open at about h0 and h1. */
+function hgtlBridge(B,x0,y0,x1,y1,opts){opts=opts||{};const cells=[];let x=x0,y=y0;const sx=Math.sign(x1-x0),sy=Math.sign(y1-y0);
+  while(x!==x1){x+=sx;cells.push([x,y])}while(y!==y1){y+=sy;cells.push([x,y])}
+  const h0=opts.h0!==undefined?opts.h0:hgtlH(B,x0,y0),h1=opts.h1!==undefined?opts.h1:hgtlH(B,x1,y1),n=cells.length;if(!n)return;
+  const need=Math.max(0,(Math.abs(h1-h0)+2*(opts.hump||0.6))/HGTL.STEP_MAX),hump=n>=need?(opts.hump===undefined?.6:opts.hump):Math.max(0,(n*HGTL.STEP_MAX-Math.abs(h1-h0))/2);
+  const rc=opts.rail?(HGTL_CHARS[opts.rail]||opts.rail):null,w=opts.width||1,run=[];
+  cells.forEach((c,i)=>{const t=(i+1)/(n+1),hh=h0+(h1-h0)*t+hump*Math.sin(Math.PI*t);
+    const horiz=i<Math.abs(x1-x0),lat=horiz?[0,1]:[1,0];
+    for(let l=0;l<w;l++){hgtlOpen(B,c[0]+lat[0]*l,c[1]+lat[1]*l,hh,HGTL.K.BRIDGE)}
+    if(rc)for(const s of [-1,w]){const rx=c[0]+lat[0]*s,ry=c[1]+lat[1]*s;if(hgtlIsOpen(B,rx,ry)&&B.kind[ry*B.W+rx]===0&&Math.abs(hgtlH(B,rx,ry)-hh)>HGTL.CLIMB)hgtlWall(B,rx,ry,rc,hh)}
+    run.push([c[0],c[1]])});
+  hgtlRegRun(B,run,h0,(h1-h0)/(n+1),'bridge')}
+
+/* ---------- sunken courts and houses ---------- */
+/* origin (x,y) is the court corner on the rim, frame faces dir (stairs go forward into the court). w across, d deep. opts {h0,stairW,stairAt,house,parapet,tint,to,tx,ty,f,fountain,plants} */
+function hgtlSunkenCourt(B,x,y,dir,w,d,depth,opts){opts=opts||{};const c=hgtlXf(x,y,dir),h0=opts.h0!==undefined?opts.h0:hgtlH(B,x,y),floor=h0-depth,n=Math.max(1,Math.ceil(depth/HGTL.STEP)),sw=Math.min(w,opts.stairW||2),su=opts.stairAt!==undefined?opts.stairAt:((w-sw)>>1),t=opts.tint||'a';
+  for(let v=0;v<d;v++)for(let u=0;u<w;u++){const [px,py]=c(u,v);hgtlOpen(B,px,py,floor,HGTL.K.COURT)}
+  const lanes=[];for(let l=0;l<sw;l++)lanes.push([]);
+  for(let v=0;v<n&&v<d;v++)for(let l=0;l<sw;l++){const [px,py]=c(su+l,v);hgtlOpen(B,px,py,h0-depth*(v+1)/n,HGTL.K.STAIR);lanes[l].push([px,py])}
+  lanes.forEach(l=>hgtlRegRun(B,l,h0,-depth/n,'down'));
+  if(opts.parapet){const pc=HGTL_CHARS[opts.parapet]||opts.parapet;for(let v=-1;v<=d;v++)for(let u=-1;u<=w;u++){if(u>=0&&u<w&&v>=0&&v<d)continue;if(v===-1&&u>=su&&u<su+sw)continue;const [px,py]=c(u,v);if(hgtlIsOpen(B,px,py)&&B.kind[py*B.W+px]===0)hgtlWall(B,px,py,pc,hgtlH(B,px,py))}}
+  let door=null;
+  if(opts.house&&d>=n+5&&w>=5){const hd=3,tp=hgtlTaper(t);for(let v=d-hd;v<d;v++)for(let u=1;u<w-1;u++){const [px,py]=c(u,v);hgtlWall(B,px,py,(v===d-hd&&u!==(w>>1)&&hgtlR(B,px,py,13)<.4)?HGTL_CHARS.window_mid:tp[2],floor)}
+    const [dx,dy]=c(w>>1,d-hd);door=hgtlDoor(B,dx,dy,(dir+2)&3,{to:opts.to,tx:opts.tx,ty:opts.ty,f:opts.f})}
+  if(opts.fountain){const [fx,fy]=c(w>>1,Math.max(n+1,(d>>1)));if(hgtlIsOpen(B,fx,fy)&&B.kind[fy*B.W+fx]===HGTL.K.COURT){hgtlDecor(B,HGTL_DECOR.fountain,fx,fy,{block:true});}}
+  if(opts.plants){for(let v=n;v<d-(opts.house?3:0);v++)for(let u=0;u<w;u++){const [px,py]=c(u,v);if(B.kind[py*B.W+px]===HGTL.K.COURT&&(u===0||u===w-1)&&hgtlR(B,px,py,17)<.7){hgtlDecor(B,HGTL_DECOR.glitter,px,py,{walk:true,deco:true,sc:.9+hgtlR(B,px,py,18)*.5});if(hgtlR(B,px,py,19)<.5)hgtlLight(B,px,py)}}}
+  return {floor,h0,steps:n,door}}
+function hgtlSunkenHouse(B,x,y,dir,depth,opts){opts=opts||{};const n=Math.max(1,Math.ceil(depth/HGTL.STEP));return hgtlSunkenCourt(B,x,y,dir,opts.w||5,n+5,depth,Object.assign({house:true,stairW:2},opts))}
+
+/* ---------- nooks, alleys, plazas, plants, lamps ---------- */
+/* alcove of len cells going in dir from (x,y); the cell behind (x,y) should be walkable. h = height of the first cell, rise per cell. opts {secret,chest,rise} */
+function hgtlNiche(B,x,y,dir,len,h,opts){opts=opts||{};const f=HGTL.DIRS[dir&3],rise=opts.rise||0;let px=x,py=y;
+  for(let i=0;i<len;i++){hgtlOpen(B,px,py,h+rise*i,HGTL.K.ALLEY);if(opts.secret)B.secrets.push([px,py]);px+=f[0];py+=f[1]}
+  px-=f[0];py-=f[1];if(opts.chest)hgtlDecor(B,HGTL_DECOR.chest,px,py,{block:true,sc:.8});return [px,py]}
+/* narrow lane (one bend: horizontal then vertical), cut through whatever is there. opts {width,rise,lamps} */
+function hgtlAlley(B,x0,y0,x1,y1,h,opts){opts=opts||{};let x=x0,y=y0,i=0;const w=opts.width||1,rise=opts.rise||0,sx=Math.sign(x1-x0),sy=Math.sign(y1-y0),cells=[],put=(px,py)=>{const hh=h+rise*i;for(let l=0;l<w;l++){const horiz=px!==x1||py===y0&&sx!==0,lx=horiz?0:l,ly=horiz?l:0;hgtlOpen(B,px+lx,py+ly,hh,HGTL.K.ALLEY)}cells.push([px,py]);i++};
+  put(x,y);while(x!==x1){x+=sx;put(x,y)}while(y!==y1){y+=sy;put(x,y)}
+  if(rise)hgtlRegRun(B,cells,h,rise,'alley');
+  if(opts.lamps){for(let k=2;k<cells.length-1;k+=opts.lamps){const c=cells[k];hgtlDecor(B,HGTL_DECOR.lamp,c[0],c[1],{walk:true,deco:true});hgtlLight(B,c[0],c[1])}}return cells}
+function hgtlPlaza(B,x,y,w,d,h,opts){opts=opts||{};hgtlFill(B,x,y,w,d,h,HGTL.K.PLAZA);
+  if(opts.fountain)hgtlDecor(B,HGTL_DECOR.fountain,x+(w>>1),y+(d>>1),{block:true});
+  if(opts.lamps)for(const [px,py] of [[x,y],[x+w-1,y],[x,y+d-1],[x+w-1,y+d-1]]){hgtlDecor(B,HGTL_DECOR.lamp,px,py,{walk:true,deco:true});hgtlLight(B,px,py)}
+  if(opts.plants)hgtlPlantBed(B,x+1,y+1,w-2,d-2,{density:.18,h:h});}
+function hgtlPlantBed(B,x,y,w,d,opts){opts=opts||{};const den=opts.density===undefined?.5:opts.density,lp=opts.lightP===undefined?.4:opts.lightP;
+  for(let j=0;j<d;j++)for(let i=0;i<w;i++){const px=x+i,py=y+j;if(!hgtlIsOpen(B,px,py)||B.kind[py*B.W+px]===HGTL.K.STAIR||B.occ.has(px+','+py))continue;if(opts.h!==undefined&&Math.abs(hgtlH(B,px,py)-opts.h)>.01)continue;
+    if(hgtlR(B,px,py,21)>=den)continue;hgtlDecor(B,HGTL_DECOR.glitter,px,py,{walk:true,deco:true,sc:.8+hgtlR(B,px,py,22)*1.2,ox:(hgtlR(B,px,py,23)-.5)*.6,oy:(hgtlR(B,px,py,24)-.5)*.6});if(hgtlR(B,px,py,25)<lp)hgtlLight(B,px,py)}}
+function hgtlLampRow(B,x,y,dir,len,gap){const f=HGTL.DIRS[dir&3];gap=gap||3;for(let i=0;i<len;i+=gap){const px=x+f[0]*i,py=y+f[1]*i;if(hgtlIsOpen(B,px,py)){hgtlDecor(B,HGTL_DECOR.lamp,px,py,{walk:true,deco:true});hgtlLight(B,px,py)}}}
+
+/* ---------- assembling ---------- */
+/* returns a LEVELS entry. opts {name,label,start,diff,ceilH,chars,extra}. rows hold the placeholder chars until hgtlBindChars is called */
+function hgtlAssemble(B,opts){opts=opts||{};const st=opts.start||B.start||{x:1,y:1,f:0};
+  const lv=Object.assign({rows:B.rows.map(r=>r.join('')),chars:Object.assign({},opts.chars||{}),start:{x:st.x,y:st.y,f:st.f|0},enemies:[],items:[],decor:B.decor,scenery:[],portals:B.portals,lights:B.lights,
+    mapNames:B.names.map(n=>Object.assign({},n)),terrace:{h:B.h},outdoor:true,day:0,name:opts.name||'Town',label:opts.label||opts.name||'Town',diff:opts.diff||1,noTele:true,hgtl:{kind:B.kind,doors:B.doors,secrets:B.secrets,lintels:B.lintels,W:B.W,H:B.H}},opts.extra||{});
+  if(opts.ceilH)lv.ceilH=opts.ceilH;return lv}
+/* map: {placeholderChar:newChar}; applies to lv.rows and keeps lv.chars keyed by the new chars */
+function hgtlBindChars(lv,map){lv.rows=lv.rows.map(r=>{let o='';for(const ch of r)o+=(map[ch]!==undefined?map[ch]:ch);return o});return lv}
+
+/* ---------- reachability and validation ---------- */
+function hgtlBlocked(B){if(B._blk&&B._blkN===B.decor.length)return B._blk;const s=new Set();for(const d of B.decor)if(d.block&&!d.walk&&!d.deco&&(d.sc===undefined||d.sc>.01))s.add(d.x+','+d.y);B._blk=s;B._blkN=B.decor.length;return s}
+function hgtlReach(B,sx,sy){const W=B.W,H=B.H,seen=new Uint8Array(W*H);if(!hgtlIsOpen(B,sx,sy))return {seen,count:0};const q=[[sx,sy]];seen[sy*W+sx]=1;let count=1,qi=0;
+  while(qi<q.length){const [x,y]=q[qi++],h=B.h[y*W+x];for(const dd of HGTL.DIRS){const nx=x+dd[0],ny=y+dd[1];if(!hgtlIn(B,nx,ny)||seen[ny*W+nx]||B.rows[ny][nx]!=='.')continue;if(Math.abs(B.h[ny*W+nx]-h)>HGTL.CLIMB+1e-6)continue;seen[ny*W+nx]=1;count++;q.push([nx,ny])}}
+  return {seen,count}}
+function hgtlValidate(B,sx,sy){const st=B.start||{x:sx,y:sy};sx=sx===undefined?st.x:sx;sy=sy===undefined?st.y:sy;const r=hgtlReach(B,sx,sy),out={ok:true,unreachable:[],doorsBad:[],steep:[],warnings:[],reached:r.count,open:0};
+  for(let y=0;y<B.H;y++)for(let x=0;x<B.W;x++)if(B.rows[y][x]==='.'){out.open++;if(!r.seen[y*B.W+x]&&!B.ignore.has(x+','+y))out.unreachable.push([x,y])}
+  for(const d of B.doors){if(!hgtlIsOpen(B,d.ax,d.ay)||!r.seen[d.ay*B.W+d.ax])out.doorsBad.push({x:d.x,y:d.y,ax:d.ax,ay:d.ay})}
+  for(const run of B.stairs){for(let i=1;i<run.cells.length;i++){const a=run.cells[i-1],b=run.cells[i],dh=Math.abs(hgtlH(B,b[0],b[1])-hgtlH(B,a[0],a[1]));
+    if(dh>HGTL.CLIMB+1e-6)out.steep.push({x:b[0],y:b[1],dh,run:run.kind});else if(dh>HGTL.STEP_MAX+.02)out.warnings.push('step '+dh.toFixed(2)+' at '+b[0]+','+b[1]+' ('+run.kind+')')}}
+  out.ok=!out.unreachable.length&&!out.doorsBad.length&&!out.steep.length;return out}
+
+/* ---------- debug image ---------- */
+function hgtlDebugImage(B,opts){opts=opts||{};const S=opts.scale||6,cv=document.createElement('canvas');cv.width=B.W*S;cv.height=B.H*S;const x=cv.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,cv.width,cv.height);
+  const col=h=>{const t=Math.max(0,Math.min(1,(h+3)/19)),hue=Math.round(250-250*t*.95);return 'hsl('+hue+','+(60+30*t|0)+'%,'+(28+34*t|0)+'%)'};
+  for(let j=0;j<B.H;j++)for(let i=0;i<B.W;i++){const ch=B.rows[j][i],h=B.h[j*B.W+i];
+    if(ch==='.'){x.fillStyle=col(h);x.fillRect(i*S,j*S,S,S);const k=B.kind[j*B.W+i];
+      if(k===HGTL.K.STAIR){x.strokeStyle='rgba(0,0,0,.65)';x.lineWidth=1;x.beginPath();x.moveTo(i*S,j*S+S);x.lineTo(i*S+S,j*S);x.moveTo(i*S,j*S+S/2);x.lineTo(i*S+S/2,j*S);x.moveTo(i*S+S/2,j*S+S);x.lineTo(i*S+S,j*S+S/2);x.stroke()}
+      else if(k===HGTL.K.BRIDGE){x.fillStyle='rgba(255,255,255,.35)';x.fillRect(i*S+1,j*S+1,S-2,S-2)}
+      else if(k===HGTL.K.COURT){x.fillStyle='rgba(0,0,40,.25)';x.fillRect(i*S,j*S,S,S)}}
+    else{const wh=HGTL_WH[ch]||4,l=10+Math.min(26,wh*3.2);x.fillStyle='hsl(280,25%,'+l+'%)';x.fillRect(i*S,j*S,S,S);if(HGTL_ROLE[ch]&&/window/.test(HGTL_ROLE[ch])){x.fillStyle='#ffe9a8';x.fillRect(i*S+2,j*S+2,S-4,S-4)}}}
+  for(const d of B.doors){x.fillStyle='#ff2020';x.fillRect(d.x*S,d.y*S,S,S);x.fillStyle='#fff';x.fillRect(d.ax*S+S/2-1,d.ay*S+S/2-1,2,2)}
+  for(const l of B.lights){x.fillStyle='#ffee66';x.fillRect(l[0]*S+S/2-1,l[1]*S+S/2-1,2,2)}
+  for(const d of B.decor){if(d.k===HGTL_DECOR.glitter){x.fillStyle='#ff9cf0';x.fillRect(d.x*S+2,d.y*S+2,2,2)}else if(d.k===HGTL_DECOR.fountain||d.k===HGTL_DECOR.chest){x.fillStyle='#fff';x.fillRect(d.x*S+1,d.y*S+1,S-2,S-2)}else if(d.k===HGTL_DECOR.arch){x.strokeStyle='#fff';x.strokeRect(d.x*S+.5,d.y*S+.5,S-1,S-1)}}
+  for(const s of B.secrets){x.fillStyle='#0f0';x.fillRect(s[0]*S+2,s[1]*S+2,2,2)}
+  if(B.start){x.strokeStyle='#0ff';x.strokeRect(B.start.x*S-1,B.start.y*S-1,S+2,S+2)}
+  return cv}
+async function hgtlPost(cv,port,name){return fetch('http://localhost:'+port+'/'+name+'.jpg',{method:'POST',body:cv.toDataURL('image/jpeg',.9)})}
+
+/* ---------- three example builders ---------- */
+/* a tall climbable spiral tower with side rooms. (x,y) is the top-left of a 17 by 17 footprint plus a margin of 3 for balconies. Returns info */
+function hgtlExampleSpire(B,x,y,seed){const s0=B.seed;if(seed!==undefined)B.seed=seed|0;const size=15,h0=hgtlH(B,x,y),tp=hgtlTaper(['a','b','c','d'][(hgtlR(B,x,y,1)*4)|0]);
+  const sp=hgtlSpiralStairs(B,x,y,size,h0,.17,{gap:1,wall:tp[1]});
+  // the tall spire core in the middle, a taper of three heights
+  const mid=x+(size>>1),mid2=y+(size>>1),topH=sp.top;
+  for(let j=-3;j<=3;j++)for(let i=-3;i<=3;i++){const px=mid+i,py=mid2+j;if(!hgtlIsOpen(B,px,py)&&B.rows[py][px]!==undefined&&!sp.cellH.has(px+','+py)){const cd=Math.max(Math.abs(i),Math.abs(j));hgtlWall(B,px,py,cd<=1?tp[4]:cd===2?tp[3]:tp[2],Math.max(hgtlH(B,px,py),topH-.6))}}
+  // a door at the end of the stair, into the tower room
+  const e=sp.ends[0];let door=null;for(const dd of HGTL.DIRS){const nx=e[0]+dd[0],ny=e[1]+dd[1];if(hgtlIn(B,nx,ny)&&B.rows[ny][nx]!=='.'&&sp.cellH.has(e[0]+','+e[1])&&!HGTL_ROLE[B.rows[ny][nx]].endsWith('_cap')){door=hgtlDoor(B,nx,ny,(HGTL.DIRS.findIndex(q=>q[0]===-dd[0]&&q[1]===-dd[1])),{});break}}
+  // the entrance: a gateway at the foot and a lamp
+  const en=sp.entries[0],ent=en[0]===x?[x-1,en[1]]:en[1]===y?[en[0],y-1]:en[0]===x+size-1?[x+size,en[1]]:[en[0],y+size];
+  // side rooms: balconies and a hidden nook off the outer lane
+  const side=[];let k=0;
+  for(const c of sp.paths[0]){const onEdge=c[0]===x||c[1]===y||c[0]===x+size-1||c[1]===y+size-1;if(!onEdge)continue;k++;if(k%9!==4)continue;
+    const dir=c[1]===y?0:c[0]===x+size-1?1:c[1]===y+size-1?2:3,f=HGTL.DIRS[dir],hh=hgtlH(B,c[0],c[1]),bx=c[0]+f[0],by=c[1]+f[1];
+    if(!hgtlIn(B,bx+f[0]*2,by+f[1]*2))continue;
+    if(k%2===0){hgtlNiche(B,bx,by,dir,3,hh,{secret:true,chest:true});side.push({kind:'nook',x:bx,y:by})}
+    else{hgtlOpen(B,bx,by,hh,HGTL.K.PLAT);hgtlOpen(B,bx+f[0],by+f[1],hh,HGTL.K.PLAT);const r=HGTL.DIRS[(dir+1)&3];for(const t of [-1,1]){hgtlOpen(B,bx+r[0]*t,by+r[1]*t,hh,HGTL.K.PLAT);hgtlOpen(B,bx+f[0]+r[0]*t,by+f[1]+r[1]*t,hh,HGTL.K.PLAT)}
+      hgtlDecor(B,HGTL_DECOR.lamp,bx+f[0],by+f[1],{walk:true,deco:true});hgtlLight(B,bx+f[0],by+f[1]);side.push({kind:'balcony',x:bx,y:by})}}
+  B.seed=s0;return {top:topH,entry:{x:en[0],y:en[1]},outside:ent,door,side,height:topH-h0}}
+function hgtlExampleBulbHouse(B,x,y,seed){const s0=B.seed;if(seed!==undefined)B.seed=seed|0;const dir=(hgtlR(B,x,y,3)*4)|0,r=hgtlBulbHouse(B,x,y,dir,{});
+  const c=hgtlXf(x,y,dir);for(const [u,v] of [[-4,6],[4,6]]){const [px,py]=c(u,v);if(hgtlIsOpen(B,px,py)){hgtlDecor(B,HGTL_DECOR.lamp,px,py,{walk:true,deco:true});hgtlLight(B,px,py)}}
+  hgtlPlantBed(B,x-6,y-6,13,13,{density:.12,h:r.ground});B.seed=s0;return Object.assign({dir},r)}
+function hgtlExampleSunkenCourt(B,x,y,seed){const s0=B.seed;if(seed!==undefined)B.seed=seed|0;const dir=(hgtlR(B,x,y,4)*4)|0,r=hgtlSunkenCourt(B,x,y,dir,9,13,2.1,{house:true,stairW:2,parapet:'nacre_c_rail',fountain:true,plants:true,tint:'b'});B.seed=s0;return Object.assign({dir},r)}
+
+/* ---------- sample town (120 by 120) ---------- */
+function hgtlSampleTown(seed){const B=hgtlNew(120,120,seed===undefined?7:seed),W=120,H=120;
+  hgtlBorder(B,HGTL_CHARS.nacre_c,0);
+  // rolling ground: gentle terraces so heights vary
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)B.h[y*W+x]=0;
+  hgtlPlaza(B,52,52,16,16,0,{fountain:true,lamps:true,plants:true});
+  hgtlAmphitheatre(B,26,92,3,8,0,.22,{a0:-Math.PI,a1:0});
+  const info={};
+  info.spire=hgtlExampleSpire(B,84,12,11);
+  info.spire2=hgtlExampleSpire(B,14,10,23);
+  info.bulb=[hgtlExampleBulbHouse(B,34,50,3),hgtlExampleBulbHouse(B,90,60,5),hgtlExampleBulbHouse(B,100,96,9)];
+  info.court=[hgtlExampleSunkenCourt(B,52,88,0,0,0),hgtlExampleSunkenCourt(B,70,16,5)];
+  // leaning round tower and a square one
+  hgtlTower(B,60,30,9,9,{shape:'round',chars:hgtlTaper('b').slice(1),h:0,lean:[.5,-.3],window:HGTL_CHARS.window_mid,windowP:.2});
+  hgtlTower(B,40,28,7,7,{shape:'square',chars:hgtlTaper('d').slice(1),h:0,window:HGTL_CHARS.window,windowP:.3});
+  // houses on small lanes
+  const hs=[[8,36,5,4,1],[8,46,4,4,1],[18,40,4,5,2],[104,40,5,4,3],[104,50,4,4,3],[96,44,4,4,3],[40,70,5,4,0],[46,70,4,4,0],[80,70,5,5,0],[86,74,4,4,1]];
+  for(const [x,y,w,d,f] of hs)hgtlHouse(B,x,y,w,d,f,{windowP:.2});
+  // an arch gateway and lamp rows on the main avenue
+  hgtlGateway(B,60,50,0,{width:1});hgtlLampRow(B,59,40,2,10,3);hgtlLampRow(B,61,40,2,10,3);
+  // a lookout platform reached by a flight of stairs, and a bridge of steps from it to a spire balcony
+  hgtlPlatform(B,66,36,3,3,3.12,{rail:'nacre_c_rail',sides:'NEW'});
+  hgtlStairsStraight(B,67,50,0,12,0,.26,{width:1,rail:'nacre_c_rail'});
+  hgtlTerrace(B,70,60,6,6,1,0,.2);
+  hgtlAlley(B,20,60,50,60,0,{lamps:4});
+  hgtlNiche(B,19,60,3,3,0,{secret:true,chest:true});
+  hgtlPlantBed(B,56,56,8,8,{density:.1,h:0});
+  hgtlSetStart(B,60,66,0);
+  return B}
+
+/* ---- src/desert/hgt_art.js ---- */
+/* ==========================================================================
+   HOLLOW GRASSLANDS CITIES: PAINTED ART (prefix hgta). Shell-like, pearly houses and glittering plants for the four strange cities (levels 480 to 483).
+   All pictures are painted with Gemini and cut with tools/ingest_tex.py (walls, doors, floors) and tools/ingest_sprite.py (sprites). They are files
+   assets/ds_*.png, which the game loads at start (DS_PAINTED in artlist.js, written by tools/inject.py). Nothing here is drawn in code.
+
+   HOW TO USE
+   - Wall tile for a level's `chars`:   const gid=hgtaWallTile('hgt_wp', 3.2);   chars['#']=gid;       (gid is a tile number, like the other builders use)
+       hgtaWallTile(name, wh, {base:'hgt_ww0', mid:'hgt_wp', top:'hgt_wb0'})  stacks pictures: base = the bottom unit, mid = the units between, top = the top unit.
+       name is the default for every unit. wh = wall height in game units (a unit is one picture, 128 px tall). Results are cached.
+   - Door tile (enter portal):          const dg=hgtaDoorTile('hgt_d0', 'hgt_wp', 3.2, {lvl:4850, at:{x:5,y:9,f:0}});  chars['D']=dg;   it also fills KH_DOOR so the door glows and enters.
+   - A map character for a gid:         hgtaChar(gid)   returns a private unused character (from U+1400 up) and records it in hgtaChars (char -> gid), merge that into `chars`.
+   - Floor names (L.floor / L.floor2 or any FLOORS[name]) are the names below starting hgt_f. Ceiling is not painted.
+   - Sprites: IMG[name] and NPC_H[name] are set; use the name as a decor `k`. Heights are in game units (the eye is 0.5, a normal wall about 2.4).
+   - hgtaAll lists every name with its group, size or height.
+
+   NAMES (png files are assets/ds_<name>.png, textures assets/ds_tex_<name>.png, floors assets/ds_floor_<name>.png)
+   WALLS (128x128 tile, tiles sideways): see HGTA_WALLS below.
+   DOORS (128x128 picture of a door set in a wall, bottom unit): see HGTA_DOORS.
+   FLOORS (128x128, tiles both ways): see HGTA_FLOORS.
+   PLANTS (sprites, height in game units): see HGTA_PLANTS.
+   ORNAMENTS (sprites): see HGTA_ORNS.
+   ========================================================================== */
+const HGTA_WALLS=[]; // filled below by name: [name, group, description]
+const HGTA_DOORS=[];
+const HGTA_FLOORS=[];
+const HGTA_PLANTS=[]; // [name, height]
+const HGTA_ORNS=[];   // [name, height]
+/*@@LISTS@@*/
+const hgtaAll={walls:HGTA_WALLS,doors:HGTA_DOORS,floors:HGTA_FLOORS,plants:HGTA_PLANTS,ornaments:HGTA_ORNS};
+for(const [n,h] of HGTA_PLANTS.concat(HGTA_ORNS))NPC_H[n]=h;
+
+/* ---------- wall, door and character helpers ---------- */
+const hgtaChars={};let hgtaNextCh=0x1400;const hgtaCharOf=new Map();
+function hgtaChar(gid){let c=hgtaCharOf.get(gid);if(!c){c=String.fromCharCode(hgtaNextCh++);hgtaCharOf.set(gid,c);hgtaChars[c]=gid}return c}
+const hgtaCache={};
+function hgtaPic(name){return IMG['art_tex_'+name]||IMG['art_'+name]||IMG[name]||null} // the painted wall or door picture, or null when its file is missing
+function hgtaStack(name,wh,o){
+  const base=hgtaPic((o&&o.base)||name),mid=hgtaPic((o&&o.mid)||name),top=hgtaPic((o&&o.top)||name),units=Math.max(1,Math.ceil(wh)),Hp=Math.max(8,Math.round(128*wh));
+  const c=document.createElement('canvas');c.width=128;c.height=Hp;const x=c.getContext('2d');x.fillStyle='#cfc4d6';x.fillRect(0,0,128,Hp);
+  for(let u=0;u<units;u++){const im=u===0?base:u===units-1&&units>1?top:mid;if(!im)continue;
+    const part=wh-u<1?wh-u:1; // the top unit may be a fraction: draw only the part of the picture that fits
+    x.drawImage(im,0,im.height*(1-part),im.width,im.height*part,0,Hp-Math.round(u*128)-Math.round(128*part),128,Math.round(128*part))}
+  return {c,Hp};
+}
+function hgtaNewTile(name,wh,o){
+  const {c,Hp}=hgtaStack(name,wh,o);
+  const d=c.getContext('2d').getImageData(0,0,128,Hp).data,id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;
+  const gid=KH_NEXT_GID++;T_TILE[gid]=id;return gid;
+}
+function hgtaWallTile(name,wh,o){
+  const key='w|'+name+'|'+wh+'|'+JSON.stringify(o||{});
+  if(hgtaCache[key]!==undefined)return hgtaCache[key];
+  return hgtaCache[key]=hgtaNewTile(name,wh,o);
+}
+function hgtaDoorTile(door,wall,wh,link,o){ // link {lvl,at:{x,y,f}} fills KH_DOOR; every call makes a new tile because each door leads somewhere else
+  const gid=hgtaNewTile(wall,wh,Object.assign({base:door},o||{}));
+  if(link&&link.lvl!==undefined)KH_DOOR[gid]={lvl:link.lvl,at:link.at};
+  return gid;
+}
 
 /* ---- src/desert/maps_common.js ---- */
 /* ==========================================================================

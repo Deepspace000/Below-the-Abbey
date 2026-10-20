@@ -1,6 +1,6 @@
 """Turns one cell of a Gemini picture into a 128x128 tile for a desert floor, wall, door or ceiling.
 
-    python tools/ingest_tex.py <source> <kind> <name> [cell=c,r,cols,rows] [seam=xy|x|none] [hue=<deg>] [sat=<x>] [val=<x>] [margin=<fraction>]
+    python tools/ingest_tex.py <source> <kind> <name> [cell=c,r,cols,rows] [seam=xy|x|edge|none] [hue=<deg>] [sat=<x>] [val=<x>] [margin=<fraction>]
 
 kind is floor, tex (wall and door pictures, number-matched in the game by name), or ceil. Writes assets/ds_<kind>_<name>.png,
 which the game loads in place of the tile the code drew with the same name. seam=xy makes it tile both ways (floors),
@@ -22,7 +22,13 @@ w, h = im.size
 im = im.crop((int(w * m), int(h * m), int(w * (1 - m)), int(h * (1 - m)))).resize((256, 256), Image.LANCZOS)
 a = np.array(im).astype(float)
 seam = opts.get('seam', 'xy' if kind == 'floor' else 'x' if kind == 'tex' else 'none')
-if seam != 'none':
+if seam == 'edge':   # keeps the middle untouched (windows, doors in the middle of a tile) and only makes the left and right edges meet
+    B = 28
+    L = a[:, :B].copy(); R = a[:, -B:][:, ::-1].copy()
+    t = (np.arange(B) / B)[None, :, None]
+    a[:, :B] = L * (.5 + .5 * t) + R * (.5 - .5 * t)
+    a[:, -B:] = (R * (.5 + .5 * t) + L * (.5 - .5 * t))[:, ::-1]
+elif seam != 'none':
     u = np.linspace(0, 1, 256)
     wx = (1 - np.abs(2 * u - 1))[None, :]; wy = (1 - np.abs(2 * u - 1))[:, None]
     if seam == 'xy':
