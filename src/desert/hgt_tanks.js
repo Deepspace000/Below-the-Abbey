@@ -1,5 +1,5 @@
 /* ==========================================================================
-   HOLLOW GRASSLANDS FISH TANKS (prefix hgtk / HGTK). Big glass tanks with fish swimming in them, for the terraced cities (480..489) and their interiors (4850..4949).
+   HOLLOW GRASSLANDS FISH TANKS (prefix hgtk / HGTK). Big glass tanks with fish swimming in them, for the terraced cities (480..489) and their interiors (4850..4999).
 
    WHAT IT IS
    A tank is a volume (a box or a cylinder) drawn on the screen by this file after the raycaster has run: the water, the back and side panels, the gravel floor,
@@ -305,7 +305,7 @@ function hgtkLights(){
   }
 }
 {const _sl=spriteList;spriteList=function(){const L=_sl.apply(this,arguments);
-  if(HGTK.on){try{hgtkSync();if(HGTK.list.length){hgtkLights();for(const T of HGTK.list)L.push(T.spr)}}catch(e){if(!HGTK._e1){HGTK._e1=1;console.error('hgtk sprites',e)}}}
+  if(HGTK.on){try{HGTK.ms=0;hgtkSync();if(HGTK.list.length){hgtkLights();for(const T of HGTK.list)L.push(T.spr)}}catch(e){if(!HGTK._e1){HGTK._e1=1;console.error('hgtk sprites',e)}}}
   return L}}
 
 /* ---------- drawing ---------- */

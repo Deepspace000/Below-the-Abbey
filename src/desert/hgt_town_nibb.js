@@ -13,14 +13,21 @@ const hs=(x,y,k)=>hash2(x,y,SEED+(k|0));
 const bandH=k=>1.5+1.2*k;
 const I=(x,y)=>y*W+x,inB=(x,y)=>x>=0&&y>=0&&x<W&&y<H,DIRS=HGTL.DIRS;
 const polar=(deg,r)=>{const a=deg*Math.PI/180;return [Math.round(CX+r*Math.cos(a)),Math.round(CY+r*Math.sin(a))]};
-HGTE.look[484]={ambient:.62,haze:.22,hazeRate:.013,hazeCol:[130,86,150],tint:[1,.98,1.08],lamp:[1,.72,.46],wallGain:.98,wallSat:1.75,riserGain:.95,floorGain:.8,floorSat:1.25,grade:[240,226,240,.22],roofGain:.8,motes:70};
+HGTE.look[484]={ambient:.74,haze:.17,hazeRate:.011,hazeCol:[130,86,150],tint:[1,.98,1.08],lamp:[1,.72,.46],wallGain:.98,wallSat:1.75,riserGain:.95,floorGain:.8,floorSat:1.25,grade:[240,226,240,.22],roofGain:.8,motes:70};
 LEVEL_NAMES[ID]='Nibb';
 HGTCITIES.nibb={level:ID,key:'nibb',name:'Nibb',entry:{x:75,y:146,f:0},entryNorth:{x:75,y:2,f:2},
   exitDoor:{x:75,y:148,to:470,at:{x:112,y:46,f:2}},exitDoorNorth:{x:75,y:1,to:470,at:{x:112,y:22,f:0}}};
 
 /* ---------- tiles (painted pictures stacked one unit at a time) ---------- */
-const TN={p:{p:'hgt_wp',w:'hgt_ww0',b:'hgt_wb0',d:'hgt_d0'},a:{p:'hgt_wa',w:'hgt_ww1',b:'hgt_wb1',d:'hgt_d1'},c:{p:'hgt_wc',w:'hgt_ww3',b:'hgt_wb2',d:'hgt_d3'},l:{p:'hgt_wl',w:'hgt_ww2',b:'hgt_wb3',d:'hgt_d2'}};
+const TN={p:{p:'hgt_wp',w:'hgt_w3_balcony_cream',b:'hgt_w3_bunting_aqua',d:'hgt_d0',base:'hgt_w3_dado_pink'},a:{p:'hgt_wa',w:'hgt_ww1',b:'hgt_w3_cornice_cream',d:'hgt_d1',base:'hgt_w3_dado_pink'},c:{p:'hgt_wc',w:'hgt_w3_arcade_cream',b:'hgt_wb2',d:'hgt_d3'},l:{p:'hgt_wl',w:'hgt_w3_arcade_lilac',b:'hgt_wb3',d:'hgt_d2',base:'hgt_w3_dado_pink'}};
+TN.q={p:'hgt_w2_rings',w:'hgt_w2_winpink',b:'hgt_w2_bandjade',d:'hgt_w2_doorblue'};
+TN.r={p:'hgt_w3_fresco_cream',w:'hgt_w3_shutters_lilac',b:'hgt_w3_cornice_cream',d:'hgt_w2_doorteal'};
+TN.s={p:'hgt_w2_mosaic',w:'hgt_w2_winaqua',b:'hgt_w2_filigree',d:'hgt_w2_doorblue'};
+TN.t={p:'hgt_w2_doodleaqua',w:'hgt_w2_winpink',b:'hgt_w2_crayon',d:'hgt_w2_doorteal'};
+TN.u={p:'hgt_w2_scales',w:'hgt_w2_portlilac',b:'hgt_w2_medallions',d:'hgt_w2_doorblue'};
+TN.v={p:'hgt_w3_relief_aqua',w:'hgt_w3_balcony2_cream',b:'hgt_w3_scroll_aqua',d:'hgt_w2_doorteal'};
 const TINTS=['p','a','c','l'];
+const ALT={p:['q','u'],a:['t'],c:['s'],l:['r','v']};
 const tcache=new Map();
 function mkTile(list,wh){
   const key=list.join(',')+'|'+wh;if(tcache.has(key))return tcache.get(key);
@@ -31,7 +38,7 @@ function mkTile(list,wh){
 /* kinds: win (windows on every other unit, band on top), tow (a window unit every third), plain (band on top only), blank (no band) */
 function pat(kind,t,wh,v){const T=TN[t],n=Math.ceil(wh-1e-6),l=[];
   for(let u=0;u<n;u++){const top=u===n-1&&wh>=2.5&&kind!=='blank';
-    l.push(top?T.b:u===0?T.p:kind==='win'?((u+v)%2===1?T.w:T.p):kind==='tow'?((u+v)%3===1?T.w:((u+v)%5===0?T.b:T.p)):T.p)}
+    l.push(top?T.b:u===0?(T.base||T.p):kind==='win'?((u+v)%2===1?T.w:T.p):kind==='tow'?((u+v)%3===1?T.w:((u+v)%5===0?T.b:T.p)):T.p)}
   return l}
 const wc=(kind,t,wh,v)=>hgtaChar(mkTile(pat(kind,t,wh,v||0),wh));
 function doorGid(t,wh,link,pic,kind){const l=[pic||TN[t].d].concat(pat(kind||'win',t,wh,1).slice(1)),base=mkTile(l,wh),gid=KH_NEXT_GID++;T_TILE[gid]=T_TILE[base];if(link)KH_DOOR[gid]=link;return gid}
@@ -63,13 +70,14 @@ function build(){
   const hAt=(x,y)=>B.h[I(x,y)];
   const dec=(k,x,y,o)=>{if(!inB(x,y))return false;B.decor.push(Object.assign({k,x,y,block:false,walk:true,deco:true},o||{}));return true};
   const put=(k,x,y,o)=>{if(!isO(x,y)||B.occ.has(x+','+y))return false;B.occ.add(x+','+y);return dec(k,x,y,o)};
-  const lamp=(x,y,o)=>{if(!put('hgt_lamppost',x,y,o))return false;B.lights.push([x,y]);return true};
+  const LAMPK=['hgt_lamppost','hgtb_lamp_tall','hgtb_lamp_vine','hgtb_lamp_bare','hgtb_glasspost','hgtb_lamp_short'];
+  const lamp=(x,y,o)=>{if(!put(LAMPK[(hs(x,y,120)*LAMPK.length)|0],x,y,o))return false;B.lights.push([x,y]);return true};
   const rsv=(x0,y0,x1,y1,v)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(inB(x,y))B.res[I(x,y)]=v};
   const fmr=(x0,y0,x1,y1,v)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(inB(x,y)&&B.rows[y][x]==='.')B.fm[I(x,y)]=v};
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){const g=ground(x,y);hgtlOpen(B,x,y,g.h,g.k);B.band[I(x,y)]=g.band;
     FM[I(x,y)]=g.band===-2?1:g.stair||g.band===-1?2:0;if(g.band===-2&&g.r<5)FM[I(x,y)]=3}
   // ---- streets: the ring road, the four avenues, the gate courts
-  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const r=Math.hypot(x-CX,y-CY);if(r>=56.5&&r<59.5)B.res[I(x,y)]=1}
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const r=Math.hypot(x-CX,y-CY);if(r>=56.5&&r<59.5)B.res[I(x,y)]=2}
   rsv(73,126,77,147,1);rsv(73,2,77,24,1);rsv(2,74,20,78,1);rsv(130,74,147,78,1);
   rsv(62,131,88,147,1);rsv(62,2,88,19,1);
   // ---- the border: two cells of tall wall all round, a different tint on each side
@@ -123,7 +131,7 @@ function build(){
     // the needle: a stepped spire on the summit, 3 by 3, with the belfry door on its south face
     for(let y=core.y0;y<=core.y1;y++)for(let x=core.x0;x<=core.x1;x++){
       const cen=x===nx&&y===ny,edge=(x===nx||y===ny),tp=top+(cen?9:edge?7:5);
-      hgtlWall(B,x,y,wc('tow','a',qwh(tp-summit),0),summit)}
+      {const nu=Math.ceil(qwh(tp-summit)),ls=[];for(let u=0;u<nu;u++)ls.push(u===0?'hgt_wa':u===nu-1?'hgt_wb1':u%2?'hgt_w3_arcade_cream':'hgt_wa');hgtlWall(B,x,y,hgtaChar(mkTile(ls,qwh(tp-summit))),summit)}}
     BT.nx=nx;BT.ny=ny;BT.door={x:nx,y:core.y1,ax:nx,ay:core.y1+1};BT.needleTop=top+9;
   })();
 
@@ -147,7 +155,6 @@ function build(){
   /* ================= ZONES ================= */
   const plaza=(x0,y0,x1,y1,v)=>{fmr(x0,y0,x1,y1,v===undefined?3:v)};
   rsv(102,5,143,44,1);plaza(102,5,143,44,3);       // the Bell Court
-  rsv(5,5,46,46,2);plaza(5,5,46,46,4);             // the Lantern Gardens
   plaza(62,131,88,147,3);plaza(62,2,88,19,3);       // the gate courts
   // sunken courts with a house at the bottom (the library builds the court and the house; doors are given interior links below)
   function court(x,y,dir,w,d,depth,t,k){
@@ -160,7 +167,7 @@ function build(){
     const d_=B.doors[B.doors.length-1];const rec={x:d_.x,y:d_.y,face:d_.face,ax:d_.ax,ay:d_.ay,floor:r.floor,bbox:[bx0,by0,bx1,by1],dir,k};B.sunken.push(rec);return rec}
   for(const [x,y,dir,w,d,dp,t] of [[10,143,0,9,13,2.1,'a'],[24,143,0,9,13,2.6,'p'],[38,143,0,9,13,2.1,'c'],
       [102,143,0,9,13,2.1,'l'],[116,143,0,9,13,2.6,'a'],[130,143,0,9,13,2.1,'p'],
-      [8,42,2,9,13,2.1,'l'],[36,10,2,9,13,2.1,'a'],[132,108,0,9,13,2.1,'c'],[8,108,0,9,13,2.1,'p']])court(x,y,dir,w,d,dp,t);
+      [132,108,0,9,13,2.1,'c'],[8,108,0,9,13,2.1,'p']])court(x,y,dir,w,d,dp,t);
 
   /* ================= STAIR TOWERS (small spiral towers: a lookout and a door on a balcony) ================= */
   const stairTowers=[];
@@ -173,6 +180,55 @@ function build(){
     const rec=Object.assign(sp,{nx,ny,door:{x:nx,y:core.y1,ax:nx,ay:core.y1+1},t,t2});stairTowers.push(rec);return rec}
   {const spots=[[14,90,'a','p'],[130,90,'p','a'],[14,60,'l','c'],[128,60,'c','l'],[30,126,'p','l'],[118,126,'a','c'],[88,128,'l','p'],[58,128,'c','a']];
    for(const [sx,sy,t,t2] of spots){let done=false;for(let r=0;r<16&&!done;r++)for(let dy=-r;dy<=r&&!done;dy+=2)for(let dx=-r;dx<=r&&!done;dx+=2){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(stairTower(sx+dx,sy+dy,t,t2))done=true}}}
+
+  /* ================= PHASE 5: MAZES, TANKS, POOLS, STAIRS TO NOWHERE, STEP-BRIDGES ================= */
+  const flatOK=(x0,y0,w,h,m,rho)=>{for(let y=y0-m;y<y0+h+m;y++)for(let x=x0-m;x<x0+w+m;x++){if(!inB(x,y)||x<3||y<3||x>W-4||y>H-4)return false;const i=I(x,y);
+    if(B.rows[y][x]!=='.'||B.res[i]===1||B.res[i]===3||B.occ.has(x+','+y)||Math.abs(B.h[i]-TOP)>.01||B.band[i]!==4||Math.hypot(x-CX,y-CY)<(rho||52))return false}return true};
+  const claim=(x0,y0,w,h,m)=>{for(let y=y0-m;y<y0+h+m;y++)for(let x=x0-m;x<x0+w+m;x++)if(inB(x,y))B.res[I(x,y)]=3};
+  function findFree(w,h,key,o){o=o||{};const m=o.m===undefined?1:o.m,list=[];for(let y=4;y<H-4-h;y+=2)for(let x=4;x<W-4-w;x+=2)list.push([x,y]);
+    list.sort((a,b)=>hs(a[0],a[1],key)-hs(b[0],b[1],key));
+    for(const [x,y] of list)if(flatOK(x,y,w,h,m,o.rho)){if(!o.noClaim)claim(x,y,w,h,m);return {x,y}}return null}
+  const W2=['hgt_w3_relief_pink','hgt_w3_relief_aqua','hgt_w3_fresco_cream','hgt_w3_fresco_amber','hgt_w3_scroll_aqua','hgt_w3_scroll_pink','hgt_w3_reed_lilac','hgt_w3_arcade_cream','hgt_w2_rings','hgt_w2_doodleaqua'];
+  const mazeTile=(role,wh,info)=>{if(role==='wall'||role==='border'||role==='post'){const bi=info?(((info.wx/6)|0)+((info.wy/6)|0)):0;return hgtaChar(mkTile([W2[Math.abs(bi)%W2.length]],qwh(wh)))}};
+  B.links=B.links||{};B.mazes=[];B.nowhere=[];B.pools2=[];B.tanksList=[];B.bridges=[];
+  const mz=(x,y,w,h,o)=>{try{const m=hgtzMaze(B,x,y,w,h,Object.assign({base:hAt(x,y),seed:x*31+y,tile:mazeTile},o));B.mazes.push({m,kind:o.kind,x,y,w,h});
+      for(let j=y-1;j<=y+h;j++)for(let i=x-1;i<=x+w;i++)if(inB(i,j)){B.occ.add(i+','+j);B.res[I(i,j)]=3}return m}catch(e){console.error('nibb maze',o.kind,e);return null}};
+  // the Grand Maze: a hedge maze in the north-west corner with a lookout stair at its heart
+  for(const s of [31,29,25]){if(flatOK(6,6,s,s,0,49)){mz(6,6,s,s,{kind:'hedge',algo:'backtracker',reward:'view',secret:true,side:'S',lampEvery:8});B.grand={x:6,y:6,s};break}}
+  // step-bridges between pairs of stair towers
+  for(let k=0;k<2;k++){const f=findFree(24,11,240+k,{noClaim:true,m:0,rho:50});if(!f){console.error('nibb: no room for bridge pair',k);continue}
+    const a=stairTower(f.x+1,f.y+1,k?'a':'p',k?'l':'c'),b=stairTower(f.x+14,f.y+1,k?'c':'l',k?'p':'a');
+    if(!a||!b){console.error('nibb bridge towers failed',k,!!a,!!b,f.x,f.y);continue}
+    const ny=(a.core.y0+a.core.y1)>>1,ha=a.hh.get(a.x1+','+ny),hb=b.hh.get(b.x0+','+ny);
+    if(ha===undefined||hb===undefined)continue;
+    hgtlBridge(B,a.x1,ny,b.x0,ny,{h0:ha,h1:hb,hump:0});B.bridges.push({ax:a.x1,bx:b.x0,y:ny,ha,hb});claim(f.x,f.y,24,11,1);
+    for(let x=a.x1;x<=b.x0;x++)B.fm[I(x,ny)]=3}
+  // the ring maze on the floor of the bowl, with the giant round tank in its heart
+  mz(65,66,21,21,{kind:'shell',algo:'circular',reward:'lamp',base:0,side:'S',seed:484});
+  for(let j=74;j<=78;j++)for(let i=73;i<=77;i++){if(hgtlIsOpen(B,i,j))B.decor=B.decor.filter(d=>!(d.x===i&&d.y===j))}
+  try{hgtkTank(B,74,75,3,3,{type:'tower',theme:'reef',z1:8.4,seed:7,bands:[2.8,5.6]});B.centreTank={x:75,y:76}}catch(e){console.error('nibb centre tank',e)}
+  // five small mazes of different kinds on the rim
+  for(const [w,k,o] of [[15,203,{kind:'sunken',algo:'kruskal',reward:'chest'}],[15,204,{kind:'raised',algo:'wilson',reward:'shrine'}],[15,202,{kind:'tube',algo:'backtracker',reward:'creature'}],[11,206,{kind:'tall',algo:'chartres',wallH:3.4,reward:'chest'}]]){
+    const f=findFree(w,w,k,{m:0});if(f)mz(f.x,f.y,w,w,o);else if(o.kind==='tube'){let ok=true;for(let y=29;y<=45&&ok;y++)for(let x=123;x<=139;x++)if(!hgtlIsOpen(B,x,y)||B.occ.has(x+','+y)||Math.abs(hAt(x,y)-TOP)>.01)ok=false;if(ok)mz(124,30,15,15,o);else console.error('nibb: no room for maze',o.kind)}else console.error('nibb: no room for maze',o.kind)}
+  // pools: one you can swim and dive from, one for bathing
+  {const p=findFree(11,9,230,{m:0});if(!p)console.error('nibb: no room for pool');if(p){const pl=hgtlPool(B,p.x,p.y,9,7,{shallow:1,lamps:true,lead:{to:5242,x:5,y:7,f:0}});B.poolA=pl;B.links[5242]={x:p.x-1,y:p.y+3,f:3}}
+   const q=findFree(9,7,231,{m:0});if(q){B.poolB=hgtlPool(B,q.x,q.y,7,5,{shallow:1,bath:true,lamps:true})}}
+  // fish tanks: a wall run, a wall tank on a side street, a round plaza tank, a tank tower
+  try{
+    const f1=findFree(13,6,210);if(f1){hgtkTank(B,f1.x,f1.y,11,3,{type:'wall',face:'S',theme:'reef',seed:11});B.tanksList.push({x:f1.x+7,y:f1.y+3.5})}
+    const f2=findFree(6,15,211);if(f2){hgtkTank(B,f2.x,f2.y,3,11,{type:'wall',face:'E',theme:'lagoon',seed:12});B.tanksList.push({x:f2.x+3.5,y:f2.y+5})}
+    hgtkTank(B,70,136,3,3,{type:'round',theme:'violet',seed:21,z1:3});B.tanksList.push({x:71,y:140});
+    hgtkTank(B,70,8,3,3,{type:'tower',theme:'deep',z1:9.4,seed:31,bands:[3,6.2]});B.tanksList.push({x:71,y:12});
+  }catch(e){console.error('nibb tanks',e)}
+  // stairs that go nowhere, every variant
+  const courtSlots=[[105,29],[109,29],[113,29],[105,29]];
+  ['wall','chair','arch','window'].forEach((v,i)=>{let sx,sy,f=findFree(6,17,220+i,{m:0});
+    if(f){sx=f.x+2;sy=f.y+15}else{const [cx,cy]=courtSlots[i];let ok=true;for(let y=cy-14;y<=cy&&ok;y++)for(let x=cx-1;x<=cx+3;x++)if(!hgtlIsOpen(B,x,y)||B.occ.has(x+','+y)||Math.abs(hAt(x,y)-TOP)>.01)ok=false;if(ok){sx=cx;sy=cy;for(let y=cy-14;y<=cy;y++)for(let x=cx-1;x<=cx+3;x++)B.occ.add(x+','+y)}}
+    if(sx!==undefined){const r=hgtlStairsToNowhere(B,sx,sy,0,v,{len:12,width:2,tint:'abcd'[i]});B.nowhere.push(r)}else console.error('nibb: no room for nowhere stair',v)});
+  {const f=findFree(10,10,226);if(f)B.nowhere.push(hgtlStairsToNowhere(B,f.x+2,f.y+2,0,'loop',{size:6,tint:'b'}))}
+  // a plaza where a bulk giant sleeps
+  {const f=findFree(15,15,250);if(f){B.giantPlaza={x:f.x+7,y:f.y+7};fmr(f.x,f.y,f.x+14,f.y+14,3);
+     for(const [dx,dy] of [[1,1],[13,1],[1,13],[13,13]])lamp(f.x+dx,f.y+dy);for(const [dx,dy] of [[3,12],[11,12]])put('hgtb_bench',f.x+dx,f.y+dy,{})}}
 
   /* ================= HOUSES ================= */
   const used=new Uint8Array(W*H); // 1 = house wall
@@ -211,11 +267,19 @@ function build(){
   const BT_TINT=['p','a','c','l','p'],BT_WH=[[3,3,4,5,7],[4,4,5,6,8],[5,5,6,7,9],[6,6,7,9,11]];
   for(let k=0;k<=3;k++)
     pack({x0:20,y0:20,x1:130,y1:132,k:100+k,test:(x,y)=>{if(B.band[I(x,y)]!==k)return false;const r=Math.hypot(x-CX,y-CY);return r>=E0+PB*k+2.5&&r<E0+PB*(k+1)},
-      sizes:[[4,3],[5,3],[4,4],[3,3],[5,4]],tint:(x,y)=>BT_TINT[k],wh:(x,y)=>BT_WH[k][(hs(x,y,7)*BT_WH[k].length)|0]});
+      sizes:[[4,3],[5,3],[4,4],[3,3],[5,4]],tint:(x,y)=>{const al=ALT[BT_TINT[k]];return hs(x,y,12)<.5?al[(hs(x,y,13)*al.length)|0]:BT_TINT[k]},wh:(x,y)=>BT_WH[k][(hs(x,y,7)*BT_WH[k].length)|0]});
   // the outer band and the rim plateau
-  {const tintAt=(x,y)=>{const a=Math.atan2(y-CY,x-CX);return a>-2.35&&a<-.78?'p':a>=-.78&&a<.78?'a':a>=.78&&a<2.35?'c':'l'};
+  {const tintAt=(x,y)=>{const a=Math.atan2(y-CY,x-CX);const t0=a>-2.35&&a<-.78?'p':a>=-.78&&a<.78?'a':a>=.78&&a<2.35?'c':'l';return hs(x,y,14)<.55?ALT[t0][(hs(x,y,15)*ALT[t0].length)|0]:t0};
    pack({x0:3,y0:3,x1:146,y1:146,k:140,test:(x,y)=>{if(B.band[I(x,y)]!==4)return false;const r=Math.hypot(x-CX,y-CY);return (r>=51.5&&r<56)||r>=60.5},
      sizes:[[4,3],[5,3],[4,4],[3,3],[5,4],[6,3]],tint:tintAt,wh:(x,y)=>{const v=hs(x,y,9);return v<.3?4:v<.5?5:v<.68?6:v<.8?8:v<.9?10:13}})}
+  /* ================= COVERED TUBES THROUGH THE BUILDINGS OF THE WEST AND EAST EDGES ================= */
+  B.tubesInfo=[];
+  for(const x of [10,139]){let y0=-1,y1=-1;
+    for(let y=50;y<=104;y++)if(hgtlIsOpen(B,x,y)&&hgtlIsOpen(B,x,y-1)&&B.band[I(x,y)]===4&&B.res[I(x,y)]!==3){y0=y;break}
+    for(let y=104;y>=50;y--)if(hgtlIsOpen(B,x,y)&&hgtlIsOpen(B,x,y+1)&&B.band[I(x,y)]===4&&B.res[I(x,y)]!==3){y1=y;break}
+    if(y0>0&&y1>y0+20){let clear=true;for(let y=y0;y<=y1;y++)if(B.res[I(x,y)]===3||B.occ.has(x+','+y))clear=false;
+      if(clear)B.tubesInfo.push(hgtlTube(B,x,y0,x,y1,{lid:2.4,h:TOP,width:1,lampEvery:4}))}}
+
   /* ================= PLACEHOLDER WALLS FROM THE LIBRARY (sunken houses) BECOME PAINTED TILES ================= */
   (function bindRoles(){
     const tt={a:'p',b:'a',c:'c',d:'l'},cache={};
@@ -256,7 +320,8 @@ function build(){
    for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=I(x,y);if(B.rows[y][x]!=='.')continue;
      const kd=B.kind[i],bd=B.band[i];
      if(kd===K.STAIR||bd===-1)B.rg[i]=stairFace;
-     else if(bd>=0)B.rg[i]=bandFace[bd%4]}
+     else if(bd>=0)B.rg[i]=bandFace[bd%4];
+     if(kd===K.BRIDGE)B.rg[i]=tall.c}
    // the cliff of the bell tower and the stair towers: tall faces with windows
    const faceRing=(sp,tints)=>{sp.path.forEach((c,idx)=>{B.rg[I(c[0],c[1])]=tall[tints[sp.ringOf[idx]%tints.length]]})};
    faceRing(BT,['p','a','l','c']);for(const st of stairTowers)faceRing(st,[st.t,st.t2||'c']);
@@ -281,9 +346,6 @@ function build(){
   for(let k=0;k<=4;k++){const r=E0+PB*k+1.1;for(let a=0;a<360;a+=360/(2*Math.PI*r/4.2)){const [x,y]=polar(a,r);if(B.band[I(x,y)]===k&&B.kind[I(x,y)]===K.GROUND&&B.res[I(x,y)]!==3)lamp(x,y)}
     const r2=E0+PB*k+1.9;for(let a=2;a<360;a+=360/(2*Math.PI*r2/3.1)){const [x,y]=polar(a,r2);if(B.band[I(x,y)]===k&&B.kind[I(x,y)]===K.GROUND&&B.res[I(x,y)]!==3&&!B.occ.has(x+','+y)&&hs(x,y,42)<.8){B.occ.add(x+','+y);hang(x,y,1.5+hs(x,y,43)*.8)}}}
   // the seats and the floor of the bowl
-  for(let a=0;a<360;a+=45){const [x,y]=polar(a+22,11);lamp(x,y)}
-  for(let a=0;a<360;a+=90){const [x,y]=polar(a+45,8);put('hgt_fountain',x,y,{block:true,walk:false,deco:false});B.lights.push([x,y])}
-  put('hgt_obelisk',CX,CY,{block:true,walk:false,deco:false,sc:2.4});B.lights.push([CX,CY]);
   for(let a=0;a<360;a+=30){const [x,y]=polar(a+15,18.5);if(B.band[I(x,y)]===-1&&hs(x,y,44)<.5)put('hgt_gardenlantern',x,y,{});}
   // the gate courts, the avenues
   for(const [x,y] of [[63,133],[87,133],[63,145],[87,145],[69,134],[81,134],[69,144],[81,144],[63,4],[87,4],[63,17],[87,17],[69,5],[81,5]])lamp(x,y);
@@ -291,14 +353,6 @@ function build(){
   for(let y=4;y<=22;y+=3){lamp(72,y);lamp(78,y)}
   put('hgt_fountain',75,138,{block:true,walk:false,deco:false});put('hgt_fountain',75,10,{block:true,walk:false,deco:false});
   for(let x=2;x<=20;x+=3){lamp(x,73);lamp(x,79)}for(let x=132;x<=147;x+=3){lamp(x,73);lamp(x,79)}
-  // the Lantern Gardens: lawn, glitter plants, big trees, a pond of crystal gravel
-  {const gx0=5,gy0=5,gx1=46,gy1=46;
-   for(let y=gy0;y<=gy1;y++)for(let x=gx0;x<=gx1;x++){const i=I(x,y);if(B.rows[y][x]!=='.'||B.occ.has(x+','+y)||B.res[i]===3)continue;
-     if(Math.hypot(x-26,y-26)<6.2){const d=Math.hypot(x-26,y-26);B.h[i]=TOP-(d<3.4?.9:d<4.7?.6:.3);B.fm[i]=5;continue}
-     const path=(x>=24&&x<=26)||(y>=24&&y<=26);if(path){B.fm[i]=5;continue}
-     const v=hs(x,y,50);if(v<.11)plant(x,y,51);else if(v<.135)put(BIG[(hs(x,y,52)*3)|0],x,y,{sc:.9+hs(x,y,53)*.5})}
-   for(const [x,y] of [[26,12],[26,40],[12,26],[40,26]])put('hgt_cupola',x,y,{block:true,walk:false,deco:false,sc:1.9});
-   for(let t=0;t<14;t++){const a=t/14*Math.PI*2,x=Math.round(26+7.5*Math.cos(a)),y=Math.round(26+7.5*Math.sin(a));put('hgt_reeds',x,y,{sc:1.1});if(t%2)lamp(Math.round(26+9*Math.cos(a)),Math.round(26+9*Math.sin(a)))}}
   // the Bell Court: rows of lamps, banners and a few beds of plants
   {for(let x=104;x<=142;x+=4){lamp(x,31);lamp(x,41)}for(let y=7;y<=43;y+=4){lamp(103,y);lamp(142,y)}
    for(const [x,y] of [[121,31],[127,31]])put('hgt_obelisk',x,y,{block:true,walk:false,deco:false,sc:1.5});
@@ -329,8 +383,27 @@ function build(){
   for(let a=0;a<360;a+=30){const x=Math.round(WL.cx+5.8*Math.cos(a*Math.PI/180)),y=Math.round(WL.cy+5.8*Math.sin(a*Math.PI/180));if(isO(x,y)&&!B.occ.has(x+','+y)){B.occ.add(x+','+y);dec(bellKind(),x,y,{bob:2.4,sc:1.2});}}
   dec(bellKind(),WL.cx,WL.cy+3,{bob:0,sc:1});B.lights.push([WL.cx,WL.cy+3],[WL.cx-3,WL.cy+3],[WL.cx+3,WL.cy+3]);
 
+  /* ================= FOCAL POINTS: plazas, courts and the edge of the city ================= */
+  {const FOC=['hgt_obelisk','hgt_fountain','hgt_lamppost','hgtb_glasspost','hgt_fairytree','hgt_banner','hgtb_shrine','hgt_pearlbush','hgt_willow','hgt_cupola','kh_stall1_0','kh_stall2_0','hgt_giantcap','hgt_bulbflower'];
+   const big=k=>k==='hgt_obelisk'?1.5:k==='hgt_cupola'?2:k==='hgt_lamppost'||k==='hgtb_glasspost'?1.3:k==='hgt_fountain'?1.6:1.1;
+   for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){const i=I(x,y);if(B.rows[y][x]!=='.'||B.occ.has(x+','+y)||B.kind[i]===K.STAIR)continue;
+     const plz=B.fm[i]===3&&B.band[i]===4&&B.res[i]!==3,edge=(x<9||y<9||x>W-10||y>H-10)&&B.band[i]===4&&B.res[i]!==3;
+     if(plz&&hs(x,y,110)<.035){const k=FOC[(hs(x,y,111)*FOC.length)|0];const blk=/fountain|obelisk|stall/.test(k);if(put(k,x,y,{block:blk,walk:!blk,deco:!blk,sc:big(k)*(.9+hs(x,y,112)*.4)}))B.lights.push([x,y])}
+     else if(edge&&hs(x,y,113)<.05){const k=['hgt_willow','hgt_fairytree','hgt_banner','hgt_obelisk','hgt_giantcap','hgtb_glasspost','hgt_lamppost'][(hs(x,y,114)*7)|0];if(put(k,x,y,{block:false,walk:true,deco:true,sc:1.1+hs(x,y,115)*.7}))if(hs(x,y,116)<.4)B.lights.push([x,y])}}
+  }
+  /* ================= THE FESTIVAL FLOOR AND THE SEATS: stalls, lantern clusters, banners, bunting ================= */
+  {const STALL=['coral_fruit','aqua_jars','lilac_cloth','yellow_bread','pink_flowers','teal_fish','orange_pottery','sage_herbs','navy_books','rose_lanterns'];
+   for(let a=0;a<360;a+=18){const [x,y]=polar(a+5,13.6);if(put('hgtb_stall_'+STALL[(a/18)%10],x,y,{block:true,walk:false,deco:false,sc:1.05}))B.lights.push([x,y])}
+   for(let a=0;a<360;a+=30){const [x,y]=polar(a+12,10.2);if(put('hgtb_deco_lanterns',x,y,{sc:1.1}))B.lights.push([x,y])}
+   for(let a=0;a<360;a+=20){const [x,y]=polar(a+3,15.4);put(a%40?'hgtb_deco_banner':'hgtb_deco_bunting',x,y,{sc:1})}
+   for(let a=0;a<360;a+=24){const [x,y]=polar(a,19.5);if(B.kind[I(x,y)]===K.TERRACE||B.band[I(x,y)]===-1)put(a%48?'hgtb_deco_bunting':'hgtb_deco_lanterns',x,y,{sc:1})}
+   for(let a=0;a<360;a+=45){const [x,y]=polar(a+22,8.6);put('hgtb_deco_shellstatue',x,y,{block:true,walk:false,deco:false,sc:.9})}
+   // bunting, brackets and balconies on the faces of the houses
+   for(const h of B.houses){if(hs(h.x,h.y,130)<.6){const [fx,fy]=h.front;dec('hgtb_deco_bunting',h.x+(h.w>>1),h.y+(h.d>>1),{bob:Math.max(1,h.wh-1.3),sc:1.5});}
+     if(hs(h.x,h.y,131)<.5)dec('hgtb_lamp_bracket',h.front[0],h.front[1],{bob:1.2,sc:1})}}
   /* ================= ORNAMENTS ON THE ROOFS ================= */
   for(const hsr of B.houses){
+    if(isO(hsr.x+(hsr.w>>1),hsr.y+(hsr.d>>1)))continue;
     const v=hs(hsr.x,hsr.y,90);
     const k=v<.2?'hgt_finial':v<.4?'hgt_cupola':v<.55?'hgt_chimney':v<.7?'hgt_banner':v<.8?'hgt_obelisk':v<.9?'hgt_fairytree':'hgt_willow';
     const sc=k==='hgt_cupola'?1.2+hsr.w*.12:k==='hgt_obelisk'?.8:(k==='hgt_fairytree'||k==='hgt_willow')?.9:1;
@@ -346,13 +419,16 @@ function build(){
   B.houseCount=B.houses.length;
   B.BT=BT;B.WL=WL;
   // names on the overview map
-  for(const [t,x,y,o] of [['The Festival Floor',75,70],['Bell Court',123,41],['The Bell Tower of Lanterns',124,8,{sz:5,col:'#8a2a20'}],['The Well of Bells',110,50],['Lantern Gardens',26,42],['Sunken Ward',28,129],['Sunken Row',116,129],['South Gate',75,143],['North Gate',75,12],['East Road',138,72],['West Road',12,72]]){hgtlName(B,x,y,t,'place');if(o)Object.assign(B.names[B.names.length-1],o)}
+  for(const [t,x,y,o] of [['The Festival Floor',75,70],['Bell Court',123,41],['The Bell Tower of Lanterns',124,8,{sz:5,col:'#8a2a20'}],['The Well of Bells',110,50],['The Grand Maze',22,44],['The Ring Maze',75,92],['Tank Run',100,100],['Sunken Ward',28,129],['Sunken Row',116,129],['South Gate',75,143],['North Gate',75,12],['East Road',138,72],['West Road',12,72]]){hgtlName(B,x,y,t,'place');if(o)Object.assign(B.names[B.names.length-1],o)}
   /* ================= DOORS: houses, towers and sunken houses that can be entered ================= */
-  B.links={};
+  B.links=B.links||{};
+  try{const il=hgtzIndoorLevel(5240,{back:{lvl:ID,at:{x:75,y:146,f:2}},seed:5240});ENTRY[5240]={x:il.start.x,y:il.start.y,f:0}}catch(e){ENTRY[5240]={x:1,y:1,f:0}}
+  ENTRY[5241]={x:11,y:11,f:0};
   const FACE_NAME=['north','east','south','west'];
   function setDoor(cx,cy,face,t,wh,roomId,pic,kind){
     // turns the wall cell (cx,cy) into a door to a room; the room is told where the street cell in front of the door is
-    const ax=cx+DIRS[face][0],ay=cy+DIRS[face][1],R=ROOMS[roomId],at=R.arrive||{x:R.ex||((R.w+1)>>1),y:R.d,f:0};
+    const ax=cx+DIRS[face][0],ay=cy+DIRS[face][1],R=ROOMS[roomId],at=R?(R.arrive||{x:R.ex||((R.w+1)>>1),y:R.d,f:0}):roomEntry(roomId);
+    if(!R&&typeof hgtrSetReturn==='function'&&roomId<5240)hgtrSetReturn(roomId,ID,{x:ax,y:ay,f:face});
     const ch=dch(t,wh,{lvl:roomId,at:{x:at.x,y:at.y,f:at.f}},pic||TN[t].d,kind||'win');
     B.rows[cy][cx]=ch;B.lights.push([ax,ay]);B.doors.push({x:cx,y:cy,face,ax,ay,to:roomId});B.links[roomId]={x:ax,y:ay,f:face};return ch}
   const taken=new Set();
@@ -363,7 +439,7 @@ function build(){
       const dd=Math.hypot(hh.x-tx,hh.y-ty);if(dd<bd){bd=dd;best=hh}}
     if(best)taken.add(best);return best}
   // the houses on the terraces
-  const HDOORS=[[4920,270,24,0,'hgt_d2'],[4921,150,32,1],[4923,18,32,1],[4928,325,39,2],[4929,45,39,2],[4930,200,46,3,'hgt_d2'],[4936,300,46,3],[4937,120,46,3]];
+  const HDOORS=[[4967,90,40,2,'hgt_d2'],[4968,330,47,3,'hgt_d2'],[5240,60,33,1,'hgt_d3'],[5241,250,40,2,'hgt_d2'],[4920,270,24,0,'hgt_d2'],[4921,150,32,1],[4923,18,32,1],[4928,325,39,2],[4929,45,39,2],[4930,200,46,3,'hgt_d2'],[4936,300,46,3],[4937,120,46,3]];
   for(const [id,deg,r,band,pic] of HDOORS){const hh=pickHouse(deg,r,{band});if(!hh)continue;
     setDoor(hh.door[0],hh.door[1],hh.face,hh.t,hh.wh,id,pic);hh.room=id;hh.special=true;B.occ.add(hh.front[0]+','+hh.front[1])}
   // the guard house at the north gate: a small house in the gate court
@@ -383,21 +459,32 @@ function build(){
   // the sunken houses without a room: shuttered, a plain wall with windows
   for(const c of B.sunken)if(!c.room){B.rows[c.y][c.x]=wc('win','c',3.5,1)}
   // a secret nook behind a house on the rim: a dead-end alcove cut into a house block with a chest, and a door at the end
-  (function secret(){
+  B.nooks=[];
+  (function secrets(){
+    let made=0;
     for(const hh of B.houses.slice().sort((a,b)=>hs(a.x,a.y,95)-hs(b.x,b.y,95))){
-      if(taken.has(hh)||hh.band!==4||hh.w<4||hh.d<4||hh.wh<5)continue;
-      // cut into the north side from the lane above: the cell above the middle of the north wall must be open
-      const mx=hh.x+(hh.w>>1),ay=hh.y-1;if(!isO(mx,ay)||B.occ.has(mx+','+ay))continue;
+      if(made>=7)break;
+      if(taken.has(hh)||hh.band<3||hh.w<4||hh.d<4||hh.wh<5)continue;
+      const mx=hh.x+(hh.w>>1),ay=hh.y-1;if(!isO(mx,ay)||B.occ.has(mx+','+ay)||Math.abs(hAt(mx,ay)-hh.h)>.01)continue;
       if(!isO(mx-1,ay)&&!isO(mx+1,ay)&&!isO(mx,ay-1))continue;
-      const h0=hh.h,len=2;let ok=true;for(let i=0;i<=len;i++){const cx=mx,cy=hh.y+i;if(B.rows[cy][cx]==='.')ok=false}
-      if(!ok)continue;
+      if(isO(mx,hh.y)||isO(mx,hh.y+1)||isO(mx,hh.y+2))continue;
+      const h0=hh.h,len=2,door=made===0;
       for(let i=0;i<len;i++){hgtlOpen(B,mx,hh.y+i,h0,K.ALLEY);B.secrets.push([mx,hh.y+i]);B.occ.add(mx+','+(hh.y+i))}
-      const dx=mx,dy=hh.y+len;B.rows[dy][dx]=dch(hh.t,hh.wh,{lvl:4938,at:{x:3,y:5,f:0}},'hgt_d3','win');
-      B.doors.push({x:dx,y:dy,face:0,ax:dx,ay:dy-1,to:4938});B.links[4938]={x:dx,y:dy-1,f:0};
-      dec('hg_chestweed',mx,hh.y,{block:true,walk:false,deco:false,sc:.9});B.lights.push([mx,hh.y]);
-      // the alcove walls: the side cells stay as house walls (they already are); mark the nook for the map
-      taken.add(hh);hh.secret=true;B.secretNook={x:mx,y:ay};hgtlName(B,mx,hh.y-3,'','nook');return}
+      if(door){const dy=hh.y+len;B.rows[dy][mx]=dch(hh.t,hh.wh,{lvl:4938,at:{x:3,y:5,f:0}},'hgt_d3','win');B.doors.push({x:mx,y:dy,face:0,ax:mx,ay:dy-1,to:4938});B.links[4938]={x:mx,y:dy-1,f:0};B.secretNook={x:mx,y:ay}}
+      const pets=['hgtb_pinkbulb','hgtb_amberpup','hgtb_pearlslug','hgtb_creammoth','hgtb_lanternbeetle','hgtb_pups','hgtb_jadeeel'];
+      if(made%2===0)dec('hg_chestweed',mx,hh.y,{block:true,walk:false,deco:false,sc:.9});else dec(pets[made%pets.length],mx,hh.y,{});
+      dec('hgt_gardenlantern',mx,hh.y+1,{});B.lights.push([mx,hh.y]);B.nooks.push({x:mx,y:hh.y});
+      taken.add(hh);hh.secret=true;made++}
   })();
+  // pets in the maze hearts, on the pool rims, at the tower tops
+  {const pets=['hgtb_pinkbulb','hgtb_lilacmoth','hgtb_lanternbeetle','hgtb_pearlslug','hgtb_amberpup','hgtb_creamjelly','hgtb_jadeeel','hgtb_pups','hgtb_creammoth','hgtb_fishbeetle','hgtb_spindleray'];
+   let n=0;const pet=(x,y)=>{if(isO(x,y)&&B.kind[I(x,y)]!==K.STAIR&&!B.occ.has(x+','+y)){B.occ.add(x+','+y);dec(pets[(n++)%pets.length],x,y,{});return true}return false};
+   for(const mm of B.mazes){if(mm.m&&mm.m.centre)for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1]])if(pet(mm.m.centre.x+dx,mm.m.centre.y+dy))break}
+   for(const pl of [B.poolA,B.poolB])if(pl)for(const [x,y] of [[pl.x-1,pl.y],[pl.x+pl.w,pl.y+1],[pl.x+1,pl.y-1]])if(pet(x,y))break;
+   for(const st of stairTowers)for(const c of st.path.slice(-4))if(pet(c[0],c[1]))break;
+   for(const c of BT.path.slice(-5))if(pet(c[0],c[1]))break;
+   if(B.giantPlaza)for(const [dx,dy] of [[-5,5],[5,5],[0,-6]])pet(B.giantPlaza.x+dx,B.giantPlaza.y+dy);
+   for(const [x,y] of [[88,96],[62,100],[96,60],[56,56],[70,128],[82,130]])pet(x,y)}
 
   /* ================= PEOPLE ================= */
   const npc=(k,id,x,y,sc)=>{B.decor.push({k,x,y,block:false,walk:true,npc:id,sc:sc||1});B.occ.add(x+','+y)};
@@ -416,13 +503,13 @@ const ROOMS={};
 const SOFT=/^hgt_|^hl_p_candle|^brazier|^lamp$|^flowerpot|^vase/;
 function room(id,name,w,d,t,floor,items,o){ROOMS[id]=Object.assign({id,name,w,d,t,floor,items:items||[],doors:[],npcs:[],loot:[],lights:[]},o||{});LEVEL_NAMES[id]=name}
 const D3=(k,x,y,o)=>[k,x,y,o||{}];
-room(4920,'The Stage House',9,7,'l','hgt_f5',[D3('hgt_banner',2,1,{bob:0}),D3('hgt_banner',4,1),D3('hgt_banner',6,1),D3('hgt_banner',8,1),D3('statue',2,3),D3('statue',8,3),D3('kh_int3_1',5,2),D3('hl_p_candle',6,2),D3('hl_p_mirror',1,5),D3('hl_p_mirror',9,5),D3('bench',3,5),D3('bench',7,5),D3('hgt_fern',1,1),D3('hgt_fern',9,1)],
+room(4920,'The Stage House',9,7,'l','hgt_f5',[D3('hgt_banner',2,1,{bob:0}),D3('hgt_banner',4,1),D3('hgt_banner',6,1),D3('hgt_banner',8,1),D3('statue',2,3),D3('statue',8,3),D3('hgtb_table',5,2),D3('hl_p_candle',6,2),D3('hl_p_mirror',1,5),D3('hl_p_mirror',9,5),D3('hgtb_bench',3,5),D3('hgtb_bench',7,5),D3('hgt_fern',1,1),D3('hgt_fern',9,1)],
   {npcs:[['hg_npc0','hgn_oom',4,3]],lights:[[5,4],[2,2],[8,2],[5,6]]});
 room(4921,'The Feast Kitchen',9,7,'p','hgt_f0',[D3('counter',2,1),D3('counter',3,1),D3('counter',4,1),D3('kh_int6_4',6,1),D3('kh_int6_3',8,1),D3('barrel',9,2),D3('barrel',9,6),D3('barrel',1,6),D3('sacks',1,4),D3('kh_int6_0',4,4),D3('breadbasket',2,3),D3('hg_waxbarrel',9,1)],
   {npcs:[['hg_npc3','hgn_bibbn',6,5]],lights:[[3,2],[6,2],[5,5],[8,4]],doors:[{wall:'E',pos:4,to:4922,at:{x:1,y:3,f:1},pic:'hgt_d0'}]});
 room(4922,'The Feast Pantry',5,5,'p','hgt_f6',[D3('barrel',2,1),D3('barrel',3,1),D3('barrel',4,1),D3('barrel',5,1),D3('hg_jar',1,2),D3('hg_jar',5,2),D3('crate',2,5),D3('crate',3,5),D3('hg_chestwax',3,3)],
   {arrive:{x:1,y:3,f:1},noSouth:true,doors:[{wall:'W',pos:3,to:4921,at:{x:9,y:4,f:3},pic:'hgt_d0'}],lights:[[3,2],[3,4]]});
-room(4923,"The Healer's House",7,6,'c','hgt_f6',[D3('hl_p_shelf',2,1),D3('hl_p_shelf',6,1),D3('vase0',1,1),D3('vase1',7,1),D3('kh_int3_3',2,4),D3('kh_int3_3',6,4),D3('hl_p_candle',4,1),D3('kh_int3_1',4,4),D3('hgt_fern',1,6),D3('hgt_pearlbush',7,6)],
+room(4923,"The Healer's House",7,6,'c','hgt_f6',[D3('hl_p_shelf',2,1),D3('hl_p_shelf',6,1),D3('vase0',1,1),D3('vase1',7,1),D3('kh_int3_3',2,4),D3('kh_int3_3',6,4),D3('hl_p_candle',4,1),D3('hgtb_table',4,4),D3('hgt_fern',1,6),D3('hgt_pearlbush',7,6)],
   {npcs:[['hg_npc6','hgn_slup',4,3]],lights:[[4,2],[2,3],[6,3],[4,5]]});
 room(4924,'The Bell Foundry',11,9,'l','hgt_f3',[D3('hgt_chime',4,3,{bob:1.1,sc:2.6,block:false}),D3('hgt_chime',8,3,{bob:1.1,sc:2.6,block:false}),D3('hgt_chime',6,5,{bob:1.1,sc:2.8,block:false}),D3('brazier0',2,2),D3('brazier0',10,2),D3('brazier0',2,8),D3('brazier0',10,8),D3('hg_waxbarrel',1,5),D3('hg_waxbarrel',11,5),D3('crate',3,7),D3('crate',9,7)],
   {ex:6,npcs:[['hg_npc4','hgxn_founder',6,2]],lights:[[2,2],[10,2],[2,8],[10,8],[6,4]],doors:[{wall:'N',pos:6,to:4925,at:{x:4,y:7,f:0},pic:'hgt_d2'}]});
@@ -430,7 +517,7 @@ room(4925,'The Bell Pit',7,7,'l','hgt_f3',[D3('hg_chestjelly',2,2),D3('hg_chestj
   {arrive:{x:4,y:7,f:0},ex:4,noSouth:true,doors:[{wall:'S',pos:4,to:4924,at:{x:6,y:1,f:2},pic:'hgt_d2'}],lights:[[2,2],[6,2],[4,4],[4,6]]});
 room(4926,'The Belfry',9,9,'a','hgt_f5',[D3('hgt_chime',2,2,{bob:1.5,sc:2.2,block:false}),D3('hgt_chime',5,2,{bob:1.5,sc:2.6,block:false}),D3('hgt_chime',8,2,{bob:1.5,sc:2.2,block:false}),D3('hgt_chime',2,5,{bob:1.5,sc:2,block:false}),D3('hgt_chime',8,5,{bob:1.5,sc:2,block:false}),D3('hgt_chime',2,8,{bob:1.5,sc:2.2,block:false}),D3('hgt_chime',8,8,{bob:1.5,sc:2.2,block:false}),D3('hg_chestjelly',5,4),D3('hg_chestwax',5,3),D3('hgt_pearlbush',1,1),D3('hgt_pearlbush',9,1)],
   {npcs:[['hg_npc0','hgxn_ringer',3,5]],lights:[[5,5],[2,2],[8,2],[2,8],[8,8]]});
-room(4927,'The Guard House',7,6,'c','hgt_f0',[D3('kh_int4_5',3,2),D3('bench',6,2),D3('sacks',1,5),D3('hl_p_banner',2,1),D3('hl_p_banner',6,1),D3('kh_int5_3',7,2),D3('crate',7,5)],
+room(4927,'The Guard House',7,6,'c','hgt_f0',[D3('kh_int4_5',3,2),D3('hgtb_bench',6,2),D3('sacks',1,5),D3('hl_p_banner',2,1),D3('hl_p_banner',6,1),D3('kh_int5_3',7,2),D3('crate',7,5)],
   {npcs:[['hg_npc4','hgxn_guard',5,3]],lights:[[4,2],[4,5]]});
 room(4928,"Trundle's Hall",9,7,'p','hgt_f0',[D3('counter2',3,3),D3('counter2',4,3),D3('counter2',5,3),D3('counter2',6,3),D3('counter2',7,3),D3('crate',1,1),D3('crate',2,1),D3('crate',8,1),D3('crate',9,1),D3('barrel',1,6),D3('barrel',9,6),D3('sacks',9,4),D3('sacks',1,3)],
   {npcs:[['hg_npc5','hgn_trundle',5,2]],lights:[[3,2],[7,2],[5,5]]});
@@ -442,15 +529,15 @@ room(4931,'The Library Loft',7,6,'l','hgt_f5',[D3('kh_int1_3',2,1),D3('kh_int1_3
   {arrive:{x:4,y:6,f:0},ex:4,noSouth:true,doors:[{wall:'S',pos:4,to:4930,at:{x:5,y:1,f:2},pic:'hgt_d3'}],lights:[[4,3],[4,5]]});
 room(4932,'The Pickling Cellar',9,6,'a','hgt_f6',[D3('barrel',1,1),D3('barrel',2,1),D3('barrel',3,1),D3('barrel',7,1),D3('barrel',8,1),D3('barrel',9,1),D3('hg_jar',1,3),D3('hg_jar',9,3),D3('hg_jar',1,5),D3('hg_jar',9,5),D3('hg_waxbarrel',3,3),D3('hg_waxbarrel',7,3),D3('crate',2,5)],
   {npcs:[['hg_npc1','hgxn_pickler',5,4]],loot:[['hgkelp',4,2],['hgkelp',5,2],['hgkelp',6,2]],lights:[[5,3],[2,2],[8,2]]});
-room(4933,"The Pond Keeper's Cellar",9,6,'a','hgt_f6',[D3('hg_jar',1,1),D3('hg_jar',2,1),D3('hg_jar',3,1),D3('hg_jar',7,1),D3('hg_jar',8,1),D3('hg_jar',9,1),D3('hg_waxbarrel',1,4),D3('hg_waxbarrel',9,4),D3('bench',5,5)],
+room(4933,"The Pond Keeper's Cellar",9,6,'a','hgt_f6',[D3('hg_jar',1,1),D3('hg_jar',2,1),D3('hg_jar',3,1),D3('hg_jar',7,1),D3('hg_jar',8,1),D3('hg_jar',9,1),D3('hg_waxbarrel',1,4),D3('hg_waxbarrel',9,4),D3('hgtb_bench',5,5)],
   {npcs:[['hg_npc3','hgxn_pond',5,2]],loot:[['hgpond',3,3],['hgpond',4,3],['hgpond',6,3],['hgpond',7,3]],lights:[[5,3],[2,3],[8,3]]});
-room(4934,"The Ringers' Room",7,6,'p','hgt_f0',[D3('hgt_chime',2,2,{bob:1.6,sc:1.7,block:false}),D3('hgt_chime',4,2,{bob:1.6,sc:2,block:false}),D3('hgt_chime',6,2,{bob:1.6,sc:1.7,block:false}),D3('bench',2,5),D3('bench',6,5),D3('hgt_gardenlantern',1,1),D3('hgt_gardenlantern',7,1)],
+room(4934,"The Ringers' Room",7,6,'p','hgt_f0',[D3('hgt_chime',2,2,{bob:1.6,sc:1.7,block:false}),D3('hgt_chime',4,2,{bob:1.6,sc:2,block:false}),D3('hgt_chime',6,2,{bob:1.6,sc:1.7,block:false}),D3('hgtb_bench',2,5),D3('hgtb_bench',6,5),D3('hgt_gardenlantern',1,1),D3('hgt_gardenlantern',7,1)],
   {lights:[[4,3],[2,5],[6,5]]});
-room(4935,'The Lookout Room',7,6,'c','hgt_f6',[D3('kh_int4_5',4,2),D3('hgt_fern',1,1),D3('hgt_pearlbush',7,1),D3('hg_chestweed',7,5),D3('bench',2,4),D3('hl_p_candle',1,5)],
+room(4935,'The Lookout Room',7,6,'c','hgt_f6',[D3('kh_int4_5',4,2),D3('hgt_fern',1,1),D3('hgt_pearlbush',7,1),D3('hg_chestweed',7,5),D3('hgtb_bench',2,4),D3('hl_p_candle',1,5)],
   {npcs:[['hg_npc6','hgxn_watcher',4,3]],lights:[[4,3],[2,4]]});
 room(4936,"The Pearl Cutter's House",7,6,'p','hgt_f6',[D3('counter',3,2),D3('counter',4,2),D3('counter',5,2),D3('hgt_pearlbush',1,1),D3('hgt_pearlbush',7,1),D3('hgt_pearlbush',1,6),D3('hl_p_mirror',7,5),D3('hl_p_candle',2,5)],
   {npcs:[['hg_npc1','hgxn_cutter',4,1]],lights:[[4,3],[2,5]]});
-room(4937,'The Costume Room',9,7,'l','hgt_f5',[D3('statue',2,2),D3('statue',4,2),D3('statue',6,2),D3('statue',8,2),D3('hl_p_mirror',1,5),D3('hl_p_mirror',9,5),D3('kh_int4_0',1,1),D3('kh_int4_0',9,1),D3('hl_p_banner',5,1),D3('kh_int3_1',7,5)],
+room(4937,'The Costume Room',9,7,'l','hgt_f5',[D3('statue',2,2),D3('statue',4,2),D3('statue',6,2),D3('statue',8,2),D3('hl_p_mirror',1,5),D3('hl_p_mirror',9,5),D3('kh_int4_0',1,1),D3('kh_int4_0',9,1),D3('hl_p_banner',5,1),D3('hgtb_table',7,5)],
   {npcs:[['hg_npc3','hgxn_costume',5,4]],lights:[[5,3],[2,4],[8,4]]});
 room(4938,'The Hidden Room',5,5,'p','hgt_f5',[D3('hg_chestjelly',2,2),D3('hg_chestjelly',4,2),D3('hg_chestweed',3,1),D3('hl_p_candle',1,1),D3('hl_p_candle',5,1),D3('statue',3,3)],
   {lights:[[3,2],[1,4],[5,4]]});
@@ -475,6 +562,8 @@ const XN=[['hgxn_gate','Gate guard','hg_npc4',['Welcome to Nibb. The festival fl
 for(const [id,nm,img,chat] of XN)hgNative(id,nm,img,chat,null);
 hgMerchant('hgxn_cart','Lantern trader','hg_npc5','Oil, wicks and glass for the lanterns. Look as long as you like.');
 
+const ENTRY={};
+function roomEntry(id){if(ENTRY[id])return ENTRY[id];const R=typeof HGTROOMS!=='undefined'&&HGTROOMS.find(q=>q.id===id);return R?R.entry:{x:1,y:1,f:0}}
 let CITY=null;
 function cityB(){return CITY||(CITY=build())}
 function roomLevel(id){
@@ -484,8 +573,20 @@ function roomLevel(id){
   if(!R.noSouth){const lk=cityB().links[id];const ch='D';nd=Math.max(nd,1);
     chars[ch]=doorGid(R.t,3,lk?{lvl:ID,at:{x:lk.x,y:lk.y,f:lk.f}}:null,TN[R.t].d,'win');rows[d+1][ex]=ch}
   for(const dr of R.doors){const ch=doorCh();let x,y;if(dr.wall==='N'){x=dr.pos;y=0}else if(dr.wall==='S'){x=dr.pos;y=d+1}else if(dr.wall==='E'){x=w+1;y=dr.pos}else{x=0;y=dr.pos}
-    chars[ch]=doorGid(R.t,3,{lvl:dr.to,at:dr.at},dr.pic||TN[R.t].d,'win');rows[y][x]=ch}
+    chars[ch]=doorGid(R.t,3,{lvl:dr.shared||dr.to,at:dr.shared?roomEntry(dr.shared):dr.at},dr.pic||TN[R.t].d,'win');rows[y][x]=ch;
+    if(dr.shared&&typeof hgtrSetReturn==='function')hgtrSetReturn(dr.shared,id,{x:dr.pos,y:1,f:2})}
   const decor=[],items=[],lights=R.lights.map(l=>[l[0],l[1]]);
+  // every room is dressed the same way: banners and light-vines on the walls, lanterns at the corners, plants in pots, and one small creature
+  {const occ=new Set(R.items.map(q=>q[1]+','+q[2]).concat(R.npcs.map(q=>q[2]+','+q[3])).concat(R.loot.map(q=>q[1]+','+q[2])).concat([ex+','+d]));
+   const dr=(k,x,y,o)=>{if(x<1||y<1||x>w||y>d||occ.has(x+','+y))return;occ.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true,deco:true},o||{}))};
+   for(let x=1;x<=w;x+=2)dr(x%4===1?'hgt_banner':'hgt_lightvine',x,1,{sc:x%4===1?1:.8});
+   for(let y=3;y<=d-1;y+=3){dr('hgt_lightvine',1,y,{sc:.8});dr('hgt_lightvine',w,y,{sc:.8})}
+   for(const [x,y] of [[1,d],[w,d]]){dr('hgt_gardenlantern',x,y,{});lights.push([x,y])}
+   const CP=['hgtb_furn_hearth','hgtb_furn_clock','hgtb_furn_loom','hgtb_furn_stage','hgtb_furn_bed','hgtb_furn_books_globe','hgtb_furn_table_chairs','hgtb_furn_bookshelf','hgtb_furn_cabinet'];
+   dr(CP[id%CP.length],(w+1)>>1,2,{block:true,walk:false,deco:false});
+   dr(id%2?'hgtb_furn_chandelier_lantern':'hgtb_furn_chandelier',(w+1)>>1,Math.max(3,(d+1)>>1),{bob:1.6});
+   dr(['hgtb_furn_table_chairs','hgtb_furn_books_globe'][id%2],2,d-1,{block:true,walk:false,deco:false});
+   dr(['hgt_shellflower','hgt_bulbflower','hgt_pearlbush'][id%3],w,d-1,{});dr(['hgtb_pinkbulb','hgtb_amberpup','hgtb_creammoth','hgtb_pearlslug'][id%4],Math.max(1,w-1),Math.max(1,d-2),{})}
   for(const [k,x,y,o] of R.items){const soft=SOFT.test(k)&&o.block!==true;decor.push(Object.assign({k,x,y,block:!soft&&o.block!==false,walk:soft,deco:soft},o))}
   for(const [k,id2,x,y] of R.npcs)decor.push({k,x,y,block:false,walk:true,npc:id2,sc:1});
   for(const [k,x,y] of R.loot)items.push({k,x,y});
@@ -493,6 +594,26 @@ function roomLevel(id){
   return {rows:rows.map(r=>r.join('')),chars,start:{x:st.x,y:st.y,f:st.f},enemies:[],items,decor,lights,portals:[],floor:R.floor,ceil:'beam',ceilH:3,day:0,amb:.5,noTele:true,noExtras:true,diff:66,name:R.name,label:R.name,mapNames:[]};
 }
 for(let id=INT0;id<=INTN;id++)if(ROOMS[id])hgtRegister(id,roomLevel);
+ROOMS[4926].doors.push({wall:'N',pos:5,shared:4976,pic:'hgt_d2'});
+ROOMS[4938].items.push(D3('hgtb_shrine',2,4),D3('hgtb_pinkbulb',4,4,{block:false}));
+room(5242,'The Pearl Cellar',9,7,'a','hgtb_uwsand',[D3('hgt_lightvine',2,1),D3('hgt_lightvine',8,1),D3('hgt_shellflower',1,3),D3('hgt_shellflower',9,3),D3('hgt_pearlbush',3,6),D3('hgt_pearlbush',7,6),D3('hg_chestjelly',5,2),D3('hgtb_creamjelly',3,3,{block:false}),D3('hgtb_jadeeel',7,3,{block:false})],{lights:[[5,3],[2,5],[8,5],[5,6]]});
+hgtRegister(5242,roomLevel);
+if(typeof HGTE!=='undefined'&&HGTE.wetLook)HGTE.wetLook(5242);
+if(typeof UWS!=='undefined')UWS[5242]={vents:[[5,4]],swim:[]};
+LEVEL_NAMES[5240]='The Lamp Rooms of Nibb';LEVEL_NAMES[5241]='The Tank Room of Nibb';
+hgtRegister(5240,id=>{const lk=cityB().links[id]||{x:75,y:146,f:2};return hgtzIndoorLevel(id,{name:'The Lamp Rooms of Nibb',back:{lvl:ID,at:{x:lk.x,y:lk.y,f:lk.f}},seed:5240})});
+hgtRegister(5241,id=>{
+  const Wq=23,Hq=13,Bq=hgtlNew(Wq,Hq,5241),body=hgtkTile('body',3.5).ch,DCH='\u24f2',lk=cityB().links[id]||{x:75,y:146,f:2};
+  hgtlBlock(Bq,0,0,Wq,Hq,body,0);hgtlFill(Bq,3,3,17,9,0,0);
+  hgtkTank(Bq,1,0,9,3,{type:'wall',face:'S',theme:'reef',seed:41});hgtkTank(Bq,13,0,9,3,{type:'wall',face:'S',theme:'deep',seed:42});
+  hgtkTank(Bq,0,4,3,7,{type:'wall',face:'E',theme:'lagoon',seed:43});hgtkTank(Bq,20,4,3,7,{type:'wall',face:'W',theme:'violet',seed:44});
+  hgtkTank(Bq,10,6,3,3,{type:'round',theme:'reef',seed:45,z1:3.0});
+  hgtlWall(Bq,11,12,DCH,0);
+  for(const [x,y] of [[4,11],[18,11],[4,3],[18,3]])hgtlDecor(Bq,'hg_lamp',x,y,{walk:true,deco:true});
+  const lv=hgtlAssemble(Bq,{name:'The Tank Room of Nibb',label:'The Tank Room of Nibb',start:{x:11,y:11,f:0},ceilH:3.6,diff:66,extra:{floor:'wood',amb:.2,noExtras:true,scenery:[]}});
+  delete lv.terrace;delete lv.outdoor;lv.chars=Object.assign({},lv.chars,{[DCH]:doorGid('c',3.5,{lvl:ID,at:{x:lk.x,y:lk.y,f:lk.f}},'hgt_d2','win')});lv.hgtkOn=true;lv.lights=[[11,11]];
+  return lv});
+
 
 
 function level(id){
@@ -501,24 +622,54 @@ function level(id){
   L.chars={};
   for(const ch in hgtaChars)L.chars[ch]=hgtaChars[ch];
   const fm=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=B.fm[y*W+x];fm.push(r)}
-  Object.assign(L,{fmap:fm,floorSet:['hgt_f0','hgt_f3','hgt_f4','hgt_f5','hgt_f7','hgt_f2'],floor:'hgt_f0',ceil:'tomb',ceilH:3,day:0,outdoor:true,amb:.72,noExtras:true,noTele:true,diff:66});
+  Object.assign(L,{fmap:fm,floorSet:['hgtb_f_terrazzo','hgtb_f_mandala','hgt_f4','hgtb_f_rosette','hgt_f7','hgtb_f_shellflags'],floor:'hgtb_f_terrazzo',ceil:'tomb',ceilH:3,day:0,outdoor:true,amb:.72,noExtras:true,noTele:true,diff:66});
   L.terrace.riser=mkTile(['hgt_wc'],1);L.terrace.rg=B.rg;
   L.sky=skyList(B);
+  try{if(typeof hgtzApplyLids==='function')hgtzApplyLids(B,L)}catch(e){console.error('nibb lids',e)}
+  try{hgtlfRegister(ID,{agents:lifeAgents(B)})}catch(e){console.error('nibb life',e)}
+  try{if(typeof hgtrSetReturn==='function'){hgtrSetReturn(4976,4926,{x:5,y:1,f:2})}}catch(e){}
   window.HGTXN_B=B;
   return L;
 }
+
+/* ================= LIFE: workers, readers, fishers and walkers (hgt_life.js); the pictures are the painted poses of hgt_art2.js ================= */
+function lifeAgents(B){
+  const ag=[],P=(deg,r)=>{const [x,y]=polar(deg,r);return {x,y}},ok=c=>c&&c.x>1&&c.y>1&&hgtlIsOpen(B,c.x,c.y);
+  const add=a=>{if(!ok(a.home))return;if(a.spots)a.spots=a.spots.filter(ok);if(a.route)a.route=a.route.filter(ok);ag.push(a)};
+  [[100,22.4],[200,22.4],[300,22.4]].forEach(([d,r],i)=>add({kind:'npc',sprite:'hgtb_sweep',name:'Sweeper',lines:['The terraces are swept every morning, from the top to the bottom.'],home:P(d,r),task:'clean',spots:[P(d,r),P(d+8,r),P(d+16,r)],zone:8}));
+  [[60,29.8],[160,36.8],[260,43.8]].forEach(([d,r])=>add({kind:'npc',sprite:'hgtb_read',name:'Reader',lines:['I read here because the light is good. The lanterns are never turned off.'],home:P(d,r),task:'read',spots:[P(d,r)],zone:3}));
+  [[20,29.8],[120,36.8],[230,43.8]].forEach(([d,r])=>add({kind:'npc',sprite:'hgtb_watch',name:'Watcher',lines:['I watch the festival floor from here. Nothing happens on it most days.'],home:P(d,r),task:'watch',spots:[P(d,r)],zone:3}));
+  for(const pl of [B.poolA,B.poolB])if(pl)add({kind:'npc',sprite:'hgtb_fisher',name:'Fisher',lines:['There are fish in the pool. I have not caught one yet.'],home:{x:pl.x-1,y:pl.y+1},task:'fish',spots:[{x:pl.x-1,y:pl.y+1}],zone:2});
+  for(const t of B.tanksList||[])add({kind:'npc',sprite:'hgtb_fisher',name:'Tank keeper',lines:['I look after the tank. The fish are fed twice a day.'],home:{x:Math.round(t.x),y:Math.round(t.y)},task:'watch',spots:[{x:Math.round(t.x),y:Math.round(t.y)}],zone:3});
+  if(B.grand)add({kind:'npc',sprite:'hgtb_plantbed',name:'Hedge tender',lines:['The hedges of the maze are cut once a month. I know every turning of it.'],home:{x:B.grand.x+(B.grand.s>>1),y:B.grand.y+B.grand.s+1},task:'tend',spots:[{x:B.grand.x+(B.grand.s>>1),y:B.grand.y+B.grand.s+1},{x:B.grand.x+(B.grand.s>>1)+3,y:B.grand.y+B.grand.s+1}],zone:6});
+  add({kind:'npc',sprite:'hgtb_plantbed',name:'Plant tender',lines:['The plants on the rim are watered from the pond. They glitter at night.'],home:P(0,58),task:'tend',spots:[P(0,58),P(10,58),P(20,58)],zone:6});
+  add({kind:'npc',sprite:'hgtb_walk',name:'Walker',lines:['I walk round the rim once a day. It takes about an hour.'],home:P(0,58),route:[P(0,58),P(90,58),P(180,58),P(270,58)].map(c=>({x:c.x,y:c.y,wait:2})),speed:.9});
+  add({kind:'npc',sprite:'hgtb_lantern',name:'Lamplighter',lines:['I light the lanterns on the avenues at evening.'],home:{x:75,y:134},route:[{x:75,y:134,wait:2},{x:75,y:122,wait:2},{x:75,y:134,wait:2}],speed:.8});
+  add({kind:'npc',sprite:'hgtb_jar',name:'Water carrier',lines:['The water for the festival comes from the pools on the rim.'],home:P(90,58),route:[P(90,58),P(70,58),P(110,58)].map(c=>({x:c.x,y:c.y,wait:2})),speed:.9});
+  return ag}
+
+/* the giants of Nibb: a bulk giant that sleeps in its plaza, and peacocks that roost at the top of the bell tower */
+{const _g=hgtgOnEnter;hgtgOnEnter=function(id){const first=!HGTG.done[id];_g.apply(this,arguments);
+  if(first&&id===ID&&!HGTG.off){try{const B=cityB();
+    if(B.giantPlaza)hgtgSpawn('hgtg_bulk_mound',{x:B.giantPlaza.x+.5,y:B.giantPlaza.y+.5,yaw:1.2,scale:.8,level:ID});
+    const c=B.BT.path[B.BT.path.length-6];hgtgSpawn('hgtg_peacock',{x:c[0]+.5,y:c[1]+.5,yaw:3,scale:.9,level:ID});
+    const d=B.BT.path[B.BT.path.length-2];hgtgSpawn('hgtg_peacock_white',{x:d[0]+.5,y:d[1]+.5,yaw:1,scale:.9,level:ID})}catch(e){console.error('nibb giants',e)}}}}
 
 /* ================= THE ROOF OF THE CAVERN: festival lanterns, chimes and banners hung high over the city (painted sprites, drawn at their height above the ground) ================= */
 function skyList(B){
   const sky=[],gh=(x,y)=>B.h[Math.max(0,Math.min(H-1,Math.round(y)))*W+Math.max(0,Math.min(W-1,Math.round(x)))];
   const add=(x,y,k,w,abs)=>{const z=abs-gh(x,y);if(z>1.2&&x>3&&y>3&&x<W-3&&y<H-3)sky.push({x,y,k,w,z,big:1})};
-  for(let i=0;i<230;i++){const a=hash2(i,1,SEED)*Math.PI*2,r=Math.sqrt(hash2(i,2,SEED))*92,v=hash2(i,6,SEED);
-    add(CX+Math.cos(a)*r,CY+Math.sin(a)*r,v<.68?'hgt_hanglamp':v<.88?'hgt_chime':'hgt_banner',v<.88?1.3+hash2(i,4,SEED)*1.5:1.1,6+hash2(i,5,SEED)*14)}
+  const KS=['hgt_hanglamp','hgt_hanglamp','hgt_chime','hgt_banner','hgt_cupola','hgt_gardenlantern','hgt_lightvine','hgt_hanglamp','hgt_finial','hgt_banner'];
+  for(let i=0;i<300;i++){const a=hash2(i,1,SEED)*Math.PI*2,r=Math.sqrt(hash2(i,2,SEED))*95,v=hash2(i,6,SEED),k=KS[(v*KS.length)|0];
+    add(CX+Math.cos(a)*r,CY+Math.sin(a)*r,k,(k==='hgt_banner'?1.1:k==='hgt_lightvine'?1.6:k==='hgt_cupola'?2.4:1.1)*(.7+hash2(i,4,SEED)*2.2),5+hash2(i,5,SEED)*17)}
   // strings of lanterns on rings round the bowl
-  for(const [r,abs,n] of [[22,6.4,34],[33,8.2,46],[44,10,58],[55,11.6,70]])for(let j=0;j<n;j++){const a=j/n*Math.PI*2;add(CX+Math.cos(a)*r,CY+Math.sin(a)*r,'hgt_hanglamp',1.5,abs+(j%2?.6:0))}
-  // over the Bell Court and the Lantern Gardens
-  for(let i=0;i<46;i++)add(104+hash2(i,7,SEED)*38,6+hash2(i,8,SEED)*38,i%3?'hgt_hanglamp':'hgt_chime',1.4+hash2(i,9,SEED),9+hash2(i,10,SEED)*12);
-  for(let i=0;i<36;i++)add(6+hash2(i,11,SEED)*40,6+hash2(i,12,SEED)*40,'hgt_hanglamp',1.5,7+hash2(i,13,SEED)*10);
+  for(const [r,abs,n] of [[22,6.4,34],[27,7.2,40],[33,8.2,46],[39,9,52],[44,10,58],[50,10.8,64],[55,11.6,70]])for(let j=0;j<n;j++){const a=j/n*Math.PI*2;add(CX+Math.cos(a)*r,CY+Math.sin(a)*r,j%7===3?'hgt_cupola':'hgt_hanglamp',j%7===3?1.8:1.4,abs+(j%2?.6:0))}
+  // long chains of lanterns across the bowl and along the avenues
+  for(const yy of [60,68,76,84,92])for(let x=30;x<=120;x+=2.6)add(x,yy,(x/2.6|0)%5===0?'hgt_chime':'hgt_hanglamp',1.2,12.5+Math.sin(x*.2)*.8);
+  for(const xx of [62,75,88])for(let y=104;y<=146;y+=2.8)add(xx,y,'hgt_hanglamp',1.3,9+Math.sin(y*.3)*.7);
+  for(const yy of [18,40])for(let x=100;x<=144;x+=2.8)add(x,yy,'hgt_hanglamp',1.3,11);
+  for(let i=0;i<60;i++)add(104+hash2(i,7,SEED)*38,6+hash2(i,8,SEED)*38,KS[(hash2(i,3,SEED)*KS.length)|0],1.2+hash2(i,9,SEED)*1.8,8+hash2(i,10,SEED)*14);
+  for(let i=0;i<60;i++)add(6+hash2(i,11,SEED)*40,6+hash2(i,12,SEED)*40,KS[(hash2(i,14,SEED)*KS.length)|0],1.3+hash2(i,13,SEED)*1.6,7+hash2(i,15,SEED)*12);
   return sky}
 
 /* ================= THE OVERVIEW MAP (M key): drawn once from the real level, in the cold parchment of the Hollow Grasslands ================= */

@@ -43,7 +43,7 @@ var HGTM_REC=true;
 const HGTM_N=8,HGTM_WN=new Uint8Array(VW),HGTM_WS=new Float64Array(VW).fill(-1),HGTM_WP=new Float32Array(VW*HGTM_N),HGTM_WT=new Float32Array(VW*HGTM_N);
 function hgtmRec(x,perp,yT,first){ // one wall hit of screen column x (called far to near)
   let n=first?0:HGTM_WN[x];HGTM_WS[x]=G.time;
-  if(n>=HGTM_N){HGTM_WP.copyWithin(x*HGTM_N,x*HGTM_N+1,x*HGTM_N+HGTM_N);HGTM_WT.copyWithin(x*HGTM_N,x*HGTM_N+1,x*HGTM_N+HGTM_N);n=HGTM_N-1}
+  if(n>=HGTM_N){const b=x*HGTM_N;for(let k=0;k<HGTM_N-1;k++){HGTM_WP[b+k]=HGTM_WP[b+k+1];HGTM_WT[b+k]=HGTM_WT[b+k+1]}n=HGTM_N-1}
   HGTM_WP[x*HGTM_N+n]=perp;HGTM_WT[x*HGTM_N+n]=yT;HGTM_WN[x]=n+1;
 }
 const HGTM_SEC=new Float32Array(VW);for(let x=0;x<VW;x++){const u=(x+.5-VW/2)/F;HGTM_SEC[x]=Math.sqrt(1+u*u)}
@@ -70,7 +70,7 @@ function hgtmTex(name,max,grade){
   if(t)return t.d?t:(G.time-t.miss>3?(delete HGTM.tex[key],hgtmTex(name,max,grade)):null);
   const im=IMG[name]||IMG['art_'+name]||IMG[name.replace(/^ds_/,'art_')]||IMG[name.replace(/^ds_/,'')];
   if(!im||!(im.width||im.videoWidth)){HGTM.tex[key]={d:null,miss:G.time};return null}
-  const pw=n=>{let p=1;while(p*2<=n)p*=2;return p},mx=max||256,w=Math.min(pw(im.width),mx),h=Math.min(pw(im.height),mx);
+  const pw=n=>{let p=1;while(p*2<=n*1.04)p*=2;return p},mx=max||256,w=Math.min(pw(im.width),mx),h=Math.min(pw(im.height),mx);
   const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0,w,h);
   const d=x.getImageData(0,0,w,h).data;
   if(grade!==false&&hgtLook(LEVEL)){const K=hgtLookFor(LEVEL),sa=1+(K.wallSat-1)*.5,gn=(1+K.wallGain)/2;
@@ -149,8 +149,7 @@ function hgtmGenFan(P,pose,inst){
   const lw=(pose&&pose.fan)||0;
   for(let L=0;L<lay;L++)for(let i=0;i<n;i++){const f=L*n+i,fr=n>1?i/(n-1):.5,a0=-spread/2+spread*fr+(L?spread/n*.5:0)+(lw*.12),rip=Math.sin(t*sh[1]+i*.7+L*1.9)*sh[0],a=a0+rip*.35,sa=Math.sin(a),ca=Math.cos(a);
     const yo=-.03*L-.012*Math.abs(fr-.5)*4,bend=Math.sin(t*sh[1]*.7+i*.5)*sh[0]*.6*len,tl=len*(L?.93:1);
-    const rows=[[0,wb],[.5,wid],[1,wid*.55]];
-    for(let r=0;r<3;r++){const dist=tl*rows[r][0],w=rows[r][1]*.5,px=c[0]+sa*dist,pz=c[2]+ca*dist,yy=c[1]+yo+bend*rows[r][0]*rows[r][0];
+    for(let r=0;r<3;r++){const r0=r*.5,dist=tl*r0,w=(r===0?wb:r===1?wid:wid*.55)*.5,px=c[0]+sa*dist,pz=c[2]+ca*dist,yy=c[1]+yo+bend*r0*r0;
       for(let s=0;s<2;s++){const sg=s?1:-1,o=(f*6+r*2+s)*3;lp[o]=px+ca*w*sg;lp[o+1]=yy;lp[o+2]=pz-sa*w*sg;ln[o]=0;ln[o+1]=1;ln[o+2]=0}}
   }
 }
@@ -241,6 +240,20 @@ function hgtmUpdate(dt){
 /* ---------- per frame ---------- */
 const HGTM_LF=(()=>{const a=[.45,-.5,.74],l=Math.hypot(...a);return a.map(v=>v/l)})();
 function hgtmSlot(i){let s=HGTM.slots[i];if(!s){const cv=document.createElement('canvas');cv.width=VW;cv.height=VH;const cx=cv.getContext('2d');s=HGTM.slots[i]={cv,cx,img:new ImageData(VW,VH),ob:null};}return s}
+/* true when every column the model's bounding sphere can cover has a wall hit (this frame, see hgtmRec) that is nearer than the whole sphere and whose top is at or above the sphere's highest row */
+function hgtmHidden(zc,xc,rad,topZ,cz){
+  const zn=zc-rad;if(zn<.6)return false;
+  const z2=zc+rad,hw=VW/2,l0=xc-rad,l1=xc+rad,vmin=l0<0?l0/zn:l0/z2,vmax=l1>0?l1/zn:l1/z2,yv=topZ-cz,rowTop=HH-F*(yv>0?yv/zn:yv/z2)-1;
+  const xa=Math.max(0,Math.floor(hw+F*vmin)-1),xb=Math.min(VW-1,Math.ceil(hw+F*vmax)+1),tnow=G.time;
+  if(xb<xa)return true;
+  for(let x=xa;x<=xb;x++){
+    if(HGTM_WS[x]!==tnow)return false;
+    const n=HGTM_WN[x],b=x*HGTM_N;let ok=false;
+    for(let k=0;k<n;k++)if(HGTM_WP[b+k]<zn&&HGTM_WT[b+k]<=rowTop){ok=true;break}
+    if(!ok)return false;
+  }
+  return true;
+}
 function hgtmBegin(cx,cy,dX,dY,pX,pY){
   const out=HGTM.out;out.length=0;HGTM.fog=0;HGTM.tris=0;HGTM.vis=0;
   if(!TERR_NOW||!TERR_NOW.terr||!TC)return out;
@@ -255,13 +268,14 @@ function hgtmBegin(cx,cy,dX,dY,pX,pY){
     const zc=dX*rx+dY*ry,xc=dX*ry-dY*rx,rad=I.kind==='mesh'?I.M.rad*I.sc:I.kind==='planet'?I.M.rad:I.r*1.7;
     if(zc+rad<.1||zc>(I.o.far||(I.kind==='cloud'?36:80)))continue;
     const lim=(zc+rad)*VW/2/F*1.05+rad;if(Math.abs(xc)-rad>lim)continue;
+    if(I.kind==='mesh'&&hgtmHidden(zc,xc,rad,I.z+rad,CAMZ))continue;   // the whole model stands behind a nearer wall: it is not worked out at all
     const dd=Math.hypot(rx,ry);I.zc=zc;I.xc=xc;I.cand=zc;I.ccz=pz;
     cand.push(I);
   }
   cand.sort((a,b)=>a.zc-b.zc);
-  let slotN=0;const SM=6;
+  let slotN=0;const SM=12;
   for(const I of cand){
-    if(performance.now()-t0>HGTM.budget&&I.kind!=='cloud')break;
+    if(performance.now()-t0>HGTM.budget&&I.kind!=='cloud'&&!I.o.cheap)continue;
     if(I.kind==='mesh'){if(slotN>=SM)continue;const e=hgtmRenderMesh(I,cam,slotN);if(e){slotN++;out.push(e);HGTM.vis++}}
     else if(I.kind==='planet'){if(slotN>=SM)continue;const e=hgtmRenderPlanet(I,cam,slotN);if(e){slotN++;out.push(e);HGTM.vis++}}
     else hgtmCloudEntries(I,cam,out);
@@ -280,9 +294,9 @@ function hgtmEnd(){
 
 /* ---------- lighting ---------- */
 const hgtmL={n:0,x:new Float32Array(8),y:new Float32Array(8),z:new Float32Array(8),q:new Float32Array(8),r:new Float32Array(8),g:new Float32Array(8),b:new Float32Array(8)};
-function hgtmPrepLights(){
+function hgtmPrepLights(mx,my,rad){ // with a model position and radius, lights too far to add anything (below about 1/500 of full light) are left out
   const C=TC,nl=C.nl,nn=C.nn,L=hgtmL;L.n=0;
-  for(let k=0,j=0;k<nn&&L.n<8;k+=3,j++){L.x[L.n]=nl[k];L.y[L.n]=nl[k+1];L.z[L.n]=terrH(nl[k],nl[k+1])+.8;L.q[L.n]=nl[k+2];L.r[L.n]=C.ncr[j];L.g[L.n]=C.ncg[j];L.b[L.n]=C.ncb[j];L.n++}
+  for(let k=0,j=0;k<nn&&L.n<8;k+=3,j++){if(mx!==undefined){const dx=nl[k]-mx,dy=nl[k+1]-my,dh=Math.max(0,Math.sqrt(dx*dx+dy*dy)-rad);if(nl[k+2]*1.9/(1+1.15*(dh*dh*.5+.44))<.002)continue}L.x[L.n]=nl[k];L.y[L.n]=nl[k+1];L.z[L.n]=terrH(nl[k],nl[k+1])+.8;L.q[L.n]=nl[k+2];L.r[L.n]=C.ncr[j];L.g[L.n]=C.ncg[j];L.b[L.n]=C.ncb[j];L.n++}
 }
 function hgtmLightAt(x,y,z,nx,ny,nz,o){ // o=[r,g,b] multipliers
   const C=TC,lb=C.lbm,L=hgtmL;
@@ -294,6 +308,26 @@ function hgtmLightAt(x,y,z,nx,ny,nz,o){ // o=[r,g,b] multipliers
 
 /* ---------- mesh rendering ---------- */
 const hgtmTmpK=[0,0,0],hgtmRoot=new Float32Array(12),hgtmEu=new Float32Array(9);
+/* the vertices of one part: world position, view position, light, screen position. Its own function so the engine optimises it on its own. Writes the g* arrays from index vo; HVB gets the screen bounds (minx,maxx,miny,maxy) and whether any vertex is behind the camera. */
+const HVB=new Float64Array(8);
+function hgtmPartVerts(P,Mx,vo,isc,cx,cy,cz,dX,dY){
+  const lp=P.lpos,ln=P.lnor,uvA=P.uv,col=P.col,cr=col[0]/255,cg=col[1]/255,cb=col[2]/255,gl=P.glow,vc=P.vcol,dbl=P.dbl,K=hgtmTmpK,NEAR=.12,F_=F,HH_=HH,hw=VW/2,nv=P.nv;
+  let minx=HVB[0],maxx=HVB[1],miny=HVB[2],maxy=HVB[3],behind=HVB[4]!==0;
+  for(let v=0;v<nv;v++){
+    const lx=lp[v*3],ly=lp[v*3+1],lz=lp[v*3+2],nx0=ln[v*3],ny0=ln[v*3+1],nz0=ln[v*3+2];
+    const wx=Mx[0]*lx+Mx[1]*ly+Mx[2]*lz+Mx[9],wy=Mx[3]*lx+Mx[4]*ly+Mx[5]*lz+Mx[10],wz=Mx[6]*lx+Mx[7]*ly+Mx[8]*lz+Mx[11];
+    let nx=(Mx[0]*nx0+Mx[1]*ny0+Mx[2]*nz0)*isc,ny=(Mx[3]*nx0+Mx[4]*ny0+Mx[5]*nz0)*isc,nz=(Mx[6]*nx0+Mx[7]*ny0+Mx[8]*nz0)*isc;
+    const rx=wx-cx,ry=wy-cy,zc=dX*rx+dY*ry,xc=dX*ry-dY*rx,yc=wz-cz;
+    if(dbl&&nx*(cx-wx)+ny*(cy-wy)+nz*(cz-wz)<0){nx=-nx;ny=-ny;nz=-nz}
+    hgtmLightAt(wx,wy,wz,nx,ny,nz,K);
+    let kr=K[0]*cr,kg=K[1]*cg,kb=K[2]*cb;if(vc){kr*=vc[v*3];kg*=vc[v*3+1];kb*=vc[v*3+2]}
+    if(gl){kr+=gl;kg+=gl;kb+=gl}
+    const o=vo+v;gXC[o]=xc;gYC[o]=yc;gZC[o]=zc;gKR[o]=kr;gKG[o]=kg;gKB[o]=kb;const uu=uvA[v*2],vv=uvA[v*2+1];gU[o]=uu;gV[o]=vv;
+    if(zc<NEAR){behind=true}else{const iz=1/zc,sx=hw+F_*xc*iz,sy=HH_-F_*yc*iz;gSX[o]=sx;gSY[o]=sy;gIZ[o]=iz;gUZ[o]=uu*iz;gVZ[o]=vv*iz;
+      if(sx<minx)minx=sx;if(sx>maxx)maxx=sx;if(sy<miny)miny=sy;if(sy>maxy)maxy=sy}
+  }
+  HVB[0]=minx;HVB[1]=maxx;HVB[2]=miny;HVB[3]=maxy;HVB[4]=behind?1:0;
+}
 function hgtmRenderMesh(I,cam,slotIx){
   const M=I.M,dX=cam.dX,dY=cam.dY,cx=cam.cx,cy=cam.cy,cz=cam.cz,nodes=M.nodes,sc=I.sc,isc=1/sc,t=G.time+I.t0;
   const st={t,phase:I.phase,walk:I.walk,sp:I.sp,seed:I.seed,sc,yaw:I.yaw};
@@ -304,31 +338,18 @@ function hgtmRenderMesh(I,cam,slotIx){
     const rx=N.rot[0]+(pn&&pn.r?pn.r[0]:0),ry=N.rot[1]+(pn&&pn.r?pn.r[1]:0),rz=N.rot[2]+(pn&&pn.r?pn.r[2]:0);
     hgtmEuler(rx,ry,rz,hgtmEu);for(let k=0;k<9;k++)L[k]=hgtmEu[k];L[9]=N.pos[0]+(pn&&pn.p?pn.p[0]:0);L[10]=N.pos[1]+(pn&&pn.p?pn.p[1]:0);L[11]=N.pos[2]+(pn&&pn.p?pn.p[2]:0);
     hgtmMul(N.par<0?R:nodes[N.par].M,L,N.M)}
-  hgtmPrepLights();
+  hgtmPrepLights(I.x,I.y,M.rad*sc);
   const C=TC,hzr=C.hzr,hzmax=C.hzmax,hzrate=C.hzrate,lbm=C.lbm,K=hgtmTmpK;
-  let vo=0,minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9,behind=false;
+  let vo=0;HVB[0]=1e9;HVB[1]=-1e9;HVB[2]=1e9;HVB[3]=-1e9;HVB[4]=0;
   const NEAR=.12,F_=F,HH_=HH,hw=VW/2;
   for(const P of M.parts){
-    const Mx=nodes[P.node].M,lp=P.lpos,ln=P.lnor;
+    const Mx=nodes[P.node].M;
     if(P.gen)P.gen(P,pose,I,Mx);
     P.vo=vo;
-    const col=P.col,cr=col[0]/255,cg=col[1]/255,cb=col[2]/255,gl=P.glow,vc=P.vcol,dbl=P.dbl;
-    for(let v=0;v<P.nv;v++){
-      const lx=lp[v*3],ly=lp[v*3+1],lz=lp[v*3+2],nx0=ln[v*3],ny0=ln[v*3+1],nz0=ln[v*3+2];
-      const wx=Mx[0]*lx+Mx[1]*ly+Mx[2]*lz+Mx[9],wy=Mx[3]*lx+Mx[4]*ly+Mx[5]*lz+Mx[10],wz=Mx[6]*lx+Mx[7]*ly+Mx[8]*lz+Mx[11];
-      let nx=(Mx[0]*nx0+Mx[1]*ny0+Mx[2]*nz0)*isc,ny=(Mx[3]*nx0+Mx[4]*ny0+Mx[5]*nz0)*isc,nz=(Mx[6]*nx0+Mx[7]*ny0+Mx[8]*nz0)*isc;
-      const rx=wx-cx,ry=wy-cy,zc=dX*rx+dY*ry,xc=dX*ry-dY*rx,yc=wz-cz;
-      if(dbl&&nx*(cx-wx)+ny*(cy-wy)+nz*(cz-wz)<0){nx=-nx;ny=-ny;nz=-nz}
-      hgtmLightAt(wx,wy,wz,nx,ny,nz,K);
-      let kr=K[0]*cr,kg=K[1]*cg,kb=K[2]*cb;if(vc){kr*=vc[v*3];kg*=vc[v*3+1];kb*=vc[v*3+2]}
-      if(gl){kr+=gl;kg+=gl;kb+=gl}
-      const o=vo+v;gXC[o]=xc;gYC[o]=yc;gZC[o]=zc;gKR[o]=kr;gKG[o]=kg;gKB[o]=kb;gU[o]=P.uv[v*2];gV[o]=P.uv[v*2+1];
-      if(zc<NEAR){behind=true}else{const iz=1/zc,sx=hw+F_*xc*iz,sy=HH_-F_*yc*iz;gSX[o]=sx;gSY[o]=sy;gIZ[o]=iz;gUZ[o]=gU[o]*iz;gVZ[o]=gV[o]*iz;
-        if(sx<minx)minx=sx;if(sx>maxx)maxx=sx;if(sy<miny)miny=sy;if(sy>maxy)maxy=sy}
-    }
+    hgtmPartVerts(P,Mx,vo,isc,cx,cy,cz,dX,dY);
     vo+=P.nv;
   }
-  let x0,x1,y0,y1;
+  let x0,x1,y0,y1;const minx=HVB[0],maxx=HVB[1],miny=HVB[2],maxy=HVB[3],behind=HVB[4]!==0;
   if(behind){x0=0;y0=0;x1=VW;y1=VH}
   else{x0=Math.max(0,Math.floor(minx)-1);x1=Math.min(VW,Math.ceil(maxx)+2);y0=Math.max(0,Math.floor(miny)-1);y1=Math.min(VH,Math.ceil(maxy)+2)}
   if(x1<=x0||y1<=y0)return null;
@@ -340,7 +361,7 @@ function hgtmRenderMesh(I,cam,slotIx){
   let nt=0;const TW=[];
   for(const P of M.parts){
     const tx=P.tex?hgtmTex(P.tex,P.texMax,P.grade):null;
-    HGTM.cur.tex=tx;HGTM.cur.alphaT=P.alpha;HGTM.cur.dbl=P.dbl;
+    HGTM.cur.tex=tx;HGTM.cur.alphaT=P.alpha;HGTM.cur.dbl=P.dbl;HGTM.cur.soft=!!(P.def&&P.def.soft);
     const tr=P.tr,vo2=P.vo;
     for(let q=0;q<tr.length;q+=3){const a=vo2+tr[q],b=vo2+tr[q+1],c=vo2+tr[q+2];
       if(gZC[a]>=NEAR&&gZC[b]>=NEAR&&gZC[c]>=NEAR){
@@ -372,7 +393,7 @@ function hgtmClipTri(a,b,c){ // near plane clip of one triangle, rasterise the p
 }
 /* the rasteriser: TV holds three vertices (x,y,1/z,u/z,v/z,r,g,b). Writes to HGTM.cur */
 function hgtmRast(){
-  const Cu=HGTM.cur,D=Cu.D,bx0=Cu.x0,bx1=Cu.x1,by0=Cu.y0,by1=Cu.y1,tex=Cu.tex,alphaT=Cu.alphaT,dbl=Cu.dbl;
+  const Cu=HGTM.cur,D=Cu.D,bx0=Cu.x0,bx1=Cu.x1,by0=Cu.y0,by1=Cu.y1,tex=Cu.tex,alphaT=Cu.alphaT,dbl=Cu.dbl,soft=Cu.soft;
   const x0=TV[0],y0=TV[1],x1=TV[8],y1=TV[9],x2=TV[16],y2=TV[17];
   const area=(x1-x0)*(y2-y0)-(x2-x0)*(y1-y0);if(area===0||(!dbl&&area<0))return;
   const ia=1/area,ymin=Math.max(by0,Math.ceil(Math.min(y0,y1,y2)-.5)),ymax=Math.min(by1-1,Math.ceil(Math.max(y0,y1,y2)-.5)-1);if(ymax<ymin)return;
@@ -396,6 +417,7 @@ function hgtmRast(){
       let kb2=((z-.55)*YBS)|0;if(kb2<0)kb2=0;else if(kb2>=YBK)kb2=YBK-1;
       if(y>=YB[x*YBK+kb2])continue;
       if(ws[x]===tnow){const n=wn[x];let hid=false;for(let k=0,b=x*HGTM_N;k<n;k++)if(wp[b+k]<z&&y>=wt[b+k]){hid=true;break}if(hid)continue}
+      if(soft&&td){const u=uz*z,v=vz*z,ti=(((v*th)|0)&hm)*tw+(((u*tw)|0)&wm),k=1-td[ti*4+3]*.00275,o2=zo*4;if(k<.99){D[o2]*=k;D[o2+1]*=k;D[o2+2]*=k}continue} // a soft ground shadow darkens what is under it (no cut-out dither, which aliased into a checker at a distance)
       let r=255,gc=255,b=255;
       if(td){const u=uz*z,v=vz*z,ti=(((v*th)|0)&hm)*tw+(((u*tw)|0)&wm),i4=ti*4;if(alphaT&&td[i4+3]<110)continue;r=td[i4];gc=td[i4+1];b=td[i4+2]}
       gZB[zo]=iz;
@@ -424,10 +446,10 @@ function hgtmRenderPlanet(I,cam,slotIx){
   if(x1<=x0||y1<=y0)return null;
   const S=hgtmSlot(slotIx),D=S.img.data,W4=VW*4;
   for(let y=y0;y<y1;y++)D.fill(0,y*W4+x0*4,y*W4+x1*4);
-  const tx=M.tex?hgtmTex(M.tex,o.max||512,false):null;
+  const txm=M.tex?hgtmTex(M.tex,o.max||512,false):null,gtx=o.glowTex?hgtmTex(o.glowTex,o.max||512,false):null,tg=[0,0,0];
   const spin=t*(o.spin===undefined?.25:o.spin),tilt=o.tilt===undefined?.35:o.tilt,ct=Math.cos(tilt),st=Math.sin(tilt),cs=Math.cos(spin),ss=Math.sin(spin);
   // light direction (world), in camera frame
-  const Lw=[.5,.75,.5],Ll=Math.hypot(...Lw),lx=Lw[0]/Ll,ly=Lw[1]/Ll,lz=Lw[2]/Ll;
+  const Lw=I.o.light||[.5,.75,.5],Ll=Math.hypot(...Lw),lx=Lw[0]/Ll,ly=Lw[1]/Ll,lz=Lw[2]/Ll;
   const Lr=lx*-dY+ly*dX,Lf=lx*dX+ly*dY,Lu=lz;
   const C=TC,hzr=C.hzr,hzmax=C.hzmax,hzrate=C.hzrate,lbm=C.lbm,glow=o.glow||0,col=o.col||[150,120,200],col2=o.col2||[230,200,160],atmo=o.atmo||null;
   // ring plane normal (world: tilted by tilt about x)
@@ -435,7 +457,7 @@ function hgtmRenderPlanet(I,cam,slotIx){
   const ring=o.ring,ri=ring?(ring.in||1.3)*R:0,ro=ringO,rc=ring?(ring.col||[210,190,150]):null,ra=ring?(ring.alpha===undefined?.8:ring.alpha):0;
   const tnow=G.time,wn=HGTM_WN,ws=HGTM_WS,wp=HGTM_WP,wt=HGTM_WT;
   const hw=VW/2,Cs=Cr*Cr+Cf*Cf+Cu*Cu,sd=I.seed;
-  const fb=(ux,uy,uz,out)=>{ // texture lookup for a unit world normal
+  const fb=(ux,uy,uz,out,TX)=>{const tx=TX||txm; // texture lookup for a unit world normal
     const x=ux*cs+uy*ss,y=-ux*ss+uy*cs; // spin about z
     const yy=y*ct+uz*st,zz=-y*st+uz*ct; // tilt
     const lon=Math.atan2(yy,x),lat=Math.asin(zz<-1?-1:zz>1?1:zz);
@@ -446,10 +468,11 @@ function hgtmRenderPlanet(I,cam,slotIx){
   };
   const tc=[0,0,0],ordT=new Float64Array(3),ordK=new Int8Array(3);
   const lightK=(nr,nf,nu)=>{const lam=nr*Lr+nf*Lf+nu*Lu;let k=lam<-.08?0:lam>.4?1:(lam+.08)/.48;k=k*k*(3-2*k);return .2+.8*k};
-  for(let y=y0;y<y1;y++){
-    const v=(HH-(y+.5))/F;
-    for(let x=x0;x<x1;x++){
-      const u=(x+.5-hw)/F;
+  const bs=(o.lowres&&(x1-x0)*(y1-y0)>5000)?2:1; // o.lowres (the moon): colour is worked out once per 2x2 block, occlusion and haze stay per pixel
+  for(let y=y0;y<y1;y+=bs){
+    const v=(HH-(y+bs*.5))/F;
+    for(let x=x0;x<x1;x+=bs){
+      const u=(x+bs*.5-hw)/F;
       let n=0;
       // sphere hits
       const a=u*u+1+v*v;
@@ -468,7 +491,7 @@ function hgtmRenderPlanet(I,cam,slotIx){
         if(kind===0){const nr=(tt*u-Cr)/R,nf=(tt-Cf)/R,nu=(tt*v-Cu)/R;
           const ux=nr*-dY+nf*dX,uy=nr*dX+nf*dY,uz=nu;fb(ux,uy,uz,tc);
           const k=lightK(nr,nf,nu)*(1-glow)+glow,rim=atmo?Math.pow(1-Math.max(0,-(nr*u+nf+nu*v)/Math.sqrt(a)),3):0;
-          cr=tc[0]*k+(atmo?atmo[0]*rim*(.3+.7*lightK(nr,nf,nu)):0);cg=tc[1]*k+(atmo?atmo[1]*rim*(.3+.7*lightK(nr,nf,nu)):0);cb=tc[2]*k+(atmo?atmo[2]*rim*(.3+.7*lightK(nr,nf,nu)):0);
+          cr=tc[0]*k+(atmo?atmo[0]*rim*(.3+.7*lightK(nr,nf,nu)):0);cg=tc[1]*k+(atmo?atmo[1]*rim*(.3+.7*lightK(nr,nf,nu)):0);cb=tc[2]*k+(atmo?atmo[2]*rim*(.3+.7*lightK(nr,nf,nu)):0);if(gtx){fb(ux,uy,uz,tg,gtx);const ge=.9*(1-.6*lightK(nr,nf,nu));cr+=tg[0]*ge;cg+=tg[1]*ge;cb+=tg[2]*ge}
           if(tt<zfront)zfront=tt}
         else if(kind===1){const nr=(tt*u-mo.xr)/mo.r,nf=(tt-mo.xf)/mo.r,nu=(tt*v-mo.xu)/mo.r,k=lightK(nr,nf,nu),sp=.8+.2*Math.sin(nr*9+nu*7+nf*5);
           if(mo.tex){const ux=nr*-dY+nf*dX,uy=nr*dX+nf*dY;const lon=Math.atan2(uy,ux),lat=Math.asin(Math.max(-1,Math.min(1,nu))),T2=mo.tex,fx=(lon/6.2831853+.5)*T2.w,fy=(.5-lat/3.1415927)*T2.h,i4=(((fy|0)&T2.hm)*T2.w+((fx|0)&T2.wm))*4;cr=T2.d[i4]*k;cg=T2.d[i4+1]*k;cb=T2.d[i4+2]*k}
@@ -486,10 +509,12 @@ function hgtmRenderPlanet(I,cam,slotIx){
       if(A_<.03)continue;
       const z=zfront;
       let kb2=((z-.55)*YBS)|0;if(kb2<0)kb2=0;else if(kb2>=YBK)kb2=YBK-1;
-      if(y>=YB[x*YBK+kb2])continue;
-      if(ws[x]===tnow){const nn=wn[x];let hid=false;for(let k=0,b=x*HGTM_N;k<nn;k++)if(wp[b+k]<z&&y>=wt[b+k]){hid=true;break}if(hid)continue}
-      const sm=Math.min(hzmax,z*HGTM_SEC[x]*hzrate*.7),iv=1-sm,sk=(.55*lbm+.05)*sm,oo=(y*VW+x)*4,gn=(o.gain||1);
+      for(let yy=y;yy<y+bs&&yy<y1;yy++)for(let xx=x;xx<x+bs&&xx<x1;xx++){
+      if(yy>=YB[xx*YBK+kb2])continue;
+      if(ws[xx]===tnow){const nn=wn[xx];let hid=false;for(let k=0,b=xx*HGTM_N;k<nn;k++)if(wp[b+k]<z&&yy>=wt[b+k]){hid=true;break}if(hid)continue}
+      const sm=Math.min(hzmax,z*HGTM_SEC[xx]*hzrate*.7),iv=1-sm,sk=(.55*lbm+.05)*sm,oo=(yy*VW+xx)*4,gn=(o.gain||1);
       D[oo]=R_*iv*gn+hzr[0]*sk;D[oo+1]=G_*iv*gn+hzr[1]*sk;D[oo+2]=B_*iv*gn+hzr[2]*sk;D[oo+3]=Math.min(255,A_*255);
+      }
     }
   }
   const cxv=S.cx;if(S.ob)cxv.clearRect(S.ob[0],S.ob[1],S.ob[2],S.ob[3]);

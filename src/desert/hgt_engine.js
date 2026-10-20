@@ -3,7 +3,7 @@
 
    DATA CONTRACT FOR LEVEL BUILDERS (read this before building a city)
    ---------------------------------------------------------------------------------------------------------------------
-   1. Register a builder. Call, at file load:   hgtRegister(id, build)       (id 480..489; interiors 4850..4949)
+   1. Register a builder. Call, at file load:   hgtRegister(id, build)       (id 480..489; interiors 4850..5499)
         build(id) must RETURN a level object (do not assign LEVELS yourself). It runs lazily the first time the level is entered,
         after the pictures have loaded (KH_READY), with ohAlias/ohArt/ohFloors/ohStyles already done. It also sets LEVEL_NAMES[id].
         The level object is the normal one, plus the terrace:
@@ -13,7 +13,7 @@
                                                // rg (Int32Array(W*H) of gids: a different riser picture for single cells, 0 = use riser)
             name, label, mapNames:[], fmap:[strings of '0'..'5'], floorSet:[6 FLOORS names], floor, ceil:'tomb', ceilH,
             day:0, outdoor:true, amb:.58, noExtras:true, noTele:true, diff, sky:[...] }
-        The look of level 470 (cold light, haze, purple torch tint, rock roof, cold overlay) is applied to 480..489 and 4850..4949 automatically
+        The look of level 470 (cold light, haze, purple torch tint, rock roof, cold overlay) is applied to 480..489 and 4850..5499 automatically
         (hgtLook). HGTE.cold.add(id) adds any other level id to the look.
    2. HEIGHTS. Unit = one cell width. Eye height is 0.5 above the ground of the cell, a normal wall is ceilH high. terrace.h[y*W+x] is the height of the
         walking surface of that cell, in the same units; negative = sunken. Every cell is ONE flat step (nearest neighbour, no slopes).
@@ -41,7 +41,7 @@
            In the interior, put the matching door tile (KH_DOOR[gid2]={lvl:cityId, at:{x,y,f}} with x,y the street cell in front of the outside door).
         b) Enter-portal decor: decor:[{k:'hg_hive',x,y,block:true,enter:{to:id,x,y,f}}] : walking into a blocking decor with `enter` goes there.
         c) Digit portals ('0'..'9' chars with L.portals[i]) also work as in other levels.
-   5. SAVES. A save made in a level 480..489 or 4850..4949 restores through Continue and through Go to area (hgtAny is in every KH_READY / restore range list).
+   5. SAVES. A save made in a level 480..489 or 4850..5499 restores through Continue and through Go to area (hgtAny is in every KH_READY / restore range list).
         Keep builders deterministic (same level every time) because only the party position and the usual level state (items taken, decor found) are saved.
    6. TEST: goToLevel(480) from the console, or the link  ?town=hgtest&lvl=34  (level 480 test level: plaza, straight stair, spiral tower, sunken court with a door to 4850).
    7. COVERED TUBES (walk-through passages with a real ceiling). Add to the terrace object:      terrace.lid = Float32Array(W*H)
@@ -64,7 +64,7 @@
           'The water is too deep to breathe in. A diving helm would let you go down.' With them, stepping on one goes to that level at x,y,f after a quarter second. A dive entry is
           {to,x,y,f,ret:{x,y,f}}: ret is the shallow cell beside the pool where the rescue brings the party back (stored in G.flags.hgtRet[to] on the way down, so it survives a save). Build the level it leads to with HGTE.wetLook(id) (see 9) and give it a door tile
           that leads back up (KH_DOOR[gid]={lvl:cityId, at:{x,y,f}} with x,y a cell beside the pool). hgtlPool(B,x,y,w,d,{lead:{to,x,y,f}}) fills all of these arrays.
-   9. WET ROOMS (a submerged interior). HGTE.wetLook(id) gives an interior level (4850..4949) the under-water look: aqua haze, tint and overlay with drifting light shafts and bubbles. The interior is
+   9. WET ROOMS (a submerged interior). HGTE.wetLook(id) gives an interior level (4850..5499) the under-water look: aqua haze, tint and overlay with drifting light shafts and bubbles. The interior is
         a normal flat room. A look key wet:[r,g,b,alpha] adds the overlay to any look. The same look is used automatically for the eye of a party swimming in a deep pool.
       HGTE.wetLook(id) also makes the room a REAL underwater level (uwLv is true for it): the air counter G.uw counts down, vents refill it, drowning hurts, and the 14 second
         'hauled up' rescue returns the party to ret in the city (see HGTE.wetReturn). Give the room a vent: UWS[id]={vents:[[x,y]],swim:[]}. Walking out through the door back to the city also ends the air counter.
@@ -72,9 +72,9 @@
       TEST LEVEL 485 (?town=hgtesttwo&lvl=34): a tube between two towers, a bent vaulted tube, a pool with a deep end leading to the submerged room 4859, and every stairs-to-nowhere variant.
    ========================================================================== */
 var HGT=(typeof HGT==='undefined')?{}:HGT; // other files add to it; never redeclare it
-HGT.ID0=480;HGT.IDN=489;HGT.INT0=4850;HGT.INTN=4949;
+HGT.ID0=480;HGT.IDN=489;HGT.INT0=4850;HGT.INTN=5499;
 const HGTE={cold:new Set(),builders:{}};
-const hgtAny=n=>(n>=480&&n<=489)||(n>=4850&&n<=4949);
+const hgtAny=n=>(n>=480&&n<=489)||(n>=4850&&n<=5499&&!!HGTE.builders[n]); // interior ids count only when a builder of ours is registered for them (Khemetra's house ids run through the same numbers)
 const hgtLook=n=>hgtAny(n)||HGTE.cold.has(n); // the look of level 470 (the cold cavern) without being level 470
 const hgtIsTown=n=>n>=480&&n<=489;
 function hgtPrep(){hgtPanoLoad();ohAlias();oqAlias();ohArt();ohFloors();ohStyles();isleFloors()}
@@ -92,7 +92,7 @@ function hgtRegister(id,build){
   };
 }
 /* ---------- THE LOOK OF THE CITIES (renderer settings per level) ----------
-   Every hgtLook level (480..489, 4850..4949 and HGTE.cold ids) is drawn with HGTE.lookDefaults. A city or an interior tunes its own look with
+   Every hgtLook level (480..489, 4850..5499 and HGTE.cold ids) is drawn with HGTE.lookDefaults. A city or an interior tunes its own look with
         HGTE.look[483]={haze:.3,hazeCol:[60,50,120]};      // only the keys you name change; the rest stay at the default. Call it at file load.
    Keys (all optional):
      ambient       0..1   base light level (the old level.amb is ignored for the look). Lower = moodier, lamps stand out more. default .56
@@ -111,28 +111,63 @@ function hgtRegister(id,build){
      starMask      far points of light in the roof: 511 = sparse, 255 = many, 4095 = very few.    starGain  their brightness. default .9
      motes         number of drifting light motes in the air (0 = none). default 46      moteCol  [r,g,b] default [255,226,170]
      pano          1 = paint the far skyline panorama behind the terrain (0 = plain dark roof). panoGain brightness, panoTint [r,g,b], panoDrift slow drift in pixels per second. defaults 1 / 1 / [1,1,1] / 2
+     ambientDay    light level at full day (ambient is the night level). default .8     hazeDay  haze strength by day. default .22
+     sun           0..1.5 strength of the north-west cave light: soft ground shadows behind walls and towers (wall faces are lit in render3D). default 1
+     sil, silGain, silAlpha, silBase   painted dark rock stacks and spires in front of the backdrop (sil 0 = off), brightness, opacity, rows below the horizon where they stand. defaults 1 / 1.3 / .92 / 20
+     sheen, sheenSpeed   animated pearl sheen on walls, strength and speed. default .8 / .5     caustic  ripples of light on floors near water. default 1
+     gradient      cool-to-warm sky-to-ground light gradient strength. default .35     shafts  number of light shafts (day: sun, night: moon). default 4     panoNight  brightness of the backdrop at night. default .6
+     mist, mistCol strength and colour of the lit mist band at the horizon. default .5 / [170,140,220]
      vignette      0..1   darkening of the view corners. default .4          grade  [r,g,b,alpha] multiply overlay colour over the whole view. default [255,244,252,.18]
      tubeSeam [r,g,b] / tubeGlow   the lit seams and self light of covered-tube ceilings (section 7). defaults [150,235,255] / .22        wet [r,g,b,alpha]  water overlay with light shafts and bubbles (section 9). default none
 */
 HGTE.look={};
-HGTE.lookDefaults={ambient:.56,haze:.42,hazeRate:.02,hazeCol:[150,122,206],roofHaze:[60,50,110],tint:[.95,1,1.1],lamp:[1.0,.75,.4],wallGain:.8,wallSat:1.6,wallAO:.3,
+HGTE.lookDefaults={ambient:.4,haze:.42,hazeRate:.02,hazeCol:[150,122,206],roofHaze:[60,50,110],tint:[.95,1,1.1],lamp:[1.0,.75,.4],wallGain:.8,wallSat:1.6,wallAO:.3,
   floorGain:.7,floorContrast:1.7,floorPivot:130,floorTint:[1,.95,.98],floorSat:1.3,riserGain:.8,lipGain:1.5,lipW:.09,footAO:.5,edgeW:.12,roofGain:.65,roofTint:[.8,.85,1.25],
-  starMask:511,starGain:.9,motes:46,moteCol:[255,226,170],vignette:.4,grade:[255,244,252,.18],pano:1,panoGain:1,panoTint:[1,1,1],panoDrift:2,tubeSeam:[150,235,255],tubeGlow:.22,wet:null};
+  starMask:511,starGain:.9,motes:46,moteCol:[255,226,170],vignette:.4,grade:[255,244,252,.18],pano:1,panoGain:1,panoTint:[1,1,1],panoDrift:2,ambientDay:.8,hazeDay:.22,sun:1,mist:.5,mistCol:[170,140,220],sil:1,silGain:1.3,silAlpha:.92,silBase:20,sheen:.8,sheenSpeed:.5,caustic:1,shafts:4,panoNight:.6,gradient:.35,tubeSeam:[150,235,255],tubeGlow:.22,wet:null};
 /* the painted far skyline (assets/hgt_pano.jpg, a seamless panorama of far towers with lit windows under the cavern roof). It replaces the roof and the empty far ground on terraced levels. */
 HGTE.pano=null;
-function hgtPanoLoad(){if(HGTE._pl)return;HGTE._pl=1;const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);HGTE.pano={w:im.width,h:im.height,d:x.getImageData(0,0,im.width,im.height).data,hr:190,rs:1.2}};im.src='assets/hgt_pano.jpg'}
-function hgtPanoPaint(D,dX,dY,pX,pY,K,t){
-  const P=HGTE.pano,w=P.w,h=P.h,d=P.d,g=K.panoGain,tr=K.panoTint[0]*g,tg=K.panoTint[1]*g,tb=K.panoTint[2]*g,off=t*K.panoDrift,rows=new Int32Array(VH);
+// painted cave-edge strips (pre-scaled to half size when loaded): far (pale, hazy), mid (terraces with lit windows), near (dark cliffs and a stalactite roof). row0: strip row at the horizon; mult: repeats round the circle; mixf: pull towards the mist colour
+HGTE.edgeLayers=[{img:'far',mult:2,off:.2,row0:340,drift:.6,gain:1,alpha:.8,mixf:.45,mistAfter:.22},{img:'mid',mult:2,off:.55,row0:200,drift:1.2,gain:1,alpha:.95,mixf:.12,mistAfter:.2},{img:'near',mult:2,off:.9,row0:175,drift:2.2,gain:1.1,alpha:.8,mixf:0,mistAfter:0}];
+HGTE.layersDefault=[{sr:4.6,mult:2,off:.11,base:-4,drift:.9,gain:2.3,alpha:.55,mistAfter:.25},{sr:3,mult:3,off:.37,base:0,drift:1.8,gain:1.3,alpha:.92,mistAfter:0}]; // sr: image rows per screen row, mult: repeats round the circle. When the art agent's near, mid and far strips exist, set HGTE.layers to a list of the same shape.
+function hgtPanoLoad(){if(HGTE._pl)return;HGTE._pl=1;const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);HGTE.pano={w:im.width,h:im.height,d:x.getImageData(0,0,im.width,im.height).data,hr:190,rs:1.2}};im.src='assets/hgt_pano.jpg';const sl=new Image();sl.onload=()=>{const c=document.createElement('canvas');c.width=sl.width;c.height=sl.height;const x=c.getContext('2d');x.drawImage(sl,0,0);HGTE.sil={w:sl.width,h:sl.height,d:x.getImageData(0,0,sl.width,sl.height).data}};sl.src='assets/hgt_sil.png';HGTE.strips={};for(const nm of ['near','mid','far']){const e=new Image();e.onload=()=>{const c=document.createElement('canvas');c.width=e.width>>1;c.height=e.height>>1;const x=c.getContext('2d');x.drawImage(e,0,0,c.width,c.height);HGTE.strips[nm]={w:c.width,h:c.height,d:x.getImageData(0,0,c.width,c.height).data}};e.src='assets/ds_hgtb_edge_'+nm+'.png'}}
+HGTE.bgc=null;
+function hgtPanoPaint(D,dX,dY,pX,pY,K,t,day){ // the backdrop depends only on the view angle, the light and a slow drift: it is kept and copied back while none of them changes
+  const key=LEVEL+'|'+dX.toFixed(4)+'|'+dY.toFixed(4)+'|'+(day||0).toFixed(2)+'|'+Math.floor(t*K.panoDrift*.5)+'|'+(HGTE.layers?1:0)+'|'+(HGTE.strips&&HGTE.strips.near?1:0)+'|'+K.sil+K.panoGain+K.mist+K.silGain,B=HGTE.bgc;
+  if(B&&B.key===key&&B.d.length===D.length){D.set(B.d);return}
+  hgtPanoPaint2(D,dX,dY,pX,pY,K,t,day);
+  if(!B||B.d.length!==D.length)HGTE.bgc={key,d:new Uint8ClampedArray(D)};else{B.d.set(D);B.key=key}
+}
+function hgtPanoPaint2(D,dX,dY,pX,pY,K,t,day){
+  const P=HGTE.pano,w=P.w,h=P.h,d=P.d,g=K.panoGain,gd=g*(K.panoNight+(1.4-K.panoNight)*(day||0)),tr=K.panoTint[0]*gd,tg=K.panoTint[1]*gd,tb=K.panoTint[2]*gd,ml=K.mist*(.65+.35*(day||0)),mc=K.mistCol,off=t*K.panoDrift,rows=new Int32Array(VH),mb=new Float32Array(VH);
+  for(let y=0;y<VH;y++){const e=(y-HH-5)/13;mb[y]=ml*.5*Math.exp(-e*e)} // a lit mist band along the horizon where the ground melts into the backdrop
   for(let y=0;y<VH;y++){let r=(P.hr+(y-HH)*P.rs)|0;rows[y]=(r<0?0:r>=h?h-1:r)*w}
   for(let x=0;x<VW;x++){const cm=2*x/VW-1,u=((((Math.atan2(dY+pY*cm,dX+pX*cm)/TAU)%1)+1)%1*w+off)%w|0;
-    for(let y=0,o=x*4;y<VH;y++,o+=VW*4){const i=(rows[y]+u)*4;D[o]=d[i]*tr;D[o+1]=d[i+1]*tg;D[o+2]=d[i+2]*tb}}
+    for(let y=0,o=x*4;y<VH;y++,o+=VW*4){const i=(rows[y]+u)*4;let r=d[i]*tr,gg=d[i+1]*tg,b=d[i+2]*tb;if(mb[y]>0){const m=mb[y];r+=mc[0]*m;gg+=mc[1]*m;b+=mc[2]*m}D[o]=r;D[o+1]=gg;D[o+2]=b}}
+  if(K.sil>0){ // parallax layers of cave-edge scenery in front of the skyline, back to front, with lit mist between them
+    const mcl=K.mistCol,dk=K.panoNight+(1.4-K.panoNight)*(day||0),ST=HGTE.strips,LY=HGTE.layers||((ST&&ST.far&&ST.mid&&ST.near)?HGTE.edgeLayers:HGTE.layersDefault);
+    for(const Ly of LY){const S=Ly.img==='sil'||!Ly.img?HGTE.sil:ST[Ly.img];if(!S)continue;const sw=S.w,sh=S.h,sd=S.d,sg=K.silGain*Ly.gain*dk*(Ly.img&&Ly.img!=='sil'?1/1.3:1),so=t*K.panoDrift*Ly.drift,sr=Ly.sr||1,r0=Ly.row0!==undefined?Ly.row0:0,base=Ly.row0!==undefined?HH:HH+K.silBase+Ly.base,mf=Ly.mixf!==undefined?Ly.mixf:0,fade=Ly.row0!==undefined?0:1;
+      const rowOf=y=>Ly.row0!==undefined?((r0+(y-HH)*sr)|0):((sh-1)-((base-y)*sr)|0);
+      const ya=Ly.row0!==undefined?Math.max(0,Math.ceil(HH+(0-r0)/sr)):Math.max(0,Math.ceil(base-(sh-1)/sr)),yb=Ly.row0!==undefined?Math.min(VH-1,Math.floor(HH+(sh-1-r0)/sr)):Math.min(VH-1,Math.floor(base));
+      for(let x=0;x<VW;x++){const cm=2*x/VW-1,u=((((Math.atan2(dY+pY*cm,dX+pX*cm)/TAU)%1)+1)%1*sw*Ly.mult+so+sw*Ly.off)%sw|0;
+        for(let y=ya,o=(ya*VW+x)*4;y<=yb;y++,o+=VW*4){const r=rowOf(y);if(r<0||r>=sh)continue;const i=(r*sw+u)*4,a=sd[i+3]/255;if(a<.02)continue;
+          const f=mf+(fade?Math.max(0,1-(sh-1-r)/(sh*.35))*.22*K.mist:0),k=a*K.silAlpha*Ly.alpha*(fade?Math.min(1,(sh-1-r)/34):1);
+          D[o]+=(sd[i]*sg+mcl[0]*f-D[o])*k;D[o+1]+=(sd[i+1]*sg+mcl[1]*f-D[o+1])*k;D[o+2]+=(sd[i+2]*sg+mcl[2]*f-D[o+2])*k}}
+      if(Ly.mistAfter){const ml2=K.mist*Ly.mistAfter*(.6+.4*(day||0)),mb=Ly.row0!==undefined?HH+4:base;for(let y=Math.max(0,(mb-40)|0),ye=Math.min(VH,(mb+24)|0);y<ye;y++){const e=(y-mb+8)/16,m=ml2*Math.exp(-e*e);if(m<.01)continue;for(let x=0,o=y*VW*4;x<VW;x++,o+=4){D[o]+=mcl[0]*m;D[o+1]+=mcl[1]*m;D[o+2]+=mcl[2]*m}}}}}
 }
+function hgtAmb(K,day){return K.ambient+(K.ambientDay-K.ambient)*day} // light level: night ambient to day ambient
 const hgtLookMem={};
 function hgtLookFor(id){const o=HGTE.look[id]||null,m=hgtLookMem[id];if(m&&m.o===o&&m.rev===(o&&o._rev||0))return m.v;const v=Object.assign({},HGTE.lookDefaults,o||{});hgtLookMem[id]={o,rev:o&&o._rev||0,v};return v} // cached; set look._rev++ after editing a look object in place
 /* the air of a city: soft grade, vignette, and drifting motes of warm light (particles, drawn over the 3D view) */
 {const _w=drawWeatherFx;drawWeatherFx=function(){_w.apply(this,arguments);if(!hgtLook(LEVEL))return;
   const K=hgtLookFor(LEVEL),t=G.time||0;ctx.save();
   if(K.grade[3]>0){ctx.globalCompositeOperation='multiply';ctx.globalAlpha=K.grade[3];ctx.fillStyle='rgb('+K.grade[0]+','+K.grade[1]+','+K.grade[2]+')';ctx.fillRect(0,0,420,210)}
+  {const dy=G.day||0,mk=(typeof HGTG!=='undefined'&&HGTG.moonK)||0;
+    if(K.gradient>0){const g=ctx.createLinearGradient(0,0,0,210),dn=1-dy,tc=[205+dy*0-dn*60,222-dn*70,255-dn*20],bc=[255-dn*40+0,238-dn*14+dn*mk*0,205+dn*50];
+      g.addColorStop(0,'rgb('+tc.map(v=>v|0).join(',')+')');g.addColorStop(1,'rgb('+bc.map(v=>v|0).join(',')+')');ctx.globalCompositeOperation='multiply';ctx.globalAlpha=K.gradient;ctx.fillStyle=g;ctx.fillRect(0,0,420,210)} // cool light from above, warm from the ground by day; indigo to moon-silver at night
+    if(K.shafts>0){ctx.globalCompositeOperation='lighter';const a0=(G.C&&G.C.a)||0,col=dy>.3?'255,240,205':'170,190,255',amp=dy>.05?.05*(.3+dy):.03*mk;
+      if(amp>.002)for(let i=0;i<K.shafts;i++){let da=(i*1.37+.4)-a0;da=Math.atan2(Math.sin(da),Math.cos(da));const x0=210+da*326,w=14+(i%3)*9,sk=70+(i%2)*30,fl=amp*(.7+.3*Math.sin(t*.4+i*2));if(x0<-80||x0>500)continue;
+        const g=ctx.createLinearGradient(0,0,0,170);g.addColorStop(0,'rgba('+col+','+fl.toFixed(3)+')');g.addColorStop(1,'rgba('+col+',0)');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(x0-w,0);ctx.lineTo(x0+w,0);ctx.lineTo(x0+w+sk,170);ctx.lineTo(x0-w+sk,170);ctx.closePath();ctx.fill()}} // soft light shafts from high openings, fixed in the world
+  }
   ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;
   if(K.vignette>0){if(!hgtLook.vg){const c=document.createElement('canvas');c.width=420;c.height=210;const x=c.getContext('2d'),g=x.createRadialGradient(210,105,70,210,105,260);g.addColorStop(0,'rgba(8,4,24,0)');g.addColorStop(.6,'rgba(8,4,24,.35)');g.addColorStop(1,'rgba(8,4,24,1)');x.fillStyle=g;x.fillRect(0,0,420,210);hgtLook.vg=c}
     ctx.globalAlpha=K.vignette;ctx.drawImage(hgtLook.vg,0,0);ctx.globalAlpha=1}
@@ -145,7 +180,8 @@ function hgtLookFor(id){const o=HGTE.look[id]||null,m=hgtLookMem[id];if(m&&m.o==
     ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over'}
   if(K.motes>0){ctx.globalCompositeOperation='lighter';const mc=K.moteCol;
     for(let i=0;i<K.motes;i++){const sp=.6+(i%5)*.35,x=((i*89.3+t*(2+i%4)+Math.sin(t*.5*sp+i)*9)%440+440)%440-10,y=((i*47.7+t*(1.5+(i%3))*(i%2?-1:1)+Math.cos(t*.4*sp+i*2)*7)%230+230)%230-10,tw=.35+.65*Math.max(0,Math.sin(t*(1.1+i%4*.5)+i*1.7)),r=.6+(i%4)*.45;
-      ctx.fillStyle='rgba('+mc[0]+','+mc[1]+','+mc[2]+','+(.5*tw).toFixed(3)+')';ctx.fillRect(x,y,r,r);
+      ctx.fillStyle='rgba('+mc[0]+','+mc[1]+','+mc[2]+','+(.5*tw*(1+(G.day||0)*.8)).toFixed(3)+')';ctx.fillRect(x,y,r,r);
+      if(i%6===0&&(G.day||0)>.3){ctx.fillStyle='rgba(255,246,225,'+(.45*tw).toFixed(3)+')';ctx.fillRect(x-2.5,y+r/2-.3,5+r,.6);ctx.fillRect(x+r/2-.3,y-2.5,.6,5+r)} // by day the motes glint
       if(i%6===0){ctx.fillStyle='rgba('+mc[0]+','+mc[1]+','+mc[2]+','+(.09*tw).toFixed(3)+')';ctx.fillRect(x-1.4,y-1.4,r+2.8,r+2.8)}}}
   ctx.restore()}}
 /* plain placeholder tiles: a flat colour (the art agent supplies the painted shell textures later) */

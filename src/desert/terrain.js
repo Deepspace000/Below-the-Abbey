@@ -172,8 +172,16 @@ function terrTerraced(n,L){
     s[i]=clamp(v,.5,1.2);
   }
   if(t.s&&t.s.length===N)for(let i=0;i<N;i++)s[i]=t.s[i];
+  // soft shadow map for the cities: the light comes from the north-west and low; a cell is shadowed when something taller stands up to five cells towards the light
+  const top=new Float32Array(N),sd=new Float32Array(N);
+  for(let y=0;y<H;y++){const r=rows[y];for(let x=0;x<W;x++){const i=y*W+x,wall=r[x]!=='.'&&r[x]!=='t';top[i]=h[i]+(wall?whOf(r[x]):0)}}
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(rows[y][x]!=='.')continue;let m=0;
+    for(let k=1;k<=5;k++){const xa=x-k,ya=y-k;if(xa>=0&&ya>=0){const e=(top[ya*W+xa]-h[i]-1.1*k)/1.2;if(e>0){const v=Math.min(1,e)*(1-k*.12);if(v>m)m=v}}
+      if(k<=3){const xb=x-k;if(xb>=0){const e=(top[i-k]-h[i]-.8*k)/1.2;if(e>0){const v=Math.min(1,e)*(1-k*.2)*.8;if(v>m)m=v}}
+        const yb=y-k;if(yb>=0){const e=(top[i-k*W]-h[i]-.8*k)/1.2;if(e>0){const v=Math.min(1,e)*(1-k*.2)*.8;if(v>m)m=v}}}}
+    sd[i]=m}
   const roof=t.roof!==undefined?t.roof:Math.max(zmax+2.5,6);
-  return TERRS[n]={W,H,h,s,rk:new Float32Array(N),block:new Uint8Array(N),terr:true,src:t,rev:t.rev||0,zmax,roof,riser:t.riser,rg:t.rg||null,lid,wat,wl,dive:t.dive||null};
+  return TERRS[n]={W,H,h,s,sd,rk:new Float32Array(N),block:new Uint8Array(N),terr:true,src:t,rev:t.rev||0,zmax,roof,riser:t.riser,rg:t.rg||null,lid,wat,wl,dive:t.dive||null};
 }
 // the camera eases between the heights of neighbouring cells (about a quarter of a second)
 let TZ=null,TZL=-1,TZT=0;
@@ -193,6 +201,90 @@ function terrBack(D,hzr,hzmax,lbm){
   for(let y=Math.max(0,HH-1);y<VH;y++){let o=y*VW*4;for(let x=0;x<VW;x++,o+=4){D[o]=r;D[o+1]=g;D[o+2]=b}}
 }
 const THN=24,THX=new Int16Array(THN),THC=new Int16Array(THN),THS=new Uint8Array(THN),THG=new Int32Array(THN),THP=new Float32Array(THN),THB=new Float32Array(THN),THF=new Float32Array(THN);
+const RCP=new Float64Array(VH+8),GLX=new Float64Array(32),GLY=new Float64Array(32),GLA=new Float64Array(32),GLR=new Float64Array(32),GLG=new Float64Array(32),GLB=new Float64Array(32);
+// the warm lights that can add anything to a ground cell (the nearest point of the cell is not so far that a light gives less than about 1/600 of full light); the rest are not summed per pixel
+function terrCellLights(nl,nn,ncr,ncg,ncb,mx,my){
+  let n=0;
+  for(let k=0,j=0;k<nn&&n<32;k+=3,j++){const lx=nl[k],ly=nl[k+1],dx=lx<mx?mx-lx:lx>mx+1?lx-mx-1:0,dy=ly<my?my-ly:ly>my+1?ly-my-1:0;
+    if(PERF_EXACT||nl[k+2]>.0017*(1+1.15*(dx*dx+dy*dy+.44))){GLX[n]=lx;GLY[n]=ly;GLA[n]=nl[k+2];GLR[n]=ncr[j];GLG[n]=ncg[j];GLB[n]=ncb[j];n++}}
+  return n;
+}
+const WCL=new Int16Array(THN),WCH=new Int16Array(THN),WLA=new Float64Array(32),WLC=new Float64Array(32),WLR=new Float64Array(32),WLG=new Float64Array(32),WLB=new Float64Array(32),WRA=new Float64Array(32),WRC=new Float64Array(32),VGT=new Float64Array(VH+8);
+/* column-major copies of the tall wall pictures. A wall is painted down one screen column, so it reads one column of its picture; in a row-major picture the next pixel is a whole row (512 bytes or far more) away and every
+   pixel is a cache miss. In the copy, a column is contiguous. The copy is made a little at a time (WTB bytes a frame); until it exists the plain picture is used, with the same result. */
+const WTD=[],WTSD=[],WTR=[],WTE=[],WTSE=[];let WTB=0;
+function wallTexT(ti,tex){ // -> the column-major copy of wall picture ti, or null if it is not made yet
+  const d=tex.d;if(!d)return null;
+  if(WTSD[ti]===d)return WTD[ti];
+  if(WTB>1500000||PERF_EXACT)return null;
+  const rows=d.length/(TS*4);if(rows!==(rows|0)||rows<1)return null;
+  const t=new Uint8ClampedArray(d.length);
+  for(let v=0;v<rows;v++){let s=v*TS*4;for(let x=0,o=v*4;x<TS;x++,s+=4,o+=rows*4){t[o]=d[s];t[o+1]=d[s+1];t[o+2]=d[s+2];t[o+3]=d[s+3]}}
+  WTB+=d.length;WTD[ti]=t;WTSD[ti]=d;WTR[ti]=rows;WTE[ti]=null;WTSE[ti]=null;return t;
+}
+function wallTexE(ti,te){ // the same for the glow picture (windows lit at night) of a wall picture whose column-major copy exists
+  if(WTSE[ti]===te)return WTE[ti];
+  if(WTB>1500000)return null;
+  const rows=WTR[ti];if(te.length!==WTSD[ti].length)return null;
+  const t=new Uint8ClampedArray(te.length);
+  for(let v=0;v<rows;v++){let s=v*TS*4;for(let x=0,o=v*4;x<TS;x++,s+=4,o+=rows*4){t[o]=te[s];t[o+1]=te[s+1];t[o+2]=te[s+2];t[o+3]=te[s+3]}}
+  WTB+=te.length;WTE[ti]=t;WTSE[ti]=te;return t;
+}
+// one run of rows of one wall hit, painted pixel by pixel. It is its own small function (the parameters are in WSP) so the engine optimises it on its own, and not as part of the huge render3D.
+// WSP: 0 y0, 1 stepT, 2 vmode, 3 wall height, 4 texture rows (0 = square), 5 yBot, 6 1/unit, 7 ivw, 8-10 haze r,g,b, 11-13 base light r,g,b, 14-15 red light r,g, 16 warm lights, 17 red lights, 18 corner shade, 19 wallAO, 20 wallSat, 21 look, 22 filtered, 23-25 filter x0,x1,frac, 26 door glow, 27 its strength, 28-30 door n,lf,i, 31 rows of a column-major picture (0 = row-major)
+const WSP=new Float64Array(40);
+function wallSpan(D,td,te,ya0,yz,x,tx){
+  const P=WSP,y0=P[0],stepT=P[1],vmode=P[2]|0,wh=P[3],texH=P[4]|0,yBot=P[5],iu=P[6],ivw=P[7],hz0=P[8],hz1=P[9],hz2=P[10],bR=P[11],bG=P[12],bB=P[13],RLRv=P[14],RLGv=P[15],na=P[16]|0,nra=P[17]|0,fk=P[18],wAO=P[19],wSat=P[20],hasHLK=P[21]!==0,bil=P[22]!==0,bx0=P[23]|0,bx1=P[24]|0,bfx=P[25],dg=P[26]!==0,dgs=P[27],kdn=P[28],kdlf=P[29],kdi=P[30],rowsT=P[31]|0,shn=P[32],shp=P[33],gfr=P[34]|0;
+  let tyf=(ya0-y0)*stepT;
+  for(let y=ya0;y<=yz;y++,tyf+=stepT){
+      const v=vmode===0?(((tyf*CEILH)|0)&(TS-1)):vmode===1?(((tyf*wh/1.55)|0)&(TS-1)):vmode===2?Math.min(texH-1,(tyf*texH/TS)|0):tyf>=TS?TS-1:(tyf|0); // sky walls tile upward instead of stretching
+      const i=rowsT?(tx*rowsT+v)*4:(v*TS+tx)*4,o=(y*VW+x)*4;
+      const vg=VGT[y],zz=(yBot-y)*iu,dz=zz-.66,dz2=dz*dz;
+      let lr=0,lg=0,lb2=0,lpr=0;
+      for(let k=0;k<na;k++){const q=WLA[k]/(1+1.15*(WLC[k]+dz2));lr+=q*WLR[k];lg+=q*WLG[k];lb2+=q*WLB[k]}
+      for(let k=0;k<nra;k++)lpr+=WRA[k]/(1+1.15*(WRC[k]+dz2));
+      const kRp=bR+lr+lpr*RLRv,kGp=bG+lg+lpr*RLGv,kBp=bB+lb2+lpr*.1;
+      let tr=td[i],tg=td[i+1],tb=td[i+2];
+      if(bil){const vf=tyf*texH/TS-.5,vy0=Math.floor(vf),fy=vf-vy0,ya=(vy0<0?0:vy0>texH-1?texH-1:vy0)*TS,yb=(vy0+1<0?0:vy0+1>texH-1?texH-1:vy0+1)*TS,i00=(ya+bx0)*4,i10=(ya+bx1)*4,i01=(yb+bx0)*4,i11=(yb+bx1)*4,w00=(1-bfx)*(1-fy),w10=bfx*(1-fy),w01=(1-bfx)*fy,w11=bfx*fy;tr=td[i00]*w00+td[i10]*w10+td[i01]*w01+td[i11]*w11;tg=td[i00+1]*w00+td[i10+1]*w10+td[i01+1]*w01+td[i11+1]*w11;tb=td[i00+2]*w00+td[i10+2]*w10+td[i01+2]*w01+td[i11+2]*w11} // close range: filtered magnification instead of blocks
+      let R=tr*kRp*vg*ivw+hz0,Gc=tg*kGp*vg*ivw+hz1,B=tb*kBp*vg*ivw+hz2;
+      if(hasHLK){const dtp=(y-y0)*iu,ao=(zz<1.3?1-wAO*(1-zz*.77)*(1-zz*.77):1)*(zz<.32?1-.3*(1-zz/.32)*(1-zz/.32):1)*(dtp<.6?1-.22*(1-dtp/.6)*(1-dtp/.6):1)*fk,gk=zz>12?1:zz*.083,lm=R*.3+Gc*.59+B*.11;R=(lm+(R-lm)*wSat)*ao*(1.03-.07*gk);Gc=(lm+(Gc-lm)*wSat)*ao;B=(lm+(B-lm)*wSat)*ao*(.97+.1*gk);
+        if(shn>0){const s=Math.sin(tx*.045+zz*.8+shp)-.8;if(s>0){const q=s*5*s*5*shn*ao;R+=q*62;Gc+=q*54;B+=q*72} // pearl sheen: a slow highlight sweeps along every face
+          if(((tx*131+y*197+gfr*53)&1023)===0){R+=shn*150;Gc+=shn*140;B+=shn*160}}} // and the odd glint on the nacre // nacre keeps its pink, aqua and cream; the foot of a wall is in shadow
+      if(te){const a=te[i+3]/255;R+=te[i]*a*.95;Gc+=te[i+1]*a*.95;B+=te[i+2]*a*.95}
+      if(dg){const vp=Math.max(0,Math.min(1,(y-y0)/(yBot-y0))),u=kdn===2?((kdlf?kdi:1-kdi)+tx/TS)/2:.5+(tx/TS-.5)*.55,hw=(u-.5)/.17,f=dgs*Math.exp(-hw*hw)*(vp<.3?0:Math.min(1,(vp-.3)/.25))*.55;R+=170*f;Gc+=108*f;B+=30*f} // only the doorway itself: a warm pool of light on and round the door
+      D[o]=R;D[o+1]=Gc;D[o+2]=B;
+  }
+}
+// the top of one ground step along one screen column of a city (see terrTerrace). Its own small function so the engine optimises it on its own; the parameters are in TPR
+const TPR=new Float64Array(40);
+function terrTopHK(D,fdd,x,ys,ye){
+  const Q=TPR,k1=Q[0],cx=Q[1],cy=Q[2],rX=Q[3],rY=Q[4],mx=Q[5],my=Q[6],rl=Q[7],hzmax=Q[8],hzrate=Q[9],lbm=Q[10],tbR=Q[11],tbG=Q[12],tbB=Q[13],cellShade=Q[14],stUp=Q[15]!==0,stDn=Q[16]!==0,lipT=Q[17],aoT=Q[18],tIn=Q[19],lipGain=Q[20],footAO=Q[21],FP=Q[22],FC=Q[23],FG=Q[24],FS=Q[25],FT0=Q[26],FT1=Q[27],FT2=Q[28],hz0=Q[29],hz1=Q[30],hz2=Q[31],gaN=Q[32]|0,ws=Q[33],cau=Q[34],ctm=Q[35];
+  let o=(ys*VW+x)*4;
+  for(let y=ys;y<ye;y++,o+=VW*4){
+    const t=k1*RCP[y],px=cx+rX*t,py=cy+rY*t,u=(((px-mx)*TS)|0)&(TS-1),v=(((py-my)*TS)|0)&(TS-1),ti=(v*TS+u)*4,dist=t*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv;
+    let lt=0,lR=0,lG=0,lB=0;for(let j=0;j<gaN;j++){const ax=px-GLX[j],ay=py-GLY[j],q=GLA[j]/(1+1.15*(ax*ax+ay*ay+.44));lt+=q;lR+=q*GLR[j];lG+=q*GLG[j];lB+=q*GLB[j]}
+    const lb=Math.max(baseL(dist),lbm),sk=(lb*.55+lt*.45+.05)*smv,kR=(lb*tbR+lR)*cellShade*(1+ws*.3),kG=(lb*tbG+lG)*cellShade*(1+ws*.05),kB=(lb*tbB+lB)*cellShade*(1-ws*.12); // warmer shadows
+    const te=t-tIn,ek=(stUp&&te<lipT)?lipGain:(stDn&&te<aoT)?footAO:1,a=(fdd[ti]-FP)*FC+FP,b=(fdd[ti+1]-FP)*FC+FP,c=(fdd[ti+2]-FP)*FC+FP,gk=FG*ek;let a2=a,b2=b,c2=c;if(FS!==1){const lm=a*.3+b*.59+c*.11;a2=lm+(a-lm)*FS;b2=lm+(b-lm)*FS;c2=lm+(c-lm)*FS}
+    D[o]=a2*FT0*gk*kR*iv+hz0*sk;D[o+1]=b2*FT1*gk*kG*iv+hz1*sk;D[o+2]=c2*FT2*gk*kB*iv+hz2*sk;
+    if(cau>0){const w=Math.sin(px*7+ctm*1.3+Math.sin(py*5+ctm))*Math.sin(py*6-ctm*1.1+Math.cos(px*4+ctm*.7));if(w>.35){const cc=(w-.35)*cau*iv;D[o]+=cc*70;D[o+1]+=cc*150;D[o+2]+=cc*170}} // caustic ripples of light near water
+  }
+}
+function vgtFill(){for(let y=0;y<VH;y++){const vy=(y-HH)/HH;VGT[y]=1-.28*vy*vy;RCP[y]=1/(y+.5-HH)}}   // the dark edge of the picture above and below the middle, one value per row
+// for each wall listed by terrTerrace (nearest first): the rows that walls nearer than it already paint over (WCL..WCH), so a far wall is only painted where it can show
+var PERF_EXACT=false;   // true: no shortcuts (every wall is painted whole, every light summed, plain wall pictures) so the faster paths can be compared pixel by pixel
+function terrCover(nh,rX,rY,cx,cy){
+  let lo=1,hi=0;
+  for(let k=0;k<nh;k++){
+    WCL[k]=lo;WCH[k]=hi;if(PERF_EXACT)continue;
+    const g=THG[k];if(g<100)continue;const ti=T_TILE[g];if(ti===undefined)continue;const tex=TEX[ti];if(!tex||(tex.sky&&SKYPAN))continue;
+    let perp=THP[k];if(perp<.05)perp=.05;
+    const wh=tex.wh||CEILH,eyeR=CAMZ-THF[k],unit=F/perp,y0=HH-(wh-eyeR)*unit,yBot=HH+eyeR*unit;let yT=y0;
+    if(tex.cren){let wx=THS[k]===0?cy+rY*perp:cx+rX*perp;wx-=Math.floor(wx);if(((wx*2)%1)>.55)yT=y0+tex.cren*unit}
+    const ds=Math.max(THA[k],Math.ceil(yT)),de=Math.min(Math.ceil(THB[k])-1,Math.floor(yBot));
+    if(de<ds)continue;
+    if(lo>hi){lo=ds;hi=de}else if(ds<=hi+1&&de>=lo-1){if(ds<lo)lo=ds;if(de>hi)hi=de}
+  }
+}
 
 /* ---------- covered tubes and pools (see hgt_engine.js): the ceiling plane, the lowered-lid face, the water surface seen from above ---------- */
 const THA=new Int16Array(THN);         // for each listed wall: the screen row down to which ceilings already cover this column (the wall is not drawn above it)
@@ -256,7 +348,7 @@ function terrWaterTop(x,rX,rY,mx,my,zw,hb,ys,ye,fdd){
 // one screen column: walks the grid, paints the ground, and lists the walls that can be seen (nearest first) in TH*; returns how many
 function terrTerrace(x,rX,rY){
   const T=TERR_NOW,W=T.W,Hh=T.H,h=T.h,sh=T.s,C=TC,D=C.D,cx=C.cx,cy=C.cy,cz=CAMZ,grid=G.grid,fm=C.fmp,fds=C.fds,hz=C.hzr,hzmax=C.hzmax,hzrate=C.hzrate,lbm=C.lbm,nl=C.nl,nn=C.nn,tbR=C.tbR,tbG=C.tbG,tbB=C.tbB,ttR=C.ttR,ttG=C.ttG,ttB=C.ttB,ncr=C.ncr,ncg=C.ncg,ncb=C.ncb,HHv=HH,Fv=F,TSv=TS,TSm=TS-1;
-  const HK=C.HLK,FG=HK?HK.floorGain:1,FC=HK?HK.floorContrast:1,FP=HK?HK.floorPivot:0,FT=HK?HK.floorTint:null,FT0=HK?FT[0]:1,FT1=HK?FT[1]:1,FT2=HK?FT[2]:1,RG=HK?HK.riserGain:1,FS=HK?HK.floorSat:1; // the look of a city (HGTE.look): floors read as stone, risers and stair edges are clear
+  const HK=C.HLK,FG=HK?HK.floorGain:1,FC=HK?HK.floorContrast:1,FP=HK?HK.floorPivot:0,FT=HK?HK.floorTint:null,FT0=HK?FT[0]:1,FT1=HK?FT[1]:1,FT2=HK?FT[2]:1,RG=HK?HK.riserGain:1,FS=HK?HK.floorSat*(1+.25*C.day):1,SD=T.sd,SHK=C.shK; // the look of a city (HGTE.look): floors read as stone, risers and stair edges are clear
   const rl=Math.hypot(rX,rY),base=x*YBK;
   let mx=Math.floor(cx),my=Math.floor(cy);
   const ddx=Math.abs(1/rX),ddy=Math.abs(1/rY);
@@ -264,30 +356,31 @@ function terrTerrace(x,rX,rY){
   if(rX<0){stx=-1;sdx=(cx-mx)*ddx}else{stx=1;sdx=(mx+1-cx)*ddx}
   if(rY<0){sty=-1;sdy=(cy-my)*ddy}else{sty=1;sdy=(my+1-cy)*ddy}
   const lidA=T.lid,watA=T.wat,wlA=T.wl,TT=lidA?hgtTubeTex():null;
-  let yb=VH,tIn=0,side=0,nh=0,lastK=-1,slopeMax=-1e9,tStop=70,hprev=-1e9,first=true,prevZc=-1e9;
+  let yb=VH,tIn=0,itIn=Infinity,side=0,nh=0,lastK=-1,slopeMax=-1e9,tStop=70,hprev=-1e9,first=true,prevZc=-1e9;
   CY_A=0;
   for(let guard=0;guard<150;guard++){
-    const tOut=Math.min(sdx,sdy),inside=mx>=0&&my>=0&&mx<W&&my<Hh,i=inside?my*W+mx:(Math.min(Hh-1,Math.max(0,my))*W+Math.min(W-1,Math.max(0,mx)));
+    const tOut=Math.min(sdx,sdy),itO=1/tOut,inside=mx>=0&&my>=0&&mx<W&&my<Hh,i=inside?my*W+mx:(Math.min(Hh-1,Math.max(0,my))*W+Math.min(W-1,Math.max(0,mx)));
     const g=inside?grid[my][mx]:1;
     if(!first&&g>0){ // a wall: remember it if its top could be seen above the walls nearer than it
       const foot=h[i];let wh=CEILH;if(g>=100){const tt=T_TILE[g];if(tt!==undefined&&TEX[tt])wh=TEX[tt].wh||CEILH}
-      const slope=(foot+wh-cz)/Math.max(tIn,.05);
+      const slope=(foot+wh-cz)*Math.min(itIn,20);
       if(slope>slopeMax&&nh<THN){THX[nh]=mx;THC[nh]=my;THS[nh]=side;THG[nh]=g;THP[nh]=tIn;THB[nh]=yb;THF[nh]=foot;THA[nh]=CY_A;nh++;slopeMax=slope;
         if(slope>0){const ts=(T.zmax-cz)/slope;if(ts<tStop)tStop=ts}}
       hprev=-1e9;prevZc=-1e9;
     }else{
-      const ybIn=yb,zcc=(lidA&&lidA[i]>0)?h[i]+lidA[i]:0,slab=zcc>0&&cz>=zcc,hc0=slab?zcc:h[i],hc=first?Math.min(hc0,cz-.05):hc0,fcc=(fm&&inside)?fm.charCodeAt(i):48,fdd=(slab&&TT)?TT:(fds[fcc-48]||fds[0]),cellShade=slab?1:sh[i];
+      const ybIn=yb,zcc=(lidA&&lidA[i]>0)?h[i]+lidA[i]:0,slab=zcc>0&&cz>=zcc,hc0=slab?zcc:h[i],hc=first?Math.min(hc0,cz-.05):hc0;let fdd=null,cellShade=1,gaN=-1;   // fdd, cellShade and the lights near this cell are only worked out if a pixel of the cell is painted
       const wI=(watA&&!slab)?watA[i]:0,zw=wI?wlA[i]:0,wTop=wI>0&&cz>zw+.01;   // wTop: the eye is above the water, so the surface is drawn from above
       if(!first&&hprev>-1e8&&hc>hprev){ // the riser: the face of this step that looks at the camera
-        const yTop=HHv-(hc-cz)*Fv/tIn,yBot=HHv-(hprev-cz)*Fv/tIn,ys=Math.max(0,Math.ceil(yTop)),ye=Math.min(Math.ceil(yb),Math.ceil(yBot),VH);
+        const yTop=HHv-(hc-cz)*Fv*itIn,yBot=HHv-(hprev-cz)*Fv*itIn,ys=Math.max(0,Math.ceil(yTop)),ye=Math.min(Math.ceil(yb),Math.ceil(yBot),VH);
         if(ye>ys){
+          if(fdd===null){const fc2=(fm&&inside)?fm.charCodeAt(i):48;fdd=(slab&&TT)?TT:(fds[fc2-48]||fds[0]);cellShade=slab?1:(HK?sh[i]*(1-SD[i]*SHK):sh[i])};if(gaN<0)gaN=terrCellLights(nl,nn,ncr,ncg,ncb,mx,my);
           let rtd=null,rth=TSv;{const rg=(T.rg&&T.rg[i])||T.riser,tt=rg?T_TILE[rg]:undefined,tx=tt!==undefined?TEX[tt]:null;if(tx&&tx.d){rtd=tx.d;rth=tx.h||TSv}} // the face of a step has its own wall picture when the level gives one
           const px=cx+rX*tIn,py=cy+rY*tIn,along=side===0?py:px,u=((along-Math.floor(along))*TSv)&TSm,dist=tIn*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv;
-          let lt=0,lR=0,lG=0,lB=0;for(let k=0,j=0;k<nn;k+=3,j++){const ax=px-nl[k],ay=py-nl[k+1],q=nl[k+2]/(1+1.15*(ax*ax+ay*ay+.44));lt+=q;lR+=q*ncr[j];lG+=q*ncg[j];lB+=q*ncb[j]}
+          let lt=0,lR=0,lG=0,lB=0;for(let j=0;j<gaN;j++){const ax=px-GLX[j],ay=py-GLY[j],q=GLA[j]/(1+1.15*(ax*ax+ay*ay+.44));lt+=q;lR+=q*GLR[j];lG+=q*GLG[j];lB+=q*GLB[j]}
           const lb=Math.max(baseL(dist),lbm),sk=(lb*.55+lt*.45+.05)*smv,rs=side===0?(stx>0?.9:.58):(sty>0?1:.68),kR=(lb*tbR+lR)*rs*RG,kG=(lb*tbG+lG)*rs*RG,kB=(lb*tbB+lB)*rs*RG;
-          let o=(ys*VW+x)*4;
+          let o=(ys*VW+x)*4;const zkR=tIn/Fv;
           for(let y=ys;y<ye;y++,o+=VW*4){
-            const z=cz-(y+.5-HHv)*tIn/Fv;let v=((hc-z)*TSv)|0,td=fdd;
+            const z=cz-(y+.5-HHv)*zkR;let v=((hc-z)*TSv)|0,td=fdd;
             if(rtd){v=v%rth;td=rtd}else v&=TSm;
             const ti=(v*TSv+u)*4;let ek=1;
             if(HK){const dn=z-hprev,up=hc-z;ek=dn<HK.edgeW?HK.footAO+(1-HK.footAO)*dn/HK.edgeW:up<.05?HK.lipGain:1} // the foot of a riser is in shadow and its top edge catches the light, so every step reads
@@ -297,13 +390,15 @@ function terrTerrace(x,rX,rY){
         if(yTop<yb)yb=yTop;
       }
       if(hc<cz){if(!wTop){ // the top of the step
-        const k1=(cz-hc)*Fv,yFar=HHv+k1/tOut,yNear=HHv+k1/Math.max(tIn,.001),ys=Math.max(0,Math.ceil(yFar)),ye=Math.min(Math.ceil(yb),Math.ceil(yNear),VH);
+        const k1=(cz-hc)*Fv,yFar=HHv+k1*itO,yNear=HHv+k1*Math.min(itIn,1000),ys=Math.max(0,Math.ceil(yFar)),ye=Math.min(Math.ceil(yb),Math.ceil(yNear),VH);
         if(ye>ys){
+          if(fdd===null){const fc2=(fm&&inside)?fm.charCodeAt(i):48;fdd=(slab&&TT)?TT:(fds[fc2-48]||fds[0]);cellShade=slab?1:(HK?sh[i]*(1-SD[i]*SHK):sh[i])};if(gaN<0)gaN=terrCellLights(nl,nn,ncr,ncg,ncb,mx,my);
           let o=(ys*VW+x)*4;
           const stUp=HK&&!first&&hprev>-1e8&&hc>hprev+.02,stDn=HK&&!first&&hprev>-1e8&&hc<hprev-.02,lipT=HK?HK.lipW*(side===0?ddx:ddy):0,aoT=HK?HK.aoW*(side===0?ddx:ddy):0;
-          for(let y=ys;y<ye;y++,o+=VW*4){
-            const t=k1/(y+.5-HHv),px=cx+rX*t,py=cy+rY*t,u=(((px-mx)*TSv)|0)&TSm,v=(((py-my)*TSv)|0)&TSm,ti=(v*TSv+u)*4,dist=t*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv;
-            let lt=0,lR=0,lG=0,lB=0;for(let k=0,j=0;k<nn;k+=3,j++){const ax=px-nl[k],ay=py-nl[k+1],q=nl[k+2]/(1+1.15*(ax*ax+ay*ay+.44));lt+=q;lR+=q*ncr[j];lG+=q*ncg[j];lB+=q*ncb[j]}
+          if(HK){const Q=TPR;Q[0]=k1;Q[1]=cx;Q[2]=cy;Q[3]=rX;Q[4]=rY;Q[5]=mx;Q[6]=my;Q[7]=rl;Q[8]=hzmax;Q[9]=hzrate;Q[10]=lbm;Q[11]=tbR;Q[12]=tbG;Q[13]=tbB;Q[14]=cellShade;Q[15]=stUp?1:0;Q[16]=stDn?1:0;Q[17]=lipT;Q[18]=aoT;Q[19]=tIn;Q[20]=HK.lipGain;Q[21]=HK.footAO;Q[22]=FP;Q[23]=FC;Q[24]=FG;Q[25]=FS;Q[26]=FT0;Q[27]=FT1;Q[28]=FT2;Q[29]=hz[0];Q[30]=hz[1];Q[31]=hz[2];Q[32]=gaN;Q[33]=SD[i]*SHK;Q[34]=(watA&&(wI>0||watA[i-1]>0||watA[i+1]>0||watA[i-W]>0||watA[i+W]>0))?HK.caustic:0;Q[35]=C.tm;terrTopHK(D,fdd,x,ys,ye)}
+          else for(let y=ys;y<ye;y++,o+=VW*4){
+            const t=k1*RCP[y],px=cx+rX*t,py=cy+rY*t,u=(((px-mx)*TSv)|0)&TSm,v=(((py-my)*TSv)|0)&TSm,ti=(v*TSv+u)*4,dist=t*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv;
+            let lt=0,lR=0,lG=0,lB=0;for(let j=0;j<gaN;j++){const ax=px-GLX[j],ay=py-GLY[j],q=GLA[j]/(1+1.15*(ax*ax+ay*ay+.44));lt+=q;lR+=q*GLR[j];lG+=q*GLG[j];lB+=q*GLB[j]}
             const lb=Math.max(baseL(dist),lbm),sk=(lb*.55+lt*.45+.05)*smv,kR=(lb*tbR+lR)*cellShade,kG=(lb*tbG+lG)*cellShade,kB=(lb*tbB+lB)*cellShade;
             if(HK){ // stone, not snow: darker, more contrast, a little colour; the tread edge of a step up is a light lip, the tread under a step down is in shadow
               const te=t-tIn,ek=(stUp&&te<lipT)?HK.lipGain:(stDn&&te<aoT)?HK.footAO:1,a=(fdd[ti]-FP)*FC+FP,b=(fdd[ti+1]-FP)*FC+FP,c=(fdd[ti+2]-FP)*FC+FP,gk=FG*ek;let a2=a,b2=b,c2=c;if(FS!==1){const lm=a*.3+b*.59+c*.11;a2=lm+(a-lm)*FS;b2=lm+(b-lm)*FS;c2=lm+(c-lm)*FS}
@@ -313,9 +408,9 @@ function terrTerrace(x,rX,rY){
           }
         }
         if(yFar<yb)yb=yFar;
-      }}else{const yT=HHv-(hc-cz)*Fv/Math.max(tIn,.001);if(yT<yb)yb=yT}
+      }}else{const yT=HHv-(hc-cz)*Fv*Math.min(itIn,1000);if(yT<yb)yb=yT}
       if(wI){
-        if(wTop){const k1=(cz-zw)*Fv,yFarS=HHv+k1/tOut,yNearS=HHv+k1/Math.max(tIn,.001),ys=Math.max(0,Math.ceil(yFarS)),ye=Math.min(ybIn,Math.ceil(yNearS),VH);if(ye>ys)terrWaterTop(x,rX,rY,mx,my,zw,hc,ys,ye,fdd);if(yFarS<yb)yb=yFarS}
+        if(wTop){const k1=(cz-zw)*Fv,yFarS=HHv+k1*itO,yNearS=HHv+k1*Math.min(itIn,1000),ys=Math.max(0,Math.ceil(yFarS)),ye=Math.min(ybIn,Math.ceil(yNearS),VH);if(ye>ys){if(fdd===null){const fc2=(fm&&inside)?fm.charCodeAt(i):48;fdd=(slab&&TT)?TT:(fds[fc2-48]||fds[0]);cellShade=slab?1:(HK?sh[i]*(1-SD[i]*SHK):sh[i])};terrWaterTop(x,rX,rY,mx,my,zw,hc,ys,ye,fdd)}if(yFarS<yb)yb=yFarS}
         else terrCeilPaint(1,x,rX,rY,tIn,tOut,zw,yb,0);          // under the surface: the water is a luminous ceiling
         prevZc=-1e9;
       }else if(zcc>0&&!slab&&cz<zcc){terrCeilPaint(0,x,rX,rY,tIn,tOut,zcc,yb,prevZc);prevZc=zcc}
@@ -328,7 +423,7 @@ function terrTerrace(x,rX,rY){
     if(kb>lastK)lastK=kb;
     if(!inside||yb<=0||tOut>tStop||CY_A>=yb)break;
     if(sdx<sdy){sdx+=ddx;mx+=stx;side=0}else{sdy+=ddy;my+=sty;side=1}
-    tIn=tOut;
+    tIn=tOut;itIn=itO;
   }
   const yv=Math.max(0,Math.min(VH,Math.ceil(yb)));
   for(let k=lastK+1;k<YBK;k++)YB[base+k]=yv;

@@ -310,12 +310,14 @@ function hgtzMaze(B,x,y,w,h,opts){
   if(!o._pal){const all=hgtzShuffle(R,['p','a','c','l']);o._pal=o.palette||all.slice(0,3)}
   const base=o.base!==undefined?o.base:hgtlH(B,x,y),C=hgtzCtx(B,x,y,w,h,o);
   let depth=0,raise=0;if(o.kind==='sunken')depth=o.depth;if(o.kind==='raised')raise=o.raise;
-  const fl=base-depth+raise;
   const cw=Math.floor((C.lw0-1)/2),ch=Math.floor((C.lh0-1)/2),lw=2*cw+1,lh=2*ch+1;
+  if(depth||raise){const dz=depth||raise,mm=Math.ceil((Math.ceil(dz/.27)+1)/2);if(cw<mm+5||ch<7||o.algo==='labyrinth'||o.algo==='chartres'||o.algo==='dungeon'&&cw<mm+9){depth=0;raise=0}} // no room for the steps: the floor stays at street level
+  const fl=base-depth+raise;
   let view=o.reward==='view';
   const wh=depth?depth+.5:o.wallH,bwh=depth?depth+.7:raise?raise+.7:o.wallH;
   const Z={ox:0,oy:C.lh0-lh,lw,lh,cw,ch,fl,wh,bwh,bfoot:depth?fl:raise?base:fl,algo:o.algo,round:o.round||o.kind==='shell',cs:0,entryCol:o.entryCol};
   if(o.kind==='shell'&&o.algo==='backtracker')Z.algo='circular';
+  if(Z.algo==='labyrinth'||Z.algo==='chartres')Z.round=false;
   // chamber size (nodes per side; the box is 2c-1 cells): a lookout needs a spiral box with a ring corridor
   let cs=2;if(view){const Sin=hgtzViewSin(wh-.1);cs=(Sin+3)>>1}
   if(cw<cs+4||ch<cs+4){cs=2;if(view)o.reward='lamp',view=false}

@@ -3,8 +3,7 @@
    - Every wall tile of a level in the range is processed once when the level is loaded (loadLevel is wrapped, like hgt_lamps.js), whoever built it:
        hgtwHeal(tex): the stacked 128 px pictures of a tall tile are joined (colour of the two pictures matched over a ramp, then a cross-fade of the rows either side
        of the join using a mirrored continuation of each picture), then a gentle unsharp + contrast step makes the painting crisper without noise.
-       tex.mir = 1 makes the renderer mirror the picture on every second cell along a wall, so tile joins and the wrap edge of the picture are seamless and the
-       pattern repeats every two cells instead of one (render3D in index.html, door cells are never mirrored).
+       The left and right edges of the picture are blended too, so it tiles sideways without a seam (tex.mir = 1 marks a healed tile).
    - Vines (stand-ins made from hgt_lightvine until painted pictures hgt_vine_climb, hgt_vine_hang, hgt_vine_wreath exist, or hgt_vine_<name>_<mode>):
        hgtwVineTile(baseGid, vineName, opts) -> new gid: the wall tile with a vine laid over it.
           opts: mode 'climb' (grows up from the foot) | 'hang' (tendrils from the top) | 'both' | 'wreath' (small clumps round the middle of a unit), seed (number),
@@ -16,16 +15,52 @@
    ========================================================================== */
 var HGTW=(typeof HGTW==='undefined')?{}:HGTW;
 HGTW.opts={481:{density:.62,max:130,seed:481},482:{density:.1,max:40,seed:482},483:{density:.08,max:40,seed:483},484:{density:.08,max:40,seed:484}};
-HGTW.off=false;HGTW.stats={};
-const hgtwRange=n=>(n>=480&&n<=489)||(n>=4850&&n<=4949);
+HGTW.noisy=11;HGTW.off=false;HGTW.stats={};
+const hgtwRange=n=>hgtAny(n);
 function hgtwHash(a,b,c){let h=(Math.imul(a|0,374761393)+Math.imul(b|0,668265263)+Math.imul(c|0,2147483647))|0;h=Math.imul(h^(h>>>13),1274126177);return ((h^(h>>>16))>>>0)/4294967296}
 function hgtwRng(seed){let s=(seed|0)||1;return()=>{s=Math.imul(s^(s>>>15),2246822519)+1013904242|0;s=Math.imul(s^(s>>>13),3266489917)|0;return ((s^(s>>>16))>>>0)/4294967296}}
 
+
+/* ---------- minimum detail: plinth, cornice and window/relief units on plain wall faces; bevelled step tiles ---------- */
+const hgtwPieces={};
+function hgtwPiece(name){ // 128x128 pixel data of a painted wall piece, or null
+  if(hgtwPieces[name]!==undefined)return hgtwPieces[name];
+  const im=typeof hgtaPic==='function'?hgtaPic(name):null;if(!im)return null; // not cached when missing: the pictures may load later
+  const c=document.createElement('canvas');c.width=128;c.height=128;const x=c.getContext('2d');x.drawImage(im,0,0,128,128);
+  const d=x.getImageData(0,0,128,128).data;let r=0,g=0,b=0;for(let i=0;i<d.length;i+=4){r+=d[i];g+=d[i+1];b+=d[i+2]}
+  return hgtwPieces[name]={d,m:[r/16384,g/16384,b/16384]};
+}
+function hgtwUnitStat(d,y0,y1){let r=0,g=0,b=0,l=0,l2=0;const n=128*(y1-y0);for(let y=y0;y<y1;y++){let o=y*512;for(let x=0;x<128;x++,o+=4){r+=d[o];g+=d[o+1];b+=d[o+2];const v=d[o]*.3+d[o+1]*.59+d[o+2]*.11;l+=v;l2+=v*v}}
+  const m=l/n;return {m:[r/n,g/n,b/n],sd:Math.sqrt(Math.max(0,l2/n-m*m))}}
+function hgtwBand(d,y0,y1,add,mul){for(let y=Math.max(0,y0);y<Math.min(y1,d.length/512);y++){let o=y*512;for(let x=0;x<128;x++,o+=4){d[o]=d[o]*mul+add;d[o+1]=d[o+1]*mul+add;d[o+2]=d[o+2]*mul+add}}}
+HGTW.winNames=['hgt_w2_winpink','hgt_w2_winaqua','hgt_w2_bandjade'];
+function hgtwDetail(tex){
+  const d=tex.d,Hp=tex.h,units=Math.floor(Hp/128);if(units<2||(tex.wh||0)<2.4)return;
+  const st=[];for(let u=0;u<units;u++)st.push(hgtwUnitStat(d,Hp-128*(u+1),Hp-128*u));
+  const plain=u=>st[u].sd<10;let busy=0;for(let u=1;u<units-1;u++)if(!plain(u))busy++;
+  // relief units: a painted window or band piece, colour-matched, in the plain units of a face that has little else
+  const pcs=HGTW.winNames.map(hgtwPiece).filter(Boolean);
+  if(pcs.length&&units>=4){const every=busy>=(units-2)/3?4:3;
+    for(let u=2;u<units-1;u+=every){if(!plain(u))continue;
+      let best=null,bd=1e9;for(const pc of pcs){const dd=Math.abs(pc.m[0]-st[u].m[0])+Math.abs(pc.m[1]-st[u].m[1])+Math.abs(pc.m[2]-st[u].m[2]);if(dd<bd){bd=dd;best=pc}}
+      const y0=Hp-128*(u+1),sh=[0,1,2].map(c=>Math.max(-60,Math.min(60,st[u].m[c]-best.m[c])));
+      for(let y=0;y<128;y++){const e=Math.min(1,Math.min(y,127-y)/10),o0=(y0+y)*512;for(let x=0;x<128;x++){const o=o0+x*4,q=(y*128+x)*4;for(let c=0;c<3;c++){const v=best.d[q+c]+sh[c];d[o+c]=d[o+c]*(1-e)+v*e}}}}}
+  if(plain(0)){const y=Hp-18;hgtwBand(d,y,y+2,22,1);hgtwBand(d,y+2,Hp-2,0,.9);hgtwBand(d,Hp-2,Hp,-18,.85)} // plinth
+  const top=Math.min(128,Hp-128*(units-1)>=64?Hp-128*(units-1):128);
+  if(plain(units-1)){hgtwBand(d,0,10,12,1);hgtwBand(d,10,12,-30,1);hgtwBand(d,12,14,16,1)} // cornice
+}
+function hgtwStep(tex){ // a pearl step tile: light bevel at the top edge, darker joint at the foot, softly shaded sides
+  if(!tex||tex._stp||!tex.d)return;const Hp=tex.h|0;if(Hp<16||tex.d.length!==128*Hp*4)return;tex._stp=1;
+  if(!(tex.d instanceof Uint8ClampedArray))tex.d=Uint8ClampedArray.from(tex.d);const d=tex.d;
+  for(let y=0;y<Hp;y++){const ty=y%128;let k=0;if(ty<3)k=30;else if(ty<10)k=16*(1-(ty-3)/7);else if(ty>=124)k=-46;else if(ty>=117)k=-20*((ty-116)/8);
+    let o=y*512;for(let x=0;x<128;x++,o+=4){const ex=Math.min(x,127-x),kx=ex<5?-14*(1-ex/5):0,m=k+kx;d[o]+=m;d[o+1]+=m;d[o+2]+=m}}
+}
 /* ---------- healing ---------- */
 function hgtwHeal(tex){
   if(!tex||tex._hl||!tex.d)return;const Hp=tex.h|0;if(Hp<8||tex.d.length!==128*Hp*4)return;tex._hl=1;
   if(!(tex.d instanceof Uint8ClampedArray))tex.d=Uint8ClampedArray.from(tex.d);
   const d=tex.d,S=512,K=12,RM=40;
+  try{hgtwDetail(tex)}catch(e){console.error('hgtw detail',e)}
   for(let J=Hp-128;J>=24;J-=128){ // joins between stacked 128 px units, counted from the bottom
     const mean=(y0,y1)=>{let r=0,g=0,b=0;for(let y=y0;y<y1;y++){let o=y*S;for(let x=0;x<128;x++,o+=4){r+=d[o];g+=d[o+1];b+=d[o+2]}}const n=128*(y1-y0);return [r/n,g/n,b/n]};
     const mu=mean(J-6,J),ml=mean(J,Math.min(Hp,J+6)),dl=[0,1,2].map(c=>Math.max(-34,Math.min(34,(mu[c]-ml[c])*.5)));
@@ -41,7 +76,13 @@ function hgtwHeal(tex){
   // unsharp (luma only, soft knee so grain is not boosted) and a little contrast around the mean of the tile
   const N=128*Hp,L=new Float32Array(N);let sum=0;
   for(let p=0,o=0;p<N;p++,o+=4){const v=d[o]*.3+d[o+1]*.59+d[o+2]*.11;L[p]=v;sum+=v}
-  const mean=sum/N,CA=1.7,CC=.12;
+  const mean=sum/N;let CA=1.7,CC=.12,hf=0;
+  for(let y=1;y<Hp-1;y+=2)for(let x=1;x<127;x+=2){const c=L[y*128+x];hf+=Math.abs(4*c-L[y*128+x-1]-L[y*128+x+1]-L[y*128-128+x]-L[y*128+128+x])*.125}
+  hf/=((Hp>>1)*63);tex.hf=hf;
+  if(hf>HGTW.noisy){ // busy small-scale noise (dots, static, cells) turns to pixel noise close up: low-pass it strongly instead of sharpening
+    const pass=()=>{const c=d.slice();for(let y=0;y<Hp;y++){const yu=(y?y-1:1)*512,yd=(y<Hp-1?y+1:Hp-2)*512,r=y*512;for(let x=0;x<128;x++){const xl=(x?x-1:1)*4,xr=(x<127?x+1:126)*4,o=r+x*4;for(let k=0;k<3;k++)d[o+k]=(c[o+k]*4+c[r+xl+k]+c[r+xr+k]+c[yu+x*4+k]+c[yd+x*4+k])*.125}}};
+    pass();pass();CA=0;CC=.04;tex.lp=1}
+
   for(let y=0;y<Hp;y++){const yu=y?y-1:1,yd=y<Hp-1?y+1:Hp-2;
     for(let x=0;x<128;x++){const xl=x?x-1:1,xr=x<127?x+1:126,c=L[y*128+x];
       let det=(4*c-L[yu*128+x]-L[yd*128+x]-L[y*128+xl]-L[y*128+xr])*.125;const a=det<0?-det:det;det*=a/(a+1.6);
@@ -52,6 +93,8 @@ function hgtwHealLevel(L){
   const seen=new Set(),t0=performance.now();let n=0;
   const one=g=>{if(g===undefined||g===null||g<100||seen.has(g))return;seen.add(g);const ti=T_TILE[g];if(ti!==undefined&&TEX[ti]&&!TEX[ti]._hl){hgtwHeal(TEX[ti]);n++}};
   for(const k in L.chars)one(L.chars[k]);
+  const stp=g=>{if(g){const ti=T_TILE[g];if(ti!==undefined&&TEX[ti])hgtwStep(TEX[ti])}};
+  if(L.terrace){stp(L.terrace.riser);if(L.terrace.rg)for(let i=0;i<L.terrace.rg.length;i++)if(L.terrace.rg[i])stp(L.terrace.rg[i])}
   if(L.terrace){one(L.terrace.riser);if(L.terrace.rg)for(let i=0;i<L.terrace.rg.length;i++)if(L.terrace.rg[i])one(L.terrace.rg[i])}
   return {tiles:n,ms:Math.round(performance.now()-t0)};
 }
@@ -71,7 +114,7 @@ function hgtwVinePic(vineName,mode,hue){
   if(!pic){ // stand-in from the painted hanging light vine, turned to leaf green; climbing vines are the same picture upside down
     const src=hgtaPic('hgt_lightvine')||IMG['hgt_lightvine'];if(!src)return hgtwPics[key]=null;
     const w=src.naturalWidth||src.width,h=src.naturalHeight||src.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
-    x.filter='hue-rotate('+hue+'deg) saturate(1.5) brightness(.82) contrast(1.15)';if(mode==='climb'||mode==='wreath'){x.translate(0,h);x.scale(1,-1)}x.drawImage(src,0,0);pic=c}
+    x.filter='hue-rotate('+hue+'deg) saturate(1.7) brightness(1) contrast(1.12)';if(mode==='climb'||mode==='wreath'){x.translate(0,h);x.scale(1,-1)}x.drawImage(src,0,0);pic=c}
   return hgtwPics[key]=pic;
 }
 const hgtwVines=new Map();

@@ -35,23 +35,32 @@ function hgtlfRng(seed){let s=seed>>>0;return()=>{s=(s+0x6D2B79F5)>>>0;let t=s;t
 /* ---------- creature species (placeholder pictures until the art agent registers its own with hgtlfSpecies) ----------
    sprites: candidate picture keys (the first that exists; or frames), h: height in cells, mode 'wander'|'sit', hover: float height, flee: steps away,
    where: kinds of place it likes (nook, pool, balcony, top, court, landing, any), cities: null = all. lines: plain factual lines for a tap or a bump. */
-{const S=HGTLF.species,add=(k,d)=>{if(!S[k])S[k]=d};
- add('glassfin',{name:'Glass fin',sprites:['hg_ins2'],h:.55,mode:'wander',hover:.22,speed:.42,flee:1,where:['pool','balcony','court'],cities:null,
-   lines:['It watches you and does not move.','It folds its fins and settles.','It drifts a short way off.','Its large eyes follow you and then look away.']});
- add('stiltcrawler',{name:'Stilt crawler',sprites:['hg_ins3'],h:.62,mode:'wander',speed:.5,flee:1,where:['court','landing','nook'],cities:null,
-   lines:['It stands very still on its thin legs.','It lifts one leg and puts it down again.','It turns its antennae toward you, then away.','It steps back and waits.']});
- add('lanternmoth',{name:'Lantern moth',sprites:['hg_ins7'],h:.5,mode:'sit',hover:.3,speed:.4,where:['top','balcony','nook'],cities:['exsce','nibb','glorm'],
-   lines:['Its wings open and close slowly.','It does not move from its perch.','It rests with its wings flat.','Its wings give off a faint light.']});
- add('bulbgrub',{name:'Bulb grub',sprites:['hg_larva'],h:.36,mode:'sit',speed:.22,where:['nook','pool','landing','court'],cities:null,
-   lines:['It does not react to you.','It shifts a little and is still again.','It ignores you.','It is warm and soft and stays where it is.']});
- add('reedcrawler',{name:'Reed crawler',sprites:['hg_ins1'],h:.5,mode:'wander',speed:.45,flee:1,where:['pool','court','nook','landing'],cities:['ulb','exsce'],
-   lines:['It holds a stem of reed and does not let go.','It moves away along the edge.','It watches you with all of its eyes.','It stops and does not move.']});
- add('stallscuttler',{name:'Stall scuttler',sprites:['hg_ins5'],h:.55,mode:'wander',speed:.55,flee:1,where:['court','landing','nook'],cities:['glorm'],
-   lines:['It looks at the stalls and not at you.','It scuttles a few steps and stops.','It rests under the edge of a step.','It watches you and does not move.']});
- add('bellclinger',{name:'Bell clinger',sprites:['hg_ins8'],h:.45,mode:'sit',speed:.3,where:['top','balcony','nook','landing'],cities:['nibb','exsce'],
-   lines:['It holds on to the stone and does not let go.','It pulls in its legs and settles.','It stays where it is.','It clicks once and is quiet.']});
+{const S=HGTLF.species,add=(k,d)=>{if(!S[k])S[k]=d},EX='exsce',UL='ulb',GL='glorm',NB='nibb';
+ // painted hgtb_ pets (hgt_art2.js): [key, name, picture, size, mode, hover, glow, where, cities, lines]. Small ones are drawn 1.5 times larger in the streets.
+ const L1=['It watches you and does not move.','It folds its fins and settles.'],L2=['It drifts a short way off.','Its fins fold flat and it hangs in the air.'],L3=['It turns its antennae toward you, then away.','It lifts one leg and puts it down again.'],L4=['The sac on its back glows.','It does not move from its place.'];
+ const P=[['pinkbulb','Pink bulb','hgtb_pinkbulb',.45,'wander',0,0,['nook','court','landing','bench'],[EX,UL,NB],L3],
+  ['lilacmoth','Lilac moth','hgtb_lilacmoth',.75,'wander',.3,0,['balcony','top','court'],[EX,GL,NB],L2],
+  ['lanternbeetle','Lantern beetle','hgtb_lanternbeetle',.55,'sit',0,1,['bench','landing','nook','top'],[EX,UL,GL,NB],L4],
+  ['pearlslug','Pearl slug','hgtb_pearlslug',.4,'sit',0,0,['pool','nook','landing','bench'],[UL,GL],L1],
+  ['aquawhale','Aqua bulb-whale','hgtb_aquawhale',1.5,'sit',0,0,['court'],[GL,NB],['It breathes slowly and does not move.','It looks at you with one eye and then closes it.']],
+  ['jadefinmoth','Jade fin-moth','hgtb_jadefinmoth',.8,'wander',.3,0,['top','balcony','pool'],[EX,UL,GL],L2],
+  ['spindleray','Spindle ray','hgtb_spindleray',.75,'wander',.1,0,['court','landing'],[EX,GL,NB],L1],
+  ['amberpup','Amber shell-pup','hgtb_amberpup',.35,'wander',0,0,['bench','landing','court'],[EX,UL,GL,NB],['It looks up at you and sits.','It steps back from you and waits.']],
+  ['fishbeetle','Fish beetle','hgtb_fishbeetle',.8,'wander',0,0,['court','landing'],[UL,NB],L3],
+  ['creamjelly','Cream jelly','hgtb_creamjelly',.9,'sit',.35,1,['pool','top','balcony'],[EX,UL,GL,NB],['The lights inside it pulse slowly.','It hangs in the air and does not move.']],
+  ['jadeeel','Jade lantern-eel','hgtb_jadeeel',.6,'sit',0,1,['pool','nook'],[UL,GL,NB],L4],
+  ['fishfly','Fish fly','hgtb_fishfly',.7,'wander',.35,0,['balcony','top','court'],[NB,EX],L2],
+  ['peachwhale','Peach bulb-whale','hgtb_peachwhale',1.9,'sit',0,0,['court'],[EX,UL],['It breathes slowly and does not move.','It settles lower on its legs.']],
+  ['creammoth','Cream moth','hgtb_creammoth',.5,'sit',.25,0,['top','bench','nook'],[EX,NB,GL],L2],
+  ['pups','Shell pups','hgtb_pups',.4,'wander',0,0,['bench','landing','court'],[UL,GL],['They sit close together and watch you.','They step back together.']],
+  ['spindlespider','Spindle spider','hgtb_spindlespider',.7,'wander',0,0,['nook','landing','court'],[EX,NB],L3]];
+ for(const [k,n,pic,sz,mode,hover,glow,where,cities,lines] of P)add('p_'+k,{name:n,sprites:[pic],h:sz<1.2?sz*1.5:sz,mode,hover:hover?hover*1.2:0,glow,speed:mode==='sit'?.22:sz>1.2?.2:.4,flee:mode==='wander'&&sz<1.2?1:0,where,cities,lines,big:sz>1.2});
+ // older placeholder species (used only when the painted pets are missing)
+ add('glassfin',{name:'Glass fin',sprites:['hg_ins2'],h:.8,mode:'wander',hover:.22,speed:.42,flee:1,where:['pool','balcony','court'],cities:null,lines:L1});
+ add('bulbgrub',{name:'Bulb grub',sprites:['hg_larva'],h:.5,mode:'sit',speed:.22,where:['nook','pool','landing','court'],cities:null,lines:['It does not react to you.','It ignores you.']});
 }
 const HGTLF_NPC=['hg_npc1','hg_npc3','hg_npc6','hg_npc0','hg_npc5','hg_npc4'];
+const HGTLF_FOLK={clean:['hgtb_sweep'],walk:['hgtb_walk','hgtb_basket','hgtb_jar','hgtb_lantern','hgtb_elder'],tend:['hgtb_plantbed','hgtb_water'],lamp:['hgtb_polish','hgtb_lantern'],sit:['hgtb_elder','hgtb_basket'],read:['hgtb_read'],fish:['hgtb_fisher'],watch:['hgtb_watch']};
 const HGTLF_TASK={clean:{name:'Sweeper',lines:['The stones need sweeping every day. Dust comes down from the roof.','I sweep this landing and the steps below it.','Leave the dust where it is and I will have to sweep it again.']},
  walk:{name:'Walker',lines:['I walk this way every day. It takes some time.','The stairs here are not steep. You get used to them.','I am on my way. The road is long.']},
  tend:{name:'Gardener',lines:['The plants here are looked after every day.','The glitter on the leaves comes back each night.','I keep the beds clear of weeds.']},
@@ -71,13 +80,15 @@ function hgtlfScan(id){
   if(T)for(let i=0;i<N;i++)h[i]=T[i];
   for(let y=0;y<H;y++){const r=L.rows[y];for(let x=0;x<W;x++)pass[y*W+x]=r.charCodeAt(x)===46?1:0}
   if(typeof hgtnCells==='function'){for(const k of hgtnCells(L)){const c=k.split(',');const x=+c[0],y=+c[1];if(x>=0&&y>=0&&x<W&&y<H)pass[y*W+x]=0}} // narrow stairs: nothing stands or walks there
-  const benches=[],plants=[],lamps=[],fountains=[],enters=[];
+  const tall=new Uint8Array(N),cover=new Uint8Array(N),benches=[],plants=[],lamps=[],fountains=[],enters=[];
   for(const d of L.decor||[]){if(d.x<0||d.y<0||d.x>=W||d.y>=H)continue;const i=d.y*W+d.x;
     if(d.block||d.enter)pass[i]=0;
     if(d.enter)enters.push(d);
     if(d.npc){for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const x=d.x+dx,y=d.y+dy;if(x>=0&&y>=0&&x<W&&y<H)avoid[y*W+x]=1}}
     const k=d.k||'';
-    if(k==='bench')benches.push(d);else if(HGTLF_PLANT.test(k))plants.push(d);else if(HGTLF_LAMP.test(k))lamps.push(d);else if(/fountain/.test(k))fountains.push(d);}
+    if(!d.hidden&&(NPC_H[k]||(HGTLF_PLANT.test(k)?1:0))>=.55&&!/^hgtb_(bench|chair|table)$|^bench$/.test(k))tall[i]=1;
+    if(k==='bench'||k==='hgtb_bench')benches.push(d);else if(HGTLF_PLANT.test(k))plants.push(d);else if(HGTLF_LAMP.test(k))lamps.push(d);else if(/fountain/.test(k))fountains.push(d);}
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(!tall[y*W+x])continue;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const xx=x+dx,yy=y+dy;if(xx>=0&&yy>=0&&xx<W&&yy<H&&cover[yy*W+xx]<250)cover[yy*W+xx]++}}
   const ok=(x,y,nx,ny)=>nx>=0&&ny>=0&&nx<W&&ny<H&&pass[ny*W+nx]&&Math.abs(h[ny*W+nx]-h[y*W+x])<=.5;
   const st=L.start||{x:(W/2)|0,y:(H/2)|0};let sx=st.x,sy=st.y;
   if(!pass[sy*W+sx]){let best=1e9;for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(pass[y*W+x]){const d=Math.abs(x-sx)+Math.abs(y-sy);if(d<best){best=d;var bx=x,by=y}}if(best<1e9){sx=bx;sy=by}}
@@ -102,11 +113,13 @@ function hgtlfScan(id){
   for(let y=0;y<H;y++){const r=L.rows[y];for(let x=0;x<W;x++){const c=r[x];if(c==='.')continue;const gid=L.chars&&L.chars[c];if(!gid||typeof KH_DOOR==='undefined'||!KH_DOOR[gid])continue;
     for(const [dx,dy] of HGTLF_D4){const nx=x+dx,ny=y+dy;if(nx>=0&&ny>=0&&nx<W&&ny<H&&reach[ny*W+nx]&&Math.abs(h[ny*W+nx]-h[y*W+x])<=.6){doors.push({x:nx,y:ny,dx:x,dy:y});break}}}}
   for(const d of enters)for(const [dx,dy] of HGTLF_D4){const nx=d.x+dx,ny=d.y+dy;if(nx>=0&&ny>=0&&nx<W&&ny<H&&reach[ny*W+nx]){doors.push({x:nx,y:ny,dx:d.x,dy:d.y});break}}
-  S={W,H,N,h,pass,avoid,reach,deg,fl,doors,benches,plants,lamps,fountains,count,start:{x:sx,y:sy},
+  S={W,H,N,h,pass,avoid,tall,cover,reach,deg,fl,doors,benches,plants,lamps,fountains,count,start:{x:sx,y:sy},
      q:new Int32Array(N),prev:new Int32Array(N),stamp:new Int32Array(N),sc:0};
   return HGTLF.scans[id]=S;
 }
 const hgtlfOK=(S,x,y,nx,ny)=>nx>=0&&ny>=0&&nx<S.W&&ny<S.H&&S.pass[ny*S.W+nx]===1&&Math.abs(S.h[ny*S.W+nx]-S.h[y*S.W+x])<=.5;
+/* a cell is in open view when no tall decor stands within one cell and a line of two open cells leads away from it in some direction */
+function hgtlfView(S,i,maxCover){if(S.cover[i]>(maxCover||0))return false;const x=i%S.W,y=(i/S.W)|0;for(const [dx,dy] of HGTLF_D4){let good=true;for(let k=1;k<=3;k++){const xx=x+dx*k,yy=y+dy*k;if(xx<0||yy<0||xx>=S.W||yy>=S.H||!S.pass[yy*S.W+xx]||S.tall[yy*S.W+xx]){good=false;break}}if(good)return true}return false}
 /* breadth-first path (list of [x,y] after the start) inside a square zone; null when none */
 function hgtlfPath(S,sx,sy,tx,ty,zx,zy,zr,maxN){
   if(sx===tx&&sy===ty)return[];
@@ -140,8 +153,9 @@ function hgtlfAuto(id,opts){
   const interest=i=>1+((S.fl[i]&16)?1:0)+((S.fl[i]&64)?1:0)+(S.h[i]>3?.5:0)+(S.h[i]>8?.5:0);
   const spotsNear=(i,pred,r,n)=>{const x=i%W,y=(i/W)|0,o=[];for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){const xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=S.W||yy>=S.H)continue;const j=yy*W+xx;if(pred(j)&&(dx||dy))o.push({x:xx,y:yy})}return shuffle(o).slice(0,n)};
   const npcSpec=(task,i,extra)=>{const c=cell(i),tk=HGTLF_TASK[extra&&extra.lamp?'lamp':task]||HGTLF_TASK.walk,dr=doorOf(c.x,c.y);
-    return Object.assign({kind:'npc',sprite:HGTLF_NPC[(rng()*HGTLF_NPC.length)|0],name:tk.name,task,home:c,door:dr,speed:.8+rng()*.4,lines:tk.lines,zone:5,schedule:city?{from:5,to:22}:{from:0,to:24},auto:1},extra||{})};
-  const plantSpot=i=>S.reach[i]&&!S.avoid[i]&&!(S.fl[i]&5)&&S.deg[i]>=2,mk=(n)=>Math.round(nNpc*n/34);
+    const fk=HGTLF_FOLK[extra&&extra.lamp?'lamp':task]||[],pick=fk.length?fk[(rng()*fk.length)|0]:null;
+    return Object.assign({kind:'npc',sprite:HGTLF_NPC[(rng()*HGTLF_NPC.length)|0],sprites:pick?[pick]:null,name:tk.name,task,home:c,door:dr,speed:.8+rng()*.4,lines:tk.lines,zone:5,schedule:city?{from:5,to:22}:{from:0,to:24},auto:1},extra||{})};
+  const plantSpot=i=>S.reach[i]&&!S.avoid[i]&&!(S.fl[i]&5)&&S.deg[i]>=2&&S.cover[i]<=2,view=i=>hgtlfView(S,i,0),mk=(n)=>Math.round(nNpc*n/34);
   if(!city){ // a room: a few residents sitting, reading or sweeping, and small creatures in the corners
     const rc=[];for(let i=0;i<S.N;i++)if(S.reach[i]&&!S.avoid[i]&&!(S.fl[i]&1)&&S.deg[i]>=2&&far(i))rc.push(i);
     const tasks=['sit','read','clean'];take(rc,nNpc,3,'room',null).forEach((i,k)=>list.push(npcSpec(tasks[k%3],i,{zone:k%3===2?2:0,door:null,spots:[]})));
@@ -161,25 +175,31 @@ function hgtlfAuto(id,opts){
   {const bedCells=[],lampCells=[];
    for(const d of S.plants){const i=d.y*W+d.x;let near=0;for(const e of S.plants)if(Math.abs(e.x-d.x)<=2&&Math.abs(e.y-d.y)<=2)near++;if(near>=3)for(const [dx,dy] of HGTLF_D4){const j=(d.y+dy)*W+d.x+dx;if(plantSpot(j)&&far(j)&&S.h[j]===S.h[i])bedCells.push(j)}}
    for(const d of S.lamps)for(const [dx,dy] of HGTLF_D4){const j=(d.y+dy)*W+d.x+dx;if(plantSpot(j)&&far(j))lampCells.push(j)}
-   for(const i of take(bedCells,mk(5),8,'tend',null))list.push(npcSpec('tend',i,{zone:4,spots:spotsNear(i,j=>plantSpot(j),3,3)}));
+   for(const i of take(bedCells.filter(i=>hgtlfView(S,i,2)),mk(5),8,'tend',null))list.push(npcSpec('tend',i,{zone:4,spots:spotsNear(i,j=>plantSpot(j),3,3)}));
    for(const i of take(lampCells,mk(3),10,'lamp',null))list.push(npcSpec('tend',i,{lamp:true,zone:6,spots:spotsNear(i,j=>plantSpot(j),4,3),schedule:{from:0,to:24},door:null}))}
   // 4. sitters on benches and platforms, readers
   {const bc=[];for(const d of S.benches)for(const [dx,dy] of HGTLF_D4){const j=(d.y+dy)*W+d.x+dx;if(S.reach[j]&&!S.avoid[j]&&!(S.fl[j]&5)&&far(j))bc.push(j)}
-   const plat=byFl(8|16|32).filter(i=>!(S.fl[i]&1)&&S.deg[i]>=2),cands=bc.length>=4?bc:bc.concat(plat);
+   const plat=byFl(8|16|32).filter(i=>!(S.fl[i]&1)&&S.deg[i]>=2),cands=(bc.length>=4?bc:bc.concat(plat)).filter(view);
    const got=take(cands,mk(5),8,'sit',interest);got.forEach((i,k)=>list.push(npcSpec(k%3===2?'read':'sit',i,{zone:0})))}
   // 5. anglers at pools and fountains, watchers at edges
   {const pc=[];for(const d of S.fountains)for(const [dx,dy] of HGTLF_D4){const j=(d.y+dy)*W+d.x+dx;if(S.reach[j]&&!S.avoid[j]&&far(j))pc.push(j)}
    const sunk=byFl(64).filter(i=>S.deg[i]>=3);
-   for(const i of take(pc.concat(sunk),mk(2),12,'fish',null))list.push(npcSpec('fish',i,{zone:0}));
-   for(const i of take(byFl(16).filter(i=>S.deg[i]>=2&&!(S.fl[i]&1)),mk(2),12,'watch',null))list.push(npcSpec('watch',i,{zone:0}))}
+   for(const i of take(pc.concat(sunk).filter(view),mk(2),12,'fish',null))list.push(npcSpec('fish',i,{zone:0}));
+   for(const i of take(byFl(16).filter(i=>S.deg[i]>=2&&!(S.fl[i]&1)&&view(i)),mk(2),12,'watch',null))list.push(npcSpec('watch',i,{zone:0}))}
   // creatures: nooks, pools, balconies, tower tops, courts and landings
-  const sp=Object.keys(HGTLF.species).filter(k=>{const d=HGTLF.species[k];return(!d.cities||d.cities.includes(ck))&&hgtlfSpriteOf(d)});
-  const place={nook:()=>byFl(2).concat(byFl(4).filter(()=>rng()<.1)),pool:()=>byFl(64).filter(i=>S.deg[i]>=2),balcony:()=>byFl(16),top:()=>byFl(32),court:()=>byFl(8),landing:()=>byFl(128)};
-  const mix=city?{nook:7,pool:4,balcony:4,top:3,court:3,landing:3}:{nook:1,court:1,landing:1,balcony:1};
-  let made=0;const tot=Object.keys(mix).reduce((a,k)=>a+mix[k],0);
-  for(const k in mix){const n=Math.round(nCre*mix[k]/tot),fit=sp.filter(s=>HGTLF.species[s].where.includes(k)||HGTLF.species[s].where.includes('any'));if(!fit.length||!n)continue;
-    for(const i of take(place[k](),n,5,'c'+k,interest)){const key=fit[(rng()*fit.length)|0],d=HGTLF.species[key],c=cell(i);
-      list.push({kind:'creature',species:key,name:d.name,home:c,mode:d.mode,zone:d.mode==='sit'?2:k==='court'?6:4,speed:d.speed,flee:d.flee,lines:d.lines,auto:1});made++}}
+  let sp=Object.keys(HGTLF.species).filter(k=>{const d=HGTLF.species[k];return(!d.cities||d.cities.includes(ck))&&hgtlfSpriteOf(d)});
+  const painted=sp.filter(k=>/^hgtb_/.test(HGTLF.species[k].sprites[0]));if(painted.length>=4)sp=painted; // the painted pets in every city, a different mix in each
+  const vw=i=>hgtlfView(S,i,0),benchCells=[];for(const d of S.benches){const i=d.y*W+d.x;if(S.h[i]>-50)benchCells.push(i)}
+  const place={nook:()=>byFl(2).concat(byFl(4).filter(()=>rng()<.1)).filter(vw),pool:()=>byFl(64).filter(i=>S.deg[i]>=2&&vw(i)),balcony:()=>byFl(16).filter(vw),top:()=>byFl(32).filter(vw),court:()=>byFl(8).filter(vw),landing:()=>byFl(128).filter(vw),bench:()=>benchCells};
+  const mix=city?{bench:4,nook:3,pool:4,balcony:3,top:3,court:3,landing:4}:{nook:1,court:1,landing:1,balcony:1};
+  let made=0;const tot=Object.keys(mix).reduce((a,k)=>a+mix[k],0),usedN={};
+  const pickSp=(fit)=>{let best=null,bn=1e9;for(const k of shuffle(fit.slice())){const d=HGTLF.species[k],n=(usedN[k]||0)+(d.big&&(usedN[k]||0)>=1?9:0);if(n<bn){bn=n;best=k}}usedN[best]=(usedN[best]||0)+1;if(HGTLF.species[best].big)bigN++;return best};
+  let bigN=0;const make=(k,i,perch)=>{const fit=sp.filter(s=>(HGTLF.species[s].where.includes(k)||HGTLF.species[s].where.includes('any'))&&!(HGTLF.species[s].big&&(bigN>=2||perch)));if(!fit.length)return false;
+    const key=pickSp(fit),d=HGTLF.species[key],c=cell(i),sit=perch||d.mode==='sit';
+    list.push({kind:'creature',species:key,name:d.name,home:c,mode:sit?'sit':'wander',perch:!!perch,zone:perch?0:sit?2:k==='court'?5:3,speed:d.speed,flee:d.flee,lines:d.lines,auto:1});made++;return true};
+  for(const k in mix){const n=Math.round(nCre*mix[k]/tot);if(!n)continue;
+    for(const i of take(place[k](),n,k==='bench'?3:5,'c'+k,k==='bench'?null:interest))make(k,i,k==='bench')}
+  if(made<nCre){const extra=shuffle(byFl(8|128).filter(vw));for(const i of extra){if(made>=nCre)break;const x=i%W,y=(i/W)|0;if(tooNear(x,y,5,'cx'))continue;used.push({x,y,g:'cx'});make(Math.random()<.5?'landing':'court',i,false)}}
   if(cache)HGTLF.autoCache[id]=list;
   HGTLF.stats[id]={npc:list.filter(a=>a.kind==='npc').length,creatures:made,open,doors:S.doors.length,plants:S.plants.length,lamps:S.lamps.length,benches:S.benches.length,fountains:S.fountains.length};
   return list;
@@ -194,13 +214,14 @@ function hgtlfMake(sp,S,rng,i){
   if(a.kind==='creature'){
     const fr=Array.isArray(sp.sprite)?sp.sprite:sp.sprite?[sp.sprite]:(hgtlfSpriteOf(d)||[]);if(!fr.length)return null;
     a.k=fr[0];a.frames=fr;a.h=sp.h||d.h||.5;a.hover=sp.hover!==undefined?sp.hover:d.hover||0;a.flee=sp.flee!==undefined?!!sp.flee:!!d.flee;a.mode=sp.mode||d.mode||'wander';a.task=a.mode;a.flipDir=sp.flipDir!==undefined?sp.flipDir:d.flipDir!==false;
-    a.lines=a.lines||d.lines||['It does not react to you.'];a.name=sp.name||d.name||'Creature';
+    a.glow=sp.glow!==undefined?sp.glow:d.glow||0;if(sp.perch)a.hover+=.3;a.lines=a.lines||d.lines||['It does not react to you.'];a.name=sp.name||d.name||'Creature';
   }else{
-    const fr=Array.isArray(sp.sprite)?sp.sprite:[sp.sprite||'hg_npc3'];a.k=fr[0];a.frames=fr;a.task=sp.task||'walk';a.sc=sp.sc||1;a.h=(NPC_H[a.k]||1.2)*a.sc;a.hover=sp.hover||0;a.flipDir=false;
+    let fr=Array.isArray(sp.sprite)?sp.sprite:[sp.sprite||'hg_npc3'];if(sp.sprites){const f=sp.sprites.find(k=>IMG[k]);if(f)fr=[f]}a.k=fr[0];a.frames=fr;a.task=sp.task||'walk';a.sc=sp.sc||1;a.h=(NPC_H[a.k]||(/^hgtb_/.test(a.k)?1.15:1.2))*a.sc;a.hover=sp.hover||0;a.flipDir=false;
     const tk=HGTLF_TASK[a.task]||HGTLF_TASK.walk;a.lines=a.lines||tk.lines;
   }
   const hm=sp.home||(sp.route&&sp.route[0])||{x:0,y:0};let hx=Math.round(hm.x),hy=Math.round(hm.y);
-  if(!(hx>=0&&hy>=0&&hx<S.W&&hy<S.H&&S.reach[hy*S.W+hx])){let b=null,bd=99;for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){const x=hx+dx,y=hy+dy;if(x>=0&&y>=0&&x<S.W&&y<S.H&&S.reach[y*S.W+x]&&Math.abs(dx)+Math.abs(dy)<bd){bd=Math.abs(dx)+Math.abs(dy);b=[x,y]}}if(!b)return null;hx=b[0];hy=b[1]}
+  if(sp.perch)a.fixed=true;
+  if(!sp.perch&&!(hx>=0&&hy>=0&&hx<S.W&&hy<S.H&&S.reach[hy*S.W+hx])){let b=null,bd=99;for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){const x=hx+dx,y=hy+dy;if(x>=0&&y>=0&&x<S.W&&y<S.H&&S.reach[y*S.W+x]&&Math.abs(dx)+Math.abs(dy)<bd){bd=Math.abs(dx)+Math.abs(dy);b=[x,y]}}if(!b)return null;hx=b[0];hy=b[1]}
   a.home={x:hx,y:hy};a.x=hx;a.y=hy;a.hz=S.h[hy*S.W+hx];
   a.zone={x:hx,y:hy,r:sp.zone!==undefined?sp.zone:a.kind==='creature'?4:5};
   if(sp.route&&sp.route.length>1)a.route=sp.route.map(p=>({x:Math.round(p.x),y:Math.round(p.y),wait:p.wait===undefined?3:p.wait}));
@@ -211,6 +232,7 @@ function hgtlfMake(sp,S,rng,i){
   a.state=hgtlfActive(a)?'wait':'in';if(a.state==='in')a.vis=false;
   return a;
 }
+const hgtlfNight=()=>typeof hgtlmNight==='function'?(typeof hgtlmInterior==='function'&&hgtlmInterior(LEVEL)?.6:hgtlmNight()):(()=>{const h=hgtlfHour();return h>=20||h<6?1:0})();
 const hgtlfHour=()=>((G.clock||0)%1440)/60;
 function hgtlfActive(a){if(!a.sched)return true;const hr=hgtlfHour(),f=a.sched.from,t=a.sched.to;return f<=t?(hr>=f&&hr<t):(hr>=f||hr<t)}
 function hgtlfEnter(){
@@ -226,11 +248,12 @@ function hgtlfEnter(){
 }
 function hgtlfPick(a,S){ // a random cell in the zone that can be walked to
   for(let k=0;k<10;k++){const z=a.zone,r=Math.max(1,z.r),x=z.x+(((Math.random()*(2*r+1))|0)-r),y=z.y+(((Math.random()*(2*r+1))|0)-r);
-    if(x<0||y<0||x>=S.W||y>=S.H)continue;const i=y*S.W+x;if(!S.reach[i]||S.avoid[i])continue;if(a.kind==='npc'&&(S.fl[i]&7))continue;if(a.kind==='creature'&&(S.fl[i]&1)&&Math.random()<.8)continue;
+    if(x<0||y<0||x>=S.W||y>=S.H)continue;const i=y*S.W+x;if(!S.reach[i]||S.avoid[i])continue;if(a.kind==='npc'&&(S.fl[i]&7))continue;if(a.kind==='creature'&&((S.fl[i]&1)&&Math.random()<.8||S.cover[i]>0&&Math.random()<.9))continue;
     if(x===Math.round(a.x)&&y===Math.round(a.y))continue;return{x,y}}
   return null}
 function hgtlfGo(a,S,tx,ty,maxN){const z=a.zone,p=hgtlfPath(S,Math.round(a.x),Math.round(a.y),tx,ty,a.homing?-1:z.x,z.y,a.homing?-1:z.r,maxN||(z.r>20?6000:900));if(p&&p.length){a.path=p;a.pi=0;a.state='move';return true}return false}
 function hgtlfDecide(a,S){
+  if(a.fixed){a.state='wait';a.t=8+Math.random()*20;return}
   const waitFor=(lo,hi)=>lo+Math.random()*(hi-lo);let ok=false;
   if(a.route){a.ri=(a.ri+1)%a.route.length;const r=a.route[a.ri];ok=hgtlfGo(a,S,r.x,r.y);a.t=ok?0:2;a.nextWait=r.wait;if(!ok){a.state='wait';a.t=3}return}
   if(a.kind==='creature'){
@@ -252,8 +275,8 @@ function hgtlfStep(a,S,dt,px,py){
   if(a.kind==='creature'&&a.flee&&a.state!=='in'){
     const dx=a.x-px,dy=a.y-py;
     if(a.fleeT>0)a.fleeT-=dt;
-    else if(dx*dx+dy*dy<9){ // the party is near: step a few cells away
-      let best=null,bd=dx*dx+dy*dy;for(let k=0;k<12;k++){const p=hgtlfPick(a,S);if(!p)continue;const d=(p.x-px)*(p.x-px)+(p.y-py)*(p.y-py);if(d>bd+4&&Math.abs(p.x-a.x)+Math.abs(p.y-a.y)<=7){bd=d;best=p}}
+    else if(dx*dx+dy*dy<5.5){ // the party is within two cells: step two to four cells away
+      let best=null,bd=dx*dx+dy*dy;for(let k=0;k<12;k++){const p=hgtlfPick(a,S);if(!p)continue;const d=(p.x-px)*(p.x-px)+(p.y-py)*(p.y-py);if(d>bd+3&&Math.abs(p.x-a.x)+Math.abs(p.y-a.y)<=5&&Math.abs(p.x-a.x)+Math.abs(p.y-a.y)>=2){bd=d;best=p}}
       if(best&&hgtlfGo(a,S,best.x,best.y,500)){a.fleeT=3;a.nextWait=3+Math.random()*5}else a.fleeT=1.5}
   }
   if(a.state==='in'){if(hgtlfActive(a)){const d=a.door||a.home;a.x=d.x;a.y=d.y;a.cx=d.x;a.cy=d.y;a.vis=true;a.state='wait';a.t=1+Math.random()*3;a.hz=S.h[Math.round(a.y)*S.W+Math.round(a.x)]}return}
@@ -295,6 +318,7 @@ function hgtlfFrames(a,mode){
 function hgtlfSprites(out){
   if(HGTLF.lv!==LEVEL||HGTLF.grid!==G.grid)hgtlfEnter();
   if(!HGTLF.ag.length||G.state!=='play')return;
+  HGTLF.night=hgtlfNight();
   const t=G.time||0;let dt=t-HGTLF.last;HGTLF.last=t;if(dt<0)dt=0;if(dt>.1)dt=.1;
   if(dt>0)hgtlfTick(dt);
   const S=HGTLF.S,cam=G.C||{x:0,y:0},sp=G._spr,dX=sp?sp[2]:1,dY=sp?sp[3]:0;
@@ -308,6 +332,9 @@ function hgtlfSprites(out){
       else if(a.task==='watch'&&!moving)flip=(((t/6+a.seed)|0)&1)===1;
       else if(moving&&a.flipDir)flip=(-dY*a.dx+dX*a.dy)>0;
     }else if(a.flipDir&&(a.dx||a.dy))flip=(-dY*a.dx+dX*a.dy)>0;
+    const pdx=(G.P?G.P.x:cam.x)-a.x,pdy=(G.P?G.P.y:cam.y)-a.y,pd2=pdx*pdx+pdy*pdy,near=!moving&&pd2<20; // standing still and the party is within four cells: turn to face it
+    if(near&&a.kind==='creature'&&a.flipDir)flip=(-dY*Math.sign(pdx)+dX*Math.sign(pdy))>0;
+    else if(near&&a.kind==='npc'&&a.task!=='clean'&&a.task!=='read'&&a.task!=='fish')flip=(-dY*Math.sign(pdx)+dX*Math.sign(pdy))>0&&false;
     if(flip)img=hgtlfFlip(key)||base;
     let bob=a.hz-S.h[Math.max(0,Math.min(S.H-1,Math.floor(a.y+.5)))*S.W+Math.max(0,Math.min(S.W-1,Math.floor(a.x+.5)))]+a.hover;
     if(a.kind==='creature'){bob+=a.hover?Math.sin(t*1.8+a.seed*3)*.06:moving?Math.abs(Math.sin(t*7+a.seed))*.025:0}
@@ -315,7 +342,9 @@ function hgtlfSprites(out){
     else if(a.task==='clean')bob+=Math.abs(Math.sin(t*4.5+a.seed))*.02;
     else if(a.task==='tend')bob-=.035*(.5+.5*Math.sin(t*1.3+a.seed));
     else bob+=Math.sin(t*1.1+a.seed)*.008;
-    out.push({x:a.x+.5,y:a.y+.5,img,w:a.h*img.width/img.height,bob,decor:a.stub});
+    if(near&&a.hover)bob+=.12*(1-pd2/20); // a hovering pet rises a little when the party comes close
+    const night=HGTLF.night,lift=Math.max(a.glow?.28+.5*night:0,.34*night);
+    const o={x:a.x+.5,y:a.y+.5,img,w:a.h*img.width/img.height,bob,decor:a.stub};if(lift>0)o.lift=lift;out.push(o);
   }
 }
 /* ---------- taps and bumps ---------- */

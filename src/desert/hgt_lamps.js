@@ -1,5 +1,5 @@
 /* ==========================================================================
-   HOLLOW GRASSLANDS LAMPS (prefix hgtlm / HGTLM): night lamps in many colours for level 470, the cities 480..489 and their interiors 4850..4949.
+   HOLLOW GRASSLANDS LAMPS (prefix hgtlm / HGTLM): night lamps in many colours for level 470, the cities 480..489 and their interiors 4850..5499.
    - The game clock (G.clock, hour = (G.clock%1440)/60) drives it: night is about 20:00 to 06:00 with a dusk fade from 18:30 and a dawn fade to 07:30.
      By day lamps are unlit (a dim picture, no light); at night they glow with a coloured light pool on the ground and walls and a halo over the lamp.
      In the cities (480..489) the ambient light, haze, roof and grade also go darker at night, so the lamps are the main light. Interiors keep their lamps lit.
@@ -24,8 +24,8 @@ for(const [name,h0,h1,sat] of HGTLM.defs){
 }
 const hgtlmIsLamp=k=>HGTLM.info[k]!==undefined;
 function hgtlmColOf(lc){if(lc===undefined||lc===null)return null;return typeof lc==='number'?HGTLM.COL[HGTLM.names[((lc%HGTLM.names.length)+HGTLM.names.length)%HGTLM.names.length]]:(HGTLM.COL[lc]||null)}
-const hgtlmId=n=>(n===470||(n>=480&&n<=489)||(n>=4850&&n<=4949));
-const hgtlmInterior=n=>n>=4850&&n<=4949;
+const hgtlmId=n=>(n===470||hgtAny(n));
+const hgtlmInterior=n=>n>=4850&&hgtAny(n);
 const hgtlmTown=n=>n>=480&&n<=489;
 /* ---------- the clock ---------- */
 function hgtlmNight(){
@@ -141,7 +141,7 @@ function hgtlmWinTick(){
   const n=hgtlmInterior(LEVEL)?1:hgtlmNight(),st=n<.12?0:n<.6?1:2;
   if(HGTLM.winLv!==LEVEL){HGTLM.winLv=LEVEL;const L=LEVELS[LEVEL],ch=L&&L.chars||{},seen=new Set();HGTLM.winQ.length=0; // the wall tiles this level uses
     for(const k in ch){const g=ch[k],id=g>=100?T_TILE[g]:undefined;if(id!==undefined&&!seen.has(id)&&!HGTLM.done.has(id)){seen.add(id);HGTLM.winQ.push(id)}}}
-  if(st>0)for(let k=0;k<6&&HGTLM.winQ.length;k++){const id=HGTLM.winQ.pop();HGTLM.done.add(id);const w=hgtlmWindows(id);if(w){HGTLM.wins.set(id,w);if(HGTLM.eState===st)TEX[id].e=st===2?w.full:w.half}}
+  if(st>0){const tw=performance.now();for(let k=0;k<6&&HGTLM.winQ.length&&(k===0||performance.now()-tw<1.5);k++){const id=HGTLM.winQ.pop();HGTLM.done.add(id);const w=hgtlmWindows(id);if(w){HGTLM.wins.set(id,w);if(HGTLM.eState===st)TEX[id].e=st===2?w.full:w.half}}} // time budget: a heavy tile never shares its frame with others
   if(HGTLM.eState!==st){HGTLM.eState=st;for(const [id,w] of HGTLM.wins)TEX[id].e=st===0?null:st===2?w.full:w.half}
 }
 /* ---------- halos and light motes over lit lamps (screen space, over the 3D view) ---------- */

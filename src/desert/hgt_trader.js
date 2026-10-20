@@ -8,7 +8,7 @@ ITEMDEF.swiftshoes={n:'Swift Shoes',k:'legs',t:'Legs',ic:'swiftshoes',c:'#e8d0e8
 if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push('bubblehelm','swiftshoes');
 /* the speed bonus: the camera glide speed in the walking code is multiplied by this */
 function hgttSpeedMul(){
-  const n=LEVEL;if(!((n>=470&&n<=474)||(n>=480&&n<=489)||(n>=4850&&n<=4949)))return 1;
+  const n=LEVEL;if(!((n>=470&&n<=474)||hgtAny(n)))return 1;
   const live=G.heroes.filter(h=>h.alive);if(!live.length)return 1;
   let w=0;for(const h of live){const it=h.eq&&h.eq.legs;if(it&&idef(it).hgSwift)w++}
   return 1+.2*w/live.length}
