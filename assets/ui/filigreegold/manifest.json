@@ -1,0 +1,31 @@
+{
+ "label": "Filigree gold",
+ "files": {
+  "std_n": {
+   "file": "stone_std_n.webp",
+   "w": 996,
+   "h": 274
+  },
+  "std_l": {
+   "file": "stone_std_l.webp",
+   "w": 996,
+   "h": 274
+  },
+  "std_p": {
+   "file": "stone_std_p.webp",
+   "w": 996,
+   "h": 274
+  }
+ },
+ "fam": {
+  "std": {
+   "cap": 0.639,
+   "pad": 0.547,
+   "ar": 3.635,
+   "wl": 0,
+   "wt": 0,
+   "bh": 274
+  }
+ },
+ "fallback": "gold"
+}

@@ -1,0 +1,54 @@
+{
+ "label": "Ruby",
+ "files": {
+  "std_n": {
+   "file": "stone_std_n.webp",
+   "w": 991,
+   "h": 262
+  },
+  "std_l": {
+   "file": "stone_std_l.webp",
+   "w": 991,
+   "h": 262
+  },
+  "std_p": {
+   "file": "stone_std_p.webp",
+   "w": 991,
+   "h": 262
+  },
+  "small_n": {
+   "file": "stone_small_n.webp",
+   "w": 991,
+   "h": 262
+  },
+  "small_l": {
+   "file": "stone_small_l.webp",
+   "w": 991,
+   "h": 262
+  },
+  "small_p": {
+   "file": "stone_small_p.webp",
+   "w": 991,
+   "h": 262
+  }
+ },
+ "fam": {
+  "std": {
+   "cap": 0.76,
+   "pad": 0.534,
+   "ar": 3.782,
+   "wl": 0,
+   "wt": 0,
+   "bh": 262
+  },
+  "small": {
+   "cap": 0.76,
+   "pad": 0.515,
+   "ar": 3.782,
+   "wl": 0,
+   "wt": 0,
+   "bh": 262
+  }
+ },
+ "ink": "light"
+}

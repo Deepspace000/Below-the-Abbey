@@ -1,0 +1,54 @@
+{
+ "label": "Filigree ruby",
+ "files": {
+  "std_n": {
+   "file": "stone_std_n.webp",
+   "w": 1000,
+   "h": 200
+  },
+  "std_l": {
+   "file": "stone_std_l.webp",
+   "w": 1000,
+   "h": 200
+  },
+  "std_p": {
+   "file": "stone_std_p.webp",
+   "w": 1000,
+   "h": 200
+  },
+  "small_n": {
+   "file": "stone_small_n.webp",
+   "w": 365,
+   "h": 200
+  },
+  "small_l": {
+   "file": "stone_small_l.webp",
+   "w": 365,
+   "h": 200
+  },
+  "small_p": {
+   "file": "stone_small_p.webp",
+   "w": 365,
+   "h": 200
+  }
+ },
+ "fam": {
+  "std": {
+   "cap": 1.028,
+   "pad": 1.0,
+   "ar": 5.0,
+   "wl": 0,
+   "wt": 0,
+   "bh": 200
+  },
+  "small": {
+   "cap": 0.514,
+   "pad": 0.437,
+   "ar": 1.825,
+   "wl": 0,
+   "wt": 0,
+   "bh": 200
+  }
+ },
+ "ink": "light"
+}

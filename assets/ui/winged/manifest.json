@@ -1,0 +1,31 @@
+{
+ "label": "Winged gold",
+ "files": {
+  "std_n": {
+   "file": "stone_std_n.webp",
+   "w": 1009,
+   "h": 286
+  },
+  "std_l": {
+   "file": "stone_std_l.webp",
+   "w": 1009,
+   "h": 286
+  },
+  "std_p": {
+   "file": "stone_std_p.webp",
+   "w": 1009,
+   "h": 286
+  }
+ },
+ "fam": {
+  "std": {
+   "cap": 0.596,
+   "pad": 0.404,
+   "ar": 3.187,
+   "wl": 130,
+   "wt": 51,
+   "bh": 235
+  }
+ },
+ "fallback": "gold"
+}

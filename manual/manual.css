@@ -99,3 +99,7 @@ figure.shot img{filter:grayscale(1) brightness(1.18) contrast(1.08)}
 .cover img{width:5.4in;height:auto;margin:1.45in auto 0;border:3pt solid #d9b45a;object-fit:contain}
 .cover .cv-bot{font-family:'OldEnglish',serif;color:#f1dba0;font-size:30pt;margin-top:.45in;line-height:1}
 .cover .cv-sub{font-family:'Times New Roman',serif;font-style:italic;color:#d8d0b8;font-size:12pt;margin-top:.15in}
+/* the finished front cover (cover_front.png, 6:9): the painting is the whole page, full bleed, no frame or text of its own */
+.cover.cover-full{padding:0;background:#000}
+.cover.cover-full::before{display:none}
+.cover.cover-full img{display:block;width:6in;height:9in;margin:0;border:0;object-fit:cover}

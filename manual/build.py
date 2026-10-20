@@ -1,6 +1,7 @@
 """Build the manual:  python build.py   ->  ../Below-the-Abbey-manual.pdf
 Chapters are chapters/NN_name.html fragments (one <section class="chapter" id="chNN"> each, sorted by file name).
-The cover is cover.png / cover.jpg in this folder (full colour).  The gear catalog pdf is added as an appendix."""
+The cover is cover_front.png (6x9 full bleed, made by make_cover.py); without it cover.png / cover.jpg in this folder (full colour, framed).
+The gear catalog pdf is added as an appendix."""
 import os, re, glob, html, sys
 from playwright.sync_api import sync_playwright
 import pymupdf
@@ -8,6 +9,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUTPDF = os.path.join(os.path.dirname(HERE), 'Below-the-Abbey-manual.pdf')
 CATALOG = os.path.join(os.path.dirname(HERE), 'item_catalog.pdf')
 def cover_html():
+    _p = open(os.path.join(HERE, 'cover_choice.txt')).read().strip() if os.path.exists(os.path.join(HERE, 'cover_choice.txt')) else ''   # the owner's pick of front cover
+    _cf = _p if _p and os.path.exists(os.path.join(HERE, _p)) else 'cover_front.png'
+    if os.path.exists(os.path.join(HERE, _cf)):      # the finished front cover is the whole page
+        return '<div class="cover cover-full" id="cover"><img src="%s"></div>' % _cf
     for n in ('cover.png', 'cover.jpg', 'cover.jpeg', 'cover.webp'):
         if os.path.exists(os.path.join(HERE, n)):
             return ('<div class="cover" id="cover"><div class="cv-top">Instruction Manual</div><img src="%s"><div class="cv-bot">The Instruction Manual</div><div class="cv-sub">Grid-movement, turn-based RPG</div></div>' % n)

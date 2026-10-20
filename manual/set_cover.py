@@ -1,12 +1,20 @@
 """Put the colour cover on page 1 of the finished manual without rebuilding the whole book:
-    python set_cover.py            (uses manual/cover.png or cover.jpg)
+    python set_cover.py            (uses manual/cover_front.png, the full-bleed 6x9 front cover made by make_cover.py;
+                                    if that does not exist, the old framed landscape manual/cover.png or cover.jpg)
 Then re-run make_showcase.py to refresh the pictures."""
 import os, sys, pymupdf
 HERE = os.path.dirname(os.path.abspath(__file__)); PDF = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(HERE), 'Below-the-Abbey-manual.pdf')
-img = next((os.path.join(HERE, n) for n in ('cover.png', 'cover.jpg', 'cover.jpeg', 'cover.webp') if os.path.exists(os.path.join(HERE, n))), None)
-if not img: sys.exit('no cover.png / cover.jpg in the manual folder')
+_ch = os.path.join(HERE, 'cover_choice.txt')   # the owner's pick: the file name of the front cover to use (cover_front.png, cover_front_grimy.png, cover_front_ingame.png ...)
+_pick = open(_ch).read().strip() if os.path.exists(_ch) else ''
+FRONT = os.path.join(HERE, _pick) if _pick and os.path.exists(os.path.join(HERE, _pick)) else os.path.join(HERE, 'cover_front.png')
+img = FRONT if os.path.exists(FRONT) else next((os.path.join(HERE, n) for n in ('cover.png', 'cover.jpg', 'cover.jpeg', 'cover.webp') if os.path.exists(os.path.join(HERE, n))), None)
+if not img: sys.exit('no cover_front.png / cover.png / cover.jpg in the manual folder')
 d = pymupdf.open(PDF); old = d[0]; W, H = old.rect.width, old.rect.height
 new = d.new_page(0, width=W, height=H)
+if img == FRONT:                 # the finished portrait cover (6:9): the picture is the whole page, full bleed
+    new.insert_image(new.rect, filename=img)
+    d.delete_page(1)             # the old cover
+    d.save(PDF + '.tmp', deflate=True, garbage=3); d.close(); os.replace(PDF + '.tmp', PDF); print('cover set (full bleed)'); sys.exit(0)
 new.draw_rect(new.rect, color=(.043, .043, .043), fill=(.043, .043, .043))
 gold = (.85, .71, .35)
 new.draw_rect(pymupdf.Rect(16, 16, W - 16, H - 16), color=gold, width=1.2); new.draw_rect(pymupdf.Rect(21, 21, W - 21, H - 21), color=gold, width=.5)

@@ -1,0 +1,53 @@
+{
+ "label": "Sandstone",
+ "files": {
+  "std_n": {
+   "file": "stone_std_n.webp",
+   "w": 989,
+   "h": 261
+  },
+  "std_l": {
+   "file": "stone_std_l.webp",
+   "w": 989,
+   "h": 261
+  },
+  "std_p": {
+   "file": "stone_std_p.webp",
+   "w": 989,
+   "h": 261
+  },
+  "slim_n": {
+   "file": "stone_slim_n.webp",
+   "w": 989,
+   "h": 261
+  },
+  "slim_l": {
+   "file": "stone_slim_l.webp",
+   "w": 989,
+   "h": 261
+  },
+  "slim_p": {
+   "file": "stone_slim_p.webp",
+   "w": 989,
+   "h": 261
+  }
+ },
+ "fam": {
+  "std": {
+   "cap": 0.766,
+   "pad": 0.728,
+   "ar": 3.789,
+   "wl": 0,
+   "wt": 0,
+   "bh": 261
+  },
+  "slim": {
+   "cap": 0.517,
+   "pad": 0.498,
+   "ar": 3.789,
+   "wl": 0,
+   "wt": 0,
+   "bh": 261
+  }
+ }
+}

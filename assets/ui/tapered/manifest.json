@@ -1,0 +1,53 @@
+{
+ "label": "Polished sandstone",
+ "files": {
+  "std_n": {
+   "file": "stone_std_n.webp",
+   "w": 990,
+   "h": 260
+  },
+  "std_l": {
+   "file": "stone_std_l.webp",
+   "w": 990,
+   "h": 260
+  },
+  "std_p": {
+   "file": "stone_std_p.webp",
+   "w": 990,
+   "h": 260
+  },
+  "small_n": {
+   "file": "stone_small_n.webp",
+   "w": 990,
+   "h": 260
+  },
+  "small_l": {
+   "file": "stone_small_l.webp",
+   "w": 990,
+   "h": 260
+  },
+  "small_p": {
+   "file": "stone_small_p.webp",
+   "w": 990,
+   "h": 260
+  }
+ },
+ "fam": {
+  "std": {
+   "cap": 0.577,
+   "pad": 0.538,
+   "ar": 3.808,
+   "wl": 0,
+   "wt": 0,
+   "bh": 260
+  },
+  "small": {
+   "cap": 0.577,
+   "pad": 0.519,
+   "ar": 3.808,
+   "wl": 0,
+   "wt": 0,
+   "bh": 260
+  }
+ }
+}

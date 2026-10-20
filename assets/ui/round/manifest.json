@@ -1,0 +1,31 @@
+{
+ "label": "Round iron",
+ "files": {
+  "round_n": {
+   "file": "stone_round_n.webp",
+   "w": 276,
+   "h": 277
+  },
+  "round_l": {
+   "file": "stone_round_l.webp",
+   "w": 276,
+   "h": 277
+  },
+  "round_p": {
+   "file": "stone_round_p.webp",
+   "w": 276,
+   "h": 277
+  }
+ },
+ "fam": {
+  "round": {
+   "cap": 0.495,
+   "pad": 0.343,
+   "ar": 0.996,
+   "wl": 0,
+   "wt": 0,
+   "bh": 277
+  }
+ },
+ "fallback": "tapered"
+}

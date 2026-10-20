@@ -1,0 +1,54 @@
+{
+ "label": "Winged sandstone",
+ "files": {
+  "std_n": {
+   "file": "stone_std_n.webp",
+   "w": 980,
+   "h": 305
+  },
+  "std_l": {
+   "file": "stone_std_l.webp",
+   "w": 980,
+   "h": 305
+  },
+  "std_p": {
+   "file": "stone_std_p.webp",
+   "w": 980,
+   "h": 305
+  },
+  "small_n": {
+   "file": "stone_small_n.webp",
+   "w": 312,
+   "h": 271
+  },
+  "small_l": {
+   "file": "stone_small_l.webp",
+   "w": 312,
+   "h": 271
+  },
+  "small_p": {
+   "file": "stone_small_p.webp",
+   "w": 312,
+   "h": 271
+  }
+ },
+ "fam": {
+  "std": {
+   "cap": 0.365,
+   "pad": 0.299,
+   "ar": 2.387,
+   "wl": 163,
+   "wt": 31,
+   "bh": 274
+  },
+  "small": {
+   "cap": 0.369,
+   "pad": 0.266,
+   "ar": 1.151,
+   "wl": 0,
+   "wt": 0,
+   "bh": 271
+  }
+ },
+ "fallback": "gold"
+}

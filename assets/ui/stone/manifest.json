@@ -1,0 +1,53 @@
+{
+ "label": "Rough stone",
+ "files": {
+  "std_n": {
+   "file": "stone_std_n.webp",
+   "w": 994,
+   "h": 264
+  },
+  "std_l": {
+   "file": "stone_std_l.webp",
+   "w": 994,
+   "h": 264
+  },
+  "std_p": {
+   "file": "stone_std_p.webp",
+   "w": 994,
+   "h": 264
+  },
+  "slim_n": {
+   "file": "stone_slim_n.webp",
+   "w": 994,
+   "h": 264
+  },
+  "slim_l": {
+   "file": "stone_slim_l.webp",
+   "w": 994,
+   "h": 264
+  },
+  "slim_p": {
+   "file": "stone_slim_p.webp",
+   "w": 994,
+   "h": 264
+  }
+ },
+ "fam": {
+  "std": {
+   "cap": 1.098,
+   "pad": 0.663,
+   "ar": 3.765,
+   "wl": 0,
+   "wt": 0,
+   "bh": 264
+  },
+  "slim": {
+   "cap": 0.511,
+   "pad": 0.492,
+   "ar": 3.765,
+   "wl": 0,
+   "wt": 0,
+   "bh": 264
+  }
+ }
+}

@@ -43,11 +43,12 @@ const autoscaleOn=()=>!!G.flags.autoScaleOn;
 function locRating(loc){if(loc.lv.length===1&&loc.lv[0]===1)return '1-3';   // the crypts climb from 1 to 3
   let lo=1e9,hi=-1;for(const v of loc.lv){const r=LEVEL_RATING[v];if(r!==undefined){lo=Math.min(lo,r);hi=Math.max(hi,r)}}return hi<0?null:(lo===hi?String(lo):lo+'-'+hi)}
 function drawGameplay(){
-  BTNS=[];veil(.6);bigPanel(70,24,340,272);
-  txt('GAMEPLAY',240,44,14,'#d8c88e','center',true);
+  BTNS=[];veil(.6);bigPanel(70,10,340,300);
+  txt('GAMEPLAY',240,28,14,'#d8c88e','center',true);
   const on=autoscaleOn();
-  btnText('gp_scale','Autoscaling:  '+(on?'ON':'OFF'),140,64,200,28);
-  btnText('gp_fog','Fog of war on maps:  '+(G.flags.noFog?'OFF':'ON'),140,96,200,24);
+  btnText('gp_scale','Autoscaling:  '+(on?'ON':'OFF'),120,42,240,26);
+  btnText('gp_fog','Fog of war on maps:  '+(G.flags.noFog?'OFF':'ON'),120,72,240,22);
+  if(typeof stbGameplayRows==='function')stbGameplayRows(98,22,26); // the button style and button font switches (stonebuttons.js)
   const lines=on?[
     'Creatures scale to the party. A party that has outgrown a place meets its creatures raised to within a few levels of itself, and the great creatures always stand above the party.',
     'Turn autoscaling off for a fixed world: every place has its own level, rising as the story goes on, and each level is shown on the world map. You will meet creatures that are too strong for you, and too weak.'
@@ -55,10 +56,10 @@ function drawGameplay(){
     'The world is fixed. Every place has its own level, rising by about three for each place the story leads to, and the level of each place is shown on the world map.',
     'Creatures stand at the level of the place (some a little lower, as ever), and the great creatures a few levels above it. If a place is too hard for the party, go elsewhere and come back stronger.'
   ];
-  let y=134;for(const p of lines){for(const l of wrapText(p,300,8.4)){txt(l,240,y,8.4,'#cdbf94','center');y+=11}y+=8}
+  let y=(typeof stbGameplayRows==='function')?158:134;for(const p of lines){for(const l of wrapText(p,300,8.4)){txt(l,240,y,8.4,'#cdbf94','center');y+=11}y+=8}
   const r=LEVEL_RATING[LEVEL];
   txt(on?'Autoscaling is on.':(r?'This place is level '+r+'.':'This place has no fixed level.'),240,y+6,9,'#e8c878','center',true);
-  btnText('gp_back','Back',190,260,100,24);
+  btnText('gp_back','Back',190,278,100,24);
 }
 (function(){const _b=handleBtn;handleBtn=function(id){
   if(G.menu==='gameplay'){if(id==='gp_back'||id==='menu')G.menu=true;else if(id==='gp_fog'){G.flags.noFog=G.flags.noFog?0:1;msg(G.flags.noFog?'Fog of war is off. Maps show everything.':'Fog of war is on. Maps are covered by clouds where you have not been.','#e8d8a0')}else if(id==='gp_scale'){G.flags.autoScaleOn=G.flags.autoScaleOn?0:1;try{rebalanceEnemies()}catch(e){}msg(G.flags.autoScaleOn?'Autoscaling is on.':'Autoscaling is off. The world is fixed.','#e8d8a0')}return}

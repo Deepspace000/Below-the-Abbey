@@ -1,0 +1,54 @@
+{
+ "label": "Winged gold",
+ "files": {
+  "std_n": {
+   "file": "stone_std_n.webp",
+   "w": 980,
+   "h": 306
+  },
+  "std_l": {
+   "file": "stone_std_l.webp",
+   "w": 980,
+   "h": 306
+  },
+  "std_p": {
+   "file": "stone_std_p.webp",
+   "w": 980,
+   "h": 306
+  },
+  "small_n": {
+   "file": "stone_small_n.webp",
+   "w": 312,
+   "h": 272
+  },
+  "small_l": {
+   "file": "stone_small_l.webp",
+   "w": 312,
+   "h": 272
+  },
+  "small_p": {
+   "file": "stone_small_p.webp",
+   "w": 312,
+   "h": 272
+  }
+ },
+ "fam": {
+  "std": {
+   "cap": 0.364,
+   "pad": 0.298,
+   "ar": 2.378,
+   "wl": 163,
+   "wt": 31,
+   "bh": 275
+  },
+  "small": {
+   "cap": 0.368,
+   "pad": 0.265,
+   "ar": 1.147,
+   "wl": 0,
+   "wt": 0,
+   "bh": 272
+  }
+ },
+ "fallback": "gold"
+}
