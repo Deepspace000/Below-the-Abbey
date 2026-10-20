@@ -17,7 +17,7 @@
     FILES=P.files;var sizes=P.sizes||[],total=0,got=[];for(var i=0;i<sizes.length;i++)total+=sizes[i];
     note('Downloading the pictures. This only happens once, please wait.');
     function prog(){var D=0;for(var i=0;i<got.length;i++)D+=got[i]||0;var T=total||D;if(!T)return;bar(Math.max(3,Math.min(97,Math.round(D/T*100))));
-      note('Downloading the pictures: '+Math.round(D/1048576)+' of '+Math.round(T/1048576)+' MB. This only happens once, please wait.')}
+      note('Downloading the pictures: '+Math.round(D/T*100)+'%, '+Math.round(D/1048576)+' of '+Math.round(T/1048576)+' MB. This only happens once, please wait.')}
     return Promise.all(P.packs.map(function(n,i){return new Promise(function(res){
       var x=new XMLHttpRequest();x.open('GET',n);x.responseType='blob';
       x.onprogress=function(e){got[i]=sizes[i]?Math.min(e.loaded,sizes[i]):e.loaded;prog()};

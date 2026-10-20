@@ -1,0 +1,9 @@
+BELOW THE ABBEY: before you install
+
+When you started this installer, Windows may have shown a blue screen that says "Windows protected your PC". That is normal for small independent games. Windows shows it for any program whose maker has not bought a commercial publisher certificate. It does not mean anything is wrong with the game.
+
+If you saw it, you have already done the right thing: click "More info", then click "Run anyway".
+
+Below the Abbey and this installer are made by Bickering Goat Studios. The game installs only into your own user folder, needs no administrator rights, and does not change anything else on your computer. It is the same game you can play in your browser on the itch.io page. You can remove it at any time from Windows Settings, Apps.
+
+Press "I Agree" to continue.

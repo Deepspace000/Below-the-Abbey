@@ -12,14 +12,40 @@
   "build": {
     "appId": "com.deepspace.belowtheabbey",
     "productName": "Below the Abbey",
-    "directories": { "output": "dist" },
-    "files": ["main.js", "preload.js", "package.json"],
-    "extraResources": [{ "from": "game", "to": "game" }],
-    "win": { "target": ["dir", "nsis"] },
-    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true }
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "game",
+        "to": "game"
+      }
+    ],
+    "win": {
+      "target": [
+        "dir",
+        "nsis"
+      ],
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "license": "build/license.txt"
+    }
   },
   "devDependencies": {
     "electron": "^33.0.0",
     "electron-builder": "^25.0.0"
-  }
+  },
+  "author": "Bickering Goat Studios"
 }
