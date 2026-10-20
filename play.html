@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.466';
+const VERSION='3.467';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2680,15 +2680,15 @@ function render3D(){
     const lit=clamp(.8+.3*Math.max(0,1-h.ty/6),.6,1.2);
     // the torch itself is a painted picture of an old, worn torch in its iron bracket (assets/wtorch0..3.png), one of four chosen by the torch's place
     {const im=IMG['wtorch'+((Math.imul(L.key,2654435761)>>>9)&3)];
-      if(im&&im.width){const top=y1-.1*F/h.ty,bot=y2+.07*F/t2,hs=Math.max(4,bot-top),ws=hs*im.width/im.height*1.15,cxm=(h.sx*.65+sx2*.35);vctx.imageSmoothingEnabled=true;vctx.drawImage(im,cxm-ws/2,top,ws,hs)}}
+      if(im&&im.width){const top=y1-.1*F/h.ty,bot=y2+.07*F/t2,hs=Math.max(4,bot-top),ws=hs*im.width/im.height*1.15,cxm=(h.sx*.65+sx2*.35);vctx.imageSmoothingEnabled=true;vctx.drawImage(im,cxm-ws/2,top,ws,hs);h._fy=top+hs*.1;h._fx=cxm}}
     vctx.restore();
   }
   vctx.save();vctx.globalCompositeOperation='lighter';
   for(const h of G.hits){
     if(h.type!=='torch'||h.ty<.4)continue;
-    const L=h.L,w=.42*F/h.ty,hh=w*1.5,base=HH-(CEILH*.5+TORCH_ZA+TORCH_RISE-EYE)*F/h.ty,fi=(Math.floor(t*10)+((L.key*7)&7))&7,ri=L.red?1:((LEVEL===364||(LEVEL>=440&&LEVEL<=460))?2:0);
-    vctx.globalAlpha=.5+.12*Math.sin(t*13+L.ph);vctx.drawImage(GLOWS[ri],h.sx-w*1.7,base-hh*.4-w*1.7,w*3.4,w*3.4);
-    vctx.globalAlpha=1;vctx.drawImage(FLAMES[ri*8+fi],h.sx-w/2,base-hh*.94,w,hh);
+    const L=h.L,w=.42*F/h.ty,hh=w*1.5,base=h._fy!==undefined?h._fy+.42*F/h.ty*.35:HH-(CEILH*.5+TORCH_ZA+TORCH_RISE-EYE)*F/h.ty,fi=(Math.floor(t*10)+((L.key*7)&7))&7,ri=L.red?1:((LEVEL===364||(LEVEL>=440&&LEVEL<=460))?2:0);
+    vctx.globalAlpha=.5+.12*Math.sin(t*13+L.ph);vctx.drawImage(GLOWS[ri],(h._fx||h.sx)-w*1.7,base-hh*.4-w*1.7,w*3.4,w*3.4);
+    vctx.globalAlpha=1;vctx.drawImage(FLAMES[ri*8+fi],(h._fx||h.sx)-w/2,base-hh*.94,w,hh);
   }
   vctx.restore();
   G._spr=[cx,cy,dX,dY,pX,pY];
