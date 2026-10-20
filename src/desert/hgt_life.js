@@ -380,7 +380,8 @@ function hgtlfLine(a){const L=a.lines;a.li=((a.li===undefined?(a.id*7)%L.length:
 function hgtlfTalk(a){
   const line=hgtlfLine(a);
   if(a.kind==='creature'){msg(line,'#c8d8e8');return}
-  G.talk={d:a.stub,n:{name:a.name},node:say(line,[BYE]),t:G.time,btns:[]};G.hold=null;G.queued=null;
+  const lv=typeof hgLvl==='function'?hgLvl():4,said=lv>=4?line:hgGarble(line,lv)+hgFoot(lv); // until all four books are in, the people of the grassland are heard as gibberish
+  G.talk={d:a.stub,n:{name:a.name},node:(typeof hgAskAdd==='function'&&lv<4?hgAskAdd(say(said,[BYE])):say(said,[BYE])),t:G.time,btns:[]};G.hold=null;G.queued=null;
 }
 function hgtlfBump(rel){
   if(!HGTLF.ag.length||G.state!=='play'||!G.P)return false;

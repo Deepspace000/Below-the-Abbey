@@ -13,7 +13,7 @@ function hgttSpeedMul(){
   let w=0;for(const h of live){const it=h.eq&&h.eq.legs;if(it&&idef(it).hgSwift)w++}
   return 1+.2*w/live.length}
 /* Orrim stands near the south gate plaza of Exsce (level 481) */
-khNpc('hgt_bubbler','Orrim, the bubble-seller','hg_npc5',d=>say('Orrim taps a glass bubble the size of a head with one finger and holds it out. "Bubble helms. They go over the head. They let you breathe under water for four minutes. I also have swift shoes."',[['Trade.',()=>{openShop(G.talk.d,[['bubblehelm',8],['swiftshoes',6]],'Orrim, the bubble-seller');return null}],['Leave.',()=>null]]));
+khNpc('hgt_bubbler','Orrim, the bubble-seller','hg_npc5',d=>hgAskAdd(say('Orrim taps a glass bubble the size of a head with one finger and holds it out. "'+(typeof hgLvl==='function'&&hgLvl()<4?hgGarble('Bubble helms. They go over the head. They let you breathe under water for four minutes. I also have swift shoes.',hgLvl()):'Bubble helms. They go over the head. They let you breathe under water for four minutes. I also have swift shoes.')+'"',[['Trade.',()=>{openShop(G.talk.d,[['bubblehelm',8],['swiftshoes',6]],'Orrim, the bubble-seller');return null}],['Leave.',()=>null]])));
 function hgttPlace(){
   const L=LEVELS[481];if(!L||L._hgttDone||!L.terrace)return;L._hgttDone=1;
   const W=L.rows[0].length,h=L.terrace.h,occ=new Set((L.decor||[]).map(d=>Math.floor(d.x)+','+Math.floor(d.y)));

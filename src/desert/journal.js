@@ -10,7 +10,7 @@ function drawJournal(){
   BTNS=[];veil(.72);bigPanel(24,8,432,304);
   txt('JOURNAL / ABILITIES',240,25,14,'#d8c88e','center',true);
   const cw=204,ch=46,gx=14,x0=36,y0=38;
-  JOURNAL.forEach((p,k)=>{
+  JOURNAL.filter(p=>!p.hide||!p.hide()).forEach((p,k)=>{
     const x=x0+(k%2)*(cw+gx),y=y0+Math.floor(k/2)*(ch+4),note=p.note?p.note():'';
     ctx.save();rrect(ctx,x,y,cw,ch,5);ctx.fillStyle='rgba(44,20,14,.92)';ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle=note?'#d8b04a':'#7a6440';ctx.stroke();ctx.restore();
     txt(p.title,x+9,y+11,10,note?'#ffe9a0':'#e2d8bc','left',true,undefined,cw-40);
