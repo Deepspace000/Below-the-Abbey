@@ -25,7 +25,22 @@ const HGTA_DOORS=[];
 const HGTA_FLOORS=[];
 const HGTA_PLANTS=[]; // [name, height]
 const HGTA_ORNS=[];   // [name, height]
-/*@@LISTS@@*/
+HGTA_WALLS.push(
+ ['hgt_wp','plain','pale pink nacre'],['hgt_wa','plain','aqua nacre'],['hgt_wc','plain','cream nacre'],['hgt_wl','plain','lavender nacre'],
+ ['hgt_ww0','window','pink nacre, one round window'],['hgt_ww1','window','aqua nacre, one arched window'],['hgt_ww2','window','lavender nacre, three tiny round windows'],['hgt_ww3','window','cream nacre, two arched windows'],
+ ['hgt_wb0','band','pink nacre, scallop shell band across the middle'],['hgt_wb1','band','aqua nacre, pearl row band'],['hgt_wb2','band','cream nacre, ammonite spiral band'],['hgt_wb3','band','lavender nacre, lit niche arcade band']);
+HGTA_DOORS.push(
+ ['hgt_d0','pink wall, round scallop shell door, pearl knob'],['hgt_d1','aqua wall, tall arched cream door with step and shell knocker'],
+ ['hgt_d2','lavender wall, glowing golden arched doorway with pearl lights (use for enter portals)'],['hgt_d3','cream wall, round aqua bulb door with ammonite spiral and ring handle']);
+HGTA_FLOORS.push(
+ ['hgt_f0','pearly shell-stone paving slabs with lit pearl edges'],['hgt_f1','mossy lavender cobbles'],['hgt_f2','glittering aqua crystal gravel path'],['hgt_f3','sunken-court diamond tiles, aqua and cream'],
+ ['hgt_f4','pale shell-stone stair treads with a bright lit lip (horizontal bands)'],['hgt_f5','cream marble flagstones inlaid with pearls and gold lines'],['hgt_f6','pale shell-stone slabs with moss and glowing specks'],['hgt_f7','cold glowing lawn with firefly sparks']);
+HGTA_PLANTS.push(
+ ['hgt_fern',1.1],['hgt_bulbflower',1.9],['hgt_mushrooms',.9],['hgt_lightvine',2.4],['hgt_shrub',1],['hgt_fairytree',3.2],['hgt_shellflower',2.1],['hgt_reeds',1.4],
+ ['hgt_giantcap',2.6],['hgt_willow',3.8],['hgt_pearlbush',1],['hgt_crystalgrass',.45]);
+HGTA_ORNS.push(
+ ['hgt_finial',1.3],['hgt_chimney',1.4],['hgt_hanglamp',.8],['hgt_lamppost',2.3],['hgt_balcony',1],['hgt_banner',2.4],['hgt_cupola',1.5],['hgt_chime',1.1],
+ ['hgt_obelisk',3.4],['hgt_fountain',1.3],['hgt_gardenlantern',.9]);
 const hgtaAll={walls:HGTA_WALLS,doors:HGTA_DOORS,floors:HGTA_FLOORS,plants:HGTA_PLANTS,ornaments:HGTA_ORNS};
 for(const [n,h] of HGTA_PLANTS.concat(HGTA_ORNS))NPC_H[n]=h;
 
