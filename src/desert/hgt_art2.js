@@ -61,7 +61,8 @@
      BULK GIANTS: cut-out faces IMG hgtb_bulk_face_pink, _aqua, _lilac, _amber (front view, two huge glossy eyes); non-repeating bulk skins IMG hgtb_bulk_skin_pink,
      _aqua, _lilac, _amber (2048x1024, large soft mottling, only left-right edges blended, NOT tiles: map once across the body).
      STILT-WALKER: cut-outs IMG hgtb_stilt_body (small armoured shell body), hgtb_stilt_head (long neck, big eyes), hgtb_stilt_knee (knee joint cap), hgtb_stilt_foot (foot pad);
-     tex hgtb_stilt_armour (shell plates), hgtb_stilt_leg (jointed bone and shell leg segments).
+     tex hgtb_stilt_armour (shell plates), hgtb_stilt_leg (jointed bone and shell leg segments, 128 px, old), hgtb_stilt_leg512 (512x512, painted pale lacquered bone leg,
+     seamless both ways: use tex:'art_tex_hgtb_stilt_leg512', texMax:512 in a mesh part).
      OTHER TILES: tex hgtb_eel_thick (thick eel-dragon body with fins and light lines), hgtb_whale_contrast (high contrast whale skin with glowing rows), hgtb_scorp_belly2 (pale
      belly), hgtb_angel_banded (clean monochrome banded angelfish body). SCORPIONFISH: IMG hgtb_scorp_pectoral_ruffle1 and _ruffle2 (ruffled frilled pectoral fins, attachment left).
    AESTHETIC ROUND 2 (all painted; large calm motifs, no fine noise):

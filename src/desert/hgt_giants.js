@@ -31,7 +31,7 @@ const hgtgR=hgtmRnd,hgtgClamp=(v,a,b)=>v<a?a:v>b?b:v,hgtgWrap=a=>Math.atan2(Math
   const bp=hgtmBuildPart;hgtmBuildPart=function(d,ix){if(HGTG.building){if(d.grade===undefined)d.grade=false;if(d.glow===undefined&&d.t!=='fan')d.glow=HGTG.lift;if(d.t==='fan'&&d.tex&&d.alpha===undefined)d.alpha=true}return d.t==='dome'?hgtgDome(d,ix):bp(d,ix)};
   const gf=hgtmGenFan;hgtmGenFan=function(P,pose,inst){const d=P.def,s=d.spread,l=d.len,ks=pose&&pose.fs,kl=pose&&pose.fl;
     if(ks===undefined&&kl===undefined)return gf(P,pose,inst);d.spread=(s||2.4)*(ks===undefined?1:ks);d.len=(l||1)*(kl===undefined?1:kl);gf(P,pose,inst);d.spread=s;d.len=l};
-  const rm=hgtmRenderMesh;hgtmRenderMesh=function(I,cam,s){HGTG.cur=I;if(!HGTG.vdone)hgtgVariants();if(!I.o.cheap&&I.zc>0&&F*I.M.rad*I.sc/Math.max(.3,I.zc)<2.5)return null;return rm(I,cam,s)};
+  const rm=hgtmRenderMesh;hgtmRenderMesh=function(I,cam,s){HGTG.cur=I;if(!HGTG.vdone)hgtgVariants();if(!I.o.cheap&&I.zc>0&&F*I.M.rad*I.sc/Math.max(.3,I.zc)<2.5)return null;if(!I.o.cheap&&I.zc>60){if(HGTG.farT!==G.time){HGTG.farT=G.time;HGTG.farN=0}if(++HGTG.farN>3)return null}return rm(I,cam,s)};
   const up=hgtmUpdate;hgtmUpdate=function(dt){for(const I of HGTM.inst){const f=I.o&&I.o.tick;if(f)f(I,dt)}const r=up(dt);if(HGTG.moon)hgtgMoonGuard(dt);return r};
   const sy=hgtmSync;hgtmSync=function(){if(HGTM.lvl!==LEVEL)HGTG.moonI=null;if(HGTM.lvl!==LEVEL&&!HGTG.off){hgtgOnEnter(LEVEL);try{hgtgWrapLook();if(LEVEL===470||(LEVEL>=480&&LEVEL<=484))hgtgMoon(LEVEL)}catch(e){console.error('moon',e)}}return sy()};
 })();
@@ -131,7 +131,7 @@ function gStiltDef(name,o){
     {t:'ell',c:[0,.0,.36],r:[.46,1.1,.22],seg:[10,5],tex:'art_tex_hgtb_stilt_armour',col:o.plate,uv:[2,1]}];
   for(let k=0;k<5;k++)body.push({t:'ell',c:[0,.9-k*.45,.4+(k%2?.0:.04)],r:[.09,.13,.11],seg:[6,4],col:o.plate});
   const bodyS=gScl(body,K);
-  for(const g of legs)kids.push({id:g.hip,pos:[g.hx,g.hy,g.hz],parts:[{t:'limb',id:g.id,len:[L[0]/2,L[0]/2,L[1]/2,L[1]/2,L[2]],rad:[.36,.34,.17,.15,.1,.07],col:o.leg,tex:'art_tex_hgtb_stilt_leg',sides:nl===6?4:5,glow:.4}]},
+  for(const g of legs)kids.push({id:g.hip,pos:[g.hx,g.hy,g.hz],parts:[{t:'limb',id:g.id,len:[L[0]/2,L[0]/2,L[1]/2,L[1]/2,L[2]],rad:[.36,.34,.17,.15,.1,.07],col:o.leg,tex:'art_tex_hgtb_stilt_leg512',texMax:512,sides:nl===6?4:5,glow:.4}]},
     {id:g.foot,pos:[0,0,0],parts:[{t:'ell',c:[0,.1,0],r:[.45,.62,.12],seg:[8,5],tex:'art_tex_hgtb_scales',col:o.leg},{t:'ell',c:[-.2,.7,0],r:[.08,.24,.06],rot:[0,0,.3],seg:[4,3],col:[250,240,215]},{t:'ell',c:[0,.76,0],r:[.08,.26,.06],seg:[4,3],col:[250,240,215]},{t:'ell',c:[.2,.7,0],r:[.08,.24,.06],rot:[0,0,-.3],seg:[4,3],col:[250,240,215]}]});
   const hc=[0,.15*K,0],hr=[.33*K,.48*K,.3*K],eyeNodes=[],er=(o.eyeR||.27)*K;
   for(const sd of[-1,1]){const x=sd*.28*K,z=.08*K,y=gSurf(hc,hr,x,z),p=[x,y,z];eyeNodes.push(gEye(sd<0?'eL':'eR',p,er*1.1,o.eye,gNormRot(hc,hr,p),{bulge:er*.8,lip:o.lip,seg:12,rings:4,eg:.55}))}
@@ -465,7 +465,8 @@ function hgtgDij(inf,sx,sy,dmin,over,maxC){
 function hgtgRoute(inf,R,sx,sy,o){
   const q=hgtgDij(inf,sx,sy,o.dmin,o.over,o.max*1.5);if(!q)return null;const W=inf.W,c=[];
   for(const i of q.order)if(q.dist[i]>=o.min&&q.dist[i]<=o.max&&inf.D[i]>=(o.endD||1)&&inf.open[i])c.push(i);
-  if(!c.length)return null;const tg=c[(R()*c.length)|0],cells=[];for(let i=tg;i>=0;i=q.prev[i])cells.push(i);cells.reverse();
+  let tgn=-1;if(o.near){let bd=1e9;for(const i of q.order){if(!inf.open[i]||inf.D[i]<(o.endD||1))continue;const d=Math.hypot(i%W-o.near[0],((i/W)|0)-o.near[1]);if(d<bd){bd=d;tgn=i}}}
+  if(!c.length&&tgn<0)return null;const tg=tgn>=0?tgn:c[(R()*c.length)|0],cells=[];for(let i=tg;i>=0;i=q.prev[i])cells.push(i);cells.reverse();
   let p=[];const st=o.step||3;for(let k=0;k<cells.length;k+=st)p.push([cells[k]%W,((cells[k]/W)|0),cells[k]]);const lc=cells[cells.length-1];if(p[p.length-1][2]!==lc)p.push([lc%W,((lc/W)|0),lc]);
   if(p.length<3)return null;
   for(let it=0;it<2;it++)p=p.map((v,k)=>k===0||k===p.length-1?v:[v[0]*.5+(p[k-1][0]+p[k+1][0])*.25,v[1]*.5+(p[k-1][1]+p[k+1][1])*.25,v[2]]);
@@ -530,7 +531,20 @@ function hgtgAuto(id,opts){
     if(found){const gz=gh(found[0],found[1]),dm=Math.max(.8,Math.min(2.4,inf.D[found[1]*W+found[0]]-2)),nb=K('bulk')[0],ns=K('stilt')[0],f=found[2],px=f%2?0:6,py=f%2?6:0;
       const one=(nm,cx,cy,r,sc,sp,sd)=>{const c=hgtgSafeCircle(inf,R,cx,cy,r,6,.2);hgtgSpawn(nm,{level:id,x:c[0][0],y:c[0][1],route:c,scale:sc,speed:sp,seed:sd})};
       one(nb,found[0]+.5,found[1]+.5,dm,fitScale(nb,.9,1.1,gz),.15,77+id);one(ns,found[0]+.5+px,found[1]+.5+py,Math.max(.8,dm-.5),fitScale(ns,.8,1,gz),.25,79+id);
-      stat.vista={x:vx,y:vy,f,h:+inf.h[vy*W+vx].toFixed(1),giant:[found[0],found[1]]};HGTG.vista=HGTG.vista||{};HGTG.vista[id]=stat.vista}}
+      stat.vista={x:vx,y:vy,f,h:+inf.h[vy*W+vx].toFixed(1),giant:[found[0],found[1]]};HGTG.vista=HGTG.vista||{};HGTG.vista[id]=stat.vista
+      // more giants on open ground in clear sight of the lookout and of the main plaza, plus low cloud around the lookout so there is fog to stand in
+      {let mp=-1,md=-1;for(let i=0;i<inf.N;i++)if(inf.open[i]&&!inf.bad[i]&&inf.D[i]>md&&(i%W)>6&&(i%W)<W-7&&((i/W)|0)>6&&((i/W)|0)<inf.H-7){md=inf.D[i];mp=i}
+        let alt=0;const used=[found];
+        const visFrom=(cx0,cy0,n)=>{let c=0;const hb=inf.h[cy0*W+cx0];for(let f=0;f<4&&c<n;f++)for(let dd=18;dd<=52&&c<n;dd+=4){const x=cx0+dirs[f][0]*dd,y=cy0+dirs[f][1]*dd;if(x<4||y<4||x>W-5||y>inf.H-5||inf.D[y*W+x]<3||inf.h[y*W+x]>hb+.6)continue;if(used.some(u=>Math.hypot(u[0]-x,u[1]-y)<9))continue;
+            let clr=true;for(let k=3;k<dd&&clr;k+=2){const cc=(cy0+dirs[f][1]*k)*W+cx0+dirs[f][0]*k;if(inf.top[cc]>hb+.3)clr=false}if(!clr)continue;used.push([x,y]);c++;alt++;const nm=alt%2?ns:nb,cs=hgtgSafeCircle(inf,R,x+.5,y+.5,Math.max(.8,Math.min(2.4,inf.D[y*W+x]-2)),6,.2);
+            hgtgSpawn(nm,{level:id,x:cs[0][0],y:cs[0][1],route:cs,scale:fitScale(nm,.8,1.1,gh(x,y)),speed:.15+.1*R(),seed:95+id*7+alt})}};
+        visFrom(vx,vy,2);if(mp>=0)visFrom(mp%W,(mp/W)|0,2);
+        for(let q=0;q<3;q++){const cx2=vx+(R()-.5)*16,cy2=vy+(R()-.5)*16,z0=inf.h[vy*W+vx]+.6+R()*1.6,rt=[];for(let k=0;k<4;k++)rt.push([cx2+Math.cos(k*1.57)*3,cy2+Math.sin(k*1.57)*3,z0]);hgtmCloud({level:id,x:cx2,y:cy2,z:z0,r:2.4,puffs:9,seed:300+q+id,route:rt,speed:.2,alpha:.7})}}
+      // a bulk giant walks from the main plaza to the foot of the lookout, and a stilt-walker the same way, so they are seen from the tower top and the plaza
+      {let pb=-1,bd=-1;const qv=hgtgDij(inf,found[0],found[1],1,false,320);if(qv)for(const i of qv.order)if(qv.dist[i]>=8&&inf.D[i]>bd&&inf.D[i]>=2){bd=inf.D[i];pb=i}
+        if(pb>=0)for(const [nm,dm2,sc0] of[[nb,3,.9],[ns,1,.8]]){const r1=hgtgRoute(inf,R,pb%W,(pb/W)|0,{dmin:dm2,over:false,min:6,max:90,endD:dm2,lane:1,step:3,near:[vx,vy]});
+          if(r1&&hgtgRouteOK(inf,r1)){hgtgSpawn(nm,{level:id,x:r1[0][0],y:r1[0][1],route:r1,scale:fitScale(nm,sc0,sc0+.15,gh(pb%W,(pb/W)|0)),speed:.3,seed:91+id+dm2});stat.walkers=(stat.walkers||0)+1;stat.vista.plaza=[pb%W,(pb/W)|0]}}}
+    }}
   // the rim: lines of distant giants outside the walls and a row of leaning mesh spires, so the painted skyline is not alone
   {const Hh=inf.H;let nr=0;for(let i=0;i<14;i++){const side=i%4,al=(R()-.5)*.9,out=10+R()*28;let x,y;if(side===0){x=W/2+al*W;y=-out}else if(side===1){x=W+out;y=Hh/2+al*Hh}else if(side===2){x=W/2+al*W;y=Hh+out}else{x=-out;y=Hh/2+al*Hh}
       const nm=i%2?pick(K('bulk')):pick(K('stilt'));hgtgSpawn(nm,{level:id,x,y,route:[[x,y]],h:0,scale:i%2?.9+.4*R():.8+.5*R(),yaw:Math.atan2(-(W/2-x),Hh/2-y),speed:0,seed:1+((R()*9000)|0),far:300,over:false});nr++}
@@ -713,9 +727,9 @@ function hgtgMoonTick(I,dt){
 }
 HGTG.moonRec={};
 function hgtgMoon(id){
-  if(!HGTG.moon||HGTG.moonRec[id])return;HGTG.moonRec[id]=1;const L=LEVELS[id];if(!L)return;const main=gArt('hgt_moon_main',['moon_main'],'hgt_planet_cratered'),gl=gArt('hgt_moon_glow',['moon_glow'],null),inf=hgtgInfo(id),W=L.rows[0].length,H=L.rows.length,R=inf?90:80;
+  if(!HGTG.moon||HGTG.moonRec[id])return;HGTG.moonRec[id]=1;const L=LEVELS[id];if(!L)return;const main=gArt('hgt_moon_main',['moon_main'],'hgt_planet_cratered'),gl=gArt('hgt_moon_glow',['moon_glow'],null),inf=hgtgInfo(id),W=L.rows[0].length,H=L.rows.length,R=inf?100:80;
   hgtmPlanet('hgtg_moon',main,R,{spin:.02,tilt:.25,glow:gl?.12:.4,glowTex:gl,atmo:[205,195,255],gain:1.2,max:512,lowres:1});
-  const M={R,cx:W/2,cy:H/2,dy:inf?-40:0,span:W*9,bottom:inf?Math.max(30,inf.zmax+6):10};
+  const M={R,cx:W/2,cy:H/2,dy:inf?-40:0,span:W*9,bottom:inf?Math.max(26,inf.zmax+3):10};
   // cities: the moon crosses through the middle of the sky above and behind the skyline (lowest point above the tallest tower), not beside the city
   return hgtmSpawn('hgtg_moon',{level:id,x:0,y:0,route:[[0,0,50]],speed:0,far:W*20,cheap:true,tick:hgtgMoonTick,seed:3,moon:M});
 }

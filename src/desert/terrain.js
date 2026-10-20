@@ -216,7 +216,7 @@ const WTD=[],WTSD=[],WTR=[],WTE=[],WTSE=[];let WTB=0;
 function wallTexT(ti,tex){ // -> the column-major copy of wall picture ti, or null if it is not made yet
   const d=tex.d;if(!d)return null;
   if(WTSD[ti]===d)return WTD[ti];
-  if(WTB>1500000||PERF_EXACT)return null;
+  if(WTB>600000||PERF_EXACT)return null;
   const rows=d.length/(TS*4);if(rows!==(rows|0)||rows<1)return null;
   const t=new Uint8ClampedArray(d.length);
   for(let v=0;v<rows;v++){let s=v*TS*4;for(let x=0,o=v*4;x<TS;x++,s+=4,o+=rows*4){t[o]=d[s];t[o+1]=d[s+1];t[o+2]=d[s+2];t[o+3]=d[s+3]}}
@@ -224,7 +224,7 @@ function wallTexT(ti,tex){ // -> the column-major copy of wall picture ti, or nu
 }
 function wallTexE(ti,te){ // the same for the glow picture (windows lit at night) of a wall picture whose column-major copy exists
   if(WTSE[ti]===te)return WTE[ti];
-  if(WTB>1500000)return null;
+  if(WTB>600000)return null;
   const rows=WTR[ti];if(te.length!==WTSD[ti].length)return null;
   const t=new Uint8ClampedArray(te.length);
   for(let v=0;v<rows;v++){let s=v*TS*4;for(let x=0,o=v*4;x<TS;x++,s+=4,o+=rows*4){t[o]=te[s];t[o+1]=te[s+1];t[o+2]=te[s+2];t[o+3]=te[s+3]}}

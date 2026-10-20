@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.472';
+const VERSION='3.473';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2709,6 +2709,10 @@ function render3D(){
 }
 const tmpC=document.createElement('canvas');tmpC.width=820;tmpC.height=820;const tmpX=tmpC.getContext('2d');
 const SPR_POOL=[128,256,512,820].map(n=>{const c=document.createElement('canvas');c.width=c.height=n;return{c,x:c.getContext('2d'),w:n}});
+let SPR_LOWQ=24,SPRQ='high';
+function sprRun(SRC,left,ku,tw,th,sh,top,rs,rc,xe){const u0=Math.max(0,(rs-left)*ku),uw=Math.max(.5,(xe-rs)*ku);SC.drawImage(SRC,u0,0,Math.min(uw,tw-u0),th*(rc-top)/sh,rs,top,xe-rs,rc-top)}
+function sprRun2(SRC,left,ku,th,sh,top,bottom,rn,rc,xe){const u0=(rn-left)*ku,u1=(xe-left)*ku,full=rc>=bottom-.5;SC.drawImage(SRC,Math.max(0,u0),0,Math.max(.5,u1-u0),full?th:th*(rc-top)/sh,rn,top,xe-rn,full?sh:rc-top)}
+function sprBlit(SRC,HZ,hA,sx,sy,sw2,sh2,dx,dy,dw,dh){SC.drawImage(SRC,sx,sy,sw2,sh2,dx,dy,dw,dh);if(HZ){const ga=SC.globalAlpha;SC.globalAlpha=ga*hA;SC.drawImage(HZ,sx,sy,sw2,sh2,dx,dy,dw,dh);SC.globalAlpha=ga}}
 const SPR_TIERS=[16,24,32,48,64,96,128,192,256,384,512],SPR_CACHE=new Map();let SPR_CID=0; // a lit copy of each picture is kept and reused, so a wood full of trees costs one drawing each, not four
 // the people of Anaea wear real colour: clothes are re-dyed (a different dye for each person), skin and hair are left alone
 const VIVID_KEYS=new Set(['peasantW','peasantM','farmer','oldman','oldwoman','child','waterwoman','widow','fisher','scribe','monk','baker','innkeeper','priest','mayor','smith']);
@@ -2791,6 +2795,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     if(s.decor&&s.img&&(G.day||0)>0&&!SKYLINE.test(s.decor.k)){const hh=s.w*s.img.height/s.img.width,mh=CEILH-.12;if(hh>mh)s.w*=mh/hh} // nothing grows through the sky
     const tX=inv*(dY*rx-dX*ry),tY=inv*(-pY*rx+pX*ry);
     if(tY<.25)continue;
+    if(TERR_NOW&&!PERF_SPR&&!s.pic&&!s.e&&!s.hang){const sxc=VW/2*(1+tX/tY),hwd=F*s.w/tY*.7+6;if(sxc+hwd<0||sxc-hwd>VW)continue} // far off to the side of the picture: not worked out at all (terraced levels only)
     s.tX=tX;s.tY=tY;proj.push(s);
   }
   proj.sort((a,b)=>b.tY-a.tY);G._sprN=proj.length;
@@ -2807,6 +2812,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     if(s.flat&&!(s.pic&&!TERR_NOW)){const rx=s.x-cx,ry=s.y-cy,dl=Math.hypot(rx,ry)||1;sw*=Math.max(.06,Math.abs((rx*s.flat[0]+ry*s.flat[1])/dl))}
     if(s.hang){const rx=s.x-cx,ry=s.y-cy,dl=Math.hypot(rx,ry)||1;sw*=Math.max(.07,Math.abs((rx*s.hang[1]-ry*s.hang[0])/dl))}
     const sh=sw*ih/iw*(1-(s.sink||0)*.6);
+    if(TERR_NOW){const lq=sw<SPR_LOWQ?'low':'high';if(lq!==SPRQ){SPRQ=lq;SC.imageSmoothingQuality=lq}} // a picture only a few pixels wide is scaled with the cheap filter (the 'high' one costs most of the sprite time in the cities and shows no difference at that size)
     const scrX=VW/2*(1+s.tX/ty)+(s.flash>0?Math.sin(G.time*60)*2.5*s.flash:0);
     const bottom=HH+(TERR_NOW?CAMZ-(s.decor&&!s.e?terrFoot(s,cx,cy):terrH(s.x,s.y)):EYE)*F/ty-(s.bob||0)*F/ty+(s.sink||0)*sh*.25+(s.drop||0)*sh+(TERR_NOW&&s.decor&&!s.e?sh*.06:0);
     const left=scrX-sw/2,top=bottom-sh;
@@ -2833,7 +2839,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
       let tier=SPR_TIERS[SPR_TIERS.length-1];for(const t of SPR_TIERS){if(t>=iw*kq0){tier=t;break}}
       tw=Math.max(2,Math.min(iw,tier));th=Math.max(2,Math.round(ih*tw/iw));
       const kh=LEVEL===44&&!s.sky; // in the city the haze is laid on at draw time, so a sprite needs one copy per size, not one per step of distance
-      const lq=s.sky?Math.round(lum*6)*4:kh?Math.round(lum*12)*2:Math.round(lum*24),hq=s.sky?Math.round(smS*10)*5:kh?0:Math.round(smS*50),key=(img._cid||(img._cid=++SPR_CID))+'|'+tw+'|'+lq+'|'+hq+(dyv?'d':'n');
+      const lq=s.sky?Math.round(lum*6)*4:kh?Math.round(lum*12)*2:Math.round(lum*24),hq=s.sky?Math.round(smS*10)*5:kh?0:Math.round(smS*50),key=((((img._cid||(img._cid=++SPR_CID))*1024+tw)*64+lq)*128+hq)*2+(dyv?1:0); // a number, so no string is made for every sprite every frame
       SRC=SPR_CACHE.get(key);
       if(!SRC){
         SRC=document.createElement('canvas');SRC.width=tw;SRC.height=th;const X=SRC.getContext('2d');X.drawImage(img,0,0,iw,ih,0,0,tw,th);
@@ -2857,18 +2863,16 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
       if(s.flash>0){X.fillStyle=`rgba(255,70,40,${(s.flash*.55).toFixed(3)})`;X.fillRect(0,0,tw,th)}
     }
     if(s.fade!==undefined&&s.fade<1){SC.globalAlpha=Math.max(0,s.fade)}
-    const blit=(sx,sy,sw2,sh2,dx,dy,dw,dh)=>{SC.drawImage(SRC,sx,sy,sw2,sh2,dx,dy,dw,dh);if(HZ){const ga=SC.globalAlpha;SC.globalAlpha=ga*hA;SC.drawImage(HZ,sx,sy,sw2,sh2,dx,dy,dw,dh);SC.globalAlpha=ga}};
     if(s.decor&&SKYLINE.test(s.decor.k)){ // the tower, or the far city, rises behind a wall: draw only what stands above the nearest wall
       const xa=Math.max(0,Math.floor(left)),xb=Math.min(VW-1,Math.ceil(left+sw)),ku=tw/sw;
       let rs=-1,rc=0;
-      const flushRun=(xe)=>{if(rs<0)return;const u0=Math.max(0,(rs-left)*ku),uw=Math.max(.5,(xe-rs)*ku);SC.drawImage(SRC,u0,0,Math.min(uw,tw-u0),th*(rc-top)/sh,rs,top,xe-rs,rc-top);rs=-1};
-      for(let xx=xa;xx<=xb;xx++){
+      for(let xx=xa;xx<=xb;xx++){ // (no closure here: one would be made for every sprite every frame)
         const cut=zbuf[xx]>ty?bottom:Math.min(bottom,wtop[xx]);
-        if(cut<=top){flushRun(xx);continue}
-        if(rs>=0&&Math.abs(cut-rc)>.8)flushRun(xx);
+        if(cut<=top){if(rs>=0){sprRun(SRC,left,ku,tw,th,sh,top,rs,rc,xx);rs=-1}continue}
+        if(rs>=0&&Math.abs(cut-rc)>.8){sprRun(SRC,left,ku,tw,th,sh,top,rs,rc,xx);rs=-1}
         if(rs<0){rs=xx;rc=cut}
       }
-      flushRun(xb+1);
+      if(rs>=0){sprRun(SRC,left,ku,tw,th,sh,top,rs,rc,xb+1);rs=-1}
       SC.globalAlpha=1;continue;
     }
     if(s.pic&&!TERR_NOW){ // a picture on a wall: drawn column by column in true perspective, so it lies flat on the wall from every angle
@@ -2883,24 +2887,23 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     let x0=Math.max(0,Math.floor(left)),x1=Math.min(VW,Math.ceil(left+sw));
     if(TERR_NOW&&!s.hang&&!s.flat){ // a hill in front hides the foot of whatever stands behind it; columns cut at the same height are painted in one go, so a tree is a few paints, not one per column
       const kb=clamp(((ty*YBS)|0)-1,0,YBK-1),xb=Math.min(VW-1,Math.ceil(left+sw)),ku=tw/sw;let rn=-1,rc=0;
-      const flush=xe=>{if(rn<0)return;const u0=(rn-left)*ku,u1=(xe-left)*ku,full=rc>=bottom-.5;SC.drawImage(SRC,Math.max(0,u0),0,Math.max(.5,u1-u0),full?th:th*(rc-top)/sh,rn,top,xe-rn,full?sh:rc-top);rn=-1;anyVis=true};
       for(let xx=Math.max(0,Math.floor(left));xx<=xb+1;xx++){
         const vis=xx<=xb&&zbuf[xx]>ty,cut=vis?Math.min(bottom,YB[xx*YBK+kb]):-1;
-        if(vis&&cut>top){if(rn>=0&&Math.abs(cut-rc)<=.6)continue;flush(xx);rn=xx;rc=cut}
-        else flush(xx)
+        if(vis&&cut>top){if(rn>=0&&Math.abs(cut-rc)<=.6)continue;if(rn>=0){sprRun2(SRC,left,ku,th,sh,top,bottom,rn,rc,xx);rn=-1;anyVis=true}rn=xx;rc=cut}
+        else if(rn>=0){sprRun2(SRC,left,ku,th,sh,top,bottom,rn,rc,xx);rn=-1;anyVis=true}
       }
       x0=x1+2;
     }
     let run=-1,allVis=x1>x0;
     for(let x=x0;x<x1;x++)if(!(zbuf[x]>ty)){allVis=false;break}
-    if(allVis){blit(0,0,tw,th,left,top,sw,sh);anyVis=true;x0=x1+1}
+    if(allVis){sprBlit(SRC,HZ,hA,0,0,tw,th,left,top,sw,sh);anyVis=true;x0=x1+1}
     for(let x=x0;x<=x1;x++){
       const vis=x<x1&&zbuf[x]>ty;
       if(vis&&run<0)run=x;
       if(vis)anyVis=true;
       if((!vis||x===x1)&&run>=0){
         const u0=(run-left)/sw*tw,u1=(x-left)/sw*tw;
-        blit(u0,0,Math.max(.5,u1-u0),th,run,top,x-run,sh);
+        sprBlit(SRC,HZ,hA,u0,0,Math.max(.5,u1-u0),th,run,top,x-run,sh);
         run=-1;
       }
     }
@@ -2961,6 +2964,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
   }
   while(hmi<HM.length)hgtmDraw(HM[hmi++]);
   if(HM.length||(typeof HGTM!=='undefined'&&HGTM.fog>0))hgtmEnd();
+  if(SPRQ!=='high'){SPRQ='high';SC.imageSmoothingQuality='high'}
 }
 
 /* ==========================================================================
@@ -7410,7 +7414,7 @@ addEventListener('resize',fit);fit();
 /*@@DESERT:BEGIN@@*/
 /* ---- src/desert/artlist.js ---- */
 /* written by tools/inject.py */
-const DS_PAINTED=['assassin', 'assassinA', 'bat', 'batA', 'bear', 'bearA', 'brazier0', 'brazier1', 'brazier2', 'brazier3', 'camelpE', 'camelpW', 'camelrE', 'camelrW', 'ceil_hgtb_tubeceil', 'ceil_tomb', 'cobra', 'cobraA', 'cvnomadA', 'cvnomadB', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'dplant0', 'dplant1', 'dplant2', 'dplant3', 'dpyrgate', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dskeleton', 'dskeletonA', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_hgt_f0', 'floor_hgt_f1', 'floor_hgt_f2', 'floor_hgt_f3', 'floor_hgt_f4', 'floor_hgt_f5', 'floor_hgt_f6', 'floor_hgt_f7', 'floor_hgtb_deep', 'floor_hgtb_f_checker', 'floor_hgtb_f_checker_dark', 'floor_hgtb_f_circles', 'floor_hgtb_f_diamonds', 'floor_hgtb_f_fish', 'floor_hgtb_f_floral', 'floor_hgtb_f_gutter', 'floor_hgtb_f_hex', 'floor_hgtb_f_lotus', 'floor_hgtb_f_mandala', 'floor_hgtb_f_mandala_dark', 'floor_hgtb_f_marble', 'floor_hgtb_f_mossy', 'floor_hgtb_f_mossy_dark', 'floor_hgtb_f_pearlbands', 'floor_hgtb_f_pearlbands_dark', 'floor_hgtb_f_petals', 'floor_hgtb_f_planks', 'floor_hgtb_f_reed', 'floor_hgtb_f_rosette', 'floor_hgtb_f_scales', 'floor_hgtb_f_shellflags', 'floor_hgtb_f_shellflags_dark', 'floor_hgtb_f_spiral', 'floor_hgtb_f_stained', 'floor_hgtb_f_star', 'floor_hgtb_f_sunburst', 'floor_hgtb_f_terrazzo', 'floor_hgtb_f_terrazzo_dark', 'floor_hgtb_f_waves', 'floor_hgtb_med_00', 'floor_hgtb_med_01', 'floor_hgtb_med_02', 'floor_hgtb_med_03', 'floor_hgtb_med_10', 'floor_hgtb_med_11', 'floor_hgtb_med_12', 'floor_hgtb_med_13', 'floor_hgtb_med_20', 'floor_hgtb_med_21', 'floor_hgtb_med_22', 'floor_hgtb_med_23', 'floor_hgtb_med_30', 'floor_hgtb_med_31', 'floor_hgtb_med_32', 'floor_hgtb_med_33', 'floor_hgtb_pool', 'floor_hgtb_uwcobble', 'floor_hgtb_uwglass', 'floor_hgtb_uwsand', 'floor_hgtb_uwslab', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_seabed1', 'floor_seabed2', 'floor_seabed3', 'floor_seabed4', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'hgt_balcony', 'hgt_banner', 'hgt_bulbflower', 'hgt_chime', 'hgt_chimney', 'hgt_cloud_aqua1', 'hgt_cloud_aqua2', 'hgt_cloud_cream1', 'hgt_cloud_cream2', 'hgt_cloud_lilac1', 'hgt_cloud_lilac2', 'hgt_cloud_pink1', 'hgt_cloud_pinkstreak', 'hgt_crystalgrass', 'hgt_cupola', 'hgt_fairytree', 'hgt_fern', 'hgt_finial', 'hgt_fountain', 'hgt_gardenlantern', 'hgt_giantcap', 'hgt_hanglamp', 'hgt_lamppost', 'hgt_lightvine', 'hgt_moon_glow', 'hgt_moon_halo', 'hgt_moon_main', 'hgt_mushrooms', 'hgt_obelisk', 'hgt_pearlbush', 'hgt_planet_coral', 'hgt_planet_cratered', 'hgt_planet_crystal', 'hgt_planet_desert', 'hgt_planet_gas', 'hgt_planet_ice', 'hgt_planet_jade', 'hgt_planet_lava', 'hgt_planet_ocean', 'hgt_planet_orange', 'hgt_planet_pearl', 'hgt_planet_violet', 'hgt_reeds', 'hgt_ring_gold', 'hgt_ring_pastel', 'hgt_shellflower', 'hgt_shrub', 'hgt_vine_cornerBR', 'hgt_vine_cornerTL', 'hgt_vine_creeper', 'hgt_vine_curtain', 'hgt_vine_garland', 'hgt_vine_ivy', 'hgt_vine_roundleaf', 'hgt_vine_stars', 'hgt_vine_tendril', 'hgt_vine_wisteria', 'hgt_vine_wreatharch', 'hgt_vine_wreathround', 'hgt_willow', 'hgtb_amberpup', 'hgtb_aquawhale', 'hgtb_basket', 'hgtb_bench', 'hgtb_bulk_face_amber', 'hgtb_bulk_face_aqua', 'hgtb_bulk_face_lilac', 'hgtb_bulk_face_pink', 'hgtb_bulk_skin_amber', 'hgtb_bulk_skin_aqua', 'hgtb_bulk_skin_lilac', 'hgtb_bulk_skin_pink', 'hgtb_chair', 'hgtb_creamjelly', 'hgtb_creammoth', 'hgtb_deco_banner', 'hgtb_deco_bunting', 'hgtb_deco_fountain', 'hgtb_deco_lanterns', 'hgtb_deco_pearlplinth', 'hgtb_deco_shellstatue', 'hgtb_edge_far', 'hgtb_edge_mid', 'hgtb_edge_near', 'hgtb_elder', 'hgtb_eye1', 'hgtb_eye2', 'hgtb_eye3', 'hgtb_eye4', 'hgtb_eye5', 'hgtb_eye6', 'hgtb_feather_down', 'hgtb_feather_iridescent', 'hgtb_feather_peacock1', 'hgtb_feather_peacock2', 'hgtb_fish_angel', 'hgtb_fish_clam', 'hgtb_fish_crabfish', 'hgtb_fish_eel', 'hgtb_fish_flounder', 'hgtb_fish_glassfish', 'hgtb_fish_insectfish', 'hgtb_fish_jelly', 'hgtb_fish_lanternfish', 'hgtb_fish_nautilus', 'hgtb_fish_neon', 'hgtb_fish_octopus', 'hgtb_fish_pearlray', 'hgtb_fish_puffer', 'hgtb_fish_seadragon', 'hgtb_fish_seahorse', 'hgtb_fish_snailfish', 'hgtb_fish_starfish', 'hgtb_fishbeetle', 'hgtb_fisher', 'hgtb_fishfly', 'hgtb_furn_bed', 'hgtb_furn_books_globe', 'hgtb_furn_bookshelf', 'hgtb_furn_bunk', 'hgtb_furn_cabinet', 'hgtb_furn_chandelier', 'hgtb_furn_chandelier_lantern', 'hgtb_furn_clock', 'hgtb_furn_hearth', 'hgtb_furn_loom', 'hgtb_furn_stage', 'hgtb_furn_table_chairs', 'hgtb_glasspost', 'hgtb_jadeeel', 'hgtb_jadefinmoth', 'hgtb_jar', 'hgtb_lamp_bare', 'hgtb_lamp_bracket', 'hgtb_lamp_hanging', 'hgtb_lamp_short', 'hgtb_lamp_tall', 'hgtb_lamp_vine', 'hgtb_lampwhite', 'hgtb_lantern', 'hgtb_lanternbeetle', 'hgtb_levi_eel_face', 'hgtb_levi_jelly_face', 'hgtb_levi_manta_face', 'hgtb_levi_whale_face', 'hgtb_lilacmoth', 'hgtb_peachwhale', 'hgtb_peacockfan', 'hgtb_pearlslug', 'hgtb_pinkbulb', 'hgtb_plant_barrel', 'hgtb_plant_belltree', 'hgtb_plant_glowshrooms', 'hgtb_plant_lacecoral', 'hgtb_plant_lupin', 'hgtb_plant_orbbush', 'hgtb_plant_potvine', 'hgtb_plant_spiralfern', 'hgtb_plant_tealgrass', 'hgtb_plantbed', 'hgtb_polish', 'hgtb_pups', 'hgtb_read', 'hgtb_rug_amber', 'hgtb_rug_aqua_fish', 'hgtb_rug_cream_mandala', 'hgtb_rug_green_oval', 'hgtb_rug_lilac_runner', 'hgtb_rug_pink_round', 'hgtb_scorp_barbels', 'hgtb_scorp_dorsal', 'hgtb_scorp_eye', 'hgtb_scorp_mouth', 'hgtb_scorp_pectoral', 'hgtb_scorp_pectoral_ruffle1', 'hgtb_scorp_pectoral_ruffle2', 'hgtb_scorp_ref_front', 'hgtb_scorp_ref_side', 'hgtb_scorp_smallfins', 'hgtb_scorp_spine', 'hgtb_scorp_tail', 'hgtb_shrine', 'hgtb_spindleray', 'hgtb_spindlespider', 'hgtb_stall_aqua_jars', 'hgtb_stall_coral_fruit', 'hgtb_stall_lilac_cloth', 'hgtb_stall_navy_books', 'hgtb_stall_orange_pottery', 'hgtb_stall_pink_flowers', 'hgtb_stall_rose_lanterns', 'hgtb_stall_sage_herbs', 'hgtb_stall_teal_fish', 'hgtb_stall_yellow_bread', 'hgtb_stilt_body', 'hgtb_stilt_foot', 'hgtb_stilt_head', 'hgtb_stilt_knee', 'hgtb_sweep', 'hgtb_table', 'hgtb_tank_anemone', 'hgtb_tank_bubbles', 'hgtb_tank_bubbles3', 'hgtb_tank_coral', 'hgtb_tank_kelp', 'hgtb_tank_rock', 'hgtb_tank_round', 'hgtb_tank_ruinarch', 'hgtb_tank_seagrass', 'hgtb_tank_tall', 'hgtb_walk', 'hgtb_watch', 'hgtb_water', 'hgtb_wing_bat', 'hgtb_wing_butterfly', 'hgtb_wing_insect', 'messenger', 'messengerA', 'msgr_A', 'msgr_D', 'msgr_E', 'msgr_H', 'msgr_T', 'offering', 'pharaohboss', 'pharaohbossA', 'pservant', 'pservantA', 'rrock0', 'rrock1', 'rrock2', 'shady', 'skel', 'skelA', 'skybirdA', 'skybirdB', 'slime', 'slimeA', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_hgt_d0', 'tex_hgt_d1', 'tex_hgt_d2', 'tex_hgt_d3', 'tex_hgt_w2_bandjade', 'tex_hgt_w2_bubbles', 'tex_hgt_w2_confetti', 'tex_hgt_w2_constellation', 'tex_hgt_w2_crayon', 'tex_hgt_w2_crosshatch', 'tex_hgt_w2_doodleaqua', 'tex_hgt_w2_doorblue', 'tex_hgt_w2_doorteal', 'tex_hgt_w2_dotsyellow', 'tex_hgt_w2_filigree', 'tex_hgt_w2_loopsmint', 'tex_hgt_w2_map', 'tex_hgt_w2_medallions', 'tex_hgt_w2_mosaic', 'tex_hgt_w2_pointillist', 'tex_hgt_w2_polkaaqua', 'tex_hgt_w2_polkapink', 'tex_hgt_w2_portholes', 'tex_hgt_w2_portlilac', 'tex_hgt_w2_quilt', 'tex_hgt_w2_ringbubbles', 'tex_hgt_w2_rings', 'tex_hgt_w2_scales', 'tex_hgt_w2_scribblepink', 'tex_hgt_w2_script', 'tex_hgt_w2_tessel', 'tex_hgt_w2_wavylilac', 'tex_hgt_w2_winaqua', 'tex_hgt_w2_winpink', 'tex_hgt_w3_arcade_cream', 'tex_hgt_w3_arcade_lilac', 'tex_hgt_w3_balcony2_cream', 'tex_hgt_w3_balcony_cream', 'tex_hgt_w3_bunting_aqua', 'tex_hgt_w3_buttress_amber', 'tex_hgt_w3_cornice_cream', 'tex_hgt_w3_dado_pink', 'tex_hgt_w3_fresco_amber', 'tex_hgt_w3_fresco_cream', 'tex_hgt_w3_reed_lilac', 'tex_hgt_w3_relief_aqua', 'tex_hgt_w3_relief_pink', 'tex_hgt_w3_scroll_aqua', 'tex_hgt_w3_scroll_pink', 'tex_hgt_w3_shop_cream', 'tex_hgt_w3_shop_pink', 'tex_hgt_w3_shutters_lilac', 'tex_hgt_wa', 'tex_hgt_wb0', 'tex_hgt_wb1', 'tex_hgt_wb2', 'tex_hgt_wb3', 'tex_hgt_wc', 'tex_hgt_wl', 'tex_hgt_wp', 'tex_hgt_ww0', 'tex_hgt_ww1', 'tex_hgt_ww2', 'tex_hgt_ww3', 'tex_hgtb_angel_banded', 'tex_hgtb_eel_thick', 'tex_hgtb_levi_eel_body', 'tex_hgtb_levi_eel_fin', 'tex_hgtb_levi_jelly_body', 'tex_hgtb_levi_jelly_fin', 'tex_hgtb_levi_manta_body', 'tex_hgtb_levi_manta_wing', 'tex_hgtb_levi_whale_body', 'tex_hgtb_levi_whale_fin', 'tex_hgtb_limbs', 'tex_hgtb_scales', 'tex_hgtb_scorp_belly', 'tex_hgtb_scorp_belly2', 'tex_hgtb_scorp_body', 'tex_hgtb_scorp_tassels', 'tex_hgtb_scorp_warts', 'tex_hgtb_skinamber', 'tex_hgtb_skinaqua', 'tex_hgtb_skinlilac', 'tex_hgtb_skinpink', 'tex_hgtb_stilt_armour', 'tex_hgtb_stilt_leg', 'tex_hgtb_tankbg1', 'tex_hgtb_tankbg2', 'tex_hgtb_tankbg3', 'tex_hgtb_tankbg4', 'tex_hgtb_tube', 'tex_hgtb_whale_contrast', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'tex_yarblue', 'tex_yarcoral', 'tex_yardoor', 'tex_yardoor2', 'tex_yardoor3', 'tex_yardoor4', 'tex_yardoor5', 'tex_yardoor6', 'tex_yardoor7', 'tex_yardrift', 'tex_yargreen', 'tex_yarnet', 'tex_yarpink', 'tex_yarrose', 'tex_yarwall', 'tex_yaryellow', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA', 'w_candleknight', 'w_candleknightA', 'w_crowncrab', 'w_crowncrabA', 'w_ferryman', 'w_ferrymanA', 'w_glassstag', 'w_glassstagA', 'w_hollowbride', 'w_hollowbrideA', 'w_manyeyedox', 'w_manyeyedoxA', 'w_marrow', 'w_marrowA', 'w_mossback', 'w_mossbackA', 'w_rattlebones', 'w_rattlebonesA', 'w_saltwife', 'w_saltwifeA', 'w_thistlewick', 'w_thistlewickA', 'w_toll', 'w_tollA', 'w_unfinished', 'w_unfinishedA', 'w_weatherhound', 'w_weatherhoundA'];
+const DS_PAINTED=['assassin', 'assassinA', 'bat', 'batA', 'bear', 'bearA', 'brazier0', 'brazier1', 'brazier2', 'brazier3', 'camelpE', 'camelpW', 'camelrE', 'camelrW', 'ceil_hgtb_tubeceil', 'ceil_tomb', 'cobra', 'cobraA', 'cvnomadA', 'cvnomadB', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'dplant0', 'dplant1', 'dplant2', 'dplant3', 'dpyrgate', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dskeleton', 'dskeletonA', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_hgt_f0', 'floor_hgt_f1', 'floor_hgt_f2', 'floor_hgt_f3', 'floor_hgt_f4', 'floor_hgt_f5', 'floor_hgt_f6', 'floor_hgt_f7', 'floor_hgtb_deep', 'floor_hgtb_f_checker', 'floor_hgtb_f_checker_dark', 'floor_hgtb_f_circles', 'floor_hgtb_f_diamonds', 'floor_hgtb_f_fish', 'floor_hgtb_f_floral', 'floor_hgtb_f_gutter', 'floor_hgtb_f_hex', 'floor_hgtb_f_lotus', 'floor_hgtb_f_mandala', 'floor_hgtb_f_mandala_dark', 'floor_hgtb_f_marble', 'floor_hgtb_f_mossy', 'floor_hgtb_f_mossy_dark', 'floor_hgtb_f_pearlbands', 'floor_hgtb_f_pearlbands_dark', 'floor_hgtb_f_petals', 'floor_hgtb_f_planks', 'floor_hgtb_f_reed', 'floor_hgtb_f_rosette', 'floor_hgtb_f_scales', 'floor_hgtb_f_shellflags', 'floor_hgtb_f_shellflags_dark', 'floor_hgtb_f_spiral', 'floor_hgtb_f_stained', 'floor_hgtb_f_star', 'floor_hgtb_f_sunburst', 'floor_hgtb_f_terrazzo', 'floor_hgtb_f_terrazzo_dark', 'floor_hgtb_f_waves', 'floor_hgtb_med_00', 'floor_hgtb_med_01', 'floor_hgtb_med_02', 'floor_hgtb_med_03', 'floor_hgtb_med_10', 'floor_hgtb_med_11', 'floor_hgtb_med_12', 'floor_hgtb_med_13', 'floor_hgtb_med_20', 'floor_hgtb_med_21', 'floor_hgtb_med_22', 'floor_hgtb_med_23', 'floor_hgtb_med_30', 'floor_hgtb_med_31', 'floor_hgtb_med_32', 'floor_hgtb_med_33', 'floor_hgtb_pool', 'floor_hgtb_uwcobble', 'floor_hgtb_uwglass', 'floor_hgtb_uwsand', 'floor_hgtb_uwslab', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_seabed1', 'floor_seabed2', 'floor_seabed3', 'floor_seabed4', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'hgt_balcony', 'hgt_banner', 'hgt_bulbflower', 'hgt_chime', 'hgt_chimney', 'hgt_cloud_aqua1', 'hgt_cloud_aqua2', 'hgt_cloud_cream1', 'hgt_cloud_cream2', 'hgt_cloud_lilac1', 'hgt_cloud_lilac2', 'hgt_cloud_pink1', 'hgt_cloud_pinkstreak', 'hgt_crystalgrass', 'hgt_cupola', 'hgt_fairytree', 'hgt_fern', 'hgt_finial', 'hgt_fountain', 'hgt_gardenlantern', 'hgt_giantcap', 'hgt_hanglamp', 'hgt_lamppost', 'hgt_lightvine', 'hgt_moon_glow', 'hgt_moon_halo', 'hgt_moon_main', 'hgt_mushrooms', 'hgt_obelisk', 'hgt_pearlbush', 'hgt_planet_coral', 'hgt_planet_cratered', 'hgt_planet_crystal', 'hgt_planet_desert', 'hgt_planet_gas', 'hgt_planet_ice', 'hgt_planet_jade', 'hgt_planet_lava', 'hgt_planet_ocean', 'hgt_planet_orange', 'hgt_planet_pearl', 'hgt_planet_violet', 'hgt_reeds', 'hgt_ring_gold', 'hgt_ring_pastel', 'hgt_shellflower', 'hgt_shrub', 'hgt_vine_cornerBR', 'hgt_vine_cornerTL', 'hgt_vine_creeper', 'hgt_vine_curtain', 'hgt_vine_garland', 'hgt_vine_ivy', 'hgt_vine_roundleaf', 'hgt_vine_stars', 'hgt_vine_tendril', 'hgt_vine_wisteria', 'hgt_vine_wreatharch', 'hgt_vine_wreathround', 'hgt_willow', 'hgtb_amberpup', 'hgtb_aquawhale', 'hgtb_basket', 'hgtb_bench', 'hgtb_bulk_face_amber', 'hgtb_bulk_face_aqua', 'hgtb_bulk_face_lilac', 'hgtb_bulk_face_pink', 'hgtb_bulk_skin_amber', 'hgtb_bulk_skin_aqua', 'hgtb_bulk_skin_lilac', 'hgtb_bulk_skin_pink', 'hgtb_chair', 'hgtb_creamjelly', 'hgtb_creammoth', 'hgtb_deco_banner', 'hgtb_deco_bunting', 'hgtb_deco_fountain', 'hgtb_deco_lanterns', 'hgtb_deco_pearlplinth', 'hgtb_deco_shellstatue', 'hgtb_edge_far', 'hgtb_edge_mid', 'hgtb_edge_near', 'hgtb_elder', 'hgtb_eye1', 'hgtb_eye2', 'hgtb_eye3', 'hgtb_eye4', 'hgtb_eye5', 'hgtb_eye6', 'hgtb_feather_down', 'hgtb_feather_iridescent', 'hgtb_feather_peacock1', 'hgtb_feather_peacock2', 'hgtb_fish_angel', 'hgtb_fish_clam', 'hgtb_fish_crabfish', 'hgtb_fish_eel', 'hgtb_fish_flounder', 'hgtb_fish_glassfish', 'hgtb_fish_insectfish', 'hgtb_fish_jelly', 'hgtb_fish_lanternfish', 'hgtb_fish_nautilus', 'hgtb_fish_neon', 'hgtb_fish_octopus', 'hgtb_fish_pearlray', 'hgtb_fish_puffer', 'hgtb_fish_seadragon', 'hgtb_fish_seahorse', 'hgtb_fish_snailfish', 'hgtb_fish_starfish', 'hgtb_fishbeetle', 'hgtb_fisher', 'hgtb_fishfly', 'hgtb_furn_bed', 'hgtb_furn_books_globe', 'hgtb_furn_bookshelf', 'hgtb_furn_bunk', 'hgtb_furn_cabinet', 'hgtb_furn_chandelier', 'hgtb_furn_chandelier_lantern', 'hgtb_furn_clock', 'hgtb_furn_hearth', 'hgtb_furn_loom', 'hgtb_furn_stage', 'hgtb_furn_table_chairs', 'hgtb_glasspost', 'hgtb_jadeeel', 'hgtb_jadefinmoth', 'hgtb_jar', 'hgtb_lamp_bare', 'hgtb_lamp_bracket', 'hgtb_lamp_hanging', 'hgtb_lamp_short', 'hgtb_lamp_tall', 'hgtb_lamp_vine', 'hgtb_lampwhite', 'hgtb_lantern', 'hgtb_lanternbeetle', 'hgtb_levi_eel_face', 'hgtb_levi_jelly_face', 'hgtb_levi_manta_face', 'hgtb_levi_whale_face', 'hgtb_lilacmoth', 'hgtb_peachwhale', 'hgtb_peacockfan', 'hgtb_pearlslug', 'hgtb_pinkbulb', 'hgtb_plant_barrel', 'hgtb_plant_belltree', 'hgtb_plant_glowshrooms', 'hgtb_plant_lacecoral', 'hgtb_plant_lupin', 'hgtb_plant_orbbush', 'hgtb_plant_potvine', 'hgtb_plant_spiralfern', 'hgtb_plant_tealgrass', 'hgtb_plantbed', 'hgtb_polish', 'hgtb_pups', 'hgtb_read', 'hgtb_rug_amber', 'hgtb_rug_aqua_fish', 'hgtb_rug_cream_mandala', 'hgtb_rug_green_oval', 'hgtb_rug_lilac_runner', 'hgtb_rug_pink_round', 'hgtb_scorp_barbels', 'hgtb_scorp_dorsal', 'hgtb_scorp_eye', 'hgtb_scorp_mouth', 'hgtb_scorp_pectoral', 'hgtb_scorp_pectoral_ruffle1', 'hgtb_scorp_pectoral_ruffle2', 'hgtb_scorp_ref_front', 'hgtb_scorp_ref_side', 'hgtb_scorp_smallfins', 'hgtb_scorp_spine', 'hgtb_scorp_tail', 'hgtb_shrine', 'hgtb_spindleray', 'hgtb_spindlespider', 'hgtb_stall_aqua_jars', 'hgtb_stall_coral_fruit', 'hgtb_stall_lilac_cloth', 'hgtb_stall_navy_books', 'hgtb_stall_orange_pottery', 'hgtb_stall_pink_flowers', 'hgtb_stall_rose_lanterns', 'hgtb_stall_sage_herbs', 'hgtb_stall_teal_fish', 'hgtb_stall_yellow_bread', 'hgtb_stilt_body', 'hgtb_stilt_foot', 'hgtb_stilt_head', 'hgtb_stilt_knee', 'hgtb_sweep', 'hgtb_table', 'hgtb_tank_anemone', 'hgtb_tank_bubbles', 'hgtb_tank_bubbles3', 'hgtb_tank_coral', 'hgtb_tank_kelp', 'hgtb_tank_rock', 'hgtb_tank_round', 'hgtb_tank_ruinarch', 'hgtb_tank_seagrass', 'hgtb_tank_tall', 'hgtb_walk', 'hgtb_watch', 'hgtb_water', 'hgtb_wing_bat', 'hgtb_wing_butterfly', 'hgtb_wing_insect', 'messenger', 'messengerA', 'msgr_A', 'msgr_D', 'msgr_E', 'msgr_H', 'msgr_T', 'offering', 'pharaohboss', 'pharaohbossA', 'pservant', 'pservantA', 'rrock0', 'rrock1', 'rrock2', 'shady', 'skel', 'skelA', 'skybirdA', 'skybirdB', 'slime', 'slimeA', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_hgt_d0', 'tex_hgt_d1', 'tex_hgt_d2', 'tex_hgt_d3', 'tex_hgt_w2_bandjade', 'tex_hgt_w2_bubbles', 'tex_hgt_w2_confetti', 'tex_hgt_w2_constellation', 'tex_hgt_w2_crayon', 'tex_hgt_w2_crosshatch', 'tex_hgt_w2_doodleaqua', 'tex_hgt_w2_doorblue', 'tex_hgt_w2_doorteal', 'tex_hgt_w2_dotsyellow', 'tex_hgt_w2_filigree', 'tex_hgt_w2_loopsmint', 'tex_hgt_w2_map', 'tex_hgt_w2_medallions', 'tex_hgt_w2_mosaic', 'tex_hgt_w2_pointillist', 'tex_hgt_w2_polkaaqua', 'tex_hgt_w2_polkapink', 'tex_hgt_w2_portholes', 'tex_hgt_w2_portlilac', 'tex_hgt_w2_quilt', 'tex_hgt_w2_ringbubbles', 'tex_hgt_w2_rings', 'tex_hgt_w2_scales', 'tex_hgt_w2_scribblepink', 'tex_hgt_w2_script', 'tex_hgt_w2_tessel', 'tex_hgt_w2_wavylilac', 'tex_hgt_w2_winaqua', 'tex_hgt_w2_winpink', 'tex_hgt_w3_arcade_cream', 'tex_hgt_w3_arcade_lilac', 'tex_hgt_w3_balcony2_cream', 'tex_hgt_w3_balcony_cream', 'tex_hgt_w3_bunting_aqua', 'tex_hgt_w3_buttress_amber', 'tex_hgt_w3_cornice_cream', 'tex_hgt_w3_dado_pink', 'tex_hgt_w3_fresco_amber', 'tex_hgt_w3_fresco_cream', 'tex_hgt_w3_reed_lilac', 'tex_hgt_w3_relief_aqua', 'tex_hgt_w3_relief_pink', 'tex_hgt_w3_scroll_aqua', 'tex_hgt_w3_scroll_pink', 'tex_hgt_w3_shop_cream', 'tex_hgt_w3_shop_pink', 'tex_hgt_w3_shutters_lilac', 'tex_hgt_wa', 'tex_hgt_wb0', 'tex_hgt_wb1', 'tex_hgt_wb2', 'tex_hgt_wb3', 'tex_hgt_wc', 'tex_hgt_wl', 'tex_hgt_wp', 'tex_hgt_ww0', 'tex_hgt_ww1', 'tex_hgt_ww2', 'tex_hgt_ww3', 'tex_hgtb_angel_banded', 'tex_hgtb_eel_thick', 'tex_hgtb_levi_eel_body', 'tex_hgtb_levi_eel_fin', 'tex_hgtb_levi_jelly_body', 'tex_hgtb_levi_jelly_fin', 'tex_hgtb_levi_manta_body', 'tex_hgtb_levi_manta_wing', 'tex_hgtb_levi_whale_body', 'tex_hgtb_levi_whale_fin', 'tex_hgtb_limbs', 'tex_hgtb_scales', 'tex_hgtb_scorp_belly', 'tex_hgtb_scorp_belly2', 'tex_hgtb_scorp_body', 'tex_hgtb_scorp_tassels', 'tex_hgtb_scorp_warts', 'tex_hgtb_skinamber', 'tex_hgtb_skinaqua', 'tex_hgtb_skinlilac', 'tex_hgtb_skinpink', 'tex_hgtb_stilt_armour', 'tex_hgtb_stilt_leg', 'tex_hgtb_stilt_leg512', 'tex_hgtb_tankbg1', 'tex_hgtb_tankbg2', 'tex_hgtb_tankbg3', 'tex_hgtb_tankbg4', 'tex_hgtb_tube', 'tex_hgtb_whale_contrast', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'tex_yarblue', 'tex_yarcoral', 'tex_yardoor', 'tex_yardoor2', 'tex_yardoor3', 'tex_yardoor4', 'tex_yardoor5', 'tex_yardoor6', 'tex_yardoor7', 'tex_yardrift', 'tex_yargreen', 'tex_yarnet', 'tex_yarpink', 'tex_yarrose', 'tex_yarwall', 'tex_yaryellow', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA', 'w_candleknight', 'w_candleknightA', 'w_crowncrab', 'w_crowncrabA', 'w_ferryman', 'w_ferrymanA', 'w_glassstag', 'w_glassstagA', 'w_hollowbride', 'w_hollowbrideA', 'w_manyeyedox', 'w_manyeyedoxA', 'w_marrow', 'w_marrowA', 'w_mossback', 'w_mossbackA', 'w_rattlebones', 'w_rattlebonesA', 'w_saltwife', 'w_saltwifeA', 'w_thistlewick', 'w_thistlewickA', 'w_toll', 'w_tollA', 'w_unfinished', 'w_unfinishedA', 'w_weatherhound', 'w_weatherhoundA'];
 
 /* ---- src/desert/artpack.js ---- */
 /* ==========================================================================
@@ -9529,7 +9533,7 @@ const WTD=[],WTSD=[],WTR=[],WTE=[],WTSE=[];let WTB=0;
 function wallTexT(ti,tex){ // -> the column-major copy of wall picture ti, or null if it is not made yet
   const d=tex.d;if(!d)return null;
   if(WTSD[ti]===d)return WTD[ti];
-  if(WTB>1500000||PERF_EXACT)return null;
+  if(WTB>600000||PERF_EXACT)return null;
   const rows=d.length/(TS*4);if(rows!==(rows|0)||rows<1)return null;
   const t=new Uint8ClampedArray(d.length);
   for(let v=0;v<rows;v++){let s=v*TS*4;for(let x=0,o=v*4;x<TS;x++,s+=4,o+=rows*4){t[o]=d[s];t[o+1]=d[s+1];t[o+2]=d[s+2];t[o+3]=d[s+3]}}
@@ -9537,7 +9541,7 @@ function wallTexT(ti,tex){ // -> the column-major copy of wall picture ti, or nu
 }
 function wallTexE(ti,te){ // the same for the glow picture (windows lit at night) of a wall picture whose column-major copy exists
   if(WTSE[ti]===te)return WTE[ti];
-  if(WTB>1500000)return null;
+  if(WTB>600000)return null;
   const rows=WTR[ti];if(te.length!==WTSD[ti].length)return null;
   const t=new Uint8ClampedArray(te.length);
   for(let v=0;v<rows;v++){let s=v*TS*4;for(let x=0,o=v*4;x<TS;x++,s+=4,o+=rows*4){t[o]=te[s];t[o+1]=te[s+1];t[o+2]=te[s+2];t[o+3]=te[s+3]}}
@@ -25911,7 +25915,9 @@ function hgtmHidden(zc,xc,rad,topZ,cz){
   const z2=zc+rad,hw=VW/2,l0=xc-rad,l1=xc+rad,vmin=l0<0?l0/zn:l0/z2,vmax=l1>0?l1/zn:l1/z2,yv=topZ-cz,rowTop=HH-F*(yv>0?yv/zn:yv/z2)-1;
   const xa=Math.max(0,Math.floor(hw+F*vmin)-1),xb=Math.min(VW-1,Math.ceil(hw+F*vmax)+1),tnow=G.time;
   if(xb<xa)return true;
+  const kbz=Math.min(YBK-1,Math.max(0,((zn-.55)*YBS)|0));
   for(let x=xa;x<=xb;x++){
+    if(YB[x*YBK+kbz]<=rowTop)continue;   // the ground nearer than the whole sphere already covers every row it can reach
     if(HGTM_WS[x]!==tnow)return false;
     const n=HGTM_WN[x],b=x*HGTM_N;let ok=false;
     for(let k=0;k<n;k++)if(HGTM_WP[b+k]<zn&&HGTM_WT[b+k]<=rowTop){ok=true;break}
@@ -25933,7 +25939,7 @@ function hgtmBegin(cx,cy,dX,dY,pX,pY){
     const zc=dX*rx+dY*ry,xc=dX*ry-dY*rx,rad=I.kind==='mesh'?I.M.rad*I.sc:I.kind==='planet'?I.M.rad:I.r*1.7;
     if(zc+rad<.1||zc>(I.o.far||(I.kind==='cloud'?36:80)))continue;
     const lim=(zc+rad)*VW/2/F*1.05+rad;if(Math.abs(xc)-rad>lim)continue;
-    if(I.kind==='mesh'&&hgtmHidden(zc,xc,rad,I.z+rad,CAMZ))continue;   // the whole model stands behind a nearer wall: it is not worked out at all
+    if(I.kind==='mesh'&&!PERF_MESH4&&hgtmHidden(zc,xc,rad,I.z+rad,CAMZ))continue;   // the whole model stands behind a nearer wall: it is not worked out at all
     const dd=Math.hypot(rx,ry);I.zc=zc;I.xc=xc;I.cand=zc;I.ccz=pz;
     cand.push(I);
   }
@@ -25941,7 +25947,7 @@ function hgtmBegin(cx,cy,dX,dY,pX,pY){
   let slotN=0;const SM=12;
   for(const I of cand){
     if(performance.now()-t0>HGTM.budget&&I.kind!=='cloud'&&!I.o.cheap)continue;
-    if(I.kind==='mesh'){if(slotN>=SM)continue;const e=hgtmRenderMesh(I,cam,slotN);if(e){slotN++;out.push(e);HGTM.vis++}}
+    if(I.kind==='mesh'){if(slotN>=SM)continue;const e=hgtmRenderMesh(I,cam,slotN);if(e){if(!e.cv)slotN++;out.push(e);HGTM.vis++}}
     else if(I.kind==='planet'){if(slotN>=SM)continue;const e=hgtmRenderPlanet(I,cam,slotN);if(e){slotN++;out.push(e);HGTM.vis++}}
     else hgtmCloudEntries(I,cam,out);
   }
@@ -25950,7 +25956,7 @@ function hgtmBegin(cx,cy,dX,dY,pX,pY){
   return out;
 }
 function hgtmDraw(e){
-  if(e.k===0){const s=HGTM.slots[e.slot];SC.globalAlpha=1;SC.drawImage(s.cv,e.x0,e.y0,e.w,e.h,e.x0,e.y0,e.w,e.h)}
+  if(e.k===0){SC.globalAlpha=1;if(e.cv)SC.drawImage(e.cv,0,0,e.w,e.h,e.x0,e.y0,e.w,e.h);else{const s=HGTM.slots[e.slot];SC.drawImage(s.cv,e.x0,e.y0,e.w,e.h,e.x0,e.y0,e.w,e.h)}}
   else hgtmDrawPuff(e);
 }
 function hgtmEnd(){
@@ -25974,26 +25980,72 @@ function hgtmLightAt(x,y,z,nx,ny,nz,o){ // o=[r,g,b] multipliers
 /* ---------- mesh rendering ---------- */
 const hgtmTmpK=[0,0,0],hgtmRoot=new Float32Array(12),hgtmEu=new Float32Array(9);
 /* the vertices of one part: world position, view position, light, screen position. Its own function so the engine optimises it on its own. Writes the g* arrays from index vo; HVB gets the screen bounds (minx,maxx,miny,maxy) and whether any vertex is behind the camera. */
-const HVB=new Float64Array(8);
+function hgtmPartBound(P){ // centre and radius of a fixed part in its node's own space, or null
+  const lp=P.lpos,n=P.nv;if(!lp||!n)return null;
+  let x0=1e9,y0=1e9,z0=1e9,x1=-1e9,y1=-1e9,z1=-1e9;
+  for(let v=0;v<n;v++){const x=lp[v*3],y=lp[v*3+1],z=lp[v*3+2];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;if(z<z0)z0=z;if(z>z1)z1=z}
+  const cx=(x0+x1)/2,cy=(y0+y1)/2,cz=(z0+z1)/2;let r2=0;
+  for(let v=0;v<n;v++){const dx=lp[v*3]-cx,dy=lp[v*3+1]-cy,dz=lp[v*3+2]-cz,d=dx*dx+dy*dy+dz*dz;if(d>r2)r2=d}
+  return [cx,cy,cz,Math.sqrt(r2)];
+}
+const HVB=new Float64Array(8),HRW=new Int16Array(VW+4);const PXB=new Int32Array(8);/* PERF_MESH6: true = the one-frame-in-three picture of tiny models is OFF (it showed as a visible change between frames) */
+var PERF_SPR=false,PERF_MESH=false,PERF_MESH2=false,PERF_MESH3=false,PERF_MESH4=false,PERF_MESH5=false,PERF_MESH6=true,PERF_MESH7=false,PERF_MESH8=false;   // true: no hidden-column shortcut in the model pass (for comparing)
 function hgtmPartVerts(P,Mx,vo,isc,cx,cy,cz,dX,dY){
   const lp=P.lpos,ln=P.lnor,uvA=P.uv,col=P.col,cr=col[0]/255,cg=col[1]/255,cb=col[2]/255,gl=P.glow,vc=P.vcol,dbl=P.dbl,K=hgtmTmpK,NEAR=.12,F_=F,HH_=HH,hw=VW/2,nv=P.nv;
-  let minx=HVB[0],maxx=HVB[1],miny=HVB[2],maxy=HVB[3],behind=HVB[4]!==0;
-  for(let v=0;v<nv;v++){
-    const lx=lp[v*3],ly=lp[v*3+1],lz=lp[v*3+2],nx0=ln[v*3],ny0=ln[v*3+1],nz0=ln[v*3+2];
-    const wx=Mx[0]*lx+Mx[1]*ly+Mx[2]*lz+Mx[9],wy=Mx[3]*lx+Mx[4]*ly+Mx[5]*lz+Mx[10],wz=Mx[6]*lx+Mx[7]*ly+Mx[8]*lz+Mx[11];
-    let nx=(Mx[0]*nx0+Mx[1]*ny0+Mx[2]*nz0)*isc,ny=(Mx[3]*nx0+Mx[4]*ny0+Mx[5]*nz0)*isc,nz=(Mx[6]*nx0+Mx[7]*ny0+Mx[8]*nz0)*isc;
+  let minx=HVB[0],maxx=HVB[1],miny=HVB[2],maxy=HVB[3],behind=HVB[4]!==0,zmin=HVB[5];
+  // with no warm light near the model the light is the cave light alone and depends only on the normal: worked out here, not through hgtmLightAt (the formula is the same as there, plus the giants' lift)
+  const flat=hgtmL.n===0&&!PERF_MESH8,Cc=TC,lbF=Cc.lbm,tRF=Cc.tbR,tGF=Cc.tbG,tBF=Cc.tbB,L0=HGTM_LF[0],L1=HGTM_LF[1],L2=HGTM_LF[2];let offF=0;
+  if(flat&&typeof HGTG!=='undefined'){const Ig=HGTG.cur;if(Ig&&Ig.o&&Ig.o.hgk)offF=.1+.16*(typeof hgtlmNight==='function'?hgtlmNight():0)}
+  const m0=Mx[0],m1=Mx[1],m2=Mx[2],m3=Mx[3],m4=Mx[4],m5=Mx[5],m6=Mx[6],m7=Mx[7],m8=Mx[8],m9=Mx[9],m10=Mx[10],m11=Mx[11];
+  for(let v=0,v3=0,v2=0;v<nv;v++,v3+=3,v2+=2){
+    const lx=lp[v3],ly=lp[v3+1],lz=lp[v3+2],nx0=ln[v3],ny0=ln[v3+1],nz0=ln[v3+2];
+    const wx=m0*lx+m1*ly+m2*lz+m9,wy=m3*lx+m4*ly+m5*lz+m10,wz=m6*lx+m7*ly+m8*lz+m11;
+    let nx=(m0*nx0+m1*ny0+m2*nz0)*isc,ny=(m3*nx0+m4*ny0+m5*nz0)*isc,nz=(m6*nx0+m7*ny0+m8*nz0)*isc;
     const rx=wx-cx,ry=wy-cy,zc=dX*rx+dY*ry,xc=dX*ry-dY*rx,yc=wz-cz;
     if(dbl&&nx*(cx-wx)+ny*(cy-wy)+nz*(cz-wz)<0){nx=-nx;ny=-ny;nz=-nz}
-    hgtmLightAt(wx,wy,wz,nx,ny,nz,K);
-    let kr=K[0]*cr,kg=K[1]*cg,kb=K[2]*cb;if(vc){kr*=vc[v*3];kg*=vc[v*3+1];kb*=vc[v*3+2]}
+    let kr,kg,kb;
+    if(flat){const df=Math.max(0,nx*L0+ny*L1+nz*L2),base=lbF*(.8+.6*df+.15*nz)*1.1+offF;kr=base*tRF*cr;kg=base*tGF*cg;kb=base*tBF*cb}
+    else{hgtmLightAt(wx,wy,wz,nx,ny,nz,K);kr=K[0]*cr;kg=K[1]*cg;kb=K[2]*cb}
+if(vc){kr*=vc[v3];kg*=vc[v3+1];kb*=vc[v3+2]}
     if(gl){kr+=gl;kg+=gl;kb+=gl}
-    const o=vo+v;gXC[o]=xc;gYC[o]=yc;gZC[o]=zc;gKR[o]=kr;gKG[o]=kg;gKB[o]=kb;const uu=uvA[v*2],vv=uvA[v*2+1];gU[o]=uu;gV[o]=vv;
+    if(zc<zmin)zmin=zc;
+    const o=vo+v;gXC[o]=xc;gYC[o]=yc;gZC[o]=zc;gKR[o]=kr;gKG[o]=kg;gKB[o]=kb;const uu=uvA[v2],vv=uvA[v2+1];gU[o]=uu;gV[o]=vv;
     if(zc<NEAR){behind=true}else{const iz=1/zc,sx=hw+F_*xc*iz,sy=HH_-F_*yc*iz;gSX[o]=sx;gSY[o]=sy;gIZ[o]=iz;gUZ[o]=uu*iz;gVZ[o]=vv*iz;
       if(sx<minx)minx=sx;if(sx>maxx)maxx=sx;if(sy<miny)miny=sy;if(sy>maxy)maxy=sy}
   }
-  HVB[0]=minx;HVB[1]=maxx;HVB[2]=miny;HVB[3]=maxy;HVB[4]=behind?1:0;
+  HVB[0]=minx;HVB[1]=maxx;HVB[2]=miny;HVB[3]=maxy;HVB[4]=behind?1:0;HVB[5]=zmin;
+}
+/* a model that covers only a few pixels (a far peacock is 4 by 8) is worked out one frame in three; in between its last picture is drawn again, moved by the move of its centre on the screen */
+function hgtmCachedMesh(I,cam){
+  const zc=I.zc;if(!(zc>1))return null;
+  const sx=VW/2+F*I.xc/zc,sy=HH-F*((I.ccz!==undefined?I.ccz:1)-cam.cz)/zc,dx=Math.round(sx-I._lsx),dy=Math.round(sy-I._lsy);
+  if(Math.abs(dx)>4||Math.abs(dy)>4||G.time-I._lcT>.1||zc>I._lzc*1.12||zc<I._lzc*.89){I._lcN=0;return null}
+  I._lcN--;return{k:0,cv:I._lc,tY:Math.max(.2,zc),x0:I._lx0+dx,y0:I._ly0+dy,w:I._lw,h:I._lh};
+}
+/* level of detail: a model that is small on the screen draws its ellipsoid parts with fewer segments (the limbs and fans are generated each frame and keep theirs). The level only changes with a margin, so it does not flicker between two. */
+const HGTM_LOD=[[1,1],[.6,.6],[.4,.4]],HGTM_LODPX=[1e9,40,15];
+function hgtmLodPart(P,lv){
+  const key='_lod'+lv;let L=P[key];if(L!==undefined)return L;
+  const d=P.def,sg=d&&d.seg;if(P.kind!=='ell'||P.gen||!sg){return P[key]=null}
+  const k=HGTM_LOD[lv],seg=[Math.max(5,Math.round(sg[0]*k[0])),Math.max(3,Math.round(sg[1]*k[1]))];
+  if(seg[0]>=sg[0]&&seg[1]>=sg[1])return P[key]=null;
+  const Q=hgtmBuildPart(Object.assign({},d,{seg}),P.node);
+  return P[key]={nv:Q.nv,lpos:Q.lpos,lnor:Q.lnor,uv:Q.uv,tr:Q.tr,nt:Q.nt};
 }
 function hgtmRenderMesh(I,cam,slotIx){
+  if(PERF_MESH7||!(I.zc>0))return hgtmRenderMesh0(I,cam,slotIx);
+  const px=F*I.M.rad*I.sc/I.zc;let lv=I._lodv===undefined?0:I._lodv;
+  while(lv<2&&px<HGTM_LODPX[lv+1]*.9)lv++;
+  while(lv>0&&px>HGTM_LODPX[lv]*1.15)lv--;
+  I._lodv=lv;
+  if(lv===0)return hgtmRenderMesh0(I,cam,slotIx);
+  const parts=I.M.parts,sw=[];
+  for(const P of parts){const L=hgtmLodPart(P,lv);if(L){sw.push(P,P.nv,P.lpos,P.lnor,P.uv,P.tr);P.nv=L.nv;P.lpos=L.lpos;P.lnor=L.lnor;P.uv=L.uv;P.tr=L.tr}}
+  try{return hgtmRenderMesh0(I,cam,slotIx)}
+  finally{for(let i=0;i<sw.length;i+=6){const P=sw[i];P.nv=sw[i+1];P.lpos=sw[i+2];P.lnor=sw[i+3];P.uv=sw[i+4];P.tr=sw[i+5]}}
+}
+function hgtmRenderMesh0(I,cam,slotIx){
+  if(I._lcN>0&&!PERF_MESH6){const e=hgtmCachedMesh(I,cam);if(e)return e}
   const M=I.M,dX=cam.dX,dY=cam.dY,cx=cam.cx,cy=cam.cy,cz=cam.cz,nodes=M.nodes,sc=I.sc,isc=1/sc,t=G.time+I.t0;
   const st={t,phase:I.phase,walk:I.walk,sp:I.sp,seed:I.seed,sc,yaw:I.yaw};
   const pose=M.anim?M.anim(t,st):null;
@@ -26005,12 +26057,16 @@ function hgtmRenderMesh(I,cam,slotIx){
     hgtmMul(N.par<0?R:nodes[N.par].M,L,N.M)}
   hgtmPrepLights(I.x,I.y,M.rad*sc);
   const C=TC,hzr=C.hzr,hzmax=C.hzmax,hzrate=C.hzrate,lbm=C.lbm,K=hgtmTmpK;
-  let vo=0;HVB[0]=1e9;HVB[1]=-1e9;HVB[2]=1e9;HVB[3]=-1e9;HVB[4]=0;
+  let vo=0;HVB[0]=1e9;HVB[1]=-1e9;HVB[2]=1e9;HVB[3]=-1e9;HVB[4]=0;HVB[5]=1e9;
   const NEAR=.12,F_=F,HH_=HH,hw=VW/2;
   for(const P of M.parts){
     const Mx=nodes[P.node].M;
     if(P.gen)P.gen(P,pose,I,Mx);
-    P.vo=vo;
+    P.vo=vo;P.hid=false;
+    if(!P.gen&&!PERF_MESH5){ // a fixed part whose bounding sphere is hidden by the ground or a nearer wall is not worked out at all
+      let cb=P.cb;if(cb===undefined)cb=P.cb=hgtmPartBound(P);
+      if(cb){const wx=Mx[0]*cb[0]+Mx[1]*cb[1]+Mx[2]*cb[2]+Mx[9],wy=Mx[3]*cb[0]+Mx[4]*cb[1]+Mx[5]*cb[2]+Mx[10],wz=Mx[6]*cb[0]+Mx[7]*cb[1]+Mx[8]*cb[2]+Mx[11],rd=cb[3]*sc*1.02+.02,rx=wx-cx,ry=wy-cy;
+        if(hgtmHidden(dX*rx+dY*ry,dX*ry-dY*rx,rd,wz+rd,cz)){P.hid=true;vo+=P.nv;continue}}}
     hgtmPartVerts(P,Mx,vo,isc,cx,cy,cz,dX,dY);
     vo+=P.nv;
   }
@@ -26021,10 +26077,17 @@ function hgtmRenderMesh(I,cam,slotIx){
   const S=hgtmSlot(slotIx),D=S.img.data,W4=VW*4;
   // clear the area
   for(let y=y0;y<y1;y++){D.fill(0,y*W4+x0*4,y*W4+x1*4);gZB.fill(0,y*VW+x0,y*VW+x1)}
-  HGTM.cur={D,x0,x1,y0,y1,hzr,hzmax,hzrate,lbm,hz:hzr,T:G.time};
+  HGTM.cur={D,x0,x1,y0,y1,hzr,hzmax,hzrate,lbm,hz:hzr,T:G.time};PXB[0]=0;PXB[1]=VW;PXB[2]=-1;PXB[3]=VH;PXB[4]=-1;
+  { // for each column: the first row from which everything of this model is hidden, by the ground or by a wall hit nearer than the whole model (so the per-pixel tests in hgtmRast give the same answer for those rows)
+    const zn=Math.max(NEAR,HVB[5]),kbz=Math.min(YBK-1,Math.max(0,((zn-.55)*YBS)|0)),tnow=G.time;
+    for(let x=x0;x<x1;x++){let h=YB[x*YBK+kbz];
+      if(HGTM_WS[x]===tnow){const n=HGTM_WN[x],b=x*HGTM_N;for(let k=0;k<n;k++)if(HGTM_WP[b+k]<zn){const r=Math.ceil(HGTM_WT[b+k]);if(r<h)h=r}}
+      HRW[x]=PERF_MESH?32000:h}
+  }
   // rasterise
   let nt=0;const TW=[];
   for(const P of M.parts){
+    if(P.hid)continue;
     const tx=P.tex?hgtmTex(P.tex,P.texMax,P.grade):null;
     HGTM.cur.tex=tx;HGTM.cur.alphaT=P.alpha;HGTM.cur.dbl=P.dbl;HGTM.cur.soft=!!(P.def&&P.def.soft);
     const tr=P.tr,vo2=P.vo;
@@ -26033,6 +26096,7 @@ function hgtmRenderMesh(I,cam,slotIx){
         // cheap reject
         const ax=gSX[a],bx=gSX[b],cxx=gSX[c];if((ax<x0&&bx<x0&&cxx<x0)||(ax>x1&&bx>x1&&cxx>x1))continue;
         const ay=gSY[a],by=gSY[b],cyy=gSY[c];if((ay<y0&&by<y0&&cyy<y0)||(ay>y1&&by>y1&&cyy>y1))continue;
+        {const tyt=Math.min(ay,by,cyy)-.5,xa=Math.max(x0,Math.floor(Math.min(ax,bx,cxx))),xb=Math.min(x1-1,Math.ceil(Math.max(ax,bx,cxx)));let vis=false;for(let xx=xa;xx<=xb;xx++)if(HRW[xx]>tyt){vis=true;break}if(!vis)continue} // every column it can touch is hidden from above its top row
         let o=0;TV[o++]=ax;TV[o++]=ay;TV[o++]=gIZ[a];TV[o++]=gUZ[a];TV[o++]=gVZ[a];TV[o++]=gKR[a];TV[o++]=gKG[a];TV[o++]=gKB[a];
         TV[o++]=bx;TV[o++]=by;TV[o++]=gIZ[b];TV[o++]=gUZ[b];TV[o++]=gVZ[b];TV[o++]=gKR[b];TV[o++]=gKG[b];TV[o++]=gKB[b];
         TV[o++]=cxx;TV[o++]=cyy;TV[o++]=gIZ[c];TV[o++]=gUZ[c];TV[o++]=gVZ[c];TV[o++]=gKR[c];TV[o++]=gKG[c];TV[o++]=gKB[c];
@@ -26042,8 +26106,13 @@ function hgtmRenderMesh(I,cam,slotIx){
   }
   HGTM.tris+=nt;
   // upload
-  const cxv=S.cx;if(S.ob)cxv.clearRect(S.ob[0],S.ob[1],S.ob[2],S.ob[3]);
+  const cxv=S.cx;if(S.ob){cxv.clearRect(S.ob[0],S.ob[1],S.ob[2],S.ob[3]);S.ob=null}
+  if(PXB[0]===0&&!PERF_MESH2)return null;   // nothing of the model shows (it is hidden): nothing to upload or draw
+  if(!PERF_MESH3){x0=PXB[1];x1=PXB[2]+1;y0=PXB[3];y1=PXB[4]+1}   // only the rows and columns that were painted
   cxv.putImageData(S.img,0,0,x0,y0,x1-x0,y1-y0);S.ob=[x0,y0,x1-x0,y1-y0];
+  if(!PERF_MESH6&&(x1-x0)*(y1-y0)<=400&&I.zc>1&&F*M.rad*sc/I.zc<24){ // a tiny one: keep its picture for the next two frames
+    const w=x1-x0,h=y1-y0;let c=I._lc;if(!c){c=I._lc=document.createElement('canvas');c._x=c.getContext('2d')}if(c.width!==w||c.height!==h){c.width=w;c.height=h}else c._x.clearRect(0,0,w,h);
+    c._x.drawImage(S.cv,x0,y0,w,h,0,0,w,h);I._lw=w;I._lh=h;I._lx0=x0;I._ly0=y0;I._lsx=VW/2+F*I.xc/I.zc;I._lsy=HH-F*((I.ccz!==undefined?I.ccz:1)-cam.cz)/I.zc;I._lcT=G.time;I._lzc=I.zc;I._lcN=2}
   return{k:0,tY:Math.max(.2,I.zc),slot:slotIx,x0,y0,w:x1-x0,h:y1-y0};
 }
 function hgtmClipTri(a,b,c){ // near plane clip of one triangle, rasterise the pieces
@@ -26076,6 +26145,7 @@ function hgtmRast(){
     let iz=TV[2]+g[0]*dx0+g[1]*dy0,uz=TV[3]+g[2]*dx0+g[3]*dy0,vz=TV[4]+g[4]*dx0+g[5]*dy0,kr=TV[5]+g[6]*dx0+g[7]*dy0,kg=TV[6]+g[8]*dx0+g[9]*dy0,kb=TV[7]+g[10]*dx0+g[11]*dy0;
     const gi=g[0],gu=g[2],gv=g[4],gr=g[6],gg=g[8],gb=g[10];
     for(let x=xs;x<=xe;x++,iz+=gi,uz+=gu,vz+=gv,kr+=gr,kg+=gg,kb+=gb){
+      if(y>=HRW[x])continue;
       const zo=y*VW+x;if(iz<=gZB[zo]||iz<=0)continue;
       const z=1/iz;
       // depth test against the ground and the walls
@@ -26087,7 +26157,7 @@ function hgtmRast(){
       if(td){const u=uz*z,v=vz*z,ti=(((v*th)|0)&hm)*tw+(((u*tw)|0)&wm),i4=ti*4;if(alphaT&&td[i4+3]<110)continue;r=td[i4];gc=td[i4+1];b=td[i4+2]}
       gZB[zo]=iz;
       const sm=Math.min(hzmax,z*HGTM_SEC[x]*hzrate),iv=1-sm,kav=(kr+kg+kb)*.3333,sk=(.55*lbm+.45*Math.max(0,kav-lbm)+.05)*sm,o=zo*4;
-      D[o]=r*kr*iv+H0*sk;D[o+1]=gc*kg*iv+H1*sk;D[o+2]=b*kb*iv+H2*sk;D[o+3]=255;
+      D[o]=r*kr*iv+H0*sk;D[o+1]=gc*kg*iv+H1*sk;D[o+2]=b*kb*iv+H2*sk;D[o+3]=255;PXB[0]++;if(x<PXB[1])PXB[1]=x;if(x>PXB[2])PXB[2]=x;if(y<PXB[3])PXB[3]=y;if(y>PXB[4])PXB[4]=y;
     }
   }
 }
@@ -26339,7 +26409,7 @@ const hgtgR=hgtmRnd,hgtgClamp=(v,a,b)=>v<a?a:v>b?b:v,hgtgWrap=a=>Math.atan2(Math
   const bp=hgtmBuildPart;hgtmBuildPart=function(d,ix){if(HGTG.building){if(d.grade===undefined)d.grade=false;if(d.glow===undefined&&d.t!=='fan')d.glow=HGTG.lift;if(d.t==='fan'&&d.tex&&d.alpha===undefined)d.alpha=true}return d.t==='dome'?hgtgDome(d,ix):bp(d,ix)};
   const gf=hgtmGenFan;hgtmGenFan=function(P,pose,inst){const d=P.def,s=d.spread,l=d.len,ks=pose&&pose.fs,kl=pose&&pose.fl;
     if(ks===undefined&&kl===undefined)return gf(P,pose,inst);d.spread=(s||2.4)*(ks===undefined?1:ks);d.len=(l||1)*(kl===undefined?1:kl);gf(P,pose,inst);d.spread=s;d.len=l};
-  const rm=hgtmRenderMesh;hgtmRenderMesh=function(I,cam,s){HGTG.cur=I;if(!HGTG.vdone)hgtgVariants();if(!I.o.cheap&&I.zc>0&&F*I.M.rad*I.sc/Math.max(.3,I.zc)<2.5)return null;return rm(I,cam,s)};
+  const rm=hgtmRenderMesh;hgtmRenderMesh=function(I,cam,s){HGTG.cur=I;if(!HGTG.vdone)hgtgVariants();if(!I.o.cheap&&I.zc>0&&F*I.M.rad*I.sc/Math.max(.3,I.zc)<2.5)return null;if(!I.o.cheap&&I.zc>60){if(HGTG.farT!==G.time){HGTG.farT=G.time;HGTG.farN=0}if(++HGTG.farN>3)return null}return rm(I,cam,s)};
   const up=hgtmUpdate;hgtmUpdate=function(dt){for(const I of HGTM.inst){const f=I.o&&I.o.tick;if(f)f(I,dt)}const r=up(dt);if(HGTG.moon)hgtgMoonGuard(dt);return r};
   const sy=hgtmSync;hgtmSync=function(){if(HGTM.lvl!==LEVEL)HGTG.moonI=null;if(HGTM.lvl!==LEVEL&&!HGTG.off){hgtgOnEnter(LEVEL);try{hgtgWrapLook();if(LEVEL===470||(LEVEL>=480&&LEVEL<=484))hgtgMoon(LEVEL)}catch(e){console.error('moon',e)}}return sy()};
 })();
@@ -26439,7 +26509,7 @@ function gStiltDef(name,o){
     {t:'ell',c:[0,.0,.36],r:[.46,1.1,.22],seg:[10,5],tex:'art_tex_hgtb_stilt_armour',col:o.plate,uv:[2,1]}];
   for(let k=0;k<5;k++)body.push({t:'ell',c:[0,.9-k*.45,.4+(k%2?.0:.04)],r:[.09,.13,.11],seg:[6,4],col:o.plate});
   const bodyS=gScl(body,K);
-  for(const g of legs)kids.push({id:g.hip,pos:[g.hx,g.hy,g.hz],parts:[{t:'limb',id:g.id,len:[L[0]/2,L[0]/2,L[1]/2,L[1]/2,L[2]],rad:[.36,.34,.17,.15,.1,.07],col:o.leg,tex:'art_tex_hgtb_stilt_leg',sides:nl===6?4:5,glow:.4}]},
+  for(const g of legs)kids.push({id:g.hip,pos:[g.hx,g.hy,g.hz],parts:[{t:'limb',id:g.id,len:[L[0]/2,L[0]/2,L[1]/2,L[1]/2,L[2]],rad:[.36,.34,.17,.15,.1,.07],col:o.leg,tex:'art_tex_hgtb_stilt_leg512',texMax:512,sides:nl===6?4:5,glow:.4}]},
     {id:g.foot,pos:[0,0,0],parts:[{t:'ell',c:[0,.1,0],r:[.45,.62,.12],seg:[8,5],tex:'art_tex_hgtb_scales',col:o.leg},{t:'ell',c:[-.2,.7,0],r:[.08,.24,.06],rot:[0,0,.3],seg:[4,3],col:[250,240,215]},{t:'ell',c:[0,.76,0],r:[.08,.26,.06],seg:[4,3],col:[250,240,215]},{t:'ell',c:[.2,.7,0],r:[.08,.24,.06],rot:[0,0,-.3],seg:[4,3],col:[250,240,215]}]});
   const hc=[0,.15*K,0],hr=[.33*K,.48*K,.3*K],eyeNodes=[],er=(o.eyeR||.27)*K;
   for(const sd of[-1,1]){const x=sd*.28*K,z=.08*K,y=gSurf(hc,hr,x,z),p=[x,y,z];eyeNodes.push(gEye(sd<0?'eL':'eR',p,er*1.1,o.eye,gNormRot(hc,hr,p),{bulge:er*.8,lip:o.lip,seg:12,rings:4,eg:.55}))}
@@ -26773,7 +26843,8 @@ function hgtgDij(inf,sx,sy,dmin,over,maxC){
 function hgtgRoute(inf,R,sx,sy,o){
   const q=hgtgDij(inf,sx,sy,o.dmin,o.over,o.max*1.5);if(!q)return null;const W=inf.W,c=[];
   for(const i of q.order)if(q.dist[i]>=o.min&&q.dist[i]<=o.max&&inf.D[i]>=(o.endD||1)&&inf.open[i])c.push(i);
-  if(!c.length)return null;const tg=c[(R()*c.length)|0],cells=[];for(let i=tg;i>=0;i=q.prev[i])cells.push(i);cells.reverse();
+  let tgn=-1;if(o.near){let bd=1e9;for(const i of q.order){if(!inf.open[i]||inf.D[i]<(o.endD||1))continue;const d=Math.hypot(i%W-o.near[0],((i/W)|0)-o.near[1]);if(d<bd){bd=d;tgn=i}}}
+  if(!c.length&&tgn<0)return null;const tg=tgn>=0?tgn:c[(R()*c.length)|0],cells=[];for(let i=tg;i>=0;i=q.prev[i])cells.push(i);cells.reverse();
   let p=[];const st=o.step||3;for(let k=0;k<cells.length;k+=st)p.push([cells[k]%W,((cells[k]/W)|0),cells[k]]);const lc=cells[cells.length-1];if(p[p.length-1][2]!==lc)p.push([lc%W,((lc/W)|0),lc]);
   if(p.length<3)return null;
   for(let it=0;it<2;it++)p=p.map((v,k)=>k===0||k===p.length-1?v:[v[0]*.5+(p[k-1][0]+p[k+1][0])*.25,v[1]*.5+(p[k-1][1]+p[k+1][1])*.25,v[2]]);
@@ -26838,7 +26909,20 @@ function hgtgAuto(id,opts){
     if(found){const gz=gh(found[0],found[1]),dm=Math.max(.8,Math.min(2.4,inf.D[found[1]*W+found[0]]-2)),nb=K('bulk')[0],ns=K('stilt')[0],f=found[2],px=f%2?0:6,py=f%2?6:0;
       const one=(nm,cx,cy,r,sc,sp,sd)=>{const c=hgtgSafeCircle(inf,R,cx,cy,r,6,.2);hgtgSpawn(nm,{level:id,x:c[0][0],y:c[0][1],route:c,scale:sc,speed:sp,seed:sd})};
       one(nb,found[0]+.5,found[1]+.5,dm,fitScale(nb,.9,1.1,gz),.15,77+id);one(ns,found[0]+.5+px,found[1]+.5+py,Math.max(.8,dm-.5),fitScale(ns,.8,1,gz),.25,79+id);
-      stat.vista={x:vx,y:vy,f,h:+inf.h[vy*W+vx].toFixed(1),giant:[found[0],found[1]]};HGTG.vista=HGTG.vista||{};HGTG.vista[id]=stat.vista}}
+      stat.vista={x:vx,y:vy,f,h:+inf.h[vy*W+vx].toFixed(1),giant:[found[0],found[1]]};HGTG.vista=HGTG.vista||{};HGTG.vista[id]=stat.vista
+      // more giants on open ground in clear sight of the lookout and of the main plaza, plus low cloud around the lookout so there is fog to stand in
+      {let mp=-1,md=-1;for(let i=0;i<inf.N;i++)if(inf.open[i]&&!inf.bad[i]&&inf.D[i]>md&&(i%W)>6&&(i%W)<W-7&&((i/W)|0)>6&&((i/W)|0)<inf.H-7){md=inf.D[i];mp=i}
+        let alt=0;const used=[found];
+        const visFrom=(cx0,cy0,n)=>{let c=0;const hb=inf.h[cy0*W+cx0];for(let f=0;f<4&&c<n;f++)for(let dd=18;dd<=52&&c<n;dd+=4){const x=cx0+dirs[f][0]*dd,y=cy0+dirs[f][1]*dd;if(x<4||y<4||x>W-5||y>inf.H-5||inf.D[y*W+x]<3||inf.h[y*W+x]>hb+.6)continue;if(used.some(u=>Math.hypot(u[0]-x,u[1]-y)<9))continue;
+            let clr=true;for(let k=3;k<dd&&clr;k+=2){const cc=(cy0+dirs[f][1]*k)*W+cx0+dirs[f][0]*k;if(inf.top[cc]>hb+.3)clr=false}if(!clr)continue;used.push([x,y]);c++;alt++;const nm=alt%2?ns:nb,cs=hgtgSafeCircle(inf,R,x+.5,y+.5,Math.max(.8,Math.min(2.4,inf.D[y*W+x]-2)),6,.2);
+            hgtgSpawn(nm,{level:id,x:cs[0][0],y:cs[0][1],route:cs,scale:fitScale(nm,.8,1.1,gh(x,y)),speed:.15+.1*R(),seed:95+id*7+alt})}};
+        visFrom(vx,vy,2);if(mp>=0)visFrom(mp%W,(mp/W)|0,2);
+        for(let q=0;q<3;q++){const cx2=vx+(R()-.5)*16,cy2=vy+(R()-.5)*16,z0=inf.h[vy*W+vx]+.6+R()*1.6,rt=[];for(let k=0;k<4;k++)rt.push([cx2+Math.cos(k*1.57)*3,cy2+Math.sin(k*1.57)*3,z0]);hgtmCloud({level:id,x:cx2,y:cy2,z:z0,r:2.4,puffs:9,seed:300+q+id,route:rt,speed:.2,alpha:.7})}}
+      // a bulk giant walks from the main plaza to the foot of the lookout, and a stilt-walker the same way, so they are seen from the tower top and the plaza
+      {let pb=-1,bd=-1;const qv=hgtgDij(inf,found[0],found[1],1,false,320);if(qv)for(const i of qv.order)if(qv.dist[i]>=8&&inf.D[i]>bd&&inf.D[i]>=2){bd=inf.D[i];pb=i}
+        if(pb>=0)for(const [nm,dm2,sc0] of[[nb,3,.9],[ns,1,.8]]){const r1=hgtgRoute(inf,R,pb%W,(pb/W)|0,{dmin:dm2,over:false,min:6,max:90,endD:dm2,lane:1,step:3,near:[vx,vy]});
+          if(r1&&hgtgRouteOK(inf,r1)){hgtgSpawn(nm,{level:id,x:r1[0][0],y:r1[0][1],route:r1,scale:fitScale(nm,sc0,sc0+.15,gh(pb%W,(pb/W)|0)),speed:.3,seed:91+id+dm2});stat.walkers=(stat.walkers||0)+1;stat.vista.plaza=[pb%W,(pb/W)|0]}}}
+    }}
   // the rim: lines of distant giants outside the walls and a row of leaning mesh spires, so the painted skyline is not alone
   {const Hh=inf.H;let nr=0;for(let i=0;i<14;i++){const side=i%4,al=(R()-.5)*.9,out=10+R()*28;let x,y;if(side===0){x=W/2+al*W;y=-out}else if(side===1){x=W+out;y=Hh/2+al*Hh}else if(side===2){x=W/2+al*W;y=Hh+out}else{x=-out;y=Hh/2+al*Hh}
       const nm=i%2?pick(K('bulk')):pick(K('stilt'));hgtgSpawn(nm,{level:id,x,y,route:[[x,y]],h:0,scale:i%2?.9+.4*R():.8+.5*R(),yaw:Math.atan2(-(W/2-x),Hh/2-y),speed:0,seed:1+((R()*9000)|0),far:300,over:false});nr++}
@@ -27021,9 +27105,9 @@ function hgtgMoonTick(I,dt){
 }
 HGTG.moonRec={};
 function hgtgMoon(id){
-  if(!HGTG.moon||HGTG.moonRec[id])return;HGTG.moonRec[id]=1;const L=LEVELS[id];if(!L)return;const main=gArt('hgt_moon_main',['moon_main'],'hgt_planet_cratered'),gl=gArt('hgt_moon_glow',['moon_glow'],null),inf=hgtgInfo(id),W=L.rows[0].length,H=L.rows.length,R=inf?90:80;
+  if(!HGTG.moon||HGTG.moonRec[id])return;HGTG.moonRec[id]=1;const L=LEVELS[id];if(!L)return;const main=gArt('hgt_moon_main',['moon_main'],'hgt_planet_cratered'),gl=gArt('hgt_moon_glow',['moon_glow'],null),inf=hgtgInfo(id),W=L.rows[0].length,H=L.rows.length,R=inf?100:80;
   hgtmPlanet('hgtg_moon',main,R,{spin:.02,tilt:.25,glow:gl?.12:.4,glowTex:gl,atmo:[205,195,255],gain:1.2,max:512,lowres:1});
-  const M={R,cx:W/2,cy:H/2,dy:inf?-40:0,span:W*9,bottom:inf?Math.max(30,inf.zmax+6):10};
+  const M={R,cx:W/2,cy:H/2,dy:inf?-40:0,span:W*9,bottom:inf?Math.max(26,inf.zmax+3):10};
   // cities: the moon crosses through the middle of the sky above and behind the skyline (lowest point above the tallest tower), not beside the city
   return hgtmSpawn('hgtg_moon',{level:id,x:0,y:0,route:[[0,0,50]],speed:0,far:W*20,cheap:true,tick:hgtgMoonTick,seed:3,moon:M});
 }
@@ -27609,7 +27693,8 @@ function hgtaDoorTile(door,wall,wh,link,o){ // link {lvl,at:{x,y,f}} fills KH_DO
      BULK GIANTS: cut-out faces IMG hgtb_bulk_face_pink, _aqua, _lilac, _amber (front view, two huge glossy eyes); non-repeating bulk skins IMG hgtb_bulk_skin_pink,
      _aqua, _lilac, _amber (2048x1024, large soft mottling, only left-right edges blended, NOT tiles: map once across the body).
      STILT-WALKER: cut-outs IMG hgtb_stilt_body (small armoured shell body), hgtb_stilt_head (long neck, big eyes), hgtb_stilt_knee (knee joint cap), hgtb_stilt_foot (foot pad);
-     tex hgtb_stilt_armour (shell plates), hgtb_stilt_leg (jointed bone and shell leg segments).
+     tex hgtb_stilt_armour (shell plates), hgtb_stilt_leg (jointed bone and shell leg segments, 128 px, old), hgtb_stilt_leg512 (512x512, painted pale lacquered bone leg,
+     seamless both ways: use tex:'art_tex_hgtb_stilt_leg512', texMax:512 in a mesh part).
      OTHER TILES: tex hgtb_eel_thick (thick eel-dragon body with fins and light lines), hgtb_whale_contrast (high contrast whale skin with glowing rows), hgtb_scorp_belly2 (pale
      belly), hgtb_angel_banded (clean monochrome banded angelfish body). SCORPIONFISH: IMG hgtb_scorp_pectoral_ruffle1 and _ruffle2 (ruffled frilled pectoral fins, attachment left).
    AESTHETIC ROUND 2 (all painted; large calm motifs, no fine noise):
@@ -29628,7 +29713,7 @@ const hs=(x,y,k)=>hash2(x,y,SEED+(k|0));
 const bandH=k=>1.5+1.2*k;
 const I=(x,y)=>y*W+x,inB=(x,y)=>x>=0&&y>=0&&x<W&&y<H,DIRS=HGTL.DIRS;
 const polar=(deg,r)=>{const a=deg*Math.PI/180;return [Math.round(CX+r*Math.cos(a)),Math.round(CY+r*Math.sin(a))]};
-HGTE.look[484]={ambient:.74,haze:.17,hazeRate:.011,hazeCol:[130,86,150],tint:[1,.98,1.08],lamp:[1,.72,.46],wallGain:.98,wallSat:1.75,riserGain:.95,floorGain:.8,floorSat:1.25,grade:[240,226,240,.22],roofGain:.8,motes:70};
+HGTE.look[484]={ambient:.74,haze:.17,hazeRate:.011,hazeCol:[130,86,150],tint:[1,.98,1.08],lamp:[1,.72,.46],wallGain:.98,wallSat:1.75,riserGain:.95,floorGain:.8,floorSat:1.25,grade:[240,226,240,.22],roofGain:.8,motes:70,caustic:1.8,sheen:1};
 LEVEL_NAMES[ID]='Nibb';
 HGTCITIES.nibb={level:ID,key:'nibb',name:'Nibb',entry:{x:75,y:146,f:0},entryNorth:{x:75,y:2,f:2},
   exitDoor:{x:75,y:148,to:470,at:{x:112,y:46,f:2}},exitDoorNorth:{x:75,y:1,to:470,at:{x:112,y:22,f:0}}};
@@ -29747,6 +29832,7 @@ function build(){
     for(let y=core.y0;y<=core.y1;y++)for(let x=core.x0;x<=core.x1;x++){
       const cen=x===nx&&y===ny,edge=(x===nx||y===ny),tp=top+(cen?9:edge?7:5);
       {const nu=Math.ceil(qwh(tp-summit)),ls=[];for(let u=0;u<nu;u++)ls.push(u===0?'hgt_wa':u===nu-1?'hgt_wb1':u%2?'hgt_w3_arcade_cream':'hgt_wa');hgtlWall(B,x,y,hgtaChar(mkTile(ls,qwh(tp-summit))),summit)}}
+    dec('hgt_vine_wreatharch',nx,core.y0-1,{oy:.4,bob:1.1,sc:1.7});dec('hgt_vine_wreatharch',nx,core.y1+1,{oy:-.4,bob:1.1,sc:1.7});
     BT.nx=nx;BT.ny=ny;BT.door={x:nx,y:core.y1,ax:nx,ay:core.y1+1};BT.needleTop=top+9;
   })();
 
@@ -30188,6 +30274,7 @@ const XN=[['hgxn_gate','Gate guard','hg_npc4',['Welcome to Nibb. The festival fl
 for(const [id,nm,img,chat] of XN)hgNative(id,nm,img,chat,null);
 hgMerchant('hgxn_cart','Lantern trader','hg_npc5','Oil, wicks and glass for the lanterns. Look as long as you like.');
 
+{const _n=typeof hgtlmNight==='function'?hgtlmNight:null;if(_n)hgtlmNight=function(){const n=_n.apply(this,arguments);return LEVEL===ID?Math.max(n,.55):n}}
 const ENTRY={};
 function roomEntry(id){if(ENTRY[id])return ENTRY[id];const R=typeof HGTROOMS!=='undefined'&&HGTROOMS.find(q=>q.id===id);return R?R.entry:{x:1,y:1,f:0}}
 let CITY=null;
@@ -30204,6 +30291,7 @@ function roomLevel(id){
   const decor=[],items=[],lights=R.lights.map(l=>[l[0],l[1]]);
   // every room is dressed the same way: banners and light-vines on the walls, lanterns at the corners, plants in pots, and one small creature
   {const occ=new Set(R.items.map(q=>q[1]+','+q[2]).concat(R.npcs.map(q=>q[2]+','+q[3])).concat(R.loot.map(q=>q[1]+','+q[2])).concat([ex+','+d]));
+   for(const q of R.doors)occ.add((q.wall==='E'?w:q.wall==='W'?1:q.pos)+','+(q.wall==='N'?1:q.wall==='S'?d:q.pos));
    const dr=(k,x,y,o)=>{if(x<1||y<1||x>w||y>d||occ.has(x+','+y))return;occ.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true,deco:true},o||{}))};
    for(let x=1;x<=w;x+=2)dr(x%4===1?'hgt_banner':'hgt_lightvine',x,1,{sc:x%4===1?1:.8});
    for(let y=3;y<=d-1;y+=3){dr('hgt_lightvine',1,y,{sc:.8});dr('hgt_lightvine',w,y,{sc:.8})}
@@ -30223,6 +30311,14 @@ function roomLevel(id){
 }
 for(let id=INT0;id<=INTN;id++)if(ROOMS[id])hgtRegister(id,roomLevel);
 ROOMS[4926].doors.push({wall:'N',pos:5,shared:4976,pic:'hgt_d2'});
+[[4923,5243,3,'The Herb Room','a',[D3('hgt_fern',1,1),D3('hgt_fern',5,1),D3('hgt_pearlbush',3,1),D3('hgtb_furn_cabinet',2,5),D3('hgtb_furn_table_chairs',4,4),D3('hgt_shellflower',5,5)]],
+ [4920,5244,4,'The Stage Wings','l',[D3('hgtb_furn_stage',3,1),D3('hgt_banner',1,2),D3('hgt_banner',5,2),D3('statue',1,5),D3('statue',5,5),D3('hgtb_shrine',3,4)]],
+ [4929,5245,6,'The Lantern Store','a',[D3('hgt_hanglamp',2,2,{bob:1.3}),D3('hgt_hanglamp',4,2,{bob:1.5}),D3('hgt_hanglamp',3,4,{bob:1.4}),D3('crate',1,1),D3('crate',5,1),D3('hgt_gardenlantern',1,5),D3('hgt_gardenlantern',5,5)]],
+ [4937,5246,3,'The Costume Loft','l',[D3('kh_int4_0',1,1),D3('kh_int4_0',5,1),D3('hl_p_mirror',3,1),D3('statue',2,4),D3('statue',4,4),D3('hgtb_furn_clock',5,5)]],
+ [4928,5247,5,'The Trade Cellar','p',[D3('barrel',1,1),D3('barrel',2,1),D3('barrel',4,1),D3('barrel',5,1),D3('sacks',1,4),D3('crate',5,4),D3('hg_chestwax',3,5)]]].forEach(([a,b,pos,nm,t,items])=>{
+  const R=ROOMS[a];R.doors.push({wall:'E',pos,to:b,at:{x:1,y:3,f:1},pic:'hgt_d0'});
+  room(b,nm,5,5,t,'hgt_f6',items,{arrive:{x:1,y:3,f:1},noSouth:true,doors:[{wall:'W',pos:3,to:a,at:{x:R.w,y:pos,f:3},pic:'hgt_d0'}],lights:[[3,2],[3,4]]});
+  hgtRegister(b,roomLevel)});
 ROOMS[4938].items.push(D3('hgtb_shrine',2,4),D3('hgtb_pinkbulb',4,4,{block:false}));
 room(5242,'The Pearl Cellar',9,7,'a','hgtb_uwsand',[D3('hgt_lightvine',2,1),D3('hgt_lightvine',8,1),D3('hgt_shellflower',1,3),D3('hgt_shellflower',9,3),D3('hgt_pearlbush',3,6),D3('hgt_pearlbush',7,6),D3('hg_chestjelly',5,2),D3('hgtb_creamjelly',3,3,{block:false}),D3('hgtb_jadeeel',7,3,{block:false})],{lights:[[5,3],[2,5],[8,5],[5,6]]});
 hgtRegister(5242,roomLevel);

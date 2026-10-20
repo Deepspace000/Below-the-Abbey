@@ -13,7 +13,7 @@ const hs=(x,y,k)=>hash2(x,y,SEED+(k|0));
 const bandH=k=>1.5+1.2*k;
 const I=(x,y)=>y*W+x,inB=(x,y)=>x>=0&&y>=0&&x<W&&y<H,DIRS=HGTL.DIRS;
 const polar=(deg,r)=>{const a=deg*Math.PI/180;return [Math.round(CX+r*Math.cos(a)),Math.round(CY+r*Math.sin(a))]};
-HGTE.look[484]={ambient:.74,haze:.17,hazeRate:.011,hazeCol:[130,86,150],tint:[1,.98,1.08],lamp:[1,.72,.46],wallGain:.98,wallSat:1.75,riserGain:.95,floorGain:.8,floorSat:1.25,grade:[240,226,240,.22],roofGain:.8,motes:70};
+HGTE.look[484]={ambient:.74,haze:.17,hazeRate:.011,hazeCol:[130,86,150],tint:[1,.98,1.08],lamp:[1,.72,.46],wallGain:.98,wallSat:1.75,riserGain:.95,floorGain:.8,floorSat:1.25,grade:[240,226,240,.22],roofGain:.8,motes:70,caustic:1.8,sheen:1};
 LEVEL_NAMES[ID]='Nibb';
 HGTCITIES.nibb={level:ID,key:'nibb',name:'Nibb',entry:{x:75,y:146,f:0},entryNorth:{x:75,y:2,f:2},
   exitDoor:{x:75,y:148,to:470,at:{x:112,y:46,f:2}},exitDoorNorth:{x:75,y:1,to:470,at:{x:112,y:22,f:0}}};
@@ -132,6 +132,7 @@ function build(){
     for(let y=core.y0;y<=core.y1;y++)for(let x=core.x0;x<=core.x1;x++){
       const cen=x===nx&&y===ny,edge=(x===nx||y===ny),tp=top+(cen?9:edge?7:5);
       {const nu=Math.ceil(qwh(tp-summit)),ls=[];for(let u=0;u<nu;u++)ls.push(u===0?'hgt_wa':u===nu-1?'hgt_wb1':u%2?'hgt_w3_arcade_cream':'hgt_wa');hgtlWall(B,x,y,hgtaChar(mkTile(ls,qwh(tp-summit))),summit)}}
+    dec('hgt_vine_wreatharch',nx,core.y0-1,{oy:.4,bob:1.1,sc:1.7});dec('hgt_vine_wreatharch',nx,core.y1+1,{oy:-.4,bob:1.1,sc:1.7});
     BT.nx=nx;BT.ny=ny;BT.door={x:nx,y:core.y1,ax:nx,ay:core.y1+1};BT.needleTop=top+9;
   })();
 
@@ -573,6 +574,7 @@ const XN=[['hgxn_gate','Gate guard','hg_npc4',['Welcome to Nibb. The festival fl
 for(const [id,nm,img,chat] of XN)hgNative(id,nm,img,chat,null);
 hgMerchant('hgxn_cart','Lantern trader','hg_npc5','Oil, wicks and glass for the lanterns. Look as long as you like.');
 
+{const _n=typeof hgtlmNight==='function'?hgtlmNight:null;if(_n)hgtlmNight=function(){const n=_n.apply(this,arguments);return LEVEL===ID?Math.max(n,.55):n}}
 const ENTRY={};
 function roomEntry(id){if(ENTRY[id])return ENTRY[id];const R=typeof HGTROOMS!=='undefined'&&HGTROOMS.find(q=>q.id===id);return R?R.entry:{x:1,y:1,f:0}}
 let CITY=null;
@@ -589,6 +591,7 @@ function roomLevel(id){
   const decor=[],items=[],lights=R.lights.map(l=>[l[0],l[1]]);
   // every room is dressed the same way: banners and light-vines on the walls, lanterns at the corners, plants in pots, and one small creature
   {const occ=new Set(R.items.map(q=>q[1]+','+q[2]).concat(R.npcs.map(q=>q[2]+','+q[3])).concat(R.loot.map(q=>q[1]+','+q[2])).concat([ex+','+d]));
+   for(const q of R.doors)occ.add((q.wall==='E'?w:q.wall==='W'?1:q.pos)+','+(q.wall==='N'?1:q.wall==='S'?d:q.pos));
    const dr=(k,x,y,o)=>{if(x<1||y<1||x>w||y>d||occ.has(x+','+y))return;occ.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true,deco:true},o||{}))};
    for(let x=1;x<=w;x+=2)dr(x%4===1?'hgt_banner':'hgt_lightvine',x,1,{sc:x%4===1?1:.8});
    for(let y=3;y<=d-1;y+=3){dr('hgt_lightvine',1,y,{sc:.8});dr('hgt_lightvine',w,y,{sc:.8})}
@@ -608,6 +611,14 @@ function roomLevel(id){
 }
 for(let id=INT0;id<=INTN;id++)if(ROOMS[id])hgtRegister(id,roomLevel);
 ROOMS[4926].doors.push({wall:'N',pos:5,shared:4976,pic:'hgt_d2'});
+[[4923,5243,3,'The Herb Room','a',[D3('hgt_fern',1,1),D3('hgt_fern',5,1),D3('hgt_pearlbush',3,1),D3('hgtb_furn_cabinet',2,5),D3('hgtb_furn_table_chairs',4,4),D3('hgt_shellflower',5,5)]],
+ [4920,5244,4,'The Stage Wings','l',[D3('hgtb_furn_stage',3,1),D3('hgt_banner',1,2),D3('hgt_banner',5,2),D3('statue',1,5),D3('statue',5,5),D3('hgtb_shrine',3,4)]],
+ [4929,5245,6,'The Lantern Store','a',[D3('hgt_hanglamp',2,2,{bob:1.3}),D3('hgt_hanglamp',4,2,{bob:1.5}),D3('hgt_hanglamp',3,4,{bob:1.4}),D3('crate',1,1),D3('crate',5,1),D3('hgt_gardenlantern',1,5),D3('hgt_gardenlantern',5,5)]],
+ [4937,5246,3,'The Costume Loft','l',[D3('kh_int4_0',1,1),D3('kh_int4_0',5,1),D3('hl_p_mirror',3,1),D3('statue',2,4),D3('statue',4,4),D3('hgtb_furn_clock',5,5)]],
+ [4928,5247,5,'The Trade Cellar','p',[D3('barrel',1,1),D3('barrel',2,1),D3('barrel',4,1),D3('barrel',5,1),D3('sacks',1,4),D3('crate',5,4),D3('hg_chestwax',3,5)]]].forEach(([a,b,pos,nm,t,items])=>{
+  const R=ROOMS[a];R.doors.push({wall:'E',pos,to:b,at:{x:1,y:3,f:1},pic:'hgt_d0'});
+  room(b,nm,5,5,t,'hgt_f6',items,{arrive:{x:1,y:3,f:1},noSouth:true,doors:[{wall:'W',pos:3,to:a,at:{x:R.w,y:pos,f:3},pic:'hgt_d0'}],lights:[[3,2],[3,4]]});
+  hgtRegister(b,roomLevel)});
 ROOMS[4938].items.push(D3('hgtb_shrine',2,4),D3('hgtb_pinkbulb',4,4,{block:false}));
 room(5242,'The Pearl Cellar',9,7,'a','hgtb_uwsand',[D3('hgt_lightvine',2,1),D3('hgt_lightvine',8,1),D3('hgt_shellflower',1,3),D3('hgt_shellflower',9,3),D3('hgt_pearlbush',3,6),D3('hgt_pearlbush',7,6),D3('hg_chestjelly',5,2),D3('hgtb_creamjelly',3,3,{block:false}),D3('hgtb_jadeeel',7,3,{block:false})],{lights:[[5,3],[2,5],[8,5],[5,6]]});
 hgtRegister(5242,roomLevel);
