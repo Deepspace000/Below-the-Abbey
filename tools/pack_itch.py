@@ -14,25 +14,26 @@ for r, d, f in os.walk(os.path.join(ROOT, 'assets')):
         e = os.path.splitext(x)[1].lower()
         if e in TYPES: imgs.append(os.path.join(r, x))
 imgs.sort()
-packs, cur, size, idx = [], [], 0, {}
-LIMIT = 40 * 1024 * 1024
-def flush():
-    global cur, size
-    if not cur: return
-    name = 'pack%d.bin' % len(packs)
+# Each picture goes into a pack chosen by a hash of its own path (NB buckets), not by its place in a sorted list. So adding or changing a picture only changes
+# the one pack it belongs to, and itch.io (butler) sends a small update instead of re-sending every pack. Packs hold a few MB each.
+import zlib
+NB = 40
+buckets = [[] for _ in range(NB)]
+for p in imgs:
+    rel = os.path.relpath(p, ROOT).replace(os.sep, '/')
+    buckets[zlib.crc32(rel.encode('utf-8')) % NB].append(p)
+packs, idx = [], {}
+for cur in buckets:
+    if not cur: continue
+    name = 'pack%02d.bin' % len(packs)
     off = 0
     with open(os.path.join(OUT, name), 'wb') as w:
-        for p in cur:
+        for p in sorted(cur):
             b = open(p, 'rb').read()
             rel = os.path.relpath(p, ROOT).replace(os.sep, '/')
             idx[rel] = [len(packs), off, len(b), TYPES[os.path.splitext(p)[1].lower()]]
             w.write(b); off += len(b)
-    packs.append(name); cur = []; size = 0
-for p in imgs:
-    s = os.path.getsize(p)
-    if size + s > LIMIT: flush()
-    cur.append(p); size += s
-flush()
+    packs.append(name)
 json.dump({'packs': packs, 'sizes': [os.path.getsize(os.path.join(OUT, n)) for n in packs], 'files': idx}, open(os.path.join(OUT, 'pack.json'), 'w'))
 # the audio and the manifest stay as they are
 for r, d, f in os.walk(os.path.join(ROOT, 'assets')):
