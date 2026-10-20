@@ -413,6 +413,11 @@ function build(){
      const around=[];for(let y=st.y0-1;y<=st.y1+1;y++)for(let x=st.x0-1;x<=st.x1+1;x++)around.push([x,y]);furnish(around.sort((a,b)=>hs(a[0],a[1],143)-hs(b[0],b[1],143)),144)}
    // the bell tower: every ring gets a bench, plants, a lamp and a roost at its corners
    BT.path.forEach((c,i)=>{if(i%11===5&&!B.occ.has(c[0]+','+c[1])){B.occ.add(c[0]+','+c[1]);const v=hs(c[0],c[1],145);dec(v<.3?'hgtb_bench':v<.6?pl[(v*80|0)%4]:pets[(v*70|0)%5],c[0],c[1],{});if(v>.6)B.lights.push([c[0],c[1]])}})}
+  /* ================= THE SUNKEN WARDS: inlays, plants and creatures on the court floors ================= */
+  {const PL=['hgtb_plant_belltree','hgtb_plant_spiralfern','hgtb_plant_orbbush','hgtb_plant_lacecoral','hgtb_plant_tealgrass','hgtb_plant_lupin','hgtb_plant_potvine','hgtb_plant_glowshrooms'],PT=['hgtb_pinkbulb','hgtb_pearlslug','hgtb_amberpup','hgtb_creamjelly','hgtb_jadeeel','hgtb_pups'];
+   for(const c of B.sunken){const [x0,y0,x1,y1]=c.bbox;for(let y=y0-3;y<=y1+1;y++)for(let x=x0;x<=x1;x++){const i=I(x,y);if(!inB(x,y)||B.rows[y][x]!=='.'||B.kind[i]!==K.COURT||B.occ.has(x+','+y))continue;
+      const dx=x-(x0+x1)/2,dy=y-(y0+y1)/2;if(Math.abs(dx)<2.5&&Math.abs(dy)<2.5)B.fm[i]=3;else if(((x+y)&3)===0)B.fm[i]=5;
+      const v=hs(x,y,150);if(v<.07&&!(Math.abs(dx)<1.5)){B.occ.add(x+','+y);dec(PL[(hs(x,y,151)*PL.length)|0],x,y,{sc:1+hs(x,y,152)*.5})}else if(v<.085){B.occ.add(x+','+y);dec(PT[(hs(x,y,153)*PT.length)|0],x,y,{})}else if(v<.095){B.occ.add(x+','+y);dec('hgtb_lamp_short',x,y,{});B.lights.push([x,y])}}}}
   /* ================= ORNAMENTS ON THE ROOFS ================= */
   for(const hsr of B.houses){
     if(isO(hsr.x+(hsr.w>>1),hsr.y+(hsr.d>>1)))continue;
@@ -602,6 +607,8 @@ function roomLevel(id){
    dr(CP[id%CP.length],(w+1)>>1,2,{block:true,walk:false,deco:false});
    dr(id%2?'hgtb_furn_chandelier_lantern':'hgtb_furn_chandelier',(w+1)>>1,Math.max(3,(d+1)>>1),{bob:1.6});
    dr(['hgtb_furn_table_chairs','hgtb_furn_books_globe'][id%2],2,d-1,{block:true,walk:false,deco:false});
+   const XP=[['hgtb_plant_belltree','hgtb_lamp_hanging'],['hgtb_plant_spiralfern','hgtb_lamp_tall'],['hgtb_plant_lacecoral','hgtb_lamp_vine'],['hgtb_plant_orbbush','hgtb_lamp_bare'],['hgtb_plant_potvine','hgtb_lamp_short']][id%5];
+   dr(XP[0],w,2,{});dr(XP[0],1,Math.max(2,d-2),{});dr(XP[1],w,Math.max(3,d-3),{});dr(XP[1],1,3,{});lights.push([w,2]);
    dr(['hgt_shellflower','hgt_bulbflower','hgt_pearlbush'][id%3],w,d-1,{});dr(['hgtb_pinkbulb','hgtb_amberpup','hgtb_creammoth','hgtb_pearlslug'][id%4],Math.max(1,w-1),Math.max(1,d-2),{})}
   for(const [k,x,y,o] of R.items){const soft=SOFT.test(k)&&o.block!==true;decor.push(Object.assign({k,x,y,block:!soft&&o.block!==false,walk:soft,deco:soft},o))}
   for(const [k,id2,x,y] of R.npcs)decor.push({k,x,y,block:false,walk:true,npc:id2,sc:1});

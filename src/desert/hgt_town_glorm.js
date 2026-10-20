@@ -280,11 +280,11 @@ function hgtxglormBuild(id){
   named('The Great Bazaar Court',75,100);
   /* the Undercroft: a steep stair down from the court, a hall at the bottom, a door */
   {const ST=14,hD=-CD-4.4;
-    for(let i=0;i<ST;i++)for(const x of [74,75,76]){open(x,90+i,-CD-(4.4*(i+1)/ST),G.STAIR,1);RES[I(x,90+i)]=1}
+    for(let i=0;i<ST;i++)for(const x of [73,74,75,76,77]){open(x,90+i,-CD-(4.4*(i+1)/ST),G.STAIR,1);RES[I(x,90+i)]=1}
     B.stairs.push({cells:[...Array(ST)].map((_,i)=>[75,90+i]),h0:-CD,rise:-4.4/ST,kind:'undercroft'});
-    for(let y=90;y<=103;y++)for(const x of [73,77])wall(x,y,'t','band',undefined,-1.4);
+    for(let y=90;y<=103;y++)for(const x of [72,78])wall(x,y,'v','wmid',undefined,-.6);
     for(let y=104;y<=106;y++)for(let x=68;x<=82;x++)open(x,y,hD,G.COURT,2);
-    for(let x=67;x<=83;x++){if(!(x>=74&&x<=76))wall(x,103,TS[(((x)%10)+10)%10],'wmid',undefined,-1.0);wall(x,107,TS[(((x)%10)+10)%10],'wmid',undefined,-1.0)}
+    for(let x=67;x<=83;x++){if(!(x>=73&&x<=77))wall(x,103,TS[(((x)%10)+10)%10],'wmid',undefined,-1.0);wall(x,107,TS[(((x)%10)+10)%10],'wmid',undefined,-1.0)}
     for(let y=104;y<=106;y++)for(const x of [67,83])wall(x,y,TS[(((y)%10)+10)%10],'wmid',undefined,-1.0);
     door(75,107,'a',hD,-1.0,0,4909,'The Undercroft');
     for(const [x,y] of [[69,105],[81,105],[72,106],[78,106]])lamp(x,y);
@@ -527,6 +527,9 @@ function hgtxglormBuild(id){
        const k=FOC[fi++%6];prop(k,x,y,{sc:k==='hgt_fountain'?1.3:k==='hgt_obelisk'?1.4:1.7});light(x,y+1);
        for(const [a,b] of [[-2,0],[2,0]])lamp(x+a,y+b);for(const [a,b] of [[-1,-1],[1,-1],[-1,1],[1,1]])plant(x+a,y+b,1.3,.7);deco('bench',x,y+2,{});named('Garden',x,y-1,'small');
        for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++)RES[I(x+a,y+b)]=1;done=true}}}
+  /* the Undercroft stair is five wide, so its edges can carry lamps, glow plants and hanging lanterns */
+  for(let y=91;y<=102;y+=2){for(const x of [73,77]){if((y/2|0)%2)lamp(x,y);else plant(x,y,1.3,.9,'hgtb_plant_glowshrooms')}hover(75,y,1.5+((y>>1)&1)*.4,1.3)}
+  for(let y=92;y<=102;y+=3)for(const x of [73,77])hgtlLight(B,x,y);
   /* night: lamps and glitter in the dark zones (the Undercroft hall, the hanging gardens, the court floor), and lanterns hung high so the city glows from above */
   for(let x=68;x<=82;x+=2){lamp(x,104);lamp(x,106);plant(x,105,1.2,.9,'hgtb_plant_glowshrooms')}
   for(let k=0;k<7;k++)hover(69+k*2,105,1.5+(k&1)*.5,1.3);
@@ -534,6 +537,9 @@ function hgtxglormBuild(id){
   for(let y=21;y<=24;y++)for(let x=120;x<=130;x+=2){hover(x,y,1.6+((x+y)&1)*.5,1.2);if(R(x,y,131)<.5)plant(x,y,1.3,.9,'hgtb_plant_lacecoral')}
   for(let y=70;y<=104;y+=6)for(let x=38;x<=112;x+=12){if(x>=66&&x<=84&&y>=80)continue;lamp(x,y+1);plant(x+1,y+1,1.3,.8,'hgtb_plant_glowshrooms')}
   for(let gy=8;gy<142;gy+=9)for(let gx=8;gx<142;gx+=9){const x=gx+((R(gx,gy,140)*4)|0),y=gy+((R(gx,gy,141)*4)|0);if(!isO(x,y)||inMz(x,y))continue;hgtlDecor(B,'hgtb_deco_lanterns',x,y,{block:false,walk:true,deco:true,bob:6+R(x,y,142)*7,sc:2.2});hgtlLight(B,x,y)}
+  /* big plain floors: plant clusters, benches and creatures every few cells */
+  for(let gy=6;gy<144;gy+=6)for(let gx=6;gx<144;gx+=6){const x=gx+((R(gx,gy,150)*3)|0),y=gy+((R(gx,gy,151)*3)|0);if(!isO(x,y)||inMz(x,y)||B.occ.has(x+','+y)||Math.abs(ground(x,y))>.01||B.kind[I(x,y)]===G.STAIR||R(x,y,152)<.45)continue;
+    plant(x,y,1.5,.7);plant(x+1,y,1.1,.6);plant(x,y+1,1.2,.6);if(R(x,y,153)<.3)deco('bench',x+2,y,{})}
   hgtlSetStart(B,75,144,0);
   /* ---------- finish: walls made by the library (placeholder characters) become my wall columns, standing on the ground ---------- */
   {const TM={a:'p',b:'a',c:'c',d:'l'};
@@ -604,7 +610,7 @@ function hgtxglormRoomBuild(rid){
   const wallG=hgtxglormTile(p1,2.7,{base:p1,mid:p1,top:'hgt_w3_cornice_cream'}),wallC=hgtxglormTile(p2,2.7,{base:p2,mid:p2,top:'hgt_w3_cornice_cream'}),wallW=hgtxglormTile('hgt_w2_winpink',2.7,{base:'hgt_w2_winpink',mid:p1,top:'hgt_w3_cornice_cream'});
   const chars={},ch=g=>{let c=hgtaChar(g);chars[c]=g;return c};
   const cw=ch(wallG),cb=ch(wallC),cwin=ch(wallW),rows=[];
-  for(let y=0;y<d;y++){let s='';for(let x=0;x<w;x++){const e=x===0||y===0||x===w-1||y===d-1;s+=e?((x+y)%3===0?cb:((x+y)%5===1&&x>0&&x<w-1?cwin:cw)):'.'}rows.push(s.split(''))}
+  for(let y=0;y<d;y++){let s='';for(let x=0;x<w;x++){const e=x===0||y===0||x===w-1||y===d-1;s+=e?((x+y)%3===0?cb:((x+y)%3===1&&x>0&&x<w-1?cwin:cw)):'.'}rows.push(s.split(''))}
   const SOL=[],solid=(x,y)=>{if(x>0&&y>0&&x<w-1&&y<d-1&&!(x===(w>>1)&&(y===d-2||y===1))){rows[y][x]=cb;SOL.push(x+','+y)}};
   if(rid>=5160){const v=rid%6;
     if(v%2===0){solid(2,2);solid(w-3,2);solid(2,d-3);solid(w-3,d-3)}                                  // corner pillars
@@ -624,23 +630,27 @@ function hgtxglormRoomBuild(rid){
     decor.push(f==='d'?{k,x,y,block:false,walk:true,deco:true}:{k,x,y,block:true});
     if(/lamppost|hanglamp|gardenlantern|candle|crystal|mushroom/.test(k))lights.push([x,y])}
   if(r.extra)decor.push({k:'hg_npc1',x:Math.max(1,(w>>1)+1),y:d-3,block:false,walk:true,npc:r.extra,sc:1});
-  {const rnd=k=>hash2(rid,k,917),used=new Set(decor.map(q=>q.x+','+q.y).concat(SOL)),v=rid%6,FOLKI=['hgtb_sweep','hgtb_basket','hgtb_water','hgtb_polish','hgtb_read','hgtb_fisher','hgtb_watch','hgtb_walk','hgtb_plantbed','hgtb_jar','hgtb_lantern','hgtb_elder'];
-   const put=(k,x,y,f,sc)=>{if(x<=0||y<=0||x>=w-1||y>=d-1||used.has(x+','+y))return false;used.add(x+','+y);decor.push(f?{k,x,y,block:false,walk:true,deco:true,sc:sc||1}:{k,x,y,block:true,sc:sc||.85});return true};
-   const SMALL=['barrel','crate','hg_jar','sacks','vase0','vase2','urn','hgtb_plant_orbbush','hgtb_plant_potvine','hgtb_plant_glowshrooms','hgtb_plant_lupin'],WALLF=['hgtb_furn_bookshelf','hgtb_furn_cabinet','hgtb_furn_clock','hgtb_furn_hearth','hgtb_furn_loom','hgtb_furn_bed','hgtb_furn_bunk','hgtb_furn_books_globe'];
-   // the layout: six plans, chosen by the room
-   const cx=w>>1,cy=d>>1;
-   if(v===0){put('counter',cx-1,cy,0);put('counter',cx+1,cy,0);for(let x=2;x<w-2;x+=3)put(WALLF[(rid+x)%8],x,1,0)}          // island counter
-   else if(v===1){for(const [x,y] of [[2,2],[w-3,2],[2,d-3],[w-3,d-3]])put('hgtb_furn_table_chairs',x,y,0);put('hgtb_furn_hearth',cx,1,0)}            // round tables, hearth
-   else if(v===2){for(let y=2;y<d-2;y+=2){put(WALLF[(rid+y)%8],1,y,0);put(WALLF[(rid+y+3)%8],w-2,y,0)}put('hgtb_furn_stage',cx,1,0)}            // stage between shelves
-   else if(v===3){put('hgtb_furn_loom',2,2,0);put('hgtb_furn_loom',w-3,2,0);put('hgtb_table',cx+1,cy,0);for(let y=3;y<d-2;y+=2)put(SMALL[(rid+y)%11],1,y,0)}   // workshop
-   else if(v===4){put('hgtb_furn_bed',2,2,0);put('hgtb_furn_bunk',w-3,2,0);put('hgtb_furn_cabinet',2,d-3,0);put('hgtb_pearlplinth',cx,1,0)}           // lodging
-   else{put('hgtb_deco_shellstatue',cx-2,cy,0);put('hgtb_deco_pearlplinth',cx+2,cy,0);for(let x=2;x<w-2;x+=2)put(WALLF[(rid+x)%8],x,1,0)}                // gallery
-   for(let k=0;k<5;k++)put(SMALL[(rid+k*3)%11],1+((rnd(k)*(w-3))|0),2+((rnd(k+9)*(d-4))|0),0,.6);
-   put('hgtb_lamp_bracket',2,1,1);put('hgtb_lamp_bracket',w-3,1,1);lights.push([2,2],[w-3,2]);
-   const PETS=['hgtb_pearlslug','hgtb_creammoth','hgtb_pinkbulb','hgtb_amberpup','hgtb_pups','hgtb_jadeeel','hgtb_lanternbeetle','hgtb_fishbeetle'];
-   put(PETS[rid%8],w-2,d-2,1);if(rid%3===0)put('hg_chestjelly',1,d-2,0);
+  {const rnd=k=>hash2(rid,k,917),used=new Set(decor.map(q=>q.x+','+q.y).concat(SOL)),cx=w>>1,cy=d>>1;
+   const put=(k,x,y,f,sc)=>{if(x<=0||y<=0||x>=w-1||y>=d-1||used.has(x+','+y)||(x===cx&&(y===1||y>=d-2)))return false;used.add(x+','+y);decor.push(f?{k,x,y,block:false,walk:true,deco:true,sc:sc||1}:{k,x,y,block:true,sc:sc||.85});return true};
+   const CENTER=['hgtb_furn_table_chairs','hgtb_deco_fountain','hgtb_furn_stage','hgtb_deco_pearlplinth','hgtb_deco_shellstatue','hgtb_furn_books_globe','counter','hgtb_furn_loom','hgtb_table','kh_maptable1_0','hgtb_stall_aqua_jars','hgtb_stall_navy_books','hgtb_stall_lilac_cloth','hgtb_stall_sage_herbs','hgtb_stall_orange_pottery','hgtb_stall_pink_flowers'];
+   const WALLP=['hgtb_furn_bookshelf','hgtb_furn_cabinet','hgtb_furn_clock','hgtb_furn_hearth','hgtb_furn_loom','hgtb_furn_bed','hgtb_furn_bunk','hgtb_deco_banner','hgtb_plant_belltree','hgtb_plant_spiralfern','hgtb_lamp_tall','hgtb_lamp_vine','vase0','vase2','hg_jar','barrel','crate','sacks','urn','hgtb_deco_lanterns','hgtb_deco_pearlplinth','counter2'];
+   const SMALL=['barrel','crate','hg_jar','sacks','vase0','vase2','urn','hgtb_plant_orbbush','hgtb_plant_potvine','hgtb_plant_glowshrooms','hgtb_plant_lupin','hgtb_plant_lacecoral','hgtb_plant_tealgrass','hgtb_bench','hgtb_chair'];
+   const pick=(L,k)=>L[((rnd(k)*L.length)|0)];
+   let last='';const wp=(k)=>{let a=pick(WALLP,k),n=0;while(a===last&&n++<6)a=pick(WALLP,k+n*17);last=a;return a};
+   // centrepiece (one per room, different from room to room) and a second feature
+   const c1=pick(CENTER,1);put(c1,cx+(rnd(2)<.5?-1:1),cy,0,/stall/.test(c1)?.9:1);const c2=pick(CENTER,3);if(c2!==c1)put(c2,cx+(rnd(4)<.5?-2:2),cy+((rnd(5)*2|0)-1),0,/stall/.test(c2)?.8:.9);
+   // wall props on the three walls: a different run on each, with gaps
+   for(let x=2;x<w-2;x+=2+(rnd(x)<.4?1:0))if(rnd(x+60)<.8)put(wp(x),x,1,0);
+   for(let y=2;y<d-2;y+=2+(rnd(y+9)<.4?1:0)){if(rnd(y+70)<.7)put(wp(y+100),1,y,0);if(rnd(y+80)<.6)put(wp(y+200),w-2,y,0)}
+   for(let k=0;k<4+(rid%3);k++)put(pick(SMALL,300+k),1+((rnd(k+400)*(w-2))|0),2+((rnd(k+410)*(d-4))|0),0,.6);
+   // corners: plants and lamps; windows: lamps in brackets and bunting hung across
+   for(const [x,y] of [[1,1],[w-2,1],[1,d-2],[w-2,d-2]])put(pick(['hgtb_plant_belltree','hgtb_plant_spiralfern','hgtb_lamp_tall','hgtb_plant_lupin','hgtb_lamp_vine'],x*7+y),x,y,1,1.2);
+   put('hgtb_lamp_bracket',2,1,1);put('hgtb_lamp_bracket',w-3,1,1);lights.push([2,2],[w-3,2],[cx,d-3]);
+   decor.push({k:'hgtb_deco_bunting',x:cx,y:2,block:false,walk:true,deco:true,bob:1.5,sc:1.4});
+   const PETS=['hgtb_pearlslug','hgtb_creammoth','hgtb_pinkbulb','hgtb_amberpup','hgtb_pups','hgtb_jadeeel','hgtb_lanternbeetle','hgtb_fishbeetle','hgtb_spindleray','hgtb_lilacmoth','hgtb_jadefinmoth','hgtb_creamjelly','hgtb_fishfly','hgtb_creammoth','hgtb_spindlespider','hgtb_amberpup'];
+   put(PETS[(rid*7+3)%16],w-2,d-2,1);if(rid%3===0)put('hg_chestjelly',1,d-2,0);
    decor.push({k:['hgtb_furn_chandelier','hgtb_furn_chandelier_lantern','hgt_hanglamp'][rid%3],x:cx,y:Math.max(2,cy-1),block:false,walk:true,deco:true,bob:1.4,sc:1.2});lights.push([cx,cy]);
-   const fi=FOLKI[rid%12];for(const q of decor)if(q.npc===r.extra)q.k=fi}
+   const FOLKI=['hgtb_sweep','hgtb_basket','hgtb_water','hgtb_polish','hgtb_read','hgtb_fisher','hgtb_watch','hgtb_walk','hgtb_plantbed','hgtb_jar','hgtb_lantern','hgtb_elder'],fi=FOLKI[rid%12];for(const q of decor)if(q.npc===r.extra)q.k=fi}
   lights.push([w>>1,d-2],[w>>1,2]);
   const fmap=[];for(let y=0;y<d;y++){let s='';for(let x=0;x<w;x++)s+=(Math.abs(x-(w>>1))<=2&&y>=(d>>1)-1&&y<=(d>>1)+1)?'1':'0';fmap.push(s)}
   return {rows:rows.map(a=>a.join('')),chars,start:{x:w>>1,y:d-2,f:0},enemies:[],items:[],decor,lights,portals:[],floor:r.fl==='wood'?'wood':hgtxglormFloor(r.fl),fmap,floorSet:[['hgtb_f_planks','hgtb_f_terrazzo','hgtb_f_marble','hgtb_f_reed'][rid%4],['hgtb_f_floral','hgtb_f_lotus','hgtb_f_mandala','hgtb_f_rosette','hgtb_f_star','hgtb_f_circles','hgtb_f_petals','hgtb_f_sunburst'][rid%8],'pale','dirt','mosscobble','stainedcobble'],ceil:'tomb',ceilH:2.7,day:0,amb:.5,torchGap:1e9,noTele:true,noExtras:true,diff:HG.DIFF,name:r.n,label:r.n,mapNames:[]}}

@@ -34,10 +34,10 @@ function hgtwUnitStat(d,y0,y1){let r=0,g=0,b=0,l=0,l2=0;const n=128*(y1-y0);for(
   const m=l/n;return {m:[r/n,g/n,b/n],sd:Math.sqrt(Math.max(0,l2/n-m*m))}}
 function hgtwBand(d,y0,y1,add,mul){for(let y=Math.max(0,y0);y<Math.min(y1,d.length/512);y++){let o=y*512;for(let x=0;x<128;x++,o+=4){d[o]=d[o]*mul+add;d[o+1]=d[o+1]*mul+add;d[o+2]=d[o+2]*mul+add}}}
 HGTW.winNames=['hgt_w2_winpink','hgt_w2_winaqua','hgt_w2_bandjade','hgt_w3_relief_pink','hgt_w3_relief_aqua','hgt_w3_fresco_cream','hgt_w3_fresco_amber','hgt_w3_scroll_aqua','hgt_w3_scroll_pink','hgt_w3_reed_lilac','hgt_w3_arcade_cream','hgt_w3_arcade_lilac','hgt_w3_shutters_lilac'];
-function hgtwDetail(tex){
+function hgtwDetail(tex,force){
   const d=tex.d,Hp=tex.h,units=Math.floor(Hp/128);if(units<2||(tex.wh||0)<1.9)return;
   const st=[];for(let u=0;u<units;u++)st.push(hgtwUnitStat(d,Hp-128*(u+1),Hp-128*u));
-  const plain=u=>st[u].sd<10;let busy=0;for(let u=1;u<units-1;u++)if(!plain(u))busy++;
+  const plain=u=>st[u].sd<(force?34:10);let busy=0;for(let u=1;u<units-1;u++)if(!plain(u))busy++;
   // relief units: a painted window or band piece, colour-matched, in the plain units of a face that has little else
   const pcs=HGTW.winNames.map(hgtwPiece).filter(Boolean);
   if(pcs.length&&units>=2){const every=busy>=(units-2)/3?4:3,u0=units>=4?2:1,sig=Math.floor(st[0].m[0]*7+st[0].m[1]*13+st[0].m[2]*29+Hp);
@@ -56,11 +56,11 @@ function hgtwStep(tex){ // a pearl step tile: light bevel at the top edge, darke
     let o=y*512;for(let x=0;x<128;x++,o+=4){const ex=Math.min(x,127-x),kx=ex<5?-14*(1-ex/5):0,m=k+kx;d[o]+=m;d[o+1]+=m;d[o+2]+=m}}
 }
 /* ---------- healing ---------- */
-function hgtwHeal(tex){
+function hgtwHeal(tex,force){
   if(!tex||tex._hl||!tex.d)return;const Hp=tex.h|0;if(Hp<8||tex.d.length!==128*Hp*4)return;tex._hl=1;
   if(!(tex.d instanceof Uint8ClampedArray))tex.d=Uint8ClampedArray.from(tex.d);
   const d=tex.d,S=512,K=12,RM=40;
-  try{hgtwDetail(tex)}catch(e){console.error('hgtw detail',e)}
+  try{hgtwDetail(tex,force)}catch(e){console.error('hgtw detail',e)}
   for(let J=Hp-128;J>=24;J-=128){ // joins between stacked 128 px units, counted from the bottom
     const mean=(y0,y1)=>{let r=0,g=0,b=0;for(let y=y0;y<y1;y++){let o=y*S;for(let x=0;x<128;x++,o+=4){r+=d[o];g+=d[o+1];b+=d[o+2]}}const n=128*(y1-y0);return [r/n,g/n,b/n]};
     const mu=mean(J-6,J),ml=mean(J,Math.min(Hp,J+6)),dl=[0,1,2].map(c=>Math.max(-34,Math.min(34,(mu[c]-ml[c])*.5)));
@@ -89,9 +89,9 @@ function hgtwHeal(tex){
       const add=det*CA+(c-mean)*CC,o=(y*128+x)*4;d[o]+=add;d[o+1]+=add;d[o+2]+=add}}
   tex.mir=1;
 }
-function hgtwHealLevel(L){
+function hgtwHealLevel(L,force){
   const seen=new Set(),t0=performance.now();let n=0;
-  const one=g=>{if(g===undefined||g===null||g<100||seen.has(g))return;seen.add(g);const ti=T_TILE[g];if(ti!==undefined&&TEX[ti]&&!TEX[ti]._hl){hgtwHeal(TEX[ti]);n++}};
+  const one=g=>{if(g===undefined||g===null||g<100||seen.has(g))return;seen.add(g);const ti=T_TILE[g];if(ti!==undefined&&TEX[ti]&&!TEX[ti]._hl){hgtwHeal(TEX[ti],force);n++}};
   for(const k in L.chars)one(L.chars[k]);
   const stp=g=>{if(g){const ti=T_TILE[g];if(ti!==undefined&&TEX[ti])hgtwStep(TEX[ti])}};
   if(L.terrace){stp(L.terrace.riser);if(L.terrace.rg)for(let i=0;i<L.terrace.rg.length;i++)if(L.terrace.rg[i])stp(L.terrace.rg[i])}
@@ -187,7 +187,7 @@ function hgtwTubeCeiling(){
 function hgtwApply(L,id){
   if(!L||L._hw||HGTW.off)return;L._hw=1;
   try{hgtwTubeCeiling()}catch(e){console.error('hgtw tube',e)}
-  const t0=performance.now(),h=hgtwHealLevel(L);let v=0;const o=HGTW.opts[id];
+  const t0=performance.now(),h=hgtwHealLevel(L,id>=4961&&id<=4976);let v=0;const o=HGTW.opts[id];
   if(o&&L.terrace){try{v=hgtwVineWalls(L,o)}catch(e){console.error('hgtw vines',e)}}
   HGTW.stats[id]={heal:h,vines:v,ms:Math.round(performance.now()-t0)};
 }

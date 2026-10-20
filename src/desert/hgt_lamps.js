@@ -90,12 +90,22 @@ function hgtlmLights(){
     const inf=HGTLM.info[d.k];l.col=col.rgb;l.calm=true;l.range2=130;l.hgtlm=1;
     items.push({d,l,col,base:HGTLM.gain*inf.li,ph:l.ph,lit:-1});
   }
-  HGTLM.cur={lv:LEVEL,items,others:LIGHTS.filter(l=>!l.hgtlm&&l.free)};
+  const fills=[];
+  if(hgtlmTown(LEVEL)){ // dead spots: where no lamp reaches within about eight cells a soft coloured pool of glow is added (a glowing floor, no lamp picture), so no part of a city is simply dark at night
+    const L=LEVELS[LEVEL],rows=L&&L.rows,H=rows?rows.length:0,W=H?rows[0].length:0,lamps=items.map(it=>[it.l.x,it.l.y]),pal=[HGTLM.COL.purple,HGTLM.COL.aqua,HGTLM.COL.pink,HGTLM.COL.orange,HGTLM.COL.sunset];
+    for(let gy=5;gy<H-2;gy+=10)for(let gx=5;gx<W-2;gx+=10){
+      let bx=-1,by=-1;for(let r=0;r<=3&&bx<0;r++)for(let dy=-r;dy<=r&&bx<0;dy++)for(let dx=-r;dx<=r;dx++){const x=gx+dx,y=gy+dy;if(x>0&&y>0&&x<W-1&&y<H-1&&rows[y][x]==='.'){bx=x;by=y;break}}
+      if(bx<0)continue;let near=false;for(const q of lamps){const dx=q[0]-bx,dy=q[1]-by;if(dx*dx+dy*dy<64){near=true;break}}if(near)continue;
+      const col=pal[Math.floor(hgtlmHash(bx,by,41)*pal.length)];
+      const l={x:bx+.5,y:by+.5,ph:hgtlmHash(bx,by,9)*6.28,key:-7000-LIGHTS.length,taken:false,red:false,free:true,col:col.rgb,calm:true,range2:130,hgtlm:1};LIGHTS.push(l);fills.push({l,ph:l.ph,base:.75})}
+  }
+  HGTLM.cur={lv:LEVEL,items,fills,others:LIGHTS.filter(l=>!l.hgtlm&&l.free)};
 }
 function hgtlmTick(t){
   const C=HGTLM.cur;if(!C||C.lv!==LEVEL)return;
   const lvl=hgtlmInterior(LEVEL)?1:hgtlmNight(),lamp=.04+.96*lvl,on=lvl>.3;
   if(hgtlmTown(LEVEL))for(const l of C.others)l.kI=1-.6*lvl; // the glitter and other lights of the city fade at night so the lamps are the main light
+  if(C.fills)for(const f of C.fills){f.l.out=lvl<.03;f.l.kI=f.base*lvl*(1+.15*Math.sin(t*.7+f.ph))}
   for(const it of C.items){
     const l=it.l;l.out=lvl<.03;l.kI=it.base*lamp*(1+.12*Math.sin(t*.9+it.ph)+.05*Math.sin(t*2.3+it.ph*1.7));
     if(it.lit!==on){it.lit=on;const nm=hgtlmVariant(it.d.k,it.col,!on);if(nm)it.d.lk=nm}
