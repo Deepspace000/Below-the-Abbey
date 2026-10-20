@@ -190,12 +190,12 @@ function build(){
     list.sort((a,b)=>hs(a[0],a[1],key)-hs(b[0],b[1],key));
     for(const [x,y] of list)if(flatOK(x,y,w,h,m,o.rho)){if(!o.noClaim)claim(x,y,w,h,m);return {x,y}}return null}
   const W2=['hgt_w3_relief_pink','hgt_w3_relief_aqua','hgt_w3_fresco_cream','hgt_w3_fresco_amber','hgt_w3_scroll_aqua','hgt_w3_scroll_pink','hgt_w3_reed_lilac','hgt_w3_arcade_cream','hgt_w2_rings','hgt_w2_doodleaqua'];
-  const mazeTile=(role,wh,info)=>{if(role==='wall'||role==='border'||role==='post'){const bi=info?(((info.wx/6)|0)+((info.wy/6)|0)):0;return hgtaChar(mkTile([W2[Math.abs(bi)%W2.length]],qwh(wh)))}};
+  const mazeTile=(role,wh,info)=>{if(info&&info.kind==='shell'&&(role==='wall'||role==='border'||role==='post'))return hgtaChar(mkTile(['hgt_w2_loopsmint'],qwh(wh)));if(role==='wall'||role==='border'||role==='post'){const bi=info?(((info.wx/6)|0)+((info.wy/6)|0)):0;return hgtaChar(mkTile([W2[Math.abs(bi)%W2.length]],qwh(wh)))}};
   B.links=B.links||{};B.mazes=[];B.nowhere=[];B.pools2=[];B.tanksList=[];B.bridges=[];
   const mz=(x,y,w,h,o)=>{try{const m=hgtzMaze(B,x,y,w,h,Object.assign({base:hAt(x,y),seed:x*31+y,tile:mazeTile},o));B.mazes.push({m,kind:o.kind,x,y,w,h});
       for(let j=y-1;j<=y+h;j++)for(let i=x-1;i<=x+w;i++)if(inB(i,j)){B.occ.add(i+','+j);B.res[I(i,j)]=3}return m}catch(e){console.error('nibb maze',o.kind,e);return null}};
   // the Grand Maze: a hedge maze in the north-west corner with a lookout stair at its heart
-  for(const s of [31,29,25]){if(flatOK(6,6,s,s,0,49)){mz(6,6,s,s,{kind:'hedge',algo:'backtracker',reward:'view',secret:true,side:'S',lampEvery:8});B.grand={x:6,y:6,s};break}}
+  for(const s of [31,29,25]){if(flatOK(6,6,s,s,0,49)){mz(6,6,s,s,{kind:'hedge',algo:'backtracker',reward:'view',secret:true,side:'S',lampEvery:8});B.grand={x:6,y:6,s};{const ap=B.mazes[0].m.approach;if(ap)claim(ap.x-2,ap.y,5,9,0)}break}}
   // step-bridges between pairs of stair towers
   for(let k=0;k<2;k++){const f=findFree(24,11,240+k,{noClaim:true,m:0,rho:50});if(!f){console.error('nibb: no room for bridge pair',k);continue}
     const a=stairTower(f.x+1,f.y+1,k?'a':'p',k?'l':'c'),b=stairTower(f.x+14,f.y+1,k?'c':'l',k?'p':'a');
@@ -429,6 +429,11 @@ function build(){
      dec('hgt_hanglamp',ap.x,ap.y,{bob:2.4,sc:1.6});dec('hgtb_deco_banner',ap.x-1,ap.y+1,{sc:1.2});dec('hgtb_deco_banner',ap.x+1,ap.y+1,{sc:1.2});
      for(const [x,y] of [[gb.x-1,gb.y-1],[gb.x+gb.s,gb.y-1],[gb.x-1,gb.y+gb.s],[gb.x+gb.s,gb.y+gb.s]]){dec('hgt_obelisk',x,y,{sc:2.8});dec('hgt_cupola',x,y,{bob:9.5,sc:1.6});B.lights.push([x,y])}
      if(g.centre){dec('hgt_finial',g.centre.x,g.centre.y,{bob:6,sc:3});dec('hgt_cupola',g.centre.x,g.centre.y,{bob:3.2,sc:2.4});B.lights.push([g.centre.x,g.centre.y])}}
+   // the ring maze: an arch, obelisks and a lit avenue at its entrance
+   {const rm=B.mazes[1]&&B.mazes[1].m;if(rm){const ap=rm.approach||{x:80,y:87};dec('hgt_vine_wreatharch',ap.x,ap.y,{sc:2.2});for(const dx of [-2,2]){dec('hgt_obelisk',ap.x+dx,ap.y,{sc:2.2});B.lights.push([ap.x+dx,ap.y])}
+     dec('hgt_hanglamp',ap.x,ap.y,{bob:2.4,sc:1.6});for(let k=2;k<=7;k+=2)for(const dx of [-1,1])if(isO(ap.x+dx,ap.y+k)&&!B.occ.has((ap.x+dx)+','+(ap.y+k))){B.occ.add((ap.x+dx)+','+(ap.y+k));dec(k%4?'hgtb_deco_banner':'hgtb_lamp_tall',ap.x+dx,ap.y+k,{});B.lights.push([ap.x+dx,ap.y+k])}}}
+   // the grand maze: a lit avenue of lamps and banners on the way to its arch
+   if(g&&gb){const ap=g.approach||{x:gb.x+(gb.s>>1),y:gb.y+gb.s};for(let k=2;k<=10;k+=2)for(const dx of [-2,2])if(isO(ap.x+dx,ap.y+k)){B.occ.add((ap.x+dx)+','+(ap.y+k));dec(k%4?'hgtb_deco_banner':'hgt_obelisk',ap.x+dx,ap.y+k,{sc:k%4?1.3:2});B.lights.push([ap.x+dx,ap.y+k])}}
    // the plaza under the bell tower
    for(let x=116;x<=134;x+=3)for(const [dy,bob] of [[33,2.4],[36,3.2],[39,2.6]]){if(isO(x,dy)&&!B.occ.has(x+','+dy)){dec('hgt_hanglamp',x,dy,{bob,sc:1.7});if(x%2)B.lights.push([x,dy])}}
    dec(bellKind(),125,34,{bob:2.2,sc:3.4});dec(bellKind(),121,37,{bob:2.6,sc:2.4});dec(bellKind(),129,37,{bob:2.6,sc:2.4});

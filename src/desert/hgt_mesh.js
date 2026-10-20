@@ -543,8 +543,8 @@ function hgtmRenderPlanet(I,cam,slotIx){
       // sphere hits
       const a=u*u+1+v*v;
       // planet
-      let tp=-1,tr_=-1,tm=-1;
-      {const b=u*Cr+Cf+v*Cu,c=Cs-R*R,dsc=b*b-a*c;if(dsc>0){const tt=(b-Math.sqrt(dsc))/a;if(tt>.1)tp=tt}}
+      let tp=-1,tr_=-1,tm=-1,ed=1;
+      {const b=u*Cr+Cf+v*Cu,c=Cs-R*R,dsc=b*b-a*c;if(dsc>0){const tt=(b-Math.sqrt(dsc))/a;if(tt>.1){tp=tt;ed=Math.min(1,(R-Math.sqrt(Math.max(0,Cs-b*b/a)))/(Cf/F*1.4))}}}
       if(mo){const mr=u*mo.xr+mo.xf+v*mo.xu,mc=mo.xr*mo.xr+mo.xf*mo.xf+mo.xu*mo.xu-mo.r*mo.r,dsc=mr*mr-a*mc;if(dsc>0){const tt=(mr-Math.sqrt(dsc))/a;if(tt>.1)tm=tt}}
       if(ring){const dn=u*Nr[0]+Nr[1]+v*Nr[2];if(Math.abs(dn)>1e-4){const tt=(Cr*Nr[0]+Cf*Nr[1]+Cu*Nr[2])/dn;if(tt>.1){const pr_=tt*u-Cr,pf=tt-Cf,pu=tt*v-Cu,rr=Math.sqrt(pr_*pr_+pf*pf+pu*pu);if(rr>ri&&rr<ro)tr_=tt}}}
       if(tp<0&&tm<0&&tr_<0)continue;
@@ -572,7 +572,7 @@ function hgtmRenderPlanet(I,cam,slotIx){
         if(kind===2){R_=R_*(1-al)+cr*al;G_=G_*(1-al)+cg*al;B_=B_*(1-al)+cb*al;A_=A_+(1-A_)*al}
         else{R_=cr;G_=cg;B_=cb;A_=1}
       }
-      if(A_<.03)continue;
+      if(tp>0&&zfront===tp)A_*=ed;if(A_<.03)continue;
       const z=zfront;
       let kb2=((z-.55)*YBS)|0;if(kb2<0)kb2=0;else if(kb2>=YBK)kb2=YBK-1;
       for(let yy=y;yy<y+bs&&yy<y1;yy++)for(let xx=x;xx<x+bs&&xx<x1;xx++){

@@ -108,7 +108,7 @@ const HGTR_LOBBY_N=[4961,4962,4963,4964,4965,4966,4967,4968],HGTR_LOBBY_S=[4970,
 const HGTR_LD={};HGTR_LOBBY_N.forEach((id,i)=>HGTR_LD[id]={x:3+3*i,y:0});HGTR_LOBBY_S.forEach((id,i)=>HGTR_LD[id]={x:3+4*i,y:8});
 for(const id in HGTR_LD){const q=HGTR_LD[id];HGTR.lobbyFront[id]=q.y===0?{x:q.x,y:1,f:2}:{x:q.x,y:7,f:0}}
 const HGTR_SPHERE_LOOK={ambient:.76,haze:.08,hazeRate:.01,hazeCol:[196,176,236],roofHaze:[120,100,170],tint:[1,1,1.04],lamp:[1,.82,.58],wallGain:.98,wallSat:1.35,wallAO:.35,floorGain:.8,floorContrast:1.4,floorSat:1.2,motes:10,vignette:.32,grade:[255,246,255,.1],pano:0};
-const HGTR_STAR_LOOK={ambient:.07,haze:.32,hazeRate:.006,hazeCol:[5,6,18],roofHaze:[3,3,10],tint:[.88,.94,1.2],lamp:[1,.8,.6],wallGain:1.5,wallSat:1.5,wallAO:.5,floorGain:1.15,floorContrast:1.5,floorSat:1.3,roofGain:.12,roofTint:[.6,.7,1.3],motes:0,vignette:.6,grade:[230,235,255,.08],pano:0,starMask:65535,starGain:.3};
+const HGTR_STAR_LOOK={ambient:.14,haze:.32,hazeRate:.006,hazeCol:[5,6,18],roofHaze:[3,3,10],tint:[.88,.94,1.2],lamp:[1,.8,.6],wallGain:2,wallSat:1.5,wallAO:.5,floorGain:1.4,floorContrast:1.5,floorSat:1.3,roofGain:.12,roofTint:[.6,.7,1.3],motes:0,vignette:.6,grade:[230,235,255,.08],pano:0,starMask:65535,starGain:.3};
 const HGTR_DEF=[
  {id:4960,kind:'lobby',name:'Hall of Spheres and Stars',w:29,d:9,wh:3,door:{x:28,y:4,face:'E'},wall:['hgt_wp','hgt_wl'],floor:'hgt_f5',look:'sphere',start:{x:14,y:4,f:2}},
  {id:4961,kind:'sphere',name:'The Ball Pit',w:8,d:8,wh:2.7,door:{x:4,y:7,face:'S'},wall:['hgt_wa','hgt_wc'],floor:'hgt_f1',look:'sphere',sim:'pit'},
@@ -120,7 +120,7 @@ const HGTR_DEF=[
  {id:4967,kind:'sphere',name:'The Sphere Court',w:23,d:17,wh:6,door:{x:11,y:16,face:'S'},wall:['hgt_wp','hgt_wc'],floor:'hgt_f6',look:'sphere',sim:'court'},
  {id:4968,kind:'sphere',name:'The Marble Gallery',w:27,d:9,wh:3.4,door:{x:13,y:8,face:'S'},wall:['hgt_wc','hgt_wl'],floor:'hgt_f5',look:'sphere',sim:'marble'},
  {id:4970,kind:'star',name:'The Planetarium',w:19,d:19,wh:6.6,door:{x:9,y:18,face:'S'},wall:['hgt_wl','hgt_wl'],floor:'hgt_f1',look:'star',stars:'planetarium'},
- {id:4971,kind:'star',name:'The Star Stair',w:9,d:31,wh:6,door:{x:4,y:30,face:'S'},wall:['hgt_wl','hgt_wl'],floor:'hgt_f4',look:'star',stars:'stair',terr:true,lookx:{ambient:.16,lipGain:1.1,floorGain:.95,riserGain:.85,lipW:.07,footAO:.5,floorContrast:1.35},hmax:7.2,heights:(h,w,d)=>{for(let y=0;y<d;y++)for(let x=0;x<w;x++)h[y*w+x]=HGTR_STAIR_H(y)}},
+ {id:4971,kind:'star',name:'The Star Stair',w:9,d:31,wh:6,door:{x:4,y:30,face:'S'},wall:['hgt_wl','hgt_wl'],floor:'hgt_f4',look:'star',stars:'stair',terr:true,lookx:{ambient:.24,lipGain:1.1,floorGain:.95,riserGain:.85,lipW:.07,footAO:.5,floorContrast:1.35},hmax:7.2,heights:(h,w,d)=>{for(let y=0;y<d;y++)for(let x=0;x<w;x++)h[y*w+x]=HGTR_STAIR_H(y)}},
  {id:4972,kind:'star',name:'The Gathering Room',w:17,d:17,wh:4,door:{x:8,y:16,face:'S'},wall:['hgt_wl','hgt_wl'],floor:'hgt_f1',look:'star',stars:'gather'},
  {id:4973,kind:'star',name:'The Lantern Stars',w:15,d:15,wh:5.6,door:{x:7,y:14,face:'S'},wall:['hgt_wl','hgt_wl'],floor:'hgt_f1',look:'star',stars:'lanterns'},
  {id:4974,kind:'star',name:'The Firefly Room',w:15,d:13,wh:3.2,door:{x:7,y:12,face:'S'},wall:['hgt_wl','hgt_wl'],floor:'hgt_f1',look:'star',stars:'fireflies'},

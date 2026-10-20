@@ -370,3 +370,12 @@ addEventListener('keyup',e=>{if(e.key==='PageUp'&&HGTE.pk>0)HGTE.pk=0;else if(e.
   let auto=0;try{const T=LEVELS[LEVEL]&&LEVELS[LEVEL].terrace;if(T&&T.h){const W=LEVELS[LEVEL].rows[0].length,i=(G.C.y|0)*W+(G.C.x|0);if(T.h[i]>=4)auto=Math.min(26,(T.h[i]-3)*6)}}catch(e){}
   const tg=Math.max(-35,Math.min(100,HGTE.pitchT+auto));HGTE.pitch+=(tg-HGTE.pitch)*Math.min(1,dt*9);
   return r+Math.round(HGTE.pitch)}}
+
+/* the floor of a room (a level that is not terraced, 4850 and up) is painted by the plain floor loop in render3D. Pale paintings (cream planks, pearl bands) wash to white under the room's lights, so the same treatment as the
+   city ground is given: the pattern is kept around the picture's own average colour (floorContrast, at most 1.6), the brightness is cut (floorGain x .8), the colour is raised (floorSat x 1.25). The inlay pictures of the fmap (floorSet) are treated the same way. */
+function hgtFloorMean(fdd){let m=fdd.mn;if(m)return m;let r=0,g=0,b=0,c=0;for(let i=0;i<fdd.length;i+=28){r+=fdd[i];g+=fdd[i+1];b+=fdd[i+2];c++}return fdd.mn=[r/c,g/c,b/c]}
+function hgtIntFloor(K,fds){
+  const o=HGTE._if||(HGTE._if={m:[],con:1,g0:1,g1:1,g2:1,sat:1});
+  for(let i=0;i<6;i++)o.m[i]=hgtFloorMean(fds[i]);
+  const g=K.floorGain*.8;o.con=Math.min(K.floorContrast,1.6);o.g0=g*K.floorTint[0];o.g1=g*K.floorTint[1];o.g2=g*K.floorTint[2];o.sat=K.floorSat*1.25;return o;
+}

@@ -197,7 +197,7 @@ function build(id){
    hgtlName(B,14,98,'The Stair Garden','place')}
   /* mazes: the Grand Maze in the north, and five smaller ones of different kinds */
   const MZP=['hgt_w3_relief_pink','hgt_w3_relief_aqua','hgt_w3_fresco_cream','hgt_w3_scroll_aqua','hgt_w3_balcony_cream','hgt_w3_arcade_cream','hgt_w2_rings','hgt_w3_fresco_amber'];
-  const mazeTile=n=>(role,wh,info)=>{if(role==='wall'||role==='border'||role==='post'){if(info&&info.kind==='hedge'){try{const bg=hgtaWallTile('hgt_wc',wh),vg=typeof hgtwVineTile==='function'?hgtwVineTile(bg,'hgt_vine_ivy',{mode:'both',h:wh+1,seed:(info.wx|0)*7+(info.wy|0)}):bg;return hgtaChar(vg)}catch(e){return undefined}}const p=MZP[(n+((info&&info.band)|0))%MZP.length],pd=hgtaPic(p)?p:'hgt_wp';return hgtaChar(hgtaWallTile(pd,wh,wh>=2.5?{top:'hgt_wb'+(n%4)}:{}))}return undefined};
+  const mazeTile=n=>(role,wh,info)=>{if(role==='wall'||role==='border'||role==='post'){if(info&&info.kind==='hedge'){try{const bg=hgtaWallTile('hgt_wc',wh),vg=typeof hgtwVineTile==='function'?hgtwVineTile(bg,'hgt_vine_wisteria',{mode:'climb',h:wh,seed:(info.wx|0)*7+(info.wy|0)}):bg;return hgtaChar(vg)}catch(e){return undefined}}const p=MZP[(n+((info&&info.band)|0))%MZP.length],pd=hgtaPic(p)?p:'hgt_wp';return hgtaChar(hgtaWallTile(pd,wh,wh>=2.5?{top:'hgt_wb'+(n%4)}:{}))}if(role==='rail'||role==='lit'){return hgtaChar(hgtaWallTile('hgt_w3_balcony_cream',wh,{top:'hgt_w3_cornice_cream'}))}return undefined};
   const mazeAt=(x,y,w,hh,opts,name,n)=>{const h0=qz(T_(x+(w>>1),y+(hh>>1)),Q);flatten(x,y,x+w-1,y+hh-1,h0,3,0);
     for(let j=y;j<y+hh;j++)for(let i=x;i<x+w;i++){wk[I(i,j)]=0;wdoor.delete(I(i,j))}
     const m=hgtzMaze(B,x,y,w,hh,Object.assign({base:h0,seed:x*7+y*3+n,tile:mazeTile(n),floor:opts.kind==='hedge'?4:3},opts));
@@ -283,7 +283,7 @@ function build(id){
   for(let y=12;y<=108;y+=4){if(y>34&&y<88)continue;for(const dx of [-3,0,3]){const x=GX+dx;if(isOpen(x,y))dec('hgtb_lamp_tall',x,y,{walk:true,deco:true,sc:1.1});}}
   for(let y=15;y<=105;y+=6){if(y>34&&y<88)continue;for(const [dx,k,bb] of [[-7,'hgtb_deco_banner',.3],[7,'hgtb_deco_banner',.3],[-5,'hgtb_deco_lanterns',.9],[5,'hgtb_deco_lanterns',.9],[0,'hgtb_deco_bunting',1.2]]){const x=GX+dx;if(isOpen(x,y))dec(k,x,y,{walk:true,deco:true,bob:bb,sc:1.2})}}
   for(let y=18;y<=102;y+=10){if(y>34&&y<88)continue;for(const dx of [-8,8]){const x=GX+dx;if(isOpen(x,y))dec('hgtb_tank_bubbles3',x,y,{walk:true,deco:true,sc:1.5,bob:.1})}}
-  for(let y=11;y<=114;y++){if(y>36&&y<86)continue;for(const dx of [-8,-7,7,8]){const x=GX+dx;if(isOpen(x,y))fm[I(x,y)]='2'}if(y%8<2)for(let dx=-6;dx<=6;dx++)if(isOpen(GX+dx,y))fm[I(GX+dx,y)]='3'}
+  for(let y=11;y<=114;y++){if(y>36&&y<86)continue;for(const dx of [-8,-7,7,8]){const x=GX+dx;if(isOpen(x,y))fm[I(x,y)]='2'}if(y%8<2)for(let dx=-6;dx<=6;dx++)if(isOpen(GX+dx,y))fm[I(GX+dx,y)]='3';else{for(const dx of [-1,0,1])if(isOpen(GX+dx,y))fm[I(GX+dx,y)]='5'}}
   for(let y=12;y<=112;y+=2){if(y>36&&y<86)continue;for(const dx of [-6,6]){const x=GX+dx;if(!isOpen(x,y))continue;const r=rnd(x,y,210);dec(r<.4?'hgt_reeds':r<.7?'hgtb_plant_tealgrass':'hgtb_plant_orbbush',x,y,{walk:true,deco:true,sc:.9+rnd(x,y,211)*.7})}}
   /* stalls on the plazas and along the Reed Plaza */
   {const ST=['coral_fruit','aqua_jars','lilac_cloth','yellow_bread','pink_flowers','teal_fish','orange_pottery','sage_herbs','navy_books','rose_lanterns'];let n=0;
@@ -810,7 +810,7 @@ hgtRegister(HGTXULB.ID,function(id){
   {const lib=L.terrace.lid;try{hgtzApplyLids(B,L)}catch(e){console.error('ulb lids',e)}if(lib){const mz=L.terrace.lid||new Float32Array(W*H);for(let i=0;i<mz.length;i++)if(lib[i]>mz[i])mz[i]=lib[i];L.terrace.lid=mz}}
   hgtlfRegister(HGTXULB.ID,{agents:U.AG||[]});
   L.fmap=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=S.fm[y*W+x];L.fmap.push(r)}
-  L.floorSet=['hgtb_f_pearlbands','hgt_f4','hgtb_f_waves','hgtb_f_marble','hgtb_f_mossy','hgtb_f_mandala'];L.floor='hgtb_f_pearlbands';L.ceil='tomb';L.ceilH=3;L.amb=.9;L.noExtras=true;L.diff=66;
+  L.floorSet=['hgtb_f_pearlbands','hgtb_f_shellflags','hgtb_f_waves','hgtb_f_marble','hgtb_f_mossy','hgtb_f_mandala'];L.floor='hgtb_f_pearlbands';L.ceil='tomb';L.ceilH=3;L.amb=.9;L.noExtras=true;L.diff=66;
   L.chars=Object.assign({},hgtaChars);
   L.sky=U.SKY.slice();
   {const ORN=['hgt_cupola','hgt_chime','hgt_banner','hgt_chimney','hgt_gardenlantern','hgt_cupola','hgt_finial','hgt_balcony'],WW={hgt_finial:1.0,hgt_cupola:1.7,hgt_chimney:1.2,hgt_banner:1.3,hgt_chime:1.1,hgt_gardenlantern:1.0,hgt_balcony:1.6};

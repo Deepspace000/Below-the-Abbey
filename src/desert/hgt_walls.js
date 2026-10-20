@@ -192,10 +192,10 @@ function hgtwHedgeTile(wh,mul,key){
   const R=hgtwRng(key.length*131+(mul[0]*100|0)*7+(mul[1]*100|0));
   const gr=x.createLinearGradient(0,0,0,Hp);gr.addColorStop(0,'rgb('+(26*mul[0]*1.6|0)+','+(70*mul[1]*1.3|0)+','+(24*mul[2]*1.6|0)+')');gr.addColorStop(1,'rgb('+(14*mul[0]*1.6|0)+','+(44*mul[1]*1.3|0)+','+(14*mul[2]*1.6|0)+')');x.fillStyle=gr;x.fillRect(0,0,128,Hp);
   const n=Math.ceil(Hp/22);
-  for(let i=0;i<n*3;i++){const w=46+R()*44,h=w*pic.height/pic.width,px=R()*128,py=R()*(Hp+h)-h*.5,a=.55+.45*R(),dark=R()<.35;
+  for(let i=0;i<n*8;i++){const w=26+R()*30,h=w*pic.height/pic.width,px=R()*128,py=R()*(Hp+h)-h*.5,a=.55+.45*R(),dark=R()<.35;
     x.save();x.globalAlpha=a;x.filter=dark?'brightness(.55) saturate(1.1)':'brightness('+(.85+R()*.5)+') saturate(1.15)';
     for(const dx of [-128,0,128]){if(px+dx+w<0||px+dx-w>128)continue;x.drawImage(pic,px+dx-w/2,py,w,h)}x.restore()}
-  const d=x.getImageData(0,0,128,Hp).data,id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;TEX[id]._hl=1;
+  const d=x.getImageData(0,0,128,Hp).data,id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;
   const gid=KH_NEXT_GID++;T_TILE[gid]=id;return gid;
 }
 /* ---------- hook: on level build ---------- */

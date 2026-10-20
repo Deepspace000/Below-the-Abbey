@@ -546,6 +546,12 @@ function hgtxglormBuild(id){
       if(k%2===1){hgtlDecor(B,'hgtb_lamp_hanging',sx0+2,y,{block:false,walk:true,deco:true,bob:1.9,sc:1.3});hgtlLight(B,sx0+2,y)}}
     for(const x of [sx0-1,sx0+5]){lamp(x,wt+1);hgtlLight(B,x,wt)}
     for(let k=1;k<=6;k+=2){for(const x of [72,77]){hgtlDecor(B,'hgtb_lamp_bracket',x,wt-k,{block:false,walk:true,deco:true,bob:1.4,sc:1.1});hgtlLight(B,x,wt-k)}}}
+  /* the foot of every flight: lamp pools, a bright mushroom glow on the lowest treads and landings */
+  for(let t=0;t<=5;t++){const wt=WT(t),west=t%2===0,sx0=west?XW(t+1):XE(t+1)-4,GL=['hgtb_plant_glowshrooms','hgtb_plant_lacecoral','hgtb_plant_orbbush'];
+    for(let k=1;k<=3;k++)for(const x of [sx0,sx0+1,sx0+3,sx0+4]){if((x+k)%2===0)plant(x,wt-k,1.6,1,GL[(x+k+t)%3]);hgtlLight(B,x,wt-k);hgtlLight(B,x,wt-k)}
+    for(let x=sx0-2;x<=sx0+6;x+=2){plant(x,wt+1,1.7,1,GL[(x+t)%3]);plant(x,wt+2,1.4,1,GL[(x+t+1)%3]);hgtlLight(B,x,wt+1);hgtlLight(B,x,wt+1)}
+    for(const x of [sx0-1,sx0+5]){lamp(x,wt+2);lamp(x,wt);hgtlLight(B,x,wt+1);hgtlLight(B,x,wt+1)}
+    for(const x of [73,76,72,77]){plant(x,wt+1,1.5,1,GL[(x+t)%3]);hgtlLight(B,74,wt+1)}}
   hgtlSetStart(B,75,144,0);
   /* ---------- finish: walls made by the library (placeholder characters) become my wall columns, standing on the ground ---------- */
   {const TM={a:'p',b:'a',c:'c',d:'l'};
@@ -657,6 +663,8 @@ function hgtxglormRoomBuild(rid){
    put(PETS[(rid*7+3)%16],w-2,d-2,1);if(rid%3===0)put('hg_chestjelly',1,d-2,0);
    decor.push({k:['hgtb_furn_chandelier','hgtb_furn_chandelier_lantern','hgt_hanglamp'][rid%3],x:cx,y:Math.max(2,cy-1),block:false,walk:true,deco:true,bob:1.4,sc:1.2});lights.push([cx,cy]);
    const FOLKI=['hgtb_sweep','hgtb_basket','hgtb_water','hgtb_polish','hgtb_read','hgtb_fisher','hgtb_watch','hgtb_walk','hgtb_plantbed','hgtb_jar','hgtb_lantern','hgtb_elder'],fi=FOLKI[rid%12];for(const q of decor)if(q.npc===r.extra)q.k=fi}
+  {const cnt={};for(const q of decor){if(!q.block||q.npc)continue;(cnt[q.y]=cnt[q.y]||[]).push(q)}
+   for(const y in cnt){const L=cnt[y];if(L.length>3){const occ=new Set(decor.map(q=>q.x+','+q.y));L.slice(3).forEach((q,i)=>{for(const dy of [2,-2,3,-3]){const ny=q.y+dy;if(ny>0&&ny<d-2&&!occ.has(q.x+','+ny)&&rows[ny][q.x]==='.'){occ.delete(q.x+','+q.y);q.y=ny;occ.add(q.x+','+ny);break}}})}}}
   lights.push([w>>1,d-2],[w>>1,2]);
   const fmap=[];for(let y=0;y<d;y++){let s='';for(let x=0;x<w;x++)s+=(Math.abs(x-(w>>1))<=2&&y>=(d>>1)-1&&y<=(d>>1)+1)?'1':'0';fmap.push(s)}
   return {rows:rows.map(a=>a.join('')),chars,start:{x:w>>1,y:d-2,f:0},enemies:[],items:[],decor,lights,portals:[],floor:r.fl==='wood'?'wood':hgtxglormFloor(r.fl),fmap,floorSet:[['hgtb_f_planks','hgtb_f_terrazzo','hgtb_f_marble','hgtb_f_reed'][rid%4],['hgtb_f_floral','hgtb_f_lotus','hgtb_f_mandala','hgtb_f_rosette','hgtb_f_star','hgtb_f_circles','hgtb_f_petals','hgtb_f_sunburst'][rid%8],'pale','dirt','mosscobble','stainedcobble'],ceil:'tomb',ceilH:2.7,day:0,amb:.5,torchGap:1e9,noTele:true,noExtras:true,diff:HG.DIFF,name:r.n,label:r.n,mapNames:[]}}

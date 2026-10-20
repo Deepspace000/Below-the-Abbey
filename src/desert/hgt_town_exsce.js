@@ -130,7 +130,7 @@ function buildCity(){
   coneDecor(B,info);rootDrum(B,info);rootDecor(B,info);rootStairsLamps(B,info);courtDecor(B,info);
   pond(B,info,43,107);axisDecor(B);
   gates(B,info);
-  tubes(B,info);recesses(B);streetDecor(B);boxDecor(B);gateDecor(B);belvedere(B);placeFolk(B,info);
+  tubes(B,info);recesses(B);streetDecor(B);boxDecor(B);gateDecor(B);belvedere(B);eastEntry(B);placeFolk(B,info);
   bigMazes(B,info);stairsNowhere(B,info);focalPoints(B);edgeGrowth(B);tanksCity(B,info);lifeAndPets(B,info);
   B.start={x:CX,y:H-3,f:0};
   return B}
@@ -306,7 +306,7 @@ function tGarden(B,bk,side,o){o=o||{};const f=frame(bk,side);if(f.A<7||f.Bd<6)re
   return {hp}}
 /* ---------- the rooms (interiors, built below) ---------- */
 const ROOMS={
-  guard:{id:4860,name:'The South Gatehouse',w:9,d:7,t:'a',kind:'guard'},
+  guard:{id:4860,name:'The South Gatehouse',w:9,d:7,t:'a',kind:'guard',floorPref:'hgtb_f_stained'},
   glubba:{id:4861,name:"Mother Glubba's House",w:9,d:7,t:'a',kind:'home',pic:'hgt_d0'},
   wibb:{id:4862,name:'The House of Salves',w:9,d:7,t:'b',kind:'healer'},
   ubbo:{id:4863,name:"Elder Ubbo's Tower Room",w:7,d:7,t:'d',kind:'elder',pic:'hgt_d2'},
@@ -459,7 +459,7 @@ function courtDecor(B,info){
    ROOMDEF[kind] = {props:[[role,x,y]..], plants:[[name,x,y,scale]..], lights:[[x,y]..], chests:[[x,y,k]..], items:[[k,x,y]..], folk:[[id,pic,x,y,scale]..]}
    ========================================================================== */
 const ROOMDEF={
- guard:{props:[['rack',1,1],['rack',2,1],['rack',6,1],['rack',7,1],['bed',1,3],['bed',1,4],['table',6,3],['chair',5,3],['hearth',7,5]],plants:[['gardenlantern',2,5,1]],lights:[[2,2],[6,2],[4,4]],chests:[[7,1,'hg_chestwax']],folk:[['hgx_ex_guard','hg_npc4',3,2,1]]},
+ guard:{props:[['bed',1,2],['bed',1,3],['bed',1,4],['rack',7,2],['rack',7,3],['table',6,5],['chair',5,5],['hearth',2,5],['cushions',7,4]],plants:[['gardenlantern',2,1,1],['gardenlantern',6,1,1],['hanglamp',3,3,1]],lights:[[2,2],[6,2],[4,4],[4,1]],chests:[[7,1,'hg_chestwax']],folk:[['hgx_ex_guard','hg_npc4',3,2,1]]},
  home:{props:[['bed',1,1],['cradle',2,1],['hearth',7,1],['table',4,3],['chair',3,3],['chair',5,3],['bookcase',1,4],['dresser',7,3],['potshelf',7,5],['planter',1,5]],plants:[['fern',2,5,.8],['bulbflower',6,5,.9]],lights:[[4,2],[2,4],[6,4]],chests:[],folk:[['hgn_glubba','hg_npc1',3,2,1]]},
  healer:{props:[['bed',1,1],['bed',2,1],['bed',3,1],['washstand',7,1],['potshelf',5,1],['shelf',7,3],['basin',6,3],['table',2,4]],plants:[['fern',1,5,.8],['bulbflower',7,5,.9],['shellflower',2,3,.8]],lights:[[4,2],[2,5],[6,5]],chests:[],folk:[['hgn_wibb','hg_npc6',4,3,1]]},
  elder:{props:[['bookcase',1,2],['bookcase',5,2],['table',3,3],['chair',2,3],['chair',4,3],['candle',1,5],['candle',5,5]],plants:[['gardenlantern',3,1,1]],lights:[[3,2],[1,4],[5,4]],chests:[],folk:[['hgn_ubbo','hg_npc0',2,5,1]],lectern:[[3,1]]},
@@ -520,7 +520,7 @@ function buildRoom(key){
    if(IMG.hgtb_lamp_bracket)for(const [x,y] of [[2,1],[w-3,1],[1,d>>1],[w-2,d>>1]])if(!taken(x,y)&&rows[y]&&rows[y][x]==='.')decorL.push({k:'hgtb_lamp_bracket',x,y,block:false,walk:true,deco:true,sc:1,bob:.9});
    if(R.id%3===0&&IMG.hgtb_plant_belltree&&!taken(1,1))decorL.push({k:'hgtb_plant_orbbush',x:1,y:1,block:false,walk:true,deco:true,sc:1})}
   for(let i=decorL.length-1;i>=0;i--){const q=decorL[i];if(rows[q.y]&&rows[q.y][q.x]!=='.')decorL.splice(i,1)}
-  const fa=nm_=>FLOORS[nm_]?nm_:'hgt_f5',f0=fa(RFLOOR[(R.id*3)%RFLOOR.length]),f1=fa(RFLOOR[(R.id*3+4)%RFLOOR.length]),f2=fa(['hgtb_f_mandala','hgtb_f_rosette','hgtb_f_lotus','hgtb_f_star'][R.id%4]),my2=Math.max(2,(d>>1)-1),fmI=[];
+  const fa=nm_=>FLOORS[nm_]?nm_:'hgt_f5',f0=fa(R.floorPref||RFLOOR[(R.id*3)%RFLOOR.length]),f1=fa(RFLOOR[(R.id*3+4)%RFLOOR.length]),f2=fa(['hgtb_f_mandala','hgtb_f_rosette','hgtb_f_lotus','hgtb_f_star'][R.id%4]),my2=Math.max(2,(d>>1)-1),fmI=[];
   for(let y=0;y<d;y++){let q='';for(let x=0;x<w;x++)q+=(Math.abs(x-cx)<=1&&Math.abs(y-my2)<=1)?'2':(x===1||y===1||x===w-2||y===d-2)?'1':'0';fmI.push(q)}
   return {rows:rows.map(r=>r.join('')),chars,start:{x:cx,y:d-2,f:0},enemies:[],items,decor:decorL,lights,portals:[],floor:f0,floorSet:[f0,f1,f2,f0,f0,f0],fmap:fmI,day:0,amb:.62,ceil:'beam',ceilH:2.7,noTele:true,noExtras:true,diff:66,name:R.name,label:R.name,mapNames:[]}}
 for(const k in ROOMS)if(!ROOMS[k].ext)hgtRegister(ROOMS[k].id,()=>k==='tankroom'?buildTankRoom():buildRoom(k));
@@ -681,6 +681,10 @@ function gateDecor(B){
     for(const dy of [0,-3,3])for(const dx of [-2,2])if(dy!==0)plant(B,['shrub','pearlbush'][(hs(dx,dy,164)*2)|0],CX+dx,gy+dy,1)}
   for(const [x,y] of [[CX,H-3],[CX,2],[CX,24],[CX,126],[CX,142],[CX,8],[31,CY],[23,CY],[13,CY],[119,CY],[127,CY],[CX-20,H-3]])if(isO(B,x,y)&&!B.decor.some(q=>q.x===x&&q.y===y))decor(B,'hgt_arch',x,y,{walk:true,deco:true,sc:1.1})}
 // the belvedere on the top of the hill: finials, obelisks, lamps, banners along the west wall street
+function eastEntry(B){
+  for(let x=119;x<=127;x++)for(const y of [73,77]){if(isO(B,x,y)&&!B.decor.some(q=>q.x===x&&q.y===y)){const r=hs(x,y,240);if(x%2===1)lampPost(B,x,y);else if(r<.7)plant(B,'crystalgrass',x,y,1.3);else decor(B,'hgtb_deco_lanterns',x,y,{walk:true,deco:true,sc:1})}}
+  for(let x=119;x<=127;x+=2)for(const y of [74,76]){if(isO(B,x,y)&&!B.decor.some(q=>q.x===x&&q.y===y)){plant(B,['crystalgrass','bulbflower','shellflower'][(x/2|0)%3],x,y,1.1);light(B,x,y)}}
+  for(let x=119;x<=127;x++)for(const [y,oy] of [[73,-.42],[77,.42]])if(isO(B,x,y)&&IMG.hgtb_lamp_bracket&&x%2===0)decor(B,'hgtb_lamp_bracket',x,y,{walk:true,deco:true,sc:1,bob:.9,oy});}
 function belvedere(B){
   for(let y=6;y<H-6;y+=7){if(isO(B,3,y)&&!B.decor.some(q=>q.x===3&&q.y===y)){decor(B,y%14===6?'hgt_obelisk':'hgt_finial',3,y,{block:y%14===6,sc:1.1});light(B,3,y)}}
   for(let y=10;y<H-10;y+=9)if(isO(B,4,y)&&!B.decor.some(q=>q.x===4&&q.y===y))decor(B,'hgt_banner',4,y,{walk:true,deco:true,sc:1})
