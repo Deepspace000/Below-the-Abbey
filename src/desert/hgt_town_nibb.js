@@ -418,6 +418,22 @@ function build(){
    for(const c of B.sunken){const [x0,y0,x1,y1]=c.bbox;for(let y=y0-3;y<=y1+1;y++)for(let x=x0;x<=x1;x++){const i=I(x,y);if(!inB(x,y)||B.rows[y][x]!=='.'||B.kind[i]!==K.COURT||B.occ.has(x+','+y))continue;
       const dx=x-(x0+x1)/2,dy=y-(y0+y1)/2;if(Math.abs(dx)<2.5&&Math.abs(dy)<2.5)B.fm[i]=3;else if(((x+y)&3)===0)B.fm[i]=5;
       const v=hs(x,y,150);if(v<.07&&!(Math.abs(dx)<1.5)){B.occ.add(x+','+y);dec(PL[(hs(x,y,151)*PL.length)|0],x,y,{sc:1+hs(x,y,152)*.5})}else if(v<.085){B.occ.add(x+','+y);dec(PT[(hs(x,y,153)*PT.length)|0],x,y,{})}else if(v<.095){B.occ.add(x+','+y);dec('hgtb_lamp_short',x,y,{});B.lights.push([x,y])}}}}
+  /* ================= NIGHT LIGHT: sunken wards, the grand maze, the foot of the bell tower ================= */
+  {for(const c of B.sunken){const [x0,y0,x1,y1]=c.bbox;
+     for(let y=y0-3;y<=y1;y+=2)for(const x of [x0,x1]){if(isO(x,y)&&!B.occ.has(x+','+y)){B.occ.add(x+','+y);dec('hgtb_lamp_bracket',x,y,{bob:1.5,sc:1.1});B.lights.push([x,y])}}
+     for(let y=y0;y<=y1;y+=3)for(const x of [x0+2,x1-2]){if(isO(x,y)&&B.kind[I(x,y)]===K.COURT&&!B.occ.has(x+','+y)){B.occ.add(x+','+y);dec('hgtb_lampwhite',x,y,{sc:1.2});B.lights.push([x,y])}}
+     dec('hgtb_deco_lanterns',c.ax,c.ay,{sc:1.2});B.lights.push([c.ax,c.ay],[c.ax,c.ay+2])}
+   const g=B.mazes[0]&&B.mazes[0].m,gb=B.grand;
+   if(g&&gb){const ap=g.approach||{x:gb.x+(gb.s>>1),y:gb.y+gb.s};
+     dec('hgt_vine_wreatharch',ap.x,ap.y,{sc:2.2});dec('hgt_obelisk',ap.x-2,ap.y,{sc:2.4});dec('hgt_obelisk',ap.x+2,ap.y,{sc:2.4});B.lights.push([ap.x,ap.y],[ap.x-2,ap.y],[ap.x+2,ap.y]);
+     dec('hgt_hanglamp',ap.x,ap.y,{bob:2.4,sc:1.6});dec('hgtb_deco_banner',ap.x-1,ap.y+1,{sc:1.2});dec('hgtb_deco_banner',ap.x+1,ap.y+1,{sc:1.2});
+     for(const [x,y] of [[gb.x-1,gb.y-1],[gb.x+gb.s,gb.y-1],[gb.x-1,gb.y+gb.s],[gb.x+gb.s,gb.y+gb.s]]){dec('hgt_obelisk',x,y,{sc:2.8});dec('hgt_cupola',x,y,{bob:9.5,sc:1.6});B.lights.push([x,y])}
+     if(g.centre){dec('hgt_finial',g.centre.x,g.centre.y,{bob:6,sc:3});dec('hgt_cupola',g.centre.x,g.centre.y,{bob:3.2,sc:2.4});B.lights.push([g.centre.x,g.centre.y])}}
+   // the plaza under the bell tower
+   for(let x=116;x<=134;x+=3)for(const [dy,bob] of [[33,2.4],[36,3.2],[39,2.6]]){if(isO(x,dy)&&!B.occ.has(x+','+dy)){dec('hgt_hanglamp',x,dy,{bob,sc:1.7});if(x%2)B.lights.push([x,dy])}}
+   dec(bellKind(),125,34,{bob:2.2,sc:3.4});dec(bellKind(),121,37,{bob:2.6,sc:2.4});dec(bellKind(),129,37,{bob:2.6,sc:2.4});
+   for(const x of [118,125,132]){dec('hgtb_deco_banner',x,32,{sc:1.7});dec('hgtb_lamp_tall',x+1,32,{sc:1.3});B.lights.push([x,32])}}
+
   /* ================= ORNAMENTS ON THE ROOFS ================= */
   for(const hsr of B.houses){
     if(isO(hsr.x+(hsr.w>>1),hsr.y+(hsr.d>>1)))continue;

@@ -270,7 +270,7 @@ function hgtmBegin(cx,cy,dX,dY,pX,pY){
     const zc=dX*rx+dY*ry,xc=dX*ry-dY*rx,rad=I.kind==='mesh'?I.M.rad*I.sc:I.kind==='planet'?I.M.rad:I.r*1.7;
     if(zc+rad<.1||zc>(I.o.far||(I.kind==='cloud'?36:80)))continue;
     const lim=(zc+rad)*VW/2/F*1.05+rad;if(Math.abs(xc)-rad>lim)continue;
-    if(I.kind==='mesh'&&!PERF_MESH4&&hgtmHidden(zc,xc,rad,I.z+rad,CAMZ))continue;   // the whole model stands behind a nearer wall: it is not worked out at all
+    if(I.kind==='mesh'&&!PERF_MESH4&&!I.o.cheap&&!I.o.fly&&hgtmHidden(zc,xc,rad,I.z+rad,CAMZ))continue;   // the whole model stands behind a nearer wall: it is not worked out at all
     const dd=Math.hypot(rx,ry);I.zc=zc;I.xc=xc;I.cand=zc;I.ccz=pz;
     cand.push(I);
   }

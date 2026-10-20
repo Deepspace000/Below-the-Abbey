@@ -351,14 +351,14 @@ function hgtlfSprites(out){
       if(a.task==='clean'&&!moving)flip=(((t/.7+a.seed)|0)&1)===1;
       else if(a.task==='watch'&&!moving)flip=(((t/6+a.seed)|0)&1)===1;
       else if(moving)flip=(((t*2.6+a.seed)|0)&1)===1; // a walking figure swaps its mirror image with each step
-    }else if(a.flipDir&&(a.dx||a.dy))flip=(-dY*a.dx+dX*a.dy)>0;
+    }else{if(a.flipDir&&(a.dx||a.dy))flip=(-dY*a.dx+dX*a.dy)>0;if(moving&&!a.hover)flip=flip!==((((t*2.2+a.seed)|0)&1)===1)} // a walking pet also swaps its mirror image with each stride
     const pdx=(G.P?G.P.x:cam.x)-a.x,pdy=(G.P?G.P.y:cam.y)-a.y,pd2=pdx*pdx+pdy*pdy,near=!moving&&pd2<20; // standing still and the party is within four cells: turn to face it
     if(near&&a.kind==='creature'&&a.flipDir)flip=(-dY*Math.sign(pdx)+dX*Math.sign(pdy))>0;
     else if(near&&a.kind==='npc'&&a.task!=='clean'&&a.task!=='read'&&a.task!=='fish')flip=(-dY*Math.sign(pdx)+dX*Math.sign(pdy))>0&&false;
     if(flip)img=hgtlfFlip(key)||base;
     let bob=a.hz-S.h[Math.max(0,Math.min(S.H-1,Math.floor(a.y+.5)))*S.W+Math.max(0,Math.min(S.W-1,Math.floor(a.x+.5)))]+a.hover;
-    if(a.kind==='creature'){bob+=a.hover?Math.sin(t*1.8+a.seed*3)*.06:moving?Math.abs(Math.sin(t*7+a.seed))*.025:0}
-    else if(moving)bob+=Math.abs(Math.sin(t*7+a.seed))*.03;
+    if(a.kind==='creature'){bob+=a.hover?Math.sin(t*(moving?4:1.8)+a.seed*3)*(moving?.12:.08):moving?Math.abs(Math.sin(t*7+a.seed))*.07:0}
+    else if(moving)bob+=Math.abs(Math.sin(t*7+a.seed))*.075;
     else if(a.task==='clean')bob+=Math.abs(Math.sin(t*4.5+a.seed))*.02;
     else if(a.task==='tend')bob-=.035*(.5+.5*Math.sin(t*1.3+a.seed));
     else bob+=Math.sin(t*1.1+a.seed)*.008;
@@ -366,8 +366,9 @@ function hgtlfSprites(out){
     const night=HGTLF.night,lift=Math.max(a.glow?.28+.5*night:0,.34*night);
     // walk cycle without new pictures: a squash and stretch in step with the bob, and a gentle sway across the view
     const ph=t*(a.kind==='creature'?7:8)+a.seed*3,rx2=-dY,ry2=dX;let lunge,sway;
-    if(moving){lunge=-.2*Math.cos(2*ph);sway=Math.sin(ph)*.035}
+    if(moving){lunge=-(a.kind==='creature'?.4:.45)*Math.cos(2*ph);sway=Math.sin(ph)*.06}
     else{lunge=.05*Math.sin(t*1.7+a.seed*2);sway=a.hover?Math.sin(t*1.1+a.seed)*.03:a.task==='clean'?Math.sin(t*4.5+a.seed)*.03:Math.sin(t*.9+a.seed)*.008}
+    if(a.hover&&a.kind==='creature')lunge=.55*Math.sin(t*(moving?10:5)+a.seed*2); // hovering pets beat their fins: the width pulses
     const o={x:a.x+.5+rx2*sway,y:a.y+.5+ry2*sway,img,w:a.h*img.width/img.height,bob,lunge,decor:a.stub};if(lift>0)o.lift=lift;out.push(o);
   }
 }

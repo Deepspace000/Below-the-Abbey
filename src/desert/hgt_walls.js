@@ -123,6 +123,7 @@ function hgtwVineTile(baseGid,vineName,opts){
   const ti=T_TILE[baseGid],base=ti!==undefined?TEX[ti]:null;if(!base||!base.d||(typeof KH_DOOR!=='undefined'&&KH_DOOR[baseGid]))return baseGid;
   const key=baseGid+'|'+vineName+'|'+mode+'|'+seed+'|'+hc+'|'+hue+'|'+(opts.unit||0);if(hgtwVines.has(key))return hgtwVines.get(key);
   const Hp=base.h|0;if(Hp<8||base.d.length!==128*Hp*4){hgtwVines.set(key,baseGid);return baseGid}
+  if(vineName==='hgt_vine_ivy'){const hg=hgtwHedgeTile(base.wh,[.6+.2*((seed&3)/3),1,.5+.2*(((seed>>2)&3)/3)],'ivy'+(seed&7)+'|'+Hp);if(hg!==undefined){hgtwVines.set(key,hg);return hg}} // a hedge maze asks for ivy: give it a real leaf hedge
   hgtwHeal(base);
   const c=document.createElement('canvas');c.width=128;c.height=Hp;const x=c.getContext('2d');x.putImageData(new ImageData(new Uint8ClampedArray(base.d),128,Hp),0,0);
   const R=hgtwRng(seed*7919+baseGid),units=Math.max(1,Math.floor(Hp/128));
@@ -182,6 +183,20 @@ function hgtwTubeCeiling(){
     if(e<2)k*=.55;else if(e<4)k*=1.18;else if(e<6)k*=.8; // rib: dark groove, bright bevel, soft shadow
     if(r<11){const g=1-r/11;R=R*(1-g)+255*g;G=G*(1-g)+226*g;B=B*(1-g)+150*g;k=1+.3*g}else if(r<13){k*=.55} // a lit round window with a dark rim
     d[o]=Math.min(255,R*k);d[o+1]=Math.min(255,G*k);d[o+2]=Math.min(255,B*k);d[o+3]=255}
+}
+
+/* ---------- leaf hedge tile: dense green leaves made from the vine picture, tiles sideways and up ---------- */
+function hgtwHedgeTile(wh,mul,key){
+  const pic=hgtwVinePic('hgt_vine','hang',-105);if(!pic)return undefined;
+  const Hp=Math.max(8,Math.round(128*wh)),c=document.createElement('canvas');c.width=128;c.height=Hp;const x=c.getContext('2d');
+  const R=hgtwRng(key.length*131+(mul[0]*100|0)*7+(mul[1]*100|0));
+  const gr=x.createLinearGradient(0,0,0,Hp);gr.addColorStop(0,'rgb('+(26*mul[0]*1.6|0)+','+(70*mul[1]*1.3|0)+','+(24*mul[2]*1.6|0)+')');gr.addColorStop(1,'rgb('+(14*mul[0]*1.6|0)+','+(44*mul[1]*1.3|0)+','+(14*mul[2]*1.6|0)+')');x.fillStyle=gr;x.fillRect(0,0,128,Hp);
+  const n=Math.ceil(Hp/22);
+  for(let i=0;i<n*3;i++){const w=46+R()*44,h=w*pic.height/pic.width,px=R()*128,py=R()*(Hp+h)-h*.5,a=.55+.45*R(),dark=R()<.35;
+    x.save();x.globalAlpha=a;x.filter=dark?'brightness(.55) saturate(1.1)':'brightness('+(.85+R()*.5)+') saturate(1.15)';
+    for(const dx of [-128,0,128]){if(px+dx+w<0||px+dx-w>128)continue;x.drawImage(pic,px+dx-w/2,py,w,h)}x.restore()}
+  const d=x.getImageData(0,0,128,Hp).data,id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;TEX[id]._hl=1;
+  const gid=KH_NEXT_GID++;T_TILE[gid]=id;return gid;
 }
 /* ---------- hook: on level build ---------- */
 function hgtwApply(L,id){

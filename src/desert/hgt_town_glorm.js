@@ -540,6 +540,12 @@ function hgtxglormBuild(id){
   /* big plain floors: plant clusters, benches and creatures every few cells */
   for(let gy=6;gy<144;gy+=6)for(let gx=6;gx<144;gx+=6){const x=gx+((R(gx,gy,150)*3)|0),y=gy+((R(gx,gy,151)*3)|0);if(!isO(x,y)||inMz(x,y)||B.occ.has(x+','+y)||Math.abs(ground(x,y))>.01||B.kind[I(x,y)]===G.STAIR||R(x,y,152)<.45)continue;
     plant(x,y,1.5,.7);plant(x+1,y,1.1,.6);plant(x,y+1,1.2,.6);if(R(x,y,153)<.3)deco('bench',x+2,y,{})}
+  /* the stairs of the bazaar court and every tier: bracket lamps on the walls, hanging lanterns and window glow along the flights */
+  for(let t=0;t<=5;t++){const wt=WT(t),west=t%2===0,sx0=west?XW(t+1):XE(t+1)-4;
+    for(let k=1;k<=6;k++){const y=wt-k;for(const x of [sx0,sx0+4]){hgtlDecor(B,'hgtb_lamp_bracket',x,y,{block:false,walk:true,deco:true,bob:1.5,sc:1.1});if(k%2===0)hgtlLight(B,x,y)}
+      if(k%2===1){hgtlDecor(B,'hgtb_lamp_hanging',sx0+2,y,{block:false,walk:true,deco:true,bob:1.9,sc:1.3});hgtlLight(B,sx0+2,y)}}
+    for(const x of [sx0-1,sx0+5]){lamp(x,wt+1);hgtlLight(B,x,wt)}
+    for(let k=1;k<=6;k+=2){for(const x of [72,77]){hgtlDecor(B,'hgtb_lamp_bracket',x,wt-k,{block:false,walk:true,deco:true,bob:1.4,sc:1.1});hgtlLight(B,x,wt-k)}}}
   hgtlSetStart(B,75,144,0);
   /* ---------- finish: walls made by the library (placeholder characters) become my wall columns, standing on the ground ---------- */
   {const TM={a:'p',b:'a',c:'c',d:'l'};
@@ -606,7 +612,7 @@ function hgtxglormRoomBuild(rid){
   if(!LEVELS[483])KH_LAZY[483]&&KH_LAZY[483]();
   const city=LEVELS[483],out=city&&city.hgtxDoors?city.hgtxDoors.find(q=>q.id===rid):null;
   let parent=null;for(const k in HGTXG_ROOMS)if(HGTXG_ROOMS[k].up===rid)parent=+k;
-  const PAT=['hgt_w3_relief_pink','hgt_w3_fresco_cream','hgt_w3_scroll_aqua','hgt_w2_quilt','hgt_w3_arcade_cream','hgt_w2_medallions','hgt_w3_relief_aqua','hgt_w3_fresco_amber','hgt_w3_scroll_pink','hgt_w2_scales','hgt_w3_reed_lilac','hgt_w3_shop_cream'],p1=PAT[(rid*7+(rid>>3))%PAT.length],p2=PAT[(rid*5+3)%PAT.length];
+  const PAT=['hgt_w3_relief_pink','hgt_w3_fresco_cream','hgt_w3_scroll_aqua','hgt_w3_balcony_cream','hgt_w3_arcade_cream','hgt_w3_shop_pink','hgt_w3_relief_aqua','hgt_w3_fresco_amber','hgt_w3_scroll_pink','hgt_w3_arcade_lilac','hgt_w3_reed_lilac','hgt_w3_shop_cream'],p1=PAT[(rid*7+(rid>>3))%PAT.length],p2=PAT[(rid*5+3)%PAT.length];
   const wallG=hgtxglormTile(p1,2.7,{base:p1,mid:p1,top:'hgt_w3_cornice_cream'}),wallC=hgtxglormTile(p2,2.7,{base:p2,mid:p2,top:'hgt_w3_cornice_cream'}),wallW=hgtxglormTile('hgt_w2_winpink',2.7,{base:'hgt_w2_winpink',mid:p1,top:'hgt_w3_cornice_cream'});
   const chars={},ch=g=>{let c=hgtaChar(g);chars[c]=g;return c};
   const cw=ch(wallG),cb=ch(wallC),cwin=ch(wallW),rows=[];
@@ -631,7 +637,7 @@ function hgtxglormRoomBuild(rid){
     if(/lamppost|hanglamp|gardenlantern|candle|crystal|mushroom/.test(k))lights.push([x,y])}
   if(r.extra)decor.push({k:'hg_npc1',x:Math.max(1,(w>>1)+1),y:d-3,block:false,walk:true,npc:r.extra,sc:1});
   {const rnd=k=>hash2(rid,k,917),used=new Set(decor.map(q=>q.x+','+q.y).concat(SOL)),cx=w>>1,cy=d>>1;
-   const put=(k,x,y,f,sc)=>{if(x<=0||y<=0||x>=w-1||y>=d-1||used.has(x+','+y)||(x===cx&&(y===1||y>=d-2)))return false;used.add(x+','+y);decor.push(f?{k,x,y,block:false,walk:true,deco:true,sc:sc||1}:{k,x,y,block:true,sc:sc||.85});return true};
+   const RC={},put=(k,x,y,f,sc)=>{if(x<=0||y<=0||x>=w-1||y>=d-1||used.has(x+','+y)||(x===cx&&(y===1||y>=d-2))||(!f&&(RC[y]||0)>=3))return false;used.add(x+','+y);if(!f)RC[y]=(RC[y]||0)+1;decor.push(f?{k,x,y,block:false,walk:true,deco:true,sc:sc||1}:{k,x,y,block:true,sc:sc||.85});return true};
    const CENTER=['hgtb_furn_table_chairs','hgtb_deco_fountain','hgtb_furn_stage','hgtb_deco_pearlplinth','hgtb_deco_shellstatue','hgtb_furn_books_globe','counter','hgtb_furn_loom','hgtb_table','kh_maptable1_0','hgtb_stall_aqua_jars','hgtb_stall_navy_books','hgtb_stall_lilac_cloth','hgtb_stall_sage_herbs','hgtb_stall_orange_pottery','hgtb_stall_pink_flowers'];
    const WALLP=['hgtb_furn_bookshelf','hgtb_furn_cabinet','hgtb_furn_clock','hgtb_furn_hearth','hgtb_furn_loom','hgtb_furn_bed','hgtb_furn_bunk','hgtb_deco_banner','hgtb_plant_belltree','hgtb_plant_spiralfern','hgtb_lamp_tall','hgtb_lamp_vine','vase0','vase2','hg_jar','barrel','crate','sacks','urn','hgtb_deco_lanterns','hgtb_deco_pearlplinth','counter2'];
    const SMALL=['barrel','crate','hg_jar','sacks','vase0','vase2','urn','hgtb_plant_orbbush','hgtb_plant_potvine','hgtb_plant_glowshrooms','hgtb_plant_lupin','hgtb_plant_lacecoral','hgtb_plant_tealgrass','hgtb_bench','hgtb_chair'];

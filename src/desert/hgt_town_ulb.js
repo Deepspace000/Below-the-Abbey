@@ -30,7 +30,7 @@ const kindOf=spec=>{let i=KINDS.indexOf(spec);if(i<0){KINDS.push(spec);i=KINDS.l
 const TT={p:['hgt_wp','hgt_ww0','hgt_wb0','hgt_d0'],a:['hgt_wa','hgt_ww1','hgt_wb1','hgt_d1'],c:['hgt_wc','hgt_ww3','hgt_wb2','hgt_d3'],l:['hgt_wl','hgt_ww2','hgt_wb3','hgt_d2']};
 const wq=wh=>Math.max(.25,Math.ceil(wh*4-1e-6)/4); // wall heights come in quarters of a cell
 /* district wall characters: the painted detail patterns (letter d in a spec) differ from district to district, so every ring and quarter has its own look */
-const STY=['hgt_w3_relief_pink','hgt_w2_rings','hgt_w3_fresco_cream','hgt_w3_reed_lilac','hgt_w3_arcade_cream','hgt_w3_scroll_aqua','hgt_w2_portholes','hgt_w3_relief_aqua','hgt_w3_fresco_amber','hgt_w3_scroll_pink','hgt_w3_shutters_lilac','hgt_w3_arcade_lilac'];
+const STY=['hgt_w3_relief_pink','hgt_w2_rings','hgt_w3_fresco_cream','hgt_w3_balcony_cream','hgt_w3_arcade_cream','hgt_w3_scroll_aqua','hgt_w2_portholes','hgt_w3_relief_aqua','hgt_w3_fresco_amber','hgt_w3_scroll_pink','hgt_w3_shop_pink','hgt_w3_arcade_lilac'];
 function wallCh(t,spec,wh,sty){const [pl,wi,ba]=TT[t];wh=wq(wh);sty=sty|0;const pat=STY[sty%STY.length],pd=hgtaPic(pat)?pat:pl;const pic=c=>c==='w'?wi:c==='b'?ba:c==='d'?pd:c==='D'?(hgtaPic('hgt_w3_dado_pink')?'hgt_w3_dado_pink':pl):c==='C'?(hgtaPic('hgt_w3_cornice_cream')?'hgt_w3_cornice_cream':ba):pl;
   return hgtaChar(hgtaWallTile(pl,wh,{base:pic(spec[0]),mid:pic(spec[1]),top:pic(spec[2])}))}
 const DOORP=['hgt_d0','hgt_d1','hgt_d2','hgt_d3','hgt_w2_doorteal','hgt_w2_doorblue','hgt_d2','hgt_d0'];
@@ -196,8 +196,8 @@ function build(id){
    bed(5,111,2,8,.4,['hgt_fern','hgt_shellflower']);bed(22,111,2,8,.4,['hgt_fern','hgt_shellflower']);
    hgtlName(B,14,98,'The Stair Garden','place')}
   /* mazes: the Grand Maze in the north, and five smaller ones of different kinds */
-  const MZP=['hgt_w3_relief_pink','hgt_w3_relief_aqua','hgt_w3_fresco_cream','hgt_w3_scroll_aqua','hgt_w3_reed_lilac','hgt_w3_arcade_cream','hgt_w2_rings','hgt_w3_fresco_amber'];
-  const mazeTile=n=>(role,wh,info)=>{if(role==='wall'||role==='border'||role==='post'){if(info&&info.kind==='hedge')return undefined;const p=MZP[(n+((info&&info.band)|0))%MZP.length],pd=hgtaPic(p)?p:'hgt_wp';return hgtaChar(hgtaWallTile(pd,wh,wh>=2.5?{top:'hgt_wb'+(n%4)}:{}))}return undefined};
+  const MZP=['hgt_w3_relief_pink','hgt_w3_relief_aqua','hgt_w3_fresco_cream','hgt_w3_scroll_aqua','hgt_w3_balcony_cream','hgt_w3_arcade_cream','hgt_w2_rings','hgt_w3_fresco_amber'];
+  const mazeTile=n=>(role,wh,info)=>{if(role==='wall'||role==='border'||role==='post'){if(info&&info.kind==='hedge'){try{const bg=hgtaWallTile('hgt_wc',wh),vg=typeof hgtwVineTile==='function'?hgtwVineTile(bg,'hgt_vine_ivy',{mode:'both',h:wh+1,seed:(info.wx|0)*7+(info.wy|0)}):bg;return hgtaChar(vg)}catch(e){return undefined}}const p=MZP[(n+((info&&info.band)|0))%MZP.length],pd=hgtaPic(p)?p:'hgt_wp';return hgtaChar(hgtaWallTile(pd,wh,wh>=2.5?{top:'hgt_wb'+(n%4)}:{}))}return undefined};
   const mazeAt=(x,y,w,hh,opts,name,n)=>{const h0=qz(T_(x+(w>>1),y+(hh>>1)),Q);flatten(x,y,x+w-1,y+hh-1,h0,3,0);
     for(let j=y;j<y+hh;j++)for(let i=x;i<x+w;i++){wk[I(i,j)]=0;wdoor.delete(I(i,j))}
     const m=hgtzMaze(B,x,y,w,hh,Object.assign({base:h0,seed:x*7+y*3+n,tile:mazeTile(n),floor:opts.kind==='hedge'?4:3},opts));
@@ -283,6 +283,8 @@ function build(id){
   for(let y=12;y<=108;y+=4){if(y>34&&y<88)continue;for(const dx of [-3,0,3]){const x=GX+dx;if(isOpen(x,y))dec('hgtb_lamp_tall',x,y,{walk:true,deco:true,sc:1.1});}}
   for(let y=15;y<=105;y+=6){if(y>34&&y<88)continue;for(const [dx,k,bb] of [[-7,'hgtb_deco_banner',.3],[7,'hgtb_deco_banner',.3],[-5,'hgtb_deco_lanterns',.9],[5,'hgtb_deco_lanterns',.9],[0,'hgtb_deco_bunting',1.2]]){const x=GX+dx;if(isOpen(x,y))dec(k,x,y,{walk:true,deco:true,bob:bb,sc:1.2})}}
   for(let y=18;y<=102;y+=10){if(y>34&&y<88)continue;for(const dx of [-8,8]){const x=GX+dx;if(isOpen(x,y))dec('hgtb_tank_bubbles3',x,y,{walk:true,deco:true,sc:1.5,bob:.1})}}
+  for(let y=11;y<=114;y++){if(y>36&&y<86)continue;for(const dx of [-8,-7,7,8]){const x=GX+dx;if(isOpen(x,y))fm[I(x,y)]='2'}if(y%8<2)for(let dx=-6;dx<=6;dx++)if(isOpen(GX+dx,y))fm[I(GX+dx,y)]='3'}
+  for(let y=12;y<=112;y+=2){if(y>36&&y<86)continue;for(const dx of [-6,6]){const x=GX+dx;if(!isOpen(x,y))continue;const r=rnd(x,y,210);dec(r<.4?'hgt_reeds':r<.7?'hgtb_plant_tealgrass':'hgtb_plant_orbbush',x,y,{walk:true,deco:true,sc:.9+rnd(x,y,211)*.7})}}
   /* stalls on the plazas and along the Reed Plaza */
   {const ST=['coral_fruit','aqua_jars','lilac_cloth','yellow_bread','pink_flowers','teal_fish','orange_pottery','sage_herbs','navy_books','rose_lanterns'];let n=0;
    const stall=(x,y)=>{if(!isOpen(x,y)||B.decor.some(d=>d.x===x&&d.y===y))return;dec('hgtb_stall_'+ST[(n++)%ST.length],x,y,{block:true,sc:1.2})};
@@ -508,6 +510,11 @@ function build(id){
      if(!c)continue;const k=FK[(rnd(gx,gy,170)*FK.length)|0];if(k==='hgt_cupola'){dec('hgt_obelisk',c[0],c[1],{block:true,sc:1.2})}else dec(k,c[0],c[1],{block:true,sc:1+rnd(gx,gy,171)*.5});
      for(const [dx,dy] of [[-1,-1],[1,1]])plant(c[0]+dx,c[1]+dy);lamp(c[0]+1,c[1]-1,{});light(c[0],c[1]);bench(c[0]-1,c[1]+1);n++}
    info.focal=n}
+  {const near=(x,y,pt)=>Math.hypot(x-pt.x,y-pt.y)<16;let n=0;
+   for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!isOpen(x,y)||B.kind[I(x,y)]===1||!(near(x,y,spots.market)||near(x,y,{x:GX,y:125}))||((x*3+y*5)%3!==0))continue;
+     let wallN=false;for(const d of HGTL.DIRS){if(rows[y+d[1]]&&rows[y+d[1]][x+d[0]]!=='.')wallN=true}
+     if(!wallN||B.decor.some(d=>d.x===x&&d.y===y))continue;dec('hgtb_lamp_bracket',x,y,{walk:true,deco:true,bob:.9,sc:1.1});light(x,y);n++}
+   info.wallLamps=n}
   /* the plains: medallion inlays in the paving, shallow puddles, landmarks and plants, so no floor is plain */
   {for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){const i=I(x,y);if(rows[y][x]!=='.'||fm[i]!=='0'||B.kind[i]===1)continue;const a=(x>>2)+(y>>2);if(a%5===0&&((x&3)===1||(x&3)===2)&&((y&3)===1||(y&3)===2))fm[i]='5';else if(a%7===3&&(x+y)%4===0)fm[i]='3'}
    const flatN=(x,y,r)=>{const h0=getH(x,y);for(let j=-r;j<=r;j++)for(let i=-r;i<=r;i++){const xx=x+i,yy=y+j;if(!isOpen(xx,yy)||occ[I(xx,yy)]||B.kind[I(xx,yy)]===1||B.decor.some(d=>d.x===xx&&d.y===yy)||Math.abs(getH(xx,yy)-h0)>.1)return false}return true};
@@ -683,6 +690,9 @@ function hgtxulbRoom(id){
    const XTRA=['hgtb_furn_cabinet','hgtb_furn_books_globe','hgtb_plant_barrel','hgtb_plant_potvine','hgtb_furn_bookshelf','hgtb_plant_lupin','hgtb_stall_sage_herbs','hgtb_deco_lanterns'];
    for(let q=0;q<4;q++){const k=XTRA[(id*3+q*5)%XTRA.length];const cand=[[1,2+q],[W_-2,2+q],[2+q*2,1],[W_-3-q,H_-3]];for(const [x,y] of cand)if(free(x,y)&&IMG[k]){take(x,y);decor.push({k,x,y,block:true,sc:1});break}}
    for(let y=2;y<H_-3;y+=3){for(const x of [1,W_-2])if(free(x,y)){take(x,y);decor.push({k:'hgtb_lamp_bracket',x,y,block:false,walk:true,deco:true,bob:.9,sc:1});lights.push([x,y])}}
+   for(const x of [3,W_-4])if(H_>=8&&free(x,H_>>1)&&Math.abs(x-mid)>1){take(x,H_>>1);rows[H_>>1][x]=wallW}
+   if(W_>=9&&H_>=8){for(const x of [mid-2,mid+2]){if(free(x,H_-4)){take(x,H_-4);decor.push({k:id%2?'hgtb_plant_potvine':'hgtb_plant_lupin',x,y:H_-4,block:false,walk:true,deco:true,sc:1.1})}}}
+   for(let x=2;x<W_-2;x+=3)lights.push([x,1]);
    // one surprise: a small creature, or a glowing fountain, by the room
    const sur=['hgtb_pinkbulb','hgtb_lilacmoth','hgtb_pearlslug','hgtb_creamjelly','hgtb_amberpup','hgtb_creammoth','hgtb_pups','hgtb_jadeeel'][id%8];
    for(const [x,y] of [[W_-3,H_-3],[2,H_-3],[W_-3,2]])if(free(x,y)){take(x,y);decor.push({k:sur,x,y,block:true,sc:1.1});lights.push([x,y]);break}

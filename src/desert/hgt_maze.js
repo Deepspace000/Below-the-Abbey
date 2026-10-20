@@ -120,6 +120,7 @@ const hgtzTileCache={};
 function hgtzReal(){return typeof hgtaWallTile==='function'&&typeof hgtaPic==='function'&&!!hgtaPic('hgt_wp')}
 function hgtzTinted(src,wh,mul,key){ // a tinted copy of a stacked painted wall (green hedge); the leaf clumps are a brightness variation of the painting, tileable sideways
   const k='t|'+src+'|'+wh+'|'+key;if(hgtzTileCache[k]!==undefined)return hgtzTileCache[k];
+  if(typeof hgtwHedgeTile==='function'){const hg=hgtwHedgeTile(wh,mul,k);if(hg!==undefined)return hgtzTileCache[k]=hg} // leafy painted-vine hedge (hgt_walls.js)
   const {c,Hp}=hgtaStack(src,wh),x=c.getContext('2d'),im=x.getImageData(0,0,128,Hp),d=im.data;let sd=1234+(key.length*77)+((mul[0]*100)|0);
   const g=(i,j,sc)=>hgtzHash(i,j,sd+sc);
   const vn=(px,py,cell,sc)=>{const fx=px/cell,fy=py/cell,i=Math.floor(fx),j=Math.floor(fy),tx=fx-i,ty=fy-j,n=Math.round(128/cell),w=a=>((a%n)+n)%n;

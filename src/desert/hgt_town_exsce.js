@@ -383,11 +383,12 @@ function streetDecor(B){
     if(((x*5+y*3)%(region(x,y)==='east'?5:11))===0&&r<.9)lampPost(B,x,y);
     else if(region(x,y)==='east'&&r<.14)plant(B,'crystalgrass',x,y,1.2);
     else if(r<.07)plant(B,['shrub','pearlbush','fern','crystalgrass','shellflower','bulbflower','lightvine'][(hs(x,y,98)*7)|0],x,y,.85+hs(x,y,99)*.7)
+    else if(IMG.hgtb_lamp_bracket&&r<(region(x,y)==='east'?.2:.15)){const o=wallSide(B,x,y);if(o){decor(B,'hgtb_lamp_bracket',x,y,{walk:true,deco:true,sc:1,bob:.9,ox:o[0]*.42,oy:o[1]*.42});light(B,x,y)}}
     else if(r<.10){const o=wallSide(B,x,y);if(o)decor(B,'hgt_banner',x,y,{walk:true,deco:true,sc:1,ox:o[0]*.38,oy:o[1]*.38})}
-    else if(r<.135){const o=wallSide(B,x,y);if(o)decor(B,'hgt_balcony',x,y,{walk:true,deco:true,sc:1.15,bob:1.15+hs(x,y,101)*.5,ox:o[0]*.44,oy:o[1]*.44})}}}
+    else if(r<(x>=62&&x<=88&&y>=116?.3:.135)){const o=wallSide(B,x,y);if(o)decor(B,'hgt_balcony',x,y,{walk:true,deco:true,sc:1.15,bob:1.15+hs(x,y,101)*.5,ox:o[0]*.44,oy:o[1]*.44})}}}
 function recesses(B){
   let n=0;const cand=[];
-  for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!isO(B,x,y)||B.fl[y*W+x]===53||(B.kind[y*W+x]!==K.GROUND)||hs(x,y,221)>=.05)continue;
+  for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!isO(B,x,y)||B.fl[y*W+x]===53||(B.kind[y*W+x]!==K.GROUND)||hs(x,y,221)>=((x>=62&&x<=88&&y>=116)?.16:.05))continue;
     if(x>=32&&x<=118&&y>=32&&y<=118)continue;
     for(const d of HGTL.DIRS){const a=[x+d[0],y+d[1]],b=[x+2*d[0],y+2*d[1]],c1=[a[0]+d[1],a[1]+d[0]],c2=[a[0]-d[1],a[1]-d[0]];
       if(!isO(B,...a)&&!isO(B,...b)&&!isO(B,...c1)&&!isO(B,...c2)&&B.rows[a[1]][a[0]]!=='.'&&META.has(B.rows[a[1]][a[0]])&&!B.doors.some(q=>Math.abs(q.ax-x)<3&&Math.abs(q.ay-y)<3)){cand.push([a,x,y]);break}}}
@@ -494,8 +495,9 @@ function buildRoom(key){
   const rows=[];for(let y=0;y<d;y++){let r='';for(let x=0;x<w;x++){if(y>0&&y<d-1&&x>0&&x<w-1)r+='.';else if(y===d-1&&x===cx)r+=cD;else r+=((x+y*3)%5===2&&(x>1&&x<w-2||y>1&&y<d-2))?cW:((x+y)%2?cA:cB)}rows.push(r.split(''))}
   if(R.next){const N=ROOMS[R.next],cN=ch(doorGid(T,2.7,{lvl:N.id,at:{x:N.w>>1,y:N.d-2,f:0}},'hgt_d2'));rows[0][cx]=cN}
   // layout variants: corner blocks, pillars or a half partition, so a room is not one bare rectangle
-  {const v=R.id%4,wallAt=(x,y,c)=>{if(x>0&&y>0&&x<w-1&&y<d-1&&!(x===cx)&&rows[y][x]==='.')rows[y][x]=c};
-   if(w>=9&&d>=7&&(R.generic||!(def.folk&&def.folk.length))){
+  {const occ=new Set();for(const k of ['props','plants','chests','barrels','lectern','fountain','folk','items'])for(const e of def[k]||[]){if(k==='props'||k==='plants')occ.add(e[1]+','+e[2]);else if(k==='folk')occ.add(e[2]+','+e[3]);else if(k==='items')occ.add(e[1]+','+e[2]);else occ.add(e[0]+','+e[1])}
+   const v=R.id%4,wallAt=(x,y,c)=>{if(x>0&&y>0&&x<w-1&&y<d-1&&!(x===cx)&&rows[y][x]==='.'&&!occ.has(x+','+y)&&!occ.has(x+','+(y-1))&&!occ.has(x+','+(y+1)))rows[y][x]=c};
+   if(w>=9&&d>=7){
     if(v===0){for(const [x,y] of [[2,2],[w-3,2],[2,d-3],[w-3,d-3]])wallAt(x,y,cW)}
     else if(v===1){for(let x=1;x<cx-1;x++)wallAt(x,d>>1,cB);for(let x=cx+2;x<w-1;x++)wallAt(x,d>>1,cB)}
     else if(v===2){for(const [x,y] of [[1,1],[2,1],[1,2],[w-2,1],[w-3,1],[w-2,2],[1,d-2],[w-2,d-2]])wallAt(x,y,cW)}
@@ -518,7 +520,9 @@ function buildRoom(key){
    if(IMG.hgtb_lamp_bracket)for(const [x,y] of [[2,1],[w-3,1],[1,d>>1],[w-2,d>>1]])if(!taken(x,y)&&rows[y]&&rows[y][x]==='.')decorL.push({k:'hgtb_lamp_bracket',x,y,block:false,walk:true,deco:true,sc:1,bob:.9});
    if(R.id%3===0&&IMG.hgtb_plant_belltree&&!taken(1,1))decorL.push({k:'hgtb_plant_orbbush',x:1,y:1,block:false,walk:true,deco:true,sc:1})}
   for(let i=decorL.length-1;i>=0;i--){const q=decorL[i];if(rows[q.y]&&rows[q.y][q.x]!=='.')decorL.splice(i,1)}
-  return {rows:rows.map(r=>r.join('')),chars,start:{x:cx,y:d-2,f:0},enemies:[],items,decor:decorL,lights,portals:[],floor:(FLOORS[RFLOOR[(R.id*3)%RFLOOR.length]]?RFLOOR[(R.id*3)%RFLOOR.length]:'hgt_f5'),day:0,amb:.62,ceil:'beam',ceilH:2.7,noTele:true,noExtras:true,diff:66,name:R.name,label:R.name,mapNames:[]}}
+  const fa=nm_=>FLOORS[nm_]?nm_:'hgt_f5',f0=fa(RFLOOR[(R.id*3)%RFLOOR.length]),f1=fa(RFLOOR[(R.id*3+4)%RFLOOR.length]),f2=fa(['hgtb_f_mandala','hgtb_f_rosette','hgtb_f_lotus','hgtb_f_star'][R.id%4]),my2=Math.max(2,(d>>1)-1),fmI=[];
+  for(let y=0;y<d;y++){let q='';for(let x=0;x<w;x++)q+=(Math.abs(x-cx)<=1&&Math.abs(y-my2)<=1)?'2':(x===1||y===1||x===w-2||y===d-2)?'1':'0';fmI.push(q)}
+  return {rows:rows.map(r=>r.join('')),chars,start:{x:cx,y:d-2,f:0},enemies:[],items,decor:decorL,lights,portals:[],floor:f0,floorSet:[f0,f1,f2,f0,f0,f0],fmap:fmI,day:0,amb:.62,ceil:'beam',ceilH:2.7,noTele:true,noExtras:true,diff:66,name:R.name,label:R.name,mapNames:[]}}
 for(const k in ROOMS)if(!ROOMS[k].ext)hgtRegister(ROOMS[k].id,()=>k==='tankroom'?buildTankRoom():buildRoom(k));
 for(const k in ROOMS)LEVEL_NAMES[ROOMS[k].id]=ROOMS[k].name;
 try{HGTE.wetLook(ROOMS.cistern.id);if(typeof UWS!=='undefined')UWS[ROOMS.cistern.id]={vents:[[3,4],[7,4]],swim:[]}}catch(e){console.error('hgt wet',e)}
@@ -778,7 +782,10 @@ function mazeAt(B,info,x,y,w,h,o){carveClear(B,x-1,y-1,w+2,h+2);
   for(const [cx,cy] of m.cells){if(!isO(B,cx,cy)||B.kind[cy*W+cx]===K.STAIR)continue;const r=hs(cx,cy,230);if(r<.18)fl(B,cx,cy,(cx+cy)%2?1:3);else if(r<.26)plant(B,['mushrooms','crystalgrass','fern','shellflower'][(r*100|0)%4],cx,cy,.9);if(r>.96)light(B,cx,cy)}
   (info.mazes=info.mazes||[]).push({x,y,w,h,kind:o.kind,algo:o.algo,reward:o.reward,centre:m.centre});glowAt(B,m.centre.x,m.centre.y);return m}
 function bigMazes(B,info){
-  mazeAt(B,info,34,34,23,23,{algo:'backtracker',kind:'tall',side:'E',reward:'view',seed:11});
+  {const m=mazeAt(B,info,34,34,23,23,{algo:'backtracker',kind:'tall',side:'E',reward:'view',seed:11});
+   const a=m.approach;if(a){decor(B,'hgt_arch',a.x,a.y,{walk:true,deco:true,sc:1.3});for(const dy of [-1,1]){lampPost(B,a.x,a.y+dy);light(B,a.x,a.y+dy)}
+     if(IMG.hgtb_deco_lanterns)decor(B,'hgtb_deco_lanterns',a.x+1,a.y-2,{walk:true,deco:true,sc:1.3});decor(B,'hgt_obelisk',a.x+1,a.y+2,{block:true,sc:1.6});for(let k=0;k<4;k++)light(B,a.x+1,a.y+k-2)}
+   for(const [x,y] of [[33,33],[57,33],[33,57],[57,57]])if(isO(B,x,y)){decor(B,'hgt_obelisk',x,y,{block:true,sc:1.5});light(B,x,y)}}
   mazeAt(B,info,34,60,15,15,{algo:'prim',kind:'hedge',side:'E',reward:'chest',seed:12});
   mazeAt(B,info,34,78,15,15,{algo:'wilson',kind:'sunken',side:'E',reward:'creature',seed:13,depth:2.4});
   mazeAt(B,info,100,35,15,15,{algo:'kruskal',kind:'tube',side:'W',reward:'chest',seed:14});

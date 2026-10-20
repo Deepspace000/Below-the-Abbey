@@ -120,7 +120,7 @@ const HGTR_DEF=[
  {id:4967,kind:'sphere',name:'The Sphere Court',w:23,d:17,wh:6,door:{x:11,y:16,face:'S'},wall:['hgt_wp','hgt_wc'],floor:'hgt_f6',look:'sphere',sim:'court'},
  {id:4968,kind:'sphere',name:'The Marble Gallery',w:27,d:9,wh:3.4,door:{x:13,y:8,face:'S'},wall:['hgt_wc','hgt_wl'],floor:'hgt_f5',look:'sphere',sim:'marble'},
  {id:4970,kind:'star',name:'The Planetarium',w:19,d:19,wh:6.6,door:{x:9,y:18,face:'S'},wall:['hgt_wl','hgt_wl'],floor:'hgt_f1',look:'star',stars:'planetarium'},
- {id:4971,kind:'star',name:'The Star Stair',w:9,d:31,wh:6,door:{x:4,y:30,face:'S'},wall:['hgt_wl','hgt_wl'],floor:'hgt_f4',look:'star',stars:'stair',terr:true,lookx:{lipGain:.35,floorGain:.55,riserGain:.45,lipW:.05,footAO:.3,floorContrast:1.1},hmax:7.2,heights:(h,w,d)=>{for(let y=0;y<d;y++)for(let x=0;x<w;x++)h[y*w+x]=HGTR_STAIR_H(y)}},
+ {id:4971,kind:'star',name:'The Star Stair',w:9,d:31,wh:6,door:{x:4,y:30,face:'S'},wall:['hgt_wl','hgt_wl'],floor:'hgt_f4',look:'star',stars:'stair',terr:true,lookx:{ambient:.16,lipGain:1.1,floorGain:.95,riserGain:.85,lipW:.07,footAO:.5,floorContrast:1.35},hmax:7.2,heights:(h,w,d)=>{for(let y=0;y<d;y++)for(let x=0;x<w;x++)h[y*w+x]=HGTR_STAIR_H(y)}},
  {id:4972,kind:'star',name:'The Gathering Room',w:17,d:17,wh:4,door:{x:8,y:16,face:'S'},wall:['hgt_wl','hgt_wl'],floor:'hgt_f1',look:'star',stars:'gather'},
  {id:4973,kind:'star',name:'The Lantern Stars',w:15,d:15,wh:5.6,door:{x:7,y:14,face:'S'},wall:['hgt_wl','hgt_wl'],floor:'hgt_f1',look:'star',stars:'lanterns'},
  {id:4974,kind:'star',name:'The Firefly Room',w:15,d:13,wh:3.2,door:{x:7,y:12,face:'S'},wall:['hgt_wl','hgt_wl'],floor:'hgt_f1',look:'star',stars:'fireflies'},
