@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.479';
+const VERSION='3.480';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -25139,7 +25139,22 @@ if(typeof drawOverview==='function'&&typeof mplFogOn==='function'){
   {const _f=mplFogOn;mplFogOn=function(L){if(LEVEL===HGTZ_ID)return false;return _f.apply(this,arguments)}}}
 
 var HGTZ_LOG=(typeof HGTZ_LOG==='undefined')?[]:HGTZ_LOG;
-function hgtzMaze(B,x,y,w,h,opts){const out=hgtzMaze0(B,x,y,w,h,opts);
+/* MAZE KEEP LIST: the owner wants only two mazes per city. In the four 150 by 150 cities only the mazes whose rectangle origin "x,y" is listed here are built; every other
+   maze footprint becomes a garden court (hgtzGarden). Set HGT_MAZE_ALL=true (or add the origin to the list) to turn a maze back on. Interiors and test levels are not touched. */
+var HGT_MAZE_ALL=(typeof HGT_MAZE_ALL==='undefined')?false:HGT_MAZE_ALL;
+var HGT_MAZE_KEEP=(typeof HGT_MAZE_KEEP==='undefined')?{'34,34':'Exsce Grand Maze','102,78':'Exsce Shell Maze','26,3':'Ulb Grand Maze','104,14':'Ulb Hedge Maze','90,88':'Glorm Grand Maze','3,70':'Glorm Hedge Maze','6,6':'Nibb Grand Maze','65,66':'Nibb Ring Maze'}:HGT_MAZE_KEEP;
+function hgtzGarden(B,x,y,w,h,opts){opts=opts||{};const base=opts.base!==undefined?opts.base:hgtlH(B,x,y),fd=5,cx=x+(w>>1),cy=y+(h>>1),cells=[],R=hgtzRng((opts.seed|0)+x*31+y);
+  if(!B.fm)B.fm=new Uint8Array(B.W*B.H);
+  for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++){hgtlOpen(B,i,j,base,HGTL.K.PLAZA);B.fm[j*B.W+i]=fd;cells.push([i,j])}
+  const free=(i,j)=>i>x&&j>y&&i<x+w-1&&j<y+h-1&&!(Math.abs(i-cx)<=1&&Math.abs(j-cy)<=1);
+  for(const [i,j] of cells){if(!free(i,j))continue;const r=R();if(r<.16)hgtlDecor(B,HGTZ.K.plants[(R()*HGTZ.K.plants.length)|0],i,j,{walk:true,deco:true,sc:.8+R()*.5});}
+  for(const [dx,dy] of [[-2,-2],[2,-2],[-2,2],[2,2]]){const i=cx+dx*((w>>2)||1),j=cy+dy*((h>>2)||1);if(i>x&&j>y&&i<x+w-1&&j<y+h-1){hgtlDecor(B,HGTZ.K.lamp,i,j,{walk:true,deco:true,sc:1.1});hgtlLight(B,i,j)}}
+  for(const [dx,dy] of [[-2,0],[2,0],[0,-2],[0,2]])hgtlDecor(B,'hgtb_bench',cx+dx,cy+dy,{walk:true,deco:true});
+  hgtlDecor(B,HGTL_DECOR.fountain,cx,cy,{block:true,sc:1.1});B.occ.add(cx+','+cy);hgtlLight(B,cx,cy+1);
+  return {rect:{x,y,w,h},algo:'garden',kind:'garden',disabled:true,floorH:base,wallH:0,cells,centre:{x:cx,y:cy},entry:null,approach:null,reward:'none',lamps:[],deadEnds:[],secret:null}}
+function hgtzMaze(B,x,y,w,h,opts){
+  if(!HGT_MAZE_ALL&&B&&B.W===150&&B.H===150&&!(opts&&opts.kind==='indoor')&&!HGT_MAZE_KEEP[x+','+y]){const g=hgtzGarden(B,x,y,w,h,opts);HGTZ_LOG.push({B,out:g,x,y,w,h});return g}
+  const out=hgtzMaze0(B,x,y,w,h,opts);
     HGTZ_LOG.push({B,out,x,y,w,h});return out}
 
 /* ==========================================================================
@@ -25203,7 +25218,7 @@ function hgtzDress(B,m,o){o=o||{};if(!m||!m.entry||!m.approach||m.kind==='indoor
       if(!dd){hgtlDecor(B,'hgt_lamppost',px,py,{walk:true,deco:true,sc:1.15});hgtlLight(B,px,py)}}}
   return m}
 /* the automatic hook: every maze made by hgtzMaze gets its spires and gate */
-{const _h=hgtzMaze;hgtzMaze=function(B,x,y,w,h,opts){const m=_h.apply(this,arguments);if(m&&m.entry){m.floorDigit=(opts&&opts.floor!==undefined)?opts.floor:(HGTZ_KIND[(opts&&opts.kind)||'tall']||{}).floor;try{hgtzDress(B,m,{floor:m.floorDigit})}catch(e){console.error('hgtzDress',e)}}return m}}
+{const _h=hgtzMaze;hgtzMaze=function(B,x,y,w,h,opts){const m=_h.apply(this,arguments);if(m&&m.entry&&!m.disabled){m.floorDigit=(opts&&opts.floor!==undefined)?opts.floor:(HGTZ_KIND[(opts&&opts.kind)||'tall']||{}).floor;try{hgtzDress(B,m,{floor:m.floorDigit})}catch(e){console.error('hgtzDress',e)}}return m}}
 
 /* ---- src/desert/hgt_tanks.js ---- */
 /* ==========================================================================
@@ -26026,15 +26041,15 @@ function hgtmBegin(cx,cy,dX,dY,pX,pY){
     const zc=dX*rx+dY*ry,xc=dX*ry-dY*rx,rad=I.kind==='mesh'?I.M.rad*I.sc:I.kind==='planet'?I.M.rad:I.r*1.7;
     if(zc+rad<.1||zc>(I.o.far||(I.kind==='cloud'?36:80)))continue;
     const lim=(zc+rad)*VW/2/F*1.05+rad;if(Math.abs(xc)-rad>lim)continue;
-    if(I.kind==='mesh'&&!PERF_MESH4&&!I.o.cheap&&!I.o.fly&&hgtmHidden(zc,xc,rad,I.z+rad,CAMZ))continue;   // the whole model stands behind a nearer wall: it is not worked out at all
+    if(I.kind==='mesh'&&!PERF_MESH4&&!I.o.cheap&&!I.o.fly&&hgtmHidden(zc,xc,rad,I.z+rad,CAMZ)){I._why='hidden';continue}   // the whole model stands behind a nearer wall: it is not worked out at all
     const dd=Math.hypot(rx,ry);I.zc=zc;I.xc=xc;I.cand=zc;I.ccz=pz;
     cand.push(I);
   }
   cand.sort((a,b)=>a.zc-b.zc);
   let slotN=0;const SM=12;
   for(const I of cand){
-    if(performance.now()-t0>HGTM.budget&&I.kind!=='cloud'&&!I.o.cheap)continue;
-    if(I.kind==='mesh'){if(slotN>=SM)continue;const e=hgtmRenderMesh(I,cam,slotN);if(e){if(!e.cv)slotN++;out.push(e);HGTM.vis++}}
+    if(performance.now()-t0>HGTM.budget&&I.kind!=='cloud'&&!I.o.cheap&&!(I._vis&&G.time-(I._drawT||0)<.6)){I._why='budget';continue}
+    if(I.kind==='mesh'){if(slotN>=SM){I._why='slots';continue}const e=hgtmRenderMesh(I,cam,slotN);if(e){I._drawT=G.time;if(!e.cv)slotN++;out.push(e);HGTM.vis++}}
     else if(I.kind==='planet'){if(slotN>=SM)continue;const e=hgtmRenderPlanet(I,cam,slotN);if(e){slotN++;out.push(e);HGTM.vis++}}
     else hgtmCloudEntries(I,cam,out);
   }
@@ -26504,9 +26519,16 @@ const hgtgR=hgtmRnd,hgtgClamp=(v,a,b)=>v<a?a:v>b?b:v,hgtgWrap=a=>Math.atan2(Math
   const bp=hgtmBuildPart;hgtmBuildPart=function(d,ix){if(HGTG.building){if(d.grade===undefined)d.grade=false;if(d.glow===undefined&&d.t!=='fan')d.glow=HGTG.lift;if(d.t==='fan'&&d.tex&&d.alpha===undefined)d.alpha=true}return d.t==='dome'?hgtgDome(d,ix):bp(d,ix)};
   const gf=hgtmGenFan;hgtmGenFan=function(P,pose,inst){const d=P.def,s=d.spread,l=d.len,ks=pose&&pose.fs,kl=pose&&pose.fl;
     if(ks===undefined&&kl===undefined)return gf(P,pose,inst);d.spread=(s||2.4)*(ks===undefined?1:ks);d.len=(l||1)*(kl===undefined?1:kl);gf(P,pose,inst);d.spread=s;d.len=l};
-  const rm0=hgtmRenderMesh,rm=function(I,cam,s){if(!HGTG.prof)return rm0(I,cam,s);const t0=performance.now(),r=rm0(I,cam,s),k=I.o.rim?'rim':I.kind==='mesh'?(HGTG.kind[I.name]||I.name):I.kind;HGTG.prof[k]=(HGTG.prof[k]||0)+performance.now()-t0;return r};hgtmRenderMesh=function(I,cam,s){HGTG.cur=I;if(!HGTG.vdone)hgtgVariants();if(I.o.minD&&I.zc<I.o.minD)return null;if(I.o.hgk==='levi'&&CAMZ<6&&HGTG.hcT===G.time&&++HGTG.hcN>1)return null;if(I.o.hgk==='levi'&&CAMZ<6&&HGTG.hcT!==G.time){HGTG.hcT=G.time;HGTG.hcN=1}if(!I.o.cheap&&I.zc>0&&F*I.M.rad*I.sc/Math.max(.3,I.zc)<2.5)return null;if(!I.o.cheap&&I.zc>6&&hgtgHidden(I))return null;if(I.zc>50+I.sc*22&&/school|angel/.test(I.name))return null;if(!I.o.cheap&&I.zc>60){if(HGTG.farT!==G.time){HGTG.farT=G.time;HGTG.farN=0}if(++HGTG.farN>3)return null}return rm(I,cam,s)};
+  const rm0=hgtmRenderMesh,rm=function(I,cam,s){if(!HGTG.prof)return rm0(I,cam,s);const t0=performance.now(),r=rm0(I,cam,s),k=I.o.rim?'rim':I.kind==='mesh'?(HGTG.kind[I.name]||I.name):I.kind;HGTG.prof[k]=(HGTG.prof[k]||0)+performance.now()-t0;return r};hgtmRenderMesh=function(I,cam,s){HGTG.cur=I;if(!HGTG.vdone)hgtgVariants();
+    // no hard thresholds: every skip rule has hysteresis (once drawn it stays drawn until clearly past the limit, once skipped it needs a clear margin to return)
+    const was=I._vis===true;let why=null;
+    if(I.o.minD){const lim=I.o.minD*(was?.85:1.15);if(I.zc<lim)why='minD'}
+    if(!why&&!I.o.cheap&&I.zc>0){const px=F*I.M.rad*I.sc/Math.max(.3,I.zc);if(px<(was?1.8:3))why='tiny'}
+    if(!why&&I.zc>50+I.sc*22&&/school|angel/.test(I.name))why='fishfar';
+    I._vis=false;if(why){I._why=why;return null}
+    const e=rm(I,cam,s);if(e){I._vis=true;I._why=null}else I._why='empty';return e};
   const up=hgtmUpdate;hgtmUpdate=function(dt){for(const I of HGTM.inst){const f=I.o&&I.o.tick;if(f)f(I,dt)}const r=up(dt);if(HGTG.moon)hgtgMoonGuard(dt);return r};
-  const sy=hgtmSync;hgtmSync=function(){if(HGTM.lvl!==LEVEL)HGTG.moonI=null;if(HGTM.lvl!==LEVEL&&!HGTG.off){hgtgOnEnter(LEVEL);try{hgtgFixRoosts(LEVEL);hgtgFixStatics(LEVEL)}catch(e){console.error('roost',e)}try{hgtgWrapLook();if(LEVEL===470||(LEVEL>=480&&LEVEL<=484))hgtgMoon(LEVEL)}catch(e){console.error('moon',e)}}return sy()};
+  const sy=hgtmSync;hgtmSync=function(){if(HGTM.lvl!==LEVEL)HGTG.moonI=null;if(HGTM.lvl!==LEVEL&&!HGTG.off){hgtgOnEnter(LEVEL);try{hgtgFixRoosts(LEVEL);hgtgFixStatics(LEVEL);hgtgReserve(LEVEL)}catch(e){console.error('roost',e)}try{hgtgWrapLook();if(LEVEL===470||(LEVEL>=480&&LEVEL<=484))hgtgMoon(LEVEL)}catch(e){console.error('moon',e)}}return sy()};
 })();
 /* a glossy eye dome: a spherical cap of height bulge on a flat circle of radius r (axis '+y','-y','+x','-x','+z','-z'), the picture mapped flat across it */
 function hgtgDome(d,ix){
@@ -26891,7 +26913,7 @@ function hgtgTick(I,dt){
   if(o.over){const inf=HGTG.info[LEVEL];if(inf){const x=I.x|0,y=I.y|0;if(x>=0&&y>=0&&x<inf.W&&y<inf.H)o.h=Math.max(inf.top[y*inf.W+x],inf.h[y*inf.W+x])}}
 }
 function hgtgSpawn(name,o){
-  o=o||{};hgtgVariants();const k=HGTG.kind[name]||'';o.hgk=k;if(o.scale===undefined)o.scale=1;if(o.minD===undefined&&k==='bulk')o.minD=10;if(o.minD===undefined&&k==='stilt')o.minD=6;
+  o=o||{};hgtgVariants();const k=HGTG.kind[name]||'';o.hgk=k;if(o.scale===undefined)o.scale=1;if(o.minD===undefined&&k==='bulk')o.minD=5;if(o.minD===undefined&&k==='stilt')o.minD=3.5;
   if(k==='wing'||k==='fish'||k==='levi'){o.fly=true;o.foot=.01}
   if(k==='stilt'&&o.over===undefined)o.over=false;
   if(!o.tick&&(k==='stilt'||k==='bulk'||k==='peacock'||k==='wing'||k==='fish'))o.tick=hgtgTick;
@@ -27016,7 +27038,7 @@ function hgtgAuto(id,opts){
   place('stilt',cnt('stilt'),2,22,{dmin:1,over:false,min:20,max:64,endD:1,lane:.8,step:3},(n,gz)=>fitScale(n,.58,1.35,gz));
   // peacocks: slow small loops on flat open ground
   {const sp=hgtgSpots(inf,R,3,cnt('peacock')*3,14);let done=0;for(const s of sp){if(done>=cnt('peacock'))break;const name=pick(K('peacock')),rr=Math.min(2.8,Math.max(.8,inf.D[s[1]*W+s[0]]-1.3)),pts=hgtgSafeCircle(inf,R,s[0]+.5,s[1]+.5,rr,6,.35);
-    hgtgSpawn(name,{level:id,x:pts[0][0],y:pts[0][1],route:pts,scale:.92+.25*R(),speed:.18+.1*R(),seed:1+((R()*9000)|0),minD:3.4});done++;stat.peacock++}}
+    hgtgSpawn(name,{level:id,x:pts[0][0],y:pts[0][1],route:pts,scale:.92+.25*R(),speed:.18+.1*R(),seed:1+((R()*9000)|0),minD:.9});done++;stat.peacock++}}
   // winged: circling loops above the roofs
   {const sp=hgtgSpots(inf,R,1,cnt('wing')*2,16,{flat:false,avoid:4});let done=0;for(const s of sp){if(done>=cnt('wing'))break;const name=pick(K('wing')),sc=1+2*R(),rad=6+12*R(),mt=hgtgMaxTop(inf,s[0],s[1],Math.min(rad,10)),z=Math.min(roof-1.5,R()<.5?Math.max(mt+1+2*R(),gh(s[0],s[1])+2.5):gh(s[0],s[1])+1.4+4.5*R());
     hgtgSpawn(name,{level:id,x:s[0]+rad,y:s[1],route:hgtgCircle(s[0]+.5,s[1]+.5,rad,z,8,R,.4),scale:sc,speed:(.8+.6*R())*Math.pow(sc,.3),seed:1+((R()*9000)|0)});done++;stat.wing++}}
@@ -27370,6 +27392,24 @@ HGTG.viewSleeper=async function(lv,shotName){
   const st=HGTG.stat[lv]&&HGTG.stat[lv].sleeper,vw=HGTG.stat[lv]&&HGTG.stat[lv].sleeperView;if(!st||!vw)return null;
   goToLevel(lv,{x:vw[0],y:vw[1],f:0});G.state='play';G.menu=false;const I0=HGTM.inst.find(i=>i.o&&i.o.sleep&&i.kind==='mesh'),fz=I0?(HGTG.height[I0.name]||11)*I0.sc*.74:8,dst=Math.hypot(st[0]-vw[0],st[1]-vw[1]),elv=Math.atan2(fz-.5,dst)*57.3,pr=Math.max(10,Math.min(95,(elv-2)*100/36));HGTE.pitch=pr;HGTE.pitchT=pr;const ang=()=>Math.atan2(st[1]-vw[1],st[0]-vw[0]);for(let i=0;i<8;i++){G.C.a=ang();G.time+=.05;render3D()}ctx.setTransform(2,0,0,2,0,0);ui(.016);
   if(shotName&&HGTG.shotURL)await fetch(HGTG.shotURL+shotName+'.jpg',{method:'POST',body:ctx.canvas.toDataURL('image/jpeg',.9)});HGTE.pitch=0;HGTE.pitchT=0;return{from:vw,sleeper:st,dist:Math.round(Math.hypot(st[0]-vw[0],st[1]-vw[1])),ms:HGTM.ms}};
+
+/* EXSCE RESERVE (481): all big creatures (bulk giants, stilt-walkers, peacocks) live inside the walled reserve x54..91, y99..117, far apart
+   (slots at least 12 cells apart, small validated circles); extras are dropped. Sleepers, rim giants and sky creatures are not touched. */
+HGTG.reserve={481:{x0:54,y0:99,x1:91,y1:117,slots:[['bulk',59,103,2.4],['bulk',85,103,2.4],['stilt',72,108,2.8],['peacock',59,113,1.8],['peacock',85,113,1.8]]}};
+function hgtgReserve(id){
+  const Rz=HGTG.reserve[id];if(!Rz||Rz.done)return;const inf=hgtgInfo(id);if(!inf)return;Rz.done=true;const list=HGTM.spawns[id]||[],R=hgtgR(481*3+1),W=inf.W;
+  const pool={bulk:[],stilt:[],peacock:[]};
+  for(const s of list){const k=HGTG.kind[s.name];if(!pool[k]||s.o.rim||s.o.sleep)continue;const lv=HGTG.vista&&HGTG.vista[id];if(lv&&Math.hypot((s.o.route&&s.o.route[0]?s.o.route[0][0]:s.o.x)-lv.x,(s.o.route&&s.o.route[0]?s.o.route[0][1]:s.o.y)-lv.y)<9)continue;pool[k].push(s)}
+  const used=new Set(),placed=[];
+  for(const [k,sx,sy,r0] of Rz.slots){const s=pool[k].find(q=>!used.has(q));if(!s)continue;let best=null;
+    for(let dy=-3;dy<=3&&!best;dy++)for(let dx=-3;dx<=3&&!best;dx++){const cx=sx+dx,cy=sy+dy;if(cx<Rz.x0+3||cx>Rz.x1-3||cy<Rz.y0+3||cy>Rz.y1-3)continue;
+      for(const r of[r0,r0*.7,.01]){const pts=r<.1?[[cx+.5,cy+.5]]:hgtgCircle(cx+.5,cy+.5,r,0,8,R,.1).map(p=>[p[0],p[1]]);if(!hgtgRouteOK(inf,pts.length>1?pts:[pts[0],[pts[0][0]+.01,pts[0][1]]])&&pts.length>1)continue;const c=cy*W+cx;if(!inf.open[c]||inf.bad[c])continue;
+        if(placed.every(p=>Math.hypot(p[0]-cx,p[1]-cy)>=11)){best=pts;break}}}
+    if(best){used.add(s);placed.push([best[0][0],best[0][1]]);s.o.x=best[0][0];s.o.y=best[0][1];s.o.route=best;if(k==='peacock')s.o.minD=.9;s.o.loop=true}}
+  for(const k in pool)for(const s of pool[k])if(!used.has(s)){const i=list.indexOf(s);if(i>=0)list.splice(i,1)}
+  Rz.placed=placed;
+  for(const s of list)if(HGTG.kind[s.name]==='peacock')s.o.minD=.9;
+}
 
 /* ---- src/desert/hgt_life.js ---- */
 /* ==========================================================================
@@ -29236,7 +29276,7 @@ function buildCity(){
   pond(B,info,43,107);axisDecor(B);
   gates(B,info);
   tubes(B,info);recesses(B);streetDecor(B);boxDecor(B);gateDecor(B);belvedere(B);eastEntry(B);eastLaneLights(B);placeFolk(B,info);
-  bigMazes(B,info);stairsNowhere(B,info);focalPoints(B);edgeGrowth(B);tanksCity(B,info);lifeAndPets(B,info);
+  bigMazes(B,info);stairsNowhere(B,info);focalPoints(B);edgeGrowth(B);tanksCity(B,info);reserve(B,info);lifeAndPets(B,info);
   B.start={x:CX,y:H-3,f:0};
   return B}
 function gates(B,info){
@@ -29281,7 +29321,7 @@ function assemble(B){
   L.chars=chars;L.terrace.riser=stair;L.terrace.rg=rg;L.fmap=fm;
   if(B.tube&&B.tube.length){const lid=L.terrace.lid||new Float32Array(W*H);for(const [x,y] of B.tube)lid[y*W+x]=B.tubeH||2.4;L.terrace.lid=lid}
   const nm=(t,x,y)=>hgtlName(B,x,y,t,'place');
-  nm('The Conservatory Spiral',CX,CY);nm('Root Well',RW.cx,RW.cy-11);nm('Grand Maze',45,33);nm('Hedge Maze',41,58);nm('Sunken Maze',41,76);nm('Tube Maze',107,33);nm('Raised Maze',109,58);nm('Shell Maze',109,76);
+  nm('The Conservatory Spiral',CX,CY);nm('Root Well',RW.cx,RW.cy-11);nm('Grand Maze',45,33);nm('Shell Maze',109,76);
   nm('Willow Pond',43,96);nm('Hill of Balconies',17,75);nm('Spire Quarter',60,16);nm('Sunken Gardens',130,75);nm('Gate Quarter',75,129);nm('South Gate',CX,H-4);nm('North Gate',CX,4);nm('The Belvedere',4,72);nm('Fish Tanks',84,40);nm('Ravine of Lamps',59,19);
   L.mapNames=B.names.map(n=>Object.assign({},n));
   const FS=[['hgtb_f_pearlbands','hgt_f0'],['hgtb_f_shellflags','hgt_f5'],['hgtb_f_terrazzo','hgt_f2'],['hgtb_f_mossy','hgt_f3'],['hgtb_f_gutter','hgt_f4'],['hgt_f7','hgt_f7']].map(a=>FLOORS[a[0]]?a[0]:a[1]);L.floorSet=FS;L.floor=FS[0];L.ceil='tomb';L.ceilH=3;L.amb=1;L.noExtras=true;L.noTele=true;L.sky=skyTowers();
@@ -29706,8 +29746,8 @@ function freeNear(B,x,y,r){r=r||6;let best=null,bd=1e9;for(let j=-r;j<=r;j++)for
 function placeFolk(B,info){
   const L=key=>ROOMLINK[key],put=(id,img,x,y,sc,near)=>{const c=freeNear(B,x,y,near||8);if(c)decor(B,img,c[0],c[1],{walk:true,npc:id,sc:sc||1})};
   put('hgn_skroop','hg_npc4',CX+4,H-6,1);
-  decor(B,'hg_well',CX-6,CY+27,{block:true,sc:1});put('hg_aldous','hg_wizard',CX-5,CY+27,1);
-  put('hgx_ex_s1','hg_npc4',CX+3,CY+25,1);
+  decor(B,'hg_well',CX-6,CY+23,{block:true,sc:1});put('hg_aldous','hg_wizard',CX-5,CY+23,1,2);
+  put('hgx_ex_s1','hg_npc4',CX+3,CY+22,1,2);
   put('hgx_ex_s2','hg_npc1',CX-4,H-12,1);
   if(L('glubba'))put('hgx_ex_s3','hg_npc1',L('glubba').ax,L('glubba').ay,1,5);
   if(L('wibb'))put('hgx_ex_s4','hg_npc6',L('wibb').ax,L('wibb').ay-1,1,5);
@@ -29934,6 +29974,26 @@ function buildTankRoom(){
   try{hgtkTank(Bm,2,0,9,3,{type:'wall',face:'S',wh:2.7,seed:21,theme:'deep',h:0});hgtkTank(Bm,1,3,3,3,{type:'round',seed:22,theme:'lagoon',h:0});hgtkTank(Bm,9,3,3,3,{type:'round',seed:23,theme:'violet',h:0})}catch(e){console.error('tankroom',e)}
   const decorL=Bm.decor.slice();for(const [x,y] of [[3,7],[9,7]]){decorL.push({k:'hgt_gardenlantern',x,y,block:false,walk:true,deco:true});}
   return {rows:Bm.rows.map(r=>r.join('')),chars,start:{x:cx,y:d-2,f:0},enemies:[],items:[],decor:decorL,lights:[[4,5],[8,5],[cx,7]],portals:[],floor:'hgt_f1',day:0,amb:.62,ceil:'beam',ceilH:2.7,noTele:true,noExtras:true,diff:66,name:R.name,label:R.name,mapNames:[]}}
+// THE RESERVE: a roomy walled garden south of the Conservatory where the big creatures live. Outer rectangle RES; wide gateways in every side.
+const RES={x0:54,y0:99,x1:91,y1:117,gates:{N:[[60,64],[73,77],[86,90]],S:[[60,64],[73,77],[86,90]],W:[[101,104],[106,110]],E:[[101,104],[106,110]]}};
+function reserve(B,info){
+  const {x0,y0,x1,y1}=RES,inR=(x,y)=>x>=x0&&x<=x1&&y>=y0&&y<=y1;
+  B.decor=B.decor.filter(d=>!inR(d.x,d.y));B.lights=B.lights.filter(l=>!inR(l[0],l[1]));
+  B.stairs=B.stairs.filter(r=>!r.cells.some(c=>inR(c[0],c[1])));B.nowhere=(B.nowhere||[]).filter(n=>!inR(n.x,n.y));
+  const wall=wc('a',1.7,0),gate=(x,y)=>{if(y===y0||y===y1){const g=RES.gates[y===y0?'N':'S'];return g.some(r=>x>=r[0]&&x<=r[1])}const g=RES.gates[x===x0?'W':'E'];return g.some(r=>y>=r[0]&&y<=r[1])};
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
+    if(conT(x,y))continue;const edge=x===x0||x===x1||y===y0||y===y1;
+    if(edge&&!gate(x,y)){Wl(B,x,y,wall,0);continue}
+    const av=x>=73&&x<=77;O(B,x,y,0,K.GROUND);fl(B,x,y,av?1:5)}
+  // gentle terraces
+  for(const [tx,ty] of [[58,112],[86,102],[86,112],[58,102]]){for(let j=0;j<5;j++)for(let i=0;i<5;i++)O(B,tx+i,ty+j,.26,K.TERRACE);for(let j=1;j<4;j++)for(let i=1;i<4;i++)O(B,tx+i,ty+j,.52,K.TERRACE);for(let j=0;j<5;j++)for(let i=0;i<5;i++)fl(B,tx+i,ty+j,1);decor(B,'hgt_fountain',tx+2,ty+2,{block:true,sc:1})}
+  // ponds
+  for(const [px,py] of [[64,105],[80,108]]){try{hgtlPool(B,px,py,8,6,{rim:0,shallow:1,deep:false,lamps:false});for(let j=0;j<6;j++)for(let i=0;i<8;i++)fl(B,px+i,py+j,3)}catch(e){console.error('res pool',e)}}
+  // trees, glowing plants, lamps
+  for(let y=y0+1;y<y1;y+=1)for(let x=x0+1;x<x1;x+=1){if(!isO(B,x,y)||(B.water&&B.water[y*W+x])||B.kind[y*W+x]===K.TERRACE||B.decor.some(d=>Math.abs(d.x-x)<2&&Math.abs(d.y-y)<2)||(x>=73&&x<=77))continue;
+    const r=hs(x,y,250);if(r<.045)plant(B,['willow','fairytree','giantcap','willow'][(r*400|0)%4],x,y,2+hs(x,y,251));else if(r<.1)plant(B,['crystalgrass','glowshrooms','bulbflower','shellflower','fern'][(r*500|0)%5],x,y,1.2);else if(r<.115)lampPost(B,x,y)}
+  for(const [x,y] of [[x0+1,y0+1],[x1-1,y0+1],[x0+1,y1-1],[x1-1,y1-1]])lampPost(B,x,y);
+  info.reserve={x0,y0,x1,y1,gates:RES.gates}}
 // life, pets and giants (specific ones; the automatic population stays)
 function lifeAndPets(B,info){
   const free=(x,y,r)=>freeNear(B,x,y,r||6);const L=[];
@@ -29970,7 +30030,7 @@ function lifeAndPets(B,info){
   _g.apply(this,arguments);if(id!==ID)return;try{
   const sp=(n,x,y,sc)=>hgtgSpawn(n,{x:x+.5,y:y+.5,level:ID,scale:sc,yaw:hs(x,y,190)*6.28});
   sp('hgtg_peacock',CON.cx+6,CON.cy-1,1);sp('hgtg_peacock_green',CON.cx+6,CON.cy+1,1);sp('hgtg_peacock_white',CON.cx+6,CON.cy,1);
-  sp('hgtg_bulk_mound',96,115,.9)}catch(e){console.error('hgt exsce giants',e)}}}}
+  }catch(e){console.error('hgt exsce giants',e)}}}}
 // focal points every 15 to 20 cells across the open ground, and hanging growth along the walls
 function focalPoints(B){
   const kinds=[['hgtb_deco_fountain',1.3,1],['hgtb_deco_shellstatue',1.3,1],['hgtb_deco_pearlplinth',1.3,1],['hgtb_deco_lanterns',1.2,1],['hgt_fountain',1.4,1],['hgt_cupola',1.5,1],['hgt_obelisk',1.3,1],['fairytree',2,0],['giantcap',1.8,0],['willow',1.6,0],['hgt_chime',1.4,0]];let n=0;
@@ -30905,7 +30965,7 @@ function hgtxglormBuild(id){
   const bf=hgtxglormFloor;
   const ROOMS=HGTXG_ROOMS,doorsOut=[],NPCS=[];
   /* an enterable door: wall cell (x,y), tint t, from foot to top, facing face; the party arrives in the room facing north */
-  const door=(x,y,t,foot,top,face,rid,name)=>{const r=ROOMS[rid];WS[I(x,y)]={t,kind:'door',top,foot,fixed:true,door:{lvl:rid,at:{x:r.w>>1,y:r.d-2,f:0}}};hgtlWall(B,x,y,'#',foot);RES[I(x,y)]=1;
+  const door=(x,y,t,foot,top,face,rid,name)=>{const r=ROOMS[rid];if(!r)return;WS[I(x,y)]={t,kind:'door',top,foot,fixed:true,door:{lvl:rid,at:{x:r.w>>1,y:r.d-2,f:0}}};hgtlWall(B,x,y,'#',foot);RES[I(x,y)]=1;
     const d=HGTL.DIRS[face&3];B.doors.push({x,y,face:face&3,ax:x+d[0],ay:y+d[1],to:rid});doorsOut.push({id:rid,x,y,face:face&3,ax:x+d[0],ay:y+d[1],name:name||r.n,foot})};
   const linkDoor=(x,y,t,foot,top,face,lvl,at,name)=>{WS[I(x,y)]={t,kind:'door',top,foot,fixed:true,door:{lvl,at}};hgtlWall(B,x,y,'#',foot);RES[I(x,y)]=1;const d=HGTL.DIRS[face&3];B.doors.push({x,y,face:face&3,ax:x+d[0],ay:y+d[1],to:lvl});doorsOut.push({id:lvl,x,y,face:face&3,ax:x+d[0],ay:y+d[1],name,foot})};
   const named=(t,x,y,k)=>hgtlName(B,x,y,t,k||'place');
@@ -31162,7 +31222,7 @@ function hgtxglormBuild(id){
   /* mazes of different kinds on the free ground of the districts */
   const MZS=[['hedge','prim',17,17,[0,2,4],'chest'],['tall','kruskal',17,17,[1,3,5],'view'],['tube','wilson',15,15,[2,5,3],'lamp'],['raised','prim',17,15,[3,4,1],'creature'],['shell','circular',17,17,[0,1,2,3],'shrine'],['tall','chartres',17,17,[4,5,2],'chest']];
   MZS.forEach(([kind,algo,w,h,ord,reward],i)=>{const p=spot(w,h,ord);if(!p)return;const side=['S','N','W','E'][i&3];
-    try{const m=hgtzMaze(B,p.x,p.y,w,h,{kind,algo,side,seed:4840+i,reward,secret:i%2===0,tile:hgtzStyle(4840+i),wallH:kind==='tall'?4.2:undefined});MZ.push(m);named((kind==='hedge'?'Hedge maze':kind==='tube'?'Tube maze':kind==='raised'?'Raised maze':kind==='shell'?'Shell maze':'Tall maze'),p.x+(w>>1),p.y-1,'small')}catch(e){console.error('maze',kind,e)}});
+    try{const m=hgtzMaze(B,p.x,p.y,w,h,{kind,algo,side,seed:4840+i,reward,secret:i%2===0,tile:hgtzStyle(4840+i),wallH:kind==='tall'?4.2:undefined});MZ.push(m);if(!m.disabled)named((kind==='hedge'?'Hedge maze':kind==='tube'?'Tube maze':kind==='raised'?'Raised maze':kind==='shell'?'Shell maze':'Tall maze'),p.x+(w>>1),p.y-1,'small')}catch(e){console.error('maze',kind,e)}});
   /* pools: wade at the rim, swim in the middle */
   const POOLS=[];
   for(const [ord,w,d] of [[[4,5],12,8],[[5,4],12,8],[[0,1],10,7],[[1,0],10,7]]){const p=spot(w,d,ord);if(!p)continue;
@@ -31723,7 +31783,7 @@ function build(id){
     const m=hgtzMaze(B,x,y,w,hh,Object.assign({base:h0,seed:x*7+y*3+n,tile:mazeTile(n),floor:opts.kind==='hedge'?4:3},opts));
     if(B.fm)for(let j=y;j<y+hh;j++)for(let i=x;i<x+w;i++){const v=B.fm[j*W+i];if(v)fm[I(i,j)]=String(v)}
     for(const [rx,ry] of (m.runner||[]))fm[I(rx,ry)]=String(m.runnerDigit);
-    mark(x-3,y-3,x+w+2,y+hh+2);hgtlName(B,x+(w>>1),y-1,name,'place');spots.mazes.push({name,x,y,w,h:hh,m,base:h0});return m};
+    mark(x-3,y-3,x+w+2,y+hh+2);if(!m.disabled)hgtlName(B,x+(w>>1),y-1,name,'place');spots.mazes.push({name,x,y,w,h:hh,m,base:h0});return m};
   const gmz=mazeAt(26,3,33,33,{kind:'tall',algo:'braid',wallH:5,braid:.5,reward:'view',secret:true,side:'S'},'The Grand Maze',0);
   mazeAt(104,14,21,21,{kind:'hedge',algo:'backtracker',reward:'creature',secret:true,side:'W'},'The Hedge Maze',1);
   mazeAt(126,26,19,19,{kind:'tube',algo:'prim',reward:'lamp',side:'W'},'The Tube Maze',2);

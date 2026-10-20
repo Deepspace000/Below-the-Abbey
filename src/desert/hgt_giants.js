@@ -31,9 +31,16 @@ const hgtgR=hgtmRnd,hgtgClamp=(v,a,b)=>v<a?a:v>b?b:v,hgtgWrap=a=>Math.atan2(Math
   const bp=hgtmBuildPart;hgtmBuildPart=function(d,ix){if(HGTG.building){if(d.grade===undefined)d.grade=false;if(d.glow===undefined&&d.t!=='fan')d.glow=HGTG.lift;if(d.t==='fan'&&d.tex&&d.alpha===undefined)d.alpha=true}return d.t==='dome'?hgtgDome(d,ix):bp(d,ix)};
   const gf=hgtmGenFan;hgtmGenFan=function(P,pose,inst){const d=P.def,s=d.spread,l=d.len,ks=pose&&pose.fs,kl=pose&&pose.fl;
     if(ks===undefined&&kl===undefined)return gf(P,pose,inst);d.spread=(s||2.4)*(ks===undefined?1:ks);d.len=(l||1)*(kl===undefined?1:kl);gf(P,pose,inst);d.spread=s;d.len=l};
-  const rm0=hgtmRenderMesh,rm=function(I,cam,s){if(!HGTG.prof)return rm0(I,cam,s);const t0=performance.now(),r=rm0(I,cam,s),k=I.o.rim?'rim':I.kind==='mesh'?(HGTG.kind[I.name]||I.name):I.kind;HGTG.prof[k]=(HGTG.prof[k]||0)+performance.now()-t0;return r};hgtmRenderMesh=function(I,cam,s){HGTG.cur=I;if(!HGTG.vdone)hgtgVariants();if(I.o.minD&&I.zc<I.o.minD)return null;if(I.o.hgk==='levi'&&CAMZ<6&&HGTG.hcT===G.time&&++HGTG.hcN>1)return null;if(I.o.hgk==='levi'&&CAMZ<6&&HGTG.hcT!==G.time){HGTG.hcT=G.time;HGTG.hcN=1}if(!I.o.cheap&&I.zc>0&&F*I.M.rad*I.sc/Math.max(.3,I.zc)<2.5)return null;if(!I.o.cheap&&I.zc>6&&hgtgHidden(I))return null;if(I.zc>50+I.sc*22&&/school|angel/.test(I.name))return null;if(!I.o.cheap&&I.zc>60){if(HGTG.farT!==G.time){HGTG.farT=G.time;HGTG.farN=0}if(++HGTG.farN>3)return null}return rm(I,cam,s)};
+  const rm0=hgtmRenderMesh,rm=function(I,cam,s){if(!HGTG.prof)return rm0(I,cam,s);const t0=performance.now(),r=rm0(I,cam,s),k=I.o.rim?'rim':I.kind==='mesh'?(HGTG.kind[I.name]||I.name):I.kind;HGTG.prof[k]=(HGTG.prof[k]||0)+performance.now()-t0;return r};hgtmRenderMesh=function(I,cam,s){HGTG.cur=I;if(!HGTG.vdone)hgtgVariants();
+    // no hard thresholds: every skip rule has hysteresis (once drawn it stays drawn until clearly past the limit, once skipped it needs a clear margin to return)
+    const was=I._vis===true;let why=null;
+    if(I.o.minD){const lim=I.o.minD*(was?.85:1.15);if(I.zc<lim)why='minD'}
+    if(!why&&!I.o.cheap&&I.zc>0){const px=F*I.M.rad*I.sc/Math.max(.3,I.zc);if(px<(was?1.8:3))why='tiny'}
+    if(!why&&I.zc>50+I.sc*22&&/school|angel/.test(I.name))why='fishfar';
+    I._vis=false;if(why){I._why=why;return null}
+    const e=rm(I,cam,s);if(e){I._vis=true;I._why=null}else I._why='empty';return e};
   const up=hgtmUpdate;hgtmUpdate=function(dt){for(const I of HGTM.inst){const f=I.o&&I.o.tick;if(f)f(I,dt)}const r=up(dt);if(HGTG.moon)hgtgMoonGuard(dt);return r};
-  const sy=hgtmSync;hgtmSync=function(){if(HGTM.lvl!==LEVEL)HGTG.moonI=null;if(HGTM.lvl!==LEVEL&&!HGTG.off){hgtgOnEnter(LEVEL);try{hgtgFixRoosts(LEVEL);hgtgFixStatics(LEVEL)}catch(e){console.error('roost',e)}try{hgtgWrapLook();if(LEVEL===470||(LEVEL>=480&&LEVEL<=484))hgtgMoon(LEVEL)}catch(e){console.error('moon',e)}}return sy()};
+  const sy=hgtmSync;hgtmSync=function(){if(HGTM.lvl!==LEVEL)HGTG.moonI=null;if(HGTM.lvl!==LEVEL&&!HGTG.off){hgtgOnEnter(LEVEL);try{hgtgFixRoosts(LEVEL);hgtgFixStatics(LEVEL);hgtgReserve(LEVEL)}catch(e){console.error('roost',e)}try{hgtgWrapLook();if(LEVEL===470||(LEVEL>=480&&LEVEL<=484))hgtgMoon(LEVEL)}catch(e){console.error('moon',e)}}return sy()};
 })();
 /* a glossy eye dome: a spherical cap of height bulge on a flat circle of radius r (axis '+y','-y','+x','-x','+z','-z'), the picture mapped flat across it */
 function hgtgDome(d,ix){
@@ -418,7 +425,7 @@ function hgtgTick(I,dt){
   if(o.over){const inf=HGTG.info[LEVEL];if(inf){const x=I.x|0,y=I.y|0;if(x>=0&&y>=0&&x<inf.W&&y<inf.H)o.h=Math.max(inf.top[y*inf.W+x],inf.h[y*inf.W+x])}}
 }
 function hgtgSpawn(name,o){
-  o=o||{};hgtgVariants();const k=HGTG.kind[name]||'';o.hgk=k;if(o.scale===undefined)o.scale=1;if(o.minD===undefined&&k==='bulk')o.minD=10;if(o.minD===undefined&&k==='stilt')o.minD=6;
+  o=o||{};hgtgVariants();const k=HGTG.kind[name]||'';o.hgk=k;if(o.scale===undefined)o.scale=1;if(o.minD===undefined&&k==='bulk')o.minD=5;if(o.minD===undefined&&k==='stilt')o.minD=3.5;
   if(k==='wing'||k==='fish'||k==='levi'){o.fly=true;o.foot=.01}
   if(k==='stilt'&&o.over===undefined)o.over=false;
   if(!o.tick&&(k==='stilt'||k==='bulk'||k==='peacock'||k==='wing'||k==='fish'))o.tick=hgtgTick;
@@ -543,7 +550,7 @@ function hgtgAuto(id,opts){
   place('stilt',cnt('stilt'),2,22,{dmin:1,over:false,min:20,max:64,endD:1,lane:.8,step:3},(n,gz)=>fitScale(n,.58,1.35,gz));
   // peacocks: slow small loops on flat open ground
   {const sp=hgtgSpots(inf,R,3,cnt('peacock')*3,14);let done=0;for(const s of sp){if(done>=cnt('peacock'))break;const name=pick(K('peacock')),rr=Math.min(2.8,Math.max(.8,inf.D[s[1]*W+s[0]]-1.3)),pts=hgtgSafeCircle(inf,R,s[0]+.5,s[1]+.5,rr,6,.35);
-    hgtgSpawn(name,{level:id,x:pts[0][0],y:pts[0][1],route:pts,scale:.92+.25*R(),speed:.18+.1*R(),seed:1+((R()*9000)|0),minD:3.4});done++;stat.peacock++}}
+    hgtgSpawn(name,{level:id,x:pts[0][0],y:pts[0][1],route:pts,scale:.92+.25*R(),speed:.18+.1*R(),seed:1+((R()*9000)|0),minD:.9});done++;stat.peacock++}}
   // winged: circling loops above the roofs
   {const sp=hgtgSpots(inf,R,1,cnt('wing')*2,16,{flat:false,avoid:4});let done=0;for(const s of sp){if(done>=cnt('wing'))break;const name=pick(K('wing')),sc=1+2*R(),rad=6+12*R(),mt=hgtgMaxTop(inf,s[0],s[1],Math.min(rad,10)),z=Math.min(roof-1.5,R()<.5?Math.max(mt+1+2*R(),gh(s[0],s[1])+2.5):gh(s[0],s[1])+1.4+4.5*R());
     hgtgSpawn(name,{level:id,x:s[0]+rad,y:s[1],route:hgtgCircle(s[0]+.5,s[1]+.5,rad,z,8,R,.4),scale:sc,speed:(.8+.6*R())*Math.pow(sc,.3),seed:1+((R()*9000)|0)});done++;stat.wing++}}
@@ -897,3 +904,21 @@ HGTG.viewSleeper=async function(lv,shotName){
   const st=HGTG.stat[lv]&&HGTG.stat[lv].sleeper,vw=HGTG.stat[lv]&&HGTG.stat[lv].sleeperView;if(!st||!vw)return null;
   goToLevel(lv,{x:vw[0],y:vw[1],f:0});G.state='play';G.menu=false;const I0=HGTM.inst.find(i=>i.o&&i.o.sleep&&i.kind==='mesh'),fz=I0?(HGTG.height[I0.name]||11)*I0.sc*.74:8,dst=Math.hypot(st[0]-vw[0],st[1]-vw[1]),elv=Math.atan2(fz-.5,dst)*57.3,pr=Math.max(10,Math.min(95,(elv-2)*100/36));HGTE.pitch=pr;HGTE.pitchT=pr;const ang=()=>Math.atan2(st[1]-vw[1],st[0]-vw[0]);for(let i=0;i<8;i++){G.C.a=ang();G.time+=.05;render3D()}ctx.setTransform(2,0,0,2,0,0);ui(.016);
   if(shotName&&HGTG.shotURL)await fetch(HGTG.shotURL+shotName+'.jpg',{method:'POST',body:ctx.canvas.toDataURL('image/jpeg',.9)});HGTE.pitch=0;HGTE.pitchT=0;return{from:vw,sleeper:st,dist:Math.round(Math.hypot(st[0]-vw[0],st[1]-vw[1])),ms:HGTM.ms}};
+
+/* EXSCE RESERVE (481): all big creatures (bulk giants, stilt-walkers, peacocks) live inside the walled reserve x54..91, y99..117, far apart
+   (slots at least 12 cells apart, small validated circles); extras are dropped. Sleepers, rim giants and sky creatures are not touched. */
+HGTG.reserve={481:{x0:54,y0:99,x1:91,y1:117,slots:[['bulk',59,103,2.4],['bulk',85,103,2.4],['stilt',72,108,2.8],['peacock',59,113,1.8],['peacock',85,113,1.8]]}};
+function hgtgReserve(id){
+  const Rz=HGTG.reserve[id];if(!Rz||Rz.done)return;const inf=hgtgInfo(id);if(!inf)return;Rz.done=true;const list=HGTM.spawns[id]||[],R=hgtgR(481*3+1),W=inf.W;
+  const pool={bulk:[],stilt:[],peacock:[]};
+  for(const s of list){const k=HGTG.kind[s.name];if(!pool[k]||s.o.rim||s.o.sleep)continue;const lv=HGTG.vista&&HGTG.vista[id];if(lv&&Math.hypot((s.o.route&&s.o.route[0]?s.o.route[0][0]:s.o.x)-lv.x,(s.o.route&&s.o.route[0]?s.o.route[0][1]:s.o.y)-lv.y)<9)continue;pool[k].push(s)}
+  const used=new Set(),placed=[];
+  for(const [k,sx,sy,r0] of Rz.slots){const s=pool[k].find(q=>!used.has(q));if(!s)continue;let best=null;
+    for(let dy=-3;dy<=3&&!best;dy++)for(let dx=-3;dx<=3&&!best;dx++){const cx=sx+dx,cy=sy+dy;if(cx<Rz.x0+3||cx>Rz.x1-3||cy<Rz.y0+3||cy>Rz.y1-3)continue;
+      for(const r of[r0,r0*.7,.01]){const pts=r<.1?[[cx+.5,cy+.5]]:hgtgCircle(cx+.5,cy+.5,r,0,8,R,.1).map(p=>[p[0],p[1]]);if(!hgtgRouteOK(inf,pts.length>1?pts:[pts[0],[pts[0][0]+.01,pts[0][1]]])&&pts.length>1)continue;const c=cy*W+cx;if(!inf.open[c]||inf.bad[c])continue;
+        if(placed.every(p=>Math.hypot(p[0]-cx,p[1]-cy)>=11)){best=pts;break}}}
+    if(best){used.add(s);placed.push([best[0][0],best[0][1]]);s.o.x=best[0][0];s.o.y=best[0][1];s.o.route=best;if(k==='peacock')s.o.minD=.9;s.o.loop=true}}
+  for(const k in pool)for(const s of pool[k])if(!used.has(s)){const i=list.indexOf(s);if(i>=0)list.splice(i,1)}
+  Rz.placed=placed;
+  for(const s of list)if(HGTG.kind[s.name]==='peacock')s.o.minD=.9;
+}

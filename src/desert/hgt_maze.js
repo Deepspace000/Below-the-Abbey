@@ -565,7 +565,22 @@ if(typeof drawOverview==='function'&&typeof mplFogOn==='function'){
   {const _f=mplFogOn;mplFogOn=function(L){if(LEVEL===HGTZ_ID)return false;return _f.apply(this,arguments)}}}
 
 var HGTZ_LOG=(typeof HGTZ_LOG==='undefined')?[]:HGTZ_LOG;
-function hgtzMaze(B,x,y,w,h,opts){const out=hgtzMaze0(B,x,y,w,h,opts);
+/* MAZE KEEP LIST: the owner wants only two mazes per city. In the four 150 by 150 cities only the mazes whose rectangle origin "x,y" is listed here are built; every other
+   maze footprint becomes a garden court (hgtzGarden). Set HGT_MAZE_ALL=true (or add the origin to the list) to turn a maze back on. Interiors and test levels are not touched. */
+var HGT_MAZE_ALL=(typeof HGT_MAZE_ALL==='undefined')?false:HGT_MAZE_ALL;
+var HGT_MAZE_KEEP=(typeof HGT_MAZE_KEEP==='undefined')?{'34,34':'Exsce Grand Maze','102,78':'Exsce Shell Maze','26,3':'Ulb Grand Maze','104,14':'Ulb Hedge Maze','90,88':'Glorm Grand Maze','3,70':'Glorm Hedge Maze','6,6':'Nibb Grand Maze','65,66':'Nibb Ring Maze'}:HGT_MAZE_KEEP;
+function hgtzGarden(B,x,y,w,h,opts){opts=opts||{};const base=opts.base!==undefined?opts.base:hgtlH(B,x,y),fd=5,cx=x+(w>>1),cy=y+(h>>1),cells=[],R=hgtzRng((opts.seed|0)+x*31+y);
+  if(!B.fm)B.fm=new Uint8Array(B.W*B.H);
+  for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++){hgtlOpen(B,i,j,base,HGTL.K.PLAZA);B.fm[j*B.W+i]=fd;cells.push([i,j])}
+  const free=(i,j)=>i>x&&j>y&&i<x+w-1&&j<y+h-1&&!(Math.abs(i-cx)<=1&&Math.abs(j-cy)<=1);
+  for(const [i,j] of cells){if(!free(i,j))continue;const r=R();if(r<.16)hgtlDecor(B,HGTZ.K.plants[(R()*HGTZ.K.plants.length)|0],i,j,{walk:true,deco:true,sc:.8+R()*.5});}
+  for(const [dx,dy] of [[-2,-2],[2,-2],[-2,2],[2,2]]){const i=cx+dx*((w>>2)||1),j=cy+dy*((h>>2)||1);if(i>x&&j>y&&i<x+w-1&&j<y+h-1){hgtlDecor(B,HGTZ.K.lamp,i,j,{walk:true,deco:true,sc:1.1});hgtlLight(B,i,j)}}
+  for(const [dx,dy] of [[-2,0],[2,0],[0,-2],[0,2]])hgtlDecor(B,'hgtb_bench',cx+dx,cy+dy,{walk:true,deco:true});
+  hgtlDecor(B,HGTL_DECOR.fountain,cx,cy,{block:true,sc:1.1});B.occ.add(cx+','+cy);hgtlLight(B,cx,cy+1);
+  return {rect:{x,y,w,h},algo:'garden',kind:'garden',disabled:true,floorH:base,wallH:0,cells,centre:{x:cx,y:cy},entry:null,approach:null,reward:'none',lamps:[],deadEnds:[],secret:null}}
+function hgtzMaze(B,x,y,w,h,opts){
+  if(!HGT_MAZE_ALL&&B&&B.W===150&&B.H===150&&!(opts&&opts.kind==='indoor')&&!HGT_MAZE_KEEP[x+','+y]){const g=hgtzGarden(B,x,y,w,h,opts);HGTZ_LOG.push({B,out:g,x,y,w,h});return g}
+  const out=hgtzMaze0(B,x,y,w,h,opts);
     HGTZ_LOG.push({B,out,x,y,w,h});return out}
 
 /* ==========================================================================
@@ -629,4 +644,4 @@ function hgtzDress(B,m,o){o=o||{};if(!m||!m.entry||!m.approach||m.kind==='indoor
       if(!dd){hgtlDecor(B,'hgt_lamppost',px,py,{walk:true,deco:true,sc:1.15});hgtlLight(B,px,py)}}}
   return m}
 /* the automatic hook: every maze made by hgtzMaze gets its spires and gate */
-{const _h=hgtzMaze;hgtzMaze=function(B,x,y,w,h,opts){const m=_h.apply(this,arguments);if(m&&m.entry){m.floorDigit=(opts&&opts.floor!==undefined)?opts.floor:(HGTZ_KIND[(opts&&opts.kind)||'tall']||{}).floor;try{hgtzDress(B,m,{floor:m.floorDigit})}catch(e){console.error('hgtzDress',e)}}return m}}
+{const _h=hgtzMaze;hgtzMaze=function(B,x,y,w,h,opts){const m=_h.apply(this,arguments);if(m&&m.entry&&!m.disabled){m.floorDigit=(opts&&opts.floor!==undefined)?opts.floor:(HGTZ_KIND[(opts&&opts.kind)||'tall']||{}).floor;try{hgtzDress(B,m,{floor:m.floorDigit})}catch(e){console.error('hgtzDress',e)}}return m}}

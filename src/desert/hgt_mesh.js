@@ -270,15 +270,15 @@ function hgtmBegin(cx,cy,dX,dY,pX,pY){
     const zc=dX*rx+dY*ry,xc=dX*ry-dY*rx,rad=I.kind==='mesh'?I.M.rad*I.sc:I.kind==='planet'?I.M.rad:I.r*1.7;
     if(zc+rad<.1||zc>(I.o.far||(I.kind==='cloud'?36:80)))continue;
     const lim=(zc+rad)*VW/2/F*1.05+rad;if(Math.abs(xc)-rad>lim)continue;
-    if(I.kind==='mesh'&&!PERF_MESH4&&!I.o.cheap&&!I.o.fly&&hgtmHidden(zc,xc,rad,I.z+rad,CAMZ))continue;   // the whole model stands behind a nearer wall: it is not worked out at all
+    if(I.kind==='mesh'&&!PERF_MESH4&&!I.o.cheap&&!I.o.fly&&hgtmHidden(zc,xc,rad,I.z+rad,CAMZ)){I._why='hidden';continue}   // the whole model stands behind a nearer wall: it is not worked out at all
     const dd=Math.hypot(rx,ry);I.zc=zc;I.xc=xc;I.cand=zc;I.ccz=pz;
     cand.push(I);
   }
   cand.sort((a,b)=>a.zc-b.zc);
   let slotN=0;const SM=12;
   for(const I of cand){
-    if(performance.now()-t0>HGTM.budget&&I.kind!=='cloud'&&!I.o.cheap)continue;
-    if(I.kind==='mesh'){if(slotN>=SM)continue;const e=hgtmRenderMesh(I,cam,slotN);if(e){if(!e.cv)slotN++;out.push(e);HGTM.vis++}}
+    if(performance.now()-t0>HGTM.budget&&I.kind!=='cloud'&&!I.o.cheap&&!(I._vis&&G.time-(I._drawT||0)<.6)){I._why='budget';continue}
+    if(I.kind==='mesh'){if(slotN>=SM){I._why='slots';continue}const e=hgtmRenderMesh(I,cam,slotN);if(e){I._drawT=G.time;if(!e.cv)slotN++;out.push(e);HGTM.vis++}}
     else if(I.kind==='planet'){if(slotN>=SM)continue;const e=hgtmRenderPlanet(I,cam,slotN);if(e){slotN++;out.push(e);HGTM.vis++}}
     else hgtmCloudEntries(I,cam,out);
   }

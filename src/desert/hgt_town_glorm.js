@@ -113,7 +113,7 @@ function hgtxglormBuild(id){
   const bf=hgtxglormFloor;
   const ROOMS=HGTXG_ROOMS,doorsOut=[],NPCS=[];
   /* an enterable door: wall cell (x,y), tint t, from foot to top, facing face; the party arrives in the room facing north */
-  const door=(x,y,t,foot,top,face,rid,name)=>{const r=ROOMS[rid];WS[I(x,y)]={t,kind:'door',top,foot,fixed:true,door:{lvl:rid,at:{x:r.w>>1,y:r.d-2,f:0}}};hgtlWall(B,x,y,'#',foot);RES[I(x,y)]=1;
+  const door=(x,y,t,foot,top,face,rid,name)=>{const r=ROOMS[rid];if(!r)return;WS[I(x,y)]={t,kind:'door',top,foot,fixed:true,door:{lvl:rid,at:{x:r.w>>1,y:r.d-2,f:0}}};hgtlWall(B,x,y,'#',foot);RES[I(x,y)]=1;
     const d=HGTL.DIRS[face&3];B.doors.push({x,y,face:face&3,ax:x+d[0],ay:y+d[1],to:rid});doorsOut.push({id:rid,x,y,face:face&3,ax:x+d[0],ay:y+d[1],name:name||r.n,foot})};
   const linkDoor=(x,y,t,foot,top,face,lvl,at,name)=>{WS[I(x,y)]={t,kind:'door',top,foot,fixed:true,door:{lvl,at}};hgtlWall(B,x,y,'#',foot);RES[I(x,y)]=1;const d=HGTL.DIRS[face&3];B.doors.push({x,y,face:face&3,ax:x+d[0],ay:y+d[1],to:lvl});doorsOut.push({id:lvl,x,y,face:face&3,ax:x+d[0],ay:y+d[1],name,foot})};
   const named=(t,x,y,k)=>hgtlName(B,x,y,t,k||'place');
@@ -370,7 +370,7 @@ function hgtxglormBuild(id){
   /* mazes of different kinds on the free ground of the districts */
   const MZS=[['hedge','prim',17,17,[0,2,4],'chest'],['tall','kruskal',17,17,[1,3,5],'view'],['tube','wilson',15,15,[2,5,3],'lamp'],['raised','prim',17,15,[3,4,1],'creature'],['shell','circular',17,17,[0,1,2,3],'shrine'],['tall','chartres',17,17,[4,5,2],'chest']];
   MZS.forEach(([kind,algo,w,h,ord,reward],i)=>{const p=spot(w,h,ord);if(!p)return;const side=['S','N','W','E'][i&3];
-    try{const m=hgtzMaze(B,p.x,p.y,w,h,{kind,algo,side,seed:4840+i,reward,secret:i%2===0,tile:hgtzStyle(4840+i),wallH:kind==='tall'?4.2:undefined});MZ.push(m);named((kind==='hedge'?'Hedge maze':kind==='tube'?'Tube maze':kind==='raised'?'Raised maze':kind==='shell'?'Shell maze':'Tall maze'),p.x+(w>>1),p.y-1,'small')}catch(e){console.error('maze',kind,e)}});
+    try{const m=hgtzMaze(B,p.x,p.y,w,h,{kind,algo,side,seed:4840+i,reward,secret:i%2===0,tile:hgtzStyle(4840+i),wallH:kind==='tall'?4.2:undefined});MZ.push(m);if(!m.disabled)named((kind==='hedge'?'Hedge maze':kind==='tube'?'Tube maze':kind==='raised'?'Raised maze':kind==='shell'?'Shell maze':'Tall maze'),p.x+(w>>1),p.y-1,'small')}catch(e){console.error('maze',kind,e)}});
   /* pools: wade at the rim, swim in the middle */
   const POOLS=[];
   for(const [ord,w,d] of [[[4,5],12,8],[[5,4],12,8],[[0,1],10,7],[[1,0],10,7]]){const p=spot(w,d,ord);if(!p)continue;

@@ -131,7 +131,7 @@ function buildCity(){
   pond(B,info,43,107);axisDecor(B);
   gates(B,info);
   tubes(B,info);recesses(B);streetDecor(B);boxDecor(B);gateDecor(B);belvedere(B);eastEntry(B);eastLaneLights(B);placeFolk(B,info);
-  bigMazes(B,info);stairsNowhere(B,info);focalPoints(B);edgeGrowth(B);tanksCity(B,info);lifeAndPets(B,info);
+  bigMazes(B,info);stairsNowhere(B,info);focalPoints(B);edgeGrowth(B);tanksCity(B,info);reserve(B,info);lifeAndPets(B,info);
   B.start={x:CX,y:H-3,f:0};
   return B}
 function gates(B,info){
@@ -176,7 +176,7 @@ function assemble(B){
   L.chars=chars;L.terrace.riser=stair;L.terrace.rg=rg;L.fmap=fm;
   if(B.tube&&B.tube.length){const lid=L.terrace.lid||new Float32Array(W*H);for(const [x,y] of B.tube)lid[y*W+x]=B.tubeH||2.4;L.terrace.lid=lid}
   const nm=(t,x,y)=>hgtlName(B,x,y,t,'place');
-  nm('The Conservatory Spiral',CX,CY);nm('Root Well',RW.cx,RW.cy-11);nm('Grand Maze',45,33);nm('Hedge Maze',41,58);nm('Sunken Maze',41,76);nm('Tube Maze',107,33);nm('Raised Maze',109,58);nm('Shell Maze',109,76);
+  nm('The Conservatory Spiral',CX,CY);nm('Root Well',RW.cx,RW.cy-11);nm('Grand Maze',45,33);nm('Shell Maze',109,76);
   nm('Willow Pond',43,96);nm('Hill of Balconies',17,75);nm('Spire Quarter',60,16);nm('Sunken Gardens',130,75);nm('Gate Quarter',75,129);nm('South Gate',CX,H-4);nm('North Gate',CX,4);nm('The Belvedere',4,72);nm('Fish Tanks',84,40);nm('Ravine of Lamps',59,19);
   L.mapNames=B.names.map(n=>Object.assign({},n));
   const FS=[['hgtb_f_pearlbands','hgt_f0'],['hgtb_f_shellflags','hgt_f5'],['hgtb_f_terrazzo','hgt_f2'],['hgtb_f_mossy','hgt_f3'],['hgtb_f_gutter','hgt_f4'],['hgt_f7','hgt_f7']].map(a=>FLOORS[a[0]]?a[0]:a[1]);L.floorSet=FS;L.floor=FS[0];L.ceil='tomb';L.ceilH=3;L.amb=1;L.noExtras=true;L.noTele=true;L.sky=skyTowers();
@@ -601,8 +601,8 @@ function freeNear(B,x,y,r){r=r||6;let best=null,bd=1e9;for(let j=-r;j<=r;j++)for
 function placeFolk(B,info){
   const L=key=>ROOMLINK[key],put=(id,img,x,y,sc,near)=>{const c=freeNear(B,x,y,near||8);if(c)decor(B,img,c[0],c[1],{walk:true,npc:id,sc:sc||1})};
   put('hgn_skroop','hg_npc4',CX+4,H-6,1);
-  decor(B,'hg_well',CX-6,CY+27,{block:true,sc:1});put('hg_aldous','hg_wizard',CX-5,CY+27,1);
-  put('hgx_ex_s1','hg_npc4',CX+3,CY+25,1);
+  decor(B,'hg_well',CX-6,CY+23,{block:true,sc:1});put('hg_aldous','hg_wizard',CX-5,CY+23,1,2);
+  put('hgx_ex_s1','hg_npc4',CX+3,CY+22,1,2);
   put('hgx_ex_s2','hg_npc1',CX-4,H-12,1);
   if(L('glubba'))put('hgx_ex_s3','hg_npc1',L('glubba').ax,L('glubba').ay,1,5);
   if(L('wibb'))put('hgx_ex_s4','hg_npc6',L('wibb').ax,L('wibb').ay-1,1,5);
@@ -829,6 +829,26 @@ function buildTankRoom(){
   try{hgtkTank(Bm,2,0,9,3,{type:'wall',face:'S',wh:2.7,seed:21,theme:'deep',h:0});hgtkTank(Bm,1,3,3,3,{type:'round',seed:22,theme:'lagoon',h:0});hgtkTank(Bm,9,3,3,3,{type:'round',seed:23,theme:'violet',h:0})}catch(e){console.error('tankroom',e)}
   const decorL=Bm.decor.slice();for(const [x,y] of [[3,7],[9,7]]){decorL.push({k:'hgt_gardenlantern',x,y,block:false,walk:true,deco:true});}
   return {rows:Bm.rows.map(r=>r.join('')),chars,start:{x:cx,y:d-2,f:0},enemies:[],items:[],decor:decorL,lights:[[4,5],[8,5],[cx,7]],portals:[],floor:'hgt_f1',day:0,amb:.62,ceil:'beam',ceilH:2.7,noTele:true,noExtras:true,diff:66,name:R.name,label:R.name,mapNames:[]}}
+// THE RESERVE: a roomy walled garden south of the Conservatory where the big creatures live. Outer rectangle RES; wide gateways in every side.
+const RES={x0:54,y0:99,x1:91,y1:117,gates:{N:[[60,64],[73,77],[86,90]],S:[[60,64],[73,77],[86,90]],W:[[101,104],[106,110]],E:[[101,104],[106,110]]}};
+function reserve(B,info){
+  const {x0,y0,x1,y1}=RES,inR=(x,y)=>x>=x0&&x<=x1&&y>=y0&&y<=y1;
+  B.decor=B.decor.filter(d=>!inR(d.x,d.y));B.lights=B.lights.filter(l=>!inR(l[0],l[1]));
+  B.stairs=B.stairs.filter(r=>!r.cells.some(c=>inR(c[0],c[1])));B.nowhere=(B.nowhere||[]).filter(n=>!inR(n.x,n.y));
+  const wall=wc('a',1.7,0),gate=(x,y)=>{if(y===y0||y===y1){const g=RES.gates[y===y0?'N':'S'];return g.some(r=>x>=r[0]&&x<=r[1])}const g=RES.gates[x===x0?'W':'E'];return g.some(r=>y>=r[0]&&y<=r[1])};
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
+    if(conT(x,y))continue;const edge=x===x0||x===x1||y===y0||y===y1;
+    if(edge&&!gate(x,y)){Wl(B,x,y,wall,0);continue}
+    const av=x>=73&&x<=77;O(B,x,y,0,K.GROUND);fl(B,x,y,av?1:5)}
+  // gentle terraces
+  for(const [tx,ty] of [[58,112],[86,102],[86,112],[58,102]]){for(let j=0;j<5;j++)for(let i=0;i<5;i++)O(B,tx+i,ty+j,.26,K.TERRACE);for(let j=1;j<4;j++)for(let i=1;i<4;i++)O(B,tx+i,ty+j,.52,K.TERRACE);for(let j=0;j<5;j++)for(let i=0;i<5;i++)fl(B,tx+i,ty+j,1);decor(B,'hgt_fountain',tx+2,ty+2,{block:true,sc:1})}
+  // ponds
+  for(const [px,py] of [[64,105],[80,108]]){try{hgtlPool(B,px,py,8,6,{rim:0,shallow:1,deep:false,lamps:false});for(let j=0;j<6;j++)for(let i=0;i<8;i++)fl(B,px+i,py+j,3)}catch(e){console.error('res pool',e)}}
+  // trees, glowing plants, lamps
+  for(let y=y0+1;y<y1;y+=1)for(let x=x0+1;x<x1;x+=1){if(!isO(B,x,y)||(B.water&&B.water[y*W+x])||B.kind[y*W+x]===K.TERRACE||B.decor.some(d=>Math.abs(d.x-x)<2&&Math.abs(d.y-y)<2)||(x>=73&&x<=77))continue;
+    const r=hs(x,y,250);if(r<.045)plant(B,['willow','fairytree','giantcap','willow'][(r*400|0)%4],x,y,2+hs(x,y,251));else if(r<.1)plant(B,['crystalgrass','glowshrooms','bulbflower','shellflower','fern'][(r*500|0)%5],x,y,1.2);else if(r<.115)lampPost(B,x,y)}
+  for(const [x,y] of [[x0+1,y0+1],[x1-1,y0+1],[x0+1,y1-1],[x1-1,y1-1]])lampPost(B,x,y);
+  info.reserve={x0,y0,x1,y1,gates:RES.gates}}
 // life, pets and giants (specific ones; the automatic population stays)
 function lifeAndPets(B,info){
   const free=(x,y,r)=>freeNear(B,x,y,r||6);const L=[];
@@ -865,7 +885,7 @@ function lifeAndPets(B,info){
   _g.apply(this,arguments);if(id!==ID)return;try{
   const sp=(n,x,y,sc)=>hgtgSpawn(n,{x:x+.5,y:y+.5,level:ID,scale:sc,yaw:hs(x,y,190)*6.28});
   sp('hgtg_peacock',CON.cx+6,CON.cy-1,1);sp('hgtg_peacock_green',CON.cx+6,CON.cy+1,1);sp('hgtg_peacock_white',CON.cx+6,CON.cy,1);
-  sp('hgtg_bulk_mound',96,115,.9)}catch(e){console.error('hgt exsce giants',e)}}}}
+  }catch(e){console.error('hgt exsce giants',e)}}}}
 // focal points every 15 to 20 cells across the open ground, and hanging growth along the walls
 function focalPoints(B){
   const kinds=[['hgtb_deco_fountain',1.3,1],['hgtb_deco_shellstatue',1.3,1],['hgtb_deco_pearlplinth',1.3,1],['hgtb_deco_lanterns',1.2,1],['hgt_fountain',1.4,1],['hgt_cupola',1.5,1],['hgt_obelisk',1.3,1],['fairytree',2,0],['giantcap',1.8,0],['willow',1.6,0],['hgt_chime',1.4,0]];let n=0;

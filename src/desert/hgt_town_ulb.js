@@ -204,7 +204,7 @@ function build(id){
     const m=hgtzMaze(B,x,y,w,hh,Object.assign({base:h0,seed:x*7+y*3+n,tile:mazeTile(n),floor:opts.kind==='hedge'?4:3},opts));
     if(B.fm)for(let j=y;j<y+hh;j++)for(let i=x;i<x+w;i++){const v=B.fm[j*W+i];if(v)fm[I(i,j)]=String(v)}
     for(const [rx,ry] of (m.runner||[]))fm[I(rx,ry)]=String(m.runnerDigit);
-    mark(x-3,y-3,x+w+2,y+hh+2);hgtlName(B,x+(w>>1),y-1,name,'place');spots.mazes.push({name,x,y,w,h:hh,m,base:h0});return m};
+    mark(x-3,y-3,x+w+2,y+hh+2);if(!m.disabled)hgtlName(B,x+(w>>1),y-1,name,'place');spots.mazes.push({name,x,y,w,h:hh,m,base:h0});return m};
   const gmz=mazeAt(26,3,33,33,{kind:'tall',algo:'braid',wallH:5,braid:.5,reward:'view',secret:true,side:'S'},'The Grand Maze',0);
   mazeAt(104,14,21,21,{kind:'hedge',algo:'backtracker',reward:'creature',secret:true,side:'W'},'The Hedge Maze',1);
   mazeAt(126,26,19,19,{kind:'tube',algo:'prim',reward:'lamp',side:'W'},'The Tube Maze',2);
