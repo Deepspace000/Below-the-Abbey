@@ -1,6 +1,7 @@
 /* ==========================================================================
    THE HOLLOW GRASSLANDS, part two: the grassland itself (level 470), its five villages, the creatures on the hills, and the way in from the Hollow Land.
    ========================================================================== */
+const DIRS_HG=[[0,-1],[1,0],[0,1],[-1,0]];
 function hgBuild(){
   if(LEVELS[HG.ID])return;
   if(typeof KH_READY!=='undefined'&&!KH_READY)return;
@@ -34,8 +35,16 @@ function hgBuild(){
     for(let d=-R;d<=R;d++)for(const l of [-5,0,5]){for(const [x,y] of [[cx+l,cy+d],[cx+d,cy+l]])if(x>2&&y>2&&x<W-3&&y<H-3)fm[I(x,y)]='1'}
     for(const dx of [-1,0,1])for(const dy of [1,2,3])for(const sg of [-1,1])fm[I(cx+dx,cy+sg*(R+dy))]='1';
     for(const dx of [-1,0,1])for(const sg of [-1,1])fm[I(cx+dx,cy+sg*R)]='1';
-    for(let t=-R;t<=R;t++)for(const [x,y,gap] of [[cx+t,cy-R,Math.abs(t)<=1],[cx+t,cy+R,Math.abs(t)<=1],[cx-R,cy+t,false],[cx+R,cy+t,false]]){if(gap)continue;used.add(K(x,y));decor.push({k:'hg_palisade',x,y,block:true,sc:1,ox:(hs(x,y,sd+20)-.5)*.3})}
+    const CITY=(typeof HGTCITIES!=='undefined')?HGTCITIES[HG_TOWNS[ti].k]:null; // a town with a real terraced city: its wall is closed and its gates lead into the city level
+    for(let t=-R;t<=R;t++)for(const [x,y,gap] of [[cx+t,cy-R,!CITY&&Math.abs(t)<=1],[cx+t,cy+R,!CITY&&Math.abs(t)<=1],[cx-R,cy+t,false],[cx+R,cy+t,false]]){if(gap)continue;used.add(K(x,y));decor.push({k:'hg_palisade',x,y,block:true,sc:1,ox:(hs(x,y,sd+20)-.5)*.3})}
     for(const [x,y] of [[cx-2,cy-R-1],[cx+2,cy-R-1],[cx-2,cy+R+1],[cx+2,cy+R+1],[cx-2,cy-R+1],[cx+2,cy-R+1],[cx-2,cy+R-1],[cx+2,cy+R-1]]){decor.push({k:'hg_lamp',x,y,block:false,walk:true,deco:true});lights.push([x,y]);used.add(K(x,y))}
+    if(CITY){ // the gates: each way out of the city on level 470 is a pale shell gate with a lamp either side; walking into it enters the city
+      const exits=[CITY.exitDoor,CITY.exitDoorNorth,CITY.exitDoorSouth].filter(e=>e&&e.at);
+      for(const e of exits){const f=e.at.f,gx=e.at.x-DIRS_HG[f][0],gy=e.at.y-DIRS_HG[f][1],south=e.at.y>cy;
+        const arr=south?(CITY.entry&&CITY.entry.y>75?CITY.entry:{x:e.x,y:e.y-1,f:0}):(CITY.entryNorth||CITY.entry&&CITY.entry.y<75&&CITY.entry||{x:e.x,y:e.y+1,f:2});
+        used.add(K(gx,gy));decor.push({k:'hg_arch',x:gx,y:gy,block:true,sc:1.8,enter:{to:CITY.level,x:arr.x,y:arr.y,f:arr.f}});
+        for(const sx of [-2,2]){const lx=gx+(f%2===0?sx:0),ly=gy+(f%2===1?sx:0);decor.push({k:'hg_lamp',x:lx,y:ly,block:false,walk:true,deco:true});lights.push([lx,ly]);used.add(K(lx,ly))}}
+      return}
     // houses in the blocks between the lanes, apart from the four round the little square
     for(const bx of [-8,-3,2,7])for(const by of [-8,-3,2,7]){
       if((bx===-3||bx===2)&&(by===-3||by===2))continue;
@@ -90,7 +99,7 @@ function hgBuild(){
 KH_LAZY[HG.ID]=hgBuild;HG.HIVES.forEach((id,i)=>{KH_LAZY[id]=()=>{hgBuild();hgHive(i)}});
 /* the way in is the portal at the top of the Orange Spire (hollowgrass_story.js), once the last ruler is dead; the spiked gate in the south leads back out onto the high ledge of the Hollow Land */
 /* the cold: a blue-grey grade over the whole view, bands of mist drifting along the horizon, and a few pale motes of light that hang in the air */
-{const _w=drawWeatherFx;drawWeatherFx=function(){_w.apply(this,arguments);if(LEVEL!==HG.ID&&!hgtLook(LEVEL))return;
+{const _w=drawWeatherFx;drawWeatherFx=function(){_w.apply(this,arguments);if(LEVEL!==HG.ID)return; // the terraced cities have their own air (hgt_engine.js)
   const t=G.time||0;ctx.save();
   ctx.globalCompositeOperation='multiply';ctx.globalAlpha=.62;ctx.fillStyle='rgb(150,184,228)';ctx.fillRect(0,0,420,210);
   ctx.globalCompositeOperation='screen';ctx.globalAlpha=1;ctx.fillStyle='rgba(60,92,134,.07)';ctx.fillRect(0,0,420,210);

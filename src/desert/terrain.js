@@ -188,6 +188,7 @@ const THN=24,THX=new Int16Array(THN),THC=new Int16Array(THN),THS=new Uint8Array(
 // one screen column: walks the grid, paints the ground, and lists the walls that can be seen (nearest first) in TH*; returns how many
 function terrTerrace(x,rX,rY){
   const T=TERR_NOW,W=T.W,Hh=T.H,h=T.h,sh=T.s,C=TC,D=C.D,cx=C.cx,cy=C.cy,cz=CAMZ,grid=G.grid,fm=C.fmp,fds=C.fds,hz=C.hzr,hzmax=C.hzmax,hzrate=C.hzrate,lbm=C.lbm,nl=C.nl,nn=C.nn,tbR=C.tbR,tbG=C.tbG,tbB=C.tbB,ttR=C.ttR,ttG=C.ttG,ttB=C.ttB,HHv=HH,Fv=F,TSv=TS,TSm=TS-1;
+  const HK=C.HLK,FG=HK?HK.floorGain:1,FC=HK?HK.floorContrast:1,FP=HK?HK.floorPivot:0,FT=HK?HK.floorTint:null,FT0=HK?FT[0]:1,FT1=HK?FT[1]:1,FT2=HK?FT[2]:1,RG=HK?HK.riserGain:1,FS=HK?HK.floorSat:1; // the look of a city (HGTE.look): floors read as stone, risers and stair edges are clear
   const rl=Math.hypot(rX,rY),base=x*YBK;
   let mx=Math.floor(cx),my=Math.floor(cy);
   const ddx=Math.abs(1/rX),ddy=Math.abs(1/rY);
@@ -212,13 +213,14 @@ function terrTerrace(x,rX,rY){
           let rtd=null,rth=TSv;{const rg=(T.rg&&T.rg[i])||T.riser,tt=rg?T_TILE[rg]:undefined,tx=tt!==undefined?TEX[tt]:null;if(tx&&tx.d){rtd=tx.d;rth=tx.h||TSv}} // the face of a step has its own wall picture when the level gives one
           const px=cx+rX*tIn,py=cy+rY*tIn,along=side===0?py:px,u=((along-Math.floor(along))*TSv)&TSm,dist=tIn*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv;
           let lt=0;for(let k=0;k<nn;k+=3){const ax=px-nl[k],ay=py-nl[k+1];lt+=nl[k+2]/(1+1.15*(ax*ax+ay*ay+.44))}
-          const lb=Math.max(baseL(dist),lbm),sk=(lb*.55+lt*.45+.05)*smv,rs=side===0?(stx>0?.9:.58):(sty>0?1:.68),kR=(lb*tbR+lt*ttR)*rs,kG=(lb*tbG+lt*ttG)*rs,kB=(lb*tbB+lt*ttB)*rs;
+          const lb=Math.max(baseL(dist),lbm),sk=(lb*.55+lt*.45+.05)*smv,rs=side===0?(stx>0?.9:.58):(sty>0?1:.68),kR=(lb*tbR+lt*ttR)*rs*RG,kG=(lb*tbG+lt*ttG)*rs*RG,kB=(lb*tbB+lt*ttB)*rs*RG;
           let o=(ys*VW+x)*4;
           for(let y=ys;y<ye;y++,o+=VW*4){
             const z=cz-(y+.5-HHv)*tIn/Fv;let v=((hc-z)*TSv)|0,td=fdd;
             if(rtd){v=v%rth;td=rtd}else v&=TSm;
-            const ti=(v*TSv+u)*4;
-            D[o]=td[ti]*kR*iv+hz[0]*sk;D[o+1]=td[ti+1]*kG*iv+hz[1]*sk;D[o+2]=td[ti+2]*kB*iv+hz[2]*sk;
+            const ti=(v*TSv+u)*4;let ek=1;
+            if(HK){const dn=z-hprev,up=hc-z;ek=dn<HK.edgeW?HK.footAO+(1-HK.footAO)*dn/HK.edgeW:up<.05?HK.lipGain:1} // the foot of a riser is in shadow and its top edge catches the light, so every step reads
+            D[o]=td[ti]*kR*ek*iv+hz[0]*sk;D[o+1]=td[ti+1]*kG*ek*iv+hz[1]*sk;D[o+2]=td[ti+2]*kB*ek*iv+hz[2]*sk;
           }
         }
         if(yTop<yb)yb=yTop;
@@ -227,11 +229,16 @@ function terrTerrace(x,rX,rY){
         const k1=(cz-hc)*Fv,yFar=HHv+k1/tOut,yNear=HHv+k1/Math.max(tIn,.001),ys=Math.max(0,Math.ceil(yFar)),ye=Math.min(Math.ceil(yb),Math.ceil(yNear),VH);
         if(ye>ys){
           let o=(ys*VW+x)*4;
+          const stUp=HK&&!first&&hprev>-1e8&&hc>hprev+.02,stDn=HK&&!first&&hprev>-1e8&&hc<hprev-.02,lipT=HK?HK.lipW*(side===0?ddx:ddy):0,aoT=HK?HK.aoW*(side===0?ddx:ddy):0;
           for(let y=ys;y<ye;y++,o+=VW*4){
             const t=k1/(y+.5-HHv),px=cx+rX*t,py=cy+rY*t,u=(((px-mx)*TSv)|0)&TSm,v=(((py-my)*TSv)|0)&TSm,ti=(v*TSv+u)*4,dist=t*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv;
             let lt=0;for(let k=0;k<nn;k+=3){const ax=px-nl[k],ay=py-nl[k+1];lt+=nl[k+2]/(1+1.15*(ax*ax+ay*ay+.44))}
             const lb=Math.max(baseL(dist),lbm),sk=(lb*.55+lt*.45+.05)*smv,kR=(lb*tbR+lt*ttR)*cellShade,kG=(lb*tbG+lt*ttG)*cellShade,kB=(lb*tbB+lt*ttB)*cellShade;
-            D[o]=fdd[ti]*kR*iv+hz[0]*sk;D[o+1]=fdd[ti+1]*kG*iv+hz[1]*sk;D[o+2]=fdd[ti+2]*kB*iv+hz[2]*sk;
+            if(HK){ // stone, not snow: darker, more contrast, a little colour; the tread edge of a step up is a light lip, the tread under a step down is in shadow
+              const te=t-tIn,ek=(stUp&&te<lipT)?HK.lipGain:(stDn&&te<aoT)?HK.footAO:1,a=(fdd[ti]-FP)*FC+FP,b=(fdd[ti+1]-FP)*FC+FP,c=(fdd[ti+2]-FP)*FC+FP,gk=FG*ek;let a2=a,b2=b,c2=c;if(FS!==1){const lm=a*.3+b*.59+c*.11;a2=lm+(a-lm)*FS;b2=lm+(b-lm)*FS;c2=lm+(c-lm)*FS}
+              D[o]=a2*FT0*gk*kR*iv+hz[0]*sk;D[o+1]=b2*FT1*gk*kG*iv+hz[1]*sk;D[o+2]=c2*FT2*gk*kB*iv+hz[2]*sk;
+            }else{
+            D[o]=fdd[ti]*kR*iv+hz[0]*sk;D[o+1]=fdd[ti+1]*kG*iv+hz[1]*sk;D[o+2]=fdd[ti+2]*kB*iv+hz[2]*sk;}
           }
         }
         if(yFar<yb)yb=yFar;

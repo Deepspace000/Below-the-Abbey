@@ -51,7 +51,7 @@ const HGTE={cold:new Set(),builders:{}};
 const hgtAny=n=>(n>=480&&n<=489)||(n>=4850&&n<=4949);
 const hgtLook=n=>hgtAny(n)||HGTE.cold.has(n); // the look of level 470 (the cold cavern) without being level 470
 const hgtIsTown=n=>n>=480&&n<=489;
-function hgtPrep(){ohAlias();oqAlias();ohArt();ohFloors();ohStyles();isleFloors()}
+function hgtPrep(){hgtPanoLoad();ohAlias();oqAlias();ohArt();ohFloors();ohStyles();isleFloors()}
 function hgtRegister(id,build){
   HGTE.builders[id]=build;
   KH_LAZY[id]=()=>{
@@ -65,6 +65,55 @@ function hgtRegister(id,build){
     LEVELS[id]=L;LEVEL_NAMES[id]=L.name;if(LEVEL_RATING[id]===undefined)LEVEL_RATING[id]=(typeof HG!=='undefined'?HG.DIFF:66);
   };
 }
+/* ---------- THE LOOK OF THE CITIES (renderer settings per level) ----------
+   Every hgtLook level (480..489, 4850..4949 and HGTE.cold ids) is drawn with HGTE.lookDefaults. A city or an interior tunes its own look with
+        HGTE.look[483]={haze:.3,hazeCol:[60,50,120]};      // only the keys you name change; the rest stay at the default. Call it at file load.
+   Keys (all optional):
+     ambient       0..1   base light level (the old level.amb is ignored for the look). Lower = moodier, lamps stand out more. default .56
+     haze          0..1   strongest haze mix reached far away. default .42           hazeRate  haze per cell of distance. default .02
+     hazeCol       [r,g,b] 0..255 colour of the far air (deep violet-teal, never white). default [150,122,206]     roofHaze  same for the roof
+     tint          [r,g,b] multipliers of the cool ambient light. default [.95,1,1.1]
+     lamp          [r,g,b] colour multipliers of lamp light (lights list, hg_lamp); warm amber against the cool ambient. default [1,.75,.4]
+     wallGain      brightness of walls (1 = painting as is). default .8     wallSat  colour saturation of walls, keeps pink/aqua/cream. default 1.6
+     wallAO        0..1   darkness at the foot of every wall. default .3
+     floorGain     brightness of floors and step treads. default .7        floorContrast  texture contrast. default 1.7     floorPivot  grey it pivots on. default 130
+     floorTint     [r,g,b] multipliers. default [1,.95,.98]                  floorSat  floor colour saturation (1 = as painted). default 1.3
+     riserGain     brightness of step risers (the vertical face). default .8
+     lipGain / lipW   brightness and depth (cells) of the light edge on the tread of a step up. default 1.5 / .09
+     footAO / edgeW   darkness and size (cells) of the shadow at the foot of a riser and under a step down. default .5 / .12
+     roofGain      brightness of the rock roof. default .65                   roofTint [r,g,b]. default [.8,.85,1.25]
+     starMask      far points of light in the roof: 511 = sparse, 255 = many, 4095 = very few.    starGain  their brightness. default .9
+     motes         number of drifting light motes in the air (0 = none). default 46      moteCol  [r,g,b] default [255,226,170]
+     pano          1 = paint the far skyline panorama behind the terrain (0 = plain dark roof). panoGain brightness, panoTint [r,g,b], panoDrift slow drift in pixels per second. defaults 1 / 1 / [1,1,1] / 2
+     vignette      0..1   darkening of the view corners. default .4          grade  [r,g,b,alpha] multiply overlay colour over the whole view. default [255,244,252,.18]
+*/
+HGTE.look={};
+HGTE.lookDefaults={ambient:.56,haze:.42,hazeRate:.02,hazeCol:[150,122,206],roofHaze:[60,50,110],tint:[.95,1,1.1],lamp:[1.0,.75,.4],wallGain:.8,wallSat:1.6,wallAO:.3,
+  floorGain:.7,floorContrast:1.7,floorPivot:130,floorTint:[1,.95,.98],floorSat:1.3,riserGain:.8,lipGain:1.5,lipW:.09,footAO:.5,edgeW:.12,roofGain:.65,roofTint:[.8,.85,1.25],
+  starMask:511,starGain:.9,motes:46,moteCol:[255,226,170],vignette:.4,grade:[255,244,252,.18],pano:1,panoGain:1,panoTint:[1,1,1],panoDrift:2};
+/* the painted far skyline (assets/hgt_pano.jpg, a seamless panorama of far towers with lit windows under the cavern roof). It replaces the roof and the empty far ground on terraced levels. */
+HGTE.pano=null;
+function hgtPanoLoad(){if(HGTE._pl)return;HGTE._pl=1;const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);HGTE.pano={w:im.width,h:im.height,d:x.getImageData(0,0,im.width,im.height).data,hr:190,rs:1.2}};im.src='assets/hgt_pano.jpg'}
+function hgtPanoPaint(D,dX,dY,pX,pY,K,t){
+  const P=HGTE.pano,w=P.w,h=P.h,d=P.d,g=K.panoGain,tr=K.panoTint[0]*g,tg=K.panoTint[1]*g,tb=K.panoTint[2]*g,off=t*K.panoDrift,rows=new Int32Array(VH);
+  for(let y=0;y<VH;y++){let r=(P.hr+(y-HH)*P.rs)|0;rows[y]=(r<0?0:r>=h?h-1:r)*w}
+  for(let x=0;x<VW;x++){const cm=2*x/VW-1,u=((((Math.atan2(dY+pY*cm,dX+pX*cm)/TAU)%1)+1)%1*w+off)%w|0;
+    for(let y=0,o=x*4;y<VH;y++,o+=VW*4){const i=(rows[y]+u)*4;D[o]=d[i]*tr;D[o+1]=d[i+1]*tg;D[o+2]=d[i+2]*tb}}
+}
+const hgtLookMem={};
+function hgtLookFor(id){const o=HGTE.look[id]||null,m=hgtLookMem[id];if(m&&m.o===o&&m.rev===(o&&o._rev||0))return m.v;const v=Object.assign({},HGTE.lookDefaults,o||{});hgtLookMem[id]={o,rev:o&&o._rev||0,v};return v} // cached; set look._rev++ after editing a look object in place
+/* the air of a city: soft grade, vignette, and drifting motes of warm light (particles, drawn over the 3D view) */
+{const _w=drawWeatherFx;drawWeatherFx=function(){_w.apply(this,arguments);if(!hgtLook(LEVEL))return;
+  const K=hgtLookFor(LEVEL),t=G.time||0;ctx.save();
+  if(K.grade[3]>0){ctx.globalCompositeOperation='multiply';ctx.globalAlpha=K.grade[3];ctx.fillStyle='rgb('+K.grade[0]+','+K.grade[1]+','+K.grade[2]+')';ctx.fillRect(0,0,420,210)}
+  ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;
+  if(K.vignette>0){if(!hgtLook.vg){const c=document.createElement('canvas');c.width=420;c.height=210;const x=c.getContext('2d'),g=x.createRadialGradient(210,105,70,210,105,260);g.addColorStop(0,'rgba(8,4,24,0)');g.addColorStop(.6,'rgba(8,4,24,.35)');g.addColorStop(1,'rgba(8,4,24,1)');x.fillStyle=g;x.fillRect(0,0,420,210);hgtLook.vg=c}
+    ctx.globalAlpha=K.vignette;ctx.drawImage(hgtLook.vg,0,0);ctx.globalAlpha=1}
+  if(K.motes>0){ctx.globalCompositeOperation='lighter';const mc=K.moteCol;
+    for(let i=0;i<K.motes;i++){const sp=.6+(i%5)*.35,x=((i*89.3+t*(2+i%4)+Math.sin(t*.5*sp+i)*9)%440+440)%440-10,y=((i*47.7+t*(1.5+(i%3))*(i%2?-1:1)+Math.cos(t*.4*sp+i*2)*7)%230+230)%230-10,tw=.35+.65*Math.max(0,Math.sin(t*(1.1+i%4*.5)+i*1.7)),r=.6+(i%4)*.45;
+      ctx.fillStyle='rgba('+mc[0]+','+mc[1]+','+mc[2]+','+(.5*tw).toFixed(3)+')';ctx.fillRect(x,y,r,r);
+      if(i%6===0){ctx.fillStyle='rgba('+mc[0]+','+mc[1]+','+mc[2]+','+(.09*tw).toFixed(3)+')';ctx.fillRect(x-1.4,y-1.4,r+2.8,r+2.8)}}}
+  ctx.restore()}}
 /* plain placeholder tiles: a flat colour (the art agent supplies the painted shell textures later) */
 function hgtTex(wh,rgb,door){
   const Hp=Math.round(128*wh),d=new Uint8ClampedArray(128*Hp*4);
