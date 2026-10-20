@@ -33,7 +33,7 @@ for p in imgs:
     if size + s > LIMIT: flush()
     cur.append(p); size += s
 flush()
-json.dump({'packs': packs, 'files': idx}, open(os.path.join(OUT, 'pack.json'), 'w'))
+json.dump({'packs': packs, 'sizes': [os.path.getsize(os.path.join(OUT, n)) for n in packs], 'files': idx}, open(os.path.join(OUT, 'pack.json'), 'w'))
 # the audio and the manifest stay as they are
 for r, d, f in os.walk(os.path.join(ROOT, 'assets')):
     for x in f:
@@ -42,12 +42,7 @@ for r, d, f in os.walk(os.path.join(ROOT, 'assets')):
         rel = os.path.relpath(p, ROOT)
         os.makedirs(os.path.dirname(os.path.join(OUT, rel)), exist_ok=True)
         shutil.copy2(p, os.path.join(OUT, rel))
-SHIM = """<script>(function(){var map={},ready=false,q=[];var d=Object.getOwnPropertyDescriptor(HTMLImageElement.prototype,'src');
-function norm(v){if(typeof v!=='string')return null;var s=v.split('?')[0].split('#')[0],i=s.indexOf('assets/');return i>=0?s.slice(i):null}
-Object.defineProperty(HTMLImageElement.prototype,'src',{configurable:true,enumerable:true,get:function(){return d.get.call(this)},set:function(v){var k=norm(v);if(!k||k.indexOf('assets/audio/')===0){d.set.call(this,v);return}if(!ready){q.push([this,v,k]);return}d.set.call(this,map[k]||v)}});
-function go(){ready=true;for(var i=0;i<q.length;i++)d.set.call(q[i][0],map[q[i][2]]||q[i][1]);q=[]}
-fetch('pack.json').then(function(r){return r.json()}).then(function(P){var bl=[];var tot={},got={};function prog(){var T=0,D=0;for(var k in tot){T+=tot[k];D+=got[k]||0}if(!T)return;var pc=Math.max(3,Math.min(97,Math.round(D/T*100)));var f=document.getElementById('ldfill');if(f)f.style.width=pc+'%';var nn=document.getElementById('ldnote');if(nn)nn.innerHTML='Downloading the pictures: '+Math.round(D/1048576)+' of '+Math.round(T/1048576)+' MB. This only happens once, please wait.'}return Promise.all(P.packs.map(function(n,i){return new Promise(function(res,rej){var x=new XMLHttpRequest();x.open('GET',n);x.responseType='blob';x.onprogress=function(e){if(e.lengthComputable){tot[i]=e.total;got[i]=e.loaded;prog()}};x.onload=function(){if(x.status>=200&&x.status<300){bl[i]=x.response;res()}else rej(new Error('download failed: '+n+' '+x.status))};x.onerror=function(){rej(new Error('download failed: '+n))};x.send()})})).then(function(){for(var k in P.files){var f=P.files[k];map[k]=URL.createObjectURL(bl[f[0]].slice(f[1],f[1]+f[2],f[3]))}go()})}).catch(function(e){console.error('pack',e);go()});
-})();</script>"""
+SHIM = '<script>' + open(os.path.join(ROOT, 'tools', 'itch_shim.js'), encoding='utf-8').read() + '</script>'
 html = open(os.path.join(ROOT, 'index.html'), encoding='utf-8', newline='').read()
 i = html.index('<head>') + len('<head>')
 html = html[:i] + SHIM + html[i:]
