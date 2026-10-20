@@ -252,16 +252,27 @@ function stoneBtn(id,label,x,y,w,h){btnText(id,label,x,y,w,h)}
 {const _tx=txt;txt=function(s,x,y,size,col,align,bold,font,maxW){
   if(STB.hf&&!font&&bold&&size>=12&&align==='center'&&col==='#d8c88e'){font=STB.hf;if(!maxW)maxW=400}
   return _tx.call(this,s,x,y,size,col,align,bold,font,maxW)}}
-/* the two switches on the Gameplay page: Button style and Button font (both cycle, both are kept in the save flags and remembered for new games) */
+/* the two switches on the Graphics page: Button style and Button font (both cycle, both are kept in the save flags and remembered for new games) */
 function stbGameplayRows(y,h,step){
   const S=stbWantStyle(),Fo=stbWantFont(),L=stbStyleNames(),si=L.indexOf(S)+1,fi=STB_FONTS.indexOf(Fo)+1;
-  txt('Button style  '+si+'/'+L.length,84,y+h/2,8.6,'#d8c9a0','left',false,undefined,96);
+  txt('Button style  '+si+'/'+L.length,104,y+h/2,8.6,'#d8c9a0','left',false,undefined,78);
   btnText('gp_sprev','<',184,y,24,h);btnText('gp_style',stbStyleLabel(S),212,y,122,h);btnText('gp_snext','>',338,y,24,h);
-  txt('Button font  '+fi+'/'+STB_FONTS.length,84,y+step+h/2,8.6,'#d8c9a0','left',false,undefined,96);
+  txt('Button font  '+fi+'/'+STB_FONTS.length,104,y+step+h/2,8.6,'#d8c9a0','left',false,undefined,78);
   btnText('gp_fprev','<',184,y+step,24,h);btnText('gp_font',Fo.n,212,y+step,122,h);btnText('gp_fnext','>',338,y+step,24,h)}
+/* the Graphics page with the two button switches added under the screen settings */
+function drawGfx(){
+  BTNS=[];veil(.6);bigPanel(90,6,300,308);
+  txt('GRAPHICS',240,22,14,'#d8c88e','center',true);
+  const rows=[['dither','Dithering'],['scan','Scanlines'],['color','Colour'],['sharp','Sharpening'],['bright','Brightness']],P=26,H=22;
+  rows.forEach(([k,l],i)=>{const y=34+i*P;txt(l,104,y+H/2,9,'#d8c9a0','left');btnText('g_'+k,GFX_NAMES[k][GFX[k]],200,y,176,H)});
+  txt('CRT screen (glow, curved glass)',104,34+5*P+H/2,9,'#d8c9a0','left');btnText('g_crt',G.crt?'On':'Off',290,34+5*P,86,H);
+  stbGameplayRows(34+6*P+4,H,P);
+  btnText('g_back','Back',170,34+8*P+8,140,24);
+  btn('menuclose2',0,0,DW,DH);BTNS.unshift(BTNS.pop());
+}
 function stbRemember(){try{localStorage.setItem('bta_buttons',JSON.stringify(STB.ls))}catch(e){}}
 {const _hb=handleBtn;handleBtn=function(id){
-  if(G.menu==='gameplay'&&/^gp_(style|font|sprev|snext|fprev|fnext)$/.test(id)){
+  if(G.menu==='gfx'&&/^gp_(style|font|sprev|snext|fprev|fnext)$/.test(id)){
     if(!G.flags)G.flags={};
     if(id==='gp_style'||id==='gp_sprev'||id==='gp_snext'){
       const L=stbStyleNames(),d=id==='gp_sprev'?-1:1,n=L[(L.indexOf(stbWantStyle())+d+L.length)%L.length];
