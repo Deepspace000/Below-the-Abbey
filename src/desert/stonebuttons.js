@@ -16,7 +16,7 @@
    filigreegold|tapered|sandstone|stone|round|brick and ?font=cinzel|... in the address. Names start with stb.
    ========================================================================== */
 const STB={styles:{},cache:new Map(),lab:new Map(),sc:{},lv:{},fl:[],mx:-99,my:-99,dx:-99,dy:-99,down:false,pt:'mouse',noise:null,sel:null,err:0,hf:null,last:null,scanA:.4,defer:true};
-const STB_DEFAULT_STYLE='gold',STB_DEFAULT_FONT='imfell';
+const STB_DEFAULT_STYLE='ruby',STB_DEFAULT_FONT='imfell';
 /* the lettering faces (all Google Fonts, loaded by the <link> in the head); s evens out their sizes, w is the weight used for the iron letters, y nudges them up or down */
 const STB_FONTS=[
   {k:'imfell',f:"'IM Fell English SC'",n:'IM Fell English SC',s:1,w:'',y:0,ls:.07},
