@@ -9,3 +9,5 @@ manual/_pass*.pdf
 manual/book.html
 manual/__pycache__/
 manual/_preview_*.html
+
+itch-manual/
