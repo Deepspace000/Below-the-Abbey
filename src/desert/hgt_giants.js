@@ -113,7 +113,7 @@ function gGait(S,st,bodyZ,l,n){
   const wk=st.walk,ph=st.phase,L=S.L;
   for(const g of S.legs){
     const fo=hgtmFoot(ph+g.ph,S.A*wk,S.H*wk,S.beta),fx=g.sx,fy=g.sy+fo[0],dx=fx-g.hx,dy=fy-g.hy,f=Math.hypot(dx,dy),yaw=Math.atan2(-dx,dy),dr=bodyZ+g.hz-(fo[1]+L[2]+S.ankle),ik=hgtmIK2(L[0],L[1],f,dr,S.bend);
-    l[g.id]=[ik[0],ik[1],-(ik[0]+ik[1])];n[g.hip]={r:[0,0,yaw]};if(g.foot)n[g.foot]={p:[fx,fy,fo[1]+S.fz-bodyZ],r:[0,0,yaw]};
+    l[g.id]=S.five?[ik[0],0,ik[1],0,-(ik[0]+ik[1])]:[ik[0],ik[1],-(ik[0]+ik[1])];n[g.hip]={r:[0,0,yaw]};if(g.foot)n[g.foot]={p:[fx,fy,fo[1]+S.fz-bodyZ],r:[0,0,yaw]};
   }
 }
 
@@ -126,12 +126,12 @@ function gStiltDef(name,o){
   const nl=o.legs||4,hh=7.4,L=[4.2,4.6,.45],ys=nl===4?[.6,-.6]:[.9,0,-.9],legs=[],kids=[];
   const ph4={'-1_0':0,'1_0':.5,'-1_1':.75,'1_1':.25},ph6=(side,i)=>(side<0?[2,1,0][i]/6:[5,4,3][i]/6);
   for(let i=0;i<nl/2;i++)for(const side of[-1,1])legs.push({id:'L'+legs.length,hip:'hip'+legs.length,foot:'ft'+legs.length,hx:side*.46*K,hy:ys[i]*K,hz:-.28*K,sx:side*3.2,sy:ys[i]*3.6,ph:nl===4?ph4[side+'_'+i]:ph6(side,i)});
-  const S={legs,L,bend:o.bend||1,A:1.3,H:1.1,beta:nl===4?.75:.8333,ankle:0,fz:.05};
+  const S={legs,L,bend:o.bend||1,A:1.3,H:1.1,beta:nl===4?.75:.8333,ankle:0,fz:.05,five:true};
   const body=[{t:'ell',c:[0,.35,0],r:[.74,1.12,.64],seg:[12,8],tex:o.skin,col:o.col,uv:[2,2],glow:.3},{t:'ell',c:[0,-.85,-.04],r:[.58,1.0,.54],rot:[.18,0,0],seg:[10,6],tex:o.skin,col:o.col,uv:[2,2],glow:.3},
     {t:'ell',c:[0,.0,.36],r:[.46,1.1,.22],seg:[10,5],tex:'art_tex_hgtb_stilt_armour',col:o.plate,uv:[2,1]}];
   for(let k=0;k<5;k++)body.push({t:'ell',c:[0,.9-k*.45,.4+(k%2?.0:.04)],r:[.09,.13,.11],seg:[6,4],col:o.plate});
   const bodyS=gScl(body,K);
-  for(const g of legs)kids.push({id:g.hip,pos:[g.hx,g.hy,g.hz],parts:[{t:'limb',id:g.id,len:L,rad:[.4,.5,.2,.1],col:o.leg,tex:'art_tex_hgtb_stilt_leg',sides:nl===6?5:6,glow:.4}]},
+  for(const g of legs)kids.push({id:g.hip,pos:[g.hx,g.hy,g.hz],parts:[{t:'limb',id:g.id,len:[L[0]/2,L[0]/2,L[1]/2,L[1]/2,L[2]],rad:[.36,.34,.17,.15,.1,.07],col:o.leg,tex:'art_tex_hgtb_stilt_leg',sides:nl===6?4:5,glow:.4}]},
     {id:g.foot,pos:[0,0,0],parts:[{t:'ell',c:[0,.1,0],r:[.45,.62,.12],seg:[8,5],tex:'art_tex_hgtb_scales',col:o.leg},{t:'ell',c:[-.2,.7,0],r:[.08,.24,.06],rot:[0,0,.3],seg:[4,3],col:[250,240,215]},{t:'ell',c:[0,.76,0],r:[.08,.26,.06],seg:[4,3],col:[250,240,215]},{t:'ell',c:[.2,.7,0],r:[.08,.24,.06],rot:[0,0,-.3],seg:[4,3],col:[250,240,215]}]});
   const hc=[0,.15*K,0],hr=[.33*K,.48*K,.3*K],eyeNodes=[],er=(o.eyeR||.27)*K;
   for(const sd of[-1,1]){const x=sd*.28*K,z=.08*K,y=gSurf(hc,hr,x,z),p=[x,y,z];eyeNodes.push(gEye(sd<0?'eL':'eR',p,er*1.1,o.eye,gNormRot(hc,hr,p),{bulge:er*.8,lip:o.lip,seg:12,rings:4,eg:.55}))}
@@ -175,10 +175,14 @@ function gWarts(R,bc,br,n,col,tex,rmin,rmax,zmin){
 }
 function gBulkDef(name,o){
   o.eyes.forEach(e=>{e.r*=1.4;e.x*=1.15});
+  {const kz=o.tall||1.25,kx=o.narrow||.78;o.bc=[o.bc[0],o.bc[1],o.bc[2]*kz];o.br=[o.br[0]*kx,o.br[1]*kx,o.br[2]*kz];o.eyes.forEach(e=>{e.x*=kx;e.z*=kz});if(o.mouth)o.mouth.z*=kz;o.armZ*=kz;o.armX*=kx;if(o.armY)o.armY*=kx;
+    if(o.extra)o.extra=o.extra.map(p=>{const q=Object.assign({},p);if(q.c)q.c=[q.c[0]*kx,q.c[1]*kx,q.c[2]*kz];if(Array.isArray(q.r))q.r=[q.r[0]*kx,q.r[1]*kx,q.r[2]*kz];return q});
+    if(o.kids)o.kids=o.kids.map(k=>Object.assign({},k,{pos:[k.pos[0]*kx,k.pos[1]*kx,k.pos[2]*kz]}));
+    if(o.legs){o.L=[o.L[0]*kz,o.L[1]*kz,o.L[2]];o.legX*=kx;o.legY*=kx;o.stX*=kx;o.legZ*=kz}if(o.tail)o.tail=Object.assign({},o.tail,{pos:[o.tail.pos[0],o.tail.pos[1]*kx,o.tail.pos[2]*kz]})}
   const bz0=o.bc[2],R=hgtgR(o.seed||3),bc=o.bc,br=o.br,kids=[],legs=[],S=o.legs?{legs,L:o.L,bend:1,A:o.A||.9,H:.7,beta:o.legs===4?.75:.6,ankle:0,fz:.05}:null;
   const col=o.col,skin=o.skin;
-  const parts=[{t:'ell',c:bc,r:br,seg:[14,10],tex:skin,col,uv:[1,1],texMax:512}].concat(o.extra||[]);
-  if(o.face){const ez=o.eyes.reduce((s,e)=>s+e.z,0)/o.eyes.length,fw=br[0]*2.05,zc=ez-fw*.1;parts.push({t:'quad',c:[0,gSurf(bc,br,0,zc)+.12,zc],size:[fw,fw*.9],piv:[.5,.5],tex:'hgtb_bulk_face_'+o.face,alpha:true,col:[255,255,255],glow:.2,texMax:512});o.eyes.forEach(e=>e.r*=.04)}
+  const parts=[{t:'ell',c:bc,r:br,seg:[18,12],tex:skin,col,uv:[1,1],texMax:512}].concat(o.extra||[]);
+  if(o.face){const ez=o.eyes.reduce((s,e)=>s+e.z,0)/o.eyes.length,fw=br[0]*2.7,zc=ez-fw*.1;parts.push({t:'quad',c:[0,gSurf(bc,br,0,zc)+.12,zc],size:[fw,fw*.9],piv:[.5,.5],tex:'hgtb_bulk_face_'+o.face,alpha:true,col:[255,255,255],glow:.2,texMax:512});o.eyes.forEach(e=>e.r*=.04)}
   parts.push(...gWarts(R,bc,br,o.warts||6,o.wart||[255,235,225],skin,.22,.5,.05));
   gBulkEyes(bc,br,o.eyes,skin,col,kids);
   if(o.mouth){const m=o.mouth,y=gSurf(bc,br,m.x||0,m.z);parts.push({t:'ell',c:[m.x||0,y-.04,m.z],r:[m.w,.3,m.h],seg:[12,6],col:[100,45,80],rot:gNormRot(bc,br,[m.x||0,y,m.z])})}
@@ -318,15 +322,14 @@ function gPeacockDef(name,o){
   kids.push({id:'tail',pos:[0,-.42,.02],rot:[1.25,0,0],parts:[
     {t:'fan',c:[0,0,0],n:15,layers:2,len:1.35,wid:.45,base:.03,spread:2.4,tex:o.fa,vcol:[[150,180,170],[255,255,255],[255,255,255]],col:[255,255,255],shimmer:[.03,2],tag:'sh'},
     {t:'fan',c:[0,-.025,0],n:13,layers:1,len:1.2,wid:.4,base:.03,spread:2.2,tex:o.fb,vcol:[[150,180,170],[255,255,255],[255,255,255]],col:[255,255,255],shimmer:[.03,2.4],tag:'sh'},
-    {t:'fan',c:[0,-.05,0],n:9,layers:1,len:1.55,wid:.16,base:.02,spread:2.0,tex:'hgtb_feather_iridescent',col:o.back||[140,230,200],shimmer:[.04,1.6]}]},
-    {id:'tailq',pos:[0,-.46,.02],rot:[1.25,0,0],parts:[{t:'quad',c:[0,0,0],size:[2.7,2.3],piv:[.5,0],tex:'hgtb_peacockfan',alpha:true,col:o.fanq||[255,255,255]}]});
-  return hgtmDef(name,{rad:2.6,foot:.9,cycle:2*S.A/S.beta,speed:.2,root:{id:'root',kids:[{id:'body',pos:[0,0,hh],parts,kids},gShadow(1.1),{id:'plinth',pos:[0,0,-.3],parts:[{t:'ell',c:[0,0,0],r:[.75,.75,.17],seg:[14,5],tex:'art_tex_hgtb_scales',col:[225,215,235]},{t:'ell',c:[0,0,.1],r:[.62,.62,.12],seg:[12,4],tex:'art_tex_hgtb_limbs',col:[240,230,245]}]}]},
+    {t:'fan',c:[0,-.05,0],n:9,layers:1,len:1.55,wid:.16,base:.02,spread:2.0,tex:'hgtb_feather_iridescent',col:o.back||[140,230,200],shimmer:[.04,1.6]}]});
+  return hgtmDef(name,{rad:2.6,foot:.9,cycle:2*S.A/S.beta,speed:.2,root:{id:'root',kids:[{id:'body',pos:[0,0,hh],parts,kids},gShadow(1.1)]},
     anim(t,st){const wk=st.walk,ph=st.phase,l={},n={},I=HGTG.cur,g=I&&I.g||{},a=g.fan||0,gz=gGaze(st,1.7,12),bob=Math.abs(Math.sin(ph*3.1416))*.02*wk;
-      const rs=hgtgSm(.3,.9,1-(g.sm===undefined?1:g.sm));S.fz=.02+.2*rs;gGait(S,st,hh+bob+.2*rs,l,n);n.body={p:[0,0,bob+.2*rs],r:[Math.sin(t*.5)*.015,0,Math.sin(ph*6.283)*.03*wk]};n.plinth={p:[0,0,.3*rs]};
+      const rs=0;S.fz=.02+.2*rs;gGait(S,st,hh+bob+.2*rs,l,n);n.body={p:[0,0,bob+.2*rs],r:[Math.sin(t*.5)*.015,0,Math.sin(ph*6.283)*.03*wk]};n.plinth={p:[0,0,.3*rs]};
       for(let i=0;i<4;i++)n['pk'+i]={r:[Math.sin(ph*6.283*2+i)*.1*wk*(i&1?1:-1)+(i?gz.p*.25:0)+Math.sin(t*.7+i)*.04,0,(i>1?gz.y*.35:0)+Math.sin(t*.5+i*.6)*.04]};
       n.head={r:[gz.p*.3,0,gz.y*.2]};n.eLb={r:[gz.p*.15,0,gz.y*.1]};n.eRb={r:[gz.p*.15,0,gz.y*.1]};
       const open=hgtgSm(0,1,a),rx=1.25*(1-open)+.12*open,sw=Math.sin(t*1.3)*.02*open;
-      n.tail={r:[rx,sw,Math.sin(t*.45)*.05]};n.tailq={r:[rx,sw,Math.sin(t*.45)*.05],p:[0,0,open>.3?0:-20]};
+      n.tail={r:[rx,sw,Math.sin(t*.45)*.05]};
       const sh=.5+.5*Math.sin(t*1.1);for(const P of HGTM.models[name].parts)if(P.def.tag==='sh'){P.col=[255-30*sh,255-10*sh,255-40*(1-sh)]}
       return{l,n,ro:{},fs:.22+.78*open,fl:.85+.15*open}}});
 }
@@ -386,7 +389,7 @@ for(const n of['hgtg_bulk_mound','hgtg_bulk_lilac','hgtg_bulk_amber','hgtg_bulk_
 for(const n of['hgtg_moth','hgtg_bellmoth','hgtg_bat','hgtg_butterfly','hgtg_dragonfly'])HGTG.kind[n]='wing';
 for(const n of['hgtg_peacock','hgtg_peacock_green','hgtg_peacock_white'])HGTG.kind[n]='peacock';
 for(const k of Object.keys(HGTG_FISHCOL))HGTG.kind['hgtg_angel_'+k]='fish';
-HGTG.height={hgtg_stilt4:14,hgtg_stilt6:14,hgtg_stilt_heron:14,hgtg_bulk_mound:9,hgtg_bulk_lilac:9,hgtg_bulk_amber:12,hgtg_bulk_aqua:9.5,hgtg_peacock:1.7,hgtg_peacock_green:1.7,hgtg_peacock_white:1.7};
+HGTG.height={hgtg_stilt4:14,hgtg_stilt6:14,hgtg_stilt_heron:14,hgtg_bulk_mound:11.5,hgtg_bulk_lilac:11.5,hgtg_bulk_amber:15,hgtg_bulk_aqua:12,hgtg_peacock:1.7,hgtg_peacock_green:1.7,hgtg_peacock_white:1.7};
 function hgtgTick(I,dt){
   const o=I.o,k=o.hgk,g=I.g||(I.g={}),cam=HGTM.cam,t=G.time;
   if(!g.R){g.R=hgtmRnd((I.seed|0)*31+7);g.mode=1;g.nt=t+g.R()*20;g.sm=1}
@@ -396,13 +399,14 @@ function hgtgTick(I,dt){
   let tg=g.mode?1:.001;
   if(k==='peacock'){const near=d<32;g.fan=hgtgClamp((g.fan||0)+(near?.22:-.12)*dt,0,1);if(near){tg=.001;if(g.fan>.15){const w=hgtgWrap(Math.atan2(cam.cx-I.x,-(cam.cy-I.y))-I.yaw);I.yaw+=w*Math.min(1,dt*.7)}}}
   else if(d<(o.foot||I.M.foot*I.sc)*1.7)tg=.001;
+  if(tg<.01){I.sp=0;I.walk*=.8}
   g.sm+=(tg-g.sm)*Math.min(1,dt*.5);o.speedMul=Math.max(.001,g.sm);
   if(o.over){const inf=HGTG.info[LEVEL];if(inf){const x=I.x|0,y=I.y|0;if(x>=0&&y>=0&&x<inf.W&&y<inf.H)o.h=Math.max(inf.top[y*inf.W+x],inf.h[y*inf.W+x])}}
 }
 function hgtgSpawn(name,o){
   o=o||{};hgtgVariants();const k=HGTG.kind[name]||'';o.hgk=k;if(o.scale===undefined)o.scale=1;
   if(k==='wing'||k==='fish'||k==='levi'){o.fly=true;o.foot=.01}
-  if(k==='stilt'&&o.over===undefined)o.over=true;
+  if(k==='stilt'&&o.over===undefined)o.over=false;
   if(!o.tick&&(k==='stilt'||k==='bulk'||k==='peacock'||k==='wing'||k==='fish'))o.tick=hgtgTick;
   if(o.seed===undefined)o.seed=1+((Math.random()*9000)|0);
   return hgtmSpawn(name,o);
@@ -470,6 +474,8 @@ function hgtgRoute(inf,R,sx,sy,o){
     const kk=Math.max(.15,Math.min(o.lane||1,(inf.D[v[2]]-1)*.55));Lf.push([v[0]+.5-ty*kk,v[1]+.5+tx*kk]);Rt.push([v[0]+.5+ty*kk,v[1]+.5-tx*kk])});
   return Lf.concat(Rt.reverse());
 }
+function hgtgRouteOK(inf,pts){const W=inf.W,n=pts.length;let pc=-1;for(let i=0;i<n;i++){const a=pts[i],b=pts[(i+1)%n];for(let k=0;k<5;k++){const x=a[0]+(b[0]-a[0])*k/5,y=a[1]+(b[1]-a[1])*k/5,c=(y|0)*W+(x|0);if(x<1||y<1||x>=W-1||y>=inf.H-1||!inf.open[c]||inf.bad[c])return false;if(pc>=0&&Math.abs(inf.h[c]-inf.h[pc])>.5)return false;pc=c}}return true}
+function hgtgSafeCircle(inf,R,cx,cy,r0,n,wob){let r=r0;for(let i=0;i<6;i++){const pts=hgtgCircle(cx,cy,r,0,n,R,wob).map(p=>[p[0],p[1]]);if(hgtgRouteOK(inf,pts))return pts;r*=.7}return[[cx,cy]]}
 function hgtgMaxTop(inf,cx,cy,r){let m=-99;const x0=Math.max(0,(cx-r)|0),x1=Math.min(inf.W-1,(cx+r)|0),y0=Math.max(0,(cy-r)|0),y1=Math.min(inf.H-1,(cy+r)|0);
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if((x-cx)*(x-cx)+(y-cy)*(y-cy)<=r*r){const v=inf.top[y*inf.W+x];if(v>m)m=v}return m}
 function hgtgCircle(cx,cy,r,z,n,R,wob){const a0=R()*6.283,pts=[];for(let i=0;i<n;i++){const a=a0+i/n*6.283,rr=r*(1+(R()-.5)*(wob||.3));pts.push([cx+Math.cos(a)*rr,cy+Math.sin(a)*rr*.85,z+(R()-.5)*1.4])}return pts}
@@ -493,15 +499,15 @@ function hgtgAuto(id,opts){
   const place=(kind,nn,minD,sep,ro,sc)=>{
     const sp=hgtgSpots(inf,R,minD,nn*3,sep);let done=0;
     for(const s of sp){if(done>=nn)break;const name=pick(K(kind)),gz=gh(s[0],s[1]),
-      r=hgtgRoute(inf,R,s[0],s[1],ro)||hgtgCircle(s[0]+.5,s[1]+.5,Math.min(2.2,Math.max(.6,inf.D[s[1]*W+s[0]]-1)),0,6,R,.25).map(p=>[p[0],p[1]]);
+      r0=hgtgRoute(inf,R,s[0],s[1],ro),r1=(r0&&!hgtgRouteOK(inf,r0))?hgtgRoute(inf,R,s[0],s[1],Object.assign({},ro,{lane:.15})):r0,r=(r1&&hgtgRouteOK(inf,r1))?r1:hgtgSafeCircle(inf,R,s[0]+.5,s[1]+.5,Math.min(2.2,Math.max(.6,inf.D[s[1]*W+s[0]]-1)),6,.25);
       hgtgSpawn(name,{level:id,x:r[0][0],y:r[0][1],route:r,scale:sc(name,gz),speed:(HGTM.models[name].speed||.4)*(.8+.4*R()),seed:1+((R()*9000)|0),yaw:0});done++;stat[kind]++}};
   place('bulk',cnt('bulk'),4,26,{dmin:3,over:false,min:14,max:52,endD:3,lane:1.3,step:3},(n,gz)=>fitScale(n,.65,1.3,gz));
-  place('stilt',cnt('stilt'),2,22,{dmin:1,over:true,min:20,max:64,endD:1,lane:.8,step:3},(n,gz)=>fitScale(n,.58,1.35,gz));
+  place('stilt',cnt('stilt'),2,22,{dmin:1,over:false,min:20,max:64,endD:1,lane:.8,step:3},(n,gz)=>fitScale(n,.58,1.35,gz));
   // peacocks: slow small loops on flat open ground
-  {const sp=hgtgSpots(inf,R,3,cnt('peacock')*3,14);let done=0;for(const s of sp){if(done>=cnt('peacock'))break;const name=pick(K('peacock')),rr=Math.min(2.8,Math.max(.8,inf.D[s[1]*W+s[0]]-1.3)),pts=hgtgCircle(s[0]+.5,s[1]+.5,rr,0,6,R,.35).map(p=>[p[0],p[1]]);
+  {const sp=hgtgSpots(inf,R,3,cnt('peacock')*3,14);let done=0;for(const s of sp){if(done>=cnt('peacock'))break;const name=pick(K('peacock')),rr=Math.min(2.8,Math.max(.8,inf.D[s[1]*W+s[0]]-1.3)),pts=hgtgSafeCircle(inf,R,s[0]+.5,s[1]+.5,rr,6,.35);
     hgtgSpawn(name,{level:id,x:pts[0][0],y:pts[0][1],route:pts,scale:.92+.25*R(),speed:.18+.1*R(),seed:1+((R()*9000)|0)});done++;stat.peacock++}}
   // winged: circling loops above the roofs
-  {const sp=hgtgSpots(inf,R,1,cnt('wing')*2,16,{flat:false,avoid:4});let done=0;for(const s of sp){if(done>=cnt('wing'))break;const name=pick(K('wing')),sc=1+2*R(),rad=6+12*R(),mt=hgtgMaxTop(inf,s[0],s[1],Math.min(rad,10)),z=Math.min(roof-1.5,Math.max(mt+1+2*R(),gh(s[0],s[1])+2.5));
+  {const sp=hgtgSpots(inf,R,1,cnt('wing')*2,16,{flat:false,avoid:4});let done=0;for(const s of sp){if(done>=cnt('wing'))break;const name=pick(K('wing')),sc=1+2*R(),rad=6+12*R(),mt=hgtgMaxTop(inf,s[0],s[1],Math.min(rad,10)),z=Math.min(roof-1.5,R()<.5?Math.max(mt+1+2*R(),gh(s[0],s[1])+2.5):gh(s[0],s[1])+1.4+4.5*R());
     hgtgSpawn(name,{level:id,x:s[0]+rad,y:s[1],route:hgtgCircle(s[0]+.5,s[1]+.5,rad,z,8,R,.4),scale:sc,speed:(.8+.6*R())*Math.pow(sc,.3),seed:1+((R()*9000)|0)});done++;stat.wing++}}
   // angelfish: schools circling towers and plazas, plus a few huge singles
   {const tints=K('tints'),scales=[.22,.5,1.0,2.0,3.2,1.4,.8];let nS=cnt('schools'),towers=[];
@@ -509,7 +515,7 @@ function hgtgAuto(id,opts){
     const sp=hgtgSpots(inf,R,5,nS*2,18,{avoid:6});
     for(let s=0;s<nS;s++){let cx,cy,z,rad;
       if(towers.length&&s%2===0){const i=towers[(R()*towers.length)|0];cx=i%W;cy=(i/W)|0;rad=4.5+3*R();z=Math.min(roof-1.2,inf.top[i]+1+2*R())}
-      else if(sp.length){const p=sp[s%sp.length];cx=p[0];cy=p[1];rad=Math.max(2.5,Math.min(inf.D[cy*W+cx]-1.5,10));z=gh(cx,cy)+2+2.5*R()}
+      else if(sp.length){const p=sp[s%sp.length];cx=p[0];cy=p[1];rad=Math.max(2.5,Math.min(inf.D[cy*W+cx]-1.5,10));z=gh(cx,cy)+1.3+2*R()}
       else continue;
       const n=4+((R()*4)|0),tt=[pick(tints),pick(tints)],sc2=Math.min(scales[s%scales.length],2.4);rad=Math.max(rad,sc2*3.5+4);
       hgtgSchool(id,{route:hgtgCircle(cx+.5,cy+.5,rad,z,6,R,.35),n,scale:sc2,tints:tt,seed:s+1+id,speed:.5+.4*R()});stat.fish+=n;stat.schools++}
@@ -522,7 +528,7 @@ function hgtgAuto(id,opts){
     for(const md of[3,2]){for(const bi of topc){vx=bi%W;vy=(bi/W)|0;for(let f=0;f<4&&!found;f++)for(let dd=22;dd<=50&&!found;dd+=3){const x=vx+dirs[f][0]*dd,y=vy+dirs[f][1]*dd;if(x<4||y<4||x>W-5||y>inf.H-5||inf.D[y*W+x]<md||inf.h[y*W+x]>inf.h[bi]-1)continue;
           let clear=true;for(let k=3;k<dd&&clear;k+=2){const c=(vy+dirs[f][1]*k)*W+vx+dirs[f][0]*k;if(inf.top[c]>inf.h[bi]+.3)clear=false}if(clear)found=[x,y,f]}if(found)break}if(found)break}
     if(found){const gz=gh(found[0],found[1]),dm=Math.max(.8,Math.min(2.4,inf.D[found[1]*W+found[0]]-2)),nb=K('bulk')[0],ns=K('stilt')[0],f=found[2],px=f%2?0:6,py=f%2?6:0;
-      const one=(nm,cx,cy,r,sc,sp,sd)=>{const c=hgtgCircle(cx,cy,r,0,6,R,.2).map(p=>[p[0],p[1]]);hgtgSpawn(nm,{level:id,x:c[0][0],y:c[0][1],route:c,scale:sc,speed:sp,seed:sd})};
+      const one=(nm,cx,cy,r,sc,sp,sd)=>{const c=hgtgSafeCircle(inf,R,cx,cy,r,6,.2);hgtgSpawn(nm,{level:id,x:c[0][0],y:c[0][1],route:c,scale:sc,speed:sp,seed:sd})};
       one(nb,found[0]+.5,found[1]+.5,dm,fitScale(nb,.9,1.1,gz),.15,77+id);one(ns,found[0]+.5+px,found[1]+.5+py,Math.max(.8,dm-.5),fitScale(ns,.8,1,gz),.25,79+id);
       stat.vista={x:vx,y:vy,f,h:+inf.h[vy*W+vx].toFixed(1),giant:[found[0],found[1]]};HGTG.vista=HGTG.vista||{};HGTG.vista[id]=stat.vista}}
   // the rim: lines of distant giants outside the walls and a row of leaning mesh spires, so the painted skyline is not alone
@@ -532,7 +538,7 @@ function hgtgAuto(id,opts){
       hgtgSpawn(sp[i%3],{level:id,x,y,route:[[x,y]],h:0,scale:.8+1.5*R(),yaw:R()*6.283,speed:0,seed:1+((R()*9000)|0),far:420,cheap:true});ns2++}stat.rim=nr;stat.spires=ns2}
   // planets and clouds
   {const np=cnt('planets'),keys=HGTG.planetKeys.slice();for(let i=keys.length-1;i>0;i--){const j=(R()*(i+1))|0,t=keys[i];keys[i]=keys[j];keys[j]=t}
-    for(let i=0;i<np;i++){const k=keys[i%keys.length],Rr=HGTG_PLANETS[k][0],route=[];for(let q=0;q<3;q++)route.push([inf.x0+(inf.x1-inf.x0)*R(),inf.y0+(inf.y1-inf.y0)*R(),Math.max(Rr+1,roof*(.45+.4*R()))-Rr*.3]);
+    for(let i=0;i<np;i++){const k=keys[i%keys.length],Rr=HGTG_PLANETS[k][0],route=[];for(let q=0;q<3;q++)route.push([inf.x0+(inf.x1-inf.x0)*R(),inf.y0+(inf.y1-inf.y0)*R(),Rr*.5+3+R()*5]);
       hgtgPlanetSpawn(id,k,route,.3+.5*R(),1+i);stat.planets++}
     const nc=cnt('clouds');if(nc>0){hgtmCloudField(id,nc,{x0:inf.x0,y0:inf.y0,x1:inf.x1,y1:inf.y1,z0:.4,z1:4.5,seed:id+3,alpha:.6});stat.clouds=nc}}
   return stat;
@@ -657,7 +663,7 @@ const HGTG_FTC={nl:[],nn:0,ncr:[],ncg:[],ncb:[],ttR:.5,ttG:.95,ttB:1.5,hzr:[40,5
 function hgtgFlatBegin(cx,cy,dX,dY,pX,pY){
   const out=HGTM.out;out.length=0;HGTM.fog=0;HGTM.tris=0;HGTM.vis=0;hgtmSync();
   if(!HGTM.inst.length){HGTM.ms=0;return out}
-  if(HGTG.ybLevel!==LEVEL){HGTG.ybLevel=LEVEL;for(let x=0;x<VW;x++)for(let b=0;b<YBK;b++){const z=.55+(b+.5)/YBS;YB[x*YBK+b]=Math.min(VH,Math.round(HH+EYE*F/z))}}
+  if(HGTG.ybLevel!==LEVEL||HGTG.ybHH!==HH){HGTG.ybLevel=LEVEL;HGTG.ybHH=HH;for(let x=0;x<VW;x++)for(let b=0;b<YBK;b++){const z=.55+(b+.5)/YBS;YB[x*YBK+b]=Math.min(VH,Math.round(HH+EYE*F/z))}}
   const t0=performance.now(),C=HGTG_FTC;C.lbm=Math.max(G.day||0,G.amb||.5,.85);C.tm=G.time;C.cx=cx;C.cy=cy;const saveTC=TC;TC=C;
   let dt=HGTM.tLast<0?0:G.time-HGTM.tLast;HGTM.tLast=G.time;if(dt<0||dt>.25)dt=Math.min(.05,Math.abs(dt));if(dt>0)hgtmUpdate(dt);else if(HGTM.inst.some(i=>i.first))hgtmUpdate(.0001);
   const cam={cx,cy,dX,dY,cz:EYE,iw:1/F};HGTM.cam=cam;const cand=[];
@@ -677,8 +683,8 @@ function hgtgHorizon(id,opts){
     const sp=Math.max(.3,dist*.0055*speedMul);
     return hgtmSpawn(name,{level:id,x:pts[0][0],y:pts[0][1],route:pts,scale,speed:sp,fly:true,foot:.01,far:dist*2.6+200,cheap:true,seed:1+((R()*9000)|0),h:0,speedMul:1,loop:true})};
   const rec=[];
-  rec.push(['scorp',place('hgtg_scorpionfish',150+20*R(),60,.62,.5)]);
-  const far=[['hgtg_levi_whale',135,42,.8],['hgtg_levi_manta',165,52,1.0],['hgtg_levi_eel',145,46,.8],['hgtg_levi_jelly',115,38,1.4]],mid=[['hgtg_levi_manta',120,34,.85]],near=[['hgtg_levi_jelly',95,26,1.1]];
+  rec.push(['scorp',place('hgtg_scorpionfish',150+20*R(),25,.62,.5)]);
+  const far=[['hgtg_levi_whale',70,12,.5],['hgtg_levi_manta',85,15,.55],['hgtg_levi_eel',145,24,.75],['hgtg_levi_jelly',115,18,1.3]],mid=[['hgtg_levi_manta',110,16,.8]],near=[['hgtg_levi_jelly',95,14,1.0]];
   const list=flat?far.concat(mid,near):far.slice(1,4);
   for(const [n,d,z,s] of list)rec.push([n,place(n,d*(.9+.2*R()),z,s,1)]);
   HGTG.stat['h'+id]={scorp:1,leviathans:list.length};return list.length+1;

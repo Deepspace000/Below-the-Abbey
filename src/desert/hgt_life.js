@@ -200,6 +200,26 @@ function hgtlfAuto(id,opts){
   for(const k in mix){const n=Math.round(nCre*mix[k]/tot);if(!n)continue;
     for(const i of take(place[k](),n,k==='bench'?3:5,'c'+k,k==='bench'?null:interest))make(k,i,k==='bench')}
   if(made<nCre){const extra=shuffle(byFl(8|128).filter(vw));for(const i of extra){if(made>=nCre)break;const x=i%W,y=(i/W)|0;if(tooNear(x,y,5,'cx'))continue;used.push({x,y,g:'cx'});make(Math.random()<.5?'landing':'court',i,false)}}
+  if(city){ // roosts and idle folk on every tower top, belvedere and platform; something moving on every empty plaza
+    const seen=new Uint8Array(S.N),comps=[];
+    for(let i0=0;i0<S.N;i0++){if(seen[i0]||!S.reach[i0]||(S.fl[i0]&1)||!(S.fl[i0]&(8|16|32)))continue;
+      const hi=S.h[i0]>=2.5,q=[i0],cells=[];seen[i0]=1;
+      while(q.length){const i=q.pop();cells.push(i);const x=i%W,y=(i/W)|0;for(const [dx,dy] of HGTLF_D4){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=S.H)continue;const j=ny*W+nx;if(seen[j]||!S.reach[j]||(S.fl[j]&1)||!(S.fl[j]&(8|16|32)))continue;if(Math.abs(S.h[j]-S.h[i])>.02||(S.h[j]>=2.5)!==hi)continue;seen[j]=1;q.push(j)}}
+      comps.push({cells,hi})}
+    const near=(x,y,r)=>list.some(a=>a.home&&Math.max(Math.abs(a.home.x-x),Math.abs(a.home.y-y))<=r);
+    const pickIn=(cells,pred)=>{const c=shuffle(cells.filter(pred));return c.length?c[0]:-1};
+    let roosts=0,folk=0,plz=0;
+    for(const c of comps){const n=c.cells.length;
+      if(c.hi&&n>=4){const x0=c.cells[0]%W,y0=(c.cells[0]/W)|0,mid=c.cells[(n/2)|0],mx=mid%W,my=(mid/W)|0;
+        if(!near(mx,my,Math.max(3,Math.min(6,Math.sqrt(n))))){const i=pickIn(c.cells,i=>!S.avoid[i]&&S.cover[i]===0&&far(i)&&!(S.fl[i]&7)&&!tooNear(i%W,(i/W)|0,2,'roost'));
+          if(i>=0){used.push({x:i%W,y:(i/W)|0,g:'roost'});if(make('top',i,false))roosts++}}
+        if(n>=9&&!list.some(a=>a.kind==='npc'&&a.home&&c.cells.includes(a.home.y*W+a.home.x))){const i=pickIn(c.cells,i=>stopOK(i)&&view(i)&&!tooNear(i%W,(i/W)|0,3,'roostf'));
+          if(i>=0){used.push({x:i%W,y:(i/W)|0,g:'roostf'});list.push(npcSpec(['watch','sit','read'][folk%3],i,{zone:0}));folk++}}}
+      else if(!c.hi&&n>=12){const mid=c.cells[(n/2)|0],mx=mid%W,my=(mid/W)|0;
+        if(!near(mx,my,6)){const i=pickIn(c.cells,i=>!S.avoid[i]&&S.cover[i]===0&&far(i)&&!(S.fl[i]&7)&&!tooNear(i%W,(i/W)|0,2,'plz'));
+          if(i>=0){used.push({x:i%W,y:(i/W)|0,g:'plz'});if(plz%2===0)list.push(npcSpec('clean',i,{zone:3,spots:spotsNear(i,j=>stopOK(j)&&(S.fl[j]&8),3,4)}));else make('court',i,false);plz++}}}}
+    made+=0;HGTLF.roost={roosts,folk,plazas:plz,comps:comps.length};
+  }
   if(cache)HGTLF.autoCache[id]=list;
   HGTLF.stats[id]={npc:list.filter(a=>a.kind==='npc').length,creatures:made,open,doors:S.doors.length,plants:S.plants.length,lamps:S.lamps.length,benches:S.benches.length,fountains:S.fountains.length};
   return list;
@@ -330,7 +350,7 @@ function hgtlfSprites(out){
     if(a.kind==='npc'){
       if(a.task==='clean'&&!moving)flip=(((t/.7+a.seed)|0)&1)===1;
       else if(a.task==='watch'&&!moving)flip=(((t/6+a.seed)|0)&1)===1;
-      else if(moving&&a.flipDir)flip=(-dY*a.dx+dX*a.dy)>0;
+      else if(moving)flip=(((t*2.6+a.seed)|0)&1)===1; // a walking figure swaps its mirror image with each step
     }else if(a.flipDir&&(a.dx||a.dy))flip=(-dY*a.dx+dX*a.dy)>0;
     const pdx=(G.P?G.P.x:cam.x)-a.x,pdy=(G.P?G.P.y:cam.y)-a.y,pd2=pdx*pdx+pdy*pdy,near=!moving&&pd2<20; // standing still and the party is within four cells: turn to face it
     if(near&&a.kind==='creature'&&a.flipDir)flip=(-dY*Math.sign(pdx)+dX*Math.sign(pdy))>0;
@@ -344,7 +364,11 @@ function hgtlfSprites(out){
     else bob+=Math.sin(t*1.1+a.seed)*.008;
     if(near&&a.hover)bob+=.12*(1-pd2/20); // a hovering pet rises a little when the party comes close
     const night=HGTLF.night,lift=Math.max(a.glow?.28+.5*night:0,.34*night);
-    const o={x:a.x+.5,y:a.y+.5,img,w:a.h*img.width/img.height,bob,decor:a.stub};if(lift>0)o.lift=lift;out.push(o);
+    // walk cycle without new pictures: a squash and stretch in step with the bob, and a gentle sway across the view
+    const ph=t*(a.kind==='creature'?7:8)+a.seed*3,rx2=-dY,ry2=dX;let lunge,sway;
+    if(moving){lunge=-.2*Math.cos(2*ph);sway=Math.sin(ph)*.035}
+    else{lunge=.05*Math.sin(t*1.7+a.seed*2);sway=a.hover?Math.sin(t*1.1+a.seed)*.03:a.task==='clean'?Math.sin(t*4.5+a.seed)*.03:Math.sin(t*.9+a.seed)*.008}
+    const o={x:a.x+.5+rx2*sway,y:a.y+.5+ry2*sway,img,w:a.h*img.width/img.height,bob,lunge,decor:a.stub};if(lift>0)o.lift=lift;out.push(o);
   }
 }
 /* ---------- taps and bumps ---------- */

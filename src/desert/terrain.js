@@ -248,7 +248,7 @@ function wallSpan(D,td,te,ya0,yz,x,tx){
       if(bil){const vf=tyf*texH/TS-.5,vy0=Math.floor(vf),fy=vf-vy0,ya=(vy0<0?0:vy0>texH-1?texH-1:vy0)*TS,yb=(vy0+1<0?0:vy0+1>texH-1?texH-1:vy0+1)*TS,i00=(ya+bx0)*4,i10=(ya+bx1)*4,i01=(yb+bx0)*4,i11=(yb+bx1)*4,w00=(1-bfx)*(1-fy),w10=bfx*(1-fy),w01=(1-bfx)*fy,w11=bfx*fy;tr=td[i00]*w00+td[i10]*w10+td[i01]*w01+td[i11]*w11;tg=td[i00+1]*w00+td[i10+1]*w10+td[i01+1]*w01+td[i11+1]*w11;tb=td[i00+2]*w00+td[i10+2]*w10+td[i01+2]*w01+td[i11+2]*w11} // close range: filtered magnification instead of blocks
       let R=tr*kRp*vg*ivw+hz0,Gc=tg*kGp*vg*ivw+hz1,B=tb*kBp*vg*ivw+hz2;
       if(hasHLK){const dtp=(y-y0)*iu,ao=(zz<1.3?1-wAO*(1-zz*.77)*(1-zz*.77):1)*(zz<.32?1-.3*(1-zz/.32)*(1-zz/.32):1)*(dtp<.6?1-.22*(1-dtp/.6)*(1-dtp/.6):1)*fk,gk=zz>12?1:zz*.083,lm=R*.3+Gc*.59+B*.11;R=(lm+(R-lm)*wSat)*ao*(1.03-.07*gk);Gc=(lm+(Gc-lm)*wSat)*ao;B=(lm+(B-lm)*wSat)*ao*(.97+.1*gk);
-        if(shn>0){const s=Math.sin(tx*.045+zz*.8+shp)-.8;if(s>0){const q=s*5*s*5*shn*ao;R+=q*62;Gc+=q*54;B+=q*72} // pearl sheen: a slow highlight sweeps along every face
+        if(shn>0){const s=Math.sin(tx*.011+zz*.13+shp)-.62;if(s>0){const q=s*2.6*s*2.6*shn*ao*.55;R+=q*62;Gc+=q*54;B+=q*72} // pearl sheen: a slow highlight sweeps along every face
           if(((tx*131+y*197+gfr*53)&1023)===0){R+=shn*150;Gc+=shn*140;B+=shn*160}}} // and the odd glint on the nacre // nacre keeps its pink, aqua and cream; the foot of a wall is in shadow
       if(te){const a=te[i+3]/255;R+=te[i]*a*.95;Gc+=te[i+1]*a*.95;B+=te[i+2]*a*.95}
       if(dg){const vp=Math.max(0,Math.min(1,(y-y0)/(yBot-y0))),u=kdn===2?((kdlf?kdi:1-kdi)+tx/TS)/2:.5+(tx/TS-.5)*.55,hw=(u-.5)/.17,f=dgs*Math.exp(-hw*hw)*(vp<.3?0:Math.min(1,(vp-.3)/.25))*.55;R+=170*f;Gc+=108*f;B+=30*f} // only the doorway itself: a warm pool of light on and round the door
@@ -259,12 +259,14 @@ function wallSpan(D,td,te,ya0,yz,x,tx){
 const TPR=new Float64Array(40);
 function terrTopHK(D,fdd,x,ys,ye){
   const Q=TPR,k1=Q[0],cx=Q[1],cy=Q[2],rX=Q[3],rY=Q[4],mx=Q[5],my=Q[6],rl=Q[7],hzmax=Q[8],hzrate=Q[9],lbm=Q[10],tbR=Q[11],tbG=Q[12],tbB=Q[13],cellShade=Q[14],stUp=Q[15]!==0,stDn=Q[16]!==0,lipT=Q[17],aoT=Q[18],tIn=Q[19],lipGain=Q[20],footAO=Q[21],FP=Q[22],FC=Q[23],FG=Q[24],FS=Q[25],FT0=Q[26],FT1=Q[27],FT2=Q[28],hz0=Q[29],hz1=Q[30],hz2=Q[31],gaN=Q[32]|0,ws=Q[33],cau=Q[34],ctm=Q[35];
+  let mn=fdd.mn;if(!mn){let r=0,g=0,b=0,c=0;for(let i=0;i<fdd.length;i+=28){r+=fdd[i];g+=fdd[i+1];b+=fdd[i+2];c++}mn=fdd.mn=[r/c,g/c,b/c]} // the average colour of the paving, for the far field
+  const mn0=mn[0],mn1=mn[1],mn2=mn[2];
   let o=(ys*VW+x)*4;
   for(let y=ys;y<ye;y++,o+=VW*4){
-    const t=k1*RCP[y],px=cx+rX*t,py=cy+rY*t,u=(((px-mx)*TS)|0)&(TS-1),v=(((py-my)*TS)|0)&(TS-1),ti=(v*TS+u)*4,dist=t*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv;
+    const t=k1*RCP[y],px=cx+rX*t,py=cy+rY*t,u=(((px-mx)*TS)|0)&(TS-1),v=(((py-my)*TS)|0)&(TS-1),ti=(v*TS+u)*4,dist=t*rl,smv=Math.min(hzmax,dist*hzrate),iv=1-smv,fm=dist<4?0:Math.min(.92,(dist-4)*.09),fk2=1-fm; // far away one pixel covers many texels: the paving fades to its average colour instead of streaking into lines
     let lt=0,lR=0,lG=0,lB=0;for(let j=0;j<gaN;j++){const ax=px-GLX[j],ay=py-GLY[j],q=GLA[j]/(1+1.15*(ax*ax+ay*ay+.44));lt+=q;lR+=q*GLR[j];lG+=q*GLG[j];lB+=q*GLB[j]}
     const lb=Math.max(baseL(dist),lbm),sk=(lb*.55+lt*.45+.05)*smv,kR=(lb*tbR+lR)*cellShade*(1+ws*.3),kG=(lb*tbG+lG)*cellShade*(1+ws*.05),kB=(lb*tbB+lB)*cellShade*(1-ws*.12); // warmer shadows
-    const te=t-tIn,ek=(stUp&&te<lipT)?lipGain:(stDn&&te<aoT)?footAO:1,a=(fdd[ti]-FP)*FC+FP,b=(fdd[ti+1]-FP)*FC+FP,c=(fdd[ti+2]-FP)*FC+FP,gk=FG*ek;let a2=a,b2=b,c2=c;if(FS!==1){const lm=a*.3+b*.59+c*.11;a2=lm+(a-lm)*FS;b2=lm+(b-lm)*FS;c2=lm+(c-lm)*FS}
+    const te=t-tIn,ek=(stUp&&te<lipT)?lipGain:(stDn&&te<aoT)?footAO:1,a=((mn0+(fdd[ti]-mn0)*fk2)-FP)*FC+FP,b=((mn1+(fdd[ti+1]-mn1)*fk2)-FP)*FC+FP,c=((mn2+(fdd[ti+2]-mn2)*fk2)-FP)*FC+FP,gk=FG*ek;let a2=a,b2=b,c2=c;if(FS!==1){const lm=a*.3+b*.59+c*.11;a2=lm+(a-lm)*FS;b2=lm+(b-lm)*FS;c2=lm+(c-lm)*FS}
     D[o]=a2*FT0*gk*kR*iv+hz0*sk;D[o+1]=b2*FT1*gk*kG*iv+hz1*sk;D[o+2]=c2*FT2*gk*kB*iv+hz2*sk;
     if(cau>0){const w=Math.sin(px*7+ctm*1.3+Math.sin(py*5+ctm))*Math.sin(py*6-ctm*1.1+Math.cos(px*4+ctm*.7));if(w>.35){const cc=(w-.35)*cau*iv;D[o]+=cc*70;D[o+1]+=cc*150;D[o+2]+=cc*170}} // caustic ripples of light near water
   }

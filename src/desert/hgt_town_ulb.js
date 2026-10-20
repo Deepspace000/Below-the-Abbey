@@ -156,7 +156,10 @@ function build(id){
   const dlink=(d,id)=>{const q=toInt(id);const i=I(d.x,d.y);wdoor.set(i,{face:d.face,lvl:id,at:{x:q.tx,y:q.ty,f:q.tf},wh:wdoor.get(i)?wdoor.get(i).wh:4});links[id]={x:d.ax!==undefined?d.ax:d.x+HGTL.DIRS[d.face][0],y:d.ay!==undefined?d.ay:d.y+HGTL.DIRS[d.face][1],f:d.face};const bd=B.doors.find(b=>b.x===d.x&&b.y===d.y);if(bd)bd.to=id};
   curSty=10;
   // --- the gate: two round towers, two pillars, an arch, lamps and glitter beds on the plaza
-  taper(62,5,3.6,8,'p',{t2:'l',steps:4});taper(88,5,3.6,8,'a',{t2:'c',steps:4});
+  taper(62,5,3.6,13,'p',{t2:'l',steps:5,lean:[-.15,0]});taper(88,5,3.6,13,'a',{t2:'c',steps:5,lean:[.15,0]});
+  taper(48,10,3,15,'l',{t2:'a',steps:5,lean:[.35,.1]});taper(102,12,3,11,'c',{t2:'p',steps:4,lean:[-.3,.15]});taper(40,6,2.2,9,'a',{t2:'p',steps:3});taper(110,6,2.2,9,'p',{t2:'l',steps:3});
+  for(const [x,y,k] of [[70,6,'hgtb_deco_shellstatue'],[80,6,'hgtb_deco_pearlplinth'],[66,4,'hgt_obelisk'],[84,4,'hgt_obelisk'],[75,7,'hgtb_deco_fountain']])if(isOpen(x,y))dec(k,x,y,{block:true,sc:1.2});
+  for(const x of [64,68,82,86])if(isOpen(x,4))dec('hgtb_deco_banner',x,4,{walk:true,deco:true,bob:.4,sc:1.3});
   pillars(73,2,1,0,2,4,'c',6);
   for(const x of [67,70,80,83]){lamp(x,3);lamp(x,7)}
   bed(66,3,4,5,.35);bed(80,3,4,5,.35);
@@ -167,7 +170,7 @@ function build(id){
   // --- the Warp Pit: the double helix wound downward, west side of the court; its floor is the door to the Warp Cellar
   const pitH=qz(getH(54,60),Q);flatten(49,55,59,65,pitH,3,0);
   curSty=7;
-  const pit=hgtxulbHelix(B,{open,wall,wallH,door,dec,light,rg,fm,occ,I,ok,isOpen,getH,toInt,h:pitH,cx:54,cy:60,R0:5.8,P:5,rc:2.2,rise:-.2,lw:.75,arms:2,tints:['a','p'],core:true,coreH:t=>[pitH-t+.4,pitH-t+2.4],coreR:.7,doorTo:{id:4886,tint:'l'},wallSpec:'pdb'});
+  const pit=hgtxulbHelix(B,{open,wall,wallH,door,dec,light,rg,fm,occ,I,ok,isOpen,getH,toInt,h:pitH,cx:54,cy:60,R0:5.8,P:5,rc:2.2,rise:-.2,lw:.75,arms:2,tints:['a','p'],core:true,coreH:t=>[pitH-t+.4,pitH-t+2.4],coreR:.7,doorTo:{id:4886,tint:'l'},wallSpec:'wdC'});
   U.DEV.pit=pit;if(pit.door)links[4886]={x:pit.door.ax,y:pit.door.ay,f:pit.door.face};if(spire.door)links[4885]={x:spire.door.ax,y:spire.door.ay,f:spire.door.face};
   // --- towers and the rest of the kit, west side
   const nwTower=sqspiral(6,5,11,.17,'p');
@@ -282,6 +285,9 @@ function build(id){
    for(let i=0;i<spots.market.w;i+=3){stall(spots.market.x-7+i,spots.market.y-5);stall(spots.market.x-7+i,spots.market.y+5)}
    for(let i=-14;i<=14;i+=4){stall(GX+i,121);if(Math.abs(i)>9)stall(GX+i,129)}
    for(const x of [93,100,107])stall(x,8)}
+  {const mx=spots.market.x,my=spots.market.y;for(let i=-6;i<=6;i+=3)for(const dy of [-4,4]){lamp(mx+i,my+dy,{});light(mx+i,my+dy)}
+   for(let i=-7;i<=7;i++)for(const dy of [-3,3])if(rnd(mx+i,my+dy,190)<.5){plant(mx+i,my+dy,['hgtb_plant_glowshrooms','hgtb_plant_lupin','hgt_lightvine','hgtb_plant_potvine'][(rnd(mx+i,my+dy,191)*4)|0]);light(mx+i,my+dy)}
+   for(const [dx,dy] of [[-7,-5],[7,-5],[-7,5],[7,5]])dec('hgtb_deco_banner',mx+dx,my+dy,{walk:true,deco:true,bob:.4,sc:1.3})}
   dec('hgtb_deco_fountain',spots.market.x-5,spots.market.y,{block:true});dec('hgtb_deco_shellstatue',spots.market.x+5,spots.market.y,{block:true});dec('hgtb_deco_pearlplinth',GX-10,125,{block:true});dec('hgtb_deco_pearlplinth',GX+10,125,{block:true});
   /* ================= the town fabric ================= */
   const tintAt=(x,y,k)=>{const pool=x<GX?'ppllcpa':'aaccpla';return pool[(rnd(x,y,k||3)*pool.length)|0]};
@@ -371,6 +377,9 @@ function build(id){
      const a=col(y0),b=col(y1);if(a===null||b===null)return null;const ha=getH(x,a),hb=getH(x,b),n=Math.abs(b-a),rise=(hb-ha)/n;if(Math.abs(rise)>.28)return null;
      const t=hgtlTube(B,x,a,x,b,Object.assign({h:ha,rise,lid:2.4,lampEvery:3},o||{}));mark(x-2,Math.min(a,b),x+2,Math.max(a,b));spots.tubes.push({x,y0:a,y1:b,v:1});return t};
    const tV=tubeV(21,20,62,{width:1,wall:'nacre_c_mid'});hgtlName(B,21,40,'The Long Tube','place');
+   if(tV){const x=21;for(let y=spots.tubes[0].y0;y<=spots.tubes[0].y1;y++){fm[I(x,y)]='3';const k=y-spots.tubes[0].y0;
+      for(const sx of [-1,1]){const wx=x+sx;if(ok(wx,y)&&rows[y][wx]!=='.'&&(k%3===1))rows[y][wx]=HGTL_CHARS.window_mid}
+      if(k%4===2){dec('hgtb_deco_lanterns',x,y,{walk:true,deco:true,bob:1.1,sc:.9});light(x,y)}if(k%8===5)dec('hgt_lightvine',x,y,{walk:true,deco:true,sc:.9})}}
    const t1=tube(30,50,86,{width:1,wall:'nacre_a_mid'}),t2=tube(100,122,92,{width:3,lid:2.4,peak:3.2,wall:'nacre_b_mid'}),t3=tube(30,50,100,{width:1});
    info.tubes=[t1,t2,t3,tV].filter(Boolean).length}
   /* the edge of the city: buttress towers, arches and lit beds along the inside of the ramparts */
@@ -501,6 +510,9 @@ function build(id){
     if(o.routeN)o.route=o.routeN.map(p=>{const q=cellNear(p[0],p[1]);return q&&{x:q[0],y:q[1],wait:p[2]||1}}).filter(Boolean);
     delete o.hx;delete o.hy;delete o.spotsN;delete o.routeN;AG.push(o);return o};
   const npcA=(sprite,task,name,hx,hy,spotsN,lines,extra)=>A(Object.assign({kind:'npc',sprite,task,name,hx,hy,spotsN,lines,speed:.7,zone:9},extra||{}));
+  npcA('hgtb_sweep','clean','Sweeper',spots.market.x,spots.market.y+4,[[spots.market.x-5,spots.market.y+4],[spots.market.x+5,spots.market.y+4],[spots.market.x,spots.market.y-4]],['The market is swept at dusk.']);
+  npcA('hgtb_sweep','clean','Sweeper',100,6,[[95,6],[104,6],[110,6]],['The tank glass is wiped every day.']);
+  npcA('hgtb_plantbed','tend','Gardener',75,10,[[68,6],[82,6],[75,9]],['The gate beds are replanted each season.']);
   npcA('hgtb_sweep','clean','Sweeper',75,76,[[68,70],[82,70],[75,80],[62,74]],['I sweep the court every morning.','The dust comes from the houses.']);
   npcA('hgtb_sweep','clean','Sweeper',75,119,[[70,121],[80,121],[75,129]],['The plaza is swept once a day.']);
   npcA('hgtb_sweep','clean','Sweeper',75,20,[[70,22],[80,22],[75,26]],['I start at the gate and sweep down.']);
@@ -525,10 +537,15 @@ function build(id){
   U.PETS=pets.map(p=>({key:p[0],name:p[1],h:p[2],mode:p[3],hover:p[4],sprite:PIC[p[0]]}));
   const pet=(k,hx,hy,zone)=>{const p=pets.find(q=>q[0]===k);if(!p)return;A({kind:'creature',species:k,name:p[1],hx,hy,mode:p[3],zone:zone||2})};
   (spots.mazes||[]).forEach((m,i)=>{if(m.m&&m.m.centre)pet(pets[(i*3+1)%pets.length][0],m.m.centre.x,m.m.centre.y,1)});
-  pet('ulb_aquawhale',34,60,3);pet('ulb_peachwhale',64,134,3);pet('ulb_jadeeel',44,132,3);pet('ulb_jadeeel',104,132,3);pet('ulb_creamjelly',100,131,3);pet('ulb_pinkbulb',75,4,3);pet('ulb_pearlslug',96,7,2);
+  pet('ulb_aquawhale',34,60,3);pet('ulb_pearlslug',70,6,2);pet('ulb_amberpup',80,8,3);pet('ulb_pinkbulb',spots.market.x+3,spots.market.y+3,3);pet('ulb_creammoth',spots.market.x-4,spots.market.y-3,3);pet('ulb_fishfly',GX,119,3);pet('ulb_peachwhale',64,134,3);pet('ulb_jadeeel',44,132,3);pet('ulb_jadeeel',104,132,3);pet('ulb_creamjelly',100,131,3);pet('ulb_pinkbulb',75,4,3);pet('ulb_pearlslug',96,7,2);
   pet('ulb_lilacmoth',cx+3,cy,2);pet('ulb_fishfly',cx-3,cy,2);pet('ulb_creammoth',neTower.plat[0][0],neTower.plat[0][1],1);pet('ulb_lanternbeetle',nwTower.end[0],nwTower.end[1],1);
   pet('ulb_spindleray',58,126,3);pet('ulb_amberpup',20,100,3);pet('ulb_pups',14,110,3);pet('ulb_fishbeetle',116,98,3);pet('ulb_spindlespider',130,100,3);pet('ulb_jadefinmoth',60,40,3);
   /* giant scenery moments, spawned when the level is entered (see the end of this file): a bulk giant sleeps on the Reed Market, peacocks roost on the tower tops */
+  /* the tops of the towers: lamp, seat, plants, banner and a creature roost */
+  {const top=(cells,n)=>{let i=0;for(const c of cells){if(!isOpen(c[0],c[1])||B.decor.some(d=>d.x===c[0]&&d.y===c[1]))continue;const r=i++%6;
+      if(r===0)dec('hgtb_lamp_tall',c[0],c[1],{walk:true,deco:true,sc:1.1});else if(r===1)bench(c[0],c[1]);else if(r===2)dec('hgtb_plant_orbbush',c[0],c[1],{walk:true,deco:true,sc:1.2});else if(r===3)dec('hgtb_deco_banner',c[0],c[1],{walk:true,deco:true,sc:1.2,bob:.3});else if(r===4)plant(c[0],c[1],'hgtb_plant_glowshrooms');else dec('hgtb_deco_lanterns',c[0],c[1],{walk:true,deco:true,bob:.8,sc:.8});light(c[0],c[1])}};
+   top(spire.plat.filter(c=>Math.hypot(c[0]-cx,c[1]-cy)>3.2));top(neTower.plat);top(shell1.plat);
+   pet('ulb_creamjelly',spire.plat[2][0],spire.plat[2][1],1);pet('ulb_lilacmoth',shell1.plat[0][0],shell1.plat[0][1],1)}
   U.GIANTS=[{name:'hgtg_bulk_mound',x:spots.market.x+3,y:spots.market.y+2,yaw:.5,scale:.78},{name:'hgtg_peacock',x:neTower.plat[0][0],y:neTower.plat[0][1],yaw:2.2,scale:1.4},{name:'hgtg_peacock_white',x:seTower.end[0],y:seTower.end[1],yaw:.8,scale:1.4},{name:'hgtg_peacock_green',x:nwTower.end[0],y:nwTower.end[1],yaw:3.6,scale:1.3}];
   B.start={x:GX,y:3,f:2};
   return {B,rg,fm,wt,wk,wtop,wdoor,occ,info,terr,ws};
@@ -564,8 +581,8 @@ function hgtxulbHelix(B,o){
     if(hi<-1e8)for(const d of nb8){const c=lane.get((i+d[0])+','+(j+d[1]));if(c){if(c.h<lo)lo=c.h;if(c.h>hi){hi=c.h;arm=c.arm}}}
     if(hi<-1e8)continue;
     if(r>R0+lw+.05&&hi-lo<.3)continue;
-    const wh=Math.abs(hi-lo)+.35,wl=Math.min(lo,hi),sp=o.wallSpec||((rnd(i,j,60)<.5)?'wwb':'pwb');
-    wallH(i,j,tints[arm%tints.length],wh>2.5?sp:'pdb',wh,wl);
+    const wh=Math.abs(hi-lo)+.35,wl=Math.min(lo,hi),sp=o.wallSpec||'wdC';
+    wallH(i,j,tints[arm%tints.length],sp,wh,wl);
     o.occ[I(i,j)]=1;gapWalls.push({i,j,lo,hi,arm});
   }
   const ch=typeof o.coreH==='function'?o.coreH(top):o.coreH,coreCells=[],isPlat=(a,b)=>plat.some(p=>p[0]===a&&p[1]===b),faceTo=(dx,dy)=>HGTL.DIRS.findIndex(d=>d[0]===dx&&d[1]===dy);
@@ -627,6 +644,12 @@ function hgtxulbRoom(id){
     back:(x,y,to,face)=>{rows[y][x]=hgtaChar(hgtaDoorTile(TT[TL][3],TT[TL][0],3,{lvl:to,at:{x:HGTXULB.INT[to][0]>>1,y:HGTXULB.INT[to][1]-2,f:0}}))},
     backAt:(x,y,to,at)=>{rows[y][x]=hgtaChar(hgtaDoorTile(TT[TL][3],TT[TL][0],3,{lvl:to,at}))}};
   sp.fn(ctx);
+  {// layout: corner alcoves, a half wall, or a raised corner, by room
+   const wl=(x,y)=>{if(x>0&&y>0&&x<W_-1&&y<H_-1&&rows[y][x]==='.'&&!decor.some(d=>d.x===x&&d.y===y)&&!(x===mid&&y>=H_-4))rows[y][x]=wall},v=id%4;
+   if(v===0){for(const y of [1,2]){wl(3,y);wl(W_-4,y)}}                 // two alcoves in the back corners
+   else if(v===1){for(let x=1;x<=3;x++)wl(x,H_-4);for(let y=H_-5;y<H_-4;y++)wl(3,y)}   // a nook behind a stub wall at the front left
+   else if(v===2){for(let y=2;y<H_-3;y++)if(y!==(H_>>1))wl(W_-4,y)}          // a long partition with a gap, a side gallery
+   else{for(let x=2;x<W_-2;x++)if(Math.abs(x-mid)>1)wl(x,H_-4)}}              // a screen across the room with a gap in the middle
   {const used=new Set(decor.map(d=>d.x+','+d.y));for(let k=1;k<=3;k++)used.add(mid+','+(H_-1-k));
    const free=(x,y)=>x>0&&y>0&&x<W_-1&&y<H_-1&&rows[y][x]==='.'&&!used.has(x+','+y),take=(x,y)=>used.add(x+','+y);
    const prop=(role,x,y,o)=>{if(!free(x,y))return false;take(x,y);put(role,x,y,o);return true};
@@ -694,7 +717,9 @@ const hgtxulbThemes=[
 ];
 for(let k=0;k<45;k++){const id=5083+k,t=hgtxulbThemes[k%hgtxulbThemes.length],w=9+((k*5)%3)*2,hh=7+((k*7)%3);
   HGTXULB.INT[id]=[w,hh];const nm=t[0]+(k>=18?' ('+(((k/18)|0)+1)+')':'');LEVEL_NAMES[id]=nm;
-  R_(id,nm,'pacl'[(k+((k/18)|0))%4],t[2],c=>{t[3](c,k)},{amb:.78})}
+  R_(id,nm,'pacl'[(k+((k/18)|0))%4],t[2],c=>{t[3](c,k);if(k%5===0)c.door(w-3,0,5128+((k/5)|0))},{amb:.78})}
+for(let q=0;q<9;q++){const cid=5128+q,k=q*5,w=9+((k*5)%3)*2;HGTXULB.INT[cid]=[7,6];LEVEL_NAMES[cid]='A Back Room';
+  R_(cid,'A Back Room','pacl'[(q+2)%4],'wood',c=>{const {put,chest,W,H}=c;put('bed',1,1);put('cradle',W-2,1);chest(W-2,H-3,'hg_chestweed');put('harp',1,H-3)},{parent:{id:5083+k,at:{x:w-3,y:1,f:2}},amb:.7})}
 /* ---------- phase 5 rooms: the indoor maze (5080), the tank room (5081) and the drowned loom hall (5082, reached by diving) ---------- */
 LEVEL_NAMES[5080]='The Indoor Maze';LEVEL_NAMES[5081]='The Tank Room';LEVEL_NAMES[5082]='The Drowned Loom Hall';
 const hgtxulbEnsureCity=()=>{if(!LEVELS[HGTXULB.ID]&&KH_LAZY[HGTXULB.ID])KH_LAZY[HGTXULB.ID]();return HGTXULB.LINKS||{}};

@@ -15,7 +15,7 @@
    ========================================================================== */
 var HGTW=(typeof HGTW==='undefined')?{}:HGTW;
 HGTW.opts={481:{density:.62,max:130,seed:481},482:{density:.1,max:40,seed:482},483:{density:.08,max:40,seed:483},484:{density:.08,max:40,seed:484}};
-HGTW.noisy=11;HGTW.off=false;HGTW.stats={};
+HGTW.noisy=5;HGTW.off=false;HGTW.stats={};
 const hgtwRange=n=>hgtAny(n);
 function hgtwHash(a,b,c){let h=(Math.imul(a|0,374761393)+Math.imul(b|0,668265263)+Math.imul(c|0,2147483647))|0;h=Math.imul(h^(h>>>13),1274126177);return ((h^(h>>>16))>>>0)/4294967296}
 function hgtwRng(seed){let s=(seed|0)||1;return()=>{s=Math.imul(s^(s>>>15),2246822519)+1013904242|0;s=Math.imul(s^(s>>>13),3266489917)|0;return ((s^(s>>>16))>>>0)/4294967296}}
@@ -33,16 +33,16 @@ function hgtwPiece(name){ // 128x128 pixel data of a painted wall piece, or null
 function hgtwUnitStat(d,y0,y1){let r=0,g=0,b=0,l=0,l2=0;const n=128*(y1-y0);for(let y=y0;y<y1;y++){let o=y*512;for(let x=0;x<128;x++,o+=4){r+=d[o];g+=d[o+1];b+=d[o+2];const v=d[o]*.3+d[o+1]*.59+d[o+2]*.11;l+=v;l2+=v*v}}
   const m=l/n;return {m:[r/n,g/n,b/n],sd:Math.sqrt(Math.max(0,l2/n-m*m))}}
 function hgtwBand(d,y0,y1,add,mul){for(let y=Math.max(0,y0);y<Math.min(y1,d.length/512);y++){let o=y*512;for(let x=0;x<128;x++,o+=4){d[o]=d[o]*mul+add;d[o+1]=d[o+1]*mul+add;d[o+2]=d[o+2]*mul+add}}}
-HGTW.winNames=['hgt_w2_winpink','hgt_w2_winaqua','hgt_w2_bandjade'];
+HGTW.winNames=['hgt_w2_winpink','hgt_w2_winaqua','hgt_w2_bandjade','hgt_w3_relief_pink','hgt_w3_relief_aqua','hgt_w3_fresco_cream','hgt_w3_fresco_amber','hgt_w3_scroll_aqua','hgt_w3_scroll_pink','hgt_w3_reed_lilac','hgt_w3_arcade_cream','hgt_w3_arcade_lilac','hgt_w3_shutters_lilac'];
 function hgtwDetail(tex){
-  const d=tex.d,Hp=tex.h,units=Math.floor(Hp/128);if(units<2||(tex.wh||0)<2.4)return;
+  const d=tex.d,Hp=tex.h,units=Math.floor(Hp/128);if(units<2||(tex.wh||0)<1.9)return;
   const st=[];for(let u=0;u<units;u++)st.push(hgtwUnitStat(d,Hp-128*(u+1),Hp-128*u));
   const plain=u=>st[u].sd<10;let busy=0;for(let u=1;u<units-1;u++)if(!plain(u))busy++;
   // relief units: a painted window or band piece, colour-matched, in the plain units of a face that has little else
   const pcs=HGTW.winNames.map(hgtwPiece).filter(Boolean);
-  if(pcs.length&&units>=4){const every=busy>=(units-2)/3?4:3;
-    for(let u=2;u<units-1;u+=every){if(!plain(u))continue;
-      let best=null,bd=1e9;for(const pc of pcs){const dd=Math.abs(pc.m[0]-st[u].m[0])+Math.abs(pc.m[1]-st[u].m[1])+Math.abs(pc.m[2]-st[u].m[2]);if(dd<bd){bd=dd;best=pc}}
+  if(pcs.length&&units>=2){const every=busy>=(units-2)/3?4:3,u0=units>=4?2:1,sig=Math.floor(st[0].m[0]*7+st[0].m[1]*13+st[0].m[2]*29+Hp);
+    for(let u=u0;u<units;u+=every){if(!plain(u)||(u===units-1&&units>=4))continue;
+      const rk=pcs.map(pc=>[Math.abs(pc.m[0]-st[u].m[0])+Math.abs(pc.m[1]-st[u].m[1])+Math.abs(pc.m[2]-st[u].m[2]),pc]).sort((p,q)=>p[0]-q[0]);const best=rk[(sig+u)%Math.min(3,rk.length)][1]; // one of the three closest in colour, varied from tile to tile
       const y0=Hp-128*(u+1),sh=[0,1,2].map(c=>Math.max(-60,Math.min(60,st[u].m[c]-best.m[c])));
       for(let y=0;y<128;y++){const e=Math.min(1,Math.min(y,127-y)/10),o0=(y0+y)*512;for(let x=0;x<128;x++){const o=o0+x*4,q=(y*128+x)*4;for(let c=0;c<3;c++){const v=best.d[q+c]+sh[c];d[o+c]=d[o+c]*(1-e)+v*e}}}}}
   if(plain(0)){const y=Hp-18;hgtwBand(d,y,y+2,22,1);hgtwBand(d,y+2,Hp-2,0,.9);hgtwBand(d,Hp-2,Hp,-18,.85)} // plinth
@@ -76,7 +76,7 @@ function hgtwHeal(tex){
   // unsharp (luma only, soft knee so grain is not boosted) and a little contrast around the mean of the tile
   const N=128*Hp,L=new Float32Array(N);let sum=0;
   for(let p=0,o=0;p<N;p++,o+=4){const v=d[o]*.3+d[o+1]*.59+d[o+2]*.11;L[p]=v;sum+=v}
-  const mean=sum/N;let CA=1.7,CC=.12,hf=0;
+  const mean=sum/N;let CA=2.0,CC=.12,hf=0;
   for(let y=1;y<Hp-1;y+=2)for(let x=1;x<127;x+=2){const c=L[y*128+x];hf+=Math.abs(4*c-L[y*128+x-1]-L[y*128+x+1]-L[y*128-128+x]-L[y*128+128+x])*.125}
   hf/=((Hp>>1)*63);tex.hf=hf;
   if(hf>HGTW.noisy){ // busy small-scale noise (dots, static, cells) turns to pixel noise close up: low-pass it strongly instead of sharpening
@@ -171,9 +171,22 @@ function hgtwVineWalls(L,opts){
   return swapped;
 }
 
+
+/* ---------- tube ceiling: pearl vault with ring ribs and lit round windows (replaces the plain placeholder of hgt_engine.js unless a painted one exists) ---------- */
+function hgtwTubeCeiling(){
+  if(typeof DS_TEXREG==='undefined'||DS_TEXREG.hgt_tube_ceiling===undefined||HGTW._tc)return;const t=TEX[DS_TEXREG.hgt_tube_ceiling];if(!t||!t.d||t.d.length!==65536||t.h>128)return;HGTW._tc=1;
+  const d=t.d;
+  for(let y=0;y<128;y++)for(let x=0;x<128;x++){const o=(y*128+x)*4,cx=(x%64)-31.5,cy=(y%64)-31.5,r=Math.hypot(cx,cy),ex=Math.min(x%64,63-x%64),ey=Math.min(y%64,63-y%64),e=Math.min(ex,ey);
+    const sw=.5+.5*Math.sin((x*.9+y*.35)*.35+Math.sin(y*.21)*2),curve=1-.22*Math.pow(1-Math.min(ex,31)/31,2)*0+.12*(e/31); // the vault is lighter towards the middle of each panel, darker at the ribs
+    let R=226-30*(1-sw)*.6,G=214-26*(1-sw)*.6,B=236-20*(1-sw)*.6,k=.8+.3*(e/31)*curve;
+    if(e<2)k*=.55;else if(e<4)k*=1.18;else if(e<6)k*=.8; // rib: dark groove, bright bevel, soft shadow
+    if(r<11){const g=1-r/11;R=R*(1-g)+255*g;G=G*(1-g)+226*g;B=B*(1-g)+150*g;k=1+.3*g}else if(r<13){k*=.55} // a lit round window with a dark rim
+    d[o]=Math.min(255,R*k);d[o+1]=Math.min(255,G*k);d[o+2]=Math.min(255,B*k);d[o+3]=255}
+}
 /* ---------- hook: on level build ---------- */
 function hgtwApply(L,id){
   if(!L||L._hw||HGTW.off)return;L._hw=1;
+  try{hgtwTubeCeiling()}catch(e){console.error('hgtw tube',e)}
   const t0=performance.now(),h=hgtwHealLevel(L);let v=0;const o=HGTW.opts[id];
   if(o&&L.terrace){try{v=hgtwVineWalls(L,o)}catch(e){console.error('hgtw vines',e)}}
   HGTW.stats[id]={heal:h,vines:v,ms:Math.round(performance.now()-t0)};

@@ -10,7 +10,7 @@
    - Extra: lamp lights are 'calm' (slow pulse, no flame flicker), light motes drift round lit lamps at night, and window pictures of the wall tiles glow at night.
    Core support in index.html: LIGHTS entries may carry col:[r,g,b] (absolute colour multipliers) and calm:true; the light loops of floors, walls and terrain.js use them.
    ========================================================================== */
-const HGTLM={bases:['hg_lamp','hgt_lamppost','hgt_gardenlantern','hgt_hanglamp'],force:null,gain:.7,maxLights:5,cur:null,wins:new Map(),done:new Set(),winQ:[],winLv:-1,eState:0};
+const HGTLM={bases:['hg_lamp','hgt_lamppost','hgt_gardenlantern','hgt_hanglamp'],force:null,gain:1.1,maxLights:5,cur:null,wins:new Map(),done:new Set(),winQ:[],winLv:-1,eState:0};
 // glass: height of the lit glass as a fraction of the picture; hs: halo size; li: light strength
 HGTLM.info={hg_lamp:{glass:.86,hs:1,li:1},hgt_lamppost:{glass:.9,hs:1.1,li:1},hgt_gardenlantern:{glass:.6,hs:.8,li:.8},hgt_hanglamp:{glass:.28,hs:.8,li:.9}};
 /* colours: h0 top hue, h1 bottom hue (degrees), s saturation scale (0 = white). The light colour is made from the hue. */
@@ -108,7 +108,7 @@ function hgtlmTick(t){
     if(!v._b)v._b={ambient:v.ambient,tint:v.tint.slice(),hazeCol:v.hazeCol.slice(),roofHaze:v.roofHaze.slice(),wallGain:v.wallGain,floorGain:v.floorGain,riserGain:v.riserGain,roofGain:v.roofGain,panoGain:v.panoGain,motes:v.motes,grade:v.grade.slice(),vignette:v.vignette};
     const b=v._b,n=hgtlmNight();
     if(v._n!==n){v._n=n;
-      v.ambient=b.ambient*(1-.58*n);v.wallGain=b.wallGain*(1-.1*n);v.floorGain=b.floorGain*(1-.08*n);v.riserGain=b.riserGain*(1-.1*n);v.roofGain=b.roofGain*(1-.5*n);v.panoGain=b.panoGain*(1-.3*n);
+      v.ambient=b.ambient*(1-.4*n);v.wallGain=b.wallGain*(1-.1*n);v.floorGain=b.floorGain*(1-.08*n);v.riserGain=b.riserGain*(1-.1*n);v.roofGain=b.roofGain*(1-.5*n);v.panoGain=b.panoGain*(1-.3*n);
       v.tint=[b.tint[0]*(1-.25*n),b.tint[1]*(1-.1*n),b.tint[2]*(1+.1*n)];
       v.hazeCol=[b.hazeCol[0]*(1-.7*n),b.hazeCol[1]*(1-.7*n),b.hazeCol[2]*(1-.5*n)];v.roofHaze=[b.roofHaze[0]*(1-.6*n),b.roofHaze[1]*(1-.6*n),b.roofHaze[2]*(1-.4*n)];
       v.grade=[b.grade[0]*(1-.35*n),b.grade[1]*(1-.3*n),b.grade[2]*(1-.1*n),b.grade[3]*(1+.8*n)];v.motes=Math.round(b.motes*(1+n));v.vignette=Math.min(1,b.vignette*(1+.25*n))}

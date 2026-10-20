@@ -190,6 +190,7 @@ function hgtxglormBuild(id){
       for(const dy of [-1,1])wall(x,y+dy,'m','band',undefined,hh+3.3);if(i%3===1)hgtlLight(B,x,y)}
     B.stairs.push({cells,h0:ha,rise:(hb-ha)/(n+1),kind:'bridge'});return cells};
   /* spiral tower of the library, with a tall core and a door at the top end */
+  const ROOST=[];
   const spiralTower=(x,y,size,h0,rise,tint,rid,coreTop,wallTint)=>{
     const wc=wch(wallTint||'c','band',2.5),sp=hgtlSpiralStairs(B,x,y,size,h0,rise,{gap:1,wall:wc});
     for(let j=y;j<y+size;j++)for(let i=x;i<x+size;i++){RES[I(i,j)]=1;if(!isO(i,j))WS[I(i,j)]={t:wallTint||'c',kind:'band',top:B.h[I(i,j)]+2.5,foot:B.h[I(i,j)],fixed:true,door:null,pre:true}}
@@ -197,9 +198,16 @@ function hgtxglormBuild(id){
     const mx=x+(size>>1),my=y+(size>>1);
     for(let j=-3;j<=3;j++)for(let i=-3;i<=3;i++){const px=mx+i,py=my+j;if(!inb(px,py)||isO(px,py))continue;const cd=Math.max(Math.abs(i),Math.abs(j));
       wall(px,py,tint,cd<=1?'band':'wmid',B.h[I(px,py)],coreTop-cd*1.4,{fixed:true})}
-    const e=sp.ends[0];let dr=null;
-    if(rid)for(const di of [2,1,3,0]){const dd=HGTL.DIRS[di],nx=e[0]+dd[0],ny=e[1]+dd[1];if(inb(nx,ny)&&!isO(nx,ny)&&WS[I(nx,ny)]){const face=HGTL.DIRS.findIndex(q=>q[0]===-dd[0]&&q[1]===-dd[1]),hh=B.h[I(e[0],e[1])];door(nx,ny,tint,hh,hh+2.8,face,rid);dr=[nx,ny];break}}
-    if(rid){const he=B.h[I(e[0],e[1])];for(let k=1;k<=3;k++)for(let dx=-1;dx<=1;dx++){const px=e[0]+dx,py=e[1]-k;if(inb(px,py)&&WS[I(px,py)]&&!WS[I(px,py)].door&&WS[I(px,py)].kind!=='door'){WS[I(px,py)].top=Math.min(WS[I(px,py)].top,he+.9);WS[I(px,py)].pre=false;WS[I(px,py)].fixed=true;WS[I(px,py)].foot=B.h[I(px,py)]}}}
+    const e=sp.ends[0],he=B.h[I(e[0],e[1])];let dr=null;
+    // the top: a square lookout platform of 5 by 5, a low rail round it, a door on one side, and furniture
+    for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const px=e[0]+dx,py=e[1]+dy;if(!inb(px,py)||sp.cellH.has(px+','+py))continue;open(px,py,he,G.PLAT,3);RES[I(px,py)]=1}
+    for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==3)continue;const px=e[0]+dx,py=e[1]+dy;if(!inb(px,py)||isO(px,py)||!WS[I(px,py)])continue;const w=WS[I(px,py)];w.top=Math.min(w.top,he+.9);w.fixed=true;w.foot=B.h[I(px,py)];w.pre=false;w.door=null}
+    if(rid)for(const [dx,dy,fc] of [[0,3,0],[3,0,3],[-3,0,1],[0,-3,2]]){const px=e[0]+dx,py=e[1]+dy;if(inb(px,py)&&!isO(px,py)&&WS[I(px,py)]){door(px,py,tint,he,he+2.8,fc,rid);dr=[px,py];break}}
+    for(const [dx,dy] of [[-2,-2],[2,-2],[-2,2],[2,2]])lamp(e[0]+dx,e[1]+dy);
+    prop('bench',e[0]-1,e[1]-2,{sc:1.1,block:false,walk:true,deco:true});prop('hgtb_chair',e[0]+1,e[1]+1,{sc:1,block:false,walk:true,deco:true});
+    for(const [dx,dy] of [[-2,0],[2,0],[0,-2],[-1,2],[1,-1]])plant(e[0]+dx,e[1]+dy,1.6,.8,['hgtb_plant_orbbush','hgtb_plant_glowshrooms','hgtb_plant_lacecoral','hgtb_plant_lupin','hgtb_plant_potvine'][(dx+dy+5)%5]);
+    deco('hgtb_deco_banner',e[0]+2,e[1]-1,{sc:.9});hgtlDecor(B,['hgtb_lilacmoth','hgtb_jadefinmoth','hgtb_creamjelly'][(e[0]+e[1])%3],e[0]+1,e[1]-2,{block:false,walk:true,deco:true,bob:.8});hgtlDecor(B,'hgtb_deco_lanterns',e[0],e[1]-1,{block:false,walk:true,deco:true,bob:1.6,sc:1.2});hgtlLight(B,e[0],e[1]);
+    ROOST.push({x:e[0],y:e[1],h:he});
     return {sp,top:sp.top,end:e,door:dr}};
   /* ---------- the summit spire ---------- */
   const spire=spiralTower(69,2,12,SH,.14,'f',4916,SH+9,'m');
@@ -460,20 +468,22 @@ function hgtxglormBuild(id){
    for(let t=0;t<=5;t++){const wt=WT(t),f=FOLK[t],g=FOLK[(t+3)%8];npc(f[0],72,wt+1,f[1],1);npc(g[0],78,wt+1,g[1],1)}}
   hgtlSetStart(B,75,144,0);
   /* ---------- more enterable houses: shop doors on every tier, and doors in the houses of the districts ---------- */
-  {const SHARED=[4965,4966,4974,4975],OWN=[];for(let i=5160;i<=5191;i++)OWN.push(i);let oi=0;
+  {const SHARED=[4965,4966,4974,4975],OWN=[];for(let i=5160;i<=5203;i++)OWN.push(i);let oi=0;
    // a second shop door on every tier of the stair
    for(let t=0;t<=5;t++){const cands=shopList.filter(s=>s.t===t&&s.bw>=5&&Math.abs(s.x-75)>8&&Math.abs(s.x-75)<34&&!doorsOut.some(d=>d.x===s.x&&d.y===s.y)&&!doorsOut.some(d=>d.y===s.y&&Math.abs(d.x-s.x)<9));
      const s=cands[(t*5+1)%Math.max(1,cands.length)];if(s&&oi<OWN.length){const rid=OWN[oi++];door(s.x,s.y,s.tint,s.h,s.h+s.sh,2,rid);deco('hgt_banner',s.x-2,s.wt,{sc:.8});plant(s.x+2,s.wt+2,1.3,.6)}
      const s2=cands[(t*5+3)%Math.max(1,cands.length)];if(s2&&s2!==s&&Math.abs(s2.x-(s&&s.x))>8&&oi<OWN.length){const rid=OWN[oi++];door(s2.x,s2.y,s2.tint,s2.h,s2.h+s2.sh,2,rid)}}
    // houses of the districts
-   const hs=houseList.filter(h=>!h.patio&&h.w>=4),want=SHARED.length+(OWN.length-oi),step=Math.max(1,Math.floor(hs.length/(want+4)));let k=0;
-   for(let i=0;i<hs.length&&k<want;i+=step){const h=hs[i],x=h.x+(h.w>>1),y=h.y+h.d-1,ay=h.y+h.d;
-     if(!isO(x,ay)||Math.abs(ground(x,ay))>.01||B.occ.has(x+','+ay)||doorsOut.some(d=>Math.hypot(d.x-x,d.y-y)<5))continue;
+   const hs=houseList.filter(h=>!h.patio&&h.w>=4),want=SHARED.length+(OWN.length-oi);let k=0;
+   for(let i=0;i<hs.length&&k<want;i++){const h=hs[i],x=h.x+(h.w>>1),y=h.y+h.d-1,ay=h.y+h.d;
+     if(!isO(x,ay)||Math.abs(ground(x,ay))>.01||B.occ.has(x+','+ay)||doorsOut.some(d=>Math.hypot(d.x-x,d.y-y)<3.5))continue;
      const ws=WS[I(x,y)];if(!ws)continue;
      if(k<SHARED.length){const id=SHARED[k],r=(typeof HGTROOMS!=='undefined')&&HGTROOMS.find(q=>q.id===id),at=r?{x:r.entry.x,y:r.entry.y,f:r.entry.f}:{x:1,y:1,f:0};
        linkDoor(x,y,ws.t,0,h.tp,2,id,at,r?r.name:'A round room');if(typeof hgtrSetReturn==='function')hgtrSetReturn(id,483,{x,y:ay,f:2})}
      else{const rid=OWN[oi++];door(x,y,ws.t,0,h.tp,2,rid)}
-     plant(x-1,ay,1.2,.6);hgtlDecor(B,'hgt_lamppost',x+1,ay,{block:false,walk:true,deco:true});k++}}
+     plant(x-1,ay,1.2,.6);hgtlDecor(B,'hgt_lamppost',x+1,ay,{block:false,walk:true,deco:true});k++
+     // a second door on the far side of the same house, to a different room
+     const ny=h.y,nay=h.y-1;if(k>=SHARED.length&&oi<OWN.length&&isO(x,nay)&&Math.abs(ground(x,nay))<.01&&!B.occ.has(x+','+nay)&&WS[I(x,ny)]&&!doorsOut.some(d=>Math.hypot(d.x-x,d.y-ny)<2.5)){door(x,ny,WS[I(x,ny)].t,0,h.tp,0,OWN[oi++]);plant(x+1,nay,1.2,.6)}}}
   hgtlSetStart(B,75,144,0);
   /* ---------- the south gallery of the court: stalls on the terraces, so the approach from the avenue is a market, not an empty floor ---------- */
   {const ST=HGTXG_STALL,WARE=['barrel','crate','sacks','hg_jar','vase0','hg_waxbarrel'];
@@ -517,6 +527,13 @@ function hgtxglormBuild(id){
        const k=FOC[fi++%6];prop(k,x,y,{sc:k==='hgt_fountain'?1.3:k==='hgt_obelisk'?1.4:1.7});light(x,y+1);
        for(const [a,b] of [[-2,0],[2,0]])lamp(x+a,y+b);for(const [a,b] of [[-1,-1],[1,-1],[-1,1],[1,1]])plant(x+a,y+b,1.3,.7);deco('bench',x,y+2,{});named('Garden',x,y-1,'small');
        for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++)RES[I(x+a,y+b)]=1;done=true}}}
+  /* night: lamps and glitter in the dark zones (the Undercroft hall, the hanging gardens, the court floor), and lanterns hung high so the city glows from above */
+  for(let x=68;x<=82;x+=2){lamp(x,104);lamp(x,106);plant(x,105,1.2,.9,'hgtb_plant_glowshrooms')}
+  for(let k=0;k<7;k++)hover(69+k*2,105,1.5+(k&1)*.5,1.3);
+  for(let j=0;j<22;j++){const y=46-j;if(j%2===0){lamp(119,y);lamp(131,y)}for(const x of [122,125,128])if(R(x,y,130)<.35)plant(x,y,1.3,.9,'hgtb_plant_glowshrooms');if(j%3===1)hover(125,y,1.8,1.3)}
+  for(let y=21;y<=24;y++)for(let x=120;x<=130;x+=2){hover(x,y,1.6+((x+y)&1)*.5,1.2);if(R(x,y,131)<.5)plant(x,y,1.3,.9,'hgtb_plant_lacecoral')}
+  for(let y=70;y<=104;y+=6)for(let x=38;x<=112;x+=12){if(x>=66&&x<=84&&y>=80)continue;lamp(x,y+1);plant(x+1,y+1,1.3,.8,'hgtb_plant_glowshrooms')}
+  for(let gy=8;gy<142;gy+=9)for(let gx=8;gx<142;gx+=9){const x=gx+((R(gx,gy,140)*4)|0),y=gy+((R(gx,gy,141)*4)|0);if(!isO(x,y)||inMz(x,y))continue;hgtlDecor(B,'hgtb_deco_lanterns',x,y,{block:false,walk:true,deco:true,bob:6+R(x,y,142)*7,sc:2.2});hgtlLight(B,x,y)}
   hgtlSetStart(B,75,144,0);
   /* ---------- finish: walls made by the library (placeholder characters) become my wall columns, standing on the ground ---------- */
   {const TM={a:'p',b:'a',c:'c',d:'l'};
@@ -541,7 +558,7 @@ function hgtxglormBuild(id){
   {const RB='saturate(1.3) brightness(1.12) contrast(1.05)',rs=['hgt_wp','hgt_wa','hgt_wl','hgt_wc'].map(n=>mkTile(n,1,{boost:RB})),rg=new Int32Array(W*H);
     for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=I(x,y);rg[i]=rs[(B.kind[i]===G.COURT||B.kind[i]===G.TERRACE)?1:((x>>3)+(y>>3)*3)&3]}
     lv.terrace.riser=rs[3];lv.terrace.rg=rg}
-  lv.hgtxB=B;lv.hgtxDoors=doorsOut;lv.hgtxShops=shopList;lv.hgtxHouses=houseList;lv.hgtxMz=MZ;
+  lv.hgtxB=B;lv.hgtxDoors=doorsOut;lv.hgtxShops=shopList;lv.hgtxHouses=houseList;lv.hgtxMz=MZ;lv.hgtxRoost=ROOST;
   return lv;
 }
 hgtRegister(483,hgtxglormBuild);
@@ -570,10 +587,11 @@ const HGTXG_FIT={
  brewer:[['barrel',1,1],['barrel',2,1],['barrel',3,1],['barrel',7,1],['hg_waxbarrel',1,5],['hg_waxbarrel',7,5],['counter',4,2],['hgt_lamppost',2,3,'d'],['hgt_lamppost',6,3,'d'],['npc','hg_npc5',5,3,'hgx_brewer']],
  gallery:[['hgt_banner',2,1,'d'],['hgt_banner',5,1,'d'],['hgt_banner',8,1,'d'],['hgtb_furn_clock',1,3],['hgtb_furn_clock',9,3],['hg_chestjelly',5,3],['hgt_fairytree',2,5],['hgt_fairytree',8,5],['hgt_lamppost',5,5,'d'],['hgt_lamppost',3,3,'d'],['hgt_lamppost',7,3,'d']]};
 
-/* thirty-two more houses and workshops, ids 5160 to 5191, built from the same themes */
-{const NM=['Rope Maker','Sail Loft','Cooper','Potter','Dyer','Saddle Maker','Net Maker','Tallow Chandler','Scale Maker','Ledger Hall','Messenger House','Customs Office','Guild Hall','Water Seller','Reed Cutter','Salt Store','Coin Changer','Weigher’s Lodge','Caravan Inn','Stairwarden’s Room','Rug Beater','Bone Carver','Shell Polisher','Wick Store','Key Maker','Cheese Cellar','Cloth Stall','Spice Stall','Pearl Stall','Lantern Stall','Basket Stall','Map Stall'];
+/* forty-four more houses and workshops, ids 5160 to 5203, built from the same themes */
+{const NM=['Rope Maker','Sail Loft','Cooper','Potter','Dyer','Saddle Maker','Net Maker','Tallow Chandler','Scale Maker','Ledger Hall','Messenger House','Customs Office','Guild Hall','Water Seller','Reed Cutter','Salt Store','Coin Changer','Weigher’s Lodge','Caravan Inn','Stairwarden’s Room','Rug Beater','Bone Carver','Shell Polisher','Wick Store','Key Maker','Cheese Cellar','Cloth Stall','Spice Stall','Pearl Stall','Lantern Stall','Basket Stall','Map Stall','Bell Cutter','Coin Weigher','Hide Dealer','Tile Maker','Oil Seller','Wax Maker','Bread Oven','Tea House','Tool Smith','Wool Store','Dye Works','Seal Cutter'];
  const TH=Object.keys(HGTXG_FIT).filter(k=>!['vault','treasury','gallery','hall'].includes(k)),FOLK=['hgtb_sweep','hgtb_basket','hgtb_water','hgtb_polish','hgtb_read','hgtb_fisher','hgtb_watch','hgtb_walk','hgtb_plantbed','hgtb_jar','hgtb_lantern','hgtb_elder'];
- NM.forEach((n,i)=>{const id=5160+i;HGTXG_ROOMS[id]={n,w:[7,9,11][i%3],d:[7,9][(i>>1)%2],t:'pacl'[i%4],fl:['wood','hgt_f0','hgt_f5','hgt_f3'][i%4],deco:TH[i%TH.length],extra:'hgx_h'+i};LEVEL_NAMES[id]=n;
+ NM.forEach((n,i)=>{const id=5160+i;if(i%3===0){const cid=5210+(i/3|0);HGTXG_ROOMS[cid]={n:n+' Back Room',w:7,d:7,t:'pacl'[(i+1)%4],fl:'hgt_f5',deco:TH[(i+5)%TH.length],extra:'hgx_h'+i+'b'};LEVEL_NAMES[cid]=n+' Back Room';hgtbNpc('hgx_h'+i+'b','Assistant',FOLK[(i+5)%12],['This room holds the stock. Ask in the front room if you want something.'])}
+  HGTXG_ROOMS[id]={up:i%3===0?5210+(i/3|0):undefined,n,w:[7,9,11][i%3],d:[7,9][(i>>1)%2],t:'pacl'[i%4],fl:['wood','hgt_f0','hgt_f5','hgt_f3'][i%4],deco:TH[i%TH.length],extra:'hgx_h'+i};LEVEL_NAMES[id]=n;
   hgtbNpc('hgx_h'+i,n.replace(/ (Stall|Hall|Store|Loft)$/,'')+' keeper',FOLK[i%12],['This is the '+n.toLowerCase()+'. It opens early and closes when the lamps on the stair are lit.','Trade here goes up the stair in baskets. Take care on the steps with a load.'])});
 }
 /* the rooms that hang off another room: parent id -> child id (a door in the north wall of the parent) */
@@ -587,6 +605,13 @@ function hgtxglormRoomBuild(rid){
   const chars={},ch=g=>{let c=hgtaChar(g);chars[c]=g;return c};
   const cw=ch(wallG),cb=ch(wallC),cwin=ch(wallW),rows=[];
   for(let y=0;y<d;y++){let s='';for(let x=0;x<w;x++){const e=x===0||y===0||x===w-1||y===d-1;s+=e?((x+y)%3===0?cb:((x+y)%5===1&&x>0&&x<w-1?cwin:cw)):'.'}rows.push(s.split(''))}
+  const SOL=[],solid=(x,y)=>{if(x>0&&y>0&&x<w-1&&y<d-1&&!(x===(w>>1)&&(y===d-2||y===1))){rows[y][x]=cb;SOL.push(x+','+y)}};
+  if(rid>=5160){const v=rid%6;
+    if(v%2===0){solid(2,2);solid(w-3,2);solid(2,d-3);solid(w-3,d-3)}                                  // corner pillars
+    if(v%3===1){for(let x=1;x<=3;x++)solid(x,d-4);solid(3,d-3);solid(3,d-2)}                         // a recess in the south west corner
+    if(v===2||v===5){for(let y=2;y<=((d>>1)-1);y++)solid(w-4,y)}                                       // a half partition on the east
+    if(v===3){for(let x=w-4;x<w-1;x++)solid(x,d-4);solid(w-4,d-3);solid(w-4,d-2)}                     // a recess in the south east corner
+  }
   const exitAt=parent!==null?{x:HGTXG_ROOMS[parent].w>>1,y:1,f:2}:out?{x:out.ax,y:out.ay,f:out.face}:{x:75,y:144,f:0};
   const exitLvl=parent!==null?parent:483;
   const eg=hgtxglormTile(n[0],2.7,{base:n[3],mid:n[1],top:n[2]});KH_DOOR[eg]={lvl:exitLvl,at:exitAt};
@@ -599,7 +624,7 @@ function hgtxglormRoomBuild(rid){
     decor.push(f==='d'?{k,x,y,block:false,walk:true,deco:true}:{k,x,y,block:true});
     if(/lamppost|hanglamp|gardenlantern|candle|crystal|mushroom/.test(k))lights.push([x,y])}
   if(r.extra)decor.push({k:'hg_npc1',x:Math.max(1,(w>>1)+1),y:d-3,block:false,walk:true,npc:r.extra,sc:1});
-  {const rnd=k=>hash2(rid,k,917),used=new Set(decor.map(q=>q.x+','+q.y)),v=rid%6,FOLKI=['hgtb_sweep','hgtb_basket','hgtb_water','hgtb_polish','hgtb_read','hgtb_fisher','hgtb_watch','hgtb_walk','hgtb_plantbed','hgtb_jar','hgtb_lantern','hgtb_elder'];
+  {const rnd=k=>hash2(rid,k,917),used=new Set(decor.map(q=>q.x+','+q.y).concat(SOL)),v=rid%6,FOLKI=['hgtb_sweep','hgtb_basket','hgtb_water','hgtb_polish','hgtb_read','hgtb_fisher','hgtb_watch','hgtb_walk','hgtb_plantbed','hgtb_jar','hgtb_lantern','hgtb_elder'];
    const put=(k,x,y,f,sc)=>{if(x<=0||y<=0||x>=w-1||y>=d-1||used.has(x+','+y))return false;used.add(x+','+y);decor.push(f?{k,x,y,block:false,walk:true,deco:true,sc:sc||1}:{k,x,y,block:true,sc:sc||.85});return true};
    const SMALL=['barrel','crate','hg_jar','sacks','vase0','vase2','urn','hgtb_plant_orbbush','hgtb_plant_potvine','hgtb_plant_glowshrooms','hgtb_plant_lupin'],WALLF=['hgtb_furn_bookshelf','hgtb_furn_cabinet','hgtb_furn_clock','hgtb_furn_hearth','hgtb_furn_loom','hgtb_furn_bed','hgtb_furn_bunk','hgtb_furn_books_globe'];
    // the layout: six plans, chosen by the room
@@ -653,3 +678,17 @@ function hgtxglormOverview(){
 {const _do=drawOverview;drawOverview=function(){if(LEVEL===483&&LEVELS[483]&&!G.world&&!G.teleMode){hgtxglormOverview();return}return _do.apply(this,arguments)}}
 /* a city map is drawn whole, with no fog of war (as the maps of Oldhaven and Khemetra are) */
 {const _f=mplFogOn;mplFogOn=function(L){return L&&L.name==='Glorm'?false:_f.apply(this,arguments)}}
+/* ---------- motion over the open spans: schools of fish and winged creatures drift over the plazas, the court and the gardens ---------- */
+const HGTXGM_MOTION={on:0};
+function hgtxglormMotion(){
+  if(typeof hgtgSchool!=='function'||typeof hgtgSpawn!=='function')return;const L=LEVEL===483&&LEVELS[483];
+  const ring=(cx,cy,r,z)=>[[cx-r,cy-r,z],[cx+r,cy-r,z+.4],[cx+r,cy+r,z],[cx-r,cy+r,z+.4]];
+  hgtgSchool(483,{route:ring(75,132,8,2.4),n:7,scale:.9,tints:['pearl','rose','gold','aqua'],seed:5,speed:.5});
+  hgtgSchool(483,{route:ring(75,86,12,2.8),n:6,scale:1,tints:['violet','pearl','glow'],seed:6,speed:.45});
+  hgtgSchool(483,{route:ring(125,35,9,3.4),n:5,scale:.9,tints:['gold','rose'],seed:7,speed:.4});
+  hgtgSchool(483,{route:ring(75,112,16,2.6),n:6,scale:1,tints:['aqua','pearl'],seed:8,speed:.5});
+  for(const [x,y,n] of [[60,126,'hgtg_butterfly'],[90,126,'hgtg_moth'],[50,80,'hgtg_butterfly'],[100,80,'hgtg_dragonfly'],[30,100,'hgtg_moth'],[120,100,'hgtg_butterfly'],[75,20,'hgtg_bellmoth']])
+    try{hgtgSpawn(n,{level:483,x,y,scale:1.2,speed:.7,route:ring(x,y,6,2.2)})}catch(e){console.error('motion',e)}
+  if(L&&L.hgtxRoost)for(const r of L.hgtxRoost)try{hgtgSpawn('hgtg_peacock',{level:483,x:r.x+1.9,y:r.y-1.6,scale:.7})}catch(e){}
+}
+{const _u=update;update=function(dt){if(LEVEL===483&&G.state==='play'&&!HGTXGM_MOTION.on&&LEVELS[483]){HGTXGM_MOTION.on=1;try{hgtxglormMotion()}catch(e){console.error('hgtxMotion',e)}}else if(LEVEL!==483)HGTXGM_MOTION.on=0;return _u.apply(this,arguments)}}

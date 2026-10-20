@@ -132,19 +132,21 @@ HGTE.layersDefault=[{sr:4.6,mult:2,off:.11,base:-4,drift:.9,gain:2.3,alpha:.55,m
 function hgtPanoLoad(){if(HGTE._pl)return;HGTE._pl=1;const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);HGTE.pano={w:im.width,h:im.height,d:x.getImageData(0,0,im.width,im.height).data,hr:190,rs:1.2}};im.src='assets/hgt_pano.jpg';const sl=new Image();sl.onload=()=>{const c=document.createElement('canvas');c.width=sl.width;c.height=sl.height;const x=c.getContext('2d');x.drawImage(sl,0,0);HGTE.sil={w:sl.width,h:sl.height,d:x.getImageData(0,0,sl.width,sl.height).data}};sl.src='assets/hgt_sil.png';HGTE.strips={};for(const nm of ['near','mid','far']){const e=new Image();e.onload=()=>{const c=document.createElement('canvas');c.width=e.width>>1;c.height=e.height>>1;const x=c.getContext('2d');x.drawImage(e,0,0,c.width,c.height);HGTE.strips[nm]={w:c.width,h:c.height,d:x.getImageData(0,0,c.width,c.height).data}};e.src='assets/ds_hgtb_edge_'+nm+'.png'}}
 HGTE.bgc=null;
 function hgtPanoPaint(D,dX,dY,pX,pY,K,t,day){ // the backdrop depends only on the view angle, the light and a slow drift: it is kept and copied back while none of them changes
-  const key=LEVEL+'|'+dX.toFixed(4)+'|'+dY.toFixed(4)+'|'+(day||0).toFixed(2)+'|'+Math.floor(t*K.panoDrift*.5)+'|'+(HGTE.layers?1:0)+'|'+(HGTE.strips&&HGTE.strips.near?1:0)+'|'+K.sil+K.panoGain+K.mist+K.silGain,B=HGTE.bgc;
+  const key=LEVEL+'|'+HH+'|'+dX.toFixed(4)+'|'+dY.toFixed(4)+'|'+(day||0).toFixed(2)+'|'+Math.floor(t*K.panoDrift*.5)+'|'+(HGTE.layers?1:0)+'|'+(HGTE.strips&&HGTE.strips.near?1:0)+'|'+K.sil+K.panoGain+K.mist+K.silGain,B=HGTE.bgc;
   if(B&&B.key===key&&B.d.length===D.length){D.set(B.d);return}
   hgtPanoPaint2(D,dX,dY,pX,pY,K,t,day);
   if(!B||B.d.length!==D.length)HGTE.bgc={key,d:new Uint8ClampedArray(D)};else{B.d.set(D);B.key=key}
 }
 function hgtPanoPaint2(D,dX,dY,pX,pY,K,t,day){
-  const P=HGTE.pano,w=P.w,h=P.h,d=P.d,g=K.panoGain,gd=g*(K.panoNight+(1.4-K.panoNight)*(day||0)),tr=K.panoTint[0]*gd,tg=K.panoTint[1]*gd,tb=K.panoTint[2]*gd,ml=K.mist*(.65+.35*(day||0)),mc=K.mistCol,off=t*K.panoDrift,rows=new Int32Array(VH),mb=new Float32Array(VH);
+  const P=HGTE.pano,w=P.w,h=P.h,d=P.d,g=K.panoGain,gd=g*(K.panoNight+(1.15-K.panoNight)*(day||0)),tr=K.panoTint[0]*gd,tg=K.panoTint[1]*gd,tb=K.panoTint[2]*gd,ml=K.mist*(.65+.35*(day||0)),mc=K.mistCol,off=t*K.panoDrift,rows=new Int32Array(VH),mb=new Float32Array(VH);
   for(let y=0;y<VH;y++){const e=(y-HH-5)/13;mb[y]=ml*.5*Math.exp(-e*e)} // a lit mist band along the horizon where the ground melts into the backdrop
-  for(let y=0;y<VH;y++){let r=(P.hr+(y-HH)*P.rs)|0;rows[y]=(r<0?0:r>=h?h-1:r)*w}
+  if(!P.avg){let ar=0,ag=0,ab=0;for(let i=0;i<w*4*4;i+=4){ar+=d[i];ag+=d[i+1];ab+=d[i+2]}const n=w*4;P.avg=[ar/n,ag/n,ab/n]}
+  const tf=new Float32Array(VH),av=P.avg; // above the top of the picture (looking far up) the roof melts into its average colour instead of smearing the top row
+  for(let y=0;y<VH;y++){let r=(P.hr+(y-HH)*P.rs)|0;rows[y]=(r<0?0:r>=h?h-1:r)*w;tf[y]=r<0?Math.min(1,-r/40):0}
   for(let x=0;x<VW;x++){const cm=2*x/VW-1,u=((((Math.atan2(dY+pY*cm,dX+pX*cm)/TAU)%1)+1)%1*w+off)%w|0;
-    for(let y=0,o=x*4;y<VH;y++,o+=VW*4){const i=(rows[y]+u)*4;let r=d[i]*tr,gg=d[i+1]*tg,b=d[i+2]*tb;if(mb[y]>0){const m=mb[y];r+=mc[0]*m;gg+=mc[1]*m;b+=mc[2]*m}D[o]=r;D[o+1]=gg;D[o+2]=b}}
+    for(let y=0,o=x*4;y<VH;y++,o+=VW*4){const i=(rows[y]+u)*4,f=tf[y];let r=(d[i]+(av[0]-d[i])*f)*tr,gg=(d[i+1]+(av[1]-d[i+1])*f)*tg,b=(d[i+2]+(av[2]-d[i+2])*f)*tb;if(mb[y]>0){const m=mb[y];r+=mc[0]*m;gg+=mc[1]*m;b+=mc[2]*m}D[o]=r;D[o+1]=gg;D[o+2]=b}}
   if(K.sil>0){ // parallax layers of cave-edge scenery in front of the skyline, back to front, with lit mist between them
-    const mcl=K.mistCol,dk=K.panoNight+(1.4-K.panoNight)*(day||0),ST=HGTE.strips,LY=HGTE.layers||((ST&&ST.far&&ST.mid&&ST.near)?HGTE.edgeLayers:HGTE.layersDefault);
+    const mcl=K.mistCol,dk=K.panoNight+(1.15-K.panoNight)*(day||0),ST=HGTE.strips,LY=HGTE.layers||((ST&&ST.far&&ST.mid&&ST.near)?HGTE.edgeLayers:HGTE.layersDefault);
     for(const Ly of LY){const S=Ly.img==='sil'||!Ly.img?HGTE.sil:ST[Ly.img];if(!S)continue;const sw=S.w,sh=S.h,sd=S.d,sg=K.silGain*Ly.gain*dk*(Ly.img&&Ly.img!=='sil'?1/1.3:1),so=t*K.panoDrift*Ly.drift,sr=Ly.sr||1,r0=Ly.row0!==undefined?Ly.row0:0,base=Ly.row0!==undefined?HH:HH+K.silBase+Ly.base,mf=Ly.mixf!==undefined?Ly.mixf:0,fade=Ly.row0!==undefined?0:1;
       const rowOf=y=>Ly.row0!==undefined?((r0+(y-HH)*sr)|0):((sh-1)-((base-y)*sr)|0);
       const ya=Ly.row0!==undefined?Math.max(0,Math.ceil(HH+(0-r0)/sr)):Math.max(0,Math.ceil(base-(sh-1)/sr)),yb=Ly.row0!==undefined?Math.min(VH-1,Math.floor(HH+(sh-1-r0)/sr)):Math.min(VH-1,Math.floor(base));
@@ -158,7 +160,7 @@ function hgtAmb(K,day){return K.ambient+(K.ambientDay-K.ambient)*day} // light l
 const hgtLookMem={};
 function hgtLookFor(id){const o=HGTE.look[id]||null,m=hgtLookMem[id];if(m&&m.o===o&&m.rev===(o&&o._rev||0))return m.v;const v=Object.assign({},HGTE.lookDefaults,o||{});hgtLookMem[id]={o,rev:o&&o._rev||0,v};return v} // cached; set look._rev++ after editing a look object in place
 /* the air of a city: soft grade, vignette, and drifting motes of warm light (particles, drawn over the 3D view) */
-{const _w=drawWeatherFx;drawWeatherFx=function(){_w.apply(this,arguments);if(!hgtLook(LEVEL))return;
+{const _w=drawWeatherFx;drawWeatherFx=function(){if(!(hgtLook(LEVEL)&&!hgtIsTown(LEVEL)))_w.apply(this,arguments);if(!hgtLook(LEVEL))return; // no rain or cold streaks indoors
   const K=hgtLookFor(LEVEL),t=G.time||0;ctx.save();
   if(K.grade[3]>0){ctx.globalCompositeOperation='multiply';ctx.globalAlpha=K.grade[3];ctx.fillStyle='rgb('+K.grade[0]+','+K.grade[1]+','+K.grade[2]+')';ctx.fillRect(0,0,420,210)}
   {const dy=G.day||0,mk=(typeof HGTG!=='undefined'&&HGTG.moonK)||0;
@@ -340,3 +342,31 @@ hgtRegister(4859,id=>{
   HGTE.wetLook(4859);UWS[4859]={vents:[[6,6]],swim:[]};
   return {rows:g.map(r=>r.join('').replace(/#/g,cw).replace(/d/g,cd)),chars:{[cw]:wall,[cd]:back},start:{x:6,y:2,f:2},enemies:[],items:[],decor,lights:[[3,4],[9,4],[6,6]],portals:[],floor:'hgt_f3',day:0,amb:.5,ceilH:3,noTele:true,noExtras:true,name:'The Submerged Room',label:'The Submerged Room',mapNames:[]};
 });
+
+/* the painted skyline pictures of a city are feathered at their edges, so no cut-out rectangle shows against the backdrop */
+HGTE.feather=new WeakMap();
+function hgtFeather(im){
+  if(!im||!im.width)return im;let c=HGTE.feather.get(im);if(c)return c;
+  c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);
+  const w=c.width,h=c.height,m=document.createElement('canvas');m.width=w;m.height=h;const mx=m.getContext('2d');
+  const gx=mx.createLinearGradient(0,0,w,0),fx=Math.min(.2,Math.max(.04,10/w));gx.addColorStop(0,'rgba(0,0,0,0)');gx.addColorStop(fx,'#000');gx.addColorStop(1-fx,'#000');gx.addColorStop(1,'rgba(0,0,0,0)');mx.fillStyle=gx;mx.fillRect(0,0,w,h);
+  x.globalCompositeOperation='destination-in';x.drawImage(m,0,0);
+  const my=document.createElement('canvas');my.width=w;my.height=h;const myx=my.getContext('2d'),gy=myx.createLinearGradient(0,0,0,h),fy=Math.min(.2,Math.max(.04,10/h));gy.addColorStop(0,'rgba(0,0,0,0)');gy.addColorStop(fy,'#000');gy.addColorStop(1-fy*.5,'#000');gy.addColorStop(1,'rgba(0,0,0,.4)');myx.fillStyle=gy;myx.fillRect(0,0,w,h);
+  x.drawImage(my,0,0);HGTE.feather.set(im,c);return c;
+}
+{const _k=khSkyList;khSkyList=function(){const out=_k.apply(this,arguments);if(hgtLook(LEVEL))for(const o of out)if(o.img&&o.sky)o.img=hgtFeather(o.img);return out}}
+
+/* LOOK UP AND DOWN (cities 480..489 and level 470). The view has no true pitch; the horizon row HH is moved (HH=105+climbView in render3D), and the ground tracer, the walls, the sprites, the mesh pass and the backdrop
+   all follow HH. Page Up / Page Down (or the right stick) tilt the view, Home levels it. HGTE.pitch is in rows (+ looks up, up to 100 rows = about 36 degrees above the horizon at the top of the picture, 35 down).
+   On a high lookout (ground 4 or more above the street) the view tilts up a little by itself. Giants, fliers, planets and the moon above the street canyons can be seen this way. */
+HGTE.pitch=0;HGTE.pitchT=0;HGTE.pk=0;HGTE._pt=0;HGTE.pitchOn=n=>n===470||hgtIsTown(n);
+addEventListener('keydown',e=>{if(!HGTE.pitchOn(LEVEL)||e.ctrlKey||e.metaKey||e.altKey)return;if(e.key==='PageUp'){HGTE.pk=1;e.preventDefault()}else if(e.key==='PageDown'){HGTE.pk=-1;e.preventDefault()}else if(e.key==='Home'&&!e.repeat){HGTE.pitchT=0;e.preventDefault()}});
+addEventListener('keyup',e=>{if(e.key==='PageUp'&&HGTE.pk>0)HGTE.pk=0;else if(e.key==='PageDown'&&HGTE.pk<0)HGTE.pk=0});
+{const _cv=climbView;climbView=function(cx,cy,dX,dY){const r=_cv.apply(this,arguments);
+  if(!HGTE.pitchOn(LEVEL)){HGTE.pitch=0;HGTE.pitchT=0;return r}
+  const now=performance.now(),dt=Math.min(.1,Math.max(0,(now-HGTE._pt)/1000));HGTE._pt=now;
+  let k=HGTE.pk;try{const gp=navigator.getGamepads&&navigator.getGamepads();if(gp)for(const p of gp){if(p&&p.axes&&p.axes.length>3&&Math.abs(p.axes[3])>.45){k=-Math.sign(p.axes[3]);break}}}catch(e){}
+  if(k)HGTE.pitchT=Math.max(-35,Math.min(100,HGTE.pitchT+k*130*dt));
+  let auto=0;try{const T=LEVELS[LEVEL]&&LEVELS[LEVEL].terrace;if(T&&T.h){const W=LEVELS[LEVEL].rows[0].length,i=(G.C.y|0)*W+(G.C.x|0);if(T.h[i]>=4)auto=Math.min(26,(T.h[i]-3)*6)}}catch(e){}
+  const tg=Math.max(-35,Math.min(100,HGTE.pitchT+auto));HGTE.pitch+=(tg-HGTE.pitch)*Math.min(1,dt*9);
+  return r+Math.round(HGTE.pitch)}}

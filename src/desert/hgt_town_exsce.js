@@ -22,7 +22,7 @@ TN.k={p:'hgt_w2_bubbles',w:'hgt_w2_portlilac',b:'hgt_w2_script',d:'hgt_d3'};TN.l
 TN.m={p:'hgt_w3_relief_pink',w:'hgt_w3_shutters_lilac',b:'hgt_w3_cornice_cream',d:'hgt_d0'};TN.n={p:'hgt_w3_relief_aqua',w:'hgt_w3_balcony_cream',b:'hgt_w3_bunting_aqua',d:'hgt_d1'};
 TN.o={p:'hgt_w3_fresco_cream',w:'hgt_w3_arcade_lilac',b:'hgt_w3_cornice_cream',d:'hgt_d3'};TN.q={p:'hgt_w3_fresco_amber',w:'hgt_w3_shutters_lilac',b:'hgt_w3_scroll_aqua',d:'hgt_d2'};
 TN.r={p:'hgt_w3_scroll_pink',w:'hgt_w3_balcony2_cream',b:'hgt_w3_cornice_cream',d:'hgt_d0'};TN.s={p:'hgt_w3_reed_lilac',w:'hgt_w3_arcade_cream',b:'hgt_w3_scroll_aqua',d:'hgt_d1'};
-const RTINT={west:['a','m','c','o','s','m'],north:['n','d','s','q','c','b'],east:['n','b','r','a','q','m'],south:['m','c','o','r','a','n'],mid:['a','b','c','d']};
+const RTINT={west:['a','m','c','o','s','m'],north:['n','d','s','q','c','b'],east:['n','r','q','m','s','n'],south:['m','c','o','r','a','n'],mid:['a','b','c','d']};
 const tcache=new Map();
 function mkTile(list,wh){ // list: picture names from the bottom up (it repeats); wh: wall height in cells
   const key=list.join(',')+'|'+wh;if(tcache.has(key))return tcache.get(key);
@@ -92,6 +92,7 @@ function buildRootWell(B,info){
   const cells=[];
   for(let y=RW.cy-12;y<=RW.cy+12;y++)for(let x=RW.cx-12;x<=RW.cx+12;x++){const c=rwT(x,y);if(!c)continue;O(B,x,y,Math.round(c.h*100)/100,K.COURT);cells.push([x,y,c])}
   info.root=cells}
+function glowAt(B,x,y,r){for(const [dx,dy] of [[0,0],[1,0],[-1,0],[0,1],[0,-1]])light(B,x+dx,y+dy);if(IMG.hgtb_deco_lanterns&&isO(B,x+1,y+1))decor(B,'hgtb_deco_lanterns',x+1,y+1,{walk:true,deco:true,sc:.9});for(const [dx,dy] of [[-1,1],[1,-1]])plant(B,'crystalgrass',x+dx,y+dy,1.1)}
 
 /* ---------- heights: the Hill of Balconies in the west (x 2 to 31) rises in flights of 7 steps and flat contour streets; everything else is level ---------- */
 const S=HGTL.STEP,r2=v=>Math.round(v*100)/100;
@@ -176,7 +177,7 @@ function assemble(B){
   if(B.tube&&B.tube.length){const lid=L.terrace.lid||new Float32Array(W*H);for(const [x,y] of B.tube)lid[y*W+x]=B.tubeH||2.4;L.terrace.lid=lid}
   const nm=(t,x,y)=>hgtlName(B,x,y,t,'place');
   nm('The Conservatory Spiral',CX,CY);nm('Root Well',RW.cx,RW.cy-11);nm('Grand Maze',45,33);nm('Hedge Maze',41,58);nm('Sunken Maze',41,76);nm('Tube Maze',107,33);nm('Raised Maze',109,58);nm('Shell Maze',109,76);
-  nm('Willow Pond',43,96);nm('Hill of Balconies',17,75);nm('Spire Quarter',60,16);nm('Sunken Gardens',130,75);nm('Gate Quarter',75,129);nm('South Gate',CX,H-4);nm('North Gate',CX,4);nm('The Belvedere',4,72);nm('Fish Tanks',75,45);nm('Ravine of Lamps',59,19);
+  nm('Willow Pond',43,96);nm('Hill of Balconies',17,75);nm('Spire Quarter',60,16);nm('Sunken Gardens',130,75);nm('Gate Quarter',75,129);nm('South Gate',CX,H-4);nm('North Gate',CX,4);nm('The Belvedere',4,72);nm('Fish Tanks',84,45);nm('Ravine of Lamps',59,19);
   L.mapNames=B.names.map(n=>Object.assign({},n));
   const FS=[['hgtb_f_pearlbands','hgt_f0'],['hgtb_f_shellflags','hgt_f5'],['hgtb_f_terrazzo','hgt_f2'],['hgtb_f_waves','hgt_f3'],['hgtb_f_gutter','hgt_f4'],['hgt_f7','hgt_f7']].map(a=>FLOORS[a[0]]?a[0]:a[1]);L.floorSet=FS;L.floor=FS[0];L.ceil='tomb';L.ceilH=3;L.amb=1;L.noExtras=true;L.noTele=true;L.sky=skyTowers();
   return L}
@@ -253,7 +254,7 @@ function tBalcony(B,bk,side,spec,o){o=o||{};const f=frame(bk,side);if(f.A<11||f.
   for(let a=a0+n;a<a0+L;a++)for(let b=0;b<2;b++){const [x,y]=f.at(a,b);O(B,x,y,hp,K.PLAT);fl(B,x,y,1)}
   const am=a0+n+((L-n)>>1),[dx,dy]=f.at(am,2),door=doorOn(B,dx,dy,f.face,spec,{wh:o.wh||3.4,pic:o.pic});
   if(!door&&spec)return null;
-  { const [lx,ly]=f.at(a0+L-1,1);lampPost(B,lx,ly);plant(B,'bulbflower',...f.at(a0+n,1),1.1);plant(B,'shellflower',...f.at(a0+L-1,0),1.2) }
+  { const [lx,ly]=f.at(a0+L-1,1);lampPost(B,lx,ly);plant(B,'bulbflower',...f.at(a0+n,1),1.1);plant(B,'shellflower',...f.at(a0+L-1,0),1.2);const [bx,by]=f.at(a0+n+1,0);if(isO(B,bx,by)&&IMG.hgtb_bench)decor(B,'hgtb_bench',bx,by,{walk:true,deco:true,sc:1});const [px,py]=f.at(a0+L-1,0);(B.info.roosts=B.info.roosts||[]).push([px,py]);decor(B,'hgt_banner',...f.at(a0+n,0),{walk:true,deco:true,sc:1}) }
   return {door,hp,base,steps:n}}
 // a sunken court reached by stairs down from the street; an optional house at the far end with a door
 function tSunken(B,bk,side,spec,o){o=o||{};const f=frame(bk,side),depth=o.depth||2.08,n=Math.ceil(depth/HGTL.STEP-1e-6),wc_=Math.min(f.A-2,o.w||7),dc=Math.min(f.Bd-1,o.d||(n+5));
@@ -329,11 +330,12 @@ Object.assign(ROOMS,{
   star1:{id:4970,name:'The Planetarium',ext:true,pic:'hgt_d2',w:5,d:5},star2:{id:4971,name:'The Star Stair',ext:true,pic:'hgt_d2',w:5,d:5},
   cistern:{id:5000,name:'The Drowned Cistern',kind:'wet',w:11,d:9,t:'b',wet:true,pic:'hgt_d1'},
   tankroom:{id:5001,name:'The Tank Room',kind:'tanks',w:13,d:9,t:'f',pic:'hgt_d2'},
-  g2:{id:5002,name:'The Reading Room',kind:'library',w:9,d:9,t:'g',generic:1},g3:{id:5003,name:'The Tea House',kind:'inn',w:11,d:9,t:'e',generic:1},
-  g4:{id:5004,name:'The Shell Workshop',kind:'loom',w:9,d:7,t:'h',generic:1},g5:{id:5005,name:'The Herbalist',kind:'healer',w:9,d:7,t:'f',generic:1},
+  g2:{id:5002,name:'The Reading Room',kind:'library',w:9,d:9,t:'g',generic:1},g3:{id:5003,name:'The Tea House',kind:'inn',w:11,d:9,t:'e',generic:1,next:'g14'},
+  g4:{id:5004,name:'The Shell Workshop',kind:'loom',w:9,d:7,t:'h',generic:1},g5:{id:5005,name:'The Herbalist',kind:'healer',w:9,d:7,t:'f',generic:1,next:'g16'},
   g6:{id:5006,name:'A Quiet House',kind:'home',w:9,d:7,t:'i',generic:1},g7:{id:5007,name:'The Map Room',kind:'observ',w:9,d:9,t:'l',generic:1},
   g8:{id:5008,name:'The Glass Garden',kind:'glass',w:11,d:9,t:'j',generic:1},g9:{id:5009,name:'The Bell Maker',kind:'bells',w:9,d:7,t:'k',generic:1},
-  g10:{id:5010,name:'The Lamp Store',kind:'stall',w:9,d:7,t:'g',generic:1},g11:{id:5011,name:'The Attic',kind:'loft',w:7,d:7,t:'e',generic:1},
+  g10:{id:5010,name:'The Lamp Store',kind:'stall',w:9,d:7,t:'g',generic:1,next:'g15'},g11:{id:5011,name:'The Attic',kind:'loft',w:7,d:7,t:'e',generic:1},
+  g14:{id:5014,name:'The Back Room',kind:'home',w:9,d:7,t:'o',generic:1,parent:'g3'},g15:{id:5015,name:'The Store Room',kind:'cellar',w:11,d:9,t:'q',generic:1,parent:'g10'},g16:{id:5016,name:'The Upper Room',kind:'loft',w:7,d:7,t:'r',generic:1,parent:'g5'},
   g12:{id:5012,name:'The Kitchen',kind:'home',w:9,d:7,t:'c',generic:1},g13:{id:5013,name:'The Pearl Baths',kind:'baths',w:11,d:7,t:'f',generic:1}});
 for(const k in ROOMS)ROOMS[k].key=k;
 
@@ -481,6 +483,13 @@ function buildRoom(key){
   const cD=ch(doorGid(T,2.7,outLink,'hgt_d1'));
   const rows=[];for(let y=0;y<d;y++){let r='';for(let x=0;x<w;x++){if(y>0&&y<d-1&&x>0&&x<w-1)r+='.';else if(y===d-1&&x===cx)r+=cD;else r+=((x+y*3)%5===2&&(x>1&&x<w-2||y>1&&y<d-2))?cW:((x+y)%2?cA:cB)}rows.push(r.split(''))}
   if(R.next){const N=ROOMS[R.next],cN=ch(doorGid(T,2.7,{lvl:N.id,at:{x:N.w>>1,y:N.d-2,f:0}},'hgt_d2'));rows[0][cx]=cN}
+  // layout variants: corner blocks, pillars or a half partition, so a room is not one bare rectangle
+  {const v=R.id%4,wallAt=(x,y,c)=>{if(x>0&&y>0&&x<w-1&&y<d-1&&!(x===cx)&&rows[y][x]==='.')rows[y][x]=c};
+   if(w>=9&&d>=7&&(R.generic||!(def.folk&&def.folk.length))){
+    if(v===0){for(const [x,y] of [[2,2],[w-3,2],[2,d-3],[w-3,d-3]])wallAt(x,y,cW)}
+    else if(v===1){for(let x=1;x<cx-1;x++)wallAt(x,d>>1,cB);for(let x=cx+2;x<w-1;x++)wallAt(x,d>>1,cB)}
+    else if(v===2){for(const [x,y] of [[1,1],[2,1],[1,2],[w-2,1],[w-3,1],[w-2,2],[1,d-2],[w-2,d-2]])wallAt(x,y,cW)}
+    else{for(let y=2;y<d-2;y++){wallAt(1,y,cW);wallAt(w-2,y,cW)}}}}
   const decorL=[],lights=[],items=[];
   const put=(role,x,y,o)=>{const k=khProp(role);if(IMG[k]&&k.startsWith('kh_'))NPC_H[k]=khPropH(role);decorL.push(Object.assign({k,x,y,block:true,deco:true},o||{}))};
   for(const [role,x,y] of def.props||[])put(role,x,y);
@@ -496,6 +505,7 @@ function buildRoom(key){
    if(ck&&IMG[ck]&&!taken(cx,my)&&!(def.fountain&&def.fountain.length&&R.kind!=='baths')){decorL.push({k:ck,x:cx,y:my,block:true,deco:true,sc:1})}
    if(IMG.hgtb_furn_chandelier&&R.kind!=='wet'){decorL.push({k:IMG.hgtb_furn_chandelier_lantern?'hgtb_furn_chandelier_lantern':'hgtb_furn_chandelier',x:cx,y:Math.max(1,my-1),block:false,walk:true,deco:true,bob:1.5,sc:1});lights.push([cx,my])}
    for(const [x,y] of [[1,d-3],[w-2,d-3]])if(!taken(x,y)&&IMG.hgtb_lamp_short)decorL.push({k:'hgtb_lamp_short',x,y,block:false,walk:true,deco:true,sc:1})}
+  for(let i=decorL.length-1;i>=0;i--){const q=decorL[i];if(rows[q.y]&&rows[q.y][q.x]!=='.')decorL.splice(i,1)}
   return {rows:rows.map(r=>r.join('')),chars,start:{x:cx,y:d-2,f:0},enemies:[],items,decor:decorL,lights,portals:[],floor:(FLOORS[RFLOOR[(R.id*3)%RFLOOR.length]]?RFLOOR[(R.id*3)%RFLOOR.length]:'hgt_f5'),day:0,amb:.62,ceil:'beam',ceilH:2.7,noTele:true,noExtras:true,diff:66,name:R.name,label:R.name,mapNames:[]}}
 for(const k in ROOMS)if(!ROOMS[k].ext)hgtRegister(ROOMS[k].id,()=>k==='tankroom'?buildTankRoom():buildRoom(k));
 for(const k in ROOMS)LEVEL_NAMES[ROOMS[k].id]=ROOMS[k].name;
@@ -533,11 +543,11 @@ function info_top(B,h){}
 
 /* ---------- the Root Well: the drum, the door at the bottom ---------- */
 function rootDrum(B,info){
-  const wcB=wc('b',9.5,1),wcC=wc('d',9.5,0);
+  const wcB=wc('n',9.5,1),wcC=wc('o',9.5,2);
   for(let y=RW.cy-3;y<=RW.cy+3;y++)for(let x=RW.cx-3;x<=RW.cx+3;x++)if(Math.hypot(x-RW.cx,y-RW.cy)<=2.1&&isO(B,x,y)){Wl(B,x,y,(x+y)&1?wcB:wcC,B.h[y*W+x])}
   // the lowest open cell beside the drum: the door goes in the drum wall next to it
   let best=null;for(let y=RW.cy-5;y<=RW.cy+5;y++)for(let x=RW.cx-5;x<=RW.cx+5;x++){if(!isO(B,x,y))continue;for(let f=0;f<4;f++){const d=HGTL.DIRS[f],nx=x+d[0],ny=y+d[1];if(!isO(B,nx,ny)&&META.has(B.rows[ny][nx])&&Math.hypot(nx-RW.cx,ny-RW.cy)<=2.2){const h=B.h[y*W+x];if(!best||h<best.h)best={h,x,y,nx,ny,face:(f+2)&3}}}}
-  if(best)info.rootDoor=doorOn(B,best.nx,best.ny,best.face,'root',{wh:9.5,pic:'hgt_d2'})}
+  if(best){info.rootDoor=doorOn(B,best.nx,best.ny,best.face,'root',{wh:9.5,pic:'hgt_d2'});glowAt(B,best.x,best.y)}}
 function rootStairsLamps(B,info){const cells=info.root;for(const [x,y,c] of cells){if(!isO(B,x,y))continue;if(((x*7+y*3)%13)===0&&B.h[y*W+x]<-1)lampPost(B,x,y)}}
 
 /* ---------- townsfolk ---------- */
@@ -633,7 +643,7 @@ function skyTowers(){const out=[];for(let i=0;i<30;i++){const f=(i+hs(i,1,150)*.
 function sunkenLane(B,xs,y0,y1,depth,seed){
   for(let y=y0;y<=y1;y++){const k=Math.min(y-y0,y1-y),d=Math.min(depth,.52*(k+1));
     for(const x of xs){O(B,x,y,-d,k<3?K.STAIR:K.COURT);fl(B,x,y,k<3?4:3)}}
-  for(let y=y0+4;y<=y1-4;y++){if(hs(xs[0],y,160+seed)<.5)plant(B,['giantcap','mushrooms','fern','bulbflower','shellflower','lightvine'][(hs(xs[1],y,161+seed)*6)|0],hs(y,3,162+seed)<.5?xs[0]:xs[xs.length-1],y,.8+hs(y,4,163)*.6);if((y-y0)%5===2)light(B,xs[1],y)}}
+  for(let y=y0+4;y<=y1-4;y++){if(hs(xs[0],y,160+seed)<.5)plant(B,['giantcap','mushrooms','fern','bulbflower','shellflower','lightvine'][(hs(xs[1],y,161+seed)*6)|0],hs(y,3,162+seed)<.5?xs[0]:xs[xs.length-1],y,.8+hs(y,4,163)*.6);if((y-y0)%3===1){light(B,xs[1],y);if((y-y0)%6===1)lampPost(B,xs[0],y);else plant(B,'crystalgrass',xs[xs.length-1],y,1.1)}}}
 // a humpback bridge of steps over the Ravine of the Lamps, from the east side of one stair tower to the west side of the next
 function skyBridge(B,info){
   const yb=26;if(!(isO(B,57,yb)&&isO(B,61,yb)))return null;const hA=B.h[yb*W+57],hB=B.h[yb*W+61];if(Math.abs(hA-hB)>.6)return null;
@@ -657,7 +667,11 @@ function gateDecor(B){
 // the belvedere on the top of the hill: finials, obelisks, lamps, banners along the west wall street
 function belvedere(B){
   for(let y=6;y<H-6;y+=7){if(isO(B,3,y)&&!B.decor.some(q=>q.x===3&&q.y===y)){decor(B,y%14===6?'hgt_obelisk':'hgt_finial',3,y,{block:y%14===6,sc:1.1});light(B,3,y)}}
-  for(let y=10;y<H-10;y+=9)if(isO(B,4,y)&&!B.decor.some(q=>q.x===4&&q.y===y))decor(B,'hgt_banner',4,y,{walk:true,deco:true,sc:1})}
+  for(let y=10;y<H-10;y+=9)if(isO(B,4,y)&&!B.decor.some(q=>q.x===4&&q.y===y))decor(B,'hgt_banner',4,y,{walk:true,deco:true,sc:1})
+  B.info.roosts=B.info.roosts||[];
+  for(let y=8;y<H-8;y+=11){const f=(x,y2)=>isO(B,x,y2)&&!B.decor.some(q=>q.x===x&&q.y===y2);
+    if(f(2,y))decor(B,IMG.hgtb_bench?'hgtb_bench':'bench',2,y,{walk:true,deco:true,sc:1});if(f(2,y+1))lampPost(B,2,y+1);if(f(4,y+1))plant(B,['lightvine','bulbflower','fairytree','shellflower'][(y/11|0)%4],4,y+1,1.2);if(f(3,y+2))plant(B,'pearlbush',3,y+2,1);
+    if(f(3,y+3)&&(y/11|0)%2===0)B.info.roosts.push([3,y+3])}}
 /* ==========================================================================
    THE OVERVIEW MAP (M key): a parchment map drawn once from the real level (heights shade the ground, stairs are hatched, sunken places are blue)
    ========================================================================== */
@@ -749,7 +763,7 @@ function mazeAt(B,info,x,y,w,h,o){carveClear(B,x-1,y-1,w+2,h+2);
   const tint=['m','n','o','q','r','s'];
   const m=hgtzMaze(B,x,y,w,h,Object.assign({tile:(role,wh,inf)=>o.kind==='hedge'?undefined:wallGid(tint[((inf&&inf.band)|0)%6],Math.round(wh*2)/2,1)},o));
   if(B.fm)for(const [cx,cy] of m.cells)fl(B,cx,cy,B.fm[cy*W+cx]);
-  (info.mazes=info.mazes||[]).push({x,y,w,h,kind:o.kind,algo:o.algo,reward:o.reward,centre:m.centre});return m}
+  (info.mazes=info.mazes||[]).push({x,y,w,h,kind:o.kind,algo:o.algo,reward:o.reward,centre:m.centre});glowAt(B,m.centre.x,m.centre.y);return m}
 function bigMazes(B,info){
   mazeAt(B,info,34,34,23,23,{algo:'backtracker',kind:'tall',side:'E',reward:'view',seed:11});
   mazeAt(B,info,34,60,15,15,{algo:'prim',kind:'hedge',side:'E',reward:'chest',seed:12});
@@ -809,6 +823,7 @@ function lifeAndPets(B,info){
   cre('hgtb_fishfly','Fish fly',[CON.cx+4,CON.cy+3],'wander',.7,['It flies a short way and settles.'],{hover:.4});
   cre('hgtb_spindleray','Spindle ray',[56,60],'wander',.75,['It glides over the steps.'],{hover:.3});
   for(const m of ml.slice(2,5))cre('hgtb_creammoth','Cream moth',[m.centre.x,m.centre.y],'sit',.5,['It rests and does not move.'],{hover:.3});
+  for(const t of (info.roosts||[]).slice(0,14))cre(['hgtb_lilacmoth','hgtb_amberpup','hgtb_pinkbulb','hgtb_creammoth','hgtb_pups'][(t[0]*3+t[1])%5],'Roost pet',t,'sit',.45,['It sits and watches the street.'],{hover:.1});
   for(const t of (info.spireTops||[]).slice(0,6))cre(['hgtb_lilacmoth','hgtb_creammoth','hgtb_pinkbulb','hgtb_pearlslug'][(t[0]+t[1])%4],'Roost pet',t,'sit',.45,['It sits at the top and watches the city.'],{hover:.2});
   info.lifeSpec=L}
 {if(typeof hgtgOnEnter==='function'){const _g=hgtgOnEnter;hgtgOnEnter=function(id){

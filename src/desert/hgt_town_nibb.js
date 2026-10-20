@@ -401,6 +401,17 @@ function build(){
    // bunting, brackets and balconies on the faces of the houses
    for(const h of B.houses){if(hs(h.x,h.y,130)<.6){const [fx,fy]=h.front;dec('hgtb_deco_bunting',h.x+(h.w>>1),h.y+(h.d>>1),{bob:Math.max(1,h.wh-1.3),sc:1.5});}
      if(hs(h.x,h.y,131)<.5)dec('hgtb_lamp_bracket',h.front[0],h.front[1],{bob:1.2,sc:1})}}
+  /* ================= THE TOWER BASES AND THE PLATFORM TOPS ================= */
+  {const pets=['hgtb_pinkbulb','hgtb_amberpup','hgtb_creammoth','hgtb_pearlslug','hgtb_lilacmoth'],pl=['hgt_shellflower','hgt_bulbflower','hgt_pearlbush','hgt_fern'];
+   const free=(x,y)=>isO(x,y)&&B.kind[I(x,y)]!==K.STAIR&&!B.occ.has(x+','+y);
+   const furnish=(cells,seed)=>{let n=0;for(const [x,y] of cells){if(!free(x,y))continue;const v=hs(x,y,seed);B.occ.add(x+','+y);
+      if(v<.2)dec('hgtb_bench',x,y,{block:false});else if(v<.4)dec(pl[(v*50|0)%4],x,y,{sc:1.1});else if(v<.55)dec('hgtb_lamp_short',x,y,{});else if(v<.7)dec('hgtb_deco_banner',x,y,{});else if(v<.85)dec(pets[(v*90|0)%5],x,y,{});else dec('hgtb_chair',x,y,{});if(++n>5)break}};
+   // the court at the foot of the bell tower
+   const bc=[];for(let x=114;x<=134;x++)for(const y of [29,30,31])bc.push([x,y]);furnish(bc.sort((a,b)=>hs(a[0],a[1],140)-hs(b[0],b[1],140)),141);
+   for(const st of stairTowers){const top=st.path.slice(-16).filter((c,i)=>i%3===0);furnish(top,142);
+     const around=[];for(let y=st.y0-1;y<=st.y1+1;y++)for(let x=st.x0-1;x<=st.x1+1;x++)around.push([x,y]);furnish(around.sort((a,b)=>hs(a[0],a[1],143)-hs(b[0],b[1],143)),144)}
+   // the bell tower: every ring gets a bench, plants, a lamp and a roost at its corners
+   BT.path.forEach((c,i)=>{if(i%11===5&&!B.occ.has(c[0]+','+c[1])){B.occ.add(c[0]+','+c[1]);const v=hs(c[0],c[1],145);dec(v<.3?'hgtb_bench':v<.6?pl[(v*80|0)%4]:pets[(v*70|0)%5],c[0],c[1],{});if(v>.6)B.lights.push([c[0],c[1]])}})}
   /* ================= ORNAMENTS ON THE ROOFS ================= */
   for(const hsr of B.houses){
     if(isO(hsr.x+(hsr.w>>1),hsr.y+(hsr.d>>1)))continue;
@@ -582,6 +593,8 @@ function roomLevel(id){
    for(let x=1;x<=w;x+=2)dr(x%4===1?'hgt_banner':'hgt_lightvine',x,1,{sc:x%4===1?1:.8});
    for(let y=3;y<=d-1;y+=3){dr('hgt_lightvine',1,y,{sc:.8});dr('hgt_lightvine',w,y,{sc:.8})}
    for(const [x,y] of [[1,d],[w,d]]){dr('hgt_gardenlantern',x,y,{});lights.push([x,y])}
+   if(w>=9&&d>=7)for(const [px,py] of [[3,4],[w-2,4],[3,d-2],[w-2,d-2]]){if(!occ.has(px+','+py)&&!occ.has(px+','+(py+1))&&!occ.has(px+','+(py-1))){rows[py][px]='P';occ.add(px+','+py)}}
+   chars.P=mkTile(pat('tow',R.t,3,1),3);
    const CP=['hgtb_furn_hearth','hgtb_furn_clock','hgtb_furn_loom','hgtb_furn_stage','hgtb_furn_bed','hgtb_furn_books_globe','hgtb_furn_table_chairs','hgtb_furn_bookshelf','hgtb_furn_cabinet'];
    dr(CP[id%CP.length],(w+1)>>1,2,{block:true,walk:false,deco:false});
    dr(id%2?'hgtb_furn_chandelier_lantern':'hgtb_furn_chandelier',(w+1)>>1,Math.max(3,(d+1)>>1),{bob:1.6});
@@ -622,7 +635,7 @@ function level(id){
   L.chars={};
   for(const ch in hgtaChars)L.chars[ch]=hgtaChars[ch];
   const fm=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=B.fm[y*W+x];fm.push(r)}
-  Object.assign(L,{fmap:fm,floorSet:['hgtb_f_terrazzo','hgtb_f_mandala','hgt_f4','hgtb_f_rosette','hgt_f7','hgtb_f_shellflags'],floor:'hgtb_f_terrazzo',ceil:'tomb',ceilH:3,day:0,outdoor:true,amb:.72,noExtras:true,noTele:true,diff:66});
+  Object.assign(L,{fmap:fm,floorSet:['hgtb_f_terrazzo','hgtb_f_mandala','hgtb_f_pearlbands','hgtb_f_rosette','hgt_f7','hgtb_f_shellflags'],floor:'hgtb_f_terrazzo',ceil:'tomb',ceilH:3,day:0,outdoor:true,amb:.72,noExtras:true,noTele:true,diff:66});
   L.terrace.riser=mkTile(['hgt_wc'],1);L.terrace.rg=B.rg;
   L.sky=skyList(B);
   try{if(typeof hgtzApplyLids==='function')hgtzApplyLids(B,L)}catch(e){console.error('nibb lids',e)}
@@ -646,6 +659,8 @@ function lifeAgents(B){
   add({kind:'npc',sprite:'hgtb_walk',name:'Walker',lines:['I walk round the rim once a day. It takes about an hour.'],home:P(0,58),route:[P(0,58),P(90,58),P(180,58),P(270,58)].map(c=>({x:c.x,y:c.y,wait:2})),speed:.9});
   add({kind:'npc',sprite:'hgtb_lantern',name:'Lamplighter',lines:['I light the lanterns on the avenues at evening.'],home:{x:75,y:134},route:[{x:75,y:134,wait:2},{x:75,y:122,wait:2},{x:75,y:134,wait:2}],speed:.8});
   add({kind:'npc',sprite:'hgtb_jar',name:'Water carrier',lines:['The water for the festival comes from the pools on the rim.'],home:P(90,58),route:[P(90,58),P(70,58),P(110,58)].map(c=>({x:c.x,y:c.y,wait:2})),speed:.9});
+  const crowd=[['hgtb_basket',[110,22]],['hgtb_water',[125,32]],['hgtb_elder',[135,38]],['hgtb_polish',[105,12]],['hgtb_sweep',[70,138]],['hgtb_walk',[82,6]],['hgtb_read',[68,10]],['hgtb_jar',[80,140]],['hgtb_lantern',[110,30]],['hgtb_watch',[128,14]]];
+  crowd.forEach(([sp,[x,y]],i)=>add({kind:'npc',sprite:sp,name:['Trader','Water carrier','Elder','Lamp polisher','Sweeper','Walker','Reader','Carrier','Lamplighter','Watcher'][i],lines:['The plazas are busy on festival days and quiet on the others.'],home:{x,y},route:[{x,y,wait:2},{x:x+4,y:y+2,wait:2},{x:x+2,y:y+6,wait:2},{x:x-2,y:y+3,wait:2}],speed:.7}));
   return ag}
 
 /* the giants of Nibb: a bulk giant that sleeps in its plaza, and peacocks that roost at the top of the bell tower */
