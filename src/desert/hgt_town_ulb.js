@@ -170,7 +170,7 @@ function build(id){
   // --- the Warp Pit: the double helix wound downward, west side of the court; its floor is the door to the Warp Cellar
   const pitH=qz(getH(54,60),Q);flatten(49,55,59,65,pitH,3,0);
   curSty=7;
-  const pit=hgtxulbHelix(B,{open,wall,wallH,door,dec,light,rg,fm,occ,I,ok,isOpen,getH,toInt,h:pitH,cx:54,cy:60,R0:5.8,P:5,rc:2.2,rise:-.2,lw:.75,arms:2,tints:['a','p'],core:true,coreH:t=>[pitH-t+.4,pitH-t+2.4],coreR:.7,doorTo:{id:4886,tint:'l'},wallSpec:'wdC'});
+  const pit=hgtxulbHelix(B,{open,wall,wallH,door,dec,light,rg,fm,occ,I,ok,isOpen,getH,toInt,h:pitH,cx:54,cy:60,R0:5.8,P:5,rc:2.2,rise:-.2,lw:.75,arms:2,tints:['a','a'],core:true,coreH:t=>[pitH-t+.4,pitH-t+2.4],coreR:.7,doorTo:{id:4886,tint:'l'},wallSpec:'wdC'});
   U.DEV.pit=pit;if(pit.door)links[4886]={x:pit.door.ax,y:pit.door.ay,f:pit.door.face};if(spire.door)links[4885]={x:spire.door.ax,y:spire.door.ay,f:spire.door.face};
   // --- towers and the rest of the kit, west side
   const nwTower=sqspiral(6,5,11,.17,'p');
@@ -280,11 +280,11 @@ function build(id){
    for(const [wx,wy] of [[50,141],[92,141]]){flatten(wx-1,wy-1,wx+8,wy+4,BF,1,0);const wp=hgtlPool(B,wx,wy,8,4,{rim:BF,shallow:1,deep:false});for(const c of wp.cells){fm[I(c[0],c[1])]='2';occ[I(c[0],c[1])]=1}for(let k=0;k<8;k+=3)plant(wx+k,wy-1,'hgt_reeds')}
    info.lake={islands:nI,boats:nB,reedRings:nR}}
   /* the approach: a long avenue of lamps on the axis of the cascade and banners, bunting and lantern clusters hanging along both edges, so that the spire is seen from far */
-  for(let y=12;y<=108;y+=4){if(y>34&&y<88)continue;for(const dx of [-3,0,3]){const x=GX+dx;if(isOpen(x,y))dec('hgtb_lamp_tall',x,y,{walk:true,deco:true,sc:1.1});}}
+  for(let y=12;y<=108;y+=8){if(y>34&&y<88)continue;for(const dx of [-4,4]){const x=GX+dx;if(isOpen(x,y))dec('hgtb_lamp_tall',x,y,{walk:true,deco:true,sc:.85});}}
   for(let y=15;y<=105;y+=6){if(y>34&&y<88)continue;for(const [dx,k,bb] of [[-7,'hgtb_deco_banner',.3],[7,'hgtb_deco_banner',.3],[-5,'hgtb_deco_lanterns',.9],[5,'hgtb_deco_lanterns',.9],[0,'hgtb_deco_bunting',1.2]]){const x=GX+dx;if(isOpen(x,y))dec(k,x,y,{walk:true,deco:true,bob:bb,sc:1.2})}}
-  for(let y=18;y<=102;y+=10){if(y>34&&y<88)continue;for(const dx of [-8,8]){const x=GX+dx;if(isOpen(x,y))dec('hgtb_tank_bubbles3',x,y,{walk:true,deco:true,sc:1.5,bob:.1})}}
-  for(let y=11;y<=114;y++){if(y>36&&y<86)continue;for(const dx of [-8,-7,7,8]){const x=GX+dx;if(isOpen(x,y))fm[I(x,y)]='2'}if(y%8<2)for(let dx=-6;dx<=6;dx++)if(isOpen(GX+dx,y))fm[I(GX+dx,y)]='3';else{for(const dx of [-1,0,1])if(isOpen(GX+dx,y))fm[I(GX+dx,y)]='5'}}
-  for(let y=12;y<=112;y+=2){if(y>36&&y<86)continue;for(const dx of [-6,6]){const x=GX+dx;if(!isOpen(x,y))continue;const r=rnd(x,y,210);dec(r<.4?'hgt_reeds':r<.7?'hgtb_plant_tealgrass':'hgtb_plant_orbbush',x,y,{walk:true,deco:true,sc:.9+rnd(x,y,211)*.7})}}
+  for(let y=14;y<=106;y+=4){if(y>34&&y<88)continue;for(const dx of [-7,-6,6,7]){const x=GX+dx;if(isOpen(x,y))dec('hgtb_tank_bubbles3',x,y,{walk:true,deco:true,sc:1.5,bob:.1})}}
+  for(let y=11;y<=114;y++){if(y>36&&y<86)continue;for(const dx of [-8,-7,-6,-5,5,6,7,8]){const x=GX+dx;if(isOpen(x,y))fm[I(x,y)]='2'}if(y%8<2)for(let dx=-6;dx<=6;dx++)if(isOpen(GX+dx,y))fm[I(GX+dx,y)]='3';else{for(const dx of [-1,0,1])if(isOpen(GX+dx,y))fm[I(GX+dx,y)]='5'}}
+  for(let y=12;y<=112;y+=2){if(y>36&&y<86)continue;for(const dx of [-4,4,-9,9]){const x=GX+dx;if(!isOpen(x,y))continue;const r=rnd(x,y,210);dec(r<.4?'hgt_reeds':r<.7?'hgtb_plant_tealgrass':'hgtb_plant_orbbush',x,y,{walk:true,deco:true,sc:.9+rnd(x,y,211)*.7})}}
   /* stalls on the plazas and along the Reed Plaza */
   {const ST=['coral_fruit','aqua_jars','lilac_cloth','yellow_bread','pink_flowers','teal_fish','orange_pottery','sage_herbs','navy_books','rose_lanterns'];let n=0;
    const stall=(x,y)=>{if(!isOpen(x,y)||B.decor.some(d=>d.x===x&&d.y===y))return;dec('hgtb_stall_'+ST[(n++)%ST.length],x,y,{block:true,sc:1.2})};
@@ -492,7 +492,7 @@ function build(id){
     for(const d of HGTL.DIRS){const nx=x+d[0],ny=y+d[1];if(rows[ny][nx]==='.')drop=Math.max(drop,h[i]-h[I(nx,ny)])}
     if(drop>.55){const t=TINTS[(rnd(x>>2,y>>2,90)*4)|0];rg[i]=riserGid(t,drop>1.6&&rnd(x,y,91)<.8?'win':'plain')}}
   for(const c of spire.lane.values())rg[I(c.i,c.j)]=riserGid(c.arm?'a':'p',rnd(c.i,c.j,92)<.6?'win':'plain');
-  for(const c of pit.lane.values())rg[I(c.i,c.j)]=riserGid(c.arm?'p':'a','plain');
+  for(const c of pit.lane.values())rg[I(c.i,c.j)]=riserGid('a','plain');
   const nm=(t,x,y)=>hgtlName(B,x,y,t,'place');
   nm('North Gate',GX,6);nm('The Great Cascade',GX,24);nm('The Loom Court',GX,40);nm('THE LOOM SPIRE',cx,cy);nm('The Warp Pit',54,60);nm('The Reed Market',36,22);nm('The Thread Market',112,25);
   nm('Dyers’ Tower',11,10);nm('The Dye Court',22,52);nm('The Spinners Court',128,53);nm('The Shell Tower',136,14);nm('The Reed Shell Tower',17,86);nm('The Reed Plaza',GX,125);nm('The Reed Hall',GX,138);nm('South Gate',GX,145);nm('The Reed Basin',55,132);nm('The Cream House',38,98);nm('The Aqua House',118,98);

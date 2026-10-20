@@ -73,7 +73,7 @@ function hgtxglormTile(name,wh,o){o=o||{};const pic=n=>hgtaPic(n||name),base=pic
     x.drawImage(im,0,im.height*(1-part),im.width,im.height*part,0,Hp-Math.round(u*128)-Math.round(128*part),128,Math.round(128*part))}
   const d=x.getImageData(0,0,128,Hp).data,id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;const gid=KH_NEXT_GID++;T_TILE[gid]=id;return gid}
 
-HGTE.look[483]={ambient:.74,lamp:[1,.72,.42],haze:.26,hazeRate:.012,wallSat:1.3,floorGain:.8,floorContrast:1.15,riserGain:.9,motes:80};
+HGTE.look[483]={ambient:.74,lamp:[1.7,1.2,.7],haze:.26,hazeRate:.012,wallSat:1.3,floorGain:.95,floorContrast:1.15,riserGain:.9,motes:80};
 
 /* traders and townsfolk of the stair canyon: plain lines */
 for(const [id,nm,img,l] of [['hgx_t1','Basket trader','hgtb_basket','Baskets by the dozen. The reed is cut on the east road.'],['hgx_t2','Jar carrier','hgtb_jar','These jars go to the Spice Cellar. They are full, so do not push.'],['hgx_t3','Traveller','hgtb_walk','I came in by the south gate and I am still looking for the way up.'],['hgx_t4','Old trader','hgtb_elder','I have kept a stall on the third landing for forty years.'],['hgx_t5','Landing watcher','hgtb_watch','I watch the landing. Nobody takes anything from it.'],['hgx_t6','Lantern bearer','hgtb_lantern','I carry light up to the upper tiers. The landings are not lit well enough.'],['hgx_t7','Lamp polisher','hgtb_polish','A clean lamp is brighter. This one is not clean yet.'],['hgx_t8','Plant waterer','hgtb_water','The plants on the landings need water every day.']])hgtbNpc(id,nm,img,[l]);
@@ -552,6 +552,11 @@ function hgtxglormBuild(id){
     for(let x=sx0-2;x<=sx0+6;x+=2){plant(x,wt+1,1.7,1,GL[(x+t)%3]);plant(x,wt+2,1.4,1,GL[(x+t+1)%3]);hgtlLight(B,x,wt+1);hgtlLight(B,x,wt+1)}
     for(const x of [sx0-1,sx0+5]){lamp(x,wt+2);lamp(x,wt);hgtlLight(B,x,wt+1);hgtlLight(B,x,wt+1)}
     for(const x of [73,76,72,77]){plant(x,wt+1,1.5,1,GL[(x+t)%3]);hgtlLight(B,74,wt+1)}}
+  /* a canopy of lanterns and bunting over the whole bazaar court, hung above the aisles */
+  for(const y of [69,74,79,94,99,104])for(let x=38;x<=112;x+=3){if(x>=66&&x<=84&&y>=80)continue;if(!isO(x,y)||inMz(x,y))continue;
+    hgtlDecor(B,(x/3|0)%2?'hgtb_deco_lanterns':'hgtb_lamp_hanging',x,y,{block:false,walk:true,deco:true,bob:3+((x+y)%3)*.3,sc:1.6});
+    if((x/3|0)%2===0)hgtlDecor(B,'hgtb_deco_bunting',x+1,y,{block:false,walk:true,deco:true,bob:2.7,sc:1.8});if((x/3|0)%4===0)hgtlLight(B,x,y)}
+  for(let y=70;y<=104;y+=6)for(const x of [36,113])hgtlDecor(B,'hgtb_deco_lanterns',x,y,{block:false,walk:true,deco:true,bob:3.2,sc:1.8});
   hgtlSetStart(B,75,144,0);
   /* ---------- finish: walls made by the library (placeholder characters) become my wall columns, standing on the ground ---------- */
   {const TM={a:'p',b:'a',c:'c',d:'l'};

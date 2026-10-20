@@ -111,17 +111,19 @@ const HGTR_SPHERE_LOOK={ambient:.76,haze:.08,hazeRate:.01,hazeCol:[196,176,236],
 const HGTR_STAR_LOOK={ambient:.14,haze:.32,hazeRate:.006,hazeCol:[5,6,18],roofHaze:[3,3,10],tint:[.88,.94,1.2],lamp:[1,.8,.6],wallGain:2,wallSat:1.5,wallAO:.5,floorGain:1.4,floorContrast:1.5,floorSat:1.3,roofGain:.12,roofTint:[.6,.7,1.3],motes:0,vignette:.6,grade:[230,235,255,.08],pano:0,starMask:65535,starGain:.3};
 const HGTR_DEF=[
  {id:4960,kind:'lobby',name:'Hall of Spheres and Stars',w:29,d:9,wh:3,door:{x:28,y:4,face:'E'},wall:['hgt_wp','hgt_wl'],floor:'hgt_f5',look:'sphere',start:{x:14,y:4,f:2}},
- {id:4961,kind:'sphere',name:'The Ball Pit',w:8,d:8,wh:2.7,door:{x:4,y:7,face:'S'},wall:['hgt_wa','hgt_wc'],floor:'hgt_f1',look:'sphere',sim:'pit'},
+ {id:4961,kind:'sphere',name:'The Ball Pit',w:8,d:8,wh:2.7,door:{x:4,y:7,face:'S'},wall:['hgt_w2_portholes','hgt_w2_ringbubbles'],floor:'hgt_f1',look:'sphere',sim:'pit'},
  {id:4962,kind:'sphere',name:'The Hall of Giant Spheres',w:17,d:15,wh:4.8,door:{x:8,y:14,face:'S'},wall:['hgt_wl','hgt_wp'],floor:'hgt_f6',look:'sphere',sim:'giants'},
  {id:4963,kind:'sphere',name:'The Floating Sphere Hall',w:19,d:13,wh:4.2,door:{x:9,y:12,face:'S'},wall:['hgt_wc','hgt_wa'],floor:'hgt_f3',look:'sphere',sim:'float'},
- {id:4964,kind:'sphere',name:'The Pearl Pool',w:15,d:15,wh:3,door:{x:7,y:14,face:'S'},wall:['hgt_wc','hgt_wp'],floor:'hgt_f5',floor2:'hgt_f2',look:'sphere',sim:'pearl',pool:{x0:5,y0:5,x1:9,y1:9},terr:true,hmax:0,heights:(h,w,d)=>{for(let y=0;y<d;y++)for(let x=0;x<w;x++)h[y*w+x]=(x>=5&&x<=9&&y>=5&&y<=9)?-.4:(x>=4&&x<=10&&y>=4&&y<=10)?-.2:0}},
+ {id:4964,kind:'sphere',name:'The Pearl Pool',w:15,d:15,wh:4.2,door:{x:7,y:14,face:'S'},wall:['hgt_w3_fresco_cream','hgt_w3_arcade_cream'],floor:'hgt_f5',floor2:'hgt_f2',ceilPic:'hgtb_tubeceil',
+  lid:(x,y,w,d,hz)=>{const r=Math.min(x,y,w-1-x,d-1-y);return (r<=1?3.3:r===2?3.6:r===3?3.9:4.2)-hz}, // a stepped vault: the ceiling rises towards the middle
+  lights:[[3,3],[11,3],[3,11],[11,11],[7,2],[2,7],[12,7]],decor:[[3,3],[11,3],[3,11],[11,11],[7,2],[2,7],[12,7]].map(([x,y])=>({k:'hgtb_furn_chandelier',x,y,block:false,walk:true,deco:true,bob:2.2,sc:1.1})),look:'sphere',sim:'pearl',pool:{x0:5,y0:5,x1:9,y1:9},terr:true,hmax:0,heights:(h,w,d)=>{for(let y=0;y<d;y++)for(let x=0;x<w;x++)h[y*w+x]=(x>=5&&x<=9&&y>=5&&y<=9)?-.4:(x>=4&&x<=10&&y>=4&&y<=10)?-.2:0}},
  {id:4965,kind:'sphere',name:'The Rainbow Corridor',w:33,d:5,wh:2.7,door:{x:0,y:2,face:'W'},wall:['hgt_wb1','hgt_wb0'],floor:'hgt_f5',look:'sphere',sim:'rainbow'},
  {id:4966,kind:'sphere',name:'The Orb Nursery',w:15,d:13,wh:3,door:{x:7,y:12,face:'S'},wall:['hgt_wl','hgt_wa'],floor:'hgt_f7',look:'nursery',sim:'nursery',lookx:{floorGain:.5,floorContrast:1.2,floorSat:.8}},
  {id:4967,kind:'sphere',name:'The Sphere Court',w:23,d:17,wh:6,door:{x:11,y:16,face:'S'},wall:['hgt_wp','hgt_wc'],floor:'hgt_f6',look:'sphere',sim:'court'},
  {id:4968,kind:'sphere',name:'The Marble Gallery',w:27,d:9,wh:3.4,door:{x:13,y:8,face:'S'},wall:['hgt_wc','hgt_wl'],floor:'hgt_f5',look:'sphere',sim:'marble'},
  {id:4970,kind:'star',name:'The Planetarium',w:19,d:19,wh:6.6,door:{x:9,y:18,face:'S'},wall:['hgt_wl','hgt_wl'],floor:'hgt_f1',look:'star',stars:'planetarium'},
- {id:4971,kind:'star',name:'The Star Stair',w:9,d:31,wh:6,door:{x:4,y:30,face:'S'},wall:['hgt_wl','hgt_wl'],floor:'hgt_f4',look:'star',stars:'stair',terr:true,lookx:{ambient:.24,lipGain:1.1,floorGain:.95,riserGain:.85,lipW:.07,footAO:.5,floorContrast:1.35},hmax:7.2,heights:(h,w,d)=>{for(let y=0;y<d;y++)for(let x=0;x<w;x++)h[y*w+x]=HGTR_STAIR_H(y)}},
- {id:4972,kind:'star',name:'The Gathering Room',w:17,d:17,wh:4,door:{x:8,y:16,face:'S'},wall:['hgt_wl','hgt_wl'],floor:'hgt_f1',look:'star',stars:'gather'},
+ {id:4971,kind:'star',name:'The Star Stair',w:9,d:31,wh:6,door:{x:4,y:30,face:'S'},wall:['hgt_w3_arcade_lilac','hgt_w2_constellation'],floor:'hgtb_f_checker_dark',frame:'hgt_w2_portlilac',look:'star',stars:'stair',terr:true,lookx:{ambient:.34,wallGain:2.2,lipGain:1.9,floorGain:2.6,riserGain:1.5,lipW:.07,footAO:.5,floorContrast:1.35},hmax:7.2,heights:(h,w,d)=>{for(let y=0;y<d;y++)for(let x=0;x<w;x++)h[y*w+x]=HGTR_STAIR_H(y)}},
+ {id:4972,kind:'star',name:'The Gathering Room',w:17,d:17,wh:4,door:{x:8,y:16,face:'S'},wall:['hgt_w3_arcade_lilac','hgt_w2_constellation'],floor:'hgtb_f_mandala_dark',frame:'hgt_w2_portlilac',look:'star',stars:'gather',lookx:{ambient:.3,wallGain:2.2,floorGain:2.8,floorContrast:1.2}},
  {id:4973,kind:'star',name:'The Lantern Stars',w:15,d:15,wh:5.6,door:{x:7,y:14,face:'S'},wall:['hgt_wl','hgt_wl'],floor:'hgt_f1',look:'star',stars:'lanterns'},
  {id:4974,kind:'star',name:'The Firefly Room',w:15,d:13,wh:3.2,door:{x:7,y:12,face:'S'},wall:['hgt_wl','hgt_wl'],floor:'hgt_f1',look:'star',stars:'fireflies'},
  {id:4975,kind:'star',name:'The Vast Star Hall',w:33,d:25,wh:7.4,door:{x:16,y:24,face:'S'},wall:['hgt_wl','hgt_wl'],floor:'hgt_f1',look:'star',stars:'vast'},
@@ -169,6 +171,7 @@ function hgtrBuildLevel(id){
   Object.defineProperty(dd,'lvl',{get:()=>hgtrReturnFor(id).to,enumerable:true});
   Object.defineProperty(dd,'at',{get:()=>{const r=hgtrReturnFor(id);return{x:r.x,y:r.y,f:r.f|0}},enumerable:true});
   KH_DOOR[db]=dd;set(R.door.x,R.door.y,ch(db));
+  if(R.frame){const fg=ch(hgtaWallTile(R.frame,wh)),dr=R.door,f2=dr.face==='N'||dr.face==='S'?[[dr.x-1,dr.y],[dr.x+1,dr.y]]:[[dr.x,dr.y-1],[dr.x,dr.y+1]];for(const [fx,fy] of f2)if(fx>0&&fy>0&&fx<w-1&&fy<d-1)set(fx,fy,fg)} // an ornamental frame either side of the door
   const decor=[],lights=[],mapNames=[],T=R.terr;
   if(R.kind==='lobby'){ // a door to every room
     for(const rid of HGTR_LOBBY_N.concat(HGTR_LOBBY_S)){const q=HGTR_LD[rid],rr=HGTR.rooms[rid],north=q.y===0;
@@ -185,7 +188,9 @@ function hgtrBuildLevel(id){
     for(let y=0;y<d;y++)for(let x=0;x<w;x++)if(rows[y][x]!=='.'){ // wall feet stand on the ground beside them
       let b=null;for(const [ox,oy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+ox,ny=y+oy;if(nx>=0&&ny>=0&&nx<w&&ny<d&&rows[ny][nx]==='.'){b=h[ny*w+nx];break}}if(b!==null)h[y*w+x]=b}
     L.terrace={h,roof:R.roof||wh+R.hmax};L.outdoor=false;
+    if(R.lid){const lid=new Float32Array(w*d);for(let y=0;y<d;y++)for(let x=0;x<w;x++)if(rows[y][x]==='.')lid[y*w+x]=R.lid(x,y,w,d,h[y*w+x]);L.terrace.lid=lid}
   }
+  for(const q of R.lights||[])lights.push(q);
   L.hgtr=R;
   const lk=R.look==='star'?HGTR_STAR_LOOK:R.look==='nursery'?Object.assign({},HGTR_SPHERE_LOOK,{ambient:.34,hazeCol:[60,50,110],wallGain:.8,floorGain:.9,vignette:.5,grade:[240,230,255,.14]}):HGTR_SPHERE_LOOK;
   HGTE.look[id]=Object.assign({},lk,R.lookx||{});
@@ -431,6 +436,7 @@ const HGTR_STARS={
     for(const x of [2.3,6.7])B.star({ax:x,ay:y+.5,az:h(y)+.2,size:.075,ci,tw:1.1+(y%3)*.3,a:.9,pool:.6,pa:.45,lt:y%3===0?.4:0});
     if(y%2===0)B.star({ax:4.5,ay:y+.5,az:h(y)+.1,size:.055,ci:0,tw:1.6,a:.7,pool:.35,pa:.25,lt:0})}
   for(let i=0;i<70;i++){const y=2+rnd()*27;B.star({ax:1.6+rnd()*5.8,ay:y,az:h(y)+.6+rnd()*(R.wh-1.2),rx:.3,ry:.3,rz:.3,w:.1+rnd()*.12,size:B.size(),ci:B.pickCi(),tw:1+rnd()*2,a:.5+rnd()*.5,pool:rnd()<.3?.8:0,pa:.3,lt:.3})}
+  for(let y=3;y<=29;y++)for(const x of [1.6,3,4.5,6,7.4])B.star({ax:x,ay:y+.12,az:h(y)+.05,size:.032,ci:(x*7+y)%5<1?2:5,tw:1.2+((x*3+y)%4)*.4,a:.75,pool:0,lt:0}); // glints along the lip of every tread
   B.star({ax:4.5,ay:2.2,az:h(2)+2.2,size:.9,ci:2,tw:.5,a:1,pool:2.6,pa:.55,lt:1}); // the great star at the top
   hgtrAddConstellations(B,'wall',{s:.55,list:[{n:'w',x:2.6,z:9.4,wall:'N',ci:1},{n:'kite',x:6.3,z:9.8,wall:'N',ci:4},{n:'cross',x:4.5,z:11.5,wall:'N',ci:5}]});
   return{shoot:{every:[7,14],zlo:6,zhi:12,x0:1.5,x1:7.5,y0:3,y1:26}};
@@ -438,6 +444,7 @@ const HGTR_STARS={
  gather(B,R){
   const rnd=B.rnd;
   for(let i=0;i<64;i++){B.star({kind:1,ax:8.5,ay:8.5,az:.5+rnd()*1.5,ph:rnd()*6.28,orb:.8+rnd()*2.6,w:.25+rnd()*.5,lag:.5+rnd()*1.2,size:.07+rnd()*.07+(i<8?.08:0),ci:B.pickCi(),tw:1+rnd()*2.4,a:.9,pool:.75,pa:.42,lt:.45+(i<10?.3:0)});}
+  for(let i=0;i<70;i++){B.star({ax:1.5+rnd()*14,ay:1.5+rnd()*14,az:.04,size:.03+rnd()*.025,ci:B.pickCi(),tw:1.4+rnd()*2.5,a:.8,pool:0,lt:0})} // sparkle on the floor tiles
   for(let i=0;i<34;i++){B.star({ax:2+rnd()*13,ay:2+rnd()*13,az:.4+rnd()*3.2,rx:.8,ry:.8,rz:.4,w:.07+rnd()*.1,size:B.size(),ci:B.pickCi(),tw:.8+rnd()*2,a:.45+rnd()*.5,pool:rnd()<.4?.7:0,pa:.3,lt:.25})}
   return{shoot:{every:[8,16],zlo:2.5,zhi:3.6,x0:2,x1:15,y0:2,y1:15}};
  },
@@ -507,6 +514,7 @@ function hgtrStarUpdate(S,dt,t,px,py,pvx,pvy){
       st.x=st.ax+Math.sin(t*st.w+st.ph)*st.rx+Math.sin(t*st.w*2.3+st.ph*2)*st.rx*.35;st.y=st.ay+Math.cos(t*st.w*(st.f2+.3)+st.ph*1.4)*st.ry+Math.sin(t*st.w*1.9+st.ph)*st.ry*.35;st.z=st.az+Math.sin(t*st.w*1.3+st.ph*.6)*st.rz;
       if(L.rows[st.y|0]&&L.rows[st.y|0][st.x|0]!=='.'){st.x=st.ax;st.y=st.ay}}
     else if(k===1){ // follower: orbits the party, trailing behind it
+      if(!st._i){st._i=1;const a0=t*st.w+st.ph,ix=px+Math.cos(a0)*st.orb,iy=py+Math.sin(a0)*st.orb*.9;const ok=L.rows[iy|0]&&L.rows[iy|0][ix|0]==='.';st.x=ok?ix:px;st.y=ok?iy:py;st.z=st.az} // start on the orbit around the party, not stacked at the room centre
       const a=t*st.w+st.ph,tx=px+Math.cos(a)*st.orb,ty=py+Math.sin(a)*st.orb*.9,tz=st.az+Math.sin(t*.7+st.ph*2)*.25;
       let gx=tx,gy=ty;const cxi=gx|0,cyi=gy|0;if(!L.rows[cyi]||L.rows[cyi][cxi]!=='.'){gx=px;gy=py}
       const kf=1-Math.exp(-dt*st.lag*1.1);st.x+=(gx-st.x)*kf;st.y+=(gy-st.y)*kf;st.z+=(tz-st.z)*kf*1.5;
@@ -629,6 +637,7 @@ function hgtrFrame(S){
   if(S.ppx!==null&&dt>0){const k=1-Math.exp(-dt*8);S.pvx+=((px-S.ppx)/dt-S.pvx)*k;S.pvy+=((py-S.ppy)/dt-S.pvy)*k}
   S.ppx=px;S.ppy=py;S.amb=hgtLookFor(LEVEL).ambient;
   const spd=Math.hypot(S.pvx,S.pvy);if(spd>8){S.pvx*=8/spd;S.pvy*=8/spd}
+  if(dt===0&&S.kind==='star'&&!S._pi){S._pi=1;hgtrStarUpdate(S,1e-4,T,px,py,0,0)}
   if(dt>0){
     if(S.kind==='sphere'){const n=dt>.03?2:1,h=dt/n;for(let i=0;i<n;i++)hgtrSphereStep(S,h,px+S.pvx*.1,py+S.pvy*.1,S.pvx,S.pvy,T);hgtrSphereSound(S,T);
       for(const e of S.em){e.x=S.x[e.i];e.y=S.y[e.i]}}
@@ -643,7 +652,8 @@ function hgtrFrame(S){
     if(S.kind==='sphere'){for(let i=0;i<S.N;i++){const sp=S.sp[i];sp.x=S.x[i];sp.y=S.y[i];L.push(sp)}}
     else for(const sp of S.sp)L.push(sp)}}}catch(e){if(!HGTR._e1){HGTR._e1=1;console.error('hgtr sprites',e)}}
   return L}}
-{const _su=setupLights;setupLights=function(){_su.apply(this,arguments);try{HGTR.S=null;if(hgtrIs(LEVEL)&&typeof HGTG!=='undefined')HGTG.done[LEVEL]=true;if(hgtrIs(LEVEL)&&LEVELS[LEVEL]&&LEVELS[LEVEL].hgtr){const S=hgtrAttach();if(S)for(const sl of S.slots)LIGHTS.push(sl.L)}}catch(e){console.error('hgtr lights',e)}}}
+{const _su=setupLights;setupLights=function(){_su.apply(this,arguments);try{HGTR.S=null;{const cp=hgtrIs(LEVEL)&&HGTR.rooms[LEVEL]&&HGTR.rooms[LEVEL].ceilPic;if(typeof CEILS!=='undefined'){if(cp&&CEILS[cp]){if(!HGTR._cs){HGTR._cs=1;HGTR._cs0=CEILS.hgt_tube_ceiling}CEILS.hgt_tube_ceiling=CEILS[cp]}else if(HGTR._cs){HGTR._cs=0;if(HGTR._cs0)CEILS.hgt_tube_ceiling=HGTR._cs0;else delete CEILS.hgt_tube_ceiling}}}
+if(hgtrIs(LEVEL)&&typeof HGTG!=='undefined')HGTG.done[LEVEL]=true;if(hgtrIs(LEVEL)&&LEVELS[LEVEL]&&LEVELS[LEVEL].hgtr){const S=hgtrAttach();if(S)for(const sl of S.slots)LIGHTS.push(sl.L)}}catch(e){console.error('hgtr lights',e)}}}
 /* a faint wash of the nearest light's colour over the party's view */
 {const _w=drawWeatherFx;drawWeatherFx=function(){_w.apply(this,arguments);
   try{const S=HGTR.S;if(!S||S.L!==LEVELS[LEVEL]||!S.slots)return;let r=0,g=0,b=0;

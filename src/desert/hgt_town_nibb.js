@@ -210,7 +210,7 @@ function build(){
   try{hgtkTank(B,74,75,3,3,{type:'tower',theme:'reef',z1:8.4,seed:7,bands:[2.8,5.6]});B.centreTank={x:75,y:76}}catch(e){console.error('nibb centre tank',e)}
   // five small mazes of different kinds on the rim
   for(const [w,k,o] of [[15,203,{kind:'sunken',algo:'kruskal',reward:'chest'}],[15,204,{kind:'raised',algo:'wilson',reward:'shrine'}],[15,202,{kind:'tube',algo:'backtracker',reward:'creature'}],[11,206,{kind:'tall',algo:'chartres',wallH:3.4,reward:'chest'}]]){
-    const f=findFree(w,w,k,{m:0});if(f)mz(f.x,f.y,w,w,o);else if(o.kind==='tube'){let ok=true;for(let y=29;y<=45&&ok;y++)for(let x=123;x<=139;x++)if(!hgtlIsOpen(B,x,y)||B.occ.has(x+','+y)||Math.abs(hAt(x,y)-TOP)>.01)ok=false;if(ok)mz(124,30,15,15,o);else console.error('nibb: no room for maze',o.kind)}else console.error('nibb: no room for maze',o.kind)}
+    const f=findFree(w,w,k,{m:0});if(f)mz(f.x,f.y,w,w,o);else if(o.kind==='tube'){let ok=true;for(let y=29;y<=45&&ok;y++)for(let x=127;x<=143;x++)if(!hgtlIsOpen(B,x,y)||B.occ.has(x+','+y)||Math.abs(hAt(x,y)-TOP)>.01)ok=false;if(ok)mz(128,30,15,15,o);else console.error('nibb: no room for maze',o.kind)}else console.error('nibb: no room for maze',o.kind)}
   // pools: one you can swim and dive from, one for bathing
   {const p=findFree(11,9,230,{m:0});if(!p)console.error('nibb: no room for pool');if(p){const pl=hgtlPool(B,p.x,p.y,9,7,{shallow:1,lamps:true,lead:{to:5242,x:5,y:7,f:0}});B.poolA=pl;B.links[5242]={x:p.x-1,y:p.y+3,f:3}}
    const q=findFree(9,7,231,{m:0});if(q){B.poolB=hgtlPool(B,q.x,q.y,7,5,{shallow:1,bath:true,lamps:true})}}
@@ -297,6 +297,9 @@ function build(){
     for(let y=0;y<H;y++)for(let x=0;x<W;x++){const ch=B.rows[y][x];if(ch!=='.'&&HGTL_ROLE[ch]){const n=conv(ch);if(n)B.rows[y][x]=n}}
   })();
 
+  // the houses of the sunken courts: carved fresco, shutter and arcade faces instead of one flat wall
+  for(const c of B.sunken){const [x0,y0,x1,y1]=c.bbox;for(let y=y0-3;y<=y1;y++)for(let x=x0;x<=x1;x++){if(!inB(x,y)||B.rows[y][x]==='.')continue;if(Math.hypot(x-c.x,y-c.y)>9)continue;
+    const fam=['r','s','u','v','q','t'][(x*3+y+c.x)%6];B.rows[y][x]=wc('win',fam,3.5,(x+y)&1)}}
   /* ================= KEEP EVERYTHING REACHABLE ================= */
   (function fixReach(){
     for(let pass=0;pass<4;pass++){
@@ -423,6 +426,9 @@ function build(){
      for(let y=y0-3;y<=y1;y+=2)for(const x of [x0,x1]){if(isO(x,y)&&!B.occ.has(x+','+y)){B.occ.add(x+','+y);dec('hgtb_lamp_bracket',x,y,{bob:1.5,sc:1.1});B.lights.push([x,y])}}
      for(let y=y0;y<=y1;y+=3)for(const x of [x0+2,x1-2]){if(isO(x,y)&&B.kind[I(x,y)]===K.COURT&&!B.occ.has(x+','+y)){B.occ.add(x+','+y);dec('hgtb_lampwhite',x,y,{sc:1.2});B.lights.push([x,y])}}
      dec('hgtb_deco_lanterns',c.ax,c.ay,{sc:1.2});B.lights.push([c.ax,c.ay],[c.ax,c.ay+2])}
+   for(const c of B.sunken){const [x0,y0,x1,y1]=c.bbox;
+     for(let x=x0+1;x<=x1-1;x++)if(isO(x,c.ay)&&!B.occ.has(x+','+c.ay)&&Math.abs(x-c.ax)>1){B.occ.add(x+','+c.ay);dec(x%2?'hgtb_lamp_bracket':'hgt_balcony',x,c.ay,{bob:x%2?1.4:1.9,sc:1.2});B.lights.push([x,c.ay])}
+     for(let y=c.ay;y<=y1;y+=2)B.lights.push([c.ax,y],[c.ax+1,y])}
    const g=B.mazes[0]&&B.mazes[0].m,gb=B.grand;
    if(g&&gb){const ap=g.approach||{x:gb.x+(gb.s>>1),y:gb.y+gb.s};
      dec('hgt_vine_wreatharch',ap.x,ap.y,{sc:2.2});dec('hgt_obelisk',ap.x-2,ap.y,{sc:2.4});dec('hgt_obelisk',ap.x+2,ap.y,{sc:2.4});B.lights.push([ap.x,ap.y],[ap.x-2,ap.y],[ap.x+2,ap.y]);
@@ -434,8 +440,12 @@ function build(){
      dec('hgt_hanglamp',ap.x,ap.y,{bob:2.4,sc:1.6});for(let k=2;k<=7;k+=2)for(const dx of [-1,1])if(isO(ap.x+dx,ap.y+k)&&!B.occ.has((ap.x+dx)+','+(ap.y+k))){B.occ.add((ap.x+dx)+','+(ap.y+k));dec(k%4?'hgtb_deco_banner':'hgtb_lamp_tall',ap.x+dx,ap.y+k,{});B.lights.push([ap.x+dx,ap.y+k])}}}
    // the grand maze: a lit avenue of lamps and banners on the way to its arch
    if(g&&gb){const ap=g.approach||{x:gb.x+(gb.s>>1),y:gb.y+gb.s};for(let k=2;k<=10;k+=2)for(const dx of [-2,2])if(isO(ap.x+dx,ap.y+k)){B.occ.add((ap.x+dx)+','+(ap.y+k));dec(k%4?'hgtb_deco_banner':'hgt_obelisk',ap.x+dx,ap.y+k,{sc:k%4?1.3:2});B.lights.push([ap.x+dx,ap.y+k])}}
+   // beacons either side of both maze entrances, seen from the east and the west as well as the south
+   for(const m of [B.mazes[0]&&B.mazes[0].m,B.mazes[1]&&B.mazes[1].m])if(m){const ap=m.approach||m.entry;for(const dx of [-6,6,-10,10]){const x=ap.x+dx,y=ap.y+1;if(isO(x,y)&&!B.occ.has(x+','+y)){B.occ.add(x+','+y);dec('hgt_obelisk',x,y,{sc:2.8});dec('hgt_cupola',x,y,{bob:9,sc:1.5});B.lights.push([x,y]);if(isO(x,y+1)){dec('hgtb_deco_banner',x,y+1,{sc:1.4})}}}}
    // the plaza under the bell tower
    for(let x=116;x<=134;x+=3)for(const [dy,bob] of [[33,2.4],[36,3.2],[39,2.6]]){if(isO(x,dy)&&!B.occ.has(x+','+dy)){dec('hgt_hanglamp',x,dy,{bob,sc:1.7});if(x%2)B.lights.push([x,dy])}}
+   for(const [x,y,bb,sc] of [[119,32,2.4,3],[131,32,2.4,3],[112,29,2.6,2.6],[126,43,2.6,2.6],[120,43,2.8,2.4],[132,43,2.8,2.4]])dec(bellKind(),x,y,{bob:bb,sc});
+   for(let x=108;x<=134;x+=4)for(const y of [28,42]){dec('hgt_hanglamp',x,y,{bob:2.8,sc:1.8});if(x%8===0)B.lights.push([x,y])}
    dec(bellKind(),125,34,{bob:2.2,sc:3.4});dec(bellKind(),121,37,{bob:2.6,sc:2.4});dec(bellKind(),129,37,{bob:2.6,sc:2.4});
    for(const x of [118,125,132]){dec('hgtb_deco_banner',x,32,{sc:1.7});dec('hgtb_lamp_tall',x+1,32,{sc:1.3});B.lights.push([x,32])}}
 

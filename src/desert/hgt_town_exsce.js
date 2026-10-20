@@ -130,7 +130,7 @@ function buildCity(){
   coneDecor(B,info);rootDrum(B,info);rootDecor(B,info);rootStairsLamps(B,info);courtDecor(B,info);
   pond(B,info,43,107);axisDecor(B);
   gates(B,info);
-  tubes(B,info);recesses(B);streetDecor(B);boxDecor(B);gateDecor(B);belvedere(B);eastEntry(B);placeFolk(B,info);
+  tubes(B,info);recesses(B);streetDecor(B);boxDecor(B);gateDecor(B);belvedere(B);eastEntry(B);eastLaneLights(B);placeFolk(B,info);
   bigMazes(B,info);stairsNowhere(B,info);focalPoints(B);edgeGrowth(B);tanksCity(B,info);lifeAndPets(B,info);
   B.start={x:CX,y:H-3,f:0};
   return B}
@@ -466,7 +466,7 @@ const ROOMDEF={
  shop:{props:[['counter',3,2],['counter',4,2],['counter',6,2],['counter',7,2],['shelf',1,3],['shelf',1,4],['stallA',8,4],['stallB',9,4],['amphorae',9,5]],plants:[['gardenlantern',1,1,1]],lights:[[3,3],[7,3],[5,5]],chests:[],folk:[['hgn_brollo','hg_npc5',2,1,1]],barrels:[[9,1],[9,2],[1,5]]},
  cellar:{props:[['amphora',1,5],['amphora',9,5]],plants:[['giantcap',2,2,1],['giantcap',8,2,1.1],['mushrooms',3,6,1],['mushrooms',7,6,1],['mushrooms',1,7,1],['mushrooms',9,7,1],['giantcap',2,6,.9],['crystalgrass',8,6,1]],lights:[[2,3],[8,3],[5,6],[5,2]],chests:[[1,1,'hg_chestweed'],[9,1,'hg_chestjelly'],[5,1,'hg_chestwax']],items:[['hgcrystal',3,4],['hgcrystal',7,4]],barrels:[[1,3],[9,3],[1,4],[9,4]]},
  study:{props:[['bookcase',1,1],['bookcase',2,1],['bookcase',8,1],['bookcase',9,1],['bookcase',1,3],['bookcase',1,5],['desk',8,3],['chair',7,3],['maptable',8,5],['mapstand',9,5],['candle',1,7],['candle',9,7]],plants:[['gardenlantern',3,2,1],['gardenlantern',7,2,1]],lights:[[3,3],[7,3],[5,6],[3,6],[7,6]],chests:[[9,7,'hg_chestjelly']],items:[['hgcrystal',2,7],['hgsting',3,7]],folk:[['hg_aldous','hg_wizard',7,4,1]],lectern:[[2,4]]},
- glass:{props:[['bench',3,5],['bench',7,5],['planter',1,1],['planter',9,1],['planter',1,7],['planter',9,7]],plants:[['fairytree',2,2,.7],['fairytree',8,2,.7],['fairytree',2,6,.7],['fairytree',8,6,.7],['pearlbush',3,1,1],['pearlbush',7,1,1],['shellflower',1,4,1],['shellflower',9,4,1],['bulbflower',3,7,1],['bulbflower',7,7,1],['lightvine',1,2,1],['lightvine',9,2,1]],lights:[[3,3],[7,3],[5,6]],chests:[[5,1,'hg_chestweed']],fountain:[[5,3]]},
+ glass:{props:[['bench',3,5],['bench',7,5],['planter',1,1],['planter',9,1],['planter',1,7],['planter',9,7]],plants:[['fairytree',1,3,.7],['fairytree',9,3,.7],['fairytree',1,6,.7],['fairytree',9,6,.7],['pearlbush',2,2,1],['pearlbush',8,2,1],['shellflower',1,4,1],['shellflower',9,4,1],['bulbflower',3,7,1],['bulbflower',7,7,1],['lightvine',1,2,1],['lightvine',9,2,1]],lights:[[3,3],[7,3],[5,6]],chests:[[9,7,'hg_chestweed']],fountain:[[5,3]]},
  library:{props:[['bookcase',1,1],['bookcase',1,3],['bookcase',1,5],['bookcase',1,7],['bookcase',7,1],['bookcase',7,3],['bookcase',7,5],['bookcase',7,7],['desk',2,4],['chair',3,4],['maptable',6,4]],plants:[['gardenlantern',3,2,1],['gardenlantern',5,2,1],['gardenlantern',3,6,1],['gardenlantern',5,6,1]],lights:[[3,3],[5,3],[3,5],[5,5]],chests:[],lectern:[[6,6]]},
  inn:{props:[['table',2,3],['chair',2,2],['chair',2,4],['table',8,3],['chair',8,2],['chair',8,4],['table',2,6],['chair',3,6],['counter',7,6],['counter',8,6],['counter',9,6],['hearth',1,1],['feast',9,1]],plants:[['gardenlantern',5,7,1]],lights:[[2,5],[8,5],[5,3]],chests:[[9,3,'hg_chestwax']],folk:[['hgx_ex_inn1','hg_npc3',3,3,.9],['hgx_ex_inn2','hg_npc0',7,5,1]],barrels:[[1,7],[1,6]]},
  loft:{props:[['bed',1,1],['cradle',5,5],['dresser',5,1]],plants:[['mushrooms',1,5,.9]],lights:[[3,2],[2,4]],chests:[],folk:[['hgn_pip','hg_npc3',2,3,.8]],barrels:[[5,2],[5,3]]},
@@ -498,7 +498,8 @@ function buildRoom(key){
   {const occ=new Set();for(const k of ['props','plants','chests','barrels','lectern','fountain','folk','items'])for(const e of def[k]||[]){if(k==='props'||k==='plants')occ.add(e[1]+','+e[2]);else if(k==='folk')occ.add(e[2]+','+e[3]);else if(k==='items')occ.add(e[1]+','+e[2]);else occ.add(e[0]+','+e[1])}
    const v=R.id%4,wallAt=(x,y,c)=>{if(x>0&&y>0&&x<w-1&&y<d-1&&!(x===cx)&&rows[y][x]==='.'&&!occ.has(x+','+y)&&!occ.has(x+','+(y-1))&&!occ.has(x+','+(y+1)))rows[y][x]=c};
    if(w>=9&&d>=7){
-    if(v===0){for(const [x,y] of [[2,2],[w-3,2],[2,d-3],[w-3,d-3]])wallAt(x,y,cW)}
+    if(R.kind==='glass'){for(const [x,y] of [[3,2],[7,2],[3,6],[7,6]])wallAt(x,y,cW)}
+    else if(v===0){for(const [x,y] of [[2,2],[w-3,2],[2,d-3],[w-3,d-3]])wallAt(x,y,cW)}
     else if(v===1){for(let x=1;x<cx-1;x++)wallAt(x,d>>1,cB);for(let x=cx+2;x<w-1;x++)wallAt(x,d>>1,cB)}
     else if(v===2){for(const [x,y] of [[1,1],[2,1],[1,2],[w-2,1],[w-3,1],[w-2,2],[1,d-2],[w-2,d-2]])wallAt(x,y,cW)}
     else{for(let y=2;y<d-2;y++){wallAt(1,y,cW);wallAt(w-2,y,cW)}}}}
@@ -656,9 +657,14 @@ function pond(B,info,cx,cy){
 function skyTowers(){const out=[];for(let i=0;i<30;i++){const f=(i+hs(i,1,150)*.6)/30*4,e=Math.floor(f),u=f-e,m=14+hs(i,2,151)*30,x=e===0?-20+u*(W+40):e===2?W+20-u*(W+40):e===1?W+m:-m,y=e===0?-m:e===2?H+m:e===1?-20+u*(H+40):H+20-u*(H+40);
     out.push({x,y,k:'hg_tower'+(4+((hs(i,3,152)*4)|0)),w:9+hs(i,4,153)*10,z:0,big:1})}return out}
 // the Ravine of the Lamps: the street between two stair towers is a sunken lane, 1.56 down, with steps at both ends
+function laneLights(B,xs,y0,y1){
+  for(const [yy,dir] of [[y0,1],[y1,-1]])for(let k=3;k<=8;k++){const y=yy+dir*k;if(y<y0||y>y1)continue;
+    for(const [x,ox] of [[xs[0],-.4],[xs[xs.length-1],.4]]){if(!isO(B,x,y))continue;
+      if(k%3===0)lampPost(B,x,y);else if(k%3===1)plant(B,['crystalgrass','bulbflower','shellflower'][(y+x)%3],x,y,1.2);else if(IMG.hgtb_lamp_bracket){decor(B,'hgtb_lamp_bracket',x,y,{walk:true,deco:true,sc:1,bob:.9,ox});light(B,x,y)}}
+    light(B,xs[1],y)}}
 function sunkenLane(B,xs,y0,y1,depth,seed){
   for(let y=y0;y<=y1;y++){const k=Math.min(y-y0,y1-y),d=Math.min(depth,.52*(k+1));
-    for(const x of xs){O(B,x,y,-d,k<3?K.STAIR:K.COURT);fl(B,x,y,k<3?4:3)}}
+    for(const x of xs){O(B,x,y,-d,k<3?K.STAIR:K.COURT);fl(B,x,y,k<3?4:(x===xs[1]?3:2))}}
   for(let y=y0+4;y<=y1-4;y++){if(hs(xs[0],y,160+seed)<.5)plant(B,['giantcap','mushrooms','fern','bulbflower','shellflower','lightvine'][(hs(xs[1],y,161+seed)*6)|0],hs(y,3,162+seed)<.5?xs[0]:xs[xs.length-1],y,.8+hs(y,4,163)*.6);if((y-y0)%3===1){light(B,xs[1],y);if((y-y0)%6===1)lampPost(B,xs[0],y);else plant(B,'crystalgrass',xs[xs.length-1],y,1.1)}}}
 // a humpback bridge of steps over the Ravine of the Lamps, from the east side of one stair tower to the west side of the next
 function skyBridge(B,info){
@@ -674,7 +680,8 @@ function axisDecor(B){
   for(let k=0;k<9;k+=4){L(72,36+k);L(78,36+k);L(72,114-k);L(78,114-k);L(36+k,72);L(36+k,78);L(114-k,72);L(114-k,78)}
   for(const [x,y] of [[CX,40],[CX,110],[40,CY],[110,CY]])if(isO(B,x,y))decor(B,'hgt_obelisk',x,y,{block:true,sc:1.1})}
 // the East: a sunken lane (1.56 down, steps at each end) between every pair of cross streets, so the cross streets pass over it at ground level
-function eastLane(B){for(let j=0;j<YB.length;j++)sunkenLane(B,[137,138,139],YB[j][0],YB[j][1],1.56,0)}
+function eastLane(B){for(let j=0;j<YB.length;j++){sunkenLane(B,[137,138,139],YB[j][0],YB[j][1],1.56,0)}}
+function eastLaneLights(B){for(let j=0;j<YB.length;j++)laneLights(B,[137,138,139],YB[j][0],YB[j][1])}
 // gate plazas and the arches along the avenues
 function gateDecor(B){
   for(const gy of [H-18,10]){decor(B,'hgt_fountain',CX,gy,{block:true,sc:1.1});for(const dx of [-2,2]){lampPost(B,CX+dx,gy+(gy>75?1:-1))}
@@ -787,7 +794,8 @@ function mazeAt(B,info,x,y,w,h,o){carveClear(B,x-1,y-1,w+2,h+2);
   (info.mazes=info.mazes||[]).push({x,y,w,h,kind:o.kind,algo:o.algo,reward:o.reward,centre:m.centre});glowAt(B,m.centre.x,m.centre.y);return m}
 function bigMazes(B,info){
   {const m=mazeAt(B,info,34,34,23,23,{algo:'backtracker',kind:'tall',side:'E',reward:'view',seed:11});
-   const a=m.approach;if(a){decor(B,'hgt_arch',a.x,a.y,{walk:true,deco:true,sc:1.3});for(const dy of [-1,1]){lampPost(B,a.x,a.y+dy);light(B,a.x,a.y+dy)}
+   const a=m.approach;if(a){for(let k=3;k<=11;k+=4){decor(B,'hgt_arch',a.x+k,a.y,{walk:true,deco:true,sc:1.2});for(const dy of [-1,1]){if(isO(B,a.x+k,a.y+dy))lampPost(B,a.x+k,a.y+dy)}}
+     for(let k=1;k<=12;k++)fl(B,a.x+k,a.y,1);decor(B,'hgt_arch',a.x,a.y,{walk:true,deco:true,sc:1.3});for(const dy of [-1,1]){lampPost(B,a.x,a.y+dy);light(B,a.x,a.y+dy)}
      if(IMG.hgtb_deco_lanterns)decor(B,'hgtb_deco_lanterns',a.x+1,a.y-2,{walk:true,deco:true,sc:1.3});decor(B,'hgt_obelisk',a.x+1,a.y+2,{block:true,sc:1.6});for(let k=0;k<4;k++)light(B,a.x+1,a.y+k-2)}
    for(const [x,y] of [[33,33],[57,33],[33,57],[57,57]])if(isO(B,x,y)){decor(B,'hgt_obelisk',x,y,{block:true,sc:1.5});light(B,x,y)}}
   mazeAt(B,info,34,60,15,15,{algo:'prim',kind:'hedge',side:'E',reward:'chest',seed:12});
