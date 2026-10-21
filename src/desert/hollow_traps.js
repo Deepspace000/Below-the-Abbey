@@ -416,3 +416,15 @@ function hltDrawScare(S,cx,cy,dX,dY){
     if(G.time<HLT.sense.until)for(const t of hltSenseList())L.push(hltCustom(t.x+.5,t.y+.5,(cx,cy,dX,dY)=>hltDrawDecal(t,cx,cy,dX,dY)));
   }catch(e){console.warn('hlt sprites',e)}
   return L}}
+/* ---- the party reaches the labyrinth for the first time: a short talk among the heroes (a nod to a famous gamebook) ---- */
+khNpc('hl_labcut','The party','gate',()=>{
+  const nm=i=>(HERO_DEF[i]||HERO_DEF[0]).name,live=hltLive(),a=live[0]===undefined?0:live[0],b=live[1]===undefined?a:live[1],c=live[2]===undefined?b:live[2],d=live[3]===undefined?c:live[3];
+  const n6=say(nm(a)+': "I still dream about the blood beast."',[['Go on.',()=>null]]);
+  const n5=say(nm(d)+': "Yeah. Great book. That blood beast..."',[['Go on.',()=>n6]]);
+  const n4=say(nm(c)+': "Do you mean Deathtrap Dungeon?"',[['Go on.',()=>n5]]);
+  const n3=say(nm(b)+': "I read a book about a place like this once. A maze under a mountain, full of traps, and only one way through."',[['Go on.',()=>n4]]);
+  const n2=say('The passage ahead leads into a labyrinth. The floor has plates set into it, the walls are scorched, and a dry wind blows out of it carrying a smell of smoke.',[['Go on.',()=>n3]]);
+  return say(nm(a)+': "Wait. Look at the walls. Burn marks, and bones in the corners. This is a death trap."',[['Go on.',()=>n2]])});
+{const _hs2=hlStep;hlStep=function(nx,ny){_hs2.apply(this,arguments);
+  try{const L=LEVELS[LEVEL],F=HLF();if(LEVEL===HLT_TOP&&L&&L._maze&&!F.labCut&&!G.cut&&!G.talk){const m=L._maze;
+    if(nx>=m.x0-1&&nx<=m.x1+1&&ny>=m.y0-2&&ny<=m.y1+1){F.labCut=1;later(500,()=>{if(G.state==='play'&&!G.talk&&!G.cut)startTalk({npc:'hl_labcut',x:nx,y:ny})})}}}catch(e){console.warn('labcut',e)}}}
