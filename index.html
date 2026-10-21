@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.486';
+const VERSION='3.487';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1736,10 +1736,12 @@ function giveXP(amount){
     while(h.xp>=xpNeed(h.lvl))levelUp(hi);
   }
 }
+/* a hero's health grows with level exactly as fast as an enemy's does (enemyStat: x(1 + 0.45 x (level - 1))), so a level 70 hero is as tough for a level 70 place as a level 1 hero is for a level 1 place; before v3.487 it grew by a fixed step per level (Warrior +6) and a level 70 Warrior had 448 health against a vampire that bit for 239 */
+function heroBaseHp(hi,lvl){const d=HERO_DEF[hi];return Math.round((d&&d.hp||20)*(1+.45*(Math.max(1,lvl)-1)))}
 function levelUp(hi){
   const h=G.heroes[hi],def=HERO_DEF[hi],g=def.grow;
   const old={hp:h.max,mp:h.mpMax,str:h.str,dex:h.dex,int:h.int,lvl:h.lvl};
-  h.xp-=xpNeed(h.lvl);h.lvl++;h.base+=g.hp;h.mpMax+=g.mp;h[g.a]++;if(h.lvl%2===0)h[g.b]++;
+  h.xp-=xpNeed(h.lvl);h.lvl++;h.base=heroBaseHp(hi,h.lvl);h.mpMax+=g.mp;h[g.a]++;if(h.lvl%2===0)h[g.b]++;
   recalcMax(hi);
   {const ch=[],gain={};for(const [k,lab] of [['str','Strength'],['dex','Dexterity'],['int','Intelligence']])if(h[k]!==old[k]){ch.push([lab,old[k],h[k]]);gain[k]=[old[k],h[k]]}
    if(h.max!==old.hp){ch.push(['Health',old.hp,h.max]);gain.hp=[old.hp,h.max]}
@@ -4114,6 +4116,7 @@ function restore(sv){ // the golden city and the rooms in it are built the first
 function restoreNow(sv){
   setParty(sv.party);reset(sv.level||1);
   sv.heroes.forEach((s,i)=>Object.assign(G.heroes[i],{_rs:s.rs||null,hp:s.hp,max:s.max,base:s.base,mp:s.mp,mpMax:s.mpMax,alive:s.alive,lvl:s.lvl,xp:s.xp,food:s.food===undefined?100:s.food,powSel:s.powSel||0,learned:s.learned||[],str:s.str,dex:s.dex,int:s.int,spellSel:s.spellSel||0,eq:s.eq||{}}));
+  G.heroes.forEach((h,i)=>{try{const nb=heroBaseHp(i,h.lvl);if(h.base!==nb){const om=h.max;h.base=nb;recalcMax(i);if(h.hp>=om)h.hp=h.max}}catch(e){console.error(e)}}); // saves made before v3.487: health follows the new rule (a hero at full health stays at full health)
   G.aff=sv.aff||[];G.bag=sv.bag;G.gold=sv.gold;G.potFav=sv.potFav||null;G.potBack=sv.potBack||[null,null];G.keys=sv.keys;G.rounds=sv.rounds;G.kills=sv.kills;G.bossDead=!!sv.bossDead;G.sel=sv.sel||0;G.lightBoost=sv.lightBoost||0;
   G.P={x:sv.P.x,y:sv.P.y,f:sv.P.f,angT:(sv.P.f-1)*Math.PI/2};G.C={x:sv.P.x,y:sv.P.y,a:G.P.angT};
   {const sr=seenRows(sv.seen);if(LEVEL===1){G.grid=sv.grid;if(sr)G.seen=sr}else if(sr&&sr.length===MH&&sr[0].length===MW)G.seen=sr}
