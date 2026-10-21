@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.513';
+const VERSION='3.514';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -19816,7 +19816,7 @@ function drawGameplay(){
     if(X){txt('Example: a '+X.name+' (level '+X.lv+') against '+X.hero+':',240,128,7.6,'#d8c88e','center');
       txt('It hits for about '+mk(X.now.dmg,X.was.dmg)+' and lands '+mk(X.now.eh,X.was.eh,'%')+' of its blows.',240,139,7.6,'#cdbf94','center');
       txt('It takes about '+mk(X.now.hits,X.was.hits)+' hits to kill, and you land '+mk(X.now.mh,X.was.mh,'%')+' of yours.',240,150,7.6,'#cdbf94','center');
-      txt('A kill pays '+mk(X.now.xp,X.was.xp)+' xp'+(X.now.gold||X.was.gold?' and about '+mk(X.now.gold,X.was.gold)+' gold.':'.'),240,161,7.6,'#cdbf94','center')}
+      txt('A kill gives '+mk(X.now.xp,X.was.xp)+' xp'+(X.now.gold||X.was.gold?' and pays about '+mk(X.now.gold,X.was.gold)+' gold.':'.'),240,161,7.6,'#cdbf94','center')}
     else txt('Enemy damage '+(st>0?'+':'-')+Math.round(Math.abs(diffDmg()-1)*100)+'%, health '+(st>0?'+':'-')+Math.round(Math.abs(diffHp()-1)*100)+'%. Gold and xp '+(st>0?'+':'-')+Math.round(Math.abs(diffRew()-1)*100)+'%.',240,128,7.6,'#cdbf94','center')}}
   const lines=on?[
     'Creatures scale to the party. A party that has outgrown a place meets its creatures raised to within a few levels of itself, and the great creatures always stand above the party.',

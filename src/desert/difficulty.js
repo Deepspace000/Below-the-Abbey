@@ -83,7 +83,7 @@ function drawGameplay(){
     if(X){txt('Example: a '+X.name+' (level '+X.lv+') against '+X.hero+':',240,128,7.6,'#d8c88e','center');
       txt('It hits for about '+mk(X.now.dmg,X.was.dmg)+' and lands '+mk(X.now.eh,X.was.eh,'%')+' of its blows.',240,139,7.6,'#cdbf94','center');
       txt('It takes about '+mk(X.now.hits,X.was.hits)+' hits to kill, and you land '+mk(X.now.mh,X.was.mh,'%')+' of yours.',240,150,7.6,'#cdbf94','center');
-      txt('A kill pays '+mk(X.now.xp,X.was.xp)+' xp'+(X.now.gold||X.was.gold?' and about '+mk(X.now.gold,X.was.gold)+' gold.':'.'),240,161,7.6,'#cdbf94','center')}
+      txt('A kill gives '+mk(X.now.xp,X.was.xp)+' xp'+(X.now.gold||X.was.gold?' and pays about '+mk(X.now.gold,X.was.gold)+' gold.':'.'),240,161,7.6,'#cdbf94','center')}
     else txt('Enemy damage '+(st>0?'+':'-')+Math.round(Math.abs(diffDmg()-1)*100)+'%, health '+(st>0?'+':'-')+Math.round(Math.abs(diffHp()-1)*100)+'%. Gold and xp '+(st>0?'+':'-')+Math.round(Math.abs(diffRew()-1)*100)+'%.',240,128,7.6,'#cdbf94','center')}}
   const lines=on?[
     'Creatures scale to the party. A party that has outgrown a place meets its creatures raised to within a few levels of itself, and the great creatures always stand above the party.',
