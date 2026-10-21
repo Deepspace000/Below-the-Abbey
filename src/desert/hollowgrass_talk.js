@@ -17,14 +17,15 @@ function hgLexB(k){
   return null}
 /* words are learned by asking: G.flags.hgWordSeen[english] counts the times a word was shown in a talk, G.flags.hgWords[english]=1 marks a learned word */
 const hgLearned=k=>hgLvl()>=4||!!(G.flags.hgWords&&G.flags.hgWords[k]);
-function hgGarble(text,l){
+const HG_RECENT=[]; // the last few garbled texts, so a message can be shown again with the words just learned
+function hgGarble(text,l,noCount){
   if(l>=4)return text;
   const F=G.flags,counted={};
-  return text.replace(/[A-Za-z’']+/g,w=>{
+  const out=text.replace(/[A-Za-z’']+/g,w=>{
     const key=w.toLowerCase().replace(/’/g,"'"),lb=hgLexB(key);let o;
     if(lb){
       if(hgLearned(lb[0]))return w; // a learned word is heard in plain English
-      if(!counted[lb[0]]){counted[lb[0]]=1;const S=F.hgWordSeen||(F.hgWordSeen={});S[lb[0]]=(S[lb[0]]||0)+1}
+      if(!noCount&&!counted[lb[0]]){counted[lb[0]]=1;const S=F.hgWordSeen||(F.hgWordSeen={});S[lb[0]]=(S[lb[0]]||0)+1}
       o=lb[1]}
     else{ // not in the lexicon: a made-up word, always the same for the same word
       let s=0;for(let i=0;i<key.length;i++)s=(s*31+key.charCodeAt(i))|0;
@@ -36,7 +37,7 @@ function hgGarble(text,l){
         o+=v?HG_VOW[(pick*HG_VOW.length)|0]:HG_CON[(pick*HG_CON.length)|0];
         if(v){vv++;cc=0}else{cc++;vv=0}}}
     return w[0]===w[0].toUpperCase()&&w[0]!==w[0].toLowerCase()?o[0].toUpperCase()+o.slice(1):o});
-}
+  HG_RECENT.push({plain:text,out});if(HG_RECENT.length>10)HG_RECENT.shift();return out}
 /* "Ask about a word.": offered once a word has been heard twice and is not yet learned */
 function hgAskCands(){const S=G.flags.hgWordSeen||{};return Object.keys(S).filter(w=>S[w]>=2&&hgHas(w)&&!hgLearned(w)).sort((a,b)=>S[b]-S[a]||(a<b?-1:1)).slice(0,4)}
 function hgAskAdd(nd){ // puts the option into a dialogue node, before its last option (Goodbye)
@@ -45,6 +46,13 @@ function hgAskAdd(nd){ // puts the option into a dialogue node, before its last 
 function hgAskList(back){
   const c=hgAskCands();if(!c.length)return back;
   return say('Which word?',c.map(w=>[HG_LEX[w],()=>hgPuzzle(w,back)]).concat([['Never mind.',()=>back]]))}
+/* the NPC's message as it reads now: each garbled piece is made again, so a word just learned shows in plain English at once */
+function hgShowAgain(back,note){
+  if(!back||typeof back.text!=='string')return say(note,[BYE]);
+  const l=hgLvl();let t=back.text;
+  for(const r of HG_RECENT.slice().reverse()){if(r.out&&t.includes(r.out)){t=t.replace(r.out,hgGarble(r.plain,l,true));r.out=null}}
+  t=t.replace('  [You cannot understand a word of it.]',hgFoot(l));
+  return Object.assign({},back,{text:note+'  '+t,opts:(back.opts||[]).filter(o=>o[0]!=='Ask about a word.')})}
 function hgPuzzle(w,back){
   const pool=Object.keys(HG_LEX).filter(k=>k!==w&&!hgLearned(k)).map(k=>[Math.abs(k.length-w.length)+Math.random()*2,k]).sort((a,b)=>a[0]-b[0]).slice(0,2).map(a=>a[1]);
   const all=[w].concat(pool);for(let i=all.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[all[i],all[j]]=[all[j],all[i]]}
@@ -52,7 +60,7 @@ function hgPuzzle(w,back){
   all.forEach(o=>opts.push([o,()=>{
     if(o!==w)return say('They shake their head. That is not what it means. Try again.',opts);
     (G.flags.hgWords||(G.flags.hgWords={}))[w]=1;msg('You learned: '+HG_LEX[w]+' = '+w+'.','#a8e8c0');
-    return hgAskAdd(say('You learned: '+HG_LEX[w]+' = '+w+'.',[BYE]))}]));
+    return hgAskAdd(hgShowAgain(back,'You learned: '+HG_LEX[w]+' = '+w+'.'))}]));
   opts.push(['Never mind.',()=>back]);
   return node}
 const hgFoot=l=>l>=4?'':(G.flags.hgWords&&Object.keys(G.flags.hgWords).length?'  [You understand only the words you have learned.]':'  [You cannot understand a word of it.]');

@@ -46,7 +46,7 @@ function hgpAlias(){for(const id of HGP_IDS){const im=IMG[HGP[id][1]];if(im&&!IM
 const HGP_ANIMALS={481:['hgtb_amberpup','hgtb_pinkbulb'],482:['hgtb_pearlslug','hgtb_creamjelly'],483:['hgtb_pups','hgtb_lanternbeetle'],484:['hgtb_fishfly','hgtb_creammoth']};
 for(const n in HGP_SELLER){const [id,name,img]=HGP_SELLER[n];
   khNpc(id,name,img,d=>{const l=typeof hgLvl==='function'?hgLvl():4,hello='Little ones for the road. Each one has a gift.';
-    return say(name.split(',')[0]+' lifts a cloth from a row of baskets. "'+(l<4?hgGarble(hello,l):hello)+'"'+(l<4?hgFoot(l):''),[['See the animals.',()=>{openPetShop(HGP_STOCK[n],'THE PET SHOP');return null}],['Leave.',()=>null]])})}
+    return hgAskAdd(say(name.split(',')[0]+' lifts a cloth from a row of baskets. "'+(l<4?hgGarble(hello,l):hello)+'"'+(l<4?hgFoot(l):''),[['See the animals.',()=>{openPetShop(HGP_STOCK[n],'THE PET SHOP');return null}],['Leave.',()=>null]]))})}
 function hgpPlace(){
   const n=LEVEL;if(!(n>=481&&n<=484))return;const L=LEVELS[n];if(!L||L._hgpDone||!L.terrace||!L.decor)return;L._hgpDone=1;
   const W=L.rows[0].length,h=L.terrace.h,occ=new Set(L.decor.map(d=>Math.floor(d.x)+','+Math.floor(d.y)));

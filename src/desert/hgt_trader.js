@@ -37,7 +37,7 @@ const HGT_PRODUCE=[
   ['Fruit and vegetable stall',[['apple',7],['potato',8],['figs',5],['wildgarlic',6],['cavemushroom',6],['blackberries',6]]]];
 HGT_PRODUCE.forEach(([name,stock],i)=>{
   khNpc('hgt_stall'+i,name,'hg_npc5',d=>{const l=typeof hgLvl==='function'?hgLvl():4,hello='Fresh from the terraces today. Take what you like.';
-    return say('The stallholder nods at the baskets. "'+(l<4?hgGarble(hello,l):hello)+'"'+(l<4?hgFoot(l):''),[['Buy.',()=>{openShop(G.talk.d,stock,name);return null}],['Leave.',()=>null]])})});
+    return hgAskAdd(say('The stallholder nods at the baskets. "'+(l<4?hgGarble(hello,l):hello)+'"'+(l<4?hgFoot(l):''),[['Buy.',()=>{openShop(G.talk.d,stock,name);return null}],['Leave.',()=>null]]))})});
 function hgttStalls(){
   const L=LEVELS[LEVEL];if(!L||!L.decor||L._hgttStalls||!(LEVEL>=481&&LEVEL<=484))return;L._hgttStalls=1;let i=0,fr=0;
   for(const d of L.decor){if(!/^hgtb_stall_/.test(d.k)||d.npc)continue;

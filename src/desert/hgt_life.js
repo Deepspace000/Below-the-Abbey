@@ -154,7 +154,7 @@ function hgtlfAuto(id,opts){
   const spotsNear=(i,pred,r,n)=>{const x=i%W,y=(i/W)|0,o=[];for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){const xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=S.W||yy>=S.H)continue;const j=yy*W+xx;if(pred(j)&&(dx||dy))o.push({x:xx,y:yy})}return shuffle(o).slice(0,n)};
   const npcSpec=(task,i,extra)=>{const c=cell(i),tk=HGTLF_TASK[extra&&extra.lamp?'lamp':task]||HGTLF_TASK.walk,dr=doorOf(c.x,c.y);
     const fk=HGTLF_FOLK[extra&&extra.lamp?'lamp':task]||[],pick=fk.length?fk[(rng()*fk.length)|0]:null;
-    return Object.assign({kind:'npc',sprite:HGTLF_NPC[(rng()*HGTLF_NPC.length)|0],sprites:pick?[pick]:null,name:tk.name,task,home:c,door:dr,speed:.8+rng()*.4,lines:tk.lines,zone:5,schedule:city?{from:5,to:22}:{from:0,to:24},auto:1},extra||{})};
+    return Object.assign({kind:'npc',sprite:HGTLF_NPC[(rng()*HGTLF_NPC.length)|0],sprites:pick?[pick]:null,name:tk.name,task,home:c,door:dr,speed:.5+rng()*.25,lines:tk.lines,zone:5,schedule:city?{from:5,to:22}:{from:0,to:24},auto:1},extra||{})};
   const plantSpot=i=>S.reach[i]&&!S.avoid[i]&&!(S.fl[i]&5)&&S.deg[i]>=2&&S.cover[i]<=2,view=i=>hgtlfView(S,i,0),mk=(n)=>Math.round(nNpc*n/34);
   if(!city){ // a room: a few residents sitting, reading or sweeping, and small creatures in the corners
     const rc=[];for(let i=0;i<S.N;i++)if(S.reach[i]&&!S.avoid[i]&&!(S.fl[i]&1)&&S.deg[i]>=2&&far(i))rc.push(i);
@@ -170,7 +170,7 @@ function hgtlfAuto(id,opts){
    for(const i of take(all,mk(12),6,'walk',interest)){const c=cell(i),d1=hgtlfDist(S,c.x,c.y,60),b=ts.filter(t=>d1[t]>=12&&d1[t]<=55);if(!b.length){list.push(npcSpec('walk',i,{zone:12}));continue}
      const B=b[(rng()*b.length)|0],bc=cell(B),d2=hgtlfDist(S,bc.x,bc.y,50),c2=ts.filter(t=>d2[t]>=10&&d2[t]<=45&&d1[t]>=8),C=c2.length?c2[(rng()*c2.length)|0]:-1;
      const route=[{x:c.x,y:c.y,wait:2+rng()*3},{x:bc.x,y:bc.y,wait:3+rng()*5}];if(C>=0){const cc=cell(C);route.push({x:cc.x,y:cc.y,wait:3+rng()*5})}
-     list.push(npcSpec('walk',i,{route,zone:70,speed:.9+rng()*.35}))}}
+     list.push(npcSpec('walk',i,{route,zone:70,speed:.55+rng()*.2}))}}
   // 3. tenders beside plant beds and lamps (lamp tenders stay out at night)
   {const bedCells=[],lampCells=[];
    for(const d of S.plants){const i=d.y*W+d.x;let near=0;for(const e of S.plants)if(Math.abs(e.x-d.x)<=2&&Math.abs(e.y-d.y)<=2)near++;if(near>=3)for(const [dx,dy] of HGTLF_D4){const j=(d.y+dy)*W+d.x+dx;if(plantSpot(j)&&far(j)&&S.h[j]===S.h[i])bedCells.push(j)}}
@@ -229,7 +229,7 @@ function hgtlfSpriteOf(d){if(d.frames&&d.frames.length&&d.frames.every(k=>IMG[k]
 
 /* ---------- agents ---------- */
 function hgtlfMake(sp,S,rng,i){
-  const a={id:i,kind:sp.kind==='creature'?'creature':'npc',sp,name:sp.name||'Resident',lines:sp.lines&&sp.lines.length?sp.lines:null,fc:{},seed:rng()*10,x:0,y:0,hz:0,state:'wait',t:rng()*4,path:null,pi:0,vis:true,bumpT:-9,dx:1,dy:0,fleeT:0,ri:0,acc:0,speed:sp.speed||(sp.kind==='creature'?.45:1)};
+  const a={id:i,kind:sp.kind==='creature'?'creature':'npc',sp,name:sp.name||'Resident',lines:sp.lines&&sp.lines.length?sp.lines:null,fc:{},seed:rng()*10,x:0,y:0,hz:0,state:'wait',t:rng()*4,path:null,pi:0,vis:true,bumpT:-9,dx:1,dy:0,fleeT:0,ri:0,acc:0,speed:sp.kind==='creature'?(sp.speed||.45):Math.min(.75,sp.speed||.75)}; // townsfolk walk slowly
   const sk=sp.species&&HGTLF.species[sp.species],d=sk||{};
   if(a.kind==='creature'){
     const fr=Array.isArray(sp.sprite)?sp.sprite:sp.sprite?[sp.sprite]:(hgtlfSpriteOf(d)||[]);if(!fr.length)return null;
@@ -257,6 +257,25 @@ const hgtlfNight=()=>Math.max(hgtlfNight0(),hgtlfEve());
 const hgtlfNight0=()=>typeof hgtlmNight==='function'?(typeof hgtlmInterior==='function'&&hgtlmInterior(LEVEL)?.6:hgtlmNight()):(()=>{const h=hgtlfHour();return h>=20||h<6?1:0})();
 const hgtlfHour=()=>((G.clock||0)%1440)/60;
 function hgtlfActive(a){if(!a.sched)return true;const hr=hgtlfHour(),f=a.sched.from,t=a.sched.to;return f<=t?(hr>=f&&hr<t):(hr>=f||hr<t)}
+/* ---------- the markets: a stallholder sits beside many of the stalls, and shoppers walk from stall to stall, stopping to look ---------- */
+function hgtlfMarket(id,S){
+  const L=LEVELS[id];if(!L||!L.decor||!(id>=481&&id<=484))return [];
+  const stalls=L.decor.filter(d=>/^hgtb_stall_/.test(d.k));if(!stalls.length)return [];
+  const r=hgtlfRng(id*17+3),pickOf=a=>a[(r()*a.length)|0],W=S.W,occ=new Set(L.decor.filter(d=>d.block!==false).map(d=>Math.floor(d.x)+','+Math.floor(d.y)));
+  const folk=L.decor.filter(d=>d.npc&&!/^hgtb_stall_/.test(d.k)),ok=(x,y,h0)=>x>=0&&y>=0&&x<S.W&&y<S.H&&S.reach[y*W+x]&&!occ.has(x+','+y)&&Math.abs(S.h[y*W+x]-h0)<.02&&!(S.fl[y*W+x]&1)&&S.deg[y*W+x]>=2&&!folk.some(d=>Math.abs(d.x-x)<=1&&Math.abs(d.y-y)<=1); // (the 'avoid' mark round a stall is only the stall's own: it has a shopkeeper's tap)
+  const fronts=stalls.map(d=>{const x=Math.floor(d.x),y=Math.floor(d.y),h0=S.h[y*W+x],c=[];for(const [dx,dy] of [[0,1],[0,-1],[1,0],[-1,0]])if(ok(x+dx,y+dy,h0))c.push({x:x+dx,y:y+dy});return {d,c}}).filter(o=>o.c.length);
+  for(let i=fronts.length-1;i>0;i--){const j=(r()*(i+1))|0,t=fronts[i];fronts[i]=fronts[j];fronts[j]=t}
+  const out=[],used=[],far=(x,y,g)=>!used.some(u=>Math.abs(u.x-x)+Math.abs(u.y-y)<g);
+  const base=(task,c,extra)=>Object.assign({kind:'npc',sprite:pickOf(HGTLF_NPC),sprites:(HGTLF_FOLK[task]||[]).length?[pickOf(HGTLF_FOLK[task])]:null,name:task==='sit'?'Stallholder':'Shopper',task,home:c,door:null,speed:.5+r()*.2,zone:2,schedule:{from:6,to:21},auto:1},extra||{});
+  const hl=['Fresh today. Look as long as you like.','Everything here came up the terraces this morning.','Take a little of everything.','The best on this row, and I am not just saying that.'];
+  const sl=['I am choosing between the figs and the dates.','The stalls on this row are the best.','Mind my basket.','I come here every morning for the greens.'];
+  const nH=Math.min(fronts.length,16);let got=0;
+  for(const o of fronts){if(got>=nH)break;const c=o.c[(r()*o.c.length)|0];if(!far(c.x,c.y,3))continue;used.push(c);got++;out.push(base('sit',c,{zone:0,lines:hl,spots:[]}))}
+  const nS=Math.min(Math.ceil(stalls.length/2)+1,12);let made=0;
+  for(let i=0;i<fronts.length&&made<nS;i+=2){const A=fronts[i],pts=[A];for(let j=0;j<fronts.length&&pts.length<3;j++){const B=fronts[j];if(B===A||pts.includes(B))continue;const d=Math.abs(B.d.x-A.d.x)+Math.abs(B.d.y-A.d.y);if(d>=3&&d<=14)pts.push(B)}
+    if(pts.length<2)continue;const route=pts.map(o=>{const c=o.c[(r()*o.c.length)|0];return {x:c.x,y:c.y,wait:4+r()*6}});
+    out.push(base('walk',{x:route[0].x,y:route[0].y},{route,zone:40,lines:sl,speed:.5+r()*.2}));made++}
+  return out}
 function hgtlfEnter(){
   HGTLF.ag=[];HGTLF.lv=LEVEL;HGTLF.grid=G.grid;HGTLF.S=null;HGTLF.last=G.time||0;
   if(!hgtAny(LEVEL)||!LEVELS[LEVEL])return;
@@ -264,6 +283,7 @@ function hgtlfEnter(){
   const S=hgtlfScan(LEVEL);if(!S)return;
   let list=reg&&reg.agents?reg.agents.slice():[];
   if(!reg||reg.auto!==false)list=list.concat(hgtlfAuto(LEVEL,reg&&typeof reg.auto==='object'?reg.auto:undefined));
+  try{list=list.concat(hgtlfMarket(LEVEL,S))}catch(e){console.error('hgtlf market',e)}
   const rng=hgtlfRng(LEVEL*31+7),ag=[];
   for(const sp of list){const a=hgtlfMake(sp,S,rng,ag.length);if(a){a.cx=Math.round(a.x);a.cy=Math.round(a.y);ag.push(a)}}
   HGTLF.ag=ag;HGTLF.S=S;
@@ -352,7 +372,7 @@ function hgtlfSprites(out){
     if(a.kind==='npc'){
       if(a.task==='clean'&&!moving)flip=(((t/1.4+a.seed)|0)&1)===1;
       else if(!moving&&(a.task==='sit'||a.task==='read'||a.task==='fish'||a.task==='watch'))flip=((a.seed*7|0)&1)===1; // someone sitting or watching keeps facing one way: no glancing about, no mirror swaps
-      else if(moving)flip=(((t*1.2+a.seed)|0)&1)===1;
+      else if(moving)flip=(((t*.9+a.seed)|0)&1)===1;
       else if(!moving&&a.task!=='clean'&&a.task!=='watch')flip=(((t/(5+a.seed%4)+a.seed)|0)&1)===1; // an idle figure glances the other way now and then // a walking figure swaps its mirror image with each step
     }else{if(a.flipDir&&(a.dx||a.dy))flip=(-dY*a.dx+dX*a.dy)>0;if(moving&&!a.hover)flip=flip!==((((t*1.0+a.seed)|0)&1)===1)} // a walking pet also swaps its mirror image with each stride
     const pdx=(G.P?G.P.x:cam.x)-a.x,pdy=(G.P?G.P.y:cam.y)-a.y,pd2=pdx*pdx+pdy*pdy,near=!moving&&pd2<20; // standing still and the party is within four cells: turn to face it
@@ -360,16 +380,16 @@ function hgtlfSprites(out){
     else if(near&&a.kind==='npc'&&a.task!=='clean'&&a.task!=='read'&&a.task!=='fish')flip=(-dY*Math.sign(pdx)+dX*Math.sign(pdy))>0&&false;
     if(flip)img=hgtlfFlip(key)||base;
     let bob=a.hz-S.h[Math.max(0,Math.min(S.H-1,Math.floor(a.y+.5)))*S.W+Math.max(0,Math.min(S.W-1,Math.floor(a.x+.5)))]+a.hover;
-    if(a.kind==='creature'){bob+=a.hover?Math.sin(t*(moving?2:.9)+a.seed*3)*(moving?.12:.08):moving?Math.abs(Math.sin(t*3.2+a.seed))*.1:0}
-    else if(moving)bob+=Math.abs(Math.sin(t*3.6+a.seed))*.1;
+    if(a.kind==='creature'){bob+=a.hover?Math.sin(t*(moving?1.6:.9)+a.seed*3)*(moving?.07:.06):moving?Math.abs(Math.sin(t*2.6+a.seed))*.06:0}
+    else if(moving)bob+=Math.abs(Math.sin(t*2.6+a.seed))*.04;
     else if(a.task==='clean')bob+=Math.abs(Math.sin(t*2.2+a.seed))*.02;
     else if(a.task==='tend')bob-=.035*(.5+.5*Math.sin(t*1.3+a.seed));
     else bob+=Math.sin(t*1.1+a.seed)*.008;
     if(near&&a.hover)bob+=.12*(1-pd2/20); // a hovering pet rises a little when the party comes close
     const night=HGTLF.night,lift=Math.max(a.glow?.4+.45*night:0,.64*night);
     // walk cycle without new pictures: a squash and stretch in step with the bob, and a gentle sway across the view
-    const ph=t*(a.kind==='creature'?3.2:3.6)+a.seed*3,rx2=-dY,ry2=dX;let lunge,sway;
-    if(moving){lunge=-.57*Math.cos(2*ph);sway=Math.sin(ph)*.06}
+    const ph=t*(a.kind==='creature'?2.8:2.6)+a.seed*3,rx2=-dY,ry2=dX;let lunge,sway;
+    if(moving){lunge=-.3*Math.cos(2*ph);sway=Math.sin(ph)*.06}
     else{lunge=.09*Math.sin(t*.8+a.seed*2);sway=a.hover?Math.sin(t*.55+a.seed)*.04:a.task==='clean'?Math.sin(t*2.2+a.seed)*.04:Math.sin(t*.45+a.seed)*.02}
     if(a.hover&&a.kind==='creature')lunge=.55*Math.sin(t*(moving?4.5:2.2)+a.seed*2); // hovering pets beat their fins: the width pulses
     const o={x:a.x+.5+rx2*sway,y:a.y+.5+ry2*sway,img,w:a.h*img.width/img.height,bob,lunge,decor:a.stub};if(lift>0)o.lift=lift;out.push(o);
