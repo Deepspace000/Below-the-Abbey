@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.489';
+const VERSION='3.490';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -5135,8 +5135,8 @@ function goToLevel(n,entry){
   reveal();G.hold=null;try{afflEnter(n);petsApply();petEnter(n);if(typeof yarEnter==='function')yarEnter(n);if(typeof uwEnterHook==='function')uwEnterHook(n);if(typeof bathEnter==='function')bathEnter(n);if(typeof seaEnterHook==='function')seaEnterHook(n)}catch(e){console.error(e)}
   G.acted=[false,false,false,false];G.state='play';G.nextAuto=G.time+180;G.lastReg=G.reg?G.reg[G.P.y*MW+G.P.x]:-2;writeSave('auto');
   if(LEVELS[n]&&LEVELS[n].scene)startScene(n);
-  if(n===2&&!G.flags.townSeen)startCut('abbeyIntro');
-  else if(n===2){respawnForest();msg('You walk back into the Thornwood. Some of the wolves and bandits have returned.','#e8a090')}
+  if(n===2&&!G.flags.townSeen&&!G.flags.abbeyIntroSeen){G.flags.abbeyIntroSeen=1;startCut('abbeyIntro')} // the cutscene plays once, not every time the party comes back out of a wild dungeon before reaching the town
+  else if(n===2&&G.flags.townSeen){respawnForest();msg('You walk back into the Thornwood. Some of the wolves and bandits have returned.','#e8a090')}
   else if(n===3&&!G.flags.townSeen){G.flags.townSeen=1;startCut('townArrive')}
   else if(n===33&&!G.flags.anaeaSeen){G.flags.anaeaSeen=1;startCut('anaeaArrive')}
   else if(n===41&&!G.flags.sandRoadSeen){G.flags.sandRoadSeen=1;startCut('sandRoad')}
