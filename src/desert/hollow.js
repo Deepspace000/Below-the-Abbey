@@ -403,7 +403,8 @@ function hlStep(nx,ny){
     else if(++m.t>=4){const w=m.wp[(m.i=(m.i+1)%m.wp.length)];if(Math.abs(w[0]-nx)+Math.abs(w[1]-ny)>=4){d.x=w[0];d.y=w[1];d.hidden=false;msg('Someone is standing in the dark ahead, quite still.','#b8b0d8')}}}}
 }
 {const _mp=msgrPlace;msgrPlace=function(){
-  try{const F=G.flags,L=LEVELS[LEVEL];if(L&&L._msgr&&LEVEL>=HL.BASE&&LEVEL<HL.BASE+HL.N){F.msgrLv=F.msgrLv||{};
+  try{const F=G.flags,L=LEVELS[LEVEL];if(L&&!L._msgr&&LEVEL>=HL.BASE&&LEVEL<HL.BASE+HL.N){F.wRoll=F.wRoll||{};F.wRoll['m'+LEVEL]=1} // (no random Messenger on the other floors of the spire)
+    if(L&&L._msgr&&LEVEL>=HL.BASE&&LEVEL<HL.BASE+HL.N){F.msgrLv=F.msgrLv||{};
     if(!F.msgrLv[LEVEL]){const m=L._msgr;F.msgrLv[LEVEL]={x:m.x,y:m.y,letters:m.letters.map((q,i)=>({k:q.k||MSG_LETTERS[i],x:q.x,y:q.y,wd:q.wd})),state:'lurk',born:G.rounds,hp:null}}}}catch(e){console.warn('hl msgr',e)} // (the letters seen are one list across all the floors of the spire: the owner's omens on floors 16 to 18 count with the rest, so the list is no longer wiped on each new floor)
   return _mp.apply(this,arguments)}}
 {const _ds=desertStep;desertStep=function(x,y){_ds.apply(this,arguments);try{hlStep(x,y)}catch(e){console.warn('hlStep',e)}}}
@@ -489,8 +490,9 @@ function hlDress(c){
   // wander off from different rooms, and no two are within ten squares of each other
   if((k===HL.N-3||k===HL.N-2)&&up){
     const setC=(cx,cy,ch)=>{rows[cy]=rows[cy].slice(0,cx)+ch+rows[cy].slice(cx+1)};
-    const chosen=secretSlots.slice(0,3).map(q=>[q[0],q[1],q[2],0]);
-    const apart=(x,y)=>chosen.every(z=>Math.abs(z[0]-x)+Math.abs(z[1]-y)>=APART);
+    const inHall=(x,y)=>rooms.concat([myst]).some(r=>x>=r.x0-1&&x<=r.x1+1&&y>=r.y0-1&&y<=r.y1+1); // (never in a hall, or against one)
+    const chosen=secretSlots.filter(q=>!inHall(q[0],q[1])).slice(0,3).map(q=>[q[0],q[1],q[2],0]);
+    const apart=(x,y)=>!inHall(x,y)&&chosen.every(z=>Math.abs(z[0]-x)+Math.abs(z[1]-y)>=APART);
     const D4=[[0,-1],[1,0],[0,1],[-1,0]];
     // a windy corridor: starts at a wall of a room, runs two to four squares, turns, and so on, for about sixteen squares; every square it digs is surrounded by solid wall except the one it came from
     let MINLEN=9,MINSEG=3,APART=9;
@@ -498,7 +500,8 @@ function hlDress(c){
       for(let attempt=0;attempt<48;attempt++){
         let x=sx,y=sy,dir=D4.findIndex(q=>q[0]===w[0]&&q[1]===w[1]),cells=[],len=0,ok=true;
         const free=(cx,cy,px,py)=>{if(cx<2||cy<2||cx>=W-2||cy>=H-2||!isW(cx,cy)||used.has(key(cx,cy)))return false;
-          for(const [a2,b2] of D4){const nx=cx+a2,ny=cy+b2;if(nx===px&&ny===py)continue;if(cells.some(q=>q[0]===nx&&q[1]===ny))continue;if(!isW(nx,ny)||used.has(key(nx,ny)))return false}return true};
+          if(cells.some(q=>q[0]===cx&&q[1]===cy))return false;
+          for(const [a2,b2] of D4){const nx=cx+a2,ny=cy+b2;if(nx===px&&ny===py)continue;if(nx===sx&&ny===sy)return false;if(!isW(nx,ny)||used.has(key(nx,ny)))return false}return true};
         let px=sx,py=sy;const turns=[];let segs=0;
         while(len<18&&segs<8){
           const seg=2+((hs(sx*7+attempt,sy*5+segs,seed+13)*3)|0);let moved=0;
@@ -517,12 +520,12 @@ function hlDress(c){
         const sn=snake(x+wd[0],y+wd[1],wd,x*31+y);if(!sn)continue;const e=sn.end;if(!apart(e[0],e[1]))continue;
         // dig it: the mouth is the wall square next to the room, then each square along the way
         setC(x+wd[0],y+wd[1],'.');used.add(key(x+wd[0],y+wd[1]));for(const [cx,cy] of sn.cells){setC(cx,cy,'.');used.add(key(cx,cy))}
-        const dl=dirOfLast([[x+wd[0],y+wd[1]]].concat(sn.cells));chosen.push([e[0],e[1],dl,0])}
+        const dl=dirOfLast([[x+wd[0],y+wd[1]]].concat(sn.cells));chosen.push([e[0],e[1],dl,1,x,y])}
       if(chosen.length>=5)break}
     if(chosen.length===5){chosen.forEach(q=>used.add(key(q[0],q[1])));
       const fc=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(isF(x,y)&&d[y*W+x]>=8&&!used.has(key(x,y)))fc.push([x,y]);
       const m0=fc.length?fc[(hs(k,3,5)*fc.length)|0]:[start.x,start.y-2];
-      c.lv_msgr={x:m0[0],y:m0[1],letters:chosen.map(q=>({x:q[0],y:q[1],wd:q[2]}))}}
+      c.lv_msgr={x:m0[0],y:m0[1],letters:chosen.map(q=>({x:q[0],y:q[1],wd:q[2],src:q[3]}))}}
   }
   // a ruler waits in the last hall of levels 4, 9, 14 and 19
   {const ru=HL_RULERS.find(q=>q[0]===k);if(ru&&far&&!top){const cx=(far.x0+far.x1)>>1,cy=rooms.length===1?far.y0+2:(far.y0+far.y1)>>1;let bx=cx,by=cy;if(used.has(key(bx,by))){const c2=[[cx,cy+1],[cx+1,cy],[cx-1,cy],[cx,cy-1]].find(([x,y])=>isF(x,y)&&!used.has(key(x,y)));if(c2){bx=c2[0];by=c2[1]}}
