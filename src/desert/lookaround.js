@@ -15,7 +15,9 @@ const LK_VIEW={x:0,y:0,w:420,h:210},LK_STRIP={x:403,y:34,w:14,h:140};
 const lkPlay=()=>G.state==='play'&&!G.cut&&!G.talk&&!G.menu&&!(G.inv&&G.inv.open)&&!G.loot&&!G.overview&&!(typeof TP!=='undefined'&&TP);
 const lkIn=(x,y)=>x>=LK_VIEW.x&&x<LK_VIEW.x+LK_VIEW.w&&y>=LK_VIEW.y&&y<LK_VIEW.y+LK_VIEW.h;
 const lkInStrip=(x,y)=>x>=LK_STRIP.x-4&&x<=LK_STRIP.x+LK_STRIP.w+4&&y>=LK_STRIP.y&&y<=LK_STRIP.y+LK_STRIP.h;
-const lkSet=v=>{HGTE.pitchT=Math.max(-35,Math.min(100,v))};
+const lkSet=v=>{HGTE.pitchT=Math.max(-55,Math.min(125,v))};
+/* looking left and right: the right button drag also swings the view sideways (up to about 80 degrees each way) without turning the party; it settles back when the party steps or turns */
+let LKYAW=0,LKYAWT=0;const lkYaw=v=>{LKYAWT=Math.max(-1.4,Math.min(1.4,v))};
 addEventListener('keydown',e=>{
   if(e.ctrlKey||e.metaKey||e.altKey||e.repeat)return;
   if(e.key==='v'||e.key==='V'){if(!lkPlay())return;LK.hover=!LK.hover;if(!LK.hover)HGTE.pitchT=0;msg(LK.hover?'Mouse look on: the height of the pointer over the view tilts it. Press V to switch it off.':'Mouse look off.','#b8d8f0');e.preventDefault();e.stopImmediatePropagation()}
@@ -25,7 +27,7 @@ cv.addEventListener('pointerdown',e=>{
   const [x,y]=toDesign(e);
   if(e.pointerType==='touch')LK.touch=true;
   if(!lkPlay())return;
-  if(e.pointerType==='mouse'&&e.button===2&&lkIn(x,y)){LK.rdrag={y,p:HGTE.pitchT};try{cv.setPointerCapture(e.pointerId)}catch(_){}e.stopImmediatePropagation();e.preventDefault();return}
+  if(e.pointerType==='mouse'&&e.button===2&&lkIn(x,y)){LK.rdrag={x,y,p:HGTE.pitchT,w:LKYAWT};try{cv.setPointerCapture(e.pointerId)}catch(_){}e.stopImmediatePropagation();e.preventDefault();return}
   if(e.pointerType==='touch'){
     LK.pts[e.pointerId]=[x,y];
     if(lkInStrip(x,y)&&!LK.two){LK.strip={id:e.pointerId};lkStrip(y,true);try{cv.setPointerCapture(e.pointerId)}catch(_){}e.stopImmediatePropagation();e.preventDefault();return}
@@ -38,7 +40,7 @@ function lkStrip(y,first){const t=(y-LK_STRIP.y)/LK_STRIP.h; // top of the strip
   lkSet(v)}
 cv.addEventListener('pointermove',e=>{
   const [x,y]=toDesign(e);LK.lx=x;LK.ly=y;
-  if(LK.rdrag){lkSet(LK.rdrag.p+(LK.rdrag.y-y)*1.3);e.stopImmediatePropagation();return}
+  if(LK.rdrag){lkSet(LK.rdrag.p+(LK.rdrag.y-y)*2.2);lkYaw(LK.rdrag.w+(LK.rdrag.x-x)*.014);e.stopImmediatePropagation();return}
   if(e.pointerType==='touch'&&LK.pts[e.pointerId]){
     LK.pts[e.pointerId]=[x,y];
     if(LK.strip&&LK.strip.id===e.pointerId){lkStrip(y,false);e.stopImmediatePropagation();return}
@@ -51,10 +53,11 @@ addEventListener('pointerup',lkUp,true);addEventListener('pointercancel',lkUp,tr
   try{
     if(LK.hover&&lkPlay()&&LK.ly>=0&&lkIn(LK.lx,LK.ly)){const t=(LK.ly-LK_VIEW.y)/LK_VIEW.h;const mid=.5;HGTE.pitchT=t<mid?(mid-t)/mid*80:-(t-mid)/mid*30}
     const pos=(G.P?G.P.x+','+G.P.y+','+G.P.f:'');
-    if(pos!==LK.pos){if(LK.pos&&!LK.hover&&!LK.rdrag&&!LK.two&&!LK.strip&&!(typeof hgtAny==='function'&&hgtAny(LEVEL)))HGTE.pitchT=0;LK.pos=pos}
+    if(pos!==LK.pos){if(LK.pos&&!LK.hover&&!LK.rdrag&&!LK.two&&!LK.strip&&!(typeof hgtAny==='function'&&hgtAny(LEVEL)))HGTE.pitchT=0;if(LK.pos&&!LK.rdrag)LKYAWT=0;LK.pos=pos}
+    LKYAW+=(LKYAWT-LKYAW)*.3;if(Math.abs(LKYAWT-LKYAW)<.002)LKYAW=LKYAWT
   }catch(e){}
   return _cv.apply(this,arguments)}}
-addEventListener('keydown',e=>{if(e.key==='Home')LK.hover=false});
+addEventListener('keydown',e=>{if(e.key==='Home'){LK.hover=false;LKYAWT=0}});
 /* the slider, drawn only after the first touch */
 (function(){const _h=uwHud;uwHud=function(){_h();try{
   if(!LK.touch||!lkPlay())return;

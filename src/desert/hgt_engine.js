@@ -366,9 +366,9 @@ addEventListener('keyup',e=>{if(e.key==='PageUp'&&HGTE.pk>0)HGTE.pk=0;else if(e.
   if(!HGTE.pitchOn(LEVEL)){HGTE.pitch=0;HGTE.pitchT=0;return r}
   const now=performance.now(),dt=Math.min(.1,Math.max(0,(now-HGTE._pt)/1000));HGTE._pt=now;
   let k=HGTE.pk;try{const gp=navigator.getGamepads&&navigator.getGamepads();if(gp)for(const p of gp){if(p&&p.axes&&p.axes.length>3&&Math.abs(p.axes[3])>.45){k=-Math.sign(p.axes[3]);break}}}catch(e){}
-  if(k)HGTE.pitchT=Math.max(-35,Math.min(100,HGTE.pitchT+k*130*dt));
+  if(k)HGTE.pitchT=Math.max(-55,Math.min(125,HGTE.pitchT+k*130*dt));
   let auto=0;try{const T=LEVELS[LEVEL]&&LEVELS[LEVEL].terrace;if(T&&T.h){const W=LEVELS[LEVEL].rows[0].length,i=(G.C.y|0)*W+(G.C.x|0);if(T.h[i]>=4)auto=Math.min(26,(T.h[i]-3)*6)}}catch(e){}
-  const tg=Math.max(-35,Math.min(100,HGTE.pitchT+auto));HGTE.pitch+=(tg-HGTE.pitch)*Math.min(1,dt*9);
+  const tg=Math.max(-55,Math.min(125,HGTE.pitchT+auto));HGTE.pitch+=(tg-HGTE.pitch)*Math.min(1,dt*9);
   return r+Math.round(HGTE.pitch)}}
 
 /* the floor of a room (a level that is not terraced, 4850 and up) is painted by the plain floor loop in render3D. Pale paintings (cream planks, pearl bands) wash to white under the room's lights, so the same treatment as the

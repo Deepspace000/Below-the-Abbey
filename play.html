@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.492';
+const VERSION='3.493';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2516,7 +2516,7 @@ function drawStorm(){
 const HGW_FACE=[1.06,.9,.72,.96]; // brightness of a wall by the side it faces (N,E,S,W) on terraced city levels, so building volumes read
 function hgwW(x,y,g){return x>=0&&y>=0&&x<MW&&y<MH&&g[y][x]>0}
 function render3D(){
-  const t=G.time,C=G.C,dX=Math.cos(C.a),dY=Math.sin(C.a),pX=-dY*PL,pY=dX*PL;
+  const t=G.time,C=G.C,LA=C.a+(typeof LKYAW==='number'?LKYAW:0),dX=Math.cos(LA),dY=Math.sin(LA),pX=-dY*PL,pY=dX*PL; // LKYAW: the look-around swing of the view (lookaround.js)
   const cx=C.x+.5-dX*.28,cy=C.y+.5-dY*.28;
   HH=105+climbView(cx,cy,dX,dY);
   // lights near camera, with flicker
@@ -24676,9 +24676,9 @@ addEventListener('keyup',e=>{if(e.key==='PageUp'&&HGTE.pk>0)HGTE.pk=0;else if(e.
   if(!HGTE.pitchOn(LEVEL)){HGTE.pitch=0;HGTE.pitchT=0;return r}
   const now=performance.now(),dt=Math.min(.1,Math.max(0,(now-HGTE._pt)/1000));HGTE._pt=now;
   let k=HGTE.pk;try{const gp=navigator.getGamepads&&navigator.getGamepads();if(gp)for(const p of gp){if(p&&p.axes&&p.axes.length>3&&Math.abs(p.axes[3])>.45){k=-Math.sign(p.axes[3]);break}}}catch(e){}
-  if(k)HGTE.pitchT=Math.max(-35,Math.min(100,HGTE.pitchT+k*130*dt));
+  if(k)HGTE.pitchT=Math.max(-55,Math.min(125,HGTE.pitchT+k*130*dt));
   let auto=0;try{const T=LEVELS[LEVEL]&&LEVELS[LEVEL].terrace;if(T&&T.h){const W=LEVELS[LEVEL].rows[0].length,i=(G.C.y|0)*W+(G.C.x|0);if(T.h[i]>=4)auto=Math.min(26,(T.h[i]-3)*6)}}catch(e){}
-  const tg=Math.max(-35,Math.min(100,HGTE.pitchT+auto));HGTE.pitch+=(tg-HGTE.pitch)*Math.min(1,dt*9);
+  const tg=Math.max(-55,Math.min(125,HGTE.pitchT+auto));HGTE.pitch+=(tg-HGTE.pitch)*Math.min(1,dt*9);
   return r+Math.round(HGTE.pitch)}}
 
 /* the floor of a room (a level that is not terraced, 4850 and up) is painted by the plain floor loop in render3D. Pale paintings (cream planks, pearl bands) wash to white under the room's lights, so the same treatment as the
@@ -29105,7 +29105,9 @@ const LK_VIEW={x:0,y:0,w:420,h:210},LK_STRIP={x:403,y:34,w:14,h:140};
 const lkPlay=()=>G.state==='play'&&!G.cut&&!G.talk&&!G.menu&&!(G.inv&&G.inv.open)&&!G.loot&&!G.overview&&!(typeof TP!=='undefined'&&TP);
 const lkIn=(x,y)=>x>=LK_VIEW.x&&x<LK_VIEW.x+LK_VIEW.w&&y>=LK_VIEW.y&&y<LK_VIEW.y+LK_VIEW.h;
 const lkInStrip=(x,y)=>x>=LK_STRIP.x-4&&x<=LK_STRIP.x+LK_STRIP.w+4&&y>=LK_STRIP.y&&y<=LK_STRIP.y+LK_STRIP.h;
-const lkSet=v=>{HGTE.pitchT=Math.max(-35,Math.min(100,v))};
+const lkSet=v=>{HGTE.pitchT=Math.max(-55,Math.min(125,v))};
+/* looking left and right: the right button drag also swings the view sideways (up to about 80 degrees each way) without turning the party; it settles back when the party steps or turns */
+let LKYAW=0,LKYAWT=0;const lkYaw=v=>{LKYAWT=Math.max(-1.4,Math.min(1.4,v))};
 addEventListener('keydown',e=>{
   if(e.ctrlKey||e.metaKey||e.altKey||e.repeat)return;
   if(e.key==='v'||e.key==='V'){if(!lkPlay())return;LK.hover=!LK.hover;if(!LK.hover)HGTE.pitchT=0;msg(LK.hover?'Mouse look on: the height of the pointer over the view tilts it. Press V to switch it off.':'Mouse look off.','#b8d8f0');e.preventDefault();e.stopImmediatePropagation()}
@@ -29115,7 +29117,7 @@ cv.addEventListener('pointerdown',e=>{
   const [x,y]=toDesign(e);
   if(e.pointerType==='touch')LK.touch=true;
   if(!lkPlay())return;
-  if(e.pointerType==='mouse'&&e.button===2&&lkIn(x,y)){LK.rdrag={y,p:HGTE.pitchT};try{cv.setPointerCapture(e.pointerId)}catch(_){}e.stopImmediatePropagation();e.preventDefault();return}
+  if(e.pointerType==='mouse'&&e.button===2&&lkIn(x,y)){LK.rdrag={x,y,p:HGTE.pitchT,w:LKYAWT};try{cv.setPointerCapture(e.pointerId)}catch(_){}e.stopImmediatePropagation();e.preventDefault();return}
   if(e.pointerType==='touch'){
     LK.pts[e.pointerId]=[x,y];
     if(lkInStrip(x,y)&&!LK.two){LK.strip={id:e.pointerId};lkStrip(y,true);try{cv.setPointerCapture(e.pointerId)}catch(_){}e.stopImmediatePropagation();e.preventDefault();return}
@@ -29128,7 +29130,7 @@ function lkStrip(y,first){const t=(y-LK_STRIP.y)/LK_STRIP.h; // top of the strip
   lkSet(v)}
 cv.addEventListener('pointermove',e=>{
   const [x,y]=toDesign(e);LK.lx=x;LK.ly=y;
-  if(LK.rdrag){lkSet(LK.rdrag.p+(LK.rdrag.y-y)*1.3);e.stopImmediatePropagation();return}
+  if(LK.rdrag){lkSet(LK.rdrag.p+(LK.rdrag.y-y)*2.2);lkYaw(LK.rdrag.w+(LK.rdrag.x-x)*.014);e.stopImmediatePropagation();return}
   if(e.pointerType==='touch'&&LK.pts[e.pointerId]){
     LK.pts[e.pointerId]=[x,y];
     if(LK.strip&&LK.strip.id===e.pointerId){lkStrip(y,false);e.stopImmediatePropagation();return}
@@ -29141,10 +29143,11 @@ addEventListener('pointerup',lkUp,true);addEventListener('pointercancel',lkUp,tr
   try{
     if(LK.hover&&lkPlay()&&LK.ly>=0&&lkIn(LK.lx,LK.ly)){const t=(LK.ly-LK_VIEW.y)/LK_VIEW.h;const mid=.5;HGTE.pitchT=t<mid?(mid-t)/mid*80:-(t-mid)/mid*30}
     const pos=(G.P?G.P.x+','+G.P.y+','+G.P.f:'');
-    if(pos!==LK.pos){if(LK.pos&&!LK.hover&&!LK.rdrag&&!LK.two&&!LK.strip&&!(typeof hgtAny==='function'&&hgtAny(LEVEL)))HGTE.pitchT=0;LK.pos=pos}
+    if(pos!==LK.pos){if(LK.pos&&!LK.hover&&!LK.rdrag&&!LK.two&&!LK.strip&&!(typeof hgtAny==='function'&&hgtAny(LEVEL)))HGTE.pitchT=0;if(LK.pos&&!LK.rdrag)LKYAWT=0;LK.pos=pos}
+    LKYAW+=(LKYAWT-LKYAW)*.3;if(Math.abs(LKYAWT-LKYAW)<.002)LKYAW=LKYAWT
   }catch(e){}
   return _cv.apply(this,arguments)}}
-addEventListener('keydown',e=>{if(e.key==='Home')LK.hover=false});
+addEventListener('keydown',e=>{if(e.key==='Home'){LK.hover=false;LKYAWT=0}});
 /* the slider, drawn only after the first touch */
 (function(){const _h=uwHud;uwHud=function(){_h();try{
   if(!LK.touch||!lkPlay())return;
