@@ -84,7 +84,7 @@ khNpc('hl_wizard','The Wizard at the top of the tower','kh_ohfolk5_4',()=>{
     [q[1][1],()=>{F.falls++;msg('The floor drops away.','#ff9a7a');later(400,()=>{G.cut=null;goToLevel(HL.BASE+HL.N-3,{x:HLX[HL.N-3].x,y:HLX[HL.N-3].y,f:0});msg('You fall two levels, and land hard in the dark.','#ff9a7a')});return null}]])};
   return say('Climb a long way, did you? Then answer me three questions, and answer them honestly. Good will opens the door. Greed opens the floor.',[['I am ready.',()=>ask(0)],BYE]);
 });
-khNpc('hl_violet','A plaque at the foot of the violet tower','gate',()=>say('THE VIOLET TOWER. The road goes on, above and beyond. This is as far as the Hollow Land goes for now. Below the Abbey is in early access. Thank you for climbing.',[['Go back down.',()=>{goToLevel(HL.BASE+HL.N-1,{x:HLX[HL.N-1].x,y:HLX[HL.N-1].y,f:0});return null}],BYE]));
+khNpc('hl_violet','A plaque at the foot of the violet tower','gate',()=>say('THE VIOLET TOWER. A wheel of dark air turns slowly beside the plaque. It smells of wet grass, and a wind comes out of it. It leads down to the Hollow Grasslands.',[['Step into the portal.',()=>{try{hgBuild()}catch(e){console.error(e)}goToLevel(HG.ID,{x:HG.START.x,y:HG.START.y,f:0});return null}],['Go back down.',()=>{goToLevel(HL.BASE+HL.N-1,{x:HLX[HL.N-1].x,y:HLX[HL.N-1].y,f:0});return null}],BYE]));
 const HLX=[]; // where each level's stair down arrives
 /* ---- the mystery rooms ---- */
 const HL_MYST=['riddle','bridge','sand','statues','pit','monster','chasm','treasure'];
