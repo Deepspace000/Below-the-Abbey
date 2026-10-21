@@ -56,6 +56,16 @@ function diffLabel(){const st=(G.flags.diffStep|0);return st===0?'Normal':(st>0?
   return Object.assign({},r,{hp:Math.max(1,Math.round(r.hp*hm)),dmg:[Math.max(1,Math.round(r.dmg[0]*dm)),Math.max(1,Math.round(r.dmg[1]*dm))],xp:Math.max(1,Math.round(r.xp*rm))})}}
 {const _hp=heroHitPct;heroHitPct=function(){const d=diffHeroHitSub();const r=_hp.apply(this,arguments);return d===0?r:Math.max(.1,Math.min(.97,r-d))}}
 function diffApply(){for(const e of (G.enemies||[])){if(!(e.hp>0))continue;const fr=e.hp/(e.maxhp||e.hp),mh=enemyStat(e.t,e.lvl).hp;e.maxhp=mh;e.hp=Math.max(1,Math.ceil(mh*fr))}}
+/* what the setting means in play: the numbers for a real creature of this place against the party's lead hero, now and at Normal */
+function diffExample(){try{
+  const live=G.heroes.map((h,i)=>({h,i})).filter(o=>o.h.alive);if(!live.length)return null;const me=live[0];
+  let e=(G.enemies||[]).filter(q=>q.hp>0&&ENEMY_DEF[q.t]&&ENEMY_DEF[q.t].hit!==undefined&&!ENEMY_DEF[q.t].fly).sort((a,b)=>Math.hypot(a.x-G.P.x,a.y-G.P.y)-Math.hypot(b.x-G.P.x,b.y-G.P.y))[0];
+  const t=e?e.t:'wolf',lv=e?e.lvl:Math.max(1,Math.round(me.h.lvl)),def=ENEMY_DEF[t];if(!def||def.hit===undefined)return null;
+  const calc=()=>{const st=enemyStat(t,lv),r=heroDmgRange(me.h),avg=Math.max(1,(r[0]+r[1])/2),hits=Math.max(1,Math.ceil(st.hp/avg)),
+    eh=Math.max(.1,Math.min(.95,def.hit+diffHitAdd()-heroArmor(me.h)*.03-pas(me.i,'dodge'))),mh=heroHitPct(me.i,!!def.fly);
+    return {dmg:Math.round((st.dmg[0]+st.dmg[1])/2),hits,eh:Math.round(eh*100),mh:Math.round(mh*100),xp:killXP(st.xp,lv)}};
+  const now=calc(),keep=G.flags.diffStep;G.flags.diffStep=0;const was=calc();G.flags.diffStep=keep;
+  return {name:def.name,lv,now,was,hero:HERO_DEF[me.i].name}}catch(err){return null}}
 function diffChange(n){const was=G.flags.diffStep|0;G.flags.diffStep=Math.max(DIFF_MIN,Math.min(DIFF_MAX,was+n));if((G.flags.diffStep|0)!==was){diffApply();msg('Difficulty: '+diffLabel()+'.','#e8d8a0')}}
 function drawGameplay(){
   BTNS=[];veil(.6);bigPanel(70,10,340,300);
@@ -64,7 +74,12 @@ function drawGameplay(){
   btnText('gp_scale','Autoscaling:  '+(on?'ON':'OFF'),120,42,240,26);
   btnText('gp_fog','Fog of war on maps:  '+(G.flags.noFog?'OFF':'ON'),120,72,240,22);
   {const st=G.flags.diffStep|0;btnText('gp_dm','-',120,98,44,24);btnText('gp_dp','+',316,98,44,24);txt('Difficulty:  '+diffLabel(),240,114,10,st===0?'#d8c88e':st>0?'#f0a080':'#a8d8a0','center',true);
-   if(st!==0){const d=diffD();txt('Enemy damage '+(d>0?'+':'-')+Math.round(Math.abs(diffDmg()-1)*100)+'%, health '+(d>0?'+':'-')+Math.round(Math.abs(diffHp()-1)*100)+'%. Gold and xp '+(d>0?'+':'-')+Math.round(Math.abs(diffRew()-1)*100)+'%.',240,128,7.6,'#cdbf94','center')}}
+   {const X=diffExample(),mk=(n,w,u)=>{u=u||'';return n===w?n+u:n+u+' (was '+w+u+')'};
+    if(X){txt('Example: a '+X.name+' (level '+X.lv+') against '+X.hero+':',240,128,7.6,'#d8c88e','center');
+      txt('It hits for about '+mk(X.now.dmg,X.was.dmg)+' and lands '+mk(X.now.eh,X.was.eh,'%')+' of its blows.',240,139,7.6,'#cdbf94','center');
+      txt('It takes about '+mk(X.now.hits,X.was.hits)+' hits to kill, and you land '+mk(X.now.mh,X.was.mh,'%')+' of yours.',240,150,7.6,'#cdbf94','center');
+      txt('A kill pays '+mk(X.now.xp,X.was.xp)+' xp.',240,161,7.6,'#cdbf94','center')}
+    else txt('Enemy damage '+(st>0?'+':'-')+Math.round(Math.abs(diffDmg()-1)*100)+'%, health '+(st>0?'+':'-')+Math.round(Math.abs(diffHp()-1)*100)+'%. Gold and xp '+(st>0?'+':'-')+Math.round(Math.abs(diffRew()-1)*100)+'%.',240,128,7.6,'#cdbf94','center')}}
   const lines=on?[
     'Creatures scale to the party. A party that has outgrown a place meets its creatures raised to within a few levels of itself, and the great creatures always stand above the party.',
     'Turn autoscaling off for a fixed world: every place has its own level, rising as the story goes on, and each level is shown on the world map. You will meet creatures that are too strong for you, and too weak.'
@@ -72,7 +87,7 @@ function drawGameplay(){
     'The world is fixed. Every place has its own level, rising by about three for each place the story leads to, and the level of each place is shown on the world map.',
     'Creatures stand at the level of the place (some a little lower, as ever), and the great creatures a few levels above it. If a place is too hard for the party, go elsewhere and come back stronger.'
   ];
-  let y=144;for(const p of lines){for(const l of wrapText(p,300,8.4)){txt(l,240,y,8.4,'#cdbf94','center');y+=11}y+=8}
+  let y=176;for(const p of lines){for(const l of wrapText(p,300,8.4)){txt(l,240,y,8.4,'#cdbf94','center');y+=11}y+=8}
   const r=LEVEL_RATING[LEVEL];
   txt(on?'Autoscaling is on.':(r?'This place is level '+r+'.':'This place has no fixed level.'),240,y+6,9,'#e8c878','center',true);
   btnText('gp_back','Back',190,278,100,24);
