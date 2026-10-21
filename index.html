@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.510';
+const VERSION='3.511';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -22886,6 +22886,8 @@ khNpc('hl_labcut','The party','gate',()=>{
 {const _hs2=hlStep;hlStep=function(nx,ny){_hs2.apply(this,arguments);
   try{const L=LEVELS[LEVEL],F=HLF();if(LEVEL===HLT_TOP&&L&&L._maze&&!F.labCut&&!G.cut&&!G.talk){const m=L._maze;
     if(nx>=m.x0-1&&nx<=m.x1+1&&ny>=m.y0-2&&ny<=m.y1+1){F.labCut=1;later(500,()=>{if(G.state==='play'&&!G.talk&&!G.cut)startTalk({npc:'hl_labcut',x:nx,y:ny})})}}}catch(e){console.warn('labcut',e)}}}
+/* every visit to the labyrinth floor starts fresh: the plates and spike tiles are armed again */
+{const _oe3=ohEnter;ohEnter=function(n){try{if(n===HLT_TOP){const F=HLF();if(F.tr)for(const k of Object.keys(F.tr))if(k.startsWith(HLT_TOP+':'))delete F.tr[k]}}catch(e){console.warn('rearm',e)}return _oe3.apply(this,arguments)}}
 
 /* ---- src/desert/worldback.js ---- */
 /* the faint painted mountain view behind the world map (drawn by drawWorldMap, with a little parallax when the map is dragged) */

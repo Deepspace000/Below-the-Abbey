@@ -428,3 +428,5 @@ khNpc('hl_labcut','The party','gate',()=>{
 {const _hs2=hlStep;hlStep=function(nx,ny){_hs2.apply(this,arguments);
   try{const L=LEVELS[LEVEL],F=HLF();if(LEVEL===HLT_TOP&&L&&L._maze&&!F.labCut&&!G.cut&&!G.talk){const m=L._maze;
     if(nx>=m.x0-1&&nx<=m.x1+1&&ny>=m.y0-2&&ny<=m.y1+1){F.labCut=1;later(500,()=>{if(G.state==='play'&&!G.talk&&!G.cut)startTalk({npc:'hl_labcut',x:nx,y:ny})})}}}catch(e){console.warn('labcut',e)}}}
+/* every visit to the labyrinth floor starts fresh: the plates and spike tiles are armed again */
+{const _oe3=ohEnter;ohEnter=function(n){try{if(n===HLT_TOP){const F=HLF();if(F.tr)for(const k of Object.keys(F.tr))if(k.startsWith(HLT_TOP+':'))delete F.tr[k]}}catch(e){console.warn('rearm',e)}return _oe3.apply(this,arguments)}}
