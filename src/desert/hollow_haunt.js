@@ -212,7 +212,7 @@ for(const m of HL_MON){loadImg('hl_'+m[2],'assets/hl_'+m[2]+'.png');loadImg('hl_
   if(ex.fly){def.fly=true;def.floatH=ex.floatH;def.glow=ex.glow}if(ex.ranged){def.ranged=ex.ranged;def.shot=ex.shot}
   if(ex.mimic)def.act=e=>{if(Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)<=1){if(e.poly){e.poly=null;msg('The chest opens its mouth: it was a mimic!','#ff9a7a');sfx('screech')}enemyAttack(e);return 290}return 250}; // it keeps still, a chest, until someone is beside it
   if(ex.shifter)def.act=e=>{if(Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)<=2&&e.poly){e.poly=null;msg('The stranger’s skin splits and ripples. It was a shape shifter!','#ff9a7a');sfx('screech')}return 0};
-  if(ex.vamp)def.act=e=>{if(Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)===1){enemyAttack(e);e.hp=Math.min(e.maxhp,e.hp+Math.round(e.maxhp*.05));return 290}return 0}; // each bite heals it a little
+  // (the vampire used to heal 5 percent of its health with every bite; it no longer heals itself at all)
   if(ex.regen)def.act=e=>{if(e.hp>0&&e.hp<e.maxhp)e.hp=Math.min(e.maxhp,e.hp+Math.max(1,Math.round(e.maxhp*.02)));return 0}; // it knits itself back together
   ENEMY_DEF[m[0]]=def}
 if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^hljester$/,'shaken',.3],[/^hlwight$/,'graverot',.3],[/^hlphantom$/,'haunted',.35],[/^hlbanshee$/,'shaken',.4],[/^hlbutcher$/,'bleeding',.4],[/^hlvampire$/,'bleeding',.3],[/^hlwerewolf$/,'bleeding',.3],[/^hlabom$/,'poisoned',.3],[/^hlvictim$/,'fever',.1],[/^hlmadman$/,'bleeding',.15]);
