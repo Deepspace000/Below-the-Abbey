@@ -102,14 +102,14 @@ function petSprites(out){
   });
 }
 /* ---------------------------------------------------------------- the shop ---------------------------------------------------------------- */
-function openPetShop(){G.talk=null;G.menu='petshop';G.psmsg=''}
+function openPetShop(stock,title){G.talk=null;G.menu='petshop';G.psmsg='';G.psStock=Array.isArray(stock)?stock:null;G.psTitle=title||null} // stock: the pet ids this seller has (Kal sells the first dozen)
 function drawPetShop(){
   BTNS=[];veil(.72);bigPanel(14,6,452,308);
-  txt("KAL'S MENAGERIE",240,22,13,'#d8c88e','center',true);txt(`Gold: ${G.gold}`,452,22,9,'#ffe36a','right',true);
+  const STK=G.psStock||PET_IDS;txt(G.psTitle||"KAL'S MENAGERIE",240,22,13,'#d8c88e','center',true);txt(`Gold: ${G.gold}`,452,22,9,'#ffe36a','right',true);
   const mine=petsData();
   txt(`Your animals (${mine.length} of ${MAX_PETS}): ${mine.map(p=>p.name+' the '+PETS[p.id].n.toLowerCase()).join(', ')||'none yet'}`,24,36,8,'#c8bc98','left',false,undefined,300);
   if(G.psmsg)txt(G.psmsg,452,36,8,'#e8a070','right',true,undefined,150);
-  PET_IDS.forEach((id,k)=>{
+  STK.forEach((id,k)=>{
     const P=PETS[id],x=22+(k%2)*220,y=46+Math.floor(k/2)*42,own=hasCompanion(id),im=IMG['pet_'+id+'_'+(((G.time*3)|0)&1)]||IMG['pet_'+id+'_0'];
     ctx.save();rrect(ctx,x,y,214,39,5);ctx.fillStyle=own?'rgba(30,50,24,.92)':'rgba(40,18,14,.92)';ctx.fill();ctx.lineWidth=1.3;ctx.strokeStyle=own?'#7ac060':'#a88a48';ctx.stroke();ctx.restore();
     ctx.fillStyle='#120c08';ctx.fillRect(x+4,y+3,33,33);if(im)ctx.drawImage(im,x+5,y+4,31,31);
