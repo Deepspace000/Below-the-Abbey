@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.499';
+const VERSION='3.500';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -24230,12 +24230,17 @@ function hgmDraw(){
   for(const e of L.sky){const px=PX(e.x),py=PY(e.y),amber=/tower[0-3]$/.test(e.k),hh=13+e.w*.9,ww=3+e.w*.28,out=[e.x<8?-1:e.x>142?1:0,e.y<8?-1:e.y>142?1:0];void out;
     x.save();x.translate(px,py+2);x.fillStyle=amber?'#c8803a':'#a8c8d8';x.strokeStyle=ink;x.lineWidth=.9;x.beginPath();x.moveTo(-ww,0);x.lineTo(-ww*.55,-hh*.55);x.lineTo(-ww*.2,-hh*.8);x.lineTo(0,-hh);x.lineTo(ww*.2,-hh*.8);x.lineTo(ww*.55,-hh*.55);x.lineTo(ww,0);x.closePath();x.fill();x.stroke();
     x.strokeStyle=amber?'rgba(70,36,10,.7)':'rgba(40,70,100,.6)';x.lineWidth=.6;for(let k=1;k<4;k++){x.beginPath();x.moveTo(-ww*(1-k*.2),-hh*k*.22);x.lineTo(ww*(1-k*.2),-hh*k*.22-1);x.stroke()}x.restore()}
+  // a painted creature picture on the parchment: a soft shadow under it, then the picture; false while the picture has not loaded (the old drawing is the fallback)
+  const hgmFrog=(a,b,w)=>{const im=IMG['hg_frog'+(((a*7+b*3)|0)&1)]||IMG.hg_frog0;if(!im||!im.width)return false;const h=w*im.height/im.width;
+    x.save();x.fillStyle='rgba(40,30,16,.28)';x.beginPath();x.ellipse(a,b+h*.36,w*.42,h*.13,0,0,Math.PI*2);x.fill();x.drawImage(im,a-w/2,b-h*.62,w,h);x.restore();return true};
   // the strange rocks on the hills, and the amber pinnacles among them
   for(const d of L.decor){if(!/^hg_(rock|tower)/.test(d.k))continue;const a=PX(d.x),b=PY(d.y);
     if(/tower/.test(d.k)){x.fillStyle='#c8803a';x.strokeStyle=ink;x.lineWidth=.8;x.beginPath();x.moveTo(a-2,b+1);x.lineTo(a-1,b-6);x.lineTo(a,b-9);x.lineTo(a+1,b-6);x.lineTo(a+2.2,b+1);x.closePath();x.fill();x.stroke()}
     else{x.fillStyle='#9a9a98';x.strokeStyle=ink;x.lineWidth=.8;x.beginPath();x.moveTo(a-3,b+1.5);x.quadraticCurveTo(a-3,b-4,a-.5,b-5);x.quadraticCurveTo(a+2,b-6,a+3,b+1.5);x.closePath();x.fill();x.stroke();x.fillStyle=ink;x.beginPath();x.ellipse(a,b-1.5,.9,1.3,0,0,Math.PI*2);x.fill()}}
   // the frog-whales, grazing
-  for(const d of L.decor){if(!/^hg_frog/.test(d.k))continue;const a=PX(d.x),b=PY(d.y);x.fillStyle='#8a9a78';x.strokeStyle=ink;x.lineWidth=.7;x.beginPath();x.ellipse(a,b,5.4,3.8,0,0,Math.PI*2);x.fill();x.stroke();x.fillStyle='#e8ecd8';x.beginPath();x.arc(a-1.8,b-2.4,1.3,0,Math.PI*2);x.arc(a+1.8,b-2.4,1.3,0,Math.PI*2);x.fill();x.strokeStyle=ink;x.beginPath();x.moveTo(a-2.4,b+.9);x.quadraticCurveTo(a,b+2.4,a+2.4,b+.9);x.stroke()}
+  for(const d of L.decor){if(!/^hg_frog/.test(d.k)||(d.sc!==undefined&&d.sc<.01))continue;const a=PX(d.x),b=PY(d.y);
+    if(hgmFrog(a,b,12*(d.sc||1)))continue; // the painted frog-whale picture; the old drawing is only the fallback while the picture has not loaded
+    x.fillStyle='#8a9a78';x.strokeStyle=ink;x.lineWidth=.7;x.beginPath();x.ellipse(a,b,5.4,3.8,0,0,Math.PI*2);x.fill();x.stroke();x.fillStyle='#e8ecd8';x.beginPath();x.arc(a-1.8,b-2.4,1.3,0,Math.PI*2);x.arc(a+1.8,b-2.4,1.3,0,Math.PI*2);x.fill();x.strokeStyle=ink;x.beginPath();x.moveTo(a-2.4,b+.9);x.quadraticCurveTo(a,b+2.4,a+2.4,b+.9);x.stroke()}
   // the insectivores: a spider mark, bigger the bigger the beast
   for(const e of L.enemies){const m=/^hgins(\d)$/.exec(e.t);if(!m)continue;const t=+m[1],a=PX(e.x),b=PY(e.y),r=1.1+t*.32;x.strokeStyle='#4a1810';x.lineWidth=.6+t*.05;x.beginPath();for(const k of [-1,1])for(let j=0;j<4;j++){const ang=(-.9+j*.6)*k+(k<0?Math.PI:0);x.moveTo(a,b);x.lineTo(a+Math.cos(ang)*r*2,b+Math.sin(ang)*r*1.3-r*.4)}x.stroke();
     x.fillStyle='#6a2418';x.beginPath();x.ellipse(a,b,r*.8,r*.65,0,0,Math.PI*2);x.fill();x.fillStyle='#e8ecd8';x.beginPath();x.arc(a-r*.3,b-r*.2,Math.max(.4,r*.2),0,Math.PI*2);x.arc(a+r*.3,b-r*.2,Math.max(.4,r*.2),0,Math.PI*2);x.fill()}
@@ -24271,7 +24276,7 @@ function hgmDraw(){
   key(3,'Strange rock',(a,b)=>{x.fillStyle='#9a9a98';x.strokeStyle=ink;x.lineWidth=.7;x.beginPath();x.moveTo(a-3,b+2);x.quadraticCurveTo(a-3,b-3,a,b-4);x.quadraticCurveTo(a+3,b-4,a+3,b+2);x.closePath();x.fill();x.stroke()});
   key(4,'Amber pinnacle',(a,b)=>{x.fillStyle='#c8803a';x.strokeStyle=ink;x.lineWidth=.7;x.beginPath();x.moveTo(a-2.4,b+3);x.lineTo(a,b-6);x.lineTo(a+2.4,b+3);x.closePath();x.fill();x.stroke()});
   key(5,'Far spire',(a,b)=>{x.fillStyle='#a8c8d8';x.strokeStyle=ink;x.lineWidth=.7;x.beginPath();x.moveTo(a-2.4,b+3);x.lineTo(a,b-6);x.lineTo(a+2.4,b+3);x.closePath();x.fill();x.stroke()});
-  key(6,'Frog-whale (harmless)',(a,b)=>{x.fillStyle='#8a9a78';x.strokeStyle=ink;x.lineWidth=.7;x.beginPath();x.ellipse(a,b,3.4,2.4,0,0,Math.PI*2);x.fill();x.stroke();x.fillStyle='#e8ecd8';x.beginPath();x.arc(a-1.2,b-1.4,.9,0,Math.PI*2);x.arc(a+1.2,b-1.4,.9,0,Math.PI*2);x.fill()});
+  key(6,'Frog-whale (harmless)',(a,b)=>{if(hgmFrog(a,b,9))return;x.fillStyle='#8a9a78';x.strokeStyle=ink;x.lineWidth=.7;x.beginPath();x.ellipse(a,b,3.4,2.4,0,0,Math.PI*2);x.fill();x.stroke();x.fillStyle='#e8ecd8';x.beginPath();x.arc(a-1.2,b-1.4,.9,0,Math.PI*2);x.arc(a+1.2,b-1.4,.9,0,Math.PI*2);x.fill()});
   key(7,'Insectivore (small to huge)',(a,b)=>{for(const [dx,t] of [[-4,0],[0,4],[4.6,9]]){const r=1.1+t*.32;x.fillStyle='#6a2418';x.beginPath();x.ellipse(a+dx,b,r*.8,r*.65,0,0,Math.PI*2);x.fill()}});
   key(8,'Red number: book in that hive',(a,b)=>{x.fillStyle='#d03a2a';x.strokeStyle=ink;x.lineWidth=.8;x.beginPath();x.arc(a,b,3.2,0,Math.PI*2);x.fill();x.stroke()});
   mpmgDraw(x,470);
