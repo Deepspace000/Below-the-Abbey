@@ -159,7 +159,7 @@ function gStiltDef(name,o){
     {t:'ell',c:[0,.84,-.12],r:[.1,.06,.05],seg:[8,4],col:[90,40,70]},
     {t:'limb',id:'aL',up:true,len:[.5,.4],rad:[.03,.02,.01],c:[-.12,.05,.26],noball:true,col:o.plate,rest:[.3,.5]},{t:'limb',id:'aR',up:true,len:[.5,.4],rad:[.03,.02,.01],c:[.12,.05,.26],noball:true,col:o.plate,rest:[.3,.5]},
     {t:'ell',c:[-.15,.2,.9],r:[.05,.05,.05],seg:[6,4],col:[255,240,200],glow:.9},{t:'ell',c:[.15,.2,.9],r:[.05,.05,.05],seg:[6,4],col:[255,240,200],glow:.9},
-    {t:'fan',c:[0,-.05,.28],n:7,len:.6,wid:.24,base:.02,spread:1.5,tex:'hgtb_feather_iridescent',col:o.crest,vcol:[[255,255,255],[255,255,255],[255,255,255]]}],K),head={id:'head',pos:[0,0,0],parts:headP.concat([{t:'quad',c:[0,hr[1]+hc[1]+.12,.1*K],size:[1.05*K,2.1*K],piv:[.5,.5],tex:'hgtb_stilt_head',alpha:true,col:[255,255,255],glow:.25,texMax:512}]),kids:eyeNodes};
+    {t:'fan',c:[0,-.05,.28],n:7,len:.6,wid:.24,base:.02,spread:1.5,tex:'hgtb_feather_iridescent',col:o.crest,vcol:[[255,255,255],[255,255,255],[255,255,255]]}],K),head={id:'head',pos:[0,0,0],parts:headP.concat([{t:'quad',c:[0,hr[1]+hc[1]+.12,-1.06],size:[1.7,3.43],piv:[.5,.5],tex:'hgtb_stilt_head',alpha:true,col:[255,255,255],glow:.25,texMax:512}]),kids:eyeNodes};
   const neck=gChain('nk',7,.7,.5,.2,{col:o.col,tex:o.skin,curve:[-.8,-.3,.1,.3,.35,.3,.15]},head);
   neck.pos=[0,1.15*K,.15*K];kids.push(neck);
   return hgtmDef(name,{rad:13,foot:2.2,cycle:2*S.A/S.beta,speed:.45,root:{id:'root',kids:[{id:'body',pos:[0,0,hh],parts:bodyS,kids},gShadow(4.2)]},
@@ -399,7 +399,12 @@ const HGTG_PLANETS={orange:[1.0,{atmo:[255,170,90],spin:.3}],ocean:[1.25,{atmo:[
   cratered:[.6,{spin:.2}],crystal:[.8,{glow:.4,atmo:[160,255,255],spin:.4,ring:{in:1.3,out:1.8,col:[190,240,255],alpha:.7}}],coral:[1.0,{atmo:[255,150,170],spin:.3}]};
 for(const k in HGTG_PLANETS){HGTG_PLANETS[k][0]*=1.5;hgtmPlanet('hgtg_planet_'+k,'hgt_planet_'+k,HGTG_PLANETS[k][0],Object.assign({gain:/jade|violet|ice|lava/.test(k)?1.7:1.3},HGTG_PLANETS[k][1],{glow:(HGTG_PLANETS[k][1].glow||0)+(/jade|violet|ice|lava/.test(k)?.2:.08)}))}
 HGTG.planetKeys=Object.keys(HGTG_PLANETS);
-function hgtgPlanetTick(I){const m=HGTG.moonI;I.o.light=m&&m.o.far?[m.x-I.x,m.y-I.y,m.pz-(I.pz||0)]:null;if(!I.o.light)delete I.o.light}
+function hgtgPlanetTick(I){
+  // a planet is never inside a building: lift it over whatever is under it (a smooth rise, never a jump)
+  try{const inf=I.o&&I.o.level!==undefined?hgtgInfo(I.o.level):hgtgInfo(LEVEL);if(inf&&I.pz!==undefined&&I.M){const Rr=I.M.rad*(I.o.scale||1),rc=Math.ceil(Rr)+1,px=Math.round(I.x),py=Math.round(I.y);let need=0;
+    for(let dy=-rc;dy<=rc;dy++)for(let dx=-rc;dx<=rc;dx++){const cx=px+dx,cy=py+dy;if(cx<0||cy<0||cx>=inf.W||cy>=inf.H||dx*dx+dy*dy>rc*rc)continue;const t=inf.top[cy*inf.W+cx];if(t>need)need=t}
+    const want=Math.max(0,need+Rr+.5-I.pz);I._lf=(I._lf||0)+(want-(I._lf||0))*.08;if(I._lf>.01)I.pz+=I._lf}}catch(e){}
+  const m=HGTG.moonI;I.o.light=m&&m.o.far?[m.x-I.x,m.y-I.y,m.pz-(I.pz||0)]:null;if(!I.o.light)delete I.o.light}
 function hgtgPlanetSpawn(level,key,route,speed,seed){return hgtmSpawn('hgtg_planet_'+key,{level,route,speed:speed||.5,seed:seed||1,tick:hgtgPlanetTick})}
 
 /* ==========================================================================
@@ -620,6 +625,10 @@ function hgtgAuto(id,opts){
   // planets and clouds
   {const np=cnt('planets'),keys=HGTG.planetKeys.slice();for(let i=keys.length-1;i>0;i--){const j=(R()*(i+1))|0,t=keys[i];keys[i]=keys[j];keys[j]=t}
     for(let i=0;i<np;i++){const k=keys[i%keys.length],Rr=HGTG_PLANETS[k][0],route=[];for(let q=0;q<3;q++)route.push([inf.x0+(inf.x1-inf.x0)*R(),inf.y0+(inf.y1-inf.y0)*R(),Rr*.5+3+R()*5]);
+      // a planet never passes through a building: it flies high enough that the tallest wall or tower under its whole route, plus its own size, is below it
+      {let need=0;const rc=Math.ceil(Rr*1.4)+1;for(let q=0;q<route.length;q++){const A=route[q],B=route[(q+1)%route.length];for(let u=0;u<=10;u++){const px=A[0]+(B[0]-A[0])*u/10,py=A[1]+(B[1]-A[1])*u/10;
+        for(let dy=-rc;dy<=rc;dy++)for(let dx=-rc;dx<=rc;dx++){const cx=Math.round(px)+dx,cy=Math.round(py)+dy;if(cx<0||cy<0||cx>=inf.W||cy>=inf.H||dx*dx+dy*dy>rc*rc)continue;const t=inf.top[cy*inf.W+cx];if(t>need)need=t}}}
+        const zz=need+Rr*1.3+.8;for(const p of route)p[2]=Math.max(p[2],zz)}
       hgtgPlanetSpawn(id,k,route,.3+.5*R(),1+i);stat.planets++}
     const nc=cnt('clouds');if(nc>0){hgtmCloudField(id,nc,{x0:inf.x0,y0:inf.y0,x1:inf.x1,y1:inf.y1,z0:.4,z1:4.5,seed:id+3,alpha:.6});stat.clouds=nc}}
   return stat;
