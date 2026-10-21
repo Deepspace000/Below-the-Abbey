@@ -157,7 +157,7 @@ function drawPadPage(){
   note('B','Wait a round','R',164,[75,-14]);
   note('A','Attack, talk, use','R',190,[60,2]);
   note('Start','Menu','R',216,[16,-7]);
-  note('Right stick','Turn','R',240,[28,22]);
+  note('Right stick','Turn, look up and down','R',240,[28,22]);
   txt('Stick presses: left stick potion, right stick rest',240,226,8,'#a89878','center');
   txt('In menus, dialogue and shops: D-pad jumps between buttons, the left stick moves a pointer, A presses, B goes back.',240,262,8,'#cdbf94','center');
   txt('Any standard pad works. Press a button once to wake it.',240,273,8,'#a89878','center');

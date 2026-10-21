@@ -92,15 +92,19 @@ function quayBuild(){
   const solid=(x,y,c)=>{rows[y][x]=c;block[y*W+x]=1};
   const SHORE=34;
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;
-    if(y<=SHORE){h[i]=.3;fm[i]='0'}
+    if(x<6&&y>9){h[i]=-.2+.03*(tsmooth(x/6,y/6,77)-.5);fm[i]='4';block[i]=1}   // west of the street is open sea, not a wall standing over the water
+    else if(y<=SHORE){h[i]=.3;fm[i]='0'}
     else if(y===SHORE+1){h[i]=.1;fm[i]='3'}
     else{h[i]=-.2+.03*(tsmooth(x/6,y/6,77)-.5);fm[i]='4';block[i]=1}
   }
   /* ---- the city wall, the castle behind it and the gate between two towers ---- */
   const WALL=3.4,wPlain=ch(TM.make('plain','castle',WALL).gid),wSlit=ch(TM.make('slit','castle',WALL).gid),wDark=ch(TM.make('plain','castle2',WALL).gid);
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){
-    if(y<=9||((x<6||x>73)&&y<=SHORE+1)){const face=y===9||x===5||x===74;solid(x,y,face&&(x+y)%4===0?wSlit:(x*7+y*3)%11===0?wDark:wPlain)}
+    if(y<=9||(x>73&&y<=SHORE+1)){const face=y===9||x===5||x===74;solid(x,y,face&&(x+y)%4===0?wSlit:(x*7+y*3)%11===0?wDark:wPlain)}
   }
+  // the edge of the map over the sea is open horizon, not a brick wall standing out in the water: the outer ring of cells west, south and east of the sea is a sky wall (not drawn, like the dune edges)
+  {const sk=TM.make('plain','castle',WALL+.0001);TEX[sk.tex].sky=true;const wSky=ch(sk.gid);
+   for(let y=10;y<H;y++)solid(0,y,wSky);for(let x=0;x<W;x++)solid(x,H-1,wSky);for(let y=SHORE+2;y<H;y++)solid(W-1,y,wSky)}
   const GX=OQ.CX,tWh=WALL;
   // the great gate: a tall gatehouse, three squares of portcullis between two wings of dressed stone with arrow slits, and a great round tower at each end
   {const pg=TM.make('gate',0,tWh,'kh_ohgate1_0');T_DOORS.oqportc=pg.tex;const gc=String.fromCharCode(nextCh++);chars[gc]=31;
