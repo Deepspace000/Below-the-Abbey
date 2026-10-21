@@ -16,7 +16,7 @@ const lkPlay=()=>G.state==='play'&&!G.cut&&!G.talk&&!G.menu&&!(G.inv&&G.inv.open
 const lkIn=(x,y)=>x>=LK_VIEW.x&&x<LK_VIEW.x+LK_VIEW.w&&y>=LK_VIEW.y&&y<LK_VIEW.y+LK_VIEW.h;
 const lkInStrip=(x,y)=>x>=LK_STRIP.x-4&&x<=LK_STRIP.x+LK_STRIP.w+4&&y>=LK_STRIP.y&&y<=LK_STRIP.y+LK_STRIP.h;
 const lkSet=v=>{HGTE.pitchT=Math.max(-55,Math.min(125,v))};
-/* looking left and right: the right button drag also swings the view sideways (up to about 80 degrees each way) without turning the party; it settles back when the party steps or turns */
+/* looking left and right: the right button drag also swings the view sideways (up to about 80 degrees each way) without turning the party; the direction is inverted by default (drag left, the view swings right, like dragging the scene itself), and Menu > Gameplay can switch it to follow the drag; it settles back when the party steps or turns */
 let LKYAW=0,LKYAWT=0;const lkYaw=v=>{LKYAWT=Math.max(-1.4,Math.min(1.4,v))};
 addEventListener('keydown',e=>{
   if(e.ctrlKey||e.metaKey||e.altKey||e.repeat)return;
@@ -40,7 +40,7 @@ function lkStrip(y,first){const t=(y-LK_STRIP.y)/LK_STRIP.h; // top of the strip
   lkSet(v)}
 cv.addEventListener('pointermove',e=>{
   const [x,y]=toDesign(e);LK.lx=x;LK.ly=y;
-  if(LK.rdrag){lkSet(LK.rdrag.p+(LK.rdrag.y-y)*2.2);lkYaw(LK.rdrag.w+(LK.rdrag.x-x)*.014);e.stopImmediatePropagation();return}
+  if(LK.rdrag){lkSet(LK.rdrag.p+(LK.rdrag.y-y)*2.2);lkYaw(LK.rdrag.w+(G.flags&&G.flags.lookXNormal?(LK.rdrag.x-x):(x-LK.rdrag.x))*.014);e.stopImmediatePropagation();return}
   if(e.pointerType==='touch'&&LK.pts[e.pointerId]){
     LK.pts[e.pointerId]=[x,y];
     if(LK.strip&&LK.strip.id===e.pointerId){lkStrip(y,false);e.stopImmediatePropagation();return}

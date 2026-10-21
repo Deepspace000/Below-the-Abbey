@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.498';
+const VERSION='3.499';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -19769,7 +19769,7 @@ function drawGameplay(){
   txt('GAMEPLAY',240,28,14,'#d8c88e','center',true);
   const on=autoscaleOn();
   btnText('gp_scale','Autoscaling:  '+(on?'ON':'OFF'),120,42,240,26);
-  btnText('gp_fog','Fog of war on maps:  '+(G.flags.noFog?'OFF':'ON'),120,72,240,22);
+  btnText('gp_fog','Fog of war:  '+(G.flags.noFog?'OFF':'ON'),120,72,118,22);btnText('gp_lookx','Look drag: '+(G.flags.lookXNormal?'NORMAL':'INVERT'),242,72,118,22);
   {const st=G.flags.diffStep|0;btnText('gp_dm','-',120,98,44,24);btnText('gp_dp','+',316,98,44,24);txt('Difficulty:  '+diffLabel(),240,114,10,st===0?'#d8c88e':st>0?'#f0a080':'#a8d8a0','center',true);
    {const X=diffExample(),mk=(n,w,u)=>{u=u||'';return n===w?n+u:n+u+' (was '+w+u+')'};
     if(X){txt('Example: a '+X.name+' (level '+X.lv+') against '+X.hero+':',240,128,7.6,'#d8c88e','center');
@@ -19791,6 +19791,7 @@ function drawGameplay(){
 }
 (function(){const _b=handleBtn;handleBtn=function(id){
   if(G.menu==='gameplay'&&(id==='gp_dm'||id==='gp_dp')){diffChange(id==='gp_dp'?1:-1);return}
+  if(G.menu==='gameplay'&&id==='gp_lookx'){G.flags.lookXNormal=G.flags.lookXNormal?0:1;msg(G.flags.lookXNormal?'Dragging with the right mouse button now swings the view the way you drag.':'Dragging with the right mouse button now swings the view the opposite way.','#e8d8a0');return}
   if(G.menu==='gameplay'){if(id==='gp_back'||id==='menu')G.menu=true;else if(id==='gp_fog'){G.flags.noFog=G.flags.noFog?0:1;msg(G.flags.noFog?'Fog of war is off. Maps show everything.':'Fog of war is on. Maps are covered by clouds where you have not been.','#e8d8a0')}else if(id==='gp_scale'){G.flags.autoScaleOn=G.flags.autoScaleOn?0:1;try{rebalanceEnemies()}catch(e){}msg(G.flags.autoScaleOn?'Autoscaling is on.':'Autoscaling is off. The world is fixed.','#e8d8a0')}return}
   _b(id)}})();
 
@@ -29148,7 +29149,7 @@ const lkPlay=()=>G.state==='play'&&!G.cut&&!G.talk&&!G.menu&&!(G.inv&&G.inv.open
 const lkIn=(x,y)=>x>=LK_VIEW.x&&x<LK_VIEW.x+LK_VIEW.w&&y>=LK_VIEW.y&&y<LK_VIEW.y+LK_VIEW.h;
 const lkInStrip=(x,y)=>x>=LK_STRIP.x-4&&x<=LK_STRIP.x+LK_STRIP.w+4&&y>=LK_STRIP.y&&y<=LK_STRIP.y+LK_STRIP.h;
 const lkSet=v=>{HGTE.pitchT=Math.max(-55,Math.min(125,v))};
-/* looking left and right: the right button drag also swings the view sideways (up to about 80 degrees each way) without turning the party; it settles back when the party steps or turns */
+/* looking left and right: the right button drag also swings the view sideways (up to about 80 degrees each way) without turning the party; the direction is inverted by default (drag left, the view swings right, like dragging the scene itself), and Menu > Gameplay can switch it to follow the drag; it settles back when the party steps or turns */
 let LKYAW=0,LKYAWT=0;const lkYaw=v=>{LKYAWT=Math.max(-1.4,Math.min(1.4,v))};
 addEventListener('keydown',e=>{
   if(e.ctrlKey||e.metaKey||e.altKey||e.repeat)return;
@@ -29172,7 +29173,7 @@ function lkStrip(y,first){const t=(y-LK_STRIP.y)/LK_STRIP.h; // top of the strip
   lkSet(v)}
 cv.addEventListener('pointermove',e=>{
   const [x,y]=toDesign(e);LK.lx=x;LK.ly=y;
-  if(LK.rdrag){lkSet(LK.rdrag.p+(LK.rdrag.y-y)*2.2);lkYaw(LK.rdrag.w+(LK.rdrag.x-x)*.014);e.stopImmediatePropagation();return}
+  if(LK.rdrag){lkSet(LK.rdrag.p+(LK.rdrag.y-y)*2.2);lkYaw(LK.rdrag.w+(G.flags&&G.flags.lookXNormal?(LK.rdrag.x-x):(x-LK.rdrag.x))*.014);e.stopImmediatePropagation();return}
   if(e.pointerType==='touch'&&LK.pts[e.pointerId]){
     LK.pts[e.pointerId]=[x,y];
     if(LK.strip&&LK.strip.id===e.pointerId){lkStrip(y,false);e.stopImmediatePropagation();return}

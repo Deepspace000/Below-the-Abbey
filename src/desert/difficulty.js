@@ -72,7 +72,7 @@ function drawGameplay(){
   txt('GAMEPLAY',240,28,14,'#d8c88e','center',true);
   const on=autoscaleOn();
   btnText('gp_scale','Autoscaling:  '+(on?'ON':'OFF'),120,42,240,26);
-  btnText('gp_fog','Fog of war on maps:  '+(G.flags.noFog?'OFF':'ON'),120,72,240,22);
+  btnText('gp_fog','Fog of war:  '+(G.flags.noFog?'OFF':'ON'),120,72,118,22);btnText('gp_lookx','Look drag: '+(G.flags.lookXNormal?'NORMAL':'INVERT'),242,72,118,22);
   {const st=G.flags.diffStep|0;btnText('gp_dm','-',120,98,44,24);btnText('gp_dp','+',316,98,44,24);txt('Difficulty:  '+diffLabel(),240,114,10,st===0?'#d8c88e':st>0?'#f0a080':'#a8d8a0','center',true);
    {const X=diffExample(),mk=(n,w,u)=>{u=u||'';return n===w?n+u:n+u+' (was '+w+u+')'};
     if(X){txt('Example: a '+X.name+' (level '+X.lv+') against '+X.hero+':',240,128,7.6,'#d8c88e','center');
@@ -94,5 +94,6 @@ function drawGameplay(){
 }
 (function(){const _b=handleBtn;handleBtn=function(id){
   if(G.menu==='gameplay'&&(id==='gp_dm'||id==='gp_dp')){diffChange(id==='gp_dp'?1:-1);return}
+  if(G.menu==='gameplay'&&id==='gp_lookx'){G.flags.lookXNormal=G.flags.lookXNormal?0:1;msg(G.flags.lookXNormal?'Dragging with the right mouse button now swings the view the way you drag.':'Dragging with the right mouse button now swings the view the opposite way.','#e8d8a0');return}
   if(G.menu==='gameplay'){if(id==='gp_back'||id==='menu')G.menu=true;else if(id==='gp_fog'){G.flags.noFog=G.flags.noFog?0:1;msg(G.flags.noFog?'Fog of war is off. Maps show everything.':'Fog of war is on. Maps are covered by clouds where you have not been.','#e8d8a0')}else if(id==='gp_scale'){G.flags.autoScaleOn=G.flags.autoScaleOn?0:1;try{rebalanceEnemies()}catch(e){}msg(G.flags.autoScaleOn?'Autoscaling is on.':'Autoscaling is off. The world is fixed.','#e8d8a0')}return}
   _b(id)}})();
