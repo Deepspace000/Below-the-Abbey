@@ -42,12 +42,29 @@ const autoscaleOn=()=>!!G.flags.autoScaleOn;
 // the level of a place on the world map: the lowest and highest of its levels that have one
 function locRating(loc){if(loc.lv.length===1&&loc.lv[0]===1)return '1-3';   // the crypts climb from 1 to 3
   let lo=1e9,hi=-1;for(const v of loc.lv){const r=LEVEL_RATING[v];if(r!==undefined){lo=Math.min(lo,r);hi=Math.max(hi,r)}}return hi<0?null:(lo===hi?String(lo):lo+'-'+hi)}
+/* ==========================================================================
+   DIFFICULTY SELECTOR (Menu > Gameplay): a relative setting, G.flags.diffStep, in steps of 10 percent either way. Harder means enemies hit harder (full), take a little more
+   to kill (40 percent of the change, so fights do not drag), hit the party more often (15 points per 100 percent) and are hit less often (10 points per 100 percent); easier is the
+   same the other way. Gold and xp from fights move by the full change. Bosses and the great creatures follow it too.
+   ========================================================================== */
+const DIFF_MIN=-8,DIFF_MAX=20; // -80 percent to +200 percent
+const diffD=()=>Math.max(DIFF_MIN,Math.min(DIFF_MAX,(G.flags&&G.flags.diffStep)|0))/10;
+const diffDmg=()=>Math.max(.2,1+diffD()),diffHp=()=>Math.max(.5,1+diffD()*.4),diffRew=()=>Math.max(.2,1+diffD());
+const diffHitAdd=()=>diffD()*.15,diffHeroHitSub=()=>diffD()*.10;
+function diffLabel(){const st=(G.flags.diffStep|0);return st===0?'Normal':(st>0?'Harder by ':'Easier by ')+Math.abs(st)*10+'%'}
+{const _es=enemyStat;enemyStat=function(){const r=_es.apply(this,arguments),dm=diffDmg(),hm=diffHp(),rm=diffRew();if(dm===1&&hm===1&&rm===1)return r;
+  return Object.assign({},r,{hp:Math.max(1,Math.round(r.hp*hm)),dmg:[Math.max(1,Math.round(r.dmg[0]*dm)),Math.max(1,Math.round(r.dmg[1]*dm))],xp:Math.max(1,Math.round(r.xp*rm))})}}
+{const _hp=heroHitPct;heroHitPct=function(){const d=diffHeroHitSub();const r=_hp.apply(this,arguments);return d===0?r:Math.max(.1,Math.min(.97,r-d))}}
+function diffApply(){for(const e of (G.enemies||[])){if(!(e.hp>0))continue;const fr=e.hp/(e.maxhp||e.hp),mh=enemyStat(e.t,e.lvl).hp;e.maxhp=mh;e.hp=Math.max(1,Math.ceil(mh*fr))}}
+function diffChange(n){const was=G.flags.diffStep|0;G.flags.diffStep=Math.max(DIFF_MIN,Math.min(DIFF_MAX,was+n));if((G.flags.diffStep|0)!==was){diffApply();msg('Difficulty: '+diffLabel()+'.','#e8d8a0')}}
 function drawGameplay(){
   BTNS=[];veil(.6);bigPanel(70,10,340,300);
   txt('GAMEPLAY',240,28,14,'#d8c88e','center',true);
   const on=autoscaleOn();
   btnText('gp_scale','Autoscaling:  '+(on?'ON':'OFF'),120,42,240,26);
   btnText('gp_fog','Fog of war on maps:  '+(G.flags.noFog?'OFF':'ON'),120,72,240,22);
+  {const st=G.flags.diffStep|0;btnText('gp_dm','-',120,98,44,24);btnText('gp_dp','+',316,98,44,24);txt('Difficulty:  '+diffLabel(),240,114,10,st===0?'#d8c88e':st>0?'#f0a080':'#a8d8a0','center',true);
+   if(st!==0){const d=diffD();txt('Enemy damage '+(d>0?'+':'-')+Math.round(Math.abs(diffDmg()-1)*100)+'%, health '+(d>0?'+':'-')+Math.round(Math.abs(diffHp()-1)*100)+'%. Gold and xp '+(d>0?'+':'-')+Math.round(Math.abs(diffRew()-1)*100)+'%.',240,128,7.6,'#cdbf94','center')}}
   const lines=on?[
     'Creatures scale to the party. A party that has outgrown a place meets its creatures raised to within a few levels of itself, and the great creatures always stand above the party.',
     'Turn autoscaling off for a fixed world: every place has its own level, rising as the story goes on, and each level is shown on the world map. You will meet creatures that are too strong for you, and too weak.'
@@ -55,11 +72,12 @@ function drawGameplay(){
     'The world is fixed. Every place has its own level, rising by about three for each place the story leads to, and the level of each place is shown on the world map.',
     'Creatures stand at the level of the place (some a little lower, as ever), and the great creatures a few levels above it. If a place is too hard for the party, go elsewhere and come back stronger.'
   ];
-  let y=110;for(const p of lines){for(const l of wrapText(p,300,8.4)){txt(l,240,y,8.4,'#cdbf94','center');y+=11}y+=8}
+  let y=144;for(const p of lines){for(const l of wrapText(p,300,8.4)){txt(l,240,y,8.4,'#cdbf94','center');y+=11}y+=8}
   const r=LEVEL_RATING[LEVEL];
   txt(on?'Autoscaling is on.':(r?'This place is level '+r+'.':'This place has no fixed level.'),240,y+6,9,'#e8c878','center',true);
   btnText('gp_back','Back',190,278,100,24);
 }
 (function(){const _b=handleBtn;handleBtn=function(id){
+  if(G.menu==='gameplay'&&(id==='gp_dm'||id==='gp_dp')){diffChange(id==='gp_dp'?1:-1);return}
   if(G.menu==='gameplay'){if(id==='gp_back'||id==='menu')G.menu=true;else if(id==='gp_fog'){G.flags.noFog=G.flags.noFog?0:1;msg(G.flags.noFog?'Fog of war is off. Maps show everything.':'Fog of war is on. Maps are covered by clouds where you have not been.','#e8d8a0')}else if(id==='gp_scale'){G.flags.autoScaleOn=G.flags.autoScaleOn?0:1;try{rebalanceEnemies()}catch(e){}msg(G.flags.autoScaleOn?'Autoscaling is on.':'Autoscaling is off. The world is fixed.','#e8d8a0')}return}
   _b(id)}})();
