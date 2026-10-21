@@ -82,10 +82,11 @@ addEventListener('pointerdown',e=>{if(e.pointerId!==77)PAD.act=false});
 addEventListener('mousemove',()=>{PAD.act=false});
 addEventListener('keydown',e=>{if(!e.isTrusted)return;PAD.act=false});
 /* the gold frame and pointer, drawn over everything while a pad is in use and the party is not walking */
-{const _pf=drawPressFx;drawPressFx=function(){_pf.apply(this,arguments);
+// painted after the stone buttons (which are flushed after the CRT pass) so the frame and the pointer are in front of them, not behind
+{const _cp2=crtPass;crtPass=function(){_cp2.apply(this,arguments);
   try{if(!PAD.name||!PAD.act||padPlaying())return;
     const T=padTargets(),f=PAD.focus&&T.find(b=>b.id===PAD.focus);
-    ctx.save();
+    ctx.save();ctx.setTransform(ctx.canvas.width/DW,0,0,ctx.canvas.height/DH,0,0);
     if(f){const pulse=.55+.45*Math.sin(G.time*6||performance.now()/160);ctx.lineWidth=2.4;ctx.strokeStyle='rgba(255,227,106,'+pulse.toFixed(2)+')';ctx.strokeRect(f.x-2,f.y-2,f.w+4,f.h+4);ctx.fillStyle='rgba(255,227,106,.10)';ctx.fillRect(f.x,f.y,f.w,f.h)}
     else{ctx.translate(PAD.cx,PAD.cy);ctx.fillStyle='#ffe36a';ctx.strokeStyle='#120c08';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,13);ctx.lineTo(3.6,10);ctx.lineTo(6.4,15.5);ctx.lineTo(8.6,14.4);ctx.lineTo(5.8,9.2);ctx.lineTo(10.4,9.2);ctx.closePath();ctx.fill();ctx.stroke()}
     ctx.restore()}catch(e){}}}
