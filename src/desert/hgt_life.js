@@ -351,7 +351,7 @@ function hgtlfSprites(out){
     let img=base,flip=false;
     if(a.kind==='npc'){
       if(a.task==='clean'&&!moving)flip=(((t/1.4+a.seed)|0)&1)===1;
-      else if(a.task==='watch'&&!moving)flip=(((t/6+a.seed)|0)&1)===1;
+      else if(!moving&&(a.task==='sit'||a.task==='read'||a.task==='fish'||a.task==='watch'))flip=((a.seed*7|0)&1)===1; // someone sitting or watching keeps facing one way: no glancing about, no mirror swaps
       else if(moving)flip=(((t*1.2+a.seed)|0)&1)===1;
       else if(!moving&&a.task!=='clean'&&a.task!=='watch')flip=(((t/(5+a.seed%4)+a.seed)|0)&1)===1; // an idle figure glances the other way now and then // a walking figure swaps its mirror image with each step
     }else{if(a.flipDir&&(a.dx||a.dy))flip=(-dY*a.dx+dX*a.dy)>0;if(moving&&!a.hover)flip=flip!==((((t*1.0+a.seed)|0)&1)===1)} // a walking pet also swaps its mirror image with each stride
