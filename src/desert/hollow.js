@@ -475,7 +475,7 @@ function hlDress(c){
     decor.push({k:'hl_p_note',x:bx+px,y:by+py,wd:[wd[0],wd[1]],pic:1,block:false,walk:true,deco:true,npc:(letterId>=0&&!letterDone)?'hl_vance'+letterId:'hl_note16',bob:.6});if(letterId>=0)letterDone=true;if(items)items.push({k:'potion',x:x+wd[0]*3,y:y+wd[1]*3});
     secretSlots.push([bx-px,by-py,[wd[0],wd[1]]]);return {dx,dy};
   };
-  {let made=0;const want=1+(k%3===0?1:0)+(k>=HL.N-4?1:0);
+  {let made=0;const want=1+(k%3===0?1:0)+(k>=HL.N-4?1:0)+(k===HL.N-3?1:0);
    for(const r of shuf(rooms.filter(q=>q!==myst&&q.x1-q.x0>=2),77)){if(made>=want)break;
      for(const [x,y,wd] of slots(r)){const ch=chamberAt(x,y,wd);if(!ch)continue;
        decor.push({k:'lever',x,y,wd:[wd[0],wd[1]],opens:[[ch.dx,ch.dy]],idx:made,block:false,deco:true});used.add(key(x,y));made++;break}}
@@ -485,16 +485,40 @@ function hlDress(c){
      for(const [x,y,wd] of slots(r)){const ch=chamberAt(x,y,wd);if(!ch)continue;
        decor.push({k:'hl_p_shelf',x,y,block:false,walk:true,deco:true,npc:'hl_shelfdoor',opens:[[ch.dx,ch.dy]],idx:100+sh});used.add(key(x,y));sh++;break}}}
   if(letterId>=0&&!letterDone){const lr=far||rooms[rooms.length-1];for(const [x,y,wd] of slots(lr)){if(pic('hl_p_note',x,y,wd,{npc:'hl_vance'+letterId,bob:.6})){letterDone=true;break}}}
-  // the Messenger of Death waits on the last four floors. His five letters are written where the main way never passes: two in secret chambers, the rest in side rooms and dead ends out of sight of the route to the stair
-  if(k>=HL.N-4&&up){
-    const los=(x0,y0,x1,y1)=>{const n=Math.max(Math.abs(x1-x0),Math.abs(y1-y0));for(let i=1;i<n;i++){const x=Math.round(x0+(x1-x0)*i/n),y=Math.round(y0+(y1-y0)*i/n);if(!isF(x,y))return false}return true};
-    const route=[];{let x=up.x,y=up.y,g=d[y*W+x];route.push([x,y]);for(let n=0;n<400&&g>0;n++){const nb=[[1,0],[-1,0],[0,1],[0,-1]].map(([a,b])=>[x+a,y+b]).find(([a,b])=>a>=0&&b>=0&&a<W&&b<H&&d[b*W+a]===g-1);if(!nb)break;x=nb[0];y=nb[1];g--;route.push([x,y])}}
-    const expo=(x,y)=>route.reduce((n,[a,b])=>n+((a-x)**2+(b-y)**2<=42&&los(a,b,x,y)?1:0),0);
-    const cand=[];for(const r of rooms)for(const sl of slots(r))cand.push([sl[0],sl[1],sl[2],expo(sl[0],sl[1])]);
-    for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!isF(x,y)||used.has(key(x,y)))continue;const wl=[[0,-1],[0,1],[-1,0],[1,0]].filter(([a,b])=>isW(x+a,y+b));if(wl.length>=3){const w=wl[0];cand.push([x,y,w,expo(x,y)])}} // dead ends
-    const chosen=secretSlots.slice(0,2).map(q=>[q[0],q[1],q[2],0]);
-    cand.sort((p,q)=>p[3]-q[3]||hs(p[0],p[1],k)-hs(q[0],q[1],k));
-    for(const q of cand){if(chosen.length>=5)break;if(used.has(key(q[0],q[1]))&&!chosen.some(z=>z===q))continue;if(chosen.every(z=>Math.abs(z[0]-q[0])+Math.abs(z[1]-q[1])>=3))chosen.push(q)}
+  // the Messenger of Death waits on floors 18 and 19. His five letters are never together: two are written inside secret walls, three at the far end of long winding corridors that
+  // wander off from different rooms, and no two are within ten squares of each other
+  if((k===HL.N-3||k===HL.N-2)&&up){
+    const setC=(cx,cy,ch)=>{rows[cy]=rows[cy].slice(0,cx)+ch+rows[cy].slice(cx+1)};
+    const chosen=secretSlots.slice(0,3).map(q=>[q[0],q[1],q[2],0]);
+    const apart=(x,y)=>chosen.every(z=>Math.abs(z[0]-x)+Math.abs(z[1]-y)>=APART);
+    const D4=[[0,-1],[1,0],[0,1],[-1,0]];
+    // a windy corridor: starts at a wall of a room, runs two to four squares, turns, and so on, for about sixteen squares; every square it digs is surrounded by solid wall except the one it came from
+    let MINLEN=9,MINSEG=3,APART=9;
+    const snake=(sx,sy,w,seed)=>{
+      for(let attempt=0;attempt<48;attempt++){
+        let x=sx,y=sy,dir=D4.findIndex(q=>q[0]===w[0]&&q[1]===w[1]),cells=[],len=0,ok=true;
+        const free=(cx,cy,px,py)=>{if(cx<2||cy<2||cx>=W-2||cy>=H-2||!isW(cx,cy)||used.has(key(cx,cy)))return false;
+          for(const [a2,b2] of D4){const nx=cx+a2,ny=cy+b2;if(nx===px&&ny===py)continue;if(cells.some(q=>q[0]===nx&&q[1]===ny))continue;if(!isW(nx,ny)||used.has(key(nx,ny)))return false}return true};
+        let px=sx,py=sy;const turns=[];let segs=0;
+        while(len<18&&segs<8){
+          const seg=2+((hs(sx*7+attempt,sy*5+segs,seed+13)*3)|0);let moved=0;
+          for(let i=0;i<seg;i++){const nx=x+D4[dir][0],ny=y+D4[dir][1];if(!free(nx,ny,x,y))break;cells.push([nx,ny]);px=x;py=y;x=nx;y=ny;moved++;len++}
+          if(!moved){break}
+          segs++;const sgn=hs(sx*3+segs,sy*11+attempt,seed+17)<.5?1:3;dir=(dir+sgn)%4}
+        if(len>=MINLEN&&segs>=MINSEG)return {cells,end:cells[cells.length-1],last:D4[(dir+(segs%2?0:0))%4]}}
+      return null};
+    const dirOfLast=(cells)=>{const n=cells.length,a2=cells[n-2],b2=cells[n-1];return [b2[0]-a2[0],b2[1]-a2[1]]};
+    const starts=[];for(const r of shuf(rooms,91))for(const [x,y,wd] of slots(r))starts.push([x,y,wd,r]);
+    {const more=[];for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!isF(x,y)||used.has(key(x,y)))continue;for(const w of D4)if(isW(x+w[0],y+w[1]))more.push([x,y,w,null])}shuf(more,93).forEach(q=>starts.push(q))} // and any other floor square beside a wall
+    let tries=0;
+    for(const pass of [[9,3,9],[6,2,8],[4,2,7],[3,2,6],[3,2,5]]){MINLEN=pass[0];MINSEG=pass[1];APART=pass[2];
+      for(const [x,y,wd,r] of starts){if(chosen.length>=5||tries++>3000)break;
+        if(used.has(key(x+wd[0],y+wd[1])))continue;
+        const sn=snake(x+wd[0],y+wd[1],wd,x*31+y);if(!sn)continue;const e=sn.end;if(!apart(e[0],e[1]))continue;
+        // dig it: the mouth is the wall square next to the room, then each square along the way
+        setC(x+wd[0],y+wd[1],'.');used.add(key(x+wd[0],y+wd[1]));for(const [cx,cy] of sn.cells){setC(cx,cy,'.');used.add(key(cx,cy))}
+        const dl=dirOfLast([[x+wd[0],y+wd[1]]].concat(sn.cells));chosen.push([e[0],e[1],dl,0])}
+      if(chosen.length>=5)break}
     if(chosen.length===5){chosen.forEach(q=>used.add(key(q[0],q[1])));
       const fc=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(isF(x,y)&&d[y*W+x]>=8&&!used.has(key(x,y)))fc.push([x,y]);
       const m0=fc.length?fc[(hs(k,3,5)*fc.length)|0]:[start.x,start.y-2];

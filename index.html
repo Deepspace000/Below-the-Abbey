@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.505';
+const VERSION='3.506';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -4239,7 +4239,7 @@ function gotoList(){
   hd('Saint Elen’s Monastery, halfway along the Pilgrim’s Path');if(has(411))out.push({n:411,name:'The road outside the monastery (the statue)'});for(const n of [430,431,6900,6901,6902,6903,6904,6905,6906,432,433,434])if(has(n))out.push({n,name:nm(n)});
   hd('Caves hidden in the woods of the Pilgrim’s Path');for(let n=7100;n<7120;n++)if(has(n))out.push({n,name:nm(n)});hd('Caves in the older forests');for(let n=7200;n<7207;n++)if(has(n))out.push({n,name:nm(n)});
   if(typeof hgtGotoList==='function')hgtGotoList(hd,has,nm,out);
-  hd('Below the Abbey, past the sealed door');for(const n of [360,361,362,363,364,440,441,445,450,455,459,460])if(has(n))out.push({n,name:nm(n)});
+  hd('Below the Abbey, past the sealed door');for(const n of [360,361,362,363,364,440,441,445,450,455,458,459,460])if(has(n))out.push({n,name:nm(n)});
     hd('Mounds of the Sand Road');for(let n=BURROW_BASE;n<BURROW_BASE+BURROW_N;n++)if(has(n))out.push({n,name:nm(n)});
   for(const [dl,dname] of DNG_DESERTS){const ids=Object.keys(DNG_INFO).map(Number).filter(n=>DNG_INFO[n].desert===dname).sort((a,b)=>a-b);if(ids.length){hd('Dungeons of '+dname);for(const n of ids)out.push({n,name:nm(n)})}}
   return out;
@@ -18269,7 +18269,7 @@ function hlDress(c){
     decor.push({k:'hl_p_note',x:bx+px,y:by+py,wd:[wd[0],wd[1]],pic:1,block:false,walk:true,deco:true,npc:(letterId>=0&&!letterDone)?'hl_vance'+letterId:'hl_note16',bob:.6});if(letterId>=0)letterDone=true;if(items)items.push({k:'potion',x:x+wd[0]*3,y:y+wd[1]*3});
     secretSlots.push([bx-px,by-py,[wd[0],wd[1]]]);return {dx,dy};
   };
-  {let made=0;const want=1+(k%3===0?1:0)+(k>=HL.N-4?1:0);
+  {let made=0;const want=1+(k%3===0?1:0)+(k>=HL.N-4?1:0)+(k===HL.N-3?1:0);
    for(const r of shuf(rooms.filter(q=>q!==myst&&q.x1-q.x0>=2),77)){if(made>=want)break;
      for(const [x,y,wd] of slots(r)){const ch=chamberAt(x,y,wd);if(!ch)continue;
        decor.push({k:'lever',x,y,wd:[wd[0],wd[1]],opens:[[ch.dx,ch.dy]],idx:made,block:false,deco:true});used.add(key(x,y));made++;break}}
@@ -18279,16 +18279,40 @@ function hlDress(c){
      for(const [x,y,wd] of slots(r)){const ch=chamberAt(x,y,wd);if(!ch)continue;
        decor.push({k:'hl_p_shelf',x,y,block:false,walk:true,deco:true,npc:'hl_shelfdoor',opens:[[ch.dx,ch.dy]],idx:100+sh});used.add(key(x,y));sh++;break}}}
   if(letterId>=0&&!letterDone){const lr=far||rooms[rooms.length-1];for(const [x,y,wd] of slots(lr)){if(pic('hl_p_note',x,y,wd,{npc:'hl_vance'+letterId,bob:.6})){letterDone=true;break}}}
-  // the Messenger of Death waits on the last four floors. His five letters are written where the main way never passes: two in secret chambers, the rest in side rooms and dead ends out of sight of the route to the stair
-  if(k>=HL.N-4&&up){
-    const los=(x0,y0,x1,y1)=>{const n=Math.max(Math.abs(x1-x0),Math.abs(y1-y0));for(let i=1;i<n;i++){const x=Math.round(x0+(x1-x0)*i/n),y=Math.round(y0+(y1-y0)*i/n);if(!isF(x,y))return false}return true};
-    const route=[];{let x=up.x,y=up.y,g=d[y*W+x];route.push([x,y]);for(let n=0;n<400&&g>0;n++){const nb=[[1,0],[-1,0],[0,1],[0,-1]].map(([a,b])=>[x+a,y+b]).find(([a,b])=>a>=0&&b>=0&&a<W&&b<H&&d[b*W+a]===g-1);if(!nb)break;x=nb[0];y=nb[1];g--;route.push([x,y])}}
-    const expo=(x,y)=>route.reduce((n,[a,b])=>n+((a-x)**2+(b-y)**2<=42&&los(a,b,x,y)?1:0),0);
-    const cand=[];for(const r of rooms)for(const sl of slots(r))cand.push([sl[0],sl[1],sl[2],expo(sl[0],sl[1])]);
-    for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(!isF(x,y)||used.has(key(x,y)))continue;const wl=[[0,-1],[0,1],[-1,0],[1,0]].filter(([a,b])=>isW(x+a,y+b));if(wl.length>=3){const w=wl[0];cand.push([x,y,w,expo(x,y)])}} // dead ends
-    const chosen=secretSlots.slice(0,2).map(q=>[q[0],q[1],q[2],0]);
-    cand.sort((p,q)=>p[3]-q[3]||hs(p[0],p[1],k)-hs(q[0],q[1],k));
-    for(const q of cand){if(chosen.length>=5)break;if(used.has(key(q[0],q[1]))&&!chosen.some(z=>z===q))continue;if(chosen.every(z=>Math.abs(z[0]-q[0])+Math.abs(z[1]-q[1])>=3))chosen.push(q)}
+  // the Messenger of Death waits on floors 18 and 19. His five letters are never together: two are written inside secret walls, three at the far end of long winding corridors that
+  // wander off from different rooms, and no two are within ten squares of each other
+  if((k===HL.N-3||k===HL.N-2)&&up){
+    const setC=(cx,cy,ch)=>{rows[cy]=rows[cy].slice(0,cx)+ch+rows[cy].slice(cx+1)};
+    const chosen=secretSlots.slice(0,3).map(q=>[q[0],q[1],q[2],0]);
+    const apart=(x,y)=>chosen.every(z=>Math.abs(z[0]-x)+Math.abs(z[1]-y)>=APART);
+    const D4=[[0,-1],[1,0],[0,1],[-1,0]];
+    // a windy corridor: starts at a wall of a room, runs two to four squares, turns, and so on, for about sixteen squares; every square it digs is surrounded by solid wall except the one it came from
+    let MINLEN=9,MINSEG=3,APART=9;
+    const snake=(sx,sy,w,seed)=>{
+      for(let attempt=0;attempt<48;attempt++){
+        let x=sx,y=sy,dir=D4.findIndex(q=>q[0]===w[0]&&q[1]===w[1]),cells=[],len=0,ok=true;
+        const free=(cx,cy,px,py)=>{if(cx<2||cy<2||cx>=W-2||cy>=H-2||!isW(cx,cy)||used.has(key(cx,cy)))return false;
+          for(const [a2,b2] of D4){const nx=cx+a2,ny=cy+b2;if(nx===px&&ny===py)continue;if(cells.some(q=>q[0]===nx&&q[1]===ny))continue;if(!isW(nx,ny)||used.has(key(nx,ny)))return false}return true};
+        let px=sx,py=sy;const turns=[];let segs=0;
+        while(len<18&&segs<8){
+          const seg=2+((hs(sx*7+attempt,sy*5+segs,seed+13)*3)|0);let moved=0;
+          for(let i=0;i<seg;i++){const nx=x+D4[dir][0],ny=y+D4[dir][1];if(!free(nx,ny,x,y))break;cells.push([nx,ny]);px=x;py=y;x=nx;y=ny;moved++;len++}
+          if(!moved){break}
+          segs++;const sgn=hs(sx*3+segs,sy*11+attempt,seed+17)<.5?1:3;dir=(dir+sgn)%4}
+        if(len>=MINLEN&&segs>=MINSEG)return {cells,end:cells[cells.length-1],last:D4[(dir+(segs%2?0:0))%4]}}
+      return null};
+    const dirOfLast=(cells)=>{const n=cells.length,a2=cells[n-2],b2=cells[n-1];return [b2[0]-a2[0],b2[1]-a2[1]]};
+    const starts=[];for(const r of shuf(rooms,91))for(const [x,y,wd] of slots(r))starts.push([x,y,wd,r]);
+    {const more=[];for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!isF(x,y)||used.has(key(x,y)))continue;for(const w of D4)if(isW(x+w[0],y+w[1]))more.push([x,y,w,null])}shuf(more,93).forEach(q=>starts.push(q))} // and any other floor square beside a wall
+    let tries=0;
+    for(const pass of [[9,3,9],[6,2,8],[4,2,7],[3,2,6],[3,2,5]]){MINLEN=pass[0];MINSEG=pass[1];APART=pass[2];
+      for(const [x,y,wd,r] of starts){if(chosen.length>=5||tries++>3000)break;
+        if(used.has(key(x+wd[0],y+wd[1])))continue;
+        const sn=snake(x+wd[0],y+wd[1],wd,x*31+y);if(!sn)continue;const e=sn.end;if(!apart(e[0],e[1]))continue;
+        // dig it: the mouth is the wall square next to the room, then each square along the way
+        setC(x+wd[0],y+wd[1],'.');used.add(key(x+wd[0],y+wd[1]));for(const [cx,cy] of sn.cells){setC(cx,cy,'.');used.add(key(cx,cy))}
+        const dl=dirOfLast([[x+wd[0],y+wd[1]]].concat(sn.cells));chosen.push([e[0],e[1],dl,0])}
+      if(chosen.length>=5)break}
     if(chosen.length===5){chosen.forEach(q=>used.add(key(q[0],q[1])));
       const fc=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(isF(x,y)&&d[y*W+x]>=8&&!used.has(key(x,y)))fc.push([x,y]);
       const m0=fc.length?fc[(hs(k,3,5)*fc.length)|0]:[start.x,start.y-2];
@@ -33418,6 +33442,284 @@ hgtRegister(HGTXULB.ID,function(id){
 });
 for(const id in ROOMS){LEVEL_NAMES[id]=ROOMS[id].name;hgtRegister(+id,hgtxulbRoom)}
 })();
+
+/* ---- src/desert/hgt_books_text.js ---- */
+/* ==========================================================================
+   THE BOOKS OF THE FOUR CITIES: the text only. The rules, the items, the reader and the placing are in hgt_books.js.
+   HGB_TEXT[id] = {title, desc, stat ('str','dex','int' or ''), price, pages:[..]}. Names start with HGB.
+   ========================================================================== */
+const HGB_TEXT={
+hgbknight:{title:'The Knight Who Walked Home',stat:'str',price:1500,desc:'A knight loses his horse a long way from home and has to carry himself back.',pages:[
+`Sir Orlo Brandt was the proudest knight of the southern march, and he owned the heaviest armour in three counties. On the morning this story begins his horse, a grey mare called Dumpling, sat down in a river and refused to get up. Orlo was three hundred miles from his own gate, and Dumpling had no plans to move before spring.`,
+`Orlo tried to sell the armour for a cart. The only buyer was a goat farmer who offered two goats and a bucket. Orlo said a knight does not sell his armour. The farmer said a knight does not walk three hundred miles in it either. They were both wrong, as it turned out, but it took a long time to find out.`,
+`On the first day Orlo walked eleven miles and lay down in a ditch like a dropped tray. On the second day he walked nine. His knees made a noise like a cart on gravel. He decided he would not take the armour off, because it would only prove the farmer right, and Orlo hated nothing more than a farmer being right.`,
+`By the fourth week he could climb a hill without stopping. By the eighth week he stopped noticing the weight at all. He lifted a fallen tree off a widow's road without thinking about it, and she asked him whether he did this sort of thing often. Orlo realised that he now did, and that he had not yet told his arms about the armour.`,
+`At a ford he met a bully with a club who took tolls from travellers. The bully swung at him. Orlo caught the club in one gloved hand and held it there, politely, until the bully let go and asked to be excused. The tale of this spread faster than Orlo could walk, and people began to bring him heavy problems on purpose.`,
+`He reached his own gate after nineteen weeks, thin and brown, and found the gatekeeper asleep. Orlo picked up the gate, which was stuck, and set it aside. Dumpling was waiting in the yard. She had walked home by the river road in nine days, and she looked at him as if to ask what had taken so long.`]},
+hgbpick:{title:'Tam and the Quick Fingers',stat:'dex',price:1300,desc:'A boy of Glorm learns that the best pocket to pick is your own.',pages:[
+`Tam was eleven, and he lived in Glorm in the shadow of the great Bazaar Stair. He had very quick fingers. He could lift a coin out of a purse so softly that the purse thought it was still full. His aunt said it was a talent. The market wardens said it was a crime. Tam said it was Tuesday, and that he was busy.`,
+`His teacher was a one-eyed woman named Marl, who sold hot chestnuts from a cart and taught pickpockets on the side. She made Tam practise on a row of bells. He had to steal a coin from a coat covered in bells without ringing one. For a month he rang them all. For a second month he rang half. In the third month the coat stayed silent.`,
+`Marl had three rules. Never take from someone who is hungry. Never take from someone who is watching. Never take what you cannot carry home in one hand. Tam argued with the third rule for years, because he once saw a man with a very fine cheese, and the cheese needed both hands.`,
+`One festival night Tam saw a hand slide into the coat of a fat, kindly baker. It was another thief, a big boy called Grist, who was not quick but was very sure of himself. Tam could have walked away. Instead he reached out and plucked the purse out of Grist's fingers in the same moment, and Grist felt nothing at all.`,
+`Tam gave the purse back to the baker. The baker, who had seen it all with one calm eye, gave Tam a hot loaf and a job sweeping the bakery. Tam grumbled, but the job came with a bed above the ovens, and the loaves were never short again. Grist went home and told everyone the bakery was haunted.`,
+`Tam never stopped being quick. He grew up to open the finest lock shop in Glorm, where customers had to describe their locks and he never once asked to see the key. Marl came by every winter for a loaf. She told him the bells had been the easy part. The hard part, she said, was the day he chose which pocket to leave alone.`]},
+hgbphil:{title:'The Philosopher of the Long Stair',stat:'int',price:1500,desc:'A thinker climbs a staircase in Exsce and tries to prove that it has no top.',pages:[
+`In the city of Exsce there is a staircase that winds up the outside of a tall shell tower, and the philosopher Wenna Arlo-Dwane decided to prove that it had no top. She had a notebook, a flask of tea, and a theory. The theory said that every step must be followed by another step, and therefore there could be no last one.`,
+`She started on a clear morning. By noon she had counted four hundred steps and written a page on the nature of up. A passing weaver asked whether she was lost. Wenna said she was conducting an inquiry. The weaver said that was the usual word for it, and went on down.`,
+`By evening she had reached the first landing, where a frog in an apron sold lamp oil. Wenna asked him whether the stairs ended. He said he had never been to the end, but that the oil got cheaper higher up, since fewer people carried it. Wenna wrote this down as the first piece of evidence.`,
+`On the second day she met a girl who was coming down. The girl said she had been to the top that morning and that it was very pretty. Wenna asked her to prove it. The girl said she could not prove it, only describe it, and that the two things were different. Wenna was annoyed, because she had just written a page on exactly that difference.`,
+`On the third day the stair grew narrow and the wind grew loud. Wenna stopped to think and found she was standing on a step that was no different from the ones below. A thought came to her, slowly. If she could not tell from here whether the stair had an end, then her theory was not about the stair at all. It was about her.`,
+`She laughed so hard that she dropped the flask. It rolled up the steps, which she had never seen a flask do before, and she followed it round a curve and out onto a flat white platform with a rail and a wide view of the whole city. There was a bench. There was a sign that read, in small plain letters, TOP.`,
+`Wenna sat on the bench for an hour. Then she took out her notebook and crossed out the title, because it was wrong. She wrote a new one underneath. Her friends say it was the best thing she ever wrote. It was seven words long, and it said that a question can have an end even when you cannot see it.`,
+`She went down the next morning. The frog in the apron asked her how it was. She told him that the oil was cheaper at the top and that he should open a second stall there. He did, and he is rich now, and he tells the story of the philosopher to everyone who buys a lamp.`]},
+hgbfish:{title:'Old Orrin and the Pond',stat:'str',price:1200,desc:'A fisherman of Ulb argues with a pond and loses until he stops arguing.',pages:[
+`Old Orrin of Ulb fished the reed pond behind his house for forty years, and in forty years the pond gave him only boots. He caught left boots, right boots, a boot with a hat in it, and once a boot with a smaller boot inside. Orrin said the pond was doing it on purpose. The pond, being a pond, said nothing.`,
+`One misty morning Orrin felt a bite so heavy that his rod bent double. He leaned back and heaved. Something heaved back. For an hour he pulled and the pond pulled, and neither of them gave way. His neighbours came to watch, and they brought chairs. A boy sold roasted nuts. It was the best day Ulb had seen in years.`,
+`By noon Orrin was sweating through his hat. He shouted that the pond was a cheat. He said it had no right to keep fish it never raised. The line shivered. A very small voice, quite clearly, came up from the water and said that the fish were not his, and that they had never been his, and that he had only been borrowing.`,
+`Orrin was so surprised that he let go with one hand. The rod did not move. He realised that the pond had not been pulling at all. A giant eel had wound itself round a sunken post, and Orrin had been pulling against the post, which was why it felt like pulling against the whole pond. He had been arguing with a post.`,
+`He pulled again, harder, and this time he did not shout. He walked backwards one step at a time, the way a man pulls a stubborn cart, and the post came up out of the mud with a long wet sound. The eel slid off it and slipped away, gleaming, and the whole crowd cheered as if it had been a battle.`,
+`Orrin's arms were twice the size they had been that morning. He kept the post, and he planted it by his door, and he still caught nothing but boots. But when people asked him how he got so strong, he said he had once argued with a pond and lost, and learned that the loser is usually the one who does the pulling.`]},
+hgbheal:{title:'The Healer\'s Apprentice',stat:'dex',price:1400,desc:'A girl with clumsy hands learns the quiet craft of stitching.',pages:[
+`Pell was fourteen when she became the apprentice of Madam Ouse, the healer on the third terrace of Nibb. She was not a good apprentice at first. She dropped bottles. She spilled tinctures. Once she bandaged a patient's head to the bed. Madam Ouse sighed and said that every healer begins by being a danger to the sick.`,
+`The first lesson was needles. Madam Ouse gave her a piece of old sailcloth and a bone needle and told her to sew a straight line. Pell's line wandered like a drunk snail. Madam Ouse unpicked it with one pull and told her to begin again. She did this forty times. On the forty-first, the line was straight, and Madam Ouse said nothing, which was the highest praise she gave.`,
+`The second lesson was knots. A healer must be able to tie a bandage in the dark, with cold fingers, while a patient is shouting. Pell practised on table legs, on chair arms, on a sleeping cat that woke up and left. By the end of the month she could tie nine knots without looking, and the cat had a new home.`,
+`In the autumn a bell-ringer fell from the lantern tower and landed on a roof. They carried him to the healer's house with a deep cut across his forearm. Madam Ouse was away at a birth. Pell stood in the doorway with her heart going like a drum, and the room waited for her.`,
+`She washed the cut. She held the edges together with her thumb. She threaded the needle with a hand that did not shake, which surprised her more than anyone, and she began to sew, stitch after small stitch, each one exactly where the last had been. The ringer whispered a joke to keep his mind off it. She did not laugh, but she nearly did.`,
+`When Madam Ouse came home at midnight she looked at the arm for a long time. She said the stitches were even. She said the knot was clean. Then she said that the fourth stitch was a hair too tight, and Pell nearly cried, until she saw the old woman was smiling at the wall.`,
+`Pell is a healer now, with her own door on the fifth terrace. Her hands are known across the city. When a child comes in frightened, she lets them hold the needle first, and she tells them what Madam Ouse told her: that steady hands are not born, they are only borrowed from the practice of the day before.`,
+`She kept the sailcloth with the wandering line. It hangs in her window, framed in reeds. Patients ask about it, and she tells them it was her first work, and that it was terrible, and that it is the thing she is proudest of, because every straight line she has made since began on that crooked one.`,
+`The cat, by the way, forgave her. It visits every winter and sleeps on the bandage shelf.`]},
+hgblamp:{title:'The Thief of Lamps',stat:'dex',price:1300,desc:'Someone is stealing the lamps of Glorm one by one, and the reason is not what the wardens think.',pages:[
+`In the winter of the dark week, the lamps of Glorm began to vanish. Every dawn another street lamp was gone from its hook, with no ladder, no rope and no footprints. The wardens set a watch. The lamps vanished from under their noses. The head warden, a heavy man named Boroc, swore he would catch the thief by the next full moon.`,
+`The thief was a girl named Sip, and she was very light and very quick. She climbed the walls of the Bazaar Stair as easily as a cat climbs a curtain. She took each lamp in one hand, blew it out with her breath, and tucked it into a bag that never clinked, because she had lined it with wool.`,
+`Boroc laid a trap. He hung one bright lamp in the middle of the square and hid twelve wardens around it. Sip walked into the square in plain sight, reached up, and took the lamp. The wardens leaped. Sip dropped from the roof of a stall to a rope, to a rail, to a balcony, and was gone before the first of them had stopped yelling.`,
+`Boroc was furious. He climbed the stair himself, puffing, and followed the trail of little oily footmarks into a back lane. At the end of it was a door. Behind the door was a long room, and in the room was every stolen lamp, lit, in rows, and under each lamp sat an old person, warm and reading.`,
+`Sip explained, quite politely. The poor houses at the bottom of the stair had no lamp oil that winter because the oil merchants had raised their price. The old folk sat in the dark and could not read or sew. She had borrowed the lamps to light a room for them, and she had meant to put every one back in the spring.`,
+`Boroc stood in the doorway for some time. Then he took off his helmet. He said that a thief who steals to light a room for the old is a poor sort of thief, and a very good sort of person, and that he did not know which of the two he was supposed to arrest.`,
+`He arrested the oil merchants instead, for pricing, and the lamps went back on their hooks with new oil. Sip was given a job as the Lamplighter of Glorm, with a ladder and a key. She kept the reading room open every winter. And she never again lit a lamp without first looking at the ones around it, to see who was sitting in the dark.`]},
+hgbswind:{title:'The Market of Seven Prices',stat:'int',price:1400,desc:'A swindler tries to cheat the sharpest bazaar in the Hollow Grasslands.',pages:[
+`Casimir Vole arrived in Glorm with a cart of shiny stones and a very smooth voice. He had cheated six towns and run from three. He told the bazaar guild that his stones were moon-glass, sold only to the wise, at the wise price of forty gold each. Then he sat down and waited for the wise to arrive.`,
+`The market of Glorm has seven prices for everything. There is the price for strangers, the price for friends, the price for the sick, the price for the rich, the price for the early, the price for the late, and the price the seller says out loud when he is fooling himself. A trader in Glorm knows which of the seven you are before you open your mouth.`,
+`Casimir sold his first stone to a young frog for thirty gold. He sold his second to a traveller for forty. By evening he had sold nine and had more gold than the cart was worth. He felt wonderful. He felt like a man who understood markets. This was the first sign that he did not.`,
+`The next morning every stall in the bazaar sold moon-glass. They sold it for two gold. It was exactly the same stone, and every trader had one. A woman at the next stall explained, very gently, that the stone was lake quartz and that the lake was ten minutes away. Everyone had bought a bucket on the first afternoon.`,
+`Casimir went red, then white. He tried to leave town, but the gate guard stopped him, politely, and asked whether he would like to pay the stall tax. It was forty gold. It was precisely the amount Casimir had made. Somebody in Glorm had counted his sales while he made them, and had sent the bill to the gate.`,
+`He paid. He sat on the edge of a fountain with his head in his hands. An old trader sat down beside him and offered him half a pie. She told him that the market was not a place where one person cheats another. It was a place where everybody agrees what a thing is worth, and a cheat is only someone who does not know yet that he is in a very large agreement.`,
+`Casimir stayed in Glorm for a year. He learned the seven prices. He learned that the quickest way to get rich in a bazaar was to be known for one honest weight. He sells scales now, good ones, with a little stamp that reads VOLE, and nobody has ever once been short.`]},
+hgbmother:{title:'The Mother Who Raised a Giant',stat:'str',price:1600,desc:'A small woman of Ulb finds a giant baby in the reeds and raises it, one bowl of porridge at a time.',pages:[
+`Dessa was a weaver of Ulb, small and square and stubborn, and she lived alone at the edge of the reed basin. One morning in the spring floods she heard crying from the water. It was not the crying of a bird or a frog. It was a big, hollow, rolling cry, like a cow in a cellar. She waded in up to her waist and found a baby.`,
+`The baby was as long as her kitchen table. It was very pale, with a round face and hands like dinner plates. It looked at Dessa, hiccupped, and put her entire head in its mouth. Dessa said a few words that a weaver does not usually say, and the baby let go, delighted. She carried it home on a door.`,
+`The neighbours came, and they said what neighbours say. They said it would eat her out of house and home. They said it would break the roof. They said it would be trouble. Dessa put the baby to bed in the reed shed and said it was her business, and that if anyone had a better idea they could come and hold the other end of the door.`,
+`She called the baby Little Hill. Little Hill ate forty eggs a day and wore a sheet for a nappy. By the end of the first summer it was as big as an ox, and by the end of the second it had to stoop to come through the barn. Dessa sewed all its clothes herself, and she was soon using a whole bale of reed cloth a week.`,
+`She sang to it every night. She had only three songs, so it heard each of them several hundred times, and later it could sing them back in a voice like a distant avalanche. It was gentle with everything it touched. It carried the village children on its shoulders. It put ducklings back in their nests with two fingers.`,
+`The trouble came in the third autumn, when a storm tore a hole in the dyke. The basin began to flood, and the water was rising in the lanes. The men ran with sandbags, but the hole was too wide. Dessa stood in the road and looked at the water, and then she looked at Little Hill, who was already walking toward it.`,
+`Little Hill sat down in the gap. The river poured around it, and the reeds flattened, and the whole basin held its breath. It sat there all night, as still as a hill, while the village mended the dyke around it with logs and stone. Dessa stood in the water at its side and sang the second song, the one it liked best.`,
+`In the morning the dyke was whole. Little Hill was blue with cold, and Dessa wrapped it in every blanket in Ulb. The neighbours who had said it would be trouble brought porridge in buckets, and nobody mentioned the roof, ever again.`,
+`The giant grew until it could have walked over the whole basin in four steps. It never left. It guards the dyke in the flood season, and when the water is quiet it sits by the reed shed and lets small children climb on its knees.`,
+`Dessa grew old and small and square. She said, near the end, that she had done very little, only fed it and sung to it. But the whole of Ulb knows what a mother does when she does very little for a very long time, and they say that the dyke stands because of her.`,
+`When she died, Little Hill carried her to the high ground on a door, the same door, and the whole city followed behind. It planted a single reed at the head of her grave. It is the tallest reed in the basin, and it hums in the wind with a low sound that a few people say is the second song.`]},
+hgbbell:{title:'The Bell-Ringer\'s Inheritance',stat:'str',price:1500,desc:'A young man of Nibb inherits a bell too heavy to lift and a promise he did not know about.',pages:[
+`When old Hollis Bree died, he left his grandson Wick a house, a cat, a debt, and a bell. The house leaked. The cat was ill-tempered. The debt was larger than the house. The bell was the great bell of the Lantern Tower of Nibb, and it weighed as much as a cow, and the job of ringing it was Wick's now, whether he liked it or not.`,
+`Wick did not like it. He was a thin, clever young man who preferred accounts to ropes. He climbed the tower on the first day and looked at the bell, which looked back, and he pulled the rope with both arms. The bell moved a finger's width, sighed, and moved back. A pigeon fell off the rail in sympathy.`,
+`The council sent a letter. It said that the festival of lanterns was in sixty days, that the bell must ring the opening, and that if it did not, the tower would be given to another family. The debt would then be collected from Wick's cat. The letter was signed by a clerk with a very small, very unkind hand.`,
+`Wick began to train. He pulled the rope at dawn, a hundred pulls, and fell off the platform. He pulled it again after lunch, and fell off the platform again. His hands blistered. His back complained. The cat watched from a beam and judged him. After ten days the bell moved a hand's width, and after twenty it swung to the rail.`,
+`He found something odd in the bell chamber, behind the great frame. It was a small iron box, rusty, and inside it was a letter from his grandfather, folded many times. It said, I never rang the bell in my own strength. I rang it with a counting rhythm and a trick of the knees. Look for the marks on the floor.`,
+`Wick looked. There were two worn patches in the planks, one for each foot, and a groove where a rope had rubbed. He stood on the patches and found that the bell came to him at the end of a swing, as a swing returns to a child. He did not pull. He only let the rope lift him, and gave it back what it gave.`,
+`That was the trick, the whole trick, and it was harder than it looked. A man had to learn the exact moment of the bell's weight, and lean into it, and let go at the right instant. Wick practised it for weeks. His arms grew thick, his back straightened, and one morning the great bell swung to the rail and the whole tower hummed.`,
+`On the night of the festival the lanterns of Nibb rose into the sky like a flock of lit birds. The crowd gathered in the sunken square. The clerk with the small hand stood at the front, holding the council's papers and looking at his watch. Wick climbed the tower in the dark and set his feet on his grandfather's patches.`,
+`He rang once. The sound rolled over the city like a wave, deep and slow and golden, and a thousand faces turned up. He rang twice, and the lanterns that had been waiting in their hands were released. He rang three times, and the hills across the cavern answered, so clearly that some said it was Hollis answering back.`,
+`The clerk dropped his papers. The council voted, that same night, to cancel the debt. They gave the tower to Wick for life and a good salary besides, with a rope that was newly spliced, and a note that they hoped he would continue.`,
+`Wick still rings the bell. He teaches apprentices now, and the first thing he shows them is not the rope but the two worn patches on the floor. He says his grandfather left him a bell, a debt, a house and a cat, and that the bell was the only one of them that gave anything back.`]},
+hgbghost:{title:'The Ghost Who Corrected the Library',stat:'int',price:1600,desc:'The Great Library of Exsce is haunted by a ghost who cannot stand a mistake.',pages:[
+`The Great Library of Exsce has forty thousand books and one ghost. The ghost arrived about two hundred years ago, nobody knows from where, and it has never been seen at any time except when it makes a correction. Then it is a pale grey outline over a reading desk, holding a quill that casts no shadow, and it looks extremely cross.`,
+`Corrections come in the night. A reader will go to bed having written, in his notes, that the Battle of Bright Reeds was won in the spring, and wake to find that the word spring is crossed out and autumn is written above it in a tidy, tiny hand. The ink is always green. It is always right.`,
+`The librarians learned to love it. They kept a log of its corrections, and over the years the log grew into a book of its own. The head librarian, a stout frog named Fenwick Dorm, once left a deliberate mistake on a desk to test the ghost. By morning there was a note beneath it that said, Not funny, and the mistake was fixed.`,
+`A scholar named Ibb Tessaly arrived from the east and announced that he had come to write the greatest history of the Hollow Grasslands ever put down. He settled at a desk, spread his papers, and began. By midnight he had written ten pages. By dawn each of them had been corrected in green, and one had a rude remark in the margin.`,
+`Ibb was offended. He wrote another ten pages with the greatest of care. The next morning there were thirty corrections. He took it to Fenwick, who shrugged and said that was how the ghost worked. Ibb went back to his desk, grim, and began checking every fact twice. He found, to his surprise, that the ghost was right every time.`,
+`Over the winter Ibb became obsessed. He stopped sleeping at night so that he could watch the ghost work. He sat with his lamp turned low and his quill ready and kept very still. On the ninth night a pale shape rose from the desk beside him, bent over his papers, and began to scratch in green.`,
+`Ibb said, as quietly as he could, that he was sorry to disturb it. The shape stopped. It turned. It had no face, but he understood that it was looking at him. Ibb asked it why it had stayed all this time, and why it corrected books that no one had written for two hundred years.`,
+`The ghost wrote its answer in the air, in green letters that faded as fast as they came. It wrote that it had been the first keeper of the library. It wrote that it had made a single mistake in the first catalogue, a small one, a misplaced scroll, and that a whole province had been given the wrong boundary because of it. It had never forgiven itself.`,
+`It wrote that every correction since was a payment on that debt. It said it would be done when it had corrected enough errors to balance the one. It had not counted how many were left. Ibb noticed that the letters were trembling a little as they faded.`,
+`Ibb thought about this for a long time. Then he did something unscholarly. He took the oldest catalogue from the shelf, the very first, and showed the ghost the page. The misplaced scroll was there, and so was its correction, in a different hand, made in the first month, by the first keeper. The ghost had fixed its own mistake on the day it made it, and had forgotten.`,
+`The green letters stopped. For a long time nothing at all moved in the room. Then the ghost wrote two words and let them hang there, brighter than any before. The words were, Thank you. Ibb said it was nothing, and the ghost wrote that it was not nothing, and that he had also spelled tomorrow wrong in line four.`,
+`The ghost did not leave. It had been there too long to know another place. But the corrections became gentler. There were fewer rude margins. Sometimes a reader would find a small green note at the edge of a page that said, Well done, and nobody could say who it was for.`,
+`Ibb finished his history in three years. It was the most careful book ever written in the grasslands. Every page of it was checked, and he said so himself in the preface. He dedicated it to the one reader who had never put a foot wrong, and the dedication was just three words, in green, written in by someone else.`,
+`The librarians still keep the log. It holds eleven thousand corrections now, in a hundred volumes, and any student may read it. Fenwick Dorm says it is the best textbook of mistakes in the world, because each entry shows how a good mind goes wrong and how a good mind is put right.`,
+`Students who come to the library are told the three rules. Read slowly. Write carefully. And if you wake to find a correction on your page, do not be angry, because it is the most patient teacher you will ever have, and it has been waiting a very long time for someone to say thank you.`,
+`There is a story that a visitor once left a book on a desk with a plain note, asking the ghost to correct the visitor's own heart. In the morning the book was untouched, but a green line had been written on the cover. It said, That is not my department, but try being kind to yourself, and fix the grammar later.`,
+`Nobody knows if the story is true. The head librarian says he cannot confirm it, but he keeps the book in a glass case, and the cover is just as described. A lot of people have looked at it. Most of them stand there for some time, and then they go and sit down and read something slowly.`,
+`Years later a new apprentice named Dova asked Fenwick whether the ghost could be made to leave, since it made her nervous. Fenwick took her to the log and let her read the last hundred entries. Dova read for an hour. Then she put the book down, looked at the empty air over the nearest desk, and said, very stiffly, that she would try to spell better. Nothing happened. But the lamp on that desk flickered once, as if somebody had nodded.`,
+`On quiet nights, a few librarians say, the ghost can be heard turning pages. It does not turn them to find mistakes any more. It reads. It reads slowly, from the first shelf to the last, and when it reaches the end it starts again from the beginning, because a library is a place where a keeper can never run out of things to be glad about.`,
+`That is the whole of the tale as it is told in Exsce. If you are reading this in the library, and you have come this far, the ghost has probably noticed. Do not worry. It has not found a single error on this page. It has only left a little green mark by the word library, and it is a small, neat tick.`]},
+hgbhives:{title:'A Tale of the Four Hives',stat:'',price:100,desc:'How the four great hives under the grasslands came to be, and why they never speak to each other.',pages:[
+`Long before the cities, there were four queens, and each of them wanted the whole of the grasslands for her own. They were sisters, and they were bees, and they were each as large as a cow. They shared a nest in the roots of an old stone tree, and they quarrelled all day, and when they slept, they quarrelled in their dreams.`,
+`The eldest was Amber, who loved order. She wanted every cell of the nest to be exactly the same size. The second was Verd, who loved growing things and wanted the nest covered with green. The third was Ashe, who loved the dark and wanted no light at all. The youngest was Rime, who loved the cold and wanted the whole cavern to be frost.`,
+`Their mother, the first queen, saw that her daughters would tear the nest apart. She called them together on the last warm night and told them she had one gift to give to each. She gave Amber the east, Verd the west, Ashe the north and Rime the south. Each would have a hive of her own, and no queen might enter another's hive.`,
+`The daughters flew apart that night. Amber built her hive in the east, in tidy six-sided rows, and every cell shone like polished brass. Verd built hers in the west, among roots and ferns and glowing moss. Ashe dug hers deep in the north, into a dark that smelled of old honey. Rime made hers in the south, from honeycomb that was white as frost.`,
+`For many years the four queens never spoke. The workers, small and anxious, carried messages between them, but the messages were always the same. Amber said, You are untidy. Verd said, You are cold. Ashe said, You are bright. Rime said, You are warm. After a time the workers stopped carrying them, because nobody wanted to be the one to say it.`,
+`In the fortieth winter a great frost came down from the roof of the cavern. It killed the moss in Verd's hive. It cracked the brass cells in Amber's. It froze the flowers that all four hives depended on, and the honey began to run low. The workers grew weak, and the queens, in their separate rooms, grew afraid.`,
+`It was the smallest worker in Rime's hive who first made the journey. She flew through the frozen dark with a drop of honey on her back and left it at the gate of Ashe's hive, and then she flew away. The drop was no bigger than a pea. But it was the first thing that had passed between hives in forty years.`,
+`Ashe's guards found it, and they were puzzled, and they brought it to their queen. She tasted it. It tasted of frost and flowers. For a long time she sat in the dark, and then she sent a drop of her own dark honey back, and a bit of dried comb, and a scrap of warm wax.`,
+`That was the beginning of the trade. The hives never spoke, because queens do not speak to queens, but their workers left things at the gates. Amber's hive sent brass cups, and Verd's sent healing herbs. Ashe's sent dark honey that kept for a hundred years. Rime's sent cold, clear combs that never spoiled.`,
+`The frost passed. The flowers returned. The four queens grew old, still proud, still apart. But each of them kept a small shelf in her hive for the things left by the others, and each of them knew, if she was honest, that she would not have lived without them.`,
+`When the first people came to the grasslands, they found the hives full of strange and lovely things. They found brass cups from the east and herbs from the west. They found jars that never spoiled. They thought it was magic, and they built their cities nearby, and they have been picking over the ruins of the old sisters' quarrel ever since.`,
+`The hives are quiet now. If you go down into them, they say, you can still feel the old rules. Amber's rows are straight. Verd's walls are green. Ashe's passages are black. Rime's rooms are cold. But on every gate there is a little shelf, worn smooth, where something has been left, and it is warm if you touch it.`]},
+hgbmap:{title:'The Cartographer and the City of Stairs',stat:'',price:100,desc:'A mapmaker tries to draw Exsce and discovers that the city keeps changing the answer.',pages:[
+`Lucan Pry was a cartographer of the old school. He believed that the world could be set down on a sheet of paper, if you were patient enough, and he had drawn nine hundred maps without a mistake. When he heard of the city of Exsce, where staircases wound up the outside of every tower, he said it would be the finest map of his career.`,
+`He arrived on a Monday with a satchel of inks, a folding table, and an assistant named Pim, who was twelve and carried the table. They climbed the first staircase, counted the steps, and noted the angles. By evening Lucan had drawn a neat little spiral and a neat little tower. He looked very pleased.`,
+`On Tuesday the tower was not where he had left it. Or rather, it was where he had left it, but the staircase went the other way. Lucan counted the steps again. There were forty-one, not forty. He frowned and corrected his map. Pim said nothing. Pim had noticed that the stairs had a way of looking innocent.`,
+`By Wednesday there were three stairs to the same landing, and Lucan was certain there had been one. He stood in the middle of a plaza, holding his notes, and turned round slowly. Every direction was uphill. A woman went by with a basket and he asked her where north was. She said it depended on the hour.`,
+`On Thursday he decided to measure the city from above. They climbed the tallest tower they could find, which took nine hours and left Pim with a blister. At the top, the whole city lay spread out below them, white and pink and endlessly tangled. Lucan opened his notebook and began to draw. And the city, quietly, moved.`,
+`It did not move in any way he could prove. The streets were where he had drawn them. The towers had not shifted. But the more carefully he looked, the more the lines in his map seemed to go wrong in small ways, like a clock that was a minute off. He rubbed out a road, and drew it again, and then rubbed it out again.`,
+`On Friday he gave up on measuring and just walked. He took no notes. He let himself get lost, and Pim followed, and they ended up in a tiny courtyard at the bottom of nowhere with a well, three lamps, and a sleeping cat. It was the loveliest place Lucan had ever seen. He could not have found it a second time.`,
+`He sat on the edge of the well for a long while. Then he took out his pen and drew a map that was not a map. He drew the well, the lamps, the cat, and a small spiral going up, and he wrote beneath it, in a hand that was not as neat as before, A place you will find if you are not looking for it.`,
+`Lucan went home on Sunday. His assistant carried the table. Lucan's publisher was furious, because the map was blank except for one small courtyard, but it sold twenty thousand copies, and it is the best-selling map in the history of the grasslands. People buy it to get lost on purpose.`,
+`Pim became a cartographer too, and she is a good one. She makes maps of cities, and every one of them has, in a corner, a small blank space marked with a tiny spiral. If you ask her what it is, she tells you that it is the part of the city that has not been found yet, and that she leaves it for you.`]},
+hgbpeacock:{title:'The Peacock Who Would Not Fan',stat:'',price:80,desc:'A giant peacock on a tower in Nibb refuses to show its tail, until one night.',pages:[
+`On the roof of a bell tower in Nibb there lived a peacock as tall as a house, and it was famous for one thing. It would not open its tail. Visitors came from all over the grasslands to see the great fan, and they stood below in the square for hours, and the peacock sat there with its feathers tucked in, as grey and dull as a washing line.`,
+`The people of Nibb tried everything. They sang to it. They played the bagpipes. A travelling actor stood on a barrel and recited a poem about a peacock's tail, with gestures. The peacock turned its head and looked off to the left, politely, as if there were something on the horizon much more interesting.`,
+`A clever girl named Quill decided to find out why. She climbed the tower, which took her all morning, and sat down beside the peacock without a word. She had brought a sandwich. She ate it slowly. The peacock watched her, and after a time she offered it half. The peacock took the crust.`,
+`They sat there until sunset. The lanterns of Nibb were lit one by one below them, red and gold and green, and the light climbed the tower in soft waves. The peacock's eye caught each colour, and its head turned slowly to follow them. Quill asked, very quietly, whether it was shy. The peacock said nothing, but it blinked once.`,
+`Then the last lantern rose into the dark, and the peacock stood up. Slowly, with a sound like a huge soft sail unfurling, it opened its tail. Every feather held an eye, and every eye caught one of the lanterns and burned with it, until the whole tower was ringed with a hundred slow, jewelled colours.`,
+`It held the fan for a minute. Then it folded it, bowed once to Quill, and went to sleep. The crowd below had missed it, because it was dark and nobody had been looking up. Quill never told them. She says the peacock fans only when the light is its own, and only for one friend.`]},
+hgbfrog:{title:'The Frog Who Sang Down the Roof',stat:'',price:70,desc:'A small frog with a very large voice causes trouble in Ulb.',pages:[
+`There was a frog in Ulb named Bellow, and he had the biggest voice in the reed basin. When he sang, the windows rattled. When he sang loudly, the plates jumped off the shelves. When he sang as loudly as he could, which he tried once and never again, the roof of the weavers' hall rose a hand's breadth into the air and settled back slightly crooked.`,
+`The weavers asked him to keep his singing for the open field. Bellow did, and he sang to the reeds, who were very polite and swayed. But he was lonely, and his songs were sad, and the loudest, sweetest ones were always the saddest, and they rolled over the whole basin at night so that no one could sleep.`,
+`One evening the roof of the hall, still crooked, cracked along the middle. Bellow was so ashamed that he went down to the pond and sat in the mud and refused to come out. The weavers brought him a pie. He would not eat it. They brought him a ladder. He did not understand why.`,
+`On the third day a small weaver said she thought the crack was rather nice. When the wind came through it, the roof hummed, a low, round, pleasant note, almost like a voice. Bellow came out of the mud to listen. Then he opened his mouth, very softly, and sang the same note back.`,
+`The hall rang like a bell. The weavers, who had been planning to mend the roof, left the crack exactly as it was. Bellow sings there every dusk now, at half his old volume, and the roof sings with him, and all of Ulb says it is the best choir in the grasslands.`]},
+hgbshell:{title:'The Shell-Wright\'s Wall',stat:'',price:65,desc:'A short account of how the pale walls of Exsce are made.',pages:[
+`The walls of Exsce are grown, not built. A shell-wright begins with a seed-shell no bigger than a thumbnail, and sets it in a mould of wet clay on a cold morning. The shell is fed with chalk water and lamplight for a year, and it grows, a little at a time, in pale spiralling layers, until it is the size of a house.`,
+`A good wall takes seven years. A great tower takes a lifetime, and the wright who starts it rarely sees it finished. They plant the first shell, and teach their apprentice to feed it, and the apprentice teaches another. This is why every shell-wright in Exsce, when asked how old their work is, says, Older than me, and younger than the next one.`]}
+};
+
+/* ---- src/desert/hgt_books.js ---- */
+/* ==========================================================================
+   BOOKS OF THE FOUR CITIES (prefix HGB). Fifteen books lie in the cities of the Hollow Grasslands (text in hgt_books_text.js).
+   - Each book is an ordinary bag item (kind 'quest', type 'Book'). It sells in shops for its price * 0.4. Nothing is equipped.
+   - Clicking a book in the bag opens a small panel: pick a hero (that hero reads it) or Read (no hero, no gain) or Cancel.
+   - The reader shows one page at a time: Previous / Next / Close, arrow keys and A, D, space also turn pages, B or Escape closes. The pad frame sits on the buttons.
+   - Ten books are teaching books: when a hero reaches the LAST page the hero's own strength, dexterity or intelligence rises by 1 for good. This is recorded
+     per hero and per book in h.booksRead = {bookId:1} (saved in the hero's save entry as 'bk'), so each hero gains once from each book, and the book stays in the bag.
+     Five books are tales only. Level ups and rings do not touch booksRead.
+   - Placement: on level entry (update hook) each book is added to G.items at a spot found by code (room corner, tower top, low basin, dead end). The books are
+     not part of the per-level saved item list (they are taken out while the level state is saved); G.flags.hgbFound[id] remembers a book that was picked up.
+   ========================================================================== */
+const HGB_STATN={str:'strength',dex:'dexterity',int:'intelligence'};
+const HGB_IDS=Object.keys(HGB_TEXT);
+const HGB_TINT={str:[[60,20,12],[236,150,110]],dex:[[14,44,22],[150,226,150]],int:[[16,28,64],[150,190,246]],'':[[40,24,50],[222,190,236]]};
+HGB_IDS.forEach((id,i)=>{const b=HGB_TEXT[id],n=b.pages.length,st=b.stat;
+  ITEMDEF[id]={n:b.title,k:'quest',t:'Book',ic:'ore',c:'#c8a870',stack:0,price:b.price,sw:.3,book:id,
+    d:b.desc+` ${n} pages. Click it in the bag to read it. `+(st?`A hero who reads it to the last page gains 1 ${HGB_STATN[st]}, once for each hero.`:'It is a tale only and gives no bonus.')};
+  ITEMDEF[id].id=id});
+function hgbIcons(){if(typeof pToneMap!=='function')return;let i=0;for(const id of HGB_IDS){i++;if(IMG['icn_'+id])continue;const base=IMG['icn_hgbook'+(1+(i%4))];if(!base)continue;const t=HGB_TINT[HGB_TEXT[id].stat],im=pToneMap(base,t[0],t[1],1.5,.9,0);IMG['icn_'+id]=im;IMG['ic_'+id]=im;IMG['it_'+id]=im}}
+/* ---------- where each book lies: [book, how]. A level number is a city, anything else is a room. how: top, low, nook (outdoors) or room (a corner of the room) ---------- */
+const HGB_WHERE={
+  481:[['hgbknight','top']],5002:[['hgbghost','room']],4866:[['hgbphil','room']],4863:[['hgbshell','room']],
+  482:[['hgbfish','low']],4895:[['hgbmother','room']],4899:[['hgbfrog','room']],5098:[['hgbmap','room']],
+  483:[['hgbpick','nook']],4916:[['hgblamp','room']],4906:[['hgbswind','room']],4919:[['hgbhives','room']],
+  484:[['hgbpeacock','top']],4934:[['hgbbell','room']],4923:[['hgbheal','room']]};
+const HGB_PLACES={hgbknight:'the top of a tower in Exsce',hgbghost:'the Reading Room in Exsce',hgbphil:"the Wizard's Study in Exsce",hgbshell:"Elder Ubbo's Tower Room in Exsce",hgbfish:'the low reed basin of Ulb',hgbmother:'the Reed Hall in Ulb',hgbfrog:"the Hermit's Cell in Ulb",hgbmap:'a Map Room in Ulb',hgbpick:'a hidden dead end in Glorm',hgblamp:'the Lookout Keeper in Glorm',hgbswind:"Gruff's Counting House in Glorm",hgbhives:'the Hidden Gallery in Glorm',hgbpeacock:'a tower top in Nibb',hgbbell:"the Ringers' Room in Nibb",hgbheal:"the Healer's House in Nibb"};
+function hgbFound(id){return !!((G.flags||{}).hgbFound||{})[id]}
+function hgbSpot(L,how,id){
+  const W=L.rows[0].length,H=L.rows.length,h=L.terrace&&L.terrace.h,hh=(x,y)=>h?h[y*W+x]:0,st=L.start||{x:W>>1,y:H>>1};
+  const occ=new Set((L.decor||[]).filter(d=>!d.deco||d.block).map(d=>Math.floor(d.x)+','+Math.floor(d.y)));
+  const open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&L.rows[y][x]==='.';
+  const sx=Math.round(st.x),sy=Math.round(st.y),seen=new Uint8Array(W*H),q=[[sx,sy]];seen[sy*W+sx]=1;const reach=[];
+  for(let qi=0;qi<q.length;qi++){const [x,y]=q[qi];reach.push([x,y]);for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(!open(nx,ny)||seen[ny*W+nx])continue;if(Math.abs(hh(nx,ny)-hh(x,y))>.55)continue;seen[ny*W+nx]=1;q.push([nx,ny])}}
+  const nb=(x,y)=>[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>[x+dx,y+dy]);
+  const flat=(x,y)=>nb(x,y).every(([a,b])=>open(a,b)&&Math.abs(hh(a,b)-hh(x,y))<.01);
+  const flatL=(x,y)=>nb(x,y).every(([a,b])=>{if(!open(a,b))return true;const d=Math.abs(hh(a,b)-hh(x,y));return d<=.15||d>.55}); // level enough, or a drop the party cannot step down
+  const blocked=(x,y)=>typeof hgtnBlocked==='function'&&hgtnBlocked(L,x,y);
+  const ok=(x,y)=>!occ.has(x+','+y)&&!blocked(x,y)&&Math.hypot(x-sx,y-sy)>=3;
+  const seed=id.length*17+(id.charCodeAt(3)||0);
+  let c=[];
+  if(how==='room'){ // a corner or an edge of the floor, away from the doors (they stand at the middle of the end walls)
+    for(const [x,y] of reach){if(!ok(x,y)||x===(W>>1)||Math.abs(y-sy)<2&&Math.abs(x-sx)<2)continue;const walls=nb(x,y).filter(([a,b])=>!open(a,b)).length;if(walls>=1)c.push([x,y,walls*2+hash2(x,y,seed)])}
+  }else if(how==='top'){
+    c=reach.filter(([x,y])=>ok(x,y)&&flatL(x,y)).map(([x,y])=>[x,y,hh(x,y)*10+hash2(x,y,seed)]);
+  }else if(how==='low'){
+    const f=reach.filter(([x,y])=>ok(x,y)&&flat(x,y)&&Math.hypot(x-sx,y-sy)>20);const mn=Math.min(...f.map(([x,y])=>hh(x,y)));c=f.filter(([x,y])=>hh(x,y)<=mn+.3).map(([x,y])=>[x,y,hash2(x,y,seed)]);
+  }else{ // a dead end far from the start
+    for(const [x,y] of reach){if(!ok(x,y)||Math.hypot(x-sx,y-sy)<30)continue;const o=nb(x,y).filter(([a,b])=>open(a,b));if(o.length<1||o.length>2)continue;if(!o.every(([a,b])=>Math.abs(hh(a,b)-hh(x,y))<.01))continue;c.push([x,y,hash2(x,y,seed)+(o.length===1?1:0)])}
+  }
+  if(!c.length)return null;c.sort((a,b)=>b[2]-a[2]);return {x:c[0][0],y:c[0][1]};
+}
+function hgbPlace(){
+  const n=LEVEL,sp=HGB_WHERE[n];if(!sp||G.state!=='play'||!G.items||G._hgbFor===G.items)return;
+  const L=LEVELS[n];if(!L||!L.rows)return;G._hgbFor=G.items;L._hgbPos=L._hgbPos||{};
+  for(const [id,how] of sp){if(hgbFound(id))continue;let p=L._hgbPos[id];if(p===undefined)p=L._hgbPos[id]=hgbSpot(L,how,id);if(!p)continue;G.items.push({k:id,x:p.x,y:p.y,taken:false,hgb:1})}
+}
+{const _u=update;update=function(dt){try{hgbPlace();if(!G._hgbIc){hgbIcons();if(IMG['icn_'+HGB_IDS[0]])G._hgbIc=1}}catch(e){console.error('hgb',e)}return _u.apply(this,arguments)}}
+/* the books are not part of the saved item list of a level: they are taken off the end of G.items while it is written */
+function hgbStrip(fn){return function(){let k=0;while(k<G.items.length&&G.items[G.items.length-1-k].hgb)k++;const mine=k?G.items.splice(G.items.length-k,k):[];try{return fn.apply(this,arguments)}finally{for(const m of mine)G.items.push(m)}}}
+levelState=hgbStrip(levelState);snapshot=hgbStrip(snapshot);
+{const _sn=snapshot;snapshot=function(){const s=_sn.apply(this,arguments);try{s.heroes.forEach((o,i)=>{const b=G.heroes[i]&&G.heroes[i].booksRead;if(b&&Object.keys(b).length)o.bk=Object.assign({},b)})}catch(e){}return s}}
+{const _rn=restoreNow;restoreNow=function(sv){const r=_rn.apply(this,arguments);try{(sv.heroes||[]).forEach((s,i)=>{if(G.heroes[i])G.heroes[i].booksRead=Object.assign({},s.bk||{})})}catch(e){console.error('hgb',e)}return r}}
+{const _pk=pickup;pickup=function(it){const d=ITEMDEF[it.k];if(!d||!d.book)return _pk.apply(this,arguments);
+  if(!bagAdd(mkItem(it.k))){msg('Your bag is full.','#d09a80');return false}
+  it.taken=true;G.flags.hgbFound=G.flags.hgbFound||{};G.flags.hgbFound[it.k]=1;sfx('equip');msg(`You pick up: ${d.n}.`,'#9ae0a0');return true}}
+/* ---------- the panel and the reader ---------- */
+const BK={ui:null};
+function hgbOpen(mode,id,hi){BK.ui={mode,id,hi:hi===undefined?-1:hi,page:0};if(typeof PAD!=='undefined'&&PAD.name)PAD.focus=mode==='panel'?'bk_h0':'bk_next';if(mode==='read')hgbSeen()}
+function hgbSeen(){ // the last page has been shown: a teaching book gives its gain
+  const u=BK.ui,b=HGB_TEXT[u.id];if(!u||u.hi<0||u.page<b.pages.length-1)return;const h=G.heroes[u.hi],nm=HERO_DEF[u.hi].name;if(!h)return;
+  if(!b.stat)return;h.booksRead=h.booksRead||{};
+  if(h.booksRead[u.id]){u.note=`${nm} has already learned what this book teaches.`;return}
+  h.booksRead[u.id]=1;h[b.stat]=(h[b.stat]||0)+1;try{recalcMax(u.hi)}catch(e){}sfx('level');
+  u.note=`${nm}'s ${HGB_STATN[b.stat]} rises by 1.`;msg(u.note,'#ffe36a');
+}
+function hgbPage(d){const u=BK.ui;if(!u||u.mode!=='read')return;const n=HGB_TEXT[u.id].pages.length,p=Math.max(0,Math.min(n-1,u.page+d));if(p===u.page)return;u.page=p;u.note=null;sfx('step');hgbSeen()}
+function hgbDraw(){
+  const u=BK.ui;if(!u)return;
+  if(G.state!=='play'||!HGB_TEXT[u.id]||(u.mode==='panel'&&!G.bag.some(b=>b.id===u.id))){BK.ui=null;return}
+  const b=HGB_TEXT[u.id];BTNS=[];ctx.save();ctx.setTransform(2,0,0,2,0,0);
+  veil(.72);
+  if(u.mode==='panel'){
+    const x=90,y=34,w=300,hgt=252;ctx.fillStyle='#120d09';ctx.fillRect(x,y,w,hgt);bigPanel(x,y,w,hgt);
+    let ty=y+20;for(const s of wrapText(b.title,w-30,12)){txt(s,x+w/2,ty,12,'#e8d8a8','center',true);ty+=15}
+    txt(`${b.pages.length} pages`,x+w/2,ty+1,8.5,'#a89878','center');ty+=14;
+    for(const s of wrapText(b.desc,w-30,8.5)){txt(s,x+w/2,ty,8.5,'#c8b898','center');ty+=11}ty+=4;
+    const eff=b.stat?`Reading it to the last page gives a hero 1 ${HGB_STATN[b.stat]}, once for each hero.`:'It is a tale only and gives no bonus.';
+    for(const s of wrapText(eff,w-30,8.5)){txt(s,x+w/2,ty,8.5,b.stat?'#9ae0a0':'#a89878','center');ty+=11}ty+=6;
+    txt('Place it in the off hand of the hero you choose.',x+w/2,ty,9.5,'#ffe9a0','center',true);ty+=12;
+    for(let i=0;i<G.heroes.length;i++){const hr=G.heroes[i],bx=x+10+(i%2)*(w/2-5),by=ty+Math.floor(i/2)*26,bw=w/2-15,nm=HERO_DEF[i].name,done=b.stat&&hr.booksRead&&hr.booksRead[u.id];
+      if(!hr.alive){panel(bx,by,bw,22,true,false);txt(nm+' (fallen)',bx+bw/2,by+11,9.5,'#6a6050','center');continue}
+      btnText('bk_h'+i,done?nm+' (has read it)':nm,bx,by,bw,22)}
+    const ry=ty+56;btnText('bk_read','Read, no gain',x+10,ry,w/2-15,22);btnText('bk_cancel','Cancel',x+w/2+5,ry,w/2-15,22);
+  }else{
+    const x=28,y=8,w=424,hgt=304,n=b.pages.length;ctx.fillStyle='#120d09';ctx.fillRect(x,y,w,hgt);bigPanel(x,y,w,hgt);
+    txt(b.title,x+w/2,y+17,12.5,'#e8d8a8','center',true,undefined,w-30);
+    txt(`Page ${u.page+1} of ${n}`,x+w/2,y+33,9.5,'#c8b982','center');
+    if(u.hi>=0)txt('Read by '+HERO_DEF[u.hi].name,x+14,y+33,8,'#a89878','left');
+    let size=10.5,lines=wrapText(b.pages[u.page],w-40,size);while(lines.length*size*1.35>196&&size>7){size-=.5;lines=wrapText(b.pages[u.page],w-40,size)}
+    ctx.fillStyle='rgba(0,0,0,.22)';ctx.fillRect(x+12,y+44,w-24,204);
+    let ly=y+44+size*.9;for(const s of lines){txt(s,x+20,ly,size,'#e6dcc0','left');ly+=size*1.35}
+    if(u.note)txt(u.note,x+w/2,y+257,10,'#ffe36a','center',true,undefined,w-30);
+    const by=y+268;
+    if(u.page>0)btnText('bk_prev','Previous',x+14,by,110,24);else{panel(x+14,by,110,24,true,false);txt('Previous',x+69,by+12,11,'#6a6050','center',true)}
+    if(u.page<n-1)btnText('bk_next','Next',x+w/2-55,by,110,24);else{panel(x+w/2-55,by,110,24,true,false);txt('The end',x+w/2,by+12,11,'#6a6050','center',true)}
+    btnText('bk_close','Close',x+w-124,by,110,24);
+  }
+  ctx.restore();
+}
+{const _ui=ui;ui=function(dt){const r=_ui.apply(this,arguments);try{if(BK.ui)hgbDraw()}catch(e){console.error('hgb',e);BK.ui=null}return r}}
+{const _hb=handleBtn;handleBtn=function(id){
+  if(BK.ui&&/^bk_/.test(id)){const u=BK.ui;
+    if(id==='bk_cancel'||id==='bk_close'){BK.ui=null;sfx('equip');return}
+    if(id==='bk_read'){hgbOpen('read',u.id,-1);return}
+    if(/^bk_h\d$/.test(id)){const hi=+id[4];if(G.heroes[hi]&&G.heroes[hi].alive)hgbOpen('read',u.id,hi);return}
+    if(id==='bk_prev'){hgbPage(-1);return}if(id==='bk_next'){hgbPage(1);return}return}
+  return _hb.apply(this,arguments)}}
+addEventListener('keydown',e=>{const u=BK.ui;if(!u)return;
+  const k=e.key;if(u.mode==='read'){if(k==='ArrowLeft'||k==='a'||k==='A')hgbPage(-1);else if(k==='ArrowRight'||k==='d'||k==='D'||k===' '||k==='Enter')hgbPage(1)}
+  if(k==='Escape'||(u.mode==='panel'&&k==='Enter'&&false)){BK.ui=null;sfx('equip')}
+  e.preventDefault();e.stopImmediatePropagation()},true);
+/* clicking a book in the bag (or pressing Equip on it) opens the panel */
+{const _ib=invBtn;invBtn=function(id){
+  const I=G.inv;let bi=-1;
+  if(id.startsWith('ibag')&&id!=='ibagarea')bi=+id.slice(4);else if(id==='iequip'&&I.sel&&I.sel.src==='bag')bi=I.sel.i;
+  const it=bi>=0&&G.bag[bi];if(it&&ITEMDEF[it.id]&&ITEMDEF[it.id].book){I.sel={src:'bag',i:bi};hgbOpen('panel',it.id);return}
+  return _ib.apply(this,arguments)}}
 
 /* ---- src/desert/maps_common.js ---- */
 /* ==========================================================================
