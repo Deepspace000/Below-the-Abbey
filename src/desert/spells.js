@@ -74,6 +74,7 @@ mx('Goat',20,'g20','Eat Anything','party',[['cleanse'],['feed',30],['heal',[16,2
 mx('Goat',30,'g30','Polymorph: Goat','front',[['poly','goat',10]],'The foe becomes a goat for 10 rounds. It seems pleased.','#e8e8d8');
 mx('Goat',40,'g40','Mountain Charge','front',[['dmg',[40,60]],['hold',3]],'A charge from the high peaks: heavy damage and a stunned foe.','#d0a060');
 mx('Goat',50,'g50','Great Stampede',['area',5],[['dmg',[44,64]],['hold',2]],'A spectral herd thunders through every foe within 5 squares.','#e8c880');
+for(const s of MX){const hf=(s.fx||[]).find(f=>f[0]==='heal');if(hf&&typeof healShare==='function'&&!/ more\./.test(s.d))s.d+=' It heals at least that, and more as you grow: about '+Math.round(healShare(s.lv,!!hf[2])*100)+' percent of the health of whoever it heals.'} // heals are a share of the patient's health now (see healScaled)
 for(const s of MX)MX_POWER[s.id]={lv:s.lv,act:true,cost:s.cost,type:'mx',name:s.name,d:s.d,col:s.col,mx:s.id,aim:s.aim,fx:s.fx,icn:'sp_'+s.id};
 function mxTintIcons(){ // the grand spells borrow the painted picture of a higher spell, recoloured, until they have their own
   const T={m30b:['m40',[10,24,70],[150,200,255]],z30b:['z40',[20,20,70],[190,200,255]],c30b:['c40',[70,56,10],[255,244,170]]};
@@ -150,7 +151,7 @@ function mxApplyParty(hi,fx,P){
     G.buffs.push({name:P.name,b:key,amt:fx[2],left:fx[3],hi:self?hi:-1});
   }else if(k==='heal'){
     const who=fx[2]?livingHeroes():(()=>{const l=livingHeroes().filter(j=>G.heroes[j].hp<G.heroes[j].max);if(!l.length)return livingHeroes().slice(0,1);let b=l[0];for(const j of l)if(G.heroes[j].hp/G.heroes[j].max<G.heroes[b].hp/G.heroes[b].max)b=j;return [b]})();
-    for(const j of (P&&P.aim==='self'?[hi]:who)){const g=G.heroes[j],a=Math.round((rnd(fx[1][0],fx[1][1])+Math.floor(Math.max(0,G.heroes[hi].int-8)/3)+(HERO_DEF[hi].cls==='Priest'?priestHealBonus(G.heroes[hi])/2:0))*(1+pas(hi,'healPct')));g.hp=Math.min(g.max,g.hp+a);if(typeof addFloat==='function')addFloat(portraitX(j)+19,250,'+'+a,'#7fe08a')}
+    for(const j of (P&&P.aim==='self'?[hi]:who)){const g=G.heroes[j],a=healScaled(hi,g,Math.round((rnd(fx[1][0],fx[1][1])+Math.floor(Math.max(0,G.heroes[hi].int-8)/3)+(HERO_DEF[hi].cls==='Priest'?priestHealBonus(G.heroes[hi])/2:0))*(1+pas(hi,'healPct'))),(P&&P.lv)||G.heroes[hi].lvl,!!fx[2]);g.hp=Math.min(g.max,g.hp+a);if(typeof addFloat==='function')addFloat(portraitX(j)+19,250,'+'+a,'#7fe08a')}
     sfx('heal');
   }else if(k==='healpct'){for(const j of livingHeroes()){const g=G.heroes[j];g.hp=Math.min(g.max,g.hp+Math.round(g.max*fx[1]));if(typeof addFloat==='function')addFloat(portraitX(j)+19,250,'+',' #7fe08a'.trim())}sfx('heal')}
   else if(k==='cleanse'){

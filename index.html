@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.487';
+const VERSION='3.488';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1712,6 +1712,9 @@ function heroLight(h){let l=0;for(const k of ['main','off']){const it=h.eq[k];if
 function partyLight(){let l=0;for(const h of G.heroes)if(h.alive)l=Math.max(l,heroLight(h));return l}
 /* every weapon has a chance to crit, fixed for now: very low on cheap weapons, high on the best (from its price), plus any crit its maker gave it, rings and armour */
 function weaponCrit(w){return w&&w.price?Math.min(.3,.01+Math.pow(w.price,.6)/800):.01}
+/* heals grow with the healer's level and the rank of the power: a heal restores a share of the patient's own maximum health, 28 percent plus 0.9 percent per power level for a single patient (37 percent at power level 10, 73 percent at 50, 100 percent at 80) and 12 percent plus 0.6 percent per power level for a whole party (18, 42 and 60 percent); the listed amount of the power is the least it ever heals. A little random spread, and the healer's own healing bonuses apply. (Before v3.488 heals were the listed 8 to 70 points, which are nothing against a level 70 hero's 1,100 health.) */
+function healShare(rank,group){const v=Math.max(1,rank||1);return group?.12+.006*v:.28+.009*v}
+function healScaled(hi,tg,old,rank,group){return Math.max(old,Math.round(tg.max*healShare(rank,group)*(.9+Math.random()*.2)*(1+pas(hi,'healPct'))))}
 function healCrit(t,amt){if(Math.random()<.12){const x=Math.round(amt*.75);t.hp=Math.min(t.max,t.hp+x);G._healCrit=1;return x}return 0} // a heal spell crits one time in eight, for three quarters more
 function rollDmg(h,mult){
   const r=heroDmgRange(h),w=heroWeapon(h);let d=rnd(r[0],r[1]),crit=false;
@@ -1851,7 +1854,7 @@ function heroSpecial(i){
   let best=-1,bf=2;
   for(const j of livingHeroes()){const fr=G.heroes[j].hp/G.heroes[j].max;if(fr<1&&fr<bf){bf=fr;best=j}}
   if(best<0){msg('Everyone is already healthy.');return false}
-  h.mp-=sp.cost;const amt=Math.round((rnd(8,12)+Math.floor(Math.max(0,h.int-8)/3)+priestHealBonus(h))*(1+pas(i,'healPct'))),tg=G.heroes[best];tg.hp=Math.min(tg.max,tg.hp+amt);const hc=healCrit(tg,amt);
+  h.mp-=sp.cost;const tg=G.heroes[best],amt=healScaled(i,tg,Math.round((rnd(8,12)+Math.floor(Math.max(0,h.int-8)/3)+priestHealBonus(h))*(1+pas(i,'healPct'))),h.lvl*.66,false);tg.hp=Math.min(tg.max,tg.hp+amt);const hc=healCrit(tg,amt);
   sfx('heal');msg(`${def.name} heals ${HERO_DEF[best].name} for ${amt+hc}.${hc?' A critical heal!':''}`,hc?'#ffe36a':'#9ae0a0');addFloat(portraitX(best)+19,250,'+'+(amt+hc),'#7fe08a',hc?1:0);
   return true;
 }
@@ -2004,7 +2007,7 @@ function powerNew(i,P){
     if(!live.length){msg('Everyone is already healthy.');return false}
     h.mp-=P.cost;const mult=1+pas(i,'healPct');let who=live;
     if(!P.all){let best=live[0];for(const j of live)if(G.heroes[j].hp/G.heroes[j].max<G.heroes[best].hp/G.heroes[best].max)best=j;who=[best]}
-    for(const j of who){const g=G.heroes[j],amt=P.pct?Math.round(g.max*P.pct*mult):Math.round((rnd(P.amt[0],P.amt[1])+Math.floor(Math.max(0,h.int-8)/3))*mult);
+    for(const j of who){const g=G.heroes[j],amt=P.pct?Math.round(g.max*P.pct*mult):healScaled(i,g,Math.round((rnd(P.amt[0],P.amt[1])+Math.floor(Math.max(0,h.int-8)/3))*mult),P.lv||h.lvl,!!P.all);
       g.hp=Math.min(g.max,g.hp+amt);{const hc=healCrit(g,amt);addFloat(portraitX(j)+19,250,'+'+(amt+hc),'#7fe08a',hc?1:0)}}
     sfx('heal');msg(`${def.name} uses ${P.name}.`,'#9ae0a0');return true;
   }
@@ -19990,6 +19993,7 @@ mx('Goat',20,'g20','Eat Anything','party',[['cleanse'],['feed',30],['heal',[16,2
 mx('Goat',30,'g30','Polymorph: Goat','front',[['poly','goat',10]],'The foe becomes a goat for 10 rounds. It seems pleased.','#e8e8d8');
 mx('Goat',40,'g40','Mountain Charge','front',[['dmg',[40,60]],['hold',3]],'A charge from the high peaks: heavy damage and a stunned foe.','#d0a060');
 mx('Goat',50,'g50','Great Stampede',['area',5],[['dmg',[44,64]],['hold',2]],'A spectral herd thunders through every foe within 5 squares.','#e8c880');
+for(const s of MX){const hf=(s.fx||[]).find(f=>f[0]==='heal');if(hf&&typeof healShare==='function'&&!/ more\./.test(s.d))s.d+=' It heals at least that, and more as you grow: about '+Math.round(healShare(s.lv,!!hf[2])*100)+' percent of the health of whoever it heals.'} // heals are a share of the patient's health now (see healScaled)
 for(const s of MX)MX_POWER[s.id]={lv:s.lv,act:true,cost:s.cost,type:'mx',name:s.name,d:s.d,col:s.col,mx:s.id,aim:s.aim,fx:s.fx,icn:'sp_'+s.id};
 function mxTintIcons(){ // the grand spells borrow the painted picture of a higher spell, recoloured, until they have their own
   const T={m30b:['m40',[10,24,70],[150,200,255]],z30b:['z40',[20,20,70],[190,200,255]],c30b:['c40',[70,56,10],[255,244,170]]};
@@ -20066,7 +20070,7 @@ function mxApplyParty(hi,fx,P){
     G.buffs.push({name:P.name,b:key,amt:fx[2],left:fx[3],hi:self?hi:-1});
   }else if(k==='heal'){
     const who=fx[2]?livingHeroes():(()=>{const l=livingHeroes().filter(j=>G.heroes[j].hp<G.heroes[j].max);if(!l.length)return livingHeroes().slice(0,1);let b=l[0];for(const j of l)if(G.heroes[j].hp/G.heroes[j].max<G.heroes[b].hp/G.heroes[b].max)b=j;return [b]})();
-    for(const j of (P&&P.aim==='self'?[hi]:who)){const g=G.heroes[j],a=Math.round((rnd(fx[1][0],fx[1][1])+Math.floor(Math.max(0,G.heroes[hi].int-8)/3)+(HERO_DEF[hi].cls==='Priest'?priestHealBonus(G.heroes[hi])/2:0))*(1+pas(hi,'healPct')));g.hp=Math.min(g.max,g.hp+a);if(typeof addFloat==='function')addFloat(portraitX(j)+19,250,'+'+a,'#7fe08a')}
+    for(const j of (P&&P.aim==='self'?[hi]:who)){const g=G.heroes[j],a=healScaled(hi,g,Math.round((rnd(fx[1][0],fx[1][1])+Math.floor(Math.max(0,G.heroes[hi].int-8)/3)+(HERO_DEF[hi].cls==='Priest'?priestHealBonus(G.heroes[hi])/2:0))*(1+pas(hi,'healPct'))),(P&&P.lv)||G.heroes[hi].lvl,!!fx[2]);g.hp=Math.min(g.max,g.hp+a);if(typeof addFloat==='function')addFloat(portraitX(j)+19,250,'+'+a,'#7fe08a')}
     sfx('heal');
   }else if(k==='healpct'){for(const j of livingHeroes()){const g=G.heroes[j];g.hp=Math.min(g.max,g.hp+Math.round(g.max*fx[1]));if(typeof addFloat==='function')addFloat(portraitX(j)+19,250,'+',' #7fe08a'.trim())}sfx('heal')}
   else if(k==='cleanse'){
