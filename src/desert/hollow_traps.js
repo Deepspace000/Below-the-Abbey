@@ -15,7 +15,7 @@
    - LETTERS OF THE MESSENGER OF DEATH: floor 20 holds all five (D and E painted at corridor ends on the way, A, T and H behind secret doors in alcoves of the labyrinth's outer
      wall), and floors 16, 17 and 18 hold an omen each (D, E, A) behind a secret door of an obviously different stone. The letters seen are one list for the whole game.
    ========================================================================== */
-const HLT_V=4,HLT_T0=.55,HLT_R=.45,HLT_STEP=.192,HLT_MARGIN=.15; // fireball: cells per second, the breath before it flies, a player's reaction, seconds per step of the party, slack needed
+const HLT_V=2,HLT_T0=.55,HLT_R=.45,HLT_STEP=.192,HLT_MARGIN=.15; // fireball: cells per second, the breath before it flies, a player's reaction, seconds per step of the party, slack needed
 const HLT_TOP=HL.BASE+HL.N-1,HLT_D4=[[0,-1],[1,0],[0,1],[-1,0]];
 const HLT={fb:[],boom:[],spk:[],scare:null,light:null,flash:0,flashCol:'255,140,40',sense:{until:-1,hi:0},lv:-1,dec:null,clock:0,seed:1};
 loadImg('hl_nozzle','assets/hl_fire.png');NPC_H.hl_nozzle=.8; // the painted fireplace with a screaming face, hung at the end of a passage: the mouth that spits the fireball
@@ -138,6 +138,16 @@ function hltMaze(c,h){
   for(const [x,y] of side){if(ns>=8)break;if(trySpike(x,y))ns++}
   for(let j=0;j<nsl&&ns<8;j++)for(const i of sp[j])if(trySpike(sol[i][0],sol[i][1])){ns++;break}
   for(const t of placed)lv._traps.push({t:t.t,x:t.x,y:t.y,u:t.u,n:t.n,m:t.m,S:t.S,W:t.W,dod:t.dod,end:t.end,long:t.long,two:t.two,onSol:onSol.has(key(t.x,t.y))});
+  // side alcoves: along every fireball passage, one-square niches dug into the side walls where the walls are thick enough, so the party can step out of the way of the slow ball
+  lv._niches=[];const rawO=(x,y)=>!!rows[y]&&rows[y][x]==='.';
+  for(const t of lv._traps){if(t.t!=='fire')continue;const u=t.u;
+    for(let i=-t.m;i<=t.n;i++){const cx=t.x+u[0]*i,cy=t.y+u[1]*i;if(!open(cx,cy)||reserved.has(key(cx,cy)))continue;
+      for(const q of [[-u[1],u[0]],[u[1],-u[0]]]){const nx=cx+q[0],ny=cy+q[1];
+        if(nx<2||ny<2||ny>=rows.length-2||nx>=rows[0].length-2||rawO(nx,ny)||reserved.has(key(nx,ny))||decor.some(q=>q.x===nx&&q.y===ny&&(!q.wd||q.k==='hl_nozzle'||q.msgr||q.npc)))continue;
+        if(HLT_D4.some(d=>{const ax=nx+d[0],ay=ny+d[1];return !(ax===cx&&ay===cy)&&(rawO(ax,ay)||reserved.has(key(ax,ay)))}))continue;
+        if(lv._niches.some(z=>Math.abs(z[0]-nx)+Math.abs(z[1]-ny)<3))continue;
+        for(let j=decor.length-1;j>=0;j--)if(decor[j].x===nx&&decor[j].y===ny)decor.splice(j,1);h.setC(nx,ny,'.');const fr=lv.fmap&&lv.fmap[cy];if(fr)lv.fmap[ny]=lv.fmap[ny].slice(0,nx)+fr[cx]+lv.fmap[ny].slice(nx+1);
+        lv._niches.push([nx,ny]);break}}}
   // the spike tiles are a different stone
   hltFloors();
   if(lv._traps.some(t=>t.t==='spike')){if(!lv.floorSet.includes('hlspike'))lv.floorSet=lv.floorSet.concat(['hlspike']);
