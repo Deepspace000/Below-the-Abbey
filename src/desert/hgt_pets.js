@@ -45,7 +45,7 @@ function hgpAlias(){for(const id of HGP_IDS){const im=IMG[HGP[id][1]];if(im&&!IM
 /* the sellers: each stands a few steps from the first plaza of the city, with a couple of animals on the ground beside them */
 const HGP_ANIMALS={481:['hgtb_amberpup','hgtb_pinkbulb'],482:['hgtb_pearlslug','hgtb_creamjelly'],483:['hgtb_pups','hgtb_lanternbeetle'],484:['hgtb_fishfly','hgtb_creammoth']};
 for(const n in HGP_SELLER){const [id,name,img]=HGP_SELLER[n];
-  khNpc(id,name,img,d=>{const l=typeof hgLvl==='function'?hgLvl():4,hello='Little ones for the road. Each one has a gift.';
+  khNpc(id,name,img,d=>{const l=typeof hgLvl==='function'?hgLvl():4,sp=(typeof HGTT_PETSHOP!=='undefined'&&HGTT_PETSHOP)||['Little ones for the road. Each one has a gift.'],ck='hgps'+n,hello=sp[(G.flags[ck]=(G.flags[ck]||0)+1)%sp.length];
     return hgAskAdd(say(name.split(',')[0]+' lifts a cloth from a row of baskets. "'+(l<4?hgGarble(hello,l):hello)+'"'+(l<4?hgFoot(l):''),[['See the animals.',()=>{openPetShop(HGP_STOCK[n],'THE PET SHOP');return null}],['Leave.',()=>null]]))})}
 function hgpPlace(){
   const n=LEVEL;if(!(n>=481&&n<=484))return;const L=LEVELS[n];if(!L||L._hgpDone||!L.terrace||!L.decor)return;L._hgpDone=1;

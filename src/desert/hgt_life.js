@@ -276,6 +276,23 @@ function hgtlfMarket(id,S){
     if(pts.length<2)continue;const route=pts.map(o=>{const c=o.c[(r()*o.c.length)|0];return {x:c.x,y:c.y,wait:4+r()*6}});
     out.push(base('walk',{x:route[0].x,y:route[0].y},{route,zone:40,lines:sl,speed:.5+r()*.2}));made++}
   return out}
+/* ---------- philosophers: a few in every city walk the streets between the plazas, slowly, and say something worth hearing ---------- */
+function hgtlfPhilosophers(id,S){
+  if(!(id>=481&&id<=484)||typeof HGTT_PHIL==='undefined')return [];
+  const r=hgtlfRng(id*29+11),W=S.W,cells=[];
+  for(let i=0;i<S.N;i++)if(S.reach[i]&&!S.avoid[i]&&!(S.fl[i]&7)&&(S.fl[i]&8)&&S.deg[i]>=3)cells.push(i);
+  if(cells.length<8)return [];
+  for(let i=cells.length-1;i>0;i--){const j=(r()*(i+1))|0,t=cells[i];cells[i]=cells[j];cells[j]=t}
+  const out=[],n=id===483?5:4,dist=(a,b)=>Math.abs((a%W)-(b%W))+Math.abs(((a/W)|0)-((b/W)|0));
+  const phil=HGTT_PHIL.slice();for(let i=phil.length-1;i>0;i--){const j=(r()*(i+1))|0,t=phil[i];phil[i]=phil[j];phil[j]=t}
+  let pi=0;const used=[];
+  for(let k=0;k<cells.length&&out.length<n;k++){const A=cells[k];if(used.some(u=>dist(u,A)<14))continue;
+    const route=[A];for(let j=0;j<cells.length&&route.length<4;j++){const B=cells[j];if(route.includes(B))continue;const d=dist(A,B);if(d>=12&&d<=40&&!route.some(q=>dist(q,B)<8))route.push(B)}
+    if(route.length<2)continue;used.push(A);
+    const lines=[phil[pi++%phil.length],phil[pi++%phil.length],phil[pi++%phil.length]];
+    out.push({kind:'npc',sprite:HGTLF_NPC[(r()*HGTLF_NPC.length)|0],sprites:IMG.hgtb_elder?['hgtb_elder']:null,name:'Philosopher',task:'walk',home:{x:A%W,y:(A/W)|0},
+      route:route.map(c=>({x:c%W,y:(c/W)|0,wait:7+r()*8})),door:null,speed:.4+r()*.12,zone:60,schedule:{from:6,to:21},lines,auto:1})}
+  return out}
 function hgtlfEnter(){
   HGTLF.ag=[];HGTLF.lv=LEVEL;HGTLF.grid=G.grid;HGTLF.S=null;HGTLF.last=G.time||0;
   if(!hgtAny(LEVEL)||!LEVELS[LEVEL])return;
@@ -284,6 +301,7 @@ function hgtlfEnter(){
   let list=reg&&reg.agents?reg.agents.slice():[];
   if(!reg||reg.auto!==false)list=list.concat(hgtlfAuto(LEVEL,reg&&typeof reg.auto==='object'?reg.auto:undefined));
   try{list=list.concat(hgtlfMarket(LEVEL,S))}catch(e){console.error('hgtlf market',e)}
+  try{list=list.concat(hgtlfPhilosophers(LEVEL,S))}catch(e){console.error('hgtlf philosophers',e)}
   const rng=hgtlfRng(LEVEL*31+7),ag=[];
   for(const sp of list){const a=hgtlfMake(sp,S,rng,ag.length);if(a){a.cx=Math.round(a.x);a.cy=Math.round(a.y);ag.push(a)}}
   HGTLF.ag=ag;HGTLF.S=S;

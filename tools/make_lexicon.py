@@ -40,6 +40,10 @@ def corpus():
             if m: lines += strings(m.group(1))
     tr = (SRC / 'hgt_trader.js').read_text(encoding='utf-8')
     lines += [s for s in strings(' '.join(re.findall(r"hgGarble\((.*?),hgLvl\(\)\)", tr))) if len(s) > 8]
+    tk = SRC / 'hgt_talk.js'
+    if tk.exists():
+        for s in strings(tk.read_text(encoding='utf-8')):
+            if len(s) > 40 and re.search(r'[.!?]$', s): lines.append(s)
     return lines
 
 def words(line):
@@ -49,6 +53,7 @@ def words(line):
         if w: out.append(w)
     return out
 
+EXTRA = 'apple apples figs fig dates blackberries rosehips hazelnuts chestnuts potatoes garlic watercress mushrooms chanterelles puffballs moss truffle root kelp lychees honey jelly grubs bread helms shoes lantern lamp shell pearl bell stair tower philosopher wizard books pond hive hives city cities street plaza bench basket market stall fruit vegetables'.split()
 ESSENTIALS = """i you we they me my your our us them he she it the a an and or but not of to in on at with for from by
 city town village house home work water pond food friend stranger good bad big small old new yes no go come give take help see find bring
 gold quest night day name road hill grass hive book word eat drink sleep walk run kill fight kind thank please sorry hello welcome
@@ -102,7 +107,7 @@ def make(word, n, k):
 def main():
     lines = corpus()
     cnt = collections.Counter(w for l in lines for w in words(l))
-    chosen = {w for w, c in cnt.items() if c >= 3} | set(ESSENTIALS)
+    chosen = {w for w, c in cnt.items() if c >= 2} | set(ESSENTIALS) | set(EXTRA)
     english = set(cnt) | set(ESSENTIALS) | SHORT3 | SHORT2 | {'a', 'i'}
     lex = {}; used = set()
     def assign(w, h):

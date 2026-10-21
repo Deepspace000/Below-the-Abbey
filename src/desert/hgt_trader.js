@@ -13,7 +13,7 @@ function hgttSpeedMul(){
   let w=0;for(const h of live){const it=h.eq&&h.eq.legs;if(it&&idef(it).hgSwift)w++}
   return 1+.2*w/live.length}
 /* Orrim stands near the south gate plaza of Exsce (level 481) */
-khNpc('hgt_bubbler','Orrim, the bubble-seller','hg_npc5',d=>hgAskAdd(say('Orrim taps a glass bubble the size of a head with one finger and holds it out. "'+(typeof hgLvl==='function'&&hgLvl()<4?hgGarble('Bubble helms. They go over the head. They let you breathe under water for four minutes. I also have swift shoes.',hgLvl()):'Bubble helms. They go over the head. They let you breathe under water for four minutes. I also have swift shoes.')+'"',[['Trade.',()=>{openShop(G.talk.d,[['bubblehelm',8],['swiftshoes',6]],'Orrim, the bubble-seller');return null}],['Leave.',()=>null]])));
+khNpc('hgt_bubbler','Orrim, the bubble-seller','hg_npc5',d=>hgAskAdd(say('Orrim taps a glass bubble the size of a head with one finger and holds it out. "'+(typeof hgLvl==='function'&&hgLvl()<4?hgGarble(HGTT_ORRIM,hgLvl()):HGTT_ORRIM)+'"',[['Trade.',()=>{openShop(G.talk.d,[['bubblehelm',8],['swiftshoes',6]],'Orrim, the bubble-seller');return null}],['Leave.',()=>null]])));
 function hgttPlace(){
   const L=LEVELS[481];if(!L||L._hgttDone||!L.terrace)return;L._hgttDone=1;
   const W=L.rows[0].length,h=L.terrace.h,occ=new Set((L.decor||[]).map(d=>Math.floor(d.x)+','+Math.floor(d.y)));
@@ -36,7 +36,7 @@ const HGT_PRODUCE=[
   ['Pond greens stall',[['watercress',9],['hgkelp',7],['hgroot',6],['edmoss',7],['lychee',5]]],
   ['Fruit and vegetable stall',[['apple',7],['potato',8],['figs',5],['wildgarlic',6],['cavemushroom',6],['blackberries',6]]]];
 HGT_PRODUCE.forEach(([name,stock],i)=>{
-  khNpc('hgt_stall'+i,name,'hg_npc5',d=>{const l=typeof hgLvl==='function'?hgLvl():4,hello='Fresh from the terraces today. Take what you like.';
+  khNpc('hgt_stall'+i,name,'hg_npc5',d=>{const l=typeof hgLvl==='function'?hgLvl():4,F=G.flags,ck='hgs'+i,sp=(typeof HGTT_WARES!=='undefined'&&HGTT_WARES['stall'+i])||['Fresh from the terraces today. Take what you like.'],hello=sp[(F[ck]=(F[ck]||0)+1)%sp.length];
     return hgAskAdd(say('The stallholder nods at the baskets. "'+(l<4?hgGarble(hello,l):hello)+'"'+(l<4?hgFoot(l):''),[['Buy.',()=>{openShop(G.talk.d,stock,name);return null}],['Leave.',()=>null]]))})});
 function hgttStalls(){
   const L=LEVELS[LEVEL];if(!L||!L.decor||L._hgttStalls||!(LEVEL>=481&&LEVEL<=484))return;L._hgttStalls=1;let i=0,fr=0;
