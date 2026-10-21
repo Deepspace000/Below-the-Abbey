@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.511';
+const VERSION='3.512';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -4036,9 +4036,9 @@ function useHeal(hi,idx){
   const d0=idef(it);
   if(d0.k==='food'){if(h.hp>=h.max&&h.food>=99){msg(`${HERO_DEF[hi].name} is not hungry or hurt.`);return false}}
   else if(h.hp>=h.max){msg(`${HERO_DEF[hi].name} is not hurt.`);return false}
-  const d=d0,ik=it.id;bagTake(idx);h.hp=Math.min(h.max,h.hp+d.heal);sfx('potion');try{if(d.k==='food')afflEat(hi,ik)}catch(e){}
+  const d=d0,ik=it.id,gain=Math.min(d.heal,h.max-h.hp);bagTake(idx);h.hp=Math.min(h.max,h.hp+d.heal);sfx('potion');try{if(d.k==='food')afflEat(hi,ik)}catch(e){}
   if(d.feed)h.food=Math.min(100,h.food+d.feed);
-  msg(`${HERO_DEF[hi].name} ${d.k==='food'?'eats':'drinks'} the ${d.n} (+${d.heal} health${d.feed?', +'+d.feed+' hunger':''}).`,'#9ae0a0');addFloat(portraitX(hi)+19,250,'+'+d.heal,'#7fe08a');
+  msg(`${HERO_DEF[hi].name} ${d.k==='food'?'eats':'drinks'} the ${d.n} (+${gain} health${gain<d.heal?' of '+d.heal:''}${d.feed?', +'+d.feed+' hunger':''}).`,'#9ae0a0');addFloat(portraitX(hi)+19,250,'+'+gain,'#7fe08a');
   return true;
 }
 function favIndex(){const f=G.potFav;return f?G.bag.findIndex(b=>b.id===f):-1}
@@ -21725,6 +21725,19 @@ function hvtDraw(){
     ctx.font='bold 7.5px '+FUI;ctx.fillStyle='#ffe9a0';ctx.textAlign='center';ctx.fillText(tip[1],kx+kw/2,y+h/2+.5);
     ctx.restore()}catch(e){}}
 {const _cp=crtPass;crtPass=function(){_cp.apply(this,arguments);hvtDraw()}}
+
+/* ---- src/desert/healcost.js ---- */
+/* HEALING COSTS A LITTLE MORE. A heal restores a share of the patient's own maximum health (healShare), so at high level a few points of mana bought a great deal; every healing
+   power now costs about 30 percent more (at least one point), so a healer runs dry in a long fight and drinks a mana potion. Done once, when the game loads. */
+(function(){
+  const up=c=>c+Math.max(1,Math.ceil(c*.3)),isHeal=p=>p&&(p.type==='heal'||p.type==='healx'||(p.fx&&p.fx.some(f=>f[0]==='heal'||f[0]==='healpct')));
+  try{
+    for(const k in CLASSES){const c=CLASSES[k];for(const p of (c.powers||[]))if(p.act&&isHeal(p)&&!p._hc){p.cost=up(p.cost);p._hc=1}}
+    for(const k in MX_POWER){const p=MX_POWER[k];if(p.act&&isHeal(p)&&!p._hc){p.cost=up(p.cost);p._hc=1}}
+    for(const d of (typeof HERO_DEF!=='undefined'?HERO_DEF:[]))if(d&&d.sp&&d.sp.type==='heal'&&!d.sp._hc){d.sp.cost=up(d.sp.cost);d.sp._hc=1}
+    if(typeof MX!=='undefined')for(const s of MX)if(isHeal(s)&&!s._hc){s.cost=up(s.cost);s._hc=1}
+  }catch(e){console.warn('healcost',e)}
+})();
 
 /* ---- src/desert/desertchests.js ---- */
 /* ==========================================================================
