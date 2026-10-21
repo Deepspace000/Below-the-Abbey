@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.512';
+const VERSION='3.513';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -19796,7 +19796,12 @@ function diffExample(){try{
   const t=e?e.t:'wolf',lv=e?e.lvl:Math.max(1,Math.round(me.h.lvl)),def=ENEMY_DEF[t];if(!def||def.hit===undefined)return null;
   const calc=()=>{const st=enemyStat(t,lv),r=heroDmgRange(me.h),avg=Math.max(1,(r[0]+r[1])/2),hits=Math.max(1,Math.ceil(st.hp/avg)),
     eh=Math.max(.1,Math.min(.95,def.hit+diffHitAdd()-heroArmor(me.h)*.03-pas(me.i,'dodge'))),mh=heroHitPct(me.i,!!def.fly);
-    return {dmg:Math.round((st.dmg[0]+st.dmg[1])/2),hits,eh:Math.round(eh*100),mh:Math.round(mh*100),xp:killXP(st.xp,lv)}};
+    // the gold an average kill pays (the same sum as hurtEnemy, with the middle of the roll)
+    const LH=livingHeroes(),pl0=LH.length?Math.round(LH.reduce((n,j)=>n+G.heroes[j].lvl,0)/LH.length):1,up=Math.max(0,lv-pl0),lm=up>0?1.5+.2*(up-1):1,
+      big=(def.goldFixed||0)>=100||(def.gold&&def.gold[1]>=100),bg=BOSS_GOLD[t],ls=bg?1+Math.min(lv,100)*.02:big?1+Math.min(lv,100)*.04:1+Math.min(lv,100)*.1,
+      pct=(1+Math.max(0,...LH.map(j=>pas(j,'goldPct'))))*lm*ls*diffRew(),sea=/^uw/.test(t)&&!/^(uwgiant|uweelboss|uwmega|uwgulper)$/.test(t)||t==='seaserpent',
+      base=bg?(bg[0]+bg[1])/2:sea?125:big?300:(def.goldFixed||(def.gold&&def.gold[1]>0&&(def.humanoid||true)))?(def.goldFixed||30):0;
+    return {dmg:Math.round((st.dmg[0]+st.dmg[1])/2),hits,eh:Math.round(eh*100),mh:Math.round(mh*100),xp:killXP(st.xp,lv),gold:Math.round(base*pct)}};
   const now=calc(),keep=G.flags.diffStep;G.flags.diffStep=0;const was=calc();G.flags.diffStep=keep;
   return {name:def.name,lv,now,was,hero:HERO_DEF[me.i].name}}catch(err){return null}}
 function diffChange(n){const was=G.flags.diffStep|0;G.flags.diffStep=Math.max(DIFF_MIN,Math.min(DIFF_MAX,was+n));if((G.flags.diffStep|0)!==was){diffApply();msg('Difficulty: '+diffLabel()+'.','#e8d8a0')}}
@@ -19811,7 +19816,7 @@ function drawGameplay(){
     if(X){txt('Example: a '+X.name+' (level '+X.lv+') against '+X.hero+':',240,128,7.6,'#d8c88e','center');
       txt('It hits for about '+mk(X.now.dmg,X.was.dmg)+' and lands '+mk(X.now.eh,X.was.eh,'%')+' of its blows.',240,139,7.6,'#cdbf94','center');
       txt('It takes about '+mk(X.now.hits,X.was.hits)+' hits to kill, and you land '+mk(X.now.mh,X.was.mh,'%')+' of yours.',240,150,7.6,'#cdbf94','center');
-      txt('A kill pays '+mk(X.now.xp,X.was.xp)+' xp.',240,161,7.6,'#cdbf94','center')}
+      txt('A kill pays '+mk(X.now.xp,X.was.xp)+' xp'+(X.now.gold||X.was.gold?' and about '+mk(X.now.gold,X.was.gold)+' gold.':'.'),240,161,7.6,'#cdbf94','center')}
     else txt('Enemy damage '+(st>0?'+':'-')+Math.round(Math.abs(diffDmg()-1)*100)+'%, health '+(st>0?'+':'-')+Math.round(Math.abs(diffHp()-1)*100)+'%. Gold and xp '+(st>0?'+':'-')+Math.round(Math.abs(diffRew()-1)*100)+'%.',240,128,7.6,'#cdbf94','center')}}
   const lines=on?[
     'Creatures scale to the party. A party that has outgrown a place meets its creatures raised to within a few levels of itself, and the great creatures always stand above the party.',
