@@ -136,6 +136,7 @@ function hgdm3Eyes(x,a,b,s,k){
 // three claw scratches
 function hgdm3Claws(g,a,b,s,ang,col){g.save();g.translate(a,b);g.rotate(ang);g.strokeStyle=col;g.lineCap='round';g.lineWidth=Math.max(.12,s*.05);g.beginPath();for(let k=-1;k<=1;k++){g.moveTo(k*s*.16,-s*.34);g.quadraticCurveTo(k*s*.16+s*.05,0,k*s*.16+s*.02,s*.34)}g.stroke();g.restore()}
 function hgdm3Under(){
+  if(!LEVELS[HGDU.ID]&&KH_LAZY[HGDU.ID])try{KH_LAZY[HGDU.ID]()}catch(e){console.error(e)} // the Underlevel is built only when first visited: build it to draw its map
   const U=LEVELS[HGDU.ID];if(!U)return null;if(HGDMP.cache[5])return HGDMP.cache[5];
   const W=201,H=201,rows=U._hgdm3r||(U._hgdm3r=hgdm3Fill(U.rows,U)),A=MPL.AREA,pad=4,s=Math.min((A.w-2*pad)/W,(A.h-2*pad)/H),ox=A.x+(A.w-W*s)/2,oy=A.y+(A.h-H*s)/2,X=c=>ox+c*s,Y=c=>oy+c*s,{c,x}=hgdm3Canvas(HGDM3.S);
   const BONE='#e6dcc0',open=(a,b)=>rows[b]&&rows[b][a]==='.';

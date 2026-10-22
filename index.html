@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.554';
+const VERSION='3.555';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -44056,6 +44056,7 @@ function hgdm3Eyes(x,a,b,s,k){
 // three claw scratches
 function hgdm3Claws(g,a,b,s,ang,col){g.save();g.translate(a,b);g.rotate(ang);g.strokeStyle=col;g.lineCap='round';g.lineWidth=Math.max(.12,s*.05);g.beginPath();for(let k=-1;k<=1;k++){g.moveTo(k*s*.16,-s*.34);g.quadraticCurveTo(k*s*.16+s*.05,0,k*s*.16+s*.02,s*.34)}g.stroke();g.restore()}
 function hgdm3Under(){
+  if(!LEVELS[HGDU.ID]&&KH_LAZY[HGDU.ID])try{KH_LAZY[HGDU.ID]()}catch(e){console.error(e)} // the Underlevel is built only when first visited: build it to draw its map
   const U=LEVELS[HGDU.ID];if(!U)return null;if(HGDMP.cache[5])return HGDMP.cache[5];
   const W=201,H=201,rows=U._hgdm3r||(U._hgdm3r=hgdm3Fill(U.rows,U)),A=MPL.AREA,pad=4,s=Math.min((A.w-2*pad)/W,(A.h-2*pad)/H),ox=A.x+(A.w-W*s)/2,oy=A.y+(A.h-H*s)/2,X=c=>ox+c*s,Y=c=>oy+c*s,{c,x}=hgdm3Canvas(HGDM3.S);
   const BONE='#e6dcc0',open=(a,b)=>rows[b]&&rows[b][a]==='.';
