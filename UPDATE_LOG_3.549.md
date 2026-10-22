@@ -175,3 +175,8 @@ Crocodiles, water, weapons and the Potion of Escape (3.568)
 * The Underlevel water is now a painted dark water picture rolled into moving waves with pale glints, instead of code-drawn ripples.
 * The six level 70 weapons (Molten Greatblade, Whitefire Warhammer, Crimson Cleaver, Bluefire Longbow, Verdant Flame Staff, Cinder Dagger) and the Sunfire Blade have painted flaming icons, each burning in its own colour.
 * New: Potion of Escape. Drunk in the Underlevel it carries the whole party up to the surface of the maze, at the foot of the nearest ladder down. Drunk anywhere else it does nothing and is not used up. The potion sellers of the maze sell it, and about 20 lie in dead ends of the Underlevel, one near each ladder down and the rest far apart.
+
+Shop stalls and the dollar sign (3.569)
+
+* Each of the 40 shopkeepers in the eight maze towns (general shop, weapons, armour, magic, trader) and the 8 inns now has a painted stall or front standing behind them that shows what they sell: a goods stall with baskets and barrels, a weapon rack, helmets and breastplates, bottles under a purple star awning, crates and cloth under a striped awning, and a thatched inn front with a hanging sign. The stall always stands behind the keeper, whichever way you come from, and does not block the way.
+* A gold dollar sign floats above every shopkeeper, the way the gold ! floats over quest givers. Shops also show as a gold dot on the minimap and a $ on the large maps.
