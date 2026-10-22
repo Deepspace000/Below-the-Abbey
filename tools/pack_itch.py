@@ -47,6 +47,10 @@ SHIM = '<script>' + open(os.path.join(ROOT, 'tools', 'itch_shim.js'), encoding='
 html = open(os.path.join(ROOT, 'index.html'), encoding='utf-8', newline='').read()
 i = html.index('<head>') + len('<head>')
 html = html[:i] + SHIM + html[i:]
+# the testing menu (testmenu.js) belongs to the Pages build only: its one-line loader is cut out of the itch.io page
+import re as _re
+html = _re.sub(r'<script>/\*TESTMENU\*/.*?/\*ENDTESTMENU\*/</script>\r?\n?', '', html, flags=_re.S)
+assert 'TESTMENU' not in html
 # the itch.io build has no "Go to area" button on the title screen (the debug jump stays on the Pages build)
 GO = "items.push(['tgoto','Go to area']);"
 assert GO in html
