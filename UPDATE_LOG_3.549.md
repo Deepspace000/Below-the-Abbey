@@ -262,3 +262,8 @@ Creatures hit a little harder (3.584)
 Skeletons farther from the wolves (3.585)
 
 * On the abbey grounds and the Thornwood, the skeletons' cutscene no longer follows straight after the wolves'. The two skeletons nearest the way in were moved east (to about x 42 and x 47), so the first skeleton is now seen about 16 squares after the wolves' cutscene point instead of at the same spot.
+
+Armour blocks less, mana runs out faster (3.586)
+
+* Enemies hit harder: armour used to cut an enemy's chance to hit by 3 points per point of armour, down to a floor of 10 percent, so a party in good armour was hit one time in ten (a level 10 party in level 10 armour hardly got hit at all). Armour now cuts 2.5 points per point and the floor is 25 percent, so even a well-armoured party is hit one time in four at least. The comparison panel uses the same numbers.
+* Mana runs out faster: every power, spell and special costs half as much again (at least one more): Fire 6 instead of 4, Power Strike 6 instead of 4, and the Priest's Heal 9 instead of 6 or so. Mana potions matter more, and a party has to plan between straight hits and power hits.

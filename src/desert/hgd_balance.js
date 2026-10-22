@@ -31,3 +31,12 @@ BAL.partyLvl=L=>{const a=(G.heroes||[]).filter(h=>h.alive!==false);return a.leng
   const ordinary=d&&!(d.boss||d.aboveParty||(typeof NO_VARY!=='undefined'&&NO_VARY.includes(t))||d.partyLevel||/^w_/.test(t));
   if(ordinary&&w>0){const pl=BAL.partyLvl(L),nw=BAL.ah(pl)*BAL.hitsRel(L-pl)*BAL.kind(t,d.hp);r.hp=Math.max(1,Math.round(old*(1-w)+nw*w))}else r.hp=old;
   r.dmg=[Math.max(1,Math.round(r.dmg[0]*k*BAL.DMG)),Math.max(1,Math.round(r.dmg[1]*k*BAL.DMG))];return r}}
+
+// 3. mana runs out faster: every power, spell and special costs half as much again (at least one more), so a party has to plan its straight hits and its power hits
+BAL.MANA=1.5;
+(function(){const up=c=>c>0?Math.max(c+1,Math.round(c*BAL.MANA)):c,fix=o=>{if(o&&typeof o.cost==='number'&&!o._mb){o.cost=up(o.cost);o._mb=1}};
+  try{for(const k in CLASSES){const c=CLASSES[k];fix(c.sp);for(const p of (c.powers||[]))fix(p)}
+    for(const k in MX_POWER)fix(MX_POWER[k]);
+    if(typeof MX!=='undefined')for(const s of MX)fix(s);
+    for(const d of (typeof HERO_DEF!=='undefined'?HERO_DEF:[]))if(d)fix(d.sp);
+    for(const k in SPELLS)fix(SPELLS[k])}catch(e){console.warn('bal mana',e)}})();

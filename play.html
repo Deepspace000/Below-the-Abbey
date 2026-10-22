@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.585';
+const VERSION='3.586';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2223,7 +2223,7 @@ function enemyAttack(e){
   e.lunge=1;
   const dirToE=DIRS.findIndex(d=>G.P.x+d[0]===e.x&&G.P.y+d[1]===e.y);
   const side=dirToE===G.P.f?'':(dirToE===(G.P.f+2)%4?' from behind':' from the side');
-  const hitC=clamp(def.hit+(typeof diffHitAdd==='function'?diffHitAdd():0)-heroArmor(h)*.03-pas(t,'dodge')-(e.st?mxMiss(e):0),.1,.95),verb=def.verb||(e.t==='skel'?'slashes':'bites');
+  const hitC=clamp(def.hit+(typeof diffHitAdd==='function'?diffHitAdd():0)-heroArmor(h)*.025-pas(t,'dodge')-(e.st?mxMiss(e):0),.25,.95),verb=def.verb||(e.t==='skel'?'slashes':'bites');
   if(Math.random()<hitC){
     if(def.slows){G.slowT=Math.max(G.slowT||0,4);msg('Dead hands drag at the party. You are slowed.','#e8c870')}let d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*(e.st?mxMul(e):1)));if(typeof armourWard==='function')d=Math.max(1,d-armourWard(t));h.hp-=d;h.hurt=1;G.shake=.35;sfx(e.t==='skel'?'hit':'bite');sfx('hurt');
     msg(`The ${def.name} ${verb} ${HERO_DEF[t].name}${side} for ${d}.`,'#e8a090');addFloat(portraitX(t)+19,250,'-'+d,'#ff6a5a');
@@ -6035,7 +6035,7 @@ function enemyShoot(e){
   const pool=[];for(const j of l)for(let k=0;k<(j<2?3:1);k++)pool.push(j);
   const t=pool[rnd(0,pool.length-1)],h=G.heroes[t];e.lunge=1;
   G.arrows.push({x0:clamp(e.sx,14,406),y0:clamp(e.sy,40,170),x1:210+rnd(-30,30),y1:196,t:G.time});sfx('arrow');
-  const hitC=clamp(def.hit+(typeof diffHitAdd==='function'?diffHitAdd():0)-heroArmor(h)*.03-pas(t,'dodge')-(e.st?mxMiss(e):0),.1,.95);
+  const hitC=clamp(def.hit+(typeof diffHitAdd==='function'?diffHitAdd():0)-heroArmor(h)*.025-pas(t,'dodge')-(e.st?mxMiss(e):0),.25,.95);
   if(Math.random()<hitC){
     const d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*(e.st?mxMul(e):1)));h.hp-=d;h.hurt=1;G.shake=.3;sfx('hurt');try{if(h.hp>0)afflHit(e.t,t)}catch(x){}
     msg(def.shot?`${def.name} hurls ${def.shot} at ${HERO_DEF[t].name} for ${d}.`:`An arrow from the ${def.name} hits ${HERO_DEF[t].name} for ${d}.`,'#e8a090');addFloat(portraitX(t)+19,250,'-'+d,'#ff6a5a');
@@ -6802,7 +6802,7 @@ function drawCompare(e,def){
   const st=enemyStat(e.t,e.lvl),plvl=Math.round(H.reduce((n,o)=>n+o.h.lvl,0)/H.length);
   const pHp=H.reduce((n,o)=>n+Math.max(0,o.h.hp),0),pMax=H.reduce((n,o)=>n+o.h.max,0);
   let dpr=0;for(const o of H){const r=heroDmgRange(o.h);dpr+=(r[0]+r[1])/2*heroHitPct(o.i,false)}
-  const eAvg=(st.dmg[0]+st.dmg[1])/2,hitC=clamp(def.hit+(typeof diffHitAdd==='function'?diffHitAdd():0)-H.reduce((n,o)=>n+heroArmor(o.h),0)/H.length*.03,.1,.95),eDpr=Math.max(.1,eAvg*hitC);
+  const eAvg=(st.dmg[0]+st.dmg[1])/2,hitC=clamp(def.hit+(typeof diffHitAdd==='function'?diffHitAdd():0)-H.reduce((n,o)=>n+heroArmor(o.h),0)/H.length*.025,.25,.95),eDpr=Math.max(.1,eAvg*hitC);
   const toKill=Math.max(.2,e.hp/Math.max(1,dpr)),toDie=Math.max(.2,(pHp/H.length)/eDpr),ratio=toDie/toKill;
   const VER=[['Trivial','#8ad07a'],['Easy','#a8d070'],['Fair fight','#e0d070'],['Hard','#e89850'],['Deadly','#e85a48']];
   let vi=ratio>=6?0:ratio>=3?1:ratio>=1.5?2:ratio>=.7?3:4;
@@ -46862,6 +46862,15 @@ BAL.partyLvl=L=>{const a=(G.heroes||[]).filter(h=>h.alive!==false);return a.leng
   const ordinary=d&&!(d.boss||d.aboveParty||(typeof NO_VARY!=='undefined'&&NO_VARY.includes(t))||d.partyLevel||/^w_/.test(t));
   if(ordinary&&w>0){const pl=BAL.partyLvl(L),nw=BAL.ah(pl)*BAL.hitsRel(L-pl)*BAL.kind(t,d.hp);r.hp=Math.max(1,Math.round(old*(1-w)+nw*w))}else r.hp=old;
   r.dmg=[Math.max(1,Math.round(r.dmg[0]*k*BAL.DMG)),Math.max(1,Math.round(r.dmg[1]*k*BAL.DMG))];return r}}
+
+// 3. mana runs out faster: every power, spell and special costs half as much again (at least one more), so a party has to plan its straight hits and its power hits
+BAL.MANA=1.5;
+(function(){const up=c=>c>0?Math.max(c+1,Math.round(c*BAL.MANA)):c,fix=o=>{if(o&&typeof o.cost==='number'&&!o._mb){o.cost=up(o.cost);o._mb=1}};
+  try{for(const k in CLASSES){const c=CLASSES[k];fix(c.sp);for(const p of (c.powers||[]))fix(p)}
+    for(const k in MX_POWER)fix(MX_POWER[k]);
+    if(typeof MX!=='undefined')for(const s of MX)fix(s);
+    for(const d of (typeof HERO_DEF!=='undefined'?HERO_DEF:[]))if(d)fix(d.sp);
+    for(const k in SPELLS)fix(SPELLS[k])}catch(e){console.warn('bal mana',e)}})();
 
 /* ---- src/desert/food_health.js ---- */
 /* ==========================================================================
