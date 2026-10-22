@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.565';
+const VERSION='3.566';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -44070,7 +44070,7 @@ function hgdm3Maze(vi){
     else if(d.k==='hgtb_deco_fountain')ix('fountain',px,py+tw*.4,tw*1.25)}
   // danger rings and warning signs
   for(const z of L._hgdp.zones){if(z.type!=='danger')continue;if(z.x+z.r<vx||z.x-z.r>vx+vw||z.y+z.r<vy||z.y-z.r>vy+vh)continue;
-    x.save();x.strokeStyle='#9a2418';x.lineWidth=big?.9:.7;x.setLineDash([2.4,3]);x.beginPath();x.arc(X(z.x+.5),Y(z.y+.5),z.r*s,0,6.3);x.stroke();x.restore()}
+    x.save();x.strokeStyle=(z.id&&G.flags.hgdVz&&G.flags.hgdVz[z.id])?'#2f8a3a':'#9a2418';x.lineWidth=big?.9:.7;x.setLineDash([2.4,3]);x.beginPath();x.arc(X(z.x+.5),Y(z.y+.5),z.r*s,0,6.3);x.stroke();x.restore()}
   if(big)for(const d of L.decor){if(d.npc!=='hgd_sign'||!inV(d.x,d.y))continue;hgdiDraw(x,'sign',X(d.x+.5),Y(d.y+.5)+2.6,8.5)}
   if(L._hgds)for(const k in L._hgds.doors){const dd=L._hgds.doors[k];if(dd.type==='secret')continue;const p=k.split(',').map(Number);if(!inV(p[0],p[1]))continue;const col=dd.type==='key'?HGDS_KEYS[dd.idx][2]:HGDS_GEMS[dd.idx][2];hgdmpDoorIcon(x,X(p[0]+.5),Y(p[1]+.5),col,dd.type==='gem',big?.85:.6)}
   // the thieves' houses
@@ -44139,6 +44139,8 @@ function hgdm3Under(){
   x.save();x.beginPath();x.rect(A.x,A.y,A.w,A.h);x.clip();
   // the dark closes in at the edges
   {const v=x.createRadialGradient(A.x+A.w/2,A.y+A.h/2,A.h*.34,A.x+A.w/2,A.y+A.h/2,A.h*.82);v.addColorStop(0,'rgba(4,0,2,0)');v.addColorStop(1,'rgba(4,0,2,.72)');x.fillStyle=v;x.fillRect(A.x,A.y,A.w,A.h)}
+  // the vermin circles: dashed red rings, green once cleared (hgd_verminu.js)
+  for(const z of (U._hgvz||[])){x.save();x.strokeStyle=(G.flags.hgdVz&&G.flags.hgdVz[z.id])?'#38c060':'#d83a24';x.lineWidth=.9;x.setLineDash([2.4,3]);x.beginPath();x.arc(X(z.x+.5),Y(z.y+.5),z.r*s,0,6.3);x.stroke();x.restore()}
   // the ladders, each on a pale glow so they cannot be missed
   for(const l of U._hgdu.ladders){const a=X(l.x+.5),b=Y(l.y+.5),r=9,gr=x.createRadialGradient(a,b,0,a,b,r);gr.addColorStop(0,'rgba(255,236,170,.95)');gr.addColorStop(.55,'rgba(255,210,120,.55)');gr.addColorStop(1,'rgba(255,200,100,0)');x.fillStyle=gr;x.fillRect(a-r,b-r,2*r,2*r);hgdmpLadderIcon(x,a,b,1.1)}
   x.restore();
@@ -46253,6 +46255,427 @@ function hgdlStep(L,dt){
         else{img=IMG.hgtb_jadefinmoth;w=.3;bob=.55+Math.sin(a.ph*.1)*.06}
         if(!img)continue;a.e.x=a.x|0;a.e.y=a.y|0;L.push({x:a.x,y:a.y,img,w,bob,e:a.e,fade:1})}}}catch(e){console.error(e)}
   return L}}
+
+/* ---- src/desert/hgd_vermin.js ---- */
+/* ==========================================================================
+   VERMIN CIRCLES (prefix hgvz / HGVZ): the dashed red circles on the maze map are challenges. Stepping into one shows a counter at the top of the 3D view (THE SLUG RUN  14 vermin left);
+   kill every creature that belongs to the circle and the place is free of vermin: a banner, a reward (a potion or a weapon, gold, experience), an achievement, a green ring on the map, thanks from the maze people.
+   Clearing every circle of a level gives a master reward. This file holds the engine (shared with the Underlevel, hgd_verminu.js) and the circles of the surface maze (level 475):
+   the old danger zones, six more large ones, twelve small ones, and two in the water (a lake, and the Flooded Quarter).
+   A circle's creatures carry the tag .vz (the circle id) in L.enemies; a live enemy takes it from L.enemies[e.id] when the level is entered, and cleared circles are removed from G.enemies then.
+   Cleared ids: G.flags.hgdVz = {id:1}; names for the gossip: G.flags.hgdVzN; pending shopkeeper thanks: G.flags.hgdVzTh.
+   ========================================================================== */
+const HGVZ={arr:null,lv:0,len:-1,cur:null,cnt:{},bq:[],bt:0,px:0,py:0,lt:-9,ct:-9,told:{}};
+const hgvzF=()=>G.flags.hgdVz||(G.flags.hgdVz={});
+const hgvzZones=lv=>{const L=LEVELS[lv];return L&&L._hgvz?L._hgvz:[]};
+const hgvzThe=n=>/^The /.test(n)?'the '+n.slice(4):n;
+const hgvzList=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+/* ---------- rewards ---------- */
+const HGVZ_CFG={
+  s:{large:{gold:[400,500,600,700,800],xm:3,pot:[['potion4',2],['elixir',1],['superiorheal',2],['supermana',2],['potion4',1],['elixir',1]],wlv:[15,35],wp:[1500,5000]},
+     small:{gold:[150,200,250,300],xm:1,pot:[['potion3',1],['greaterheal',1],['manadraught',1],['antidote',1]]},
+     water:[{items:['gem_diamond'],gold:500,xm:2},{items:['gem_emerald','superiorheal'],gold:500,xm:2}],
+     all:{item:'ar_wyrm_c',gold:2000},allName:'Scourge of the Hollow',allText:'The Deeper Hollow is free of vermin'},
+  u:{large:{gold:[1000],xm:4,pot:[['elixir',1],['supermana',2],['superiorheal',2],['potion4',3],['elixir',2]],wlv:[40,60],wp:[4000,8000]},
+     small:{gold:[400],xm:1.5,pot:[['potion4',1],['supermana',1],['superiorheal',1],['elixir',1]]},
+     water:[{items:['gem_blackopal','gem_diamond'],gold:1500,xm:3}],
+     all:{item:'ar_god_c',gold:4000},allName:'Scourge of the Underlevel',allText:'The Underlevel is free of vermin'}};
+function hgvzWeapons(c){const o=[];for(const id in ITEMDEF){const d=ITEMDEF[id];if(d&&d.k==='weapon'&&!d.rar&&!/^hg/.test(id)&&d.lvl>=c.wlv[0]&&d.lvl<=c.wlv[1]&&d.price>=c.wp[0]&&d.price<=c.wp[1])o.push(id)}return o.sort()}
+// the reward of the j-th zone of a tier ('large','small','water') on a level kind ('s' or 'u')
+function hgvzReward(kind,tier,j){
+  const C=HGVZ_CFG[kind];
+  if(tier==='water')return Object.assign({},C.water[j%C.water.length]);
+  const c=C[tier];let items=[];
+  if(tier==='large'&&j%2===1){const w=hgvzWeapons(c);if(w.length)items=[w[((j>>1)*7+j)%w.length]]}
+  if(!items.length){const p=c.pot[(tier==='large'?j>>1:j)%c.pot.length];for(let k=0;k<p[1];k++)items.push(p[0])}
+  return {items,gold:c.gold[j%c.gold.length],xm:c.xm}}
+/* ---------- the engine: tagging, counting, clearing ---------- */
+function hgvzCount(){const c={};for(const e of G.enemies)if(e.vz&&e.hp>0)c[e.vz]=(c[e.vz]||0)+1;return c}
+function hgvzTag(){const L=LEVELS[LEVEL],S=L.enemies;for(const e of G.enemies)if(!e._vzc){e._vzc=1;const s=S[e.id];if(s&&s.vz&&s.t===e.t)e.vz=s.vz}}
+function hgvzSync(){
+  const L=LEVELS[LEVEL];if(!L||!L._hgvz||!G.enemies)return false;const F=hgvzF();
+  if(HGVZ.arr!==G.enemies||HGVZ.lv!==LEVEL){
+    hgvzTag();if(Object.keys(F).length)G.enemies=G.enemies.filter(e=>!(e.vz&&F[e.vz])); // cleared circles stay empty
+    HGVZ.arr=G.enemies;HGVZ.lv=LEVEL;HGVZ.ct=-9;HGVZ.cur=null;hgvzTold()}
+  else if(HGVZ.len!==G.enemies.length)hgvzTag();
+  HGVZ.len=G.enemies.length;return true}
+function hgvzCheckAll(){
+  const F=hgvzF(),c=hgvzCount();HGVZ.cnt=c;
+  for(const z of hgvzZones(LEVEL))if(!F[z.id]&&!(c[z.id]>0))hgvzClear(z)}
+function hgvzMapBust(){try{if(typeof HGDMP!=='undefined')for(const k of Object.keys(HGDMP.cache))delete HGDMP.cache[k];G.mplKey=null}catch(e){}}
+function hgvzGossipLine(z){
+  const n=hgvzThe(z.name),N=z.name,u=z.lv===476,i=Object.keys(hgvzF()).length;
+  const A=u?[
+    'Someone has cleared '+n+' under the maze. Whatever lived down there is quiet now. Thank you, whoever you are.',
+    'They say '+n+', down in the dark, is free of vermin. I did not think anyone would ever do it.',
+    'A party went down the ladder and emptied '+n+'. I would shake their hands, if I could find them.']
+  :[
+    'Someone has cleared '+N+'! My cousin walks there again. Thank you, whoever you are.',
+    'They say '+n+' is free of vermin now. Whoever did it, the corridors are quieter tonight.',
+    'I heard '+n+' is empty. A party came through and left nothing alive. We owe them a drink.',
+    'The traders use the way past '+n+' again. Bless whoever swung the sword.',
+    'My brother lost a boot in '+n+' last year. He went back for it this week. Thank you.',
+    'Nothing crawls in '+n+' any more. The whole quarter is saying thank you.'];
+  return A[i%A.length]}
+function hgvzTold(){
+  const N=hgvzF().hgdVzN||G.flags.hgdVzN;if(!N)return;
+  for(const id in N){if(HGVZ.told[id])continue;HGVZ.told[id]=1;const z={name:N[id],lv:/^vzu/.test(id)?476:475},line=hgvzGossipLine(z);
+    if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push(line);if(typeof HGDK_SAY!=='undefined')HGDK_SAY.push(line)}}
+function hgvzGive(rw){
+  const got={};
+  for(const id of rw.items||[]){const d=ITEMDEF[id];if(!d)continue;let nm=d.n;if(bagAdd(mkItem(id)));else{G.items.push({k:id,x:G.P.x,y:G.P.y,taken:false});nm+=' (on the floor)'}got[nm]=(got[nm]||0)+1}
+  const parts=Object.keys(got).map(k=>got[k]>1?k+' x'+got[k]:k);
+  if(rw.gold){G.gold+=rw.gold;parts.push(rw.gold+' gold')}
+  if(rw.xp&&typeof giveXP==='function')giveXP(rw.xp);
+  return parts}
+function hgvzBanner(l1,l2,col){HGVZ.bq.push({l1,l2,col:col||'#ffe36a'})}
+function hgvzClear(z){
+  const F=hgvzF();if(F[z.id])return;F[z.id]=1;(G.flags.hgdVzN||(G.flags.hgdVzN={}))[z.id]=z.name;if(HGVZ.cur===z)HGVZ.cur=null;
+  const rw=Object.assign({},z.rw);rw.xp=Math.round((rw.xm||0)*enemyStat(z.lv===HGDU.ID?'hgusl3':'hgdslug').xp);const parts=hgvzGive(rw),NM=z.name.toUpperCase();
+  hgvzBanner(NM+' IS FREE OF VERMIN','Reward: '+parts.join(', ')+(rw.xp?'  (+'+rw.xp+' xp)':''));
+  sfx('win');msg(z.name+' is free of vermin.','#a8e8a0');msg('Reward: '+parts.join(', ')+(rw.xp?' and '+rw.xp+' experience':'')+'.','#ffe36a');msg('Achievement: '+z.name+' cleared.','#ffd76a');
+  hgvzMapBust();hgvzTold();
+  // the nearest town's shopkeeper and the nearest quest giver thank the party the next time they talk to them
+  try{const L=LEVELS[HGD.ID];if(z.lv===HGD.ID&&L&&L._hgdp){const P=L._hgdp,TH=G.flags.hgdVzTh||(G.flags.hgdVzTh={}),add=npc=>{if(npc){(TH[npc]||(TH[npc]=[])).push(z.name)}};
+      let bz=null,bd=1e9;for(const s of P.zones)if(s.type==='safe'&&s.town!==undefined){const d=Math.hypot(s.x-z.x,s.y-z.y);if(d<bd){bd=d;bz=s}}
+      if(bz){const f=P.folk.find(f=>f.shop!==undefined&&f.zone===bz.name);if(f)add(f.npc)}
+      let bq=null;bd=1e9;for(const f of P.folk)if(f.qi!==undefined){const s=P.zones.find(q=>q.name===f.zone);if(!s)continue;const d=Math.hypot(s.x-z.x,s.y-z.y);if(d<bd){bd=d;bq=f}}
+      if(bq)add(bq.npc)}}catch(e){console.warn('hgvz thanks',e)}
+  hgvzMaster(z.lv)}
+function hgvzMaster(lv){
+  const kind=lv===HGD.ID?'s':'u',C=HGVZ_CFG[kind],F=hgvzF(),Z=hgvzZones(lv),key='hgdVzAll'+kind;
+  if(F[key]||!Z.length||!Z.every(z=>F[z.id]))return;F[key]=1;
+  let it=C.all.item;if(!ITEMDEF[it]){const c=Object.keys(ITEMDEF).filter(i=>/^ar_.*_c$/.test(i)&&!ITEMDEF[i].rar).sort((a,b)=>ITEMDEF[b].lvl-ITEMDEF[a].lvl);it=c[0]}
+  const parts=hgvzGive({items:[it],gold:C.all.gold});
+  hgvzBanner(C.allText.toUpperCase(),C.allName+'.  Reward: '+parts.join(', '),'#ffd76a');
+  msg(C.allText+'.','#ffe36a');msg('Reward: '+parts.join(', ')+'.','#ffe36a');msg('Achievement: '+C.allName+'.','#ffd76a');
+  sfx('win');setTimeout(()=>{try{sfx('level')}catch(e){}},900);hgvzMapBust()}
+// kills: a creature of a circle dying is checked at once; everything else is checked four times a second
+{const _he=hurtEnemy;hurtEnemy=function(e){const was=e&&e.hp>0,r=_he.apply(this,arguments);try{if(was&&e.hp<=0&&e.vz&&hgvzSync())hgvzCheckAll()}catch(x){console.warn('hgvz',x)}return r}}
+{const _u=update;update=function(dt){
+  try{if((LEVEL===HGD.ID||LEVEL===HGDU.ID)&&G.state==='play'&&G.P&&hgvzSync()){
+    if(G.time-HGVZ.ct>.25||G.time<HGVZ.ct){HGVZ.ct=G.time;hgvzCheckAll()}
+    const F=hgvzF();let best=null,bd=9;
+    for(const z of hgvzZones(LEVEL)){if(F[z.id])continue;const d=Math.hypot(G.P.x-z.x,G.P.y-z.y)/z.r;if(d<=1&&d<bd){bd=d;best=z}}
+    if(best&&!F['s_'+best.id]&&(HGVZ.cnt[best.id]||0)>0){F['s_'+best.id]=1;msg('Challenge: '+best.name+'. '+HGVZ.cnt[best.id]+' vermin live here. Kill them all to free the place.','#e8a070')}
+    HGVZ.cur=best}}catch(e){console.warn('hgvz update',e)}
+  return _u.apply(this,arguments)}}
+// the thanks of the shopkeepers and quest givers
+{const _st=startTalk;startTalk=function(d){const r=_st.apply(this,arguments);
+  try{const TH=G.flags.hgdVzTh,l=TH&&d&&d.npc&&TH[d.npc];if(l&&l.length&&G.talk&&G.talk.node&&G.talk.d===d){G.talk.node.text='Thank you for freeing '+(l.length>3?hgvzList(l.slice(0,3).map(hgvzThe).concat([(l.length-3)+' other places'])):hgvzList(l.map(hgvzThe)))+' of vermin! '+G.talk.node.text;delete TH[d.npc]}}catch(e){}return r}}
+// the achievements page
+{const _al=achList;achList=function(){const r=_al.apply(this,arguments);
+  try{const F=hgvzF();for(const [lv,head,all,key] of [[HGD.ID,'Vermin cleared in the Deeper Hollow','Scourge of the Hollow','hgdVzAlls'],[HGDU.ID,'Vermin cleared in the Underlevel','Scourge of the Underlevel','hgdVzAllu']]){const Z=hgvzZones(lv);if(!Z.length)continue;
+      const n=Z.filter(z=>F[z.id]).length;r.out.push({h:head+' ('+n+' of '+Z.length+')'});for(const z of Z.slice().sort((a,b)=>(a.tier==='large'?0:a.tier==='water'?1:2)-(b.tier==='large'?0:b.tier==='water'?1:2)))r.out.push({n:z.name,s:!!F[z.id]});r.out.push({n:all,s:!!F[key]})}}catch(e){console.warn('hgvz ach',e)}return r}}
+/* ---------- the counter and the banner ---------- */
+const hgvzHit=(a,b)=>a.x<b.x+b.w+1&&b.x<a.x+a.w+1&&a.y<b.y+b.h+1&&b.y<a.y+a.h+1;
+// the places on the 3D view (420 x 210) that already hold something
+function hgvzBusy(extra){
+  const B=[{x:176,y:0,w:80,h:18},{x:2,y:2,w:24,h:24}];
+  try{if(frontEnemy(4)){B.push({x:26,y:2,w:232,h:28},{x:28,y:30,w:124,h:84},{x:6,y:38,w:18,h:168})}}catch(e){}
+  try{if(G.uw)B.push({x:128,y:16,w:164,h:38})}catch(e){}
+  try{if(typeof teleOn==='function'&&!TP&&teleOn()&&teleActive(LEVEL))B.push({x:160,y:30,w:100,h:20})}catch(e){}
+  try{const ids=new Set(afflList().map(e=>e.id));if(ids.size){const c=Math.min(8,ids.size),r=Math.ceil(ids.size/8);B.push({x:420-6-c*21,y:2,w:c*21+4,h:r*22+2})}}catch(e){}
+  try{let y=22;for(const b of G.lvlBanners.slice(-2)){const h=24+(Math.ceil(b.changes.length/2)+(b.powers.length?1:0))*11;B.push({x:40,y,w:340,h});y+=h+4}}catch(e){}
+  try{const now=G.time,ms=G.msgs.filter(m=>now-m.t<6).slice(-3);let n=0;for(const m of ms)n+=wrapMsg(m.text,VW-24,10).length;n=Math.min(5,n);if(n)B.push({x:4,y:VH-10-n*12,w:VW-8,h:n*12+6})}catch(e){}
+  if(extra)B.push(extra);return B}
+function hgvzDraw(){
+  if(G.cut||G.talk||G.menu||(G.inv&&G.inv.open)||G.loot||G.overview)return;
+  // the banner: one at a time, six seconds each
+  let bn=null,brect=null;
+  if(HGVZ.bq.length){const b=HGVZ.bq[0];if(!b.t)b.t=G.time;if(G.time-b.t>6)HGVZ.bq.shift();else{bn=b;
+    let by=76;const lb=hgvzBusy().filter(r=>r.w===340);if(lb.some(r=>hgvzHit(r,{x:40,y:by,w:340,h:50})))by=124;brect={x:40,y:by,w:340,h:50}}}
+  if(bn){const age=G.time-bn.t,a=Math.max(0,Math.min(1,age*3,(6-age)*1.5)),x=brect.x,y=brect.y,w=brect.w,h=brect.h;
+    ctx.save();ctx.globalAlpha=a;ctx.fillStyle='rgba(10,8,5,.92)';rrect(ctx,x,y,w,h,6);ctx.fill();ctx.lineWidth=2.2;ctx.strokeStyle=goldG(x,y,w,h);rrect(ctx,x,y,w,h,6);ctx.stroke();
+    txt(bn.l1,x+w/2,y+17,13,bn.col,'center',true,undefined,w-20);txt(bn.l2,x+w/2,y+37,8.5,'#c8e8b0','center',true,undefined,w-20);ctx.restore()}
+  // the counter
+  const z=HGVZ.cur;if(!z||G.state!=='play'){HGVZ.lt=-9;return}
+  const n=HGVZ.cnt[z.id]||0,label=z.name.toUpperCase()+'   '+n+' vermin left';
+  ctx.save();ctx.font=(9*1.08)+'px '+FUI;const tw=ctx.measureText(label).width;ctx.restore();
+  const w=Math.max(120,Math.ceil(tw+30)),h=22,B=hgvzBusy(brect);
+  const C=[[420-w-4,4],[420-w-4,28],[210-w/2,22],[210-w/2,46],[4,4],[4,118],[420-w-4,118],[210-w/2,118],[4,90]];
+  let tx=C[0][0],ty=C[0][1];for(const c of C){const r={x:c[0],y:c[1],w,h};if(!B.some(b=>hgvzHit(r,b))){tx=c[0];ty=c[1];break}}
+  const dt=Math.max(0,Math.min(.1,G.time-HGVZ.lt));
+  if(G.time-HGVZ.lt>.5||HGVZ.lt<0){HGVZ.px=tx;HGVZ.py=ty}else{const k=1-Math.exp(-dt*9);HGVZ.px+=(tx-HGVZ.px)*k;HGVZ.py+=(ty-HGVZ.py)*k}
+  HGVZ.lt=G.time;HGVZ.tx=tx;HGVZ.ty=ty;HGVZ.w=w;
+  const x=HGVZ.px,y=HGVZ.py,tot=Math.max(1,z.n||n),fr=Math.max(0,Math.min(1,1-n/tot));
+  ctx.save();ctx.fillStyle='rgba(8,6,4,.82)';rrect(ctx,x,y,w,h,5);ctx.fill();ctx.lineWidth=1.6;ctx.strokeStyle=goldG(x,y,w,h);rrect(ctx,x,y,w,h,5);ctx.stroke();
+  // a small skull
+  {const sx=x+10,sy=y+8;ctx.fillStyle='#d9cfb6';ctx.beginPath();ctx.arc(sx,sy-.5,4,0,TAU);ctx.fill();ctx.fillRect(sx-2.4,sy+1.5,4.8,3);ctx.fillStyle='#2a0a0a';ctx.beginPath();ctx.arc(sx-1.6,sy-.8,1.1,0,TAU);ctx.arc(sx+1.6,sy-.8,1.1,0,TAU);ctx.fill()}
+  txt(z.name.toUpperCase(),x+19,y+8,9,'#e0c898','left',true);txt(n+' vermin left',x+w-6,y+8,9,'#f0907a','right',true);
+  ctx.fillStyle='rgba(30,12,10,.9)';ctx.fillRect(x+7,y+15,w-14,3.5);ctx.fillStyle=fr>.66?'#8ad07a':fr>.33?'#e0c050':'#d05040';ctx.fillRect(x+7,y+15,(w-14)*fr,3.5);ctx.strokeStyle='rgba(0,0,0,.7)';ctx.lineWidth=.7;ctx.strokeRect(x+7,y+15,w-14,3.5);
+  ctx.restore()}
+{const _d=drawLevelBanners;drawLevelBanners=function(){_d.apply(this,arguments);try{hgvzDraw()}catch(e){console.warn('hgvz draw',e)}}}
+/* ==========================================================================
+   THE SURFACE CIRCLES (level 475)
+   ========================================================================== */
+const HGVZ_BIO=['Hedge','Stone','Comb','Shell','Sand','Blue','Tile','Gilt'];
+const HGVZ_LARGE=[['The Wasp Alley','bug'],['Beetle Row','beetle'],['The Pale Burrows','worm'],['Spider Gully','spider'],['The Mud Nest','slug'],['The Crawling Court','mixed']];
+const HGVZ_SMALLK=['slug','jelly','worm','bug','spider','beetle','slug','jelly','worm','spider','beetle','bug'];
+const HGVZ_KNAME={slug:'Slug',jelly:'Jelly',worm:'Worm',bug:'Bug',spider:'Spider',beetle:'Beetle',mixed:'Mixed'};
+function hgvzSurface(L){
+  if(L._hgvz||!L._hgdp||!L._hgdl)return;
+  const M=L._hgdm,W=M.W,H=M.H,P=L._hgdp,rows=L.rows,fm=L.fmap,rnd=hgdmRng(475130),bio=M.bio;
+  const dry=(x,y)=>x>=2&&y>=2&&x<W-2&&y<H-2&&rows[y][x]==='.'&&!(fm&&(fm[y][x]==='5'||fm[y][x]==='6'));
+  const blk=new Set(),occ=new Set(),bad=new Set(),mark=(s,x,y,r)=>{for(let j=-r;j<=r;j++)for(let i=-r;i<=r;i++)s.add((x+i)+','+(y+j))};
+  for(const d of L.decor){const k=d.x+','+d.y;occ.add(k);if(d.block)blk.add(k);if(d.npc||d.k==='chest'||d.k==='hg_chestweed')mark(bad,d.x,d.y,2)}
+  for(const i of L.items)occ.add(i.x+','+i.y);for(const e of L.enemies)occ.add(e.x+','+e.y);
+  if(L._hgdu)for(const l of L._hgdu.ladders){mark(bad,l.ax,l.ay,3);mark(bad,l.x,l.y,3)}
+  if(L._hgdv)for(const a of L._hgdv.agents)mark(bad,a.house[0],a.house[1],3);
+  const lakes=L._hgdl.lakes,mask=hgdlMask(L),near=(k,m,x,y,r)=>x+r>=k.x0-m&&x-r<=k.x1+m&&y+r>=k.y0-m&&y-r<=k.y1+m;
+  for(const k of lakes)for(const pz of (k.plazas||(k.plaza?[k.plaza]:[])))for(const c of pz)mark(bad,c[0],c[1],6);
+  // the cells the party can walk to from the start
+  const reach=new Uint8Array(W*H),q=[[L.start.x,L.start.y]];reach[L.start.y*W+L.start.x]=1;
+  for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||reach[ny*W+nx]||!dry(nx,ny)||blk.has(nx+','+ny))continue;reach[ny*W+nx]=1;q.push([nx,ny])}}
+  const zones=P.zones,all=()=>zones.filter(z=>z.type==='danger'),safeNear=(x,y,m)=>zones.some(z=>z.type==='safe'&&Math.hypot(z.x-x,z.y-y)<=z.r+m);
+  const out=[];let li=0,si=0;
+  const finish=(z,tier,j)=>{z.vz=true;z.tier=tier;z.small=tier==='small';z.water=tier==='water';z.lv=HGD.ID;z.rw=hgvzReward('s',tier,j);out.push(z)};
+  // the old danger zones: their creatures are counted by position
+  const KINDS=t=>t==='mixed'?['hgdslug','hgdjelly','hgdworm','hgdbug','hgdspider','hgdbeetle','hgdgrub','hgdswarm','hgdguard','hgdwarden']:HGDP_KINDS[t].concat(t==='bug'||t==='beetle'?[]:[]);
+  all().forEach((z,i)=>{z.id='vzo'+i;z.mon=z.mon||'mixed';const ks=new Set(z.boss?KINDS('mixed'):KINDS(z.mon));let n=0;
+    for(const e of L.enemies)if(!e.vz&&ks.has(e.t)&&Math.hypot(e.x-z.x,e.y-z.y)<=z.r){e.vz=z.id;n++}z.n=n;if(n>0)finish(z,'large',li++)});
+  // placing new ground circles: a site, then its creatures on free walkable squares
+  const cellsOf=(x,y,R)=>{const c=[];for(let j=y-R;j<=y+R;j++)for(let i=x-R;i<=x+R;i++){if(i<2||j<2||i>=W-2||j>=H-2||Math.hypot(i-x,j-y)>R)continue;const k=i+','+j;if(reach[j*W+i]&&!occ.has(k)&&!bad.has(k)&&!mask[j*W+i]&&!safeNear(i,j,3))c.push([i,j])}return c};
+  const site=(R,gap,minCells,startD)=>{for(let t=0;t<7000;t++){const x=8+((rnd()*(W-16))|0),y=8+((rnd()*(H-16))|0);
+      if(!reach[y*W+x]||Math.hypot(x-M.sx,y-M.sy)<R+startD||safeNear(x,y,R+3)||lakes.some(k=>near(k,4,x,y,R))||all().some(z=>Math.hypot(z.x-x,z.y-y)<z.r+R+gap))continue;
+      const cs=cellsOf(x,y,R);if(cs.length>=minCells)return {x,y,cs}}return null};
+  const fill=(z,cs,n,kinds)=>{let got=0;const sp=[];for(let t=0;t<n&&cs.length;t++){let ci=(rnd()*cs.length)|0;
+      for(let a=0;a<6&&sp.some(s=>Math.abs(s[0]-cs[ci][0])+Math.abs(s[1]-cs[ci][1])<2);a++)ci=(rnd()*cs.length)|0;
+      const c=cs.splice(ci,1)[0];sp.push(c);occ.add(c[0]+','+c[1]);L.enemies.push({t:kinds[(rnd()*kinds.length)|0],x:c[0],y:c[1],vz:z.id});got++}z.n=got};
+  // six more large circles
+  let lj=0;for(const [name,mon] of HGVZ_LARGE){const R=9+((rnd()*4)|0),n=12+((rnd()*9)|0),s=site(R,6,n*2,26);if(!s)continue;
+    const z={type:'danger',x:s.x,y:s.y,r:R,name,mon,biome:bio[s.y*W+s.x],id:'vz'+(lj++)};zones.push(z);fill(z,s.cs,n,HGDP_KINDS[mon]);if(z.n>=8)finish(z,'large',li++);else{zones.pop();L.enemies=L.enemies.filter(e=>e.vz!==z.id)}}
+  // twelve small circles
+  let sj=0;const used=new Set(out.map(z=>z.name));
+  for(let k=0;k<12;k++){const R=4+((rnd()*2)|0),n=5+((rnd()*3)|0),s=site(R,3,n+4,14);if(!s)continue;const mon=HGVZ_SMALLK[k];
+    let name=HGVZ_BIO[bio[s.y*W+s.x]]+' '+HGVZ_KNAME[mon]+' Nest';for(let a=2;used.has(name);a++)name=HGVZ_BIO[bio[s.y*W+s.x]]+' '+HGVZ_KNAME[mon]+' Nest '+a;used.add(name);
+    const z={type:'danger',x:s.x,y:s.y,r:R,name,mon,biome:bio[s.y*W+s.x],id:'vzs'+(sj++)};zones.push(z);fill(z,s.cs,n,HGDP_KINDS[mon]);if(z.n>=4)finish(z,'small',si++);else{zones.pop();L.enemies=L.enemies.filter(e=>e.vz!==z.id)}}
+  // the water: the south-west lake, and the Flooded Quarter
+  const WK=new Set(['hgwcroc','hgweel','hgwsnake']),inC=(cx,cy,R)=>L.enemies.filter(e=>WK.has(e.t)&&!e.vz&&Math.hypot(e.x-cx,e.y-cy)<=R);
+  let wj=0;const addW=(name,cx,cy,R,id)=>{const es=inC(cx,cy,R);if(es.length<4)return false;const z={type:'danger',x:cx,y:cy,r:R,name,mon:'water',biome:bio[cy*W+cx],id,n:es.length};for(const e of es)e.vz=id;zones.push(z);finish(z,'water',wj++);return true};
+  {const ks=lakes.filter(k=>!k.wm),sw=ks.slice().sort((a,b)=>(b.y0+b.y1)-(a.y0+a.y1)||(a.x0+a.x1)-(b.x0+b.x1))[0];
+   if(sw)addW('The Reed Lake Hunters',(sw.x0+sw.x1)>>1,(sw.y0+sw.y1)>>1,9,'vzw0')}
+  {const fq=lakes.find(k=>k.wm);if(fq){let best=null,bs=1e9;for(let y=fq.y0+4;y<=fq.y1-4;y+=2)for(let x=fq.x0+4;x<=fq.x1-4;x+=2){if(!mask[y*W+x])continue;const c=inC(x,y,10).length;if(c<8)continue;const sc=Math.abs(c-18)+Math.hypot(x-(fq.x0+fq.x1)/2,y-(fq.y0+fq.y1)/2)*.02;if(sc<bs){bs=sc;best=[x,y]}}
+   if(best)addW('The Flooded Quarter Hunters',best[0],best[1],10,'vzw1')}}
+  L._hgvz=out;L._hgvzBuilt=out.length}
+{const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];_b.apply(this,arguments);const L=LEVELS[HGD.ID];if(!had&&L&&L._hgdl&&L._hgdlDone)try{hgvzSurface(L)}catch(e){console.error('hgvz',e)}}}
+// the map: a cleared circle is named in the green of the safe places, with (cleared) after its name
+{const _n=hgdmpNames;hgdmpNames=function(vi){const out=_n.apply(this,arguments);try{const F=G.flags.hgdVz,L=LEVELS[HGD.ID];if(F&&L&&L._hgvz)for(const o of out)if(o.k==='danger'){const z=L._hgvz.find(q=>q.name===o.t);if(z&&F[z.id]){o.k='encl';o.t=o.t+' (cleared)'}}}catch(e){}return out}}
+
+/* ---- src/desert/hgd_verminu.js ---- */
+/* ==========================================================================
+   VERMIN CIRCLES OF THE UNDERLEVEL (prefix hgvu / HGVU), level 476. The same challenge as on the surface (engine in hgd_vermin.js), with higher rewards:
+   five large circles (radius 10), eight small ones (radius 4 to 5) on the land of the labyrinth, and one over the black sea (its horrors count). The dark insects already standing inside a circle
+   belong to it; the rest are added on free land squares. The ladders keep their distance. Built after the sea and its horrors (hgd_ocean.js, hgd_oceanfoes.js).
+   ========================================================================== */
+const HGVU_LARGE=['The Weeping Nest','The Black Warren','The Red-Eye Pit','The Chittering Hall','The Bone Gutter'];
+const HGVU_SMALL=['The Dripping Hole','The Eye Cluster','The Claw Nook','The Cold Crawl','The Skull Heap','The Sour Corner','The Tar Burrow','The Whisper Bend'];
+function hgvuBuild(L){
+  if(L._hgvz||!L._hgdu||!L._hgdo)return;
+  const W=201,H=201,rnd=hgdmRng(476130),O=L._hgdo,wm=O.wm,rows=L.rows,lad=L._hgdu.ladders;
+  const land=(x,y)=>x>=2&&y>=2&&x<W-2&&y<H-2&&rows[y][x]==='.'&&!wm[y*W+x];
+  const occ=new Set(),bad=new Set(),mark=(x,y,r)=>{for(let j=-r;j<=r;j++)for(let i=-r;i<=r;i++)bad.add((x+i)+','+(y+j))};
+  for(const d of L.decor){occ.add(d.x+','+d.y);if(d.k==='chest')mark(d.x,d.y,2)}for(const i of L.items)occ.add(i.x+','+i.y);for(const e of L.enemies)occ.add(e.x+','+e.y);
+  if(L._msgr)for(const l of L._msgr.letters)mark(l.x,l.y,2);
+  const reach=new Uint8Array(W*H),q=[[lad[0].ax,lad[0].ay]];reach[lad[0].ay*W+lad[0].ax]=1;
+  for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||reach[ny*W+nx]||!land(nx,ny))continue;reach[ny*W+nx]=1;q.push([nx,ny])}}
+  const out=[],ids=[];for(let i=0;i<10;i++){ids.push('hgusl'+i);ids.push('hguyk'+i)}
+  const isIn=e=>/^hg(usl|uyk)\d$/.test(e.t),nearLad=(x,y,m)=>lad.some(l=>Math.hypot(l.ax-x,l.ay-y)<m);
+  const clash=(x,y,R,gap)=>out.some(z=>Math.hypot(z.x-x,z.y-y)<z.r+R+gap);
+  const finish=(z,tier,j)=>{z.type='danger';z.vz=true;z.lv=HGDU.ID;z.tier=tier;z.small=tier==='small';z.water=tier==='water';z.rw=hgvzReward('u',tier,j);out.push(z)};
+  let wj=0,lj=0,sj=0;
+  // the sea: a circle that holds a fair number of horrors
+  for(const R of [12,9]){if(out.length)break;let best=null,bs=1e9;const hs=L.enemies.filter(e=>/^hgo/.test(e.t)&&e.t!=='hgoboss'&&!e.vz);
+    for(let y=8;y<H-8;y+=3)for(let x=8;x<W-8;x+=3){if(!wm[y*W+x])continue;let c=0;for(const e of hs)if(Math.hypot(e.x-x,e.y-y)<=R)c++;if(c<8||c>26)continue;const sc=Math.abs(c-16)+Math.hypot(x-100,y-100)*.01;if(sc<bs){bs=sc;best=[x,y]}}
+    if(best){const z={x:best[0],y:best[1],r:R,name:'The Sunless Deeps',id:'vzu_w0',mon:'sea'};let n=0;for(const e of hs)if(Math.hypot(e.x-z.x,e.y-z.y)<=R){e.vz=z.id;n++}z.n=n;finish(z,'water',wj++)}}
+  const cellsOf=(x,y,R)=>{const c=[];for(let j=y-R;j<=y+R;j++)for(let i=x-R;i<=x+R;i++){if(Math.hypot(i-x,j-y)>R||!land(i,j)||!reach[j*W+i])continue;const k=i+','+j;if(!occ.has(k)&&!bad.has(k)&&!nearLad(i,j,8))c.push([i,j])}return c};
+  const place=(name,id,R,n0,gap,tier,j)=>{
+    for(let t=0;t<9000;t++){const x=8+((rnd()*(W-16))|0),y=8+((rnd()*(H-16))|0);if(!land(x,y)||!reach[y*W+x]||nearLad(x,y,R+8)||clash(x,y,R,gap))continue;
+      const ex=L.enemies.filter(e=>isIn(e)&&!e.vz&&Math.hypot(e.x-x,e.y-y)<=R);if(ex.length>(tier==='large'?n0+4:n0+1))continue;
+      const cs=cellsOf(x,y,R),need=Math.max(0,n0-ex.length);if(cs.length<need+(tier==='large'?14:5))continue;
+      const z={x,y,r:R,name,id,mon:'under'};for(const e of ex)e.vz=id;let got=ex.length;
+      for(let k=0;k<need;k++){const c=cs.splice((rnd()*cs.length)|0,1)[0];occ.add(c[0]+','+c[1]);L.enemies.push({t:ids[(rnd()*ids.length)|0],x:c[0],y:c[1],vz:id});got++}
+      z.n=got;finish(z,tier,j);return true}return false};
+  HGVU_LARGE.forEach((nm,k)=>{place(nm,'vzu_l'+k,10,14+((rnd()*7)|0),6,'large',lj++)});
+  HGVU_SMALL.forEach((nm,k)=>{place(nm,'vzu_s'+k,4+((rnd()*2)|0),5+((rnd()*3)|0),3,'small',sj++)});
+  L._hgvz=out}
+{const _b=hgduBuild;hgduBuild=function(){const had=!!LEVELS[HGDU.ID];_b.apply(this,arguments);const L=LEVELS[HGDU.ID];if(!had&&L&&L._hgdo)try{hgvuBuild(L)}catch(e){console.error('hgvu',e)}}}
+/* ---------- the names on the Underlevel map (the shared names layer has no kind for them) ---------- */
+{const _dn=hgdmpDrawNames;hgdmpDrawNames=function(vi){_dn.apply(this,arguments);
+  if(vi!==5)return;try{const V=MPL.view,U=LEVELS[HGDU.ID];if(!V||!V.z||!U||!U._hgvz)return;const z=V.z,A=V.area,F=G.flags.hgdVz||{};
+    ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';
+    for(const q of U._hgvz){const sz=Math.max(4.6,6.4/Math.pow(z,.4)),px=A.x+(V.X(q.x+.5)-V.sx0)*z,py=A.y+(V.Y(q.y+.5)-V.sy0)*z;if(px<A.x-60||px>A.x+A.w+60||py<A.y-8||py>A.y+A.h+8)continue;
+      ctx.font='bold '+sz+'px '+FUI;const t=q.name+(F[q.id]?' (cleared)':'');ctx.lineWidth=2.2;ctx.strokeStyle='#050102';ctx.strokeText(t,px,py);ctx.fillStyle=F[q.id]?'#7ee08a':'#ecdcc0';ctx.fillText(t,px,py)}
+    ctx.restore()}catch(e){}}}
+
+/* ---- src/desert/hgd_dark.js ---- */
+/* ==========================================================================
+   THE DARK OF THE UNDERLEVEL (prefix hgdn / HGDN), level 476. The black water now rolls in slow waves (the water floor is redrawn from a loop of 16 frames), the walls are jagged dark rock (a faceted stone texture made in code,
+   cracked and sharp-edged), an occasional line of text describes the oppressive dark, the snarling all round and the party's own dislike of the place (each line is shown once, in a shuffled order, and never repeats),
+   there are terrifying stone statues (the demons and sea horrors, turned to stone) in dead ends and rooms, and now and then the Bogeyman stands up behind the party and springs.
+   ========================================================================== */
+const HGDN={ID:476,N:16,frames:null,fi:-1,said:null};
+/* ---------- the water: a loop of waves ---------- */
+function hgdnFrames(){
+  if(HGDN.frames)return HGDN.frames;const T=Math.PI*2,N=HGDN.N,out=[];
+  for(let k=0;k<N;k++){const f=T*k/N,d=new Uint8ClampedArray(128*128*4);
+    for(let y=0;y<128;y++)for(let x=0;x<128;x++){
+      const a=Math.sin(T*(x*2/128)+f+1.7*Math.sin(T*(y*3/128)+2*f)),b=Math.sin(T*(y*3/128+x/128)-f+1.3*Math.sin(T*(x*2/128)+f)),c=Math.sin(T*(x*4/128-y*2/128)+2*f+Math.sin(T*(y*5/128)-f));
+      const h=a*.5+b*.35+c*.25,v=(h+1)*.5,cr=Math.pow(Math.max(0,h),3),o=(y*128+x)*4;
+      d[o]=3+v*9+cr*38;d[o+1]=7+v*20+cr*58;d[o+2]=13+v*36+cr*80;d[o+3]=255}
+    out.push(d)}
+  return HGDN.frames=out}
+/* ---------- the walls: jagged dark rock ---------- */
+function hgdnRock(seed){
+  const S=128,G0=7,C=S/G0,rnd=hgdmRng(seed),pts=[];
+  for(let j=0;j<G0;j++)for(let i=0;i<G0;i++){const ang=rnd()*Math.PI*2,tilt=.25+rnd()*.75;pts.push({x:(i+.15+rnd()*.7)*C,y:(j+.15+rnd()*.7)*C,sh:.5+.5*Math.cos(ang-2.2)*tilt,gx:Math.cos(ang)*tilt,gy:Math.sin(ang)*tilt,tone:.8+rnd()*.4})}
+  const cv=document.createElement('canvas');cv.width=cv.height=S;const cx=cv.getContext('2d'),id=cx.createImageData(S,S),d=id.data;
+  for(let y=0;y<S;y++)for(let x=0;x<S;x++){
+    let d1=1e9,d2=1e9,n1=null;const ci=Math.floor(x/C),cj=Math.floor(y/C);
+    for(let dj=-1;dj<=1;dj++)for(let di=-1;di<=1;di++){const i=(ci+di+G0)%G0,j=(cj+dj+G0)%G0,p=pts[j*G0+i];let px=p.x+(ci+di-i)*0,py=p.y;
+      // wrap the point to the nearest copy
+      let ddx=x-px,ddy=y-py;if(ddx>S/2)ddx-=S;else if(ddx<-S/2)ddx+=S;if(ddy>S/2)ddy-=S;else if(ddy<-S/2)ddy+=S;
+      const dist=Math.hypot(ddx,ddy)*.65+Math.max(Math.abs(ddx),Math.abs(ddy))*.5; // angular facets
+      if(dist<d1){d2=d1;d1=dist;n1={p,ddx,ddy}}else if(dist<d2)d2=dist}
+    const e=d2-d1,p=n1.p;let lum=40+Math.pow(p.sh,1.4)*175*p.tone+(n1.ddx*p.gx+n1.ddy*p.gy)*-1.6;
+    lum+=(Math.sin(x*1.7+y*.9)*Math.sin(y*2.3-x*.6)>.7?-10:0)+(((x*73856093^y*19349663)>>>0)%100)/100*22-11;
+    if(e<3)lum*=.12+e*.12; // the cracks between the facets
+    else if(e<5.5)lum*=(p.gx+p.gy<0)?1.55:.55; // a lit edge on one side, shadow on the other
+    const o=(y*S+x)*4;lum=Math.max(2,lum);d[o]=lum*.97;d[o+1]=lum*.94;d[o+2]=lum*1.08;d[o+3]=255}
+  cx.putImageData(id,0,0);return cv}
+{const _b=hgduBuild;hgduBuild=function(){try{if(!IMG.hgdn_rock){IMG.hgdn_rock=hgdnRock(476101);IMG.hgdn_rock2=hgdnRock(476202);IMG.art_tex_hgdu_brick=IMG.hgdn_rock;IMG.art_tex_hgdu_brick2=IMG.hgdn_rock2}}catch(e){console.error('hgdn rock',e)}return _b.apply(this,arguments)}}
+/* ---------- statues: the demons and the sea horrors, turned to stone ---------- */
+const HGDN_ST=['hgdemon0','hgdemon1','hgdemon2','hgdemon3','hgdemon4','hgdemon5','hgdemon6','hgdemon7','hgdemon8','hgdemon9','hgohag','hgoangler','hgoserpent','hgocorpse','hgoleech','hgocrab'];
+function hgdnStatImgs(){
+  if(HGDN.st)return HGDN.st;const out=[];
+  for(const n of HGDN_ST){const s=IMG['art_'+n];if(!s||!s.width){return null}
+    const w=s.width,h=s.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(s,0,0);const im=x.getImageData(0,0,w,h),p=im.data;
+    for(let k=0;k<p.length;k+=4){if(p[k+3]<8)continue;const px=(k>>2)%w,py=((k>>2)/w)|0;
+      const g=p[k]*.3+p[k+1]*.5+p[k+2]*.2,n2=(((px*73856093^py*19349663)>>>0)%100)/100,v=Math.max(0,Math.min(255,(g-70)*1.25+78+n2*16-8));
+      p[k]=v*.96;p[k+1]=v*.95;p[k+2]=v*1.02} // grey stone: no colour, a little grain
+    x.putImageData(im,0,0);
+    // a dark plinth under it
+    const o=document.createElement('canvas');o.width=w;o.height=Math.round(h*1.06);const ox=o.getContext('2d');ox.drawImage(c,0,0);
+    ox.fillStyle='#3a3836';ox.fillRect(w*.18,h*1.0,w*.64,h*.06);ox.fillStyle='#262424';ox.fillRect(w*.18,h*1.04,w*.64,h*.02);
+    out.push(o)}
+  return HGDN.st=out}
+function hgdnPlace(L){
+  if(L._hgdn)return L._hgdn;const ims=hgdnStatImgs();if(!ims)return null;
+  ims.forEach((c,i)=>{IMG['hgdn_st'+i]=c;NPC_H['hgdn_st'+i]=1.45});
+  const rows=L.rows,H=rows.length,W=rows[0].length,rnd=hgdmRng(476444),open=(x,y)=>rows[y]&&rows[y][x]==='.'&&!(typeof hgoWater==='function'&&hgoWater(x,y)),res=[];
+  const lad=(L._hgdu&&L._hgdu.ladders)||[],keep=[].concat(lad.map(l=>[l.ax,l.ay]),(L._hgdu&&L._hgdu.letters||[]).map(l=>[l.x,l.y]),L._msgr?[[L._msgr.x,L._msgr.y]]:[]);
+  const occ=new Set(L.enemies.concat(L.decor).map(e=>e.x+','+e.y)),tooNear=(x,y)=>keep.some(k=>Math.hypot(k[0]-x,k[1]-y)<4)||res.some(r=>Math.abs(r.x-x)+Math.abs(r.y-y)<9);
+  const DV=[[0,-1],[1,0],[0,1],[-1,0]],cand=[];
+  for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!open(x,y)||occ.has(x+','+y))continue;
+    const deg=DV.filter(d=>open(x+d[0],y+d[1])).length;
+    // the middle of a room: open all round (a statue there never blocks the way)
+    let room=true;for(let j=-1;j<=1&&room;j++)for(let i=-1;i<=1;i++)if(!open(x+i,y+j)){room=false;break}
+    if(deg===1)cand.push([x,y,1,rnd()]);else if(room)cand.push([x,y,2,rnd()])}
+  cand.sort((a,b)=>a[3]-b[3]);
+  for(const c of cand){if(res.length>=70)break;if(tooNear(c[0],c[1]))continue;
+    const k='hgdn_st'+((rnd()*ims.length)|0);res.push({k,x:c[0],y:c[1],hx:1,block:true,deco:true,sc:+(.95+rnd()*.25).toFixed(2),face:c[2]})}
+  for(const r of res)L.decor.push({k:r.k,x:r.x,y:r.y,hx:1,block:true,deco:true,sc:r.sc});
+  return L._hgdn=res}
+function hgdnSync(){
+  const L=LEVELS[HGDN.ID];if(!L||!L._hgdo)return; // after the sea is cut (hgd_ocean.js)
+  const res=hgdnPlace(L);if(!res||G.decor===G._hgdnDecor)return;G._hgdnDecor=G.decor;
+  for(const r of res)if(!G.decor.some(d=>d.x===r.x&&d.y===r.y&&d.k===r.k))G.decor.push({k:r.k,x:r.x,y:r.y,hx:1,block:true,deco:true,sc:r.sc});
+}
+/* ---------- the lines: once each, shuffled ---------- */
+const HGDN_LINES=[
+ ['a','The dark here is not an empty dark. It presses on the eyes like a wet hand.'],
+ ['a','The air is thick and warm and tastes of old copper. Every breath has to be pulled in.'],
+ ['a','Somewhere far off, stone grates on stone, very slowly, as if the walls were turning over in their sleep.'],
+ ['a','The torchlight shrinks back from the walls. It does not like it here either.'],
+ ['a','Water drips in the dark, always just out of sight, always a little closer than the last drip.'],
+ ['a','The corridor bends the light until you cannot tell if the end is ten paces away or a hundred.'],
+ ['a','The rock sweats. The black beads of it run down the walls in the glow and look like slow tears.'],
+ ['a','There is no wind, and yet the dust on the floor lifts and settles, as if the whole place were breathing.'],
+ ['a','Nothing here is square or kind. The walls lean in, jagged as broken teeth, and you feel swallowed.'],
+ ['a','The silence is not silence. It is the sound of many things holding very still and listening to you.'],
+ ['a','A smell of rot and wet fur rolls down the corridor, and the light flickers as it passes.'],
+ ['a','The ground is slick and warm underfoot, like the inside of something alive.'],
+ ['s','A snarl rises from the dark ahead, wet and low, and is answered from three other directions.'],
+ ['s','Claws click on stone behind the walls, keeping pace with the party, and stop when you stop.'],
+ ['s','A long, wet hiss slides along the ceiling. Something up there is licking its teeth.'],
+ ['s','Far below, something howls like a child and a wolf at the same time. The howl is cut off short.'],
+ ['s','Many voices growl together in the distance, a low chant of hunger, and none of them is human.'],
+ ['s','Something drags itself through the dark nearby, a heavy body and a rasping breath, then silence.'],
+ ['s','A chorus of snarls swells from the sea of black, and ends with one single, patient, clicking tongue.'],
+ ['s','Teeth grind in the walls. It is a dry, steady sound, like a mill with nothing left to grind but bone.'],
+ ['s','A shriek tears through the tunnels. It sounds hurt, and it sounds delighted about it.'],
+ ['s','Something big shifts its weight in the dark. Pebbles rattle down the wall beside you.'],
+ ['r','{A} stares into the dark and whispers: "I do not like this place. I do not like it at all."'],
+ ['r','{A} keeps a hand on the weapon and says: "Every shadow here is looking back. Let us find that ladder."'],
+ ['r','{A} mutters: "We were not made for this. Somebody tell me where the first ladder up is."'],
+ ['r','{A} says, trying to laugh: "At least it cannot get any worse." Then something snarls, and nobody laughs.'],
+ ['r','{A} whispers: "I can feel it watching the back of my neck. How far to the surface?"'],
+ ['r','{A} and {B} walk back to back now. Neither of them says why.'],
+ ['r','{B} says in a thin voice: "Please. The first ladder up. Anything with sunlight on it."'],
+ ['r','{B} keeps flinching at the noises. "I am fine," {B} says. Nobody believes it.'],
+ ['r','{A} says quietly: "If we get out of this, I am never going below a cellar again."'],
+ ['r','{A} stops, listens, and goes pale. "Did you hear that? No. Keep walking. Do not look round."'],
+ ['r','{B} says: "My torch is shaking, or is it my hand?" The flame leans away from the dark ahead.'],
+ ['r','{A} says: "Stay close, all of you. Whatever lives down here has had a long time to get hungry."'],
+ ['r','{B} whispers: "I want the sky back. I want one single breath of clean air."'],
+ ['r','{A} says: "Remember the ladder we came down. Somewhere there is one that goes up. We find it, we go."'],
+ ['r','{A} grips {B} by the shoulder, hard. "Together," {A} says. "Out of this hole, together."'],
+ ['r','{B} counts the steps aloud to stay calm, and loses the count every time something growls.'],
+ ['r','{A} says bitterly: "Whoever dug this place was not building a home." {B} says: "No. A trap."'],
+ ['r','{B} says: "Is it me, or are the statues down here turned to face us?"'],
+ ['t','A pale stone figure stands at the end of the corridor, mouth open in a scream. It looks as if it was alive when it was carved.'],
+ ['t','You pass a statue with too many teeth. Its eyes have been left unfinished, as though whoever carved them could not stand to.'],
+ ['t','{A} stops dead before a stone horror, arms spread wide, claws out. "It is only a statue," {A} says, and does not sound sure.'],
+ ['t','The statues down here were put in the dead ends on purpose. Something wanted the lost to see them last.'],
+ ['t','A stone face leers from the dark, cracked with age. A smile that wide should not fit on any face.'],
+ ['t','{B} refuses to walk past the grinning stone thing in the room ahead. "I will wait," {B} says. "Go round."'],
+ ['a','You have lost the sense of time. Hours, minutes, it could be either; the dark does not say.'],
+ ['a','Something very large has just stopped breathing nearby. It is waiting for you to move first.'],
+ ['a','The corridor narrows. The ceiling lowers. The whole level seems to be closing like a fist.'],
+ ['a','A faint red glint hangs in the dark, blinks, and is gone. It has been following for some time.']
+];
+function hgdnLine(){
+  const F=G.flags;F.hgdnSaid=F.hgdnSaid||[];const left=HGDN_LINES.map((l,i)=>i).filter(i=>!F.hgdnSaid.includes(i));if(!left.length)return;
+  const live=[];G.heroes.forEach((h,i)=>{if(h.alive!==false&&h.hp>0)live.push(i)});
+  const i=left[(Math.random()*left.length)|0],L=HGDN_LINES[i];let t=L[1];
+  if(/\{[AB]\}/.test(t)&&!live.length)return;
+  const a=live[(Math.random()*live.length)|0];let b=live.filter(q=>q!==a);b=b.length?b[(Math.random()*b.length)|0]:a;
+  t=t.replace(/\{A\}/g,HERO_DEF[a].name).replace(/\{B\}/g,HERO_DEF[b].name);
+  F.hgdnSaid.push(i);msg(t,{a:'#a498c8',s:'#d88a8a',r:'#e8d29a',t:'#bcbcc4'}[L[0]])}
+/* ---------- the Bogeyman: from behind, at random ---------- */
+function hgdnBogey(){
+  const S=G.hgdn=G.hgdn||{};
+  if(S.warn){ // the warning has run its time: he springs now
+    if(G.time<S.warn)return;S.warn=0;const v=DIRS[G.P.f],bx=G.P.x-v[0],by=G.P.y-v[1];
+    if(!(G.grid[by]&&G.grid[by][bx]===0)||enemyAt(bx,by)){S.next=G.time+6;return}
+    const plvl=Math.round(G.heroes.reduce((n,h)=>n+h.lvl,0)/Math.max(1,G.heroes.length));
+    hlSpawn('hlbogey',bx,by,plvl);const be=G.enemies[G.enemies.length-1];be.alert=true;be.lunge=1;
+    S.scare=G.time;G.shake=.9;sfx('screech');sfx('hit');msg('THE BOGEYMAN IS RIGHT BEHIND YOU!','#ff6a5a');
+    const l=hlLive();if(l.length&&Math.random()<.5){try{afflInflict('shaken',l[(Math.random()*l.length)|0],true)}catch(e){}}
+    S.next=G.time+120+Math.random()*240;return}
+  if(!S.next)S.next=G.time+70+Math.random()*120;
+  if(G.time<S.next||G.cut||G.talk||G.menu||(G.inv&&G.inv.open)||G.loot||!camSettled())return;
+  if(G.enemies.some(e=>e.t==='hlbogey'&&e.hp>0&&!e.dying)){S.next=G.time+60;return}
+  if(G.enemies.some(e=>e.hp>0&&e.alert&&Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)<6)){S.next=G.time+10;return} // never in the middle of another fight
+  S.warn=G.time+1.6+Math.random()*1.8;sfx('step');
+  msg(['The dark behind you has gone very quiet.','Something is breathing, slowly, right at your back.','A cold draught touches the back of your neck.','The torchlight dims, and your shadow is suddenly too long.'][(Math.random()*4)|0],'#9a8fc0')}
+/* ---------- the loop ---------- */
+{const _u=update;update=function(dt){
+  try{if(LEVEL===HGDN.ID&&G.state==='play'){
+      const fr=hgdnFrames(),fi=Math.floor(G.time*6)%HGDN.N;if(fi!==HGDN.fi&&FLOORS.hgo_water){HGDN.fi=fi;FLOORS.hgo_water.set(fr[fi])}
+      hgdnSync();
+      const S=G.hgdn=G.hgdn||{};if(!S.lt)S.lt=G.time+25+Math.random()*30;
+      if(G.time>=S.lt&&!G.cut&&!G.talk&&!G.menu&&!(G.inv&&G.inv.open)){hgdnLine();S.lt=G.time+55+Math.random()*60}
+      hgdnBogey()}}catch(e){console.error('hgdn',e)}
+  return _u.apply(this,arguments)}}
+{const _g=goToLevel;goToLevel=function(){const r=_g.apply(this,arguments);try{G.hgdn=null;G._hgdnDecor=null}catch(e){}return r}}
+/* the jump scare, drawn over everything */
+{const _ui=ui;ui=function(dt){_ui.apply(this,arguments);
+  try{const S=G.hgdn;if(LEVEL===HGDN.ID&&G.state==='play'&&S&&S.scare&&IMG.hl_bogeyA){const t=G.time-S.scare;if(t<1.2){
+      ctx.save();ctx.globalAlpha=Math.min(1,t<.9?.78:.78*(1-(t-.9)/.3));ctx.fillStyle='#000';ctx.fillRect(0,0,DW,DH);ctx.globalAlpha=1;
+      if(t<.12){ctx.fillStyle='rgba(255,255,255,'+(.95*(1-t/.12)).toFixed(3)+')';ctx.fillRect(0,0,DW,DH)}
+      const im=IMG.hl_bogeyA,sc=.8+Math.min(t,.3)/.3*.5+t*.12,h=DH*sc,w=h*im.width/im.height;ctx.globalAlpha=t<.9?1:1-(t-.9)/.3;
+      ctx.drawImage(im,DW/2-w/2+(Math.random()-.5)*5,DH*.52-h*.5+(Math.random()-.5)*5,w,h);ctx.restore()}}}catch(e){}}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

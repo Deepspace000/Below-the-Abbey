@@ -150,3 +150,17 @@ Other
 * On the Deeper Hollow map, the All button was hidden under the map's own buttons, so after choosing a quarter or another view there was no way back to the whole maze. The view buttons now sit beside the map's own buttons, and every view can return to the whole map. Fit, and Minus when the map cannot zoom out any further, also take a close-up quarter back out to the whole map, and a map opened afresh always shows the whole map. The Under button now shows the Underlevel map even before the party has been down there (it was blank until the Underlevel had been visited).
 * Discarding an item in the inventory now asks first: "Discard (item)? It will be gone for good." with Discard and Keep it buttons.
 * The little pet creatures wandering the maze and the clouds drifting through it were not moving at all. They move now, slowly, and the clouds only ever drift over open floor, never through a wall.
+
+The dark of the Underlevel (3.566)
+
+* The black water of the Underlevel now moves: it rolls in slow waves with pale crests, a loop of sixteen pictures.
+* The walls of the Underlevel are jagged dark rock: sharp cracked facets with a lit edge on one side and shadow on the other, two kinds mixed, instead of the plain brick texture.
+* Now and then (about once a minute) a line of text appears. It describes the dark and the oppressive air, the snarling of demonic creatures all round, or how the party reacts and wants to find the first ladder up. Each line is shown once and never repeats (about 50 lines, in a random order, using the names of your heroes).
+* About 60 terrifying stone statues stand in the dead ends and in the middle of the rooms: the demons and sea horrors turned to grey stone on a plinth. They cannot be walked through.
+* The Bogeyman now haunts the Underlevel. At random, every two to six minutes, you get a warning (a quiet line about the dark behind you), then he springs from directly behind with the full screen jump scare, and a fight at the party's own level. Never while another monster is close, and never two at once.
+
+Vermin circles (3.566)
+
+* The dashed red circles on the Deeper Hollow map are now challenges. 27 circles on the surface (13 large, 12 small, 2 in the water) and 14 in the Underlevel (5 large, 8 small, 1 on the black sea). Walking into one shows a counter at the top of the screen that moves aside if text is there.
+* Clearing a circle shows a "free of vermin" banner, turns its map circle green, gives a reward (a strong potion, a weapon, a gem and gold), the people thank you, and it is listed in the achievements.
+* Clearing every circle gives a final message, a high grade piece of armour and exactly 2000 gold on the surface (4000 gold in the Underlevel).

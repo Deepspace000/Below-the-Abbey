@@ -98,7 +98,7 @@ function hgdm3Maze(vi){
     else if(d.k==='hgtb_deco_fountain')ix('fountain',px,py+tw*.4,tw*1.25)}
   // danger rings and warning signs
   for(const z of L._hgdp.zones){if(z.type!=='danger')continue;if(z.x+z.r<vx||z.x-z.r>vx+vw||z.y+z.r<vy||z.y-z.r>vy+vh)continue;
-    x.save();x.strokeStyle='#9a2418';x.lineWidth=big?.9:.7;x.setLineDash([2.4,3]);x.beginPath();x.arc(X(z.x+.5),Y(z.y+.5),z.r*s,0,6.3);x.stroke();x.restore()}
+    x.save();x.strokeStyle=(z.id&&G.flags.hgdVz&&G.flags.hgdVz[z.id])?'#2f8a3a':'#9a2418';x.lineWidth=big?.9:.7;x.setLineDash([2.4,3]);x.beginPath();x.arc(X(z.x+.5),Y(z.y+.5),z.r*s,0,6.3);x.stroke();x.restore()}
   if(big)for(const d of L.decor){if(d.npc!=='hgd_sign'||!inV(d.x,d.y))continue;hgdiDraw(x,'sign',X(d.x+.5),Y(d.y+.5)+2.6,8.5)}
   if(L._hgds)for(const k in L._hgds.doors){const dd=L._hgds.doors[k];if(dd.type==='secret')continue;const p=k.split(',').map(Number);if(!inV(p[0],p[1]))continue;const col=dd.type==='key'?HGDS_KEYS[dd.idx][2]:HGDS_GEMS[dd.idx][2];hgdmpDoorIcon(x,X(p[0]+.5),Y(p[1]+.5),col,dd.type==='gem',big?.85:.6)}
   // the thieves' houses
@@ -167,6 +167,8 @@ function hgdm3Under(){
   x.save();x.beginPath();x.rect(A.x,A.y,A.w,A.h);x.clip();
   // the dark closes in at the edges
   {const v=x.createRadialGradient(A.x+A.w/2,A.y+A.h/2,A.h*.34,A.x+A.w/2,A.y+A.h/2,A.h*.82);v.addColorStop(0,'rgba(4,0,2,0)');v.addColorStop(1,'rgba(4,0,2,.72)');x.fillStyle=v;x.fillRect(A.x,A.y,A.w,A.h)}
+  // the vermin circles: dashed red rings, green once cleared (hgd_verminu.js)
+  for(const z of (U._hgvz||[])){x.save();x.strokeStyle=(G.flags.hgdVz&&G.flags.hgdVz[z.id])?'#38c060':'#d83a24';x.lineWidth=.9;x.setLineDash([2.4,3]);x.beginPath();x.arc(X(z.x+.5),Y(z.y+.5),z.r*s,0,6.3);x.stroke();x.restore()}
   // the ladders, each on a pale glow so they cannot be missed
   for(const l of U._hgdu.ladders){const a=X(l.x+.5),b=Y(l.y+.5),r=9,gr=x.createRadialGradient(a,b,0,a,b,r);gr.addColorStop(0,'rgba(255,236,170,.95)');gr.addColorStop(.55,'rgba(255,210,120,.55)');gr.addColorStop(1,'rgba(255,200,100,0)');x.fillStyle=gr;x.fillRect(a-r,b-r,2*r,2*r);hgdmpLadderIcon(x,a,b,1.1)}
   x.restore();
