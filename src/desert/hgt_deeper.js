@@ -23,6 +23,7 @@ const HGD_Q={
 for(const id in HGD_Q){QUESTS[id]=HGD_Q[id];QAREA[id]='The Hollow Grasslands'}
 if(typeof MAIN_QUESTS!=='undefined')['dh1','dh2','dh3'].forEach(id=>MAIN_QUESTS.add(id));
 const QNEXT_HGD={dh1:'dh2',dh2:'dh3'};
+if(typeof QNOTE!=='undefined')QNOTE.dh3='Bulb presses a coil of silver thread into your hands: a magic map that will record your footsteps in the maze below.';
 {const _t=qTurnIn;qTurnIn=function(id){const ok=_t.apply(this,arguments);if(ok&&QNEXT_HGD[id]&&qSt(QNEXT_HGD[id])===null){qAccept(QNEXT_HGD[id]);msg('New quest: '+QUESTS[QNEXT_HGD[id]].title+'.','#ffe36a')}return ok}}
 const HGD_DESC=[ // the wizard's story, then what each giant says
   'There is a thing I have not told you. Since the Hollow Child-King fell, the corruption has not stopped. It runs from the Orange Spire down into the ground, and it comes up again here: in the wax of the hives, in the pond water, in the way the grubs have started to look at people. It is rising from a place further down, the deeper Hollow Lands, and nobody I know has seen them.',
@@ -51,7 +52,7 @@ hgdGiant(HGD.WHALE,()=>{
   const F=G.flags;
   if(qSt('dh2')!=='done')return say('A great pale whale as big as a house drifts above the plaza on a bulb of warm light, trailing glowing fins. She looks at you gently and does not speak. Perhaps she is waiting for a word from Old Lilac, in Glorm.',[BYE]);
   if(qSt('dh3')==='done'||F.hgdCarry)return say('"Climb on, little ones. Hold the fin and do not look down." Bulb\'s voice is a warm hum. "The gate is open now. Shall I carry you?"',[['Carry us down.',()=>{F.hgdCarry=1;hgdGo();return null}],['Not yet.',()=>null]]);
-  return qNode('dh3',hgdO('"Lilac sent you. Good." The great whale hums low. "I can find the gate, and I can carry you down, but the creatures of the hives are thick around it, and I cannot fly through them. Kill eight of them. Any creature of the hives will do. Then come back and I will take you."','"Then I will wait here. Do not take long."','"Eight! Yes. The air is clearer already. Now: climb onto my back."','Bulb rolls slowly in the air, and her fin settles on the ground like a stair. "Hold on. Do not look down."','"The gate is open. Climb on whenever you like."'));
+  return qNode('dh3',hgdO('"Lilac sent you. Good." The great whale hums low. "I can find the gate, and I can carry you down, but the creatures of the hives are thick around it, and I cannot fly through them. Kill eight of them. Any creature of the hives will do. Then come back and I will take you."','"Then I will wait here. Do not take long."','"Eight! Yes. The air is clearer already. Now: climb onto my back."','Bulb rolls slowly in the air, and her fin settles on the ground like a stair. "Before we go, take this. It is a map woven of silver thread, from the first king\'s loom. It remembers every step you take in the maze below, and draws it for you as a thin glowing line. You will want it. Hold on. Do not look down."','"The gate is open. Climb on whenever you like."'));
 });
 // the whale's carry: a short flight, then the first stretch of the deeper lands
 function hgdGo(){

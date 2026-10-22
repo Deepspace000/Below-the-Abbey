@@ -19,6 +19,21 @@ function hgdmpPrec(L){
       // the label sits on the place of the group nearest its middle, so it never floats over rock
       const n=g.slice().sort((p,q)=>Math.hypot(p[0]-gx,p[1]-gy)-Math.hypot(q[0]-gx,q[1]-gy))[0];out.push({name:tw?tw.name+' Precinct':HGDMP.names[b][i],x:n[0],y:n[1],b})})}
   return M.prec=out}
+/* little huts, one style for each biome, small enough to leave the maze showing: hedge thatch, stone cottage, honeycomb skep, shell roof, sandstone dome, blue tent, mosaic pavilion, gilded onion dome */
+function hgdmpHut(x,a,b,bi,town,u){
+  x.save();x.translate(a,b);x.scale(u,u);x.lineJoin='round';x.lineWidth=.55;const INK=MPL.INK;x.strokeStyle=INK;
+  const door=()=>{x.fillStyle='#3a2410';x.fillRect(-.8,0,1.6,2.4)};
+  if(!town){x.fillStyle='#8aa862';x.beginPath();x.moveTo(-3.2,2.6);x.lineTo(0,-3);x.lineTo(3.2,2.6);x.closePath();x.fill();x.stroke();x.fillStyle='#3a2410';x.beginPath();x.moveTo(-.9,2.6);x.lineTo(0,-.4);x.lineTo(.9,2.6);x.fill();x.restore();return}
+  if(bi===0){x.fillStyle='#efe2b8';x.fillRect(-3,-.5,6,3.2);x.strokeRect(-3,-.5,6,3.2);x.fillStyle='#8a7a2c';x.beginPath();x.moveTo(-4.2,-.5);x.lineTo(0,-5.4);x.lineTo(4.2,-.5);x.closePath();x.fill();x.stroke();x.strokeStyle='rgba(60,40,10,.7)';x.beginPath();x.moveTo(-2.4,-1.4);x.lineTo(2.4,-1.4);x.moveTo(-1.4,-3);x.lineTo(1.4,-3);x.stroke();x.strokeStyle=INK;door()}
+  else if(bi===1){x.fillStyle='#b0aca0';x.fillRect(-3,-.8,6,3.5);x.strokeRect(-3,-.8,6,3.5);x.fillStyle='#4a4a58';x.beginPath();x.moveTo(-3.8,-.8);x.lineTo(0,-4.6);x.lineTo(3.8,-.8);x.closePath();x.fill();x.stroke();x.fillStyle='#8a8478';x.fillRect(1.6,-4.2,1.3,2.6);x.strokeRect(1.6,-4.2,1.3,2.6);x.strokeStyle='rgba(180,180,190,.8)';x.beginPath();x.moveTo(2.2,-4.8);x.quadraticCurveTo(3.4,-6,2.2,-7.2);x.stroke();x.strokeStyle=INK;door()}
+  else if(bi===2){x.fillStyle='#e0a028';for(let k=0;k<3;k++){x.beginPath();x.ellipse(0,2-k*2.2,3.2-k*.8,1.5,0,0,6.3);x.fill();x.stroke()}x.fillStyle='#3a2410';x.beginPath();x.ellipse(0,1.2,.9,.7,0,0,6.3);x.fill()}
+  else if(bi===3){x.fillStyle='#f4e4e0';x.fillRect(-3,-.2,6,2.9);x.strokeRect(-3,-.2,6,2.9);x.fillStyle='#e8a0b4';x.beginPath();x.moveTo(-4,-.2);x.quadraticCurveTo(-4,-5,0,-5.4);x.quadraticCurveTo(4,-5,4,-.2);x.closePath();x.fill();x.stroke();x.strokeStyle='rgba(120,40,70,.7)';x.beginPath();for(const d of [-2.4,-.8,.8,2.4]){x.moveTo(0,-.2);x.lineTo(d,-4.4)}x.stroke();x.strokeStyle=INK;door()}
+  else if(bi===4){x.fillStyle='#e6cd92';x.fillRect(-3,0,6,2.7);x.strokeRect(-3,0,6,2.7);x.beginPath();x.arc(0,0,3,Math.PI,0);x.closePath();x.fill();x.stroke();x.fillStyle='#3a2410';x.fillRect(-.7,.6,1.4,2.1);x.beginPath();x.arc(0,-1.4,.6,0,6.3);x.fill()}
+  else if(bi===5){x.fillStyle='#4a78c8';x.beginPath();x.moveTo(-3.6,2.7);x.lineTo(0,-4);x.lineTo(3.6,2.7);x.closePath();x.fill();x.stroke();x.fillStyle='#dce8ff';x.beginPath();x.moveTo(-.9,2.7);x.lineTo(0,-.2);x.lineTo(.9,2.7);x.fill();x.strokeStyle=INK;x.beginPath();x.moveTo(0,-4);x.lineTo(0,-6);x.stroke();x.fillStyle='#d03a2a';x.beginPath();x.moveTo(0,-6);x.lineTo(2.2,-5.3);x.lineTo(0,-4.6);x.fill()}
+  else if(bi===6){x.fillStyle='#efe6f4';x.fillRect(-3,-.2,6,2.9);x.strokeRect(-3,-.2,6,2.9);x.fillStyle='#8a5ab0';for(let i=0;i<3;i++)for(let j=0;j<2;j++)if((i+j)%2===0)x.fillRect(-3+i*2,-.2+j*1.45,2,1.45);x.fillStyle='#b080d8';x.beginPath();x.moveTo(-3.8,-.2);x.lineTo(0,-4.8);x.lineTo(3.8,-.2);x.closePath();x.fill();x.stroke()}
+  else{x.fillStyle='#f4e8b0';x.fillRect(-2.6,0,5.2,2.7);x.strokeRect(-2.6,0,5.2,2.7);x.fillStyle='#e6b422';x.beginPath();x.moveTo(-3,0);x.quadraticCurveTo(-3.6,-3.4,0,-4.2);x.quadraticCurveTo(3.6,-3.4,3,0);x.closePath();x.fill();x.stroke();x.beginPath();x.moveTo(0,-4.2);x.lineTo(0,-6);x.stroke();x.fillStyle='#3a2410';x.fillRect(-.7,.6,1.4,2.1)}
+  x.restore()}
+function hgdmpLadderIcon(x,a,b,u){x.save();x.translate(a,b);x.scale(u,u);x.strokeStyle='#4a2c14';x.lineWidth=.6;x.fillStyle='#14100a';x.fillRect(-2,-3,4,6);x.strokeRect(-2,-3,4,6);x.strokeStyle='#c08850';x.lineWidth=.5;x.beginPath();x.moveTo(-1,-3);x.lineTo(-1,3);x.moveTo(1,-3);x.lineTo(1,3);for(let y=-2;y<3;y+=1.4){x.moveTo(-1,y);x.lineTo(1,y)}x.stroke();x.restore()}
 function hgdmpSheet(vi){
   const L=LEVELS[HGD.ID];if(!L||!L._hgdp)return null;if(HGDMP.cache[vi])return HGDMP.cache[vi];
   const M=L._hgdm,W=M.W,H=M.H,bio=M.bio,kind=M.kind,rows=L.rows,V=HGDMP.views[vi],[,vname,vx,vy,vw,vh]=V,A=MPL.AREA,pad=4,s=Math.min((A.w-2*pad)/vw,(A.h-2*pad)/vh),ox=A.x+(A.w-vw*s)/2,oy=A.y+(A.h-vh*s)/2;
@@ -53,17 +68,18 @@ function hgdmpSheet(vi){
   if(big)for(const d of L.decor){if(d.npc!=='hgd_sign'||d.x<vx||d.x>=vx+vw||d.y<vy||d.y>=vy+vh)continue;x.fillStyle='#c02a1a';x.strokeStyle=INK;x.lineWidth=.4;const a=X(d.x+.5),b=Y(d.y+.5);x.beginPath();x.moveTo(a,b-2.8);x.lineTo(a+2.4,b+1.8);x.lineTo(a-2.4,b+1.8);x.closePath();x.fill();x.stroke()}
   // locked doors that can be seen: a bold square in the colour of the lock
   if(L._hgds)for(const k in L._hgds.doors){const dd=L._hgds.doors[k];if(dd.type==='secret')continue;const p=k.split(',').map(Number);if(p[0]<vx||p[0]>=vx+vw||p[1]<vy||p[1]>=vy+vh)continue;const col=dd.type==='key'?HGDS_KEYS[dd.idx][2]:HGDS_GEMS[dd.idx][2];x.fillStyle=col;x.strokeStyle=INK;x.lineWidth=.7;const a=X(p[0]+.5),b=Y(p[1]+.5),h=big?3.4:2.4;x.fillRect(a-h,b-h,h*2,h*2);x.strokeRect(a-h,b-h,h*2,h*2)}
-  // towns and enclaves: houses
-  for(const z of L._hgdp.zones){if(z.type!=='safe')continue;if(z.x<vx-2||z.x>vx+vw+2||z.y<vy-2||z.y>vy+vh+2)continue;const a=X(z.x+.5),b=Y(z.y+.5),town=z.town!==undefined,st=(town?1:.7)*(big?1.4:1);
-    x.save();x.translate(a,b);x.scale(st,st);x.strokeStyle=INK;x.lineWidth=.7;x.fillStyle=town?'#f4ecd6':'#e8e0c0';x.fillRect(-4,-3,8,6);x.strokeRect(-4,-3,8,6);x.fillStyle=town?'#b8321e':'#6a8a4a';x.beginPath();x.moveTo(-5,-3);x.lineTo(0,-8);x.lineTo(5,-3);x.closePath();x.fill();x.stroke();x.fillStyle=INK;x.fillRect(-1,0,2,3);x.restore()}
+  // towns and enclaves: small huts (a different style in each biome), and the ladders down
+  for(const z of L._hgdp.zones){if(z.type!=='safe')continue;if(z.x<vx-2||z.x>vx+vw+2||z.y<vy-2||z.y>vy+vh+2)continue;const town=z.town!==undefined;
+    hgdmpHut(x,X(z.x+.5),Y(z.y+.5)-1,bio[z.y*W+z.x],town,(town?.95:.8)*(big?1.05:.7))}
+  if(L._hgdu)for(const l of L._hgdu.ladders){if(l.x<vx||l.x>=vx+vw||l.y<vy||l.y>=vy+vh)continue;hgdmpLadderIcon(x,X(l.x+.5),Y(l.y+.5),big?.9:.62)}
   x.restore();
   // frame, title, compass and key
   mplTitle(x,'The Deeper Hollow',vname,10,12);
   const lx=8,ly=64;x.save();x.font='bold 7px '+FUI;x.fillStyle=INK;x.textAlign='left';x.fillText('BIOMES',lx,ly);
   ['Hedge maze','Stone warrens','Honeycomb reach','Shell galleries','Sandstone deeps','Blue quarter','Mosaic halls','Gilded quarter'].forEach((n,i)=>{const yy=ly+10+i*11;x.fillStyle=HGDMP.tints[i];x.strokeStyle=INK;x.lineWidth=.4;x.fillRect(lx,yy-4,9,7);x.strokeRect(lx,yy-4,9,7);x.fillStyle=INK;x.font='6.2px '+FUI;x.fillText(n,lx+12,yy)});
   const ky=ly+104;x.font='bold 7px '+FUI;x.fillStyle=INK;x.fillText('KEY',lx,ky);
-  const ent=[['Town',()=>{x.fillStyle='#f4ecd6';x.strokeStyle=INK;x.lineWidth=.5;x.fillRect(lx+1,ky+7,7,5);x.strokeRect(lx+1,ky+7,7,5);x.fillStyle='#b8321e';x.beginPath();x.moveTo(lx,ky+7);x.lineTo(lx+4.5,ky+2);x.lineTo(lx+9,ky+7);x.fill();x.stroke()}],['Danger zone',()=>{x.strokeStyle='#9a2418';x.lineWidth=.8;x.setLineDash([2,1.6]);x.beginPath();x.arc(lx+4.5,ky+22,4,0,6.3);x.stroke();x.setLineDash([])}],['Warning sign',()=>{x.fillStyle='#c02a1a';x.strokeStyle=INK;x.lineWidth=.4;x.beginPath();x.moveTo(lx+4.5,ky+31);x.lineTo(lx+7.5,ky+37);x.lineTo(lx+1.5,ky+37);x.fill();x.stroke()}],['Locked door',()=>{x.fillStyle='#e0b030';x.strokeStyle=INK;x.lineWidth=.7;x.fillRect(lx+1,ky+43,7,7);x.strokeRect(lx+1,ky+43,7,7)}]];
-  ent.forEach(([n,dr],i)=>{dr();x.fillStyle=INK;x.font='6.2px '+FUI;x.textAlign='left';x.fillText(n,lx+12,ky+(i===0?10:i===1?22:i===2?34:48))});
+  const ent=[['Town',()=>hgdmpHut(x,lx+4.5,ky+9,2,true,1)],['Safe place',()=>hgdmpHut(x,lx+4.5,ky+21,0,false,1)],['Danger zone',()=>{x.strokeStyle='#9a2418';x.lineWidth=.8;x.setLineDash([2,1.6]);x.beginPath();x.arc(lx+4.5,ky+34,4,0,6.3);x.stroke();x.setLineDash([])}],['Warning sign',()=>{x.fillStyle='#c02a1a';x.strokeStyle=INK;x.lineWidth=.4;x.beginPath();x.moveTo(lx+4.5,ky+43);x.lineTo(lx+7.5,ky+49);x.lineTo(lx+1.5,ky+49);x.fill();x.stroke()}],['Locked door',()=>{x.fillStyle='#e0b030';x.strokeStyle=INK;x.lineWidth=.7;x.fillRect(lx+1,ky+55,7,7);x.strokeRect(lx+1,ky+55,7,7)}],['Ladder down',()=>hgdmpLadderIcon(x,lx+4.5,ky+71,1.1)],['Your footsteps',()=>{x.save();x.strokeStyle='#38b8d0';x.lineWidth=1;x.setLineDash([2,2]);x.beginPath();x.moveTo(lx,ky+82);x.lineTo(lx+9,ky+82);x.stroke();x.restore()}]];
+  ent.forEach(([n,dr],i)=>{dr();x.fillStyle=INK;x.font='6.2px '+FUI;x.textAlign='left';x.fillText(n,lx+12,ky+[10,22,34,46,59,71,82][i])});
   x.restore();mplCompass(x,448,48,17);mplBorder(x);
   return HGDMP.cache[vi]={c,X,Y}}
 /* the names are a separate layer drawn on the screen over the map: no halo and no box, a fixed small size that looks smaller as the map is zoomed in, and the precinct names fade out as you zoom */
@@ -92,9 +108,22 @@ function hgdmpDrawNames(vi){
 {const _do=drawOverview;drawOverview=function(){
   if(LEVEL!==HGD.ID||G.world||G.teleMode||!LEVELS[HGD.ID]||!LEVELS[HGD.ID]._hgdp)return _do.apply(this,arguments);
   const vi=G.hgdView|0,sh=hgdmpSheet(vi);if(!sh)return _do.apply(this,arguments);
-  MPL.reveal=false;mplPaint(sh.c,MPL.S,MPL.AREA,sh.X,sh.Y,'You are the yellow arrow.');hgdmpDrawNames(vi);
+  MPL.reveal=false;mplPaint(sh.c,MPL.S,MPL.AREA,sh.X,sh.Y,'You are the yellow arrow.');hgdmpDrawTrail(vi);hgdmpDrawNames(vi);
   HGDMP.views.forEach((v,i)=>btnText('hgdv'+i,v[0],124+i*29,303,27,17))}}
 {const _h=handleBtn;handleBtn=function(id){if(G.overview&&!G.world&&LEVEL===HGD.ID&&/^hgdv\d$/.test(id)){G.hgdView=+id[4];G.mplKey=null;return}return _h.apply(this,arguments)}}
+/* ---------- the magic map: it records the party's footsteps in the maze ---------- */
+const HGDT_MAX=40000;
+function hgdmpDrawTrail(vi){
+  const F=G.flags,T=F&&F.hgdTrail,V=MPL.view;if(!T||!T.length||!V||!V.z)return;const z=V.z,A=V.area;
+  ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();ctx.lineJoin='round';ctx.lineCap='round';
+  const path=()=>{ctx.beginPath();let pen=false;for(let i=0;i<T.length;i++){const v=T[i];if(v<0){pen=false;continue}const cx=v&255,cy=v>>8,px=A.x+(V.X(cx+.5)-V.sx0)*z,py=A.y+(V.Y(cy+.5)-V.sy0)*z;if(!pen){ctx.moveTo(px,py);pen=true}else ctx.lineTo(px,py)}};
+  path();ctx.strokeStyle='rgba(90,230,255,.45)';ctx.lineWidth=3;ctx.setLineDash([]);ctx.stroke();
+  path();ctx.strokeStyle='#0a98c8';ctx.lineWidth=.85;ctx.setLineDash([2.4,2.6]);ctx.shadowColor='#5ff';ctx.shadowBlur=5;ctx.stroke();
+  ctx.restore()}
+{const _u=update;update=function(dt){try{const F=G.flags;if(LEVEL===HGD.ID&&G.state==='play'&&F&&G.P){
+    if(!F.hgdMapTold&&!G.talk&&!G.cut&&!G.menu){F.hgdMapTold=1;F.hgdMagicMap=1;msg("Bulb's gift, the silver thread map, wakes in your pack and glows faintly. From now on it records your footsteps in this labyrinth.",'#9ff0ff');later(2600,()=>msg('Open the map to see the line of where you have been. It is a thin, glowing, dashed trail.','#9ff0ff'))}
+    if(F.hgdMagicMap){const T=F.hgdTrail||(F.hgdTrail=[]),cell=G.P.x+(G.P.y<<8),last=F.hgdTrailLast;
+      if(cell!==last){if(last!==undefined&&(Math.abs((last&255)-G.P.x)+Math.abs((last>>8)-G.P.y)>2)&&T.length&&T[T.length-1]>=0)T.push(-1);T.push(cell);F.hgdTrailLast=cell;if(T.length>HGDT_MAX)T.splice(0,2000)}}}}catch(e){}return _u.apply(this,arguments)}}
 /* ---------- a small copy of the maze on the world map ---------- */
 WORLD_LOCS.push({k:'deephollow',n:'The Deeper Hollow',sub:'a giant maze',lv:[475],x:-84,y:302,ic:'trees'});
 LEVEL_RATING[HGD.ID]=HGD.DIFF;
