@@ -1,4 +1,4 @@
-Below the Abbey: update 3.558 (changes since 3.534, the update on itch.io before this one, including the last Hollow Grasslands quests and the way down to the Deeper Hollow)
+Below the Abbey: update 3.559 (changes since 3.534, the update on itch.io before this one, including the last Hollow Grasslands quests and the way down to the Deeper Hollow)
 
 The Hollow Grasslands: the last quests, and the way down to the Deeper Hollow
 
@@ -107,6 +107,20 @@ Boats: embark and disembark
 * The reeds in the lakes are much lower, and the bigger reeds on the islets are lower still, so you can see across the water.
 * The wall block at each dock, which showed the picture of the boat twice, one above the other, now shows one dock picture with plain stone above it.
 
+The black sea of the Underlevel
+
+* A huge black sea fills about a third of the Underlevel (about 12,000 squares of deep black water), with a ragged coast of bays and headlands, rock pillars, reefs and islets. Four rivers, 5 to 7 squares wide, leave the sea at its corners and wind round the edge of the level, with branches, and six plank causeways cross them so the labyrinth can still be walked. The water is almost black, the wind howls and the surf is loud near the water (full volume in a boat, fading to nothing beyond twelve squares).
+* There are boats at anchor on the shores, one for each section of water: the first lies at a shore near the first ladder, and the others on the other sections of the sea and the rivers. The Narrow Sea Embark and Disembark buttons work: near a shore, in the boat, a Disembark button puts the party ashore (not with an enemy next to it); on land within eight squares of a boat, an Embark button puts the party aboard.
+* 160 horrors swim in the black water and attack the boat, ten painted kinds, all with red glowing eyes and near-black bodies: a leviathan with rows of teeth, a giant angler with a glowing red lure, a many-tentacled kraken horror, a drowned corpse swimmer, a giant black eel, a sea hag, a blind white abyssal crab, a swarm of bone fish, a black slime serpent and a hooked-jaw giant leech. The Black Leviathan guards the island in the middle of the sea.
+* A treasure chest on the island in the middle of the sea holds 5,000 gold. Five more chests hold 1,000 gold each, on river banks and islets round the level, each guarded by two or three of the Underlevel's creatures.
+* Around the Deeper Hollow, people whisper about a huge treasure below: that under the maze, past the ladders, lies a black sea with an island in the middle, with a chest on it worth more gold than a king has.
+* The Underlevel map shows the sea and rivers as black water.
+* Many more red eyes stare from the dark of the Underlevel: about 290 pairs and clusters of glowing red eyes hang at the far ends of straight corridors and at dead ends, blinking now and then, visible from far away. They are only a stare.
+
+Lake reeds
+
+* There are now many thin, sparse, see-through painted reeds in the lakes and the Flooded Quarter, so you can see across the water, with the dense clumps only now and then.
+
 The marshes
 
 * Eight stretches of the maze are marshes under warm, shallow water that can be waded through, thick with reeds, lilies and tall grass that the party walks straight through. The biggest is the Marsh Maze, and the others are named too (the Reed Flats, Lily Shallows, the Wading Rows, Heron Marsh, the Sedge Fens, Mudwater Court and the Rush Beds). The names are on the map and the water shows light blue. The first time the party wades into each, a message says where it is.
@@ -119,6 +133,7 @@ Controls
 
 Other
 
+* The clouds drifting in the maze were drawn as moving blocks with a cloud painted on them. They are now soft see-through clouds.
 * On the Deeper Hollow map, the All button was hidden under the map's own buttons, so after choosing a quarter or another view there was no way back to the whole maze. The view buttons now sit beside the map's own buttons, and every view can return to the whole map. Fit, and Minus when the map cannot zoom out any further, also take a close-up quarter back out to the whole map, and a map opened afresh always shows the whole map. The Under button now shows the Underlevel map even before the party has been down there (it was blank until the Underlevel had been visited).
 * Discarding an item in the inventory now asks first: "Discard (item)? It will be gone for good." with Discard and Keep it buttons.
 * The little pet creatures wandering the maze and the clouds drifting through it were not moving at all. They move now, slowly, and the clouds only ever drift over open floor, never through a wall.

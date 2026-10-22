@@ -144,7 +144,7 @@ function hgdm3Under(){
   x.fillStyle='#0b0406';x.fillRect(0,0,DW,DH);
   for(let i=0;i<150;i++){x.fillStyle=i%4?'rgba(70,8,10,.16)':'rgba(0,0,0,.35)';x.beginPath();x.ellipse(hgdm3H(i,1)*DW,hgdm3H(i,2)*DH,6+hgdm3H(i,3)*34,3+hgdm3H(i,4)*16,hgdm3H(i,5)*3,0,6.3);x.fill()}
   hgdm3Paint(x,{rows,W,H,vx:0,vy:0,vw:W,vh:H,X,Y,s,S:HGDM3.S,ink:'#060103',pw:[1.3,1.3,1.3,1.3,1.3],hatch:'rgba(0,0,0,.6)',shade:[120,8,10],halo:['rgba(150,10,10,.18)','rgba(170,14,10,.24)'],
-    rock:(cx,cy)=>{const v=hgdm3Vn(cx/9,cy/9),w=hgdm3Vn(cx/3+50,cy/3);return [24+v*40+w*10,8+v*6,12+v*6]},cat:()=>0,floors:['#cdbf9d','#cdbf9d','#cdbf9d','#cdbf9d','#cdbf9d'],
+    rock:(cx,cy)=>{const v=hgdm3Vn(cx/9,cy/9),w=hgdm3Vn(cx/3+50,cy/3);return [24+v*40+w*10,8+v*6,12+v*6]},cat:(cx,cy)=>U._hgdo&&U._hgdo.wm&&U._hgdo.wm[cy*W+cx]?4:0,floors:['#cdbf9d','#cdbf9d','#cdbf9d','#cdbf9d','#06080e'], // the black sea and its rivers: black water
     rockDeco:(g,q)=>{
       // cracks, claw marks and watching eyes in the rock next to the passages
       const cand=[];for(let cy=q.y0;cy<q.y1;cy++)for(let cx=q.x0;cx<q.x1;cx++){if(open(cx,cy))continue;if(open(cx-1,cy)||open(cx+1,cy)||open(cx,cy-1)||open(cx,cy+1))cand.push([cx,cy])}
@@ -154,6 +154,7 @@ function hgdm3Under(){
         else if(h<.14)hgdm3Claws(g,a,b,s*3.6,hgdm3H(cx,cy)*6,'rgba(170,16,12,.85)')}
       for(const [cx,cy] of cand){if(hgdm3H(cx*3.1,cy*1.3)<pe)hgdm3Eyes(g,X(cx+.5),Y(cy+.5),s*1.5,hgdm3H(cy,cx))}},
     corridorDeco:(g,cx,cy,a,b,s)=>{
+      if(U._hgdo&&U._hgdo.wm&&U._hgdo.wm[cy*W+cx])return; // nothing is spilled on the water
       const h=k=>hgdm3H(cx*5+k,cy*11+k*3),v=hgdm3Vn(cx/8+7,cy/8);
       // sickly red light and old blood pools
       if(v>.55&&h(1)<.5){const r=s*1.6,gr=g.createRadialGradient(a,b,0,a,b,r);gr.addColorStop(0,'rgba(190,24,12,'+Math.min(.45,(v-.5)*1.3)+')');gr.addColorStop(1,'rgba(190,24,12,0)');g.fillStyle=gr;g.fillRect(a-r,b-r,2*r,2*r)}

@@ -11,6 +11,13 @@ for(let i=0;i<9;i++)NPC_H['art_hgdf_shield'+i]=.8;
 Object.assign(NPC_H,{art_hgdf_plant0:.95,art_hgdf_plant1:.5,art_hgdf_plant2:.8,art_hgdf_plant3:.55,art_hgdf_plant4:.7,art_hgdf_plant5:.85,art_hgdf_plant6:.35,art_hgdf_plant7:1.0});
 for(let i=0;i<4;i++)NPC_H['art_hgdf_vine'+i]=1.8;
 for(const k of ['aqua1','aqua2','cream1','cream2','lilac1','lilac2','pink1','pinkstreak'])NPC_H['hgt_cloud_'+k]=.75;
+// the cloud pictures are soft clouds on BLACK with no alpha (brightness is the alpha): as plain sprites they showed as opaque blocks with a cloud painted on, so each is turned into a see-through picture
+function hgdfCloudInit(){if(HGDF2_CLOUD_OK)return;let n=0;for(const k of ['aqua1','aqua2','cream1','cream2','lilac1','lilac2','pink1','pinkstreak']){if(IMG['hgdfc_'+k]){n++;continue}
+    const src=IMG['hgt_cloud_'+k];if(!src||!src.width)continue;const S=Math.min(256,src.width),h=Math.max(8,Math.round(S*src.height/src.width)),c=document.createElement('canvas');c.width=S;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(src,0,0,S,h);
+    const d=x.getImageData(0,0,S,h),a=d.data;for(let i=0;i<a.length;i+=4){const l0=Math.max(a[i],a[i+1],a[i+2])/255,l=Math.max(0,(l0-.1)/.9),kk=l0>.02?1/l0:0;a[i]=Math.min(255,a[i]*kk*.92);a[i+1]=Math.min(255,a[i+1]*kk*.92);a[i+2]=Math.min(255,a[i+2]*kk*.92);a[i+3]=Math.min(255,Math.pow(l,.85)*255*.85)} // the dark noise of the black background counts as nothing
+    x.putImageData(d,0,0);IMG['hgdfc_'+k]=c;NPC_H['hgdfc_'+k]=.75;n++}
+  if(n>=8)HGDF2_CLOUD_OK=true}
+let HGDF2_CLOUD_OK=false;
 const HGDF2_WSYM=[0,1,2,3,4,5,6,7],HGDF2_SHIELD=[0,1,2,5,3,4,7,8],HGDF2_EXTRA=[8,9,10,11,12,13,14,15],HGDF2_CLOUDS=['cream1','cream2','aqua1','aqua2','lilac1','lilac2','pink1'];
 function hgdf2Build(L){
   if(L._hgdf2)return;const M=L._hgdm,W=M.W,P=L._hgdp,rows=L.rows,kind=M.kind,bio=M.bio,rnd=hgdmRng(475020),open=(x,y)=>rows[y]&&rows[y][x]==='.';
@@ -43,10 +50,11 @@ function hgdf2Build(L){
   const clouds=[];let tc=0;const cells2=[...reach];const homes=[];
   while(homes.length<7&&tc++<4000){const c=cells2[(rnd()*cells2.length)|0].split(',').map(Number);if(homes.some(h=>Math.hypot(h[0]-c[0],h[1]-c[1])<26))continue;homes.push(c)}
   homes.forEach((h,hi)=>{for(let k=0;k<4;k++){const id='hgdcloud'+hi+'_'+k;let c=h;const near=cells2.map(s=>s.split(',').map(Number)).filter(s=>Math.hypot(s[0]-h[0],s[1]-h[1])<=7);if(near.length)c=near[(rnd()*near.length)|0];
-    L.decor.push({k:'hgt_cloud_'+HGDF2_CLOUDS[(rnd()*HGDF2_CLOUDS.length)|0],x:c[0],y:c[1],block:false,walk:true,deco:true,cloudid:id,sc:1.5+rnd()*.8,bob:.6+rnd()*.25});clouds.push({id,home:h,cell:[c[0],c[1]],tgt:null,f:0,wait:rnd()*3,prev:null})}});
+    L.decor.push({k:'hgdfc_'+HGDF2_CLOUDS[(rnd()*HGDF2_CLOUDS.length)|0],x:c[0],y:c[1],block:false,walk:true,deco:true,cloudid:id,sc:1.5+rnd()*.8,bob:.6+rnd()*.25});clouds.push({id,home:h,cell:[c[0],c[1]],tgt:null,f:0,wait:rnd()*3,prev:null})}});
   L._hgdf2={symbols:ns,shields:nsh,vines:nv,plants:np,wild:wild.length,clouds:clouds.length,cloudAgents:clouds}}
 // the drift: a cloud steps to a neighbouring open floor square, mostly straight on, slowly; it never enters a wall or a blocked square
 {const _u=update;let dec=null,map=null,blk=null;update=function(dt){
+  try{hgdfCloudInit()}catch(e){}
   try{if(LEVEL===HGD.ID&&G.state==='play'&&G.decor){const L=LEVELS[HGD.ID];if(L&&L._hgdf2){
     if(dec!==G.decor){dec=G.decor;map=new Map();blk=new Set(G.decor.filter(q=>q.block).map(q=>q.x+','+q.y))}
     const open=(x,y)=>L.rows[y]&&L.rows[y][x]==='.'&&!blk.has(x+','+y);
