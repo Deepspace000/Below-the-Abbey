@@ -56,17 +56,6 @@ function hgdmpSheet(vi){
   // towns and enclaves: houses
   for(const z of L._hgdp.zones){if(z.type!=='safe')continue;if(z.x<vx-2||z.x>vx+vw+2||z.y<vy-2||z.y>vy+vh+2)continue;const a=X(z.x+.5),b=Y(z.y+.5),town=z.town!==undefined,st=(town?1:.7)*(big?1.4:1);
     x.save();x.translate(a,b);x.scale(st,st);x.strokeStyle=INK;x.lineWidth=.7;x.fillStyle=town?'#f4ecd6':'#e8e0c0';x.fillRect(-4,-3,8,6);x.strokeRect(-4,-3,8,6);x.fillStyle=town?'#b8321e':'#6a8a4a';x.beginPath();x.moveTo(-5,-3);x.lineTo(0,-8);x.lineTo(5,-3);x.closePath();x.fill();x.stroke();x.fillStyle=INK;x.fillRect(-1,0,2,3);x.restore()}
-  // labels: towns first, then the danger zones, then the door, then the precincts last and only where there is room; every label is kept inside the frame and off the others
-  const LR=[],lbl=(t,a,b,sz,fill,opt,italic)=>{const font=(italic?'italic ':'')+'bold '+sz+'px '+FUI;x.save();x.font=font;const w=x.measureText(t).width;x.restore();
-    for(const dy of [0,-sz*.9,sz*.9,-sz*1.8,sz*1.8]){const bx=Math.max(A.x+w/2+2,Math.min(A.x+A.w-w/2-2,a)),by=Math.max(A.y+sz/2+3,Math.min(A.y+A.h-sz/2-3,b+dy));
-      if(LR.some(q=>Math.abs(q.x-bx)<(q.w+w)/2+1&&Math.abs(q.y-by)<(q.h+sz)/2))continue;
-      LR.push({x:bx,y:by,w,h:sz+1});x.save();x.font=font;x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';x.lineWidth=3;x.strokeStyle='rgba(243,233,200,.95)';x.strokeText(t,bx,by);x.fillStyle=fill;x.fillText(t,bx,by);x.restore();return true}
-    if(!opt){const bx=Math.max(A.x+w/2+2,Math.min(A.x+A.w-w/2-2,a)),by=Math.max(A.y+sz/2+3,Math.min(A.y+A.h-sz/2-3,b));LR.push({x:bx,y:by,w,h:sz+1});x.save();x.font=font;x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';x.lineWidth=3;x.strokeStyle='rgba(243,233,200,.95)';x.strokeText(t,bx,by);x.fillStyle=fill;x.fillText(t,bx,by);x.restore();return true}
-    return false};
-  for(const z of L._hgdp.zones){if(z.type!=='safe'||z.x<vx-2||z.x>vx+vw+2||z.y<vy-2||z.y>vy+vh+2)continue;const town=z.town!==undefined;lbl(z.name,X(z.x+.5),Y(z.y+.5)+(big?12:9),big?(town?8:6.4):(town?5.8:4.6),town?'#6a1a10':'#2a4a22')}
-  for(const z of L._hgdp.zones){if(z.type!=='danger'||z.x+z.r<vx||z.x-z.r>vx+vw||z.y+z.r<vy||z.y-z.r>vy+vh)continue;if(lbl(z.name,X(z.x+.5),Y(z.y+.5),big?7:5,'#8a1a10')){x.save();x.strokeStyle='#8a1a10';x.lineWidth=.9;const a=X(z.x+.5),b=Y(z.y+.5)+(big?8:6);x.beginPath();x.moveTo(a-3,b-2);x.lineTo(a+3,b+2);x.moveTo(a+3,b-2);x.lineTo(a-3,b+2);x.stroke();x.restore()}}
-  {const a=X(M.sx+.5),b=Y(M.H-1.5);if(b<A.y+A.h&&a>A.x&&a<A.x+A.w){x.save();x.translate(a,b);x.fillStyle='#d8d0bc';x.strokeStyle=INK;x.lineWidth=.8;x.fillRect(-5,-4,10,5);x.strokeRect(-5,-4,10,5);x.restore();lbl('THE DOOR IN',a,b-9,big?7:5.4,INK)}}
-  for(const p of hgdmpPrec(L)){if(p.x<vx-2||p.x>vx+vw+2||p.y<vy-2||p.y>vy+vh+2)continue;lbl(p.name.toUpperCase(),X(p.x),Y(p.y),big?7.4:4.4,'rgba(70,40,20,.92)',true,true)}
   x.restore();
   // frame, title, compass and key
   mplTitle(x,'The Deeper Hollow',vname,10,12);
@@ -77,11 +66,33 @@ function hgdmpSheet(vi){
   ent.forEach(([n,dr],i)=>{dr();x.fillStyle=INK;x.font='6.2px '+FUI;x.textAlign='left';x.fillText(n,lx+12,ky+(i===0?10:i===1?22:i===2?34:48))});
   x.restore();mplCompass(x,448,48,17);mplBorder(x);
   return HGDMP.cache[vi]={c,X,Y}}
+/* the names are a separate layer drawn on the screen over the map: no halo and no box, a fixed small size that looks smaller as the map is zoomed in, and the precinct names fade out as you zoom */
+function hgdmpNames(vi){
+  const L=LEVELS[HGD.ID];if(!L||!L._hgdp)return[];const V=HGDMP.views[vi],[,,vx,vy,vw,vh]=V,M=L._hgdm,out=[];
+  const inV=(x,y)=>x>=vx-2&&x<=vx+vw+2&&y>=vy-2&&y<=vy+vh+2;
+  for(const z of L._hgdp.zones){if(!inV(z.x,z.y))continue;if(z.type==='safe')out.push({t:z.name,x:z.x+.5,y:z.y+.5,dy:z.town!==undefined?7:5,k:z.town!==undefined?'town':'encl'});else out.push({t:z.name,x:z.x+.5,y:z.y+.5,dy:0,k:'danger'})}
+  out.push({t:'THE DOOR IN',x:M.sx+.5,y:M.H-1.5,dy:-5,k:'door'});
+  for(const p of hgdmpPrec(L))if(inV(p.x,p.y))out.push({t:p.name.toUpperCase(),x:p.x+.5,y:p.y+.5,dy:0,k:'prec'});
+  return out}
+function hgdmpDrawNames(vi){
+  const V=MPL.view;if(!V||!V.z)return;const z=V.z,A=V.area,names=hgdmpNames(vi),box=[];
+  const col={town:'#6a1a10',encl:'#2a4a22',danger:'#8a1a10',door:'#2a1a0c',prec:'#46281a'},base={town:7,encl:5.6,danger:6,door:5.6,prec:5.8};
+  ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();ctx.textAlign='center';ctx.textBaseline='middle';
+  const order=['town','encl','danger','door','prec'];
+  for(const kd of order)for(const n of names){if(n.k!==kd)continue;
+    const sz=Math.max(4.6,base[kd]/Math.pow(z,.4)),al=kd==='prec'?Math.max(.3,Math.min(.9,1.25-(z-1)*.3)):Math.max(.7,Math.min(1,1.1-(z-1)*.05));
+    if(kd==='prec'&&al<=.32)continue;
+    ctx.font=(kd==='prec'?'italic ':'')+'bold '+sz+'px '+FUI;const w=ctx.measureText(n.t).width,px0=A.x+(V.X(n.x)-V.sx0)*z,py0=A.y+(V.Y(n.y+n.dy)-V.sy0)*z;
+    if(px0<A.x-w||px0>A.x+A.w+w||py0<A.y-8||py0>A.y+A.h+8)continue;
+    const px=Math.max(A.x+w/2+1,Math.min(A.x+A.w-w/2-1,px0));let py=py0,placed=false;
+    for(const o of [0,-sz*.9,sz*.9,-sz*1.8,sz*1.8]){const yy=Math.max(A.y+sz/2+1,Math.min(A.y+A.h-sz/2-1,py0+o));if(box.some(q=>Math.abs(q.x-px)<(q.w+w)/2+1&&Math.abs(q.y-yy)<(q.h+sz)/2)){if(kd==='prec')continue;continue}py=yy;placed=true;break}
+    if(!placed)continue;box.push({x:px,y:py,w,h:sz+1});ctx.globalAlpha=al;ctx.fillStyle=col[kd];ctx.fillText(n.t,px,py)}
+  ctx.restore()}
 // the screen
 {const _do=drawOverview;drawOverview=function(){
   if(LEVEL!==HGD.ID||G.world||G.teleMode||!LEVELS[HGD.ID]||!LEVELS[HGD.ID]._hgdp)return _do.apply(this,arguments);
   const vi=G.hgdView|0,sh=hgdmpSheet(vi);if(!sh)return _do.apply(this,arguments);
-  MPL.reveal=false;mplPaint(sh.c,MPL.S,MPL.AREA,sh.X,sh.Y,'You are the yellow arrow.');
+  MPL.reveal=false;mplPaint(sh.c,MPL.S,MPL.AREA,sh.X,sh.Y,'You are the yellow arrow.');hgdmpDrawNames(vi);
   HGDMP.views.forEach((v,i)=>btnText('hgdv'+i,v[0],124+i*29,303,27,17))}}
 {const _h=handleBtn;handleBtn=function(id){if(G.overview&&!G.world&&LEVEL===HGD.ID&&/^hgdv\d$/.test(id)){G.hgdView=+id[4];G.mplKey=null;return}return _h.apply(this,arguments)}}
 /* ---------- a small copy of the maze on the world map ---------- */
