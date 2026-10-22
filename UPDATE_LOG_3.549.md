@@ -180,3 +180,7 @@ Shop stalls and the dollar sign (3.569)
 
 * Each of the 40 shopkeepers in the eight maze towns (general shop, weapons, armour, magic, trader) and the 8 inns now has a painted stall or front standing behind them that shows what they sell: a goods stall with baskets and barrels, a weapon rack, helmets and breastplates, bottles under a purple star awning, crates and cloth under a striped awning, and a thatched inn front with a hanging sign. The stall always stands behind the keeper, whichever way you come from, and does not block the way.
 * A gold dollar sign floats above every shopkeeper, the way the gold ! floats over quest givers. Shops also show as a gold dot on the minimap and a $ on the large maps.
+
+Shops on the map (3.570)
+
+* On the Deeper Hollow map, every shop now shows as a gold $ once the map is zoomed in a little. Zoom in further and the kind of shop is written under it (Goods, Arms, Armour, Magic, Trader, Inn). Labels that would crowd each other are left out.
