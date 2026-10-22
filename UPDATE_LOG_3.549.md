@@ -1,4 +1,4 @@
-Below the Abbey: update 3.552 (changes since 3.534, the update on itch.io before this one, including the last Hollow Grasslands quests and the way down to the Deeper Hollow)
+Below the Abbey: update 3.554 (changes since 3.534, the update on itch.io before this one, including the last Hollow Grasslands quests and the way down to the Deeper Hollow)
 
 The Hollow Grasslands: the last quests, and the way down to the Deeper Hollow
 
@@ -105,6 +105,6 @@ Controls
 
 Other
 
-* On the Deeper Hollow map, the All button was hidden under the map's own buttons, so after choosing a quarter or another view there was no way back to the whole maze. The view buttons now sit beside the map's own buttons, and every view can return to the whole map.
+* On the Deeper Hollow map, the All button was hidden under the map's own buttons, so after choosing a quarter or another view there was no way back to the whole maze. The view buttons now sit beside the map's own buttons, and every view can return to the whole map. Fit, and Minus when the map cannot zoom out any further, also take a close-up quarter back out to the whole map, and a map opened afresh always shows the whole map.
 * Discarding an item in the inventory now asks first: "Discard (item)? It will be gone for good." with Discard and Keep it buttons.
 * The little pet creatures wandering the maze and the clouds drifting through it were not moving at all. They move now, slowly, and the clouds only ever drift over open floor, never through a wall.
