@@ -79,7 +79,8 @@ function hgduBuild(){
   const nests=[];for(let k=0;k<12;k++){const n=nodes[(rnd()*nodes.length)|0],ox=n.x+((rnd()-.5)*20|0),oy=n.y+((rnd()-.5)*20|0),r=2;for(let y=oy-r;y<=oy+r;y++)for(let x=ox-r;x<=ox+r;x++)carve(x,y);nests.push([ox,oy])}
   // the ladders up, in the same walls as the ladders down
   const TM=ohTiles(),chars={};
-  OH_STY.hgdu_rock=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:IMG.art_tex_hgdp_cave?'art_tex_hgdp_cave':'art_tex_wall_cave',door:IMG.art_tex_hgdp_cave?'art_tex_hgdp_cave':'art_tex_wall_cave',win:IMG.art_tex_hgdp_cave?'art_tex_hgdp_cave':'art_tex_wall_cave',alt:IMG.art_tex_hgdp_cave?'art_tex_hgdp_cave':'art_tex_wall_cave',zoom:1,contrast:1.05,tint:[10,8,16,.4]});
+  const BR=IMG.art_tex_hgdu_brick&&IMG.art_tex_hgdu_brick.width?'art_tex_hgdu_brick':null,BR2=IMG.art_tex_hgdu_brick2&&IMG.art_tex_hgdu_brick2.width?'art_tex_hgdu_brick2':BR;
+  OH_STY.hgdu_rock=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:BR||(IMG.art_tex_hgdp_cave?'art_tex_hgdp_cave':'art_tex_wall_cave'),door:BR||'art_tex_wall_cave',win:BR2||'art_tex_wall_cave',alt:BR2||'art_tex_wall_cave',zoom:1,contrast:1.0,tint:[4,3,5,.5]});
   OH_STY.hgdu_up=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:hgduTex(true),door:hgduTex(true),win:hgduTex(true),alt:hgduTex(true),zoom:1,contrast:1.0,tint:[255,255,255,0]});
   chars['#']=TM.make('plain','hgdu_rock',2.7).gid;const chUp=String.fromCharCode(0x331);chars[chUp]=TM.make('plain','hgdu_up',2.7).gid;
   for(const l of SU.ladders)g[l.y][l.x]=chUp;
@@ -88,12 +89,14 @@ function hgduBuild(){
   const enemies=[],used=new Set();const ids=HGDU_KINDS.map(k=>k[0]);
   for(let k=0;k<340&&cells.length;k++){const c=cells.splice((rnd()*cells.length)|0,1)[0];used.add(c[0]+','+c[1]);enemies.push({t:ids[(rnd()*ids.length)|0],x:c[0],y:c[1]})}
   for(const n of nests)for(let k=0;k<7;k++){const x=n[0]+((rnd()*5-2)|0),y=n[1]+((rnd()*5-2)|0);if(g[y]&&g[y][x]==='.'&&!used.has(x+','+y)){used.add(x+','+y);enemies.push({t:ids[(rnd()*ids.length)|0],x,y})}}
+  // ten demon-insect bosses wander the corridors, far apart (see hgd_minis.js)
+  {const bs=[];for(const c of cells.slice().sort(()=>rnd()-.5)){if(bs.length>=10)break;if(bs.every(o=>Math.hypot(o[0]-c[0],o[1]-c[1])>=32)&&!SU.ladders.some(l=>Math.hypot(l.ax-c[0],l.ay-c[1])<22)&&!used.has(c[0]+','+c[1])){bs.push(c);used.add(c[0]+','+c[1]);enemies.push({t:'hgdemon'+(bs.length-1),x:c[0],y:c[1]})}}}
   // the Messenger of Death and his five letters, one at the end of each of five far-apart dead ends
   const letters=[];const sp=spurs.slice().sort(()=>rnd()-.5);
   for(const s of sp){if(letters.length>=5)break;if(letters.every(l=>Math.hypot(l.x-s[0],l.y-s[1])>=40)){const w=dirs.find(d=>g[s[1]+d[1]]&&g[s[1]+d[1]][s[0]+d[0]]==='#');if(w)letters.push({x:s[0],y:s[1],wd:[w[0],w[1]]})}}
   const mid=cells.length?cells[(rnd()*cells.length)|0]:[W>>1,H>>1];
   const a0=SU.ladders[0];
-  const L={rows:g.map(r=>r.join('')),start:{x:a0.ax,y:a0.ay,f:0},enemies,items:[],decor:[],chars,day:0,amb:0,floor:'dirt',floor2:'mud',name:'The Underlevel',label:'The Underlevel',diff:HGDU.DIFF,ceilH:2.2,torchGap:1e9,noTele:true,noExtras:true,portals:[],lights:[],
+  const L={rows:g.map(r=>r.join('')),start:{x:a0.ax,y:a0.ay,f:0},enemies,items:[],decor:[],chars,day:0,amb:0,floor:FLOORS.hgduf?'hgduf':'dirt',floor2:FLOORS.hgduf2?'hgduf2':'mud',name:'The Underlevel',label:'The Underlevel',diff:HGDU.DIFF,ceilH:2.2,torchGap:1e9,noTele:true,noExtras:true,portals:[],lights:[],
     _hgdu:{ladders:SU.ladders,spurs:spurs.length,nests:nests.length,letters},_msgr:letters.length===5?{x:mid[0],y:mid[1],letters:letters.map((l,i)=>({k:MSG_LETTERS[i],x:l.x,y:l.y,wd:l.wd}))}:null,
     mapNames:[{t:'The Underlevel',x:100,y:100,k:'place'}]};
   LEVELS[HGDU.ID]=L}

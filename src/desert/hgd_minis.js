@@ -40,7 +40,7 @@ function hgdm2Build(L){
   return _ea.apply(this,arguments)}}
 // the marks on the mini map: seen from far off, so they can be avoided
 {const _m=drawMinimap;drawMinimap=function(x,y,w,h){_m.apply(this,arguments);
-  try{if(LEVEL===HGD.ID&&G.state==='play'){const cs=4.6,ox=x+w/2-(G.C.x+.5)*cs,oy=y+h/2-(G.C.y+.5)*cs;
+  try{if((LEVEL===HGD.ID||LEVEL===HGDU.ID)&&G.state==='play'){const cs=4.6,ox=x+w/2-(G.C.x+.5)*cs,oy=y+h/2-(G.C.y+.5)*cs;
     ctx.save();ctx.beginPath();ctx.rect(x+2,y+2,w-4,h-4);ctx.clip();
     for(const e of G.enemies){const def=ENEMY_DEF[e.t];if(e.hp<=0||!def||!def.mini)continue;
       const px=ox+(e.rx+.5)*cs,py=oy+(e.ry+.5)*cs;if(px<x-6||px>x+w+6||py<y-6||py>y+h+6)continue;
@@ -83,3 +83,10 @@ Object.assign(ITEMDEF,{
 {const done=new Set();for(const id in ITEMDEF){const d=ITEMDEF[id];if(!d||d.k!=='weapon'||!d.lvl||d.lvl<30||done.has(d))continue;done.add(d);
   const f=(d.lvl>=65?1:d.lvl<=50?3.4-(d.lvl-30)*.04:2.9)*.9; // then 10% off every weapon of level 30 and above, the Sunfire Blade and the level 70 weapons included
   d.dmg=[Math.round(d.dmg[0]*f),Math.round(d.dmg[1]*f)]}}
+
+/* ---------- the underlevel: ten demon-insect bosses (painted, assets/ds_hgdemon*.png) that wander the corridors the same way, and a much darker light ---------- */
+{const N=['Mantis Demon','Scorpion Demon','Beetle Demon','Wasp Demon','Centipede Demon','Spider Demon','Moth Demon','Locust Demon','Fly Demon','Cicada Demon'],V=['slashes','stings','gores','jabs','lashes','bites','smothers','rakes','sickens','shrieks at'];
+  N.forEach((n,i)=>{ENEMY_DEF['hgdemon'+i]={name:n,hp:1200+i*70,dmg:[26+i,42+i],hit:.84,w:2.2,img:'art_hgdemon'+i,xp:1800+i*60,gold:[150,320],speed:1,verb:V[i],mini:1,aboveParty:0};if(typeof NO_VARY!=='undefined')NO_VARY.push('hgdemon'+i)})}
+{const _sl=setLightLevel;setLightLevel=function(l){_sl.apply(this,arguments);
+  if(LEVEL===HGDU.ID){RANGE=2.8+.7*l;const amp=.34+.1*l;for(let i=0;i<=1024;i++){const t=1-i/1024;LUT[i]=AMB*.25+(t>0?amp*Math.pow(t,1.9):0)}}}}
+{const _u=update;update=function(dt){const u=LEVEL===HGDU.ID;if(update._hu!==u){update._hu=u;try{setLightLevel(G.lightLevel)}catch(e){}}return _u.apply(this,arguments)}}
