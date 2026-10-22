@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.521';
+const VERSION='3.522';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -43562,6 +43562,36 @@ if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push(...HGDS_KEYS.map(k=>'hgdk
 for(const [id,k] of [['dq3','red'],['dq6','blue'],['dq9','green'],['dq11','gold']])if(QUESTS[id])QUESTS[id].reward.items=(QUESTS[id].reward.items||[]).concat(['hgdkey_'+k]);
 if(typeof HGDP_SHOPS!=='undefined'){HGDP_SHOPS[2][1].push(['hgdkey_red',3]);HGDP_SHOPS[6][1].push(['hgdkey_blue',3],['hgdkey_green',3]);HGDP_SHOPS[7][1].push(['hgdkey_gold',3],['hgdgem_pearl',1]);HGDP_SHOPS[3][1].push(['hgdkey_green',2])}
 if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('A door with a gem set in it wants that gem, and takes it. Keys are used up the same way. Save them for the good doors.','The walls of a secret door are a shade off from the rest. Walk into one and see.','Dead ends are not always dead. Some have a door that is not a door.');
+/* ---------- the looks of the doors (drawn in code: walls and doors may be) ---------- */
+function hgdsTexSecret(i){ // the wall of its biome, with a hairline seam in the shape of a door and a few scuffs: it can be spotted by a careful eye
+  const key='hgds_sec'+i;if(IMG[key])return key;const b=IMG[HGDM.biomes[i].wall];
+  IMG[key]=mkCanvas(128,128,(x,w,h)=>{if(b)x.drawImage(b,0,0,w,h);else{x.fillStyle='#777';x.fillRect(0,0,w,h)}
+    x.fillStyle='rgba(255,230,170,.10)';x.fillRect(0,0,w,h);
+    x.strokeStyle='rgba(18,10,4,.7)';x.lineWidth=1.8;x.lineJoin='round';x.beginPath();x.moveTo(34,h);x.lineTo(34,30);x.quadraticCurveTo(34,14,64,14);x.quadraticCurveTo(94,14,94,30);x.lineTo(94,h);x.stroke();
+    x.strokeStyle='rgba(255,240,200,.45)';x.lineWidth=1;x.beginPath();x.moveTo(36,h);x.lineTo(36,30);x.quadraticCurveTo(36,16,64,16);x.stroke();
+    x.fillStyle='rgba(18,10,4,.45)';for(const [a,c] of [[44,100],[80,112],[56,70],[72,44]]){x.beginPath();x.ellipse(a,c,2.4,1.2,0,0,6.3);x.fill()}});
+  return key}
+function hgdsTexKey(k){ // a banded wooden door with an iron lock plate and a stripe of the key's colour
+  const key='hgds_key'+k[0];if(IMG[key])return key;const col=k[2];
+  IMG[key]=mkCanvas(128,128,(x,w,h)=>{const g=x.createLinearGradient(0,0,w,0);g.addColorStop(0,'#4a2c18');g.addColorStop(.5,'#6a4426');g.addColorStop(1,'#42281a');x.fillStyle=g;x.fillRect(0,0,w,h);
+    x.strokeStyle='rgba(20,10,4,.55)';x.lineWidth=1.4;for(let i=1;i<6;i++){x.beginPath();x.moveTo(i*w/6,0);x.lineTo(i*w/6,h);x.stroke()}
+    x.fillStyle='#2a2a30';for(const y of [22,100]){x.fillRect(0,y,w,10);x.fillStyle='#9a9aa4';for(let a=8;a<w;a+=18){x.beginPath();x.arc(a,y+5,1.6,0,6.3);x.fill()}x.fillStyle='#2a2a30'}
+    x.fillStyle=col;x.fillRect(0,56,w,16);x.strokeStyle='rgba(0,0,0,.6)';x.lineWidth=1.4;x.strokeRect(.7,56,w-1.4,16);
+    x.fillStyle='#22222a';x.strokeStyle='#c8c8d0';x.lineWidth=1.6;x.beginPath();x.arc(64,64,17,0,6.3);x.fill();x.stroke();
+    x.fillStyle='#d8d8e0';x.beginPath();x.arc(64,60,4.4,0,6.3);x.fill();x.fillRect(62,60,4,13);
+    x.strokeStyle='rgba(0,0,0,.8)';x.lineWidth=3;x.strokeRect(1.5,1.5,w-3,h-3)});
+  return key}
+function hgdsTexGem(g){ // a carved stone slab with a golden ring and a large cut gem that glows in its own colour
+  const key='hgds_gem'+g[0];if(IMG[key])return key;const col=g[2],rgb=g[3];
+  IMG[key]=mkCanvas(128,128,(x,w,h)=>{x.fillStyle='#6a665e';x.fillRect(0,0,w,h);
+    x.strokeStyle='rgba(20,16,10,.55)';x.lineWidth=1.4;for(const y of [32,64,96]){x.beginPath();x.moveTo(0,y);x.lineTo(w,y);x.stroke()}for(const [y,a] of [[0,48],[32,80],[64,40],[96,88]]){x.beginPath();x.moveTo(a,y);x.lineTo(a,y+32);x.stroke()}
+    const rg=x.createRadialGradient(64,64,6,64,64,60);rg.addColorStop(0,'rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+',.55)');rg.addColorStop(1,'rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+',0)');x.fillStyle=rg;x.fillRect(0,0,w,h);
+    x.strokeStyle='#d8b440';x.lineWidth=4;x.beginPath();x.arc(64,64,36,0,6.3);x.stroke();x.strokeStyle='#7a5a18';x.lineWidth=1.2;x.beginPath();x.arc(64,64,38.5,0,6.3);x.stroke();x.beginPath();x.arc(64,64,33.5,0,6.3);x.stroke();
+    const pts=[[64,34],[88,52],[88,76],[64,94],[40,76],[40,52]];x.fillStyle=col;x.strokeStyle='#201810';x.lineWidth=1.6;x.beginPath();pts.forEach((p,i)=>i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.closePath();x.fill();x.stroke();
+    x.strokeStyle='rgba(255,255,255,.6)';x.lineWidth=1;x.beginPath();x.moveTo(40,52);x.lineTo(64,64);x.lineTo(88,52);x.moveTo(64,64);x.lineTo(64,94);x.stroke();
+    x.fillStyle='rgba(255,255,255,.65)';x.beginPath();x.moveTo(52,46);x.lineTo(62,40);x.lineTo(58,52);x.closePath();x.fill();
+    x.strokeStyle='rgba(0,0,0,.7)';x.lineWidth=3;x.strokeRect(1.5,1.5,w-3,h-3)});
+  return key}
 /* ---------- placing them ---------- */
 function hgdsBuild(L){
   if(L._hgds)return;const M=L._hgdm,W=M.W,H=M.H,rows=L.rows.map(r=>r.split('')),rnd=hgdmRng(475003),kind=M.kind,bio=M.bio;
@@ -43572,9 +43602,9 @@ function hgdsBuild(L){
   // tiles: a secret wall per biome (a shade off), the four key doors, the six gem doors
   const TM=ohTiles(),base=L.chars,chars=L.chars,wchB=i=>String.fromCharCode(0x2e0+i);let nextCh=0x300;
   const mk=(style,img,tint,contrast)=>{OH_STY[style]=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:img,door:img,win:img,alt:img,zoom:1,contrast:contrast||1.05,tint});const ch=String.fromCharCode(nextCh++);chars[ch]=TM.make('plain',style,2.7).gid;return ch};
-  const secretCh=HGDM.biomes.map((b,i)=>mk('hgdm_sec'+i,b.wall,[255,220,150,.12],1.5));
-  const keyCh=HGDS_KEYS.map(k=>mk('hgdm_key'+k[0],'art_tex_hgt_w2_doorblue',[k[3][0],k[3][1],k[3][2],.5],1.2));
-  const gemCh=HGDS_GEMS.map(g=>mk('hgdm_gem'+g[0],'art_tex_wall_eye',[g[3][0],g[3][1],g[3][2],.5],1.2));
+  const secretCh=HGDM.biomes.map((b,i)=>mk('hgdm_sec'+i,hgdsTexSecret(i),[255,255,255,0],1.0));
+  const keyCh=HGDS_KEYS.map(k=>mk('hgdm_key'+k[0],hgdsTexKey(k),[255,255,255,0],1.0));
+  const gemCh=HGDS_GEMS.map(g=>mk('hgdm_gem'+g[0],hgdsTexGem(g),[255,255,255,0],1.0));
   const doors={};
   // dead-end chains: from a dead end back along the corridor to a junction
   const chains=[];const seenE=new Set();
