@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.572';
+const VERSION='3.573';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -46789,6 +46789,57 @@ function hgdhgList(kind){
   return rows}}
 // the level 60 and over weapons all cost between 8000 and 9000 gold, dearer with level and power
 {const P={hgsting:8000,hgmandible:8200,hgsunblade:8400,hgl70dagger:8500,hgl70axe:8600,hgl70staff:8700,hgl70bow:8800,hgl70mace:8900,hgl70sword:9000};for(const id in P)if(ITEMDEF[id])ITEMDEF[id].price=P[id]}
+
+/* ---- src/desert/hgd_balance.js ---- */
+/* ==========================================================================
+   BALANCE (prefix bal / BAL). A smoother difficulty gradient and shorter fights.
+   1. The weapon curve: ordinary weapons of level 16 to 29 are raised on a smooth ramp (x1.0 at level 15 to about x2.8 at level 29), so party damage climbs steadily towards the level 30 weapons instead of
+      jumping about 3 times at level 30 (see the weapon curve in hgd_minis.js, which raised everything from level 30 up).
+   2. Shorter fights: creature health is cut to BAL.HP (0.6, so a fight lasts about 40% fewer rounds). To pay for it, creature damage is raised by BAL.dk(level), fitted so that three creatures of a place's level cost
+      a level-appropriate party about BAL.target(level) of its health: a gentle rise from 10% at level 10 to 17% at level 100. These are only the best-geared case, so real parties with less gear, and bosses, will lose more; tune BAL.dkT.
+   ========================================================================== */
+const BAL={HP:.6,
+  dkT:[[1,1],[10,1],[15,1],[20,1.2],[25,1.5],[28,1.7],[30,2.3],[35,3.2],[40,3.9],[50,4.3],[60,4],[70,3.5],[80,3.3],[90,3.05],[100,2.8]], // (level, creature damage factor): fitted with the pacing check (a test party with the best shop gear for its level fighting three median creatures)
+  tgT:[[10,10],[20,11],[30,12],[50,14],[100,17]]}; // the health a party should lose in one fight against three creatures of its own level, in percent: a gentle rise
+BAL.lerp=(T,x)=>{if(x<=T[0][0])return T[0][1];for(let i=1;i<T.length;i++)if(x<=T[i][0]){const a=T[i-1],b=T[i];return a[1]+(b[1]-a[1])*(x-a[0])/(b[0]-a[0])}return T[T.length-1][1]};
+BAL.dk=l=>BAL.lerp(BAL.dkT,l);BAL.target=l=>BAL.lerp(BAL.tgT,l);
+// 1. the weapon ramp (done once, when the game loads)
+{const done=new Set();for(const id in ITEMDEF){const d=ITEMDEF[id];if(!d||d.k!=='weapon'||!d.lvl||d.lvl<16||d.lvl>29||d.rar||done.has(d))continue;done.add(d);
+  const f=1+1.8*Math.pow((d.lvl-15)/15,1.5);d.dmg=[Math.round(d.dmg[0]*f),Math.round(d.dmg[1]*f)]}}
+// 2. creature health and damage
+{const _es=enemyStat;enemyStat=function(t,lvl){const r=_es.apply(this,arguments),L=lvl||lvlHere(),k=BAL.dk(L);
+  r.hp=Math.max(1,Math.round(r.hp*BAL.HP));r.dmg=[Math.max(1,Math.round(r.dmg[0]*k)),Math.max(1,Math.round(r.dmg[1]*k))];return r}}
+
+/* ---- src/desert/food_health.js ---- */
+/* ==========================================================================
+   FOOD AS HEALTH (prefix fdhp / FDHP). Every food item heals a percentage of the hero's MAX health at the moment of eating, as well as feeding hunger.
+   Plain bread or cheese about 4-6 percent, cooked meals and stews 9-15, the best feasts 20-25. Potions stay stronger per item. The old fixed 'heal' number
+   stays on each item (shrine meals, sorting) but eating uses 'hpct'. Afflictions on eating and starvation are unchanged.
+   ========================================================================== */
+const FDHP_PCT={water:3,dates:4,apple:4,ale:4,nuts:4,bread:6,cheese:5,herring:9,sausage:10,pottage:12,pie:20,roast:25};
+function fdhpPct(id,d){if(FDHP_PCT[id])return FDHP_PCT[id];return Math.max(3,Math.min(25,Math.round((d.heal||8)/2.2)))}
+function fdhpSetup(){
+  for(const id in ITEMDEF){const d=ITEMDEF[id];if(!d||d.k!=='food'||d.fdhp)continue;
+    d.fdhp=1;d.hpct=fdhpPct(id,d);
+    const tail=' Restores '+d.hpct+' percent of maximum health.';
+    if(d.d&&/restores \d+ health\./.test(d.d))d.d=d.d.replace(/restores \d+ health\./,'restores '+d.hpct+' percent of maximum health.');
+    else d.d=(d.t||'Food')+'. Fills '+(d.feed||0)+' hunger.'+tail+(d.d?' '+d.d:'')}
+}
+fdhpSetup();
+{const _f=statLines;statLines=function(d){const L=_f.apply(this,arguments);
+  try{if(d&&d.k==='food'&&d.hpct){for(const l of L)if(/^Heals \d+ health$/.test(l[0]))l[0]='Heals '+d.hpct+' percent of max health'}}catch(e){}
+  return L}}
+{const _h=useHeal;useHeal=function(hi,idx){
+  try{const it=G.bag[idx],d=it&&idef(it);
+    if(d&&d.k==='food'&&d.hpct){
+      const h=G.heroes[hi];
+      if(h.hp>=h.max&&h.food>=99){msg(`${HERO_DEF[hi].name} is not hungry or hurt.`);return false}
+      const heal=Math.max(1,Math.round(h.max*d.hpct/100)),gain=Math.min(heal,h.max-h.hp),ik=it.id;
+      bagTake(idx);h.hp=Math.min(h.max,h.hp+heal);sfx('potion');try{afflEat(hi,ik)}catch(e){}
+      if(d.feed)h.food=Math.min(100,h.food+d.feed);
+      msg(`${HERO_DEF[hi].name} eats the ${d.n} (+${gain} health${gain<heal?' of '+heal:''}${d.feed?', +'+d.feed+' hunger':''}).`,'#9ae0a0');addFloat(portraitX(hi)+19,250,'+'+gain,'#7fe08a');
+      return true}}catch(e){console.error('fdhp',e)}
+  return _h.apply(this,arguments)}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

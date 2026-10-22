@@ -193,3 +193,9 @@ Quarter names and high level gear in the shops (3.571)
 Weapon prices (3.572)
 
 * The nine weapons of level 60 and over (Stinger Blade, Mandible Axe, Sunfire Blade and the six level 70 fire weapons) now cost between 8000 and 9000 gold each, dearer with power: from 8000 for the Stinger Blade to 9000 for the Molten Greatblade.
+
+Balance and food (3.573)
+
+* Fights are shorter: creatures have 60 percent of their old health, so an average fight lasts about 40 to 50 percent fewer rounds from level 10 to 50. To keep the challenge, creature damage was raised on a table that grows with level (about the same as before up to level 15, then rising to roughly four times at level 50 and easing to under three times at level 100). The aim is that a party with good gear for its level loses about 10 percent of its health in a fight against three creatures at level 10, rising gently to about 17 percent at level 100.
+* Weapons of level 16 to 29 are stronger on a smooth ramp, so the party's damage no longer triples all at once at level 30.
+* Food is now a health mechanic as well as hunger: each food heals a percentage of the hero's maximum health (water 3 percent, bread 6, pottage 12, meat pie 20, roast mutton 25, other foods about the old figure divided by 2.2, from 3 to 25 percent) and still feeds hunger. The item card and description show the percentage. Potions are still stronger. Eating is refused only when the hero is both at full health and not hungry.
