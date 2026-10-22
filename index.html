@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.578';
+const VERSION='3.579';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -47016,6 +47016,17 @@ function hgdnaThin(L){
 // the same sweep on the live decor when the maze is entered, for anything added after the build
 function hgdnaSweep(list){for(const d of list){if(!HGDNA.SMALL.test(d.k||'')||d.block||d.npc||d.loot||d.wd)continue;if(Math.abs(d.ox||0)>=.15||Math.abs(d.oy||0)>=.15)continue;const h=hgdnaHash(d.x,d.y,d.k),sg=h&1?1:-1,mag=.18+((h>>>1)%13)/100;if((h>>5)&1){d.oy=sg*mag;d.ox=((h>>>6)%9-4)/40}else{d.ox=sg*mag;d.oy=((h>>>6)%9-4)/40}}}
 {const _u=update;update=function(dt){try{if(LEVEL===HGD.ID&&G.decor&&G._hgdnaDec!==G.decor){G._hgdnaDec=G.decor;hgdnaSweep(G.decor);const L=LEVELS[HGD.ID];if(L&&L.decor)hgdnaSweep(L.decor)}}catch(e){}return _u.apply(this,arguments)}}
+
+/* ---- src/desert/area_levels.js ---- */
+/* ==========================================================================
+   AREA LEVELS (prefix alv / ALV). Some areas were never given a level on the ladder (LEVEL_RATING), so their creatures stood at the level they were first built at, far below the place around them: the 52 desert dungeons
+   stood at 14 to 21 inside deserts rated 36 to 45, and Saint Elen's Monastery (its grounds, buildings, cellars and crypts) stood at 16 to 33 on the level 55 Pilgrim's Path. Each now takes the level of its surroundings:
+   a dungeon the level of its desert, the Golden Pyramid the level of the deserts, and the monastery the level of the Pilgrim's Path. (With autoscaling on, levels come from the party, as before.)
+   ========================================================================== */
+{const DES={'The Sand Road':41,'The Red Dunes':43,'The Blue Dunes':60,'The Golden Erg':61,'The Violet Erg':62,'The White Dunes':63,'The Flatlands':64};
+  if(typeof DNG_INFO!=='undefined')for(const k of Object.keys(DNG_INFO)){const n=+k,d=DNG_INFO[k],main=DES[d.desert];if(main!==undefined&&LEVEL_RATING[main]&&LEVEL_RATING[n]===undefined)LEVEL_RATING[n]=LEVEL_RATING[main]}
+  if(LEVEL_RATING[65]===undefined&&LEVEL_RATING[60])LEVEL_RATING[65]=LEVEL_RATING[60]; // the Golden Pyramid
+  const path=LEVEL_RATING[400]||55;for(const n of [430,431,432,433,434,6900,6901,6902,6903,6904,6905,6906])if(LEVEL_RATING[n]===undefined)LEVEL_RATING[n]=path}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

@@ -230,3 +230,8 @@ Go to area: every area has a level (3.578)
 * Every area in the Go to area list now shows a level. It is the level on the world map; for an area that has none of its own, the level of the world map place that holds it; else the level the area is built at (which is what its creatures stand at). Nothing is left blank, and the list sorts by those levels, highest first, inside each section and among sections.
 * Areas that were not built when the list was made showed "No creatures", including the Deeper Hollow and the Hollow Grasslands. Every area is now built when the list opens, and the counts are refreshed if an area finishes building later. The Deeper Hollow now lists 462 creatures and the Hollow Grasslands 106.
 * A handful of empty entries (blank names, nothing behind them) in the strange cities section are gone.
+
+Desert dungeons and the monastery at their surroundings' level (3.579)
+
+* The 52 desert dungeons stood at levels 14 to 21 inside deserts rated 36 to 45. Each now takes the level of its desert (Sand Road 36, Red Dunes 41, the other deserts 45), and the Golden Pyramid is level 45. Their creatures, chests and the level shown on the Go to area list follow.
+* Saint Elen's Monastery (the grounds, the church and its buildings, the cellars, crypts and mausoleum) stood at 16 to 33 on the level 55 Pilgrim's Path. All of it is now level 55.
