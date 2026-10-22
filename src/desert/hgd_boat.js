@@ -42,7 +42,7 @@ function hgdbSync(){ // the anchored boats are sprites on the water; the boat yo
   const L=hgdbL();if(LEVEL!==HGD.ID||!L||!G.decor||!G.flags)return;const F=G.flags,ride=F.hgdBoat?F.hgdBoat.lk:-1,sig=ride+'|'+JSON.stringify(F.hgdBoats||{});
   if(G._hgdbRef===G.decor&&G._hgdbSig===sig)return;
   G.decor=G.decor.filter(d=>!d.hgdBoatSpr);
-  for(const k of L._hgdl.lakes){if(k.i===ride)continue;const b=hgdbBoatAt(k);if(b)G.decor.push({k:'yar_boat_row',x:b.x,y:b.y,block:false,walk:true,deco:false,hgdBoatSpr:1,hgdl:1})}
+  for(const k of L._hgdl.lakes){if(k.i===ride)continue;const b=hgdbBoatAt(k);if(b)G.decor.push({k:'yar_boat_row',x:b.x,y:b.y,block:false,walk:true,deco:false,hgdBoatSpr:1,hgdl:1,bob:-.22})}
   G._hgdbRef=G.decor;G._hgdbSig=sig}
 function hgdbEmbark(k){
   const F=G.flags,b=hgdbBoatAt(k);if(!b)return;

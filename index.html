@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.564';
+const VERSION='3.565';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -44916,7 +44916,7 @@ function hgdbSync(){ // the anchored boats are sprites on the water; the boat yo
   const L=hgdbL();if(LEVEL!==HGD.ID||!L||!G.decor||!G.flags)return;const F=G.flags,ride=F.hgdBoat?F.hgdBoat.lk:-1,sig=ride+'|'+JSON.stringify(F.hgdBoats||{});
   if(G._hgdbRef===G.decor&&G._hgdbSig===sig)return;
   G.decor=G.decor.filter(d=>!d.hgdBoatSpr);
-  for(const k of L._hgdl.lakes){if(k.i===ride)continue;const b=hgdbBoatAt(k);if(b)G.decor.push({k:'yar_boat_row',x:b.x,y:b.y,block:false,walk:true,deco:false,hgdBoatSpr:1,hgdl:1})}
+  for(const k of L._hgdl.lakes){if(k.i===ride)continue;const b=hgdbBoatAt(k);if(b)G.decor.push({k:'yar_boat_row',x:b.x,y:b.y,block:false,walk:true,deco:false,hgdBoatSpr:1,hgdl:1,bob:-.22})}
   G._hgdbRef=G.decor;G._hgdbSig=sig}
 function hgdbEmbark(k){
   const F=G.flags,b=hgdbBoatAt(k);if(!b)return;
@@ -45749,7 +45749,7 @@ function hgoMake(L,att,last){
   L.mapNames=(L.mapNames||[]).concat([{t:'The Black Sea',x:CX,y:CY,k:'place'}]);
   let wcount=0;for(let i=0;i<W*H;i++){if(wm[i]){wcount++;sec[i]=1}else sec[i]=0}
   L._hgdo={reg,riv,wm,sec,nsec:1,boats,landings,W,H,docks,island:{cx:icx,cy:icy,r:ir,cells:isl,chest},islets,rivers:paths.map(p=>({tag:p.tag,n:p.path.length,from:p.path[0]&&[p.path[0][0]|0,p.path[0][1]|0],to:p.path.length&&[p.path[p.path.length-1][0]|0,p.path[p.path.length-1][1]|0]})),keep,moved,joined,water:wcount,isle};
-  for(const b of boats)L.decor.push({k:'yar_boat_row',x:b[0],y:b[1],block:false,walk:true,deco:true,sc:1.7});
+  for(const b of boats)L.decor.push({k:'yar_boat_row',x:b[0],y:b[1],block:false,walk:true,deco:true,sc:1.7,bob:-.22});
   L.decor.push({k:'chest',x:chest[0],y:chest[1],block:true,goldAmt:5000});
   try{hgoPopulate(L)}catch(e){console.error('hgo populate',e)}
   return true}

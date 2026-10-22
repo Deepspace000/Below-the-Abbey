@@ -1,4 +1,4 @@
-Below the Abbey: update 3.564 (changes since 3.534, the update on itch.io before this one, including the last Hollow Grasslands quests and the way down to the Deeper Hollow)
+Below the Abbey: update 3.565 (changes since 3.534, the update on itch.io before this one, including the last Hollow Grasslands quests and the way down to the Deeper Hollow)
 
 The Hollow Grasslands: the last quests, and the way down to the Deeper Hollow
 
@@ -142,6 +142,7 @@ Controls
 
 Other
 
+* The boats at anchor (on the lakes and in the Underlevel) sit lower, in the water instead of floating above it.
 * The rusty lanterns lying on the ground in the maze are 40 percent smaller. The same little thing (a lantern, a pot, a book and so on) is never repeated near itself any more: within nine squares there is only one of each kind, and where there would have been two, the second is a different little thing.
 * Reeds and plants are lower in the lakes, the marshes, the Drowned Maze and the wild parts of the maze, so they no longer hide the view.
 * The loading screen of the web version (GitHub Pages) now shows a percentage and the megabytes, for example "Loading the pictures: 40%, 33 of 203 MB", the way the itch.io version already did. The first visit downloads about 200 MB of pictures.

@@ -147,7 +147,7 @@ function hgoMake(L,att,last){
   L.mapNames=(L.mapNames||[]).concat([{t:'The Black Sea',x:CX,y:CY,k:'place'}]);
   let wcount=0;for(let i=0;i<W*H;i++){if(wm[i]){wcount++;sec[i]=1}else sec[i]=0}
   L._hgdo={reg,riv,wm,sec,nsec:1,boats,landings,W,H,docks,island:{cx:icx,cy:icy,r:ir,cells:isl,chest},islets,rivers:paths.map(p=>({tag:p.tag,n:p.path.length,from:p.path[0]&&[p.path[0][0]|0,p.path[0][1]|0],to:p.path.length&&[p.path[p.path.length-1][0]|0,p.path[p.path.length-1][1]|0]})),keep,moved,joined,water:wcount,isle};
-  for(const b of boats)L.decor.push({k:'yar_boat_row',x:b[0],y:b[1],block:false,walk:true,deco:true,sc:1.7});
+  for(const b of boats)L.decor.push({k:'yar_boat_row',x:b[0],y:b[1],block:false,walk:true,deco:true,sc:1.7,bob:-.22});
   L.decor.push({k:'chest',x:chest[0],y:chest[1],block:true,goldAmt:5000});
   try{hgoPopulate(L)}catch(e){console.error('hgo populate',e)}
   return true}
