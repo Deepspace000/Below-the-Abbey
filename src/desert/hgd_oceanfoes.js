@@ -43,20 +43,22 @@ function hgoPopulate(L){
   for(const e of O.moved){const c=spare.pop();if(!c)break;e.x=c[0];e.y=c[1];occ.add(c[0]+','+c[1]);L.enemies.push(e)}
   const ids=HGO_KINDS.map(k=>k[0]);
   // the horrors: about 120 spread over the sea, 8 in every river section, never within 7 of a boat, a dock or the island; 6 more round the island with the Black Leviathan
-  const ic=O.island,islD=(x,y)=>Math.hypot(x-ic.cx,y-ic.cy)-ic.r,boats=[];for(let i=1;i<O.secBoat.length;i++)boats.push(O.secBoat[i]);
-  const farBoat=(x,y,m)=>boats.every(b=>Math.hypot(b[0]-x,b[1]-y)>=m)&&O.docks.every(d=>Math.hypot(d.wx-x,d.wy-y)>=m),farCw=(x,y,m)=>O.cwCells.every(c=>Math.hypot(c[0]-x,c[1]-y)>=m);
+  const ic=O.island,islD=(x,y)=>Math.hypot(x-ic.cx,y-ic.cy)-ic.r,boats=O.boats;
+  const farBoat=(x,y,m)=>boats.every(b=>Math.hypot(b[0]-x,b[1]-y)>=m)&&O.docks.every(d=>Math.hypot(d.wx-x,d.wy-y)>=m);
   const seaC=[],rivC={};for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(!O.wm[ix(x,y)])continue;if(O.reg[ix(x,y)]&&!O.riv[ix(x,y)])seaC.push([x,y]);else{const s=O.sec[ix(x,y)];(rivC[s]||(rivC[s]=[])).push([x,y])}}
-  const spread=(cs,n,gap,minD)=>{const got=[];for(const c of cs.sort(()=>rnd()-.5)){if(got.length>=n)break;const k=c[0]+','+c[1];if(occ.has(k)||!farBoat(c[0],c[1],minD)||!farCw(c[0],c[1],3)||keepAt(c[0],c[1],5))continue;if(got.every(q=>Math.abs(q[0]-c[0])+Math.abs(q[1]-c[1])>=gap))got.push(c)}return got};
+  const spread=(cs,n,gap,minD)=>{const got=[];for(const c of cs.sort(()=>rnd()-.5)){if(got.length>=n)break;const k=c[0]+','+c[1];if(occ.has(k)||!farBoat(c[0],c[1],minD)||keepAt(c[0],c[1],5))continue;if(got.every(q=>Math.abs(q[0]-c[0])+Math.abs(q[1]-c[1])>=gap))got.push(c)}return got};
   const seaG=spread(seaC.filter(c=>islD(c[0],c[1])>=7),120,5,7);let ii=0;
   for(const c of seaG){L.enemies.push({t:ids[ii++%10],x:c[0],y:c[1]});occ.add(c[0]+','+c[1])}
-  let rivN=0;for(const s in rivC){const g=spread(rivC[s],8,7,7);for(const c of g){L.enemies.push({t:ids[ii++%10],x:c[0],y:c[1]});occ.add(c[0]+','+c[1]);rivN++}}
+  let rivN=0;{const rc=[];for(const s2 in rivC)for(const c of rivC[s2])rc.push(c);const g=spread(rc,40,8,7);for(const c of g){L.enemies.push({t:ids[ii++%10],x:c[0],y:c[1]});occ.add(c[0]+','+c[1]);rivN++}}
   const ring=seaC.filter(c=>{const d=islD(c[0],c[1]);return d>=2.5&&d<=5&&!occ.has(c[0]+','+c[1])});let nr=0;
   for(let k=0;k<6;k++){const a=k/6*Math.PI*2+.4;let b=null,bd=1e9;for(const c of ring){const aa=Math.atan2(c[1]-ic.cy,c[0]-ic.cx),dd=Math.abs(Math.atan2(Math.sin(aa-a),Math.cos(aa-a)));if(dd<bd&&!occ.has(c[0]+','+c[1])){bd=dd;b=c}}
     if(b){L.enemies.push({t:k===0?'hgoboss':ids[(k*3+1)%10],x:b[0],y:b[1]});occ.add(b[0]+','+b[1]);nr++}}
   if(!L.enemies.some(e=>e.t==='hgoboss')){const b=ring.find(c=>!occ.has(c[0]+','+c[1]));if(b)L.enemies.push({t:'hgoboss',x:b[0],y:b[1]})}
-  // five chests of 1000 gold on river banks (the end of a corridor that runs into a river), far apart, each with two or three guards
-  const dead=cells.filter(c=>{const k=c[0]+','+c[1];return !occ.has(k)&&!nearLad(c[0],c[1],14)&&!keepAt(c[0],c[1],6)&&DV.some(d=>O.riv[ix(c[0]+d[0],c[1]+d[1])])&&!O.reg[ix(c[0],c[1])]&&DV.filter(d=>land(c[0]+d[0],c[1]+d[1])).length===1&&L.fmap[c[1]][c[0]]==='0'}).sort(()=>rnd()-.5);
+  const nearRiv=(x,y,m)=>{for(let dy=-m;dy<=m;dy++)for(let dx=-m;dx<=m;dx++){const k=ix(x+dx,y+dy);if(O.riv[k]&&Math.hypot(dx,dy)<=m+.2)return true}return false};
+  // five chests of 1000 gold beside the rivers (the end of a corridor that runs up to a river bank), far apart, each with two or three guards
+  const dead=cells.filter(c=>{const k=c[0]+','+c[1];return !occ.has(k)&&!nearLad(c[0],c[1],14)&&!keepAt(c[0],c[1],6)&&nearRiv(c[0],c[1],7)&&!O.reg[ix(c[0],c[1])]&&DV.filter(d=>land(c[0]+d[0],c[1]+d[1])).length===1&&L.fmap[c[1]][c[0]]==='0'}).sort(()=>rnd()-.5);
   const chests=[];for(const gap of [55,42,32,24,14]){for(const c of dead){if(chests.length>=5)break;if(chests.every(q=>Math.hypot(q[0]-c[0],q[1]-c[1])>=gap))chests.push(c)}if(chests.length>=5)break}
+  if(chests.length<5){const more=cells.filter(c=>!occ.has(c[0]+','+c[1])&&!nearLad(c[0],c[1],14)&&!keepAt(c[0],c[1],6)&&!O.reg[ix(c[0],c[1])]&&!O.isle[ix(c[0],c[1])]&&DV.filter(d=>land(c[0]+d[0],c[1]+d[1])).length===1&&L.fmap[c[1]][c[0]]==='0'&&chests.every(q=>Math.hypot(q[0]-c[0],q[1]-c[1])>=1)).sort(()=>rnd()-.5);for(const gap of [45,32,22,12]){for(const c of more){if(chests.length>=5)break;if(chests.every(q=>Math.hypot(q[0]-c[0],q[1]-c[1])>=gap))chests.push(c)}if(chests.length>=5)break}}
   const kinds=[];for(let i=0;i<10;i++)kinds.push('hgusl'+i,'hguyk'+i);
   for(const c of chests){L.decor.push({k:'chest',x:c[0],y:c[1],block:true,goldAmt:1000});occ.add(c[0]+','+c[1]);
     const dist=new Map([[c[0]+','+c[1],0]]),q=[c];for(let i=0;i<q.length;i++){const [a,b]=q[i],dd=dist.get(a+','+b);if(dd>=9)continue;for(const d of DV){const nx=a+d[0],ny=b+d[1],kk=nx+','+ny;if(land(nx,ny)&&!dist.has(kk)){dist.set(kk,dd+1);q.push([nx,ny])}}}
