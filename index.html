@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.526';
+const VERSION='3.527';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -43520,7 +43520,7 @@ function hgdpBuild(L){
   for(const it of ['hgcomb','hgcomb','hgcomb','hgcomb','hgpond','hgpond','hgpond','hgpond','hgroot','hgroot','hgroot','hgroot','hgjelly','hgjelly','hgjelly','hgkelp','hgkelp'])for(let k=0;k<2;k++){const p=quiet.splice((rnd()*quiet.length)|0,1)[0];if(!p)break;used.add(p[0]+','+p[1]);L.items.push({k:it,x:p[0],y:p[1]})}
   // the people
   const place=(z,img,npc,name,dx,dy)=>{const cands=[];for(let r=0;r<8&&!cands.length;r++)for(let y=z.y-r;y<=z.y+r;y++)for(let x=z.x-r;x<=z.x+r;x++){if(Math.max(Math.abs(x-z.x),Math.abs(y-z.y))!==r)continue;if(!open(x,y)||used.has(x+','+y))continue;let all=true;for(let ay=-1;ay<=1;ay++)for(let ax=-1;ax<=1;ax++)if(!open(x+ax,y+ay)||used.has((x+ax)+','+(y+ay))&&!(ax===0&&ay===0))all=false;if(all)cands.push([x,y])}
-    const c=cands[((dx*3+dy*5)&15)%Math.max(1,cands.length)]||cands[0];if(!c)return null;used.add(c[0]+','+c[1]);L.decor.push({k:img,x:c[0],y:c[1],block:true,npc,sc:1});return c};
+    const c=cands[((dx*3+dy*5)&15)%Math.max(1,cands.length)]||cands[0];if(!c)return null;used.add(c[0]+','+c[1]);L.decor.push({k:img,x:c[0],y:c[1],block:true,npc,sc:.72});return c};
   const folk=[],safeZ=zones.filter(z=>z.type==='safe');
   const towns=safeZ.filter(z=>z.town!==undefined),encls=safeZ.filter(z=>z.enclave!==undefined);
   // quest givers: eight in the towns, four in the enclaves
@@ -43907,7 +43907,7 @@ function hgdfBuild(L){
   P.zones.filter(z=>z.town!==undefined).forEach((z,zi)=>{let lamps=0,vill=0;
     for(let t=0;t<200&&(lamps<4||vill<3);t++){const x=z.x-8+((rnd()*17)|0),y=z.y-8+((rnd()*17)|0);if(Math.hypot(x-z.x,y-z.y)>8||!free(x,y)||!interior(x,y))continue;
       if(lamps<4&&t%2===0){take(x,y);L.decor.push({k:'hg_lamp',x,y,block:true});lamps++;n4++}
-      else if(vill<3){take(x,y);const id=zi*3+vill;L.decor.push({k:'hg_npc'+(1+(id%5)),x,y,block:true,npc:'hgd_vill'+id,sc:1});vill++;n5++}}});
+      else if(vill<3){take(x,y);const id=zi*3+vill;L.decor.push({k:'hg_npc'+(1+(id%5)),x,y,block:true,npc:'hgd_vill'+id,sc:.72});vill++;n5++}}});
   L._hgdf={champions:n1,notes:n2,statues:n3,lamps:n4,villagers:n5}}
 const hgdmrngSafe=hgdmRng;
 {const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];_b.apply(this,arguments);const L=LEVELS[HGD.ID];if(!had&&L&&L._hgds)try{hgdfBuild(L)}catch(e){console.error('hgdf',e)}}}

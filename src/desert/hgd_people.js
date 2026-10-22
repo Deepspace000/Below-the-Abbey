@@ -133,7 +133,7 @@ function hgdpBuild(L){
   for(const it of ['hgcomb','hgcomb','hgcomb','hgcomb','hgpond','hgpond','hgpond','hgpond','hgroot','hgroot','hgroot','hgroot','hgjelly','hgjelly','hgjelly','hgkelp','hgkelp'])for(let k=0;k<2;k++){const p=quiet.splice((rnd()*quiet.length)|0,1)[0];if(!p)break;used.add(p[0]+','+p[1]);L.items.push({k:it,x:p[0],y:p[1]})}
   // the people
   const place=(z,img,npc,name,dx,dy)=>{const cands=[];for(let r=0;r<8&&!cands.length;r++)for(let y=z.y-r;y<=z.y+r;y++)for(let x=z.x-r;x<=z.x+r;x++){if(Math.max(Math.abs(x-z.x),Math.abs(y-z.y))!==r)continue;if(!open(x,y)||used.has(x+','+y))continue;let all=true;for(let ay=-1;ay<=1;ay++)for(let ax=-1;ax<=1;ax++)if(!open(x+ax,y+ay)||used.has((x+ax)+','+(y+ay))&&!(ax===0&&ay===0))all=false;if(all)cands.push([x,y])}
-    const c=cands[((dx*3+dy*5)&15)%Math.max(1,cands.length)]||cands[0];if(!c)return null;used.add(c[0]+','+c[1]);L.decor.push({k:img,x:c[0],y:c[1],block:true,npc,sc:1});return c};
+    const c=cands[((dx*3+dy*5)&15)%Math.max(1,cands.length)]||cands[0];if(!c)return null;used.add(c[0]+','+c[1]);L.decor.push({k:img,x:c[0],y:c[1],block:true,npc,sc:.72});return c};
   const folk=[],safeZ=zones.filter(z=>z.type==='safe');
   const towns=safeZ.filter(z=>z.town!==undefined),encls=safeZ.filter(z=>z.enclave!==undefined);
   // quest givers: eight in the towns, four in the enclaves

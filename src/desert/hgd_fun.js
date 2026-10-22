@@ -74,7 +74,7 @@ function hgdfBuild(L){
   P.zones.filter(z=>z.town!==undefined).forEach((z,zi)=>{let lamps=0,vill=0;
     for(let t=0;t<200&&(lamps<4||vill<3);t++){const x=z.x-8+((rnd()*17)|0),y=z.y-8+((rnd()*17)|0);if(Math.hypot(x-z.x,y-z.y)>8||!free(x,y)||!interior(x,y))continue;
       if(lamps<4&&t%2===0){take(x,y);L.decor.push({k:'hg_lamp',x,y,block:true});lamps++;n4++}
-      else if(vill<3){take(x,y);const id=zi*3+vill;L.decor.push({k:'hg_npc'+(1+(id%5)),x,y,block:true,npc:'hgd_vill'+id,sc:1});vill++;n5++}}});
+      else if(vill<3){take(x,y);const id=zi*3+vill;L.decor.push({k:'hg_npc'+(1+(id%5)),x,y,block:true,npc:'hgd_vill'+id,sc:.72});vill++;n5++}}});
   L._hgdf={champions:n1,notes:n2,statues:n3,lamps:n4,villagers:n5}}
 const hgdmrngSafe=hgdmRng;
 {const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];_b.apply(this,arguments);const L=LEVELS[HGD.ID];if(!had&&L&&L._hgds)try{hgdfBuild(L)}catch(e){console.error('hgdf',e)}}}
