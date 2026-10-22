@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.547';
+const VERSION='3.548';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -3418,8 +3418,12 @@ function drawInventory(){
     else if(d.k==='quest'){label=null}
     else{label='Equip';id='iequip'}
     const dk=I.sel.src==='bag'?'b'+I.sel.i:'s'+I.sel.slot,sure=I.dropKey===dk;
-    if(label){btnText(id,label,rx+6,171,70,26);btnText('idrop',sure?'Sure?':'Discard',rx+80,171,70,26)}
-    else btnText('idrop',sure?'Sure?':'Discard',rx+22,171,112,26);
+    if(sure){ // the discard prompt: it says what will be thrown away, and asks
+      ctx.fillStyle='rgba(8,5,3,.94)';rrect(ctx,rx,120,rw,86,5);ctx.fill();ctx.lineWidth=1.6;ctx.strokeStyle=goldG(rx,120,rw,86);rrect(ctx,rx,120,rw,86,5);ctx.stroke();
+      txt('Discard '+d.n+'?',rx+rw/2,138,10.5,'#f0d8a0','center',true,undefined,rw-10);txt('It will be gone for good.',rx+rw/2,154,8.5,'#c8b898','center');
+      btnText('idropyes','Discard',rx+6,171,70,26);btnText('idropno','Keep it',rx+80,171,70,26)}
+    else if(label){btnText(id,label,rx+6,171,70,26);btnText('idrop','Discard',rx+80,171,70,26)}
+    else btnText('idrop','Discard',rx+22,171,112,26);
   }else{
     txt(def.name,rx+rw/2,20,13,heroSpeech(hi),'center',true);
     txt(`${def.cls}  Level ${h.lvl}`,rx+rw/2,38,10,'#c8b898','center');
@@ -3483,10 +3487,14 @@ function invBtn(id){
     if(equipTo(hi,slot,I.sel.i))I.sel={src:'slot',slot};
     return;
   }
+  if(id==='idropno'){I.dropKey=null;return}
   if(id==='idrop'){
     const it=selItem();if(!it)return;
+    I.dropKey=I.sel.src==='bag'?'b'+I.sel.i:'s'+I.sel.slot;return}
+  if(id==='idropyes'){
+    const it=selItem();if(!it)return;
     const dk=I.sel.src==='bag'?'b'+I.sel.i:'s'+I.sel.slot;
-    if(I.dropKey!==dk){I.dropKey=dk;return}
+    if(I.dropKey!==dk)return;
     const name=idef(it).n;
     if(I.sel.src==='bag')G.bag.splice(I.sel.i,1);else{delete h.eq[I.sel.slot];recalcMax(hi)}
     I.sel=null;I.dropKey=null;sfx('equip');msg(`Discarded ${name}.`,'#c8b898');return;
