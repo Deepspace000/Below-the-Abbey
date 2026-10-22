@@ -104,19 +104,20 @@ function hgdpBuild(L){
   // the start is safe too
   zones.push({type:'safe',x:M.sx,y:M.sy,r:9,name:'The Foot of the Maze'});
   // four lone enclaves: a room or clearing away from every town
-  const encl=[];for(const s of M.spots.filter(z=>(z.type===1||z.type===2)&&!z.boss).sort(()=>rnd()-.5)){if(encl.length>=4)break;if(zones.some(z=>z.type==='safe'&&Math.hypot(z.x-s.x,z.y-s.y)<30))continue;if(encl.some(e=>Math.hypot(e.x-s.x,e.y-s.y)<40))continue;encl.push(s);zones.push({type:'safe',x:s.x,y:s.y,r:7,name:['The Quiet Room','The Lamp Clearing','The Pond Enclave','The Reading Room'][encl.length-1],enclave:encl.length-1})}
+  const encl=[];const ENN=['The Quiet Room','The Lamp Clearing','The Pond Enclave','The Reading Room','The Rest Stop','The Sleeping Nook','The Lantern Landing','The Mossy Corner','The Waiting Room','The Safe Hollow'];
+  for(const s of M.spots.filter(z=>(z.type===1||z.type===2)&&!z.boss).sort(()=>rnd()-.5)){if(encl.length>=10)break;if(zones.some(z=>z.type==='safe'&&Math.hypot(z.x-s.x,z.y-s.y)<24))continue;if(encl.some(e=>Math.hypot(e.x-s.x,e.y-s.y)<32))continue;encl.push(s);zones.push({type:'safe',x:s.x,y:s.y,r:7,name:ENN[encl.length-1],enclave:encl.length-1})}
   // sixteen signed danger zones, far from safe places and from each other
   const dz=[];let tries=0;
-  while(dz.length<HGDP_DANGER.length&&tries++<4000){const x=6+((rnd()*(W-12))|0),y=6+((rnd()*(H-12))|0),R=13+((rnd()*7)|0);
-    if(!open(x,y)||Math.hypot(x-M.sx,y-M.sy)<R+26||safeHit(x,y,R+4)||dz.some(z=>Math.hypot(z.x-x,z.y-y)<z.r+R+6))continue;
+  while(dz.length<HGDP_DANGER.length&&tries++<9000){const x=6+((rnd()*(W-12))|0),y=6+((rnd()*(H-12))|0),R=10+((rnd()*6)|0);
+    if(!open(x,y)||Math.hypot(x-M.sx,y-M.sy)<R+26||safeHit(x,y,R+9)||dz.some(z=>Math.hypot(z.x-x,z.y-y)<z.r+R+8))continue;
     const b=bio[y*W+x];dz.push({type:'danger',x,y,r:R,name:HGDP_DANGER[dz.length][0],mon:HGDP_DANGER[dz.length][1],biome:b})}
   dz.forEach(z=>zones.push(z));
-  const top=M.spots.find(s=>s.boss);zones.push({type:'danger',x:top.x,y:top.y,r:15,name:'The Black Hall',mon:'mixed',boss:true,biome:7});
+  const top=M.spots.find(s=>s.boss);zones.push({type:'danger',x:top.x,y:top.y,r:13,name:'The Black Hall',mon:'mixed',boss:true,biome:7});
   // creatures only in the danger zones: the scattered ones from stage 1 are removed
   L.enemies=L.enemies.filter(e=>e.t==='hgdwarden');
   const dzs=zones.filter(z=>z.type==='danger');
   dzs.forEach((z,zi)=>{const cells=[];for(let y=Math.max(2,z.y-z.r);y<=Math.min(H-3,z.y+z.r);y++)for(let x=Math.max(2,z.x-z.r);x<=Math.min(W-3,z.x+z.r);x++)if(open(x,y)&&Math.hypot(x-z.x,y-z.y)<=z.r&&!used.has(x+','+y)&&!safeHit(x,y,4))cells.push([x,y]);
-    const n=Math.max(12,Math.min(30,(cells.length/14)|0)),ks=HGDP_KINDS[z.mon];z.n=0;
+    const n=Math.max(10,Math.min(24,(cells.length/14)|0)),ks=HGDP_KINDS[z.mon];z.n=0;
     for(let k=0;k<n&&cells.length;k++){const j=(rnd()*cells.length)|0,c=cells.splice(j,1)[0];used.add(c[0]+','+c[1]);L.enemies.push({t:ks[(rnd()*ks.length)|0],x:c[0],y:c[1]});z.n++}
     // the signs: on the corridors that cross the edge of the zone, a few, well spaced
     const edge=[];for(let y=Math.max(2,z.y-z.r-1);y<=Math.min(H-3,z.y+z.r+1);y++)for(let x=Math.max(2,z.x-z.r-1);x<=Math.min(W-3,z.x+z.r+1);x++){const d=Math.hypot(x-z.x,y-z.y);if(d>=z.r+.4&&d<z.r+1.5&&open(x,y)&&!used.has(x+','+y)&&!(kind[y*W+x]))edge.push([x,y,Math.atan2(y-z.y,x-z.x)])}
@@ -140,7 +141,10 @@ function hgdpBuild(L){
     const c=place(z,g[0],npc,g[1],qi,1);if(c)folk.push({npc,qi,zone:z.name})});
   // shopkeepers in the towns
   for(const b in HGDP_SHOPS){const z=towns[b];if(!z)continue;const c=place(z,'hg_npc'+(1+(b%5)),'hgd_shop'+b,HGDP_SHOPS[b][0],+b+3,2);if(c)folk.push({npc:'hgd_shop'+b,shop:+b,zone:z.name})}
+  encls.slice(4).forEach((z,i)=>{const npc='hgd_rest'+i,c=place(z,'hg_npc'+(1+(i%5)),npc,'A traveller',i+7,3);if(c)folk.push({npc,rest:i,zone:z.name})});
   L._hgdp={zones,towns:towns.map(z=>z.name),folk,dzs:dzs.length}}
+const HGDP_REST=['Sit a while. This is a safe place, and the safe places are few.','I have walked three quarters of the maze, and I keep to the safe places. So should you.','If a wall is a shade off from its neighbours, walk into it. Half the secrets of this place are hidden that way.','There is a door ahead that wants a key, and another that wants a gem. I have never found either. Ask in the towns.','The towns sell keys, and some of the shops sell gems. They are not cheap.'];
+for(let i=0;i<6;i++)khNpc('hgd_rest'+i,'A traveller','hg_npc'+(1+(i%5)),d=>{const nodeFn=()=>hgdNode(HGDP_REST[i%HGDP_REST.length]+' '+HGDP_WARN[i%HGDP_WARN.length],[['Anything else?',()=>hgdNode(HGDP_GOSS[(i+1)%HGDP_GOSS.length],[BYE],nodeFn)],BYE],nodeFn);return nodeFn()});
 // the quest givers and shopkeepers speak
 HGDP_QS.forEach(([id,gi,zi,kind,need,title,offer,done],qi)=>{const g=HGDP_FOLK[gi],npc='hgd_q'+qi;
   khNpc(npc,g[1],g[0],d=>{const F=G.flags,more=()=>nodeFn(),zn=()=>{const L=LEVELS[HGD.ID],dz=L&&L._hgdp?L._hgdp.zones.filter(z=>z.type==='danger'):[];const me=G.talk&&G.talk.d;let b=dz[0],bd=1e9;for(const z of dz){const dd=Math.hypot(z.x-(me?me.x:0),z.y-(me?me.y:0));if(dd<bd){bd=dd;b=z}}return b?b.name:'the danger zones'};
