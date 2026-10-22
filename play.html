@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.565';
+const VERSION='3.574';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2785,7 +2785,7 @@ function spriteList(){
     L.push({x:e.rx+.5,y:e.ry+.5,img:atk||base,w:(atk?def.w*atk.width/base.width:def.w)*fs,e,
       bob:def.fly?(def.floatH!==undefined?def.floatH:.3)+Math.sin(G.time*6+e.seed)*.05:Math.sin(G.time*3+e.seed)*.015,lunge:e.lunge,flash:e.flash,fade:e.hp<=0?e.dying/.55:1,sink:e.hp<=0?1-e.dying/.55:0});
   }
-  for(const it of G.items)if(!it.taken){const d=ITEMDEF[it.k];L.push({x:it.x+.5,y:it.y+.5,img:IMG['it_'+it.k]||IMG[it.k],w:it.k==='key'?.3:/^sundisc/.test(it.k)?.62:(d?d.sw:.3)*.95,item:it})}
+  for(const it of G.items)if(!it.taken){const d=ITEMDEF[it.k];L.push({x:it.x+.5+(typeof hgdnaOff==='function'?hgdnaOff(it)[0]:0),y:it.y+.5+(typeof hgdnaOff==='function'?hgdnaOff(it)[1]:0),img:IMG['it_'+it.k]||IMG[it.k],w:it.k==='key'?.3:/^sundisc/.test(it.k)?.62:(d?d.sw:.3)*.8075,item:it})} // (items lying on the floor drawn 15 percent smaller)
   if(G.flora&&G.flora.length){const px=G.C.x+.5,py=G.C.y+.5;for(const f of G.flora){const dx=f.wx-px,dy=f.wy-py;if(dx*dx+dy*dy>256)continue;const im=IMG[f.k];if(!im)continue;L.push({x:f.wx,y:f.wy,img:im,w:(NPC_H[f.k]?NPC_H[f.k]*im.width/im.height:decorW(f.k))*f.sc,decor:f.decor})}} // lots of tiny tufts: only those within sixteen cells are drawn
   const DROP={well:.07,fountain:.1,chest:.05,cart:.05,barrel:.03,crate:.03,bench:.04,urn:.03,memorial:.04,statue:.03,coffin:.03,gate:.02,tree0:.15,tree1:.13,tree2:.09,tree3:.14,tree4:.15,tree5:.16,tree6:.13,tree7:.14};
   const cam=G.C||{x:0,y:0};
@@ -2956,9 +2956,9 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
         SC.restore();
       }
     }
-    if(anyVis&&s.decor&&s.decor.npc&&ty<20&&QGIVER[s.decor.npc]){ // a gold ! over anyone with a quest to give, a green ? over anyone the party can hand a finished quest in to
+    if(anyVis&&s.decor&&s.decor.npc&&ty<20&&(QGIVER[s.decor.npc]||(typeof hgdstShop==='function'&&hgdstShop(s.decor.npc)))){ // (a gold $ over the shopkeepers of the maze towns) // a gold ! over anyone with a quest to give, a green ? over anyone the party can hand a finished quest in to
       const dd=s.decor;
-      if(!dd._qt||G.time-dd._qt>.3){dd._qt=G.time;dd._qv=questMark(dd)}
+      if(!dd._qt||G.time-dd._qt>.3){dd._qt=G.time;dd._qv=(QGIVER[dd.npc]?questMark(dd):0)||(typeof hgdstShop==='function'&&hgdstShop(dd.npc)?3:0)}
       const cm=Math.max(0,Math.min(VW-1,Math.floor(scrX)));
       if(dd._qv&&zbuf[cm]>ty){
         const sz=clamp(sw*.36,11,34),bb=top-sz*.12+Math.sin(G.time*3.2+dd.x*7+dd.y*3)*sz*.1,ready=dd._qv===2;
@@ -2966,9 +2966,9 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
         const hg=SC.createRadialGradient(scrX,bb-sz*.5,0,scrX,bb-sz*.5,sz*.95);hg.addColorStop(0,ready?'rgba(150,255,140,.42)':'rgba(255,226,110,.42)');hg.addColorStop(1,'rgba(255,200,60,0)');
         SC.fillStyle=hg;SC.fillRect(scrX-sz,bb-sz*1.5,sz*2,sz*2);
         SC.font=`bold ${sz}px ${FUI}`;SC.textAlign='center';SC.textBaseline='alphabetic';SC.lineJoin='round';
-        SC.lineWidth=Math.max(2,sz*.24);SC.strokeStyle='rgba(30,16,4,.92)';SC.strokeText(ready?'?':'!',scrX,bb);
+        SC.lineWidth=Math.max(2,sz*.24);SC.strokeStyle='rgba(30,16,4,.92)';SC.strokeText(ready?'?':dd._qv===3?'$':'!',scrX,bb);
         const tg=SC.createLinearGradient(0,bb-sz,0,bb);tg.addColorStop(0,ready?'#d8ffc8':'#fff4a8');tg.addColorStop(1,ready?'#4cb83c':'#e8a420');
-        SC.fillStyle=tg;SC.fillText(ready?'?':'!',scrX,bb);
+        SC.fillStyle=tg;SC.fillText(ready?'?':dd._qv===3?'$':'!',scrX,bb);
         SC.restore();
       }
     }
@@ -6689,6 +6689,7 @@ function drawQuestMarks(ox,oy,cs,big,rad){ // rad: only the marks within that ma
   const pulse=.6+.4*Math.sin(G.time*5);
   for(const d of (rad&&LEVEL===44&&G.khB?khNearDecor(G.C.x,G.C.y):G.decor)){
     if(rad&&(Math.abs(d.x-G.C.x)>rad||Math.abs(d.y-G.C.y)>rad))continue;
+    if(d.npc&&!d.found&&typeof hgdstShop==='function'&&hgdstShop(d.npc)){const cx=ox+(d.x+.5)*cs,cy=oy+(d.y+.5)*cs;ctx.save();ctx.fillStyle='#ffd24a';ctx.globalAlpha=pulse;ctx.beginPath();ctx.arc(cx,cy,cs*.32,0,TAU);ctx.fill();ctx.globalAlpha=1;if(big)txt('$',cx,cy-cs*1.1,10,'#ffd24a','center',true);ctx.restore();continue} // a shop
     const qv=QGIVER[d.npc];if(!qv||d.found)continue;
     const q=Array.isArray(qv)?qv.find(z=>qSt(z)!=='done'):qv;if(!q)continue;
     const st=qSt(q),ready=qReady(q);
@@ -7287,7 +7288,7 @@ function handleBtn(id){
   if(id==='qsave'){const ok=writeSave('quick')&&writeSave('auto');G.qsT=G.time;sfx(ok?'level':'locked');msg(ok?'Game saved.':'The save failed: the browser would not store it.',ok?'#a8e8a0':'#e8a090');return}
   if(id==='menu'){G.menu=true;return}
   if(id==='map'){G.overview=true;return}
-  if(id.startsWith('hero')){try{afflPortraitNote(+id.slice(4))}catch(e){}openInv(+id.slice(4));return}
+  if(id.startsWith('hero')){openInv(+id.slice(4));return} // (no longer a line about the hero's afflictions each time the inventory is opened)
   act(id);
   if(['fwd','back','left','right','turnL','turnR'].includes(id))G.hold={id,t:G.time+.42};
 }
@@ -7456,7 +7457,7 @@ addEventListener('resize',fit);fit();
 /*@@DESERT:BEGIN@@*/
 /* ---- src/desert/artlist.js ---- */
 /* written by tools/inject.py */
-const DS_PAINTED=['assassin', 'assassinA', 'bat', 'batA', 'bear', 'bearA', 'brazier0', 'brazier1', 'brazier2', 'brazier3', 'camelpE', 'camelpW', 'camelrE', 'camelrW', 'ceil_hgtb_tubeceil', 'ceil_tomb', 'cobra', 'cobraA', 'cvnomadA', 'cvnomadB', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'dplant0', 'dplant1', 'dplant2', 'dplant3', 'dpyrgate', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dskeleton', 'dskeletonA', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_hgduf', 'floor_hgduf2', 'floor_hgdwf', 'floor_hgdwf2', 'floor_hgt_f0', 'floor_hgt_f1', 'floor_hgt_f2', 'floor_hgt_f3', 'floor_hgt_f4', 'floor_hgt_f5', 'floor_hgt_f6', 'floor_hgt_f7', 'floor_hgtb_deep', 'floor_hgtb_f_checker', 'floor_hgtb_f_checker_dark', 'floor_hgtb_f_circles', 'floor_hgtb_f_diamonds', 'floor_hgtb_f_fish', 'floor_hgtb_f_floral', 'floor_hgtb_f_gutter', 'floor_hgtb_f_hex', 'floor_hgtb_f_lotus', 'floor_hgtb_f_mandala', 'floor_hgtb_f_mandala_dark', 'floor_hgtb_f_marble', 'floor_hgtb_f_mossy', 'floor_hgtb_f_mossy_dark', 'floor_hgtb_f_pearlbands', 'floor_hgtb_f_pearlbands_dark', 'floor_hgtb_f_petals', 'floor_hgtb_f_planks', 'floor_hgtb_f_reed', 'floor_hgtb_f_rosette', 'floor_hgtb_f_scales', 'floor_hgtb_f_shellflags', 'floor_hgtb_f_shellflags_dark', 'floor_hgtb_f_spiral', 'floor_hgtb_f_stained', 'floor_hgtb_f_star', 'floor_hgtb_f_sunburst', 'floor_hgtb_f_terrazzo', 'floor_hgtb_f_terrazzo_dark', 'floor_hgtb_f_waves', 'floor_hgtb_med_00', 'floor_hgtb_med_01', 'floor_hgtb_med_02', 'floor_hgtb_med_03', 'floor_hgtb_med_10', 'floor_hgtb_med_11', 'floor_hgtb_med_12', 'floor_hgtb_med_13', 'floor_hgtb_med_20', 'floor_hgtb_med_21', 'floor_hgtb_med_22', 'floor_hgtb_med_23', 'floor_hgtb_med_30', 'floor_hgtb_med_31', 'floor_hgtb_med_32', 'floor_hgtb_med_33', 'floor_hgtb_pool', 'floor_hgtb_uwcobble', 'floor_hgtb_uwglass', 'floor_hgtb_uwsand', 'floor_hgtb_uwslab', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_seabed1', 'floor_seabed2', 'floor_seabed3', 'floor_seabed4', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'fw_bream_0', 'fw_bream_1', 'fw_carp_0', 'fw_carp_1', 'fw_goldfish_0', 'fw_goldfish_1', 'fw_minnows_0', 'fw_minnows_1', 'fw_perch_0', 'fw_perch_1', 'fw_pike_0', 'fw_pike_1', 'fw_tench_0', 'fw_tench_1', 'fw_trout_0', 'fw_trout_1', 'hgdemon0', 'hgdemon1', 'hgdemon2', 'hgdemon3', 'hgdemon4', 'hgdemon5', 'hgdemon6', 'hgdemon7', 'hgdemon8', 'hgdemon9', 'hgdf_plant0', 'hgdf_plant1', 'hgdf_plant2', 'hgdf_plant3', 'hgdf_plant4', 'hgdf_plant5', 'hgdf_plant6', 'hgdf_plant7', 'hgdf_shield0', 'hgdf_shield1', 'hgdf_shield2', 'hgdf_shield3', 'hgdf_shield4', 'hgdf_shield5', 'hgdf_shield6', 'hgdf_shield7', 'hgdf_shield8', 'hgdf_vine0', 'hgdf_vine1', 'hgdf_vine2', 'hgdf_vine3', 'hgdf_wsym0', 'hgdf_wsym1', 'hgdf_wsym10', 'hgdf_wsym11', 'hgdf_wsym12', 'hgdf_wsym13', 'hgdf_wsym14', 'hgdf_wsym15', 'hgdf_wsym2', 'hgdf_wsym3', 'hgdf_wsym4', 'hgdf_wsym5', 'hgdf_wsym6', 'hgdf_wsym7', 'hgdf_wsym8', 'hgdf_wsym9', 'hgdl_bow', 'hgfbeetle', 'hgfbloodworm', 'hgfcatfish', 'hgfcrayfish', 'hgfire0', 'hgfire1', 'hgfire2', 'hgfire3', 'hgfire4', 'hgfire5', 'hgfleech', 'hgfpiranha', 'hgfscorpion', 'hgfsnake', 'hgfspider', 'hgfturtle', 'hgmbeetle', 'hgmcricket', 'hgmdragonfly', 'hgmhornet', 'hgmhorsefly', 'hgmlocust', 'hgmmosquito', 'hgmtoad', 'hgoangler', 'hgobones', 'hgocorpse', 'hgocrab', 'hgoeel', 'hgohag', 'hgokraken', 'hgoleech', 'hgoleviathan', 'hgoserpent', 'hgslime0', 'hgslime1', 'hgslime2', 'hgslime3', 'hgslime4', 'hgslime5', 'hgslime6', 'hgslime7', 'hgslime8', 'hgslime9', 'hgt_balcony', 'hgt_banner', 'hgt_bulbflower', 'hgt_chime', 'hgt_chimney', 'hgt_cloud_aqua1', 'hgt_cloud_aqua2', 'hgt_cloud_cream1', 'hgt_cloud_cream2', 'hgt_cloud_lilac1', 'hgt_cloud_lilac2', 'hgt_cloud_pink1', 'hgt_cloud_pinkstreak', 'hgt_crystalgrass', 'hgt_cupola', 'hgt_fairytree', 'hgt_fern', 'hgt_finial', 'hgt_fountain', 'hgt_gardenlantern', 'hgt_giantcap', 'hgt_hanglamp', 'hgt_lamppost', 'hgt_lightvine', 'hgt_moon_glow', 'hgt_moon_halo', 'hgt_moon_main', 'hgt_mushrooms', 'hgt_obelisk', 'hgt_pearlbush', 'hgt_planet_coral', 'hgt_planet_cratered', 'hgt_planet_crystal', 'hgt_planet_desert', 'hgt_planet_gas', 'hgt_planet_ice', 'hgt_planet_jade', 'hgt_planet_lava', 'hgt_planet_ocean', 'hgt_planet_orange', 'hgt_planet_pearl', 'hgt_planet_violet', 'hgt_reeds', 'hgt_ring_gold', 'hgt_ring_pastel', 'hgt_shellflower', 'hgt_shrub', 'hgt_vine_cornerBR', 'hgt_vine_cornerTL', 'hgt_vine_creeper', 'hgt_vine_curtain', 'hgt_vine_garland', 'hgt_vine_ivy', 'hgt_vine_roundleaf', 'hgt_vine_stars', 'hgt_vine_tendril', 'hgt_vine_wisteria', 'hgt_vine_wreatharch', 'hgt_vine_wreathround', 'hgt_willow', 'hgtb_amberpup', 'hgtb_aquawhale', 'hgtb_basket', 'hgtb_bench', 'hgtb_bulk_face_amber', 'hgtb_bulk_face_aqua', 'hgtb_bulk_face_lilac', 'hgtb_bulk_face_pink', 'hgtb_bulk_skin_amber', 'hgtb_bulk_skin_aqua', 'hgtb_bulk_skin_lilac', 'hgtb_bulk_skin_pink', 'hgtb_chair', 'hgtb_creamjelly', 'hgtb_creammoth', 'hgtb_deco_banner', 'hgtb_deco_bunting', 'hgtb_deco_fountain', 'hgtb_deco_lanterns', 'hgtb_deco_pearlplinth', 'hgtb_deco_shellstatue', 'hgtb_edge_far', 'hgtb_edge_mid', 'hgtb_edge_near', 'hgtb_elder', 'hgtb_eye1', 'hgtb_eye2', 'hgtb_eye3', 'hgtb_eye4', 'hgtb_eye5', 'hgtb_eye6', 'hgtb_feather_down', 'hgtb_feather_iridescent', 'hgtb_feather_peacock1', 'hgtb_feather_peacock2', 'hgtb_fish_angel', 'hgtb_fish_clam', 'hgtb_fish_crabfish', 'hgtb_fish_eel', 'hgtb_fish_flounder', 'hgtb_fish_glassfish', 'hgtb_fish_insectfish', 'hgtb_fish_jelly', 'hgtb_fish_lanternfish', 'hgtb_fish_nautilus', 'hgtb_fish_neon', 'hgtb_fish_octopus', 'hgtb_fish_pearlray', 'hgtb_fish_puffer', 'hgtb_fish_seadragon', 'hgtb_fish_seahorse', 'hgtb_fish_snailfish', 'hgtb_fish_starfish', 'hgtb_fishbeetle', 'hgtb_fisher', 'hgtb_fishfly', 'hgtb_furn_bed', 'hgtb_furn_books_globe', 'hgtb_furn_bookshelf', 'hgtb_furn_bunk', 'hgtb_furn_cabinet', 'hgtb_furn_chandelier', 'hgtb_furn_chandelier_lantern', 'hgtb_furn_clock', 'hgtb_furn_hearth', 'hgtb_furn_loom', 'hgtb_furn_stage', 'hgtb_furn_table_chairs', 'hgtb_glasspost', 'hgtb_jadeeel', 'hgtb_jadefinmoth', 'hgtb_jar', 'hgtb_lamp_bare', 'hgtb_lamp_bracket', 'hgtb_lamp_hanging', 'hgtb_lamp_short', 'hgtb_lamp_tall', 'hgtb_lamp_vine', 'hgtb_lampwhite', 'hgtb_lantern', 'hgtb_lanternbeetle', 'hgtb_levi_eel_face', 'hgtb_levi_jelly_face', 'hgtb_levi_manta_face', 'hgtb_levi_whale_face', 'hgtb_lilacmoth', 'hgtb_peachwhale', 'hgtb_peacockfan', 'hgtb_pearlslug', 'hgtb_pinkbulb', 'hgtb_plant_barrel', 'hgtb_plant_belltree', 'hgtb_plant_glowshrooms', 'hgtb_plant_lacecoral', 'hgtb_plant_lupin', 'hgtb_plant_orbbush', 'hgtb_plant_potvine', 'hgtb_plant_spiralfern', 'hgtb_plant_tealgrass', 'hgtb_plantbed', 'hgtb_polish', 'hgtb_pups', 'hgtb_read', 'hgtb_rug_amber', 'hgtb_rug_aqua_fish', 'hgtb_rug_cream_mandala', 'hgtb_rug_green_oval', 'hgtb_rug_lilac_runner', 'hgtb_rug_pink_round', 'hgtb_scorp_barbels', 'hgtb_scorp_dorsal', 'hgtb_scorp_eye', 'hgtb_scorp_mouth', 'hgtb_scorp_pectoral', 'hgtb_scorp_pectoral_ruffle1', 'hgtb_scorp_pectoral_ruffle2', 'hgtb_scorp_ref_front', 'hgtb_scorp_ref_side', 'hgtb_scorp_smallfins', 'hgtb_scorp_spine', 'hgtb_scorp_tail', 'hgtb_shrine', 'hgtb_spindleray', 'hgtb_spindlespider', 'hgtb_stall_aqua_jars', 'hgtb_stall_coral_fruit', 'hgtb_stall_lilac_cloth', 'hgtb_stall_navy_books', 'hgtb_stall_orange_pottery', 'hgtb_stall_pink_flowers', 'hgtb_stall_rose_lanterns', 'hgtb_stall_sage_herbs', 'hgtb_stall_teal_fish', 'hgtb_stall_yellow_bread', 'hgtb_stilt_body', 'hgtb_stilt_foot', 'hgtb_stilt_head', 'hgtb_stilt_knee', 'hgtb_sweep', 'hgtb_table', 'hgtb_tank_anemone', 'hgtb_tank_bubbles', 'hgtb_tank_bubbles3', 'hgtb_tank_coral', 'hgtb_tank_kelp', 'hgtb_tank_rock', 'hgtb_tank_round', 'hgtb_tank_ruinarch', 'hgtb_tank_seagrass', 'hgtb_tank_tall', 'hgtb_walk', 'hgtb_watch', 'hgtb_water', 'hgtb_wing_bat', 'hgtb_wing_butterfly', 'hgtb_wing_insect', 'hgthin0', 'hgthin1', 'hgthin2', 'hgthin3', 'hgthin4', 'hgthin5', 'hgthin6', 'hgthin7', 'hgxprop0', 'hgxprop1', 'hgxprop10', 'hgxprop11', 'hgxprop12', 'hgxprop13', 'hgxprop14', 'hgxprop15', 'hgxprop2', 'hgxprop3', 'hgxprop4', 'hgxprop5', 'hgxprop6', 'hgxprop7', 'hgxprop8', 'hgxprop9', 'hgxrock0', 'hgxrock1', 'hgxrock2', 'hgxrock3', 'hgxrock4', 'hgxrock5', 'hgxrock6', 'hgxrock7', 'hgxstat0', 'hgxstat1', 'hgxstat2', 'hgxstat3', 'hgxstat4', 'hgxstat5', 'hgxstat6', 'hgxstat7', 'hgyuck0', 'hgyuck1', 'hgyuck2', 'hgyuck3', 'hgyuck4', 'hgyuck5', 'hgyuck6', 'hgyuck7', 'hgyuck8', 'hgyuck9', 'messenger', 'messengerA', 'msgr_A', 'msgr_D', 'msgr_E', 'msgr_H', 'msgr_T', 'offering', 'pharaohboss', 'pharaohbossA', 'pservant', 'pservantA', 'rrock0', 'rrock1', 'rrock2', 'shady', 'skel', 'skelA', 'skybirdA', 'skybirdB', 'slime', 'slimeA', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_hgdp_cave', 'tex_hgdp_crack', 'tex_hgdp_dock', 'tex_hgdp_doorkey', 'tex_hgdp_gem', 'tex_hgdp_ladderdn', 'tex_hgdp_ladderup', 'tex_hgdp_planks', 'tex_hgdp_secret', 'tex_hgdp_stepsdn', 'tex_hgdp_stepsup', 'tex_hgdp_vines', 'tex_hgdu_brick', 'tex_hgdu_brick2', 'tex_hgdw_moss', 'tex_hgdw_moss2', 'tex_hgt_d0', 'tex_hgt_d1', 'tex_hgt_d2', 'tex_hgt_d3', 'tex_hgt_w2_bandjade', 'tex_hgt_w2_bubbles', 'tex_hgt_w2_confetti', 'tex_hgt_w2_constellation', 'tex_hgt_w2_crayon', 'tex_hgt_w2_crosshatch', 'tex_hgt_w2_doodleaqua', 'tex_hgt_w2_doorblue', 'tex_hgt_w2_doorteal', 'tex_hgt_w2_dotsyellow', 'tex_hgt_w2_filigree', 'tex_hgt_w2_loopsmint', 'tex_hgt_w2_map', 'tex_hgt_w2_medallions', 'tex_hgt_w2_mosaic', 'tex_hgt_w2_pointillist', 'tex_hgt_w2_polkaaqua', 'tex_hgt_w2_polkapink', 'tex_hgt_w2_portholes', 'tex_hgt_w2_portlilac', 'tex_hgt_w2_quilt', 'tex_hgt_w2_ringbubbles', 'tex_hgt_w2_rings', 'tex_hgt_w2_scales', 'tex_hgt_w2_scribblepink', 'tex_hgt_w2_script', 'tex_hgt_w2_tessel', 'tex_hgt_w2_wavylilac', 'tex_hgt_w2_winaqua', 'tex_hgt_w2_winpink', 'tex_hgt_w3_arcade_cream', 'tex_hgt_w3_arcade_lilac', 'tex_hgt_w3_balcony2_cream', 'tex_hgt_w3_balcony_cream', 'tex_hgt_w3_bunting_aqua', 'tex_hgt_w3_buttress_amber', 'tex_hgt_w3_cornice_cream', 'tex_hgt_w3_dado_pink', 'tex_hgt_w3_fresco_amber', 'tex_hgt_w3_fresco_cream', 'tex_hgt_w3_reed_lilac', 'tex_hgt_w3_relief_aqua', 'tex_hgt_w3_relief_pink', 'tex_hgt_w3_scroll_aqua', 'tex_hgt_w3_scroll_pink', 'tex_hgt_w3_shop_cream', 'tex_hgt_w3_shop_pink', 'tex_hgt_w3_shutters_lilac', 'tex_hgt_wa', 'tex_hgt_wb0', 'tex_hgt_wb1', 'tex_hgt_wb2', 'tex_hgt_wb3', 'tex_hgt_wc', 'tex_hgt_wl', 'tex_hgt_wp', 'tex_hgt_ww0', 'tex_hgt_ww1', 'tex_hgt_ww2', 'tex_hgt_ww3', 'tex_hgtb_angel_banded', 'tex_hgtb_eel_thick', 'tex_hgtb_levi_eel_body', 'tex_hgtb_levi_eel_fin', 'tex_hgtb_levi_jelly_body', 'tex_hgtb_levi_jelly_fin', 'tex_hgtb_levi_manta_body', 'tex_hgtb_levi_manta_wing', 'tex_hgtb_levi_whale_body', 'tex_hgtb_levi_whale_fin', 'tex_hgtb_limbs', 'tex_hgtb_scales', 'tex_hgtb_scorp_belly', 'tex_hgtb_scorp_belly2', 'tex_hgtb_scorp_body', 'tex_hgtb_scorp_tassels', 'tex_hgtb_scorp_warts', 'tex_hgtb_skinamber', 'tex_hgtb_skinaqua', 'tex_hgtb_skinlilac', 'tex_hgtb_skinpink', 'tex_hgtb_stilt_armour', 'tex_hgtb_stilt_foot_shell', 'tex_hgtb_stilt_joint_shell', 'tex_hgtb_stilt_knee_shell', 'tex_hgtb_stilt_leg', 'tex_hgtb_stilt_leg512', 'tex_hgtb_stilt_leg_shell', 'tex_hgtb_tankbg1', 'tex_hgtb_tankbg2', 'tex_hgtb_tankbg3', 'tex_hgtb_tankbg4', 'tex_hgtb_tube', 'tex_hgtb_whale_contrast', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'tex_yarblue', 'tex_yarcoral', 'tex_yardoor', 'tex_yardoor2', 'tex_yardoor3', 'tex_yardoor4', 'tex_yardoor5', 'tex_yardoor6', 'tex_yardoor7', 'tex_yardrift', 'tex_yargreen', 'tex_yarnet', 'tex_yarpink', 'tex_yarrose', 'tex_yarwall', 'tex_yaryellow', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA', 'w_candleknight', 'w_candleknightA', 'w_crowncrab', 'w_crowncrabA', 'w_ferryman', 'w_ferrymanA', 'w_glassstag', 'w_glassstagA', 'w_hollowbride', 'w_hollowbrideA', 'w_manyeyedox', 'w_manyeyedoxA', 'w_marrow', 'w_marrowA', 'w_mossback', 'w_mossbackA', 'w_rattlebones', 'w_rattlebonesA', 'w_saltwife', 'w_saltwifeA', 'w_thistlewick', 'w_thistlewickA', 'w_toll', 'w_tollA', 'w_unfinished', 'w_unfinishedA', 'w_weatherhound', 'w_weatherhoundA'];
+const DS_PAINTED=['assassin', 'assassinA', 'bat', 'batA', 'bear', 'bearA', 'brazier0', 'brazier1', 'brazier2', 'brazier3', 'camelpE', 'camelpW', 'camelrE', 'camelrW', 'ceil_hgtb_tubeceil', 'ceil_tomb', 'cobra', 'cobraA', 'cvnomadA', 'cvnomadB', 'cyclops', 'cyclopsA', 'danubis', 'dbastet', 'dbones', 'dburrow', 'dcactus', 'dcryptL', 'dcryptS', 'ddead', 'dhatch', 'dobelisk', 'dpalm0', 'dpalm1', 'dpalm2', 'dpalm3', 'dpharaoh', 'dpillar0', 'dpillar1', 'dplant0', 'dplant1', 'dplant2', 'dplant3', 'dpyrgate', 'drock0', 'drock1', 'drock2', 'druinstairs', 'dshrub0', 'dshrub1', 'dshrub2', 'dskeleton', 'dskeletonA', 'dsphinx', 'dspire', 'dstairs', 'dsutstatue', 'dtreehole', 'dwolf', 'dwolfA', 'firelizard', 'firelizardA', 'floor_bluegrass', 'floor_bluesand', 'floor_bluesand2', 'floor_bluewater', 'floor_dgrass', 'floor_dune', 'floor_hgduf', 'floor_hgduf2', 'floor_hgdwf', 'floor_hgdwf2', 'floor_hgt_f0', 'floor_hgt_f1', 'floor_hgt_f2', 'floor_hgt_f3', 'floor_hgt_f4', 'floor_hgt_f5', 'floor_hgt_f6', 'floor_hgt_f7', 'floor_hgtb_deep', 'floor_hgtb_f_checker', 'floor_hgtb_f_checker_dark', 'floor_hgtb_f_circles', 'floor_hgtb_f_diamonds', 'floor_hgtb_f_fish', 'floor_hgtb_f_floral', 'floor_hgtb_f_gutter', 'floor_hgtb_f_hex', 'floor_hgtb_f_lotus', 'floor_hgtb_f_mandala', 'floor_hgtb_f_mandala_dark', 'floor_hgtb_f_marble', 'floor_hgtb_f_mossy', 'floor_hgtb_f_mossy_dark', 'floor_hgtb_f_pearlbands', 'floor_hgtb_f_pearlbands_dark', 'floor_hgtb_f_petals', 'floor_hgtb_f_planks', 'floor_hgtb_f_reed', 'floor_hgtb_f_rosette', 'floor_hgtb_f_scales', 'floor_hgtb_f_shellflags', 'floor_hgtb_f_shellflags_dark', 'floor_hgtb_f_spiral', 'floor_hgtb_f_stained', 'floor_hgtb_f_star', 'floor_hgtb_f_sunburst', 'floor_hgtb_f_terrazzo', 'floor_hgtb_f_terrazzo_dark', 'floor_hgtb_f_waves', 'floor_hgtb_med_00', 'floor_hgtb_med_01', 'floor_hgtb_med_02', 'floor_hgtb_med_03', 'floor_hgtb_med_10', 'floor_hgtb_med_11', 'floor_hgtb_med_12', 'floor_hgtb_med_13', 'floor_hgtb_med_20', 'floor_hgtb_med_21', 'floor_hgtb_med_22', 'floor_hgtb_med_23', 'floor_hgtb_med_30', 'floor_hgtb_med_31', 'floor_hgtb_med_32', 'floor_hgtb_med_33', 'floor_hgtb_pool', 'floor_hgtb_uwcobble', 'floor_hgtb_uwglass', 'floor_hgtb_uwsand', 'floor_hgtb_uwslab', 'floor_redpath', 'floor_redsand', 'floor_redsand2', 'floor_sand', 'floor_sandpath', 'floor_scrub', 'floor_seabed1', 'floor_seabed2', 'floor_seabed3', 'floor_seabed4', 'floor_tombdark', 'floor_tombgold', 'floor_tomblapis', 'floor_tombred', 'floor_tombsand', 'floor_tombslab', 'fw_bream_0', 'fw_bream_1', 'fw_carp_0', 'fw_carp_1', 'fw_goldfish_0', 'fw_goldfish_1', 'fw_minnows_0', 'fw_minnows_1', 'fw_perch_0', 'fw_perch_1', 'fw_pike_0', 'fw_pike_1', 'fw_tench_0', 'fw_tench_1', 'fw_trout_0', 'fw_trout_1', 'hgdemon0', 'hgdemon1', 'hgdemon2', 'hgdemon3', 'hgdemon4', 'hgdemon5', 'hgdemon6', 'hgdemon7', 'hgdemon8', 'hgdemon9', 'hgdf_plant0', 'hgdf_plant1', 'hgdf_plant2', 'hgdf_plant3', 'hgdf_plant4', 'hgdf_plant5', 'hgdf_plant6', 'hgdf_plant7', 'hgdf_shield0', 'hgdf_shield1', 'hgdf_shield2', 'hgdf_shield3', 'hgdf_shield4', 'hgdf_shield5', 'hgdf_shield6', 'hgdf_shield7', 'hgdf_shield8', 'hgdf_vine0', 'hgdf_vine1', 'hgdf_vine2', 'hgdf_vine3', 'hgdf_wsym0', 'hgdf_wsym1', 'hgdf_wsym10', 'hgdf_wsym11', 'hgdf_wsym12', 'hgdf_wsym13', 'hgdf_wsym14', 'hgdf_wsym15', 'hgdf_wsym2', 'hgdf_wsym3', 'hgdf_wsym4', 'hgdf_wsym5', 'hgdf_wsym6', 'hgdf_wsym7', 'hgdf_wsym8', 'hgdf_wsym9', 'hgdl_bow', 'hgfbeetle', 'hgfbloodworm', 'hgfcatfish', 'hgfcrayfish', 'hgfire0', 'hgfire1', 'hgfire2', 'hgfire3', 'hgfire4', 'hgfire5', 'hgfleech', 'hgfpiranha', 'hgfscorpion', 'hgfsnake', 'hgfspider', 'hgfturtle', 'hgmbeetle', 'hgmcricket', 'hgmdragonfly', 'hgmhornet', 'hgmhorsefly', 'hgmlocust', 'hgmmosquito', 'hgmtoad', 'hgoangler', 'hgobones', 'hgocorpse', 'hgocrab', 'hgoeel', 'hgohag', 'hgokraken', 'hgoleech', 'hgoleviathan', 'hgoserpent', 'hgslime0', 'hgslime1', 'hgslime2', 'hgslime3', 'hgslime4', 'hgslime5', 'hgslime6', 'hgslime7', 'hgslime8', 'hgslime9', 'hgstall_armour', 'hgstall_arms', 'hgstall_church', 'hgstall_general', 'hgstall_inn', 'hgstall_magic', 'hgstall_shrine', 'hgstall_trader', 'hgt_balcony', 'hgt_banner', 'hgt_bulbflower', 'hgt_chime', 'hgt_chimney', 'hgt_cloud_aqua1', 'hgt_cloud_aqua2', 'hgt_cloud_cream1', 'hgt_cloud_cream2', 'hgt_cloud_lilac1', 'hgt_cloud_lilac2', 'hgt_cloud_pink1', 'hgt_cloud_pinkstreak', 'hgt_crystalgrass', 'hgt_cupola', 'hgt_fairytree', 'hgt_fern', 'hgt_finial', 'hgt_fountain', 'hgt_gardenlantern', 'hgt_giantcap', 'hgt_hanglamp', 'hgt_lamppost', 'hgt_lightvine', 'hgt_moon_glow', 'hgt_moon_halo', 'hgt_moon_main', 'hgt_mushrooms', 'hgt_obelisk', 'hgt_pearlbush', 'hgt_planet_coral', 'hgt_planet_cratered', 'hgt_planet_crystal', 'hgt_planet_desert', 'hgt_planet_gas', 'hgt_planet_ice', 'hgt_planet_jade', 'hgt_planet_lava', 'hgt_planet_ocean', 'hgt_planet_orange', 'hgt_planet_pearl', 'hgt_planet_violet', 'hgt_reeds', 'hgt_ring_gold', 'hgt_ring_pastel', 'hgt_shellflower', 'hgt_shrub', 'hgt_vine_cornerBR', 'hgt_vine_cornerTL', 'hgt_vine_creeper', 'hgt_vine_curtain', 'hgt_vine_garland', 'hgt_vine_ivy', 'hgt_vine_roundleaf', 'hgt_vine_stars', 'hgt_vine_tendril', 'hgt_vine_wisteria', 'hgt_vine_wreatharch', 'hgt_vine_wreathround', 'hgt_willow', 'hgtb_amberpup', 'hgtb_aquawhale', 'hgtb_basket', 'hgtb_bench', 'hgtb_bulk_face_amber', 'hgtb_bulk_face_aqua', 'hgtb_bulk_face_lilac', 'hgtb_bulk_face_pink', 'hgtb_bulk_skin_amber', 'hgtb_bulk_skin_aqua', 'hgtb_bulk_skin_lilac', 'hgtb_bulk_skin_pink', 'hgtb_chair', 'hgtb_creamjelly', 'hgtb_creammoth', 'hgtb_deco_banner', 'hgtb_deco_bunting', 'hgtb_deco_fountain', 'hgtb_deco_lanterns', 'hgtb_deco_pearlplinth', 'hgtb_deco_shellstatue', 'hgtb_edge_far', 'hgtb_edge_mid', 'hgtb_edge_near', 'hgtb_elder', 'hgtb_eye1', 'hgtb_eye2', 'hgtb_eye3', 'hgtb_eye4', 'hgtb_eye5', 'hgtb_eye6', 'hgtb_feather_down', 'hgtb_feather_iridescent', 'hgtb_feather_peacock1', 'hgtb_feather_peacock2', 'hgtb_fish_angel', 'hgtb_fish_clam', 'hgtb_fish_crabfish', 'hgtb_fish_eel', 'hgtb_fish_flounder', 'hgtb_fish_glassfish', 'hgtb_fish_insectfish', 'hgtb_fish_jelly', 'hgtb_fish_lanternfish', 'hgtb_fish_nautilus', 'hgtb_fish_neon', 'hgtb_fish_octopus', 'hgtb_fish_pearlray', 'hgtb_fish_puffer', 'hgtb_fish_seadragon', 'hgtb_fish_seahorse', 'hgtb_fish_snailfish', 'hgtb_fish_starfish', 'hgtb_fishbeetle', 'hgtb_fisher', 'hgtb_fishfly', 'hgtb_furn_bed', 'hgtb_furn_books_globe', 'hgtb_furn_bookshelf', 'hgtb_furn_bunk', 'hgtb_furn_cabinet', 'hgtb_furn_chandelier', 'hgtb_furn_chandelier_lantern', 'hgtb_furn_clock', 'hgtb_furn_hearth', 'hgtb_furn_loom', 'hgtb_furn_stage', 'hgtb_furn_table_chairs', 'hgtb_glasspost', 'hgtb_jadeeel', 'hgtb_jadefinmoth', 'hgtb_jar', 'hgtb_lamp_bare', 'hgtb_lamp_bracket', 'hgtb_lamp_hanging', 'hgtb_lamp_short', 'hgtb_lamp_tall', 'hgtb_lamp_vine', 'hgtb_lampwhite', 'hgtb_lantern', 'hgtb_lanternbeetle', 'hgtb_levi_eel_face', 'hgtb_levi_jelly_face', 'hgtb_levi_manta_face', 'hgtb_levi_whale_face', 'hgtb_lilacmoth', 'hgtb_peachwhale', 'hgtb_peacockfan', 'hgtb_pearlslug', 'hgtb_pinkbulb', 'hgtb_plant_barrel', 'hgtb_plant_belltree', 'hgtb_plant_glowshrooms', 'hgtb_plant_lacecoral', 'hgtb_plant_lupin', 'hgtb_plant_orbbush', 'hgtb_plant_potvine', 'hgtb_plant_spiralfern', 'hgtb_plant_tealgrass', 'hgtb_plantbed', 'hgtb_polish', 'hgtb_pups', 'hgtb_read', 'hgtb_rug_amber', 'hgtb_rug_aqua_fish', 'hgtb_rug_cream_mandala', 'hgtb_rug_green_oval', 'hgtb_rug_lilac_runner', 'hgtb_rug_pink_round', 'hgtb_scorp_barbels', 'hgtb_scorp_dorsal', 'hgtb_scorp_eye', 'hgtb_scorp_mouth', 'hgtb_scorp_pectoral', 'hgtb_scorp_pectoral_ruffle1', 'hgtb_scorp_pectoral_ruffle2', 'hgtb_scorp_ref_front', 'hgtb_scorp_ref_side', 'hgtb_scorp_smallfins', 'hgtb_scorp_spine', 'hgtb_scorp_tail', 'hgtb_shrine', 'hgtb_spindleray', 'hgtb_spindlespider', 'hgtb_stall_aqua_jars', 'hgtb_stall_coral_fruit', 'hgtb_stall_lilac_cloth', 'hgtb_stall_navy_books', 'hgtb_stall_orange_pottery', 'hgtb_stall_pink_flowers', 'hgtb_stall_rose_lanterns', 'hgtb_stall_sage_herbs', 'hgtb_stall_teal_fish', 'hgtb_stall_yellow_bread', 'hgtb_stilt_body', 'hgtb_stilt_foot', 'hgtb_stilt_head', 'hgtb_stilt_knee', 'hgtb_sweep', 'hgtb_table', 'hgtb_tank_anemone', 'hgtb_tank_bubbles', 'hgtb_tank_bubbles3', 'hgtb_tank_coral', 'hgtb_tank_kelp', 'hgtb_tank_rock', 'hgtb_tank_round', 'hgtb_tank_ruinarch', 'hgtb_tank_seagrass', 'hgtb_tank_tall', 'hgtb_walk', 'hgtb_watch', 'hgtb_water', 'hgtb_wing_bat', 'hgtb_wing_butterfly', 'hgtb_wing_insect', 'hgthin0', 'hgthin1', 'hgthin2', 'hgthin3', 'hgthin4', 'hgthin5', 'hgthin6', 'hgthin7', 'hgw_croc', 'hgw_crocA', 'hgwm_algae0', 'hgwm_algae1', 'hgwm_grass0', 'hgwm_grass1', 'hgwm_grass2', 'hgwm_moss0', 'hgwm_moss1', 'hgwm_reed0', 'hgwm_rock0', 'hgwm_rock1', 'hgxprop0', 'hgxprop1', 'hgxprop10', 'hgxprop11', 'hgxprop12', 'hgxprop13', 'hgxprop14', 'hgxprop15', 'hgxprop2', 'hgxprop3', 'hgxprop4', 'hgxprop5', 'hgxprop6', 'hgxprop7', 'hgxprop8', 'hgxprop9', 'hgxrock0', 'hgxrock1', 'hgxrock2', 'hgxrock3', 'hgxrock4', 'hgxrock5', 'hgxrock6', 'hgxrock7', 'hgxstat0', 'hgxstat1', 'hgxstat2', 'hgxstat3', 'hgxstat4', 'hgxstat5', 'hgxstat6', 'hgxstat7', 'hgyuck0', 'hgyuck1', 'hgyuck2', 'hgyuck3', 'hgyuck4', 'hgyuck5', 'hgyuck6', 'hgyuck7', 'hgyuck8', 'hgyuck9', 'messenger', 'messengerA', 'msgr_A', 'msgr_D', 'msgr_E', 'msgr_H', 'msgr_T', 'offering', 'pharaohboss', 'pharaohbossA', 'pservant', 'pservantA', 'rrock0', 'rrock1', 'rrock2', 'shady', 'skel', 'skelA', 'skybirdA', 'skybirdB', 'slime', 'slimeA', 'sunslab', 'tele0', 'tele1', 'tele2', 'tele3', 'tele4', 'tex_bluecave', 'tex_citygate', 'tex_citywall', 'tex_cliffR', 'tex_cliffY', 'tex_hgdp_cave', 'tex_hgdp_crack', 'tex_hgdp_dock', 'tex_hgdp_doorkey', 'tex_hgdp_gem', 'tex_hgdp_ladderdn', 'tex_hgdp_ladderup', 'tex_hgdp_planks', 'tex_hgdp_secret', 'tex_hgdp_stepsdn', 'tex_hgdp_stepsup', 'tex_hgdp_vines', 'tex_hgdu_brick', 'tex_hgdu_brick2', 'tex_hgdu_water', 'tex_hgdw_moss', 'tex_hgdw_moss2', 'tex_hgt_d0', 'tex_hgt_d1', 'tex_hgt_d2', 'tex_hgt_d3', 'tex_hgt_w2_bandjade', 'tex_hgt_w2_bubbles', 'tex_hgt_w2_confetti', 'tex_hgt_w2_constellation', 'tex_hgt_w2_crayon', 'tex_hgt_w2_crosshatch', 'tex_hgt_w2_doodleaqua', 'tex_hgt_w2_doorblue', 'tex_hgt_w2_doorteal', 'tex_hgt_w2_dotsyellow', 'tex_hgt_w2_filigree', 'tex_hgt_w2_loopsmint', 'tex_hgt_w2_map', 'tex_hgt_w2_medallions', 'tex_hgt_w2_mosaic', 'tex_hgt_w2_pointillist', 'tex_hgt_w2_polkaaqua', 'tex_hgt_w2_polkapink', 'tex_hgt_w2_portholes', 'tex_hgt_w2_portlilac', 'tex_hgt_w2_quilt', 'tex_hgt_w2_ringbubbles', 'tex_hgt_w2_rings', 'tex_hgt_w2_scales', 'tex_hgt_w2_scribblepink', 'tex_hgt_w2_script', 'tex_hgt_w2_tessel', 'tex_hgt_w2_wavylilac', 'tex_hgt_w2_winaqua', 'tex_hgt_w2_winpink', 'tex_hgt_w3_arcade_cream', 'tex_hgt_w3_arcade_lilac', 'tex_hgt_w3_balcony2_cream', 'tex_hgt_w3_balcony_cream', 'tex_hgt_w3_bunting_aqua', 'tex_hgt_w3_buttress_amber', 'tex_hgt_w3_cornice_cream', 'tex_hgt_w3_dado_pink', 'tex_hgt_w3_fresco_amber', 'tex_hgt_w3_fresco_cream', 'tex_hgt_w3_reed_lilac', 'tex_hgt_w3_relief_aqua', 'tex_hgt_w3_relief_pink', 'tex_hgt_w3_scroll_aqua', 'tex_hgt_w3_scroll_pink', 'tex_hgt_w3_shop_cream', 'tex_hgt_w3_shop_pink', 'tex_hgt_w3_shutters_lilac', 'tex_hgt_wa', 'tex_hgt_wb0', 'tex_hgt_wb1', 'tex_hgt_wb2', 'tex_hgt_wb3', 'tex_hgt_wc', 'tex_hgt_wl', 'tex_hgt_wp', 'tex_hgt_ww0', 'tex_hgt_ww1', 'tex_hgt_ww2', 'tex_hgt_ww3', 'tex_hgtb_angel_banded', 'tex_hgtb_eel_thick', 'tex_hgtb_levi_eel_body', 'tex_hgtb_levi_eel_fin', 'tex_hgtb_levi_jelly_body', 'tex_hgtb_levi_jelly_fin', 'tex_hgtb_levi_manta_body', 'tex_hgtb_levi_manta_wing', 'tex_hgtb_levi_whale_body', 'tex_hgtb_levi_whale_fin', 'tex_hgtb_limbs', 'tex_hgtb_scales', 'tex_hgtb_scorp_belly', 'tex_hgtb_scorp_belly2', 'tex_hgtb_scorp_body', 'tex_hgtb_scorp_tassels', 'tex_hgtb_scorp_warts', 'tex_hgtb_skinamber', 'tex_hgtb_skinaqua', 'tex_hgtb_skinlilac', 'tex_hgtb_skinpink', 'tex_hgtb_stilt_armour', 'tex_hgtb_stilt_foot_shell', 'tex_hgtb_stilt_joint_shell', 'tex_hgtb_stilt_knee_shell', 'tex_hgtb_stilt_leg', 'tex_hgtb_stilt_leg512', 'tex_hgtb_stilt_leg_shell', 'tex_hgtb_tankbg1', 'tex_hgtb_tankbg2', 'tex_hgtb_tankbg3', 'tex_hgtb_tankbg4', 'tex_hgtb_tube', 'tex_hgtb_whale_contrast', 'tex_sundoor0', 'tex_sundoor1', 'tex_sundoor2', 'tex_sundoor3', 'tex_sundoor4', 'tex_sutdoor', 'tex_tombdoor', 'tex_wall_cave', 'tex_wall_eye', 'tex_wall_glyph', 'tex_wall_gold', 'tex_wall_lapis', 'tex_wall_pillar', 'tex_wall_plain', 'tex_wall_rubble', 'tex_yarblue', 'tex_yarcoral', 'tex_yardoor', 'tex_yardoor2', 'tex_yardoor3', 'tex_yardoor4', 'tex_yardoor5', 'tex_yardoor6', 'tex_yardoor7', 'tex_yardrift', 'tex_yargreen', 'tex_yarnet', 'tex_yarpink', 'tex_yarrose', 'tex_yarwall', 'tex_yaryellow', 'treasure', 'vase0', 'vase1', 'vase2', 'vase3', 'ventplate', 'vulture', 'vultureA', 'w_candleknight', 'w_candleknightA', 'w_crowncrab', 'w_crowncrabA', 'w_ferryman', 'w_ferrymanA', 'w_glassstag', 'w_glassstagA', 'w_hollowbride', 'w_hollowbrideA', 'w_manyeyedox', 'w_manyeyedoxA', 'w_marrow', 'w_marrowA', 'w_mossback', 'w_mossbackA', 'w_rattlebones', 'w_rattlebonesA', 'w_saltwife', 'w_saltwifeA', 'w_thistlewick', 'w_thistlewickA', 'w_toll', 'w_tollA', 'w_unfinished', 'w_unfinishedA', 'w_weatherhound', 'w_weatherhoundA'];
 
 /* ---- src/desert/artpack.js ---- */
 /* ==========================================================================
@@ -14770,7 +14771,7 @@ const wGold=QUESTS.wq_toll;if(wGold){wGold.goal=()=>G.gold>=60?1:0}
 /* ---- the Messenger of Death ---- */
 const MSG_LETTERS='DEATH';
 function msgrRec(){const F=G.flags;F.msgrLv=F.msgrLv||{};return F.msgrLv[LEVEL]}
-function msgrReg(){const F=G.flags;F.msgrSeen=F.msgrSeen||{};return F.msgrSeen}
+function msgrReg(){const F=G.flags;F.msgrSeenLv=F.msgrSeenLv||{};return F.msgrSeenLv[LEVEL]=F.msgrSeenLv[LEVEL]||{}} // the letters belong to the level where they were seen
 CUTS.msgrTouch=()=>[
   {text:'Something very thin and very black has come out of the dark, laid one long cold finger on '+hn(0)+'\'s shoulder, and gone again. It did not run. It simply was not there any more. Where it stood, the air has the smell of a snuffed candle.'},
   {who:hn(1),text:'I know that smile. I heard it from my grandmother, and she heard it from hers. That was the Messenger of Death.'},
@@ -14874,7 +14875,7 @@ function msgrFrame(){ // every frame: has the party read a letter?
     break}
 }
 function msgrHud(){
-  const reg=msgrReg();if(!G.flags.msgrSeen||!Object.keys(reg).length||G.state!=='play'||G.menu||G.cut)return;
+  const reg=msgrReg();if(!Object.keys(reg).length||G.state!=='play'||G.menu||G.cut)return;
   const rec=msgrRec();if(!rec&&Object.keys(reg).length<5)return; // the letters belong to the level where they were seen
   ctx.save();ctx.font=`bold 15px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';
   const x0=240-MSG_LETTERS.length*8.5;
@@ -44070,7 +44071,7 @@ function hgdm3Maze(vi){
     else if(d.k==='hgtb_deco_fountain')ix('fountain',px,py+tw*.4,tw*1.25)}
   // danger rings and warning signs
   for(const z of L._hgdp.zones){if(z.type!=='danger')continue;if(z.x+z.r<vx||z.x-z.r>vx+vw||z.y+z.r<vy||z.y-z.r>vy+vh)continue;
-    x.save();x.strokeStyle='#9a2418';x.lineWidth=big?.9:.7;x.setLineDash([2.4,3]);x.beginPath();x.arc(X(z.x+.5),Y(z.y+.5),z.r*s,0,6.3);x.stroke();x.restore()}
+    x.save();x.strokeStyle=(z.id&&G.flags.hgdVz&&G.flags.hgdVz[z.id])?'#2f8a3a':'#9a2418';x.lineWidth=big?.9:.7;x.setLineDash([2.4,3]);x.beginPath();x.arc(X(z.x+.5),Y(z.y+.5),z.r*s,0,6.3);x.stroke();x.restore()}
   if(big)for(const d of L.decor){if(d.npc!=='hgd_sign'||!inV(d.x,d.y))continue;hgdiDraw(x,'sign',X(d.x+.5),Y(d.y+.5)+2.6,8.5)}
   if(L._hgds)for(const k in L._hgds.doors){const dd=L._hgds.doors[k];if(dd.type==='secret')continue;const p=k.split(',').map(Number);if(!inV(p[0],p[1]))continue;const col=dd.type==='key'?HGDS_KEYS[dd.idx][2]:HGDS_GEMS[dd.idx][2];hgdmpDoorIcon(x,X(p[0]+.5),Y(p[1]+.5),col,dd.type==='gem',big?.85:.6)}
   // the thieves' houses
@@ -44139,6 +44140,8 @@ function hgdm3Under(){
   x.save();x.beginPath();x.rect(A.x,A.y,A.w,A.h);x.clip();
   // the dark closes in at the edges
   {const v=x.createRadialGradient(A.x+A.w/2,A.y+A.h/2,A.h*.34,A.x+A.w/2,A.y+A.h/2,A.h*.82);v.addColorStop(0,'rgba(4,0,2,0)');v.addColorStop(1,'rgba(4,0,2,.72)');x.fillStyle=v;x.fillRect(A.x,A.y,A.w,A.h)}
+  // the vermin circles: dashed red rings, green once cleared (hgd_verminu.js)
+  for(const z of (U._hgvz||[])){x.save();x.strokeStyle=(G.flags.hgdVz&&G.flags.hgdVz[z.id])?'#38c060':'#d83a24';x.lineWidth=.9;x.setLineDash([2.4,3]);x.beginPath();x.arc(X(z.x+.5),Y(z.y+.5),z.r*s,0,6.3);x.stroke();x.restore()}
   // the ladders, each on a pale glow so they cannot be missed
   for(const l of U._hgdu.ladders){const a=X(l.x+.5),b=Y(l.y+.5),r=9,gr=x.createRadialGradient(a,b,0,a,b,r);gr.addColorStop(0,'rgba(255,236,170,.95)');gr.addColorStop(.55,'rgba(255,210,120,.55)');gr.addColorStop(1,'rgba(255,200,100,0)');x.fillStyle=gr;x.fillRect(a-r,b-r,2*r,2*r);hgdmpLadderIcon(x,a,b,1.1)}
   x.restore();
@@ -44878,12 +44881,13 @@ if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('There are plates in the floor 
    ========================================================================== */
 const HGDB={DIFF:73};
 Object.assign(ENEMY_DEF,{
-  hgwcroc:{name:'Swamp Crocodile',hp:300,dmg:[15,26],hit:.8,w:1.9,img:'hgw_croc',xp:230,gold:[10,40],speed:1,verb:'snaps at',aboveParty:1},
+  hgwcroc:{name:'Swamp Crocodile',hp:300,dmg:[15,26],hit:.8,w:1.05,img:'hgw_croc',xp:230,gold:[10,40],speed:1,verb:'snaps at',aboveParty:1},
   hgweel:{name:'Marsh Eel',hp:150,dmg:[10,18],hit:.8,w:1.1,img:'uw_eel_0',xp:150,gold:[0,12],speed:1,verb:'bites'},
   hgwsnake:{name:'Vine Snake',hp:130,dmg:[9,16],hit:.82,w:1.0,img:'hgw_snake',xp:140,gold:[0,10],speed:1,verb:'strikes'}});
 if(typeof NO_VARY!=='undefined')NO_VARY.push('hgwcroc','hgweel','hgwsnake');
 AFFL_HITS.push([/^hgwsnake/,'stung',.3],[/^hgwcroc/,'bleeding',.2],[/^hgweel/,'fever',.1]);
-function hgdbArt(){if(!IMG.hgw_croc&&IMG.firelizard){try{hlTint('firelizard',30,90,40,.62,'hgw_croc');if(IMG.firelizardA)hlTint('firelizardA',30,90,40,.62,'hgw_crocA')}catch(e){}}
+function hgdbArt(){if(IMG.art_hgw_croc&&IMG.art_hgw_croc.width&&IMG.hgw_croc!==IMG.art_hgw_croc){IMG.hgw_croc=IMG.art_hgw_croc;IMG.hgw_crocA=IMG.art_hgw_crocA||IMG.art_hgw_croc} // the painted front-on crocodile
+  if(!IMG.hgw_croc&&IMG.firelizard){try{hlTint('firelizard',30,90,40,.62,'hgw_croc');if(IMG.firelizardA)hlTint('firelizardA',30,90,40,.62,'hgw_crocA')}catch(e){}}
   if(!IMG.hgw_snake&&IMG.cobra){try{hlTint('cobra',40,150,60,.55,'hgw_snake');if(IMG.cobraA)hlTint('cobraA',40,150,60,.55,'hgw_snakeA')}catch(e){}}}
 /* ---------- the dock tile ---------- */
 function hgdbTexDock(){const key='hgdb_dock';if(IMG[key])return key;if(IMG.art_tex_hgdp_dock&&IMG.art_tex_hgdp_dock.width)return 'art_tex_hgdp_dock';
@@ -46254,6 +46258,726 @@ function hgdlStep(L,dt){
         if(!img)continue;a.e.x=a.x|0;a.e.y=a.y|0;L.push({x:a.x,y:a.y,img,w,bob,e:a.e,fade:1})}}}catch(e){console.error(e)}
   return L}}
 
+/* ---- src/desert/hgd_vermin.js ---- */
+/* ==========================================================================
+   VERMIN CIRCLES (prefix hgvz / HGVZ): the dashed red circles on the maze map are challenges. Stepping into one shows a counter at the top of the 3D view (THE SLUG RUN  14 vermin left);
+   kill every creature that belongs to the circle and the place is free of vermin: a banner, a reward (a potion or a weapon, gold, experience), an achievement, a green ring on the map, thanks from the maze people.
+   Clearing every circle of a level gives a master reward. This file holds the engine (shared with the Underlevel, hgd_verminu.js) and the circles of the surface maze (level 475):
+   the old danger zones, six more large ones, twelve small ones, and two in the water (a lake, and the Flooded Quarter).
+   A circle's creatures carry the tag .vz (the circle id) in L.enemies; a live enemy takes it from L.enemies[e.id] when the level is entered, and cleared circles are removed from G.enemies then.
+   Cleared ids: G.flags.hgdVz = {id:1}; names for the gossip: G.flags.hgdVzN; pending shopkeeper thanks: G.flags.hgdVzTh.
+   ========================================================================== */
+const HGVZ={arr:null,lv:0,len:-1,cur:null,cnt:{},bq:[],bt:0,px:0,py:0,lt:-9,ct:-9,told:{}};
+const hgvzF=()=>G.flags.hgdVz||(G.flags.hgdVz={});
+const hgvzZones=lv=>{const L=LEVELS[lv];return L&&L._hgvz?L._hgvz:[]};
+const hgvzThe=n=>/^The /.test(n)?'the '+n.slice(4):n;
+const hgvzList=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+/* ---------- rewards ---------- */
+const HGVZ_CFG={
+  s:{large:{gold:[400,500,600,700,800],xm:3,pot:[['potion4',2],['elixir',1],['superiorheal',2],['supermana',2],['potion4',1],['elixir',1]],wlv:[15,35],wp:[1500,5000]},
+     small:{gold:[150,200,250,300],xm:1,pot:[['potion3',1],['greaterheal',1],['manadraught',1],['antidote',1]]},
+     water:[{items:['gem_diamond'],gold:500,xm:2},{items:['gem_emerald','superiorheal'],gold:500,xm:2}],
+     all:{item:'ar_wyrm_c',gold:2000},allName:'Scourge of the Hollow',allText:'The Deeper Hollow is free of vermin'},
+  u:{large:{gold:[1000],xm:4,pot:[['elixir',1],['supermana',2],['superiorheal',2],['potion4',3],['elixir',2]],wlv:[40,60],wp:[4000,8000]},
+     small:{gold:[400],xm:1.5,pot:[['potion4',1],['supermana',1],['superiorheal',1],['elixir',1]]},
+     water:[{items:['gem_blackopal','gem_diamond'],gold:1500,xm:3}],
+     all:{item:'ar_god_c',gold:4000},allName:'Scourge of the Underlevel',allText:'The Underlevel is free of vermin'}};
+function hgvzWeapons(c){const o=[];for(const id in ITEMDEF){const d=ITEMDEF[id];if(d&&d.k==='weapon'&&!d.rar&&!/^hg/.test(id)&&d.lvl>=c.wlv[0]&&d.lvl<=c.wlv[1]&&d.price>=c.wp[0]&&d.price<=c.wp[1])o.push(id)}return o.sort()}
+// the reward of the j-th zone of a tier ('large','small','water') on a level kind ('s' or 'u')
+function hgvzReward(kind,tier,j){
+  const C=HGVZ_CFG[kind];
+  if(tier==='water')return Object.assign({},C.water[j%C.water.length]);
+  const c=C[tier];let items=[];
+  if(tier==='large'&&j%2===1){const w=hgvzWeapons(c);if(w.length)items=[w[((j>>1)*7+j)%w.length]]}
+  if(!items.length){const p=c.pot[(tier==='large'?j>>1:j)%c.pot.length];for(let k=0;k<p[1];k++)items.push(p[0])}
+  return {items,gold:c.gold[j%c.gold.length],xm:c.xm}}
+/* ---------- the engine: tagging, counting, clearing ---------- */
+function hgvzCount(){const c={};for(const e of G.enemies)if(e.vz&&e.hp>0)c[e.vz]=(c[e.vz]||0)+1;return c}
+function hgvzTag(){const L=LEVELS[LEVEL],S=L.enemies;for(const e of G.enemies)if(!e._vzc){e._vzc=1;const s=S[e.id];if(s&&s.vz&&s.t===e.t)e.vz=s.vz}}
+function hgvzSync(){
+  const L=LEVELS[LEVEL];if(!L||!L._hgvz||!G.enemies)return false;const F=hgvzF();
+  if(HGVZ.arr!==G.enemies||HGVZ.lv!==LEVEL){
+    hgvzTag();if(Object.keys(F).length)G.enemies=G.enemies.filter(e=>!(e.vz&&F[e.vz])); // cleared circles stay empty
+    HGVZ.arr=G.enemies;HGVZ.lv=LEVEL;HGVZ.ct=-9;HGVZ.cur=null;hgvzTold()}
+  else if(HGVZ.len!==G.enemies.length)hgvzTag();
+  HGVZ.len=G.enemies.length;return true}
+function hgvzCheckAll(){
+  const F=hgvzF(),c=hgvzCount();HGVZ.cnt=c;
+  for(const z of hgvzZones(LEVEL))if(!F[z.id]&&!(c[z.id]>0))hgvzClear(z)}
+function hgvzMapBust(){try{if(typeof HGDMP!=='undefined')for(const k of Object.keys(HGDMP.cache))delete HGDMP.cache[k];G.mplKey=null}catch(e){}}
+function hgvzGossipLine(z){
+  const n=hgvzThe(z.name),N=z.name,u=z.lv===476,i=Object.keys(hgvzF()).length;
+  const A=u?[
+    'Someone has cleared '+n+' under the maze. Whatever lived down there is quiet now. Thank you, whoever you are.',
+    'They say '+n+', down in the dark, is free of vermin. I did not think anyone would ever do it.',
+    'A party went down the ladder and emptied '+n+'. I would shake their hands, if I could find them.']
+  :[
+    'Someone has cleared '+N+'! My cousin walks there again. Thank you, whoever you are.',
+    'They say '+n+' is free of vermin now. Whoever did it, the corridors are quieter tonight.',
+    'I heard '+n+' is empty. A party came through and left nothing alive. We owe them a drink.',
+    'The traders use the way past '+n+' again. Bless whoever swung the sword.',
+    'My brother lost a boot in '+n+' last year. He went back for it this week. Thank you.',
+    'Nothing crawls in '+n+' any more. The whole quarter is saying thank you.'];
+  return A[i%A.length]}
+function hgvzTold(){
+  const N=hgvzF().hgdVzN||G.flags.hgdVzN;if(!N)return;
+  for(const id in N){if(HGVZ.told[id])continue;HGVZ.told[id]=1;const z={name:N[id],lv:/^vzu/.test(id)?476:475},line=hgvzGossipLine(z);
+    if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push(line);if(typeof HGDK_SAY!=='undefined')HGDK_SAY.push(line)}}
+function hgvzGive(rw){
+  const got={};
+  for(const id of rw.items||[]){const d=ITEMDEF[id];if(!d)continue;let nm=d.n;if(bagAdd(mkItem(id)));else{G.items.push({k:id,x:G.P.x,y:G.P.y,taken:false});nm+=' (on the floor)'}got[nm]=(got[nm]||0)+1}
+  const parts=Object.keys(got).map(k=>got[k]>1?k+' x'+got[k]:k);
+  if(rw.gold){G.gold+=rw.gold;parts.push(rw.gold+' gold')}
+  if(rw.xp&&typeof giveXP==='function')giveXP(rw.xp);
+  return parts}
+function hgvzBanner(l1,l2,col){HGVZ.bq.push({l1,l2,col:col||'#ffe36a'})}
+function hgvzClear(z){
+  const F=hgvzF();if(F[z.id])return;F[z.id]=1;(G.flags.hgdVzN||(G.flags.hgdVzN={}))[z.id]=z.name;if(HGVZ.cur===z)HGVZ.cur=null;
+  const rw=Object.assign({},z.rw);rw.xp=Math.round((rw.xm||0)*enemyStat(z.lv===HGDU.ID?'hgusl3':'hgdslug').xp);const parts=hgvzGive(rw),NM=z.name.toUpperCase();
+  hgvzBanner(NM+' IS FREE OF VERMIN','Reward: '+parts.join(', ')+(rw.xp?'  (+'+rw.xp+' xp)':''));
+  sfx('win');msg(z.name+' is free of vermin.','#a8e8a0');msg('Reward: '+parts.join(', ')+(rw.xp?' and '+rw.xp+' experience':'')+'.','#ffe36a');msg('Achievement: '+z.name+' cleared.','#ffd76a');
+  hgvzMapBust();hgvzTold();
+  // the nearest town's shopkeeper and the nearest quest giver thank the party the next time they talk to them
+  try{const L=LEVELS[HGD.ID];if(z.lv===HGD.ID&&L&&L._hgdp){const P=L._hgdp,TH=G.flags.hgdVzTh||(G.flags.hgdVzTh={}),add=npc=>{if(npc){(TH[npc]||(TH[npc]=[])).push(z.name)}};
+      let bz=null,bd=1e9;for(const s of P.zones)if(s.type==='safe'&&s.town!==undefined){const d=Math.hypot(s.x-z.x,s.y-z.y);if(d<bd){bd=d;bz=s}}
+      if(bz){const f=P.folk.find(f=>f.shop!==undefined&&f.zone===bz.name);if(f)add(f.npc)}
+      let bq=null;bd=1e9;for(const f of P.folk)if(f.qi!==undefined){const s=P.zones.find(q=>q.name===f.zone);if(!s)continue;const d=Math.hypot(s.x-z.x,s.y-z.y);if(d<bd){bd=d;bq=f}}
+      if(bq)add(bq.npc)}}catch(e){console.warn('hgvz thanks',e)}
+  hgvzMaster(z.lv)}
+function hgvzMaster(lv){
+  const kind=lv===HGD.ID?'s':'u',C=HGVZ_CFG[kind],F=hgvzF(),Z=hgvzZones(lv),key='hgdVzAll'+kind;
+  if(F[key]||!Z.length||!Z.every(z=>F[z.id]))return;F[key]=1;
+  let it=C.all.item;if(!ITEMDEF[it]){const c=Object.keys(ITEMDEF).filter(i=>/^ar_.*_c$/.test(i)&&!ITEMDEF[i].rar).sort((a,b)=>ITEMDEF[b].lvl-ITEMDEF[a].lvl);it=c[0]}
+  const parts=hgvzGive({items:[it],gold:C.all.gold});
+  hgvzBanner(C.allText.toUpperCase(),C.allName+'.  Reward: '+parts.join(', '),'#ffd76a');
+  msg(C.allText+'.','#ffe36a');msg('Reward: '+parts.join(', ')+'.','#ffe36a');msg('Achievement: '+C.allName+'.','#ffd76a');
+  sfx('win');setTimeout(()=>{try{sfx('level')}catch(e){}},900);hgvzMapBust()}
+// kills: a creature of a circle dying is checked at once; everything else is checked four times a second
+{const _he=hurtEnemy;hurtEnemy=function(e){const was=e&&e.hp>0,r=_he.apply(this,arguments);try{if(was&&e.hp<=0&&e.vz&&hgvzSync())hgvzCheckAll()}catch(x){console.warn('hgvz',x)}return r}}
+{const _u=update;update=function(dt){
+  try{if((LEVEL===HGD.ID||LEVEL===HGDU.ID)&&G.state==='play'&&G.P&&hgvzSync()){
+    if(G.time-HGVZ.ct>.25||G.time<HGVZ.ct){HGVZ.ct=G.time;hgvzCheckAll()}
+    const F=hgvzF();let best=null,bd=9;
+    for(const z of hgvzZones(LEVEL)){if(F[z.id])continue;const d=Math.hypot(G.P.x-z.x,G.P.y-z.y)/z.r;if(d<=1&&d<bd){bd=d;best=z}}
+    if(best&&!F['s_'+best.id]&&(HGVZ.cnt[best.id]||0)>0){F['s_'+best.id]=1;msg('Challenge: '+best.name+'. '+HGVZ.cnt[best.id]+' vermin live here. Kill them all to free the place.','#e8a070')}
+    HGVZ.cur=best}}catch(e){console.warn('hgvz update',e)}
+  return _u.apply(this,arguments)}}
+// the thanks of the shopkeepers and quest givers
+{const _st=startTalk;startTalk=function(d){const r=_st.apply(this,arguments);
+  try{const TH=G.flags.hgdVzTh,l=TH&&d&&d.npc&&TH[d.npc];if(l&&l.length&&G.talk&&G.talk.node&&G.talk.d===d){G.talk.node.text='Thank you for freeing '+(l.length>3?hgvzList(l.slice(0,3).map(hgvzThe).concat([(l.length-3)+' other places'])):hgvzList(l.map(hgvzThe)))+' of vermin! '+G.talk.node.text;delete TH[d.npc]}}catch(e){}return r}}
+// the achievements page
+{const _al=achList;achList=function(){const r=_al.apply(this,arguments);
+  try{const F=hgvzF();for(const [lv,head,all,key] of [[HGD.ID,'Vermin cleared in the Deeper Hollow','Scourge of the Hollow','hgdVzAlls'],[HGDU.ID,'Vermin cleared in the Underlevel','Scourge of the Underlevel','hgdVzAllu']]){const Z=hgvzZones(lv);if(!Z.length)continue;
+      const n=Z.filter(z=>F[z.id]).length;r.out.push({h:head+' ('+n+' of '+Z.length+')'});for(const z of Z.slice().sort((a,b)=>(a.tier==='large'?0:a.tier==='water'?1:2)-(b.tier==='large'?0:b.tier==='water'?1:2)))r.out.push({n:z.name,s:!!F[z.id]});r.out.push({n:all,s:!!F[key]})}}catch(e){console.warn('hgvz ach',e)}return r}}
+/* ---------- the counter and the banner ---------- */
+const hgvzHit=(a,b)=>a.x<b.x+b.w+1&&b.x<a.x+a.w+1&&a.y<b.y+b.h+1&&b.y<a.y+a.h+1;
+// the places on the 3D view (420 x 210) that already hold something
+function hgvzBusy(extra){
+  const B=[{x:176,y:0,w:80,h:18},{x:2,y:2,w:24,h:24}];
+  try{if(frontEnemy(4)){B.push({x:26,y:2,w:232,h:28},{x:28,y:30,w:124,h:84},{x:6,y:38,w:18,h:168})}}catch(e){}
+  try{if(G.uw)B.push({x:128,y:16,w:164,h:38})}catch(e){}
+  try{if(typeof teleOn==='function'&&!TP&&teleOn()&&teleActive(LEVEL))B.push({x:160,y:30,w:100,h:20})}catch(e){}
+  try{const ids=new Set(afflList().map(e=>e.id));if(ids.size){const c=Math.min(8,ids.size),r=Math.ceil(ids.size/8);B.push({x:420-6-c*21,y:2,w:c*21+4,h:r*22+2})}}catch(e){}
+  try{let y=22;for(const b of G.lvlBanners.slice(-2)){const h=24+(Math.ceil(b.changes.length/2)+(b.powers.length?1:0))*11;B.push({x:40,y,w:340,h});y+=h+4}}catch(e){}
+  try{const now=G.time,ms=G.msgs.filter(m=>now-m.t<6).slice(-3);let n=0;for(const m of ms)n+=wrapMsg(m.text,VW-24,10).length;n=Math.min(5,n);if(n)B.push({x:4,y:VH-10-n*12,w:VW-8,h:n*12+6})}catch(e){}
+  if(extra)B.push(extra);return B}
+function hgvzDraw(){
+  if(G.cut||G.talk||G.menu||(G.inv&&G.inv.open)||G.loot||G.overview)return;
+  // the banner: one at a time, six seconds each
+  let bn=null,brect=null;
+  if(HGVZ.bq.length){const b=HGVZ.bq[0];if(!b.t)b.t=G.time;if(G.time-b.t>6)HGVZ.bq.shift();else{bn=b;
+    let by=76;const lb=hgvzBusy().filter(r=>r.w===340);if(lb.some(r=>hgvzHit(r,{x:40,y:by,w:340,h:50})))by=124;brect={x:40,y:by,w:340,h:50}}}
+  if(bn){const age=G.time-bn.t,a=Math.max(0,Math.min(1,age*3,(6-age)*1.5)),x=brect.x,y=brect.y,w=brect.w,h=brect.h;
+    ctx.save();ctx.globalAlpha=a;ctx.fillStyle='rgba(10,8,5,.92)';rrect(ctx,x,y,w,h,6);ctx.fill();ctx.lineWidth=2.2;ctx.strokeStyle=goldG(x,y,w,h);rrect(ctx,x,y,w,h,6);ctx.stroke();
+    txt(bn.l1,x+w/2,y+17,13,bn.col,'center',true,undefined,w-20);txt(bn.l2,x+w/2,y+37,8.5,'#c8e8b0','center',true,undefined,w-20);ctx.restore()}
+  // the counter
+  const z=HGVZ.cur;if(!z||G.state!=='play'){HGVZ.lt=-9;return}
+  const n=HGVZ.cnt[z.id]||0,label=z.name.toUpperCase()+'   '+n+' vermin left';
+  ctx.save();ctx.font=(9*1.08)+'px '+FUI;const tw=ctx.measureText(label).width;ctx.restore();
+  const w=Math.max(120,Math.ceil(tw+30)),h=22,B=hgvzBusy(brect);
+  const C=[[420-w-4,4],[420-w-4,28],[210-w/2,22],[210-w/2,46],[4,4],[4,118],[420-w-4,118],[210-w/2,118],[4,90]];
+  let tx=C[0][0],ty=C[0][1];for(const c of C){const r={x:c[0],y:c[1],w,h};if(!B.some(b=>hgvzHit(r,b))){tx=c[0];ty=c[1];break}}
+  const dt=Math.max(0,Math.min(.1,G.time-HGVZ.lt));
+  if(G.time-HGVZ.lt>.5||HGVZ.lt<0){HGVZ.px=tx;HGVZ.py=ty}else{const k=1-Math.exp(-dt*9);HGVZ.px+=(tx-HGVZ.px)*k;HGVZ.py+=(ty-HGVZ.py)*k}
+  HGVZ.lt=G.time;HGVZ.tx=tx;HGVZ.ty=ty;HGVZ.w=w;
+  const x=HGVZ.px,y=HGVZ.py,tot=Math.max(1,z.n||n),fr=Math.max(0,Math.min(1,1-n/tot));
+  ctx.save();ctx.fillStyle='rgba(8,6,4,.82)';rrect(ctx,x,y,w,h,5);ctx.fill();ctx.lineWidth=1.6;ctx.strokeStyle=goldG(x,y,w,h);rrect(ctx,x,y,w,h,5);ctx.stroke();
+  // a small skull
+  {const sx=x+10,sy=y+8;ctx.fillStyle='#d9cfb6';ctx.beginPath();ctx.arc(sx,sy-.5,4,0,TAU);ctx.fill();ctx.fillRect(sx-2.4,sy+1.5,4.8,3);ctx.fillStyle='#2a0a0a';ctx.beginPath();ctx.arc(sx-1.6,sy-.8,1.1,0,TAU);ctx.arc(sx+1.6,sy-.8,1.1,0,TAU);ctx.fill()}
+  txt(z.name.toUpperCase(),x+19,y+8,9,'#e0c898','left',true);txt(n+' vermin left',x+w-6,y+8,9,'#f0907a','right',true);
+  ctx.fillStyle='rgba(30,12,10,.9)';ctx.fillRect(x+7,y+15,w-14,3.5);ctx.fillStyle=fr>.66?'#8ad07a':fr>.33?'#e0c050':'#d05040';ctx.fillRect(x+7,y+15,(w-14)*fr,3.5);ctx.strokeStyle='rgba(0,0,0,.7)';ctx.lineWidth=.7;ctx.strokeRect(x+7,y+15,w-14,3.5);
+  ctx.restore()}
+{const _d=drawLevelBanners;drawLevelBanners=function(){_d.apply(this,arguments);try{hgvzDraw()}catch(e){console.warn('hgvz draw',e)}}}
+/* ==========================================================================
+   THE SURFACE CIRCLES (level 475)
+   ========================================================================== */
+const HGVZ_BIO=['Hedge','Stone','Comb','Shell','Sand','Blue','Tile','Gilt'];
+const HGVZ_LARGE=[['The Wasp Alley','bug'],['Beetle Row','beetle'],['The Pale Burrows','worm'],['Spider Gully','spider'],['The Mud Nest','slug'],['The Crawling Court','mixed']];
+const HGVZ_SMALLK=['slug','jelly','worm','bug','spider','beetle','slug','jelly','worm','spider','beetle','bug'];
+const HGVZ_KNAME={slug:'Slug',jelly:'Jelly',worm:'Worm',bug:'Bug',spider:'Spider',beetle:'Beetle',mixed:'Mixed'};
+function hgvzSurface(L){
+  if(L._hgvz||!L._hgdp||!L._hgdl)return;
+  const M=L._hgdm,W=M.W,H=M.H,P=L._hgdp,rows=L.rows,fm=L.fmap,rnd=hgdmRng(475130),bio=M.bio;
+  const dry=(x,y)=>x>=2&&y>=2&&x<W-2&&y<H-2&&rows[y][x]==='.'&&!(fm&&(fm[y][x]==='5'||fm[y][x]==='6'));
+  const blk=new Set(),occ=new Set(),bad=new Set(),mark=(s,x,y,r)=>{for(let j=-r;j<=r;j++)for(let i=-r;i<=r;i++)s.add((x+i)+','+(y+j))};
+  for(const d of L.decor){const k=d.x+','+d.y;occ.add(k);if(d.block)blk.add(k);if(d.npc||d.k==='chest'||d.k==='hg_chestweed')mark(bad,d.x,d.y,2)}
+  for(const i of L.items)occ.add(i.x+','+i.y);for(const e of L.enemies)occ.add(e.x+','+e.y);
+  if(L._hgdu)for(const l of L._hgdu.ladders){mark(bad,l.ax,l.ay,3);mark(bad,l.x,l.y,3)}
+  if(L._hgdv)for(const a of L._hgdv.agents)mark(bad,a.house[0],a.house[1],3);
+  const lakes=L._hgdl.lakes,mask=hgdlMask(L),near=(k,m,x,y,r)=>x+r>=k.x0-m&&x-r<=k.x1+m&&y+r>=k.y0-m&&y-r<=k.y1+m;
+  for(const k of lakes)for(const pz of (k.plazas||(k.plaza?[k.plaza]:[])))for(const c of pz)mark(bad,c[0],c[1],6);
+  // the cells the party can walk to from the start
+  const reach=new Uint8Array(W*H),q=[[L.start.x,L.start.y]];reach[L.start.y*W+L.start.x]=1;
+  for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||reach[ny*W+nx]||!dry(nx,ny)||blk.has(nx+','+ny))continue;reach[ny*W+nx]=1;q.push([nx,ny])}}
+  const zones=P.zones,all=()=>zones.filter(z=>z.type==='danger'),safeNear=(x,y,m)=>zones.some(z=>z.type==='safe'&&Math.hypot(z.x-x,z.y-y)<=z.r+m);
+  const out=[];let li=0,si=0;
+  const finish=(z,tier,j)=>{z.vz=true;z.tier=tier;z.small=tier==='small';z.water=tier==='water';z.lv=HGD.ID;z.rw=hgvzReward('s',tier,j);out.push(z)};
+  // the old danger zones: their creatures are counted by position
+  const KINDS=t=>t==='mixed'?['hgdslug','hgdjelly','hgdworm','hgdbug','hgdspider','hgdbeetle','hgdgrub','hgdswarm','hgdguard','hgdwarden']:HGDP_KINDS[t].concat(t==='bug'||t==='beetle'?[]:[]);
+  all().forEach((z,i)=>{z.id='vzo'+i;z.mon=z.mon||'mixed';const ks=new Set(z.boss?KINDS('mixed'):KINDS(z.mon));let n=0;
+    for(const e of L.enemies)if(!e.vz&&ks.has(e.t)&&Math.hypot(e.x-z.x,e.y-z.y)<=z.r){e.vz=z.id;n++}z.n=n;if(n>0)finish(z,'large',li++)});
+  // placing new ground circles: a site, then its creatures on free walkable squares
+  const cellsOf=(x,y,R)=>{const c=[];for(let j=y-R;j<=y+R;j++)for(let i=x-R;i<=x+R;i++){if(i<2||j<2||i>=W-2||j>=H-2||Math.hypot(i-x,j-y)>R)continue;const k=i+','+j;if(reach[j*W+i]&&!occ.has(k)&&!bad.has(k)&&!mask[j*W+i]&&!safeNear(i,j,3))c.push([i,j])}return c};
+  const site=(R,gap,minCells,startD)=>{for(let t=0;t<7000;t++){const x=8+((rnd()*(W-16))|0),y=8+((rnd()*(H-16))|0);
+      if(!reach[y*W+x]||Math.hypot(x-M.sx,y-M.sy)<R+startD||safeNear(x,y,R+3)||lakes.some(k=>near(k,4,x,y,R))||all().some(z=>Math.hypot(z.x-x,z.y-y)<z.r+R+gap))continue;
+      const cs=cellsOf(x,y,R);if(cs.length>=minCells)return {x,y,cs}}return null};
+  const fill=(z,cs,n,kinds)=>{let got=0;const sp=[];for(let t=0;t<n&&cs.length;t++){let ci=(rnd()*cs.length)|0;
+      for(let a=0;a<6&&sp.some(s=>Math.abs(s[0]-cs[ci][0])+Math.abs(s[1]-cs[ci][1])<2);a++)ci=(rnd()*cs.length)|0;
+      const c=cs.splice(ci,1)[0];sp.push(c);occ.add(c[0]+','+c[1]);L.enemies.push({t:kinds[(rnd()*kinds.length)|0],x:c[0],y:c[1],vz:z.id});got++}z.n=got};
+  // six more large circles
+  let lj=0;for(const [name,mon] of HGVZ_LARGE){const R=9+((rnd()*4)|0),n=12+((rnd()*9)|0),s=site(R,6,n*2,26);if(!s)continue;
+    const z={type:'danger',x:s.x,y:s.y,r:R,name,mon,biome:bio[s.y*W+s.x],id:'vz'+(lj++)};zones.push(z);fill(z,s.cs,n,HGDP_KINDS[mon]);if(z.n>=8)finish(z,'large',li++);else{zones.pop();L.enemies=L.enemies.filter(e=>e.vz!==z.id)}}
+  // twelve small circles
+  let sj=0;const used=new Set(out.map(z=>z.name));
+  for(let k=0;k<12;k++){const R=4+((rnd()*2)|0),n=5+((rnd()*3)|0),s=site(R,3,n+4,14);if(!s)continue;const mon=HGVZ_SMALLK[k];
+    let name=HGVZ_BIO[bio[s.y*W+s.x]]+' '+HGVZ_KNAME[mon]+' Nest';for(let a=2;used.has(name);a++)name=HGVZ_BIO[bio[s.y*W+s.x]]+' '+HGVZ_KNAME[mon]+' Nest '+a;used.add(name);
+    const z={type:'danger',x:s.x,y:s.y,r:R,name,mon,biome:bio[s.y*W+s.x],id:'vzs'+(sj++)};zones.push(z);fill(z,s.cs,n,HGDP_KINDS[mon]);if(z.n>=4)finish(z,'small',si++);else{zones.pop();L.enemies=L.enemies.filter(e=>e.vz!==z.id)}}
+  // the water: the south-west lake, and the Flooded Quarter
+  const WK=new Set(['hgwcroc','hgweel','hgwsnake']),inC=(cx,cy,R)=>L.enemies.filter(e=>WK.has(e.t)&&!e.vz&&Math.hypot(e.x-cx,e.y-cy)<=R);
+  let wj=0;const addW=(name,cx,cy,R,id)=>{const es=inC(cx,cy,R);if(es.length<4)return false;const z={type:'danger',x:cx,y:cy,r:R,name,mon:'water',biome:bio[cy*W+cx],id,n:es.length};for(const e of es)e.vz=id;zones.push(z);finish(z,'water',wj++);return true};
+  {const ks=lakes.filter(k=>!k.wm),sw=ks.slice().sort((a,b)=>(b.y0+b.y1)-(a.y0+a.y1)||(a.x0+a.x1)-(b.x0+b.x1))[0];
+   if(sw)addW('The Reed Lake Hunters',(sw.x0+sw.x1)>>1,(sw.y0+sw.y1)>>1,9,'vzw0')}
+  {const fq=lakes.find(k=>k.wm);if(fq){let best=null,bs=1e9;for(let y=fq.y0+4;y<=fq.y1-4;y+=2)for(let x=fq.x0+4;x<=fq.x1-4;x+=2){if(!mask[y*W+x])continue;const c=inC(x,y,10).length;if(c<8)continue;const sc=Math.abs(c-18)+Math.hypot(x-(fq.x0+fq.x1)/2,y-(fq.y0+fq.y1)/2)*.02;if(sc<bs){bs=sc;best=[x,y]}}
+   if(best)addW('The Flooded Quarter Hunters',best[0],best[1],10,'vzw1')}}
+  L._hgvz=out;L._hgvzBuilt=out.length}
+{const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];_b.apply(this,arguments);const L=LEVELS[HGD.ID];if(!had&&L&&L._hgdl&&L._hgdlDone)try{hgvzSurface(L)}catch(e){console.error('hgvz',e)}}}
+// the map: a cleared circle is named in the green of the safe places, with (cleared) after its name
+{const _n=hgdmpNames;hgdmpNames=function(vi){const out=_n.apply(this,arguments);try{const F=G.flags.hgdVz,L=LEVELS[HGD.ID];if(F&&L&&L._hgvz)for(const o of out)if(o.k==='danger'){const z=L._hgvz.find(q=>q.name===o.t);if(z&&F[z.id]){o.k='encl';o.t=o.t+' (cleared)'}}}catch(e){}return out}}
+
+/* ---- src/desert/hgd_verminu.js ---- */
+/* ==========================================================================
+   VERMIN CIRCLES OF THE UNDERLEVEL (prefix hgvu / HGVU), level 476. The same challenge as on the surface (engine in hgd_vermin.js), with higher rewards:
+   five large circles (radius 10), eight small ones (radius 4 to 5) on the land of the labyrinth, and one over the black sea (its horrors count). The dark insects already standing inside a circle
+   belong to it; the rest are added on free land squares. The ladders keep their distance. Built after the sea and its horrors (hgd_ocean.js, hgd_oceanfoes.js).
+   ========================================================================== */
+const HGVU_LARGE=['The Weeping Nest','The Black Warren','The Red-Eye Pit','The Chittering Hall','The Bone Gutter'];
+const HGVU_SMALL=['The Dripping Hole','The Eye Cluster','The Claw Nook','The Cold Crawl','The Skull Heap','The Sour Corner','The Tar Burrow','The Whisper Bend'];
+function hgvuBuild(L){
+  if(L._hgvz||!L._hgdu||!L._hgdo)return;
+  const W=201,H=201,rnd=hgdmRng(476130),O=L._hgdo,wm=O.wm,rows=L.rows,lad=L._hgdu.ladders;
+  const land=(x,y)=>x>=2&&y>=2&&x<W-2&&y<H-2&&rows[y][x]==='.'&&!wm[y*W+x];
+  const occ=new Set(),bad=new Set(),mark=(x,y,r)=>{for(let j=-r;j<=r;j++)for(let i=-r;i<=r;i++)bad.add((x+i)+','+(y+j))};
+  for(const d of L.decor){occ.add(d.x+','+d.y);if(d.k==='chest')mark(d.x,d.y,2)}for(const i of L.items)occ.add(i.x+','+i.y);for(const e of L.enemies)occ.add(e.x+','+e.y);
+  if(L._msgr)for(const l of L._msgr.letters)mark(l.x,l.y,2);
+  const reach=new Uint8Array(W*H),q=[[lad[0].ax,lad[0].ay]];reach[lad[0].ay*W+lad[0].ax]=1;
+  for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||reach[ny*W+nx]||!land(nx,ny))continue;reach[ny*W+nx]=1;q.push([nx,ny])}}
+  const out=[],ids=[];for(let i=0;i<10;i++){ids.push('hgusl'+i);ids.push('hguyk'+i)}
+  const isIn=e=>/^hg(usl|uyk)\d$/.test(e.t),nearLad=(x,y,m)=>lad.some(l=>Math.hypot(l.ax-x,l.ay-y)<m);
+  const clash=(x,y,R,gap)=>out.some(z=>Math.hypot(z.x-x,z.y-y)<z.r+R+gap);
+  const finish=(z,tier,j)=>{z.type='danger';z.vz=true;z.lv=HGDU.ID;z.tier=tier;z.small=tier==='small';z.water=tier==='water';z.rw=hgvzReward('u',tier,j);out.push(z)};
+  let wj=0,lj=0,sj=0;
+  // the sea: a circle that holds a fair number of horrors
+  for(const R of [12,9]){if(out.length)break;let best=null,bs=1e9;const hs=L.enemies.filter(e=>/^hgo/.test(e.t)&&e.t!=='hgoboss'&&!e.vz);
+    for(let y=8;y<H-8;y+=3)for(let x=8;x<W-8;x+=3){if(!wm[y*W+x])continue;let c=0;for(const e of hs)if(Math.hypot(e.x-x,e.y-y)<=R)c++;if(c<8||c>26)continue;const sc=Math.abs(c-16)+Math.hypot(x-100,y-100)*.01;if(sc<bs){bs=sc;best=[x,y]}}
+    if(best){const z={x:best[0],y:best[1],r:R,name:'The Sunless Deeps',id:'vzu_w0',mon:'sea'};let n=0;for(const e of hs)if(Math.hypot(e.x-z.x,e.y-z.y)<=R){e.vz=z.id;n++}z.n=n;finish(z,'water',wj++)}}
+  const cellsOf=(x,y,R)=>{const c=[];for(let j=y-R;j<=y+R;j++)for(let i=x-R;i<=x+R;i++){if(Math.hypot(i-x,j-y)>R||!land(i,j)||!reach[j*W+i])continue;const k=i+','+j;if(!occ.has(k)&&!bad.has(k)&&!nearLad(i,j,8))c.push([i,j])}return c};
+  const place=(name,id,R,n0,gap,tier,j)=>{
+    for(let t=0;t<9000;t++){const x=8+((rnd()*(W-16))|0),y=8+((rnd()*(H-16))|0);if(!land(x,y)||!reach[y*W+x]||nearLad(x,y,R+8)||clash(x,y,R,gap))continue;
+      const ex=L.enemies.filter(e=>isIn(e)&&!e.vz&&Math.hypot(e.x-x,e.y-y)<=R);if(ex.length>(tier==='large'?n0+4:n0+1))continue;
+      const cs=cellsOf(x,y,R),need=Math.max(0,n0-ex.length);if(cs.length<need+(tier==='large'?14:5))continue;
+      const z={x,y,r:R,name,id,mon:'under'};for(const e of ex)e.vz=id;let got=ex.length;
+      for(let k=0;k<need;k++){const c=cs.splice((rnd()*cs.length)|0,1)[0];occ.add(c[0]+','+c[1]);L.enemies.push({t:ids[(rnd()*ids.length)|0],x:c[0],y:c[1],vz:id});got++}
+      z.n=got;finish(z,tier,j);return true}return false};
+  HGVU_LARGE.forEach((nm,k)=>{place(nm,'vzu_l'+k,10,14+((rnd()*7)|0),6,'large',lj++)});
+  HGVU_SMALL.forEach((nm,k)=>{place(nm,'vzu_s'+k,4+((rnd()*2)|0),5+((rnd()*3)|0),3,'small',sj++)});
+  L._hgvz=out}
+{const _b=hgduBuild;hgduBuild=function(){const had=!!LEVELS[HGDU.ID];_b.apply(this,arguments);const L=LEVELS[HGDU.ID];if(!had&&L&&L._hgdo)try{hgvuBuild(L)}catch(e){console.error('hgvu',e)}}}
+/* ---------- the names on the Underlevel map (the shared names layer has no kind for them) ---------- */
+{const _dn=hgdmpDrawNames;hgdmpDrawNames=function(vi){_dn.apply(this,arguments);
+  if(vi!==5)return;try{const V=MPL.view,U=LEVELS[HGDU.ID];if(!V||!V.z||!U||!U._hgvz)return;const z=V.z,A=V.area,F=G.flags.hgdVz||{};
+    ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';
+    for(const q of U._hgvz){const sz=Math.max(4.6,6.4/Math.pow(z,.4)),px=A.x+(V.X(q.x+.5)-V.sx0)*z,py=A.y+(V.Y(q.y+.5)-V.sy0)*z;if(px<A.x-60||px>A.x+A.w+60||py<A.y-8||py>A.y+A.h+8)continue;
+      ctx.font='bold '+sz+'px '+FUI;const t=q.name+(F[q.id]?' (cleared)':'');ctx.lineWidth=2.2;ctx.strokeStyle='#050102';ctx.strokeText(t,px,py);ctx.fillStyle=F[q.id]?'#7ee08a':'#ecdcc0';ctx.fillText(t,px,py)}
+    ctx.restore()}catch(e){}}}
+
+/* ---- src/desert/hgd_dark.js ---- */
+/* ==========================================================================
+   THE DARK OF THE UNDERLEVEL (prefix hgdn / HGDN), level 476. The black water now rolls in slow waves (the water floor is redrawn from a loop of 16 frames), the walls are jagged dark rock (a faceted stone texture made in code,
+   cracked and sharp-edged), an occasional line of text describes the oppressive dark, the snarling all round and the party's own dislike of the place (each line is shown once, in a shuffled order, and never repeats),
+   there are terrifying stone statues (the demons and sea horrors, turned to stone) in dead ends and rooms, and now and then the Bogeyman stands up behind the party and springs.
+   ========================================================================== */
+const HGDN={ID:476,N:16,frames:null,fi:-1,said:null};
+/* ---------- the water: a loop of waves ---------- */
+function hgdnFrames(){
+  if(HGDN.frames)return HGDN.frames;const T=Math.PI*2,N=HGDN.N,out=[],art=IMG.art_tex_hgdu_water;
+  if(art&&art.width){ // the painted black water: its pixels are rolled by moving waves (looping, seamless) with a shimmer on the crests
+    const c=document.createElement('canvas');c.width=c.height=128;const cx=c.getContext('2d');cx.drawImage(art,0,0,128,128);const b=cx.getImageData(0,0,128,128).data;
+    const px=(x,y,ch)=>b[(((y%128)+128)%128*128+((x%128)+128)%128)*4+ch];
+    for(let k=0;k<N;k++){const f=T*k/N,d=new Uint8ClampedArray(128*128*4);
+      for(let y=0;y<128;y++)for(let x=0;x<128;x++){
+        const w1=Math.sin(T*(y*2/128)+f),w2=Math.sin(T*(x*3/128+y/128)-f),w3=Math.sin(T*(x*2/128-y*3/128)+2*f);
+        const u=x+3.2*w1+1.8*w3,v=y+3.2*w2+1.8*Math.sin(T*(x*2/128)-2*f),x0=Math.floor(u),y0=Math.floor(v),fx=u-x0,fy=v-y0,o=(y*128+x)*4;
+        const sh=1+.22*(w1*.5+w2*.3+w3*.2),gl=Math.max(0,w1*.5+w2*.3+w3*.2-.45)*70;
+        for(let ch=0;ch<3;ch++){const a=px(x0,y0,ch)*(1-fx)+px(x0+1,y0,ch)*fx,a2=px(x0,y0+1,ch)*(1-fx)+px(x0+1,y0+1,ch)*fx;d[o+ch]=(a*(1-fy)+a2*fy)*1.35*sh+gl*(ch===0?.55:ch===1?.85:1)}
+        d[o+3]=255}
+      out.push(d)}
+    return HGDN.frames=out}
+  for(let k=0;k<N;k++){const f=T*k/N,d=new Uint8ClampedArray(128*128*4);
+    for(let y=0;y<128;y++)for(let x=0;x<128;x++){
+      const a=Math.sin(T*(x*2/128)+f+1.7*Math.sin(T*(y*3/128)+2*f)),b=Math.sin(T*(y*3/128+x/128)-f+1.3*Math.sin(T*(x*2/128)+f)),c=Math.sin(T*(x*4/128-y*2/128)+2*f+Math.sin(T*(y*5/128)-f));
+      const h=a*.5+b*.35+c*.25,v=(h+1)*.5,cr=Math.pow(Math.max(0,h),3),o=(y*128+x)*4;
+      d[o]=3+v*9+cr*38;d[o+1]=7+v*20+cr*58;d[o+2]=13+v*36+cr*80;d[o+3]=255}
+    out.push(d)}
+  return HGDN.frames=out}
+/* ---------- the walls: jagged dark rock ---------- */
+function hgdnRock(seed){
+  const S=128,G0=7,C=S/G0,rnd=hgdmRng(seed),pts=[];
+  for(let j=0;j<G0;j++)for(let i=0;i<G0;i++){const ang=rnd()*Math.PI*2,tilt=.25+rnd()*.75;pts.push({x:(i+.15+rnd()*.7)*C,y:(j+.15+rnd()*.7)*C,sh:.5+.5*Math.cos(ang-2.2)*tilt,gx:Math.cos(ang)*tilt,gy:Math.sin(ang)*tilt,tone:.8+rnd()*.4})}
+  const cv=document.createElement('canvas');cv.width=cv.height=S;const cx=cv.getContext('2d'),id=cx.createImageData(S,S),d=id.data;
+  for(let y=0;y<S;y++)for(let x=0;x<S;x++){
+    let d1=1e9,d2=1e9,n1=null;const ci=Math.floor(x/C),cj=Math.floor(y/C);
+    for(let dj=-1;dj<=1;dj++)for(let di=-1;di<=1;di++){const i=(ci+di+G0)%G0,j=(cj+dj+G0)%G0,p=pts[j*G0+i];let px=p.x+(ci+di-i)*0,py=p.y;
+      // wrap the point to the nearest copy
+      let ddx=x-px,ddy=y-py;if(ddx>S/2)ddx-=S;else if(ddx<-S/2)ddx+=S;if(ddy>S/2)ddy-=S;else if(ddy<-S/2)ddy+=S;
+      const dist=Math.hypot(ddx,ddy)*.65+Math.max(Math.abs(ddx),Math.abs(ddy))*.5; // angular facets
+      if(dist<d1){d2=d1;d1=dist;n1={p,ddx,ddy}}else if(dist<d2)d2=dist}
+    const e=d2-d1,p=n1.p;let lum=40+Math.pow(p.sh,1.4)*175*p.tone+(n1.ddx*p.gx+n1.ddy*p.gy)*-1.6;
+    lum+=(Math.sin(x*1.7+y*.9)*Math.sin(y*2.3-x*.6)>.7?-10:0)+(((x*73856093^y*19349663)>>>0)%100)/100*22-11;
+    if(e<3)lum*=.12+e*.12; // the cracks between the facets
+    else if(e<5.5)lum*=(p.gx+p.gy<0)?1.55:.55; // a lit edge on one side, shadow on the other
+    const o=(y*S+x)*4;lum=Math.max(2,lum);d[o]=lum*.97;d[o+1]=lum*.94;d[o+2]=lum*1.08;d[o+3]=255}
+  cx.putImageData(id,0,0);return cv}
+{const _b=hgduBuild;hgduBuild=function(){try{if(!IMG.hgdn_rock){IMG.hgdn_rock=hgdnRock(476101);IMG.hgdn_rock2=hgdnRock(476202);IMG.art_tex_hgdu_brick=IMG.hgdn_rock;IMG.art_tex_hgdu_brick2=IMG.hgdn_rock2}}catch(e){console.error('hgdn rock',e)}return _b.apply(this,arguments)}}
+/* ---------- statues: the demons and the sea horrors, turned to stone ---------- */
+const HGDN_ST=['hgdemon0','hgdemon1','hgdemon2','hgdemon3','hgdemon4','hgdemon5','hgdemon6','hgdemon7','hgdemon8','hgdemon9','hgohag','hgoangler','hgoserpent','hgocorpse','hgoleech','hgocrab'];
+function hgdnStatImgs(){
+  if(HGDN.st)return HGDN.st;const out=[];
+  for(const n of HGDN_ST){const s=IMG['art_'+n];if(!s||!s.width){return null}
+    const w=s.width,h=s.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(s,0,0);const im=x.getImageData(0,0,w,h),p=im.data;
+    for(let k=0;k<p.length;k+=4){if(p[k+3]<8)continue;const px=(k>>2)%w,py=((k>>2)/w)|0;
+      const g=p[k]*.3+p[k+1]*.5+p[k+2]*.2,n2=(((px*73856093^py*19349663)>>>0)%100)/100,v=Math.max(0,Math.min(255,(g-70)*1.25+78+n2*16-8));
+      p[k]=v*.96;p[k+1]=v*.95;p[k+2]=v*1.02} // grey stone: no colour, a little grain
+    x.putImageData(im,0,0);
+    // a dark plinth under it
+    const o=document.createElement('canvas');o.width=w;o.height=Math.round(h*1.06);const ox=o.getContext('2d');ox.drawImage(c,0,0);
+    ox.fillStyle='#3a3836';ox.fillRect(w*.18,h*1.0,w*.64,h*.06);ox.fillStyle='#262424';ox.fillRect(w*.18,h*1.04,w*.64,h*.02);
+    out.push(o)}
+  return HGDN.st=out}
+function hgdnPlace(L){
+  if(L._hgdn)return L._hgdn;const ims=hgdnStatImgs();if(!ims)return null;
+  ims.forEach((c,i)=>{IMG['hgdn_st'+i]=c;NPC_H['hgdn_st'+i]=1.45});
+  const rows=L.rows,H=rows.length,W=rows[0].length,rnd=hgdmRng(476444),open=(x,y)=>rows[y]&&rows[y][x]==='.'&&!(typeof hgoWater==='function'&&hgoWater(x,y)),res=[];
+  const lad=(L._hgdu&&L._hgdu.ladders)||[],keep=[].concat(lad.map(l=>[l.ax,l.ay]),(L._hgdu&&L._hgdu.letters||[]).map(l=>[l.x,l.y]),L._msgr?[[L._msgr.x,L._msgr.y]]:[]);
+  const occ=new Set(L.enemies.concat(L.decor).map(e=>e.x+','+e.y)),tooNear=(x,y)=>keep.some(k=>Math.hypot(k[0]-x,k[1]-y)<4)||res.some(r=>Math.abs(r.x-x)+Math.abs(r.y-y)<9);
+  const DV=[[0,-1],[1,0],[0,1],[-1,0]],cand=[];
+  for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!open(x,y)||occ.has(x+','+y))continue;
+    const deg=DV.filter(d=>open(x+d[0],y+d[1])).length;
+    // the middle of a room: open all round (a statue there never blocks the way)
+    let room=true;for(let j=-1;j<=1&&room;j++)for(let i=-1;i<=1;i++)if(!open(x+i,y+j)){room=false;break}
+    if(deg===1)cand.push([x,y,1,rnd()]);else if(room)cand.push([x,y,2,rnd()])}
+  cand.sort((a,b)=>a[3]-b[3]);
+  for(const c of cand){if(res.length>=70)break;if(tooNear(c[0],c[1]))continue;
+    const k='hgdn_st'+((rnd()*ims.length)|0);res.push({k,x:c[0],y:c[1],hx:1,block:true,deco:true,sc:+(.95+rnd()*.25).toFixed(2),face:c[2]})}
+  for(const r of res)L.decor.push({k:r.k,x:r.x,y:r.y,hx:1,block:true,deco:true,sc:r.sc});
+  return L._hgdn=res}
+function hgdnSync(){
+  const L=LEVELS[HGDN.ID];if(!L||!L._hgdo)return; // after the sea is cut (hgd_ocean.js)
+  const res=hgdnPlace(L);if(!res||G.decor===G._hgdnDecor)return;G._hgdnDecor=G.decor;
+  for(const r of res)if(!G.decor.some(d=>d.x===r.x&&d.y===r.y&&d.k===r.k))G.decor.push({k:r.k,x:r.x,y:r.y,hx:1,block:true,deco:true,sc:r.sc});
+}
+/* ---------- the lines: once each, shuffled ---------- */
+const HGDN_LINES=[
+ ['a','The dark here is not an empty dark. It presses on the eyes like a wet hand.'],
+ ['a','The air is thick and warm and tastes of old copper. Every breath has to be pulled in.'],
+ ['a','Somewhere far off, stone grates on stone, very slowly, as if the walls were turning over in their sleep.'],
+ ['a','The torchlight shrinks back from the walls. It does not like it here either.'],
+ ['a','Water drips in the dark, always just out of sight, always a little closer than the last drip.'],
+ ['a','The corridor bends the light until you cannot tell if the end is ten paces away or a hundred.'],
+ ['a','The rock sweats. The black beads of it run down the walls in the glow and look like slow tears.'],
+ ['a','There is no wind, and yet the dust on the floor lifts and settles, as if the whole place were breathing.'],
+ ['a','Nothing here is square or kind. The walls lean in, jagged as broken teeth, and you feel swallowed.'],
+ ['a','The silence is not silence. It is the sound of many things holding very still and listening to you.'],
+ ['a','A smell of rot and wet fur rolls down the corridor, and the light flickers as it passes.'],
+ ['a','The ground is slick and warm underfoot, like the inside of something alive.'],
+ ['s','A snarl rises from the dark ahead, wet and low, and is answered from three other directions.'],
+ ['s','Claws click on stone behind the walls, keeping pace with the party, and stop when you stop.'],
+ ['s','A long, wet hiss slides along the ceiling. Something up there is licking its teeth.'],
+ ['s','Far below, something howls like a child and a wolf at the same time. The howl is cut off short.'],
+ ['s','Many voices growl together in the distance, a low chant of hunger, and none of them is human.'],
+ ['s','Something drags itself through the dark nearby, a heavy body and a rasping breath, then silence.'],
+ ['s','A chorus of snarls swells from the sea of black, and ends with one single, patient, clicking tongue.'],
+ ['s','Teeth grind in the walls. It is a dry, steady sound, like a mill with nothing left to grind but bone.'],
+ ['s','A shriek tears through the tunnels. It sounds hurt, and it sounds delighted about it.'],
+ ['s','Something big shifts its weight in the dark. Pebbles rattle down the wall beside you.'],
+ ['r','{A} stares into the dark and whispers: "I do not like this place. I do not like it at all."'],
+ ['r','{A} keeps a hand on the weapon and says: "Every shadow here is looking back. Let us find that ladder."'],
+ ['r','{A} mutters: "We were not made for this. Somebody tell me where the first ladder up is."'],
+ ['r','{A} says, trying to laugh: "At least it cannot get any worse." Then something snarls, and nobody laughs.'],
+ ['r','{A} whispers: "I can feel it watching the back of my neck. How far to the surface?"'],
+ ['r','{A} and {B} walk back to back now. Neither of them says why.'],
+ ['r','{B} says in a thin voice: "Please. The first ladder up. Anything with sunlight on it."'],
+ ['r','{B} keeps flinching at the noises. "I am fine," {B} says. Nobody believes it.'],
+ ['r','{A} says quietly: "If we get out of this, I am never going below a cellar again."'],
+ ['r','{A} stops, listens, and goes pale. "Did you hear that? No. Keep walking. Do not look round."'],
+ ['r','{B} says: "My torch is shaking, or is it my hand?" The flame leans away from the dark ahead.'],
+ ['r','{A} says: "Stay close, all of you. Whatever lives down here has had a long time to get hungry."'],
+ ['r','{B} whispers: "I want the sky back. I want one single breath of clean air."'],
+ ['r','{A} says: "Remember the ladder we came down. Somewhere there is one that goes up. We find it, we go."'],
+ ['r','{A} grips {B} by the shoulder, hard. "Together," {A} says. "Out of this hole, together."'],
+ ['r','{B} counts the steps aloud to stay calm, and loses the count every time something growls.'],
+ ['r','{A} says bitterly: "Whoever dug this place was not building a home." {B} says: "No. A trap."'],
+ ['r','{B} says: "Is it me, or are the statues down here turned to face us?"'],
+ ['t','A pale stone figure stands at the end of the corridor, mouth open in a scream. It looks as if it was alive when it was carved.'],
+ ['t','You pass a statue with too many teeth. Its eyes have been left unfinished, as though whoever carved them could not stand to.'],
+ ['t','{A} stops dead before a stone horror, arms spread wide, claws out. "It is only a statue," {A} says, and does not sound sure.'],
+ ['t','The statues down here were put in the dead ends on purpose. Something wanted the lost to see them last.'],
+ ['t','A stone face leers from the dark, cracked with age. A smile that wide should not fit on any face.'],
+ ['t','{B} refuses to walk past the grinning stone thing in the room ahead. "I will wait," {B} says. "Go round."'],
+ ['a','You have lost the sense of time. Hours, minutes, it could be either; the dark does not say.'],
+ ['a','Something very large has just stopped breathing nearby. It is waiting for you to move first.'],
+ ['a','The corridor narrows. The ceiling lowers. The whole level seems to be closing like a fist.'],
+ ['a','A faint red glint hangs in the dark, blinks, and is gone. It has been following for some time.']
+];
+function hgdnLine(){
+  const F=G.flags;F.hgdnSaid=F.hgdnSaid||[];const left=HGDN_LINES.map((l,i)=>i).filter(i=>!F.hgdnSaid.includes(i));if(!left.length)return;
+  const live=[];G.heroes.forEach((h,i)=>{if(h.alive!==false&&h.hp>0)live.push(i)});
+  const i=left[(Math.random()*left.length)|0],L=HGDN_LINES[i];let t=L[1];
+  if(/\{[AB]\}/.test(t)&&!live.length)return;
+  const a=live[(Math.random()*live.length)|0];let b=live.filter(q=>q!==a);b=b.length?b[(Math.random()*b.length)|0]:a;
+  t=t.replace(/\{A\}/g,HERO_DEF[a].name).replace(/\{B\}/g,HERO_DEF[b].name);
+  F.hgdnSaid.push(i);msg(t,{a:'#a498c8',s:'#d88a8a',r:'#e8d29a',t:'#bcbcc4'}[L[0]])}
+/* ---------- the Bogeyman: from behind, at random ---------- */
+function hgdnBogey(){
+  const S=G.hgdn=G.hgdn||{};
+  if(S.warn){ // the warning has run its time: he springs now
+    if(G.time<S.warn)return;S.warn=0;const v=DIRS[G.P.f],bx=G.P.x-v[0],by=G.P.y-v[1];
+    if(!(G.grid[by]&&G.grid[by][bx]===0)||enemyAt(bx,by)){S.next=G.time+6;return}
+    const plvl=Math.round(G.heroes.reduce((n,h)=>n+h.lvl,0)/Math.max(1,G.heroes.length));
+    hlSpawn('hlbogey',bx,by,plvl);const be=G.enemies[G.enemies.length-1];be.alert=true;be.lunge=1;
+    S.scare=G.time;G.shake=.9;sfx('screech');sfx('hit');msg('THE BOGEYMAN IS RIGHT BEHIND YOU!','#ff6a5a');
+    const l=hlLive();if(l.length&&Math.random()<.5){try{afflInflict('shaken',l[(Math.random()*l.length)|0],true)}catch(e){}}
+    S.next=G.time+120+Math.random()*240;return}
+  if(!S.next)S.next=G.time+70+Math.random()*120;
+  if(G.time<S.next||G.cut||G.talk||G.menu||(G.inv&&G.inv.open)||G.loot||!camSettled())return;
+  if(G.enemies.some(e=>e.t==='hlbogey'&&e.hp>0&&!e.dying)){S.next=G.time+60;return}
+  if(G.enemies.some(e=>e.hp>0&&e.alert&&Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)<6)){S.next=G.time+10;return} // never in the middle of another fight
+  S.warn=G.time+1.6+Math.random()*1.8;sfx('step');
+  msg(['The dark behind you has gone very quiet.','Something is breathing, slowly, right at your back.','A cold draught touches the back of your neck.','The torchlight dims, and your shadow is suddenly too long.'][(Math.random()*4)|0],'#9a8fc0')}
+/* ---------- the loop ---------- */
+{const _u=update;update=function(dt){
+  try{if(LEVEL===HGDN.ID&&G.state==='play'){
+      const fr=hgdnFrames(),fi=Math.floor(G.time*6)%HGDN.N;if(fi!==HGDN.fi&&FLOORS.hgo_water){HGDN.fi=fi;FLOORS.hgo_water.set(fr[fi])}
+      hgdnSync();
+      const S=G.hgdn=G.hgdn||{};if(!S.lt)S.lt=G.time+25+Math.random()*30;
+      if(G.time>=S.lt&&!G.cut&&!G.talk&&!G.menu&&!(G.inv&&G.inv.open)){hgdnLine();S.lt=G.time+55+Math.random()*60}
+      hgdnBogey()}}catch(e){console.error('hgdn',e)}
+  return _u.apply(this,arguments)}}
+{const _g=goToLevel;goToLevel=function(){const r=_g.apply(this,arguments);try{G.hgdn=null;G._hgdnDecor=null}catch(e){}return r}}
+/* the jump scare, drawn over everything */
+{const _ui=ui;ui=function(dt){_ui.apply(this,arguments);
+  try{const S=G.hgdn;if(LEVEL===HGDN.ID&&G.state==='play'&&S&&S.scare&&IMG.hl_bogeyA){const t=G.time-S.scare;if(t<1.2){
+      ctx.save();ctx.globalAlpha=Math.min(1,t<.9?.78:.78*(1-(t-.9)/.3));ctx.fillStyle='#000';ctx.fillRect(0,0,DW,DH);ctx.globalAlpha=1;
+      if(t<.12){ctx.fillStyle='rgba(255,255,255,'+(.95*(1-t/.12)).toFixed(3)+')';ctx.fillRect(0,0,DW,DH)}
+      const im=IMG.hl_bogeyA,sc=.8+Math.min(t,.3)/.3*.5+t*.12,h=DH*sc,w=h*im.width/im.height;ctx.globalAlpha=t<.9?1:1-(t-.9)/.3;
+      ctx.drawImage(im,DW/2-w/2+(Math.random()-.5)*5,DH*.52-h*.5+(Math.random()-.5)*5,w,h);ctx.restore()}}}catch(e){}}}
+
+/* ---- src/desert/hgd_escape.js ---- */
+/* ==========================================================================
+   THE POTION OF ESCAPE (prefix hgdes / HGDES). Drunk anywhere in the Underlevel (level 476), it takes the whole party up to the surface of the maze, to the foot of the nearest ladder down. Drunk anywhere else it
+   does nothing and is not used up. Sold by the potion sellers of the Deeper Hollow, and lying in the dead ends of the Underlevel (a few near the ladders down).
+   ========================================================================== */
+ITEMDEF.hgescape={n:'Potion of Escape',k:'potion',t:'Potion',ic:'potion',c:'#8fd8ff',escape:1,price:700,minLvl:1,d:'Drink it in the Underlevel and the whole party is carried up to the surface of the maze, at the foot of a ladder down. It does nothing anywhere else, and is not used up.',sw:.32};
+{const _h=useHeal;useHeal=function(hi,idx){
+  try{if(idx<0)idx=bestPotionIndex(hi);const it=G.bag[idx];
+    if(it&&idef(it).escape){
+      if(LEVEL!==HGDU.ID){msg('The Potion of Escape only works in the Underlevel. Keep it for when you are down there.','#c8b8e0');return false}
+      bagTake(idx);sfx('potion');
+      const SU=LEVELS[HGD.ID]&&LEVELS[HGD.ID]._hgdu;if(!SU||!SU.ladders.length){msg('The potion fizzles.','#c8b8e0');return false}
+      // the ladder nearest to where the party stands
+      let bi=0,bd=1e9;SU.ladders.forEach((l,i)=>{const d=Math.hypot(l.ax-G.P.x,l.ay-G.P.y);if(d<bd){bd=d;bi=i}});
+      try{if(G.flags.hgdOcean)G.flags.hgdOcean.on=false}catch(e){}
+      hgduGo(bi,false);
+      msg(HERO_DEF[hi].name+' drinks the Potion of Escape. The dark rushes past, and the party stands in the light at the foot of a ladder, back on the surface of the maze.','#9ae0ff');
+      return true}}catch(e){console.error('hgdes',e)}
+  return _h.apply(this,arguments)}}
+// the potion sellers of the maze keep it
+{const _os=openShop;openShop=function(d,stock,name){
+  try{if(LEVEL===HGD.ID&&!d.contents&&stock.some(r=>/potion/.test(r[0]))&&!stock.some(r=>r[0]==='hgescape'))stock=stock.concat([['hgescape',4]])}catch(e){}
+  return _os.call(this,d,stock,name)}}
+// the dead ends of the Underlevel hold a few
+function hgdesPlace(L){
+  if(L._hgdes)return L._hgdes;const rows=L.rows,H=rows.length,W=rows[0].length,rnd=hgdmRng(476555),open=(x,y)=>rows[y]&&rows[y][x]==='.'&&!(typeof hgoWater==='function'&&hgoWater(x,y));
+  const occ=new Set(L.enemies.concat(L.decor,L.items||[]).map(e=>e.x+','+e.y)),lad=(L._hgdu&&L._hgdu.ladders)||[],res=[],cand=[];
+  for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!open(x,y)||occ.has(x+','+y))continue;const deg=[[0,-1],[1,0],[0,1],[-1,0]].filter(d=>open(x+d[0],y+d[1])).length;if(deg===1)cand.push([x,y,rnd()])}
+  cand.sort((a,b)=>a[2]-b[2]);
+  // two close to each ladder down (a way out near the way in), the rest scattered far apart
+  for(const l of lad){let n=0;for(const c of cand){const d=Math.hypot(c[0]-l.ax,c[1]-l.ay);if(d>=9&&d<=24&&!res.some(r=>Math.abs(r.x-c[0])+Math.abs(r.y-c[1])<8)){res.push({k:'hgescape',x:c[0],y:c[1],taken:false});if(++n>=1)break}}}
+  for(const c of cand){if(res.length>=lad.length+8)break;if(res.some(r=>Math.abs(r.x-c[0])+Math.abs(r.y-c[1])<24))continue;res.push({k:'hgescape',x:c[0],y:c[1],taken:false})}
+  return L._hgdes=res}
+{const _u=update;update=function(dt){
+  try{if(LEVEL===HGDU.ID&&G.state==='play'){const L=LEVELS[HGDU.ID];if(L&&L._hgdo){
+      const res=hgdesPlace(L),F=G.flags;F.hgdesTaken=F.hgdesTaken||{};
+      if(G.items!==G._hgdesItems){G._hgdesItems=G.items;for(const r of res){const key=r.x+','+r.y;if(F.hgdesTaken[key])continue;if(!G.items.some(i=>i.k==='hgescape'&&i.x===r.x&&i.y===r.y))G.items.push({k:'hgescape',x:r.x,y:r.y,taken:false,hgdes:key})}}
+      for(const i of G.items)if(i.hgdes&&i.taken&&!F.hgdesTaken[i.hgdes])F.hgdesTaken[i.hgdes]=1}}}catch(e){console.error('hgdes upd',e)}
+  return _u.apply(this,arguments)}}
+// painted icons (assets/icn_<id>.png): the six level 70 fire weapons, the Sunfire Blade and the Potion of Escape
+if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push('hgl70sword','hgl70mace','hgl70axe','hgl70bow','hgl70staff','hgl70dagger','hgsunblade','hgescape');
+
+/* ---- src/desert/hgd_stalls.js ---- */
+/* ==========================================================================
+   SHOP STALLS OF THE MAZE (prefix hgdst / HGDST). Every shopkeeper of the eight maze towns (the general shop hgd_shopN, and the weapon, armour, magic, trader and inn of hgd_s2_*) now has a painted stall standing behind them that shows what
+   the shop sells (assets/ds_hgstall_<kind>.png). The stall is a picture only: it is drawn about half a square behind the keeper, on the far side from wherever the party stands, so the keeper is always in front of it. It has no collision.
+   ========================================================================== */
+const HGDST={H:1.2,HK:{church:1.75},KIND:{arms:'arms',armour:'armour',magic:'magic',trader:'trader',inn:'inn'},list:null,src:null};
+const hgdstShop=npc=>{const k=hgdstKind(npc);return k&&k!=='church'?k:null}; // shops only: the church has its picture behind its priest but no dollar sign
+function hgdstKind(npc){npc=String(npc||'');if(/^hgd_church\d/.test(npc))return 'church';if(/^hgd_shop\d/.test(npc))return 'general';const m=/^hgd_s2_([a-z]+)\d/.exec(npc);return m&&HGDST.KIND[m[1]]||null}
+{const _sl=spriteList;spriteList=function(){const L=_sl.apply(this,arguments);
+  try{if(LEVEL===HGD.ID&&G.state==='play'&&G.decor){
+      if(HGDST.src!==G.decor){HGDST.src=G.decor;HGDST.list=[];for(const d of G.decor){const k=hgdstKind(d.npc);if(k)HGDST.list.push({x:d.x,y:d.y,k})}}
+      const cx=G.C.x+.5,cy=G.C.y+.5;
+      for(const s of HGDST.list){const im=IMG['art_hgstall_'+s.k];if(!im||!im.width)continue;
+        const dx=s.x+.5-cx,dy=s.y+.5-cy,d2=dx*dx+dy*dy;if(d2>900)continue;
+        const d=Math.sqrt(d2)||1;
+        L.push({x:s.x+.5+dx/d*.5,y:s.y+.5+dy/d*.5,img:im,w:(HGDST.HK[s.k]||HGDST.H)*im.width/im.height,bob:0,drop:0})}}}catch(e){console.error('hgdst',e)}
+  return L}}
+/* ---------- the shops on the Deeper Hollow map: a gold $ for each shop once the map is zoomed in a little, with the kind of shop beside it when zoomed in further ---------- */
+const HGDST_LBL={church:'Church',general:'Goods',arms:'Arms',armour:'Armour',magic:'Magic',trader:'Trader',inn:'Inn'};
+{const _dn=hgdmpDrawNames;hgdmpDrawNames=function(vi){
+  _dn.apply(this,arguments);
+  try{const V=MPL.view,L=LEVELS[HGD.ID];if(!V||!V.z||vi>=5||!L||!L._hgdp)return;const z=V.z;if(z<1.25)return;
+    if(!HGDST.map||HGDST.mapSrc!==L){HGDST.mapSrc=L;HGDST.map=[];for(const d of L.decor){const k=hgdstKind(d.npc);if(k)HGDST.map.push({x:d.x,y:d.y,k})}}
+    const A=V.area,r=Math.max(3.4,Math.min(5.6,2.6+z*.5)),lab=z>=2.2;
+    ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();ctx.textAlign='center';ctx.textBaseline='middle';const lbx=[];
+    for(const s of HGDST.map){const px=A.x+(V.X(s.x+.5)-V.sx0)*z,py=A.y+(V.Y(s.y+.5)-V.sy0)*z;if(px<A.x-8||px>A.x+A.w+8||py<A.y-8||py>A.y+A.h+8)continue;
+      ctx.globalAlpha=1;ctx.fillStyle=s.k==='church'?'#f4f0e0':'#f4c430';ctx.strokeStyle='#2a1a0c';ctx.lineWidth=1;ctx.beginPath();ctx.arc(px,py,r,0,6.2832);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#2a1a0c';ctx.font='bold '+Math.round(r*1.35)+'px '+FUI;ctx.fillText(s.k==='church'?'+':'$',px,py+.5);
+      if(lab&&!lbx.some(q=>Math.abs(q[0]-px)<22&&Math.abs(q[1]-py)<8)){lbx.push([px,py]);ctx.font='bold 5.6px '+FUI;ctx.lineWidth=2.2;ctx.strokeStyle='rgba(233,220,180,.9)';ctx.strokeText(HGDST_LBL[s.k],px,py+r+4.5);ctx.fillStyle='#4a2a08';ctx.fillText(HGDST_LBL[s.k],px,py+r+4.5)}}
+    ctx.restore()}catch(e){console.error('hgdst map',e)}}}
+// the key of the map names it
+/* ---------- the four quarters of the maze have names, shown under the map title and as a banner at the top of the map when a quarter is opened ---------- */
+{const Q=['The Lantern Reaches','The Gilded Heights','The Cairn Warrens','The Hedgefoot Approaches'];for(let i=0;i<4;i++)HGDMP.views[i+1][1]=Q[i]}
+{const _dn2=hgdmpDrawNames;hgdmpDrawNames=function(vi){
+  _dn2.apply(this,arguments);
+  try{const V=MPL.view;if(!V||vi<1||vi>4)return;const B=HGDST.ban=HGDST.ban||{};
+    if(B.vi!==vi||G.time-(B.last||0)>1.2)B.t=G.time;B.vi=vi;B.last=G.time; // a quarter opened afresh (or switched to) starts its banner
+    const age=G.time-B.t;if(age>3.4)return;const al=age<.4?age/.4:age>2.6?Math.max(0,1-(age-2.6)/.8):1,A=V.area,name=HGDMP.views[vi][1];
+    ctx.save();ctx.globalAlpha=al;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 19px '+FTITLE;
+    const w=ctx.measureText(name).width+36;ctx.fillStyle='rgba(30,18,8,.78)';ctx.fillRect(A.x+A.w/2-w/2,A.y+8,w,28);ctx.strokeStyle='#c8a050';ctx.lineWidth=1;ctx.strokeRect(A.x+A.w/2-w/2+.5,A.y+8.5,w-1,27);
+    ctx.fillStyle='#f0dca0';ctx.fillText(name,A.x+A.w/2,A.y+23);ctx.restore()}catch(e){console.error('hgdst ban',e)}}}
+
+/* ---- src/desert/hgd_highgear.js ---- */
+/* ==========================================================================
+   HIGH LEVEL GEAR IN THE SHOPS (prefix hgdhg / HGDHG). The weapon shops of the eight maze towns now also sell every weapon of level 50 and over, and the armour shops every piece of armour of level 50 and over (helmets, chests, arms, legs and shields), one of each,
+   in order of level, on top of the usual stock. The lists are read from ITEMDEF when a shop is opened, so gear added later is picked up too.
+   ========================================================================== */
+const HGDHG={MIN:50};
+function hgdhgList(kind){
+  const armour=['head','chest','arms','legs','shield','feet','cloak'],ids=Object.keys(ITEMDEF).filter(id=>{const d=ITEMDEF[id];if(!d||!(d.lvl>=HGDHG.MIN)||!((d.price||0)>0))return false;return kind==='arms'?d.k==='weapon':armour.includes(d.k)});
+  return ids.sort((a,b)=>(ITEMDEF[a].lvl-ITEMDEF[b].lvl)||(ITEMDEF[a].price-ITEMDEF[b].price))}
+{const _s=hgds2Stock;hgds2Stock=function(kind,town){const rows=_s.apply(this,arguments);
+  if(kind!=='arms'&&kind!=='armour')return rows;
+  try{const have=new Set(rows.map(r=>r[0]));for(const id of hgdhgList(kind))if(!have.has(id))rows.push([id,1])}catch(e){console.error('hgdhg',e)}
+  return rows}}
+// the level 60 and over weapons all cost between 8000 and 9000 gold, dearer with level and power
+{const P={hgsting:8000,hgmandible:8200,hgsunblade:8400,hgl70dagger:8500,hgl70axe:8600,hgl70staff:8700,hgl70bow:8800,hgl70mace:8900,hgl70sword:9000};for(const id in P)if(ITEMDEF[id])ITEMDEF[id].price=P[id]}
+
+/* ---- src/desert/hgd_balance.js ---- */
+/* ==========================================================================
+   BALANCE (prefix bal / BAL). A smoother difficulty gradient and shorter fights.
+   1. The weapon curve: ordinary weapons of level 16 to 29 are raised on a smooth ramp (x1.0 at level 15 to about x2.8 at level 29), so party damage climbs steadily towards the level 30 weapons instead of
+      jumping about 3 times at level 30 (see the weapon curve in hgd_minis.js, which raised everything from level 30 up).
+   2. Shorter fights: creature health is cut to BAL.HP (0.6, so a fight lasts about 40% fewer rounds). To pay for it, creature damage is raised by BAL.dk(level), fitted so that three creatures of a place's level cost
+      a level-appropriate party about BAL.target(level) of its health: a gentle rise from 10% at level 10 to 17% at level 100. These are only the best-geared case, so real parties with less gear, and bosses, will lose more; tune BAL.dkT.
+   ========================================================================== */
+const BAL={HP:.6,
+  dkT:[[1,1],[10,1],[15,1],[20,1.2],[25,1.5],[28,1.7],[30,2.3],[35,3.2],[40,3.9],[50,4.3],[60,4],[70,3.5],[80,3.3],[90,3.05],[100,2.8]], // (level, creature damage factor): fitted with the pacing check (a test party with the best shop gear for its level fighting three median creatures)
+  tgT:[[10,10],[20,11],[30,12],[50,14],[100,17]]}; // the health a party should lose in one fight against three creatures of its own level, in percent: a gentle rise
+BAL.lerp=(T,x)=>{if(x<=T[0][0])return T[0][1];for(let i=1;i<T.length;i++)if(x<=T[i][0]){const a=T[i-1],b=T[i];return a[1]+(b[1]-a[1])*(x-a[0])/(b[0]-a[0])}return T[T.length-1][1]};
+BAL.dk=l=>BAL.lerp(BAL.dkT,l);BAL.target=l=>BAL.lerp(BAL.tgT,l);
+// 1. the weapon ramp (done once, when the game loads)
+{const done=new Set();for(const id in ITEMDEF){const d=ITEMDEF[id];if(!d||d.k!=='weapon'||!d.lvl||d.lvl<16||d.lvl>29||d.rar||done.has(d))continue;done.add(d);
+  const f=1+1.8*Math.pow((d.lvl-15)/15,1.5);d.dmg=[Math.round(d.dmg[0]*f),Math.round(d.dmg[1]*f)]}}
+// 2. creature health and damage
+{const _es=enemyStat;enemyStat=function(t,lvl){const r=_es.apply(this,arguments),L=lvl||lvlHere(),k=BAL.dk(L);
+  r.hp=Math.max(1,Math.round(r.hp*BAL.HP));r.dmg=[Math.max(1,Math.round(r.dmg[0]*k)),Math.max(1,Math.round(r.dmg[1]*k))];return r}}
+
+/* ---- src/desert/food_health.js ---- */
+/* ==========================================================================
+   FOOD AS HEALTH (prefix fdhp / FDHP). Every food item heals a percentage of the hero's MAX health at the moment of eating, as well as feeding hunger.
+   Plain bread or cheese about 4-6 percent, cooked meals and stews 9-15, the best feasts 20-25. Potions stay stronger per item. The old fixed 'heal' number
+   stays on each item (shrine meals, sorting) but eating uses 'hpct'. Afflictions on eating and starvation are unchanged.
+   ========================================================================== */
+const FDHP_PCT={water:3,dates:4,apple:4,ale:4,nuts:4,bread:6,cheese:5,herring:9,sausage:10,pottage:12,pie:20,roast:25};
+function fdhpPct(id,d){if(FDHP_PCT[id])return FDHP_PCT[id];return Math.max(3,Math.min(25,Math.round((d.heal||8)/2.2)))}
+function fdhpSetup(){
+  for(const id in ITEMDEF){const d=ITEMDEF[id];if(!d||d.k!=='food'||d.fdhp)continue;
+    d.fdhp=1;d.hpct=fdhpPct(id,d);
+    const tail=' Restores '+d.hpct+' percent of maximum health.';
+    if(d.d&&/restores \d+ health\./.test(d.d))d.d=d.d.replace(/restores \d+ health\./,'restores '+d.hpct+' percent of maximum health.');
+    else d.d=(d.t||'Food')+'. Fills '+(d.feed||0)+' hunger.'+tail+(d.d?' '+d.d:'')}
+}
+fdhpSetup();
+{const _f=statLines;statLines=function(d){const L=_f.apply(this,arguments);
+  try{if(d&&d.k==='food'&&d.hpct){for(const l of L)if(/^Heals \d+ health$/.test(l[0]))l[0]='Heals '+d.hpct+' percent of max health'}}catch(e){}
+  return L}}
+{const _h=useHeal;useHeal=function(hi,idx){
+  try{const it=G.bag[idx],d=it&&idef(it);
+    if(d&&d.k==='food'&&d.hpct){
+      const h=G.heroes[hi];
+      if(h.hp>=h.max&&h.food>=99){msg(`${HERO_DEF[hi].name} is not hungry or hurt.`);return false}
+      const heal=Math.max(1,Math.round(h.max*d.hpct/100)),gain=Math.min(heal,h.max-h.hp),ik=it.id;
+      bagTake(idx);h.hp=Math.min(h.max,h.hp+heal);sfx('potion');try{afflEat(hi,ik)}catch(e){}
+      if(d.feed)h.food=Math.min(100,h.food+d.feed);
+      msg(`${HERO_DEF[hi].name} eats the ${d.n} (+${gain} health${gain<heal?' of '+heal:''}${d.feed?', +'+d.feed+' hunger':''}).`,'#9ae0a0');addFloat(portraitX(hi)+19,250,'+'+gain,'#7fe08a');
+      return true}}catch(e){console.error('fdhp',e)}
+  return _h.apply(this,arguments)}}
+
+/* ---- src/desert/hgd_water2.js ---- */
+/* ==========================================================================
+   THE DROWNED MAZE, SECOND PASS (prefix hgdw2 / HGDW2). Finishes the freshwater look of level 477 and mends two faults:
+   1. No chest may block the way. Every shell chest stands on a square whose loss cannot cut the maze in two (a dead end or a chamber), checked by flood fill from the first stairs, and any that blocks is moved. (Before this,
+      a chest stood in the one-wide passage out of the first stairs and nobody could get past it.)
+   2. A thick green murk: the water is cloudy, yellow-green and you cannot see far.
+   3. Moss everywhere (cushions and carpets on the floor, mossy boulders, long hanging green algae), and many more underwater reeds and grasses, all from the painted pictures assets/ds_hgwm_*.png.
+   4. About three times as many freshwater creatures: every one of the ten kinds appears all through the maze, the great catfish still alone in the far chamber.
+   ========================================================================== */
+const HGDW2={AIR:null};
+// the murk
+if(typeof HGTE!=='undefined'&&HGTE.wetLook)HGTE.wetLook(HGDW.ID,{hazeCol:[58,100,34],roofHaze:[34,60,22],haze:.93,hazeRate:.085,tint:[.8,1.06,.66],grade:[176,222,110,.4],wet:[48,104,34,.46],ambient:.5,vignette:.62,motes:30});
+{const _sl=setLightLevel;setLightLevel=function(l){_sl.apply(this,arguments);if(LEVEL===HGDW.ID){RANGE=Math.min(RANGE,4.6+.9*l)}}} // the green water hides what is more than a few squares away
+{const _u=update;update=function(dt){if(update._hw!==(LEVEL===HGDW.ID)){update._hw=LEVEL===HGDW.ID;try{setLightLevel(G.lightLevel)}catch(e){}}return _u.apply(this,arguments)}}
+/* ---------- helpers ---------- */
+const hgdw2Open=(L,x,y)=>L.rows[y]&&L.rows[y][x]==='.';
+function hgdw2Flood(L,from,blocked){const seen=new Set([from[0]+','+from[1]]),q=[from];for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b,k=nx+','+ny;if(seen.has(k)||!hgdw2Open(L,nx,ny)||blocked.has(k))continue;seen.add(k);q.push([nx,ny])}}return seen}
+/* a square is a safe place for something solid when, with it (and the other solid things) in place, every other free square can still be reached */
+function hgdw2Safe(L,cell,blocked,from,freeCount){const b=new Set(blocked);b.add(cell[0]+','+cell[1]);return hgdw2Flood(L,from,b).size>=freeCount-1-(blocked.size?0:0)}
+function hgdw2Fix(L){
+  const st=L._hgdw.stairs[0];if(!st)return;const from=[st.ax,st.ay];
+  const solid=new Set(L.decor.filter(d=>d.block&&!/shellchest/.test(d.k)).map(d=>d.x+','+d.y));
+  let free=0;for(let y=0;y<L.rows.length;y++)for(let x=0;x<L.rows[0].length;x++)if(hgdw2Open(L,x,y)&&!solid.has(x+','+y))free++;
+  const chests=L.decor.filter(d=>/shellchest/.test(d.k)),taken=new Set(L.decor.concat(L.enemies).map(d=>d.x+','+d.y)),done=new Set(solid);
+  // the chests are put back one at a time: each must leave every other free square reachable
+  const cand=[];for(let y=2;y<L.rows.length-2;y++)for(let x=2;x<L.rows[0].length-2;x++){if(!hgdw2Open(L,x,y)||solid.has(x+','+y))continue;const deg=[[1,0],[-1,0],[0,1],[0,-1]].filter(d=>hgdw2Open(L,x+d[0],y+d[1])).length;cand.push([x,y,deg])}
+  const rnd=hgdmRng(477311);
+  for(const c of chests){
+    const ok=(x,y)=>{const k=x+','+y;if(done.has(k))return false;const b=new Set(done);b.add(k);return hgdw2Flood(L,from,b).size>=free-done.size+solid.size-1};
+    // keep the place if it is safe, else the nearest safe dead end or chamber square
+    const here=ok(c.x,c.y);
+    if(!here){const spots=cand.filter(q=>!taken.has(q[0]+','+q[1])&&q[2]<=1||false);let best=null,bd=1e9;
+      for(const q of cand.filter(q=>!taken.has(q[0]+','+q[1])&&!done.has(q[0]+','+q[1]))){const d=Math.hypot(q[0]-c.x,q[1]-c.y)+(q[2]<=1?0:6)+rnd()*3;if(d<bd&&ok(q[0],q[1])){bd=d;best=q}}
+      if(best){c.x=best[0];c.y=best[1];taken.add(best[0]+','+best[1])}}
+    done.add(c.x+','+c.y)}
+  L._hgdw2={chestsChecked:chests.length}}
+/* ---------- the rest of the finish ---------- */
+const HGDW2_GRASS=['art_hgwm_grass0','art_hgwm_grass1','art_hgwm_grass2','art_hgwm_reed0'],HGDW2_MOSS=['art_hgwm_moss0','art_hgwm_moss1'],HGDW2_ROCK=['art_hgwm_rock0','art_hgwm_rock1'],HGDW2_ALGAE=['art_hgwm_algae0','art_hgwm_algae1'];
+function hgdw2Finish(L){
+  if(L._hgdw2done)return;L._hgdw2done=1;
+  const rnd=hgdmRng(477512),S=L.rows.length,have=k=>IMG[k]&&IMG[k].width,pick=a=>a.filter(have);
+  const gr=pick(HGDW2_GRASS),mo=pick(HGDW2_MOSS),rk=pick(HGDW2_ROCK),al=pick(HGDW2_ALGAE);
+  const heights={art_hgwm_grass0:1.15,art_hgwm_grass1:.8,art_hgwm_grass2:1.05,art_hgwm_reed0:1.5,art_hgwm_moss0:.5,art_hgwm_moss1:.42,art_hgwm_rock0:.85,art_hgwm_rock1:1.05,art_hgwm_algae0:1.35,art_hgwm_algae1:1.25};
+  for(const k in heights)NPC_H[k]=heights[k];
+  const free=[];for(let y=1;y<S-1;y++)for(let x=1;x<S-1;x++)if(hgdw2Open(L,x,y))free.push([x,y]);
+  const occ=new Set(L.decor.filter(d=>d.block||d.hgdtele).map(d=>d.x+','+d.y).concat(L._hgdw.stairs.map(s=>s.ax+','+s.ay)));
+  const add=(k,x,y,o)=>L.decor.push(Object.assign({k,x,y,block:false,walk:true,deco:true},o||{}));
+  const nearWall=(x,y)=>!hgdw2Open(L,x+1,y)||!hgdw2Open(L,x-1,y)||!hgdw2Open(L,x,y+1)||!hgdw2Open(L,x,y-1);
+  for(const [x,y] of free){if(occ.has(x+','+y))continue;
+    if(gr.length&&rnd()<.55)add(gr[(rnd()*gr.length)|0],x,y,{sc:.7+rnd()*.55});          // grass and reeds on over half the squares
+    if(mo.length&&rnd()<.5)add(mo[(rnd()*mo.length)|0],x,y,{sc:.8+rnd()*.6});             // moss on half of them
+    if(rk.length&&nearWall(x,y)&&rnd()<.16)add(rk[(rnd()*rk.length)|0],x,y,{sc:.8+rnd()*.4}); // mossy boulders against the walls (walk through: never in the way)
+    if(al.length&&rnd()<.22)add(al[(rnd()*al.length)|0],x,y,{sc:.8+rnd()*.5,bob:.7+rnd()*.35})} // hanging green algae
+  // creatures: three times as many, all ten kinds spread through the maze (not near the stairs); the great catfish stays alone in the far chamber
+  const kinds=HGFW.enemies.filter(e=>e!=='hgfcatfish'),stairs=L._hgdw.stairs,tk=new Set(L.enemies.map(e=>e.x+','+e.y));
+  const cells=free.filter(c=>!occ.has(c[0]+','+c[1])&&!tk.has(c[0]+','+c[1])&&!stairs.some(s=>Math.hypot(s.ax-c[0],s.ay-c[1])<9)).sort(()=>rnd()-.5);
+  const placed=[];let n=0;for(const c of cells){if(n>=62)break;if(placed.some(p=>Math.abs(p[0]-c[0])+Math.abs(p[1]-c[1])<5))continue;placed.push(c);L.enemies.push({t:kinds[n%kinds.length],x:c[0],y:c[1]});n++}
+  L._hgdw2.enemies=n;L._hgdw2.decor=L.decor.length}
+{const _b=hgdwBuild;hgdwBuild=function(){const had=!!LEVELS[HGDW.ID];_b.apply(this,arguments);const L=LEVELS[HGDW.ID];if(!had&&L&&L._hgdw)try{hgdw2Fix(L);hgdw2Finish(L)}catch(e){console.error('hgdw2',e)}}}
+
+/* ---- src/desert/hgd_church.js ---- */
+/* ==========================================================================
+   THE CHURCHES OF THE MAZE (prefix hgdch / HGDCH). Each of the eight maze towns has a small church near its shops: a frog priest stands in front of a painted chapel (the picture is drawn behind the priest by
+   hgd_stalls.js, assets/ds_hgstall_church.png). The priest will heal the whole party for a small gift, raise a fallen hero, lift a curse or a haunting, and cure sicknesses (30 gold each).
+   ========================================================================== */
+const HGDCH={NAMES:['Father Ripple','Sister Reed','Brother Mossback','Mother Brook','Elder Tadwick','Sister Marsh','Father Lilywick','Brother Croakley'],IMG:['hg_npc2','hg_npc4','hg_npc1','hg_npc5','hg_npc3','hg_npc2','hg_npc4','hg_npc1'],TOWN:['Hedgefoot','Cairnhold','Combwick','Nacre Landing','Dunewell','Blue Lantern','Tessera','Gildmere']};
+const hgdchLvl=()=>{const a=G.heroes||[];return Math.max(1,Math.round(a.reduce((n,h)=>n+h.lvl,0)/Math.max(1,a.length)))};
+for(let t=0;t<8;t++){
+  const id='hgd_church'+t,name=HGDCH.NAMES[t]+', the priest of '+HGDCH.TOWN[t];
+  khNpc(id,name,HGDCH.IMG[t],d=>{
+    const lvl=hgdchLvl(),heal=4*lvl+10,raise=40*lvl,hurt=G.heroes.some(h=>h.alive&&(h.hp<h.max||h.mp<h.mpMax)),dead=G.heroes.map((h,i)=>h.alive?-1:i).filter(i=>i>=0);
+    const opts=[];
+    opts.push(['Ask for healing ('+heal+' gold)',()=>{
+      if(!hurt)return say('You are all in good health. Keep your gold, and walk with care.',[BYE]);
+      if(G.gold<heal)return say('The church asks '+heal+' gold for the candles and the herbs. Come back when you have it.',[BYE]);
+      G.gold-=heal;G.heroes.forEach(h=>{if(h.alive){h.hp=h.max;h.mp=h.mpMax}});sfx('heal');return say('The priest lays a wet green hand on each of you and murmurs the old words. Your hurts close, and your strength comes back.',[BYE])}]);
+    if(dead.length)opts.push(['Raise '+HERO_DEF[dead[0]].name+' ('+raise+' gold)',()=>{
+      if(G.gold<raise)return say('Raising the dead costs '+raise+' gold, and the church cannot do it for less.',[BYE]);
+      G.gold-=raise;const h=G.heroes[dead[0]];h.alive=true;h.hp=Math.max(1,Math.ceil(h.max/2));sfx('heal');return say('The bells ring, and '+HERO_DEF[dead[0]].name+' breathes again.',[BYE])}]);
+    try{if(typeof afflCureOn==='function'&&typeof afflList==='function'&&afflList().some(e=>{const A=AFFL[e.id];return A&&(A.cureOn||[]).includes('church')}))opts.push(['Ask the priest to lift a curse or a haunting',()=>{const c=afflCureOn('church');sfx('heal');return say(c?'He lays a hand on each of you and says the old words. The weight lifts.':'You carry no curse that he can lift.',[BYE])}])}catch(e){}
+    try{if(typeof afflHealOptions==='function')opts.push(...afflHealOptions(30))}catch(e){}
+    opts.push(BYE);
+    return say('Welcome to the church of '+HGDCH.TOWN[t]+'. The roof leaks, the bell is cracked, and the door is always open. Do you need healing, or a prayer?',opts)});
+}
+function hgdchPlace(L){
+  if(L._hgdch||!L._hgds2)return;const rows=L.rows,open=(x,y)=>rows[y]&&rows[y][x]==='.',occ=new Set(L.decor.concat(L.items,L.enemies).map(d=>d.x+','+d.y)),out=[];
+  for(let t=0;t<8;t++){
+    const sh=L._hgds2.shops.filter(s=>s[1]===t);if(!sh.length)continue;
+    const cx=Math.round(sh.reduce((n,s)=>n+s[2],0)/sh.length),cy=Math.round(sh.reduce((n,s)=>n+s[3],0)/sh.length);let done=false;
+    for(let strict=1;strict>=0&&!done;strict--)for(let r=1;r<16&&!done;r++)for(let dy=-r;dy<=r&&!done;dy++)for(let dx=-r;dx<=r&&!done;dx++){
+      if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=cx+dx,y=cy+dy;if(!open(x,y)||occ.has(x+','+y))continue;
+      if(sh.some(s=>Math.abs(s[2]-x)+Math.abs(s[3]-y)<2))continue; // not right on top of a shopkeeper
+      let free=0;for(let ay=-1;ay<=1;ay++)for(let ax=-1;ax<=1;ax++)if((ax||ay)&&open(x+ax,y+ay)&&!occ.has((x+ax)+','+(y+ay)))free++;
+      if(free<(strict?8:6))continue;
+      occ.add(x+','+y);L.decor.push({k:HGDCH.IMG[t],x,y,block:true,npc:'hgd_church'+t,sc:.72});out.push([t,x,y]);done=true}}
+  L._hgdch={churches:out}}
+{const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];_b.apply(this,arguments);const L=LEVELS[HGD.ID];if(!had&&L&&L._hgdp&&L.decor)try{hgdchPlace(L)}catch(e){console.error('hgdch',e)}}}
+if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('Every town has a little church near its shops. The priest heals for a few coins, and will raise the fallen if you can pay.');
+
+/* ---- src/desert/hgd_natural.js ---- */
+/* ==========================================================================
+   A MORE NATURAL FLOOR (prefix hgdna / HGDNA). The small things lying on the floor of the Deeper Hollow maze were too many and too odd:
+   - the open books (assets/ds_hgxprop3) and the melted candles (ds_hgxprop2) are taken off the floor altogether: nothing would leave them there;
+   - in the passages (squares with at most two ways on) the small props are thinned out so that each stretch of passage is bare, or holds one thing, or a few (never two within four squares), and in the wider places a quarter of them go too.
+   Runs last of all the maze builders, so it sees everything they placed. Deterministic (hgdmRng 475777).
+   ========================================================================== */
+const HGDNA={GONE:/^art_hgxprop(2|3)$/,SMALL:/^art_hgxprop\d+$/};
+const hgdnaHash=(x,y,k)=>{let h=(x*374761393+y*668265263+String(k||'').length*2147483647)|0;h=(h^(h>>>13))*1274126177|0;return (h^(h>>>16))>>>0};
+// the offset of a loose item lying on the floor: always to one side, never dead centre
+function hgdnaOff(it){const h=hgdnaHash(it.x,it.y,it.k),sg=h&1?1:-1,mag=.16+((h>>1)%14)/100,o=((h>>6)%9-4)/40;return (h>>5)&1?[o,sg*mag]:[sg*mag,o]}
+function hgdnaThin(L){
+  if(L._hgdna)return;const rows=L.rows,rnd=hgdmRng(475777),open=(x,y)=>rows[y]&&rows[y][x]==='.',before=L.decor.length;
+  const ways=(x,y)=>[[1,0],[-1,0],[0,1],[0,-1]].filter(d=>open(x+d[0],y+d[1])).length;
+  // each stretch of passage (a run of squares with at most two ways on) gets its own amount of litter: three in ten are bare, four in ten hold one thing, three in ten hold a few (three or four)
+  const seg=new Map(),cap=[];
+  for(let y=0;y<rows.length;y++)for(let x=0;x<rows[0].length;x++){if(!open(x,y)||ways(x,y)>2||seg.has(x+','+y))continue;
+    const id=cap.length,h=hgdnaHash(x,y,'seg'),r=h%10;cap.push(r<3?0:r<7?1:3+((h>>4)&1));const q=[[x,y]];seg.set(x+','+y,id);
+    for(let i=0;i<q.length;i++){const [cx,cy]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=cx+a,ny=cy+b,k=nx+','+ny;if(seg.has(k)||!open(nx,ny)||ways(nx,ny)>2)continue;seg.set(k,id);q.push([nx,ny])}}}
+  const used=new Array(cap.length).fill(0);
+  let books=0,candles=0,thinned=0;const kept=[];
+  L.decor=L.decor.filter(d=>{
+    if(HGDNA.GONE.test(d.k||'')){if(d.k.endsWith('3'))books++;else candles++;return false}
+    if(!HGDNA.SMALL.test(d.k||'')||d.block||d.npc||d.loot||d.wd)return true; // only loose small props on the floor
+    const hall=ways(d.x,d.y)<=2;
+    if(hall){const sid=seg.get(d.x+','+d.y);if(sid!==undefined&&used[sid]>=cap[sid]){thinned++;return false}if(kept.some(q=>Math.abs(q.x-d.x)+Math.abs(q.y-d.y)<4)){thinned++;return false}if(sid!==undefined)used[sid]++}
+    else if(rnd()<.25){thinned++;return false}
+    // never in the middle of the square: pushed to one side of the passage, left or right
+    {const h=hgdnaHash(d.x,d.y,d.k),sg=h&1?1:-1,mag=.18+((h>>1)%13)/100,hx=open(d.x+1,d.y)||open(d.x-1,d.y),vy=open(d.x,d.y+1)||open(d.x,d.y-1),lateralY=hx&&!vy?true:vy&&!hx?false:!!((h>>5)&1);
+     if(lateralY){d.ox=((h>>6)%9-4)/40;d.oy=sg*mag}else{d.oy=((h>>6)%9-4)/40;d.ox=sg*mag}}
+    kept.push(d);return true});
+  L._hgdna={books,candles,thinned,before,after:L.decor.length}}
+{const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];_b.apply(this,arguments);const L=LEVELS[HGD.ID];if(!had&&L&&L.decor)try{hgdnaThin(L)}catch(e){console.error('hgdna',e)}}}
+// everything small that lies on the floor of the maze is 15 percent smaller (the pictures of the little props and rocks; floor items are drawn smaller in the sprite list itself)
+{for(let i=0;i<16;i++){const k='art_hgxprop'+i;if(NPC_H[k]&&!NPC_H[k+'_s']){NPC_H[k]*=.85;NPC_H[k+'_s']=1}}
+ for(let i=0;i<8;i++){const k='art_hgxrock'+i;if(NPC_H[k]&&!NPC_H[k+'_s']){NPC_H[k]*=.85;NPC_H[k+'_s']=1}}}
+
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
 (async function boot(){
@@ -46386,5 +47110,6 @@ function hgdlStep(L,dt){
   ldHide();
 })();
 </script>
+<script>/*TESTMENU*/try{if(/\.github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname)){var tms=document.createElement('script');tms.src='testmenu.js?v='+VERSION;document.head.appendChild(tms)}}catch(e){}/*ENDTESTMENU*/</script>
 </body>
 </html>
