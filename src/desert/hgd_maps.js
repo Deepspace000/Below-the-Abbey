@@ -144,7 +144,7 @@ function hgdmpDrawNames(vi){
   const vi=G.hgdView|0,sh=hgdmpSheet(vi);if(!sh)return _do.apply(this,arguments);
   MPL.reveal=false;const own=[HGD.ID,HGD.ID,HGD.ID,HGD.ID,HGD.ID,HGDU.ID,477][vi],gc=G.C;if(own!==LEVEL)G.C={x:-9999,y:-9999,a:0}; // the arrow only shows on the sheet of the level you are in
   try{mplPaint(sh.c,sh.S||MPL.S,MPL.AREA,sh.X,sh.Y,'You are the yellow arrow.')}finally{G.C=gc}if(vi<6)hgdmpDrawTrail(vi);hgdmpDrawNames(vi);
-  {let bx=92;HGDMP.views.forEach((v,i)=>{const w=i===5?36:i===6?42:v[0].length>3?33:27;btnText('hgdv'+i,v[0],bx,303,w,17);bx+=w+2})}}}
+  {let bx=194;HGDMP.views.forEach((v,i)=>{const w=i===5?36:i===6?42:v[0].length>3?33:27;btnText('hgdv'+i,v[0],bx,303,w,17);bx+=w+2})}}}
 {const _h=handleBtn;handleBtn=function(id){if(G.overview&&!G.world&&(LEVEL===HGD.ID||LEVEL===HGDU.ID||LEVEL===477)&&/^hgdv\d$/.test(id)){G.hgdView=+id[4];G.mplKey=null;return}return _h.apply(this,arguments)}}
 /* ---------- the magic map: it records the party's footsteps in the maze ---------- */
 const HGDT_MAX=40000;

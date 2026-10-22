@@ -53,6 +53,7 @@ The deeper Hollow Lands
 * New music: the Underlevel plays Dark Cavern Ambient, the Deeper Hollow maze and its boat canals play Paranoid Truth, and the Hollow Land and the Hollow Grasslands play Searching outdoors.
 * Go to area now lists the Hollow Grasslands, its four beehive dungeons, and the Drowned Maze.
 * The gate between the Hollow Land and the Hollow Grasslands now goes both ways: a spiked gate on the Hollow Land's ledge leads down into the Grasslands.
+* Fixed: on the Deeper Hollow map, the All button was hidden under the map's own buttons, so after choosing a quarter or another view there was no way back to the whole maze. The view buttons now sit beside the map's own buttons and every view can return to the whole map.
 * Fixed: the little pet creatures and the drifting clouds in the maze were not moving.
 * Bulb gives the party a magic map of silver thread when the whale's errand is done. From then on, the map of the maze draws a thin, glowing, dashed line of everywhere the party has walked. The party is told of it when it first enters the maze.
 * The towns on the maze maps are now small huts in the style of their biome (thatch, stone, honeycomb skep, shell roof, sandstone dome, tent, mosaic pavilion, gilded dome), small enough to leave the maze showing. Ladders are marked too.
