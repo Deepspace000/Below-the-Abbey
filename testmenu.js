@@ -1,6 +1,6 @@
 /* ==========================================================================
    THE TESTING MENU (prefix tm / TM). Loaded only by the GitHub Pages (and local) copy of the game: index.html has a one-line loader that does nothing on itch.io or in the Windows app, and both of those builds
-   leave this file out. A "Testing" button on the title screen opens a list of typical parties (level 10, 20, ... 80, each in two kinds: best gear for the level, and a weaker party with average weapons), each with a healer (a Priest) in the party and with gear that fits its level, some potions and food, an average amount of gold, the main quests
+   leave this file out. A "Testing" button on the title screen opens a list of typical parties (level 10, 20, ... 80, each in three kinds: best gear for the level; a weaker party with average weapons; and a real party where the front fighters hold the ok and good gear and the back line waits with cheap gear, and half the gold), each with a healer (a Priest) in the party and with gear that fits its level, some potions and food, an average amount of gold, the main quests
    done up to about that point of the story, and a couple of side quests done in each town passed. Choose one, press "Go to area", and pick the area on the usual Go to area list: the party is built when you arrive.
    (Quests are only marked done: the story flags that the quests would have set are not all set, so a few doors and talks may still behave as at the start.)
    ========================================================================== */
@@ -16,7 +16,24 @@ function tmQuestPlan(n){
   const ka=Math.round(areas.filter(a=>by[a]).length*frac),use=areas.filter(a=>by[a]).slice(0,ka),extra=[];
   for(const a of use)for(const id of by[a].slice(0,2))extra.push(id);
   return {main:main.slice(0,k),mainAll:main.length,extra,towns:use.length}}
-function tmApply(n,weak){
+// a real party: what most parties carry in the first thirty levels. Each piece is cheap (from the lowest third of what the shops sell by that level), or ok (the middle), or missing (one in seven of the armour slots), and only two pieces in the whole party are good (the best of the level)
+function tmRealGear(h,hi,n,good){
+  const rnd=hgdmRng(n*131+hi*17+7),want=HERO_DEF[hi].caster?['Staff']:/Priest/.test(HERO_DEF[hi].cls)?['Mace','Staff']:null;h.eq={};
+  for(const slot of ['main','head','chest','arms','legs','off']){
+    const list=[];
+    for(const id of Object.keys(ITEMDEF)){const d=ITEMDEF[id];
+      if(slot==='main'){if(d.k!=='weapon')continue;if(want&&!want.includes(d.t))continue}else if(slot==='off'){if(d.k!=='shield')continue}else if(d.k!==slot)continue;
+      if(!tmOk(id,d,n)||!slotFits(slot,d,hi)||reqFail(h,d))continue;
+      let v;if(slot==='main'){h.eq.main=mkItem(id);const r=heroDmgRange(h);v=(r[0]+r[1])/2;delete h.eq.main}else v=d.armor||0;
+      list.push([id,v])}
+    if(!list.length&&slot==='main'&&want){for(const id of Object.keys(ITEMDEF)){const d=ITEMDEF[id];if(d.k!=='weapon'||!tmOk(id,d,n)||!slotFits('main',d,hi)||reqFail(h,d))continue;h.eq.main=mkItem(id);const r=heroDmgRange(h);list.push([id,(r[0]+r[1])/2]);delete h.eq.main}}
+    if(!list.length)continue;list.sort((a,b)=>a[1]-b[1]);const L=list.length;
+    let tier;if(good.has(hi+':'+slot))tier='good';else{const r=rnd(),front=hi<2; // the front fighters get the upgrades first (mostly ok pieces); the back line waits, with mostly cheap old gear
+      tier=(slot!=='main'&&r<(front?.08:.12))?'none':r<(front?.3:.72)?'cheap':'ok'}
+    if(tier==='none')continue;
+    let idx=tier==='good'?L-1:tier==='cheap'?Math.floor(rnd()*Math.max(1,Math.ceil(L*.3))):Math.min(L-1,Math.floor(L*.4)+Math.floor(rnd()*Math.max(1,Math.ceil(L*.3))));
+    h.eq[slot]=mkItem(list[idx][0])}}
+function tmApply(n,weak,real){
   // 0. the party is exactly level n: a higher one left by a save is rebuilt from level 1; the bag loses the usual test weapons and any spare gear
   { // a typical party, with a healer: Warrior, Thief, Mage and Priest
     setParty(DEFAULT_PARTY);
@@ -25,8 +42,10 @@ function tmApply(n,weak){
     G.heroes.forEach((h,i)=>{while(h.lvl<n){h.xp=xpNeed(h.lvl);levelUp(i)}});G.lvlBanners.length=0;G.sel=0}
   G.bag=G.bag.filter(it=>{const d=ITEMDEF[it.id];return d&&!['weapon','head','chest','arms','legs','shield','ring'].includes(d.k)});
   // 1. gear that fits the level (the best shop gear of the level, no rare or reward pieces), keeping the casters' spells
+  const goodSet=new Set();if(real){goodSet.add('0:main');goodSet.add('0:chest')} // the two good pieces go to the front melee fighter: his weapon and his armour
   G.heroes.forEach((h,hi)=>{
     const keep={};for(const k of ['s0','s1','s2','s3'])if(h.eq&&h.eq[k])keep[k]=h.eq[k];
+    if(real){tmRealGear(h,hi,n,goodSet);Object.assign(h.eq,keep);recalcMax(hi);h.hp=h.max;h.mp=h.mpMax;h.food=100;return}
     h.eq={};
     const wl=[];for(const id of Object.keys(ITEMDEF)){const d=ITEMDEF[id];if(d.k!=='weapon'||!tmOk(id,d,n)||!slotFits('main',d,hi)||reqFail(h,d))continue;h.eq.main=mkItem(id);const r=heroDmgRange(h),w=heroWeapon(h);wl.push([id,(r[0]+r[1])/2*(1+.5*(weaponCrit(w)+(w&&w.dbl||0)))*heroHitPct(hi,0),tmEffL(d)])}
     // casters carry a staff, the Priest a mace or staff, when the shops have one at this level
@@ -47,25 +66,25 @@ function tmApply(n,weak){
   for(const [id,c] of [['torch',4],['bread',4],['cheese',3],['apple',3]])add(id,c);
   if(!bagCount('lantern'))add('lantern',1);
   // 3. gold
-  G.gold=tmGold(n);
+  G.gold=real?Math.round(tmGold(n)*.5):tmGold(n);
   // 4. the quests
   const Q=tmQuestPlan(n);for(const id of Q.main.concat(Q.extra))G.quests[id]={st:'done',base:0};
-  msg('Testing party, level '+n+(weak?' (weaker, average weapons)':'')+': suitable gear, '+tmGold(n)+' gold, '+Q.main.length+' main and '+Q.extra.length+' side quests marked done.','#9ae0ff')}
+  msg('Testing party, level '+n+(real?' (real party: a mix of cheap and ok gear, two good pieces)':weak?' (weaker, average weapons)':'')+': '+(real?Math.round(tmGold(n)*.5):tmGold(n))+' gold, '+Q.main.length+' main and '+Q.extra.length+' side quests marked done.','#9ae0ff')}
 // ----- the screen -----
 function tmDraw(){
   BTNS=[];veil(.82);bigPanel(24,8,432,304);
   txt('TESTING',240,22,13,'#d8c88e','center',true);
   txt('Choose a typical party (with a Priest to heal), then press Go to area. It is built when you arrive. Only in the GitHub Pages copy of the game.',240,37,7.5,'#c8b888','center');
-  const grp=[['Best gear for the level',50,''],['Weaker party: average weapons, not the best of their level',118,'w']];
+  const grp=[['Best gear for the level',48,''],['Weaker party: average weapons, not the best of their level',90,'w'],['Real party: front fighters upgraded first, back line cheap, half the gold',132,'r']];
   for(const [title,y0,pre] of grp){
-    txt(title,40,y0-4,8.5,'#c8a860','left',true);
-    TM.PRESETS.forEach((n,i)=>{const x=40+(i%4)*104,y=y0+4+((i/4)|0)*28,on=TM.sel&&TM.sel.n===n&&!!TM.sel.weak===!!pre;
-      btnText('tm_'+pre+n,(pre?'Weaker ':'Level ')+n,x,y,98,24);
-      if(on){ctx.save();ctx.strokeStyle='#ffe36a';ctx.lineWidth=2;ctx.strokeRect(x-1,y-1,100,26);ctx.restore()}})}
+    txt(title,40,y0-3,8.5,'#c8a860','left',true);
+    TM.PRESETS.forEach((n,i)=>{const x=40+i*52,y=y0+2,on=TM.sel&&TM.sel.n===n&&(TM.sel.real?'r':TM.sel.weak?'w':'')===pre;
+      btnText('tm_'+pre+n,(pre==='r'?'R ':pre==='w'?'W ':'L ')+n,x,y,48,24);
+      if(on){ctx.save();ctx.strokeStyle='#ffe36a';ctx.lineWidth=2;ctx.strokeRect(x-1,y-1,50,26);ctx.restore()}})}
   const S=TM.sel;
   if(S){const n=S.n,Q=tmQuestPlan(n),tier=tmPotionTier(n).map(id=>ITEMDEF[id].n).reverse().join(' and ');
-    const L=[['Party','Warrior, Thief, Mage and Priest (the healer), every hero level '+n+' with full health.'],['Gear',(S.weak?'An average weapon of the last dozen levels (not the best); the best armour, helm, arms, legs and shield the shops sell by level '+n+', and two rings.':'The best weapon, helm, chest, arms, legs and shield the shops sell by level '+n+', and two rings.')],['Potions',tier+' (6 of the best, 4 of the next), mana potions, antidotes, torches and food.'],['Gold',tmGold(n)+' gold, about what a party of this level has in hand.'],['Quests',Q.main.length+' of '+Q.mainAll+' main quests, and 2 side quests in each of the first '+Q.towns+' towns ('+Q.extra.length+' in all), marked done.']];
-    L.forEach(([a,b],i)=>{txt(a,50,196+i*18,9,'#c8a860','left',true);txt(b,104,196+i*18,8,'#ece0c0','left',false,undefined,340)});
+    const L=[['Party','Warrior, Thief, Mage and Priest (the healer), every hero level '+n+' with full health.'],['Gear',(S.real?'A mix: the front fighters (Warrior and Thief) hold the upgrades, mostly ok pieces, and only the weapon and chest of the Warrior are good. The back line (Mage and Priest) waits with old cheap gear and some empty slots.':S.weak?'An average weapon of the last dozen levels (not the best); the best armour, helm, arms, legs and shield the shops sell by level '+n+', and two rings.':'The best weapon, helm, chest, arms, legs and shield the shops sell by level '+n+', and two rings.')],['Potions',tier+' (6 of the best, 4 of the next), mana potions, antidotes, torches and food.'],['Gold',(S.real?Math.round(tmGold(n)*.5):tmGold(n))+' gold'+(S.real?', half of what a party of this level has in hand (it takes a while to save).':', about what a party of this level has in hand.')],['Quests',Q.main.length+' of '+Q.mainAll+' main quests, and 2 side quests in each of the first '+Q.towns+' towns ('+Q.extra.length+' in all), marked done.']];
+    L.forEach(([a,b],i)=>{txt(a,50,188+i*18,9,'#c8a860','left',true);txt(b,104,188+i*18,8,'#ece0c0','left',false,undefined,340)});
   }else txt('Pick a party above.',240,230,10,'#c8b888','center');
   btnText('tm_back','Back',36,286,58,20);
   btnText('tm_plain','Go to area (no test party)',150,286,170,20);
@@ -74,13 +93,13 @@ function tmDraw(){
 {const _d=drawGoto;drawGoto=function(){
   if(G.testScreen)return tmDraw();
   _d.apply(this,arguments);
-  if(G.testPreset)txt('TEST PARTY: '+(G.testPreset.weak?'WEAKER ':'LEVEL ')+G.testPreset.n,240,48,8.5,'#9ae0ff','center',true)}}
+  if(G.testPreset)txt('TEST PARTY: '+(G.testPreset.real?'REAL ':G.testPreset.weak?'WEAKER ':'LEVEL ')+G.testPreset.n,240,48,8.5,'#9ae0ff','center',true)}}
 {const _g=gotoBtn;gotoBtn=function(id){
   if(G.testScreen){
     if(id==='tm_back'){G.testScreen=false;G.state='title';return}
     if(id==='tm_plain'){G.testScreen=false;G.testPreset=null;G.gs=0;return} // the plain Go to area list: your own party, raised to the level and gold set there
-    if(id==='tm_go'&&TM.sel){G.testScreen=false;G.testPreset=TM.sel;G.gotoLvl=TM.sel.n;G.gotoGold=tmGold(TM.sel.n);G.gs=0;return}
-    {const m=/^tm_(w?)(\d+)$/.exec(id);if(m){TM.sel={n:+m[2],weak:!!m[1]};return}}
+    if(id==='tm_go'&&TM.sel){G.testScreen=false;G.testPreset=TM.sel;G.gotoLvl=TM.sel.n;G.gotoGold=TM.sel.real?Math.round(tmGold(TM.sel.n)*.5):tmGold(TM.sel.n);G.gs=0;return}
+    {const m=/^tm_([wr]?)(\d+)$/.exec(id);if(m){TM.sel={n:+m[2],weak:m[1]==='w',real:m[1]==='r'};return}}
     return}
   if(['go_lm','go_lp','go_gm','go_gp'].includes(id))G.testPreset=null; // changing the level or gold by hand goes back to the plain Go to area
   if(id==='go_back'){G.testPreset=null}
@@ -91,5 +110,5 @@ function tmDraw(){
 // when the area has been entered, the party is built
 {const _j=jumpToLevel;jumpToLevel=function(){TM.apply=G.testPreset||null;return _j.apply(this,arguments)}}
 {const _u=update;update=function(dt){
-  try{if(TM.apply&&G.state==='play'&&G.heroes&&G.heroes.length&&!G.cut){const a=TM.apply;TM.apply=null;tmApply(a.n,a.weak)}}catch(e){console.error('tm',e);TM.apply=null}
+  try{if(TM.apply&&G.state==='play'&&G.heroes&&G.heroes.length&&!G.cut){const a=TM.apply;TM.apply=null;tmApply(a.n,a.weak,a.real)}}catch(e){console.error('tm',e);TM.apply=null}
   return _u.apply(this,arguments)}}

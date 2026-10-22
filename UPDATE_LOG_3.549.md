@@ -267,3 +267,7 @@ Armour blocks less, mana runs out faster (3.586)
 
 * Enemies hit harder: armour used to cut an enemy's chance to hit by 3 points per point of armour, down to a floor of 10 percent, so a party in good armour was hit one time in ten (a level 10 party in level 10 armour hardly got hit at all). Armour now cuts 2.5 points per point and the floor is 25 percent, so even a well-armoured party is hit one time in four at least. The comparison panel uses the same numbers.
 * Mana runs out faster: every power, spell and special costs half as much again (at least one more): Fire 6 instead of 4, Power Strike 6 instead of 4, and the Priest's Heal 9 instead of 6 or so. Mana potions matter more, and a party has to plan between straight hits and power hits.
+
+Testing menu: a real party (3.587)
+
+* The Testing menu (Pages copy only) has a third kind of party at each level, "Real party": the front fighters (Warrior and Thief) hold the upgrades, mostly ok pieces, only the Warrior's weapon and chest are good, the back line (Mage and Priest) waits with cheap old gear and some empty slots, and the party has half the usual gold.
