@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.577';
+const VERSION='3.578';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -4246,7 +4246,12 @@ G.gotoLvl=34;G.gotoGold=2000;
 const gotoGoldStep=(v,up)=>{const s=v<5000||(!up&&v<=5000)?500:v<50000||(!up&&v<=50000)?5000:25000;return up?Math.min(999999,v+s):Math.max(0,v-s)};
 function gotoListRaw(){
   const out=[],nm=n=>LEVEL_NAMES[n]||(LEVELS[n]&&LEVELS[n].name)||('Level '+n),hd=(h,g)=>out.push({h,g});
-  const has=n=>{if(!LEVELS[n]&&n>=289&&n<=312&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();return LEVELS[n]||(typeof KH_LAZY!=='undefined'&&KH_LAZY[n])};
+  const khFam=n=>n===44||(n>=199&&n<=274),khStub=()=>LEVELS[44]&&LEVELS[44].stub;
+  const has=n=>{ // every area is built when the list is made, so that its creatures can be listed; one that cannot be built (and is not waiting for the pictures or Khemetra) is left out
+    if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n]&&!(khFam(n)&&khStub())){try{KH_LAZY[n]()}catch(e){}}
+    if(LEVELS[n])return LEVELS[n];
+    if(typeof KH_LAZY!=='undefined'&&KH_LAZY[n]&&((typeof KH_READY!=='undefined'&&!KH_READY)||(khFam(n)&&khStub())))return true; // still loading: keep the row
+    return null};
   hd('The Known Lands');for(let n=1;n<=40;n++)if(has(n))out.push({n,name:nm(n)});
   hd('The Deserts','desert');for(const n of [41,42,43,44,60,61,62,63,64,65])if(has(n))out.push({n,name:nm(n)});
   hd('Mounds of the Sand Road','desert');for(let n=BURROW_BASE;n<BURROW_BASE+BURROW_N;n++)if(has(n))out.push({n,name:nm(n)});
@@ -4268,8 +4273,10 @@ function gotoListRaw(){
 }
 
 /* the level an area is rated at (cheap: no scan of the map), and the level range shown on its button: the creatures' levels when it has creatures, else its rating */
-const gotoRate=n=>{const r=(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[n])||(LEVELS[n]&&(LEVELS[n].diff||0)+((LEVELS[n].lvlBonus)||0))||0;if(r)return r;try{return areaStats(n).hi||0}catch(e){return 0}}; // (an area with no rating takes the highest level of its creatures)
-function gotoRange(n){if(n===1)return '1 to 3';const r=typeof LEVEL_RATING!=='undefined'?LEVEL_RATING[n]:undefined;if(r)return ''+r; /* the level the world map shows for the place */ const st=areaStats(n);return st.en?(st.lo===st.hi?''+st.lo:st.lo+' to '+st.hi):(gotoRate(n)?''+gotoRate(n):'')}
+const gotoLocRate=n=>{try{const loc=typeof WORLD_LOCS!=='undefined'&&WORLD_LOCS.find(l=>l.lv.includes(n));const r=loc&&typeof locRating==='function'?locRating(loc):null;if(r)return +String(r).split('-').pop()}catch(e){}return 0};
+/* the level of an area: its rating on the world map; else the rating of the place on the world map that holds it; else the level it is built at (what its creatures stand at when it has no rating); else its creatures' top level */
+const gotoRate=n=>{const r=(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[n])||0;if(r)return r;const lr=gotoLocRate(n);if(lr)return lr;const L=LEVELS[n];if(L&&L.diff)return L.diff+(L.lvlBonus||0);try{return areaStats(n).hi||0}catch(e){return 0}};
+function gotoRange(n){if(n===1)return '1 to 3';const r=gotoRate(n);return r?''+r:''}
 const gotoSortOn=()=>G.gotoSort===undefined?true:!!G.gotoSort; // the highest levels at the top is the default
 function gotoList(){
   const raw=gotoListRaw();if(!gotoSortOn())return raw;
@@ -4303,7 +4310,7 @@ const AREA_WAVES={ // creatures that arrive during play and are not in the map: 
   5:['mayor'],10:['ghost','ghost'],42:['mummy','mummy','mummy']}; // the mayor's fight, the lone gravestone, the fourth sun disc's trap
 const AREA_NOTE={19:'plus hunters while you are wanted',22:'plus hunters while you are wanted',42:'Sut fights alone',44:'40 shops, inns and temples, 20 quests, the palace'};
 function areaStats(n){ // what a level holds: creatures and their levels, potions, gold and other items
-  if(AREA_STATS[n])return AREA_STATS[n];
+  {const c=AREA_STATS[n],L0=LEVELS[n];if(c&&L0&&c.len===(L0.enemies||[]).length&&c.dl===(L0.decor||[]).length)return c} // (remembered only while the area has the same creatures and decor it had: an area finished building later is counted again)
   // an area that has not been built yet is built now (its creatures are only known once it exists); the few that need their pictures first (or Khemetra's stub) are marked unbuilt and not remembered
   if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n]&&!((n===44||(n>=199&&n<=274))&&LEVELS[44]&&LEVELS[44].stub)){try{KH_LAZY[n]()}catch(e){}}
   const L=LEVELS[n],o={en:0,lo:0,hi:0,pot:0,gold:0,it:0};if(!L||L.stub)return {en:0,lo:0,hi:0,pot:0,gold:0,it:0,unbuilt:1};
@@ -4324,7 +4331,7 @@ function areaStats(n){ // what a level holds: creatures and their levels, potion
   try{LEVEL=n;for(const d of L.decor||[]){if(!CONTAINERS.includes(d.k)||d.shop||d.npc)continue;
     try{const c=Object.assign({},d);delete c.contents;const its=lootFor(c);o.gold+=c.gold||0;for(const i of its){if(/potion/.test(i.id))o.pot+=i.n||1;else o.it+=i.n||1}}catch(e){}}}
   finally{LEVEL=keep}
-  o.gold=Math.round(o.gold);return AREA_STATS[n]=o;
+  o.gold=Math.round(o.gold);o.len=(L.enemies||[]).length;o.dl=(L.decor||[]).length;return AREA_STATS[n]=o;
 }
 const GO_LIST=[36,50,396,228],GO_ROW=42,GO_HEAD=16;
 function gotoLayout(){let y=0;const A=gotoList(),rows=A.map(r=>{const h=r.h?GO_HEAD:GO_ROW,o={r,y,h};y+=h;return o});return{rows,total:y}}
