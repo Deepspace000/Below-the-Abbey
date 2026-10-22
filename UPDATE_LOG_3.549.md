@@ -1,4 +1,4 @@
-Below the Abbey: update 3.561 (changes since 3.534, the update on itch.io before this one, including the last Hollow Grasslands quests and the way down to the Deeper Hollow)
+Below the Abbey: update 3.562 (changes since 3.534, the update on itch.io before this one, including the last Hollow Grasslands quests and the way down to the Deeper Hollow)
 
 The Hollow Grasslands: the last quests, and the way down to the Deeper Hollow
 
@@ -142,6 +142,7 @@ Controls
 
 Other
 
+* The loading screen of the web version (GitHub Pages) now shows a percentage and the megabytes, for example "Loading the pictures: 40%, 33 of 203 MB", the way the itch.io version already did. The first visit downloads about 200 MB of pictures.
 * The clouds drifting in the maze were drawn as moving blocks with a cloud painted on them. They are now soft see-through clouds.
 * On the Deeper Hollow map, the All button was hidden under the map's own buttons, so after choosing a quarter or another view there was no way back to the whole maze. The view buttons now sit beside the map's own buttons, and every view can return to the whole map. Fit, and Minus when the map cannot zoom out any further, also take a close-up quarter back out to the whole map, and a map opened afresh always shows the whole map. The Under button now shows the Underlevel map even before the party has been down there (it was blank until the Underlevel had been visited).
 * Discarding an item in the inventory now asks first: "Discard (item)? It will be gone for good." with Discard and Keep it buttons.
