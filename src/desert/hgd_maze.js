@@ -22,9 +22,9 @@ hgdBuild=function hgdBuildMaze(){
   const seen=new Uint8Array(N*N),st=[],D=[[0,-1],[1,0],[0,1],[-1,0]],cx0=N>>1,cy0=N-1;
   const carve=(i,j)=>{g[2*j+1][2*i+1]='.'};
   // ---- the lakes: three rectangles of the cell grid the walk never enters (carved afterwards as closed rooms of deep water, see below) ----
-  const LAKES=[];{const lr=hgdmRng(475777),SPEC=[[8,32,56,78],[58,86,34,58],[28,64,17,30]];
-    for(const [xa,xb,ya,yb] of SPEC){const wc=7+((lr()*4)|0),hc=5+((lr()*3)|0);for(let t=0;t<60;t++){const a=xa+((lr()*(xb-xa))|0),c=ya+((lr()*(yb-ya))|0),b=a+wc,d=c+hc;
-      if(LAKES.some(k=>Math.abs(k.a-a)<24&&Math.abs(k.c-c)<16))continue;LAKES.push({a,b,c,d,x0:2*a+1,x1:2*b+1,y0:2*c+1,y1:2*d+1});break}}
+  const LAKES=[];{const lr=hgdmRng(475777),SPEC=[[6,28,52,76],[54,80,28,48],[24,58,14,26]],WMR={a:63,b:92,c:66,d:93},clear=(r,q,m)=>r.a-m<=q.b&&q.a-m<=r.b&&r.c-m<=q.d&&q.c-m<=r.d; // the lakes are big (25 to 31 squares wide, 19 to 23 high) and keep five cells clear of each other and of the Flooded Quarter
+    for(const [xa,xb,ya,yb] of SPEC){const wc=12+((lr()*4)|0),hc=9+((lr()*3)|0);for(let t=0;t<300;t++){const a=xa+((lr()*(xb-xa))|0),c=ya+((lr()*(yb-ya))|0),b=a+wc,d=c+hc,r={a,b,c,d};
+      if(a<3||c<3||b>N-5||d>N-5||clear(r,WMR,5)||LAKES.some(k=>clear(r,k,5)))continue;LAKES.push({a,b,c,d,x0:2*a+1,x1:2*b+1,y0:2*c+1,y1:2*d+1});break}}
     for(const k of LAKES)for(let j=k.c;j<=k.d;j++)for(let i=k.a;i<=k.b;i++)seen[j*N+i]=1}
   // the Flooded Quarter: a fourth, much bigger water region in the south-east (about 59 x 55 squares), a maze of deep channels carved below (it comes last, so it is always lake number 4)
   {const wm={a:63,b:92,c:66,d:93,wm:true,name:'The Flooded Quarter'};wm.x0=2*wm.a+1;wm.x1=2*wm.b+1;wm.y0=2*wm.c+1;wm.y1=2*wm.d+1;LAKES.push(wm);

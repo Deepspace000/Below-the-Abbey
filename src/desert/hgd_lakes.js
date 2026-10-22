@@ -30,7 +30,7 @@ function hgdlFill(L){
     // hanging vines on the ring of wall
     const vs=[];for(const [x,y] of cells)for(const [a,b] of DV)if(wall(x+a,y+b)&&!nearD(x,y,1)&&rnd()<.4&&vs.every(v=>Math.abs(v[0]-x)+Math.abs(v[1]-y)>=3)){vs.push([x,y]);dec('art_hgdf_vine'+((rnd()*4)|0),x,y,{wd:[a,b],pic:1,bob:.9});break}
     // islets: a clump of reeds (blocking) with reeds round it; two have a chest
-    const ils=[];let t=0;while(ils.length<5&&t++<400){const c=cells[(rnd()*cells.length)|0];if(shoreD(c[0],c[1])<3||nearD(c[0],c[1],4)||ils.some(q=>Math.abs(q[0]-c[0])+Math.abs(q[1]-c[1])<6))continue;ils.push(c)}
+    const ils=[];let t=0;while(ils.length<8&&t++<600){const c=cells[(rnd()*cells.length)|0];if(shoreD(c[0],c[1])<3||nearD(c[0],c[1],4)||ils.some(q=>Math.abs(q[0]-c[0])+Math.abs(q[1]-c[1])<6))continue;ils.push(c)}
     const gi=ils.length>=3?ils.length-1:-1;
     ils.forEach((c,i)=>{const [x,y]=c;used.add(x+','+y);
       if(i===gi)L.decor.push({k:'hg_chestweed',x,y,block:true,hgdwg:1000,hgdl:1});
@@ -50,7 +50,7 @@ function hgdlFill(L){
     for(let i=0;i<5&&lilies.length;i++){const c=lilies.splice((rnd()*lilies.length)|0,1)[0];L.items.push({k:'hgllily',x:c[0],y:c[1],hgdl:1})}
     if(li===0&&ils[0]){const [x,y]=ils[0];for(const [a,b] of DV){if(freeI(x+a,y+b)&&!L.decor.some(d=>d.block&&d.x===x+a&&d.y===y+b)){L.items.push({k:'hglnet',x:x+a,y:y+b,hgdl:1});break}}}
     // creatures, only ever in the water of this lake
-    const kinds=['hgwcroc','hgwcroc','hgwcroc','hgweel','hgweel','hgweel','hgweel','hgwsnake','hgwsnake','hgwsnake','hgwsnake'];
+    const kinds0=['hgwcroc','hgwcroc','hgwcroc','hgweel','hgweel','hgweel','hgweel','hgwsnake','hgwsnake','hgwsnake','hgwsnake'],kinds=k.wm?kinds0:kinds0.concat(kinds0).concat(kinds0.slice(0,5)); // the bigger lakes hold more
     const spots=cells.filter(([x,y])=>water(x,y)&&!nearD(x,y,5)&&!L.decor.some(d=>d.block&&d.x===x&&d.y===y)&&!L.items.some(i=>i.x===x&&i.y===y));
     const got=[];for(const kd of kinds){for(let tt=0;tt<60&&spots.length;tt++){const c=spots[(rnd()*spots.length)|0];if(got.some(q=>Math.abs(q[0]-c[0])+Math.abs(q[1]-c[1])<4))continue;got.push(c);L.enemies.push({t:kd,x:c[0],y:c[1],hgdl:1});break}}
     // the islet with the gold chest has two guards in the water close by
@@ -59,7 +59,7 @@ function hgdlFill(L){
     const homes=cells.filter(([x,y])=>L.decor.some(d=>d.hgdl&&!d.block&&d.x===x&&d.y===y&&(d.k==='hgt_reeds'||d.k==='art_hgdf_plant6')));
     const BF=['cabbagewhite','brimstone','orangetip','commonblue','smallcopper','peacock','redadmiral','paintedlady','cloudedyellow'];
     const mk=(type,n,kind)=>{for(let i=0;i<n;i++){const h=homes.length?homes[(rnd()*homes.length)|0]:cells[(rnd()*cells.length)|0];L._hgdl.agents.push({lake:li,type,kind:kind?kind[i%kind.length]:null,x:h[0]+.5,y:h[1]+.5,hx:h[0]+.5,hy:h[1]+.5,tx:h[0]+.5,ty:h[1]+.5,t:rnd()*2,ph:rnd()*6,e:{t:'bfly',x:h[0],y:h[1],hp:1}})}};
-    mk('bf',8,BF);mk('bee',6);mk('dfl',2)});
+    mk('bf',12,BF);mk('bee',9);mk('dfl',3)});
   L._hgdl.agentCount=L._hgdl.agents.length}
 /* ---------- the Flooded Quarter: the life of the big water maze (about a thousand squares of deep channel, seven open basins) ---------- */
 function hgdlFillWm(L,k,li){
