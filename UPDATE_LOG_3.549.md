@@ -276,6 +276,6 @@ Creatures that died in one hit (3.588)
 
 * Some creatures in an area had a fraction of their proper health (a Deeper Hollow slug had 317 instead of about 7,000, so a level 50 party killed it in one hit). Cause: creature health from level 28 up was sized from the party's level at the moment the creature was first sized, and while a party is being levelled up (by Go to area or the Testing menu) its average level is briefly very low. Health is now sized from the creature's own level and kind, never from the party. All creatures of one kind and level now have the same health. The toughest ordinary kinds are also capped lower (at 1.4 times the middle ones, not 1.75).
 
-Mana comes back slower (3.589)
+Mana comes back slower (3.589 and 3.590; the change itself went in with 3.590)
 
 * Mana regeneration takes twice as long: a hero recovers 1 mana every second round of a fight instead of every round, and the mana regeneration of armour and powers (such as Mana Well) is halved too. Resting and mana potions are unchanged.

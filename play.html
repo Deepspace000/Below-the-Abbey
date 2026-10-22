@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.589';
+const VERSION='3.590';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2260,8 +2260,8 @@ function enemyAct(e){
   return dur;
 }
 function finishRound(){
-  G.heroes.forEach((h,i)=>{if(!h.alive)return;h.mp=Math.min(h.mpMax,h.mp+1);
-    h.mpAcc=(h.mpAcc||0)+pas(i,'mpRegen');while(h.mpAcc>=1){h.mp=Math.min(h.mpMax,h.mp+1);h.mpAcc--}
+  G.heroes.forEach((h,i)=>{if(!h.alive)return;h.mpBase=(h.mpBase||0)+.5;if(h.mpBase>=1){h.mp=Math.min(h.mpMax,h.mp+1);h.mpBase--} // mana comes back half as fast: one point every second round, not every round
+    h.mpAcc=(h.mpAcc||0)+pas(i,'mpRegen')*.5;while(h.mpAcc>=1){h.mp=Math.min(h.mpMax,h.mp+1);h.mpAcc--}
     h.hpAcc=(h.hpAcc||0)+pas(i,'regen');while(h.hpAcc>=1){h.hp=Math.min(h.max,h.hp+1);h.hpAcc--}});
   for(const b of G.buffs)b.left--;G.buffs=G.buffs.filter(b=>b.left>0);
   if(G.lightBoost>0)G.lightBoost--;
