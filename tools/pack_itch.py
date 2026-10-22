@@ -51,10 +51,7 @@ html = html[:i] + SHIM + html[i:]
 import re as _re
 html = _re.sub(r'<script>/\*TESTMENU\*/.*?/\*ENDTESTMENU\*/</script>\r?\n?', '', html, flags=_re.S)
 assert 'TESTMENU' not in html
-# the itch.io build has no "Go to area" button on the title screen (the debug jump stays on the Pages build)
-GO = "items.push(['tgoto','Go to area']);"
-assert GO in html
-html = html.replace(GO, '')
+# (the title screen has no "Go to area" button any more: it is in the Testing menu, which the itch.io build does not have)
 # the powerful test weapons are for the Pages build only: the itch.io build never hands them out
 TW = 'function giveTestWeapons(){'
 assert TW in html

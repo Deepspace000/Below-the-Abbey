@@ -68,6 +68,7 @@ function tmDraw(){
     L.forEach(([a,b],i)=>{txt(a,50,196+i*18,9,'#c8a860','left',true);txt(b,104,196+i*18,8,'#ece0c0','left',false,undefined,340)});
   }else txt('Pick a party above.',240,230,10,'#c8b888','center');
   btnText('tm_back','Back',36,286,58,20);
+  btnText('tm_plain','Go to area (no test party)',150,286,170,20);
   if(S)btnText('tm_go','Go to area  >',330,286,110,20);
 }
 {const _d=drawGoto;drawGoto=function(){
@@ -77,6 +78,7 @@ function tmDraw(){
 {const _g=gotoBtn;gotoBtn=function(id){
   if(G.testScreen){
     if(id==='tm_back'){G.testScreen=false;G.state='title';return}
+    if(id==='tm_plain'){G.testScreen=false;G.testPreset=null;G.gs=0;return} // the plain Go to area list: your own party, raised to the level and gold set there
     if(id==='tm_go'&&TM.sel){G.testScreen=false;G.testPreset=TM.sel;G.gotoLvl=TM.sel.n;G.gotoGold=tmGold(TM.sel.n);G.gs=0;return}
     {const m=/^tm_(w?)(\d+)$/.exec(id);if(m){TM.sel={n:+m[2],weak:!!m[1]};return}}
     return}

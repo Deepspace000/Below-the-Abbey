@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.576';
+const VERSION='3.577';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -4269,7 +4269,7 @@ function gotoListRaw(){
 
 /* the level an area is rated at (cheap: no scan of the map), and the level range shown on its button: the creatures' levels when it has creatures, else its rating */
 const gotoRate=n=>{const r=(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[n])||(LEVELS[n]&&(LEVELS[n].diff||0)+((LEVELS[n].lvlBonus)||0))||0;if(r)return r;try{return areaStats(n).hi||0}catch(e){return 0}}; // (an area with no rating takes the highest level of its creatures)
-function gotoRange(n){const st=areaStats(n);return st.en?(st.lo===st.hi?''+st.lo:st.lo+' to '+st.hi):(gotoRate(n)?''+gotoRate(n):'')}
+function gotoRange(n){if(n===1)return '1 to 3';const r=typeof LEVEL_RATING!=='undefined'?LEVEL_RATING[n]:undefined;if(r)return ''+r; /* the level the world map shows for the place */ const st=areaStats(n);return st.en?(st.lo===st.hi?''+st.lo:st.lo+' to '+st.hi):(gotoRate(n)?''+gotoRate(n):'')}
 const gotoSortOn=()=>G.gotoSort===undefined?true:!!G.gotoSort; // the highest levels at the top is the default
 function gotoList(){
   const raw=gotoListRaw();if(!gotoSortOn())return raw;
@@ -4304,10 +4304,19 @@ const AREA_WAVES={ // creatures that arrive during play and are not in the map: 
 const AREA_NOTE={19:'plus hunters while you are wanted',22:'plus hunters while you are wanted',42:'Sut fights alone',44:'40 shops, inns and temples, 20 quests, the palace'};
 function areaStats(n){ // what a level holds: creatures and their levels, potions, gold and other items
   if(AREA_STATS[n])return AREA_STATS[n];
-  const L=LEVELS[n],o={en:0,lo:0,hi:0,pot:0,gold:0,it:0};if(!L)return o;
+  // an area that has not been built yet is built now (its creatures are only known once it exists); the few that need their pictures first (or Khemetra's stub) are marked unbuilt and not remembered
+  if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n]&&!((n===44||(n>=199&&n<=274))&&LEVELS[44]&&LEVELS[44].stub)){try{KH_LAZY[n]()}catch(e){}}
+  const L=LEVELS[n],o={en:0,lo:0,hi:0,pot:0,gold:0,it:0};if(!L||L.stub)return {en:0,lo:0,hi:0,pot:0,gold:0,it:0,unbuilt:1};
   const base=(L.diff||n)+(L.lvlBonus||0);let lo=1e9,hi=0;
   const spawned=(AREA_WAVES[n]||[]).concat((L.decor||[]).reduce((a,d)=>a.concat(d.ambush||[]),[])).map(t=>({t}));o.late=spawned.length; // creatures a quest sends in later, not placed in the map
-  for(const e of (L.enemies||[]).concat(spawned)){const lv=e.lvl||base;o.en++;lo=Math.min(lo,lv);hi=Math.max(hi,lv);if(ENEMY_DEF[e.t]){const g=enemyStat(e.t,lv).gold;o.gold+=(g[0]+g[1])/2}}
+  // the levels the creatures really have in the game: with a fixed world (autoscaling off) the place's own level from the ladder (the level the world map shows), the great creatures a few above it,
+  // and most of the ordinary ones from that level down to seven below it (see rebalanceEnemies); with autoscaling on, the level they were built at
+  const keepL=LEVEL,fixedW=!(G.flags&&G.flags.autoScaleOn);let R=base;try{LEVEL=n;R=DIFF()}finally{LEVEL=keepL}
+  for(const e of (L.enemies||[]).concat(spawned)){
+    const def=ENEMY_DEF[e.t],ap=def&&def.aboveParty,vary=!(ap||(def&&(def.boss||NO_VARY.includes(e.t)))||/^w_/.test(e.t));
+    let top;if(fixedW){let c=0;try{LEVEL=n;c=crypt1Level(e)}finally{LEVEL=keepL}top=c||(R+(ap?Math.min(ap,8):0))}else top=e.lvl||base;
+    const bot=fixedW&&vary?Math.max(1,top-7):top;o.en++;lo=Math.min(lo,bot);hi=Math.max(hi,top);
+    if(def){const g=enemyStat(e.t,top).gold;o.gold+=(g[0]+g[1])/2}}
   if(o.en){o.lo=lo;o.hi=hi}
   o.note=AREA_NOTE[n]||'';
   for(const it of L.items||[]){if(/potion/.test(it.k))o.pot++;else o.it++}
@@ -4321,6 +4330,8 @@ const GO_LIST=[36,50,396,228],GO_ROW=42,GO_HEAD=16;
 function gotoLayout(){let y=0;const A=gotoList(),rows=A.map(r=>{const h=r.h?GO_HEAD:GO_ROW,o={r,y,h};y+=h;return o});return{rows,total:y}}
 function gotoMax(){return Math.max(0,gotoLayout().total-GO_LIST[3])}
 function drawGoto(){
+  if(!G._gotoAssets&&typeof KH_READY!=='undefined'&&!KH_READY&&typeof khLoadAssets==='function'){G._gotoAssets=1;try{khLoadAssets()}catch(e){}} // the areas that need their pictures are built in the background, so their creatures can be listed
+  if(!G._gotoKh&&typeof KH_READY!=='undefined'&&KH_READY&&LEVELS[44]&&LEVELS[44].stub&&typeof khThen==='function'){G._gotoKh=1;try{khThen(()=>{})}catch(e){}} // and Khemetra, so its rooms can be listed
   BTNS=[];veil(.82);bigPanel(24,8,432,304);
   const [lx,ly,lw,lh]=GO_LIST,Ly=gotoLayout();G.gs=clamp(G.gs||0,0,Math.max(0,Ly.total-lh));
   txt('GO TO AREA',240,22,13,'#d8c88e','center',true);
@@ -4334,7 +4345,7 @@ function drawGoto(){
     panel(lx,yy+1,lw-8,h-3,false,false);
     {const rg=gotoRange(r.n);if(rg)txt('Level '+rg,lx+lw-16,yy+12,9.5,'#ffe36a','right',true)} // the level range of the area, on its button
     txt(r.name,lx+8,yy+12,10,'#ece0c0','left',true,undefined,lw-110);
-    txt(st.en?`${st.en} creatures, level ${st.lo===st.hi?st.lo:st.lo+' to '+st.hi}${st.late?' ('+st.late+' arrive later)':''}${st.note?', '+st.note:''}`:'No creatures',lx+8,yy+25,8.5,st.en?'#e8a090':'#a8c8a0','left',false,undefined,lw-20);
+    txt(st.unbuilt?'Creatures: shown once the area has loaded.':st.en?`${st.en} creatures, level ${st.lo===st.hi?st.lo:st.lo+' to '+st.hi}${st.late?' ('+st.late+' arrive later)':''}${st.note?', '+st.note:''}`:'No creatures',lx+8,yy+25,8.5,st.en?'#e8a090':'#a8c8a0','left',false,undefined,lw-20);
     txt(`${st.pot} potions   ${st.gold} gold   ${st.it} items`,lx+8,yy+35,8.5,'#e8dca8','left',false,undefined,lw-20);
     if(vh>4)BTNS.push({id:'go_'+r.n,x:lx,y:vy,w:lw-8,h:vh,up:true,drag:'goto'});
   }
@@ -4370,7 +4381,7 @@ function drawTitle(){
   txtS('grid-movement, turn-based fantasy rpg',210,142,10,'#d8c9a0','center');
   const any=SAVE_SLOTS.some(([k])=>hasSave(k)),items=[];
   if(hasSave('auto')||hasSave('prev'))items.push(['tcont','Continue']);
-  items.push(['tnew','New game']);if(any)items.push(['tload','Load game']);items.push(['tgoto','Go to area']);items.push(['tsettings','Settings'],['texit','Exit to desktop']);
+  items.push(['tnew','New game']);if(any)items.push(['tload','Load game']);/* (Go to area now lives in the Testing menu of the Pages copy) */items.push(['tsettings','Settings'],['texit','Exit to desktop']);
   items.forEach(([id,label],i)=>btnText(id,label,140,150+i*24,140,21));
   if(G.titleNote&&G.time-G.titleNote.t<5)txt('Close this window or tab to leave the game.',210,298,9,'#e8c878','center',true);
   txt('Version '+VERSION,210,310,10,'#b8a880','center',true);

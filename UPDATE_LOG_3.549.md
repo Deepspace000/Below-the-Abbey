@@ -218,3 +218,9 @@ Go to area list (3.576)
 * The desert structures (the Mounds of the Sand Road and the dungeons of each desert) now sit right after The Deserts, not at the bottom of the list.
 * Every area button shows its level range on the right ("Level 28 to 31" from its creatures, or its rating when it has none).
 * A "Highest first" button at the top right of the list sorts by level, highest at the top, and is the default; press it again for the plain order. Areas that belong together (the deserts and their structures) stay together.
+
+Go to area corrected (3.577)
+
+* The Go to area list now matches the world map. The level on each button is the level the world map shows for that place, and the creature line gives the levels the creatures really have in the game: the place's own level at the top, the great creatures a few above it, and most of the ordinary ones from that level down to seven below. Checked by entering every area: the creatures stand at those levels.
+* Areas that had not been built yet showed "No creatures". They are now built when the list opens (the ones that need their pictures, and Khemetra, load in the background and fill in when ready). What still says "No creatures" is a town, a shop or a house.
+* The Go to area button is gone from the title screen. It is now in the Testing menu (Pages copy only), as "Go to area (no test party)", beside the test parties.
