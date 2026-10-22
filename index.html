@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.557';
+const VERSION='3.558';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -45600,14 +45600,14 @@ function hgdlFill(L){
     const gi=ils.length>=3?ils.length-1:-1;
     ils.forEach((c,i)=>{const [x,y]=c;used.add(x+','+y);
       if(i===gi)L.decor.push({k:'hg_chestweed',x,y,block:true,hgdwg:1000,hgdl:1});
-      else if(i<2&&!(li===0&&i===0))L.decor.push({k:'hg_chestweed',x,y,block:true,hgdTier:2,hgdGive:[],hgdl:1});else dec('hgt_reeds',x,y,{block:true,walk:false,deco:false,sc:.7});
-      for(const [a,b] of DV.concat([[1,1],[-1,1],[1,-1],[-1,-1]])){const xx=x+a,yy=y+b;if(isFree(xx,yy)&&rnd()<.75){used.add(xx+','+yy);dec(REED[(rnd()*4)|0],xx,yy,{sc:.38+rnd()*.22})}}});
+      else if(i<2&&!(li===0&&i===0))L.decor.push({k:'hg_chestweed',x,y,block:true,hgdTier:2,hgdGive:[],hgdl:1});else dec('hgt_reeds',x,y,{block:true,walk:false,deco:false,sc:.45});
+      for(const [a,b] of DV.concat([[1,1],[-1,1],[1,-1],[-1,-1]])){const xx=x+a,yy=y+b;if(isFree(xx,yy)&&rnd()<.75){used.add(xx+','+yy);dec(REED[(rnd()*4)|0],xx,yy,{sc:.3+rnd()*.16})}}});
     k.islets=ils;
     // reeds along the shore, a few out in the open water, lily pads
     const lilies=[];
     for(const [x,y] of cells){if(!isFree(x,y)||nearD(x,y,1))continue;const sd=shoreD(x,y),r=rnd();
-      if(sd===1&&r<.55){used.add(x+','+y);dec(REED[(rnd()*4)|0],x,y,{sc:.38+rnd()*.22})}
-      else if(sd>1&&r<.05){used.add(x+','+y);dec('hgt_reeds',x,y,{sc:.38+rnd()*.22})}
+      if(sd===1&&r<.55){used.add(x+','+y);dec(REED[(rnd()*4)|0],x,y,{sc:.3+rnd()*.16})}
+      else if(sd>1&&r<.05){used.add(x+','+y);dec('hgt_reeds',x,y,{sc:.3+rnd()*.16})}
       else if(sd>1&&r<.15){used.add(x+','+y);lilies.push([x,y]);dec('art_hgdf_plant6',x,y,{sc:.55+rnd()*.3})}}
     // things to pick up: bundles of reeds in the reed beds, lily flowers on the pads, the lost net by an islet
     const ni=[];const freeI=(x,y)=>water(x,y)&&!L.items.some(i=>i.x===x&&i.y===y)&&!nearD(x,y,1);
@@ -45643,13 +45643,13 @@ function hgdlFillWm(L,k,li){
   const gset=new Set(k.basins.map((b,i)=>[i,Math.min(...dw.map(p=>Math.hypot(p[0]-b[0],p[1]-b[1])))]).sort((p,q)=>q[1]-p[1]).slice(0,2).map(q=>q[0]));k.goldChest=[];
   k.basins.forEach((b,i)=>{const [x,y]=b;used.add(x+','+y);k.islets.push([x,y]);
     if(gset.has(i)){L.decor.push({k:'hg_chestweed',x,y,block:true,hgdwg:1000,hgdl:1});k.goldChest.push([x,y])}
-    else if(i%2===0&&i<6)L.decor.push({k:'hg_chestweed',x,y,block:true,hgdTier:2,hgdGive:[],hgdl:1});else dec('hgt_reeds',x,y,{block:true,walk:false,deco:false,sc:.7});
+    else if(i%2===0&&i<6)L.decor.push({k:'hg_chestweed',x,y,block:true,hgdTier:2,hgdGive:[],hgdl:1});else dec('hgt_reeds',x,y,{block:true,walk:false,deco:false,sc:.45});
     const ring=DV.map(([a,c])=>[x+a,y+c]).filter(([xx,yy])=>isFree(xx,yy));if(ring.length){const e=ring[(rnd()*ring.length)|0];used.add(e[0]+','+e[1]);L.items.push({k:'hglegg',x:e[0],y:e[1],hgdl:1})}
-    for(const [a,c] of DV8){const xx=x+a,yy=y+c;if(isFree(xx,yy)&&rnd()<.35){used.add(xx+','+yy);dec(REED[(rnd()*4)|0],xx,yy,{sc:.38+rnd()*.22})}}
+    for(const [a,c] of DV8){const xx=x+a,yy=y+c;if(isFree(xx,yy)&&rnd()<.35){used.add(xx+','+yy);dec(REED[(rnd()*4)|0],xx,yy,{sc:.3+rnd()*.16})}}
     for(let yy=y-2;yy<=y+2;yy++)for(let xx=x-2;xx<=x+2;xx++)if(isFree(xx,yy)&&rnd()<.3){used.add(xx+','+yy);lilies.push([xx,yy]);dec('art_hgdf_plant6',xx,yy,{sc:.55+rnd()*.3})}});
   // reed beds along the channels
   const beds=[];let t=0;while(beds.length<13&&t++<500){const c=cells[(rnd()*cells.length)|0];if(nearD(c[0],c[1],5)||inBasin(c[0],c[1])||beds.some(q=>Math.abs(q[0]-c[0])+Math.abs(q[1]-c[1])<16))continue;beds.push(c)}
-  for(const [bx,by] of beds){let n=0;for(let y=by-3;y<=by+3&&n<9;y++)for(let x=bx-3;x<=bx+3&&n<9;x++)if(isFree(x,y)&&!nearD(x,y,1)&&Math.hypot(x-bx,y-by)<=3.3&&rnd()<.5){used.add(x+','+y);n++;dec(REED[(rnd()*4)|0],x,y,{sc:.38+rnd()*.22})}}
+  for(const [bx,by] of beds){let n=0;for(let y=by-3;y<=by+3&&n<9;y++)for(let x=bx-3;x<=bx+3&&n<9;x++)if(isFree(x,y)&&!nearD(x,y,1)&&Math.hypot(x-bx,y-by)<=3.3&&rnd()<.5){used.add(x+','+y);n++;dec(REED[(rnd()*4)|0],x,y,{sc:.3+rnd()*.16})}}
   // a few lily flowers for the bees
   for(let i=0;i<3&&lilies.length;i++){const c=lilies.splice((rnd()*lilies.length)|0,1)[0];if(!L.items.some(q=>q.x===c[0]&&q.y===c[1]))L.items.push({k:'hgllily',x:c[0],y:c[1],hgdl:1})}
   // creatures: ten groups of three, spread over the maze, never near a dock

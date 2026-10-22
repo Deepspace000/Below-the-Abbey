@@ -1,4 +1,4 @@
-Below the Abbey: update 3.557 (changes since 3.534, the update on itch.io before this one, including the last Hollow Grasslands quests and the way down to the Deeper Hollow)
+Below the Abbey: update 3.558 (changes since 3.534, the update on itch.io before this one, including the last Hollow Grasslands quests and the way down to the Deeper Hollow)
 
 The Hollow Grasslands: the last quests, and the way down to the Deeper Hollow
 
@@ -104,7 +104,7 @@ Boats: embark and disembark
 
 * Boats on the lakes and the Flooded Quarter now work like the ship of the Narrow Sea. Bumping a dock no longer asks anything. The boat lies at anchor at the dock where it was left, drawn as a rowing boat, and on land within eight squares of it an Embark button appears. In the boat, within three squares of a dock landing, a Disembark button appears. Landing at a far dock still counts for the far dock quests.
 * The three lakes are much bigger (about 25 to 27 squares wide and 19 to 23 high, nearly three times the area), with more creatures, islets and butterflies and bees in each.
-* The reeds in the lakes are much lower, so you can see across the water.
+* The reeds in the lakes are much lower, and the bigger reeds on the islets are lower still, so you can see across the water.
 * The wall block at each dock, which showed the picture of the boat twice, one above the other, now shows one dock picture with plain stone above it.
 
 The marshes
