@@ -124,9 +124,9 @@ function hgdmpNames(vi){
   return out}
 function hgdmpDrawNames(vi){
   const V=MPL.view;if(!V||!V.z)return;const z=V.z,A=V.area,names=hgdmpNames(vi),box=[];
-  const col={town:'#6a1a10',encl:'#2a4a22',danger:'#8a1a10',door:'#2a1a0c',prec:'#46281a',thief:'#4a1a1a',marsh:'#1f5a52'},base={town:7,encl:5.6,danger:6,door:5.6,prec:5.8,thief:5.2,marsh:6};
+  const col={town:'#6a1a10',encl:'#2a4a22',danger:'#8a1a10',door:'#2a1a0c',prec:'#46281a',thief:'#4a1a1a',marsh:'#1f5a52',water:'#14406e'},base={town:7,encl:5.6,danger:6,door:5.6,prec:5.8,thief:5.2,marsh:6,water:7};
   ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();ctx.textAlign='center';ctx.textBaseline='middle';
-  const order=['town','encl','danger','marsh','thief','door','prec'];
+  const order=['town','encl','danger','marsh','water','thief','door','prec'];
   for(const kd of order)for(const n of names){if(n.k!==kd)continue;
     const sz=Math.max(4.6,base[kd]/Math.pow(z,.4)),al=kd==='prec'?Math.max(.3,Math.min(.9,1.25-(z-1)*.3)):Math.max(.7,Math.min(1,1.1-(z-1)*.05));
     if(kd==='prec'&&al<=.32)continue;

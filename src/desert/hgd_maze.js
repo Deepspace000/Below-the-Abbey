@@ -26,6 +26,9 @@ hgdBuild=function hgdBuildMaze(){
     for(const [xa,xb,ya,yb] of SPEC){const wc=7+((lr()*4)|0),hc=5+((lr()*3)|0);for(let t=0;t<60;t++){const a=xa+((lr()*(xb-xa))|0),c=ya+((lr()*(yb-ya))|0),b=a+wc,d=c+hc;
       if(LAKES.some(k=>Math.abs(k.a-a)<24&&Math.abs(k.c-c)<16))continue;LAKES.push({a,b,c,d,x0:2*a+1,x1:2*b+1,y0:2*c+1,y1:2*d+1});break}}
     for(const k of LAKES)for(let j=k.c;j<=k.d;j++)for(let i=k.a;i<=k.b;i++)seen[j*N+i]=1}
+  // the Flooded Quarter: a fourth, much bigger water region in the south-east (about 59 x 55 squares), a maze of deep channels carved below (it comes last, so it is always lake number 4)
+  {const wm={a:63,b:92,c:66,d:93,wm:true,name:'The Flooded Quarter'};wm.x0=2*wm.a+1;wm.x1=2*wm.b+1;wm.y0=2*wm.c+1;wm.y1=2*wm.d+1;LAKES.push(wm);
+    for(let j=wm.c;j<=wm.d;j++)for(let i=wm.a;i<=wm.b;i++)seen[j*N+i]=1}
   const nearLake=(x,y,r)=>LAKES.some(k=>x+r+4>=k.x0-1&&x-r-4<=k.x1+1&&y+r+4>=k.y0-1&&y-r-4<=k.y1+1);
   st.push([cx0,cy0,-1]);seen[cy0*N+cx0]=1;carve(cx0,cy0);
   while(st.length){const [i,j,pd]=st[st.length-1],opts=[];
@@ -38,7 +41,7 @@ hgdBuild=function hgdBuildMaze(){
     if((y%2===1&&x%2===0&&g[y][x-1]==='.'&&g[y][x+1]==='.'||y%2===0&&x%2===1&&g[y-1][x]==='.'&&g[y+1][x]==='.')&&rnd()<.05)g[y][x]='.'}
   // the lakes are carved as a placeholder (so no other builder treats them as open ground); hgd_lakes.js turns it into water at the very end
   const PH=String.fromCharCode(0x361);
-  for(const k of LAKES)for(let y=k.y0;y<=k.y1;y++)for(let x=k.x0;x<=k.x1;x++)g[y][x]=PH;
+  for(const k of LAKES)if(!k.wm)for(let y=k.y0;y<=k.y1;y++)for(let x=k.x0;x<=k.x1;x++)g[y][x]=PH;
   // ---- the biome of every place: bands climbing away from the start, with a ragged edge; the top is three coloured quarters ----
   const sx=cx0*2+1,sy=cy0*2+1,maxd=Math.hypot(W/2,H);
   const nz=(x,y)=>{let v=0;for(let o=0;o<3;o++){const f=1/(11*(1+o)),a=Math.sin(x*f*1.7+o*3.1)+Math.sin(y*f*2.3+o*1.7)+Math.sin((x+y)*f*1.1+o*5.3);v+=a/(3*(1+o))}return v}
@@ -69,7 +72,7 @@ hgdBuild=function hgdBuildMaze(){
   const bfs=(x0,y0)=>{const d=new Int32Array(W*H).fill(-1),q=[y0*W+x0];d[q[0]]=0;for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [a,b] of DV){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||g[ny][nx]!=='.')continue;const n=ny*W+nx;if(d[n]>=0)continue;d[n]=d[c]+1;q.push(n)}}return d};
   const degAt=(x,y)=>DV.filter(([a,b])=>g[y+b]&&g[y+b][x+a]==='.').length;
   const dS=bfs(sx,sy-1),lrn=hgdmRng(475778);
-  LAKES.forEach((k,li)=>{
+  LAKES.forEach((k,li)=>{if(k.wm)return;
     const cands=[];const add=(x,y,dx,dy)=>cands.push({x,y,dx,dy,ax:x-dx,ay:y-dy,wx:x+dx,wy:y+dy});
     for(let y=k.y0;y<=k.y1;y+=2){add(k.x0-1,y,1,0);add(k.x1+1,y,-1,0)}for(let x=k.x0;x<=k.x1;x+=2){add(x,k.y0-1,0,1);add(x,k.y1+1,0,-1)}
     const plazaOf=c=>{const cells=[],px=Math.abs(c.dy),py=Math.abs(c.dx);for(let u=1;u<=7;u++)for(let v=-1;v<=1;v++){const x=c.x-c.dx*u+px*v,y=c.y-c.dy*u+py*v;if(x<2||y<2||x>=W-2||y>=H-2||g[y][x]===PH||LAKES.some(q=>x>=q.x0-1&&x<=q.x1+1&&y>=q.y0-1&&y<=q.y1+1))return null;cells.push([x,y,u,v])}return cells};
@@ -92,6 +95,49 @@ hgdBuild=function hgdBuildMaze(){
     const seenW=new Set([A.wx+','+A.wy]),qq=[[A.wx,A.wy]];for(let i=0;i<qq.length;i++){const [x,y]=qq[i];for(const [a,b] of DV){const nx=x+a,ny=y+b,kk=nx+','+ny;if(g[ny]&&g[ny][nx]===PH&&!seenW.has(kk)){seenW.add(kk);qq.push([nx,ny])}}}
     for(let y=k.y0;y<=k.y1;y++)for(let x=k.x0;x<=k.x1;x++)if(g[y][x]===PH&&!seenW.has(x+','+y))g[y][x]='#'});
 
+  // ---- the Flooded Quarter: four docks (west, north, south, east), each with a wide wooden landing, then the maze of deep channels inside ----
+  {const k=LAKES.find(q=>q.wm);if(k){
+    const plazaOfW=c=>{const cells=[],px=Math.abs(c.dy),py=Math.abs(c.dx);for(let u=1;u<=7;u++)for(let v=-1;v<=1;v++){const x=c.x-c.dx*u+px*v,y=c.y-c.dy*u+py*v;if(x<2||y<2||x>=W-2||y>=H-2||g[y][x]===PH||LAKES.some(q=>x>=q.x0-1&&x<=q.x1+1&&y>=q.y0-1&&y<=q.y1+1))return null;cells.push([x,y,u,v])}return cells};
+    const sideC=(sd)=>{const out=[],add=(x,y,dx,dy)=>out.push({x,y,dx,dy,ax:x-dx,ay:y-dy,wx:x+dx,wy:y+dy});
+      if(sd===0)for(let y=k.y0;y<=k.y1;y+=2)add(k.x0-1,y,1,0);if(sd===1)for(let x=k.x0;x<=k.x1;x+=2)add(x,k.y0-1,0,1);
+      if(sd===2)for(let x=k.x0;x<=k.x1;x+=2)add(x,k.y1+1,0,-1);if(sd===3)for(let y=k.y0;y<=k.y1;y+=2)add(k.x1+1,y,-1,0);return out};
+    // west (the departure dock, on the way in from the start), north, south, east; where along each side they would like to be
+    const want=[[0,.5],[1,.36],[2,.74],[3,.3]],chosen=[];
+    for(const [sd,fr] of want){const cs=sideC(sd),pos=c=>sd%2===0?(c.y-k.y0)/(k.y1-k.y0):(c.x-k.x0)/(k.x1-k.x0);
+      const ok=cs.filter(c=>g[c.ay]&&g[c.ay][c.ax]==='.'&&dS[c.ay*W+c.ax]>=20&&plazaOfW(c)&&chosen.every(o=>Math.hypot(o.x-c.x,o.y-c.y)>=26)).sort((p,q)=>Math.abs(pos(p)-fr)-Math.abs(pos(q)-fr));
+      if(!ok.length)continue;const A=ok[0];A.n=chosen.length;A.side=sd;chosen.push(A)}
+    k.wdocks=chosen;k.plazas=[];
+    for(const c of chosen){const pz=plazaOfW(c);for(const [x,y] of pz)g[y][x]='.';k.plazas.push(pz);plazas.push(pz);g[c.y][c.x]=chD;docksFlat.push(Object.assign({level:LAKES.indexOf(k)+1,end:'d'+c.n},c))}
+    k.plaza=k.plazas[0];k.i=LAKES.indexOf(k);
+    // ---- the water maze: its own depth-first walk over the cells of the region, with rock blocks left out, loops and open basins ----
+    const CW=k.b-k.a+1,CH=k.d-k.c+1,rr=hgdmRng(475901),ix=(i,j)=>j*CW+i,allow=new Uint8Array(CW*CH).fill(1),keep=new Uint8Array(CW*CH),vis=new Uint8Array(CW*CH);
+    const ent=chosen.map(c=>[(c.wx-1>>1)-k.a,(c.wy-1>>1)-k.c]);
+    const cgx=i=>2*(k.a+i)+1,cgy=j=>2*(k.c+j)+1;
+    // the spine: from each dock inward to the middle, kept open so every dock joins the rest
+    for(const [ei,ej] of ent){for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const i=ei+dx,j=ej+dy;if(i>=0&&j>=0&&i<CW&&j<CH)keep[ix(i,j)]=1}
+      let i=ei,j=ej;const mi=CW>>1,mj=CH>>1;while(i!==mi||j!==mj){keep[ix(i,j)]=1;if(Math.abs(i-mi)>=Math.abs(j-mj)&&i!==mi)i+=i<mi?1:-1;else if(j!==mj)j+=j<mj?1:-1;else i+=i<mi?1:-1}keep[ix(mi,mj)]=1}
+    // rock blocks the channels wind around
+    let ex=0,tr=0;while(ex<CW*CH*.34&&tr++<600){const ci=(rr()*CW)|0,cj=(rr()*CH)|0,hw=1+((rr()*3)|0),hh=1+((rr()*3)|0);for(let j=cj-hh;j<=cj+hh;j++)for(let i=ci-hw;i<=ci+hw;i++){if(i<0||j<0||i>=CW||j>=CH||keep[ix(i,j)]||!allow[ix(i,j)])continue;if(((i-ci)/(hw+.5))**2+((j-cj)/(hh+.5))**2>1.1)continue;allow[ix(i,j)]=0;ex++}}
+    const wc=(i,j)=>{g[cgy(j)][cgx(i)]=PH},wcon=(i,j,d)=>{g[cgy(j)+D[d][1]][cgx(i)+D[d][0]]=PH};
+    const st2=[[ent[0][0],ent[0][1],-1]];vis[ix(ent[0][0],ent[0][1])]=1;wc(ent[0][0],ent[0][1]);
+    while(st2.length){const [i,j,pd]=st2[st2.length-1],opts=[];for(let d=0;d<4;d++){const ni=i+D[d][0],nj=j+D[d][1];if(ni>=0&&nj>=0&&ni<CW&&nj<CH&&allow[ix(ni,nj)]&&!vis[ix(ni,nj)])opts.push(d)}
+      if(!opts.length){st2.pop();continue}let d=opts[(rr()*opts.length)|0];if(pd>=0&&opts.includes(pd)&&rr()<.6)d=pd;
+      const ni=i+D[d][0],nj=j+D[d][1];vis[ix(ni,nj)]=1;wcon(i,j,d);wc(ni,nj);st2.push([ni,nj,d])}
+    // a few loops
+    for(let y=k.y0+1;y<k.y1;y++)for(let x=k.x0+1;x<k.x1;x++){if(g[y][x]!=='#')continue;
+      if((y%2===1&&x%2===0&&g[y][x-1]===PH&&g[y][x+1]===PH||y%2===0&&x%2===1&&g[y-1][x]===PH&&g[y+1][x]===PH)&&rr()<.075)g[y][x]=PH}
+    // open basins (5 x 5 squares) well apart and away from the docks
+    k.basins=[];const dockW=chosen.map(c=>[c.wx,c.wy]);
+    for(let t=0;t<900&&k.basins.length<7;t++){const i=1+((rr()*(CW-2))|0),j=1+((rr()*(CH-2))|0);if(!vis[ix(i,j)])continue;const cx=cgx(i),cy=cgy(j);
+      if(k.basins.some(b=>Math.hypot(b[0]-cx,b[1]-cy)<17)||dockW.some(p=>Math.hypot(p[0]-cx,p[1]-cy)<10))continue;
+      for(let y=cy-2;y<=cy+2;y++)for(let x=cx-2;x<=cx+2;x++)g[y][x]=PH;k.basins.push([cx,cy])}
+    // whatever is cut off from the first dock becomes wall
+    const seenW=new Uint8Array(W*H),qw=[[chosen[0].wx,chosen[0].wy]];seenW[chosen[0].wy*W+chosen[0].wx]=1;
+    for(let i=0;i<qw.length;i++){const [x,y]=qw[i];for(const [a,b] of DV){const nx=x+a,ny=y+b;if(g[ny][nx]===PH&&!seenW[ny*W+nx]){seenW[ny*W+nx]=1;qw.push([nx,ny])}}}
+    for(let y=k.y0;y<=k.y1;y++)for(let x=k.x0;x<=k.x1;x++)if(g[y][x]===PH&&!seenW[y*W+x])g[y][x]='#';
+    k.basins=k.basins.filter(b=>g[b[1]][b[0]]===PH);
+  }}
+
   // ---- tiles ----
   const TM=ohTiles(),chars={};
   HGDM.biomes.forEach((b,i)=>{const sty='hgdm_'+b.k;OH_STY[sty]=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:b.wall,door:b.wall,win:b.wall,alt:b.wall,zoom:1,contrast:1.05,tint:[255,255,255,0]});
@@ -106,7 +152,8 @@ hgdBuild=function hgdBuildMaze(){
   for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(g[y][x]===PH)fm[y*W+x]='6';
   for(const pz of plazas)for(const [x,y] of pz)fm[y*W+x]='2';
   const decor=[],items=[],enemies=[],lights=[],used=new Set();
-  for(const k of LAKES){lights.push([(k.x0+k.x1)>>1,(k.y0+k.y1)>>1]);if(k.docks)for(const c of [k.docks.dep,k.docks.far]){decor.push({k:'hgt_reeds',x:c.ax,y:c.ay,block:false,walk:true,deco:true,hgdl:1,sc:.9});used.add(c.ax+','+c.ay)}}
+  for(const k of LAKES){lights.push([(k.x0+k.x1)>>1,(k.y0+k.y1)>>1]);if(k.docks)for(const c of [k.docks.dep,k.docks.far]){decor.push({k:'hgt_reeds',x:c.ax,y:c.ay,block:false,walk:true,deco:true,hgdl:1,sc:.5});used.add(c.ax+','+c.ay)}}
+  for(const k of LAKES)if(k.wm){if(k.wdocks)for(const c of k.wdocks){decor.push({k:'hgt_reeds',x:c.ax,y:c.ay,block:false,walk:true,deco:true,hgdl:1,sc:.5});used.add(c.ax+','+c.ay)}for(const b of k.basins||[])lights.push([b[0],b[1]])}
   const isF=(x,y)=>g[y]&&g[y][x]==='.'&&!used.has(x+','+y);
   const interior=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(!(g[y+dy]&&g[y+dy][x+dx]==='.'))return false;return true};
   const treeAt=new Set(),near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(treeAt.has((x+dx)+','+(y+dy)))return true;return false};

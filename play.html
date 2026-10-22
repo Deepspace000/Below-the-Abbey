@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.555';
+const VERSION='3.556';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -43335,6 +43335,9 @@ hgdBuild=function hgdBuildMaze(){
     for(const [xa,xb,ya,yb] of SPEC){const wc=7+((lr()*4)|0),hc=5+((lr()*3)|0);for(let t=0;t<60;t++){const a=xa+((lr()*(xb-xa))|0),c=ya+((lr()*(yb-ya))|0),b=a+wc,d=c+hc;
       if(LAKES.some(k=>Math.abs(k.a-a)<24&&Math.abs(k.c-c)<16))continue;LAKES.push({a,b,c,d,x0:2*a+1,x1:2*b+1,y0:2*c+1,y1:2*d+1});break}}
     for(const k of LAKES)for(let j=k.c;j<=k.d;j++)for(let i=k.a;i<=k.b;i++)seen[j*N+i]=1}
+  // the Flooded Quarter: a fourth, much bigger water region in the south-east (about 59 x 55 squares), a maze of deep channels carved below (it comes last, so it is always lake number 4)
+  {const wm={a:63,b:92,c:66,d:93,wm:true,name:'The Flooded Quarter'};wm.x0=2*wm.a+1;wm.x1=2*wm.b+1;wm.y0=2*wm.c+1;wm.y1=2*wm.d+1;LAKES.push(wm);
+    for(let j=wm.c;j<=wm.d;j++)for(let i=wm.a;i<=wm.b;i++)seen[j*N+i]=1}
   const nearLake=(x,y,r)=>LAKES.some(k=>x+r+4>=k.x0-1&&x-r-4<=k.x1+1&&y+r+4>=k.y0-1&&y-r-4<=k.y1+1);
   st.push([cx0,cy0,-1]);seen[cy0*N+cx0]=1;carve(cx0,cy0);
   while(st.length){const [i,j,pd]=st[st.length-1],opts=[];
@@ -43347,7 +43350,7 @@ hgdBuild=function hgdBuildMaze(){
     if((y%2===1&&x%2===0&&g[y][x-1]==='.'&&g[y][x+1]==='.'||y%2===0&&x%2===1&&g[y-1][x]==='.'&&g[y+1][x]==='.')&&rnd()<.05)g[y][x]='.'}
   // the lakes are carved as a placeholder (so no other builder treats them as open ground); hgd_lakes.js turns it into water at the very end
   const PH=String.fromCharCode(0x361);
-  for(const k of LAKES)for(let y=k.y0;y<=k.y1;y++)for(let x=k.x0;x<=k.x1;x++)g[y][x]=PH;
+  for(const k of LAKES)if(!k.wm)for(let y=k.y0;y<=k.y1;y++)for(let x=k.x0;x<=k.x1;x++)g[y][x]=PH;
   // ---- the biome of every place: bands climbing away from the start, with a ragged edge; the top is three coloured quarters ----
   const sx=cx0*2+1,sy=cy0*2+1,maxd=Math.hypot(W/2,H);
   const nz=(x,y)=>{let v=0;for(let o=0;o<3;o++){const f=1/(11*(1+o)),a=Math.sin(x*f*1.7+o*3.1)+Math.sin(y*f*2.3+o*1.7)+Math.sin((x+y)*f*1.1+o*5.3);v+=a/(3*(1+o))}return v}
@@ -43378,7 +43381,7 @@ hgdBuild=function hgdBuildMaze(){
   const bfs=(x0,y0)=>{const d=new Int32Array(W*H).fill(-1),q=[y0*W+x0];d[q[0]]=0;for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [a,b] of DV){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||g[ny][nx]!=='.')continue;const n=ny*W+nx;if(d[n]>=0)continue;d[n]=d[c]+1;q.push(n)}}return d};
   const degAt=(x,y)=>DV.filter(([a,b])=>g[y+b]&&g[y+b][x+a]==='.').length;
   const dS=bfs(sx,sy-1),lrn=hgdmRng(475778);
-  LAKES.forEach((k,li)=>{
+  LAKES.forEach((k,li)=>{if(k.wm)return;
     const cands=[];const add=(x,y,dx,dy)=>cands.push({x,y,dx,dy,ax:x-dx,ay:y-dy,wx:x+dx,wy:y+dy});
     for(let y=k.y0;y<=k.y1;y+=2){add(k.x0-1,y,1,0);add(k.x1+1,y,-1,0)}for(let x=k.x0;x<=k.x1;x+=2){add(x,k.y0-1,0,1);add(x,k.y1+1,0,-1)}
     const plazaOf=c=>{const cells=[],px=Math.abs(c.dy),py=Math.abs(c.dx);for(let u=1;u<=7;u++)for(let v=-1;v<=1;v++){const x=c.x-c.dx*u+px*v,y=c.y-c.dy*u+py*v;if(x<2||y<2||x>=W-2||y>=H-2||g[y][x]===PH||LAKES.some(q=>x>=q.x0-1&&x<=q.x1+1&&y>=q.y0-1&&y<=q.y1+1))return null;cells.push([x,y,u,v])}return cells};
@@ -43401,6 +43404,49 @@ hgdBuild=function hgdBuildMaze(){
     const seenW=new Set([A.wx+','+A.wy]),qq=[[A.wx,A.wy]];for(let i=0;i<qq.length;i++){const [x,y]=qq[i];for(const [a,b] of DV){const nx=x+a,ny=y+b,kk=nx+','+ny;if(g[ny]&&g[ny][nx]===PH&&!seenW.has(kk)){seenW.add(kk);qq.push([nx,ny])}}}
     for(let y=k.y0;y<=k.y1;y++)for(let x=k.x0;x<=k.x1;x++)if(g[y][x]===PH&&!seenW.has(x+','+y))g[y][x]='#'});
 
+  // ---- the Flooded Quarter: four docks (west, north, south, east), each with a wide wooden landing, then the maze of deep channels inside ----
+  {const k=LAKES.find(q=>q.wm);if(k){
+    const plazaOfW=c=>{const cells=[],px=Math.abs(c.dy),py=Math.abs(c.dx);for(let u=1;u<=7;u++)for(let v=-1;v<=1;v++){const x=c.x-c.dx*u+px*v,y=c.y-c.dy*u+py*v;if(x<2||y<2||x>=W-2||y>=H-2||g[y][x]===PH||LAKES.some(q=>x>=q.x0-1&&x<=q.x1+1&&y>=q.y0-1&&y<=q.y1+1))return null;cells.push([x,y,u,v])}return cells};
+    const sideC=(sd)=>{const out=[],add=(x,y,dx,dy)=>out.push({x,y,dx,dy,ax:x-dx,ay:y-dy,wx:x+dx,wy:y+dy});
+      if(sd===0)for(let y=k.y0;y<=k.y1;y+=2)add(k.x0-1,y,1,0);if(sd===1)for(let x=k.x0;x<=k.x1;x+=2)add(x,k.y0-1,0,1);
+      if(sd===2)for(let x=k.x0;x<=k.x1;x+=2)add(x,k.y1+1,0,-1);if(sd===3)for(let y=k.y0;y<=k.y1;y+=2)add(k.x1+1,y,-1,0);return out};
+    // west (the departure dock, on the way in from the start), north, south, east; where along each side they would like to be
+    const want=[[0,.5],[1,.36],[2,.74],[3,.3]],chosen=[];
+    for(const [sd,fr] of want){const cs=sideC(sd),pos=c=>sd%2===0?(c.y-k.y0)/(k.y1-k.y0):(c.x-k.x0)/(k.x1-k.x0);
+      const ok=cs.filter(c=>g[c.ay]&&g[c.ay][c.ax]==='.'&&dS[c.ay*W+c.ax]>=20&&plazaOfW(c)&&chosen.every(o=>Math.hypot(o.x-c.x,o.y-c.y)>=26)).sort((p,q)=>Math.abs(pos(p)-fr)-Math.abs(pos(q)-fr));
+      if(!ok.length)continue;const A=ok[0];A.n=chosen.length;A.side=sd;chosen.push(A)}
+    k.wdocks=chosen;k.plazas=[];
+    for(const c of chosen){const pz=plazaOfW(c);for(const [x,y] of pz)g[y][x]='.';k.plazas.push(pz);plazas.push(pz);g[c.y][c.x]=chD;docksFlat.push(Object.assign({level:LAKES.indexOf(k)+1,end:'d'+c.n},c))}
+    k.plaza=k.plazas[0];k.i=LAKES.indexOf(k);
+    // ---- the water maze: its own depth-first walk over the cells of the region, with rock blocks left out, loops and open basins ----
+    const CW=k.b-k.a+1,CH=k.d-k.c+1,rr=hgdmRng(475901),ix=(i,j)=>j*CW+i,allow=new Uint8Array(CW*CH).fill(1),keep=new Uint8Array(CW*CH),vis=new Uint8Array(CW*CH);
+    const ent=chosen.map(c=>[(c.wx-1>>1)-k.a,(c.wy-1>>1)-k.c]);
+    const cgx=i=>2*(k.a+i)+1,cgy=j=>2*(k.c+j)+1;
+    // the spine: from each dock inward to the middle, kept open so every dock joins the rest
+    for(const [ei,ej] of ent){for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const i=ei+dx,j=ej+dy;if(i>=0&&j>=0&&i<CW&&j<CH)keep[ix(i,j)]=1}
+      let i=ei,j=ej;const mi=CW>>1,mj=CH>>1;while(i!==mi||j!==mj){keep[ix(i,j)]=1;if(Math.abs(i-mi)>=Math.abs(j-mj)&&i!==mi)i+=i<mi?1:-1;else if(j!==mj)j+=j<mj?1:-1;else i+=i<mi?1:-1}keep[ix(mi,mj)]=1}
+    // rock blocks the channels wind around
+    let ex=0,tr=0;while(ex<CW*CH*.34&&tr++<600){const ci=(rr()*CW)|0,cj=(rr()*CH)|0,hw=1+((rr()*3)|0),hh=1+((rr()*3)|0);for(let j=cj-hh;j<=cj+hh;j++)for(let i=ci-hw;i<=ci+hw;i++){if(i<0||j<0||i>=CW||j>=CH||keep[ix(i,j)]||!allow[ix(i,j)])continue;if(((i-ci)/(hw+.5))**2+((j-cj)/(hh+.5))**2>1.1)continue;allow[ix(i,j)]=0;ex++}}
+    const wc=(i,j)=>{g[cgy(j)][cgx(i)]=PH},wcon=(i,j,d)=>{g[cgy(j)+D[d][1]][cgx(i)+D[d][0]]=PH};
+    const st2=[[ent[0][0],ent[0][1],-1]];vis[ix(ent[0][0],ent[0][1])]=1;wc(ent[0][0],ent[0][1]);
+    while(st2.length){const [i,j,pd]=st2[st2.length-1],opts=[];for(let d=0;d<4;d++){const ni=i+D[d][0],nj=j+D[d][1];if(ni>=0&&nj>=0&&ni<CW&&nj<CH&&allow[ix(ni,nj)]&&!vis[ix(ni,nj)])opts.push(d)}
+      if(!opts.length){st2.pop();continue}let d=opts[(rr()*opts.length)|0];if(pd>=0&&opts.includes(pd)&&rr()<.6)d=pd;
+      const ni=i+D[d][0],nj=j+D[d][1];vis[ix(ni,nj)]=1;wcon(i,j,d);wc(ni,nj);st2.push([ni,nj,d])}
+    // a few loops
+    for(let y=k.y0+1;y<k.y1;y++)for(let x=k.x0+1;x<k.x1;x++){if(g[y][x]!=='#')continue;
+      if((y%2===1&&x%2===0&&g[y][x-1]===PH&&g[y][x+1]===PH||y%2===0&&x%2===1&&g[y-1][x]===PH&&g[y+1][x]===PH)&&rr()<.075)g[y][x]=PH}
+    // open basins (5 x 5 squares) well apart and away from the docks
+    k.basins=[];const dockW=chosen.map(c=>[c.wx,c.wy]);
+    for(let t=0;t<900&&k.basins.length<7;t++){const i=1+((rr()*(CW-2))|0),j=1+((rr()*(CH-2))|0);if(!vis[ix(i,j)])continue;const cx=cgx(i),cy=cgy(j);
+      if(k.basins.some(b=>Math.hypot(b[0]-cx,b[1]-cy)<17)||dockW.some(p=>Math.hypot(p[0]-cx,p[1]-cy)<10))continue;
+      for(let y=cy-2;y<=cy+2;y++)for(let x=cx-2;x<=cx+2;x++)g[y][x]=PH;k.basins.push([cx,cy])}
+    // whatever is cut off from the first dock becomes wall
+    const seenW=new Uint8Array(W*H),qw=[[chosen[0].wx,chosen[0].wy]];seenW[chosen[0].wy*W+chosen[0].wx]=1;
+    for(let i=0;i<qw.length;i++){const [x,y]=qw[i];for(const [a,b] of DV){const nx=x+a,ny=y+b;if(g[ny][nx]===PH&&!seenW[ny*W+nx]){seenW[ny*W+nx]=1;qw.push([nx,ny])}}}
+    for(let y=k.y0;y<=k.y1;y++)for(let x=k.x0;x<=k.x1;x++)if(g[y][x]===PH&&!seenW[y*W+x])g[y][x]='#';
+    k.basins=k.basins.filter(b=>g[b[1]][b[0]]===PH);
+  }}
+
   // ---- tiles ----
   const TM=ohTiles(),chars={};
   HGDM.biomes.forEach((b,i)=>{const sty='hgdm_'+b.k;OH_STY[sty]=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:b.wall,door:b.wall,win:b.wall,alt:b.wall,zoom:1,contrast:1.05,tint:[255,255,255,0]});
@@ -43415,7 +43461,8 @@ hgdBuild=function hgdBuildMaze(){
   for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(g[y][x]===PH)fm[y*W+x]='6';
   for(const pz of plazas)for(const [x,y] of pz)fm[y*W+x]='2';
   const decor=[],items=[],enemies=[],lights=[],used=new Set();
-  for(const k of LAKES){lights.push([(k.x0+k.x1)>>1,(k.y0+k.y1)>>1]);if(k.docks)for(const c of [k.docks.dep,k.docks.far]){decor.push({k:'hgt_reeds',x:c.ax,y:c.ay,block:false,walk:true,deco:true,hgdl:1,sc:.9});used.add(c.ax+','+c.ay)}}
+  for(const k of LAKES){lights.push([(k.x0+k.x1)>>1,(k.y0+k.y1)>>1]);if(k.docks)for(const c of [k.docks.dep,k.docks.far]){decor.push({k:'hgt_reeds',x:c.ax,y:c.ay,block:false,walk:true,deco:true,hgdl:1,sc:.5});used.add(c.ax+','+c.ay)}}
+  for(const k of LAKES)if(k.wm){if(k.wdocks)for(const c of k.wdocks){decor.push({k:'hgt_reeds',x:c.ax,y:c.ay,block:false,walk:true,deco:true,hgdl:1,sc:.5});used.add(c.ax+','+c.ay)}for(const b of k.basins||[])lights.push([b[0],b[1]])}
   const isF=(x,y)=>g[y]&&g[y][x]==='.'&&!used.has(x+','+y);
   const interior=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(!(g[y+dy]&&g[y+dy][x+dx]==='.'))return false;return true};
   const treeAt=new Set(),near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(treeAt.has((x+dx)+','+(y+dy)))return true;return false};
@@ -43860,9 +43907,9 @@ function hgdmpNames(vi){
   return out}
 function hgdmpDrawNames(vi){
   const V=MPL.view;if(!V||!V.z)return;const z=V.z,A=V.area,names=hgdmpNames(vi),box=[];
-  const col={town:'#6a1a10',encl:'#2a4a22',danger:'#8a1a10',door:'#2a1a0c',prec:'#46281a',thief:'#4a1a1a',marsh:'#1f5a52'},base={town:7,encl:5.6,danger:6,door:5.6,prec:5.8,thief:5.2,marsh:6};
+  const col={town:'#6a1a10',encl:'#2a4a22',danger:'#8a1a10',door:'#2a1a0c',prec:'#46281a',thief:'#4a1a1a',marsh:'#1f5a52',water:'#14406e'},base={town:7,encl:5.6,danger:6,door:5.6,prec:5.8,thief:5.2,marsh:6,water:7};
   ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();ctx.textAlign='center';ctx.textBaseline='middle';
-  const order=['town','encl','danger','marsh','thief','door','prec'];
+  const order=['town','encl','danger','marsh','water','thief','door','prec'];
   for(const kd of order)for(const n of names){if(n.k!==kd)continue;
     const sz=Math.max(4.6,base[kd]/Math.pow(z,.4)),al=kd==='prec'?Math.max(.3,Math.min(.9,1.25-(z-1)*.3)):Math.max(.7,Math.min(1,1.1-(z-1)*.05));
     if(kd==='prec'&&al<=.32)continue;
@@ -44821,8 +44868,7 @@ if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('There are plates in the floor 
 /* ---- src/desert/hgd_boat.js ---- */
 /* ==========================================================================
    THE BOAT LAKES (prefix hgdb / HGDB). Three lakes lie inside the great maze of the Deeper Hollow (level 475), each a closed room of deep water ringed with wall (laid out in hgd_maze.js, filled in
-   hgd_lakes.js). Each has two docks, a departure dock and a far dock: a wooden tile in the ring where a corridor ends, with steps going down into the water and a boat. Walking into the dock offers
-   a hop aboard; in the boat (G.flags.hgdBoat) the party moves over water only, the view is the bow of a wooden boat, and the steps are water. Walking into a dock from the water offers to land.
+   hgd_lakes.js). Each has two docks, a departure dock and a far dock: a wooden tile in the ring where a corridor ends, with steps going down into the water and a boat. The boat lies at anchor where it was left (G.flags.hgdBoats); the Embark button appears on land near it and the Disembark button in the boat beside a landing, as at the Narrow Sea. In the boat (G.flags.hgdBoat) the party moves over water only and the view is the bow of a wooden boat.
    ========================================================================== */
 const HGDB={DIFF:73};
 Object.assign(ENEMY_DEF,{
@@ -44843,34 +44889,68 @@ function hgdbTexDock(){const key='hgdb_dock';if(IMG[key])return key;if(IMG.art_t
     x.fillStyle='#7a5a30';x.fillRect(8,110,112,10);x.strokeStyle='#2a1808';x.lineWidth=1.4;x.strokeRect(8,110,112,10);for(let i=1;i<7;i++){x.beginPath();x.moveTo(8+i*16,110);x.lineTo(8+i*16,120);x.stroke()}
     x.strokeStyle='rgba(0,0,0,.8)';x.lineWidth=3;x.strokeRect(1.5,1.5,w-3,h-3)});
   return key}
-function hgdbDockGid(TM){OH_STY.hgdb_dock=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:hgdbTexDock(),door:hgdbTexDock(),win:hgdbTexDock(),alt:hgdbTexDock(),zoom:1,contrast:1,tint:[255,255,255,0]});return TM.make('plain','hgdb_dock',2.7).gid}
+function hgdbDockGid(TM){OH_STY.hgdb_dock=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:'tex_abbeywall',door:hgdbTexDock(),win:'tex_abbeywall',alt:'tex_abbeywall',zoom:1,contrast:1,tint:[255,255,255,0]});return TM.make('door','hgdb_dock',2.7).gid} // one dock picture at the bottom of the wall, plain stone above it (not three stacked docks)
 const hgdbL=()=>{const L=LEVELS[HGD.ID];return L&&L._hgdl?L:null};
 const hgdbWater=(x,y)=>{const L=LEVELS[HGD.ID];return !!(L&&L.fmap&&L.fmap[y]&&L.fmap[y][x]==='6')};
 const hgdbOn=()=>LEVEL===HGD.ID&&G.flags&&G.flags.hgdBoat;
+// every dock of a lake: the old lakes have a departure dock and a far dock, the Flooded Quarter has four
+function hgdbDocksOf(k){if(k.wm)return (k.wdocks||[]).map(d=>({k,d,side:'d'+d.n,n:d.n}));if(!k.docks)return [];return [{k,d:k.docks.dep,side:'dep'},{k,d:k.docks.far,side:'far'}]}
+function hgdbAllDocks(L){const o=[];for(const k of L._hgdl.lakes)for(const q of hgdbDocksOf(k))o.push(q);return o}
+const hgdbDirOf=(dx,dy)=>Math.max(0,DIRS.findIndex(q=>q[0]===dx&&q[1]===dy));
 // the map shows the docks
 {const _dn=hgdmpDrawNames;hgdmpDrawNames=function(vi){try{const L=hgdbL(),V=MPL.view;if(L&&V&&V.z&&vi<5){const A=V.area,z=V.z;ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();
-    for(const k of L._hgdl.lakes)if(k.docks)for(const d of [k.docks.dep,k.docks.far]){const px=A.x+(V.X(d.x+.5)-V.sx0)*z,py=A.y+(V.Y(d.y+.5)-V.sy0)*z;if(px<A.x||px>A.x+A.w||py<A.y||py>A.y+A.h)continue;hgdmpBoatIcon(ctx,px,py,Math.max(.9,Math.min(1.6,.7+z*.12)))}
+    for(const q of hgdbAllDocks(L)){const d=q.d,px=A.x+(V.X(d.x+.5)-V.sx0)*z,py=A.y+(V.Y(d.y+.5)-V.sy0)*z;if(px<A.x||px>A.x+A.w||py<A.y||py>A.y+A.h)continue;hgdmpBoatIcon(ctx,px,py,Math.max(.9,Math.min(1.6,.7+z*.12)))}
     ctx.restore()}}catch(e){}return _dn.apply(this,arguments)}}
-/* ---------- hopping on, and landing ---------- */
-function hgdbPrompt(text,opts){G.talk={d:{k:'_',x:G.P.x,y:G.P.y},n:{name:'A dock'},node:say(text,opts),t:G.time,btns:[]};G.hold=null;G.queued=null}
-function hgdbFindDock(nx,ny){const L=hgdbL();if(!L)return null;for(const k of L._hgdl.lakes){if(!k.docks)continue;for(const side of ['dep','far']){const d=k.docks[side];if(d.x===nx&&d.y===ny)return {k,side,d}}}return null}
-function hgdbHop(f){const d=f.d;G.flags.hgdBoat={lk:f.k.i,side:f.side};G.P.x=d.wx;G.P.y=d.wy;G.P.f=DIRS.findIndex(q=>q[0]===d.dx&&q[1]===d.dy);G.P.angT=(G.P.f-1)*Math.PI/2;G.C={x:G.P.x,y:G.P.y,a:G.P.angT};reveal();msg('You step into the boat and push off. Steer it with the arrows. It is a small lake, and things move in the water.','#9fe0c0');sfx('door')}
-function hgdbLand(f){const d=f.d,F=G.flags;if(f.side==='far'){F.hgdFar=F.hgdFar||{};F.hgdFar[f.k.i]=1}F.hgdBoat=null;G.P.x=d.ax;G.P.y=d.ay;G.P.f=DIRS.findIndex(q=>q[0]===-d.dx&&q[1]===-d.dy);G.P.angT=(G.P.f-1)*Math.PI/2;G.C={x:G.P.x,y:G.P.y,a:G.P.angT};reveal();msg(f.side==='far'?'The boat bumps the far dock. You climb the steps and walk on.':'The boat bumps the dock. You climb the steps.','#e8e0a0');sfx('door')}
+// the name of the Flooded Quarter on the map
+{const _n=hgdmpNames;hgdmpNames=function(vi){const out=_n.apply(this,arguments);try{const L=hgdbL();if(L&&vi<5){const V=HGDMP.views[vi],[,,vx,vy,vw,vh]=V;for(const k of L._hgdl.lakes)if(k.wm){const cx=(k.x0+k.x1)/2,cy=(k.y0+k.y1)/2;if(cx>=vx-2&&cx<=vx+vw+2&&cy>=vy-2&&cy<=vy+vh+2)out.push({t:k.name,x:cx+.5,y:cy+.5,dy:0,k:'water'})}}}catch(e){}return out}}
+/* ---------- the boat at anchor, embarking and disembarking (the same buttons as the Narrow Sea ship: Disembark in the boat beside a landing, Embark on land within eight squares of the boat) ---------- */
+// where each lake's boat lies: where it was left (G.flags.hgdBoats, kept in the save), or at the departure dock at first
+function hgdbBoatAt(k){const F=G.flags,b=F.hgdBoats&&F.hgdBoats[k.i];if(b)return b;const q=hgdbDocksOf(k)[0];if(!q)return null;return {x:q.d.wx,y:q.d.wy,f:hgdbDirOf(q.d.dx,q.d.dy)}}
+function hgdbSync(){ // the anchored boats are sprites on the water; the boat you ride is not
+  const L=hgdbL();if(LEVEL!==HGD.ID||!L||!G.decor||!G.flags)return;const F=G.flags,ride=F.hgdBoat?F.hgdBoat.lk:-1,sig=ride+'|'+JSON.stringify(F.hgdBoats||{});
+  if(G._hgdbRef===G.decor&&G._hgdbSig===sig)return;
+  G.decor=G.decor.filter(d=>!d.hgdBoatSpr);
+  for(const k of L._hgdl.lakes){if(k.i===ride)continue;const b=hgdbBoatAt(k);if(b)G.decor.push({k:'yar_boat_row',x:b.x,y:b.y,block:false,walk:true,deco:false,hgdBoatSpr:1,hgdl:1})}
+  G._hgdbRef=G.decor;G._hgdbSig=sig}
+function hgdbEmbark(k){
+  const F=G.flags,b=hgdbBoatAt(k);if(!b)return;
+  F.hgdBoat={lk:k.i,side:'e'};G.P.x=b.x;G.P.y=b.y;G.P.f=b.f;G.P.angT=(G.P.f-1)*Math.PI/2;G.C={x:G.P.x,y:G.P.y,a:G.P.angT};reveal();
+  if(k.wm&&!F.hgdWmSeen){F.hgdWmSeen=1;msg('You push off into The Flooded Quarter, a maze of deep channels between high walls.','#9fe0c0')}
+  else msg(k.wm?'You step into the boat and push off. Steer it with the arrows.':'You step into the boat and push off. Steer it with the arrows. It is a small lake, and things move in the water.','#9fe0c0');
+  sfx('door');hgdbSync()}
+function hgdbDisembark(q){
+  const F=G.flags,d=q.d;if(q.side==='far'){F.hgdFar=F.hgdFar||{};F.hgdFar[q.k.i]=1}if(q.k.wm){F.hgdWd=F.hgdWd||{};F.hgdWd[q.n]=1}
+  F.hgdBoats=F.hgdBoats||{};F.hgdBoats[q.k.i]={x:d.wx,y:d.wy,f:G.P.f};F.hgdBoat=null;
+  G.P.x=d.ax;G.P.y=d.ay;G.P.f=hgdbDirOf(-d.dx,-d.dy);G.P.angT=(G.P.f-1)*Math.PI/2;G.C={x:G.P.x,y:G.P.y,a:G.P.angT};reveal();
+  msg(q.side==='far'?'The boat bumps the far dock. You climb the steps and walk on. The boat stays tied at the steps.':'You climb the steps to the landing. The boat stays tied at the steps.','#e8e0a0');sfx('door');hgdbSync()}
+function hgdbNearLanding(){ // in the boat: the landing within three squares
+  const L=hgdbL();if(!L||!G.flags.hgdBoat)return null;let best=null,bd=99;
+  for(const q of hgdbAllDocks(L)){if(q.k.i!==G.flags.hgdBoat.lk)continue;const dd=Math.hypot(G.P.x-q.d.ax,G.P.y-q.d.ay);if(dd<=3.1&&dd<bd){bd=dd;best=q}}return best}
+function hgdbNearBoat(){ // on land: a boat at anchor within eight squares
+  const L=hgdbL();if(!L||G.flags.hgdBoat)return null;let best=null,bd=99;
+  for(const k of L._hgdl.lakes){const b=hgdbBoatAt(k);if(!b)continue;const dd=Math.hypot(G.P.x-b.x,G.P.y-b.y);if(dd<=8&&dd<bd){bd=dd;best=k}}return best}
+function hgdbButtons(){
+  if(LEVEL!==HGD.ID||G.state!=='play'||G.cut||G.talk||G.menu||(G.inv&&G.inv.open)||G.loot||G.overview||TP||!hgdbL())return;
+  if(G.flags.hgdBoat){const q=hgdbNearLanding();if(q)btnText('hgdbdis','Disembark',6,180,100,22)}
+  else if(hgdbNearBoat())btnText('hgdbemb','Embark',6,180,100,22)}
+{const _h=uwHud;uwHud=function(){_h.apply(this,arguments);try{hgdbButtons()}catch(e){}}}
+{const _b=handleBtn;handleBtn=function(id){
+  if((id==='hgdbdis'||id==='hgdbemb')&&G.state==='play'&&!G.cut&&!G.talk&&!G.menu&&!TP){if(id==='hgdbdis'){const q=hgdbNearLanding();if(q)hgdbDisembark(q)}else{const k=hgdbNearBoat();if(k)hgdbEmbark(k)}return}
+  _b(id)}}
+// the dock is only scenery with steps now; and the boat moves only on water, the party never wades into deep water
 {const _db=desertBump;desertBump=function(nx,ny,g){
-  try{if(LEVEL===HGD.ID&&hgdbL()){const boat=!!G.flags.hgdBoat,dk=hgdbFindDock(nx,ny);
-      if(dk){sfx('locked');
-        if(!boat)hgdbPrompt('A flight of wooden steps goes down into dark water, and a little boat is tied at the bottom. The lake is deep, and the boat is the only way across. Do you want to hop on?',[['Hop on.',()=>{G.talk=null;hgdbHop(dk);return null}],['Not now.',()=>null]]);
-        else hgdbPrompt(dk.side==='far'?'The far dock. Wooden steps lead up into a corridor. Do you want to land here and go on on foot?':'The dock where you started. Wooden steps lead up into a corridor. Do you want to land here?',[['Land.',()=>{G.talk=null;hgdbLand(dk);return null}],['Keep steering.',()=>null]]);return true}
+  try{if(LEVEL===HGD.ID&&hgdbL()){const boat=!!G.flags.hgdBoat;
+      if(hgdbAllDocks(hgdbL()).some(q=>q.d.x===nx&&q.d.y===ny)){sfx('bump');if(!G.flags.hgdDockHint){G.flags.hgdDockHint=1;msg(boat?'Wooden steps go up to a landing. Use the Disembark button when you are close.':'Wooden steps go down into dark water, with a boat tied below. Use the Embark button when you are near it.','#9fc0d0')}return true}
       if(g===0){const w=hgdbWater(nx,ny);
         if(boat&&!w){sfx('bump');G.shake=.08;msg('The boat cannot go on land.','#9fc0d0');return true}
-        if(!boat&&w){sfx('bump');G.shake=.08;msg('The water is too deep to wade. There is a boat at the dock.','#9fc0d0');return true}}}}catch(e){console.warn('hgdb',e)}
+        if(!boat&&w){sfx('bump');G.shake=.08;msg('The water is too deep to wade. Find the boat and use the Embark button.','#9fc0d0');return true}}}}catch(e){console.warn('hgdb',e)}
   return _db.apply(this,arguments)}}
 // the boat does not outlive the lake: any other way into or out of the maze puts the party on its feet
 function hgdbDeep(){if(FLOORS.hgdl_deep)return FLOORS.hgdl_deep;const s=FLOORS.hgtb_deep||FLOORS.water;if(!s)return null;const o=new Uint8ClampedArray(s.length);for(let i=0;i<s.length;i+=4){o[i]=s[i]*1.5+10;o[i+1]=s[i+1]*1.6+22;o[i+2]=s[i+2]*1.7+38;o[i+3]=s[i+3]}return FLOORS.hgdl_deep=o}
 function hgdbFloor(){G.fl7=LEVEL===HGD.ID&&typeof FLOORS!=='undefined'?hgdbDeep():null}
 {const _g=goToLevel;goToLevel=function(n,e){const r=_g.apply(this,arguments);try{if(G.flags&&G.flags.hgdBoat&&(LEVEL!==HGD.ID||!hgdbWater(G.P.x,G.P.y)))G.flags.hgdBoat=null;hgdbFloor()}catch(x){}return r}}
 {const _r=restore;restore=function(sv){const r=_r.apply(this,arguments);try{hgdbFloor();if(G.flags&&G.flags.hgdBoat&&!(LEVEL===HGD.ID&&hgdbWater(G.P.x,G.P.y)))G.flags.hgdBoat=null}catch(e){}return r}}
-{const _u=update;update=function(dt){if(G.fl7===undefined||(LEVEL===HGD.ID)!==!!G.fl7)try{hgdbFloor()}catch(e){}return _u.apply(this,arguments)}}
+{const _u=update;update=function(dt){try{hgdbSync()}catch(e){}if(G.fl7===undefined||(LEVEL===HGD.ID)!==!!G.fl7)try{hgdbFloor()}catch(e){}return _u.apply(this,arguments)}}
 /* ---------- the view: the bow of a wooden boat, bobbing on the water ---------- */
 function hgdbHud(){
   if(!hgdbOn()||G.state!=='play'||G.cut||G.talk||G.menu||(G.inv&&G.inv.open)||G.loot||G.overview)return;
@@ -44898,7 +44978,7 @@ function hgdbSound(){
   HGDBS.src.g.gain.setTargetAtTime(on?.14+.1*sw:0,now,.5);HGDBS.src.f.frequency.setTargetAtTime(240+260*sw,now,.4);HGDBS.hush.g.gain.setTargetAtTime(on?.012+.03*sw:0,now,.6);
   if(on&&now>HGDBS.next){HGDBS.next=now+1.8+Math.random()*3.5;nz(.5,.13,'bandpass',1200,520,0);if(Math.random()<.4)tone(380+Math.random()*200,200,.09,'sine',.04,.1)}}
 {const _s=seaSoundTick;seaSoundTick=function(){_s.apply(this,arguments);try{hgdbSound()}catch(e){}}}
-if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('There are lakes in the maze, with a boat at the steps down to each. Cross by boat and you save a long walk, but the water has crocodiles in it.');
+if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('There are lakes in the maze, with a boat tied at the steps down to each. Use the Embark button by the steps. Cross by boat and you save a long walk, but the water has crocodiles in it.');
 
 /* ---- src/desert/hgd_quests2.js ---- */
 /* ==========================================================================
@@ -44910,23 +44990,28 @@ Object.assign(ITEMDEF,{
   hglreed:{n:'Lake Reeds',k:'quest',t:'Quest item',ic:'herb',c:'#8aa850',stack:1,price:1,d:'A bundle of long green reeds, cut from a lake in the maze.',sw:.3},
   hgllily:{n:'Water Lily Flower',k:'quest',t:'Quest item',ic:'herb',c:'#f0b8d8',stack:1,price:1,d:'A pink water lily, picked from a floating pad on a lake in the maze.',sw:.2},
   hglnet:{n:'Lost Fishing Net',k:'quest',t:'Quest item',ic:'ore',c:'#b8a878',stack:0,price:0,d:'A wet fishing net, tangled with reeds. It was lost on an islet in a lake of the maze.',sw:.5},
+  hglegg:{n:'Heron Egg Clutch',k:'quest',t:'Quest item',ic:'herb',c:'#c8d8c0',stack:1,price:1,d:'A nest of pale green heron eggs, taken from an islet in the Flooded Quarter.',sw:.2},
   hglletter:{n:'Sealed Letter',k:'quest',t:'Quest item',ic:'scroll',c:'#e8e0c0',stack:0,price:0,d:'A letter sealed with green wax. It is for the hermit who lives by the far dock of the second lake.',sw:.1}});
 const HGDQ_DEF={
   wq1:{title:'Pearls from the Drowned Maze',who:'Old Gill, the diver',desc:'Old Gill wants 4 pearls from the shell chests of the Drowned Maze, under the water in the maze (steps down in the pond clearings). A helm is needed to breathe.',need:4,goal:()=>bagCount('pearl'),take:{pearl:4},reward:{gold:600,xp:2400,items:['potion3']}},
   wq2:{title:'The Warden of the Deep',who:'Old Gill, the diver',desc:'Something huge sleeps at the far end of the Drowned Maze. Old Gill wants Old Gulper dead, so that divers can use the passages again.',need:1,goal:()=>G.flags.hgdGulper?1:0,reward:{gold:900,xp:3600,items:['potion4']}},
   wq3:{title:'Breathing Lessons',who:'Old Gill, the diver',desc:'A diver must know the bubble vents. Breathe at 5 different vents in the Drowned Maze.',need:5,goal:()=>Object.keys(G.flags.hgdVents||{}).length,reward:{gold:500,xp:2000,items:['potion3']}},
   wq4:{title:'Shell Chests',who:'Old Gill, the diver',desc:'Open 6 of the shell chests in the Drowned Maze. Old Gill wants to know what the sea keeps there.',need:6,goal:()=>Object.keys(G.flags.hgdwOpened||{}).length,reward:{gold:1200,xp:4000,items:['potion4','hgcrystal']}},
-  bq1:{title:'Crocodile Skins',who:'Reed, the lake warden',desc:'Crocodiles have taken the lakes of the maze. Reed wants 6 swamp crocodiles killed on the lakes. Hop on a boat at a dock to reach them.',need:6,cnt:'hgdk_wcroc',goal:q=>(G.flags.hgdk_wcroc||0)-(q.base||0),reward:{gold:700,xp:2800,items:['potion3']}},
+  bq1:{title:'Crocodile Skins',who:'Reed, the lake warden',desc:'Crocodiles have taken the lakes of the maze. Reed wants 6 swamp crocodiles killed on the lakes. Use the Embark button by a boat at a dock to reach them.',need:6,cnt:'hgdk_wcroc',goal:q=>(G.flags.hgdk_wcroc||0)-(q.base||0),reward:{gold:700,xp:2800,items:['potion3']}},
   bq2:{title:'Eels in the Lake',who:'Reed, the lake warden',desc:'Marsh eels bite the boatmen. Kill 5 marsh eels on the lakes.',need:5,cnt:'hgdk_weel',goal:q=>(G.flags.hgdk_weel||0)-(q.base||0),reward:{gold:600,xp:2400,items:['potion3']}},
   bq3:{title:'Snake Bounty',who:'Reed, the lake warden',desc:'Vine snakes drop from the walls onto the boats. Kill 5 vine snakes on the lakes.',need:5,cnt:'hgdk_wsnake',goal:q=>(G.flags.hgdk_wsnake||0)-(q.base||0),reward:{gold:600,xp:2400,items:['potion3']}},
-  bq4:{title:'The Far Docks',who:'Reed, the lake warden',desc:'Cross all three lakes by boat and land at the far dock of each. There is a dock in a dead-end corridor at each end of a lake.',need:3,goal:()=>Object.keys(G.flags.hgdFar||{}).length,reward:{gold:1000,xp:3600,items:['potion4']}},
+  bq4:{title:'The Far Docks',who:'Reed, the lake warden',desc:'Cross all three lakes by boat and use the Disembark button at the far dock of each. There is a dock in a dead-end corridor at each end of a lake.',need:3,goal:()=>Object.keys(G.flags.hgdFar||{}).length,reward:{gold:1000,xp:3600,items:['potion4']}},
   bq5:{title:'Reeds for the Roofs',who:'Reed, the lake warden',desc:'Reed wants 8 bundles of cut reeds, to mend the roofs of the dock huts. Bundles of reeds float among the reed beds on the lakes. Steer the boat over them to pick them up.',need:8,goal:()=>bagCount('hglreed'),take:{hglreed:8},reward:{gold:800,xp:3000,items:['potion4','antidote']}},
-  bq6:{title:'The Lost Net',who:'Bram, the boatwright',desc:'Bram lost his best fishing net on a little islet in the first lake, the one beside his boathouse. Take the boat out, find the Lost Fishing Net floating among the reeds by the islet, and bring it back.',need:1,goal:()=>bagCount('hglnet'),take:{hglnet:1},reward:{gold:700,xp:2600,items:['potion3']}},
+  bq6:{title:'The Lost Net',who:'Bram, the boatwright',desc:'Bram lost his best fishing net on a little islet in the first lake, the one beside his boathouse. Embark, take the boat out, find the Lost Fishing Net floating among the reeds by the islet, and bring it back.',need:1,goal:()=>bagCount('hglnet'),take:{hglnet:1},reward:{gold:700,xp:2600,items:['potion3']}},
   bq7:{title:'Lilies for the Bees',who:'Fenn, the beekeeper',desc:'Fenn keeps bees by the third lake, and they love water lilies. Bring 4 water lily flowers, picked from the floating pads on the lakes by steering the boat over them.',need:4,goal:()=>bagCount('hgllily'),take:{hgllily:4},reward:{gold:650,xp:2500,items:['potion3','hgjelly']}},
-  bq8:{title:'A Letter for the Hermit',who:'Odda, the ferrywoman',desc:'Odda gives you a sealed letter for Old Marl, a hermit who lives by the far dock of the second lake. Cross the lake by boat, land at the far dock and hand it over.',need:1,goal:()=>G.flags.hgdLetterDone?1:0,reward:{gold:900,xp:3300,items:['potion4']}}};
+  bq8:{title:'A Letter for the Hermit',who:'Odda, the ferrywoman',desc:'Odda gives you a sealed letter for Old Marl, a hermit who lives by the far dock of the second lake. Cross the lake by boat, disembark at the far dock and hand it over.',need:1,goal:()=>G.flags.hgdLetterDone?1:0,reward:{gold:900,xp:3300,items:['potion4']}}};
+Object.assign(HGDQ_DEF,{
+  bq9:{title:'Chart the Flooded Quarter',who:'Tamsin, the channel pilot',desc:'The Flooded Quarter, the big flooded part of the maze in the south-east, has four docks, one on each side. Reach each of them by boat and use Disembark at each, so that Tamsin can draw the chart.',need:4,goal:()=>Object.keys(G.flags.hgdWd||{}).length,reward:{gold:1100,xp:4200,items:['potion4']}},
+  bq10:{title:'Heron Eggs',who:'Tamsin, the channel pilot',desc:'Herons nest on the little islets in the open basins of the Flooded Quarter. Tamsin wants 5 clutches of heron eggs. Steer the boat next to an islet to pick up its clutch.',need:5,goal:()=>bagCount('hglegg'),take:{hglegg:5},reward:{gold:900,xp:3600,items:['potion4','antidote']}},
+  bq11:{title:'Clear the Channels',who:'Tamsin, the channel pilot',desc:'Crocodiles, eels and vine snakes fill the channels of the Flooded Quarter. Kill 12 of them there.',need:12,cnt:'hgdk_wm',goal:q=>(G.flags.hgdk_wm||0)-(q.base||0),reward:{gold:1300,xp:5000,items:['potion4','hgcrystal']}}});
 for(const id in HGDQ_DEF){QUESTS[id]=HGDQ_DEF[id];QAREA[id]='The Deeper Hollow'}
 // counting what happens in the water
-{const _he=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;_he.apply(this,arguments);if(was&&e.hp<=0){const F=G.flags;
+{const _he=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;_he.apply(this,arguments);if(was&&e.hp<=0){const F=G.flags;try{const wm=LEVEL===HGD.ID&&LEVELS[HGD.ID]._hgdl.lakes.find(k=>k.wm),ex=Math.floor(e.x),ey=Math.floor(e.y);if(wm&&(e.t==='hgwcroc'||e.t==='hgweel'||e.t==='hgwsnake')&&ex>=wm.x0&&ex<=wm.x1&&ey>=wm.y0&&ey<=wm.y1)F.hgdk_wm=(F.hgdk_wm||0)+1}catch(x){}
   if(e.t==='hgwcroc')F.hgdk_wcroc=(F.hgdk_wcroc||0)+1;else if(e.t==='hgweel')F.hgdk_weel=(F.hgdk_weel||0)+1;else if(e.t==='hgwsnake')F.hgdk_wsnake=(F.hgdk_wsnake||0)+1;else if(e.t==='uwgulper'&&LEVEL===HGDW.ID)F.hgdGulper=1}}}
 {const _u=update;update=function(dt){try{if(LEVEL===HGDW.ID&&G.uw&&G.uw.vent&&G.state==='play'){const F=G.flags,V=UWS[HGDW.ID];if(V){const v=V.vents.find(q=>Math.abs(q[0]-G.P.x)<=1&&Math.abs(q[1]-G.P.y)<=1);if(v){F.hgdVents=F.hgdVents||{};F.hgdVents[v[0]+','+v[1]]=1}}}}catch(e){}return _u.apply(this,arguments)}}
 {const _lf=lootFor;lootFor=function(d){if(LEVEL===HGDW.ID&&d&&d.hgdwTier){G.flags.hgdwOpened=G.flags.hgdwOpened||{};G.flags.hgdwOpened[d.x+','+d.y]=1}return _lf.apply(this,arguments)}}
@@ -44936,14 +45021,17 @@ const HGDQ_TALK={
   wq2:{offer:'At the far end of the drowned maze sleeps Old Gulper, a grouper the size of a barn. As long as it lives, no diver will cross that water. Kill it.',accept:'Take the long way round and the vents with you. It is slow, but it hits like a wave.',ready:'Gulper is dead? Then the maze under the water is open at last.',thanks:'You have done what forty years of divers could not.',after:'They say there is still treasure in the chests there.'},
   wq3:{offer:'A diver who does not know the vents is a diver who does not come home. Go down, and breathe at 5 different vents, so you know where the air is.',accept:'Five vents. Learn the way between them.',ready:'You breathe like a fish now.',thanks:'Good. Never swim farther than you can swim back.',after:'Count the vents on the way in, and count them again on the way out.'},
   wq4:{offer:'Last of my tasks: open 6 of the shell chests in the drowned maze, and tell me what the sea keeps in them.',accept:'Six chests, then. Do not drown over the last one.',ready:'Six chests opened. You are a diver in all but name.',thanks:'There. The sea has made you rich, and the sea has made you a friend.',after:'Come back whenever you are in need of a helm.'},
-  bq1:{offer:'I keep the lakes of the maze, and the crocodiles have taken them. There are three, each with a boat at the steps down. Hop on, and kill 6 of them in the dark water under the vines.',accept:'Keep the boat steady and your sword ready. They come up fast.',ready:'Six crocodiles! The lakes are almost clear.',thanks:'Well done. There is more to do, if you have the stomach.',after:'The lakes are quieter since you passed.'},
+  bq1:{offer:'I keep the lakes of the maze, and the crocodiles have taken them. There are three, each with a boat at the steps down. Embark, and kill 6 of them in the dark water under the vines.',accept:'Keep the boat steady and your sword ready. They come up fast.',ready:'Six crocodiles! The lakes are almost clear.',thanks:'Well done. There is more to do, if you have the stomach.',after:'The lakes are quieter since you passed.'},
   bq2:{offer:'Now the eels. They bite the boatmen at the ankles. Kill 5 marsh eels on the lakes.',accept:'They are quick. Strike first.',ready:'Five eels. My boatmen will sleep tonight.',thanks:'My thanks. One more kind of pest remains.',after:'The water is cleaner for it.'},
   bq3:{offer:'The vine snakes drop from the walls onto the boats, and the venom is cruel. Kill 5 of them.',accept:'Look up as well as ahead.',ready:'Five snakes dead. That is a great relief.',thanks:'The vines can have the rest of the year in peace.',after:'Mind the vines, all the same.'},
-  bq4:{offer:'A lake is not cleared until it has been crossed. Ride a boat over each of the three lakes and land at the far dock. The far dock is at the end of a dead-end corridor, on the other side of the lake from where you start.',accept:'Hop on at a dock, steer to the far side, and bump the far dock to land. Then walk on.',ready:'All three lakes crossed! Then they are safe enough.',thanks:'You have the freedom of the water now.',after:'Fair winds.'},
+  bq4:{offer:'A lake is not cleared until it has been crossed. Ride a boat over each of the three lakes and disembark at the far dock. The far dock is at the end of a dead-end corridor, on the other side of the lake from where you start.',accept:'Embark at a dock, steer to the far side, and use Disembark at the far dock. Then walk on.',ready:'All three lakes crossed! Then they are safe enough.',thanks:'You have the freedom of the water now.',after:'Fair winds.'},
   bq5:{offer:'One last thing. My dock huts need new thatch. Bring me 8 bundles of reeds from the reed beds on the lakes. They float among the reeds, and you pick them up by steering the boat over them.',accept:'Look in the reed beds, and by the little islets. Eight bundles.',ready:'Eight bundles of reeds. The roofs will be dry by winter.',thanks:'There. Keep a little of it for yourselves.',after:'My boats are in your debt.'},
-  bq6:{offer:'I build the boats here, and I lost my best net on an islet in the first lake, the one just beyond this dock. Take a boat out, find the Lost Fishing Net floating among the reeds by the islet, and bring it back.',accept:'Mind the crocodiles. They like the islet.',ready:'My net! Look at the knots, not one cut.',thanks:'A fair trade. Use the boats whenever you like.',after:'The boats are tied up and waiting.'},
+  bq6:{offer:'I build the boats here, and I lost my best net on an islet in the first lake, the one just beyond this dock. Embark, find the Lost Fishing Net floating among the reeds by the islet, and bring it back.',accept:'Mind the crocodiles. They like the islet.',ready:'My net! Look at the knots, not one cut.',thanks:'A fair trade. Use the boats whenever you like.',after:'The boats are tied up and waiting.'},
   bq7:{offer:'I keep bees by this lake, and they will work for nothing but water lilies. Bring me 4 lily flowers from the floating pads on the lakes. Steer the boat over them to pick them.',accept:'The pads are pale green and the flowers are pink. Four will do.',ready:'Four lilies. The bees will hum all night.',thanks:'There is honey in it for you, one of these days.',after:'The bees are glad of you.'},
-  bq8:{offer:'There is a hermit, Old Marl, who lives by the far dock of the second lake. No one has been to see him since spring. Take this letter across the lake by boat, land at the far dock and give it to him.',accept:'It is a long way round on foot, and a short way by water. Mind the crocodiles.',ready:'He has read it! Good. I could not get a boat across for weeks.',thanks:'Thank you. That is one worry less.',after:'Fair winds.'}};
+  bq9:{offer:'I pilot the boats in the Flooded Quarter, the big drowned part of the maze to the south-east. It has four docks, one on each side, and nobody has drawn a chart. Reach each dock by boat and use Disembark there, and I will draw it.',accept:'Embark here, steer to the other docks one at a time, and step ashore at each. The channels turn a lot, so go slowly.',ready:'All four docks! Now I can draw the chart.',thanks:'There. Pilots will use this for years.',after:'The chart is pinned up in the hut.'},
+  bq10:{offer:'Herons nest on the little islets in the open basins of the Flooded Quarter. I need 5 clutches of their eggs for the cook at the inn. Steer the boat next to an islet and take the clutch.',accept:'Take only one clutch from each islet. The basins are wide, with lily pads, and crocodiles like them.',ready:'Five clutches, and not one cracked.',thanks:'The cook will be very pleased. Here is your share.',after:'The herons will lay again by spring.'},
+  bq11:{offer:'The channels are not safe while the crocodiles, eels and snakes live in them. Kill 12 of them in the Flooded Quarter. They hide in the narrow channels, so keep the boat steady.',accept:'Fight them where the channel is wide, if you can. In a narrow channel you cannot turn.',ready:'Twelve down! The channels are quieter already.',thanks:'Thank you. I can take passengers again.',after:'Mind the corners, all the same.'},
+  bq8:{offer:'There is a hermit, Old Marl, who lives by the far dock of the second lake. No one has been to see him since spring. Take this letter across the lake by boat, disembark at the far dock and give it to him.',accept:'It is a long way round on foot, and a short way by water. Mind the crocodiles.',ready:'He has read it! Good. I could not get a boat across for weeks.',thanks:'Thank you. That is one worry less.',after:'Fair winds.'}};
 function hgdqGiver(npc,name,img,list,intro,doneLine){
   khNpc(npc,name,img,d=>{const nodeFn=()=>{
       const id=list.find(q=>qSt(q)!=='done');
@@ -44953,6 +45041,7 @@ function hgdqGiver(npc,name,img,list,intro,doneLine){
       if(qSt(id)===null)G.flags[npc+'_met']=1;
       n.text=hgdSay(n.text);return n};return nodeFn()},{q:list})}
 hgdqGiver('hgd_diver','Old Gill, the diver','hg_npc4',HGDQ_G,'Come in, come in. Mind the dripping.','The sea is quiet now. Thank you. I mean it.');
+hgdqGiver('hgd_pilot','Tamsin, the channel pilot','hg_npc3',['bq9','bq10','bq11'],'Welcome to the dock. Mind the water.','The channels are charted and clear. Thank you.');
 hgdqGiver('hgd_warden','Reed, the lake warden','hg_npc2',HGDQ_R,'Boots off at the dock, if you please.','The lakes are clear. I may have to find a hobby.');
 hgdqGiver('hgd_boatwright','Bram, the boatwright','hg_npc3',['bq6'],'Mind the planks, they are wet.','The boats are all in order, thanks to you.');
 hgdqGiver('hgd_beekeeper','Fenn, the beekeeper','hg_npc4',['bq7'],'Stand still, they are curious.','The bees are well fed. Thank you.');
@@ -44979,7 +45068,7 @@ function hgdqPlace(L){
       for(let i=0;i<q.length&&!ok;i++){const [x,y]=q[i];for(const [e,f] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+e,ny=y+f,k=nx+','+ny;if(seen.has(k)||!open(nx,ny)||b2.has(k))continue;if(nx===B.ax&&ny===B.ay){ok=true;break}seen.add(k);q.push([nx,ny])}}
       if(ok)return [cx,cy]}return null};
   const hn=hermitSpot(),hermit=hn?(L.decor.push({k:'hg_npc5',x:hn[0],y:hn[1],block:true,npc:'hgd_hermit',sc:.72,hgdl:1}),hn):null;
-  L._hgdq={diver:place('Nacre Landing','hg_npc4','hgd_diver'),warden:land(lk[0],3,'hg_npc2','hgd_warden'),boatwright:land(lk[0],5,'hg_npc3','hgd_boatwright'),ferry:land(lk[1],3,'hg_npc1','hgd_ferry'),beekeeper:land(lk[2],3,'hg_npc4','hgd_beekeeper'),hermit}}
+  L._hgdq={diver:place('Nacre Landing','hg_npc4','hgd_diver'),warden:land(lk[0],3,'hg_npc2','hgd_warden'),boatwright:land(lk[0],5,'hg_npc3','hgd_boatwright'),ferry:land(lk[1],3,'hg_npc1','hgd_ferry'),beekeeper:land(lk[2],3,'hg_npc4','hgd_beekeeper'),hermit,pilot:land(lk.find(k=>k.wm),3,'hg_npc3','hgd_pilot')}}
 {const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];_b.apply(this,arguments);const L=LEVELS[HGD.ID];if(!had&&L&&L._hgdb)try{hgdqPlace(L)}catch(e){console.error('hgdq',e)}}}
 
 /* ---- src/desert/hgd_flora.js ---- */
@@ -45488,7 +45577,7 @@ function hgdlClean(L){
   if(!L||!L._hgdl||!L._hgdlDone)return;const W=L._hgdm.W,m=hgdlMask(L),on=o=>m[o.y*W+o.x]===1;
   let n=0;const keep=(arr)=>{const k=arr.filter(o=>o.hgdl||!on(o));n+=arr.length-k.length;return k};
   L.decor=keep(L.decor);L.items=keep(L.items);L.enemies=keep(L.enemies);
-  const land=[];for(const k of L._hgdl.lakes)if(k.plaza)for(const c of k.plaza)land.push(c);
+  const land=[];for(const k of L._hgdl.lakes)for(const pz of (k.plazas||(k.plaza?[k.plaza]:[])))for(const c of pz)land.push(c);
   const e2=L.enemies.filter(e=>e.hgdl||!land.some(c=>Math.abs(c[0]-e.x)<=5&&Math.abs(c[1]-e.y)<=5));n+=L.enemies.length-e2.length;L.enemies=e2;
   L._hgdlRemoved=(L._hgdlRemoved||0)+n}
 function hgdlFill(L){
@@ -45499,7 +45588,7 @@ function hgdlFill(L){
   const open=(x,y)=>L.rows[y]&&L.rows[y][x]==='.',water=(x,y)=>m[y*W+x]===1,wall=(x,y)=>{const c=L.rows[y]&&L.rows[y][x];return !!c&&c!=='.'&&c.charCodeAt(0)>=0x2e0&&c.charCodeAt(0)<0x2e8};
   const DV=[[0,-1],[1,0],[0,1],[-1,0]],REED=['hgt_reeds','hgt_reeds','hgt_reeds','art_hgdf_plant1'];
   L._hgdl.agents=[];
-  L._hgdl.lakes.forEach((k,li)=>{if(!k.docks)return;const rnd=hgdmRng(475800+li),cells=[],dw=[[k.docks.dep.wx,k.docks.dep.wy],[k.docks.far.wx,k.docks.far.wy]];
+  L._hgdl.lakes.forEach((k,li)=>{if(k.wm){hgdlFillWm(L,k,li);return}if(!k.docks)return;const rnd=hgdmRng(475800+li),cells=[],dw=[[k.docks.dep.wx,k.docks.dep.wy],[k.docks.far.wx,k.docks.far.wy]];
     for(let y=k.y0;y<=k.y1;y++)for(let x=k.x0;x<=k.x1;x++)if(water(x,y))cells.push([x,y]);
     const nearD=(x,y,r)=>dw.some(p=>Math.abs(p[0]-x)<=r&&Math.abs(p[1]-y)<=r),shoreD=(x,y)=>{let d=9;for(let r=1;r<=4&&d===9;r++)for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++)if(Math.max(Math.abs(a),Math.abs(b))===r&&!water(x+a,y+b)){d=r;break}return d};
     const used=new Set(),isFree=(x,y)=>water(x,y)&&!used.has(x+','+y);
@@ -45508,15 +45597,17 @@ function hgdlFill(L){
     const vs=[];for(const [x,y] of cells)for(const [a,b] of DV)if(wall(x+a,y+b)&&!nearD(x,y,1)&&rnd()<.4&&vs.every(v=>Math.abs(v[0]-x)+Math.abs(v[1]-y)>=3)){vs.push([x,y]);dec('art_hgdf_vine'+((rnd()*4)|0),x,y,{wd:[a,b],pic:1,bob:.9});break}
     // islets: a clump of reeds (blocking) with reeds round it; two have a chest
     const ils=[];let t=0;while(ils.length<5&&t++<400){const c=cells[(rnd()*cells.length)|0];if(shoreD(c[0],c[1])<3||nearD(c[0],c[1],4)||ils.some(q=>Math.abs(q[0]-c[0])+Math.abs(q[1]-c[1])<6))continue;ils.push(c)}
+    const gi=ils.length>=3?ils.length-1:-1;
     ils.forEach((c,i)=>{const [x,y]=c;used.add(x+','+y);
-      if(i<2&&!(li===0&&i===0))L.decor.push({k:'hg_chestweed',x,y,block:true,hgdTier:2,hgdGive:[],hgdl:1});else dec('hgt_reeds',x,y,{block:true,walk:false,deco:false,sc:1.25});
-      for(const [a,b] of DV.concat([[1,1],[-1,1],[1,-1],[-1,-1]])){const xx=x+a,yy=y+b;if(isFree(xx,yy)&&rnd()<.75){used.add(xx+','+yy);dec(REED[(rnd()*4)|0],xx,yy,{sc:.8+rnd()*.5})}}});
+      if(i===gi)L.decor.push({k:'hg_chestweed',x,y,block:true,hgdwg:1000,hgdl:1});
+      else if(i<2&&!(li===0&&i===0))L.decor.push({k:'hg_chestweed',x,y,block:true,hgdTier:2,hgdGive:[],hgdl:1});else dec('hgt_reeds',x,y,{block:true,walk:false,deco:false,sc:.7});
+      for(const [a,b] of DV.concat([[1,1],[-1,1],[1,-1],[-1,-1]])){const xx=x+a,yy=y+b;if(isFree(xx,yy)&&rnd()<.75){used.add(xx+','+yy);dec(REED[(rnd()*4)|0],xx,yy,{sc:.38+rnd()*.22})}}});
     k.islets=ils;
     // reeds along the shore, a few out in the open water, lily pads
     const lilies=[];
     for(const [x,y] of cells){if(!isFree(x,y)||nearD(x,y,1))continue;const sd=shoreD(x,y),r=rnd();
-      if(sd===1&&r<.55){used.add(x+','+y);dec(REED[(rnd()*4)|0],x,y,{sc:.8+rnd()*.5})}
-      else if(sd>1&&r<.05){used.add(x+','+y);dec('hgt_reeds',x,y,{sc:.8+rnd()*.5})}
+      if(sd===1&&r<.55){used.add(x+','+y);dec(REED[(rnd()*4)|0],x,y,{sc:.38+rnd()*.22})}
+      else if(sd>1&&r<.05){used.add(x+','+y);dec('hgt_reeds',x,y,{sc:.38+rnd()*.22})}
       else if(sd>1&&r<.15){used.add(x+','+y);lilies.push([x,y]);dec('art_hgdf_plant6',x,y,{sc:.55+rnd()*.3})}}
     // things to pick up: bundles of reeds in the reed beds, lily flowers on the pads, the lost net by an islet
     const ni=[];const freeI=(x,y)=>water(x,y)&&!L.items.some(i=>i.x===x&&i.y===y)&&!nearD(x,y,1);
@@ -45528,12 +45619,54 @@ function hgdlFill(L){
     const kinds=['hgwcroc','hgwcroc','hgwcroc','hgweel','hgweel','hgweel','hgweel','hgwsnake','hgwsnake','hgwsnake','hgwsnake'];
     const spots=cells.filter(([x,y])=>water(x,y)&&!nearD(x,y,5)&&!L.decor.some(d=>d.block&&d.x===x&&d.y===y)&&!L.items.some(i=>i.x===x&&i.y===y));
     const got=[];for(const kd of kinds){for(let tt=0;tt<60&&spots.length;tt++){const c=spots[(rnd()*spots.length)|0];if(got.some(q=>Math.abs(q[0]-c[0])+Math.abs(q[1]-c[1])<4))continue;got.push(c);L.enemies.push({t:kd,x:c[0],y:c[1],hgdl:1});break}}
+    // the islet with the gold chest has two guards in the water close by
+    if(gi>=0){const [gx,gy]=ils[gi];k.goldChest=[gx,gy];let ng=0;for(let tt=0;tt<300&&ng<2;tt++){const x=gx+(((rnd()*11)|0)-5),y=gy+(((rnd()*11)|0)-5),dd=Math.abs(x-gx)+Math.abs(y-gy);if(dd<3||!water(x,y)||nearD(x,y,5)||L.decor.some(d=>d.block&&d.x===x&&d.y===y)||L.items.some(i=>i.x===x&&i.y===y)||L.enemies.some(e=>e.x===x&&e.y===y))continue;L.enemies.push({t:ng?'hgweel':'hgwcroc',x,y,hgdl:1});ng++}}
     // the life in the air
     const homes=cells.filter(([x,y])=>L.decor.some(d=>d.hgdl&&!d.block&&d.x===x&&d.y===y&&(d.k==='hgt_reeds'||d.k==='art_hgdf_plant6')));
     const BF=['cabbagewhite','brimstone','orangetip','commonblue','smallcopper','peacock','redadmiral','paintedlady','cloudedyellow'];
     const mk=(type,n,kind)=>{for(let i=0;i<n;i++){const h=homes.length?homes[(rnd()*homes.length)|0]:cells[(rnd()*cells.length)|0];L._hgdl.agents.push({lake:li,type,kind:kind?kind[i%kind.length]:null,x:h[0]+.5,y:h[1]+.5,hx:h[0]+.5,hy:h[1]+.5,tx:h[0]+.5,ty:h[1]+.5,t:rnd()*2,ph:rnd()*6,e:{t:'bfly',x:h[0],y:h[1],hp:1}})}};
     mk('bf',8,BF);mk('bee',6);mk('dfl',2)});
   L._hgdl.agentCount=L._hgdl.agents.length}
+/* ---------- the Flooded Quarter: the life of the big water maze (about a thousand squares of deep channel, seven open basins) ---------- */
+function hgdlFillWm(L,k,li){
+  const M=L._hgdm,W=M.W,m=hgdlMask(L),rnd=hgdmRng(475900),DV=[[0,-1],[1,0],[0,1],[-1,0]],DV8=DV.concat([[1,1],[-1,1],[1,-1],[-1,-1]]),REED=['hgt_reeds','hgt_reeds','hgt_reeds','art_hgdf_plant1'];
+  const water=(x,y)=>m[y*W+x]===1,wall=(x,y)=>{const c=L.rows[y]&&L.rows[y][x];return !!c&&c!=='.'&&c.charCodeAt(0)>=0x2e0&&c.charCodeAt(0)<0x2e8};
+  const cells=[];for(let y=k.y0;y<=k.y1;y++)for(let x=k.x0;x<=k.x1;x++)if(water(x,y))cells.push([x,y]);k.waterCells=cells.length;
+  const dw=k.wdocks.map(c=>[c.wx,c.wy]),nearD=(x,y,r)=>dw.some(p=>Math.abs(p[0]-x)<=r&&Math.abs(p[1]-y)<=r);
+  const used=new Set(),isFree=(x,y)=>water(x,y)&&!used.has(x+','+y);
+  const dec=(kk,x,y,o)=>L.decor.push(Object.assign({k:kk,x,y,block:false,walk:true,deco:true,hgdl:1},o||{}));
+  const inBasin=(x,y)=>k.basins.some(b=>Math.abs(b[0]-x)<=2&&Math.abs(b[1]-y)<=2);
+  // hanging vines on the walls, thinly
+  const vs=[];for(const [x,y] of cells){if(vs.length>=55||nearD(x,y,2)||rnd()>.12)continue;for(const [a,b] of DV)if(wall(x+a,y+b)&&vs.every(v=>Math.abs(v[0]-x)+Math.abs(v[1]-y)>=6)){vs.push([x,y]);dec('art_hgdf_vine'+((rnd()*4)|0),x,y,{wd:[a,b],pic:1,bob:.9});break}}
+  // the basins: an islet in the middle (three with a chest), reeds round it, a clutch of heron eggs beside it, lily pads on the open water
+  const lilies=[];k.islets=[];
+  const gset=new Set(k.basins.map((b,i)=>[i,Math.min(...dw.map(p=>Math.hypot(p[0]-b[0],p[1]-b[1])))]).sort((p,q)=>q[1]-p[1]).slice(0,2).map(q=>q[0]));k.goldChest=[];
+  k.basins.forEach((b,i)=>{const [x,y]=b;used.add(x+','+y);k.islets.push([x,y]);
+    if(gset.has(i)){L.decor.push({k:'hg_chestweed',x,y,block:true,hgdwg:1000,hgdl:1});k.goldChest.push([x,y])}
+    else if(i%2===0&&i<6)L.decor.push({k:'hg_chestweed',x,y,block:true,hgdTier:2,hgdGive:[],hgdl:1});else dec('hgt_reeds',x,y,{block:true,walk:false,deco:false,sc:.7});
+    const ring=DV.map(([a,c])=>[x+a,y+c]).filter(([xx,yy])=>isFree(xx,yy));if(ring.length){const e=ring[(rnd()*ring.length)|0];used.add(e[0]+','+e[1]);L.items.push({k:'hglegg',x:e[0],y:e[1],hgdl:1})}
+    for(const [a,c] of DV8){const xx=x+a,yy=y+c;if(isFree(xx,yy)&&rnd()<.35){used.add(xx+','+yy);dec(REED[(rnd()*4)|0],xx,yy,{sc:.38+rnd()*.22})}}
+    for(let yy=y-2;yy<=y+2;yy++)for(let xx=x-2;xx<=x+2;xx++)if(isFree(xx,yy)&&rnd()<.3){used.add(xx+','+yy);lilies.push([xx,yy]);dec('art_hgdf_plant6',xx,yy,{sc:.55+rnd()*.3})}});
+  // reed beds along the channels
+  const beds=[];let t=0;while(beds.length<13&&t++<500){const c=cells[(rnd()*cells.length)|0];if(nearD(c[0],c[1],5)||inBasin(c[0],c[1])||beds.some(q=>Math.abs(q[0]-c[0])+Math.abs(q[1]-c[1])<16))continue;beds.push(c)}
+  for(const [bx,by] of beds){let n=0;for(let y=by-3;y<=by+3&&n<9;y++)for(let x=bx-3;x<=bx+3&&n<9;x++)if(isFree(x,y)&&!nearD(x,y,1)&&Math.hypot(x-bx,y-by)<=3.3&&rnd()<.5){used.add(x+','+y);n++;dec(REED[(rnd()*4)|0],x,y,{sc:.38+rnd()*.22})}}
+  // a few lily flowers for the bees
+  for(let i=0;i<3&&lilies.length;i++){const c=lilies.splice((rnd()*lilies.length)|0,1)[0];if(!L.items.some(q=>q.x===c[0]&&q.y===c[1]))L.items.push({k:'hgllily',x:c[0],y:c[1],hgdl:1})}
+  // creatures: ten groups of three, spread over the maze, never near a dock
+  const kinds=[];for(let i=0;i<30;i++)kinds.push(i<8?'hgwcroc':i<19?'hgweel':'hgwsnake');for(let i=kinds.length-1;i>0;i--){const j=(rnd()*(i+1))|0;[kinds[i],kinds[j]]=[kinds[j],kinds[i]]}
+  const free=(x,y)=>water(x,y)&&!nearD(x,y,8)&&!L.decor.some(d=>d.block&&d.x===x&&d.y===y)&&!L.items.some(i=>i.x===x&&i.y===y)&&!L.enemies.some(e=>e.x===x&&e.y===y);
+  const gc=[];t=0;while(gc.length<10&&t++<3000){const c=cells[(rnd()*cells.length)|0];if(!free(c[0],c[1])||gc.some(q=>Math.abs(q[0]-c[0])+Math.abs(q[1]-c[1])<(t<2000?22:12)))continue;gc.push(c)}
+  let ki=0;for(const c of gc){for(let n=0;n<3&&ki<kinds.length;n++){for(let tt=0;tt<80;tt++){const x=c[0]+(((rnd()*13)|0)-6),y=c[1]+(((rnd()*13)|0)-6);if(!free(x,y))continue;L.enemies.push({t:kinds[ki++],x,y,hgdl:1,wm:1});break}}}
+  // the two gold islets have two guards each close by
+  for(const [gx,gy] of k.goldChest){let ng=0;for(let tt=0;tt<400&&ng<2;tt++){const x=gx+(((rnd()*13)|0)-6),y=gy+(((rnd()*13)|0)-6),dd=Math.abs(x-gx)+Math.abs(y-gy);if(dd<3||!free(x,y))continue;L.enemies.push({t:ng?'hgweel':'hgwcroc',x,y,hgdl:1,wm:1});ng++;ki++}}
+  // the life in the air
+  const homes=cells.filter(([x,y])=>L.decor.some(d=>d.hgdl&&!d.block&&d.x===x&&d.y===y&&(d.k==='hgt_reeds'||d.k==='art_hgdf_plant6')));
+  const BF=['cabbagewhite','brimstone','orangetip','commonblue','smallcopper','peacock','redadmiral','paintedlady','cloudedyellow'];
+  const mk=(type,n,kind)=>{for(let i=0;i<n;i++){const h=homes.length?homes[(rnd()*homes.length)|0]:cells[(rnd()*cells.length)|0];L._hgdl.agents.push({lake:li,type,kind:kind?kind[i%kind.length]:null,x:h[0]+.5,y:h[1]+.5,hx:h[0]+.5,hy:h[1]+.5,tx:h[0]+.5,ty:h[1]+.5,t:rnd()*2,ph:rnd()*6,e:{t:'bfly',x:h[0],y:h[1],hp:1}})}};
+  mk('bf',16,BF);mk('bee',12);mk('dfl',6);k.life={enemies:ki,vines:vs.length,beds:beds.length}}
+// the gold chests on the islets: exactly 1000 gold and nothing else (paid whole, not cut by goldCut)
+{const _lf=lootFor;lootFor=function(d){if(d&&d.hgdwg){if(!d.hgdwgTaken){d.hgdwgTaken=1;d.goldTaken=true;d.opened=true;G.gold+=d.hgdwg;msg('You find '+d.hgdwg+' gold.','#ffe9a0');sfx('key')}return []}if(d&&d.hgdl&&d.hgdTier===2){const it=_lf.apply(this,arguments);const g=300+Math.floor(hash2(d.x,d.y,731)*600);d.gold=0;d.goldTaken=true;d.opened=true;G.gold+=g;msg('You find '+g+' gold.','#ffe9a0');sfx('key');return it}
+  return _lf.apply(this,arguments)}}
 // the final pass, after every other builder
 {const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];_b.apply(this,arguments);const L=LEVELS[HGD.ID];if(!had&&L&&L._hgdl)try{hgdlFill(L)}catch(e){console.error('hgdl',e)}}}
 // whatever a later lazy builder adds before the party enters is swept out too

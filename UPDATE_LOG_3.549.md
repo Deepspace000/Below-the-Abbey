@@ -1,4 +1,4 @@
-Below the Abbey: update 3.555 (changes since 3.534, the update on itch.io before this one, including the last Hollow Grasslands quests and the way down to the Deeper Hollow)
+Below the Abbey: update 3.556 (changes since 3.534, the update on itch.io before this one, including the last Hollow Grasslands quests and the way down to the Deeper Hollow)
 
 The Hollow Grasslands: the last quests, and the way down to the Deeper Hollow
 
@@ -92,6 +92,19 @@ The lakes and the boats
 * In the boat the sound changes to water: lapping and oar dips instead of footsteps, with a soft water hush, as on the ship in the Narrow Sea.
 * Butterflies, bees and dragonflies flit over each lake and its reeds.
 * Quests next to the departure docks: Reed, the canal warden, and Bram the boatwright (south-west lake): Crocodile Skins, Eels in the Lake, Snake Bounty, The Far Docks (land at the far dock of all three lakes), Reeds for the Roofs and The Lost Net. Fenn the beekeeper (north-centre lake): Lilies for the Bees. Odda the ferrywoman (east lake): A Letter for the Hermit, to Old Marl, who lives beside that lake's far dock.
+
+The Flooded Quarter
+
+* A big part of the south east of the maze is now deep water: the Flooded Quarter, a real maze about 59 by 55 squares in which the passages themselves are deep water between high walls, with a few wider basins of lily pads. It can only be crossed by boat. Four docks lead into it, on its west, north, south and east sides, each at the end of a land corridor with a wide wooden landing. A boat can go from any dock to any other.
+* It holds 34 crocodiles, eels and vine snakes (in groups, never next to a dock), reed beds, lily pads, hanging vines, heron egg clutches on the islets, treasure on islets in the basins, and butterflies, bees and dragonflies. The map shows it dark blue with its name.
+* Tamsin, the channel pilot, stands at the west dock and gives three quests: Chart the Flooded Quarter (disembark at all four docks), Heron Eggs (bring 5 clutches from the islets) and Clear the Channels (kill 12 creatures of the water maze).
+* Five chests holding exactly 1,000 gold each are on islets in the lakes and the Flooded Quarter, guarded by a crocodile and an eel, and the other chests on the islets now always give a real reward (300 to 900 gold plus potions and sometimes armour). Some lake chests were empty before.
+
+Boats: embark and disembark
+
+* Boats on the lakes and the Flooded Quarter now work like the ship of the Narrow Sea. Bumping a dock no longer asks anything. The boat lies at anchor at the dock where it was left, drawn as a rowing boat, and on land within eight squares of it an Embark button appears. In the boat, within three squares of a dock landing, a Disembark button appears. Landing at a far dock still counts for the far dock quests.
+* The reeds in the lakes are much lower, so you can see across the water.
+* The wall block at each dock, which showed the picture of the boat twice, one above the other, now shows one dock picture with plain stone above it.
 
 The marshes
 
