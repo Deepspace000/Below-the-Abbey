@@ -54,3 +54,6 @@ function hgsBoss(){
   try{return _j.call(this,n,target)}
   catch(e){console.error('Go to area: the save could not be restored, starting fresh',e);const rs=readSave;readSave=()=>null;try{return _j.call(this,n,target)}catch(e2){console.error(e2)}finally{readSave=rs}}
   finally{HGS.jump=0}}}
+/* the gate between the Hollow Land and the Hollow Grasslands goes both ways: the spiked gate on the east of the Hollow Land's high ledge leads down into the Grasslands, as the Grasslands' southern gate leads back out onto the ledge */
+{const _c=hlCavern;hlCavern=function(){const had=!!LEVELS[HL.CAV];_c.apply(this,arguments);const L=LEVELS[HL.CAV];
+  if(L&&!had&&!L.decor.some(d=>d.hgGateBack))L.decor.push({k:'hg_gate',x:62,y:57,block:true,hgGateBack:1,enter:{to:HG.ID,x:HG.START.x,y:HG.H-5,f:0}})}}

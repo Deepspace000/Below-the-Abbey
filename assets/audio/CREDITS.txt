@@ -28,3 +28,6 @@ music_wanderer.mp3 | Wanderer at Night | Zambolino, via freetouse.com | Free To 
 music_embers.mp3 | Embers on the Flagstone (seamless loop) | Kaazoom, via Pixabay | Pixabay Content License (not CC0), used for the first crypt and the tiny dungeons
 music_andorios.mp3 | RPG Medieval Animated Music | Andorios, via Pixabay | Pixabay Content License (not CC0), used for the abbey grounds
 music_sands_*.mp3 | Forgotten Deserts (MoodMode, via Pixabay, Pixabay Content License); Vibration of the Sand, Dream of a Holy City, Golden Key and the tomb music (dungeon_music) copied from the Sword of the Sands project | streamed on the road north of Anaea, in the tomb and in the red dunes
+music_underlevel.mp3 | Dark Cavern Ambient (001) | Paul Wortmann, via OpenGameArt.org (https://opengameart.org/content/dark-cavern-ambient) | CC0 | used for the Underlevel
+music_hollowland.mp3 | Searching | yd, via OpenGameArt.org (https://opengameart.org/content/searching) | CC0 | used for the Hollow Land and the Hollow Grasslands (outdoors)
+music_deeperhollow.mp3 | Paranoid Truth | Tsorthan Grove, via OpenGameArt.org (https://opengameart.org/content/paranoid-truth) | CC0 | used for the Deeper Hollow maze and its boat canals

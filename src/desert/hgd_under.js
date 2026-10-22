@@ -7,17 +7,23 @@
 const HGDU={ID:476,DIFF:80,N:12};
 LEVEL_NAMES[HGDU.ID]='The Underlevel';LEVEL_RATING[HGDU.ID]=HGDU.DIFF;
 /* ---------- the dark insects ---------- */
-const HGDU_KINDS=[['hgubeetle','Gloom Beetle','hgtb_fishbeetle',[14,10,26,.62],{hp:330,dmg:[14,24],xp:26,w:1.2,verb:'butts'}],
-  ['hgucrawler','Night Crawler','hg_ins3',[10,8,22,.55],{hp:410,dmg:[16,27],xp:34,w:1.5,verb:'bites'}],
-  ['hguspider','Gloom Spider','hgtb_spindlespider',[8,6,20,.6],{hp:300,dmg:[13,23],xp:28,w:1.3,verb:'bites'}],
-  ['hgugrub','Blind Grub','hg_larva',[12,8,18,.62],{hp:360,dmg:[15,25],xp:24,w:1.35,verb:'gnaws'}],
-  ['hguwasp','Night Wasp','hg_wasp',[10,8,24,.58],{hp:280,dmg:[15,26],xp:30,w:.9,verb:'stabs'}],
-  ['hguhorror','Gravel Horror','hg_ins8',[10,8,16,.55],{hp:520,dmg:[18,31],xp:44,w:1.8,verb:'impales'}],
-  ['hguswarm','Black Moth Cloud','hg_swarm1',[8,6,18,.6],{hp:220,dmg:[11,19],xp:20,w:1.3,verb:'bites',fly:true,wander:true,kind:'swarm'}]];
-for(const [id,name,img,,o] of HGDU_KINDS){ENEMY_DEF[id]=Object.assign({name,hp:o.hp,dmg:o.dmg,hit:.82,w:o.w,img:'hgu_'+id,xp:o.xp,gold:[0,0],speed:1,verb:o.verb,aboveParty:1},o.fly?{fly:true,wander:true,kind:'swarm'}:{});if(typeof NO_VARY!=='undefined')NO_VARY.push(id)}
-function hgduArt(){for(const [id,,img,tint] of HGDU_KINDS){if(!IMG['hgu_'+id]&&IMG[img])try{hlTint(img,tint[0],tint[1],tint[2],tint[3],'hgu_'+id)}catch(e){}}}
+/* twenty frightening creatures, all painted (assets/ds_hgslime*.png and ds_hgyuck*.png): ten black slime monsters and ten demonic horrors. Every one has red glowing eyes; the bodies are darkened at load so that, in the dark, the eyes are most of what is seen */
+const HGDU_SL=['Tar Walker','Eye Puddle','Tentacle Ooze','Slime Spider','Slime Serpent','Maw Slime','Slime Hound','Skull Slime','Many-Armed Horror','Eye Mass'],HGDU_YK=['Flesh Maggot Demon','Chest-Eyed Crawler','Skinned Hound','Faced Centipede','Split-Jaw Ghoul','Horned Spider Demon','Tentacled Eye Horror','Leather Imp','Skull Pile','Spined Bone Beast'];
+const HGDU_VB=['smothers','engulfs','lashes','bites','strangles','devours','mauls','screams at','crushes','blinds'],HGDU_YV=['gnaws','claws','rends','whips','rips','impales','gazes at','slashes','grasps','tears'];
+const HGDU_KINDS=[];
+HGDU_SL.forEach((n,i)=>HGDU_KINDS.push(['hgusl'+i,n,'art_hgslime'+i,null,{hp:360+i*28,dmg:[15+i,26+i],xp:30+i*3,w:i===1?1.9:i===9?2.0:1.5,verb:HGDU_VB[i]}]));
+HGDU_YK.forEach((n,i)=>HGDU_KINDS.push(['hguyk'+i,n,'art_hgyuck'+i,null,{hp:380+i*30,dmg:[16+i,28+i],xp:34+i*3,w:i===3?1.8:1.5,verb:HGDU_YV[i]}]));
+for(const [id,name,img,,o] of HGDU_KINDS){ENEMY_DEF[id]=Object.assign({name,hp:o.hp,dmg:o.dmg,hit:.82,w:o.w,img:'hgu_'+id,xp:o.xp,gold:[0,0],speed:1,verb:o.verb,aboveParty:0,glow:.95},{});if(typeof NO_VARY!=='undefined')NO_VARY.push(id)}
+// the bodies are darkened to near black; red pixels (the eyes) are kept and made brighter
+function hgduArt(){for(const [id,,img] of HGDU_KINDS){const src=IMG[img];if(IMG['hgu_'+id]||!src||!src.width)continue;try{
+  const c=document.createElement('canvas');c.width=src.width;c.height=src.height;const x=c.getContext('2d');x.drawImage(src,0,0);const d=x.getImageData(0,0,c.width,c.height),p=d.data;
+  const eye=document.createElement('canvas');eye.width=c.width;eye.height=c.height;const ex=eye.getContext('2d'),ed=ex.createImageData(c.width,c.height),q=ed.data;
+  for(let k=0;k<p.length;k+=4){const r=p[k],g=p[k+1],b=p[k+2];if(p[k+3]>40&&r>120&&g<110&&b<110&&r>g*1.7){p[k]=255;p[k+1]=Math.min(70,g);p[k+2]=Math.min(60,b);q[k]=255;q[k+1]=30;q[k+2]=20;q[k+3]=255}else{p[k]*=.32;p[k+1]*=.3;p[k+2]*=.3}}
+  x.putImageData(d,0,0);ex.putImageData(ed,0,0);
+  x.save();x.globalCompositeOperation='lighter';x.filter='blur('+Math.max(3,c.width/55)+'px)';x.globalAlpha=.9;x.drawImage(eye,0,0);x.filter='blur('+Math.max(8,c.width/22)+'px)';x.globalAlpha=.55;x.drawImage(eye,0,0);x.restore();
+  IMG['hgu_'+id]=c}catch(e){console.error('hgduArt',e)}}}
 // what the bites leave behind
-AFFL_HITS.push([/^hgu(beetle|grub)/,'poisoned',.2],[/^hgu(crawler|horror)/,'bleeding',.22],[/^hguspider/,'stung',.25],[/^hguwasp/,'fever',.14],[/^hguswarm/,'fleas',.22],[/^hgu/,'shaken',.1],[/^hgu/,'graverot',.07]);
+AFFL_HITS.push([/^hgusl/,'poisoned',.22],[/^hguyk/,'bleeding',.22],[/^hguyk[35]/,'fever',.14],[/^hgusl[37]/,'stung',.2],[/^hgu/,'shaken',.1],[/^hgu/,'graverot',.07]);
 {const _aa=afflArea;afflArea=function(n,L){const r=_aa.apply(this,arguments);if(n===HGDU.ID){r.msgText='The air is close and sour, and something is clicking in the walls. You cannot see more than a step.';r.out.push(['tomblung',.3],['shaken',.2],['fleas',.2],['fever',.08])}return r}}
 /* ---------- the ladders: wall tiles ---------- */
 function hgduTex(up){const P=IMG['art_tex_hgdp_ladder'+(up?'up':'dn')];if(P&&P.width)return 'art_tex_hgdp_ladder'+(up?'up':'dn');const key='hgdu_ladder_'+(up?'up':'down');if(IMG[key])return key;
@@ -41,8 +47,8 @@ function hgduLadders(L){
   const occ=new Set(L.decor.concat(L.items,L.enemies).map(d=>d.x+','+d.y));
   const reach=new Set([L.start.x+','+L.start.y]),q=[[L.start.x,L.start.y]];for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b,k=nx+','+ny;if(reach.has(k)||!open(nx,ny))continue;reach.add(k);q.push([nx,ny])}}
   const TM=ohTiles(),chDown=String.fromCharCode(0x330);
-  OH_STY.hgdu_down=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:hgduTex(false),door:hgduTex(false),win:hgduTex(false),alt:hgduTex(false),zoom:1,contrast:1.0,tint:[255,255,255,0]});
-  L.chars[chDown]=TM.make('plain','hgdu_down',2.7).gid;
+  OH_STY.hgdu_down=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:'tex_abbeywall',door:hgduTex(false),win:'tex_abbeywall',alt:'tex_abbeywall',zoom:1,contrast:1.0,tint:[255,255,255,0]}); // one ladder at the bottom, plain stone above it
+  L.chars[chDown]=TM.make('door','hgdu_down',2.7).gid;
   const cands=[];for(let y=4;y<H-4;y++)for(let x=4;x<W-4;x++){if(!open(x,y)||!reach.has(x+','+y)||occ.has(x+','+y))continue;if(!kind[y*W+x])continue;
     if(P.zones.some(z=>z.type==='safe'&&Math.hypot(z.x-x,z.y-y)<=z.r+3))continue;
     for(const [a,b] of [[0,-1],[1,0],[0,1],[-1,0]]){const wx=x+a,wy=y+b,c=rows[wy][wx];if(c==='.'||c.charCodeAt(0)<0x2e0||c.charCodeAt(0)>=0x2e8)continue;
@@ -81,8 +87,8 @@ function hgduBuild(){
   const TM=ohTiles(),chars={};
   const BR=IMG.art_tex_hgdu_brick&&IMG.art_tex_hgdu_brick.width?'art_tex_hgdu_brick':null,BR2=IMG.art_tex_hgdu_brick2&&IMG.art_tex_hgdu_brick2.width?'art_tex_hgdu_brick2':BR;
   OH_STY.hgdu_rock=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:BR||(IMG.art_tex_hgdp_cave?'art_tex_hgdp_cave':'art_tex_wall_cave'),door:BR||'art_tex_wall_cave',win:BR2||'art_tex_wall_cave',alt:BR2||'art_tex_wall_cave',zoom:1,contrast:1.0,tint:[4,3,5,.5]});
-  OH_STY.hgdu_up=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:hgduTex(true),door:hgduTex(true),win:hgduTex(true),alt:hgduTex(true),zoom:1,contrast:1.0,tint:[255,255,255,0]});
-  chars['#']=TM.make('plain','hgdu_rock',2.7).gid;const chUp=String.fromCharCode(0x331);chars[chUp]=TM.make('plain','hgdu_up',2.7).gid;
+  OH_STY.hgdu_up=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:BR||'art_tex_wall_cave',door:hgduTex(true),win:BR||'art_tex_wall_cave',alt:BR||'art_tex_wall_cave',zoom:1,contrast:1.0,tint:[4,3,5,.5]});
+  chars['#']=TM.make('plain','hgdu_rock',2.7).gid;const chUp=String.fromCharCode(0x331);chars[chUp]=TM.make('door','hgdu_up',2.7).gid;
   for(const l of SU.ladders)g[l.y][l.x]=chUp;
   // enemies: a great many, spread along every corridor, thicker in the nests; none near the ladders
   const cells=[];for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++)if(g[y][x]==='.'&&!SU.ladders.some(l=>Math.hypot(l.ax-x,l.ay-y)<8))cells.push([x,y]);

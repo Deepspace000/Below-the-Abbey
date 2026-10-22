@@ -130,7 +130,7 @@ function hgdvPlain(text,opts,again){const nd=say(text,opts.slice());return nd}
 for(let i=0;i<4;i++)khNpc('hgd_thf'+i,HGDV_NAMES[i],'pickpocket',d=>hgdvTalk(i,d));
 // the red marks on the mini map
 {const _m=drawMinimap;drawMinimap=function(x,y,w,h){_m.apply(this,arguments);
-  try{if(LEVEL===HGD.ID&&G.state==='play'){const L=LEVELS[HGD.ID];if(L&&L._hgdv){const cs=4.6,ox=x+w/2-(G.C.x+.5)*cs,oy=y+h/2-(G.C.y+.5)*cs;
+  try{if(LEVEL===HGD.ID&&G.state==='play'){const L=LEVELS[HGD.ID];if(L&&L._hgdv){const cs=4.6*MMZ(),ox=x+w/2-(G.C.x+.5)*cs,oy=y+h/2-(G.C.y+.5)*cs;
     ctx.save();ctx.beginPath();ctx.rect(x+2,y+2,w-4,h-4);ctx.clip();
     for(const a of L._hgdv.agents){if(a.mode==='dead'||a.mode==='gone'||a.mode==='fighting'||a.mode==='home')continue;const d=HGDV.map&&HGDV.map.get(a.id);if(!d)continue;
       const px=ox+(d.x+(d.ox||0)+.5)*cs,py=oy+(d.y+(d.oy||0)+.5)*cs;if(px<x||px>x+w||py<y||py>y+h)continue;

@@ -41,10 +41,16 @@ function hgdtGo(s){
   if(TP)return;G.teleMode=false;G.overview=false;G.world=false;if(!LEVELS[HGD.ID]&&KH_LAZY[HGD.ID])KH_LAZY[HGD.ID]();let f=0;const L=LEVELS[HGD.ID];for(let k=0;k<4;k++){const c=(L.rows[s.y+DIRS[k][1]]||'')[s.x+DIRS[k][0]];if(c==='.'){f=k;break}}
   TP={ph:'out',t:0,n:HGD.ID,sp:{x:s.x,y:s.y},f,name:s.name};sfx('level')}
 // the maps show the stones that have been woken
-{const _dn=hgdmpDrawNames;hgdmpDrawNames=function(vi){try{const L=LEVELS[HGD.ID],V=MPL.view;if(L&&L._hgdt&&V&&V.z){const W0=hgdtWoken(),A=V.area,z=V.z;ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();
+{const _dn=hgdmpDrawNames;hgdmpDrawNames=function(vi){try{const L=LEVELS[HGD.ID],V=MPL.view;if(L&&L._hgdt&&V&&V.z&&vi<5){const W0=hgdtWoken(),A=V.area,z=V.z;ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();
     for(const s of L._hgdt.stones){if(!W0[s.id])continue;const px=A.x+(V.X(s.x+.5)-V.sx0)*z,py=A.y+(V.Y(s.y+.5)-V.sy0)*z;if(px<A.x||px>A.x+A.w||py<A.y||py>A.y+A.h)continue;
       if(!hgdiDraw(ctx,'stone',px,py+2.6,Math.max(7,Math.min(10,5.5+z*.5)))){ctx.strokeStyle='#2a5a9a';ctx.fillStyle='rgba(150,210,255,.9)';ctx.lineWidth=.8;ctx.beginPath();ctx.arc(px,py,2.3,0,6.3);ctx.fill();ctx.stroke();ctx.beginPath();ctx.arc(px,py,.8,0,6.3);ctx.fillStyle='#2a5a9a';ctx.fill()}}
+    // standing on a stone: every other woken stone on the map is a button, ringed in blue; tap one to travel there
+    const here=hgdtAt();if(here&&!TP&&vi!==5){let n=0;for(const s of L._hgdt.stones){if(!W0[s.id]||s===here)continue;const px=A.x+(V.X(s.x+.5)-V.sx0)*z,py=A.y+(V.Y(s.y+.5)-V.sy0)*z;if(px<A.x||px>A.x+A.w||py<A.y||py>A.y+A.h)continue;n++;
+      ctx.save();ctx.strokeStyle='rgba(80,170,255,.95)';ctx.lineWidth=1.3;ctx.beginPath();ctx.arc(px,py,8.5,0,6.3);ctx.stroke();ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=.6;ctx.beginPath();ctx.arc(px,py,10.2,0,6.3);ctx.stroke();ctx.restore();
+      BTNS.push({id:'hgdts_'+s.id,x:px-10,y:py-10,w:20,h:20,up:true})}
+      const tt=n?'Tap a ringed stone to travel to it':'No other stone woken yet';ctx.font='bold 7px '+FUI;ctx.textAlign='center';const tw=ctx.measureText(tt).width+10;ctx.fillStyle='rgba(238,226,190,.94)';ctx.fillRect(A.x+A.w/2-tw/2,A.y+A.h-15,tw,12);ctx.strokeStyle='#2a5a9a';ctx.lineWidth=.8;ctx.strokeRect(A.x+A.w/2-tw/2,A.y+A.h-15,tw,12);ctx.fillStyle='#1a3a6a';ctx.textBaseline='middle';ctx.fillText(tt,A.x+A.w/2,A.y+A.h-9);ctx.textBaseline='alphabetic'}
     ctx.restore()}}catch(e){}return _dn.apply(this,arguments)}}
+{const _h=handleBtn;handleBtn=function(id){if(typeof id==='string'&&id.startsWith('hgdts_')){const L=LEVELS[HGD.ID],s=L&&L._hgdt&&L._hgdt.stones.find(q=>'hgdts_'+q.id===id);if(s&&hgdtWoken()[s.id]&&hgdtAt()&&hgdtAt()!==s){hgdtGo(s)}return}return _h.apply(this,arguments)}}
 // the people mention them
 if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('There is a stone in every town and safe place. Wake one by standing on it, and it will carry you to any other you have woken. They say a few stand at the far ends of the danger zones too.');
 {const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];_b.apply(this,arguments);const L=LEVELS[HGD.ID];if(!had&&L&&L._hgdu)try{hgdtBuild(L)}catch(e){console.error('hgdt',e)}}}

@@ -40,7 +40,7 @@ function hgdm2Build(L){
   return _ea.apply(this,arguments)}}
 // the marks on the mini map: seen from far off, so they can be avoided
 {const _m=drawMinimap;drawMinimap=function(x,y,w,h){_m.apply(this,arguments);
-  try{if((LEVEL===HGD.ID||LEVEL===HGDU.ID)&&G.state==='play'){const cs=4.6,ox=x+w/2-(G.C.x+.5)*cs,oy=y+h/2-(G.C.y+.5)*cs;
+  try{if((LEVEL===HGD.ID||LEVEL===HGDU.ID)&&G.state==='play'){const cs=4.6*MMZ(),ox=x+w/2-(G.C.x+.5)*cs,oy=y+h/2-(G.C.y+.5)*cs;
     ctx.save();ctx.beginPath();ctx.rect(x+2,y+2,w-4,h-4);ctx.clip();
     for(const e of G.enemies){const def=ENEMY_DEF[e.t];if(e.hp<=0||!def||!def.mini)continue;
       const px=ox+(e.rx+.5)*cs,py=oy+(e.ry+.5)*cs;if(px<x-6||px>x+w+6||py<y-6||py>y+h+6)continue;
@@ -90,3 +90,6 @@ Object.assign(ITEMDEF,{
 {const _sl=setLightLevel;setLightLevel=function(l){_sl.apply(this,arguments);
   if(LEVEL===HGDU.ID){RANGE=2.8+.7*l;const amp=.34+.1*l;for(let i=0;i<=1024;i++){const t=1-i/1024;LUT[i]=AMB*.25+(t>0?amp*Math.pow(t,1.9):0)}}}}
 {const _u=update;update=function(dt){const u=LEVEL===HGDU.ID;if(update._hu!==u){update._hu=u;try{setLightLevel(G.lightLevel)}catch(e){}}return _u.apply(this,arguments)}}
+/* ---------- zoom for the mini map: a plus and a minus beside it (G.mmz, 0.26 to 1.6; the minus can zoom out a good way) ---------- */
+{const _m=drawMinimap;drawMinimap=function(x,y,w,h){_m.apply(this,arguments);try{if(x===424&&G.state==='play'){btnText('mmplus','+',408,3,14,15);btnText('mmminus','-',408,20,14,15)}}catch(e){}}}
+{const _h=handleBtn;handleBtn=function(id){if(id==='mmplus'||id==='mmminus'){const z=G.mmz||1;G.mmz=Math.max(.26,Math.min(1.6,id==='mmplus'?z*1.4:z/1.4));sfx('equip');return}return _h.apply(this,arguments)}}

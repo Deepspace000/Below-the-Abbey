@@ -116,7 +116,7 @@ function hgdmpSheet(vi){
   return HGDMP.cache[vi]={c,X,Y}}
 /* the names are a separate layer drawn on the screen over the map: no halo and no box, a fixed small size that looks smaller as the map is zoomed in, and the precinct names fade out as you zoom */
 function hgdmpNames(vi){
-  const L=LEVELS[HGD.ID];if(vi===5||!L||!L._hgdp)return[];const V=HGDMP.views[vi],[,,vx,vy,vw,vh]=V,M=L._hgdm,out=[];
+  const L=LEVELS[HGD.ID];if(vi>=5||!L||!L._hgdp)return[];const V=HGDMP.views[vi],[,,vx,vy,vw,vh]=V,M=L._hgdm,out=[];
   const inV=(x,y)=>x>=vx-2&&x<=vx+vw+2&&y>=vy-2&&y<=vy+vh+2;
   for(const z of L._hgdp.zones){if(!inV(z.x,z.y))continue;if(z.type==='safe')out.push({t:z.name,x:z.x+.5,y:z.y+.5,dy:z.town!==undefined?7:5,k:z.town!==undefined?'town':'encl'});else out.push({t:z.name,x:z.x+.5,y:z.y+.5,dy:0,k:'danger'})}
   out.push({t:'THE DOOR IN',x:M.sx+.5,y:M.H-1.5,dy:-5,k:'door'});
@@ -124,9 +124,9 @@ function hgdmpNames(vi){
   return out}
 function hgdmpDrawNames(vi){
   const V=MPL.view;if(!V||!V.z)return;const z=V.z,A=V.area,names=hgdmpNames(vi),box=[];
-  const col={town:'#6a1a10',encl:'#2a4a22',danger:'#8a1a10',door:'#2a1a0c',prec:'#46281a'},base={town:7,encl:5.6,danger:6,door:5.6,prec:5.8};
+  const col={town:'#6a1a10',encl:'#2a4a22',danger:'#8a1a10',door:'#2a1a0c',prec:'#46281a',thief:'#4a1a1a'},base={town:7,encl:5.6,danger:6,door:5.6,prec:5.8,thief:5.2};
   ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();ctx.textAlign='center';ctx.textBaseline='middle';
-  const order=['town','encl','danger','door','prec'];
+  const order=['town','encl','danger','thief','door','prec'];
   for(const kd of order)for(const n of names){if(n.k!==kd)continue;
     const sz=Math.max(4.6,base[kd]/Math.pow(z,.4)),al=kd==='prec'?Math.max(.3,Math.min(.9,1.25-(z-1)*.3)):Math.max(.7,Math.min(1,1.1-(z-1)*.05));
     if(kd==='prec'&&al<=.32)continue;
@@ -138,12 +138,14 @@ function hgdmpDrawNames(vi){
   ctx.restore()}
 // the screen
 {const _do=drawOverview;drawOverview=function(){
-  if((LEVEL!==HGD.ID&&LEVEL!==HGDU.ID)||G.world||G.teleMode||!LEVELS[HGD.ID]||!LEVELS[HGD.ID]._hgdp)return _do.apply(this,arguments);
-  if(G.hgdLv!==LEVEL){G.hgdLv=LEVEL;G.hgdView=LEVEL===HGDU.ID?5:0}
+  const WV=LEVEL===478?6:LEVEL===479?7:LEVEL===477?8:0; // the water levels have their own views
+  if((LEVEL!==HGD.ID&&LEVEL!==HGDU.ID&&!WV)||G.world||G.teleMode||!LEVELS[HGD.ID]||!LEVELS[HGD.ID]._hgdp)return _do.apply(this,arguments);
+  if(G.hgdLv!==LEVEL){G.hgdLv=LEVEL;G.hgdView=LEVEL===HGDU.ID?5:WV||0}
   const vi=G.hgdView|0,sh=hgdmpSheet(vi);if(!sh)return _do.apply(this,arguments);
-  MPL.reveal=false;mplPaint(sh.c,MPL.S,MPL.AREA,sh.X,sh.Y,'You are the yellow arrow.');hgdmpDrawTrail(vi);hgdmpDrawNames(vi);
-  HGDMP.views.forEach((v,i)=>btnText('hgdv'+i,v[0],124+i*31,303,i===5?38:29,17))}}
-{const _h=handleBtn;handleBtn=function(id){if(G.overview&&!G.world&&(LEVEL===HGD.ID||LEVEL===HGDU.ID)&&/^hgdv\d$/.test(id)){G.hgdView=+id[4];G.mplKey=null;return}return _h.apply(this,arguments)}}
+  MPL.reveal=false;const own=[HGD.ID,HGD.ID,HGD.ID,HGD.ID,HGD.ID,HGDU.ID,478,479,477][vi],gc=G.C;if(own!==LEVEL)G.C={x:-9999,y:-9999,a:0}; // the arrow only shows on the sheet of the level you are in
+  try{mplPaint(sh.c,sh.S||MPL.S,MPL.AREA,sh.X,sh.Y,'You are the yellow arrow.')}finally{G.C=gc}if(vi<6)hgdmpDrawTrail(vi);hgdmpDrawNames(vi);
+  {let bx=92;HGDMP.views.forEach((v,i)=>{const w=i===5?36:i===8?42:v[0].length>3?33:27;btnText('hgdv'+i,v[0],bx,303,w,17);bx+=w+2})}}}
+{const _h=handleBtn;handleBtn=function(id){if(G.overview&&!G.world&&(LEVEL===HGD.ID||LEVEL===HGDU.ID||LEVEL===477||LEVEL===478||LEVEL===479)&&/^hgdv\d$/.test(id)){G.hgdView=+id[4];G.mplKey=null;return}return _h.apply(this,arguments)}}
 /* ---------- the magic map: it records the party's footsteps in the maze ---------- */
 const HGDT_MAX=40000;
 function hgdmpDrawTrail(vi){
