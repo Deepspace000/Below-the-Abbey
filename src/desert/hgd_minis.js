@@ -51,8 +51,8 @@ if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('Six huge burning spheres roam 
 {const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];_b.apply(this,arguments);const L=LEVELS[HGD.ID];if(!had&&L&&L._hgdv)try{hgdm2Build(L)}catch(e){console.error('hgdm2',e)}}}
 
 /* ---------- the quest: kill all six spheres. Cinder the ember warden of Gildmere gives it; the reward is a weapon, the Sunfire Blade ---------- */
-ITEMDEF.hgsunblade={n:'Sunfire Blade',k:'weapon',t:'Sword',ic:'sword',c:'#ff8a2a',dmg:[70,110],hit:.05,req:{str:28},lvl:30,price:15000,rar:1,sw:.42,d:'A sword that glows like a sphere of fire, taken from the burning spheres of the maze. Needs level 30.'};
-QUESTS.hgsph={title:'Six Burning Spheres',who:'Cinder, the ember warden',desc:'Six huge burning spheres roam the Deeper Hollow. Kill all six: the molten, the white-hot, the crimson, the blue, the green and the cinder-core sphere. They show on the mini map as big orange rings.',need:6,goal:()=>Object.keys(G.flags.hgdSph||{}).length,reward:{gold:4000,xp:16000,items:['hgsunblade']}};
+ITEMDEF.hgsunblade={n:'Sunfire Blade',k:'weapon',t:'Sword',ic:'sword',c:'#ff8a2a',dmg:[260,380],hit:.15,req:{str:55},lvl:65,price:60000,rar:1,eff:{bossdmg:.3},dbl:.15,sw:.44,d:'A sword that glows like a sphere of fire, made from the burning spheres of the maze. Bosses take 30% more from its blows. Needs level 65.'};
+QUESTS.hgsph={title:'Six Burning Spheres',who:'Cinder, the ember warden',desc:'Six huge burning spheres roam the Deeper Hollow. Kill all six: the molten, the white-hot, the crimson, the blue, the green and the cinder-core sphere. They show on the mini map as big orange rings.',need:6,goal:()=>Object.keys(G.flags.hgdSph||{}).length,reward:{gold:12000,xp:60000,items:['hgsunblade']}};
 QAREA.hgsph='The Deeper Hollow';
 {const _he=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;_he.apply(this,arguments);if(was&&e.hp<=0&&/^hgmini\d$/.test(e.t)){G.flags.hgdSph=G.flags.hgdSph||{};G.flags.hgdSph[e.t]=1}}}
 khNpc('hgd_cinder','Cinder, the ember warden','hg_npc5',d=>{
