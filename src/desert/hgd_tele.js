@@ -23,23 +23,26 @@ function hgdtBuild(L){
 const hgdtAt=()=>{const L=LEVELS[HGD.ID];if(LEVEL!==HGD.ID||!L||!L._hgdt)return null;return L._hgdt.stones.find(s=>s.x===G.P.x&&s.y===G.P.y)||null};
 const hgdtWoken=()=>G.flags.hgdTele||(G.flags.hgdTele={});
 // waking a stone: step on it
-{const _u=update;update=function(dt){try{if(LEVEL===HGD.ID&&G.state==='play'){const s=hgdtAt(),W0=hgdtWoken();if(s&&!W0[s.id]){W0[s.id]=1;sfx('level');msg('The stone hums, and runes of pale light run round its rim. '+s.name+' is awake. Press T to travel to another woken stone of the maze.','#a8d8ff');if(s.main){G.flags.teles=G.flags.teles||{};G.flags.teles[LEVEL]=1}}}}catch(e){}return _u.apply(this,arguments)}}
+{const _u=update;update=function(dt){try{if(LEVEL===HGD.ID&&G.state==='play'){const s=hgdtAt(),W0=hgdtWoken();if(s&&!W0[s.id]){W0[s.id]=1;sfx('level');msg('The stone hums, and runes of pale light run round its rim. '+s.name+' is awake. Press T to travel.','#a8d8ff');G.flags.teles=G.flags.teles||{};G.flags.teles[LEVEL]=1}}}catch(e){}return _u.apply(this,arguments)}}
 // the button and the key work on any stone of the maze
 {const _on=teleOn;teleOn=function(){return _on.apply(this,arguments)||(G.state==='play'&&!!hgdtAt())}}
 {const _ac=teleActive;teleActive=function(n){return _ac.apply(this,arguments)||(n===HGD.ID&&!!hgdtAt()&&!!hgdtWoken()[hgdtAt().id])}}
-{const _om=openTeleMap;openTeleMap=function(){
-  const here=hgdtAt();if(LEVEL!==HGD.ID||!here)return _om.apply(this,arguments);
-  const L=LEVELS[HGD.ID],W0=hgdtWoken(),list=L._hgdt.stones.filter(s=>W0[s.id]&&s!==here);
-  const opts=list.map(s=>[s.name,()=>{G.talk=null;hgdtGo(s);return null}]);
-  if(here.main&&G.flags.teles&&Object.keys(G.flags.teles).filter(k=>G.flags.teles[k]&&+k!==HGD.ID).length)opts.push(['The world map.',()=>{G.talk=null;_om.call(this);return null}]);
-  opts.push(['Stay.',()=>null]);
-  G.talk={d:{k:'teleporter'},n:{name:'Teleporter'},node:say(list.length?'The stone listens. Which woken stone of the maze?':'No other stone of the maze is awake yet. Find them in the towns, the safe places and the far ends of the danger zones.',opts),t:G.time,btns:[]};G.hold=null;G.queued=null}}
+/* the usual way: stand on a stone, press T, and the world map shows the woken places; tapping the Deeper Hollow lists the woken stones of the maze (the others of it, when standing in it) */
+{const _tf=teleFromMap;teleFromMap=function(k){
+  const loc=WORLD_LOCS.find(l=>l.k===k);if(!loc||!loc.lv.includes(HGD.ID))return _tf.apply(this,arguments);
+  if(!teleOn()){G.wnote={text:'Stand on a woken teleporter to travel.',t:G.time};return}
+  if(!LEVELS[HGD.ID]&&KH_LAZY[HGD.ID])KH_LAZY[HGD.ID]();
+  const L=LEVELS[HGD.ID],W0=hgdtWoken(),here=hgdtAt(),list=L&&L._hgdt?L._hgdt.stones.filter(s=>W0[s.id]&&s!==here):[];
+  if(!list.length){G.wnote={text:'You are already here.',t:G.time};return}
+  if(list.length===1){hgdtGo(list[0]);return}
+  G.overview=false;G.world=false;G.teleMode=false;
+  G.talk={d:{k:'teleporter'},n:{name:'Teleporter'},node:say('Which stone in the Deeper Hollow?',list.map(s=>[s.name,()=>{G.talk=null;hgdtGo(s);return null}]).concat([['Stay.',()=>null]])),t:G.time,btns:[]};G.hold=null;G.queued=null}}
 function hgdtGo(s){
-  if(TP)return;let f=0;const L=LEVELS[HGD.ID];for(let k=0;k<4;k++){const c=(L.rows[s.y+DIRS[k][1]]||'')[s.x+DIRS[k][0]];if(c==='.'){f=k;break}}
+  if(TP)return;G.teleMode=false;G.overview=false;G.world=false;if(!LEVELS[HGD.ID]&&KH_LAZY[HGD.ID])KH_LAZY[HGD.ID]();let f=0;const L=LEVELS[HGD.ID];for(let k=0;k<4;k++){const c=(L.rows[s.y+DIRS[k][1]]||'')[s.x+DIRS[k][0]];if(c==='.'){f=k;break}}
   TP={ph:'out',t:0,n:HGD.ID,sp:{x:s.x,y:s.y},f,name:s.name};sfx('level')}
 // the maps show the stones that have been woken
 {const _dn=hgdmpDrawNames;hgdmpDrawNames=function(vi){try{const L=LEVELS[HGD.ID],V=MPL.view;if(L&&L._hgdt&&V&&V.z){const W0=hgdtWoken(),A=V.area,z=V.z;ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();
-    for(const s of L._hgdt.stones){if(!(W0[s.id]||(s.main&&G.flags.teles&&G.flags.teles[HGD.ID])))continue;const px=A.x+(V.X(s.x+.5)-V.sx0)*z,py=A.y+(V.Y(s.y+.5)-V.sy0)*z;if(px<A.x||px>A.x+A.w||py<A.y||py>A.y+A.h)continue;
+    for(const s of L._hgdt.stones){if(!W0[s.id])continue;const px=A.x+(V.X(s.x+.5)-V.sx0)*z,py=A.y+(V.Y(s.y+.5)-V.sy0)*z;if(px<A.x||px>A.x+A.w||py<A.y||py>A.y+A.h)continue;
       ctx.strokeStyle='#2a5a9a';ctx.fillStyle='rgba(150,210,255,.9)';ctx.lineWidth=.8;ctx.beginPath();ctx.arc(px,py,2.3,0,6.3);ctx.fill();ctx.stroke();ctx.beginPath();ctx.arc(px,py,.8,0,6.3);ctx.fillStyle='#2a5a9a';ctx.fill()}
     ctx.restore()}}catch(e){}return _dn.apply(this,arguments)}}
 // the people mention them
