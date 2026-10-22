@@ -7,7 +7,7 @@
    Runs as the last decorating pass (just before the lakes are filled): it reads everything the other builders placed and keeps clear of it. Deterministic (hgdmRng 475090).
    Exposes L._hgdx for testing. A picture that does not exist yet is simply skipped (window.HGX_STAND = 1 swaps in stand-in sprites for testing).
    ========================================================================== */
-{const hr=[.55,.55,.45,.25,1,.7,.35,.6],hp=[.3,.3,.25,.12,.3,.35,.3,.3,.3,.3,.08,.1,.4,.35,.3,.3];
+{const hr=[.55,.55,.45,.25,1,.7,.35,.6],hp=[.3,.3,.25,.12,.3,.35,.3,.18,.3,.3,.08,.1,.4,.35,.3,.3]; // the rusty lantern (7) is 40 percent smaller
  for(let i=0;i<8;i++){NPC_H['art_hgxrock'+i]=hr[i];NPC_H['art_hgxstat'+i]=1.25}
  for(let i=0;i<16;i++)NPC_H['art_hgxprop'+i]=hp[i]}
 const HGX_STANDIN={r:'hgt_pearlbush',s:'hgtb_deco_shellstatue',p:['art_hgdf_plant3','art_hgdf_plant1','hgt_mushrooms','art_hgdf_plant6','hgt_fern','art_hgdf_plant4','art_hgdf_plant2','hgt_reeds']};
@@ -168,5 +168,19 @@ function hgxBuild(L){
   // ---- coverage of the passages ----
   let n3=0,cov=0,can=0,cc=0;for(const s of segs)if(s.path.length>=3){n3++;if(s.n>0)cov++;if(s.can){can++;if(s.n>0)cc++}}
   const why={bad:0,occ:0,water:0,mine:0,fm5:0,other:0,segs:0};for(const s of segs)if(s.path.length>=3&&!s.n){why.segs++;for(const [x,y] of s.path){const i=y*W+x;if(bad[i])why.bad++;else if(occ[i])why.occ++;else if(fmap[y][x]==='5')why.fm5++;else if(fmap[y][x]==='6')why.water++;else if(mine[i])why.mine++;else why.other++}}
+  // the same little thing is never repeated near itself: where two non-blocking props or small rocks of the same picture lie within 9 squares, the later one is swapped for a different small thing that has no twin near it (or dropped if every kind is taken)
+  {const cell=9,grid=new Map(),keep=[],fac=i=>i===10||i===11?2.3:i===3?1.8:1,ALT=[];let dropped=0,swapped=0;
+    for(let n=0;n<16;n++)ALT.push('art_hgxprop'+n);for(const n of [1,2,3,6])ALT.push('art_hgxrock'+n);
+    const near=(d,k)=>{const gx=(d.x/cell)|0,gy=(d.y/cell)|0;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const l=grid.get((gx+a)+','+(gy+b)+','+k);if(l)for(const o of l)if(Math.abs(o.x-d.x)<9&&Math.abs(o.y-d.y)<9)return true}return false};
+    const add=d=>{const key=((d.x/cell)|0)+','+((d.y/cell)|0)+','+d.k;if(!grid.has(key))grid.set(key,[]);grid.get(key).push(d)};
+    const kindIdx=k=>{const m=/art_hgxprop(\d+)$/.exec(k);return m?+m[1]:-1};
+    for(const d of L.decor){if(!d.hx||d.block||d.pic||!/art_hgx(prop|rock)/.test(d.k)){keep.push(d);continue}
+      if(!near(d,d.k)){add(d);keep.push(d);continue}
+      // a different small thing, tried from a point in the list that depends on the square, so neighbours differ
+      let done=false;const st=((d.x*7+d.y*13)%ALT.length+ALT.length)%ALT.length;
+      for(let t=0;t<ALT.length&&!done;t++){const k=ALT[(st+t)%ALT.length];if(k===d.k||!IMG[k]||!IMG[k].width||near(d,k))continue;
+        const oi=kindIdx(d.k),ni=kindIdx(k);let sc=d.sc||1;if(oi>=0)sc/=fac(oi);if(ni>=0)sc*=fac(ni);d.k=k;d.sc=Math.round(sc*100)/100;add(d);keep.push(d);done=true;swapped++}
+      if(!done)dropped++}
+    L.decor=keep;counts.dedupDropped=dropped;counts.dedupSwapped=swapped;counts.total-=dropped}
   L._hgdx={why,counts,segments:{all:segs.length,len3:n3,covered:cov,pct:n3?Math.round(1000*cov/n3)/10:100,placeable:can,coveredOfPlaceable:cc,pctPlaceable:can?Math.round(1000*cc/can)/10:100},deadEnds:dead.length,statuesAll:statues.length,mineCells:mine.reduce((a,b)=>a+b,0),ms:Math.round(performance.now()-T0),prec:prec.map(p=>p.name)}}
 {const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];_b.apply(this,arguments);const L=LEVELS[HGD.ID];if(!had&&L&&L._hgdm&&L._hgdp&&L.decor)try{hgxBuild(L)}catch(e){console.error('hgdx',e)}}}
