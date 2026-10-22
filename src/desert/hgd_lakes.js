@@ -27,7 +27,7 @@ function hgdlFill(L){
     for(let y=k.y0;y<=k.y1;y++)for(let x=k.x0;x<=k.x1;x++)if(water(x,y))cells.push([x,y]);
     const nearD=(x,y,r)=>dw.some(p=>Math.abs(p[0]-x)<=r&&Math.abs(p[1]-y)<=r),shoreD=(x,y)=>{let d=9;for(let r=1;r<=4&&d===9;r++)for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++)if(Math.max(Math.abs(a),Math.abs(b))===r&&!water(x+a,y+b)){d=r;break}return d};
     const used=new Set(),isFree=(x,y)=>water(x,y)&&!used.has(x+','+y);
-    const dec=(kk,x,y,o)=>{if(kk.startsWith('art_hgthin')&&o&&o.sc)o=Object.assign({},o,{sc:o.sc*2.1}); L.decor.push(Object.assign({k:kk,x,y,block:false,walk:true,deco:true,hgdl:1},o||{}))}; // thin reeds are drawn larger: they are mostly see-through
+    const dec=(kk,x,y,o)=>{if(kk.startsWith('art_hgthin')&&o&&o.sc)o=Object.assign({},o,{sc:o.sc*1.45}); L.decor.push(Object.assign({k:kk,x,y,block:false,walk:true,deco:true,hgdl:1},o||{}))}; // thin reeds are drawn larger: they are mostly see-through
     // hanging vines on the ring of wall
     const vs=[];for(const [x,y] of cells)for(const [a,b] of DV)if(wall(x+a,y+b)&&!nearD(x,y,1)&&rnd()<.4&&vs.every(v=>Math.abs(v[0]-x)+Math.abs(v[1]-y)>=3)){vs.push([x,y]);dec('art_hgdf_vine'+((rnd()*4)|0),x,y,{wd:[a,b],pic:1,bob:.9});break}
     // islets: a clump of reeds (blocking) with reeds round it; two have a chest
@@ -69,7 +69,7 @@ function hgdlFillWm(L,k,li){
   const cells=[];for(let y=k.y0;y<=k.y1;y++)for(let x=k.x0;x<=k.x1;x++)if(water(x,y))cells.push([x,y]);k.waterCells=cells.length;
   const dw=k.wdocks.map(c=>[c.wx,c.wy]),nearD=(x,y,r)=>dw.some(p=>Math.abs(p[0]-x)<=r&&Math.abs(p[1]-y)<=r);
   const used=new Set(),isFree=(x,y)=>water(x,y)&&!used.has(x+','+y);
-  const dec=(kk,x,y,o)=>{if(kk.startsWith('art_hgthin')&&o&&o.sc)o=Object.assign({},o,{sc:o.sc*2.1}); L.decor.push(Object.assign({k:kk,x,y,block:false,walk:true,deco:true,hgdl:1},o||{}))}; // thin reeds are drawn larger: they are mostly see-through
+  const dec=(kk,x,y,o)=>{if(kk.startsWith('art_hgthin')&&o&&o.sc)o=Object.assign({},o,{sc:o.sc*1.45}); L.decor.push(Object.assign({k:kk,x,y,block:false,walk:true,deco:true,hgdl:1},o||{}))}; // thin reeds are drawn larger: they are mostly see-through
   const inBasin=(x,y)=>k.basins.some(b=>Math.abs(b[0]-x)<=2&&Math.abs(b[1]-y)<=2);
   // hanging vines on the walls, thinly
   const vs=[];for(const [x,y] of cells){if(vs.length>=55||nearD(x,y,2)||rnd()>.12)continue;for(const [a,b] of DV)if(wall(x+a,y+b)&&vs.every(v=>Math.abs(v[0]-x)+Math.abs(v[1]-y)>=6)){vs.push([x,y]);dec('art_hgdf_vine'+((rnd()*4)|0),x,y,{wd:[a,b],pic:1,bob:.9});break}}

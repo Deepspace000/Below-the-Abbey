@@ -45,7 +45,7 @@ function hgdf2Build(L){
   let np=0;const plantAt=new Set();
   for(const k of reach){const [x,y]=k.split(',').map(Number);if(occ.has(k)||blk.has(k)||plantAt.has(k))continue;const w=inWild(x,y),wide=kind[y*W+x]>0;
     const p=w?(wide?.34:.12):(wide?.03:0);if(rnd()>=p)continue;
-    const t=rnd()<.4?(rnd()<.5?0:1):(rnd()*8)|0;plantAt.add(k);L.decor.push({k:'art_hgdf_plant'+t,x,y,block:false,walk:true,deco:true,sc:.8+rnd()*.35});np++}
+    const t=rnd()<.4?(rnd()<.5?0:1):(rnd()*8)|0;plantAt.add(k);L.decor.push({k:'art_hgdf_plant'+t,x,y,block:false,walk:true,deco:true,sc:.6+rnd()*.28});np++}
   // clouds drifting slowly through seven sections of the maze (open floor only)
   const clouds=[];let tc=0;const cells2=[...reach];const homes=[];
   while(homes.length<7&&tc++<4000){const c=cells2[(rnd()*cells2.length)|0].split(',').map(Number);if(homes.some(h=>Math.hypot(h[0]-c[0],h[1]-c[1])<26))continue;homes.push(c)}

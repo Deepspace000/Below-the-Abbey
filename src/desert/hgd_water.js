@@ -72,8 +72,8 @@ function hgdwBuild(){
   for(let k=0;k<10;k++){const c=take();if(c)decor.push({k:'uw_shellchest',x:c[0],y:c[1],block:true,hgdwTier:k%4===0?2:1})}
   // reed beds, lilies and green weed to swim through, everywhere
   const REED=['hgt_reeds','hgt_reeds','hgt_vine_roundleaf','uw_seagrass'];
-  for(const c of cells.slice()){if(rnd()<.3){decor.push({k:REED[(rnd()*REED.length)|0],x:c[0],y:c[1],block:false,walk:true,deco:true})}}
-  for(const r of rooms)for(let k=0;k<7;k++){const x=r.x+((rnd()*r.w)|0),y=r.y+((rnd()*r.h)|0);if(g[y][x]==='.'&&!used.has(x+','+y)&&!decor.some(d=>d.x===x&&d.y===y))decor.push({k:REED[(rnd()*REED.length)|0],x,y,block:false,walk:true,deco:true})}
+  for(const c of cells.slice()){if(rnd()<.3){decor.push({k:REED[(rnd()*REED.length)|0],x:c[0],y:c[1],block:false,walk:true,deco:true,sc:.5+rnd()*.25})}}
+  for(const r of rooms)for(let k=0;k<7;k++){const x=r.x+((rnd()*r.w)|0),y=r.y+((rnd()*r.h)|0);if(g[y][x]==='.'&&!used.has(x+','+y)&&!decor.some(d=>d.x===x&&d.y===y))decor.push({k:REED[(rnd()*REED.length)|0],x,y,block:false,walk:true,deco:true,sc:.5+rnd()*.25})}
   // moss and trailing weed hung on the walls
   {const faces=[];for(let y=1;y<S-1;y++)for(let x=1;x<S-1;x++){if(g[y][x]!=='.')continue;for(const [a,b] of D){if(g[y+b][x+a]==='#')faces.push([x,y,a,b])}}
     faces.sort(()=>rnd()-.5);const got=[];for(const [x,y,a,b] of faces){if(got.length>=110)break;if(got.some(q=>Math.abs(q[0]-x)+Math.abs(q[1]-y)<3))continue;got.push([x,y]);decor.push({k:'art_hgdf_vine'+((rnd()*4)|0),x,y,wd:[a,b],pic:1,block:false,walk:true,deco:true,bob:.9})}}

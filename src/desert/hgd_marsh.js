@@ -19,7 +19,7 @@ function hgdmrBuild(L){
       const d=Math.hypot(x-cx,y-cy)+(rnd()-.5)*3.2; // a ragged edge
       if(d>r||bad(x,y,2)||fm[y][x]==='6')continue;
       fm[y][x]='5';wet.set(x+','+y,mi);nw++;
-      if(!occ.has(x+','+y)&&rnd()<.55){occ.add(x+','+y);L.decor.push({k:HGDMR_PLANTS[(rnd()*HGDMR_PLANTS.length)|0],x,y,block:false,walk:true,deco:true,sc:.85+rnd()*.4});np++}}});
+      if(!occ.has(x+','+y)&&rnd()<.55){occ.add(x+','+y);L.decor.push({k:HGDMR_PLANTS[(rnd()*HGDMR_PLANTS.length)|0],x,y,block:false,walk:true,deco:true,sc:.5+rnd()*.28});np++}}});
   // marsh vermin (see hgd_marshfoes.js): locusts, mosquitoes, horseflies, dragonflies, hornets, crickets, bog toads and mire beetles, more in the big marsh
   let ne=0;if(typeof HGMR!=='undefined'&&HGMR.enemies){const free=centers.map(()=>[]);for(const [k,mi] of wet)if(!occ.has(k)||true){const [x,y]=k.split(',').map(Number);if(!L.decor.some(d=>d.block&&d.x===x&&d.y===y)&&!L.enemies.some(e=>e.x===x&&e.y===y))free[mi].push([x,y])}
     centers.forEach((c,mi)=>{const want=mi?5:11,f=free[mi];for(let k=0;k<want&&f.length;k++){const p2=f.splice((rnd()*f.length)|0,1)[0];L.enemies.push({t:HGMR.enemies[(rnd()*HGMR.enemies.length)|0],x:p2[0],y:p2[1]});ne++}})}
