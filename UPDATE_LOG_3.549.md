@@ -244,3 +244,9 @@ Fights from level 25 up last longer (3.580)
 Fights from level 10 to 25 as they were (3.581)
 
 * Levels 1 to 28 are back to the creature health and damage they had before 3.573 (the 40 percent cut to fight length is gone for those levels). Creature health starts rising at level 30 as in 3.580. The stronger weapons of levels 16 to 29 still make the fights near level 25 a little shorter than they were, so there is no sudden drop at level 30.
+
+Creatures sized by how many hits they take; steadier camera (3.582)
+
+* From level 28 up, an ordinary creature's health is now set as a rough guide by how many hits it takes an average (weaker) party of the same level: about 8 hits at the party's level, about 6 to 8 for creatures below it, about 12 for creatures above it, the toughest kinds up to 14, the weakest kinds about 5, and each kind a little different. A party with better gear than average kills them in about a quarter fewer hits, and sails through for a while. Bosses and great creatures keep their old toughness. Creature damage was raised to keep fights costing about the same health. Levels 1 to 27 are unchanged.
+* The weaker test party's weapons are now about four fifths as good as the best the shops sell at that level (before they could be far weaker at the highest levels).
+* The camera no longer dips up and down so much when walking over hilly ground (deserts and other terrain areas): it follows the ground height smoothly.

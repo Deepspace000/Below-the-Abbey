@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.581';
+const VERSION='3.582';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2568,7 +2568,8 @@ function render3D(){
   const skyPan=(skyLv||ovcLv||desertLv||LEVEL===3||LEVEL===13||LEVEL===32||LEVEL===33)&&SKP?(()=>{for(let x=0;x<VW;x++){const cm=2*x/VW-1;UCOL[x]=((((Math.atan2(dY+pY*cm,dX+pX*cm)/TAU)%1)+1)%1*1024+t*(ovcLv?11:7))%1024|0}return true})():false; // the sky is one panorama on walls and ceiling alike
   const fmp=G.fmap,fd2=G.fl2,fd3=G.fl3,fd4=G.fl4,fd5=G.fl5,fd6=G.fl6,IFL=(HLK&&!(LEVELS[LEVEL]&&LEVELS[LEVEL].terrace))?hgtIntFloor(HLK,[fd,fd2||fd,fd3||fd,fd4||fd,fd5||fd,fd6||fd]):null,lmp=G.lmap,lmN=lmp?clamp(1.2-(G.day||0)*1.35,0,1)*.95:0;
   TERR_NOW=desertLv&&skyPan?terrFor(LEVEL):(LEVELS[LEVEL]&&LEVELS[LEVEL].terrace?terrFor(LEVEL):null);CAMZ=EYE;const TERRACE=!!(TERR_NOW&&TERR_NOW.terr); // real hills: the camera rides the ground, the ground is marched column by column, the sky is painted behind it
-  if(TERR_NOW){CAMZ=(TERRACE?terrCam(cx,cy,t):terrH(cx,cy))+EYE;TC={nl,nn,ttR,ttG,ttB,ncr:NCR,ncg:NCG,ncb:NCB,wat:yarSea(LEVEL)&&!uwL,uw:uwL,tm:t,D,cx,cy,fmp,fds:[fd,fd2||fd,fd3||fd,fd4||fd,fd5||fd,fd6||fd],hzr,hzmax,hzrate,lbm,tbR,tbG,tbB,HLK,day,shK:HLK?HLK.sun*(.3+.7*day)*.55:0,rock:terrRock()};
+  if(TERR_NOW){const gz0=(TERRACE?terrCam(cx,cy,t):terrH(cx,cy)),dtz=Math.max(0,Math.min(.1,t-(G._gzT===undefined?t:G._gzT)));G._gzT=t;if(G._gz===undefined||G._gzLv!==LEVEL||Math.abs(gz0-G._gz)>2){G._gz=gz0;G._gzLv=LEVEL}else G._gz+=(gz0-G._gz)*(1-Math.exp(-dtz/.3)); // the camera follows the ground height smoothly, so walking over bumpy ground does not dip the view up and down
+  CAMZ=G._gz+EYE;TC={nl,nn,ttR,ttG,ttB,ncr:NCR,ncg:NCG,ncb:NCB,wat:yarSea(LEVEL)&&!uwL,uw:uwL,tm:t,D,cx,cy,fmp,fds:[fd,fd2||fd,fd3||fd,fd4||fd,fd5||fd,fd6||fd],hzr,hzmax,hzrate,lbm,tbR,tbG,tbB,HLK,day,shK:HLK?HLK.sun*(.3+.7*day)*.55:0,rock:terrRock()};
     if(TERRACE){terrBack(D,hzr,hzmax,lbm);if(HLK&&HGTE.pano&&HLK.pano>0)hgtPanoPaint(D,dX,dY,pX,pY,HLK,t,day)} // a painted far skyline and cavern roof behind the terrain (hgt_engine.js)else if(SK)paintDesertSky(D,SKP,UCOL,SK,ST,stormC,dX,dY,pX,pY,t);
     else{const WOB=uwL?new Float32Array(VW):null;if(WOB)for(let x=0;x<VW;x++)WOB[x]=Math.sin(t*.7+x*.05)*4+Math.sin(t*.43+x*.021)*3; // the light moves and bends
     for(let y=0;y<VH;y++){const v0=y-HH+150,o=y*VW*4;for(let x=0;x<VW;x++){const v=clamp(WOB?v0+WOB[x]:v0,0,255)|0,i=(v*1024+UCOL[x])*4,io=o+x*4;D[io]=SKP[i]*lbm*tbR;D[io+1]=SKP[i+1]*lbm*tbG;D[io+2]=SKP[i+2]*lbm*tbB}}}}
@@ -46838,7 +46839,7 @@ function hgdhgList(kind){
 const BAL={HP:.6,
   // creature health factor by level: unchanged (1.0) up to level 30, then rising through levels 30 to 40 so that the better weapons of the middle game do not kill an ordinary creature in one or two hits (about three rounds to kill at every level from 30 up)
   hpT:[[1,1],[28,1],[30,1],[35,1.08],[40,1.25],[50,1.26],[60,1.12],[70,1.16],[80,1.03],[100,.95]],
-  dkT:[[1,1],[25,1],[28,1.3],[30,1.6],[35,1.77],[40,1.87],[50,2.05],[60,2.16],[70,2.18],[80,1.95],[90,1.9],[100,1.85]], // (level, creature damage factor): refitted with the longer fights above
+  dkT:[[1,1],[25,1],[28,1.3],[30,2.0],[32,2.6],[34,2.8],[40,2.65],[50,2.95],[60,3.15],[70,3.45],[80,3.45],[90,3.6],[100,3.7]], // (level, creature damage factor): refitted with the longer fights above
   tgT:[[10,10],[20,11],[30,12],[50,14],[100,17]]}; // the health a party should lose in one fight against three creatures of its own level, in percent: a gentle rise
 BAL.lerp=(T,x)=>{if(x<=T[0][0])return T[0][1];for(let i=1;i<T.length;i++)if(x<=T[i][0]){const a=T[i-1],b=T[i];return a[1]+(b[1]-a[1])*(x-a[0])/(b[0]-a[0])}return T[T.length-1][1]};
 BAL.dk=l=>BAL.lerp(BAL.dkT,l);BAL.hp=l=>BAL.lerp(BAL.hpT,l);BAL.target=l=>BAL.lerp(BAL.tgT,l);
@@ -46846,8 +46847,20 @@ BAL.dk=l=>BAL.lerp(BAL.dkT,l);BAL.hp=l=>BAL.lerp(BAL.hpT,l);BAL.target=l=>BAL.le
 {const done=new Set();for(const id in ITEMDEF){const d=ITEMDEF[id];if(!d||d.k!=='weapon'||!d.lvl||d.lvl<16||d.lvl>29||d.rar||done.has(d))continue;done.add(d);
   const f=1+1.8*Math.pow((d.lvl-15)/15,1.5);d.dmg=[Math.round(d.dmg[0]*f),Math.round(d.dmg[1]*f)]}}
 // 2. creature health and damage
-{const _es=enemyStat;enemyStat=function(t,lvl){const r=_es.apply(this,arguments),L=lvl||lvlHere(),k=BAL.dk(L);
-  r.hp=Math.max(1,Math.round(r.hp*BAL.hp(L)));r.dmg=[Math.max(1,Math.round(r.dmg[0]*k)),Math.max(1,Math.round(r.dmg[1]*k))];return r}}
+/* From level 28 an ordinary creature is sized by how many hits it takes from a hero with good gear for the party's level (AH, average hit = damage times chance to hit, of an average party: a party with the best gear takes about a quarter fewer hits, and sails through for a while), as a rough guide, not a rule:
+   a creature at the party's level takes about 8 hits, one below it about 6 to 8, one above it about 12 (BAL.hitsRel: 6 at 6 or more levels below, 8 at the same level, 12 at 3 or more above, 14 at the most);
+   the kind of creature changes it (a wolf-like one about 60 percent of that, the toughest ordinary kinds up to 175 percent), and each kind is a little different (plus or minus 15 percent), so no two fights feel the same.
+   Bosses and great creatures keep the older formula (health factor hpT). The new sizing fades in from level 26 to 32; below it nothing changes. */
+BAL.REF=48;BAL.ahT=[[1,8],[10,14],[20,36],[25,54],[28,62],[30,98],[34,100],[36,143],[40,150],[46,164],[50,178],[60,182],[70,183],[100,184]]; // the average hit (damage times chance to hit) of an average (weaker) party: about four fifths of one with the best gear for its level, so a party with better gear than average kills faster for a while
+BAL.ah=l=>BAL.lerp(BAL.ahT,l);
+BAL.w=l=>Math.max(0,Math.min(1,(l-26)/6));
+BAL.hitsRel=rel=>BAL.lerp([[-6,6],[0,8],[3,12],[8,14]],rel);
+BAL.kind=(t,base)=>{let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;const j=.85+.3*(((h>>>0)%1000)/1000);return Math.max(.6,Math.min(1.75,base/BAL.REF))*j};
+BAL.partyLvl=L=>{const a=(G.heroes||[]).filter(h=>h.alive!==false);return a.length?a.reduce((n,h)=>n+h.lvl,0)/a.length:L};
+{const _es=enemyStat;enemyStat=function(t,lvl){const r=_es.apply(this,arguments),L=lvl||lvlHere(),k=BAL.dk(L),d=ENEMY_DEF[t],old=Math.max(1,Math.round(r.hp*BAL.hp(L))),w=BAL.w(L);
+  const ordinary=d&&!(d.boss||d.aboveParty||(typeof NO_VARY!=='undefined'&&NO_VARY.includes(t))||d.partyLevel||/^w_/.test(t));
+  if(ordinary&&w>0){const pl=BAL.partyLvl(L),nw=BAL.ah(pl)*BAL.hitsRel(L-pl)*BAL.kind(t,d.hp);r.hp=Math.max(1,Math.round(old*(1-w)+nw*w))}else r.hp=old;
+  r.dmg=[Math.max(1,Math.round(r.dmg[0]*k)),Math.max(1,Math.round(r.dmg[1]*k))];return r}}
 
 /* ---- src/desert/food_health.js ---- */
 /* ==========================================================================
