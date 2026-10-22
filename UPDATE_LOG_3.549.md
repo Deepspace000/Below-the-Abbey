@@ -184,3 +184,8 @@ Shop stalls and the dollar sign (3.569)
 Shops on the map (3.570)
 
 * On the Deeper Hollow map, every shop now shows as a gold $ once the map is zoomed in a little. Zoom in further and the kind of shop is written under it (Goods, Arms, Armour, Magic, Trader, Inn). Labels that would crowd each other are left out.
+
+Quarter names and high level gear in the shops (3.571)
+
+* The four quarters of the Deeper Hollow now have names: the north-west is The Lantern Reaches, the north-east The Gilded Heights, the south-west The Cairn Warrens and the south-east The Hedgefoot Approaches. The name shows under the map title and also as a banner across the top of the map for a few seconds whenever you open a quarter.
+* The weapon shops of the eight maze towns now sell every weapon of level 50 and over (14 of them, from the Worldbreaker Blade to the Molten Greatblade), and the armour shops every piece of armour of level 50 and over (32 pieces, up to the Godforged set), one of each, on top of the normal stock. The lists are read from the item table, so gear added later shows up too.

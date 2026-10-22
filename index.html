@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.570';
+const VERSION='3.571';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -46763,6 +46763,30 @@ const HGDST_LBL={general:'Goods',arms:'Arms',armour:'Armour',magic:'Magic',trade
       if(lab&&!lbx.some(q=>Math.abs(q[0]-px)<22&&Math.abs(q[1]-py)<8)){lbx.push([px,py]);ctx.font='bold 5.6px '+FUI;ctx.lineWidth=2.2;ctx.strokeStyle='rgba(233,220,180,.9)';ctx.strokeText(HGDST_LBL[s.k],px,py+r+4.5);ctx.fillStyle='#4a2a08';ctx.fillText(HGDST_LBL[s.k],px,py+r+4.5)}}
     ctx.restore()}catch(e){console.error('hgdst map',e)}}}
 // the key of the map names it
+/* ---------- the four quarters of the maze have names, shown under the map title and as a banner at the top of the map when a quarter is opened ---------- */
+{const Q=['The Lantern Reaches','The Gilded Heights','The Cairn Warrens','The Hedgefoot Approaches'];for(let i=0;i<4;i++)HGDMP.views[i+1][1]=Q[i]}
+{const _dn2=hgdmpDrawNames;hgdmpDrawNames=function(vi){
+  _dn2.apply(this,arguments);
+  try{const V=MPL.view;if(!V||vi<1||vi>4)return;const B=HGDST.ban=HGDST.ban||{};
+    if(B.vi!==vi||G.time-(B.last||0)>1.2)B.t=G.time;B.vi=vi;B.last=G.time; // a quarter opened afresh (or switched to) starts its banner
+    const age=G.time-B.t;if(age>3.4)return;const al=age<.4?age/.4:age>2.6?Math.max(0,1-(age-2.6)/.8):1,A=V.area,name=HGDMP.views[vi][1];
+    ctx.save();ctx.globalAlpha=al;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 19px '+FTITLE;
+    const w=ctx.measureText(name).width+36;ctx.fillStyle='rgba(30,18,8,.78)';ctx.fillRect(A.x+A.w/2-w/2,A.y+8,w,28);ctx.strokeStyle='#c8a050';ctx.lineWidth=1;ctx.strokeRect(A.x+A.w/2-w/2+.5,A.y+8.5,w-1,27);
+    ctx.fillStyle='#f0dca0';ctx.fillText(name,A.x+A.w/2,A.y+23);ctx.restore()}catch(e){console.error('hgdst ban',e)}}}
+
+/* ---- src/desert/hgd_highgear.js ---- */
+/* ==========================================================================
+   HIGH LEVEL GEAR IN THE SHOPS (prefix hgdhg / HGDHG). The weapon shops of the eight maze towns now also sell every weapon of level 50 and over, and the armour shops every piece of armour of level 50 and over (helmets, chests, arms, legs and shields), one of each,
+   in order of level, on top of the usual stock. The lists are read from ITEMDEF when a shop is opened, so gear added later is picked up too.
+   ========================================================================== */
+const HGDHG={MIN:50};
+function hgdhgList(kind){
+  const armour=['head','chest','arms','legs','shield','feet','cloak'],ids=Object.keys(ITEMDEF).filter(id=>{const d=ITEMDEF[id];if(!d||!(d.lvl>=HGDHG.MIN)||!((d.price||0)>0))return false;return kind==='arms'?d.k==='weapon':armour.includes(d.k)});
+  return ids.sort((a,b)=>(ITEMDEF[a].lvl-ITEMDEF[b].lvl)||(ITEMDEF[a].price-ITEMDEF[b].price))}
+{const _s=hgds2Stock;hgds2Stock=function(kind,town){const rows=_s.apply(this,arguments);
+  if(kind!=='arms'&&kind!=='armour')return rows;
+  try{const have=new Set(rows.map(r=>r[0]));for(const id of hgdhgList(kind))if(!have.has(id))rows.push([id,1])}catch(e){console.error('hgdhg',e)}
+  return rows}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

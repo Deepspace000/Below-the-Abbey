@@ -27,3 +27,13 @@ const HGDST_LBL={general:'Goods',arms:'Arms',armour:'Armour',magic:'Magic',trade
       if(lab&&!lbx.some(q=>Math.abs(q[0]-px)<22&&Math.abs(q[1]-py)<8)){lbx.push([px,py]);ctx.font='bold 5.6px '+FUI;ctx.lineWidth=2.2;ctx.strokeStyle='rgba(233,220,180,.9)';ctx.strokeText(HGDST_LBL[s.k],px,py+r+4.5);ctx.fillStyle='#4a2a08';ctx.fillText(HGDST_LBL[s.k],px,py+r+4.5)}}
     ctx.restore()}catch(e){console.error('hgdst map',e)}}}
 // the key of the map names it
+/* ---------- the four quarters of the maze have names, shown under the map title and as a banner at the top of the map when a quarter is opened ---------- */
+{const Q=['The Lantern Reaches','The Gilded Heights','The Cairn Warrens','The Hedgefoot Approaches'];for(let i=0;i<4;i++)HGDMP.views[i+1][1]=Q[i]}
+{const _dn2=hgdmpDrawNames;hgdmpDrawNames=function(vi){
+  _dn2.apply(this,arguments);
+  try{const V=MPL.view;if(!V||vi<1||vi>4)return;const B=HGDST.ban=HGDST.ban||{};
+    if(B.vi!==vi||G.time-(B.last||0)>1.2)B.t=G.time;B.vi=vi;B.last=G.time; // a quarter opened afresh (or switched to) starts its banner
+    const age=G.time-B.t;if(age>3.4)return;const al=age<.4?age/.4:age>2.6?Math.max(0,1-(age-2.6)/.8):1,A=V.area,name=HGDMP.views[vi][1];
+    ctx.save();ctx.globalAlpha=al;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 19px '+FTITLE;
+    const w=ctx.measureText(name).width+36;ctx.fillStyle='rgba(30,18,8,.78)';ctx.fillRect(A.x+A.w/2-w/2,A.y+8,w,28);ctx.strokeStyle='#c8a050';ctx.lineWidth=1;ctx.strokeRect(A.x+A.w/2-w/2+.5,A.y+8.5,w-1,27);
+    ctx.fillStyle='#f0dca0';ctx.fillText(name,A.x+A.w/2,A.y+23);ctx.restore()}catch(e){console.error('hgdst ban',e)}}}
