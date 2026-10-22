@@ -212,3 +212,9 @@ Floor items to the side, bare passages (3.575)
 
 * Small things on the floor of the maze (props, and loose items lying about) now always lie to one side of the square, left or right (or toward the near or far wall), never in the middle. About half to each side. A fault in the first version left some close to the middle; fixed.
 * Passages vary: about half of the stretches are bare, a third hold one thing, and the rest hold a few (two to four).
+
+Go to area list (3.576)
+
+* The desert structures (the Mounds of the Sand Road and the dungeons of each desert) now sit right after The Deserts, not at the bottom of the list.
+* Every area button shows its level range on the right ("Level 28 to 31" from its creatures, or its rating when it has none).
+* A "Highest first" button at the top right of the list sorts by level, highest at the top, and is the default; press it again for the plain order. Areas that belong together (the deserts and their structures) stay together.

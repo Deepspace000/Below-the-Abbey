@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.575';
+const VERSION='3.576';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -4244,11 +4244,13 @@ function drawInitialFrame(x,y,w,h){
 /* ---------- the title screen's "Go to area": pick any area or dungeon and start there ---------- */
 G.gotoLvl=34;G.gotoGold=2000;
 const gotoGoldStep=(v,up)=>{const s=v<5000||(!up&&v<=5000)?500:v<50000||(!up&&v<=50000)?5000:25000;return up?Math.min(999999,v+s):Math.max(0,v-s)};
-function gotoList(){
-  const out=[],nm=n=>LEVEL_NAMES[n]||(LEVELS[n]&&LEVELS[n].name)||('Level '+n),hd=h=>out.push({h});
+function gotoListRaw(){
+  const out=[],nm=n=>LEVEL_NAMES[n]||(LEVELS[n]&&LEVELS[n].name)||('Level '+n),hd=(h,g)=>out.push({h,g});
   const has=n=>{if(!LEVELS[n]&&n>=289&&n<=312&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();return LEVELS[n]||(typeof KH_LAZY!=='undefined'&&KH_LAZY[n])};
   hd('The Known Lands');for(let n=1;n<=40;n++)if(has(n))out.push({n,name:nm(n)});
-  hd('The Deserts');for(const n of [41,42,43,44,60,61,62,63,64,65])if(has(n))out.push({n,name:nm(n)});
+  hd('The Deserts','desert');for(const n of [41,42,43,44,60,61,62,63,64,65])if(has(n))out.push({n,name:nm(n)});
+  hd('Mounds of the Sand Road','desert');for(let n=BURROW_BASE;n<BURROW_BASE+BURROW_N;n++)if(has(n))out.push({n,name:nm(n)});
+  for(const [dl,dname] of DNG_DESERTS){const ids=Object.keys(DNG_INFO).map(Number).filter(n=>DNG_INFO[n].desert===dname).sort((a,b)=>a-b);if(ids.length){hd('Dungeons of '+dname,'desert');for(const n of ids)out.push({n,name:nm(n)})}} // (the desert structures sit with the deserts)
   const FIXED={199:'The Palace of Khemetra',260:'The Cisterns beneath Khemetra',261:"Ishkander's Study",266:'The Tunnel to the Narrow Sea',270:'The Temple Dungeons',271:"Ironhill: Corvin's Arcana",272:'Ironhill: The Cauldron',273:'Ironhill: Steelhold Blades',274:'Ironhill: Plate and Mail'};
   hd('Khemetra: the palace, the cisterns and the cells');for(const n of [199,260,261,266,270])out.push({n,name:LEVEL_NAMES[n]||FIXED[n]});
   hd('Ironhill shops');for(const n of [271,272,273,274])out.push({n,name:LEVEL_NAMES[n]||FIXED[n]});
@@ -4262,10 +4264,23 @@ function gotoList(){
   hd('Caves hidden in the woods of the Pilgrim’s Path');for(let n=7100;n<7120;n++)if(has(n))out.push({n,name:nm(n)});hd('Caves in the older forests');for(let n=7200;n<7207;n++)if(has(n))out.push({n,name:nm(n)});
   if(typeof hgtGotoList==='function')hgtGotoList(hd,has,nm,out);
   hd('Below the Abbey, past the sealed door');for(const n of [360,361,362,363,364,440,441,445,450,455,458,459,460,470,471,472,473,474,475,476,477])if(has(n))out.push({n,name:nm(n)});
-    hd('Mounds of the Sand Road');for(let n=BURROW_BASE;n<BURROW_BASE+BURROW_N;n++)if(has(n))out.push({n,name:nm(n)});
-  for(const [dl,dname] of DNG_DESERTS){const ids=Object.keys(DNG_INFO).map(Number).filter(n=>DNG_INFO[n].desert===dname).sort((a,b)=>a-b);if(ids.length){hd('Dungeons of '+dname);for(const n of ids)out.push({n,name:nm(n)})}}
   return out;
 }
+
+/* the level an area is rated at (cheap: no scan of the map), and the level range shown on its button: the creatures' levels when it has creatures, else its rating */
+const gotoRate=n=>{const r=(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[n])||(LEVELS[n]&&(LEVELS[n].diff||0)+((LEVELS[n].lvlBonus)||0))||0;if(r)return r;try{return areaStats(n).hi||0}catch(e){return 0}}; // (an area with no rating takes the highest level of its creatures)
+function gotoRange(n){const st=areaStats(n);return st.en?(st.lo===st.hi?''+st.lo:st.lo+' to '+st.hi):(gotoRate(n)?''+gotoRate(n):'')}
+const gotoSortOn=()=>G.gotoSort===undefined?true:!!G.gotoSort; // the highest levels at the top is the default
+function gotoList(){
+  const raw=gotoListRaw();if(!gotoSortOn())return raw;
+  const secs=[];for(const r of raw){if(r.h){secs.push({h:r.h,g:r.g,items:[]})}else if(secs.length)secs[secs.length-1].items.push(r)}
+  for(const sc of secs){sc.items.sort((a,b)=>(gotoRate(b.n)-gotoRate(a.n))||(a.n-b.n));sc.top=sc.items.length?gotoRate(sc.items[0].n):0}
+  // groups: sections that belong together (the desert and its structures) stay together, in their own order; groups and lone sections go highest first
+  const groups=[];for(const sc of secs){const last=groups[groups.length-1];if(sc.g&&last&&last.g===sc.g)last.secs.push(sc);else groups.push({g:sc.g,secs:[sc]})}
+  for(const g of groups)g.top=Math.max(...g.secs.map(s=>s.top));
+  groups.sort((a,b)=>b.top-a.top);
+  const out=[];for(const g of groups)for(const sc of g.secs){out.push({h:sc.h});for(const it of sc.items)out.push(it)}
+  return out}
 function jumpToLevel(n,target){
   if((((n>=304&&n<=312)||(n>=360&&n<=364)||(n>=400&&n<=434)||(n>=440&&n<=474)||hgtAny(n))||(n>=6000&&n<9000))&&typeof KH_READY!=='undefined'&&!KH_READY){khLoadAssets().then(()=>jumpToLevel(n,target));return} // Oldhaven needs its pictures before it is built
   if((n===44||(n>=199&&n<=274))&&LEVELS[44].stub){khEnter(()=>jumpToLevel(n,target));return}
@@ -4317,13 +4332,15 @@ function drawGoto(){
     if(r.h){txt(r.h,lx+2,yy+9,9,'#c8a860','left',true,undefined,lw);ctx.fillStyle='rgba(200,168,96,.35)';ctx.fillRect(lx,yy+h-2,lw,1);continue}
     const st=areaStats(r.n),vy=Math.max(yy,ly),vh=Math.min(yy+h,ly+lh)-vy;
     panel(lx,yy+1,lw-8,h-3,false,false);
-    txt(r.name,lx+8,yy+12,10,'#ece0c0','left',true,undefined,lw-30);
+    {const rg=gotoRange(r.n);if(rg)txt('Level '+rg,lx+lw-16,yy+12,9.5,'#ffe36a','right',true)} // the level range of the area, on its button
+    txt(r.name,lx+8,yy+12,10,'#ece0c0','left',true,undefined,lw-110);
     txt(st.en?`${st.en} creatures, level ${st.lo===st.hi?st.lo:st.lo+' to '+st.hi}${st.late?' ('+st.late+' arrive later)':''}${st.note?', '+st.note:''}`:'No creatures',lx+8,yy+25,8.5,st.en?'#e8a090':'#a8c8a0','left',false,undefined,lw-20);
     txt(`${st.pot} potions   ${st.gold} gold   ${st.it} items`,lx+8,yy+35,8.5,'#e8dca8','left',false,undefined,lw-20);
     if(vh>4)BTNS.push({id:'go_'+r.n,x:lx,y:vy,w:lw-8,h:vh,up:true,drag:'goto'});
   }
   ctx.restore();
   if(Ly.total>lh){const th=Math.max(16,lh*lh/Ly.total),ty=ly+(lh-th)*(G.gs/(Ly.total-lh));ctx.fillStyle='rgba(216,200,142,.55)';rrect(ctx,lx+lw-5,ty,4,th,2);ctx.fill()}
+  btnText('go_sort',gotoSortOn()?'Highest first':'Plain order',346,10,100,17);
   btnText('go_back','Back',36,286,58,20);
   btnText('go_up','Up',100,286,40,20);btnText('go_dn','Down',144,286,48,20);
   btnText('go_lm','-',200,286,22,20);txt('Party level '+G.gotoLvl,261,296,8.5,'#e8dca8','center',true);btnText('go_lp','+',302,286,22,20);
@@ -4333,6 +4350,7 @@ function gotoBtn(id){
   if(id==='go_up')G.gs=Math.max(0,(G.gs||0)-GO_ROW*3);
   else if(id==='go_dn')G.gs=Math.min(gotoMax(),(G.gs||0)+GO_ROW*3);
   else if(id==='go_back')G.state='title';
+  else if(id==='go_sort'){G.gotoSort=gotoSortOn()?0:1;G.gs=0}
   else if(id==='go_lm')G.gotoLvl=Math.max(1,G.gotoLvl-2);
   else if(id==='go_lp')G.gotoLvl=Math.min(80,G.gotoLvl+2);
   else if(id==='go_gm')G.gotoGold=gotoGoldStep(G.gotoGold,false);
