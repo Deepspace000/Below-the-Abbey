@@ -258,3 +258,7 @@ Creature toughness matched to Gandrick's Wood (3.583)
 Creatures hit a little harder (3.584)
 
 * Every creature now hits 12 percent harder, at every level.
+
+Skeletons farther from the wolves (3.585)
+
+* On the abbey grounds and the Thornwood, the skeletons' cutscene no longer follows straight after the wolves'. The two skeletons nearest the way in were moved east (to about x 42 and x 47), so the first skeleton is now seen about 16 squares after the wolves' cutscene point instead of at the same spot.
