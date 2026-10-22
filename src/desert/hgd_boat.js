@@ -65,8 +65,8 @@ function hgdbHud(){
 {const _h=uwHud;uwHud=function(){_h.apply(this,arguments);try{hgdbHud()}catch(e){}}}
 /* ---------- the sound: steps are the lap of water and the dip of an oar; a soft hush of water all the while ---------- */
 {const _s=sfx;sfx=function(n){if((n==='step'||n==='turn')&&hgdbOn()&&AC&&!G.mute&&SNDOPT.steps){
-    const v=.8+Math.random()*.4;nz(.32,(n==='step'?.2:.1)*v*SNDOPT.steps,'bandpass',900+Math.random()*500,450,0);nz(.55,.11*v*SNDOPT.steps,'lowpass',520,180,.06);
-    if(n==='step'){tone(300+Math.random()*120,170,.1,'sine',.05*SNDOPT.steps,.02);if(Math.random()<.5)tone(500+Math.random()*300,260,.06,'sine',.035*SNDOPT.steps,.16)}return}
+    const v=.8+Math.random()*.4;nz(.34,(n==='step'?.1:.06)*v*SNDOPT.steps,'lowpass',3800*v,1400,0);nz(.3,.06*v*SNDOPT.steps,'highpass',2000*v,3800,.02);nz(.55,.05*v*SNDOPT.steps,'lowpass',900,300,.06);
+    return}
   return _s.apply(this,arguments)}}
 const HGDBS={src:null,hush:null,next:0};
 function hgdbSound(){

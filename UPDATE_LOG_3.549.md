@@ -96,7 +96,7 @@ The lakes and the boats
 The marshes
 
 * Eight stretches of the maze are marshes under warm, shallow water that can be waded through, thick with reeds, lilies and tall grass that the party walks straight through. The biggest is the Marsh Maze, and the others are named too (the Reed Flats, Lily Shallows, the Wading Rows, Heron Marsh, the Sedge Fens, Mudwater Court and the Rush Beds). The names are on the map and the water shows light blue. The first time the party wades into each, a message says where it is.
-* Footsteps splash while the party is in the shallows.
+* Footsteps splash while the party is in the shallows: a soft, hissy wash of water noise, not a thump.
 * Eight painted marsh creatures live in them, more in the Marsh Maze: giant locusts, giant mosquitoes, giant horseflies, razor dragonflies, marsh hornets, bog crickets, bloated bog toads and mire beetles.
 
 Controls

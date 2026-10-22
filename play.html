@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.552';
+const VERSION='3.553';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -44872,8 +44872,8 @@ function hgdbHud(){
 {const _h=uwHud;uwHud=function(){_h.apply(this,arguments);try{hgdbHud()}catch(e){}}}
 /* ---------- the sound: steps are the lap of water and the dip of an oar; a soft hush of water all the while ---------- */
 {const _s=sfx;sfx=function(n){if((n==='step'||n==='turn')&&hgdbOn()&&AC&&!G.mute&&SNDOPT.steps){
-    const v=.8+Math.random()*.4;nz(.32,(n==='step'?.2:.1)*v*SNDOPT.steps,'bandpass',900+Math.random()*500,450,0);nz(.55,.11*v*SNDOPT.steps,'lowpass',520,180,.06);
-    if(n==='step'){tone(300+Math.random()*120,170,.1,'sine',.05*SNDOPT.steps,.02);if(Math.random()<.5)tone(500+Math.random()*300,260,.06,'sine',.035*SNDOPT.steps,.16)}return}
+    const v=.8+Math.random()*.4;nz(.34,(n==='step'?.1:.06)*v*SNDOPT.steps,'lowpass',3800*v,1400,0);nz(.3,.06*v*SNDOPT.steps,'highpass',2000*v,3800,.02);nz(.55,.05*v*SNDOPT.steps,'lowpass',900,300,.06);
+    return}
   return _s.apply(this,arguments)}}
 const HGDBS={src:null,hush:null,next:0};
 function hgdbSound(){
@@ -45065,8 +45065,8 @@ const hgdmrWet=()=>{const L=LEVELS[HGD.ID];return LEVEL===HGD.ID&&L&&L.fmap&&G.P
 {const _s=sfx;sfx=function(n){
   if(n==='step'&&AC&&!G.mute&&SNDOPT.steps&&G.state==='play'&&hgdmrWet()){
     G.bumpT=0;SFXM=SNDOPT.steps;const v=.85+Math.random()*.3,p=(G.stepAlt=!G.stepAlt)?1:.88;
-    nz(.12+Math.random()*.05,.26,'bandpass',1500*v*p,700,0);nz(.07,.2,'highpass',2800*v,5200,.02);nz(.1,.16,'bandpass',800*v,380,.06);
-    tone(260+Math.random()*220,150,.09,'sine',.07,.01);if(Math.random()<.5)tone(420+Math.random()*260,260,.06,'sine',.05,.07);
+    // soft and hissy: broad white noise, no thump and no pitched blips
+    const sw=SNDOPT.steps;nz(.26+Math.random()*.1,.11*v*sw,'lowpass',4200*v,1500,0);nz(.2+Math.random()*.08,.08*v*sw,'highpass',2200*v,4200,.015);nz(.14,.05*v*sw,'bandpass',1500*v*p,900,.07);
     return}
   return _s.apply(this,arguments)}}
 if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('Some stretches of the maze lie under a hand of warm water, thick with reeds. You can wade through them. Your boots will be wet, and everyone will know you are coming.');

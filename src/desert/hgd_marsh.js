@@ -29,8 +29,8 @@ const hgdmrWet=()=>{const L=LEVELS[HGD.ID];return LEVEL===HGD.ID&&L&&L.fmap&&G.P
 {const _s=sfx;sfx=function(n){
   if(n==='step'&&AC&&!G.mute&&SNDOPT.steps&&G.state==='play'&&hgdmrWet()){
     G.bumpT=0;SFXM=SNDOPT.steps;const v=.85+Math.random()*.3,p=(G.stepAlt=!G.stepAlt)?1:.88;
-    nz(.12+Math.random()*.05,.26,'bandpass',1500*v*p,700,0);nz(.07,.2,'highpass',2800*v,5200,.02);nz(.1,.16,'bandpass',800*v,380,.06);
-    tone(260+Math.random()*220,150,.09,'sine',.07,.01);if(Math.random()<.5)tone(420+Math.random()*260,260,.06,'sine',.05,.07);
+    // soft and hissy: broad white noise, no thump and no pitched blips
+    const sw=SNDOPT.steps;nz(.26+Math.random()*.1,.11*v*sw,'lowpass',4200*v,1500,0);nz(.2+Math.random()*.08,.08*v*sw,'highpass',2200*v,4200,.015);nz(.14,.05*v*sw,'bandpass',1500*v*p,900,.07);
     return}
   return _s.apply(this,arguments)}}
 if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('Some stretches of the maze lie under a hand of warm water, thick with reeds. You can wade through them. Your boots will be wet, and everyone will know you are coming.');
