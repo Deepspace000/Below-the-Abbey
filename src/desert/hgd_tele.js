@@ -43,7 +43,7 @@ function hgdtGo(s){
 // the maps show the stones that have been woken
 {const _dn=hgdmpDrawNames;hgdmpDrawNames=function(vi){try{const L=LEVELS[HGD.ID],V=MPL.view;if(L&&L._hgdt&&V&&V.z){const W0=hgdtWoken(),A=V.area,z=V.z;ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();
     for(const s of L._hgdt.stones){if(!W0[s.id])continue;const px=A.x+(V.X(s.x+.5)-V.sx0)*z,py=A.y+(V.Y(s.y+.5)-V.sy0)*z;if(px<A.x||px>A.x+A.w||py<A.y||py>A.y+A.h)continue;
-      ctx.strokeStyle='#2a5a9a';ctx.fillStyle='rgba(150,210,255,.9)';ctx.lineWidth=.8;ctx.beginPath();ctx.arc(px,py,2.3,0,6.3);ctx.fill();ctx.stroke();ctx.beginPath();ctx.arc(px,py,.8,0,6.3);ctx.fillStyle='#2a5a9a';ctx.fill()}
+      if(!hgdiDraw(ctx,'stone',px,py+2.6,Math.max(7,Math.min(10,5.5+z*.5)))){ctx.strokeStyle='#2a5a9a';ctx.fillStyle='rgba(150,210,255,.9)';ctx.lineWidth=.8;ctx.beginPath();ctx.arc(px,py,2.3,0,6.3);ctx.fill();ctx.stroke();ctx.beginPath();ctx.arc(px,py,.8,0,6.3);ctx.fillStyle='#2a5a9a';ctx.fill()}}
     ctx.restore()}}catch(e){}return _dn.apply(this,arguments)}}
 // the people mention them
 if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('There is a stone in every town and safe place. Wake one by standing on it, and it will carry you to any other you have woken. They say a few stand at the far ends of the danger zones too.');

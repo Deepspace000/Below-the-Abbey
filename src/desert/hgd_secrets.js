@@ -12,8 +12,9 @@ if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push(...HGDS_KEYS.map(k=>'hgdk
 for(const [id,k] of [['dq3','red'],['dq6','blue'],['dq9','green'],['dq11','gold']])if(QUESTS[id])QUESTS[id].reward.items=(QUESTS[id].reward.items||[]).concat(['hgdkey_'+k]);
 if(typeof HGDP_SHOPS!=='undefined'){HGDP_SHOPS[2][1].push(['hgdkey_red',3]);HGDP_SHOPS[6][1].push(['hgdkey_blue',3],['hgdkey_green',3]);HGDP_SHOPS[7][1].push(['hgdkey_gold',3],['hgdgem_pearl',1]);HGDP_SHOPS[3][1].push(['hgdkey_green',2])}
 if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('A door with a gem set in it wants that gem, and takes it. Keys are used up the same way. Save them for the good doors.','The walls of a secret door are a shade off from the rest. Walk into one and see.','Dead ends are not always dead. Some have a door that is not a door.');
+const hgdpTex=n=>{const i=IMG['art_tex_hgdp_'+n];return i&&i.width?i:null};
 /* ---------- the looks of the doors (drawn in code: walls and doors may be) ---------- */
-function hgdsTexSecret(i){ // the wall of its biome, with a hairline seam in the shape of a door and a few scuffs: it can be spotted by a careful eye
+function hgdsTexSecret(i){const P=hgdpTex('secret');if(P){const key='hgds_sec'+i;if(IMG[key])return key;const b=IMG[HGDM.biomes[i].wall];IMG[key]=mkCanvas(128,128,(x,w,h)=>{if(b)x.drawImage(b,0,0,w,h);x.globalCompositeOperation='multiply';x.globalAlpha=.75;x.drawImage(P,0,0,w,h)});return key} // the wall of its biome, with a hairline seam in the shape of a door and a few scuffs: it can be spotted by a careful eye
   const key='hgds_sec'+i;if(IMG[key])return key;const b=IMG[HGDM.biomes[i].wall];
   IMG[key]=mkCanvas(128,128,(x,w,h)=>{if(b)x.drawImage(b,0,0,w,h);else{x.fillStyle='#777';x.fillRect(0,0,w,h)}
     x.fillStyle='rgba(255,230,170,.10)';x.fillRect(0,0,w,h);
@@ -21,7 +22,7 @@ function hgdsTexSecret(i){ // the wall of its biome, with a hairline seam in the
     x.strokeStyle='rgba(255,240,200,.45)';x.lineWidth=1;x.beginPath();x.moveTo(36,h);x.lineTo(36,30);x.quadraticCurveTo(36,16,64,16);x.stroke();
     x.fillStyle='rgba(18,10,4,.45)';for(const [a,c] of [[44,100],[80,112],[56,70],[72,44]]){x.beginPath();x.ellipse(a,c,2.4,1.2,0,0,6.3);x.fill()}});
   return key}
-function hgdsTexKey(k){ // a banded wooden door with an iron lock plate and a stripe of the key's colour
+function hgdsTexKey(k){const P=hgdpTex('doorkey');if(P){const key='hgds_key'+k[0];if(IMG[key])return key;IMG[key]=mkCanvas(128,128,(x,w,h)=>{x.drawImage(P,0,0,w,h);x.globalAlpha=.55;x.fillStyle=k[2];x.fillRect(0,58,w,14);x.globalAlpha=1;x.strokeStyle='rgba(0,0,0,.55)';x.lineWidth=1.2;x.strokeRect(.6,58,w-1.2,14)});return key} // a banded wooden door with an iron lock plate and a stripe of the key's colour
   const key='hgds_key'+k[0];if(IMG[key])return key;const col=k[2];
   IMG[key]=mkCanvas(128,128,(x,w,h)=>{const g=x.createLinearGradient(0,0,w,0);g.addColorStop(0,'#4a2c18');g.addColorStop(.5,'#6a4426');g.addColorStop(1,'#42281a');x.fillStyle=g;x.fillRect(0,0,w,h);
     x.strokeStyle='rgba(20,10,4,.55)';x.lineWidth=1.4;for(let i=1;i<6;i++){x.beginPath();x.moveTo(i*w/6,0);x.lineTo(i*w/6,h);x.stroke()}
@@ -31,7 +32,7 @@ function hgdsTexKey(k){ // a banded wooden door with an iron lock plate and a st
     x.fillStyle='#d8d8e0';x.beginPath();x.arc(64,60,4.4,0,6.3);x.fill();x.fillRect(62,60,4,13);
     x.strokeStyle='rgba(0,0,0,.8)';x.lineWidth=3;x.strokeRect(1.5,1.5,w-3,h-3)});
   return key}
-function hgdsTexGem(g){ // a carved stone slab with a golden ring and a large cut gem that glows in its own colour
+function hgdsTexGem(g){const P=hgdpTex('gem');if(P){const key='hgds_gem'+g[0];if(IMG[key])return key;const hue={ruby:0,sapphire:230,emerald:130,amber:40,amethyst:280,pearl:0}[g[0]];IMG[key]=mkCanvas(128,128,(x,w,h)=>{x.filter=g[0]==='pearl'?'grayscale(1) brightness(1.5) contrast(.9)':'hue-rotate('+hue+'deg) saturate(1.1)';x.drawImage(P,0,0,w,h);x.filter='none'});return key} // a carved stone slab with a golden ring and a large cut gem that glows in its own colour
   const key='hgds_gem'+g[0];if(IMG[key])return key;const col=g[2],rgb=g[3];
   IMG[key]=mkCanvas(128,128,(x,w,h)=>{x.fillStyle='#6a665e';x.fillRect(0,0,w,h);
     x.strokeStyle='rgba(20,16,10,.55)';x.lineWidth=1.4;for(const y of [32,64,96]){x.beginPath();x.moveTo(0,y);x.lineTo(w,y);x.stroke()}for(const [y,a] of [[0,48],[32,80],[64,40],[96,88]]){x.beginPath();x.moveTo(a,y);x.lineTo(a,y+32);x.stroke()}

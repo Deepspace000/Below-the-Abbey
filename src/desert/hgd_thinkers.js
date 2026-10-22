@@ -44,7 +44,7 @@ function hgdkBuild(L){
     de.sort(()=>rnd()-.5);const got=[];for(const c of de){if(ns>=48)break;if(got.some(g=>Math.hypot(g[0]-c[0],g[1]-c[1])<9))continue;got.push(c);occ.add(c[0]+','+c[1]);L.decor.push({k:ns%3===2?'hgtb_deco_pearlplinth':'hgtb_deco_shellstatue',x:c[0],y:c[1],block:true});ns++}
     L._hgdkStatues=ns}
   // cracked walls: a wall that looks broken, between two passages: walk into it and it crumbles into a way through to the other side. Quite a few.
-  {const TM=ohTiles(),S=L._hgds,ch=[];const tex=bi=>{const key='hgdk_crack'+bi;if(!IMG[key]){const b=IMG[HGDM.biomes[bi].wall];IMG[key]=mkCanvas(128,128,(x,w,h)=>{if(b)x.drawImage(b,0,0,w,h);else{x.fillStyle='#777';x.fillRect(0,0,w,h)}
+  {const TM=ohTiles(),S=L._hgds,ch=[];const tex=bi=>{const key='hgdk_crack'+bi;const PC=IMG.art_tex_hgdp_crack;if(!IMG[key]&&PC&&PC.width){const b=IMG[HGDM.biomes[bi].wall];IMG[key]=mkCanvas(128,128,(x,w,h)=>{if(b)x.drawImage(b,0,0,w,h);x.globalCompositeOperation='multiply';x.globalAlpha=.85;x.drawImage(PC,0,0,w,h)})}if(!IMG[key]){const b=IMG[HGDM.biomes[bi].wall];IMG[key]=mkCanvas(128,128,(x,w,h)=>{if(b)x.drawImage(b,0,0,w,h);else{x.fillStyle='#777';x.fillRect(0,0,w,h)}
         x.fillStyle='rgba(0,0,0,.18)';x.fillRect(0,0,w,h);x.strokeStyle='rgba(8,4,2,.95)';x.lineWidth=3.2;x.lineJoin='round';x.beginPath();x.moveTo(60,0);x.lineTo(72,26);x.lineTo(54,48);x.lineTo(76,74);x.lineTo(58,98);x.lineTo(70,h);x.stroke();
         x.lineWidth=1.6;x.beginPath();x.moveTo(72,26);x.lineTo(98,34);x.moveTo(54,48);x.lineTo(28,58);x.moveTo(76,74);x.lineTo(102,90);x.moveTo(58,98);x.lineTo(34,112);x.stroke();
         x.fillStyle='rgba(6,3,2,.8)';x.beginPath();x.moveTo(54,48);x.lineTo(76,74);x.lineTo(62,86);x.lineTo(46,64);x.closePath();x.fill();

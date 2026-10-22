@@ -7,7 +7,7 @@ const HGDW={ID:477,DIFF:74,N:4,S:61};
 LEVEL_NAMES[HGDW.ID]='The Drowned Maze';LEVEL_RATING[HGDW.ID]=HGDW.DIFF;
 if(typeof HGTE!=='undefined'&&HGTE.wet)HGTE.wet.add(HGDW.ID); // this makes it a true underwater level (air counter, drowning, hauled up to the surface)
 /* ---------- the steps: wall tiles drawn in code (stone steps going down into green water, and the same going up) ---------- */
-function hgdwTex(up){const key='hgdw_steps_'+(up?'up':'down');if(IMG[key])return key;
+function hgdwTex(up){const P=IMG['art_tex_hgdp_steps'+(up?'up':'dn')];if(P&&P.width)return 'art_tex_hgdp_steps'+(up?'up':'dn');const key='hgdw_steps_'+(up?'up':'down');if(IMG[key])return key;
   IMG[key]=mkCanvas(128,128,(x,w,h)=>{const b=IMG.tex_abbeywall;if(b)x.drawImage(b,0,0,w,h);else{x.fillStyle='#3a4a48';x.fillRect(0,0,w,h)}
     x.fillStyle='rgba(0,20,30,.3)';x.fillRect(0,0,w,h);
     // an arched opening, with the water inside it and steps going down into it

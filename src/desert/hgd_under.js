@@ -20,7 +20,7 @@ function hgduArt(){for(const [id,,img,tint] of HGDU_KINDS){if(!IMG['hgu_'+id]&&I
 AFFL_HITS.push([/^hgu(beetle|grub)/,'poisoned',.2],[/^hgu(crawler|horror)/,'bleeding',.22],[/^hguspider/,'stung',.25],[/^hguwasp/,'fever',.14],[/^hguswarm/,'fleas',.22],[/^hgu/,'shaken',.1],[/^hgu/,'graverot',.07]);
 {const _aa=afflArea;afflArea=function(n,L){const r=_aa.apply(this,arguments);if(n===HGDU.ID){r.msgText='The air is close and sour, and something is clicking in the walls. You cannot see more than a step.';r.out.push(['tomblung',.3],['shaken',.2],['fleas',.2],['fever',.08])}return r}}
 /* ---------- the ladders: wall tiles ---------- */
-function hgduTex(up){const key='hgdu_ladder_'+(up?'up':'down');if(IMG[key])return key;
+function hgduTex(up){const P=IMG['art_tex_hgdp_ladder'+(up?'up':'dn')];if(P&&P.width)return 'art_tex_hgdp_ladder'+(up?'up':'dn');const key='hgdu_ladder_'+(up?'up':'down');if(IMG[key])return key;
   IMG[key]=mkCanvas(128,128,(x,w,h)=>{const b=IMG.tex_abbeywall;if(b)x.drawImage(b,0,0,w,h);else{x.fillStyle='#3a3630';x.fillRect(0,0,w,h)}
     x.fillStyle='rgba(0,0,0,.25)';x.fillRect(0,0,w,h);
     // the shaft: an arched dark opening
@@ -79,7 +79,7 @@ function hgduBuild(){
   const nests=[];for(let k=0;k<12;k++){const n=nodes[(rnd()*nodes.length)|0],ox=n.x+((rnd()-.5)*20|0),oy=n.y+((rnd()-.5)*20|0),r=2;for(let y=oy-r;y<=oy+r;y++)for(let x=ox-r;x<=ox+r;x++)carve(x,y);nests.push([ox,oy])}
   // the ladders up, in the same walls as the ladders down
   const TM=ohTiles(),chars={};
-  OH_STY.hgdu_rock=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:'art_tex_wall_cave',door:'art_tex_wall_cave',win:'art_tex_wall_cave',alt:'art_tex_wall_cave',zoom:1,contrast:1.05,tint:[10,8,16,.5]});
+  OH_STY.hgdu_rock=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:IMG.art_tex_hgdp_cave?'art_tex_hgdp_cave':'art_tex_wall_cave',door:IMG.art_tex_hgdp_cave?'art_tex_hgdp_cave':'art_tex_wall_cave',win:IMG.art_tex_hgdp_cave?'art_tex_hgdp_cave':'art_tex_wall_cave',alt:IMG.art_tex_hgdp_cave?'art_tex_hgdp_cave':'art_tex_wall_cave',zoom:1,contrast:1.05,tint:[10,8,16,.4]});
   OH_STY.hgdu_up=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:hgduTex(true),door:hgduTex(true),win:hgduTex(true),alt:hgduTex(true),zoom:1,contrast:1.0,tint:[255,255,255,0]});
   chars['#']=TM.make('plain','hgdu_rock',2.7).gid;const chUp=String.fromCharCode(0x331);chars[chUp]=TM.make('plain','hgdu_up',2.7).gid;
   for(const l of SU.ladders)g[l.y][l.x]=chUp;

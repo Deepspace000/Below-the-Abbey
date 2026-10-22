@@ -14,7 +14,7 @@ AFFL_HITS.push([/^hgwsnake/,'stung',.3],[/^hgwcroc/,'bleeding',.2],[/^hgweel/,'f
 function hgdbArt(){if(!IMG.hgw_croc&&IMG.firelizard){try{hlTint('firelizard',30,90,40,.62,'hgw_croc');if(IMG.firelizardA)hlTint('firelizardA',30,90,40,.62,'hgw_crocA')}catch(e){}}
   if(!IMG.hgw_snake&&IMG.cobra){try{hlTint('cobra',40,150,60,.55,'hgw_snake');if(IMG.cobraA)hlTint('cobraA',40,150,60,.55,'hgw_snakeA')}catch(e){}}}
 /* ---------- the looks: the wall hung with vines, and the dock ---------- */
-function hgdbTexVines(){const key='hgdb_vines';if(IMG[key])return key;
+function hgdbTexVines(){const key='hgdb_vines';if(IMG[key])return key;const PV=IMG.art_tex_hgdp_vines;if(PV&&PV.width){const b=IMG.lushwall||IMG.tex_forestwall;IMG[key]=mkCanvas(128,128,(x,w,h)=>{if(b)x.drawImage(b,0,0,w,h);x.globalCompositeOperation='multiply';x.globalAlpha=.9;x.drawImage(PV,0,0,w,h);x.globalCompositeOperation='source-over';x.globalAlpha=.25;x.fillStyle='#0a2a10';x.fillRect(0,0,w,h)});return key}
   IMG[key]=mkCanvas(128,128,(x,w,h)=>{const b=IMG.lushwall||IMG.tex_forestwall;if(b)x.drawImage(b,0,0,w,h);else{x.fillStyle='#2a4a24';x.fillRect(0,0,w,h)}
     x.fillStyle='rgba(8,30,12,.35)';x.fillRect(0,0,w,h);
     for(let i=0;i<9;i++){const px=8+i*14+((i*37)%7),len=50+((i*53)%70);x.strokeStyle=i%2?'#2f6a2a':'#245a22';x.lineWidth=2.4+(i%3)*.6;x.lineCap='round';x.beginPath();x.moveTo(px,0);
@@ -22,7 +22,7 @@ function hgdbTexVines(){const key='hgdb_vines';if(IMG[key])return key;
       x.fillStyle=i%3?'#4a9a3a':'#6ab84a';for(let y=10;y<len;y+=13){x.beginPath();x.ellipse(px+Math.sin(y*.16+i)*4+5,y,5,2.6,.5,0,6.3);x.fill();x.beginPath();x.ellipse(px+Math.sin(y*.16+i)*4-5,y+6,5,2.6,-.5,0,6.3);x.fill()}}
     x.strokeStyle='rgba(0,0,0,.7)';x.lineWidth=3;x.strokeRect(1.5,1.5,w-3,h-3)});
   return key}
-function hgdbTexDock(){const key='hgdb_dock';if(IMG[key])return key;
+function hgdbTexDock(){const key='hgdb_dock';if(IMG[key])return key;if(IMG.art_tex_hgdp_dock&&IMG.art_tex_hgdp_dock.width)return 'art_tex_hgdp_dock';
   IMG[key]=mkCanvas(128,128,(x,w,h)=>{const b=IMG.tex_abbeywall;if(b)x.drawImage(b,0,0,w,h);else{x.fillStyle='#4a4638';x.fillRect(0,0,w,h)}x.fillStyle='rgba(0,16,20,.3)';x.fillRect(0,0,w,h);
     const g=x.createLinearGradient(0,40,0,h);g.addColorStop(0,'#2a6a74');g.addColorStop(1,'#0a2a34');x.fillStyle=g;x.beginPath();x.moveTo(14,h);x.lineTo(14,50);x.quadraticCurveTo(14,14,64,14);x.quadraticCurveTo(114,14,114,50);x.lineTo(114,h);x.closePath();x.fill();x.strokeStyle='#0c1418';x.lineWidth=3;x.stroke();
     // a little boat lying in the water, seen from the side
