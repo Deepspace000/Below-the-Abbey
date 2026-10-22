@@ -57,10 +57,10 @@ The maps
 * The Deeper Hollow map is redrawn as a hand-inked medieval map, painted at five times the old sharpness. Soft watercolour washes colour each biome and run into each other, passages are inked in wobbly rounded pen lines instead of a grid of squares, the walls are hatched with short pen strokes, clearings have tufts of grass, flowers and pebbles, atriums have ferns, rooms have scattered flagstones and ponds have ripples and lily pads.
 * Trees on the map are now painted: an oak, a yew and a bell-shaped tree with golden blossoms, and a fountain, instead of green dots. Painted pictures also mark the thieves' houses, the dock and steps of the water passages and the huts of the towns.
 * The thieves' houses are on the map, each with its name.
-* The water passages are on the map. A dashed blue line joins the two docks of each canal, with reeds at the docks, and a pond marks each flight of steps down into the Drowned Maze. Three new buttons show the watery passages in full: Vine (the Vine Canal), Croc (the Croc Canals) and Drowned (the Drowned Maze), each drawn in water-blue with pools and reeds. They also work while you are standing in those levels.
+* The water passages are on the map. Shallow water that can be walked through is light blue, and deep water that needs a boat (or a helm, in the Drowned Maze) is dark blue. Reeds mark the docks of the canals, and a pond marks each flight of steps down into the Drowned Maze. Three new buttons show the watery passages in full: Vine (the Vine Canal), Croc (the Croc Canals) and Drowned (the Drowned Maze), every passage dark blue with pools and reeds. They also work while you are standing in those levels. The key lists both kinds of water.
 * Standing on a woken teleport stone and opening the map, every other woken stone is ringed in blue on the whole map and on each quarter. Tap a ringed stone to travel to it.
 * The Underlevel map is far more sinister: near-black and blood-red parchment, blood pools and spatters, claw scratches, crossed bones, skulls and watching eyes, a dripping red title and a bloody frame, with the ladders glowing so they can still be found.
-* The key on the map lists the thieves' houses, canal docks, steps into the water and the water routes.
+* The key on the map lists the thieves' houses, canal docks, steps into the water, and shallow and deep water.
 
 The mini map
 
