@@ -168,3 +168,10 @@ Vermin circles (3.566)
 Messenger of Death letters (3.567)
 
 * The letters of the Messenger of Death are now counted per level. Before, the letters seen anywhere (for example D, E and A in the Orange Spire) were shown at the top of the screen in the Underlevel straight away, and those three letters could not be found again there. Each level now starts with no letters seen, and the five letters of one level are what count.
+
+Crocodiles, water, weapons and the Potion of Escape (3.568)
+
+* The Swamp Crocodile is now a painted crocodile seen head on, with its own attack picture (open jaws). It was a green fire lizard before. It is also smaller (about a third narrower), so it no longer clips into the walls of narrow channels.
+* The Underlevel water is now a painted dark water picture rolled into moving waves with pale glints, instead of code-drawn ripples.
+* The six level 70 weapons (Molten Greatblade, Whitefire Warhammer, Crimson Cleaver, Bluefire Longbow, Verdant Flame Staff, Cinder Dagger) and the Sunfire Blade have painted flaming icons, each burning in its own colour.
+* New: Potion of Escape. Drunk in the Underlevel it carries the whole party up to the surface of the maze, at the foot of the nearest ladder down. Drunk anywhere else it does nothing and is not used up. The potion sellers of the maze sell it, and about 20 lie in dead ends of the Underlevel, one near each ladder down and the rest far apart.

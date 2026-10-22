@@ -4,12 +4,13 @@
    ========================================================================== */
 const HGDB={DIFF:73};
 Object.assign(ENEMY_DEF,{
-  hgwcroc:{name:'Swamp Crocodile',hp:300,dmg:[15,26],hit:.8,w:1.9,img:'hgw_croc',xp:230,gold:[10,40],speed:1,verb:'snaps at',aboveParty:1},
+  hgwcroc:{name:'Swamp Crocodile',hp:300,dmg:[15,26],hit:.8,w:1.05,img:'hgw_croc',xp:230,gold:[10,40],speed:1,verb:'snaps at',aboveParty:1},
   hgweel:{name:'Marsh Eel',hp:150,dmg:[10,18],hit:.8,w:1.1,img:'uw_eel_0',xp:150,gold:[0,12],speed:1,verb:'bites'},
   hgwsnake:{name:'Vine Snake',hp:130,dmg:[9,16],hit:.82,w:1.0,img:'hgw_snake',xp:140,gold:[0,10],speed:1,verb:'strikes'}});
 if(typeof NO_VARY!=='undefined')NO_VARY.push('hgwcroc','hgweel','hgwsnake');
 AFFL_HITS.push([/^hgwsnake/,'stung',.3],[/^hgwcroc/,'bleeding',.2],[/^hgweel/,'fever',.1]);
-function hgdbArt(){if(!IMG.hgw_croc&&IMG.firelizard){try{hlTint('firelizard',30,90,40,.62,'hgw_croc');if(IMG.firelizardA)hlTint('firelizardA',30,90,40,.62,'hgw_crocA')}catch(e){}}
+function hgdbArt(){if(IMG.art_hgw_croc&&IMG.art_hgw_croc.width&&IMG.hgw_croc!==IMG.art_hgw_croc){IMG.hgw_croc=IMG.art_hgw_croc;IMG.hgw_crocA=IMG.art_hgw_crocA||IMG.art_hgw_croc} // the painted front-on crocodile
+  if(!IMG.hgw_croc&&IMG.firelizard){try{hlTint('firelizard',30,90,40,.62,'hgw_croc');if(IMG.firelizardA)hlTint('firelizardA',30,90,40,.62,'hgw_crocA')}catch(e){}}
   if(!IMG.hgw_snake&&IMG.cobra){try{hlTint('cobra',40,150,60,.55,'hgw_snake');if(IMG.cobraA)hlTint('cobraA',40,150,60,.55,'hgw_snakeA')}catch(e){}}}
 /* ---------- the dock tile ---------- */
 function hgdbTexDock(){const key='hgdb_dock';if(IMG[key])return key;if(IMG.art_tex_hgdp_dock&&IMG.art_tex_hgdp_dock.width)return 'art_tex_hgdp_dock';

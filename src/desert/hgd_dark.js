@@ -6,7 +6,19 @@
 const HGDN={ID:476,N:16,frames:null,fi:-1,said:null};
 /* ---------- the water: a loop of waves ---------- */
 function hgdnFrames(){
-  if(HGDN.frames)return HGDN.frames;const T=Math.PI*2,N=HGDN.N,out=[];
+  if(HGDN.frames)return HGDN.frames;const T=Math.PI*2,N=HGDN.N,out=[],art=IMG.art_tex_hgdu_water;
+  if(art&&art.width){ // the painted black water: its pixels are rolled by moving waves (looping, seamless) with a shimmer on the crests
+    const c=document.createElement('canvas');c.width=c.height=128;const cx=c.getContext('2d');cx.drawImage(art,0,0,128,128);const b=cx.getImageData(0,0,128,128).data;
+    const px=(x,y,ch)=>b[(((y%128)+128)%128*128+((x%128)+128)%128)*4+ch];
+    for(let k=0;k<N;k++){const f=T*k/N,d=new Uint8ClampedArray(128*128*4);
+      for(let y=0;y<128;y++)for(let x=0;x<128;x++){
+        const w1=Math.sin(T*(y*2/128)+f),w2=Math.sin(T*(x*3/128+y/128)-f),w3=Math.sin(T*(x*2/128-y*3/128)+2*f);
+        const u=x+3.2*w1+1.8*w3,v=y+3.2*w2+1.8*Math.sin(T*(x*2/128)-2*f),x0=Math.floor(u),y0=Math.floor(v),fx=u-x0,fy=v-y0,o=(y*128+x)*4;
+        const sh=1+.22*(w1*.5+w2*.3+w3*.2),gl=Math.max(0,w1*.5+w2*.3+w3*.2-.45)*70;
+        for(let ch=0;ch<3;ch++){const a=px(x0,y0,ch)*(1-fx)+px(x0+1,y0,ch)*fx,a2=px(x0,y0+1,ch)*(1-fx)+px(x0+1,y0+1,ch)*fx;d[o+ch]=(a*(1-fy)+a2*fy)*1.35*sh+gl*(ch===0?.55:ch===1?.85:1)}
+        d[o+3]=255}
+      out.push(d)}
+    return HGDN.frames=out}
   for(let k=0;k<N;k++){const f=T*k/N,d=new Uint8ClampedArray(128*128*4);
     for(let y=0;y<128;y++)for(let x=0;x<128;x++){
       const a=Math.sin(T*(x*2/128)+f+1.7*Math.sin(T*(y*3/128)+2*f)),b=Math.sin(T*(y*3/128+x/128)-f+1.3*Math.sin(T*(x*2/128)+f)),c=Math.sin(T*(x*4/128-y*2/128)+2*f+Math.sin(T*(y*5/128)-f));
