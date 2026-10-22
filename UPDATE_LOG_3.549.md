@@ -1,4 +1,4 @@
-Below the Abbey: update 3.560 (changes since 3.534, the update on itch.io before this one, including the last Hollow Grasslands quests and the way down to the Deeper Hollow)
+Below the Abbey: update 3.561 (changes since 3.534, the update on itch.io before this one, including the last Hollow Grasslands quests and the way down to the Deeper Hollow)
 
 The Hollow Grasslands: the last quests, and the way down to the Deeper Hollow
 
@@ -120,6 +120,15 @@ The black sea of the Underlevel
 Lake reeds
 
 * There are now many thin, sparse, see-through painted reeds in the lakes and the Flooded Quarter, so you can see across the water, with the dense clumps only now and then.
+
+Little details everywhere in the maze
+
+* The whole Deeper Hollow maze is dressed with about 2,900 little painted details. Nearly every passageway of three or more squares (89 in every hundred; the rest are right beside doors, docks, ladders and people) has something small and different in it, and no two neighbouring stretches have the same thing: a broken clay pot, a heap of bones and a skull, a candle burning in its wax, an open book, a cluster of glowing blue mushrooms, a fern in a crack, a cracked bucket, a rusty lantern, a pile of shells, a branch of coral, scattered coins, broken mosaic tiles, a gnarled root, an antler, a dripping piece of honeycomb, a bundle of reeds. Dead ends get something special. You walk straight through the small ones.
+* Each of the 24 named areas of the maze has its own signature: the hedge areas have roots, ferns, mushrooms, bones and antlers; the stone warrens have cairns, standing stones, mason statues and rubble; the honeycomb areas have honeycomb, candle shrines and rings of pots; the shell galleries have rings of shells and coral; the sandstone deeps have scarab statues, hoards of coins and bones; the blue quarter has lantern shrines, crystal outcrops and rings of books; the mosaic halls have rings and spirals of broken tiles; and the gilded quarter has hoards of coins, lantern and book shrines and weeping child statues. Each area also has a trail of its main thing along its longest passage, and some a toppled pillar or a lone statue.
+* 120 painted statues stand in the clearings, rooms and atriums and in dead-end niches of the maze: a hedge knight, a mason with a hammer, a bee queen, a shell maiden with a conch, a scarab beetle, a lapis owl, a hooded monk and a weeping child with a lantern. They block the way where they stand, but only in wide places, never in a one-square passage.
+* About 600 rocks and stones: mossy boulders in the wide places, leaning slabs, small cairns, piles of pebbles, tall standing stones carved with spirals, broken pillars, heaps of rubble and crystal outcrops. Six big clearings have a ring of standing stones.
+* 400 little pictures are hung on the walls of the corridors (the wall symbols and trailing vines), at least three squares apart.
+* None of it is in water, on a dock or beside a door, a ladder, a teleport stone or a person, and the maze can still be walked everywhere it could before.
 
 The marshes
 
