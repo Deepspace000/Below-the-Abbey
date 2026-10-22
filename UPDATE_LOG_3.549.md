@@ -164,3 +164,7 @@ Vermin circles (3.566)
 * The dashed red circles on the Deeper Hollow map are now challenges. 27 circles on the surface (13 large, 12 small, 2 in the water) and 14 in the Underlevel (5 large, 8 small, 1 on the black sea). Walking into one shows a counter at the top of the screen that moves aside if text is there.
 * Clearing a circle shows a "free of vermin" banner, turns its map circle green, gives a reward (a strong potion, a weapon, a gem and gold), the people thank you, and it is listed in the achievements.
 * Clearing every circle gives a final message, a high grade piece of armour and exactly 2000 gold on the surface (4000 gold in the Underlevel).
+
+Messenger of Death letters (3.567)
+
+* The letters of the Messenger of Death are now counted per level. Before, the letters seen anywhere (for example D, E and A in the Orange Spire) were shown at the top of the screen in the Underlevel straight away, and those three letters could not be found again there. Each level now starts with no letters seen, and the five letters of one level are what count.

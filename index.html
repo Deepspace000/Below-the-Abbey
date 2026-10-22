@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.566';
+const VERSION='3.567';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -14770,7 +14770,7 @@ const wGold=QUESTS.wq_toll;if(wGold){wGold.goal=()=>G.gold>=60?1:0}
 /* ---- the Messenger of Death ---- */
 const MSG_LETTERS='DEATH';
 function msgrRec(){const F=G.flags;F.msgrLv=F.msgrLv||{};return F.msgrLv[LEVEL]}
-function msgrReg(){const F=G.flags;F.msgrSeen=F.msgrSeen||{};return F.msgrSeen}
+function msgrReg(){const F=G.flags;F.msgrSeenLv=F.msgrSeenLv||{};return F.msgrSeenLv[LEVEL]=F.msgrSeenLv[LEVEL]||{}} // the letters belong to the level where they were seen
 CUTS.msgrTouch=()=>[
   {text:'Something very thin and very black has come out of the dark, laid one long cold finger on '+hn(0)+'\'s shoulder, and gone again. It did not run. It simply was not there any more. Where it stood, the air has the smell of a snuffed candle.'},
   {who:hn(1),text:'I know that smile. I heard it from my grandmother, and she heard it from hers. That was the Messenger of Death.'},
@@ -14874,7 +14874,7 @@ function msgrFrame(){ // every frame: has the party read a letter?
     break}
 }
 function msgrHud(){
-  const reg=msgrReg();if(!G.flags.msgrSeen||!Object.keys(reg).length||G.state!=='play'||G.menu||G.cut)return;
+  const reg=msgrReg();if(!Object.keys(reg).length||G.state!=='play'||G.menu||G.cut)return;
   const rec=msgrRec();if(!rec&&Object.keys(reg).length<5)return; // the letters belong to the level where they were seen
   ctx.save();ctx.font=`bold 15px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';
   const x0=240-MSG_LETTERS.length*8.5;
