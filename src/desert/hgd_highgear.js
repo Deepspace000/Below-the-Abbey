@@ -10,3 +10,5 @@ function hgdhgList(kind){
   if(kind!=='arms'&&kind!=='armour')return rows;
   try{const have=new Set(rows.map(r=>r[0]));for(const id of hgdhgList(kind))if(!have.has(id))rows.push([id,1])}catch(e){console.error('hgdhg',e)}
   return rows}}
+// the level 60 and over weapons all cost between 8000 and 9000 gold, dearer with level and power
+{const P={hgsting:8000,hgmandible:8200,hgsunblade:8400,hgl70dagger:8500,hgl70axe:8600,hgl70staff:8700,hgl70bow:8800,hgl70mace:8900,hgl70sword:9000};for(const id in P)if(ITEMDEF[id])ITEMDEF[id].price=P[id]}

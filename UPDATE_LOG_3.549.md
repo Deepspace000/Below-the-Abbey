@@ -189,3 +189,7 @@ Quarter names and high level gear in the shops (3.571)
 
 * The four quarters of the Deeper Hollow now have names: the north-west is The Lantern Reaches, the north-east The Gilded Heights, the south-west The Cairn Warrens and the south-east The Hedgefoot Approaches. The name shows under the map title and also as a banner across the top of the map for a few seconds whenever you open a quarter.
 * The weapon shops of the eight maze towns now sell every weapon of level 50 and over (14 of them, from the Worldbreaker Blade to the Molten Greatblade), and the armour shops every piece of armour of level 50 and over (32 pieces, up to the Godforged set), one of each, on top of the normal stock. The lists are read from the item table, so gear added later shows up too.
+
+Weapon prices (3.572)
+
+* The nine weapons of level 60 and over (Stinger Blade, Mandible Axe, Sunfire Blade and the six level 70 fire weapons) now cost between 8000 and 9000 gold each, dearer with power: from 8000 for the Stinger Blade to 9000 for the Molten Greatblade.

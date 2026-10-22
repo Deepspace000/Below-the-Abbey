@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.571';
+const VERSION='3.572';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -46787,6 +46787,8 @@ function hgdhgList(kind){
   if(kind!=='arms'&&kind!=='armour')return rows;
   try{const have=new Set(rows.map(r=>r[0]));for(const id of hgdhgList(kind))if(!have.has(id))rows.push([id,1])}catch(e){console.error('hgdhg',e)}
   return rows}}
+// the level 60 and over weapons all cost between 8000 and 9000 gold, dearer with level and power
+{const P={hgsting:8000,hgmandible:8200,hgsunblade:8400,hgl70dagger:8500,hgl70axe:8600,hgl70staff:8700,hgl70bow:8800,hgl70mace:8900,hgl70sword:9000};for(const id in P)if(ITEMDEF[id])ITEMDEF[id].price=P[id]}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
