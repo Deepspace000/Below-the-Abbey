@@ -78,6 +78,10 @@ function hgdbDocks(L){
     c.sort((a,b)=>a[6]-b[6]);const e=c[0];if(e){docks.push({ax:e[0],ay:e[1],x:e[2],y:e[3],dx:e[4],dy:e[5],level:i<2?HGDB.A:HGDB.B,end:i%2===0?'in':'out'});occ.add(e[0]+','+e[1])}});
   for(const d of docks)rows[d.y][d.x]=chD;
   L.rows=rows.map(r=>r.join(''));L._hgdb={docks,windows:pick.map(p=>p.sc)}}
+// the surface map marks the docks
+{const _dn=hgdmpDrawNames;hgdmpDrawNames=function(vi){try{const L=LEVELS[HGD.ID],V=MPL.view;if(L&&L._hgdb&&V&&V.z&&vi!==5){const A=V.area,z=V.z;ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();
+    for(const d of L._hgdb.docks){const px=A.x+(V.X(d.x+.5)-V.sx0)*z,py=A.y+(V.Y(d.y+.5)-V.sy0)*z;if(px<A.x||px>A.x+A.w||py<A.y||py>A.y+A.h)continue;hgdmpBoatIcon(ctx,px,py,Math.max(.9,Math.min(1.6,.7+z*.12)))}
+    ctx.restore()}}catch(e){}return _dn.apply(this,arguments)}}
 /* ---------- hopping on, and landing ---------- */
 function hgdbPrompt(text,opts){G.talk={d:{k:'_',x:G.P.x,y:G.P.y},n:{name:'A dock'},node:say(text,opts),t:G.time,btns:[]};G.hold=null;G.queued=null}
 function hgdbGo(dk,toBoat){

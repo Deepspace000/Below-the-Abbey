@@ -40,7 +40,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.531';
+const VERSION='3.532';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -43704,6 +43704,8 @@ function hgdmpHut(x,a,b,bi,town,u){
   x.restore()}
 function hgdmpDoorIcon(x,a,b,col,gem,u){x.save();x.translate(a,b);x.scale(u,u);x.lineJoin='round';x.strokeStyle='#2a1a0c';x.lineWidth=.45;x.fillStyle=col;x.beginPath();x.moveTo(-1.5,2.2);x.lineTo(-1.5,-.5);x.arc(0,-.5,1.5,Math.PI,0);x.lineTo(1.5,2.2);x.closePath();x.fill();x.stroke();
   if(gem){x.fillStyle='#fff';x.beginPath();x.moveTo(0,-.9);x.lineTo(.7,.1);x.lineTo(0,1.1);x.lineTo(-.7,.1);x.closePath();x.fill()}else{x.fillStyle='#14100a';x.beginPath();x.arc(0,.2,.45,0,6.3);x.fill();x.fillRect(-.15,.2,.3,.9)}x.restore()}
+function hgdmpStepsIcon(c,a,b,u){c.save();c.translate(a,b);c.scale(u,u);c.lineJoin='round';c.fillStyle='#3a8ab8';c.strokeStyle='#14303c';c.lineWidth=.55;c.beginPath();c.moveTo(-2.8,2.4);c.lineTo(-2.8,-1.2);c.lineTo(-1,-1.2);c.lineTo(-1,0);c.lineTo(1,0);c.lineTo(1,1.2);c.lineTo(2.8,1.2);c.lineTo(2.8,2.4);c.closePath();c.fill();c.stroke();c.strokeStyle='rgba(255,255,255,.8)';c.lineWidth=.4;c.beginPath();c.moveTo(-2.4,-2);c.quadraticCurveTo(0,-3,2.4,-2);c.stroke();c.restore()}
+function hgdmpBoatIcon(c,a,b,u){c.save();c.translate(a,b);c.scale(u,u);c.lineJoin='round';c.strokeStyle='#2a1808';c.lineWidth=.5;c.fillStyle='#9a6a34';c.beginPath();c.moveTo(-3,.6);c.quadraticCurveTo(0,3.4,3,.6);c.lineTo(2.2,-.6);c.lineTo(-2.2,-.6);c.closePath();c.fill();c.stroke();c.beginPath();c.moveTo(0,-.6);c.lineTo(0,-4);c.stroke();c.fillStyle='#f0e8d0';c.beginPath();c.moveTo(0,-3.8);c.lineTo(2.2,-1);c.lineTo(0,-1);c.closePath();c.fill();c.stroke();c.restore()}
 function hgdmpLadderIcon(x,a,b,u){x.save();x.translate(a,b);x.scale(u,u);x.strokeStyle='#4a2c14';x.lineWidth=.6;x.fillStyle='#14100a';x.fillRect(-2,-3,4,6);x.strokeRect(-2,-3,4,6);x.strokeStyle='#c08850';x.lineWidth=.5;x.beginPath();x.moveTo(-1,-3);x.lineTo(-1,3);x.moveTo(1,-3);x.lineTo(1,3);for(let y=-2;y<3;y+=1.4){x.moveTo(-1,y);x.lineTo(1,y)}x.stroke();x.restore()}
 function hgdmpSheetUnder(){
   const U=LEVELS[HGDU.ID];if(!U)return null;if(HGDMP.cache[5])return HGDMP.cache[5];
@@ -43770,8 +43772,8 @@ function hgdmpSheet(vi){
   const lx=8,ly=64;x.save();x.font='bold 7px '+FUI;x.fillStyle=INK;x.textAlign='left';x.fillText('BIOMES',lx,ly);
   ['Hedge maze','Stone warrens','Honeycomb reach','Shell galleries','Sandstone deeps','Blue quarter','Mosaic halls','Gilded quarter'].forEach((n,i)=>{const yy=ly+10+i*11;x.fillStyle=HGDMP.tints[i];x.strokeStyle=INK;x.lineWidth=.4;x.fillRect(lx,yy-4,9,7);x.strokeRect(lx,yy-4,9,7);x.fillStyle=INK;x.font='6.2px '+FUI;x.fillText(n,lx+12,yy)});
   const ky=ly+104;x.font='bold 7px '+FUI;x.fillStyle=INK;x.fillText('KEY',lx,ky);
-  const ent=[['Town',()=>hgdmpHut(x,lx+4.5,ky+9,2,true,1)],['Safe place',()=>hgdmpHut(x,lx+4.5,ky+21,0,false,1)],['Danger zone',()=>{x.strokeStyle='#9a2418';x.lineWidth=.8;x.setLineDash([2,1.6]);x.beginPath();x.arc(lx+4.5,ky+34,4,0,6.3);x.stroke();x.setLineDash([])}],['Warning sign',()=>{x.fillStyle='#c02a1a';x.strokeStyle=INK;x.lineWidth=.4;x.beginPath();x.moveTo(lx+4.5,ky+43);x.lineTo(lx+7.5,ky+49);x.lineTo(lx+1.5,ky+49);x.fill();x.stroke()}],['Locked door',()=>hgdmpDoorIcon(x,lx+4.5,ky+57,'#e0b030',false,1.6)],['Ladder down',()=>hgdmpLadderIcon(x,lx+4.5,ky+71,1.1)],['Your footsteps',()=>{x.save();x.strokeStyle='#38b8d0';x.lineWidth=1;x.setLineDash([2,2]);x.beginPath();x.moveTo(lx,ky+82);x.lineTo(lx+9,ky+82);x.stroke();x.restore()}]];
-  ent.forEach(([n,dr],i)=>{dr();x.fillStyle=INK;x.font='6.2px '+FUI;x.textAlign='left';x.fillText(n,lx+12,ky+[10,22,34,46,59,71,82][i])});
+  const ent=[['Town',()=>hgdmpHut(x,lx+4.5,ky+9,2,true,1)],['Safe place',()=>hgdmpHut(x,lx+4.5,ky+21,0,false,1)],['Danger zone',()=>{x.strokeStyle='#9a2418';x.lineWidth=.8;x.setLineDash([2,1.6]);x.beginPath();x.arc(lx+4.5,ky+34,4,0,6.3);x.stroke();x.setLineDash([])}],['Warning sign',()=>{x.fillStyle='#c02a1a';x.strokeStyle=INK;x.lineWidth=.4;x.beginPath();x.moveTo(lx+4.5,ky+43);x.lineTo(lx+7.5,ky+49);x.lineTo(lx+1.5,ky+49);x.fill();x.stroke()}],['Locked door',()=>hgdmpDoorIcon(x,lx+4.5,ky+57,'#e0b030',false,1.6)],['Ladder down',()=>hgdmpLadderIcon(x,lx+4.5,ky+71,1.1)],['Your footsteps',()=>{x.save();x.strokeStyle='#38b8d0';x.lineWidth=1;x.setLineDash([2,2]);x.beginPath();x.moveTo(lx,ky+82);x.lineTo(lx+9,ky+82);x.stroke();x.restore()}],['Steps into water',()=>hgdmpStepsIcon(x,lx+4.5,ky+95,1.2)],['Boat dock',()=>hgdmpBoatIcon(x,lx+4.5,ky+107,1.1)]];
+  ent.forEach(([n,dr],i)=>{dr();x.fillStyle=INK;x.font='6.2px '+FUI;x.textAlign='left';x.fillText(n,lx+12,ky+[10,22,34,46,59,71,82,96,108][i])});
   x.restore();mplCompass(x,448,48,17);mplBorder(x);
   return HGDMP.cache[vi]={c,X,Y}}
 /* the names are a separate layer drawn on the screen over the map: no halo and no box, a fixed small size that looks smaller as the map is zoomed in, and the precinct names fade out as you zoom */
@@ -44285,7 +44287,7 @@ function hgdwGo(i,down){
 // the surface map marks the steps
 {const _dn=hgdmpDrawNames;hgdmpDrawNames=function(vi){try{const L=LEVELS[HGD.ID],V=MPL.view;if(L&&L._hgdw&&V&&V.z&&vi!==5){const A=V.area,z=V.z;ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();
     for(const e of L._hgdw.entrances){const px=A.x+(V.X(e.x+.5)-V.sx0)*z,py=A.y+(V.Y(e.y+.5)-V.sy0)*z;if(px<A.x||px>A.x+A.w||py<A.y||py>A.y+A.h)continue;
-      ctx.fillStyle='#3a8ab8';ctx.strokeStyle='#14303c';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(px-2.4,py+2);ctx.lineTo(px-2.4,py-1);ctx.lineTo(px-.8,py-1);ctx.lineTo(px-.8,py);ctx.lineTo(px+.8,py);ctx.lineTo(px+.8,py+1);ctx.lineTo(px+2.4,py+1);ctx.lineTo(px+2.4,py+2);ctx.closePath();ctx.fill();ctx.stroke()}
+      hgdmpStepsIcon(ctx,px,py,Math.max(.9,Math.min(1.6,.7+z*.12)))}
     ctx.restore()}}catch(e){}return _dn.apply(this,arguments)}}
 if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('There are steps down into the water in four of the pond clearings. Below is a flooded maze. Bring a helm for everyone, or nobody will come back up with you.');
 {const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];_b.apply(this,arguments);const L=LEVELS[HGD.ID];if(!had&&L&&L._hgdk)try{hgdwEntrances(L)}catch(e){console.error('hgdw entrances',e)}}}
@@ -44421,6 +44423,10 @@ function hgdbDocks(L){
     c.sort((a,b)=>a[6]-b[6]);const e=c[0];if(e){docks.push({ax:e[0],ay:e[1],x:e[2],y:e[3],dx:e[4],dy:e[5],level:i<2?HGDB.A:HGDB.B,end:i%2===0?'in':'out'});occ.add(e[0]+','+e[1])}});
   for(const d of docks)rows[d.y][d.x]=chD;
   L.rows=rows.map(r=>r.join(''));L._hgdb={docks,windows:pick.map(p=>p.sc)}}
+// the surface map marks the docks
+{const _dn=hgdmpDrawNames;hgdmpDrawNames=function(vi){try{const L=LEVELS[HGD.ID],V=MPL.view;if(L&&L._hgdb&&V&&V.z&&vi!==5){const A=V.area,z=V.z;ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();
+    for(const d of L._hgdb.docks){const px=A.x+(V.X(d.x+.5)-V.sx0)*z,py=A.y+(V.Y(d.y+.5)-V.sy0)*z;if(px<A.x||px>A.x+A.w||py<A.y||py>A.y+A.h)continue;hgdmpBoatIcon(ctx,px,py,Math.max(.9,Math.min(1.6,.7+z*.12)))}
+    ctx.restore()}}catch(e){}return _dn.apply(this,arguments)}}
 /* ---------- hopping on, and landing ---------- */
 function hgdbPrompt(text,opts){G.talk={d:{k:'_',x:G.P.x,y:G.P.y},n:{name:'A dock'},node:say(text,opts),t:G.time,btns:[]};G.hold=null;G.queued=null}
 function hgdbGo(dk,toBoat){

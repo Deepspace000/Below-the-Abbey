@@ -99,7 +99,7 @@ function hgdwGo(i,down){
 // the surface map marks the steps
 {const _dn=hgdmpDrawNames;hgdmpDrawNames=function(vi){try{const L=LEVELS[HGD.ID],V=MPL.view;if(L&&L._hgdw&&V&&V.z&&vi!==5){const A=V.area,z=V.z;ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();
     for(const e of L._hgdw.entrances){const px=A.x+(V.X(e.x+.5)-V.sx0)*z,py=A.y+(V.Y(e.y+.5)-V.sy0)*z;if(px<A.x||px>A.x+A.w||py<A.y||py>A.y+A.h)continue;
-      ctx.fillStyle='#3a8ab8';ctx.strokeStyle='#14303c';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(px-2.4,py+2);ctx.lineTo(px-2.4,py-1);ctx.lineTo(px-.8,py-1);ctx.lineTo(px-.8,py);ctx.lineTo(px+.8,py);ctx.lineTo(px+.8,py+1);ctx.lineTo(px+2.4,py+1);ctx.lineTo(px+2.4,py+2);ctx.closePath();ctx.fill();ctx.stroke()}
+      hgdmpStepsIcon(ctx,px,py,Math.max(.9,Math.min(1.6,.7+z*.12)))}
     ctx.restore()}}catch(e){}return _dn.apply(this,arguments)}}
 if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('There are steps down into the water in four of the pond clearings. Below is a flooded maze. Bring a helm for everyone, or nobody will come back up with you.');
 {const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];_b.apply(this,arguments);const L=LEVELS[HGD.ID];if(!had&&L&&L._hgdk)try{hgdwEntrances(L)}catch(e){console.error('hgdw entrances',e)}}}
