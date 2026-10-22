@@ -6,7 +6,7 @@
    ========================================================================== */
 const HGDMP={cache:{},mini:null,names:[['The Briar Rows','Lowhedge Ward','The Thorn Reach'],['Cairn Precinct','The Mason\'s Ward','Gravel Court'],['The Waxen Ward','Droneside Precinct','The Brood Rows'],['The Whelk Rows','The Whelk Court','Pearl Ward'],['Scarab Row','The Dry Ward','Scarab Court'],['Lamp Ward','The Blue Precinct','Inkwell Court'],['The Tile Rows','The Pattern Rows','Grout Court'],['The Gilt Rows','The Gilded Ward','Leaf Court']],
   tints:['#a9bd8a','#b3b0a2','#d8a23c','#e0bcc4','#d9bf8a','#8fa8d0','#c4b0d6','#f1e6a8'],
-  views:[['All','The Whole Maze',0,0,201,201],['NW','The North-West Quarter',0,0,101,101],['NE','The North-East Quarter',100,0,101,101],['SW','The South-West Quarter',0,100,101,101],['SE','The South-East Quarter',100,100,101,101]]};
+  views:[['All','The Whole Maze',0,0,201,201],['NW','The North-West Quarter',0,0,101,101],['NE','The North-East Quarter',100,0,101,101],['SW','The South-West Quarter',0,100,101,101],['SE','The South-East Quarter',100,100,101,101],['Under','The Underlevel',0,0,201,201]]};
 // three precincts in every biome: far-apart seeds, every place belongs to the nearest
 function hgdmpPrec(L){
   const M=L._hgdm;if(M.prec)return M.prec;const W=M.W,H=M.H,bio=M.bio,out=[];
@@ -34,7 +34,28 @@ function hgdmpHut(x,a,b,bi,town,u){
   else{x.fillStyle='#f4e8b0';x.fillRect(-2.6,0,5.2,2.7);x.strokeRect(-2.6,0,5.2,2.7);x.fillStyle='#e6b422';x.beginPath();x.moveTo(-3,0);x.quadraticCurveTo(-3.6,-3.4,0,-4.2);x.quadraticCurveTo(3.6,-3.4,3,0);x.closePath();x.fill();x.stroke();x.beginPath();x.moveTo(0,-4.2);x.lineTo(0,-6);x.stroke();x.fillStyle='#3a2410';x.fillRect(-.7,.6,1.4,2.1)}
   x.restore()}
 function hgdmpLadderIcon(x,a,b,u){x.save();x.translate(a,b);x.scale(u,u);x.strokeStyle='#4a2c14';x.lineWidth=.6;x.fillStyle='#14100a';x.fillRect(-2,-3,4,6);x.strokeRect(-2,-3,4,6);x.strokeStyle='#c08850';x.lineWidth=.5;x.beginPath();x.moveTo(-1,-3);x.lineTo(-1,3);x.moveTo(1,-3);x.lineTo(1,3);for(let y=-2;y<3;y+=1.4){x.moveTo(-1,y);x.lineTo(1,y)}x.stroke();x.restore()}
+function hgdmpSheetUnder(){
+  const U=LEVELS[HGDU.ID];if(!U)return null;if(HGDMP.cache[5])return HGDMP.cache[5];
+  const W=201,H=201,rows=U.rows,A=MPL.AREA,pad=4,s=Math.min((A.w-2*pad)/W,(A.h-2*pad)/H),ox=A.x+(A.w-W*s)/2,oy=A.y+(A.h-H*s)/2,X=c=>ox+c*s,Y=c=>oy+c*s;
+  const c=document.createElement('canvas');c.width=DW*MPL.S;c.height=DH*MPL.S;const x=c.getContext('2d');x.scale(MPL.S,MPL.S);
+  mplParchment(x);const INK=MPL.INK,open=(a,b)=>rows[b]&&rows[b][a]==='.';
+  x.save();x.beginPath();x.rect(A.x,A.y,A.w,A.h);x.clip();
+  x.fillStyle='#4a4258';x.fillRect(A.x,A.y,A.w,A.h);
+  for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){if(!open(cx,cy))continue;x.fillStyle='#e6dbbd';x.fillRect(X(cx),Y(cy),s+.35,s+.35)}
+  x.strokeStyle=INK;x.lineWidth=.35;x.beginPath();
+  for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){if(!open(cx,cy))continue;const a=X(cx),b=Y(cy);if(!open(cx,cy-1)){x.moveTo(a,b);x.lineTo(a+s,b)}if(!open(cx,cy+1)){x.moveTo(a,b+s);x.lineTo(a+s,b+s)}if(!open(cx-1,cy)){x.moveTo(a,b);x.lineTo(a,b+s)}if(!open(cx+1,cy)){x.moveTo(a+s,b);x.lineTo(a+s,b+s)}}
+  x.stroke();
+  for(const l of U._hgdu.ladders)hgdmpLadderIcon(x,X(l.x+.5),Y(l.y+.5),.9);
+  x.restore();
+  mplTitle(x,'The Underlevel','very dark and dangerous',10,12);
+  const lx=8,ly=70;x.save();x.font='bold 7px '+FUI;x.fillStyle=INK;x.textAlign='left';x.fillText('KEY',lx,ly);
+  hgdmpLadderIcon(x,lx+4.5,ly+12,1.1);x.font='6.2px '+FUI;x.fillText('Ladder up',lx+12,ly+13);
+  x.save();x.strokeStyle='#38b8d0';x.lineWidth=1;x.setLineDash([2,2]);x.beginPath();x.moveTo(lx,ly+27);x.lineTo(lx+9,ly+27);x.stroke();x.restore();x.fillText('Your footsteps',lx+12,ly+28);
+  x.fillStyle=INK;x.font='6.2px '+FUI;const notes=['No food, no torches.','Dark insects, many.','Something wanders here.'];notes.forEach((n,i)=>x.fillText(n,lx,ly+48+i*10));
+  x.restore();mplCompass(x,448,48,17);mplBorder(x);
+  return HGDMP.cache[5]={c,X,Y}}
 function hgdmpSheet(vi){
+  if(vi===5)return hgdmpSheetUnder();
   const L=LEVELS[HGD.ID];if(!L||!L._hgdp)return null;if(HGDMP.cache[vi])return HGDMP.cache[vi];
   const M=L._hgdm,W=M.W,H=M.H,bio=M.bio,kind=M.kind,rows=L.rows,V=HGDMP.views[vi],[,vname,vx,vy,vw,vh]=V,A=MPL.AREA,pad=4,s=Math.min((A.w-2*pad)/vw,(A.h-2*pad)/vh),ox=A.x+(A.w-vw*s)/2,oy=A.y+(A.h-vh*s)/2;
   const X=c=>ox+(c-vx)*s,Y=c=>oy+(c-vy)*s;
@@ -84,7 +105,7 @@ function hgdmpSheet(vi){
   return HGDMP.cache[vi]={c,X,Y}}
 /* the names are a separate layer drawn on the screen over the map: no halo and no box, a fixed small size that looks smaller as the map is zoomed in, and the precinct names fade out as you zoom */
 function hgdmpNames(vi){
-  const L=LEVELS[HGD.ID];if(!L||!L._hgdp)return[];const V=HGDMP.views[vi],[,,vx,vy,vw,vh]=V,M=L._hgdm,out=[];
+  const L=LEVELS[HGD.ID];if(vi===5||!L||!L._hgdp)return[];const V=HGDMP.views[vi],[,,vx,vy,vw,vh]=V,M=L._hgdm,out=[];
   const inV=(x,y)=>x>=vx-2&&x<=vx+vw+2&&y>=vy-2&&y<=vy+vh+2;
   for(const z of L._hgdp.zones){if(!inV(z.x,z.y))continue;if(z.type==='safe')out.push({t:z.name,x:z.x+.5,y:z.y+.5,dy:z.town!==undefined?7:5,k:z.town!==undefined?'town':'encl'});else out.push({t:z.name,x:z.x+.5,y:z.y+.5,dy:0,k:'danger'})}
   out.push({t:'THE DOOR IN',x:M.sx+.5,y:M.H-1.5,dy:-5,k:'door'});
@@ -106,21 +127,23 @@ function hgdmpDrawNames(vi){
   ctx.restore()}
 // the screen
 {const _do=drawOverview;drawOverview=function(){
-  if(LEVEL!==HGD.ID||G.world||G.teleMode||!LEVELS[HGD.ID]||!LEVELS[HGD.ID]._hgdp)return _do.apply(this,arguments);
+  if((LEVEL!==HGD.ID&&LEVEL!==HGDU.ID)||G.world||G.teleMode||!LEVELS[HGD.ID]||!LEVELS[HGD.ID]._hgdp)return _do.apply(this,arguments);
+  if(G.hgdLv!==LEVEL){G.hgdLv=LEVEL;G.hgdView=LEVEL===HGDU.ID?5:0}
   const vi=G.hgdView|0,sh=hgdmpSheet(vi);if(!sh)return _do.apply(this,arguments);
   MPL.reveal=false;mplPaint(sh.c,MPL.S,MPL.AREA,sh.X,sh.Y,'You are the yellow arrow.');hgdmpDrawTrail(vi);hgdmpDrawNames(vi);
-  HGDMP.views.forEach((v,i)=>btnText('hgdv'+i,v[0],124+i*29,303,27,17))}}
-{const _h=handleBtn;handleBtn=function(id){if(G.overview&&!G.world&&LEVEL===HGD.ID&&/^hgdv\d$/.test(id)){G.hgdView=+id[4];G.mplKey=null;return}return _h.apply(this,arguments)}}
+  HGDMP.views.forEach((v,i)=>btnText('hgdv'+i,v[0],124+i*31,303,i===5?38:29,17))}}
+{const _h=handleBtn;handleBtn=function(id){if(G.overview&&!G.world&&(LEVEL===HGD.ID||LEVEL===HGDU.ID)&&/^hgdv\d$/.test(id)){G.hgdView=+id[4];G.mplKey=null;return}return _h.apply(this,arguments)}}
 /* ---------- the magic map: it records the party's footsteps in the maze ---------- */
 const HGDT_MAX=40000;
 function hgdmpDrawTrail(vi){
-  const F=G.flags,T=F&&F.hgdTrail,V=MPL.view;if(!T||!T.length||!V||!V.z)return;const z=V.z,A=V.area;
+  const F=G.flags,T=F&&(vi===5?F.hgdTrailU:F.hgdTrail),V=MPL.view;if(!T||!T.length||!V||!V.z)return;const z=V.z,A=V.area;
   ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();ctx.lineJoin='round';ctx.lineCap='round';
   const path=()=>{ctx.beginPath();let pen=false;for(let i=0;i<T.length;i++){const v=T[i];if(v<0){pen=false;continue}const cx=v&255,cy=v>>8,px=A.x+(V.X(cx+.5)-V.sx0)*z,py=A.y+(V.Y(cy+.5)-V.sy0)*z;if(!pen){ctx.moveTo(px,py);pen=true}else ctx.lineTo(px,py)}};
   path();ctx.strokeStyle='rgba(90,230,255,.45)';ctx.lineWidth=3;ctx.setLineDash([]);ctx.stroke();
   path();ctx.strokeStyle='#0a98c8';ctx.lineWidth=.85;ctx.setLineDash([2.4,2.6]);ctx.shadowColor='#5ff';ctx.shadowBlur=5;ctx.stroke();
   ctx.restore()}
-{const _u=update;update=function(dt){try{const F=G.flags;if(LEVEL===HGD.ID&&G.state==='play'&&F&&G.P){
+{const _u=update;update=function(dt){try{const F=G.flags;if(LEVEL===HGDU.ID&&G.state==='play'&&F&&G.P&&F.hgdMagicMap){const T=F.hgdTrailU||(F.hgdTrailU=[]),cell=G.P.x+(G.P.y<<8),last=F.hgdTrailLastU;if(cell!==last){if(last!==undefined&&(Math.abs((last&255)-G.P.x)+Math.abs((last>>8)-G.P.y)>2)&&T.length&&T[T.length-1]>=0)T.push(-1);T.push(cell);F.hgdTrailLastU=cell;if(T.length>HGDT_MAX)T.splice(0,2000)}}
+    if(LEVEL===HGD.ID&&G.state==='play'&&F&&G.P){
     if(!F.hgdMapTold&&!G.talk&&!G.cut&&!G.menu){F.hgdMapTold=1;F.hgdMagicMap=1;msg("Bulb's gift, the silver thread map, wakes in your pack and glows faintly. From now on it records your footsteps in this labyrinth.",'#9ff0ff');later(2600,()=>msg('Open the map to see the line of where you have been. It is a thin, glowing, dashed trail.','#9ff0ff'))}
     if(F.hgdMagicMap){const T=F.hgdTrail||(F.hgdTrail=[]),cell=G.P.x+(G.P.y<<8),last=F.hgdTrailLast;
       if(cell!==last){if(last!==undefined&&(Math.abs((last&255)-G.P.x)+Math.abs((last>>8)-G.P.y)>2)&&T.length&&T[T.length-1]>=0)T.push(-1);T.push(cell);F.hgdTrailLast=cell;if(T.length>HGDT_MAX)T.splice(0,2000)}}}}catch(e){}return _u.apply(this,arguments)}}
