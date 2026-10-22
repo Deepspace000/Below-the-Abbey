@@ -109,7 +109,7 @@ function hgdpBuild(L){
   // sixteen signed danger zones, far from safe places and from each other
   const dz=[];let tries=0;
   while(dz.length<HGDP_DANGER.length&&tries++<9000){const x=6+((rnd()*(W-12))|0),y=6+((rnd()*(H-12))|0),R=10+((rnd()*6)|0);
-    if(!open(x,y)||Math.hypot(x-M.sx,y-M.sy)<R+26||safeHit(x,y,R+9)||dz.some(z=>Math.hypot(z.x-x,z.y-y)<z.r+R+8))continue;
+    if(!open(x,y)||Math.hypot(x-M.sx,y-M.sy)<R+26||safeHit(x,y,R+9)||(M.lakes||[]).some(k=>x+R+12>=k.x0-1&&x-R-12<=k.x1+1&&y+R+12>=k.y0-1&&y-R-12<=k.y1+1)||dz.some(z=>Math.hypot(z.x-x,z.y-y)<z.r+R+8))continue;
     const b=bio[y*W+x];dz.push({type:'danger',x,y,r:R,name:HGDP_DANGER[dz.length][0],mon:HGDP_DANGER[dz.length][1],biome:b})}
   dz.forEach(z=>zones.push(z));
   const top=M.spots.find(s=>s.boss);zones.push({type:'danger',x:top.x,y:top.y,r:13,name:'The Black Hall',mon:'mixed',boss:true,biome:7});

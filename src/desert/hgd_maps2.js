@@ -1,11 +1,11 @@
 /* ==========================================================================
    THE DEEPER HOLLOW MAPS, REDRAWN (prefix hgdm3 / HGDM3). The maze map is now drawn like a hand-inked medieval map instead of a grid of squares: soft watercolour washes for each biome,
    wobbly ink-lined passages with rounded corners, hatching along the walls, painted trees and fountains in the clearings, and a much finer picture (sheets are painted five times as sharp).
-   Also: the thieves' houses, the water routes between the canal docks, and three more views, the Vine Canal, the Croc Canals and the Drowned Maze (the watery passages).
+   Also: the thieves' houses, the lakes (deep water, dark blue) and their docks, and one more view, the Drowned Maze (the watery passages).
    Replaces hgdmpSheet and the underlevel sheet of hgd_maps.js.
    ========================================================================== */
 for(const n of ['tree0','tree1','tree2','fountain','thouse','pond','reeds','croc'])loadImg('icn_hgdi_'+n,'assets/icn_hgdi_'+n+'.png');
-HGDMP.views.push(['Vine','The Vine Canal',0,0,71,71],['Croc','The Croc Canals',0,0,71,71],['Drowned','The Drowned Maze',0,0,61,61]);
+HGDMP.views.push(['Drowned','The Drowned Maze',0,0,61,61]);
 const HGDM3={S:5,order:[]};
 const hgdm3H=(a,b)=>{const t=Math.sin(a*127.1+b*311.7)*43758.5453;return t-Math.floor(t)};
 const hgdm3RGB=h=>{const n=parseInt(h.slice(1),16);return [n>>16&255,n>>8&255,n&255]};
@@ -53,13 +53,13 @@ function hgdm3Paint(x,o){
     x.stroke()}
   if(o.rockDeco)o.rockDeco(x,{open,x0,x1,y0,y1});
   // the passages: every open cell is a wobbly pen line to its neighbours
-  const cat=o.cat,pw=o.pw||[.66,1.4,1.4,1.4,1.4],ow=Math.max(.15,s*.09),paths=[0,1,2,3,4].map(()=>new Path2D()),used=[0,0,0,0,0];
+  const cat=o.cat,pw=o.pw||[.66,1.4,1.4,1.4,1.4,1.4],ow=Math.max(.15,s*.09),paths=[0,1,2,3,4,5].map(()=>new Path2D()),used=[0,0,0,0,0,0];
   const px=(cx,cy)=>X(cx+.5)+(hgdm3H(cx,cy)-.5)*s*.2,py=(cx,cy)=>Y(cy+.5)+(hgdm3H(cy+5,cx)-.5)*s*.2;
   for(let cy=y0;cy<y1;cy++)for(let cx=x0;cx<x1;cx++){if(!open(cx,cy))continue;const c0=cat(cx,cy),a=px(cx,cy),b=py(cx,cy);paths[c0].moveTo(a,b);paths[c0].lineTo(a+.01,b);used[c0]=1;
     for(const [dx,dy] of [[1,0],[0,1]]){const nx=cx+dx,ny=cy+dy;if(nx>=x1||ny>=y1||!open(nx,ny))continue;const c1=(c0&&cat(nx,ny))?Math.max(c0,cat(nx,ny)):0,a2=px(nx,ny),b2=py(nx,ny),w=(hgdm3H(cx*2,cy+nx)-.5)*s*.14;
       paths[c1].moveTo(a,b);paths[c1].quadraticCurveTo((a+a2)/2+(dy?w:0),(b+b2)/2+(dx?w:0),a2,b2);used[c1]=1}}
   x.lineCap='round';x.lineJoin='round';
-  const each=(f)=>{for(let c=0;c<5;c++)if(used[c])f(c)};
+  const each=(f)=>{for(let c=0;c<6;c++)if(used[c])f(c)};
   // a soft shadow round the ink, then the ink twice (a faint second pass a hair off, like a pen going over it again)
   const hl=o.halo||['rgba(50,30,12,.13)','rgba(50,30,12,.15)'];
   each(c=>{x.strokeStyle=hl[0];x.lineWidth=pw[c]*s+7*ow;x.stroke(paths[c])});
@@ -72,7 +72,7 @@ function hgdm3Paint(x,o){
   [[1,.34],[.95,.17],[.9,0]].forEach(([k,t])=>each(c=>{g.strokeStyle=hgdm3Mix(o.floors[c],shade,t);g.lineWidth=pw[c]*s*k;g.stroke(paths[c])}));
   g.globalCompositeOperation='source-atop';
   for(let cy=y0;cy<y1;cy++)for(let cx=x0;cx<x1;cx++){if(!open(cx,cy))continue;const c0=cat(cx,cy),a=px(cx,cy),b=py(cx,cy);
-    if(c0>0&&hgdm3H(cx+1,cy*5)<.06){const r=s*(1.2+hgdm3H(cy,cx)*2.4),gr=g.createRadialGradient(a,b,0,a,b,r),bc=(o.blot||['','rgba(70,110,40,','rgba(150,100,40,','rgba(40,110,60,','rgba(30,90,150,'])[c0];gr.addColorStop(0,bc+'.2)');gr.addColorStop(1,bc+'0)');g.fillStyle=gr;g.fillRect(a-r,b-r,2*r,2*r)}
+    if(c0>0&&hgdm3H(cx+1,cy*5)<.06){const r=s*(1.2+hgdm3H(cy,cx)*2.4),gr=g.createRadialGradient(a,b,0,a,b,r),bc=(o.blot||['','rgba(70,110,40,','rgba(150,100,40,','rgba(40,110,60,','rgba(30,90,150,','rgba(10,40,110,'])[c0];gr.addColorStop(0,bc+'.2)');gr.addColorStop(1,bc+'0)');g.fillStyle=gr;g.fillRect(a-r,b-r,2*r,2*r)}
     if(c0===0){if(o.corridorDeco)o.corridorDeco(g,cx,cy,a,b,s)}
     else if(fine||hgdm3H(cx,cy)<.4)(o.deco||hgdm3Deco)(g,cx,cy,c0,a,b,s,fine)}
   x.drawImage(lay.c,0,0,DW,DH);
@@ -82,19 +82,18 @@ function hgdm3Maze(vi){
   const L=LEVELS[HGD.ID];if(!L||!L._hgdp)return null;if(HGDMP.cache[vi])return HGDMP.cache[vi];
   const M=L._hgdm,W=M.W,H=M.H,bio=M.bio,kind=M.kind,rows=L._hgdm3r||(L._hgdm3r=hgdm3Fill(L.rows,L)),V=HGDMP.views[vi],[,vname,vx,vy,vw,vh]=V,A=MPL.AREA,pad=4,s=Math.min((A.w-2*pad)/vw,(A.h-2*pad)/vh),ox=A.x+(A.w-vw*s)/2,oy=A.y+(A.h-vh*s)/2;
   const X=c=>ox+(c-vx)*s,Y=c=>oy+(c-vy)*s,{c,x}=hgdm3Canvas(HGDM3.S);mplParchment(x);const INK=MPL.INK,big=vi>0,tint=HGDMP.tints.map(hgdm3RGB);
-  const wet=(a,b)=>L.fmap&&L.fmap[b]&&L.fmap[b][a]==='5';
+  const wet=(a,b)=>L.fmap&&L.fmap[b]&&L.fmap[b][a]==='5',deep=(a,b)=>L.fmap&&L.fmap[b]&&L.fmap[b][a]==='6';
   hgdm3Paint(x,{rows,W,H,vx,vy,vw,vh,X,Y,s,S:HGDM3.S,hatch:'rgba(46,28,12,.42)',
     rock:(cx,cy)=>{const t=tint[bio[cy*W+cx]]||tint[0];return [t[0]*.93,t[1]*.93,t[2]*.9]},
-    cat:(cx,cy)=>wet(cx,cy)?4:kind[cy*W+cx]||0,floors:['#f6efd6','#e2ecc6','#f1dcb0','#d2e3b4','#a6dcf2']});
+    cat:(cx,cy)=>deep(cx,cy)?5:wet(cx,cy)?4:kind[cy*W+cx]||0,floors:['#f6efd6','#e2ecc6','#f1dcb0','#d2e3b4','#a6dcf2','#2a5c92']});
   x.save();x.beginPath();x.rect(A.x,A.y,A.w,A.h);x.clip();
   const inV=(a,b)=>a>=vx-1&&a<=vx+vw+1&&b>=vy-1&&b<=vy+vh+1,ix=(n,a,b,w)=>hgdiDraw(x,n,a,b,w);
-  // the docks of the canals (the canals themselves are separate levels: see the Vine, Croc and Drowned views)
-  if(L._hgdb){
-    for(const d of L._hgdb.docks)if(inV(d.x,d.y))ix('reeds',X(d.x+.5)+s*1.3,Y(d.y+.5)+s*1.1,Math.max(5,Math.min(11,s*2.4)))}
+  // the lakes: their reed beds are drawn, the docks are marked by hgd_boat.js
+  if(L._hgdl)for(const k of L._hgdl.lakes){if(!k.islets)continue;for(const c of k.islets)if(inV(c[0],c[1]))ix('reeds',X(c[0]+.5),Y(c[1]+.5)+s*.8,Math.max(5,Math.min(10,s*2.2)))}
   if(L._hgdw)for(const e of L._hgdw.entrances)if(inV(e.x,e.y))ix('pond',X(e.x+.5)-s*1.2,Y(e.y+.5)+s*1.4,Math.max(6,Math.min(13,s*2.8)));
   // trees and fountains, painted; thinned so they do not hide the passages
   const taken=new Set(),gap=big?3.6:4.4,tw=Math.max(4.2,Math.min(10,s*2.5));
-  for(const d of L.decor){if(!inV(d.x,d.y)||wet(d.x,d.y))continue;const px=X(d.x+.5),py=Y(d.y+.5);
+  for(const d of L.decor){if(!inV(d.x,d.y)||wet(d.x,d.y)||deep(d.x,d.y))continue;const px=X(d.x+.5),py=Y(d.y+.5);
     if(d.k==='hgt_fairytree'||d.k==='hgtb_plant_belltree'){const key=((px/gap)|0)+','+((py/gap)|0);if(taken.has(key))continue;taken.add(key);ix('tree'+(d.k==='hgtb_plant_belltree'?2:hgdm3H(d.x,d.y)<.5?0:1),px,py+tw*.38,tw)}
     else if(d.k==='hgtb_deco_fountain')ix('fountain',px,py+tw*.4,tw*1.25)}
   // danger rings and warning signs
@@ -115,7 +114,7 @@ function hgdm3Maze(vi){
   const ky=ly+98;x.font='bold 7px '+FUI;x.fillStyle=INK;x.fillText('KEY',lx,ky);
   const ent=[['Town',()=>hgdmpHut(x,lx+4.5,ky+9,2,true,1)],['Safe place',()=>hgdmpHut(x,lx+4.5,ky+20,0,false,1)],['Danger zone',()=>{x.strokeStyle='#9a2418';x.lineWidth=.8;x.setLineDash([2,1.6]);x.beginPath();x.arc(lx+4.5,ky+30,3.6,0,6.3);x.stroke();x.setLineDash([])}],
     ['Warning sign',()=>hgdiDraw(x,'sign',lx+4.5,ky+43,9)],['Locked door',()=>hgdmpDoorIcon(x,lx+4.5,ky+51,'#b8321e',false,.9)],['Gem door',()=>hgdmpDoorIcon(x,lx+4.5,ky+62,'#274a9a',true,.9)],['Ladder down',()=>hgdmpLadderIcon(x,lx+4.5,ky+73,.9)],
-    ["Thief's house",()=>hgdiDraw(x,'thouse',lx+4.5,ky+87,10)],['Canal dock',()=>hgdmpBoatIcon(x,lx+4.5,ky+96,.9)],['Steps to water',()=>hgdmpStepsIcon(x,lx+4.5,ky+107,.9)],['Shallow water (walk)',()=>{x.fillStyle='#a6dcf2';x.strokeStyle=INK;x.lineWidth=.4;x.fillRect(lx,ky+112,9,7);x.strokeRect(lx,ky+112,9,7)}],['Deep water (boat)',()=>{x.fillStyle='#2a5c92';x.strokeStyle=INK;x.lineWidth=.4;x.fillRect(lx,ky+123,9,7);x.strokeRect(lx,ky+123,9,7)}]];
+    ["Thief's house",()=>hgdiDraw(x,'thouse',lx+4.5,ky+87,10)],['Boat dock',()=>hgdmpBoatIcon(x,lx+4.5,ky+96,.9)],['Steps to water',()=>hgdmpStepsIcon(x,lx+4.5,ky+107,.9)],['Shallow water (walk)',()=>{x.fillStyle='#a6dcf2';x.strokeStyle=INK;x.lineWidth=.4;x.fillRect(lx,ky+112,9,7);x.strokeRect(lx,ky+112,9,7)}],['Deep water (lake, boat)',()=>{x.fillStyle='#2a5c92';x.strokeStyle=INK;x.lineWidth=.4;x.fillRect(lx,ky+123,9,7);x.strokeRect(lx,ky+123,9,7)}]];
   ent.forEach(([n,dr],i)=>{dr();x.fillStyle=INK;x.font='6.2px '+FUI;x.textAlign='left';x.fillText(n,lx+12,ky+[10,21,31,42,52,63,74,86,96,107,117,128][i])});
   x.restore();mplCompass(x,448,48,17);mplBorder(x);
   hgdm3Keep(vi);return HGDMP.cache[vi]={c,X,Y,S:HGDM3.S}}
@@ -189,22 +188,19 @@ function hgdm3Under(){
   hgdm3Keep(5);return HGDMP.cache[5]={c,X,Y,S:HGDM3.S}}
 /* ---------- the watery passages: views 6 to 8 ---------- */
 function hgdm3Water(vi){
-  const id=[HGDB.A,HGDB.B,HGDW.ID][vi-6];if(HGDMP.cache[vi])return HGDMP.cache[vi];
+  const id=HGDW.ID;if(HGDMP.cache[vi])return HGDMP.cache[vi];
   if(!LEVELS[id]&&KH_LAZY[id])try{KH_LAZY[id]()}catch(e){console.error(e)}
   const L=LEVELS[id];if(!L)return null;const rows=L._hgdm3r||(L._hgdm3r=hgdm3Fill(L.rows,L,true)),W=rows[0].length,H=rows.length,A=MPL.AREA,pad=6,s=Math.min((A.w-2*pad)/W,(A.h-2*pad)/H),ox=A.x+(A.w-W*s)/2,oy=A.y+(A.h-H*s)/2,X=c=>ox+c*s,Y=c=>oy+c*s,{c,x}=hgdm3Canvas(HGDM3.S);
   mplParchment(x);const INK=MPL.INK;
   hgdm3Paint(x,{rows,W,H,vx:0,vy:0,vw:W,vh:H,X,Y,s,S:HGDM3.S,hatch:'rgba(30,60,28,.5)',rock:(cx,cy)=>[104+hgdm3H(cx,cy)*20,132+hgdm3H(cy,cx)*16,86],cat:()=>4,floors:['#2a5c92','#2a5c92','#2a5c92','#2a5c92','#2a5c92']});
   x.save();x.beginPath();x.rect(A.x,A.y,A.w,A.h);x.clip();
   const ix=(n,a,b,w)=>hgdiDraw(x,n,a,b,w);
-  if(L._hgdb){for(const b of (L.lights||[]))ix('reeds',X(b[0]+.5),Y(b[1]+.5)+s*.8,Math.max(5,s*2.2));
-    for(const k of ['in','out']){const d=L._hgdb.docks[k];if(d)hgdmpBoatIcon(x,X(d.x+.5),Y(d.y+.5),1.1)}
-    let n=0;for(const e of L.enemies){if(e.t==='hgwcroc'&&n<6&&hgdm3H(e.x,e.y)<.3){n++;ix('croc',X(e.x+.5),Y(e.y+.5)+s,Math.max(6,s*2.6))}}}
   if(L._hgdw)for(const st of (L._hgdw.stairs||[]))if(st&&st.x!==undefined)hgdmpStepsIcon(x,X(st.x+.5),Y(st.y+.5),1.1);
   x.restore();
   mplTitle(x,LEVEL_NAMES[id],'water passages',10,12);
   const lx=8,ly=70;x.save();x.font='bold 7px '+FUI;x.fillStyle=INK;x.textAlign='left';x.fillText('KEY',lx,ly);x.font='6.2px '+FUI;
-  hgdmpBoatIcon(x,lx+4.5,ly+12,.95);x.fillText('Dock',lx+12,ly+13);ix('reeds',lx+4.5,ly+26,10);x.fillText('Open pool',lx+12,ly+25);x.fillStyle='#2a5c92';x.strokeStyle=INK;x.lineWidth=.4;x.fillRect(lx,ly+60,9,7);x.strokeRect(lx,ly+60,9,7);x.fillStyle=INK;x.fillText(vi<8?'Deep water (boat)':'Deep water (helm)',lx+12,ly+66);
-  if(vi<8){ix('croc',lx+4.5,ly+39,9);x.fillText('Crocodiles',lx+12,ly+38)}else{hgdmpStepsIcon(x,lx+4.5,ly+38,.9);x.fillText('Steps up',lx+12,ly+38)}
+  x.fillStyle='#2a5c92';x.strokeStyle=INK;x.lineWidth=.4;x.fillRect(lx,ly+60,9,7);x.strokeRect(lx,ly+60,9,7);x.fillStyle=INK;x.fillText('Deep water (helm)',lx+12,ly+66);
+  hgdmpStepsIcon(x,lx+4.5,ly+38,.9);x.fillText('Steps up',lx+12,ly+38)
   x.restore();mplCompass(x,448,48,17);mplBorder(x);
   hgdm3Keep(vi);return HGDMP.cache[vi]={c,X,Y,S:HGDM3.S}}
 {const _s=hgdmpSheet;hgdmpSheet=function(vi){try{if(vi===5)return hgdm3Under();if(vi>=6)return hgdm3Water(vi);return hgdm3Maze(vi)}catch(e){console.error('hgdm3',e);return _s.apply(this,arguments)}}}

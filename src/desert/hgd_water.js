@@ -3,9 +3,10 @@
    quarter). It is a real underwater level of the game's own system: the party needs a Diving Helm or a Bubble Helm (a hero without one drowns), has four minutes of air, and breathes at
    the bubble vents set in its chambers. Sea creatures swim its passages, shell chests hold pearls and gems, and a warden sleeps at the far end. The same four stairs lead back up.
    ========================================================================== */
-const HGDW={ID:477,DIFF:74,N:4,S:61};
+const HGDW={ID:477,DIFF:74,N:4,S:43};
 LEVEL_NAMES[HGDW.ID]='The Drowned Maze';LEVEL_RATING[HGDW.ID]=HGDW.DIFF;
-if(typeof HGTE!=='undefined'&&HGTE.wet)HGTE.wet.add(HGDW.ID); // this makes it a true underwater level (air counter, drowning, hauled up to the surface)
+if(typeof HGTE!=='undefined'&&HGTE.wetLook)HGTE.wetLook(HGDW.ID,{hazeCol:[52,112,52],roofHaze:[26,60,28],tint:[.86,1.07,.8],grade:[200,238,150,.28],wet:[36,106,46,.36],ambient:.58,haze:.78}); // fresh, green water: a true underwater level (air counter, drowning, hauled up to the surface) with a green look
+else if(typeof HGTE!=='undefined'&&HGTE.wet)HGTE.wet.add(HGDW.ID);
 /* ---------- the steps: wall tiles drawn in code (stone steps going down into green water, and the same going up) ---------- */
 function hgdwTex(up){const P=IMG['art_tex_hgdp_steps'+(up?'up':'dn')];if(P&&P.width)return 'art_tex_hgdp_steps'+(up?'up':'dn');const key='hgdw_steps_'+(up?'up':'down');if(IMG[key])return key;
   IMG[key]=mkCanvas(128,128,(x,w,h)=>{const b=IMG.tex_abbeywall;if(b)x.drawImage(b,0,0,w,h);else{x.fillStyle='#3a4a48';x.fillRect(0,0,w,h)}
@@ -42,37 +43,49 @@ function hgdwBuild(){
     if(!opts.length){st.pop();continue}let d=opts[(rnd()*opts.length)|0];if(pd>=0&&opts.includes(pd)&&rnd()<.5)d=pd;const ni=i+D[d][0],nj=j+D[d][1];seen[nj*N+ni]=1;g[2*j+1+D[d][1]][2*i+1+D[d][0]]='.';g[2*nj+1][2*ni+1]='.';st.push([ni,nj,d])}
   for(let y=2;y<S-2;y++)for(let x=2;x<S-2;x++)if(g[y][x]==='#'&&((y%2===1&&x%2===0&&g[y][x-1]==='.'&&g[y][x+1]==='.')||(y%2===0&&x%2===1&&g[y-1][x]==='.'&&g[y+1][x]==='.'))&&rnd()<.07)g[y][x]='.';
   // chambers: bigger rooms in the maze, each with a bubble vent
-  const rooms=[];for(let k=0;k<10;k++){const w=5+((rnd()*3)|0),h=5+((rnd()*3)|0),x0=3+((rnd()*(S-w-6))|0),y0=3+((rnd()*(S-h-6))|0);if(rooms.some(r=>Math.abs(r.x-x0)<12&&Math.abs(r.y-y0)<12))continue;for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++)g[y][x]='.';rooms.push({x:x0,y:y0,w,h,cx:x0+(w>>1),cy:y0+(h>>1)})}
+  const rooms=[];for(let k=0;k<14;k++){const w=5+((rnd()*3)|0),h=5+((rnd()*3)|0),x0=3+((rnd()*(S-w-6))|0),y0=3+((rnd()*(S-h-6))|0);if(rooms.some(r=>Math.abs(r.x-x0)<10&&Math.abs(r.y-y0)<10))continue;for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++)g[y][x]='.';rooms.push({x:x0,y:y0,w,h,cx:x0+(w>>1),cy:y0+(h>>1)})}
   const vents=rooms.map(r=>[r.cx,r.cy]);
-  for(let t=0;t<600&&vents.length<12;t++){const x=2+((rnd()*(S-4))|0),y=2+((rnd()*(S-4))|0);if(g[y][x]==='.'&&vents.every(v=>Math.hypot(v[0]-x,v[1]-y)>=13))vents.push([x,y])} // more vents along the passages, so the air is never far
+  for(let t=0;t<600&&vents.length<9;t++){const x=2+((rnd()*(S-4))|0),y=2+((rnd()*(S-4))|0);if(g[y][x]==='.'&&vents.every(v=>Math.hypot(v[0]-x,v[1]-y)>=11))vents.push([x,y])} // more vents along the passages, so the air is never far
   // the four stairs up: at the ends of four far-apart passages (the same ones the entrances lead to)
-  const TM=ohTiles(),chars={};
-  OH_STY.hgdw_wall=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:'art_tex_hgt_w2_bubbles',door:'art_tex_hgt_w2_bubbles',win:'art_tex_hgt_w2_bubbles',alt:'art_tex_hgt_w2_bubbles',zoom:1,contrast:1,tint:[20,120,150,.35]});
+  const TM=ohTiles(),chars={},MW1=IMG.art_tex_hgdw_moss&&IMG.art_tex_hgdw_moss.width?'art_tex_hgdw_moss':null,MW2=IMG.art_tex_hgdw_moss2&&IMG.art_tex_hgdw_moss2.width?'art_tex_hgdw_moss2':MW1;
+  OH_STY.hgdw_wall=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:MW1||'art_tex_hgt_w2_bubbles',door:MW2||'art_tex_hgt_w2_bubbles',win:MW2||'art_tex_hgt_w2_bubbles',alt:MW2||'art_tex_hgt_w2_bubbles',zoom:1,contrast:1,tint:MW1?[150,185,130,.1]:[60,140,70,.35]});
   OH_STY.hgdw_up=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:hgdwTex(true),door:hgdwTex(true),win:hgdwTex(true),alt:hgdwTex(true),zoom:1,contrast:1,tint:[255,255,255,0]});
   chars['#']=TM.make('plain','hgdw_wall',2.7).gid;const chUp=String.fromCharCode(0x351);chars[chUp]=TM.make('plain','hgdw_up',2.7).gid;
   const corners=[[1,1],[S-2,1],[1,S-2],[S-2,S-2]],stairs=[];
   corners.forEach((c,i)=>{const e=SU[i];if(!e)return;let best=null,bd=1e9;for(let y=1;y<S-1;y++)for(let x=1;x<S-1;x++){if(g[y][x]!=='.')continue;let deg=0,wall=null;for(const [a,b] of D){if(g[y+b][x+a]==='.')deg++;else if(g[y+b][x+a]==='#'&&y+b>0&&x+a>0&&y+b<S-1&&x+a<S-1)wall=[x+a,y+b,a,b]}
       if(deg<=2&&wall&&!stairs.some(s=>Math.hypot(s.ax-x,s.ay-y)<6)){const d=Math.hypot(x-c[0],y-c[1]);if(d<bd){bd=d;best=[x,y,wall]}}}
     if(best){const [x,y,w]=best;g[w[1]][w[0]]=chUp;stairs.push({i,ax:x,ay:y,x:w[0],y:w[1],dx:w[2],dy:w[3]})}});
-  const used=new Set(stairs.map(s=>s.ax+','+s.ay));vents.forEach(v=>used.add(v[0]+','+v[1]));
+  const a0=stairs[0]||{ax:1,ay:1};
+  // the warden sleeps in the room farthest from the first stairs; the teleport stone stands in the middle of it, the warden and the prize chest on either side
+  const far=rooms.slice().sort((a,b)=>Math.hypot(b.cx-a0.ax,b.cy-a0.ay)-Math.hypot(a.cx-a0.ax,a.cy-a0.ay))[0]||{cx:S>>1,cy:S>>1};
+  const used=new Set(stairs.map(s=>s.ax+','+s.ay));vents.forEach(v=>used.add(v[0]+','+v[1]));[[far.cx,far.cy],[far.cx+1,far.cy+1],[far.cx-1,far.cy-1]].forEach(c=>used.add(c[0]+','+c[1]));
   const cells=[];for(let y=1;y<S-1;y++)for(let x=1;x<S-1;x++)if(g[y][x]==='.'&&!used.has(x+','+y)&&!stairs.some(s=>Math.hypot(s.ax-x,s.ay-y)<5))cells.push([x,y]);
   const take=()=>cells.length?cells.splice((rnd()*cells.length)|0,1)[0]:null;
   const decor=[],enemies=[],items=[];
   for(const v of vents)decor.push({k:'uw_vent0',x:v[0],y:v[1],block:false,walk:true,deco:true});
-  const kinds=[['uwshark',5],['uwbarra',7],['uwcrab',8],['uwoctopus',4],['uwjelly',7],['uweel',5],['uwpuffer',4]];let list=[];for(const [k,n] of kinds)for(let i=0;i<n;i++)list.push(k);
+  // freshwater vermin (see hgd_fresh.js): three of each, more piranhas
+  const FW=(typeof HGFW!=='undefined'&&HGFW.enemies)?HGFW.enemies.filter(e=>e!=='hgfcatfish'):['uwbarra','uweel','uwcrab','uwpuffer'],list=[];
+  for(const k of FW)for(let i=0;i<3;i++)list.push(k);for(let i=0;i<5;i++)list.push(FW[0]);
   for(const k of list){const c=take();if(c)enemies.push({t:k,x:c[0],y:c[1]})}
-  // the warden sleeps in the room farthest from the first stairs, with the prize chest behind him
-  const far=rooms.slice().sort((a,b)=>Math.hypot(b.cx-(stairs[0]?stairs[0].ax:1),b.cy-(stairs[0]?stairs[0].ay:1))-Math.hypot(a.cx-(stairs[0]?stairs[0].ax:1),a.cy-(stairs[0]?stairs[0].ay:1)))[0];
-  if(far){enemies.push({t:'uwgulper',x:far.cx,y:far.cy+1});decor.push({k:'uw_shellchest',x:far.cx,y:far.cy-1,block:true,hgdwTier:3})}
-  for(let k=0;k<12;k++){const c=take();if(c)decor.push({k:'uw_shellchest',x:c[0],y:c[1],block:true,hgdwTier:k%4===0?2:1})}
-  for(let k=0;k<30;k++){const c=take();if(c)decor.push({k:['uw_staghorn','uw_brain','uw_kelp','uw_seafan','uw_rocks','uw_seagrass','uw_amphora'][k%7],x:c[0],y:c[1],block:false,walk:true,deco:true})}
-  const swim=[];const R=(a,b,c)=>hash2(a,b,c+477);const lane=(k,cnt,hlo,hhi,spd,n0)=>{for(let q=0;q<cnt;q++)swim.push({k,x0:6+R(q,n0,5)*(S-12),y0:8+R(q,n0+1,5)*(S-16),dx:(R(q,n0+2,5)-.5)*40,dy:(R(q,n0+3,5)-.5)*30,h:hlo+R(q,n0+4,5)*(hhi-hlo),sp:spd*(.7+R(q,n0+5,5)*.6),ph:R(q,n0+6,5)*100,sz:.85+R(q,n0+7,5)*.3})};
-  lane('reef',8,.5,1.8,.9,60);lane('angel',5,.6,2,.8,70);lane('school',5,.8,2.4,1.0,80);lane('turtle',1,.5,1.4,.35,90);lane('jelly',3,1,2.6,.3,150);
-  const a0=stairs[0]||{ax:1,ay:1};
+  decor.push({k:'teleporter',x:far.cx,y:far.cy,block:false,walk:true,loot:false,shop:false,hgdtele:'zw'});
+  enemies.push({t:(typeof HGFW!=='undefined'&&HGFW.enemies)?'hgfcatfish':'uwgulper',x:far.cx+1,y:far.cy+1});decor.push({k:'uw_shellchest',x:far.cx-1,y:far.cy-1,block:true,hgdwTier:3});
+  for(let k=0;k<10;k++){const c=take();if(c)decor.push({k:'uw_shellchest',x:c[0],y:c[1],block:true,hgdwTier:k%4===0?2:1})}
+  // reed beds, lilies and green weed to swim through, everywhere
+  const REED=['hgt_reeds','hgt_reeds','hgt_vine_roundleaf','uw_seagrass'];
+  for(const c of cells.slice()){if(rnd()<.3){decor.push({k:REED[(rnd()*REED.length)|0],x:c[0],y:c[1],block:false,walk:true,deco:true})}}
+  for(const r of rooms)for(let k=0;k<7;k++){const x=r.x+((rnd()*r.w)|0),y=r.y+((rnd()*r.h)|0);if(g[y][x]==='.'&&!used.has(x+','+y)&&!decor.some(d=>d.x===x&&d.y===y))decor.push({k:REED[(rnd()*REED.length)|0],x,y,block:false,walk:true,deco:true})}
+  // moss and trailing weed hung on the walls
+  {const faces=[];for(let y=1;y<S-1;y++)for(let x=1;x<S-1;x++){if(g[y][x]!=='.')continue;for(const [a,b] of D){if(g[y+b][x+a]==='#')faces.push([x,y,a,b])}}
+    faces.sort(()=>rnd()-.5);const got=[];for(const [x,y,a,b] of faces){if(got.length>=110)break;if(got.some(q=>Math.abs(q[0]-x)+Math.abs(q[1]-y)<3))continue;got.push([x,y]);decor.push({k:'art_hgdf_vine'+((rnd()*4)|0),x,y,wd:[a,b],pic:1,block:false,walk:true,deco:true,bob:.9})}}
+  // freshwater fish swimming overhead and across (see hgd_fresh.js)
+  const swim=[];const R=(a,b,c)=>hash2(a,b,c+477);const lane=(k,cnt,hlo,hhi,spd,n0)=>{for(let q=0;q<cnt;q++)swim.push({k,x0:5+R(q,n0,5)*(S-10),y0:6+R(q,n0+1,5)*(S-12),dx:(R(q,n0+2,5)-.5)*34,dy:(R(q,n0+3,5)-.5)*26,h:hlo+R(q,n0+4,5)*(hhi-hlo),sp:spd*(.7+R(q,n0+5,5)*.6),ph:R(q,n0+6,5)*100,sz:.85+R(q,n0+7,5)*.3})};
+  const FISH=(typeof HGFW!=='undefined'&&HGFW.fish)?HGFW.fish:['reef','angel','school'];FISH.forEach((k,i)=>lane(k,3,.5,2.2,.7+(i%3)*.15,60+i*10));
   const fm=[];for(let y=0;y<S;y++)fm.push('0'.repeat(S));
-  const L={rows:g.map(r=>r.join('')),start:{x:a0.ax,y:a0.ay,f:0},enemies,items,decor,chars,fmap:fm,floorSet:['seabed1','seabed2','seabed3','sand','sand','seabed4'],floor:'seabed1',day:0,amb:.8,name:'The Drowned Maze',label:'The Drowned Maze',noExtras:true,noTele:true,diff:HGDW.DIFF,ceilH:2.6,torchGap:1e9,lights:[],portals:[],
-    _hgdw:{stairs,rooms:rooms.length},mapNames:[{t:'The Drowned Maze',x:30,y:30,k:'place'}]};
-  UWS[HGDW.ID]={vents,swim};LEVELS[HGDW.ID]=L}
+  const L={rows:g.map(r=>r.join('')),start:{x:a0.ax,y:a0.ay,f:0},enemies,items,decor,chars,fmap:fm,floorSet:[FLOORS.hgdwf?'hgdwf':'seabed1',FLOORS.hgdwf2?'hgdwf2':'seabed2'],floor:FLOORS.hgdwf?'hgdwf':'seabed1',day:0,amb:.8,name:'The Drowned Maze',label:'The Drowned Maze',noExtras:true,noTele:true,diff:HGDW.DIFF,ceilH:2.6,torchGap:1e9,lights:[],portals:[],
+    _hgdw:{stairs,rooms:rooms.length,roomList:rooms,far:{x:far.cx,y:far.cy}},mapNames:[{t:'The Drowned Maze',x:20,y:20,k:'place'}]};
+  UWS[HGDW.ID]={vents,swim};LEVELS[HGDW.ID]=L;
+  // the far stone joins the stones of the maze (see hgd_tele.js): it is a different level, so it is marked with its level
+  try{const SL=LEVELS[HGD.ID];if(SL&&SL._hgdt&&!SL._hgdt.stones.some(q=>q.id==='zw'))SL._hgdt.stones.push({id:'zw',x:far.cx,y:far.cy,level:HGDW.ID,name:'The Far Drowned Stone',kind:'drowned',zone:'The Drowned Maze'})}catch(e){console.error(e)}}
 KH_LAZY[HGDW.ID]=()=>{hgBuild();hgdBuild();hgdwBuild()};
 /* ---------- walking into the steps ---------- */
 function hgdwPrompt(text,opts){G.talk={d:{k:'_',x:G.P.x,y:G.P.y},n:{name:'Steps'},node:say(text,opts),t:G.time,btns:[]};G.hold=null;G.queued=null}
@@ -102,4 +115,15 @@ function hgdwGo(i,down){
       hgdmpStepsIcon(ctx,px,py,Math.max(.9,Math.min(1.6,.7+z*.12)))}
     ctx.restore()}}catch(e){}return _dn.apply(this,arguments)}}
 if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('There are steps down into the water in four of the pond clearings. Below is a flooded maze. Bring a helm for everyone, or nobody will come back up with you.');
-{const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];_b.apply(this,arguments);const L=LEVELS[HGD.ID];if(!had&&L&&L._hgdk)try{hgdwEntrances(L)}catch(e){console.error('hgdw entrances',e)}}}
+{const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];_b.apply(this,arguments);const L=LEVELS[HGD.ID];if(!had&&L&&L._hgdk)try{hgdwEntrances(L)}catch(e){console.error('hgdw entrances',e)}if(!had&&L&&L._hgdw&&L._hgdt)try{hgdwStone(L)}catch(e){console.error('hgdw stone',e)}}}
+
+/* a teleport stone in the clearing next to the first steps (the area next to the Drowned Maze); the other stone is at the far end of the Drowned Maze itself */
+function hgdwStone(L){
+  if(L._hgdw.stone)return;const e=L._hgdw.entrances[0];if(!e)return;const rows=L.rows,open=(x,y)=>rows[y]&&rows[y][x]==='.',occ=new Set(L.decor.concat(L.items,L.enemies).map(d=>d.x+','+d.y));
+  for(let pass=0;pass<2;pass++)for(let r=2;r<12;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=e.ax+dx,y=e.ay+dy;if(!open(x,y)||occ.has(x+','+y)||(L.fmap&&L.fmap[y]&&L.fmap[y][x]==='6'))continue;
+    let free=0;for(let ay=-1;ay<=1;ay++)for(let ax=-1;ax<=1;ax++)if((ax||ay)&&open(x+ax,y+ay)&&!occ.has((x+ax)+','+(y+ay)))free++;if(free<(pass?2:6))continue;
+    const s={id:'sY',x,y,name:'The Drowned Maze Landing Stone',kind:'water',zone:'The Drowned Maze'};L._hgdt.stones.push(s);L.decor.push({k:'teleporter',x,y,block:false,walk:true,loot:false,shop:false,hgdtele:'sY'});L._hgdw.stone={x,y};return}}
+const hgdwZ=()=>{const L=LEVELS[HGDW.ID];return L&&L._hgdw&&L._hgdw.far&&LEVEL===HGDW.ID&&G.P.x===L._hgdw.far.x&&G.P.y===L._hgdw.far.y?{id:'zw',x:L._hgdw.far.x,y:L._hgdw.far.y,level:HGDW.ID,name:'The Far Drowned Stone'}:null};
+// waking the far stone: stand on it
+{const _u=update;update=function(dt){try{if(LEVEL===HGDW.ID&&G.state==='play'){const z=hgdwZ(),W0=G.flags.hgdTele||(G.flags.hgdTele={});if(z&&!W0.zw){W0.zw=1;sfx('level');msg('The stone hums, and runes of pale green light run round its rim. It is awake. Press T to travel.','#a8f0c0');G.flags.teles=G.flags.teles||{};G.flags.teles[LEVEL]=1}}}catch(e){}return _u.apply(this,arguments)}}
+{const _on=teleOn;teleOn=function(){return _on.apply(this,arguments)||(G.state==='play'&&!!hgdwZ())}}

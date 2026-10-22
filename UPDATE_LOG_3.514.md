@@ -48,10 +48,10 @@ The deeper Hollow Lands
 * Every kind of shop now works in each of the eight maze towns: a weaponsmith, an armourer, a magic seller, a general trader and an inn (60 gold a bed, heals the party), as well as the shops already there.
 * Discarding an item in the inventory now asks first: Discard asks "Discard (item)? It will be gone for good." with Discard and Keep it buttons.
 * The Underlevel has twenty new painted frightening creatures (ten black slime monsters and ten demonic horrors, all with red glowing eyes, bodies near black) in place of the old insects and grubs. The ladders to and from it are one ladder with plain stone above, not two stacked.
-* The Deeper Hollow map is redrawn like a hand-inked medieval map at a much sharper resolution, with painted trees, the thieves' houses, water passages in light and dark blue, and views for the Vine Canal, the Croc Canals and the Drowned Maze. Standing on a teleport stone, the other woken stones on the map are ringed and can be tapped to travel. The Underlevel map is much more sinister.
+* The Deeper Hollow map is redrawn like a hand-inked medieval map at a much sharper resolution, with painted trees, the thieves' houses, water passages in light and dark blue, and a view of the Drowned Maze. Standing on a teleport stone, the other woken stones on the map are ringed and can be tapped to travel. The Underlevel map is much more sinister.
 * The mini map has plus and minus buttons beside it to zoom in and out.
 * New music: the Underlevel plays Dark Cavern Ambient, the Deeper Hollow maze and its boat canals play Paranoid Truth, and the Hollow Land and the Hollow Grasslands play Searching outdoors.
-* Go to area now lists the Hollow Grasslands, its four beehive dungeons, and the Drowned Maze, Vine Canal and Croc Canals.
+* Go to area now lists the Hollow Grasslands, its four beehive dungeons, and the Drowned Maze.
 * The gate between the Hollow Land and the Hollow Grasslands now goes both ways: a spiked gate on the Hollow Land's ledge leads down into the Grasslands.
 * Fixed: the little pet creatures and the drifting clouds in the maze were not moving.
 * Bulb gives the party a magic map of silver thread when the whale's errand is done. From then on, the map of the maze draws a thin, glowing, dashed line of everywhere the party has walked. The party is told of it when it first enters the maze.

@@ -1,4 +1,4 @@
-Below the Abbey: update 3.549 (changes since 3.534, the update on itch.io before this one, including the last Hollow Grasslands quests and the way down to the Deeper Hollow)
+Below the Abbey: update 3.551 (changes since 3.534, the update on itch.io before this one, including the last Hollow Grasslands quests and the way down to the Deeper Hollow)
 
 The Hollow Grasslands: the last quests, and the way down to the Deeper Hollow
 
@@ -57,7 +57,7 @@ The maps
 * The Deeper Hollow map is redrawn as a hand-inked medieval map, painted at five times the old sharpness. Soft watercolour washes colour each biome and run into each other, passages are inked in wobbly rounded pen lines instead of a grid of squares, the walls are hatched with short pen strokes, clearings have tufts of grass, flowers and pebbles, atriums have ferns, rooms have scattered flagstones and ponds have ripples and lily pads.
 * Trees on the map are now painted: an oak, a yew and a bell-shaped tree with golden blossoms, and a fountain, instead of green dots. Painted pictures also mark the thieves' houses, the dock and steps of the water passages and the huts of the towns.
 * The thieves' houses are on the map, each with its name.
-* The water passages are on the map. Shallow water that can be walked through is light blue, and deep water that needs a boat (or a helm, in the Drowned Maze) is dark blue. Reeds mark the docks of the canals, and a pond marks each flight of steps down into the Drowned Maze. Three new buttons show the watery passages in full: Vine (the Vine Canal), Croc (the Croc Canals) and Drowned (the Drowned Maze), every passage dark blue with pools and reeds. They also work while you are standing in those levels. The key lists both kinds of water.
+* The water passages are on the map. Shallow water that can be walked through is light blue, and deep water that needs a boat (or a helm, in the Drowned Maze) is dark blue. Reeds mark the docks of the canals, and a pond marks each flight of steps down into the Drowned Maze. The lakes of the maze are dark blue on the map with a dock icon at each dock, and the marshes light blue. A Drowned button shows the whole Drowned Maze in green-blue. The key lists both kinds of water.
 * Standing on a woken teleport stone and opening the map, every other woken stone is ringed in blue on the whole map and on each quarter. Tap a ringed stone to travel to it.
 * The Underlevel map is far more sinister: near-black and blood-red parchment, blood pools and spatters, claw scratches, crossed bones, skulls and watching eyes, a dripping red title and a bloody frame, with the ladders glowing so they can still be found.
 * The key on the map lists the thieves' houses, canal docks, steps into the water, and shallow and deep water.
@@ -75,8 +75,33 @@ Music
 
 Areas and gates
 
-* Go to area now lists the Hollow Grasslands, its four beehive dungeons (the Hush, Droning, Amber and Queen's Hives) and the Drowned Maze, the Vine Canal and the Croc Canals.
+* Go to area now lists the Hollow Grasslands, its four beehive dungeons (the Hush, Droning, Amber and Queen's Hives) and the Drowned Maze.
 * The gate between the Hollow Land and the Hollow Grasslands now goes both ways. A spiked gate on the ledge of the Hollow Land leads down into the Grasslands, as the southern gate of the Grasslands leads back out onto the ledge.
+
+The Drowned Maze, made fresh
+
+* The Drowned Maze is now a freshwater dungeon, half its old size (43 by 43 cells), and greenish instead of blue. The walls are thick with moss and slime, hung with trailing weed, the floor is silty pond bottom, and there are reeds, lily pads and green weed everywhere to swim through. Freshwater fish of eight kinds (carp, perch, trout, goldfish, bream, pike, tench and shoals of minnows) swim by.
+* Ten freshwater creatures live there, all painted: giant piranhas, marsh water snakes, water scorpions, diving-bell spiders, giant leeches, giant water beetles, mud crayfish, snapping turtles and bloodworms, and Old Whiskers, a huge whiskered catfish that is the warden of the maze and sleeps in the farthest chamber with the prize chest. Their bites leave bleeding, stings, poison and fever.
+* A teleport stone stands in the farthest chamber, next to the warden, and another stands in the clearing beside the first steps down. Wake each by standing on it. From either one you can travel to the other, and the stone at the far end also takes you to any other woken stone of the maze.
+* Four people live in the clearing beside the first steps and give nine quests that give a reason to go under the water: The Lost Urn and Reeds for the Wreaths (Anselm Dray, the sexton), Two Wedding Rings and Leeches for the Healer (Odile Pemm), The Moonscale Carp, Piranha Pie and Pests in the Pantry (Brannoc Gule, the cook), and The Diver's Journal and Old Whiskers (Wynne Tarn, the diver's daughter). Each person offers the next quest when the last is handed in. The urn, the two rings, the carp, the journal and the reed bundles are lying in the chambers of the maze.
+
+The lakes and the boats
+
+* The old canal levels (the Vine Canal and the Croc Canals) are gone. In their place the maze itself has three lakes: one in the south-west (15 by 11 cells), one in the east (15 by 15) and one in the north-centre (17 by 15). Each has ragged shores, reeds growing out of the water, lily pads, small islets of reeds (two of them with a chest), hanging vines on the walls, and crocodiles, eels and vine snakes in the water.
+* Each lake has two docks, a departure dock and a far dock, in different parts of the maze, 84 to 136 steps apart on land. Walking along a corridor you come to a couple of steps going down into the water, and a boat. Step in and the view changes to the front of a wooden boat, rocking gently, with the water ahead. Steer it with the ordinary arrows. The boat only goes on water and the party cannot wade into deep water. Bump a dock from the boat to land.
+* In the boat the sound changes to water: lapping and oar dips instead of footsteps, with a soft water hush, as on the ship in the Narrow Sea.
+* Butterflies, bees and dragonflies flit over each lake and its reeds.
+* Quests next to the departure docks: Reed, the canal warden, and Bram the boatwright (south-west lake): Crocodile Skins, Eels in the Lake, Snake Bounty, The Far Docks (land at the far dock of all three lakes), Reeds for the Roofs and The Lost Net. Fenn the beekeeper (north-centre lake): Lilies for the Bees. Odda the ferrywoman (east lake): A Letter for the Hermit, to Old Marl, who lives beside that lake's far dock.
+
+The marshes
+
+* Eight stretches of the maze are marshes under warm, shallow water that can be waded through, thick with reeds, lilies and tall grass that the party walks straight through. The biggest is the Marsh Maze, and the others are named too (the Reed Flats, Lily Shallows, the Wading Rows, Heron Marsh, the Sedge Fens, Mudwater Court and the Rush Beds). The names are on the map and the water shows light blue. The first time the party wades into each, a message says where it is.
+* Footsteps splash while the party is in the shallows.
+* Eight painted marsh creatures live in them, more in the Marsh Maze: giant locusts, giant mosquitoes, giant horseflies, razor dragonflies, marsh hornets, bog crickets, bloated bog toads and mire beetles.
+
+Controls
+
+* Drag one finger anywhere on the 3D view to look round: up and down, and left and right. The old look slider on the right side of the screen is gone. A plain tap still works as a tap, and the two-finger drag still works.
 
 Other
 

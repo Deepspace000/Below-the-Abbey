@@ -1,10 +1,9 @@
 /* ==========================================================================
-   THE BOAT CANALS (prefix hgdb / HGDB). Two flooded canal labyrinths, levels 478 (The Vine Canal) and 479 (The Croc Canals). A wooden dock in a wall of the maze, in a part of the
-   maze that is fairly empty, lets the party hop on a boat; steering it (the ordinary arrows) takes it through a maze of water passages, the walls hung thick with vines. Crocodiles, eels and
-   vine snakes swim there. At the far dock the party lands in another empty part of the maze and goes on on foot. (The same two docks serve both ways.)
+   THE BOAT LAKES (prefix hgdb / HGDB). Three lakes lie inside the great maze of the Deeper Hollow (level 475), each a closed room of deep water ringed with wall (laid out in hgd_maze.js, filled in
+   hgd_lakes.js). Each has two docks, a departure dock and a far dock: a wooden tile in the ring where a corridor ends, with steps going down into the water and a boat. Walking into the dock offers
+   a hop aboard; in the boat (G.flags.hgdBoat) the party moves over water only, the view is the bow of a wooden boat, and the steps are water. Walking into a dock from the water offers to land.
    ========================================================================== */
-const HGDB={A:478,B:479,S:71,DIFF:73};
-LEVEL_NAMES[HGDB.A]='The Vine Canal';LEVEL_NAMES[HGDB.B]='The Croc Canals';LEVEL_RATING[HGDB.A]=LEVEL_RATING[HGDB.B]=HGDB.DIFF;
+const HGDB={DIFF:73};
 Object.assign(ENEMY_DEF,{
   hgwcroc:{name:'Swamp Crocodile',hp:300,dmg:[15,26],hit:.8,w:1.9,img:'hgw_croc',xp:230,gold:[10,40],speed:1,verb:'snaps at',aboveParty:1},
   hgweel:{name:'Marsh Eel',hp:150,dmg:[10,18],hit:.8,w:1.1,img:'uw_eel_0',xp:150,gold:[0,12],speed:1,verb:'bites'},
@@ -13,87 +12,69 @@ if(typeof NO_VARY!=='undefined')NO_VARY.push('hgwcroc','hgweel','hgwsnake');
 AFFL_HITS.push([/^hgwsnake/,'stung',.3],[/^hgwcroc/,'bleeding',.2],[/^hgweel/,'fever',.1]);
 function hgdbArt(){if(!IMG.hgw_croc&&IMG.firelizard){try{hlTint('firelizard',30,90,40,.62,'hgw_croc');if(IMG.firelizardA)hlTint('firelizardA',30,90,40,.62,'hgw_crocA')}catch(e){}}
   if(!IMG.hgw_snake&&IMG.cobra){try{hlTint('cobra',40,150,60,.55,'hgw_snake');if(IMG.cobraA)hlTint('cobraA',40,150,60,.55,'hgw_snakeA')}catch(e){}}}
-/* ---------- the looks: the wall hung with vines, and the dock ---------- */
-function hgdbTexVines(){const key='hgdb_vines';if(IMG[key])return key;const PV=IMG.art_tex_hgdp_vines;if(PV&&PV.width){const b=IMG.lushwall||IMG.tex_forestwall;IMG[key]=mkCanvas(128,128,(x,w,h)=>{if(b)x.drawImage(b,0,0,w,h);x.globalCompositeOperation='multiply';x.globalAlpha=.9;x.drawImage(PV,0,0,w,h);x.globalCompositeOperation='source-over';x.globalAlpha=.25;x.fillStyle='#0a2a10';x.fillRect(0,0,w,h)});return key}
-  IMG[key]=mkCanvas(128,128,(x,w,h)=>{const b=IMG.lushwall||IMG.tex_forestwall;if(b)x.drawImage(b,0,0,w,h);else{x.fillStyle='#2a4a24';x.fillRect(0,0,w,h)}
-    x.fillStyle='rgba(8,30,12,.35)';x.fillRect(0,0,w,h);
-    for(let i=0;i<9;i++){const px=8+i*14+((i*37)%7),len=50+((i*53)%70);x.strokeStyle=i%2?'#2f6a2a':'#245a22';x.lineWidth=2.4+(i%3)*.6;x.lineCap='round';x.beginPath();x.moveTo(px,0);
-      for(let y=0;y<len;y+=8)x.lineTo(px+Math.sin(y*.16+i)*4,y+8);x.stroke();
-      x.fillStyle=i%3?'#4a9a3a':'#6ab84a';for(let y=10;y<len;y+=13){x.beginPath();x.ellipse(px+Math.sin(y*.16+i)*4+5,y,5,2.6,.5,0,6.3);x.fill();x.beginPath();x.ellipse(px+Math.sin(y*.16+i)*4-5,y+6,5,2.6,-.5,0,6.3);x.fill()}}
-    x.strokeStyle='rgba(0,0,0,.7)';x.lineWidth=3;x.strokeRect(1.5,1.5,w-3,h-3)});
-  return key}
+/* ---------- the dock tile ---------- */
 function hgdbTexDock(){const key='hgdb_dock';if(IMG[key])return key;if(IMG.art_tex_hgdp_dock&&IMG.art_tex_hgdp_dock.width)return 'art_tex_hgdp_dock';
   IMG[key]=mkCanvas(128,128,(x,w,h)=>{const b=IMG.tex_abbeywall;if(b)x.drawImage(b,0,0,w,h);else{x.fillStyle='#4a4638';x.fillRect(0,0,w,h)}x.fillStyle='rgba(0,16,20,.3)';x.fillRect(0,0,w,h);
     const g=x.createLinearGradient(0,40,0,h);g.addColorStop(0,'#2a6a74');g.addColorStop(1,'#0a2a34');x.fillStyle=g;x.beginPath();x.moveTo(14,h);x.lineTo(14,50);x.quadraticCurveTo(14,14,64,14);x.quadraticCurveTo(114,14,114,50);x.lineTo(114,h);x.closePath();x.fill();x.strokeStyle='#0c1418';x.lineWidth=3;x.stroke();
-    // a little boat lying in the water, seen from the side
     x.fillStyle='#8a5a2c';x.strokeStyle='#2a1808';x.lineWidth=2;x.beginPath();x.moveTo(34,92);x.quadraticCurveTo(64,112,94,92);x.lineTo(88,80);x.lineTo(40,80);x.closePath();x.fill();x.stroke();
-    x.fillStyle='#c8a060';x.fillRect(44,84,40,4);x.strokeStyle='#5a3a18';x.lineWidth=2.4;x.beginPath();x.moveTo(64,80);x.lineTo(64,40);x.stroke();x.fillStyle='#e8e0c8';x.beginPath();x.moveTo(64,42);x.lineTo(88,66);x.lineTo(64,66);x.closePath();x.fill();x.stroke();
+    x.fillStyle='#c8a060';x.fillRect(44,84,40,4);
     x.strokeStyle='rgba(180,240,230,.5)';x.lineWidth=1.4;for(let i=0;i<3;i++){x.beginPath();x.moveTo(24,100+i*8);x.quadraticCurveTo(64,94+i*8,104,100+i*8);x.stroke()}
     x.fillStyle='#7a5a30';x.fillRect(8,110,112,10);x.strokeStyle='#2a1808';x.lineWidth=1.4;x.strokeRect(8,110,112,10);for(let i=1;i<7;i++){x.beginPath();x.moveTo(8+i*16,110);x.lineTo(8+i*16,120);x.stroke()}
     x.strokeStyle='rgba(0,0,0,.8)';x.lineWidth=3;x.strokeRect(1.5,1.5,w-3,h-3)});
   return key}
-/* ---------- the two canal levels ---------- */
-function hgdbBuild(id){
-  if(LEVELS[id])return;const SU=LEVELS[HGD.ID]&&LEVELS[HGD.ID]._hgdb;if(!SU){try{hgBuild();hgdBuild()}catch(e){console.error(e)}}
-  const docks=LEVELS[HGD.ID]._hgdb.docks.filter(d=>d.level===id);if(docks.length<2)return;hgdbArt();
-  const S=HGDB.S,N=(S-1)>>1,rnd=hgdmRng(478000+id),g=[];for(let y=0;y<S;y++)g.push(new Array(S).fill('#'));
-  const seen=new Uint8Array(N*N),st=[[0,0,-1]],D=[[0,-1],[1,0],[0,1],[-1,0]];seen[0]=1;g[1][1]='.';
-  while(st.length){const [i,j,pd]=st[st.length-1],opts=[];for(let d=0;d<4;d++){const ni=i+D[d][0],nj=j+D[d][1];if(ni>=0&&nj>=0&&ni<N&&nj<N&&!seen[nj*N+ni])opts.push(d)}
-    if(!opts.length){st.pop();continue}let d=opts[(rnd()*opts.length)|0];if(pd>=0&&opts.includes(pd)&&rnd()<.55)d=pd;const ni=i+D[d][0],nj=j+D[d][1];seen[nj*N+ni]=1;g[2*j+1+D[d][1]][2*i+1+D[d][0]]='.';g[2*nj+1][2*ni+1]='.';st.push([ni,nj,d])}
-  for(let y=2;y<S-2;y++)for(let x=2;x<S-2;x++)if(g[y][x]==='#'&&((y%2===1&&x%2===0&&g[y][x-1]==='.'&&g[y][x+1]==='.')||(y%2===0&&x%2===1&&g[y-1][x]==='.'&&g[y+1][x]==='.'))&&rnd()<.06)g[y][x]='.';
-  // basins: wider pools of open water, with lily plants and hanging vines (never in a one-square canal)
-  const basins=[];for(let k=0;k<5;k++){const w=5+((rnd()*2)|0),h=5+((rnd()*2)|0),x0=4+((rnd()*(S-w-8))|0),y0=4+((rnd()*(S-h-8))|0);if(basins.some(b=>Math.abs(b.x-x0)<14&&Math.abs(b.y-y0)<14)||(x0<10&&y0<10))continue;for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++)g[y][x]='.';basins.push({x:x0,y:y0,w,h,cx:x0+(w>>1),cy:y0+(h>>1)})}
-  // the far end: the open cell farthest by water from the start
-  const start={x:1,y:1},dist=new Int32Array(S*S).fill(-1),q=[[1,1]];dist[S+1]=0;let far=[1,1];
-  for(let i=0;i<q.length;i++){const [x,y]=q[i];far=[x,y];for(const [a,b] of D){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=S||ny>=S||g[ny][nx]!=='.'||dist[ny*S+nx]>=0)continue;dist[ny*S+nx]=dist[y*S+x]+1;q.push([nx,ny])}}
-  const TM=ohTiles(),chars={};
-  OH_STY.hgdb_vines=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:hgdbTexVines(),door:hgdbTexVines(),win:hgdbTexVines(),alt:hgdbTexVines(),zoom:1,contrast:1.05,tint:[255,255,255,0]});
-  OH_STY.hgdb_dock=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:hgdbTexDock(),door:hgdbTexDock(),win:hgdbTexDock(),alt:hgdbTexDock(),zoom:1,contrast:1,tint:[255,255,255,0]});
-  chars['#']=TM.make('plain','hgdb_vines',2.7).gid;const chD=String.fromCharCode(0x360);chars[chD]=TM.make('plain','hgdb_dock',2.7).gid;
-  const dockAt=(c)=>{for(const [a,b] of D){const wx=c[0]+a,wy=c[1]+b;if(wx>0&&wy>0&&wx<S-1&&wy<S-1&&g[wy][wx]==='#'&&(wx%2===0||wy%2===0)){g[wy][wx]=chD;return {ax:c[0],ay:c[1],x:wx,y:wy,dx:a,dy:b}}}return null};
-  const dIn=dockAt([1,1])||dockAt([1,3]),dOut=dockAt(far);
-  const used=new Set([dIn&&dIn.ax+','+dIn.ay,dOut&&dOut.ax+','+dOut.ay]);
-  const cells=[];for(let y=1;y<S-1;y++)for(let x=1;x<S-1;x++)if(g[y][x]==='.'&&dist[y*S+x]>8&&Math.hypot(x-far[0],y-far[1])>6)cells.push([x,y]);
-  const take=()=>cells.length?cells.splice((rnd()*cells.length)|0,1)[0]:null;
-  const enemies=[],decor=[];
-  const kinds=['hgwcroc','hgwcroc','hgweel','hgweel','hgwsnake','hgwsnake'];for(let k=0;k<40;k++){const c=take();if(c)enemies.push({t:kinds[k%6],x:c[0],y:c[1]})}
-  for(const b of basins)for(let k=0;k<4;k++){const x=b.x+1+((rnd()*(b.w-2))|0),y=b.y+1+((rnd()*(b.h-2))|0);if(g[y][x]==='.'&&!used.has(x+','+y)&&!enemies.some(e=>e.x===x&&e.y===y)&&!decor.some(d=>d.x===x&&d.y===y)){decor.push({k:k%2?'hgt_reeds':'hgt_vine_roundleaf',x,y,block:false,walk:true,deco:true})}}
-  const L={rows:g.map(r=>r.join('')),start:{x:dIn?dIn.ax:1,y:dIn?dIn.ay:1,f:0},enemies,items:[],decor,chars,day:0,amb:.7,floor:'water',floor2:'water',name:LEVEL_NAMES[id],label:LEVEL_NAMES[id],diff:HGDB.DIFF,ceilH:2.6,torchGap:1e9,noTele:true,noExtras:true,portals:[],lights:basins.map(b=>[b.cx,b.cy]),
-    _hgdb:{docks:{in:dIn,out:dOut},basins:basins.length},mapNames:[{t:LEVEL_NAMES[id],x:35,y:35,k:'place'}]};
-  LEVELS[id]=L}
-KH_LAZY[HGDB.A]=()=>{hgBuild();hgdBuild();hgdbBuild(HGDB.A)};KH_LAZY[HGDB.B]=()=>{hgBuild();hgdBuild();hgdbBuild(HGDB.B)};
-/* ---------- the docks on the surface: in four fairly empty parts of the maze ---------- */
-function hgdbDocks(L){
-  if(L._hgdb)return;const M=L._hgdm,W=M.W,P=L._hgdp,rows=L.rows.map(r=>r.split('')),kind=M.kind,open=(x,y)=>rows[y]&&rows[y][x]==='.',rnd=hgdmRng(478999);
-  const occ=new Set(L.decor.concat(L.items,L.enemies).map(d=>d.x+','+d.y));
-  const reach=new Set([L.start.x+','+L.start.y]),q=[[L.start.x,L.start.y]];for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b,k=nx+','+ny;if(reach.has(k)||!open(nx,ny))continue;reach.add(k);q.push([nx,ny])}}
-  // how full is each window of the maze? (people, finds, creatures, doors, steps, ladders, stones, towns and danger zones all count)
-  const feats=L.decor.concat(L.items,L.enemies).map(d=>[d.x,d.y,1]);for(const z of P.zones)feats.push([z.x,z.y,z.type==='safe'?40:z.r*2]);for(const k in (L._hgds?L._hgds.doors:{})){const p=k.split(',');feats.push([+p[0],+p[1],1])}
-  const win=30,wins=[];for(let wy=6;wy+win<W-6;wy+=10)for(let wx=6;wx+win<W-6;wx+=10){let sc=0;for(const f of feats)if(f[0]>=wx&&f[0]<wx+win&&f[1]>=wy&&f[1]<wy+win)sc+=f[2];wins.push({x:wx,y:wy,sc})}
-  wins.sort((a,b)=>a.sc-b.sc);const pick=[];for(const w of wins){if(pick.length>=4)break;if(pick.every(p=>Math.hypot(p.x-w.x,p.y-w.y)>=60))pick.push(w)}
-  const TM=ohTiles(),chD=String.fromCharCode(0x360);OH_STY.hgdb_dock=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:hgdbTexDock(),door:hgdbTexDock(),win:hgdbTexDock(),alt:hgdbTexDock(),zoom:1,contrast:1,tint:[255,255,255,0]});L.chars[chD]=TM.make('plain','hgdb_dock',2.7).gid;
-  const docks=[];pick.forEach((w,i)=>{const cx=w.x+(win>>1),cy=w.y+(win>>1),c=[];
-    for(let y=w.y;y<w.y+win;y++)for(let x=w.x;x<w.x+win;x++){if(!open(x,y)||!reach.has(x+','+y)||occ.has(x+','+y)||kind[y*W+x])continue;if(P.zones.some(z=>Math.hypot(z.x-x,z.y-y)<=z.r+(z.type==='safe'?3:2)))continue;
-      for(const [a,b] of [[0,-1],[1,0],[0,1],[-1,0]]){const wx=x+a,wy=y+b,cc=rows[wy][wx];if(cc==='.'||cc.charCodeAt(0)<0x2e0||cc.charCodeAt(0)>=0x2e8)continue;c.push([x,y,wx,wy,a,b,Math.hypot(x-cx,y-cy)]);break}}
-    c.sort((a,b)=>a[6]-b[6]);const e=c[0];if(e){docks.push({ax:e[0],ay:e[1],x:e[2],y:e[3],dx:e[4],dy:e[5],level:i<2?HGDB.A:HGDB.B,end:i%2===0?'in':'out'});occ.add(e[0]+','+e[1])}});
-  for(const d of docks)rows[d.y][d.x]=chD;
-  L.rows=rows.map(r=>r.join(''));L._hgdb={docks,windows:pick.map(p=>p.sc)}}
-// the surface map marks the docks
-{const _dn=hgdmpDrawNames;hgdmpDrawNames=function(vi){try{const L=LEVELS[HGD.ID],V=MPL.view;if(L&&L._hgdb&&V&&V.z&&vi!==5){const A=V.area,z=V.z;ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();
-    for(const d of L._hgdb.docks){const px=A.x+(V.X(d.x+.5)-V.sx0)*z,py=A.y+(V.Y(d.y+.5)-V.sy0)*z;if(px<A.x||px>A.x+A.w||py<A.y||py>A.y+A.h)continue;hgdmpBoatIcon(ctx,px,py,Math.max(.9,Math.min(1.6,.7+z*.12)))}
+function hgdbDockGid(TM){OH_STY.hgdb_dock=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:hgdbTexDock(),door:hgdbTexDock(),win:hgdbTexDock(),alt:hgdbTexDock(),zoom:1,contrast:1,tint:[255,255,255,0]});return TM.make('plain','hgdb_dock',2.7).gid}
+const hgdbL=()=>{const L=LEVELS[HGD.ID];return L&&L._hgdl?L:null};
+const hgdbWater=(x,y)=>{const L=LEVELS[HGD.ID];return !!(L&&L.fmap&&L.fmap[y]&&L.fmap[y][x]==='6')};
+const hgdbOn=()=>LEVEL===HGD.ID&&G.flags&&G.flags.hgdBoat;
+// the map shows the docks
+{const _dn=hgdmpDrawNames;hgdmpDrawNames=function(vi){try{const L=hgdbL(),V=MPL.view;if(L&&V&&V.z&&vi<5){const A=V.area,z=V.z;ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();
+    for(const k of L._hgdl.lakes)if(k.docks)for(const d of [k.docks.dep,k.docks.far]){const px=A.x+(V.X(d.x+.5)-V.sx0)*z,py=A.y+(V.Y(d.y+.5)-V.sy0)*z;if(px<A.x||px>A.x+A.w||py<A.y||py>A.y+A.h)continue;hgdmpBoatIcon(ctx,px,py,Math.max(.9,Math.min(1.6,.7+z*.12)))}
     ctx.restore()}}catch(e){}return _dn.apply(this,arguments)}}
 /* ---------- hopping on, and landing ---------- */
 function hgdbPrompt(text,opts){G.talk={d:{k:'_',x:G.P.x,y:G.P.y},n:{name:'A dock'},node:say(text,opts),t:G.time,btns:[]};G.hold=null;G.queued=null}
-function hgdbGo(dk,toBoat){
-  const S=LEVELS[HGD.ID]._hgdb.docks;
-  if(toBoat){const lv=dk.level;try{hgdbBuild(lv)}catch(e){console.error(e)}const L=LEVELS[lv];if(!L)return;const d=dk.end==='in'?L._hgdb.docks.in:L._hgdb.docks.out;if(!d)return;
-    goToLevel(lv,{x:d.ax,y:d.ay,f:DIRS.findIndex(q=>q[0]===-d.dx&&q[1]===-d.dy)});G.cut=null;msg('You step into the boat and push off. Steer it with the arrows. The vines hang low, and things move in the water.','#9fe0c0')}
-  else{goToLevel(HGD.ID,{x:dk.ax,y:dk.ay,f:DIRS.findIndex(q=>q[0]===-dk.dx&&q[1]===-dk.dy)});G.cut=null;msg('The boat bumps the dock. You climb out and walk on.','#e8e0a0')}}
+function hgdbFindDock(nx,ny){const L=hgdbL();if(!L)return null;for(const k of L._hgdl.lakes){if(!k.docks)continue;for(const side of ['dep','far']){const d=k.docks[side];if(d.x===nx&&d.y===ny)return {k,side,d}}}return null}
+function hgdbHop(f){const d=f.d;G.flags.hgdBoat={lk:f.k.i,side:f.side};G.P.x=d.wx;G.P.y=d.wy;G.P.f=DIRS.findIndex(q=>q[0]===d.dx&&q[1]===d.dy);G.P.angT=(G.P.f-1)*Math.PI/2;G.C={x:G.P.x,y:G.P.y,a:G.P.angT};reveal();msg('You step into the boat and push off. Steer it with the arrows. It is a small lake, and things move in the water.','#9fe0c0');sfx('door')}
+function hgdbLand(f){const d=f.d,F=G.flags;if(f.side==='far'){F.hgdFar=F.hgdFar||{};F.hgdFar[f.k.i]=1}F.hgdBoat=null;G.P.x=d.ax;G.P.y=d.ay;G.P.f=DIRS.findIndex(q=>q[0]===-d.dx&&q[1]===-d.dy);G.P.angT=(G.P.f-1)*Math.PI/2;G.C={x:G.P.x,y:G.P.y,a:G.P.angT};reveal();msg(f.side==='far'?'The boat bumps the far dock. You climb the steps and walk on.':'The boat bumps the dock. You climb the steps.','#e8e0a0');sfx('door')}
 {const _db=desertBump;desertBump=function(nx,ny,g){
-  try{if(LEVEL===HGD.ID){const L=LEVELS[LEVEL],dk=L&&L._hgdb&&L._hgdb.docks.find(d=>d.x===nx&&d.y===ny);
-      if(dk){sfx('locked');hgdbPrompt('A wooden dock, and a little boat tied to it. The water beyond is dark, and the walls are hung with vines. A boat can be steered through the canals to another part of the maze. Do you want to hop on?',[['Hop on.',()=>{G.talk=null;sfx('door');hgdbGo(dk,true);return null}],['Not now.',()=>null]]);return true}}
-    else if(LEVEL===HGDB.A||LEVEL===HGDB.B){const L=LEVELS[LEVEL],dd=L&&L._hgdb;if(dd){for(const side of ['in','out']){const d=dd.docks[side];if(d&&d.x===nx&&d.y===ny){const sd=LEVELS[HGD.ID]._hgdb.docks.find(q=>q.level===LEVEL&&q.end===side);if(!sd)continue;
-        hgdbPrompt(side==='in'?'The dock where you started. Do you want to land here and go back to the maze?':'The far dock. Do you want to land here and continue on foot?',[['Land.',()=>{G.talk=null;sfx('door');hgdbGo(sd,false);return null}],['Keep steering.',()=>null]]);return true}}}}}catch(e){console.warn('hgdb',e)}
+  try{if(LEVEL===HGD.ID&&hgdbL()){const boat=!!G.flags.hgdBoat,dk=hgdbFindDock(nx,ny);
+      if(dk){sfx('locked');
+        if(!boat)hgdbPrompt('A flight of wooden steps goes down into dark water, and a little boat is tied at the bottom. The lake is deep, and the boat is the only way across. Do you want to hop on?',[['Hop on.',()=>{G.talk=null;hgdbHop(dk);return null}],['Not now.',()=>null]]);
+        else hgdbPrompt(dk.side==='far'?'The far dock. Wooden steps lead up into a corridor. Do you want to land here and go on on foot?':'The dock where you started. Wooden steps lead up into a corridor. Do you want to land here?',[['Land.',()=>{G.talk=null;hgdbLand(dk);return null}],['Keep steering.',()=>null]]);return true}
+      if(g===0){const w=hgdbWater(nx,ny);
+        if(boat&&!w){sfx('bump');G.shake=.08;msg('The boat cannot go on land.','#9fc0d0');return true}
+        if(!boat&&w){sfx('bump');G.shake=.08;msg('The water is too deep to wade. There is a boat at the dock.','#9fc0d0');return true}}}}catch(e){console.warn('hgdb',e)}
   return _db.apply(this,arguments)}}
-if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('There are docks in two lonely parts of the maze, and a boat at each. The canals are hung with vines, and crocodiles live in them.');
-{const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];_b.apply(this,arguments);const L=LEVELS[HGD.ID];if(!had&&L&&L._hgdr)try{hgdbDocks(L)}catch(e){console.error('hgdb docks',e)}}}
+// the boat does not outlive the lake: any other way into or out of the maze puts the party on its feet
+function hgdbDeep(){if(FLOORS.hgdl_deep)return FLOORS.hgdl_deep;const s=FLOORS.hgtb_deep||FLOORS.water;if(!s)return null;const o=new Uint8ClampedArray(s.length);for(let i=0;i<s.length;i+=4){o[i]=s[i]*1.5+10;o[i+1]=s[i+1]*1.6+22;o[i+2]=s[i+2]*1.7+38;o[i+3]=s[i+3]}return FLOORS.hgdl_deep=o}
+function hgdbFloor(){G.fl7=LEVEL===HGD.ID&&typeof FLOORS!=='undefined'?hgdbDeep():null}
+{const _g=goToLevel;goToLevel=function(n,e){const r=_g.apply(this,arguments);try{if(G.flags&&G.flags.hgdBoat&&(LEVEL!==HGD.ID||!hgdbWater(G.P.x,G.P.y)))G.flags.hgdBoat=null;hgdbFloor()}catch(x){}return r}}
+{const _r=restore;restore=function(sv){const r=_r.apply(this,arguments);try{hgdbFloor();if(G.flags&&G.flags.hgdBoat&&!(LEVEL===HGD.ID&&hgdbWater(G.P.x,G.P.y)))G.flags.hgdBoat=null}catch(e){}return r}}
+{const _u=update;update=function(dt){if(G.fl7===undefined||(LEVEL===HGD.ID)!==!!G.fl7)try{hgdbFloor()}catch(e){}return _u.apply(this,arguments)}}
+/* ---------- the view: the bow of a wooden boat, bobbing on the water ---------- */
+function hgdbHud(){
+  if(!hgdbOn()||G.state!=='play'||G.cut||G.talk||G.menu||(G.inv&&G.inv.open)||G.loot||G.overview)return;
+  const im=IMG.art_hgdl_bow,t=G.time;if(!im||!im.width)return;
+  const w=400,hh=w*im.height/im.width,bob=Math.sin(t*1.3)*1.8+Math.sin(t*.41)*1.3,sway=Math.sin(t*.7)*1.2,x=(420-w)/2+sway;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();
+  // the lap of the water along both sides of the hull
+  ctx.strokeStyle='rgba(190,235,240,.55)';ctx.lineWidth=1.2;
+  for(let i=0;i<5;i++){const y=150+i*11+Math.sin(t*1.1+i)*1.5,ph=t*.9+i*1.7;for(const s of [0,1]){const bx=s?330:90,dir=s?1:-1;ctx.beginPath();ctx.moveTo(bx+dir*(10+i*14),y);ctx.quadraticCurveTo(bx+dir*(26+i*14),y-2.5+Math.sin(ph)*1.2,bx+dir*(44+i*14),y);ctx.stroke()}}
+  ctx.drawImage(im,x,210-hh*.76+bob,w,hh);
+  ctx.fillStyle='rgba(120,200,220,.22)';const ly=203+Math.sin(t*1.6)*1.2;ctx.fillRect(0,ly,420,210-ly);
+  ctx.restore()}
+{const _h=uwHud;uwHud=function(){_h.apply(this,arguments);try{hgdbHud()}catch(e){}}}
+/* ---------- the sound: steps are the lap of water and the dip of an oar; a soft hush of water all the while ---------- */
+{const _s=sfx;sfx=function(n){if((n==='step'||n==='turn')&&hgdbOn()&&AC&&!G.mute&&SNDOPT.steps){
+    const v=.8+Math.random()*.4;nz(.32,(n==='step'?.2:.1)*v*SNDOPT.steps,'bandpass',900+Math.random()*500,450,0);nz(.55,.11*v*SNDOPT.steps,'lowpass',520,180,.06);
+    if(n==='step'){tone(300+Math.random()*120,170,.1,'sine',.05*SNDOPT.steps,.02);if(Math.random()<.5)tone(500+Math.random()*300,260,.06,'sine',.035*SNDOPT.steps,.16)}return}
+  return _s.apply(this,arguments)}}
+const HGDBS={src:null,hush:null,next:0};
+function hgdbSound(){
+  if(!AC||typeof NB==='undefined'||!NB)return;const now=AC.currentTime,on=G.state==='play'&&!G.mute&&SNDOPT.amb&&hgdbOn();
+  if(!HGDBS.src){const mk=(type,f,q)=>{const s=AC.createBufferSource(),fl=AC.createBiquadFilter(),g=AC.createGain();s.buffer=NB;s.loop=true;s.loopStart=Math.random()*.5;fl.type=type;fl.frequency.value=f;fl.Q.value=q;g.gain.value=0;s.connect(fl);fl.connect(g);g.connect(MASTER);s.start();return {s,f:fl,g}};
+    HGDBS.src=mk('lowpass',320,.7);HGDBS.hush=mk('bandpass',1800,.6)}
+  const sw=.5+.5*Math.sin(now*.43)*Math.sin(now*.15+1);
+  HGDBS.src.g.gain.setTargetAtTime(on?.14+.1*sw:0,now,.5);HGDBS.src.f.frequency.setTargetAtTime(240+260*sw,now,.4);HGDBS.hush.g.gain.setTargetAtTime(on?.012+.03*sw:0,now,.6);
+  if(on&&now>HGDBS.next){HGDBS.next=now+1.8+Math.random()*3.5;nz(.5,.13,'bandpass',1200,520,0);if(Math.random()<.4)tone(380+Math.random()*200,200,.09,'sine',.04,.1)}}
+{const _s=seaSoundTick;seaSoundTick=function(){_s.apply(this,arguments);try{hgdbSound()}catch(e){}}}
+if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('There are lakes in the maze, with a boat at the steps down to each. Cross by boat and you save a long walk, but the water has crocodiles in it.');
