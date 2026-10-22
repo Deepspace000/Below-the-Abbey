@@ -235,3 +235,8 @@ Desert dungeons and the monastery at their surroundings' level (3.579)
 
 * The 52 desert dungeons stood at levels 14 to 21 inside deserts rated 36 to 45. Each now takes the level of its desert (Sand Road 36, Red Dunes 41, the other deserts 45), and the Golden Pyramid is level 45. Their creatures, chests and the level shown on the Go to area list follow.
 * Saint Elen's Monastery (the grounds, the church and its buildings, the cellars, crypts and mausoleum) stood at 16 to 33 on the level 55 Pilgrim's Path. All of it is now level 55.
+
+Fights from level 25 up last longer (3.580)
+
+* From level 28 up, ordinary creatures died to one or two hits from a strong party. Creature health is no longer cut to 60 percent all the way: it stays at 60 percent up to level 20, then rises (about 86 percent at 30, 125 percent at 40) so that a party with good gear needs about three rounds to kill an average creature from level 30 to 100, and four or five hits to kill even the weakest kind at level 34 (the wolf-like ones). Creature damage was lowered to match, so a fight is longer but each hit hurts less: a party loses about 10 to 17 percent of its health in a fight of three creatures of its level, as before.
+* Levels 10 to 25 are unchanged (still about 40 percent shorter than before 3.573).
