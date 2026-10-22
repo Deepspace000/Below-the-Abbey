@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.587';
+const VERSION='3.588';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -46848,7 +46848,7 @@ BAL.dk=l=>BAL.lerp(BAL.dkT,l);BAL.hp=l=>BAL.lerp(BAL.hpT,l);BAL.target=l=>BAL.le
   const f=1+1.8*Math.pow((d.lvl-15)/15,1.5);d.dmg=[Math.round(d.dmg[0]*f),Math.round(d.dmg[1]*f)]}}
 // 2. creature health and damage
 /* From level 28 an ordinary creature is sized by how many hits it takes from a hero with good gear for the party's level (AH, average hit = damage times chance to hit, of an average party: a party with the best gear takes about a quarter fewer hits, and sails through for a while), as a rough guide, not a rule:
-   a creature at the party's level takes about 13 hits, one below it about 10, one above it about 20 (BAL.hitsRel);
+   a creature takes about 13 hits from an average party of its own level, so one the party has outgrown takes fewer, and one above the party more (BAL.hitsRel(0));
    the kind of creature changes it (a wolf-like one about 60 percent of that, the toughest ordinary kinds up to 175 percent), and each kind is a little different (plus or minus 15 percent), so no two fights feel the same.
    Bosses and great creatures keep the older formula (health factor hpT). The new sizing fades in from level 26 to 32; below it nothing changes. */
 BAL.REF=48;BAL.DMG=1.12; // every creature hits 12 percent harder, at every level
@@ -46856,11 +46856,11 @@ BAL.ahT=[[1,8],[10,14],[20,36],[25,54],[28,62],[30,98],[34,100],[36,143],[40,150
 BAL.ah=l=>BAL.lerp(BAL.ahT,l);
 BAL.w=l=>Math.max(0,Math.min(1,(l-26)/6));
 BAL.hitsRel=rel=>BAL.lerp([[-6,10],[0,13.3],[3,20],[8,23]],rel); // matched to Gandrick's Wood, which felt just right to a weaker party at level 10: its creatures take about 9 to 17 hits (the average of the three weapon heroes) from them
-BAL.kind=(t,base)=>{let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;const j=.85+.3*(((h>>>0)%1000)/1000);return Math.max(.6,Math.min(1.75,base/BAL.REF))*j};
+BAL.kind=(t,base)=>{let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;const j=.85+.3*(((h>>>0)%1000)/1000);return Math.max(.6,Math.min(1.4,base/BAL.REF))*j};
 BAL.partyLvl=L=>{const a=(G.heroes||[]).filter(h=>h.alive!==false);return a.length?a.reduce((n,h)=>n+h.lvl,0)/a.length:L};
 {const _es=enemyStat;enemyStat=function(t,lvl){const r=_es.apply(this,arguments),L=lvl||lvlHere(),k=BAL.dk(L),d=ENEMY_DEF[t],old=Math.max(1,Math.round(r.hp*BAL.hp(L))),w=BAL.w(L);
   const ordinary=d&&!(d.boss||d.aboveParty||(typeof NO_VARY!=='undefined'&&NO_VARY.includes(t))||d.partyLevel||/^w_/.test(t));
-  if(ordinary&&w>0){const pl=BAL.partyLvl(L),nw=BAL.ah(pl)*BAL.hitsRel(L-pl)*BAL.kind(t,d.hp);r.hp=Math.max(1,Math.round(old*(1-w)+nw*w))}else r.hp=old;
+  if(ordinary&&w>0){const nw=BAL.ah(L)*BAL.hitsRel(0)*BAL.kind(t,d.hp);r.hp=Math.max(1,Math.round(old*(1-w)+nw*w))}else r.hp=old; // sized from the creature's own level, never from the party (the party's level changes while it is being levelled up, and that once gave some creatures a fraction of their health)
   r.dmg=[Math.max(1,Math.round(r.dmg[0]*k*BAL.DMG)),Math.max(1,Math.round(r.dmg[1]*k*BAL.DMG))];return r}}
 
 // 3. mana runs out faster: every power, spell and special costs half as much again (at least one more), so a party has to plan its straight hits and its power hits

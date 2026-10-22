@@ -69,6 +69,8 @@ function tmApply(n,weak,real){
   G.gold=real?Math.round(tmGold(n)*.5):tmGold(n);
   // 4. the quests
   const Q=tmQuestPlan(n);for(const id of Q.main.concat(Q.extra))G.quests[id]={st:'done',base:0};
+  // the creatures of the area were sized while the party was being rebuilt at a low level: size them again now that it stands at level n
+  for(const e of G.enemies){if(e.hp<=0||e.dying)continue;const fr=e.hp/e.maxhp;e.maxhp=enemyStat(e.t,e.lvl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*fr))}
   msg('Testing party, level '+n+(real?' (real party: a mix of cheap and ok gear, two good pieces)':weak?' (weaker, average weapons)':'')+': '+(real?Math.round(tmGold(n)*.5):tmGold(n))+' gold, '+Q.main.length+' main and '+Q.extra.length+' side quests marked done.','#9ae0ff')}
 // ----- the screen -----
 function tmDraw(){

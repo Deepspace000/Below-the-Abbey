@@ -271,3 +271,7 @@ Armour blocks less, mana runs out faster (3.586)
 Testing menu: a real party (3.587)
 
 * The Testing menu (Pages copy only) has a third kind of party at each level, "Real party": the front fighters (Warrior and Thief) hold the upgrades, mostly ok pieces, only the Warrior's weapon and chest are good, the back line (Mage and Priest) waits with cheap old gear and some empty slots, and the party has half the usual gold.
+
+Creatures that died in one hit (3.588)
+
+* Some creatures in an area had a fraction of their proper health (a Deeper Hollow slug had 317 instead of about 7,000, so a level 50 party killed it in one hit). Cause: creature health from level 28 up was sized from the party's level at the moment the creature was first sized, and while a party is being levelled up (by Go to area or the Testing menu) its average level is briefly very low. Health is now sized from the creature's own level and kind, never from the party. All creatures of one kind and level now have the same health. The toughest ordinary kinds are also capped lower (at 1.4 times the middle ones, not 1.75).
