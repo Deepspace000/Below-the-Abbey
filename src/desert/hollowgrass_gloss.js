@@ -13,14 +13,14 @@ journalPage({id:'hglex',title:'Grassland Tongue',
   open(){G.hgPg=0},
   draw(){
     jFrame('Grassland tongue');
-    const list=hgGlossKnown(),total=Object.keys(HG_LEX).length,pages=Math.max(1,Math.ceil(list.length/HGG_PER));
+    const list=hgGlossKnown(),total=Object.keys(HG_LEX).length+(typeof HGDP_WORDS!=='undefined'?HGDP_WORDS.length:0),pages=Math.max(1,Math.ceil(list.length/HGG_PER));
     G.hgPg=clamp(G.hgPg||0,0,pages-1);
     txt(`Words known: ${list.length} of ${total}`,240,42,10,'#e8d890','center',true);
     if(!list.length)txt('No words yet. Listen to the people, then ask about a word.',240,150,9,'#a89878','center');
     const cw=136,x0=36,y0=60;
     list.slice(G.hgPg*HGG_PER,(G.hgPg+1)*HGG_PER).forEach((w,i)=>{
       const col=Math.floor(i/HGG_ROWS),row=i%HGG_ROWS,x=x0+col*(cw+6),y=y0+row*12.6;
-      txt(HG_LEX[w],x,y,8.4,'#e8d890','left',false,undefined,66);
+      txt(HG_LEX[w]||(typeof HGD_LEX!=='undefined'&&HGD_LEX[w])||'',x,y,8.4,'#e8d890','left',false,undefined,66);
       txt('= '+w,x+68,y,8.4,'#d2c9b2','left',false,undefined,cw-68)});
     txt(`Page ${G.hgPg+1} of ${pages}`,240,285,8,'#9a8a68','center');
     if(pages>1){btnText('hg_prev','Prev',60,278,90,16);btnText('hg_next','Next',330,278,90,16)}
