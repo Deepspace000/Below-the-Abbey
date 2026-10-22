@@ -78,3 +78,7 @@ Object.assign(ITEMDEF,{
   hgl70dagger:{n:'Cinder Dagger',k:'weapon',t:'Dagger',ic:'dagger',c:'#e06a20',dmg:[300,440],hit:.25,req:{dex:60},lvl:70,price:10000,rar:1,eff:{exec:[.5,4],bleed:[.6,8,40],double:.4},dbl:.3,sw:.36,d:'Left in the Cinder-Core Sphere. Quick and cruel: a foe under half health takes four times the blow, and most wounds bleed. Needs level 70.'}});
 {const _he=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;_he.apply(this,arguments);if(was&&e.hp<=0&&/^hgmini\d$/.test(e.t)){const F=G.flags,id=HGDM2_W[+e.t.slice(-1)];F.hgdSphDrop=F.hgdSphDrop||{};if(id&&!F.hgdSphDrop[e.t]){F.hgdSphDrop[e.t]=1;
   if(bagAdd(mkItem(id)))msg('The burning sphere dies, and in the ashes lies '+ITEMDEF[id].n+'!','#ffb060');else{G.items.push({k:id,x:e.x,y:e.y,taken:false});msg(ITEMDEF[id].n+' falls to the ground. Your bag is full.','#ffb060')}}}}}
+
+/* ---------- the weapon curve: the level 28 boss weapons are the best of their time, so every ordinary weapon of level 30 to 64 is raised above them (about 3.4 times at level 30, easing to 2.6 at level 50, 2.9 for the odd ones above it). Done once, when the game loads ---------- */
+{const done=new Set();for(const id in ITEMDEF){const d=ITEMDEF[id];if(!d||d.k!=='weapon'||!d.lvl||d.lvl<30||d.lvl>=65||done.has(d)||/^hgl70|^hgsunblade$/.test(id))continue;done.add(d);
+  const f=d.lvl<=50?3.4-(d.lvl-30)*.04:2.9;d.dmg=[Math.round(d.dmg[0]*f),Math.round(d.dmg[1]*f)]}}
