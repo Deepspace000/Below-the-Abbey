@@ -240,3 +240,7 @@ Fights from level 25 up last longer (3.580)
 
 * From level 28 up, ordinary creatures died to one or two hits from a strong party. Creature health is no longer cut to 60 percent all the way: it stays at 60 percent up to level 20, then rises (about 86 percent at 30, 125 percent at 40) so that a party with good gear needs about three rounds to kill an average creature from level 30 to 100, and four or five hits to kill even the weakest kind at level 34 (the wolf-like ones). Creature damage was lowered to match, so a fight is longer but each hit hurts less: a party loses about 10 to 17 percent of its health in a fight of three creatures of its level, as before.
 * Levels 10 to 25 are unchanged (still about 40 percent shorter than before 3.573).
+
+Fights from level 10 to 25 as they were (3.581)
+
+* Levels 1 to 28 are back to the creature health and damage they had before 3.573 (the 40 percent cut to fight length is gone for those levels). Creature health starts rising at level 30 as in 3.580. The stronger weapons of levels 16 to 29 still make the fights near level 25 a little shorter than they were, so there is no sudden drop at level 30.
