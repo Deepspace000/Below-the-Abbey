@@ -207,3 +207,8 @@ The Drowned Maze finished, churches, a more natural floor (3.574)
 * Every maze town now has a church near its shops, a painted chapel behind a frog priest. The priest heals the party for a small gift (4 gold per level plus 10), raises a fallen hero (40 gold per level), lifts curses and hauntings, and cures sicknesses for 30 gold each. Churches show on the map as a white cross when zoomed in.
 * The floor of the maze is more natural: the open books and melted candles are gone from the floor, passages are bare, or hold one thing, or a few (never two within four squares of each other), small props and floor items are 15 percent smaller, and every one lies off to the left or right of the square, never in the middle.
 * Clicking a hero portrait to open the inventory no longer prints the line about the hero's afflictions ("Wenna is sick" and so on).
+
+Floor items to the side, bare passages (3.575)
+
+* Small things on the floor of the maze (props, and loose items lying about) now always lie to one side of the square, left or right (or toward the near or far wall), never in the middle. About half to each side. A fault in the first version left some close to the middle; fixed.
+* Passages vary: about half of the stretches are bare, a third hold one thing, and the rest hold a few (two to four).
