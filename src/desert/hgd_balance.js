@@ -20,7 +20,8 @@ BAL.dk=l=>BAL.lerp(BAL.dkT,l);BAL.hp=l=>BAL.lerp(BAL.hpT,l);BAL.target=l=>BAL.le
    a creature at the party's level takes about 13 hits, one below it about 10, one above it about 20 (BAL.hitsRel);
    the kind of creature changes it (a wolf-like one about 60 percent of that, the toughest ordinary kinds up to 175 percent), and each kind is a little different (plus or minus 15 percent), so no two fights feel the same.
    Bosses and great creatures keep the older formula (health factor hpT). The new sizing fades in from level 26 to 32; below it nothing changes. */
-BAL.REF=48;BAL.ahT=[[1,8],[10,14],[20,36],[25,54],[28,62],[30,98],[34,100],[36,143],[40,150],[46,164],[50,178],[60,182],[70,183],[100,184]]; // the average hit (damage times chance to hit) of an average (weaker) party: about four fifths of one with the best gear for its level, so a party with better gear than average kills faster for a while
+BAL.REF=48;BAL.DMG=1.12; // every creature hits 12 percent harder, at every level
+BAL.ahT=[[1,8],[10,14],[20,36],[25,54],[28,62],[30,98],[34,100],[36,143],[40,150],[46,164],[50,178],[60,182],[70,183],[100,184]]; // the average hit (damage times chance to hit) of an average (weaker) party: about four fifths of one with the best gear for its level, so a party with better gear than average kills faster for a while
 BAL.ah=l=>BAL.lerp(BAL.ahT,l);
 BAL.w=l=>Math.max(0,Math.min(1,(l-26)/6));
 BAL.hitsRel=rel=>BAL.lerp([[-6,10],[0,13.3],[3,20],[8,23]],rel); // matched to Gandrick's Wood, which felt just right to a weaker party at level 10: its creatures take about 9 to 17 hits (the average of the three weapon heroes) from them
@@ -29,4 +30,4 @@ BAL.partyLvl=L=>{const a=(G.heroes||[]).filter(h=>h.alive!==false);return a.leng
 {const _es=enemyStat;enemyStat=function(t,lvl){const r=_es.apply(this,arguments),L=lvl||lvlHere(),k=BAL.dk(L),d=ENEMY_DEF[t],old=Math.max(1,Math.round(r.hp*BAL.hp(L))),w=BAL.w(L);
   const ordinary=d&&!(d.boss||d.aboveParty||(typeof NO_VARY!=='undefined'&&NO_VARY.includes(t))||d.partyLevel||/^w_/.test(t));
   if(ordinary&&w>0){const pl=BAL.partyLvl(L),nw=BAL.ah(pl)*BAL.hitsRel(L-pl)*BAL.kind(t,d.hp);r.hp=Math.max(1,Math.round(old*(1-w)+nw*w))}else r.hp=old;
-  r.dmg=[Math.max(1,Math.round(r.dmg[0]*k)),Math.max(1,Math.round(r.dmg[1]*k))];return r}}
+  r.dmg=[Math.max(1,Math.round(r.dmg[0]*k*BAL.DMG)),Math.max(1,Math.round(r.dmg[1]*k*BAL.DMG))];return r}}

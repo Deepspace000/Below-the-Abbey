@@ -254,3 +254,7 @@ Creatures sized by how many hits they take; steadier camera (3.582)
 Creature toughness matched to Gandrick's Wood (3.583)
 
 * Gandrick's Wood felt just right to a weaker party at level 10: its creatures take that party's weapon heroes about 8 to 31 hits (half of them 13 or fewer). From level 28 up, creatures are now sized to the same feel: about 13 hits at the party's level, about 10 below it and about 20 above it, spread a little by kind. Creature damage was lowered to keep fights costing about the same health.
+
+Creatures hit a little harder (3.584)
+
+* Every creature now hits 12 percent harder, at every level.
