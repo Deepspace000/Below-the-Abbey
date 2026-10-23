@@ -418,3 +418,8 @@ The world map's rivers are painted systems (pending release)
 
 * The rivers are now painted river systems, made with Gemini: medieval, hand-inked, with wooden dams, groups of trees on the banks, and tiny rowing and sailing boats. 22 of them are placed in the free land of the map by a program that checks each one lies wholly on land and clear of every picture, name and title, and the scenery keeps clear of them. Where a river does not reach the coast it ends in a small lake.
 * A sea serpent, two ships and the label The Western Deep that stood on land are moved out to the western sea, and a ship at the mouth of a river is moved out to sea.
+
+The rivers are drawn to fit (pending release)
+
+* The world map's rivers are drawn again, each one made to fit its place: a thin stream in the hills, a long winding course that keeps clear of every picture, name and title, side streams that join it, and a mouth that runs out to the coast. Nothing is repeated and nothing is cut off. They are painted in watercolour water between hand-inked banks, with wooden dams across the narrower stretches, little rowing boats and a sailing boat on the wide ones, groves of trees on the banks, and a plank bridge wherever a road crosses a river. There are no lakes.
+* The same kind of picture is not used twice: the dams, boats and groves are separate painted pieces (made with Gemini) laid upright along the river.

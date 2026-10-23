@@ -1,2 +1,0 @@
-/* The painted river systems of the world map: file, size and the place where the river ends (its mouth), in pixels of the picture. Written by tools/cut_rivers.py, do not edit. */
-const WMR_META=[{"f":"wm_river1.png","w":1078,"h":1100,"mouth":[945.9,868.7],"scale":0.6871},{"f":"wm_river2.png","w":934,"h":1100,"mouth":[794.2,875.5],"scale":0.6849},{"f":"wm_river3.png","w":1100,"h":928,"mouth":[931.5,664.6],"scale":0.5978},{"f":"wm_river4.png","w":1100,"h":798,"mouth":[880.2,524.0],"scale":0.7959},{"f":"wm_river5.png","w":1100,"h":893,"mouth":[628.1,858.7],"scale":0.6246}];

@@ -63,7 +63,7 @@ function mpWorldInit(){
     [[1420,30],[1370,70],[1320,110],[1270,120],[1215,125],[1170,112],[1138,104]]];
   M.rv=RV.map((r,i)=>mpWorldCat(r,6));
   M.lakes=[[-480,60,26,14],[-700,210,30,16],[-310,200,18,10],[140,128,15,8],[610,10,12,7],[1292,262,14,8],[26,60,12,7]];
-  M.rv=[];if(typeof WMR_FIT!=='undefined')M.lakes=WMR_FIT.lakes.map(l=>l.slice()); // the painted river systems stand where tools/fit_rivers.py put them; the lakes are the ones it left
+  M.rv=[];M.lakes=[]; // the rivers are made once the roads are known (wmnMakeRivers, maps_world_rivers.js); no lakes
   // roads: the old road list, as inked ribbons; a ferry across the sea; the pilgrim's way round the north; the road east
   const rd=[];let sd=1;
   const road=(keys,style)=>{const pts=keys.map(k=>[by[k].x,by[k].y]);rd.push({pts:mpWorldRoute(pts,sd++,style==='track'?2.5:3.5),style})};
@@ -73,10 +73,11 @@ function mpWorldInit(){
   rd.push({pts:mpWorldRoute([[O.x,O.y-14],[1160,110],[mpWorldCxe(40)+14,40],[mpWorldCxe(-40)+14,-40],[1132,-110],[1090,-160],[1030,-190],[982,-194],[MO.x+8,MO.y+2],[870,-182],[800,-176],[mpWorldCxo(-150)-14,-158],[mpWorldCxo(-90)-16,-90],[mpWorldCxo(-30)-16,-30],[mpWorldCxo(20)-16,20],[Y.x+10,Y.y-10]],95,3),style:'pilgrim'});
   M.rd=rd;
   M.ferry=mpWorldRoute([[O.x-10,O.y],[1030,150],[900,128],[790,96],[Y.x+14,Y.y+6]],97,2);
+  wmnMakeRivers();
   // things that scenery keeps clear of
   const av=new Map(),ap=(x,y)=>{const k=Math.floor(x/10)*10007+Math.floor(y/10);let l=av.get(k);if(!l)av.set(k,l=[]);l.push([x,y])};
   const dense=(pts)=>{for(let i=0;i<pts.length-1;i++){const a=pts[i],b=pts[i+1],L=Math.hypot(b[0]-a[0],b[1]-a[1]),m=Math.max(1,Math.ceil(L/3));for(let k=0;k<m;k++)ap(a[0]+(b[0]-a[0])*k/m,a[1]+(b[1]-a[1])*k/m)}};
-  rd.forEach(r=>dense(r.pts));if(typeof WMR_FIT!=='undefined')for(let i=0;i<WMR_FIT.pts.length;i+=2)ap(WMR_FIT.pts[i],WMR_FIT.pts[i+1]);
+  rd.forEach(r=>dense(r.pts));for(const q of (M.rvAvoid||[]))ap(q[0],q[1]);
   const nearLine=(x,y,d)=>{const gx=Math.floor(x/10),gy=Math.floor(y/10),m=Math.ceil(d/10);for(let a=-m;a<=m;a++)for(let b=-m;b<=m;b++){const l=av.get((gx+a)*10007+gy+b);if(l)for(const q of l){if(Math.hypot(q[0]-x,q[1]-y)<d)return true}}return false};
   const regionLab=[[-330,120,80,14],[-760,100,80,14],[-560,250,70,14],[210,16,64,12],[652,16,70,12],[476,-10,80,14],[-6,208,56,13],[1230,18,70,12],[930,-138,130,7],[530,264,50,5]];
   const blocked=(x,y,d)=>{
@@ -226,7 +227,7 @@ function mpWorldFeatures(V,z){
   c.fillStyle='rgba(138,90,138,.8)';for(const t of M.hea){if(t[0]<V.x0||t[0]>V.x1||t[1]<V.y0||t[1]>V.y1||t[2]%3)continue;c.fillRect(t[0]-.6,t[1]-5,1.2,1.2)}
   c.fillStyle='rgba(90,70,50,.6)';for(const p of M.peb){if(p[0]<V.x0||p[0]>V.x1||p[1]<V.y0||p[1]>V.y1)continue;c.fillRect(p[0],p[1],.8+p[2]*.9,.6+p[2]*.6)}
   // roads: dirt paths
-  wmnRoads(V,z);
+  wmnRoads(V,z);wmnBridges(V,z);
 }
 function mpWorldNames(V,z){
   const c=ctx,fx=(s,x,y,sz,col,sp)=>{c.save();c.font=`${sz}px ${FTITLE}`;if('letterSpacing' in c)c.letterSpacing=(sp||1)+'px';c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=3.4;c.strokeStyle='rgba(236,222,176,.7)';c.strokeText(s,x,y);c.fillStyle=col;c.fillText(s,x,y);c.restore()},

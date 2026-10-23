@@ -6,14 +6,14 @@
    Nothing on this map may overlap: wmnLayout() places every picture and every name (and its level and quest dots) once, so that no name stands on a picture,
    another name or a region title, and the scenery keeps clear of all of them.
    ========================================================================== */
-const WMN={a:null,s:null,ok:false,loading:false,lay:null,layKey:'',pat:null,rv:[],rvOk:false,
+const WMN={a:null,s:null,ok:false,loading:false,lay:null,layKey:'',pat:null,water:null,waterPat:null,
   K:{oak:.115,pine:.125,mtn:.133,hill:.125,dune:.173,palm:.112},   // map units per picture pixel, per kind of scenery (times the item's own scale)
   TINT:{'#dcc088':'sand','#cf8a60':'red','#a4b8cc':'blue','#efe9da':'white','#e0b850':'gold','#a98cbb':'violet'}};
 function wmnLoad(){
   if(WMN.loading||typeof WMN_RECTS==='undefined')return;WMN.loading=true;let n=0;
   for(const p of ['a','s']){const im=new Image();im.onload=()=>{WMN[p]=im;if(++n===2)WMN.ok=true};im.onerror=()=>{WMN.failed=true};im.decoding='async';
     im.src='assets/wm_'+p+'.png'+(typeof VERSION!=='undefined'?'?v='+VERSION:'')}
-  if(typeof WMR_META!=='undefined'){let m=0;WMR_META.forEach((q,i)=>{const im=new Image();im.decoding='async';im.onload=()=>{WMN.rv[i]=im;if(++m===WMR_META.length)WMN.rvOk=true};im.src='assets/'+q.f+(typeof VERSION!=='undefined'?'?v='+VERSION:'')})}}
+  {const im=new Image();im.decoding='async';im.onload=()=>{WMN.water=im};im.src='assets/wm_water.jpg'+(typeof VERSION!=='undefined'?'?v='+VERSION:'')}}
 wmnLoad();   // the pictures are fetched at start-up, so the map has them the first time it is opened
 
 /* one picture, bottom centre at (cx,by), size = height, or width when isW */
@@ -173,22 +173,6 @@ function wmnObstacles(){
   const c=ctx;for(const [t,x,y,sz] of WMN_REG){c.save();c.font=`${sz}px ${FTITLE}`;const w=c.measureText(t).width+t.length*1.5+6;c.restore();o.push([x-w/2,y-sz*.7,x+w/2,y+sz*.7])}
   for(const [t,x,y,sz] of WMN_SMALL){c.save();c.font=`italic ${sz}px ${FUI}`;const w=c.measureText(t).width;c.restore();o.push([x-w/2-2,y-sz*.7,x+w/2+2,y+sz*.7])}
   return o}
-/* the rivers: the painted river systems (assets/wm_river<N>.png, cut by tools/cut_rivers.py) stand where tools/fit_rivers.py found room for them (maps_world_river_fit.js): wholly on land,
-   clear of every place, name and title. Then the lakes: watercolour blue between hand-inked, wobbling banks with short hatching on the outside, ripples and reeds. */
-function wmnRivers(V,z){
-  const c=ctx,H=hash2,M=mpWorldM,minW=1.1/z;
-  if(typeof WMR_FIT!=='undefined')for(const [k,x,y,rot,flip,s] of WMR_FIT.placed){
-    const im=WMN.rv[k],m=WMR_META[k];if(!im||!m)continue;
-    const r=Math.hypot(m.w,m.h)*s/2;if(x+r<V.x0||x-r>V.x1||y+r<V.y0||y-r>V.y1)continue;
-    c.save();c.translate(x,y);c.rotate(-rot*Math.PI/180);if(flip)c.scale(-1,1);c.drawImage(im,-m.w*s/2,-m.h*s/2,m.w*s,m.h*s);c.restore()}
-  for(const [lx,ly,rx,ry] of M.lakes){if(lx+rx<V.x0||lx-rx>V.x1||ly+ry<V.y0||ly-ry>V.y1)continue;
-    const edge=(sc)=>{c.beginPath();for(let k=0;k<=24;k++){const a=k/24*TAU,j=1+.1*Math.sin(a*3+lx)+.05*Math.sin(a*7+ly);const px=lx+Math.cos(a)*rx*j*sc,py=ly+Math.sin(a)*ry*j*sc;k?c.lineTo(px,py):c.moveTo(px,py)}c.closePath()};
-    edge(1.18);c.fillStyle='rgba(110,150,150,.18)';c.fill();edge(1);c.fillStyle='rgba(130,174,182,.92)';c.fill();
-    c.save();edge(1);c.clip();c.fillStyle='rgba(196,228,232,.45)';c.beginPath();c.ellipse(lx-rx*.18,ly-ry*.2,rx*.5,ry*.34,0,0,TAU);c.fill();
-    c.strokeStyle='rgba(246,252,252,.75)';c.lineWidth=.36;c.beginPath();for(let k=0;k<4;k++){const ox=lx+(k-1.5)*rx*.34,oy=ly+((k*37)%5-2)*ry*.18;c.moveTo(ox-2,oy);c.quadraticCurveTo(ox,oy-1.3,ox+2,oy)}c.stroke();c.restore();
-    edge(1);c.strokeStyle='rgba(54,40,24,.62)';c.lineWidth=Math.max(.45,.5/z);c.stroke();
-    c.strokeStyle='rgba(54,40,24,.42)';c.lineWidth=.3;c.beginPath();for(let k=0;k<30;k++){const a=k/30*TAU,j=1+.1*Math.sin(a*3+lx)+.05*Math.sin(a*7+ly),ex=Math.cos(a),ey=Math.sin(a);c.moveTo(lx+ex*rx*j+ex*.7,ly+ey*ry*j+ey*.7);c.lineTo(lx+ex*(rx*j+1.4+H(k,lx,624)*1.2),ly+ey*(ry*j+1.4+H(k,lx,624)*1.2))}c.stroke();
-    if(z>.9){c.strokeStyle='rgba(62,102,52,.8)';c.lineWidth=.38;c.beginPath();for(let k=0;k<6;k++){const a=(k/6+H(k,ly,625)*.1)*TAU,j=1+.1*Math.sin(a*3+lx),px=lx+Math.cos(a)*(rx*j+2),py=ly+Math.sin(a)*(ry*j+2);for(const q of [-.9,0,.9]){c.moveTo(px+q,py+.6);c.lineTo(px+q*1.5,py-2.4-Math.abs(q))}}c.stroke()}}}
 /* the small writing under The Hollow Lands */
 function wmnSmallWords(){const c=ctx;for(const [t,x,y,sz] of WMN_SMALL){c.save();c.font=`italic ${sz}px ${FUI}`;c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=2.6;c.strokeStyle='rgba(236,222,176,.6)';c.strokeText(t,x,y);c.fillStyle='rgba(50,36,18,.7)';c.fillText(t,x,y);c.restore()}}
 
@@ -197,13 +181,3 @@ function wmnParchment(x){
   const tint=[2,2,-6],f=(a,b,c)=>`rgb(${Math.max(0,Math.min(255,a+tint[0]))},${Math.max(0,Math.min(255,b+tint[1]))},${Math.max(0,Math.min(255,c+tint[2]))})`,g=x.createLinearGradient(0,0,0,DH);
   g.addColorStop(0,f(226,208,160));g.addColorStop(1,f(206,184,134));x.fillStyle=g;x.fillRect(0,0,DW,DH);
   const v=x.createRadialGradient(DW/2,DH/2,DH*.3,DW/2,DH/2,DW*.62);v.addColorStop(0,'rgba(80,50,20,0)');v.addColorStop(1,'rgba(80,50,20,.38)');x.fillStyle=v;x.fillRect(0,0,DW,DH)}
-
-/* A helper for tools/fit_rivers.py (run it in the browser console with the world map open, with a receiver listening such as _video/recv.py on port 8071): sends the land (as a picture,
-   2.5 map units a pixel from x -1100, y -500) and the rectangles of every place, name and title, to ART-HOLD/map_icons/fit/. Use it again whenever places or names move. */
-async function wmnFitExport(base){
-  base=base||'http://127.0.0.1:8071/';const M=mpWorldM,U=2.5,X0=-1100,Y0=-500,W=1200,H=520;
-  const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,W,H);x.scale(1/U,1/U);x.translate(-X0,-Y0);x.fillStyle='#fff';x.fill(M.landP);
-  const b=await new Promise(r=>c.toBlob(r,'image/png'));await fetch(base+'land_mask.png',{method:'POST',body:b});
-  const lay=wmnLayout();
-  await fetch(base+'world_fit.json',{method:'POST',body:JSON.stringify({U,X0,Y0,W,H,obstacles:wmnObstacles(),icons:Object.keys(lay).map(k=>[k,lay[k].ib]),lakes:M.lakes,places:WORLD_LOCS.map(l=>[l.k,l.x,l.y])})});
-  return 'sent'}

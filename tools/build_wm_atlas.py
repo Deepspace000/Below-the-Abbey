@@ -91,6 +91,16 @@ def defringe(im):
 for k in range(16):
     im = load(os.path.join(C2, 'path_%02d.png' % k)); im = defringe(straighten(im)); S['path%d' % k] = fit(im, w=112)
 
+# ---- the details laid on the rivers (cut by tools/cut_components.py into ART-HOLD/map_icons/cut3: boat_NN, dam_NN, grove_NN) ----
+C3 = os.path.join(ROOT, 'ART-HOLD', 'map_icons', 'cut3')
+for k in range(8):
+    S['rb%d' % k] = fit(load(os.path.join(C3, 'boat_%02d.png' % k)), w=100)       # rowing boats, seen from above, pointing right
+for k in range(4):
+    S['sb%d' % k] = fit(load(os.path.join(C3, 'boat_%02d.png' % (8 + k))), w=140)  # sailing boats, from the side, pointing right
+for k, i in enumerate([3, 6, 7, 9, 10, 12]):
+    S['dam%d' % k] = fit(load(os.path.join(C3, 'dam_%02d.png' % i)), w=200)        # wooden dams, lying across
+for k in range(20):
+    S['grv%d' % k] = fit(load(os.path.join(C3, 'grove_%02d.png' % k)), h=100)      # little groves
 def pack(items, W, out, pad=6):
     names = sorted(items, key=lambda n: -items[n].height)
     x = y = rowh = 0; rects = {}
