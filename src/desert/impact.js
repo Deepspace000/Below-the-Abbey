@@ -12,7 +12,7 @@ let IMP_QUIET=0; // the old synthesised hit and hurt sounds stay silent while a 
 const AFFL_TINT={poisoned:['#58d048','#1a6a14'],foodpoison:['#a0d040','#4a6a10'],bleeding:['#d01830','#6a0814'],fever:['#f09a30','#9a4a10'],frostbitten:['#8ad0f0','#2a6a9a'],haunted:['#a88ae8','#4a3a8a'],cursed:['#9a4ab8','#4a1a60'],graverot:['#8a9a40','#3a4a14'],tomblung:['#a0a890','#4a5040'],stung:['#e8c040','#8a6a10'],sunstroke:['#f0d860','#a08a20'],shaken:['#d8cccc','#7a6a6a'],sleepless:['#6a7ad0','#2a3a7a'],hangover:['#c8a860','#6a5a24'],fleas:['#b08060','#5a3a24'],poorly:['#80b890','#305a40'],dehydrated:['#d8b078','#8a6a34'],sandblind:['#e0b870','#8a6a30'],exhausted:['#a8a8b8','#505060']};
 function impTint(hi){const o=afflList().filter(e=>(e.hi===hi||e.hi===-1)&&AFFL_TINT[e.id]);if(!o.length)return ['#e83a2a','#8a1410'];const p=o.find(e=>e.id==='poisoned')||o[0];return AFFL_TINT[p.id]}
 function drawSplat(cx,cy,R,n,tint,seed,alpha,sub){
-  ctx.save();ctx.globalAlpha=alpha;let s=(seed*7919+13)%2147483647||13;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
+  ctx.save();ctx.globalAlpha=alpha;let s=Math.abs(Math.floor(seed*7919+13))%2147483647||13; // a creature left of the picture gives a negative seed, and a negative seed gave the drops a negative radius, which threwconst rnd=()=>(s=(s*16807)%2147483647)/2147483647;
   const g=ctx.createRadialGradient(cx-R*.1,cy-R*.15,R*.1,cx,cy,R*1.3);g.addColorStop(0,tint[0]);g.addColorStop(1,tint[1]);
   ctx.beginPath();for(let i=0;i<=26;i++){const a=i/26*TAU,rr=R*(1+(rnd()-.5)*.55);const px=cx+Math.cos(a)*rr,py=cy+Math.sin(a)*rr;i?ctx.lineTo(px,py):ctx.moveTo(px,py)}ctx.closePath();
   ctx.fillStyle=g;ctx.fill();ctx.lineWidth=1.4;ctx.strokeStyle='rgba(30,4,4,.9)';ctx.stroke();

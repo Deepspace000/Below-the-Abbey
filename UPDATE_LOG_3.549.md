@@ -293,3 +293,12 @@ Enemies hit more accurately and harder (3.591)
 Testing menu (3.591, the GitHub Pages version only)
 
 * A test party made with the Testing menu starts with no afflictions. Any that an area gives on arrival are cleared a moment later too.
+
+A gentle arpeggio in the Orange Spire (3.592)
+
+* The short rising arpeggio that plays on a level up, when a teleporter wakes or carries the party, at a shrine and in a few other places was five bright triangle notes. When a party was built at a high level (the Go to level screen, the Testing menu, a start link such as the one for Orange Spire level 1), every level gained played its own copy at the same instant, up to 130 copies on top of each other, and the result was a loud, distorted blast at the start of Orange Spire level 1.
+* It is now a gentle arpeggio: five soft sine notes of an A minor add 9 chord, rising, each with a slow attack and a long fade, about 6 decibels quieter than before, and never more than one at a time. Starting at Orange Spire level 1 now gives a single soft arpeggio. Every other place that used the old sound uses the new one.
+
+A crash in fights fixed (3.592)
+
+* Hitting a creature that stood at the left edge of the picture could stop the screen from drawing for that moment (the red damage splat was given a negative size). The splat is now always drawn properly.
