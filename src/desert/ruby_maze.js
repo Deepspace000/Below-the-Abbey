@@ -64,6 +64,7 @@ function rmBuild(){
   const decor=[],lights=[[mx(16),12],[mx(16),14],[mx(20),13],[mx(18),13]];
   const dc=(k,x,y,o)=>decor.push(Object.assign({k,x:mx(x),y,block:false},o||{}));
   dc('rubysorceress',18,13,{npc:'rubysorceress',walk:true});
+  dc('rubyportal',18,14,{npc:'rubyportal',walk:true}); // the ruby portal on the gravel path, just south of the sorceress: the way out of the maze
   dc('chest',21,13,{block:true,goldAmt:450});
   dc('fountain',18,11,{block:true});dc('bench',18,15,{block:true});
   for(const [x,y] of [[17,11],[19,11],[17,15],[19,15]])dc('bush',x,y,{block:true});
@@ -131,8 +132,10 @@ function rmSwapWalls(on){
   if(on&&!RMA.on&&RMA.made){RMA.save=[T_STONE,T_TORCH_STONE];T_STONE=RMA.stone;T_TORCH_STONE=RMA.torch;RMA.on=true}
   else if(!on&&RMA.on){T_STONE=RMA.save[0];T_TORCH_STONE=RMA.save[1];RMA.on=false}
 }
+/* the ruby portal: the glowing rune stone of the teleporters, recoloured to red and gold */
+function rmPortalArt(){if(IMG.rubyportal||!IMG.tele3||typeof pToneMap!=='function')return;try{IMG.rubyportal=pToneMap(IMG.tele3,[26,4,10],[255,150,120],1.35,.85,0);NPC_H.rubyportal=.78}catch(e){console.error(e)}}
 {const _ll=loadLevel;loadLevel=function(n){
-  try{if(n===RMZ.ID)rmMakeArt();rmSwapWalls(n===RMZ.ID)}catch(e){console.error(e)}
+  try{if(n===RMZ.ID){rmMakeArt();rmPortalArt()}rmSwapWalls(n===RMZ.ID)}catch(e){console.error(e)}
   return _ll.apply(this,arguments)}}
 
 /* ---- creature levels: in a fixed world every creature is set to the place's level, less a random few; here each one keeps the level it was given (27 to 30) ---- */
@@ -217,6 +220,13 @@ NPCS.rubysorceress={name:'Wren, the sorceress',img:'rubysorceress',root:d=>{
   F.rubySorceressMet=1;
   return say('A woman in a red robe stands among the flowers, holding a staff with a red stone on top. She is not frightened, but she is careful. "You came through the whole maze. Few people get past the ghosts. My name is Wren. I built this place so that nobody from Ironhill could find me."',[['Why are you hiding?',()=>rmWhy()],['Just passing through.',()=>null]]);
 }};
+
+/* ---- the ruby portal in the garden: step onto it, or tap it, to leave the maze for the back lane of Ironhill ---- */
+function rmLeave(){if(LEVEL!==RMZ.ID||G.state!=='play')return;msg('The ruby portal carries the party out of the maze, to the back lane of Ironhill.','#ffb0a0');sfx('level');goToLevel(13,{x:RMZ.DX,y:RMZ.DY+1,f:2});G.state='play'}
+NPCS.rubyportal={name:'The ruby portal',img:'rubyportal',root:d=>say('A tall stone, covered in runes, glows red on a ring of gravel. The air around it hums. It will carry the party out of the maze, to the back lane of Ironhill.',[['Step through.',()=>{rmLeave();return null}],['Stay in the garden.',()=>null]])};
+{const _dm=doMove;doMove=function(){const r=_dm.apply(this,arguments);
+  try{if(LEVEL===RMZ.ID&&G.state==='play'&&!G.cut&&!G.talk){const p=LEVELS[RMZ.ID].decor.find(d=>d.k==='rubyportal');if(p&&G.P.x===p.x&&G.P.y===p.y)later(450,()=>{if(LEVEL===RMZ.ID&&G.P.x===p.x&&G.P.y===p.y&&!G.cut&&!G.talk)rmLeave()})}}catch(e){console.error(e)}
+  return r}}
 
 /* ---- Tobin, a young man in Ironhill who misses a girl called Wren ---- */
 function rmBoyGive(){const F=G.flags;if(F.ironhillBoyPotion)return;F.ironhillBoyPotion=1;if(!bagAdd(mkItem('greatermana')))G.items.push({k:'greatermana',x:G.P.x,y:G.P.y,taken:false});msg('Tobin gives you a Greater Mana Draught.','#ffe9a0');sfx('key')}

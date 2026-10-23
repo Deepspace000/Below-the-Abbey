@@ -1,7 +1,7 @@
 /* ==========================================================================
    THE DARK OF THE UNDERLEVEL (prefix hgdn / HGDN), level 476. The black water now rolls in slow waves (the water floor is redrawn from a loop of 16 frames), the walls are jagged dark rock (a faceted stone texture made in code,
    cracked and sharp-edged), an occasional line of text describes the oppressive dark, the snarling all round and the party's own dislike of the place (each line is shown once, in a shuffled order, and never repeats),
-   there are terrifying stone statues (the demons and sea horrors, turned to stone) in dead ends and rooms, and now and then the Bogeyman stands up behind the party and springs.
+   there are terrifying stone statues (the demons and sea horrors, turned to stone) in dead ends and rooms, and the Bogeyman wanders the corridors on his own and springs on the party when he gets close (hgd_bogey.js).
    ========================================================================== */
 const HGDN={ID:476,N:16,frames:null,fi:-1,said:null};
 /* ---------- the water: a loop of waves ---------- */
@@ -143,31 +143,13 @@ function hgdnLine(){
   const a=live[(Math.random()*live.length)|0];let b=live.filter(q=>q!==a);b=b.length?b[(Math.random()*b.length)|0]:a;
   t=t.replace(/\{A\}/g,HERO_DEF[a].name).replace(/\{B\}/g,HERO_DEF[b].name);
   F.hgdnSaid.push(i);msg(t,{a:'#a498c8',s:'#d88a8a',r:'#e8d29a',t:'#bcbcc4'}[L[0]])}
-/* ---------- the Bogeyman: from behind, at random ---------- */
-function hgdnBogey(){
-  const S=G.hgdn=G.hgdn||{};
-  if(S.warn){ // the warning has run its time: he springs now
-    if(G.time<S.warn)return;S.warn=0;const v=DIRS[G.P.f],bx=G.P.x-v[0],by=G.P.y-v[1];
-    if(!(G.grid[by]&&G.grid[by][bx]===0)||enemyAt(bx,by)){S.next=G.time+6;return}
-    const plvl=Math.round(G.heroes.reduce((n,h)=>n+h.lvl,0)/Math.max(1,G.heroes.length));
-    hlSpawn('hlbogey',bx,by,plvl);const be=G.enemies[G.enemies.length-1];be.alert=true;be.lunge=1;
-    S.scare=G.time;G.shake=.9;sfx('screech');sfx('hit');msg('THE BOGEYMAN IS RIGHT BEHIND YOU!','#ff6a5a');
-    const l=hlLive();if(l.length&&Math.random()<.5){try{afflInflict('shaken',l[(Math.random()*l.length)|0],true)}catch(e){}}
-    S.next=G.time+120+Math.random()*240;return}
-  if(!S.next)S.next=G.time+70+Math.random()*120;
-  if(G.time<S.next||G.cut||G.talk||G.menu||(G.inv&&G.inv.open)||G.loot||!camSettled())return;
-  if(G.enemies.some(e=>e.t==='hlbogey'&&e.hp>0&&!e.dying)){S.next=G.time+60;return}
-  if(G.enemies.some(e=>e.hp>0&&e.alert&&Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)<6)){S.next=G.time+10;return} // never in the middle of another fight
-  S.warn=G.time+1.6+Math.random()*1.8;sfx('step');
-  msg(['The dark behind you has gone very quiet.','Something is breathing, slowly, right at your back.','A cold draught touches the back of your neck.','The torchlight dims, and your shadow is suddenly too long.'][(Math.random()*4)|0],'#9a8fc0')}
 /* ---------- the loop ---------- */
 {const _u=update;update=function(dt){
   try{if(LEVEL===HGDN.ID&&G.state==='play'){
       const fr=hgdnFrames(),fi=Math.floor(G.time*6)%HGDN.N;if(fi!==HGDN.fi&&FLOORS.hgo_water){HGDN.fi=fi;FLOORS.hgo_water.set(fr[fi])}
       hgdnSync();
       const S=G.hgdn=G.hgdn||{};if(!S.lt)S.lt=G.time+25+Math.random()*30;
-      if(G.time>=S.lt&&!G.cut&&!G.talk&&!G.menu&&!(G.inv&&G.inv.open)){hgdnLine();S.lt=G.time+55+Math.random()*60}
-      hgdnBogey()}}catch(e){console.error('hgdn',e)}
+      if(G.time>=S.lt&&!G.cut&&!G.talk&&!G.menu&&!(G.inv&&G.inv.open)){hgdnLine();S.lt=G.time+55+Math.random()*60}}}catch(e){console.error('hgdn',e)}
   return _u.apply(this,arguments)}}
 {const _g=goToLevel;goToLevel=function(){const r=_g.apply(this,arguments);try{G.hgdn=null;G._hgdnDecor=null}catch(e){}return r}}
 /* the jump scare, drawn over everything */

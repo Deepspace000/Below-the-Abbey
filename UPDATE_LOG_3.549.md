@@ -381,3 +381,13 @@ The Ruby Maze in Ironhill (3.599)
 * In the garden lives Wren, a sorceress who hides from the people of Ironhill, who would burn her if they knew. She asks the party to keep her secret. If they say they will, she gives them the Ruby Staff, a level 30 staff (damage 58 to 92, adds 42 to the power of spells, and one blow in four dazes the foe). If they say they will not, she gives them a Red Apple "as a gift". The apple is poisoned: the hero who eats it loses 30 percent of their health, is poisoned, and the game says it tastes of bitter almonds. She gives only one of the two, once. If the party leaves without answering, nothing is given and they can come back to her.
 * Wren also asks the party if they have met Tobin, a young man in Ironhill. If they have, and they tell her he misses her, she is moved, but she still hides. This gives no reward.
 * Tobin is a young man in a blue tunic who stands near the west end of Ironhill's main street. He tells of a girl called Wren who was bullied for her magic and vanished one day, how he never stood up for her, and that he misses her. He does not know where she is. After the party has met Wren, they can go back and tell him. If the party kept her secret, he promises to tell no one and gives them a Greater Mana Draught, once. If they would not keep it, he is sad and gives nothing.
+
+A way out of the Ruby Maze (3.600)
+
+* A glowing red rune stone, the ruby portal, stands in the garden at the heart of the Ruby Maze, just south of the sorceress. Step onto it, or tap it and choose Step through, and the party is carried out of the maze to the back lane of Ironhill, so it does not have to walk the whole maze back.
+
+The Bogeyman wanders the Underlevel (3.600)
+
+* The Bogeyman no longer comes on a timer. He is one creature that wanders the corridors of the Underlevel on his own, a slow walk that drifts toward the places the party has walked. He never shows on the mini map, and in the 3D view he is only a dark shape.
+* When he gets close, behind the party, beside it or head on, he jumps out with the full-screen scare and the fight begins at the party's own level, as before. He cannot scare the party in its first 20 seconds in the level or for 30 seconds after a scare, and he waits while the party is fighting something else, talking or in a menu. About 7 squares away behind or beside the party, a line says something is breathing, and a faint heartbeat plays.
+* If the party gets away from him, he slips off and comes back 40 to 90 seconds later, at least 25 squares away. If he is killed he stays gone until the party next enters the Underlevel.
