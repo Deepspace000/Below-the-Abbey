@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.600';
+const VERSION='3.601';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -7261,7 +7261,7 @@ function handleBtn(id){
   if(TP)return;
   if(G.cut){cutAdvance();return}
   if(G.talk){talkBtn(id);return}
-  if(G.overview){if(id==='ovexit'){G.overview=false;G.world=false;G.teleMode=false;G.qFocus=null}else if(/^wtp_/.test(id))teleFromMap(id.slice(4));else if(id==='worldback')G.world=false;else if(id==='worldmap'){G.world=true;G.wv=wvDefault()}else if(id==='wzin')setWorldZoom((G.wv?G.wv.z:1)*1.4,240,160);else if(id==='wzout')setWorldZoom((G.wv?G.wv.z:1)/1.4,240,160);else if(id==='wreset')G.wv=wvDefault();else if(id==='wmap'){}
+  if(G.overview){if(id==='ovexit'){G.overview=false;G.world=false;G.teleMode=false;G.qFocus=null}else if(/^wtp_/.test(id))teleFromMap(id.slice(4));else if(id==='worldback')G.world=false;else if(id==='worldmap'){G.world=true;G.wv=wvDefault()}else if(id==='wzin')setWorldZoom((G.wv?G.wv.z:1)*1.4,240,160);else if(id==='wzout')setWorldZoom((G.wv?G.wv.z:1)/1.4,240,160);else if(id==='wreset')G.wv=wvDefault();else if(id==='wmnew')wmnToggle();else if(id==='wmap'){}
     else if(id==='mzin')setMapZoom((G.mz||12)*1.3,DW/2,DH/2);else if(id==='mzout')setMapZoom((G.mz||12)/1.3,DW/2,DH/2);else if(id==='mzfit')setMapZoom(0,DW/2,DH/2);else if(id==='mzme'){const mz=G.mz||12,[rw,rh]=mapRes();G.panX=(DW-rw)/2-((G.C.x+.5)*mz+6);G.panY=(DH-rh)/2-((G.C.y+.5)*mz+30)} /* centre the map on the party, keeping the zoom */return}
   if(G.saves){savesBtn(id);return}
   if(G.state==='title'&&!G.menu){titleBtn(id);return}
@@ -19818,7 +19818,7 @@ const LEVEL_LADDER=[ // [levels of the game that make up a place, its level]
 const LEVEL_RATING={};
 for(const [ls,r] of LEVEL_LADDER)for(const l of ls)LEVEL_RATING[l]=Math.round(1+(r-1)*1.5)+3;   // each place stands three levels above the one before it (the table is in steps of two), and the whole ladder three levels higher
 LEVEL_RATING[20]-=2; // the Burial Ground stands two levels lower than the ladder gave it
-for(const [ls,r] of LEVEL_LADDER){if(r===21){for(const l of ls)LEVEL_RATING[l]=30}else if(r>21){for(const l of ls)LEVEL_RATING[l]-=3}} // Ironhill Moor is level 30, and every place after it three levels lower
+for(const [ls,r] of LEVEL_LADDER){if(r===21){for(const l of ls)LEVEL_RATING[l]=31}else if(r>21){for(const l of ls)LEVEL_RATING[l]-=3}} // Ironhill Moor is level 31, and every place after it three levels lower than the ladder gave it
 // the ladder goes on after Oldhaven: the four floors below the Abbey, the Hollow Land, then each floor of the Orange Spire and the foot of the Violet Tower, each three levels above the one before
 {const top=Math.max(...Object.values(LEVEL_RATING));
  for(let i=0;i<4;i++)LEVEL_RATING[360+i]=top+3+3*i;
@@ -42556,6 +42556,7 @@ function mpWorldRoute(pts,seed,amp){
 /* ---------- build everything that does not change: coasts, land mask, roads, rivers, scenery ---------- */
 function mpWorldInit(){
   const M=mpWorldM,H=hash2,by={};WORLD_LOCS.forEach(l=>by[l.k]=l);M.by=by;
+  const NL=typeof wmnOn==='function'&&wmnOn();M.newLook=NL;if(NL)WMN.lay=null; // the painted look has its own idea of how much room each place takes (maps_world_new.js)
   // the land: one big polygon (the western land, the northern land that joins it to the Eastern Lands). The sea is everything else.
   const west=y=>-1060+9*Math.sin(y*.03)+6*Math.sin(y*.09+2)+4*Math.sin(y*.21),south=x=>352+9*Math.sin(x*.04)+5*Math.sin(x*.13)+3*Math.sin(x*.29);
   const P=[[-1500,-900]],C=[];let n=0;const jt=()=>(H(n++,3,41)-.5)*1.7,add=(x,y)=>{const q=[x+jt(),y+jt()];P.push(q);C.push(q)};
@@ -42586,6 +42587,7 @@ function mpWorldInit(){
     [[1420,30],[1370,70],[1320,110],[1270,120],[1215,125],[1170,112],[1138,104]]];
   M.rv=RV.map((r,i)=>mpWorldCat(r,6));
   M.lakes=[[-480,60,26,14],[-700,210,30,16],[-310,200,18,10],[140,128,15,8],[610,10,12,7],[1292,262,14,8],[26,60,12,7]];
+  if(NL)wmnMakeRivers(); // the painted look: long winding rivers with side streams, clear of every place and name
   // roads: the old road list, as inked ribbons; a ferry across the sea; the pilgrim's way round the north; the road east
   const rd=[];let sd=1;
   const road=(keys,style)=>{const pts=keys.map(k=>[by[k].x,by[k].y]);rd.push({pts:mpWorldRoute(pts,sd++,style==='track'?2.5:3.5),style})};
@@ -42602,7 +42604,8 @@ function mpWorldInit(){
   const nearLine=(x,y,d)=>{const gx=Math.floor(x/10),gy=Math.floor(y/10),m=Math.ceil(d/10);for(let a=-m;a<=m;a++)for(let b=-m;b<=m;b++){const l=av.get((gx+a)*10007+gy+b);if(l)for(const q of l){if(Math.hypot(q[0]-x,q[1]-y)<d)return true}}return false};
   const regionLab=[[-330,120,80,14],[-760,100,80,14],[-560,250,70,14],[210,16,64,12],[652,16,70,12],[476,-10,80,14],[-6,208,56,13],[1230,18,70,12],[930,-138,130,7],[530,264,50,5]];
   const blocked=(x,y,d)=>{
-    for(const l of WORLD_LOCS){const big=l.ic==='town'||l.ic==='castle'||l.ic==='abbey'||l.ic==='orangecastle',area=l.ic==='trees'||l.ic==='rain'||l.ic==='moor'||l.ic==='dunes';
+    if(NL&&wmnBlocked(x,y,d))return true;
+    for(const l of (NL?[]:WORLD_LOCS)){const big=l.ic==='town'||l.ic==='castle'||l.ic==='abbey'||l.ic==='orangecastle',area=l.ic==='trees'||l.ic==='rain'||l.ic==='moor'||l.ic==='dunes';
       const lw2=l.n.length*2.7+6,dn=l.sub?44:34;
       if(Math.abs(x-l.x)<lw2&&y>l.y+10&&y<l.y+dn)return true;
       if(!area){const hx=big?24:20,up=l.ic==='castle'||l.ic==='orangecastle'?36:big?26:20;if(Math.abs(x-l.x)<hx&&y>l.y-up&&y<l.y+12)return true}
@@ -42750,7 +42753,7 @@ function mpWorldPalm(c,x,y,s,sd,z){
   c.strokeStyle='#6a4a22';c.lineWidth=1.1*s;c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+1.6*s,y-4*s,x+1*s,y-8*s);c.stroke();
   c.strokeStyle='#4a8a4a';c.lineWidth=.9*s;c.lineCap='round';c.beginPath();for(let k=0;k<5;k++){const an=-Math.PI/2+(k-2)*.75;c.moveTo(x+1*s,y-8*s);c.quadraticCurveTo(x+1*s+Math.cos(an)*4*s,y-8*s+Math.sin(an)*4*s-1*s,x+1*s+Math.cos(an)*6.5*s,y-8*s+Math.sin(an)*5*s+2.4*s)}c.stroke();c.lineCap='butt';
   c.fillStyle='#5a3a1c';c.beginPath();c.arc(x+.2*s,y-7.4*s,.7*s,0,TAU);c.arc(x+1.9*s,y-7.4*s,.7*s,0,TAU);c.fill()}
-function mpWorldItem(c,it,z){const t=it[0],x=it[1],y=it[2],s=it[3],sd=it[4];
+function mpWorldItem(c,it,z){if(wmnOn()){wmnItem(c,it,z);return}const t=it[0],x=it[1],y=it[2],s=it[3],sd=it[4];
   if(t===0)mpWorldTree(c,x,y,s,sd,z);else if(t===1)mpWorldPine(c,x,y,s,sd,z);else if(t===2)mpWorldMountain(c,x,y,s,sd,z);else if(t===3)mpWorldHill(c,x,y,s,sd,z);else if(t===4)mpWorldDune(c,x,y,s,sd,z,it[5]);else mpWorldPalm(c,x,y,s,sd,z)}
 
 /* ---------- ships and sea monsters ---------- */
@@ -42801,7 +42804,7 @@ function mpWorldTrees(x,y,z,l,kind){
   const c=ctx,k=l.k,pine=kind==='pine'||k==='gwood'||k==='road';
   const ts=[[-14,5,1],[-4,-3,1.2],[8,3,1],[16,-4,.9],[2,9,.9],[-9,10,.8]];ts.sort((a,b)=>a[1]-b[1]);
   for(const [dx,dy,s] of ts){if(pine)mpWorldPine(c,x+dx,y+dy+4,s*1.05,Math.abs(dx),z);else mpWorldTree(c,x+dx,y+dy+4,s*1.05,Math.abs(dx),z)}}
-function mpWorldIco(l,x,y,z){
+function mpWorldIco(l,x,y,z){if(wmnOn()){wmnIco(l);return}
   const c=ctx,k=l.k,d1=z>1.5,d2=z>2.8,d3=z>4.2,ink=mpWorldInk,t=G.time;c.lineJoin='round';c.strokeStyle=ink;c.lineWidth=mpWorldLw(.9);
   const house=(hx,hy,s,roof,o)=>mpWorldHouse(hx,hy,s,roof,Object.assign({d1,d2,d3},o||{}));
   switch(l.ic){
@@ -42932,7 +42935,7 @@ function mpWorldIco(l,x,y,z){
 /* the key (live, in screen space) */
 function mpWorldKey(){
   const c=ctx,x0=338,y0=212,w=124,h=62;c.save();c.fillStyle='rgba(238,226,190,.9)';c.fillRect(x0,y0,w,h);c.restore();mplPanel(c,x0,y0,w,h);
-  const rows=[['Town',(a,b)=>mpWorldHouse(a,b+3,.8,MPL.VERM,{})],['Castle',(a,b)=>{c.save();c.translate(a,b+1);c.scale(.36,.36);mpWorldCastle(0,0,1,{});c.restore()}],['Abbey',(a,b)=>{c.save();c.translate(a,b+2);c.scale(.4,.4);mpWorldIco({ic:'abbey',k:'x'},0,0,1);c.restore()}],
+  const rows=wmnOn()?wmnKeyRows(c):[['Town',(a,b)=>mpWorldHouse(a,b+3,.8,MPL.VERM,{})],['Castle',(a,b)=>{c.save();c.translate(a,b+1);c.scale(.36,.36);mpWorldCastle(0,0,1,{});c.restore()}],['Abbey',(a,b)=>{c.save();c.translate(a,b+2);c.scale(.4,.4);mpWorldIco({ic:'abbey',k:'x'},0,0,1);c.restore()}],
     ['Cave or mine',(a,b)=>{c.save();c.translate(a,b+1);c.scale(.5,.5);mpWorldIco({ic:'cave',k:'x'},0,0,1);c.restore()}],['Graves',(a,b)=>{c.fillStyle='#a8a498';c.strokeStyle=mpWorldInk;c.lineWidth=.6;c.fillRect(a-.9,b-5,1.8,8);c.strokeRect(a-.9,b-5,1.8,8);c.fillRect(a-3,b-3,6,1.8);c.strokeRect(a-3,b-3,6,1.8)}],
     ['Road',(a,b)=>{c.strokeStyle='rgba(42,26,12,.85)';c.lineWidth=3.6;c.beginPath();c.moveTo(a-6,b);c.lineTo(a+6,b);c.stroke();c.strokeStyle='#e8d8a6';c.lineWidth=2.2;c.stroke()}],
     ['Teleport stone',(a,b)=>{c.fillStyle='#46506a';c.strokeStyle=mpWorldInk;c.lineWidth=.6;c.beginPath();c.ellipse(a,b+1,4.4,2.4,0,0,TAU);c.fill();c.stroke();c.strokeStyle='#cfeaff';c.beginPath();c.arc(a,b,2.4,0,TAU);c.stroke()}],
@@ -42947,7 +42950,9 @@ function mpWorldTerrain(V,z){
   const WS=[[-420,100,260,150,'120,150,84',.3],[-760,120,260,160,'104,140,76',.28],[-560,-110,260,70,'130,140,130',.24],[-600,280,240,50,'150,150,100',.22],[60,160,150,110,'120,150,84',.34],[210,230,100,70,'96,134,70',.3],[330,200,110,100,'140,160,90',.26],[116,222,60,44,'70,110,64',.34],[324,136,44,28,'140,100,130',.3],[-6,284,76,56,'50,70,60',.5],[-6,254,40,30,'200,120,50',.3],[250,70,150,60,'150,150,140',.24],
     [480,215,46,46,'216,184,110',.4],[486,96,44,50,'200,110,70',.42],[566,190,50,44,'110,150,196',.42],[572,128,50,40,'226,226,226',.5],[566,66,52,38,'160,150,130',.4],[652,160,60,60,'226,176,60',.46],[652,230,60,52,'150,100,180',.4],[480,34,54,36,'226,176,60',.34],[590,262,120,40,'216,184,110',.3],
     [1244,190,70,56,'90,130,70',.34],[1350,200,160,170,'110,150,80',.22],[1380,420,160,100,'100,140,76',.2],[930,-210,150,70,'120,130,140',.3],[1040,-240,100,40,'60,100,70',.26],[420,186,40,36,'80,130,70',.3],[560,-170,160,50,'130,140,130',.2],[1165,50,30,50,'90,130,70',.2]];
-  for(const [cx,cy,rx,ry,col,a] of WS){if(cx+rx<V.x0||cx-rx>V.x1||cy+ry<V.y0||cy-ry>V.y1)continue;c.save();c.translate(cx,cy);c.scale(1,ry/rx);const g=c.createRadialGradient(0,0,0,0,0,rx);g.addColorStop(0,`rgba(${col},${a})`);g.addColorStop(.6,`rgba(${col},${a*.55})`);g.addColorStop(1,`rgba(${col},0)`);c.fillStyle=g;c.fillRect(-rx,-rx,rx*2,rx*2);c.restore()}
+  const KW=wmnOn()?1.5:1;
+  for(const [cx,cy,rx,ry,col,a0] of WS){const a=Math.min(.85,a0*KW);if(cx+rx<V.x0||cx-rx>V.x1||cy+ry<V.y0||cy-ry>V.y1)continue;c.save();c.translate(cx,cy);c.scale(1,ry/rx);const g=c.createRadialGradient(0,0,0,0,0,rx);g.addColorStop(0,`rgba(${col},${a})`);g.addColorStop(.6,`rgba(${col},${a*.55})`);g.addColorStop(1,`rgba(${col},0)`);c.fillStyle=g;c.fillRect(-rx,-rx,rx*2,rx*2);c.restore()}
+  if(wmnOn())wmnWash(V,z);
   // the unknown lands: a hatched wash east of Greyfang Pass
   const UL=[[424,-400],[424,100],[416,140],[398,200],[380,262],[380,700],[1900,700],[1900,-400]];
   c.beginPath();UL.forEach((q,k)=>k?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));c.closePath();c.fillStyle='rgba(70,52,30,.10)';c.fill();c.save();c.clip();
@@ -42984,10 +42989,11 @@ function mpWorldTerrain(V,z){
 function mpWorldFeatures(V,z){
   const c=ctx,M=mpWorldM;
   // rivers: two inked banks with a blue wash between them, narrowing as they start
-  for(const pts of M.rv){let ok=false;for(const p of pts){if(p[0]>V.x0&&p[0]<V.x1&&p[1]>V.y0&&p[1]<V.y1){ok=true;break}}if(!ok)continue;
+  if(wmnOn())wmnRivers(V,z);
+  for(const pts of (wmnOn()?[]:M.rv)){let ok=false;for(const p of pts){if(p[0]>V.x0&&p[0]<V.x1&&p[1]>V.y0&&p[1]<V.y1){ok=true;break}}if(!ok)continue;
     c.lineCap='round';c.lineJoin='round';c.beginPath();c.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)c.lineTo(pts[i][0],pts[i][1]);
     c.strokeStyle='rgba(42,26,12,.75)';c.lineWidth=mpWorldLw(3.2);c.stroke();c.strokeStyle='#8fb0b4';c.lineWidth=mpWorldLw(2.1);c.stroke();c.strokeStyle='rgba(240,248,250,.5)';c.lineWidth=mpWorldLw(.6);c.setLineDash([3,5]);c.stroke();c.setLineDash([]);c.lineCap='butt'}
-  for(const [lx,ly,rx,ry] of M.lakes){if(lx+rx<V.x0||lx-rx>V.x1||ly+ry<V.y0||ly-ry>V.y1)continue;c.beginPath();for(let k=0;k<=18;k++){const a=k/18*TAU,j=1+.12*Math.sin(a*3+lx);k?c.lineTo(lx+Math.cos(a)*rx*j,ly+Math.sin(a)*ry*j):c.moveTo(lx+Math.cos(a)*rx*j,ly+Math.sin(a)*ry*j)}c.closePath();c.fillStyle='#8fb0b4';c.fill();c.strokeStyle=mpWorldInk;c.lineWidth=mpWorldLw(1);c.stroke();
+  for(const [lx,ly,rx,ry] of (wmnOn()?[]:M.lakes)){if(lx+rx<V.x0||lx-rx>V.x1||ly+ry<V.y0||ly-ry>V.y1)continue;c.beginPath();for(let k=0;k<=18;k++){const a=k/18*TAU,j=1+.12*Math.sin(a*3+lx);k?c.lineTo(lx+Math.cos(a)*rx*j,ly+Math.sin(a)*ry*j):c.moveTo(lx+Math.cos(a)*rx*j,ly+Math.sin(a)*ry*j)}c.closePath();c.fillStyle='#8fb0b4';c.fill();c.strokeStyle=mpWorldInk;c.lineWidth=mpWorldLw(1);c.stroke();
     c.strokeStyle='rgba(22,56,86,.5)';c.lineWidth=mpWorldLw(.6);c.beginPath();for(let k=0;k<3;k++){c.moveTo(lx-rx*.5+k*rx*.3,ly-ry*.3+k*ry*.3);c.quadraticCurveTo(lx-rx*.4+k*rx*.3,ly-ry*.5+k*ry*.3,lx-rx*.3+k*rx*.3,ly-ry*.3+k*ry*.3)}c.stroke()}
   // grass tufts, heather and pebbles
   if(z>.85){c.beginPath();for(const t of M.tuf){if(t[0]<V.x0||t[0]>V.x1||t[1]<V.y0||t[1]>V.y1)continue;const a=t[0],b=t[1];c.moveTo(a-1.3,b);c.lineTo(a-.4,b-2.4);c.moveTo(a,b);c.lineTo(a,b-2.8);c.moveTo(a+1.3,b);c.lineTo(a+.5,b-2.2)}c.strokeStyle='rgba(60,90,50,.7)';c.lineWidth=mpWorldLw(.5);c.stroke()}
@@ -42995,7 +43001,7 @@ function mpWorldFeatures(V,z){
   c.fillStyle='rgba(138,90,138,.8)';for(const t of M.hea){if(t[0]<V.x0||t[0]>V.x1||t[1]<V.y0||t[1]>V.y1||t[2]%3)continue;c.fillRect(t[0]-.6,t[1]-5,1.2,1.2)}
   c.fillStyle='rgba(90,70,50,.6)';for(const p of M.peb){if(p[0]<V.x0||p[0]>V.x1||p[1]<V.y0||p[1]>V.y1)continue;c.fillRect(p[0],p[1],.8+p[2]*.9,.6+p[2]*.6)}
   // roads: inked ribbons with a dashed middle, milestones by the verge
-  for(const r of M.rd){const pts=r.pts;let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(const p of pts){if(p[0]<x0)x0=p[0];if(p[0]>x1)x1=p[0];if(p[1]<y0)y0=p[1];if(p[1]>y1)y1=p[1]}if(x1<V.x0||x0>V.x1||y1<V.y0||y0>V.y1)continue;
+  if(wmnOn())wmnRoads(V,z);else for(const r of M.rd){const pts=r.pts;let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(const p of pts){if(p[0]<x0)x0=p[0];if(p[0]>x1)x1=p[0];if(p[1]<y0)y0=p[1];if(p[1]>y1)y1=p[1]}if(x1<V.x0||x0>V.x1||y1<V.y0||y0>V.y1)continue;
     const w=r.style==='road'?3.4:r.style==='pilgrim'?2:2.4;c.lineCap='round';c.lineJoin='round';c.beginPath();c.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)c.lineTo(pts[i][0],pts[i][1]);
     if(r.style==='pilgrim'){c.strokeStyle='rgba(42,26,12,.4)';c.lineWidth=mpWorldLw(w+1);c.setLineDash([5,3]);c.stroke();c.strokeStyle='#d8bc86';c.lineWidth=mpWorldLw(w);c.stroke();c.setLineDash([])}
     else{c.strokeStyle='rgba(42,26,12,.85)';c.lineWidth=mpWorldLw(w+1.5);c.stroke();c.strokeStyle=r.style==='road'?'#e8d8a6':'#d4bd8a';c.lineWidth=mpWorldLw(w);c.stroke();c.strokeStyle='rgba(120,80,40,.7)';c.lineWidth=mpWorldLw(.5);c.setLineDash([2.2,3]);c.stroke();c.setLineDash([])}
@@ -43008,13 +43014,13 @@ function mpWorldFeatures(V,z){
 }
 function mpWorldNames(V,z){
   const c=ctx,fx=(s,x,y,sz,col,sp)=>{c.save();c.font=`${sz}px ${FTITLE}`;if('letterSpacing' in c)c.letterSpacing=(sp||1)+'px';c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=3.4;c.strokeStyle='rgba(236,222,176,.7)';c.strokeText(s,x,y);c.fillStyle=col;c.fillText(s,x,y);c.restore()},
-    sm=(s,x,y,sz,col)=>{c.save();c.font=`italic ${sz}px ${FUI}`;c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=2.6;c.strokeStyle='rgba(236,222,176,.6)';c.strokeText(s,x,y);c.fillStyle=col;c.fillText(s,x,y);c.restore()},
+    sm=(s,x,y,sz,col)=>{if(wmnOn())return;c.save();c.font=`italic ${sz}px ${FUI}`;c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=2.6;c.strokeStyle='rgba(236,222,176,.6)';c.strokeText(s,x,y);c.fillStyle=col;c.fillText(s,x,y);c.restore()},
     sea=(s,x,y,sz,col)=>{c.save();c.font=`italic ${sz}px ${FUI}`;if('letterSpacing' in c)c.letterSpacing='3px';c.textAlign='center';c.textBaseline='middle';c.fillStyle=col;c.fillText(s,x,y);c.restore()};
   const ink='rgba(50,36,18,.78)',ink2='rgba(50,36,18,.62)';
   fx('The Unknown Lands',476,-16,19,ink,1.5);sm('east of Greyfang Pass, uncharted',476,-1,8,ink2);
-  fx('The Known Lands',210,16,19,ink,1.5);
+  fx('The Known Lands',wmnOn()?196:210,wmnOn()?12:16,19,ink,1.5);
   fx('The Sea Lands',652,16,19,ink,1.5);sm('the country along the coast',652,30,8,ink2);
-  fx('The Hollow Lands',-60,150,16,ink,1);sm('under the Abbey',-60,163,8,ink2);
+  fx('The Hollow Lands',-60,150,16,ink,1);if(wmnOn())wmnSmallWords();sm('under the Abbey',-60,163,8,ink2);
   fx('The Western Reaches',-330,120,19,ink,1.5);sm('the land goes on, beyond the Hollow Lands',-330,134,8,ink2);
   fx('The Far West',-760,100,19,ink,1.5);sm('where no road has been drawn',-760,114,8,ink2);
   fx('The Grey Downs',-560,250,15,ink,1);sm('open hills and long grass',-560,262,8,ink2);
@@ -43024,7 +43030,7 @@ function mpWorldNames(V,z){
   sea('The Western Deep',-250,110,16,'rgba(26,48,84,.7)');sea('The Southern Sea',380,450,17,'rgba(26,48,84,.7)');
   sm('the road east, then north',530,264,8,'#3a2a16');
 }
-function mpWorldCreatures(V,z){
+function mpWorldCreatures(V,z){if(wmnOn()){wmnCreatures(V,z);return}
   const c=ctx,vis=(x,y,r)=>x+r>V.x0&&x-r<V.x1&&y+r>V.y0&&y-r<V.y1;
   for(const [x,y,d,s] of [[790,-62,1,1],[1010,34,-1,1.1],[1040,330,1,1],[880,432,-1,1],[300,408,1,1],[560,396,-1,1.1],[-222,196,1,1],[-176,-60,-1,1],[690,-30,1,.9]])if(vis(x,y,30))mpWorldShip(x,y,s,d,z);
   if(vis(-230,84,50))mpWorldSerpent(-230,84,.9,1,z);if(vis(450,430,50))mpWorldSerpent(450,432,.9,-1,z);
@@ -43034,7 +43040,7 @@ function mpWorldCreatures(V,z){
 }
 
 function mpWorldDraw(){
-  const M=mpWorldM;if(!M.ready)mpWorldInit();
+  const M=mpWorldM;if(typeof wmnLoad==='function')wmnLoad();if(M.ready&&M.newLook!==!!wmnOn())M.ready=false;if(!M.ready)mpWorldInit();
   { // rebuild the title sheet once if the blackletter font arrives after the first draw
     let fo=false;try{fo=!document.fonts||document.fonts.check('20px UnifrakturCook')}catch(e){fo=true}
     if(!M.over||(fo&&!M.fontOK)){M.over=mpWorldOverlay();M.fontOK=fo}}
@@ -43062,9 +43068,9 @@ function mpWorldDraw(){
   const LBL_PLACED=[]; // where the place labels already stand
   for(const l of WORLD_LOCS){
     const v=visited(l);
-    ctx.globalAlpha=v?1:.8;mpWorldIco(l,l.x,l.y,z);ctx.globalAlpha=1;
+    ctx.globalAlpha=v||wmnOn()?1:.8;mpWorldIco(l,l.x,l.y,z);ctx.globalAlpha=1;
     const big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle';
-    {const lr=(!G.flags.autoScaleOn&&typeof locRating==='function')?locRating(l):null,ny0=l.above?l.y-22:l.y+(l.ic==='castle'||l.ic==='orangecastle'?24:l.ic==='mountains'?20:18),nsz=big?10.5:9,ncol=v?'#1c1208':'#5a4a30';
+    if(wmnOn())wmnLabel(l,v,txtH);else {const lr=(!G.flags.autoScaleOn&&typeof locRating==='function')?locRating(l):null,ny0=l.above?l.y-22:l.y+(l.ic==='castle'||l.ic==='orangecastle'?24:l.ic==='mountains'?20:18),nsz=big?10.5:9,ncol=v?'#1c1208':'#5a4a30';
       ctx.save();ctx.font=`bold ${nsz}px ${FUI}`;const w1=ctx.measureText(l.n).width;ctx.font=`bold 8px ${FUI}`;const t2=lr?'Lv '+lr:'',w2=lr?ctx.measureText(t2).width:0;ctx.font=`bold 7.4px ${FUI}`;const sw=l.sub?ctx.measureText(l.sub).width:0;ctx.restore();
       const gap=lr?5:0,wt=w1+gap+w2,subY=l.above?l.y-13:l.y+(l.ic==='orangecastle'||l.ic==='castle'?35:29);
       // a label that would land on another place's label slides up or down until it is clear
@@ -43076,7 +43082,7 @@ function mpWorldDraw(){
       if(lr){txtH(l.n,xs+w1/2,ny,nsz,ncol);txtH(t2,xs+w1+gap+w2/2,ny,8,'#7a1a10')}else txtH(l.n,l.x,ny,nsz,ncol);
       if(l.sub)txtH(l.sub,l.x,subY+ldy,7.4,'#4a3a22')}
     const nq=QLEFT[l.k]||0;
-    if(nq){ctx.fillStyle='#b02818';ctx.strokeStyle='rgba(42,26,12,.7)';ctx.lineWidth=.35;const left=l.k==='scoria'; // Khemetra's dots stand to the left of the city: below it is the Red Dunes
+    if(nq&&wmnOn()){ctx.fillStyle='#b02818';ctx.strokeStyle='rgba(42,26,12,.7)';ctx.lineWidth=.35;wmnDots(l,nq,ctx)}else if(nq){ctx.fillStyle='#b02818';ctx.strokeStyle='rgba(42,26,12,.7)';ctx.lineWidth=.35;const left=l.k==='scoria'; // Khemetra's dots stand to the left of the city: below it is the Red Dunes
       for(let i=0;i<nq;i++){const row=(i/14)|0,inRow=Math.min(14,nq-row*14),col=i%14;ctx.beginPath();if(left)ctx.arc(l.x-34-(inRow-1-col)*3.4,l.y-10+row*3.4,1.15,0,TAU);else ctx.arc(l.x+(col-(inRow-1)/2)*3.4,l.y+(l.sub?38:29)+row*3.4,1.15,0,TAU);ctx.fill();ctx.stroke()}}
   }
   // you are here: a pulsing ring and a red pin with a gold rim
@@ -43098,7 +43104,7 @@ function mpWorldDraw(){
   if(G.teleMode||awake.length){const hm=teleOn()?'Tap a glowing stone to travel there.':'Woken teleporters glow on the map. Stand on one to travel.';ctx.save();ctx.font=`bold 9px ${FUI}`;const hw=ctx.measureText(hm).width+16;ctx.fillStyle='rgba(238,226,190,.82)';rrect(ctx,240-hw/2,55,hw,14,6);ctx.fill();ctx.strokeStyle=MPL.GOLD;ctx.lineWidth=.8;ctx.stroke();ctx.restore();txt(hm,240,62,9,'#2a1c0e','center',true)}
   if(G.wnote&&G.time-G.wnote.t<4)txt(G.wnote.text,240,74,9,'#7a1a10','center',true);
   btnText('worldback','Level map',34,278,100,22);btnText('ovexit','Exit',346,278,100,22);
-  btnText('wzin','+',196,278,26,22);btnText('wzout','-',226,278,26,22);btnText('wreset','Fit',256,278,44,22);
+  btnText('wmnew',wmnWanted()?'Old look':'New look',136,278,58,22);btnText('wzin','+',196,278,26,22);btnText('wzout','-',226,278,26,22);btnText('wreset','Fit',256,278,44,22);
   txt(Math.round(WV.z*100)+'%',322,290,8,'#d8c88e','center');
 }
 const mpWorldOld=drawWorldMap;
@@ -48319,6 +48325,317 @@ function bgywTick(dt){
 {const _dp=drawEnemyPlate;drawEnemyPlate=function(){try{const f=frontEnemy(4);if(f&&f.e.t==='hlbogeyw')return}catch(x){}return _dp.apply(this,arguments)}} // no name plate for a dark shape
 {const _g=goToLevel;goToLevel=function(n){const r=_g.apply(this,arguments);try{G.bgyw=null;if(n===BGYW.ID&&LEVEL===BGYW.ID&&G.flags)delete G.flags.hgdnBogeyDead}catch(e){}return r}} // a new visit: he is back
 {const _rn=restoreNow;restoreNow=function(){const r=_rn.apply(this,arguments);try{G.bgyw=null}catch(e){}return r}}
+
+/* ---- src/desert/maps_world_atlas.js ---- */
+/* The hand-painted world map pictures: where each one sits in assets/wm_a.png (big) and assets/wm_s.png (small). Written by tools/build_wm_atlas.py, do not edit. */
+const WMN_RECTS={"i_town":["a",0,0,260,260],"i_seaside":["a",266,0,260,260],"i_castle":["a",532,0,260,260],"i_desertcity":["a",798,0,260,260],"i_cave":["a",1064,0,260,260],"i_mine":["a",1330,0,260,260],"i_graves":["a",1596,0,261,260],"i_crypt":["a",0,266,260,260],"i_spire":["a",266,266,208,260],"i_abbey":["a",480,266,275,260],"i_oaks":["a",761,266,260,260],"i_pines":["a",1027,266,260,260],"i_mountains":["a",1293,266,260,260],"l_drowned":["a",1559,266,373,260],"l_lighthouse":["a",0,532,262,260],"l_volcano":["a",268,532,311,260],"l_monastery":["a",585,532,340,260],"l_hamlet":["a",931,532,448,260],"l_ruin":["a",1385,532,357,260],"c_galleon":["a",1748,532,190,217],"c_caravel":["a",0,798,190,212],"c_boat":["a",196,798,190,195],"c_stack":["a",392,798,190,184],"c_whale2":["a",588,798,190,176],"i_pyramid":["a",784,798,260,170],"i_rubymaze":["a",1050,798,260,148],"i_stonemaze":["a",1316,798,260,148],"c_kraken":["a",1582,798,190,147],"c_kraken2":["a",1778,798,190,138],"l_moor":["a",0,1016,260,134],"c_dolphins":["a",266,1016,190,133],"l_storm":["a",462,1016,260,128],"l_grove":["a",728,1016,260,120],"c_serpent":["a",994,1016,190,115],"c_whale":["a",1190,1016,190,111],"l_cloud":["a",1386,1016,260,98],"c_rowboat":["a",1652,1016,190,90],"l_waves":["a",0,1156,260,87],"mtn4":["s",0,0,105,132],"mtn7":["s",111,0,148,104],"mtn11":["s",265,0,148,103],"mtn1":["s",419,0,148,101],"oak1":["s",573,0,38,100],"mtn6":["s",617,0,148,99],"mtn9":["s",771,0,148,99],"mtn10":["s",925,0,148,99],"oak8":["s",1079,0,95,98],"mtn0":["s",1180,0,148,98],"palm0":["s",1334,0,46,98],"oak7":["s",1386,0,89,97],"oak10":["s",0,138,113,96],"oak2":["s",119,138,124,94],"oak3":["s",249,138,66,94],"palm2":["s",321,138,79,94],"mtn2":["s",406,138,148,93],"palm1":["s",560,138,64,93],"hill5":["s",630,138,114,87],"oak4":["s",750,138,77,86],"oak6":["s",833,138,75,86],"oak9":["s",914,138,55,84],"oak5":["s",975,138,45,80],"mtn5":["s",1026,138,148,76],"pine7":["s",1180,138,41,74],"pine11":["s",1227,138,30,72],"oak0":["s",1263,138,59,71],"pine8":["s",1328,138,38,71],"pine9":["s",1372,138,37,70],"pine1":["s",1415,138,29,68],"pine4":["s",1450,138,40,64],"dune_sand4":["s",0,240,110,64],"dune_red4":["s",116,240,110,64],"dune_blue4":["s",232,240,110,64],"dune_white4":["s",348,240,110,64],"dune_gold4":["s",464,240,110,64],"dune_violet4":["s",580,240,110,64],"palm3":["s",696,240,58,64],"pine2":["s",760,240,39,63],"pine3":["s",805,240,36,63],"hill1":["s",847,240,119,61],"pine6":["s",972,240,62,57],"hill10":["s",1040,240,119,56],"dune_sand6":["s",1165,240,110,53],"dune_red6":["s",1281,240,110,53],"dune_blue6":["s",1397,240,110,53],"dune_white6":["s",0,310,110,53],"dune_gold6":["s",116,310,110,53],"dune_violet6":["s",232,310,110,53],"hill6":["s",348,310,118,52],"dune_sand0":["s",472,310,108,52],"dune_red0":["s",586,310,108,52],"dune_blue0":["s",700,310,108,52],"dune_white0":["s",814,310,108,52],"dune_gold0":["s",928,310,108,52],"dune_violet0":["s",1042,310,108,52],"rock1":["s",1156,310,88,52],"pine10":["s",1250,310,32,51],"hill3":["s",1288,310,119,50],"path13":["s",1413,310,112,50],"path15":["s",0,369,112,50],"mtn3":["s",118,369,148,49],"path0":["s",272,369,112,49],"path1":["s",390,369,112,49],"path2":["s",508,369,112,49],"path3":["s",626,369,112,49],"path8":["s",744,369,112,49],"path9":["s",862,369,112,49],"path10":["s",980,369,112,49],"path11":["s",1098,369,112,49],"path12":["s",1216,369,112,49],"path14":["s",1334,369,112,49],"dune_sand2":["s",0,425,110,48],"dune_red2":["s",116,425,110,48],"dune_blue2":["s",232,425,110,48],"dune_white2":["s",348,425,110,48],"dune_gold2":["s",464,425,110,48],"dune_violet2":["s",580,425,110,48],"path4":["s",696,425,112,48],"path5":["s",814,425,112,48],"path6":["s",932,425,112,48],"path7":["s",1050,425,112,48],"pine0":["s",1168,425,28,44],"hill2":["s",1202,425,119,44],"dune_sand1":["s",1327,425,110,44],"dune_sand3":["s",0,479,110,44],"dune_red1":["s",116,479,110,44],"dune_red3":["s",232,479,110,44],"dune_blue1":["s",348,479,110,44],"dune_blue3":["s",464,479,110,44],"dune_white1":["s",580,479,110,44],"dune_white3":["s",696,479,110,44],"dune_gold1":["s",812,479,110,44],"dune_gold3":["s",928,479,110,44],"dune_violet1":["s",1044,479,110,44],"dune_violet3":["s",1160,479,110,44],"dune_sand5":["s",1276,479,109,43],"dune_red5":["s",1391,479,109,43],"dune_blue5":["s",0,529,109,43],"dune_white5":["s",115,529,109,43],"dune_gold5":["s",230,529,109,43],"dune_violet5":["s",345,529,109,43],"rock0":["s",460,529,80,43],"pine5":["s",546,529,26,42],"mtn8":["s",578,529,149,42],"dune_sand7":["s",733,529,110,41],"dune_red7":["s",849,529,110,41],"dune_blue7":["s",965,529,110,41],"dune_white7":["s",1081,529,110,41],"dune_gold7":["s",1197,529,110,41],"dune_violet7":["s",1313,529,110,41],"hill4":["s",0,578,117,40],"hill0":["s",123,578,114,39],"hill9":["s",243,578,119,37],"hill7":["s",368,578,93,35],"hill8":["s",467,578,118,32]};
+
+/* ---- src/desert/maps_world_new.js ---- */
+/* ==========================================================================
+   THE NEW LOOK FOR THE WORLD MAP (prefix wmn / WMN). Hand-painted pictures in coloured pencil and watercolour instead of the pen drawings: every place, the trees,
+   pines, mountains, hills, dunes and palms, and the ships and sea creatures. It is a second way to draw the same map (G.flags.mapNew, the "New look" button on the
+   world map); the old drawings stay and the map's roads, rivers, coast, clouds, titles and behaviour are shared. maps_world.js calls the functions here
+   when wmnOn() is true.
+   Pictures: assets/wm_a.png (big: places, landmarks, sea creatures) and assets/wm_s.png (small: scenery), cut and packed by tools/build_wm_atlas.py;
+   where each one sits is in maps_world_atlas.js (WMN_RECTS).
+   Nothing on this map may overlap: wmnLayout() places every picture and every name (and its level and quest dots) once, so that no name stands on a picture,
+   another name or a region title, and the scenery keeps clear of all of them.
+   ========================================================================== */
+const WMN={a:null,s:null,ok:false,loading:false,lay:null,layKey:'',pat:null,
+  K:{oak:.115,pine:.125,mtn:.133,hill:.125,dune:.173,palm:.112},   // map units per picture pixel, per kind of scenery (times the item's own scale)
+  TINT:{'#dcc088':'sand','#cf8a60':'red','#a4b8cc':'blue','#efe9da':'white','#e0b850':'gold','#a98cbb':'violet'}};
+function wmnLoad(){
+  if(WMN.loading||typeof WMN_RECTS==='undefined')return;WMN.loading=true;let n=0;
+  for(const p of ['a','s']){const im=new Image();im.onload=()=>{WMN[p]=im;if(++n===2)WMN.ok=true};im.onerror=()=>{WMN.failed=true};im.decoding='async';
+    im.src='assets/wm_'+p+'.png'+(typeof VERSION!=='undefined'?'?v='+VERSION:'')}}
+/* the painted look is the map unless the player has switched it off (G.flags.mapNew===false) */
+function wmnWanted(){return !(G.flags&&G.flags.mapNew===false)}
+function wmnOn(){if(!wmnWanted())return false;if(!WMN.ok){wmnLoad();return false}return true}
+function wmnToggle(){G.flags.mapNew=!wmnWanted();if(G.flags.mapNew)wmnLoad();WMN.lay=null}
+
+/* one picture, bottom centre at (cx,by), size = height, or width when isW */
+function wmnDims(name,size,isW){const r=WMN_RECTS[name];if(!r)return [0,0];return isW?[size,size*r[4]/r[3]]:[size*r[3]/r[4],size]}
+const WMN_ICO_SCALE=1.2;   // places are drawn this much bigger than the sizes in WMN_SPEC
+function wmnDraw(c,name,cx,by,size,isW,flip){
+  const r=WMN_RECTS[name];if(!r||!WMN.ok)return;const im=r[0]==='a'?WMN.a:WMN.s,d=wmnDims(name,size,isW),w=d[0],h=d[1];
+  if(flip){c.save();c.translate(cx,0);c.scale(-1,1);c.drawImage(im,r[1],r[2],r[3],r[4],-w/2,by-h,w,h);c.restore()}
+  else c.drawImage(im,r[1],r[2],r[3],r[4],cx-w/2,by-h,w,h)}
+
+/* ---------- the places: what picture each one has, [picture, across, down (to its bottom), size, size is the width] ---------- */
+const WMN_SPEC={
+  abbey:[['i_abbey',0,0,30]],thornwood:[['i_oaks',0,0,22]],thornwick:[['i_town',0,0,28]],gwood:[['i_pines',0,0,28]],gcave:[['i_cave',0,0,22]],
+  road:[['l_grove',0,0,26,1],['l_storm',0,-8,26,1]],tunnel:[['i_cave',0,0,22]],ironhill:[['i_castle',0,0,40]],graves:[['i_graves',0,0,26]],mines:[['i_mine',0,0,28]],
+  moor:[['l_moor',0,0,38,1]],pass:[['i_mountains',0,0,32]],greendale:[['i_oaks',0,0,28]],anaea:[['i_town',0,0,28]],
+  sandroad:[],reddunes:[],bluedunes:[],whitedunes:[],flatlands:[],goldenerg:[],violeterg:[],   // the desert areas have no picture of their own: the dunes of their colour all round them, and the name
+  tomb:[['i_pyramid',0,0,38,1]],scoria:[['i_desertcity',0,0,38]],yarrim:[['i_seaside',0,0,30]],saltbarrow:[['i_oaks',0,0,24]],bells:[['l_drowned',0,0,32,1]],cinder:[['l_volcano',0,0,32]],
+  lastlight:[['l_lighthouse',0,0,36]],openSea:[['l_waves',0,0,36,1],['l_storm',0,-6,28,1]],oldhaven:[['i_castle',0,0,40]],oakwood:[['i_oaks',0,0,28]],monastery:[['l_monastery',0,0,34]],
+  landpath:[['i_pines',0,0,26]],below:[['i_cave',0,0,20]],orangecastle:[['i_spire',0,0,42]],hollowgrass:[['i_oaks',0,0,36]],deephollow:[['i_stonemaze',0,0,34,1]],goldencrypt:[['i_crypt',0,0,28]],rubymaze:[['i_rubymaze',0,0,30,1]]};
+const WMN_ICSPEC={town:'i_town',castle:'i_castle',abbey:'i_abbey',cave:'i_cave',mine:'i_mine',graves:'i_graves',crypt:'i_crypt',trees:'i_oaks',mountains:'i_mountains',orangecastle:'i_spire',rubymaze:'i_rubymaze'};
+function wmnSpec(l){return WMN_SPEC[l.k]||[[WMN_ICSPEC[l.ic]||'i_oaks',0,0,l.ic==='castle'||l.ic==='orangecastle'?40:28]]}
+/* the picture's footprint: its parts, how far down they are drawn, and its box (the bottom stands a little below the place's own point) */
+function wmnShape(l){
+  const s=wmnSpec(l);if(!s.length)return {parts:[],off:0,ib:[l.x,l.y-12,l.x,l.y-4]};let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  for(const p of s){const d=wmnDims(p[0],p[3]*WMN_ICO_SCALE,p[4]);x0=Math.min(x0,p[1]*WMN_ICO_SCALE-d[0]/2);x1=Math.max(x1,p[1]*WMN_ICO_SCALE+d[0]/2);y0=Math.min(y0,p[2]*WMN_ICO_SCALE-d[1]);y1=Math.max(y1,p[2]*WMN_ICO_SCALE)}
+  const off=l.y+10-y1;return {parts:s.slice().sort((a,b)=>a[2]-b[2]),off,ib:[l.x+x0,y0+off,l.x+x1,y1+off]}}
+
+/* ---------- the layout: pictures, then names ---------- */
+const WMN_REG=[['The Unknown Lands',476,-16,19],['The Known Lands',196,12,19],['The Sea Lands',652,16,19],['The Hollow Lands',-60,150,16],['The Western Reaches',-330,120,19],['The Far West',-760,100,19],['The Grey Downs',-560,250,15],['The Eastern Lands',1230,16,19]];
+const wmnHit=(a,b)=>a[0]<b[2]&&a[2]>b[0]&&a[1]<b[3]&&a[3]>b[1];
+function wmnLayout(){
+  let fo=true;try{fo=!document.fonts||document.fonts.check("bold 10px 'IM Fell English SC'")}catch(e){}
+  const key=(G.flags.autoScaleOn?1:0)+'|'+(fo?1:0)+'|'+WORLD_LOCS.length;if(WMN.lay&&WMN.layKey===key)return WMN.lay;
+  const c=ctx,out={},placed=[],info=[];
+  for(const [t,x,y,sz] of WMN_REG){c.save();c.font=`${sz}px ${FTITLE}`;const w=c.measureText(t).width+t.length*1.5+6;c.restore();placed.push([x-w/2,y-sz*.7,x+w/2,y+sz*.7])}
+  for(const [t,x,y,sz] of WMN_SMALL){c.save();c.font=`italic ${sz}px ${FUI}`;const w=c.measureText(t).width;c.restore();placed.push([x-w/2-2,y-sz*.7,x+w/2+2,y+sz*.7])}
+  for(const l of WORLD_LOCS){const sh=wmnShape(l);out[l.k]={sh,ib:sh.ib,parts:sh.parts,off:sh.off};placed.push(sh.ib)}
+  const order=WORLD_LOCS.slice().sort((a,b)=>(b.ic==='castle'||b.ic==='town'||b.ic==='abbey'||b.ic==='orangecastle'?1:0)-(a.ic==='castle'||a.ic==='town'||a.ic==='abbey'||a.ic==='orangecastle'?1:0));
+  for(const l of order){
+    const L=out[l.k],ib=L.ib,big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle',nsz=big?10.5:9;
+    const lr=(!G.flags.autoScaleOn&&typeof locRating==='function')?locRating(l):null,t2=lr?'Lv '+lr:'';
+    c.save();c.font=`bold ${nsz}px ${FUI}`;const w1=c.measureText(l.n).width;c.font=`bold 8px ${FUI}`;const w2=lr?c.measureText(t2).width:0;c.font=`bold 7.4px ${FUI}`;const sw=l.sub?c.measureText(l.sub).width:0;c.restore();
+    const gap=lr?5:0,wt=w1+gap+w2,bw=Math.max(wt,sw),sub=l.sub?11:0,ym=(ib[1]+ib[3])/2;
+    // every spot round the picture where the name could stand: under it, over it, beside it, each a few steps further out; the nearest spot that is clear wins (under is preferred).
+    // The block keeps 7 free under the name for the quest dots; where there is no room for that, the dots may sit on whatever is there.
+    let best=null,bestA=1e9;
+    for(const strip of [7,0]){
+      const H=14+sub+strip,cands=[];
+      for(const [side,bias] of [['b',0],['t',5],['r',3],['l',3]])for(let k=-4;k<=4;k++)for(let step=0;step<7;step++){
+        let cx,ny;
+        if(side==='b'){cx=l.x+k*bw*.25;ny=ib[3]+8+step*7}else if(side==='t'){cx=l.x+k*bw*.25;ny=ib[1]-8-sub-7-step*7}
+        else if(side==='r'){cx=ib[2]+4+bw/2+step*6;ny=ym-sub/2+k*8}else{cx=ib[0]-4-bw/2-step*6;ny=ym-sub/2+k*8}
+        cands.push({cx,ny,r:[cx-bw/2-2,ny-7,cx+bw/2+2,ny-7+H],d:Math.hypot(cx-l.x,ny-ib[3])+bias+Math.abs(k)*2.5})}
+      cands.sort((p,q)=>p.d-q.d);
+      for(const q of cands){let a=0;for(const p of placed){if(wmnHit(q.r,p)){const ox=Math.min(q.r[2],p[2])-Math.max(q.r[0],p[0]),oy=Math.min(q.r[3],p[3])-Math.max(q.r[1],p[1]);a+=ox*oy+1}}
+        if(a<bestA){bestA=a;best=q;if(!a)break}}
+      if(!bestA)break}
+    placed.push(best.r);Object.assign(L,{cx:best.cx,ny:best.ny,rect:[best.r[0],best.r[1],best.r[2],best.r[1]+14+sub+7],w1,w2,gap,wt,t2,nsz,over:bestA>0});
+  }
+  WMN.lay=out;WMN.layKey=key;return out}
+function wmnLay(l){return wmnLayout()[l.k]}
+/* scenery keeps clear of every picture, name and title */
+function wmnBlocked(x,y,d){const lay=wmnLayout(),m=d*.5+1.5;
+  for(const k in lay){const L=lay[k],a=L.ib,r=L.rect;
+    if(x>a[0]-m&&x<a[2]+m&&y>a[1]-m&&y<a[3]+m)return true;
+    if(r&&x>r[0]-m&&x<r[2]+m&&y>r[1]-m&&y<r[3]-5+m)return true}
+  for(const [t,rx,ry,sz] of WMN_REG)if(Math.abs(x-rx)<t.length*sz*.3+m&&Math.abs(y-ry)<sz*.7+m)return true;
+  return false}
+
+/* ---------- drawing ---------- */
+function wmnIco(l){const L=wmnLay(l);if(!L)return;const K=WMN_ICO_SCALE;for(const p of L.parts)wmnDraw(ctx,p[0],l.x+p[1]*K,p[2]*K+L.off,p[3]*K,!!p[4])}
+function wmnLabel(l,v,txtH){
+  const L=wmnLay(l);if(!L||L.cx===undefined)return;const col=v?'#1c1208':'#5a4a30',xs=L.cx-L.wt/2;
+  if(L.t2){txtH(l.n,xs+L.w1/2,L.ny,L.nsz,col);txtH(L.t2,xs+L.w1+L.gap+L.w2/2,L.ny,8,'#7a1a10')}else txtH(l.n,L.cx,L.ny,L.nsz,col);
+  if(l.sub)txtH(l.sub,L.cx,L.ny+11,7.4,'#4a3a22')}
+/* the quest dots stand in the strip left under each name */
+function wmnDots(l,nq,c){const L=wmnLay(l);if(!L||!L.rect)return;
+  for(let i=0;i<nq;i++){const row=(i/14)|0,inRow=Math.min(14,nq-row*14),col=i%14;c.beginPath();c.arc(L.cx+(col-(inRow-1)/2)*3.4,L.rect[3]-4+row*3.4,1.15,0,TAU);c.fill();c.stroke()}}
+
+/* the scenery: kind 0 broad tree, 1 pine, 2 mountain, 3 hill, 4 dune, 5 palm */
+function wmnItem(c,it,z){
+  const t=it[0],x=it[1],y=it[2],s=it[3],sd=it[4],K=WMN.K;let n;
+  if(t===0){n='oak'+(sd%11);const r=WMN_RECTS[n];wmnDraw(c,n,x,y+1,r[4]*K.oak*s,false)}
+  else if(t===1){n='pine'+(sd%12);const r=WMN_RECTS[n];wmnDraw(c,n,x,y+1,r[4]*K.pine*s,false)}
+  else if(t===2){n='mtn'+(sd%12);const r=WMN_RECTS[n];wmnDraw(c,n,x,y+1,r[3]*K.mtn*s,true)}
+  else if(t===3){const q=sd%16;n='hill'+(q<11?q:(q-11)%8);const r=WMN_RECTS[n];wmnDraw(c,n,x,y+1,r[3]*K.hill*s,true)}
+  else if(t===4){n='dune_'+(WMN.TINT[it[5]]||'sand')+(sd%8);const r=WMN_RECTS[n];wmnDraw(c,n,x,y+1,r[3]*K.dune*s,true)}
+  else{n='palm'+(sd%4);const r=WMN_RECTS[n];wmnDraw(c,n,x,y+1,r[4]*K.palm*s,false)}}
+
+/* the land: colour washes laid on thicker, and fine coloured-pencil hatching over all of it (kept one pixel thin at every zoom) */
+function wmnPencil(){
+  if(WMN.pat)return WMN.pat;const k=document.createElement('canvas');k.width=k.height=96;const x=k.getContext('2d');x.lineCap='round';
+  const cols=['rgba(70,100,50,.2)','rgba(124,100,52,.17)','rgba(60,84,44,.15)','rgba(150,120,60,.14)'];
+  for(let i=0;i<120;i++){const px=hash2(i,1,901)*96,py=hash2(i,2,901)*96,L=3+hash2(i,3,901)*6,a=-1.0+(hash2(i,4,901)-.5)*.35;x.strokeStyle=cols[i%4];x.lineWidth=.55+hash2(i,5,901)*.45;
+    for(const [ox,oy] of [[0,0],[96,0],[-96,0],[0,96],[0,-96],[96,96],[-96,-96],[96,-96],[-96,96]]){x.beginPath();x.moveTo(px+ox,py+oy);x.lineTo(px+ox+Math.cos(a)*L,py+oy+Math.sin(a)*L);x.stroke()}}
+  WMN.pat=ctx.createPattern(k,'repeat');return WMN.pat}
+function wmnWash(V,z){
+  const c=ctx,p=wmnPencil();if(p&&p.setTransform){try{p.setTransform(new DOMMatrix([1/z,0,0,1/z,0,0]))}catch(e){}}
+  c.fillStyle=p;c.fillRect(V.x0,V.y0,V.x1-V.x0,V.y1-V.y0)}
+
+/* ships and the creatures of the sea, painted */
+function wmnCreatures(V,z){
+  const c=ctx,t=G.time,vis=(x,y,r)=>x+r>V.x0&&x-r<V.x1&&y+r>V.y0&&y-r<V.y1,bob=(x,a)=>Math.sin(t*1.4+x*.1)*a;
+  const ships=[[790,-62,1,'caravel'],[1010,34,-1,'galleon'],[1040,330,1,'caravel'],[880,432,-1,'boat'],[300,408,1,'galleon'],[560,396,-1,'caravel'],[-222,196,1,'boat'],[-176,-60,-1,'caravel'],[690,-30,1,'galleon']];
+  for(const [x,y,d,k] of ships)if(vis(x,y,30))wmnDraw(c,'c_'+k,x,y+bob(x,.7),k==='galleon'?28:k==='boat'?20:25,true,d>0);
+  if(vis(-230,84,50))wmnDraw(c,'c_serpent',-230,84+bob(-230,.5),36,true,false);
+  if(vis(450,432,50))wmnDraw(c,'c_serpent',450,432+bob(450,.5),36,true,true);
+  if(vis(690,440,40))wmnDraw(c,'c_kraken',690,440+bob(690,.6),32,true,false);
+  if(vis(1040,228,40))wmnDraw(c,'c_whale',1040,228+bob(1040,.5),36,true,true);
+  for(const [x,y,k,w,f] of WMN_SEAX)if(vis(x,y,30))wmnDraw(c,'c_'+k,x,y+bob(x,.5),w,true,f);
+  const G1=G.flags||{};
+  if(G1.voyage){const by=mpWorldM.by,ks=['yarrim','saltbarrow','bells','cinder','lastlight'];c.strokeStyle='rgba(30,70,110,.85)';c.lineWidth=mpWorldLw(1.5);c.setLineDash([3,3.5]);c.beginPath();ks.forEach((k,i)=>{const l=by[k];i?c.lineTo(l.x,l.y):c.moveTo(l.x,l.y)});c.stroke();c.setLineDash([])}}
+const WMN_SEAX=[];   // more creatures in the open sea: [x, y, picture, width, face right]
+
+/* the key: the same eight entries, the first five painted */
+function wmnKeyRows(c){
+  const sp=(n,h)=>(a,b)=>wmnDraw(c,n,a,b+5,h,false);
+  return [['Town',sp('i_town',11)],['Castle',sp('i_castle',12)],['Abbey',sp('i_abbey',12)],['Cave or mine',sp('i_cave',10)],['Graves',sp('i_graves',11)],
+    ['Road',(a,b)=>{c.strokeStyle='rgba(42,26,12,.85)';c.lineWidth=3.6;c.beginPath();c.moveTo(a-6,b);c.lineTo(a+6,b);c.stroke();c.strokeStyle='#e8d8a6';c.lineWidth=2.2;c.stroke()}],
+    ['Teleport stone',(a,b)=>{c.fillStyle='#46506a';c.strokeStyle=mpWorldInk;c.lineWidth=.6;c.beginPath();c.ellipse(a,b+1,4.4,2.4,0,0,TAU);c.fill();c.stroke();c.strokeStyle='#cfeaff';c.beginPath();c.arc(a,b,2.4,0,TAU);c.stroke()}],
+    ['Quest open',(a,b)=>{c.fillStyle='#b02818';c.beginPath();c.arc(a,b,1.8,0,TAU);c.fill()}],['A day on foot',(a,b)=>{c.fillStyle=mpWorldInk;c.fillRect(a-6,b,12,1.2);c.fillRect(a-6,b-2,1,4.4);c.fillRect(a+5,b-2,1,4.4)}]]}
+
+/* the roads: dirt paths made of painted patches of trodden earth (path0-15), laid one after another along the route, each turned to follow it, a different one each time, faint.
+   Tracks are narrower; the Pilgrim's way is the faintest. Pebbles and grass tufts along the verge, and the Pilgrim's little crosses. */
+function wmnRoads(V,z){
+  const c=ctx,H=hash2,M=mpWorldM;if(!WMN.ok)return;
+  M.rd.forEach((r,ri)=>{const pts=r.pts,n=pts.length;let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(const p of pts){if(p[0]<x0)x0=p[0];if(p[0]>x1)x1=p[0];if(p[1]<y0)y0=p[1];if(p[1]>y1)y1=p[1]}if(x1<V.x0-12||x0>V.x1+12||y1<V.y0-12||y0>V.y1+12)return;
+    const kind=r.style,wid=Math.max(kind==='road'?5.4:kind==='pilgrim'?3.4:4.4,2.2/z),len=wid*2.3,step=len*.42,al=kind==='road'?.62:kind==='pilgrim'?.4:.5;
+    c.save();c.globalAlpha=al;let carry=step*(.3+H(ri,0,640)*.5),k=0;
+    for(let i=1;i<n;i++){const a=pts[i-1],b=pts[i],dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy);if(L<1e-6)continue;let pos=0;
+      while(carry+(L-pos)>=step){const adv=step-carry;pos+=adv;carry=0;k++;const t=pos/L,px=a[0]+dx*t,py=a[1]+dy*t;
+        if(px<V.x0-10||px>V.x1+10||py<V.y0-10||py>V.y1+10)continue;
+        const h1=H(k,ri,641),h2=H(k,ri,642),h3=H(k,ri,643),nm='path'+((h1*16)|0),R=WMN_RECTS[nm];if(!R)continue;
+        const sc=.9+h2*.28,w=len*sc,h=w*R[4]/R[3],ang=Math.atan2(dy,dx)+(h3-.5)*.18,off=(h2-.5)*wid*.16;
+        c.save();c.translate(px-dy/L*off,py+dx/L*off);c.rotate(ang);if(h3>.5)c.scale(1,-1);c.drawImage(WMN.s,R[1],R[2],R[3],R[4],-w/2,-h/2,w,h);c.restore()}
+      carry+=L-pos}
+    c.restore();
+    // pebbles and grass along the verge
+    if(z>.5){let acc=0,q=0;for(let i=1;i<n;i++){const a=pts[i-1],b=pts[i],L=Math.hypot(b[0]-a[0],b[1]-a[1]);acc+=L;if(acc<(z>1.4?5:8))continue;acc=0;q++;
+      if(b[0]<V.x0||b[0]>V.x1||b[1]<V.y0||b[1]>V.y1)continue;const tx=b[0]-a[0],ty=b[1]-a[1],LL=Math.hypot(tx,ty)||1,nx=-ty/LL,ny=tx/LL,h1=H(i,q,611),h2=H(i,q,612),sd=h1<.5?1:-1,off=wid*.5+.8+h2*1.8;
+      const px=b[0]+nx*off*sd,py=b[1]+ny*off*sd;
+      if(h2<.5){c.fillStyle='rgba(138,126,108,.7)';c.beginPath();c.ellipse(px,py,.45+h2*.5,.3+h2*.3,0,0,TAU);c.fill();c.strokeStyle='rgba(42,26,12,.4)';c.lineWidth=.2;c.stroke()}
+      else if(z>.85){c.strokeStyle='rgba(66,100,46,.7)';c.lineWidth=.38;c.beginPath();c.moveTo(px-.8,py);c.lineTo(px-1.2,py-2);c.moveTo(px,py);c.lineTo(px,py-2.5);c.moveTo(px+.8,py);c.lineTo(px+1.3,py-1.9);c.stroke()}}}
+    if(kind==='pilgrim'){let acc=0,nm=0;for(let i=1;i<n;i++){const a=pts[i-1],b=pts[i],L=Math.hypot(b[0]-a[0],b[1]-a[1]);acc+=L;if(acc<46)continue;acc=0;nm++;if(b[0]<V.x0||b[0]>V.x1||b[1]<V.y0||b[1]>V.y1)continue;
+      const dx=b[0]-a[0],dy=b[1]-a[1],LL=Math.hypot(dx,dy)||1,sd=nm%2?1:-1,mx=b[0]-dy/LL*4.6*sd,my=b[1]+dx/LL*4.6*sd;c.strokeStyle=mpWorldInk;c.lineWidth=mpWorldLw(.8);c.beginPath();c.moveTo(mx,my+2);c.lineTo(mx,my-4);c.moveTo(mx-1.6,my-2.4);c.lineTo(mx+1.6,my-2.4);c.stroke()}}
+  })}
+
+/* ---------- the rivers: long, winding, with side streams, and kept clear of every place, name and title ---------- */
+const WMN_SMALL=[['Below the Abbey',-60,163,8]];   // the small writing under The Hollow Lands
+function wmnObstacles(){
+  const lay=wmnLayout(),o=[];for(const k in lay){const L=lay[k];o.push(L.ib);if(L.rect)o.push([L.rect[0],L.rect[1],L.rect[2],L.rect[3]-6])}
+  const c=ctx;for(const [t,x,y,sz] of WMN_REG){c.save();c.font=`${sz}px ${FTITLE}`;const w=c.measureText(t).width+t.length*1.5+6;c.restore();o.push([x-w/2,y-sz*.7,x+w/2,y+sz*.7])}
+  for(const [t,x,y,sz] of WMN_SMALL){c.save();c.font=`italic ${sz}px ${FUI}`;const w=c.measureText(t).width;c.restore();o.push([x-w/2-2,y-sz*.7,x+w/2+2,y+sz*.7])}
+  return o}
+function wmnMakeRivers(){
+  const M=mpWorldM,H=hash2,obst=wmnObstacles(),MG=6,land=(x,y)=>M.isLand(x,y);
+  const pushOut=(p,m)=>{for(let it=0;it<3;it++){let moved=false;for(const r of obst){if(p[0]>r[0]-m&&p[0]<r[2]+m&&p[1]>r[1]-m&&p[1]<r[3]+m){const dl=p[0]-(r[0]-m),dr=(r[2]+m)-p[0],dt=p[1]-(r[1]-m),db=(r[3]+m)-p[1],mn=Math.min(dl,dr,dt,db);
+        if(mn===dl)p[0]=r[0]-m-.6;else if(mn===dr)p[0]=r[2]+m+.6;else if(mn===dt)p[1]=r[1]-m-.6;else p[1]=r[3]+m+.6;moved=true}}if(!moved)break}};
+  const resample=(pts,st)=>{const o=[pts[0].slice()];let acc=0;for(let i=1;i<pts.length;i++){let a=pts[i-1],b=pts[i],L=Math.hypot(b[0]-a[0],b[1]-a[1]);while(acc+L>=st){const t=(st-acc)/L;a=[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];o.push(a);L=Math.hypot(b[0]-a[0],b[1]-a[1]);acc=0}acc+=L}const e=pts[pts.length-1];if(Math.hypot(e[0]-o[o.length-1][0],e[1]-o[o.length-1][1])>st*.4)o.push(e.slice());return o};
+  // lay a meander on a line: long sideways swings of two sizes that grow in from the ends, smoothed so the bends are round
+  const meander=(base,amp,wl,seed)=>{const n=base.length,ph=[H(seed,1,651)*TAU,H(seed,2,651)*TAU];let s=0;const out=[];
+    for(let i=0;i<n;i++){const a=base[Math.max(0,i-1)],b=base[Math.min(n-1,i+1)],tx=b[0]-a[0],ty=b[1]-a[1],L=Math.hypot(tx,ty)||1;if(i)s+=Math.hypot(base[i][0]-base[i-1][0],base[i][1]-base[i-1][1]);
+      const env=Math.min(1,s/30)*Math.min(1,(n-1-i)*3/30+.001),sw=Math.sin(s/wl*TAU+ph[0])+.42*Math.sin(s/(wl*.53)*TAU+ph[1]),k=amp*(.85+.3*Math.sin(s/(wl*2.7)+ph[1]))*env*sw;
+      out.push([base[i][0]-ty/L*k,base[i][1]+tx/L*k])}
+    for(let pass=0;pass<5;pass++){const q=out.map(p=>p.slice());for(let i=1;i<n-1;i++){out[i][0]=(q[i-1][0]+q[i][0]*2+q[i+1][0])/4;out[i][1]=(q[i-1][1]+q[i][1]*2+q[i+1][1])/4}}
+    return out};
+  // keep a river off the places: the push away from any picture, name or title within 18 units is worked out as a sideways shift of the winding line, the shift is smoothed
+  // (so the river bends round a place in a curve and keeps its windings elsewhere), and anything still on a place is moved out. Points that end up in the sea are drawn back to the line the river was laid on.
+  const R=18,fix=(pts,base)=>{const n=pts.length,B=pts.map(p=>p.slice()),off=pts.map(()=>[0,0]);
+    for(let it=0;it<44;it++){
+      for(let i=1;i<n-1;i++){const px=B[i][0]+off[i][0],py=B[i][1]+off[i][1];let ax=0,ay=0;
+        for(const r of obst){const qx=Math.max(r[0],Math.min(r[2],px)),qy=Math.max(r[1],Math.min(r[3],py));let dx=px-qx,dy=py-qy;const dist=Math.hypot(dx,dy);
+          if(dist>=R)continue;
+          if(dist<1e-6){const dl=px-r[0],dr=r[2]-px,dt=py-r[1],db=r[3]-py,mn=Math.min(dl,dr,dt,db);dx=mn===dl?-1:mn===dr?1:0;dy=mn===dt?-1:mn===db?1:0;const f=(R+mn)*.2;ax+=dx*f;ay+=dy*f}
+          else{const f=(R-dist)/R*3;ax+=dx/dist*f;ay+=dy/dist*f}}
+        off[i][0]+=ax;off[i][1]+=ay}
+      for(let k=0;k<3;k++){const q=off.map(o=>o.slice());for(let i=1;i<n-1;i++){off[i][0]=(q[i-1][0]+q[i][0]*2+q[i+1][0])/4;off[i][1]=(q[i-1][1]+q[i][1]*2+q[i+1][1])/4}}}
+    for(let i=0;i<n;i++){pts[i][0]=B[i][0]+off[i][0];pts[i][1]=B[i][1]+off[i][1]}
+    for(let i=1;i<n-8;i++){let g=0;while(!land(pts[i][0],pts[i][1])&&g++<4){pts[i][0]=(pts[i][0]+base[i][0])/2;pts[i][1]=(pts[i][1]+base[i][1])/2}}
+    for(let pass=0;pass<4;pass++)for(let i=1;i<n-1;i++)pushOut(pts[i],2.5);
+    return pts};
+  const rivers=[];
+  M.rv.forEach((base0,ri)=>{
+    const base=resample(base0,3),main=fix(meander(base,13+H(ri,4,652)*7,62+H(ri,5,652)*40,ri*7+1),base);
+    main.w0=2.0;main.w1=4.4;rivers.push(main);
+    // side streams: two or three, branching off at points along it, each winding in turn
+    const nb=2+((H(ri,6,653)*2)|0);
+    for(let b=0;b<nb;b++){
+      const u=.18+.62*((b+H(ri,b,654)*.7)/nb),bi=Math.max(4,Math.min(main.length-8,(main.length*u)|0)),P=main[bi],Q=main[bi+3];
+      let ang=Math.atan2(Q[1]-P[1],Q[0]-P[0])+(b%2?1:-1)*(.9+H(ri,b,655)*.5),x=P[0],y=P[1];const tr=[[x,y]],maxL=70+H(ri,b,656)*90;let len=0;
+      for(let st=0;st<60&&len<maxL;st++){ang+=(H(st,ri*9+b,657)-.5)*.3;x+=Math.cos(ang)*3;y+=Math.sin(ang)*3;len+=3;if(!land(x,y))break;tr.push([x,y])}
+      if(tr.length<14)continue;tr.reverse();                                                  // from the source down to the main river
+      const t2=fix(meander(tr,5+H(ri,b,658)*4,40+H(ri,b,659)*30,ri*13+b+3),tr);t2[t2.length-1]=P.slice();t2.w0=1.0;t2.w1=Math.max(1.8,(main.w0+(main.w1-main.w0)*bi/main.length)*.78);rivers.push(t2)}});
+  M.rv=rivers;
+  // lakes: any that sits on a place, a name or a title is dropped
+  M.lakes=M.lakes.filter(([lx,ly,rx,ry])=>!obst.some(r=>lx+rx*1.2>r[0]&&lx-rx*1.2<r[2]&&ly+ry*1.2>r[1]&&ly-ry*1.2<r[3]))}
+
+/* the rivers and lakes: watercolour blue between hand-inked, wobbling banks with short hatching on the outside, ripples on the water and reeds at the edge. A river widens from its source to its mouth. */
+function wmnRivers(V,z){
+  const c=ctx,H=hash2,M=mpWorldM,minW=1.1/z;
+  M.rv.forEach((pts,ri)=>{let ok=false;for(const p of pts){if(p[0]>V.x0-20&&p[0]<V.x1+20&&p[1]>V.y0-20&&p[1]<V.y1+20){ok=true;break}}if(!ok)return;
+    const n=pts.length,w0=pts.w0||2.2,w1=pts.w1||4.6,wAt=i=>Math.max(w0+(w1-w0)*i/n,minW);
+    const side=(sd,f)=>{c.beginPath();for(let i=0;i<n;i++){const a=pts[Math.max(0,i-1)],b=pts[Math.min(n-1,i+1)],tx=b[0]-a[0],ty=b[1]-a[1],L=Math.hypot(tx,ty)||1,o=sd*wAt(i)*.5+Math.sin(i*.8+f)*.3+Math.sin(i*2.1+f*3)*.15;const px=pts[i][0]-ty/L*o,py=pts[i][1]+tx/L*o;i?c.lineTo(px,py):c.moveTo(px,py)}};
+    c.lineCap='round';c.lineJoin='round';
+    const pass=(wm,col)=>{for(let i=1;i<n;i++){c.beginPath();c.moveTo(pts[i-1][0],pts[i-1][1]);c.lineTo(pts[i][0],pts[i][1]);c.strokeStyle=col;c.lineWidth=wAt(i)*wm;c.stroke()}};
+    pass(1.9,'rgba(110,150,150,.16)');pass(1.06,'rgba(130,174,182,.9)');pass(.45,'rgba(196,228,232,.5)');
+    c.strokeStyle='rgba(54,40,24,.62)';c.lineWidth=Math.max(.45,.5/z);for(const sd of [-1,1]){side(sd,ri*5+sd);c.stroke()}
+    c.beginPath();let acc=0,k=0;for(let i=1;i<n;i++){const a=pts[i-1],b=pts[i];acc+=Math.hypot(b[0]-a[0],b[1]-a[1]);if(acc<(z>1.2?3.6:6.5))continue;acc=0;k++;
+      if(b[0]<V.x0||b[0]>V.x1||b[1]<V.y0||b[1]>V.y1)continue;const tx=b[0]-a[0],ty=b[1]-a[1],L=Math.hypot(tx,ty)||1,nx=-ty/L,ny=tx/L,w=wAt(i),h1=H(i,ri,621),sd=k%2?1:-1,o1=w*.5+.5,o2=o1+1.1+h1*1.4;
+      c.moveTo(b[0]+nx*o1*sd,b[1]+ny*o1*sd);c.lineTo(b[0]+nx*o2*sd+tx/L*.7,b[1]+ny*o2*sd+ty/L*.7)}
+    c.strokeStyle='rgba(54,40,24,.42)';c.lineWidth=.3;c.stroke();
+    if(z>.6){c.beginPath();acc=0;k=0;for(let i=1;i<n;i++){const a=pts[i-1],b=pts[i];acc+=Math.hypot(b[0]-a[0],b[1]-a[1]);if(acc<10)continue;acc=0;k++;if(b[0]<V.x0||b[0]>V.x1||b[1]<V.y0||b[1]>V.y1)continue;
+        const h=H(i,ri,622),ox=(h-.5)*wAt(i)*.5;c.moveTo(b[0]+ox-1.5,b[1]);c.quadraticCurveTo(b[0]+ox,b[1]-1.1,b[0]+ox+1.5,b[1])}
+      c.strokeStyle='rgba(246,252,252,.75)';c.lineWidth=.36;c.stroke()}
+    if(z>.9){c.strokeStyle='rgba(62,102,52,.8)';c.lineWidth=.38;c.beginPath();acc=0;for(let i=1;i<n;i++){const a=pts[i-1],b=pts[i];acc+=Math.hypot(b[0]-a[0],b[1]-a[1]);if(acc<17)continue;acc=0;if(b[0]<V.x0||b[0]>V.x1||b[1]<V.y0||b[1]>V.y1)continue;
+        const tx=b[0]-a[0],ty=b[1]-a[1],L=Math.hypot(tx,ty)||1,nx=-ty/L,ny=tx/L,sd=H(i,ri,623)<.5?1:-1,o=wAt(i)*.5+1.4,px=b[0]+nx*o*sd,py=b[1]+ny*o*sd;
+        for(const q of [-.9,0,.9]){c.moveTo(px+q,py+.6);c.lineTo(px+q*1.5,py-2.4-Math.abs(q))}}c.stroke()}
+    c.lineCap='butt'});
+  for(const [lx,ly,rx,ry] of M.lakes){if(lx+rx<V.x0||lx-rx>V.x1||ly+ry<V.y0||ly-ry>V.y1)continue;
+    const edge=(sc)=>{c.beginPath();for(let k=0;k<=24;k++){const a=k/24*TAU,j=1+.1*Math.sin(a*3+lx)+.05*Math.sin(a*7+ly);const px=lx+Math.cos(a)*rx*j*sc,py=ly+Math.sin(a)*ry*j*sc;k?c.lineTo(px,py):c.moveTo(px,py)}c.closePath()};
+    edge(1.18);c.fillStyle='rgba(110,150,150,.18)';c.fill();edge(1);c.fillStyle='rgba(130,174,182,.92)';c.fill();
+    c.save();edge(1);c.clip();c.fillStyle='rgba(196,228,232,.45)';c.beginPath();c.ellipse(lx-rx*.18,ly-ry*.2,rx*.5,ry*.34,0,0,TAU);c.fill();
+    c.strokeStyle='rgba(246,252,252,.75)';c.lineWidth=.36;c.beginPath();for(let k=0;k<4;k++){const ox=lx+(k-1.5)*rx*.34,oy=ly+((k*37)%5-2)*ry*.18;c.moveTo(ox-2,oy);c.quadraticCurveTo(ox,oy-1.3,ox+2,oy)}c.stroke();c.restore();
+    edge(1);c.strokeStyle='rgba(54,40,24,.62)';c.lineWidth=Math.max(.45,.5/z);c.stroke();
+    c.strokeStyle='rgba(54,40,24,.42)';c.lineWidth=.3;c.beginPath();for(let k=0;k<30;k++){const a=k/30*TAU,j=1+.1*Math.sin(a*3+lx)+.05*Math.sin(a*7+ly),ex=Math.cos(a),ey=Math.sin(a);c.moveTo(lx+ex*rx*j+ex*.7,ly+ey*ry*j+ey*.7);c.lineTo(lx+ex*(rx*j+1.4+H(k,lx,624)*1.2),ly+ey*(ry*j+1.4+H(k,lx,624)*1.2))}c.stroke();
+    if(z>.9){c.strokeStyle='rgba(62,102,52,.8)';c.lineWidth=.38;c.beginPath();for(let k=0;k<6;k++){const a=(k/6+H(k,ly,625)*.1)*TAU,j=1+.1*Math.sin(a*3+lx),px=lx+Math.cos(a)*(rx*j+2),py=ly+Math.sin(a)*(ry*j+2);for(const q of [-.9,0,.9]){c.moveTo(px+q,py+.6);c.lineTo(px+q*1.5,py-2.4-Math.abs(q))}}c.stroke()}}}
+/* the small writing under The Hollow Lands */
+function wmnSmallWords(){const c=ctx;for(const [t,x,y,sz] of WMN_SMALL){c.save();c.font=`italic ${sz}px ${FUI}`;c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=2.6;c.strokeStyle='rgba(236,222,176,.6)';c.strokeText(t,x,y);c.fillStyle='rgba(50,36,18,.7)';c.fillText(t,x,y);c.restore()}}
+
+/* ---- src/desert/wd_hills.js ---- */
+/* ==========================================================================
+   WILD PLACES, REBUILT AS HILLS AND ROCK PILES (prefix wdh / WDH). The caves and old ruins of wilds.js used to stand as a big box of wall, five squares wide and
+   three and a half high, that looked like a bunker. Now each entrance is a small painted hill with a door set into it (assets/wd_hill0-3.png), with trees growing
+   all round it, and the dead trees (the thicket that has to be burned) across the way in. In the deserts it is a pile of rocks with a door in it (assets/wd_rock0-3.png)
+   and no trees. The hill is one blocking sprite with an enter link (like the desert burrows), two invisible blockers keep the party from walking through its sides.
+   The way out of the place, the thicket, the ? marks and the interiors are the ones in wilds.js, which this file only re-places.
+   ========================================================================== */
+for(const n of ['wd_hill0','wd_hill1','wd_hill2','wd_hill3','wd_rock0','wd_rock1','wd_rock2','wd_rock3'])loadImg(n,'assets/'+n+'.png');
+for(let i=0;i<4;i++){NPC_H['wd_hill'+i]=1.9;NPC_H['wd_rock'+i]=1.5}   // the hill is about a person and a half high, two and a half squares wide; the rock pile a little lower and wider
+const WDH_DESERT=new Set([41,60,61,62,63,64]); // the outdoor maps that are desert
+{const _wp=wdPlace;wdPlace=function(L,n,id,kind,tint,seed){
+  const sp=wdSpot(L,n,seed);if(!sp)return false;const [x,y]=sp,lp=wdIsLP(n),cave=kind==='cave';
+  const nt=L.decor.reduce((c,d)=>c+(wdTreeKey(d)&&(d.sc===undefined||d.sc>.01)&&Math.abs(d.x-x)<=14&&Math.abs(d.y-y)<=14?1:0),0);
+  const desert=WDH_DESERT.has(n)&&!(n===41&&nt>=12);   // the Sand Road runs from forest into dunes: where it is still forest, a hill among trees
+  const pic=desert?'wd_rock'+((hash2(id,3,811)*4)|0):'wd_hill'+(cave?[1,0,1,3][(hash2(id,3,812)*4)|0]:[2,3,0,2][(hash2(id,3,813)*4)|0]);
+  const at=cave?{x:8,y:16,f:0}:{x:16,y:22,f:0};
+  L.decor=L.decor||[];const Q=L._wdhQ||(L._wdhQ=[]);   // the new sprites are added after everything else in wdPrep, so the saved states of the burned thickets (kept by position in the list) still line up
+  // where the party stands to knock (the thicket is on this square), the squares the hill covers, and the sides that are closed off
+  const door=lp?[x-1,y]:[x,y+1],side=lp?[[x,y-1],[x,y+1]]:[[x-1,y],[x+1,y]];
+  const free=(d)=>!d.npc&&!d.loot&&!d.shop&&!d.enter&&d.k!=='lever';
+  const covered=(d)=>(d.x===x&&d.y===y)||side.some(q=>q[0]===d.x&&q[1]===d.y)||(lp?(d.x===x-1&&d.y===y)||(d.x===x-2&&d.y===y):(d.x===x&&d.y>=y+1&&d.y<=y+3));
+  for(const d of L.decor)if(free(d)&&covered(d)&&!(d.x===door[0]&&d.y===door[1])){d.block=false;d.sc=.0001;d.pfCut=1}   // nothing grows where the hill stands or on the way up to it
+  Q.push({k:pic,x,y,block:true,enter:{to:id,x:at.x,y:at.y,f:at.f},wdh:1});
+  for(const q of side)Q.push({k:'pstump',x:q[0],y:q[1],block:true,sc:.0001,wdh:1}); // invisible: the hill is wider than its own square
+  // more trees round it: copies of the trees that grow nearby, in the clear squares beside, behind and in front of the hill (never on the way to the door)
+  if(!desert){
+    const tpl=L.decor.filter(d=>wdTreeKey(d)&&(d.sc===undefined||d.sc>.01)&&Math.abs(d.x-x)<=14&&Math.abs(d.y-y)<=14);
+    if(tpl.length){
+      const used=new Set(L.decor.concat(Q).filter(d=>d.sc===undefined||d.sc>.01||d.block).map(d=>d.x+','+d.y)),cnt=8+((hash2(id,4,814)*6)|0);let made=0;
+      for(let t=0;t<90&&made<cnt;t++){
+        const dx=((hash2(t,id,815)*13)|0)-6,dy=((hash2(t,id,816)*10)|0)-5,tx=x+dx,ty=y+dy;
+        if(Math.abs(dx)<=1&&Math.abs(dy)<=1)continue;                                   // not on the hill
+        if(lp?(ty===y&&tx<x&&tx>=x-4):(tx===x&&ty>y&&ty<=y+4))continue;                  // the way to the door stays clear
+        if((L.rows[ty]||'')[tx]!=='.'||used.has(tx+','+ty))continue;
+        const tp=tpl[(hash2(t,id,817)*tpl.length)|0];used.add(tx+','+ty);made++;
+        Q.push({k:tp.k,x:tx,y:ty,block:tp.block,walk:tp.walk,sc:(tp.sc||1)*(.9+hash2(t,id,818)*.25),ox:(hash2(t,id,819)-.5)*.5,oy:(hash2(t,id,820)-.5)*.4,wdh:1})}}}
+  wdThicket(L,n,door[0],door[1],id);
+  (L._wd=L._wd||[]).push(lp?{x,y,id,w:1}:{x,y,id});
+  WD_ENT[id]={n,x:door[0],y:door[1],f:lp?3:2};
+  return true}}
+{const _wpr=wdPrep;wdPrep=function(n){const L=LEVELS[n],r=_wpr.apply(this,arguments);
+  if(L&&L._wdhQ&&!L._wdhDone){L._wdhDone=1;for(const d of L._wdhQ)L.decor.push(d);L._wdhQ=null}
+  return r}}
+/* walking into a hill or rock pile goes in (the desert levels do this already, in desertBump; the older outdoor maps need it here) */
+{const _dm=doMove;doMove=function(rel){
+  try{if(LEVEL<41&&G.state==='play'&&!G.cut&&!G.talk){const dir=DIRS[(G.P.f+rel)%4],nx=G.P.x+dir[0],ny=G.P.y+dir[1],d=G.decor.find(q=>q.enter&&/^wd_(hill|rock)/.test(q.k)&&q.x===nx&&q.y===ny&&!q.found);
+    if(d){sfx('door');goToLevel(d.enter.to,{x:d.enter.x,y:d.enter.y,f:d.enter.f});return}}}catch(e){console.error(e)}
+  return _dm.apply(this,arguments)}}
+
+/* ---- src/desert/world_tweaks.js ---- */
+/* WORLD MAP TWEAKS. The Burial Ground, the Golden Crypt and the Ruby Maze are all in Ironhill, so they stand close round it on the world map, and no road is drawn to them. */
+{const gone=r=>r.includes('graves')||r.includes('goldencrypt')||r.includes('rubymaze');
+  for(let i=WORLD_ROADS.length-1;i>=0;i--)if(gone(WORLD_ROADS[i]))WORLD_ROADS.splice(i,1);
+  const mv=(k,x,y)=>{const l=WORLD_LOCS.find(q=>q.k===k);if(l){l.x=x;l.y=y}};
+  mv('graves',214,108);mv('goldencrypt',216,62);mv('rubymaze',262,54)}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

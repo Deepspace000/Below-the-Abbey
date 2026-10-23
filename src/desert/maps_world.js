@@ -32,6 +32,7 @@ function mpWorldRoute(pts,seed,amp){
 /* ---------- build everything that does not change: coasts, land mask, roads, rivers, scenery ---------- */
 function mpWorldInit(){
   const M=mpWorldM,H=hash2,by={};WORLD_LOCS.forEach(l=>by[l.k]=l);M.by=by;
+  const NL=typeof wmnOn==='function'&&wmnOn();M.newLook=NL;if(NL)WMN.lay=null; // the painted look has its own idea of how much room each place takes (maps_world_new.js)
   // the land: one big polygon (the western land, the northern land that joins it to the Eastern Lands). The sea is everything else.
   const west=y=>-1060+9*Math.sin(y*.03)+6*Math.sin(y*.09+2)+4*Math.sin(y*.21),south=x=>352+9*Math.sin(x*.04)+5*Math.sin(x*.13)+3*Math.sin(x*.29);
   const P=[[-1500,-900]],C=[];let n=0;const jt=()=>(H(n++,3,41)-.5)*1.7,add=(x,y)=>{const q=[x+jt(),y+jt()];P.push(q);C.push(q)};
@@ -62,6 +63,7 @@ function mpWorldInit(){
     [[1420,30],[1370,70],[1320,110],[1270,120],[1215,125],[1170,112],[1138,104]]];
   M.rv=RV.map((r,i)=>mpWorldCat(r,6));
   M.lakes=[[-480,60,26,14],[-700,210,30,16],[-310,200,18,10],[140,128,15,8],[610,10,12,7],[1292,262,14,8],[26,60,12,7]];
+  if(NL)wmnMakeRivers(); // the painted look: long winding rivers with side streams, clear of every place and name
   // roads: the old road list, as inked ribbons; a ferry across the sea; the pilgrim's way round the north; the road east
   const rd=[];let sd=1;
   const road=(keys,style)=>{const pts=keys.map(k=>[by[k].x,by[k].y]);rd.push({pts:mpWorldRoute(pts,sd++,style==='track'?2.5:3.5),style})};
@@ -78,7 +80,8 @@ function mpWorldInit(){
   const nearLine=(x,y,d)=>{const gx=Math.floor(x/10),gy=Math.floor(y/10),m=Math.ceil(d/10);for(let a=-m;a<=m;a++)for(let b=-m;b<=m;b++){const l=av.get((gx+a)*10007+gy+b);if(l)for(const q of l){if(Math.hypot(q[0]-x,q[1]-y)<d)return true}}return false};
   const regionLab=[[-330,120,80,14],[-760,100,80,14],[-560,250,70,14],[210,16,64,12],[652,16,70,12],[476,-10,80,14],[-6,208,56,13],[1230,18,70,12],[930,-138,130,7],[530,264,50,5]];
   const blocked=(x,y,d)=>{
-    for(const l of WORLD_LOCS){const big=l.ic==='town'||l.ic==='castle'||l.ic==='abbey'||l.ic==='orangecastle',area=l.ic==='trees'||l.ic==='rain'||l.ic==='moor'||l.ic==='dunes';
+    if(NL&&wmnBlocked(x,y,d))return true;
+    for(const l of (NL?[]:WORLD_LOCS)){const big=l.ic==='town'||l.ic==='castle'||l.ic==='abbey'||l.ic==='orangecastle',area=l.ic==='trees'||l.ic==='rain'||l.ic==='moor'||l.ic==='dunes';
       const lw2=l.n.length*2.7+6,dn=l.sub?44:34;
       if(Math.abs(x-l.x)<lw2&&y>l.y+10&&y<l.y+dn)return true;
       if(!area){const hx=big?24:20,up=l.ic==='castle'||l.ic==='orangecastle'?36:big?26:20;if(Math.abs(x-l.x)<hx&&y>l.y-up&&y<l.y+12)return true}
@@ -226,7 +229,7 @@ function mpWorldPalm(c,x,y,s,sd,z){
   c.strokeStyle='#6a4a22';c.lineWidth=1.1*s;c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+1.6*s,y-4*s,x+1*s,y-8*s);c.stroke();
   c.strokeStyle='#4a8a4a';c.lineWidth=.9*s;c.lineCap='round';c.beginPath();for(let k=0;k<5;k++){const an=-Math.PI/2+(k-2)*.75;c.moveTo(x+1*s,y-8*s);c.quadraticCurveTo(x+1*s+Math.cos(an)*4*s,y-8*s+Math.sin(an)*4*s-1*s,x+1*s+Math.cos(an)*6.5*s,y-8*s+Math.sin(an)*5*s+2.4*s)}c.stroke();c.lineCap='butt';
   c.fillStyle='#5a3a1c';c.beginPath();c.arc(x+.2*s,y-7.4*s,.7*s,0,TAU);c.arc(x+1.9*s,y-7.4*s,.7*s,0,TAU);c.fill()}
-function mpWorldItem(c,it,z){const t=it[0],x=it[1],y=it[2],s=it[3],sd=it[4];
+function mpWorldItem(c,it,z){if(wmnOn()){wmnItem(c,it,z);return}const t=it[0],x=it[1],y=it[2],s=it[3],sd=it[4];
   if(t===0)mpWorldTree(c,x,y,s,sd,z);else if(t===1)mpWorldPine(c,x,y,s,sd,z);else if(t===2)mpWorldMountain(c,x,y,s,sd,z);else if(t===3)mpWorldHill(c,x,y,s,sd,z);else if(t===4)mpWorldDune(c,x,y,s,sd,z,it[5]);else mpWorldPalm(c,x,y,s,sd,z)}
 
 /* ---------- ships and sea monsters ---------- */
@@ -277,7 +280,7 @@ function mpWorldTrees(x,y,z,l,kind){
   const c=ctx,k=l.k,pine=kind==='pine'||k==='gwood'||k==='road';
   const ts=[[-14,5,1],[-4,-3,1.2],[8,3,1],[16,-4,.9],[2,9,.9],[-9,10,.8]];ts.sort((a,b)=>a[1]-b[1]);
   for(const [dx,dy,s] of ts){if(pine)mpWorldPine(c,x+dx,y+dy+4,s*1.05,Math.abs(dx),z);else mpWorldTree(c,x+dx,y+dy+4,s*1.05,Math.abs(dx),z)}}
-function mpWorldIco(l,x,y,z){
+function mpWorldIco(l,x,y,z){if(wmnOn()){wmnIco(l);return}
   const c=ctx,k=l.k,d1=z>1.5,d2=z>2.8,d3=z>4.2,ink=mpWorldInk,t=G.time;c.lineJoin='round';c.strokeStyle=ink;c.lineWidth=mpWorldLw(.9);
   const house=(hx,hy,s,roof,o)=>mpWorldHouse(hx,hy,s,roof,Object.assign({d1,d2,d3},o||{}));
   switch(l.ic){
@@ -408,7 +411,7 @@ function mpWorldIco(l,x,y,z){
 /* the key (live, in screen space) */
 function mpWorldKey(){
   const c=ctx,x0=338,y0=212,w=124,h=62;c.save();c.fillStyle='rgba(238,226,190,.9)';c.fillRect(x0,y0,w,h);c.restore();mplPanel(c,x0,y0,w,h);
-  const rows=[['Town',(a,b)=>mpWorldHouse(a,b+3,.8,MPL.VERM,{})],['Castle',(a,b)=>{c.save();c.translate(a,b+1);c.scale(.36,.36);mpWorldCastle(0,0,1,{});c.restore()}],['Abbey',(a,b)=>{c.save();c.translate(a,b+2);c.scale(.4,.4);mpWorldIco({ic:'abbey',k:'x'},0,0,1);c.restore()}],
+  const rows=wmnOn()?wmnKeyRows(c):[['Town',(a,b)=>mpWorldHouse(a,b+3,.8,MPL.VERM,{})],['Castle',(a,b)=>{c.save();c.translate(a,b+1);c.scale(.36,.36);mpWorldCastle(0,0,1,{});c.restore()}],['Abbey',(a,b)=>{c.save();c.translate(a,b+2);c.scale(.4,.4);mpWorldIco({ic:'abbey',k:'x'},0,0,1);c.restore()}],
     ['Cave or mine',(a,b)=>{c.save();c.translate(a,b+1);c.scale(.5,.5);mpWorldIco({ic:'cave',k:'x'},0,0,1);c.restore()}],['Graves',(a,b)=>{c.fillStyle='#a8a498';c.strokeStyle=mpWorldInk;c.lineWidth=.6;c.fillRect(a-.9,b-5,1.8,8);c.strokeRect(a-.9,b-5,1.8,8);c.fillRect(a-3,b-3,6,1.8);c.strokeRect(a-3,b-3,6,1.8)}],
     ['Road',(a,b)=>{c.strokeStyle='rgba(42,26,12,.85)';c.lineWidth=3.6;c.beginPath();c.moveTo(a-6,b);c.lineTo(a+6,b);c.stroke();c.strokeStyle='#e8d8a6';c.lineWidth=2.2;c.stroke()}],
     ['Teleport stone',(a,b)=>{c.fillStyle='#46506a';c.strokeStyle=mpWorldInk;c.lineWidth=.6;c.beginPath();c.ellipse(a,b+1,4.4,2.4,0,0,TAU);c.fill();c.stroke();c.strokeStyle='#cfeaff';c.beginPath();c.arc(a,b,2.4,0,TAU);c.stroke()}],
@@ -423,7 +426,9 @@ function mpWorldTerrain(V,z){
   const WS=[[-420,100,260,150,'120,150,84',.3],[-760,120,260,160,'104,140,76',.28],[-560,-110,260,70,'130,140,130',.24],[-600,280,240,50,'150,150,100',.22],[60,160,150,110,'120,150,84',.34],[210,230,100,70,'96,134,70',.3],[330,200,110,100,'140,160,90',.26],[116,222,60,44,'70,110,64',.34],[324,136,44,28,'140,100,130',.3],[-6,284,76,56,'50,70,60',.5],[-6,254,40,30,'200,120,50',.3],[250,70,150,60,'150,150,140',.24],
     [480,215,46,46,'216,184,110',.4],[486,96,44,50,'200,110,70',.42],[566,190,50,44,'110,150,196',.42],[572,128,50,40,'226,226,226',.5],[566,66,52,38,'160,150,130',.4],[652,160,60,60,'226,176,60',.46],[652,230,60,52,'150,100,180',.4],[480,34,54,36,'226,176,60',.34],[590,262,120,40,'216,184,110',.3],
     [1244,190,70,56,'90,130,70',.34],[1350,200,160,170,'110,150,80',.22],[1380,420,160,100,'100,140,76',.2],[930,-210,150,70,'120,130,140',.3],[1040,-240,100,40,'60,100,70',.26],[420,186,40,36,'80,130,70',.3],[560,-170,160,50,'130,140,130',.2],[1165,50,30,50,'90,130,70',.2]];
-  for(const [cx,cy,rx,ry,col,a] of WS){if(cx+rx<V.x0||cx-rx>V.x1||cy+ry<V.y0||cy-ry>V.y1)continue;c.save();c.translate(cx,cy);c.scale(1,ry/rx);const g=c.createRadialGradient(0,0,0,0,0,rx);g.addColorStop(0,`rgba(${col},${a})`);g.addColorStop(.6,`rgba(${col},${a*.55})`);g.addColorStop(1,`rgba(${col},0)`);c.fillStyle=g;c.fillRect(-rx,-rx,rx*2,rx*2);c.restore()}
+  const KW=wmnOn()?1.5:1;
+  for(const [cx,cy,rx,ry,col,a0] of WS){const a=Math.min(.85,a0*KW);if(cx+rx<V.x0||cx-rx>V.x1||cy+ry<V.y0||cy-ry>V.y1)continue;c.save();c.translate(cx,cy);c.scale(1,ry/rx);const g=c.createRadialGradient(0,0,0,0,0,rx);g.addColorStop(0,`rgba(${col},${a})`);g.addColorStop(.6,`rgba(${col},${a*.55})`);g.addColorStop(1,`rgba(${col},0)`);c.fillStyle=g;c.fillRect(-rx,-rx,rx*2,rx*2);c.restore()}
+  if(wmnOn())wmnWash(V,z);
   // the unknown lands: a hatched wash east of Greyfang Pass
   const UL=[[424,-400],[424,100],[416,140],[398,200],[380,262],[380,700],[1900,700],[1900,-400]];
   c.beginPath();UL.forEach((q,k)=>k?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));c.closePath();c.fillStyle='rgba(70,52,30,.10)';c.fill();c.save();c.clip();
@@ -460,10 +465,11 @@ function mpWorldTerrain(V,z){
 function mpWorldFeatures(V,z){
   const c=ctx,M=mpWorldM;
   // rivers: two inked banks with a blue wash between them, narrowing as they start
-  for(const pts of M.rv){let ok=false;for(const p of pts){if(p[0]>V.x0&&p[0]<V.x1&&p[1]>V.y0&&p[1]<V.y1){ok=true;break}}if(!ok)continue;
+  if(wmnOn())wmnRivers(V,z);
+  for(const pts of (wmnOn()?[]:M.rv)){let ok=false;for(const p of pts){if(p[0]>V.x0&&p[0]<V.x1&&p[1]>V.y0&&p[1]<V.y1){ok=true;break}}if(!ok)continue;
     c.lineCap='round';c.lineJoin='round';c.beginPath();c.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)c.lineTo(pts[i][0],pts[i][1]);
     c.strokeStyle='rgba(42,26,12,.75)';c.lineWidth=mpWorldLw(3.2);c.stroke();c.strokeStyle='#8fb0b4';c.lineWidth=mpWorldLw(2.1);c.stroke();c.strokeStyle='rgba(240,248,250,.5)';c.lineWidth=mpWorldLw(.6);c.setLineDash([3,5]);c.stroke();c.setLineDash([]);c.lineCap='butt'}
-  for(const [lx,ly,rx,ry] of M.lakes){if(lx+rx<V.x0||lx-rx>V.x1||ly+ry<V.y0||ly-ry>V.y1)continue;c.beginPath();for(let k=0;k<=18;k++){const a=k/18*TAU,j=1+.12*Math.sin(a*3+lx);k?c.lineTo(lx+Math.cos(a)*rx*j,ly+Math.sin(a)*ry*j):c.moveTo(lx+Math.cos(a)*rx*j,ly+Math.sin(a)*ry*j)}c.closePath();c.fillStyle='#8fb0b4';c.fill();c.strokeStyle=mpWorldInk;c.lineWidth=mpWorldLw(1);c.stroke();
+  for(const [lx,ly,rx,ry] of (wmnOn()?[]:M.lakes)){if(lx+rx<V.x0||lx-rx>V.x1||ly+ry<V.y0||ly-ry>V.y1)continue;c.beginPath();for(let k=0;k<=18;k++){const a=k/18*TAU,j=1+.12*Math.sin(a*3+lx);k?c.lineTo(lx+Math.cos(a)*rx*j,ly+Math.sin(a)*ry*j):c.moveTo(lx+Math.cos(a)*rx*j,ly+Math.sin(a)*ry*j)}c.closePath();c.fillStyle='#8fb0b4';c.fill();c.strokeStyle=mpWorldInk;c.lineWidth=mpWorldLw(1);c.stroke();
     c.strokeStyle='rgba(22,56,86,.5)';c.lineWidth=mpWorldLw(.6);c.beginPath();for(let k=0;k<3;k++){c.moveTo(lx-rx*.5+k*rx*.3,ly-ry*.3+k*ry*.3);c.quadraticCurveTo(lx-rx*.4+k*rx*.3,ly-ry*.5+k*ry*.3,lx-rx*.3+k*rx*.3,ly-ry*.3+k*ry*.3)}c.stroke()}
   // grass tufts, heather and pebbles
   if(z>.85){c.beginPath();for(const t of M.tuf){if(t[0]<V.x0||t[0]>V.x1||t[1]<V.y0||t[1]>V.y1)continue;const a=t[0],b=t[1];c.moveTo(a-1.3,b);c.lineTo(a-.4,b-2.4);c.moveTo(a,b);c.lineTo(a,b-2.8);c.moveTo(a+1.3,b);c.lineTo(a+.5,b-2.2)}c.strokeStyle='rgba(60,90,50,.7)';c.lineWidth=mpWorldLw(.5);c.stroke()}
@@ -471,7 +477,7 @@ function mpWorldFeatures(V,z){
   c.fillStyle='rgba(138,90,138,.8)';for(const t of M.hea){if(t[0]<V.x0||t[0]>V.x1||t[1]<V.y0||t[1]>V.y1||t[2]%3)continue;c.fillRect(t[0]-.6,t[1]-5,1.2,1.2)}
   c.fillStyle='rgba(90,70,50,.6)';for(const p of M.peb){if(p[0]<V.x0||p[0]>V.x1||p[1]<V.y0||p[1]>V.y1)continue;c.fillRect(p[0],p[1],.8+p[2]*.9,.6+p[2]*.6)}
   // roads: inked ribbons with a dashed middle, milestones by the verge
-  for(const r of M.rd){const pts=r.pts;let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(const p of pts){if(p[0]<x0)x0=p[0];if(p[0]>x1)x1=p[0];if(p[1]<y0)y0=p[1];if(p[1]>y1)y1=p[1]}if(x1<V.x0||x0>V.x1||y1<V.y0||y0>V.y1)continue;
+  if(wmnOn())wmnRoads(V,z);else for(const r of M.rd){const pts=r.pts;let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(const p of pts){if(p[0]<x0)x0=p[0];if(p[0]>x1)x1=p[0];if(p[1]<y0)y0=p[1];if(p[1]>y1)y1=p[1]}if(x1<V.x0||x0>V.x1||y1<V.y0||y0>V.y1)continue;
     const w=r.style==='road'?3.4:r.style==='pilgrim'?2:2.4;c.lineCap='round';c.lineJoin='round';c.beginPath();c.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)c.lineTo(pts[i][0],pts[i][1]);
     if(r.style==='pilgrim'){c.strokeStyle='rgba(42,26,12,.4)';c.lineWidth=mpWorldLw(w+1);c.setLineDash([5,3]);c.stroke();c.strokeStyle='#d8bc86';c.lineWidth=mpWorldLw(w);c.stroke();c.setLineDash([])}
     else{c.strokeStyle='rgba(42,26,12,.85)';c.lineWidth=mpWorldLw(w+1.5);c.stroke();c.strokeStyle=r.style==='road'?'#e8d8a6':'#d4bd8a';c.lineWidth=mpWorldLw(w);c.stroke();c.strokeStyle='rgba(120,80,40,.7)';c.lineWidth=mpWorldLw(.5);c.setLineDash([2.2,3]);c.stroke();c.setLineDash([])}
@@ -484,13 +490,13 @@ function mpWorldFeatures(V,z){
 }
 function mpWorldNames(V,z){
   const c=ctx,fx=(s,x,y,sz,col,sp)=>{c.save();c.font=`${sz}px ${FTITLE}`;if('letterSpacing' in c)c.letterSpacing=(sp||1)+'px';c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=3.4;c.strokeStyle='rgba(236,222,176,.7)';c.strokeText(s,x,y);c.fillStyle=col;c.fillText(s,x,y);c.restore()},
-    sm=(s,x,y,sz,col)=>{c.save();c.font=`italic ${sz}px ${FUI}`;c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=2.6;c.strokeStyle='rgba(236,222,176,.6)';c.strokeText(s,x,y);c.fillStyle=col;c.fillText(s,x,y);c.restore()},
+    sm=(s,x,y,sz,col)=>{if(wmnOn())return;c.save();c.font=`italic ${sz}px ${FUI}`;c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=2.6;c.strokeStyle='rgba(236,222,176,.6)';c.strokeText(s,x,y);c.fillStyle=col;c.fillText(s,x,y);c.restore()},
     sea=(s,x,y,sz,col)=>{c.save();c.font=`italic ${sz}px ${FUI}`;if('letterSpacing' in c)c.letterSpacing='3px';c.textAlign='center';c.textBaseline='middle';c.fillStyle=col;c.fillText(s,x,y);c.restore()};
   const ink='rgba(50,36,18,.78)',ink2='rgba(50,36,18,.62)';
   fx('The Unknown Lands',476,-16,19,ink,1.5);sm('east of Greyfang Pass, uncharted',476,-1,8,ink2);
-  fx('The Known Lands',210,16,19,ink,1.5);
+  fx('The Known Lands',wmnOn()?196:210,wmnOn()?12:16,19,ink,1.5);
   fx('The Sea Lands',652,16,19,ink,1.5);sm('the country along the coast',652,30,8,ink2);
-  fx('The Hollow Lands',-60,150,16,ink,1);sm('under the Abbey',-60,163,8,ink2);
+  fx('The Hollow Lands',-60,150,16,ink,1);if(wmnOn())wmnSmallWords();sm('under the Abbey',-60,163,8,ink2);
   fx('The Western Reaches',-330,120,19,ink,1.5);sm('the land goes on, beyond the Hollow Lands',-330,134,8,ink2);
   fx('The Far West',-760,100,19,ink,1.5);sm('where no road has been drawn',-760,114,8,ink2);
   fx('The Grey Downs',-560,250,15,ink,1);sm('open hills and long grass',-560,262,8,ink2);
@@ -500,7 +506,7 @@ function mpWorldNames(V,z){
   sea('The Western Deep',-250,110,16,'rgba(26,48,84,.7)');sea('The Southern Sea',380,450,17,'rgba(26,48,84,.7)');
   sm('the road east, then north',530,264,8,'#3a2a16');
 }
-function mpWorldCreatures(V,z){
+function mpWorldCreatures(V,z){if(wmnOn()){wmnCreatures(V,z);return}
   const c=ctx,vis=(x,y,r)=>x+r>V.x0&&x-r<V.x1&&y+r>V.y0&&y-r<V.y1;
   for(const [x,y,d,s] of [[790,-62,1,1],[1010,34,-1,1.1],[1040,330,1,1],[880,432,-1,1],[300,408,1,1],[560,396,-1,1.1],[-222,196,1,1],[-176,-60,-1,1],[690,-30,1,.9]])if(vis(x,y,30))mpWorldShip(x,y,s,d,z);
   if(vis(-230,84,50))mpWorldSerpent(-230,84,.9,1,z);if(vis(450,430,50))mpWorldSerpent(450,432,.9,-1,z);
@@ -510,7 +516,7 @@ function mpWorldCreatures(V,z){
 }
 
 function mpWorldDraw(){
-  const M=mpWorldM;if(!M.ready)mpWorldInit();
+  const M=mpWorldM;if(typeof wmnLoad==='function')wmnLoad();if(M.ready&&M.newLook!==!!wmnOn())M.ready=false;if(!M.ready)mpWorldInit();
   { // rebuild the title sheet once if the blackletter font arrives after the first draw
     let fo=false;try{fo=!document.fonts||document.fonts.check('20px UnifrakturCook')}catch(e){fo=true}
     if(!M.over||(fo&&!M.fontOK)){M.over=mpWorldOverlay();M.fontOK=fo}}
@@ -538,9 +544,9 @@ function mpWorldDraw(){
   const LBL_PLACED=[]; // where the place labels already stand
   for(const l of WORLD_LOCS){
     const v=visited(l);
-    ctx.globalAlpha=v?1:.8;mpWorldIco(l,l.x,l.y,z);ctx.globalAlpha=1;
+    ctx.globalAlpha=v||wmnOn()?1:.8;mpWorldIco(l,l.x,l.y,z);ctx.globalAlpha=1;
     const big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle';
-    {const lr=(!G.flags.autoScaleOn&&typeof locRating==='function')?locRating(l):null,ny0=l.above?l.y-22:l.y+(l.ic==='castle'||l.ic==='orangecastle'?24:l.ic==='mountains'?20:18),nsz=big?10.5:9,ncol=v?'#1c1208':'#5a4a30';
+    if(wmnOn())wmnLabel(l,v,txtH);else {const lr=(!G.flags.autoScaleOn&&typeof locRating==='function')?locRating(l):null,ny0=l.above?l.y-22:l.y+(l.ic==='castle'||l.ic==='orangecastle'?24:l.ic==='mountains'?20:18),nsz=big?10.5:9,ncol=v?'#1c1208':'#5a4a30';
       ctx.save();ctx.font=`bold ${nsz}px ${FUI}`;const w1=ctx.measureText(l.n).width;ctx.font=`bold 8px ${FUI}`;const t2=lr?'Lv '+lr:'',w2=lr?ctx.measureText(t2).width:0;ctx.font=`bold 7.4px ${FUI}`;const sw=l.sub?ctx.measureText(l.sub).width:0;ctx.restore();
       const gap=lr?5:0,wt=w1+gap+w2,subY=l.above?l.y-13:l.y+(l.ic==='orangecastle'||l.ic==='castle'?35:29);
       // a label that would land on another place's label slides up or down until it is clear
@@ -552,7 +558,7 @@ function mpWorldDraw(){
       if(lr){txtH(l.n,xs+w1/2,ny,nsz,ncol);txtH(t2,xs+w1+gap+w2/2,ny,8,'#7a1a10')}else txtH(l.n,l.x,ny,nsz,ncol);
       if(l.sub)txtH(l.sub,l.x,subY+ldy,7.4,'#4a3a22')}
     const nq=QLEFT[l.k]||0;
-    if(nq){ctx.fillStyle='#b02818';ctx.strokeStyle='rgba(42,26,12,.7)';ctx.lineWidth=.35;const left=l.k==='scoria'; // Khemetra's dots stand to the left of the city: below it is the Red Dunes
+    if(nq&&wmnOn()){ctx.fillStyle='#b02818';ctx.strokeStyle='rgba(42,26,12,.7)';ctx.lineWidth=.35;wmnDots(l,nq,ctx)}else if(nq){ctx.fillStyle='#b02818';ctx.strokeStyle='rgba(42,26,12,.7)';ctx.lineWidth=.35;const left=l.k==='scoria'; // Khemetra's dots stand to the left of the city: below it is the Red Dunes
       for(let i=0;i<nq;i++){const row=(i/14)|0,inRow=Math.min(14,nq-row*14),col=i%14;ctx.beginPath();if(left)ctx.arc(l.x-34-(inRow-1-col)*3.4,l.y-10+row*3.4,1.15,0,TAU);else ctx.arc(l.x+(col-(inRow-1)/2)*3.4,l.y+(l.sub?38:29)+row*3.4,1.15,0,TAU);ctx.fill();ctx.stroke()}}
   }
   // you are here: a pulsing ring and a red pin with a gold rim
@@ -574,7 +580,7 @@ function mpWorldDraw(){
   if(G.teleMode||awake.length){const hm=teleOn()?'Tap a glowing stone to travel there.':'Woken teleporters glow on the map. Stand on one to travel.';ctx.save();ctx.font=`bold 9px ${FUI}`;const hw=ctx.measureText(hm).width+16;ctx.fillStyle='rgba(238,226,190,.82)';rrect(ctx,240-hw/2,55,hw,14,6);ctx.fill();ctx.strokeStyle=MPL.GOLD;ctx.lineWidth=.8;ctx.stroke();ctx.restore();txt(hm,240,62,9,'#2a1c0e','center',true)}
   if(G.wnote&&G.time-G.wnote.t<4)txt(G.wnote.text,240,74,9,'#7a1a10','center',true);
   btnText('worldback','Level map',34,278,100,22);btnText('ovexit','Exit',346,278,100,22);
-  btnText('wzin','+',196,278,26,22);btnText('wzout','-',226,278,26,22);btnText('wreset','Fit',256,278,44,22);
+  btnText('wmnew',wmnWanted()?'Old look':'New look',136,278,58,22);btnText('wzin','+',196,278,26,22);btnText('wzout','-',226,278,26,22);btnText('wreset','Fit',256,278,44,22);
   txt(Math.round(WV.z*100)+'%',322,290,8,'#d8c88e','center');
 }
 const mpWorldOld=drawWorldMap;

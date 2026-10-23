@@ -391,3 +391,16 @@ The Bogeyman wanders the Underlevel (3.600)
 * The Bogeyman no longer comes on a timer. He is one creature that wanders the corridors of the Underlevel on his own, a slow walk that drifts toward the places the party has walked. He never shows on the mini map, and in the 3D view he is only a dark shape.
 * When he gets close, behind the party, beside it or head on, he jumps out with the full-screen scare and the fight begins at the party's own level, as before. He cannot scare the party in its first 20 seconds in the level or for 30 seconds after a scare, and he waits while the party is fighting something else, talking or in a menu. About 7 squares away behind or beside the party, a line says something is breathing, and a faint heartbeat plays.
 * If the party gets away from him, he slips off and comes back 40 to 90 seconds later, at least 25 squares away. If he is killed he stays gone until the party next enters the Underlevel.
+
+The world map, hand-painted (3.601)
+
+* The whole world map is redrawn as a painted chart: every town, castle, abbey, cave, mine, graveyard, crypt, maze, pyramid, tower, island and ruin is a hand-painted picture, and so are the trees, pines, mountains, hills, dunes, palms, ships and sea creatures. The land is washed in colour with fine coloured-pencil hatching over it. A button at the bottom of the map, Old look / New look, switches between this and the old pen drawings.
+* Pictures are no longer faded when a place has not been visited. Nothing overlaps: no picture, name, title or road stands on another.
+* The roads are dirt paths laid from separate painted patches of trodden earth, faint, each patch different and turned to follow the road. The rivers are drawn again as long, winding rivers with side streams, in watercolour with hand-inked banks, and they bend round every place instead of running under it.
+* The Burial Ground, the Golden Crypt and the Ruby Maze (which is smaller) now stand close round Ironhill, with no roads drawn to them. The Hollow Lands has the words Below the Abbey in small writing under it. The old one-line notes under the region names (such as "a great ocean, and no charts") are left off the painted map.
+* Ironhill Moor, and the places inside it, is level 31.
+
+Wild places are hills and rock piles (3.601)
+
+* The caves and old ruins hidden in the woods are no longer big wall boxes. Each is a small painted hill with a door set into it, wooden, stone or a dark cave mouth. In the deserts it is a pile of rocks with a stone door in it. The party walks into the door as before.
+* More trees grow round every hill, and the dead trees across the door have to be burned as before. The two sides of the hill are closed, so the party cannot walk through them.
