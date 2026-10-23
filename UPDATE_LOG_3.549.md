@@ -302,3 +302,7 @@ A gentle arpeggio in the Orange Spire (3.592)
 A crash in fights fixed (3.592)
 
 * Hitting a creature that stood at the left edge of the picture could stop the screen from drawing for that moment (the red damage splat was given a negative size). The splat is now always drawn properly.
+
+A new ready-made party (3.593)
+
+* The ready-made party (Play with the default party on the party screen, and the Testing menu) has new faces and names: Sigrid the Warrior, Gruff the Thief (a goat), Sorcha the Mage and Wulfric the Priest. The classes are the same as before. A party you made yourself is not changed.
