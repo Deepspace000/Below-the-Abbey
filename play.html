@@ -35,8 +35,10 @@ function ldUpdate(){var f=document.getElementById('ldfill'),SZ=window.__SZ;
 function ldHide(){var e=document.getElementById('loading');if(!e)return;var f=document.getElementById('ldfill');if(f)f.style.width='100%';e.classList.add('gone');setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e)},800)}
 function ldNote(t){var n=document.getElementById('ldnote');if(n)n.innerHTML=t}
 setTimeout(function(){if(!window.__ready)ldNote('Still loading. The first visit downloads all the pictures, so please wait a little.')},12000);
-addEventListener('error',function(e){if(window.__ready)return;ldNote('<b>Something went wrong while loading:</b><br>'+String(e.message||'a file would not load').slice(0,160)+'<br>Try reloading the page.')});
-addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNote('<b>Something went wrong while loading:</b><br>'+String((e.reason&&e.reason.message)||e.reason||'').slice(0,160)+'<br>Try reloading the page.')});
+function ldEsc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function ldWhy(m,where,stack){return '<b>Something went wrong while loading:</b><br>'+ldEsc(String(m||'a file would not load').slice(0,160))+'<br><span style="font-size:.8em;opacity:.8">'+ldEsc((where||'')+' '+String(stack||'').split('\n').slice(0,4).join(' | ').slice(0,260))+'</span><br>Try reloading the page.'}
+addEventListener('error',function(e){if(window.__ready)return;ldNote(ldWhy(e.message,(e.filename||'').split('/').pop().split('?')[0]+':'+(e.lineno||0)+':'+(e.colno||0),e.error&&e.error.stack))});
+addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r=e.reason;ldNote(ldWhy((r&&r.message)||r,'',r&&r.stack))});
 </script>
 <canvas id="c" width="960" height="640"></canvas><div id="glass"></div><svg width="0" height="0" style="position:absolute"><filter id="sharpL" color-interpolation-filters="sRGB"><feConvolveMatrix order="3" kernelMatrix="0 -.25 0 -.25 2 -.25 0 -.25 0" preserveAlpha="true"/></filter><filter id="sharpH" color-interpolation-filters="sRGB"><feConvolveMatrix order="3" kernelMatrix="0 -.6 0 -.6 3.4 -.6 0 -.6 0" preserveAlpha="true"/></filter></svg>
 <script>
@@ -45,7 +47,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.606';
+const VERSION='3.607';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";

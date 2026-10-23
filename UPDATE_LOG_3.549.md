@@ -444,3 +444,8 @@ River mouths open into the sea (3.604)
 3.606: the Windows app updates itself
 
 * The Windows app now looks for a newer version on GitHub Pages five seconds after it starts. If there is one, it downloads only the game files that changed (checking every file), keeps them, and uses them the next time the game starts. A note on screen says when a new version is ready. Players who did not get the game through the itch.io app no longer have to download the whole game again for each update. Only the game's own files update this way; a new Windows build is still needed to change the app itself, and this first build has to be downloaded once.
+
+3.607: the itch.io page on the iPad, and a clearer loading error
+
+* The itch.io browser build asked for all of its picture packs at once. It now takes five at a time, tries a pack again if it fails, and names the pack if one cannot be opened. This is for an iPad that showed "Something went wrong while loading: Type error" with the itch.io version (the GitHub Pages version loaded).
+* When the loading screen shows an error it now also shows the file and line and the first lines of the trace, in small writing, so the cause can be read from a photo of the screen.
