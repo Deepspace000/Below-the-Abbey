@@ -341,3 +341,43 @@ Numbers on every bar (3.598)
 
 * The mana (or stamina), experience and food bars under the portraits now show their numbers, like the health bar: for example 15/134 mana, 2400/24600 experience toward the next level, and 63/100 food. The three bars are a little taller so the numbers can be read.
 * Menu, Gameplay has a new button, Bar numbers, to hide or show all the numbers on the bars. It starts on.
+
+Treasure shovels cost more, and the shops stock better ones as you level (3.599)
+
+* Shovels are dearer: the Peasant’s Shovel 300 gold, then the Farmer’s 450, the Miner’s 650, the Gravedigger’s 950, the Sailor’s 1,400, the Knight’s 2,100, the Dwarven 3,100, the Silver 4,600, the Royal 6,800 and the King’s Golden Shovel 10,000. Their chances of finding treasure are unchanged. The Butterfly Cage costs 500 gold.
+* The better shovels now appear in the shops as the party’s level rises. The traders, the general stores and the peddler’s carts add each shovel (the Miner’s at level 8, the Gravedigger’s at 15, the Sailor’s at 22, the Knight’s at 30, the Dwarven at 38, the Silver at 46, the Royal at 54, the King’s Golden at 62) the next time they are opened once the party has reached that level, and the lower shovels stay on sale.
+
+Food costs twice as much (3.599)
+
+* Every food item (water, bread, cheese, apples, pottage, pies, roasts, ale and the rest) costs twice as much in every shop, and sells for twice as much too.
+
+Level ups heal but do not refill mana (3.599)
+
+* When a hero gains a level their health is filled up completely, but their mana (or stamina) is not refilled: the higher maximum stays as empty as it was, and comes back one point for every step and every round of a fight.
+
+Desert levels (3.599)
+
+* The Blue Dunes are now level 37, the White Dunes level 42 and the Violet Erg level 46, and the dungeons in each take their desert’s level. The Golden Erg and the Flatlands stay at 45.
+
+The Golden Crypt (3.599)
+
+* The Golden Crypt under the Ironhill Burial Ground is now a level 30 place: its creatures stand at levels 23 to 30 (they stood at 12 and 13), and the Go to area list and the world map show level 30.
+* The Mine Overseer in the Ironhill Mines is one level higher than the mines around him: level 26 (the mines are level 25).
+* The Old Vault in Greyfang Pass is now level 32 (it was 34, the level of the Pass around it): its six creatures stand at levels 26 to 32.
+* The Golden Crypt has its own place on the world map, next to the Burial Ground, joined to it by a short track, and its own painted local map (Menu, map) showing its halls, coffins, statues, chests, levers, the gold door and the stair up.
+
+World map (3.599)
+
+* The line “where the road began” is gone from under “The Known Lands” on the world map.
+* The drifting clouds on the world map are smaller (the large ones about a third smaller) and much more see-through, so the chart shows through them.
+* The Deeper Hollow stands north-east of the Hollow Grasslands, the “The Hollow Lands” title stands north of it, and the Hollow Grasslands are drawn as a bigger, fuller grove of trees.
+
+The Ruby Maze in Ironhill (3.599)
+
+* Behind Dorn's store in Ironhill, in the back lane, there is a plain wooden back door with a sign beside it that says STAY OUT. The way to it runs from the main street down the lane between Dorn's store and the church, then west along the back lane. Tilda, Maren and Ivo now say a little about the back door when asked "Heard anything strange?", and there are two new rumours about it.
+* Behind the door is the Ruby Maze, a small, tight labyrinth about the size of the Golden Crypt. Its walls are ruby red with gold bands, its floors are red and black tiles, and it is lit by the ordinary wall torches. It is a true maze: one-wide passages with only one way to any place (about 480 squares and 30 dead ends). The way out is the door where you came in, back to the back lane in Ironhill.
+* The Ruby Maze is a level 30 place (Go to area list, in The Known Lands, and ?town=rubymaze), and it has its own place on the world map, north of Ironhill on a short track. About twenty ghosts and undead servants (Ghosts, Spectres, Wailing Ghosts, Pharaoh's Servants, Mummies and Skeletons) walk its passages at levels 27 to 30. The Wraith and two Wights guard the way to the middle, at level 30. A few potions lie at far dead ends.
+* At the heart of the maze is a small walled garden with a fountain, flowers, bushes, small trees, a bench, urns and braziers, and a chest with 450 gold and good things for level 30 (potions, mana and life draughts, armour and a ring).
+* In the garden lives Wren, a sorceress who hides from the people of Ironhill, who would burn her if they knew. She asks the party to keep her secret. If they say they will, she gives them the Ruby Staff, a level 30 staff (damage 58 to 92, adds 42 to the power of spells, and one blow in four dazes the foe). If they say they will not, she gives them a Red Apple "as a gift". The apple is poisoned: the hero who eats it loses 30 percent of their health, is poisoned, and the game says it tastes of bitter almonds. She gives only one of the two, once. If the party leaves without answering, nothing is given and they can come back to her.
+* Wren also asks the party if they have met Tobin, a young man in Ironhill. If they have, and they tell her he misses her, she is moved, but she still hides. This gives no reward.
+* Tobin is a young man in a blue tunic who stands near the west end of Ironhill's main street. He tells of a girl called Wren who was bullied for her magic and vanished one day, how he never stood up for her, and that he misses her. He does not know where she is. After the party has met Wren, they can go back and tell him. If the party kept her secret, he promises to tell no one and gives them a Greater Mana Draught, once. If they would not keep it, he is sad and gives nothing.

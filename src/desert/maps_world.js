@@ -347,6 +347,36 @@ function mpWorldIco(l,x,y,z){
       else{c.beginPath();c.moveTo(px-3,py+2);c.lineTo(px-3,py-5);c.quadraticCurveTo(px,py-10,px+3,py-5);c.lineTo(px+3,py+2);c.closePath();c.fill();c.stroke();if(d1){c.beginPath();c.moveTo(px-1.2,py-3);c.lineTo(px+1.2,py-3);c.moveTo(px,py-5);c.lineTo(px,py);c.stroke()}}}
     c.strokeStyle='#3a2a1c';c.lineWidth=1.1;c.beginPath();c.moveTo(x+18,y+10);c.lineTo(x+18,y-8);c.moveTo(x+18,y-3);c.lineTo(x+13,y-8);c.moveTo(x+18,y-5);c.lineTo(x+22,y-10);c.stroke();
     if(d2){c.fillStyle=ink;c.beginPath();c.moveTo(x+14,y-9);c.lineTo(x+17,y-11);c.lineTo(x+16,y-8.6);c.fill()}break}
+  case 'crypt':{ // the Golden Crypt: a small stone vault in a green mound, a gold roof, a dark door and steps, a gold finial
+    c.fillStyle='rgba(235,240,235,.26)';c.beginPath();c.ellipse(x,y+9,22,5.5,0,0,TAU);c.fill();
+    c.fillStyle='#8aa070';c.beginPath();c.moveTo(x-20,y+9);c.quadraticCurveTo(x-18,y-2,x-9,y-3);c.lineTo(x+9,y-3);c.quadraticCurveTo(x+18,y-2,x+20,y+9);c.closePath();c.fill();c.strokeStyle=ink;c.lineWidth=mpWorldLw(.7);c.stroke();
+    c.fillStyle='#d6cfbc';c.beginPath();c.rect(x-10,y-8,20,16);c.fill();c.stroke();
+    c.fillStyle='rgba(60,40,20,.22)';c.fillRect(x+3,y-8,7,16);
+    c.fillStyle='#d8b04a';c.beginPath();c.moveTo(x-13,y-8);c.lineTo(x,y-17);c.lineTo(x+13,y-8);c.closePath();c.fill();c.stroke();c.fillStyle='rgba(120,80,10,.3)';c.beginPath();c.moveTo(x,y-17);c.lineTo(x+13,y-8);c.lineTo(x+3,y-8);c.closePath();c.fill();
+    c.fillStyle='#17110a';c.beginPath();c.moveTo(x-3.4,y+8);c.lineTo(x-3.4,y-1);c.quadraticCurveTo(x,y-5.6,x+3.4,y-1);c.lineTo(x+3.4,y+8);c.closePath();c.fill();c.strokeStyle='#e0b850';c.lineWidth=mpWorldLw(.8);c.stroke();
+    c.strokeStyle=ink;c.lineWidth=mpWorldLw(.6);c.beginPath();c.moveTo(x-6,y+8);c.lineTo(x+6,y+8);c.moveTo(x-5,y+10);c.lineTo(x+5,y+10);c.stroke();
+    c.fillStyle='#e8c860';c.beginPath();c.arc(x,y-19,1.7,0,TAU);c.fill();c.lineWidth=mpWorldLw(.5);c.stroke();
+    if(d1){c.strokeStyle='rgba(60,40,20,.5)';c.lineWidth=.35;c.beginPath();for(let q=1;q<4;q++){c.moveTo(x-10,y-8+q*4);c.lineTo(x+10,y-8+q*4)}c.stroke();c.fillStyle='#e8d890';c.fillRect(x-1,y-11.4,2,2.4)}
+    if(d2){const gl=.5+.5*Math.sin(t*3);c.fillStyle=`rgba(255,214,110,${.25+.25*gl})`;c.beginPath();c.arc(x,y+3,3.4,0,TAU);c.fill()}break}
+  case 'rubymaze':{ // the Ruby Maze: a small walled labyrinth with ruby red walls and a green garden at its heart, drawn like the other pictures on this chart
+    c.fillStyle='rgba(235,240,235,.24)';c.beginPath();c.ellipse(x,y+9,24,5.5,0,0,TAU);c.fill();
+    const top=[[x-19,y-1],[x,y-9],[x+19,y-1],[x,y+7]];
+    c.fillStyle='#a8362a';c.beginPath();c.moveTo(top[0][0],top[0][1]);c.lineTo(top[3][0],top[3][1]);c.lineTo(top[3][0],top[3][1]+7);c.lineTo(top[0][0],top[0][1]+7);c.closePath();c.fill();c.strokeStyle=ink;c.lineWidth=mpWorldLw(.8);c.stroke();
+    c.fillStyle='#7e241c';c.beginPath();c.moveTo(top[3][0],top[3][1]);c.lineTo(top[2][0],top[2][1]);c.lineTo(top[2][0],top[2][1]+7);c.lineTo(top[3][0],top[3][1]+7);c.closePath();c.fill();c.stroke();
+    c.fillStyle='#d9c79a';c.beginPath();c.moveTo(top[0][0],top[0][1]);c.lineTo(top[1][0],top[1][1]);c.lineTo(top[2][0],top[2][1]);c.lineTo(top[3][0],top[3][1]);c.closePath();c.fill();c.stroke();
+    // the passages: ruby walls in rings with gaps, in the same slanted view
+    const P=(u,v)=>[x+(u-v)*13.5,y-1+(u+v)*4-4]; // u and v run 0 to 1 along the two edges of the top
+    c.strokeStyle='#b3402e';c.lineWidth=mpWorldLw(1.5);c.lineCap='round';c.beginPath();
+    const wall=(u0,v0,u1,v1)=>{const a=P(u0,v0),b=P(u1,v1);c.moveTo(a[0],a[1]);c.lineTo(b[0],b[1])};
+    wall(.2,.12,.2,.8);wall(.2,.8,.86,.8);wall(.86,.8,.86,.2);wall(.86,.2,.42,.2);wall(.4,.38,.4,.62);wall(.4,.62,.68,.62);wall(.68,.62,.68,.4);wall(.5,.1,.5,.2);wall(.2,.4,.3,.4);wall(.7,.8,.7,.9);wall(.52,.8,.52,.9);c.stroke();
+    c.strokeStyle=ink;c.lineWidth=mpWorldLw(.35);c.stroke();
+    // the little garden in the middle
+    {const g=P(.54,.5);c.fillStyle='#7fa05a';c.beginPath();c.ellipse(g[0],g[1],4.6,2.4,0,0,TAU);c.fill();c.strokeStyle=ink;c.lineWidth=mpWorldLw(.5);c.stroke();c.fillStyle='#3e7a46';c.beginPath();c.arc(g[0],g[1]-3,2.2,0,TAU);c.fill();c.stroke();c.fillStyle='#d8403a';for(const [dx,dy] of [[-2.4,.4],[2.2,.6],[0,1.4]]){c.beginPath();c.arc(g[0]+dx,g[1]+dy,.8,0,TAU);c.fill()}}
+    c.strokeStyle=ink;c.lineWidth=mpWorldLw(.7);c.beginPath();c.moveTo(top[0][0],top[0][1]);c.lineTo(top[1][0],top[1][1]);c.lineTo(top[2][0],top[2][1]);c.stroke();
+    // a gold gate on the near wall
+    c.fillStyle='#17110a';c.fillRect(top[3][0]-7,top[3][1]+1.6,3.4,5.4);c.strokeStyle='#e0b850';c.lineWidth=mpWorldLw(.7);c.strokeRect(top[3][0]-7,top[3][1]+1.6,3.4,5.4);
+    if(d1){c.strokeStyle='rgba(30,14,10,.45)';c.lineWidth=.35;c.beginPath();for(let q=1;q<3;q++){c.moveTo(top[0][0],top[0][1]+q*2.3);c.lineTo(top[3][0],top[3][1]+q*2.3)}c.stroke()}
+    if(d2){const gl=.5+.5*Math.sin(t*2.4);c.fillStyle=`rgba(240,200,90,${.22+.2*gl})`;const g=P(.54,.5);c.beginPath();c.arc(g[0],g[1]-2,4.4,0,TAU);c.fill()}break}
   case 'moor':{
     c.strokeStyle='#4a5a36';c.lineWidth=1.1;for(let i=0;i<16;i++){const px=x-22+hash2(i,1,9)*44,py=y-6+hash2(i,2,9)*16;c.beginPath();c.moveTo(px,py);c.lineTo(px-2,py-5);c.moveTo(px,py);c.lineTo(px+2,py-5);c.moveTo(px,py);c.lineTo(px,py-6);c.stroke();if(i%3===0){c.fillStyle='#8a5a8a';c.beginPath();c.arc(px,py-6,1,0,TAU);c.fill()}}
     c.fillStyle='#a8a498';c.strokeStyle=ink;c.lineWidth=mpWorldLw(.8);c.beginPath();c.moveTo(x-2.4,y+4);c.lineTo(x-2,y-12);c.quadraticCurveTo(x,y-14,x+2,y-12);c.lineTo(x+2.6,y+4);c.closePath();c.fill();c.stroke();c.fillStyle='rgba(30,16,10,.25)';c.fillRect(x,y-12,2.6,16);break}
@@ -368,7 +398,10 @@ function mpWorldIco(l,x,y,z){
     c.strokeStyle='rgba(40,60,90,.75)';c.lineWidth=.9;for(let q=0;q<9;q++){const px=x-18+q*4.5,py=y-10+(q%3)*4+((t*14+q*3)%4);c.beginPath();c.moveTo(px,py);c.lineTo(px-1.6,py+5);c.stroke()}break}
   case 'trees':{
     if(k==='saltbarrow'){mpWorldTrees(x-2,y+2,z,l,'broad');c.strokeStyle=ink;c.lineWidth=mpWorldLw(.9);c.beginPath();c.moveTo(x+14,y+8);c.lineTo(x+14,y-14);c.stroke();c.fillStyle='#1a1410';c.beginPath();c.moveTo(x+14,y-14);c.lineTo(x+24,y-12);c.lineTo(x+14,y-7);c.closePath();c.fill();c.fillStyle='#efe8d8';c.beginPath();c.arc(x+17.4,y-11.2,1.4,0,TAU);c.fill();break}
-    if(k==='thornwood'||k==='hollowgrass'){mpWorldTrees(x,y,z,l,'broad');break}
+    if(k==='hollowgrass'){ // the Hollow Grasslands: a wider, fuller grove, about 60 percent bigger than the ordinary clump
+      const ts=[[-30,8,1.45],[-18,-6,1.7],[-4,-10,1.8],[12,-5,1.6],[26,0,1.45],[34,10,1.2],[-24,18,1.3],[-8,13,1.5],[8,16,1.4],[22,17,1.25],[-38,0,1.1],[0,3,1.65]].sort((p,q)=>p[1]-q[1]);
+      for(const [dx,dy,sc] of ts)mpWorldTree(c,x+dx,y+dy+4,sc,Math.abs(dx),z);break}
+    if(k==='thornwood'){mpWorldTrees(x,y,z,l,'broad');break}
     mpWorldTrees(x,y,z,l,k==='oakwood'||k==='greendale'?'broad':'pine');break}
   default:mpWorldTrees(x,y,z,l,'broad')}}
 
@@ -455,9 +488,9 @@ function mpWorldNames(V,z){
     sea=(s,x,y,sz,col)=>{c.save();c.font=`italic ${sz}px ${FUI}`;if('letterSpacing' in c)c.letterSpacing='3px';c.textAlign='center';c.textBaseline='middle';c.fillStyle=col;c.fillText(s,x,y);c.restore()};
   const ink='rgba(50,36,18,.78)',ink2='rgba(50,36,18,.62)';
   fx('The Unknown Lands',476,-16,19,ink,1.5);sm('east of Greyfang Pass, uncharted',476,-1,8,ink2);
-  fx('The Known Lands',210,16,19,ink,1.5);sm('where the road began',210,30,8,ink2);
+  fx('The Known Lands',210,16,19,ink,1.5);
   fx('The Sea Lands',652,16,19,ink,1.5);sm('the country along the coast',652,30,8,ink2);
-  fx('The Hollow Lands',-6,206,16,ink,1);sm('under the Abbey',-6,219,8,ink2);
+  fx('The Hollow Lands',-60,150,16,ink,1);sm('under the Abbey',-60,163,8,ink2);
   fx('The Western Reaches',-330,120,19,ink,1.5);sm('the land goes on, beyond the Hollow Lands',-330,134,8,ink2);
   fx('The Far West',-760,100,19,ink,1.5);sm('where no road has been drawn',-760,114,8,ink2);
   fx('The Grey Downs',-560,250,15,ink,1);sm('open hills and long grass',-560,262,8,ink2);
@@ -550,7 +583,7 @@ drawWorldMap=function(){if(mpWorldM.dead)return mpWorldOld.apply(this,arguments)
 /* ---------- clouds: hand-drawn map clouds that drift slowly across the map. Dragging the map sends them away faster than the land, and new ones drift in from the opposite edge. ---------- */
 const mpWorldCl={list:[],spr:null,t:0,px:null,py:null,pz:null};
 /* the kinds of cloud: [name, width, height, how it is built, size range, share of the sky] */
-const MPW_CK=[['plain',420,210,'heap',[.6,.9],24],['small',200,200,'small',[.45,.75],20],['thin',540,110,'thin',[.65,1.0],18],['tower',460,470,'tower',[.8,1.05],10],['wisp',440,120,'wisp',[.65,1.0],14],['twin',400,200,'twin',[.7,1.0],8],['pair',290,150,'pair',[.45,.7],6]];
+const MPW_CK=[['plain',420,210,'heap',[.42,.62],24],['small',200,200,'small',[.4,.62],20],['thin',540,110,'thin',[.5,.75],18],['tower',460,470,'tower',[.5,.7],10],['wisp',440,120,'wisp',[.5,.75],14],['twin',400,200,'twin',[.48,.7],8],['pair',290,150,'pair',[.38,.58],6]];
 function mpWorldCloudSprites(){
   // puffy cumulus in the manner of old chart-makers: a heap of round puffs with a scalloped base, curling spirals in the billows, cross-hatched shade, stipple and a white highlight
   const out=[];
@@ -610,7 +643,7 @@ function mpWorldClouds(WV){
   const S=mpWorldCl,now=performance.now()/1000,dt=Math.min(.1,S.t?now-S.t:0);S.t=now;S.on=now;
   if(!S.spr)S.spr=mpWorldCloudSprites();
   const H=hash2,X0=-130,X1=610,Y0=-90,Y1=410,spawn=(side,k)=>{ // a new cloud, entering from one edge
-    let v=0;{let r=Math.random()*100;for(let q=0;q<MPW_CK.length;q++){r-=MPW_CK[q][5];if(r<=0){v=q;break}}}const ck=MPW_CK[v],sc=ck[4][0]+Math.random()*(ck[4][1]-ck[4][0]),w=ck[1]*sc*.5,h=ck[2]*sc*.5,c={v,sc,w,h,vx:3+Math.random()*3.5,vy:(Math.random()-.5)*1.6,a:.55+Math.random()*.2,ph:Math.random()*6};
+    let v=0;{let r=Math.random()*100;for(let q=0;q<MPW_CK.length;q++){r-=MPW_CK[q][5];if(r<=0){v=q;break}}}const ck=MPW_CK[v],sc=ck[4][0]+Math.random()*(ck[4][1]-ck[4][0]),w=ck[1]*sc*.5,h=ck[2]*sc*.5,c={v,sc,w,h,vx:3+Math.random()*3.5,vy:(Math.random()-.5)*1.6,a:.3+Math.random()*.12,ph:Math.random()*6}; // smaller and fainter than before: the land shows through them
     if(side==='l'){c.x=X0+Math.random()*30;c.y=Y0+Math.random()*(Y1-Y0)}else if(side==='r'){c.x=X1-Math.random()*30;c.y=Y0+Math.random()*(Y1-Y0)}else if(side==='t'){c.x=X0+Math.random()*(X1-X0);c.y=Y0+Math.random()*30}else{c.x=X0+Math.random()*(X1-X0);c.y=Y1-Math.random()*30}
     if(k){c.x=X0+Math.random()*(X1-X0);c.y=Y0+Math.random()*(Y1-Y0)}return c};
   if(!S.list.length)for(let i=0;i<15;i++)S.list.push(spawn('l',true));
@@ -626,9 +659,9 @@ function mpWorldClouds(WV){
     if(c.x<X0-80||c.x>X1+80||c.y<Y0-60||c.y>Y1+60){S.list[i]=spawn(c.x>X1?'l':c.x<X0?'r':c.y>Y1?'t':'b',false);if(arrive!=='l'&&Math.random()<.7)S.list[i]=spawn(arrive,false)}}
   // the soft shadows on the land, then the clouds
   ctx.save();
-  for(const c of S.list){const zz=.75+.35*WV.z,w=c.w*zz,h=c.h*zz,e=Math.min(1,Math.max(0,Math.min(c.x+60-14,466+60-c.x,c.y+40-14,306+40-c.y)/70));if(e<=0)continue;
-    const lf=c.lift||0;ctx.globalAlpha=e*(.16-.05*lf);ctx.fillStyle='#3a2a14';ctx.beginPath();ctx.ellipse(c.x+w*.12+10+10*lf,c.y+h*.5+16+14*lf,w*.42*(1+.1*lf),h*.2*(1+.1*lf),0,0,Math.PI*2);ctx.fill()}
-  for(const c of S.list){const zz=.75+.35*WV.z,w=c.w*zz,h=c.h*zz,e=Math.min(1,Math.max(0,Math.min(c.x+60-14,466+60-c.x,c.y+40-14,306+40-c.y)/70));if(e<=0)continue;
+  for(const c of S.list){const zz=.7+.25*WV.z,w=c.w*zz,h=c.h*zz,e=Math.min(1,Math.max(0,Math.min(c.x+60-14,466+60-c.x,c.y+40-14,306+40-c.y)/70));if(e<=0)continue;
+    const lf=c.lift||0;ctx.globalAlpha=e*(.09-.03*lf);ctx.fillStyle='#3a2a14';ctx.beginPath();ctx.ellipse(c.x+w*.12+10+10*lf,c.y+h*.5+16+14*lf,w*.42*(1+.1*lf),h*.2*(1+.1*lf),0,0,Math.PI*2);ctx.fill()}
+  for(const c of S.list){const zz=.7+.25*WV.z,w=c.w*zz,h=c.h*zz,e=Math.min(1,Math.max(0,Math.min(c.x+60-14,466+60-c.x,c.y+40-14,306+40-c.y)/70));if(e<=0)continue;
     const lf=c.lift||0,k=1+.07*lf;ctx.globalAlpha=Math.min(1,e*(c.a+.25*lf));ctx.drawImage(S.spr[c.v],c.x-w*k/2,c.y-h*.6*k-6*lf,w*k,h*k)}
   ctx.restore()}
 
@@ -636,7 +669,7 @@ function mpWorldClouds(WV){
 mpWorldCl.drag=null;
 function mpWorldCloudAt(px,py){
   const S=mpWorldCl;if(!S.list.length||!G.overview||!G.world||performance.now()/1000-(S.on||0)>.3)return null;
-  for(let i=S.list.length-1;i>=0;i--){const c=S.list[i],zz=.75+.35*(G.wv?G.wv.z:1),w=c.w*zz,h=c.h*zz;
+  for(let i=S.list.length-1;i>=0;i--){const c=S.list[i],zz=.7+.25*(G.wv?G.wv.z:1),w=c.w*zz,h=c.h*zz;
     if(((px-c.x)/(w*.5))**2+((py-(c.y-h*.12))/(h*.36))**2<1)return c}
   return null}
 cv.addEventListener('pointerdown',e=>{

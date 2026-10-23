@@ -14,7 +14,7 @@ Object.assign(NPC_H,{hg_frog0:4.2,hg_frog1:4.2,hg_house0:3.1,hg_house1:2.5,hg_ho
 CONTAINERS.push('hg_chestwax','hg_chestweed','hg_chestjelly','hg_waxbarrel','hg_jar');
 LEVEL_NAMES[HG.ID]='The Hollow Grasslands';HG.HIVES.forEach((id,i)=>LEVEL_NAMES[id]=HG_HIVE_NAMES[i]);
 LEVEL_RATING[HG.ID]=HG.DIFF;HG.HIVES.forEach((id,i)=>LEVEL_RATING[id]=HG.DIFF+i+1);
-WORLD_LOCS.push({k:'hollowgrass',n:'Hollow Grasslands',sub:'a dark grassland',lv:[470,471,472,473,474],x:-84,y:258,ic:'trees'});
+WORLD_LOCS.push({k:'hollowgrass',n:'Hollow Grasslands',sub:'a dark grassland',lv:[470,471,472,473,474],x:-92,y:250,ic:'trees'});
 WIND_AMT[HG.ID]=1; // the wind is always in the grass
 /* ---------- the creatures ---------- */
 const HG_INS=[['Mire Tick',30,[3,6],.9],['Reed Skitter',38,[4,7],1.1],['Pond Stalker',48,[5,9],1.35],['Barbed Lurker',60,[6,11],1.6],['Gulping Mantis',74,[7,13],1.9],['Dusk Weaver',90,[8,15],2.2],['Glass-Eyed Hunter',110,[10,18],2.6],['Hollow Crawler',135,[11,20],3.0],['Spindle Tyrant',165,[13,23],3.5],['The Great Insectivore',210,[15,28],4.2]];

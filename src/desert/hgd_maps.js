@@ -168,7 +168,7 @@ function hgdmpDrawTrail(vi){
     if(F.hgdMagicMap){const T=F.hgdTrail||(F.hgdTrail=[]),cell=G.P.x+(G.P.y<<8),last=F.hgdTrailLast;
       if(cell!==last){if(last!==undefined&&(Math.abs((last&255)-G.P.x)+Math.abs((last>>8)-G.P.y)>2)&&T.length&&T[T.length-1]>=0)T.push(-1);T.push(cell);F.hgdTrailLast=cell;if(T.length>HGDT_MAX)T.splice(0,2000)}}}}catch(e){}return _u.apply(this,arguments)}}
 /* ---------- a small copy of the maze on the world map ---------- */
-WORLD_LOCS.push({k:'deephollow',n:'The Deeper Hollow',sub:'a giant maze',lv:[475],x:-84,y:302,ic:'trees'});
+WORLD_LOCS.push({k:'deephollow',n:'The Deeper Hollow',sub:'a giant maze',lv:[475],x:-96,y:190,ic:'trees'}) // north east of the Hollow Grasslands;
 LEVEL_RATING[HGD.ID]=HGD.DIFF;
 function hgdmpMini(){
   if(HGDMP.mini)return HGDMP.mini;const S=48,c=document.createElement('canvas');c.width=c.height=S*2;const x=c.getContext('2d');x.scale(2,2);

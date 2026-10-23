@@ -18,7 +18,7 @@ const HERBS=[ // [key, name, price, minimum level of the place]
  ['feverfew','Feverfew',5,0],['valerian','Valerian',8,5],['burdock','Burdock',8,8],['elderflower','Elderflower',8,10],['sunleaf','Sunleaf',12,20],['moonpetal','Moonpetal',12,20],['bloodmoss','Bloodmoss',12,20],['ghostcap','Ghostcap',12,25],['dragonstongue',"Dragon's Tongue",20,30],
  ['silverleaf','Silverleaf',20,38],['frostbloom','Frostbloom',20,38],['emberroot','Emberroot',25,45],['dreamthistle','Dreamthistle',25,45]];
 for(const [k,n,p] of HERBS)ITEMDEF['herb_'+k]={n,k:'quest',t:'Herb',ic:'herb',c:'#6a9a58',stack:1,price:p,d:`A picked ${n.toLowerCase()}. It is logged in the Collection, and sells at the usual herb price.`,sw:.3};
-ITEMDEF.butterflycage={n:'Butterfly Cage',k:'quest',t:'Tool',ic:'herb',c:'#a0804a',stack:0,price:20,d:'A little cage of fine wire. With it in the bag, butterflies can be caught: a hand appears when one is near, and the best hand in the party tries.',sw:.3};
+ITEMDEF.butterflycage={n:'Butterfly Cage',k:'quest',t:'Tool',ic:'herb',c:'#a0804a',stack:0,price:500,d:'A little cage of fine wire. With it in the bag, butterflies can be caught: a hand appears when one is near, and the best hand in the party tries.',sw:.3};
 if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push('butterflycage',...BFLIES.map(b=>'bf_'+b[0]),...HERBS.map(h=>'herb_'+h[0]));
 /* the log pages */
 COLL.bf={title:'BUTTERFLY CATCHING',noun:'butterfly',items:()=>BFLIES.map(b=>({id:'bf_'+b[0],name:b[1],value:b[2]})),blurb:'Buy a butterfly cage from a trader. When a butterfly is on your square, the catch hand lights up.'};
@@ -44,15 +44,22 @@ function herbPlace(n,late){
 }
 /* ---------- the shovels: ten of them, from the peasant's to the king's ---------- */
 const SHOVELS=[ // [id, name, chance of treasure per dig (%), price, level to be sold at, tint dark, tint light]
- ['shovel_1',"Peasant's Shovel",1,30,0,[44,34,24],[190,160,120]],['shovel_2',"Farmer's Shovel",1.5,60,0,[40,40,34],[200,190,150]],['shovel_3',"Miner's Shovel",2,120,8,[30,30,40],[170,180,200]],
- ['shovel_4',"Gravedigger's Shovel",2.5,250,15,[24,28,24],[150,200,160]],['shovel_5',"Sailor's Shovel",3,450,22,[16,30,44],[150,205,235]],['shovel_6',"Knight's Shovel",4,800,30,[36,36,44],[205,210,225]],
- ['shovel_7',"Dwarven Shovel",5,1400,38,[44,26,10],[240,170,90]],['shovel_8',"Silver Shovel",6.5,2400,46,[30,34,40],[235,240,250]],['shovel_9',"Royal Shovel",8,4000,54,[40,12,24],[245,150,170]],['shovel_10',"King's Golden Shovel",10,7000,62,[50,40,6],[255,226,110]]];
+ ['shovel_1',"Peasant's Shovel",1,300,0,[44,34,24],[190,160,120]],['shovel_2',"Farmer's Shovel",1.5,450,0,[40,40,34],[200,190,150]],['shovel_3',"Miner's Shovel",2,650,8,[30,30,40],[170,180,200]],
+ ['shovel_4',"Gravedigger's Shovel",2.5,950,15,[24,28,24],[150,200,160]],['shovel_5',"Sailor's Shovel",3,1400,22,[16,30,44],[150,205,235]],['shovel_6',"Knight's Shovel",4,2100,30,[36,36,44],[205,210,225]],
+ ['shovel_7',"Dwarven Shovel",5,3100,38,[44,26,10],[240,170,90]],['shovel_8',"Silver Shovel",6.5,4600,46,[30,34,40],[235,240,250]],['shovel_9',"Royal Shovel",8,6800,54,[40,12,24],[245,150,170]],['shovel_10',"King's Golden Shovel",10,10000,62,[50,40,6],[255,226,110]]];
 for(const [id,n,p,pr] of SHOVELS)ITEMDEF[id]={n,k:'quest',t:'Tool',ic:'pick',c:'#c8a050',stack:0,price:pr,sh:p,d:`A shovel for treasure hunting. Press Dig on an empty square: ${p}% of digs turn something up (the best shovel in the bag counts). Jewels, coins, boots, weapons and odd things.`,sw:.4};
 const bestShovel=()=>{let b=null;for(const s of SHOVELS)if(bagCount(s[0])>0)b=s;return b};
 function shovelIcons(){if(typeof pToneMap!=='function'||!IMG.icn_pick)return;for(const s of SHOVELS){if(IMG['icn_'+s[0]])continue;const im=pToneMap(IMG.icn_pick,s[5],s[6],1.6,.9,0);IMG['icn_'+s[0]]=im;IMG['ic_'+s[0]]=im;IMG['it_'+s[0]]=im}}
 /* what the traders sell */
 {SHOP_STOCK.push(['butterflycage',2],['shovel_1',2],['shovel_2',1]);MERCHANT_STOCK.push(['butterflycage',2],['shovel_1',2],['shovel_2',1]);
- if(typeof KH_STOCK!=='undefined'&&KH_STOCK.general){const g=KH_STOCK.general;KH_STOCK.general=()=>{const L=partyLevel();return g().concat([['butterflycage',3]],SHOVELS.filter(s=>L>=s[4]&&L<s[4]+40).map(s=>[s[0],1]))}}}
+ if(typeof KH_STOCK!=='undefined'&&KH_STOCK.general){const g=KH_STOCK.general;KH_STOCK.general=()=>{const L=partyLevel();return g().concat([['butterflycage',3]],SHOVELS.filter(s=>L>=s[4]).map(s=>[s[0],1]))}}}
+/* the shops that sell shovels (the traders, the general stores and the peddler's carts) stock the dearer, better shovels as the party's level rises: each time one of them opens,
+   every shovel whose level the party has reached, and that the shop has not stocked before, is added to its shelves (a shovel that was bought out is not put back) */
+{const _ol=openLoot;openLoot=function(d){const r=_ol.apply(this,arguments); // after the shelves exist (a cart or store opened for the first time makes them inside openLoot)
+  try{if(d&&d.shop&&d.contents&&d.contents.some(x=>x.id==='butterflycage'||/^shovel_/.test(x.id))){
+    const L=partyLevel(),seen=d.shovelSeen||(d.shovelSeen={});
+    for(const sv of SHOVELS){if(seen[sv[0]])continue;if(d.contents.some(x=>x.id===sv[0])){seen[sv[0]]=1;continue}if(L>=sv[4]){d.contents.push({id:sv[0],n:1});seen[sv[0]]=1}}}}catch(e){console.error(e)}
+  return r}}
 /* ---------- digging ---------- */
 const ODDITIES=[['A Bent Spoon',2],['A Clay Pipe',3],['A Glass Eye',9],['A Tarnished Locket',14],['A Chipped Doll',4],['A Bone Die',3],['A Rusted Horseshoe',2],['A Bronze Button',2],['A Cracked Teacup',3],['A Wooden Whistle',4],['A Bag of Marbles',6],['An Old Tooth',1]];
 ODDITIES.forEach(([n,p],i)=>{ITEMDEF['odd_'+i]={n,k:'quest',t:'Oddity',ic:'bones',c:'#a89878',stack:1,price:Math.ceil(p/.4),d:'Dug up out of the ground. Somebody lost it, or hid it, or threw it away.',sw:.2}});
