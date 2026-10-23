@@ -23,6 +23,8 @@ function mpIronhillRoof(x,a,b,w,h,col,seed,ridgeAlong){x.save();x.fillStyle='rgb
   x.strokeStyle='rgba(30,22,16,.42)';x.lineWidth=.45;if(w>=h){for(let k=1;k<h/1.9;k++){x.beginPath();x.moveTo(a,b+k*1.9);x.lineTo(a+w,b+k*1.9);x.stroke()}}else{for(let k=1;k<w/1.9;k++){x.beginPath();x.moveTo(a+k*1.9,b);x.lineTo(a+k*1.9,b+h);x.stroke()}}
   x.strokeStyle=MPL.INK;x.lineWidth=.8;x.beginPath();if(w>=h){x.moveTo(a,b+h/2);x.lineTo(a+w,b+h/2)}else{x.moveTo(a+w/2,b);x.lineTo(a+w/2,b+h)}x.stroke();x.lineWidth=1;x.strokeRect(a,b,w,h);x.restore()}
 
+/* a ruby diamond: the mark of the way into the Ruby Maze */
+function mpIronhillRuby(x,a,b,r){x.save();x.beginPath();x.moveTo(a,b-r*1.2);x.lineTo(a+r,b);x.lineTo(a,b+r*1.2);x.lineTo(a-r,b);x.closePath();x.fillStyle='#b01030';x.fill();x.strokeStyle=MPL.INK;x.lineWidth=.7;x.stroke();x.fillStyle='rgba(255,255,255,.7)';x.beginPath();x.moveTo(a-r*.2,b-r*.7);x.lineTo(a+r*.15,b-r*.3);x.lineTo(a-r*.35,b-r*.05);x.closePath();x.fill();x.restore()}
 mplInstall({name:'ironhill',levels:[13],tint:[-12,-9,-3],foot:'You are the yellow arrow. The walls of Ironhill.',
 draw(c,x,L,api){
   const I=api.I,A=MPL.AREA,F=api.fit(L.rows[0].length,L.rows.length),S=F.s,X=F.X,Y=F.Y,H=mpIronhillH,W0=L.rows[0].length,H0=L.rows.length;
@@ -81,6 +83,8 @@ draw(c,x,L,api){
     else if(b.n>=12&&H(b.x0,b.y0,81)<.6){smokers.push([bx+bw*.7,by+bh*.3,b.x0+b.y0,.7]);x.fillStyle='#3a2e28';x.fillRect(bx+bw*.7-1,by+bh*.3-1,2,2)}}
   /* doors: the digit cells in the level are the door marks */
   for(let y=1;y<H0-1;y++)for(let xx=1;xx<W0-1;xx++){const ch=L.rows[y][xx];if(/[2-9]/.test(ch)||ch==='ś'||ch==='̃'){const [px,py]=cell(xx,y);x.fillStyle='#e8b830';x.strokeStyle=MPL.INK;x.lineWidth=.6;x.fillRect(px-1.4,py-1.4,2.8,2.8);x.strokeRect(px-1.4,py-1.4,2.8,2.8)}}
+  /* the back door behind Dorn's store (set by ruby_maze.js), marked as a strange door: a ruby diamond on the wall of the lane */
+  if(typeof RMZ!=='undefined')for(let y=1;y<H0-1;y++)for(let xx=1;xx<W0-1;xx++)if(L.rows[y][xx]===RMZ.TD){mpIronhillRuby(x,X(xx+.5),Y(y+1)-S*.15,2.2)}
   /* ---- the castle: a stone curtain wall with round corner towers, a keep, a gate and a vermilion banner ---- */
   {const cx0=X(18),cy0=Y(10),cw=14*S,ch=6*S;x.save();x.fillStyle='rgba(40,30,22,.35)';x.fillRect(cx0+2,cy0+2.4,cw,ch);x.fillStyle='#a9a392';x.fillRect(cx0,cy0,cw,ch);x.strokeStyle=MPL.INK;x.lineWidth=1.3;x.strokeRect(cx0,cy0,cw,ch);
     x.strokeStyle='rgba(42,26,12,.6)';x.lineWidth=.5;for(let k=0;k<70;k++){const px=cx0+H(k,1,91)*cw,py=cy0+H(k,2,91)*ch;x.strokeRect(px,py,2.2,1.2)}
@@ -108,15 +112,15 @@ draw(c,x,L,api){
   /* ---- names, placed from the level's buildings and gates ---- */
   const T=(t,cx,cy,sz,col)=>api.text(x,t,X(cx),Y(cy),sz||6,col||'#2a1a0c');
   T('IRONHILL CASTLE',25,13.4,6.4,'#1a1208');T('Town Square',26,17.9,5.6);T('West Gate',8,20.5,5);T('East Gate',41.5,20.5,5);
-  T('Brannoch\'s Forge',14,25.4,5.4);T('Dorn\'s Store',20,26.8,5.4);T('Church',26.5,25.4,5.4);T('The Anvil and Ale',31,26.8,5.4);
+  T('Brannoch\'s Forge',14,25.4,5.4);T('Dorn\'s Store',20,26.95,5.4);T('Church',26.5,25.4,5.4);T('The Anvil and Ale',31,26.8,5.4);
   T('Steelhold Blades',4,25.5,5.4);T('Plate and Mail',42,25.5,5.4);T('Corvin\'s Arcana',3.5,8.8,5.4);T('The Cauldron',41.5,8.8,5.4);
   T('Burial Ground',13.5,8.1,5.2);T('Mine Entrance',35.5,8.1,5.2);T('Ironhill Moor',45,17.4,5,'#4a2a10');T('The Tunnel',5,17.4,5,'#4a2a10');
-  T('slag heap',8,29.2,4.6,'#4a2a10');T('slag heap',41.5,29.4,4.6,'#4a2a10');
+  T('A strange door',20.5,25.75,4.8,'#8a1c10');T('slag heap',8,29.2,4.6,'#4a2a10');T('slag heap',41.5,29.4,4.6,'#4a2a10');
   /* ---- margins: title, notes, key, compass ---- */
   api.title(x,'Ironhill','A walled mining town on a hill');
   api.notes(x,['Ironhill stands on a hill. Its stone wall has gates to the west and the east.','The castle is at the top of the town. The mayor holds court there.','Smoke rises from the forges all day long.','The old mines lie north-east, behind the wall.'],8,58,78,6.4,5);
-  api.panel(x,392,38,84,100);api.text(x,'KEY',434,47,7,MPL.VERM);
-  const kx=402,ky=[58,70,82,94,106,118,130];
+  api.panel(x,392,38,84,112);api.text(x,'KEY',434,47,7,MPL.VERM);
+  const kx=402,ky=[58,70,82,94,106,118,130,142];
   x.save();x.fillStyle='#bdb7a6';x.strokeStyle=MPL.INK;x.lineWidth=.8;x.fillRect(kx-5,ky[0]-3,10,6);x.strokeRect(kx-5,ky[0]-3,10,6);x.restore();api.text(x,'Castle',kx+9,ky[0],5.6,'#2a1a0c','left');
   x.save();x.lineWidth=3;x.strokeStyle='#2a1a0c';x.beginPath();x.moveTo(kx-5,ky[1]);x.lineTo(kx+5,ky[1]);x.stroke();x.lineWidth=1.8;x.strokeStyle='#b4ae9e';x.stroke();x.restore();api.text(x,'Town wall',kx+9,ky[1],5.6,'#2a1a0c','left');
   x.save();mpIronhillRoof(x,kx-5,ky[2]-3,10,6,'#7a5a4c',2);x.restore();api.text(x,'Forge, smithy',kx+9,ky[2],5.6,'#2a1a0c','left');
@@ -124,6 +128,7 @@ draw(c,x,L,api){
   x.save();x.fillStyle='#aeaaa0';x.fillRect(kx-5,ky[4]-2.5,10,5);x.strokeStyle=MPL.INK;x.lineWidth=.6;x.strokeRect(kx-5,ky[4]-2.5,10,5);x.restore();api.text(x,'Cobbled street',kx+9,ky[4],5.6,'#2a1a0c','left');
   mpIronhillSlag(x,kx,ky[5]+3,.5,5);api.text(x,'Slag heap',kx+9,ky[5],5.6,'#2a1a0c','left');
   x.save();x.fillStyle=MPL.GOLD;x.strokeStyle=MPL.INK;x.lineWidth=.6;x.fillRect(kx-1.6,ky[6]-1.6,3.2,3.2);x.strokeRect(kx-1.6,ky[6]-1.6,3.2,3.2);x.restore();api.text(x,'Door',kx+9,ky[6],5.6,'#2a1a0c','left');
-  api.compass(x,436,150,13);
-  api.notes(x,['Blue is the fountain in the square. Grey clouds are smoke.'],398,187,74,6,4);
+  mpIronhillRuby(x,kx,ky[7],2.2);api.text(x,'A strange door',kx+9,ky[7],5.6,'#2a1a0c','left');
+  api.compass(x,436,184,13);
+  api.notes(x,['Blue is the fountain in the square. Grey clouds are smoke.'],398,212,74,6,4);
 }});

@@ -79,7 +79,7 @@ function mplInstall(cfg){
     const key=LEVEL+':'+cfg.name;let c=MPL.CACHE[key];
     if(!c){c=document.createElement('canvas');c.width=DW*MPL.S;c.height=DH*MPL.S;const x=c.getContext('2d');x.scale(MPL.S,MPL.S);
       try{mplParchment(x,cfg.tint);cfg.draw(c,x,LEVELS[LEVEL],{parchment:mplParchment,border:mplBorder,title:mplTitle,compass:mplCompass,text:mplText,notes:mplNotes,panel:mplPanel,fit:mplFit,I:MPLI,wrap:mplWrap});mpmgDraw(x,LEVEL);mplBorder(x)}catch(e){console.error(e)}
-      MPL.CACHE[key]=c}
+      MPL.CACHE[key]=c;{const ks=Object.keys(MPL.CACHE);while(ks.length>3){const o=ks.shift();if(o!==key){const oc=MPL.CACHE[o];delete MPL.CACHE[o];if(oc)oc.width=oc.height=0}}}} // only the three newest sheets are kept (each is a big canvas, and the iPad runs short of canvas memory)
     const L=LEVELS[LEVEL],a=cfg.fit?cfg.fit(L):mplFit(L.rows[0].length,L.rows.length);
     MPL.reveal=!!cfg.reveal;
     mplPaint(c,MPL.S,MPL.AREA,cx=>a.X(cx),cy=>a.Y(cy),cfg.foot)}}

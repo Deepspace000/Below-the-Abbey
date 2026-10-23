@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.604';
+const VERSION='3.605';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2731,6 +2731,21 @@ function sprRun(SRC,left,ku,tw,th,sh,top,rs,rc,xe){const u0=Math.max(0,(rs-left)
 function skySmoothCut(xx,kb){let m=0,n=0;for(let k=-8;k<=8;k+=2){const x=xx+k;if(x<0||x>=VW)continue;m+=YB[x*YBK+kb];n++}return Math.round(m/n/5)*5} // a skyline picture far away is cut by the average ground line, not by every terrace lip, so it stays one unbroken panel
 function sprRun2(SRC,left,ku,th,sh,top,bottom,rn,rc,xe){const u0=(rn-left)*ku,u1=(xe-left)*ku,full=rc>=bottom-.5;SC.drawImage(SRC,Math.max(0,u0),0,Math.max(.5,u1-u0),full?th:th*(rc-top)/sh,rn,top,xe-rn,full?sh:rc-top)}
 function sprBlit(SRC,HZ,hA,sx,sy,sw2,sh2,dx,dy,dw,dh){SC.drawImage(SRC,sx,sy,sw2,sh2,dx,dy,dw,dh);if(HZ){const ga=SC.globalAlpha;SC.globalAlpha=ga*hA;SC.drawImage(HZ,sx,sy,sw2,sh2,dx,dy,dw,dh);SC.globalAlpha=ga}}
+/* The sprite cache is held to a budget in pixels (not just a count of 900 pictures, which could be 900 MB of canvas): the iPad runs out of canvas memory, and then the maps go black and the pictures flash.
+   A canvas that leaves the cache is not thrown away to wait for the garbage collector (Safari keeps it counted until then): it goes in a pool, to be reused for the next copy of the same size, or it is shrunk to nothing. */
+const SPR_PXMAX=14e6,SPR_POOLPX=3e6,SPR_FREE=new Map(),SPR_DEAD=[];let SPR_PX=0,SPR_FREEPX=0;
+function sprCanvas(w,h){const k=w*4096+h,l=SPR_FREE.get(k);if(l&&l.length){const c=l.pop();SPR_FREEPX-=w*h;const X=c.getContext('2d');X.globalCompositeOperation='source-over';X.globalAlpha=1;X.clearRect(0,0,w,h);return c}const c=document.createElement('canvas');c.width=w;c.height=h;return c}
+function sprKeep(key,c){SPR_CACHE.set(key,c);SPR_PX+=c.width*c.height;
+  while((SPR_CACHE.size>900||SPR_PX>SPR_PXMAX)&&SPR_CACHE.size>1){const k=SPR_CACHE.keys().next().value,o=SPR_CACHE.get(k);SPR_CACHE.delete(k);SPR_PX-=o.width*o.height;SPR_DEAD.push(o)}}
+function sprRelease(){ // at the start of a frame: what left the cache last frame can no longer be in use
+  for(const c of SPR_DEAD){const w=c.width,h=c.height,k=w*4096+h;
+    if(w&&SPR_FREEPX+w*h<=SPR_POOLPX){let l=SPR_FREE.get(k);if(!l)SPR_FREE.set(k,l=[]);if(l.length<24){l.push(c);SPR_FREEPX+=w*h;continue}}
+    c.width=c.height=0}
+  SPR_DEAD.length=0}
+/* when the page comes back to the front (iOS can empty the canvases of a page that was behind another app or short of memory), every cached copy is dropped and made again as it is needed */
+function memFlushCaches(){try{for(const o of SPR_CACHE.values())o.width=o.height=0;SPR_CACHE.clear();SPR_PX=0;for(const l of SPR_FREE.values())for(const c of l)c.width=c.height=0;SPR_FREE.clear();SPR_FREEPX=0;SPR_DEAD.length=0;
+  if(typeof MPL!=='undefined'&&MPL.CACHE)for(const k of Object.keys(MPL.CACHE)){const c=MPL.CACHE[k];delete MPL.CACHE[k];if(c)c.width=c.height=0}}catch(e){console.error(e)}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)memFlushCaches()});window.addEventListener('pageshow',e=>{if(e.persisted)memFlushCaches()});
 const SPR_TIERS=[16,24,32,48,64,96,128,192,256,384,512],SPR_CACHE=new Map();let SPR_CID=0; // a lit copy of each picture is kept and reused, so a wood full of trees costs one drawing each, not four
 // the people of Anaea wear real colour: clothes are re-dyed (a different dye for each person), skin and hair are left alone
 const VIVID_KEYS=new Set(['peasantW','peasantM','farmer','oldman','oldwoman','child','waterwoman','widow','fisher','scribe','monk','baker','innkeeper','priest','mayor','smith']);
@@ -2805,6 +2820,7 @@ function spriteList(){
 }
 let SC=ctx; // sprites are painted straight onto the full-size screen, not into the small 3D picture, so they stay sharp
 function drawSprites(cx,cy,dX,dY,pX,pY){
+  sprRelease();
   const inv=-1/PL,list=spriteList().concat(LEVEL===44&&LEVELS[44].sky?khSkyList(cx,cy,dX,dY):((LEVEL===YR.ID||LEVEL===305||LEVEL===304||LEVEL===364||LEVEL===470||hgtLook(LEVEL)||(LEVEL>=400&&LEVEL<440))&&LEVELS[LEVEL]&&LEVELS[LEVEL].sky?khSkyList(cx,cy,dX,dY,LEVELS[LEVEL],.6):[])),proj=[],far=LEVEL===44?26:(G.day||0)>0?34:20,far2=far*far,farT=LEVEL===44?26:(G.day||0)>0?33:16; // outdoors the trees stay drawn as far as the walls can be seen
   for(const s of list){
     if(s.custom){const q=s.custom.prep(cx,cy,dX,dY);if(q>0){s.tY=q;s.tX=0;proj.push(s)}continue} // a fish tank (hgt_tanks.js) draws itself
@@ -2860,15 +2876,15 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
       const lq=s.sky?Math.round(lum*6)*4:kh?Math.round(lum*12)*2:Math.round(lum*24),hq=s.sky?Math.round(smS*10)*5:kh?0:Math.round(smS*50),key=((((img._cid||(img._cid=++SPR_CID))*1024+tw)*64+lq)*128+hq)*2+(dyv?1:0); // a number, so no string is made for every sprite every frame
       SRC=SPR_CACHE.get(key);
       if(!SRC){
-        SRC=document.createElement('canvas');SRC.width=tw;SRC.height=th;const X=SRC.getContext('2d');X.drawImage(img,0,0,iw,ih,0,0,tw,th);
+        SRC=sprCanvas(tw,th);const X=SRC.getContext('2d');X.drawImage(img,0,0,iw,ih,0,0,tw,th);
         X.globalCompositeOperation='source-atop';X.fillStyle=`rgba(8,5,3,${(1-lq/24).toFixed(3)})`;X.fillRect(0,0,tw,th);
         if(hq>1){X.fillStyle=`rgba(${hzv[0]},${hzv[1]},${hzv[2]},${(hq/50).toFixed(3)})`;X.fillRect(0,0,tw,th)}
-        SPR_CACHE.set(key,SRC);if(SPR_CACHE.size>900)SPR_CACHE.delete(SPR_CACHE.keys().next().value);
+        sprKeep(key,SRC);
       }
       if(kh&&smS>.01){ // the haze: the sprite's own shape in the haze colour, drawn over it at the right strength
         const hk=img._cid+'|'+tw+'|z'+hzv.join(',');HZ=SPR_CACHE.get(hk);
-        if(!HZ){HZ=document.createElement('canvas');HZ.width=tw;HZ.height=th;const X=HZ.getContext('2d');X.drawImage(img,0,0,iw,ih,0,0,tw,th);X.globalCompositeOperation='source-in';X.fillStyle=`rgb(${hzv[0]},${hzv[1]},${hzv[2]})`;X.fillRect(0,0,tw,th);
-          SPR_CACHE.set(hk,HZ);if(SPR_CACHE.size>900)SPR_CACHE.delete(SPR_CACHE.keys().next().value)}
+        if(!HZ){HZ=sprCanvas(tw,th);const X=HZ.getContext('2d');X.drawImage(img,0,0,iw,ih,0,0,tw,th);X.globalCompositeOperation='source-in';X.fillStyle=`rgb(${hzv[0]},${hzv[1]},${hzv[2]})`;X.fillRect(0,0,tw,th);
+          sprKeep(hk,HZ)}
         hA=smS;
       }
     }else{
@@ -33931,7 +33947,7 @@ function mplInstall(cfg){
     const key=LEVEL+':'+cfg.name;let c=MPL.CACHE[key];
     if(!c){c=document.createElement('canvas');c.width=DW*MPL.S;c.height=DH*MPL.S;const x=c.getContext('2d');x.scale(MPL.S,MPL.S);
       try{mplParchment(x,cfg.tint);cfg.draw(c,x,LEVELS[LEVEL],{parchment:mplParchment,border:mplBorder,title:mplTitle,compass:mplCompass,text:mplText,notes:mplNotes,panel:mplPanel,fit:mplFit,I:MPLI,wrap:mplWrap});mpmgDraw(x,LEVEL);mplBorder(x)}catch(e){console.error(e)}
-      MPL.CACHE[key]=c}
+      MPL.CACHE[key]=c;{const ks=Object.keys(MPL.CACHE);while(ks.length>3){const o=ks.shift();if(o!==key){const oc=MPL.CACHE[o];delete MPL.CACHE[o];if(oc)oc.width=oc.height=0}}}} // only the three newest sheets are kept (each is a big canvas, and the iPad runs short of canvas memory)
     const L=LEVELS[LEVEL],a=cfg.fit?cfg.fit(L):mplFit(L.rows[0].length,L.rows.length);
     MPL.reveal=!!cfg.reveal;
     mplPaint(c,MPL.S,MPL.AREA,cx=>a.X(cx),cy=>a.Y(cy),cfg.foot)}}
@@ -34798,6 +34814,8 @@ function mpIronhillRoof(x,a,b,w,h,col,seed,ridgeAlong){x.save();x.fillStyle='rgb
   x.strokeStyle='rgba(30,22,16,.42)';x.lineWidth=.45;if(w>=h){for(let k=1;k<h/1.9;k++){x.beginPath();x.moveTo(a,b+k*1.9);x.lineTo(a+w,b+k*1.9);x.stroke()}}else{for(let k=1;k<w/1.9;k++){x.beginPath();x.moveTo(a+k*1.9,b);x.lineTo(a+k*1.9,b+h);x.stroke()}}
   x.strokeStyle=MPL.INK;x.lineWidth=.8;x.beginPath();if(w>=h){x.moveTo(a,b+h/2);x.lineTo(a+w,b+h/2)}else{x.moveTo(a+w/2,b);x.lineTo(a+w/2,b+h)}x.stroke();x.lineWidth=1;x.strokeRect(a,b,w,h);x.restore()}
 
+/* a ruby diamond: the mark of the way into the Ruby Maze */
+function mpIronhillRuby(x,a,b,r){x.save();x.beginPath();x.moveTo(a,b-r*1.2);x.lineTo(a+r,b);x.lineTo(a,b+r*1.2);x.lineTo(a-r,b);x.closePath();x.fillStyle='#b01030';x.fill();x.strokeStyle=MPL.INK;x.lineWidth=.7;x.stroke();x.fillStyle='rgba(255,255,255,.7)';x.beginPath();x.moveTo(a-r*.2,b-r*.7);x.lineTo(a+r*.15,b-r*.3);x.lineTo(a-r*.35,b-r*.05);x.closePath();x.fill();x.restore()}
 mplInstall({name:'ironhill',levels:[13],tint:[-12,-9,-3],foot:'You are the yellow arrow. The walls of Ironhill.',
 draw(c,x,L,api){
   const I=api.I,A=MPL.AREA,F=api.fit(L.rows[0].length,L.rows.length),S=F.s,X=F.X,Y=F.Y,H=mpIronhillH,W0=L.rows[0].length,H0=L.rows.length;
@@ -34856,6 +34874,8 @@ draw(c,x,L,api){
     else if(b.n>=12&&H(b.x0,b.y0,81)<.6){smokers.push([bx+bw*.7,by+bh*.3,b.x0+b.y0,.7]);x.fillStyle='#3a2e28';x.fillRect(bx+bw*.7-1,by+bh*.3-1,2,2)}}
   /* doors: the digit cells in the level are the door marks */
   for(let y=1;y<H0-1;y++)for(let xx=1;xx<W0-1;xx++){const ch=L.rows[y][xx];if(/[2-9]/.test(ch)||ch==='ś'||ch==='̃'){const [px,py]=cell(xx,y);x.fillStyle='#e8b830';x.strokeStyle=MPL.INK;x.lineWidth=.6;x.fillRect(px-1.4,py-1.4,2.8,2.8);x.strokeRect(px-1.4,py-1.4,2.8,2.8)}}
+  /* the back door behind Dorn's store (set by ruby_maze.js), marked as a strange door: a ruby diamond on the wall of the lane */
+  if(typeof RMZ!=='undefined')for(let y=1;y<H0-1;y++)for(let xx=1;xx<W0-1;xx++)if(L.rows[y][xx]===RMZ.TD){mpIronhillRuby(x,X(xx+.5),Y(y+1)-S*.15,2.2)}
   /* ---- the castle: a stone curtain wall with round corner towers, a keep, a gate and a vermilion banner ---- */
   {const cx0=X(18),cy0=Y(10),cw=14*S,ch=6*S;x.save();x.fillStyle='rgba(40,30,22,.35)';x.fillRect(cx0+2,cy0+2.4,cw,ch);x.fillStyle='#a9a392';x.fillRect(cx0,cy0,cw,ch);x.strokeStyle=MPL.INK;x.lineWidth=1.3;x.strokeRect(cx0,cy0,cw,ch);
     x.strokeStyle='rgba(42,26,12,.6)';x.lineWidth=.5;for(let k=0;k<70;k++){const px=cx0+H(k,1,91)*cw,py=cy0+H(k,2,91)*ch;x.strokeRect(px,py,2.2,1.2)}
@@ -34883,15 +34903,15 @@ draw(c,x,L,api){
   /* ---- names, placed from the level's buildings and gates ---- */
   const T=(t,cx,cy,sz,col)=>api.text(x,t,X(cx),Y(cy),sz||6,col||'#2a1a0c');
   T('IRONHILL CASTLE',25,13.4,6.4,'#1a1208');T('Town Square',26,17.9,5.6);T('West Gate',8,20.5,5);T('East Gate',41.5,20.5,5);
-  T('Brannoch\'s Forge',14,25.4,5.4);T('Dorn\'s Store',20,26.8,5.4);T('Church',26.5,25.4,5.4);T('The Anvil and Ale',31,26.8,5.4);
+  T('Brannoch\'s Forge',14,25.4,5.4);T('Dorn\'s Store',20,26.95,5.4);T('Church',26.5,25.4,5.4);T('The Anvil and Ale',31,26.8,5.4);
   T('Steelhold Blades',4,25.5,5.4);T('Plate and Mail',42,25.5,5.4);T('Corvin\'s Arcana',3.5,8.8,5.4);T('The Cauldron',41.5,8.8,5.4);
   T('Burial Ground',13.5,8.1,5.2);T('Mine Entrance',35.5,8.1,5.2);T('Ironhill Moor',45,17.4,5,'#4a2a10');T('The Tunnel',5,17.4,5,'#4a2a10');
-  T('slag heap',8,29.2,4.6,'#4a2a10');T('slag heap',41.5,29.4,4.6,'#4a2a10');
+  T('A strange door',20.5,25.75,4.8,'#8a1c10');T('slag heap',8,29.2,4.6,'#4a2a10');T('slag heap',41.5,29.4,4.6,'#4a2a10');
   /* ---- margins: title, notes, key, compass ---- */
   api.title(x,'Ironhill','A walled mining town on a hill');
   api.notes(x,['Ironhill stands on a hill. Its stone wall has gates to the west and the east.','The castle is at the top of the town. The mayor holds court there.','Smoke rises from the forges all day long.','The old mines lie north-east, behind the wall.'],8,58,78,6.4,5);
-  api.panel(x,392,38,84,100);api.text(x,'KEY',434,47,7,MPL.VERM);
-  const kx=402,ky=[58,70,82,94,106,118,130];
+  api.panel(x,392,38,84,112);api.text(x,'KEY',434,47,7,MPL.VERM);
+  const kx=402,ky=[58,70,82,94,106,118,130,142];
   x.save();x.fillStyle='#bdb7a6';x.strokeStyle=MPL.INK;x.lineWidth=.8;x.fillRect(kx-5,ky[0]-3,10,6);x.strokeRect(kx-5,ky[0]-3,10,6);x.restore();api.text(x,'Castle',kx+9,ky[0],5.6,'#2a1a0c','left');
   x.save();x.lineWidth=3;x.strokeStyle='#2a1a0c';x.beginPath();x.moveTo(kx-5,ky[1]);x.lineTo(kx+5,ky[1]);x.stroke();x.lineWidth=1.8;x.strokeStyle='#b4ae9e';x.stroke();x.restore();api.text(x,'Town wall',kx+9,ky[1],5.6,'#2a1a0c','left');
   x.save();mpIronhillRoof(x,kx-5,ky[2]-3,10,6,'#7a5a4c',2);x.restore();api.text(x,'Forge, smithy',kx+9,ky[2],5.6,'#2a1a0c','left');
@@ -34899,8 +34919,9 @@ draw(c,x,L,api){
   x.save();x.fillStyle='#aeaaa0';x.fillRect(kx-5,ky[4]-2.5,10,5);x.strokeStyle=MPL.INK;x.lineWidth=.6;x.strokeRect(kx-5,ky[4]-2.5,10,5);x.restore();api.text(x,'Cobbled street',kx+9,ky[4],5.6,'#2a1a0c','left');
   mpIronhillSlag(x,kx,ky[5]+3,.5,5);api.text(x,'Slag heap',kx+9,ky[5],5.6,'#2a1a0c','left');
   x.save();x.fillStyle=MPL.GOLD;x.strokeStyle=MPL.INK;x.lineWidth=.6;x.fillRect(kx-1.6,ky[6]-1.6,3.2,3.2);x.strokeRect(kx-1.6,ky[6]-1.6,3.2,3.2);x.restore();api.text(x,'Door',kx+9,ky[6],5.6,'#2a1a0c','left');
-  api.compass(x,436,150,13);
-  api.notes(x,['Blue is the fountain in the square. Grey clouds are smoke.'],398,187,74,6,4);
+  mpIronhillRuby(x,kx,ky[7],2.2);api.text(x,'A strange door',kx+9,ky[7],5.6,'#2a1a0c','left');
+  api.compass(x,436,184,13);
+  api.notes(x,['Blue is the fountain in the square. Grey clouds are smoke.'],398,212,74,6,4);
 }});
 
 /* ---- src/desert/maps_gravesmines.js ---- */

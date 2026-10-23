@@ -435,3 +435,8 @@ The rivers are drawn to fit (pending release)
 River mouths open into the sea (3.604)
 
 * The dark coast line no longer runs across the mouth of a river. The river's water carries on a short way into the sea and fades out.
+
+3.605: the iPad no longer runs out of canvas memory; a strange door on the Ironhill map
+
+* On the iPad, after a few minutes of play, the screen redrew suddenly, pictures disappeared and flashed, and the maps went black. The cause: the game kept making new copies of its lit pictures and leaving the old ones for Safari to clear up later, so it ran past the iPad's limit for canvas memory. The cache of lit pictures now has a fixed size in pixels, and a picture that leaves it is reused or freed at once. Only the three newest area maps are kept. When the game comes back to the front, every cached copy is made again.
+* The Ironhill map shows a ruby diamond on the back wall of Dorn's store, named "A strange door", and the key lists it.
