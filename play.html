@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.595';
+const VERSION='3.596';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1420,7 +1420,7 @@ const CLASSES=[
  {name:'Goat',icon:'horns',hp:30,mp:8,mpn:'Stamina',hit:.82,str:12,dex:10,int:5,grow:{hp:6,mp:1,a:'str',b:'dex'},unarmed:[2,5],
   desc:'A stubborn goat. Butts hard, eats anything, and answers to no one. Strength lets the whole party carry more.',sp:{name:'Headbutt',cost:3,type:'butt',d:'A hard butt for 5-10 damage that leaves the foe dazed for a turn.'}}
 ];
-const NPORT=91; // party portraits assets/pt/0..90.png (70 to 89 added in 3.594, 90 in 3.595)
+const NPORT=93; // party portraits assets/pt/0..92.png (70 to 89 added in 3.594, 90 in 3.595, 91 and 92 in 3.596)
 const NAME_POOL=['Aldric','Brannoc','Cedric','Dorin','Edric','Fenwick','Garrick','Hugo','Ivor','Joran','Kellan','Lothar','Osric','Piers','Rowan','Tobias','Wulfric','Vesna','Mira','Thessaly','Elspeth','Rowena','Isolde','Brigid','Maud','Sigrid','Yara','Wenna','Agnes','Eadlyn','Hilda','Odette','Petra','Sorcha','Una'];
 const GOAT_NAMES=['Billy','Gruff','Clover','Biscuit','Thistle','Nanny','Barnaby','Pip'];
 const DEFAULT_PARTY=[ // the ready-made party: a wild warrior, a goat thief, a hooded mage and an old priest

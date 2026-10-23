@@ -324,3 +324,7 @@ New faces for the cats and the curly-haired girl (3.595)
 One more face (3.595)
 
 * A feisty young woman with fierce blue eyes and straight, shoulder-length peroxide blonde hair joins the party screen, which now has 91 faces.
+
+Two more faces (3.596)
+
+* A slender young man with short messy sandy brown hair, a long face, high cheekbones and big brown eyes, and a beautiful woman with long wavy brown curls, half-moon blue eyes and a warm, knowing smile. The party screen now has 93 faces.
