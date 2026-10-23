@@ -95,10 +95,11 @@ function drawGameplay(){
   let y=176;for(const p of lines){for(const l of wrapText(p,300,8.4)){txt(l,240,y,8.4,'#cdbf94','center');y+=11}y+=8}
   const r=LEVEL_RATING[LEVEL];
   txt(on?'Autoscaling is on.':(r?'This place is level '+r+'.':'This place has no fixed level.'),240,y+6,9,'#e8c878','center',true);
+  btnText('gp_nums','Bar numbers: '+(G.flags.noBarNums?'OFF':'ON'),78,278,106,24); // the numbers over the health, mana, experience and food bars
   btnText('gp_back','Back',190,278,100,24);
 }
 (function(){const _b=handleBtn;handleBtn=function(id){
   if(G.menu==='gameplay'&&(id==='gp_dm'||id==='gp_dp')){diffChange(id==='gp_dp'?1:-1);return}
   if(G.menu==='gameplay'&&id==='gp_lookx'){G.flags.lookXNormal=G.flags.lookXNormal?0:1;msg(G.flags.lookXNormal?'Dragging with the right mouse button now swings the view the way you drag.':'Dragging with the right mouse button now swings the view the opposite way.','#e8d8a0');return}
-  if(G.menu==='gameplay'){if(id==='gp_back'||id==='menu')G.menu=true;else if(id==='gp_fog'){G.flags.noFog=G.flags.noFog?0:1;msg(G.flags.noFog?'Fog of war is off. Maps show everything.':'Fog of war is on. Maps are covered by clouds where you have not been.','#e8d8a0')}else if(id==='gp_scale'){G.flags.autoScaleOn=G.flags.autoScaleOn?0:1;try{rebalanceEnemies()}catch(e){}msg(G.flags.autoScaleOn?'Autoscaling is on.':'Autoscaling is off. The world is fixed.','#e8d8a0')}return}
+  if(G.menu==='gameplay'){if(id==='gp_back'||id==='menu')G.menu=true;else if(id==='gp_nums'){G.flags.noBarNums=G.flags.noBarNums?0:1;msg(G.flags.noBarNums?'The numbers over the health, mana, experience and food bars are hidden.':'The health, mana, experience and food bars show their numbers.','#e8d8a0')}else if(id==='gp_fog'){G.flags.noFog=G.flags.noFog?0:1;msg(G.flags.noFog?'Fog of war is off. Maps show everything.':'Fog of war is on. Maps are covered by clouds where you have not been.','#e8d8a0')}else if(id==='gp_scale'){G.flags.autoScaleOn=G.flags.autoScaleOn?0:1;try{rebalanceEnemies()}catch(e){}msg(G.flags.autoScaleOn?'Autoscaling is on.':'Autoscaling is off. The world is fixed.','#e8d8a0')}return}
   _b(id)}})();

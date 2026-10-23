@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.597';
+const VERSION='3.598';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2262,7 +2262,7 @@ function enemyAct(e){
   return dur;
 }
 function finishRound(){
-  G.heroes.forEach((h,i)=>{if(!h.alive)return;h.mpBase=(h.mpBase||0)+.5;if(h.mpBase>=1){h.mp=Math.min(h.mpMax,h.mp+1);h.mpBase--} // mana comes back half as fast: one point every second round, not every round
+  G.heroes.forEach((h,i)=>{if(!h.alive)return;h.mpBase=(h.mpBase||0)+1;if(h.mpBase>=1){h.mp=Math.min(h.mpMax,h.mp+1);h.mpBase--} // one point of mana back for every step and every round of a fight
     h.mpAcc=(h.mpAcc||0)+pas(i,'mpRegen')*.5;while(h.mpAcc>=1){h.mp=Math.min(h.mpMax,h.mp+1);h.mpAcc--}
     h.hpAcc=(h.hpAcc||0)+pas(i,'regen');while(h.hpAcc>=1){h.hp=Math.min(h.max,h.hp+1);h.hpAcc--}});
   for(const b of G.buffs)b.left--;G.buffs=G.buffs.filter(b=>b.left>0);
@@ -3177,15 +3177,20 @@ function drawPortraits(y0,selIdx,prefix){
     const bw=w;
     const hpf=h.max>0?clamp(h.hp/h.max,0,1):0;
     ctx.fillStyle='#1a0a08';ctx.fillRect(x,y+hh+2,bw,7);ctx.fillStyle='#c43a2a';ctx.fillRect(x,y+hh+2,bw*hpf,7);ctx.fillStyle='rgba(255,255,255,.25)';ctx.fillRect(x,y+hh+2,bw*hpf,2);
-    ctx.fillStyle='#08101c';ctx.fillRect(x,y+hh+10,bw,4);ctx.fillStyle='#3a7ad8';ctx.fillRect(x,y+hh+10,bw*h.mp/h.mpMax,4);ctx.fillStyle='rgba(255,255,255,.22)';ctx.fillRect(x,y+hh+10,bw*h.mp/h.mpMax,1.2);
-    ctx.fillStyle='#141006';ctx.fillRect(x,y+hh+15,bw,2.5);ctx.fillStyle='#e8c040';ctx.fillRect(x,y+hh+15,bw*h.xp/xpNeed(h.lvl),2.5);
-    ctx.fillStyle='#140c04';ctx.fillRect(x,y+hh+18.5,bw,2.5);ctx.fillStyle=h.food<25?'#e0602a':'#b88a48';ctx.fillRect(x,y+hh+18.5,bw*h.food/100,2.5);
-    ctx.strokeStyle='rgba(0,0,0,.8)';ctx.lineWidth=1;roughStrokeRect(x,y+hh+2,bw,7);roughStrokeRect(x,y+hh+10,bw,4);
-    { // the health in numbers over the bar: 59/180
-      ctx.save();ctx.font="bold 5.8px Verdana,'Trebuchet MS',sans-serif";ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=1.5;ctx.strokeStyle='rgba(8,2,2,.92)';
-      const t=Math.max(0,Math.ceil(h.hp))+'/'+h.max;ctx.strokeText(t,x+bw/2,y+hh+5.6);ctx.fillStyle=h.hp<=h.max*.25?'#ffd0c0':'#fff6ec';ctx.fillText(t,x+bw/2,y+hh+5.6);ctx.restore();
+    ctx.fillStyle='#08101c';ctx.fillRect(x,y+hh+9.5,bw,4.5);ctx.fillStyle='#3a7ad8';ctx.fillRect(x,y+hh+9.5,bw*h.mp/h.mpMax,4.5);ctx.fillStyle='rgba(255,255,255,.22)';ctx.fillRect(x,y+hh+9.5,bw*h.mp/h.mpMax,1.2);
+    ctx.fillStyle='#141006';ctx.fillRect(x,y+hh+14.5,bw,4.5);ctx.fillStyle='#b8901c';ctx.fillRect(x,y+hh+14.5,bw*clamp(h.xp/xpNeed(h.lvl),0,1),4.5);
+    ctx.fillStyle='#140c04';ctx.fillRect(x,y+hh+19.5,bw,4.5);ctx.fillStyle=h.food<25?'#c0501e':'#8a6430';ctx.fillRect(x,y+hh+19.5,bw*clamp(h.food/100,0,1),4.5);
+    ctx.strokeStyle='rgba(0,0,0,.8)';ctx.lineWidth=1;roughStrokeRect(x,y+hh+2,bw,7);roughStrokeRect(x,y+hh+9.5,bw,4.5);
+    if(!G.flags.noBarNums){ // the numbers over the bars: health 59/180, mana or stamina 15/134, experience toward the next level, and how fed the hero is (Menu, Gameplay, Bar numbers)
+      ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';
+      const num=(t,cy,size,col,edge)=>{ctx.font='bold '+size+"px Verdana,'Trebuchet MS',sans-serif";ctx.lineWidth=1.4;ctx.strokeStyle=edge;ctx.strokeText(t,x+bw/2,cy);ctx.fillStyle=col;ctx.fillText(t,x+bw/2,cy)};
+      num(Math.max(0,Math.ceil(h.hp))+'/'+h.max,y+hh+5.6,5.8,h.hp<=h.max*.25?'#ffd0c0':'#fff6ec','rgba(8,2,2,.92)');
+      num(Math.max(0,Math.floor(h.mp))+'/'+h.mpMax,y+hh+11.85,4.4,'#e6f0ff','rgba(2,6,18,.95)');
+      num(Math.max(0,Math.floor(h.xp))+'/'+xpNeed(h.lvl),y+hh+16.85,4.4,'#fff2c8','rgba(14,10,2,.95)');
+      num(Math.max(0,Math.round(h.food))+'/100',y+hh+21.85,4.4,h.food<25?'#ffd8c0':'#f4e6cc','rgba(14,8,2,.95)');
+      ctx.restore();
     }
-    btn(prefix+i,x,y,w,hh+17);
+    btn(prefix+i,x,y,w,hh+24);
   }
 }
 function afflPips(i,x,y){ // a tiny picture for each affliction on this hero: rows of four at the top left of the portrait
@@ -19891,12 +19896,13 @@ function drawGameplay(){
   let y=176;for(const p of lines){for(const l of wrapText(p,300,8.4)){txt(l,240,y,8.4,'#cdbf94','center');y+=11}y+=8}
   const r=LEVEL_RATING[LEVEL];
   txt(on?'Autoscaling is on.':(r?'This place is level '+r+'.':'This place has no fixed level.'),240,y+6,9,'#e8c878','center',true);
+  btnText('gp_nums','Bar numbers: '+(G.flags.noBarNums?'OFF':'ON'),78,278,106,24); // the numbers over the health, mana, experience and food bars
   btnText('gp_back','Back',190,278,100,24);
 }
 (function(){const _b=handleBtn;handleBtn=function(id){
   if(G.menu==='gameplay'&&(id==='gp_dm'||id==='gp_dp')){diffChange(id==='gp_dp'?1:-1);return}
   if(G.menu==='gameplay'&&id==='gp_lookx'){G.flags.lookXNormal=G.flags.lookXNormal?0:1;msg(G.flags.lookXNormal?'Dragging with the right mouse button now swings the view the way you drag.':'Dragging with the right mouse button now swings the view the opposite way.','#e8d8a0');return}
-  if(G.menu==='gameplay'){if(id==='gp_back'||id==='menu')G.menu=true;else if(id==='gp_fog'){G.flags.noFog=G.flags.noFog?0:1;msg(G.flags.noFog?'Fog of war is off. Maps show everything.':'Fog of war is on. Maps are covered by clouds where you have not been.','#e8d8a0')}else if(id==='gp_scale'){G.flags.autoScaleOn=G.flags.autoScaleOn?0:1;try{rebalanceEnemies()}catch(e){}msg(G.flags.autoScaleOn?'Autoscaling is on.':'Autoscaling is off. The world is fixed.','#e8d8a0')}return}
+  if(G.menu==='gameplay'){if(id==='gp_back'||id==='menu')G.menu=true;else if(id==='gp_nums'){G.flags.noBarNums=G.flags.noBarNums?0:1;msg(G.flags.noBarNums?'The numbers over the health, mana, experience and food bars are hidden.':'The health, mana, experience and food bars show their numbers.','#e8d8a0')}else if(id==='gp_fog'){G.flags.noFog=G.flags.noFog?0:1;msg(G.flags.noFog?'Fog of war is off. Maps show everything.':'Fog of war is on. Maps are covered by clouds where you have not been.','#e8d8a0')}else if(id==='gp_scale'){G.flags.autoScaleOn=G.flags.autoScaleOn?0:1;try{rebalanceEnemies()}catch(e){}msg(G.flags.autoScaleOn?'Autoscaling is on.':'Autoscaling is off. The world is fixed.','#e8d8a0')}return}
   _b(id)}})();
 
 /* ---- src/desert/story.js ---- */

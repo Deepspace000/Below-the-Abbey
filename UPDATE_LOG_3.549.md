@@ -332,3 +332,12 @@ Two more faces (3.596)
 Three more faces (3.597)
 
 * A gentle young man with a long face and dark brown hair, a Russian Blue cat in a riveted leather jerkin with a mail collar, pouches and a sword on its back, and a brown and white border collie in a warrior’s breastplate with a sword. The party screen now has 96 faces.
+
+Mana comes back with every step (3.598)
+
+* Every hero now gets 1 point of mana (or stamina) back for every step and every round of a fight, twice as fast as in 3.590. Mana regeneration from gear and powers still comes on top.
+
+Numbers on every bar (3.598)
+
+* The mana (or stamina), experience and food bars under the portraits now show their numbers, like the health bar: for example 15/134 mana, 2400/24600 experience toward the next level, and 63/100 food. The three bars are a little taller so the numbers can be read.
+* Menu, Gameplay has a new button, Bar numbers, to hide or show all the numbers on the bars. It starts on.
