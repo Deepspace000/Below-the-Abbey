@@ -306,3 +306,13 @@ A crash in fights fixed (3.592)
 A new ready-made party (3.593)
 
 * The ready-made party (Play with the default party on the party screen, and the Testing menu) has new faces and names: Sigrid the Warrior, Gruff the Thief (a goat), Sorcha the Mage and Wulfric the Priest. The classes are the same as before. A party you made yourself is not changed.
+
+Monsters hit more often (3.594)
+
+* Why creatures missed so much: armour cut a creature's chance to hit by 2.5 points for every point of armour, so 48 armour (the best gear at level 30) cut 120 points. From level 10 on, any party in decent armour sat on the 35 percent floor, and the armoured goblin (hit chance .74) and a few other kinds started lower still. Armour past about 20 did nothing at all.
+* Now armour cuts at most 24 points and is judged against what is normal at the creature's level. Gear and power dodge count in full up to 10 points and a quarter beyond, and armour plus gear dodge never cut more than 24 points. Short-lived dodge (Mirror Images, Sanctuary Ward, Potion of Swiftness) and a blinded or cursed creature still come off on top, down to the 35 percent floor. Creatures whose hit chance is below .70 (up to level 10) or .80 (from level 30, rising in between) are raised to that, which lifts the armoured goblin, slimes, wolves and rats. The 95 percent ceiling and every damage number are unchanged.
+* New typical numbers: at levels 30 to 60 a creature of the party's level now hits a front-line hero in ok gear about 68 to 77 percent of the time (was 35), a front-line hero in the best gear for the level about 66 to 71 percent (was 35), and the back line about 72 to 86 percent. At the Orange Spire, a level 59 goblin hits a level 60 party's front line about 68 to 70 percent of the time. Creatures now land about twice as many blows as before, so fights cost more health; BAL.DMG in src/desert/hgd_balance.js is the one number to lower if that is too much. The fight comparison panel and the Gameplay menu example use the same sum.
+
+Twenty new faces for the party (3.594)
+
+* The party screen has 90 faces to choose from instead of 70. New: a frog-folk man and woman of the Hollow Land, a yellow toad, a green frog, a proud black goat, a goat in spectacles, a goat in a turban, a goat in a wizard’s cowl, a white llama, a brown llama, a lobster creature, a crocodile, a man with a goatee, a young man with brown hair, a young woman with short black hair and big blue eyes, an older woman with silver hair, a girl with big curly hair, a white Khao Manee cat with one blue eye and one gold eye, a grey cat with a white neck and a white patch above its mouth, and a young Russian Blue cat.

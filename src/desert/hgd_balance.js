@@ -32,6 +32,19 @@ BAL.partyLvl=L=>{const a=(G.heroes||[]).filter(h=>h.alive!==false);return a.leng
   if(ordinary&&w>0){const nw=BAL.ah(L)*BAL.hitsRel(0)*BAL.kind(t,d.hp);r.hp=Math.max(1,Math.round(old*(1-w)+nw*w))}else r.hp=old; // sized from the creature's own level, never from the party (the party's level changes while it is being levelled up, and that once gave some creatures a fraction of their health)
   r.dmg=[Math.max(1,Math.round(r.dmg[0]*k*BAL.DMG)),Math.max(1,Math.round(r.dmg[1]*k*BAL.DMG))];return r}}
 
+// 2b. how often creatures hit. Armour used to cut a creature's chance by 2.5 points per point of armour (so 48 armour cut 120 points), which put every well armoured hero on the 35 percent floor from level 10 on.
+// Now: base chance = the kind's hit (at least BAL.HITMINT: .70 up to level 10, rising to .80 at level 30, as a few kinds sat at .62 to .76) + BAL.ACC + the difficulty add; minus armour, which cuts up to BAL.ARM.max (24) points as armour/(armour+ref), ref = r0 + rl*creature level, so armour counts against what is normal at the creature's level (about 68 to 77 percent
+// against an at-level front fighter in ok gear, 66 to 71 in the best gear for the level, 68 to 86 against the back line); minus gear and power dodge (all of it up to BAL.DODGE.knee, a quarter of the rest); armour and that dodge together never cut more than BAL.CUT. Short-lived dodge (Mirror Images, Sanctuary Ward, Swiftness) and a blinded or cursed
+// creature come off on top of that, down to the old 35 percent floor. The ceiling is still .95. Damage is unchanged.
+BAL.HITMINT=[[10,.70],[30,.80]];BAL.ARM={max:.24,r0:12,rl:.9};BAL.DODGE={knee:.10,slope:.25};BAL.CUT=.24;BAL.HITFLOOR=.35;
+enemyHitC=function(def,hi,lvl,e){
+  const h=G.heroes[hi];if(!h)return .5;
+  const L=lvl||lvlHere(),base=def.hit>=.3?Math.max(def.hit,BAL.lerp(BAL.HITMINT,L)):def.hit,arm=heroArmor(h);
+  let buff=0;for(const b of G.buffs||[])if(b.left>0&&b.b==='dodge'&&(b.hi===-1||b.hi===hi))buff+=b.amt; // short-lived dodge counts in full
+  const dod=Math.max(0,pas(hi,'dodge')-buff),dc=Math.min(dod,BAL.DODGE.knee)+Math.max(0,dod-BAL.DODGE.knee)*BAL.DODGE.slope,
+    ac=BAL.ARM.max*arm/(arm+BAL.ARM.r0+BAL.ARM.rl*L);
+  return clamp(base+(typeof diffHitAdd==='function'?diffHitAdd():0)+BAL.ACC-Math.min(BAL.CUT,ac+dc)-buff-(e&&e.st?mxMiss(e):0),BAL.HITFLOOR,.95)};
+
 // 3. mana runs out faster: every power, spell and special costs half as much again (at least one more), so a party has to plan its straight hits and its power hits
 BAL.MANA=1.5;
 (function(){const up=c=>c>0?Math.max(c+1,Math.round(c*BAL.MANA)):c,fix=o=>{if(o&&typeof o.cost==='number'&&!o._mb){o.cost=up(o.cost);o._mb=1}};

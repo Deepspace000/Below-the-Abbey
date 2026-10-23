@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.593';
+const VERSION='3.594';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1420,7 +1420,7 @@ const CLASSES=[
  {name:'Goat',icon:'horns',hp:30,mp:8,mpn:'Stamina',hit:.82,str:12,dex:10,int:5,grow:{hp:6,mp:1,a:'str',b:'dex'},unarmed:[2,5],
   desc:'A stubborn goat. Butts hard, eats anything, and answers to no one. Strength lets the whole party carry more.',sp:{name:'Headbutt',cost:3,type:'butt',d:'A hard butt for 5-10 damage that leaves the foe dazed for a turn.'}}
 ];
-const NPORT=70;
+const NPORT=90; // party portraits assets/pt/0..89.png (70 to 89 added in 3.594)
 const NAME_POOL=['Aldric','Brannoc','Cedric','Dorin','Edric','Fenwick','Garrick','Hugo','Ivor','Joran','Kellan','Lothar','Osric','Piers','Rowan','Tobias','Wulfric','Vesna','Mira','Thessaly','Elspeth','Rowena','Isolde','Brigid','Maud','Sigrid','Yara','Wenna','Agnes','Eadlyn','Hilda','Odette','Petra','Sorcha','Una'];
 const GOAT_NAMES=['Billy','Gruff','Clover','Biscuit','Thistle','Nanny','Barnaby','Pip'];
 const DEFAULT_PARTY=[ // the ready-made party: a wild warrior, a goat thief, a hooded mage and an old priest
@@ -2215,6 +2215,8 @@ function runEnemies(es,i){
   if(was&&far())dur=0; // a creature far out of sight takes its turn at once, so walking never waits on it
   later(dur,()=>runEnemies(es,i+1));
 }
+/* the chance that a creature's blow lands on hero hi (lvl: the creature's level; e: the creature, if any). The desert block (hgd_balance.js) replaces this with the balanced version; this is the plain one */
+function enemyHitC(def,hi,lvl,e){return clamp(def.hit+(typeof diffHitAdd==='function'?diffHitAdd():0)-heroArmor(G.heroes[hi])*.025-pas(hi,'dodge')-(e&&e.st?mxMiss(e):0)+(typeof BAL!=='undefined'?BAL.ACC:0),.35,.95)}
 function enemyAttack(e){
   const def=ENEMY_DEF[e.t],st=enemyStat(e.t,e.lvl);
   const l=livingHeroes();if(!l.length)return;
@@ -2223,7 +2225,7 @@ function enemyAttack(e){
   e.lunge=1;
   const dirToE=DIRS.findIndex(d=>G.P.x+d[0]===e.x&&G.P.y+d[1]===e.y);
   const side=dirToE===G.P.f?'':(dirToE===(G.P.f+2)%4?' from behind':' from the side');
-  const hitC=clamp(def.hit+(typeof diffHitAdd==='function'?diffHitAdd():0)-heroArmor(h)*.025-pas(t,'dodge')-(e.st?mxMiss(e):0)+(typeof BAL!=='undefined'?BAL.ACC:0),.35,.95),verb=def.verb||(e.t==='skel'?'slashes':'bites');
+  const hitC=enemyHitC(def,t,e.lvl,e),verb=def.verb||(e.t==='skel'?'slashes':'bites');
   if(Math.random()<hitC){
     if(def.slows){G.slowT=Math.max(G.slowT||0,4);msg('Dead hands drag at the party. You are slowed.','#e8c870')}let d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*(e.st?mxMul(e):1)));if(typeof armourWard==='function')d=Math.max(1,d-armourWard(t));h.hp-=d;h.hurt=1;G.shake=.35;sfx(e.t==='skel'?'hit':'bite');sfx('hurt');
     msg(`The ${def.name} ${verb} ${HERO_DEF[t].name}${side} for ${d}.`,'#e8a090');addFloat(portraitX(t)+19,250,'-'+d,'#ff6a5a');
@@ -6035,7 +6037,7 @@ function enemyShoot(e){
   const pool=[];for(const j of l)for(let k=0;k<(j<2?3:1);k++)pool.push(j);
   const t=pool[rnd(0,pool.length-1)],h=G.heroes[t];e.lunge=1;
   G.arrows.push({x0:clamp(e.sx,14,406),y0:clamp(e.sy,40,170),x1:210+rnd(-30,30),y1:196,t:G.time});sfx('arrow');
-  const hitC=clamp(def.hit+(typeof diffHitAdd==='function'?diffHitAdd():0)-heroArmor(h)*.025-pas(t,'dodge')-(e.st?mxMiss(e):0)+(typeof BAL!=='undefined'?BAL.ACC:0),.35,.95);
+  const hitC=enemyHitC(def,t,e.lvl,e);
   if(Math.random()<hitC){
     const d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*(e.st?mxMul(e):1)));h.hp-=d;h.hurt=1;G.shake=.3;sfx('hurt');try{if(h.hp>0)afflHit(e.t,t)}catch(x){}
     msg(def.shot?`${def.name} hurls ${def.shot} at ${HERO_DEF[t].name} for ${d}.`:`An arrow from the ${def.name} hits ${HERO_DEF[t].name} for ${d}.`,'#e8a090');addFloat(portraitX(t)+19,250,'-'+d,'#ff6a5a');
@@ -6802,7 +6804,7 @@ function drawCompare(e,def){
   const st=enemyStat(e.t,e.lvl),plvl=Math.round(H.reduce((n,o)=>n+o.h.lvl,0)/H.length);
   const pHp=H.reduce((n,o)=>n+Math.max(0,o.h.hp),0),pMax=H.reduce((n,o)=>n+o.h.max,0);
   let dpr=0;for(const o of H){const r=heroDmgRange(o.h);dpr+=(r[0]+r[1])/2*heroHitPct(o.i,false)}
-  const eAvg=(st.dmg[0]+st.dmg[1])/2,hitC=clamp(def.hit+(typeof diffHitAdd==='function'?diffHitAdd():0)-H.reduce((n,o)=>n+heroArmor(o.h),0)/H.length*.025+(typeof BAL!=='undefined'?BAL.ACC:0),.35,.95),eDpr=Math.max(.1,eAvg*hitC);
+  const eAvg=(st.dmg[0]+st.dmg[1])/2,hitC=H.reduce((n,o)=>n+enemyHitC(def,o.i,e.lvl,e)*(o.i<2?3:1),0)/H.reduce((n,o)=>n+(o.i<2?3:1),0),eDpr=Math.max(.1,eAvg*hitC);
   const toKill=Math.max(.2,e.hp/Math.max(1,dpr)),toDie=Math.max(.2,(pHp/H.length)/eDpr),ratio=toDie/toKill;
   const VER=[['Trivial','#8ad07a'],['Easy','#a8d070'],['Fair fight','#e0d070'],['Hard','#e89850'],['Deadly','#e85a48']];
   let vi=ratio>=6?0:ratio>=3?1:ratio>=1.5?2:ratio>=.7?3:4;
@@ -19856,7 +19858,7 @@ function diffExample(){try{
   let e=(G.enemies||[]).filter(q=>q.hp>0&&ENEMY_DEF[q.t]&&ENEMY_DEF[q.t].hit!==undefined&&!ENEMY_DEF[q.t].fly).sort((a,b)=>Math.hypot(a.x-G.P.x,a.y-G.P.y)-Math.hypot(b.x-G.P.x,b.y-G.P.y))[0];
   const t=e?e.t:'wolf',lv=e?e.lvl:Math.max(1,Math.round(me.h.lvl)),def=ENEMY_DEF[t];if(!def||def.hit===undefined)return null;
   const calc=()=>{const st=enemyStat(t,lv),r=heroDmgRange(me.h),avg=Math.max(1,(r[0]+r[1])/2),hits=Math.max(1,Math.ceil(st.hp/avg)),
-    eh=Math.max(.1,Math.min(.95,def.hit+diffHitAdd()-heroArmor(me.h)*.03-pas(me.i,'dodge'))),mh=heroHitPct(me.i,!!def.fly);
+    eh=enemyHitC(def,me.i,lv,e),mh=heroHitPct(me.i,!!def.fly);
     // the gold an average kill pays (the same sum as hurtEnemy, with the middle of the roll)
     const LH=livingHeroes(),pl0=LH.length?Math.round(LH.reduce((n,j)=>n+G.heroes[j].lvl,0)/LH.length):1,up=Math.max(0,lv-pl0),lm=up>0?1.5+.2*(up-1):1,
       big=(def.goldFixed||0)>=100||(def.gold&&def.gold[1]>=100),bg=BOSS_GOLD[t],ls=bg?1+Math.min(lv,100)*.02:big?1+Math.min(lv,100)*.04:1+Math.min(lv,100)*.1,
@@ -46862,6 +46864,19 @@ BAL.partyLvl=L=>{const a=(G.heroes||[]).filter(h=>h.alive!==false);return a.leng
   const ordinary=d&&!(d.boss||d.aboveParty||(typeof NO_VARY!=='undefined'&&NO_VARY.includes(t))||d.partyLevel||/^w_/.test(t));
   if(ordinary&&w>0){const nw=BAL.ah(L)*BAL.hitsRel(0)*BAL.kind(t,d.hp);r.hp=Math.max(1,Math.round(old*(1-w)+nw*w))}else r.hp=old; // sized from the creature's own level, never from the party (the party's level changes while it is being levelled up, and that once gave some creatures a fraction of their health)
   r.dmg=[Math.max(1,Math.round(r.dmg[0]*k*BAL.DMG)),Math.max(1,Math.round(r.dmg[1]*k*BAL.DMG))];return r}}
+
+// 2b. how often creatures hit. Armour used to cut a creature's chance by 2.5 points per point of armour (so 48 armour cut 120 points), which put every well armoured hero on the 35 percent floor from level 10 on.
+// Now: base chance = the kind's hit (at least BAL.HITMINT: .70 up to level 10, rising to .80 at level 30, as a few kinds sat at .62 to .76) + BAL.ACC + the difficulty add; minus armour, which cuts up to BAL.ARM.max (24) points as armour/(armour+ref), ref = r0 + rl*creature level, so armour counts against what is normal at the creature's level (about 68 to 77 percent
+// against an at-level front fighter in ok gear, 66 to 71 in the best gear for the level, 68 to 86 against the back line); minus gear and power dodge (all of it up to BAL.DODGE.knee, a quarter of the rest); armour and that dodge together never cut more than BAL.CUT. Short-lived dodge (Mirror Images, Sanctuary Ward, Swiftness) and a blinded or cursed
+// creature come off on top of that, down to the old 35 percent floor. The ceiling is still .95. Damage is unchanged.
+BAL.HITMINT=[[10,.70],[30,.80]];BAL.ARM={max:.24,r0:12,rl:.9};BAL.DODGE={knee:.10,slope:.25};BAL.CUT=.24;BAL.HITFLOOR=.35;
+enemyHitC=function(def,hi,lvl,e){
+  const h=G.heroes[hi];if(!h)return .5;
+  const L=lvl||lvlHere(),base=def.hit>=.3?Math.max(def.hit,BAL.lerp(BAL.HITMINT,L)):def.hit,arm=heroArmor(h);
+  let buff=0;for(const b of G.buffs||[])if(b.left>0&&b.b==='dodge'&&(b.hi===-1||b.hi===hi))buff+=b.amt; // short-lived dodge counts in full
+  const dod=Math.max(0,pas(hi,'dodge')-buff),dc=Math.min(dod,BAL.DODGE.knee)+Math.max(0,dod-BAL.DODGE.knee)*BAL.DODGE.slope,
+    ac=BAL.ARM.max*arm/(arm+BAL.ARM.r0+BAL.ARM.rl*L);
+  return clamp(base+(typeof diffHitAdd==='function'?diffHitAdd():0)+BAL.ACC-Math.min(BAL.CUT,ac+dc)-buff-(e&&e.st?mxMiss(e):0),BAL.HITFLOOR,.95)};
 
 // 3. mana runs out faster: every power, spell and special costs half as much again (at least one more), so a party has to plan its straight hits and its power hits
 BAL.MANA=1.5;

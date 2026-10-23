@@ -62,7 +62,7 @@ function diffExample(){try{
   let e=(G.enemies||[]).filter(q=>q.hp>0&&ENEMY_DEF[q.t]&&ENEMY_DEF[q.t].hit!==undefined&&!ENEMY_DEF[q.t].fly).sort((a,b)=>Math.hypot(a.x-G.P.x,a.y-G.P.y)-Math.hypot(b.x-G.P.x,b.y-G.P.y))[0];
   const t=e?e.t:'wolf',lv=e?e.lvl:Math.max(1,Math.round(me.h.lvl)),def=ENEMY_DEF[t];if(!def||def.hit===undefined)return null;
   const calc=()=>{const st=enemyStat(t,lv),r=heroDmgRange(me.h),avg=Math.max(1,(r[0]+r[1])/2),hits=Math.max(1,Math.ceil(st.hp/avg)),
-    eh=Math.max(.1,Math.min(.95,def.hit+diffHitAdd()-heroArmor(me.h)*.03-pas(me.i,'dodge'))),mh=heroHitPct(me.i,!!def.fly);
+    eh=enemyHitC(def,me.i,lv,e),mh=heroHitPct(me.i,!!def.fly);
     // the gold an average kill pays (the same sum as hurtEnemy, with the middle of the roll)
     const LH=livingHeroes(),pl0=LH.length?Math.round(LH.reduce((n,j)=>n+G.heroes[j].lvl,0)/LH.length):1,up=Math.max(0,lv-pl0),lm=up>0?1.5+.2*(up-1):1,
       big=(def.goldFixed||0)>=100||(def.gold&&def.gold[1]>=100),bg=BOSS_GOLD[t],ls=bg?1+Math.min(lv,100)*.02:big?1+Math.min(lv,100)*.04:1+Math.min(lv,100)*.1,
