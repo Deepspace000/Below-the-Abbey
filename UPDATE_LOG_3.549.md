@@ -328,3 +328,7 @@ One more face (3.595)
 Two more faces (3.596)
 
 * A slender young man with short messy sandy brown hair, a long face, high cheekbones and big brown eyes, and a beautiful woman with long wavy brown curls, half-moon blue eyes and a warm, knowing smile. The party screen now has 93 faces.
+
+Three more faces (3.597)
+
+* A gentle young man with a long face and dark brown hair, a Russian Blue cat in a riveted leather jerkin with a mail collar, pouches and a sword on its back, and a brown and white border collie in a warrior’s breastplate with a sword. The party screen now has 96 faces.
