@@ -413,3 +413,8 @@ World map: names closer, no background ovals (pending release)
 
 * The names of the Ruby Maze and the Ironhill Mines now stand right beside their own pictures. Every name on the map is put at the nearest clear spot to its own picture, and never nearer to a different place's picture than to its own.
 * The faint oval blotches in the parchment behind the world map are gone, so the land is clean.
+
+The world map's rivers are painted systems (pending release)
+
+* The rivers are now painted river systems, made with Gemini: medieval, hand-inked, with wooden dams, groups of trees on the banks, and tiny rowing and sailing boats. 22 of them are placed in the free land of the map by a program that checks each one lies wholly on land and clear of every picture, name and title, and the scenery keeps clear of them. Where a river does not reach the coast it ends in a small lake.
+* A sea serpent, two ships and the label The Western Deep that stood on land are moved out to the western sea, and a ship at the mouth of a river is moved out to sea.

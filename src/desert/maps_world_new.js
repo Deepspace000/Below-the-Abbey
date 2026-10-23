@@ -6,13 +6,14 @@
    Nothing on this map may overlap: wmnLayout() places every picture and every name (and its level and quest dots) once, so that no name stands on a picture,
    another name or a region title, and the scenery keeps clear of all of them.
    ========================================================================== */
-const WMN={a:null,s:null,ok:false,loading:false,lay:null,layKey:'',pat:null,
+const WMN={a:null,s:null,ok:false,loading:false,lay:null,layKey:'',pat:null,rv:[],rvOk:false,
   K:{oak:.115,pine:.125,mtn:.133,hill:.125,dune:.173,palm:.112},   // map units per picture pixel, per kind of scenery (times the item's own scale)
   TINT:{'#dcc088':'sand','#cf8a60':'red','#a4b8cc':'blue','#efe9da':'white','#e0b850':'gold','#a98cbb':'violet'}};
 function wmnLoad(){
   if(WMN.loading||typeof WMN_RECTS==='undefined')return;WMN.loading=true;let n=0;
   for(const p of ['a','s']){const im=new Image();im.onload=()=>{WMN[p]=im;if(++n===2)WMN.ok=true};im.onerror=()=>{WMN.failed=true};im.decoding='async';
-    im.src='assets/wm_'+p+'.png'+(typeof VERSION!=='undefined'?'?v='+VERSION:'')}}
+    im.src='assets/wm_'+p+'.png'+(typeof VERSION!=='undefined'?'?v='+VERSION:'')}
+  if(typeof WMR_META!=='undefined'){let m=0;WMR_META.forEach((q,i)=>{const im=new Image();im.decoding='async';im.onload=()=>{WMN.rv[i]=im;if(++m===WMR_META.length)WMN.rvOk=true};im.src='assets/'+q.f+(typeof VERSION!=='undefined'?'?v='+VERSION:'')})}}
 wmnLoad();   // the pictures are fetched at start-up, so the map has them the first time it is opened
 
 /* one picture, bottom centre at (cx,by), size = height, or width when isW */
@@ -121,9 +122,9 @@ function wmnWash(V,z){
 /* ships and the creatures of the sea, painted */
 function wmnCreatures(V,z){
   const c=ctx,t=G.time,vis=(x,y,r)=>x+r>V.x0&&x-r<V.x1&&y+r>V.y0&&y-r<V.y1,bob=(x,a)=>Math.sin(t*1.4+x*.1)*a;
-  const ships=[[790,-62,1,'caravel'],[1010,34,-1,'galleon'],[1040,330,1,'caravel'],[880,432,-1,'boat'],[300,408,1,'galleon'],[560,396,-1,'caravel'],[-222,196,1,'boat'],[-176,-60,-1,'caravel'],[690,-30,1,'galleon']];
+  const ships=[[790,-62,1,'caravel'],[1010,34,-1,'galleon'],[1040,330,1,'caravel'],[880,432,-1,'boat'],[300,408,1,'galleon'],[560,396,-1,'caravel'],[-1150,196,1,'boat'],[-1140,-60,-1,'caravel'],[780,-20,1,'galleon']];
   for(const [x,y,d,k] of ships)if(vis(x,y,30))wmnDraw(c,'c_'+k,x,y+bob(x,.7),k==='galleon'?28:k==='boat'?20:25,true,d>0);
-  if(vis(-230,84,50))wmnDraw(c,'c_serpent',-230,84+bob(-230,.5),36,true,false);
+  if(vis(-1160,84,50))wmnDraw(c,'c_serpent',-1160,84+bob(-1160,.5),36,true,false);
   if(vis(450,432,50))wmnDraw(c,'c_serpent',450,432+bob(450,.5),36,true,true);
   if(vis(690,440,40))wmnDraw(c,'c_kraken',690,440+bob(690,.6),32,true,false);
   if(vis(1040,228,40))wmnDraw(c,'c_whale',1040,228+bob(1040,.5),36,true,true);
@@ -172,70 +173,14 @@ function wmnObstacles(){
   const c=ctx;for(const [t,x,y,sz] of WMN_REG){c.save();c.font=`${sz}px ${FTITLE}`;const w=c.measureText(t).width+t.length*1.5+6;c.restore();o.push([x-w/2,y-sz*.7,x+w/2,y+sz*.7])}
   for(const [t,x,y,sz] of WMN_SMALL){c.save();c.font=`italic ${sz}px ${FUI}`;const w=c.measureText(t).width;c.restore();o.push([x-w/2-2,y-sz*.7,x+w/2+2,y+sz*.7])}
   return o}
-function wmnMakeRivers(){
-  const M=mpWorldM,H=hash2,obst=wmnObstacles(),MG=6,land=(x,y)=>M.isLand(x,y);
-  const pushOut=(p,m)=>{for(let it=0;it<3;it++){let moved=false;for(const r of obst){if(p[0]>r[0]-m&&p[0]<r[2]+m&&p[1]>r[1]-m&&p[1]<r[3]+m){const dl=p[0]-(r[0]-m),dr=(r[2]+m)-p[0],dt=p[1]-(r[1]-m),db=(r[3]+m)-p[1],mn=Math.min(dl,dr,dt,db);
-        if(mn===dl)p[0]=r[0]-m-.6;else if(mn===dr)p[0]=r[2]+m+.6;else if(mn===dt)p[1]=r[1]-m-.6;else p[1]=r[3]+m+.6;moved=true}}if(!moved)break}};
-  const resample=(pts,st)=>{const o=[pts[0].slice()];let acc=0;for(let i=1;i<pts.length;i++){let a=pts[i-1],b=pts[i],L=Math.hypot(b[0]-a[0],b[1]-a[1]);while(acc+L>=st){const t=(st-acc)/L;a=[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];o.push(a);L=Math.hypot(b[0]-a[0],b[1]-a[1]);acc=0}acc+=L}const e=pts[pts.length-1];if(Math.hypot(e[0]-o[o.length-1][0],e[1]-o[o.length-1][1])>st*.4)o.push(e.slice());return o};
-  // lay a meander on a line: long sideways swings of two sizes that grow in from the ends, smoothed so the bends are round
-  const meander=(base,amp,wl,seed)=>{const n=base.length,ph=[H(seed,1,651)*TAU,H(seed,2,651)*TAU];let s=0;const out=[];
-    for(let i=0;i<n;i++){const a=base[Math.max(0,i-1)],b=base[Math.min(n-1,i+1)],tx=b[0]-a[0],ty=b[1]-a[1],L=Math.hypot(tx,ty)||1;if(i)s+=Math.hypot(base[i][0]-base[i-1][0],base[i][1]-base[i-1][1]);
-      const env=Math.min(1,s/30)*Math.min(1,(n-1-i)*3/30+.001),sw=Math.sin(s/wl*TAU+ph[0])+.42*Math.sin(s/(wl*.53)*TAU+ph[1]),k=amp*(.85+.3*Math.sin(s/(wl*2.7)+ph[1]))*env*sw;
-      out.push([base[i][0]-ty/L*k,base[i][1]+tx/L*k])}
-    for(let pass=0;pass<5;pass++){const q=out.map(p=>p.slice());for(let i=1;i<n-1;i++){out[i][0]=(q[i-1][0]+q[i][0]*2+q[i+1][0])/4;out[i][1]=(q[i-1][1]+q[i][1]*2+q[i+1][1])/4}}
-    return out};
-  // keep a river off the places: the push away from any picture, name or title within 18 units is worked out as a sideways shift of the winding line, the shift is smoothed
-  // (so the river bends round a place in a curve and keeps its windings elsewhere), and anything still on a place is moved out. Points that end up in the sea are drawn back to the line the river was laid on.
-  const R=18,fix=(pts,base)=>{const n=pts.length,B=pts.map(p=>p.slice()),off=pts.map(()=>[0,0]);
-    for(let it=0;it<44;it++){
-      for(let i=1;i<n-1;i++){const px=B[i][0]+off[i][0],py=B[i][1]+off[i][1];let ax=0,ay=0;
-        for(const r of obst){const qx=Math.max(r[0],Math.min(r[2],px)),qy=Math.max(r[1],Math.min(r[3],py));let dx=px-qx,dy=py-qy;const dist=Math.hypot(dx,dy);
-          if(dist>=R)continue;
-          if(dist<1e-6){const dl=px-r[0],dr=r[2]-px,dt=py-r[1],db=r[3]-py,mn=Math.min(dl,dr,dt,db);dx=mn===dl?-1:mn===dr?1:0;dy=mn===dt?-1:mn===db?1:0;const f=(R+mn)*.2;ax+=dx*f;ay+=dy*f}
-          else{const f=(R-dist)/R*3;ax+=dx/dist*f;ay+=dy/dist*f}}
-        off[i][0]+=ax;off[i][1]+=ay}
-      for(let k=0;k<3;k++){const q=off.map(o=>o.slice());for(let i=1;i<n-1;i++){off[i][0]=(q[i-1][0]+q[i][0]*2+q[i+1][0])/4;off[i][1]=(q[i-1][1]+q[i][1]*2+q[i+1][1])/4}}}
-    for(let i=0;i<n;i++){pts[i][0]=B[i][0]+off[i][0];pts[i][1]=B[i][1]+off[i][1]}
-    for(let i=1;i<n-8;i++){let g=0;while(!land(pts[i][0],pts[i][1])&&g++<4){pts[i][0]=(pts[i][0]+base[i][0])/2;pts[i][1]=(pts[i][1]+base[i][1])/2}}
-    for(let pass=0;pass<4;pass++)for(let i=1;i<n-1;i++)pushOut(pts[i],2.5);
-    return pts};
-  const rivers=[];
-  M.rv.forEach((base0,ri)=>{
-    const base=resample(base0,3),main=fix(meander(base,13+H(ri,4,652)*7,62+H(ri,5,652)*40,ri*7+1),base);
-    main.w0=2.0;main.w1=4.4;rivers.push(main);
-    // side streams: two or three, branching off at points along it, each winding in turn
-    const nb=2+((H(ri,6,653)*2)|0);
-    for(let b=0;b<nb;b++){
-      const u=.18+.62*((b+H(ri,b,654)*.7)/nb),bi=Math.max(4,Math.min(main.length-8,(main.length*u)|0)),P=main[bi],Q=main[bi+3];
-      let ang=Math.atan2(Q[1]-P[1],Q[0]-P[0])+(b%2?1:-1)*(.9+H(ri,b,655)*.5),x=P[0],y=P[1];const tr=[[x,y]],maxL=70+H(ri,b,656)*90;let len=0;
-      for(let st=0;st<60&&len<maxL;st++){ang+=(H(st,ri*9+b,657)-.5)*.3;x+=Math.cos(ang)*3;y+=Math.sin(ang)*3;len+=3;if(!land(x,y))break;tr.push([x,y])}
-      if(tr.length<14)continue;tr.reverse();                                                  // from the source down to the main river
-      const t2=fix(meander(tr,5+H(ri,b,658)*4,40+H(ri,b,659)*30,ri*13+b+3),tr);t2[t2.length-1]=P.slice();t2.w0=1.0;t2.w1=Math.max(1.8,(main.w0+(main.w1-main.w0)*bi/main.length)*.78);rivers.push(t2)}});
-  M.rv=rivers;
-  // lakes: any that sits on a place, a name or a title is dropped
-  M.lakes=M.lakes.filter(([lx,ly,rx,ry])=>!obst.some(r=>lx+rx*1.2>r[0]&&lx-rx*1.2<r[2]&&ly+ry*1.2>r[1]&&ly-ry*1.2<r[3]))}
-
-/* the rivers and lakes: watercolour blue between hand-inked, wobbling banks with short hatching on the outside, ripples on the water and reeds at the edge. A river widens from its source to its mouth. */
+/* the rivers: the painted river systems (assets/wm_river<N>.png, cut by tools/cut_rivers.py) stand where tools/fit_rivers.py found room for them (maps_world_river_fit.js): wholly on land,
+   clear of every place, name and title. Then the lakes: watercolour blue between hand-inked, wobbling banks with short hatching on the outside, ripples and reeds. */
 function wmnRivers(V,z){
   const c=ctx,H=hash2,M=mpWorldM,minW=1.1/z;
-  M.rv.forEach((pts,ri)=>{let ok=false;for(const p of pts){if(p[0]>V.x0-20&&p[0]<V.x1+20&&p[1]>V.y0-20&&p[1]<V.y1+20){ok=true;break}}if(!ok)return;
-    const n=pts.length,w0=pts.w0||2.2,w1=pts.w1||4.6,wAt=i=>Math.max(w0+(w1-w0)*i/n,minW);
-    const side=(sd,f)=>{c.beginPath();for(let i=0;i<n;i++){const a=pts[Math.max(0,i-1)],b=pts[Math.min(n-1,i+1)],tx=b[0]-a[0],ty=b[1]-a[1],L=Math.hypot(tx,ty)||1,o=sd*wAt(i)*.5+Math.sin(i*.8+f)*.3+Math.sin(i*2.1+f*3)*.15;const px=pts[i][0]-ty/L*o,py=pts[i][1]+tx/L*o;i?c.lineTo(px,py):c.moveTo(px,py)}};
-    c.lineCap='round';c.lineJoin='round';
-    const pass=(wm,col)=>{for(let i=1;i<n;i++){c.beginPath();c.moveTo(pts[i-1][0],pts[i-1][1]);c.lineTo(pts[i][0],pts[i][1]);c.strokeStyle=col;c.lineWidth=wAt(i)*wm;c.stroke()}};
-    pass(1.9,'rgba(110,150,150,.16)');pass(1.06,'rgba(130,174,182,.9)');pass(.45,'rgba(196,228,232,.5)');
-    c.strokeStyle='rgba(54,40,24,.62)';c.lineWidth=Math.max(.45,.5/z);for(const sd of [-1,1]){side(sd,ri*5+sd);c.stroke()}
-    c.beginPath();let acc=0,k=0;for(let i=1;i<n;i++){const a=pts[i-1],b=pts[i];acc+=Math.hypot(b[0]-a[0],b[1]-a[1]);if(acc<(z>1.2?3.6:6.5))continue;acc=0;k++;
-      if(b[0]<V.x0||b[0]>V.x1||b[1]<V.y0||b[1]>V.y1)continue;const tx=b[0]-a[0],ty=b[1]-a[1],L=Math.hypot(tx,ty)||1,nx=-ty/L,ny=tx/L,w=wAt(i),h1=H(i,ri,621),sd=k%2?1:-1,o1=w*.5+.5,o2=o1+1.1+h1*1.4;
-      c.moveTo(b[0]+nx*o1*sd,b[1]+ny*o1*sd);c.lineTo(b[0]+nx*o2*sd+tx/L*.7,b[1]+ny*o2*sd+ty/L*.7)}
-    c.strokeStyle='rgba(54,40,24,.42)';c.lineWidth=.3;c.stroke();
-    if(z>.6){c.beginPath();acc=0;k=0;for(let i=1;i<n;i++){const a=pts[i-1],b=pts[i];acc+=Math.hypot(b[0]-a[0],b[1]-a[1]);if(acc<10)continue;acc=0;k++;if(b[0]<V.x0||b[0]>V.x1||b[1]<V.y0||b[1]>V.y1)continue;
-        const h=H(i,ri,622),ox=(h-.5)*wAt(i)*.5;c.moveTo(b[0]+ox-1.5,b[1]);c.quadraticCurveTo(b[0]+ox,b[1]-1.1,b[0]+ox+1.5,b[1])}
-      c.strokeStyle='rgba(246,252,252,.75)';c.lineWidth=.36;c.stroke()}
-    if(z>.9){c.strokeStyle='rgba(62,102,52,.8)';c.lineWidth=.38;c.beginPath();acc=0;for(let i=1;i<n;i++){const a=pts[i-1],b=pts[i];acc+=Math.hypot(b[0]-a[0],b[1]-a[1]);if(acc<17)continue;acc=0;if(b[0]<V.x0||b[0]>V.x1||b[1]<V.y0||b[1]>V.y1)continue;
-        const tx=b[0]-a[0],ty=b[1]-a[1],L=Math.hypot(tx,ty)||1,nx=-ty/L,ny=tx/L,sd=H(i,ri,623)<.5?1:-1,o=wAt(i)*.5+1.4,px=b[0]+nx*o*sd,py=b[1]+ny*o*sd;
-        for(const q of [-.9,0,.9]){c.moveTo(px+q,py+.6);c.lineTo(px+q*1.5,py-2.4-Math.abs(q))}}c.stroke()}
-    c.lineCap='butt'});
+  if(typeof WMR_FIT!=='undefined')for(const [k,x,y,rot,flip,s] of WMR_FIT.placed){
+    const im=WMN.rv[k],m=WMR_META[k];if(!im||!m)continue;
+    const r=Math.hypot(m.w,m.h)*s/2;if(x+r<V.x0||x-r>V.x1||y+r<V.y0||y-r>V.y1)continue;
+    c.save();c.translate(x,y);c.rotate(-rot*Math.PI/180);if(flip)c.scale(-1,1);c.drawImage(im,-m.w*s/2,-m.h*s/2,m.w*s,m.h*s);c.restore()}
   for(const [lx,ly,rx,ry] of M.lakes){if(lx+rx<V.x0||lx-rx>V.x1||ly+ry<V.y0||ly-ry>V.y1)continue;
     const edge=(sc)=>{c.beginPath();for(let k=0;k<=24;k++){const a=k/24*TAU,j=1+.1*Math.sin(a*3+lx)+.05*Math.sin(a*7+ly);const px=lx+Math.cos(a)*rx*j*sc,py=ly+Math.sin(a)*ry*j*sc;k?c.lineTo(px,py):c.moveTo(px,py)}c.closePath()};
     edge(1.18);c.fillStyle='rgba(110,150,150,.18)';c.fill();edge(1);c.fillStyle='rgba(130,174,182,.92)';c.fill();
@@ -252,3 +197,13 @@ function wmnParchment(x){
   const tint=[2,2,-6],f=(a,b,c)=>`rgb(${Math.max(0,Math.min(255,a+tint[0]))},${Math.max(0,Math.min(255,b+tint[1]))},${Math.max(0,Math.min(255,c+tint[2]))})`,g=x.createLinearGradient(0,0,0,DH);
   g.addColorStop(0,f(226,208,160));g.addColorStop(1,f(206,184,134));x.fillStyle=g;x.fillRect(0,0,DW,DH);
   const v=x.createRadialGradient(DW/2,DH/2,DH*.3,DW/2,DH/2,DW*.62);v.addColorStop(0,'rgba(80,50,20,0)');v.addColorStop(1,'rgba(80,50,20,.38)');x.fillStyle=v;x.fillRect(0,0,DW,DH)}
+
+/* A helper for tools/fit_rivers.py (run it in the browser console with the world map open, with a receiver listening such as _video/recv.py on port 8071): sends the land (as a picture,
+   2.5 map units a pixel from x -1100, y -500) and the rectangles of every place, name and title, to ART-HOLD/map_icons/fit/. Use it again whenever places or names move. */
+async function wmnFitExport(base){
+  base=base||'http://127.0.0.1:8071/';const M=mpWorldM,U=2.5,X0=-1100,Y0=-500,W=1200,H=520;
+  const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,W,H);x.scale(1/U,1/U);x.translate(-X0,-Y0);x.fillStyle='#fff';x.fill(M.landP);
+  const b=await new Promise(r=>c.toBlob(r,'image/png'));await fetch(base+'land_mask.png',{method:'POST',body:b});
+  const lay=wmnLayout();
+  await fetch(base+'world_fit.json',{method:'POST',body:JSON.stringify({U,X0,Y0,W,H,obstacles:wmnObstacles(),icons:Object.keys(lay).map(k=>[k,lay[k].ib]),lakes:M.lakes,places:WORLD_LOCS.map(l=>[l.k,l.x,l.y])})});
+  return 'sent'}

@@ -63,7 +63,7 @@ function mpWorldInit(){
     [[1420,30],[1370,70],[1320,110],[1270,120],[1215,125],[1170,112],[1138,104]]];
   M.rv=RV.map((r,i)=>mpWorldCat(r,6));
   M.lakes=[[-480,60,26,14],[-700,210,30,16],[-310,200,18,10],[140,128,15,8],[610,10,12,7],[1292,262,14,8],[26,60,12,7]];
-  wmnMakeRivers(); // long winding rivers with side streams, clear of every place and name
+  M.rv=[];if(typeof WMR_FIT!=='undefined')M.lakes=WMR_FIT.lakes.map(l=>l.slice()); // the painted river systems stand where tools/fit_rivers.py put them; the lakes are the ones it left
   // roads: the old road list, as inked ribbons; a ferry across the sea; the pilgrim's way round the north; the road east
   const rd=[];let sd=1;
   const road=(keys,style)=>{const pts=keys.map(k=>[by[k].x,by[k].y]);rd.push({pts:mpWorldRoute(pts,sd++,style==='track'?2.5:3.5),style})};
@@ -76,7 +76,7 @@ function mpWorldInit(){
   // things that scenery keeps clear of
   const av=new Map(),ap=(x,y)=>{const k=Math.floor(x/10)*10007+Math.floor(y/10);let l=av.get(k);if(!l)av.set(k,l=[]);l.push([x,y])};
   const dense=(pts)=>{for(let i=0;i<pts.length-1;i++){const a=pts[i],b=pts[i+1],L=Math.hypot(b[0]-a[0],b[1]-a[1]),m=Math.max(1,Math.ceil(L/3));for(let k=0;k<m;k++)ap(a[0]+(b[0]-a[0])*k/m,a[1]+(b[1]-a[1])*k/m)}};
-  rd.forEach(r=>dense(r.pts));M.rv.forEach(dense);
+  rd.forEach(r=>dense(r.pts));if(typeof WMR_FIT!=='undefined')for(let i=0;i<WMR_FIT.pts.length;i+=2)ap(WMR_FIT.pts[i],WMR_FIT.pts[i+1]);
   const nearLine=(x,y,d)=>{const gx=Math.floor(x/10),gy=Math.floor(y/10),m=Math.ceil(d/10);for(let a=-m;a<=m;a++)for(let b=-m;b<=m;b++){const l=av.get((gx+a)*10007+gy+b);if(l)for(const q of l){if(Math.hypot(q[0]-x,q[1]-y)<d)return true}}return false};
   const regionLab=[[-330,120,80,14],[-760,100,80,14],[-560,250,70,14],[210,16,64,12],[652,16,70,12],[476,-10,80,14],[-6,208,56,13],[1230,18,70,12],[930,-138,130,7],[530,264,50,5]];
   const blocked=(x,y,d)=>{
@@ -241,7 +241,7 @@ function mpWorldNames(V,z){
   fx('The Grey Downs',-560,250,15,ink,1);
   fx('The Eastern Lands',1230,16,19,ink,1.5);
   sea('The Narrow Sea',836,24,21,'rgba(26,48,84,.78)');
-  sea('The Western Deep',-250,110,16,'rgba(26,48,84,.7)');sea('The Southern Sea',380,450,17,'rgba(26,48,84,.7)');
+  sea('The Western Deep',-1215,110,16,'rgba(26,48,84,.7)');sea('The Southern Sea',380,450,17,'rgba(26,48,84,.7)');
 }
 function mpWorldCreatures(V,z){wmnCreatures(V,z)}
 
