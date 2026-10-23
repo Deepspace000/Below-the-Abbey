@@ -123,7 +123,7 @@ function mpWorldInit(){
 
 /* the paper: aged vellum with a little fibre, cached at 2x (one pixel to a screen pixel) */
 function mpWorldPaper(){
-  const c=document.createElement('canvas');c.width=DW*2;c.height=DH*2;const x=c.getContext('2d');x.scale(2,2);mplParchment(x,[2,2,-6]);
+  const c=document.createElement('canvas');c.width=DW*2;c.height=DH*2;const x=c.getContext('2d');x.scale(2,2);wmnParchment(x);
   x.save();x.globalAlpha=.1;x.strokeStyle='#6a4a28';x.lineWidth=.4;for(let i=0;i<420;i++){const a=hash2(i,1,77)*DW,b=hash2(i,2,77)*DH,l=3+hash2(i,3,77)*9,an=hash2(i,4,77)*TAU;x.beginPath();x.moveTo(a,b);x.lineTo(a+Math.cos(an)*l,b+Math.sin(an)*l);x.stroke()}x.restore();return c}
 
 /* the frame, vignette, title cartouche and compass: static, cached at 2x (one pixel to a screen pixel). Rebuilt once if the blackletter font finishes loading late. */

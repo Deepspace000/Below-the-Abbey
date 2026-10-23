@@ -42647,7 +42647,7 @@ function mpWorldInit(){
 
 /* the paper: aged vellum with a little fibre, cached at 2x (one pixel to a screen pixel) */
 function mpWorldPaper(){
-  const c=document.createElement('canvas');c.width=DW*2;c.height=DH*2;const x=c.getContext('2d');x.scale(2,2);mplParchment(x,[2,2,-6]);
+  const c=document.createElement('canvas');c.width=DW*2;c.height=DH*2;const x=c.getContext('2d');x.scale(2,2);wmnParchment(x);
   x.save();x.globalAlpha=.1;x.strokeStyle='#6a4a28';x.lineWidth=.4;for(let i=0;i<420;i++){const a=hash2(i,1,77)*DW,b=hash2(i,2,77)*DH,l=3+hash2(i,3,77)*9,an=hash2(i,4,77)*TAU;x.beginPath();x.moveTo(a,b);x.lineTo(a+Math.cos(an)*l,b+Math.sin(an)*l);x.stroke()}x.restore();return c}
 
 /* the frame, vignette, title cartouche and compass: static, cached at 2x (one pixel to a screen pixel). Rebuilt once if the blackletter font finishes loading late. */
@@ -48110,20 +48110,23 @@ function wmnLayout(){
     const lr=(!G.flags.autoScaleOn&&typeof locRating==='function')?locRating(l):null,t2=lr?'Lv '+lr:'';
     c.save();c.font=`bold ${nsz}px ${FUI}`;const w1=c.measureText(l.n).width;c.font=`bold 8px ${FUI}`;const w2=lr?c.measureText(t2).width:0;c.font=`bold 7.4px ${FUI}`;const sw=l.sub?c.measureText(l.sub).width:0;c.restore();
     const gap=lr?5:0,wt=w1+gap+w2,bw=Math.max(wt,sw),sub=l.sub?11:0,ym=(ib[1]+ib[3])/2;
-    // every spot round the picture where the name could stand: under it, over it, beside it, each a few steps further out; the nearest spot that is clear wins (under is preferred).
-    // The block keeps 7 free under the name for the quest dots; where there is no room for that, the dots may sit on whatever is there.
-    let best=null,bestA=1e9;
-    for(const strip of [7,0]){
-      const H=14+sub+strip,cands=[];
-      for(const [side,bias] of [['b',0],['t',5],['r',3],['l',3]])for(let k=-4;k<=4;k++)for(let step=0;step<7;step++){
+    // every spot round the picture where the name could stand: under it, over it, beside it, each a few steps further out. The clear spot nearest to the picture wins
+    // (the gap between the name and the picture is what counts; under is preferred a little). The block keeps 7 free under the name for the quest dots; a spot that has no room
+    // for those still counts, a little behind (the dots may then sit on whatever is there).
+    const cands=[];
+    for(const strip of [7,0]){const H=14+sub+strip;
+      for(const [side,bias] of [['b',0],['r',1.5],['l',1.5],['t',3]])for(let k=-4;k<=4;k++)for(let step=0;step<7;step++){
         let cx,ny;
         if(side==='b'){cx=l.x+k*bw*.25;ny=ib[3]+8+step*7}else if(side==='t'){cx=l.x+k*bw*.25;ny=ib[1]-8-sub-7-step*7}
         else if(side==='r'){cx=ib[2]+4+bw/2+step*6;ny=ym-sub/2+k*8}else{cx=ib[0]-4-bw/2-step*6;ny=ym-sub/2+k*8}
-        cands.push({cx,ny,r:[cx-bw/2-2,ny-7,cx+bw/2+2,ny-7+H],d:Math.hypot(cx-l.x,ny-ib[3])+bias+Math.abs(k)*2.5})}
-      cands.sort((p,q)=>p.d-q.d);
-      for(const q of cands){let a=0;for(const p of placed){if(wmnHit(q.r,p)){const ox=Math.min(q.r[2],p[2])-Math.max(q.r[0],p[0]),oy=Math.min(q.r[3],p[3])-Math.max(q.r[1],p[1]);a+=ox*oy+1}}
-        if(a<bestA){bestA=a;best=q;if(!a)break}}
-      if(!bestA)break}
+        const r=[cx-bw/2-2,ny-7,cx+bw/2+2,ny-7+H],gx=Math.max(0,r[0]-ib[2],ib[0]-r[2]),gy=Math.max(0,r[1]-ib[3],ib[1]-r[3]);
+        const own=Math.hypot(gx,gy);let near=1e9;                                   // a name must not stand nearer to another place's picture than to its own
+        for(const m of order)if(m!==l){const o=out[m.k].ib,hx=Math.max(0,r[0]-o[2],o[0]-r[2]),hy=Math.max(0,r[1]-o[3],o[1]-r[3]);near=Math.min(near,Math.hypot(hx,hy))}
+        cands.push({cx,ny,r,d:own+bias+Math.abs(k)*1.2+(strip?0:2.5)+(near<own+4?(own+4-near)*1.5+6:0)})}}
+    cands.sort((p,q)=>p.d-q.d);
+    let best=null,bestA=1e9;
+    for(const q of cands){let a=0;for(const p of placed){if(wmnHit(q.r,p)){const ox=Math.min(q.r[2],p[2])-Math.max(q.r[0],p[0]),oy=Math.min(q.r[3],p[3])-Math.max(q.r[1],p[1]);a+=ox*oy+1}}
+      if(a<bestA){bestA=a;best=q;if(!a)break}}
     placed.push(best.r);Object.assign(L,{cx:best.cx,ny:best.ny,rect:[best.r[0],best.r[1],best.r[2],best.r[1]+14+sub+7],w1,w2,gap,wt,t2,nsz,over:bestA>0});
   }
   WMN.lay=out;WMN.layKey=key;return out}
@@ -48295,6 +48298,12 @@ function wmnRivers(V,z){
     if(z>.9){c.strokeStyle='rgba(62,102,52,.8)';c.lineWidth=.38;c.beginPath();for(let k=0;k<6;k++){const a=(k/6+H(k,ly,625)*.1)*TAU,j=1+.1*Math.sin(a*3+lx),px=lx+Math.cos(a)*(rx*j+2),py=ly+Math.sin(a)*(ry*j+2);for(const q of [-.9,0,.9]){c.moveTo(px+q,py+.6);c.lineTo(px+q*1.5,py-2.4-Math.abs(q))}}c.stroke()}}}
 /* the small writing under The Hollow Lands */
 function wmnSmallWords(){const c=ctx;for(const [t,x,y,sz] of WMN_SMALL){c.save();c.font=`italic ${sz}px ${FUI}`;c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=2.6;c.strokeStyle='rgba(236,222,176,.6)';c.strokeText(t,x,y);c.fillStyle='rgba(50,36,18,.7)';c.fillText(t,x,y);c.restore()}}
+
+/* the paper under the map: plain aged vellum, with a light vignette and no blotches (the oval stains of the common parchment showed through the washes as ovals) */
+function wmnParchment(x){
+  const tint=[2,2,-6],f=(a,b,c)=>`rgb(${Math.max(0,Math.min(255,a+tint[0]))},${Math.max(0,Math.min(255,b+tint[1]))},${Math.max(0,Math.min(255,c+tint[2]))})`,g=x.createLinearGradient(0,0,0,DH);
+  g.addColorStop(0,f(226,208,160));g.addColorStop(1,f(206,184,134));x.fillStyle=g;x.fillRect(0,0,DW,DH);
+  const v=x.createRadialGradient(DW/2,DH/2,DH*.3,DW/2,DH/2,DW*.62);v.addColorStop(0,'rgba(80,50,20,0)');v.addColorStop(1,'rgba(80,50,20,.38)');x.fillStyle=v;x.fillRect(0,0,DW,DH)}
 
 /* ---- src/desert/wd_hills.js ---- */
 /* ==========================================================================

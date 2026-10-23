@@ -408,3 +408,8 @@ Wild places are hills and rock piles (3.601)
 The old pen-drawn world map is gone (3.602)
 
 * The Old look button and the old pen-drawn world map are removed. The painted map is the only world map. The pen drawings of towns, castles, trees, mountains, ships and the rest are deleted from the code.
+
+World map: names closer, no background ovals (pending release)
+
+* The names of the Ruby Maze and the Ironhill Mines now stand right beside their own pictures. Every name on the map is put at the nearest clear spot to its own picture, and never nearer to a different place's picture than to its own.
+* The faint oval blotches in the parchment behind the world map are gone, so the land is clean.
