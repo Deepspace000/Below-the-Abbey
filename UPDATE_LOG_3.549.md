@@ -316,3 +316,11 @@ Monsters hit more often (3.594)
 Twenty new faces for the party (3.594)
 
 * The party screen has 90 faces to choose from instead of 70. New: a frog-folk man and woman of the Hollow Land, a yellow toad, a green frog, a proud black goat, a goat in spectacles, a goat in a turban, a goat in a wizard’s cowl, a white llama, a brown llama, a lobster creature, a crocodile, a man with a goatee, a young man with brown hair, a young woman with short black hair and big blue eyes, an older woman with silver hair, a girl with big curly hair, a white Khao Manee cat with one blue eye and one gold eye, a grey cat with a white neck and a white patch above its mouth, and a young Russian Blue cat.
+
+New faces for the cats and the curly-haired girl (3.595)
+
+* The white Khao Manee, the grey cat and the Russian Blue on the party screen are now slim, short-haired cats, and the Russian Blue has its silvery blue coat and green eyes. The girl with the big curly hair is paler and looks more innocent.
+
+One more face (3.595)
+
+* A feisty young woman with fierce blue eyes and straight, shoulder-length peroxide blonde hair joins the party screen, which now has 91 faces.
