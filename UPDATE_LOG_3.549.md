@@ -440,3 +440,7 @@ River mouths open into the sea (3.604)
 
 * On the iPad, after a few minutes of play, the screen redrew suddenly, pictures disappeared and flashed, and the maps went black. The cause: the game kept making new copies of its lit pictures and leaving the old ones for Safari to clear up later, so it ran past the iPad's limit for canvas memory. The cache of lit pictures now has a fixed size in pixels, and a picture that leaves it is reused or freed at once. Only the three newest area maps are kept. When the game comes back to the front, every cached copy is made again.
 * The Ironhill map shows a ruby diamond on the back wall of Dorn's store, named "A strange door", and the key lists it.
+
+3.606: the Windows app updates itself
+
+* The Windows app now looks for a newer version on GitHub Pages five seconds after it starts. If there is one, it downloads only the game files that changed (checking every file), keeps them, and uses them the next time the game starts. A note on screen says when a new version is ready. Players who did not get the game through the itch.io app no longer have to download the whole game again for each update. Only the game's own files update this way; a new Windows build is still needed to change the app itself, and this first build has to be downloaded once.

@@ -15,3 +15,6 @@ for dp, dn, fn in os.walk(os.path.join(ROOT, 'assets')):
             sizes[os.path.relpath(full, ROOT).replace(os.sep, '/')] = os.path.getsize(full)
 json.dump(sizes, open(os.path.join(ROOT, 'assetsizes.json'), 'w'), separators=(',', ':'))
 print('stamped', v, len(sizes), 'pictures')
+# the list of content files and hashes the Windows app uses to update itself from GitHub Pages
+import subprocess, sys
+subprocess.check_call([sys.executable, os.path.join(ROOT, 'tools', 'make_win_manifest.py')])
