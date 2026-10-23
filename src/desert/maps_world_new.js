@@ -1,8 +1,6 @@
 /* ==========================================================================
-   THE NEW LOOK FOR THE WORLD MAP (prefix wmn / WMN). Hand-painted pictures in coloured pencil and watercolour instead of the pen drawings: every place, the trees,
-   pines, mountains, hills, dunes and palms, and the ships and sea creatures. It is a second way to draw the same map (G.flags.mapNew, the "New look" button on the
-   world map); the old drawings stay and the map's roads, rivers, coast, clouds, titles and behaviour are shared. maps_world.js calls the functions here
-   when wmnOn() is true.
+   THE PAINTED WORLD MAP (prefix wmn / WMN). Hand-painted pictures in coloured pencil and watercolour: every place, the trees, pines, mountains, hills, dunes and palms,
+   the ships and sea creatures, the dirt paths and the rivers. maps_world.js keeps the map's shape, coast, clouds, titles and behaviour and calls the functions here.
    Pictures: assets/wm_a.png (big: places, landmarks, sea creatures) and assets/wm_s.png (small: scenery), cut and packed by tools/build_wm_atlas.py;
    where each one sits is in maps_world_atlas.js (WMN_RECTS).
    Nothing on this map may overlap: wmnLayout() places every picture and every name (and its level and quest dots) once, so that no name stands on a picture,
@@ -15,10 +13,7 @@ function wmnLoad(){
   if(WMN.loading||typeof WMN_RECTS==='undefined')return;WMN.loading=true;let n=0;
   for(const p of ['a','s']){const im=new Image();im.onload=()=>{WMN[p]=im;if(++n===2)WMN.ok=true};im.onerror=()=>{WMN.failed=true};im.decoding='async';
     im.src='assets/wm_'+p+'.png'+(typeof VERSION!=='undefined'?'?v='+VERSION:'')}}
-/* the painted look is the map unless the player has switched it off (G.flags.mapNew===false) */
-function wmnWanted(){return !(G.flags&&G.flags.mapNew===false)}
-function wmnOn(){if(!wmnWanted())return false;if(!WMN.ok){wmnLoad();return false}return true}
-function wmnToggle(){G.flags.mapNew=!wmnWanted();if(G.flags.mapNew)wmnLoad();WMN.lay=null}
+wmnLoad();   // the pictures are fetched at start-up, so the map has them the first time it is opened
 
 /* one picture, bottom centre at (cx,by), size = height, or width when isW */
 function wmnDims(name,size,isW){const r=WMN_RECTS[name];if(!r)return [0,0];return isW?[size,size*r[4]/r[3]]:[size*r[3]/r[4],size]}
@@ -40,7 +35,9 @@ const WMN_SPEC={
 const WMN_ICSPEC={town:'i_town',castle:'i_castle',abbey:'i_abbey',cave:'i_cave',mine:'i_mine',graves:'i_graves',crypt:'i_crypt',trees:'i_oaks',mountains:'i_mountains',orangecastle:'i_spire',rubymaze:'i_rubymaze'};
 function wmnSpec(l){return WMN_SPEC[l.k]||[[WMN_ICSPEC[l.ic]||'i_oaks',0,0,l.ic==='castle'||l.ic==='orangecastle'?40:28]]}
 /* the picture's footprint: its parts, how far down they are drawn, and its box (the bottom stands a little below the place's own point) */
+const WMN_BOX={deephollow:[-21,-27,21,15]};   // places whose picture is drawn by another file: their box
 function wmnShape(l){
+  if(WMN_BOX[l.k]){const b=WMN_BOX[l.k];return {parts:[],off:0,ib:[l.x+b[0],l.y+b[1],l.x+b[2],l.y+b[3]]}}
   const s=wmnSpec(l);if(!s.length)return {parts:[],off:0,ib:[l.x,l.y-12,l.x,l.y-4]};let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
   for(const p of s){const d=wmnDims(p[0],p[3]*WMN_ICO_SCALE,p[4]);x0=Math.min(x0,p[1]*WMN_ICO_SCALE-d[0]/2);x1=Math.max(x1,p[1]*WMN_ICO_SCALE+d[0]/2);y0=Math.min(y0,p[2]*WMN_ICO_SCALE-d[1]);y1=Math.max(y1,p[2]*WMN_ICO_SCALE)}
   const off=l.y+10-y1;return {parts:s.slice().sort((a,b)=>a[2]-b[2]),off,ib:[l.x+x0,y0+off,l.x+x1,y1+off]}}
