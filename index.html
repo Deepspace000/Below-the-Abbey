@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;ldNot
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.590';
+const VERSION='3.591';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2223,7 +2223,7 @@ function enemyAttack(e){
   e.lunge=1;
   const dirToE=DIRS.findIndex(d=>G.P.x+d[0]===e.x&&G.P.y+d[1]===e.y);
   const side=dirToE===G.P.f?'':(dirToE===(G.P.f+2)%4?' from behind':' from the side');
-  const hitC=clamp(def.hit+(typeof diffHitAdd==='function'?diffHitAdd():0)-heroArmor(h)*.025-pas(t,'dodge')-(e.st?mxMiss(e):0),.25,.95),verb=def.verb||(e.t==='skel'?'slashes':'bites');
+  const hitC=clamp(def.hit+(typeof diffHitAdd==='function'?diffHitAdd():0)-heroArmor(h)*.025-pas(t,'dodge')-(e.st?mxMiss(e):0)+(typeof BAL!=='undefined'?BAL.ACC:0),.35,.95),verb=def.verb||(e.t==='skel'?'slashes':'bites');
   if(Math.random()<hitC){
     if(def.slows){G.slowT=Math.max(G.slowT||0,4);msg('Dead hands drag at the party. You are slowed.','#e8c870')}let d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*(e.st?mxMul(e):1)));if(typeof armourWard==='function')d=Math.max(1,d-armourWard(t));h.hp-=d;h.hurt=1;G.shake=.35;sfx(e.t==='skel'?'hit':'bite');sfx('hurt');
     msg(`The ${def.name} ${verb} ${HERO_DEF[t].name}${side} for ${d}.`,'#e8a090');addFloat(portraitX(t)+19,250,'-'+d,'#ff6a5a');
@@ -6035,7 +6035,7 @@ function enemyShoot(e){
   const pool=[];for(const j of l)for(let k=0;k<(j<2?3:1);k++)pool.push(j);
   const t=pool[rnd(0,pool.length-1)],h=G.heroes[t];e.lunge=1;
   G.arrows.push({x0:clamp(e.sx,14,406),y0:clamp(e.sy,40,170),x1:210+rnd(-30,30),y1:196,t:G.time});sfx('arrow');
-  const hitC=clamp(def.hit+(typeof diffHitAdd==='function'?diffHitAdd():0)-heroArmor(h)*.025-pas(t,'dodge')-(e.st?mxMiss(e):0),.25,.95);
+  const hitC=clamp(def.hit+(typeof diffHitAdd==='function'?diffHitAdd():0)-heroArmor(h)*.025-pas(t,'dodge')-(e.st?mxMiss(e):0)+(typeof BAL!=='undefined'?BAL.ACC:0),.35,.95);
   if(Math.random()<hitC){
     const d=Math.max(1,Math.round(rnd(st.dmg[0],st.dmg[1])*(e.st?mxMul(e):1)));h.hp-=d;h.hurt=1;G.shake=.3;sfx('hurt');try{if(h.hp>0)afflHit(e.t,t)}catch(x){}
     msg(def.shot?`${def.name} hurls ${def.shot} at ${HERO_DEF[t].name} for ${d}.`:`An arrow from the ${def.name} hits ${HERO_DEF[t].name} for ${d}.`,'#e8a090');addFloat(portraitX(t)+19,250,'-'+d,'#ff6a5a');
@@ -6802,7 +6802,7 @@ function drawCompare(e,def){
   const st=enemyStat(e.t,e.lvl),plvl=Math.round(H.reduce((n,o)=>n+o.h.lvl,0)/H.length);
   const pHp=H.reduce((n,o)=>n+Math.max(0,o.h.hp),0),pMax=H.reduce((n,o)=>n+o.h.max,0);
   let dpr=0;for(const o of H){const r=heroDmgRange(o.h);dpr+=(r[0]+r[1])/2*heroHitPct(o.i,false)}
-  const eAvg=(st.dmg[0]+st.dmg[1])/2,hitC=clamp(def.hit+(typeof diffHitAdd==='function'?diffHitAdd():0)-H.reduce((n,o)=>n+heroArmor(o.h),0)/H.length*.025,.25,.95),eDpr=Math.max(.1,eAvg*hitC);
+  const eAvg=(st.dmg[0]+st.dmg[1])/2,hitC=clamp(def.hit+(typeof diffHitAdd==='function'?diffHitAdd():0)-H.reduce((n,o)=>n+heroArmor(o.h),0)/H.length*.025+(typeof BAL!=='undefined'?BAL.ACC:0),.35,.95),eDpr=Math.max(.1,eAvg*hitC);
   const toKill=Math.max(.2,e.hp/Math.max(1,dpr)),toDie=Math.max(.2,(pHp/H.length)/eDpr),ratio=toDie/toKill;
   const VER=[['Trivial','#8ad07a'],['Easy','#a8d070'],['Fair fight','#e0d070'],['Hard','#e89850'],['Deadly','#e85a48']];
   let vi=ratio>=6?0:ratio>=3?1:ratio>=1.5?2:ratio>=.7?3:4;
@@ -46851,7 +46851,7 @@ BAL.dk=l=>BAL.lerp(BAL.dkT,l);BAL.hp=l=>BAL.lerp(BAL.hpT,l);BAL.target=l=>BAL.le
    a creature takes about 13 hits from an average party of its own level, so one the party has outgrown takes fewer, and one above the party more (BAL.hitsRel(0));
    the kind of creature changes it (a wolf-like one about 60 percent of that, the toughest ordinary kinds up to 175 percent), and each kind is a little different (plus or minus 15 percent), so no two fights feel the same.
    Bosses and great creatures keep the older formula (health factor hpT). The new sizing fades in from level 26 to 32; below it nothing changes. */
-BAL.REF=48;BAL.DMG=1.12; // every creature hits 12 percent harder, at every level
+BAL.REF=48;BAL.DMG=1.232;BAL.ACC=.10; // every creature hits 12 percent harder, then a further 10 percent (1.12*1.10), at every level; ACC is added to every enemy's hit chance (kept between .35 and .95 where it is used)
 BAL.ahT=[[1,8],[10,14],[20,36],[25,54],[28,62],[30,98],[34,100],[36,143],[40,150],[46,164],[50,178],[60,182],[70,183],[100,184]]; // the average hit (damage times chance to hit) of an average (weaker) party: about four fifths of one with the best gear for its level, so a party with better gear than average kills faster for a while
 BAL.ah=l=>BAL.lerp(BAL.ahT,l);
 BAL.w=l=>Math.max(0,Math.min(1,(l-26)/6));
@@ -47063,6 +47063,28 @@ function hgdnaSweep(list){for(const d of list){if(!HGDNA.SMALL.test(d.k||'')||d.
   const moves=[[25,12,40,12],[30,5,44,6]];
   for(const [fx,fy,tx,ty] of moves){const e=L.enemies.find(q=>q.t==='skel'&&q.x===fx&&q.y===fy);if(!e)continue;
     let done=false;for(let r=0;r<8&&!done;r++)for(let dy=-r;dy<=r&&!done;dy++)for(let dx=-r;dx<=r&&!done;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=tx+dx,y=ty+dy;if(!open(x,y)||occ.has(x+','+y))continue;occ.delete(fx+','+fy);e.x=x;e.y=y;if(e.rx!==undefined){e.rx=x;e.ry=y}occ.add(x+','+y);done=true}}}}
+
+/* ---- src/desert/sut_more.js ---- */
+/* ==========================================================================
+   MORE FOES IN THE TOMB OF SUT, AND SKELETONS THAT HIT MORE OFTEN (prefix sutm).
+   1. Four more skeletons and two more mummies stand in the Hall of Eternity, the big hall in the middle of the Tomb of Sut (level 42). They are spread
+      out in a zigzag from the south end to the north end, five or more squares apart, so they do not all wake at once, and none is near the way in or
+      beside a passage mouth. The skeleton kind the tomb already uses is dskeleton; the mummies use the tomb's own level 16.
+   2. Skeletons missed a lot. Every creature kind named Skeleton (skel and dskeleton) gets 0.12 added to its hit chance (about 0.72 and 0.74 before).
+   ========================================================================== */
+(function sutMore(){
+  // skeletons hit more often (done once, whatever the number of times this file runs)
+  for(const k of Object.keys(ENEMY_DEF)){const d=ENEMY_DEF[k];if(d&&d.name==='Skeleton'&&!d.sutmHit){d.hit=Math.min(.95,Math.round((d.hit+.12)*100)/100);d.sutmHit=1}}
+  // the extra foes in the Hall of Eternity
+  const L=LEVELS[42];if(!L||!L.enemies||!L.rows)return;
+  const open=(x,y)=>L.rows[y]&&L.rows[y][x]==='.';
+  const taken=new Set(L.enemies.concat(L.decor||[],L.items||[]).map(e=>e.x+','+e.y));
+  const solid=new Set((L.decor||[]).filter(d=>d.block).map(d=>d.x+','+d.y));
+  const plan=[['dskeleton',44,41,15],['mummy',52,41,16],['dskeleton',48,36,15],['dskeleton',43,31,15],['dskeleton',53,31,15],['mummy',48,30,16]];
+  for(const [t,x,y,lvl] of plan){
+    if(!L.enemies.some(e=>e.sutm&&e.x===x&&e.y===y)&&open(x,y)&&!solid.has(x+','+y)&&!taken.has(x+','+y)){L.enemies.push({t,x,y,lvl,sutm:1});taken.add(x+','+y)}
+  }
+})();
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

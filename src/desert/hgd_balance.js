@@ -20,7 +20,7 @@ BAL.dk=l=>BAL.lerp(BAL.dkT,l);BAL.hp=l=>BAL.lerp(BAL.hpT,l);BAL.target=l=>BAL.le
    a creature takes about 13 hits from an average party of its own level, so one the party has outgrown takes fewer, and one above the party more (BAL.hitsRel(0));
    the kind of creature changes it (a wolf-like one about 60 percent of that, the toughest ordinary kinds up to 175 percent), and each kind is a little different (plus or minus 15 percent), so no two fights feel the same.
    Bosses and great creatures keep the older formula (health factor hpT). The new sizing fades in from level 26 to 32; below it nothing changes. */
-BAL.REF=48;BAL.DMG=1.12; // every creature hits 12 percent harder, at every level
+BAL.REF=48;BAL.DMG=1.232;BAL.ACC=.10; // every creature hits 12 percent harder, then a further 10 percent (1.12*1.10), at every level; ACC is added to every enemy's hit chance (kept between .35 and .95 where it is used)
 BAL.ahT=[[1,8],[10,14],[20,36],[25,54],[28,62],[30,98],[34,100],[36,143],[40,150],[46,164],[50,178],[60,182],[70,183],[100,184]]; // the average hit (damage times chance to hit) of an average (weaker) party: about four fifths of one with the best gear for its level, so a party with better gear than average kills faster for a while
 BAL.ah=l=>BAL.lerp(BAL.ahT,l);
 BAL.w=l=>Math.max(0,Math.min(1,(l-26)/6));

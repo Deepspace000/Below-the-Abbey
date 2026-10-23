@@ -33,6 +33,7 @@ function tmRealGear(h,hi,n,good){
     if(tier==='none')continue;
     let idx=tier==='good'?L-1:tier==='cheap'?Math.floor(rnd()*Math.max(1,Math.ceil(L*.3))):Math.min(L-1,Math.floor(L*.4)+Math.floor(rnd()*Math.max(1,Math.ceil(L*.3))));
     h.eq[slot]=mkItem(list[idx][0])}}
+function tmCleanse(){try{for(const e of afflList().slice())afflRemove(e,true)}catch(er){}}
 function tmApply(n,weak,real){
   // 0. the party is exactly level n: a higher one left by a save is rebuilt from level 1; the bag loses the usual test weapons and any spare gear
   { // a typical party, with a healer: Warrior, Thief, Mage and Priest
@@ -69,6 +70,7 @@ function tmApply(n,weak,real){
   G.gold=real?Math.round(tmGold(n)*.5):tmGold(n);
   // 4. the quests
   const Q=tmQuestPlan(n);for(const id of Q.main.concat(Q.extra))G.quests[id]={st:'done',base:0};
+  tmCleanse();TM.clean=[G.time+1.2,G.time+3]; // a test party starts with no afflictions (those an area gives on entering are cleared a moment later too)
   // the creatures of the area were sized while the party was being rebuilt at a low level: size them again now that it stands at level n
   for(const e of G.enemies){if(e.hp<=0||e.dying)continue;const fr=e.hp/e.maxhp;e.maxhp=enemyStat(e.t,e.lvl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*fr))}
   msg('Testing party, level '+n+(real?' (real party: a mix of cheap and ok gear, two good pieces)':weak?' (weaker, average weapons)':'')+': '+(real?Math.round(tmGold(n)*.5):tmGold(n))+' gold, '+Q.main.length+' main and '+Q.extra.length+' side quests marked done.','#9ae0ff')}
@@ -112,5 +114,6 @@ function tmDraw(){
 // when the area has been entered, the party is built
 {const _j=jumpToLevel;jumpToLevel=function(){TM.apply=G.testPreset||null;return _j.apply(this,arguments)}}
 {const _u=update;update=function(dt){
+  try{if(TM.clean&&TM.clean.length&&G.state==='play'&&G.time>=TM.clean[0]){TM.clean.shift();tmCleanse()}}catch(er){}
   try{if(TM.apply&&G.state==='play'&&G.heroes&&G.heroes.length&&!G.cut){const a=TM.apply;TM.apply=null;tmApply(a.n,a.weak,a.real)}}catch(e){console.error('tm',e);TM.apply=null}
   return _u.apply(this,arguments)}}

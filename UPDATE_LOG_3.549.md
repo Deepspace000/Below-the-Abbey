@@ -279,3 +279,17 @@ Creatures that died in one hit (3.588)
 Mana comes back slower (3.589 and 3.590; the change itself went in with 3.590)
 
 * Mana regeneration takes twice as long: a hero recovers 1 mana every second round of a fight instead of every round, and the mana regeneration of armour and powers (such as Mana Well) is halved too. Resting and mana potions are unchanged.
+
+Skeletons hit more often, more foes in the Tomb of Sut (3.591)
+
+* Skeletons missed too often. Both skeleton kinds (the crypt skeleton and the desert skeleton) now have a 12 point higher chance to hit than before, on top of the change below. No other creature changed.
+* The Tomb of Sut has four more skeletons and two more mummies, standing in the Hall of Eternity, the big hall in the middle. They are spread out from the south end to the north end, five or more squares apart, so they do not all attack at once.
+
+Enemies hit more accurately and harder (3.591)
+
+* Every creature now hits another 10 percent harder than before.
+* Every enemy is more likely to hit: all enemy attacks get +10 percent chance to hit. A hit chance can never go below 35 percent or above 95 percent, so even a very well armoured hero is hit at least about one time in three.
+
+Testing menu (3.591, the GitHub Pages version only)
+
+* A test party made with the Testing menu starts with no afflictions. Any that an area gives on arrival are cleared a moment later too.
