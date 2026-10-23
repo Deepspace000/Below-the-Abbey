@@ -405,6 +405,6 @@ Wild places are hills and rock piles (3.601)
 * The caves and old ruins hidden in the woods are no longer big wall boxes. Each is a small painted hill with a door set into it, wooden, stone or a dark cave mouth. In the deserts it is a pile of rocks with a stone door in it. The party walks into the door as before.
 * More trees grow round every hill, and the dead trees across the door have to be burned as before. The two sides of the hill are closed, so the party cannot walk through them.
 
-The old pen-drawn world map is gone (pending release)
+The old pen-drawn world map is gone (3.602)
 
 * The Old look button and the old pen-drawn world map are removed. The painted map is the only world map. The pen drawings of towns, castles, trees, mountains, ships and the rest are deleted from the code.
