@@ -1,10 +1,10 @@
 /* ==========================================================================
    THE TESTING MENU (prefix tm / TM). Loaded only by the GitHub Pages (and local) copy of the game: index.html has a one-line loader that does nothing on itch.io or in the Windows app, and both of those builds
-   leave this file out. A "Testing" button on the title screen opens a list of typical parties (level 10, 20, ... 80, each in three kinds: best gear for the level; a weaker party with average weapons; and a real party where the front fighters hold the ok and good gear and the back line waits with cheap gear, and half the gold), each with a healer (a Priest) in the party and with gear that fits its level, some potions and food, an average amount of gold, the main quests
+   leave this file out. A "Testing" button on the title screen opens a list of typical parties (levels 5, 10, 15, ... 85, each in three kinds: best gear for the level; a weaker party with average weapons; and a real party where the front fighters hold the ok and good gear and the back line waits with cheap gear, and half the gold), each with a healer (a Priest) in the party and with gear that fits its level, some potions and food, an average amount of gold, the main quests
    done up to about that point of the story, and a couple of side quests done in each town passed. Choose one, press "Go to area", and pick the area on the usual Go to area list: the party is built when you arrive.
    (Quests are only marked done: the story flags that the quests would have set are not all set, so a few doors and talks may still behave as at the start.)
    ========================================================================== */
-const TM={PRESETS:[10,20,30,40,50,60,70,80],sel:null,apply:null};
+const TM={PRESETS:[5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85],sel:null,apply:null};
 const tmGold=n=>Math.round(3.2*n*n+600);
 const tmEffL=d=>d.lvl||Math.min(100,Math.round(Math.sqrt(d.price||0)/1.2));
 const tmOk=(id,d,n)=>d&&tmEffL(d)<=n&&(d.price||0)>0&&(d.price||0)<=40*n*n+300&&!/^pp_/.test(id)&&!d.rar&&d.k!=='quest';
@@ -78,13 +78,14 @@ function tmApply(n,weak,real){
 function tmDraw(){
   BTNS=[];veil(.82);bigPanel(24,8,432,304);
   txt('TESTING',240,22,13,'#d8c88e','center',true);
-  txt('Choose a typical party (with a Priest to heal), then press Go to area. It is built when you arrive. Only in the GitHub Pages copy of the game.',240,37,7.5,'#c8b888','center');
+  txt('Choose a typical party (with a Priest to heal), then press Go to area. It is built when you arrive.',240,37,7.5,'#c8b888','center');
   const grp=[['Best gear for the level',48,''],['Weaker party: average weapons, not the best of their level',90,'w'],['Real party: front fighters upgraded first, back line cheap, half the gold',132,'r']];
   for(const [title,y0,pre] of grp){
     txt(title,40,y0-3,8.5,'#c8a860','left',true);
-    TM.PRESETS.forEach((n,i)=>{const x=40+i*52,y=y0+2,on=TM.sel&&TM.sel.n===n&&(TM.sel.real?'r':TM.sel.weak?'w':'')===pre;
-      btnText('tm_'+pre+n,(pre==='r'?'R ':pre==='w'?'W ':'L ')+n,x,y,48,24);
-      if(on){ctx.save();ctx.strokeStyle='#ffe36a';ctx.lineWidth=2;ctx.strokeRect(x-1,y-1,50,26);ctx.restore()}})}
+    TM.PRESETS.forEach((n,i)=>{const x=34+i*24,y=y0+2,on=TM.sel&&TM.sel.n===n&&(TM.sel.real?'r':TM.sel.weak?'w':'')===pre; // seventeen levels in a row, 5 to 85: the row title says which kind of party
+      ctx.save();ctx.fillStyle=on?'#4a3c1c':'#241c10';ctx.fillRect(x,y,22,24);ctx.lineWidth=1.2;ctx.strokeStyle=on?'#ffe36a':'#8a7448';ctx.strokeRect(x+.5,y+.5,21,23);ctx.restore(); // plain small boxes: the stone buttons are too wide for a number this small
+      txt(String(n),x+11,y+12.5,8.6,on?'#ffe9a0':'#e6d8aa','center',true);btn('tm_'+pre+n,x,y,22,24);
+      if(on){ctx.save();ctx.strokeStyle='#ffe36a';ctx.lineWidth=2;ctx.strokeRect(x-1,y-1,24,26);ctx.restore()}})}
   const S=TM.sel;
   if(S){const n=S.n,Q=tmQuestPlan(n),tier=tmPotionTier(n).map(id=>ITEMDEF[id].n).reverse().join(' and ');
     const L=[['Party','Warrior, Thief, Mage and Priest (the healer), every hero level '+n+' with full health.'],['Gear',(S.real?'A mix: the front fighters (Warrior and Thief) hold the upgrades, mostly ok pieces, and only the weapon and chest of the Warrior are good. The back line (Mage and Priest) waits with old cheap gear and some empty slots.':S.weak?'An average weapon of the last dozen levels (not the best); the best armour, helm, arms, legs and shield the shops sell by level '+n+', and two rings.':'The best weapon, helm, chest, arms, legs and shield the shops sell by level '+n+', and two rings.')],['Potions',tier+' (6 of the best, 4 of the next), mana potions, antidotes, torches and food.'],['Gold',(S.real?Math.round(tmGold(n)*.5):tmGold(n))+' gold'+(S.real?', half of what a party of this level has in hand (it takes a while to save).':', about what a party of this level has in hand.')],['Quests',Q.main.length+' of '+Q.mainAll+' main quests, and 2 side quests in each of the first '+Q.towns+' towns ('+Q.extra.length+' in all), marked done.']];
