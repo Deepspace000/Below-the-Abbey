@@ -431,3 +431,7 @@ The rivers are drawn to fit (pending release)
 * The names and levels on the world map are smaller and stand right against their pictures (Thornwick, Ironhill and the rest). A name may stand over the faded ground under a picture.
 * The Hollow Lands (the Deeper Hollow, the Hollow Grasslands, the Orange Spire and the title) sit in a shadowed pit with a dark rim, to show they are under the ground.
 * All the small subtitles under place names are gone, except "the golden city" under Khemetra.
+
+River mouths open into the sea (3.604)
+
+* The dark coast line no longer runs across the mouth of a river. The river's water carries on a short way into the sea and fades out.
