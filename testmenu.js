@@ -84,7 +84,7 @@ function tmDraw(){
     txt(title,40,y0-3,8.5,'#c8a860','left',true);
     TM.PRESETS.forEach((n,i)=>{const x=34+i*24,y=y0+2,on=TM.sel&&TM.sel.n===n&&(TM.sel.real?'r':TM.sel.weak?'w':'')===pre; // seventeen levels in a row, 5 to 85: the row title says which kind of party
       ctx.save();ctx.fillStyle=on?'#4a3c1c':'#241c10';ctx.fillRect(x,y,22,24);ctx.lineWidth=1.2;ctx.strokeStyle=on?'#ffe36a':'#8a7448';ctx.strokeRect(x+.5,y+.5,21,23);ctx.restore(); // plain small boxes: the stone buttons are too wide for a number this small
-      txt(String(n),x+11,y+12.5,8.6,on?'#ffe9a0':'#e6d8aa','center',true);btn('tm_'+pre+n,x,y,22,24);
+      ctx.save();ctx.font="bold 10.5px 'IM Fell English SC',Georgia,serif";ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=3;ctx.strokeStyle='#000';ctx.strokeText(String(n),x+11,y+12.5);ctx.fillStyle=on?'#ffffff':'#fff0bc';ctx.fillText(String(n),x+11,y+12.5);ctx.restore();btn('tm_'+pre+n,x,y,22,24); // bold, bright and outlined so it reads at once
       if(on){ctx.save();ctx.strokeStyle='#ffe36a';ctx.lineWidth=2;ctx.strokeRect(x-1,y-1,24,26);ctx.restore()}})}
   const S=TM.sel;
   if(S){const n=S.n,Q=tmQuestPlan(n),tier=tmPotionTier(n).map(id=>ITEMDEF[id].n).reverse().join(' and ');
