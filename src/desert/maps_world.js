@@ -183,7 +183,7 @@ function mpWorldTerrain(V,z){
     [1244,190,70,56,'90,130,70',.34],[1350,200,160,170,'110,150,80',.22],[1380,420,160,100,'100,140,76',.2],[930,-210,150,70,'120,130,140',.3],[1040,-240,100,40,'60,100,70',.26],[420,186,40,36,'80,130,70',.3],[560,-170,160,50,'130,140,130',.2],[1165,50,30,50,'90,130,70',.2]];
   const KW=1.5;
   for(const [cx,cy,rx,ry,col,a0] of WS){const a=Math.min(.85,a0*KW);if(cx+rx<V.x0||cx-rx>V.x1||cy+ry<V.y0||cy-ry>V.y1)continue;c.save();c.translate(cx,cy);c.scale(1,ry/rx);const g=c.createRadialGradient(0,0,0,0,0,rx);g.addColorStop(0,`rgba(${col},${a})`);g.addColorStop(.6,`rgba(${col},${a*.55})`);g.addColorStop(1,`rgba(${col},0)`);c.fillStyle=g;c.fillRect(-rx,-rx,rx*2,rx*2);c.restore()}
-  wmnWash(V,z);
+  wmnWash(V,z);wmnHollow(V,z);
   // the unknown lands: a hatched wash east of Greyfang Pass
   const UL=[[424,-400],[424,100],[416,140],[398,200],[380,262],[380,700],[1900,700],[1900,-400]];
   c.beginPath();UL.forEach((q,k)=>k?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));c.closePath();c.fillStyle='rgba(70,52,30,.10)';c.fill();c.save();c.clip();

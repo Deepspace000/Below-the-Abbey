@@ -3,3 +3,5 @@
   for(let i=WORLD_ROADS.length-1;i>=0;i--)if(gone(WORLD_ROADS[i]))WORLD_ROADS.splice(i,1);
   const mv=(k,x,y)=>{const l=WORLD_LOCS.find(q=>q.k===k);if(l){l.x=x;l.y=y}};
   mv('graves',214,108);mv('goldencrypt',216,62);mv('rubymaze',262,54)}
+/* no small writing under any place name, except "the golden city" under Khemetra */
+for(const l of WORLD_LOCS)if(l.k!=='scoria')delete l.sub;

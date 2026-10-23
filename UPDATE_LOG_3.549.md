@@ -423,3 +423,11 @@ The rivers are drawn to fit (pending release)
 
 * The world map's rivers are drawn again, each one made to fit its place: a thin stream in the hills, a long winding course that keeps clear of every picture, name and title, side streams that join it, and a mouth that runs out to the coast. Nothing is repeated and nothing is cut off. They are painted in watercolour water between hand-inked banks, with wooden dams across the narrower stretches, little rowing boats and a sailing boat on the wide ones, groves of trees on the banks, and a plank bridge wherever a road crosses a river. There are no lakes.
 * The same kind of picture is not used twice: the dams, boats and groves are separate painted pieces (made with Gemini) laid upright along the river.
+
+3.603: river joins, greyer water, smaller names, the Hollow Lands pit
+
+* Where a side stream meets a bigger river, the ink and shading of the banks no longer run across the other river's water, so the join is smooth. A side stream no longer crosses any river on its way.
+* The river water is greyer and a little darker, to match the sea. The ink banks are lighter and thinner, and the white ripples are fainter. The pale wash where a river reaches the sea now draws.
+* The names and levels on the world map are smaller and stand right against their pictures (Thornwick, Ironhill and the rest). A name may stand over the faded ground under a picture.
+* The Hollow Lands (the Deeper Hollow, the Hollow Grasslands, the Orange Spire and the title) sit in a shadowed pit with a dark rim, to show they are under the ground.
+* All the small subtitles under place names are gone, except "the golden city" under Khemetra.

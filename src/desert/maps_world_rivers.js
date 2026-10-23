@@ -60,7 +60,7 @@ function wmnMakeRivers(){
     const n=main.length,w=widths(n,.6,bs.w*1.3);
     for(let i=Math.max(0,ic-6);i<n;i++){const t=Math.min(1,(i-(ic-6))/6);w[i]*=1+.9*Math.pow(t,1.5)}   // the estuary opens out as it reaches the shore
     main.mouth={i:Math.min(ic,n-1)};
-    const rm={pts:main,w,main:true,id:ri};rivers.push(rm);mainBy[ri]=rm;
+    const rm={pts:main,w,main:true,id:ri,mouth:main.mouth};rivers.push(rm);mainBy[ri]=rm;
     // side streams: two to four, branching off at points along it, each winding in turn
     const nb=2+((H(ri,6,653)*3)|0);
     for(let b=0;b<nb;b++){
@@ -68,11 +68,23 @@ function wmnMakeRivers(){
       let ang=Math.atan2(Q[1]-P[1],Q[0]-P[0])+(b%2?1:-1)*(.9+H(ri,b,655)*.5),x=P[0],y=P[1];const tr=[[x,y]],maxL=80+H(ri,b,656)*110;let len=0;
       for(let st=0;st<70&&len<maxL;st++){ang+=(H(st,ri*9+b,657)-.5)*.3;x+=Math.cos(ang)*3;y+=Math.sin(ang)*3;len+=3;if(!land(x,y)||inObst(x,y,4))break;tr.push([x,y])}
       if(tr.length<16)continue;tr.reverse();                                                  // from the source down to the main river
-      const t2=fix(meander(tr,8+H(ri,b,658)*5,52+H(ri,b,659)*30,ri*13+b+3),tr);t2[t2.length-1]=P.slice();
+      let t2=fix(meander(tr,8+H(ri,b,658)*5,52+H(ri,b,659)*30,ri*13+b+3),tr);t2[t2.length-1]=P.slice();
+      // a side stream joins the river it springs from and never crosses any river on the way: where it would, its upper part is cut off (or it is dropped)
+      {let cl=-1;for(const r2 of rivers){const own=r2===rm;for(let a=0;a<t2.length-1;a++){if(own&&a>=t2.length-9)continue;const p=t2[a];for(let c2=0;c2<r2.pts.length;c2++){if(own&&Math.abs(c2-bi)<=10)continue;const q=r2.pts[c2];if(Math.abs(q[0]-p[0])<6&&Math.abs(q[1]-p[1])<6&&Math.hypot(q[0]-p[0],q[1]-p[1])<5){if(a>cl)cl=a;break}}}}
+        if(cl>=0){if(cl>t2.length*.7)continue;t2=t2.slice(cl+3);if(t2.length<14)continue}}
       rivers.push({pts:t2,w:widths(t2.length,.6,Math.max(2.4,w[bi]*.8)),main:false,id:ri*10+b+1})}});
   // each river's box, for drawing only what shows
   for(const r of rivers){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const p of r.pts){x0=Math.min(x0,p[0]);y0=Math.min(y0,p[1]);x1=Math.max(x1,p[0]);y1=Math.max(y1,p[1])}r.bb=[x0-16,y0-16,x1+16,y1+16]}
   M.rv=rivers.map(r=>r.pts);M.rivers=rivers;M.lakes=[];
+  // where two rivers meet, the ink of a bank must not run across the other's water: for every bank point, is it inside another river's water? (hL, hR: 1 = hidden)
+  {const gk=(x,y)=>Math.floor(x/8)*10007+Math.floor(y/8),grid=new Map(),put=(x,y,sg)=>{const k=gk(x,y);let l=grid.get(k);if(!l)grid.set(k,l=[]);if(l[l.length-1]!==sg)l.push(sg)};
+    rivers.forEach((r,ri)=>{for(let i=0;i<r.pts.length-1;i++){const a=r.pts[i],b=r.pts[i+1],sg=[a[0],a[1],b[0],b[1],Math.max(r.w[i],.3)/2,Math.max(r.w[i+1],.3)/2,ri];put(a[0],a[1],sg);put((a[0]+b[0])/2,(a[1]+b[1])/2,sg);put(b[0],b[1],sg)}});
+    const inOther=(x,y,self)=>{const gx=Math.floor(x/8),gy=Math.floor(y/8);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const l=grid.get((gx+a)*10007+gy+b);if(l)for(const q of l){if(q[6]===self)continue;
+        const dx=q[2]-q[0],dy=q[3]-q[1],ll=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((x-q[0])*dx+(y-q[1])*dy)/ll));
+        if(Math.hypot(q[0]+dx*t-x,q[1]+dy*t-y)<q[4]+(q[5]-q[4])*t-.05)return true}}return false};
+    rivers.forEach((r,ri)=>{const n=r.pts.length;r.hL=new Uint8Array(n);r.hR=new Uint8Array(n);
+      for(let i=0;i<n;i++){const a=r.pts[Math.max(0,i-1)],b=r.pts[Math.min(n-1,i+1)],tx=b[0]-a[0],ty=b[1]-a[1],ln=Math.hypot(tx,ty)||1,nx=-ty/ln,ny=tx/ln,hw=Math.max(r.w[i],.3)/2,p=r.pts[i];
+        r.hL[i]=inOther(p[0]+nx*hw,p[1]+ny*hw,ri)?1:0;r.hR[i]=inOther(p[0]-nx*hw,p[1]-ny*hw,ri)?1:0}})}
   // the roads, on a grid, to keep dams, boats and groves off them
   const rg=new Map(),rgk=(x,y)=>Math.floor(x/8)*10007+Math.floor(y/8);
   for(const r of M.rd){const p=r.pts;for(let i=0;i<p.length-1;i++){const a=p[i],b=p[i+1],L=Math.hypot(b[0]-a[0],b[1]-a[1]),m=Math.max(1,Math.ceil(L/4));for(let k=0;k<m;k++){const x=a[0]+(b[0]-a[0])*k/m,y=a[1]+(b[1]-a[1])*k/m,key=rgk(x,y);let l=rg.get(key);if(!l)rg.set(key,l=[]);l.push([x,y])}}}
@@ -118,31 +130,40 @@ function wmrSpr(c,name,x,y,ang,len,flip){
 function wmnRivers(V,z){
   const c=ctx,H=hash2,M=mpWorldM;if(!M.rivers)return;
   let pat=WMN.waterPat;if(!pat&&WMN.water){pat=WMN.waterPat=c.createPattern(WMN.water,'repeat');if(pat&&pat.setTransform)try{pat.setTransform(new DOMMatrix([.15,0,0,.15,0,0]))}catch(e){}}
-  const minW=.4/z*.7;
+  const minW=.4/z*.7,vis=[];
+  // the two banks of every river showing, as lines of points
   for(const r of M.rivers){const bb=r.bb;if(bb[2]<V.x0||bb[0]>V.x1||bb[3]<V.y0||bb[1]>V.y1)continue;
     const pts=r.pts,n=pts.length,L=[],Rr=[];
     for(let i=0;i<n;i++){const a=pts[Math.max(0,i-1)],b=pts[Math.min(n-1,i+1)],tx=b[0]-a[0],ty=b[1]-a[1],ln=Math.hypot(tx,ty)||1,nx=-ty/ln,ny=tx/ln,wob=(Math.sin(i*.7+r.id)+Math.sin(i*1.9+r.id*2)*.5)*.14;
       let hw=Math.max(r.w[i],.3)/2;{const a2=pts[Math.max(0,i-3)],b2=pts[Math.min(n-1,i+3)],c2=pts[i],d1=Math.atan2(c2[1]-a2[1],c2[0]-a2[0]),d2=Math.atan2(b2[1]-c2[1],b2[0]-c2[0]),dth=Math.abs(Math.atan2(Math.sin(d2-d1),Math.cos(d2-d1))),sl=(Math.hypot(c2[0]-a2[0],c2[1]-a2[1])+Math.hypot(b2[0]-c2[0],b2[1]-c2[1]))/2;
         if(dth>.05)hw=Math.min(hw,.75*sl/dth)}   // on a tight bend the banks must not cross over each other
       L.push([pts[i][0]+nx*(hw+wob),pts[i][1]+ny*(hw+wob)]);Rr.push([pts[i][0]-nx*(hw-wob*.6),pts[i][1]-ny*(hw-wob*.6)])}
-    const outline=()=>{c.beginPath();c.moveTo(L[0][0],L[0][1]);for(let i=1;i<n;i++)c.lineTo(L[i][0],L[i][1]);for(let i=n-1;i>=0;i--)c.lineTo(Rr[i][0],Rr[i][1]);c.closePath()};
-    c.save();c.clip(M.landP);c.lineJoin='round';c.lineCap='round';
-    // the bank, a soft earthy shadow outside the water; then the water itself, the painted wash
-    outline();c.strokeStyle='rgba(116,88,48,.3)';c.lineWidth=2.8;c.stroke();
-    outline();c.fillStyle=pat||'#86b0b6';c.fill();outline();c.fillStyle='rgba(98,150,160,.16)';c.fill();
-    c.save();outline();c.clip();outline();c.strokeStyle='rgba(40,88,102,.32)';c.lineWidth=2.4;c.stroke();c.restore();
-    // the ink banks, drawn with a quill: the line thickens and thins, and now and then lifts
-    c.strokeStyle='rgba(50,32,20,.85)';
-    for(const side of [L,Rr]){for(let i=1;i<n;i++){if(r.w[i]<.45)continue;const q=H(i,r.id,675);if(q<.04)continue;c.lineWidth=Math.max(minW,Math.min(.95,.24*r.w[i]+.22+.22*H(i>>1,r.id,676)));c.beginPath();c.moveTo(side[i-1][0],side[i-1][1]);c.lineTo(side[i][0],side[i][1]);c.stroke()}}
-    // short hatching on the bank, and wavy ripples on the water
+    vis.push({r,pts,n,L,Rr})}
+  // a bank line: only the stretches that are not lying in another river's water (where two rivers meet, the line must not cross the water of the one it joins)
+  const bankLine=(g,side,hide,lw,gap)=>{const n=g.n;for(let i=1;i<n;i++){const ha=hide[i-1],hb=hide[i];if(ha&&hb)continue;if(g.r.w[i]<.45)continue;if(gap&&H(i,g.r.id,675)<.04)continue;
+      let x0=side[i-1][0],y0=side[i-1][1],x1=side[i][0],y1=side[i][1];if(ha){x0=(x0+x1)/2;y0=(y0+y1)/2}else if(hb){x1=(x0+x1)/2;y1=(y0+y1)/2}
+      c.lineWidth=typeof lw==='function'?lw(i):lw;c.beginPath();c.moveTo(x0,y0);c.lineTo(x1,y1);c.stroke()}};
+  c.save();c.clip(M.landP);c.lineJoin='round';c.lineCap='round';
+  // 1. the soft earthy shadow of the banks, all rivers first, so that every river's water covers every other's shadow
+  c.strokeStyle='rgba(116,88,48,.3)';for(const g of vis){bankLine(g,g.L,g.r.hL,2.8,false);bankLine(g,g.Rr,g.r.hR,2.8,false)}
+  // 2. the water, the painted wash
+  for(const g of vis){const {n,L,Rr}=g;c.beginPath();c.moveTo(L[0][0],L[0][1]);for(let i=1;i<n;i++)c.lineTo(L[i][0],L[i][1]);for(let i=n-1;i>=0;i--)c.lineTo(Rr[i][0],Rr[i][1]);c.closePath();
+    c.fillStyle=pat||'#86b0b6';c.fill();c.fillStyle='rgba(84,106,82,.25)';c.fill()}
+  // 3. the darker water along each bank (pooling), and the ink banks, drawn with a quill: the line thickens and thins, and now and then lifts
+  for(const g of vis){c.strokeStyle='rgba(46,76,66,.30)';bankLine(g,g.L,g.r.hL,2.0,false);bankLine(g,g.Rr,g.r.hR,2.0,false)}
+  c.strokeStyle='rgba(66,44,26,.62)';
+  for(const g of vis){const lw=i=>Math.max(minW,Math.min(.7,.24*g.r.w[i]+.22+.22*H(i>>1,g.r.id,676)));bankLine(g,g.L,g.r.hL,lw,true);bankLine(g,g.Rr,g.r.hR,lw,true)}
+  // 4. short hatching on the banks and wavy ripples on the water
+  for(const g of vis){const {r,pts,n,L,Rr}=g;
     c.strokeStyle='rgba(50,32,20,.5)';c.lineWidth=Math.max(.25,.3/z);c.beginPath();let acc=0;
-    for(let i=1;i<n;i++){acc+=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);if(acc<(z>1.2?4:7))continue;acc=0;if(r.w[i]<1)continue;const side=(i&1)?L:Rr,s=(i&1)?1:-1,a=tang2(pts,i);
-      const hx=side[i][0],hy=side[i][1];c.moveTo(hx,hy);c.lineTo(hx+(Math.sin(a)*s)*1.6*-1,hy+(Math.cos(a)*s)*1.6)}c.stroke();
-    if(z>.5){c.strokeStyle='rgba(250,255,255,.75)';c.lineWidth=.34;c.beginPath();acc=0;for(let i=1;i<n;i++){acc+=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);if(acc<13)continue;acc=0;if(r.w[i]<2.6)continue;const ox=(H(i,r.id,677)-.5)*r.w[i]*.5;const ta=tang2(pts,i),ux=Math.cos(ta),uy=Math.sin(ta),px=pts[i][0]-uy*ox,py=pts[i][1]+ux*ox;c.moveTo(px-ux*1.5,py-uy*1.5);c.quadraticCurveTo(px-uy*.7,py+ux*.7,px+ux*1.5,py+uy*1.5)}c.stroke()}
-    c.restore();
-    // where it runs out into the sea: a pale wash of river water in the sea water
-    if(r.main&&r.mouth){const m=pts[r.mouth.i],a=tang2(pts,r.mouth.i);c.save();c.clip(M.waterP,'evenodd');c.translate(m[0]+Math.cos(a)*4,m[1]+Math.sin(a)*4);c.rotate(a);c.scale(1.5,1);
-      const g=c.createRadialGradient(0,0,0,0,0,r.w[r.mouth.i]*1.1+3);g.addColorStop(0,'rgba(150,196,202,.6)');g.addColorStop(1,'rgba(150,196,202,0)');c.fillStyle=g;c.beginPath();c.arc(0,0,r.w[r.mouth.i]*1.1+3,0,TAU);c.fill();c.restore()}}
+    for(let i=1;i<n;i++){acc+=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);if(acc<(z>1.2?4:7))continue;acc=0;if(r.w[i]<1)continue;const left=!!(i&1);if((left?r.hL:r.hR)[i])continue;const side=left?L:Rr,s=left?1:-1,a=tang2(pts,i);
+      const hx=side[i][0],hy=side[i][1];c.moveTo(hx,hy);c.lineTo(hx-Math.sin(a)*s*1.6,hy+Math.cos(a)*s*1.6)}c.stroke();
+    if(z>.5){c.strokeStyle='rgba(250,255,255,.5)';c.lineWidth=.3;c.beginPath();acc=0;for(let i=1;i<n;i++){acc+=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);if(acc<13)continue;acc=0;if(r.w[i]<2.6)continue;const ox=(H(i,r.id,677)-.5)*r.w[i]*.5;
+        const ta=tang2(pts,i),ux=Math.cos(ta),uy=Math.sin(ta),px=pts[i][0]-uy*ox,py=pts[i][1]+ux*ox;c.moveTo(px-ux*1.5,py-uy*1.5);c.quadraticCurveTo(px-uy*.7,py+ux*.7,px+ux*1.5,py+uy*1.5)}c.stroke()}}
+  c.restore();
+  // where a river runs out into the sea: a pale wash of river water in the sea water
+  for(const g of vis){const {r,pts}=g;if(r.main&&r.mouth){const m=pts[r.mouth.i],a=tang2(pts,r.mouth.i);c.save();c.clip(M.waterP,'evenodd');c.translate(m[0]+Math.cos(a)*4,m[1]+Math.sin(a)*4);c.rotate(a);c.scale(1.5,1);
+      const g2=c.createRadialGradient(0,0,0,0,0,r.w[r.mouth.i]*1.1+3);g2.addColorStop(0,'rgba(96,120,114,.45)');g2.addColorStop(1,'rgba(96,120,114,0)');c.fillStyle=g2;c.beginPath();c.arc(0,0,r.w[r.mouth.i]*1.1+3,0,TAU);c.fill();c.restore()}}
   // the details: dams, then boats, then groves
   const X=M.rvx;if(!X)return;
   for(const [x,y,a,len,nm] of X.dams)if(x>V.x0-10&&x<V.x1+10&&y>V.y0-10&&y<V.y1+10)wmrSpr(c,nm,x,y,a,len,false);
