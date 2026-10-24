@@ -35,7 +35,8 @@ const WDH_DESERT=new Set([41,60,61,62,63,64]); // the outdoor maps that are dese
         if((L.rows[ty]||'')[tx]!=='.'||used.has(tx+','+ty))continue;
         const tp=tpl[(hash2(t,id,817)*tpl.length)|0];used.add(tx+','+ty);made++;
         Q.push({k:tp.k,x:tx,y:ty,block:tp.block,walk:tp.walk,sc:(tp.sc||1)*(.9+hash2(t,id,818)*.25),ox:(hash2(t,id,819)-.5)*.5,oy:(hash2(t,id,820)-.5)*.4,wdh:1})}}}
-  wdThicket(L,n,door[0],door[1],id);
+  {const n0=L.decor.length;wdThicket(L,n,door[0],door[1],id);
+   if(desert)for(let i=n0;i<L.decor.length;i++){const d=L.decor[i];d.block=false;d.sc=.0001;d.pfCut=1}}   // no dead trees in the deserts, so the rock pile is walked straight into (the sprites stay in the list, so saved games still line up)
   (L._wd=L._wd||[]).push(lp?{x,y,id,w:1}:{x,y,id});
   WD_ENT[id]={n,x:door[0],y:door[1],f:lp?3:2};
   return true}}

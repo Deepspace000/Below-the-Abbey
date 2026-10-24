@@ -47,7 +47,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.612';
+const VERSION='3.613';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1462,7 +1462,7 @@ function enemyStat(t,lvl){
 }
 /* scaling: a creature has a base level, the level of its place, raised (once) to 2-5 below the party if the party has outgrown it by more than 5.
    Within one place the creatures are not all the same level: about two in five stand at that scaled level, a third of them 1-3 levels below it and a
-   quarter 4-7 below, so a fight is a mix of tough and easy ones and the weak die fast. Bosses and the great creatures are never lowered; the great
+   quarter 4-7 below, so a fight is a mix of tough and easy ones and the weak die fast. A few (about one in nine) stand 1 or 2 levels ABOVE the place. Bosses and the great creatures are never lowered; the great
    ones always stand a fixed number of levels above the party. */
 const NO_VARY=['boss','gandrick','mayor','overseer','halbrecht','wraith','sut','firelizard','cyclops','pharaohboss','chancellor','corvane','kraken'];
 /* the crypts under the abbey climb from level 1 at the start, to 2 in the middle, to 3 near the Rat King, whatever the mode */
@@ -1476,7 +1476,7 @@ function rebalanceEnemies(){
     if(!G.flags.autoScaleOn){ // a fixed world (the default): the place's own level, the great creatures a few above it
       if(e.hp<=0||e.dying)continue;
       if(e.base===undefined||e.fixed!==LEVEL||e.am){e.base=crypt1Level(e)||(DIFF()+(ap?Math.min(ap,8):0));e.fixed=LEVEL;e.vd=undefined;e.am=0}
-      if(e.vd===undefined){const r=Math.random();e.vd=(ap||(def&&(def.boss||NO_VARY.includes(e.t)||/^w_/.test(e.t))))?0:r<.4?0:r<.75?1+Math.floor(Math.random()*3):4+Math.floor(Math.random()*4)}
+      if(e.vd===undefined){const r=Math.random();e.vd=(ap||(def&&(def.boss||NO_VARY.includes(e.t)||/^w_/.test(e.t))))?0:r<.07?-1:r<.11?-2:r<.4?0:r<.75?1+Math.floor(Math.random()*3):4+Math.floor(Math.random()*4)}
       const nl=Math.max(1,e.base-e.vd);if(nl!==e.lvl){const frac=e.hp/e.maxhp;e.lvl=nl;e.maxhp=enemyStat(e.t,nl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*frac))}
       continue}
     if(ap&&e.hp>0&&!e.dying){if(e.lvl!==pl+ap){const fr=e.hp/e.maxhp;e.lvl=pl+ap;e.maxhp=enemyStat(e.t,e.lvl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*fr))}continue} // the great creatures always stand a few levels above the party
@@ -1484,7 +1484,7 @@ function rebalanceEnemies(){
     if(e.base===undefined||!e.am){ // autoscaling was just switched on: every creature starts again from the level the place had before the fixed world
       const L0=LEVELS[LEVEL]||{};e.base=crypt1Level(e)||((L0.diff||LEVEL)+(L0.lvlBonus||0));e.vd=undefined;e.am=1}
     if(pl-e.base>5)e.base=Math.max(1,pl-(2+Math.floor(Math.random()*4)));   // catch-up, once
-    if(e.vd===undefined){const r=Math.random();e.vd=(def&&(def.boss||NO_VARY.includes(e.t)||/^w_/.test(e.t)))?0:r<.4?0:r<.75?1+Math.floor(Math.random()*3):4+Math.floor(Math.random()*4)}
+    if(e.vd===undefined){const r=Math.random();e.vd=(def&&(def.boss||NO_VARY.includes(e.t)||/^w_/.test(e.t)))?0:r<.07?-1:r<.11?-2:r<.4?0:r<.75?1+Math.floor(Math.random()*3):4+Math.floor(Math.random()*4)}
     const nl=Math.max(1,e.base-e.vd);
     if(nl!==e.lvl){const frac=e.hp/e.maxhp;e.lvl=nl;e.maxhp=enemyStat(e.t,nl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*frac))}
   }
@@ -1937,7 +1937,7 @@ const EXTRA_POWERS={
   Mage:[
     pas_(4,'Arcane Mind','Spell damage +15%.',{spellPct:.15}),
     actP(7,'Mage Armor',4,'buff','The whole party gains +3 armor for 8 rounds.',{b:'armor',amt:3,rounds:8,party:true}),
-    pas_(10,'Mana Well','Recover 1 mana every 3 rounds.',{mpRegen:.34}),
+    pas_(10,'Mana Well','Spell damage +10% and max health +10.',{spellPct:.1,maxhp:10}),
     actP(13,'Fireball',8,'aoe','Fire hits every enemy within 3 tiles for 14-20.',{range:3,dmg:[14,20]}),
     pas_(16,'Spell Mastery','Spell damage +25%.',{spellPct:.25}),
     actP(18,'Chain Lightning',9,'aoe','Lightning hits every enemy within 4 tiles for 12-18.',{range:4,dmg:[12,18]}),
@@ -1947,7 +1947,7 @@ const EXTRA_POWERS={
     actP(7,'Siphon',4,'drain','Drains 10-16 health from the enemy ahead and heals you for half.',{dmg:[10,16]}),
     pas_(10,'Wild Magic','Spell damage +20%.',{spellPct:.2}),
     actP(13,'Frost Nova',7,'aoe','Ice hits every enemy within 3 tiles for 8-12 and stuns them.',{range:3,dmg:[8,12],daze:1}),
-    pas_(16,'Overchannel','Spell damage +20%. Recover 1 mana every 4 rounds.',{spellPct:.2,mpRegen:.25}),
+    pas_(16,'Overchannel','Spell damage +30%.',{spellPct:.3}),
     actP(18,'Lightning Storm',10,'aoe','Lightning hits every enemy within 4 tiles for 16-24.',{range:4,dmg:[16,24]}),
     actP(20,'Cataclysm',15,'aoe','Ruin hits every enemy within 4 tiles for 34-48.',{range:4,dmg:[34,48]})],
   Priest:[
@@ -1978,8 +1978,8 @@ const EXTRA_POWERS={
 const CAPSTONE={Warrior:['Warlord','Max health +30, all damage +10%.',{maxhp:30,dmgPct:.1}],Barbarian:['Primal Rage','All damage +15% and max health +25.',{dmgPct:.15,maxhp:25}],
   Paladin:['Aura of Light','Armor +4 and all damage +10%.',{armor:4,dmgPct:.1}],Ranger:['Master of the Wild','+8% to hit and 10% more double damage.',{hitPct:.08,crit:.1}],
   Archer:['Legendary Marksman','All damage +15% and 10% more double damage.',{dmgPct:.15,crit:.1}],Thief:['Ghost','Enemies miss 10% more often and 10% more double damage.',{dodge:.1,crit:.1}],
-  Assassin:['Angel of Death','All damage +15% and 10% more double damage.',{dmgPct:.15,crit:.1}],Mage:['Archmage','Spell damage +30% and recover 1 mana every 3 rounds.',{spellPct:.3,mpRegen:.34}],
-  Sorcerer:['Living Storm','Spell damage +30% and recover 1 mana every 3 rounds.',{spellPct:.3,mpRegen:.34}],Priest:['Saint','Healing is 30% stronger and max health +20.',{healPct:.3,maxhp:20}],
+  Assassin:['Angel of Death','All damage +15% and 10% more double damage.',{dmgPct:.15,crit:.1}],Mage:['Archmage','Spell damage +40% and enemies miss 5% more often.',{spellPct:.4,dodge:.05}],
+  Sorcerer:['Living Storm','Spell damage +40% and max health +20.',{spellPct:.4,maxhp:20}],Priest:['Saint','Healing is 30% stronger and max health +20.',{healPct:.3,maxhp:20}],
   Monk:['Enlightenment','All damage +15%, armor +3 and enemies miss 8% more often.',{dmgPct:.15,armor:3,dodge:.08}],Goat:['Mountain King','Max health +30, armor +3 and enemies miss 8% more often.',{maxhp:30,armor:3,dodge:.08}]};
 for(const c of CLASSES){
   c.powers=[Object.assign({lv:1,act:true},c.sp)].concat(EXTRA_POWERS[c.name]||[]);
@@ -2264,8 +2264,8 @@ function enemyAct(e){
   return dur;
 }
 function finishRound(){
-  G.heroes.forEach((h,i)=>{if(!h.alive)return;// no mana comes back by itself: only resting, potions and the few pieces of gear with mpRegen (high armour sets, some rings) give it back, a little each round
-    {const r=gearPas(i,'mpRegen');if(r>0){h.mpAcc=(h.mpAcc||0)+r*.5;while(h.mpAcc>=1){h.mp=Math.min(h.mpMax,h.mp+1);h.mpAcc--}}}
+  G.heroes.forEach((h,i)=>{if(!h.alive)return;// no mana comes back by itself (the Monk's stamina still does, from Ki Mastery): only resting, potions and the few pieces of gear with mpRegen (high armour sets, some rings) give it back, a little each round
+    {const r=HERO_DEF[i].cls==='Monk'?pas(i,'mpRegen'):gearPas(i,'mpRegen');if(r>0){h.mpAcc=(h.mpAcc||0)+r*.5;while(h.mpAcc>=1){h.mp=Math.min(h.mpMax,h.mp+1);h.mpAcc--}}}
     h.hpAcc=(h.hpAcc||0)+pas(i,'regen');while(h.hpAcc>=1){h.hp=Math.min(h.max,h.hp+1);h.hpAcc--}});
   for(const b of G.buffs)b.left--;G.buffs=G.buffs.filter(b=>b.left>0);
   if(G.lightBoost>0)G.lightBoost--;
@@ -48516,7 +48516,8 @@ const WDH_DESERT=new Set([41,60,61,62,63,64]); // the outdoor maps that are dese
         if((L.rows[ty]||'')[tx]!=='.'||used.has(tx+','+ty))continue;
         const tp=tpl[(hash2(t,id,817)*tpl.length)|0];used.add(tx+','+ty);made++;
         Q.push({k:tp.k,x:tx,y:ty,block:tp.block,walk:tp.walk,sc:(tp.sc||1)*(.9+hash2(t,id,818)*.25),ox:(hash2(t,id,819)-.5)*.5,oy:(hash2(t,id,820)-.5)*.4,wdh:1})}}}
-  wdThicket(L,n,door[0],door[1],id);
+  {const n0=L.decor.length;wdThicket(L,n,door[0],door[1],id);
+   if(desert)for(let i=n0;i<L.decor.length;i++){const d=L.decor[i];d.block=false;d.sc=.0001;d.pfCut=1}}   // no dead trees in the deserts, so the rock pile is walked straight into (the sprites stay in the list, so saved games still line up)
   (L._wd=L._wd||[]).push(lp?{x,y,id,w:1}:{x,y,id});
   WD_ENT[id]={n,x:door[0],y:door[1],f:lp?3:2};
   return true}}
@@ -48537,6 +48538,39 @@ const WDH_DESERT=new Set([41,60,61,62,63,64]); // the outdoor maps that are dese
   mv('graves',214,108);mv('goldencrypt',216,62);mv('rubymaze',262,54)}
 /* no small writing under any place name, except "the golden city" under Khemetra */
 for(const l of WORLD_LOCS)if(l.k!=='scoria')delete l.sub;
+
+/* ---- src/desert/magegear.js ---- */
+/* ==========================================================================
+   MAGE GEAR. Eight cloth sets for the magic users, one every ten levels from 10 to 80: a hat, a robe, cuffs and leggings, each set in its own colours
+   (Apprentice, Hedge Mage, Magus, Warlock, Sage, Enchanter, Wizard, Archmage). Cloth gives little armour, but every piece adds spell damage and healing,
+   and from level 50 the hats and robes give back a little mana each round (mpRegen; the only way mana returns on its own is from gear like this).
+   Any class may wear them. Sold in the armouries (the sets up to ten levels above the party) and found in chests, next to the armour sets.
+   Pictures: assets/icn_mg_<set>_<h|c|a|l>.png (the Abbot's cloth pieces from the Pilgrim's Path, cleaned of crosses and recoloured, until they have paintings of their own).
+   ========================================================================== */
+const MG_SETS=[ // [key, name, level]
+ ['app','Apprentice',10],['hed','Hedge Mage',20],['mag','Magus',30],['war','Warlock',40],['sag','Sage',50],['enc','Enchanter',60],['wiz','Wizard',70],['arc','Archmage',80]];
+const MG_SLOTS=[['h','head','Helm','head','Hat',.55],['c','chest','Chest','chest','Robe',1],['a','arms','Arms','arms','Cuffs',.35],['l','legs','Legs','legs','Leggings',.45]];
+const MG_IDS=[],MG_REGEN={50:.1,60:.15,70:.2,80:.3};
+for(const [key,name,lv] of MG_SETS){
+  const t=lv/10,A=Math.max(2,Math.round(2+lv*.14)),pr=Math.round(350*Math.pow(t,1.7)),sp=+(.02+.0013*lv).toFixed(3);
+  for(const [sx,slot,ty,ic,nm,f] of MG_SLOTS){
+    const id='mg_'+key+'_'+sx,pas={};let txt;
+    if(sx==='h'||sx==='c'){pas.spellPct=sp;pas.healPct=+(sp*1.2).toFixed(3);txt=`Spell damage +${Math.round(sp*100)}% and healing +${Math.round(pas.healPct*100)}%.`}
+    else if(sx==='a'){pas.spellPct=+(sp*.7).toFixed(3);txt=`Spell damage +${Math.round(pas.spellPct*100)}%.`}
+    else{pas.spellPct=+(sp*.7).toFixed(3);pas.dodge=+(.01+lv*.0007).toFixed(3);txt=`Spell damage +${Math.round(pas.spellPct*100)}% and enemies miss ${Math.round(pas.dodge*100)}% more.`}
+    if((sx==='h'||sx==='c')&&MG_REGEN[lv]){pas.mpRegen=MG_REGEN[lv];txt+=' Mana comes back a little each round.'}
+    ITEMDEF[id]={n:`${name}'s ${nm}`,k:slot,t:ty,ic,c:'#8a8ae8',armor:Math.max(1,Math.round(A*f)),price:Math.max(30,Math.round(pr*f)),lvl:lv,pas,tier:lv,mage:1,
+      d:`Cloth of the ${name} set, made for those who work magic. ${txt} Any class may wear it. Needs level ${lv}.`,sw:slot==='chest'?.34:.22,gear:1};
+    GEAR.push(id);MG_IDS.push(id);
+  }
+}
+if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push(...MG_IDS);
+{const _as=GEAR_STOCK.armour;GEAR_STOCK.armour=()=>{const L=partyLevel();return _as().concat(MG_IDS.filter(id=>ITEMDEF[id].lvl<=L+10).map(id=>[id,1]))}}
+/* chests: now and then a piece of mage cloth from the best sets the party or the place has reached, instead of armour */
+{const _ad=armourDrop;armourDrop=function(u){
+  const L=Math.max(partyLevel(),(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[LEVEL])||0);
+  if(u<.4){const top=MG_SETS.map(x=>x[2]).filter(q=>q<=L).sort((x,y)=>y-x).slice(0,3),pool=MG_IDS.filter(id=>top.includes(ITEMDEF[id].lvl));if(pool.length)return pool[Math.floor(u/.4*pool.length*.9999)]}
+  return _ad.apply(this,arguments)}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
