@@ -52,8 +52,8 @@ function makePyramidArt(){LEVELS[65].chars=LEVEL42_DATA.chars;NPC_H.dpyrgate=2.1
 
 /* ---- the creatures ---- */
 Object.assign(ENEMY_DEF,{
-  pharaohboss:{name:'The Undying Pharaoh',hp:100,dmg:[7,11],hit:.82,w:1.1,img:'pharaohboss',xp:400,gold:[0,0],speed:1,verb:'smites',boss:true,aboveParty:10,patrol:true,act:e=>pharaohAct(e)},
-  pservant:{name:"Pharaoh's Servant",hp:30,dmg:[3,5],hit:.72,w:.7,img:'pservant',xp:60,gold:[2,8],speed:1,verb:'strikes',patrol:true,slows:true,act:e=>{if(Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)>20){e.alert=false;return 130}return 0}}});
+  pharaohboss:{name:'The Undying Pharaoh',hp:160,dmg:[7,11],hit:.82,w:1.1,img:'pharaohboss',xp:400,gold:[0,0],speed:1,verb:'smites',boss:true,aboveParty:10,patrol:true,act:e=>pharaohAct(e)},
+  pservant:{name:"Pharaoh's Servant",hp:50,dmg:[3,5],hit:.72,w:.7,img:'pservant',xp:60,gold:[2,8],speed:1,verb:'strikes',patrol:true,slows:true,act:e=>{if(Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)>20){e.alert=false;return 130}return 0}}});
 // first step of the shortest walk through the labyrinth from one cell to another (or null)
 function mazeBfs(sx,sy,tx,ty,self){
   const dist=new Int16Array(MW*MH).fill(-1),first=new Int16Array(MW*MH).fill(-1),q=[sy*MW+sx];dist[q[0]]=0;

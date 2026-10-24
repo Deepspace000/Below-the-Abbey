@@ -54,8 +54,8 @@ function rmBuild(){
   for(let i=cand.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[cand[i],cand[j]]=[cand[j],cand[i]]}
   const far=(x,y,m)=>enemies.every(e=>Math.hypot(e.x-x,e.y-y)>=m);
   for(const k of kinds){const p=cand.find(([x,y])=>!taken.has(x+','+y)&&far(x,y,5.2));if(!p)continue;put(k,p,0)}
-  // levels 27 to 30: the nearer to the garden, the higher (the Wraith and the Wights always 30)
-  {const rest=enemies.filter(e=>e.lvl!==30).sort((a,b)=>a.c-b.c),slots=[30,30,29,29,29,29,29,28,28,28,28,28,27,27,27,27,27];rest.forEach((e,i)=>{e.lvl=slots[Math.min(i,slots.length-1)]})}
+  // every creature is level 30
+  {const rest=enemies.filter(e=>e.lvl!==30).sort((a,b)=>a.c-b.c),slots=[30];rest.forEach((e,i)=>{e.lvl=slots[Math.min(i,slots.length-1)]})}
   enemies.forEach(e=>delete e.c);
   // a few potions at the far dead ends
   const items=[];{const de=floor.filter(([x,y])=>deg.get(x+','+y)===1&&!taken.has(x+','+y)&&S.d[y*W+x]>=20&&!(x===sx&&y===sy));de.sort((a,b)=>S.d[b[1]*W+b[0]]-S.d[a[1]*W+a[0]]);
