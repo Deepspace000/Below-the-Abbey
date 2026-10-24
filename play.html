@@ -48969,6 +48969,16 @@ function hgNooks(){
     const sx=-open[1],sy=open[0];for(const s of [-1,1]){const cx=x+open[0]+sx*s,cy=y+open[1]+sy*s;if(free(cx,cy))cells.push([cx,cy])}
     placed.push([x,y]);cells.forEach(([cx,cy],i)=>{L.decor.push({k:hash2(cx,cy,619)<.5?'hg_rock0':'hg_rock1',x:cx,y:cy,block:true,sc:.9+hash2(cx,cy,621)*.25});mark(cx,cy,1)});mark(x,y,2)}}
 {const _ll2=loadLevel;loadLevel=function(n){_ll2.apply(this,arguments);try{if(LEVEL===470)hgNooks()}catch(e){console.error(e)}}}
+/* THE BOOKS ON THEIR LECTERNS: in each of the four hives the language book lies on its lectern, which now glows gold so that it can be seen from far down the tunnels. The lectern can be walked onto
+   and the book is taken from it (the book used to lie on the floor beside it). */
+loadImg('hg_lecternglow','assets/hg_lecternglow.png');NPC_H.hg_lecternglow=1.92;
+function hgLecterns(n){
+  const L=LEVELS[n];if(!L||L._glow||!L.decor)return;L._glow=1;
+  const lec=L.decor.find(d=>d.k==='hg_lectern');if(!lec)return;
+  lec.k='hg_lecternglow';lec.block=false;lec.walk=true;lec.deco=true;
+  const bk=(L.items||[]).find(i=>i.k==='hgbook'+(n-470));if(bk){bk.x=lec.x;bk.y=lec.y}
+  if(L.lights&&!L.lights.some(p=>p[0]===lec.x&&p[1]===lec.y))L.lights.push([lec.x,lec.y])}
+{const _ll3=loadLevel;loadLevel=function(n){_ll3.apply(this,arguments);try{if(LEVEL>=471&&LEVEL<=474)hgLecterns(LEVEL)}catch(e){console.error(e)}}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

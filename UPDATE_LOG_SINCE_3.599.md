@@ -131,7 +131,7 @@ The Ruby Maze (new)
 
 * On the party screen the name box (top right) is drawn as a box with a small pencil. Click or tap it and type the hero's name, twelve letters at most. Enter or clicking away keeps it, Escape drops the change, and a keyboard comes up on a tablet. This replaces a pop-up question that did nothing in the Windows app.
 
-## 3.624 (made, not yet released)
+## 3.624
 
 Mana potions in every area
 * Every area now has a few mana draughts lying on the floor: one in a small den, two in a small place, three to six in the rest, by size. They lie on ground that can be walked to from the start, never by a door and never on scenery or a creature's post. The kind goes with the area's level: Mana Draught in the early places, Greater in the middle ones, and in the high places mostly Greater with now and then a Superior. Shops, houses and the open sea get none. The places are the same on every visit and in every save, and a save made before this change keeps everything it knew.
@@ -150,6 +150,8 @@ The Queen's Hive: a map and a rescue
 * The creatures of the Hollow Grasslands and the hives are slower: the fast ones (the swarms) take one step instead of two, and every step, blow and shot waits a little longer.
 
 * The Hollow Grasslands have thirty small rock nooks (rock on three sides, open on one) set about the open ground, away from villages and hive doors: stand in one and only one creature at a time can reach you in melee.
+
+* In all four hives the language book now lies on its lectern, which glows gold so that it can be seen down the tunnels. The lectern can be walked onto and the book is taken from it.
 
 Potion slots
 * The two backup potion slots under the frequent use potion (in the inventory) work: clicking one drinks that potion on the chosen hero, and the potion stays in the slot. Before, a click emptied the slot and sent the potion back to the bag. A slot whose potion has run out clears itself, and a potion dragged onto a slot replaces what was there.
