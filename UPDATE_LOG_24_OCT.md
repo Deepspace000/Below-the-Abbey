@@ -116,3 +116,4 @@ Portraits
 
 ## 3.627 (not pushed yet)
 - No two creatures can stand on one square: a move onto an occupied square is undone, and creatures that spawn or load on the same square are spread to the nearest free square after every round, on arrival and on loading a save.
+- Power Move: the skip to the next character now works whenever the game says the character lacks the mana or stamina, whatever kind of power they have.

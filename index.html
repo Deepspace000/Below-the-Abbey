@@ -2413,7 +2413,7 @@ function act(id){
     case 'fwd':doMove(0);break;case 'right':doMove(1);break;case 'back':doMove(2);break;case 'left':doMove(3);break;
     case 'turnL':doTurn(-1);break;case 'turnR':doTurn(1);break;
     case 'attack':if(G.heroes[i].alive&&heroAttack(i))heroDone(i);break;
-    case 'special':{const H=G.heroes[i],mi=H.eq.main;if(H.alive&&mi&&idef(mi).k==='potion'){if(drinkPocket(i,'main')&&hostileNear()&&!G.acted[i])heroDone(i)}else if(H.alive){if(heroSpecial(i))heroDone(i);else if(H.mp<specialInfo(i).cost&&livingHeroes().some(j=>j!==i&&!G.acted[j]))nextHero()}break}
+    case 'special':{const H=G.heroes[i],mi=H.eq.main;if(H.alive&&mi&&idef(mi).k==='potion'){if(drinkPocket(i,'main')&&hostileNear()&&!G.acted[i])heroDone(i)}else if(H.alive){let lacked=false;const _m=msg;msg=function(t){if(/lacks/.test(String(t)))lacked=true;return _m.apply(this,arguments)};let ok;try{ok=heroSpecial(i)}finally{msg=_m}if(ok)heroDone(i);else if((lacked||H.mp<specialInfo(i).cost)&&livingHeroes().some(j=>j!==i&&!G.acted[j]))nextHero()}break}
     case 'potion':if(G.heroes[i].alive&&usePotion(i))heroDone(i);break;
     case 'swapoff':case 'swapalt':{const sl=id==='swapoff'?'off':'alt',H=G.heroes[i],it=H.eq[sl];if(!H.alive)break;if(it&&idef(it).k==='potion'){if(drinkPocket(i,sl)&&hostileNear()&&!G.acted[i])heroDone(i)}else if(it&&idef(it).k==='weapon'){let ok=false;H.wslot=sl;try{ok=heroAttack(i)}finally{H.wslot=null}if(ok)heroDone(i)}else if(swapHand(i,sl)&&hostileNear()&&!G.acted[i])heroDone(i);break}
     case 'wait':msg('The party waits.','#a09880');endRound();break;
