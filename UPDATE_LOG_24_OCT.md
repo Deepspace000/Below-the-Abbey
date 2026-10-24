@@ -99,3 +99,4 @@ Portraits
 * The priest's Heal costs 3 mana (it had grown to 9).* The Gravewarden's Mace is stronger: damage 6 to 11 (was 4 to 8), a little easier to hit with, and the double blow comes 16 percent of the time (was 12).
 * A very slow mana trickle is back: every fifth step the party walks gives each living hero one point of mana (or stamina). Only walking gives it; waiting, resting in place and fighting do not.
 * Mana potions now lie only in areas that have creatures in them (80 of 207 areas): none in shops, houses or the towns.
+* Every area map now shows the quest givers: a gold ! over each person with a quest to take and a green ? over each person a finished quest can be handed to, with their name beside it (names that would overlap are moved). On the Thornwick map this shows Goodwife Edda, who gives the Rat Catcher quest, east of the fountain.
