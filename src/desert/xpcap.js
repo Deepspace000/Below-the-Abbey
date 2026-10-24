@@ -4,8 +4,10 @@
    party's average level needs to go up one level (xpNeed). Quest and story rewards are not touched. Last in the injection order, so it sees every other change to enemyStat.
    ========================================================================== */
 const XP_ORDINARY_MAX=150;
+const XP_NOT_BOSS=['assassin','rguard','ashguard','hlgoblin','hlmadman','hlvictim','hgwcroc']; // stand a level or more above the party, but are ordinary creatures (the crocodiles come forty at a time)
+const isXpBoss=t=>isBossy(t)&&!XP_NOT_BOSS.includes(t);
 {const _es=enemyStat;enemyStat=function(t,lvl){const r=_es.apply(this,arguments);
-  try{const d=ENEMY_DEF[t];if(d&&r&&r.xp!==undefined&&!isBossy(t)){const lv=lvl||lvlHere();r.xp=Math.min(r.xp,XP_ORDINARY_MAX*lv)}}catch(e){}
+  try{const d=ENEMY_DEF[t];if(d&&r&&r.xp!==undefined&&!isXpBoss(t)){const lv=lvl||lvlHere();r.xp=Math.min(r.xp,XP_ORDINARY_MAX*lv)}}catch(e){}
   return r}}
 {const _kx=killXP;killXP=function(base,elvl){const x=_kx.apply(this,arguments);
   const L=livingHeroes(),pl=L.length?Math.round(L.reduce((n,i)=>n+G.heroes[i].lvl,0)/L.length):1;
