@@ -47,7 +47,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.627';
+const VERSION='3.628';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -48258,7 +48258,7 @@ wmnLoad();   // the pictures are fetched at start-up, so the map has them the fi
 
 /* one picture, bottom centre at (cx,by), size = height, or width when isW */
 function wmnDims(name,size,isW){const r=WMN_RECTS[name];if(!r)return [0,0];return isW?[size,size*r[4]/r[3]]:[size*r[3]/r[4],size]}
-const WMN_ICO_SCALE=1.2;   // places are drawn this much bigger than the sizes in WMN_SPEC
+const WMN_ICO_SCALE=1.6;   // places are drawn this much bigger than the sizes in WMN_SPEC
 function wmnDraw(c,name,cx,by,size,isW,flip){
   const r=WMN_RECTS[name];if(!r||!WMN.ok)return;const im=r[0]==='a'?WMN.a:WMN.s,d=wmnDims(name,size,isW),w=d[0],h=d[1];
   if(flip){c.save();c.translate(cx,0);c.scale(-1,1);c.drawImage(im,r[1],r[2],r[3],r[4],-w/2,by-h,w,h);c.restore()}

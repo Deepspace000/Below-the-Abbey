@@ -18,7 +18,7 @@ wmnLoad();   // the pictures are fetched at start-up, so the map has them the fi
 
 /* one picture, bottom centre at (cx,by), size = height, or width when isW */
 function wmnDims(name,size,isW){const r=WMN_RECTS[name];if(!r)return [0,0];return isW?[size,size*r[4]/r[3]]:[size*r[3]/r[4],size]}
-const WMN_ICO_SCALE=1.2;   // places are drawn this much bigger than the sizes in WMN_SPEC
+const WMN_ICO_SCALE=1.6;   // places are drawn this much bigger than the sizes in WMN_SPEC
 function wmnDraw(c,name,cx,by,size,isW,flip){
   const r=WMN_RECTS[name];if(!r||!WMN.ok)return;const im=r[0]==='a'?WMN.a:WMN.s,d=wmnDims(name,size,isW),w=d[0],h=d[1];
   if(flip){c.save();c.translate(cx,0);c.scale(-1,1);c.drawImage(im,r[1],r[2],r[3],r[4],-w/2,by-h,w,h);c.restore()}
