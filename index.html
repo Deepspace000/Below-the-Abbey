@@ -47,7 +47,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.622';
+const VERSION='3.623';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -3820,9 +3820,9 @@ function drawCreate(){
   }else if(C.step==='stats'&&k){
     for(const s of wrapText(`${k.name}. ${k.desc}`,292,10)){txt(s,12,ly,10,'#cdbf94','left');ly+=13}
   }else if(C.step==='look'){
-    txt('Tap a portrait. Use the arrows to see more faces.',12,ly,10,'#a89878','left');
+    txt('Tap a portrait. Use the arrows to see more faces.',12,ly,10,'#a89878','left');ly+=14;txt('Tap the name box (top right) to type your own name.',12,ly,9.5,'#a89878','left');
   }else if(C.step==='done'){
-    txt('Tap a hero to change them.',12,ly,10,'#a89878','left');
+    txt('Tap a hero to change them.',12,ly,10,'#a89878','left');ly+=14;txt('Tap the name box (top right) to type your own name.',12,ly,9.5,'#a89878','left');
   }
   if(C.note){txt(C.note,12,246,9.5,'#d07a5a','left',true)}
   // default party (the floppy) and back (the red stop)
@@ -3843,7 +3843,9 @@ function drawCreate(){
     btn('cr_slot'+i,x,y,37,46);
   }
   inset(318,56,160,100);
-  txt(cur.name||(k?'(unnamed)':''),324,66,11,'#f0e4b4','left',true);btn('cr_name',324,58,92,16);
+  ctx.save();ctx.fillStyle='rgba(10,8,6,.55)';rrect(ctx,322,57,96,18,3);ctx.fill();ctx.lineWidth=1;ctx.strokeStyle='rgba(200,168,80,.6)';rrect(ctx,322,57,96,18,3);ctx.stroke();
+  ctx.strokeStyle='#c8a850';ctx.fillStyle='#c8a850';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(407,70);ctx.lineTo(412,61);ctx.stroke();ctx.beginPath();ctx.moveTo(405.5,72.5);ctx.lineTo(406.2,69.2);ctx.lineTo(408.6,70.8);ctx.closePath();ctx.fill();ctx.restore(); // a pencil: the name can be typed
+  txt(cur.name||(k?'(unnamed)':'Type a name'),325,66,11,cur.name||k?'#f0e4b4':'#7a6a48','left',true,undefined,80);btn('cr_name',322,57,96,18);
   txt(k?k.name:'?',324,83,11,'#cdbf94','left');
   if(k){
     txt('Level 1',324,99,10,'#e8b030','left',true);
@@ -3894,6 +3896,22 @@ function drawCreate(){
     txt('You can change this at any time: Menu, Settings, Gameplay.',240,292,8.5,'#a89878','center');
   }
 }
+/* Clicking the name field puts a real text box over it (a keyboard comes up on a tablet). Enter or clicking away keeps the name, Escape drops the change. Twelve letters at most.
+   (window.prompt does nothing in the Windows app, so it is not used.) The keys typed here are not passed on to the game. */
+function crNameEdit(){
+  const C=G.cr;if(!C||document.getElementById('crNameIn'))return;const cur=C.cur;
+  const r=cv.getBoundingClientRect(),sx=r.width/DW,sy=r.height/DH,inp=document.createElement('input');
+  inp.id='crNameIn';inp.type='text';inp.maxLength=12;inp.value=cur.name||'';
+  for(const [a,b] of [['autocomplete','off'],['autocapitalize','words'],['spellcheck','false'],['enterkeyhint','done'],['aria-label','Hero name']])inp.setAttribute(a,b);
+  const fs=11*sy,k=fs<16?16/fs:1; // a text box with letters under 16 pixels makes Safari zoom the page in: so it is made big and drawn smaller
+  inp.style.cssText='position:fixed;left:'+(r.left+322*sx)+'px;top:'+(r.top+57*sy)+'px;width:'+(96*sx*k)+'px;height:'+(18*sy*k)+'px;transform:scale('+(1/k)+');transform-origin:0 0;box-sizing:border-box;margin:0;padding:0 '+(4*sx*k)+'px;font:bold '+(fs*k)+'px '+FUI+';color:#f0e4b4;background:#171310;border:1px solid #ffe36a;border-radius:3px;outline:none;z-index:60;caret-color:#ffe36a;user-select:text;-webkit-user-select:text;touch-action:auto';
+  let done=false;
+  const end=ok=>{if(done)return;done=true;removeEventListener('resize',rs);if(ok){const v=inp.value.trim().replace(/\s+/g,' ').slice(0,12);if(v)cur.name=v}try{inp.remove()}catch(e){}};
+  const rs=()=>end(true);addEventListener('resize',rs);
+  for(const t of ['keydown','keyup','keypress']){inp.addEventListener(t,e=>{e.stopPropagation();if(t==='keydown'){if(e.key==='Enter'){e.preventDefault();end(true)}else if(e.key==='Escape'){e.preventDefault();end(false)}}})}
+  inp.addEventListener('blur',()=>end(true));
+  document.body.appendChild(inp);inp.focus();inp.select();addEventListener('pointerup',()=>{if(!done&&document.activeElement!==inp){inp.focus();inp.select()}},{once:true});
+}
 function crBtn(id){
   const C=G.cr,cur=C.cur;C.note='';
   if(id==='cr_sc0'){C.scale=false;return}
@@ -3927,8 +3945,7 @@ function crBtn(id){
   if(id==='cr_default'){C.party=DEFAULT_PARTY.map(p=>Object.assign({},p));C.slot=0;C.cur=Object.assign({},C.party[0]);C.step='done';return}
   if(id==='cr_rand'){cur.name=randName(cur.cls);return}
   if(id==='cr_name'){
-    let n=null;try{n=prompt('Name this hero (12 letters at most):',cur.name||randName(cur.cls))}catch(e){}
-    if(n&&n.trim())cur.name=n.trim().slice(0,12);return;
+    crNameEdit();return;
   }
   const m=id.match(/^cr_(bs|bd|bi)([+-])$/);
   if(m&&cur.cls>=0){

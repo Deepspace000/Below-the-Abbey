@@ -449,3 +449,7 @@ River mouths open into the sea (3.604)
 
 * The itch.io browser build asked for all of its picture packs at once. It now takes five at a time, tries a pack again if it fails, and names the pack if one cannot be opened. This is for an iPad that showed "Something went wrong while loading: Type error" with the itch.io version (the GitHub Pages version loaded).
 * When the loading screen shows an error it now also shows the file and line and the first lines of the trace, in small writing, so the cause can be read from a photo of the screen.
+
+3.623: type your own hero name
+
+* On the party creation screen the name box (top right) is now drawn as a box with a small pencil. Click or tap it and type the hero's name (twelve letters at most). Enter or clicking away keeps it, Escape drops the change. A keyboard comes up on a tablet. This replaces a pop-up question that did nothing in the Windows app.
