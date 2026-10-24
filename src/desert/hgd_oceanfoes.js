@@ -3,12 +3,12 @@
    (darkened at load the way hgduArt does it), and the Black Leviathan that guards the island. The great chest on the island holds 5000 gold; five more chests, 1000 gold each, stand at the ends of far dead
    corridors under guard. The core pays chest gold through goldCut (a fifth of the sum above 80), so the sum written into the chest is the one that goldCut turns into exactly 5000 or 1000.
    ========================================================================== */
-const HGO_KINDS=[ // id, name, picture, hp, width, xp, verb, damage
- ['hgo0','Toothed Leviathan','hgoleviathan',1300,2.8,1700,'swallows'],['hgo1','Lure Angler','hgoangler',900,2.2,1100,'snaps at'],['hgo2','Kraken Horror','hgokraken',1500,3.0,2000,'crushes'],
- ['hgo3','Drowned Swimmer','hgocorpse',520,1.5,600,'claws'],['hgo4','Black Eel','hgoeel',700,2.0,800,'bites'],['hgo5','Sea Hag','hgohag',800,1.5,1000,'rakes'],
- ['hgo6','Blind Abyssal Crab','hgocrab',1000,1.8,1200,'pinches'],['hgo7','Bone-Fish Swarm','hgobones',600,1.6,700,'gnaws'],['hgo8','Black Slime Serpent','hgoserpent',1100,2.4,1400,'strangles'],
- ['hgo9','Hooked Leech','hgoleech',650,1.3,750,'drains']];
-for(const [id,name,pic,hp,w,xp,verb] of HGO_KINDS){ENEMY_DEF[id]={name,hp,dmg:[24,48],hit:.85,w,img:'hgo_'+id,xp,gold:[0,0],speed:1,verb,aboveParty:0,glow:.95};if(typeof NO_VARY!=='undefined')NO_VARY.push(id)}
+const HGO_KINDS=[ // id, name, picture, hp, width, xp, verb. Sized like the other creatures of the Underlevel (they used to have 10 to 30 times the health and four times the damage of an ordinary creature, and one bite killed a hero)
+ ['hgo0','Toothed Leviathan','hgoleviathan',90,2.8,150,'swallows'],['hgo1','Lure Angler','hgoangler',70,2.2,120,'snaps at'],['hgo2','Kraken Horror','hgokraken',100,3.0,150,'crushes'],
+ ['hgo3','Drowned Swimmer','hgocorpse',40,1.5,80,'claws'],['hgo4','Black Eel','hgoeel',55,2.0,100,'bites'],['hgo5','Sea Hag','hgohag',60,1.5,110,'rakes'],
+ ['hgo6','Blind Abyssal Crab','hgocrab',75,1.8,130,'pinches'],['hgo7','Bone-Fish Swarm','hgobones',45,1.6,90,'gnaws'],['hgo8','Black Slime Serpent','hgoserpent',80,2.4,140,'strangles'],
+ ['hgo9','Hooked Leech','hgoleech',50,1.3,95,'drains']];
+for(const [id,name,pic,hp,w,xp,verb] of HGO_KINDS){ENEMY_DEF[id]={name,hp,dmg:hp>=75?[14,26]:[12,22],hit:.85,w,img:'hgo_'+id,xp,gold:[0,0],speed:1,verb,aboveParty:0,glow:.95}} // not in NO_VARY: the balance code sizes their health like any ordinary creature
 ENEMY_DEF.hgoboss={name:'The Black Leviathan',hp:6000,dmg:[40,70],hit:.88,w:3.4,img:'hgo_hgoboss',xp:9000,gold:[0,0],speed:1,verb:'devours',aboveParty:0,glow:.95};if(typeof NO_VARY!=='undefined')NO_VARY.push('hgoboss');
 AFFL_HITS.push([/^hgo[06]$/,'bleeding',.25],[/^hgo[14]$/,'shaken',.2],[/^hgo[27]$/,'stung',.2],[/^hgo3$/,'graverot',.25],[/^hgo[58]$/,'poisoned',.25],[/^hgo9$/,'fever',.22],[/^hgoboss$/,'bleeding',.3],[/^hgo/,'shaken',.08]);
 // the bodies are darkened to near black; the red pixels (the eyes) are kept and made brighter, with a glow
