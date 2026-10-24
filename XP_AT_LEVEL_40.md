@@ -1,6 +1,6 @@
-# XP per kill for a level 40 party (version 3.617, after the caps)
+# XP per kill for a level 40 party (version 3.618)
 
-How it works: a kill gives `base XP x creature level`. An ordinary creature counts at most 150 base XP (6,000 XP at level 40). If the party's average level is above the creature's, it gives 6% less for each level of difference (never below 30%). Every living hero gets the full amount. A boss or named great creature never gives more than one level of XP (24,600 at level 40). Going from level 40 to 41 needs 24,600 XP.
+How it works: a kill gives `base XP x creature level`. An ordinary creature counts at most 150 base XP (6,000 XP at level 40). The kill gives 6% less for each level the creature is below the party's average level (never below 30%) and 6% more for each level above (at most 50% more). Every living hero gets the full amount. A boss or named great creature never gives more than one level of XP (24,600 at level 40). Going from level 40 to 41 needs 24,600 XP.
 
 ## Ordinary creatures (119), smallest first
 
@@ -8,136 +8,136 @@ How it works: a kill gives `base XP x creature level`. An ordinary creature coun
 |---|---|---|---|---|---|
 | Butterfly (`bfly`) | 0 | 1 | 1 | 1 | 24600 |
 | Creature (`critter`) | 0 | 1 | 1 | 1 | 24600 |
-| Green Slime (`slime`) | 30 | 1,100 | 1,200 | 1,230 | 20.5 |
-| Tar Walker (`hgusl0`) | 30 | 1,100 | 1,200 | 1,230 | 20.5 |
-| Cave Bat (`bat`) | 32 | 1,173 | 1,280 | 1,312 | 19.2 |
-| Eye Puddle (`hgusl1`) | 33 | 1,210 | 1,320 | 1,353 | 18.6 |
-| Flesh Maggot Demon (`hguyk0`) | 34 | 1,246 | 1,360 | 1,394 | 18.1 |
-| Tentacle Ooze (`hgusl2`) | 36 | 1,320 | 1,440 | 1,476 | 17.1 |
-| Chest-Eyed Crawler (`hguyk1`) | 37 | 1,356 | 1,480 | 1,517 | 16.6 |
-| Slime Spider (`hgusl3`) | 39 | 1,430 | 1,560 | 1,599 | 15.8 |
-| Black Rat (`rat`) | 40 | 1,466 | 1,600 | 1,640 | 15.4 |
-| Grey Wolf (`wolf`) | 40 | 1,466 | 1,600 | 1,640 | 15.4 |
-| Skinned Hound (`hguyk2`) | 40 | 1,466 | 1,600 | 1,640 | 15.4 |
-| Slime Serpent (`hgusl4`) | 42 | 1,540 | 1,680 | 1,722 | 14.6 |
-| Faced Centipede (`hguyk3`) | 43 | 1,576 | 1,720 | 1,763 | 14.3 |
-| Maw Slime (`hgusl5`) | 45 | 1,650 | 1,800 | 1,845 | 13.7 |
-| Split-Jaw Ghoul (`hguyk4`) | 46 | 1,686 | 1,840 | 1,886 | 13.4 |
-| Slime Hound (`hgusl6`) | 48 | 1,760 | 1,920 | 1,968 | 12.8 |
-| Horned Spider Demon (`hguyk5`) | 49 | 1,796 | 1,960 | 2,009 | 12.6 |
-| Bandit Archer (`archer`) | 50 | 1,833 | 2,000 | 2,050 | 12.3 |
-| Moth Cloud (`hgswarm1`) | 50 | 1,833 | 2,000 | 2,050 | 12.3 |
-| Skull Slime (`hgusl7`) | 51 | 1,870 | 2,040 | 2,091 | 12.1 |
-| Tentacled Eye Horror (`hguyk6`) | 52 | 1,906 | 2,080 | 2,132 | 11.8 |
-| Many-Armed Horror (`hgusl8`) | 54 | 1,980 | 2,160 | 2,214 | 11.4 |
-| Biter Swarm (`hgswarm0`) | 55 | 2,016 | 2,200 | 2,255 | 11.2 |
-| Leather Imp (`hguyk7`) | 55 | 2,016 | 2,200 | 2,255 | 11.2 |
-| Eye Mass (`hgusl9`) | 57 | 2,090 | 2,280 | 2,337 | 10.8 |
-| Skull Pile (`hguyk8`) | 58 | 2,126 | 2,320 | 2,378 | 10.6 |
-| Bandit (`bandit`) | 60 | 2,200 | 2,400 | 2,460 | 10.3 |
-| Pharaoh's Servant (`pservant`) | 60 | 2,200 | 2,400 | 2,460 | 10.3 |
-| Spined Bone Beast (`hguyk9`) | 61 | 2,236 | 2,440 | 2,501 | 10.1 |
-| Castle Guard (`guard`) | 70 | 2,566 | 2,800 | 2,870 | 8.8 |
-| Desert Wolf (`dwolf`) | 70 | 2,566 | 2,800 | 2,870 | 8.8 |
-| Mire Tick (`hgins0`) | 70 | 2,566 | 2,800 | 2,870 | 8.8 |
-| Blackened Swarm (`hgdswarm`) | 80 | 2,933 | 3,200 | 3,280 | 7.7 |
-| Bounty Hunter (`hunter`) | 80 | 2,933 | 3,200 | 3,280 | 7.7 |
-| Skeleton (`skel`) | 80 | 2,933 | 3,200 | 3,280 | 7.7 |
-| Brown Bear (`bear`) | 85 | 3,116 | 3,400 | 3,485 | 7.2 |
-| Carrion Vulture (`vulture`) | 90 | 3,299 | 3,600 | 3,690 | 6.8 |
-| Desperate Nomad (`nomad`) | 90 | 3,299 | 3,600 | 3,690 | 6.8 |
-| Desperate Nomad (`nomad2`) | 90 | 3,299 | 3,600 | 3,690 | 6.8 |
-| Ghost (`ghost`) | 90 | 3,299 | 3,600 | 3,690 | 6.8 |
-| Hive Grub (`hglarva`) | 90 | 3,299 | 3,600 | 3,690 | 6.8 |
-| Cobra (`cobra`) | 100 | 3,666 | 4,000 | 4,100 | 6.2 |
-| Spectre (`spectre`) | 100 | 3,666 | 4,000 | 4,100 | 6.2 |
-| Spectre (`spectre2`) | 100 | 3,666 | 4,000 | 4,100 | 6.2 |
-| Hitman (`hitman`) | 110 | 4,033 | 4,400 | 4,510 | 5.6 |
-| Skeleton (`dskeleton`) | 110 | 4,033 | 4,400 | 4,510 | 5.6 |
-| Giant Scorpion (`scorpion`) | 120 | 4,399 | 4,800 | 4,920 | 5.1 |
-| Hive Guard (`hgwasp`) | 120 | 4,399 | 4,800 | 4,920 | 5.1 |
-| Reed Skitter (`hgins1`) | 120 | 4,399 | 4,800 | 4,920 | 5.1 |
-| Spiny Puffer (`uwpuffer`) | 120 | 4,399 | 4,800 | 4,920 | 5.1 |
-| Glow Jelly (`uwjelly`) | 130 | 4,766 | 5,200 | 5,330 | 4.7 |
-| Hollowed Grub (`hgdgrub`) | 130 | 4,766 | 5,200 | 5,330 | 4.7 |
-| Assassin (`assassin`) | 140 | 5,132 | 5,600 | 5,740 | 4.4 |
-| Barracuda (`uwbarra`) | 140 | 5,132 | 5,600 | 5,740 | 4.4 |
-| Vine Snake (`hgwsnake`) | 140 | 5,132 | 5,600 | 5,740 | 4.4 |
-| Armoured Goblin (`hlgoblin`) | 420 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Ash Guard (`ashguard`) | 160 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Barbed Lurker (`hgins3`) | 220 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Big Bug (`hgdbug`) | 240 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Black Eel (`hgo4`) | 800 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Black Slime Serpent (`hgo8`) | 1400 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Blind Abyssal Crab (`hgo6`) | 1200 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Bloated Bog Toad (`hgmtoad`) | 380 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Bloodworm (`hgfbloodworm`) | 260 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Bog Cricket (`hgmcricket`) | 300 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Bone-Fish Swarm (`hgo7`) | 700 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Cave Slime (`hlslime`) | 380 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Cave Spider (`hgdspider`) | 200 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Clawing Hands (`hlhands`) | 350 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Diving-Bell Spider (`hgfspider`) | 320 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Drowned Swimmer (`hgo3`) | 600 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Dusk Weaver (`hgins5`) | 320 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Giant Horsefly (`hgmhorsefly`) | 280 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Giant Leech (`hgfleech`) | 300 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Giant Mosquito (`hgmmosquito`) | 200 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Giant Piranha (`hgfpiranha`) | 180 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Giant Water Beetle (`hgfbeetle`) | 360 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Glass-Eyed Hunter (`hgins6`) | 370 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Gulping Mantis (`hgins4`) | 270 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Hollow Crawler (`hgins7`) | 420 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Hollow Jelly (`hgdjelly`) | 160 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Hollow Slug (`hgdslug`) | 150 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Hollow Worm (`hgdworm`) | 210 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Hollowed Golem (`hgdgolem`) | 230 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Hollowed Guard (`hgdguard`) | 170 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Hooked Leech (`hgo9`) | 750 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Kraken Horror (`hgo2`) | 2000 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Lantern Beetle (`hgdbeetle`) | 190 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Lure Angler (`hgo1`) | 1100 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Marsh Eel (`hgweel`) | 150 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Marsh Hornet (`hgmhornet`) | 300 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Marsh Locust (`hgmlocust`) | 240 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Marsh Water Snake (`hgfsnake`) | 240 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Maze Thief (`hgthief`) | 420 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Mire Beetle (`hgmbeetle`) | 400 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Moray Eel (`uweel`) | 230 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Mud Crayfish (`hgfcrayfish`) | 380 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Mummy (`mummy`) | 150 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Murdered Peasant (`hlvictim`) | 350 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Octopus (`uwoctopus`) | 260 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Pond Stalker (`hgins2`) | 170 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Raving Madman (`hlmadman`) | 550 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Razor Dragonfly (`hgmdragonfly`) | 340 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Reef Crab (`uwcrab`) | 150 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Reef Shark (`uwshark`) | 200 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Royal Guard (`rguard`) | 300 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Sea Hag (`hgo5`) | 1000 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Snapping Turtle (`hgfturtle`) | 420 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Spindle Tyrant (`hgins8`) | 470 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Swamp Crocodile (`hgwcroc`) | 230 | 5,499 | 6,000 | 6,150 | 4.1 |
-| The Bogeyman (`hlbogey`) | 2500 | 5,499 | 6,000 | 6,150 | 4.1 |
-| The Bogeyman (`hlbogeyw`) | 2500 | 5,499 | 6,000 | 6,150 | 4.1 |
-| The Great Insectivore (`hgins9`) | 520 | 5,499 | 6,000 | 6,150 | 4.1 |
-| The Screaming Witch (`hlwitch`) | 3500 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Toothed Leviathan (`hgo0`) | 1700 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Water Scorpion (`hgfscorpion`) | 280 | 5,499 | 6,000 | 6,150 | 4.1 |
-| Wax Golem (`hggolem`) | 170 | 5,499 | 6,000 | 6,150 | 4.1 |
+| Green Slime (`slime`) | 30 | 1,100 | 1,200 | 1,304 | 20.5 |
+| Tar Walker (`hgusl0`) | 30 | 1,100 | 1,200 | 1,304 | 20.5 |
+| Cave Bat (`bat`) | 32 | 1,173 | 1,280 | 1,391 | 19.2 |
+| Eye Puddle (`hgusl1`) | 33 | 1,210 | 1,320 | 1,434 | 18.6 |
+| Flesh Maggot Demon (`hguyk0`) | 34 | 1,246 | 1,360 | 1,478 | 18.1 |
+| Tentacle Ooze (`hgusl2`) | 36 | 1,320 | 1,440 | 1,565 | 17.1 |
+| Chest-Eyed Crawler (`hguyk1`) | 37 | 1,356 | 1,480 | 1,608 | 16.6 |
+| Slime Spider (`hgusl3`) | 39 | 1,430 | 1,560 | 1,695 | 15.8 |
+| Black Rat (`rat`) | 40 | 1,466 | 1,600 | 1,738 | 15.4 |
+| Grey Wolf (`wolf`) | 40 | 1,466 | 1,600 | 1,738 | 15.4 |
+| Skinned Hound (`hguyk2`) | 40 | 1,466 | 1,600 | 1,738 | 15.4 |
+| Slime Serpent (`hgusl4`) | 42 | 1,540 | 1,680 | 1,825 | 14.6 |
+| Faced Centipede (`hguyk3`) | 43 | 1,576 | 1,720 | 1,869 | 14.3 |
+| Maw Slime (`hgusl5`) | 45 | 1,650 | 1,800 | 1,956 | 13.7 |
+| Split-Jaw Ghoul (`hguyk4`) | 46 | 1,686 | 1,840 | 1,999 | 13.4 |
+| Slime Hound (`hgusl6`) | 48 | 1,760 | 1,920 | 2,086 | 12.8 |
+| Horned Spider Demon (`hguyk5`) | 49 | 1,796 | 1,960 | 2,130 | 12.6 |
+| Bandit Archer (`archer`) | 50 | 1,833 | 2,000 | 2,173 | 12.3 |
+| Moth Cloud (`hgswarm1`) | 50 | 1,833 | 2,000 | 2,173 | 12.3 |
+| Skull Slime (`hgusl7`) | 51 | 1,870 | 2,040 | 2,216 | 12.1 |
+| Tentacled Eye Horror (`hguyk6`) | 52 | 1,906 | 2,080 | 2,260 | 11.8 |
+| Many-Armed Horror (`hgusl8`) | 54 | 1,980 | 2,160 | 2,347 | 11.4 |
+| Biter Swarm (`hgswarm0`) | 55 | 2,016 | 2,200 | 2,390 | 11.2 |
+| Leather Imp (`hguyk7`) | 55 | 2,016 | 2,200 | 2,390 | 11.2 |
+| Eye Mass (`hgusl9`) | 57 | 2,090 | 2,280 | 2,477 | 10.8 |
+| Skull Pile (`hguyk8`) | 58 | 2,126 | 2,320 | 2,521 | 10.6 |
+| Bandit (`bandit`) | 60 | 2,200 | 2,400 | 2,608 | 10.3 |
+| Pharaoh's Servant (`pservant`) | 60 | 2,200 | 2,400 | 2,608 | 10.3 |
+| Spined Bone Beast (`hguyk9`) | 61 | 2,236 | 2,440 | 2,651 | 10.1 |
+| Castle Guard (`guard`) | 70 | 2,566 | 2,800 | 3,042 | 8.8 |
+| Desert Wolf (`dwolf`) | 70 | 2,566 | 2,800 | 3,042 | 8.8 |
+| Mire Tick (`hgins0`) | 70 | 2,566 | 2,800 | 3,042 | 8.8 |
+| Blackened Swarm (`hgdswarm`) | 80 | 2,933 | 3,200 | 3,477 | 7.7 |
+| Bounty Hunter (`hunter`) | 80 | 2,933 | 3,200 | 3,477 | 7.7 |
+| Skeleton (`skel`) | 80 | 2,933 | 3,200 | 3,477 | 7.7 |
+| Brown Bear (`bear`) | 85 | 3,116 | 3,400 | 3,694 | 7.2 |
+| Carrion Vulture (`vulture`) | 90 | 3,299 | 3,600 | 3,911 | 6.8 |
+| Desperate Nomad (`nomad`) | 90 | 3,299 | 3,600 | 3,911 | 6.8 |
+| Desperate Nomad (`nomad2`) | 90 | 3,299 | 3,600 | 3,911 | 6.8 |
+| Ghost (`ghost`) | 90 | 3,299 | 3,600 | 3,911 | 6.8 |
+| Hive Grub (`hglarva`) | 90 | 3,299 | 3,600 | 3,911 | 6.8 |
+| Cobra (`cobra`) | 100 | 3,666 | 4,000 | 4,346 | 6.2 |
+| Spectre (`spectre`) | 100 | 3,666 | 4,000 | 4,346 | 6.2 |
+| Spectre (`spectre2`) | 100 | 3,666 | 4,000 | 4,346 | 6.2 |
+| Hitman (`hitman`) | 110 | 4,033 | 4,400 | 4,781 | 5.6 |
+| Skeleton (`dskeleton`) | 110 | 4,033 | 4,400 | 4,781 | 5.6 |
+| Giant Scorpion (`scorpion`) | 120 | 4,399 | 4,800 | 5,215 | 5.1 |
+| Hive Guard (`hgwasp`) | 120 | 4,399 | 4,800 | 5,215 | 5.1 |
+| Reed Skitter (`hgins1`) | 120 | 4,399 | 4,800 | 5,215 | 5.1 |
+| Spiny Puffer (`uwpuffer`) | 120 | 4,399 | 4,800 | 5,215 | 5.1 |
+| Glow Jelly (`uwjelly`) | 130 | 4,766 | 5,200 | 5,650 | 4.7 |
+| Hollowed Grub (`hgdgrub`) | 130 | 4,766 | 5,200 | 5,650 | 4.7 |
+| Assassin (`assassin`) | 140 | 5,132 | 5,600 | 6,084 | 4.4 |
+| Barracuda (`uwbarra`) | 140 | 5,132 | 5,600 | 6,084 | 4.4 |
+| Vine Snake (`hgwsnake`) | 140 | 5,132 | 5,600 | 6,084 | 4.4 |
+| Armoured Goblin (`hlgoblin`) | 420 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Ash Guard (`ashguard`) | 160 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Barbed Lurker (`hgins3`) | 220 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Big Bug (`hgdbug`) | 240 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Black Eel (`hgo4`) | 800 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Black Slime Serpent (`hgo8`) | 1400 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Blind Abyssal Crab (`hgo6`) | 1200 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Bloated Bog Toad (`hgmtoad`) | 380 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Bloodworm (`hgfbloodworm`) | 260 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Bog Cricket (`hgmcricket`) | 300 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Bone-Fish Swarm (`hgo7`) | 700 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Cave Slime (`hlslime`) | 380 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Cave Spider (`hgdspider`) | 200 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Clawing Hands (`hlhands`) | 350 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Diving-Bell Spider (`hgfspider`) | 320 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Drowned Swimmer (`hgo3`) | 600 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Dusk Weaver (`hgins5`) | 320 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Giant Horsefly (`hgmhorsefly`) | 280 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Giant Leech (`hgfleech`) | 300 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Giant Mosquito (`hgmmosquito`) | 200 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Giant Piranha (`hgfpiranha`) | 180 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Giant Water Beetle (`hgfbeetle`) | 360 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Glass-Eyed Hunter (`hgins6`) | 370 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Gulping Mantis (`hgins4`) | 270 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Hollow Crawler (`hgins7`) | 420 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Hollow Jelly (`hgdjelly`) | 160 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Hollow Slug (`hgdslug`) | 150 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Hollow Worm (`hgdworm`) | 210 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Hollowed Golem (`hgdgolem`) | 230 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Hollowed Guard (`hgdguard`) | 170 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Hooked Leech (`hgo9`) | 750 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Kraken Horror (`hgo2`) | 2000 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Lantern Beetle (`hgdbeetle`) | 190 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Lure Angler (`hgo1`) | 1100 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Marsh Eel (`hgweel`) | 150 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Marsh Hornet (`hgmhornet`) | 300 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Marsh Locust (`hgmlocust`) | 240 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Marsh Water Snake (`hgfsnake`) | 240 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Maze Thief (`hgthief`) | 420 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Mire Beetle (`hgmbeetle`) | 400 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Moray Eel (`uweel`) | 230 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Mud Crayfish (`hgfcrayfish`) | 380 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Mummy (`mummy`) | 150 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Murdered Peasant (`hlvictim`) | 350 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Octopus (`uwoctopus`) | 260 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Pond Stalker (`hgins2`) | 170 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Raving Madman (`hlmadman`) | 550 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Razor Dragonfly (`hgmdragonfly`) | 340 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Reef Crab (`uwcrab`) | 150 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Reef Shark (`uwshark`) | 200 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Royal Guard (`rguard`) | 300 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Sea Hag (`hgo5`) | 1000 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Snapping Turtle (`hgfturtle`) | 420 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Spindle Tyrant (`hgins8`) | 470 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Swamp Crocodile (`hgwcroc`) | 230 | 5,499 | 6,000 | 6,519 | 4.1 |
+| The Bogeyman (`hlbogey`) | 2500 | 5,499 | 6,000 | 6,519 | 4.1 |
+| The Bogeyman (`hlbogeyw`) | 2500 | 5,499 | 6,000 | 6,519 | 4.1 |
+| The Great Insectivore (`hgins9`) | 520 | 5,499 | 6,000 | 6,519 | 4.1 |
+| The Screaming Witch (`hlwitch`) | 3500 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Toothed Leviathan (`hgo0`) | 1700 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Water Scorpion (`hgfscorpion`) | 280 | 5,499 | 6,000 | 6,519 | 4.1 |
+| Wax Golem (`hggolem`) | 170 | 5,499 | 6,000 | 6,519 | 4.1 |
 
 ## Bosses, mini-bosses and named creatures (83), capped at one level
 
 | Creature | Listed base XP | 1 level below (39) | At level (40) | 1 level above (41) | Kills for one level-up |
 |---|---|---|---|---|---|
-| Cinderback, the Fire Lizard (`firelizard`) | 160 | 5,866 | 6,400 | 6,560 | 3.8 |
-| The Wandering Cyclops (`cyclops`) | 220 | 8,065 | 8,800 | 9,020 | 2.8 |
-| Captain of the Hush Hive (`hgboss1`) | 280 | 10,265 | 11,200 | 11,480 | 2.2 |
-| Mayor Corbin (`mayor`) | 400 | 14,664 | 16,000 | 16,400 | 1.5 |
-| The Undying Pharaoh (`pharaohboss`) | 400 | 14,664 | 16,000 | 16,400 | 1.5 |
-| The Droning Warden (`hgboss2`) | 420 | 15,397 | 16,800 | 17,220 | 1.5 |
-| Rat King (`boss`) | 500 | 18,330 | 20,000 | 20,500 | 1.2 |
-| The Mother Grub (`hgboss3`) | 560 | 20,530 | 22,400 | 22,960 | 1.1 |
+| Cinderback, the Fire Lizard (`firelizard`) | 160 | 5,866 | 6,400 | 6,954 | 3.8 |
+| The Wandering Cyclops (`cyclops`) | 220 | 8,065 | 8,800 | 9,561 | 2.8 |
+| Captain of the Hush Hive (`hgboss1`) | 280 | 10,265 | 11,200 | 12,169 | 2.2 |
+| Mayor Corbin (`mayor`) | 400 | 14,664 | 16,000 | 17,384 | 1.5 |
+| The Undying Pharaoh (`pharaohboss`) | 400 | 14,664 | 16,000 | 17,384 | 1.5 |
+| The Droning Warden (`hgboss2`) | 420 | 15,397 | 16,800 | 18,253 | 1.5 |
+| Rat King (`boss`) | 500 | 18,330 | 20,000 | 21,730 | 1.2 |
+| The Mother Grub (`hgboss3`) | 560 | 20,530 | 22,400 | 24,338 | 1.1 |
 | Mine Overseer (`overseer`) | 600 | 21,996 | 24,000 | 24,600 | 1 |
 | Banshee (`hlbanshee`) | 1100 | 24,600 | 24,600 | 24,600 | 1 |
 | Beetle Demon (`hgdemon2`) | 1920 | 24,600 | 24,600 | 24,600 | 1 |
