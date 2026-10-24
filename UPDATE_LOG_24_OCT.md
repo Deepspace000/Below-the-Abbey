@@ -123,4 +123,4 @@ Portraits
 - The Ruby Maze back door in Ironhill moved from 20,24 (3 squares from Dorn's store) to 33,24, 6 squares from every other door. The STAY OUT sign and the map label moved with it.
 
 ## 3.628 (not pushed yet)
-- The icons on the world map are a third bigger (1.2 to 1.6 times their old size). The layout re-places every name so nothing overlaps.
+- The icons on the world map are two thirds bigger (1.2 to 2 times their old size). The layout re-places every name so nothing overlaps.
