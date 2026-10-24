@@ -460,4 +460,5 @@ River mouths open into the sea (3.604)
 * When the party dies: Start of this area again, Last quicksave, Load another game, Go to menu. The start of every area and of a new game is saved.
 * The weapons found first are a bit stronger: dagger 3 to 5, sword 4 to 7, mace 4 to 8, bow 3 to 6, hand axe 5 to 9, staff 2 to 4 with spell power +3.
 * The long chins on seven elf portraits are shortened.
+* Every potion stacks in the bag (the Antidote, Cleansing Salve, Holy Water, Sleeping Tea, the four colour potions and the Potion of Escape did not).
 * A full list of changes since 3.599 is in UPDATE_LOG_SINCE_3.599.md.

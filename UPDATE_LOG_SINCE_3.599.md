@@ -143,5 +143,8 @@ When the party dies
 Starting weapons
 * The weapons the party finds first are a bit stronger: Old Dagger 3 to 5 (was 2 to 4), Rusty Sword 4 to 7 (3 to 5), Battered Mace 4 to 8 (3 to 6), Short Bow 3 to 6 (2 to 5), Hand Axe 5 to 9 (4 to 7), Gnarled Staff 2 to 4 (1 to 3) and it adds 3 to spell power (was 2).
 
+Potions
+* Every potion now stacks in the bag. Nine did not (the Antidote, Cleansing Salve, Holy Water, Sleeping Tea, the Potions of Red, Blue, Green and Yellow, and the Potion of Escape) and each took a slot of its own. Singles already in a bag stay as they are; new ones join a stack.
+
 Portraits
 * The over-long chins on seven elf portraits are shortened (the blond elf with the circlet, the grey elf with the jutting chin, the dark elf, the elf with the leaf crown, the old grey elf, the hooded archer, and a little on the pale elf). The originals are kept in `ART-HOLD/portrait_chin_orig`; `tools/fix_chins.py` redoes it.
