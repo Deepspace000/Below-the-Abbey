@@ -96,4 +96,4 @@ Portraits
 
 ## 3.625 (made, not yet released)
 
-* The priest's Heal costs 3 mana (it had grown to 9).
+* The priest's Heal costs 3 mana (it had grown to 9).* The Gravewarden's Mace is stronger: damage 6 to 11 (was 4 to 8), a little easier to hit with, and the double blow comes 16 percent of the time (was 12).
