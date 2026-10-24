@@ -34,7 +34,8 @@ function manaDrop(n){
     cand.push([x,y])}
   let reach=0;for(let i=0;i<W*H;i++)if(seen[i]&&rows[(i/W)|0][i%W]==='.')reach++; // how many floor squares can be walked to: the sizes below go by this, which no item or scenery changes
   const lived=(L.enemies||[]).length>0; // a small place with creatures in it (a den, a burrow) gets one; a shop or a house gets none
-  if(reach<MANA_DROP_MIN_FLOOR&&!(lived&&reach>=12))return;
+  if(!lived)return;                                            // only places with creatures in them: no potions on the floor of shops, houses and towns
+  if(reach<MANA_DROP_MIN_FLOOR&&reach<12)return;
   const cnt=reach<MANA_DROP_MIN_FLOOR?1:reach<150?2:Math.max(3,Math.min(6,2+Math.round(reach/450)));
   const rating=(typeof gotoRate==='function'?gotoRate(n):0)||(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[n])||L.diff||n;
   const placed=[];
@@ -53,5 +54,6 @@ function manaDrop(n){
 {const _ll=loadLevel;loadLevel=function(n){_ll.apply(this,arguments);try{if(typeof herbPlace==='function')herbPlace(LEVEL,false);manaDrop(LEVEL)}catch(e){console.error(e)}}}
 // a save made before this change knows fewer floor items than the area has now: what it knew still applies (the new ones are on the end)
 {const _as=applyLevelState;applyLevelState=function(s){
-  try{if(s&&Array.isArray(s.items)&&s.items.length<G.items.length){const pad=s.items.slice();while(pad.length<G.items.length)pad.push(0);s=Object.assign({},s,{items:pad})}}catch(e){console.error(e)}
+  try{if(s&&Array.isArray(s.items)&&s.items.length!==G.items.length){const pad=s.items.slice(0,G.items.length);while(pad.length<G.items.length)pad.push(0);s=Object.assign({},s,{items:pad})}} // (a save from 3.624 may know potions that a place without creatures no longer has)
+  catch(e){console.error(e)}
   return _as.call(this,s)}}
