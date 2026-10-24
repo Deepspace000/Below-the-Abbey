@@ -100,3 +100,10 @@ Portraits
 * A very slow mana trickle is back: every fifth step the party walks gives each living hero one point of mana (or stamina). Only walking gives it; waiting, resting in place and fighting do not.
 * Mana potions now lie only in areas that have creatures in them (80 of 207 areas): none in shops, houses or the towns.
 * Every area map now shows the quest givers: a gold ! over each person with a quest to take and a green ? over each person a finished quest can be handed to, with their name beside it (names that would overlap are moved). On the Thornwick map this shows Goodwife Edda, who gives the Rat Catcher quest, east of the fountain.
+
+## Under the Well (Thornwick)
+- A new well stands in Thornwick, a few steps west of Goodwife Edda. Talk to it, or step on it, to climb down.
+- Below it is a small windy maze of grey-blue brick with the eight rats of the Rat Catcher quest. A chest waits at the dead end that is the longest walk from the stair, and there is a potion in another dead end.
+- Edda now tells the party to go down the well, because the rats like water. The quest text says the same.
+- The maze has its own little hand-inked map (passages, chest, way out) and is in the Go to area list. Link: `?town=thornwickwell&lvl=34`.
+- Power Move: a character with no mana for their power now passes the turn to the next character who has not acted, instead of staying stuck.
