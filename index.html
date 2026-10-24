@@ -49107,14 +49107,14 @@ function twSwapWalls(on){
 
 /* ---- the well in Thornwick: a few squares west of Goodwife Edda ---- */
 function twDescend(){if(LEVEL!==3||G.state!=='play')return;msg('The party climbs down the well, into the tunnels below Thornwick.','#9ec4e8');sfx('level');const st=LEVELS[TWL.ID].start;goToLevel(TWL.ID,{x:st.x,y:st.y,f:st.f});G.state='play'}
-NPCS.thornwell={name:'The well',img:'well',root:d=>say('The well is old, and the rope is worn. Something scratches far down in the dark, and the stones are wet. There are iron rungs set into the wall of the shaft.',[['Climb down.',()=>{twDescend();return null}],BYE])};
+NPCS.thornwell={name:'The well',img:'well',root:d=>say('You look into the well and hear scratching sounds far below. Do you descend?',[['Descend.',()=>{twDescend();return null}],['Not.',()=>null]])};
 function twTownSetup(){
   const L=LEVELS[3];if(!L||!L.decor||L._twWell)return;L._twWell=1;
   L.decor.push({k:'well',x:TWL.WX,y:TWL.WY,block:false,walk:true,npc:'thornwell'});
 }
 twTownSetup();
 {const _dm=doMove;doMove=function(){const r=_dm.apply(this,arguments);
-  try{if(LEVEL===3&&G.state==='play'&&!G.cut&&!G.talk&&G.P.x===TWL.WX&&G.P.y===TWL.WY)later(450,()=>{if(LEVEL===3&&G.P.x===TWL.WX&&G.P.y===TWL.WY&&!G.cut&&!G.talk)twDescend()})}catch(e){console.error(e)}
+  try{if(LEVEL===3&&G.state==='play'&&!G.cut&&!G.talk&&G.P.x===TWL.WX&&G.P.y===TWL.WY)later(450,()=>{if(LEVEL===3&&G.P.x===TWL.WX&&G.P.y===TWL.WY&&!G.cut&&!G.talk){const w=LEVELS[3].decor.find(d=>d.npc==='thornwell');if(w)startTalk(w)}})}catch(e){console.error(e)}
   return r}}
 
 /* ---- the lists: the Go to area list and ?town=thornwickwell ---- */
