@@ -113,3 +113,6 @@ Portraits
 - The second and third potion shortcuts are now on the right-hand side, where Wait and Camp were (keys 6 and 7). The first potion stays below them (key 5).
 - Food can go into the three shortcut slots as well as potions (select it in the bag, "Put in shortcut").
 - Arriving somewhere by a door or a cave mouth can no longer leave the party walled in: if the party is in a small pocket of trees or rocks, the shortest line of scenery out of it is opened. Nothing is regenerated.
+
+## 3.627 (not pushed yet)
+- No two creatures can stand on one square: a move onto an occupied square is undone, and creatures that spawn or load on the same square are spread to the nearest free square after every round, on arrival and on loading a save.
