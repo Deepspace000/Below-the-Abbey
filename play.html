@@ -47,7 +47,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.623';
+const VERSION='3.624';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -982,10 +982,10 @@ function heroFallback(i){
    k = kind, t = label, c = colour, req = stat requirements, rar 1 = magic
    ========================================================================== */
 const ITEMDEF={
-  dagger:{n:'Old Dagger',k:'weapon',t:'Dagger',ic:'dagger',c:'#b8c0cc',dmg:[2,4],hit:.04,req:{dex:6},price:12,d:'Light and quick. Easy to hit with.',sw:.34},
-  sword:{n:'Rusty Sword',k:'weapon',t:'Sword',ic:'sword',c:'#a8806a',dmg:[3,5],hit:0,req:{str:8},price:20,d:'Old and pitted, but still sharp enough.',sw:.4},
-  mace:{n:'Battered Mace',k:'weapon',t:'Mace',ic:'mace',c:'#8a8e98',dmg:[3,6],hit:-.03,req:{str:8},price:24,d:'A heavy iron head on a wooden handle.',sw:.4},
-  staff:{n:'Gnarled Staff',k:'weapon',t:'Staff',ic:'staff',c:'#8a6a40',dmg:[1,3],magic:2,req:{int:6},price:28,d:'Adds 2 to the power of spells.',sw:.4},
+  dagger:{n:'Old Dagger',k:'weapon',t:'Dagger',ic:'dagger',c:'#b8c0cc',dmg:[3,5],hit:.04,req:{dex:6},price:12,d:'Light and quick. Easy to hit with.',sw:.34},
+  sword:{n:'Rusty Sword',k:'weapon',t:'Sword',ic:'sword',c:'#a8806a',dmg:[4,7],hit:0,req:{str:8},price:20,d:'Old and pitted, but still sharp enough.',sw:.4},
+  mace:{n:'Battered Mace',k:'weapon',t:'Mace',ic:'mace',c:'#8a8e98',dmg:[4,8],hit:-.03,req:{str:8},price:24,d:'A heavy iron head on a wooden handle.',sw:.4},
+  staff:{n:'Gnarled Staff',k:'weapon',t:'Staff',ic:'staff',c:'#8a6a40',dmg:[2,4],magic:3,req:{int:6},price:28,d:'Adds 3 to the power of spells.',sw:.4},
   drowndagger:{n:"Drowned Dagger",k:'weapon',t:'Dagger',ic:'dagger',c:'#8fc0d0',dmg:[4,6],hit:.1,req:{dex:8},price:120,rar:1,d:'Pale and wet, with a groove for blood. It is quick and it rarely misses.',sw:.34},
   ore:{n:'Iron Ore',k:'quest',t:'Quest item',ic:'ore',c:'#8a8a96',stack:1,price:125,d:'Heavy grey ore. Brannoch the smith wants six pieces. Any shop pays 50 gold for a chunk.',sw:.34},
   herb:{n:'Moor Herb',k:'quest',t:'Quest item',ic:'herb',c:'#6a9a58',stack:1,price:2,d:'A grey-green herb from the moor. Wynn wants six.',sw:.3},
@@ -1005,8 +1005,8 @@ const ITEMDEF={
   bluepotion:{n:'Potion of Blue',k:'potion',t:'Potion',ic:'potion',c:'#4070e8',dye:'#2a60f0',price:30,d:'Drink it and the drinker turns blue for four days.',sw:.34},
   greenpotion:{n:'Potion of Green',k:'potion',t:'Potion',ic:'potion',c:'#48c058',dye:'#2ab840',price:30,d:'Drink it and the drinker turns green for four days.',sw:.34},
   yellowpotion:{n:'Potion of Yellow',k:'potion',t:'Potion',ic:'potion',c:'#e8d040',dye:'#f0d020',price:30,d:'Drink it and the drinker turns yellow for four days.',sw:.34},
-  bow:{n:'Short Bow',k:'weapon',t:'Bow',ic:'bow',c:'#8a6a40',dmg:[2,5],hit:.02,ranged:3,req:{dex:8},price:30,d:'Shoots at targets up to 3 tiles ahead.',sw:.4},
-  axe:{n:'Hand Axe',k:'weapon',t:'Axe',ic:'axe',c:'#9aa0aa',dmg:[4,7],hit:-.05,req:{str:10},price:30,d:'Heavy and hard-hitting, but hard to land.',sw:.4},
+  bow:{n:'Short Bow',k:'weapon',t:'Bow',ic:'bow',c:'#8a6a40',dmg:[3,6],hit:.02,ranged:3,req:{dex:8},price:30,d:'Shoots at targets up to 3 tiles ahead.',sw:.4},
+  axe:{n:'Hand Axe',k:'weapon',t:'Axe',ic:'axe',c:'#9aa0aa',dmg:[5,9],hit:-.05,req:{str:10},price:30,d:'Heavy and hard-hitting, but hard to land.',sw:.4},
   shield:{n:'Wooden Shield',k:'shield',t:'Shield',ic:'shield',c:'#8a6238',armor:2,req:{str:8},price:18,d:'Planks bound with a rusty band.',sw:.42},
   cap:{n:'Leather Cap',k:'head',t:'Helm',ic:'head',c:'#7a5a38',armor:1,price:8,d:'Stiff boiled leather.',sw:.36},
   helm:{n:'Iron Helm',k:'head',t:'Helm',ic:'head',c:'#9aa0aa',armor:2,req:{str:8},price:40,d:'Dented, but it still turns a blade.',sw:.38},
@@ -3746,6 +3746,7 @@ function startGame(){
   reset();G.state='play';audioInit();
   G.flags.autoScaleOn=C.scale?1:0; // the choice made with the party: a fixed world, or one that scales
   msg('You wake in the crypts below the abbey. Something is scratching in the dark...');
+  writeAreaSaves(); // the first area starts with a save too
 }
 function drawCover(img,x,y,w,h){
   if(!img){ctx.fillStyle='#1a1410';ctx.fillRect(x,y,w,h);return}
@@ -4143,6 +4144,8 @@ function setScroll(d,v){if(d==='saves'){G.svs=clamp(v,0,G.svMax||0);return}if(d=
 const SAVE_SLOTS=[['auto','Autosave'],['quick','Quick save'],['1','Slot 1'],['2','Slot 2'],['3','Slot 3'],['prev','Previous run'],['prev2','Older run']];
 const hasSave=k=>{try{return !!localStorage.getItem('abbeySave_'+k)}catch(e){return false}};
 function readSave(k){try{const s=localStorage.getItem('abbeySave_'+k);return s?JSON.parse(s):null}catch(e){return null}}
+/* The start of every area is saved twice: as the autosave, and as "area", which the death screen can return to (the beginning of this area, with the party as it came in). */
+function writeAreaSaves(){try{const j=JSON.stringify(snapshot());let ok=true;for(const k of ['auto','area']){try{localStorage.setItem('abbeySave_'+k,j)}catch(e){ok=false}}return ok}catch(e){return false}}
 function writeSave(k){
   try{localStorage.setItem('abbeySave_'+k,JSON.stringify(snapshot()));return true}catch(e){return false}
 }
@@ -4212,6 +4215,7 @@ function restoreNow(sv){
   }
   if(LEVEL>=41)desertApplyState();
   recountRegions();reveal();msg('Game loaded.','#9ae0a0');
+  try{const a=readSave('area');if(!a||a.level!==sv.level)localStorage.setItem('abbeySave_area',JSON.stringify(sv))}catch(e){} // a game loaded in the middle of an area: that is as far back as this area goes
 }
 function refreshSaves(){
   G.saves.rows=SAVE_SLOTS.map(([k,label])=>{
@@ -5239,7 +5243,7 @@ function goToLevel(n,entry){
     if(cd&&!F.mayorKilled&&!F.mayorFight&&G.quests.gandrick&&G.quests.gandrick.st==='done')G.quests.gandrick.st='active'; // repairs saves where a jump link had wrongly marked him defeated
     if(cd&&(F.mayorFight||F.mayorDown)){cd.found=true;cd.block=false}if(F.mayorFight&&!F.mayorDown&&cd)addEnemy('mayor',cd.x,cd.y,true)}
   reveal();G.hold=null;try{afflEnter(n);petsApply();petEnter(n);if(typeof yarEnter==='function')yarEnter(n);if(typeof uwEnterHook==='function')uwEnterHook(n);if(typeof bathEnter==='function')bathEnter(n);if(typeof seaEnterHook==='function')seaEnterHook(n)}catch(e){console.error(e)}
-  G.acted=[false,false,false,false];G.state='play';G.nextAuto=G.time+180;G.lastReg=G.reg?G.reg[G.P.y*MW+G.P.x]:-2;writeSave('auto');
+  G.acted=[false,false,false,false];G.state='play';G.nextAuto=G.time+180;G.lastReg=G.reg?G.reg[G.P.y*MW+G.P.x]:-2;writeAreaSaves();
   if(LEVELS[n]&&LEVELS[n].scene)startScene(n);
   if(n===2&&!G.flags.townSeen&&!G.flags.abbeyIntroSeen){G.flags.abbeyIntroSeen=1;startCut('abbeyIntro')} // the cutscene plays once, not every time the party comes back out of a wild dungeon before reaching the town
   else if(n===2&&G.flags.townSeen){respawnForest();msg('You walk back into the Thornwood. Some of the wolves and bandits have returned.','#e8a090')}
@@ -7124,10 +7128,20 @@ function drawEnd(win){
     ctx.save();ctx.font=`26px ${FTITLE}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='#000';ctx.strokeText('The Party Has Fallen',240,82);ctx.fillStyle='#ff9a8a';ctx.fillText('The Party Has Fallen',240,82);ctx.restore();
     txt('The crypts keep their secrets.',240,110,10,'#d8c9a0','center');
   }
-  txt(`Creatures slain: ${G.kills}     Rounds: ${G.rounds}`,240,156,11,'#d0c298','center');
-  txt(`Survivors: ${livingHeroes().length} of 4     Gold: ${G.gold}`,240,174,11,'#d0c298','center');
-  txt('Levels: '+G.heroes.map(h=>h.lvl).join('  '),240,192,11,'#d0c298','center');
-  btnText('endload','Load most recent save',140,206,200,26);btnText('endmenu','Go to menu',140,236,200,26);
+  if(win){
+    txt(`Creatures slain: ${G.kills}     Rounds: ${G.rounds}`,240,156,11,'#d0c298','center');
+    txt(`Survivors: ${livingHeroes().length} of 4     Gold: ${G.gold}`,240,174,11,'#d0c298','center');
+    txt('Levels: '+G.heroes.map(h=>h.lvl).join('  '),240,192,11,'#d0c298','center');
+    btnText('endload','Load most recent save',140,206,200,26);btnText('endmenu','Go to menu',140,236,200,26);
+  }else{ // the party has fallen: back to the start of this area, to the last quicksave, to another game, or out to the menu
+    txt(`Creatures slain: ${G.kills}     Rounds: ${G.rounds}     Gold: ${G.gold}`,240,132,10,'#d0c298','center');
+    txt('Levels: '+G.heroes.map(h=>h.lvl).join('  '),240,146,10,'#d0c298','center');
+    if(G.endNote&&G.time-G.endNote.t<4)txt(G.endNote.s,240,160,9.5,'#ff9a8a','center');
+    btnText('endarea',hasSave('area')?'Start of this area again':'Start of this area (no save)',130,170,220,22);
+    btnText('endquick',hasSave('quick')?'Last quicksave':'Last quicksave (none yet)',130,196,220,22);
+    btnText('endother','Load another game',130,222,220,22);
+    btnText('endmenu','Go to menu',130,248,220,22);
+  }
 }
 
 /* ==========================================================================
@@ -7307,7 +7321,12 @@ function handleBtn(id){
   if(G.state==='title'&&!G.menu){titleBtn(id);return}
   if(G.state==='goto'){gotoBtn(id);return}
   if(G.state==='create'){crBtn(id);return}
-  if(G.state==='win'||G.state==='dead'){if(id==='endload')loadRecent();else if(id==='endmenu'){G.state='title'}return}
+  if(G.state==='win'||G.state==='dead'){
+    if(id==='endload')loadRecent();
+    else if(id==='endarea'||id==='endquick'){const sv=readSave(id==='endarea'?'area':'quick');if(sv)restore(sv);else G.endNote={t:G.time,s:id==='endarea'?'No save was made at the start of this area.':'There is no quicksave yet (F5 makes one).'}}
+    else if(id==='endother')openSaves('title');
+    else if(id==='endmenu'){G.state='title'}
+    return}
   if(G.loot){lootBtn(id);return}
   if(G.inv.open){invBtn(id);return}
   if(G.map){if(id==='mapclose'||id==='map')G.map=false;return}
@@ -7519,7 +7538,7 @@ addEventListener('keydown',e=>{
   if(G.state==='title'&&G.menu){if(e.key==='Escape'){G.menu=false}e.preventDefault();return}
   if(G.state==='title'){titleBtn(hasSave('auto')||hasSave('prev')?'tcont':'tnew');e.preventDefault();return}
   if(G.state==='create'){if(e.key==='Enter'){crBtn(G.cr.choose?'cr_pick_def':G.cr.step==='done'?'cr_start':'cr_ok');e.preventDefault()}return}
-  if(G.state==='win'||G.state==='dead'){if(e.key==='Enter'||e.key===' ')loadRecent();return}
+  if(G.state==='win'||G.state==='dead'){if(e.key==='Enter'||e.key===' '){if(G.state==='dead'&&hasSave('area'))handleBtn('endarea');else loadRecent()}return}
   if(e.key==='Escape'){if(G.overview){if(G.world)G.world=false;else G.overview=false}else if(G.loot){G.loot=null}else if(G.inv.open){G.inv.open=false}else{G.menu=!G.menu;G.map=false}e.preventDefault();return}
   if(e.key==='i'||e.key==='I'){if(G.inv.open)G.inv.open=false;else openInv(G.sel);e.preventDefault();return}
   if((e.key==='o'||e.key==='O')&&G.state==='play'){G.overview=!G.overview;G.world=false;return}
@@ -48629,6 +48648,65 @@ for(const t of Object.keys(ENEMY_DEF)){
   if(typeof NO_VARY!=='undefined')for(let i=NO_VARY.length-1;i>=0;i--)if(NO_VARY[i]===t)NO_VARY.splice(i,1);
   const avg=(d.dmg[0]+d.dmg[1])/2;if(avg>HOLLOW_DMG_AVG_MAX){const k=HOLLOW_DMG_AVG_MAX/avg;d.dmg=[Math.max(1,Math.round(d.dmg[0]*k)),Math.max(1,Math.round(d.dmg[1]*k))]}
 }
+
+/* ---- src/desert/manadrops.js ---- */
+/* ==========================================================================
+   MANA POTIONS ON THE FLOOR. Mana no longer comes back by itself, so every area has a few mana draughts lying about for the party to find: three to six, by the size of the area,
+   (one in a small den, two in a small place, three to six in the rest), spread out over the ground that can be walked to from the start (never by a door, never on scenery, a creature's post or another item). The kind goes with the area's level:
+   the Mana Draught in the early places, the Greater Mana Draught in the middle ones, and in the high ones mostly Greater with now and then a Superior (which fills the whole bar).
+   The places are picked from the number of the area and nothing else, so they are the same on every visit and in every save. They go on the END of the area's list of floor items,
+   after the herbs, so a save made before this change still finds every item it knew where it was. The tiny rooms (shops, houses) get none, and neither does the open sea.
+   ========================================================================== */
+const MANA_DROP_MIN_FLOOR=60;
+function manaDrop(n){
+  const L=LEVELS[n];if(!L||L._manaDrop||!L.rows||!L.rows.length||!Array.isArray(L.items))return;L._manaDrop=1;
+  if(n>=330&&n<=343)return;                                   // the open sea
+  const H=L.rows.length,W=L.rows[0].length,st=L.start||{x:1,y:1},rows=L.rows;
+  const cell=(x,y)=>x>=0&&y>=0&&x<W&&y<H?rows[y][x]:'#';
+  // the ground that can be walked to from the start (floor, and doors that open)
+  const seen=new Uint8Array(W*H),q=new Int32Array(W*H);let qh=0,qt=0;
+  const push=(x,y)=>{const c=cell(x,y);if(c!=='.'&&c!=='D'&&c!=='t')return;const i=y*W+x;if(seen[i])return;seen[i]=1;q[qt++]=i};
+  push(st.x,st.y);for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]])push(st.x+dx,st.y+dy);
+  while(qh<qt){const i=q[qh++],x=i%W,y=(i/W)|0;
+    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy,c=cell(nx,ny);if(c==='.'||c==='D')push(nx,ny)}}
+  const taken=new Set(),block=new Set();
+  for(const o of [...L.items,...(L.enemies||[])])if(o)taken.add(o.x+','+o.y);
+  for(const d of ((typeof DECOR_SPAWNS!=='undefined'&&LEVEL===n&&DECOR_SPAWNS)||L.decor||[])){ // solid scenery, people and containers: the square itself (flowers and other things that can be walked over do not count)
+    if(d&&(d.block||d.npc||(typeof CONTAINERS!=='undefined'&&CONTAINERS.includes(d.k))||d.shop))block.add(d.x+','+d.y)}
+  for(const p of (L.portals||[]))if(p)for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)block.add((p.x+dx)+','+(p.y+dy));
+  const tb=typeof terrFor==='function'?terrFor(n):null;
+  const cand=[];
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){
+    if(!seen[y*W+x]||rows[y][x]!=='.')continue;
+    const k=x+','+y;if(taken.has(k)||block.has(k))continue;
+    if(tb&&tb.block&&tb.block[y*tb.W+x])continue;
+    if(Math.abs(x-st.x)+Math.abs(y-st.y)<4)continue;
+    let door=false;for(let dy=-2;dy<=2&&!door;dy++)for(let dx=-2;dx<=2;dx++){const c=cell(x+dx,y+dy);if(c==='D'||/[0-9]/.test(c)){door=true;break}} // not by a door
+    if(door)continue;
+    cand.push([x,y])}
+  let reach=0;for(let i=0;i<W*H;i++)if(seen[i]&&rows[(i/W)|0][i%W]==='.')reach++; // how many floor squares can be walked to: the sizes below go by this, which no item or scenery changes
+  const lived=(L.enemies||[]).length>0; // a small place with creatures in it (a den, a burrow) gets one; a shop or a house gets none
+  if(reach<MANA_DROP_MIN_FLOOR&&!(lived&&reach>=12))return;
+  const cnt=reach<MANA_DROP_MIN_FLOOR?1:reach<150?2:Math.max(3,Math.min(6,2+Math.round(reach/450)));
+  const rating=(typeof gotoRate==='function'?gotoRate(n):0)||(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[n])||L.diff||n;
+  const placed=[];
+  // each square has its own number for each potion (from its place and the area only), and the potion goes on the square with the lowest number that is far enough from the others:
+  // so a different list of squares (an item put somewhere by another part of the game) cannot move the potions
+  for(let k=0;k<cnt;k++){
+    let best=null;
+    for(const need of [12,7,3]){let bs=2;
+      for(const c of cand){const sc=hash2(c[0]*131+k*7919,c[1]*17+n,977+k);if(sc>=bs)continue;if(!placed.every(p=>Math.abs(p[0]-c[0])+Math.abs(p[1]-c[1])>=need))continue;bs=sc;best=c}
+      if(best)break}
+    if(!best)continue;placed.push(best);
+    const id=rating<35?'manadraught':rating<65?(k%2?'greatermana':'manadraught'):(k===0&&cnt>=4&&hash2(n,k,983)<.6?'supermana':'greatermana');
+    L.items.push({k:id,x:best[0],y:best[1]})}
+}
+// every area, whichever way it is entered (a new game, a door, a loaded save), gets its mana potions once, after the herbs
+{const _ll=loadLevel;loadLevel=function(n){_ll.apply(this,arguments);try{if(typeof herbPlace==='function')herbPlace(LEVEL,false);manaDrop(LEVEL)}catch(e){console.error(e)}}}
+// a save made before this change knows fewer floor items than the area has now: what it knew still applies (the new ones are on the end)
+{const _as=applyLevelState;applyLevelState=function(s){
+  try{if(s&&Array.isArray(s.items)&&s.items.length<G.items.length){const pad=s.items.slice();while(pad.length<G.items.length)pad.push(0);s=Object.assign({},s,{items:pad})}}catch(e){console.error(e)}
+  return _as.call(this,s)}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

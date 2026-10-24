@@ -453,3 +453,11 @@ River mouths open into the sea (3.604)
 3.623: type your own hero name
 
 * On the party creation screen the name box (top right) is now drawn as a box with a small pencil. Click or tap it and type the hero's name (twelve letters at most). Enter or clicking away keeps it, Escape drops the change. A keyboard comes up on a tablet. This replaces a pop-up question that did nothing in the Windows app.
+
+3.624: mana potions on every floor, death options, stronger starting weapons, shorter chins
+
+* Every area has a few mana draughts lying on the floor (one in a small den, two in a small place, three to six elsewhere), by the area's level. Saves made before keep everything they knew.
+* When the party dies: Start of this area again, Last quicksave, Load another game, Go to menu. The start of every area and of a new game is saved.
+* The weapons found first are a bit stronger: dagger 3 to 5, sword 4 to 7, mace 4 to 8, bow 3 to 6, hand axe 5 to 9, staff 2 to 4 with spell power +3.
+* The long chins on seven elf portraits are shortened.
+* A full list of changes since 3.599 is in UPDATE_LOG_SINCE_3.599.md.
