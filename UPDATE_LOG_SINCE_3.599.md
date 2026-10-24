@@ -143,6 +143,9 @@ When the party dies
 Starting weapons
 * The weapons the party finds first are a bit stronger: Old Dagger 3 to 5 (was 2 to 4), Rusty Sword 4 to 7 (3 to 5), Battered Mace 4 to 8 (3 to 6), Short Bow 3 to 6 (2 to 5), Hand Axe 5 to 9 (4 to 7), Gnarled Staff 2 to 4 (1 to 3) and it adds 3 to spell power (was 2).
 
+Gifts are announced
+* Whatever the party is handed (by a person in a talk, in a scene, or by a quest) is printed on the screen: "Received: Antidote x2.", "Received: Ring of Vigor.", "Received: 40 gold." A quest taken also shows what it pays and any item it gives ("It pays: 160 gold, 400 XP, Hand Axe."). A thing that a line already names (a quest's Reward line, "She gives you a Cleansing Salve.") is not said twice. Things picked up off the floor, taken from a chest or bought are left as they were.
+
 Potions
 * Every potion now stacks in the bag. Nine did not (the Antidote, Cleansing Salve, Holy Water, Sleeping Tea, the Potions of Red, Blue, Green and Yellow, and the Potion of Escape) and each took a slot of its own. Singles already in a bag stay as they are; new ones join a stack.
 
