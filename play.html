@@ -48892,6 +48892,10 @@ addEventListener('keydown',e=>{
 function priestHealCost(){try{for(const c of CLASSES)if(c.name==='Priest'){if(c.sp&&c.sp.type==='heal')c.sp.cost=3;for(const p of (c.powers||[]))if(p&&p.name==='Heal'&&p.act!==false)p.cost=3}for(const d of (typeof HERO_DEF!=='undefined'?HERO_DEF:[]))if(d&&d.cls==='Priest'&&d.sp&&d.sp.type==='heal')d.sp.cost=3}catch(e){console.error(e)}}
 priestHealCost();
 {const _sp=setParty;setParty=function(){const r=_sp.apply(this,arguments);priestHealCost();return r}}
+/* A VERY SLOW MANA TRICKLE: every fifth step the party walks gives each living hero one point of mana (or stamina). Walking only: waiting, resting in place and fighting give none. */
+{const _dm2=doMove;doMove=function(rel){const x0=G.P.x,y0=G.P.y,l0=LEVEL;const r=_dm2.apply(this,arguments);
+  try{if(LEVEL===l0&&(G.P.x!==x0||G.P.y!==y0)){G.manaSteps=(G.manaSteps||0)+1;if(G.manaSteps>=5){G.manaSteps=0;for(const h of G.heroes)if(h.alive&&h.mp<h.mpMax)h.mp++}}}catch(e){}
+  return r}}
 
 /* ---- src/desert/hg_rescue.js ---- */
 /* ==========================================================================
