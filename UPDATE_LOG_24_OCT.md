@@ -107,3 +107,9 @@ Portraits
 - Edda now tells the party to go down the well, because the rats like water. The quest text says the same.
 - The maze has its own little hand-inked map (passages, chest, way out) and is in the Go to area list. Link: `?town=thornwickwell&lvl=34`.
 - Power Move: a character with no mana for their power now passes the turn to the next character who has not acted, instead of staying stuck.
+
+## 3.626 (not pushed yet)
+- Battle buttons moved: Camp is now the top small window to the right of the power move, Wait is under it. The weapon swap windows that stood there are gone (change weapons in the inventory).
+- The second and third potion shortcuts are now on the right-hand side, where Wait and Camp were (keys 6 and 7). The first potion stays below them (key 5).
+- Food can go into the three shortcut slots as well as potions (select it in the bag, "Put in shortcut").
+- Arriving somewhere by a door or a cave mouth can no longer leave the party walled in: if the party is in a small pocket of trees or rocks, the shortest line of scenery out of it is opened. Nothing is regenerated.

@@ -47,7 +47,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.625';
+const VERSION='3.626';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -3238,19 +3238,17 @@ function drawSpecialBtn(){
   {const ws=sp.name.split(' ');if(ws.length>1&&sp.name.length>7){txt(ws[0],225,233,6.4,'#c9ba8e','center',true,undefined,34);txt(ws.slice(1).join(' '),225,241,6.4,'#c9ba8e','center',true,undefined,34)}else txt(sp.name,225,235,6.4,'#c9ba8e','center',true,undefined,34)}
   if(!(main&&idef(main).k==='potion'))txt(sp.cost?`${sp.cost} ${HERO_DEF[hi].mpn.slice(0,4).toUpperCase()}`:'',225,285,7,can?'#9ac8ff':'#7a7a80','center',true,undefined,34);
   btn('special',206,226,38,72);
-  // two small windows to its right: off hand and second weapon (tap to swap into the main hand)
-  for(const [slot,y,id] of [['off',226,'swapoff'],['alt',264,'swapalt']]){
-    panel(248,y,38,34,false,false);
-    const it=h.eq[slot];
-    if(it)itemIcon(idef(it),267,y+17,.9);else txt('+',267,y+17,11,'rgba(220,200,160,.3)','center');
-    if(it&&idef(it).k==='potion'){const m=G.bag.reduce((a,b)=>a+(b.id===it.id?b.n:0),0)+1;txt('x'+m,267,y+30,6.5,'#c9ba8e','center',true)}
-    btn(id,248,y,38,34);
-  }
+  // two small windows to its right: camp above, wait below (the weapon swap windows that stood here are gone: weapons are changed in the inventory)
+  panel(248,226,38,34,false,false);iconRest(267,241,.7);txt('Camp',267,255,6.4,'#c9ba8e','center',true,undefined,34);btn('rest',248,226,38,34);
+  panel(248,264,38,34,false,false);iconHourglass(267,279,.7);txt('Wait',267,293,6.4,'#c9ba8e','center',true,undefined,34);btn('wait',248,264,38,34);
 }
 function hudRight(){
-  // wait, camp and potion down the right-hand side
-  panel(424,56,54,44,false,false);iconHourglass(451,76,.95);txt('Wait',451,93,7.5,'#c9ba8e','center',true,undefined,48);btn('wait',424,56,54,44);
-  panel(424,104,54,44,false,false);iconRest(451,123,.95);txt('Camp',451,141,7.5,'#c9ba8e','center',true,undefined,48);btn('rest',424,104,54,44);
+  // the second and third potion (or food) shortcuts, then the first, down the right-hand side
+  for(let q=0;q<2;q++){const y=56+q*48,pid=(G.potBack||[])[q],ok=pid&&ITEMDEF[pid];
+    panel(424,y,54,44,false,false);
+    if(ok){const n=G.bag.reduce((a,b)=>a+(b.id===pid?b.n:0),0);ctx.globalAlpha=n>0?1:.4;itemIcon(ITEMDEF[pid],451,y+19,1.15);ctx.globalAlpha=1;txt('x'+n,451,y+38,8,'#c9ba8e','center',true,undefined,48)}
+    else{txt('+',451,y+23,13,'rgba(220,200,160,.3)','center');txt(q?'Third':'Second',451,y+38,6.5,'#8a7a58','center',true,undefined,48)}
+    btn('potb'+q,424,y,54,44);txt(String(6+q),429,y+6,5.5,'#8a7a58','left',true)}
   panel(424,152,54,52,false,false);
   const pc=countPotions();
   ctx.globalAlpha=(G.potFav?favIndex()>=0:pc>0)?1:.4;if(G.potFav&&ITEMDEF[G.potFav])itemIcon(ITEMDEF[G.potFav],451,174,1.4);else iconPotion(451,174,1.4);ctx.globalAlpha=1;
@@ -3462,7 +3460,7 @@ function drawInventory(){
       txt('Discard '+d.n+'?',rx+rw/2,138,10.5,'#f0d8a0','center',true,undefined,rw-10);txt('It will be gone for good.',rx+rw/2,154,8.5,'#c8b898','center');
       btnText('idropyes','Discard',rx+6,171,70,26);btnText('idropno','Keep it',rx+80,171,70,26)}
     else if(label){btnText(id,label,rx+6,171,70,26);btnText('idrop','Discard',rx+80,171,70,26)
-      if(I.sel.src==='bag'&&d.k==='potion'){txt('Put in shortcut:',rx+rw/2,138,7,'#a89878','center');for(let q=0;q<3;q++)btnText('ipset'+q,String(q+1),rx+6+q*52,144,46,15)}}
+      if(I.sel.src==='bag'&&(d.k==='potion'||d.k==='food')){txt('Put in shortcut:',rx+rw/2,138,7,'#a89878','center');for(let q=0;q<3;q++)btnText('ipset'+q,String(q+1),rx+6+q*52,144,46,15)}}
     else btnText('idrop','Discard',rx+22,171,112,26);
   }else{
     txt(def.name,rx+rw/2,20,13,heroSpeech(hi),'center',true);
@@ -3541,7 +3539,7 @@ function invBtn(id){
   }
   if(id==='iunequip'){if(I.sel&&I.sel.src==='slot'&&unequip(hi,I.sel.slot))I.sel=null;return}
   if(id==='ipset0'||id==='ipset1'||id==='ipset2'){ // the chosen potion goes into shortcut 1 (the frequent use potion) or backup 2 or 3
-    const it=I.sel&&I.sel.src==='bag'?G.bag[I.sel.i]:null;if(!it||idef(it).k!=='potion')return;
+    const it=I.sel&&I.sel.src==='bag'?G.bag[I.sel.i]:null;if(!it||(idef(it).k!=='potion'&&idef(it).k!=='food'))return;
     const q=+id.slice(5);G.potBack=G.potBack||[null,null];const nm=idef(it).n;
     if(q===0){const old=G.potFav;G.potFav=it.id;for(let k=0;k<2;k++)if(G.potBack[k]===it.id)G.potBack[k]=old&&old!==it.id?old:null}
     else{if(it.id===G.potFav)G.potFav=G.potBack[q-1]||null;for(let k=0;k<2;k++)if(k!==q-1&&G.potBack[k]===it.id)G.potBack[k]=null;G.potBack[q-1]=it.id}
@@ -7424,7 +7422,7 @@ function peekHit(x,y){
 function dropOk(d,id){
   if(!id)return false;
   if(d.kind==='world')return id.startsWith('hero')||id==='swapoff'||id==='swapalt'||id==='special';
-  if(d.kind==='inv')return d.src==='bag'?(id.startsWith('islot_')||id.startsWith('ihero')||((id==='ipotion'||id.startsWith('ipotb'))&&idef(d.item).k==='potion')):(id.startsWith('ibag')||id.startsWith('islot_'));
+  if(d.kind==='inv')return d.src==='bag'?(id.startsWith('islot_')||id.startsWith('ihero')||((id==='ipotion'||id.startsWith('ipotb'))&&(idef(d.item).k==='potion'||idef(d.item).k==='food'))):(id.startsWith('ibag')||id.startsWith('islot_'));
   if(d.kind==='loot')return d.src==='bag'?id.startsWith('lbox'):id.startsWith('lbag');
   return false;
 }
@@ -49173,6 +49171,40 @@ draw(c,x,L,api){
   mpQhDoor(x,kx,82,.8);api.text(x,'Way out',kx+9,82,5.6,'#2a1a0c','left');
   api.compass(x,436,130,13);
 }});
+
+/* ---- src/desert/no_trap.js ---- */
+/* ==========================================================================
+   NEVER TRAPPED. Whenever the party arrives somewhere by a door, a cave mouth or a stair, make sure it is not walled in by trees, rocks or other solid scenery.
+   Nothing is generated and nothing is moved: the level is exactly as it was built. If the squares the party can walk to from where it stands are only a small pocket
+   (fewer than 40), the shortest line of solid scenery (trees, rocks, bushes, stumps) out of the pocket is opened, the same way a burned tree is (it stays open from then on,
+   because the level remembers it). Walls are never touched. Last in the injection order.
+   ========================================================================== */
+const NT_SOLID=/^([glp]?tree|ltree|pt_|flora|bush|gboulder|grocks|rock|gstump|pstump|stump|veg|hay|wd_hill|hedge)/;
+function noTrapCheck(){for(let i=0;i<8;i++)if(!noTrapStep())break} // one line of trees at a time, until the pocket opens onto open ground
+function noTrapStep(){
+  try{
+    if(G.state!=='play'||!G.grid||!G.decor)return false;
+    const px=G.P.x,py=G.P.y,key=(x,y)=>y*MW+x;
+    const solid=new Map();for(const d of G.decor)if(d.block&&!d.found&&!d.npc&&NT_SOLID.test(d.k))solid.set(key(d.x,d.y),d);
+    const blocked=(x,y)=>{if(x<0||y<0||x>=MW||y>=MH)return true;const g=G.grid[y]&&G.grid[y][x];if(g!==0)return true;return G.decor.some(d=>d.block&&!d.found&&!d.npc&&d.x===x&&d.y===y&&!solid.has(key(x,y)))};
+    // the pocket: free squares reachable from the party (stop counting at 40)
+    const seen=new Set([key(px,py)]),q=[[px,py]];
+    for(let i=0;i<q.length&&q.length<40;i++){const [x,y]=q[i];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy,k=key(nx,ny);if(seen.has(k)||blocked(nx,ny)||solid.has(k))continue;seen.add(k);q.push([nx,ny])}}
+    if(q.length>=40)return false;
+    // Dijkstra out of the pocket: a free square costs 0, a solid-scenery square costs 1; stop at the first free square that is not in the pocket
+    const dist=new Map(),prev=new Map(),open=[];for(const [x,y] of q){dist.set(key(x,y),0);open.push([0,x,y])}
+    let goal=null;
+    while(open.length&&!goal){open.sort((a,b)=>a[0]-b[0]);const [dd,x,y]=open.shift();if(dd>dist.get(key(x,y)))continue;
+      for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy,k=key(nx,ny);if(blocked(nx,ny))continue;const c=solid.has(k)?1:0,nd=dd+c;
+        if(dist.has(k)&&dist.get(k)<=nd)continue;dist.set(k,nd);prev.set(k,key(x,y));
+        if(!seen.has(k)&&c===0&&nd>0){goal=k;break}open.push([nd,nx,ny])}}
+    if(!goal)return false;
+    let k=goal,opened=0;while(k!==undefined&&!seen.has(k)){const d=solid.get(k);if(d){for(const e of G.decor)if(e.block&&!e.found&&!e.npc&&e.x===d.x&&e.y===d.y&&NT_SOLID.test(e.k)){e.found=true;e.block=false;opened++}}k=prev.get(k)}
+    if(opened){try{buildDecorMap()}catch(e){}}
+    return opened>0;
+  }catch(e){console.error('noTrapCheck',e);return false}
+}
+{const _g=goToLevel;goToLevel=function(n,entry){const r=_g.apply(this,arguments);if(entry)try{noTrapCheck()}catch(e){}return r}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
