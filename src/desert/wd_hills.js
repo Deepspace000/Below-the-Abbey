@@ -20,6 +20,7 @@ const WDH_DESERT=new Set([41,60,61,62,63,64]); // the outdoor maps that are dese
   const free=(d)=>!d.npc&&!d.loot&&!d.shop&&!d.enter&&d.k!=='lever';
   const covered=(d)=>(d.x===x&&d.y===y)||side.some(q=>q[0]===d.x&&q[1]===d.y)||(lp?(d.x===x-1&&d.y===y)||(d.x===x-2&&d.y===y):(d.x===x&&d.y>=y+1&&d.y<=y+3));
   for(const d of L.decor)if(free(d)&&covered(d)&&!(d.x===door[0]&&d.y===door[1])){d.block=false;d.sc=.0001;d.pfCut=1}   // nothing grows where the hill stands or on the way up to it
+  for(const d of L.decor)if(free(d)&&d.x===door[0]&&d.y===door[1]&&!wdTreeKey(d)){d.block=false;d.sc=.0001;d.pfCut=1}   // a pillar, rock or bush on the door square would still shut the way after the thicket is burned
   Q.push({k:pic,x,y,block:true,enter:{to:id,x:at.x,y:at.y,f:at.f},wdh:1});
   for(const q of side)Q.push({k:'pstump',x:q[0],y:q[1],block:true,sc:.0001,wdh:1}); // invisible: the hill is wider than its own square
   // more trees round it: copies of the trees that grow nearby, in the clear squares beside, behind and in front of the hill (never on the way to the door)
