@@ -143,6 +143,10 @@ When the party dies
 Starting weapons
 * The weapons the party finds first are a bit stronger: Old Dagger 3 to 5 (was 2 to 4), Rusty Sword 4 to 7 (3 to 5), Battered Mace 4 to 8 (3 to 6), Short Bow 3 to 6 (2 to 5), Hand Axe 5 to 9 (4 to 7), Gnarled Staff 2 to 4 (1 to 3) and it adds 3 to spell power (was 2).
 
+Potion slots
+* The two backup potion slots under the frequent use potion (in the inventory) work: clicking one drinks that potion on the chosen hero, and the potion stays in the slot. Before, a click emptied the slot and sent the potion back to the bag. A slot whose potion has run out clears itself, and a potion dragged onto a slot replaces what was there.
+* The three potion slots have keys: 5 drinks the frequent use potion (as H and P do), 6 and 7 drink the first and second backup. In play the chosen hero (keys 1 to 4) drinks; with the inventory open it is the hero whose page is open. The keys show on the slots, in the help page and in the hover tip.
+
 Gifts are announced
 * Whatever the party is handed (by a person in a talk, in a scene, or by a quest) is printed on the screen: "Received: Antidote x2.", "Received: Ring of Vigor.", "Received: 40 gold." A quest taken also shows what it pays and any item it gives ("It pays: 160 gold, 400 XP, Hand Axe."). A thing that a line already names (a quest's Reward line, "She gives you a Cleansing Salve.") is not said twice. Things picked up off the floor, taken from a chest or bought are left as they were.
 

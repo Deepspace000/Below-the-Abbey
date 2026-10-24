@@ -461,5 +461,6 @@ River mouths open into the sea (3.604)
 * The weapons found first are a bit stronger: dagger 3 to 5, sword 4 to 7, mace 4 to 8, bow 3 to 6, hand axe 5 to 9, staff 2 to 4 with spell power +3.
 * The long chins on seven elf portraits are shortened.
 * Whatever the party is handed is now printed on the screen: "Received: Antidote x2.", "Received: 40 gold." (by people in a talk, in scenes and by quests). A quest also shows what it pays when it is taken ("It pays: 160 gold, 400 XP, Hand Axe."). Nothing is said twice if the line already names the thing.
+* The two backup potion slots under the frequent use potion in the inventory now work: clicking one drinks that potion on the chosen hero and the potion stays in the slot (before, a click emptied the slot). A slot whose potion has run out clears itself. The three potion slots have keys: 5 (frequent use potion, also H and P), 6 and 7 (the backups). In play the chosen hero drinks; in the inventory the hero whose page is open.
 * Every potion stacks in the bag (the Antidote, Cleansing Salve, Holy Water, Sleeping Tea, the four colour potions and the Potion of Escape did not).
 * A full list of changes since 3.599 is in UPDATE_LOG_SINCE_3.599.md.

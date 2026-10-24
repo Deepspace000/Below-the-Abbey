@@ -3,7 +3,7 @@
    page, shortcuts.js). Mouse only (a touch screen has no hover; a pad has its own frame). Drawn last, over everything, after the stone buttons. Names start with HVT.
    ========================================================================== */
 const HVT_TIPS={
-  qsave:['Quick save','F5'],menu:['Menu','Esc'],map:['Map of this level','M / O'],wait:['Wait a turn','Z'],rest:['Rest and camp','R'],potion:['Drink a healing potion','H / P'],
+  qsave:['Quick save','F5'],menu:['Menu','Esc'],map:['Map of this level','M / O'],wait:['Wait a turn','Z'],rest:['Rest and camp','R'],potion:['Drink the frequent use potion','H / P / 5'],
   hero0:['Choose hero 1','1'],hero1:['Choose hero 2','2'],hero2:['Choose hero 3','3'],hero3:['Choose hero 4','4'],
   attack:['Attack','Space / Enter'],special:['Special attack or spell','X'],turnL:['Turn left','Q / Left'],turnR:['Turn right','E / Right'],fwd:['Forward','W / Up'],back:['Back','S / Down'],left:['Step left','A'],right:['Step right','D'],
   bfcatch:['Catch the butterfly','N'],bfdig:['Dig with a shovel','G'],
