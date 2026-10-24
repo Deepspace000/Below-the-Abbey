@@ -47,7 +47,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.619';
+const VERSION='3.620';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -48593,8 +48593,8 @@ const isXpBoss=t=>isBossy(t)&&!XP_NOT_BOSS.includes(t);
 {const _kx=killXP;killXP=function(base,elvl){const x=_kx.apply(this,arguments);
   const L=livingHeroes(),pl=L.length?Math.round(L.reduce((n,i)=>n+G.heroes[i].lvl,0)/L.length):1;
   return Math.max(1,Math.min(x,xpNeed(Math.max(1,pl))))}}
-/* the Rat King, the first boss (level 3 in the crypts): about 150 XP, a bit less than a level for the party at level 3 (he gave a whole level, or several, before) */
-ENEMY_DEF.boss.xp=50;
+/* the Rat King, the first boss (level 3 in the crypts): a party usually reaches him around level 5, and he gives it one full level there (450 XP); a party at level 4 or below also gets a full level, a party above level 5 a bit less */
+ENEMY_DEF.boss.xp=175;
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
