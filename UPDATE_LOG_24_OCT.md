@@ -120,3 +120,4 @@ Portraits
 - The Thornwick well now asks first: "You look into the well and hear scratching sounds far below. Do you descend?" (Descend or Not), whether the party taps it or steps onto it.
 - House doors keep away from shops and exits: in Oldhaven and Yarrim, any house door within 4 steps of a shop, inn, hall, chapel or exit is closed up into the plain wall of its building (6 houses in Oldhaven, 5 in Yarrim). Thornwick, Ironhill and Anaea already kept them apart. Khemetra (about 20,000 door squares, interiors built on demand) was not checked.
 - Creatures also never stand on a square where a person (NPC) stands: they cannot walk onto one, and any that start or spawn on one are moved to the nearest free square.
+- The Ruby Maze back door in Ironhill moved from 20,24 (3 squares from Dorn's store) to 33,24, 6 squares from every other door. The STAY OUT sign and the map label moved with it.

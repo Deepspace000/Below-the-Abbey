@@ -115,7 +115,7 @@ draw(c,x,L,api){
   T('Brannoch\'s Forge',14,25.4,5.4);T('Dorn\'s Store',20,26.95,5.4);T('Church',26.5,25.4,5.4);T('The Anvil and Ale',31,26.8,5.4);
   T('Steelhold Blades',4,25.5,5.4);T('Plate and Mail',42,25.5,5.4);T('Corvin\'s Arcana',3.5,8.8,5.4);T('The Cauldron',41.5,8.8,5.4);
   T('Burial Ground',13.5,8.1,5.2);T('Mine Entrance',35.5,8.1,5.2);T('Ironhill Moor',45,17.4,5,'#4a2a10');T('The Tunnel',5,17.4,5,'#4a2a10');
-  T('A strange door',20.5,25.75,4.8,'#8a1c10');T('slag heap',8,29.2,4.6,'#4a2a10');T('slag heap',41.5,29.4,4.6,'#4a2a10');
+  T('A strange door',33.5,25.75,4.8,'#8a1c10');T('slag heap',8,29.2,4.6,'#4a2a10');T('slag heap',41.5,29.4,4.6,'#4a2a10');
   /* ---- margins: title, notes, key, compass ---- */
   api.title(x,'Ironhill','A walled mining town on a hill');
   api.notes(x,['Ironhill stands on a hill. Its stone wall has gates to the west and the east.','The castle is at the top of the town. The mayor holds court there.','Smoke rises from the forges all day long.','The old mines lie north-east, behind the wall.'],8,58,78,6.4,5);

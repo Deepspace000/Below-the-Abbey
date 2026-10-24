@@ -34966,7 +34966,7 @@ draw(c,x,L,api){
   T('Brannoch\'s Forge',14,25.4,5.4);T('Dorn\'s Store',20,26.95,5.4);T('Church',26.5,25.4,5.4);T('The Anvil and Ale',31,26.8,5.4);
   T('Steelhold Blades',4,25.5,5.4);T('Plate and Mail',42,25.5,5.4);T('Corvin\'s Arcana',3.5,8.8,5.4);T('The Cauldron',41.5,8.8,5.4);
   T('Burial Ground',13.5,8.1,5.2);T('Mine Entrance',35.5,8.1,5.2);T('Ironhill Moor',45,17.4,5,'#4a2a10');T('The Tunnel',5,17.4,5,'#4a2a10');
-  T('A strange door',20.5,25.75,4.8,'#8a1c10');T('slag heap',8,29.2,4.6,'#4a2a10');T('slag heap',41.5,29.4,4.6,'#4a2a10');
+  T('A strange door',33.5,25.75,4.8,'#8a1c10');T('slag heap',8,29.2,4.6,'#4a2a10');T('slag heap',41.5,29.4,4.6,'#4a2a10');
   /* ---- margins: title, notes, key, compass ---- */
   api.title(x,'Ironhill','A walled mining town on a hill');
   api.notes(x,['Ironhill stands on a hill. Its stone wall has gates to the west and the east.','The castle is at the top of the town. The mayor holds court there.','Smoke rises from the forges all day long.','The old mines lie north-east, behind the wall.'],8,58,78,6.4,5);
@@ -47443,13 +47443,13 @@ for(const id in ITEMDEF){const d=ITEMDEF[id];if(!d||d.k!=='food'||d.fdprx2||type
       about twenty of them, standing at levels 27 to 30 (the nearest to the garden, and the Wraith, at 30). The place is rated level 30.
    2. The walls are the painted gold panel wall recoloured ruby red with gold bands (made when the level is first entered); the torches are the ordinary wall
       torches. The floor is red and black tiles, the garden floor is grass.
-   3. The way in: a plain back door in the back wall of Dorn's store (Ironhill square 20,24), reached from the back lane (20,25), with a sign beside it that
+   3. The way in: a plain back door in the back wall of the buildings on Ironhill's back lane (Ironhill square 33,24, kept 6 squares from every shop door), reached from the back lane (33,25), with a sign beside it that
       says STAY OUT. Level 13 is changed here, from this file, once.
    4. Wren (NPC rubysorceress): asks the party to keep her secret. Keep it and she gives the Ruby Staff (a level 30 weapon). Refuse and she gives a Red Apple, which
       is poisoned. She gives one or the other, once. She also asks after Tobin, a young man in Ironhill, who misses her (NPC ihboy, flag ironhillBoy).
       Tobin can be told what the party did after they have met her: if the party kept her secret he gives them a Greater Mana Draught, once.
    ========================================================================== */
-const RMZ={ID:500,W:37,H:27,GX0:15,GX1:21,GY0:11,GY1:15,CX:18,CY:13,EX:5,DX:20,DY:24,TD:String.fromCharCode(0x2f1),townIdx:undefined};
+const RMZ={ID:500,W:37,H:27,GX0:15,GX1:21,GY0:11,GY1:15,CX:18,CY:13,EX:5,DX:33,DY:24,TD:String.fromCharCode(0x2f1),townIdx:undefined};
 
 /* ---- the maze ---- */
 function rmRng(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}}
@@ -47707,7 +47707,7 @@ function rmTownSetup(){
   L.rows[y]=L.rows[y].slice(0,x)+RMZ.TD+L.rows[y].slice(x+1);
   L.portals=L.portals||[];L.portals.push({to:RMZ.ID,x:RMZ.M.start.x,y:RMZ.M.start.y,f:0,tex:'farm'});RMZ.townIdx=L.portals.length-1;
   L.chars=L.chars||{};L.chars[RMZ.TD]=30+RMZ.townIdx;
-  L.decor.push({k:'sign_rubymaze',x:RMZ.DX-1,y:RMZ.DY+1,block:false,wd:[0,-1],sc:1.2,txt:['STAY OUT','']});
+  L.decor.push({k:'sign_rubymaze',x:RMZ.DX+1,y:RMZ.DY+1,block:false,wd:[0,-1],sc:1.2,txt:['STAY OUT','']});
   L.decor.push({k:'kh_ohfolk7_1',x:8,y:18,block:false,walk:true,npc:'ihboy'});
 }
 rmTownSetup();
@@ -49107,14 +49107,14 @@ function twSwapWalls(on){
 
 /* ---- the well in Thornwick: a few squares west of Goodwife Edda ---- */
 function twDescend(){if(LEVEL!==3||G.state!=='play')return;msg('The party climbs down the well, into the tunnels below Thornwick.','#9ec4e8');sfx('level');const st=LEVELS[TWL.ID].start;goToLevel(TWL.ID,{x:st.x,y:st.y,f:st.f});G.state='play'}
-NPCS.thornwell={name:'The well',img:'well',root:d=>say('The well is old, and the rope is worn. Something scratches far down in the dark, and the stones are wet. There are iron rungs set into the wall of the shaft.',[['Climb down.',()=>{twDescend();return null}],BYE])};
+NPCS.thornwell={name:'The well',img:'well',root:d=>say('You look into the well and hear scratching sounds far below. Do you descend?',[['Descend.',()=>{twDescend();return null}],['Not.',()=>null]])};
 function twTownSetup(){
   const L=LEVELS[3];if(!L||!L.decor||L._twWell)return;L._twWell=1;
   L.decor.push({k:'well',x:TWL.WX,y:TWL.WY,block:false,walk:true,npc:'thornwell'});
 }
 twTownSetup();
 {const _dm=doMove;doMove=function(){const r=_dm.apply(this,arguments);
-  try{if(LEVEL===3&&G.state==='play'&&!G.cut&&!G.talk&&G.P.x===TWL.WX&&G.P.y===TWL.WY)later(450,()=>{if(LEVEL===3&&G.P.x===TWL.WX&&G.P.y===TWL.WY&&!G.cut&&!G.talk)twDescend()})}catch(e){console.error(e)}
+  try{if(LEVEL===3&&G.state==='play'&&!G.cut&&!G.talk&&G.P.x===TWL.WX&&G.P.y===TWL.WY)later(450,()=>{if(LEVEL===3&&G.P.x===TWL.WX&&G.P.y===TWL.WY&&!G.cut&&!G.talk){const w=LEVELS[3].decor.find(d=>d.npc==='thornwell');if(w)startTalk(w)}})}catch(e){console.error(e)}
   return r}}
 
 /* ---- the lists: the Go to area list and ?town=thornwickwell ---- */
@@ -49212,21 +49212,23 @@ function noTrapStep(){
    1. A creature's turn that would end on a square another creature holds (a walk, a flutter, a leap or a teleport of any kind) is undone: it stays where it was.
    2. After every round, on every arrival and when a save is loaded, any creatures that do share a square (a spawn, a summon, an old save) are spread out: the later one
       moves to the nearest square that is open floor with no solid scenery, no creature and not the party's.
+   3. Creatures also never stand on a square where a person (an NPC) stands: they cannot walk onto one, and any that start on one are moved off it.
    Last in the injection order.
    ========================================================================== */
 function nsFree(x,y,self){
   if(x<0||y<0||x>=MW||y>=MH||!G.grid[y]||G.grid[y][x]!==0)return false;
   if(x===G.P.x&&y===G.P.y)return false;
   for(const e of G.enemies)if(e!==self&&e.hp>0&&e.x===x&&e.y===y)return false;
-  return !G.decor.some(d=>d.block&&!d.found&&!d.npc&&d.x===x&&d.y===y);
+  return !G.decor.some(d=>(d.npc&&!d.found&&d.x===x&&d.y===y)||(d.block&&!d.found&&!d.npc&&d.x===x&&d.y===y));
 }
+const nsNpcAt=(x,y)=>G.decor.some(d=>d.npc&&!d.found&&d.x===x&&d.y===y);
 function nsUnstack(){
   try{
     if(!G.enemies||!G.grid)return;
-    const seen=new Map();
+    const seen=new Map(),npcs=new Set();for(const d of G.decor)if(d.npc&&!d.found)npcs.add(d.y*MW+d.x);
     for(const e of G.enemies){
       if(!(e.hp>0))continue;const k=e.y*MW+e.x;
-      if(!seen.has(k)){seen.set(k,e);continue}
+      if(!seen.has(k)&&!npcs.has(k)){seen.set(k,e);continue}
       let best=null;
       for(let r=1;r<10&&!best;r++)for(let dy=-r;dy<=r&&!best;dy++)for(let dx=-r;dx<=r;dx++){
         if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=e.x+dx,y=e.y+dy;
@@ -49237,11 +49239,51 @@ function nsUnstack(){
 }
 {const _ea=enemyAct;enemyAct=function(e){
   const x0=e.x,y0=e.y,r=_ea.apply(this,arguments);
-  try{if((e.x!==x0||e.y!==y0)&&G.enemies.some(o=>o!==e&&o.hp>0&&o.x===e.x&&o.y===e.y)){e.x=x0;e.y=y0}}catch(err){console.error(err)}
+  try{if((e.x!==x0||e.y!==y0)&&(G.enemies.some(o=>o!==e&&o.hp>0&&o.x===e.x&&o.y===e.y)||nsNpcAt(e.x,e.y))){e.x=x0;e.y=y0}}catch(err){console.error(err)}
   return r}}
 {const _fr=finishRound;finishRound=function(){nsUnstack();return _fr.apply(this,arguments)}}
 {const _g=goToLevel;goToLevel=function(){const r=_g.apply(this,arguments);nsUnstack();return r}}
 {const _as=applyEnemyState;applyEnemyState=function(){const r=_as.apply(this,arguments);nsUnstack();return r}}
+
+/* ---- src/desert/door_spacing.js ---- */
+/* ==========================================================================
+   HOUSE DOORS AWAY FROM SHOPS AND EXITS. In a town, a house door never stands close to a shop, an inn, a church, a hall, an exit or any other public door: it must be at least
+   5 squares away (by the count of steps), so it is always clear which door is which. A house door that is too close is closed up: it becomes the plain wall of its building.
+   This is done once when the town is loaded, from the level's own rows, so it is the same on every visit. Doors of the places with names that are not houses (shops, inns,
+   halls, quays, gates, caves) are never touched. Last in the injection order.
+   ========================================================================== */
+const DS_MIN=5;
+const DS_HOUSE=/(House|Billet|Study|Workshop|Cottage|Hut)$/i;
+function dsDoors(L){
+  const out=[];if(!L||!L.rows||!L.chars&&!L.portals)return out;
+  const ch=L.chars||{};
+  for(let y=0;y<L.rows.length;y++){const r=L.rows[y];for(let x=0;x<r.length;x++){
+    const c=r[x];let to=null,idx=null;const v=ch[c];
+    if(typeof v==='number'&&typeof KH_DOOR!=='undefined'&&KH_DOOR[v])to=KH_DOOR[v].lvl;
+    else if(typeof v==='number'&&v>=30&&v<100&&L.portals&&L.portals[v-30])idx=v-30;
+    else if(/[0-9]/.test(c)&&L.portals&&L.portals[+c])idx=+c;
+    if(idx!==null)to=L.portals[idx].to;
+    if(to===null)continue;
+    const nm=LEVEL_NAMES[to]||(LEVELS[to]&&LEVELS[to].name)||'';
+    out.push({x,y,c,to,nm,house:DS_HOUSE.test(nm)&&!/^The /.test(nm)})}}
+  return out}
+function dsFix(n){
+  const L=LEVELS[n];if(!L||L._dsDone||!L.rows)return;L._dsDone=1;
+  try{
+    const ds=dsDoors(L);if(ds.length<4)return;
+    const pub=ds.filter(d=>!d.house),ch=L.chars||{};
+    let closed=0;
+    for(const h of ds){if(!h.house)continue;
+      if(!pub.some(p=>Math.abs(p.x-h.x)+Math.abs(p.y-h.y)<DS_MIN))continue;
+      const row=L.rows[h.y],wall=c=>c!==undefined&&c!=='.'&&c!==h.c&&typeof ch[c]==='number'&&!(typeof KH_DOOR!=='undefined'&&KH_DOOR[ch[c]])&&!(ch[c]>=30&&ch[c]<100);
+      const w=wall(row[h.x+1])?row[h.x+1]:wall(row[h.x-1])?row[h.x-1]:null;
+      if(!w)continue;
+      L.rows[h.y]=row.slice(0,h.x)+w+row.slice(h.x+1);closed++;
+      if(L.decor)for(const d of L.decor)if(d.x===h.x&&d.y===h.y&&(d.enter||/door|glow/i.test(d.k||'')))d.sc=.0001}
+    if(closed)(L._dsClosed=closed);
+  }catch(e){console.error('dsFix',n,e)}
+}
+{const _ll=loadLevel;loadLevel=function(n){try{dsFix(n)}catch(e){console.error(e)}return _ll.apply(this,arguments)}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

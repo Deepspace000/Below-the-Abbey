@@ -6,13 +6,13 @@
       about twenty of them, standing at levels 27 to 30 (the nearest to the garden, and the Wraith, at 30). The place is rated level 30.
    2. The walls are the painted gold panel wall recoloured ruby red with gold bands (made when the level is first entered); the torches are the ordinary wall
       torches. The floor is red and black tiles, the garden floor is grass.
-   3. The way in: a plain back door in the back wall of Dorn's store (Ironhill square 20,24), reached from the back lane (20,25), with a sign beside it that
+   3. The way in: a plain back door in the back wall of the buildings on Ironhill's back lane (Ironhill square 33,24, kept 6 squares from every shop door), reached from the back lane (33,25), with a sign beside it that
       says STAY OUT. Level 13 is changed here, from this file, once.
    4. Wren (NPC rubysorceress): asks the party to keep her secret. Keep it and she gives the Ruby Staff (a level 30 weapon). Refuse and she gives a Red Apple, which
       is poisoned. She gives one or the other, once. She also asks after Tobin, a young man in Ironhill, who misses her (NPC ihboy, flag ironhillBoy).
       Tobin can be told what the party did after they have met her: if the party kept her secret he gives them a Greater Mana Draught, once.
    ========================================================================== */
-const RMZ={ID:500,W:37,H:27,GX0:15,GX1:21,GY0:11,GY1:15,CX:18,CY:13,EX:5,DX:20,DY:24,TD:String.fromCharCode(0x2f1),townIdx:undefined};
+const RMZ={ID:500,W:37,H:27,GX0:15,GX1:21,GY0:11,GY1:15,CX:18,CY:13,EX:5,DX:33,DY:24,TD:String.fromCharCode(0x2f1),townIdx:undefined};
 
 /* ---- the maze ---- */
 function rmRng(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}}
@@ -270,7 +270,7 @@ function rmTownSetup(){
   L.rows[y]=L.rows[y].slice(0,x)+RMZ.TD+L.rows[y].slice(x+1);
   L.portals=L.portals||[];L.portals.push({to:RMZ.ID,x:RMZ.M.start.x,y:RMZ.M.start.y,f:0,tex:'farm'});RMZ.townIdx=L.portals.length-1;
   L.chars=L.chars||{};L.chars[RMZ.TD]=30+RMZ.townIdx;
-  L.decor.push({k:'sign_rubymaze',x:RMZ.DX-1,y:RMZ.DY+1,block:false,wd:[0,-1],sc:1.2,txt:['STAY OUT','']});
+  L.decor.push({k:'sign_rubymaze',x:RMZ.DX+1,y:RMZ.DY+1,block:false,wd:[0,-1],sc:1.2,txt:['STAY OUT','']});
   L.decor.push({k:'kh_ohfolk7_1',x:8,y:18,block:false,walk:true,npc:'ihboy'});
 }
 rmTownSetup();
