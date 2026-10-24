@@ -105,9 +105,9 @@ gp('healdraught','Healing Draught','#d03a2a',60,'Restores 60 health.',{heal:60})
 gp('greaterheal','Greater Healing Draught','#e0502e',140,'Restores 120 health.',{heal:120});
 gp('superiorheal','Superior Healing Draught','#f06a30',320,'Restores 220 health.',{heal:220});
 gp('elixir','Elixir of Life','#ff9a3a',700,'Restores 400 health.',{heal:400});
-gp('manadraught','Mana Draught','#3a6ae0',70,'Restores 20 mana or stamina.',{mana:20});
-gp('greatermana','Greater Mana Draught','#4a7af0',170,'Restores 45 mana or stamina.',{mana:45});
-gp('supermana','Superior Mana Draught','#6a9aff',380,'Restores 80 mana or stamina.',{mana:80});
+gp('manadraught','Mana Draught','#3a6ae0',70,'Restores 40 mana or stamina.',{mana:40});
+gp('greatermana','Greater Mana Draught','#4a7af0',170,'Restores 70 mana or stamina.',{mana:70});
+gp('supermana','Superior Mana Draught','#6a9aff',380,'Fills the whole mana or stamina bar.',{mana:9999,full:1});
 gp('might','Potion of Might','#e07030',120,'The drinker deals 25% more damage for 25 rounds.',{buff:{b:'dmgPct',amt:.25,rounds:25}});
 gp('swiftness','Potion of Swiftness','#50d0e0',110,'Enemies miss the drinker 15% more for 25 rounds.',{buff:{b:'dodge',amt:.15,rounds:25}});
 gp('ironskin','Potion of Iron Skin','#9098a8',110,'The drinker gains +5 armor for 25 rounds.',{buff:{b:'armor',amt:5,rounds:25}});
