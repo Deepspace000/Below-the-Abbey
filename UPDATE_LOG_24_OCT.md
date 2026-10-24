@@ -119,3 +119,4 @@ Portraits
 - Power Move: the skip to the next character now works whenever the game says the character lacks the mana or stamina, whatever kind of power they have.
 - The Thornwick well now asks first: "You look into the well and hear scratching sounds far below. Do you descend?" (Descend or Not), whether the party taps it or steps onto it.
 - House doors keep away from shops and exits: in Oldhaven and Yarrim, any house door within 4 steps of a shop, inn, hall, chapel or exit is closed up into the plain wall of its building (6 houses in Oldhaven, 5 in Yarrim). Thornwick, Ironhill and Anaea already kept them apart. Khemetra (about 20,000 door squares, interiors built on demand) was not checked.
+- Creatures also never stand on a square where a person (NPC) stands: they cannot walk onto one, and any that start or spawn on one are moved to the nearest free square.

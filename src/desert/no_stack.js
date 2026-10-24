@@ -3,21 +3,23 @@
    1. A creature's turn that would end on a square another creature holds (a walk, a flutter, a leap or a teleport of any kind) is undone: it stays where it was.
    2. After every round, on every arrival and when a save is loaded, any creatures that do share a square (a spawn, a summon, an old save) are spread out: the later one
       moves to the nearest square that is open floor with no solid scenery, no creature and not the party's.
+   3. Creatures also never stand on a square where a person (an NPC) stands: they cannot walk onto one, and any that start on one are moved off it.
    Last in the injection order.
    ========================================================================== */
 function nsFree(x,y,self){
   if(x<0||y<0||x>=MW||y>=MH||!G.grid[y]||G.grid[y][x]!==0)return false;
   if(x===G.P.x&&y===G.P.y)return false;
   for(const e of G.enemies)if(e!==self&&e.hp>0&&e.x===x&&e.y===y)return false;
-  return !G.decor.some(d=>d.block&&!d.found&&!d.npc&&d.x===x&&d.y===y);
+  return !G.decor.some(d=>(d.npc&&!d.found&&d.x===x&&d.y===y)||(d.block&&!d.found&&!d.npc&&d.x===x&&d.y===y));
 }
+const nsNpcAt=(x,y)=>G.decor.some(d=>d.npc&&!d.found&&d.x===x&&d.y===y);
 function nsUnstack(){
   try{
     if(!G.enemies||!G.grid)return;
-    const seen=new Map();
+    const seen=new Map(),npcs=new Set();for(const d of G.decor)if(d.npc&&!d.found)npcs.add(d.y*MW+d.x);
     for(const e of G.enemies){
       if(!(e.hp>0))continue;const k=e.y*MW+e.x;
-      if(!seen.has(k)){seen.set(k,e);continue}
+      if(!seen.has(k)&&!npcs.has(k)){seen.set(k,e);continue}
       let best=null;
       for(let r=1;r<10&&!best;r++)for(let dy=-r;dy<=r&&!best;dy++)for(let dx=-r;dx<=r;dx++){
         if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=e.x+dx,y=e.y+dy;
@@ -28,7 +30,7 @@ function nsUnstack(){
 }
 {const _ea=enemyAct;enemyAct=function(e){
   const x0=e.x,y0=e.y,r=_ea.apply(this,arguments);
-  try{if((e.x!==x0||e.y!==y0)&&G.enemies.some(o=>o!==e&&o.hp>0&&o.x===e.x&&o.y===e.y)){e.x=x0;e.y=y0}}catch(err){console.error(err)}
+  try{if((e.x!==x0||e.y!==y0)&&(G.enemies.some(o=>o!==e&&o.hp>0&&o.x===e.x&&o.y===e.y)||nsNpcAt(e.x,e.y))){e.x=x0;e.y=y0}}catch(err){console.error(err)}
   return r}}
 {const _fr=finishRound;finishRound=function(){nsUnstack();return _fr.apply(this,arguments)}}
 {const _g=goToLevel;goToLevel=function(){const r=_g.apply(this,arguments);nsUnstack();return r}}
