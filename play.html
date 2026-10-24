@@ -47,7 +47,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.610';
+const VERSION='3.611';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2264,7 +2264,8 @@ function enemyAct(e){
   return dur;
 }
 function finishRound(){
-  G.heroes.forEach((h,i)=>{if(!h.alive)return;// no mana comes back by itself (no step or round trickle, no mpRegen): only resting and potions refill it
+  G.heroes.forEach((h,i)=>{if(!h.alive)return;// no mana comes back by itself: only resting, potions and the few pieces of gear with mpRegen (high armour sets, some rings) give it back, a little each round
+    {const r=gearPas(i,'mpRegen');if(r>0){h.mpAcc=(h.mpAcc||0)+r*.5;while(h.mpAcc>=1){h.mp=Math.min(h.mpMax,h.mp+1);h.mpAcc--}}}
     h.hpAcc=(h.hpAcc||0)+pas(i,'regen');while(h.hpAcc>=1){h.hp=Math.min(h.max,h.hp+1);h.hpAcc--}});
   for(const b of G.buffs)b.left--;G.buffs=G.buffs.filter(b=>b.left>0);
   if(G.lightBoost>0)G.lightBoost--;
@@ -20558,11 +20559,11 @@ const ARM_SETS=[ // [key, name, level, colour, flavour, effects of helm / chest 
  ['rime','Rimeforged',30,'#8ac8e8','Pale blue steel rimed with frost, trimmed with white fur.',['dodge','ward','mpRegen','lifesteal'],{secondWind:.3,mpRegen:.2},'Rimeforged Sentinel'],
  ['ember','Emberplate',40,'#d8602a','Black iron plate with cracks of glowing red, like cooling lava.',['dmgPct','thorns','crit','regen'],{thorns:8,dmgPct:.08},'Emberplate Champion'],
  ['sun','Sunsteel',50,'#e8c860','Polished gold and white steel, engraved with the sun.',['regen','dodge','lifesteal','mpRegen'],{secondWind:.4,regen:.5},'Sunsteel Paladin'],
- ['void','Voidglass',60,'#7a4ac8','Black obsidian glass plate with veins of violet light.',['crit','lifesteal','dodge','dmgPct'],{lifesteal:.08,crit:.06},'Voidglass Reaver'],
+ ['void','Voidglass',60,'#7a4ac8','Black obsidian glass plate with veins of violet light.',['crit','lifesteal','dodge','dmgPct'],{lifesteal:.08,crit:.06,mpRegen:.2},'Voidglass Reaver'],
  ['storm','Stormwrought',70,'#58d0f0','Bright blue steel engraved with lightning, and it crackles.',['dodge','mpRegen','crit','dmgPct'],{dodge:.08,mpRegen:.5},'Stormwrought Tempest'],
  ['wyrm','Wyrmbone',80,'#e8e0c8','Ivory plates of dragon bone, ridged and toothed.',['ward','thorns','regen','lifesteal'],{ward:8,thorns:12},'Wyrmbone Slayer'],
  ['star','Starforged',90,'#3a58b8','Midnight plate scattered with silver stars.',['mpRegen','dodge','secondWind','regen'],{mpRegen:.6,secondWind:.4},'Starforged Seer'],
- ['god','Godforged',100,'#f0e0a0','Radiant white and gold plate with a halo and feathered wings.',['ward','lifesteal','dmgPct','regen'],{secondWind:.5,dmgPct:.1,ward:8},'Godforged Exemplar']];
+ ['god','Godforged',100,'#f0e0a0','Radiant white and gold plate with a halo and feathered wings.',['ward','lifesteal','dmgPct','regen'],{secondWind:.5,dmgPct:.1,ward:8,mpRegen:.3},'Godforged Exemplar']];
 const ARM_SLOTS=[['h','head','Helm','head',.55],['c','chest','Chest','chest',1],['a','arms','Arms','arms',.35],['l','legs','Legs','legs',.45]];
 const ARM_NAMES={boar:['Tusked Boarhide Helm','Boarhide Cuirass','Boarhide Vambraces','Boarhide Greaves'],iron:['Ironscale Coif','Ironscale Hauberk','Ironscale Vambraces','Ironscale Greaves'],rime:['Rimeforged Helm','Rimeforged Breastplate','Rimeforged Bracers','Rimeforged Greaves'],ember:['Emberplate Helm','Emberplate Cuirass','Emberplate Vambraces','Emberplate Greaves'],sun:['Sunsteel Helm','Sunsteel Cuirass','Sunsteel Vambraces','Sunsteel Greaves'],void:['Voidglass Crown','Voidglass Cuirass','Voidglass Vambraces','Voidglass Greaves'],storm:['Stormwrought Helm','Stormwrought Breastplate','Stormwrought Vambraces','Stormwrought Greaves'],wyrm:['Wyrmbone Skull Helm','Wyrmbone Cuirass','Wyrmbone Vambraces','Wyrmbone Greaves'],star:['Starforged Helm','Starforged Breastplate','Starforged Vambraces','Starforged Greaves'],god:['Godforged Helm','Godforged Cuirass','Godforged Vambraces','Godforged Greaves']};
 const ARM_VAL={dodge:t=>+(.012*t+.01).toFixed(3),regen:t=>+(.08*t+.08).toFixed(2),thorns:t=>Math.round(2*t),dmgPct:t=>+(.012*t+.01).toFixed(3),crit:t=>+(.01*t+.01).toFixed(3),mpRegen:t=>+(.06*t+.04).toFixed(2),ward:t=>Math.round(1.2*t+.5),lifesteal:t=>+(.008*t+.02).toFixed(3),secondWind:t=>+(.2+.02*t).toFixed(2),hungerSlow:t=>+(.04*t+.06).toFixed(2)};
@@ -23867,6 +23868,10 @@ const RINGS=[ // [id, name, colour, bonuses, price, tier, description]
  ['ringOak','Ring of the Oak','#6a8a3a',{hp:24},580,3,'A green ring of living wood that never dries. Adds 24 to maximum health.'],
  ['ringHaul','Ring of the Great Haul','#b89858',{bagb:16,wtb:30},700,3,'A ring on a golden chain-link band. Adds 16 pack slots and lets the party carry 30 kg more.'],
  ['ringChampion','Ring of the Champion','#f0d060',{str:1,dex:1,int:1},650,3,'A gold ring set with three small stones. Adds 1 to Strength, Dexterity and Intelligence.'],
+ ['ringSpring','Ring of the Spring','#5ab0e8',{pas:{mpRegen:.2}},1400,3,'A ring of blue glass with a drop of water inside that never settles. Mana comes back slowly while it is worn.'],
+ ['ringTide','Ring of the Tide','#4a90c8',{pas:{mpRegen:.3},mpb:10},2000,3,'A silver ring with a wave cut around it. Adds 10 to maximum mana, and mana comes back a little faster.'],
+ ['ringDeepWell','Ring of the Deep Well','#3a58d8',{pas:{mpRegen:.4},mpb:16},3000,4,'A dark blue ring, cold as water from the bottom of a well. Adds 16 to maximum mana, and mana comes back steadily.'],
+ ['ringArchmage','Ring of the Archmage','#b88af0',{pas:{mpRegen:.5},int:3},4400,4,'A violet ring set with a star sapphire, worn by the masters of the art. Adds 3 Intelligence, and mana comes back well.'],
  ['ringMaster','Ring of the Master Hand','#f0e8a0',{profb:2},900,4,'A ring that only a master of a trade is given. Adds 2 ranks to the wearer’s profession.']];
 for(const [id,n,c,b,price,tier,d] of RINGS)ITEMDEF[id]=Object.assign({n,k:'ring',t:'Ring',ic:'ring',c,price:Math.round(price*1.8/10)*10,rar:1,d,sw:.2},b); // rings are dear
 /* ---------- what everything weighs, in kilograms ---------- */

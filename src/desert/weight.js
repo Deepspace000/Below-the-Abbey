@@ -24,6 +24,10 @@ const RINGS=[ // [id, name, colour, bonuses, price, tier, description]
  ['ringOak','Ring of the Oak','#6a8a3a',{hp:24},580,3,'A green ring of living wood that never dries. Adds 24 to maximum health.'],
  ['ringHaul','Ring of the Great Haul','#b89858',{bagb:16,wtb:30},700,3,'A ring on a golden chain-link band. Adds 16 pack slots and lets the party carry 30 kg more.'],
  ['ringChampion','Ring of the Champion','#f0d060',{str:1,dex:1,int:1},650,3,'A gold ring set with three small stones. Adds 1 to Strength, Dexterity and Intelligence.'],
+ ['ringSpring','Ring of the Spring','#5ab0e8',{pas:{mpRegen:.2}},1400,3,'A ring of blue glass with a drop of water inside that never settles. Mana comes back slowly while it is worn.'],
+ ['ringTide','Ring of the Tide','#4a90c8',{pas:{mpRegen:.3},mpb:10},2000,3,'A silver ring with a wave cut around it. Adds 10 to maximum mana, and mana comes back a little faster.'],
+ ['ringDeepWell','Ring of the Deep Well','#3a58d8',{pas:{mpRegen:.4},mpb:16},3000,4,'A dark blue ring, cold as water from the bottom of a well. Adds 16 to maximum mana, and mana comes back steadily.'],
+ ['ringArchmage','Ring of the Archmage','#b88af0',{pas:{mpRegen:.5},int:3},4400,4,'A violet ring set with a star sapphire, worn by the masters of the art. Adds 3 Intelligence, and mana comes back well.'],
  ['ringMaster','Ring of the Master Hand','#f0e8a0',{profb:2},900,4,'A ring that only a master of a trade is given. Adds 2 ranks to the wearer’s profession.']];
 for(const [id,n,c,b,price,tier,d] of RINGS)ITEMDEF[id]=Object.assign({n,k:'ring',t:'Ring',ic:'ring',c,price:Math.round(price*1.8/10)*10,rar:1,d,sw:.2},b); // rings are dear
 /* ---------- what everything weighs, in kilograms ---------- */
