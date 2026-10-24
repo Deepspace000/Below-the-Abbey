@@ -1,4 +1,4 @@
-# XP per kill for a level 40 party (version 3.618)
+# XP per kill for a level 40 party (version 3.619)
 
 How it works: a kill gives `base XP x creature level`. An ordinary creature counts at most 150 base XP (6,000 XP at level 40). The kill gives 6% less for each level the creature is below the party's average level (never below 30%) and 6% more for each level above (at most 50% more). Every living hero gets the full amount. A boss or named great creature never gives more than one level of XP (24,600 at level 40). Going from level 40 to 41 needs 24,600 XP.
 
@@ -130,13 +130,13 @@ How it works: a kill gives `base XP x creature level`. An ordinary creature coun
 
 | Creature | Listed base XP | 1 level below (39) | At level (40) | 1 level above (41) | Kills for one level-up |
 |---|---|---|---|---|---|
+| Rat King (`boss`) | 50 | 1,833 | 2,000 | 2,173 | 12.3 |
 | Cinderback, the Fire Lizard (`firelizard`) | 160 | 5,866 | 6,400 | 6,954 | 3.8 |
 | The Wandering Cyclops (`cyclops`) | 220 | 8,065 | 8,800 | 9,561 | 2.8 |
 | Captain of the Hush Hive (`hgboss1`) | 280 | 10,265 | 11,200 | 12,169 | 2.2 |
 | Mayor Corbin (`mayor`) | 400 | 14,664 | 16,000 | 17,384 | 1.5 |
 | The Undying Pharaoh (`pharaohboss`) | 400 | 14,664 | 16,000 | 17,384 | 1.5 |
 | The Droning Warden (`hgboss2`) | 420 | 15,397 | 16,800 | 18,253 | 1.5 |
-| Rat King (`boss`) | 500 | 18,330 | 20,000 | 21,730 | 1.2 |
 | The Mother Grub (`hgboss3`) | 560 | 20,530 | 22,400 | 24,338 | 1.1 |
 | Mine Overseer (`overseer`) | 600 | 21,996 | 24,000 | 24,600 | 1 |
 | Banshee (`hlbanshee`) | 1100 | 24,600 | 24,600 | 24,600 | 1 |
