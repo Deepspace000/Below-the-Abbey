@@ -48940,6 +48940,12 @@ NPCS.hgbound={name:'A frog in the honey',img:'hg_bound0',root:d=>hgFreeFrog(d)};
   try{if(id==='hgb4'&&qSt('hgrescue')===null){qAccept('hgrescue');msg('Aldous Wend: "Eight of our villagers were dragged into that hive and tied up in honey. If you find them, free them. They have a gift for you."','#ffe36a')}}catch(e){console.error(e)}
   return r}}
 {const _g=goToLevel;goToLevel=function(n){const r=_g.apply(this,arguments);try{if(n===HGR.ID&&qSt('hgrescue')===null&&!(G.flags.hgFreed>=HGR.N)){qAccept('hgrescue');msg('Small voices are calling for help somewhere in the hive.','#ffe36a')}}catch(e){console.error(e)}return r}}
+/* SLOWER CREATURES in the Hollow Grasslands and the hives (levels 470 to 474): the fast ones (speed 2, two steps at a time) take one step, and every step, blow and shot waits 150 thousandths of a second longer. */
+{const _ea=enemyAct;enemyAct=function(e){
+  if(LEVEL<470||LEVEL>474)return _ea.apply(this,arguments);
+  const def=ENEMY_DEF[e.t],sp=def&&def.speed;if(def&&sp>1)def.speed=1;
+  let r;try{r=_ea.apply(this,arguments)}finally{if(def&&sp>1)def.speed=sp}
+  return typeof r==='number'&&r>0?r+150:r}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
