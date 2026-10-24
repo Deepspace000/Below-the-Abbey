@@ -1,11 +1,10 @@
 # Below the Abbey: update log since 3.599
 
-Covers versions 3.599 to 3.624 (23 to 24 October 2026). Written for the owner. Each version says what a player will notice, then the one or two things that matter when working on the game. Versions 3.608 to 3.622 were made in another session (the balance work); they are described from their commits and files.
+Covers versions 3.600 to 3.624 (3.599 is not repeated) (23 to 24 October 2026). Written for the owner. Each version says what a player will notice, then the one or two things that matter when working on the game. Versions 3.608 to 3.622 were made in another session (the balance work); they are described from their commits and files.
 
 ## At a glance
 
 * The world map was redrawn by hand: painted places, scenery, dirt paths and winding painted rivers (3.601 to 3.604). The old pen-drawn map is gone.
-* New places: the Ruby Maze behind Dorn's store in Ironhill, with Wren the sorceress and Tobin; the Golden Crypt now a level 30 place.
 * The wild dungeons in the woods and deserts are hills and rock piles with a door in them (3.601).
 * Mana does not come back by itself any more (3.610). It comes back from rings and gear (3.611, 3.613), from mana potions (stronger since 3.615) and now from mana potions lying in every area (3.624).
 * Combat balance: creatures stand 1 below, at or 1 above their place (3.614); experience is capped and stepped (3.616 to 3.620); the Black Sea and Hollow creatures are sized like everyone else's (3.621, 3.622).
@@ -14,28 +13,6 @@ Covers versions 3.599 to 3.624 (23 to 24 October 2026). Written for the owner. E
 * Party screen: type your own hero name (3.623). When the party dies there are now four choices, and every area start is saved (3.624).
 
 ---
-
-## 3.599 (23 October)
-
-Prices and levels
-* Shovels cost more: Peasant's 300 gold, Farmer's 450, Miner's 650, Gravedigger's 950, Sailor's 1,400, Knight's 2,100, Dwarven 3,100, Silver 4,600, Royal 6,800, King's Golden 10,000. The Butterfly Cage is 500. The chances of finding treasure did not change. The better shovels reach the shops as the party levels (Miner's at level 8, Gravedigger's 15, Sailor's 22, Knight's 30, Dwarven 38, Silver 46, Royal 54, King's Golden 62): each time a trader, general store or peddler's cart is opened after the party has reached the level, the new shovel is added and the cheaper ones stay.
-* Every food item costs twice as much and sells for twice as much.
-* A level up fills health but not mana: the higher maximum stays as empty as it was.
-* Desert levels: Blue Dunes 37, White Dunes 42, Violet Erg 46 (the dungeons in each take their desert's level). The Golden Erg and the Flatlands stay at 45.
-
-The Golden Crypt and Ironhill
-* The Golden Crypt under the Ironhill Burial Ground is a level 30 place; its creatures stand at levels 23 to 30 (they were 12 and 13). It has its own place on the world map next to the Burial Ground, joined by a short track, and its own painted local map showing the halls, coffins, statues, chests, levers, the gold door and the stair up.
-* The Mine Overseer is level 26 (the mines are 25). The Old Vault in Greyfang Pass is level 32 (it was 34); its six creatures stand at 26 to 32.
-
-World map tidying
-* The line "where the road began" under "The Known Lands" is gone. The drifting clouds are smaller and much more see-through. The Deeper Hollow stands north-east of the Hollow Grasslands, "The Hollow Lands" title north of it, and the Grasslands are a bigger, fuller grove.
-
-The Ruby Maze (new)
-* Behind Dorn's store in Ironhill, in the back lane, there is a plain wooden door with a sign that says STAY OUT. Tilda, Maren and Ivo say a little about it when asked "Heard anything strange?", and there are two new rumours.
-* Behind it is the Ruby Maze: a true maze (about 480 squares, 30 dead ends, one way to any place), ruby red walls with gold bands, red and black tiled floors, lit by the usual torches. It is level 30 (Go to area list, in The Known Lands, and `?town=rubymaze`) and has its own place on the world map, north of Ironhill. About twenty ghosts and undead servants walk it at levels 27 to 30 (made all level 30 in 3.608); a Wraith and two Wights guard the way to the middle. A few potions lie at far dead ends.
-* At the heart is a small walled garden with a fountain, flowers, bushes, trees, a bench, urns, braziers and a chest (450 gold and good things for level 30).
-* Wren, a sorceress hiding from the people of Ironhill, lives there. If the party promises to keep her secret she gives the Ruby Staff (level 30, damage 58 to 92, adds 42 to spell power, one blow in four dazes). If they refuse, she gives a "gift" Red Apple that is poisoned (30 percent of health lost, poisoned, tastes of bitter almonds). Only one of the two, once. She also asks about Tobin; telling her he misses her moves her but gives no reward.
-* Tobin, a young man in a blue tunic near the west end of Ironhill's main street, tells of a girl called Wren who was bullied for her magic and vanished. After the party has met Wren they can go back to him. If the party kept her secret he promises to tell no one and gives a Greater Mana Draught, once.
 
 ## 3.600
 
