@@ -142,6 +142,7 @@ function rmPortalArt(){if(IMG.rubyportal||!IMG.tele3||typeof pToneMap!=='functio
 {const _rb=rebalanceEnemies;rebalanceEnemies=function(){
   const r=_rb.apply(this,arguments);
   try{if(LEVEL===RMZ.ID&&typeof ENEMY_SPAWNS!=='undefined')for(const e of G.enemies){
+    if(!G.flags.autoScaleOn)continue; // a fixed world: the general rule (1 below, at or 1 above level 30) applies
     const sp=ENEMY_SPAWNS[e.id];if(!sp||sp.t!==e.t||!sp.lvl||e.hp<=0||e.dying||e.base===undefined)continue;
     const nl=G.flags.autoScaleOn?Math.max(1,e.base-Math.max(0,30-sp.lvl)):sp.lvl,vd=Math.max(0,e.base-nl); // a fixed world: exactly the level it was given; an autoscaled one: the same number of levels below the place's level
     if(e.vd!==vd||e.lvl!==nl){e.vd=vd;if(e.lvl!==nl){const fr=e.hp/e.maxhp;e.lvl=nl;e.maxhp=enemyStat(e.t,nl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*fr))}}}}catch(x){console.error(x)}

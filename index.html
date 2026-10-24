@@ -47,7 +47,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.613';
+const VERSION='3.614';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1461,12 +1461,17 @@ function enemyStat(t,lvl){
   return {hp:Math.round(d.hp*m),dmg:[Math.max(1,Math.round(d.dmg[0]*(1+.3*(lv-1))*.5)),Math.max(1,Math.round(d.dmg[1]*(1+.3*(lv-1))*.5))],xp:d.xp*lv,gold:d.gold[1]>=100?[d.gold[0],d.gold[1]]:d.gold[1]>20?[Math.round(d.gold[0]*(1+.15*(lv-1))),Math.round(d.gold[1]*(1+.15*(lv-1)))]:[Math.round(d.gold[0]*(1+.2*(lv-1))),Math.round(d.gold[1]*(1+.2*(lv-1)))]}; // bosses pay the gold written for them; only ordinary creatures pay more as they level
 }
 /* scaling: a creature has a base level, the level of its place, raised (once) to 2-5 below the party if the party has outgrown it by more than 5.
-   Within one place the creatures are not all the same level: about two in five stand at that scaled level, a third of them 1-3 levels below it and a
-   quarter 4-7 below, so a fight is a mix of tough and easy ones and the weak die fast. A few (about one in nine) stand 1 or 2 levels ABOVE the place. Bosses and the great creatures are never lowered; the great
+   Within one place the creatures stand 1 below, at or 1 above that level (see levelSpread). A few (about one in nine) stand 1 or 2 levels ABOVE the place. Bosses and the great creatures are never lowered; the great
    ones always stand a fixed number of levels above the party. */
 const NO_VARY=['boss','gandrick','mayor','overseer','halbrecht','wraith','sut','firelizard','cyclops','pharaohboss','chancellor','corvane','kraken'];
 /* the crypts under the abbey climb from level 1 at the start, to 2 in the middle, to 3 near the Rat King, whatever the mode */
 function crypt1Level(e){if(LEVEL!==1)return 0;if(e.zl===undefined){const d=Math.hypot(e.x-23,e.y-15);e.zl=e.t==='boss'?3:d<=6.5?3:d<=12?2:1}return e.zl}
+/* every ordinary creature stands 1 below, at, or 1 above the level of its place (a level 40 area has 39, 40 and 41); in the Underlevel (476) they stand at it or up to 5 above.
+   The pick is made from the creature's own number and the place, so it is the same every time the place is loaded. Bosses and the great creatures are never moved.
+   The number returned is how far BELOW the place's level the creature stands (negative means above). */
+const BOSSY_NAMES=/^(hgboss|hgdwarden|hgdb_|hgoboss|hgdemon|hgmini|w_)/; // the bosses and mini-bosses of the Hollow lands and the named wanderers: never moved off their level
+function isBossy(t){const d=ENEMY_DEF[t];return !!(d&&(d.boss||d.aboveParty))||['boss','gandrick','mayor','overseer','halbrecht','wraith','sut','firelizard','cyclops','pharaohboss','chancellor','corvane','kraken'].includes(t)||BOSSY_NAMES.test(t)}
+function levelSpread(e){const r=hash2(e.id||0,LEVEL,991);return LEVEL===476?-Math.floor(r*6):Math.floor(r*3)-1}
 function rebalanceEnemies(){
   const L=G.heroes.filter(h=>h.alive);if(!L.length)return;
   const pl=Math.floor(L.reduce((n,h)=>n+h.lvl,0)/L.length);
@@ -1476,7 +1481,7 @@ function rebalanceEnemies(){
     if(!G.flags.autoScaleOn){ // a fixed world (the default): the place's own level, the great creatures a few above it
       if(e.hp<=0||e.dying)continue;
       if(e.base===undefined||e.fixed!==LEVEL||e.am){e.base=crypt1Level(e)||(DIFF()+(ap?Math.min(ap,8):0));e.fixed=LEVEL;e.vd=undefined;e.am=0}
-      if(e.vd===undefined){const r=Math.random();e.vd=(ap||(def&&(def.boss||NO_VARY.includes(e.t)||/^w_/.test(e.t))))?0:r<.07?-1:r<.11?-2:r<.4?0:r<.75?1+Math.floor(Math.random()*3):4+Math.floor(Math.random()*4)}
+      if(e.vd===undefined||e.vr!==2){e.vd=(ap||(def&&isBossy(e.t)))?0:levelSpread(e);e.vr=2}
       const nl=Math.max(1,e.base-e.vd);if(nl!==e.lvl){const frac=e.hp/e.maxhp;e.lvl=nl;e.maxhp=enemyStat(e.t,nl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*frac))}
       continue}
     if(ap&&e.hp>0&&!e.dying){if(e.lvl!==pl+ap){const fr=e.hp/e.maxhp;e.lvl=pl+ap;e.maxhp=enemyStat(e.t,e.lvl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*fr))}continue} // the great creatures always stand a few levels above the party
@@ -1484,7 +1489,7 @@ function rebalanceEnemies(){
     if(e.base===undefined||!e.am){ // autoscaling was just switched on: every creature starts again from the level the place had before the fixed world
       const L0=LEVELS[LEVEL]||{};e.base=crypt1Level(e)||((L0.diff||LEVEL)+(L0.lvlBonus||0));e.vd=undefined;e.am=1}
     if(pl-e.base>5)e.base=Math.max(1,pl-(2+Math.floor(Math.random()*4)));   // catch-up, once
-    if(e.vd===undefined){const r=Math.random();e.vd=(def&&(def.boss||NO_VARY.includes(e.t)||/^w_/.test(e.t)))?0:r<.07?-1:r<.11?-2:r<.4?0:r<.75?1+Math.floor(Math.random()*3):4+Math.floor(Math.random()*4)}
+    if(e.vd===undefined||e.vr!==2){e.vd=(def&&isBossy(e.t))?0:levelSpread(e);e.vr=2}
     const nl=Math.max(1,e.base-e.vd);
     if(nl!==e.lvl){const frac=e.hp/e.maxhp;e.lvl=nl;e.maxhp=enemyStat(e.t,nl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*frac))}
   }
@@ -16781,7 +16786,7 @@ function oakBuild(){
     portals:[{to:305,x:142,y:73,f:3,tex:'tgate'}],
     mapNames:[{t:'The Gate Glade',x:6,y:32,k:'place'},{t:'Woodwarden Camp',x:22,y:15,k:'place'},{t:'Oakwrights’ Yard',x:22,y:49,k:'place'},{t:'Bramwick’s Glade',x:46,y:31,k:'place'},{t:'The Ashen Glade',x:62,y:7,k:'place'},{t:'The Great Oak',x:68,y:48,k:'place'},{t:'The Woodwardens’ Path',x:14,y:28,k:'lane'},{t:'The Oakwrights’ Road',x:14,y:46,k:'lane'},{t:'The Heart Road',x:34,y:36,k:'lane'},{t:'The Great Oak Road',x:57,y:46,k:'lane'},{t:'To Oldhaven',x:4,y:38,k:'lane'}]};
   LEVELS[OAK.ID]=lv;LEVEL_NAMES[OAK.ID]='The Oakwood';
-  {const N=W*H,hh=new Float32Array(N).fill(.3),rk=new Float32Array(N),bl=new Uint8Array(N);for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(x===0||y===0||x===W-1||y===H-1)bl[y*W+x]=1;TERRS[OAK.ID]=yarTerrain(W,H,hh,rk,bl)} // a real blue sky above the oaks, as in Oldhaven
+  {const N=W*H,hh=new Float32Array(N).fill(.3),rk=new Float32Array(N),bl=new Uint8Array(N);for(let y=0;y<H;y++)for(let x=0;x<W;x++)if((x===0||y===0||x===W-1||y===H-1)&&!(x===0&&y===36))bl[y*W+x]=1;TERRS[OAK.ID]=yarTerrain(W,H,hh,rk,bl)} // a real blue sky above the oaks, as in Oldhaven
   lv.ceilH=5.2;
 }
 KH_LAZY[OAK.ID]=oakBuild;LEVEL_NAMES[OAK.ID]='The Oakwood';
@@ -47420,6 +47425,7 @@ function rmPortalArt(){if(IMG.rubyportal||!IMG.tele3||typeof pToneMap!=='functio
 {const _rb=rebalanceEnemies;rebalanceEnemies=function(){
   const r=_rb.apply(this,arguments);
   try{if(LEVEL===RMZ.ID&&typeof ENEMY_SPAWNS!=='undefined')for(const e of G.enemies){
+    if(!G.flags.autoScaleOn)continue; // a fixed world: the general rule (1 below, at or 1 above level 30) applies
     const sp=ENEMY_SPAWNS[e.id];if(!sp||sp.t!==e.t||!sp.lvl||e.hp<=0||e.dying||e.base===undefined)continue;
     const nl=G.flags.autoScaleOn?Math.max(1,e.base-Math.max(0,30-sp.lvl)):sp.lvl,vd=Math.max(0,e.base-nl); // a fixed world: exactly the level it was given; an autoscaled one: the same number of levels below the place's level
     if(e.vd!==vd||e.lvl!==nl){e.vd=vd;if(e.lvl!==nl){const fr=e.hp/e.maxhp;e.lvl=nl;e.maxhp=enemyStat(e.t,nl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*fr))}}}}catch(x){console.error(x)}
