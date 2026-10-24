@@ -19,3 +19,7 @@ addEventListener('keydown',e=>{
   if(G.menu)return;
   e.preventDefault();act(q===0?'potion':'potb'+(q-1));
 });
+/* THE PRIEST'S HEAL costs 3 mana (it had grown to 9). Set last, on the class and on every priest of the party, and again whenever a party is made. */
+function priestHealCost(){try{for(const c of CLASSES)if(c.name==='Priest'){if(c.sp&&c.sp.type==='heal')c.sp.cost=3;for(const p of (c.powers||[]))if(p&&p.name==='Heal'&&p.act!==false)p.cost=3}for(const d of (typeof HERO_DEF!=='undefined'?HERO_DEF:[]))if(d&&d.cls==='Priest'&&d.sp&&d.sp.type==='heal')d.sp.cost=3}catch(e){console.error(e)}}
+priestHealCost();
+{const _sp=setParty;setParty=function(){const r=_sp.apply(this,arguments);priestHealCost();return r}}

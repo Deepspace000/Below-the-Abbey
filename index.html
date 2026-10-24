@@ -47,7 +47,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.624';
+const VERSION='3.625';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -48888,6 +48888,10 @@ addEventListener('keydown',e=>{
   if(G.menu)return;
   e.preventDefault();act(q===0?'potion':'potb'+(q-1));
 });
+/* THE PRIEST'S HEAL costs 3 mana (it had grown to 9). Set last, on the class and on every priest of the party, and again whenever a party is made. */
+function priestHealCost(){try{for(const c of CLASSES)if(c.name==='Priest'){if(c.sp&&c.sp.type==='heal')c.sp.cost=3;for(const p of (c.powers||[]))if(p&&p.name==='Heal'&&p.act!==false)p.cost=3}for(const d of (typeof HERO_DEF!=='undefined'?HERO_DEF:[]))if(d&&d.cls==='Priest'&&d.sp&&d.sp.type==='heal')d.sp.cost=3}catch(e){console.error(e)}}
+priestHealCost();
+{const _sp=setParty;setParty=function(){const r=_sp.apply(this,arguments);priestHealCost();return r}}
 
 /* ---- src/desert/hg_rescue.js ---- */
 /* ==========================================================================

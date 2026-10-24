@@ -93,3 +93,7 @@ Potions
 
 Portraits
 * The over-long chins on seven elf portraits are shortened (the blond elf with the circlet, the grey elf with the jutting chin, the dark elf, the elf with the leaf crown, the old grey elf, the hooded archer, and a little on the pale elf). The originals are kept in `ART-HOLD/portrait_chin_orig`; `tools/fix_chins.py` redoes it.
+
+## 3.625 (made, not yet released)
+
+* The priest's Heal costs 3 mana (it had grown to 9).
