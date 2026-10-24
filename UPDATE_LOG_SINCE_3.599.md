@@ -149,6 +149,8 @@ The Queen's Hive: a map and a rescue
 
 * The creatures of the Hollow Grasslands and the hives are slower: the fast ones (the swarms) take one step instead of two, and every step, blow and shot waits a little longer.
 
+* The Hollow Grasslands have thirty small rock nooks (rock on three sides, open on one) set about the open ground, away from villages and hive doors: stand in one and only one creature at a time can reach you in melee.
+
 Potion slots
 * The two backup potion slots under the frequent use potion (in the inventory) work: clicking one drinks that potion on the chosen hero, and the potion stays in the slot. Before, a click emptied the slot and sent the potion back to the bag. A slot whose potion has run out clears itself, and a potion dragged onto a slot replaces what was there.
 * The three potion slots have keys: 5 drinks the frequent use potion (as H and P do), 6 and 7 drink the first and second backup. In play the chosen hero (keys 1 to 4) drinks; with the inventory open it is the hero whose page is open. The keys show on the slots, in the help page and in the hover tip.

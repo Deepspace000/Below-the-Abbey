@@ -48946,6 +48946,29 @@ NPCS.hgbound={name:'A frog in the honey',img:'hg_bound0',root:d=>hgFreeFrog(d)};
   const def=ENEMY_DEF[e.t],sp=def&&def.speed;if(def&&sp>1)def.speed=1;
   let r;try{r=_ea.apply(this,arguments)}finally{if(def&&sp>1)def.speed=sp}
   return typeof r==='number'&&r>0?r+150:r}}
+/* NOOKS IN THE GRASSLAND: the Hollow Grasslands (level 470) are open ground, so a party could be surrounded. Thirty small outcrops of rock are set about it, each a square with rock on three sides
+   and the open side facing one of the four ways: stand in it and only one creature at a time can reach you in melee. They keep clear of the villages, the hive doors, the start, the creatures and
+   every other object, and are the same every time. */
+function hgNooks(){
+  const L=LEVELS[470];if(!L||L._nooks||!L.rows)return;L._nooks=1;
+  const rows=L.rows,H=rows.length,W=rows[0].length,busy=new Set();
+  const mark=(x,y,r)=>{for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++)busy.add((x+dx)+','+(y+dy))};
+  for(const o of [...(L.enemies||[]),...(L.items||[]),...(L.decor||[])])if(o)mark(o.x,o.y,1);
+  for(const t of HG_TOWNS)mark(t.x,t.y,16);for(const h of HG_HIVE_AT)mark(h[0],h[1],8);mark(HG.START.x,HG.START.y,10);
+  for(const p of (L.portals||[]))if(p)mark(p.x,p.y,4);
+  const free=(x,y)=>x>1&&y>1&&x<W-2&&y<H-2&&rows[y][x]==='.'&&!busy.has(x+','+y);
+  const dirs=[[0,-1],[1,0],[0,1],[-1,0]],placed=[];let tries=0;
+  while(placed.length<30&&tries<4000){tries++;
+    const x=2+Math.floor(hash2(tries,470,611)*(W-4)),y=2+Math.floor(hash2(tries,470,613)*(H-4)),o=(hash2(x,y,617)*4)|0,open=dirs[o];
+    if(placed.some(p=>Math.abs(p[0]-x)+Math.abs(p[1]-y)<14))continue;
+    // the standing square and the three squares round it, and the two open squares in front, must be free
+    const cells=[];let ok=free(x,y)&&free(x+open[0],y+open[1])&&free(x+open[0]*2,y+open[1]*2);
+    for(const [dx,dy] of dirs)if(ok&&(dx!==open[0]||dy!==open[1])){if(free(x+dx,y+dy))cells.push([x+dx,y+dy]);else ok=false}
+    if(!ok)continue;
+    // the two squares beside the open one are rock as well, so the mouth is one square wide
+    const sx=-open[1],sy=open[0];for(const s of [-1,1]){const cx=x+open[0]+sx*s,cy=y+open[1]+sy*s;if(free(cx,cy))cells.push([cx,cy])}
+    placed.push([x,y]);cells.forEach(([cx,cy],i)=>{L.decor.push({k:hash2(cx,cy,619)<.5?'hg_rock0':'hg_rock1',x:cx,y:cy,block:true,sc:.9+hash2(cx,cy,621)*.25});mark(cx,cy,1)});mark(x,y,2)}}
+{const _ll2=loadLevel;loadLevel=function(n){_ll2.apply(this,arguments);try{if(LEVEL===470)hgNooks()}catch(e){console.error(e)}}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
