@@ -5,11 +5,21 @@
    pointer (left stick), A presses, B goes back. The Controller page, in Settings, shows the pad and what each button does.
    Also here: the Settings and More menus, so the main menu is short, with Exit game at the bottom.
    ========================================================================== */
-const PADMAP={ // what each button does while the party is walking (the same key the keyboard would send)
-  0:['Enter','Attack, talk, use'],1:['z','Wait a round'],2:['x','Special attack'],3:['i','Inventory'],4:['q','Turn left'],5:['e','Turn right'],
-  8:['m','Map'],9:['Escape','Menu'],10:['p','Drink a potion'],11:['r','Rest']};
+/* what each button does while the party is walking: [action, what it is called, the key it sends (the same key the keyboard would send), the button it has to begin with]. The buttons
+   0 A, 1 B, 2 X, 3 Y, 4 LB, 5 RB, 6 LT, 7 RT, 8 Back, 9 Start, 10 left stick press, 11 right stick press can be changed on the Buttons page (Settings, Controller);
+   the D-pad and the two sticks are fixed, and so is what the buttons do in menus (A presses, B goes back). */
+const PADACT=[['attack','Attack, talk, use','Enter',0],['wait','Wait a round','z',1],['special','Special attack','x',2],['inv','Inventory','i',3],['turnL','Turn left','q',4],['turnR','Turn right','e',5],
+  ['heroPrev','Previous hero',null,6],['heroNext','Next hero',null,7],['map','Map','m',8],['menu','Menu','Escape',9],['potion','Drink potion 1','p',10],['rest','Camp','r',11],
+  ['potb0','Drink potion 2','6',-1],['potb1','Drink potion 3','7',-1],['quests','Quests','j',-1],['qsave','Quick save','F5',-1]];
+const PADBTN=['A','B','X','Y','LB','RB','LT','RT','Back','Start','L3','R3'];
+const PB={map:{},wait:null};
+function padBindLoad(){let c={};try{c=JSON.parse(localStorage.getItem('abbeyPadBind')||'{}')||{}}catch(e){}PB.map={};for(const a of PADACT)PB.map[a[0]]=c[a[0]]!==undefined?c[a[0]]:a[3]}
+function padBindSave(){const c={};for(const a of PADACT)if(PB.map[a[0]]!==a[3])c[a[0]]=PB.map[a[0]];try{localStorage.setItem('abbeyPadBind',JSON.stringify(c))}catch(e){}}
+padBindLoad();
+const padActOf=i=>PADACT.find(a=>PB.map[a[0]]===i)||null;
+const padLabel=i=>{const a=padActOf(i);return a?a[1]:'Not used'};
 const PAD={cx:240,cy:160,focus:null,act:false,held:{},btn:{},keysDown:{},name:'',seen:0,lastX:0,lastY:0,rep:0,mode:'play'};
-function padKey(key,down){try{window.dispatchEvent(new KeyboardEvent(down?'keydown':'keyup',{key,bubbles:true,cancelable:true}))}catch(e){}}
+function padKey(key,down){try{const ev=new KeyboardEvent(down?'keydown':'keyup',{key,bubbles:true,cancelable:true});ev.__dk=1;window.dispatchEvent(ev)}catch(e){}} // __dk: the keyboard page's key changes do not apply to the pad
 function padPointer(type,x,y){
   const r=cv.getBoundingClientRect(),o={clientX:r.left+x/DW*r.width,clientY:r.top+y/DH*r.height,pointerId:77,pointerType:'mouse',bubbles:true,cancelable:true,button:0,isPrimary:true};
   const ev=new PointerEvent(type,o);if(type==='pointerdown')cv.dispatchEvent(ev);else if(type==='pointermove')cv.dispatchEvent(ev);else window.dispatchEvent(ev)}
@@ -29,11 +39,12 @@ function padJump(dx,dy){
 function padOnButtons(){return BTNS.length&&padTargets().length}
 function padPress(i){ // a button has just gone down
   PAD.act=true;
+  if(PB.wait&&i<=11){const id=PB.wait;PB.wait=null;const old=PB.map[id],other=PADACT.find(q=>q[0]!==id&&PB.map[q[0]]===i);if(other)PB.map[other[0]]=old;PB.map[id]=i;padBindSave();return} // the Buttons page is waiting for a button
   if(padPlaying()){
     if(i===12){padKey('ArrowUp',true);PAD.keysDown.up=1;return}if(i===13){padKey('ArrowDown',true);PAD.keysDown.down=1;return}
     if(i===14){padKey('ArrowLeft',true);PAD.keysDown.left=1;return}if(i===15){padKey('ArrowRight',true);PAD.keysDown.right=1;return}
-    if(i===6){const n=(G.sel+3)%4;G.sel=n;return}if(i===7){G.sel=(G.sel+1)%4;return}
-    const m=PADMAP[i];if(m){padKey(m[0],true);padKey(m[0],false)}return}
+    if(i<=11){const a=padActOf(i);if(!a)return;if(a[0]==='heroPrev'){G.sel=(G.sel+3)%4;return}if(a[0]==='heroNext'){G.sel=(G.sel+1)%4;return}if(a[2]){padKey(a[2],true);padKey(a[2],false)}return}
+    return}
   // menus, dialogue, shops, maps: the frame and the pointer
   if(G.cut&&i===0){padKey('Enter',true);padKey('Enter',false);return}
   if(i===12)padJump(0,-1);else if(i===13)padJump(0,1);else if(i===14)padJump(-1,0);else if(i===15)padJump(1,0);
@@ -146,22 +157,22 @@ function drawPadPage(){
     txt(label,lx,y,9.5,'#e8c870',al,true);txt(what,lx,y+11,8,'#cdbf94',al);
     ctx.strokeStyle='rgba(216,200,142,.55)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(side==='L'?118:362,y+4);ctx.lineTo(px,py);ctx.stroke();
     ctx.fillStyle='#e8c870';ctx.beginPath();ctx.arc(px,py,2,0,TAU);ctx.fill()};
-  note('Left bumper','Turn left','L',56,[-80,-46]);
-  note('Left trigger','Previous hero','L',84,[-80,-58]);
+  note('Left bumper',padLabel(4),'L',56,[-80,-46]);
+  note('Left trigger',padLabel(6),'L',84,[-80,-58]);
   note('Left stick','Walk, step sideways','L',122,[-58,-12]);
   note('D-pad','Forward, back, turn','L',164,[-30,22]);
-  note('Back','Map','L',204,[-16,-7]);
-  note('Right bumper','Turn right','R',56,[80,-46]);
-  note('Right trigger','Next hero','R',84,[80,-58]);
-  note('Y','Inventory','R',112,[60,-30]);
-  note('X','Special attack','R',138,[45,-14]);
-  note('B','Wait a round','R',164,[75,-14]);
-  note('A','Attack, talk, use','R',190,[60,2]);
-  note('Start','Menu','R',216,[16,-7]);
+  note('Back',padLabel(8),'L',204,[-16,-7]);
+  note('Right bumper',padLabel(5),'R',56,[80,-46]);
+  note('Right trigger',padLabel(7),'R',84,[80,-58]);
+  note('Y',padLabel(3),'R',112,[60,-30]);
+  note('X',padLabel(2),'R',138,[45,-14]);
+  note('B',padLabel(1),'R',164,[75,-14]);
+  note('A',padLabel(0),'R',190,[60,2]);
+  note('Start',padLabel(9),'R',216,[16,-7]);
   note('Right stick','Turn, look up and down','R',240,[28,22]);
-  txt('Stick presses: left stick potion, right stick rest',240,226,8,'#a89878','center');
+  txt('Stick presses: left stick '+padLabel(10).toLowerCase()+', right stick '+padLabel(11).toLowerCase(),240,226,8,'#a89878','center');
   txt('In menus, dialogue and shops: D-pad jumps between buttons, the left stick moves a pointer, A presses, B goes back.',240,262,8,'#cdbf94','center');
   txt('Any standard pad works. Press a button once to wake it.',240,273,8,'#a89878','center');
-  btnText('menuback','Back',190,282,100,24);
+  btnText('menuback','Back',100,282,100,24);btnText('padbindpage','Change buttons',250,282,130,24);
   btn('menuclose',0,0,DW,DH);BTNS.unshift(BTNS.pop());
 }
