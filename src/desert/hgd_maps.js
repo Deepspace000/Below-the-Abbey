@@ -115,6 +115,13 @@ function hgdmpSheet(vi){
   x.restore();mplCompass(x,448,48,17);mplBorder(x);
   return HGDMP.cache[vi]={c,X,Y}}
 /* the names are a separate layer drawn on the screen over the map: no halo and no box, a fixed small size that looks smaller as the map is zoomed in, and the precinct names fade out as you zoom */
+/* the names of places are placed round the other writing on the map (people's names, quest marks, the banner): everything written on the screen while the map is painted is noted, and
+   each place name looks for a free spot clear of all of it */
+const HGDREC={on:false,r:[]};
+{const P=CanvasRenderingContext2D.prototype,_ft=P.fillText;P.fillText=function(t,x,y,mw){
+  if(HGDREC.on&&this===ctx){try{const f=parseFloat(String(this.font).match(/([\d.]+)px/)[1]),m=this.measureText(String(t));let w=m.width;if(mw&&w>mw)w=mw;let x0=x;const al=this.textAlign;if(al==='center')x0=x-w/2;else if(al==='right'||al==='end')x0=x-w;
+    const bl=this.textBaseline;let y0=y-f;if(bl==='middle')y0=y-f/2;else if(bl==='top'||bl==='hanging')y0=y;HGDREC.r.push({x:x0+w/2,y:y0+f/2,w,h:f})}catch(e){}}
+  return _ft.apply(this,arguments)}}
 function hgdmpNames(vi){
   const L=LEVELS[HGD.ID];if(vi>=5||!L||!L._hgdp)return[];const V=HGDMP.views[vi],[,,vx,vy,vw,vh]=V,M=L._hgdm,out=[];
   const inV=(x,y)=>x>=vx-2&&x<=vx+vw+2&&y>=vy-2&&y<=vy+vh+2;
@@ -123,7 +130,8 @@ function hgdmpNames(vi){
   for(const p of hgdmpPrec(L))if(inV(p.x,p.y))out.push({t:p.name.toUpperCase(),x:p.x+.5,y:p.y+.5,dy:0,k:'prec'});
   return out}
 function hgdmpDrawNames(vi){
-  const V=MPL.view;if(!V||!V.z)return;const z=V.z,A=V.area,names=hgdmpNames(vi),box=[];
+  const V=MPL.view;if(!V||!V.z)return;const z=V.z,A=V.area,names=hgdmpNames(vi),box=HGDREC.r.slice();
+  for(const fn of (window.QOBST||[])){try{for(const b of fn(A,z))box.push({x:(b[0]+b[2])/2,y:(b[1]+b[3])/2,w:b[2]-b[0],h:b[3]-b[1]})}catch(e){}}
   const col={town:'#6a1a10',encl:'#2a4a22',danger:'#8a1a10',door:'#2a1a0c',prec:'#46281a',thief:'#4a1a1a',marsh:'#1f5a52',water:'#14406e'},base={town:7,encl:5.6,danger:6,door:5.6,prec:5.8,thief:5.2,marsh:6,water:7};
   ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();ctx.textAlign='center';ctx.textBaseline='middle';
   const order=['town','encl','danger','marsh','water','thief','door','prec'];
@@ -144,7 +152,7 @@ function hgdmpDrawNames(vi){
   G._hgdOvT=G.time;
   const vi=G.hgdView|0,sh=hgdmpSheet(vi);if(!sh)return _do.apply(this,arguments);
   MPL.reveal=false;const own=[HGD.ID,HGD.ID,HGD.ID,HGD.ID,HGD.ID,HGDU.ID,477][vi],gc=G.C;if(own!==LEVEL)G.C={x:-9999,y:-9999,a:0}; // the arrow only shows on the sheet of the level you are in
-  try{mplPaint(sh.c,sh.S||MPL.S,MPL.AREA,sh.X,sh.Y,'You are the yellow arrow.')}finally{G.C=gc}if(vi<6)hgdmpDrawTrail(vi);hgdmpDrawNames(vi);
+  HGDREC.r=[];HGDREC.on=true;try{mplPaint(sh.c,sh.S||MPL.S,MPL.AREA,sh.X,sh.Y,'You are the yellow arrow.')}finally{G.C=gc;HGDREC.on=false}if(vi<6)hgdmpDrawTrail(vi);hgdmpDrawNames(vi);
   {let bx=194;HGDMP.views.forEach((v,i)=>{const w=i===5?36:i===6?42:v[0].length>3?33:27;btnText('hgdv'+i,v[0],bx,303,w,17);bx+=w+2})}}}
 {const _h=handleBtn;handleBtn=function(id){
   if(G.overview&&!G.world&&(LEVEL===HGD.ID||LEVEL===HGDU.ID||LEVEL===477)){

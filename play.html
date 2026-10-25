@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0c0a08">
 <title>Below the Abbey</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=UnifrakturCook:wght@700&family=Cinzel:wght@400;700&family=Cinzel+Decorative:wght@400;700&family=Almendra+SC&family=Metamorphous&family=Uncial+Antiqua&family=Pirata+One&family=Grenze+Gotisch:wght@400;600&family=MedievalSharp&family=Texturina:wght@400;600&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Almendra&family=Almendra+Display&family=IM+Fell+DW+Pica+SC&family=IM+Fell+Double+Pica+SC&family=IM+Fell+French+Canon+SC&family=IM+Fell+Great+Primer+SC&family=Cormorant+Unicase:wght@500;700&family=Cormorant+SC:wght@500;700&family=Marcellus+SC&family=Forum&family=Germania+One&family=Jacquard+24&family=Kings&family=Caudex:wght@400;700&family=Aladin&family=New+Rocker&family=Cardo:wght@400;700&family=Spectral+SC:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/fonts/fonts.css"><!-- the fonts are kept in assets/fonts, so the text looks the same on every machine and works offline -->
 <style>
   html,body{margin:0;height:100%;background:#050403;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
   canvas{position:absolute;left:0;top:0;image-rendering:auto;touch-action:none;border-radius:2.6% / 4%}
@@ -47,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.628';
+const VERSION='3.629';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -7562,8 +7560,12 @@ addEventListener('keydown',e=>{
 });
 addEventListener('keyup',e=>{const i=KDOWN.findIndex(k=>k[0]===e.key);if(i>=0)KDOWN.splice(i,1)});
 addEventListener('blur',()=>{KDOWN.length=0});
+const DISP=(()=>{try{return Object.assign({fit:0,sharp:0},JSON.parse(localStorage.getItem('abbeyDisp')||'{}'))}catch(e){return {fit:0,sharp:0}}})(); // fit: 0 fit the window, 1 fill it, 2 whole-number scale; sharp: 1 = hard pixels
 function fit(){
-  const s=Math.min(innerWidth/DW,innerHeight/DH),w=Math.floor(DW*s),h=Math.floor(DH*s);
+  let s=Math.min(innerWidth/DW,innerHeight/DH),w=Math.floor(DW*s),h=Math.floor(DH*s);
+  if(DISP.fit===1){w=innerWidth;h=innerHeight}                                                  // fill the window (stretches the picture)
+  else if(DISP.fit===2&&s>=1){const k=Math.floor(s);w=DW*k;h=DH*k}                              // whole-number scale: every pixel the same size
+  cv.style.imageRendering=DISP.sharp?'pixelated':'auto';
   cv.style.width=w+'px';cv.style.height=h+'px';cv.style.left=Math.floor((innerWidth-w)/2)+'px';cv.style.top=Math.floor((innerHeight-h)/2)+'px';
   const gl=document.getElementById('glass');gl.style.width=cv.style.width;gl.style.height=cv.style.height;gl.style.left=cv.style.left;gl.style.top=cv.style.top;gl.style.display=G.crt?'block':'none';
 }
@@ -43796,6 +43798,13 @@ function hgdmpSheet(vi){
   x.restore();mplCompass(x,448,48,17);mplBorder(x);
   return HGDMP.cache[vi]={c,X,Y}}
 /* the names are a separate layer drawn on the screen over the map: no halo and no box, a fixed small size that looks smaller as the map is zoomed in, and the precinct names fade out as you zoom */
+/* the names of places are placed round the other writing on the map (people's names, quest marks, the banner): everything written on the screen while the map is painted is noted, and
+   each place name looks for a free spot clear of all of it */
+const HGDREC={on:false,r:[]};
+{const P=CanvasRenderingContext2D.prototype,_ft=P.fillText;P.fillText=function(t,x,y,mw){
+  if(HGDREC.on&&this===ctx){try{const f=parseFloat(String(this.font).match(/([\d.]+)px/)[1]),m=this.measureText(String(t));let w=m.width;if(mw&&w>mw)w=mw;let x0=x;const al=this.textAlign;if(al==='center')x0=x-w/2;else if(al==='right'||al==='end')x0=x-w;
+    const bl=this.textBaseline;let y0=y-f;if(bl==='middle')y0=y-f/2;else if(bl==='top'||bl==='hanging')y0=y;HGDREC.r.push({x:x0+w/2,y:y0+f/2,w,h:f})}catch(e){}}
+  return _ft.apply(this,arguments)}}
 function hgdmpNames(vi){
   const L=LEVELS[HGD.ID];if(vi>=5||!L||!L._hgdp)return[];const V=HGDMP.views[vi],[,,vx,vy,vw,vh]=V,M=L._hgdm,out=[];
   const inV=(x,y)=>x>=vx-2&&x<=vx+vw+2&&y>=vy-2&&y<=vy+vh+2;
@@ -43804,7 +43813,8 @@ function hgdmpNames(vi){
   for(const p of hgdmpPrec(L))if(inV(p.x,p.y))out.push({t:p.name.toUpperCase(),x:p.x+.5,y:p.y+.5,dy:0,k:'prec'});
   return out}
 function hgdmpDrawNames(vi){
-  const V=MPL.view;if(!V||!V.z)return;const z=V.z,A=V.area,names=hgdmpNames(vi),box=[];
+  const V=MPL.view;if(!V||!V.z)return;const z=V.z,A=V.area,names=hgdmpNames(vi),box=HGDREC.r.slice();
+  for(const fn of (window.QOBST||[])){try{for(const b of fn(A,z))box.push({x:(b[0]+b[2])/2,y:(b[1]+b[3])/2,w:b[2]-b[0],h:b[3]-b[1]})}catch(e){}}
   const col={town:'#6a1a10',encl:'#2a4a22',danger:'#8a1a10',door:'#2a1a0c',prec:'#46281a',thief:'#4a1a1a',marsh:'#1f5a52',water:'#14406e'},base={town:7,encl:5.6,danger:6,door:5.6,prec:5.8,thief:5.2,marsh:6,water:7};
   ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();ctx.textAlign='center';ctx.textBaseline='middle';
   const order=['town','encl','danger','marsh','water','thief','door','prec'];
@@ -43825,7 +43835,7 @@ function hgdmpDrawNames(vi){
   G._hgdOvT=G.time;
   const vi=G.hgdView|0,sh=hgdmpSheet(vi);if(!sh)return _do.apply(this,arguments);
   MPL.reveal=false;const own=[HGD.ID,HGD.ID,HGD.ID,HGD.ID,HGD.ID,HGDU.ID,477][vi],gc=G.C;if(own!==LEVEL)G.C={x:-9999,y:-9999,a:0}; // the arrow only shows on the sheet of the level you are in
-  try{mplPaint(sh.c,sh.S||MPL.S,MPL.AREA,sh.X,sh.Y,'You are the yellow arrow.')}finally{G.C=gc}if(vi<6)hgdmpDrawTrail(vi);hgdmpDrawNames(vi);
+  HGDREC.r=[];HGDREC.on=true;try{mplPaint(sh.c,sh.S||MPL.S,MPL.AREA,sh.X,sh.Y,'You are the yellow arrow.')}finally{G.C=gc;HGDREC.on=false}if(vi<6)hgdmpDrawTrail(vi);hgdmpDrawNames(vi);
   {let bx=194;HGDMP.views.forEach((v,i)=>{const w=i===5?36:i===6?42:v[0].length>3?33:27;btnText('hgdv'+i,v[0],bx,303,w,17);bx+=w+2})}}}
 {const _h=handleBtn;handleBtn=function(id){
   if(G.overview&&!G.world&&(LEVEL===HGD.ID||LEVEL===HGDU.ID||LEVEL===477)){
@@ -46637,6 +46647,15 @@ const HGDST_LBL={church:'Church',general:'Goods',arms:'Arms',armour:'Armour',mag
       ctx.fillStyle='#2a1a0c';ctx.font='bold '+Math.round(r*1.35)+'px '+FUI;ctx.fillText(s.k==='church'?'+':'$',px,py+.5);
       if(lab&&!lbx.some(q=>Math.abs(q[0]-px)<22&&Math.abs(q[1]-py)<8)){lbx.push([px,py]);ctx.font='bold 5.6px '+FUI;ctx.lineWidth=2.2;ctx.strokeStyle='rgba(233,220,180,.9)';ctx.strokeText(HGDST_LBL[s.k],px,py+r+4.5);ctx.fillStyle='#4a2a08';ctx.fillText(HGDST_LBL[s.k],px,py+r+4.5)}}
     ctx.restore()}catch(e){console.error('hgdst map',e)}}}
+/* where the shop marks and their labels stand, for the layers that are drawn before them (quest names and place names keep clear of them) */
+(window.QOBST=window.QOBST||[]).push(()=>{
+  const V=MPL.view,L=LEVELS[HGD.ID],out=[];if(LEVEL!==HGD.ID||!V||!V.z||(G.hgdView|0)>=5||!L||!L._hgdp||V.z<1.25)return out;
+  if(!HGDST.map||HGDST.mapSrc!==L){HGDST.mapSrc=L;HGDST.map=[];for(const d of L.decor){const k=hgdstKind(d.npc);if(k)HGDST.map.push({x:d.x,y:d.y,k})}}
+  const z=V.z,A=V.area,r=Math.max(3.4,Math.min(5.6,2.6+z*.5));ctx.save();ctx.font='bold 5.6px '+FUI;
+  for(const s of HGDST.map){const px=A.x+(V.X(s.x+.5)-V.sx0)*z,py=A.y+(V.Y(s.y+.5)-V.sy0)*z;if(px<A.x-12||px>A.x+A.w+12||py<A.y-12||py>A.y+A.h+12)continue;
+    out.push([px-r-.5,py-r-.5,px+r+.5,py+r+.5]);
+    if(z>=2.2){const w=ctx.measureText(HGDST_LBL[s.k]).width;out.push([px-w/2-1,py+r+1.2,px+w/2+1,py+r+7.8])}}
+  ctx.restore();return out});
 // the key of the map names it
 /* ---------- the four quarters of the maze have names, shown under the map title and as a banner at the top of the map when a quarter is opened ---------- */
 {const Q=['The Lantern Reaches','The Gilded Heights','The Cairn Warrens','The Hedgefoot Approaches'];for(let i=0;i<4;i++)HGDMP.views[i+1][1]=Q[i]}
@@ -48993,13 +49012,21 @@ function hgLecterns(n){
    QUEST MARKS ON THE AREA MAPS. On every area map, each person who has a quest to give carries a gold ! (a quest to take) and each person a finished quest can be handed to a green ? (the same marks
    as over their heads), with their name under the mark, so a quest giver can be found on the map. Laid over the cached map each time it is shown, so they follow the quests. Last in the injection order.
    ========================================================================== */
+/* everything already written on the map while it is painted (shop marks, people, titles) is noted, so a name never lands on it */
+const QREC={on:false,r:[]};
+{const P=CanvasRenderingContext2D.prototype,_f=P.fillText;P.fillText=function(t,x,y,mw){
+  if(QREC.on&&this===ctx){try{const f=parseFloat(String(this.font).match(/([\d.]+)px/)[1]);let w=this.measureText(String(t)).width;if(mw&&w>mw)w=mw;let x0=x;const al=this.textAlign;if(al==='center')x0=x-w/2;else if(al==='right'||al==='end')x0=x-w;
+    const bl=this.textBaseline;let y0=y-f;if(bl==='middle')y0=y-f/2;else if(bl==='top'||bl==='hanging')y0=y;QREC.r.push([x0,y0,x0+w,y0+f])}catch(e){}}
+  return _f.apply(this,arguments)}}
 {const _mp=mplPaint;mplPaint=function(c,S,area,X,Y,foot){
-  const r=_mp.apply(this,arguments);
+  QREC.r=[];QREC.on=true;let r;try{r=_mp.apply(this,arguments)}finally{QREC.on=false}
   try{if(typeof questMark!=='function'||!G.decor)return r;
     const z=mplZoom();ctx.save();ctx.beginPath();ctx.rect(area.x,area.y,area.w,area.h);ctx.clip();
-    const placed=[];
+    const placed=QREC.r.slice(),list=[];
+    const obst=[];for(const fn of (window.QOBST||[])){try{for(const b of fn(area,z)){placed.push(b);obst.push(b)}}catch(e){}} // marks other layers draw later (the shops of the Deeper Hollow)
     for(const d of G.decor){if(!d.npc||!QGIVER[d.npc]||d.found||d.hidden)continue;const m=questMark(d);if(!m)continue;
-      const sx=area.x+(X(d.x+.5)-area.x)*z+(G.panX||0),sy=area.y+(Y(d.y+.5)-area.y)*z+(G.panY||0);
+      const sx=area.x+(X(d.x+.5)-area.x)*z+(G.panX||0),sy=area.y+(Y(d.y+.5)-area.y)*z+(G.panY||0);const up=obst.some(q=>sx>=q[0]&&sx<=q[2]&&sy>=q[1]&&sy<=q[3])?9:0,sy2=sy-up;list.push([d,m,sx,sy2]);placed.push([sx-5.4,sy2-12.2,sx+5.4,sy2-2.4])} // every mark is an obstacle for every name
+    for(const [d,m,sx,sy] of list){
       ctx.beginPath();ctx.arc(sx,sy-7,4.6,0,6.283);ctx.fillStyle='rgba(20,12,6,.92)';ctx.fill();ctx.lineWidth=1;ctx.strokeStyle=m===2?'#7ad88a':'#ffd24a';ctx.stroke();
       ctx.fillStyle=m===2?'#7ad88a':'#ffd24a';ctx.font=`bold 7px ${FUI}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(m===2?'?':'!',sx,sy-6.6);
       ctx.beginPath();ctx.moveTo(sx-1.6,sy-3);ctx.lineTo(sx+1.6,sy-3);ctx.lineTo(sx,sy-.4);ctx.closePath();ctx.fill();
@@ -49284,6 +49311,115 @@ function dsFix(n){
   }catch(e){console.error('dsFix',n,e)}
 }
 {const _ll=loadLevel;loadLevel=function(n){try{dsFix(n)}catch(e){console.error(e)}return _ll.apply(this,arguments)}}
+
+/* ---- src/desert/display_keys.js ---- */
+/* ==========================================================================
+   DISPLAY AND KEYS. Two new pages under Settings.
+   1. DISPLAY: full screen on or off (the Windows app also has F11); the shape of the picture (fit the window and keep its shape, fill the window, or a whole-number
+      scale so every pixel is the same size); smooth or hard-edged pixels. Kept in this device's storage ('abbeyDisp') and applied by fit() in the base game.
+   2. KEYBOARD: every key the game uses can be changed. A key you choose is turned into the game's own key for that action before the game sees it (the real key press is
+      swallowed and the game's key is sent in its place), so every screen and every part of the game follows without any other change. A key that has been moved away from an
+      action does nothing any more. Pressing a key already used by another action swaps the two. Arrow keys, Enter, Esc, F1 and ? keep working as they are. Kept in 'abbeyKeys'.
+   Last in the injection order.
+   ========================================================================== */
+const DK_ACTS=[ // [id, label, the game's own key]
+ ['fwd','Forward','w'],['back','Back','s'],['left','Step left','a'],['right','Step right','d'],['turnL','Turn left','q'],['turnR','Turn right','e'],
+ ['attack','Attack',' '],['special','Special power','x'],['potion','Potion 1','p'],['potb0','Potion 2','6'],['potb1','Potion 3','7'],['wait','Wait','z'],['rest','Camp','r'],
+ ['hero1','Hero 1','1'],['hero2','Hero 2','2'],['hero3','Hero 3','3'],['hero4','Hero 4','4'],
+ ['inv','Items','i'],['chr','Character','c'],['spl','Spells','b'],['pow','Powers','k'],['qst','Quests','j'],['jnl','Journal','l'],['aff','Afflictions','f'],['col','Collection','u'],['map','Map','m'],['tel','Teleport','t'],
+ ['dig','Dig','g'],['bfly','Butterfly','n'],['qsave','Quick save','F5']];
+const DK={custom:{},wait:null,syn:null};
+try{DK.custom=JSON.parse(localStorage.getItem('abbeyKeys')||'{}')||{}}catch(e){DK.custom={}}
+const dkNorm=k=>k&&k.length===1?k.toLowerCase():k;
+const dkBound=id=>DK.custom[id]||DK_ACTS.find(a=>a[0]===id)[2];
+function dkSave(){try{localStorage.setItem('abbeyKeys',JSON.stringify(DK.custom))}catch(e){}}
+function dkMaps(){const toAct={},canon=new Set(DK_ACTS.map(a=>dkNorm(a[2])));for(const [id,,c] of DK_ACTS)toAct[dkNorm(dkBound(id))]=id;return {toAct,canon}}
+function dkName(k){return k===' '?'Space':k.length===1?k.toUpperCase():k}
+function dkAssign(id,key){
+  key=dkNorm(key);const def=DK_ACTS.find(a=>a[0]===id)[2],old=dkBound(id);
+  const other=DK_ACTS.find(a=>a[0]!==id&&dkNorm(dkBound(a[0]))===key);
+  if(other){const od=other[2];if(dkNorm(old)===dkNorm(od))delete DK.custom[other[0]];else DK.custom[other[0]]=old}
+  if(dkNorm(key)===dkNorm(def))delete DK.custom[id];else DK.custom[id]=key;
+  dkSave()}
+function dkSend(type,key,rep){const ev=new KeyboardEvent(type,{key,bubbles:true,cancelable:true,repeat:!!rep});ev.__dk=1;(document.body||window).dispatchEvent(ev)}
+const dkOkKey=k=>k&&k!=='Escape'&&(k.length===1||/^F([2-9]|10)$/.test(k))&&k!=='F5'||k==='F5';
+window.addEventListener('keydown',e=>{
+  if(e.__dk)return;
+  if(DK.wait){ // waiting for the new key of an action
+    e.preventDefault();e.stopImmediatePropagation();
+    if(e.key==='Escape'){DK.wait=null;return}
+    if(['Shift','Control','Alt','Meta','CapsLock','Tab'].includes(e.key))return;
+    if(dkOkKey(e.key)){dkAssign(DK.wait,e.key);DK.wait=null}
+    return}
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  const lk=dkNorm(e.key),M=dkMaps(),id=M.toAct[lk];
+  if(id){const c=DK_ACTS.find(a=>a[0]===id)[2];if(dkNorm(c)!==lk){e.preventDefault();e.stopImmediatePropagation();DK.syn=DK.syn||{};DK.syn[lk]=c;dkSend('keydown',c,e.repeat)}return}
+  if(M.canon.has(lk)){e.preventDefault();e.stopImmediatePropagation()} // the game's own key for an action that has been given another key: it does nothing now
+},true);
+window.addEventListener('keyup',e=>{
+  if(e.__dk)return;const lk=dkNorm(e.key),c=DK.syn&&DK.syn[lk];
+  if(c){delete DK.syn[lk];e.stopImmediatePropagation();dkSend('keyup',c)}
+},true);
+
+/* ---- the Settings page gets Display and Keyboard ---- */
+drawSettingsMenu=function(){
+  BTNS=[];veil(.6);bigPanel(110,28,260,270);
+  txt('SETTINGS',240,50,14,'#d8c88e','center',true);
+  btnText('mute','Sound',140,62,200,26);btnText('gfx','Graphics',140,92,200,26);btnText('dispage','Screen',140,122,200,26);btnText('gameplay','Gameplay',140,152,200,26);
+  btnText('padpage','Controller',140,182,200,26);btnText('kbpage','Keyboard',140,212,200,26);
+  btnText('menuback','Back',170,252,140,28);
+  btn('menuclose',0,0,DW,DH);BTNS.unshift(BTNS.pop());
+};
+const DK_FIT=['Fit window','Fill window','Whole pixels'];
+const dkDesk=()=>typeof BTA_DESKTOP!=='undefined'&&BTA_DESKTOP&&BTA_DESKTOP.toggleFullscreen;
+function dkFullOn(){if(dkDesk()){if(!DK.fsT||Date.now()-DK.fsT>400){DK.fsT=Date.now();BTA_DESKTOP.fullscreen().then(v=>{DK.fs=v}).catch(()=>{})}return !!DK.fs}return !!(document.fullscreenElement||document.webkitFullscreenElement)}
+function dkFullToggle(){try{if(dkDesk()){BTA_DESKTOP.toggleFullscreen().then(v=>{DK.fs=v});return}if(dkFullOn()){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}else{const d=document.documentElement;(d.requestFullscreen||d.webkitRequestFullscreen).call(d)}}catch(e){}}
+function drawDisplayPage(){
+  BTNS=[];veil(.6);bigPanel(90,40,300,232);
+  txt('SCREEN',240,62,14,'#d8c88e','center',true);
+  const row=(i,l,id,v)=>{const y=76+i*34;txt(l,104,y+13,9,'#d8c9a0','left');btnText(id,v,230,y,146,26)};
+  row(0,'Full screen','d_full',dkFullOn()?'On':'Off');
+  row(1,'Picture shape','d_fit',DK_FIT[DISP.fit]);
+  row(2,'Pixels','d_sharp',DISP.sharp?'Hard edged':'Smooth');
+  txt('The Windows app also uses F11 for full screen.',240,226,7.4,'#a89878','center');
+  txt('Fill stretches the picture to the window shape.',240,236,7.4,'#a89878','center');
+  btnText('d_back','Back',170,246,140,22);
+  btn('menuclose',0,0,DW,DH);BTNS.unshift(BTNS.pop());
+}
+function drawKeybindsPage(){
+  BTNS=[];veil(.7);bigPanel(6,6,468,308);
+  txt('KEYBOARD',240,22,13,'#d8c88e','center',true);
+  txt(DK.wait?'Press the new key for '+DK_ACTS.find(a=>a[0]===DK.wait)[1]+'  (Esc cancels)':'Click a key, then press the key you want.',240,35,7.8,DK.wait?'#ffe36a':'#a89878','center');
+  DK_ACTS.forEach(([id,label],i)=>{const col=(i/10)|0,row=i%10,x=16+col*154,y=46+row*20;
+    txt(label,x,y+8,8,'#d8c9a0','left');
+    const cust=!!DK.custom[id],k=dkBound(id);
+    btnText('kb_'+id,DK.wait===id?'...':dkName(k),x+84,y,62,16);
+    if(cust)txt('*',x+148,y+8,8,'#ffe36a','center')});
+  txt('* changed.  Arrow keys, Enter, Esc and F1 always work.',240,255,7.4,'#a89878','center');
+  btnText('kb_reset','Reset all',30,268,110,22);btnText('kb_list','Key list',185,268,110,22);btnText('kb_back','Back',340,268,110,22);
+  btn('menuclose',0,0,DW,DH);BTNS.unshift(BTNS.pop());
+}
+{const _d=drawMenu;drawMenu=function(){
+  if(G.menu==='display'){drawDisplayPage();return}
+  if(G.menu==='keybinds'){drawKeybindsPage();return}
+  return _d.apply(this,arguments)}}
+{const _h=handleBtn;handleBtn=function(id){
+  if(G.menu==='settings'&&id==='dispage'){G.menu='display';return}
+  if(G.menu==='settings'&&id==='kbpage'){G.menu='keybinds';DK.wait=null;return}
+  if(G.menu==='display'){
+    if(id==='d_back'||id==='menuclose'||id==='menu')G.menu='settings';
+    else if(id==='d_full')dkFullToggle();
+    else if(id==='d_fit'){DISP.fit=(DISP.fit+1)%3;try{localStorage.setItem('abbeyDisp',JSON.stringify(DISP))}catch(e){}fit()}
+    else if(id==='d_sharp'){DISP.sharp=DISP.sharp?0:1;try{localStorage.setItem('abbeyDisp',JSON.stringify(DISP))}catch(e){}fit()}
+    return}
+  if(G.menu==='keybinds'){
+    if(id==='kb_back'||id==='menuclose'||id==='menu'){if(DK.wait)DK.wait=null;else G.menu='settings'}
+    else if(id==='kb_reset'){DK.custom={};dkSave();DK.wait=null}
+    else if(id==='kb_list'){G.menu='keys'}
+    else if(id&&id.startsWith('kb_'))DK.wait=DK.wait===id.slice(3)?null:id.slice(3);
+    return}
+  return _h.apply(this,arguments)}}
+addEventListener('fullscreenchange',()=>{try{fit()}catch(e){}});
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

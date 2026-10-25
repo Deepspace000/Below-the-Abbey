@@ -119,3 +119,9 @@ Portraits
 
 ## 3.628
 - The icons on the world map are bigger (2 times their old size, from 1.2). The layout re-places every name so nothing overlaps.
+
+## 3.629 (feedback from a player)
+- New Settings page "Screen": full screen on or off (also F11 in the Windows app and the browser), the shape of the picture (Fit window, Fill window which stretches, or Whole pixels so every pixel is the same size), and Smooth or Hard edged pixels. Remembered on the device.
+- New Settings page "Keyboard": every key can be changed (movement, attack, special, potions 1 to 3, wait, camp, heroes 1 to 4, items, character, spells, powers, quests, journal, afflictions, collection, map, teleport, dig, butterfly, quick save). Click a key, press the new one; pressing a key that another action uses swaps the two; Reset all puts them back. Arrow keys, Enter, Esc and F1 keep working. The old key list is still there under "Key list". Remembered on the device.
+- The fonts are now part of the game (assets/fonts) instead of coming from Google when the game starts, so text looks the same on every machine, works offline, and cannot fall back to a wider font that pushes labels on top of each other.
+- Text overlap on maps: all 479 maps were checked for writing that lands on other writing. The Deeper Hollow map had it (people's names and quest marks on top of place names, and the banner on a place name, and the shop marks and their labels); place names now keep clear of every other mark, quest names keep clear of shop marks, and a quest mark lifts clear of a shop mark it would sit on. The Deeper Hollow went from 15 overlaps to none at the normal zoom and at most one at a few zoom levels; no other map had any.

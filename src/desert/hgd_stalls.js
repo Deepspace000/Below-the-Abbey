@@ -27,6 +27,15 @@ const HGDST_LBL={church:'Church',general:'Goods',arms:'Arms',armour:'Armour',mag
       ctx.fillStyle='#2a1a0c';ctx.font='bold '+Math.round(r*1.35)+'px '+FUI;ctx.fillText(s.k==='church'?'+':'$',px,py+.5);
       if(lab&&!lbx.some(q=>Math.abs(q[0]-px)<22&&Math.abs(q[1]-py)<8)){lbx.push([px,py]);ctx.font='bold 5.6px '+FUI;ctx.lineWidth=2.2;ctx.strokeStyle='rgba(233,220,180,.9)';ctx.strokeText(HGDST_LBL[s.k],px,py+r+4.5);ctx.fillStyle='#4a2a08';ctx.fillText(HGDST_LBL[s.k],px,py+r+4.5)}}
     ctx.restore()}catch(e){console.error('hgdst map',e)}}}
+/* where the shop marks and their labels stand, for the layers that are drawn before them (quest names and place names keep clear of them) */
+(window.QOBST=window.QOBST||[]).push(()=>{
+  const V=MPL.view,L=LEVELS[HGD.ID],out=[];if(LEVEL!==HGD.ID||!V||!V.z||(G.hgdView|0)>=5||!L||!L._hgdp||V.z<1.25)return out;
+  if(!HGDST.map||HGDST.mapSrc!==L){HGDST.mapSrc=L;HGDST.map=[];for(const d of L.decor){const k=hgdstKind(d.npc);if(k)HGDST.map.push({x:d.x,y:d.y,k})}}
+  const z=V.z,A=V.area,r=Math.max(3.4,Math.min(5.6,2.6+z*.5));ctx.save();ctx.font='bold 5.6px '+FUI;
+  for(const s of HGDST.map){const px=A.x+(V.X(s.x+.5)-V.sx0)*z,py=A.y+(V.Y(s.y+.5)-V.sy0)*z;if(px<A.x-12||px>A.x+A.w+12||py<A.y-12||py>A.y+A.h+12)continue;
+    out.push([px-r-.5,py-r-.5,px+r+.5,py+r+.5]);
+    if(z>=2.2){const w=ctx.measureText(HGDST_LBL[s.k]).width;out.push([px-w/2-1,py+r+1.2,px+w/2+1,py+r+7.8])}}
+  ctx.restore();return out});
 // the key of the map names it
 /* ---------- the four quarters of the maze have names, shown under the map title and as a banner at the top of the map when a quarter is opened ---------- */
 {const Q=['The Lantern Reaches','The Gilded Heights','The Cairn Warrens','The Hedgefoot Approaches'];for(let i=0;i<4;i++)HGDMP.views[i+1][1]=Q[i]}

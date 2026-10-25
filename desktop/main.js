@@ -1,7 +1,7 @@
 // Desktop wrapper for Below the Abbey. It serves the game's own files through a private app:// address, so the game
 // code runs exactly as it does on the web (fetch, audio and images all work), and it keeps the window running at full
 // speed even when it is covered. The web version is untouched.
-const { app, BrowserWindow, protocol, net, Menu, globalShortcut } = require('electron');
+const { app, BrowserWindow, protocol, net, Menu, globalShortcut, ipcMain } = require('electron');
 const path = require('path');
 const { pathToFileURL } = require('url');
 const updater = require('./updater');
@@ -15,6 +15,13 @@ if (process.env.BTA_USERDATA) app.setPath('userData', path.resolve(process.env.B
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true, corsEnabled: true } }
 ]);
+
+// the game's Screen page asks for full screen on or off (F11 does the same)
+ipcMain.handle('bta-fs', (e, cmd) => {
+  const w = BrowserWindow.fromWebContents(e.sender); if (!w) return false;
+  if (cmd === 'toggle') { const on = !w.isFullScreen(); w.setFullScreen(on); return on; }
+  return w.isFullScreen();
+});
 
 function createWindow() {
   const win = new BrowserWindow({
