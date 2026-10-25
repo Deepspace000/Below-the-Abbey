@@ -14,3 +14,8 @@ itch-manual/
 
 tools/butler/
 desktop/dist2/
+steam/steamcmd/
+steam/output/
+steam/store/screenshots/
+steam/store/capsules/
+steam/store/video/
