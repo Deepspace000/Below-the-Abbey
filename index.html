@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.630';
+const VERSION='3.631';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -29740,6 +29740,27 @@ addEventListener('keydown',e=>{if(e.key==='Home'){LK.hover=false;LKYAWT=0}});
   ctx.fillStyle='#c8a860';ctx.fillRect(S.x+2,S.y+S.h/2,S.w-4,1);
   ctx.globalAlpha=.95;ctx.fillStyle='#f0e0a8';const ky=S.y+12+(S.h-24)*Math.max(0,Math.min(1,t));ctx.fillRect(S.x+1,ky-3,S.w-2,6);
   ctx.restore()}catch(e){}}})();
+
+/* ---- src/desert/kbfocus.js ---- */
+/* ==========================================================================
+   KEYBOARD FOCUS. When the game runs inside a page (the itch.io embed, a preview pane) the keys go to the page that has the focus, which is often not the game
+   until it is clicked: W, A, S and D then do nothing. This file asks for the focus as soon as the game has loaded and at every pointer movement, touch and press
+   over the game, and, while the game still does not have it, shows a small notice at the foot of the screen: "Click the game once to use the keyboard."
+   ========================================================================== */
+const KBF={lost:false,t:0,tries:0};
+function kbfGrab(){try{cv.tabIndex=0;window.focus();cv.focus({preventScroll:true})}catch(e){}}
+function kbfCheck(){try{KBF.lost=!document.hasFocus()}catch(e){KBF.lost=false}}
+kbfGrab();
+for(const ev of ['pointermove','pointerdown','mousedown','touchstart','mouseenter'])cv.addEventListener(ev,()=>{if(!KBF.lost&&document.hasFocus())return;kbfGrab();kbfCheck()},{passive:true,capture:true});
+addEventListener('focus',()=>{KBF.lost=false});addEventListener('blur',()=>{setTimeout(kbfCheck,50)});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){kbfGrab();kbfCheck()}});
+addEventListener('keydown',()=>{KBF.lost=false},true);
+setInterval(()=>{if(window.__ready){if(KBF.tries<6&&!document.hasFocus()){KBF.tries++;kbfGrab()}kbfCheck()}},800);
+{const _ui=ui;ui=function(dt){_ui(dt);try{
+  if(!KBF.lost||!window.__ready||G.state==='dead')return;
+  const t='Click the game once to use the keyboard.';ctx.save();ctx.font='bold 9px serif';ctx.textAlign='center';
+  const w=ctx.measureText(t).width+22,x=240-w/2,y=299;ctx.fillStyle='rgba(12,8,4,.82)';ctx.fillRect(x,y,w,15);ctx.strokeStyle='#d8b860';ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,w-1,14);
+  ctx.fillStyle='#f0e0a8';ctx.fillText(t,240,y+10.5);ctx.restore()}catch(e){}}}
 
 /* ---- src/desert/hgt_rooms.js ---- */
 /* ==========================================================================
