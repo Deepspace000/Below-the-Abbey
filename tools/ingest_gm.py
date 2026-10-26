@@ -1,0 +1,179 @@
+"""Cuts one Gemini sheet (pictures on flat magenta) into the separate pieces the city of Khemetra uses.
+
+    python tools/ingest_kh.py <sheet.jpg> <name> <fac|sprite|tex> [cols=<n> rows=<n>] [maxh=<px>]
+
+fac     each house front is cropped out and saved as assets/gm/<name>_<k>.jpg (opaque, a flat wall)
+sprite  each picture is keyed out of the magenta and saved as assets/gm/<name>_<k>.webp (with transparency); soft=1 keeps thin dark parts and takes the purple fringe off flames
+tex     the sheet is cut into a cols x rows grid of seamless squares, saved as assets/gm/<name>_<k>.jpg
+
+Pieces are numbered in reading order. assets/gm/manifest.json lists every piece with its size.
+"""
+import sys, json, pathlib
+import numpy as np
+from PIL import Image, ImageFilter
+
+src, name, kind = sys.argv[1], sys.argv[2], sys.argv[3]
+opts = dict(a.split('=') for a in sys.argv[4:] if '=' in a)
+OUT = pathlib.Path(__file__).resolve().parent.parent / 'assets' / 'gm'
+OUT.mkdir(parents=True, exist_ok=True)
+MAN = OUT / 'manifest.json'
+man = json.loads(MAN.read_text()) if MAN.exists() else {}
+im = Image.open(src).convert('RGB')
+a = np.array(im).astype(int)
+r, g, b = a[..., 0], a[..., 1], a[..., 2]
+mag = (r > 140) & (b > 140) & (g < 120) & (np.abs(r - b) < 90)     # the background
+fg = ~mag
+
+def runs(profile, mingap):
+    """spans of the profile that hold something, split wherever there is an empty gap of at least mingap"""
+    spans = []; start = None; gap = 0
+    for i, v in enumerate(profile):
+        if v:
+            if start is None: start = i
+            gap = 0; last = i
+        elif start is not None:
+            gap += 1
+            if gap >= mingap:
+                spans.append((start, last)); start = None
+    if start is not None: spans.append((start, last))
+    return spans
+
+
+def fill_magenta(c):
+    """magenta left in a corner or a gap (a pylon's notch, a broken wall) takes the colour of the nearest wall pixel on its row"""
+    a = np.array(c).astype(int); r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    m = (r > 120) & (b > 120) & (g < 150) & (r - g > 35) & (b - g > 35)
+    m = np.array(Image.fromarray((m * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(7))) > 0
+    # a top that is mostly background is cut off first
+    top = 0
+    while top < a.shape[0] // 4 and m[top].mean() > .4: top += 1
+    a = a[top:]; m = m[top:]
+    if m.any():
+        for y in np.where(m.any(axis=1))[0]:
+            xs = np.where(~m[y])[0]
+            if len(xs) == 0: a[y] = a[min(y + 1, a.shape[0] - 1)]; continue
+            idx = np.searchsorted(xs, np.where(m[y])[0])
+            left = xs[np.clip(idx - 1, 0, len(xs) - 1)]; right = xs[np.clip(idx, 0, len(xs) - 1)]
+            pos = np.where(m[y])[0]
+            pick = np.where(np.abs(pos - left) <= np.abs(right - pos), left, right)
+            a[y, pos] = a[y, pick]
+    return Image.fromarray(a.clip(0, 255).astype(np.uint8))
+
+pieces = []
+if kind == 'tex':
+    cols, rows = int(opts.get('cols', 3)), int(opts.get('rows', 2))
+    W, H = im.size
+    for rj in range(rows):
+        for ci in range(cols):
+            pieces.append((ci * W // cols, rj * H // rows, (ci + 1) * W // cols, (rj + 1) * H // rows))
+else:
+    if opts.get('order') == 'rows':
+        for (y0, y1) in runs(fg.sum(axis=1) > 6, 4):
+            if y1 - y0 < 40: continue
+            row = fg[y0:y1 + 1]
+            for (x0, x1) in runs(row.sum(axis=0) > 6, 3):
+                if x1 - x0 < 40: continue
+                sub = fg[y0:y1 + 1, x0:x1 + 1]; ys = np.where(sub.sum(axis=1) > 3)[0]
+                pieces.append((x0, y0 + ys[0], x1 + 1, y0 + ys[-1] + 1))
+        pieces.sort(key=lambda p: (round(p[1] / 120), p[0]))
+    # columns first (the gaps between neighbours are widest sideways), then the pieces stacked in each column
+    forced_rows = int(opts.get('rows', 0))
+    gapx = 3 if kind == 'sprite' else 6
+    thin = bool(opts.get('soft'))   # soft: a one or two pixel rope or chain still counts as part of the picture
+    for (x0, x1) in (runs(fg.sum(axis=0) > (2 if thin else 6), gapx) if opts.get('order') != 'rows' else []):
+        if x1 - x0 < 40: continue
+        col = fg[:, x0:x1 + 1]
+        spans = runs(col.sum(axis=1) > (0 if thin else 3), 2)
+        if forced_rows and len(spans) < forced_rows:
+            ys = np.where(col.sum(axis=1) > 3)[0]; top, bot = ys[0], ys[-1] + 1
+            h = (bot - top) / forced_rows
+            spans = [(int(top + k * h), int(top + (k + 1) * h) - 1) for k in range(forced_rows)]
+        for (y0, y1) in spans:
+            if y1 - y0 < 40: continue
+            sub = fg[y0:y1 + 1, x0:x1 + 1]
+            xs = np.where(sub.sum(axis=0) > 3)[0]
+            if len(xs) == 0: continue
+            pieces.append((x0 + xs[0], y0, x0 + xs[-1] + 1, y1 + 1))
+    # reading order: rows of similar height first, then left to right
+    pieces.sort(key=lambda p: (round(p[1] / 120), p[0]))
+if kind == 'sprite' and len(pieces) > 2:   # slivers (a staff, a stray fringe) are not pictures
+    ar = sorted((x1 - x0) * (y1 - y0) for (x0, y0, x1, y1) in pieces); med = ar[len(ar) // 2]
+    pieces = [q for q in pieces if (q[2] - q[0]) * (q[3] - q[1]) >= .3 * med]
+maxh = int(opts.get('maxh', 512))
+n = 0
+for (x0, y0, x1, y1) in pieces:
+    crop = im.crop((x0, y0, x1, y1))
+    if kind == 'tex':
+        m = int((x1 - x0) * float(opts.get('margin', .03)))
+        crop = crop.crop((m, m, crop.width - m, crop.height - m)).resize((256, 256), Image.LANCZOS)
+        seam = opts.get('seam', 'xy')
+        if seam != 'none':   # blend the edges so the tile repeats without a visible line
+            a = np.array(crop).astype(float); u = np.linspace(0, 1, 256)
+            wx = (1 - np.abs(2 * u - 1))[None, :]; wy = (1 - np.abs(2 * u - 1))[:, None]
+            if seam == 'xy':
+                r_ = np.roll(a, (128, 128), (0, 1)); wm = (wx * wy)[..., None]
+            else:
+                r_ = np.roll(a, 128, 1); wm = np.broadcast_to(wx, (256, 256))[..., None]
+            crop = Image.fromarray((a * wm + r_ * (1 - wm)).clip(0, 255).astype(np.uint8))
+        crop.save(OUT / ('%s_%d.jpg' % (name, n)), quality=90)
+        man['%s_%d' % (name, n)] = {'file': '%s_%d.jpg' % (name, n), 'w': 256, 'h': 256, 'kind': 'tex', 'sheet': name}
+    elif kind == 'fac':
+        ct = int(crop.height * float(opts.get('croptop', 0)))
+        c = crop.crop((2, 2 + ct, crop.width - 2, crop.height - 2))
+        parts = [c]
+        ca = np.array(c).astype(int)
+        mrow = ((ca[..., 0] > 140) & (ca[..., 2] > 140) & (ca[..., 1] < 125)).mean(axis=1)
+        mid = [y for y in range(int(c.height * .25), int(c.height * .75)) if mrow[y] > .6]
+        if mid:   # a magenta band across the middle: two houses were stacked
+            y = mid[len(mid) // 2]; parts = [c.crop((0, 0, c.width, y - len(mid) // 2)), c.crop((0, y + len(mid) // 2 + 1, c.width, c.height))]
+        if len(parts) == 1 and c.height / c.width > 1.35:   # two houses were stacked into one piece: split them
+            parts = [c.crop((0, 0, c.width, c.height // 2)), c.crop((0, c.height // 2, c.width, c.height))]
+        for c in parts:
+            c = fill_magenta(c)
+            if c.height > maxh: c = c.resize((round(c.width * maxh / c.height), maxh), Image.LANCZOS)
+            c.save(OUT / ('%s_%d.jpg' % (name, n)), quality=90)
+            man['%s_%d' % (name, n)] = {'file': '%s_%d.jpg' % (name, n), 'w': c.width, 'h': c.height, 'kind': 'fac', 'sheet': name}
+            n += 1
+        continue
+    else:
+        arr = np.array(crop).astype(int)
+        rr, gg, bb = arr[..., 0], arr[..., 1], arr[..., 2]
+        key = (rr > 140) & (bb > 140) & (gg < 125) & (np.abs(rr - bb) < 90)
+        if opts.get('matte'):   # thin things on magenta (iron, stems): pixels in the edge band are un-mixed from the magenta, so no purple fringe is left
+            mg = np.clip(np.minimum(rr, bb) - gg, 0, 255).astype(float)
+            band = np.array(Image.fromarray((key * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(7))) > 0
+            band &= ~key
+            a_ = np.where(key, 0.0, 1.0)
+            ab = np.clip(1 - mg / 255.0 * 1.15, 0, 1)
+            a_[band] = ab[band]
+            a_[band & (ab < .12)] = 0
+            for c_, m_ in ((0, 255.0), (2, 255.0)):
+                ch = arr[..., c_].astype(float)
+                un = np.where(a_ > .05, (ch - (1 - a_) * m_) / np.maximum(a_, .05), ch)
+                ch[band] = np.clip(un[band], 0, 255); arr[..., c_] = ch.astype(int)
+            alpha = Image.fromarray((a_ * 255).astype(np.uint8))
+        elif opts.get('soft'):   # thin dark parts (iron posts, chains) survive: no erosion, only the pixels beside the background lose opacity by how magenta they are
+            mg = np.minimum(rr, bb) - gg
+            edge = np.array(Image.fromarray((key * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(3))) > 0
+            edge &= ~key
+            a_ = np.where(key, 0, 255).astype(float)
+            a_[edge] = np.clip(255 * (1 - (mg[edge] - 30) / 90.0), 0, 255)
+            alpha = Image.fromarray(a_.astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.5))
+            # a purple fringe round bright things (flames): the magenta part of an edge pixel is taken out
+            fr = edge & (mg > 25)
+            arr[..., 0][fr] = np.minimum(rr[fr], gg[fr] + 25); arr[..., 2][fr] = np.minimum(bb[fr], gg[fr] + 25)
+        else:
+            alpha = Image.fromarray(np.where(key, 0, 255).astype(np.uint8)).filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(0.7))
+        # pull the magenta out of the edge pixels
+        rr, gg, bb = arr[..., 0], arr[..., 1], arr[..., 2]
+        if not opts.get('matte'):
+            arr[..., 0] = np.minimum(rr, np.maximum(gg, 50) + 100); arr[..., 2] = np.minimum(bb, np.maximum(gg, 50) + 100)
+        out = Image.fromarray(arr.clip(0, 255).astype(np.uint8)).convert('RGBA'); out.putalpha(alpha)
+        bb_ = out.getchannel('A').point(lambda v: 255 if v > 100 else 0).getbbox()
+        if bb_: out = out.crop(bb_)
+        if out.height > maxh: out = out.resize((round(out.width * maxh / out.height), maxh), Image.LANCZOS)
+        out.save(OUT / ('%s_%d.webp' % (name, n)), quality=88, method=4)
+        man['%s_%d' % (name, n)] = {'file': '%s_%d.webp' % (name, n), 'w': out.width, 'h': out.height, 'kind': 'sprite', 'sheet': name}
+    n += 1
+MAN.write_text(json.dumps(man, indent=0))
+print(name, kind, n, 'pieces')

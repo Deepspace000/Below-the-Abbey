@@ -1,0 +1,590 @@
+{
+"floor_0": {
+"file": "floor_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "floor"
+},
+"floor_1": {
+"file": "floor_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "floor"
+},
+"floor_2": {
+"file": "floor_2.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "floor"
+},
+"floor_3": {
+"file": "floor_3.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "floor"
+},
+"floor_4": {
+"file": "floor_4.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "floor"
+},
+"floor_5": {
+"file": "floor_5.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "floor"
+},
+"wall_0": {
+"file": "wall_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "wall"
+},
+"wall_1": {
+"file": "wall_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "wall"
+},
+"wall_2": {
+"file": "wall_2.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "wall"
+},
+"wall_3": {
+"file": "wall_3.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "wall"
+},
+"wall_4": {
+"file": "wall_4.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "wall"
+},
+"wall_5": {
+"file": "wall_5.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "wall"
+},
+"ww_0": {
+"file": "ww_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ww"
+},
+"ww_1": {
+"file": "ww_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ww"
+},
+"ww_2": {
+"file": "ww_2.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ww"
+},
+"ww_3": {
+"file": "ww_3.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ww"
+},
+"ww_4": {
+"file": "ww_4.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ww"
+},
+"ww_5": {
+"file": "ww_5.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "ww"
+},
+"inn_0": {
+"file": "inn_0.webp",
+"w": 301,
+"h": 278,
+"kind": "sprite",
+"sheet": "inn"
+},
+"inn_1": {
+"file": "inn_1.webp",
+"w": 322,
+"h": 187,
+"kind": "sprite",
+"sheet": "inn"
+},
+"inn_2": {
+"file": "inn_2.webp",
+"w": 324,
+"h": 161,
+"kind": "sprite",
+"sheet": "inn"
+},
+"inn_3": {
+"file": "inn_3.webp",
+"w": 314,
+"h": 276,
+"kind": "sprite",
+"sheet": "inn"
+},
+"inn_4": {
+"file": "inn_4.webp",
+"w": 248,
+"h": 255,
+"kind": "sprite",
+"sheet": "inn"
+},
+"inn_5": {
+"file": "inn_5.webp",
+"w": 256,
+"h": 232,
+"kind": "sprite",
+"sheet": "inn"
+},
+"smith_0": {
+"file": "smith_0.webp",
+"w": 292,
+"h": 305,
+"kind": "sprite",
+"sheet": "smith"
+},
+"smith_1": {
+"file": "smith_1.webp",
+"w": 294,
+"h": 277,
+"kind": "sprite",
+"sheet": "smith"
+},
+"smith_2": {
+"file": "smith_2.webp",
+"w": 237,
+"h": 228,
+"kind": "sprite",
+"sheet": "smith"
+},
+"smith_3": {
+"file": "smith_3.webp",
+"w": 288,
+"h": 292,
+"kind": "sprite",
+"sheet": "smith"
+},
+"smith_4": {
+"file": "smith_4.webp",
+"w": 285,
+"h": 296,
+"kind": "sprite",
+"sheet": "smith"
+},
+"smith_5": {
+"file": "smith_5.webp",
+"w": 312,
+"h": 224,
+"kind": "sprite",
+"sheet": "smith"
+},
+"armour_0": {
+"file": "armour_0.webp",
+"w": 144,
+"h": 324,
+"kind": "sprite",
+"sheet": "armour"
+},
+"armour_1": {
+"file": "armour_1.webp",
+"w": 292,
+"h": 250,
+"kind": "sprite",
+"sheet": "armour"
+},
+"armour_2": {
+"file": "armour_2.webp",
+"w": 231,
+"h": 289,
+"kind": "sprite",
+"sheet": "armour"
+},
+"armour_3": {
+"file": "armour_3.webp",
+"w": 253,
+"h": 260,
+"kind": "sprite",
+"sheet": "armour"
+},
+"armour_4": {
+"file": "armour_4.webp",
+"w": 302,
+"h": 288,
+"kind": "sprite",
+"sheet": "armour"
+},
+"armour_5": {
+"file": "armour_5.webp",
+"w": 254,
+"h": 273,
+"kind": "sprite",
+"sheet": "armour"
+},
+"library_0": {
+"file": "library_0.webp",
+"w": 289,
+"h": 313,
+"kind": "sprite",
+"sheet": "library"
+},
+"library_1": {
+"file": "library_1.webp",
+"w": 248,
+"h": 313,
+"kind": "sprite",
+"sheet": "library"
+},
+"library_2": {
+"file": "library_2.webp",
+"w": 188,
+"h": 296,
+"kind": "sprite",
+"sheet": "library"
+},
+"library_3": {
+"file": "library_3.webp",
+"w": 280,
+"h": 277,
+"kind": "sprite",
+"sheet": "library"
+},
+"library_4": {
+"file": "library_4.webp",
+"w": 286,
+"h": 243,
+"kind": "sprite",
+"sheet": "library"
+},
+"library_5": {
+"file": "library_5.webp",
+"w": 296,
+"h": 268,
+"kind": "sprite",
+"sheet": "library"
+},
+"bakery_0": {
+"file": "bakery_0.webp",
+"w": 291,
+"h": 264,
+"kind": "sprite",
+"sheet": "bakery"
+},
+"bakery_1": {
+"file": "bakery_1.webp",
+"w": 259,
+"h": 291,
+"kind": "sprite",
+"sheet": "bakery"
+},
+"bakery_2": {
+"file": "bakery_2.webp",
+"w": 354,
+"h": 224,
+"kind": "sprite",
+"sheet": "bakery"
+},
+"bakery_3": {
+"file": "bakery_3.webp",
+"w": 295,
+"h": 249,
+"kind": "sprite",
+"sheet": "bakery"
+},
+"bakery_4": {
+"file": "bakery_4.webp",
+"w": 273,
+"h": 290,
+"kind": "sprite",
+"sheet": "bakery"
+},
+"bakery_5": {
+"file": "bakery_5.webp",
+"w": 298,
+"h": 268,
+"kind": "sprite",
+"sheet": "bakery"
+},
+"trades_0": {
+"file": "trades_0.webp",
+"w": 314,
+"h": 308,
+"kind": "sprite",
+"sheet": "trades"
+},
+"trades_1": {
+"file": "trades_1.webp",
+"w": 308,
+"h": 303,
+"kind": "sprite",
+"sheet": "trades"
+},
+"trades_2": {
+"file": "trades_2.webp",
+"w": 306,
+"h": 295,
+"kind": "sprite",
+"sheet": "trades"
+},
+"trades_3": {
+"file": "trades_3.webp",
+"w": 319,
+"h": 298,
+"kind": "sprite",
+"sheet": "trades"
+},
+"trades_4": {
+"file": "trades_4.webp",
+"w": 308,
+"h": 313,
+"kind": "sprite",
+"sheet": "trades"
+},
+"trades_5": {
+"file": "trades_5.webp",
+"w": 308,
+"h": 285,
+"kind": "sprite",
+"sheet": "trades"
+},
+"church_0": {
+"file": "church_0.webp",
+"w": 353,
+"h": 226,
+"kind": "sprite",
+"sheet": "church"
+},
+"church_1": {
+"file": "church_1.webp",
+"w": 331,
+"h": 265,
+"kind": "sprite",
+"sheet": "church"
+},
+"church_2": {
+"file": "church_2.webp",
+"w": 186,
+"h": 315,
+"kind": "sprite",
+"sheet": "church"
+},
+"church_3": {
+"file": "church_3.webp",
+"w": 191,
+"h": 259,
+"kind": "sprite",
+"sheet": "church"
+},
+"church_4": {
+"file": "church_4.webp",
+"w": 161,
+"h": 294,
+"kind": "sprite",
+"sheet": "church"
+},
+"church_5": {
+"file": "church_5.webp",
+"w": 242,
+"h": 241,
+"kind": "sprite",
+"sheet": "church"
+},
+"home_0": {
+"file": "home_0.webp",
+"w": 450,
+"h": 212,
+"kind": "sprite",
+"sheet": "home"
+},
+"home_1": {
+"file": "home_1.webp",
+"w": 235,
+"h": 312,
+"kind": "sprite",
+"sheet": "home"
+},
+"home_2": {
+"file": "home_2.webp",
+"w": 244,
+"h": 141,
+"kind": "sprite",
+"sheet": "home"
+},
+"home_3": {
+"file": "home_3.webp",
+"w": 260,
+"h": 174,
+"kind": "sprite",
+"sheet": "home"
+},
+"home_4": {
+"file": "home_4.webp",
+"w": 267,
+"h": 282,
+"kind": "sprite",
+"sheet": "home"
+},
+"home_5": {
+"file": "home_5.webp",
+"w": 132,
+"h": 410,
+"kind": "sprite",
+"sheet": "home"
+},
+"hall_0": {
+"file": "hall_0.webp",
+"w": 205,
+"h": 392,
+"kind": "sprite",
+"sheet": "hall"
+},
+"hall_1": {
+"file": "hall_1.webp",
+"w": 280,
+"h": 254,
+"kind": "sprite",
+"sheet": "hall"
+},
+"hall_2": {
+"file": "hall_2.webp",
+"w": 430,
+"h": 234,
+"kind": "sprite",
+"sheet": "hall"
+},
+"hall_3": {
+"file": "hall_3.webp",
+"w": 178,
+"h": 340,
+"kind": "sprite",
+"sheet": "hall"
+},
+"hall_4": {
+"file": "hall_4.webp",
+"w": 215,
+"h": 222,
+"kind": "sprite",
+"sheet": "hall"
+},
+"hall_5": {
+"file": "hall_5.webp",
+"w": 165,
+"h": 337,
+"kind": "sprite",
+"sheet": "hall"
+},
+"folk1_0": {
+"file": "folk1_0.webp",
+"w": 137,
+"h": 302,
+"kind": "sprite",
+"sheet": "folk1"
+},
+"folk1_1": {
+"file": "folk1_1.webp",
+"w": 132,
+"h": 307,
+"kind": "sprite",
+"sheet": "folk1"
+},
+"folk1_2": {
+"file": "folk1_2.webp",
+"w": 107,
+"h": 312,
+"kind": "sprite",
+"sheet": "folk1"
+},
+"folk1_3": {
+"file": "folk1_3.webp",
+"w": 99,
+"h": 279,
+"kind": "sprite",
+"sheet": "folk1"
+},
+"folk1_4": {
+"file": "folk1_4.webp",
+"w": 91,
+"h": 253,
+"kind": "sprite",
+"sheet": "folk1"
+},
+"folk1_5": {
+"file": "folk1_5.webp",
+"w": 142,
+"h": 312,
+"kind": "sprite",
+"sheet": "folk1"
+},
+"folk2_0": {
+"file": "folk2_0.webp",
+"w": 157,
+"h": 311,
+"kind": "sprite",
+"sheet": "folk2"
+},
+"folk2_1": {
+"file": "folk2_1.webp",
+"w": 152,
+"h": 305,
+"kind": "sprite",
+"sheet": "folk2"
+},
+"folk2_2": {
+"file": "folk2_2.webp",
+"w": 143,
+"h": 302,
+"kind": "sprite",
+"sheet": "folk2"
+},
+"folk2_3": {
+"file": "folk2_3.webp",
+"w": 132,
+"h": 283,
+"kind": "sprite",
+"sheet": "folk2"
+},
+"folk2_4": {
+"file": "folk2_4.webp",
+"w": 128,
+"h": 307,
+"kind": "sprite",
+"sheet": "folk2"
+},
+"folk2_5": {
+"file": "folk2_5.webp",
+"w": 160,
+"h": 299,
+"kind": "sprite",
+"sheet": "folk2"
+}
+}

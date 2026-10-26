@@ -1,0 +1,884 @@
+{
+"gmhedgeA_0": {
+"file": "gmhedgeA_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmhedgeA"
+},
+"gmhedgeA_1": {
+"file": "gmhedgeA_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmhedgeA"
+},
+"gmhedgeA_2": {
+"file": "gmhedgeA_2.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmhedgeA"
+},
+"gmhedgeA_3": {
+"file": "gmhedgeA_3.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmhedgeA"
+},
+"gmhedgeA_4": {
+"file": "gmhedgeA_4.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmhedgeA"
+},
+"gmhedgeA_5": {
+"file": "gmhedgeA_5.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmhedgeA"
+},
+"gmhedgeA_6": {
+"file": "gmhedgeA_6.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmhedgeA"
+},
+"gmhedgeA_7": {
+"file": "gmhedgeA_7.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmhedgeA"
+},
+"gmhedgeA_8": {
+"file": "gmhedgeA_8.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmhedgeA"
+},
+"gmhedgeB_0": {
+"file": "gmhedgeB_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmhedgeB"
+},
+"gmhedgeB_1": {
+"file": "gmhedgeB_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmhedgeB"
+},
+"gmhedgeB_2": {
+"file": "gmhedgeB_2.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmhedgeB"
+},
+"gmhedgeB_3": {
+"file": "gmhedgeB_3.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmhedgeB"
+},
+"gmhedgeB_4": {
+"file": "gmhedgeB_4.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmhedgeB"
+},
+"gmhedgeB_5": {
+"file": "gmhedgeB_5.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmhedgeB"
+},
+"gmhedgeB_6": {
+"file": "gmhedgeB_6.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmhedgeB"
+},
+"gmhedgeB_7": {
+"file": "gmhedgeB_7.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmhedgeB"
+},
+"gmhedgeB_8": {
+"file": "gmhedgeB_8.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmhedgeB"
+},
+"gmprops1_0": {
+"file": "gmprops1_0.webp",
+"w": 216,
+"h": 157,
+"kind": "sprite",
+"sheet": "gmprops1"
+},
+"gmprops1_1": {
+"file": "gmprops1_1.webp",
+"w": 212,
+"h": 211,
+"kind": "sprite",
+"sheet": "gmprops1"
+},
+"gmprops1_2": {
+"file": "gmprops1_2.webp",
+"w": 131,
+"h": 182,
+"kind": "sprite",
+"sheet": "gmprops1"
+},
+"gmprops1_3": {
+"file": "gmprops1_3.webp",
+"w": 211,
+"h": 140,
+"kind": "sprite",
+"sheet": "gmprops1"
+},
+"gmprops1_4": {
+"file": "gmprops1_4.webp",
+"w": 106,
+"h": 226,
+"kind": "sprite",
+"sheet": "gmprops1"
+},
+"gmprops1_5": {
+"file": "gmprops1_5.webp",
+"w": 134,
+"h": 236,
+"kind": "sprite",
+"sheet": "gmprops1"
+},
+"gmprops1_6": {
+"file": "gmprops1_6.webp",
+"w": 192,
+"h": 233,
+"kind": "sprite",
+"sheet": "gmprops1"
+},
+"gmprops1_7": {
+"file": "gmprops1_7.webp",
+"w": 138,
+"h": 226,
+"kind": "sprite",
+"sheet": "gmprops1"
+},
+"gmprops1_8": {
+"file": "gmprops1_8.webp",
+"w": 112,
+"h": 208,
+"kind": "sprite",
+"sheet": "gmprops1"
+},
+"gmprops1_9": {
+"file": "gmprops1_9.webp",
+"w": 144,
+"h": 218,
+"kind": "sprite",
+"sheet": "gmprops1"
+},
+"gmprops1_10": {
+"file": "gmprops1_10.webp",
+"w": 135,
+"h": 176,
+"kind": "sprite",
+"sheet": "gmprops1"
+},
+"gmprops1_11": {
+"file": "gmprops1_11.webp",
+"w": 221,
+"h": 154,
+"kind": "sprite",
+"sheet": "gmprops1"
+},
+"gmprops2_0": {
+"file": "gmprops2_0.webp",
+"w": 217,
+"h": 188,
+"kind": "sprite",
+"sheet": "gmprops2"
+},
+"gmprops2_1": {
+"file": "gmprops2_1.webp",
+"w": 217,
+"h": 187,
+"kind": "sprite",
+"sheet": "gmprops2"
+},
+"gmprops2_2": {
+"file": "gmprops2_2.webp",
+"w": 214,
+"h": 195,
+"kind": "sprite",
+"sheet": "gmprops2"
+},
+"gmprops2_3": {
+"file": "gmprops2_3.webp",
+"w": 216,
+"h": 113,
+"kind": "sprite",
+"sheet": "gmprops2"
+},
+"gmprops2_4": {
+"file": "gmprops2_4.webp",
+"w": 206,
+"h": 207,
+"kind": "sprite",
+"sheet": "gmprops2"
+},
+"gmprops2_5": {
+"file": "gmprops2_5.webp",
+"w": 216,
+"h": 198,
+"kind": "sprite",
+"sheet": "gmprops2"
+},
+"gmprops2_6": {
+"file": "gmprops2_6.webp",
+"w": 200,
+"h": 165,
+"kind": "sprite",
+"sheet": "gmprops2"
+},
+"gmprops2_7": {
+"file": "gmprops2_7.webp",
+"w": 225,
+"h": 123,
+"kind": "sprite",
+"sheet": "gmprops2"
+},
+"gmprops2_8": {
+"file": "gmprops2_8.webp",
+"w": 224,
+"h": 183,
+"kind": "sprite",
+"sheet": "gmprops2"
+},
+"gmprops2_9": {
+"file": "gmprops2_9.webp",
+"w": 227,
+"h": 165,
+"kind": "sprite",
+"sheet": "gmprops2"
+},
+"gmprops2_10": {
+"file": "gmprops2_10.webp",
+"w": 224,
+"h": 162,
+"kind": "sprite",
+"sheet": "gmprops2"
+},
+"gmprops2_11": {
+"file": "gmprops2_11.webp",
+"w": 235,
+"h": 150,
+"kind": "sprite",
+"sheet": "gmprops2"
+},
+"gmstone_0": {
+"file": "gmstone_0.webp",
+"w": 120,
+"h": 264,
+"kind": "sprite",
+"sheet": "gmstone"
+},
+"gmstone_1": {
+"file": "gmstone_1.webp",
+"w": 121,
+"h": 259,
+"kind": "sprite",
+"sheet": "gmstone"
+},
+"gmstone_2": {
+"file": "gmstone_2.webp",
+"w": 120,
+"h": 267,
+"kind": "sprite",
+"sheet": "gmstone"
+},
+"gmstone_3": {
+"file": "gmstone_3.webp",
+"w": 124,
+"h": 255,
+"kind": "sprite",
+"sheet": "gmstone"
+},
+"gmstone_4": {
+"file": "gmstone_4.webp",
+"w": 178,
+"h": 215,
+"kind": "sprite",
+"sheet": "gmstone"
+},
+"gmstone_5": {
+"file": "gmstone_5.webp",
+"w": 92,
+"h": 218,
+"kind": "sprite",
+"sheet": "gmstone"
+},
+"gmstone_6": {
+"file": "gmstone_6.webp",
+"w": 126,
+"h": 211,
+"kind": "sprite",
+"sheet": "gmstone"
+},
+"gmstone_7": {
+"file": "gmstone_7.webp",
+"w": 118,
+"h": 197,
+"kind": "sprite",
+"sheet": "gmstone"
+},
+"gmstone_8": {
+"file": "gmstone_8.webp",
+"w": 149,
+"h": 217,
+"kind": "sprite",
+"sheet": "gmstone"
+},
+"gmstone_9": {
+"file": "gmstone_9.webp",
+"w": 129,
+"h": 180,
+"kind": "sprite",
+"sheet": "gmstone"
+},
+"gmstone_10": {
+"file": "gmstone_10.webp",
+"w": 100,
+"h": 178,
+"kind": "sprite",
+"sheet": "gmstone"
+},
+"gmstone_11": {
+"file": "gmstone_11.webp",
+"w": 212,
+"h": 127,
+"kind": "sprite",
+"sheet": "gmstone"
+},
+"gmanim_0": {
+"file": "gmanim_0.webp",
+"w": 194,
+"h": 210,
+"kind": "sprite",
+"sheet": "gmanim"
+},
+"gmanim_1": {
+"file": "gmanim_1.webp",
+"w": 241,
+"h": 202,
+"kind": "sprite",
+"sheet": "gmanim"
+},
+"gmanim_2": {
+"file": "gmanim_2.webp",
+"w": 97,
+"h": 209,
+"kind": "sprite",
+"sheet": "gmanim"
+},
+"gmanim_3": {
+"file": "gmanim_3.webp",
+"w": 106,
+"h": 204,
+"kind": "sprite",
+"sheet": "gmanim"
+},
+"gmanim_4": {
+"file": "gmanim_4.webp",
+"w": 100,
+"h": 214,
+"kind": "sprite",
+"sheet": "gmanim"
+},
+"gmanim_5": {
+"file": "gmanim_5.webp",
+"w": 174,
+"h": 165,
+"kind": "sprite",
+"sheet": "gmanim"
+},
+"gmanim_6": {
+"file": "gmanim_6.webp",
+"w": 98,
+"h": 212,
+"kind": "sprite",
+"sheet": "gmanim"
+},
+"gmanim_7": {
+"file": "gmanim_7.webp",
+"w": 192,
+"h": 159,
+"kind": "sprite",
+"sheet": "gmanim"
+},
+"gmanim_8": {
+"file": "gmanim_8.webp",
+"w": 112,
+"h": 213,
+"kind": "sprite",
+"sheet": "gmanim"
+},
+"gmanim_9": {
+"file": "gmanim_9.webp",
+"w": 220,
+"h": 146,
+"kind": "sprite",
+"sheet": "gmanim"
+},
+"gmanim_10": {
+"file": "gmanim_10.webp",
+"w": 215,
+"h": 145,
+"kind": "sprite",
+"sheet": "gmanim"
+},
+"gmanim_11": {
+"file": "gmanim_11.webp",
+"w": 182,
+"h": 153,
+"kind": "sprite",
+"sheet": "gmanim"
+},
+"gmtopi_0": {
+"file": "gmtopi_0.webp",
+"w": 87,
+"h": 229,
+"kind": "sprite",
+"sheet": "gmtopi"
+},
+"gmtopi_1": {
+"file": "gmtopi_1.webp",
+"w": 91,
+"h": 226,
+"kind": "sprite",
+"sheet": "gmtopi"
+},
+"gmtopi_2": {
+"file": "gmtopi_2.webp",
+"w": 110,
+"h": 224,
+"kind": "sprite",
+"sheet": "gmtopi"
+},
+"gmtopi_3": {
+"file": "gmtopi_3.webp",
+"w": 235,
+"h": 228,
+"kind": "sprite",
+"sheet": "gmtopi"
+},
+"gmtopi_4": {
+"file": "gmtopi_4.webp",
+"w": 165,
+"h": 204,
+"kind": "sprite",
+"sheet": "gmtopi"
+},
+"gmtopi_5": {
+"file": "gmtopi_5.webp",
+"w": 123,
+"h": 205,
+"kind": "sprite",
+"sheet": "gmtopi"
+},
+"gmtopi_6": {
+"file": "gmtopi_6.webp",
+"w": 117,
+"h": 205,
+"kind": "sprite",
+"sheet": "gmtopi"
+},
+"gmtopi_7": {
+"file": "gmtopi_7.webp",
+"w": 185,
+"h": 208,
+"kind": "sprite",
+"sheet": "gmtopi"
+},
+"gmtopi_8": {
+"file": "gmtopi_8.webp",
+"w": 139,
+"h": 230,
+"kind": "sprite",
+"sheet": "gmtopi"
+},
+"gmtopi_9": {
+"file": "gmtopi_9.webp",
+"w": 124,
+"h": 206,
+"kind": "sprite",
+"sheet": "gmtopi"
+},
+"gmtopi_10": {
+"file": "gmtopi_10.webp",
+"w": 157,
+"h": 203,
+"kind": "sprite",
+"sheet": "gmtopi"
+},
+"gmtopi_11": {
+"file": "gmtopi_11.webp",
+"w": 131,
+"h": 222,
+"kind": "sprite",
+"sheet": "gmtopi"
+},
+"gmwarden_0": {
+"file": "gmwarden_0.webp",
+"w": 513,
+"h": 512,
+"kind": "sprite",
+"sheet": "gmwarden"
+},
+"gmgates_0": {
+"file": "gmgates_0.webp",
+"w": 364,
+"h": 475,
+"kind": "sprite",
+"sheet": "gmgates"
+},
+"gmgates_1": {
+"file": "gmgates_1.webp",
+"w": 465,
+"h": 406,
+"kind": "sprite",
+"sheet": "gmgates"
+},
+"gmgates_2": {
+"file": "gmgates_2.webp",
+"w": 379,
+"h": 463,
+"kind": "sprite",
+"sheet": "gmgates"
+},
+"gmgates_3": {
+"file": "gmgates_3.webp",
+"w": 458,
+"h": 431,
+"kind": "sprite",
+"sheet": "gmgates"
+},
+"gmfloor_0": {
+"file": "gmfloor_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmfloor"
+},
+"gmfloor_1": {
+"file": "gmfloor_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmfloor"
+},
+"gmfloor_2": {
+"file": "gmfloor_2.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmfloor"
+},
+"gmfloor_3": {
+"file": "gmfloor_3.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmfloor"
+},
+"gmfloor_4": {
+"file": "gmfloor_4.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmfloor"
+},
+"gmfloor_5": {
+"file": "gmfloor_5.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "gmfloor"
+},
+"gmtrees_0": {
+"file": "gmtrees_0.webp",
+"w": 155,
+"h": 296,
+"kind": "sprite",
+"sheet": "gmtrees"
+},
+"gmtrees_1": {
+"file": "gmtrees_1.webp",
+"w": 312,
+"h": 298,
+"kind": "sprite",
+"sheet": "gmtrees"
+},
+"gmtrees_2": {
+"file": "gmtrees_2.webp",
+"w": 274,
+"h": 298,
+"kind": "sprite",
+"sheet": "gmtrees"
+},
+"gmtrees_3": {
+"file": "gmtrees_3.webp",
+"w": 250,
+"h": 298,
+"kind": "sprite",
+"sheet": "gmtrees"
+},
+"gmtrees_4": {
+"file": "gmtrees_4.webp",
+"w": 176,
+"h": 299,
+"kind": "sprite",
+"sheet": "gmtrees"
+},
+"gmtrees_5": {
+"file": "gmtrees_5.webp",
+"w": 278,
+"h": 292,
+"kind": "sprite",
+"sheet": "gmtrees"
+},
+"gmtrees_6": {
+"file": "gmtrees_6.webp",
+"w": 161,
+"h": 291,
+"kind": "sprite",
+"sheet": "gmtrees"
+},
+"gmtrees_7": {
+"file": "gmtrees_7.webp",
+"w": 295,
+"h": 297,
+"kind": "sprite",
+"sheet": "gmtrees"
+},
+"gmguard_0": {
+"file": "gmguard_0.webp",
+"w": 273,
+"h": 305,
+"kind": "sprite",
+"sheet": "gmguard"
+},
+"gmguard_1": {
+"file": "gmguard_1.webp",
+"w": 136,
+"h": 293,
+"kind": "sprite",
+"sheet": "gmguard"
+},
+"gmguard_2": {
+"file": "gmguard_2.webp",
+"w": 317,
+"h": 305,
+"kind": "sprite",
+"sheet": "gmguard"
+},
+"gmguard_3": {
+"file": "gmguard_3.webp",
+"w": 179,
+"h": 325,
+"kind": "sprite",
+"sheet": "gmguard"
+},
+"gmguard_4": {
+"file": "gmguard_4.webp",
+"w": 312,
+"h": 308,
+"kind": "sprite",
+"sheet": "gmguard"
+},
+"gmguard_5": {
+"file": "gmguard_5.webp",
+"w": 310,
+"h": 325,
+"kind": "sprite",
+"sheet": "gmguard"
+},
+"gmguard_6": {
+"file": "gmguard_6.webp",
+"w": 170,
+"h": 132,
+"kind": "sprite",
+"sheet": "gmguard"
+},
+"gmguard_7": {
+"file": "gmguard_7.webp",
+"w": 290,
+"h": 132,
+"kind": "sprite",
+"sheet": "gmguard"
+},
+"gmguard_8": {
+"file": "gmguard_8.webp",
+"w": 168,
+"h": 132,
+"kind": "sprite",
+"sheet": "gmguard"
+},
+"gmbldg_0": {
+"file": "gmbldg_0.webp",
+"w": 150,
+"h": 198,
+"kind": "sprite",
+"sheet": "gmbldg"
+},
+"gmbldg_1": {
+"file": "gmbldg_1.webp",
+"w": 224,
+"h": 195,
+"kind": "sprite",
+"sheet": "gmbldg"
+},
+"gmbldg_2": {
+"file": "gmbldg_2.webp",
+"w": 201,
+"h": 199,
+"kind": "sprite",
+"sheet": "gmbldg"
+},
+"gmbldg_3": {
+"file": "gmbldg_3.webp",
+"w": 220,
+"h": 180,
+"kind": "sprite",
+"sheet": "gmbldg"
+},
+"gmbldg_4": {
+"file": "gmbldg_4.webp",
+"w": 209,
+"h": 193,
+"kind": "sprite",
+"sheet": "gmbldg"
+},
+"gmbldg_5": {
+"file": "gmbldg_5.webp",
+"w": 214,
+"h": 185,
+"kind": "sprite",
+"sheet": "gmbldg"
+},
+"gmbldg_6": {
+"file": "gmbldg_6.webp",
+"w": 241,
+"h": 183,
+"kind": "sprite",
+"sheet": "gmbldg"
+},
+"gmbldg_7": {
+"file": "gmbldg_7.webp",
+"w": 232,
+"h": 131,
+"kind": "sprite",
+"sheet": "gmbldg"
+},
+"gmtuft_0": {
+"file": "gmtuft_0.webp",
+"w": 199,
+"h": 183,
+"kind": "sprite",
+"sheet": "gmtuft"
+},
+"gmtuft_1": {
+"file": "gmtuft_1.webp",
+"w": 197,
+"h": 193,
+"kind": "sprite",
+"sheet": "gmtuft"
+},
+"gmtuft_2": {
+"file": "gmtuft_2.webp",
+"w": 192,
+"h": 192,
+"kind": "sprite",
+"sheet": "gmtuft"
+},
+"gmtuft_3": {
+"file": "gmtuft_3.webp",
+"w": 194,
+"h": 194,
+"kind": "sprite",
+"sheet": "gmtuft"
+},
+"gmtuft_4": {
+"file": "gmtuft_4.webp",
+"w": 196,
+"h": 204,
+"kind": "sprite",
+"sheet": "gmtuft"
+},
+"gmtuft_5": {
+"file": "gmtuft_5.webp",
+"w": 208,
+"h": 185,
+"kind": "sprite",
+"sheet": "gmtuft"
+},
+"gmtuft_6": {
+"file": "gmtuft_6.webp",
+"w": 206,
+"h": 197,
+"kind": "sprite",
+"sheet": "gmtuft"
+},
+"gmtuft_7": {
+"file": "gmtuft_7.webp",
+"w": 191,
+"h": 205,
+"kind": "sprite",
+"sheet": "gmtuft"
+},
+"gmtuft_8": {
+"file": "gmtuft_8.webp",
+"w": 191,
+"h": 187,
+"kind": "sprite",
+"sheet": "gmtuft"
+},
+"gmtuft_9": {
+"file": "gmtuft_9.webp",
+"w": 196,
+"h": 201,
+"kind": "sprite",
+"sheet": "gmtuft"
+},
+"gmtuft_10": {
+"file": "gmtuft_10.webp",
+"w": 225,
+"h": 150,
+"kind": "sprite",
+"sheet": "gmtuft"
+},
+"gmtuft_11": {
+"file": "gmtuft_11.webp",
+"w": 213,
+"h": 153,
+"kind": "sprite",
+"sheet": "gmtuft"
+}
+}
