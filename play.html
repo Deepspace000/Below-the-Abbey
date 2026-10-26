@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.640';
+const VERSION='3.641';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -52559,6 +52559,21 @@ function gmsTick(){
   if(day&&now>GMS.nextBee){GMS.nextBee=now+1.2+Math.random()*.8;const v=gmsNear(/^gm_(skep|bee|lavender)$/,8);if(v>0)tone(190+Math.random()*30,200,.9,'sawtooth',.012*v,0)}
 }
 {const _ys=yarSoundTick;yarSoundTick=function(){_ys.apply(this,arguments);try{gmsTick()}catch(e){console.error('gms',e)}}}
+
+/* ---- src/desert/no_battle_tele.js ---- */
+/* ==========================================================================
+   NO TELEPORTING IN A BATTLE. A fight is on when a living creature is within 3 squares of the party, or an alerted one within 7 (the same rule the Bogeyman uses).
+   While it is on, the teleport stones (teleportTo and the maze stones), and the Potion of Escape refuse, with a message. The party must win, or get away, first.
+   ========================================================================== */
+function inBattle(){
+  try{const P=G.P;return (G.enemies||[]).some(q=>{if(q.hp<=0||q.dying)return false;const m=Math.abs(q.x-P.x)+Math.abs(q.y-P.y);return m<=3||(q.alert&&m<=7)})}catch(e){return false}
+}
+function nbtRefuse(){msg('You cannot teleport while a fight is on. Win it, or get away, first.','#d09a80');return false}
+if(typeof teleportTo==='function'){const _t=teleportTo;teleportTo=function(){if(inBattle()){G.teleMode=false;return nbtRefuse()}return _t.apply(this,arguments)}}
+if(typeof hgdtGo==='function'){const _h=hgdtGo;hgdtGo=function(){if(inBattle())return nbtRefuse();return _h.apply(this,arguments)}}
+if(typeof useHeal==='function'){const _u=useHeal;useHeal=function(hi,idx){
+  try{if(inBattle()){const i=idx<0?bestPotionIndex(hi):idx,it=G.bag[i];if(it&&idef(it).escape)return nbtRefuse()}}catch(e){}
+  return _u.apply(this,arguments)}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
