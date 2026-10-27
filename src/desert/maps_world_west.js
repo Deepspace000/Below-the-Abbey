@@ -313,6 +313,11 @@ function wmwAtlasData(){
         {const nm=WD_RUIN_NAMES[(hash2(id,8,732)*WD_RUIN_NAMES.length)|0];(lpm?rowsLP:rows).push(seen(id)?[id,nm,'in '+area]:[id,'Hidden ruin - '+nm,'somewhere in '+area])}}}
     if(rows.length)G1.push({t:'Wild ruins of the outdoor lands',sw:'cave',rows});
     if(rowsLP.length)G1.push({t:"Wild ruins of the Pilgrim's Path",sw:'cave',rows:rowsLP})}
+  // the twenty caves hidden in the woods of the Pilgrim's Path
+  if(typeof PF_CAVE0!=='undefined'&&typeof PF_NAMES!=='undefined'){const rows=[];
+    for(let i=0;i<PF_CAVES;i++){const id=PF_CAVE0+i,leg=LP.BASE+PF_SEGS[i],nm=PF_NAMES[i]||LEVEL_NAMES[id];if(LEVEL_RATING[id]===undefined&&LEVEL_RATING[leg]!==undefined)LEVEL_RATING[id]=LEVEL_RATING[leg];
+      rows.push(seen(id)?[id,nm,'on stretch '+(PF_SEGS[i]+1)+' of the path']:[id,'Hidden cave - '+nm,'somewhere on stretch '+(PF_SEGS[i]+1)+' of the path'])}
+    G1.push({t:"Wild caves of the Pilgrim's Path",sw:'cave',rows})}
   // the earlier places, from the first crypts to the great tombs of the desert
   const have=ids=>ids.filter(n=>LEVEL_NAMES[n]);
   G1.push({t:'The old crypts, caves and mines',sw:'dungeon',rows:have([1,8,23,24,25,12,11,18,20,21,26,27,28,31,22,42,65]).map(n=>[n]).concat(LEVEL_NAMES[501]?[[501]]:[])});
