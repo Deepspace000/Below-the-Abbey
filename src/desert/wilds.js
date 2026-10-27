@@ -11,11 +11,11 @@ for(const n of ['pt_birch','pt_willow','pf_witch','pf_exile'])loadImg(n,'assets/
 Object.assign(NPC_H,{pt_birch:2.7,pt_willow:2.5,pf_witch:1.3,pf_exile:1.25});
 ENEMY_DEF.bear=Object.assign({},ENEMY_DEF.wolf,{name:'Brown Bear',hp:64,dmg:[7,13],hit:.78,w:1.15,img:'bear',xp:85,speed:1,kind:'bear'});
 ENEMY_DEF.slime=Object.assign({},ENEMY_DEF.wolf,{name:'Green Slime',hp:30,dmg:[2,5],hit:.62,w:.85,img:'slime',xp:30,speed:1,kind:'slime'});
-const WD_OUT=[2,7,10,19,22,32,41,60,61,62,63,64,311]; // the outdoor maps outside the Pilgrim's Path that hide places (the Path's own levels are LP.BASE to LP.BASE+LP.N-1)
+const WD_OUT=[2,7,10,19,22,32,41,60,61,62,63,64,311,520]; // the outdoor maps outside the Pilgrim's Path that hide places (the Path's own levels are LP.BASE to LP.BASE+LP.N-1)
 const WD_TINTS=[[255,255,255],[200,228,200],[240,214,170],[226,190,192],[190,206,236],[236,226,200]];
 const WD_RUIN_NAMES=['The Overgrown Ruin','The Mossy Vault','The Vine-Choked Cellar','The Forgotten Shrine','The Sunken Hall','The Old Watchpost','The Tangled Crypt','The Green Hall','The Fallen Gatehouse','The Ivy Chapel'];
 const WD_CAVES=[ // [level, kind, name]  ids 7200 and up
- [2,'witch','The Witch’s Hollow'],[7,'bears','The Bear Den'],[10,'fugitive','The Hunted Man’s Hole'],[19,'wolvestreasure','The Moor Wolves’ Cave'],[22,'exile','The Exile’s Cave'],[32,'treasure','The Greendale Hoard'],[311,'bears','The Oakwood Bear Cave']];
+ [2,'witch','The Witch’s Hollow'],[7,'bears','The Bear Den'],[10,'fugitive','The Hunted Man’s Hole'],[19,'wolvestreasure','The Moor Wolves’ Cave'],[22,'exile','The Exile’s Cave'],[32,'treasure','The Greendale Hoard'],[311,'bears','The Oakwood Bear Cave'],[520,'bears','The Blackbriar Den'],[520,'wolvestreasure','The Hounds’ Hollow']];
 const WD_CAVE0=7200,WD_RUIN0=8000;
 WD_CAVES.forEach((c,i)=>LEVEL_NAMES[WD_CAVE0+i]=c[2]);
 const WD_ENT={}; // interior id -> {n,x,y,f}: where its door stands in the outdoor map
@@ -80,7 +80,8 @@ function wdSpot(L,n,seed){
     let ok=true;
     if(tb&&tb.h){let lo=9,hi=-9;for(let dy=-1;dy<=4;dy++)for(let dx=-3;dx<=3;dx++){const v=hAt(x+dx,y+dy);if(v<lo)lo=v;if(v>hi)hi=v}if(hi-lo>.1)continue}
     for(let dy=0;dy<=3&&ok;dy++)for(let dx=-2;dx<=2;dx++){const c=(L.rows[y+dy]||'')[x+dx];if(c!=='.'){ok=false;break}}
-    if(!ok||near(x,y+1,3)||(L._wd||[]).some(q=>Math.abs(q.x-x)<8&&Math.abs(q.y-y)<8))continue;
+    if(ok&&L._wdOnly){for(let dy=0;dy<=3&&ok;dy++)for(let dx=-2;dx<=2;dx++)if(!L._wdOnly.has((x+dx)+','+(y+dy))){ok=false;break}} // a maze wood: only inside its clearings
+    if(!ok||near(x,y+1,L._wdOnly?2:3)||(L._wd||[]).some(q=>Math.abs(q.x-x)<8&&Math.abs(q.y-y)<8))continue;
     for(const [dx,dy] of [[-3,1],[3,1],[-2,4],[2,4]]){const c=(L.rows[y+dy]||'')[x+dx];if(c&&c!=='.'&&/[0-9]/.test(c))ok=false}
     if(!ok)continue;
     let tc=0;for(let dy=-4;dy<=5;dy++)for(let dx=-4;dx<=4;dx++)if(trees.has((x+dx)+','+(y+dy)))tc++;

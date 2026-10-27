@@ -13,8 +13,11 @@ const WWA={ // alias: [picture, height of the thing in squares (one square is ab
   stone:['propsB_0',1.7],grave:['propsB_1',1.0],ring:['propsB_2',.42],well:['propsB_3',1.3],stump:['propsB_4',1.9],charm:['propsB_5',1.15],
   cauldron:['propsA_0',.95],oven:['propsA_1',2.0],cagefull:['propsA_2',1.5],cageempty:['propsA_3',1.5],totem:['propsA_4',1.9],sign:['propsA_5',1.35],
   bridge:['bldg_2',.62],boot:['smalls_0',.28],ribbon:['smalls_1',.7],crumbs:['smalls_2',.22],rowan:['smalls_3',.9],hagstone:['smalls_4',.3],gingerman:['smalls_5',.4],
-  wisp:['guardB_3',.8],crowtree:['propsB_4',1.9]};
+  wisp:['guardB_3',.8],crowtree:['propsB_4',1.9],twig:['trees_5',.5],twig2:['trees_3',.46]};
 const WW_ALIAS_EXTRA={};
+/* the trees and branches are painted darker, almost black, so the wood is a place of dark trunks */
+const WW_TREEA=['oakface','oakmoss','pine','pine2','willow','thorn','twig','twig2'];
+function wwDarken(im,f){const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);x.globalCompositeOperation='source-atop';x.fillStyle='rgba(5,10,8,'+f+')';x.fillRect(0,0,c.width,c.height);return c}
 /* ---- loading the pictures ---- */
 function wwLoad(){
   if(WW.loading)return WW.loading;
@@ -28,7 +31,7 @@ function wwLoad(){
 }
 /* every alias gets its own key in IMG (decor k is 'ww_<alias>') and its height; the creatures their picture keys */
 function wwAlias(){
-  for(const a in WWA){const [n,h]=WWA[a];if(IMG[n]){IMG['ww_'+a]=IMG[n];NPC_H['ww_'+a]=h}}
+  for(const a in WWA){const [n,h]=WWA[a];if(IMG[n]){IMG['ww_'+a]=WW_TREEA.includes(a)?wwDarken(IMG[n],.6):IMG[n];NPC_H['ww_'+a]=h}}
   for(const [k,n] of [['wwi_scare','guardA_0'],['wwi_hound','guardA_1'],['wwi_spider','guardA_2'],['wwi_golem','guardA_3'],['wwi_crows','guardA_4'],['wwi_toad','guardA_5'],['wwi_revenant','guardB_0'],['wwi_root','guardB_1'],['wwi_abom','guardB_2'],['wwi_wisp','guardB_3'],['wwi_crow','guardB_4'],['wwi_witch','witch_1'],['wwi_witchA','witch_0']])if(IMG[n])IMG[k]=IMG[n];
   NPC_H.wwi_witch=2.7;NPC_H.wwi_witchA=2.6;
   wwFloors();
@@ -39,7 +42,7 @@ function wwFloors(){
   if(WW._floors)return;
   const mk=(nm,key,gain,tint)=>{const im=IMG[key];if(!im||FLOORS[nm])return;const base=dsPaintedTex(im),d=new Uint8ClampedArray(base.length);
     for(let i=0;i<d.length;i+=4){const l=(base[i]+base[i+1]+base[i+2])/3,k=tint.sat===undefined?1:tint.sat;d[i]=(l+(base[i]-l)*k)*gain*tint.r;d[i+1]=(l+(base[i+1]-l)*k)*gain*tint.g;d[i+2]=(l+(base[i+2]-l)*k)*gain*tint.b;d[i+3]=255}FLOORS[nm]=d};
-  mk('wwf_moss','tex_1',2.3,{r:.95,g:1.05,b:.9});mk('wwf_leaf','tex_2',2.1,{r:1.02,g:.95,b:.88});mk('wwf_dirt','tex_5',2.1,{r:1.05,g:1,b:.9});
+  mk('wwf_moss','tex_1',1.5,{r:.95,g:1.05,b:.9});mk('wwf_leaf','tex_2',1.4,{r:1.02,g:.95,b:.88});mk('wwf_dirt','tex_5',1.5,{r:1.05,g:1,b:.9});
   mk('wwf_brook','tex_5',2.7,{r:1.1,g:1.04,b:.92,sat:.4});mk('wwf_grave','tex_3',1.9,{r:.9,g:1,b:.95});mk('wwf_board','tex_0',1.7,{r:1.15,g:.95,b:.75});
   const fb={wwf_moss:'lush',wwf_leaf:'dirt',wwf_dirt:'dirt',wwf_brook:'dirt',wwf_grave:'mosscobble',wwf_board:'cobble'};
   for(const nm of WW_FLOORSET)if(!FLOORS[nm])FLOORS[nm]=FLOORS[fb[nm]]||FLOORS.cobble;
@@ -96,6 +99,6 @@ if(typeof AFFL!=='undefined'&&!AFFL.hagblind){AFFL.hagblind={n:'Hag-blinded',kin
 {const _wl=wlLoad;wlLoad=function(){if(WW._both)return WW._both;return WW._both=Promise.resolve(_wl.apply(this,arguments)).then(()=>wwLoad())}}
 /* fog: the wood lives under a thick, cold, green-grey murk; the party sees a few squares and creatures alert late (ambushers in the fog) */
 {const _w=weatherNow;weatherNow=function(){
-  if(LEVEL===WW.ID)return {id:'fog',n:'Murk',fog:.125,haze:.9,dark:.7,mix:.9,col:[30,46,36],text:'A thick, cold murk lies between the trees. The view is a few squares, and things stand very close before they are seen.'};
+  if(LEVEL===WW.ID)return {id:'fog',n:'Murk',fog:.16,haze:.92,dark:.84,mix:.92,col:[14,24,18],text:'A thick, cold murk lies between the trees. The view is a few squares, and things stand very close before they are seen.'};
   if(wwIs(LEVEL))return null;
   return _w.apply(this,arguments)}}

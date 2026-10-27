@@ -18,7 +18,7 @@ const wmwId=()=>({
 
 /* ---------- places: positions in map units. The map already has a wide western land (The Western Reaches, The Far West), so nothing is widened; Wenlock moves west to make room ---------- */
 const wmwGyName=(id,i)=>(typeof GY!=='undefined'&&GY.NAMES&&GY.NAMES[id])||LEVEL_NAMES[id]||('Grave Maze '+(i+1));
-const WMW_POS={wenlock:[-300,226],gardens:[-214,200],witchwood:[-296,150],wkgrave:[-356,198],gm1:[-392,166],gm2:[-396,216],gm3:[-362,244],gm4:[-330,174],wellmaze:[-258,260],westgate:[-350,262],
+const WMW_POS={wenlock:[-300,226],gardens:[-214,200],witchwood:[-282,126],wkgrave:[-356,198],gm1:[-392,166],gm2:[-396,216],gm3:[-362,244],gm4:[-326,152],wellmaze:[-258,260],westgate:[-338,288],
   underlevel:[-84,98],drowned:[-30,100],thornwell:[186,176],goldenpyramid:[678,178]};
 function wmwBuild(){
   const I=wmwId(),by=k=>WORLD_LOCS.find(l=>l.k===k),add=(o)=>{if(!by(o.k))WORLD_LOCS.push(o);return by(o.k)};

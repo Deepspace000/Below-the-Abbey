@@ -6,7 +6,7 @@
 const MPWW={floor:['#56664a','#7a5e40','#d8c490','#a89a82','#8a8c84','#7a5a3a'],ink:'#0e1a12'};
 function mpWwDraw(c,x,L,api){
   const R=L.rows,W=R[0].length,H=R.length,F=api.fit(W,H),s=F.s,X=F.X,Y=F.Y,PX=F.ox,PY=F.oy,PW=W*s,PH=H*s,INK=MPL.INK,ww=L._ww||{};
-  const wall=(cx,cy)=>!(R[cy]&&R[cy][cx]==='.'),col=(cx,cy)=>{const g=L.chars[R[cy][cx]],q=WW.col&&WW.col[g];return q||[40,56,44]};
+  const wall=(cx,cy)=>!(R[cy]&&R[cy][cx]==='.')||!!(ww.tree&&ww.tree.has(cy*W+cx)),col=(cx,cy)=>{const g=L.chars[R[cy][cx]],q=WW.col&&WW.col[g];return q||[40,56,44]};
   x.save();x.shadowColor='rgba(10,20,10,.6)';x.shadowBlur=14;x.shadowOffsetX=3;x.shadowOffsetY=5;x.fillStyle='#0e1a12';x.fillRect(PX-1.6,PY-1.6,PW+3.2,PH+3.2);x.restore();
   x.save();x.beginPath();x.rect(PX,PY,PW,PH);x.clip();
   for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){if(!wall(cx,cy))continue;const k=col(cx,cy),v=hash2(cx,cy,5)*12-6,f=.62;x.fillStyle=`rgb(${Math.max(0,k[0]*f*.7+v+10)|0},${Math.max(0,k[1]*f*.8+v+14)|0},${Math.max(0,k[2]*f*.7+v+8)|0})`;x.fillRect(X(cx)-.1,Y(cy)-.1,s+.2,s+.2)}
