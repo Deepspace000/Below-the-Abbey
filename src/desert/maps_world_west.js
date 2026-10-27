@@ -41,8 +41,8 @@ function wmwBuild(){
   R('deephollow','gardens','wenlock');R('wenlock','witchwood');R('wenlock','wkgrave');R('wenlock','westgate');R('wkgrave','gm1');R('wkgrave','gm2');R('wkgrave','gm3');R('wkgrave','gm4');R('wenlock','wellmaze');R('thornwick','thornwell');
   // pictures: the graveyard has the graves and a crypt of the atlas; the mazes are the brick maze of the atlas in other colours; the pyramid is the atlas pyramid
   Object.assign(WMN_SPEC,{wkgrave:[['i_graves',-9,0,22],['i_crypt',11,-3,19]],gm1:[['i_rubymaze',0,0,20,1]],gm2:[['i_rubymaze',0,0,20,1]],gm3:[['i_rubymaze',0,0,20,1]],gm4:[['i_rubymaze',0,0,20,1]],
-    goldenpyramid:[['i_pyramid',0,0,22,1]],thornwell:[['i_rubymaze',0,0,17,1]],gardens:[],witchwood:[],wellmaze:[],westgate:[],underlevel:[],drowned:[]});
-  Object.assign(WMN_BOX,{gardens:[-19,-36,19,2],witchwood:[-27,-49,27,6],wellmaze:[-17,-33,17,6],westgate:[-12,-26,12,2],underlevel:[-24,-26,24,4],drowned:[-15,-30,15,2]});
+    goldenpyramid:[['i_pyramid',0,0,22,1]],thornwell:[['i_rubymaze',0,0,17,1]],gardens:[],witchwood:[],wellmaze:[['i_rubymaze',0,-15,12,1],['i_rubymaze',0,-10,12,1],['i_rubymaze',0,-5,12,1],['i_rubymaze',0,0,12,1]],westgate:[],underlevel:[],drowned:[]});
+  Object.assign(WMN_BOX,{gardens:[-19,-36,19,2],witchwood:[-27,-49,27,6],westgate:[-12,-26,12,2],underlevel:[-24,-26,24,4],drowned:[-15,-30,15,2]});
   WMW.ready=true}
 if(typeof WORLD_LOCS!=='undefined'&&typeof WMN_SPEC!=='undefined')wmwBuild();
 /* the names of the lanes, written along the road itself: [first place, last place, how far along (0 to 1), words] */
@@ -191,10 +191,90 @@ function wmwGateMark(l){ // the gate to the gardens, in the north wall of the ma
   c.save();c.fillStyle=open?'#e0b020':'#8a8478';c.strokeStyle=wmwInk;c.lineWidth=.5;c.beginPath();c.moveTo(x-3,y+1.4);c.lineTo(x-3,y-1.6);c.arc(x,y-1.6,3,Math.PI,0);c.lineTo(x+3,y+1.4);c.closePath();c.fill();c.stroke();c.fillStyle='#1c1208';c.beginPath();c.moveTo(x-1.2,y+1.2);c.lineTo(x-1.2,y-1.2);c.arc(x,y-1.2,1.2,Math.PI,0);c.lineTo(x+1.2,y+1.2);c.closePath();c.fill();c.restore()}
 {const _w=mpWorldIco;mpWorldIco=function(l,x,y,z){_w.apply(this,arguments);try{if(l&&l.k==='deephollow'){wmwTowns(l);wmwGateMark(l)}}catch(e){}}}
 /* ---------- hooks: the drawing of each picture, and the dungeon marks over the desert dunes ---------- */
-const WMW_ICO={gardens:wmwHedge,witchwood:wmwForest,wellmaze:wmwWell,underlevel:wmwSea,drowned:wmwDrown,westgate:wmwGate};
+/* THE MAZE OF GARDENS and THE DROWNED MAZE, drawn as isometric mazes: tall walls with lit tops and shaded sides on a floor of walks, each painted once into a canvas (leaf and stone dabs, soft shading) and then drawn at the size of the map picture.
+   The gardens are leafy hedges on gravel, with a stone fountain in the open heart and a gold gate in the south. The drowned maze is old grey stone, grown with weed, standing in dark green water that comes half way up every wall. */
+const WMW_ISOS={};
+function wmwIsoMaze(kind){
+  if(WMW_ISOS[kind])return WMW_ISOS[kind];
+  const D=kind==='drowned',G=11,TW=30,TH=15,HH=D?20:24,CW=360,CH=250,ox=CW/2,oy=HH+16,c0=document.createElement('canvas');c0.width=CW;c0.height=CH;const c=c0.getContext('2d');
+  const open=[];for(let y=0;y<G;y++)open.push(new Array(G).fill(false));
+  let seed=D?31337:90417;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
+  const vis=new Set(),st=[[0,0]];vis.add('0,0');open[1][1]=true;
+  while(st.length){const [i,j]=st[st.length-1],nb=[[1,0],[-1,0],[0,1],[0,-1]].map(([a,b])=>[i+a,j+b]).filter(([a,b])=>a>=0&&b>=0&&a<5&&b<5&&!vis.has(a+','+b));
+    if(!nb.length){st.pop();continue}const [a,b]=nb[(rnd()*nb.length)|0];vis.add(a+','+b);open[2*b+1][2*a+1]=true;open[j+b+1][i+a+1]=true;st.push([a,b])}
+  for(let y=4;y<=6;y++)for(let x=4;x<=6;x++)open[y][x]=true;
+  if(!D){open[10][5]=true;open[9][5]=true}
+  const P=(gx,gy)=>[ox+(gx-gy)*TW/2,oy+(gx+gy)*TH/2];
+  c.save();c.fillStyle=D?'rgba(8,30,36,.5)':'rgba(40,30,16,.32)';{const [x,y]=P(G/2,G/2);c.beginPath();c.ellipse(x+6,y+16,G*TW*.52,G*TH*.62,0,0,6.3);c.fill()}c.restore();
+  for(let gy=0;gy<G;gy++)for(let gx=0;gx<G;gx++){const [x,y]=P(gx,gy);c.beginPath();c.moveTo(x,y);c.lineTo(x+TW/2,y+TH/2);c.lineTo(x,y+TH);c.lineTo(x-TW/2,y+TH/2);c.closePath();
+    const o=open[gy][gx],h=hash2(gx,gy,91);c.fillStyle=D?(o?(h<.5?'#1f6d78':'#195f6b'):'#2a5a4a'):(o?(h<.5?'#d4c08e':'#c9b57f'):'#6f9a45');c.fill();
+    if(o){c.strokeStyle=D?'rgba(150,225,225,.28)':'rgba(120,92,50,.25)';c.lineWidth=.6;c.stroke();if(D&&h>.62){c.strokeStyle='rgba(190,240,240,.5)';c.lineWidth=.7;c.beginPath();c.moveTo(x-6,y+TH/2);c.quadraticCurveTo(x-2,y+TH/2-2,x+2,y+TH/2);c.quadraticCurveTo(x+4,y+TH/2+1.4,x+7,y+TH/2);c.stroke()}}}
+  const PAL=D?['#7f8d97','#9aa6ae','#6b7882','#aebab9','#5e8056']:['#5f9a3e','#86b85a','#4a8434','#9acb68','#3e7430'];
+  const dab=(x,y,r,k)=>{c.fillStyle=PAL[k%5];c.beginPath();c.arc(x,y,r,0,6.3);c.fill()};
+  const face=(pts,base,seedv,dark)=>{c.save();c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.closePath();c.fillStyle=base;c.fill();c.clip();
+    const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]),x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+    for(let i=0;i<(D?30:46);i++){const px=x0+hash2(i,1,seedv)*(x1-x0),py=y0+hash2(i,2,seedv)*(y1-y0),r=D?1+hash2(i,3,seedv)*2:1.4+hash2(i,3,seedv)*2.6;c.globalAlpha=dark?.55:.8;dab(px,py,r,(hash2(i,4,seedv)*5)|0)}
+    c.globalAlpha=1;c.restore();c.strokeStyle=D?'rgba(20,34,40,.6)':'rgba(20,50,16,.55)';c.lineWidth=.8;c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.closePath();c.stroke()};
+  const water=(a,b)=>{ // the flood: the lower half of a wall face stands in dark green water with a pale waterline
+    const f=.5,p0=[a[0],a[1]+HH*f],p1=[b[0],b[1]+HH*f],p2=[b[0],b[1]+HH],p3=[a[0],a[1]+HH];c.save();c.beginPath();c.moveTo(p0[0],p0[1]);c.lineTo(p1[0],p1[1]);c.lineTo(p2[0],p2[1]);c.lineTo(p3[0],p3[1]);c.closePath();c.fillStyle='rgba(22,104,118,.78)';c.fill();
+    c.strokeStyle='rgba(205,245,240,.75)';c.lineWidth=.9;c.beginPath();c.moveTo(p0[0],p0[1]);c.lineTo(p1[0],p1[1]);c.stroke();c.restore()};
+  const hedge=(gx,gy)=>{const [x,y]=P(gx,gy),t=[x,y-HH],r=[x+TW/2,y+TH/2-HH],b=[x,y+TH-HH],l=[x-TW/2,y+TH/2-HH],sd=gx*31+gy*17;
+    face([l,b,[b[0],b[1]+HH],[l[0],l[1]+HH]],D?'#5a6872':'#356a2b',sd+1,true);face([b,r,[r[0],r[1]+HH],[b[0],b[1]+HH]],D?'#46535d':'#2a5523',sd+2,true);
+    if(D){water([l[0],l[1]],[b[0],b[1]]);water([b[0],b[1]],[r[0],r[1]])}
+    face([t,r,b,l],D?'#a3b0b8':'#79ad4e',sd+3,false)};
+  for(let s=0;s<2*G-1;s++)for(let gx=0;gx<G;gx++){const gy=s-gx;if(gy<0||gy>=G)continue;if(!open[gy][gx])hedge(gx,gy);
+    if(gx===5&&gy===5){const [x,y]=P(5.5,5.5);
+      if(!D){c.fillStyle='#b9b2a2';c.beginPath();c.ellipse(x,y,22,11,0,0,6.3);c.fill();c.strokeStyle='#6a6458';c.lineWidth=1;c.stroke();c.fillStyle='#5fa6c8';c.beginPath();c.ellipse(x,y-1.5,17,8,0,0,6.3);c.fill();
+        c.fillStyle='#a9a393';c.fillRect(x-2.5,y-16,5,14);c.fillStyle='#d6f0ff';c.beginPath();c.ellipse(x,y-18,5,3,0,0,6.3);c.fill();c.strokeStyle='rgba(214,240,255,.8)';c.lineWidth=1.2;c.beginPath();c.moveTo(x,y-18);c.quadraticCurveTo(x+9,y-22,x+11,y-4);c.moveTo(x,y-18);c.quadraticCurveTo(x-9,y-22,x-11,y-4);c.stroke()}
+      else{ // a broken column and a fallen block standing in the water, with bubbles rising
+        c.fillStyle='#7c8993';c.fillRect(x-5,y-16,10,17);c.fillStyle='#9fabb3';c.beginPath();c.ellipse(x,y-16,5,2.4,0,0,6.3);c.fill();c.fillStyle='rgba(22,104,118,.8)';c.fillRect(x-5,y-6,10,7);c.strokeStyle='rgba(205,245,240,.8)';c.lineWidth=.8;c.beginPath();c.moveTo(x-5,y-6);c.lineTo(x+5,y-6);c.stroke();
+        c.fillStyle='#8a97a0';c.beginPath();c.moveTo(x+10,y+3);c.lineTo(x+18,y-1);c.lineTo(x+26,y+3);c.lineTo(x+18,y+7);c.closePath();c.fill();
+        for(let k=0;k<5;k++){c.strokeStyle='rgba(215,248,244,.8)';c.beginPath();c.arc(x-16+k*3,y-10-k*5,1+k*.2,0,6.3);c.stroke()}}}}
+  if(!D){const [x,y]=P(5.5,10.2);c.save();c.strokeStyle='#8a6a1c';c.fillStyle='#e0b020';c.lineWidth=1;c.fillRect(x-14,y-20,3,20);c.fillRect(x+11,y-20,3,20);c.beginPath();c.moveTo(x-14,y-18);c.quadraticCurveTo(x,y-34,x+14,y-18);c.lineWidth=3;c.strokeStyle='#e0b020';c.stroke();c.restore()}
+  return WMW_ISOS[kind]=c0}
+function wmwIsoDraw(c,x,y,kind,w){const im=wmwIsoMaze(kind),h=w*im.height/im.width;c.save();c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.drawImage(im,x-w/2,y+3-h,w,h);c.restore()}
+const wmwHedgeIso=(c,x,y)=>wmwIsoDraw(c,x,y,'garden',42),wmwDrownIso=(c,x,y)=>wmwIsoDraw(c,x,y,'drowned',36);
+/* THE UNDERLEVEL, drawn as a cut-away of the ground: grass and a little wood on top, strata of rock, and below them a vast cavern holding the black sea, with an island and its chest, a lantern boat throwing gold light on the water, wooden ladders going down, stalactites and pairs of red eyes in the dark. */
+let WMW_UNDER=null;
+function wmwUnderMake(){
+  if(WMW_UNDER)return WMW_UNDER;const W=420,H=300,c0=document.createElement('canvas');c0.width=W;c0.height=H;const c=c0.getContext('2d'),hs=(a,b,s)=>hash2(a,b,s);
+  const L=14,R=W-14,T=46,B=H-12;
+  c.save();c.beginPath();c.moveTo(L,T+8);for(let x=L;x<=R;x+=6)c.lineTo(x,T+hs(x,1,501)*8-2);c.lineTo(R,B);for(let x=R;x>=L;x-=8)c.lineTo(x,B-hs(x,2,501)*7);c.closePath();c.clip();
+  let g=c.createLinearGradient(0,T,0,B);g.addColorStop(0,'#6a5236');g.addColorStop(.25,'#4a3a2a');g.addColorStop(.6,'#2c2a2c');g.addColorStop(1,'#16161c');c.fillStyle=g;c.fillRect(L,T,R-L,B-T);
+  for(let i=0;i<420;i++){const x=L+hs(i,1,502)*(R-L),y=T+hs(i,2,502)*(B-T),r=2+hs(i,3,502)*7,t=hs(i,4,502),dk=(y-T)/(B-T);c.fillStyle='rgba('+((46+t*40)*(1-dk*.6)|0)+','+((40+t*34)*(1-dk*.6)|0)+','+((36+t*30)*(1-dk*.5)|0)+',.55)';c.beginPath();c.ellipse(x,y,r,r*.6,hs(i,5,502)*3,0,6.3);c.fill()}
+  c.strokeStyle='rgba(20,14,8,.5)';c.lineWidth=1.2;for(const y0 of [T+34,T+62,T+98]){c.beginPath();for(let x=L;x<=R;x+=8)c.lineTo(x,y0+Math.sin(x*.05+y0)*4+hs(x,y0,503)*3);c.stroke()}
+  c.beginPath();c.moveTo(60,T+78);c.bezierCurveTo(70,T+60,130,T+66,170,T+72);c.bezierCurveTo(210,T+60,290,T+62,340,T+84);c.bezierCurveTo(372,T+110,380,T+170,352,T+206);c.bezierCurveTo(300,B-18,120,B-16,80,T+196);c.bezierCurveTo(46,T+160,44,T+104,60,T+78);c.closePath();
+  g=c.createRadialGradient(W/2,T+150,10,W/2,T+150,200);g.addColorStop(0,'#10202a');g.addColorStop(.6,'#070d12');g.addColorStop(1,'#020406');c.fillStyle=g;c.fill();c.save();c.clip();
+  const sy=T+150;g=c.createLinearGradient(0,sy,0,B);g.addColorStop(0,'#04090e');g.addColorStop(1,'#010305');c.fillStyle=g;c.fillRect(40,sy,W-80,B-sy);
+  c.strokeStyle='rgba(120,170,200,.16)';c.lineWidth=1;for(let i=0;i<26;i++){const y=sy+4+hs(i,1,504)*(B-sy-14),x=60+hs(i,2,504)*(W-140),w=10+hs(i,3,504)*34;c.beginPath();c.moveTo(x,y);c.lineTo(x+w,y);c.stroke()}
+  c.fillStyle='#1b1d22';c.beginPath();c.moveTo(150,sy+8);c.lineTo(176,sy-18);c.lineTo(206,sy-26);c.lineTo(238,sy-12);c.lineTo(262,sy+8);c.closePath();c.fill();c.strokeStyle='rgba(120,130,150,.35)';c.lineWidth=1;c.stroke();
+  for(let i=0;i<14;i++){c.fillStyle='rgba(70,76,90,.5)';c.beginPath();c.ellipse(158+hs(i,1,505)*96,sy-14+hs(i,2,505)*20,3+hs(i,3,505)*5,2,0,0,6.3);c.fill()}
+  c.fillStyle='#6a4a22';c.fillRect(200,sy-38,22,13);c.fillStyle='#c89a30';c.fillRect(200,sy-38,22,4);c.fillRect(209,sy-34,4,6);c.strokeStyle='#2a1a08';c.lineWidth=.8;c.strokeRect(200,sy-38,22,13);
+  c.fillStyle='#2a1c10';c.beginPath();c.moveTo(286,sy+24);c.lineTo(334,sy+24);c.lineTo(324,sy+34);c.lineTo(296,sy+34);c.closePath();c.fill();c.fillStyle='#e8c060';c.fillRect(309,sy+8,3,16);
+  g=c.createRadialGradient(311,sy+8,1,311,sy+8,70);g.addColorStop(0,'rgba(255,214,120,.95)');g.addColorStop(.25,'rgba(255,170,70,.4)');g.addColorStop(1,'rgba(255,150,40,0)');c.fillStyle=g;c.fillRect(230,sy-60,160,140);
+  for(let i=0;i<9;i++){c.strokeStyle='rgba(255,200,100,'+(.5-i*.04)+')';c.lineWidth=1.6;c.beginPath();const y=sy+38+i*5,w=22-i*1.5;c.moveTo(311-w+Math.sin(i)*3,y);c.lineTo(311+w+Math.cos(i)*3,y);c.stroke()}
+  for(let i=0;i<22;i++){const x=70+hs(i,1,506)*290,h=14+hs(i,2,506)*40,w=6+hs(i,3,506)*10;c.fillStyle='#2b2926';c.beginPath();c.moveTo(x-w,T+66+Math.sin(x*.03)*8);c.lineTo(x+w,T+66+Math.sin(x*.03)*8);c.lineTo(x+hs(i,4,506)*4-2,T+66+h+Math.sin(x*.03)*8);c.closePath();c.fill()}
+  for(let i=0;i<9;i++){const x=70+hs(i,1,507)*40+i*32,h=10+hs(i,2,507)*24;c.fillStyle='#24221f';c.beginPath();c.moveTo(x-7,B-18);c.lineTo(x+7,B-18);c.lineTo(x,B-18-h);c.closePath();c.fill()}
+  for(const [x,y] of [[98,sy-30],[128,sy+30],[352,sy-44],[84,sy-6],[250,sy+44]]){for(const dx of [-5,5]){const eg=c.createRadialGradient(x+dx,y,0,x+dx,y,9);eg.addColorStop(0,'rgba(255,40,30,1)');eg.addColorStop(.3,'rgba(220,20,20,.6)');eg.addColorStop(1,'rgba(200,0,0,0)');c.fillStyle=eg;c.fillRect(x+dx-9,y-9,18,18)}}
+  c.restore();
+  for(const lx of [104,300]){c.strokeStyle='#8a6a3a';c.lineWidth=2.2;c.beginPath();c.moveTo(lx,T-6);c.lineTo(lx,T+90);c.moveTo(lx+9,T-6);c.lineTo(lx+9,T+90);c.stroke();c.lineWidth=1.8;for(let y=T;y<T+90;y+=9){c.beginPath();c.moveTo(lx,y);c.lineTo(lx+9,y);c.stroke()}}
+  c.restore();
+  c.fillStyle='#4f7a34';c.beginPath();c.moveTo(L,T+8);for(let x=L;x<=R;x+=6)c.lineTo(x,T+hs(x,1,501)*8-2);for(let x=R;x>=L;x-=6)c.lineTo(x,T+hs(x,1,501)*8+6);c.closePath();c.fill();
+  for(const x of [50,90,140,200,258,320,372]){const h=22+hs(x,1,508)*18;c.fillStyle='#2e4a24';c.beginPath();c.moveTo(x,T-h);c.lineTo(x-9,T+2);c.lineTo(x+9,T+2);c.closePath();c.fill();c.fillStyle='#244018';c.beginPath();c.moveTo(x,T-h*.55);c.lineTo(x-11,T+4);c.lineTo(x+11,T+4);c.closePath();c.fill()}
+  c.strokeStyle='#1a1008';c.lineWidth=1.4;c.beginPath();c.moveTo(L,T+8);for(let x=L;x<=R;x+=6)c.lineTo(x,T+hs(x,1,501)*8-2);c.lineTo(R,B);c.lineTo(L,B);c.closePath();c.stroke();
+  return WMW_UNDER=c0}
+function wmwUnderIco(c,x,y){const im=wmwUnderMake(),w=50,h=w*im.height/im.width;c.save();c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.drawImage(im,x-w/2,y+4-h,w,h);c.restore()}
+const WMW_ICO={gardens:wmwHedgeIso,witchwood:wmwForest,underlevel:wmwUnderIco,drowned:wmwDrownIso,westgate:wmwGate};
+/* each of the four graveyard mazes is drawn as its own door from the yard (the painted pictures of the game): the mossy iron gate, the sunken stair, the stone archway and the trapdoor */
+const WMW_GMPIC=['stairFix_2','stairFix_0','gatesC_1','stairFix_3'];
+function wmwGmIco(c,l,i){const im=IMG['gyp_'+WMW_GMPIC[i]];if(!im||!im.width)return false;const h=i===3?20:32,w=h*im.width/im.height,by=l.y+9;
+  c.save();c.fillStyle='rgba(40,28,14,.3)';c.beginPath();c.ellipse(l.x,by-.5,w*.45,2.6,0,0,6.3);c.fill();c.drawImage(im,l.x-w/2,by-h,w,h);c.restore();return true}
 {const _ico=wmnIco;wmnIco=function(l){
   const f=WMW_ICO[l.k];if(f){const L=wmnLay(l);if(L){f(ctx,l.x,l.y+(L.off||0)*0,l)}return}
-  const m=/^gm(\d)$/.exec(l.k);if(m){ctx.save();ctx.filter=wmwBrickFilter(+m[1]-1);_ico(l);ctx.restore();return}
+  const m=/^gm(\d)$/.exec(l.k);if(m){if(!wmwGmIco(ctx,l,+m[1]-1)){ctx.save();ctx.filter=wmwBrickFilter(+m[1]-1);_ico(l);ctx.restore()}return}
+  if(l.k==='wellmaze'){ // four floors of purple maze stacked down, under the painted well of Wenlock
+    ctx.save();ctx.filter='hue-rotate(250deg) saturate(1.25) brightness(.82)';_ico(l);ctx.restore();
+    const L=wmnLay(l),w=IMG.kh_city1_1;if(L&&L.ib&&w&&w.width){const h=18,ww=h*w.width/w.height,top=L.ib[1];ctx.save();ctx.fillStyle='rgba(40,28,14,.28)';ctx.beginPath();ctx.ellipse(l.x,top+8.5,ww*.42,2,0,0,6.3);ctx.fill();ctx.drawImage(w,l.x-ww/2,top+8-h,ww,h);ctx.restore()}return}
   if(l.k==='thornwell'){ctx.save();ctx.filter='hue-rotate(185deg) saturate(.5) brightness(1.1)';_ico(l);ctx.restore();return}
   _ico(l)}}
 {const _f=mpWorldCreatures;mpWorldCreatures=function(V,z){_f.apply(this,arguments);try{wmwDungeonMarks(V,z)}catch(e){console.error('wmw dungeons',e)}}}

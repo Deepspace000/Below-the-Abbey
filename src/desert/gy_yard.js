@@ -12,6 +12,8 @@ WK.GRAVESTART=WK.GRAVESTART||{x:66,y:35,f:3};WK.GRAVEBACK=WK.GRAVEBACK||{x:3,y:3
 function gyRng(seed){let a=seed|0;return()=>{a=(a+0x6D2B79F5)|0;let t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296}}
 /* where things stand (cells) */
 const GY_TOMBS=[{id:536,side:'N',x:22,y:2},{id:537,side:'N',x:48,y:2},{id:538,side:'S',x:22,y:67},{id:539,side:'S',x:48,y:67},{id:540,side:'W',x:2,y:20},{id:541,side:'W',x:2,y:50}];
+/* themed areas, after the reference photos: [x0,y0,x1,y1] */
+const GY_AREAS=[[14,36,27,60],[49,9,55,34],[44,53,56,61]];
 const GY_Y={gate:{x:68,y:35},start:{x:66,y:35,f:3},crypt:{x:35,y:30},plaza:{x0:29,y0:29,x1:41,y1:41},
   doors:[{x:58,y:6,k:0,name:'The mossy iron gate',pic:'igate2'},{x:58,y:63,k:1,name:'The sunken stair',pic:'stair'},{x:12,y:63,k:2,name:'The stone archway',pic:'arch'},{x:12,y:6,k:3,name:'The trapdoor',pic:'hatch2'}],
   grave:{x:36,y:50},edmund:{x:33,y:50},hut:{x:60,y:44},chapel:{x:19,y:21}};
@@ -133,6 +135,28 @@ function gyYardBuild(){
     for(let a=-2;a<=2;a++)for(let b=0;b<=1;b++){const x=T.side==='W'?fx+b:fx+a,y=T.side==='W'?fy+a:T.side==='N'?fy+b:fy-b;used.add(x+','+y)}
     // a short cobbled walk from the lane to the door
     if(T.side==='N')pth(T.x,3,T.x,8,'3');else if(T.side==='S')pth(T.x,62,T.x,66,'3');else pth(3,T.y,12,T.y,'3')}
+  // ---- the entrance is a Gothic gatehouse: carved stone round the iron gate ----
+  for(const y of [33,34,36,37]){const gid=gyTile('texGrey_0',3.4,{fac:{img:'sceneB_4',i:y-33,n:5},gain:1.0});if(rows[y][68]!=='.'||true){rows[y][68]=ch(gid);block[y*W+68]=1}}
+  // ---- THE OVERGROWN WALK (south west): a narrow earth path winding between leaning, ivy-covered stones, under dark bushes and trees ----
+  {const wp=[[20,36],[20,40],[17,40],[17,45],[22,45],[22,50],[18,50],[18,56],[22,56]];
+   for(let i=1;i<wp.length;i++){const [a,b]=wp[i-1],[c,d]=wp[i];pth(Math.min(a,c),Math.min(b,d),Math.max(a,c),Math.max(b,d),'1')}
+   const BUSH=['lbush0','lbush0_2','pbracken'].filter(k=>IMG[k]),TR=['ltree20','ltree21','ltree2','ltree6','ltree0','ltree12','ltree19','ltree15'],ST=['lean','stone1','stone2','wcross','lean','slab','ccross'];
+   for(let y=36;y<=60;y++)for(let x=14;x<=27;x++){if(path.has(x+','+y))continue;
+     let dmin=9;for(const k of path){const [px,py]=k.split(',').map(Number);if(Math.abs(px-x)<=4&&Math.abs(py-y)<=4){const d=Math.max(Math.abs(px-x),Math.abs(py-y));if(d<dmin)dmin=d}}
+     const r=hs(x,y,31);
+     if(dmin<=2&&r<.36)D(ST[(hs(x,y,32)*ST.length)|0],x,y,{block:true,sc:.9+hs(x,y,33)*.2});
+     else if(dmin<=3&&BUSH.length&&r<.7)D(BUSH[(hs(x,y,34)*BUSH.length)|0],x,y,{block:false,sc:.8+hs(x,y,35)*.6});
+     else if(dmin>=3&&r<.55)DB(TR[(hs(x,y,36)*TR.length)|0],x,y,{sc:.95+hs(x,y,37)*.4})}}
+  // ---- THE AVENUE OF VAULTS (north east): a cobbled lane between two rows of tomb fronts, under an arch ----
+  {pth(51,9,53,34,'3');
+   for(let y=11;y<=33;y++)for(const x of [50,54]){const gid=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:(y+(x===54?1:0))%3,n:3},gain:1.0});rows[y][x]=ch(gid);block[y*W+x]=1;path.add(x+','+y)}
+   dec('arch',52,10,{sc:1.45});for(const x of [51,53])for(const y of [18,26])lamp(x,y);
+   for(const y of [14,22,30]){if(free(52,y)&&false)dec('lantern',52,y)}
+   for(const y of [12,19,27])for(const x of [49,55]){if(free(x,y))DB(['ltree20','ltree21','ltree12'][(hs(x,y,38)*3)|0],x,y,{sc:1.1})}}
+  // ---- THE AUTUMN CORNER (south): red and gold maples over a few stones in the grass ----
+  {for(let y=53;y<=61;y++)for(let x=44;x<=56;x++){const r=hs(x,y,39);if(path.has(x+','+y)||Math.abs(x-58)<=2)continue;
+     if(r<.26)DB(['ltree21','ltree20','ltree21','ltree12','ltree19'][(hs(x,y,40)*5)|0],x,y,{sc:1+hs(x,y,41)*.4});
+     else if(r<.4&&(x+y)%2===0)DB(['stone1','lean','wcross','stone2','ccross'][(hs(x,y,42)*5)|0],x,y,{sc:.95})}}
   // ---- the four doors into the mazes ----
   for(const g of GY_Y.doors){
     dec(g.pic,g.x,g.y,{block:true,npc:'gyo_door'+g.k});
@@ -162,6 +186,7 @@ function gyYardBuild(){
     if(x>=12&&x<=28&&y>=14&&y<=26)return true;   // the ruined chapel
     for(const g of GY_Y.doors)if(Math.abs(x-g.x)<=4&&Math.abs(y-g.y)<=4)return true;
     if(x>=62&&y>=32&&y<=38)return true;
+    for(const r of GY_AREAS)if(x>=r[0]&&x<=r[2]&&y>=r[1]&&y<=r[3])return true;   // the four themed areas are dressed by hand
     return false};
   for(let y=4;y<=66;y+=3)for(let x=4;x<=66;x+=2){
     if(path.has(x+','+y)||path.has((x-1)+','+y)||path.has((x+1)+','+y)||reserved(x,y)||!free(x,y))continue;
@@ -197,7 +222,7 @@ function gyYardBuild(){
   // ---- the level ----
   const rowsS=[],fmS=[];for(let y=0;y<H;y++){rowsS.push(rows[y].join(''));let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmS.push(s)}
   const mapNames=[{t:'The Lych-gate',x:65,y:35,k:'place'},{t:'The Tomb of the Crypt',x:35,y:32,k:'place'},{t:'The Mossy Iron Gate',x:58,y:9,k:'place'},{t:'The Sunken Stair',x:58,y:61,k:'place'},{t:'The Stone Archway',x:12,y:61,k:'place'},{t:'The Trapdoor',x:12,y:9,k:'place'},
-    {t:'The Ruined Chapel',x:19,y:19,k:'place'},{t:"The Gravedigger's Hut",x:60,y:42,k:'place'},{t:'The Wenlock Family Plot',x:35,y:49,k:'place'},{t:'Lady Aldith\'s Grave',x:36,y:51,k:'place'}];
+    {t:'The Overgrown Walk',x:20,y:46,k:'place'},{t:'The Avenue of Vaults',x:52,y:22,k:'place'},{t:'The Autumn Corner',x:50,y:57,k:'place'},{t:'The Ruined Chapel',x:19,y:19,k:'place'},{t:"The Gravedigger's Hut",x:60,y:42,k:'place'},{t:'The Wenlock Family Plot',x:35,y:49,k:'place'},{t:'Lady Aldith\'s Grave',x:36,y:51,k:'place'}];
   const lv={rows:rowsS,chars,fmap:fmS,floorSet:GY_FLOORSET,floor:GY_FLOORSET[0],ceil:'cloud',start:{x:GY_Y.start.x,y:GY_Y.start.y,f:GY_Y.start.f},enemies,items,decor,lights,portals:[],day:.78,outdoor:true,amb:.92,
     name:GY.NAMES[530],label:GY.NAMES[530],noExtras:true,diff:84,ceilH:5.2,noTele:true,torchGap:1e9,mapNames,
     _gy:{kind:'yard',glow,lcol:{},epitaphs:readable.length,placed:ri}};
