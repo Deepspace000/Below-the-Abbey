@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.665';
+const VERSION='3.666';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -54759,7 +54759,7 @@ function wmwUnderMake(){
 function wmwUnderIco(c,x,y){const im=wmwUnderMake(),w=50,h=w*im.height/im.width;c.save();c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.drawImage(im,x-w/2,y+4-h,w,h);c.restore()}
 const WMW_ICO={gardens:wmwHedgeIso,witchwood:wmwForest,underlevel:wmwUnderIco,drowned:wmwDrownIso,westgate:wmwGate};
 /* each of the four graveyard mazes is drawn as its own door from the yard (the painted pictures of the game): the mossy iron gate, the sunken stair, the stone archway and the trapdoor */
-const WMW_GMPIC=['stairFix_2','stairFix_0','gatesC_1','stairFix_3'];
+const WMW_GMPIC=['stairFix_2','gatesC_4','gatesC_1','stairFix_3'];
 function wmwGmIco(c,l,i){const im=IMG['gyp_'+WMW_GMPIC[i]];if(!im||!im.width)return false;const h=i===3?20:32,w=h*im.width/im.height,by=l.y+9;
   c.save();c.fillStyle='rgba(40,28,14,.3)';c.beginPath();c.ellipse(l.x,by-.5,w*.45,2.6,0,0,6.3);c.fill();c.drawImage(im,l.x-w/2,by-h,w,h);c.restore();return true}
 {const _ico=wmnIco;wmnIco=function(l){
@@ -54804,8 +54804,16 @@ function wmwAtlasData(){
   G1.push({t:'The Orange Spire',sw:'dungeon',rows:[[[440,441,442,443,444,445,446,447,448,449,450,451,452,453,454,455,456,457,458,459],'The Orange Spire','twenty floors, one above the other'],[460]].filter(r=>LEVEL_NAMES[Array.isArray(r[0])?r[0][0]:r[0]])});
   return G1}
 /* the paged flow: groups fill columns, two columns to a page */
+/* sorting: by area (the groups as they are), or every place in one list from the lowest level to the highest, or the reverse; places with no level come last */
+const WMW_SORTS=['area','low','high'],WMW_SORTN={area:'By area',low:'Low to high',high:'High to low'};
+function wmwRowLevel(r){const ids=Array.isArray(r[0])?r[0]:[r[0]];let lo=1e9;for(const v of ids){const q=LEVEL_RATING[v];if(q!==undefined&&q<lo)lo=q}return lo<1e9?lo:null}
+function wmwAtlasView(){
+  const D=wmwAtlasData(),m=(typeof G!=='undefined'&&G.wAtlasSort)||'area';if(m==='area')return D;
+  const all=[];for(const g of D)for(const r of g.rows)all.push([wmwRowLevel(r),r,g]);
+  const dir=m==='low'?1:-1;all.sort((a,b)=>{if(a[0]===null&&b[0]===null)return 0;if(a[0]===null)return 1;if(b[0]===null)return -1;return (a[0]-b[0])*dir});
+  return [{t:m==='low'?'Every place, lowest level first':'Every place, highest level first',sw:'dungeon',rows:all.map(([lv,r,g])=>[r[0],r[1],r[2]||g.t])}]}
 function wmwAtlasPages(){
-  const D=wmwAtlasData(),H=12,R=8.6,N=5.6,CAP=196,cols=[];let cur=[],used=0;
+  const D=wmwAtlasView(),H=12,R=8.6,N=5.6,CAP=196,cols=[];let cur=[],used=0;
   const rowH=r=>R+(r[2]?N:0);
   const flush=()=>{if(cur.length)cols.push(cur);cur=[];used=0};
   for(const g of D){let rows=g.rows.slice(),first=true;
@@ -54857,8 +54865,9 @@ function wmwAtlasDraw(){
   // the foot: page, and the buttons
   c.font=`italic 7px ${FUI}`;c.textAlign='center';c.fillStyle='#4a3a22';c.fillText('Page '+(pg+1)+' of '+pages.length+'.  First box: been there (ticked for you, or tap it).  Second box: finished (tap it yourself).',240,271);
   c.restore();
-  btnText('watl_back','World map',34,278,100,22);btnText('ovexit','Exit',346,278,100,22);
-  if(pg>0)btnText('watl_prev','Back',196,278,40,22);if(pg<pages.length-1)btnText('watl_next','Next',246,278,40,22)}
+  // the buttons stand in the same place on every page; Back and Next are dimmed when there is no page that way
+  btnText('watl_back','World map',34,278,96,22);btnText('watl_prev','Back',146,278,44,22);btnText('watl_next','Next',194,278,44,22);btnText('watl_sort',WMW_SORTN[G.wAtlasSort||'area'],250,278,84,22);btnText('ovexit','Exit',346,278,100,22);
+  ctx.save();ctx.fillStyle='rgba(40,28,14,.55)';if(pg<=0)ctx.fillRect(146,278,44,22);if(pg>=pages.length-1)ctx.fillRect(194,278,44,22);ctx.restore()}
 {const _dw=drawWorldMap;drawWorldMap=function(){
   if(G.wAtlas&&G._wAtlasT!==undefined&&G.time-G._wAtlasT>.6)G.wAtlas=false;   // the atlas was left open when the map was closed: the map opens afresh
   if(G.wAtlas){try{wmwAtlasDraw();return}catch(e){console.error('atlas '+e+' '+(e.stack||'').slice(0,300));G.wAtlas=false}}
@@ -54866,7 +54875,7 @@ function wmwAtlasDraw(){
 {const _hb=handleBtn;handleBtn=function(id){
   if(G.overview&&G.world&&!G.cut&&!G.talk&&!TP){
     if(id==='watlas'){G.wAtlas=true;G.wAtlasPage=0;G._wAtlasT=G.time;return}
-    if(G.wAtlas){if(id==='watl_back'){G.wAtlas=false;G._wvT=G.time;return}if(id==='watl_prev'){G.wAtlasPage=Math.max(0,(G.wAtlasPage|0)-1);return}if(id==='watl_next'){G.wAtlasPage=(G.wAtlasPage|0)+1;return}
+    if(G.wAtlas){if(id==='watl_back'){G.wAtlas=false;G._wvT=G.time;return}if(id==='watl_prev'){G.wAtlasPage=Math.max(0,(G.wAtlasPage|0)-1);return}if(id==='watl_next'){G.wAtlasPage=Math.min(wmwAtlasPages().length-1,(G.wAtlasPage|0)+1);return}if(id==='watl_sort'){G.wAtlasSort=WMW_SORTS[(WMW_SORTS.indexOf(G.wAtlasSort||'area')+1)%3];G.wAtlasPage=0;sfx('equip');return}
       {const m=/^at([vc])_(.+)$/.exec(id||'');if(m){const F=G.flags,k=m[2],map=m[1]==='v'?(F.atlasV=F.atlasV||{}):(F.atlasC=F.atlasC||{});if(m[1]==='v'&&G._atlAuto&&G._atlAuto[k])return;if(map[k])delete map[k];else map[k]=1;sfx('equip');return}}if(id==='ovexit')G.wAtlas=false}}
   return _hb.apply(this,arguments)}}
 /* where is a level shown? [how, where] or null (used by tools/worldmap_check.py) */
