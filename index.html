@@ -52925,7 +52925,7 @@ function wwLoad(){
 function wwAlias(){
   for(const a in WWA){const [n,h]=WWA[a];if(IMG[n]){IMG['ww_'+a]=WW_TREEA.includes(a)?wwDarken(IMG[n],.86):IMG[n];NPC_H['ww_'+a]=h}}
   for(const [k,n] of [['wwi_scare','guardA_0'],['wwi_hound','guardA_1'],['wwi_spider','guardA_2'],['wwi_golem','guardA_3'],['wwi_crows','guardA_4'],['wwi_toad','guardA_5'],['wwi_revenant','guardB_0'],['wwi_root','guardB_1'],['wwi_abom','guardB_2'],['wwi_wisp','guardB_3'],['wwi_crow','guardB_4'],['wwi_witch','witch_1'],['wwi_witchA','witch_0']])if(IMG[n])IMG[k]=IMG[n];
-  NPC_H.wwi_witch=2.7;NPC_H.wwi_witchA=2.6;
+  NPC_H.wwi_witch=1.7;NPC_H.wwi_witchA=2.6;
   wwFloors();
 }
 /* the ground: six pictures, brightened (the originals are very dark), as floors */
@@ -52935,14 +52935,14 @@ function wwFloors(){
   const mk=(nm,key,gain,tint)=>{const im=IMG[key];if(!im||FLOORS[nm])return;const base=dsPaintedTex(im),d=new Uint8ClampedArray(base.length);
     for(let i=0;i<d.length;i+=4){const l=(base[i]+base[i+1]+base[i+2])/3,k=tint.sat===undefined?1:tint.sat;d[i]=(l+(base[i]-l)*k)*gain*tint.r;d[i+1]=(l+(base[i+1]-l)*k)*gain*tint.g;d[i+2]=(l+(base[i+2]-l)*k)*gain*tint.b;d[i+3]=255}FLOORS[nm]=d};
   mk('wwf_moss','tex_1',.9,{r:.95,g:1.05,b:.9});mk('wwf_leaf','tex_2',1.4,{r:1.02,g:.95,b:.88});mk('wwf_dirt','tex_5',2.6,{r:1.05,g:1,b:.9});
-  mk('wwf_brook','tex_5',2.7,{r:1.1,g:1.04,b:.92,sat:.4});mk('wwf_grave','tex_3',1.9,{r:.9,g:1,b:.95});mk('wwf_board','tex_0',1.7,{r:1.15,g:.95,b:.75});
+  mk('wwf_kit','tex_3',2.1,{r:1.3,g:.95,b:.78,sat:.15});mk('wwf_brook','tex_5',2.7,{r:1.1,g:1.04,b:.92,sat:.4});mk('wwf_grave','tex_3',1.9,{r:.9,g:1,b:.95});mk('wwf_board','tex_0',1.8,{r:1.2,g:.92,b:.65,sat:.1});
   const fb={wwf_moss:'lush',wwf_leaf:'dirt',wwf_dirt:'dirt',wwf_brook:'dirt',wwf_grave:'mosscobble',wwf_board:'cobble'};
   for(const nm of WW_FLOORSET)if(!FLOORS[nm])FLOORS[nm]=FLOORS[fb[nm]]||FLOORS.cobble;
   WW._floors=1;
 }
 /* ---- wall tiles: a painted texture stood up into a tall tile (stacked, each copy slid sideways), or one slice of a big front picture (the cottage, the chapel, the gate) ---- */
 function wwTile(tex,wh,opt){
-  opt=opt||{};const key=tex+'|'+wh+'|'+(opt.fac?opt.fac.img+opt.fac.i+'/'+opt.fac.n:'')+(opt.rgb?opt.rgb.join(','):'')+(opt.gain||'');if(WW.tiles[key]!==undefined)return WW.tiles[key];
+  opt=opt||{};const key=(opt.mono?'M':'')+tex+'|'+wh+'|'+(opt.fac?opt.fac.img+opt.fac.i+'/'+opt.fac.n:'')+(opt.rgb?opt.rgb.join(','):'')+(opt.gain||'');if(WW.tiles[key]!==undefined)return WW.tiles[key];
   const im=IMG[tex],Hp=Math.round(128*wh),c=document.createElement('canvas');c.width=128;c.height=Hp;const x=c.getContext('2d');
   x.fillStyle='#0f1a12';x.fillRect(0,0,128,Hp);
   if(im){const units=Math.ceil(wh);for(let u=0;u<units;u++){const y=Hp-(u+1)*128,sh=((u*.37+(tex.length%5)*.11)%1)*128;
@@ -52951,9 +52951,11 @@ function wwTile(tex,wh,opt){
   // light: a little brighter high up, the dark foot where the wall meets the ground
   x.globalCompositeOperation='multiply';const gr=x.createLinearGradient(0,0,0,Hp);gr.addColorStop(0,'rgb(255,255,255)');gr.addColorStop(.7,'rgb(235,240,235)');gr.addColorStop(1,'rgb(170,176,170)');x.fillStyle=gr;x.fillRect(0,0,128,Hp);x.globalCompositeOperation='source-over';
   const d=x.getImageData(0,0,128,Hp).data,gain=opt.gain||(opt.fac?1.18:2.5),m=opt.rgb||[1,1,1];
+  if(opt.mono)for(let i=0;i<d.length;i+=4){const l=(d[i]+d[i+1]+d[i+2])/3;d[i]=d[i+1]=d[i+2]=l}   // drop the green of the painted texture, so the tint can make it brown or grey
   for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,d[i]*gain*m[0]*(opt.fac?1:.95));d[i+1]=Math.min(255,d[i+1]*gain*m[1]);d[i+2]=Math.min(255,d[i+2]*gain*m[2]*(opt.fac?1:.9))}
   const id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;const gid=KH_NEXT_GID++;T_TILE[gid]=id;
   {let r=0,g=0,b=0,n=0;for(let i=0;i<d.length;i+=4*37){r+=d[i];g+=d[i+1];b+=d[i+2];n++}(WW.col=WW.col||{})[gid]=[r/n|0,g/n|0,b/n|0]}
+  if((opt.fac&&!IMG[opt.fac.img])||!im)return gid;   // pictures not here yet (the level was built early): do not keep this dark stand-in
   return WW.tiles[key]=gid}
 /* ---- the creatures: level 82 guardians, the nastier ones nearer the cottage. w is the width in squares worked out from the picture and the height wanted ---- */
 function wwW(img,h){const e=typeof WW_LIST!=='undefined'&&WW_LIST[img];return e?+(h*e[1]/e[2]).toFixed(2):h*.7}
@@ -53051,7 +53053,7 @@ function wwBuild(){
   const near=(x,y,id,pad)=>{const q=Q[id];return x>=q.x0-pad&&x<=q.x1+pad&&y>=q.y0-pad&&y<=q.y1+pad};
   const wallChar=(x,y)=>{
     const wh=Math.round((4.2+hs((x/2)|0,(y/2)|0,41)*.5)*10)/10;   // tall enough to close the horizon under the 5.2 ceiling
-    if(y===0&&x>=doorX-2&&x<=doorX+2)return ch(wwTile('tex_4',4.6,{fac:{img:'front_1',i:x-(doorX-2),n:5},gain:1.3}));          // the cottage front (door in the middle: see below)
+    if(y===0&&x>=doorX-2&&x<=doorX+2)return ch(wwTile('tex_4',4.6,{fac:{img:'front_1',i:x-(doorX-2),n:5},gain:1.45,rgb:[1.3,1,.8]}));          // the cottage front (door in the middle: see below)
     if(x===W-1&&y>=39&&y<=43)return ch(wwTile('tex_3',4.2,{fac:{img:'front_0',i:y-39,n:5},gain:2.3}));                                   // the ruined chapel front
     let tex='tex_0';
     if(near(x,y,'grave',2)||near(x,y,'chapel',2)||near(x,y,'circle',1)||near(x,y,'well',1))tex='tex_3';
@@ -53149,7 +53151,7 @@ function wwBuild(){
    const setc=(x,y,gidv)=>{const c=ch(gidv);rows[y]=rows[y].slice(0,x)+c+rows[y].slice(x+1)};
    setc(gx,H-1,gid);setc(gx-1,H-1,ga);setc(gx+1,H-1,gb);
    KH_DOOR[gid]={ww:'gate',get lvl(){return WK.WENLOCK},get at(){return WK.WITCHBACK||{x:38,y:4,f:2}}};
-   const cd=wwTile('tex_4',4.6,{fac:{img:'front_1',i:2,n:5},gain:1.3});setc(doorX,0,cd);
+   const cd=wwTile('tex_4',4.6,{fac:{img:'front_1',i:2,n:5},gain:1.45,rgb:[1.3,1,.8]});setc(doorX,0,cd);
    KH_DOOR[cd]={ww:'cottage',get lvl(){return WW.COTTAGE},get at(){const L=LEVELS[WW.COTTAGE],s=L&&L.start;return s?{x:s.x,y:s.y,f:0}:{x:8,y:9,f:0}}}}
   const wshaft=[];for(const id of ['gate','grave','hang','circle','well','chapel','hollow','nw','ne'])wshaft.push([Q[id].cx,Q[id].cy-1],[Q[id].cx+2,Q[id].cy+1]);
   const mapNames=[];for(const id in Q)mapNames.push({t:WW_RNAME[id],x:Q[id].cx,y:Q[id].cy,k:'place'});
@@ -53229,12 +53231,12 @@ khNpc('wwo_plaque','A signpost','ww_sign',d=>{const t=d.txt||['',''];return say(
    The fight: she is NPC 'wwo_grisselda' until the party draws steel (or frees her captives), then the enemy 'wwwitch' (see wwWitchAct and the hurtEnemy hook in ww_quests.js).
    ========================================================================== */
 function wwBuildRooms(){
-  const wall=(tex,rgb,wh)=>wwTile(tex,wh||2.6,{gain:1.55,rgb});
+  const wall=(tex,rgb,wh)=>wwTile(tex,wh||2.6,{gain:2.4,rgb,mono:1});
   const prop=(decor,role,x,y,o)=>{const k=khProp(role);if(IMG[k]&&k.startsWith('kh_'))NPC_H[k]=khPropH(role);decor.push(Object.assign({k,x,y,block:true,deco:true},o||{}))};
   const mkRows=(W,H,doors)=>{const rows=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=(y===0||y===H-1||x===0||x===W-1)?'w':'.';rows.push(r.split(''))}for(const [x,y,c] of doors)rows[y][x]=c;return rows.map(r=>r.join(''))};
   const base=(o)=>Object.assign({day:0,amb:.6,ceil:'beam',diff:82,noExtras:true,noTele:true,items:[],enemies:[],lights:[],portals:[]},o);
   // ---- 521: the cottage ----
-  {const W=17,H=11,gid=wall('tex_0',[1.45,1.0,.62]);   // gingerbread brown
+  {const W=17,H=11,gid=wall('tex_0',[1.7,1.0,.55]);   // gingerbread brown
    const rows=mkRows(W,H,[[8,H-1,'0'],[0,5,'1'],[W-1,5,'2']]),decor=[];
    decor.push({k:'ww_cauldron',x:8,y:3,block:true,deco:true,sc:1.25});
    decor.push({k:'ww_totem',x:3,y:2,block:true,deco:true});decor.push({k:'ww_totem',x:13,y:2,block:true,deco:true});
@@ -53243,11 +53245,11 @@ function wwBuildRooms(){
    decor.push({k:'ww_charm',x:4,y:6,block:false,walk:true,deco:true});decor.push({k:'ww_charm',x:12,y:6,block:false,walk:true,deco:true});decor.push({k:'ww_ring',x:6,y:8,block:false,walk:true,deco:true});
    decor.push({k:'ww_crumbs',x:10,y:8,block:false,walk:true,deco:true});
    LEVELS[WW.COTTAGE]=base({rows,chars:{w:gid},start:{x:8,y:9,f:0},decor,floor:'wwf_board',name:"Grisselda's Cottage",label:"Grisselda's Cottage",lights:[[4,3],[12,3],[8,7],[3,8],[13,8]],
-     portals:[{to:WW.ID,x:27,y:1,f:2,tex:'in'},{to:WW.CELLAR,x:7,y:7,f:0,tex:'in',req:'wwCellarOpen',lock:'A trapdoor stair behind a heavy iron lock. Something small is crying down there. The lock is far too big for a pick: she keeps the key on one of her creatures.'},{to:WW.KITCHEN,x:6,y:7,f:0,tex:'in'}],
-     _wwl:[[8,4],[3,3],[13,3]]});
+     portals:[{to:WW.ID,x:27,y:1,f:2,tex:'in'},{to:WW.CELLAR,x:7,y:7,f:0,tex:'tomb',req:'wwCellarOpen',lock:'A trapdoor stair behind a heavy iron lock. Something small is crying down there. The lock is far too big for a pick: she keeps the key on one of her creatures.'},{to:WW.KITCHEN,x:6,y:7,f:0,tex:'shop'}],
+     _wwl:[[8,4]]});
    LEVEL_NAMES[WW.COTTAGE]="Grisselda's Cottage"}
   // ---- 522: the cellar ----
-  {const W=15,H=9,gid=wall('tex_3',[.95,1,1.05]);
+  {const W=15,H=9,gid=wall('tex_3',[.9,.98,1.15]);   // cold grey-blue cellar stone
    const rows=mkRows(W,H,[[7,H-1,'0']]),decor=[];
    decor.push({k:'ww_cagefull',x:3,y:2,block:true,npc:'wwo_cage1',i:1},{k:'ww_cagefull',x:7,y:2,block:true,npc:'wwo_cage2',i:2},{k:'ww_cagefull',x:11,y:2,block:true,npc:'wwo_cage3',i:3});
    decor.push({k:'kh_oqdogs_3',x:13,y:5,block:true,npc:'wwo_button',sc:1});NPC_H.kh_oqdogs_3=NPC_H.kh_oqdogs_3||.36;
@@ -53256,7 +53258,7 @@ function wwBuildRooms(){
    LEVELS[WW.CELLAR]=base({rows,chars:{w:gid},start:{x:7,y:7,f:0},decor,floor:'wwf_grave',name:"Grisselda's Cellar",label:"Grisselda's Cellar",lights:[[3,3],[7,3],[11,3],[7,6]],
      portals:[{to:WW.COTTAGE,x:1,y:5,f:1,tex:'in'}],_wwl:[[7,4],[2,5]]});LEVEL_NAMES[WW.CELLAR]="Grisselda's Cellar"}
   // ---- 523: the kitchen and the oven ----
-  {const W=13,H=9,gid=wall('tex_3',[1.35,.92,.75]);
+  {const W=13,H=9,gid=wall('tex_3',[1.55,1.05,.78]);   // warm terracotta kitchen
    const rows=mkRows(W,H,[[6,H-1,'0']]),decor=[];
    decor.push({k:'ww_oven',x:6,y:2,block:true,npc:'wwo_oven',sc:1.05});
    decor.push({k:'ww_cauldron',x:2,y:3,block:true,deco:true},{k:'ww_cauldron',x:10,y:3,block:true,deco:true,sc:.8});
@@ -53264,8 +53266,8 @@ function wwBuildRooms(){
    decor.push({k:'ww_gingerman',x:4,y:7,block:false,walk:true,npc:'wwo_recipe',deco:false,found:true,sc:1.4});
    prop(decor,'table',9,6);prop(decor,'kitchenshelf',1,1);prop(decor,'potshelf',11,1);prop(decor,'rack',4,1);prop(decor,'rack',8,1);prop(decor,'shelf',1,6);
    decor.push({k:'ww_charm',x:3,y:5,block:false,walk:true,deco:true},{k:'ww_crumbs',x:8,y:5,block:false,walk:true,deco:true});
-   LEVELS[WW.KITCHEN]=base({rows,chars:{w:gid},start:{x:6,y:7,f:0},decor,floor:'wwf_board',name:"Grisselda's Kitchen",label:"Grisselda's Kitchen",lights:[[3,3],[9,3],[6,6],[2,7],[10,7]],
-     portals:[{to:WW.COTTAGE,x:15,y:5,f:3,tex:'in'}],_wwl:[[6,3],[2,4],[10,4]]});LEVEL_NAMES[WW.KITCHEN]="Grisselda's Kitchen"}
+   LEVELS[WW.KITCHEN]=base({rows,chars:{w:gid},start:{x:6,y:7,f:0},decor,floor:'wwf_kit',name:"Grisselda's Kitchen",label:"Grisselda's Kitchen",lights:[[3,3],[9,3],[6,6],[2,7],[10,7]],
+     portals:[{to:WW.COTTAGE,x:15,y:5,f:3,tex:'in'}],_wwl:[]});LEVEL_NAMES[WW.KITCHEN]="Grisselda's Kitchen"}
 }
 
 /* ---- src/desert/ww_quests.js ---- */

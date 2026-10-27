@@ -51,7 +51,7 @@ function wwBuild(){
   const near=(x,y,id,pad)=>{const q=Q[id];return x>=q.x0-pad&&x<=q.x1+pad&&y>=q.y0-pad&&y<=q.y1+pad};
   const wallChar=(x,y)=>{
     const wh=Math.round((4.2+hs((x/2)|0,(y/2)|0,41)*.5)*10)/10;   // tall enough to close the horizon under the 5.2 ceiling
-    if(y===0&&x>=doorX-2&&x<=doorX+2)return ch(wwTile('tex_4',4.6,{fac:{img:'front_1',i:x-(doorX-2),n:5},gain:1.3}));          // the cottage front (door in the middle: see below)
+    if(y===0&&x>=doorX-2&&x<=doorX+2)return ch(wwTile('tex_4',4.6,{fac:{img:'front_1',i:x-(doorX-2),n:5},gain:1.45,rgb:[1.3,1,.8]}));          // the cottage front (door in the middle: see below)
     if(x===W-1&&y>=39&&y<=43)return ch(wwTile('tex_3',4.2,{fac:{img:'front_0',i:y-39,n:5},gain:2.3}));                                   // the ruined chapel front
     let tex='tex_0';
     if(near(x,y,'grave',2)||near(x,y,'chapel',2)||near(x,y,'circle',1)||near(x,y,'well',1))tex='tex_3';
@@ -149,7 +149,7 @@ function wwBuild(){
    const setc=(x,y,gidv)=>{const c=ch(gidv);rows[y]=rows[y].slice(0,x)+c+rows[y].slice(x+1)};
    setc(gx,H-1,gid);setc(gx-1,H-1,ga);setc(gx+1,H-1,gb);
    KH_DOOR[gid]={ww:'gate',get lvl(){return WK.WENLOCK},get at(){return WK.WITCHBACK||{x:38,y:4,f:2}}};
-   const cd=wwTile('tex_4',4.6,{fac:{img:'front_1',i:2,n:5},gain:1.3});setc(doorX,0,cd);
+   const cd=wwTile('tex_4',4.6,{fac:{img:'front_1',i:2,n:5},gain:1.45,rgb:[1.3,1,.8]});setc(doorX,0,cd);
    KH_DOOR[cd]={ww:'cottage',get lvl(){return WW.COTTAGE},get at(){const L=LEVELS[WW.COTTAGE],s=L&&L.start;return s?{x:s.x,y:s.y,f:0}:{x:8,y:9,f:0}}}}
   const wshaft=[];for(const id of ['gate','grave','hang','circle','well','chapel','hollow','nw','ne'])wshaft.push([Q[id].cx,Q[id].cy-1],[Q[id].cx+2,Q[id].cy+1]);
   const mapNames=[];for(const id in Q)mapNames.push({t:WW_RNAME[id],x:Q[id].cx,y:Q[id].cy,k:'place'});
