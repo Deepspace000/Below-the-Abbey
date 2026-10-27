@@ -109,17 +109,27 @@ function gyYardBuild(){
   pth(3,35,67,35,'5');pth(35,3,35,66,'5');
   pth(58,8,58,34,'5');pth(58,36,58,62,'5');pth(12,8,12,34,'5');pth(12,36,12,62,'5');
   pth(12,8,58,8,'5');pth(12,62,58,62,'5');   // the paths ring the yard, so that every door can be reached from either side
-  pth(GY_Y.plaza.x0,GY_Y.plaza.y0,GY_Y.plaza.x1,GY_Y.plaza.y1,'0');   // the ground round the tomb is grass; only the two cobbled lanes cross it
-  pth(29,35,41,35,'5');pth(35,29,35,41,'5');
+  pth(GY_Y.plaza.x0,GY_Y.plaza.y0,GY_Y.plaza.x1,GY_Y.plaza.y1,'5');   // the plaza round the tomb is cobbled, with four grass beds of flowers; two lanes cross it
+  const BEDS=[[30,32,32,34],[38,40,32,34],[30,32,36,38],[38,40,36,38]];   // [x0,x1,y0,y1]
+  for(const [x0,x1,y0,y1] of BEDS)for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){path.delete(x+','+y);fm[y*W+x]='0'}
+  // a ring of cobbled lanes round the middle of the yard (the plaza lies in the middle of it), joined to the two crossing lanes
+  pth(25,26,45,26,'5');pth(25,44,45,44,'5');pth(25,26,25,44,'5');pth(45,26,45,44,'5');
   pth(30,46,40,54,'0');   // the family plot
   setF(54,40,66,48,'0');   // the gravedigger's yard
   // ---- the boundary: a stone wall two squares thick, with the lych-gate in the east side ----
   const wallH=2.1,wt=v=>ch((typeof wwTile==='function'&&IMG.tex_1)?wwTile(['tex_1','tex_2','tex_1'][v%3],2.6,{gain:.62}):gyTile('texGrey_'+v,wallH,{gain:.62}));   // the boundary is a bank of dark leaves and mossy bark, not stone   // the boundary wall is darker, so that the far wall does not shine in the mist as pale stripes
   const WC=[0,0,0,1,3,5,0,3,2].map(wt);
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(x>=2&&x<=67&&y>=2&&y<=67)continue;solid(x,y,WC[(hs(x,y,7)*WC.length)|0])}
-  {const gid=gyTile('texGrey_0',2.5,{fac:{img:'gatesC_0',i:0,n:1},gain:1.1});KH_DOOR[gid]={lvl:WL.ID,get at(){return WK.GRAVEBACK||{x:3,y:31,f:1}},gy:'lane'};
-   const c=ch(gid);rows[GY_Y.gate.y][GY_Y.gate.x]=c;block[GY_Y.gate.y*W+GY_Y.gate.x]=1;
-   dec('lych',67,35);used.add('67,35')}
+  // the lych-gate: a built front five squares wide in the east wall: a round arch of cut stones in a high wall under a cornice with the churchyard's name, iron gates in the opening, lamps and ivy (painted once, see gyEntryPic 'gate'); the door is in the middle
+  {IMG['gyp_entry_gate']=gyEntryPic('gate');
+   for(let q=0;q<5;q++){const y=33+q,gid=gyTile('texGrey_0',3.0,{fac:{img:'entry_gate',i:q,n:5},gain:1.0,tag:'gate'+q});
+     if(q===2)KH_DOOR[gid]={lvl:WL.ID,get at(){return WK.GRAVEBACK||{x:3,y:31,f:1}},gy:'lane'};
+     rows[y][68]=ch(gid);block[y*W+68]=1}
+   for(const y of [34,36]){dec('lantern',67,y,{block:true});lights.push([67,y])}
+   for(const y of [32,33,37,38])dec('fence',67,y,{block:true,sc:.95});
+   dec('urn',67,31,{block:true});dec('urn',67,39,{block:true});
+   for(const y of [32,38])dec('bench',65,y,{block:false});
+   for(const y of [33,37])dec('rose',65,y,{sc:.5})}
   // ---- the tomb and its plaza ----
   {const cx=GY_Y.crypt.x,cy=GY_Y.crypt.y;const cd=dec('crypt',cx,cy,{block:false,npc:'gyo_crypt'});if(cd)cd.sc=.0001;   // an unseen marker for the quest signs; the tomb itself is built into the ground below
    {const mk=i=>gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i,n:3},gain:1.0}),dg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:1,n:3},gain:1.0,rgb:[1,1,1.00099]});   // the tomb's own door tile (the Avenue fronts use the plain middle slice and must not share it)
@@ -129,9 +139,16 @@ function gyYardBuild(){
    for(const [x,y] of [[31,30],[39,30],[31,40],[39,40]])dec('lantern',x,y,{block:true});
    for(const [x,y] of [[31,35],[39,35]])dec('bench',x,y,{block:false});
    for(const [x,y] of [[32,31],[38,31],[32,39],[38,39]])dec('urn',x,y,{block:true});
+   // the plaza is furnished: benches along the lanes, a flower bed in each corner with an urn in its middle, lanterns and angels round the tomb
+   for(const [x,y] of [[33,32],[37,32],[33,38],[37,38],[29,33],[41,33],[29,37],[41,37]])dec('bench',x,y,{block:false});
+   {const FL=['lflora0','pflw1_0','pflw3_0','pflw0_0','pflw2_1'].filter(k=>IMG[k]);
+    for(const [x0,x1,y0,y1] of BEDS){const mx=(x0+x1)>>1,my=(y0+y1)>>1;dec('urn',mx,my,{block:true,sc:.8});
+      for(const [dx,dy] of [[-1,-1],[1,-1],[-1,1],[1,1],[0,-1],[0,1]]){const k=(dx+dy+mx+my)&3;if(k===0||!FL.length)dec('rose',mx+dx,my+dy,{sc:.5});else dec(FL[k%FL.length],mx+dx,my+dy,{sc:.85})}}}
+   for(const [x,y] of [[29,30],[41,30],[29,40],[41,40],[29,32],[41,32],[29,38],[41,38]]){dec('lantern',x,y,{block:true});lamp(x,y)}
+   for(const [x,y] of [[33,31],[37,31]])dec('angel',x,y,{block:true,sc:.9});
    lights.push([cx-1,cy+2],[cx+1,cy+2]);glow.push([cx,cy+1])}
-  // ---- six small tombs built into the edge of the yard: a vine-covered front, and a door to walk into ----
-  for(const T of GY_TOMBS){const gid=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:1,n:3},gain:1.0}),dg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:1,n:3},gain:1.0,rgb:[1,1,1+T.id*.00001]}),lg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:0,n:3},gain:1.0}),rg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:2,n:3},gain:1.0});
+  // ---- six small tombs built into the edge of the yard: each has its own front (stone, tint, ivy, name plaque), its own pair of statues or urns, its own lamp colour, and a door to walk into ----
+  for(const T of GY_TOMBS){const st=GY_TSTYLE[T.id],lg=gyTombTile(T,st,0),dg=gyTombTile(T,st,1),rg=gyTombTile(T,st,2);
     KH_DOOR[dg]={lvl:T.id,get at(){return {x:5,y:9,f:0}},gy:'tomb'};
     const sq=T.side==='N'?[[T.x-1,2,lg],[T.x,2,dg],[T.x+1,2,rg]]:T.side==='S'?[[T.x-1,67,lg],[T.x,67,dg],[T.x+1,67,rg]]:[[2,T.y-1,lg],[2,T.y,dg],[2,T.y+1,rg]];
     for(const [x,y,t] of sq){rows[y][x]=ch(t);block[y*W+x]=1}
@@ -139,9 +156,13 @@ function gyYardBuild(){
     T.front=[fx,fy];
     for(let a=-2;a<=2;a++)for(let b=0;b<=1;b++){const x=T.side==='W'?fx+b:fx+a,y=T.side==='W'?fy+a:T.side==='N'?fy+b:fy-b;used.add(x+','+y)}
     // a short cobbled walk from the lane to the door
-    if(T.side==='N')pth(T.x,3,T.x,8,'5');else if(T.side==='S')pth(T.x,62,T.x,66,'5');else pth(3,T.y,12,T.y,'5')}
-  // ---- the entrance is a Gothic gatehouse: carved stone round the iron gate ----
-  for(const y of [33,34,36,37]){const gid=gyTile('texGrey_0',3.4,{fac:{img:'sceneB_4',i:y-33,n:5},gain:1.0});if(rows[y][68]!=='.'||true){rows[y][68]=ch(gid);block[y*W+68]=1}}
+    if(T.side==='N')pth(T.x,3,T.x,8,'5');else if(T.side==='S')pth(T.x,62,T.x,66,'5');else pth(3,T.y,12,T.y,'5')
+    // the dressing of the front: along = the way the front runs, deep = away from the door into the yard
+    const al=T.side==='W'?[0,1]:[1,0],dp=T.side==='N'?[0,1]:T.side==='S'?[0,-1]:[1,0],at=(o,d)=>[fx+al[0]*o+dp[0]*d,fy+al[1]*o+dp[1]*d];
+    for(const o of [-2,2]){const [x,y]=at(o,0);dec(st.stat[o<0?0:1],x,y,{block:true,sc:st.sc||.9})}
+    for(const o of [-1,1]){const [x,y]=at(o,0);dec('lantern',x,y,{block:true})}
+    {const [lx,ly]=at(0,1);lights.push([lx,ly]);YG_LC[lx+','+ly]=st.lamp;const [mx,my]=at(0,3);lights.push([mx,my]);YG_LC[mx+','+my]=st.lamp}
+    for(const e of st.ext||[]){const [x,y]=at(e[1],e[2]);dec(e[0],x,y,{block:!!e[3],sc:e[4]})}}
   // ---- THE OVERGROWN WALK (south west): a narrow earth path winding between leaning, ivy-covered stones, under dark bushes and trees ----
   {const wp=[[20,36],[20,40],[17,40],[17,45],[22,45],[22,50],[18,50],[18,56],[22,56]];
    for(let i=1;i<wp.length;i++){const [a,b]=wp[i-1],[c,d]=wp[i];pth(Math.min(a,c),Math.min(b,d),Math.max(a,c),Math.max(b,d),'5')}
@@ -181,14 +202,25 @@ function gyYardBuild(){
     const dy=g.y<35?1:-1;for(const dx of [-2,2])D('lean',g.x+dx,g.y+dy*2);
     for(const dx of [-3,3])D('ww_pine',g.x+dx,g.y,{block:true,sc:1})}
   // ---- the ruined chapel, the family plot, the gravedigger ----
-  {const c=GY_Y.chapel;dec('chapel',c.x,c.y,{block:true,npc:'gyo_chapel'});for(const [x,y] of [[c.x-3,c.y+2],[c.x+3,c.y+2],[c.x-2,c.y+3],[c.x+2,c.y+3]])D('lean',x,y);D('dead',c.x-4,c.y-1,{block:true});D('dead',c.x+4,c.y-1,{block:true});D('rpost',c.x+2,c.y+1,{block:true});lamp(c.x,c.y+3)}
+  {const c=GY_Y.chapel;dec('chapel',c.x,c.y,{block:true,npc:'gyo_chapel'});for(const [x,y] of [[c.x-3,c.y+2],[c.x+3,c.y+2],[c.x-2,c.y+3],[c.x+2,c.y+3]])D('lean',x,y);D('dead',c.x-4,c.y-1,{block:true});D('dead',c.x+4,c.y-1,{block:true});D('rpost',c.x+2,c.y+1,{block:true});lamp(c.x,c.y+3);   // pews in front of the open end, broken pillars, candles at the door
+   for(const [x,y] of [[c.x-1,c.y+4],[c.x+1,c.y+4]])dec('bench',x,y,{block:false,sc:.8});
+   for(const x of [c.x-3,c.x+3])dec('column',x,c.y+1,{block:true,sc:.7});dec('candles',c.x-2,c.y+1,{block:true,sc:.6});dec('candles',c.x+2,c.y+2,{block:true,sc:.6});lights.push([c.x-2,c.y+2]);YG_LC[(c.x-2)+','+(c.y+2)]=[1.5,1.0,.5]}
   {const e=GY_Y.edmund,g=GY_Y.grave;
    dec('edmund',e.x,e.y,{block:true,npc:'gyo_edmund'});dec('slab',g.x,g.y,{block:true,npc:'gyo_grave'});dec('angel',35,52,{block:true,npc:'gyo_angel'});
    
    D('bench',35,48,{block:false});D('rose',34,50);D('rose',37,50);lamp(35,50);lamp(33,52);lamp(38,52);glow.push([g.x,g.y+1]);
-   dec('ww_sign',35,47,{block:true,npc:'gyo_sign',i:2})}
+   dec('ww_sign',35,47,{block:true,npc:'gyo_sign',i:2});
+   // the plot is railed in (a gap in the north side), with the family's headstones in rows, urns and lanterns in the corners, and flowers along the railings
+   for(let x=30;x<=40;x++){if(x>=34&&x<=36)continue;dec('fence',x,46,{block:true,sc:.95});dec('fence',x,54,{block:true,sc:.95})}
+   for(let y=47;y<=53;y++){dec('fence',30,y,{block:true,sc:.95});dec('fence',40,y,{block:true,sc:.95})}
+   for(const [x,y] of [[31,47],[39,47],[31,53],[39,53]])dec('urn',x,y,{block:true,sc:.85});
+   for(const [x,y] of [[30,46],[40,46],[30,54],[40,54]]){dec('lantern',x,y,{block:true});lights.push([x,y])}
+   for(const [x,y,k] of [[32,48,'stone1'],[33,48,'lean'],[37,48,'stone2'],[38,48,'lean'],[32,52,'stone2'],[38,52,'stone1'],[32,50,'wcross'],[39,50,'wcross'],[34,53,'slab'],[37,53,'slab']])dec(k,x,y,{block:true,sc:.9});
+   for(const [x,y] of [[31,49],[31,51],[39,49],[39,51],[33,47],[37,47],[34,52],[36,53]])dec(hs(x,y,61)<.5?'rose':(IMG.lflora0?'lflora0':'rose'),x,y,{sc:hs(x,y,61)<.5?.5:.85});
+   for(const [x,y] of [[33,54],[37,54]])lamp(x,y)}
   {const h=GY_Y.hut;dec('hut',h.x,h.y,{block:true,npc:'gyo_hut'});dec('mound',56,44,{block:true,npc:'gyo_opengrave'});dec('barrow',58,42,{block:true});dec('rpost',63,42,{block:true});lamp(h.x-2,h.y+2);lamp(55,46);
-   dec('ww_sign',57,41,{block:true,npc:'gyo_sign',i:3})}
+   dec('ww_sign',57,41,{block:true,npc:'gyo_sign',i:3});
+   dec('lantern',h.x+2,h.y+1,{block:true});lights.push([h.x+2,h.y+2]);for(const x of [h.x-3,h.x+3])dec('fence',x,h.y+1,{block:true,sc:.9});dec('urn',h.x+3,h.y+2,{block:true,sc:.8})}
   // the lanes' signs
   dec('ww_sign',65,36,{block:true,npc:'gyo_sign',i:0});dec('ww_sign',34,34,{block:true,npc:'gyo_sign',i:1});dec('ww_sign',34,12,{block:true,npc:'gyo_sign',i:4});
   // ---- the plots of graves: stones at the crossings of a lattice, with gaps so that the plots can be walked ----

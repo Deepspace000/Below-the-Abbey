@@ -12,7 +12,7 @@ function gyMapDraw(c,x,L,api){
   x.save();x.beginPath();x.rect(PX,PY,PW,PH);x.clip();
   for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){
     if(wall(cx,cy)){const k=col(cx,cy),v=hash2(cx,cy,5)*12-6;x.fillStyle=`rgb(${Math.max(0,Math.min(255,k[0]*.8+v))|0},${Math.max(0,Math.min(255,k[1]*.8+v))|0},${Math.max(0,Math.min(255,k[2]*.8+v))|0})`}
-    else{const f=L.fmap[cy][cx];x.fillStyle=GYMP.ground[f]||'#cfc8b6'}
+    else{const f=L.fmap[cy][cx];x.fillStyle=((L._gy&&L._gy.ground)||GYMP.ground)[f]||'#cfc8b6'}
     x.fillRect(X(cx)-.1,Y(cy)-.1,s+.2,s+.2)}
   // the edge of every wall in ink
   x.strokeStyle=GYMP.ink;x.lineWidth=yard?.5:.7;x.lineCap='round';x.beginPath();
@@ -38,7 +38,7 @@ function gyMapDraw(c,x,L,api){
   {const a=392,b=40,w=82,lh=10.4,h=14+names.length*lh;api.panel(x,a,b,w,h);api.text(x,'Places',a+w/2,b+8,6.6,'#6a1a0e');
     names.forEach((n,i)=>{api.text(x,(i+1)+'  '+n.t.replace(/^The /,''),a+5,b+17+i*lh,5.2,INK,'left')})}
   {const a=6,b=46,w=84,h=yard?72:(L._gy&&L._gy.torch?72:58);api.panel(x,a,b,w,h);api.text(x,'Key',a+w/2,b+8,6.6,'#6a1a0e');
-    const rows=yard?[['Grass',GYMP.ground['0']],['Gravel',GYMP.ground['2']],['Flags',GYMP.ground['3']],['Bare earth',GYMP.ground['1']]]:[['Floor',GYMP.ground[(L.fmap[1]||'0')[1]]||'#cfc8b6'],['Wall',(()=>{const k=col(0,0);return `rgb(${k[0]*.8|0},${k[1]*.8|0},${k[2]*.8|0})`})()]];
+    const rows=yard?[['Grass',GYMP.ground['0']],['Gravel',GYMP.ground['2']],['Flags',GYMP.ground['3']],['Bare earth',GYMP.ground['1']]]:[['Floor',((L._gy&&L._gy.ground)||GYMP.ground)[(L.fmap[1]||'0')[1]]||'#cfc8b6'],['Wall',(()=>{const k=col(0,0);return `rgb(${k[0]*.8|0},${k[1]*.8|0},${k[2]*.8|0})`})()]];
     if(L._gy&&L._gy.torch)rows.push([L._gy.torch.name.replace(/^./,m=>m.toUpperCase())+' torch',L._gy.torch.css]);
     rows.forEach(([t,cc],i)=>{x.fillStyle=cc;x.strokeStyle=INK;x.lineWidth=.5;if(/ torch$/.test(t)){x.beginPath();x.arc(a+11,b+19+i*13,3,0,6.3);x.fill();x.stroke()}else{x.fillRect(a+6,b+16+i*13,10,6);x.strokeRect(a+6,b+16+i*13,10,6)}api.text(x,t,a+22,b+19+i*13,6,INK,'left')})}
 }

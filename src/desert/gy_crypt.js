@@ -3,6 +3,8 @@
    an altar at the north end where Lady Aldith's ghost waits, a transept with wall niches of bones, and two small side chambers. The stair up to the graveyard is in the south wall.
    When she has found peace (G.flags.gy.peace) the ghost is gone and the crypt is a quiet lit shrine: all the candles burn, a rose lies on the altar, the light is warm gold and nothing here fights.
    ========================================================================== */
+/* the crypt floor: the painted flagstone is pale and its big slabs show as light rectangles under the candles, so the crypts, tombs and vaults use it darker, with a cool tint */
+function gyCryptFloors(){const n=gyFloorTone('gyf_cflag','gyf_flag',.46,[.88,.92,1]);return GY_FLOORSET.map((f,i)=>i===3?n:f)}
 const GY_C={W:25,H:21,start:{x:12,y:17,f:0},ghost:{x:12,y:6},altar:{x:12,y:2}};
 function gyCryptBuild(){
   if(LEVELS[GY.CRYPT])return LEVELS[GY.CRYPT];
@@ -43,7 +45,7 @@ function gyCryptBuild(){
   lights.push([GY_C.ghost.x,GY_C.ghost.y+1]);lcol[GY_C.ghost.x+','+(GY_C.ghost.y+1)]=[.6,.85,1.5];
   const names=[{t:'The Apse',x:12,y:2,k:'place'},{t:'The Nave',x:12,y:11,k:'place'},{t:'The Transept',x:5,y:10,k:'place'},{t:'The Western Chamber',x:4,y:16,k:'place'},{t:'The Eastern Chamber',x:20,y:16,k:'place'}];
   const fm=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=(open(x,y)&&(x>=10&&x<=14&&y<=3))?'3':'3';fm.push(s)}
-  const L={rows,chars,fmap:fm,floorSet:GY_FLOORSET,floor:GY_FLOORSET[3],ceil:'gyc_crypt',ceilH:WH+1,start:{x:GY_C.start.x,y:GY_C.start.y,f:GY_C.start.f},enemies:[],items:[],decor,lights,portals:[],day:0,amb:.04,torchGap:1e9,noTele:true,noExtras:true,
+  const L={rows,chars,fmap:fm,floorSet:gyCryptFloors(),floor:gyCryptFloors()[3],ceil:'gyc_crypt',ceilH:WH+1,start:{x:GY_C.start.x,y:GY_C.start.y,f:GY_C.start.f},enemies:[],items:[],decor,lights,portals:[],day:0,amb:.04,torchGap:1e9,noTele:true,noExtras:true,
     name:GY.NAMES[531],label:GY.NAMES[531],diff:84,mapNames:names,peaceful:true,_gy:{kind:'crypt',lcol}};
   LEVELS[GY.CRYPT]=L;
   return L}
