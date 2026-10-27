@@ -22,10 +22,10 @@ const WL_FOLK=[
   {id:'wlo_gravedigger',n:'Sexton Moss',face:'kh_ohfolk4_1',sc:1,out:[30,20],lines:["Nobody's ever in a hurry to see me. That is the nicest thing about the trade.","Quiet lot, my customers. I have never once had a complaint."]},
   {id:'wlo_squire',n:'Piers, a young squire',face:'kh_ohfolk5_1',sc:1.02,out:[52,46],lines:["I carry the helmet. One day I will wear the helmet. Today I carry it, and it is very heavy.","Sir Gareth says courage is going forward when you are afraid. I have a great deal of practice."]},
   {id:'wlo_knight',n:'Sir Gareth of the Western March',face:'kh_ohsold1_2',sc:1.12,out:[54,52],lines:["I ride west when the road opens. Until then I am guarding the market square from, ah, unruly pigeons.","A knight does not gossip. I will tell you only that the baker's pie was last seen going east at a trot."]},
-  {id:'wlo_pedlar',n:'Silas, a pedlar',face:'kh_ohfolk5_5',sc:1.02,out:[44,53],lines:["Needles, ribbons, buttons, bells and one very good boot. I will sell you the boot at a loss.","Everything in this pack was lost by somebody and found by me. That is what finding means."]},
+  {id:'wlo_pedlar',n:'Silas, a pedlar',face:'kh_ohfolk5_5',sc:1.02,out:[44,55],lines:["Needles, ribbons, buttons, bells and one very good boot. I will sell you the boot at a loss.","Everything in this pack was lost by somebody and found by me. That is what finding means."]},
   {id:'wlo_carpenter',n:'Jack Joiner, carpenter',face:'kh_ohfolk4_0',sc:1.04,out:[60,47],lines:["Measure twice, cut once, and swear quietly. That is the whole trade.","I built the stocks on the green. Nobody has ever been in them. They are the best work of my life."]},
   {id:'wlo_mason',n:'Stubbs the mason',face:'kh_ohfolk4_1',sc:1,out:[28,45],lines:["Every stone in that church was cut by hand, and most of them were dropped on my foot.","A good wall is never finished. It is only standing, for now."]},
-  {id:'wlo_potter',n:'Clay the potter',face:'kh_ohfolk4_4',sc:1,out:[75,53],lines:["I made this jug this morning. It already has a crack. That is how you know it is honest work.","Clay is easy. It is the fire that is difficult."]},
+  {id:'wlo_potter',n:'Clay the potter',face:'kh_ohfolk4_4',sc:1,out:[51,47],lines:["I made this jug this morning. It already has a crack. That is how you know it is honest work.","Clay is easy. It is the fire that is difficult."]},
   {id:'wlo_washer',n:'Mrs Suds, the washerwoman',face:'kh_ohfolk7_2',sc:1,out:[66,55],lines:["Sheets for the inn, shirts for the squire, and a very small pair of stockings for the vicar's cat.","You can tell everything about a man by his shirt. I never say what."]},
   {id:'wlo_farmer',n:'Farmer Giles',face:'kh_ohfolk7_3',sc:1.02,out:[50,12],lines:["Wheat, barley and sheep. I have not had a day off since the old king died, and I was not told he had.","If the brook floods, I move the cow. If the cow floods, I move the brook."]},
   {id:'wlo_shepherd',n:'Meg the shepherd',face:'kh_ohfolk7_4',sc:1,out:[44,11],lines:["Forty sheep, one dog, and a very firm understanding.","Sheep are not stupid. They simply have different priorities. Mostly the grass in the next field."]},
@@ -40,9 +40,13 @@ const WL_FOLK=[
   {id:'wlo_page',n:'Wren, the mayor\'s page',face:'kh_ohfolk7_1',sc:.9,out:[27,35],lines:["I carry messages for the mayor. I am not allowed to read them. I read them anyway. They are mostly about drains.","If you see a lord with a very large hat, please tell him the soup is cold."]},
   {id:'wlo_merchant',n:'A wool merchant',face:'kh_ohfolk5_5',sc:1.02,out:[74,47],lines:["Wool is the gold of this kingdom, and I am a very comfortable man.","If you want to buy anything, I know a man. If you want to sell anything, I am that man."]},
   {id:'wlo_stall1',n:'An apple seller',face:'kh_ohfolk6_3',sc:1,out:[44,47],lines:["Apples! Sweet as a sunny day and twice as crisp. A penny each, and a bite free if you smile.","Do not eat the green ones. I am not telling you why."]},
-  {id:'wlo_stall2',n:'A cheese seller',face:'kh_ohfolk7_2',sc:1,out:[51,47],lines:["Cheese! Sharp, mild or mouldy, and the mouldy ones are the best. I have a customer who swears by them, and a doctor who swears at them.","Try a crumb. Try another. Now you have to buy."]},
-  {id:'wlo_stall3',n:'A fishwife',face:'kh_ohfolk2_0',sc:1,out:[44,53],lines:["Fish from the river, fresh as a slap. Well, fresh as yesterday.","The cat has been watching my stall since dawn. I have made my peace with this."]},
-  {id:'wlo_stall4',n:'An egg woman',face:'kh_ohfolk3_1',sc:.96,out:[53,53],lines:["Eggs, a dozen a penny. The hens are in a mood, so they are very good eggs.","I will tell you which hen laid which, if you promise not to tell the hens."]},
+  {id:'wlo_stall2',n:'A cheese seller',face:'kh_ohfolk7_2',sc:1,out:[54,52],lines:["Cheese! Sharp, mild or mouldy, and the mouldy ones are the best. I have a customer who swears by them, and a doctor who swears at them.","Try a crumb. Try another. Now you have to buy."]},
+  {id:'wlo_stall3',n:'A fishwife',face:'kh_ohfolk2_0',sc:1,out:[53,47],lines:["Fish from the river, fresh as a slap. Well, fresh as yesterday.","The cat has been watching my stall since dawn. I have made my peace with this."]},
+  {id:'wlo_stall4',n:'An egg woman',face:'kh_ohfolk3_1',sc:.96,out:[42,48],lines:["Eggs, a dozen a penny. The hens are in a mood, so they are very good eggs.","I will tell you which hen laid which, if you promise not to tell the hens."]},
+  {id:'wlo_stall5',n:'A spice seller',face:'kh_ohfolk6_5',sc:1,out:[47,47],lines:["Cinnamon, pepper, saffron.","Smell that."]},
+  {id:'wlo_stall6',n:'A jeweller',face:'kh_ohfolk2_3',sc:1,out:[54,53],lines:["Rings and charms.","Nothing here is stolen."]},
+  {id:'wlo_stall7',n:'A melon seller',face:'kh_ohfolk7_1',sc:1,out:[54,48],lines:["Melons, cold from the cellar.","Mind the crate."]},
+  {id:'wlo_stall8',n:'A jar seller',face:'kh_ohfolk1_2',sc:1,out:[42,52],lines:["Jars of ale, water and honey.","Please bring the jar back."]},
   {id:'wlo_traveller',n:'A weary traveller',face:'kh_oqmen_5',sc:1,out:[75,48],lines:["I have walked from the sea. I am told it was a short cut.","Is it always this peaceful? I keep waiting for something to happen, and it keeps not."]},
 ];
 /* the animals: dogs, cats, a goat, chickens */
@@ -64,4 +68,11 @@ function wlPlaceFolk(C){
   C.dc('greensign',4,49,{block:false,walk:true,npc:'wlo_signpost',deco:false});
   for(const [x,y] of [[10,46],[30,46],[88,46],[63,45]])C.tryDc('chicken',x,y);
 }
+/* the apple trees: a click shakes one, and half the time an apple falls into the bag */
+khNpc('wlo_appletree','An apple tree','ltree17',()=>{
+  if(Math.random()<.5){
+    if(bagAdd(mkItem('apple'))){sfx('key');msg('An apple falls from the tree.','#ffe36a')}
+    else msg('An apple falls, but your bag is full.','#e0a080');
+  }else msg('You shake the tree. Leaves fall, and no apple.','#c8b890');
+  return null});
 khNpc('wlo_signpost','A signpost','kh_ohgard2_5',()=>say('Two fingers point west and east. The west one reads TO THE WESTERN KINGDOMS, and below it, painted in a wobbly hand, (not yet open). The east one reads TO THE GARDENS. Somebody has added: AND GOOD LUCK.',[BYE]));

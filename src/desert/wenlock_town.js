@@ -132,7 +132,7 @@ function wlBuild(){
   const lamp=(x,y)=>{if(tryDc('lamp',x,y))lights.push([x,y])};
   const flowers=(x,y,sc)=>{const k=pick(['lflora0','lflora0_1','lflora0_2'],x,y,62);if(IMG[k]&&free(x,y)){used.add(x+','+y);scenery.push({k,wx:x+.5,wy:y+.5,sc:sc||1,decor:{k,walk:true,x,y}})}};
   const OAKS=['ltree0','ltree4','ltree8','ltree12','ltree19'],tree=(x,y,k)=>solidDc(k||pick(OAKS,x,y,61),x,y);
-  const apple=(x,y)=>solidDc('ltree17',x,y);
+  const apple=(x,y)=>solidDc('ltree17',x,y,{npc:'wlo_appletree',deco:false}); // click one: half the time an apple falls (wenlock_folk.js)
   const bush=(x,y)=>solidDc('lbush0',x,y,{sc:1.2});
   const A=(...k)=>wlPick(...k);      // the first picture that exists
   // ---- the ground: lawn everywhere, the square, the roads ----
