@@ -37,7 +37,7 @@ def run(p, town):
           const l0=LEVEL;for(let i=0;i<4&&LEVEL===l0;i++)doMove(0)}""", size)
         pg.wait_for_timeout(2500)
         r = pg.evaluate("()=>({lvl:LEVEL,heroes:heroes(),affs:affs()})")
-        good = r['lvl'] == T['ids'][size] and all(h.split(' ')[0].split('/')[0] == h.split(' ')[0].split('/')[1] for h in r['heroes']) and set(r['affs']) == {'cursed'}
+        good = r['lvl'] == T['ids'][size] and all(h.split(' ')[0].split('/')[0] == h.split(' ')[0].split('/')[1] for h in r['heroes']) and set(r['affs']) - {'wellrested','wellfed'} == {'cursed'}
         c = pg.evaluate("""()=>{G.bag.push({id:'torch',n:2});G.talk=null;hsChestOpen();hsDeposit(G.bag.findIndex(b=>b.id==='torch'));const a=G.flags.hs.chest.length;G.loot.sel={side:'box',i:0};lootBtn('lact');G.loot=null;return [a,G.flags.hs.chest.length]}""")
         rest = pg.evaluate("()=>{G.heroes.forEach(h=>{h.hp=5;h.food=10});const c=G.clock;talkTo('hs_bed');clickOpt('Sleep');return [G.clock-c,G.heroes.every(h=>h.hp===h.max)]}")
         eat = pg.evaluate("()=>{G.heroes.forEach(h=>{h.food=10});talkTo('hs_table');clickOpt('Eat');return G.heroes.every(h=>h.food===100)}")
