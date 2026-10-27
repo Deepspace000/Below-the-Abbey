@@ -27,7 +27,7 @@ function wlcPass(C){
   for(const [x,y] of [[6,21],[10,21],[6,24],[10,24]])C.tree(x,y,'ltree12');
   for(const [x,y] of [[7,24],[9,24],[7,27],[9,26],[7,29],[9,30]])C.flowers(x,y,1.15);
   C.tryDc('kh_ohgard1_3',9,23);for(let y=23;y<=30;y++)C.used.add('8,'+y);
-  C.decor.push({k:'sign_wlst',x:7,y:23,block:false,wd:[0,-1],txt:['THE QUIET CHAPEL','All are welcome'],sc:.85});
+  C.decor.push({k:'sign_wlst',x:7,y:23,block:false,wd:[0,-1],txt:['THE QUIET CHAPEL'],sc:.85});
   wlnPost(C,9,31,[[[-1,0],'TO THE QUIET CHAPEL','The footpath north'],[[0,1],'CHURCHYARD LANE','East to Church Lane']],'A signpost at the start of a footpath. TO THE QUIET CHAPEL, north up the gravel. Churchyard Lane runs on east to Church Lane.');
   // on the map
   C.houses.push({x0:WLCH.x0,x1:WLCH.x1,y0:WLCH.y0,y1:WLCH.y1,face:'S',door:WLCH.door,front:WLCH.front,wall:[0,-1],out:2,sty:'flint',rk:'slate',sp:null,id:WLX.CHAPEL,w:3,num:0});

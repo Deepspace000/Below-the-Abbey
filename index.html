@@ -2772,25 +2772,24 @@ function vividImg(k,d){ // each person is one colour, head to foot, a different 
   }
   x.putImageData(id2,0,0);return VIVID_CACHE[id]=c;
 }
-const SIGN_CACHE={};
+const SIGN_CACHE={},SIGN_TINTS=['132,158,204','204,152,82','116,166,110','188,92,82','152,122,170','96,152,176'],SIGN_FONTS=['Georgia,serif','"Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif','"Times New Roman",Times,Georgia,serif']; // muted paints and three related serif faces for the signs of Wenlock
 const WALKTREE=/^([glp]?tree\d|pt_|lbush)/,BURNABLE=/^[gp]?tree\d/,NOSHADOW=/^[glp]?tree\d/,SKYLINE=/^(abbeyspire|dcity|kroof)$/; // skyline sprites stand behind a wall and only the part above it shows // dead trees can be burned; no tree casts a round shadow
 function signFlip(im){return im.alt||im}   // the sign made the other way round (bracket on the right), its lettering still reading the right way
 function shopSign(d){
-  const key=(d.x*31+d.y)%2,hv=Math.abs((d.x*73856093)^(d.y*19349663)^((d.txt[0]||'').length*83492791)),id=key+'|'+(d.sc||1)+'|'+(hv%997)+'|'+d.txt.join('|');if(SIGN_CACHE[id])return SIGN_CACHE[id];
+  const key=(d.x*31+d.y)%2,wl=/^sign_wl/.test(d.k),nm=d.txt[0],hs=((nm.length*131+nm.charCodeAt(0)*17+nm.charCodeAt(nm.length-1)*7)>>>0),ti=hs%SIGN_TINTS.length,fi=(hs>>3)%SIGN_FONTS.length,id=key+'|'+(wl?nm+'|'+ti+'|'+fi:d.txt.join('|'));if(SIGN_CACHE[id])return SIGN_CACHE[id];
   const base=IMG['signb'+key];if(!base)return IMG[d.k];
   const w=base.width,h=base.height;
   const mk=flip=>mkCanvas(w,h,(x)=>{
     if(flip){x.save();x.translate(w,0);x.scale(-1,1);x.drawImage(base,0,0);x.restore()}else x.drawImage(base,0,0);
-    // every sign its own colour and its own lettering: a colour from a wide palette, a typeface and a letter colour picked from the position
-    const TP=['112,134,176','196,148,64','92,142,84','168,70,62','124,100,140','60,130,200','190,90,40','70,150,140','160,60,110','200,170,50','100,110,60','150,80,50','80,90,160','180,120,140'],TINT=TP[(hv>>3)%TP.length],
-      FONTS=['Georgia','Palatino Linotype,Book Antiqua,Palatino','Garamond,Baskerville','Cambria,Constantia','Times New Roman,Times','Trebuchet MS,Verdana','Copperplate,Papyrus,fantasy','Courier New,monospace'],FF=FONTS[(hv>>7)%FONTS.length],
-      LC=['#d6c9a0','#efe2b8','#e8d8c0','#f0e8d0','#cfd8b0','#e8c8a8'][(hv>>11)%6];
-    x.save();x.globalCompositeOperation='source-atop';x.fillStyle=`rgba(${TINT},.4)`;x.fillRect(w*.08,h*.44,w*.88,h*.56);x.restore();
+    const TINT=wl?SIGN_TINTS[ti]:{sign_church:'112,134,176',sign_bakery:'196,148,64',sign_store:'92,142,84',sign_inn:'168,70,62',sign_smith:'124,100,140',sign_bath:'60,130,200'}[d.k]||'140,120,90';
+    x.save();x.globalCompositeOperation='source-atop';x.fillStyle=`rgba(${TINT},${wl?.78:.4})`;x.fillRect(w*.08,h*.44,w*.88,h*.56);x.restore();
     x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';
-    const cx=w*(flip?.465:.535),mw=w*.68;
-    const line=(t,y,fs0,font,col)=>{let fs=fs0;x.font=`${font} ${fs}px ${FF},serif`;while(x.measureText(t).width>mw&&fs>10){fs-=2;x.font=`${font} ${fs}px ${FF},serif`}x.lineWidth=Math.max(3,fs*.16);x.strokeStyle='rgba(18,12,6,.9)';x.strokeText(t,cx,y);x.fillStyle=col;x.fillText(t,cx,y)};
-    line(d.txt[0],h*.67,h*.16,'bold',LC);
-    if(d.txt[1])line(d.txt[1],h*.84,h*.1,'italic','#b0a47e');
+    const cx=w*(flip?.465:.535),mw=w*.7,fam=wl?SIGN_FONTS[fi]:'Georgia,serif';
+    // Wenlock: one line only, big and bold; a long name is narrowed a little and then shrunk so it always sits inside the board with a margin
+    const line=(t,y,fs0,font,col)=>{let fs=fs0,sx=1;x.font=`${font} ${fs}px ${fam}`;let tw=x.measureText(t).width;if(wl&&tw>mw){sx=Math.max(.64,mw/tw);tw*=sx}while(tw>mw&&fs>10){fs-=2;x.font=`${font} ${fs}px ${fam}`;tw=x.measureText(t).width*sx}
+      x.save();x.translate(cx,y);x.scale(sx,1);x.lineWidth=Math.max(3,fs*.16);x.strokeStyle='rgba(18,12,6,.9)';x.strokeText(t,0,0);x.fillStyle=col;x.fillText(t,0,0);x.restore()};
+    line(d.txt[0],h*.7,h*(wl?.27:.16),'bold','#f0e6c2');
+    if(d.txt[1]&&!wl)line(d.txt[1],h*.84,h*.1,'italic','#b0a47e');
   });
   const c0=mk(false);c0.alt=mk(true);return SIGN_CACHE[id]=c0;
 }
@@ -2818,7 +2817,7 @@ function spriteList(){
   if(G.flora&&G.flora.length){const px=G.C.x+.5,py=G.C.y+.5;for(const f of G.flora){const dx=f.wx-px,dy=f.wy-py;if(dx*dx+dy*dy>256)continue;const im=IMG[f.k];if(!im)continue;L.push({x:f.wx,y:f.wy,img:im,w:(NPC_H[f.k]?NPC_H[f.k]*im.width/im.height:decorW(f.k))*f.sc,decor:f.decor})}} // lots of tiny tufts: only those within sixteen cells are drawn
   const DROP={well:.07,fountain:.1,chest:.05,cart:.05,barrel:.03,crate:.03,bench:.04,urn:.03,memorial:.04,statue:.03,coffin:.03,gate:.02,tree0:.15,tree1:.13,tree2:.09,tree3:.14,tree4:.15,tree5:.16,tree6:.13,tree7:.14};
   const cam=G.C||{x:0,y:0};
-  for(const d of (LEVEL===44&&G.khB?khNearDecor(cam.x,cam.y):G.decor)){if(d.found)continue;if(d.hidden)continue;if(G.decor.length>250&&((d.x-cam.x)*(d.x-cam.x)+(d.y-cam.y)*(d.y-cam.y))>1300)continue;const k=(d.wind&&IMG[d.k+'f'])?(Math.sin(G.C.a)<0?d.k+'f':d.k):(d.lk&&IMG[d.lk])?d.lk:(d.k==='grave'&&IMG.grave2&&hash2(d.x,d.y,5)>.5)?'grave2':d.k;if(d.wd&&d.txt){L.push({x:d.x+.5+d.wd[0]*.3,y:d.y+.5+d.wd[1]*.3,img:shopSign(d),w:.6*(d.sc||1),bob:.5,hang:[d.wd[0],d.wd[1]],mount:[d.wd[0],d.wd[1]],decor:d});continue}
+  for(const d of (LEVEL===44&&G.khB?khNearDecor(cam.x,cam.y):G.decor)){if(d.found)continue;if(d.hidden)continue;if(G.decor.length>250&&((d.x-cam.x)*(d.x-cam.x)+(d.y-cam.y)*(d.y-cam.y))>1300)continue;const k=(d.wind&&IMG[d.k+'f'])?(Math.sin(G.C.a)<0?d.k+'f':d.k):(d.lk&&IMG[d.lk])?d.lk:(d.k==='grave'&&IMG.grave2&&hash2(d.x,d.y,5)>.5)?'grave2':d.k;if(d.wd&&d.txt){{const hx=/^sign_wl/.test(d.k)&&d.k!=='sign_wlst'?.18:.1;L.push({x:d.x+.5+d.wd[0]*hx,y:d.y+.5+d.wd[1]*hx,img:shopSign(d),w:.8*(d.sc||1),bob:(d.bob===undefined?.3:d.bob)+.2,hang:[d.wd[0],d.wd[1]],mount:[d.wd[0],d.wd[1]],decor:d})}continue}
     if(d.pic&&d.wd&&IMG[d.k]){const im=(d.lk&&IMG[d.lk])?IMG[d.lk]:IMG[d.k],hh=NPC_H[d.k]||.6;L.push({x:d.x+.5+d.wd[0]*.47,y:d.y+.5+d.wd[1]*.47,img:im,w:hh*im.width/im.height,bob:d.bob===undefined?.45:d.bob,flat:[d.wd[0],d.wd[1]],pic:1,decor:d});continue}
     if(d.msgr&&IMG[d.k]){L.push({x:d.x+.5+d.wd[0]*.46,y:d.y+.5+d.wd[1]*.46,img:IMG[d.k],w:.55,bob:.45,flat:[d.wd[0],d.wd[1]],decor:d});continue}
     if(d.k==='lever'){const lk=IMG.hl_lever0?(d.pulled?((G.time-(d.pullT||0))<.14?'hl_lever1':'hl_lever2'):'hl_lever0'):'lever',li=IMG[lk]||IMG.lever;L.push({x:d.x+.5+d.wd[0]*.43,y:d.y+.5+d.wd[1]*.43,img:li,w:.34,bob:.34,flat:[d.wd[0],d.wd[1]],decor:d});continue} // a lever: old wood, with its off, halfway and on pictures
@@ -50290,11 +50289,11 @@ function wlBuild(){
       const sx=horizontal?h.front[0]+sgn:h.front[0],sy=horizontal?h.front[1]:h.front[1]+sgn;
       const wallCell=horizontal?[sx,h.face==='S'?h.y1:h.y0]:[h.face==='E'?h.x1:h.x0,sy];
       if(rows[wallCell[1]]&&rows[wallCell[1]][wallCell[0]]==='.')continue;
-      decor.push({k:'sign_wl'+h.id,x:sx,y:sy,block:false,wd:h.wall,txt:[h.name.toUpperCase(),h.sp.keeper||'']});break;
+      decor.push({k:'sign_wl'+h.id,x:sx,y:sy,block:false,wd:h.wall,txt:[(h.name.length>24?h.name.split(',')[0]:h.name).toUpperCase()],sc:.7,bob:(h.wall[0]+h.wall[1])>0?.4:.26});break;
     }
   }
   // the church's own sign, on the lane
-  decor.push({k:'sign_wlchurch',x:24,y:26,block:false,wd:[0,-1],txt:['SAINT WENNA\'S CHURCH','Reverend Alder']});
+  decor.push({k:'sign_wlchurch',x:24,y:26,block:false,wd:[0,-1],txt:['SAINT WENNA\'S CHURCH']});
   // ---- the churchyard: yews, graves, a stone cross, a lych-gate of its own, a low wall ----
   {const gy={x0:13,x1:35,y0:12,y1:26};
     for(let y=gy.y0;y<=gy.y1;y++)for(let x=gy.x0;x<=gy.x1;x++)if(free(x,y)){fm[y*W+x]='2'}
@@ -51553,75 +51552,108 @@ for(const [id,n,face,lines,o] of [
 const WLN_STREET={N:'High Street',S:'High Street',MW:'Mill Lane',ME:'Mill Lane',CW:'Church Lane',CE:'Church Lane',GW:'Green Lane',GE:'Green Lane',TN:'Back Track',TS:'Back Track'};
 const WLN_HINT={N:'high',S:'high',MW:'mill',ME:'mill',CW:'church',CE:'church',GW:'green',GE:'green',TN:'track',TS:'track'};
 const WLN_ODD={N:1,MW:1,CW:1,GW:1,TN:1};   // the sides that carry the odd numbers
-/* ten door colours: [name, r, g, b] */
-const WLN_DOORS=[['racing green',38,92,60],['navy blue',38,60,124],['oxblood',124,34,38],['black',36,34,36],['cream',230,216,180],['mustard',200,152,40],['plum',96,48,104],['teal',36,122,128],['slate grey',98,106,114],['terracotta',194,98,46]];
+/* eight muted door colours: [name, r, g, b] */
+const WLN_DOORS=[['racing green',44,96,66],['navy blue',44,66,128],['oxblood',128,42,44],['charcoal',54,54,60],['plum',100,56,108],['teal',40,118,122],['slate grey',104,112,122],['terracotta',190,100,56]];
 /* the house names: [name, where it likes to stand] */
 const WLN_NAMES=[['Pear Tree Cottage','any'],['Wren\'s Rest','any'],['Honeysuckle Cottage','any'],['Mill View','mill'],['The Nook','any'],['Rose Cottage','any'],['Bramble Cottage','any'],['Hollyhock House','any'],
   ['Church View','church'],['Tansy Cottage','any'],['Dove Cottage','church'],['Fiddler\'s Rest','any'],['Lavender Cottage','any'],['The Old Dairy','track'],['Sparrow Hall','any'],['Elm Tree House','any'],['Primrose Cottage','any'],
   ['Brook Cottage','mill'],['Thimble Cottage','any'],['The Sheepfold','track'],['Foxglove Cottage','any'],['Marigold House','any'],['Ivy Cottage','any'],['The Hollies','any'],['Cobbler\'s Rest','high'],['The Willows','mill'],
   ['Jasmine Cottage','any'],['Damson Cottage','green'],['Quince House','any'],['Robin\'s Nest','any'],['Bluebell Cottage','green'],['Meadow View','track'],['Orchard End','green'],['Little Thatch','any'],['Brewer\'s Cottage','high'],
   ['Lamplighter\'s Cottage','high'],['Thrush Cottage','any'],['Hazel Cottage','any'],['Apple Loft','green'],['Barley Mow','track'],['Gable End','any'],['Green View','green'],['Weaver\'s Cottage','high'],['Swallow\'s Rest','any'],['Sexton\'s Cottage','church']];
-/* ---- the brass numeral plate, the knocker, and the colour of the door, painted into a copy of the door tile ---- */
+/* ---- the colour of the door, a small brass numeral, a knocker and a letter slot, all measured from the door in the tile and painted into a copy of it ---- */
+/* where is the door in this tile? scan the bottom rows for the edges of the opening (the wall changes at the jambs) and a column up the middle for the top of the arch */
+function wlnDoorBox(x,w,hh){
+  const d=x.getImageData(0,0,w,hh).data,L=(px,py)=>{const i=(py*w+px)*4;return .3*d[i]+.59*d[i+1]+.11*d[i+2]};
+  const colM=(px,y0,y1)=>{let s=0,n=0;for(let y=y0;y<=y1;y++){s+=L(px,y);n++}return s/n};
+  const row=px=>colM(px,hh-16,hh-6);
+  let le=64-29,re=64+29;
+  for(let px=64-16;px>16;px--){if(Math.abs((row(px-1)+row(px-2)+row(px-3))/3-(row(px+1)+row(px)+row(px+2))/3)>26){le=px;break}}
+  for(let px=64+16;px<112;px++){if(Math.abs((row(px+1)+row(px+2)+row(px+3))/3-(row(px-1)+row(px)+row(px-2))/3)>26){re=px;break}}
+  let cx=(le+re)/2,hw=(re-le)/2;if(hw<20||hw>38||Math.abs(cx-64)>12){cx=64;hw=29}
+  let top=hh-100;const rowM=py=>{let s=0;for(let px=(cx-6)|0;px<=cx+6;px++)s+=L(px,py);return s/13};
+  for(let py=hh-72;py>hh-132;py--){if(Math.abs((rowM(py-1)+rowM(py-2)+rowM(py-3))/3-(rowM(py+1)+rowM(py+2)+rowM(py+3))/3)>30){top=py;break}}
+  top=Math.max(hh-118,Math.min(hh-78,top));
+  return {cx,hw,top,bot:hh-3};
+}
 function wlnDoorTile(gid,h,pal,num,fan){
-  return wlgTile(gid,'door|'+pal+'|'+num+'|'+(fan===undefined?'-':fan),(x,w,hh)=>{
-    const top=hh-128,c=WLN_DOORS[pal];
-    // the door itself: the darker pixels inside the arch of the opening take the new colour, keeping the grain and the panels
-    if(c){const X0=36,X1=94,Y0=top+28,Y1=hh-2,id=x.getImageData(X0,Y0,X1-X0,Y1-Y0),d=id.data,iw=X1-X0;
-      for(let yy=0;yy<Y1-Y0;yy++)for(let xx=0;xx<iw;xx++){const wx=X0+xx,wy=Y0+yy;
-        if(wy<top+58){const dx=wx-65,dy=wy-(top+58);if(dx*dx+dy*dy>29*29)continue}
-        const i=(yy*iw+xx)*4,r=d[i],g=d[i+1],b=d[i+2],l=.3*r+.59*g+.11*b;
-        if(l<138){const k=Math.min(1.45,.35+l/80);d[i]=Math.min(255,c[1]*k);d[i+1]=Math.min(255,c[2]*k);d[i+2]=Math.min(255,c[3]*k)}}
+  return wlgTile(gid,'door2|'+pal+'|'+num+'|'+(fan===undefined?'-':fan),(x,w,hh)=>{
+    const B=wlnDoorBox(x,w,hh),c=WLN_DOORS[pal],cx=B.cx,hw=B.hw-2,top=B.top,bot=B.bot,dh=bot-top;
+    // the door itself: every pixel inside the opening (a rectangle with a round top) is dyed, keeping its light and shade, so pale doors get a colour too
+    if(c){const X0=Math.max(0,Math.floor(cx-hw)),X1=Math.min(w,Math.ceil(cx+hw)),Y0=top,Y1=bot,id=x.getImageData(X0,Y0,X1-X0,Y1-Y0),d=id.data,iw=X1-X0;
+      for(let yy=0;yy<Y1-Y0;yy++)for(let xx=0;xx<iw;xx++){const wx=X0+xx+.5,wy=Y0+yy,ay=wy-(top+hw);
+        if(ay<0){const dx=wx-cx;if(dx*dx+ay*ay>hw*hw)continue}
+        const i=(yy*iw+xx)*4,l=(.3*d[i]+.59*d[i+1]+.11*d[i+2])/255,k=.55+.9*l;
+        d[i]=d[i]*.12+Math.min(255,c[1]*k)*.88;d[i+1]=d[i+1]*.12+Math.min(255,c[2]*k)*.88;d[i+2]=d[i+2]*.12+Math.min(255,c[3]*k)*.88}
       x.putImageData(id,X0,Y0)}
-    // the engine shows a wall tile mirrored left to right, so the things painted on it are painted in a mirror (and read the right way round in the game)
-    x.save();x.translate(w,0);x.scale(-1,1);
-    // a stained fan-light in the top of the doorway
-    if(fan!==undefined&&fan!==null){const cx=65,cy=top+62,r=21;x.save();x.beginPath();x.arc(cx,cy,r,Math.PI,0);x.lineTo(cx+r,cy+3);x.lineTo(cx-r,cy+3);x.closePath();x.clip();
-      const pal2=WLGS_SETS[fan%WLGS_SETS.length];for(let i=0;i<7;i++){const a0=Math.PI+i*Math.PI/7,a1=Math.PI+(i+1)*Math.PI/7,cc=WLGS_COL[pal2[i%pal2.length]];x.beginPath();x.moveTo(cx,cy+3);x.arc(cx,cy+3,r+4,a0,a1);x.closePath();
-        const g=x.createRadialGradient(cx,cy,2,cx,cy,r);g.addColorStop(0,cc[1]);g.addColorStop(1,cc[0]);x.fillStyle=g;x.fill();x.strokeStyle='#17140f';x.lineWidth=1.8;x.stroke()}
-      x.restore();x.strokeStyle='#17140f';x.lineWidth=2.4;x.beginPath();x.arc(cx,cy,r+1,Math.PI,0);x.lineTo(cx+r+1,cy+4);x.lineTo(cx-r-1,cy+4);x.stroke()}
-    // the knocker: a brass ring on a plate, and a letter slot
-    x.fillStyle='#b8862c';x.beginPath();x.arc(80,top+70,3.4,0,6.3);x.fill();x.strokeStyle='#e8c060';x.lineWidth=2.1;x.beginPath();x.arc(80,top+76,4.6,0,6.3);x.stroke();x.fillStyle='#8a6420';x.fillRect(52,top+86,22,4);x.fillStyle='#e0b850';x.fillRect(53,top+86,20,1.5);
-    // the number: a brass-rimmed oval of cream enamel beside the door
-    if(num){const px=111,py=top+50,s=String(num),fs=s.length>2?12:s.length>1?15:17;
-      x.save();x.fillStyle='#6a4a14';x.beginPath();x.ellipse(px,py,16.5,12,0,0,6.3);x.fill();x.fillStyle='#d8a838';x.beginPath();x.ellipse(px,py,15,10.8,0,0,6.3);x.fill();x.fillStyle='#f6eed4';x.beginPath();x.ellipse(px,py,12.6,8.6,0,0,6.3);x.fill();
-      x.strokeStyle='#8a6a20';x.lineWidth=.9;x.beginPath();x.ellipse(px,py,11,7.2,0,0,6.3);x.stroke();
-      x.font='bold '+fs+'px Georgia,serif';x.textAlign='center';x.textBaseline='middle';x.fillStyle='#1c1208';x.fillText(s,px,py+1);
-      x.fillStyle='#e8c860';for(const sx of [-15,15]){x.beginPath();x.arc(px+sx,py,1.4,0,6.3);x.fill()}x.restore()}
+    // the engine shows a wall tile mirrored left to right, so the things painted on it are painted in a mirror (and read the right way round in the game); M turns a tile x into a painting x
+    x.save();x.translate(w,0);x.scale(-1,1);const M=t=>w-t;
+    if(fan!==undefined&&fan!==null){const fx=M(cx),fy=top+hw,r=Math.min(21,hw-3);x.save();x.beginPath();x.arc(fx,fy,r,Math.PI,0);x.lineTo(fx+r,fy+3);x.lineTo(fx-r,fy+3);x.closePath();x.clip();
+      const pal2=WLGS_SETS[fan%WLGS_SETS.length];for(let i=0;i<7;i++){const a0=Math.PI+i*Math.PI/7,a1=Math.PI+(i+1)*Math.PI/7,cc=WLGS_COL[pal2[i%pal2.length]];x.beginPath();x.moveTo(fx,fy+3);x.arc(fx,fy+3,r+4,a0,a1);x.closePath();
+        const g=x.createRadialGradient(fx,fy,2,fx,fy,r);g.addColorStop(0,cc[1]);g.addColorStop(1,cc[0]);x.fillStyle=g;x.fill();x.strokeStyle='#17140f';x.lineWidth=1.8;x.stroke()}
+      x.restore();x.strokeStyle='#17140f';x.lineWidth=2.4;x.beginPath();x.arc(fx,fy,r+1,Math.PI,0);x.lineTo(fx+r+1,fy+4);x.lineTo(fx-r-1,fy+4);x.stroke()}
+    // the knocker: a small brass ring hung on the middle of the door, and a letter slot below it, both measured from the door
+    {const kx=M(cx),ky=top+dh*.46,sy=top+dh*.64,sw=Math.min(20,hw*.7);
+      x.fillStyle='#8a6420';x.beginPath();x.arc(kx,ky,2.6,0,6.3);x.fill();x.strokeStyle='#d8a838';x.lineWidth=1.7;x.beginPath();x.arc(kx,ky+4.2,3.6,0,6.3);x.stroke();
+      x.fillStyle='#6a4a14';x.fillRect(kx-sw/2,sy,sw,3.4);x.fillStyle='#e0b850';x.fillRect(kx-sw/2+.8,sy,sw-1.6,1.2)}
+    // the number: a small brass-rimmed oval on the wall beside the door, kept inside the tile and clear of the frame
+    if(num){const s=String(num),fs=s.length>2?9:s.length>1?11:12,rx=s.length>2?10.5:9,ry=7.4;
+      let pxT=cx+hw+rx+9;if(pxT+rx>w-6)pxT=cx-hw-rx-9;if(pxT-rx<6)pxT=w-rx-6;
+      const px=M(pxT),py=top+dh*.5;
+      x.save();x.fillStyle='#6a4a14';x.beginPath();x.ellipse(px,py,rx+1.2,ry+1.2,0,0,6.3);x.fill();x.fillStyle='#d8a838';x.beginPath();x.ellipse(px,py,rx,ry,0,0,6.3);x.fill();x.fillStyle='#f6eed4';x.beginPath();x.ellipse(px,py,rx-1.8,ry-1.8,0,0,6.3);x.fill();
+      x.font='bold '+fs+'px Georgia,serif';x.textAlign='center';x.textBaseline='middle';x.fillStyle='#1c1208';x.fillText(s,px,py+.6);x.restore()}
     x.restore();
   });
 }
-/* ---- white enamel street plates, in the way of the shop signs: decor with wd, txt and plate:'street' ---- */
+/* ---- white enamel street plates, in the way of the shop signs: decor with wd, txt and plate:'street'. One line only, large, shrunk to fit with a margin ---- */
 const WLN_PLATES={};
 function wlnStreetPlate(d){
-  const id=d.txt.join('|');if(WLN_PLATES[id])return WLN_PLATES[id];
-  return WLN_PLATES[id]=mkCanvas(320,150,(x,w,h)=>{
-    x.fillStyle='rgba(0,0,0,.35)';x.fillRect(6,8,w-8,h-8);
-    x.fillStyle='#161a28';x.fillRect(0,0,w-6,h-8);x.fillStyle='#f4f0e2';x.fillRect(6,6,w-18,h-20);
-    x.strokeStyle='#161a28';x.lineWidth=3;x.strokeRect(14,14,w-34,h-36);
-    x.fillStyle='#8a8678';for(const [px,py] of [[10,10],[w-16,10],[10,h-18],[w-16,h-18]]){x.beginPath();x.arc(px,py,2.4,0,6.3);x.fill()}
+  const id=d.txt[0];if(WLN_PLATES[id])return WLN_PLATES[id];
+  return WLN_PLATES[id]=mkCanvas(480,190,(x,w,h)=>{
+    x.fillStyle='rgba(0,0,0,.35)';x.fillRect(8,10,w-10,h-10);
+    x.fillStyle='#161a28';x.fillRect(0,0,w-8,h-10);x.fillStyle='#f4f0e2';x.fillRect(8,8,w-24,h-26);
+    x.strokeStyle='#161a28';x.lineWidth=4;x.strokeRect(20,20,w-48,h-50);
+    x.fillStyle='#8a8678';for(const [px,py] of [[13,13],[w-21,13],[13,h-23],[w-21,h-23]]){x.beginPath();x.arc(px,py,3,0,6.3);x.fill()}
     x.textAlign='center';x.textBaseline='middle';
-    const fit=(t,y,fs0,font,col)=>{let fs=fs0;x.font=font+' '+fs+'px Georgia,serif';while(x.measureText(t).width>w-60&&fs>10){fs-=2;x.font=font+' '+fs+'px Georgia,serif'}x.fillStyle=col;x.fillText(t,(w-6)/2,y)};
-    fit(d.txt[0],d.txt[1]?h*.42:h*.5,50,'bold','#161a28');
-    if(d.txt[1])fit(d.txt[1],h*.7,24,'italic','#3a3a46');
+    const t=d.txt[0],mw=w-96;let fs=84,sx=1;x.font='bold '+fs+'px Georgia,serif';
+    let tw=x.measureText(t).width;if(tw>mw){sx=Math.max(.78,mw/tw);tw*=sx}
+    while(tw>mw&&fs>16){fs-=2;x.font='bold '+fs+'px Georgia,serif';tw=x.measureText(t).width*sx}
+    x.save();x.translate((w-8)/2,(h-10)/2+3);x.scale(sx,1);x.fillStyle='#161a28';x.fillText(t,0,0);x.restore();
   });
 }
 {const _s=shopSign;shopSign=function(d){if(d&&d.k==='sign_wlst'&&d.txt)return wlnStreetPlate(d);return _s.apply(this,arguments)}}
-/* a freestanding street sign: a painted signpost (walk up and read it) with a plate on each of the two ways it faces */
+/* a freestanding street sign: a signpost whose two boards are painted at three times the size, one board to a street, each post with its own shapes and colours; the boards are in the picture of the post itself, so the letters read from every side (never mirrored) */
 let WLN_POSTS=0;
-function wlnPostPic(plates){   // the painted wooden signpost with the street names lettered straight onto its two boards
-  const base=IMG.greensign;if(!base||!base.width)return 'greensign';
-  const key='wlpost_'+plates.map(p=>p[1]).join('|');if(IMG[key])return key;
-  const S=2,w=base.width*S,h=base.height*S;
-  IMG[key]=mkCanvas(w,h,x=>{x.imageSmoothingEnabled=true;x.drawImage(base,0,0,w,h);
-    x.textAlign='center';x.textBaseline='middle';
-    for(const [wd,t,t2] of plates){const left=plates[0][1]===t;
-      const cx=left?w*.215:w*.785,cy=h*.265,mw=w*.33;let fs=32*S,f=()=>'bold '+fs+'px Georgia,serif';x.font=f();while(x.measureText(t).width>mw&&fs>8*S){fs-=S;x.font=f()}
-      x.lineJoin='round';x.lineWidth=Math.max(1.5,fs*.05);x.strokeStyle='rgba(255,226,170,.25)';x.strokeText(t,cx,cy+1);x.fillStyle='#2a1608';x.fillText(t,cx,cy)}});
-  NPC_H[key]=NPC_H.greensign||.8;return key}
+const WLN_BOARD=[[[104,70,44],[236,222,184]],[[60,96,70],[240,232,196]],[[110,50,46],[240,226,190]],[[44,70,108],[238,232,206]],[[84,64,104],[236,226,196]],[[52,92,98],[240,232,200]]];
+function wlnPostPic(i,names){
+  const S=3,W=825,H=849,src=IMG.greensign,c=document.createElement('canvas');c.width=550;c.height=566;const x=c.getContext('2d');x.scale(2/3,2/3);
+  x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';
+  if(src)x.drawImage(src,70,0,135,283,414-68*S,0,135*S,H);
+  const board=(bx,by,bw,bh,dir,shape,name,pal)=>{
+    x.save();x.shadowColor='rgba(0,0,0,.45)';x.shadowBlur=10;x.shadowOffsetY=6;
+    x.beginPath();const t=shape===0?bh*.42:0,L=bx,R=bx+bw,T=by,B=by+bh;
+    if(shape===2){const r=bh*.3;x.moveTo(L+r,T);x.lineTo(R-r,T);x.quadraticCurveTo(R,T,R,T+r);x.lineTo(R,B-r);x.quadraticCurveTo(R,B,R-r,B);x.lineTo(L+r,B);x.quadraticCurveTo(L,B,L,B-r);x.lineTo(L,T+r);x.quadraticCurveTo(L,T,L+r,T)}
+    else if(dir<0){x.moveTo(L+t,T);x.lineTo(R,T);x.lineTo(R,B);x.lineTo(L+t,B);if(t){x.lineTo(L,(T+B)/2)}else{x.lineTo(L,B);x.lineTo(L,T)}}
+    else{x.moveTo(L,T);x.lineTo(R-t,T);if(t){x.lineTo(R,(T+B)/2)}else{x.lineTo(R,T);x.lineTo(R,B)}x.lineTo(R-t,B);x.lineTo(L,B)}
+    x.closePath();x.fillStyle='rgb('+pal[0][0]+','+pal[0][1]+','+pal[0][2]+')';x.fill();x.restore();
+    x.save();x.clip();for(let g=0;g<14;g++){x.fillStyle='rgba(255,240,210,'+(.05+.04*((g*7+i)%3))+')';x.fillRect(L,T+g*bh/14+2,bw,2.2)}x.restore();
+    x.strokeStyle='rgb('+pal[1][0]+','+pal[1][1]+','+pal[1][2]+')';x.lineWidth=6;x.stroke();
+    // the name: one line, shrunk (and a little narrowed) to fit with a margin
+    const ix=L+(dir<0?t:0)+22,iw=bw-t-44,fonts=['Georgia','"Palatino Linotype",Palatino,"Book Antiqua",Georgia','"Times New Roman",Times,Georgia'];
+    let fs=Math.round(bh*.5),sx=1;const fam=fonts[(i+name.length)%3];x.font='bold '+fs+'px '+fam;let tw=x.measureText(name).width;
+    if(tw>iw){sx=Math.max(.76,iw/tw);tw*=sx}while(tw>iw&&fs>16){fs-=2;x.font='bold '+fs+'px '+fam;tw=x.measureText(name).width*sx}
+    x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';x.save();x.translate(ix+iw/2,(T+B)/2+3);x.scale(sx,1);
+    x.lineWidth=Math.max(5,fs*.16);x.strokeStyle='rgba(20,14,8,.85)';x.strokeText(name,0,0);x.fillStyle='rgb('+pal[1][0]+','+pal[1][1]+','+pal[1][2]+')';x.fillText(name,0,0);x.restore();
+  };
+  const pal=WLN_BOARD[i%WLN_BOARD.length],pal2=WLN_BOARD[(i+2)%WLN_BOARD.length],sh=i%3;
+  board(40,104,640,198,-1,sh,names[0],pal);
+  if(names[1])board(150,330,640,198,1,(sh+1)%3,names[1],pal2);
+  return c;
+}
 function wlnPost(C,x,y,plates,talk,rad){
   const q=C.free(x,y)?[x,y]:C.near(x,y,rad||2);if(!q)return null;
-  const id='wlo_post'+(WLN_POSTS++),pic=wlnPostPic(plates.map(p=>[p[0],p[1],p[2]]));khNpc(id,'A signpost',pic,()=>say(talk,[BYE]));
-  C.dc('greensign',q[0],q[1],{npc:id,deco:false});const dd=C.decor[C.decor.length-1];if(dd&&pic!=='greensign')dd.lk=pic;
+  const n=WLN_POSTS++,id='wlo_post'+n,key='wlpost'+n;khNpc(id,'A signpost',key,()=>say(talk,[BYE]));
+  IMG[key]=wlnPostPic(n,plates.map(p=>p[1]));NPC_H[key]=1.35;
+  C.dc(key,q[0],q[1],{npc:id,deco:false});
   return q;
 }
 /* ---- the pass ---- */
@@ -51638,7 +51670,7 @@ function wlnPass(C){
   const forge=homes.find(h=>h.sideKey==='N'&&h.x0===14);if(forge)forge.hname='The Old Forge House';
   homes.forEach((h,i)=>{if(h.hname)return;if(hs(h.x0,h.y0,44)<.1)return;h.hname=take(WLN_HINT[h.sideKey]);});
   // 3. doors: colour, knocker, number, fan-light; and the name board beside the door
-  const FAN={chandler:3,school:1,almshouse:4};
+  const FAN={chandler:3,school:1,almshouse:4},cand=[];
   houses.forEach((h,k)=>{
     if(!h.num)return;
     const dc=rows[h.door[1]][h.door[0]],gid=chars[dc];if(!gid)return;
@@ -51652,9 +51684,15 @@ function wlnPass(C){
         const sx=horizontal?h.front[0]+sgn:h.front[0],sy=horizontal?h.front[1]:h.front[1]+sgn;
         const wallCell=horizontal?[sx,h.face==='S'?h.y1:h.y0]:[h.face==='E'?h.x1:h.x0,sy];
         if(!rows[wallCell[1]]||rows[wallCell[1]][wallCell[0]]==='.')continue;
-        C.decor.push({k:'sign_wlh'+h.id,x:sx,y:sy,block:false,wd:h.wall,txt:[h.hname,h.num+' '+h.street],sc:.78});break}
+        cand.push({k:'sign_wlh'+h.id,x:sx,y:sy,block:false,wd:h.wall,txt:[h.hname],sc:.56,bob:(k%2)?.4:.22});break}
     }
   });
+  // a hanging board hides the ones behind it when you look along a street, so two boards never share a stretch of street: a house name is left off when another board (a shop, a notice, a name already kept)
+  // hangs on the same street within five squares, on either wall
+  {const kept=C.decor.filter(d=>d.wd&&d.txt&&/^sign_wl/.test(d.k)&&d.k!=='sign_wlst');
+    for(const c of cand){const ax=c.wd[0]?0:1;
+      const clash=kept.some(s=>{if((s.wd[0]?0:1)!==ax)return false;const across=ax===0?Math.abs(s.x-c.x):Math.abs(s.y-c.y),along=ax===0?Math.abs(s.y-c.y):Math.abs(s.x-c.x);return across<=1&&along<5});
+      if(!clash){kept.push(c);C.decor.push(c)}}}
   // 4. the street signs at the corners
   wlnPost(C,23,49,[[[1,0],'CHURCH LANE','North to the church'],[[0,1],'HIGH STREET','Nos 1 to 35']],'A signpost at the corner. One board reads CHURCH LANE, north to the church. The other reads HIGH STREET.');
   wlnPost(C,71,51,[[[1,0],'MILL LANE','South to the mill'],[[0,-1],'HIGH STREET','Nos 2 to 24']],'A signpost at the corner. One board reads MILL LANE, south to the brook and the mill. The other reads HIGH STREET.');
@@ -51666,8 +51704,7 @@ function wlnPass(C){
   wlnPost(C,29,52,[[[1,0],'THE VILLAGE GREEN','Duck pond. Please do not feed the ducks.'],[[0,-1],'HIGH STREET','Back to the square']],'A signpost at the head of the path. THE VILLAGE GREEN, with a duck pond. Underneath: please do not feed the ducks. Somebody has added: they feed themselves.');
   wlnPost(C,73,83,[[[-1,0],'MILL LANE','The brook and the mill'],[[0,-1],'HIGH STREET','Back up the lane']],'A signpost by the bridge. MILL LANE, over the old bridge to the mill. HIGH STREET is back up the lane.');
   // the bridge: plates on the low parapets
-  C.decor.push({k:'sign_wlst',x:72,y:84,block:false,wd:[-1,0],txt:['THE OLD BRIDGE','Built 1412'],plate:'street',sc:.8});
-  C.decor.push({k:'sign_wlst',x:72,y:85,block:false,wd:[1,0],txt:['WENLOCK BROOK','Mind the ducks'],plate:'street',sc:.8});
+  C.decor.push({k:'sign_wlst',x:72,y:84,block:false,wd:[-1,0],txt:['THE OLD BRIDGE'],plate:'street',sc:.8});
   wlnGate(C);
 }
 /* the west gate, a proper one: oak leaves bound in iron under the arch, a lamp each side, a board overhead */
@@ -51687,7 +51724,7 @@ function wlnGate(C){
   const id=addTex(x.getImageData(0,0,w,h).data,null);TEX[id].h=h;TEX[id].wh=T.wh;T_DOORS.wlgate2=id;
   // a lamp each side of the gate and a board over it
   for(const [lx,ly] of [[3,49],[3,51]])C.lamp(lx,ly);
-  C.decor.push({k:'sign_wlst',x:3,y:50,block:false,wd:[-1,0],txt:['WEST GATE','Not yet open'],plate:'street',sc:.9});
+  C.decor.push({k:'sign_wlst',x:3,y:50,block:false,wd:[-1,0],txt:['WEST GATE'],plate:'street',sc:.9});
 }
 
 /* ---- src/desert/wenlock_chapel.js ---- */
@@ -51720,7 +51757,7 @@ function wlcPass(C){
   for(const [x,y] of [[6,21],[10,21],[6,24],[10,24]])C.tree(x,y,'ltree12');
   for(const [x,y] of [[7,24],[9,24],[7,27],[9,26],[7,29],[9,30]])C.flowers(x,y,1.15);
   C.tryDc('kh_ohgard1_3',9,23);for(let y=23;y<=30;y++)C.used.add('8,'+y);
-  C.decor.push({k:'sign_wlst',x:7,y:23,block:false,wd:[0,-1],txt:['THE QUIET CHAPEL','All are welcome'],sc:.85});
+  C.decor.push({k:'sign_wlst',x:7,y:23,block:false,wd:[0,-1],txt:['THE QUIET CHAPEL'],sc:.85});
   wlnPost(C,9,31,[[[-1,0],'TO THE QUIET CHAPEL','The footpath north'],[[0,1],'CHURCHYARD LANE','East to Church Lane']],'A signpost at the start of a footpath. TO THE QUIET CHAPEL, north up the gravel. Churchyard Lane runs on east to Church Lane.');
   // on the map
   C.houses.push({x0:WLCH.x0,x1:WLCH.x1,y0:WLCH.y0,y1:WLCH.y1,face:'S',door:WLCH.door,front:WLCH.front,wall:[0,-1],out:2,sty:'flint',rk:'slate',sp:null,id:WLX.CHAPEL,w:3,num:0});

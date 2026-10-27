@@ -224,11 +224,11 @@ function wlBuild(){
       const sx=horizontal?h.front[0]+sgn:h.front[0],sy=horizontal?h.front[1]:h.front[1]+sgn;
       const wallCell=horizontal?[sx,h.face==='S'?h.y1:h.y0]:[h.face==='E'?h.x1:h.x0,sy];
       if(rows[wallCell[1]]&&rows[wallCell[1]][wallCell[0]]==='.')continue;
-      decor.push({k:'sign_wl'+h.id,x:sx,y:sy,block:false,wd:h.wall,txt:[h.name.toUpperCase(),h.sp.keeper||'']});break;
+      decor.push({k:'sign_wl'+h.id,x:sx,y:sy,block:false,wd:h.wall,txt:[(h.name.length>24?h.name.split(',')[0]:h.name).toUpperCase()],sc:.7,bob:(h.wall[0]+h.wall[1])>0?.4:.26});break;
     }
   }
   // the church's own sign, on the lane
-  decor.push({k:'sign_wlchurch',x:24,y:26,block:false,wd:[0,-1],txt:['SAINT WENNA\'S CHURCH','Reverend Alder']});
+  decor.push({k:'sign_wlchurch',x:24,y:26,block:false,wd:[0,-1],txt:['SAINT WENNA\'S CHURCH']});
   // ---- the churchyard: yews, graves, a stone cross, a lych-gate of its own, a low wall ----
   {const gy={x0:13,x1:35,y0:12,y1:26};
     for(let y=gy.y0;y<=gy.y1;y++)for(let x=gy.x0;x<=gy.x1;x++)if(free(x,y)){fm[y*W+x]='2'}
