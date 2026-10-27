@@ -92,7 +92,7 @@ function gyYardBuild(){
   const isOpen=(x,y)=>x>=2&&y>=2&&x<=67&&y<=67&&rows[y][x]==='.';
   const free=(x,y)=>isOpen(x,y)&&!used.has(x+','+y);
   const setF=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(x>=0&&y>=0&&x<W&&y<H)fm[y*W+x]=f};
-  const pth=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){path.add(x+','+y);fm[y*W+x]=f||'2'}};
+  const pth=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){path.add(x+','+y);fm[y*W+x]=f||'3'}};
   const dec=(a,x,y,o)=>{o=o||{};const k=GYA[a]?'gy_'+a:a;if(!isOpen(x,y))return null;const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}
     if(o.sc)d.sc=o.sc;if(o.npc){d.npc=o.npc;d.deco=false}if(o.i!==undefined)d.i=o.i;if(o.wd){d.wd=o.wd;d.pic=1}if(o.txt)d.txt=o.txt;
     decor.push(d);used.add(x+','+y);return d};
@@ -101,11 +101,11 @@ function gyYardBuild(){
   const foe=(t,x,y)=>{if(!free(x,y))return false;enemies.push({t,x,y,lvl:84});used.add(x+','+y);return true};
   const lamp=(x,y)=>{if(isOpen(x,y)){lights.push([x,y])}};
   // ---- the ground: grass; gravel paths; a flagged plaza; bare earth round the gravedigger ----
-  pth(3,35,67,35,'2');pth(35,3,35,66,'2');
-  pth(58,8,58,34,'2');pth(58,36,58,62,'2');pth(12,8,12,34,'2');pth(12,36,12,62,'2');
-  pth(12,8,58,8,'2');pth(12,62,58,62,'2');   // the paths ring the yard, so that every door can be reached from either side
-  pth(GY_Y.plaza.x0,GY_Y.plaza.y0,GY_Y.plaza.x1,GY_Y.plaza.y1,'3');
-  pth(30,46,40,54,'2');   // the family plot
+  pth(3,35,67,35,'3');pth(35,3,35,66,'3');
+  pth(58,8,58,34,'3');pth(58,36,58,62,'3');pth(12,8,12,34,'3');pth(12,36,12,62,'3');
+  pth(12,8,58,8,'3');pth(12,62,58,62,'3');   // the paths ring the yard, so that every door can be reached from either side
+  pth(GY_Y.plaza.x0,GY_Y.plaza.y0,GY_Y.plaza.x1,GY_Y.plaza.y1,'5');
+  pth(30,46,40,54,'3');   // the family plot
   setF(54,40,66,48,'1');   // the gravedigger's yard
   // ---- the boundary: a stone wall two squares thick, with the lych-gate in the east side ----
   const wallH=2.1,wt=v=>ch(gyTile('texGrey_'+v,wallH,{gain:.62}));   // the boundary wall is darker, so that the far wall does not shine in the mist as pale stripes
@@ -121,12 +121,14 @@ function gyYardBuild(){
    for(const [x,y] of [[31,35],[39,35]])dec('bench',x,y,{block:false});
    for(const [x,y] of [[32,31],[38,31],[32,39],[38,39]])dec('urn',x,y,{block:true});
    lights.push([cx-1,cy+2],[cx+1,cy+2]);glow.push([cx,cy+1])}
+  // ---- two lines of tall wrought iron fence divide the yard into three areas (the west, the tomb and the east); a tall gate stands open wherever a cobbled path crosses ----
+  for(const fx of [27,43]){for(let y=3;y<=66;y++){if([8,35,62].includes(y))dec('igate',fx,y,{sc:1.3});else dec('fence',fx,y,{block:true,sc:1.3})}}
   // ---- the four doors into the mazes ----
   for(const g of GY_Y.doors){
     dec(g.pic,g.x,g.y,{block:true,npc:'gyo_door'+g.k});
     lamp(g.x-1,g.y+(g.y<35?2:-2));lamp(g.x+1,g.y+(g.y<35?2:-2));
     const dy=g.y<35?1:-1;for(const dx of [-2,2])D('lean',g.x+dx,g.y+dy*2);
-    for(const dx of [-3,3])D('yew',g.x+dx,g.y+(g.y<35?0:0),{block:true,sc:.9})}
+    for(const dx of [-3,3])D('ww_pine',g.x+dx,g.y,{block:true,sc:1})}
   // ---- the ruined chapel, the family plot, the gravedigger ----
   {const c=GY_Y.chapel;dec('chapel',c.x,c.y,{block:true,npc:'gyo_chapel'});for(const [x,y] of [[c.x-3,c.y+2],[c.x+3,c.y+2],[c.x-2,c.y+3],[c.x+2,c.y+3]])D('lean',x,y);D('dead',c.x-4,c.y-1,{block:true});D('dead',c.x+4,c.y-1,{block:true});D('rpost',c.x+2,c.y+1,{block:true});lamp(c.x,c.y+3)}
   {const e=GY_Y.edmund,g=GY_Y.grave;
@@ -163,15 +165,22 @@ function gyYardBuild(){
   // any epitaph not yet placed goes on a stone next to a path, so that all of them can be read
   {const spots=[];for(let y=4;y<=66;y++)for(let x=4;x<=66;x++){if(free(x,y)&&!path.has(x+','+y)&&!reserved(x,y)&&(path.has((x+1)+','+y)||path.has((x-1)+','+y))&&(x+y)%2===0)spots.push([x,y])}
     while(ri<readable.length&&spots.length){const [x,y]=spots.splice((R()*spots.length)|0,1)[0];if(!free(x,y))continue;DB(R()<.5?'stone1':'stone2',x,y,{npc:'gyo_stone',i:readable[ri++]})}}
+  // ---- every grave stone stands in a plot of bare dirt, with the grass round it ----
+  for(const d of decor){if(!d.block||!/^gy_(stone1|stone2|lean|slab|wcross|ccross|tomb|urn|angel|obelisk|column|mausoleum)$/.test(d.k))continue;
+    const big=/^gy_(angel|obelisk|column|mausoleum|tomb)$/.test(d.k);
+    for(let dy=-(big?1:0);dy<=(big?2:1);dy++)for(let dx=-1;dx<=1;dx++){const x=d.x+dx,y=d.y+dy;if(x<2||y<2||x>67||y>67||path.has(x+','+y)||fm[y*W+x]!=='0')continue;fm[y*W+x]='1'}}
   // ---- trees, ravens, flowers, bones, the iron fence along the plots ----
-  for(const [x,y] of [[4,4],[65,4],[4,65],[65,65],[22,4],[48,4],[22,65],[48,65],[4,22],[4,48],[65,22],[65,48]])DB('yew',x,y,{sc:1});
-  for(let n=0;n<44;n++){const x=3+((hs(n,1,21)*64)|0),y=3+((hs(n,2,21)*64)|0);if(!free(x,y)||path.has(x+','+y)||reserved(x,y))continue;DB(hs(n,3,21)<.45?'yew':'dead',x,y,{sc:.9+hs(n,4,21)*.25})}
+  const FIR=n=>hs(n[0],n[1],24)<.5?'ww_pine':'ww_pine2';
+  for(let i=4;i<=65;i+=2){for(const [x,y] of [[i,4],[i,65],[4,i],[65,i]]){if(hs(x,y,25)<.78)DB(FIR([x,y]),x,y,{sc:.95+hs(x,y,26)*.4})}}   // a dark wall of firs all round the yard
+  for(let n=0;n<190;n++){const x=3+((hs(n,1,21)*64)|0),y=3+((hs(n,2,21)*64)|0);if(!free(x,y)||path.has(x+','+y)||reserved(x,y))continue;const r=hs(n,3,21);DB(r<.82?FIR([x,y]):'dead',x,y,{sc:.9+hs(n,4,21)*.35})}
   for(let n=0;n<18;n++){const x=3+((hs(n,1,22)*64)|0),y=3+((hs(n,2,22)*64)|0);if(free(x,y)&&!path.has(x+','+y)&&!reserved(x,y))DB('rpost',x,y)}
   for(let n=0;n<16;n++){const x=3+((hs(n,1,23)*64)|0),y=3+((hs(n,2,23)*64)|0);if(free(x,y)&&!path.has(x+','+y))D('bones',x,y,{sc:.8})}
   for(let x=4;x<=66;x+=4){for(const y of [3,66]){if(free(x,y)&&!path.has(x+','+y))D('fence',x,y,{block:true,sc:.9})}}
   // lanterns along the main paths
-  for(let x=6;x<=64;x+=8){for(const y of [34,36])if(free(x,y)&&!(x>=28&&x<=42)){lamp(x,y);break}}
-  for(let y=6;y<=64;y+=8){for(const x of [34,36])if(free(x,y)&&!(y>=28&&y<=42)){lamp(x,y);break}}
+  for(let x=6;x<=64;x+=8){for(const y of [34,36])if(free(x,y)&&!(x>=28&&x<=42)){if(DB('lantern',x,y))lights.push([x,y]);break}}
+  for(let y=6;y<=64;y+=8){for(const x of [34,36])if(free(x,y)&&!(y>=28&&y<=42)){if(DB('lantern',x,y))lights.push([x,y]);break}}
+  // cobwebs hang between the trees, stones and fences
+  {const bs=new Set();for(const d of decor)if(d.block)bs.add(d.x+','+d.y);for(let n=0;n<110;n++){const x=3+((hs(n,1,27)*64)|0),y=3+((hs(n,2,27)*64)|0);if(!free(x,y)||path.has(x+','+y))continue;if([[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>bs.has((x+a)+','+(y+b))))D('web',x,y,{sc:.7+hs(n,3,27)*.5})}}
   for(let x=14;x<=56;x+=10){lamp(x,7);lamp(x,63)}
   for(const g of GY_Y.doors){for(let k=1;k<=3;k++)lamp(g.x+(g.x>35?-1:1),g.y+(g.y<35?k*5:-k*5))}
   // ---- the living: the gravedigger's apprentice, and the things that live here ----
@@ -183,7 +192,7 @@ function gyYardBuild(){
   const rowsS=[],fmS=[];for(let y=0;y<H;y++){rowsS.push(rows[y].join(''));let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmS.push(s)}
   const mapNames=[{t:'The Lych-gate',x:65,y:35,k:'place'},{t:'The Tomb of the Crypt',x:35,y:32,k:'place'},{t:'The Mossy Iron Gate',x:58,y:9,k:'place'},{t:'The Sunken Stair',x:58,y:61,k:'place'},{t:'The Stone Archway',x:12,y:61,k:'place'},{t:'The Trapdoor',x:12,y:9,k:'place'},
     {t:'The Ruined Chapel',x:19,y:19,k:'place'},{t:"The Gravedigger's Hut",x:60,y:42,k:'place'},{t:'The Wenlock Family Plot',x:35,y:49,k:'place'},{t:'Lady Aldith\'s Grave',x:36,y:51,k:'place'}];
-  const lv={rows:rowsS,chars,fmap:fmS,floorSet:GY_FLOORSET,floor:GY_FLOORSET[0],ceil:'cloud',start:{x:GY_Y.start.x,y:GY_Y.start.y,f:GY_Y.start.f},enemies,items,decor,lights,portals:[],day:.66,outdoor:true,amb:.92,
+  const lv={rows:rowsS,chars,fmap:fmS,floorSet:GY_FLOORSET,floor:GY_FLOORSET[0],ceil:'cloud',start:{x:GY_Y.start.x,y:GY_Y.start.y,f:GY_Y.start.f},enemies,items,decor,lights,portals:[],day:.4,outdoor:true,amb:.56,
     name:GY.NAMES[530],label:GY.NAMES[530],noExtras:true,diff:84,ceilH:5.2,noTele:true,torchGap:1e9,mapNames,
     _gy:{kind:'yard',glow,lcol:{},epitaphs:readable.length,placed:ri}};
   // ---- check: everything that can be walked to can be reached from the lych-gate; a piece that walls something in is made walk-through ----

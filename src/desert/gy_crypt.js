@@ -35,6 +35,9 @@ function gyCryptBuild(){
   for(const [x,y] of [[9,1],[15,1],[3,8],[21,8],[9,4],[15,4],[3,14],[21,14],[8,16],[16,16]])dec('web',x,y,{sc:.8});
   for(const [x,y] of [[5,17],[6,15],[19,17],[18,15],[3,18]])dec('bones',x,y,{sc:.9});
   light(12,17,[1.1,.85,.55]);
+  // glowing lights: a cold blue-green glow in every niche and at each sarcophagus, and more candle stands about the nave
+  for(const [x,y] of [[2,9],[2,11],[22,9],[22,11],[9,5],[15,5],[9,8],[15,8],[9,13],[15,13],[9,15],[15,15],[12,13],[12,6]])light(x,y,[.45,1.05,.95]);
+  for(const [x,y] of [[11,4],[13,4],[11,15],[13,15],[6,9],[18,9],[6,11],[18,11]]){dec('candles',x,y,{block:true,sc:.65});light(x,y,[1.5,1.0,.5])}
   // the ghost, on the step before the apse (her picture follows the story; see gyArrive)
   dec('ghost0',GY_C.ghost.x,GY_C.ghost.y,{block:true,npc:'gyo_ghost'});
   lights.push([GY_C.ghost.x,GY_C.ghost.y+1]);lcol[GY_C.ghost.x+','+(GY_C.ghost.y+1)]=[.6,.85,1.5];
