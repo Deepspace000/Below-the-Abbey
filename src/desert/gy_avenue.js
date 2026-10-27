@@ -37,7 +37,7 @@ function gyAvenueBuild(){
     enemies.push({t:GY_AV_FOES[i],x:cx,y:v.mid,lvl:86})});
   const fm=[];for(let y=0;y<H;y++)fm.push('3'.repeat(W));
   const names=[{t:'The Hall of the Avenue',x:15,y:9,k:'place'}];vaults.forEach((v,i)=>names.push({t:'Vault '+(i+1),x:v.x0+2,y:v.mid,k:'place'}));
-  const L={rows,chars,fmap:fm,floorSet:GY_FLOORSET,floor:GY_FLOORSET[3],ceil:'gyc_crypt',ceilH:WH+1,start:{x:GY_AV.start.x,y:GY_AV.start.y,f:GY_AV.start.f},enemies,items:[],decor,lights,portals:[],day:0,amb:.05,torchGap:1e9,noTele:true,noExtras:true,
+  const L={rows,chars,fmap:fm,floorSet:gyCryptFloors(),floor:gyCryptFloors()[3],ceil:'gyc_crypt',ceilH:WH+1,start:{x:GY_AV.start.x,y:GY_AV.start.y,f:GY_AV.start.f},enemies,items:[],decor,lights,portals:[],day:0,amb:.05,torchGap:1e9,noTele:true,noExtras:true,
     name:GY.NAMES[542],label:GY.NAMES[542],diff:85,mapNames:names,_gy:{kind:'crypt',lcol}};
   LEVELS[GY_AV.ID]=L;LEVEL_NAMES[GY_AV.ID]=GY.NAMES[542];LEVEL_RATING[GY_AV.ID]=85;
   return L}

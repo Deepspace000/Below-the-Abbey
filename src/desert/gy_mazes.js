@@ -18,7 +18,7 @@ const GYM_SPEC=[
  {seed:86043,brick:'texBlack',vars:[2,3,5,5,1,3,2,4,3,5],name:GY.NAMES[534],lcol:[.45,.78,1.6],torch:{fl:3,col:[.45,.8,1.7],name:'blue',css:'#4f9cff'},floor:'5',floor2:'3',ceil:'gyc_2',
   rooms:[{id:'start',kind:'start',i:0,j:13,w:2,h:2},{id:'boss',kind:'boss',i:11,j:0,w:4,h:3},{id:'moot',kind:'hall',w:3,h:3,zone:[3,8,4,9]},{id:'sorrow',kind:'hall',w:3,h:2,zone:[8,12,7,12]},{id:'vigil',kind:'chapel',w:2,h:2,zone:[1,5,1,5]}],
   foes:[['gywraith',4],['gyshade',4],['gybanshee',4]],count:24},
- {seed:87057,brick:'texBone',name:GY.NAMES[535],lcol:[.96,.62,1.22],torch:{fl:2,col:[.96,.6,1.26],name:'purple',css:'#b06cf0'},floor:'4',floor2:'2',ceil:'gyc_3',
+ {seed:87057,brick:'texBone',name:GY.NAMES[535],lcol:[.68,.45,.88],torch:{fl:2,col:[.56,.36,.74],name:'purple',css:'#b06cf0'},floor:'4',floor2:'2',ceil:'gyc_3',wall:.55,floorGain:.55,
   rooms:[{id:'start',kind:'start',i:0,j:13,w:2,h:2},{id:'boss',kind:'boss',i:11,j:0,w:4,h:3},{id:'reliquary',kind:'reliquary',w:2,h:2,zone:[3,9,5,10]},{id:'nest',kind:'hall',w:3,h:3,zone:[5,10,9,12]},{id:'bonehall',kind:'ossuary',w:3,h:2,zone:[1,5,2,6]}],
   foes:[['gyrats',4],['gyhound',4],['gyrat',3],['gyraven',3]],count:24}
 ];
@@ -67,7 +67,7 @@ function gyMazeBuild(k){
   gyAlias();
   const spec=GYM_SPEC[k],M=gyMazeGen(spec),W=GYM.W,H=GYM.H,g=M.g,WH=GYM.WH,hs=(a,b,c)=>hash2(a,b,c),R=gyRng(M.seed*7+k);
   const chars={},chMap=new Map();let nextCh=0x300;const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
-  const vt=v=>ch(gyTile(spec.brick+'_'+v,WH));
+  const vt=v=>ch(gyTile(spec.brick+'_'+v,WH,spec.wall?{gain:1.05*spec.wall}:undefined));
   const VAR=(spec.vars||[0,0,0,3,3,5,5,1,0,3,2,4]).map(vt),RIM=[4,5,1,4,2].map(vt);
   const open=(x,y)=>g[y]&&g[y][x]==='.',near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(open(x+dx,y+dy))return true;return false};
   const rimCell=new Set();for(const r of M.rooms)for(let y=r.y0-1;y<=r.y1+1;y++)for(let x=r.x0-1;x<=r.x1+1;x++)if(g[y]&&g[y][x]==='#')rimCell.add(y*W+x);
@@ -135,7 +135,7 @@ function gyMazeBuild(k){
   // small chests at dead ends (potions, gold, a piece of gear)
   {const cs=pick(ends.filter(e=>free(e[0],e[1])),3);for(const [x,y] of cs)dec('chest',x,y,{block:true,sc:.9})}
   // light: a lamp every few squares along the way
-  {const have=lights.slice();for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!open(x,y)||M.dist[y*W+x]<0||M.dist[y*W+x]%6!==2)continue;if(have.every(l=>Math.hypot(l[0]-x,l[1]-y)>=5)){have.push([x,y]);light(x,y,spec.lcol)}}}
+  {const have=lights.slice();for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!open(x,y)||M.dist[y*W+x]<0||false)continue;if(have.every(l=>Math.hypot(l[0]-x,l[1]-y)>=4.2)){have.push([x,y]);light(x,y,spec.lcol)}}}
   // cobwebs and bones in corners of corridors (walk through)
   for(const [x,y] of ends){if(free(x,y)&&hs(x,y,k+70)<.35)dec(hs(x,y,k+71)<.5?'bones':'web',x,y,{sc:.8})}
   // ---- the creatures: not near the start, not in the boss room, spread out ----
@@ -150,7 +150,11 @@ function gyMazeBuild(k){
   const bt=['gyvane','gygrimsby','gyaldric','gymorwenna'][k];
   {const r=M.boss,cx=(r.x0+r.x1)>>1,cy=(r.y0+r.y1)>>1;enemies.push({t:bt,x:cx,y:cy,lvl:84+k});occ.add(cx+','+cy);Q.boss={x:cx,y:cy,t:bt}}
   // ---- floors ----
-  const fm=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++){let f=spec.floor;if(open(x,y)&&hs(x,y,k+80)<.16)f=spec.floor2;if(open(x,y)){const r=roomOf(x,y);if(r&&(r.kind==='chapel'||r.kind==='boss'))f='3'}s+=f}fm.push(s)}
+  // the floor set of this maze: 0 the floor, 1 the second floor, 2 and 4 the same with puddles of standing water, 3 the dim flagstone of chapels and boss rooms
+  const fb0=spec.floorGain?gyFloorTone('gyf_m'+k+'a',GY_FLOORSET[+spec.floor],spec.floorGain):GY_FLOORSET[+spec.floor],fb1=spec.floorGain?gyFloorTone('gyf_m'+k+'b',GY_FLOORSET[+spec.floor2],spec.floorGain):GY_FLOORSET[+spec.floor2],
+    fw0=gyFloorWet('gyf_m'+k+'w0',fb0,spec.lcol,k*17+3),fw1=gyFloorWet('gyf_m'+k+'w1',fb1,spec.lcol,k*17+8),fSet=[fb0,fb1,fw0,gyFloorTone('gyf_cflag','gyf_flag',.46,[.88,.92,1]),fw1,fb0];
+  const fm=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++){let f='0';if(open(x,y)&&hs(x,y,k+80)<.16)f='1';
+      if(open(x,y)){const r=roomOf(x,y);if(r&&(r.kind==='chapel'||r.kind==='boss'))f='3';else if(!r&&hs(x,y,k+90)<.2&&!mouths.has(x+','+y))f=f==='1'?'4':'2'}s+=f}fm.push(s)}
   const names=[];   // every room of a maze has its own name on the map
   for(const r of M.rooms){const nm={start:null,boss:{0:"The Vane Hall",1:"The Gravedigger's Pit",2:"The Knight's Vigil",3:"The Prioress's Chapel"}[k],cell:"The Warden's Cell",hall:'The Charnel Hall',chapel:'The Little Chapel',ossuary:'The Bone Room',lever:'The Lever Room',reliquary:'The Reliquary'}[r.kind];
     const own={lev0:'The Cross Lever Room',lev1:'The Crown Lever Room',lev2:'The Candle Lever Room',moot:'The Moot Hall',sorrow:'The Hall of Sorrow',nest:"The Rats' Nest",bonehall:'The Bone Hall'}[r.id];if(own||nm)names.push({t:own||nm,x:(r.x0+r.x1)>>1,y:(r.y0+r.y1)>>1,k:'place'})}
@@ -166,10 +170,21 @@ function gyMazeBuild(k){
        cand.push({x,y,f,nx,ny,nar,pri,h:hs(x,y,f*7+k)})}}
    cand.sort((a,b)=>a.pri-b.pri||a.h-b.h);
    const near=(c,g)=>torches.some(t=>Math.hypot(t[0]-c.x,t[1]-c.y)<g);
-   for(const c of cand){const g=c.pri===0?3.2:c.pri===1?3.4:c.pri===2?4.2:(c.nar?5.2:6);if(near(c,g))continue;torches.push([c.x,c.y,c.f,c.nar?1:0])}}
+   for(const c of cand){const g=c.pri===0?1.6:c.pri===1?1.7:c.pri===2?2.1:(c.nar?2.6:3);if(near(c,g))continue;torches.push([c.x,c.y,c.f,c.nar?1:0])}}
+  // ---- wall niches with candles: a few alcoves cut into the corridor walls, each lit by its own little warm light and one more candle-lit pool of colour ----
+  const NICHES=[];
+  {const nic=NICHES,tor=torches,bossD=(x,y)=>Math.hypot(x-M.door.x,y-M.door.y)<3.2,tk=new Set(tor.map(t=>t[0]+','+t[1]));
+   const NIL=gyTile(spec.brick+'_0',WH,{fac:{img:'cryptD_3',i:0,n:1},gain:.92*(spec.wall||1),tag:'niche'+k,draw:(x,w,h)=>{
+     const c=IMG.gyp_cryptD_2;x.globalCompositeOperation='lighter';const g=x.createRadialGradient(64,h-62,2,64,h-62,46);g.addColorStop(0,'rgba(255,170,70,.2)');g.addColorStop(1,'rgba(255,140,40,0)');x.fillStyle=g;x.fillRect(0,h-120,w,120);x.globalCompositeOperation='source-over';
+     if(c){x.drawImage(c,0,0,c.width,c.height*.5,46,h-84,36,25)}}});
+   const cand=[];for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(open(x,y)||rows[y][x]==='.'||tk.has(x+','+y)||bossD(x,y)||(x===ex.x&&Math.abs(y-ex.y)<3))continue;
+     const ns=GYM_D.filter(([a,b])=>open(x+a,y+b));if(ns.length!==1)continue;const [a,b]=ns[0],nx=x+a,ny=y+b;if(roomOf(nx,ny)&&roomOf(nx,ny).kind==='boss')continue;if(M.dist[ny*W+nx]<5)continue;
+     if(tor.some(t=>Math.hypot(t[0]-x,t[1]-y)<1.5))continue;cand.push({x,y,nx,ny,h:hs(x,y,k+95)})}
+   cand.sort((p,q)=>p.h-q.h);
+   for(const c of cand){if(nic.length>=16)break;if(nic.some(n=>Math.hypot(n.x-c.x,n.y-c.y)<4))continue;nic.push(c);put(c.x,c.y,ch(NIL));light(c.nx,c.ny,[1.15,.8,.42])}}
   const arr={x:sr.x0,y:ex.y,f:1};
-  const L={rows,chars,fmap:fm,floorSet:GY_FLOORSET,floor:GY_FLOORSET[+spec.floor],floor2:GY_FLOORSET[+spec.floor2],ceil:spec.ceil,ceilH:GYM.WH,start:arr,enemies,items,decor,lights,portals:[],day:0,amb:0,torchGap:1e9,noTele:true,noExtras:true,
-    name:spec.name,label:spec.name,diff:84+k,mapNames:names,_gy:{kind:'maze',k,M,Q,lcol,seed:M.seed,exit:ex,torches,torch:spec.torch}};
+  const L={rows,chars,fmap:fm,floorSet:fSet,floor:fb0,floor2:fb1,ceil:spec.ceil,ceilH:GYM.WH,start:arr,enemies,items,decor,lights,portals:[],day:0,amb:0,torchGap:1e9,noTele:true,noExtras:true,
+    name:spec.name,label:spec.name,diff:84+k,mapNames:names,_gy:{kind:'maze',k,M,Q,lcol,niches:NICHES,ground:(()=>{const c=GYMP.ground[spec.floor],o={};for(const f of '012345')o[f]=c;return o})(),seed:M.seed,exit:ex,torches,torch:spec.torch}};
   LEVELS[id]=L;
   gyMazeCheck(k,L);
   return L}

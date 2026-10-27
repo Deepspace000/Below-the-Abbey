@@ -29,13 +29,21 @@ const GYA={ // alias: [piece, height of the thing in squares (one square is abou
 function gyIvy(){
   if(GY._ivy){for(const a in GY._ivy)IMG['gy_'+a]=GY._ivy[a];return}
   const t=IMG.gyp_texFloor_0;if(!t)return;GY._ivy={};
-  for(const a of ['stone1','stone2','lean','slab','wcross','ccross','tomb','urn','obelisk','column','mausoleum','angel','chapel','hut','crypt','barrow','fence']){
+  for(const a of ['stone1','stone2','lean','slab','wcross','ccross','tomb','urn','obelisk','column','mausoleum','angel','crypt','barrow','fence']){
     const s=IMG['gy_'+a];if(!s)continue;try{
     const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.drawImage(s,0,0);x.globalCompositeOperation='source-atop';
     const w=c.width,h=c.height,n=Math.round(w*h/(a==='fence'?110:52)),G=['#2a5a26','#3b7f31','#58a03e','#244c24','#6fb04a'];
     // vines running up from the foot, then leaves over them, thickest low down
     for(let k=0;k<Math.round(w/16);k++){let px=hash2(k,1,620)*w,py=h;x.strokeStyle='#27481f';x.lineWidth=1.6+hash2(k,2,620)*1.6;x.beginPath();x.moveTo(px,py);for(let t=0;t<9;t++){px+=(hash2(k,t+3,621)-.5)*10;py-=h*(.04+hash2(k,t+4,622)*.08);x.lineTo(px,py)}x.stroke()}
     for(let k=0;k<n;k++){const px=hash2(k,1,623)*w,py=h*(1-Math.pow(hash2(k,2,623),1.9)),r=2.2+hash2(k,3,623)*3.6;x.fillStyle=G[(hash2(k,4,623)*G.length)|0];x.globalAlpha=.9;x.beginPath();x.ellipse(px,py,r,r*.62,hash2(k,5,623)*3.14,0,6.3);x.fill()}
+    x.globalAlpha=1;GY._ivy[a]=c;IMG['gy_'+a]=c}catch(e){console.error('gyIvy',a,e)}}
+  // the ruined chapel and the hut keep their own shape: only a little ivy at the foot corners, nothing over the roof, the window or the door
+  for(const a of ['chapel','hut']){
+    const s=IMG['gy_'+a];if(!s)continue;try{
+    const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.drawImage(s,0,0);x.globalCompositeOperation='source-atop';
+    const w=c.width,h=c.height,n=Math.round(w*h/(a==='hut'?900:700)),G=['#2a5a26','#3b7f31','#58a03e','#244c24','#6fb04a'];
+    for(let k=0;k<n;k++){const side=hash2(k,6,624)<.5,ex=Math.pow(hash2(k,1,624),2.2)*w*.14,px=side?ex:w-ex,py=h*(1-Math.pow(hash2(k,2,624),2.4)*(a==='hut'?.3:.42)),r=2.2+hash2(k,3,624)*3.2;
+      x.fillStyle=G[(hash2(k,4,624)*G.length)|0];x.globalAlpha=.9;x.beginPath();x.ellipse(px,py,r,r*.62,hash2(k,5,624)*3.14,0,6.3);x.fill()}
     x.globalAlpha=1;GY._ivy[a]=c;IMG['gy_'+a]=c}catch(e){console.error('gyIvy',a,e)}}}
 /* cobwebs are drawn faint and fine: the painted web at half strength */
 function gyWeb(){const s=IMG.gyp_bonesH_1;if(!s)return;if(!GY._web){const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.globalAlpha=.5;x.drawImage(s,0,0);GY._web=c}IMG.gy_web=GY._web}
@@ -91,14 +99,28 @@ function gyFloors(){
     for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,base[i]*gain*t[0]);d[i+1]=Math.min(255,base[i+1]*gain*t[1]);d[i+2]=Math.min(255,base[i+2]*gain*t[2]);d[i+3]=255}CEILS[nm]=d};
   cl('gyc_0','texRed_3',.5,T1);cl('gyc_1','texGrey_3',.5,T1);cl('gyc_2','texBlack_3',.55,T1);cl('gyc_3','texBone_3',.5,T1);cl('gyc_crypt','texGrey_0',.5,[.9,.95,1]);
   GY._floors=1}
+/* a floor made from another one: darker and tinted (the crypts, the Pale Catacombs) or with puddles of standing water (the mazes) */
+function gyFloorTone(out,src,g,t){
+  if(FLOORS[out])return out;const b=FLOORS[src];if(!b)return src;t=t||[1,1,1];const d=new Uint8ClampedArray(b.length);
+  for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,b[i]*g*t[0]);d[i+1]=Math.min(255,b[i+1]*g*t[1]);d[i+2]=Math.min(255,b[i+2]*g*t[2]);d[i+3]=255}
+  FLOORS[out]=d;return out}
+function gyFloorWet(out,src,tint,seed){
+  if(FLOORS[out])return out;const b=FLOORS[src];if(!b)return src;const N=Math.round(Math.sqrt(b.length/4)),d=new Uint8ClampedArray(b),hh=(a,c,e)=>hash2(a,c,e),sm=(e0,e1,v)=>{v=Math.max(0,Math.min(1,(v-e0)/(e1-e0)));return v*v*(3-2*v)};
+  const P=[];for(let n=0;n<3;n++)P.push({cx:N*(.3+.4*hh(n,1,seed)),cy:N*(.3+.4*hh(n,2,seed)),rx:N*(.17+.11*hh(n,3,seed)),ry:N*(.1+.08*hh(n,4,seed))});
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){let m=0,hi=0;
+    for(const p of P){const dx=(x-p.cx)/p.rx,dy=(y-p.cy)/p.ry,v=1-(dx*dx+dy*dy)+(hh(x>>2,y>>2,seed+9)-.5)*.5;const mm=sm(0,.22,v);if(mm>m)m=mm;if(v>.05&&v<.3&&dy<0)hi=Math.max(hi,.7)}
+    if(m<=0)continue;const o=(y*N+x)*4,k=m*.9;
+    for(let c=0;c<3;c++){const dark=b[o+c]*.22+tint[c]*62+hi*tint[c]*80;d[o+c]=Math.min(255,b[o+c]*(1-k)+dark*k)}}
+  FLOORS[out]=d;return out}
 /* wall tiles: a painted texture stood up into a tall tile (stacked, each copy slid sideways), or one slice of a big front picture */
 function gyTile(tex,wh,opt){
-  opt=opt||{};const key=tex+'|'+wh+'|'+(opt.fac?opt.fac.img+opt.fac.i+'/'+opt.fac.n:'')+(opt.rgb?opt.rgb.join(','):'')+(opt.gain||'');if(GY.tiles[key]!==undefined)return GY.tiles[key];
+  opt=opt||{};const key=tex+'|'+wh+'|'+(opt.fac?opt.fac.img+opt.fac.i+'/'+opt.fac.n:'')+(opt.rgb?opt.rgb.join(','):'')+(opt.gain||'')+(opt.tag||'');if(GY.tiles[key]!==undefined)return GY.tiles[key];
   const im=IMG['gyp_'+tex],Hp=Math.round(128*wh),c=document.createElement('canvas');c.width=128;c.height=Hp;const x=c.getContext('2d');
   x.fillStyle='#14120f';x.fillRect(0,0,128,Hp);
   if(im){const units=Math.ceil(wh);for(let u=0;u<units;u++){const y=Hp-(u+1)*128,sh=((u*.37+(tex.length%5)*.11)%1)*128;
       x.save();if(u%2){x.translate(128,0);x.scale(-1,1)}for(const dx of [-sh,128-sh])x.drawImage(im,0,0,im.width,im.height,dx,y,128,128);x.restore()}}
-  if(opt.fac){const f=IMG['gyp_'+opt.fac.img];if(f){const n=opt.fac.n,i=opt.fac.i,s=n*128/f.width,fh=f.height*s,sw=f.width/n;x.drawImage(f,i*sw,0,sw,f.height,0,Hp-fh,128,fh)}}
+  if(opt.fac){const f=IMG['gyp_'+opt.fac.img];if(f){const n=opt.fac.n,i=opt.fac.i,s=n*128/f.width,fh=f.height*s,sw=f.width/n;x.imageSmoothingQuality='high';x.drawImage(f,i*sw,0,sw,f.height,0,Hp-fh,128,fh)}}
+  if(opt.draw)try{opt.draw(x,128,Hp)}catch(e){console.error('gyTile draw',e)}   // paint more on the tile (a plaque, ivy, candles in a niche) before the shading
   x.globalCompositeOperation='multiply';const gr=x.createLinearGradient(0,0,0,Hp);gr.addColorStop(0,'rgb(255,255,255)');gr.addColorStop(.7,'rgb(236,238,240)');gr.addColorStop(1,'rgb(176,178,180)');x.fillStyle=gr;x.fillRect(0,0,128,Hp);x.globalCompositeOperation='source-over';
   const d=x.getImageData(0,0,128,Hp).data,gain=opt.gain||1.05,m=opt.rgb||[1,1,1];
   for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,d[i]*gain*m[0]);d[i+1]=Math.min(255,d[i+1]*gain*m[1]);d[i+2]=Math.min(255,d[i+2]*gain*m[2])}
