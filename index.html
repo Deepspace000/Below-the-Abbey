@@ -53179,6 +53179,7 @@ function wwBuild(){
   const objAt=(alias,npc,x,y)=>{for(let r=0;r<5;r++)for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const xx=x+a,yy=y+b;if(isOpen(xx,yy)&&!occ.has(xx+','+yy)&&!near4.has(xx+','+yy)){const d=dec(alias,xx,yy,{npc,occ:1});if(d){d.deco=false;return [xx,yy]}}}return null};
   const pathAt=f=>pathList[Math.min(pathList.length-1,Math.floor(pathList.length*f))];
   const clue1=objAt('boot','wwo_boot',Q.gate.cx-4,Q.gate.cy-1),p2=pathAt(.28),clue2=objAt('ribbon','wwo_ribbon',p2[0],p2[1]),p3=pathAt(.5),clue3=objAt('crumbs','wwo_crumbs',p3[0],p3[1]);
+  for(const [i,f] of [[1,.18],[2,.4],[3,.64]]){const pp=pathAt(f);objAt('ribbon','wwo_smock'+i,pp[0]+(i%2?2:-2),pp[1])}   // the lost washing (wwq9)
   // the hag-stone lies in the dried brook, off the track
   let hag=null;{const cs=corr.filter(([x,y])=>inBrook(x,y)&&!track.has(x+','+y)&&!occ.has(x+','+y)&&frac(x,y)>.2).sort((a,b)=>Math.abs(a[0]-22)-Math.abs(b[0]-22));if(cs.length)hag=objAt('hagstone','wwo_hagstone',cs[0][0],cs[0][1])}
   // ---- the walls ----
@@ -53555,6 +53556,19 @@ function wwArrive(n){
   if(n===WL.ID){
     const show={wwo_pip:F.wwCage1,wwo_twins:F.wwCage2,wwo_hannah:F.wwCage3,wwo_buttonw:F.wwButton||F.wwCage1,wwo_gingerstall:F.wwStall};
     for(const id in show){const d=G.decor.find(q=>q.npc===id);if(d){d.found=!show[id];d.block=false}}}}
+/* ---- 9. The Lost Washing: Goody Prue (after Salt and Iron). Three smocks blew off her line into Blackbriar Wood and are caught on thorns along the dirt track. ---- */
+WW_REW.wwq9={gold:1400,xp:6000,items:['potion6','potion6']};
+const WWD9=khQD("Oh, you again, and just in time. The wind took my washing on Monday. Three good smocks, off the line and over the wall, and straight up Blackbriar Lane into the wood. I am not going in there for a smock. Not for three. Would you? They will be hanging on thorns along the dirt track, wherever the wind dropped them. Bring them back and I will wash yours for free for the rest of your life, which at your rate of travel may be short.",
+  "Bless you. Stay on the dirt track and keep your hands off anything that glows.",
+  (n,m)=>`${n} of ${m} smocks found. They are caught on thorns along the dirt track in Blackbriar Wood, north of Wenlock.`,
+  "All three! Look at them. One has a bit of moss on it, but that is the wood's doing and not mine. They are still damp, so they have not been up there long.",
+  "Here is something for the trouble. I will not ask what it was like in there. I do not want to know about the trees.",
+  "The smocks are dry and folded and the line has new pegs. Thank you again.","All three smocks are here.");
+wwQ('wwq9','The Lost Washing','Goody Prue',[1,2,3].map(i=>['Find smock number '+i+' of 3, caught on a thorn along the dirt track in Blackbriar Wood.',()=>wwF()['wwSmock'+i],['wwo_smock'+i]]));
+wwGive('wlo_gran','wwq9',()=>qSt('wwq2')==='done'&&(qSt('wwq7')!=='done'||qSt('wwq8')==='done'),WWD9,()=>qSt('wlq7')==='active'&&!wwF().wlq7c);
+for(const i of [1,2,3])wwObj('wwo_smock'+i,'A smock on a thorn','ribbon',d=>{const F=wwF();
+  if(qSt('wwq9')==='active'&&!F['wwSmock'+i]){F['wwSmock'+i]=1;yrStep('You have found a smock ('+[1,2,3].filter(k=>F['wwSmock'+k]).length+' of 3).');d.found=true;d.block=false;return say('A plain linen smock, damp and snagged on a thorn. It has a darned patch at the elbow. You fold it into your bag.',[BYE])}
+  return say('A plain linen smock hangs on a thorn. It is not yours to take.',[BYE])});
 /* ---- where Wenlock's new people stand (wlPlaceFolk is called by wlBuild; the freed folk and the stall stand there hidden until they are real) ---- */
 const WW_PLACE=[['wwo_marrow',36,8,4],['wwo_pip',40,10,4],['wwo_twins',36,12,4],['wwo_hannah',41,12,4],['wwo_buttonw',39,9,4],['wwo_gingerstall',47,53,4]];
 {const _p=wlPlaceFolk;wlPlaceFolk=function(C){_p.apply(this,arguments);try{for(const [id,x,y,r] of WW_PLACE)C.person(id,x,y,r)}catch(e){console.error('wwplace',e)}}}

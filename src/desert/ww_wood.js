@@ -134,6 +134,7 @@ function wwBuild(){
   const objAt=(alias,npc,x,y)=>{for(let r=0;r<5;r++)for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const xx=x+a,yy=y+b;if(isOpen(xx,yy)&&!occ.has(xx+','+yy)&&!near4.has(xx+','+yy)){const d=dec(alias,xx,yy,{npc,occ:1});if(d){d.deco=false;return [xx,yy]}}}return null};
   const pathAt=f=>pathList[Math.min(pathList.length-1,Math.floor(pathList.length*f))];
   const clue1=objAt('boot','wwo_boot',Q.gate.cx-4,Q.gate.cy-1),p2=pathAt(.28),clue2=objAt('ribbon','wwo_ribbon',p2[0],p2[1]),p3=pathAt(.5),clue3=objAt('crumbs','wwo_crumbs',p3[0],p3[1]);
+  for(const [i,f] of [[1,.18],[2,.4],[3,.64]]){const pp=pathAt(f);objAt('ribbon','wwo_smock'+i,pp[0]+(i%2?2:-2),pp[1])}   // the lost washing (wwq9)
   // the hag-stone lies in the dried brook, off the track
   let hag=null;{const cs=corr.filter(([x,y])=>inBrook(x,y)&&!track.has(x+','+y)&&!occ.has(x+','+y)&&frac(x,y)>.2).sort((a,b)=>Math.abs(a[0]-22)-Math.abs(b[0]-22));if(cs.length)hag=objAt('hagstone','wwo_hagstone',cs[0][0],cs[0][1])}
   // ---- the walls ----
