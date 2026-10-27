@@ -32,7 +32,20 @@ const WLIN_P={
 const WLIN_S=1.2; // every prop is drawn a fifth larger than its table height, so the rooms are not bare
 const WLIN_FOLK={wife:'folk1_0',vicar:'folk1_1',teacher:'folk1_2',boy:'folk1_3',girl:'folk1_4',baker:'folk1_5',minstrel:'folk2_0',smith:'folk2_1',farmer:'folk2_2',gran:'folk2_3',merchant:'folk2_4',maid:'folk2_5'};
 /* fall-back looks: the older props are used while a picture is missing */
+/* the painted pieces were cut from a magenta ground and kept a thin purple line round their edges: every edge pixel that is still pink or violet is pulled back to the colour of the thing it borders and darkened */
+function wlinDefringe(k){
+  const im=IMG[k];if(!im||!im.width||im._wlfd)return;
+  try{const w=im.width,h=im.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(im,0,0);const d=x.getImageData(0,0,w,h),p=d.data;let n=0;
+    const A=(xx,yy)=>xx<0||yy<0||xx>=w||yy>=h?0:p[(yy*w+xx)*4+3];
+    for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){const i=(yy*w+xx)*4,a=p[i+3];if(a===0)continue;
+      let edge=a<250;if(!edge){for(let r=1;r<=2&&!edge;r++)if(A(xx-r,yy)<40||A(xx+r,yy)<40||A(xx,yy-r)<40||A(xx,yy+r)<40)edge=true}
+      if(!edge)continue;
+      const R=p[i],G=p[i+1],B=p[i+2],m=(R+B)/2;
+      if(m>G*1.1+6&&Math.min(R,B)>G*.9){const g=G*.85;p[i]=Math.min(R,g*1.08+4)*.8;p[i+1]=g*.8;p[i+2]=Math.min(B,g*1.02+4)*.8;n++}}
+    if(n){x.putImageData(d,0,0);c._wlfd=1;IMG[k]=c}else im._wlfd=1}catch(e){}
+}
 function wlinPrep(){
+  for(const k of Object.keys(IMG))if(/^wl2_/.test(k)&&!/^wl2_(wall|floor|ww)_/.test(k))wlinDefringe(k);
   for(const k in WLIN_P){const p=WLIN_P[k];NPC_H['wl2_'+p[0]]=p[1]*WLIN_S}
   for(const k in WLIN_FOLK)NPC_H['wl2_'+WLIN_FOLK[k]]=.98;
   for(let i=0;i<6;i++){const im=IMG['wl2_floor_'+i];if(im&&!FLOORS['wl2f'+i])FLOORS['wl2f'+i]=dsPaintedTex(im)}
@@ -72,7 +85,7 @@ WLIR('inn',{w:15,h:11,look:'timber',amb:.62,lights:[[3,2],[11,2],[7,6,1],[2,8],[
   folk:[['wli_nell',6,4],['wli_farmers',9,4],['wli_traveller2',5,5],['wli_minstrel',12,9],['wli_innkeeper_dog',8,6],['wli_inn_cat',2,4]],win:[[4,0],[10,0],[0,4],[0,8],[14,4],[14,8]]});
 /* THE GENERAL STORE */
 WLIR('general',{w:11,h:8,look:'timber2',amb:.64,lights:[[2,2],[8,2],[5,5]],keeper:[5,2],
-  props:[['shelving',1,1],['shelving',2,1],['shelving',8,1],['shelving',9,1],['hangstand',5,1],['shopcounter',3,3],['shopcounter',4,3],['shopcounter',6,3],['shopcounter',7,3],['coopstack',9,5],['veg',1,5],['bookshelf',9,3,{h:1.0}]],
+  props:[['shelving',1,1,{h:.95}],['shelving',2,1,{h:.95}],['shelving',8,1,{h:.95}],['shelving',9,1,{h:.95}],['hangstand',5,1,{h:.7}],['shopcounter',3,3],['shopcounter',4,3],['shopcounter',6,3],['shopcounter',7,3],['coopstack',9,5],['veg',1,5],['bookshelf',9,3,{h:1.0}]],
   folk:[['wli_dibble_cat',2,6]],win:[[3,0],[7,0],[0,4],[10,4]],raw:[['barrel',1,3],['sacks',9,6],['crate',1,6],['sacks',10,2]]});
 /* THE SMITHY: forge glow, anvil, bellows, racks of blades */
 WLIR('forge',{w:13,h:9,look:'cellar',amb:.5,lights:[[5,1,1],[7,1,1],[2,4],[10,4],[6,6,1]],keeper:[6,2],
@@ -145,7 +158,7 @@ WLIR('almshouse',{w:11,h:8,look:'plaster2',amb:.64,lights:[[2,2],[8,2],[5,5]],ke
   folk:[['wli_gran',3,3],['wli_oldfarmer',7,5],['wli_almscat',3,6]],win:[[3,0],[7,0],[0,4],[10,4]],raw:[]});
 /* THE CHURCH OF SAINT WENNA: nave, pews, stained glass, altar, a font, a priest */
 WLIR('church',{w:13,h:13,look:'church',amb:.62,lights:[[3,2],[9,2],[6,3],[3,7],[9,7],[2,10],[10,10]],keeper:[6,2],
-  props:[['altar',6,1],['glasswin',3,1],['glasswin',9,1],['votive',2,2,{npc:'wli_votive'}],['votive',10,2,{npc:'wli_votive'}],['pew',3,5],['pew',4,5],['pew',8,5],['pew',9,5],['pew',3,7],['pew',4,7],['pew',8,7],['pew',9,7],['pew',3,9],['pew',4,9],['pew',8,9],['pew',9,9],
+  props:[['altar',6,1],['banner',3,1,{h:1.25}],['banner',9,1,{h:1.25}],['votive',2,2,{npc:'wli_votive'}],['votive',10,2,{npc:'wli_votive'}],['pew',3,5],['pew',4,5],['pew',8,5],['pew',9,5],['pew',3,7],['pew',4,7],['pew',8,7],['pew',9,7],['pew',3,9],['pew',4,9],['pew',8,9],['pew',9,9],
     ['font',10,11],['lectern',5,3,{npc:'wli_lectern'}],['banner',1,5,{h:1.2}],['banner',11,5,{h:1.2}]],
   folk:[['wli_widow',3,6],['wli_choirboy',9,8],['wli_church_cat',7,10]],win:[[2,0],[4,0],[6,0],[8,0],[10,0],[0,3],[0,6],[0,9],[12,3],[12,6],[12,9]],raw:[]});
 /* THE INN CELLAR and THE OLD GRANARY */
@@ -164,16 +177,34 @@ const WLIN_HOME={
   messy:{look:'oak',amb:.6,res:[4,3],props:[['bookshelf',1,1],['bookshelf',2,1],['bookshelf',7,1],['readdesk',4,1],['globe',6,3,{h:.55}],['bed',7,4],['scrollrack',1,4,{h:.8}]],folk:[['wli_home_cat',3,4]],win:[[3,0],[0,3]],raw:[['crate',6,5],['crate',2,5],['sacks',8,5]]},
   scholar:{look:'oak',amb:.6,res:[4,3],props:[['bookshelf',1,1],['bookshelf',2,1],['bookshelf',3,1],['bookshelf',7,1],['readdesk',5,1],['globe',2,4],['rocker',7,4],['lectern',6,3,{h:.8}]],folk:[['wli_home_cat',5,5]],win:[[4,0],[8,3]]},
   merchant:{look:'timber',amb:.62,res:[4,3],props:[['dresser',1,1],['shelving',3,1],['tapestry',5,1,{h:.9}],['bed',7,1],['pietable',2,4],['clock',8,3,{h:1.1}]],folk:[['wli_home_dog',5,5]],win:[[4,0],[0,3],[8,3]],raw:[['chest',1,3],['chest',2,3],['sacks',6,3],['sacks',7,3]]},
-  healer:{look:'plaster2',amb:.62,res:[4,3],props:[['herbrack',1,1],['herbrack',2,1],['apothcab',4,1],['cauldron',7,3,{h:.6}],['bed',7,1],['herbrack',1,4,{h:.8}]],folk:[['wli_home_cat',3,5]],win:[[3,0],[6,0],[0,3]]},
+  healer:{look:'plaster2',amb:.62,res:[4,3],props:[['herbrack',1,1,{h:.9}],['dresser',3,1,{h:.85}],['cothearth',5,1],['cauldron',7,3,{h:.6}],['bed',7,1],['rocker',2,4]],folk:[['wli_home_cat',3,5]],win:[[3,0],[6,0],[0,3]]},
   children:{look:'timber2',amb:.68,res:[4,3],props:[['cot',1,1],['bed',7,1],['cothearth',4,1],['cot',7,4,{h:.5}],['rocker',2,4],['pietable',5,5,{h:.55}]],folk:[['wli_home_cat',3,3],['wli_home_dog',6,5],['wli_home_kid',2,6]],win:[[2,0],[6,0],[0,3],[8,3]]},
-  potter:{look:'brick2',amb:.62,res:[4,3],props:[['oven',1,1],['bakertable',4,1],['bed',7,1],['shelving',8,3,{h:.9}],['veg',1,4,{h:.5}]],folk:[['wli_home_dog',6,5]],win:[[3,0],[6,0],[8,3]],raw:[['sacks',2,4],['sacks',7,4]]},
+  potter:{look:'brick2',amb:.62,res:[4,3],props:[['cothearth',1,1],['pietable',4,1,{h:.6}],['bed',7,1],['dresser',8,3,{h:.9}],['veg',1,4,{h:.5}],['rocker',5,5]],folk:[['wli_home_dog',6,5]],win:[[3,0],[6,0],[8,3]],raw:[['sacks',2,4],['sacks',7,4]]},
   cats:{look:'plaster',amb:.64,res:[4,3],props:[['cat',1,1,{h:.3}],['cat',2,3,{h:.3}],['cat',6,1,{h:.3}],['cat',7,4,{h:.3}],['rocker',2,1],['bed',7,1,{h:.6}],['pietable',4,5,{h:.55}],['dresser',8,2,{h:.9}]],folk:[['wli_home_cat',3,5],['wli_cat2',5,3]],win:[[4,0],[0,3],[8,3]]},
-  soldier:{look:'stone',amb:.58,res:[4,3],props:[['weaponrack',1,1],['mannequin',3,1],['bed',7,1],['shields',5,1],['pietable',2,4],['ale',7,4,{h:.55}]],folk:[['wli_home_dog',5,5]],win:[[4,0],[0,3],[8,3]]},
+  soldier:{look:'stone',amb:.58,res:[4,3],props:[['cothearth',1,1],['bed',7,1],['banner',4,1,{h:1.2}],['pietable',2,4],['rocker',6,4],['dresser',8,3,{h:.9}]],folk:[['wli_home_dog',5,5]],win:[[4,0],[0,3],[8,3]]},
   fisher:{look:'timber2',amb:.6,res:[4,3],props:[['hangstand',1,1],['bed',7,1],['cothearth',4,1],['ale',7,4,{h:.7}],['coopstack',1,4,{h:.8}],['pietable',2,4]],folk:[['wli_home_cat',5,5]],win:[[2,0],[6,0],[8,3]]},
   noble:{look:'oak',amb:.66,res:[4,3],props:[['dresser',1,1],['tapestry',4,1,{h:.95}],['clock',7,1],['bed',7,4,{h:.8}],['pietable',2,4],['bookshelf',1,4,{h:1.0}],['mannequin',3,1,{h:.9}]],folk:[['wli_home_dog',5,5]],win:[[3,0],[6,0],[0,3],[8,3]]},
   musician:{look:'timber',amb:.64,res:[4,3],props:[['lute',1,1],['lute',2,1,{h:.5}],['bed',7,1],['tapestry',4,1,{h:.9}],['rocker',2,4],['pietable',7,4,{h:.55}]],folk:[['wli_home_cat',5,5]],win:[[4,0],[0,3],[8,3]]}
 };
 for(const k in WLIN_HOME)WLIR('home_'+k,Object.assign({w:9,h:7,keeper:null},WLIN_HOME[k]));
+/* ---- a home is never the same room twice: its size, its mirror and its wall hangings come from its door number ---- */
+function wlinHomeVariant(scene,id){
+  const base=WLIN_ROOMS['home_'+scene];if(!base||scene==='cats'||scene==='children')return 'home_'+scene;
+  const name='home_'+scene+'_'+id;if(WLIN_ROOMS[name])return name;
+  const dw=(hash2(id,21,5)*3)|0,dh=hash2(id,22,5)<.4?1:0,mir=hash2(id,23,5)<.5,W0=base.w,H0=base.h;
+  const mx=x=>{if(x>=W0-4)x+=dw;else if(x>3)x+=(dw>>1);return mir?W0+dw-1-x:x},my=y=>y>2?y+dh:y;
+  const mp=a=>a.map(q=>{q=q.slice();q[1]=mx(q[1]);q[2]=my(q[2]);return q});
+  const D=Object.assign({},base,{w:W0+dw,h:H0+dh,props:mp(base.props),raw:base.raw&&mp(base.raw),folk:base.folk&&mp(base.folk),win:base.win&&base.win.map(q=>[mx(q[0]),q[1]===0?0:my(q[1])]),res:base.res&&[mx(base.res[0]),my(base.res[1])],lights:(base.lights||[[2,2],[W0-3,2],[W0>>1,H0>>1]]).map(q=>[mx(q[0]),my(q[1])].concat(q.slice(2)))});
+  D.dress=1;WLIN_ROOMS[name]=D;return name;
+}
+/* pictures, a tapestry or a shelf on the long bare wall of a home */
+function wlinDress(C,D,id){
+  if(!D.dress)return;const HANG=['tapestry','noticeboard','tapestry','clock'],y=1;let n=0;
+  for(let x=1;x<D.w-1&&n<3;x++){const k=HANG[(hash2(id,x,31)*HANG.length)|0];
+    if(hash2(id,x,32)<.5||C.has(x,y)||C.has(x+1,y)||(C.has(x-1,y)&&false))continue;
+    if(k==='clock'&&C.has(x,y+1))continue;
+    wlinProp(C,k,x,y,{h:k==='clock'?1.0:.8,free:1,bob:k==='clock'?0:.35});n++;x+=2}
+}
 /* ---- every door of the town (WL_DOORS in wenlock_town.js) gets its room, built when first entered (KH_LAZY) ---- */
 const WLIN_BY_KIND={church:'church',inn:'inn',smith:'forge',bakery:'bakery',butcher:'butcher',library:'library',scroll:'scrolls',tailor:'tailor',armour:'armour',weapons:'weapons',general:'general',greengrocer:'green',potion:'potion',herb:'herbs',cooper:'cooper',chandler:'chandler',cobbler:'cobbler',almshouse:'almshouse',school:'school',hall:'hall'};
 const WLIN_KEEPER={church:'wli_k_church',inn:'wli_k_inn',smith:'wli_k_smith',bakery:'wli_k_bakery',butcher:'wli_k_butcher',library:'wli_k_library',scroll:'wli_k_scrolls',tailor:'wli_k_tailor',armour:'wli_k_armour',weapons:'wli_k_weapons',general:'wli_k_general',greengrocer:'wli_k_green',potion:'wli_k_potion',herb:'wli_k_herbs',cooper:'wli_k_cooper',chandler:'wli_k_chandler',cobbler:'wli_k_cobbler',almshouse:'wli_k_almshouse',school:'wli_k_school',hall:'wli_k_hall'};
@@ -181,9 +212,9 @@ const WLIN_SCENES=['warm','worker','spartan','messy','scholar','merchant','heale
 const WLIN_HOMENAME={warm:'A Warm Cottage',worker:"A Farmer's Kitchen",spartan:"A Widow's Parlour",messy:'A Cluttered Cottage',scholar:"A Scholar's Cottage",merchant:"A Wool Merchant's House",healer:"A Healer's Cottage",children:"A Family's Cottage",potter:"A Baker's Flat",cats:'A House of Cats',soldier:"A Retired Soldier's House",fisher:"A Brook Fisher's Cottage",noble:"A Gentleman's House",musician:"A Fiddler's Cottage"};
 const WLIN_RES={warm:['wli_r_wife','wli_r_cook'],worker:['wli_r_wife','wli_r_man'],spartan:['wli_r_old','wli_r_nun'],messy:['wli_r_scholar','wli_r_fiddler'],scholar:['wli_r_scholar','wli_r_girl'],merchant:['wli_r_wife','wli_r_cook'],healer:['wli_r_nun','wli_r_old'],children:['wli_r_mum','wli_r_wife'],potter:['wli_r_weaver','wli_r_cook'],cats:['wli_r_old','wli_r_weaver'],soldier:['wli_r_man','wli_r_old'],fisher:['wli_r_old','wli_r_man'],noble:['wli_r_wife','wli_r_scholar'],musician:['wli_r_fiddler','wli_r_girl']};
 function wlinMake(d){ // d: one entry of WL_DOORS
-  const id=d.id,home=!WLIN_BY_KIND[d.kind],r=hash2(id,7,3),scene=home?WLIN_SCENES[(r*WLIN_SCENES.length)|0]:null;
+  const id=d.id,home=!WLIN_BY_KIND[d.kind],hi=WL_DOORS.filter(q=>!WLIN_BY_KIND[q.kind]).findIndex(q=>q.id===id),scene=home?WLIN_SCENES[(hi*5+(hi>>4))%WLIN_SCENES.length]:null;   // the kinds of home go round in turn, so no street gets one kind over and over
   const name=home?WLIN_HOMENAME[scene]:d.name,back={to:WL.ID,x:d.front.x,y:d.front.y,f:d.out};
-  const b={id:'wlin'+id,wlin:home?'home_'+scene:WLIN_BY_KIND[d.kind],name,room:home?'home':'shop',keeper:home?(hash2(id,9,4)<.8?WLIN_RES[scene][(hash2(id,5,5)*WLIN_RES[scene].length)|0]:null):WLIN_KEEPER[d.kind],floor:'wood',wallImg:'kh_ohwall1_2'};
+  const b={id:'wlin'+id,wlin:home?wlinHomeVariant(scene,id):WLIN_BY_KIND[d.kind],name,room:home?'home':'shop',keeper:home?(hash2(id,9,4)<.8?WLIN_RES[scene][(hash2(id,5,5)*WLIN_RES[scene].length)|0]:null):WLIN_KEEPER[d.kind],floor:'wood',wallImg:'kh_ohwall1_2'};
   const R=khRoom(b,id,back);LEVELS[id]=R.level;LEVELS[id].diff=80;LEVEL_NAMES[id]=name;LEVEL_RATING[id]=80;return R.level;
 }
 for(const d of WL_DOORS){const id=d.id;KH_LAZY[id]=()=>{if(!LEVELS[id])wlinMake(d)}}
@@ -208,6 +239,7 @@ function wlinBuild(D,name,b,C){
   if(b.keeper&&kp)npc(b.keeper,kp[0],kp[1]);
   for(const f of (D.folk||[]))npc(f[0],f[1],f[2],f[3]);
   if(D.extra)D.extra(C,b);
+  try{wlinDress(C,D,+String(b.id).replace(/\D/g,'')||0)}catch(e){console.error('wlinDress',e)}
 }
 /* wrap khRoom: a Wenlock room is built from the data above, with its own walls, floor and windows */
 {const _kr=khRoom;khRoom=function(b,lvl,back){

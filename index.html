@@ -2852,7 +2852,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     if(s.mount){const side=inv*(dY*s.mount[0]-dX*s.mount[1]);if(side>0)img=signFlip(img)}   // a hanging shop sign: its iron bracket is always on the wall (shop) side
     const iw=img.width,ih=img.height,ty=s.tY;
     if(s.decor&&s.decor.burn>0){const bp=s.decor.burn/5;s.fade=bp>.82?clamp((1-bp)/.18,0,1):1;if(s.fade<.03)continue}
-    if(s.hang||(s.decor&&(s.decor.walk||/^sign_|^lamp$/.test(s.decor.k)))){const f=s.decor&&s.decor.walk&&WALKTREE.test(s.decor.k)?clamp((ty-1.15)/1,0,1):clamp((ty-.35)/.55,0,1);if(f<.03)continue;s.fade=f} // signs, lanterns and walk-through people melt away when you stand beside them
+    if(s.hang||(s.decor&&(s.decor.walk||/^sign_|^lamp$/.test(s.decor.k)))){const f=s.decor&&s.decor.walk&&WALKTREE.test(s.decor.k)?(LEVEL===496?clamp((ty-1.7)/1.8,0,1):clamp((ty-1.15)/1,0,1)):clamp((ty-.35)/.55,0,1);if(f<.03)continue;s.fade=f} // signs, lanterns and walk-through people melt away when you stand beside them
     let sw=F*s.w/ty;sw*=(1+(s.lunge||0)*.28);
     if(s.smallSky&&sw<7)continue; // a far roof too small to see is not painted
     if(s.flat&&!(s.pic&&!TERR_NOW)){const rx=s.x-cx,ry=s.y-cy,dl=Math.hypot(rx,ry)||1;sw*=Math.max(.06,Math.abs((rx*s.flat[0]+ry*s.flat[1])/dl))}
@@ -50005,7 +50005,7 @@ const wlHas=k=>!!IMG['wl_'+k];
 function wlPick(...keys){for(const k of keys){if(IMG[k])return k;if(IMG['wl_'+k])return 'wl_'+k}return null}
 /* heights (in cells) of everything that stands about */
 function wlHeights(){
-  Object.assign(NPC_H,{cow:.62,wl_cow:.62,hay:.72,kh_ohgard1_0:1.7,kh_ohgard1_2:2.3,kh_ohgard1_3:.62,kh_ohgard1_4:1.0,kh_ohgard1_5:.95,kh_ohgard2_0:1.15,kh_ohgard2_1:.95,kh_ohgard2_2:1.35,kh_ohgard2_3:.7,kh_ohgard2_4:.75,kh_ohgard2_5:1.1,
+  Object.assign(NPC_H,{cow:.62,wl_cow:.62,hay:.72,kh_ohgard1_0:1.7,kh_ohgard1_2:2.3,kh_ohgard1_3:.5,kh_ohgard1_4:1.0,kh_ohgard1_5:.95,kh_ohgard2_0:1.15,kh_ohgard2_1:.95,kh_ohgard2_2:1.35,kh_ohgard2_3:.7,kh_ohgard2_4:.75,kh_ohgard2_5:1.1,
     kh_oqdogs_0:.5,kh_oqdogs_1:.62,kh_oqdogs_2:.5,kh_oqdogs_3:.36,kh_oqdogs_4:.46,kh_oqdogs_5:.44,kh_anim1_0:.3,kh_anim1_3:.55,kh_anim1_4:.7,kh_anim1_5:.26,
     kh_stall1_0:1.5,kh_stall1_1:1.5,kh_stall1_2:1.5,kh_stall1_3:1.5,kh_stall1_4:1.5,kh_stall1_5:1.5,kh_stall2_0:.8,kh_stall2_1:.8,kh_stall2_2:.9,kh_stall2_3:.8,kh_oqstuff_0:1.2,kh_oqstuff_1:.4,kh_oqstuff_2:.6,kh_oqstuff_4:.4,kh_oqstuff_6:.3,kh_oqstuff_8:.7,kh_oqstuff_9:.55,kh_oqstuff_10:.6,
     kh_city1_1:1.5,kh_city2_1:1.7,kh_city2_2:.8,kh_city2_3:.9,kh_city2_4:2.4,kh_city2_5:.55,kh_ohtower1_1:3.4,kh_ohtower1_4:3.4,kh_ohtower1_0:3.2,kh_ytree1_0:1.5,kh_fire1_0:.7,kh_fire1_4:1.0,kh_fire1_3:.7,kh_ohprops1_7:.62,kh_cart1_0:.8,
@@ -50039,7 +50039,19 @@ function wlRoofs(){
 /* the floors of Wenlock: cobbles, pale paving, lawn, gravel, brook water, meadow (the order of floorSet) */
 function wlFloors(){
   if(typeof ohFloors==='function')ohFloors();
-  return ['ohCobble','ohPale','ohLawn','ohGravel',FLOORS.bluewater?'bluewater':'ohMoss','ohMeadow'];
+  // painted-quality ground: the thin seams and dither of the old tiles broke up into dots at a distance, so the paving is softened, the lane is packed earth with grass in it, the water is a rippled green-grey pond
+  const blur=(src,r)=>{const n=2*r+1,t=new Uint8ClampedArray(src.length),o=new Uint8ClampedArray(src.length);
+    for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){let R=0,G=0,B=0;for(let k=-r;k<=r;k++){const i=(y*TS+((x+k+TS)%TS))*4;R+=src[i];G+=src[i+1];B+=src[i+2]}const j=(y*TS+x)*4;t[j]=R/n;t[j+1]=G/n;t[j+2]=B/n}
+    for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){let R=0,G=0,B=0;for(let k=-r;k<=r;k++){const i=(((y+k+TS)%TS)*TS+x)*4;R+=t[i];G+=t[i+1];B+=t[i+2]}const j=(y*TS+x)*4;o[j]=R/n;o[j+1]=G/n;o[j+2]=B/n;o[j+3]=255}
+    return o};
+  const mix=(a,b,f)=>{const d=new Uint8ClampedArray(a.length);for(let i=0;i<a.length;i+=4){const k=typeof f==='function'?f((i>>2)%TS,((i>>2)/TS)|0):f;d[i]=a[i]*(1-k)+b[i]*k;d[i+1]=a[i+1]*(1-k)+b[i+1]*k;d[i+2]=a[i+2]*(1-k)+b[i+2]*k;d[i+3]=255}return d};
+  const mul=(a,m)=>{const d=new Uint8ClampedArray(a.length);for(let i=0;i<a.length;i+=4){d[i]=a[i]*m[0];d[i+1]=a[i+1]*m[1];d[i+2]=a[i+2]*m[2];d[i+3]=255}return d};
+  if(!FLOORS.wlPale&&FLOORS.ohPale)FLOORS.wlPale=mul(mix(FLOORS.ohPale,blur(FLOORS.ohPale,3),.93),[.97,.93,.86]);
+  if(!FLOORS.wlEarth&&FLOORS.ohGravel&&FLOORS.ohLawn){const gb=blur(FLOORS.ohGravel,2),lb=blur(FLOORS.ohLawn,3);
+    FLOORS.wlEarth=mul(mix(gb,lb,(x,y)=>Math.max(0,Math.min(.85,dsNoise(x,y,8,771)*2.2-.75))),[1,.94,.84])}
+  if(!FLOORS.wlMeadow&&FLOORS.ohLawn&&FLOORS.ohMeadow)FLOORS.wlMeadow=mix(FLOORS.ohLawn,blur(FLOORS.ohMeadow,1),(x,y)=>.3+.5*dsNoise(x,y,3,772));
+  if(!FLOORS.wlWater)FLOORS.wlWater=dsFloor((x,y)=>{const n=dsNoise(x,y,4,331),m=dsNoise(x,y,8,332),r=Math.sin(TAU*(1*x/TS+3*y/TS+n*1.4))*.5+.5,k=.98+.26*r+.3*(m-.5);return [70*k+14,104*k+16,104*k+10]});
+  return ['ohCobble',FLOORS.wlPale?'wlPale':'ohPale','ohLawn',FLOORS.wlEarth?'wlEarth':'ohGravel',FLOORS.wlWater?'wlWater':(FLOORS.bluewater?'bluewater':'ohMoss'),FLOORS.wlMeadow?'wlMeadow':'ohMeadow'];
 }
 /* the wall styles: the Oldhaven sheets, and the new English ones when they have been painted */
 function wlStyles(){
@@ -50240,6 +50252,10 @@ function wlBuild(){
   houses.forEach((h,k)=>{
     h.k=k;const sp=h.sp;
     h.sty=sp?sp.sty:pick(STY,h.x0,h.y0,14);h.rk=sp?sp.roof:pick(ROOFS,h.x0,h.y0,15);
+    // no two houses in a row on the same street share a wall style or a roof: step on to the next one if they would
+    {const pv=houses[k-1],pv2=houses[k-2];
+     if(!sp&&pv&&pv.face===h.face){for(let t=1;t<=STY.length&&(h.sty===pv.sty||(pv2&&pv2.face===h.face&&h.sty===pv2.sty));t++)h.sty=STY[(STY.indexOf(h.sty)+t)%STY.length];
+       for(let t=1;t<=ROOFS.length&&(h.rk===pv.rk||(pv2&&pv2.face===h.face&&h.rk===pv2.rk));t++)h.rk=ROOFS[(ROOFS.indexOf(h.rk)+t)%ROOFS.length]}}
     h.wh=sp?sp.wh:Math.round((1.9+hs(h.x0,h.y0,16)*.5)*10)/10;
     h.name=sp?sp.name:null;
   });
@@ -50262,7 +50278,9 @@ function wlBuild(){
     // tubs and window boxes either side of the door, on the verge beside the wall, never in the road
     const side2=horiz?[[h.front[0]-1,h.front[1]],[h.front[0]+1,h.front[1]]]:[[h.front[0],h.front[1]-1],[h.front[0],h.front[1]+1]];
     const wallRow=horiz?[[h.x0-1,h.face==='S'?h.y1:h.y0],[h.x1+1,h.face==='S'?h.y1:h.y0]]:[[h.face==='E'?h.x1:h.x0,h.y0-1],[h.face==='E'?h.x1:h.x0,h.y1+1]];
-    for(const [tx,ty] of wallRow)if(free(tx,ty)&&hs(tx,ty,96)<.8){const k=hs(tx,ty,97)<.5?'kh_city2_5':'kh_city2_3';if(IMG[k]){used.add(tx+','+ty);scenery.push({k,wx:tx+.5,wy:ty+.5,sc:.85+hs(tx,ty,99)*.3,decor:{k,walk:true,x:tx,y:ty}})}}
+    // a different thing by each door, none taller than a man's waist: tubs, window boxes, herb benches, barrels, shrubs, and only rarely a palm in a pot
+    for(const [tx,ty] of wallRow)if(free(tx,ty)&&hs(tx,ty,96)<.7){const r=hs(tx,ty,97),PL=[['yar_tub',.78],['kh_city2_5',.8],['kh_ohgard2_4',.7],['kh_ohgard2_1',.62],['kh_city2_2',.7],['lbush0',.9],['vase0',.8],['kh_ohgard2_3',.7],['kh_city2_3',.5]],pi=r<.04?8:((hs(tx,ty,98)*8)|0),[k,psc]=PL[pi];
+      if(IMG[k]){used.add(tx+','+ty);scenery.push({k,wx:tx+.5,wy:ty+.5,sc:psc*(.9+hs(tx,ty,99)*.2),decor:{k,walk:true,x:tx,y:ty}})}}
   }
   // ---- the signs of the buildings with something to sell, and the names of the rest ----
   for(const h of houses){
@@ -50296,7 +50314,7 @@ function wlBuild(){
       for(const [x,y] of [[44,52],[46,52],[44,51],[46,51],[44,53],[46,53],[45,51]])flowers(x,y,1.25);
       tryDc('kh_ohgard1_3',43,53);tryDc('kh_ohgard1_3',47,51);}
     solidDc('kh_ohgard1_0',52,53,{});
-    for(const [x,y,k] of [[43,46,'kh_stall1_0'],[46,46,'kh_stall1_1'],[50,46,'kh_stall1_3'],[53,46,'kh_stall1_4'],[43,54,'kh_stall1_2'],[54,54,'kh_stall1_5']])solidDc(k,x,y);
+    for(const [x,y,k] of [[43,46,'kh_stall1_0'],[46,46,'kh_stall1_1'],[50,46,'kh_stall1_3'],[53,46,'kh_stall1_4'],[43,54,'kh_stall1_2'],[54,54,'kh_stall1_5']])solidDc(k,x,y,{sc:1.28});
     for(const [x,y,k] of [[41,48,'kh_stall2_3'],[55,48,'kh_stall2_0'],[41,52,'kh_stall2_1'],[55,52,'kh_stall2_2'],[44,48,'kh_oqstuff_9'],[52,48,'kh_oqstuff_2'],[47,54,'kh_oqstuff_8']])tryDc(k,x,y,{block:true,walk:false});
     for(const [x,y] of [[46,48],[50,54],[56,47],[40,53]])tryDc('kh_ohgard1_3',x,y);
     for(const [x,y] of [[41,45],[55,45],[41,55],[55,55],[48,45],[48,55]])lamp(x,y);
@@ -50327,7 +50345,7 @@ function wlBuild(){
     for(let n=0;n<14;n++){const x=44+((hs(n,1,8)*20)|0),y=60+((hs(n,2,8)*20)|0);if(hs(n,3,8)<.5)tree(x,y);else bush(x,y)}
     // across the brook: meadow with the mill and the windmill, cows and sheep
     setF(3,87,96,96,'5');
-    for(const [x,y,i] of [[60,91,0],[64,89,1],[56,93,2],[68,93,3]])tryDc(i%2?'cow':A('sheep0','kh_anim1_3'),x,y,{block:false});
+    for(const [x,y,i] of [[60,91,0],[64,89,1],[56,93,2],[68,93,3]])tryDc(i%2?'cow':A('sheep','sheep0','kh_anim1_3'),x,y,{block:false});
     for(let n=0;n<26;n++){const x=4+((hs(n,1,9)*90)|0),y=87+((hs(n,2,9)*9)|0);if(free(x,y)&&!(x>=68&&x<=76)){if(hs(n,3,9)<.5)tree(x,y);else bush(x,y)}}
     for(let x=4;x<=95;x+=2)for(const y of [WL_BROOK(x)-1])if(hs(x,y,10)<.35&&free(x,y))flowers(x,y,.9);
   }
@@ -50446,7 +50464,9 @@ const WL_ANIMALS=[
   {id:'wlo_goat',n:'A goat',face:'kh_anim1_3',sc:.9,out:[86,52],lines:["Maaa. (He has just eaten a hat, and is thinking about the other one.)","Maaa. (He gives you a look of calm, patient contempt.)"]},
   {id:'wlo_donkey',n:'Neddy, the donkey',face:'kh_anim1_4',sc:.9,out:[66,47],lines:["Hee-haw. (He has a strong opinion and has decided not to share it.)","Hee-haw. (The donkey looks, you suspect, at the world's long list of unfinished business.)"]}
 ];
-for(const f of WL_FOLK.concat(WL_ANIMALS))if(f.id!=='wlo_mayor')khNpc(f.id,f.n,f.face,()=>yrLines(f.id,f.lines),{sc:f.sc});
+/* grown-ups were drawn a little too big beside the doors and stalls: every adult is brought down a tenth, the children and animals stay as they are */
+const wlFolkSc=f=>f.sc>.9&&!/^wlo_(dog|cat|goat|donkey)/.test(f.id)?Math.round(f.sc*.88*100)/100:f.sc;
+for(const f of WL_FOLK.concat(WL_ANIMALS))if(f.id!=='wlo_mayor')khNpc(f.id,f.n,f.face,()=>yrLines(f.id,f.lines),{sc:wlFolkSc(f)});
 /* ---- placement: each person stands near their place, off the roads (wenlock_town.js calls this) ---- */
 function wlPlaceFolk(C){
   C.person('wlo_mayor',27,31,4);
@@ -50500,7 +50520,20 @@ const WLIN_P={
 const WLIN_S=1.2; // every prop is drawn a fifth larger than its table height, so the rooms are not bare
 const WLIN_FOLK={wife:'folk1_0',vicar:'folk1_1',teacher:'folk1_2',boy:'folk1_3',girl:'folk1_4',baker:'folk1_5',minstrel:'folk2_0',smith:'folk2_1',farmer:'folk2_2',gran:'folk2_3',merchant:'folk2_4',maid:'folk2_5'};
 /* fall-back looks: the older props are used while a picture is missing */
+/* the painted pieces were cut from a magenta ground and kept a thin purple line round their edges: every edge pixel that is still pink or violet is pulled back to the colour of the thing it borders and darkened */
+function wlinDefringe(k){
+  const im=IMG[k];if(!im||!im.width||im._wlfd)return;
+  try{const w=im.width,h=im.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(im,0,0);const d=x.getImageData(0,0,w,h),p=d.data;let n=0;
+    const A=(xx,yy)=>xx<0||yy<0||xx>=w||yy>=h?0:p[(yy*w+xx)*4+3];
+    for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){const i=(yy*w+xx)*4,a=p[i+3];if(a===0)continue;
+      let edge=a<250;if(!edge){for(let r=1;r<=2&&!edge;r++)if(A(xx-r,yy)<40||A(xx+r,yy)<40||A(xx,yy-r)<40||A(xx,yy+r)<40)edge=true}
+      if(!edge)continue;
+      const R=p[i],G=p[i+1],B=p[i+2],m=(R+B)/2;
+      if(m>G*1.1+6&&Math.min(R,B)>G*.9){const g=G*.85;p[i]=Math.min(R,g*1.08+4)*.8;p[i+1]=g*.8;p[i+2]=Math.min(B,g*1.02+4)*.8;n++}}
+    if(n){x.putImageData(d,0,0);c._wlfd=1;IMG[k]=c}else im._wlfd=1}catch(e){}
+}
 function wlinPrep(){
+  for(const k of Object.keys(IMG))if(/^wl2_/.test(k)&&!/^wl2_(wall|floor|ww)_/.test(k))wlinDefringe(k);
   for(const k in WLIN_P){const p=WLIN_P[k];NPC_H['wl2_'+p[0]]=p[1]*WLIN_S}
   for(const k in WLIN_FOLK)NPC_H['wl2_'+WLIN_FOLK[k]]=.98;
   for(let i=0;i<6;i++){const im=IMG['wl2_floor_'+i];if(im&&!FLOORS['wl2f'+i])FLOORS['wl2f'+i]=dsPaintedTex(im)}
@@ -50540,7 +50573,7 @@ WLIR('inn',{w:15,h:11,look:'timber',amb:.62,lights:[[3,2],[11,2],[7,6,1],[2,8],[
   folk:[['wli_nell',6,4],['wli_farmers',9,4],['wli_traveller2',5,5],['wli_minstrel',12,9],['wli_innkeeper_dog',8,6],['wli_inn_cat',2,4]],win:[[4,0],[10,0],[0,4],[0,8],[14,4],[14,8]]});
 /* THE GENERAL STORE */
 WLIR('general',{w:11,h:8,look:'timber2',amb:.64,lights:[[2,2],[8,2],[5,5]],keeper:[5,2],
-  props:[['shelving',1,1],['shelving',2,1],['shelving',8,1],['shelving',9,1],['hangstand',5,1],['shopcounter',3,3],['shopcounter',4,3],['shopcounter',6,3],['shopcounter',7,3],['coopstack',9,5],['veg',1,5],['bookshelf',9,3,{h:1.0}]],
+  props:[['shelving',1,1,{h:.95}],['shelving',2,1,{h:.95}],['shelving',8,1,{h:.95}],['shelving',9,1,{h:.95}],['hangstand',5,1,{h:.7}],['shopcounter',3,3],['shopcounter',4,3],['shopcounter',6,3],['shopcounter',7,3],['coopstack',9,5],['veg',1,5],['bookshelf',9,3,{h:1.0}]],
   folk:[['wli_dibble_cat',2,6]],win:[[3,0],[7,0],[0,4],[10,4]],raw:[['barrel',1,3],['sacks',9,6],['crate',1,6],['sacks',10,2]]});
 /* THE SMITHY: forge glow, anvil, bellows, racks of blades */
 WLIR('forge',{w:13,h:9,look:'cellar',amb:.5,lights:[[5,1,1],[7,1,1],[2,4],[10,4],[6,6,1]],keeper:[6,2],
@@ -50613,7 +50646,7 @@ WLIR('almshouse',{w:11,h:8,look:'plaster2',amb:.64,lights:[[2,2],[8,2],[5,5]],ke
   folk:[['wli_gran',3,3],['wli_oldfarmer',7,5],['wli_almscat',3,6]],win:[[3,0],[7,0],[0,4],[10,4]],raw:[]});
 /* THE CHURCH OF SAINT WENNA: nave, pews, stained glass, altar, a font, a priest */
 WLIR('church',{w:13,h:13,look:'church',amb:.62,lights:[[3,2],[9,2],[6,3],[3,7],[9,7],[2,10],[10,10]],keeper:[6,2],
-  props:[['altar',6,1],['glasswin',3,1],['glasswin',9,1],['votive',2,2,{npc:'wli_votive'}],['votive',10,2,{npc:'wli_votive'}],['pew',3,5],['pew',4,5],['pew',8,5],['pew',9,5],['pew',3,7],['pew',4,7],['pew',8,7],['pew',9,7],['pew',3,9],['pew',4,9],['pew',8,9],['pew',9,9],
+  props:[['altar',6,1],['banner',3,1,{h:1.25}],['banner',9,1,{h:1.25}],['votive',2,2,{npc:'wli_votive'}],['votive',10,2,{npc:'wli_votive'}],['pew',3,5],['pew',4,5],['pew',8,5],['pew',9,5],['pew',3,7],['pew',4,7],['pew',8,7],['pew',9,7],['pew',3,9],['pew',4,9],['pew',8,9],['pew',9,9],
     ['font',10,11],['lectern',5,3,{npc:'wli_lectern'}],['banner',1,5,{h:1.2}],['banner',11,5,{h:1.2}]],
   folk:[['wli_widow',3,6],['wli_choirboy',9,8],['wli_church_cat',7,10]],win:[[2,0],[4,0],[6,0],[8,0],[10,0],[0,3],[0,6],[0,9],[12,3],[12,6],[12,9]],raw:[]});
 /* THE INN CELLAR and THE OLD GRANARY */
@@ -50632,16 +50665,34 @@ const WLIN_HOME={
   messy:{look:'oak',amb:.6,res:[4,3],props:[['bookshelf',1,1],['bookshelf',2,1],['bookshelf',7,1],['readdesk',4,1],['globe',6,3,{h:.55}],['bed',7,4],['scrollrack',1,4,{h:.8}]],folk:[['wli_home_cat',3,4]],win:[[3,0],[0,3]],raw:[['crate',6,5],['crate',2,5],['sacks',8,5]]},
   scholar:{look:'oak',amb:.6,res:[4,3],props:[['bookshelf',1,1],['bookshelf',2,1],['bookshelf',3,1],['bookshelf',7,1],['readdesk',5,1],['globe',2,4],['rocker',7,4],['lectern',6,3,{h:.8}]],folk:[['wli_home_cat',5,5]],win:[[4,0],[8,3]]},
   merchant:{look:'timber',amb:.62,res:[4,3],props:[['dresser',1,1],['shelving',3,1],['tapestry',5,1,{h:.9}],['bed',7,1],['pietable',2,4],['clock',8,3,{h:1.1}]],folk:[['wli_home_dog',5,5]],win:[[4,0],[0,3],[8,3]],raw:[['chest',1,3],['chest',2,3],['sacks',6,3],['sacks',7,3]]},
-  healer:{look:'plaster2',amb:.62,res:[4,3],props:[['herbrack',1,1],['herbrack',2,1],['apothcab',4,1],['cauldron',7,3,{h:.6}],['bed',7,1],['herbrack',1,4,{h:.8}]],folk:[['wli_home_cat',3,5]],win:[[3,0],[6,0],[0,3]]},
+  healer:{look:'plaster2',amb:.62,res:[4,3],props:[['herbrack',1,1,{h:.9}],['dresser',3,1,{h:.85}],['cothearth',5,1],['cauldron',7,3,{h:.6}],['bed',7,1],['rocker',2,4]],folk:[['wli_home_cat',3,5]],win:[[3,0],[6,0],[0,3]]},
   children:{look:'timber2',amb:.68,res:[4,3],props:[['cot',1,1],['bed',7,1],['cothearth',4,1],['cot',7,4,{h:.5}],['rocker',2,4],['pietable',5,5,{h:.55}]],folk:[['wli_home_cat',3,3],['wli_home_dog',6,5],['wli_home_kid',2,6]],win:[[2,0],[6,0],[0,3],[8,3]]},
-  potter:{look:'brick2',amb:.62,res:[4,3],props:[['oven',1,1],['bakertable',4,1],['bed',7,1],['shelving',8,3,{h:.9}],['veg',1,4,{h:.5}]],folk:[['wli_home_dog',6,5]],win:[[3,0],[6,0],[8,3]],raw:[['sacks',2,4],['sacks',7,4]]},
+  potter:{look:'brick2',amb:.62,res:[4,3],props:[['cothearth',1,1],['pietable',4,1,{h:.6}],['bed',7,1],['dresser',8,3,{h:.9}],['veg',1,4,{h:.5}],['rocker',5,5]],folk:[['wli_home_dog',6,5]],win:[[3,0],[6,0],[8,3]],raw:[['sacks',2,4],['sacks',7,4]]},
   cats:{look:'plaster',amb:.64,res:[4,3],props:[['cat',1,1,{h:.3}],['cat',2,3,{h:.3}],['cat',6,1,{h:.3}],['cat',7,4,{h:.3}],['rocker',2,1],['bed',7,1,{h:.6}],['pietable',4,5,{h:.55}],['dresser',8,2,{h:.9}]],folk:[['wli_home_cat',3,5],['wli_cat2',5,3]],win:[[4,0],[0,3],[8,3]]},
-  soldier:{look:'stone',amb:.58,res:[4,3],props:[['weaponrack',1,1],['mannequin',3,1],['bed',7,1],['shields',5,1],['pietable',2,4],['ale',7,4,{h:.55}]],folk:[['wli_home_dog',5,5]],win:[[4,0],[0,3],[8,3]]},
+  soldier:{look:'stone',amb:.58,res:[4,3],props:[['cothearth',1,1],['bed',7,1],['banner',4,1,{h:1.2}],['pietable',2,4],['rocker',6,4],['dresser',8,3,{h:.9}]],folk:[['wli_home_dog',5,5]],win:[[4,0],[0,3],[8,3]]},
   fisher:{look:'timber2',amb:.6,res:[4,3],props:[['hangstand',1,1],['bed',7,1],['cothearth',4,1],['ale',7,4,{h:.7}],['coopstack',1,4,{h:.8}],['pietable',2,4]],folk:[['wli_home_cat',5,5]],win:[[2,0],[6,0],[8,3]]},
   noble:{look:'oak',amb:.66,res:[4,3],props:[['dresser',1,1],['tapestry',4,1,{h:.95}],['clock',7,1],['bed',7,4,{h:.8}],['pietable',2,4],['bookshelf',1,4,{h:1.0}],['mannequin',3,1,{h:.9}]],folk:[['wli_home_dog',5,5]],win:[[3,0],[6,0],[0,3],[8,3]]},
   musician:{look:'timber',amb:.64,res:[4,3],props:[['lute',1,1],['lute',2,1,{h:.5}],['bed',7,1],['tapestry',4,1,{h:.9}],['rocker',2,4],['pietable',7,4,{h:.55}]],folk:[['wli_home_cat',5,5]],win:[[4,0],[0,3],[8,3]]}
 };
 for(const k in WLIN_HOME)WLIR('home_'+k,Object.assign({w:9,h:7,keeper:null},WLIN_HOME[k]));
+/* ---- a home is never the same room twice: its size, its mirror and its wall hangings come from its door number ---- */
+function wlinHomeVariant(scene,id){
+  const base=WLIN_ROOMS['home_'+scene];if(!base||scene==='cats'||scene==='children')return 'home_'+scene;
+  const name='home_'+scene+'_'+id;if(WLIN_ROOMS[name])return name;
+  const dw=(hash2(id,21,5)*3)|0,dh=hash2(id,22,5)<.4?1:0,mir=hash2(id,23,5)<.5,W0=base.w,H0=base.h;
+  const mx=x=>{if(x>=W0-4)x+=dw;else if(x>3)x+=(dw>>1);return mir?W0+dw-1-x:x},my=y=>y>2?y+dh:y;
+  const mp=a=>a.map(q=>{q=q.slice();q[1]=mx(q[1]);q[2]=my(q[2]);return q});
+  const D=Object.assign({},base,{w:W0+dw,h:H0+dh,props:mp(base.props),raw:base.raw&&mp(base.raw),folk:base.folk&&mp(base.folk),win:base.win&&base.win.map(q=>[mx(q[0]),q[1]===0?0:my(q[1])]),res:base.res&&[mx(base.res[0]),my(base.res[1])],lights:(base.lights||[[2,2],[W0-3,2],[W0>>1,H0>>1]]).map(q=>[mx(q[0]),my(q[1])].concat(q.slice(2)))});
+  D.dress=1;WLIN_ROOMS[name]=D;return name;
+}
+/* pictures, a tapestry or a shelf on the long bare wall of a home */
+function wlinDress(C,D,id){
+  if(!D.dress)return;const HANG=['tapestry','noticeboard','tapestry','clock'],y=1;let n=0;
+  for(let x=1;x<D.w-1&&n<3;x++){const k=HANG[(hash2(id,x,31)*HANG.length)|0];
+    if(hash2(id,x,32)<.5||C.has(x,y)||C.has(x+1,y)||(C.has(x-1,y)&&false))continue;
+    if(k==='clock'&&C.has(x,y+1))continue;
+    wlinProp(C,k,x,y,{h:k==='clock'?1.0:.8,free:1,bob:k==='clock'?0:.35});n++;x+=2}
+}
 /* ---- every door of the town (WL_DOORS in wenlock_town.js) gets its room, built when first entered (KH_LAZY) ---- */
 const WLIN_BY_KIND={church:'church',inn:'inn',smith:'forge',bakery:'bakery',butcher:'butcher',library:'library',scroll:'scrolls',tailor:'tailor',armour:'armour',weapons:'weapons',general:'general',greengrocer:'green',potion:'potion',herb:'herbs',cooper:'cooper',chandler:'chandler',cobbler:'cobbler',almshouse:'almshouse',school:'school',hall:'hall'};
 const WLIN_KEEPER={church:'wli_k_church',inn:'wli_k_inn',smith:'wli_k_smith',bakery:'wli_k_bakery',butcher:'wli_k_butcher',library:'wli_k_library',scroll:'wli_k_scrolls',tailor:'wli_k_tailor',armour:'wli_k_armour',weapons:'wli_k_weapons',general:'wli_k_general',greengrocer:'wli_k_green',potion:'wli_k_potion',herb:'wli_k_herbs',cooper:'wli_k_cooper',chandler:'wli_k_chandler',cobbler:'wli_k_cobbler',almshouse:'wli_k_almshouse',school:'wli_k_school',hall:'wli_k_hall'};
@@ -50649,9 +50700,9 @@ const WLIN_SCENES=['warm','worker','spartan','messy','scholar','merchant','heale
 const WLIN_HOMENAME={warm:'A Warm Cottage',worker:"A Farmer's Kitchen",spartan:"A Widow's Parlour",messy:'A Cluttered Cottage',scholar:"A Scholar's Cottage",merchant:"A Wool Merchant's House",healer:"A Healer's Cottage",children:"A Family's Cottage",potter:"A Baker's Flat",cats:'A House of Cats',soldier:"A Retired Soldier's House",fisher:"A Brook Fisher's Cottage",noble:"A Gentleman's House",musician:"A Fiddler's Cottage"};
 const WLIN_RES={warm:['wli_r_wife','wli_r_cook'],worker:['wli_r_wife','wli_r_man'],spartan:['wli_r_old','wli_r_nun'],messy:['wli_r_scholar','wli_r_fiddler'],scholar:['wli_r_scholar','wli_r_girl'],merchant:['wli_r_wife','wli_r_cook'],healer:['wli_r_nun','wli_r_old'],children:['wli_r_mum','wli_r_wife'],potter:['wli_r_weaver','wli_r_cook'],cats:['wli_r_old','wli_r_weaver'],soldier:['wli_r_man','wli_r_old'],fisher:['wli_r_old','wli_r_man'],noble:['wli_r_wife','wli_r_scholar'],musician:['wli_r_fiddler','wli_r_girl']};
 function wlinMake(d){ // d: one entry of WL_DOORS
-  const id=d.id,home=!WLIN_BY_KIND[d.kind],r=hash2(id,7,3),scene=home?WLIN_SCENES[(r*WLIN_SCENES.length)|0]:null;
+  const id=d.id,home=!WLIN_BY_KIND[d.kind],hi=WL_DOORS.filter(q=>!WLIN_BY_KIND[q.kind]).findIndex(q=>q.id===id),scene=home?WLIN_SCENES[(hi*5+(hi>>4))%WLIN_SCENES.length]:null;   // the kinds of home go round in turn, so no street gets one kind over and over
   const name=home?WLIN_HOMENAME[scene]:d.name,back={to:WL.ID,x:d.front.x,y:d.front.y,f:d.out};
-  const b={id:'wlin'+id,wlin:home?'home_'+scene:WLIN_BY_KIND[d.kind],name,room:home?'home':'shop',keeper:home?(hash2(id,9,4)<.8?WLIN_RES[scene][(hash2(id,5,5)*WLIN_RES[scene].length)|0]:null):WLIN_KEEPER[d.kind],floor:'wood',wallImg:'kh_ohwall1_2'};
+  const b={id:'wlin'+id,wlin:home?wlinHomeVariant(scene,id):WLIN_BY_KIND[d.kind],name,room:home?'home':'shop',keeper:home?(hash2(id,9,4)<.8?WLIN_RES[scene][(hash2(id,5,5)*WLIN_RES[scene].length)|0]:null):WLIN_KEEPER[d.kind],floor:'wood',wallImg:'kh_ohwall1_2'};
   const R=khRoom(b,id,back);LEVELS[id]=R.level;LEVELS[id].diff=80;LEVEL_NAMES[id]=name;LEVEL_RATING[id]=80;return R.level;
 }
 for(const d of WL_DOORS){const id=d.id;KH_LAZY[id]=()=>{if(!LEVELS[id])wlinMake(d)}}
@@ -50676,6 +50727,7 @@ function wlinBuild(D,name,b,C){
   if(b.keeper&&kp)npc(b.keeper,kp[0],kp[1]);
   for(const f of (D.folk||[]))npc(f[0],f[1],f[2],f[3]);
   if(D.extra)D.extra(C,b);
+  try{wlinDress(C,D,+String(b.id).replace(/\D/g,'')||0)}catch(e){console.error('wlinDress',e)}
 }
 /* wrap khRoom: a Wenlock room is built from the data above, with its own walls, floor and windows */
 {const _kr=khRoom;khRoom=function(b,lvl,back){
@@ -50948,7 +51000,7 @@ for(const [id,n,face,title,greet,key,sc] of WLSTALLS){
   khNpc(id,n,face,d=>{
     let g=greet;
     try{if((id==='wlo_pedlar'||id==='wlo_potter')&&typeof wwF==='function'&&wwF().wwDead)g=id==='wlo_pedlar'?'Silas has gingerbread men for a penny, and they are certified, by a goat, as safe. Cloth, rugs, ribbons and one very good boot too.':'I have made a gingerbread mould for Pip\'s stall, shaped like a small man. It came out with a small, unhappy face, and I could not make it stop. Jugs, bowls and honey are over here.'}catch(e){}
-    return say(g,[['Browse the wares',()=>{openShop(d,KH_STOCK[key](),title);return null}],BYE])},{sc});
+    return say(g,[['Browse the wares',()=>{openShop(d,KH_STOCK[key](),title);return null}],BYE])},{sc:Math.round(sc*.84*100)/100});
 }
 
 /* ---- src/desert/wenlock_quests.js ---- */
@@ -51115,14 +51167,15 @@ const WL_QOBJ=[
 
 /* ---- src/desert/wenlock_strays.js ---- */
 /* ==========================================================================
-   WENLOCK: THE STRAYS (quests wlq11 and wlq12, ids wlo_goat1..5 and wlo_llama1..5). Two more fetch quests, open as soon as the mayor's welcome is done:
-   Farmer Giles has lost five goats and the wool merchant has lost five llamas, dotted about the town. Each animal is a step of its own (the log shows the next one and where it was
+   WENLOCK: THE STRAYS (quests wlq11 and wlq12, ids wlo_goat1..5 and wlo_sheep1..5). Two more fetch quests, open as soon as the mayor's welcome is done:
+   Farmer Giles has lost five goats and the wool merchant has lost five sheep, dotted about the town. Each animal is a step of its own (the log shows the next one and where it was
    last seen); clicking one when its quest is active sends it home. The town builder puts each one near its spot, off the roads (WL_QOBJ in wenlock_quests.js).
    ========================================================================== */
 Object.assign(WL_REW,{wlq11:{gold:700,xp:7000},wlq12:{gold:800,xp:8000}});
 WL_QUESTS.push(
   {id:'wlq11',giver:'Farmer Giles',title:'Five Runaway Goats',desc:'Five of Farmer Giles\' goats have got out of the top field and are somewhere about the town. Find them all.'},
-  {id:'wlq12',giver:'A wool merchant',title:'Five Lost Llamas',desc:'Five of the wool merchant\'s llamas have wandered off from the wool yard. Find them all.'});
+  {id:'wlq12',giver:'A wool merchant',title:'Five Lost Sheep',desc:'Five of the wool merchant\'s sheep have wandered off from the wool yard. Find them all.'});
+if(NPC_H.sheep===undefined)NPC_H.sheep=.5;
 const WL_STRAYS=[
   {q:'wlq11',who:'Farmer Giles',kind:'goat',flag:'wlg',face:'kh_anim1_3',sc:.9,list:[
     ['Gruff',[46,16],'in the fields at the north end of town, near Farmer Giles.','Gruff looks at you, chews, and trots off home by himself. He does not say thank you.','Maaa. (Gruff is eating a hedge, and wants you to know it is his hedge.)'],
@@ -51130,21 +51183,21 @@ const WL_STRAYS=[
     ['Thistle',[14,56],'in the meadow at the west end of town, below the High Street.','Thistle sighs, as if you have spoiled a very good plan, and ambles off home.','Maaa. (Thistle is staring at the horizon, planning something.)'],
     ['Barnaby',[38,33],'on the grass between the church and the market square.','Barnaby bleats once, loudly, to tell the whole town he is leaving on his own terms, and goes.','Maaa. (Barnaby is standing very still, in the hope that nobody has noticed him.)'],
     ['Nettle',[58,76],'in the meadow south of the village green, near the brook.','Nettle lets you hold a very small piece of her rope, and then leads you home. It was her idea.','Maaa. (Nettle is paddling in the brook, looking pleased with herself.)']]},
-  {q:'wlq12',who:'A wool merchant',kind:'llama',flag:'wll',face:'pet_llama_0',sc:1.05,list:[
-    ['Dolores',[76,86],'near Wenlock Mill, at the far south-east.','Dolores looks down at you from a great height, spits very slightly, and strolls back to the wool yard.','Hmmm. (Dolores is looking at the mill wheel as if it owes her money.)'],
-    ['Lord Fluff',[90,48],'at the east end of the High Street.','Lord Fluff allows you to say a few words, then turns, and processes back to the yard like a small, woolly bishop.','Hmmm. (Lord Fluff is standing in the road, blocking a cart, and does not care.)'],
-    ['Pachamama',[68,60],'in the fields east of the market square.','Pachamama hums, flicks an ear, and wanders home. The cart behind her is very relieved.','Hmmm. (Pachamama is chewing something, and is not going to explain.)'],
-    ['Alpaco',[66,24],'beside the big barn, in the north-east.','Alpaco bows his long neck, turns about, and goes home with very great dignity indeed.','Hmmm. (Alpaco has got his head in a sack of oats, and is not coming out.)'],
-    ['Brenda',[32,88],'in the south meadow across the brook.','Brenda sniffs, looks at the brook, looks at you, and decides you are almost as good as a bridge.','Hmmm. (Brenda is lying in the grass like a very large cat.)']]}];
+  {q:'wlq12',who:'A wool merchant',kind:'sheep',flag:'wll',face:'sheep',sc:1.2,list:[
+    ['Dolores',[76,86],'near Wenlock Mill, at the far south-east.','Dolores gives you a long, flat look, says nothing at all, and strolls back to the wool yard.','Baa. (Dolores is looking at the mill wheel as if it owes her money.)'],
+    ['Lord Fluff',[90,48],'at the east end of the High Street.','Lord Fluff allows you to say a few words, then turns, and processes back to the yard like a small, woolly bishop.','Baa. (Lord Fluff is standing in the road, blocking a cart, and does not care.)'],
+    ['Pachamama',[68,60],'in the fields east of the market square.','Pachamama baas, flicks an ear, and wanders home. The cart behind her is very relieved.','Baa. (Pachamama is chewing something, and is not going to explain.)'],
+    ['Alpaco',[66,24],'beside the big barn, in the north-east.','Alpaco bows his woolly head, turns about, and goes home with very great dignity indeed.','Baa. (Alpaco has got his head in a sack of oats, and is not coming out.)'],
+    ['Brenda',[32,88],'in the south meadow across the brook.','Brenda sniffs, looks at the brook, looks at you, and decides you are almost as good as a bridge.','Baa. (Brenda is lying in the grass like a very large, very round cat.)']]}];
 for(const S of WL_STRAYS){
   const ids=S.list.map((a,i)=>'wlo_'+S.kind+(i+1)),got=()=>S.list.reduce((n,a,i)=>n+(wlF()[S.flag+(i+1)]?1:0),0);
   S.list.forEach(([name,at,hint,foundLine,flavour],i)=>{
     const id=ids[i],flag=S.flag+(i+1);
-    khNpc(id,name+(S.kind==='goat'?', a goat':', a llama'),S.face,d=>{const F=wlF();
+    khNpc(id,name+(S.kind==='goat'?', a goat':', a sheep'),S.face,d=>{const F=wlF();
       if(qSt(S.q)==='active'&&!F[flag]){F[flag]=1;d.found=true;d.block=false;yrStep('You have found '+name+'. ('+got()+'/5)');return say(foundLine,[BYE])}
       return say(flavour,[BYE])},{sc:S.sc});
     WL_QOBJ.push({npc:id,k:()=>S.face,at,rad:6,o:{sc:S.sc}})});
-  wlQ(S.q,S.who,S.list.map(([name,at,hint],i)=>['Find '+name+', '+(S.kind==='goat'?'a goat':'a llama')+', last seen '+hint,()=>wlF()[S.flag+(i+1)],[ids[i]]]));
+  wlQ(S.q,S.who,S.list.map(([name,at,hint],i)=>['Find '+name+', '+(S.kind==='goat'?'a goat':'a sheep')+', last seen '+hint,()=>wlF()[S.flag+(i+1)],[ids[i]]]));
 }
 const WLD11=khQD("Five goats, gone! They were in the top field at breakfast, and by elevenses there was a hole in the hedge and a very smug sheep. They do it every spring, but never all five, and never in market week. They answer to Gruff, Clover, Thistle, Barnaby and Nettle, and to nothing else. Could you find them and send them home? They will not hurt you. They will only look at you as if you owe them rent.",
   "Bless you. They will be somewhere in town, wherever there is grass, or a hedge, or a bin. Tell them Giles sent you. They will not listen, but it is polite.",
@@ -51152,12 +51205,12 @@ const WLD11=khQD("Five goats, gone! They were in the top field at breakfast, and
   "All five? Let me count. One, two, three, four, five. And not one of them has said thank you. That is how I know they are mine.",
   "They are back in the top field, and already looking at the hedge. I shall mend it. I shall mend it badly. Take this, with my thanks.",
   "The goats are home. The hedge has a new hole. I have decided not to look at it.","All five are home.");
-const WLD12=khQD("Llamas! Five of them, my best fleece-bearers, gone from the wool yard. Somebody left the gate open, and I will not say who, because it was me. They are called Dolores, Lord Fluff, Pachamama, Alpaco and Brenda, and each is worth more than the shop. They are not fast, but they are very, very stubborn, and they spit. Find them and send them home. Do not argue with them. They always win.",
-  "Thank you. They will be about the town, wherever it is quiet and there is something to look down on. If one spits, take it as a mark of respect.",
-  (n,m)=>n?n+' of '+m+' found. The others are about the town, looking down at something.':'Look in the quiet places, the edges of town, and wherever a cart is blocked.',
+const WLD12=khQD("Sheep! Five of them, my best fleece-bearers, gone from the wool yard. Somebody left the gate open, and I will not say who, because it was me. They are called Dolores, Lord Fluff, Pachamama, Alpaco and Brenda, and each is worth more than the shop. They are not fast, but they are very, very stubborn, and they bite the hands that count them. Find them and send them home. Do not argue with them. They always win.",
+  "Thank you. They will be about the town, wherever it is quiet and there is grass to be eaten. If one stares at you, take it as a mark of respect.",
+  (n,m)=>n?n+' of '+m+' found. The others are about the town, looking at the grass.':'Look in the quiet places, the edges of town, and wherever a cart is blocked.',
   "All five home? Dolores, Fluff, Pachamama, Alpaco and Brenda? I shall count them twice, and then again, to be sure.",
   "They are in the yard, and all of them look as if the whole business was my fault. Which it was. Here, with my thanks, and a very fine bit of wool.",
-  "The llamas are home, the gate is shut, and I have put a sign on it. The sign says SHUT. Dolores has read it, and is not impressed.","All five are home.");
+  "The sheep are home, the gate is shut, and I have put a sign on it. The sign says SHUT. Dolores has read it, and is not impressed.","All five are home.");
 wlGive('wlo_farmer','wlq11','wlq1',WLD11);
 wlGive('wlo_merchant','wlq12','wlq1',WLD12);
 
@@ -51975,10 +52028,38 @@ const WLD20=khQD("A friar walks a great deal and my feet are not what they were.
 wlQ('wlq20','Brother Tuck',[["Light the five lanterns along Churchyard Lane, the lane that runs west from Church Lane.",()=>wleDup(wleF(),'wlq20_',5)>=5,WLE_LAMPS.map((a,i)=>'wlo_lantern'+(i+1))],["Lay a wildflower on Hester's grave, in the quiet corner at the west end of the town. The greengrocer and the herb shop sell them.",()=>wleF().wlq20g,['wlo_hester']]]);
 wlGive('wlo_friar','wlq20','wlq1',WLD20);
 /* ---- detail in the meadows (called from the polish pass) ---- */
+/* ---- the ground: kerbs round the square, worn verges beside the roads, mud banks at the brook and the pond, drifts of flowery meadow ---- */
+function wleGround(C){
+  const {fm,block,rows,street,hs,W,H}=C,at=(x,y)=>x<0||y<0||x>=W||y>=H?'x':fm[y*W+x],isSt=(x,y)=>street.has(x+','+y);
+  const open=(x,y)=>x>2&&y>2&&x<97&&y<97&&!block[y*W+x]&&rows[y][x]==='.';
+  const set=[];
+  const nb4=[[1,0],[-1,0],[0,1],[0,-1]],nb8=nb4.concat([[1,1],[-1,1],[1,-1],[-1,-1]]);
+  for(let y=3;y<97;y++)for(let x=3;x<97;x++){
+    const f=at(x,y);if(f!=='2'&&f!=='5'||!open(x,y))continue;
+    let road=false,sq=false,wat=false,gl=false;
+    for(const [dx,dy] of nb4){if(isSt(x+dx,y+dy))road=true;const g=at(x+dx,y+dy);if(g==='1')sq=true;if(g==='4')wat=true}
+    for(const [dx,dy] of nb8){if(at(x+dx,y+dy)==='4')wat=true}
+    const r=hs(x,y,201);
+    if(sq&&r<.9)set.push([x,y,'0']);                    // a cobbled kerb round the paving of the square
+    else if(wat&&r<.88)set.push([x,y,'3']);             // mud and earth at the water's edge
+    else if(road&&r<.62)set.push([x,y,'3']);            // the verge beside a road, worn bare in patches
+  }
+  // the cobbled ribbon of High Street frays into the paving where it crosses the square
+  for(let y=44;y<=56;y++)for(let x=40;x<=56;x++){if(at(x,y)!=='1')continue;let n=0;for(const [dx,dy] of nb4)if(at(x+dx,y+dy)==='0')n++;if(n&&hs(x,y,206)<.45)set.push([x,y,'0'])}
+  for(const [x,y,c] of set)fm[y*W+x]=c;
+  // a second, thinner ring of worn ground round the verges and the banks, so the edge frays into the grass
+  const ring=[];
+  for(let y=3;y<97;y++)for(let x=3;x<97;x++){if(at(x,y)!=='2'||!open(x,y))continue;let n=0;for(const [dx,dy] of nb4)if(at(x+dx,y+dy)==='3')n++;if(n&&hs(x,y,202)<.2+.08*n)ring.push([x,y])}
+  for(const [x,y] of ring)fm[y*W+x]='3';
+  // drifts of flowery meadow in the big open fields, so the lawn is not one flat green
+  const blob=(x,y)=>{const a=hs((x/4)|0,(y/4)|0,203),b=hs(((x+2)/4)|0,((y+2)/4)|0,204);return (a+b)/2};
+  for(let y=3;y<97;y++)for(let x=3;x<97;x++){if(at(x,y)==='2'&&open(x,y)&&blob(x,y)>.62&&hs(x,y,205)<.8&&!isSt(x,y))fm[y*W+x]='5'}
+}
 function wlePass(C){
+  try{wleGround(C)}catch(e){console.error('wleGround',e)}
   const {hs,decor,rows,block,W}=C;
   const get=k=>IMG[k]?k:null,thin=['art_hgthin3','art_hgthin5','art_hgthin0'].filter(get),stumps=['pstump','plog','glogm','stumpm'].filter(get),stones=['mossstone','gstone','grocks'].filter(get);
-  for(const k of thin)NPC_H[k]=NPC_H[k]||1.35;for(const k of stumps)NPC_H[k]=NPC_H[k]||.5;for(const k of stones)NPC_H[k]=NPC_H[k]||(k==='mossstone'?1.1:.55);
+  for(const k of thin)NPC_H[k]=.75;for(const k of stumps)NPC_H[k]=NPC_H[k]||.5;for(const k of stones)NPC_H[k]=NPC_H[k]||(k==='mossstone'?1.1:.55);
   const trees=[];for(const d of decor)if(/tree/.test(d.k))trees.push([d.x,d.y]);
   const sparse=(x,y,r)=>{for(const [a,b] of trees)if(Math.abs(a-x)<r&&Math.abs(b-y)<r)return false;return true};
   const ok=(x,y)=>x>3&&y>3&&x<96&&y<96&&C.free(x,y)&&!C.isRoad(x-1,y)&&!C.isRoad(x+1,y)&&!C.isRoad(x,y-1)&&!C.isRoad(x,y+1);
@@ -51998,9 +52079,14 @@ function wlePass(C){
   // Old Bracken's den, in the north-east corner: an earth-banked hut with a woodpile
   if(IMG.wd_rock0){NPC_H.wd_rock0=NPC_H.wd_rock0||1.1;C.dc('wd_rock0',89,6,{block:true,walk:false,sc:1.2});C.tryDc('hay',87,5,{block:true,walk:false});C.tryDc(IMG.pstump?'pstump':null,91,7,{block:false})}
   // cattails at the pond and at the brook
-  const P=WL_GREEN.pond,reed=(x,y,i)=>{const k=thin[i%Math.max(1,thin.length)];if(k&&C.free(x,y))C.dc(k,x,y,{block:false,walk:true,sc:.85+hs(x,y,94)*.35})};
+  const P=WL_GREEN.pond,reed=(x,y,i)=>{const k=thin[i%Math.max(1,thin.length)];if(k&&C.free(x,y))C.dc(k,x,y,{block:false,walk:true,sc:.7+hs(x,y,94)*.25})};
   let ri=0;for(let y=P[1]-1;y<=P[3]+1;y++)for(let x=P[0]-1;x<=P[2]+1;x++){const edge=x<P[0]||x>P[2]||y<P[1]||y>P[3];if(edge&&hs(x,y,95)<.45)reed(x,y,ri++)}
   for(let x=4;x<=95;x++){if(x>=69&&x<=75)continue;const by=WL_BROOK(x);if(hs(x,by,96)<.34)reed(x,by-1,ri++);if(hs(x,by,97)<.3)reed(x,by+2,ri++)}
+  // trees and bushes are walk-through and melt away as the party comes close (index.html, WALKTREE), and none stands within a square of a road, so nothing fills the screen or walls in a path
+  const roadNear=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(C.street.has((x+dx)+','+(y+dy)))return true;return false};
+  for(let i=decor.length-1;i>=0;i--){const d=decor[i];if(!/^(ltree|lbush)/.test(d.k))continue;
+    if(roadNear(d.x,d.y)){decor.splice(i,1);continue}
+    d.block=false;d.walk=true}
 }
 
 /* ---- src/desert/maps_wenlock.js ---- */
