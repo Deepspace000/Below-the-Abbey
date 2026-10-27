@@ -25,6 +25,16 @@ const GYA={ // alias: [piece, height of the thing in squares (one square is abou
   lean:['stonesB_0',.8],wcross:['stonesB_1',1.15],slab:['stonesB_2',1.1],obelisk:['stonesB_3',2.3],column:['stonesB_4',1.9],urn:['stonesB_5',1.3],
   fence:['fenceG_0',1.55],barrow:['fenceG_1',.75],lantern:['fenceG_2',2.1],bench:['fenceG_3',.55],
   bones:['bonesH_0',.45],web:['bonesH_1',1.2],lever:['bonesH_2',.9],chest:['bonesH_3',.6],rune:['bonesH_4',1.15],sign:['bonesH_5',1.2]};
+/* graves, tombs and walls are grown over with ivy: the painted grass texture over the lower part of each picture, thickest at the foot */
+function gyIvy(){
+  if(GY._ivy){for(const a in GY._ivy)IMG['gy_'+a]=GY._ivy[a];return}
+  const t=IMG.gyp_texFloor_0;if(!t)return;GY._ivy={};
+  for(const a of ['stone1','stone2','lean','slab','wcross','ccross','tomb','urn','obelisk','column','mausoleum','angel','chapel','hut','crypt','barrow','fence']){
+    const s=IMG['gy_'+a];if(!s)continue;try{
+    const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.drawImage(s,0,0);
+    const v=document.createElement('canvas');v.width=c.width;v.height=c.height;const y=v.getContext('2d');y.drawImage(t,0,0,v.width,v.height);y.globalCompositeOperation='destination-in';
+    const g=y.createLinearGradient(0,0,0,v.height);g.addColorStop(0,'rgba(0,0,0,.08)');g.addColorStop(.4,'rgba(0,0,0,.4)');g.addColorStop(1,'rgba(0,0,0,.95)');y.fillStyle=g;y.fillRect(0,0,v.width,v.height);
+    x.globalCompositeOperation='source-atop';x.drawImage(v,0,0);GY._ivy[a]=c;IMG['gy_'+a]=c}catch(e){console.error('gyIvy',a,e)}}}
 function gyLoad(){
   if(GY.loading)return GY.loading;
   GY.loading=new Promise(res=>{
@@ -38,7 +48,7 @@ function gyAlias(){
   for(const a in GYA){const [n,h]=GYA[a];if(IMG['gyp_'+n]){IMG['gy_'+a]=IMG['gyp_'+n];NPC_H['gy_'+a]=h}}
   for(const [k,n] of [['skel','crA_0'],['pike','crA_1'],['bmage','crA_2'],['ghoul','crA_3'],['zombie','crA_4'],['giant','crA_5'],['wraith','crB_0'],['shade','crB_1'],['banshee','crB_2'],['rats','crB_3'],['hound','crB_4'],['rat','crB_5'],['raven','crB_6'],
     ['vane','boss_0'],['grimsby','boss_1'],['aldric','boss_2'],['morwenna','boss_3'],['ghost0','ghost_0'],['ghost1','ghost_1'],['ghost2','ghost_2']])if(IMG['gyp_'+n])IMG['gyi_'+k]=IMG['gyp_'+n];
-  gySlab();gyFloors()}
+  gySlab();gyFloors();gyIvy()}
 /* the blank grave slab (stonesB_2) was painted as a plain flat grey card, which glows in the mist: it is given the grain of the painted grey stone texture, darker towards the foot like the other stones */
 function gySlab(){
   if(GY._slabC){IMG.gy_slab=GY._slabC;return}   // gyAlias runs again for every maze that is built, and puts the plain piece back, so the finished one is put in again each time
@@ -54,7 +64,7 @@ function gyFloors(){
   const mk=(nm,key,gain,t)=>{const im=IMG['gyp_'+key];if(!im||FLOORS[nm])return;const base=dsPaintedTex(im),d=new Uint8ClampedArray(base.length);
     for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,base[i]*gain*t[0]);d[i+1]=Math.min(255,base[i+1]*gain*t[1]);d[i+2]=Math.min(255,base[i+2]*gain*t[2]);d[i+3]=255}FLOORS[nm]=d};
   const T1=[1,1,1];
-  mk('gyf_grass','texFloor_0',1.0,[.9,1.04,.9]);mk('gyf_dirt','texFloor_1',1.1,[1.05,.95,.85]);mk('gyf_gravel','texFloor_2',1.35,T1);mk('gyf_flag','texFloor_3',1.3,T1);mk('gyf_bone','texFloor_4',.95,T1);mk('gyf_slate','texFloor_5',1.0,T1);
+  mk('gyf_grass','texFloor_0',1.5,[.92,1.06,.9]);mk('gyf_dirt','texFloor_1',1.1,[1.05,.95,.85]);mk('gyf_gravel','texFloor_2',1.35,T1);mk('gyf_flag','texFloor_3',1.3,T1);mk('gyf_bone','texFloor_4',.95,T1);mk('gyf_slate','texFloor_5',1.0,T1);
   for(const nm of GY_FLOORSET)if(!FLOORS[nm])FLOORS[nm]=FLOORS.cobble||FLOORS.grass;
   const cl=(nm,key,gain,t)=>{const im=IMG['gyp_'+key];if(!im||CEILS[nm])return;const base=dsPaintedTex(im),d=new Uint8ClampedArray(base.length);
     for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,base[i]*gain*t[0]);d[i+1]=Math.min(255,base[i+1]*gain*t[1]);d[i+2]=Math.min(255,base[i+2]*gain*t[2]);d[i+3]=255}CEILS[nm]=d};
@@ -115,7 +125,7 @@ if(typeof CONTAINERS!=='undefined'&&!CONTAINERS.includes('gy_chest'))CONTAINERS.
 if(typeof DS_LOOTNAME!=='undefined')DS_LOOTNAME.gy_chest='Old chest';
 /* the look: dusk mist in the graveyard, nothing outdoors elsewhere */
 {const _w=weatherNow;weatherNow=function(){
-  if(LEVEL===GY.ID)return {id:'fog',n:'Dusk mist',fog:.055,haze:.8,dark:.5,mix:.5,col:[40,50,76],text:'A cold blue mist lies low between the stones, and the last of the daylight is going. Somewhere a raven clears its throat.'};
+  if(LEVEL===GY.ID)return {id:'fog',n:'Dusk mist',fog:.04,haze:.7,dark:.28,mix:.45,col:[132,130,102],text:'A cold blue mist lies low between the stones, and the last of the daylight is going. Somewhere a raven clears its throat.'};
   if(gyIs(LEVEL))return null;
   return _w.apply(this,arguments)}}
 /* arrival: the pictures first, then the level; no door ever opens on a level that is not built */
