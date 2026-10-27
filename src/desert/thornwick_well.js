@@ -39,6 +39,12 @@ function twBuild(){
   // a potion in the second longest dead end
   const items=[];{const e2=ends.find(p=>!taken.has(p[0]+','+p[1])&&d[p[1]*W+p[0]]>=14);if(e2)items.push({k:'potion',x:e2[0],y:e2[1]})}
   const decor=[{k:'chest',x:chest[0],y:chest[1],block:true,goldAmt:35}];
+  // a hungry cat in one dead end, and a salt herring lying in another (The Rat Catcher's Cat)
+  {const used=new Set(items.map(q=>q.x+','+q.y));used.add(chest[0]+','+chest[1]);
+   const cat=ends.find(p=>!used.has(p[0]+','+p[1])&&!taken.has(p[0]+','+p[1])&&d[p[1]*W+p[0]]>=10);
+   if(cat){used.add(cat[0]+','+cat[1]);decor.push({k:'pet_cat_0',x:cat[0],y:cat[1],block:true,npc:'twcat',sc:.9})}
+   const fish=ends.find(p=>!used.has(p[0]+','+p[1])&&!taken.has(p[0]+','+p[1])&&d[p[1]*W+p[0]]>=6);
+   if(fish)items.push({k:'herring',x:fish[0],y:fish[1]})}
   // a torch light every so often along the passages
   const lights=[];for(const [x,y] of floor)if(d[y*W+x]%9===4&&lights.every(l=>Math.hypot(l[0]-x,l[1]-y)>=5))lights.push([x,y]);
   const fm=[];for(let y=0;y<H;y++)fm.push('0'.repeat(W));
@@ -47,6 +53,13 @@ function twBuild(){
   let edges=0;for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(g[y][x]!=='.')continue;for(const [a,b] of [[1,0],[0,1]])if(g[y+b]&&g[y+b][x+a]==='.')edges++}
   const info={ok:reach===floors&&edges===floors-1&&enemies.length===8&&g[H-1][sx]==='0',floors,reach,edges,rats:enemies.length,chest,chestWalk:d[chest[1]*W+chest[0]]};
   if(!info.ok)console.error('Under the Well failed its own checks',info);
+  // the chest's dead end is dressed (the maze is cut so tight that no room fits round it): bones, a barrel and a light on the way in
+  {const nb=D4.find(([a,b])=>g[chest[1]+b][chest[0]+a]==='.');if(nb){const px=chest[0]+nb[0],py=chest[1]+nb[1];decor.push({k:'bones',x:px,y:py,block:false});lights.push([chest[0],chest[1]]);
+     const nn=D4.find(([a,b])=>(a!==-nb[0]||b!==-nb[1])&&g[py+b][px+a]==='.');if(nn)decor.push({k:'barrel',x:px+nn[0],y:py+nn[1],block:false,walk:true,deco:true,sc:.8})}}
+  const near=(x,y)=>decor.some(q=>q.x===x&&q.y===y)||(x===chest[0]&&y===chest[1])||items.some(q=>q.x===x&&q.y===y);
+  floor.forEach(([x,y],i)=>{if(near(x,y)||d[y*W+x]<5)return;const h=hash2(x,y,9917);
+    if(h<.045)decor.push({k:'bones',x,y,block:false});
+    else if(h<.06&&deg.get(x+','+y)===1&&g[y][x]==='.')decor.push({k:'barrel',x,y,block:true})});
   return {rows:g.map(r=>r.join('')),fmap:fm,start:{x:sx,y:sy,f:0},enemies,items,decor,lights,info,chest};
 }
 {const M=twBuild();TWL.M=M;
@@ -66,14 +79,20 @@ function twMakeArt(){
   const sorted=Float32Array.from(L).sort(),lo=sorted[(N*.03)|0],hi=sorted[Math.min(N-1,(N*.97)|0)],span=Math.max(.05,hi-lo);
   const RAMP=[[0,8,16,36],[.35,40,68,118],[.7,84,126,196],[1,160,204,255]];
   const ramp=v=>{for(let k=1;k<RAMP.length;k++)if(v<=RAMP[k][0]){const a=RAMP[k-1],b=RAMP[k],t=(v-a[0])/(b[0]-a[0]);return [a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t,a[3]+(b[3]-a[3])*t]}const l=RAMP[RAMP.length-1];return [l[1],l[2],l[3]]};
-  const wall=new Uint8ClampedArray(N*4);
-  for(let i=0;i<N;i++){const v=Math.min(1,Math.max(0,(L[i]-lo)/span)),[r,g,b]=ramp(v);wall[i*4]=r;wall[i*4+1]=g;wall[i*4+2]=b;wall[i*4+3]=255}
+  const Ls=new Float32Array(N);   // a gentle blur (wrapping at the edges, so the tile still repeats), so the stone is smooth and not noisy
+  for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){let a=0;for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++)a+=L[((y+j+TS)%TS)*TS+((x+i+TS)%TS)];Ls[y*TS+x]=a/9}
+  const mkWall=(tint)=>{const w=new Uint8ClampedArray(N*4);for(let i=0;i<N;i++){const v=Math.min(1,Math.max(0,(Ls[i]-lo)/span*1.1)),[r,g,b]=ramp(v);w[i*4]=Math.min(255,r*tint[0]);w[i*4+1]=Math.min(255,g*tint[1]);w[i*4+2]=Math.min(255,b*tint[2]);w[i*4+3]=255}return w};
+  const wall=mkWall([1,1,1]);
+  TWA.variants=[[1.18,1.08,.82],[.85,1.12,1.0]].map(t=>addTex(mkWall(t)));   // a warmer stone and a greener one, mixed in
   TWA.stone=addTex(wall);TWA.torch=TEX.length;for(const f of torchFrames(wall))addTex(f.d,f.e);
   {const A=FLOORS.wetcobble||FLOORS.cobble,d=new Uint8ClampedArray(TS*TS*4);
     for(let i=0;i<TS*TS;i++){const m=(A[i*4]+A[i*4+1]+A[i*4+2])/3;d[i*4]=m*.62;d[i*4+1]=m*.78;d[i*4+2]=m*1.02+6;d[i*4+3]=255}
     FLOORS.twfloor=d}
   {const C0=CEILS.gloom||CEILS.tomb;if(C0){const d=new Uint8ClampedArray(C0.length);for(let i=0;i<C0.length;i+=4){const m=(C0[i]+C0[i+1]+C0[i+2])/3;d[i]=m*.5;d[i+1]=m*.62;d[i+2]=m*.86+8;d[i+3]=255}CEILS.twceil=d}}
   TWA.made=true;
+  // three kinds of wall in the rows: the blue stone, a warmer stone and a green one, in patches
+  {const Lv=LEVELS[TWL.ID];if(Lv&&!Lv._twVar){Lv._twVar=1;Lv.chars=Lv.chars||{};const cs=['Ѡ','ѡ'];TWA.variants.forEach((id,i)=>{const gid=KH_NEXT_GID++;T_TILE[gid]=id;Lv.chars[cs[i]]=gid});
+    Lv.rows=Lv.rows.map((row,y)=>row.split('').map((c,x)=>{if(c!=='#')return c;const n=hash2((x/3)|0,(y/3)|0,4471);return n<.18?cs[0]:n<.34?cs[1]:c}).join(''))}}
 }
 function twSwapWalls(on){
   if(on&&!TWA.on&&TWA.made){TWA.save=[T_STONE,T_TORCH_STONE];T_STONE=TWA.stone;T_TORCH_STONE=TWA.torch;TWA.on=true}
@@ -159,3 +178,16 @@ draw(c,x,L,api){
   mpQhDoor(x,kx,82,.8);api.text(x,'Way out',kx+9,82,5.6,'#2a1a0c','left');
   api.compass(x,436,130,13);
 }});
+
+/* ---- The Rat Catcher's Cat: a hungry cat sits in a dead end under the well, and a salt herring lies in another ---- */
+QUESTS.twq_cat={title:"The Rat Catcher's Cat",who:'A hungry cat',desc:"A thin tabby cat sits in a dead end in the tunnels under the Thornwick well. She is hungry. Find a salt herring, which is lying in another dead end in the tunnels (or buy one), and bring it to her.",need:1,goal:()=>(bagCount('herring')>0||G.flags.twCatFed)?1:0,reward:{gold:1200,xp:4500,items:['potion5']}};
+QAREA.twq_cat='Thornwick';
+const TWCAT=khQD("Mrrow. (A thin tabby cat sits in the dead end with her paws together. She has the look of a cat who used to catch the rats down here and has now run out of rats she is brave enough to catch. She looks at your bag, and then at you.)",
+  "Mrr. (She settles down to wait.)",
+  (n,m)=>'She wants a salt herring. One lies in another dead end somewhere in the tunnels, and the shops in Thornwick may sell them too.',
+  "Mrrow! (She smells the herring through your bag and stands up at once.)",
+  "(She eats the herring in four bites, washes her face, and leaves something for you on the floor.)",
+  "(The cat is asleep in the corner with a full stomach and a very small smile.)","Give her the herring.");
+NPCS.twcat={name:'A hungry cat',img:'pet_cat_0',root:d=>qNode('twq_cat',TWCAT)};
+Object.defineProperty(QGIVER,'twcat',{enumerable:true,configurable:true,get(){return qSt('twq_cat')==='done'?null:['twq_cat']}});
+{const _t=qTurnIn;qTurnIn=function(id){const r=_t.apply(this,arguments);try{if(r&&id==='twq_cat'){G.flags.twCatFed=1;if(bagCount('herring')>0)bagRemove('herring',1)}}catch(e){console.error(e)}return r}}

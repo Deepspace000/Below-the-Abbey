@@ -50,14 +50,14 @@ function wwBuild(){
   const chars={},chMap=new Map();let nextCh=0x300;const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
   const near=(x,y,id,pad)=>{const q=Q[id];return x>=q.x0-pad&&x<=q.x1+pad&&y>=q.y0-pad&&y<=q.y1+pad};
   const wallChar=(x,y)=>{
-    const wh=Math.round((1.9+hs((x/2)|0,(y/2)|0,41)*.7)*10)/10;
-    if(y===0&&x>=doorX-2&&x<=doorX+2)return ch(wwTile('tex_4',4.6,{fac:{img:'front_1',i:x-(doorX-2),n:5},gain:1.3}));          // the cottage front (door in the middle: see below)
+    const wh=Math.round((4.2+hs((x/2)|0,(y/2)|0,41)*.5)*10)/10;   // tall enough to close the horizon under the 5.2 ceiling
+    if(y===0&&x>=doorX-2&&x<=doorX+2)return ch(wwTile('tex_4',4.6,{fac:{img:'front_1',i:x-(doorX-2),n:5},gain:1.45,rgb:[1.3,1,.8]}));          // the cottage front (door in the middle: see below)
     if(x===W-1&&y>=39&&y<=43)return ch(wwTile('tex_3',4.2,{fac:{img:'front_0',i:y-39,n:5},gain:2.3}));                                   // the ruined chapel front
     let tex='tex_0';
     if(near(x,y,'grave',2)||near(x,y,'chapel',2)||near(x,y,'circle',1)||near(x,y,'well',1))tex='tex_3';
     else if(near(x,y,'witch',2)||near(x,y,'hollow',2)||near(x,y,'nw',1)||near(x,y,'ne',1))tex='tex_4';
     if(tex==='tex_0'&&hs(x,y,43)<.16)tex='tex_4';
-    return ch(wwTile(tex,wh,{gain:.45}))};   // the solid mass behind the trees is nearly black
+    return ch(wwTile(tex,wh,{gain:.75}))};   // the solid mass behind the trees: dark, but not a black cut-out
   const fl=new Uint8Array(W*H);
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){let f=0;if(hs((x/3)|0,(y/3)|0,53)<.32)f=1;fl[y*W+x]=f}
   for(const id in Q){const q=Q[id],f={gate:1,grave:4,chapel:4,well:1,hang:1,circle:0,hollow:1,witch:1,nw:1,ne:0}[id];for(let y=q.y0;y<=q.y1;y++)for(let x=q.x0;x<=q.x1;x++)fl[y*W+x]=f}
@@ -83,7 +83,7 @@ function wwBuild(){
   const tree=(x,y,k)=>DB(k||TREES[(hs(x,y,61)*TREES.length)|0],x,y);
   const plaque=(x,y,wd,t)=>{if(!isOpen(x,y)||occ.has(x+','+y))return;decor.push({k:'ww_sign',x,y,block:true,npc:'wwo_plaque',txt:[t[0],t[1]],sc:.9});occ.add(x+','+y)};   // a wooden signpost, read by walking up to it
   // the gate glade: a warning sign, thorns, a wisp
-  {const q=Q.gate;DB('sign',q.cx-3,q.y1-1,{npc:'wwo_sign',i:0});for(const [x,y,k] of [[q.x0,q.y0,'oakface'],[q.x1,q.y0,'oakmoss'],[q.x0,q.y1,'thorn'],[q.x1,q.y1,'thorn']])DB(k,x,y);
+  {const q=Q.gate;DB('sign',q.cx,q.y1-4,{npc:'wwo_sign',i:0});DB('crowtree',q.cx-2,q.y1-3);DB('thorn',q.cx+3,q.y1-5);for(const [x,y,k] of [[q.x0,q.y0,'oakface'],[q.x1,q.y0,'oakmoss'],[q.x0,q.y1,'thorn'],[q.x1,q.y1,'thorn']])DB(k,x,y);
     plaque(q.cx+1,q.y1,[0,1],WW_PLAQUES[0])}
   // the graveyard glade: graves in rows, a bone totem, a golem, hounds and a scarecrow
   {const q=Q.grave;for(let y=q.y0+2;y<=q.y1-2;y+=2)for(let x=q.x0+1;x<=q.x1-1;x+=2){if(Math.abs(x-q.cx)<=1||Math.abs(y-q.cy)<=1)continue;if(hs(x,y,81)<.62)DB('grave',x,y,{sc:.85+hs(x,y,82)*.3})}
@@ -134,6 +134,7 @@ function wwBuild(){
   const objAt=(alias,npc,x,y)=>{for(let r=0;r<5;r++)for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const xx=x+a,yy=y+b;if(isOpen(xx,yy)&&!occ.has(xx+','+yy)&&!near4.has(xx+','+yy)){const d=dec(alias,xx,yy,{npc,occ:1});if(d){d.deco=false;return [xx,yy]}}}return null};
   const pathAt=f=>pathList[Math.min(pathList.length-1,Math.floor(pathList.length*f))];
   const clue1=objAt('boot','wwo_boot',Q.gate.cx-4,Q.gate.cy-1),p2=pathAt(.28),clue2=objAt('ribbon','wwo_ribbon',p2[0],p2[1]),p3=pathAt(.5),clue3=objAt('crumbs','wwo_crumbs',p3[0],p3[1]);
+  for(const [i,f] of [[1,.18],[2,.4],[3,.64]]){const pp=pathAt(f);objAt('ribbon','wwo_smock'+i,pp[0]+(i%2?2:-2),pp[1])}   // the lost washing (wwq9)
   // the hag-stone lies in the dried brook, off the track
   let hag=null;{const cs=corr.filter(([x,y])=>inBrook(x,y)&&!track.has(x+','+y)&&!occ.has(x+','+y)&&frac(x,y)>.2).sort((a,b)=>Math.abs(a[0]-22)-Math.abs(b[0]-22));if(cs.length)hag=objAt('hagstone','wwo_hagstone',cs[0][0],cs[0][1])}
   // ---- the walls ----
@@ -149,12 +150,13 @@ function wwBuild(){
    const setc=(x,y,gidv)=>{const c=ch(gidv);rows[y]=rows[y].slice(0,x)+c+rows[y].slice(x+1)};
    setc(gx,H-1,gid);setc(gx-1,H-1,ga);setc(gx+1,H-1,gb);
    KH_DOOR[gid]={ww:'gate',get lvl(){return WK.WENLOCK},get at(){return WK.WITCHBACK||{x:38,y:4,f:2}}};
-   const cd=wwTile('tex_4',4.6,{fac:{img:'front_1',i:2,n:5},gain:1.3});setc(doorX,0,cd);
+   const cd=wwTile('tex_4',4.6,{fac:{img:'front_1',i:2,n:5},gain:1.45,rgb:[1.3,1,.8]});setc(doorX,0,cd);
    KH_DOOR[cd]={ww:'cottage',get lvl(){return WW.COTTAGE},get at(){const L=LEVELS[WW.COTTAGE],s=L&&L.start;return s?{x:s.x,y:s.y,f:0}:{x:8,y:9,f:0}}}}
+  const wshaft=[];for(const id of ['gate','grave','hang','circle','well','chapel','hollow','nw','ne'])wshaft.push([Q[id].cx,Q[id].cy-1],[Q[id].cx+2,Q[id].cy+1]);
   const mapNames=[];for(const id in Q)mapNames.push({t:WW_RNAME[id],x:Q[id].cx,y:Q[id].cy,k:'place'});
   const lv={rows,chars,fmap:fm,floorSet:WW_FLOORSET,floor:WW_FLOORSET[0],ceil:'cloud',start:{x:sx,y:sy,f:0},enemies,items,decor,lights,portals:[],day:.44,outdoor:true,amb:.36,
     name:"Blackbriar Wood",label:"Blackbriar Wood",noExtras:true,diff:82,ceilH:5.2,noTele:true,mapNames,
-    _ww:{Q,roomAt,track:[...track],pathList,hag,clue1,clue2,clue3,dead:dead.length,wglow,brookY,dDoor,foes:enemies.length,decor:decor.length}};
+    _ww:{wshaft,Q,roomAt,track:[...track],pathList,hag,clue1,clue2,clue3,dead:dead.length,wglow,brookY,dDoor,foes:enemies.length,decor:decor.length}};
   // ---- checks: every open square is reachable; nothing that stands in the way cuts a clearing off ----
   {const blockSet=()=>{const s=new Set();for(const d of decor)if(d.block)s.add(d.x+','+d.y);return s};   // creatures can be fought through, so only the standing things count
    const flood=bs=>{const seen=new Uint8Array(W*H),q=[sy*W+sx];seen[q[0]]=1;for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [a,b] of WW_DIRS){const nx=x+a,ny=y+b;if(!isOpen(nx,ny)||seen[ny*W+nx]||bs.has(nx+','+ny))continue;seen[ny*W+nx]=1;q.push(ny*W+nx)}}return seen};
@@ -197,7 +199,8 @@ for(const n of [521,522,523])LEVEL_RATING[n]=82;
 /* the green lights: sickly glows near the witch, her totems, the toadstool rings and the wisps; put in on every arrival (lights are cleared whenever a level is entered) */
 function wwLights(){
   try{const L=LEVELS[LEVEL];if(!L)return;const list=LEVEL===WW.ID?(L._ww&&L._ww.wglow)||[]:(L._wwl||[]);
-    for(const [x,y] of list)LIGHTS.push({x:x+.5,y:y+.5,ph:hash2(x,y,13)*6.28,key:-5000-LIGHTS.length,taken:false,red:false,free:true,calm:true,col:[.45,1.25,.5],kI:LEVEL===WW.ID?.8:1.1,range2:LEVEL===WW.ID?30:60})}catch(e){console.error('wwLights',e)}}
+    for(const [x,y] of list)LIGHTS.push({x:x+.5,y:y+.5,ph:hash2(x,y,13)*6.28,key:-5000-LIGHTS.length,taken:false,red:false,free:true,calm:true,col:[.45,1.25,.5],kI:LEVEL===WW.ID?.8:1.1,range2:LEVEL===WW.ID?30:60});
+    if(LEVEL===WW.ID)for(const [x,y] of (L._ww.wshaft||[]))LIGHTS.push({x:x+.5,y:y+.5,ph:hash2(x,y,17)*6.28,key:-5000-LIGHTS.length,taken:false,red:false,free:true,calm:true,col:[1.1,1.15,.9],kI:.7,range2:40}) /* pale shafts of light falling into the glades */}catch(e){console.error('wwLights',e)}}
 /* arrival: the lights, the witch, the kitchen's creature and the freed folk of Wenlock (see ww_quests.js for wwArrive) */
 {const _g=goToLevel;goToLevel=function(n,entry){const r=_g.apply(this,arguments);try{if(wwIs(n)||n===WL.ID)wwArrive(n)}catch(e){console.error('wwArrive',e)}return r}}
 /* the way back: out of the gate to Blackbriar Lane */

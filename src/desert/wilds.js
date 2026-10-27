@@ -37,18 +37,18 @@ function wdTiles(kind,wh,tint,dark){const TM=ohTiles(),k=wdStyle(kind,tint,dark)
 /* ---------- the way out, seen from inside: a bright arch of daylight in the dark rock, so it can be found ---------- */
 loadImg('pf_exit','assets/pf_exit.jpg');
 const WD_EXIT={};
-function wdExitTile(wh,kind,tint){ // the arch of daylight is set in the same wall as the rest of the room, so it does not look pasted on
-  const key=wh+(kind||'')+(tint?tint.join('_'):'');if(WD_EXIT[key])return WD_EXIT[key];const im=IMG.pf_exit,Hp=Math.round(128*wh),wl=kind==='ruin'?IMG.pf_ruinwall:IMG.pf_rock,tn=wdTone(kind||'cave',tint||[255,255,255],true);
+function wdExitTile(wh,kind,tint,dim){ // the arch of daylight is set in the same wall as the rest of the room, so it does not look pasted on
+  const key=wh+(kind||'')+(tint?tint.join('_'):'')+(dim?'D':'');if(WD_EXIT[key])return WD_EXIT[key];const im=IMG.pf_exit,Hp=Math.round(128*wh),wl=kind==='ruin'?IMG.pf_ruinwall:IMG.pf_rock,tn=wdTone(kind||'cave',tint||[255,255,255],true);
   const c=mkCanvas(128,Hp,(x,w,h)=>{
     if(wl&&wl.width&&kind){for(let yy=0;yy<h;yy+=128)x.drawImage(wl,0,0,wl.width,wl.height,0,yy,128,128);x.globalCompositeOperation='multiply';x.fillStyle=`rgb(${tn[0]},${tn[1]},${tn[2]})`;x.fillRect(0,0,w,h);x.globalCompositeOperation='source-over'}else{x.fillStyle='#1a1814';x.fillRect(0,0,w,h)}
     if(im&&im.width){const sx=w/256,k=h*.9/370,Y=v=>h*.1+(v-190)*k,r=im.height/665; // the opening runs right down to the floor
       const path=()=>{x.beginPath();x.moveTo(30*sx,Y(572));x.lineTo(28*sx,Y(330));x.quadraticCurveTo(34*sx,Y(205),128*sx,Y(198));x.quadraticCurveTo(222*sx,Y(205),228*sx,Y(330));x.lineTo(226*sx,Y(572))};
-      x.save();path();x.closePath();x.clip();x.drawImage(im,0,190*r,im.width,375*r,0,h*.1,w,h*.9);x.restore();
+      x.save();path();x.closePath();x.clip();if(dim){x.imageSmoothingQuality='high';x.filter='blur(1.2px) brightness(.5) saturate(.45) sepia(.35)'}x.drawImage(im,0,190*r,im.width,375*r,0,h*.1,w,h*.9);x.filter='none';x.restore();
       x.strokeStyle='rgba(8,7,5,.75)';x.lineWidth=7;path();x.stroke()} // a dark worn rim all round the opening
     else{x.fillStyle='#c8d8a0';x.fillRect(w*.2,h*.3,w*.6,h*.25)}});
   const d=c.getContext('2d').getImageData(0,0,128,Hp).data,id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;
   const e=new Uint8ClampedArray(d.length); // the bright part of the picture gives off its own light, so the way out shines in the dark
-  for(let i=0;i<d.length;i+=4){const lum=d[i]*.3+d[i+1]*.59+d[i+2]*.11;e[i]=d[i];e[i+1]=d[i+1];e[i+2]=d[i+2];e[i+3]=Math.max(0,Math.min(1,(lum-80)/80))*255}
+  for(let i=0;i<d.length;i+=4){const lum=d[i]*.3+d[i+1]*.59+d[i+2]*.11;e[i]=d[i];e[i+1]=d[i+1];e[i+2]=d[i+2];e[i+3]=Math.max(0,Math.min(1,(lum-80)/80))*(dim?.35:1)*255}
   TEX[id].e=e;return WD_EXIT[key]=id}
 const WD_DOOR={};
 function wdDoorTile(wh,tint){ // the door of a ruin: a dark arched doorway cut into the very same wall, so the stone around it matches
@@ -236,11 +236,12 @@ function wdBuild(id){
   }
   if(hash2(id,12,795)<.4&&!decor.some(d=>d.k==='chest'))pfFoodChest(g,W,H,sx,sy,decor,items,used,id+7,{gear:1,food:null}); // armour in about four dungeons in ten
   if(hash2(id,6,764)<.5)pfFoodChest(g,W,H,sx,sy,decor,items,used,id); // some hold a little food in a chest
-  const T=wdTiles(cave?'cave':'ruin',cave?2.6:2.8,tint,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(cave?2.6:2.8,cave?'cave':'ruin',tint);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:ent.f}};
+  const T=wdTiles(cave?'cave':'ruin',cave?2.6:2.8,tint,true),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(cave?2.6:2.8,cave?'cave':'ruin',tint,P.n===520);KH_DOOR[dgid]={lvl:ent.n,at:{x:ent.x,y:ent.y,f:ent.f}};
   const chars={'#':T.wall};chars[door]=dgid;
   if(typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[P.n])LEVEL_RATING[id]=LEVEL_RATING[P.n];
   LEVEL_NAMES[id]=name;
-  return {rows:g.map(r=>r.join('')),start:{x:sx,y:sy,f:0},enemies,items,decor,chars,day:0,floor:cave?'scree':'mosscobble',name,label:name,diff,ceilH:cave?2.6:2.9,torchGap:1e9,noTele:true,portals:[],lights:[],mapNames:[{t:name,x:sx,y:H-1,k:'place'}]}}
+  if(P.n===520){decor.push({k:'lantern',x:sx+1,y:sy,block:false,walk:true,deco:true})}   /* Blackbriar Wood: a lantern by the way out */
+  return {rows:g.map(r=>r.join('')),start:{x:sx,y:sy,f:0},enemies,items,decor,chars,day:0,floor:cave?'scree':'mosscobble',name,label:name,diff,ceilH:cave?2.6:2.9,torchGap:1e9,noTele:true,portals:[],lights:P.n===520?[[sx+1,sy],[sx,sy-2]]:[],mapNames:[{t:name,x:sx,y:H-1,k:'place'}]}}
 /* every place gets a lazy builder */
 for(let i=0;i<WD_CAVES.length;i++)KH_LAZY[WD_CAVE0+i]=((id)=>()=>{if(!LEVELS[id])LEVELS[id]=wdBuild(id)})(WD_CAVE0+i);
 for(const n of [...WD_OUT,...Array.from({length:24},(_,i)=>400+i)])for(let k=0;k<4;k++){const id=wdRuinId(n,k);KH_LAZY[id]=((i)=>()=>{if(!LEVELS[i])LEVELS[i]=wdBuild(i)})(id)}

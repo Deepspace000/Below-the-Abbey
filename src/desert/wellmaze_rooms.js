@@ -29,7 +29,7 @@ WMFU.camp=function(c,r){const R=c.rect(r);
   c.D('wm_barrel',R.x0,R.y1,{block:true,npc:'wmw_barrel'});c.D('wm_crate',R.cx,R.y0,{block:true,npc:'wmw_crate'});
   c.deco('skeleton',R.cx,R.y1,{});c.light(R.cx,R.cy,WM_COL.gold);wmFoes(c,r,['wmbat','wmslime'],2)};
 WMFU.cistern=function(c,r){const R=c.rect(r);
-  c.D('wm_boat',R.x0,R.cy,{block:true,npc:'wmrow_a'});c.note('cistern1',R.x0,R.y0,'signpost');
+  if(c.k===0){c.D('wm_boat',R.x0,R.cy,{block:true,npc:'wmrow_a'});c.note('cistern1',R.x0,R.y0,'signpost')}
   for(const [x,y] of c.pick(c.inner(r),4))c.deco('crystal_small',x,y,{});
   c.chest('chest',R.x1,R.cy,1,null,{});
   c.light(R.cx,R.cy,WM_COL.teal);c.light(R.x0+1,R.y0+1,WM_COL.vio);
@@ -37,7 +37,7 @@ WMFU.cistern=function(c,r){const R=c.rect(r);
 WMFU.cellar=function(c,r){const R=c.rect(r);
   wmSpread(c,r,['cask','cask','barrel_tall','keg'],5,false,{});
   if(c.k===0){c.D('wm_barrel',R.x1,R.y0,{block:true,npc:'wmw_barrel'});c.D('wm_barrel',R.x0,R.y1,{block:true,npc:'wmw_barrel'});c.D('wm_crate',R.x1,R.y1,{block:true,npc:'wmw_crate'})}
-  c.note('cellar1',R.x0,R.y0,'signpost');c.chest('chest',R.cx,R.y1,1,null,{});
+  if(c.k===0)c.note('cellar1',R.x0,R.y0,'signpost');c.chest('chest',R.cx,R.y1,1,null,{});
   c.light(R.cx,R.cy,WM_COL.gold);wmFoes(c,r,['wmspider','wmbat','wmslime'],c.k===0?2:3)};
 WMFU.shrine=function(c,r){const R=c.rect(r);
   c.prop('shrine',R.cx,R.y0,{});c.prop('statue',R.cx,R.cy,{});
@@ -105,6 +105,9 @@ WMFU.boss=function(c,r){const R=c.rect(r);
   c.prop('brazier',R.x0,R.y1,{});c.prop('brazier',R.x1,R.y1,{});c.light(R.x0,R.y1,WM_COL.vio);c.light(R.x1,R.y1,WM_COL.vio);
   c.D('wm_orb_pedestal',R.cx,R.y0,{block:true,npc:'wm_prize'});
   for(const [x,y] of c.pick(c.rim(r),4))c.deco('crystal_teal',x,y,{});
+  for(const [x,y] of [[R.x0,R.y0],[R.x1,R.y0],[R.x0,R.cy],[R.x1,R.cy]])if(c.free(x,y))c.prop('statue',x,y,{});   // a hall of statues, with candles and old bones of the ones who came before
+  for(const [x,y] of [[R.cx-2,R.y0],[R.cx+2,R.y0]])if(c.free(x,y))c.prop('candelabra',x,y,{});
+  for(const [x,y] of c.pick(c.rim(r),3))c.deco('skeleton',x,y,{});for(const [x,y] of c.pick(c.rim(r),2))c.prop('web',x,y,{});
   c.light(R.cx,R.cy,WM_COL.wht);c.light(R.cx,R.y0+1,WM_COL.vio);c.light(R.x0+1,R.cy,WM_COL.vio);c.light(R.x1-1,R.cy,WM_COL.vio);
   c.note('warden1',R.cx-1,R.y1,'signpost');
   c.enemy('wmwarden',R.cx,R.cy-0);c.meta.boss={x:R.cx,y:R.cy};
@@ -119,6 +122,12 @@ WMFU.island=function(c,r){const R=c.rect(r);
 WMFU.vault=function(c,r){const R=c.rect(r);
   const cells=c.pick(c.rim(r),4);let n=0;
   for(const [x,y] of cells){if(n>=3)break;c.chest(n===0?'treasure_chest':'chest',x,y,3,null,{});n++}
-  c.D('wm_gold',R.cx,R.cy,{block:false,walk:true,deco:true});c.prop('candelabra',R.x0,R.y0,{});c.light(R.cx,R.cy,WM_COL.gold);c.light(R.x1,R.y0,WM_COL.wht)};
+  const v=(hash2(r.x0,r.y0,c.k*17+3)*5)|0;   // five dressings, so the vaults do not all look alike
+  if(v===0){c.D('wm_gold',R.cx,R.cy,{block:false,walk:true,deco:true});c.prop('candelabra',R.x0,R.y0,{})}
+  else if(v===1){for(const x of [R.x0,R.x1])c.prop('bookshelf',x,R.y0,{});c.prop('statue',R.cx,R.cy,{});c.prop('candelabra',R.x0,R.y1,{})}
+  else if(v===2){for(const [x,y] of c.pick(c.inner(r),3))c.prop('crystal_tall',x,y,{});c.prop('shrine',R.cx,R.y0,{});c.deco('skeleton',R.cx,R.cy,{})}
+  else if(v===3){for(const [x,y] of c.pick(c.inner(r).concat(c.rim(r)),4))c.prop(['barrel_stack','crate','cask','barrel_tall'][(hash2(x,y,5)*4)|0],x,y,{});c.D('wm_gold',R.cx,R.cy,{block:false,walk:true,deco:true,sc:.7});c.prop('lamp_post',R.x1,R.y1,{})}
+  else{c.prop('brazier',R.x0,R.y0,{});c.prop('brazier',R.x1,R.y0,{});c.prop('orb_pedestal',R.cx,R.cy,{});for(const [x,y] of c.pick(c.rim(r),2))c.deco('mush_cluster',x,y,{})}
+  c.light(R.cx,R.cy,WM_COL.gold);c.light(R.x1,R.y0,WM_COL.wht)};
 WMFU.riddle=function(c,r){const R=c.rect(r);c.light(R.cx,R.cy,WM_COL.gold)};
 WM.ROOMNAMES.shaft='The Well Shaft';
