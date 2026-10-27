@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.672';
+const VERSION='3.673';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -51283,6 +51283,104 @@ if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^gmbriar/,'bleeding',.3],[/^g
   return _r.apply(this,arguments)}}
 {const _wd=wdDoorLevel;wdDoorLevel=function(n){return _wd.apply(this,arguments)||n===GM.ID}}
 
+/* ---- src/desert/garden_hedges.js ---- */
+/* ==========================================================================
+   THE HEDGES OF THE MAZE OF GARDENS (prefix gmh). Sixteen kinds of hedge, each painted in code leaf by leaf with its own leaf shape, colours and blossom, and four variants of each so that no two neighbouring
+   walls repeat: clipped box, yew, holly with red berries, privet, glossy laurel, copper beech, hawthorn in white blossom, ivy over old brick, climbing roses (red, white and pink), wisteria with hanging lilac,
+   honeysuckle, lavender, hydrangea, clematis, nasturtium and jasmine, and a clipped hedge with an arched niche in it holding a stone bench and a little lantern. gmHedge(type, variant, wh) makes the wall tile
+   (cached), gmhPick(types, x, y) picks a type and variant for a wall cell. Painted at load of the garden; each tile is 128 pixels wide and wh squares high, like the painted ones of garden_art.js.
+   ========================================================================== */
+const GMH={
+  box:{base:'#142e17',cols:['#255a27','#2f6d30','#3d8238','#4a9644','#1c4a20'],len:[4,7],ratio:.72,n:2.4,shape:'oval'},
+  yew:{base:'#0c2016',cols:['#173d2a','#1f4c34','#285c3e','#133524','#2f6a48'],len:[10,15],ratio:.14,n:1.6,shape:'needle'},
+  holly:{base:'#122c17',cols:['#1b5026','#256333','#327a3f','#154520','#3a8a48'],len:[8,12],ratio:.55,n:1.15,shape:'spike',acc:[{k:'berry',cs:['#d22a2a','#e03838','#b81e24'],n:34,s:2.7}]},
+  privet:{base:'#1a3c16',cols:['#47a02e','#58b638','#3a8a2a','#6fc84a','#2f7a24'],len:[5,8],ratio:.5,n:2,shape:'oval'},
+  laurel:{base:'#102c18',cols:['#255f33','#307540','#40904f','#1b4c2a','#58a864'],len:[13,19],ratio:.42,n:.85,shape:'oval',gloss:1},
+  beech:{base:'#26121e',cols:['#68283a','#7a3a46','#8c4a50','#521c36','#a05a58'],len:[8,12],ratio:.55,n:1.3,shape:'oval'},
+  hawthorn:{base:'#183818',cols:['#386f2e','#488a3e','#2c6428','#58a04c'],len:[6,9],ratio:.65,n:1.6,shape:'lobed',acc:[{k:'bloom',cs:['#fff8f8','#ffe8ee','#fff0f4'],n:46,s:4.2,p:5},{k:'berry',cs:['#c01f2a'],n:10,s:2}]},
+  ivy:{base:'#5e564e',cols:['#2d6a2c','#3a7e36','#245a26','#4a9242','#1c4a20'],len:[8,12],ratio:.9,n:1.5,shape:'heart',brick:1},
+  rose:{base:'#173717',cols:['#2d6a30','#3a7f38','#265a2a','#4a9444'],len:[7,10],ratio:.5,n:1.25,shape:'oval',acc:[{k:'bloom',cs:['#d82a3a','#e84a5a','#c01830','#f06a78'],n:36,s:6.4,p:7}]},
+  roseW:{base:'#173717',cols:['#2d6a30','#3a7f38','#265a2a','#4a9444'],len:[7,10],ratio:.5,n:1.25,shape:'oval',acc:[{k:'bloom',cs:['#fffaf0','#f6f0e0','#fff4f4','#ffe8e0'],n:36,s:6.4,p:7}]},
+  roseP:{base:'#173717',cols:['#2d6a30','#3a7f38','#265a2a','#4a9444'],len:[7,10],ratio:.5,n:1.25,shape:'oval',acc:[{k:'bloom',cs:['#f49ab8','#f8b4c8','#e87aa0','#fcc8d8'],n:36,s:6.4,p:7}]},
+  wisteria:{base:'#173a1a',cols:['#2f6e30','#3d8238','#285e2a','#4c9644'],len:[8,12],ratio:.45,n:1.2,shape:'oval',acc:[{k:'rac',cs:['#9a7ad8','#b090e8','#7a5ac0','#c4a8f0'],n:18}]},
+  honey:{base:'#17381a',cols:['#2f6e30','#3d8238','#4c9644','#276028'],len:[6,9],ratio:.55,n:1.5,shape:'oval',acc:[{k:'tube',cs:['#f6e4a8','#f4b860','#fff0c0','#f0a04a'],n:48}]},
+  lavender:{base:'#3d5a48',cols:['#6a8a72','#7a9a82','#587a62','#8aaa90'],len:[10,15],ratio:.1,n:1.8,shape:'needle',acc:[{k:'spike',cs:['#8a5ad0','#a070e0','#7a48c0','#b48af0'],n:90}]},
+  hydrangea:{base:'#12301a',cols:['#2a6a38','#378048','#1f5530','#48985a'],len:[12,17],ratio:.55,n:.9,shape:'oval',acc:[{k:'ball',cs:['#6a8ae8','#8aa0f0','#e88ab8','#f0a0c8','#a8b8f8','#d070a8'],n:26,s:11}]},
+  clematis:{base:'#17381a',cols:['#2f6e30','#3d8238','#285e2a','#4c9644'],len:[7,11],ratio:.5,n:1.25,shape:'lobed',acc:[{k:'star',cs:['#8a3ad0','#b068e8','#9a50e0','#cf90f4'],n:40,s:6.4,p:6}]},
+  nasturt:{base:'#1c4018',cols:['#58b038','#6cc844','#4a9a30','#80dc58'],len:[8,12],ratio:1,n:1,shape:'round',acc:[{k:'bloom',cs:['#f08a1a','#f6b01a','#e85a1a','#fcc84a'],n:34,s:5.6,p:5}]},
+  jasmine:{base:'#0f2a16',cols:['#1f5028','#296434','#184420','#337a40'],len:[6,9],ratio:.5,n:1.7,shape:'oval',acc:[{k:'star',cs:['#ffffff','#fff8f0','#f8fff8'],n:64,s:4.2,p:5}]},
+  niche:{base:'#142e17',cols:['#255a27','#2f6d30','#3d8238','#4a9644','#1c4a20'],len:[4,7],ratio:.72,n:2.4,shape:'oval',niche:1}
+};
+const GMH_NAMES=Object.keys(GMH);
+function gmhRng(sd){return()=>{sd=(sd+0x6D2B79F5)|0;let t=Math.imul(sd^(sd>>>15),1|sd);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296}}
+function gmHedge(type,variant,wh){
+  const S=GMH[type]||GMH.box,key='H|'+type+'|'+variant+'|'+wh;if(GM.tiles[key]!==undefined)return GM.tiles[key];
+  const Hp=Math.round(128*wh),W=128,c=document.createElement('canvas');c.width=W;c.height=Hp;const x=c.getContext('2d');
+  let sd=variant*7919+type.length*131;for(let i=0;i<type.length;i++)sd=(sd*31+type.charCodeAt(i))|0;const R=gmhRng(sd);
+  x.fillStyle=S.base;x.fillRect(0,0,W,Hp);
+  if(S.brick){ // old brick under the ivy
+    x.fillStyle='#7a4a3a';for(let yy=0,r=0;yy<Hp;yy+=14,r++){for(let xx=-((r%2)*16);xx<W;xx+=32){x.fillStyle=['#7a4a3a','#6a4234','#855244','#704638'][(R()*4)|0];x.fillRect(xx+1,yy+1,30,12)}}}
+  const wrap=fn=>{fn(0);};
+  const leaf=(px,py,len,wid,ang,col,sh)=>{x.fillStyle=col;x.beginPath();
+    if(sh==='needle'){x.moveTo(px,py);x.lineTo(px+Math.cos(ang)*len+Math.cos(ang+1.57)*wid,py+Math.sin(ang)*len+Math.sin(ang+1.57)*wid);x.lineTo(px+Math.cos(ang)*len*1.1,py+Math.sin(ang)*len*1.1);x.lineTo(px+Math.cos(ang)*len-Math.cos(ang+1.57)*wid,py+Math.sin(ang)*len-Math.sin(ang+1.57)*wid);x.closePath()}
+    else if(sh==='spike'){const ex=Math.cos(ang),ey=Math.sin(ang),nx=-ey,ny=ex;x.moveTo(px,py);for(let k=0;k<=4;k++){const t=k/4,wx=px+ex*len*t,wy=py+ey*len*t,w=wid*Math.sin(t*Math.PI)*(k%2?1:.7);x.lineTo(wx+nx*w,wy+ny*w)}x.lineTo(px+ex*len*1.08,py+ey*len*1.08);for(let k=4;k>=0;k--){const t=k/4,wx=px+ex*len*t,wy=py+ey*len*t,w=wid*Math.sin(t*Math.PI)*(k%2?1:.7);x.lineTo(wx-nx*w,wy-ny*w)}x.closePath()}
+    else if(sh==='heart'){x.save();x.translate(px,py);x.rotate(ang);x.moveTo(0,0);x.bezierCurveTo(-len*.55,-len*.1,-len*.5,len*.6,0,len);x.bezierCurveTo(len*.5,len*.6,len*.55,-len*.1,0,0);x.restore()}
+    else if(sh==='lobed'){x.save();x.translate(px,py);x.rotate(ang);x.moveTo(0,0);x.quadraticCurveTo(-len*.5,len*.25,-len*.3,len*.55);x.quadraticCurveTo(-len*.2,len*.8,0,len);x.quadraticCurveTo(len*.2,len*.8,len*.3,len*.55);x.quadraticCurveTo(len*.5,len*.25,0,0);x.restore()}
+    else if(sh==='round'){x.arc(px,py,len*.5,0,6.3)}
+    else{x.save();x.translate(px,py);x.rotate(ang);x.ellipse(len*.5,0,len*.5,wid*.5,0,0,6.3);x.restore()}
+    x.fill()};
+  const light=py=>1-.34*(py/Hp)+.1;   // brighter high up, shaded low down
+  const N=Math.round(S.n*W*Hp/((S.len[0]+S.len[1])/2*((S.len[0]+S.len[1])/2*S.ratio+2)*.9));
+  // three passes: deep shade, the body of the hedge, then sunlit leaves on top
+  for(let pass=0;pass<3;pass++){const cnt=pass===0?N*.5:pass===1?N:N*.55;
+    for(let i=0;i<cnt;i++){const px=R()*W,py=R()*Hp,len=S.len[0]+R()*(S.len[1]-S.len[0]),wid=len*S.ratio,ang=(S.shape==='needle'?1.2+R()*.7:R()*6.28),ci=pass===0?S.cols.length-1:Math.min(S.cols.length-1,(R()*S.cols.length)|0);
+      let col=S.cols[ci];if(pass===2)col=S.cols[(R()*Math.min(3,S.cols.length))|0];
+      x.globalAlpha=pass===0?.9:pass===1?.95:.8;
+      for(const ox of (px<len?[0,W]:px>W-len?[0,-W]:[0])){x.save();x.translate(ox,0);leaf(px,py,len,wid,ang,col,S.shape);x.restore()}
+      if(S.gloss&&R()<.5){x.globalAlpha=.35;x.fillStyle='#e8ffe8';x.beginPath();x.ellipse(px+len*.3,py,len*.18,wid*.12,ang,0,6.3);x.fill()}}}
+  x.globalAlpha=1;
+  // blossom, berries and hangings
+  for(const A of (S.acc||[])){
+    for(let i=0;i<A.n*wh;i++){const px=R()*W,py=R()*Hp,col=A.cs[(R()*A.cs.length)|0],ox=px<12?[0,W]:px>W-12?[0,-W]:[0];
+      for(const o of ox){x.save();x.translate(px+o,py);
+        if(A.k==='berry'){x.fillStyle=col;x.beginPath();x.arc(0,0,A.s,0,6.3);x.fill();x.fillStyle='rgba(255,255,255,.55)';x.beginPath();x.arc(-A.s*.3,-A.s*.3,A.s*.3,0,6.3);x.fill()}
+        else if(A.k==='bloom'||A.k==='star'){const p=A.p,r=A.s*(.75+R()*.5);x.fillStyle=col;for(let k=0;k<p;k++){const a=k*6.283/p+R()*.3;x.beginPath();if(A.k==='star'){x.moveTo(0,0);x.lineTo(Math.cos(a-.25)*r*.55,Math.sin(a-.25)*r*.55);x.lineTo(Math.cos(a)*r,Math.sin(a)*r);x.lineTo(Math.cos(a+.25)*r*.55,Math.sin(a+.25)*r*.55);x.closePath()}else x.ellipse(Math.cos(a)*r*.5,Math.sin(a)*r*.5,r*.5,r*.36,a,0,6.3);x.fill()}
+          x.fillStyle=A.k==='star'?'#f0d060':'rgba(255,230,120,.95)';x.beginPath();x.arc(0,0,r*.2,0,6.3);x.fill();x.strokeStyle='rgba(30,10,10,.25)';x.lineWidth=.6;x.beginPath();x.arc(0,0,r*.55,0,6.3);x.stroke()}
+        else if(A.k==='rac'){const L=14+R()*18;for(let k=0;k<12;k++){const t=k/12;x.fillStyle=A.cs[(R()*A.cs.length)|0];x.beginPath();x.arc((R()-.5)*(5.5-t*4),t*L,3.2-t*2,0,6.3);x.fill()}}
+        else if(A.k==='tube'){x.strokeStyle=col;x.lineWidth=2.2;x.lineCap='round';x.beginPath();x.moveTo(0,0);x.quadraticCurveTo(3,-2,5,-6);x.stroke();x.fillStyle=col;x.beginPath();x.arc(5,-6,1.6,0,6.3);x.fill()}
+        else if(A.k==='spike'){x.strokeStyle='#4a6a50';x.lineWidth=.9;x.beginPath();x.moveTo(0,0);x.lineTo(0,-16);x.stroke();for(let k=0;k<7;k++){x.fillStyle=col;x.beginPath();x.ellipse((k%2?1.4:-1.4),-6-k*1.7,1.9,1.4,0,0,6.3);x.fill()}}
+        else if(A.k==='ball'){const r=A.s*(.8+R()*.4);for(let k=0;k<16;k++){const a=R()*6.283,d=R()*r;x.fillStyle=A.cs[(R()*A.cs.length)|0];x.beginPath();x.arc(Math.cos(a)*d,Math.sin(a)*d,2.7,0,6.3);x.fill()}}
+        x.restore()}}}
+  if(S.niche){ // an arched niche cut into the clipped hedge: a stone bench, an urn and a lantern, in a pool of warm light
+    const nw=64,nx=(W-nw)/2+(variant%2?-6:6),base=Hp-18,top=Hp-18-82;
+    x.save();x.beginPath();x.moveTo(nx,base);x.lineTo(nx,top+nw/2);x.arc(nx+nw/2,top+nw/2,nw/2,Math.PI,0);x.lineTo(nx+nw,base);x.closePath();x.clip();
+    let g=x.createLinearGradient(0,top,0,base);g.addColorStop(0,'#0a1a0d');g.addColorStop(1,'#1c3a1e');x.fillStyle=g;x.fillRect(nx,top,nw,base-top);
+    g=x.createRadialGradient(nx+nw/2,base-24,2,nx+nw/2,base-24,46);g.addColorStop(0,'rgba(255,214,130,.8)');g.addColorStop(1,'rgba(255,200,100,0)');x.fillStyle=g;x.fillRect(nx,top,nw,base-top);
+    x.fillStyle='#a8a090';x.fillRect(nx+8,base-16,nw-16,7);x.fillStyle='#8a8272';x.fillRect(nx+12,base-9,6,9);x.fillRect(nx+nw-18,base-9,6,9);
+    if(variant%2){x.fillStyle='#b8b0a0';x.beginPath();x.ellipse(nx+nw/2,base-30,7,9,0,0,6.3);x.fill();x.fillStyle='#d83a3a';x.beginPath();x.arc(nx+nw/2-2,base-40,3,0,6.3);x.arc(nx+nw/2+3,base-38,2.6,0,6.3);x.fill()}
+    else{x.fillStyle='#2a2a2a';x.fillRect(nx+nw/2-1,base-52,2,18);x.fillStyle='#ffe090';x.fillRect(nx+nw/2-5,base-44,10,14);x.fillStyle='rgba(255,240,180,.9)';x.fillRect(nx+nw/2-3,base-42,6,10)}
+    x.restore();x.strokeStyle='#d8d0b8';x.lineWidth=3;x.beginPath();x.moveTo(nx,base);x.lineTo(nx,top+nw/2);x.arc(nx+nw/2,top+nw/2,nw/2,Math.PI,0);x.lineTo(nx+nw,base);x.stroke();
+  }
+  // light: warm and bright high up, deep green shade at the foot where the hedge meets the ground, a soft shade at both edges so that a run of cells reads as clipped sections
+  x.globalCompositeOperation='multiply';let gr=x.createLinearGradient(0,0,0,Hp);gr.addColorStop(0,'rgb(255,250,232)');gr.addColorStop(.7,'rgb(236,234,212)');gr.addColorStop(1,'rgb(170,176,150)');x.fillStyle=gr;x.fillRect(0,0,W,Hp);
+  gr=x.createLinearGradient(0,0,W,0);gr.addColorStop(0,'rgba(190,196,176,1)');gr.addColorStop(.12,'rgba(255,255,255,1)');gr.addColorStop(.88,'rgba(255,255,255,1)');gr.addColorStop(1,'rgba(200,204,184,1)');x.fillStyle=gr;x.fillRect(0,0,W,Hp);x.globalCompositeOperation='source-over';
+  const d=x.getImageData(0,0,W,Hp).data;
+  for(let i=0;i<d.length;i+=4){const l=d[i]*.3+d[i+1]*.59+d[i+2]*.11,k=1.2;d[i]=Math.min(255,(l+(d[i]-l)*k)*1.12);d[i+1]=Math.min(255,(l+(d[i+1]-l)*k)*1.12);d[i+2]=Math.min(255,(l+(d[i+2]-l)*k)*1.1)}
+  const id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;const gid=KH_NEXT_GID++;T_TILE[gid]=id;
+  {let r=0,g=0,b=0,n=0;for(let i=0;i<d.length;i+=4*37){r+=d[i];g+=d[i+1];b+=d[i+2];n++}(GM.col=GM.col||{})[gid]=[r/n|0,g/n|0,b/n|0]}
+  return GM.tiles[key]=gid}
+/* a type and a variant for a wall cell: a type holds for about three cells together, the variant changes cell by cell so no two neighbours look alike */
+function gmhPick(types,x,y,sd){const t=types[Math.min(types.length-1,Math.floor(hash2((x/3)|0,(y/3)|0,sd)*types.length))];return [t,(hash2(x,y,sd+5)*4)|0]}
+
+/* little glowing motes of light, in four colours (gold, rose, lilac and mint): the floating sparkle of the garden */
+function gmMotes(){if(IMG.gm_mote0)return;
+  [[255,236,150],[255,190,220],[200,180,255],[190,255,230]].forEach((c,i)=>{const cv=document.createElement('canvas');cv.width=cv.height=48;const x=cv.getContext('2d'),g=x.createRadialGradient(24,24,0,24,24,24);
+    g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.18,'rgba('+c[0]+','+c[1]+','+c[2]+',.95)');g.addColorStop(.5,'rgba('+c[0]+','+c[1]+','+c[2]+',.25)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,48,48);IMG['gm_mote'+i]=cv;NPC_H['gm_mote'+i]=.24})}
+/* a golden, hazy air over the garden */
+{const _w=weatherNow;weatherNow=function(){
+  if(LEVEL===GM.ID)return {id:'mist',n:'Golden haze',fog:.028,haze:.42,dark:0,mix:.4,col:[255,232,190],text:'The air is warm and golden, and full of drifting light. Bees hum in the hedges.'};
+  return _w.apply(this,arguments)}}
+
 /* ---- src/desert/garden_maze.js ---- */
 /* ==========================================================================
    THE MAZE OF GARDENS, the level (id 490, rated 80; prefix gm / GM; the maze is made by garden_gen.js, the pictures are loaded by garden_art.js).
@@ -51311,33 +51409,32 @@ function gmBuild(){
   const isOpen=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&g[y][x]==='.';
   // ---- the hedges: three rows of three precincts, with ragged edges ----
   const A=i=>'gmhedgeA_'+i,B=i=>'gmhedgeB_'+i;
-  const REG=[ // [row north to south][column west to east]: hedges ('F..' are hedges with flowers set into them), base height, corridor ground (0 brick 1 gravel 2 flagstone 3 lawn 4 cobble 5 petals)
-    [{h:[A(3),'F1',B(3),B(4),A(0),'F1'],wh:1.9,fl:5},{h:[A(1),A(2),'F2',A(4),A(1),'F2'],wh:2.3,fl:2},{h:[A(5),A(6),B(0),'F4',A(5)],wh:2.1,fl:1}],
-    [{h:[A(0),B(2),'F0',B(1),'F3',A(4)],wh:1.9,fl:3},{h:[A(4),A(3),B(5),'F5',B(6),A(0)],wh:2.0,fl:1},{h:[A(2),A(7),'F7',B(8),A(2)],wh:2.2,fl:4}],
-    [{h:[A(0),A(8),'F6',B(7),A(0)],wh:1.8,fl:4},{h:[A(3),'F0',B(0),B(1),'F1',A(3)],wh:1.9,fl:0},{h:[A(6),B(4),'F3',A(1),A(6)],wh:2.1,fl:3}]];
+  const REG=[ // [row north to south][column west to east]: the hedge kinds of the precinct (see garden_hedges.js), base height, corridor ground (0 brick 1 gravel 2 flagstone 3 lawn 4 cobble 5 petals)
+    [{h:['rose','box','privet','wisteria','hawthorn','roseW','niche'],wh:1.9,fl:5},{h:['yew','holly','ivy','jasmine','laurel','box','niche'],wh:2.3,fl:2},{h:['beech','wisteria','lavender','laurel','clematis','privet'],wh:2.1,fl:1}],
+    [{h:['privet','hydrangea','box','honey','rose','niche','roseP'],wh:1.9,fl:3},{h:['yew','box','laurel','holly','niche','ivy','jasmine'],wh:2.2,fl:1},{h:['hawthorn','lavender','privet','nasturt','beech','honey','roseW'],wh:2.2,fl:4}],
+    [{h:['box','clematis','rose','laurel','hydrangea','niche','roseP'],wh:1.9,fl:4},{h:['privet','roseW','box','jasmine','wisteria','niche','honey'],wh:1.9,fl:0},{h:['beech','yew','lavender','hawthorn','ivy','clematis'],wh:2.1,fl:3}]];
   const regAt=(x,y)=>{const u=x+Math.round(4*Math.sin(y*.11)+3*Math.sin(y*.047+1)),v=y+Math.round(4*Math.sin(x*.09+2));
     return REG[Math.max(0,Math.min(2,Math.floor(v/30.4)))][Math.max(0,Math.min(2,Math.floor(u/30.4)))]};
   const RS={ // the hedges of each room's walls, their height
-    start:{h:[A(3),B(0),'F0',B(1),'F2'],wh:2.2},fount:{h:[A(1),A(2),'F2'],wh:2.4},orch:{h:[A(3),A(4),'F3',A(6)],wh:2.0},knot:{h:[A(0),'F0',A(8)],wh:1.9},rose:{h:[B(0),B(1),'F0'],wh:2.1},
-    turf:{h:[A(3),'F1',A(0)],wh:2.0},herb:{h:[B(5),'F4',A(4)],wh:1.9},kitchen:{h:[A(8),'F6',A(0)],wh:1.9},sun:{h:[A(0),'F1',A(3)],wh:1.8},theatre:{h:[A(1),A(1),'F2'],wh:2.4},
-    gallery:{h:[A(1),A(2),'F7'],wh:2.4},pond:{h:[A(4),'F3',B(6)],wh:2.0},gazebo:{h:[B(2),'F5',B(1),'F1'],wh:2.0},folly:{h:[A(7),'F7',A(2)],wh:2.4},bee:{h:[B(4),'F4','F6',A(3)],wh:1.9},
-    wist:{h:[B(3),'F5',B(7)],wh:2.1},zoo:{h:[A(0),'F3',A(1)],wh:2.1},exit:{h:[A(1),'F2','F0',A(7),A(1)],wh:2.5}};
+    start:{h:['box','rose','wisteria','roseW','niche'],wh:2.2},fount:{h:['yew','jasmine','box','niche'],wh:2.5},orch:{h:['privet','hawthorn','honey','roseW'],wh:2.2},knot:{h:['box','lavender','rose'],wh:1.9},rose:{h:['rose','roseW','roseP','box'],wh:2.2},
+    turf:{h:['box','hawthorn','privet'],wh:2.2},herb:{h:['lavender','box','honey','nasturt'],wh:1.9},kitchen:{h:['nasturt','box','privet','clematis'],wh:1.9},sun:{h:['box','hydrangea','roseW'],wh:1.9},theatre:{h:['yew','laurel','niche','ivy'],wh:2.5},
+    gallery:{h:['yew','ivy','niche','laurel'],wh:2.5},pond:{h:['laurel','hydrangea','jasmine','box'],wh:2.2},gazebo:{h:['wisteria','clematis','rose','roseW'],wh:2.2},folly:{h:['ivy','beech','clematis'],wh:2.5},bee:{h:['honey','lavender','hydrangea','nasturt'],wh:1.9},
+    wist:{h:['wisteria','jasmine','clematis','wisteria'],wh:2.2},zoo:{h:['box','yew','privet','holly'],wh:2.2},exit:{h:['yew','rose','roseW','box','niche'],wh:2.5}};
   // ---- tiles ----
   const TM=null,chars={},chMap=new Map();let nextCh=0x300;
   const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
   const lowWall=new Map(); // cells inside rooms that are low hedges (knot garden, turf maze): value = tile name and height
   const rows=[],fm=[],occ=new Set(),decor=[],enemies=[],items=[],lights=[],used=new Set();
   const pick=(list,x,y,sd)=>list[Math.min(list.length-1,Math.floor(hs((x/3)|0,(y/3)|0,sd)*list.length))];
-  const tileOf=(tex,wh)=>{const f=GM_FW[tex];return f?gmTile(f[0],wh,{flowers:f[1],n:f[2],w:f[3],fid:tex}):gmTile(tex,wh)};
+  const QH=h=>[1.9,2.2,2.5].reduce((b,v)=>Math.abs(v-h)<Math.abs(b-h)?v:b,2.2);   // the hedge heights are few, so that the garden is not made of hundreds of tile sizes
   const wallChar=(x,y)=>{
     if(x===0||y===0||x===W-1||y===H-1){const gate=(x===45&&y===0)?'gmgates_0':(x===45&&y===H-1)?'gmgates_1':null;
       return ch(gmTile(A(7),2.7,gate?{gate}:undefined))}
-    const lw=lowWall.get(x+','+y);if(lw)return ch(gmTile(lw[0],lw[1]));
-    const q=roomAt(x,y,1);let reg,tex,wh;
-    if(q&&RS[q.id]){reg=RS[q.id];tex=pick(reg.h,x,y,31);wh=reg.wh}
-    else{reg=regAt(x,y);tex=pick(reg.h,x,y,37);wh=reg.wh}
-    wh=Math.round((wh+(hs((x/4)|0,(y/4)|0,41)-.5)*.3)*10)/10;
-    return ch(tileOf(tex,wh))};
+    const lw=lowWall.get(x+','+y);if(lw)return ch(gmHedge(lw[0],(hs(x,y,9)*4)|0,lw[1]));
+    const q=roomAt(x,y,1);let reg;const inRoom=q&&RS[q.id];
+    reg=inRoom?RS[q.id]:regAt(x,y);
+    const [t,v]=gmhPick(reg.h,x,y,inRoom?31:37),wh=QH(reg.wh+(hs((x/4)|0,(y/4)|0,41)-.5)*.5);
+    return ch(gmHedge(t,v,wh))};
   // ---- ground: the corridors take the ground of their precinct, in patches ----
   const GF=['gmf_brick','gmf_gravel','gmf_flag','gmf_lawn','gmf_cobble','gmf_petal'];
   const fl=new Uint8Array(W*H);
@@ -51362,7 +51459,7 @@ function gmBuild(){
   const foe=(t,x,y)=>{if(!isOpen(x,y))return;enemies.push({t,x,y,lvl:80});occ.add(x+','+y)};
   const ring=(q,pad,fn)=>{for(let x=q.x0+pad;x<=q.x1-pad;x++){fn(x,q.y0+pad);fn(x,q.y1-pad)}for(let y=q.y0+pad+1;y<q.y1-pad;y++){fn(q.x0+pad,y);fn(q.x1-pad,y)}};
   // a low hedge cell inside a room (blocks, painted as a clipped box hedge)
-  const low=(x,y,tex,wh,force)=>{if(!isOpen(x,y)||doorCell.has(x+','+y)||(!force&&near.has(x+','+y)))return;lowWall.set(x+','+y,[tex||A(0),wh||.6]);g[y][x]='L'};
+  const low=(x,y,tex,wh,force)=>{if(!isOpen(x,y)||doorCell.has(x+','+y)||(!force&&near.has(x+','+y)))return;lowWall.set(x+','+y,[(tex&&!/^gmhedge/.test(tex))?tex:'box',wh||.6]);g[y][x]='L'};
   const walkers=[];
   const walker=(a,x,y,r,o)=>{const d=D(a,x,y,Object.assign({bob:0},o||{}));if(!d)return;const id='gmw'+walkers.length;d.cloudid=id;walkers.push({id,home:[x,y],r,cell:[x,y],tgt:null,f:0,wait:R()*3,prev:null,sp:(o&&o.sp)||.5})};
   // ---- THE WELCOME COURT: the first look ----
@@ -51515,8 +51612,14 @@ function gmBuild(){
     // seen from the way in: the piece stands at the end of the passage; a niche is set in the end wall
     const d=a==='niche'?(op?dec(a,x,y,{wd:[-op[0],-op[1]]}):null):dec(a,x,y,{block:true});if(d)dn++}
   // flowers and butterflies along the corridors (walk through)
-  let fc=0;for(const [x,y] of corr){const r=hs(x,y,63);const foot=[[0,-1],[0,1],[1,0],[-1,0]].some(([p,q])=>!isOpen(x+p,y+q));if(r<(foot?.09:.04)&&!occ.has(x+','+y)){const a=hs(x,y,64)<.6?'tuft'+((hs(x,y,80)*12)|0):['flowers0','flowers1','flowers2','lavender','tulips','fern','fern2'][(hs(x,y,64)*7)|0];dec(a,x,y,{sc:a[0]==='t'?.9+hs(x,y,65)*.5:.55+hs(x,y,65)*.25});fc++}
-    else if(r<.055)dec('butterfly',x,y,{bob:.4})}
+  let fc=0;for(const [x,y] of corr){const r=hs(x,y,63);const foot=[[0,-1],[0,1],[1,0],[-1,0]].some(([p,q])=>!isOpen(x+p,y+q));if(r<(foot?.22:.1)&&!occ.has(x+','+y)){const a=hs(x,y,64)<.45?'tuft'+((hs(x,y,80)*12)|0):['flowers0','flowers1','flowers2','lavender','tulips','fern','fern2','rose_red','rose_white','hydrangea','delphinium','hollyhock'][(hs(x,y,64)*12)|0];dec(a,x,y,{sc:a[0]==='t'?.9+hs(x,y,65)*.5:.55+hs(x,y,65)*.25});fc++}
+    else if(r<.04)dec('butterfly',x,y,{bob:.4})}
+  // butterflies, bees and drifting motes of light, each circling its own square (moved smoothly by the update below)
+  const FLY=[];{gmMotes();let bn=0,ben=0,mn=0;const add=(a,x,y,o,sp,r,b)=>{const d=dec(a,x,y,o);if(!d)return;d.cloudid='gmf'+FLY.length;FLY.push({sp,r,b,ph:hs(x,y,95)*6.28});return d};
+    for(const [x,y] of corr){const r=hs(x,y,90);if(occ.has(x+','+y)||near.has(x+','+y))continue;
+      if(r<.05&&bn<110){if(add('butterfly',x,y,{bob:.5,sc:.8+hs(x,y,92)*.5},.7+hs(x,y,94)*.8,.34,.5+hs(x,y,91)*.4))bn++}
+      else if(r<.088&&ben<80){if(add('bee',x,y,{bob:.4,sc:.9},1.8+hs(x,y,94)*1.2,.3,.4+hs(x,y,91)*.3))ben++}
+      else if(r<.125&&mn<110){if(add('mote'+((hs(x,y,96)*4)|0),x,y,{bob:.3,sc:.7+hs(x,y,92)*.7},.25+hs(x,y,94)*.3,.36,.25+hs(x,y,91)*.9))mn++}}}
   // climbers hung on the hedge walls along the corridors
   for(const [x,y] of corr){if(hs(x,y,78)>.022||occ.has(x+','+y))continue;const wl=[[0,-1],[0,1],[1,0],[-1,0]].filter(([p,q])=>!isOpen(x+p,y+q));if(wl.length&&wl.length<=2)dec('trellis',x,y,{wd:wl[(hs(x,y,79)*wl.length)|0]})}
   // lamps at some junctions
@@ -51553,7 +51656,7 @@ function gmBuild(){
     {t:'The Bee Garden',x:12,y:23,k:'place'},{t:'The Sundial Lawn',x:26,y:21,k:'place'},{t:'The Hedge Theatre',x:43,y:21,k:'place'},{t:'The Ruined Folly',x:74,y:24,k:'place'},{t:'The Wisteria Walk',x:10,y:7,k:'place'},{t:'The Topiary Zoo',x:77,y:7,k:'place'},{t:'The Wardens Court',x:45,y:7,k:'place'}];
   const lv={rows,chars,fmap:fm,floorSet:GM_FLOORSET,floor:GM_FLOORSET[3],ceil:'cloud',start:{x:sx,y:sy,f:0},enemies,items,decor,lights,portals:[],day:.98,outdoor:true,amb:.92,
     name:'The Maze of Gardens',label:'The Maze of Gardens',noExtras:true,diff:80,ceilH:4.5,noTele:true,mapNames,
-    _gm:{seed:m.seed,pathLen:m.pathLen,open:m.open,Q,doors:m.doors,sdoors:m.sdoors,walkers,plaques:pc,deadEnds:dead.length,removedBlockers:m.removedBlockers,decor:decor.length,enemies:enemies.length}};
+    _gm:{fly:FLY,seed:m.seed,pathLen:m.pathLen,open:m.open,Q,doors:m.doors,sdoors:m.sdoors,walkers,plaques:pc,deadEnds:dead.length,removedBlockers:m.removedBlockers,decor:decor.length,enemies:enemies.length}};
   LEVELS[GM.ID]=lv;LEVEL_NAMES[GM.ID]='The Maze of Gardens';LEVEL_RATING[GM.ID]=80;
   // flat ground under a real sky (as in Oldhaven)
   {const NN=W*H,hh=new Float32Array(NN).fill(.3),rk=new Float32Array(NN),block=new Uint8Array(NN);for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(rows[y][x]!=='.')block[y*W+x]=1;TERRS[GM.ID]=yarTerrain(W,H,hh,rk,block)}
@@ -51581,6 +51684,12 @@ KH_LAZY[GM.ID]=gmBuild;LEVEL_NAMES[GM.ID]='The Maze of Gardens';LEVEL_RATING[GM.
       a.f+=dt*a.sp;if(a.f>=1){a.cell=a.tgt;a.tgt=null;a.f=0;a.wait=1+Math.random()*3;d.x=a.cell[0];d.y=a.cell[1];d.ox=0;d.oy=0;continue}
       d.x=a.cell[0];d.y=a.cell[1];d.ox=(a.tgt[0]-a.cell[0])*a.f;d.oy=(a.tgt[1]-a.cell[1])*a.f}}}}catch(e){}
   return _u.apply(this,arguments)}}
+/* the butterflies, bees and motes of light circle their squares */
+{const _uf=update;let fdec=null,fl=[];update=function(dt){
+  try{if(LEVEL===GM.ID&&G.state==='play'&&G.decor){const L=LEVELS[GM.ID];if(L&&L._gm&&L._gm.fly){
+    if(fdec!==G.decor){fdec=G.decor;fl=[];const by=new Map();for(const q of G.decor)if(q.cloudid&&q.cloudid.startsWith('gmf'))by.set(q.cloudid,q);L._gm.fly.forEach((f,i)=>{const d=by.get('gmf'+i);if(d)fl.push([d,f])})}
+    const t=G.time;for(const [d,f] of fl){const a=t*f.sp+f.ph;d.ox=Math.sin(a)*f.r+Math.sin(a*2.3)*f.r*.3;d.oy=Math.cos(a*.8+f.ph)*f.r;d.bob=f.b+Math.sin(a*3)*.08}}}}catch(e){}
+  return _uf.apply(this,arguments)}}
 {const _lf=lootFor;lootFor=function(d){
   if(LEVEL===GM.ID&&d&&d.k==='chest'){
     const r=k=>hash2(d.x,d.y,300+k),items=[],add=(id,n)=>{if(ITEMDEF[id])items.push({id,n:ITEMDEF[id].stack?(n||1):1})};
@@ -52645,7 +52754,12 @@ function mpGmDraw(c,x,L,api){
       ['Flagstones',()=>{x.fillStyle=MPGM.floor[2];x.fillRect(a+6,b+58,10,6);x.strokeRect(a+6,b+58,10,6)}],['Brick',()=>{x.fillStyle=MPGM.floor[0];x.fillRect(a+6,b+72,10,6);x.strokeRect(a+6,b+72,10,6)}],['Petals',()=>{x.fillStyle=MPGM.floor[5];x.fillRect(a+6,b+86,10,6);x.strokeRect(a+6,b+86,10,6)}]];
     rows.forEach(([t,f],i)=>{f();api.text(x,t,a+22,b+19+i*14,6,INK,'left')})}
 }
-mplInstall({name:'gardens',levels:[490],draw:mpGmDraw,foot:'You are the yellow arrow. Press M to close the map.'});
+mplInstall({name:'gardens',levels:[490],draw:mpGmDraw,reveal:true,foot:'You are the yellow arrow. Press M to close the map.'});
+/* the covered ground of the garden map follows the ground the party has walked near (a radius of eight squares, as on the other outdoor maps) and not only the squares that were in sight, so that the plan fills in as the maze is explored */
+{const _f=mplFogFor;mplFogFor=function(area,X,Y,L,seenMode){
+  if(seenMode&&LEVEL===GM.ID&&typeof mplFogArr==='function'){const a=mplFogArr();
+    if(a){const W=L.rows[0].length,H=L.rows.length,bak=G.seen,rows=[];for(let y=0;y<H;y++)rows.push(a.subarray(y*W,(y+1)*W));G.seen=rows;try{return _f.apply(this,arguments)}finally{G.seen=bak}}}
+  return _f.apply(this,arguments)}}
 
 /* ---- src/desert/garden_sound.js ---- */
 /* ==========================================================================

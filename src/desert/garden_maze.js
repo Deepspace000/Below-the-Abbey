@@ -25,33 +25,32 @@ function gmBuild(){
   const isOpen=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&g[y][x]==='.';
   // ---- the hedges: three rows of three precincts, with ragged edges ----
   const A=i=>'gmhedgeA_'+i,B=i=>'gmhedgeB_'+i;
-  const REG=[ // [row north to south][column west to east]: hedges ('F..' are hedges with flowers set into them), base height, corridor ground (0 brick 1 gravel 2 flagstone 3 lawn 4 cobble 5 petals)
-    [{h:[A(3),'F1',B(3),B(4),A(0),'F1'],wh:1.9,fl:5},{h:[A(1),A(2),'F2',A(4),A(1),'F2'],wh:2.3,fl:2},{h:[A(5),A(6),B(0),'F4',A(5)],wh:2.1,fl:1}],
-    [{h:[A(0),B(2),'F0',B(1),'F3',A(4)],wh:1.9,fl:3},{h:[A(4),A(3),B(5),'F5',B(6),A(0)],wh:2.0,fl:1},{h:[A(2),A(7),'F7',B(8),A(2)],wh:2.2,fl:4}],
-    [{h:[A(0),A(8),'F6',B(7),A(0)],wh:1.8,fl:4},{h:[A(3),'F0',B(0),B(1),'F1',A(3)],wh:1.9,fl:0},{h:[A(6),B(4),'F3',A(1),A(6)],wh:2.1,fl:3}]];
+  const REG=[ // [row north to south][column west to east]: the hedge kinds of the precinct (see garden_hedges.js), base height, corridor ground (0 brick 1 gravel 2 flagstone 3 lawn 4 cobble 5 petals)
+    [{h:['rose','box','privet','wisteria','hawthorn','roseW','niche'],wh:1.9,fl:5},{h:['yew','holly','ivy','jasmine','laurel','box','niche'],wh:2.3,fl:2},{h:['beech','wisteria','lavender','laurel','clematis','privet'],wh:2.1,fl:1}],
+    [{h:['privet','hydrangea','box','honey','rose','niche','roseP'],wh:1.9,fl:3},{h:['yew','box','laurel','holly','niche','ivy','jasmine'],wh:2.2,fl:1},{h:['hawthorn','lavender','privet','nasturt','beech','honey','roseW'],wh:2.2,fl:4}],
+    [{h:['box','clematis','rose','laurel','hydrangea','niche','roseP'],wh:1.9,fl:4},{h:['privet','roseW','box','jasmine','wisteria','niche','honey'],wh:1.9,fl:0},{h:['beech','yew','lavender','hawthorn','ivy','clematis'],wh:2.1,fl:3}]];
   const regAt=(x,y)=>{const u=x+Math.round(4*Math.sin(y*.11)+3*Math.sin(y*.047+1)),v=y+Math.round(4*Math.sin(x*.09+2));
     return REG[Math.max(0,Math.min(2,Math.floor(v/30.4)))][Math.max(0,Math.min(2,Math.floor(u/30.4)))]};
   const RS={ // the hedges of each room's walls, their height
-    start:{h:[A(3),B(0),'F0',B(1),'F2'],wh:2.2},fount:{h:[A(1),A(2),'F2'],wh:2.4},orch:{h:[A(3),A(4),'F3',A(6)],wh:2.0},knot:{h:[A(0),'F0',A(8)],wh:1.9},rose:{h:[B(0),B(1),'F0'],wh:2.1},
-    turf:{h:[A(3),'F1',A(0)],wh:2.0},herb:{h:[B(5),'F4',A(4)],wh:1.9},kitchen:{h:[A(8),'F6',A(0)],wh:1.9},sun:{h:[A(0),'F1',A(3)],wh:1.8},theatre:{h:[A(1),A(1),'F2'],wh:2.4},
-    gallery:{h:[A(1),A(2),'F7'],wh:2.4},pond:{h:[A(4),'F3',B(6)],wh:2.0},gazebo:{h:[B(2),'F5',B(1),'F1'],wh:2.0},folly:{h:[A(7),'F7',A(2)],wh:2.4},bee:{h:[B(4),'F4','F6',A(3)],wh:1.9},
-    wist:{h:[B(3),'F5',B(7)],wh:2.1},zoo:{h:[A(0),'F3',A(1)],wh:2.1},exit:{h:[A(1),'F2','F0',A(7),A(1)],wh:2.5}};
+    start:{h:['box','rose','wisteria','roseW','niche'],wh:2.2},fount:{h:['yew','jasmine','box','niche'],wh:2.5},orch:{h:['privet','hawthorn','honey','roseW'],wh:2.2},knot:{h:['box','lavender','rose'],wh:1.9},rose:{h:['rose','roseW','roseP','box'],wh:2.2},
+    turf:{h:['box','hawthorn','privet'],wh:2.2},herb:{h:['lavender','box','honey','nasturt'],wh:1.9},kitchen:{h:['nasturt','box','privet','clematis'],wh:1.9},sun:{h:['box','hydrangea','roseW'],wh:1.9},theatre:{h:['yew','laurel','niche','ivy'],wh:2.5},
+    gallery:{h:['yew','ivy','niche','laurel'],wh:2.5},pond:{h:['laurel','hydrangea','jasmine','box'],wh:2.2},gazebo:{h:['wisteria','clematis','rose','roseW'],wh:2.2},folly:{h:['ivy','beech','clematis'],wh:2.5},bee:{h:['honey','lavender','hydrangea','nasturt'],wh:1.9},
+    wist:{h:['wisteria','jasmine','clematis','wisteria'],wh:2.2},zoo:{h:['box','yew','privet','holly'],wh:2.2},exit:{h:['yew','rose','roseW','box','niche'],wh:2.5}};
   // ---- tiles ----
   const TM=null,chars={},chMap=new Map();let nextCh=0x300;
   const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
   const lowWall=new Map(); // cells inside rooms that are low hedges (knot garden, turf maze): value = tile name and height
   const rows=[],fm=[],occ=new Set(),decor=[],enemies=[],items=[],lights=[],used=new Set();
   const pick=(list,x,y,sd)=>list[Math.min(list.length-1,Math.floor(hs((x/3)|0,(y/3)|0,sd)*list.length))];
-  const tileOf=(tex,wh)=>{const f=GM_FW[tex];return f?gmTile(f[0],wh,{flowers:f[1],n:f[2],w:f[3],fid:tex}):gmTile(tex,wh)};
+  const QH=h=>[1.9,2.2,2.5].reduce((b,v)=>Math.abs(v-h)<Math.abs(b-h)?v:b,2.2);   // the hedge heights are few, so that the garden is not made of hundreds of tile sizes
   const wallChar=(x,y)=>{
     if(x===0||y===0||x===W-1||y===H-1){const gate=(x===45&&y===0)?'gmgates_0':(x===45&&y===H-1)?'gmgates_1':null;
       return ch(gmTile(A(7),2.7,gate?{gate}:undefined))}
-    const lw=lowWall.get(x+','+y);if(lw)return ch(gmTile(lw[0],lw[1]));
-    const q=roomAt(x,y,1);let reg,tex,wh;
-    if(q&&RS[q.id]){reg=RS[q.id];tex=pick(reg.h,x,y,31);wh=reg.wh}
-    else{reg=regAt(x,y);tex=pick(reg.h,x,y,37);wh=reg.wh}
-    wh=Math.round((wh+(hs((x/4)|0,(y/4)|0,41)-.5)*.3)*10)/10;
-    return ch(tileOf(tex,wh))};
+    const lw=lowWall.get(x+','+y);if(lw)return ch(gmHedge(lw[0],(hs(x,y,9)*4)|0,lw[1]));
+    const q=roomAt(x,y,1);let reg;const inRoom=q&&RS[q.id];
+    reg=inRoom?RS[q.id]:regAt(x,y);
+    const [t,v]=gmhPick(reg.h,x,y,inRoom?31:37),wh=QH(reg.wh+(hs((x/4)|0,(y/4)|0,41)-.5)*.5);
+    return ch(gmHedge(t,v,wh))};
   // ---- ground: the corridors take the ground of their precinct, in patches ----
   const GF=['gmf_brick','gmf_gravel','gmf_flag','gmf_lawn','gmf_cobble','gmf_petal'];
   const fl=new Uint8Array(W*H);
@@ -76,7 +75,7 @@ function gmBuild(){
   const foe=(t,x,y)=>{if(!isOpen(x,y))return;enemies.push({t,x,y,lvl:80});occ.add(x+','+y)};
   const ring=(q,pad,fn)=>{for(let x=q.x0+pad;x<=q.x1-pad;x++){fn(x,q.y0+pad);fn(x,q.y1-pad)}for(let y=q.y0+pad+1;y<q.y1-pad;y++){fn(q.x0+pad,y);fn(q.x1-pad,y)}};
   // a low hedge cell inside a room (blocks, painted as a clipped box hedge)
-  const low=(x,y,tex,wh,force)=>{if(!isOpen(x,y)||doorCell.has(x+','+y)||(!force&&near.has(x+','+y)))return;lowWall.set(x+','+y,[tex||A(0),wh||.6]);g[y][x]='L'};
+  const low=(x,y,tex,wh,force)=>{if(!isOpen(x,y)||doorCell.has(x+','+y)||(!force&&near.has(x+','+y)))return;lowWall.set(x+','+y,[(tex&&!/^gmhedge/.test(tex))?tex:'box',wh||.6]);g[y][x]='L'};
   const walkers=[];
   const walker=(a,x,y,r,o)=>{const d=D(a,x,y,Object.assign({bob:0},o||{}));if(!d)return;const id='gmw'+walkers.length;d.cloudid=id;walkers.push({id,home:[x,y],r,cell:[x,y],tgt:null,f:0,wait:R()*3,prev:null,sp:(o&&o.sp)||.5})};
   // ---- THE WELCOME COURT: the first look ----
@@ -229,8 +228,14 @@ function gmBuild(){
     // seen from the way in: the piece stands at the end of the passage; a niche is set in the end wall
     const d=a==='niche'?(op?dec(a,x,y,{wd:[-op[0],-op[1]]}):null):dec(a,x,y,{block:true});if(d)dn++}
   // flowers and butterflies along the corridors (walk through)
-  let fc=0;for(const [x,y] of corr){const r=hs(x,y,63);const foot=[[0,-1],[0,1],[1,0],[-1,0]].some(([p,q])=>!isOpen(x+p,y+q));if(r<(foot?.09:.04)&&!occ.has(x+','+y)){const a=hs(x,y,64)<.6?'tuft'+((hs(x,y,80)*12)|0):['flowers0','flowers1','flowers2','lavender','tulips','fern','fern2'][(hs(x,y,64)*7)|0];dec(a,x,y,{sc:a[0]==='t'?.9+hs(x,y,65)*.5:.55+hs(x,y,65)*.25});fc++}
-    else if(r<.055)dec('butterfly',x,y,{bob:.4})}
+  let fc=0;for(const [x,y] of corr){const r=hs(x,y,63);const foot=[[0,-1],[0,1],[1,0],[-1,0]].some(([p,q])=>!isOpen(x+p,y+q));if(r<(foot?.22:.1)&&!occ.has(x+','+y)){const a=hs(x,y,64)<.45?'tuft'+((hs(x,y,80)*12)|0):['flowers0','flowers1','flowers2','lavender','tulips','fern','fern2','rose_red','rose_white','hydrangea','delphinium','hollyhock'][(hs(x,y,64)*12)|0];dec(a,x,y,{sc:a[0]==='t'?.9+hs(x,y,65)*.5:.55+hs(x,y,65)*.25});fc++}
+    else if(r<.04)dec('butterfly',x,y,{bob:.4})}
+  // butterflies, bees and drifting motes of light, each circling its own square (moved smoothly by the update below)
+  const FLY=[];{gmMotes();let bn=0,ben=0,mn=0;const add=(a,x,y,o,sp,r,b)=>{const d=dec(a,x,y,o);if(!d)return;d.cloudid='gmf'+FLY.length;FLY.push({sp,r,b,ph:hs(x,y,95)*6.28});return d};
+    for(const [x,y] of corr){const r=hs(x,y,90);if(occ.has(x+','+y)||near.has(x+','+y))continue;
+      if(r<.05&&bn<110){if(add('butterfly',x,y,{bob:.5,sc:.8+hs(x,y,92)*.5},.7+hs(x,y,94)*.8,.34,.5+hs(x,y,91)*.4))bn++}
+      else if(r<.088&&ben<80){if(add('bee',x,y,{bob:.4,sc:.9},1.8+hs(x,y,94)*1.2,.3,.4+hs(x,y,91)*.3))ben++}
+      else if(r<.125&&mn<110){if(add('mote'+((hs(x,y,96)*4)|0),x,y,{bob:.3,sc:.7+hs(x,y,92)*.7},.25+hs(x,y,94)*.3,.36,.25+hs(x,y,91)*.9))mn++}}}
   // climbers hung on the hedge walls along the corridors
   for(const [x,y] of corr){if(hs(x,y,78)>.022||occ.has(x+','+y))continue;const wl=[[0,-1],[0,1],[1,0],[-1,0]].filter(([p,q])=>!isOpen(x+p,y+q));if(wl.length&&wl.length<=2)dec('trellis',x,y,{wd:wl[(hs(x,y,79)*wl.length)|0]})}
   // lamps at some junctions
@@ -267,7 +272,7 @@ function gmBuild(){
     {t:'The Bee Garden',x:12,y:23,k:'place'},{t:'The Sundial Lawn',x:26,y:21,k:'place'},{t:'The Hedge Theatre',x:43,y:21,k:'place'},{t:'The Ruined Folly',x:74,y:24,k:'place'},{t:'The Wisteria Walk',x:10,y:7,k:'place'},{t:'The Topiary Zoo',x:77,y:7,k:'place'},{t:'The Wardens Court',x:45,y:7,k:'place'}];
   const lv={rows,chars,fmap:fm,floorSet:GM_FLOORSET,floor:GM_FLOORSET[3],ceil:'cloud',start:{x:sx,y:sy,f:0},enemies,items,decor,lights,portals:[],day:.98,outdoor:true,amb:.92,
     name:'The Maze of Gardens',label:'The Maze of Gardens',noExtras:true,diff:80,ceilH:4.5,noTele:true,mapNames,
-    _gm:{seed:m.seed,pathLen:m.pathLen,open:m.open,Q,doors:m.doors,sdoors:m.sdoors,walkers,plaques:pc,deadEnds:dead.length,removedBlockers:m.removedBlockers,decor:decor.length,enemies:enemies.length}};
+    _gm:{fly:FLY,seed:m.seed,pathLen:m.pathLen,open:m.open,Q,doors:m.doors,sdoors:m.sdoors,walkers,plaques:pc,deadEnds:dead.length,removedBlockers:m.removedBlockers,decor:decor.length,enemies:enemies.length}};
   LEVELS[GM.ID]=lv;LEVEL_NAMES[GM.ID]='The Maze of Gardens';LEVEL_RATING[GM.ID]=80;
   // flat ground under a real sky (as in Oldhaven)
   {const NN=W*H,hh=new Float32Array(NN).fill(.3),rk=new Float32Array(NN),block=new Uint8Array(NN);for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(rows[y][x]!=='.')block[y*W+x]=1;TERRS[GM.ID]=yarTerrain(W,H,hh,rk,block)}
@@ -295,6 +300,12 @@ KH_LAZY[GM.ID]=gmBuild;LEVEL_NAMES[GM.ID]='The Maze of Gardens';LEVEL_RATING[GM.
       a.f+=dt*a.sp;if(a.f>=1){a.cell=a.tgt;a.tgt=null;a.f=0;a.wait=1+Math.random()*3;d.x=a.cell[0];d.y=a.cell[1];d.ox=0;d.oy=0;continue}
       d.x=a.cell[0];d.y=a.cell[1];d.ox=(a.tgt[0]-a.cell[0])*a.f;d.oy=(a.tgt[1]-a.cell[1])*a.f}}}}catch(e){}
   return _u.apply(this,arguments)}}
+/* the butterflies, bees and motes of light circle their squares */
+{const _uf=update;let fdec=null,fl=[];update=function(dt){
+  try{if(LEVEL===GM.ID&&G.state==='play'&&G.decor){const L=LEVELS[GM.ID];if(L&&L._gm&&L._gm.fly){
+    if(fdec!==G.decor){fdec=G.decor;fl=[];const by=new Map();for(const q of G.decor)if(q.cloudid&&q.cloudid.startsWith('gmf'))by.set(q.cloudid,q);L._gm.fly.forEach((f,i)=>{const d=by.get('gmf'+i);if(d)fl.push([d,f])})}
+    const t=G.time;for(const [d,f] of fl){const a=t*f.sp+f.ph;d.ox=Math.sin(a)*f.r+Math.sin(a*2.3)*f.r*.3;d.oy=Math.cos(a*.8+f.ph)*f.r;d.bob=f.b+Math.sin(a*3)*.08}}}}catch(e){}
+  return _uf.apply(this,arguments)}}
 {const _lf=lootFor;lootFor=function(d){
   if(LEVEL===GM.ID&&d&&d.k==='chest'){
     const r=k=>hash2(d.x,d.y,300+k),items=[],add=(id,n)=>{if(ITEMDEF[id])items.push({id,n:ITEMDEF[id].stack?(n||1):1})};

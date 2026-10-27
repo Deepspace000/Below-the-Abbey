@@ -45,4 +45,9 @@ function mpGmDraw(c,x,L,api){
       ['Flagstones',()=>{x.fillStyle=MPGM.floor[2];x.fillRect(a+6,b+58,10,6);x.strokeRect(a+6,b+58,10,6)}],['Brick',()=>{x.fillStyle=MPGM.floor[0];x.fillRect(a+6,b+72,10,6);x.strokeRect(a+6,b+72,10,6)}],['Petals',()=>{x.fillStyle=MPGM.floor[5];x.fillRect(a+6,b+86,10,6);x.strokeRect(a+6,b+86,10,6)}]];
     rows.forEach(([t,f],i)=>{f();api.text(x,t,a+22,b+19+i*14,6,INK,'left')})}
 }
-mplInstall({name:'gardens',levels:[490],draw:mpGmDraw,foot:'You are the yellow arrow. Press M to close the map.'});
+mplInstall({name:'gardens',levels:[490],draw:mpGmDraw,reveal:true,foot:'You are the yellow arrow. Press M to close the map.'});
+/* the covered ground of the garden map follows the ground the party has walked near (a radius of eight squares, as on the other outdoor maps) and not only the squares that were in sight, so that the plan fills in as the maze is explored */
+{const _f=mplFogFor;mplFogFor=function(area,X,Y,L,seenMode){
+  if(seenMode&&LEVEL===GM.ID&&typeof mplFogArr==='function'){const a=mplFogArr();
+    if(a){const W=L.rows[0].length,H=L.rows.length,bak=G.seen,rows=[];for(let y=0;y<H;y++)rows.push(a.subarray(y*W,(y+1)*W));G.seen=rows;try{return _f.apply(this,arguments)}finally{G.seen=bak}}}
+  return _f.apply(this,arguments)}}
