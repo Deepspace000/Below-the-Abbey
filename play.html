@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.680';
+const VERSION='3.681';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -56652,8 +56652,38 @@ function wmwGateMark(l){ // the gate to the gardens, in the north wall of the ma
 /* THE MAZE OF GARDENS and THE DROWNED MAZE, drawn as isometric mazes: tall walls with lit tops and shaded sides on a floor of walks, each painted once into a canvas (leaf and stone dabs, soft shading) and then drawn at the size of the map picture.
    The gardens are leafy hedges on gravel, with a stone fountain in the open heart and a gold gate in the south. The drowned maze is old grey stone, grown with weed, standing in dark green water that comes half way up every wall. */
 const WMW_ISOS={};
+/* THE FOUR BRICK MAZES OF THE GRAVEYARD, drawn as small isometric mazes like the garden and the drowned maze: tall brick walls in the maze's own brick, mossy tops, a floor of dark flags, mist lying low, and torches in the maze's own flame colour throwing a glow on the walls. Each has its own layout (WMW_GMPLAN). */
+const WMW_GMFIRE=['#ff7a3c','#ffd45c','#5ab0ff','#c080ff'];
+function wmwIsoGrave(i){
+  const key='gm'+i;if(WMW_ISOS[key])return WMW_ISOS[key];
+  const G=11,TW=30,TH=15,HH=22,CW=360,CH=240,ox=CW/2,oy=HH+18,c0=document.createElement('canvas');c0.width=CW;c0.height=CH;const c=c0.getContext('2d'),pl=WMW_GMPLAN[i%4],col=WMW_GMCOL[i%4],fire=WMW_GMFIRE[i%4];
+  const isOpen=(x,y)=>x>=0&&y>=0&&x<G&&y<G&&pl[y][x]!=='#';
+  const P=(gx,gy)=>[ox+(gx-gy)*TW/2,oy+(gx+gy)*TH/2];
+  c.save();c.fillStyle='rgba(16,10,6,.26)';{const [x,y]=P(G/2,G/2);c.beginPath();c.ellipse(x+6,y+16,G*TW*.52,G*TH*.62,0,0,6.3);c.fill()}c.restore();
+  const flo=['#3a3228','#332c23'];
+  for(let gy=0;gy<G;gy++)for(let gx=0;gx<G;gx++){const [x,y]=P(gx,gy);c.beginPath();c.moveTo(x,y);c.lineTo(x+TW/2,y+TH/2);c.lineTo(x,y+TH);c.lineTo(x-TW/2,y+TH/2);c.closePath();c.fillStyle=isOpen(gx,gy)?flo[(gx+gy)&1]:'#241e17';c.fill();if(isOpen(gx,gy)){c.strokeStyle='rgba(0,0,0,.35)';c.lineWidth=.6;c.stroke()}}
+  const shade=(k,f)=>{const n=parseInt(k.slice(1),16),r=Math.round((n>>16&255)*f),g=Math.round((n>>8&255)*f),b=Math.round((n&255)*f);return `rgb(${Math.min(255,r)},${Math.min(255,g)},${Math.min(255,b)})`};
+  const face=(pts,base,sd,lit)=>{c.save();c.beginPath();pts.forEach((q,k)=>k?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));c.closePath();c.fillStyle=base;c.fill();c.clip();
+    const xs=pts.map(q=>q[0]),ys=pts.map(q=>q[1]),x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+    if(!lit){c.strokeStyle='rgba(0,0,0,.4)';c.lineWidth=.55;for(let k=1;k<4;k++){const yy=y0+(y1-y0)*k/4;c.beginPath();c.moveTo(x0,yy);c.lineTo(x1,yy);c.stroke()}
+      for(let k=0;k<9;k++){const xx=x0+(x1-x0)*(k+.5*(k&1)+hash2(k,sd,3)*.4)/9;c.beginPath();c.moveTo(xx,y0);c.lineTo(xx,y1);c.stroke()}
+      for(let k=0;k<8;k++){c.fillStyle='rgba(60,96,44,'+(.2+hash2(k,sd,5)*.3)+')';c.beginPath();c.arc(x0+hash2(k,sd,6)*(x1-x0),y1-hash2(k,sd,7)*(y1-y0)*.4,1+hash2(k,sd,8)*2,0,6.3);c.fill()}}
+    else{for(let k=0;k<7;k++){c.fillStyle='rgba(84,128,56,'+(.25+hash2(k,sd,5)*.35)+')';c.beginPath();c.arc(x0+hash2(k,sd,6)*(x1-x0),y0+hash2(k,sd,7)*(y1-y0),.8+hash2(k,sd,8)*1.8,0,6.3);c.fill()}}
+    c.restore();c.strokeStyle='rgba(8,6,4,.65)';c.lineWidth=.7;c.beginPath();pts.forEach((q,k)=>k?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));c.closePath();c.stroke()};
+  const wall=(gx,gy)=>{const [x,y]=P(gx,gy),t=[x,y-HH],r=[x+TW/2,y+TH/2-HH],b=[x,y+TH-HH],l=[x-TW/2,y+TH/2-HH],sd=gx*31+gy*17+i*7;
+    face([l,b,[b[0],b[1]+HH],[l[0],l[1]+HH]],shade(col[0],.78),sd+1,false);face([b,r,[r[0],r[1]+HH],[b[0],b[1]+HH]],shade(col[0],.58),sd+2,false);face([t,r,b,l],shade(col[1],.9),sd+3,true)};
+  const torches=[];
+  for(let sw=0;sw<2*G-1;sw++)for(let gx=0;gx<G;gx++){const gy=sw-gx;if(gy<0||gy>=G)continue;if(!isOpen(gx,gy))wall(gx,gy);
+    else if(((gx*5+gy*3+i)%7===0)&&(!isOpen(gx,gy-1)||!isOpen(gx-1,gy)))torches.push([gx,gy])}
+  // torches stand in the open squares beside the walls, with a glow of the flame's colour on the brick
+  c.save();c.globalCompositeOperation='lighter';for(const [gx,gy] of torches){const [x,y]=P(gx+.5,gy+.5);const g=c.createRadialGradient(x,y-8,1,x,y-8,26);g.addColorStop(0,fire+'aa');g.addColorStop(1,fire+'00');c.fillStyle=g;c.beginPath();c.arc(x,y-8,26,0,6.3);c.fill()}c.restore();
+  for(const [gx,gy] of torches){const [x,y]=P(gx+.5,gy+.5);c.fillStyle='#2a1a10';c.fillRect(x-.8,y-10,1.6,9);c.fillStyle=fire;c.beginPath();c.moveTo(x,y-17);c.quadraticCurveTo(x+3.2,y-12,x,y-9);c.quadraticCurveTo(x-3.2,y-12,x,y-17);c.fill();c.fillStyle='#fff6d0';c.beginPath();c.arc(x,y-11.5,1,0,6.3);c.fill()}
+  // mist lying low along the floor
+  for(let k=0;k<7;k++){const [x,y]=P(1+hash2(k,i,11)*9,1+hash2(k,i,12)*9);const g=c.createRadialGradient(x,y+4,1,x,y+4,22);g.addColorStop(0,'rgba(210,214,226,.28)');g.addColorStop(1,'rgba(210,214,226,0)');c.fillStyle=g;c.beginPath();c.ellipse(x,y+4,22,8,0,0,6.3);c.fill()}
+  return WMW_ISOS[key]=c0}
 function wmwIsoMaze(kind){
   if(WMW_ISOS[kind])return WMW_ISOS[kind];
+  {const g=/^gm(\d)$/.exec(kind);if(g)return wmwIsoGrave(+g[1])}
   const D=kind==='drowned',G=11,TW=30,TH=15,HH=D?20:24,CW=360,CH=250,ox=CW/2,oy=HH+16,c0=document.createElement('canvas');c0.width=CW;c0.height=CH;const c=c0.getContext('2d');
   const open=[];for(let y=0;y<G;y++)open.push(new Array(G).fill(false));
   let seed=D?31337:90417;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
@@ -56748,7 +56778,7 @@ function wmwGmIco(c,l,i){const im=IMG['gyp_'+WMW_GMPIC[i]];if(!im||!im.width)ret
   c.save();c.fillStyle='rgba(40,28,14,.3)';c.beginPath();c.ellipse(l.x,by-.5,w*.45,2.6,0,0,6.3);c.fill();c.drawImage(im,l.x-w/2,by-h,w,h);c.restore();return true}
 {const _ico=wmnIco;wmnIco=function(l){
   const f=WMW_ICO[l.k];if(f){const L=wmnLay(l);if(L){f(ctx,l.x,l.y+(L.off||0)*0,l)}return}
-  const m=/^gm(\d)$/.exec(l.k);if(m){if(!wmwGmPlan(ctx,l,+m[1]-1)){ctx.save();ctx.filter=wmwBrickFilter(+m[1]-1);_ico(l);ctx.restore()}return}
+  const m=/^gm(\d)$/.exec(l.k);if(m){try{wmwIsoDraw(ctx,l.x,l.y+9,'gm'+(+m[1]-1),36)}catch(e){console.error('gm iso',e);ctx.save();ctx.filter=wmwBrickFilter(+m[1]-1);_ico(l);ctx.restore()}return}
   if(l.k==='wellmaze'){ // four floors of purple maze stacked down, under the painted well of Wenlock
     ctx.save();ctx.filter='hue-rotate(250deg) saturate(1.25) brightness(.82)';_ico(l);ctx.restore();
     const L=wmnLay(l),w=IMG.kh_city1_1;if(L&&L.ib&&w&&w.width){const h=18,ww=h*w.width/w.height,top=L.ib[1];ctx.save();ctx.fillStyle='rgba(40,28,14,.28)';ctx.beginPath();ctx.ellipse(l.x,top+8.5,ww*.42,2,0,0,6.3);ctx.fill();ctx.drawImage(w,l.x-ww/2,top+8-h,ww,h);ctx.restore()}return}
@@ -56832,6 +56862,14 @@ function wmwSwatch(c,k,x,y,s){
   const D={wenlock:()=>wmnDraw(c,'i_town',0,10,26),deephollow:()=>wmnDraw(c,'i_stonemaze',0,6,24,true),hollowgrass:()=>wmnDraw(c,'i_oaks',0,10,26),cave:()=>wmnDraw(c,'i_cave',0,10,26),
     wellmaze:()=>wmwWell(c,0,16),dungeon:()=>wmnDraw(c,'i_crypt',0,10,26),maze:()=>wmwHedge(c,0,14)};
   try{(D[k]||D.cave)()}catch(e){}c.restore()}
+/* the same name always scrambles the same way: the letters of each word are shuffled (a seeded shuffle), spaces and punctuation stay where they are */
+function wmwScramble(nm){
+  let h=2166136261;for(let i=0;i<nm.length;i++){h^=nm.charCodeAt(i);h=Math.imul(h,16777619)}
+  const rnd=()=>{h^=h<<13;h^=h>>>17;h^=h<<5;return ((h>>>0)%100000)/100000};
+  return String(nm).split(/(\s+)/).map(w=>{if(!/[A-Za-z]{3,}/.test(w))return w;const a=w.split(''),idx=[];a.forEach((ch,i)=>{if(/[A-Za-z]/.test(ch))idx.push(i)});
+    const L=idx.map(i=>a[i]);for(let i=L.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[L[i],L[j]]=[L[j],L[i]]}
+    let same=true;for(let i=0;i<L.length;i++)if(L[i]!==a[idx[i]])same=false;if(same&&L.length>2)L.push(L.shift());
+    idx.forEach((p,i)=>a[p]=L[i]);return a.join('')}).join('')}
 function wmwAtlasDraw(){
   const M=mpWorldM,c=ctx,ink=mpWorldInk;if(!M.ready)mpWorldInit();
   BTNS=[];veil(1);const x0=14,y0=14,w=452,h=292;G._wAtlasT=G.time;
@@ -56862,11 +56900,14 @@ function wmwAtlasDraw(){
         c.font=`bold 6.8px ${FUI}`;c.textBaseline='middle';
         c.textAlign='right';c.fillStyle='#4a3a22';c.fillText(idt,X+W,y+3.2);let rw=c.measureText(idt).width;
         if(rt){c.fillStyle='#7a1a10';c.fillText('Lv '+rt,X+W-rw-4,y+3.2);rw+=c.measureText('Lv '+rt).width+4}
-        c.textAlign='left';c.fillStyle='#1c1208';let t=nm;const mw=W-19-rw-6;while(c.measureText(t).width>mw&&t.length>4)t=t.slice(0,-2);if(t!==nm)t=t.trim()+'.';c.fillText(t,X+19,y+3.2);y+=R;
-        if(r[2]){c.font=`italic 5.4px ${FUI}`;c.fillStyle='#5a4a30';let n=r[2];const mw2=W-22;while(c.measureText(n).width>mw2&&n.length>6)n=n.slice(0,-2);if(n!==r[2])n=n.trim()+'.';c.fillText(n,X+19,y+1);y+=N}}
+        c.textAlign='left';
+        // a place that has not been reached shows its name scrambled and faint; once the party has been there (or the box is ticked) it is spelled out and bold
+        const shown=seenAny?nm:wmwScramble(nm);c.font=seenAny?`bold 6.8px ${FUI}`:`6.8px ${FUI}`;c.fillStyle=seenAny?'#1c1208':'rgba(70,52,30,.4)';
+        let t=shown;const mw=W-19-rw-6;while(c.measureText(t).width>mw&&t.length>4)t=t.slice(0,-2);if(t!==shown)t=t.trim()+'.';c.fillText(t,X+19,y+3.2);y+=R;
+        if(r[2]){c.font=`italic 5.4px ${FUI}`;c.fillStyle=seenAny?'#5a4a30':'rgba(90,74,48,.35)';let n=r[2];const mw2=W-22;while(c.measureText(n).width>mw2&&n.length>6)n=n.slice(0,-2);if(n!==r[2])n=n.trim()+'.';c.fillText(n,X+19,y+1);y+=N}}
       y+=4}});
   // the foot: page, and the buttons
-  c.font=`italic 7px ${FUI}`;c.textAlign='center';c.fillStyle='#4a3a22';c.fillText('Page '+(pg+1)+' of '+pages.length+'.  First box: been there (ticked for you, or tap it).  Second box: finished (tap it yourself).',240,271);
+  c.font=`italic 7px ${FUI}`;c.textAlign='center';c.fillStyle='#4a3a22';c.fillText('Page '+(pg+1)+' of '+pages.length+'.  Names stay scrambled until you have been there.  First box: been there.  Second box: finished (tap it).',240,271);
   c.restore();
   // the buttons stand in the same place on every page; Back and Next are dimmed when there is no page that way
   btnText('watl_back','World map',34,278,96,22);btnText('watl_prev','Back',146,278,44,22);btnText('watl_next','Next',194,278,44,22);btnText('watl_sort',WMW_SORTN[G.wAtlasSort||'area'],250,278,84,22);btnText('ovexit','Exit',346,278,100,22);
