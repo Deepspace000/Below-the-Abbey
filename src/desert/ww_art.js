@@ -33,9 +33,24 @@ function wwLoad(){
 function wwAlias(){
   for(const a in WWA){const [n,h]=WWA[a];if(IMG[n]){IMG['ww_'+a]=WW_TREEA.includes(a)?wwDarken(IMG[n],.86):IMG[n];NPC_H['ww_'+a]=h}}
   for(const [k,n] of [['wwi_scare','guardA_0'],['wwi_hound','guardA_1'],['wwi_spider','guardA_2'],['wwi_golem','guardA_3'],['wwi_crows','guardA_4'],['wwi_toad','guardA_5'],['wwi_revenant','guardB_0'],['wwi_root','guardB_1'],['wwi_abom','guardB_2'],['wwi_wisp','guardB_3'],['wwi_crow','guardB_4'],['wwi_witch','witch_1'],['wwi_witchA','witch_0']])if(IMG[n])IMG[k]=IMG[n];
-  NPC_H.wwi_witch=1.7;NPC_H.wwi_witchA=2.6;
+  NPC_H.wwi_witch=1.45;NPC_H.wwi_witchA=2.6;
+  wwLeafImgs();
   wwFloors();
 }
+/* drifting leaves: four small ochre and brown leaves painted in code (a speck of colour, not a creature or an item), moved slowly along the ground by the update below */
+function wwLeafImgs(){
+  if(IMG.ww_leaf0)return;
+  [['#9a6a24','#5a3a10'],['#b88a30','#6a4a14'],['#7a5a20','#40280c'],['#a8541c','#5e2a0c']].forEach(([a,b],i)=>{
+    IMG['ww_leaf'+i]=mkCanvas(30,20,(x)=>{x.fillStyle=a;x.beginPath();x.moveTo(2,10);x.quadraticCurveTo(14,-2,28,10);x.quadraticCurveTo(14,22,2,10);x.fill();x.strokeStyle=b;x.lineWidth=1.3;x.beginPath();x.moveTo(3,10);x.lineTo(27,10);x.stroke();
+      x.lineWidth=.8;for(let k=0;k<3;k++){x.beginPath();x.moveTo(9+k*6,10);x.lineTo(13+k*6,4+k);x.moveTo(9+k*6,10);x.lineTo(13+k*6,16-k);x.stroke()}});
+    NPC_H['ww_leaf'+i]=.1});
+}
+{const _u=update;let fdec=null,fl=[];update=function(dt){
+  try{if(typeof LEVEL!=='undefined'&&LEVEL===WW.ID&&G.state==='play'&&G.decor){const L=LEVELS[WW.ID];if(L&&L._ww&&L._ww.leaves){
+    wwLeafImgs();
+    if(fdec!==G.decor){fdec=G.decor;fl=[];const by=new Map();for(const q of G.decor)if(q.cloudid&&q.cloudid.startsWith('wwlf'))by.set(q.cloudid,q);L._ww.leaves.forEach((f,i)=>{const d=by.get('wwlf'+i);if(d)fl.push([d,f])})}
+    const t=G.time;for(const [d,f] of fl){const u=(t*f.sp+f.ph)%1,a=u*Math.PI*2;d.ox=(u-.5)*f.len;d.oy=Math.sin(a*2+f.ph*9)*.2;d.bob=.03+Math.abs(Math.sin(a*5+f.ph*7))*.1;d.sc=f.sc*Math.max(.05,1-Math.pow(Math.abs(2*u-1),6))}}}}catch(e){}
+  return _u.apply(this,arguments)}}
 /* the ground: six pictures, brightened (the originals are very dark), as floors */
 const WW_FLOORSET=['wwf_moss','wwf_leaf','wwf_dirt','wwf_brook','wwf_grave','wwf_board'];
 function wwFloors(){
@@ -43,8 +58,8 @@ function wwFloors(){
   const mk=(nm,key,gain,tint)=>{const im=IMG[key];if(!im||FLOORS[nm])return;const base=dsPaintedTex(im),d=new Uint8ClampedArray(base.length);
     for(let i=0;i<d.length;i+=4){const l=(base[i]+base[i+1]+base[i+2])/3,k=tint.sat===undefined?1:tint.sat;d[i]=(l+(base[i]-l)*k)*gain*tint.r;d[i+1]=(l+(base[i+1]-l)*k)*gain*tint.g;d[i+2]=(l+(base[i+2]-l)*k)*gain*tint.b;d[i+3]=255}FLOORS[nm]=d};
   mk('wwf_moss','tex_1',.9,{r:.95,g:1.05,b:.9});mk('wwf_leaf','tex_2',1.4,{r:1.02,g:.95,b:.88});mk('wwf_dirt','tex_5',2.6,{r:1.05,g:1,b:.9});
-  mk('wwf_kit','tex_3',2.1,{r:1.3,g:.95,b:.78,sat:.15});mk('wwf_brook','tex_5',2.7,{r:1.1,g:1.04,b:.92,sat:.4});mk('wwf_grave','tex_3',1.9,{r:.9,g:1,b:.95});mk('wwf_board','tex_0',1.8,{r:1.2,g:.92,b:.65,sat:.1});
-  const fb={wwf_moss:'lush',wwf_leaf:'dirt',wwf_dirt:'dirt',wwf_brook:'dirt',wwf_grave:'mosscobble',wwf_board:'cobble'};
+  mk('wwf_kit','tex_3',2.1,{r:1.3,g:.95,b:.78,sat:.15});mk('wwf_brook','tex_5',2.7,{r:1.1,g:1.04,b:.92,sat:.4});mk('wwf_grave','tex_3',1.9,{r:.9,g:1,b:.95});mk('wwf_cellar','tex_3',1.7,{r:1.06,g:.97,b:.96,sat:0});mk('wwf_board','tex_0',1.8,{r:1.2,g:.92,b:.65,sat:.1});
+  const fb={wwf_moss:'lush',wwf_leaf:'dirt',wwf_dirt:'dirt',wwf_brook:'dirt',wwf_grave:'mosscobble',wwf_cellar:'cobble',wwf_board:'cobble'};
   for(const nm of WW_FLOORSET)if(!FLOORS[nm])FLOORS[nm]=FLOORS[fb[nm]]||FLOORS.cobble;
   WW._floors=1;
 }
@@ -109,13 +124,38 @@ if(typeof AFFL!=='undefined'&&!AFFL.hagblind){AFFL.hagblind={n:'Hag-blinded',kin
 
 /* the little hills that hide the caves and ruins of the wood: painted again in the wood's own colours, with a dark patch of ground under them (the art is the usual hill; the colour and the shadow are the wood's) */
 function wwHillArt(i){
-  const key='wd_hillw'+i;if(IMG[key])return key;const im=IMG['wd_hill'+i];if(!im||!im.width)return null;
-  const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');
-  x.drawImage(im,0,0);x.globalCompositeOperation='source-atop';x.fillStyle='rgba(18,30,22,.55)';x.fillRect(0,0,c.width,c.height);
-  x.globalCompositeOperation='multiply';x.fillStyle='rgb(190,215,190)';x.fillRect(0,0,c.width,c.height);
-  x.globalCompositeOperation='destination-in';x.drawImage(im,0,0);
-  x.globalCompositeOperation='destination-over';const g=x.createRadialGradient(c.width/2,c.height-3,2,c.width/2,c.height-3,c.width*.62);g.addColorStop(0,'rgba(4,8,5,.8)');g.addColorStop(1,'rgba(4,8,5,0)');
-  x.save();x.translate(0,c.height-3);x.scale(1,.12);x.translate(0,-(c.height-3));x.fillStyle=g;x.fillRect(0,0,c.width,c.height);x.restore();
+  /* a Gothic pointed-arch stone doorway in a dark, mossy block of old wall: the chapel's own painted doorway (front_0) set into a wall of the painted grey stone (tex_3), with a ground shadow and no halo */
+  const key='wd_hillw'+i;if(IMG[key])return key;const im=IMG['wd_hill'+i],T=IMG.tex_3,F=IMG.front_0;if(!im||!im.width||!T||!F)return null;
+  const W=im.width,H=im.height,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d'),hs=(a,b,s)=>hash2(a,b,s+i*13);
+  const x0=34+hs(1,1,1)*10,x1=W-34-hs(2,2,1)*10,top=64+hs(3,3,1)*14,bot=H-4;
+  // the block of wall: a low ruined front with rounded shoulders, its top lower at one side
+  x.beginPath();x.moveTo(x0,bot);x.lineTo(x0,top+70);x.quadraticCurveTo(x0,top+8,x0+60,top+2);x.lineTo(x1-70,top+(i%2?14:0));x.quadraticCurveTo(x1,top+8,x1,top+66);x.lineTo(x1,bot);x.closePath();
+  x.save();x.clip();
+  x.fillStyle='#3c3f3a';x.fillRect(0,0,W,H);for(let yy=0;yy<H;yy+=128)for(let xx=0;xx<W;xx+=128)x.drawImage(T,xx,yy,128,128);
+  x.globalCompositeOperation='multiply';x.fillStyle='rgb(185,198,178)';x.fillRect(0,0,W,H);x.globalCompositeOperation='source-over';
+  x.strokeStyle='rgba(10,14,10,.5)';x.lineWidth=1.6;for(let yy=top+18,r=0;yy<bot;yy+=30,r++){x.beginPath();x.moveTo(x0,yy);x.lineTo(x1,yy);x.stroke();for(let xx=x0+(r%2)*26;xx<x1;xx+=52){x.beginPath();x.moveTo(xx+hs(xx,yy,2)*6,yy);x.lineTo(xx+hs(xx,yy,3)*6,yy+30);x.stroke()}}
+  // dark at both sides and the foot, green damp rising from the ground
+  let g=x.createLinearGradient(x0,0,x1,0);g.addColorStop(0,'rgba(4,8,5,.5)');g.addColorStop(.2,'rgba(4,8,5,0)');g.addColorStop(.8,'rgba(4,8,5,0)');g.addColorStop(1,'rgba(4,8,5,.5)');x.fillStyle=g;x.fillRect(0,0,W,H);
+  g=x.createLinearGradient(0,bot-110,0,bot);g.addColorStop(0,'rgba(24,60,28,0)');g.addColorStop(1,'rgba(24,64,30,.6)');x.fillStyle=g;x.fillRect(0,bot-110,W,110);
+  x.restore();
+  // the doorway: the chapel's pointed arch (a crop of its front picture), feathered into the wall and darkened
+  const sw=84,sh=140,sx=172,sy=299,dw=Math.round(W*.34),dh=Math.round(dw*sh/sw),dx=(W-dw)/2,dy=bot-dh+2,d=document.createElement('canvas');d.width=dw;d.height=dh;const y=d.getContext('2d');
+  y.drawImage(F,sx,sy,sw,sh,0,0,dw,dh);y.globalCompositeOperation='multiply';y.fillStyle='rgb(150,165,150)';y.fillRect(0,0,dw,dh);
+  y.globalCompositeOperation='destination-in';const m=y.createLinearGradient(0,0,0,dh);y.fillStyle='#000';
+  y.beginPath();y.moveTo(0,dh);y.lineTo(0,dh*.36);y.quadraticCurveTo(0,dh*.1,dw*.5,0);y.quadraticCurveTo(dw,dh*.1,dw,dh*.36);y.lineTo(dw,dh);y.closePath();y.fill();
+  x.drawImage(d,dx,dy);
+  // the opening gets a deep shade at the top of the door, and a worn step at the foot
+  x.save();x.beginPath();x.moveTo(dx+dw*.2,bot-6);x.lineTo(dx+dw*.2,dy+dh*.5);x.quadraticCurveTo(dx+dw*.22,dy+dh*.2,dx+dw*.5,dy+dh*.1);x.quadraticCurveTo(dx+dw*.78,dy+dh*.2,dx+dw*.8,dy+dh*.5);x.lineTo(dx+dw*.8,bot-6);x.closePath();x.clip();
+  g=x.createLinearGradient(0,dy,0,bot);g.addColorStop(0,'rgba(2,4,3,.55)');g.addColorStop(.6,'rgba(2,4,3,.1)');g.addColorStop(1,'rgba(2,4,3,0)');x.fillStyle=g;x.fillRect(dx,dy,dw,dh);x.restore();
+  x.fillStyle='#34362f';x.fillRect(dx-6,bot-8,dw+12,8);x.fillStyle='#22241f';x.fillRect(dx-6,bot-2,dw+12,2);
+  // moss on the shoulders, ivy hanging from the top
+  const GR=['#1f4a22','#2e6a2c','#3f7f34','#173a1b'];
+  for(let k=0;k<90;k++){const px=x0+hs(k,1,5)*(x1-x0),py=top+hs(k,2,5)*18+(px<x0+50||px>x1-50?22:0);x.fillStyle=GR[(hs(k,3,5)*4)|0];x.globalAlpha=.85;x.beginPath();x.ellipse(px,py,3+hs(k,4,5)*6,1.8+hs(k,5,5)*2.6,hs(k,7,5)*3,0,6.3);x.fill()}
+  x.globalAlpha=1;for(let k=0;k<12;k++){const px=x0+10+hs(k,6,6)*(x1-x0-20);if(Math.abs(px-W/2)<dw*.5)continue;let qx=px,qy=top+8;x.strokeStyle='#1b3a1b';x.lineWidth=1.6;x.beginPath();x.moveTo(qx,qy);for(let t=0;t<7;t++){qx+=(hs(k,t+7,7)-.5)*7;qy+=8+hs(k,t+9,7)*10;x.lineTo(qx,qy)}x.stroke();
+    for(let t=0;t<5;t++){x.fillStyle=GR[(hs(k,t+20,8)*4)|0];x.beginPath();x.ellipse(qx+(hs(k,t+30,9)-.5)*10,qy-t*9,3.5,2.4,hs(k,t+40,9)*3,0,6.3);x.fill()}}
+  // ground shadow under the foot (soft and flat, under the stone so nothing glows round it)
+  x.globalCompositeOperation='destination-over';g=x.createRadialGradient(W/2,H-3,2,W/2,H-3,W*.55);g.addColorStop(0,'rgba(3,6,4,.85)');g.addColorStop(1,'rgba(3,6,4,0)');
+  x.save();x.translate(0,H-3);x.scale(1,.1);x.translate(0,-(H-3));x.fillStyle=g;x.fillRect(0,0,W,H);x.restore();
   IMG[key]=c;NPC_H[key]=NPC_H['wd_hill'+i]||1.9;return key}
 function wwTintHills(){
   const L=LEVELS[WW.ID];if(!L||!L.decor||L._wwHillDone)return;let n=0;

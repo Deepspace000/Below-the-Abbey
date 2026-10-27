@@ -49166,8 +49166,16 @@ function twBuild(){
   const info={ok:reach===floors&&edges===floors-1&&enemies.length===8&&g[H-1][sx]==='0',floors,reach,edges,rats:enemies.length,chest,chestWalk:d[chest[1]*W+chest[0]]};
   if(!info.ok)console.error('Under the Well failed its own checks',info);
   // the chest's dead end is dressed (the maze is cut so tight that no room fits round it): bones, a barrel and a light on the way in
-  {const nb=D4.find(([a,b])=>g[chest[1]+b][chest[0]+a]==='.');if(nb){const px=chest[0]+nb[0],py=chest[1]+nb[1];decor.push({k:'bones',x:px,y:py,block:false});lights.push([chest[0],chest[1]]);
-     const nn=D4.find(([a,b])=>(a!==-nb[0]||b!==-nb[1])&&g[py+b][px+a]==='.');if(nn)decor.push({k:'barrel',x:px+nn[0],y:py+nn[1],block:false,walk:true,deco:true,sc:.8})}}
+  // the chest's dead end is widened into a small chamber: the nine squares round the chest are cleared (the chest stands in the middle, the way in is where the passage met it), with a light in the room and a few bones
+  {const nb=D4.find(([a,b])=>g[chest[1]+b][chest[0]+a]==='.');
+   for(let y=chest[1]-1;y<=chest[1]+1;y++)for(let x=chest[0]-1;x<=chest[0]+1;x++)if(x>=1&&y>=1&&x<=W-2&&y<=H-2&&g[y][x]==='#')g[y][x]='.';
+   // the room is walkable all round the chest, and still joined to the stair
+   const d2=new Int16Array(W*H).fill(-1),q2=[sy*W+sx];d2[q2[0]]=0;for(let i=0;i<q2.length;i++){const c=q2[i],x=c%W,y=(c/W)|0;for(const [a,b] of D4){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||g[ny][nx]!=='.'||d2[ny*W+nx]>=0)continue;d2[ny*W+nx]=d2[c]+1;q2.push(ny*W+nx)}}
+   let ring=0;for(let y=chest[1]-1;y<=chest[1]+1;y++)for(let x=chest[0]-1;x<=chest[0]+1;x++)if(g[y][x]==='.'&&d2[y*W+x]>=0)ring++;
+   info.chamber={cells:ring,solvable:d2[chest[1]*W+chest[0]]>=0};
+   if(ring!==9)console.error('Under the Well: the chest chamber is not whole',info.chamber);
+   const lx=chest[0]+(nb&&nb[0]===1?-1:1),ly=chest[1]+(nb&&nb[1]===1?-1:1);lights.push([lx,ly]);
+   decor.push({k:'bones',x:chest[0]+(nb?nb[0]:1),y:chest[1]+(nb?nb[1]:0),block:false});decor.push({k:'barrel',x:lx,y:ly,block:false,walk:true,deco:true,sc:.8})}
   const near=(x,y)=>decor.some(q=>q.x===x&&q.y===y)||(x===chest[0]&&y===chest[1])||items.some(q=>q.x===x&&q.y===y);
   floor.forEach(([x,y],i)=>{if(near(x,y)||d[y*W+x]<5)return;const h=hash2(x,y,9917);
     if(h<.045)decor.push({k:'bones',x,y,block:false});
@@ -53110,7 +53118,9 @@ WMFU.stairOut=function(c,r){const R=c.rect(r);c.prop('brazier',R.x0,R.y1,{});c.l
 WMFU.camp=function(c,r){const R=c.rect(r);
   c.note('camp1',R.x0,R.y0,'noticeboard');c.prop('tools',R.x1,R.y0,{});c.prop('bucket',R.x1,R.y1,{block:false,walk:true});
   c.D('wm_barrel',R.x0,R.y1,{block:true,npc:'wmw_barrel'});c.D('wm_crate',R.cx,R.y0,{block:true,npc:'wmw_crate'});
-  c.deco('skeleton',R.cx,R.y1,{});c.light(R.cx,R.cy,WM_COL.gold);wmFoes(c,r,['wmbat','wmslime'],2)};
+  c.deco('skeleton',R.cx,R.y1,{});
+  if(c.k===0){const q=c.free(R.x1-1,R.cy)?[R.x1-1,R.cy]:c.pick(c.rim(r),1)[0];if(q)c.D('sack2',q[0],q[1],{block:true,npc:'wm_hoblunch',sc:.7})}   // Hobb's lunchbox (the quest Hobb's Lunch, hobs_lunch.js)
+  c.light(R.cx,R.cy,WM_COL.gold);wmFoes(c,r,['wmbat','wmslime'],2)};
 WMFU.cistern=function(c,r){const R=c.rect(r);
   if(c.k===0){c.D('wm_boat',R.x0,R.cy,{block:true,npc:'wmrow_a'});c.note('cistern1',R.x0,R.y0,'signpost')}
   for(const [x,y] of c.pick(c.inner(r),4))c.deco('crystal_small',x,y,{});
@@ -53134,6 +53144,7 @@ WMFU.mine=function(c,r){const R=c.rect(r);
   c.prop('mine_cart',R.x0,R.y0,{});c.prop('ore_cart',R.x1,R.y0,{});c.prop('tools',R.x0,R.y1,{});c.deco('ladder',R.cx,R.y0,{block:true,walk:false});
   for(const [x,y] of c.pick(c.inner(r),3))c.deco('crystal_small',x,y,{});
   c.note(c.k===2?'lantern_order':'mine'+c.k,R.x1,R.y1,'signpost');
+  if(c.k===0){const q=c.free(R.cx,R.y1)?[R.cx,R.y1]:c.pick(c.inner(r),1)[0];if(q)c.D('wm_gold',q[0],q[1],{block:true,npc:'wm_hobring',sc:.45})}   // the family ring (the quest Hobb's Lunch)
   if(c.k===0){ // the foreman's strongbox at the far corner: the Violet Key, and a mimic
     const q=c.free(R.x1-1,R.y1)?[R.x1-1,R.y1]:c.pick(c.rim(r),1)[0];
     const kc=c.chest('chest',q[0],q[1],2,['wmkey1'],{ambush:['wmmimic'],goldAmt:0});c.meta.keyAt=c.meta.keyAt||{};if(kc)c.meta.keyAt.wmkey1={x:kc.x,y:kc.y}}
@@ -53811,9 +53822,24 @@ function wwLoad(){
 function wwAlias(){
   for(const a in WWA){const [n,h]=WWA[a];if(IMG[n]){IMG['ww_'+a]=WW_TREEA.includes(a)?wwDarken(IMG[n],.86):IMG[n];NPC_H['ww_'+a]=h}}
   for(const [k,n] of [['wwi_scare','guardA_0'],['wwi_hound','guardA_1'],['wwi_spider','guardA_2'],['wwi_golem','guardA_3'],['wwi_crows','guardA_4'],['wwi_toad','guardA_5'],['wwi_revenant','guardB_0'],['wwi_root','guardB_1'],['wwi_abom','guardB_2'],['wwi_wisp','guardB_3'],['wwi_crow','guardB_4'],['wwi_witch','witch_1'],['wwi_witchA','witch_0']])if(IMG[n])IMG[k]=IMG[n];
-  NPC_H.wwi_witch=1.7;NPC_H.wwi_witchA=2.6;
+  NPC_H.wwi_witch=1.45;NPC_H.wwi_witchA=2.6;
+  wwLeafImgs();
   wwFloors();
 }
+/* drifting leaves: four small ochre and brown leaves painted in code (a speck of colour, not a creature or an item), moved slowly along the ground by the update below */
+function wwLeafImgs(){
+  if(IMG.ww_leaf0)return;
+  [['#9a6a24','#5a3a10'],['#b88a30','#6a4a14'],['#7a5a20','#40280c'],['#a8541c','#5e2a0c']].forEach(([a,b],i)=>{
+    IMG['ww_leaf'+i]=mkCanvas(30,20,(x)=>{x.fillStyle=a;x.beginPath();x.moveTo(2,10);x.quadraticCurveTo(14,-2,28,10);x.quadraticCurveTo(14,22,2,10);x.fill();x.strokeStyle=b;x.lineWidth=1.3;x.beginPath();x.moveTo(3,10);x.lineTo(27,10);x.stroke();
+      x.lineWidth=.8;for(let k=0;k<3;k++){x.beginPath();x.moveTo(9+k*6,10);x.lineTo(13+k*6,4+k);x.moveTo(9+k*6,10);x.lineTo(13+k*6,16-k);x.stroke()}});
+    NPC_H['ww_leaf'+i]=.1});
+}
+{const _u=update;let fdec=null,fl=[];update=function(dt){
+  try{if(typeof LEVEL!=='undefined'&&LEVEL===WW.ID&&G.state==='play'&&G.decor){const L=LEVELS[WW.ID];if(L&&L._ww&&L._ww.leaves){
+    wwLeafImgs();
+    if(fdec!==G.decor){fdec=G.decor;fl=[];const by=new Map();for(const q of G.decor)if(q.cloudid&&q.cloudid.startsWith('wwlf'))by.set(q.cloudid,q);L._ww.leaves.forEach((f,i)=>{const d=by.get('wwlf'+i);if(d)fl.push([d,f])})}
+    const t=G.time;for(const [d,f] of fl){const u=(t*f.sp+f.ph)%1,a=u*Math.PI*2;d.ox=(u-.5)*f.len;d.oy=Math.sin(a*2+f.ph*9)*.2;d.bob=.03+Math.abs(Math.sin(a*5+f.ph*7))*.1;d.sc=f.sc*Math.max(.05,1-Math.pow(Math.abs(2*u-1),6))}}}}catch(e){}
+  return _u.apply(this,arguments)}}
 /* the ground: six pictures, brightened (the originals are very dark), as floors */
 const WW_FLOORSET=['wwf_moss','wwf_leaf','wwf_dirt','wwf_brook','wwf_grave','wwf_board'];
 function wwFloors(){
@@ -53821,8 +53847,8 @@ function wwFloors(){
   const mk=(nm,key,gain,tint)=>{const im=IMG[key];if(!im||FLOORS[nm])return;const base=dsPaintedTex(im),d=new Uint8ClampedArray(base.length);
     for(let i=0;i<d.length;i+=4){const l=(base[i]+base[i+1]+base[i+2])/3,k=tint.sat===undefined?1:tint.sat;d[i]=(l+(base[i]-l)*k)*gain*tint.r;d[i+1]=(l+(base[i+1]-l)*k)*gain*tint.g;d[i+2]=(l+(base[i+2]-l)*k)*gain*tint.b;d[i+3]=255}FLOORS[nm]=d};
   mk('wwf_moss','tex_1',.9,{r:.95,g:1.05,b:.9});mk('wwf_leaf','tex_2',1.4,{r:1.02,g:.95,b:.88});mk('wwf_dirt','tex_5',2.6,{r:1.05,g:1,b:.9});
-  mk('wwf_kit','tex_3',2.1,{r:1.3,g:.95,b:.78,sat:.15});mk('wwf_brook','tex_5',2.7,{r:1.1,g:1.04,b:.92,sat:.4});mk('wwf_grave','tex_3',1.9,{r:.9,g:1,b:.95});mk('wwf_board','tex_0',1.8,{r:1.2,g:.92,b:.65,sat:.1});
-  const fb={wwf_moss:'lush',wwf_leaf:'dirt',wwf_dirt:'dirt',wwf_brook:'dirt',wwf_grave:'mosscobble',wwf_board:'cobble'};
+  mk('wwf_kit','tex_3',2.1,{r:1.3,g:.95,b:.78,sat:.15});mk('wwf_brook','tex_5',2.7,{r:1.1,g:1.04,b:.92,sat:.4});mk('wwf_grave','tex_3',1.9,{r:.9,g:1,b:.95});mk('wwf_cellar','tex_3',1.7,{r:1.06,g:.97,b:.96,sat:0});mk('wwf_board','tex_0',1.8,{r:1.2,g:.92,b:.65,sat:.1});
+  const fb={wwf_moss:'lush',wwf_leaf:'dirt',wwf_dirt:'dirt',wwf_brook:'dirt',wwf_grave:'mosscobble',wwf_cellar:'cobble',wwf_board:'cobble'};
   for(const nm of WW_FLOORSET)if(!FLOORS[nm])FLOORS[nm]=FLOORS[fb[nm]]||FLOORS.cobble;
   WW._floors=1;
 }
@@ -53887,13 +53913,38 @@ if(typeof AFFL!=='undefined'&&!AFFL.hagblind){AFFL.hagblind={n:'Hag-blinded',kin
 
 /* the little hills that hide the caves and ruins of the wood: painted again in the wood's own colours, with a dark patch of ground under them (the art is the usual hill; the colour and the shadow are the wood's) */
 function wwHillArt(i){
-  const key='wd_hillw'+i;if(IMG[key])return key;const im=IMG['wd_hill'+i];if(!im||!im.width)return null;
-  const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');
-  x.drawImage(im,0,0);x.globalCompositeOperation='source-atop';x.fillStyle='rgba(18,30,22,.55)';x.fillRect(0,0,c.width,c.height);
-  x.globalCompositeOperation='multiply';x.fillStyle='rgb(190,215,190)';x.fillRect(0,0,c.width,c.height);
-  x.globalCompositeOperation='destination-in';x.drawImage(im,0,0);
-  x.globalCompositeOperation='destination-over';const g=x.createRadialGradient(c.width/2,c.height-3,2,c.width/2,c.height-3,c.width*.62);g.addColorStop(0,'rgba(4,8,5,.8)');g.addColorStop(1,'rgba(4,8,5,0)');
-  x.save();x.translate(0,c.height-3);x.scale(1,.12);x.translate(0,-(c.height-3));x.fillStyle=g;x.fillRect(0,0,c.width,c.height);x.restore();
+  /* a Gothic pointed-arch stone doorway in a dark, mossy block of old wall: the chapel's own painted doorway (front_0) set into a wall of the painted grey stone (tex_3), with a ground shadow and no halo */
+  const key='wd_hillw'+i;if(IMG[key])return key;const im=IMG['wd_hill'+i],T=IMG.tex_3,F=IMG.front_0;if(!im||!im.width||!T||!F)return null;
+  const W=im.width,H=im.height,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d'),hs=(a,b,s)=>hash2(a,b,s+i*13);
+  const x0=34+hs(1,1,1)*10,x1=W-34-hs(2,2,1)*10,top=64+hs(3,3,1)*14,bot=H-4;
+  // the block of wall: a low ruined front with rounded shoulders, its top lower at one side
+  x.beginPath();x.moveTo(x0,bot);x.lineTo(x0,top+70);x.quadraticCurveTo(x0,top+8,x0+60,top+2);x.lineTo(x1-70,top+(i%2?14:0));x.quadraticCurveTo(x1,top+8,x1,top+66);x.lineTo(x1,bot);x.closePath();
+  x.save();x.clip();
+  x.fillStyle='#3c3f3a';x.fillRect(0,0,W,H);for(let yy=0;yy<H;yy+=128)for(let xx=0;xx<W;xx+=128)x.drawImage(T,xx,yy,128,128);
+  x.globalCompositeOperation='multiply';x.fillStyle='rgb(185,198,178)';x.fillRect(0,0,W,H);x.globalCompositeOperation='source-over';
+  x.strokeStyle='rgba(10,14,10,.5)';x.lineWidth=1.6;for(let yy=top+18,r=0;yy<bot;yy+=30,r++){x.beginPath();x.moveTo(x0,yy);x.lineTo(x1,yy);x.stroke();for(let xx=x0+(r%2)*26;xx<x1;xx+=52){x.beginPath();x.moveTo(xx+hs(xx,yy,2)*6,yy);x.lineTo(xx+hs(xx,yy,3)*6,yy+30);x.stroke()}}
+  // dark at both sides and the foot, green damp rising from the ground
+  let g=x.createLinearGradient(x0,0,x1,0);g.addColorStop(0,'rgba(4,8,5,.5)');g.addColorStop(.2,'rgba(4,8,5,0)');g.addColorStop(.8,'rgba(4,8,5,0)');g.addColorStop(1,'rgba(4,8,5,.5)');x.fillStyle=g;x.fillRect(0,0,W,H);
+  g=x.createLinearGradient(0,bot-110,0,bot);g.addColorStop(0,'rgba(24,60,28,0)');g.addColorStop(1,'rgba(24,64,30,.6)');x.fillStyle=g;x.fillRect(0,bot-110,W,110);
+  x.restore();
+  // the doorway: the chapel's pointed arch (a crop of its front picture), feathered into the wall and darkened
+  const sw=84,sh=140,sx=172,sy=299,dw=Math.round(W*.34),dh=Math.round(dw*sh/sw),dx=(W-dw)/2,dy=bot-dh+2,d=document.createElement('canvas');d.width=dw;d.height=dh;const y=d.getContext('2d');
+  y.drawImage(F,sx,sy,sw,sh,0,0,dw,dh);y.globalCompositeOperation='multiply';y.fillStyle='rgb(150,165,150)';y.fillRect(0,0,dw,dh);
+  y.globalCompositeOperation='destination-in';const m=y.createLinearGradient(0,0,0,dh);y.fillStyle='#000';
+  y.beginPath();y.moveTo(0,dh);y.lineTo(0,dh*.36);y.quadraticCurveTo(0,dh*.1,dw*.5,0);y.quadraticCurveTo(dw,dh*.1,dw,dh*.36);y.lineTo(dw,dh);y.closePath();y.fill();
+  x.drawImage(d,dx,dy);
+  // the opening gets a deep shade at the top of the door, and a worn step at the foot
+  x.save();x.beginPath();x.moveTo(dx+dw*.2,bot-6);x.lineTo(dx+dw*.2,dy+dh*.5);x.quadraticCurveTo(dx+dw*.22,dy+dh*.2,dx+dw*.5,dy+dh*.1);x.quadraticCurveTo(dx+dw*.78,dy+dh*.2,dx+dw*.8,dy+dh*.5);x.lineTo(dx+dw*.8,bot-6);x.closePath();x.clip();
+  g=x.createLinearGradient(0,dy,0,bot);g.addColorStop(0,'rgba(2,4,3,.55)');g.addColorStop(.6,'rgba(2,4,3,.1)');g.addColorStop(1,'rgba(2,4,3,0)');x.fillStyle=g;x.fillRect(dx,dy,dw,dh);x.restore();
+  x.fillStyle='#34362f';x.fillRect(dx-6,bot-8,dw+12,8);x.fillStyle='#22241f';x.fillRect(dx-6,bot-2,dw+12,2);
+  // moss on the shoulders, ivy hanging from the top
+  const GR=['#1f4a22','#2e6a2c','#3f7f34','#173a1b'];
+  for(let k=0;k<90;k++){const px=x0+hs(k,1,5)*(x1-x0),py=top+hs(k,2,5)*18+(px<x0+50||px>x1-50?22:0);x.fillStyle=GR[(hs(k,3,5)*4)|0];x.globalAlpha=.85;x.beginPath();x.ellipse(px,py,3+hs(k,4,5)*6,1.8+hs(k,5,5)*2.6,hs(k,7,5)*3,0,6.3);x.fill()}
+  x.globalAlpha=1;for(let k=0;k<12;k++){const px=x0+10+hs(k,6,6)*(x1-x0-20);if(Math.abs(px-W/2)<dw*.5)continue;let qx=px,qy=top+8;x.strokeStyle='#1b3a1b';x.lineWidth=1.6;x.beginPath();x.moveTo(qx,qy);for(let t=0;t<7;t++){qx+=(hs(k,t+7,7)-.5)*7;qy+=8+hs(k,t+9,7)*10;x.lineTo(qx,qy)}x.stroke();
+    for(let t=0;t<5;t++){x.fillStyle=GR[(hs(k,t+20,8)*4)|0];x.beginPath();x.ellipse(qx+(hs(k,t+30,9)-.5)*10,qy-t*9,3.5,2.4,hs(k,t+40,9)*3,0,6.3);x.fill()}}
+  // ground shadow under the foot (soft and flat, under the stone so nothing glows round it)
+  x.globalCompositeOperation='destination-over';g=x.createRadialGradient(W/2,H-3,2,W/2,H-3,W*.55);g.addColorStop(0,'rgba(3,6,4,.85)');g.addColorStop(1,'rgba(3,6,4,0)');
+  x.save();x.translate(0,H-3);x.scale(1,.1);x.translate(0,-(H-3));x.fillStyle=g;x.fillRect(0,0,W,H);x.restore();
   IMG[key]=c;NPC_H[key]=NPC_H['wd_hill'+i]||1.9;return key}
 function wwTintHills(){
   const L=LEVELS[WW.ID];if(!L||!L.decor||L._wwHillDone)return;let n=0;
@@ -53973,7 +54024,7 @@ function wwBuild(){
   for(let x=0;x<W;x++){for(const dy of [0,1]){const y=brookY(x)+dy;if(y>0&&y<H-1&&isOpen(x,y)&&!roomAt[x+','+y])fl[y*W+x]=3}}
   const inBrook=(x,y)=>fl[y*W+x]===3;
   // ---- decor, foes, items ----
-  const decor=[],enemies=[],items=[],lights=[],occ=new Set(),wglow=[];
+  const decor=[],enemies=[],items=[],lights=[],occ=new Set(),wglow=[];let lv_leaves=[];
   const near4=new Set();for(const [a,b] of [[sx,sy],[sx,sy-1],[sx,sy+1],[doorX,1],[doorX,2]])for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++)near4.add((a+i)+','+(b+j));
   const free=(x,y)=>isOpen(x,y)&&!occ.has(x+','+y);
   const dec=(a,x,y,o)=>{o=o||{};const k=WWA[a]?'ww_'+a:a;if(!isOpen(x,y))return null;const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}if(o.sc)d.sc=o.sc;if(o.bob)d.bob=o.bob;if(o.npc){d.npc=o.npc;d.deco=false}if(o.goldAmt)d.goldAmt=o.goldAmt;if(o.wd){d.wd=o.wd;d.pic=1}if(o.txt)d.txt=o.txt;if(o.i!==undefined)d.i=o.i;
@@ -54026,6 +54077,10 @@ function wwBuild(){
       const k=TIER[t][(hs(x,y,97)*TIER[t].length)|0];if(foe(k,x,y)){placed.push([x,y]);cnt[t]++}}}
   // dressing along the paths (walk through): only twisted branches on the dark ground; bridges over the brook
   for(const [x,y] of corr){if(occ.has(x+','+y))continue;const r=hs(x,y,63);if(r<.16)dec(r<.08?'twig':'twig2',x,y,{sc:.8+hs(x,y,67)*.5});else if(r<.2)dec('dbones',x,y,{sc:.3+hs(x,y,68)*.3})} // small bones here and there
+  // drifting leaves, ochre and brown, blown slowly along the ground (walk through; moved by the update in ww_art.js)
+  {const LF=[];let n=0;for(const [x,y] of corr.concat(Object.keys(roomAt).map(k=>k.split(',').map(Number)))){if(n>=70)break;if(occ.has(x+','+y)||hs(x,y,141)>.14)continue;
+      const d=dec('leaf'+((hs(x,y,142)*4)|0),x,y,{bob:.04,sc:.8+hs(x,y,143)*.5});if(!d)continue;d.k='ww_leaf'+((hs(x,y,142)*4)|0);d.cloudid='wwlf'+LF.length;LF.push({sp:.06+hs(x,y,144)*.07,ph:hs(x,y,145),sc:d.sc,len:1.4+hs(x,y,146)*1.4});n++}
+   lv_leaves=LF}
   // bridges: on the track where it crosses the brook, and a couple of others
   {let n=0;for(const [x,y] of pathList){if(inBrook(x,y)&&!roomAt[x+','+y]&&n<2&&!occ.has(x+','+y)){dec('bridge',x,y,{sc:1});n++;x+=0}}
    for(const [x,y] of corr){if(n>=4)break;if(inBrook(x,y)&&!occ.has(x+','+y)&&hs(x,y,65)<.06){dec('bridge',x,y,{sc:.9});n++}}}
@@ -54060,7 +54115,7 @@ function wwBuild(){
   const mapNames=[];for(const id in Q)mapNames.push({t:WW_RNAME[id],x:Q[id].cx,y:Q[id].cy,k:'place'});
   const lv={rows,chars,fmap:fm,floorSet:WW_FLOORSET,floor:WW_FLOORSET[0],ceil:'cloud',start:{x:sx,y:sy,f:0},enemies,items,decor,lights,portals:[],day:.44,outdoor:true,amb:.36,
     name:"Blackbriar Wood",label:"Blackbriar Wood",noExtras:true,diff:82,ceilH:5.2,noTele:true,mapNames,
-    _ww:{wshaft,Q,roomAt,track:[...track],pathList,hag,clue1,clue2,clue3,dead:dead.length,wglow,brookY,dDoor,foes:enemies.length,decor:decor.length}};
+    _ww:{wshaft,Q,roomAt,track:[...track],pathList,hag,clue1,clue2,clue3,dead:dead.length,wglow,brookY,dDoor,foes:enemies.length,decor:decor.length,leaves:lv_leaves}};
   // ---- checks: every open square is reachable; nothing that stands in the way cuts a clearing off ----
   {const blockSet=()=>{const s=new Set();for(const d of decor)if(d.block)s.add(d.x+','+d.y);return s};   // creatures can be fought through, so only the standing things count
    const flood=bs=>{const seen=new Uint8Array(W*H),q=[sy*W+sx];seen[q[0]]=1;for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [a,b] of WW_DIRS){const nx=x+a,ny=y+b;if(!isOpen(nx,ny)||seen[ny*W+nx]||bs.has(nx+','+ny))continue;seen[ny*W+nx]=1;q.push(ny*W+nx)}}return seen};
@@ -54158,7 +54213,7 @@ function wwBuildRooms(){
    decor.push({k:'kh_oqdogs_3',x:13,y:5,block:true,npc:'wwo_button',sc:1});NPC_H.kh_oqdogs_3=NPC_H.kh_oqdogs_3||.36;
    decor.push({k:'ww_charm',x:2,y:5,block:false,walk:true,deco:true},{k:'ww_ring',x:9,y:5,block:false,walk:true,deco:true},{k:'ww_crumbs',x:5,y:6,block:false,walk:true,deco:true});
    for(const [r,x,y] of [['rack',1,1],['rack',13,1],['shelf',1,7],['chest',13,7]])prop(decor,r,x,y);
-   LEVELS[WW.CELLAR]=base({rows,chars:{w:gid},start:{x:7,y:7,f:0},decor,floor:'wwf_grave',name:"Grisselda's Cellar",label:"Grisselda's Cellar",lights:[[3,3],[7,3],[11,3],[7,6]],
+   LEVELS[WW.CELLAR]=base({rows,chars:{w:gid},start:{x:7,y:7,f:0},decor,floor:'wwf_cellar',name:"Grisselda's Cellar",label:"Grisselda's Cellar",lights:[[3,3],[7,3],[11,3],[7,6]],
      portals:[{to:WW.COTTAGE,x:1,y:5,f:1,tex:'in'}],_wwl:[[7,4],[2,5]]});LEVEL_NAMES[WW.CELLAR]="Grisselda's Cellar"}
   // ---- 523: the kitchen and the oven ----
   {const W=13,H=9,gid=wall('tex_3',[1.55,1.05,.78]);   // warm terracotta kitchen
@@ -54462,6 +54517,36 @@ function wwsTick(){
   }
 }
 {const _ys=yarSoundTick;yarSoundTick=function(){_ys.apply(this,arguments);try{wwsTick()}catch(e){console.error('wws',e)}}}
+
+/* ---- src/desert/hobs_lunch.js ---- */
+/* ==========================================================================
+   HOBB'S LUNCH (quest wlq21, prefix hl). Maud Pike, Hobb's sister, stands in the quiet north-west corner of Wenlock, on the footpath south of the Quiet Chapel.
+   Her brother Hobb was one of the diggers of the well (the diggers' tally in the camp on level 497 names him). She wants his lunchbox, which still lies in the diggers' camp, and the ring
+   that belonged to the family, which lies in the collapsed mine on the same level. Both objects are put into level 497 by WMFU.camp and WMFU.mine (wellmaze_rooms.js). Plain text, rewards for a party of level 80.
+   ========================================================================== */
+if(NPC_H.sack2===undefined)NPC_H.sack2=.6;
+Object.assign(WL_REW,{wlq21:{gold:1400,xp:14000,items:['potion5','potion5']}});
+WL_QUESTS.push({id:'wlq21',giver:'Maud Pike',title:"Hobb's Lunch",desc:"Maud Pike, in the quiet corner of Wenlock, wants her brother Hobb's lunchbox from the diggers' camp under the well, and the family ring from the collapsed mine."});
+const hlF=()=>G.flags;
+khNpc('wlo_maud','Maud Pike','kh_ohfolk4_2',()=>yrLines('wlo_maud',["I come up here because it is quiet. My brother Hobb dug the well, and he did not come back up.","It is a good place to sit and think about him."]),{sc:1});
+WL_QOBJ.push({npc:'wlo_maud',k:()=>'kh_ohfolk4_2',at:[10,27],rad:4,o:{sc:1}});
+const HLD=khQD("Excuse me. Are you the people who go down the well? My brother Hobb was one of the diggers, years ago. He went down with the others and never came up. I am not asking you to find him. I know what happened. But Hobb always took his lunch down in a tin lunchbox with his name scratched on the lid, and I would like it back. It will be in the diggers' camp, the first big room you find at the bottom. There is also a ring. It was our mother's, and Hobb carried it for luck. He would have kept it near him when he worked, so look in the collapsed mine on the same level. Will you bring me both?",
+  "Thank you. The lunchbox is in the diggers' camp, the first big room below the well. The ring should be in the collapsed mine, on the same level.",
+  (n,m)=>hlF().wlq21a&&hlF().wlq21b?'You have both. Take them back to Maud Pike, in the quiet corner south of the Quiet Chapel.':(hlF().wlq21a?'You have the lunchbox. The ring should be in the collapsed mine, on the level under the well.':(hlF().wlq21b?"You have the ring. The lunchbox should be in the diggers' camp, the first big room under the well.":"The lunchbox is in the diggers' camp, the first big room below the well. The ring is in the collapsed mine on the same level.")),
+  "You found them. His name is still on the lid. And the ring. Thank you. I did not think I would ever hold either of them again.",
+  "Please take this. It is all I have put by, and Hobb would have wanted you to have the lunch money.",
+  "I keep the lunchbox on my knee when I sit here. The ring is on my finger. Thank you again.","Both are back with Maud.");
+wlQ('wlq21','Maud Pike',[["Find Hobb's lunchbox in the diggers' camp, the first big room under the well.",()=>hlF().wlq21a,['wm_hoblunch']],["Find the family ring in the collapsed mine, on the same level under the well.",()=>hlF().wlq21b,['wm_hobring']]]);
+wlGive('wlo_maud','wlq21','wlq8',HLD);
+/* the two things in level 497 */
+NPCS.wm_hoblunch={name:"Hobb's lunchbox",img:'sack2',root:d=>{const F=hlF();
+  if(qSt('wlq21')==='active'&&!F.wlq21a){F.wlq21a=1;yrStep("You have Hobb's lunchbox.");d.found=true;d.block=false;sfx('equip');return say("A tin lunchbox with HOBB scratched on the lid. Inside is a crust of bread gone hard as stone, and a folded cloth. You put it in your pack to take back to his sister.",[BYE])}
+  if(F.wlq21a){d.found=true;d.block=false;return say('An empty patch of floor where the lunchbox lay.',[BYE])}
+  return say('A tin lunchbox with HOBB scratched on the lid. Nobody has asked you to fetch it yet, so you leave it where it is.',[BYE])}};
+NPCS.wm_hobring={name:'A ring on the floor',img:'wm_gold',root:d=>{const F=hlF();
+  if(qSt('wlq21')==='active'&&!F.wlq21b){F.wlq21b=1;yrStep('You have the family ring.');d.found=true;d.block=false;sfx('equip');return say('A plain silver ring lies in the dust under a fallen beam. It is worn thin on one side. You put it in your pack.',[BYE])}
+  if(F.wlq21b){d.found=true;d.block=false;return say('Dust and a fallen beam. The ring is gone.',[BYE])}
+  return say('A plain silver ring lies in the dust under a fallen beam. Nobody has asked you to fetch it yet, so you leave it where it is.',[BYE])}};
 
 /* ---- src/desert/maps_witchwood.js ---- */
 /* ==========================================================================

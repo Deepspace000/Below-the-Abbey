@@ -27,7 +27,9 @@ WMFU.stairOut=function(c,r){const R=c.rect(r);c.prop('brazier',R.x0,R.y1,{});c.l
 WMFU.camp=function(c,r){const R=c.rect(r);
   c.note('camp1',R.x0,R.y0,'noticeboard');c.prop('tools',R.x1,R.y0,{});c.prop('bucket',R.x1,R.y1,{block:false,walk:true});
   c.D('wm_barrel',R.x0,R.y1,{block:true,npc:'wmw_barrel'});c.D('wm_crate',R.cx,R.y0,{block:true,npc:'wmw_crate'});
-  c.deco('skeleton',R.cx,R.y1,{});c.light(R.cx,R.cy,WM_COL.gold);wmFoes(c,r,['wmbat','wmslime'],2)};
+  c.deco('skeleton',R.cx,R.y1,{});
+  if(c.k===0){const q=c.free(R.x1-1,R.cy)?[R.x1-1,R.cy]:c.pick(c.rim(r),1)[0];if(q)c.D('sack2',q[0],q[1],{block:true,npc:'wm_hoblunch',sc:.7})}   // Hobb's lunchbox (the quest Hobb's Lunch, hobs_lunch.js)
+  c.light(R.cx,R.cy,WM_COL.gold);wmFoes(c,r,['wmbat','wmslime'],2)};
 WMFU.cistern=function(c,r){const R=c.rect(r);
   if(c.k===0){c.D('wm_boat',R.x0,R.cy,{block:true,npc:'wmrow_a'});c.note('cistern1',R.x0,R.y0,'signpost')}
   for(const [x,y] of c.pick(c.inner(r),4))c.deco('crystal_small',x,y,{});
@@ -51,6 +53,7 @@ WMFU.mine=function(c,r){const R=c.rect(r);
   c.prop('mine_cart',R.x0,R.y0,{});c.prop('ore_cart',R.x1,R.y0,{});c.prop('tools',R.x0,R.y1,{});c.deco('ladder',R.cx,R.y0,{block:true,walk:false});
   for(const [x,y] of c.pick(c.inner(r),3))c.deco('crystal_small',x,y,{});
   c.note(c.k===2?'lantern_order':'mine'+c.k,R.x1,R.y1,'signpost');
+  if(c.k===0){const q=c.free(R.cx,R.y1)?[R.cx,R.y1]:c.pick(c.inner(r),1)[0];if(q)c.D('wm_gold',q[0],q[1],{block:true,npc:'wm_hobring',sc:.45})}   // the family ring (the quest Hobb's Lunch)
   if(c.k===0){ // the foreman's strongbox at the far corner: the Violet Key, and a mimic
     const q=c.free(R.x1-1,R.y1)?[R.x1-1,R.y1]:c.pick(c.rim(r),1)[0];
     const kc=c.chest('chest',q[0],q[1],2,['wmkey1'],{ambush:['wmmimic'],goldAmt:0});c.meta.keyAt=c.meta.keyAt||{};if(kc)c.meta.keyAt.wmkey1={x:kc.x,y:kc.y}}

@@ -69,7 +69,7 @@ function wwBuild(){
   for(let x=0;x<W;x++){for(const dy of [0,1]){const y=brookY(x)+dy;if(y>0&&y<H-1&&isOpen(x,y)&&!roomAt[x+','+y])fl[y*W+x]=3}}
   const inBrook=(x,y)=>fl[y*W+x]===3;
   // ---- decor, foes, items ----
-  const decor=[],enemies=[],items=[],lights=[],occ=new Set(),wglow=[];
+  const decor=[],enemies=[],items=[],lights=[],occ=new Set(),wglow=[];let lv_leaves=[];
   const near4=new Set();for(const [a,b] of [[sx,sy],[sx,sy-1],[sx,sy+1],[doorX,1],[doorX,2]])for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++)near4.add((a+i)+','+(b+j));
   const free=(x,y)=>isOpen(x,y)&&!occ.has(x+','+y);
   const dec=(a,x,y,o)=>{o=o||{};const k=WWA[a]?'ww_'+a:a;if(!isOpen(x,y))return null;const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}if(o.sc)d.sc=o.sc;if(o.bob)d.bob=o.bob;if(o.npc){d.npc=o.npc;d.deco=false}if(o.goldAmt)d.goldAmt=o.goldAmt;if(o.wd){d.wd=o.wd;d.pic=1}if(o.txt)d.txt=o.txt;if(o.i!==undefined)d.i=o.i;
@@ -122,6 +122,10 @@ function wwBuild(){
       const k=TIER[t][(hs(x,y,97)*TIER[t].length)|0];if(foe(k,x,y)){placed.push([x,y]);cnt[t]++}}}
   // dressing along the paths (walk through): only twisted branches on the dark ground; bridges over the brook
   for(const [x,y] of corr){if(occ.has(x+','+y))continue;const r=hs(x,y,63);if(r<.16)dec(r<.08?'twig':'twig2',x,y,{sc:.8+hs(x,y,67)*.5});else if(r<.2)dec('dbones',x,y,{sc:.3+hs(x,y,68)*.3})} // small bones here and there
+  // drifting leaves, ochre and brown, blown slowly along the ground (walk through; moved by the update in ww_art.js)
+  {const LF=[];let n=0;for(const [x,y] of corr.concat(Object.keys(roomAt).map(k=>k.split(',').map(Number)))){if(n>=70)break;if(occ.has(x+','+y)||hs(x,y,141)>.14)continue;
+      const d=dec('leaf'+((hs(x,y,142)*4)|0),x,y,{bob:.04,sc:.8+hs(x,y,143)*.5});if(!d)continue;d.k='ww_leaf'+((hs(x,y,142)*4)|0);d.cloudid='wwlf'+LF.length;LF.push({sp:.06+hs(x,y,144)*.07,ph:hs(x,y,145),sc:d.sc,len:1.4+hs(x,y,146)*1.4});n++}
+   lv_leaves=LF}
   // bridges: on the track where it crosses the brook, and a couple of others
   {let n=0;for(const [x,y] of pathList){if(inBrook(x,y)&&!roomAt[x+','+y]&&n<2&&!occ.has(x+','+y)){dec('bridge',x,y,{sc:1});n++;x+=0}}
    for(const [x,y] of corr){if(n>=4)break;if(inBrook(x,y)&&!occ.has(x+','+y)&&hs(x,y,65)<.06){dec('bridge',x,y,{sc:.9});n++}}}
@@ -156,7 +160,7 @@ function wwBuild(){
   const mapNames=[];for(const id in Q)mapNames.push({t:WW_RNAME[id],x:Q[id].cx,y:Q[id].cy,k:'place'});
   const lv={rows,chars,fmap:fm,floorSet:WW_FLOORSET,floor:WW_FLOORSET[0],ceil:'cloud',start:{x:sx,y:sy,f:0},enemies,items,decor,lights,portals:[],day:.44,outdoor:true,amb:.36,
     name:"Blackbriar Wood",label:"Blackbriar Wood",noExtras:true,diff:82,ceilH:5.2,noTele:true,mapNames,
-    _ww:{wshaft,Q,roomAt,track:[...track],pathList,hag,clue1,clue2,clue3,dead:dead.length,wglow,brookY,dDoor,foes:enemies.length,decor:decor.length}};
+    _ww:{wshaft,Q,roomAt,track:[...track],pathList,hag,clue1,clue2,clue3,dead:dead.length,wglow,brookY,dDoor,foes:enemies.length,decor:decor.length,leaves:lv_leaves}};
   // ---- checks: every open square is reachable; nothing that stands in the way cuts a clearing off ----
   {const blockSet=()=>{const s=new Set();for(const d of decor)if(d.block)s.add(d.x+','+d.y);return s};   // creatures can be fought through, so only the standing things count
    const flood=bs=>{const seen=new Uint8Array(W*H),q=[sy*W+sx];seen[q[0]]=1;for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [a,b] of WW_DIRS){const nx=x+a,ny=y+b;if(!isOpen(nx,ny)||seen[ny*W+nx]||bs.has(nx+','+ny))continue;seen[ny*W+nx]=1;q.push(ny*W+nx)}}return seen};

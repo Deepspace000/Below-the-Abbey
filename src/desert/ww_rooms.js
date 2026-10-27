@@ -29,7 +29,7 @@ function wwBuildRooms(){
    decor.push({k:'kh_oqdogs_3',x:13,y:5,block:true,npc:'wwo_button',sc:1});NPC_H.kh_oqdogs_3=NPC_H.kh_oqdogs_3||.36;
    decor.push({k:'ww_charm',x:2,y:5,block:false,walk:true,deco:true},{k:'ww_ring',x:9,y:5,block:false,walk:true,deco:true},{k:'ww_crumbs',x:5,y:6,block:false,walk:true,deco:true});
    for(const [r,x,y] of [['rack',1,1],['rack',13,1],['shelf',1,7],['chest',13,7]])prop(decor,r,x,y);
-   LEVELS[WW.CELLAR]=base({rows,chars:{w:gid},start:{x:7,y:7,f:0},decor,floor:'wwf_grave',name:"Grisselda's Cellar",label:"Grisselda's Cellar",lights:[[3,3],[7,3],[11,3],[7,6]],
+   LEVELS[WW.CELLAR]=base({rows,chars:{w:gid},start:{x:7,y:7,f:0},decor,floor:'wwf_cellar',name:"Grisselda's Cellar",label:"Grisselda's Cellar",lights:[[3,3],[7,3],[11,3],[7,6]],
      portals:[{to:WW.COTTAGE,x:1,y:5,f:1,tex:'in'}],_wwl:[[7,4],[2,5]]});LEVEL_NAMES[WW.CELLAR]="Grisselda's Cellar"}
   // ---- 523: the kitchen and the oven ----
   {const W=13,H=9,gid=wall('tex_3',[1.55,1.05,.78]);   // warm terracotta kitchen
