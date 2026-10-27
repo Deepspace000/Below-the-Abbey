@@ -14,7 +14,7 @@ URL = 'http://localhost:%s/index.html?town=graveyard&lvl=84&v=%d' % (PORT, time.
 
 
 def boot(p, url=URL, w=900, h=600):
-    b = p.chromium.launch(args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader'])
+    b = p.chromium.launch(args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader'], executable_path=os.environ.get('GY_CHROME') or None)  # GY_CHROME = path of an installed Chrome if Playwright's own is missing
     pg = b.new_page(viewport={'width': w, 'height': h})
     errs = []
     pg.on('pageerror', lambda e: errs.append('PAGE ' + str(e)))
@@ -147,9 +147,9 @@ def run_map_shots():
         for lv, nm in [(530, 'yard'), (531, 'crypt'), (532, 'm1'), (533, 'm2'), (534, 'm3'), (535, 'm4'), (496, 'wenlock')]:
             pg.evaluate("([lv]) => { G.menu=false; G.talk=null; if(!LEVELS[lv]&&KH_LAZY[lv]&&lv!==496)KH_LAZY[lv](); const st=lv===496?{x:12,y:31,f:3}:LEVELS[lv].start; goToLevel(lv,{x:st.x,y:st.y,f:st.f||0}); G.state='play'; }", [lv])
             pg.wait_for_timeout(3000)
-            pg.evaluate("() => { G.talk=null; G.map=true; }"); pg.wait_for_timeout(1800)
+            pg.evaluate("() => { G.talk=null; G.flags.noFog=true; G.overview=true; }"); pg.wait_for_timeout(1800)   # the parchment map is G.overview (fog off so that all of it shows)
             shot(pg, 'map_' + nm)
-            pg.evaluate("() => { G.map=false; }")
+            pg.evaluate("() => { G.overview=false; delete G.flags.noFog; }")
         print('errors', [e for e in errs if 'assets/sp_' not in e and 'assets/icn_' not in e and 'Failed to load resource' not in e][:10])
         b.close()
 

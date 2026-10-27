@@ -33,7 +33,7 @@ function gyMapDraw(c,x,L,api){
   // numbered places and the list of them
   const names=L.mapNames||[];
   names.forEach((n,i)=>{const px=X(n.x+.5),py=Y(n.y+.5);x.save();x.fillStyle='rgba(250,240,200,.92)';x.strokeStyle=INK;x.lineWidth=.6;x.beginPath();x.arc(px,py,3.6,0,6.3);x.fill();x.stroke();x.restore();api.text(x,String(i+1),px,py+.2,5.4,INK)});
-  api.title(x,GY.NAMES[LEVEL]||'The Graveyard',yard?'Stones, yews and four ways down':LEVEL===GY.CRYPT?'Under the great tomb':'A small maze under the churchyard',12,5);
+  api.title(x,GY.NAMES[LEVEL]||'The Graveyard','',12,5);   // the name only, no caption
   api.compass(x,50,262,15);
   {const a=392,b=40,w=82,lh=10.4,h=14+names.length*lh;api.panel(x,a,b,w,h);api.text(x,'Places',a+w/2,b+8,6.6,'#6a1a0e');
     names.forEach((n,i)=>{api.text(x,(i+1)+'  '+n.t.replace(/^The /,''),a+5,b+17+i*lh,5.2,INK,'left')})}

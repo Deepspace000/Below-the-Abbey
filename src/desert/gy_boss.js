@@ -24,9 +24,9 @@ function gyBossAct(e,spec){
   for(const m of spec.moves)if(e.gyR%m.every===0&&los&&(!m.near||d<=m.near))return gyVolley(e,m.txt,m.col,m.all,m.mult,m.affl,m.verb);
   return 0}
 const GY_BOSSMOVES={
-  gyvane:{moves:[{every:5,all:true,mult:.55,affl:'cursed',txt:'Lord Vane flings a fistful of cursed coins. They ring on the brick, and burn where they land.',col:'#a8e090',verb:'A coin burns'},{every:3,mult:1.05,near:3,txt:'Lord Vane lunges with the rapier, very elegantly, and very rudely.',col:'#c8e8a0',verb:'The rapier finds'}]},
-  gygrimsby:{moves:[{every:4,mult:1.35,near:2,affl:'graverot',txt:'Digger Grimsby swings the great spade in a flat arc. It has buried a great many people, and it knows how.',col:'#d8c090',verb:'The spade hits'},{every:7,all:true,mult:.5,txt:'Grimsby kicks over a heap of grave-earth, and a rotten cloud of it rolls across the hall.',col:'#c8b080',verb:'Grave dirt chokes'}]},
-  gyaldric:{moves:[{every:5,all:true,mult:.6,affl:'haunted',txt:'Black flames pour out of the visor of Sir Aldric, and the hall goes cold and blue.',col:'#80c8ff',verb:'Cold flame burns'},{every:3,mult:1.15,near:2,txt:'Sir Aldric brings the greatsword round in a stroke that has not been learnt in this century.',col:'#a8c8f0',verb:'The greatsword cleaves'}]},
+  gyvane:{moves:[{every:5,all:true,mult:.55,affl:'cursed',txt:'Lord Vane flings a fistful of cursed coins. They ring on the brick, and burn where they land.',col:'#a8e090',verb:'A coin burns'},{every:3,mult:1.05,near:2,txt:'Lord Vane lunges with the rapier, very elegantly, and very rudely.',col:'#c8e8a0',verb:'The rapier finds'}]},
+  gygrimsby:{moves:[{every:3,mult:1.4,near:2,affl:'graverot',txt:'Digger Grimsby swings the great spade in a flat arc. It has buried a great many people, and it knows how.',col:'#d8c090',verb:'The spade hits'},{every:6,all:true,mult:.55,txt:'Grimsby kicks over a heap of grave-earth, and a rotten cloud of it rolls across the hall.',col:'#c8b080',verb:'Grave dirt chokes'}]},
+  gyaldric:{moves:[{every:5,all:true,mult:.6,affl:'haunted',txt:'Black flames pour out of the visor of Sir Aldric, and the hall goes cold and blue.',col:'#80c8ff',verb:'Cold flame burns'},{every:3,mult:1.15,near:1,txt:'Sir Aldric brings the greatsword round in a stroke that has not been learnt in this century.',col:'#a8c8f0',verb:'The greatsword cleaves'}]},
   gymorwenna:{moves:[{every:6,all:true,mult:.55,affl:'shaken',txt:'Prioress Morwenna raises the bell-staff and tolls. The sound goes through the bone.',col:'#f0d870',verb:'The bell tolls on'},{every:4,mult:.9,near:5,affl:'cursed',txt:'The Prioress swings the censer, and a yellow smoke curls round one of you, whispering that it is all your fault.',col:'#e8d070',verb:'The smoke stings'}],mend:[9,.04,"The Prioress mutters the burial service backwards, and her wounds close a little."]}};
 for(const t in GY_BOSSMOVES)ENEMY_DEF[t].act=e=>gyBossAct(e,GY_BOSSMOVES[t]);
 const GY_HELPERS={gyvane:['gypike','The dead of the Vane household step out of the brick to defend their master.'],gygrimsby:['gyzombie','A rotten shape drags itself up out of the pit, still holding a shovel.'],gyaldric:['gywraith','A wraith of the old knight\'s men rises from the black stone, and kneels, and then attacks.'],gymorwenna:['gyhound','A bone hound shakes itself loose from the heap of the dead, and growls at the bell.']};
@@ -36,7 +36,7 @@ const GY_HELPERS={gyvane:['gypike','The dead of the Vane household step out of t
   _he.apply(this,arguments);
   try{
     if(isB){if(e.hp<=0){gyBossDied(e);return}
-      const step=Math.min(2,Math.floor((1-e.hp/e.maxhp)*3));e.gySum=e.gySum||0;
+      const step=Math.min(2,Math.floor((1-e.hp/e.maxhp)*3));if(e.gySum===undefined)e.gySum=Math.min(2,Math.max(0,Math.floor((1-(e.hp+dmg)/e.maxhp)*3)));   // a boss loaded from a saved game starts counting from the health it had before this blow, so the helpers already called are not called twice
       while(e.gySum<step){e.gySum++;const H=GY_HELPERS[e.t],free=gyFreeAround(e,4);if(H&&free.length){for(let n=0;n<2&&n<free.length;n++){addEnemy(H[0],free[n][0],free[n][1],true);const m=G.enemies[G.enemies.length-1];if(m)m.gyAdd=1}msg(H[1],'#d8c8a0');sfx('growl')}}}
     else if(spirit&&e.hp<=0)gySpiritDown(e)}catch(x){console.error('gy hurt',x)}}}
 function gySpiritDown(e){
@@ -52,7 +52,8 @@ const GY_LAST=[
 const GY_GIVE=[['gyring',"Lady Aldith's Wedding Ring"],['gyname',"Lady Aldith's Name-stone"],['gylocket',"Sir Edmund's Locket"],['gybook',"The Prioress's Book of Rest"]];
 function gyBossDied(e){
   const k=ENEMY_DEF[e.t].gyb,F=gyF();if(F.dead[k])return;F.dead[k]=1;
-  for(const q of G.enemies)if(q.hp>0&&q.gyAdd){q.hp=0;q.dying=.4}
+  {const L=LEVELS[GY.M[k]],B=L&&L._gy&&L._gy.M&&L._gy.M.boss;   // the helpers go with him (also after a saved game, which does not remember who was a helper): nothing else lives in the boss room
+   for(const q of G.enemies)if(q.hp>0&&(q.gyAdd||(B&&ENEMY_DEF[q.t].gyb===undefined&&q.x>=B.x0&&q.x<=B.x1&&q.y>=B.y0&&q.y<=B.y1))){q.hp=0;q.dying=.4}}
   const [id,nm]=GY_GIVE[k];if(!bagAdd(mkItem(id)))G.items.push({k:id,x:e.x,y:e.y,taken:false});
   for(const it of ['potion6','potion6','supermana']){if(!bagAdd(mkItem(it)))G.items.push({k:it,x:e.x,y:e.y,taken:false})}
   msg('You have '+nm+'.','#ffe36a');sfx('win');

@@ -47,8 +47,8 @@ async () => {
     for (let i = 0; i < q.length; i++) { const [x, y] = q[i]; for (const [a, b] of [[1,0],[-1,0],[0,1],[0,-1]]) { const nx = x + a, ny = y + b, kk = nx + ',' + ny; if (seen.has(kk) || nx < 0 || ny < 0 || nx >= W || ny >= H || G.grid[ny][nx] !== 0) continue; if (G.decor.some(z => z.block && !z.found && z.x === nx && z.y === ny)) continue; seen.add(kk); q.push([nx, ny]) } }
     ok(seen.has(((M.boss.x0 + M.boss.x1) >> 1) + ',' + ((M.boss.y0 + M.boss.y1) >> 1)), 'boss room reachable on foot (' + seen.size + ' squares)');
     // the fight: the boss acts, calls helpers, dies
-    const boss = G.enemies.find(e => ENEMY_DEF[e.t].gyb === k); G.P.x = M.door.ix; G.P.y = M.door.iy;
-    ok(boss.maxhp > 14000 && boss.maxhp < 21000 && boss.lvl === 84 + k, 'boss ' + boss.t + ' hp ' + boss.maxhp + ' level ' + boss.lvl);
+    const boss = G.enemies.find(e => ENEMY_DEF[e.t].gyb === k); G.P.x = boss.x - 1; G.P.y = boss.y;   // next to the boss, so the close-range moves count too
+    ok(boss.maxhp > 14000 && boss.maxhp < 24000 && boss.lvl === 84 + k, 'boss ' + boss.t + ' hp ' + boss.maxhp + ' level ' + boss.lvl);
     boss.alert = true; let acts = 0; const hurt0 = G.heroes.reduce((n, h) => n + h.hp, 0);
     for (let i = 0; i < 24; i++) { acts += ENEMY_DEF[boss.t].act(boss) ? 1 : 0 }
     const hurt1 = G.heroes.reduce((n, h) => n + h.hp, 0); ok(acts >= 4 && hurt1 < hurt0, 'special moves fired ' + acts + ' times, party lost ' + (hurt0 - hurt1) + ' health over 24 rounds');

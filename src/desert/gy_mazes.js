@@ -18,7 +18,7 @@ const GYM_SPEC=[
  {seed:86043,brick:'texBlack',vars:[2,3,5,5,1,3,2,4,3,5],name:GY.NAMES[534],lcol:[.45,.78,1.6],torch:{fl:3,col:[.45,.8,1.7],name:'blue',css:'#4f9cff'},floor:'5',floor2:'3',ceil:'gyc_2',
   rooms:[{id:'start',kind:'start',i:0,j:13,w:2,h:2},{id:'boss',kind:'boss',i:11,j:0,w:4,h:3},{id:'moot',kind:'hall',w:3,h:3,zone:[3,8,4,9]},{id:'sorrow',kind:'hall',w:3,h:2,zone:[8,12,7,12]},{id:'vigil',kind:'chapel',w:2,h:2,zone:[1,5,1,5]}],
   foes:[['gywraith',4],['gyshade',4],['gybanshee',4]],count:24},
- {seed:87057,brick:'texBone',name:GY.NAMES[535],lcol:[.95,.5,1.35],torch:{fl:2,col:[.98,.5,1.38],name:'purple',css:'#b06cf0'},floor:'4',floor2:'2',ceil:'gyc_3',
+ {seed:87057,brick:'texBone',name:GY.NAMES[535],lcol:[.96,.62,1.22],torch:{fl:2,col:[.96,.6,1.26],name:'purple',css:'#b06cf0'},floor:'4',floor2:'2',ceil:'gyc_3',
   rooms:[{id:'start',kind:'start',i:0,j:13,w:2,h:2},{id:'boss',kind:'boss',i:11,j:0,w:4,h:3},{id:'reliquary',kind:'reliquary',w:2,h:2,zone:[3,9,5,10]},{id:'nest',kind:'hall',w:3,h:3,zone:[5,10,9,12]},{id:'bonehall',kind:'ossuary',w:3,h:2,zone:[1,5,2,6]}],
   foes:[['gyrats',4],['gyhound',4],['gyrat',3],['gyraven',3]],count:24}
 ];
@@ -81,7 +81,7 @@ function gyMazeBuild(k){
   {const gid=gyTile(spec.brick+'_0',WH,{fac:{img:'stairFix_0',i:0,n:1},gain:1.1});
    KH_DOOR[gid]={lvl:GY.ID,get at(){const d=GY_Y.doors[k],dy=d.y<35?1:-1;return {x:d.x,y:d.y+dy,f:d.y<35?2:0}},gy:'up',k};put(ex.x,ex.y,ch(gid))}
   // the boss door: an iron-barred gate in the wall cell, opened by the key, the levers, the dead or the seal
-  {const gid=gyTile(spec.brick+'_0',WH,{fac:{img:'stairFix_2',i:0,n:1},gain:1.7});KH_DOOR[gid]={gy:'bossdoor',k,x:M.door.x,y:M.door.y};put(M.door.x,M.door.y,ch(gid))}
+  {const gid=gyTile(spec.brick+'_0',WH,{fac:{img:'stairFix_2',i:0,n:1},gain:[1.3,1.15,1.4,.95][k]});KH_DOOR[gid]={gy:'bossdoor',k,x:M.door.x,y:M.door.y};put(M.door.x,M.door.y,ch(gid))}
   // ---- decor, creatures, lights ----
   const decor=[],enemies=[],items=[],lights=[],occ=new Set(),lcol={};
   const isRoomCell=(x,y,r)=>x>=r.x0&&x<=r.x1&&y>=r.y0&&y<=r.y1;
@@ -104,9 +104,9 @@ function gyMazeBuild(k){
   const far=(a,b,d)=>Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1])>=d;
   // rooms: furnish by kind
   const FURN={
-    start:r=>{light((r.x0+r.x1)>>1,(r.y0+r.y1)>>1,spec.lcol);const [dx]=[0];dec('candles',r.x0+2,r.y0,{block:true,sc:.7});
-      // the name of the place, on a plaque on the wall
-      decor.push({k:'sign_gy',x:r.x0+1,y:r.y0,block:false,wd:[0,-1],txt:[spec.name.toUpperCase(),'Level '+(84+k)]})},
+    start:r=>{light((r.x0+r.x1)>>1,(r.y0+r.y1)>>1,spec.lcol);dec('candles',r.x0+2,r.y1,{block:true,sc:.7});
+      // the name of the place, on a hanging plaque on the north wall, two squares ahead and a little to the left of the arrival square, so that it is in view when the party comes down
+      decor.push({k:'sign_gy',x:r.x0+2,y:r.y0,block:false,wd:[0,-1],txt:[spec.name.toUpperCase(),'Level '+(84+k)]})},
     boss:r=>{const cx=(r.x0+r.x1)>>1,cy=(r.y0+r.y1)>>1;light(cx,cy,spec.lcol);light(r.x0,r.y0,spec.lcol);light(r.x1,r.y1,spec.lcol);
       for(const [x,y] of [[r.x0,r.y0],[r.x1,r.y0],[r.x0,r.y1],[r.x1,r.y1]])if(free(x,y)&&!mouths.has(x+','+y))dec('candles',x,y,{block:true,sc:.8});
       for(let n=0;n<4;n++){const [x,y]=[r.x0+1+((hs(n,1,k+40)*(r.x1-r.x0-1))|0),r.y0+((hs(n,2,k+40)*(r.y1-r.y0+1))|0)];if(free(x,y)&&!(x===cx&&y===cy)&&!mouths.has(x+','+y))dec('bones',x,y)}},
@@ -151,13 +151,15 @@ function gyMazeBuild(k){
   {const r=M.boss,cx=(r.x0+r.x1)>>1,cy=(r.y0+r.y1)>>1;enemies.push({t:bt,x:cx,y:cy,lvl:84+k});occ.add(cx+','+cy);Q.boss={x:cx,y:cy,t:bt}}
   // ---- floors ----
   const fm=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++){let f=spec.floor;if(open(x,y)&&hs(x,y,k+80)<.16)f=spec.floor2;if(open(x,y)){const r=roomOf(x,y);if(r&&(r.kind==='chapel'||r.kind==='boss'))f='3'}s+=f}fm.push(s)}
-  const names=[];for(const r of M.rooms){const nm={start:null,boss:{0:"The Vane Hall",1:"The Gravedigger's Pit",2:"The Knight's Vigil",3:"The Prioress's Chapel"}[k],cell:"The Warden's Cell",hall:'The Charnel Hall',chapel:'The Little Chapel',ossuary:'The Bone Room',lever:'The Lever Room',reliquary:'The Reliquary'}[r.kind];if(nm)names.push({t:nm,x:(r.x0+r.x1)>>1,y:(r.y0+r.y1)>>1,k:'place'})}
+  const names=[];   // every room of a maze has its own name on the map
+  for(const r of M.rooms){const nm={start:null,boss:{0:"The Vane Hall",1:"The Gravedigger's Pit",2:"The Knight's Vigil",3:"The Prioress's Chapel"}[k],cell:"The Warden's Cell",hall:'The Charnel Hall',chapel:'The Little Chapel',ossuary:'The Bone Room',lever:'The Lever Room',reliquary:'The Reliquary'}[r.kind];
+    const own={lev0:'The Cross Lever Room',lev1:'The Crown Lever Room',lev2:'The Candle Lever Room',moot:'The Moot Hall',sorrow:'The Hall of Sorrow',nest:"The Rats' Nest",bonehall:'The Bone Hall'}[r.id];if(own||nm)names.push({t:own||nm,x:(r.x0+r.x1)>>1,y:(r.y0+r.y1)>>1,k:'place'})}
   // ---- the wall torches of this maze (one colour for the whole maze): at junctions, along the corridors every few squares, round the boss chamber and in the start room ----
   const torches=[];
   {const blk=new Set();for(const d of decor)if(d.block)blk.add(d.x+','+d.y);
    const skip=new Set([M.door.x+','+M.door.y,sr.x0-1+','+ex.y]);
    const cand=[];
-   for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(open(x,y)||skip.has(x+','+y))continue;
+   for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(open(x,y)||skip.has(x+','+y)||Math.hypot(x-M.door.x,y-M.door.y)<3.1)continue;   // no torch beside the boss door: the gate would glare
      for(let f=0;f<4;f++){const nx=x+GYM_D[f][0],ny=y+GYM_D[f][1];if(!open(nx,ny)||blk.has(nx+','+ny))continue;
        const d4=GYM_D.filter(([a,b])=>open(nx+a,ny+b)).length,nar=(!open(nx-1,ny)&&!open(nx+1,ny))||(!open(nx,ny-1)&&!open(nx,ny+1)),rm=roomOf(nx,ny),
          pri=rm&&rm.kind==='boss'?0:d4>=3?1:rm?2:3;

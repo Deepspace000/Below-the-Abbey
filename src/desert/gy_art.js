@@ -38,7 +38,15 @@ function gyAlias(){
   for(const a in GYA){const [n,h]=GYA[a];if(IMG['gyp_'+n]){IMG['gy_'+a]=IMG['gyp_'+n];NPC_H['gy_'+a]=h}}
   for(const [k,n] of [['skel','crA_0'],['pike','crA_1'],['bmage','crA_2'],['ghoul','crA_3'],['zombie','crA_4'],['giant','crA_5'],['wraith','crB_0'],['shade','crB_1'],['banshee','crB_2'],['rats','crB_3'],['hound','crB_4'],['rat','crB_5'],['raven','crB_6'],
     ['vane','boss_0'],['grimsby','boss_1'],['aldric','boss_2'],['morwenna','boss_3'],['ghost0','ghost_0'],['ghost1','ghost_1'],['ghost2','ghost_2']])if(IMG['gyp_'+n])IMG['gyi_'+k]=IMG['gyp_'+n];
-  gyFloors()}
+  gySlab();gyFloors()}
+/* the blank grave slab (stonesB_2) was painted as a plain flat grey card, which glows in the mist: it is given the grain of the painted grey stone texture, darker towards the foot like the other stones */
+function gySlab(){
+  if(GY._slabC){IMG.gy_slab=GY._slabC;return}   // gyAlias runs again for every maze that is built, and puts the plain piece back, so the finished one is put in again each time
+  const s=IMG.gyp_stonesB_2,t=IMG.gyp_texGrey_2;if(!s||!t)return;
+  try{const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');
+    x.drawImage(t,0,0,c.width,c.height);x.globalCompositeOperation='multiply';
+    const g=x.createLinearGradient(0,0,0,c.height);g.addColorStop(0,'rgb(205,208,205)');g.addColorStop(.6,'rgb(170,172,168)');g.addColorStop(1,'rgb(118,120,116)');x.fillStyle=g;x.fillRect(0,0,c.width,c.height);
+    x.globalCompositeOperation='destination-in';x.drawImage(s,0,0);GY._slabC=c;IMG.gy_slab=c}catch(e){console.error('gySlab',e)}}
 /* the ground and the ceilings, from the painted textures */
 const GY_FLOORSET=['gyf_grass','gyf_dirt','gyf_gravel','gyf_flag','gyf_bone','gyf_slate'];
 function gyFloors(){
@@ -83,10 +91,10 @@ Object.assign(ENEMY_DEF,{
   gyrat:{name:'Corpse Rat',hp:38,dmg:[5,9],hit:.85,w:gyW('crB_5',.6),img:'gyi_rat',xp:20,gold:[0,0],speed:2,verb:'bites',gy:1},
   gyraven:{name:'Carrion Raven',hp:36,dmg:[5,9],hit:.87,w:gyW('crB_6',.55),img:'gyi_raven',xp:20,gold:[0,0],speed:2,fly:true,floatH:.3,verb:'stabs',gy:1},
   // the four enemies of the ghost: named, level 84 to 87, hard but fair
-  gyvane:{name:'Lord Corwin Vane',hp:386,dmg:[8,12],hit:.9,w:gyW('boss_0',1.25),img:'gyi_vane',xp:600,gold:[0,0],speed:1,verb:'runs through',boss:true,gy:1,gyb:0,glow:.3},
-  gygrimsby:{name:'Digger Grimsby',hp:421,dmg:[9,13],hit:.9,w:gyW('boss_1',1.45),img:'gyi_grimsby',xp:600,gold:[0,0],speed:1,verb:'swings his spade at',boss:true,gy:1,gyb:1},
-  gyaldric:{name:'Sir Aldric the Forsworn',hp:456,dmg:[9,14],hit:.9,w:gyW('boss_2',1.55),img:'gyi_aldric',xp:600,gold:[0,0],speed:1,verb:'cleaves',boss:true,gy:1,gyb:2,glow:.3},
-  gymorwenna:{name:'Prioress Morwenna',hp:503,dmg:[10,15],hit:.9,w:gyW('boss_3',1.4),img:'gyi_morwenna',xp:600,gold:[0,0],speed:1,verb:'curses',boss:true,gy:1,gyb:3,glow:.3}
+  gyvane:{name:'Lord Corwin Vane',hp:386,dmg:[8,13],hit:.9,w:gyW('boss_0',1.25),img:'gyi_vane',xp:600,gold:[0,0],speed:1,verb:'runs through',boss:true,gy:1,gyb:0,glow:.3},
+  gygrimsby:{name:'Digger Grimsby',hp:421,dmg:[9,15],hit:.9,w:gyW('boss_1',1.45),img:'gyi_grimsby',xp:600,gold:[0,0],speed:1,verb:'swings his spade at',boss:true,gy:1,gyb:1},
+  gyaldric:{name:'Sir Aldric the Forsworn',hp:456,dmg:[8,14],hit:.9,w:gyW('boss_2',1.55),img:'gyi_aldric',xp:600,gold:[0,0],speed:1,verb:'cleaves',boss:true,gy:1,gyb:2,glow:.3},
+  gymorwenna:{name:'Prioress Morwenna',hp:503,dmg:[9,15],hit:.9,w:gyW('boss_3',1.4),img:'gyi_morwenna',xp:600,gold:[0,0],speed:1,verb:'curses',boss:true,gy:1,gyb:3,glow:.3}
 });
 if(typeof NO_VARY!=='undefined')NO_VARY.push('gyvane','gygrimsby','gyaldric','gymorwenna');
 if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push('gyvane','gygrimsby','gyaldric','gymorwenna','gygiant');
@@ -107,7 +115,7 @@ if(typeof CONTAINERS!=='undefined'&&!CONTAINERS.includes('gy_chest'))CONTAINERS.
 if(typeof DS_LOOTNAME!=='undefined')DS_LOOTNAME.gy_chest='Old chest';
 /* the look: dusk mist in the graveyard, nothing outdoors elsewhere */
 {const _w=weatherNow;weatherNow=function(){
-  if(LEVEL===GY.ID)return {id:'fog',n:'Dusk mist',fog:.05,haze:.5,dark:.2,mix:.5,col:[84,92,130],text:'A cold blue mist lies low between the stones, and the last of the daylight is going. Somewhere a raven clears its throat.'};
+  if(LEVEL===GY.ID)return {id:'fog',n:'Dusk mist',fog:.04,haze:.8,dark:.2,mix:.4,col:[96,106,140],text:'A cold blue mist lies low between the stones, and the last of the daylight is going. Somewhere a raven clears its throat.'};
   if(gyIs(LEVEL))return null;
   return _w.apply(this,arguments)}}
 /* arrival: the pictures first, then the level; no door ever opens on a level that is not built */
@@ -127,6 +135,10 @@ if(typeof DS_LOOTNAME!=='undefined')DS_LOOTNAME.gy_chest='Old chest';
 {const _r=restore;restore=function(sv){
   if(sv&&gyIs(sv.level)&&!GY.ready&&!GY._wait){GY._wait=1;gyLoad().then(()=>{GY._wait=0;restore(sv)});return}
   return _r.apply(this,arguments)}}
+/* a game loaded inside the graveyard gets the same arrival as walking in (the dressed grave, the lit shrine, the quiet ghost), because the pieces added on arrival are not part of a save */
+{const _rn=restoreNow;restoreNow=function(sv){const r=_rn.apply(this,arguments);
+  try{if(gyIs(LEVEL)&&typeof gyArrive==='function')gyArrive(LEVEL);else if(LEVEL===WL.ID&&typeof gyTownArrive==='function')gyTownArrive()}catch(e){console.error('gy restore',e)}
+  return r}}
 {const _wd=wdDoorLevel;wdDoorLevel=function(n){return _wd.apply(this,arguments)||gyIs(n)}}
 /* Wenlock's own loader also loads these pictures, so that the lych-gate in Churchyard Lane can be painted when the town is built */
 {const _wl=wlLoad;wlLoad=function(){if(!GY_ENABLED)return _wl.apply(this,arguments);if(GY._both)return GY._both;return GY._both=Promise.resolve(_wl.apply(this,arguments)).then(()=>gyLoad())}}

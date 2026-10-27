@@ -1,7 +1,7 @@
 """Writes src/desert/gy_list.js from assets/gy/manifest.json (the Graveyard pictures that exist on disk): python tools/gy_list.py
 The file also holds GY_ENABLED, the master switch of the whole graveyard (see tools/GRAVEYARD_NOTES.md); set ENABLED below to True to turn it on."""
 import json, pathlib
-ENABLED = False
+ENABLED = True
 R = pathlib.Path(__file__).resolve().parent.parent
 man = json.loads((R / 'assets' / 'gy' / 'manifest.json').read_text())
 out = {k: [v['file'], v['w'], v['h'], v['kind'][0]] for k, v in sorted(man.items()) if (R / 'assets' / 'gy' / v['file']).exists()}

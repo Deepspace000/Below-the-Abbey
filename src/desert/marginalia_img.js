@@ -18,7 +18,7 @@ const MPMGI_POOL={
 function mpmgiKind(lv){
   if([300,301,302,303,304,320,322].includes(lv))return 'sea';
   if([41,42,43,44,60,61,62,63,64,290].includes(lv)||(lv>=311&&lv<=316&&false))return 'desert';
-  if(lv===1||lv===18||lv===20||(lv>=440&&lv<=459))return 'dungeon';
+  if(lv===1||lv===18||lv===20||(lv>=440&&lv<=459)||(lv>=531&&lv<=535))return 'dungeon';
   if([3,13,32,33,305,364,411,430].includes(lv))return 'town';
   return 'land'}
 function mpmgiSpecies(n){return n.replace(/_\d+$/,'')}

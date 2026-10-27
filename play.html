@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.652';
+const VERSION='3.653';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2647,7 +2647,7 @@ function render3D(){
     let side=0,g=0,guard=0,nHit=1;
     if(TERRACE){nHit=terrTerrace(x,rX,rY);if(nHit===0){zbuf[x]=99;wtop[x]=-1e9;continue}terrCover(nHit,rX,rY,cx,cy)} // terraced town: the ground is walked cell by cell and every wall that can be seen is listed, nearest first
     else{
-    while(guard++<64){
+    while(guard++<(LEVEL===530?100:64)){
       if(sdx<sdy){sdx+=ddx;mx+=stx;side=0}else{sdy+=ddy;my+=sty;side=1}
       if(mx<0||my<0||mx>=MW||my>=MH){g=1;break}
       g=grid[my][mx];if(g>0)break;
@@ -43101,7 +43101,7 @@ const MPMGI_POOL={
 function mpmgiKind(lv){
   if([300,301,302,303,304,320,322].includes(lv))return 'sea';
   if([41,42,43,44,60,61,62,63,64,290].includes(lv)||(lv>=311&&lv<=316&&false))return 'desert';
-  if(lv===1||lv===18||lv===20||(lv>=440&&lv<=459))return 'dungeon';
+  if(lv===1||lv===18||lv===20||(lv>=440&&lv<=459)||(lv>=531&&lv<=535))return 'dungeon';
   if([3,13,32,33,305,364,411,430].includes(lv))return 'town';
   return 'land'}
 function mpmgiSpecies(n){return n.replace(/_\d+$/,'')}
@@ -53263,7 +53263,7 @@ if(typeof QAREA_ORDER!=='undefined'&&!QAREA_ORDER.includes('Blackbriar Wood'))QA
 /* ---- src/desert/gy_list.js ---- */
 /* written by tools/gy_list.py from assets/gy/manifest.json: name -> [file, width, height, kind (s sprite, t texture)] */
 /* THE MASTER SWITCH of the Wenlock Graveyard (work in progress, see tools/GRAVEYARD_NOTES.md). false: no gate in Wenlock, no Go to area rows, no jump link, no pictures loaded with the town. true: all of it. */
-const GY_ENABLED=false;
+const GY_ENABLED=true;
 const GY_LIST={"bonesH_0":["bonesH_0.webp",311,148,"s"],"bonesH_1":["bonesH_1.webp",305,184,"s"],"bonesH_2":["bonesH_2.webp",262,161,"s"],"bonesH_3":["bonesH_3.webp",230,158,"s"],"bonesH_4":["bonesH_4.webp",158,230,"s"],"bonesH_5":["bonesH_5.webp",158,141,"s"],"boss_0":["boss_0.webp",99,223,"s"],"boss_1":["boss_1.webp",175,226,"s"],"boss_2":["boss_2.webp",87,220,"s"],"boss_3":["boss_3.webp",160,219,"s"],"crA_0":["crA_0.webp",176,217,"s"],"crA_1":["crA_1.webp",102,244,"s"],"crA_2":["crA_2.webp",140,208,"s"],"crA_3":["crA_3.webp",127,214,"s"],"crA_4":["crA_4.webp",109,219,"s"],"crA_5":["crA_5.webp",164,231,"s"],"crB_0":["crB_0.webp",234,271,"s"],"crB_1":["crB_1.webp",254,260,"s"],"crB_2":["crB_2.webp",117,276,"s"],"crB_3":["crB_3.webp",285,165,"s"],"crB_4":["crB_4.webp",58,194,"s"],"crB_5":["crB_5.webp",148,201,"s"],"crB_6":["crB_6.webp",242,190,"s"],"cryptD_0":["cryptD_0.webp",298,176,"s"],"cryptD_1":["cryptD_1.webp",331,239,"s"],"cryptD_2":["cryptD_2.webp",191,276,"s"],"cryptD_3":["cryptD_3.webp",296,271,"s"],"cryptD_4":["cryptD_4.webp",165,245,"s"],"cryptD_5":["cryptD_5.webp",270,275,"s"],"fenceG_0":["fenceG_0.webp",268,159,"s"],"fenceG_1":["fenceG_1.webp",229,114,"s"],"fenceG_2":["fenceG_2.webp",36,191,"s"],"fenceG_3":["fenceG_3.webp",231,75,"s"],"gatesC_0":["gatesC_0.webp",305,203,"s"],"gatesC_1":["gatesC_1.webp",210,244,"s"],"gatesC_2":["gatesC_2.webp",284,241,"s"],"gatesC_3":["gatesC_3.webp",310,183,"s"],"gatesC_4":["gatesC_4.webp",299,279,"s"],"gatesC_5":["gatesC_5.webp",239,255,"s"],"ghost_0":["ghost_0.webp",297,493,"s"],"ghost_1":["ghost_1.webp",277,493,"s"],"ghost_2":["ghost_2.webp",280,494,"s"],"relicsE_0":["relicsE_0.webp",261,113,"s"],"relicsE_1":["relicsE_1.webp",242,148,"s"],"relicsE_2":["relicsE_2.webp",237,194,"s"],"relicsE_3":["relicsE_3.webp",175,234,"s"],"relicsE_4":["relicsE_4.webp",161,238,"s"],"relicsE_5":["relicsE_5.webp",120,244,"s"],"sceneB_0":["sceneB_0.webp",307,297,"s"],"sceneB_1":["sceneB_1.webp",264,282,"s"],"sceneB_2":["sceneB_2.webp",326,163,"s"],"sceneB_3":["sceneB_3.webp",248,272,"s"],"sceneB_4":["sceneB_4.webp",269,271,"s"],"sceneB_5":["sceneB_5.webp",177,264,"s"],"stairFix_0":["stairFix_0.webp",234,189,"s"],"stairFix_1":["stairFix_1.webp",223,145,"s"],"stairFix_2":["stairFix_2.webp",227,166,"s"],"stairFix_3":["stairFix_3.webp",216,76,"s"],"stonesA_0":["stonesA_0.webp",178,280,"s"],"stonesA_1":["stonesA_1.webp",158,274,"s"],"stonesA_2":["stonesA_2.webp",133,301,"s"],"stonesA_3":["stonesA_3.webp",118,286,"s"],"stonesA_4":["stonesA_4.webp",308,165,"s"],"stonesA_5":["stonesA_5.webp",230,286,"s"],"stonesB_0":["stonesB_0.webp",102,120,"s"],"stonesB_1":["stonesB_1.webp",126,172,"s"],"stonesB_2":["stonesB_2.webp",104,157,"s"],"stonesB_3":["stonesB_3.webp",140,243,"s"],"stonesB_4":["stonesB_4.webp",157,235,"s"],"stonesB_5":["stonesB_5.webp",117,243,"s"],"texBlack_0":["texBlack_0.jpg",256,256,"t"],"texBlack_1":["texBlack_1.jpg",256,256,"t"],"texBlack_2":["texBlack_2.jpg",256,256,"t"],"texBlack_3":["texBlack_3.jpg",256,256,"t"],"texBlack_4":["texBlack_4.jpg",256,256,"t"],"texBlack_5":["texBlack_5.jpg",256,256,"t"],"texBone_0":["texBone_0.jpg",256,256,"t"],"texBone_1":["texBone_1.jpg",256,256,"t"],"texBone_2":["texBone_2.jpg",256,256,"t"],"texBone_3":["texBone_3.jpg",256,256,"t"],"texBone_4":["texBone_4.jpg",256,256,"t"],"texBone_5":["texBone_5.jpg",256,256,"t"],"texFloor_0":["texFloor_0.jpg",256,256,"t"],"texFloor_1":["texFloor_1.jpg",256,256,"t"],"texFloor_2":["texFloor_2.jpg",256,256,"t"],"texFloor_3":["texFloor_3.jpg",256,256,"t"],"texFloor_4":["texFloor_4.jpg",256,256,"t"],"texFloor_5":["texFloor_5.jpg",256,256,"t"],"texGrey_0":["texGrey_0.jpg",256,256,"t"],"texGrey_1":["texGrey_1.jpg",256,256,"t"],"texGrey_2":["texGrey_2.jpg",256,256,"t"],"texGrey_3":["texGrey_3.jpg",256,256,"t"],"texGrey_4":["texGrey_4.jpg",256,256,"t"],"texGrey_5":["texGrey_5.jpg",256,256,"t"],"texRed_0":["texRed_0.jpg",256,256,"t"],"texRed_1":["texRed_1.jpg",256,256,"t"],"texRed_2":["texRed_2.jpg",256,256,"t"],"texRed_3":["texRed_3.jpg",256,256,"t"],"texRed_4":["texRed_4.jpg",256,256,"t"],"texRed_5":["texRed_5.jpg",256,256,"t"]};
 
 /* ---- src/desert/gy_art.js ---- */
@@ -53307,7 +53307,15 @@ function gyAlias(){
   for(const a in GYA){const [n,h]=GYA[a];if(IMG['gyp_'+n]){IMG['gy_'+a]=IMG['gyp_'+n];NPC_H['gy_'+a]=h}}
   for(const [k,n] of [['skel','crA_0'],['pike','crA_1'],['bmage','crA_2'],['ghoul','crA_3'],['zombie','crA_4'],['giant','crA_5'],['wraith','crB_0'],['shade','crB_1'],['banshee','crB_2'],['rats','crB_3'],['hound','crB_4'],['rat','crB_5'],['raven','crB_6'],
     ['vane','boss_0'],['grimsby','boss_1'],['aldric','boss_2'],['morwenna','boss_3'],['ghost0','ghost_0'],['ghost1','ghost_1'],['ghost2','ghost_2']])if(IMG['gyp_'+n])IMG['gyi_'+k]=IMG['gyp_'+n];
-  gyFloors()}
+  gySlab();gyFloors()}
+/* the blank grave slab (stonesB_2) was painted as a plain flat grey card, which glows in the mist: it is given the grain of the painted grey stone texture, darker towards the foot like the other stones */
+function gySlab(){
+  if(GY._slabC){IMG.gy_slab=GY._slabC;return}   // gyAlias runs again for every maze that is built, and puts the plain piece back, so the finished one is put in again each time
+  const s=IMG.gyp_stonesB_2,t=IMG.gyp_texGrey_2;if(!s||!t)return;
+  try{const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');
+    x.drawImage(t,0,0,c.width,c.height);x.globalCompositeOperation='multiply';
+    const g=x.createLinearGradient(0,0,0,c.height);g.addColorStop(0,'rgb(205,208,205)');g.addColorStop(.6,'rgb(170,172,168)');g.addColorStop(1,'rgb(118,120,116)');x.fillStyle=g;x.fillRect(0,0,c.width,c.height);
+    x.globalCompositeOperation='destination-in';x.drawImage(s,0,0);GY._slabC=c;IMG.gy_slab=c}catch(e){console.error('gySlab',e)}}
 /* the ground and the ceilings, from the painted textures */
 const GY_FLOORSET=['gyf_grass','gyf_dirt','gyf_gravel','gyf_flag','gyf_bone','gyf_slate'];
 function gyFloors(){
@@ -53352,10 +53360,10 @@ Object.assign(ENEMY_DEF,{
   gyrat:{name:'Corpse Rat',hp:38,dmg:[5,9],hit:.85,w:gyW('crB_5',.6),img:'gyi_rat',xp:20,gold:[0,0],speed:2,verb:'bites',gy:1},
   gyraven:{name:'Carrion Raven',hp:36,dmg:[5,9],hit:.87,w:gyW('crB_6',.55),img:'gyi_raven',xp:20,gold:[0,0],speed:2,fly:true,floatH:.3,verb:'stabs',gy:1},
   // the four enemies of the ghost: named, level 84 to 87, hard but fair
-  gyvane:{name:'Lord Corwin Vane',hp:386,dmg:[8,12],hit:.9,w:gyW('boss_0',1.25),img:'gyi_vane',xp:600,gold:[0,0],speed:1,verb:'runs through',boss:true,gy:1,gyb:0,glow:.3},
-  gygrimsby:{name:'Digger Grimsby',hp:421,dmg:[9,13],hit:.9,w:gyW('boss_1',1.45),img:'gyi_grimsby',xp:600,gold:[0,0],speed:1,verb:'swings his spade at',boss:true,gy:1,gyb:1},
-  gyaldric:{name:'Sir Aldric the Forsworn',hp:456,dmg:[9,14],hit:.9,w:gyW('boss_2',1.55),img:'gyi_aldric',xp:600,gold:[0,0],speed:1,verb:'cleaves',boss:true,gy:1,gyb:2,glow:.3},
-  gymorwenna:{name:'Prioress Morwenna',hp:503,dmg:[10,15],hit:.9,w:gyW('boss_3',1.4),img:'gyi_morwenna',xp:600,gold:[0,0],speed:1,verb:'curses',boss:true,gy:1,gyb:3,glow:.3}
+  gyvane:{name:'Lord Corwin Vane',hp:386,dmg:[8,13],hit:.9,w:gyW('boss_0',1.25),img:'gyi_vane',xp:600,gold:[0,0],speed:1,verb:'runs through',boss:true,gy:1,gyb:0,glow:.3},
+  gygrimsby:{name:'Digger Grimsby',hp:421,dmg:[9,15],hit:.9,w:gyW('boss_1',1.45),img:'gyi_grimsby',xp:600,gold:[0,0],speed:1,verb:'swings his spade at',boss:true,gy:1,gyb:1},
+  gyaldric:{name:'Sir Aldric the Forsworn',hp:456,dmg:[8,14],hit:.9,w:gyW('boss_2',1.55),img:'gyi_aldric',xp:600,gold:[0,0],speed:1,verb:'cleaves',boss:true,gy:1,gyb:2,glow:.3},
+  gymorwenna:{name:'Prioress Morwenna',hp:503,dmg:[9,15],hit:.9,w:gyW('boss_3',1.4),img:'gyi_morwenna',xp:600,gold:[0,0],speed:1,verb:'curses',boss:true,gy:1,gyb:3,glow:.3}
 });
 if(typeof NO_VARY!=='undefined')NO_VARY.push('gyvane','gygrimsby','gyaldric','gymorwenna');
 if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push('gyvane','gygrimsby','gyaldric','gymorwenna','gygiant');
@@ -53376,7 +53384,7 @@ if(typeof CONTAINERS!=='undefined'&&!CONTAINERS.includes('gy_chest'))CONTAINERS.
 if(typeof DS_LOOTNAME!=='undefined')DS_LOOTNAME.gy_chest='Old chest';
 /* the look: dusk mist in the graveyard, nothing outdoors elsewhere */
 {const _w=weatherNow;weatherNow=function(){
-  if(LEVEL===GY.ID)return {id:'fog',n:'Dusk mist',fog:.05,haze:.5,dark:.2,mix:.5,col:[84,92,130],text:'A cold blue mist lies low between the stones, and the last of the daylight is going. Somewhere a raven clears its throat.'};
+  if(LEVEL===GY.ID)return {id:'fog',n:'Dusk mist',fog:.04,haze:.8,dark:.2,mix:.4,col:[96,106,140],text:'A cold blue mist lies low between the stones, and the last of the daylight is going. Somewhere a raven clears its throat.'};
   if(gyIs(LEVEL))return null;
   return _w.apply(this,arguments)}}
 /* arrival: the pictures first, then the level; no door ever opens on a level that is not built */
@@ -53396,6 +53404,10 @@ if(typeof DS_LOOTNAME!=='undefined')DS_LOOTNAME.gy_chest='Old chest';
 {const _r=restore;restore=function(sv){
   if(sv&&gyIs(sv.level)&&!GY.ready&&!GY._wait){GY._wait=1;gyLoad().then(()=>{GY._wait=0;restore(sv)});return}
   return _r.apply(this,arguments)}}
+/* a game loaded inside the graveyard gets the same arrival as walking in (the dressed grave, the lit shrine, the quiet ghost), because the pieces added on arrival are not part of a save */
+{const _rn=restoreNow;restoreNow=function(sv){const r=_rn.apply(this,arguments);
+  try{if(gyIs(LEVEL)&&typeof gyArrive==='function')gyArrive(LEVEL);else if(LEVEL===WL.ID&&typeof gyTownArrive==='function')gyTownArrive()}catch(e){console.error('gy restore',e)}
+  return r}}
 {const _wd=wdDoorLevel;wdDoorLevel=function(n){return _wd.apply(this,arguments)||gyIs(n)}}
 /* Wenlock's own loader also loads these pictures, so that the lych-gate in Churchyard Lane can be painted when the town is built */
 {const _wl=wlLoad;wlLoad=function(){if(!GY_ENABLED)return _wl.apply(this,arguments);if(GY._both)return GY._both;return GY._both=Promise.resolve(_wl.apply(this,arguments)).then(()=>gyLoad())}}
@@ -53529,7 +53541,7 @@ function gyYardBuild(){
   pth(30,46,40,54,'2');   // the family plot
   setF(54,40,66,48,'1');   // the gravedigger's yard
   // ---- the boundary: a stone wall two squares thick, with the lych-gate in the east side ----
-  const wallH=2.1,wt=v=>ch(gyTile('texGrey_'+v,wallH));
+  const wallH=2.1,wt=v=>ch(gyTile('texGrey_'+v,wallH,{gain:.62}));   // the boundary wall is darker, so that the far wall does not shine in the mist as pale stripes
   const WC=[0,0,0,1,3,5,0,3,2].map(wt);
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(x>=2&&x<=67&&y>=2&&y<=67)continue;solid(x,y,WC[(hs(x,y,7)*WC.length)|0])}
   {const gid=gyTile('texGrey_0',2.5,{fac:{img:'gatesC_0',i:0,n:1},gain:1.1});KH_DOOR[gid]={lvl:WL.ID,get at(){return WK.GRAVEBACK||{x:3,y:31,f:1}},gy:'lane'};
@@ -53604,7 +53616,7 @@ function gyYardBuild(){
   const rowsS=[],fmS=[];for(let y=0;y<H;y++){rowsS.push(rows[y].join(''));let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmS.push(s)}
   const mapNames=[{t:'The Lych-gate',x:65,y:35,k:'place'},{t:'The Tomb of the Crypt',x:35,y:32,k:'place'},{t:'The Mossy Iron Gate',x:58,y:9,k:'place'},{t:'The Sunken Stair',x:58,y:61,k:'place'},{t:'The Stone Archway',x:12,y:61,k:'place'},{t:'The Trapdoor',x:12,y:9,k:'place'},
     {t:'The Ruined Chapel',x:19,y:19,k:'place'},{t:"The Gravedigger's Hut",x:60,y:42,k:'place'},{t:'The Wenlock Family Plot',x:35,y:49,k:'place'},{t:'Lady Aldith\'s Grave',x:36,y:51,k:'place'}];
-  const lv={rows:rowsS,chars,fmap:fmS,floorSet:GY_FLOORSET,floor:GY_FLOORSET[0],ceil:'cloud',start:{x:GY_Y.start.x,y:GY_Y.start.y,f:GY_Y.start.f},enemies,items,decor,lights,portals:[],day:.52,outdoor:true,amb:.62,
+  const lv={rows:rowsS,chars,fmap:fmS,floorSet:GY_FLOORSET,floor:GY_FLOORSET[0],ceil:'cloud',start:{x:GY_Y.start.x,y:GY_Y.start.y,f:GY_Y.start.f},enemies,items,decor,lights,portals:[],day:.66,outdoor:true,amb:.92,
     name:GY.NAMES[530],label:GY.NAMES[530],noExtras:true,diff:84,ceilH:5.2,noTele:true,torchGap:1e9,mapNames,
     _gy:{kind:'yard',glow,lcol:{},epitaphs:readable.length,placed:ri}};
   // ---- check: everything that can be walked to can be reached from the lych-gate; a piece that walls something in is made walk-through ----
@@ -53706,7 +53718,7 @@ const GYM_SPEC=[
  {seed:86043,brick:'texBlack',vars:[2,3,5,5,1,3,2,4,3,5],name:GY.NAMES[534],lcol:[.45,.78,1.6],torch:{fl:3,col:[.45,.8,1.7],name:'blue',css:'#4f9cff'},floor:'5',floor2:'3',ceil:'gyc_2',
   rooms:[{id:'start',kind:'start',i:0,j:13,w:2,h:2},{id:'boss',kind:'boss',i:11,j:0,w:4,h:3},{id:'moot',kind:'hall',w:3,h:3,zone:[3,8,4,9]},{id:'sorrow',kind:'hall',w:3,h:2,zone:[8,12,7,12]},{id:'vigil',kind:'chapel',w:2,h:2,zone:[1,5,1,5]}],
   foes:[['gywraith',4],['gyshade',4],['gybanshee',4]],count:24},
- {seed:87057,brick:'texBone',name:GY.NAMES[535],lcol:[.95,.5,1.35],torch:{fl:2,col:[.98,.5,1.38],name:'purple',css:'#b06cf0'},floor:'4',floor2:'2',ceil:'gyc_3',
+ {seed:87057,brick:'texBone',name:GY.NAMES[535],lcol:[.96,.62,1.22],torch:{fl:2,col:[.96,.6,1.26],name:'purple',css:'#b06cf0'},floor:'4',floor2:'2',ceil:'gyc_3',
   rooms:[{id:'start',kind:'start',i:0,j:13,w:2,h:2},{id:'boss',kind:'boss',i:11,j:0,w:4,h:3},{id:'reliquary',kind:'reliquary',w:2,h:2,zone:[3,9,5,10]},{id:'nest',kind:'hall',w:3,h:3,zone:[5,10,9,12]},{id:'bonehall',kind:'ossuary',w:3,h:2,zone:[1,5,2,6]}],
   foes:[['gyrats',4],['gyhound',4],['gyrat',3],['gyraven',3]],count:24}
 ];
@@ -53769,7 +53781,7 @@ function gyMazeBuild(k){
   {const gid=gyTile(spec.brick+'_0',WH,{fac:{img:'stairFix_0',i:0,n:1},gain:1.1});
    KH_DOOR[gid]={lvl:GY.ID,get at(){const d=GY_Y.doors[k],dy=d.y<35?1:-1;return {x:d.x,y:d.y+dy,f:d.y<35?2:0}},gy:'up',k};put(ex.x,ex.y,ch(gid))}
   // the boss door: an iron-barred gate in the wall cell, opened by the key, the levers, the dead or the seal
-  {const gid=gyTile(spec.brick+'_0',WH,{fac:{img:'stairFix_2',i:0,n:1},gain:1.7});KH_DOOR[gid]={gy:'bossdoor',k,x:M.door.x,y:M.door.y};put(M.door.x,M.door.y,ch(gid))}
+  {const gid=gyTile(spec.brick+'_0',WH,{fac:{img:'stairFix_2',i:0,n:1},gain:[1.3,1.15,1.4,.95][k]});KH_DOOR[gid]={gy:'bossdoor',k,x:M.door.x,y:M.door.y};put(M.door.x,M.door.y,ch(gid))}
   // ---- decor, creatures, lights ----
   const decor=[],enemies=[],items=[],lights=[],occ=new Set(),lcol={};
   const isRoomCell=(x,y,r)=>x>=r.x0&&x<=r.x1&&y>=r.y0&&y<=r.y1;
@@ -53792,9 +53804,9 @@ function gyMazeBuild(k){
   const far=(a,b,d)=>Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1])>=d;
   // rooms: furnish by kind
   const FURN={
-    start:r=>{light((r.x0+r.x1)>>1,(r.y0+r.y1)>>1,spec.lcol);const [dx]=[0];dec('candles',r.x0+2,r.y0,{block:true,sc:.7});
-      // the name of the place, on a plaque on the wall
-      decor.push({k:'sign_gy',x:r.x0+1,y:r.y0,block:false,wd:[0,-1],txt:[spec.name.toUpperCase(),'Level '+(84+k)]})},
+    start:r=>{light((r.x0+r.x1)>>1,(r.y0+r.y1)>>1,spec.lcol);dec('candles',r.x0+2,r.y1,{block:true,sc:.7});
+      // the name of the place, on a hanging plaque on the north wall, two squares ahead and a little to the left of the arrival square, so that it is in view when the party comes down
+      decor.push({k:'sign_gy',x:r.x0+2,y:r.y0,block:false,wd:[0,-1],txt:[spec.name.toUpperCase(),'Level '+(84+k)]})},
     boss:r=>{const cx=(r.x0+r.x1)>>1,cy=(r.y0+r.y1)>>1;light(cx,cy,spec.lcol);light(r.x0,r.y0,spec.lcol);light(r.x1,r.y1,spec.lcol);
       for(const [x,y] of [[r.x0,r.y0],[r.x1,r.y0],[r.x0,r.y1],[r.x1,r.y1]])if(free(x,y)&&!mouths.has(x+','+y))dec('candles',x,y,{block:true,sc:.8});
       for(let n=0;n<4;n++){const [x,y]=[r.x0+1+((hs(n,1,k+40)*(r.x1-r.x0-1))|0),r.y0+((hs(n,2,k+40)*(r.y1-r.y0+1))|0)];if(free(x,y)&&!(x===cx&&y===cy)&&!mouths.has(x+','+y))dec('bones',x,y)}},
@@ -53839,13 +53851,15 @@ function gyMazeBuild(k){
   {const r=M.boss,cx=(r.x0+r.x1)>>1,cy=(r.y0+r.y1)>>1;enemies.push({t:bt,x:cx,y:cy,lvl:84+k});occ.add(cx+','+cy);Q.boss={x:cx,y:cy,t:bt}}
   // ---- floors ----
   const fm=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++){let f=spec.floor;if(open(x,y)&&hs(x,y,k+80)<.16)f=spec.floor2;if(open(x,y)){const r=roomOf(x,y);if(r&&(r.kind==='chapel'||r.kind==='boss'))f='3'}s+=f}fm.push(s)}
-  const names=[];for(const r of M.rooms){const nm={start:null,boss:{0:"The Vane Hall",1:"The Gravedigger's Pit",2:"The Knight's Vigil",3:"The Prioress's Chapel"}[k],cell:"The Warden's Cell",hall:'The Charnel Hall',chapel:'The Little Chapel',ossuary:'The Bone Room',lever:'The Lever Room',reliquary:'The Reliquary'}[r.kind];if(nm)names.push({t:nm,x:(r.x0+r.x1)>>1,y:(r.y0+r.y1)>>1,k:'place'})}
+  const names=[];   // every room of a maze has its own name on the map
+  for(const r of M.rooms){const nm={start:null,boss:{0:"The Vane Hall",1:"The Gravedigger's Pit",2:"The Knight's Vigil",3:"The Prioress's Chapel"}[k],cell:"The Warden's Cell",hall:'The Charnel Hall',chapel:'The Little Chapel',ossuary:'The Bone Room',lever:'The Lever Room',reliquary:'The Reliquary'}[r.kind];
+    const own={lev0:'The Cross Lever Room',lev1:'The Crown Lever Room',lev2:'The Candle Lever Room',moot:'The Moot Hall',sorrow:'The Hall of Sorrow',nest:"The Rats' Nest",bonehall:'The Bone Hall'}[r.id];if(own||nm)names.push({t:own||nm,x:(r.x0+r.x1)>>1,y:(r.y0+r.y1)>>1,k:'place'})}
   // ---- the wall torches of this maze (one colour for the whole maze): at junctions, along the corridors every few squares, round the boss chamber and in the start room ----
   const torches=[];
   {const blk=new Set();for(const d of decor)if(d.block)blk.add(d.x+','+d.y);
    const skip=new Set([M.door.x+','+M.door.y,sr.x0-1+','+ex.y]);
    const cand=[];
-   for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(open(x,y)||skip.has(x+','+y))continue;
+   for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(open(x,y)||skip.has(x+','+y)||Math.hypot(x-M.door.x,y-M.door.y)<3.1)continue;   // no torch beside the boss door: the gate would glare
      for(let f=0;f<4;f++){const nx=x+GYM_D[f][0],ny=y+GYM_D[f][1];if(!open(nx,ny)||blk.has(nx+','+ny))continue;
        const d4=GYM_D.filter(([a,b])=>open(nx+a,ny+b)).length,nar=(!open(nx-1,ny)&&!open(nx+1,ny))||(!open(nx,ny-1)&&!open(nx,ny+1)),rm=roomOf(nx,ny),
          pri=rm&&rm.kind==='boss'?0:d4>=3?1:rm?2:3;
@@ -53907,9 +53921,9 @@ function gyBossAct(e,spec){
   for(const m of spec.moves)if(e.gyR%m.every===0&&los&&(!m.near||d<=m.near))return gyVolley(e,m.txt,m.col,m.all,m.mult,m.affl,m.verb);
   return 0}
 const GY_BOSSMOVES={
-  gyvane:{moves:[{every:5,all:true,mult:.55,affl:'cursed',txt:'Lord Vane flings a fistful of cursed coins. They ring on the brick, and burn where they land.',col:'#a8e090',verb:'A coin burns'},{every:3,mult:1.05,near:3,txt:'Lord Vane lunges with the rapier, very elegantly, and very rudely.',col:'#c8e8a0',verb:'The rapier finds'}]},
-  gygrimsby:{moves:[{every:4,mult:1.35,near:2,affl:'graverot',txt:'Digger Grimsby swings the great spade in a flat arc. It has buried a great many people, and it knows how.',col:'#d8c090',verb:'The spade hits'},{every:7,all:true,mult:.5,txt:'Grimsby kicks over a heap of grave-earth, and a rotten cloud of it rolls across the hall.',col:'#c8b080',verb:'Grave dirt chokes'}]},
-  gyaldric:{moves:[{every:5,all:true,mult:.6,affl:'haunted',txt:'Black flames pour out of the visor of Sir Aldric, and the hall goes cold and blue.',col:'#80c8ff',verb:'Cold flame burns'},{every:3,mult:1.15,near:2,txt:'Sir Aldric brings the greatsword round in a stroke that has not been learnt in this century.',col:'#a8c8f0',verb:'The greatsword cleaves'}]},
+  gyvane:{moves:[{every:5,all:true,mult:.55,affl:'cursed',txt:'Lord Vane flings a fistful of cursed coins. They ring on the brick, and burn where they land.',col:'#a8e090',verb:'A coin burns'},{every:3,mult:1.05,near:2,txt:'Lord Vane lunges with the rapier, very elegantly, and very rudely.',col:'#c8e8a0',verb:'The rapier finds'}]},
+  gygrimsby:{moves:[{every:3,mult:1.4,near:2,affl:'graverot',txt:'Digger Grimsby swings the great spade in a flat arc. It has buried a great many people, and it knows how.',col:'#d8c090',verb:'The spade hits'},{every:6,all:true,mult:.55,txt:'Grimsby kicks over a heap of grave-earth, and a rotten cloud of it rolls across the hall.',col:'#c8b080',verb:'Grave dirt chokes'}]},
+  gyaldric:{moves:[{every:5,all:true,mult:.6,affl:'haunted',txt:'Black flames pour out of the visor of Sir Aldric, and the hall goes cold and blue.',col:'#80c8ff',verb:'Cold flame burns'},{every:3,mult:1.15,near:1,txt:'Sir Aldric brings the greatsword round in a stroke that has not been learnt in this century.',col:'#a8c8f0',verb:'The greatsword cleaves'}]},
   gymorwenna:{moves:[{every:6,all:true,mult:.55,affl:'shaken',txt:'Prioress Morwenna raises the bell-staff and tolls. The sound goes through the bone.',col:'#f0d870',verb:'The bell tolls on'},{every:4,mult:.9,near:5,affl:'cursed',txt:'The Prioress swings the censer, and a yellow smoke curls round one of you, whispering that it is all your fault.',col:'#e8d070',verb:'The smoke stings'}],mend:[9,.04,"The Prioress mutters the burial service backwards, and her wounds close a little."]}};
 for(const t in GY_BOSSMOVES)ENEMY_DEF[t].act=e=>gyBossAct(e,GY_BOSSMOVES[t]);
 const GY_HELPERS={gyvane:['gypike','The dead of the Vane household step out of the brick to defend their master.'],gygrimsby:['gyzombie','A rotten shape drags itself up out of the pit, still holding a shovel.'],gyaldric:['gywraith','A wraith of the old knight\'s men rises from the black stone, and kneels, and then attacks.'],gymorwenna:['gyhound','A bone hound shakes itself loose from the heap of the dead, and growls at the bell.']};
@@ -53919,7 +53933,7 @@ const GY_HELPERS={gyvane:['gypike','The dead of the Vane household step out of t
   _he.apply(this,arguments);
   try{
     if(isB){if(e.hp<=0){gyBossDied(e);return}
-      const step=Math.min(2,Math.floor((1-e.hp/e.maxhp)*3));e.gySum=e.gySum||0;
+      const step=Math.min(2,Math.floor((1-e.hp/e.maxhp)*3));if(e.gySum===undefined)e.gySum=Math.min(2,Math.max(0,Math.floor((1-(e.hp+dmg)/e.maxhp)*3)));   // a boss loaded from a saved game starts counting from the health it had before this blow, so the helpers already called are not called twice
       while(e.gySum<step){e.gySum++;const H=GY_HELPERS[e.t],free=gyFreeAround(e,4);if(H&&free.length){for(let n=0;n<2&&n<free.length;n++){addEnemy(H[0],free[n][0],free[n][1],true);const m=G.enemies[G.enemies.length-1];if(m)m.gyAdd=1}msg(H[1],'#d8c8a0');sfx('growl')}}}
     else if(spirit&&e.hp<=0)gySpiritDown(e)}catch(x){console.error('gy hurt',x)}}}
 function gySpiritDown(e){
@@ -53935,7 +53949,8 @@ const GY_LAST=[
 const GY_GIVE=[['gyring',"Lady Aldith's Wedding Ring"],['gyname',"Lady Aldith's Name-stone"],['gylocket',"Sir Edmund's Locket"],['gybook',"The Prioress's Book of Rest"]];
 function gyBossDied(e){
   const k=ENEMY_DEF[e.t].gyb,F=gyF();if(F.dead[k])return;F.dead[k]=1;
-  for(const q of G.enemies)if(q.hp>0&&q.gyAdd){q.hp=0;q.dying=.4}
+  {const L=LEVELS[GY.M[k]],B=L&&L._gy&&L._gy.M&&L._gy.M.boss;   // the helpers go with him (also after a saved game, which does not remember who was a helper): nothing else lives in the boss room
+   for(const q of G.enemies)if(q.hp>0&&(q.gyAdd||(B&&ENEMY_DEF[q.t].gyb===undefined&&q.x>=B.x0&&q.x<=B.x1&&q.y>=B.y0&&q.y<=B.y1))){q.hp=0;q.dying=.4}}
   const [id,nm]=GY_GIVE[k];if(!bagAdd(mkItem(id)))G.items.push({k:id,x:e.x,y:e.y,taken:false});
   for(const it of ['potion6','potion6','supermana']){if(!bagAdd(mkItem(it)))G.items.push({k:it,x:e.x,y:e.y,taken:false})}
   msg('You have '+nm+'.','#ffe36a');sfx('win');
@@ -54155,7 +54170,7 @@ function gyArrive(n){
   if(gyMazeK(n)>=0&&!F['metM'+gyMazeK(n)]){F['metM'+gyMazeK(n)]=1;msg(['Red brick, and a smell of old pennies. Somewhere ahead, a skeleton is clearing its throat.','Grey stone, wet with something. A soft, slow dragging, on the far side of a wall.','Black basalt, and cold. Very far off, somebody is crying, quietly, in a high old voice.','Pale brick under green moss. Somewhere a little bell rings, and the rats stop to listen.'][gyMazeK(n)],'#d8c8b0')}}
 /* the bell of Wenlock rings once, the first time the party is back in the town after the ending, and the townsfolk have something new to say */
 function gyTownArrive(){
-  const F=gyF();if(!F.peace)return;
+  const F=gyF();if(!F.peace||LEVEL!==WL.ID)return;   // Wenlock waits for its pictures on a first visit and calls goToLevel again; the loading call must not use up the bell (loadLevel clears the timers)
   if(F.bell&&!F.bellRung){F.bellRung=1;later(1800,()=>{try{tone(523,520,3.2,'sine',.2);tone(1046,1040,2.2,'sine',.09,.02);tone(1568,1560,1.4,'sine',.04,.04);tone(262,260,3.6,'sine',.1)}catch(e){}msg("From the tower of Saint Wenna's, one stroke of the old cracked bell. Nobody was meant to be ringing it. The whole town looks up, and then, for no reason at all, smiles.",'#ffe9a0')})}}
 {const NEW=[['wlo_mayor',"Did you hear the bell? Nobody was at the rope, and it rang as sweetly as it has in three hundred years. Sexton Moss says it is the damp. I say it is Lady Aldith, and that she has gone home, and that I owe her an apology on behalf of every Thistlewood since the beginning."],
   ['wlo_gravedigger',"The old crypt has gone all warm and quiet. I have been in it forty years and never once felt it was a nice place to be. Somebody has left a rose on the altar. Do not tell the vicar, he will want to charge for it."],
@@ -54199,7 +54214,7 @@ function gyMapDraw(c,x,L,api){
   // numbered places and the list of them
   const names=L.mapNames||[];
   names.forEach((n,i)=>{const px=X(n.x+.5),py=Y(n.y+.5);x.save();x.fillStyle='rgba(250,240,200,.92)';x.strokeStyle=INK;x.lineWidth=.6;x.beginPath();x.arc(px,py,3.6,0,6.3);x.fill();x.stroke();x.restore();api.text(x,String(i+1),px,py+.2,5.4,INK)});
-  api.title(x,GY.NAMES[LEVEL]||'The Graveyard',yard?'Stones, yews and four ways down':LEVEL===GY.CRYPT?'Under the great tomb':'A small maze under the churchyard',12,5);
+  api.title(x,GY.NAMES[LEVEL]||'The Graveyard','',12,5);   // the name only, no caption
   api.compass(x,50,262,15);
   {const a=392,b=40,w=82,lh=10.4,h=14+names.length*lh;api.panel(x,a,b,w,h);api.text(x,'Places',a+w/2,b+8,6.6,'#6a1a0e');
     names.forEach((n,i)=>{api.text(x,(i+1)+'  '+n.t.replace(/^The /,''),a+5,b+17+i*lh,5.2,INK,'left')})}
@@ -54551,18 +54566,21 @@ if(typeof useHeal==='function'){const _u=useHeal;useHeal=function(hi,idx){
 
 /* ---- src/desert/shop_tiers.js ---- */
 /* ==========================================================================
-   BETTER GOODS FOR THORNWICK AND IRONHILL. The playtest found that gear did not keep pace with the creatures: the shops of the two towns sold only plain (tier 0, white) goods,
+   BETTER GOODS FOR THE EARLY TOWNS AND SHOPS. The playtest found that gear did not keep pace with the creatures: the shops of the early towns sold only plain (tier 0, white) goods,
    and the party piled up gold with nothing worth buying. Gear tiers are white (basic), green, blue, red, purple and orange; they are worked out from the price (see
    tools/SHOP_TIERS_NOTES.md), the game has no tier names of its own.
 
-   Thornwick (Aldous's Store, the Witch's Shelf) now sells plain goods plus green and early blue gear for every class.
+   Thornwick (Aldous's Store, the Witch's Shelf), the hunter in Gandrick's Wood and the Peddler's Cart in the crypts sell plain goods plus green and early blue gear for every class.
    Ironhill (Brannoch's Forge, Dorn's Store, Steelhold Blades, Ironhill Plate and Mail, the Cauldron) sells blue and red gear, with the odd purple piece.
+   Fenwick's Goods in Anaea (Greendale) sells red and purple gear.
    Everything is gated by the party: a thing shows in the shop when its level is at most the party level plus 5, so the better goods appear a few levels before they can be
-   worn (each piece says "Needs level N" in its text, and the game refuses to equip it before that). The shops pick up newly allowed goods each time they are opened.
+   worn (each piece says "Needs level N" in its text, and the game refuses to equip it before that). The shops pick up newly allowed goods each time they are opened, and
+   what a shop has already put out is saved with the game, so a piece that was bought out is not put back.
+   With the flag on, the trees that stood on the doors of Corvin's Arcana and the Cauldron in Ironhill (and across the way to them) are also cleared, so that the party can walk in.
    Khemetra's shops and everything else are untouched. Last in the injection order. The goods are the ones that already exist (gear.js, armour.js, magegear.js, weight.js),
    plus the daggers, staves, a mace, a shield and chain sleeves and leggings made here, to fill the gaps (nothing but swords, axes, maces and bows had tiers; no dagger or staff did).
    ========================================================================== */
-const ST_ENABLED=false; // false leaves every shop exactly as before (the new items exist but nothing sells them); set true to turn the new stock on
+const ST_ENABLED=true; // true: the new stock is on. False leaves every shop exactly as before (the new items exist but nothing sells them)
 const ST_IDS=[];
 function stWeapon(id,n,t,lv,dmg,hit,req,price,eff,d,x){
   ITEMDEF[id]=Object.assign({n,k:'weapon',t,ic:t==='Dagger'?'dagger':t==='Staff'?'staff':'mace',c:'#c8ccd4',dmg,price,lvl:lv,req,eff:eff||undefined,
@@ -54582,6 +54600,8 @@ stWeapon('st_misericorde','Misericorde','Dagger',15,[17,29],.12,{dex:20},1500,{e
 stWeapon('st_dirk','Highland Dirk','Dagger',20,[30,44],.12,{dex:22},1600,{bleed:[.4,8,4]},'A long dirk with a black handle. Two hits in five leave the foe bleeding.');
 stWeapon('st_midnightkris','Midnight Kris','Dagger',25,[54,78],.14,{dex:24},2100,{bleed:[.35,8,4],exec:[.2,2]},'A dark, wavy blade that is hard to see in the dusk. It bleeds the foe, and finishes the weak.');
 stWeapon('st_nightblade','Nightblade','Dagger',30,[100,142],.15,{dex:26},2600,{exec:[.3,2.5],bleed:[.4,8,4]},'A black dagger that drinks the light. Against a foe under 30% health it deals two and a half times damage.',{dbl:.1});
+stWeapon('st_wraithknife','Wraith Knife','Dagger',35,[112,164],.16,{dex:28},3300,{bleed:[.4,10,4],exec:[.3,2.5]},'A pale dagger with a ring hilt. It bleeds the foe, and against a foe under 30% health it deals two and a half times damage.',{dbl:.1});
+stWeapon('st_kingsbane','Kingsbane','Dagger',40,[126,181],.17,{dex:30},4200,{bleed:[.4,10,4],exec:[.35,3]},'A long, plain dagger of black steel. It bleeds the foe, and against a foe under 35% health it deals three times damage.',{dbl:.12});
 // staves (a little melee damage, and spell power for the casters)
 stWeapon('st_oakstaff','Oak Staff','Staff',1,[2,5],0,{int:8},150,null,'A plain staff of seasoned oak with an iron cap. Adds 5 to the power of spells.',{magic:5});
 stWeapon('st_ashstaff','Ash Staff','Staff',1,[3,6],0,{int:10},400,null,'A pale, straight staff of ash, carved with small runes. Adds 8 to the power of spells.',{magic:8});
@@ -54591,6 +54611,8 @@ stWeapon('st_sagestaff',"Sage's Staff",'Staff',15,[7,13],0,{int:17},1500,null,'A
 stWeapon('st_moonstaff','Moonwood Staff','Staff',20,[14,24],0,{int:20},1600,{daze:.15},'A silver-white staff from a tree that grows only by moonlight. Adds 26 to the power of spells, and one blow in seven leaves the foe dazed.',{magic:26});
 stWeapon('st_stormstaff','Stormwood Staff','Staff',25,[24,38],0,{int:23},2100,{daze:.2},'A staff of black, split wood that crackles when it is held. Adds 34 to the power of spells, and one blow in five leaves the foe dazed.',{magic:34});
 stWeapon('st_magusstaff','Staff of the Magus','Staff',30,[50,82],0,{int:26},2600,{daze:.2},'The staff of a master of the art, topped with a gold claw around a blue stone. Adds 40 to the power of spells, and one blow in five leaves the foe dazed.',{magic:40});
+stWeapon('st_dawnstaff','Dawnwood Staff','Staff',35,[62,92],0,{int:28},3300,{daze:.25},'A pale staff of ash with a ring of gold at the head. Adds 46 to the power of spells, and one blow in four leaves the foe dazed.',{magic:46});
+stWeapon('st_archstaff',"Archmage's Staff",'Staff',40,[70,104],0,{int:30},4200,{daze:.25},'A tall staff of black wood with a large blue crystal. Adds 52 to the power of spells, and one blow in four leaves the foe dazed.',{magic:52});
 // a mace, a shield, and chain for the arms and legs
 stWeapon('st_morningstar','Morning Star','Mace',1,[10,16],-.03,{str:14},400,{daze:.12},'A spiked iron ball on a chain-wrapped haft. One hit in eight leaves the foe dazed.');
 stArmour('st_rimmed','shield','Iron-Rimmed Shield','Shield',5,3,180,'#8a8a96',{str:9},'A wooden shield with a rim and a boss of iron.');
@@ -54611,7 +54633,7 @@ const ST_SHOPS={
     ['cutlass',1],['splitaxe',1],['hunterbow',1],['st_morningstar',1],['st_poniard',1],['st_ashstaff',1],
     ['bastard',1],['beardaxe',1],['flanged',1],['longbow',1],['st_kris',1],['st_runestaff',1],
     ['greatsword',1],['wolfaxe',1],['barbedbow',1],['st_rondel',1],['st_hedgestaff',1],
-    ['st_rimmed',1],['roundshield',1],['ar_boar_h',1],['ironcap',1],['ar_boar_c',1],['brigandine',1],['st_chainarms',1],['ar_boar_a',1],['st_chainlegs',1],['ar_boar_l',1],
+    ['st_rimmed',2],['roundshield',2],['ar_boar_h',1],['ironcap',1],['ar_boar_c',1],['brigandine',1],['st_chainarms',1],['ar_boar_a',1],['st_chainlegs',1],['ar_boar_l',1],
     ['mg_app_h',1],['mg_app_c',1],['mg_app_a',1],['mg_app_l',1],
     ['ringOx',1],['ringFox',1],['ringOwl',1],['ringWell',1],['ringBear',1],
     ['healdraught',4],['manadraught',3],['greaterheal',2,12]]},
@@ -54619,16 +54641,21 @@ const ST_SHOPS={
     ['healdraught',3],['manadraught',4],['greatermana',2,14],['ringWell',1],['ringOwl',1],['ringMoon',1,12],
     ['st_oakstaff',1],['st_ashstaff',1],['st_runestaff',1],['st_hedgestaff',1],
     ['mg_app_h',1],['mg_app_c',1],['mg_app_a',1],['mg_app_l',1],['mg_hed_h',1],['mg_hed_a',1],['mg_hed_l',1]]},
+  "The Hunter's Pack":{items:[ // the hunter in the Bandit Cache, Gandrick's Wood: bows, knives, hatchets, walking staves and boarhide, green to early blue
+    ['huntbow',1],['st_stiletto',1],['hatchet',1],['gladius',1],['cudgel',1],['st_oakstaff',1],
+    ['hunterbow',1],['st_poniard',1],['splitaxe',1],['cutlass',1],['st_ashstaff',1],['longbow',1],['st_kris',1],
+    ['st_rimmed',1],['st_chainarms',1],['st_chainlegs',1],['ar_boar_h',1],['ar_boar_c',1],['ar_boar_a',1],['ar_boar_l',1],['ringFox',1],
+    ['healdraught',3],['manadraught',2],['greaterheal',2,12]]},
   "Brannoch's Forge":{items:[ // Ironhill: good plain steel (blue, and red as the party grows)
-    ['bastard',1],['beardaxe',1],['flanged',1],['longbow',1],['st_kris',1],['st_runestaff',1],
     ['greatsword',1],['wolfaxe',1],['barbedbow',1],['st_rondel',1],['st_hedgestaff',1],
     ['tempered',1],['battleaxe',1],['warhammer',1],['compbow',1],['st_misericorde',1],['st_sagestaff',1],
     ['executioner',1],['maul',1],['twinbow',1],['st_dirk',1],['st_moonstaff',1],
-    ['st_rimmed',1],['roundshield',1],['kiteshield',1],['spikeshield',1],
-    ['ironcap',1],['greathelm',1],['hornhelm',1],['brigandine',1],['hauberk',1],
+    ['roundshield',1],['kiteshield',1],['spikeshield',1],
+    ['ironcap',1],['greathelm',1],['hornhelm',1],['brigandine',1],['hauberk',1],['ar_iron_a',1],['ar_iron_l',1],
     ['healdraught',3],['greaterheal',2]]},
   "Dorn's Store":{items:[ // Ironhill's general store: everyday gear, blue at most
     ['bastard',1],['beardaxe',1],['flanged',1],['longbow',1],['st_kris',1],['st_runestaff',1],
+    ['greatsword',1],['wolfaxe',1],['barbedbow',1],['st_rondel',1],['st_hedgestaff',1],
     ['st_rimmed',1],['roundshield',1],['kiteshield',1],['ironcap',1],['brigandine',1],['st_chainarms',1],['st_chainlegs',1],
     ['ar_boar_h',1],['ar_boar_c',1],['ar_boar_a',1],['ar_boar_l',1],['ar_iron_a',1],['ar_iron_l',1],
     ['mg_app_h',1],['mg_app_c',1],['mg_hed_h',1],
@@ -54647,35 +54674,111 @@ const ST_SHOPS={
     ['ironcap',1],['greathelm',1],['ar_iron_h',1],['hornhelm',1],['ar_rime_h',1],['drakehelm',1],
     ['brigandine',1],['hauberk',1],['ar_iron_c',1],['cuirass',1],['ar_rime_c',1],['wyrmplate',1],
     ['ar_iron_a',1],['ar_rime_a',1],['ar_iron_l',1],['ar_rime_l',1],
-    ['ar_boar_h',1],['ar_boar_c',1],['ar_boar_a',1],['ar_boar_l',1],
     ['mg_hed_h',1],['mg_hed_c',1],['mg_hed_a',1],['mg_hed_l',1],['mg_mag_h',1],['mg_mag_c',1],['mg_mag_a',1],['mg_mag_l',1],
     ['ringBulwark',1],['ringTitan',1],['ringWind',1],['ringSage',1],['ringOak',1],['ringChampion',1]]},
   'The Cauldron':{replace:1,items:[ // Ironhill's alchemist: the draughts that fit the levels
     ['healdraught',6],['greaterheal',4,10],['superiorheal',3,18],['elixir',1,22],['potion2',3,20],
     ['manadraught',6],['greatermana',4,12],['supermana',2,20],
     ['might',3],['swiftness',3],['ironskin',3],['keeneye',3],
-    ['antidote',5],['salve',5],['holywater',2],['sleeptea',3]]}
+    ['antidote',5],['salve',5],['holywater',2],['sleeptea',3]]},
+  "Fenwick's Goods":{items:[ // Anaea (Greendale): the plain stock stays; red and purple gear from the north road, for every class (the party arrives at about level 31)
+    ['frostbrand',1],['reaveraxe',1],['greatmaul',1],['elvenbow',1],['st_midnightkris',1],['st_stormstaff',1],
+    ['claymore',1],['headsman',1],['skullcrusher',1],['warbow',1],['st_nightblade',1],['st_magusstaff',1],
+    ['doomblade',1],['dreadaxe',1],['titanhammer',1],['bonebow',1],['st_wraithknife',1],['st_dawnstaff',1],
+    ['nightfall',1],['dragonmaw',1],['judgement',1],['ruinbow',1],
+    ['kingslayer',1],['worldaxe',1],['silverbow',1],['st_kingsbane',1],['st_archstaff',1],
+    ['spikeshield',1],['bulwark',1],['towershield',1],
+    ['hornhelm',1],['ar_rime_h',1],['drakehelm',1],['centurion',1],['mg_mag_h',1],['ar_ember_h',1],['mg_war_h',1],
+    ['cuirass',1],['ar_rime_c',1],['wyrmplate',1],['lionplate',1],['mg_mag_c',1],['ar_ember_c',1],['mg_war_c',1],
+    ['ar_iron_a',1],['mg_hed_a',1],['ar_rime_a',1],['mg_mag_a',1],['ar_ember_a',1],['mg_war_a',1],
+    ['ar_iron_l',1],['mg_hed_l',1],['ar_rime_l',1],['mg_mag_l',1],['ar_ember_l',1],['mg_war_l',1],
+    ['ringTitan',1],['ringWind',1],['ringSage',1],['ringOak',1],['ringChampion',1],
+    ['greaterheal',4],['superiorheal',3],['elixir',2,22],['greatermana',3],['supermana',2],['might',2],['swiftness',2],['ironskin',2],['keeneye',2]]},
+  /* the Peddler's Cart in the crypts below the abbey (the only cart in the game that is a shop: the carts in Ironhill, the Mines, the Moor and the Pass are lootable scenery) */
+  "Peddler's Cart (crypts)":{items:[ // the first cart: a few green weapons and a shield
+    ['gladius',1],['hatchet',1],['cudgel',1],['huntbow',1],['st_stiletto',1],['st_oakstaff',1],['st_rimmed',1]]}
 };
+/* which table a Peddler's Cart uses: the level it stands in */
+const ST_CART_OF={'1':"Peddler's Cart (crypts)"};
+const stCartTable=d=>ST_SHOPS[ST_CART_OF[LEVEL]];
 function stVisible(r){const d=ITEMDEF[r[0]];if(!d)return false;const at=r[2]!==undefined?r[2]:Math.max(1,(d.lvl||1)-5);return partyLevel()>=at}
 function stRows(T,stock){
   const out=T.replace?[]:stock.map(r=>[r[0],r[1]]),have=new Set(out.map(r=>r[0]));
   for(const r of T.items){if(have.has(r[0])||!stVisible(r))continue;have.add(r[0]);out.push([r[0],r[1]])}
   return out}
+/* put out the goods a shop should have. Returns {first, rows}: the rows to open the shop with the first time; a shop that has been opened before is topped up in place
+   with the goods the party has since reached (a piece that was bought out is not put back: what has been put out is kept in d.tierSeen, saved with the level) */
+function stFill(d,stock,T,potions){
+  if(T.replace&&d.contents&&!d.tierSeen)d.contents=null; // an old stock of a shop that is now curated is thrown away once
+  const first=!d.contents,rows=stRows(T,stock);
+  if(!first){
+    const seen=d.tierSeen||(d.tierSeen=Object.fromEntries(stock.map(q=>[q[0],1]))); // a shop opened before this was switched on: its old stock counts as put out
+    for(const r of rows.concat(T.replace||!potions||!stock.some(q=>q[0]==='potion')?[]:potionStockRows())){
+      if(seen[r[0]]||d.contents.some(c=>c.id===r[0]))continue;seen[r[0]]=1;d.contents.push({id:r[0],n:r[1]})}}
+  return {first,rows}}
+function stSeen(d){if(d.contents){d.tierSeen={};for(const c of d.contents)d.tierSeen[c.id]=1}}
 {const _os=openShop;openShop=function(d,stock,name){
   const T=ST_SHOPS[name];
   if(!ST_ENABLED||!T||!d||(typeof repRefuses==='function'&&repRefuses()))return _os.apply(this,arguments);
-  if(T.replace&&d.contents&&!d.tierSeen)d.contents=null; // an old stock of a shop that is now curated is thrown away once
-  const first=!d.contents,rows=stRows(T,stock);
-  if(!first){ // the shop has been opened before: the goods that the party has since reached are put out
-    const seen=d.tierSeen||(d.tierSeen={});
-    for(const r of rows.concat(T.replace||!stock.some(q=>q[0]==='potion')?[]:potionStockRows())){
-      if(seen[r[0]]||d.contents.some(c=>c.id===r[0]))continue;seen[r[0]]=1;d.contents.push({id:r[0],n:r[1]})}}
-  const res=_os.call(this,d,first?rows:stock,name);
-  if(first&&d.contents){d.tierSeen={};for(const c of d.contents)d.tierSeen[c.id]=1}
+  const f=stFill(d,stock,T,1);
+  const res=_os.call(this,d,f.first?f.rows:stock,name);
+  if(f.first)stSeen(d);
   return res}}
-/* Aldous no longer says "nothing fancy" */
-try{const _ar=ST_ENABLED&&NPCS.aldous&&NPCS.aldous.root;if(_ar)NPCS.aldous.root=function(){const n=_ar.apply(this,arguments);
-  if(n&&typeof n.text==='string'&&n.text.indexOf('Nothing fancy.')>=0)n.text=n.text.replace('Nothing fancy.','And since the road opened, a few better pieces from the Ironhill smiths.');return n}}catch(e){console.error(e)}
+/* a Peddler's Cart is opened with openLoot (it has no name of its own): its first stock is built here, before the game builds the plain one */
+{const _ol=openLoot;openLoot=function(d){
+  try{if(ST_ENABLED&&d&&d.shop&&d.k==='cart'&&!d.shopName&&!(typeof repRefuses==='function'&&repRefuses())){const T=stCartTable(d);
+    if(T){const f=stFill(d,SHOP_STOCK,T,0);if(f.first){d.contents=f.rows.map(([id,n])=>({id,n}));stSeen(d)}}}}catch(e){console.error(e)}
+  return _ol.apply(this,arguments)}}
+/* what a shop has put out is saved with the level, so that a bought-out piece stays gone after loading */
+{const _sd=sparseDecor;sparseDecor=function(){const o=_sd.apply(this,arguments);
+  try{G.decor.forEach((d,i)=>{if(d.tierSeen&&d.contents&&!d.caravan){const e=o[i]||(o[i]={contents:d.contents,gold:d.gold||0,goldTaken:!!d.goldTaken,found:!!d.found,opened:!!d.opened,ambushed:!!d.ambushed});e.tierSeen=d.tierSeen}})}catch(e){console.error(e)}
+  return o}}
+{const _ap=applySparseDecor;applySparseDecor=function(sd){_ap.apply(this,arguments);
+  try{if(sd&&!Array.isArray(sd))for(const k in sd){const d=G.decor[+k];if(d&&sd[k]&&sd[k].tierSeen)d.tierSeen=sd[k].tierSeen}}catch(e){console.error(e)}}}
+/* Aldous and Fenwick no longer say that they sell nothing fancy */
+if(ST_ENABLED){
+  try{const _ar=NPCS.aldous&&NPCS.aldous.root;if(_ar)NPCS.aldous.root=function(){const n=_ar.apply(this,arguments);
+    if(n&&typeof n.text==='string'&&n.text.indexOf('Nothing fancy.')>=0)n.text=n.text.replace('Nothing fancy.','And since the road opened, a few better pieces from the Ironhill smiths.');return n}}catch(e){console.error(e)}
+  try{const _fr=NPCS.fenwick&&NPCS.fenwick.root;if(_fr)NPCS.fenwick.root=function(){const n=_fr.apply(this,arguments);
+    if(n&&typeof n.text==='string'&&n.text.indexOf('Greendale prices are fair.')>=0)n.text=n.text.replace('Greendale prices are fair.','Greendale prices are fair. I also stock good steel and armour that came down the north road.');return n}}catch(e){console.error(e)}
+}
+/* Corvin's Arcana and the Cauldron stand in the woods on the north side of Ironhill, and trees and rocks stand on their doors and across the way to them, so the party could not walk in.
+   The scenery on each door and on the shortest way from the door to open ground is cleared (the shops are the point of this file, so this is switched on with it). */
+function stClearDoors(){
+  const L=LEVELS[13];if(!L||!L.rows||!L.decor||L._stDoors)return;L._stDoors=1;
+  const rows=L.rows,W=rows[0].length,H=rows.length,SC=/^(ptree|gtree|pjuniper|grocks|gboulder)/,st=L.start||{x:1,y:19};
+  const decors=[L.decor];try{const b=typeof LEVEL13_DATA!=='undefined'&&LEVEL13_DATA;if(b&&b.decor&&b.decor!==L.decor)decors.push(b.decor)}catch(e){}
+  const hold=new Map(); // cell -> the blocking pieces of scenery standing on it
+  for(const d of L.decor)if(d.block&&!d.npc&&!d.found){const k=d.x+','+d.y;if(!hold.has(k))hold.set(k,[]);hold.get(k).push(d)}
+  const open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&rows[y][x]==='.';
+  const free=new Set([st.x+','+st.y]),q=[[st.x,st.y]]; // the ground the party can already reach
+  while(q.length){const [x,y]=q.pop();for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const k=(x+dx)+','+(y+dy);if(free.has(k)||!open(x+dx,y+dy)||hold.has(k))continue;free.add(k);q.push([x+dx,y+dy])}}
+  const doors=(typeof IH_SHOPS!=='undefined'?IH_SHOPS:[]).map(S=>S.dir==='N'?[S.x+1,S.y+2,1]:[S.x+2,S.y,-1]); // the door of each of the four shops and which way its front lies
+  for(const [dx0,dy0,fw] of doors){
+    const fx=dx0,fy=dy0+fw;if(!open(fx,fy))continue;
+    const dist=new Map([[fx+','+fy,0]]),prev=new Map(),todo=[[fx,fy,0]];let goal=null;
+    while(todo.length){todo.sort((a,b)=>b[2]-a[2]);const [x,y,c]=todo.pop();const k=x+','+y;if(c>dist.get(k))continue;if(free.has(k)){goal=k;break}
+      for(const [ax,ay] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+ax,ny=y+ay,nk=nx+','+ny;if(!open(nx,ny))continue;
+        const h=hold.get(nk);if(h&&!h.every(d=>SC.test(d.k)))continue;const nc=c+1+(h?6:0);if(!dist.has(nk)||nc<dist.get(nk)){dist.set(nk,nc);prev.set(nk,k);todo.push([nx,ny,nc])}}}
+    if(!goal)continue;
+    const cells=new Set([dx0+','+dy0]);for(let k=goal;k;k=prev.get(k))cells.add(k);
+    for(const arr of decors)for(let i=arr.length-1;i>=0;i--){const d=arr[i];if(d.block&&!d.npc&&SC.test(d.k)&&cells.has(d.x+','+d.y))arr.splice(i,1)}
+  }
+}
+if(ST_ENABLED)try{stClearDoors()}catch(e){console.error(e)}
+
+/* ---- src/desert/boss_plus.js ---- */
+/* ==========================================================================
+   BOSSES ONE LEVEL ABOVE THEIR AREA. Sut, Lord of the Red Desert (the Tomb of Sut, area level 39) stands one level above the area, like the other creatures of the
+   place stand within one level of it. This runs after the game has set every creature's level for the area (rebalanceEnemies), on arrival and whenever it is run again.
+   Add a creature to BOSS_PLUS (its type and how many levels above) to give another boss the same. Last in the injection order.
+   ========================================================================== */
+const BOSS_PLUS={sut:1};
+{const _rb=rebalanceEnemies;rebalanceEnemies=function(){
+  const r=_rb.apply(this,arguments);
+  try{for(const e of G.enemies){const up=BOSS_PLUS[e.t];if(!up||e.hp<=0||e.dying||e.base===undefined)continue;
+    const nl=e.base+up;if(e.lvl!==nl){const fr=e.hp/Math.max(1,e.maxhp);e.lvl=nl;e.vd=-up;e.maxhp=enemyStat(e.t,nl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*fr))}}}catch(x){console.error('bossplus',x)}
+  return r}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
