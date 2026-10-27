@@ -24,7 +24,7 @@ function hgduArt(){for(const [id,,img] of HGDU_KINDS){const src=IMG[img];if(IMG[
   IMG['hgu_'+id]=c}catch(e){console.error('hgduArt',e)}}}
 // what the bites leave behind
 AFFL_HITS.push([/^hgusl/,'poisoned',.22],[/^hguyk/,'bleeding',.22],[/^hguyk[35]/,'fever',.14],[/^hgusl[37]/,'stung',.2],[/^hgu/,'shaken',.1],[/^hgu/,'graverot',.07]);
-{const _aa=afflArea;afflArea=function(n,L){const r=_aa.apply(this,arguments);if(n===HGDU.ID){r.msgText='The air is close and sour, and something is clicking in the walls. You cannot see more than a step.';r.out.push(['tomblung',.3],['shaken',.2],['fleas',.2],['fever',.08])}return r}}
+{const _aa=afflArea;afflArea=function(n,L){const r=_aa.apply(this,arguments);if(n===HGDU.ID){r.msgText='The air is close and sour, and something is clicking in the walls. You cannot see more than a step.'}return r}} // only a line of text on arrival: the party is no longer afflicted with nobody near (it used to roll tomblung, shaken, fleas and fever at every arrival; the bites of the creatures still leave afflictions)
 /* ---------- the ladders: wall tiles ---------- */
 function hgduTex(up){const P=IMG['art_tex_hgdp_ladder'+(up?'up':'dn')];if(P&&P.width)return 'art_tex_hgdp_ladder'+(up?'up':'dn');const key='hgdu_ladder_'+(up?'up':'down');if(IMG[key])return key;
   IMG[key]=mkCanvas(128,128,(x,w,h)=>{const b=IMG.tex_abbeywall;if(b)x.drawImage(b,0,0,w,h);else{x.fillStyle='#3a3630';x.fillRect(0,0,w,h)}
