@@ -53880,7 +53880,8 @@ function gyYardBuild(){
   const free=(x,y)=>isOpen(x,y)&&!used.has(x+','+y);
   const setF=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(x>=0&&y>=0&&x<W&&y<H)fm[y*W+x]=f};
   const pth=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){path.add(x+','+y);fm[y*W+x]=f||'5'}};
-  const dec=(a,x,y,o)=>{o=o||{};const k=GYA[a]?'gy_'+a:a;if(!isOpen(x,y))return null;const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}
+  const dec=(a,x,y,o)=>{o=o||{};const k=GYA[a]?'gy_'+a:a;if(!isOpen(x,y))return null;if(/^(gy_(stone1|stone2|lean|slab|wcross|ccross)|ltree)/.test(k))o=Object.assign({},o,{block:true});   // stones, crosses and trees are always solid
+  const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}
     if(o.block&&o.npc)d.solid=1;   // a stone structure or a post: nobody walks through it (the base game makes every person walk-through unless flagged solid)
     if(o.sc)d.sc=o.sc;if(o.npc){d.npc=o.npc;d.deco=false}if(o.i!==undefined)d.i=o.i;if(o.wd){d.wd=o.wd;d.pic=1}if(o.txt)d.txt=o.txt;
     decor.push(d);used.add(x+','+y);return d};
@@ -53940,6 +53941,7 @@ function gyYardBuild(){
    for(let y=11;y<=33;y++)for(const x of [50,54]){let gid=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:(y+(x===54?1:0))%3,n:3},gain:1.0});
      if(x===50&&y===22){gid=gyTile('texGrey_0',3.4,{fac:{img:'stairFix_0',i:0,n:1},gain:1.0,rgb:[1,1,1.00042]});KH_DOOR[gid]={lvl:542,get at(){return {x:3,y:9,f:1}},gy:'avenue'}}   // one of the tomb fronts is a stair down to the vaults beneath the Avenue
      rows[y][x]=ch(gid);block[y*W+x]=1;path.add(x+','+y)}
+   for(let x=51;x<=53;x++){rows[9][x]=ch(gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:x-51,n:3},gain:1.0,rgb:[1,1,1+(x-51)*.00007]}));block[9*W+x]=1}   // the closed north end of the Avenue: a plain stone front, not a black void
    dec('arch',52,10,{sc:1.45});for(const x of [51,53])for(const y of [18,26])lamp(x,y);
    for(const y of [14,22,30]){if(free(52,y)&&false)dec('lantern',52,y)}
    for(const y of [12,19,27])for(const x of [49,55]){if(free(x,y))DB(['ltree20','ltree21','ltree12'][(hs(x,y,38)*3)|0],x,y,{sc:1.1})}}
