@@ -6,10 +6,10 @@
    the graveyard is first needed (gyLoad). IMG['gyp_<piece>'] is the raw piece; IMG['gy_<alias>'] and NPC_H the pieces as the game uses them (GYA: alias -> [piece, height in squares]).
    Notes: tools/GRAVEYARD_NOTES.md.
    ========================================================================== */
-const GY={ID:530,CRYPT:531,M:[532,533,534,535],W:70,H:70,ready:false,loading:null,tiles:{},LV:{530:84,531:84,532:84,533:85,534:86,535:87}};
-const gyIs=n=>n===530||n===531||(n>=532&&n<=535);
+const GY={ID:530,CRYPT:531,M:[532,533,534,535],W:70,H:70,ready:false,loading:null,tiles:{},LV:{530:84,531:84,532:84,533:85,534:86,535:87,536:84,537:84,538:84,539:84,540:84,541:84}};
+const gyIs=n=>n===530||n===531||(n>=532&&n<=541);   // 536 to 541 are the six small tombs built into the yard's edge (gy_tombs.js)
 const gyMazeK=n=>GY.M.indexOf(n);   // 0..3, or -1
-GY.NAMES={530:'Wenlock Graveyard',531:"Lady Aldith's Crypt",532:'The Red Ossuary',533:'The Grey Charnel',534:'The Black Barrow',535:'The Pale Catacombs'};
+GY.NAMES={530:'Wenlock Graveyard',531:"Lady Aldith's Crypt",532:'The Red Ossuary',533:'The Grey Charnel',534:'The Black Barrow',535:'The Pale Catacombs',536:'The Vane Tomb',537:'The Ashby Vault',538:'The Thorne Mausoleum',539:'The Marsh Crypt',540:'The Cobb Vault',541:'The Fell Tomb'};
 for(const n in GY.LV){LEVEL_RATING[n]=GY.LV[n];LEVEL_NAMES[n]=GY.NAMES[n]}
 const GYA={ // alias: [piece, height of the thing in squares (one square is about a person's height)]
   ghost0:['ghost_0',1.85],ghost1:['ghost_1',1.85],ghost2:['ghost_2',1.85],
@@ -33,8 +33,10 @@ function gyIvy(){
     const s=IMG['gy_'+a];if(!s)continue;try{
     const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.drawImage(s,0,0);
     const v=document.createElement('canvas');v.width=c.width;v.height=c.height;const y=v.getContext('2d');y.drawImage(t,0,0,v.width,v.height);y.globalCompositeOperation='destination-in';
-    const g=y.createLinearGradient(0,0,0,v.height);g.addColorStop(0,'rgba(0,0,0,.08)');g.addColorStop(.4,'rgba(0,0,0,.4)');g.addColorStop(1,'rgba(0,0,0,.95)');y.fillStyle=g;y.fillRect(0,0,v.width,v.height);
+    const g=y.createLinearGradient(0,0,0,v.height);g.addColorStop(0,'rgba(0,0,0,.3)');g.addColorStop(.35,'rgba(0,0,0,.65)');g.addColorStop(1,'rgba(0,0,0,1)');y.fillStyle=g;y.fillRect(0,0,v.width,v.height);
     x.globalCompositeOperation='source-atop';x.drawImage(v,0,0);GY._ivy[a]=c;IMG['gy_'+a]=c}catch(e){console.error('gyIvy',a,e)}}}
+/* cobwebs are drawn faint and fine: the painted web at half strength */
+function gyWeb(){const s=IMG.gyp_bonesH_1;if(!s)return;if(!GY._web){const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.globalAlpha=.5;x.drawImage(s,0,0);GY._web=c}IMG.gy_web=GY._web}
 function gyLoad(){
   if(GY.loading)return GY.loading;
   GY.loading=new Promise(res=>{
@@ -48,7 +50,7 @@ function gyAlias(){
   for(const a in GYA){const [n,h]=GYA[a];if(IMG['gyp_'+n]){IMG['gy_'+a]=IMG['gyp_'+n];NPC_H['gy_'+a]=h}}
   for(const [k,n] of [['skel','crA_0'],['pike','crA_1'],['bmage','crA_2'],['ghoul','crA_3'],['zombie','crA_4'],['giant','crA_5'],['wraith','crB_0'],['shade','crB_1'],['banshee','crB_2'],['rats','crB_3'],['hound','crB_4'],['rat','crB_5'],['raven','crB_6'],
     ['vane','boss_0'],['grimsby','boss_1'],['aldric','boss_2'],['morwenna','boss_3'],['ghost0','ghost_0'],['ghost1','ghost_1'],['ghost2','ghost_2']])if(IMG['gyp_'+n])IMG['gyi_'+k]=IMG['gyp_'+n];
-  gySlab();gyFloors();gyIvy()}
+  gySlab();gyFloors();gyIvy();gyWeb()}
 /* the blank grave slab (stonesB_2) was painted as a plain flat grey card, which glows in the mist: it is given the grain of the painted grey stone texture, darker towards the foot like the other stones */
 function gySlab(){
   if(GY._slabC){IMG.gy_slab=GY._slabC;return}   // gyAlias runs again for every maze that is built, and puts the plain piece back, so the finished one is put in again each time
@@ -125,7 +127,7 @@ if(typeof CONTAINERS!=='undefined'&&!CONTAINERS.includes('gy_chest'))CONTAINERS.
 if(typeof DS_LOOTNAME!=='undefined')DS_LOOTNAME.gy_chest='Old chest';
 /* the look: dusk mist in the graveyard, nothing outdoors elsewhere */
 {const _w=weatherNow;weatherNow=function(){
-  if(LEVEL===GY.ID)return {id:'fog',n:'Dusk mist',fog:.04,haze:.7,dark:.28,mix:.45,col:[132,130,102],text:'A cold blue mist lies low between the stones, and the last of the daylight is going. Somewhere a raven clears its throat.'};
+  if(LEVEL===GY.ID)return {id:'fog',n:'Dusk mist',fog:.03,haze:.55,dark:.1,mix:.4,col:[196,174,126],text:'A cold blue mist lies low between the stones, and the last of the daylight is going. Somewhere a raven clears its throat.'};
   if(gyIs(LEVEL))return null;
   return _w.apply(this,arguments)}}
 /* arrival: the pictures first, then the level; no door ever opens on a level that is not built */

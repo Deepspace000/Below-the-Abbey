@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.660';
+const VERSION='3.661';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -53381,10 +53381,10 @@ const GY_LIST={"bonesH_0":["bonesH_0.webp",311,148,"s"],"bonesH_1":["bonesH_1.we
    the graveyard is first needed (gyLoad). IMG['gyp_<piece>'] is the raw piece; IMG['gy_<alias>'] and NPC_H the pieces as the game uses them (GYA: alias -> [piece, height in squares]).
    Notes: tools/GRAVEYARD_NOTES.md.
    ========================================================================== */
-const GY={ID:530,CRYPT:531,M:[532,533,534,535],W:70,H:70,ready:false,loading:null,tiles:{},LV:{530:84,531:84,532:84,533:85,534:86,535:87}};
-const gyIs=n=>n===530||n===531||(n>=532&&n<=535);
+const GY={ID:530,CRYPT:531,M:[532,533,534,535],W:70,H:70,ready:false,loading:null,tiles:{},LV:{530:84,531:84,532:84,533:85,534:86,535:87,536:84,537:84,538:84,539:84,540:84,541:84}};
+const gyIs=n=>n===530||n===531||(n>=532&&n<=541);   // 536 to 541 are the six small tombs built into the yard's edge (gy_tombs.js)
 const gyMazeK=n=>GY.M.indexOf(n);   // 0..3, or -1
-GY.NAMES={530:'Wenlock Graveyard',531:"Lady Aldith's Crypt",532:'The Red Ossuary',533:'The Grey Charnel',534:'The Black Barrow',535:'The Pale Catacombs'};
+GY.NAMES={530:'Wenlock Graveyard',531:"Lady Aldith's Crypt",532:'The Red Ossuary',533:'The Grey Charnel',534:'The Black Barrow',535:'The Pale Catacombs',536:'The Vane Tomb',537:'The Ashby Vault',538:'The Thorne Mausoleum',539:'The Marsh Crypt',540:'The Cobb Vault',541:'The Fell Tomb'};
 for(const n in GY.LV){LEVEL_RATING[n]=GY.LV[n];LEVEL_NAMES[n]=GY.NAMES[n]}
 const GYA={ // alias: [piece, height of the thing in squares (one square is about a person's height)]
   ghost0:['ghost_0',1.85],ghost1:['ghost_1',1.85],ghost2:['ghost_2',1.85],
@@ -53408,8 +53408,10 @@ function gyIvy(){
     const s=IMG['gy_'+a];if(!s)continue;try{
     const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.drawImage(s,0,0);
     const v=document.createElement('canvas');v.width=c.width;v.height=c.height;const y=v.getContext('2d');y.drawImage(t,0,0,v.width,v.height);y.globalCompositeOperation='destination-in';
-    const g=y.createLinearGradient(0,0,0,v.height);g.addColorStop(0,'rgba(0,0,0,.08)');g.addColorStop(.4,'rgba(0,0,0,.4)');g.addColorStop(1,'rgba(0,0,0,.95)');y.fillStyle=g;y.fillRect(0,0,v.width,v.height);
+    const g=y.createLinearGradient(0,0,0,v.height);g.addColorStop(0,'rgba(0,0,0,.3)');g.addColorStop(.35,'rgba(0,0,0,.65)');g.addColorStop(1,'rgba(0,0,0,1)');y.fillStyle=g;y.fillRect(0,0,v.width,v.height);
     x.globalCompositeOperation='source-atop';x.drawImage(v,0,0);GY._ivy[a]=c;IMG['gy_'+a]=c}catch(e){console.error('gyIvy',a,e)}}}
+/* cobwebs are drawn faint and fine: the painted web at half strength */
+function gyWeb(){const s=IMG.gyp_bonesH_1;if(!s)return;if(!GY._web){const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.globalAlpha=.5;x.drawImage(s,0,0);GY._web=c}IMG.gy_web=GY._web}
 function gyLoad(){
   if(GY.loading)return GY.loading;
   GY.loading=new Promise(res=>{
@@ -53423,7 +53425,7 @@ function gyAlias(){
   for(const a in GYA){const [n,h]=GYA[a];if(IMG['gyp_'+n]){IMG['gy_'+a]=IMG['gyp_'+n];NPC_H['gy_'+a]=h}}
   for(const [k,n] of [['skel','crA_0'],['pike','crA_1'],['bmage','crA_2'],['ghoul','crA_3'],['zombie','crA_4'],['giant','crA_5'],['wraith','crB_0'],['shade','crB_1'],['banshee','crB_2'],['rats','crB_3'],['hound','crB_4'],['rat','crB_5'],['raven','crB_6'],
     ['vane','boss_0'],['grimsby','boss_1'],['aldric','boss_2'],['morwenna','boss_3'],['ghost0','ghost_0'],['ghost1','ghost_1'],['ghost2','ghost_2']])if(IMG['gyp_'+n])IMG['gyi_'+k]=IMG['gyp_'+n];
-  gySlab();gyFloors();gyIvy()}
+  gySlab();gyFloors();gyIvy();gyWeb()}
 /* the blank grave slab (stonesB_2) was painted as a plain flat grey card, which glows in the mist: it is given the grain of the painted grey stone texture, darker towards the foot like the other stones */
 function gySlab(){
   if(GY._slabC){IMG.gy_slab=GY._slabC;return}   // gyAlias runs again for every maze that is built, and puts the plain piece back, so the finished one is put in again each time
@@ -53500,7 +53502,7 @@ if(typeof CONTAINERS!=='undefined'&&!CONTAINERS.includes('gy_chest'))CONTAINERS.
 if(typeof DS_LOOTNAME!=='undefined')DS_LOOTNAME.gy_chest='Old chest';
 /* the look: dusk mist in the graveyard, nothing outdoors elsewhere */
 {const _w=weatherNow;weatherNow=function(){
-  if(LEVEL===GY.ID)return {id:'fog',n:'Dusk mist',fog:.04,haze:.7,dark:.28,mix:.45,col:[132,130,102],text:'A cold blue mist lies low between the stones, and the last of the daylight is going. Somewhere a raven clears its throat.'};
+  if(LEVEL===GY.ID)return {id:'fog',n:'Dusk mist',fog:.03,haze:.55,dark:.1,mix:.4,col:[196,174,126],text:'A cold blue mist lies low between the stones, and the last of the daylight is going. Somewhere a raven clears its throat.'};
   if(gyIs(LEVEL))return null;
   return _w.apply(this,arguments)}}
 /* arrival: the pictures first, then the level; no door ever opens on a level that is not built */
@@ -53563,6 +53565,7 @@ WK.GRAVE=GY.ID;WK.GRAVECRYPT=GY.CRYPT;WK.GRAVEMAZES=GY.M;
 WK.GRAVESTART=WK.GRAVESTART||{x:66,y:35,f:3};WK.GRAVEBACK=WK.GRAVEBACK||{x:3,y:31,f:1};
 function gyRng(seed){let a=seed|0;return()=>{a=(a+0x6D2B79F5)|0;let t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296}}
 /* where things stand (cells) */
+const GY_TOMBS=[{id:536,side:'N',x:22,y:2},{id:537,side:'N',x:48,y:2},{id:538,side:'S',x:22,y:67},{id:539,side:'S',x:48,y:67},{id:540,side:'W',x:2,y:20},{id:541,side:'W',x:2,y:50}];
 const GY_Y={gate:{x:68,y:35},start:{x:66,y:35,f:3},crypt:{x:35,y:30},plaza:{x0:29,y0:29,x1:41,y1:41},
   doors:[{x:58,y:6,k:0,name:'The mossy iron gate',pic:'igate2'},{x:58,y:63,k:1,name:'The sunken stair',pic:'stair'},{x:12,y:63,k:2,name:'The stone archway',pic:'arch'},{x:12,y:6,k:3,name:'The trapdoor',pic:'hatch2'}],
   grave:{x:36,y:50},edmund:{x:33,y:50},hut:{x:60,y:44},chapel:{x:19,y:21}};
@@ -53674,8 +53677,16 @@ function gyYardBuild(){
    for(const [x,y] of [[31,35],[39,35]])dec('bench',x,y,{block:false});
    for(const [x,y] of [[32,31],[38,31],[32,39],[38,39]])dec('urn',x,y,{block:true});
    lights.push([cx-1,cy+2],[cx+1,cy+2]);glow.push([cx,cy+1])}
-  // ---- two lines of tall wrought iron fence divide the yard into three areas (the west, the tomb and the east); a tall gate stands open wherever a cobbled path crosses ----
-  for(const fx of [27,43]){for(let y=3;y<=66;y++){if([8,35,62].includes(y))dec('igate',fx,y,{sc:.72});else dec('fence',fx,y,{block:true,sc:.75})}}
+  // ---- six small tombs built into the edge of the yard: a vine-covered front, and a door to walk into ----
+  for(const T of GY_TOMBS){const gid=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:1,n:3},gain:1.0}),dg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:1,n:3},gain:1.0,rgb:[1,1,1.001]}),lg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:0,n:3},gain:1.0}),rg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:2,n:3},gain:1.0});
+    KH_DOOR[dg]={lvl:T.id,get at(){return {x:5,y:9,f:0}},gy:'tomb'};
+    const sq=T.side==='N'?[[T.x-1,2,lg],[T.x,2,dg],[T.x+1,2,rg]]:T.side==='S'?[[T.x-1,67,lg],[T.x,67,dg],[T.x+1,67,rg]]:[[2,T.y-1,lg],[2,T.y,dg],[2,T.y+1,rg]];
+    for(const [x,y,t] of sq){rows[y][x]=ch(t);block[y*W+x]=1}
+    const fx=T.side==='N'?T.x:T.side==='S'?T.x:3,fy=T.side==='N'?3:T.side==='S'?66:T.y;
+    T.front=[fx,fy];
+    for(let a=-2;a<=2;a++)for(let b=0;b<=1;b++){const x=T.side==='W'?fx+b:fx+a,y=T.side==='W'?fy+a:T.side==='N'?fy+b:fy-b;used.add(x+','+y)}
+    // a short cobbled walk from the lane to the door
+    if(T.side==='N')pth(T.x,3,T.x,8,'3');else if(T.side==='S')pth(T.x,62,T.x,66,'3');else pth(3,T.y,12,T.y,'3')}
   // ---- the four doors into the mazes ----
   for(const g of GY_Y.doors){
     dec(g.pic,g.x,g.y,{block:true,npc:'gyo_door'+g.k});
@@ -53686,7 +53697,7 @@ function gyYardBuild(){
   {const c=GY_Y.chapel;dec('chapel',c.x,c.y,{block:true,npc:'gyo_chapel'});for(const [x,y] of [[c.x-3,c.y+2],[c.x+3,c.y+2],[c.x-2,c.y+3],[c.x+2,c.y+3]])D('lean',x,y);D('dead',c.x-4,c.y-1,{block:true});D('dead',c.x+4,c.y-1,{block:true});D('rpost',c.x+2,c.y+1,{block:true});lamp(c.x,c.y+3)}
   {const e=GY_Y.edmund,g=GY_Y.grave;
    dec('edmund',e.x,e.y,{block:true,npc:'gyo_edmund'});dec('slab',g.x,g.y,{block:true,npc:'gyo_grave'});dec('angel',35,52,{block:true,npc:'gyo_angel'});
-   for(const [x,y] of [[31,49],[31,51],[40,49],[40,51],[31,53],[40,53]])D('fence',x,y,{block:true,sc:.9});
+   
    D('bench',35,48,{block:false});D('rose',34,50);D('rose',37,50);lamp(35,50);lamp(33,52);lamp(38,52);glow.push([g.x,g.y+1]);
    decor.push({k:'sign_gy',x:35,y:47,block:false,wd:[0,-1],txt:GY_SIGNS[2]})}
   {const h=GY_Y.hut;dec('hut',h.x,h.y,{block:true,npc:'gyo_hut'});dec('mound',56,44,{block:true,npc:'gyo_opengrave'});dec('barrow',58,42,{block:true});dec('rpost',63,42,{block:true});lamp(h.x-2,h.y+2);lamp(55,46);
@@ -53719,17 +53730,17 @@ function gyYardBuild(){
   {const spots=[];for(let y=4;y<=66;y++)for(let x=4;x<=66;x++){if(free(x,y)&&!path.has(x+','+y)&&!reserved(x,y)&&(path.has((x+1)+','+y)||path.has((x-1)+','+y))&&(x+y)%2===0)spots.push([x,y])}
     while(ri<readable.length&&spots.length){const [x,y]=spots.splice((R()*spots.length)|0,1)[0];if(!free(x,y))continue;DB(R()<.5?'stone1':'stone2',x,y,{npc:'gyo_stone',i:readable[ri++]})}}
   // ---- trees, ravens, flowers, bones, the iron fence along the plots ----
-  const OAKY=['ltree0','ltree4','ltree8','ltree12','ltree19'],FIR=n=>{const r=hs(n[0],n[1],24);return r<.22?'ww_pine':r<.38?'ww_pine2':r<.8?OAKY[(hs(n[0],n[1],28)*OAKY.length)|0]:r<.9?'pt_willow':'pt_birch'};   // lots of trees: oaks, firs, willows and birches
+  const AUTUMN=['ltree20','ltree21','ltree12','ltree19','ltree13','ltree15','ltree0','ltree4','ltree8','ltree20','ltree21','ltree2','ltree6','ltree10','ltree16','ltree3','ltree7','ltree1'],FIR=n=>AUTUMN[(hs(n[0],n[1],24)*AUTUMN.length)|0];   // trees in autumn colours, with firs and willows among them   // lots of trees: oaks, firs, willows and birches
   for(let i=4;i<=65;i+=2){for(const [x,y] of [[i,4],[i,65],[4,i],[65,i]]){if(hs(x,y,25)<.78)DB(FIR([x,y]),x,y,{sc:.95+hs(x,y,26)*.4})}}   // a dark wall of firs all round the yard
-  for(let n=0;n<300;n++){const x=3+((hs(n,1,21)*64)|0),y=3+((hs(n,2,21)*64)|0);if(!free(x,y)||path.has(x+','+y)||reserved(x,y))continue;const r=hs(n,3,21);DB(r<.82?FIR([x,y]):'dead',x,y,{sc:.9+hs(n,4,21)*.35})}
+  for(let n=0;n<420;n++){const x=3+((hs(n,1,21)*64)|0),y=3+((hs(n,2,21)*64)|0);if(!free(x,y)||path.has(x+','+y)||reserved(x,y))continue;const r=hs(n,3,21);DB(r<.82?FIR([x,y]):'dead',x,y,{sc:.9+hs(n,4,21)*.35})}
   for(let n=0;n<18;n++){const x=3+((hs(n,1,22)*64)|0),y=3+((hs(n,2,22)*64)|0);if(free(x,y)&&!path.has(x+','+y)&&!reserved(x,y))DB('rpost',x,y)}
   for(let n=0;n<16;n++){const x=3+((hs(n,1,23)*64)|0),y=3+((hs(n,2,23)*64)|0);if(free(x,y)&&!path.has(x+','+y))D('bones',x,y,{sc:.8})}
-  for(let x=4;x<=66;x+=4){for(const y of [3,66]){if(free(x,y)&&!path.has(x+','+y))D('fence',x,y,{block:true,sc:.9})}}
   // lanterns along the main paths
   for(let x=6;x<=64;x+=8){for(const y of [34,36])if(free(x,y)&&!(x>=28&&x<=42)){if(DB('lantern',x,y))lights.push([x,y]);break}}
   for(let y=6;y<=64;y+=8){for(const x of [34,36])if(free(x,y)&&!(y>=28&&y<=42)){if(DB('lantern',x,y))lights.push([x,y]);break}}
-  // cobwebs hang between the trees, stones and fences
-  {const bs=new Set();for(const d of decor)if(d.block)bs.add(d.x+','+d.y);for(let n=0;n<110;n++){const x=3+((hs(n,1,27)*64)|0),y=3+((hs(n,2,27)*64)|0);if(!free(x,y)||path.has(x+','+y))continue;if([[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>bs.has((x+a)+','+(y+b))))D('web',x,y,{sc:.7+hs(n,3,27)*.5})}}
+  // fine, small cobwebs stretched between two grave stones (the square between a pair of stones two apart)
+  {const st=decor.filter(d=>d.block&&/^gy_(stone1|stone2|lean|slab|wcross|ccross|tomb|obelisk|column)$/.test(d.k)),at=new Map();for(const d of st)at.set(d.x+','+d.y,d);let n=0;
+   for(const d of st)for(const [a,b] of [[2,0],[0,2]]){const o=at.get((d.x+a)+','+(d.y+b)),x=d.x+a/2,y=d.y+b/2;if(o&&free(x,y)&&!path.has(x+','+y)&&hs(x,y,27)<.6&&n<70){D('web',x,y,{sc:.5});n++}}}
   for(let x=14;x<=56;x+=10){lamp(x,7);lamp(x,63)}
   for(const g of GY_Y.doors){for(let k=1;k<=3;k++)lamp(g.x+(g.x>35?-1:1),g.y+(g.y<35?k*5:-k*5))}
   // ---- the living: the gravedigger's apprentice, and the things that live here ----
@@ -53741,7 +53752,7 @@ function gyYardBuild(){
   const rowsS=[],fmS=[];for(let y=0;y<H;y++){rowsS.push(rows[y].join(''));let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmS.push(s)}
   const mapNames=[{t:'The Lych-gate',x:65,y:35,k:'place'},{t:'The Tomb of the Crypt',x:35,y:32,k:'place'},{t:'The Mossy Iron Gate',x:58,y:9,k:'place'},{t:'The Sunken Stair',x:58,y:61,k:'place'},{t:'The Stone Archway',x:12,y:61,k:'place'},{t:'The Trapdoor',x:12,y:9,k:'place'},
     {t:'The Ruined Chapel',x:19,y:19,k:'place'},{t:"The Gravedigger's Hut",x:60,y:42,k:'place'},{t:'The Wenlock Family Plot',x:35,y:49,k:'place'},{t:'Lady Aldith\'s Grave',x:36,y:51,k:'place'}];
-  const lv={rows:rowsS,chars,fmap:fmS,floorSet:GY_FLOORSET,floor:GY_FLOORSET[0],ceil:'cloud',start:{x:GY_Y.start.x,y:GY_Y.start.y,f:GY_Y.start.f},enemies,items,decor,lights,portals:[],day:.62,outdoor:true,amb:.8,
+  const lv={rows:rowsS,chars,fmap:fmS,floorSet:GY_FLOORSET,floor:GY_FLOORSET[0],ceil:'cloud',start:{x:GY_Y.start.x,y:GY_Y.start.y,f:GY_Y.start.f},enemies,items,decor,lights,portals:[],day:.78,outdoor:true,amb:.92,
     name:GY.NAMES[530],label:GY.NAMES[530],noExtras:true,diff:84,ceilH:5.2,noTele:true,torchGap:1e9,mapNames,
     _gy:{kind:'yard',glow,lcol:{},epitaphs:readable.length,placed:ri}};
   // ---- check: everything that can be walked to can be reached from the lych-gate; a piece that walls something in is made walk-through ----
@@ -53813,7 +53824,7 @@ function gyCryptBuild(){
   for(const [x,y] of [[5,10],[19,10]])light(x,y,[1.15,.85,.5]);
   // the two chambers: a coffin on trestles in the west, a family stone in the east, cobwebs
   dec('coffin',4,16,{block:true,npc:'gyo_coffin'});dec('edmund',20,16,{block:true,npc:'gyo_edmund2'});light(4,15,[1.1,.8,.5]);light(20,15,[1.1,.8,.5]);
-  for(const [x,y] of [[9,1],[15,1],[3,8],[21,8],[9,4],[15,4],[3,14],[21,14],[8,16],[16,16]])dec('web',x,y,{sc:.8});
+  for(const [x,y] of [[9,1],[15,1],[3,8],[21,8],[9,4],[15,4],[3,14],[21,14],[8,16],[16,16]])dec('web',x,y,{sc:.5});
   for(const [x,y] of [[5,17],[6,15],[19,17],[18,15],[3,18]])dec('bones',x,y,{sc:.9});
   light(12,17,[1.1,.85,.55]);
   // glowing lights: a cold blue-green glow in every niche and at each sarcophagus, and more candle stands about the nave
@@ -53829,6 +53840,45 @@ function gyCryptBuild(){
   LEVELS[GY.CRYPT]=L;
   return L}
 KH_LAZY[GY.CRYPT]=gyCryptBuild;
+
+/* ---- src/desert/gy_tombs.js ---- */
+/* ==========================================================================
+   THE SIX SMALL TOMBS (levels 536 to 541, prefix gy / GY). Family tombs built into the edge of the Wenlock Graveyard (see GY_TOMBS in gy_yard.js: four along the north and south sides, two on the west).
+   Each is a small vaulted room (11 by 11) that you walk into from the yard: sarcophagi, candle stands, cobwebs, bones, a cold blue-green glow in the corners, and in some a little treasure.
+   Nothing here fights. The door in the south wall leads back out to the lane beside the tomb's front.
+   ========================================================================== */
+const GY_TOMB_NAMES={536:'The Vane Tomb',537:'The Ashby Vault',538:'The Thorne Mausoleum',539:'The Marsh Crypt',540:'The Cobb Vault',541:'The Fell Tomb'};
+function gyTombBuild(id){
+  if(LEVELS[id])return LEVELS[id];
+  gyAlias();
+  const W=11,H=11,hs=(a,b,c)=>hash2(a,b,c),g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
+  for(let y=2;y<=8;y++)for(let x=2;x<=8;x++)g[y][x]='.';
+  g[9][5]='.';
+  const T=GY_TOMBS.find(t=>t.id===id)||GY_TOMBS[0];
+  const chars={},chMap=new Map();let nextCh=0x300;const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
+  const WH=3.0,open=(x,y)=>g[y]&&g[y][x]==='.',near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(open(x+dx,y+dy))return true;return false};
+  const V=[0,3,0,5,0,1,3,0,2].map(v=>ch(gyTile('texGrey_'+v,WH,{rgb:[.92,.95,1]})));
+  const rows=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++){s+=open(x,y)?'.':near(x,y)?V[(hs(x,y,9)*V.length)|0]:V[0]}rows.push(s)}
+  {const gid=gyTile('texGrey_0',WH,{fac:{img:'stairFix_0',i:0,n:1},gain:1.1});
+   KH_DOOR[gid]={lvl:GY.ID,get at(){const f=T.front||[T.x,T.y];return {x:f[0],y:f[1],f:T.side==='N'?2:T.side==='S'?0:1}},gy:'tombexit'};
+   rows[10]=rows[10].slice(0,5)+ch(gid)+rows[10].slice(6)}
+  const decor=[],lights=[],lcol={},occ=new Set();
+  const dec=(a,x,y,o)=>{o=o||{};const k=GYA[a]?'gy_'+a:a;if(!open(x,y))return null;const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}if(o.sc)d.sc=o.sc;if(o.npc){d.npc=o.npc;d.deco=false}if(o.i!==undefined)d.i=o.i;if(o.goldAmt)d.goldAmt=o.goldAmt;decor.push(d);occ.add(x+','+y);return d};
+  const light=(x,y,col)=>{lights.push([x,y]);if(col)lcol[x+','+y]=col};
+  // sarcophagi along the side walls, candle stands, a cold glow in every corner
+  for(const [x,y] of [[3,3],[7,3],[3,6],[7,6]])dec('sarc',x,y,{block:true,sc:.9});
+  for(const [x,y] of [[5,2],[2,5],[8,5]]){dec('candles',x,y,{block:true,sc:.75});light(x,y,[1.5,1.0,.5])}
+  for(const [x,y] of [[2,2],[8,2],[2,8],[8,8],[5,5]])light(x,y,[.45,1.05,.95]);
+  for(const [x,y] of [[2,3],[8,3],[2,7],[8,7],[4,2],[6,2]])dec('web',x,y,{sc:.5});
+  for(const [x,y] of [[4,7],[6,7],[3,8]])dec('bones',x,y,{sc:.9});
+  // some hold a little treasure on the floor at the back
+  if(id%2===0)dec('chest',5,4,{block:true,goldAmt:2500+(id%7)*400});
+  const fm=[];for(let y=0;y<H;y++)fm.push('3'.repeat(W));
+  const L={rows,chars,fmap:fm,floorSet:GY_FLOORSET,floor:GY_FLOORSET[3],ceil:'gyc_crypt',ceilH:WH+1,start:{x:5,y:9,f:0},enemies:[],items:[],decor,lights,portals:[],day:0,amb:.05,torchGap:1e9,noTele:true,noExtras:true,
+    name:GY_TOMB_NAMES[id],label:GY_TOMB_NAMES[id],diff:84,mapNames:[{t:GY_TOMB_NAMES[id],x:5,y:5,k:'place'}],peaceful:true,_gy:{kind:'crypt',lcol}};
+  LEVELS[id]=L;LEVEL_NAMES[id]=GY_TOMB_NAMES[id];LEVEL_RATING[id]=84;
+  return L}
+for(const id of [536,537,538,539,540,541])KH_LAZY[id]=((i)=>()=>gyTombBuild(i))(id);
 
 /* ---- src/desert/gy_mazes.js ---- */
 /* ==========================================================================

@@ -32,7 +32,7 @@ function gyCryptBuild(){
   for(const [x,y] of [[5,10],[19,10]])light(x,y,[1.15,.85,.5]);
   // the two chambers: a coffin on trestles in the west, a family stone in the east, cobwebs
   dec('coffin',4,16,{block:true,npc:'gyo_coffin'});dec('edmund',20,16,{block:true,npc:'gyo_edmund2'});light(4,15,[1.1,.8,.5]);light(20,15,[1.1,.8,.5]);
-  for(const [x,y] of [[9,1],[15,1],[3,8],[21,8],[9,4],[15,4],[3,14],[21,14],[8,16],[16,16]])dec('web',x,y,{sc:.8});
+  for(const [x,y] of [[9,1],[15,1],[3,8],[21,8],[9,4],[15,4],[3,14],[21,14],[8,16],[16,16]])dec('web',x,y,{sc:.5});
   for(const [x,y] of [[5,17],[6,15],[19,17],[18,15],[3,18]])dec('bones',x,y,{sc:.9});
   light(12,17,[1.1,.85,.55]);
   // glowing lights: a cold blue-green glow in every niche and at each sarcophagus, and more candle stands about the nave
