@@ -91,12 +91,13 @@ function gyYardBuild(){
   const rows=[];for(let y=0;y<H;y++)rows.push(new Array(W).fill('.'));
   const block=new Uint8Array(W*H),fm=new Array(W*H).fill('0'),hgt=new Float32Array(W*H).fill(.3),rk=new Float32Array(W*H);
   const solid=(x,y,c)=>{rows[y][x]=c;block[y*W+x]=1};
-  const decor=[],enemies=[],items=[],lights=[],used=new Set(),path=new Set(),glow=[];
+  const decor=[],enemies=[],items=[],lights=[],used=new Set(),path=new Set(),glow=[],YG_LC={};
   const isOpen=(x,y)=>x>=2&&y>=2&&x<=67&&y<=67&&rows[y][x]==='.';
   const free=(x,y)=>isOpen(x,y)&&!used.has(x+','+y);
   const setF=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(x>=0&&y>=0&&x<W&&y<H)fm[y*W+x]=f};
   const pth=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){path.add(x+','+y);fm[y*W+x]=f||'5'}};
   const dec=(a,x,y,o)=>{o=o||{};const k=GYA[a]?'gy_'+a:a;if(!isOpen(x,y))return null;const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}
+    if(o.block&&o.npc)d.solid=1;   // a stone structure or a post: nobody walks through it (the base game makes every person walk-through unless flagged solid)
     if(o.sc)d.sc=o.sc;if(o.npc){d.npc=o.npc;d.deco=false}if(o.i!==undefined)d.i=o.i;if(o.wd){d.wd=o.wd;d.pic=1}if(o.txt)d.txt=o.txt;
     decor.push(d);used.add(x+','+y);return d};
   const D=(a,x,y,o)=>free(x,y)&&!path.has(x+','+y)?dec(a,x,y,o):null;
@@ -165,9 +166,15 @@ function gyYardBuild(){
   // ---- the four doors into the mazes ----
   for(const g of GY_Y.doors){
     {const md=dec(g.pic,g.x,g.y,{block:false,npc:'gyo_door'+g.k});if(md)md.sc=.0001;   // an unseen marker for the quest signs
-     const img={igate2:'stairFix_2',stair:'stairFix_0',arch:'gatesC_1',hatch2:'stairFix_3'}[g.pic],wh={igate2:2.3,stair:2.6,arch:2.5,hatch2:1.4}[g.pic],gid=gyTile('texGrey_0',wh,{fac:{img,i:0,n:1},gain:1.05}),id=GY.M[g.k];
-     KH_DOOR[gid]={lvl:id,get at(){if(!LEVELS[id]&&KH_LAZY[id])KH_LAZY[id]();const st=LEVELS[id].start;return {x:st.x,y:st.y,f:st.f}},gy:'mazedoor',k:g.k};
-     rows[g.y][g.x]=ch(gid);block[g.y*W+g.x]=1}   // a solid door tile: you go in by walking up to it and pressing on, not by walking through it
+     const kind=['red','grey','black','pale'][g.k],[nw,wh]=GY_ENTRY[kind],id=GY.M[g.k],half=(nw-1)/2;IMG['gyp_entry_'+kind]=gyEntryPic(kind);
+     for(let q=0;q<nw;q++){const x=g.x-half+q,gid=gyTile('texGrey_0',wh,{fac:{img:'entry_'+kind,i:q,n:nw},gain:1.0,rgb:[1,1,1+(g.k*8+q)*.00001]});
+       if(q===half)KH_DOOR[gid]={lvl:id,get at(){if(!LEVELS[id]&&KH_LAZY[id])KH_LAZY[id]();const st=LEVELS[id].start;return {x:st.x,y:st.y,f:st.f}},gy:'mazedoor',k:g.k};
+       rows[g.y][x]=ch(gid);block[g.y*W+x]=1}   // a built front five tiles wide (three for the trapdoor) with the door in the middle: solid, you go in by walking up and pressing on
+     const fy=g.y+(g.y<35?1:-1);
+     if(kind==='red'){dec('angel',g.x-2,fy,{block:true,sc:.9});dec('angel',g.x+2,fy,{block:true,sc:.9});dec('lantern',g.x-1,fy,{block:true});dec('lantern',g.x+1,fy,{block:true});lights.push([g.x,fy]);YG_LC[g.x+','+fy]=[1.55,.5,.34]}
+     else if(kind==='grey'){dec('urn',g.x-1,fy,{block:true});dec('urn',g.x+1,fy,{block:true});lights.push([g.x,fy]);YG_LC[g.x+','+fy]=[.5,1.2,1.0]}
+     else if(kind==='black'){dec('obelisk',g.x-2,fy,{block:true,sc:.85});dec('obelisk',g.x+2,fy,{block:true,sc:.85});lights.push([g.x,fy]);YG_LC[g.x+','+fy]=[.8,.6,1.5]}
+     else{dec('urn',g.x-1,fy,{block:true});dec('urn',g.x+1,fy,{block:true});lights.push([g.x,fy]);YG_LC[g.x+','+fy]=[1.2,.9,1.4]}}
     lamp(g.x-1,g.y+(g.y<35?2:-2));lamp(g.x+1,g.y+(g.y<35?2:-2));
     const dy=g.y<35?1:-1;for(const dx of [-2,2])D('lean',g.x+dx,g.y+dy*2);
     for(const dx of [-3,3])D('ww_pine',g.x+dx,g.y,{block:true,sc:1})}
@@ -236,7 +243,7 @@ function gyYardBuild(){
     {t:'The Overgrown Walk',x:20,y:46,k:'place'},{t:'The Avenue of Vaults',x:52,y:22,k:'place'},{t:'The Autumn Corner',x:50,y:57,k:'place'},{t:'The Ruined Chapel',x:19,y:19,k:'place'},{t:"The Gravedigger's Hut",x:60,y:42,k:'place'},{t:'The Wenlock Family Plot',x:35,y:49,k:'place'},{t:'Lady Aldith\'s Grave',x:36,y:51,k:'place'}];
   const lv={rows:rowsS,chars,fmap:fmS,floorSet:GY_FLOORSET.slice(0,5).concat(['gyf_cobble']),floor:GY_FLOORSET[0],ceil:'cloud',start:{x:GY_Y.start.x,y:GY_Y.start.y,f:GY_Y.start.f},enemies,items,decor,lights,portals:[],day:.78,outdoor:true,amb:.92,
     name:GY.NAMES[530],label:GY.NAMES[530],noExtras:true,diff:84,ceilH:5.2,noTele:true,torchGap:1e9,mapNames,
-    _gy:{kind:'yard',glow,lcol:{},epitaphs:readable.length,placed:ri}};
+    _gy:{kind:'yard',glow,lcol:YG_LC,epitaphs:readable.length,placed:ri}};
   // ---- check: everything that can be walked to can be reached from the lych-gate; a piece that walls something in is made walk-through ----
   {const D4=[[1,0],[-1,0],[0,1],[0,-1]];const flood=()=>{const bs=new Set();for(const d of decor)if(d.block)bs.add(d.x+','+d.y);const seen=new Uint8Array(W*H),q=[GY_Y.start.y*W+GY_Y.start.x];seen[q[0]]=1;
       for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [a,b] of D4){const nx=x+a,ny=y+b;if(nx<2||ny<2||nx>67||ny>67||rows[ny][nx]!=='.'||seen[ny*W+nx]||bs.has(nx+','+ny))continue;seen[ny*W+nx]=1;q.push(ny*W+nx)}}return {seen,bs}};

@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.671';
+const VERSION='3.672';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1535,10 +1535,10 @@ function reset(n){
   G.inv={open:false,tab:'inv',hero:0,sel:null,scroll:0};
   G.enemies=ENEMY_SPAWNS.map((s,i)=>{const st=enemyStat(s.t,s.lvl);return {id:i,t:s.t,lvl:s.lvl||lvlHere(),x:s.x,y:s.y,rx:s.x,ry:s.y,hp:st.hp,maxhp:st.hp,alert:false,chilled:0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100}});
   G.items=ITEM_SPAWNS.map(s=>({k:s.k==='potion'?potionFor(hash2(s.x,s.y,LEVEL+7)):s.k==='hlfood'?hlFoodFor(hash2(s.x,s.y,LEVEL+9)):s.k,x:s.x,y:s.y,taken:false}));
-  G.decor=DECOR_SPAWNS.map(s=>{const o={k:s.k,x:s.x,y:s.y,block:!!s.block,loot:CONTAINERS.includes(s.k),shop:s.k==='cart'};if(s.deco){o.loot=false;o.shop=false}if(s.npc){o.npc=s.npc;o.loot=false;o.shop=false;if(s.goat)o.goat=s.goat}if(s.sc)o.sc=s.sc;if(s.walk)o.walk=true;if(s.wd)o.wd=s.wd;if(s.txt)o.txt=s.txt;if(s.bob)o.bob=s.bob;if(s.ox!==undefined){o.ox=s.ox;o.oy=s.oy}if(s.opens){o.opens=s.opens;o.idx=s.idx}if(s.lockedBy)o.lockedBy=s.lockedBy;if(s.secret)o.secret=true;for(const kk of ['ambush','hidden','trap','frame','goldAmt','food','gear','enter','magic','cat','scar','hatch','kname','kl','lk','glow','red','lit','deco','wind','lw','lr','pic','fr','petid','cloudid','thiefid'])if(s[kk]!==undefined)o[kk]=s[kk];return o});
+  G.decor=DECOR_SPAWNS.map(s=>{const o={k:s.k,x:s.x,y:s.y,block:!!s.block,loot:CONTAINERS.includes(s.k),shop:s.k==='cart'};if(s.deco){o.loot=false;o.shop=false}if(s.npc){o.npc=s.npc;o.loot=false;o.shop=false;if(s.goat)o.goat=s.goat}if(s.sc)o.sc=s.sc;if(s.walk)o.walk=true;if(s.wd)o.wd=s.wd;if(s.txt)o.txt=s.txt;if(s.bob)o.bob=s.bob;if(s.ox!==undefined){o.ox=s.ox;o.oy=s.oy}if(s.opens){o.opens=s.opens;o.idx=s.idx}if(s.lockedBy)o.lockedBy=s.lockedBy;if(s.secret)o.secret=true;for(const kk of ['solid','ambush','hidden','trap','frame','goldAmt','food','gear','enter','magic','cat','scar','hatch','kname','kl','lk','glow','red','lit','deco','wind','lw','lr','pic','fr','petid','cloudid','thiefid'])if(s[kk]!==undefined)o[kk]=s[kk];return o});
   applyLevers();clearDoorFronts();
   G.decor.forEach(d=>{if(!d.npc&&(d.k==='grave'||d.k==='grave2'||d.k==='cross')){d.npc='epitaph';d.loot=false}});
-  G.decor.forEach(d=>{if(d.npc&&!/^(lockedgate|gate|fence|lever|hatch)/.test(d.k)){d.block=false;d.walk=true}}); // the party walks through every person and creature; tap them or press attack to speak
+  G.decor.forEach(d=>{if(d.npc&&!d.solid&&!/^(lockedgate|gate|fence|lever|hatch)/.test(d.k)){d.block=false;d.walk=true}}); // the party walks through every person and creature; tap them or press attack to speak
   for(let y=0;y<MH;y++)for(let x=0;x<MW;x++)if(MAPROWS[y][x]==='t')G.decor.push({k:'tree'+((hash2(x,y,7)*NTREES)|0),x,y,block:true,loot:false,shop:false});
   placeTeleporter();
   buildDecorMap();
@@ -53672,12 +53672,13 @@ function gyYardBuild(){
   const rows=[];for(let y=0;y<H;y++)rows.push(new Array(W).fill('.'));
   const block=new Uint8Array(W*H),fm=new Array(W*H).fill('0'),hgt=new Float32Array(W*H).fill(.3),rk=new Float32Array(W*H);
   const solid=(x,y,c)=>{rows[y][x]=c;block[y*W+x]=1};
-  const decor=[],enemies=[],items=[],lights=[],used=new Set(),path=new Set(),glow=[];
+  const decor=[],enemies=[],items=[],lights=[],used=new Set(),path=new Set(),glow=[],YG_LC={};
   const isOpen=(x,y)=>x>=2&&y>=2&&x<=67&&y<=67&&rows[y][x]==='.';
   const free=(x,y)=>isOpen(x,y)&&!used.has(x+','+y);
   const setF=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(x>=0&&y>=0&&x<W&&y<H)fm[y*W+x]=f};
   const pth=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){path.add(x+','+y);fm[y*W+x]=f||'5'}};
   const dec=(a,x,y,o)=>{o=o||{};const k=GYA[a]?'gy_'+a:a;if(!isOpen(x,y))return null;const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}
+    if(o.block&&o.npc)d.solid=1;   // a stone structure or a post: nobody walks through it (the base game makes every person walk-through unless flagged solid)
     if(o.sc)d.sc=o.sc;if(o.npc){d.npc=o.npc;d.deco=false}if(o.i!==undefined)d.i=o.i;if(o.wd){d.wd=o.wd;d.pic=1}if(o.txt)d.txt=o.txt;
     decor.push(d);used.add(x+','+y);return d};
   const D=(a,x,y,o)=>free(x,y)&&!path.has(x+','+y)?dec(a,x,y,o):null;
@@ -53746,9 +53747,15 @@ function gyYardBuild(){
   // ---- the four doors into the mazes ----
   for(const g of GY_Y.doors){
     {const md=dec(g.pic,g.x,g.y,{block:false,npc:'gyo_door'+g.k});if(md)md.sc=.0001;   // an unseen marker for the quest signs
-     const img={igate2:'stairFix_2',stair:'stairFix_0',arch:'gatesC_1',hatch2:'stairFix_3'}[g.pic],wh={igate2:2.3,stair:2.6,arch:2.5,hatch2:1.4}[g.pic],gid=gyTile('texGrey_0',wh,{fac:{img,i:0,n:1},gain:1.05}),id=GY.M[g.k];
-     KH_DOOR[gid]={lvl:id,get at(){if(!LEVELS[id]&&KH_LAZY[id])KH_LAZY[id]();const st=LEVELS[id].start;return {x:st.x,y:st.y,f:st.f}},gy:'mazedoor',k:g.k};
-     rows[g.y][g.x]=ch(gid);block[g.y*W+g.x]=1}   // a solid door tile: you go in by walking up to it and pressing on, not by walking through it
+     const kind=['red','grey','black','pale'][g.k],[nw,wh]=GY_ENTRY[kind],id=GY.M[g.k],half=(nw-1)/2;IMG['gyp_entry_'+kind]=gyEntryPic(kind);
+     for(let q=0;q<nw;q++){const x=g.x-half+q,gid=gyTile('texGrey_0',wh,{fac:{img:'entry_'+kind,i:q,n:nw},gain:1.0,rgb:[1,1,1+(g.k*8+q)*.00001]});
+       if(q===half)KH_DOOR[gid]={lvl:id,get at(){if(!LEVELS[id]&&KH_LAZY[id])KH_LAZY[id]();const st=LEVELS[id].start;return {x:st.x,y:st.y,f:st.f}},gy:'mazedoor',k:g.k};
+       rows[g.y][x]=ch(gid);block[g.y*W+x]=1}   // a built front five tiles wide (three for the trapdoor) with the door in the middle: solid, you go in by walking up and pressing on
+     const fy=g.y+(g.y<35?1:-1);
+     if(kind==='red'){dec('angel',g.x-2,fy,{block:true,sc:.9});dec('angel',g.x+2,fy,{block:true,sc:.9});dec('lantern',g.x-1,fy,{block:true});dec('lantern',g.x+1,fy,{block:true});lights.push([g.x,fy]);YG_LC[g.x+','+fy]=[1.55,.5,.34]}
+     else if(kind==='grey'){dec('urn',g.x-1,fy,{block:true});dec('urn',g.x+1,fy,{block:true});lights.push([g.x,fy]);YG_LC[g.x+','+fy]=[.5,1.2,1.0]}
+     else if(kind==='black'){dec('obelisk',g.x-2,fy,{block:true,sc:.85});dec('obelisk',g.x+2,fy,{block:true,sc:.85});lights.push([g.x,fy]);YG_LC[g.x+','+fy]=[.8,.6,1.5]}
+     else{dec('urn',g.x-1,fy,{block:true});dec('urn',g.x+1,fy,{block:true});lights.push([g.x,fy]);YG_LC[g.x+','+fy]=[1.2,.9,1.4]}}
     lamp(g.x-1,g.y+(g.y<35?2:-2));lamp(g.x+1,g.y+(g.y<35?2:-2));
     const dy=g.y<35?1:-1;for(const dx of [-2,2])D('lean',g.x+dx,g.y+dy*2);
     for(const dx of [-3,3])D('ww_pine',g.x+dx,g.y,{block:true,sc:1})}
@@ -53817,7 +53824,7 @@ function gyYardBuild(){
     {t:'The Overgrown Walk',x:20,y:46,k:'place'},{t:'The Avenue of Vaults',x:52,y:22,k:'place'},{t:'The Autumn Corner',x:50,y:57,k:'place'},{t:'The Ruined Chapel',x:19,y:19,k:'place'},{t:"The Gravedigger's Hut",x:60,y:42,k:'place'},{t:'The Wenlock Family Plot',x:35,y:49,k:'place'},{t:'Lady Aldith\'s Grave',x:36,y:51,k:'place'}];
   const lv={rows:rowsS,chars,fmap:fmS,floorSet:GY_FLOORSET.slice(0,5).concat(['gyf_cobble']),floor:GY_FLOORSET[0],ceil:'cloud',start:{x:GY_Y.start.x,y:GY_Y.start.y,f:GY_Y.start.f},enemies,items,decor,lights,portals:[],day:.78,outdoor:true,amb:.92,
     name:GY.NAMES[530],label:GY.NAMES[530],noExtras:true,diff:84,ceilH:5.2,noTele:true,torchGap:1e9,mapNames,
-    _gy:{kind:'yard',glow,lcol:{},epitaphs:readable.length,placed:ri}};
+    _gy:{kind:'yard',glow,lcol:YG_LC,epitaphs:readable.length,placed:ri}};
   // ---- check: everything that can be walked to can be reached from the lych-gate; a piece that walls something in is made walk-through ----
   {const D4=[[1,0],[-1,0],[0,1],[0,-1]];const flood=()=>{const bs=new Set();for(const d of decor)if(d.block)bs.add(d.x+','+d.y);const seen=new Uint8Array(W*H),q=[GY_Y.start.y*W+GY_Y.start.x];seen[q[0]]=1;
       for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [a,b] of D4){const nx=x+a,ny=y+b;if(nx<2||ny<2||nx>67||ny>67||rows[ny][nx]!=='.'||seen[ny*W+nx]||bs.has(nx+','+ny))continue;seen[ny*W+nx]=1;q.push(ny*W+nx)}}return {seen,bs}};
@@ -53902,6 +53909,61 @@ function gyCryptBuild(){
   LEVELS[GY.CRYPT]=L;
   return L}
 KH_LAZY[GY.CRYPT]=gyCryptBuild;
+
+/* ---- src/desert/gy_entries.js ---- */
+/* ==========================================================================
+   THE FOUR GREAT ENTRANCES OF THE WENLOCK GRAVEYARD (prefix gyen). Each maze is entered through a built front, a row of wall tiles in the yard, painted here once from the game's own pictures into one
+   wide canvas that is cut into the tiles: the Red Ossuary is a skull-keyed stone arch with a wrought iron gate in a high wall under a cornice with its name cut over the door, between ivy-grown pillars, with a red
+   glow behind the bars; the Grey Charnel is a damp stair arch between two lengths of iron fence and lamps; the Black Barrow is a dark arch set in a grassy barrow between obelisks; the Pale Catacombs are
+   the double wooden doors of a grassy mound between urns. gyEntryPic(kind) returns the canvas (kinds: red, grey, black, pale); GY_ENTRY says how many tiles wide and how tall each is.
+   ========================================================================== */
+const GY_ENTRY={red:[5,3.4,'THE RED OSSUARY'],grey:[5,3.0,'THE GREY CHARNEL'],black:[5,3.0,'THE BLACK BARROW'],pale:[3,1.9,'THE PALE CATACOMBS']};
+function gyEntryPic(kind){
+  const K=GY._entry=GY._entry||{};if(K[kind])return K[kind];
+  const [n,wh,title]=GY_ENTRY[kind],W=n*128,H=Math.round(wh*128),c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d'),I=k=>IMG['gyp_'+k],hs=(a,b,s)=>hash2(a,b,s+n*7);
+  const putW=(k,cx,bottom,w)=>{const im=I(k);if(!im)return null;const h=w*im.height/im.width;x.drawImage(im,cx-w/2,bottom-h,w,h);return h};
+  const putH=(k,cx,bottom,h)=>{const im=I(k);if(!im)return null;const w=h*im.width/im.height;x.drawImage(im,cx-w/2,bottom-h,w,h);return w};
+  // the stone wall: the painted grey stone, tinted, with the joints of the blocks and damp at the foot
+  const wall=tint=>{const t=I('texGrey_0');x.fillStyle='#55534f';x.fillRect(0,0,W,H);if(t)for(let yy=0;yy<H;yy+=128)for(let xx=0;xx<W;xx+=128)x.drawImage(t,xx,yy,128,128);
+    x.globalCompositeOperation='multiply';x.fillStyle=tint;x.fillRect(0,0,W,H);x.globalCompositeOperation='source-over';
+    x.strokeStyle='rgba(18,16,14,.4)';x.lineWidth=1.4;for(let yy=22,r=0;yy<H;yy+=34,r++){x.beginPath();x.moveTo(0,yy);x.lineTo(W,yy);x.stroke();for(let xx=(r%2)*28;xx<W;xx+=56){x.beginPath();x.moveTo(xx+hs(xx,yy,1)*6,yy);x.lineTo(xx+hs(xx,yy,2)*6,yy+34);x.stroke()}}
+    const g=x.createLinearGradient(0,H*.6,0,H);g.addColorStop(0,'rgba(20,40,20,0)');g.addColorStop(1,'rgba(20,50,24,.55)');x.fillStyle=g;x.fillRect(0,H*.6,W,H*.4)};
+  const cornice=col=>{x.fillStyle='#1d1b19';x.fillRect(0,0,W,34);x.fillStyle=col;x.fillRect(0,34,W,6);x.fillStyle='#121110';x.fillRect(0,40,W,4);
+    for(let xx=8;xx<W;xx+=26){x.fillStyle='#34312d';x.fillRect(xx,44,14,10);x.fillStyle='#161412';x.fillRect(xx,54,14,3)}};
+  const plaque=(cy,txt)=>{const w=Math.min(W*.5,300),h=34,px=W/2-w/2;x.fillStyle='#2a2825';x.fillRect(px,cy,w,h);x.strokeStyle='#8a7a52';x.lineWidth=2;x.strokeRect(px+2,cy+2,w-4,h-4);
+    x.fillStyle='#d8c88a';x.font='bold 19px '+(typeof FTITLE!=='undefined'?FTITLE:'serif');x.textAlign='center';x.textBaseline='middle';x.fillText(txt,W/2,cy+h/2+1)};
+  const ivy=(count,zone)=>{const G=['#2a5a26','#3b7f31','#58a03e','#244c24','#6fb04a'];
+    for(let k=0;k<count;k++){const px=zone==='sides'?(hs(k,1,3)<.5?hs(k,2,3)*W*.22:W-hs(k,2,3)*W*.22):hs(k,1,3)*W,py=Math.pow(hs(k,3,3),1.7)*H*.7;x.strokeStyle='#27481f';x.lineWidth=1.4+hs(k,4,3)*1.6;x.beginPath();x.moveTo(px,0);let qx=px,qy=0;for(let t=0;t<7;t++){qx+=(hs(k,t+5,4)-.5)*9;qy+=py/7*(.6+hs(k,t+9,5));x.lineTo(qx,qy)}x.stroke();
+      for(let t=0;t<9;t++){x.fillStyle=G[(hs(k,t+20,6)*5)|0];x.beginPath();x.ellipse(px+(hs(k,t+30,7)-.5)*14,py*t/9+hs(k,t+40,8)*8,3+hs(k,t+50,9)*4,2.2+hs(k,t+60,9)*2.5,hs(k,t+70,9)*3,0,6.3);x.fill()}}};
+  const archGate=(cx,bottom,aw,glow)=>{ // the skull arch with its opening filled by a lit glow and a wrought iron gate
+    const ah=putW('gatesC_1',cx,bottom,aw);if(!ah)return;const ow=aw*.56,ox=cx-ow/2,top=bottom-ah*.72,bot=bottom-ah*.03;
+    x.save();x.beginPath();x.moveTo(ox,bot);x.lineTo(ox,top+ow/2);x.arc(cx,top+ow/2,ow/2,Math.PI,0);x.lineTo(ox+ow,bot);x.closePath();x.clip();
+    const g=x.createRadialGradient(cx,bot,4,cx,bot-ow*.3,ow*1.1);g.addColorStop(0,glow[0]);g.addColorStop(1,glow[1]);x.fillStyle=g;x.fillRect(ox,top,ow,bot-top);
+    const gt=I('stairFix_2');if(gt){x.globalAlpha=.96;x.drawImage(gt,gt.width*.15,gt.height*.06,gt.width*.7,gt.height*.92,ox,top,ow,bot-top);x.globalAlpha=1}x.restore()};
+  if(kind==='red'){
+    wall('#9a8e8a');cornice('#7a1c14');
+    putH('stonesB_4',46,H,330);putH('stonesB_4',W-46,H,330);
+    x.fillStyle='rgba(120,20,12,.18)';x.fillRect(W*.2,60,W*.6,H);
+    archGate(W/2,H,330,['rgba(255,70,40,.75)','rgba(60,6,4,.95)']);
+    plaque(52,title);ivy(26,'sides');ivy(10,'top');
+  }else if(kind==='grey'){
+    wall('#8a948f');cornice('#4a6a60');
+    for(const px of [W*.17,W*.83]){putW('fenceG_0',px,H-4,190)}
+    for(const px of [W*.31,W*.69]){putH('fenceG_2',px,H,230)}
+    putW('gatesC_2',W/2,H,300);x.fillStyle='rgba(30,70,60,.22)';x.fillRect(0,H*.4,W,H*.6);
+    plaque(52,title);ivy(14,'sides');
+  }else if(kind==='black'){
+    wall('#5e5e6c');cornice('#3a3a4c');
+    const mw=putW('stairFix_1',W/2,H+10,W*1.02);
+    x.globalCompositeOperation='source-atop';x.fillStyle='rgba(20,20,40,.35)';x.fillRect(0,0,W,H);x.globalCompositeOperation='source-over';
+    putH('stonesB_3',60,H,300);putH('stonesB_3',W-60,H,300);
+    archGate(W/2,H-4,270,['rgba(140,110,255,.55)','rgba(8,6,20,.95)']);
+    plaque(52,title);ivy(10,'sides');
+  }else{ // pale
+    x.fillStyle='rgba(0,0,0,0)';x.fillRect(0,0,W,H);
+    putW('gatesC_3',W/2,H,W*.98);putH('stonesB_5',26,H,110);putH('stonesB_5',W-26,H,110);ivy(8,'top');
+  }
+  return K[kind]=c}
 
 /* ---- src/desert/gy_tombs.js ---- */
 /* ==========================================================================
