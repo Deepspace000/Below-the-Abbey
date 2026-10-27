@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.673';
+const VERSION='3.674';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -51065,7 +51065,7 @@ if(typeof QWORLD!=='undefined')QWORLD.Wenlock='wenlock';
 
 /* ---- src/desert/garden_list.js ---- */
 /* written by tools/gm_list.py from assets/gm/manifest.json: name -> [file, width, height, kind (s sprite, t texture)] */
-const GM_LIST={"gmanim_0":["gmanim_0.webp",194,210,"s"],"gmanim_1":["gmanim_1.webp",241,202,"s"],"gmanim_10":["gmanim_10.webp",215,145,"s"],"gmanim_11":["gmanim_11.webp",182,153,"s"],"gmanim_2":["gmanim_2.webp",97,209,"s"],"gmanim_3":["gmanim_3.webp",106,204,"s"],"gmanim_4":["gmanim_4.webp",100,214,"s"],"gmanim_5":["gmanim_5.webp",174,165,"s"],"gmanim_6":["gmanim_6.webp",98,212,"s"],"gmanim_7":["gmanim_7.webp",192,159,"s"],"gmanim_8":["gmanim_8.webp",112,213,"s"],"gmanim_9":["gmanim_9.webp",220,146,"s"],"gmbldg_0":["gmbldg_0.webp",150,198,"s"],"gmbldg_1":["gmbldg_1.webp",224,195,"s"],"gmbldg_2":["gmbldg_2.webp",201,199,"s"],"gmbldg_3":["gmbldg_3.webp",220,180,"s"],"gmbldg_4":["gmbldg_4.webp",209,193,"s"],"gmbldg_5":["gmbldg_5.webp",214,185,"s"],"gmbldg_6":["gmbldg_6.webp",241,183,"s"],"gmbldg_7":["gmbldg_7.webp",232,131,"s"],"gmfloor_0":["gmfloor_0.jpg",256,256,"t"],"gmfloor_1":["gmfloor_1.jpg",256,256,"t"],"gmfloor_2":["gmfloor_2.jpg",256,256,"t"],"gmfloor_3":["gmfloor_3.jpg",256,256,"t"],"gmfloor_4":["gmfloor_4.jpg",256,256,"t"],"gmfloor_5":["gmfloor_5.jpg",256,256,"t"],"gmgates_0":["gmgates_0.webp",364,475,"s"],"gmgates_1":["gmgates_1.webp",465,406,"s"],"gmgates_2":["gmgates_2.webp",379,463,"s"],"gmgates_3":["gmgates_3.webp",458,431,"s"],"gmguard_0":["gmguard_0.webp",273,305,"s"],"gmguard_1":["gmguard_1.webp",136,293,"s"],"gmguard_2":["gmguard_2.webp",317,305,"s"],"gmguard_3":["gmguard_3.webp",179,325,"s"],"gmguard_4":["gmguard_4.webp",312,308,"s"],"gmguard_5":["gmguard_5.webp",310,325,"s"],"gmguard_6":["gmguard_6.webp",170,132,"s"],"gmguard_7":["gmguard_7.webp",290,132,"s"],"gmguard_8":["gmguard_8.webp",168,132,"s"],"gmhedgeA_0":["gmhedgeA_0.jpg",256,256,"t"],"gmhedgeA_1":["gmhedgeA_1.jpg",256,256,"t"],"gmhedgeA_2":["gmhedgeA_2.jpg",256,256,"t"],"gmhedgeA_3":["gmhedgeA_3.jpg",256,256,"t"],"gmhedgeA_4":["gmhedgeA_4.jpg",256,256,"t"],"gmhedgeA_5":["gmhedgeA_5.jpg",256,256,"t"],"gmhedgeA_6":["gmhedgeA_6.jpg",256,256,"t"],"gmhedgeA_7":["gmhedgeA_7.jpg",256,256,"t"],"gmhedgeA_8":["gmhedgeA_8.jpg",256,256,"t"],"gmhedgeB_0":["gmhedgeB_0.jpg",256,256,"t"],"gmhedgeB_1":["gmhedgeB_1.jpg",256,256,"t"],"gmhedgeB_2":["gmhedgeB_2.jpg",256,256,"t"],"gmhedgeB_3":["gmhedgeB_3.jpg",256,256,"t"],"gmhedgeB_4":["gmhedgeB_4.jpg",256,256,"t"],"gmhedgeB_5":["gmhedgeB_5.jpg",256,256,"t"],"gmhedgeB_6":["gmhedgeB_6.jpg",256,256,"t"],"gmhedgeB_7":["gmhedgeB_7.jpg",256,256,"t"],"gmhedgeB_8":["gmhedgeB_8.jpg",256,256,"t"],"gmprops1_0":["gmprops1_0.webp",216,157,"s"],"gmprops1_1":["gmprops1_1.webp",212,211,"s"],"gmprops1_10":["gmprops1_10.webp",135,176,"s"],"gmprops1_11":["gmprops1_11.webp",221,154,"s"],"gmprops1_2":["gmprops1_2.webp",131,182,"s"],"gmprops1_3":["gmprops1_3.webp",211,140,"s"],"gmprops1_4":["gmprops1_4.webp",106,226,"s"],"gmprops1_5":["gmprops1_5.webp",134,236,"s"],"gmprops1_6":["gmprops1_6.webp",192,233,"s"],"gmprops1_7":["gmprops1_7.webp",138,226,"s"],"gmprops1_8":["gmprops1_8.webp",112,208,"s"],"gmprops1_9":["gmprops1_9.webp",144,218,"s"],"gmprops2_0":["gmprops2_0.webp",217,188,"s"],"gmprops2_1":["gmprops2_1.webp",217,187,"s"],"gmprops2_10":["gmprops2_10.webp",224,162,"s"],"gmprops2_11":["gmprops2_11.webp",235,150,"s"],"gmprops2_2":["gmprops2_2.webp",214,195,"s"],"gmprops2_3":["gmprops2_3.webp",216,113,"s"],"gmprops2_4":["gmprops2_4.webp",206,207,"s"],"gmprops2_5":["gmprops2_5.webp",216,198,"s"],"gmprops2_6":["gmprops2_6.webp",200,165,"s"],"gmprops2_7":["gmprops2_7.webp",225,123,"s"],"gmprops2_8":["gmprops2_8.webp",224,183,"s"],"gmprops2_9":["gmprops2_9.webp",227,165,"s"],"gmstone_0":["gmstone_0.webp",120,264,"s"],"gmstone_1":["gmstone_1.webp",121,259,"s"],"gmstone_10":["gmstone_10.webp",100,178,"s"],"gmstone_11":["gmstone_11.webp",212,127,"s"],"gmstone_2":["gmstone_2.webp",120,267,"s"],"gmstone_3":["gmstone_3.webp",124,255,"s"],"gmstone_4":["gmstone_4.webp",178,215,"s"],"gmstone_5":["gmstone_5.webp",92,218,"s"],"gmstone_6":["gmstone_6.webp",126,211,"s"],"gmstone_7":["gmstone_7.webp",118,197,"s"],"gmstone_8":["gmstone_8.webp",149,217,"s"],"gmstone_9":["gmstone_9.webp",129,180,"s"],"gmtopi_0":["gmtopi_0.webp",87,229,"s"],"gmtopi_1":["gmtopi_1.webp",91,226,"s"],"gmtopi_10":["gmtopi_10.webp",157,203,"s"],"gmtopi_11":["gmtopi_11.webp",131,222,"s"],"gmtopi_2":["gmtopi_2.webp",110,224,"s"],"gmtopi_3":["gmtopi_3.webp",235,228,"s"],"gmtopi_4":["gmtopi_4.webp",165,204,"s"],"gmtopi_5":["gmtopi_5.webp",123,205,"s"],"gmtopi_6":["gmtopi_6.webp",117,205,"s"],"gmtopi_7":["gmtopi_7.webp",185,208,"s"],"gmtopi_8":["gmtopi_8.webp",139,230,"s"],"gmtopi_9":["gmtopi_9.webp",124,206,"s"],"gmtrees_0":["gmtrees_0.webp",155,296,"s"],"gmtrees_1":["gmtrees_1.webp",312,298,"s"],"gmtrees_2":["gmtrees_2.webp",274,298,"s"],"gmtrees_3":["gmtrees_3.webp",250,298,"s"],"gmtrees_4":["gmtrees_4.webp",176,299,"s"],"gmtrees_5":["gmtrees_5.webp",278,292,"s"],"gmtrees_6":["gmtrees_6.webp",161,291,"s"],"gmtrees_7":["gmtrees_7.webp",295,297,"s"],"gmtuft_0":["gmtuft_0.webp",199,183,"s"],"gmtuft_1":["gmtuft_1.webp",197,193,"s"],"gmtuft_10":["gmtuft_10.webp",225,150,"s"],"gmtuft_11":["gmtuft_11.webp",213,153,"s"],"gmtuft_2":["gmtuft_2.webp",192,192,"s"],"gmtuft_3":["gmtuft_3.webp",194,194,"s"],"gmtuft_4":["gmtuft_4.webp",196,204,"s"],"gmtuft_5":["gmtuft_5.webp",208,185,"s"],"gmtuft_6":["gmtuft_6.webp",206,197,"s"],"gmtuft_7":["gmtuft_7.webp",191,205,"s"],"gmtuft_8":["gmtuft_8.webp",191,187,"s"],"gmtuft_9":["gmtuft_9.webp",196,201,"s"],"gmwarden_0":["gmwarden_0.webp",513,512,"s"]};
+const GM_LIST={"gmanim_0":["gmanim_0.webp",194,210,"s"],"gmanim_1":["gmanim_1.webp",241,202,"s"],"gmanim_10":["gmanim_10.webp",215,145,"s"],"gmanim_11":["gmanim_11.webp",182,153,"s"],"gmanim_2":["gmanim_2.webp",97,209,"s"],"gmanim_3":["gmanim_3.webp",106,204,"s"],"gmanim_4":["gmanim_4.webp",100,214,"s"],"gmanim_5":["gmanim_5.webp",174,165,"s"],"gmanim_6":["gmanim_6.webp",98,212,"s"],"gmanim_7":["gmanim_7.webp",192,159,"s"],"gmanim_8":["gmanim_8.webp",112,213,"s"],"gmanim_9":["gmanim_9.webp",220,146,"s"],"gmbldg_0":["gmbldg_0.webp",150,198,"s"],"gmbldg_1":["gmbldg_1.webp",224,195,"s"],"gmbldg_2":["gmbldg_2.webp",201,199,"s"],"gmbldg_3":["gmbldg_3.webp",220,180,"s"],"gmbldg_4":["gmbldg_4.webp",209,193,"s"],"gmbldg_5":["gmbldg_5.webp",214,185,"s"],"gmbldg_6":["gmbldg_6.webp",241,183,"s"],"gmbldg_7":["gmbldg_7.webp",232,131,"s"],"gmfloor_0":["gmfloor_0.jpg",256,256,"t"],"gmfloor_1":["gmfloor_1.jpg",256,256,"t"],"gmfloor_2":["gmfloor_2.jpg",256,256,"t"],"gmfloor_3":["gmfloor_3.jpg",256,256,"t"],"gmfloor_4":["gmfloor_4.jpg",256,256,"t"],"gmfloor_5":["gmfloor_5.jpg",256,256,"t"],"gmgates_0":["gmgates_0.webp",364,475,"s"],"gmgates_1":["gmgates_1.webp",465,406,"s"],"gmgates_2":["gmgates_2.webp",379,463,"s"],"gmgates_3":["gmgates_3.webp",458,431,"s"],"gmguard_0":["gmguard_0.webp",273,305,"s"],"gmguard_1":["gmguard_1.webp",136,293,"s"],"gmguard_2":["gmguard_2.webp",317,305,"s"],"gmguard_3":["gmguard_3.webp",179,325,"s"],"gmguard_4":["gmguard_4.webp",312,308,"s"],"gmguard_5":["gmguard_5.webp",310,325,"s"],"gmhedgeA_0":["gmhedgeA_0.jpg",256,256,"t"],"gmhedgeA_1":["gmhedgeA_1.jpg",256,256,"t"],"gmhedgeA_2":["gmhedgeA_2.jpg",256,256,"t"],"gmhedgeA_3":["gmhedgeA_3.jpg",256,256,"t"],"gmhedgeA_4":["gmhedgeA_4.jpg",256,256,"t"],"gmhedgeA_5":["gmhedgeA_5.jpg",256,256,"t"],"gmhedgeA_6":["gmhedgeA_6.jpg",256,256,"t"],"gmhedgeA_7":["gmhedgeA_7.jpg",256,256,"t"],"gmhedgeA_8":["gmhedgeA_8.jpg",256,256,"t"],"gmhedgeB_0":["gmhedgeB_0.jpg",256,256,"t"],"gmhedgeB_1":["gmhedgeB_1.jpg",256,256,"t"],"gmhedgeB_2":["gmhedgeB_2.jpg",256,256,"t"],"gmhedgeB_3":["gmhedgeB_3.jpg",256,256,"t"],"gmhedgeB_4":["gmhedgeB_4.jpg",256,256,"t"],"gmhedgeB_5":["gmhedgeB_5.jpg",256,256,"t"],"gmhedgeB_6":["gmhedgeB_6.jpg",256,256,"t"],"gmhedgeB_7":["gmhedgeB_7.jpg",256,256,"t"],"gmhedgeB_8":["gmhedgeB_8.jpg",256,256,"t"],"gmprops1_0":["gmprops1_0.webp",216,157,"s"],"gmprops1_1":["gmprops1_1.webp",212,211,"s"],"gmprops1_10":["gmprops1_10.webp",135,176,"s"],"gmprops1_11":["gmprops1_11.webp",221,154,"s"],"gmprops1_2":["gmprops1_2.webp",131,182,"s"],"gmprops1_3":["gmprops1_3.webp",211,140,"s"],"gmprops1_4":["gmprops1_4.webp",106,226,"s"],"gmprops1_5":["gmprops1_5.webp",134,236,"s"],"gmprops1_6":["gmprops1_6.webp",192,233,"s"],"gmprops1_7":["gmprops1_7.webp",138,226,"s"],"gmprops1_8":["gmprops1_8.webp",112,208,"s"],"gmprops1_9":["gmprops1_9.webp",144,218,"s"],"gmprops2_0":["gmprops2_0.webp",217,188,"s"],"gmprops2_1":["gmprops2_1.webp",217,187,"s"],"gmprops2_10":["gmprops2_10.webp",224,162,"s"],"gmprops2_11":["gmprops2_11.webp",235,150,"s"],"gmprops2_2":["gmprops2_2.webp",214,195,"s"],"gmprops2_3":["gmprops2_3.webp",216,113,"s"],"gmprops2_4":["gmprops2_4.webp",206,207,"s"],"gmprops2_5":["gmprops2_5.webp",216,198,"s"],"gmprops2_6":["gmprops2_6.webp",200,165,"s"],"gmprops2_7":["gmprops2_7.webp",225,123,"s"],"gmprops2_8":["gmprops2_8.webp",224,183,"s"],"gmprops2_9":["gmprops2_9.webp",227,165,"s"],"gmstone_0":["gmstone_0.webp",120,264,"s"],"gmstone_1":["gmstone_1.webp",121,259,"s"],"gmstone_10":["gmstone_10.webp",100,178,"s"],"gmstone_11":["gmstone_11.webp",212,127,"s"],"gmstone_2":["gmstone_2.webp",120,267,"s"],"gmstone_3":["gmstone_3.webp",124,255,"s"],"gmstone_4":["gmstone_4.webp",178,215,"s"],"gmstone_5":["gmstone_5.webp",92,218,"s"],"gmstone_6":["gmstone_6.webp",126,211,"s"],"gmstone_7":["gmstone_7.webp",118,197,"s"],"gmstone_8":["gmstone_8.webp",149,217,"s"],"gmstone_9":["gmstone_9.webp",129,180,"s"],"gmtopi_0":["gmtopi_0.webp",87,229,"s"],"gmtopi_1":["gmtopi_1.webp",91,226,"s"],"gmtopi_10":["gmtopi_10.webp",157,203,"s"],"gmtopi_11":["gmtopi_11.webp",131,222,"s"],"gmtopi_2":["gmtopi_2.webp",110,224,"s"],"gmtopi_3":["gmtopi_3.webp",235,228,"s"],"gmtopi_4":["gmtopi_4.webp",165,204,"s"],"gmtopi_5":["gmtopi_5.webp",123,205,"s"],"gmtopi_6":["gmtopi_6.webp",117,205,"s"],"gmtopi_7":["gmtopi_7.webp",185,208,"s"],"gmtopi_8":["gmtopi_8.webp",139,230,"s"],"gmtopi_9":["gmtopi_9.webp",124,206,"s"],"gmtrees_0":["gmtrees_0.webp",155,296,"s"],"gmtrees_1":["gmtrees_1.webp",312,298,"s"],"gmtrees_2":["gmtrees_2.webp",274,298,"s"],"gmtrees_3":["gmtrees_3.webp",250,298,"s"],"gmtrees_4":["gmtrees_4.webp",176,299,"s"],"gmtrees_5":["gmtrees_5.webp",278,292,"s"],"gmtrees_6":["gmtrees_6.webp",161,291,"s"],"gmtrees_7":["gmtrees_7.webp",295,297,"s"],"gmtuft_0":["gmtuft_0.webp",199,183,"s"],"gmtuft_1":["gmtuft_1.webp",197,193,"s"],"gmtuft_10":["gmtuft_10.webp",225,150,"s"],"gmtuft_11":["gmtuft_11.webp",213,153,"s"],"gmtuft_2":["gmtuft_2.webp",192,192,"s"],"gmtuft_3":["gmtuft_3.webp",194,194,"s"],"gmtuft_4":["gmtuft_4.webp",196,204,"s"],"gmtuft_5":["gmtuft_5.webp",208,185,"s"],"gmtuft_6":["gmtuft_6.webp",206,197,"s"],"gmtuft_7":["gmtuft_7.webp",191,205,"s"],"gmtuft_8":["gmtuft_8.webp",191,187,"s"],"gmtuft_9":["gmtuft_9.webp",196,201,"s"],"gmwarden_0":["gmwarden_0.webp",513,512,"s"]};
 
 /* ---- src/desert/garden_gen.js ---- */
 /* ==========================================================================
@@ -51291,10 +51291,10 @@ if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^gmbriar/,'bleeding',.3],[/^g
    (cached), gmhPick(types, x, y) picks a type and variant for a wall cell. Painted at load of the garden; each tile is 128 pixels wide and wh squares high, like the painted ones of garden_art.js.
    ========================================================================== */
 const GMH={
-  box:{base:'#142e17',cols:['#255a27','#2f6d30','#3d8238','#4a9644','#1c4a20'],len:[4,7],ratio:.72,n:2.4,shape:'oval'},
+  box:{base:'#142e17',cols:['#255a27','#2f6d30','#3d8238','#4a9644','#1c4a20'],len:[3,5],ratio:1,n:3.4,shape:'round'},
   yew:{base:'#0c2016',cols:['#173d2a','#1f4c34','#285c3e','#133524','#2f6a48'],len:[10,15],ratio:.14,n:1.6,shape:'needle'},
   holly:{base:'#122c17',cols:['#1b5026','#256333','#327a3f','#154520','#3a8a48'],len:[8,12],ratio:.55,n:1.15,shape:'spike',acc:[{k:'berry',cs:['#d22a2a','#e03838','#b81e24'],n:34,s:2.7}]},
-  privet:{base:'#1a3c16',cols:['#47a02e','#58b638','#3a8a2a','#6fc84a','#2f7a24'],len:[5,8],ratio:.5,n:2,shape:'oval'},
+  privet:{base:'#1a3c16',cols:['#47a02e','#58b638','#3a8a2a','#6fc84a','#2f7a24'],len:[7,11],ratio:.36,n:1.6,shape:'oval'},
   laurel:{base:'#102c18',cols:['#255f33','#307540','#40904f','#1b4c2a','#58a864'],len:[13,19],ratio:.42,n:.85,shape:'oval',gloss:1},
   beech:{base:'#26121e',cols:['#68283a','#7a3a46','#8c4a50','#521c36','#a05a58'],len:[8,12],ratio:.55,n:1.3,shape:'oval'},
   hawthorn:{base:'#183818',cols:['#386f2e','#488a3e','#2c6428','#58a04c'],len:[6,9],ratio:.65,n:1.6,shape:'lobed',acc:[{k:'bloom',cs:['#fff8f8','#ffe8ee','#fff0f4'],n:46,s:4.2,p:5},{k:'berry',cs:['#c01f2a'],n:10,s:2}]},
@@ -51309,12 +51309,12 @@ const GMH={
   clematis:{base:'#17381a',cols:['#2f6e30','#3d8238','#285e2a','#4c9644'],len:[7,11],ratio:.5,n:1.25,shape:'lobed',acc:[{k:'star',cs:['#8a3ad0','#b068e8','#9a50e0','#cf90f4'],n:40,s:6.4,p:6}]},
   nasturt:{base:'#1c4018',cols:['#58b038','#6cc844','#4a9a30','#80dc58'],len:[8,12],ratio:1,n:1,shape:'round',acc:[{k:'bloom',cs:['#f08a1a','#f6b01a','#e85a1a','#fcc84a'],n:34,s:5.6,p:5}]},
   jasmine:{base:'#0f2a16',cols:['#1f5028','#296434','#184420','#337a40'],len:[6,9],ratio:.5,n:1.7,shape:'oval',acc:[{k:'star',cs:['#ffffff','#fff8f0','#f8fff8'],n:64,s:4.2,p:5}]},
-  niche:{base:'#142e17',cols:['#255a27','#2f6d30','#3d8238','#4a9644','#1c4a20'],len:[4,7],ratio:.72,n:2.4,shape:'oval',niche:1}
+  niche:{base:'#142e17',cols:['#255a27','#2f6d30','#3d8238','#4a9644','#1c4a20'],len:[3,5],ratio:1,n:3.4,shape:'round',niche:1}
 };
 const GMH_NAMES=Object.keys(GMH);
 function gmhRng(sd){return()=>{sd=(sd+0x6D2B79F5)|0;let t=Math.imul(sd^(sd>>>15),1|sd);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296}}
-function gmHedge(type,variant,wh){
-  const S=GMH[type]||GMH.box,key='H|'+type+'|'+variant+'|'+wh;if(GM.tiles[key]!==undefined)return GM.tiles[key];
+function gmHedge(type,variant,wh,opt){
+  opt=opt||{};const S=GMH[type]||GMH.box,key='H|'+type+'|'+variant+'|'+wh+(opt.gate?'|'+opt.gate:'');if(GM.tiles[key]!==undefined)return GM.tiles[key];
   const Hp=Math.round(128*wh),W=128,c=document.createElement('canvas');c.width=W;c.height=Hp;const x=c.getContext('2d');
   let sd=variant*7919+type.length*131;for(let i=0;i<type.length;i++)sd=(sd*31+type.charCodeAt(i))|0;const R=gmhRng(sd);
   x.fillStyle=S.base;x.fillRect(0,0,W,Hp);
@@ -51356,14 +51356,17 @@ function gmHedge(type,variant,wh){
     x.save();x.beginPath();x.moveTo(nx,base);x.lineTo(nx,top+nw/2);x.arc(nx+nw/2,top+nw/2,nw/2,Math.PI,0);x.lineTo(nx+nw,base);x.closePath();x.clip();
     let g=x.createLinearGradient(0,top,0,base);g.addColorStop(0,'#0a1a0d');g.addColorStop(1,'#1c3a1e');x.fillStyle=g;x.fillRect(nx,top,nw,base-top);
     g=x.createRadialGradient(nx+nw/2,base-24,2,nx+nw/2,base-24,46);g.addColorStop(0,'rgba(255,214,130,.8)');g.addColorStop(1,'rgba(255,200,100,0)');x.fillStyle=g;x.fillRect(nx,top,nw,base-top);
-    x.fillStyle='#a8a090';x.fillRect(nx+8,base-16,nw-16,7);x.fillStyle='#8a8272';x.fillRect(nx+12,base-9,6,9);x.fillRect(nx+nw-18,base-9,6,9);
-    if(variant%2){x.fillStyle='#b8b0a0';x.beginPath();x.ellipse(nx+nw/2,base-30,7,9,0,0,6.3);x.fill();x.fillStyle='#d83a3a';x.beginPath();x.arc(nx+nw/2-2,base-40,3,0,6.3);x.arc(nx+nw/2+3,base-38,2.6,0,6.3);x.fill()}
-    else{x.fillStyle='#2a2a2a';x.fillRect(nx+nw/2-1,base-52,2,18);x.fillStyle='#ffe090';x.fillRect(nx+nw/2-5,base-44,10,14);x.fillStyle='rgba(255,240,180,.9)';x.fillRect(nx+nw/2-3,base-42,6,10)}
+    const vv=variant%4,cx0=nx+nw/2;
+    if(vv===0){x.fillStyle='#a8a090';x.fillRect(nx+8,base-16,nw-16,7);x.fillStyle='#8a8272';x.fillRect(nx+12,base-9,6,9);x.fillRect(nx+nw-18,base-9,6,9);x.fillStyle='#2a2a2a';x.fillRect(cx0-1,base-52,2,18);x.fillStyle='#ffe090';x.fillRect(cx0-5,base-44,10,14);x.fillStyle='rgba(255,240,180,.9)';x.fillRect(cx0-3,base-42,6,10)}
+    else if(vv===1){x.fillStyle='#b8b0a0';x.beginPath();x.moveTo(cx0-12,base);x.lineTo(cx0-9,base-18);x.lineTo(cx0+9,base-18);x.lineTo(cx0+12,base);x.closePath();x.fill();x.fillStyle='#a09888';x.fillRect(cx0-14,base-22,28,5);for(let k=0;k<7;k++){x.fillStyle=['#d83a3a','#f0c030','#f08aa8','#fff'][k%4];x.beginPath();x.arc(cx0-10+k*3.4,base-26-(k%3)*3,3.2,0,6.3);x.fill()}x.fillStyle='#2f7a30';x.fillRect(cx0-12,base-24,24,3)}
+    else if(vv===2){x.fillStyle='#b4ac9c';x.fillRect(cx0-4,base-30,8,30);x.fillStyle='#c8c0b0';x.beginPath();x.ellipse(cx0,base-32,16,6,0,0,6.3);x.fill();x.fillStyle='#6aa4c8';x.beginPath();x.ellipse(cx0,base-33,12,3.6,0,0,6.3);x.fill();x.fillStyle='#8a8272';x.fillRect(cx0-9,base-4,18,4);x.fillStyle='#fff';x.beginPath();x.arc(cx0+4,base-40,2.4,0,6.3);x.fill();x.fillStyle='#e8a030';x.beginPath();x.arc(cx0+5,base-41,1.2,0,6.3);x.fill()}
+    else{x.fillStyle='#b0a898';x.fillRect(cx0-10,base-8,20,8);x.beginPath();x.ellipse(cx0,base-18,8,10,0,0,6.3);x.fill();x.beginPath();x.arc(cx0,base-32,6.5,0,6.3);x.fill();x.beginPath();x.moveTo(cx0-6,base-36);x.lineTo(cx0-4,base-44);x.lineTo(cx0-1,base-37);x.closePath();x.fill();x.beginPath();x.moveTo(cx0+6,base-36);x.lineTo(cx0+4,base-44);x.lineTo(cx0+1,base-37);x.closePath();x.fill();x.fillStyle='#1c1c1c';x.fillRect(cx0-3,base-33,1.6,2);x.fillRect(cx0+1.6,base-33,1.6,2);x.strokeStyle='#a8a090';x.lineWidth=2.4;x.beginPath();x.moveTo(cx0+8,base-14);x.quadraticCurveTo(cx0+16,base-12,cx0+12,base-24);x.stroke()}
     x.restore();x.strokeStyle='#d8d0b8';x.lineWidth=3;x.beginPath();x.moveTo(nx,base);x.lineTo(nx,top+nw/2);x.arc(nx+nw/2,top+nw/2,nw/2,Math.PI,0);x.lineTo(nx+nw,base);x.stroke();
   }
+  if(opt.gate&&IMG[opt.gate]){const g=IMG[opt.gate],sc=Math.min(124/g.width,(Hp-6)/g.height);x.drawImage(g,(W-g.width*sc)/2,Hp-g.height*sc-1,g.width*sc,g.height*sc)}
   // light: warm and bright high up, deep green shade at the foot where the hedge meets the ground, a soft shade at both edges so that a run of cells reads as clipped sections
-  x.globalCompositeOperation='multiply';let gr=x.createLinearGradient(0,0,0,Hp);gr.addColorStop(0,'rgb(255,250,232)');gr.addColorStop(.7,'rgb(236,234,212)');gr.addColorStop(1,'rgb(170,176,150)');x.fillStyle=gr;x.fillRect(0,0,W,Hp);
-  gr=x.createLinearGradient(0,0,W,0);gr.addColorStop(0,'rgba(190,196,176,1)');gr.addColorStop(.12,'rgba(255,255,255,1)');gr.addColorStop(.88,'rgba(255,255,255,1)');gr.addColorStop(1,'rgba(200,204,184,1)');x.fillStyle=gr;x.fillRect(0,0,W,Hp);x.globalCompositeOperation='source-over';
+  x.globalCompositeOperation='multiply';let gr=x.createLinearGradient(0,0,0,Hp);gr.addColorStop(0,'rgb(255,250,232)');gr.addColorStop(.5+variant*.07,'rgb(238,236,214)');gr.addColorStop(1,'rgb(176,182,156)');x.fillStyle=gr;x.fillRect(0,0,W,Hp);
+  gr=x.createLinearGradient(0,0,W,0);gr.addColorStop(0,'rgba(214,218,200,1)');gr.addColorStop(.08,'rgba(255,255,255,1)');gr.addColorStop(.92,'rgba(255,255,255,1)');gr.addColorStop(1,'rgba(220,224,206,1)');x.fillStyle=gr;x.fillRect(0,0,W,Hp);x.globalCompositeOperation='source-over';
   const d=x.getImageData(0,0,W,Hp).data;
   for(let i=0;i<d.length;i+=4){const l=d[i]*.3+d[i+1]*.59+d[i+2]*.11,k=1.2;d[i]=Math.min(255,(l+(d[i]-l)*k)*1.12);d[i+1]=Math.min(255,(l+(d[i+1]-l)*k)*1.12);d[i+2]=Math.min(255,(l+(d[i+2]-l)*k)*1.1)}
   const id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;const gid=KH_NEXT_GID++;T_TILE[gid]=id;
@@ -51374,11 +51377,13 @@ function gmhPick(types,x,y,sd){const t=types[Math.min(types.length-1,Math.floor(
 
 /* little glowing motes of light, in four colours (gold, rose, lilac and mint): the floating sparkle of the garden */
 function gmMotes(){if(IMG.gm_mote0)return;
+  {const cv=document.createElement('canvas');cv.width=64;cv.height=256;const x=cv.getContext('2d'),g=x.createLinearGradient(0,0,0,256);g.addColorStop(0,'rgba(255,240,190,0)');g.addColorStop(.25,'rgba(255,236,170,.38)');g.addColorStop(.8,'rgba(255,226,150,.5)');g.addColorStop(1,'rgba(255,220,140,.15)');x.fillStyle=g;x.beginPath();x.moveTo(26,0);x.lineTo(38,0);x.lineTo(62,256);x.lineTo(2,256);x.closePath();x.fill();IMG.gm_beam=cv;NPC_H.gm_beam=2.8}
+  [['#f8b4c8',0],['#fff4f4',1],['#e84a5a',2]].forEach(([col,i])=>{const cv=document.createElement('canvas');cv.width=24;cv.height=16;const x=cv.getContext('2d');x.fillStyle=col;x.beginPath();x.ellipse(12,8,10,5.5,.4,0,6.3);x.fill();x.fillStyle='rgba(255,255,255,.35)';x.beginPath();x.ellipse(9,6,4,2,.4,0,6.3);x.fill();IMG['gm_petal'+i]=cv;NPC_H['gm_petal'+i]=.09});
   [[255,236,150],[255,190,220],[200,180,255],[190,255,230]].forEach((c,i)=>{const cv=document.createElement('canvas');cv.width=cv.height=48;const x=cv.getContext('2d'),g=x.createRadialGradient(24,24,0,24,24,24);
     g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.18,'rgba('+c[0]+','+c[1]+','+c[2]+',.95)');g.addColorStop(.5,'rgba('+c[0]+','+c[1]+','+c[2]+',.25)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,48,48);IMG['gm_mote'+i]=cv;NPC_H['gm_mote'+i]=.24})}
 /* a golden, hazy air over the garden */
 {const _w=weatherNow;weatherNow=function(){
-  if(LEVEL===GM.ID)return {id:'mist',n:'Golden haze',fog:.028,haze:.42,dark:0,mix:.4,col:[255,232,190],text:'The air is warm and golden, and full of drifting light. Bees hum in the hedges.'};
+  if(LEVEL===GM.ID)return {id:'mist',n:'Golden haze',fog:.02,haze:.2,dark:0,mix:.24,col:[255,224,150],text:'The air is warm and golden, and full of drifting light. Bees hum in the hedges.'};
   return _w.apply(this,arguments)}}
 
 /* ---- src/desert/garden_maze.js ---- */
@@ -51429,7 +51434,7 @@ function gmBuild(){
   const QH=h=>[1.9,2.2,2.5].reduce((b,v)=>Math.abs(v-h)<Math.abs(b-h)?v:b,2.2);   // the hedge heights are few, so that the garden is not made of hundreds of tile sizes
   const wallChar=(x,y)=>{
     if(x===0||y===0||x===W-1||y===H-1){const gate=(x===45&&y===0)?'gmgates_0':(x===45&&y===H-1)?'gmgates_1':null;
-      return ch(gmTile(A(7),2.7,gate?{gate}:undefined))}
+      return ch(gmHedge('yew',(hs(x,y,3)*4)|0,2.5,gate?{gate}:undefined))}
     const lw=lowWall.get(x+','+y);if(lw)return ch(gmHedge(lw[0],(hs(x,y,9)*4)|0,lw[1]));
     const q=roomAt(x,y,1);let reg;const inRoom=q&&RS[q.id];
     reg=inRoom?RS[q.id]:regAt(x,y);
@@ -51449,7 +51454,7 @@ function gmBuild(){
   const near=new Set();for(const d of m.doors){for(let k=-1;k<=1;k++)for(let l=-1;l<=1;l++)near.add((d.x+k)+','+(d.y+l));if(d.dx!==undefined){for(let t=1;t<=3;t++)near.add((d.x-Math.sign(d.dx)*t)+','+(d.y-Math.sign(d.dy)*t))}}
   const free=(x,y)=>isOpen(x,y)&&!occ.has(x+','+y)&&!near.has(x+','+y);
   const dec=(a,x,y,o)=>{o=o||{};const k=a.startsWith('gm_')||a==='chest'?a:'gm_'+a;if(!isOpen(x,y))return null;
-    const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}if(o.sc)d.sc=o.sc;if(o.txt)d.txt=o.txt;if(o.bob)d.bob=o.bob;if(o.goldAmt)d.goldAmt=o.goldAmt;if(o.wd){d.wd=o.wd;d.pic=1}
+    const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}if(o.sc)d.sc=o.sc;if(o.npc){d.npc=o.npc;d.deco=false;if(o.block)d.solid=1}if(o.txt)d.txt=o.txt;if(o.bob)d.bob=o.bob;if(o.goldAmt)d.goldAmt=o.goldAmt;if(o.wd){d.wd=o.wd;d.pic=1}
     decor.push(d);if(o.block||o.occ)occ.add(x+','+y);return d};
   const D=(a,x,y,o)=>free(x,y)?dec(a,x,y,o):null;                 // only on free squares
   const DB=(a,x,y,o)=>D(a,x,y,Object.assign({block:true},o||{}));  // standing in the way
@@ -51612,14 +51617,14 @@ function gmBuild(){
     // seen from the way in: the piece stands at the end of the passage; a niche is set in the end wall
     const d=a==='niche'?(op?dec(a,x,y,{wd:[-op[0],-op[1]]}):null):dec(a,x,y,{block:true});if(d)dn++}
   // flowers and butterflies along the corridors (walk through)
-  let fc=0;for(const [x,y] of corr){const r=hs(x,y,63);const foot=[[0,-1],[0,1],[1,0],[-1,0]].some(([p,q])=>!isOpen(x+p,y+q));if(r<(foot?.22:.1)&&!occ.has(x+','+y)){const a=hs(x,y,64)<.45?'tuft'+((hs(x,y,80)*12)|0):['flowers0','flowers1','flowers2','lavender','tulips','fern','fern2','rose_red','rose_white','hydrangea','delphinium','hollyhock'][(hs(x,y,64)*12)|0];dec(a,x,y,{sc:a[0]==='t'?.9+hs(x,y,65)*.5:.55+hs(x,y,65)*.25});fc++}
+  let fc=0;for(const [x,y] of corr){const r=hs(x,y,63);const foot=[[0,-1],[0,1],[1,0],[-1,0]].some(([p,q])=>!isOpen(x+p,y+q));if(r<(foot?.22:.1)&&!occ.has(x+','+y)){const a=hs(x,y,64)<.45?'tuft'+((hs(x,y,80)*12)|0):['flowers0','flowers1','flowers2','lavender','tulips','fern','fern2','rose_red','rose_white','hydrangea','delphinium','hollyhock','herbbed','lilytub','sunflowers','skep','rosetree','birdbath','cabbages','pumpkins'][(hs(x,y,64)*20)|0];dec(a,x,y,{sc:a[0]==='t'?.9+hs(x,y,65)*.5:.55+hs(x,y,65)*.25});fc++}
     else if(r<.04)dec('butterfly',x,y,{bob:.4})}
   // butterflies, bees and drifting motes of light, each circling its own square (moved smoothly by the update below)
   const FLY=[];{gmMotes();let bn=0,ben=0,mn=0;const add=(a,x,y,o,sp,r,b)=>{const d=dec(a,x,y,o);if(!d)return;d.cloudid='gmf'+FLY.length;FLY.push({sp,r,b,ph:hs(x,y,95)*6.28});return d};
     for(const [x,y] of corr){const r=hs(x,y,90);if(occ.has(x+','+y)||near.has(x+','+y))continue;
-      if(r<.05&&bn<110){if(add('butterfly',x,y,{bob:.5,sc:.8+hs(x,y,92)*.5},.7+hs(x,y,94)*.8,.34,.5+hs(x,y,91)*.4))bn++}
-      else if(r<.088&&ben<80){if(add('bee',x,y,{bob:.4,sc:.9},1.8+hs(x,y,94)*1.2,.3,.4+hs(x,y,91)*.3))ben++}
-      else if(r<.125&&mn<110){if(add('mote'+((hs(x,y,96)*4)|0),x,y,{bob:.3,sc:.7+hs(x,y,92)*.7},.25+hs(x,y,94)*.3,.36,.25+hs(x,y,91)*.9))mn++}}}
+      if(r<.05&&bn<110){if(add('butterfly',x,y,{bob:.5,sc:.42+hs(x,y,92)*.3},.7+hs(x,y,94)*.8,.34,.5+hs(x,y,91)*.4))bn++}
+      else if(r<.088&&ben<80){if(add('bee',x,y,{bob:.4,sc:.5},1.8+hs(x,y,94)*1.2,.3,.4+hs(x,y,91)*.3))ben++}
+      else if(r<.125&&mn<110){if(add('mote'+((hs(x,y,96)*4)|0),x,y,{bob:.3,sc:.5+hs(x,y,92)*.5},.25+hs(x,y,94)*.3,.36,.25+hs(x,y,91)*.9))mn++}}}
   // climbers hung on the hedge walls along the corridors
   for(const [x,y] of corr){if(hs(x,y,78)>.022||occ.has(x+','+y))continue;const wl=[[0,-1],[0,1],[1,0],[-1,0]].filter(([p,q])=>!isOpen(x+p,y+q));if(wl.length&&wl.length<=2)dec('trellis',x,y,{wd:wl[(hs(x,y,79)*wl.length)|0]})}
   // lamps at some junctions
@@ -51630,6 +51635,21 @@ function gmBuild(){
   // small finds at dead ends
   const IK=['potion3','potion3','supermana','elixir'];let ic=0;
   for(const [x,y] of dead){if(occ.has(x+','+y)||hs(x,y,69)>.14)continue;items.push({k:IK[ic%4],x,y});ic++}
+  // sunbeams: a soft shaft of gold light at a few of the junctions, with a mote or two in it; and rose petals blowing low along the ground in the precincts of roses
+  {let bc=0,pc2=0;for(const [x,y] of corr){if(occ.has(x+','+y)||near.has(x+','+y))continue;
+      if(deg(x,y)>=3&&hs(x,y,97)<.1&&bc<9){const d=dec('beam',x,y,{bob:0,sc:1});if(d){bc++;add2('mote'+((hs(x,y,98)*4)|0),x,y,.35,.45)}}
+      else if(hs(x,y,99)<.06&&pc2<70&&regAt(x,y).h.some(k=>/^rose/.test(k))){const d=dec('petal'+((hs(x,y,100)*3)|0),x,y,{bob:.03,sc:1});if(d){d.cloudid='gmf'+FLY.length;FLY.push({sp:.5+hs(x,y,94)*.4,r:.46,b:.03,ph:hs(x,y,95)*6.28});pc2++}}}
+    function add2(a,x,y,sp,r){const d=dec(a,x,y,{bob:.5,sc:.7});if(d){d.cloudid='gmf'+FLY.length;FLY.push({sp,r,b:.5,ph:hs(x,y,95)*6.28})}}}
+  // ---- the small folk and what they have lost (see garden_folk.js) ----
+  {const D2=dead.slice().sort((p,q)=>hs(p[0],p[1],110)-hs(q[0],q[1],110));
+    const spot=(room,dx,dy)=>{const q=Q[room];return q?[q.cx+dx,q.cy+dy]:null};
+    const place=(a,npc,pos,o)=>{if(!pos)return;for(let r=0;r<4;r++)for(let ax=-r;ax<=r;ax++)for(let ay=-r;ay<=r;ay++){if(Math.max(Math.abs(ax),Math.abs(ay))!==r)continue;const x=pos[0]+ax,y=pos[1]+ay;if(isOpen(x,y)&&!occ.has(x+','+y)){const d=dec(a,x,y,Object.assign({npc},o||{}));if(d)return d}}};
+    place('duck','gmo_duchess',spot('pond',3,2),{sc:1.1});place('robin','gmo_robin',spot('bee',3,1),{sc:1.4});place('lady','gmo_stonelady',spot('gallery',0,1),{block:true});place('knight','gmo_stoneknight',spot('wist',0,0),{block:true});place('saint','gmo_prompter',spot('theatre',2,2),{block:true});
+    const far=(room,k,min)=>{const q=Q[room];return D2.filter(([x,y])=>Math.hypot(x-q.cx,y-q.cy)>min&&!occ.has(x+','+y))[k]};
+    const ducks=['gmo_duckling1','gmo_duckling2','gmo_duckling3'],used2=new Set();
+    ['pond'].forEach(()=>{let k=0;for(const [x,y] of D2){if(k>=3)break;const q=Q.pond;if(Math.hypot(x-q.cx,y-q.cy)<22||occ.has(x+','+y)||[...used2].some(u=>Math.hypot(u[0]-x,u[1]-y)<24))continue;const d=dec('duck',x,y,{npc:ducks[k],sc:.7});if(d){used2.add([x,y]);k++}}});
+    {const q=Q.bee;const t=D2.find(([x,y])=>Math.hypot(x-q.cx,y-q.cy)>14&&Math.hypot(x-q.cx,y-q.cy)<40&&!occ.has(x+','+y));if(t)dec('bee',t[0],t[1],{npc:'gmo_queen',sc:2.4})}
+    {const q=Q.theatre;let k=0;for(const [x,y] of D2){if(k>=3)break;if(occ.has(x+','+y)||Math.hypot(x-q.cx,y-q.cy)<14||[...used2].some(u=>Math.hypot(u[0]-x,u[1]-y)<16))continue;items.push({k:'gmpage',x,y});used2.add([x,y]);k++}}}
   // ---- the hedges: wall characters, floors ----
   for(let y=0;y<H;y++){let r='',f='';for(let x=0;x<W;x++){const c=g[y][x];r+=(c==='.')?'.':wallChar(x,y);f+=String(fl[y*W+x])}rows.push(r);fm.push(f)}
   // ---- the two gates ----
@@ -51703,6 +51723,75 @@ KH_LAZY[GM.ID]=gmBuild;LEVEL_NAMES[GM.ID]='The Maze of Gardens';LEVEL_RATING[GM.
 {const _gl=gotoListRaw;gotoListRaw=function(){const out=_gl.apply(this,arguments);
   try{if(!out.some(r=>r.n===GM.ID)){out.push({h:'The Maze of Gardens, the way to Wenlock'});out.push({n:GM.ID,name:'The Maze of Gardens'})}}catch(e){console.error(e)}
   return out}}
+
+/* ---- src/desert/garden_folk.js ---- */
+/* ==========================================================================
+   THE SMALL FOLK OF THE MAZE OF GARDENS (prefix gmo_ / gmq). Four little favours for the quiet corners of the garden, asked by the garden's own creatures and statues (the pictures are all the garden's own):
+   gmq1 Duchess Mallard (the Lily Pond Court) has lost three ducklings in the hedges; gmq2 the Robin (the Bee Garden) wants the wandering queen bee brought home; gmq3 the Stone Lady (the Statue Gallery) has a
+   letter for the Stone Knight (the Wisteria Walk); gmq4 the Prompter (a stone saint in the Hedge Theatre) wants three torn pages of the play, found at dead ends. Where they stand and where the things to find are
+   is decided in garden_maze.js (GM_FOLK, filled by gmBuild); the talk and the quests are here. Rewards are for a level 80 party.
+   ========================================================================== */
+Object.assign(WL_REW,{gmq1:{gold:500,xp:5000},gmq2:{gold:600,xp:6000,items:['potion5']},gmq3:{gold:700,xp:6500},gmq4:{gold:800,xp:7500,items:['potion5']}});
+WL_QUESTS.push(
+  {id:'gmq1',giver:'Duchess Mallard',title:'Three Ducklings',desc:'Duchess Mallard has lost her three ducklings among the hedges of the garden. Find them.'},
+  {id:'gmq2',giver:'The Robin',title:'The Missing Queen',desc:'The queen bee has wandered off from the Bee Garden. Find her.'},
+  {id:'gmq3',giver:'The Stone Lady',title:'A Letter for the Knight',desc:'The stone lady in the Statue Gallery has a letter for the stone knight in the Wisteria Walk.'},
+  {id:'gmq4',giver:'The Prompter',title:'Three Torn Pages',desc:'The prompter in the Hedge Theatre wants three torn pages of the play, from three dead ends in the maze.'});
+ITEMDEF.gmpage={n:'A Torn Page',k:'quest',t:'Quest item',ic:'scroll',c:'#e8dcb8',stack:1,price:0,sw:.05,d:'A page torn from a play, in a looping hand. The ink has run a little where it was rained on. It reads: ENTER A GARDENER, WITH A SPADE, LOOKING SUSPICIOUS.'};
+const gmF=()=>G.flags;
+const gmCount=(...f)=>f.reduce((n,k)=>n+(gmF()[k]?1:0),0);
+/* a thing to find: click it while the quest is active */
+function gmFind(npc,face,name,q,flag,line,flav,sc){
+  khNpc(npc,name,face,d=>{const F=gmF();
+    if(qSt(q)==='active'&&!F[flag]){F[flag]=1;d.found=true;d.block=false;yrStep(name+' found. ('+(flag.startsWith('gmd')?gmCount('gmd1','gmd2','gmd3')+'/3':'')+')');return say(line,[BYE])}
+    return say(flav,[BYE])},{sc:sc||1})}
+// ---- 1. the ducklings ----
+const GMD1=khQD("Quack. Oh, forgive me, I do not quack at strangers, it is only that I am quite beside myself. I took my three ducklings for a walk through the hedges, one fell in love with a butterfly, one chased a bee, and one simply sat down, and when I turned round they had all gone. There are a great many corners in this garden, and they are very small. Would you look for them? Please be gentle. They are only ducklings.",
+  "Thank you, thank you. Look at the ends of the paths, the quiet corners, wherever a very small duck might sit and think. They answer to peep.",
+  (n,m)=>n+' of '+m+' found. They will be in quiet corners at the ends of the paths, being very small.',
+  "Peep? Oh, you have them? All three? Come here, come here, you terrible children!",
+  "Three ducklings, counted twice, and one is already asleep. You have the thanks of the Pond Court, and a little something from the pond. Do come again. The lilies are lovely in the evening.",
+  "The ducklings are home and extremely pleased with themselves. They have started telling people about the butterfly.","All three are home.");
+gmFind('gmo_duckling1','gm_duck','The first duckling','gmq1','gmd1',"A very small duck, sitting at the end of a path, looking at nothing. 'Peep,' it says. It follows you to the edge of the hedge, and then it goes home on its own, very quickly.","Peep. (It is sitting in the middle of the path, looking at a leaf.)",.8);
+gmFind('gmo_duckling2','gm_duck','The second duckling','gmq1','gmd2',"A duckling, covered in pollen, with a bee still sitting on its head. 'Peep!' it says, and it waddles off home, with the bee, in great triumph.","Peep. (It is wearing a bee.)",.8);
+gmFind('gmo_duckling3','gm_duck','The third duckling','gmq1','gmd3',"A duckling gazing up at a butterfly with its whole heart. 'Peep,' it says sadly, and it leaves with you, looking back over its shoulder at the butterfly.","Peep. (It is staring at the sky.)",.8);
+khNpc('gmo_duchess','Duchess Mallard','gm_duck',d=>say("Quack. A lovely evening, is it not? Please mind the lilies.",[BYE]),{sc:1.2});
+wlGive('gmo_duchess','gmq1',null,GMD1);
+wlQ('gmq1','Duchess Mallard',['gmd1','gmd2','gmd3'].map((f,i)=>['Find duckling number '+(i+1)+', somewhere at the end of a path.',()=>gmF()[f],['gmo_duckling'+(i+1)]]));
+// ---- 2. the queen bee ----
+const GMD2=khQD("Tweet, tweet, I hope you do not mind, I do not usually speak to people, but I am worried. The queen of the Bee Garden has wandered off. The bees are all in a flutter, they have stopped making honey and started making speeches, and the garden does not smell the same. She is very big and very golden, and she has gone to sit somewhere quiet and think. Would you find her, and tell her they are all waiting?",
+  "Thank you. Try the quiet corners where the paths end. She likes somewhere warm, and somewhere with a view of flowers.",
+  (n,m)=>gmF().gmq2a?'You have found her. Come back and tell me, and I shall tell the bees.':'A quiet, warm corner at the end of a path, with a view of flowers. She is very big and very golden.',
+  "She is found? And she will come home? Oh, tweet, I could sing.",
+  "The hive has gone quiet, which is the sound of bees being happy. Here, a little honey from the queen, and a good deal of thanks. Mind the thistle on your way out.",
+  "The queen is home, the bees are working, and the Bee Garden smells of summer again.","She is on her way home.");
+gmFind('gmo_queen','gm_bee','The queen bee','gmq2','gmq2a',"A bee as big as a loaf, golden and heavy, sitting in a patch of sun with her feet up. 'Bzzz,' she says, which means, quite clearly, 'Five more minutes.' But she rises, and she hums off towards the Bee Garden, and the little bees fall in behind her.","Bzzz. (She is sitting very still, being queenly.)",3.2);
+khNpc('gmo_robin','The Robin','gm_robin',d=>say("Tweet. Everything in the Bee Garden is perfectly fine, and I would like you to know that I am worried sick.",[BYE]),{sc:1.6});
+wlGive('gmo_robin','gmq2',null,GMD2);
+wlQ('gmq2','The Robin',[['Find the queen bee, somewhere warm at the end of a path, and tell her that the hive is waiting.',()=>gmF().gmq2a,['gmo_queen']]]);
+// ---- 3. a letter for the knight ----
+const GMD3=khQD("Do not stare, dear. It is rude to stare at a lady in stone. But since you are here, you may as well be of use. Three hundred years ago the knight on the other side of the garden, in the wisteria, wrote me a letter, and I never answered it, because I am made of stone, and the post is slow. I have written one now. It is very short. It says, Yes. Would you take it to him?",
+  "Thank you, dear. He is in the Wisteria Walk, in the north west corner. He will be the one standing in the wisteria. He has been standing there a long time.",
+  (n,m)=>gmF().gmq3a?'You have given it to him? Come and tell me what he said. I want the whole thing, and I want it slowly.':'The knight is in the Wisteria Walk, in the north west corner of the garden, standing in the wisteria.',
+  "He said what? Oh, he did not! Say it again.",
+  "Three hundred years, and all it took was a letter, and someone to carry it. Thank you, dear. Here, a little something for the post. I shall write to him again tomorrow.",
+  "The knight is writing back. It will take a decade. We are in no hurry.","He has the letter.");
+khNpc('gmo_stonelady','The Stone Lady','gm_lady',d=>say("I am not looking at you. I am looking at the knight, who is a very long way away.",[BYE]),{sc:1});
+wlGive('gmo_stonelady','gmq3',null,GMD3);
+khNpc('gmo_stoneknight','The Stone Knight','gm_knight',d=>{const F=gmF();
+  if(qSt('gmq3')==='active'&&!F.gmq3a){F.gmq3a=1;yrStep('The knight has the letter.');return say("A small, folded square of paper. He reads it. For a long time there is no sound at all, except the wisteria. Then, very slowly, the knight lowers his sword and says, in a voice like a landslide, 'Yes?' He reads it again. 'YES?' he says. 'Tell her I will write back. Tell her it may take some time. Tell her I have a great deal to say.'",[BYE])}
+  return say("The wisteria has grown over his boots. He does not mind. He is thinking about a letter.",[BYE])},{sc:1});
+wlQ('gmq3','The Stone Lady',[['Take the stone lady\'s letter to the stone knight in the Wisteria Walk, in the north west corner of the garden.',()=>gmF().gmq3a,['gmo_stoneknight']]]);
+// ---- 4. three torn pages ----
+const GMD4=khQD("Psst. Down here. No, here. I am the prompter, which is a very quiet job, and I have a problem. The play on this stage, The Gardener and the Duke, is to be performed at midsummer, and the wind has taken the script. Three pages are lying about at the ends of the paths, in the quiet places, and without them the Duke will say the wrong lines, and the gardener will be very rude. Please would you fetch them?",
+  "Thank you. Look at the ends of the paths, the dead ends. A page will be lying there, looking guilty.",
+  (n,m)=>bagCount('gmpage')+' of 3 pages. They are lying at the ends of the paths, looking guilty.',
+  "Pages! Yes! Page two, page five, and what is this, page nine? Perfect. Perfect, perfect, perfect.",
+  "The Duke shall have his lines, and the gardener shall have a spade, and it will be the finest midsummer the theatre has ever had. Please take this, with my thanks, and come to the play. Seats are free. The hedges are not very comfortable.",
+  "The play goes on at midsummer. The Duke is learning his lines. The gardener is practising being rude.","I have all three pages.");
+khNpc('gmo_prompter','The Prompter','gm_saint',d=>say("Shhh. Not so loud. The actors are resting.",[BYE]),{sc:1});
+wlGive('gmo_prompter','gmq4',null,GMD4);
+wlQ('gmq4','The Prompter',[['Find three torn pages of the play at the ends of the paths, and bring them to the prompter in the Hedge Theatre.',()=>bagCount('gmpage')>=3,['gmo_prompter']]]);
 
 /* ---- src/desert/wellmaze_gen.js ---- */
 /* ==========================================================================

@@ -5,10 +5,10 @@
    (cached), gmhPick(types, x, y) picks a type and variant for a wall cell. Painted at load of the garden; each tile is 128 pixels wide and wh squares high, like the painted ones of garden_art.js.
    ========================================================================== */
 const GMH={
-  box:{base:'#142e17',cols:['#255a27','#2f6d30','#3d8238','#4a9644','#1c4a20'],len:[4,7],ratio:.72,n:2.4,shape:'oval'},
+  box:{base:'#142e17',cols:['#255a27','#2f6d30','#3d8238','#4a9644','#1c4a20'],len:[3,5],ratio:1,n:3.4,shape:'round'},
   yew:{base:'#0c2016',cols:['#173d2a','#1f4c34','#285c3e','#133524','#2f6a48'],len:[10,15],ratio:.14,n:1.6,shape:'needle'},
   holly:{base:'#122c17',cols:['#1b5026','#256333','#327a3f','#154520','#3a8a48'],len:[8,12],ratio:.55,n:1.15,shape:'spike',acc:[{k:'berry',cs:['#d22a2a','#e03838','#b81e24'],n:34,s:2.7}]},
-  privet:{base:'#1a3c16',cols:['#47a02e','#58b638','#3a8a2a','#6fc84a','#2f7a24'],len:[5,8],ratio:.5,n:2,shape:'oval'},
+  privet:{base:'#1a3c16',cols:['#47a02e','#58b638','#3a8a2a','#6fc84a','#2f7a24'],len:[7,11],ratio:.36,n:1.6,shape:'oval'},
   laurel:{base:'#102c18',cols:['#255f33','#307540','#40904f','#1b4c2a','#58a864'],len:[13,19],ratio:.42,n:.85,shape:'oval',gloss:1},
   beech:{base:'#26121e',cols:['#68283a','#7a3a46','#8c4a50','#521c36','#a05a58'],len:[8,12],ratio:.55,n:1.3,shape:'oval'},
   hawthorn:{base:'#183818',cols:['#386f2e','#488a3e','#2c6428','#58a04c'],len:[6,9],ratio:.65,n:1.6,shape:'lobed',acc:[{k:'bloom',cs:['#fff8f8','#ffe8ee','#fff0f4'],n:46,s:4.2,p:5},{k:'berry',cs:['#c01f2a'],n:10,s:2}]},
@@ -23,12 +23,12 @@ const GMH={
   clematis:{base:'#17381a',cols:['#2f6e30','#3d8238','#285e2a','#4c9644'],len:[7,11],ratio:.5,n:1.25,shape:'lobed',acc:[{k:'star',cs:['#8a3ad0','#b068e8','#9a50e0','#cf90f4'],n:40,s:6.4,p:6}]},
   nasturt:{base:'#1c4018',cols:['#58b038','#6cc844','#4a9a30','#80dc58'],len:[8,12],ratio:1,n:1,shape:'round',acc:[{k:'bloom',cs:['#f08a1a','#f6b01a','#e85a1a','#fcc84a'],n:34,s:5.6,p:5}]},
   jasmine:{base:'#0f2a16',cols:['#1f5028','#296434','#184420','#337a40'],len:[6,9],ratio:.5,n:1.7,shape:'oval',acc:[{k:'star',cs:['#ffffff','#fff8f0','#f8fff8'],n:64,s:4.2,p:5}]},
-  niche:{base:'#142e17',cols:['#255a27','#2f6d30','#3d8238','#4a9644','#1c4a20'],len:[4,7],ratio:.72,n:2.4,shape:'oval',niche:1}
+  niche:{base:'#142e17',cols:['#255a27','#2f6d30','#3d8238','#4a9644','#1c4a20'],len:[3,5],ratio:1,n:3.4,shape:'round',niche:1}
 };
 const GMH_NAMES=Object.keys(GMH);
 function gmhRng(sd){return()=>{sd=(sd+0x6D2B79F5)|0;let t=Math.imul(sd^(sd>>>15),1|sd);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296}}
-function gmHedge(type,variant,wh){
-  const S=GMH[type]||GMH.box,key='H|'+type+'|'+variant+'|'+wh;if(GM.tiles[key]!==undefined)return GM.tiles[key];
+function gmHedge(type,variant,wh,opt){
+  opt=opt||{};const S=GMH[type]||GMH.box,key='H|'+type+'|'+variant+'|'+wh+(opt.gate?'|'+opt.gate:'');if(GM.tiles[key]!==undefined)return GM.tiles[key];
   const Hp=Math.round(128*wh),W=128,c=document.createElement('canvas');c.width=W;c.height=Hp;const x=c.getContext('2d');
   let sd=variant*7919+type.length*131;for(let i=0;i<type.length;i++)sd=(sd*31+type.charCodeAt(i))|0;const R=gmhRng(sd);
   x.fillStyle=S.base;x.fillRect(0,0,W,Hp);
@@ -70,14 +70,17 @@ function gmHedge(type,variant,wh){
     x.save();x.beginPath();x.moveTo(nx,base);x.lineTo(nx,top+nw/2);x.arc(nx+nw/2,top+nw/2,nw/2,Math.PI,0);x.lineTo(nx+nw,base);x.closePath();x.clip();
     let g=x.createLinearGradient(0,top,0,base);g.addColorStop(0,'#0a1a0d');g.addColorStop(1,'#1c3a1e');x.fillStyle=g;x.fillRect(nx,top,nw,base-top);
     g=x.createRadialGradient(nx+nw/2,base-24,2,nx+nw/2,base-24,46);g.addColorStop(0,'rgba(255,214,130,.8)');g.addColorStop(1,'rgba(255,200,100,0)');x.fillStyle=g;x.fillRect(nx,top,nw,base-top);
-    x.fillStyle='#a8a090';x.fillRect(nx+8,base-16,nw-16,7);x.fillStyle='#8a8272';x.fillRect(nx+12,base-9,6,9);x.fillRect(nx+nw-18,base-9,6,9);
-    if(variant%2){x.fillStyle='#b8b0a0';x.beginPath();x.ellipse(nx+nw/2,base-30,7,9,0,0,6.3);x.fill();x.fillStyle='#d83a3a';x.beginPath();x.arc(nx+nw/2-2,base-40,3,0,6.3);x.arc(nx+nw/2+3,base-38,2.6,0,6.3);x.fill()}
-    else{x.fillStyle='#2a2a2a';x.fillRect(nx+nw/2-1,base-52,2,18);x.fillStyle='#ffe090';x.fillRect(nx+nw/2-5,base-44,10,14);x.fillStyle='rgba(255,240,180,.9)';x.fillRect(nx+nw/2-3,base-42,6,10)}
+    const vv=variant%4,cx0=nx+nw/2;
+    if(vv===0){x.fillStyle='#a8a090';x.fillRect(nx+8,base-16,nw-16,7);x.fillStyle='#8a8272';x.fillRect(nx+12,base-9,6,9);x.fillRect(nx+nw-18,base-9,6,9);x.fillStyle='#2a2a2a';x.fillRect(cx0-1,base-52,2,18);x.fillStyle='#ffe090';x.fillRect(cx0-5,base-44,10,14);x.fillStyle='rgba(255,240,180,.9)';x.fillRect(cx0-3,base-42,6,10)}
+    else if(vv===1){x.fillStyle='#b8b0a0';x.beginPath();x.moveTo(cx0-12,base);x.lineTo(cx0-9,base-18);x.lineTo(cx0+9,base-18);x.lineTo(cx0+12,base);x.closePath();x.fill();x.fillStyle='#a09888';x.fillRect(cx0-14,base-22,28,5);for(let k=0;k<7;k++){x.fillStyle=['#d83a3a','#f0c030','#f08aa8','#fff'][k%4];x.beginPath();x.arc(cx0-10+k*3.4,base-26-(k%3)*3,3.2,0,6.3);x.fill()}x.fillStyle='#2f7a30';x.fillRect(cx0-12,base-24,24,3)}
+    else if(vv===2){x.fillStyle='#b4ac9c';x.fillRect(cx0-4,base-30,8,30);x.fillStyle='#c8c0b0';x.beginPath();x.ellipse(cx0,base-32,16,6,0,0,6.3);x.fill();x.fillStyle='#6aa4c8';x.beginPath();x.ellipse(cx0,base-33,12,3.6,0,0,6.3);x.fill();x.fillStyle='#8a8272';x.fillRect(cx0-9,base-4,18,4);x.fillStyle='#fff';x.beginPath();x.arc(cx0+4,base-40,2.4,0,6.3);x.fill();x.fillStyle='#e8a030';x.beginPath();x.arc(cx0+5,base-41,1.2,0,6.3);x.fill()}
+    else{x.fillStyle='#b0a898';x.fillRect(cx0-10,base-8,20,8);x.beginPath();x.ellipse(cx0,base-18,8,10,0,0,6.3);x.fill();x.beginPath();x.arc(cx0,base-32,6.5,0,6.3);x.fill();x.beginPath();x.moveTo(cx0-6,base-36);x.lineTo(cx0-4,base-44);x.lineTo(cx0-1,base-37);x.closePath();x.fill();x.beginPath();x.moveTo(cx0+6,base-36);x.lineTo(cx0+4,base-44);x.lineTo(cx0+1,base-37);x.closePath();x.fill();x.fillStyle='#1c1c1c';x.fillRect(cx0-3,base-33,1.6,2);x.fillRect(cx0+1.6,base-33,1.6,2);x.strokeStyle='#a8a090';x.lineWidth=2.4;x.beginPath();x.moveTo(cx0+8,base-14);x.quadraticCurveTo(cx0+16,base-12,cx0+12,base-24);x.stroke()}
     x.restore();x.strokeStyle='#d8d0b8';x.lineWidth=3;x.beginPath();x.moveTo(nx,base);x.lineTo(nx,top+nw/2);x.arc(nx+nw/2,top+nw/2,nw/2,Math.PI,0);x.lineTo(nx+nw,base);x.stroke();
   }
+  if(opt.gate&&IMG[opt.gate]){const g=IMG[opt.gate],sc=Math.min(124/g.width,(Hp-6)/g.height);x.drawImage(g,(W-g.width*sc)/2,Hp-g.height*sc-1,g.width*sc,g.height*sc)}
   // light: warm and bright high up, deep green shade at the foot where the hedge meets the ground, a soft shade at both edges so that a run of cells reads as clipped sections
-  x.globalCompositeOperation='multiply';let gr=x.createLinearGradient(0,0,0,Hp);gr.addColorStop(0,'rgb(255,250,232)');gr.addColorStop(.7,'rgb(236,234,212)');gr.addColorStop(1,'rgb(170,176,150)');x.fillStyle=gr;x.fillRect(0,0,W,Hp);
-  gr=x.createLinearGradient(0,0,W,0);gr.addColorStop(0,'rgba(190,196,176,1)');gr.addColorStop(.12,'rgba(255,255,255,1)');gr.addColorStop(.88,'rgba(255,255,255,1)');gr.addColorStop(1,'rgba(200,204,184,1)');x.fillStyle=gr;x.fillRect(0,0,W,Hp);x.globalCompositeOperation='source-over';
+  x.globalCompositeOperation='multiply';let gr=x.createLinearGradient(0,0,0,Hp);gr.addColorStop(0,'rgb(255,250,232)');gr.addColorStop(.5+variant*.07,'rgb(238,236,214)');gr.addColorStop(1,'rgb(176,182,156)');x.fillStyle=gr;x.fillRect(0,0,W,Hp);
+  gr=x.createLinearGradient(0,0,W,0);gr.addColorStop(0,'rgba(214,218,200,1)');gr.addColorStop(.08,'rgba(255,255,255,1)');gr.addColorStop(.92,'rgba(255,255,255,1)');gr.addColorStop(1,'rgba(220,224,206,1)');x.fillStyle=gr;x.fillRect(0,0,W,Hp);x.globalCompositeOperation='source-over';
   const d=x.getImageData(0,0,W,Hp).data;
   for(let i=0;i<d.length;i+=4){const l=d[i]*.3+d[i+1]*.59+d[i+2]*.11,k=1.2;d[i]=Math.min(255,(l+(d[i]-l)*k)*1.12);d[i+1]=Math.min(255,(l+(d[i+1]-l)*k)*1.12);d[i+2]=Math.min(255,(l+(d[i+2]-l)*k)*1.1)}
   const id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;const gid=KH_NEXT_GID++;T_TILE[gid]=id;
@@ -88,9 +91,11 @@ function gmhPick(types,x,y,sd){const t=types[Math.min(types.length-1,Math.floor(
 
 /* little glowing motes of light, in four colours (gold, rose, lilac and mint): the floating sparkle of the garden */
 function gmMotes(){if(IMG.gm_mote0)return;
+  {const cv=document.createElement('canvas');cv.width=64;cv.height=256;const x=cv.getContext('2d'),g=x.createLinearGradient(0,0,0,256);g.addColorStop(0,'rgba(255,240,190,0)');g.addColorStop(.25,'rgba(255,236,170,.38)');g.addColorStop(.8,'rgba(255,226,150,.5)');g.addColorStop(1,'rgba(255,220,140,.15)');x.fillStyle=g;x.beginPath();x.moveTo(26,0);x.lineTo(38,0);x.lineTo(62,256);x.lineTo(2,256);x.closePath();x.fill();IMG.gm_beam=cv;NPC_H.gm_beam=2.8}
+  [['#f8b4c8',0],['#fff4f4',1],['#e84a5a',2]].forEach(([col,i])=>{const cv=document.createElement('canvas');cv.width=24;cv.height=16;const x=cv.getContext('2d');x.fillStyle=col;x.beginPath();x.ellipse(12,8,10,5.5,.4,0,6.3);x.fill();x.fillStyle='rgba(255,255,255,.35)';x.beginPath();x.ellipse(9,6,4,2,.4,0,6.3);x.fill();IMG['gm_petal'+i]=cv;NPC_H['gm_petal'+i]=.09});
   [[255,236,150],[255,190,220],[200,180,255],[190,255,230]].forEach((c,i)=>{const cv=document.createElement('canvas');cv.width=cv.height=48;const x=cv.getContext('2d'),g=x.createRadialGradient(24,24,0,24,24,24);
     g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.18,'rgba('+c[0]+','+c[1]+','+c[2]+',.95)');g.addColorStop(.5,'rgba('+c[0]+','+c[1]+','+c[2]+',.25)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,48,48);IMG['gm_mote'+i]=cv;NPC_H['gm_mote'+i]=.24})}
 /* a golden, hazy air over the garden */
 {const _w=weatherNow;weatherNow=function(){
-  if(LEVEL===GM.ID)return {id:'mist',n:'Golden haze',fog:.028,haze:.42,dark:0,mix:.4,col:[255,232,190],text:'The air is warm and golden, and full of drifting light. Bees hum in the hedges.'};
+  if(LEVEL===GM.ID)return {id:'mist',n:'Golden haze',fog:.02,haze:.2,dark:0,mix:.24,col:[255,224,150],text:'The air is warm and golden, and full of drifting light. Bees hum in the hedges.'};
   return _w.apply(this,arguments)}}

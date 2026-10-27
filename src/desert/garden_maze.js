@@ -45,7 +45,7 @@ function gmBuild(){
   const QH=h=>[1.9,2.2,2.5].reduce((b,v)=>Math.abs(v-h)<Math.abs(b-h)?v:b,2.2);   // the hedge heights are few, so that the garden is not made of hundreds of tile sizes
   const wallChar=(x,y)=>{
     if(x===0||y===0||x===W-1||y===H-1){const gate=(x===45&&y===0)?'gmgates_0':(x===45&&y===H-1)?'gmgates_1':null;
-      return ch(gmTile(A(7),2.7,gate?{gate}:undefined))}
+      return ch(gmHedge('yew',(hs(x,y,3)*4)|0,2.5,gate?{gate}:undefined))}
     const lw=lowWall.get(x+','+y);if(lw)return ch(gmHedge(lw[0],(hs(x,y,9)*4)|0,lw[1]));
     const q=roomAt(x,y,1);let reg;const inRoom=q&&RS[q.id];
     reg=inRoom?RS[q.id]:regAt(x,y);
@@ -65,7 +65,7 @@ function gmBuild(){
   const near=new Set();for(const d of m.doors){for(let k=-1;k<=1;k++)for(let l=-1;l<=1;l++)near.add((d.x+k)+','+(d.y+l));if(d.dx!==undefined){for(let t=1;t<=3;t++)near.add((d.x-Math.sign(d.dx)*t)+','+(d.y-Math.sign(d.dy)*t))}}
   const free=(x,y)=>isOpen(x,y)&&!occ.has(x+','+y)&&!near.has(x+','+y);
   const dec=(a,x,y,o)=>{o=o||{};const k=a.startsWith('gm_')||a==='chest'?a:'gm_'+a;if(!isOpen(x,y))return null;
-    const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}if(o.sc)d.sc=o.sc;if(o.txt)d.txt=o.txt;if(o.bob)d.bob=o.bob;if(o.goldAmt)d.goldAmt=o.goldAmt;if(o.wd){d.wd=o.wd;d.pic=1}
+    const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}if(o.sc)d.sc=o.sc;if(o.npc){d.npc=o.npc;d.deco=false;if(o.block)d.solid=1}if(o.txt)d.txt=o.txt;if(o.bob)d.bob=o.bob;if(o.goldAmt)d.goldAmt=o.goldAmt;if(o.wd){d.wd=o.wd;d.pic=1}
     decor.push(d);if(o.block||o.occ)occ.add(x+','+y);return d};
   const D=(a,x,y,o)=>free(x,y)?dec(a,x,y,o):null;                 // only on free squares
   const DB=(a,x,y,o)=>D(a,x,y,Object.assign({block:true},o||{}));  // standing in the way
@@ -228,14 +228,14 @@ function gmBuild(){
     // seen from the way in: the piece stands at the end of the passage; a niche is set in the end wall
     const d=a==='niche'?(op?dec(a,x,y,{wd:[-op[0],-op[1]]}):null):dec(a,x,y,{block:true});if(d)dn++}
   // flowers and butterflies along the corridors (walk through)
-  let fc=0;for(const [x,y] of corr){const r=hs(x,y,63);const foot=[[0,-1],[0,1],[1,0],[-1,0]].some(([p,q])=>!isOpen(x+p,y+q));if(r<(foot?.22:.1)&&!occ.has(x+','+y)){const a=hs(x,y,64)<.45?'tuft'+((hs(x,y,80)*12)|0):['flowers0','flowers1','flowers2','lavender','tulips','fern','fern2','rose_red','rose_white','hydrangea','delphinium','hollyhock'][(hs(x,y,64)*12)|0];dec(a,x,y,{sc:a[0]==='t'?.9+hs(x,y,65)*.5:.55+hs(x,y,65)*.25});fc++}
+  let fc=0;for(const [x,y] of corr){const r=hs(x,y,63);const foot=[[0,-1],[0,1],[1,0],[-1,0]].some(([p,q])=>!isOpen(x+p,y+q));if(r<(foot?.22:.1)&&!occ.has(x+','+y)){const a=hs(x,y,64)<.45?'tuft'+((hs(x,y,80)*12)|0):['flowers0','flowers1','flowers2','lavender','tulips','fern','fern2','rose_red','rose_white','hydrangea','delphinium','hollyhock','herbbed','lilytub','sunflowers','skep','rosetree','birdbath','cabbages','pumpkins'][(hs(x,y,64)*20)|0];dec(a,x,y,{sc:a[0]==='t'?.9+hs(x,y,65)*.5:.55+hs(x,y,65)*.25});fc++}
     else if(r<.04)dec('butterfly',x,y,{bob:.4})}
   // butterflies, bees and drifting motes of light, each circling its own square (moved smoothly by the update below)
   const FLY=[];{gmMotes();let bn=0,ben=0,mn=0;const add=(a,x,y,o,sp,r,b)=>{const d=dec(a,x,y,o);if(!d)return;d.cloudid='gmf'+FLY.length;FLY.push({sp,r,b,ph:hs(x,y,95)*6.28});return d};
     for(const [x,y] of corr){const r=hs(x,y,90);if(occ.has(x+','+y)||near.has(x+','+y))continue;
-      if(r<.05&&bn<110){if(add('butterfly',x,y,{bob:.5,sc:.8+hs(x,y,92)*.5},.7+hs(x,y,94)*.8,.34,.5+hs(x,y,91)*.4))bn++}
-      else if(r<.088&&ben<80){if(add('bee',x,y,{bob:.4,sc:.9},1.8+hs(x,y,94)*1.2,.3,.4+hs(x,y,91)*.3))ben++}
-      else if(r<.125&&mn<110){if(add('mote'+((hs(x,y,96)*4)|0),x,y,{bob:.3,sc:.7+hs(x,y,92)*.7},.25+hs(x,y,94)*.3,.36,.25+hs(x,y,91)*.9))mn++}}}
+      if(r<.05&&bn<110){if(add('butterfly',x,y,{bob:.5,sc:.42+hs(x,y,92)*.3},.7+hs(x,y,94)*.8,.34,.5+hs(x,y,91)*.4))bn++}
+      else if(r<.088&&ben<80){if(add('bee',x,y,{bob:.4,sc:.5},1.8+hs(x,y,94)*1.2,.3,.4+hs(x,y,91)*.3))ben++}
+      else if(r<.125&&mn<110){if(add('mote'+((hs(x,y,96)*4)|0),x,y,{bob:.3,sc:.5+hs(x,y,92)*.5},.25+hs(x,y,94)*.3,.36,.25+hs(x,y,91)*.9))mn++}}}
   // climbers hung on the hedge walls along the corridors
   for(const [x,y] of corr){if(hs(x,y,78)>.022||occ.has(x+','+y))continue;const wl=[[0,-1],[0,1],[1,0],[-1,0]].filter(([p,q])=>!isOpen(x+p,y+q));if(wl.length&&wl.length<=2)dec('trellis',x,y,{wd:wl[(hs(x,y,79)*wl.length)|0]})}
   // lamps at some junctions
@@ -246,6 +246,21 @@ function gmBuild(){
   // small finds at dead ends
   const IK=['potion3','potion3','supermana','elixir'];let ic=0;
   for(const [x,y] of dead){if(occ.has(x+','+y)||hs(x,y,69)>.14)continue;items.push({k:IK[ic%4],x,y});ic++}
+  // sunbeams: a soft shaft of gold light at a few of the junctions, with a mote or two in it; and rose petals blowing low along the ground in the precincts of roses
+  {let bc=0,pc2=0;for(const [x,y] of corr){if(occ.has(x+','+y)||near.has(x+','+y))continue;
+      if(deg(x,y)>=3&&hs(x,y,97)<.1&&bc<9){const d=dec('beam',x,y,{bob:0,sc:1});if(d){bc++;add2('mote'+((hs(x,y,98)*4)|0),x,y,.35,.45)}}
+      else if(hs(x,y,99)<.06&&pc2<70&&regAt(x,y).h.some(k=>/^rose/.test(k))){const d=dec('petal'+((hs(x,y,100)*3)|0),x,y,{bob:.03,sc:1});if(d){d.cloudid='gmf'+FLY.length;FLY.push({sp:.5+hs(x,y,94)*.4,r:.46,b:.03,ph:hs(x,y,95)*6.28});pc2++}}}
+    function add2(a,x,y,sp,r){const d=dec(a,x,y,{bob:.5,sc:.7});if(d){d.cloudid='gmf'+FLY.length;FLY.push({sp,r,b:.5,ph:hs(x,y,95)*6.28})}}}
+  // ---- the small folk and what they have lost (see garden_folk.js) ----
+  {const D2=dead.slice().sort((p,q)=>hs(p[0],p[1],110)-hs(q[0],q[1],110));
+    const spot=(room,dx,dy)=>{const q=Q[room];return q?[q.cx+dx,q.cy+dy]:null};
+    const place=(a,npc,pos,o)=>{if(!pos)return;for(let r=0;r<4;r++)for(let ax=-r;ax<=r;ax++)for(let ay=-r;ay<=r;ay++){if(Math.max(Math.abs(ax),Math.abs(ay))!==r)continue;const x=pos[0]+ax,y=pos[1]+ay;if(isOpen(x,y)&&!occ.has(x+','+y)){const d=dec(a,x,y,Object.assign({npc},o||{}));if(d)return d}}};
+    place('duck','gmo_duchess',spot('pond',3,2),{sc:1.1});place('robin','gmo_robin',spot('bee',3,1),{sc:1.4});place('lady','gmo_stonelady',spot('gallery',0,1),{block:true});place('knight','gmo_stoneknight',spot('wist',0,0),{block:true});place('saint','gmo_prompter',spot('theatre',2,2),{block:true});
+    const far=(room,k,min)=>{const q=Q[room];return D2.filter(([x,y])=>Math.hypot(x-q.cx,y-q.cy)>min&&!occ.has(x+','+y))[k]};
+    const ducks=['gmo_duckling1','gmo_duckling2','gmo_duckling3'],used2=new Set();
+    ['pond'].forEach(()=>{let k=0;for(const [x,y] of D2){if(k>=3)break;const q=Q.pond;if(Math.hypot(x-q.cx,y-q.cy)<22||occ.has(x+','+y)||[...used2].some(u=>Math.hypot(u[0]-x,u[1]-y)<24))continue;const d=dec('duck',x,y,{npc:ducks[k],sc:.7});if(d){used2.add([x,y]);k++}}});
+    {const q=Q.bee;const t=D2.find(([x,y])=>Math.hypot(x-q.cx,y-q.cy)>14&&Math.hypot(x-q.cx,y-q.cy)<40&&!occ.has(x+','+y));if(t)dec('bee',t[0],t[1],{npc:'gmo_queen',sc:2.4})}
+    {const q=Q.theatre;let k=0;for(const [x,y] of D2){if(k>=3)break;if(occ.has(x+','+y)||Math.hypot(x-q.cx,y-q.cy)<14||[...used2].some(u=>Math.hypot(u[0]-x,u[1]-y)<16))continue;items.push({k:'gmpage',x,y});used2.add([x,y]);k++}}}
   // ---- the hedges: wall characters, floors ----
   for(let y=0;y<H;y++){let r='',f='';for(let x=0;x<W;x++){const c=g[y][x];r+=(c==='.')?'.':wallChar(x,y);f+=String(fl[y*W+x])}rows.push(r);fm.push(f)}
   // ---- the two gates ----
