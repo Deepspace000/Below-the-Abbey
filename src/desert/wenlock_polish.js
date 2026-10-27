@@ -14,9 +14,9 @@ const WLP_PASSES=[
   ['meadow',C=>{if(typeof wlePass==='function')wlePass(C)}]
 ];
 function wlPolish(C){for(const [n,f] of WLP_PASSES){try{f(C)}catch(e){console.error('wlPolish '+n,e)}}}
-/* distant roofs: a house roof is drawn out to forty squares, but the walls under it only out to the fog, so far houses floated as bare roofs. Roofs are kept only as far as walls are drawn. */
-{const _k=khSkyList;khSkyList=function(cx,cy,dX,dY,L,md){const out=_k.apply(this,arguments);if(LEVEL!==496||typeof RANGE==='undefined'||!RANGE)return out;const r2=(RANGE+1.5)*(RANGE+1.5);
-  return out.filter(s=>!s.smallSky||((s.x-cx)*(s.x-cx)+(s.y-cy)*(s.y-cy))<=r2)}}
+/* distant roofs: a house roof is a separate sky picture, and it used to be dropped past seven squares while the walls under it are drawn out to about thirty-four, so every far house was a roofless slab. Roofs now reach as far as the walls do and melt away over the last six squares (s.fade), so none floats alone beyond them. */
+{const _k=khSkyList;khSkyList=function(cx,cy,dX,dY,L,md){const out=_k.apply(this,arguments);if(LEVEL!==496)return out;const far=(G.day||0)>0?34:20,f2=far*far,n2=(far-6)*(far-6);
+  return out.filter(s=>{if(!s.smallSky)return true;const d2=(s.x-cx)*(s.x-cx)+(s.y-cy)*(s.y-cy);if(d2>f2)return false;if(d2>n2)s.fade=clamp((far-Math.sqrt(d2))/6,0,1);return true})}}
 /* the waystone: every room has one in a corner, which looked like a stray post. In a Wenlock room it is a plain wooden bench (it still wakes and still works, T to travel). */
 {const _pt=placeTeleporter;placeTeleporter=function(){const r=_pt.apply(this,arguments);
   try{if(LEVEL>=WL.H0&&LEVEL<=WL.H0+99&&G.tele){const d=G.decor.find(q=>q.tele&&q.k==='teleporter');if(d){d.k='kh_ohgard1_3';d.sc=1.1;d.deco=true;NPC_H.kh_ohgard1_3=NPC_H.kh_ohgard1_3||.62}}}catch(e){console.error(e)}
