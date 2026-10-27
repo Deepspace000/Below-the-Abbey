@@ -56,7 +56,7 @@ function hgdnPlace(L){
   ims.forEach((c,i)=>{IMG['hgdn_st'+i]=c;NPC_H['hgdn_st'+i]=1.45});
   const rows=L.rows,H=rows.length,W=rows[0].length,rnd=hgdmRng(476444),open=(x,y)=>rows[y]&&rows[y][x]==='.'&&!(typeof hgoWater==='function'&&hgoWater(x,y)),res=[];
   const lad=(L._hgdu&&L._hgdu.ladders)||[],keep=[].concat(lad.map(l=>[l.ax,l.ay]),(L._hgdu&&L._hgdu.letters||[]).map(l=>[l.x,l.y]),L._msgr?[[L._msgr.x,L._msgr.y]]:[]);
-  const occ=new Set(L.enemies.concat(L.decor).map(e=>e.x+','+e.y)),tooNear=(x,y)=>keep.some(k=>Math.hypot(k[0]-x,k[1]-y)<4)||res.some(r=>Math.abs(r.x-x)+Math.abs(r.y-y)<9);
+  const occ=new Set(L.enemies.concat(L.decor).map(e=>e.x+','+e.y)),tooNear=(x,y)=>keep.some(k=>Math.hypot(k[0]-x,k[1]-y)<4)||res.some(r=>Math.abs(r.x-x)+Math.abs(r.y-y)<9)||(L._bsw&&Math.hypot(L._bsw.cx-x,L._bsw.cy-y)<L._bsw.R+2.5);
   const DV=[[0,-1],[1,0],[0,1],[-1,0]],cand=[];
   for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!open(x,y)||occ.has(x+','+y))continue;
     const deg=DV.filter(d=>open(x+d[0],y+d[1])).length;
