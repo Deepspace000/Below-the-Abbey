@@ -15,7 +15,7 @@ function gyTombBuild(id){
   const WH=3.0,open=(x,y)=>g[y]&&g[y][x]==='.',near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(open(x+dx,y+dy))return true;return false};
   const V=[0,3,0,5,0,1,3,0,2].map(v=>ch(gyTile('texGrey_'+v,WH,{rgb:[.92,.95,1]})));
   const rows=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++){s+=open(x,y)?'.':near(x,y)?V[(hs(x,y,9)*V.length)|0]:V[0]}rows.push(s)}
-  {const gid=gyTile('texGrey_0',WH,{fac:{img:'stairFix_0',i:0,n:1},gain:1.1});
+  {const gid=gyTile('texGrey_0',WH,{fac:{img:'stairFix_0',i:0,n:1},gain:1.1,rgb:[1,1,1+id*.00001]});
    KH_DOOR[gid]={lvl:GY.ID,get at(){const f=T.front||[T.x,T.y];return {x:f[0],y:f[1],f:T.side==='N'?2:T.side==='S'?0:1}},gy:'tombexit'};
    rows[10]=rows[10].slice(0,5)+ch(gid)+rows[10].slice(6)}
   const decor=[],lights=[],lcol={},occ=new Set();

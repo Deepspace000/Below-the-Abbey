@@ -42,7 +42,7 @@ function gyMapDraw(c,x,L,api){
     if(L._gy&&L._gy.torch)rows.push([L._gy.torch.name.replace(/^./,m=>m.toUpperCase())+' torch',L._gy.torch.css]);
     rows.forEach(([t,cc],i)=>{x.fillStyle=cc;x.strokeStyle=INK;x.lineWidth=.5;if(/ torch$/.test(t)){x.beginPath();x.arc(a+11,b+19+i*13,3,0,6.3);x.fill();x.stroke()}else{x.fillRect(a+6,b+16+i*13,10,6);x.strokeRect(a+6,b+16+i*13,10,6)}api.text(x,t,a+22,b+19+i*13,6,INK,'left')})}
 }
-mplInstall({name:'graveyard',levels:[530,531,532,533,534,535],draw:gyMapDraw,tint:[2,6,0],foot:'You are the yellow arrow. The numbers on the map are listed on the right.'});
+mplInstall({name:'graveyard',levels:[530,531,532,533,534,535,536,537,538,539,540,541,542],draw:gyMapDraw,tint:[2,6,0],foot:'You are the yellow arrow. The numbers on the map are listed on the right.'});
 /* the Go to area list */
 {const _gl=gotoListRaw;gotoListRaw=function(){const out=_gl.apply(this,arguments);
   try{if(GY_ENABLED&&!out.some(r=>r.n===GY.ID)){out.push({h:'The Wenlock Graveyard, west of Wenlock'});for(const n of [GY.ID,GY.CRYPT].concat(GY.M))out.push({n,name:GY.NAMES[n]})}}catch(e){console.error(e)}

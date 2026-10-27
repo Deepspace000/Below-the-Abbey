@@ -119,14 +119,17 @@ function gyYardBuild(){
    const c=ch(gid);rows[GY_Y.gate.y][GY_Y.gate.x]=c;block[GY_Y.gate.y*W+GY_Y.gate.x]=1;
    dec('lych',67,35);used.add('67,35')}
   // ---- the tomb and its plaza ----
-  {const cx=GY_Y.crypt.x,cy=GY_Y.crypt.y;dec('crypt',cx,cy,{block:false,npc:'gyo_crypt'});   // its door stands open: walk in and the stair goes down (see the end of this file)
+  {const cx=GY_Y.crypt.x,cy=GY_Y.crypt.y;const cd=dec('crypt',cx,cy,{block:false,npc:'gyo_crypt'});if(cd)cd.sc=.0001;   // an unseen marker for the quest signs; the tomb itself is built into the ground below
+   {const mk=i=>gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i,n:3},gain:1.0}),dg=mk(1);
+    KH_DOOR[dg]={lvl:GY.CRYPT,get at(){return {x:GY_C.start.x,y:GY_C.start.y,f:GY_C.start.f}},gy:'crypt'};
+    for(const [x,t] of [[cx-1,mk(0)],[cx,dg],[cx+1,mk(2)]]){rows[cy][x]=ch(t);block[cy*W+x]=1}}   // a solid front of vine-grown stone with its door in the middle: walk up and press on to go down
    for(const [dx,dy] of [[-4,2],[4,2],[-4,8],[4,8],[0,10]])lamp(cx+dx,cy+dy);
    for(const [x,y] of [[31,30],[39,30],[31,40],[39,40]])dec('lantern',x,y,{block:true});
    for(const [x,y] of [[31,35],[39,35]])dec('bench',x,y,{block:false});
    for(const [x,y] of [[32,31],[38,31],[32,39],[38,39]])dec('urn',x,y,{block:true});
    lights.push([cx-1,cy+2],[cx+1,cy+2]);glow.push([cx,cy+1])}
   // ---- six small tombs built into the edge of the yard: a vine-covered front, and a door to walk into ----
-  for(const T of GY_TOMBS){const gid=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:1,n:3},gain:1.0}),dg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:1,n:3},gain:1.0,rgb:[1,1,1.001]}),lg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:0,n:3},gain:1.0}),rg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:2,n:3},gain:1.0});
+  for(const T of GY_TOMBS){const gid=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:1,n:3},gain:1.0}),dg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:1,n:3},gain:1.0,rgb:[1,1,1+T.id*.00001]}),lg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:0,n:3},gain:1.0}),rg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:2,n:3},gain:1.0});
     KH_DOOR[dg]={lvl:T.id,get at(){return {x:5,y:9,f:0}},gy:'tomb'};
     const sq=T.side==='N'?[[T.x-1,2,lg],[T.x,2,dg],[T.x+1,2,rg]]:T.side==='S'?[[T.x-1,67,lg],[T.x,67,dg],[T.x+1,67,rg]]:[[2,T.y-1,lg],[2,T.y,dg],[2,T.y+1,rg]];
     for(const [x,y,t] of sq){rows[y][x]=ch(t);block[y*W+x]=1}
@@ -149,7 +152,9 @@ function gyYardBuild(){
      else if(dmin>=3&&r<.55)DB(TR[(hs(x,y,36)*TR.length)|0],x,y,{sc:.95+hs(x,y,37)*.4})}}
   // ---- THE AVENUE OF VAULTS (north east): a cobbled lane between two rows of tomb fronts, under an arch ----
   {pth(51,9,53,34,'5');
-   for(let y=11;y<=33;y++)for(const x of [50,54]){const gid=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:(y+(x===54?1:0))%3,n:3},gain:1.0});rows[y][x]=ch(gid);block[y*W+x]=1;path.add(x+','+y)}
+   for(let y=11;y<=33;y++)for(const x of [50,54]){let gid=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:(y+(x===54?1:0))%3,n:3},gain:1.0});
+     if(x===50&&y===22){gid=gyTile('texGrey_0',3.4,{fac:{img:'stairFix_0',i:0,n:1},gain:1.0,rgb:[1,1,1.00042]});KH_DOOR[gid]={lvl:542,get at(){return {x:3,y:9,f:1}},gy:'avenue'}}   // one of the tomb fronts is a stair down to the vaults beneath the Avenue
+     rows[y][x]=ch(gid);block[y*W+x]=1;path.add(x+','+y)}
    dec('arch',52,10,{sc:1.45});for(const x of [51,53])for(const y of [18,26])lamp(x,y);
    for(const y of [14,22,30]){if(free(52,y)&&false)dec('lantern',52,y)}
    for(const y of [12,19,27])for(const x of [49,55]){if(free(x,y))DB(['ltree20','ltree21','ltree12'][(hs(x,y,38)*3)|0],x,y,{sc:1.1})}}
@@ -159,7 +164,10 @@ function gyYardBuild(){
      else if(r<.4&&(x+y)%2===0)DB(['stone1','lean','wcross','stone2','ccross'][(hs(x,y,42)*5)|0],x,y,{sc:.95})}}
   // ---- the four doors into the mazes ----
   for(const g of GY_Y.doors){
-    dec(g.pic,g.x,g.y,{block:true,npc:'gyo_door'+g.k});
+    {const md=dec(g.pic,g.x,g.y,{block:false,npc:'gyo_door'+g.k});if(md)md.sc=.0001;   // an unseen marker for the quest signs
+     const img={igate2:'stairFix_2',stair:'stairFix_0',arch:'gatesC_1',hatch2:'stairFix_3'}[g.pic],wh={igate2:2.3,stair:2.6,arch:2.5,hatch2:1.4}[g.pic],gid=gyTile('texGrey_0',wh,{fac:{img,i:0,n:1},gain:1.05}),id=GY.M[g.k];
+     KH_DOOR[gid]={lvl:id,get at(){if(!LEVELS[id]&&KH_LAZY[id])KH_LAZY[id]();const st=LEVELS[id].start;return {x:st.x,y:st.y,f:st.f}},gy:'mazedoor',k:g.k};
+     rows[g.y][g.x]=ch(gid);block[g.y*W+g.x]=1}   // a solid door tile: you go in by walking up to it and pressing on, not by walking through it
     lamp(g.x-1,g.y+(g.y<35?2:-2));lamp(g.x+1,g.y+(g.y<35?2:-2));
     const dy=g.y<35?1:-1;for(const dx of [-2,2])D('lean',g.x+dx,g.y+dy*2);
     for(const dx of [-3,3])D('ww_pine',g.x+dx,g.y,{block:true,sc:1})}
@@ -257,11 +265,6 @@ function gyWenlockGate(C){
     if(WK.GRAVEBACK===undefined)WK.GRAVEBACK={x:4,y,f:1};
     WK.GRAVEBACK={x:4,y,f:1};
   }catch(e){console.error('gyWenlockGate',e)}}
-
-/* the tomb is entered by walking into it */
-{const _dm=doMove;doMove=function(){const r=_dm.apply(this,arguments);
-  try{if(LEVEL===GY.ID&&G.state==='play'&&!G.cut&&!G.talk&&G.P.x===GY_Y.crypt.x&&G.P.y===GY_Y.crypt.y)later(350,()=>{if(LEVEL===GY.ID&&G.P.x===GY_Y.crypt.x&&G.P.y===GY_Y.crypt.y&&!G.cut&&!G.talk){sfx('door');goToLevel(GY.CRYPT,{x:GY_C.start.x,y:GY_C.start.y,f:GY_C.start.f})}})}catch(e){console.error(e)}
-  return r}}
 
 /* the signs of the yard are wooden signposts: walk up to one and read it */
 khNpc('gyo_sign','A signpost','ww_sign',d=>{const t=GY_SIGNS[d.i]||GY_SIGNS[0];return say(t[0]+'. '+t[1],[BYE])});

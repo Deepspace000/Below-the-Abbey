@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.669';
+const VERSION='3.670';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -6121,7 +6121,13 @@ function drawArrows(){
    TOWNSFOLK, DIALOGUE AND QUESTS
    ========================================================================== */
 const NPC_H={abbeyspire:6.333,prismwiz:.95,nymph:.95,gstone:1.1,ptree0:2.6,ptree1:3.2,ptree2:1.6,ptree3:1.9,ptree4:3.1,ptree5:2.6,ptree6:2.6,ptree7:1.6,ptree8:1.6,ptree9:3.2,ptree10:1.9,pjuniper:.6,pjuniper_1:.6,pheather:.55,pbracken:.75,plog:.38,pstump:.6,gtree12:2.3,gtree13:2.9,gtree14:2.0,gtree15:2.1,gtree16:2.3,gtree17:2.9,gtree18:2.0,gtree19:2.1,gtree20:2.3,gtree21:2.9,gtree22:2.0,gtree23:2.1,gtree24:2.3,gtree25:2.9,gtree26:2.0,gtree27:2.1,gtree0:2.3,gtree1:2.9,gtree2:2.0,gtree3:2.1,gtree4:2.3,gtree5:2.9,gtree6:2.0,gtree7:2.1,gtree8:2.3,gtree9:2.9,gtree10:2.0,gtree11:2.1,gbramble:.62,gfungus:.55,gboulder:.7,grocks:.55,glogm:.38,gstump:.6,greeds:.85,ltree0:2.3,ltree1:2.7,ltree2:3.0,ltree3:2.3,ltree4:2.3,ltree5:2.7,ltree6:3.0,ltree7:2.3,ltree8:2.3,ltree9:2.7,ltree10:3.0,ltree11:2.3,ltree12:2.3,ltree13:2.7,ltree14:3.0,ltree15:2.3,ltree16:3.1,ltree17:1.5,ltree18:1.9,ltree19:2.2,ltree20:2.2,ltree21:2.2,lflora0:.45,lflora0_1:.45,lflora0_2:.45,lbush0:.7,lbush0_1:.7,lbush0_2:.7,lavender:.55,reeds:.85,boulder:.7,rocks:.55,logm:.38,stumpm:.6,mossstone:1.6,greensign:1.0,deer:1.05,rabbits:.36,cairn:.85,banner:1.05,ironfence:.6,bush0:.34,bush1:.42,counter2:.62,sack2:.5,counter:.62,sacks:.6,breadbasket:.52,produce:.58,widow:.78,miner:.82,scribe:.8,sergeant:.88,priest:.84,farmer:.82,oldwoman:.72,child:.62,smith:.86,baker:.76,monk:.84,guard:.86,waterwoman:.78,oldman:.78,fisher:.8,flora0:.3,flora1:.32,flora2:.42,flora3:.28,flora4:.22,flora5:.3,flora6:.18,flora7:.4,flora8:.3,flora9:.32,flora10:.26,flowerpot:.3,chicken:.3,chicken2:.3,urn:.55,noticeboard:.85,lamp:1.5,memorial:1.0,flora:.28,sign_thornwick:.8,sign_ironhill:.8,sign_smith:.75,sign_store:.75,sign_inn:.75,sign_bakery:.75,sign_church:.75,gate:.95,fountain:.86,chest:.48,fence:.44,bush:.55,veg:.38,hay:.72,crate:.48,tree0:2.0,tree1:2.3,tree2:2.5,tree3:2.1,tree4:2.0,tree5:.8,tree6:2.3,tree7:2.1,grave:.55,grave2:.5,cross:.9,statue:1.15,well:.78,bench:.58,barrel:.5,coffin:.52,cart:.74,peasantM:.8,peasantW:.76,beggar:.7,drunk:.78,thug:.82,pickpocket:.76,merchant:.74,mayor:.78,goat:.42,shepherdess:.72,huntress:.8,innkeeper:.78};
-const say=(text,opts)=>({text,opts:opts||[]});
+/* a long speech is shown a page at a time: cut at sentence ends into pages of about 400 characters, each with a Go on button, and the real choices come with the last page, so that nothing runs off the panel */
+const say=(text,opts)=>{opts=opts||[];if(typeof text!=='string'||text.length<=460)return {text,opts};
+  const sents=text.match(/[^.!?]+[.!?]+['"’”)]*\s*|[^.!?]+$/g)||[text],pages=[];let cur='';
+  for(const t of sents){if(cur&&(cur+t).length>420){pages.push(cur.trim());cur=t}else cur+=t}
+  if(cur.trim())pages.push(cur.trim());if(pages.length<2)return {text,opts};
+  const go=i=>i>=pages.length-1?{text:pages[i],opts}:{text:pages[i],opts:[['Go on.',()=>go(i+1)]]};
+  return go(0)};
 const BYE=['Goodbye.',()=>null];
 const bagIs=(b,id)=>b.id===id||(id==='herb'&&typeof b.id==='string'&&b.id.startsWith('herb_')); // any herb picked from the ground counts as a herb for the quests that ask for herbs
 const bagCount=id=>G.bag.reduce((n,b)=>n+(bagIs(b,id)?b.n:0),0);
@@ -53383,13 +53389,13 @@ const GY_LIST={"bonesH_0":["bonesH_0.webp",311,148,"s"],"bonesH_1":["bonesH_1.we
    the graveyard is first needed (gyLoad). IMG['gyp_<piece>'] is the raw piece; IMG['gy_<alias>'] and NPC_H the pieces as the game uses them (GYA: alias -> [piece, height in squares]).
    Notes: tools/GRAVEYARD_NOTES.md.
    ========================================================================== */
-const GY={ID:530,CRYPT:531,M:[532,533,534,535],W:70,H:70,ready:false,loading:null,tiles:{},LV:{530:84,531:84,532:84,533:85,534:86,535:87,536:84,537:84,538:84,539:84,540:84,541:84}};
-const gyIs=n=>n===530||n===531||(n>=532&&n<=541);   // 536 to 541 are the six small tombs built into the yard's edge (gy_tombs.js)
+const GY={ID:530,CRYPT:531,M:[532,533,534,535],W:70,H:70,ready:false,loading:null,tiles:{},LV:{530:84,531:84,532:84,533:85,534:86,535:87,536:84,537:84,538:84,539:84,540:84,541:84,542:85}};
+const gyIs=n=>n===530||n===531||(n>=532&&n<=542);   // 536 to 541 are the six small tombs built into the yard's edge (gy_tombs.js)
 const gyMazeK=n=>GY.M.indexOf(n);   // 0..3, or -1
-GY.NAMES={530:'Wenlock Graveyard',531:"Lady Aldith's Crypt",532:'The Red Ossuary',533:'The Grey Charnel',534:'The Black Barrow',535:'The Pale Catacombs',536:'The Vane Tomb',537:'The Ashby Vault',538:'The Thorne Mausoleum',539:'The Marsh Crypt',540:'The Cobb Vault',541:'The Fell Tomb'};
+GY.NAMES={530:'Wenlock Graveyard',531:"Lady Aldith's Crypt",532:'The Red Ossuary',533:'The Grey Charnel',534:'The Black Barrow',535:'The Pale Catacombs',536:'The Vane Tomb',537:'The Ashby Vault',538:'The Thorne Mausoleum',539:'The Marsh Crypt',540:'The Cobb Vault',541:'The Fell Tomb',542:'The Vaults Beneath the Avenue'};
 for(const n in GY.LV){LEVEL_RATING[n]=GY.LV[n];LEVEL_NAMES[n]=GY.NAMES[n]}
 const GYA={ // alias: [piece, height of the thing in squares (one square is about a person's height)]
-  ghost0:['ghost_0',1.85],ghost1:['ghost_1',1.85],ghost2:['ghost_2',1.85],
+  ghost0:['ghost_0',1.1],ghost1:['ghost_1',1.1],ghost2:['ghost_2',1.1],
   vane:['boss_0',1.95],grimsby:['boss_1',2.15],aldric:['boss_2',2.3],morwenna:['boss_3',2.1],
   skel:['crA_0',1.55],pike:['crA_1',1.9],bmage:['crA_2',1.75],ghoul:['crA_3',1.5],zombie:['crA_4',1.55],giant:['crA_5',2.1],
   wraith:['crB_0',1.95],shade:['crB_1',1.8],banshee:['crB_2',1.6],rats:['crB_3',1.0],hound:['crB_4',.9],rat:['crB_5',1.0],raven:['crB_6',1.05],
@@ -53490,7 +53496,7 @@ Object.assign(ENEMY_DEF,{
   gybmage:{name:'Bone Mage',hp:40,dmg:[6,11],hit:.86,w:gyW('crA_2',.7),img:'gyi_bmage',xp:24,gold:[0,0],speed:1,ranged:2,verb:'blasts',gy:1,glow:.4},
   gyghoul:{name:'Ghoul',hp:50,dmg:[6,10],hit:.85,w:gyW('crA_3',.55),img:'gyi_ghoul',xp:22,gold:[0,0],speed:2,verb:'claws',gy:1},
   gyzombie:{name:'Rotting Zombie',hp:60,dmg:[5,9],hit:.82,w:gyW('crA_4',.62),img:'gyi_zombie',xp:20,gold:[0,0],speed:1,verb:'pummels',gy:1},
-  gygiant:{name:'Bloated Corpse',hp:84,dmg:[7,12],hit:.84,w:gyW('crA_5',1.2),img:'gyi_giant',xp:30,gold:[0,0],speed:1,verb:'crushes',gy:1},
+  gygiant:{name:'Bloated Corpse',hp:84,dmg:[7,12],hit:.84,w:gyW('crA_5',.72),img:'gyi_giant',xp:30,gold:[0,0],speed:1,verb:'crushes',gy:1},
   gywraith:{name:'Barrow Wraith',hp:52,dmg:[6,11],hit:.86,w:gyW('crB_0',.76),img:'gyi_wraith',xp:26,gold:[0,0],speed:1,fly:true,floatH:.1,verb:'reaps',gy:1,glow:.5},
   gyshade:{name:'Shade',hp:44,dmg:[6,10],hit:.87,w:gyW('crB_1',.68),img:'gyi_shade',xp:24,gold:[0,0],speed:2,fly:true,floatH:.2,verb:'rakes',gy:1,glow:.35},
   gybanshee:{name:'Banshee',hp:46,dmg:[6,11],hit:.86,w:gyW('crB_2',.68),img:'gyi_banshee',xp:26,gold:[0,0],speed:1,fly:true,floatH:.15,verb:'wails at',gy:1,glow:.6},
@@ -53505,7 +53511,7 @@ Object.assign(ENEMY_DEF,{
   gymorwenna:{name:'Prioress Morwenna',hp:503,dmg:[9,15],hit:.9,w:gyW('boss_3',1.4),img:'gyi_morwenna',xp:600,gold:[0,0],speed:1,verb:'curses',boss:true,gy:1,gyb:3,glow:.3}
 });
 if(typeof NO_VARY!=='undefined')NO_VARY.push('gyvane','gygrimsby','gyaldric','gymorwenna');
-if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push('gyvane','gygrimsby','gyaldric','gymorwenna','gygiant');
+if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push('gyvane','gygrimsby','gyaldric','gymorwenna');
 if(typeof BOSS_GOLD!=='undefined'){BOSS_GOLD.gyvane=[3000,3800];BOSS_GOLD.gygrimsby=[3400,4200];BOSS_GOLD.gyaldric=[3800,4600];BOSS_GOLD.gymorwenna=[4200,5200]}
 if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^gyghoul/,'tomblung',.2],[/^gyzombie/,'foodpoison',.2],[/^gygiant/,'foodpoison',.25],[/^gywraith/,'shaken',.2],[/^gybanshee/,'haunted',.25],[/^gyshade/,'cursed',.15],[/^gyrat/,'fever',.15],[/^gyhound/,'bleeding',.2],[/^gyraven/,'bleeding',.15],[/^gymorwenna/,'cursed',.2],[/^gyaldric/,'shaken',.2]);
 /* ---- the things the party carries: the four relics, the keys, the rewards ---- */
@@ -53694,14 +53700,17 @@ function gyYardBuild(){
    const c=ch(gid);rows[GY_Y.gate.y][GY_Y.gate.x]=c;block[GY_Y.gate.y*W+GY_Y.gate.x]=1;
    dec('lych',67,35);used.add('67,35')}
   // ---- the tomb and its plaza ----
-  {const cx=GY_Y.crypt.x,cy=GY_Y.crypt.y;dec('crypt',cx,cy,{block:false,npc:'gyo_crypt'});   // its door stands open: walk in and the stair goes down (see the end of this file)
+  {const cx=GY_Y.crypt.x,cy=GY_Y.crypt.y;const cd=dec('crypt',cx,cy,{block:false,npc:'gyo_crypt'});if(cd)cd.sc=.0001;   // an unseen marker for the quest signs; the tomb itself is built into the ground below
+   {const mk=i=>gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i,n:3},gain:1.0}),dg=mk(1);
+    KH_DOOR[dg]={lvl:GY.CRYPT,get at(){return {x:GY_C.start.x,y:GY_C.start.y,f:GY_C.start.f}},gy:'crypt'};
+    for(const [x,t] of [[cx-1,mk(0)],[cx,dg],[cx+1,mk(2)]]){rows[cy][x]=ch(t);block[cy*W+x]=1}}   // a solid front of vine-grown stone with its door in the middle: walk up and press on to go down
    for(const [dx,dy] of [[-4,2],[4,2],[-4,8],[4,8],[0,10]])lamp(cx+dx,cy+dy);
    for(const [x,y] of [[31,30],[39,30],[31,40],[39,40]])dec('lantern',x,y,{block:true});
    for(const [x,y] of [[31,35],[39,35]])dec('bench',x,y,{block:false});
    for(const [x,y] of [[32,31],[38,31],[32,39],[38,39]])dec('urn',x,y,{block:true});
    lights.push([cx-1,cy+2],[cx+1,cy+2]);glow.push([cx,cy+1])}
   // ---- six small tombs built into the edge of the yard: a vine-covered front, and a door to walk into ----
-  for(const T of GY_TOMBS){const gid=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:1,n:3},gain:1.0}),dg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:1,n:3},gain:1.0,rgb:[1,1,1.001]}),lg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:0,n:3},gain:1.0}),rg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:2,n:3},gain:1.0});
+  for(const T of GY_TOMBS){const gid=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:1,n:3},gain:1.0}),dg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:1,n:3},gain:1.0,rgb:[1,1,1+T.id*.00001]}),lg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:0,n:3},gain:1.0}),rg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:2,n:3},gain:1.0});
     KH_DOOR[dg]={lvl:T.id,get at(){return {x:5,y:9,f:0}},gy:'tomb'};
     const sq=T.side==='N'?[[T.x-1,2,lg],[T.x,2,dg],[T.x+1,2,rg]]:T.side==='S'?[[T.x-1,67,lg],[T.x,67,dg],[T.x+1,67,rg]]:[[2,T.y-1,lg],[2,T.y,dg],[2,T.y+1,rg]];
     for(const [x,y,t] of sq){rows[y][x]=ch(t);block[y*W+x]=1}
@@ -53724,7 +53733,9 @@ function gyYardBuild(){
      else if(dmin>=3&&r<.55)DB(TR[(hs(x,y,36)*TR.length)|0],x,y,{sc:.95+hs(x,y,37)*.4})}}
   // ---- THE AVENUE OF VAULTS (north east): a cobbled lane between two rows of tomb fronts, under an arch ----
   {pth(51,9,53,34,'5');
-   for(let y=11;y<=33;y++)for(const x of [50,54]){const gid=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:(y+(x===54?1:0))%3,n:3},gain:1.0});rows[y][x]=ch(gid);block[y*W+x]=1;path.add(x+','+y)}
+   for(let y=11;y<=33;y++)for(const x of [50,54]){let gid=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:(y+(x===54?1:0))%3,n:3},gain:1.0});
+     if(x===50&&y===22){gid=gyTile('texGrey_0',3.4,{fac:{img:'stairFix_0',i:0,n:1},gain:1.0,rgb:[1,1,1.00042]});KH_DOOR[gid]={lvl:542,get at(){return {x:3,y:9,f:1}},gy:'avenue'}}   // one of the tomb fronts is a stair down to the vaults beneath the Avenue
+     rows[y][x]=ch(gid);block[y*W+x]=1;path.add(x+','+y)}
    dec('arch',52,10,{sc:1.45});for(const x of [51,53])for(const y of [18,26])lamp(x,y);
    for(const y of [14,22,30]){if(free(52,y)&&false)dec('lantern',52,y)}
    for(const y of [12,19,27])for(const x of [49,55]){if(free(x,y))DB(['ltree20','ltree21','ltree12'][(hs(x,y,38)*3)|0],x,y,{sc:1.1})}}
@@ -53734,7 +53745,10 @@ function gyYardBuild(){
      else if(r<.4&&(x+y)%2===0)DB(['stone1','lean','wcross','stone2','ccross'][(hs(x,y,42)*5)|0],x,y,{sc:.95})}}
   // ---- the four doors into the mazes ----
   for(const g of GY_Y.doors){
-    dec(g.pic,g.x,g.y,{block:true,npc:'gyo_door'+g.k});
+    {const md=dec(g.pic,g.x,g.y,{block:false,npc:'gyo_door'+g.k});if(md)md.sc=.0001;   // an unseen marker for the quest signs
+     const img={igate2:'stairFix_2',stair:'stairFix_0',arch:'gatesC_1',hatch2:'stairFix_3'}[g.pic],wh={igate2:2.3,stair:2.6,arch:2.5,hatch2:1.4}[g.pic],gid=gyTile('texGrey_0',wh,{fac:{img,i:0,n:1},gain:1.05}),id=GY.M[g.k];
+     KH_DOOR[gid]={lvl:id,get at(){if(!LEVELS[id]&&KH_LAZY[id])KH_LAZY[id]();const st=LEVELS[id].start;return {x:st.x,y:st.y,f:st.f}},gy:'mazedoor',k:g.k};
+     rows[g.y][g.x]=ch(gid);block[g.y*W+g.x]=1}   // a solid door tile: you go in by walking up to it and pressing on, not by walking through it
     lamp(g.x-1,g.y+(g.y<35?2:-2));lamp(g.x+1,g.y+(g.y<35?2:-2));
     const dy=g.y<35?1:-1;for(const dx of [-2,2])D('lean',g.x+dx,g.y+dy*2);
     for(const dx of [-3,3])D('ww_pine',g.x+dx,g.y,{block:true,sc:1})}
@@ -53833,11 +53847,6 @@ function gyWenlockGate(C){
     WK.GRAVEBACK={x:4,y,f:1};
   }catch(e){console.error('gyWenlockGate',e)}}
 
-/* the tomb is entered by walking into it */
-{const _dm=doMove;doMove=function(){const r=_dm.apply(this,arguments);
-  try{if(LEVEL===GY.ID&&G.state==='play'&&!G.cut&&!G.talk&&G.P.x===GY_Y.crypt.x&&G.P.y===GY_Y.crypt.y)later(350,()=>{if(LEVEL===GY.ID&&G.P.x===GY_Y.crypt.x&&G.P.y===GY_Y.crypt.y&&!G.cut&&!G.talk){sfx('door');goToLevel(GY.CRYPT,{x:GY_C.start.x,y:GY_C.start.y,f:GY_C.start.f})}})}catch(e){console.error(e)}
-  return r}}
-
 /* the signs of the yard are wooden signposts: walk up to one and read it */
 khNpc('gyo_sign','A signpost','ww_sign',d=>{const t=GY_SIGNS[d.i]||GY_SIGNS[0];return say(t[0]+'. '+t[1],[BYE])});
 khNpc('gyo_lanesign','A signpost','greensign',()=>say('CHURCHYARD LANE. To the old churchyard. The gate closes at dusk. Residents let themselves in.',[BYE]));
@@ -53912,7 +53921,7 @@ function gyTombBuild(id){
   const WH=3.0,open=(x,y)=>g[y]&&g[y][x]==='.',near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(open(x+dx,y+dy))return true;return false};
   const V=[0,3,0,5,0,1,3,0,2].map(v=>ch(gyTile('texGrey_'+v,WH,{rgb:[.92,.95,1]})));
   const rows=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++){s+=open(x,y)?'.':near(x,y)?V[(hs(x,y,9)*V.length)|0]:V[0]}rows.push(s)}
-  {const gid=gyTile('texGrey_0',WH,{fac:{img:'stairFix_0',i:0,n:1},gain:1.1});
+  {const gid=gyTile('texGrey_0',WH,{fac:{img:'stairFix_0',i:0,n:1},gain:1.1,rgb:[1,1,1+id*.00001]});
    KH_DOOR[gid]={lvl:GY.ID,get at(){const f=T.front||[T.x,T.y];return {x:f[0],y:f[1],f:T.side==='N'?2:T.side==='S'?0:1}},gy:'tombexit'};
    rows[10]=rows[10].slice(0,5)+ch(gid)+rows[10].slice(6)}
   const decor=[],lights=[],lcol={},occ=new Set();
@@ -53932,6 +53941,63 @@ function gyTombBuild(id){
   LEVELS[id]=L;LEVEL_NAMES[id]=GY_TOMB_NAMES[id];LEVEL_RATING[id]=84;
   return L}
 for(const id of [536,537,538,539,540,541])KH_LAZY[id]=((i)=>()=>gyTombBuild(i))(id);
+
+/* ---- src/desert/gy_avenue.js ---- */
+/* ==========================================================================
+   THE VAULTS BENEATH THE AVENUE (level 542, rated 85; prefix gy / GY). A small dungeon under the Avenue of Vaults in the Wenlock Graveyard: a stair behind one of the tomb fronts on the west side of the
+   Avenue goes down to a long hall, and off the hall open eight vaults, four to the north and four to the south, each with a sarcophagus, candles, cobwebs and one creature of the graveyard (level 86).
+   When all eight are dead the party has "Cleansed the Avenue of Vaults": an achievement, 12,000 gold, a great deal of experience and Vaultbreaker, a level 88 weapon (once only; flag G.flags.gyAvenue).
+   ========================================================================== */
+const GY_AV={ID:542,W:31,H:19,start:{x:3,y:9,f:1},front:{x:51,y:22,f:1}};
+const GY_AV_FOES=['gyskel','gyghoul','gywraith','gybmage','gyzombie','gybanshee','gypike','gygiant'];
+ITEMDEF.gyavenue={n:'Vaultbreaker',k:'weapon',t:'Sword',ic:'sword',c:'#c8d8ff',dmg:[480,580],hit:.2,req:{str:70},lvl:88,price:0,rar:1,eff:{daze:.25,bleed:[.3,6,40],bossdmg:.4},dbl:.2,sw:.5,d:"A long grey blade found on the last sarcophagus of the Avenue of Vaults, cold to the hand and never rusted. One blow in four leaves the foe dazed, wounds bleed, and bosses take 40% more. Needs level 88."};
+function gyAvenueBuild(){
+  if(LEVELS[GY_AV.ID])return LEVELS[GY_AV.ID];
+  gyAlias();
+  const W=GY_AV.W,H=GY_AV.H,hs=(a,b,c)=>hash2(a,b,c),g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
+  const rect=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)g[y][x]='.'};
+  rect(3,8,28,10);
+  const vaults=[];for(let i=0;i<4;i++){const x0=2+7*i;rect(x0,2,x0+4,6);g[7][x0+2]='.';vaults.push({x0,y0:2,y1:6,back:2,mid:4});rect(x0,12,x0+4,16);g[11][x0+2]='.';vaults.push({x0,y0:12,y1:16,back:16,mid:14})}
+  const chars={},chMap=new Map();let nextCh=0x300;const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
+  const WH=3.0,open=(x,y)=>g[y]&&g[y][x]==='.',near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(open(x+dx,y+dy))return true;return false};
+  const V=[0,3,0,5,0,1,3,0,2].map(v=>ch(gyTile('texGrey_'+v,WH,{rgb:[.92,.95,1]})));
+  const rows=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++){s+=open(x,y)?'.':near(x,y)?V[(hs(x,y,9)*V.length)|0]:V[0]}rows.push(s)}
+  {const gid=gyTile('texGrey_0',WH,{fac:{img:'stairFix_0',i:0,n:1},gain:1.1,rgb:[1,1,1.00042]});
+   KH_DOOR[gid]={lvl:GY.ID,get at(){return {x:GY_AV.front.x,y:GY_AV.front.y,f:GY_AV.front.f}},gy:'avenueexit'};
+   rows[9]=rows[9].slice(0,2)+ch(gid)+rows[9].slice(3)}
+  const decor=[],lights=[],lcol={},enemies=[];
+  const dec=(a,x,y,o)=>{o=o||{};const k=GYA[a]?'gy_'+a:a;if(!open(x,y))return null;const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}if(o.sc)d.sc=o.sc;decor.push(d);return d};
+  const light=(x,y,col)=>{lights.push([x,y]);if(col)lcol[x+','+y]=col};
+  // the hall: candles and a warm glow, and bones
+  for(let x=5;x<=27;x+=4)light(x,9,[1.4,1.0,.55]);
+  for(const x of [4,12,20,27]){dec('candles',x,8,{block:true,sc:.7});dec('candles',x,10,{block:true,sc:.7})}
+  for(const [x,y] of [[8,9],[16,9],[24,9]])dec('bones',x,y,{sc:.9});
+  for(const [x,y] of [[3,8],[28,8],[3,10],[28,10],[14,8],[22,10]])dec('web',x,y,{sc:.5});
+  // the eight vaults
+  vaults.forEach((v,i)=>{const cx=v.x0+2,sd=v.y0<8?1:-1;
+    dec('sarc',cx,v.back,{block:true,sc:1});dec('candles',v.x0,v.back,{block:true,sc:.65});dec('candles',v.x0+4,v.back,{block:true,sc:.65});
+    light(cx,v.mid,[.45,1.05,.95]);light(v.x0,v.back,[1.5,1.0,.5]);light(v.x0+4,v.back,[1.5,1.0,.5]);
+    for(const [x,y] of [[v.x0,v.y0],[v.x0+4,v.y0],[v.x0,v.y1],[v.x0+4,v.y1]])dec('web',x,y,{sc:.5});
+    dec('bones',v.x0+1,v.mid+sd,{sc:.8});dec('bones',v.x0+3,v.mid,{sc:.7});
+    enemies.push({t:GY_AV_FOES[i],x:cx,y:v.mid,lvl:86})});
+  const fm=[];for(let y=0;y<H;y++)fm.push('3'.repeat(W));
+  const names=[{t:'The Hall of the Avenue',x:15,y:9,k:'place'}];vaults.forEach((v,i)=>names.push({t:'Vault '+(i+1),x:v.x0+2,y:v.mid,k:'place'}));
+  const L={rows,chars,fmap:fm,floorSet:GY_FLOORSET,floor:GY_FLOORSET[3],ceil:'gyc_crypt',ceilH:WH+1,start:{x:GY_AV.start.x,y:GY_AV.start.y,f:GY_AV.start.f},enemies,items:[],decor,lights,portals:[],day:0,amb:.05,torchGap:1e9,noTele:true,noExtras:true,
+    name:GY.NAMES[542],label:GY.NAMES[542],diff:85,mapNames:names,_gy:{kind:'crypt',lcol}};
+  LEVELS[GY_AV.ID]=L;LEVEL_NAMES[GY_AV.ID]=GY.NAMES[542];LEVEL_RATING[GY_AV.ID]=85;
+  return L}
+KH_LAZY[GY_AV.ID]=gyAvenueBuild;
+/* the reward, once every creature in the vaults is dead */
+CUTS.avenueDone=()=>[{text:'ACHIEVEMENT. You have cleansed the Avenue of Vaults.'},{text:'Something has been left on the last sarcophagus: a long grey blade, for those who laid the dead to rest. Look in your backpack...'}];
+function gyAvenueReward(){
+  const F=G.flags;if(F.gyAvenue)return;F.gyAvenue=1;G.gold+=12000;try{giveXP(90000)}catch(e){console.error(e)}
+  if(!bagAdd(mkItem('gyavenue')))G.items.push({k:'gyavenue',x:G.P.x,y:G.P.y,taken:false});
+  msg('Achievement: Cleansed the Avenue of Vaults. 12,000 gold, a great deal of experience, and Vaultbreaker, a level 88 sword.','#ffe36a');sfx('win');startCut('avenueDone')}
+{const _u=update;update=function(dt){const r=_u.apply(this,arguments);
+  try{if(LEVEL===GY_AV.ID&&G.state==='play'&&!G.cut&&!G.talk&&G.flags&&!G.flags.gyAvenue&&G.enemies&&G.enemies.every(e=>e.hp<=0)&&(G._gyAvT=(G._gyAvT||0)+dt)>1.5){G._gyAvT=0;gyAvenueReward()}else if(LEVEL!==GY_AV.ID)G._gyAvT=0}catch(e){console.error(e)}
+  return r}}
+/* the Achievements page also says so */
+{const _d=drawAch;drawAch=function(){_d.apply(this,arguments);try{if(G.flags&&G.flags.gyAvenue)txt('Cleansed the Avenue of Vaults',240,273,8.5,'#e8d890','center',true)}catch(e){}}}
 
 /* ---- src/desert/gy_mazes.js ---- */
 /* ==========================================================================
@@ -54244,6 +54310,15 @@ function gyOpenDoor(k){
    The people and things of the graveyard talk here too. Rewards are for a level 84 party (every quest pays double, see QREW_MUL); the mazes pay a little more each.
    All the writing is plain and warm. Jokes in the epitaphs and the ghost's talk are the writer's, to be replaced freely.
    ========================================================================== */
+/* long speech is shown a page at a time: the text is cut at sentence ends into pages of about 250 characters, each with a Go on button, and the real choices come with the last page, so nothing runs off the panel */
+function gySay(text,opts){
+  if(typeof text!=='string'||text.length<=260)return say(text,opts);
+  const sents=text.match(/[^.!?]+[.!?]+['"’”)]*\s*|[^.!?]+$/g)||[text],pages=[];let cur='';
+  for(const t of sents){if(cur&&(cur+t).length>250){pages.push(cur.trim());cur=t}else cur+=t}
+  if(cur.trim())pages.push(cur.trim());
+  const go=i=>i>=pages.length-1?say(pages[i],opts):say(pages[i],[['Go on.',()=>go(i+1)]]);
+  return go(0)}
+
 QAREA_ORDER.splice(Math.max(0,QAREA_ORDER.indexOf('Wenlock'))+1,0,'Wenlock Graveyard');
 const GY_REW={gyq1:{gold:1800,xp:5000,items:['potion6','supermana']},gyq2:{gold:2000,xp:5500,items:['potion6','potion6']},gyq3:{gold:2200,xp:6000,items:['supermana','elixir']},gyq4:{gold:2500,xp:6500,items:['elixir','supermana']},
   gyq5:{gold:12000,xp:12000,items:['gylantern','gysword','gyring2','gyrose','elixir']}};
@@ -54302,10 +54377,10 @@ const GYQ_D=[
 khNpc('gyo_ghost','Lady Aldith','gyi_ghost0',d=>{const F=gyF();F.met=1;
   const ids=['gyq1','gyq2','gyq3','gyq4','gyq5'];
   for(let i=0;i<5;i++)if(qSt(ids[i])!=='done')return qNode(ids[i],GYQ_D[i]);
-  return say("I am only the memory of a light, now. Go well.",[BYE])},{sc:1.05});
+  return gySay("I am only the memory of a light, now. Go well.",[BYE])},{sc:1.05});
 /* ---- the graveyard: the stones, the doors, the tomb ---- */
 const gyI=d=>{const L=LEVELS[LEVEL],q=L&&L.decor.find(z=>z.x===d.x&&z.y===d.y&&z.npc===d.npc);return q&&q.i!==undefined?q.i:(d.i||0)};   // the game keeps only a few fields of a piece of scenery, so its number is looked up by square
-khNpc('gyo_stone','A weathered stone','gy_stone1',d=>{const e=GY_EPI[gyI(d)%GY_EPI.length];return say(e[0]+'. '+e[1],[BYE])});
+khNpc('gyo_stone','A weathered stone','gy_stone1',d=>{const e=GY_EPI[gyI(d)%GY_EPI.length];return gySay(e[0]+'. '+e[1],[BYE])});
 const GY_DOORT=[
  ["A tall wrought-iron gate, furred with moss and ajar by exactly one person's width. Brick steps go down behind it, and the air that comes up smells of old pennies and red brick dust. THE RED OSSUARY. Skeletons. (Level 84.)",'Go down the steps.'],
  ["A sunken stair, with a dark stone arch and wet steps going down into the earth. The air from it is cold and green. THE GREY CHARNEL. Ghouls, zombies and worse. (Level 85.)",'Go down the stair.'],
@@ -54313,23 +54388,23 @@ const GY_DOORT=[
  ["A wooden trapdoor in a grassy hump, iron-bound, with two rings for handles. Somebody has painted NO on it, and somebody else has painted over the NO with YES, and then somebody else has painted NO again. THE PALE CATACOMBS. Rats, bone hounds, and a bell. (Level 87.)",'Open the trapdoor.']];
 for(let k=0;k<4;k++)khNpc('gyo_door'+k,['The mossy iron gate','The sunken stair','The stone archway','The trapdoor'][k],['gy_igate2','gy_stair','gy_arch','gy_hatch2'][k],d=>{
   const F=gyF(),done=F.dead[k];
-  return say(GY_DOORT[k][0]+(done?" The enemy of Lady Aldith is dead, and the place is quiet, though not empty.":""),[[GY_DOORT[k][1],()=>{G.talk=null;sfx('door');const id=GY.M[k];if(!LEVELS[id]&&KH_LAZY[id])KH_LAZY[id]();const st=LEVELS[id].start;goToLevel(id,{x:st.x,y:st.y,f:st.f});return null}],['Not yet.',()=>null]])});
+  return gySay(GY_DOORT[k][0]+(done?" The enemy of Lady Aldith is dead, and the place is quiet, though not empty.":""),[[GY_DOORT[k][1],()=>{G.talk=null;sfx('door');const id=GY.M[k];if(!LEVELS[id]&&KH_LAZY[id])KH_LAZY[id]();const st=LEVELS[id].start;goToLevel(id,{x:st.x,y:st.y,f:st.f});return null}],['Not yet.',()=>null]])});
 // the dialogues call gyo_door for decor made with the generic id; the yard uses gyo_door with i
 khNpc('gyo_door','A door into the earth','gy_igate2',d=>NPCS['gyo_door'+(d.i||0)].root(d));
-khNpc('gyo_crypt','The tomb','gy_crypt',d=>say("A great mossy tomb, with a double door of stone standing ajar. Over it, a pediment, and carved in the pediment, faint but readable, WENLOCK. A stair goes down behind the door, and at the bottom of the stair there is candlelight, which is rather more than a tomb usually stretches to. Lady Aldith's Crypt.",[['Go down.',()=>{G.talk=null;sfx('door');goToLevel(GY.CRYPT,{x:GY_C.start.x,y:GY_C.start.y,f:GY_C.start.f});return null}],['Not yet.',()=>null]]));
-khNpc('gyo_chapel','The ruined chapel','gy_chapel',()=>say("The front wall of the old chapel of Saint Wenna, and nothing behind it. A fine pointed window, with the stone tracery still in it, and ivy all over the rest. The chapel burnt down in the time of the old king, and the village has never been in a hurry to replace it. It still gets prayed in. You can tell by the candle stubs.",[BYE]));
-khNpc('gyo_hut',"The gravedigger's hut",'gy_hut',()=>say("A small timber hut with a plank door, a lantern, and a notice on the door in a neat hand: BACK IN TEN MINUTES. The notice is very faded. Somebody has underlined 'ten' in a different ink. The door is locked.",[BYE]));
-khNpc('gyo_opengrave','A heap of earth','gy_mound',()=>say("A heap of fresh brown earth, a spade stuck in it, and a coffin lid leaning on it. There is no hole that you can see. Somebody has stuck a small card in the earth: NOT YET.",[BYE]));
-khNpc('gyo_angel','A stone angel','gy_angel',()=>say("A stone angel with her face in her hands. Somebody has tucked a small knitted scarf round her neck, in the winter, and nobody will say who.",[BYE]));
-khNpc('gyo_edmund','Sir Edmund Wenlock','gy_edmund',()=>say("SIR EDMUND WENLOCK, knight. Husband. A small, plain stone, slightly crooked, with a wreath of dried flowers hung on it, and the name cut a great deal deeper than the dates. It says: HE HELD THE BRIDGE. Nothing else. The stone beside it has no name at all.",[BYE]));
-khNpc('gyo_edmund2','Sir Edmund Wenlock','gy_edmund',()=>say("SIR EDMUND WENLOCK, knight. The same plain stone as the one up in the yard, cut for the crypt. HE HELD THE BRIDGE, it says. Someone has hung a wreath on it, dried, and very old, and not dusty at all.",[BYE]));
-khNpc('gyo_altar','The altar','gy_altar',d=>say(gyF().peace?"The altar is bare except for the candles, which are all lit, and a single dried red rose with a grey ribbon. It is very quiet. It is the sort of quiet that you could put a hand on.":"A plain stone altar with a white cloth, a black iron cross and two tall candles that burn without any need of wax. The cloth is very old and very clean. Lady Aldith keeps it so, she says, because there is nothing else to do with her hands.",[BYE]));
+khNpc('gyo_crypt','The tomb','gy_crypt',d=>gySay("A great mossy tomb, with a double door of stone standing ajar. Over it, a pediment, and carved in the pediment, faint but readable, WENLOCK. A stair goes down behind the door, and at the bottom of the stair there is candlelight, which is rather more than a tomb usually stretches to. Lady Aldith's Crypt.",[['Go down.',()=>{G.talk=null;sfx('door');goToLevel(GY.CRYPT,{x:GY_C.start.x,y:GY_C.start.y,f:GY_C.start.f});return null}],['Not yet.',()=>null]]));
+khNpc('gyo_chapel','The ruined chapel','gy_chapel',()=>gySay("The front wall of the old chapel of Saint Wenna, and nothing behind it. A fine pointed window, with the stone tracery still in it, and ivy all over the rest. The chapel burnt down in the time of the old king, and the village has never been in a hurry to replace it. It still gets prayed in. You can tell by the candle stubs.",[BYE]));
+khNpc('gyo_hut',"The gravedigger's hut",'gy_hut',()=>gySay("A small timber hut with a plank door, a lantern, and a notice on the door in a neat hand: BACK IN TEN MINUTES. The notice is very faded. Somebody has underlined 'ten' in a different ink. The door is locked.",[BYE]));
+khNpc('gyo_opengrave','A heap of earth','gy_mound',()=>gySay("A heap of fresh brown earth, a spade stuck in it, and a coffin lid leaning on it. There is no hole that you can see. Somebody has stuck a small card in the earth: NOT YET.",[BYE]));
+khNpc('gyo_angel','A stone angel','gy_angel',()=>gySay("A stone angel with her face in her hands. Somebody has tucked a small knitted scarf round her neck, in the winter, and nobody will say who.",[BYE]));
+khNpc('gyo_edmund','Sir Edmund Wenlock','gy_edmund',()=>gySay("SIR EDMUND WENLOCK, knight. Husband. A small, plain stone, slightly crooked, with a wreath of dried flowers hung on it, and the name cut a great deal deeper than the dates. It says: HE HELD THE BRIDGE. Nothing else. The stone beside it has no name at all.",[BYE]));
+khNpc('gyo_edmund2','Sir Edmund Wenlock','gy_edmund',()=>gySay("SIR EDMUND WENLOCK, knight. The same plain stone as the one up in the yard, cut for the crypt. HE HELD THE BRIDGE, it says. Someone has hung a wreath on it, dried, and very old, and not dusty at all.",[BYE]));
+khNpc('gyo_altar','The altar','gy_altar',d=>gySay(gyF().peace?"The altar is bare except for the candles, which are all lit, and a single dried red rose with a grey ribbon. It is very quiet. It is the sort of quiet that you could put a hand on.":"A plain stone altar with a white cloth, a black iron cross and two tall candles that burn without any need of wax. The cloth is very old and very clean. Lady Aldith keeps it so, she says, because there is nothing else to do with her hands.",[BYE]));
 const GY_SARC=["LORD ALARIC WENLOCK. 'Built the chapel, drained the marsh, and was loved by neither the priest nor the frogs.'","LADY MATILDA WENLOCK. 'She had eleven children, and the grace to be buried in a separate coffin from each.'","SIR HUGH WENLOCK. 'He died of a surfeit of lampreys. We are told it was a good way to go.'","MARGERY, wife of Alaric the Younger. 'She is here with her cat, which is not recorded.'","THOMAS WENLOCK, steward. 'Counted everything twice. The second count is in the vault.'","SIR GUY WENLOCK. 'A knight of the shire, and a very bad poet.'","DAME ISOLDE WENLOCK. 'Her beloved dog lies at her feet, and has done for six hundred years.'","OLD HUGH THE ELDER. 'This coffin is too short, we know. We are sorry. He was shorter than he said.'","ROBERT, a younger son. 'He travelled, and returned, and was buried. In that order.'","EDWARD AND EDWIN. 'Twin brothers. Identical in all things, they say, except the matter of who was the elder.'","The ABBOT'S MAN. 'Nobody remembers his name. It is probably in the lid.'","A KNIGHT, unnamed. 'He fought for the family, and has a sarcophagus bigger than he deserved.'"];
-khNpc('gyo_sarc','A sarcophagus','gy_sarc',d=>say(GY_SARC[gyI(d)%GY_SARC.length],[BYE]));
-khNpc('gyo_coffin','A coffin on trestles','gy_coffin',()=>say("A coffin on two trestles, with its lid ajar. It is lined with black velvet, and it is empty, and the velvet is, frankly, wasted. Lady Aldith says it was put out for her in the year she died, in case, and she has been annoyed about it ever since, because she never got to use it.",[BYE]));
+khNpc('gyo_sarc','A sarcophagus','gy_sarc',d=>gySay(GY_SARC[gyI(d)%GY_SARC.length],[BYE]));
+khNpc('gyo_coffin','A coffin on trestles','gy_coffin',()=>gySay("A coffin on two trestles, with its lid ajar. It is lined with black velvet, and it is empty, and the velvet is, frankly, wasted. Lady Aldith says it was put out for her in the year she died, in case, and she has been annoyed about it ever since, because she never got to use it.",[BYE]));
 khNpc('gyo_digger','Dill, the sexton\'s nephew','kh_ohfolk3_2',d=>{const F=gyF(),n=(F.digT||0)%5;F.digT=n+1;
   const L=["Evening. Uncle Moss says I am not to talk to the living, because it is a waste of good grave-digging time. Hello.","The mazes? Four of them, under the yard. Go round clockwise from the lych-gate: the mossy gate, the sunken stair, the archway and the trapdoor. Skeletons first, then the ghouls, then the wraiths. Then the rats. The rats are the worst, they are not even dignified.","Lady Aldith? Oh, she is lovely. Cold as a pond, but lovely. She is down in the Wenlock crypt, under the big tomb, and she will not hurt a fly. The flies are not so sure.","I bury, I do not enquire. That is the first rule of the trade, and the second one is, do not stand in the hole.","The mound over there is for nobody, as far as I know. I keep the spade in it so it will not go missing. It goes missing anyway."];
-  return say(L[n],[BYE])});
+  return gySay(L[n],[BYE])});
 KH_KEEPERS.gyo_digger.sc=1;
 /* ---- inside the mazes ---- */
 const GY_NOTES={100:"THE RED OSSUARY. Brick-built, before the great plague, for the dead of the old parish. Nothing here is the worse for being dead, and a good deal of it is the worse for being about.",101:"THE GREY CHARNEL. Where the parish put the people it did not like to think about. A hand-lettered notice says: THE LEVERS ARE NOT FOR PLAYING WITH.",102:"THE BLACK BARROW. Black stone, brought a very long way, for a knight and the men who died round him. The air is cold, and keeps getting colder.",103:"THE PALE CATACOMBS. Bone-white brick under a skin of moss. A bell rings somewhere, on its own, once in a long while. It is not a cheerful bell.",
@@ -54337,55 +54412,55 @@ const GY_NOTES={100:"THE RED OSSUARY. Brick-built, before the great plague, for 
  10:"A scrawl on the stone: 'I pulled the crown first. Do not pull the crown first.'",11:"A lantern hook with a note on it: 'Bring your own light. The Charnel's has gone off.'",12:"A gravedigger's tally, scratched on the wall: forty strokes, then the word ENOUGH.",13:"An empty stone coffin. On the inside of the lid, somebody has scratched: I GOT BETTER.",
  20:"A knight's gauntlet stands on a ledge, palm up, holding nothing. The dust on it is very even.",21:"Scratched in the black stone: 'He kept the locket so that he would have somewhere to put the shame.'",22:"A ring of candle stubs, all burnt down at once, and a single pale petal in the middle.",23:"On a ledge, a small wooden horse, much loved, with one ear chewed. It is not at all dusty.",
  30:"A tiny bell on a nail, tied up with a ribbon so that it cannot ring. Somebody has cut the ribbon, and tied it again.",31:"Gnawed into the brick: THE RATS DID NOT DO THE TRAP. THE PRIORESS DID.",32:"A bone-white brick with a line of prayer cut round it, in Latin, going round and round. Somebody has written under it, in English: still going.",33:"A heap of bones in order, size by size, like a very bad orchestra."};
-khNpc('gyo_note','A note, a stone, a sign','gy_sign',d=>say(GY_NOTES[gyI(d)]||GY_NOTES[0],[BYE]));
-khNpc('gyo_riddle','A stone in the first room','gy_stone1',()=>say("A grey stone, cut in a good square hand: 'THREE LEVERS IN THE CHARNEL, THE CROSS, THE CROWN, AND THE CANDLE. THE CROSS COMES FIRST, FOR THE CROSS IS ALWAYS FIRST. THE CANDLE COMES SECOND, TO SEE WHAT COMES. THE CROWN COMES LAST, AS CROWNS DO, IN THE END, TO THE DUST.' Underneath, scratched: 'told you.'",[BYE]));
+khNpc('gyo_note','A note, a stone, a sign','gy_sign',d=>gySay(GY_NOTES[gyI(d)]||GY_NOTES[0],[BYE]));
+khNpc('gyo_riddle','A stone in the first room','gy_stone1',()=>gySay("A grey stone, cut in a good square hand: 'THREE LEVERS IN THE CHARNEL, THE CROSS, THE CROWN, AND THE CANDLE. THE CROSS COMES FIRST, FOR THE CROSS IS ALWAYS FIRST. THE CANDLE COMES SECOND, TO SEE WHAT COMES. THE CROWN COMES LAST, AS CROWNS DO, IN THE END, TO THE DUST.' Underneath, scratched: 'told you.'",[BYE]));
 const GY_LEVER=['The cross','The crown','The candle'],GY_ORDER=[0,2,1];
 khNpc('gyo_lever','An iron lever','gy_lever',d=>{const F=gyF(),i=gyI(d),nm=GY_LEVER[i];
-  if(F.lev||F.dead[1])return say("The lever of "+nm.toLowerCase()+" is down, and stays down. The gate has been opened.",[BYE]);
-  return say("A rusty iron lever on a stone base, with a small plaque in front of it: "+nm.toUpperCase()+".",[['Pull it.',()=>{
+  if(F.lev||F.dead[1])return gySay("The lever of "+nm.toLowerCase()+" is down, and stays down. The gate has been opened.",[BYE]);
+  return gySay("A rusty iron lever on a stone base, with a small plaque in front of it: "+nm.toUpperCase()+".",[['Pull it.',()=>{
     F.seq=F.seq||[];sfx('door');
-    if(GY_ORDER[F.seq.length]!==i){F.seq=[];msg('Clunk. Every lever in the Charnel springs back, and a distant gate does not open. Wrong order.','#d09a80');return say("The lever of "+nm.toLowerCase()+" goes down with a clank, and then, a moment later, all three of them come back up with a terrible rattle. That was not the right order.",[BYE])}
+    if(GY_ORDER[F.seq.length]!==i){F.seq=[];msg('Clunk. Every lever in the Charnel springs back, and a distant gate does not open. Wrong order.','#d09a80');return gySay("The lever of "+nm.toLowerCase()+" goes down with a clank, and then, a moment later, all three of them come back up with a terrible rattle. That was not the right order.",[BYE])}
     F.seq.push(i);
-    if(F.seq.length===3){F.lev=1;F.seq=[];gyOpenDoor(1);return say("The last lever goes down, and stays down. Somewhere in the Charnel a very heavy gate rolls aside.",[BYE])}
-    msg('The lever of '+nm.toLowerCase()+' stays down. '+F.seq.length+' of 3.','#c8d8a0');return say("The lever of "+nm.toLowerCase()+" goes down with a deep clunk, and stays there. "+F.seq.length+" of 3.",[BYE])}],['Leave it.',()=>null]])});
+    if(F.seq.length===3){F.lev=1;F.seq=[];gyOpenDoor(1);return gySay("The last lever goes down, and stays down. Somewhere in the Charnel a very heavy gate rolls aside.",[BYE])}
+    msg('The lever of '+nm.toLowerCase()+' stays down. '+F.seq.length+' of 3.','#c8d8a0');return gySay("The lever of "+nm.toLowerCase()+" goes down with a deep clunk, and stays there. "+F.seq.length+" of 3.",[BYE])}],['Leave it.',()=>null]])});
 khNpc('gyo_keychest',"The Warden's chest",'gy_chest',d=>{const F=gyF();
-  if(F.key||F.dead[0]||bagCount('gykey'))return say("The Warden's chest, empty now except for a pair of mouldy gloves and a note: 'I told you to keep the key on you.'",[BYE]);
-  return say("A heavy chest, iron-bound, in the Warden's cell. The lid is not locked. Perhaps the Warden thought nobody would come this far. Inside, on a bed of old straw, lies a rusty iron key as long as a hand.",[['Take the key.',()=>{F.key=1;bagAdd(mkItem('gykey'));sfx('key');msg("You take the Warden's Iron Key.",'#ffe36a');return say("You take the Warden's Iron Key. It is heavy, and the rust comes off in red flakes on your glove.",[BYE])}],['Leave it.',()=>null]])});
+  if(F.key||F.dead[0]||bagCount('gykey'))return gySay("The Warden's chest, empty now except for a pair of mouldy gloves and a note: 'I told you to keep the key on you.'",[BYE]);
+  return gySay("A heavy chest, iron-bound, in the Warden's cell. The lid is not locked. Perhaps the Warden thought nobody would come this far. Inside, on a bed of old straw, lies a rusty iron key as long as a hand.",[['Take the key.',()=>{F.key=1;bagAdd(mkItem('gykey'));sfx('key');msg("You take the Warden's Iron Key.",'#ffe36a');return gySay("You take the Warden's Iron Key. It is heavy, and the rust comes off in red flakes on your glove.",[BYE])}],['Leave it.',()=>null]])});
 khNpc('gyo_trapchest',"The Prioress's chest",'gy_chest',d=>{const F=gyF();
-  if(F.seal||F.dead[3]||bagCount('gyseal'))return say("The Prioress's chest is open, and empty, and a little sad about it.",[BYE]);
+  if(F.seal||F.dead[3]||bagCount('gyseal'))return gySay("The Prioress's chest is open, and empty, and a little sad about it.",[BYE]);
   const open=(clean)=>{F.seal=1;bagAdd(mkItem('gyseal'));sfx('key');msg("You take the Prioress's Bone Seal.",'#ffe36a');
     if(!clean){const hit=[];for(const i of livingHeroes()){const h=G.heroes[i],dmg=Math.max(1,Math.min(h.hp-1,Math.round(h.max*.14)));h.hp-=dmg;h.hurt=1;hit.push(i);addFloat(portraitX(i)+19,250,'-'+dmg,'#a8e090');try{afflInflict('poisoned',i,true)}catch(x){}}
       msg('A glass vial bursts under the hinge, and a green cloud rolls out and into everybody.','#a8e090');
       const free=gyFreeAround({x:d.x,y:d.y},3);for(let n=0;n<2&&n<free.length;n++)addEnemy('gyrats',free[n][0],free[n][1],true)}
-    return say(clean?"The wire parts with a tiny click. Nothing happens, and nothing goes on happening, and you lift the lid. In a nest of grey wool lies a seal of carved bone, on a cord, stamped with a bell.":"The lid comes up, and the trap goes off, and for a moment everybody is very sorry. When the cloud has thinned there is a seal of carved bone in the chest, on a cord, stamped with a bell. The rats of the Catacombs have heard the noise, and are coming.",[BYE])};
-  return say("A small, heavy chest with a brass lock, in the middle of the Reliquary. A hair-fine wire runs from the lid down under the hinge, to something that glints. It was put there on purpose, and by somebody who wished you ill.",[
+    return gySay(clean?"The wire parts with a tiny click. Nothing happens, and nothing goes on happening, and you lift the lid. In a nest of grey wool lies a seal of carved bone, on a cord, stamped with a bell.":"The lid comes up, and the trap goes off, and for a moment everybody is very sorry. When the cloud has thinned there is a seal of carved bone in the chest, on a cord, stamped with a bell. The rats of the Catacombs have heard the noise, and are coming.",[BYE])};
+  return gySay("A small, heavy chest with a brass lock, in the middle of the Reliquary. A hair-fine wire runs from the lid down under the hinge, to something that glints. It was put there on purpose, and by somebody who wished you ill.",[
     ['Cut the wire, carefully.',()=>{if(Math.random()<.7)return open(true);msg('The wire is cut a hair too late.','#d09a80');return open(false)}],
     ['Force the lid.',()=>open(false)],['Leave it.',()=>null]])});
 /* ---- the grave: the ending ---- */
 const GY_RELICS=['gyname','gyring','gylocket','gybook'];
 function gyHasRelics(){return GY_RELICS.every(id=>bagCount(id)>0)}
 khNpc('gyo_grave',"A grave with no name",'gy_slab',d=>{const F=gyF();
-  if(F.peace)return say("The stone now bears a name in clean deep letters: ALDITH, WIFE OF EDMUND WENLOCK. Beside it lie a gold ring, a silver locket, and a black prayer book, with a handful of fresh flowers. It is very quiet here, in a good way. The moss on it has been trimmed back by somebody.",[BYE]);
+  if(F.peace)return gySay("The stone now bears a name in clean deep letters: ALDITH, WIFE OF EDMUND WENLOCK. Beside it lie a gold ring, a silver locket, and a black prayer book, with a handful of fresh flowers. It is very quiet here, in a good way. The moss on it has been trimmed back by somebody.",[BYE]);
   if(qSt('gyq5')==='active'){
-    if(!gyHasRelics())return say("The grave of Lady Aldith, which has no name on it. You have not everything yet. You need her name-stone, her ring, Edmund's locket and the Prioress's book. Keep looking.",[BYE]);
-    return say("A flat grey stone, with moss all over it. You have everything. Her name-stone, her ring, Edmund's locket, and the book with the page marked.",[['Lay them down, and read the page.',()=>gyCut(1)],['Not yet.',()=>null]])}
-  return say("A plain grey stone in the Wenlock family plot, beside Sir Edmund's, with moss over the face and an empty place at the foot, as if it were waiting for a name. "+(F.met?"Lady Aldith said that this is hers.":"Somebody has put a single, fresh flower on it."),[BYE])});
+    if(!gyHasRelics())return gySay("The grave of Lady Aldith, which has no name on it. You have not everything yet. You need her name-stone, her ring, Edmund's locket and the Prioress's book. Keep looking.",[BYE]);
+    return gySay("A flat grey stone, with moss all over it. You have everything. Her name-stone, her ring, Edmund's locket, and the book with the page marked.",[['Lay them down, and read the page.',()=>gyCut(1)],['Not yet.',()=>null]])}
+  return gySay("A plain grey stone in the Wenlock family plot, beside Sir Edmund's, with moss over the face and an empty place at the foot, as if it were waiting for a name. "+(F.met?"Lady Aldith said that this is hers.":"Somebody has put a single, fresh flower on it."),[BYE])});
 function gyCutGhost(k,show){
   const g=GY_Y.grave;let d=G.decor.find(q=>q.gyCut);
   if(show&&!d){d={k:'gy_'+k,x:g.x,y:g.y+1,block:false,walk:true,deco:true,gyCut:1,sc:1.05};G.decor.push(d)}
   else if(d){if(show)d.k='gy_'+k;else{d.found=true;d.hidden=true}}}
 const GY_CUT={
- 1:()=>say("You kneel at the grave with no name. The moss is soft, and wet with the mist. You lay the name-stone against the head of it, and the carved leaves round the edge seem to catch what is left of the daylight. You set the ring on the stone, and Edmund's locket beside it, and open the book at the marked page. The writing is very small, and very plain, and not at all like the woman who would not read it.",[['Read it aloud.',()=>gyCut(2)]]),
- 2:()=>{sfx('heal');sfx('level');gyCutGhost('ghost1',true);return say("'Go gently, and go home. The door is open. You are expected.' It is not long. You read it twice, because it feels wrong to leave it. Under your knees the earth lets go of something very old and very heavy. The mist begins to glow from the inside, softly, like a lamp behind a curtain. A lady stands at the grave in a gown of light, with her hand to her mouth, and she is looking at the stone.",[['Look up.',()=>gyCut(3)]])},
- 3:()=>{gyCutGhost('ghost1',true);return say("'It has my name on it,' says Lady Aldith. 'Look at that. ALDITH. I had forgotten how many letters it has.' She looks at the stone beside it, for some time. 'Edmund's is crooked. It is a good stone, but it is crooked. He was always slightly crooked. I used to straighten his collar.' She wipes her face with the back of a hand that is not quite there. 'I know how this goes, I think. You are supposed to be sad. Please do not. I have been dead for three hundred years, and it has been very dull, and now it is going to be interesting.'",[['Tell her she is welcome.',()=>gyCut(4)]])},
- 4:()=>{gyCutGhost('ghost2',true);return say("'You took a long road, for strangers,' says Lady Aldith, and she is smiling now, with her eyes shut, in the light. 'Lord Corwin Vane will not enjoy this news. Take my husband's sword. It lay in my tomb, and I would like something of ours to be used for something useful. Take the lantern, too, it is lit from the last of me, and it will keep you company in the dark. And the rose is for luck. And stop looking so worried. It is only dying. I have done it before, and it did not hurt at all, and I was very bad at it.'",[['Say goodbye.',()=>gyCut(5)]])},
+ 1:()=>gySay("You kneel at the grave with no name. The moss is soft, and wet with the mist. You lay the name-stone against the head of it, and the carved leaves round the edge seem to catch what is left of the daylight. You set the ring on the stone, and Edmund's locket beside it, and open the book at the marked page. The writing is very small, and very plain, and not at all like the woman who would not read it.",[['Read it aloud.',()=>gyCut(2)]]),
+ 2:()=>{sfx('heal');sfx('level');gyCutGhost('ghost1',true);return gySay("'Go gently, and go home. The door is open. You are expected.' It is not long. You read it twice, because it feels wrong to leave it. Under your knees the earth lets go of something very old and very heavy. The mist begins to glow from the inside, softly, like a lamp behind a curtain. A lady stands at the grave in a gown of light, with her hand to her mouth, and she is looking at the stone.",[['Look up.',()=>gyCut(3)]])},
+ 3:()=>{gyCutGhost('ghost1',true);return gySay("'It has my name on it,' says Lady Aldith. 'Look at that. ALDITH. I had forgotten how many letters it has.' She looks at the stone beside it, for some time. 'Edmund's is crooked. It is a good stone, but it is crooked. He was always slightly crooked. I used to straighten his collar.' She wipes her face with the back of a hand that is not quite there. 'I know how this goes, I think. You are supposed to be sad. Please do not. I have been dead for three hundred years, and it has been very dull, and now it is going to be interesting.'",[['Tell her she is welcome.',()=>gyCut(4)]])},
+ 4:()=>{gyCutGhost('ghost2',true);return gySay("'You took a long road, for strangers,' says Lady Aldith, and she is smiling now, with her eyes shut, in the light. 'Lord Corwin Vane will not enjoy this news. Take my husband's sword. It lay in my tomb, and I would like something of ours to be used for something useful. Take the lantern, too, it is lit from the last of me, and it will keep you company in the dark. And the rose is for luck. And stop looking so worried. It is only dying. I have done it before, and it did not hurt at all, and I was very bad at it.'",[['Say goodbye.',()=>gyCut(5)]])},
  5:()=>{
    const F=gyF();F.peace=1;F.bell=1;sfx('win');gyCutGhost('ghost2',false);
    try{tone(660,655,2.4,'sine',.16);tone(1320,1310,1.6,'sine',.06,.02);tone(1980,1970,1.1,'sine',.03,.04)}catch(e){}
    const ok=qTurnIn('gyq5');
    for(const id of ['gyname','gylocket','gybook','gyring'])bagRemove(id,1);   // the four things are on her grave now
    gyDressGrave();
-   return say("She smiles, and the smile is the last of her to go. There is a moment of perfect light, and perfect quiet, and then the evening is only an evening, and the mist is only mist. On the stone, in clean deep letters, there is a name: ALDITH, WIFE OF EDMUND WENLOCK. Far away, in the town, a bell rings once, as if it had been waiting to.",[['Stand up, quietly.',()=>null]])}};
+   return gySay("She smiles, and the smile is the last of her to go. There is a moment of perfect light, and perfect quiet, and then the evening is only an evening, and the mist is only mist. On the stone, in clean deep letters, there is a name: ALDITH, WIFE OF EDMUND WENLOCK. Far away, in the town, a bell rings once, as if it had been waiting to.",[['Stand up, quietly.',()=>null]])}};
 function gyCut(n){return GY_CUT[n]()}
 /* the grave after the ending: the stone carries the name, and the four things lie on it; the crypt a lit shrine (see gyArrive) */
 function gyDressGrave(){
@@ -54412,7 +54487,7 @@ function gyTownArrive(){
   ['wlo_gravedigger',"The old crypt has gone all warm and quiet. I have been in it forty years and never once felt it was a nice place to be. Somebody has left a rose on the altar. Do not tell the vicar, he will want to charge for it."],
   ['wlo_curate',"There is a story in the village that Lady Aldith's grave has a name on it. I went to look. It has. I came back and wrote it in the register myself, in my best hand. It is the best entry in the book, and I am not saying that because I am the curate."],
   ['wlo_crier',"Oyez! Oyez! The Lady of Wenlock is at rest, and her name is on her stone, and the whole town is to be told! ... I am told that I have already told it twice, and the second time was to the pig."]];
-  for(const [id,line] of NEW)try{yrHook(id,d=>{const F=gyF();if(F.peace&&!F['town_'+id]){F['town_'+id]=1;return say(line,[BYE])}return null})}catch(e){console.error('gy town',e)}}
+  for(const [id,line] of NEW)try{yrHook(id,d=>{const F=gyF();if(F.peace&&!F['town_'+id]){F['town_'+id]=1;return gySay(line,[BYE])}return null})}catch(e){console.error('gy town',e)}}
 
 /* ---- src/desert/gy_maps.js ---- */
 /* ==========================================================================
@@ -54459,7 +54534,7 @@ function gyMapDraw(c,x,L,api){
     if(L._gy&&L._gy.torch)rows.push([L._gy.torch.name.replace(/^./,m=>m.toUpperCase())+' torch',L._gy.torch.css]);
     rows.forEach(([t,cc],i)=>{x.fillStyle=cc;x.strokeStyle=INK;x.lineWidth=.5;if(/ torch$/.test(t)){x.beginPath();x.arc(a+11,b+19+i*13,3,0,6.3);x.fill();x.stroke()}else{x.fillRect(a+6,b+16+i*13,10,6);x.strokeRect(a+6,b+16+i*13,10,6)}api.text(x,t,a+22,b+19+i*13,6,INK,'left')})}
 }
-mplInstall({name:'graveyard',levels:[530,531,532,533,534,535],draw:gyMapDraw,tint:[2,6,0],foot:'You are the yellow arrow. The numbers on the map are listed on the right.'});
+mplInstall({name:'graveyard',levels:[530,531,532,533,534,535,536,537,538,539,540,541,542],draw:gyMapDraw,tint:[2,6,0],foot:'You are the yellow arrow. The numbers on the map are listed on the right.'});
 /* the Go to area list */
 {const _gl=gotoListRaw;gotoListRaw=function(){const out=_gl.apply(this,arguments);
   try{if(GY_ENABLED&&!out.some(r=>r.n===GY.ID)){out.push({h:'The Wenlock Graveyard, west of Wenlock'});for(const n of [GY.ID,GY.CRYPT].concat(GY.M))out.push({n,name:GY.NAMES[n]})}}catch(e){console.error(e)}

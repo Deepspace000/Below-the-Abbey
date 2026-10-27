@@ -6,13 +6,13 @@
    the graveyard is first needed (gyLoad). IMG['gyp_<piece>'] is the raw piece; IMG['gy_<alias>'] and NPC_H the pieces as the game uses them (GYA: alias -> [piece, height in squares]).
    Notes: tools/GRAVEYARD_NOTES.md.
    ========================================================================== */
-const GY={ID:530,CRYPT:531,M:[532,533,534,535],W:70,H:70,ready:false,loading:null,tiles:{},LV:{530:84,531:84,532:84,533:85,534:86,535:87,536:84,537:84,538:84,539:84,540:84,541:84}};
-const gyIs=n=>n===530||n===531||(n>=532&&n<=541);   // 536 to 541 are the six small tombs built into the yard's edge (gy_tombs.js)
+const GY={ID:530,CRYPT:531,M:[532,533,534,535],W:70,H:70,ready:false,loading:null,tiles:{},LV:{530:84,531:84,532:84,533:85,534:86,535:87,536:84,537:84,538:84,539:84,540:84,541:84,542:85}};
+const gyIs=n=>n===530||n===531||(n>=532&&n<=542);   // 536 to 541 are the six small tombs built into the yard's edge (gy_tombs.js)
 const gyMazeK=n=>GY.M.indexOf(n);   // 0..3, or -1
-GY.NAMES={530:'Wenlock Graveyard',531:"Lady Aldith's Crypt",532:'The Red Ossuary',533:'The Grey Charnel',534:'The Black Barrow',535:'The Pale Catacombs',536:'The Vane Tomb',537:'The Ashby Vault',538:'The Thorne Mausoleum',539:'The Marsh Crypt',540:'The Cobb Vault',541:'The Fell Tomb'};
+GY.NAMES={530:'Wenlock Graveyard',531:"Lady Aldith's Crypt",532:'The Red Ossuary',533:'The Grey Charnel',534:'The Black Barrow',535:'The Pale Catacombs',536:'The Vane Tomb',537:'The Ashby Vault',538:'The Thorne Mausoleum',539:'The Marsh Crypt',540:'The Cobb Vault',541:'The Fell Tomb',542:'The Vaults Beneath the Avenue'};
 for(const n in GY.LV){LEVEL_RATING[n]=GY.LV[n];LEVEL_NAMES[n]=GY.NAMES[n]}
 const GYA={ // alias: [piece, height of the thing in squares (one square is about a person's height)]
-  ghost0:['ghost_0',1.85],ghost1:['ghost_1',1.85],ghost2:['ghost_2',1.85],
+  ghost0:['ghost_0',1.1],ghost1:['ghost_1',1.1],ghost2:['ghost_2',1.1],
   vane:['boss_0',1.95],grimsby:['boss_1',2.15],aldric:['boss_2',2.3],morwenna:['boss_3',2.1],
   skel:['crA_0',1.55],pike:['crA_1',1.9],bmage:['crA_2',1.75],ghoul:['crA_3',1.5],zombie:['crA_4',1.55],giant:['crA_5',2.1],
   wraith:['crB_0',1.95],shade:['crB_1',1.8],banshee:['crB_2',1.6],rats:['crB_3',1.0],hound:['crB_4',.9],rat:['crB_5',1.0],raven:['crB_6',1.05],
@@ -113,7 +113,7 @@ Object.assign(ENEMY_DEF,{
   gybmage:{name:'Bone Mage',hp:40,dmg:[6,11],hit:.86,w:gyW('crA_2',.7),img:'gyi_bmage',xp:24,gold:[0,0],speed:1,ranged:2,verb:'blasts',gy:1,glow:.4},
   gyghoul:{name:'Ghoul',hp:50,dmg:[6,10],hit:.85,w:gyW('crA_3',.55),img:'gyi_ghoul',xp:22,gold:[0,0],speed:2,verb:'claws',gy:1},
   gyzombie:{name:'Rotting Zombie',hp:60,dmg:[5,9],hit:.82,w:gyW('crA_4',.62),img:'gyi_zombie',xp:20,gold:[0,0],speed:1,verb:'pummels',gy:1},
-  gygiant:{name:'Bloated Corpse',hp:84,dmg:[7,12],hit:.84,w:gyW('crA_5',1.2),img:'gyi_giant',xp:30,gold:[0,0],speed:1,verb:'crushes',gy:1},
+  gygiant:{name:'Bloated Corpse',hp:84,dmg:[7,12],hit:.84,w:gyW('crA_5',.72),img:'gyi_giant',xp:30,gold:[0,0],speed:1,verb:'crushes',gy:1},
   gywraith:{name:'Barrow Wraith',hp:52,dmg:[6,11],hit:.86,w:gyW('crB_0',.76),img:'gyi_wraith',xp:26,gold:[0,0],speed:1,fly:true,floatH:.1,verb:'reaps',gy:1,glow:.5},
   gyshade:{name:'Shade',hp:44,dmg:[6,10],hit:.87,w:gyW('crB_1',.68),img:'gyi_shade',xp:24,gold:[0,0],speed:2,fly:true,floatH:.2,verb:'rakes',gy:1,glow:.35},
   gybanshee:{name:'Banshee',hp:46,dmg:[6,11],hit:.86,w:gyW('crB_2',.68),img:'gyi_banshee',xp:26,gold:[0,0],speed:1,fly:true,floatH:.15,verb:'wails at',gy:1,glow:.6},
@@ -128,7 +128,7 @@ Object.assign(ENEMY_DEF,{
   gymorwenna:{name:'Prioress Morwenna',hp:503,dmg:[9,15],hit:.9,w:gyW('boss_3',1.4),img:'gyi_morwenna',xp:600,gold:[0,0],speed:1,verb:'curses',boss:true,gy:1,gyb:3,glow:.3}
 });
 if(typeof NO_VARY!=='undefined')NO_VARY.push('gyvane','gygrimsby','gyaldric','gymorwenna');
-if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push('gyvane','gygrimsby','gyaldric','gymorwenna','gygiant');
+if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push('gyvane','gygrimsby','gyaldric','gymorwenna');
 if(typeof BOSS_GOLD!=='undefined'){BOSS_GOLD.gyvane=[3000,3800];BOSS_GOLD.gygrimsby=[3400,4200];BOSS_GOLD.gyaldric=[3800,4600];BOSS_GOLD.gymorwenna=[4200,5200]}
 if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^gyghoul/,'tomblung',.2],[/^gyzombie/,'foodpoison',.2],[/^gygiant/,'foodpoison',.25],[/^gywraith/,'shaken',.2],[/^gybanshee/,'haunted',.25],[/^gyshade/,'cursed',.15],[/^gyrat/,'fever',.15],[/^gyhound/,'bleeding',.2],[/^gyraven/,'bleeding',.15],[/^gymorwenna/,'cursed',.2],[/^gyaldric/,'shaken',.2]);
 /* ---- the things the party carries: the four relics, the keys, the rewards ---- */
