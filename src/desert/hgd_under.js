@@ -102,7 +102,9 @@ function hgduBuild(){
   for(const s of sp){if(letters.length>=5)break;if(letters.every(l=>Math.hypot(l.x-s[0],l.y-s[1])>=40)){const w=dirs.find(d=>g[s[1]+d[1]]&&g[s[1]+d[1]][s[0]+d[0]]==='#');if(w)letters.push({x:s[0],y:s[1],wd:[w[0],w[1]]})}}
   const mid=cells.length?cells[(rnd()*cells.length)|0]:[W>>1,H>>1];
   const a0=SU.ladders[0];
-  const L={rows:g.map(r=>r.join('')),start:{x:a0.ax,y:a0.ay,f:0},enemies,items:[],decor:[],chars,day:0,amb:0,floor:FLOORS.hgduf?'hgduf':'dirt',floor2:FLOORS.hgduf2?'hgduf2':'mud',name:'The Underlevel',label:'The Underlevel',diff:HGDU.DIFF,ceilH:2.2,torchGap:1e9,noTele:true,noExtras:true,portals:[],lights:[],
+  // a warm lamp at every ladder, and a faint light every dozen squares or so along the corridors, so the walls and ladders can be read
+  const ulights=SU.ladders.map(l=>[l.ax,l.ay]);{let k=0;for(const c of cells){if((c[0]*7+c[1]*13)%53===0&&ulights.every(q=>Math.hypot(q[0]-c[0],q[1]-c[1])>=12)&&k++<60)ulights.push([c[0],c[1]])}}
+  const L={rows:g.map(r=>r.join('')),start:{x:a0.ax,y:a0.ay,f:0},enemies,items:[],decor:[],chars,day:0,amb:0,floor:FLOORS.hgduf?'hgduf':'dirt',floor2:FLOORS.hgduf2?'hgduf2':'mud',name:'The Underlevel',label:'The Underlevel',diff:HGDU.DIFF,ceilH:2.2,torchGap:1e9,noTele:true,noExtras:true,portals:[],lights:ulights,
     _hgdu:{ladders:SU.ladders,spurs:spurs.length,nests:nests.length,letters},_msgr:letters.length===5?{x:mid[0],y:mid[1],letters:letters.map((l,i)=>({k:MSG_LETTERS[i],x:l.x,y:l.y,wd:l.wd}))}:null,
     mapNames:[{t:'The Underlevel',x:100,y:100,k:'place'}]};
   LEVELS[HGDU.ID]=L}

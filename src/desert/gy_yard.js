@@ -252,7 +252,7 @@ function gyYardBuild(){
     let moved=0;for(let pass=0;pass<6;pass++){const {seen,bs}=flood();const kill=new Set();
       for(let y=2;y<=67;y++)for(let x=2;x<=67;x++)if(rows[y][x]==='.'&&!seen[y*W+x]&&!bs.has(x+','+y))for(const [a,b] of D4){const k=(x+a)+','+(y+b);if(bs.has(k))kill.add(k)}
       if(!kill.size)break;
-      for(const d of decor)if(d.block&&kill.has(d.x+','+d.y)&&!d.npc){d.block=false;d.walk=true;d.deco=true;moved++}
+      for(let i=decor.length-1;i>=0;i--){const d=decor[i];if(d.block&&kill.has(d.x+','+d.y)&&!d.npc){decor.splice(i,1);moved++}}   // a stone or tree that walls off a pocket is taken away (never made walk-through)
       for(const d of decor)if(d.block&&d.npc&&kill.has(d.x+','+d.y)&&(d.npc==='gyo_stone')){d.block=false;d.walk=true;d.deco=false;moved++}}
     lv._gy.softened=moved}
   LEVELS[GY.ID]=lv;
