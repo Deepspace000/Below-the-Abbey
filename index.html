@@ -52029,7 +52029,7 @@ WM.M=[];
    for the grottos and the Deep), floors, lights, creatures, finds, and calls WM.furnish[kind] (wellmaze_rooms.js) for every room and WM.mech (wellmaze_mech.js) for the doors,
    keys, switches and puzzles. Decor fields the game does not copy (it keeps only a short list) are looked up by square in L._wm instead.
    ========================================================================== */
-const WM_STY={bo:'brick_old',bm:'brick_moss',bc:'brick_crack',bw:'brick_wet',bb:'brick_big',bv:'brick_vein',cr:'crystal',vi:'violet',li:'lilac',ve:'vein',ge:'geode',de:'deep'};
+const WM_STY={bo:'brick_old',bm:'brick_moss',bc:'brick_crack',bw:'brick_wet',bb:'brick_big',bv:'brick_vein',cr:'crystal',vi:'violet',li:'lilac',ve:'vein',ge:'vein',de:'violet'};
 const WM_RING={grotto:['cr','ge','cr','vi'],mine:['vi','de','vi','bc'],cistern:['bw','bw','bm'],cellar:['bb','bo'],library:['bo','bo','bv'],fungus:['li','bm','li'],shrine:['bv','bo'],mirror:['bb','bv'],
   spiders:['bm','de'],lanterns:['bb','bv'],boss:['cr','ve','ge','de'],lake:['de','ve','bw'],camp:['bo','bm'],start:['bw','bo','bm'],bells:['bb','bo'],vault:['bb','bv'],stairOut:['bo'],island:['bw'],riddle:['bb']};
 const WM_BAND=[ // [limit, style] by noise value, per level
@@ -52044,6 +52044,31 @@ function wmSecretTex(){const key='wm_secret';if(IMG[key])return key;const b=IMG.
   IMG[key]=mkCanvas(128,128,(x,w,h)=>{if(b)x.drawImage(b,0,0,w,h);else{x.fillStyle='#4a3860';x.fillRect(0,0,w,h)}if(P){x.globalCompositeOperation='multiply';x.globalAlpha=.8;x.drawImage(P,0,0,w,h)}});return key}
 /* a style for ohTiles: plain wall, door picture, window picture */
 function wmSty(name,plain,door,win){OH_STY[name]=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain,door:door||plain,win:win||plain,alt:plain,zoom:1,contrast:1.0,tint:[255,255,255,0]});return name}
+/* ---------- the doors, painted over the arch picture: steps and a lock plate down, a bricked arch for a sealed vault, a plaque on the riddle door ---------- */
+function wmDoorArt(kind,col){
+  const key='wm_dr_'+kind+(col||'');if(IMG[key])return key;
+  const src=IMG[kind==='riddle'?'art_tex_wm_door':'art_tex_wm_arch'];if(!src||!src.width)return kind==='riddle'?'art_tex_wm_door':'art_tex_wm_arch';
+  const brick=IMG.art_tex_wm_brick_old;
+  IMG[key]=mkCanvas(128,128,(x,w,h)=>{
+    x.drawImage(src,0,0,w,h);if(kind==='riddle'){wmPlate(x,64,70,30,22,'#b89a58',col||'#ffe9a0',true);return}
+    const im=x.getImageData(0,0,w,h),d=im.data,m=new Uint8Array(w*h);
+    for(let i=0;i<w*h;i++)if(d[i*4]+d[i*4+1]+d[i*4+2]<95)m[i]=1;   // the black of the arch
+    const [c,y]=tcv();y.canvas.width=w;y.canvas.height=h;
+    if(kind==='sealed'){y.fillStyle='#2a2036';y.fillRect(0,0,w,h);if(brick){y.globalAlpha=.9;y.drawImage(brick,0,0,w,h);y.globalAlpha=1}y.fillStyle='rgba(10,6,20,.38)';y.fillRect(0,0,w,h)}
+    else{for(let yy=0;yy<h;yy+=1){const t=yy/h,band=((yy-36)/10)|0,edge=((yy-36)%10)<2;const v=edge?150:Math.max(40,70+t*85-(band%2)*14);y.fillStyle='rgb('+(v*.78|0)+','+(v*.62|0)+','+(v*1.0|0)+')';y.fillRect(0,yy,w,1)}
+      const g=y.createLinearGradient(0,30,0,h);g.addColorStop(0,'rgba(0,0,0,.7)');g.addColorStop(.6,'rgba(0,0,0,0)');y.fillStyle=g;y.fillRect(0,30,w,h-30)}   // steps going down into the dark
+    const fill=y.getImageData(0,0,w,h).data;
+    for(let i=0;i<w*h;i++)if(m[i]){d[i*4]=fill[i*4];d[i*4+1]=fill[i*4+1];d[i*4+2]=fill[i*4+2]}
+    x.putImageData(im,0,0);
+    if(kind==='down')wmPlate(x,64,92,20,26,'#b89a58',col||'#a064e8',false);
+    else wmPlate(x,64,86,22,22,'#5a5a66','#8a8aa0',false,true)});
+  return key}
+function wmPlate(x,cx,cy,w,h,metal,gem,words,iron){
+  x.save();x.fillStyle='rgba(0,0,0,.55)';x.fillRect(cx-w/2+2,cy-h/2+2,w,h);x.fillStyle=metal;x.fillRect(cx-w/2,cy-h/2,w,h);x.strokeStyle='rgba(255,240,200,.6)';x.lineWidth=1;x.strokeRect(cx-w/2+.5,cy-h/2+.5,w-1,h-1);
+  if(words){x.fillStyle='rgba(40,28,10,.85)';for(let i=0;i<4;i++)x.fillRect(cx-w/2+4,cy-h/2+4+i*4.5,w-8-(i===3?10:0),1.6)}
+  else if(iron){x.fillStyle='#22202c';for(const [a,b] of [[-1,-1],[1,-1],[-1,1],[1,1]]){x.beginPath();x.arc(cx+a*(w/2-3),cy+b*(h/2-3),1.5,0,6.3);x.fill()}x.fillRect(cx-1.5,cy-6,3,12);x.fillRect(cx-6,cy-1.5,12,3)}
+  else{x.fillStyle=gem;x.beginPath();x.arc(cx,cy-h/2+6,4,0,6.3);x.fill();x.fillStyle='#120c04';x.beginPath();x.arc(cx,cy+1,3.2,0,6.3);x.fill();x.fillRect(cx-1.2,cy+1,2.4,7)}   // a gem for the key, and a keyhole
+  x.restore()}
 WM.WH=2.2;
 /* the grid and the tiles of level k: returns {rows,chars,ring} */
 function wmWalls(k,M){
@@ -52054,9 +52079,10 @@ function wmWalls(k,M){
   const niche=()=>special('niche','window',wmPicTex('bo'),wmPicTex('bo'),'art_tex_wm_niche');
   const grate=()=>special('grate','door',wmPicTex('bo'),'art_tex_wm_grate',wmPicTex('bo'));
   const secret=()=>ch('secret',()=>TM.make('plain',wmSty('wm_secret',wmSecretTex()),WH).gid);
-  const doorDown=()=>special('down','door',wmPicTex('bo'),'art_tex_wm_arch','art_tex_wm_plaque');
+  const doorDown=(k2)=>special('down'+(k2||0),'door',wmPicTex('bo'),wmDoorArt('down',['#a064e8','#c488ff','#e0b84a'][k2||0]),'art_tex_wm_plaque');
+  const sealed=()=>special('sealed','door',wmPicTex('bo'),wmDoorArt('sealed'),'art_tex_wm_plaque');
   const doorUp=()=>special('up','door',wmPicTex('bo'),'art_tex_wm_door','art_tex_wm_niche');
-  const doorRiddle=()=>special('riddle','door',wmPicTex('bb'),'art_tex_wm_door','art_tex_wm_plaque');
+  const doorRiddle=()=>special('riddle','door',wmPicTex('bb'),wmDoorArt('riddle'),'art_tex_wm_plaque');
   const g=M.g,rows=[],ringOf=new Map();
   // the rim of every room (the wall cells touching it, corners too) takes the room's own walls
   for(const r of M.rooms){const set=WM_RING[r.kind];if(!set)continue;for(let y=r.y0-1;y<=r.y1+1;y++)for(let x=r.x0-1;x<=r.x1+1;x++)if(g[y]&&g[y][x]==='#'){const key=y*W+x;if(!ringOf.has(key))ringOf.set(key,set[(hash2(x,y,k*13+5)*set.length)|0])}}
@@ -52075,7 +52101,7 @@ function wmWalls(k,M){
       if(h>.985){row+=grate();continue}}
     row+=plain(key)}rows.push(row)}
   const put=(x,y,c)=>{rows[y]=rows[y].slice(0,x)+c+rows[y].slice(x+1)};
-  const tiles={put,secret,doorDown,doorUp,doorRiddle,plain};
+  const tiles={put,secret,sealed,doorDown,doorUp,doorRiddle,plain};
   return {rows,chars,tiles,idx}}
 /* ---------- creatures: what lives where ---------- */
 const WM_FOES=[ // by level: [type, weight]
@@ -52399,14 +52425,14 @@ WM.mech=function(c,wl){
   const inRoomRect=(x,y)=>M.rooms.some(r=>x>=r.x0&&x<=r.x1&&y>=r.y0&&y<=r.y1);
   // ---- the stairs ----
   if(k>0){const u=M.up;T.put(u.x,u.y,T.doorUp());addDoor(u.x,u.y,{type:'up'})}
-  if(M.down){const d=M.down;T.put(d.x,d.y,T.doorDown());addDoor(d.x,d.y,{type:'down',key:'wmkey'+(k+1)});
+  if(M.down){const d=M.down;T.put(d.x,d.y,T.doorDown(k));addDoor(d.x,d.y,{type:'down',key:'wmkey'+(k+1)});
     // a brass plate beside the foot of the stair names the key
     wmStairSign(c,'stairdown'+k,d)}
   if(k>0&&WM_NOTES['violet'+k])wmStairSign(c,'violet'+k,M.up);
   // ---- vault doors and the riddle closet ----
   for(const r of M.rooms){if(!r.sealed||r.noDoor||!r.door)continue;const q=r.door;
     const type=r.kind==='riddle'?'riddle':(r.vault==='mirror'?'secret':'sealed');
-    T.put(q.x,q.y,type==='riddle'?T.doorRiddle():T.secret());g[q.y][q.x]='#';
+    T.put(q.x,q.y,type==='riddle'?T.doorRiddle():type==='sealed'?T.sealed():T.secret());g[q.y][q.x]='#';
     addDoor(q.x,q.y,{type,vault:r.vault||'riddle',room:r.id});L.vault[r.vault||'riddle']={x:q.x,y:q.y,room:r.id,inside:q.inside,outside:q.outside,rect:{x0:r.x0,x1:r.x1,y0:r.y0,y1:r.y1}};
     // the first treasure chest of a vault holds its special things
     const tc=c.dec.find(d=>d.k==='wm_treasure_chest'&&d.x>=r.x0&&d.x<=r.x1&&d.y>=r.y0&&d.y<=r.y1);

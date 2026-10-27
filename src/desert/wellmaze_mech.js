@@ -24,14 +24,14 @@ WM.mech=function(c,wl){
   const inRoomRect=(x,y)=>M.rooms.some(r=>x>=r.x0&&x<=r.x1&&y>=r.y0&&y<=r.y1);
   // ---- the stairs ----
   if(k>0){const u=M.up;T.put(u.x,u.y,T.doorUp());addDoor(u.x,u.y,{type:'up'})}
-  if(M.down){const d=M.down;T.put(d.x,d.y,T.doorDown());addDoor(d.x,d.y,{type:'down',key:'wmkey'+(k+1)});
+  if(M.down){const d=M.down;T.put(d.x,d.y,T.doorDown(k));addDoor(d.x,d.y,{type:'down',key:'wmkey'+(k+1)});
     // a brass plate beside the foot of the stair names the key
     wmStairSign(c,'stairdown'+k,d)}
   if(k>0&&WM_NOTES['violet'+k])wmStairSign(c,'violet'+k,M.up);
   // ---- vault doors and the riddle closet ----
   for(const r of M.rooms){if(!r.sealed||r.noDoor||!r.door)continue;const q=r.door;
     const type=r.kind==='riddle'?'riddle':(r.vault==='mirror'?'secret':'sealed');
-    T.put(q.x,q.y,type==='riddle'?T.doorRiddle():T.secret());g[q.y][q.x]='#';
+    T.put(q.x,q.y,type==='riddle'?T.doorRiddle():type==='sealed'?T.sealed():T.secret());g[q.y][q.x]='#';
     addDoor(q.x,q.y,{type,vault:r.vault||'riddle',room:r.id});L.vault[r.vault||'riddle']={x:q.x,y:q.y,room:r.id,inside:q.inside,outside:q.outside,rect:{x0:r.x0,x1:r.x1,y0:r.y0,y1:r.y1}};
     // the first treasure chest of a vault holds its special things
     const tc=c.dec.find(d=>d.k==='wm_treasure_chest'&&d.x>=r.x0&&d.x<=r.x1&&d.y>=r.y0&&d.y<=r.y1);
