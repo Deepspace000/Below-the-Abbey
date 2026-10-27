@@ -106,3 +106,19 @@ if(typeof AFFL!=='undefined'&&!AFFL.hagblind){AFFL.hagblind={n:'Hag-blinded',kin
   if(LEVEL===WW.ID)return {id:'fog',n:'Murk',fog:.09,haze:.62,dark:.7,mix:.8,col:[22,34,26],text:'A thick, cold murk lies between the trees. The view is a few squares, and things stand very close before they are seen.'};
   if(wwIs(LEVEL))return null;
   return _w.apply(this,arguments)}}
+
+/* the little hills that hide the caves and ruins of the wood: painted again in the wood's own colours, with a dark patch of ground under them (the art is the usual hill; the colour and the shadow are the wood's) */
+function wwHillArt(i){
+  const key='wd_hillw'+i;if(IMG[key])return key;const im=IMG['wd_hill'+i];if(!im||!im.width)return null;
+  const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');
+  x.drawImage(im,0,0);x.globalCompositeOperation='source-atop';x.fillStyle='rgba(18,30,22,.55)';x.fillRect(0,0,c.width,c.height);
+  x.globalCompositeOperation='multiply';x.fillStyle='rgb(190,215,190)';x.fillRect(0,0,c.width,c.height);
+  x.globalCompositeOperation='destination-in';x.drawImage(im,0,0);
+  x.globalCompositeOperation='destination-over';const g=x.createRadialGradient(c.width/2,c.height-3,2,c.width/2,c.height-3,c.width*.62);g.addColorStop(0,'rgba(4,8,5,.8)');g.addColorStop(1,'rgba(4,8,5,0)');
+  x.save();x.translate(0,c.height-3);x.scale(1,.12);x.translate(0,-(c.height-3));x.fillStyle=g;x.fillRect(0,0,c.width,c.height);x.restore();
+  IMG[key]=c;NPC_H[key]=NPC_H['wd_hill'+i]||1.9;return key}
+function wwTintHills(){
+  const L=LEVELS[WW.ID];if(!L||!L.decor||L._wwHillDone)return;let n=0;
+  for(const d of L.decor){const m=/^wd_hill(\d)$/.exec(d.k||'');if(m){const k=wwHillArt(+m[1]);if(k){d.k=k;n++}}}
+  if(n)L._wwHillDone=1}
+{const _u=ui;ui=function(dt){try{if(typeof LEVEL!=='undefined'&&LEVEL===WW.ID&&G.state==='play')wwTintHills()}catch(e){}return _u.apply(this,arguments)}}
