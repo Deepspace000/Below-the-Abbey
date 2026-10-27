@@ -76,7 +76,7 @@ WM.M=[];
     const dn=M.rooms.find(r=>r.kind==='stairOut');if(dn)M.down=stairWall(dn,0);
     WM.M[k]=M});
   // the shaft: the ladder stands in the north wall of the first room; the party arrives in front of it
-  {const sh=WM.M[0].rooms.find(r=>r.kind==='start'),cx=(sh.x0+sh.x1)>>1;WM.M[0].ladder={x:cx,y:sh.y0};WM.M[0].arrive={x:cx,y:sh.y0+1,f:2};
+  {const sh=WM.M[0].rooms.find(r=>r.kind==='start'),cx=(sh.x0+sh.x1)>>1;WM.M[0].ladder={x:cx,y:sh.y0};WM.M[0].arrive={x:cx,y:sh.y0+1,f:0};
     try{WK.WELLSTART={x:cx,y:sh.y0+1,f:2}}catch(e){}}
   for(let k=1;k<4;k++){const u=WM.M[k].up;WM.M[k].arrive={x:u.ax,y:u.ay,f:u.f}} // facing into the room, away from the door it came through
   for(let k=0;k<3;k++){const d=WM.M[k].down;WM.M[k].back={x:d.ax,y:d.ay,f:d.f}} // where the party stands when it climbs back up from the level below

@@ -52016,7 +52016,7 @@ WM.M=[];
     const dn=M.rooms.find(r=>r.kind==='stairOut');if(dn)M.down=stairWall(dn,0);
     WM.M[k]=M});
   // the shaft: the ladder stands in the north wall of the first room; the party arrives in front of it
-  {const sh=WM.M[0].rooms.find(r=>r.kind==='start'),cx=(sh.x0+sh.x1)>>1;WM.M[0].ladder={x:cx,y:sh.y0};WM.M[0].arrive={x:cx,y:sh.y0+1,f:2};
+  {const sh=WM.M[0].rooms.find(r=>r.kind==='start'),cx=(sh.x0+sh.x1)>>1;WM.M[0].ladder={x:cx,y:sh.y0};WM.M[0].arrive={x:cx,y:sh.y0+1,f:0};
     try{WK.WELLSTART={x:cx,y:sh.y0+1,f:2}}catch(e){}}
   for(let k=1;k<4;k++){const u=WM.M[k].up;WM.M[k].arrive={x:u.ax,y:u.ay,f:u.f}} // facing into the room, away from the door it came through
   for(let k=0;k<3;k++){const d=WM.M[k].down;WM.M[k].back={x:d.ax,y:d.ay,f:d.f}} // where the party stands when it climbs back up from the level below
@@ -52235,7 +52235,7 @@ WMFU.camp=function(c,r){const R=c.rect(r);
   c.D('wm_barrel',R.x0,R.y1,{block:true,npc:'wmw_barrel'});c.D('wm_crate',R.cx,R.y0,{block:true,npc:'wmw_crate'});
   c.deco('skeleton',R.cx,R.y1,{});c.light(R.cx,R.cy,WM_COL.gold);wmFoes(c,r,['wmbat','wmslime'],2)};
 WMFU.cistern=function(c,r){const R=c.rect(r);
-  c.D('wm_boat',R.x0,R.cy,{block:true,npc:'wmrow_a'});c.note('cistern1',R.x0,R.y0,'signpost');
+  if(c.k===0){c.D('wm_boat',R.x0,R.cy,{block:true,npc:'wmrow_a'});c.note('cistern1',R.x0,R.y0,'signpost')}
   for(const [x,y] of c.pick(c.inner(r),4))c.deco('crystal_small',x,y,{});
   c.chest('chest',R.x1,R.cy,1,null,{});
   c.light(R.cx,R.cy,WM_COL.teal);c.light(R.x0+1,R.y0+1,WM_COL.vio);
@@ -52243,7 +52243,7 @@ WMFU.cistern=function(c,r){const R=c.rect(r);
 WMFU.cellar=function(c,r){const R=c.rect(r);
   wmSpread(c,r,['cask','cask','barrel_tall','keg'],5,false,{});
   if(c.k===0){c.D('wm_barrel',R.x1,R.y0,{block:true,npc:'wmw_barrel'});c.D('wm_barrel',R.x0,R.y1,{block:true,npc:'wmw_barrel'});c.D('wm_crate',R.x1,R.y1,{block:true,npc:'wmw_crate'})}
-  c.note('cellar1',R.x0,R.y0,'signpost');c.chest('chest',R.cx,R.y1,1,null,{});
+  if(c.k===0)c.note('cellar1',R.x0,R.y0,'signpost');c.chest('chest',R.cx,R.y1,1,null,{});
   c.light(R.cx,R.cy,WM_COL.gold);wmFoes(c,r,['wmspider','wmbat','wmslime'],c.k===0?2:3)};
 WMFU.shrine=function(c,r){const R=c.rect(r);
   c.prop('shrine',R.cx,R.y0,{});c.prop('statue',R.cx,R.cy,{});
@@ -52348,7 +52348,7 @@ const WM_NOTES={
   violet2:['Sign at the Stair','THE BELL VAULTS. Three bells hang here that were never meant to be rung by the living. The ringer left his notes somewhere on this level.'],
   violet3:['Sign at the Stair','THE AMETHYST DEEP. The first stone of the well lies at the end of this hall, and its keeper does not sleep.'],
   violet1:['Sign at the Stair','THE VIOLET MAZE. Whoever built it wanted something kept. They did not say what. The left hand wall is a poor guide here. The diggers pinned their notes wherever they stopped to think.'],
-  library1:['Soaked Ledger','The ink has run. What is left says: the plaque on the closet door asks what we MADE, not what we FOUND. Think of what you climbed down to get here. The key to the lower door is kept in that closet, behind the plaque door.','key2'],
+  library1:['Soaked Ledger','The ink has run. What is left says: the plaque on the closet door asks about something that is DUG, that is DEEP, that gives when it is FILLED and waits when it is empty. Think of what you climbed down into to get here. The key to the lower door is kept in that closet, behind the plaque door.','key2'],
   library2:['Wet Pages','Pages of tallies, all the same: one more bell rung, one more night kept. The last page is a drawing of a mouth with the words DO NOT FEED IT.'],
   mirror1:['Plaque in the Hall of Mirrors','THE GLASS TURNS EVERYTHING ABOUT, left for right. A white crystal stands in a dead end not far from this hall, and a true walk begins there: stand on the crystal and face the only way out. Read what the glass shows, turn every turn the other way, and walk it. At the end of the walk the wall is missing in the glass. In life a door waits there.','mirror'],
   spiders1:['Scratched in the Wall','DO NOT SLEEP HERE. They do not like the light. They like the dark and anything in it.'],
@@ -52381,6 +52381,15 @@ function wmBfs(c,x0,y0,avoid){const W=c.W,H=c.H,d=new Int32Array(W*H).fill(-1),q
   for(let i=0;i<q.length;i++){const p=q[i],x=p%W,y=(p/W)|0;for(const [a,b] of WM_D4){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||d[ny*W+nx]>=0||!c.open(nx,ny))continue;if(avoid&&avoid(nx,ny))continue;d[ny*W+nx]=d[p]+1;q.push(ny*W+nx)}}
   return d}
 const wmDeg=(c,x,y)=>WM_D4.filter(([a,b])=>c.open(x+a,y+b)).length;
+/* a sign beside a stair door: the room around a stair is small, so the sign may take any square next to the foot of the stair as long as the foot and the rest of the room stay reachable */
+function wmStairSign(c,id,st){
+  const W=c.W,blk=new Set(c.dec.filter(d=>d.block).map(d=>d.x+','+d.y)),from=c.M.arrive;
+  const cand=[[1,0],[-1,0],[0,1],[0,-1]].map(([a,b])=>[st.ax+a,st.ay+b]).filter(([x,y])=>c.open(x,y)&&!blk.has(x+','+y)&&!(x===from.x&&y===from.y)&&!(x===st.ax&&y===st.ay));
+  for(const [x,y] of cand){
+    const d=wmBfs(c,from.x,from.y,(nx,ny)=>blk.has(nx+','+ny)||(nx===x&&ny===y));
+    if(d[st.ay*W+st.ax]<0)continue;
+    const n=c.D('wm_signpost',x,y,{block:true,npc:'wmnote_'+id,force:true});if(n){c.meta.notes[id]={x,y};return true}}
+  console.warn('wm: no square for sign '+id);return false}
 WM.VLOOT={lever1:['elixir','supermana'],weights:['elixir','potion6'],pair:['supermana','supermana','greatermana'],hidden:['elixir','potion6'],mirror:['elixir','supermana'],trap:['supermana','elixir'],bells:['wmring','supermana'],chain:['wmplate','supermana'],lanterns:['wmring','supermana']};
 WM.mech=function(c,wl){
   const k=c.k,M=c.M,g=c.g,W=c.W,T=wl.tiles,rnd=c.rnd,L={doors:{},sw:[],pits:{},vault:{},keyAt:c.meta.keyAt||{},closets:[]};
@@ -52391,9 +52400,8 @@ WM.mech=function(c,wl){
   if(k>0){const u=M.up;T.put(u.x,u.y,T.doorUp());addDoor(u.x,u.y,{type:'up'})}
   if(M.down){const d=M.down;T.put(d.x,d.y,T.doorDown());addDoor(d.x,d.y,{type:'down',key:'wmkey'+(k+1)});
     // a brass plate beside the foot of the stair names the key
-    const near=[[1,0],[-1,0],[0,1],[0,-1]].map(([a,b])=>[d.ax+a,d.ay+b]).filter(([x,y])=>c.free(x,y));
-    if(near.length)c.note('stairdown'+k,near[0][0],near[0][1],'signpost')}
-  if(k>0){const u=M.up,near=[[1,0],[-1,0],[0,1],[0,-1]].map(([a,b])=>[u.ax+a,u.ay+b]).filter(([x,y])=>c.free(x,y));if(near.length&&WM_NOTES['violet'+k])c.note('violet'+k,near[0][0],near[0][1],'signpost')}
+    wmStairSign(c,'stairdown'+k,d)}
+  if(k>0&&WM_NOTES['violet'+k])wmStairSign(c,'violet'+k,M.up);
   // ---- vault doors and the riddle closet ----
   for(const r of M.rooms){if(!r.sealed||r.noDoor||!r.door)continue;const q=r.door;
     const type=r.kind==='riddle'?'riddle':(r.vault==='mirror'?'secret':'sealed');
@@ -52459,7 +52467,7 @@ WM.mech=function(c,wl){
    read, the boss and the prize. Doors: stair doors need their own key (Violet, Amethyst, Warden's), vault doors open to a switch or a puzzle, secret doors open when walked into.
    ========================================================================== */
 function wmF(){const F=G.flags;if(!F.wm)F.wm={open:{},sw:{},got:{},hint:{},pit:{},unl:{},wb:0,wc:0,bell:[],lamp:[],pz:{},seen:{},pin:{},bossDead:0,prize:0,row:0};return F.wm}
-function wmTalk(name,node,img){G.talk={d:null,n:{name,img},node,t:G.time,btns:[]};G.hold=null;G.queued=null}
+function wmTalk(name,node,img){G.talk={d:{k:img||'wm_signpost',x:0,y:0},n:{name,img},node,t:G.time,btns:[]};G.hold=null;G.queued=null}
 function wmOpenCell(x,y){const F=wmF();F.open[LEVEL+':'+x+','+y]=1;if(G.grid[y])G.grid[y][x]=0}
 /* open the door of a vault (the cell stays open for good, and the map gets a pin) */
 function wmOpenVault(vault,quiet){const L=LEVELS[LEVEL],v=L&&L._wm&&L._wm.vault[vault];if(!v)return false;const F=wmF();if(F.open[LEVEL+':'+v.x+','+v.y])return false;

@@ -3,7 +3,7 @@
    read, the boss and the prize. Doors: stair doors need their own key (Violet, Amethyst, Warden's), vault doors open to a switch or a puzzle, secret doors open when walked into.
    ========================================================================== */
 function wmF(){const F=G.flags;if(!F.wm)F.wm={open:{},sw:{},got:{},hint:{},pit:{},unl:{},wb:0,wc:0,bell:[],lamp:[],pz:{},seen:{},pin:{},bossDead:0,prize:0,row:0};return F.wm}
-function wmTalk(name,node,img){G.talk={d:null,n:{name,img},node,t:G.time,btns:[]};G.hold=null;G.queued=null}
+function wmTalk(name,node,img){G.talk={d:{k:img||'wm_signpost',x:0,y:0},n:{name,img},node,t:G.time,btns:[]};G.hold=null;G.queued=null}
 function wmOpenCell(x,y){const F=wmF();F.open[LEVEL+':'+x+','+y]=1;if(G.grid[y])G.grid[y][x]=0}
 /* open the door of a vault (the cell stays open for good, and the map gets a pin) */
 function wmOpenVault(vault,quiet){const L=LEVELS[LEVEL],v=L&&L._wm&&L._wm.vault[vault];if(!v)return false;const F=wmF();if(F.open[LEVEL+':'+v.x+','+v.y])return false;

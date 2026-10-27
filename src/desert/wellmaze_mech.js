@@ -7,6 +7,15 @@ function wmBfs(c,x0,y0,avoid){const W=c.W,H=c.H,d=new Int32Array(W*H).fill(-1),q
   for(let i=0;i<q.length;i++){const p=q[i],x=p%W,y=(p/W)|0;for(const [a,b] of WM_D4){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||d[ny*W+nx]>=0||!c.open(nx,ny))continue;if(avoid&&avoid(nx,ny))continue;d[ny*W+nx]=d[p]+1;q.push(ny*W+nx)}}
   return d}
 const wmDeg=(c,x,y)=>WM_D4.filter(([a,b])=>c.open(x+a,y+b)).length;
+/* a sign beside a stair door: the room around a stair is small, so the sign may take any square next to the foot of the stair as long as the foot and the rest of the room stay reachable */
+function wmStairSign(c,id,st){
+  const W=c.W,blk=new Set(c.dec.filter(d=>d.block).map(d=>d.x+','+d.y)),from=c.M.arrive;
+  const cand=[[1,0],[-1,0],[0,1],[0,-1]].map(([a,b])=>[st.ax+a,st.ay+b]).filter(([x,y])=>c.open(x,y)&&!blk.has(x+','+y)&&!(x===from.x&&y===from.y)&&!(x===st.ax&&y===st.ay));
+  for(const [x,y] of cand){
+    const d=wmBfs(c,from.x,from.y,(nx,ny)=>blk.has(nx+','+ny)||(nx===x&&ny===y));
+    if(d[st.ay*W+st.ax]<0)continue;
+    const n=c.D('wm_signpost',x,y,{block:true,npc:'wmnote_'+id,force:true});if(n){c.meta.notes[id]={x,y};return true}}
+  console.warn('wm: no square for sign '+id);return false}
 WM.VLOOT={lever1:['elixir','supermana'],weights:['elixir','potion6'],pair:['supermana','supermana','greatermana'],hidden:['elixir','potion6'],mirror:['elixir','supermana'],trap:['supermana','elixir'],bells:['wmring','supermana'],chain:['wmplate','supermana'],lanterns:['wmring','supermana']};
 WM.mech=function(c,wl){
   const k=c.k,M=c.M,g=c.g,W=c.W,T=wl.tiles,rnd=c.rnd,L={doors:{},sw:[],pits:{},vault:{},keyAt:c.meta.keyAt||{},closets:[]};
@@ -17,9 +26,8 @@ WM.mech=function(c,wl){
   if(k>0){const u=M.up;T.put(u.x,u.y,T.doorUp());addDoor(u.x,u.y,{type:'up'})}
   if(M.down){const d=M.down;T.put(d.x,d.y,T.doorDown());addDoor(d.x,d.y,{type:'down',key:'wmkey'+(k+1)});
     // a brass plate beside the foot of the stair names the key
-    const near=[[1,0],[-1,0],[0,1],[0,-1]].map(([a,b])=>[d.ax+a,d.ay+b]).filter(([x,y])=>c.free(x,y));
-    if(near.length)c.note('stairdown'+k,near[0][0],near[0][1],'signpost')}
-  if(k>0){const u=M.up,near=[[1,0],[-1,0],[0,1],[0,-1]].map(([a,b])=>[u.ax+a,u.ay+b]).filter(([x,y])=>c.free(x,y));if(near.length&&WM_NOTES['violet'+k])c.note('violet'+k,near[0][0],near[0][1],'signpost')}
+    wmStairSign(c,'stairdown'+k,d)}
+  if(k>0&&WM_NOTES['violet'+k])wmStairSign(c,'violet'+k,M.up);
   // ---- vault doors and the riddle closet ----
   for(const r of M.rooms){if(!r.sealed||r.noDoor||!r.door)continue;const q=r.door;
     const type=r.kind==='riddle'?'riddle':(r.vault==='mirror'?'secret':'sealed');

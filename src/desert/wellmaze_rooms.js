@@ -29,7 +29,7 @@ WMFU.camp=function(c,r){const R=c.rect(r);
   c.D('wm_barrel',R.x0,R.y1,{block:true,npc:'wmw_barrel'});c.D('wm_crate',R.cx,R.y0,{block:true,npc:'wmw_crate'});
   c.deco('skeleton',R.cx,R.y1,{});c.light(R.cx,R.cy,WM_COL.gold);wmFoes(c,r,['wmbat','wmslime'],2)};
 WMFU.cistern=function(c,r){const R=c.rect(r);
-  c.D('wm_boat',R.x0,R.cy,{block:true,npc:'wmrow_a'});c.note('cistern1',R.x0,R.y0,'signpost');
+  if(c.k===0){c.D('wm_boat',R.x0,R.cy,{block:true,npc:'wmrow_a'});c.note('cistern1',R.x0,R.y0,'signpost')}
   for(const [x,y] of c.pick(c.inner(r),4))c.deco('crystal_small',x,y,{});
   c.chest('chest',R.x1,R.cy,1,null,{});
   c.light(R.cx,R.cy,WM_COL.teal);c.light(R.x0+1,R.y0+1,WM_COL.vio);
@@ -37,7 +37,7 @@ WMFU.cistern=function(c,r){const R=c.rect(r);
 WMFU.cellar=function(c,r){const R=c.rect(r);
   wmSpread(c,r,['cask','cask','barrel_tall','keg'],5,false,{});
   if(c.k===0){c.D('wm_barrel',R.x1,R.y0,{block:true,npc:'wmw_barrel'});c.D('wm_barrel',R.x0,R.y1,{block:true,npc:'wmw_barrel'});c.D('wm_crate',R.x1,R.y1,{block:true,npc:'wmw_crate'})}
-  c.note('cellar1',R.x0,R.y0,'signpost');c.chest('chest',R.cx,R.y1,1,null,{});
+  if(c.k===0)c.note('cellar1',R.x0,R.y0,'signpost');c.chest('chest',R.cx,R.y1,1,null,{});
   c.light(R.cx,R.cy,WM_COL.gold);wmFoes(c,r,['wmspider','wmbat','wmslime'],c.k===0?2:3)};
 WMFU.shrine=function(c,r){const R=c.rect(r);
   c.prop('shrine',R.cx,R.y0,{});c.prop('statue',R.cx,R.cy,{});
