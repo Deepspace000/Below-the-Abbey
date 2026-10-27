@@ -169,11 +169,11 @@ function gyYardBuild(){
    dec('edmund',e.x,e.y,{block:true,npc:'gyo_edmund'});dec('slab',g.x,g.y,{block:true,npc:'gyo_grave'});dec('angel',35,52,{block:true,npc:'gyo_angel'});
    
    D('bench',35,48,{block:false});D('rose',34,50);D('rose',37,50);lamp(35,50);lamp(33,52);lamp(38,52);glow.push([g.x,g.y+1]);
-   decor.push({k:'sign_gy',x:35,y:47,block:false,wd:[0,-1],txt:GY_SIGNS[2]})}
+   dec('ww_sign',35,47,{block:true,npc:'gyo_sign',i:2})}
   {const h=GY_Y.hut;dec('hut',h.x,h.y,{block:true,npc:'gyo_hut'});dec('mound',56,44,{block:true,npc:'gyo_opengrave'});dec('barrow',58,42,{block:true});dec('rpost',63,42,{block:true});lamp(h.x-2,h.y+2);lamp(55,46);
-   decor.push({k:'sign_gy',x:57,y:41,block:false,wd:[0,1],txt:GY_SIGNS[3]})}
+   dec('ww_sign',57,41,{block:true,npc:'gyo_sign',i:3})}
   // the lanes' signs
-  decor.push({k:'sign_gy',x:65,y:36,block:false,wd:[0,1],txt:GY_SIGNS[0]});decor.push({k:'sign_gy',x:35,y:34,block:false,wd:[0,-1],txt:GY_SIGNS[1]});decor.push({k:'sign_gy',x:34,y:12,block:false,wd:[1,0],txt:GY_SIGNS[4]});
+  dec('ww_sign',65,36,{block:true,npc:'gyo_sign',i:0});dec('ww_sign',34,34,{block:true,npc:'gyo_sign',i:1});dec('ww_sign',34,12,{block:true,npc:'gyo_sign',i:4});
   // ---- the plots of graves: stones at the crossings of a lattice, with gaps so that the plots can be walked ----
   const readable=[];for(let i=0;i<GY_EPI.length;i++)readable.push(i);for(let i=readable.length-1;i>0;i--){const j=(R()*(i+1))|0;[readable[i],readable[j]]=[readable[j],readable[i]]}
   let ri=0;const STONES=['stone1','stone2','lean','slab','wcross','stone1','lean','wcross','stone2','ccross','tomb','urn','angel','obelisk','column','mausoleum'];
@@ -253,7 +253,7 @@ function gyWenlockGate(C){
     KH_DOOR[gid]={lvl:GY.ID,get at(){return WK.GRAVESTART||{x:66,y:35,f:3}},gy:'wenlock'};
     const c=ch(gid);rows[y][2]=c;block[y*W+2]=1;
     decor.push({k:'gy_lych',x:3,y,block:false,walk:true,deco:true});
-    decor.push({k:'sign_gy',x:5,y:y-1,block:false,wd:[0,1],txt:['CHURCHYARD LANE','To the old churchyard. Gate closes at dusk. Residents let themselves in.']});
+    decor.push({k:'greensign',x:5,y:y-1,block:false,walk:true,npc:'gyo_lanesign',deco:false});
     if(WK.GRAVEBACK===undefined)WK.GRAVEBACK={x:4,y,f:1};
     WK.GRAVEBACK={x:4,y,f:1};
   }catch(e){console.error('gyWenlockGate',e)}}
@@ -262,3 +262,7 @@ function gyWenlockGate(C){
 {const _dm=doMove;doMove=function(){const r=_dm.apply(this,arguments);
   try{if(LEVEL===GY.ID&&G.state==='play'&&!G.cut&&!G.talk&&G.P.x===GY_Y.crypt.x&&G.P.y===GY_Y.crypt.y)later(350,()=>{if(LEVEL===GY.ID&&G.P.x===GY_Y.crypt.x&&G.P.y===GY_Y.crypt.y&&!G.cut&&!G.talk){sfx('door');goToLevel(GY.CRYPT,{x:GY_C.start.x,y:GY_C.start.y,f:GY_C.start.f})}})}catch(e){console.error(e)}
   return r}}
+
+/* the signs of the yard are wooden signposts: walk up to one and read it */
+khNpc('gyo_sign','A signpost','ww_sign',d=>{const t=GY_SIGNS[d.i]||GY_SIGNS[0];return say(t[0]+'. '+t[1],[BYE])});
+khNpc('gyo_lanesign','A signpost','greensign',()=>say('CHURCHYARD LANE. To the old churchyard. The gate closes at dusk. Residents let themselves in.',[BYE]));

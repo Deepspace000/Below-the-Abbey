@@ -81,7 +81,7 @@ function wwBuild(){
   const ring=(q,pad,fn)=>{for(let x=q.x0+pad;x<=q.x1-pad;x++){fn(x,q.y0+pad);fn(x,q.y1-pad)}for(let y=q.y0+pad+1;y<q.y1-pad;y++){fn(q.x0+pad,y);fn(q.x1-pad,y)}};
   const TREES=['oakface','oakmoss','pine','pine2','willow','thorn'];
   const tree=(x,y,k)=>DB(k||TREES[(hs(x,y,61)*TREES.length)|0],x,y);
-  const plaque=(x,y,wd,t)=>{if(!isOpen(x,y))return;decor.push({k:'sign_ww',x,y,block:false,wd,txt:[t[0],t[1]]})};
+  const plaque=(x,y,wd,t)=>{if(!isOpen(x,y)||occ.has(x+','+y))return;decor.push({k:'ww_sign',x,y,block:true,npc:'wwo_plaque',txt:[t[0],t[1]],sc:.9});occ.add(x+','+y)};   // a wooden signpost, read by walking up to it
   // the gate glade: a warning sign, thorns, a wisp
   {const q=Q.gate;DB('sign',q.cx-3,q.y1-1,{npc:'wwo_sign',i:0});for(const [x,y,k] of [[q.x0,q.y0,'oakface'],[q.x1,q.y0,'oakmoss'],[q.x0,q.y1,'thorn'],[q.x1,q.y1,'thorn']])DB(k,x,y);
     plaque(q.cx+1,q.y1,[0,1],WW_PLAQUES[0])}
@@ -216,3 +216,5 @@ function wwWenlockGate(C){
     C.decor.push({k:'greensign',x:x+1,y:5,block:false,walk:true,npc:'wwo_lanesign',deco:false});
     C.lamp&&0;
   }catch(e){console.error('wwWenlockGate',e)}}
+
+khNpc('wwo_plaque','A signpost','ww_sign',d=>{const t=d.txt||['',''];return say(t[0]+'. '+t[1],[BYE])});
