@@ -57,7 +57,7 @@ function wwBuild(){
     if(near(x,y,'grave',2)||near(x,y,'chapel',2)||near(x,y,'circle',1)||near(x,y,'well',1))tex='tex_3';
     else if(near(x,y,'witch',2)||near(x,y,'hollow',2)||near(x,y,'nw',1)||near(x,y,'ne',1))tex='tex_4';
     if(tex==='tex_0'&&hs(x,y,43)<.16)tex='tex_4';
-    return ch(wwTile(tex,wh))};
+    return ch(wwTile(tex,wh,{gain:.45}))};   // the solid mass behind the trees is nearly black
   const fl=new Uint8Array(W*H);
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){let f=0;if(hs((x/3)|0,(y/3)|0,53)<.32)f=1;fl[y*W+x]=f}
   for(const id in Q){const q=Q[id],f={gate:1,grave:4,chapel:4,well:1,hang:1,circle:0,hollow:1,witch:1,nw:1,ne:0}[id];for(let y=q.y0;y<=q.y1;y++)for(let x=q.x0;x<=q.x1;x++)fl[y*W+x]=f}
@@ -140,6 +140,8 @@ function wwBuild(){
   const rows=[],fm=[];
   // the maze walls are trees: every wall square beside an open one is open ground with a dark tree on it (placed below); the solid mass behind them, and the edge of the wood, stay wall
   const treeSq=new Set();for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(g[y][x]!=='#')continue;let n=false;for(let a=-1;a<=1&&!n;a++)for(let b=-1;b<=1;b++)if(g[y+b][x+a]==='.'){n=true;break}if(n)treeSq.add(y*W+x)}
+  // every path of the maze is pale dirt, and the ground under the trees is the darkest moss, so the way can be followed through the trunks
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const k=y*W+x;if(treeSq.has(k))fl[k]=0;else if(g[y][x]==='.'&&!roomAt[x+','+y]&&fl[k]!==3)fl[k]=2}
   for(let y=0;y<H;y++){let r='',f='';for(let x=0;x<W;x++){r+=g[y][x]==='.'||treeSq.has(y*W+x)?'.':wallChar(x,y);f+=String(fl[y*W+x])}rows.push(r);fm.push(f)}
   // the gate to Wenlock (south) and the cottage door (north)
   const gx=doorX;
