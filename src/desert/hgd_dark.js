@@ -6,24 +6,15 @@
 const HGDN={ID:476,N:16,frames:null,fi:-1,said:null};
 /* ---------- the water: a loop of waves ---------- */
 function hgdnFrames(){
-  if(HGDN.frames)return HGDN.frames;const T=Math.PI*2,N=HGDN.N,out=[],art=IMG.art_tex_hgdu_water;
-  if(art&&art.width){ // the painted black water: its pixels are rolled by moving waves (looping, seamless) with a shimmer on the crests
-    const c=document.createElement('canvas');c.width=c.height=128;const cx=c.getContext('2d');cx.drawImage(art,0,0,128,128);const b=cx.getImageData(0,0,128,128).data;
-    const px=(x,y,ch)=>b[(((y%128)+128)%128*128+((x%128)+128)%128)*4+ch];
-    for(let k=0;k<N;k++){const f=T*k/N,d=new Uint8ClampedArray(128*128*4);
-      for(let y=0;y<128;y++)for(let x=0;x<128;x++){
-        const w1=Math.sin(T*(y*2/128)+f),w2=Math.sin(T*(x*3/128+y/128)-f),w3=Math.sin(T*(x*2/128-y*3/128)+2*f);
-        const u=x+3.2*w1+1.8*w3,v=y+3.2*w2+1.8*Math.sin(T*(x*2/128)-2*f),x0=Math.floor(u),y0=Math.floor(v),fx=u-x0,fy=v-y0,o=(y*128+x)*4;
-        const sh=1+.22*(w1*.5+w2*.3+w3*.2),gl=Math.max(0,w1*.5+w2*.3+w3*.2-.45)*70;
-        for(let ch=0;ch<3;ch++){const a=px(x0,y0,ch)*(1-fx)+px(x0+1,y0,ch)*fx,a2=px(x0,y0+1,ch)*(1-fx)+px(x0+1,y0+1,ch)*fx;d[o+ch]=(a*(1-fy)+a2*fy)*1.35*sh+gl*(ch===0?.55:ch===1?.85:1)}
-        d[o+3]=255}
-      out.push(d)}
-    return HGDN.frames=out}
+  if(HGDN.frames)return HGDN.frames;const T=Math.PI*2,N=HGDN.N,out=[];
+  // black, wet water: no wave lines. A smooth, slowly moving swell tilts the surface, and where a tilt faces the light the water throws back a small soft glint (so the light of a torch or lantern is picked up in the water and slides about as it rolls). Every term is periodic, so the 16 frames loop and the floor tiles.
+  const W=[[2,1,.5,1],[-1,3,.4,-1],[1,4,.3,2],[5,-3,.22,-2],[7,6,.14,3]];   // [kx, ky, amplitude, speed]
+  let Hn=0;for(const w of W)Hn+=w[2]*Math.hypot(w[0],w[1]);
   for(let k=0;k<N;k++){const f=T*k/N,d=new Uint8ClampedArray(128*128*4);
     for(let y=0;y<128;y++)for(let x=0;x<128;x++){
-      const a=Math.sin(T*(x*2/128)+f+1.7*Math.sin(T*(y*3/128)+2*f)),b=Math.sin(T*(y*3/128+x/128)-f+1.3*Math.sin(T*(x*2/128)+f)),c=Math.sin(T*(x*4/128-y*2/128)+2*f+Math.sin(T*(y*5/128)-f));
-      const h=a*.5+b*.35+c*.25,v=(h+1)*.5,cr=Math.pow(Math.max(0,h),3),o=(y*128+x)*4;
-      d[o]=3+v*9+cr*38;d[o+1]=7+v*20+cr*58;d[o+2]=13+v*36+cr*80;d[o+3]=255}
+      let hx=0,hy=0,h=0;for(const w of W){const ph=T*(w[0]*x/128+w[1]*y/128)+f*w[3],c=Math.cos(ph)*w[2];hx+=c*w[0];hy+=c*w[1];h+=Math.sin(ph)*w[2]}
+      const nx=hx/Hn,ny=hy/Hn,q=(nx-.12)*(nx-.12)+(ny+.08)*(ny+.08),sp=Math.exp(-q*110),gl=sp*sp*sp*170,v=.5+.5*h,o=(y*128+x)*4;
+      d[o]=2+v*3+gl*.6;d[o+1]=5+v*7+gl*.85;d[o+2]=9+v*12+gl;d[o+3]=255}
     out.push(d)}
   return HGDN.frames=out}
 /* ---------- the walls: jagged dark rock ---------- */
@@ -159,3 +150,7 @@ function hgdnLine(){
       if(t<.12){ctx.fillStyle='rgba(255,255,255,'+(.95*(1-t/.12)).toFixed(3)+')';ctx.fillRect(0,0,DW,DH)}
       const im=IMG.hl_bogeyA,sc=.8+Math.min(t,.3)/.3*.5+t*.12,h=DH*sc,w=h*im.width/im.height;ctx.globalAlpha=t<.9?1:1-(t-.9)/.3;
       ctx.drawImage(im,DW/2-w/2+(Math.random()-.5)*5,DH*.52-h*.5+(Math.random()-.5)*5,w,h);ctx.restore()}}}catch(e){}}}
+
+/* lanterns, torches and the party's light reach further and shine brighter in the Underlevel, so a little more of the dark can be seen */
+{const _sl=setLightLevel;setLightLevel=function(l){_sl.apply(this,arguments);
+  if(LEVEL===HGDN.ID){RANGE*=1.45;const amp=.82+.34*l;for(let i=0;i<=1024;i++){const t=1-i/1024;LUT[i]=AMB+(t>0?amp*Math.pow(t,1.35):0)}}}}

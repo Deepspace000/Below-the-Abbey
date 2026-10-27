@@ -16,10 +16,13 @@ function hgoMakeFloors(){
   const hs=(x,y,s)=>{let h=(x*374761393+y*668265263+s*2147483647)|0;h=(h^(h>>>13))*1274126177|0;return((h^(h>>>16))>>>0)/4294967296};
   FLOORS.hgo_water=new Uint8ClampedArray(mk((x,y,T)=>{
     const a=Math.sin(T*(x*2/128)+1.7*Math.sin(T*(y*3/128)+.6)),b=Math.sin(T*(y*3/128+x/128)+1.3*Math.sin(T*(x*2/128)+2.1)),c=Math.sin(T*(x*4/128-y*2/128)+Math.sin(T*(y*5/128)));
-    const r=Math.pow(Math.max(0,(a*.5+b*.35+c*.25)),9)*1.9,n=hs(x>>1,y>>1,3)*5;
+    const r=0*(a+b+c),n=hs(x>>1,y>>1,3)*3;
     return [3+n*.3+r*34,6+n*.4+r*46,11+n*.6+r*60]}));
-  FLOORS.hgo_sand=new Uint8ClampedArray(mk((x,y)=>{const n=hs(x,y,5),m=hs(x>>2,y>>2,6);const v=12+n*14+m*8;return [v,v*.97,v*1.05+2]}));
-  FLOORS.hgo_rock=new Uint8ClampedArray(mk((x,y,T)=>{const n=hs(x>>1,y>>1,7),cr=Math.abs(Math.sin(T*(x*3/128+y*2/128)+2*Math.sin(T*y*2/128)));const v=17+n*12-(cr<.06?9:0);return [v,v*.98,v*1.04]}));}
+  // rock: cells of broken stone with dark cracks between them (a cellular pattern that tiles), grey-black with a cold tint; the shore is the same stone in smaller pieces
+  const cells=(pts,seed)=>{const P=[];for(let i=0;i<pts;i++)P.push([hs(i,1,seed)*128,hs(i,2,seed)*128]);return (X,Y)=>{let d1=1e9,d2=1e9,id=0;for(let i=0;i<P.length;i++){let dx=Math.abs(X-P[i][0]),dy=Math.abs(Y-P[i][1]);if(dx>64)dx=128-dx;if(dy>64)dy=128-dy;const d=Math.hypot(dx,dy);if(d<d1){d2=d1;d1=d;id=i}else if(d<d2)d2=d}return [d2-d1,id]}};
+  const rk1=cells(26,41),rk2=cells(70,42);
+  FLOORS.hgo_sand=new Uint8ClampedArray(mk((x,y)=>{const [e,id]=rk2(x,y),n=hs(x,y,5);const v=(11+hs(id,3,9)*13+n*5)*(e<1.4?.45:1);return [v,v*.98,v*1.06+1]}));
+  FLOORS.hgo_rock=new Uint8ClampedArray(mk((x,y)=>{const [e,id]=rk1(x,y),n=hs(x,y,7);const v=(10+hs(id,4,8)*15+n*6+(e<2.2?0:e*.5))*(e<1.8?.35:1);return [v,v*.98,v*1.07+1]}));}
 hgoMakeFloors();
 /* ---------- helpers on the finished level ---------- */
 const hgoL=()=>{const L=LEVELS[HGO.ID];return L&&L._hgdo?L:null};
@@ -64,7 +67,7 @@ function hgoMake(L,att,last){
   let ic=[CX,CY],bd=-1;for(let y=30;y<H-30;y++)for(let x=30;x<W-30;x++){const v=dt[ix(x,y)]-Math.hypot(x-CX,y-CY)*.3;if(v>bd){bd=v;ic=[x,y]}}
   const ir=5.2,icx=ic[0],icy=ic[1],isl=[];
   for(let y=icy-8;y<=icy+8;y++)for(let x=icx-8;x<=icx+8;x++){const d=Math.hypot(x-icx,y-icy),a=Math.atan2(y-icy,x-icx),rr=ir+.9*Math.sin(a*3+ph[0])+.7*Math.sin(a*5+ph[1])+.4*Math.sin(a*8+ph[2]);
-    if(d<rr&&wm[ix(x,y)]===1){setLand(x,y,d>rr-1.6?'3':'2');isl.push([x,y]);isle[ix(x,y)]=1}}
+    if(d<rr&&wm[ix(x,y)]===1){setLand(x,y,'3');isl.push([x,y]);isle[ix(x,y)]=1}}
   const chest=[icx,icy];for(const [dx,dy] of [[3,-2],[-3,2],[2,3],[-2,-3]]){if(rows[icy+dy][icx+dx]==='.'&&wm[ix(icx+dx,icy+dy)]===0)setWall(icx+dx,icy+dy)}
   const nearIsl=(x,y,m)=>Math.hypot(x-icx,y-icy)<ir+m,inSea=(x,y)=>wm[ix(x,y)]===1&&reg[ix(x,y)]===1;
   // pillars, reefs and little rocky islets in the sea
