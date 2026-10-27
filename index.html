@@ -3463,9 +3463,9 @@ function drawInventory(){
       ctx.fillStyle='rgba(8,5,3,.94)';rrect(ctx,rx,120,rw,86,5);ctx.fill();ctx.lineWidth=1.6;ctx.strokeStyle=goldG(rx,120,rw,86);rrect(ctx,rx,120,rw,86,5);ctx.stroke();
       txt('Discard '+d.n+'?',rx+rw/2,138,10.5,'#f0d8a0','center',true,undefined,rw-10);txt('It will be gone for good.',rx+rw/2,154,8.5,'#c8b898','center');
       btnText('idropyes','Discard',rx+6,171,70,26);btnText('idropno','Keep it',rx+80,171,70,26)}
-    else if(label){btnText(id,label,rx+6,171,70,26);btnText('idrop','Discard',rx+80,171,70,26)
+    else if(label){const s3=typeof csDraw==='function';btnText(id,label,rx+(s3?4:6),171,s3?49:70,26);btnText('idrop','Discard',rx+(s3?54:80),171,s3?49:70,26)
       if(I.sel.src==='bag'&&(d.k==='potion'||d.k==='food')){txt('Put in shortcut:',rx+rw/2,138,7,'#a89878','center');for(let q=0;q<3;q++)btnText('ipset'+q,String(q+1),rx+6+q*52,144,46,15)}}
-    else btnText('idrop','Discard',rx+22,171,112,26);
+    else if(typeof csDraw==='function')btnText('idrop','Discard',rx+4,171,74,26);else btnText('idrop','Discard',rx+22,171,112,26);
   }else{
     txt(def.name,rx+rw/2,20,13,heroSpeech(hi),'center',true);
     txt(`${def.cls}  Level ${h.lvl}`,rx+rw/2,38,10,'#c8b898','center');
@@ -4073,7 +4073,7 @@ function drawLoot(){
   else if(L.sel&&L.sel.side==='bag'&&it&&L.shop)label=`Sell  ${sellPrice(it.id)}`;
   else if(L.sel&&L.sel.side==='bag'&&it&&L.cap)label='Store in chest';
   if(label)btnText(id,label,324,198,146,26);
-  if(!L.shop&&box.length)btnText('ltakeall','Take all',324,214,146,26);
+  if(!L.shop&&box.length){const cs=typeof csDraw==='function';btnText('ltakeall','Take all',324,214,cs?58:146,26);if(cs)csDraw(L)}
   // bottom bar
   drawPortraits(250,hi,'lhero');
   panel(168,252,230,62,false,false);txt(`${HERO_DEF[hi].name}  -  health ${h.hp}/${h.max}`,283,276,10,heroSpeech(hi),'center',true);
@@ -4083,13 +4083,14 @@ function drawLoot(){
 function lootBtn(id){
   const L=G.loot,box=L.decor.contents;
   if(id==='lclose'){G.loot=null;return}
+  if(typeof csLootBtn==='function'&&csLootBtn(id,L))return;
   if(id.startsWith('lhero')){const i=+id.slice(5);if(G.heroes[i].alive)G.sel=i;return}
   if(id==='lsort'){G.bag.sort((a,b)=>(KIND_ORDER[idef(a).k]-KIND_ORDER[idef(b).k])||idef(a).n.localeCompare(idef(b).n));L.sel=null;return}
   if(id.startsWith('lbag')&&id!=='lbagarea'){const i=+id.slice(4);L.sel=G.bag[i]?((L.sel&&L.sel.side==='bag'&&L.sel.i===i)?null:{side:'bag',i}):null;return}
   if(id.startsWith('lbox')&&id!=='lboxarea'){const i=+id.slice(4);L.sel=box[i]?((L.sel&&L.sel.side==='box'&&L.sel.i===i)?null:{side:'box',i}):null;return}
   if(id==='ltakeall'){
     let n=0;
-    for(let k=box.length-1;k>=0;k--){const c=box[k];if(bagAdd({id:c.id,n:c.n})){box.splice(k,1);n++}}
+    for(let k=box.length-1;k>=0;k--){const c=box[k];if(bagAdd({id:c.id,n:c.n,a:c.a})){box.splice(k,1);n++}}
     L.sel=null;if(n){sfx('equip');msg('You take everything you can carry.','#9ae0a0')}if(box.length)msg('Your bag is full.','#d09a80');return;
   }
   if(id==='lact'&&L.sel){
@@ -4101,7 +4102,7 @@ function lootBtn(id){
         G.gold-=buyPrice(it.id);it.n--;if(it.n<=0){box.splice(L.sel.i,1);L.sel=null}
         sfx('key');msg(`You buy the ${d.n}.`,'#9ae0a0');try{if(typeof hgBoughtItem==='function')hgBoughtItem(it.id)}catch(e){}
       }else{
-        if(!bagAdd({id:it.id,n:it.n})){msg('Your bag is full.','#d09a80');return}
+        if(!bagAdd({id:it.id,n:it.n,a:it.a})){msg('Your bag is full.','#d09a80');return}
         box.splice(L.sel.i,1);L.sel=null;sfx('equip');msg(`You take the ${d.n}.`,'#9ae0a0');
       }
     }else if(L.cap&&typeof hsDeposit==='function'){hsDeposit(L.sel.i)
@@ -58274,7 +58275,7 @@ function hsDeposit(i){ // from the bag into the chest: stackable things join the
   const L=G.loot;if(!L||!L.cap)return;const box=L.decor.contents,it=G.bag[i];if(!it)return;
   const d=ITEMDEF[it.id],at=d&&d.stack?box.find(b=>b.id===it.id):null;
   if(!at&&box.length>=L.cap){msg('The chest is full.','#d09a80');return}
-  const t=bagTake(i);if(at)at.n+=t.n||1;else box.push({id:t.id,n:t.n||1});
+  const a0=it.a,t=bagTake(i);if(at)at.n+=t.n||1;else box.push({id:t.id,n:t.n||1,a:a0});
   L.sel=null;sfx('equip');
 }
 function hsTrophyBook(page){
@@ -58324,6 +58325,93 @@ function hsTroMenu(i){
 setInterval(()=>{try{if(G&&G._hsDirty&&!G.talk&&!G.cut&&!G.loot&&G.state==='play'&&(hsTownAt(LEVEL)||hsHouseAt(LEVEL))){G._hsDirty=0;G._hsQuiet=1;try{goToLevel(LEVEL,{x:G.P.x,y:G.P.y,f:G.P.f})}finally{G._hsQuiet=0}}}catch(e){console.error(e)}},250);
 /* a start link for trying the houses: ?estate=1 gives the party 300,000 gold once, as soon as the game has started (try it with ?town=wenlock&lvl=34&estate=1) */
 try{if(new URLSearchParams(location.search).get('estate')){const iv=setInterval(()=>{if(typeof G!=='undefined'&&G.state==='play'&&G.flags){clearInterval(iv);if(!G.flags.hsEstate){G.flags.hsEstate=1;G.gold+=300000;msg('The real estate agents are waiting. You have 300,000 gold to spend on houses and furniture.','#ffe9a0')}}},400)}}catch(e){}
+
+/* ---- src/desert/chest_sort.js ---- */
+/* ==========================================================================
+   STORE AND SORT (prefix cs): a Store button in the inventory (only inside one of the party's houses) that sends the chosen item to the Home Chest,
+   and a Sort button in every chest-like loot window (by Value, Type, Quest or Order of acquisition; the arrow button turns the order round).
+   - Every new bag stack is stamped with an acquisition number (item.a, counter G.flags.acq) by a wrapper on bagAdd; the stamp travels into the chest and back out.
+     Things saved before this existed have no stamp and sort last.
+   - Quest items (kind quest, tag Quest item or no tag) can not be stored, because a quest may need them. Herbs, gems, bait and the like can.
+   ========================================================================== */
+const CS_MODES=['Value','Type','Quest','Order'];
+const csTrueQuest=d=>!!d&&d.k==='quest'&&(!d.t||d.t==='Quest item');
+function csGroup(d){ // the Type order: weapons, armour, potions, food, fish, gems, scrolls and books, quest items, then the rest
+  if(!d)return 9;
+  if(d.k==='weapon')return 0;
+  if(d.k==='shield'||d.k==='head'||d.k==='chest'||d.k==='arms'||d.k==='legs'||d.k==='ring'||d.k==='light')return 1;
+  if(d.k==='potion')return 2;
+  if(d.fish)return 4;
+  if(d.k==='food')return 3;
+  if(d.gem)return 5;
+  if(d.k==='spell'||d.fread||/book|scroll/i.test(d.t||''))return 6;
+  if(csTrueQuest(d))return 7;
+  return 8;
+}
+function csSortList(arr,mode,asc){ // sorts the array in place, stable
+  const dk=it=>ITEMDEF[it.id]||{},nm=it=>dk(it).n||it.id,val=it=>dk(it).price||0;
+  const dec=arr.map((it,i)=>({it,i}));
+  const cmp=(a,b)=>{
+    let r=0;
+    if(mode==='Order'){ // oldest first; things without a stamp always last
+      const x=a.it.a||0,y=b.it.a||0;if(x&&!y)return -1;if(y&&!x)return 1;if(x&&y&&x!==y)return asc?x-y:y-x;return a.i-b.i}
+    if(mode==='Value')r=val(b.it)-val(a.it);                       // highest first
+    else if(mode==='Type')r=csGroup(dk(a.it))-csGroup(dk(b.it));
+    else r=(csTrueQuest(dk(b.it))?1:0)-(csTrueQuest(dk(a.it))?1:0)||csGroup(dk(a.it))-csGroup(dk(b.it)); // quest items first
+    if(r)return asc?r:-r;
+    const n=nm(a.it).localeCompare(nm(b.it));if(n)return n;
+    return a.i-b.i;
+  };
+  dec.sort(cmp);dec.forEach((o,i)=>{arr[i]=o.it});return arr;
+}
+const csState=()=>{const F=G.flags;return F.csort||(F.csort={m:'Value',up:true})};
+/* the acquisition stamp */
+{const _ba=bagAdd;bagAdd=function(it){try{if(it&&!it.a&&G.flags){G.flags.acq=(G.flags.acq|0)+1;it.a=G.flags.acq}}catch(e){}return _ba.apply(this,arguments)}}
+/* the loot window: Take all gets narrower, and the sort buttons stand beside it */
+function csDraw(L){
+  const S=csState();
+  btnText('lsortbox',S.m,385,214,56,26);
+  btnText('lsortdir',S.up?'▲':'▼',444,214,26,26);
+}
+function csLootBtn(id,L){
+  if(id!=='lsortbox'&&id!=='lsortdir')return false;
+  const S=csState(),box=L.decor.contents;
+  if(id==='lsortbox'){S.m=CS_MODES[(CS_MODES.indexOf(S.m)+1)%4];S.up=true}else S.up=!S.up;
+  csSortList(box,S.m,S.up);L.sel=null;sfx('equip');
+  msg('Sorted by '+S.m.toLowerCase()+(S.m==='Order'?(S.up?', oldest first.':', newest first.'):S.m==='Value'?(S.up?', highest first.':', lowest first.'):S.m==='Quest'?(S.up?', quest items first.':', quest items last.'):(S.up?'.':', backwards.')),'#c8d8a0');
+  return true;
+}
+/* Store in the inventory */
+const csAtHome=()=>{try{return !!hsHouseAt(LEVEL)}catch(e){return false}};
+function csStore(all){
+  const I=G.inv,hi=I.hero,it=selItem();if(!it)return;const d=ITEMDEF[it.id];
+  if(!csAtHome()){msg('You can only store things at home. Walk into one of your houses.','#d09a80');return}
+  if(csTrueQuest(d)){msg('Quest items cannot be stored.','#d09a80');return}
+  const box=hsF().chest,cap=hsCap(),at=d.stack?box.find(b=>b.id===it.id):null;
+  if(!at&&box.length>=cap){msg('The Home Chest is full ('+cap+' stacks). Take something out first.','#d09a80');return}
+  let n=1;
+  if(I.sel.src==='slot'){const slot=I.sel.slot;if(!unequip(hi,slot))return;const i=G.bag.indexOf(it);if(i<0)return;G.bag.splice(i,1)}
+  else{const i=I.sel.i;if(all&&(it.n||1)>1){n=it.n;G.bag.splice(i,1)}else{bagTake(i)}}
+  if(at)at.n+=n;else box.push({id:it.id,n,a:it.a});
+  I.dropKey=null;
+  if(I.sel.src==='slot'||!G.bag[I.sel.i]||G.bag[I.sel.i].id!==it.id)I.sel=null;
+  sfx('equip');msg('You put '+(n>1?n+' x ':'the ')+d.n+' in the Home Chest.','#b8e8a0');
+}
+{const _di=drawInventory;drawInventory=function(){
+  const r=_di.apply(this,arguments);
+  try{const I=G.inv;if(I.open&&I.sel&&I.tab!=='powers'&&I.tab!=='spell'){const cur=selItem();if(cur){
+    const d=ITEMDEF[cur.id],rx=316,rw=156,dk=I.sel.src==='bag'?'b'+I.sel.i:'s'+I.sel.slot,sure=I.dropKey===dk;
+    if(sure)txt('Or store it at home.',rx+rw/2,163,8,'#a8d898','center');
+    else{
+      const home=csAtHome(),ok=home&&!csTrueQuest(d),multi=I.sel.src==='bag'&&(cur.n||1)>1&&d.stack;
+      const hasLabel=I.sel.src==='slot'||d.k!=='quest',x=rx+(hasLabel?104:80),w=hasLabel?49:72;
+      btnText(multi?'istoreall':'istore',multi?'Store all':'Store',x,171,w,26);
+      if(!ok){ctx.fillStyle='rgba(10,8,6,.55)';rrect(ctx,x,171,w,26,5);ctx.fill()}
+    }}}}catch(e){console.error(e)}
+  return r}}
+{const _ib=invBtn;invBtn=function(id){
+  if(id==='istore'||id==='istoreall'){csStore(id==='istoreall');return}
+  return _ib.apply(this,arguments)}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

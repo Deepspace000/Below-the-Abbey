@@ -355,7 +355,7 @@ function hsDeposit(i){ // from the bag into the chest: stackable things join the
   const L=G.loot;if(!L||!L.cap)return;const box=L.decor.contents,it=G.bag[i];if(!it)return;
   const d=ITEMDEF[it.id],at=d&&d.stack?box.find(b=>b.id===it.id):null;
   if(!at&&box.length>=L.cap){msg('The chest is full.','#d09a80');return}
-  const t=bagTake(i);if(at)at.n+=t.n||1;else box.push({id:t.id,n:t.n||1});
+  const a0=it.a,t=bagTake(i);if(at)at.n+=t.n||1;else box.push({id:t.id,n:t.n||1,a:a0});
   L.sel=null;sfx('equip');
 }
 function hsTrophyBook(page){
