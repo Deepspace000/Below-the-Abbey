@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.666';
+const VERSION='3.667';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -54790,12 +54790,22 @@ function wmwAtlasData(){
   G1.push({t:'Under the Well of Wenlock',sw:'wellmaze',rows:I.well.map(id=>[id])});
   G1.push({t:'The Deeper Hollow',sw:'deephollow',rows:[[475,'The Deeper Hollow','a giant maze, with eight safe towns (below)'],[476,null,'the Black Sea and the island of the Black Swill'],[477,null,'under the steps in the ponds of the maze']]});
   if(typeof HGDP_T!=='undefined')G1.push({t:'The eight towns of the maze',sw:'deephollow',rows:HGDP_T.map((n,i)=>[[],n,'town '+(i+1)+' of 8, in level 475'])});
-  G1.push({t:'The Hollow Grasslands',sw:'hollowgrass',rows:[[[470,471,472,473,474],'The Hollow Grasslands','the dark grassland and its beehive dungeons'],[481],[482],[483],[484]]});
+  G1.push({t:'The Hollow Grasslands',sw:'hollowgrass',rows:[[[470,471,472,473,474],'The Hollow Grasslands','the dark grassland and its beehive dungeons']]});
+  // every town and city of the game, one list (the eight towns inside the Deeper Hollow maze have their own list above)
+  G1.push({t:'Towns and cities',sw:'wenlock',rows:[[3,null,'by the abbey, with its shops and the Bickering Goat'],[13,null,'with its castle, forge and church'],[33,null,'a town of the south, with its temple'],[44,null,'the great desert city'],[290,null,'the harbour town'],[300],[301],[302],[303],[305,null,'with the court of King Osric'],[430,null,'on the pilgrim road'],[I.wenlock,'Wenlock','a market town of the west'],[481,null,'a terrace town of the Hollow Grasslands'],[482,null,'a terrace town of the Hollow Grasslands'],[483,null,'a terrace town of the Hollow Grasslands'],[484,null,'a terrace town of the Hollow Grasslands']].filter(r=>r[0]===I.wenlock||LEVEL_NAMES[r[0]])});
   G1.push({t:'The Terrace test levels',sw:'hollowgrass',rows:[[480],[485],[486],[487]]});
   G1.push({t:'Hidden places',sw:'cave',rows:[[39,null,"a hollow behind a nymph's gift"],[40,null,'the cellars of the Prism Wizard']]});
-  if(typeof WD_CAVES!=='undefined')G1.push({t:'The hidden caves',sw:'cave',rows:WD_CAVES.map((c,i)=>{const id=(typeof WD_CAVE0!=='undefined'?WD_CAVE0:7200)+i,P=WORLD_LOCS.find(l=>l.lv.includes(c[0]));return seen(id)?[id,null,'in '+(P?P.n:'the woods')]:[id,'? A hidden cave','somewhere in '+(P?P.n:'the woods')]})});
+  if(typeof WD_CAVES!=='undefined')G1.push({t:'The hidden caves',sw:'cave',rows:WD_CAVES.map((c,i)=>{const id=(typeof WD_CAVE0!=='undefined'?WD_CAVE0:7200)+i,P=WORLD_LOCS.find(l=>l.lv.includes(c[0]));if(LEVEL_RATING[id]===undefined&&LEVEL_RATING[c[0]]!==undefined)LEVEL_RATING[id]=LEVEL_RATING[c[0]];return seen(id)?[id,null,'in '+(P?P.n:'the woods')]:[id,'? A hidden cave','somewhere in '+(P?P.n:'the woods')]})});
   G1.push({t:'The burrows of the Sand Road',sw:'dungeon',rows:[50,51,52,53,54,55,56,57,58,59].filter(n=>LEVEL_NAMES[n]).map(n=>[n])});
   for(const dn of Object.keys(dng))G1.push({t:'Little dungeons of '+dn,sw:'dungeon',rows:dng[dn].map(id=>[id])});
+  // the wild ruins hidden in the woods and moors (a question mark until the party has found one)
+  if(typeof wdCount==='function'&&typeof WD_OUT!=='undefined'&&typeof wdRuinId==='function'){
+    const maps=WD_OUT.concat(typeof LP!=='undefined'?Array.from({length:LP.N},(_,i)=>LP.BASE+i):[]),rows=[],rowsLP=[];
+    for(const n of maps){const cnt=wdCount(n),P=WORLD_LOCS.find(l=>l.lv.includes(n)),area=(P&&P.n)||LEVEL_NAMES[n]||'the wilds',lpm=typeof LP!=='undefined'&&n>=LP.BASE&&n<LP.BASE+LP.N;
+      for(let k=0;k<cnt;k++){const id=wdRuinId(n,k);if(LEVEL_RATING[id]===undefined&&LEVEL_RATING[n]!==undefined)LEVEL_RATING[id]=LEVEL_RATING[n];
+        (lpm?rowsLP:rows).push(seen(id)&&LEVEL_NAMES[id]?[id,null,'in '+area]:[id,'? A hidden ruin','somewhere in '+area])}}
+    if(rows.length)G1.push({t:'Wild ruins of the outdoor lands',sw:'cave',rows});
+    if(rowsLP.length)G1.push({t:"Wild ruins of the Pilgrim's Path",sw:'cave',rows:rowsLP})}
   // the earlier places, from the first crypts to the great tombs of the desert
   const have=ids=>ids.filter(n=>LEVEL_NAMES[n]);
   G1.push({t:'The old crypts, caves and mines',sw:'dungeon',rows:have([1,8,23,24,25,12,11,18,20,21,26,27,28,31,22,42,65]).map(n=>[n]).concat(LEVEL_NAMES[501]?[[501]]:[])});
@@ -54808,7 +54818,11 @@ function wmwAtlasData(){
 const WMW_SORTS=['area','low','high'],WMW_SORTN={area:'By area',low:'Low to high',high:'High to low'};
 function wmwRowLevel(r){const ids=Array.isArray(r[0])?r[0]:[r[0]];let lo=1e9;for(const v of ids){const q=LEVEL_RATING[v];if(q!==undefined&&q<lo)lo=q}return lo<1e9?lo:null}
 function wmwAtlasView(){
-  const D=wmwAtlasData(),m=(typeof G!=='undefined'&&G.wAtlasSort)||'area';if(m==='area')return D;
+  const D=wmwAtlasData(),m=(typeof G!=='undefined'&&G.wAtlasSort)||'area';
+  if(m==='area'){ // the groups in the order of their lowest level, and the rows of each group in level order (places with no level last)
+    const key=r=>{const v=wmwRowLevel(r);return v===null?1e6:v},gk=g=>g.rows.reduce((a,r)=>Math.min(a,key(r)),1e6);
+    const E=D.map((g,i)=>({t:g.t,sw:g.sw,rows:g.rows.map((r,j)=>[r,j]).sort((a,b)=>key(a[0])-key(b[0])||a[1]-b[1]).map(x=>x[0]),i}));
+    E.sort((a,b)=>gk(a)-gk(b)||a.i-b.i);return E}
   const all=[];for(const g of D)for(const r of g.rows)all.push([wmwRowLevel(r),r,g]);
   const dir=m==='low'?1:-1;all.sort((a,b)=>{if(a[0]===null&&b[0]===null)return 0;if(a[0]===null)return 1;if(b[0]===null)return -1;return (a[0]-b[0])*dir});
   return [{t:m==='low'?'Every place, lowest level first':'Every place, highest level first',sw:'dungeon',rows:all.map(([lv,r,g])=>[r[0],r[1],r[2]||g.t])}]}
@@ -54850,7 +54864,7 @@ function wmwAtlasDraw(){
       c.font=`10px ${FTITLE}`;c.textAlign='left';c.textBaseline='middle';c.fillStyle='#2a3f8a';c.fillText(g.t,X+(g.sw?16:0),y+5);y+=12;
       c.strokeStyle='rgba(42,26,12,.55)';c.lineWidth=.5;c.beginPath();c.moveTo(X,y-1.5);c.lineTo(X+W,y-1.5);c.stroke();
       for(const r of g.rows){const ids=Array.isArray(r[0])?r[0]:[r[0]],nm=r[1]||(ids.length?WMW_LEVELNAME(ids[0]):'');
-        const auto=ids.some(visit),rt=rate(ids),idt=ids.length>1?ids[0]+' to '+ids[ids.length-1]:(ids.length?String(ids[0]):''),key=ids.length?String(ids[0]):'n:'+nm,Fv=G.flags.atlasV||{},Fc=G.flags.atlasC||{},seenAny=auto||!!Fv[key],done=!!Fc[key];
+        const auto=ids.some(visit),rt=rate(ids),idt='',key=ids.length?String(ids[0]):'n:'+nm,Fv=G.flags.atlasV||{},Fc=G.flags.atlasC||{},seenAny=auto||!!Fv[key],done=!!Fc[key];
         (G._atlAuto=G._atlAuto||{})[key]=auto;
         // two small boxes: seen (ticked by itself when the party has been there, or by hand) and done (by hand)
         for(const [bx,on,kind] of [[X,seenAny,'v'],[X+8.5,done,'c']]){c.fillStyle=on?(kind==='c'?'#6b8e3a':'#d8b040'):'rgba(255,248,226,.55)';c.fillRect(bx,y+.4,6,6);c.strokeStyle='rgba(42,26,12,.75)';c.lineWidth=.5;c.strokeRect(bx,y+.4,6,6);
