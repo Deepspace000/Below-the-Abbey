@@ -73,9 +73,11 @@ function fplCtx(n){
       c.setFloor(x,y,ch);c.wset.add(I(x,y));if(L.khWalkOK){L.khWalkOK[I(x,y)]=0;if(L.khWalkQuiet)L.khWalkQuiet[I(x,y)]=0}
       if(T){T.block[I(x,y)]=1;T.h[I(x,y)]=Math.min(T.h[I(x,y)],avg-.32)}
       else c.add({k:'pstump',x,y,block:true,sc:.0001,wdh:1,hidden:false,fplWater:1})}
-    if(T)for(const [x,y] of cells){for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const xx=x+dx,yy=y+dy,i=I(xx,yy);if(!c.wset.has(i)&&xx>0&&yy>0&&xx<W&&yy<H&&!T.block[i])T.h[i]=Math.min(T.h[i],avg-.1)}}
+    if(T){let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(const [x,y] of cells){x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)}
+      for(let y=y0-3;y<=y1+3;y++)for(let x=x0-3;x<=x1+3;x++){const i=I(x,y);if(x<1||y<1||x>=W-1||y>=H-1||c.wset.has(i)||T.block[i])continue;T.h[i]=avg+(T.h[i]-avg)*.35}   // the banks are levelled so the lake lies in a shallow dish
+      for(const [x,y] of cells){for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const xx=x+dx,yy=y+dy,i=I(xx,yy);if(!c.wset.has(i)&&xx>0&&yy>0&&xx<W&&yy<H&&!T.block[i])T.h[i]=Math.min(T.h[i],avg-.08)}}}
     c._v++;c.lakes.push(cells.length);return true};
-  c.isWater=(x,y)=>c.wset.has(I(x,y))||(typeof fshWaterAt==='function'&&fshWaterAt(L,n,x,y));
+  c.isWater=(x,y)=>{if(x<0||y<0||x>=W||y>=H)return false;const i=I(x,y);return c.wset.has(i)||(typeof fshWaterAt==='function'&&fshWaterAt(L,n,x,y))||!!(T&&T.block[i]&&T.h[i]<-.05&&L.rows[y][x]==='.')}; // water floor, or a blocked square of a sea terrain lying below the waterline
   // ---- planks
   c.jetty=(x,y,dx,dy,len,name)=>{const ch=c.slot(name||'wood');if(ch===null)return false;const o=[];
     for(let k=0;k<len;k++){const xx=x+dx*k,yy=y+dy*k;if(c.wset.has(I(xx,yy)))return false;o.push([xx,yy])}
@@ -91,8 +93,26 @@ function fplCtx(n){
     const rf=m=>(c.quietStands?c.tried:c.refused).push(m);
     if(c.blocked(x,y)){rf('stand blocked '+x+','+y);return false}
     if(!c.reachC()[I(x,y)]){rf('stand unreachable '+x+','+y);return false}
-    const w1=c.isWater(x+dx,y+dy);if(!w1||!c.blocked(x+dx,y+dy)){rf('stand no water '+x+','+y+' '+dx+','+dy);return false}
-    c.stands.push({x,y,dx,dy,water:water||null});return true};
+    if(c.isWater(x,y)){rf('stand in water '+x+','+y);return false}
+    let k=0;for(let j=1;j<=3;j++)if(c.isWater(x+dx*j,y+dy*j)){k=j;break}
+    if(!k){rf('stand no water '+x+','+y+' '+dx+','+dy);return false}
+    for(let j=1;j<k;j++)if(c.walk(x+dx*j,y+dy*j)&&!c.isWater(x+dx*j,y+dy*j)){rf('stand far from water '+x+','+y);return false}
+    for(let j=1;j<=3;j++){const xx=x+dx*j,yy=y+dy*j;if(xx>=0&&yy>=0&&xx<W&&yy<H&&L.rows[yy][xx]!=='.'&&j<=k+0){rf('stand wall before water '+x+','+y);return false}}  // the game looks along the row: a wall square in the way hides the patch
+    c.stands.push({x,y,dx,dy,k,water:water||null});return true};
+  // ---- finding room for lakes in open country: a lake needs flat ground and nothing important near it
+  const imp=[],impS=[];for(const d of L.decor)if(d&&(d.npc||d.enter||d.shop||d.loot||d.contents||d.block&&!FPL_VEG.test(d.k)))((/rock|frog|stone|boulder|stump|log/.test(d.k)&&!d.npc&&!d.enter)?impS:imp).push([d.x,d.y]);
+  for(const p of (L.portals||[]))if(p)imp.push([p.x,p.y]);const impM=[];for(const q of (L.items||[]))if(q)impS.push([q.x,q.y]);for(const q of (L.enemies||[]))if(q)impM.push([q.x,q.y]);
+  c.roomFor=(cells,margin,tol,pathDigit)=>{
+    let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(const [x,y] of cells){x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)}
+    for(const [x,y] of imp)if(x>=x0-margin&&x<=x1+margin&&y>=y0-margin&&y<=y1+margin)return false;
+    for(const [x,y] of impM)if(x>=x0-4&&x<=x1+4&&y>=y0-4&&y<=y1+4)return false;
+    for(const [x,y] of impS)if(x>=x0-1&&x<=x1+1&&y>=y0-1&&y<=y1+1)return false;
+    if(T&&tol){let lo=1e9,hi=-1e9;for(let y=y0-2;y<=y1+2;y++)for(let x=x0-2;x<=x1+2;x++){const v=T.h[I(x,y)];lo=Math.min(lo,v);hi=Math.max(hi,v)}if(hi-lo>tol)return false}
+    if(L.fmap&&pathDigit)for(let y=y0-2;y<=y1+2;y++)for(let x=x0-2;x<=x1+2;x++)if(L.fmap[y]&&L.fmap[y][x]===pathDigit)return false;
+    for(let y=y0-1;y<=y1+1;y++)for(let x=x0-1;x<=x1+1;x++){if(x<2||y<2||x>=W-2||y>=H-2||L.rows[y][x]!=='.')return false}
+    return true};
+  // ---- sand or pebbles round a lake: the floor of the ring of walkable squares round the water becomes the named floor (never a road square)
+  c.rim=(name,keepDigit)=>{const ch=c.slot(name);if(ch===null)return;for(const i of c.wset){const x=i%W,y=(i/W)|0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const xx=x+dx,yy=y+dy,j=I(xx,yy);if(c.wset.has(j)||c.planks.has(j)||c.isWall(xx,yy))continue;if(keepDigit&&L.fmap[yy][xx]===keepDigit)continue;c.setFloor(xx,yy,ch)}}};
   // ---- a spot on one side of a lake given as a list of cells: side N S E W, along = the x (N, S) or y (E, W) of the line to look along
   c.edgeStand=(cells,side,along,water)=>{
     const col=side==='N'||side==='S',sel=cells.filter(q=>col?q[0]===along:q[1]===along);if(!sel.length){c.refused.push('edge none '+side+along);return false}
@@ -100,15 +120,38 @@ function fplCtx(n){
     if(side==='S'){const y=Math.max(...sel.map(q=>q[1]));return c.stand(along,y+1,0,-1,water)}
     if(side==='W'){const x=Math.min(...sel.map(q=>q[0]));return c.stand(x-1,along,1,0,water)}
     const x=Math.max(...sel.map(q=>q[0]));return c.stand(x+1,along,-1,0,water)};
+  // ---- windows: where a lake lies behind a wall (one or two squares thick) from a walkable corridor, cut the wall through so the party can stand at the water
+  c.windows=(o)=>{
+    const reach=c.reachC(),cand=[],D=[[1,0],[-1,0],[0,1],[0,-1]];
+    const open=(x,y)=>x>=2&&y>=2&&x<W-2&&y<H-2&&L.rows[y][x]==='.'&&!c.isWater(x,y)&&reach[I(x,y)];
+    const solid=(x,y)=>x>=3&&y>=3&&x<W-3&&y<H-3&&L.rows[y][x]!=='.'&&!c.isWater(x,y)&&!c.decAt(x,y).some(d=>d.block||d.enter||d.npc);
+    const box=o.box||[2,2,W-3,H-3];
+    for(let y=box[1];y<=box[3];y++)for(let x=box[0];x<=box[2];x++){
+      if(!c.isWater(x,y)||L.rows[y][x]!=='.')continue;
+      for(const [dx,dy] of D){const w2x=x-dx,w2y=y-dy;if(!c.isWater(w2x,w2y))continue;   // two water squares in a row behind the opening
+        const p1=[x+dx,y+dy],p2=[x+dx*2,y+dy*2],p3=[x+dx*3,y+dy*3];
+        if(!solid(p1[0],p1[1]))continue;
+        let cut=null;
+        if(open(p2[0],p2[1]))cut=[p1];else if(solid(p2[0],p2[1])&&open(p3[0],p3[1]))cut=[p1,p2];
+        if(cut)cand.push({cut,x:p1[0],y:p1[1],dx:-dx,dy:-dy,h:hash2(x,y,o.seed||9)})}}
+    cand.sort((p,q)=>p.h-q.h);const got=[];
+    for(const p of cand){if(got.length>=(o.max||8))break;if(got.some(g=>Math.max(Math.abs(g.x-p.x),Math.abs(g.y-p.y))<(o.step||12)))continue;
+      for(const [x,y] of p.cut){for(const d of c.decAt(x,y))if(d.block)c.hide(d);const r=L.rows[y];L.rows[y]=r.slice(0,x)+'.'+r.slice(x+1);if(c.hasFm&&o.floor){const ch=c.slot(o.floor);if(ch!==null)c.setFloor(x,y,ch)}}
+      c._v++;
+      if(c.stand(p.x,p.y,p.dx,p.dy,o.water)){got.push(p);c.windowCells=(c.windowCells||[]).concat(p.cut)}}
+    return got};
   // ---- scanning a shore
   c.shore=(o)=>{
     const reach=c.reachC(),want=o.max||20,step=o.step||6,box=o.box||[2,2,W-3,H-3],dirs=o.dirs||[[1,0],[-1,0],[0,1],[0,-1]],cand=[];
-    for(let y=box[1];y<=box[3];y++)for(let x=box[0];x<=box[2];x++){const i=I(x,y);if(!reach[i])continue;
-      for(const [dx,dy] of dirs){const a=x+dx,b=y+dy,a2=x+dx*2,b2=y+dy*2;if(a2<1||b2<1||a2>=W-1||b2>=H-1)continue;
-        if(!c.isWater(a,b)||!c.isWater(a2,b2)||!c.blocked(a,b)||!c.blocked(a2,b2))continue;
-        if(c.decAt(x,y).some(d=>d.block))continue;
-        let ok=true;for(let k=1;k<=3;k++){const bx=x+dx*k,by=y+dy*k;if(!c.isWater(bx,by)&&k<3){ok=false;break}}
-        if(!ok)continue;cand.push({x,y,dx,dy,h:hash2(x,y,o.seed||5)})}}
+    for(let y=box[1];y<=box[3];y++)for(let x=box[0];x<=box[2];x++){const i=I(x,y);if(!reach[i]||c.isWater(x,y))continue;
+      if(c.decAt(x,y).some(d=>d.block))continue;
+      for(const [dx,dy] of dirs){let k=0;for(let j=1;j<=3;j++){const bx=x+dx*j,by=y+dy*j;if(bx<2||by<2||bx>=W-2||by>=H-2)break;if(c.isWater(bx,by)){k=j;break}}
+        if(!k)continue;
+        let ok=true;for(let j=1;j<k;j++)if(c.walk(x+dx*j,y+dy*j)||L.rows[y+dy*j][x+dx*j]!=='.'){ok=false;break}  // the squares before the water must be shore that cannot be walked but is not a wall
+        if(!ok)continue;
+        // two water squares in a row at least, so the patch has room
+        if(!c.isWater(x+dx*(k+1),y+dy*(k+1)))continue;
+        cand.push({x,y,dx,dy,h:hash2(x,y,o.seed||5)})}}
     cand.sort((p,q)=>p.h-q.h);const got=[];
     for(const p of cand){if(got.length>=want)break;if(got.some(g=>Math.max(Math.abs(g.x-p.x),Math.abs(g.y-p.y))<step))continue;
       if(o.min&&Math.abs(p.x-L.start.x)+Math.abs(p.y-L.start.y)<o.min)continue;
@@ -130,7 +173,7 @@ function fplFinish(c){
   const after=c.reachSet(),lost=[];
   for(let i=0;i<c.W*c.H;i++)if(c.before[i]&&!after[i]&&!c.wset.has(i))lost.push((i%c.W)+','+((i/c.W)|0));
   const spots=[];for(const s of c.stands){spots.push({x:s.x,y:s.y,dx:s.dx,dy:s.dy});}
-  const byW={};for(const s of c.stands){const w=s.water||'';(byW[w]=byW[w]||[]).push({x:s.x,y:s.y,dx:s.dx,dy:s.dy})}
+  const byW={};for(const s of c.stands){const w=s.water||'';(byW[w]=byW[w]||[]).push(s.k===1?{x:s.x,y:s.y,dx:s.dx,dy:s.dy}:{x:s.x+s.dx*s.k,y:s.y+s.dy*s.k})}
   for(const w in byW)fshAddSpots(c.n,byW[w],w?{water:w}:undefined);
   FPL.rep[c.n]={lakes:c.lakes.slice(),water:c.wset.size,stands:c.stands.slice(),refused:c.refused.slice(),lost,props:c.props,prepared:true};
   if(lost.length||c.refused.length)console.error('fishing places',c.n,'lost',lost.slice(0,6),'refused',c.refused.slice(0,6));
