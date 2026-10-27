@@ -8276,11 +8276,12 @@ function makeTombSprites(){
 
 /* ---- src/desert/teleport.js ---- */
 /* ==========================================================================
-   STONE TELEPORTERS. Every map has one. Standing on it wakes it; a woken teleporter can carry the party to any other
+   STONE TELEPORTERS. Only the important places have one (see teleWanted): the town maps, the shops, inns, temples and halls, the
+   dungeons and the wild areas. Ordinary houses, cottages, cellars, lofts and sheds have none. Standing on it wakes it; a woken teleporter can carry the party to any other
    woken teleporter. They show on the world map, where a tap on one travels there (while standing on a teleporter).
    ========================================================================== */
 function teleSpot(n){
-  const L=LEVELS[n];if(!L)return null;if(L._tele)return L._tele;if(L.tele)return L._tele=L.tele;
+  const L=LEVELS[n];if(!L)return null;if(!teleWanted(n,L))return null;if(L._tele)return L._tele;if(L.tele)return L._tele=L.tele;
   const rows=L.rows,H=rows.length,W=rows[0].length,st=L.start;
   const solid=new Set((L.decor||[]).filter(d=>d.block!==false).map(d=>d.x+','+d.y)),bad=new Set(solid); // solid scenery and people cannot be walked through, so the stone is never put behind them
   const tb=typeof terrFor==='function'?terrFor(n):null;if(tb)for(let q=0;q<tb.block.length;q++)if(tb.block[q]){const k=(q%tb.W)+','+((q/tb.W)|0);solid.add(k);bad.add(k)}
@@ -8302,6 +8303,20 @@ function teleSpot(n){
   if(!best)best=far?{x:far[0],y:far[1]}:{x:st.x,y:st.y};
   return L._tele=best;
 }
+/* ---- which levels get a stone. Ordinary houses, cottages, huts, cellars, granaries, barns, sheds and the player's own houses have none. ----
+   Levels from 1000 up (the Khemetra, Oldhaven, Yarrim and Wenlock doors, built by the house maker) are almost all private houses or
+   generic filler shops, so there the answer is a short list of kept ids; every other level keeps its stone unless it is in TELE_NONE. */
+const TELE_NONE=new Set([5,9,12,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258,259,261,265,296,297,298]);
+const TELE_KEEP_HI=new Set([6074,6136,6147,6169,6176,6223,6250,6255,6700,6701,6702,6703,6704,6705,6900,6904,6906,
+  7000,7010,7022,7062]);   // Wenlock is a village: stones only in the church, the inn, the general store and the village hall
+function teleWanted(n,L){
+  L=L||LEVELS[n];
+  if(n>=400&&n<=423)return true;            // the Pilgrim’s Path (hidden stones and the cliff stone) is always kept, built or not
+  if(L&&L.noTele)return false;
+  if(TELE_NONE.has(n))return false;
+  if(n>=1000&&n<13200)return TELE_KEEP_HI.has(n);
+  return true;
+}
 /* which place on the world map a level belongs to: the rooms of Khemetra and Ironhill, and any room behind a door, belong to the town round them */
 function teleLocOf(n,d){
   const L=WORLD_LOCS.find(l=>l.lv.includes(n));if(L)return L;
@@ -8311,8 +8326,9 @@ function teleLocOf(n,d){
   const lv=LEVELS[n],p=lv&&lv.portals&&lv.portals[0];
   return p&&p.to!==undefined&&p.to!==n?teleLocOf(p.to,(d||0)+1):null;
 }
-function teleLevelsAt(loc){return Object.keys(G.flags.teles||{}).map(Number).filter(n=>G.flags.teles[n]&&(loc.lv.includes(n)||teleLocOf(n)===loc))}
-function teleActive(n){return !!(G.flags.teles&&G.flags.teles[n])}
+function teleLevelsAt(loc){return Object.keys(G.flags.teles||{}).map(Number).filter(n=>G.flags.teles[n]&&teleWanted(n)&&(loc.lv.includes(n)||teleLocOf(n)===loc))}
+function teleActive(n){return !!(G.flags.teles&&G.flags.teles[n]&&teleWanted(n))} // a stone woken in a level that has none any more (an old save) is ignored
+function teleWokenCount(){return Object.keys(G.flags.teles||{}).filter(n=>G.flags.teles[n]&&teleWanted(+n)).length}
 function teleOn(){return !!(G.tele&&G.P.x===G.tele.x&&G.P.y===G.tele.y&&G.state==='play')}
 /* nothing else may stand on the teleporter's square: whatever is there moves to the nearest free square, or is removed if the room is too full */
 function clearTeleSquare(sp){
