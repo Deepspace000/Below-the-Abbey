@@ -186,6 +186,10 @@ function wlBuild(){
   houses.forEach((h,k)=>{
     h.k=k;const sp=h.sp;
     h.sty=sp?sp.sty:pick(STY,h.x0,h.y0,14);h.rk=sp?sp.roof:pick(ROOFS,h.x0,h.y0,15);
+    // no two houses in a row on the same street share a wall style or a roof: step on to the next one if they would
+    {const pv=houses[k-1],pv2=houses[k-2];
+     if(!sp&&pv&&pv.face===h.face){for(let t=1;t<=STY.length&&(h.sty===pv.sty||(pv2&&pv2.face===h.face&&h.sty===pv2.sty));t++)h.sty=STY[(STY.indexOf(h.sty)+t)%STY.length];
+       for(let t=1;t<=ROOFS.length&&(h.rk===pv.rk||(pv2&&pv2.face===h.face&&h.rk===pv2.rk));t++)h.rk=ROOFS[(ROOFS.indexOf(h.rk)+t)%ROOFS.length]}}
     h.wh=sp?sp.wh:Math.round((1.9+hs(h.x0,h.y0,16)*.5)*10)/10;
     h.name=sp?sp.name:null;
   });
@@ -208,7 +212,9 @@ function wlBuild(){
     // tubs and window boxes either side of the door, on the verge beside the wall, never in the road
     const side2=horiz?[[h.front[0]-1,h.front[1]],[h.front[0]+1,h.front[1]]]:[[h.front[0],h.front[1]-1],[h.front[0],h.front[1]+1]];
     const wallRow=horiz?[[h.x0-1,h.face==='S'?h.y1:h.y0],[h.x1+1,h.face==='S'?h.y1:h.y0]]:[[h.face==='E'?h.x1:h.x0,h.y0-1],[h.face==='E'?h.x1:h.x0,h.y1+1]];
-    for(const [tx,ty] of wallRow)if(free(tx,ty)&&hs(tx,ty,96)<.8){const k=hs(tx,ty,97)<.5?'kh_city2_5':'kh_city2_3';if(IMG[k]){used.add(tx+','+ty);scenery.push({k,wx:tx+.5,wy:ty+.5,sc:.85+hs(tx,ty,99)*.3,decor:{k,walk:true,x:tx,y:ty}})}}
+    // a different thing by each door, none taller than a man's waist: tubs, window boxes, herb benches, barrels, shrubs, and only rarely a palm in a pot
+    for(const [tx,ty] of wallRow)if(free(tx,ty)&&hs(tx,ty,96)<.7){const r=hs(tx,ty,97),PL=[['yar_tub',.78],['kh_city2_5',.8],['kh_ohgard2_4',.7],['kh_ohgard2_1',.62],['kh_city2_2',.7],['lbush0',.9],['vase0',.8],['kh_ohgard2_3',.7],['kh_city2_3',.5]],pi=r<.04?8:((hs(tx,ty,98)*8)|0),[k,psc]=PL[pi];
+      if(IMG[k]){used.add(tx+','+ty);scenery.push({k,wx:tx+.5,wy:ty+.5,sc:psc*(.9+hs(tx,ty,99)*.2),decor:{k,walk:true,x:tx,y:ty}})}}
   }
   // ---- the signs of the buildings with something to sell, and the names of the rest ----
   for(const h of houses){
@@ -242,7 +248,7 @@ function wlBuild(){
       for(const [x,y] of [[44,52],[46,52],[44,51],[46,51],[44,53],[46,53],[45,51]])flowers(x,y,1.25);
       tryDc('kh_ohgard1_3',43,53);tryDc('kh_ohgard1_3',47,51);}
     solidDc('kh_ohgard1_0',52,53,{});
-    for(const [x,y,k] of [[43,46,'kh_stall1_0'],[46,46,'kh_stall1_1'],[50,46,'kh_stall1_3'],[53,46,'kh_stall1_4'],[43,54,'kh_stall1_2'],[54,54,'kh_stall1_5']])solidDc(k,x,y);
+    for(const [x,y,k] of [[43,46,'kh_stall1_0'],[46,46,'kh_stall1_1'],[50,46,'kh_stall1_3'],[53,46,'kh_stall1_4'],[43,54,'kh_stall1_2'],[54,54,'kh_stall1_5']])solidDc(k,x,y,{sc:1.28});
     for(const [x,y,k] of [[41,48,'kh_stall2_3'],[55,48,'kh_stall2_0'],[41,52,'kh_stall2_1'],[55,52,'kh_stall2_2'],[44,48,'kh_oqstuff_9'],[52,48,'kh_oqstuff_2'],[47,54,'kh_oqstuff_8']])tryDc(k,x,y,{block:true,walk:false});
     for(const [x,y] of [[46,48],[50,54],[56,47],[40,53]])tryDc('kh_ohgard1_3',x,y);
     for(const [x,y] of [[41,45],[55,45],[41,55],[55,55],[48,45],[48,55]])lamp(x,y);
@@ -273,7 +279,7 @@ function wlBuild(){
     for(let n=0;n<14;n++){const x=44+((hs(n,1,8)*20)|0),y=60+((hs(n,2,8)*20)|0);if(hs(n,3,8)<.5)tree(x,y);else bush(x,y)}
     // across the brook: meadow with the mill and the windmill, cows and sheep
     setF(3,87,96,96,'5');
-    for(const [x,y,i] of [[60,91,0],[64,89,1],[56,93,2],[68,93,3]])tryDc(i%2?'cow':A('sheep0','kh_anim1_3'),x,y,{block:false});
+    for(const [x,y,i] of [[60,91,0],[64,89,1],[56,93,2],[68,93,3]])tryDc(i%2?'cow':A('sheep','sheep0','kh_anim1_3'),x,y,{block:false});
     for(let n=0;n<26;n++){const x=4+((hs(n,1,9)*90)|0),y=87+((hs(n,2,9)*9)|0);if(free(x,y)&&!(x>=68&&x<=76)){if(hs(n,3,9)<.5)tree(x,y);else bush(x,y)}}
     for(let x=4;x<=95;x+=2)for(const y of [WL_BROOK(x)-1])if(hs(x,y,10)<.35&&free(x,y))flowers(x,y,.9);
   }

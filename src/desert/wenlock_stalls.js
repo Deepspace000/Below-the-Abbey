@@ -34,5 +34,5 @@ for(const [id,n,face,title,greet,key,sc] of WLSTALLS){
   khNpc(id,n,face,d=>{
     let g=greet;
     try{if((id==='wlo_pedlar'||id==='wlo_potter')&&typeof wwF==='function'&&wwF().wwDead)g=id==='wlo_pedlar'?'Silas has gingerbread men for a penny, and they are certified, by a goat, as safe. Cloth, rugs, ribbons and one very good boot too.':'I have made a gingerbread mould for Pip\'s stall, shaped like a small man. It came out with a small, unhappy face, and I could not make it stop. Jugs, bowls and honey are over here.'}catch(e){}
-    return say(g,[['Browse the wares',()=>{openShop(d,KH_STOCK[key](),title);return null}],BYE])},{sc});
+    return say(g,[['Browse the wares',()=>{openShop(d,KH_STOCK[key](),title);return null}],BYE])},{sc:Math.round(sc*.84*100)/100});
 }

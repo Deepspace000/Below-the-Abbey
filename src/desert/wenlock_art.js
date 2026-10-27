@@ -20,7 +20,7 @@ const wlHas=k=>!!IMG['wl_'+k];
 function wlPick(...keys){for(const k of keys){if(IMG[k])return k;if(IMG['wl_'+k])return 'wl_'+k}return null}
 /* heights (in cells) of everything that stands about */
 function wlHeights(){
-  Object.assign(NPC_H,{cow:.62,wl_cow:.62,hay:.72,kh_ohgard1_0:1.7,kh_ohgard1_2:2.3,kh_ohgard1_3:.62,kh_ohgard1_4:1.0,kh_ohgard1_5:.95,kh_ohgard2_0:1.15,kh_ohgard2_1:.95,kh_ohgard2_2:1.35,kh_ohgard2_3:.7,kh_ohgard2_4:.75,kh_ohgard2_5:1.1,
+  Object.assign(NPC_H,{cow:.62,wl_cow:.62,hay:.72,kh_ohgard1_0:1.7,kh_ohgard1_2:2.3,kh_ohgard1_3:.5,kh_ohgard1_4:1.0,kh_ohgard1_5:.95,kh_ohgard2_0:1.15,kh_ohgard2_1:.95,kh_ohgard2_2:1.35,kh_ohgard2_3:.7,kh_ohgard2_4:.75,kh_ohgard2_5:1.1,
     kh_oqdogs_0:.5,kh_oqdogs_1:.62,kh_oqdogs_2:.5,kh_oqdogs_3:.36,kh_oqdogs_4:.46,kh_oqdogs_5:.44,kh_anim1_0:.3,kh_anim1_3:.55,kh_anim1_4:.7,kh_anim1_5:.26,
     kh_stall1_0:1.5,kh_stall1_1:1.5,kh_stall1_2:1.5,kh_stall1_3:1.5,kh_stall1_4:1.5,kh_stall1_5:1.5,kh_stall2_0:.8,kh_stall2_1:.8,kh_stall2_2:.9,kh_stall2_3:.8,kh_oqstuff_0:1.2,kh_oqstuff_1:.4,kh_oqstuff_2:.6,kh_oqstuff_4:.4,kh_oqstuff_6:.3,kh_oqstuff_8:.7,kh_oqstuff_9:.55,kh_oqstuff_10:.6,
     kh_city1_1:1.5,kh_city2_1:1.7,kh_city2_2:.8,kh_city2_3:.9,kh_city2_4:2.4,kh_city2_5:.55,kh_ohtower1_1:3.4,kh_ohtower1_4:3.4,kh_ohtower1_0:3.2,kh_ytree1_0:1.5,kh_fire1_0:.7,kh_fire1_4:1.0,kh_fire1_3:.7,kh_ohprops1_7:.62,kh_cart1_0:.8,
@@ -54,7 +54,19 @@ function wlRoofs(){
 /* the floors of Wenlock: cobbles, pale paving, lawn, gravel, brook water, meadow (the order of floorSet) */
 function wlFloors(){
   if(typeof ohFloors==='function')ohFloors();
-  return ['ohCobble','ohPale','ohLawn','ohGravel',FLOORS.bluewater?'bluewater':'ohMoss','ohMeadow'];
+  // painted-quality ground: the thin seams and dither of the old tiles broke up into dots at a distance, so the paving is softened, the lane is packed earth with grass in it, the water is a rippled green-grey pond
+  const blur=(src,r)=>{const n=2*r+1,t=new Uint8ClampedArray(src.length),o=new Uint8ClampedArray(src.length);
+    for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){let R=0,G=0,B=0;for(let k=-r;k<=r;k++){const i=(y*TS+((x+k+TS)%TS))*4;R+=src[i];G+=src[i+1];B+=src[i+2]}const j=(y*TS+x)*4;t[j]=R/n;t[j+1]=G/n;t[j+2]=B/n}
+    for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){let R=0,G=0,B=0;for(let k=-r;k<=r;k++){const i=(((y+k+TS)%TS)*TS+x)*4;R+=t[i];G+=t[i+1];B+=t[i+2]}const j=(y*TS+x)*4;o[j]=R/n;o[j+1]=G/n;o[j+2]=B/n;o[j+3]=255}
+    return o};
+  const mix=(a,b,f)=>{const d=new Uint8ClampedArray(a.length);for(let i=0;i<a.length;i+=4){const k=typeof f==='function'?f((i>>2)%TS,((i>>2)/TS)|0):f;d[i]=a[i]*(1-k)+b[i]*k;d[i+1]=a[i+1]*(1-k)+b[i+1]*k;d[i+2]=a[i+2]*(1-k)+b[i+2]*k;d[i+3]=255}return d};
+  const mul=(a,m)=>{const d=new Uint8ClampedArray(a.length);for(let i=0;i<a.length;i+=4){d[i]=a[i]*m[0];d[i+1]=a[i+1]*m[1];d[i+2]=a[i+2]*m[2];d[i+3]=255}return d};
+  if(!FLOORS.wlPale&&FLOORS.ohPale)FLOORS.wlPale=mul(mix(FLOORS.ohPale,blur(FLOORS.ohPale,3),.93),[.97,.93,.86]);
+  if(!FLOORS.wlEarth&&FLOORS.ohGravel&&FLOORS.ohLawn){const gb=blur(FLOORS.ohGravel,2),lb=blur(FLOORS.ohLawn,3);
+    FLOORS.wlEarth=mul(mix(gb,lb,(x,y)=>Math.max(0,Math.min(.85,dsNoise(x,y,8,771)*2.2-.75))),[1,.94,.84])}
+  if(!FLOORS.wlMeadow&&FLOORS.ohLawn&&FLOORS.ohMeadow)FLOORS.wlMeadow=mix(FLOORS.ohLawn,blur(FLOORS.ohMeadow,1),(x,y)=>.3+.5*dsNoise(x,y,3,772));
+  if(!FLOORS.wlWater)FLOORS.wlWater=dsFloor((x,y)=>{const n=dsNoise(x,y,4,331),m=dsNoise(x,y,8,332),r=Math.sin(TAU*(1*x/TS+3*y/TS+n*1.4))*.5+.5,k=.98+.26*r+.3*(m-.5);return [70*k+14,104*k+16,104*k+10]});
+  return ['ohCobble',FLOORS.wlPale?'wlPale':'ohPale','ohLawn',FLOORS.wlEarth?'wlEarth':'ohGravel',FLOORS.wlWater?'wlWater':(FLOORS.bluewater?'bluewater':'ohMoss'),FLOORS.wlMeadow?'wlMeadow':'ohMeadow'];
 }
 /* the wall styles: the Oldhaven sheets, and the new English ones when they have been painted */
 function wlStyles(){

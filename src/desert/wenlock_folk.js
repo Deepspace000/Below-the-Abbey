@@ -58,7 +58,9 @@ const WL_ANIMALS=[
   {id:'wlo_goat',n:'A goat',face:'kh_anim1_3',sc:.9,out:[86,52],lines:["Maaa. (He has just eaten a hat, and is thinking about the other one.)","Maaa. (He gives you a look of calm, patient contempt.)"]},
   {id:'wlo_donkey',n:'Neddy, the donkey',face:'kh_anim1_4',sc:.9,out:[66,47],lines:["Hee-haw. (He has a strong opinion and has decided not to share it.)","Hee-haw. (The donkey looks, you suspect, at the world's long list of unfinished business.)"]}
 ];
-for(const f of WL_FOLK.concat(WL_ANIMALS))if(f.id!=='wlo_mayor')khNpc(f.id,f.n,f.face,()=>yrLines(f.id,f.lines),{sc:f.sc});
+/* grown-ups were drawn a little too big beside the doors and stalls: every adult is brought down a tenth, the children and animals stay as they are */
+const wlFolkSc=f=>f.sc>.9&&!/^wlo_(dog|cat|goat|donkey)/.test(f.id)?Math.round(f.sc*.88*100)/100:f.sc;
+for(const f of WL_FOLK.concat(WL_ANIMALS))if(f.id!=='wlo_mayor')khNpc(f.id,f.n,f.face,()=>yrLines(f.id,f.lines),{sc:wlFolkSc(f)});
 /* ---- placement: each person stands near their place, off the roads (wenlock_town.js calls this) ---- */
 function wlPlaceFolk(C){
   C.person('wlo_mayor',27,31,4);

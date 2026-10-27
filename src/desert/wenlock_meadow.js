@@ -106,10 +106,38 @@ const WLD20=khQD("A friar walks a great deal and my feet are not what they were.
 wlQ('wlq20','Brother Tuck',[["Light the five lanterns along Churchyard Lane, the lane that runs west from Church Lane.",()=>wleDup(wleF(),'wlq20_',5)>=5,WLE_LAMPS.map((a,i)=>'wlo_lantern'+(i+1))],["Lay a wildflower on Hester's grave, in the quiet corner at the west end of the town. The greengrocer and the herb shop sell them.",()=>wleF().wlq20g,['wlo_hester']]]);
 wlGive('wlo_friar','wlq20','wlq1',WLD20);
 /* ---- detail in the meadows (called from the polish pass) ---- */
+/* ---- the ground: kerbs round the square, worn verges beside the roads, mud banks at the brook and the pond, drifts of flowery meadow ---- */
+function wleGround(C){
+  const {fm,block,rows,street,hs,W,H}=C,at=(x,y)=>x<0||y<0||x>=W||y>=H?'x':fm[y*W+x],isSt=(x,y)=>street.has(x+','+y);
+  const open=(x,y)=>x>2&&y>2&&x<97&&y<97&&!block[y*W+x]&&rows[y][x]==='.';
+  const set=[];
+  const nb4=[[1,0],[-1,0],[0,1],[0,-1]],nb8=nb4.concat([[1,1],[-1,1],[1,-1],[-1,-1]]);
+  for(let y=3;y<97;y++)for(let x=3;x<97;x++){
+    const f=at(x,y);if(f!=='2'&&f!=='5'||!open(x,y))continue;
+    let road=false,sq=false,wat=false,gl=false;
+    for(const [dx,dy] of nb4){if(isSt(x+dx,y+dy))road=true;const g=at(x+dx,y+dy);if(g==='1')sq=true;if(g==='4')wat=true}
+    for(const [dx,dy] of nb8){if(at(x+dx,y+dy)==='4')wat=true}
+    const r=hs(x,y,201);
+    if(sq&&r<.9)set.push([x,y,'0']);                    // a cobbled kerb round the paving of the square
+    else if(wat&&r<.88)set.push([x,y,'3']);             // mud and earth at the water's edge
+    else if(road&&r<.62)set.push([x,y,'3']);            // the verge beside a road, worn bare in patches
+  }
+  // the cobbled ribbon of High Street frays into the paving where it crosses the square
+  for(let y=44;y<=56;y++)for(let x=40;x<=56;x++){if(at(x,y)!=='1')continue;let n=0;for(const [dx,dy] of nb4)if(at(x+dx,y+dy)==='0')n++;if(n&&hs(x,y,206)<.45)set.push([x,y,'0'])}
+  for(const [x,y,c] of set)fm[y*W+x]=c;
+  // a second, thinner ring of worn ground round the verges and the banks, so the edge frays into the grass
+  const ring=[];
+  for(let y=3;y<97;y++)for(let x=3;x<97;x++){if(at(x,y)!=='2'||!open(x,y))continue;let n=0;for(const [dx,dy] of nb4)if(at(x+dx,y+dy)==='3')n++;if(n&&hs(x,y,202)<.2+.08*n)ring.push([x,y])}
+  for(const [x,y] of ring)fm[y*W+x]='3';
+  // drifts of flowery meadow in the big open fields, so the lawn is not one flat green
+  const blob=(x,y)=>{const a=hs((x/4)|0,(y/4)|0,203),b=hs(((x+2)/4)|0,((y+2)/4)|0,204);return (a+b)/2};
+  for(let y=3;y<97;y++)for(let x=3;x<97;x++){if(at(x,y)==='2'&&open(x,y)&&blob(x,y)>.62&&hs(x,y,205)<.8&&!isSt(x,y))fm[y*W+x]='5'}
+}
 function wlePass(C){
+  try{wleGround(C)}catch(e){console.error('wleGround',e)}
   const {hs,decor,rows,block,W}=C;
   const get=k=>IMG[k]?k:null,thin=['art_hgthin3','art_hgthin5','art_hgthin0'].filter(get),stumps=['pstump','plog','glogm','stumpm'].filter(get),stones=['mossstone','gstone','grocks'].filter(get);
-  for(const k of thin)NPC_H[k]=NPC_H[k]||1.35;for(const k of stumps)NPC_H[k]=NPC_H[k]||.5;for(const k of stones)NPC_H[k]=NPC_H[k]||(k==='mossstone'?1.1:.55);
+  for(const k of thin)NPC_H[k]=.75;for(const k of stumps)NPC_H[k]=NPC_H[k]||.5;for(const k of stones)NPC_H[k]=NPC_H[k]||(k==='mossstone'?1.1:.55);
   const trees=[];for(const d of decor)if(/tree/.test(d.k))trees.push([d.x,d.y]);
   const sparse=(x,y,r)=>{for(const [a,b] of trees)if(Math.abs(a-x)<r&&Math.abs(b-y)<r)return false;return true};
   const ok=(x,y)=>x>3&&y>3&&x<96&&y<96&&C.free(x,y)&&!C.isRoad(x-1,y)&&!C.isRoad(x+1,y)&&!C.isRoad(x,y-1)&&!C.isRoad(x,y+1);
@@ -129,7 +157,12 @@ function wlePass(C){
   // Old Bracken's den, in the north-east corner: an earth-banked hut with a woodpile
   if(IMG.wd_rock0){NPC_H.wd_rock0=NPC_H.wd_rock0||1.1;C.dc('wd_rock0',89,6,{block:true,walk:false,sc:1.2});C.tryDc('hay',87,5,{block:true,walk:false});C.tryDc(IMG.pstump?'pstump':null,91,7,{block:false})}
   // cattails at the pond and at the brook
-  const P=WL_GREEN.pond,reed=(x,y,i)=>{const k=thin[i%Math.max(1,thin.length)];if(k&&C.free(x,y))C.dc(k,x,y,{block:false,walk:true,sc:.85+hs(x,y,94)*.35})};
+  const P=WL_GREEN.pond,reed=(x,y,i)=>{const k=thin[i%Math.max(1,thin.length)];if(k&&C.free(x,y))C.dc(k,x,y,{block:false,walk:true,sc:.7+hs(x,y,94)*.25})};
   let ri=0;for(let y=P[1]-1;y<=P[3]+1;y++)for(let x=P[0]-1;x<=P[2]+1;x++){const edge=x<P[0]||x>P[2]||y<P[1]||y>P[3];if(edge&&hs(x,y,95)<.45)reed(x,y,ri++)}
   for(let x=4;x<=95;x++){if(x>=69&&x<=75)continue;const by=WL_BROOK(x);if(hs(x,by,96)<.34)reed(x,by-1,ri++);if(hs(x,by,97)<.3)reed(x,by+2,ri++)}
+  // trees and bushes are walk-through and melt away as the party comes close (index.html, WALKTREE), and none stands within a square of a road, so nothing fills the screen or walls in a path
+  const roadNear=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(C.street.has((x+dx)+','+(y+dy)))return true;return false};
+  for(let i=decor.length-1;i>=0;i--){const d=decor[i];if(!/^(ltree|lbush)/.test(d.k))continue;
+    if(roadNear(d.x,d.y)){decor.splice(i,1);continue}
+    d.block=false;d.walk=true}
 }
