@@ -48,7 +48,7 @@ const WL_LOTS=[
 const WL_BROOK=x=>x>=66&&x<=78?84:84+Math.round(1.6*Math.sin(x*.13+.7));  // the y of the first of the brook's two rows
 const WL_SQUARE={x0:41,y0:45,x1:55,y1:55};
 const WL_GREEN={x0:17,y0:56,x1:40,y1:80,pond:[24,66,29,71]};
-const WL_CHURCH={x0:21,x1:27,y0:20,y1:25,door:[24,25]};
+const WL_CHURCH={x0:21,x1:28,y0:20,y1:25,door:[24,25]};
 const WL_HALL={x0:25,x1:28,y0:33,y1:36};
 const WL_TRACK={y:14,x0:38,x1:92};
 const WL_ROAD=(x,y)=>y===WL_Y&&x>=3&&x<=96||(x===24&&y>=26&&y<=49)||(x===72&&y>=51&&y<=86)||(x===84&&y>=14&&y<=49)||(y===14&&x>=38&&x<=92)||(x===38&&y>=3&&y<=13);   // the last one is Blackbriar Lane, north to the gate of the witch's wood
@@ -170,7 +170,7 @@ function wlBuild(){
   {const cwh=3.1,cp=ch(TM.make('plain','golden',cwh).gid),cw=ch(TM.make('window','golden',cwh).gid),cw2=ch(TM.make('window2','golden',cwh).gid);
     const dt=TM.make('door','golden',cwh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;KH_DOOR[dgid]={lvl:WL.H0,get at(){if(!LEVELS[WL.H0]&&KH_LAZY[WL.H0])KH_LAZY[WL.H0]();const L=LEVELS[WL.H0],st=L&&L.start;return st?{x:st.x,y:st.y,f:0}:{x:6,y:9,f:0}}};
     for(let y=C.y0;y<=C.y1;y++)for(let x=C.x0;x<=C.x1;x++){const front=y===C.y1;solid(x,y,x===C.door[0]&&y===C.door[1]?ch(dgid):front?(x%2?cw:cw2):cp)}
-    if(IMG.wl_bldg1_0)sky.push({x:25.5,y:C.y1+1.2,k:'wl_bldg1_0',w:8.6,z:0,big:1});   // the painted church (porch above the door)
+    if(IMG.wl_bldg1_0){if(typeof wlgPaintFront==='function')try{wlgPaintFront()}catch(e){console.error(e)}sky.push({x:25.5,y:C.y1+1.2,k:'wl_bldg1_0',w:8.3,z:0,big:1})}   // the painted church (porch above the door)
     else{sky.push({x:(C.x0+C.x1+1)/2,y:(C.y0+C.y1+1)/2,k:A('church_roof','roof1_4','kh_ohroof1_1')||'kh_ohroof1_1',w:8.2,z:cwh-.03,big:1});
     const tw=A('church_tower','kh_ohtower1_4');if(tw)sky.push({x:C.x0+1,y:C.y1+.6,k:tw,w:3.4,z:cwh-.03,big:1})}
     WL.church={x:(C.x0+C.x1+1)/2,y:C.y1+1,door:C.door};
@@ -178,7 +178,7 @@ function wlBuild(){
   // ---- painted buildings that stand over a hidden block of wall: the mill, the windmill, the dovecote and the barn ----
   const pic=(img,x0,y0,x1,y1,wh,sx,sy,w)=>{if(!IMG[img])return false;const pw=ch(TM.make('plain','wlgrey',wh).gid);for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(rows[y][x]==='.')solid(x,y,pw);sky.push({x:sx,y:sy,k:img,w,z:0,big:1});for(let y=y0-4;y<=y1+1;y++)for(let x=x0-2;x<=x1+2;x++)used.add(x+','+y);return true};   // and keep the ground in front of it clear of trees
   WL.pics=[];
-  for(const [img,x0,y0,x1,y1,sx,sy,w,nm] of [['wl_bldg1_3',75,88,80,91,77.5,87.8,5.6,'Wenlock Mill'],['wl_bldg1_2',86,89,87,90,87,88.8,3.4,'The Windmill'],['wl_bldg1_4',54,38,55,39,55,37.8,2.5,'The Dovecote'],['wl_bldg1_5',62,18,65,20,64,17.8,4.4,'The Barn']])
+  for(const [img,x0,y0,x1,y1,sx,sy,w,nm] of [['wl_bldg1_3',75,88,80,91,78,87.8,5.9,'Wenlock Mill'],['wl_bldg1_2',86,89,87,90,87,88.8,3.4,'The Windmill'],['wl_bldg1_4',54,38,55,39,55,37.8,2.5,'The Dovecote'],['wl_bldg1_5',62,18,65,20,64,17.8,4.4,'The Barn']])
     if(pic(img,x0,y0,x1,y1,2.4,sx,sy,w))WL.pics.push({img,x0,y0,x1,y1,nm});
   // ---- the lots: houses along the roads (the plan is WL_HOUSES, at the top of this file) ----
   const houses=WL_HOUSES;
@@ -298,11 +298,14 @@ function wlBuild(){
   if(typeof wwWenlockGate==='function')wwWenlockGate({W,rows,block,fm,street,decor,ch});
   // ---- Churchyard Lane: a lane west of Church Lane to the lych-gate of the old graveyard (src/desert/gy_yard.js) ----
   if(typeof gyWenlockGate==='function')gyWenlockGate({W,rows,block,fm,street,decor,ch});
+  // ---- polish: glass, numbers and names, the chapel, the mill, the air, the dead meadows (src/desert/wenlock_polish.js and friends) ----
+  if(typeof wlPolish==='function')wlPolish({W,H,rows,block,fm,hgt,sky,decor,scenery,lights,items,used,street,ch,TM,solid,free,dc,tryDc,solidDc,walk,near,person,pick,hs,lamp,flowers,tree,bush,apple,A,houses,pch,chars,lv,setF,isRoad,brook});
   // ---- the level ----
   lv.rows=rows.map(r=>r.join(''));
   const fmap=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmap.push(s)}lv.fmap=fmap;
   lv.mapNames=[{t:'High Street',x:70,y:50,k:'lane'},{t:'Market Square',x:48,y:50,k:'place'},{t:'Church Lane',x:24,y:38,k:'lane'},{t:'Mill Lane',x:72,y:66,k:'lane'},{t:'Green Lane',x:84,y:32,k:'lane'},
     {t:"Saint Wenna's",x:24,y:16,k:'place'},{t:'The Village Green',x:28,y:62,k:'place'},{t:'The Brook',x:40,y:84,k:'lane'},{t:'Back Track',x:60,y:13,k:'lane'},{t:'The Orchard',x:86,y:66,k:'place'},{t:'Wenlock Mill',x:78,y:90,k:'place'}];
+  if(typeof WL_MAPX!=='undefined')lv.mapNames.push(...WL_MAPX);
   {for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=chars[rows[y][x]];if(c>=30&&c<100)block[y*W+x]=0}} // a gate is not a rock face
   WL.houses=houses;WL.brook=brook;WL.street=street;
   LEVELS[WL.ID]=lv;LEVEL_NAMES[WL.ID]='Wenlock';
@@ -323,7 +326,7 @@ const wlFam=n=>n===WL.ID||(n>=WL.H0&&n<=WL.H0+99);
   return r}}
 if(typeof restore==='function'){const _r=restore;restore=function(sv){const l=sv&&sv.level;if(wlFam(l)&&!(WLART.ready&&(typeof KH_READY==='undefined'||KH_READY))){wlLoad().then(()=>{if(!LEVELS[l]&&KH_LAZY[l])KH_LAZY[l]();restore(sv)});return}return _r.apply(this,arguments)}}
 if(typeof jumpToLevel==='function'){const _j=jumpToLevel;jumpToLevel=function(n,target){if(wlFam(n)&&!(WLART.ready&&(typeof KH_READY==='undefined'||KH_READY))){wlLoad().then(()=>jumpToLevel(n,target));return}if(n===WL.ID&&!LEVELS[WL.ID])wlBuild();return _j.apply(this,arguments)}}
-{const _wd=wdDoorLevel;wdDoorLevel=function(n){return _wd.apply(this,arguments)||n===WL.ID}}
+{const _wd=wdDoorLevel;wdDoorLevel=function(n){return _wd.apply(this,arguments)||wlFam(n)}}
 /* the way back to the Maze of Gardens: where the garden says the party stands (WK.GBACK), or its first square */
 {const _u=usePortal;usePortal=function(i){const p=G.portals[i];if(LEVEL===WL.ID&&p&&p.to===WK.GARDEN){const b=WK.GBACK||{x:2,y:2,f:0};if(!LEVELS[WK.GARDEN]&&KH_LAZY[WK.GARDEN])KH_LAZY[WK.GARDEN]();p.x=b.x;p.y=b.y;p.f=b.f}return _u.apply(this,arguments)}}
 LEVEL_NAMES[WK.GARDEN]=LEVEL_NAMES[WK.GARDEN]||'The Maze of Gardens';

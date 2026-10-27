@@ -49868,7 +49868,7 @@ const WL_LOTS=[
 const WL_BROOK=x=>x>=66&&x<=78?84:84+Math.round(1.6*Math.sin(x*.13+.7));  // the y of the first of the brook's two rows
 const WL_SQUARE={x0:41,y0:45,x1:55,y1:55};
 const WL_GREEN={x0:17,y0:56,x1:40,y1:80,pond:[24,66,29,71]};
-const WL_CHURCH={x0:21,x1:27,y0:20,y1:25,door:[24,25]};
+const WL_CHURCH={x0:21,x1:28,y0:20,y1:25,door:[24,25]};
 const WL_HALL={x0:25,x1:28,y0:33,y1:36};
 const WL_TRACK={y:14,x0:38,x1:92};
 const WL_ROAD=(x,y)=>y===WL_Y&&x>=3&&x<=96||(x===24&&y>=26&&y<=49)||(x===72&&y>=51&&y<=86)||(x===84&&y>=14&&y<=49)||(y===14&&x>=38&&x<=92)||(x===38&&y>=3&&y<=13);   // the last one is Blackbriar Lane, north to the gate of the witch's wood
@@ -49990,7 +49990,7 @@ function wlBuild(){
   {const cwh=3.1,cp=ch(TM.make('plain','golden',cwh).gid),cw=ch(TM.make('window','golden',cwh).gid),cw2=ch(TM.make('window2','golden',cwh).gid);
     const dt=TM.make('door','golden',cwh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;KH_DOOR[dgid]={lvl:WL.H0,get at(){if(!LEVELS[WL.H0]&&KH_LAZY[WL.H0])KH_LAZY[WL.H0]();const L=LEVELS[WL.H0],st=L&&L.start;return st?{x:st.x,y:st.y,f:0}:{x:6,y:9,f:0}}};
     for(let y=C.y0;y<=C.y1;y++)for(let x=C.x0;x<=C.x1;x++){const front=y===C.y1;solid(x,y,x===C.door[0]&&y===C.door[1]?ch(dgid):front?(x%2?cw:cw2):cp)}
-    if(IMG.wl_bldg1_0)sky.push({x:25.5,y:C.y1+1.2,k:'wl_bldg1_0',w:8.6,z:0,big:1});   // the painted church (porch above the door)
+    if(IMG.wl_bldg1_0){if(typeof wlgPaintFront==='function')try{wlgPaintFront()}catch(e){console.error(e)}sky.push({x:25.5,y:C.y1+1.2,k:'wl_bldg1_0',w:8.3,z:0,big:1})}   // the painted church (porch above the door)
     else{sky.push({x:(C.x0+C.x1+1)/2,y:(C.y0+C.y1+1)/2,k:A('church_roof','roof1_4','kh_ohroof1_1')||'kh_ohroof1_1',w:8.2,z:cwh-.03,big:1});
     const tw=A('church_tower','kh_ohtower1_4');if(tw)sky.push({x:C.x0+1,y:C.y1+.6,k:tw,w:3.4,z:cwh-.03,big:1})}
     WL.church={x:(C.x0+C.x1+1)/2,y:C.y1+1,door:C.door};
@@ -49998,7 +49998,7 @@ function wlBuild(){
   // ---- painted buildings that stand over a hidden block of wall: the mill, the windmill, the dovecote and the barn ----
   const pic=(img,x0,y0,x1,y1,wh,sx,sy,w)=>{if(!IMG[img])return false;const pw=ch(TM.make('plain','wlgrey',wh).gid);for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(rows[y][x]==='.')solid(x,y,pw);sky.push({x:sx,y:sy,k:img,w,z:0,big:1});for(let y=y0-4;y<=y1+1;y++)for(let x=x0-2;x<=x1+2;x++)used.add(x+','+y);return true};   // and keep the ground in front of it clear of trees
   WL.pics=[];
-  for(const [img,x0,y0,x1,y1,sx,sy,w,nm] of [['wl_bldg1_3',75,88,80,91,77.5,87.8,5.6,'Wenlock Mill'],['wl_bldg1_2',86,89,87,90,87,88.8,3.4,'The Windmill'],['wl_bldg1_4',54,38,55,39,55,37.8,2.5,'The Dovecote'],['wl_bldg1_5',62,18,65,20,64,17.8,4.4,'The Barn']])
+  for(const [img,x0,y0,x1,y1,sx,sy,w,nm] of [['wl_bldg1_3',75,88,80,91,78,87.8,5.9,'Wenlock Mill'],['wl_bldg1_2',86,89,87,90,87,88.8,3.4,'The Windmill'],['wl_bldg1_4',54,38,55,39,55,37.8,2.5,'The Dovecote'],['wl_bldg1_5',62,18,65,20,64,17.8,4.4,'The Barn']])
     if(pic(img,x0,y0,x1,y1,2.4,sx,sy,w))WL.pics.push({img,x0,y0,x1,y1,nm});
   // ---- the lots: houses along the roads (the plan is WL_HOUSES, at the top of this file) ----
   const houses=WL_HOUSES;
@@ -50118,11 +50118,14 @@ function wlBuild(){
   if(typeof wwWenlockGate==='function')wwWenlockGate({W,rows,block,fm,street,decor,ch});
   // ---- Churchyard Lane: a lane west of Church Lane to the lych-gate of the old graveyard (src/desert/gy_yard.js) ----
   if(typeof gyWenlockGate==='function')gyWenlockGate({W,rows,block,fm,street,decor,ch});
+  // ---- polish: glass, numbers and names, the chapel, the mill, the air, the dead meadows (src/desert/wenlock_polish.js and friends) ----
+  if(typeof wlPolish==='function')wlPolish({W,H,rows,block,fm,hgt,sky,decor,scenery,lights,items,used,street,ch,TM,solid,free,dc,tryDc,solidDc,walk,near,person,pick,hs,lamp,flowers,tree,bush,apple,A,houses,pch,chars,lv,setF,isRoad,brook});
   // ---- the level ----
   lv.rows=rows.map(r=>r.join(''));
   const fmap=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmap.push(s)}lv.fmap=fmap;
   lv.mapNames=[{t:'High Street',x:70,y:50,k:'lane'},{t:'Market Square',x:48,y:50,k:'place'},{t:'Church Lane',x:24,y:38,k:'lane'},{t:'Mill Lane',x:72,y:66,k:'lane'},{t:'Green Lane',x:84,y:32,k:'lane'},
     {t:"Saint Wenna's",x:24,y:16,k:'place'},{t:'The Village Green',x:28,y:62,k:'place'},{t:'The Brook',x:40,y:84,k:'lane'},{t:'Back Track',x:60,y:13,k:'lane'},{t:'The Orchard',x:86,y:66,k:'place'},{t:'Wenlock Mill',x:78,y:90,k:'place'}];
+  if(typeof WL_MAPX!=='undefined')lv.mapNames.push(...WL_MAPX);
   {for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=chars[rows[y][x]];if(c>=30&&c<100)block[y*W+x]=0}} // a gate is not a rock face
   WL.houses=houses;WL.brook=brook;WL.street=street;
   LEVELS[WL.ID]=lv;LEVEL_NAMES[WL.ID]='Wenlock';
@@ -50143,7 +50146,7 @@ const wlFam=n=>n===WL.ID||(n>=WL.H0&&n<=WL.H0+99);
   return r}}
 if(typeof restore==='function'){const _r=restore;restore=function(sv){const l=sv&&sv.level;if(wlFam(l)&&!(WLART.ready&&(typeof KH_READY==='undefined'||KH_READY))){wlLoad().then(()=>{if(!LEVELS[l]&&KH_LAZY[l])KH_LAZY[l]();restore(sv)});return}return _r.apply(this,arguments)}}
 if(typeof jumpToLevel==='function'){const _j=jumpToLevel;jumpToLevel=function(n,target){if(wlFam(n)&&!(WLART.ready&&(typeof KH_READY==='undefined'||KH_READY))){wlLoad().then(()=>jumpToLevel(n,target));return}if(n===WL.ID&&!LEVELS[WL.ID])wlBuild();return _j.apply(this,arguments)}}
-{const _wd=wdDoorLevel;wdDoorLevel=function(n){return _wd.apply(this,arguments)||n===WL.ID}}
+{const _wd=wdDoorLevel;wdDoorLevel=function(n){return _wd.apply(this,arguments)||wlFam(n)}}
 /* the way back to the Maze of Gardens: where the garden says the party stands (WK.GBACK), or its first square */
 {const _u=usePortal;usePortal=function(i){const p=G.portals[i];if(LEVEL===WL.ID&&p&&p.to===WK.GARDEN){const b=WK.GBACK||{x:2,y:2,f:0};if(!LEVELS[WK.GARDEN]&&KH_LAZY[WK.GARDEN])KH_LAZY[WK.GARDEN]();p.x=b.x;p.y=b.y;p.f=b.f}return _u.apply(this,arguments)}}
 LEVEL_NAMES[WK.GARDEN]=LEVEL_NAMES[WK.GARDEN]||'The Maze of Gardens';
@@ -50182,7 +50185,7 @@ const WL_FOLK=[
   {id:'wlo_shepherd',n:'Meg the shepherd',face:'kh_ohfolk7_4',sc:1,out:[44,11],lines:["Forty sheep, one dog, and a very firm understanding.","Sheep are not stupid. They simply have different priorities. Mostly the grass in the next field."]},
   {id:'wlo_hunter',n:'Rafe the woodsman',face:'kh_ohfolk7_4',sc:1,out:[70,12],lines:["I came in from the western wood this morning. The deer are thick, the wolves are thin, and the squirrels are rude.","If you are heading west, wait for the road to open, and bring a friend, or a very large dog."]},
   {id:'wlo_farmhand',n:'Dobbs the farmhand',face:'kh_ohfolk7_3',sc:.96,out:[62,17],lines:["I look after the granary. Which means I look after the rats, as they look after nothing.","The boss says an honest day's work. I say an honest day's work, with a pie."]},
-  {id:'wlo_miller',n:'Dusty the miller',face:'kh_ohfolk4_3',sc:1,out:[79,89],lines:["I grind the corn, and the corn grinds me. It is a fair arrangement.","Mind the wheel. It has not hurt anyone since Tuesday."]},
+  {id:'wlo_miller',n:'Dusty the miller',face:'kh_ohfolk4_3',sc:1,out:[77,86],lines:["I grind the corn, and the corn grinds me. It is a fair arrangement.","Mind the wheel. It has not hurt anyone since Tuesday."]},
   {id:'wlo_beekeeper',n:'Mother Honeybee',face:'kh_ohfolk3_1',sc:.98,out:[80,58],lines:["The bees and I have an understanding. They do not sting me, and I do not mention their taxes.","Do not wave. Do not run. Do not, whatever you do, say the word jam."]},
   {id:'wlo_dairymaid',n:'Hetty the dairymaid',face:'kh_ohfolk2_5',sc:.98,out:[62,90],lines:["Twelve cows and every one of them has a name and a grudge.","Butter by Tuesday, cheese by Friday, and the cream comes when it feels like it."]},
   {id:'wlo_bully',n:'Big Hob',face:'kh_ohfolk1_0',sc:1.08,out:[36,66],lines:["Oi. What are you looking at? Do not answer that.","I am not a bully. I am a very forceful conversationalist."]},
@@ -50897,7 +50900,7 @@ const WL_STRAYS=[
     ['Dolores',[76,86],'near Wenlock Mill, at the far south-east.','Dolores looks down at you from a great height, spits very slightly, and strolls back to the wool yard.','Hmmm. (Dolores is looking at the mill wheel as if it owes her money.)'],
     ['Lord Fluff',[90,48],'at the east end of the High Street.','Lord Fluff allows you to say a few words, then turns, and processes back to the yard like a small, woolly bishop.','Hmmm. (Lord Fluff is standing in the road, blocking a cart, and does not care.)'],
     ['Pachamama',[68,60],'in the fields east of the market square.','Pachamama hums, flicks an ear, and wanders home. The cart behind her is very relieved.','Hmmm. (Pachamama is chewing something, and is not going to explain.)'],
-    ['Alpaco',[66,24],'by the granary, in the north-east.','Alpaco bows his long neck, turns about, and goes home with very great dignity indeed.','Hmmm. (Alpaco has got his head in a sack of grain, and is not coming out.)'],
+    ['Alpaco',[66,24],'beside the big barn, in the north-east.','Alpaco bows his long neck, turns about, and goes home with very great dignity indeed.','Hmmm. (Alpaco has got his head in a sack of oats, and is not coming out.)'],
     ['Brenda',[32,88],'in the south meadow across the brook.','Brenda sniffs, looks at the brook, looks at you, and decides you are almost as good as a bridge.','Hmmm. (Brenda is lying in the grass like a very large cat.)']]}];
 for(const S of WL_STRAYS){
   const ids=S.list.map((a,i)=>'wlo_'+S.kind+(i+1)),got=()=>S.list.reduce((n,a,i)=>n+(wlF()[S.flag+(i+1)]?1:0),0);
@@ -50958,6 +50961,804 @@ function wlSoundTick(){
   else if(h!==WLS.hour){WLS.hour=h;if(SNDOPT.amb)wlsBell(Math.max(1,h%12||12))}
 }
 {const _ys=yarSoundTick;yarSoundTick=function(){_ys.apply(this,arguments);try{wlSoundTick()}catch(e){console.error('wls',e)}}}
+
+/* ---- src/desert/wenlock_glass.js ---- */
+/* ==========================================================================
+   WENLOCK: STAINED GLASS AND PAINTED WALL TILES (prefix WLGS). Procedural canvas pieces for the walls and glass of Wenlock: leaded pointed-arch windows in jewel colours,
+   a rose window, buttresses, and a helper that copies an existing wall tile (its pixels are in TEX) and paints over it, so every new tile keeps the stone or timber of
+   its street. The church of Saint Wenna gets glass in its sides and back (wlgChurch) and in the painted front (wlgPaintFront); the fan-lights over some doors are in wenlock_names.js.
+   Everything here is flat front elevation: windows are seen straight on, as in the painted pieces.
+   ========================================================================== */
+const WLGS={tiles:{},front:false};
+/* the jewel colours: [deep, bright] */
+const WLGS_COL={red:['#a81424','#ef4a52'],blue:['#1c3a96','#5c8cf0'],gold:['#d29a18','#ffe070'],green:['#1c7438','#5cc878'],violet:['#62289a','#b070e8'],amber:['#d4601a','#ffb060'],teal:['#187484','#60d4d8'],rose:['#bc4478','#f898c0']};
+const WLGS_SETS=[['blue','red','gold','blue','green'],['green','gold','red','violet','blue'],['violet','amber','blue','gold','red'],['red','blue','gold','green','teal'],['teal','rose','gold','violet','blue'],['amber','green','blue','red','gold']];
+/* a copy of an existing tile with painting over it. src: the tile gid; draw(ctx,w,h) paints on the copy. Cached by key. */
+function wlgTile(srcGid,key,draw){
+  const k=srcGid+'|'+key;if(WLGS.tiles[k]!==undefined)return WLGS.tiles[k];
+  const tx=T_TILE[srcGid],T=TEX[tx];if(!T||!T.d)return WLGS.tiles[k]=srcGid;
+  const w=128,h=(T.d.length/512)|0,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+  x.putImageData(new ImageData(new Uint8ClampedArray(T.d),w,h),0,0);
+  draw(x,w,h);
+  const d=x.getImageData(0,0,w,h).data,id=addTex(d,null);TEX[id].h=h;TEX[id].wh=T.wh||h/128;if(T.cren)TEX[id].cren=T.cren;
+  const gid=KH_NEXT_GID++;T_TILE[gid]=id;return WLGS.tiles[k]=gid;
+}
+/* the outline of a pointed (lancet) arch: cx centre, yb bottom, w width, h total height */
+function wlgArch(x,cx,yb,w,h,grow){
+  grow=grow||0;const hw=w/2+grow,ys=yb-h+.866*w+0;   // ys: where the sides stop being straight
+  x.beginPath();x.moveTo(cx-hw,yb+grow);x.lineTo(cx-hw,ys);
+  x.arc(cx+w/2,ys,w+grow,Math.PI,Math.PI*4/3,false);x.arc(cx-w/2,ys,w+grow,Math.PI*5/3,Math.PI*2,false);
+  x.lineTo(cx+hw,yb+grow);x.closePath();
+}
+/* a leaded window: diamond panes in jewel colours, lead lines, a little rose at the top, stone all round it. set: one of WLGS_SETS; kind: 0 banded, 1 medallion, 2 saint-and-border */
+function wlgWindow(x,cx,yb,w,h,set,kind,seed){
+  const pal=WLGS_SETS[set%WLGS_SETS.length],col=i=>WLGS_COL[pal[((i%pal.length)+pal.length)%pal.length]];
+  // the stone surround and a deep reveal
+  x.save();x.fillStyle='#6e5c3c';wlgArch(x,cx,yb+5,w,h+10,9);x.fill();x.fillStyle='#d8c690';wlgArch(x,cx,yb+4,w,h+6,5);x.fill();x.fillStyle='#4a3c28';wlgArch(x,cx,yb,w,h,1.5);x.fill();x.restore();
+  x.save();wlgArch(x,cx,yb,w,h);x.clip();
+  x.fillStyle=WLGS_COL[pal[0]][0];x.fillRect(cx-w,yb-h-4,w*2,h+8);
+  const dw=Math.max(9,w/4),dh=dw*1.55,y0=yb-h-dh,rows=Math.ceil((h+dh*2)/dh*2);
+  const top=yb-h+.866*w;   // the rose sits in the point of the arch, the diamonds below it
+  for(let j=0;j<rows;j++){const cy=yb-j*dh/2;if(cy<top-dh*.2)continue;const off=(j%2)*dw/2;
+    for(let i=-1;i<Math.ceil(w/dw)+1;i++){const px=cx-w/2+off+i*dw;if(px<cx-w/2-dw||px>cx+w/2+dw)continue;
+      const u=(px-(cx-w/2))/w,v=(yb-cy)/h;let ci;
+      if(kind===0)ci=v<.28?2:v<.5?1:v<.72?3:0;
+      else if(kind===1){const m=Math.hypot((u-.5)*w*1.1,(v-.45)*h*.5);ci=m<w*.22?2:m<w*.42?1:(i+j)%2?4:3}
+      else{const edge=u<.2||u>.8;ci=edge?(j%4<2?3:1):(Math.abs(u-.5)<.14?(j%3===0?2:1):(j%2?0:4))}
+      const jit=hash2(seed+i,j,77)*.35,cc=col(ci);
+      const g=x.createLinearGradient(px-dw/2,cy-dh/2,px+dw/2,cy+dh/2);g.addColorStop(0,cc[1]);g.addColorStop(1,cc[0]);
+      x.fillStyle=cc[0];x.beginPath();x.moveTo(px,cy-dh/2);x.lineTo(px+dw/2,cy);x.lineTo(px,cy+dh/2);x.lineTo(px-dw/2,cy);x.closePath();x.fill();
+      x.globalAlpha=.55+jit;x.fillStyle=g;x.fill();x.globalAlpha=1;
+      x.strokeStyle='#17140f';x.lineWidth=2.1;x.stroke()}}
+  // a rose in the point: four small lobes round a gold boss
+  {const rc=top-w*.02,rr=Math.min(w*.3,18);if(rc-rr>yb-h){x.fillStyle='#17140f';x.beginPath();x.arc(cx,rc,rr+1.5,0,6.3);x.fill();
+    for(let q=0;q<4;q++){const a=q*Math.PI/2+Math.PI/4,cc=col(q+1);x.fillStyle=cc[1];x.beginPath();x.arc(cx+Math.cos(a)*rr*.5,rc+Math.sin(a)*rr*.5,rr*.42,0,6.3);x.fill();x.strokeStyle='#17140f';x.lineWidth=1.6;x.stroke()}
+    x.fillStyle=WLGS_COL.gold[1];x.beginPath();x.arc(cx,rc,rr*.22,0,6.3);x.fill()}}
+  // the centre mullion and a transom
+  x.fillStyle='#17140f';x.fillRect(cx-1.6,yb-h,3.2,h);x.fillRect(cx-w/2,yb-h*.42,w,2.6);
+  // glow: the glass is lit from behind
+  const gl=x.createRadialGradient(cx,yb-h*.5,2,cx,yb-h*.5,h*.62);gl.addColorStop(0,'rgba(255,245,210,.34)');gl.addColorStop(1,'rgba(255,245,210,0)');x.fillStyle=gl;x.fillRect(cx-w,yb-h-4,w*2,h+8);
+  x.restore();
+  // the sill
+  x.fillStyle='#bfae80';x.fillRect(cx-w/2-8,yb+4,w+16,6);x.fillStyle='#5a4a30';x.fillRect(cx-w/2-8,yb+10,w+16,2);
+}
+/* a round rose window of n petals; (cx,cy) centre, r radius */
+function wlgRose(x,cx,cy,r,set,seed){
+  const pal=WLGS_SETS[set%WLGS_SETS.length],col=i=>WLGS_COL[pal[((i%pal.length)+pal.length)%pal.length]],k=Math.min(1,Math.max(.22,r/60));   // k thins the lead and the stone on a small rose
+  x.save();x.fillStyle='#6e5c3c';x.beginPath();x.arc(cx,cy,r+9*k,0,6.3);x.fill();x.fillStyle='#d8c690';x.beginPath();x.arc(cx,cy,r+5*k,0,6.3);x.fill();x.fillStyle='#17140f';x.beginPath();x.arc(cx,cy,r+1.5*k,0,6.3);x.fill();
+  x.beginPath();x.arc(cx,cy,r,0,6.3);x.clip();x.fillStyle=col(0)[0];x.fillRect(cx-r,cy-r,r*2,r*2);
+  const n=8;
+  for(let i=0;i<n;i++){const a0=i*Math.PI*2/n,a1=(i+1)*Math.PI*2/n,cc=col(i%2?2:1);   // wedge petals
+    x.beginPath();x.moveTo(cx,cy);x.arc(cx,cy,r,a0,a1);x.closePath();const g=x.createRadialGradient(cx,cy,r*.15,cx,cy,r);g.addColorStop(0,cc[1]);g.addColorStop(1,cc[0]);x.fillStyle=g;x.fill();x.strokeStyle='#17140f';x.lineWidth=2.4*k;x.stroke();
+    const am=(a0+a1)/2;x.fillStyle=col(i+3)[1];x.globalAlpha=.9;x.beginPath();x.arc(cx+Math.cos(am)*r*.66,cy+Math.sin(am)*r*.66,r*.17,0,6.3);x.fill();x.globalAlpha=1;x.lineWidth=1.8*k;x.stroke()}
+  x.strokeStyle='#17140f';x.lineWidth=2.6*k;x.beginPath();x.arc(cx,cy,r*.4,0,6.3);x.stroke();x.beginPath();x.arc(cx,cy,r*.78,0,6.3);x.stroke();
+  x.fillStyle=WLGS_COL.gold[1];x.beginPath();x.arc(cx,cy,r*.17,0,6.3);x.fill();x.strokeStyle='#17140f';x.lineWidth=2*k;x.stroke();
+  const gl=x.createRadialGradient(cx,cy,1,cx,cy,r);gl.addColorStop(0,'rgba(255,245,210,.4)');gl.addColorStop(1,'rgba(255,245,210,0)');x.fillStyle=gl;x.fillRect(cx-r,cy-r,r*2,r*2);
+  x.restore();
+}
+/* a buttress: a lighter, slightly proud column of dressed stone, with a weathered cap and a string course */
+function wlgButtress(x,w,h,top){
+  x.save();const l=34,r=w-34;
+  const g=x.createLinearGradient(l,0,r,0);g.addColorStop(0,'rgba(60,44,24,.5)');g.addColorStop(.14,'rgba(255,240,200,.28)');g.addColorStop(.86,'rgba(255,240,200,.22)');g.addColorStop(1,'rgba(40,28,14,.55)');
+  x.fillStyle=g;x.fillRect(l,top,r-l,h-top);
+  x.fillStyle='rgba(40,28,14,.5)';for(let y=h-30;y>top;y-=34)x.fillRect(l,y,r-l,2);
+  x.fillStyle='rgba(255,240,200,.35)';x.beginPath();x.moveTo(l-3,top+26);x.lineTo(l+(r-l)/2,top);x.lineTo(r+3,top+26);x.closePath();x.fill();
+  x.restore();
+}
+/* a string course and a plinth along a stone wall, so a long blank wall has a base and a band */
+function wlgBand(x,w,h){x.fillStyle='rgba(40,28,14,.35)';x.fillRect(0,h-22,w,3);x.fillStyle='rgba(255,240,200,.25)';x.fillRect(0,h-19,w,3);}
+/* ---- the church of Saint Wenna: tiles for the sides and the back ---- */
+function wlgChurch(C){
+  const {TM,rows,ch}=C,WH=3.1,base=TM.make('plain','golden',WH),bgid=base.gid,H=Math.round(128*WH);
+  const win=(set,kind,wd,hh,key)=>wlgTile(bgid,key,(x,w,h)=>{wlgBand(x,w,h);wlgWindow(x,64,h-92,wd,hh,set,kind,set*7+kind)});
+  const twin=set=>wlgTile(bgid,'twin'+set,(x,w,h)=>{wlgBand(x,w,h);wlgWindow(x,33,h-96,34,150,set,0,set);wlgWindow(x,95,h-96,34,150,set+2,2,set+5);});
+  const butt=wlgTile(bgid,'butt',(x,w,h)=>{wlgBand(x,w,h);wlgButtress(x,w,h,30)});
+  const slit=wlgTile(bgid,'slit',(x,w,h)=>{wlgBand(x,w,h);wlgWindow(x,64,h-150,22,110,2,1,9)});
+  const roseA=i=>wlgTile(bgid,'rose'+i,(x,w,h)=>{wlgBand(x,w,h);x.save();x.translate(-128*i,0);wlgRose(x,128,h-205,68,1,3);x.restore()});
+  const set=(x,y,g)=>{rows[y][x]=ch(g)};
+  const C0=WL_CHURCH,x0=C0.x0,x1=C0.x1,y0=C0.y0,y1=C0.y1;
+  // the east side
+  [[y0,'b'],[y0+1,'w',0],[y0+2,'w',1],[y0+3,'b'],[y0+4,'t',3],[y0+5,'b']].forEach(([y,k,s])=>set(x1,y,k==='b'?butt:k==='t'?twin(s):win(s,1,56,190,'w'+s)));
+  // the west side (the tower is at the south end of it)
+  [[y0,'b'],[y0+1,'w',2],[y0+2,'w',4],[y0+3,'b'],[y0+4,'s'],[y0+5,'s']].forEach(([y,k,s])=>set(x0,y,k==='b'?butt:k==='s'?slit:win(s,0,56,190,'w'+s)));
+  // the back: windows either side, a rose over the middle
+  const mid=Math.floor((x0+x1)/2);   // the rose spans mid and mid+1
+  for(let x=x0;x<=x1;x++){const k=x-x0;let g;
+    if(x===x0||x===x1)g=butt;else if(x===mid)g=roseA(0);else if(x===mid+1)g=roseA(1);else g=win((k+2)%6,k%3,50,170,'b'+k);set(x,y0,g)}
+  // the stone of the front row: the corners are buttresses too
+  set(x0,y1,butt);set(x1,y1,butt);
+}
+/* the painted front of the church: stained glass painted into its five windows, and a small rose in the gable of the porch (image coordinates of bldg1_0, 471 by 431) */
+function wlgPaintFront(){
+  if(WLGS.front||!IMG.wl_bldg1_0)return;WLGS.front=true;
+  const im=IMG.wl_bldg1_0,c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);
+  const gl=(cx,yb,w,h,set,kind)=>{x.save();wlgArch(x,cx,yb,w,h);x.clip();x.globalAlpha=.8;
+    // a paler, thinner version of the window, laid over the painted one so its own tracery still shows through
+    const t=document.createElement('canvas');t.width=Math.ceil(w+24);t.height=Math.ceil(h+24);const tx=t.getContext('2d');wlgWindow(tx,t.width/2,t.height-6,w,h,set,kind,set+kind);
+    x.drawImage(t,cx-t.width/2,yb-t.height+6);x.restore()};
+  gl(77,386,26,62,0,2);gl(273,386,25,60,1,0);gl(344,386,25,60,3,1);gl(414,386,25,60,2,2);
+  // the little rose in the porch gable
+  x.save();x.translate(0,0);wlgRose(x,181,322,12,0,1);x.restore();
+  IMG.wl_bldg1_0=c;
+}
+
+/* ---- src/desert/wenlock_walls.js ---- */
+/* ==========================================================================
+   WENLOCK: THE BLANK WALLS (prefix wlw). Walls that were flat slabs now have something on them:
+   - the hidden blocks under the painted barn, dovecote, mill and windmill get proper backs and sides (boarding, pigeon holes, stone with windows, whitewash), and real doors that lead
+     into small rooms (wenlock_mill.js: mill 7092, barn 7093, dovecote 7094, windmill 7096; the chapel is 7095);
+   - the sides and backs of houses get ground-floor windows, ivy and plainer wall in a mix, so no long wall is blank;
+   - the village hall gets windows on its north and south faces and a notice board each;
+   - notice boards on a few blank walls (decor with wd and txt, the same plaques as the shop signs).
+   Wall tiles are shown mirrored by the engine, so anything with writing is painted in a mirror (see wenlock_names.js).
+   ========================================================================== */
+const WLX={MILL:7092,BARN:7093,DOVE:7094,CHAPEL:7095,WIND:7096};
+/* a tile made from nothing: key, wall height in cells, draw(ctx,w,h) */
+function wlwNew(key,wh,draw){
+  const k='new|'+key+'|'+wh;if(WLGS.tiles[k]!==undefined)return WLGS.tiles[k];
+  const w=128,h=Math.round(128*wh),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');draw(x,w,h);
+  const id=addTex(x.getImageData(0,0,w,h).data,null);TEX[id].h=h;TEX[id].wh=wh;const gid=KH_NEXT_GID++;T_TILE[gid]=id;return WLGS.tiles[k]=gid;
+}
+/* a door tile that leads into a room built later (KH_LAZY); its start square is looked up when the door is opened */
+function wlwDoorGid(tex,lvl){
+  const gid=KH_NEXT_GID++;T_TILE[gid]=tex;
+  KH_DOOR[gid]={lvl,get at(){if(!LEVELS[lvl]&&KH_LAZY[lvl])KH_LAZY[lvl]();const L=LEVELS[lvl],st=L&&L.start;return st?{x:st.x,y:st.y,f:0}:{x:4,y:4,f:0}}};return gid;
+}
+/* ivy: a mat of leaves climbing from the ground, ragged at the top. cover 0..1 is how high it reaches, side -1/0/1 leans it to one edge */
+function wlwIvy(x,w,h,seed,cover,side){
+  const cols=['#2c5424','#386a2c','#46803a','#24461e','#5a9446'];const top=h-h*cover;
+  x.save();
+  x.strokeStyle='#3a2a18';x.lineWidth=2;for(let i=0;i<3;i++){const sx=w*(.2+hash2(seed,i,1)*.6+side*.15);x.beginPath();x.moveTo(sx,h);let px=sx;for(let y=h;y>top;y-=14){px+=(hash2(seed,i*50+y,2)-.5)*10;x.lineTo(px,y)}x.stroke()}
+  const n=Math.round(150*cover+40);
+  for(let i=0;i<n;i++){const u=hash2(seed,i,3),v=hash2(seed,i,4),px=w*(.04+.92*(side>0?Math.pow(u,1.5):side<0?1-Math.pow(u,1.5):u)),py=top+(h-top)*Math.pow(v,.7);
+    const ragged=top+(h-top)*(.1*hash2(seed,(px/9)|0,5));if(py<ragged)continue;
+    const a=hash2(seed,i,6)*6.28,r=4+hash2(seed,i,7)*5;x.fillStyle=cols[(hash2(seed,i,8)*cols.length)|0];
+    x.save();x.translate(px,py);x.rotate(a);x.beginPath();x.moveTo(0,-r);x.quadraticCurveTo(r*.9,-r*.2,0,r*.9);x.quadraticCurveTo(-r*.9,-r*.2,0,-r);x.fill();
+    x.strokeStyle='rgba(20,40,14,.55)';x.lineWidth=.8;x.beginPath();x.moveTo(0,-r*.8);x.lineTo(0,r*.7);x.stroke();x.restore()}
+  x.restore();
+}
+/* boarding, as on a barn: weathered upright boards on a stone plinth, two rails and a brace; kind 0 plain, 1 with a hay loft hatch, 2 with a small barred window */
+function wlwBoards(key,wh,kind){
+  return wlwNew('boards'+key+kind,wh,(x,w,h)=>{
+    const plinth=44;x.fillStyle='#4a3420';x.fillRect(0,0,w,h);
+    for(let b=0;b<8;b++){const bx=b*16,tone=hash2(key.length+kind,b,11),g=x.createLinearGradient(bx,0,bx+16,0);const c0=[96+tone*30,66+tone*20,38+tone*12];
+      g.addColorStop(0,'rgb('+(c0[0]-14)+','+(c0[1]-10)+','+(c0[2]-6)+')');g.addColorStop(.5,'rgb('+c0.map(Math.round)+')');g.addColorStop(1,'rgb('+(c0[0]-20)+','+(c0[1]-14)+','+(c0[2]-8)+')');x.fillStyle=g;x.fillRect(bx,0,15,h-plinth);
+      x.fillStyle='#1c120a';x.fillRect(bx+15,0,1.4,h-plinth);
+      for(let s=0;s<5;s++){x.strokeStyle='rgba(30,18,8,'+(.18+hash2(b,s,12)*.2)+')';x.lineWidth=.8;const gy=hash2(b,s,13)*(h-plinth);x.beginPath();x.moveTo(bx+2+hash2(b,s,14)*10,gy);x.lineTo(bx+2+hash2(b,s,15)*10,gy+20+hash2(b,s,16)*40);x.stroke()}}
+    for(const ry of [h*.34,h*.7]){x.fillStyle='#3a2616';x.fillRect(0,ry,w,11);x.fillStyle='rgba(255,230,180,.15)';x.fillRect(0,ry,w,2);x.fillStyle='#16110d';for(let n=0;n<4;n++){x.beginPath();x.arc(10+n*36,ry+5.5,1.8,0,6.3);x.fill()}}
+    x.strokeStyle='#3a2616';x.lineWidth=9;x.beginPath();x.moveTo(6,h*.34+8);x.lineTo(122,h*.7);x.stroke();x.strokeStyle='rgba(255,230,180,.13)';x.lineWidth=1.5;x.beginPath();x.moveTo(6,h*.34+3);x.lineTo(122,h*.7-5);x.stroke();
+    if(kind===1){const hx=34,hy=h*.12,hw=60,hh=h*.2;x.fillStyle='#22160c';x.fillRect(hx-4,hy-4,hw+8,hh+8);x.fillStyle='#5a3e22';x.fillRect(hx,hy,hw,hh);x.fillStyle='#16110d';x.fillRect(hx+hw/2-1,hy,2,hh);
+      x.strokeStyle='#16110d';x.lineWidth=2.4;x.beginPath();x.moveTo(hx,hy);x.lineTo(hx+hw,hy+hh);x.moveTo(hx+hw,hy);x.lineTo(hx,hy+hh);x.stroke();x.fillStyle='#1c1c22';x.fillRect(hx,hy+hh*.3,hw,5);x.fillRect(hx,hy+hh*.72,hw,5)}
+    if(kind===2){const hx=46,hy=h*.46,hw=36,hh=30;x.fillStyle='#22160c';x.fillRect(hx-4,hy-4,hw+8,hh+8);x.fillStyle='#0a0806';x.fillRect(hx,hy,hw,hh);x.fillStyle='#2a2a32';for(let n=0;n<4;n++)x.fillRect(hx+4+n*9,hy,3,hh);x.fillRect(hx,hy+hh/2-1.5,hw,3)}
+    // the stone plinth: rubble courses
+    x.fillStyle='#3a362e';x.fillRect(0,h-plinth,w,plinth);
+    for(let r=0;r<3;r++){for(let n=0;n<5;n++){const sx=n*27+(r%2)*13+hash2(r,n,17)*6,sy=h-plinth+r*15,tone=100+hash2(r,n,18)*60;x.fillStyle='rgb('+tone+','+(tone-6)+','+(tone-18)+')';x.beginPath();x.roundRect?x.roundRect(sx,sy,25,13,4):x.rect(sx,sy,25,13);x.fill();x.strokeStyle='rgba(20,16,10,.5)';x.lineWidth=1;x.stroke()}}
+    x.fillStyle='rgba(0,0,0,.18)';x.fillRect(0,h-6,w,6);
+  });
+}
+/* the dovecote: pale stone with rows of small arched pigeon holes, each with a ledge */
+function wlwHoles(base,key,wh,rowsN){
+  return wlgTile(base,'holes'+key+rowsN,(x,w,h)=>{
+    for(let r=0;r<rowsN;r++){const y=h-70-r*34;for(let n=0;n<4;n++){const px=16+n*32+(r%2)*16;if(px>w-8)continue;
+      x.fillStyle='#2a2216';x.beginPath();x.moveTo(px-5,y+12);x.lineTo(px-5,y+4);x.arc(px,y+4,5,Math.PI,0);x.lineTo(px+5,y+12);x.closePath();x.fill();
+      x.fillStyle='#e6dcc0';x.fillRect(px-8,y+12,16,3);x.fillStyle='rgba(60,44,20,.5)';x.fillRect(px-8,y+15,16,2)}}
+  });
+}
+/* ---- the doors painted onto the pictures: the mill had none. A plank door in the dark opening at its lower right (picture coordinates 459 by 436) ---- */
+function wlwPaintMill(){
+  if(WLGS.mill||!IMG.wl_bldg1_3)return;WLGS.mill=true;
+  const im=IMG.wl_bldg1_3,c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);
+  const cx=387,bt=436,w=34,h=52,top=bt-h;
+  x.fillStyle='#2a1c10';x.beginPath();x.moveTo(cx-w/2-4,bt);x.lineTo(cx-w/2-4,top+14);x.arc(cx,top+14,w/2+4,Math.PI,0);x.lineTo(cx+w/2+4,bt);x.closePath();x.fill();
+  x.save();x.beginPath();x.moveTo(cx-w/2,bt);x.lineTo(cx-w/2,top+16);x.arc(cx,top+16,w/2,Math.PI,0);x.lineTo(cx+w/2,bt);x.closePath();x.clip();
+  const g=x.createLinearGradient(cx-w/2,0,cx+w/2,0);g.addColorStop(0,'#4a2e18');g.addColorStop(.5,'#6e4a26');g.addColorStop(1,'#46301a');x.fillStyle=g;x.fillRect(cx-w/2,top,w,h);
+  x.fillStyle='rgba(20,10,4,.6)';for(let i=1;i<5;i++)x.fillRect(cx-w/2+i*w/5,top,1.4,h);
+  x.fillStyle='#1c1c22';x.fillRect(cx-w/2,top+24,w,4);x.fillRect(cx-w/2,bt-14,w,4);x.restore();
+  x.fillStyle='#d0a840';x.beginPath();x.arc(cx+8,bt-22,2.2,0,6.3);x.fill();
+  // a stone step
+  x.fillStyle='#8a7a5a';x.fillRect(cx-w/2-8,bt-3,w+16,5);
+  IMG.wl_bldg1_3=c;
+}
+/* ---- the pass ---- */
+function wlwPass(C){
+  const {rows,ch,TM,houses,hs,chars}=C,OSTY=WL.sty;
+  wlwPaintMill();
+  // 1. the hidden blocks under the big pictures: boarding, pigeon holes, honey stone, whitewash. Door squares lead into rooms.
+  const defs={
+    'The Barn':{wh:2.4,tiles:()=>[wlwBoards('b',2.4,0),wlwBoards('b',2.4,1),wlwBoards('b',2.4,2),wlwBoards('b',2.4,0)],doors:[[63,18],[64,18]],lvl:WLX.BARN},
+    'The Dovecote':{wh:2.4,tiles:()=>{const b=TM.make('plain','golden',2.4).gid;return [wlwHoles(b,'a',2.4,3),wlwHoles(b,'a',2.4,2),b,wlwHoles(b,'a',2.4,3)]},doors:[[54,38],[55,38]],lvl:WLX.DOVE},
+    'Wenlock Mill':{wh:2.4,tiles:()=>{const s='golden';return [TM.make('plain',s,2.4).gid,TM.make('gwin',s,2.4).gid,TM.make('window',s,2.4).gid,TM.make('plain2',s,2.4).gid,TM.make('window2',s,2.4).gid]},doors:[[79,88],[80,88]],lvl:WLX.MILL},
+    'The Windmill':{wh:2.4,tiles:()=>{const s=OSTY.white||'cottage';return [TM.make('plain',s,2.4).gid,TM.make('gwin',s,2.4).gid,TM.make('window',s,2.4).gid,TM.make('plain2',s,2.4).gid]},doors:[[86,89],[87,89]],lvl:WLX.WIND}
+  };
+  for(const p of (WL.pics||[])){const d=defs[p.nm];if(!d)continue;const T=d.tiles();
+    for(let y=p.y0;y<=p.y1;y++)for(let x=p.x0;x<=p.x1;x++){
+      if(d.doors.some(q=>q[0]===x&&q[1]===y)){
+        let tx;if(p.nm==='The Barn')tx=T_TILE[wlwBoards('door',2.4,0)];else tx=T_TILE[T[0]];
+        const dg=wlwDoorGid(tx,d.lvl);rows[y][x]=ch(dg);continue}
+      const r=hs(x,y,71),g=T[(r*T.length)|0];
+      let gg=g;if(p.nm==='Wenlock Mill'&&hs(x,y,72)<.4)gg=wlgTile(g,'ivy'+x+y,(c,w,h)=>wlwIvy(c,w,h,x*31+y,.5+hs(x,y,73)*.4,0));
+      rows[y][x]=ch(gg)}}
+  // 2. house sides and backs: ground-floor windows, ivy, and plain wall in a mix
+  for(const h of houses){
+    const sty=OSTY[h.sty]||h.sty,wh=h.wh,front=(x,y)=>h.face==='N'?y===h.y0:h.face==='S'?y===h.y1:h.face==='E'?x===h.x1:x===h.x0;
+    const horiz=h.face==='N'||h.face==='S';
+    for(let y=h.y0;y<=h.y1;y++)for(let x=h.x0;x<=h.x1;x++){
+      if(front(x,y)||(x===h.door[0]&&y===h.door[1]))continue;
+      if(h.spk==='hall')continue;
+      const r=hs(x,y,61),mk=k=>TM.make(k,sty,wh).gid;let g=null;
+      if(r<.28)g=mk('gwin');else if(r<.42)g=mk('window2');else if(r<.62){const b=mk(hs(x,y,62)<.5?'plain':'window');g=wlgTile(b,'ivyh'+h.sty+wh+(x*7+y*3)%5,(c,w,hh)=>wlwIvy(c,w,hh,x*13+y*7,.45+hs(x,y,63)*.35,((x+y)%3)-1))}
+      else if(r<.72)g=mk('plain2');
+      if(g!==null)rows[y][x]=ch(g)}
+  }
+  // 3. the village hall: windows on its north and south faces
+  {const H=WL_HALL,sty=OSTY.honey||'golden',wh=3.0,mk=k=>TM.make(k,sty,wh).gid;
+    for(let x=H.x0+1;x<=H.x1;x++)for(const y of [H.y0,H.y1]){rows[y][x]=ch((x+y)%2?mk('window'):mk('gwin'))}}
+  // 4. notices on blank walls
+  const note=(x,y,wd,a,b,sc)=>{if(!(rows[y]&&rows[y][x]==='.'))return;C.decor.push({k:'sign_wlnote',x,y,block:false,wd,txt:[a,b||''],sc:sc||.75})};
+  note(26,32,[0,1],'NOTICE','Council meets Mondays');note(27,37,[0,-1],'LOST AND FOUND','Ask for Clerk Fiddlesticks');note(29,35,[-1,0],'BY ORDER OF THE MAYOR','Mind the ducks');
+  note(64,16,[0,1],'FOR SALE','One barn, some owl');note(64,21,[0,-1],'HAY','Please do not smoke');note(55,36,[0,1],'DOVECOTE','Do not disturb the doves');
+  note(77,86,[0,1],'WENLOCK MILL','Flour sold by the sack');note(86,87,[0,1],'THE WINDMILL','Mind the sails');
+}
+
+/* ---- src/desert/wenlock_polish.js ---- */
+/* ==========================================================================
+   WENLOCK: THE POLISH (prefix wlp). The town builder (wenlock_town.js) calls wlPolish(C) at the end of wlBuild() with everything it has in hand (rows, tiles, decor, sky...).
+   This file runs the finishing passes one after another, each in its own file and each guarded so that one failing pass never stops the town from building:
+   glass (wenlock_glass.js), names and numbers (wenlock_names.js), chapel (wenlock_chapel.js), mill (wenlock_mill.js), air (wenlock_air.js), meadows (wenlock_meadow.js).
+   It also holds the small global fixes: distant roofs and the waystone in the rooms.
+   ========================================================================== */
+const WLP_PASSES=[
+  ['glass',C=>{wlgChurch(C)}],
+  ['walls',C=>{if(typeof wlwPass==='function')wlwPass(C)}],
+  ['names',C=>{if(typeof wlnPass==='function')wlnPass(C)}],
+  ['chapel',C=>{if(typeof wlcPass==='function')wlcPass(C)}],
+  ['mill',C=>{if(typeof wlmPass==='function')wlmPass(C)}],
+  ['air',C=>{if(typeof wlaPass==='function')wlaPass(C)}],
+  ['meadow',C=>{if(typeof wlePass==='function')wlePass(C)}]
+];
+function wlPolish(C){for(const [n,f] of WLP_PASSES){try{f(C)}catch(e){console.error('wlPolish '+n,e)}}}
+/* distant roofs: a house roof is drawn out to forty squares, but the walls under it only out to the fog, so far houses floated as bare roofs. Roofs are kept only as far as walls are drawn. */
+{const _k=khSkyList;khSkyList=function(cx,cy,dX,dY,L,md){const out=_k.apply(this,arguments);if(LEVEL!==496||typeof RANGE==='undefined'||!RANGE)return out;const r2=(RANGE+1.5)*(RANGE+1.5);
+  return out.filter(s=>!s.smallSky||((s.x-cx)*(s.x-cx)+(s.y-cy)*(s.y-cy))<=r2)}}
+/* the waystone: every room has one in a corner, which looked like a stray post. In a Wenlock room it is a plain wooden bench (it still wakes and still works, T to travel). */
+{const _pt=placeTeleporter;placeTeleporter=function(){const r=_pt.apply(this,arguments);
+  try{if(LEVEL>=WL.H0&&LEVEL<=WL.H0+99&&G.tele){const d=G.decor.find(q=>q.tele&&q.k==='teleporter');if(d){d.k='kh_ohgard1_3';d.sc=1.1;d.deco=true;NPC_H.kh_ohgard1_3=NPC_H.kh_ohgard1_3||.62}}}catch(e){console.error(e)}
+  return r}}
+/* ---- the rooms: touch-ups to the room data of wenlock_in.js ---- */
+{const R=WLIN_ROOMS;
+  // the widow's parlour: the right wall was bare
+  R.home_spartan.props.push(['dresser',7,3,{h:.85}],['tapestry',7,5,{h:.8}]);
+  // the smithy: the right wall was bare, and now has racks of tongs and blades
+  R.forge.props.push(['hangstand',11,3,{h:1.1}],['weaponrack',11,7,{h:.95}],['shopcounter',9,7,{h:.55}]);R.forge.raw.push(['crate',11,6]);
+  // the inn cellar and the old granary: a few more lights, and two hanging candle rings in the cellar
+  R.cellar.amb=.46;R.cellar.lights=[[2,2],[12,2],[7,6],[3,8],[11,8],[1,5],[13,5],[7,2],[4,4],[10,4]];R.cellar.props.push(['chandelier',4,5,{free:1}],['chandelier',10,5,{free:1}]);
+  R.granary.amb=.48;R.granary.lights=[[2,2],[10,2],[6,5],[2,7],[10,7],[6,2]];
+}
+/* the pets of the cottages: the same cat on the same cushion was in a dozen rooms; now each cottage picks its household from a longer list by its number */
+for(const [id,n,face,lines,o] of [
+  ['wli_home_parrot','A parrot in a cage','pet_parrot_0',["Hello. Hello. Hello. (It has said this forty times and it is still pleased.)","Pretty boy. (It is not clear who it is talking to. It is looking at the dog.)"],{sc:.9}],
+  ['wli_home_dove','A pet dove','kh_anim1_5',["Coo. (She sits on the back of the chair and watches the room go by.)","Coo, coo. (She has been tame since she fell out of a nest in the spring.)"],{sc:.85}],
+  ['wli_home_goat','A house goat','kh_anim1_3',["Maaa. (She is allowed in the kitchen. Nobody remembers agreeing to this.)","Maaa. (She has eaten the end of a rug and is now eating the other end, for balance.)"],{sc:.7}],
+  ['wli_home_duck','A duck by the hearth','pet_duck_0',["Quack. (She has settled in front of the fire as if she paid the rent.)","Quack. (She has decided this house is hers and is walking round it to make the point.)"],{sc:.75}]]){
+  khNpc(id,n,face,()=>yrLines(id,lines),o)}
+{const _wb=wlinBuild;wlinBuild=function(D,name,b,C){
+  if(/^home_/.test(name)&&D&&D.folk){const k=+String(b&&b.id||'').replace(/\D/g,'')||0,r=hash2(k,5,91);
+    const catAlt=['wli_home_cat','wli_home_cat','wli_home_dog','wli_home_parrot','wli_home_dove','wli_home_goat','wli_home_duck','wli_home_cat'],dogAlt=['wli_home_dog','wli_home_dog','wli_home_cat','wli_home_goat','wli_home_duck','wli_home_dog'];
+    if(name!=='home_cats'&&name!=='home_children'){
+      D=Object.assign({},D,{folk:D.folk.map(f=>f[0]==='wli_home_cat'?[catAlt[(r*catAlt.length)|0]].concat(f.slice(1)):f[0]==='wli_home_dog'?[dogAlt[(hash2(k,6,92)*dogAlt.length)|0]].concat(f.slice(1)):f)})}}
+  const out=_wb.call(this,D,name,b,C);
+  // a rolled carpet or a plant in a corner, now and then
+  try{if(/^home_/.test(name)){const k=+String(b&&b.id||'').replace(/\D/g,'')||0,w=D.w||9,h=D.h||7;
+    const spots=[[1,h-2],[w-2,h-2],[1,3],[w-2,3]],pick=spots[(hash2(k,7,93)*spots.length)|0],r2=hash2(k,8,94);
+    if(!C.has(pick[0],pick[1])){if(r2<.35)C.put('rolledcarpets',pick[0],pick[1]);else if(r2<.7&&IMG.flowerpot)C.raw('flowerpot',pick[0],pick[1],{sc:1})}}}catch(e){console.error(e)}
+  return out}}
+
+/* ---- src/desert/wenlock_names.js ---- */
+/* ==========================================================================
+   WENLOCK: NUMBERS, NAMES AND STREET SIGNS (prefix wln). Every door of the town was the same door. Now:
+   - each house has its number on a brass-and-enamel plate set in its door tile (odd numbers on the west or north side of a street, even on the east or south side, counted from
+     the west or the north), a door painted one of ten colours, and a knocker; some doors have a coloured fan-light;
+   - about forty cottages have a name, on a hanging board beside the door ("Pear Tree Cottage, 11 High Street");
+   - the corners of the streets have a signpost with white enamel street plates, readable from both ways; the bridge has plates on its parapet;
+   - the west gate is a proper gate: wooden leaves bound in iron, a lamp each side, and a board over it.
+   The plates are the same kind of thing as the shop signs: decor with wd and txt, drawn by shopSign() (wrapped below for the white street plates).
+   ========================================================================== */
+const WLN_STREET={N:'High Street',S:'High Street',MW:'Mill Lane',ME:'Mill Lane',CW:'Church Lane',CE:'Church Lane',GW:'Green Lane',GE:'Green Lane',TN:'Back Track',TS:'Back Track'};
+const WLN_HINT={N:'high',S:'high',MW:'mill',ME:'mill',CW:'church',CE:'church',GW:'green',GE:'green',TN:'track',TS:'track'};
+const WLN_ODD={N:1,MW:1,CW:1,GW:1,TN:1};   // the sides that carry the odd numbers
+/* ten door colours: [name, r, g, b] */
+const WLN_DOORS=[['racing green',38,92,60],['navy blue',38,60,124],['oxblood',124,34,38],['black',36,34,36],['cream',230,216,180],['mustard',200,152,40],['plum',96,48,104],['teal',36,122,128],['slate grey',98,106,114],['terracotta',194,98,46]];
+/* the house names: [name, where it likes to stand] */
+const WLN_NAMES=[['Pear Tree Cottage','any'],['Wren\'s Rest','any'],['Honeysuckle Cottage','any'],['Mill View','mill'],['The Nook','any'],['Rose Cottage','any'],['Bramble Cottage','any'],['Hollyhock House','any'],
+  ['Church View','church'],['Tansy Cottage','any'],['Dove Cottage','church'],['Fiddler\'s Rest','any'],['Lavender Cottage','any'],['The Old Dairy','track'],['Sparrow Hall','any'],['Elm Tree House','any'],['Primrose Cottage','any'],
+  ['Brook Cottage','mill'],['Thimble Cottage','any'],['The Sheepfold','track'],['Foxglove Cottage','any'],['Marigold House','any'],['Ivy Cottage','any'],['The Hollies','any'],['Cobbler\'s Rest','high'],['The Willows','mill'],
+  ['Jasmine Cottage','any'],['Damson Cottage','green'],['Quince House','any'],['Robin\'s Nest','any'],['Bluebell Cottage','green'],['Meadow View','track'],['Orchard End','green'],['Little Thatch','any'],['Brewer\'s Cottage','high'],
+  ['Lamplighter\'s Cottage','high'],['Thrush Cottage','any'],['Hazel Cottage','any'],['Apple Loft','green'],['Barley Mow','track'],['Gable End','any'],['Green View','green'],['Weaver\'s Cottage','high'],['Swallow\'s Rest','any'],['Sexton\'s Cottage','church']];
+/* ---- the brass numeral plate, the knocker, and the colour of the door, painted into a copy of the door tile ---- */
+function wlnDoorTile(gid,h,pal,num,fan){
+  return wlgTile(gid,'door|'+pal+'|'+num+'|'+(fan===undefined?'-':fan),(x,w,hh)=>{
+    const top=hh-128,c=WLN_DOORS[pal];
+    // the door itself: the darker pixels inside the arch of the opening take the new colour, keeping the grain and the panels
+    if(c){const X0=36,X1=94,Y0=top+28,Y1=hh-2,id=x.getImageData(X0,Y0,X1-X0,Y1-Y0),d=id.data,iw=X1-X0;
+      for(let yy=0;yy<Y1-Y0;yy++)for(let xx=0;xx<iw;xx++){const wx=X0+xx,wy=Y0+yy;
+        if(wy<top+58){const dx=wx-65,dy=wy-(top+58);if(dx*dx+dy*dy>29*29)continue}
+        const i=(yy*iw+xx)*4,r=d[i],g=d[i+1],b=d[i+2],l=.3*r+.59*g+.11*b;
+        if(l<138){const k=Math.min(1.45,.35+l/80);d[i]=Math.min(255,c[1]*k);d[i+1]=Math.min(255,c[2]*k);d[i+2]=Math.min(255,c[3]*k)}}
+      x.putImageData(id,X0,Y0)}
+    // the engine shows a wall tile mirrored left to right, so the things painted on it are painted in a mirror (and read the right way round in the game)
+    x.save();x.translate(w,0);x.scale(-1,1);
+    // a stained fan-light in the top of the doorway
+    if(fan!==undefined&&fan!==null){const cx=65,cy=top+62,r=21;x.save();x.beginPath();x.arc(cx,cy,r,Math.PI,0);x.lineTo(cx+r,cy+3);x.lineTo(cx-r,cy+3);x.closePath();x.clip();
+      const pal2=WLGS_SETS[fan%WLGS_SETS.length];for(let i=0;i<7;i++){const a0=Math.PI+i*Math.PI/7,a1=Math.PI+(i+1)*Math.PI/7,cc=WLGS_COL[pal2[i%pal2.length]];x.beginPath();x.moveTo(cx,cy+3);x.arc(cx,cy+3,r+4,a0,a1);x.closePath();
+        const g=x.createRadialGradient(cx,cy,2,cx,cy,r);g.addColorStop(0,cc[1]);g.addColorStop(1,cc[0]);x.fillStyle=g;x.fill();x.strokeStyle='#17140f';x.lineWidth=1.8;x.stroke()}
+      x.restore();x.strokeStyle='#17140f';x.lineWidth=2.4;x.beginPath();x.arc(cx,cy,r+1,Math.PI,0);x.lineTo(cx+r+1,cy+4);x.lineTo(cx-r-1,cy+4);x.stroke()}
+    // the knocker: a brass ring on a plate, and a letter slot
+    x.fillStyle='#b8862c';x.beginPath();x.arc(80,top+70,3.4,0,6.3);x.fill();x.strokeStyle='#e8c060';x.lineWidth=2.1;x.beginPath();x.arc(80,top+76,4.6,0,6.3);x.stroke();x.fillStyle='#8a6420';x.fillRect(52,top+86,22,4);x.fillStyle='#e0b850';x.fillRect(53,top+86,20,1.5);
+    // the number: a brass-rimmed oval of cream enamel beside the door
+    if(num){const px=111,py=top+50,s=String(num),fs=s.length>2?12:s.length>1?15:17;
+      x.save();x.fillStyle='#6a4a14';x.beginPath();x.ellipse(px,py,16.5,12,0,0,6.3);x.fill();x.fillStyle='#d8a838';x.beginPath();x.ellipse(px,py,15,10.8,0,0,6.3);x.fill();x.fillStyle='#f6eed4';x.beginPath();x.ellipse(px,py,12.6,8.6,0,0,6.3);x.fill();
+      x.strokeStyle='#8a6a20';x.lineWidth=.9;x.beginPath();x.ellipse(px,py,11,7.2,0,0,6.3);x.stroke();
+      x.font='bold '+fs+'px Georgia,serif';x.textAlign='center';x.textBaseline='middle';x.fillStyle='#1c1208';x.fillText(s,px,py+1);
+      x.fillStyle='#e8c860';for(const sx of [-15,15]){x.beginPath();x.arc(px+sx,py,1.4,0,6.3);x.fill()}x.restore()}
+    x.restore();
+  });
+}
+/* ---- white enamel street plates, in the way of the shop signs: decor with wd, txt and plate:'street' ---- */
+const WLN_PLATES={};
+function wlnStreetPlate(d){
+  const id=d.txt.join('|');if(WLN_PLATES[id])return WLN_PLATES[id];
+  return WLN_PLATES[id]=mkCanvas(320,150,(x,w,h)=>{
+    x.fillStyle='rgba(0,0,0,.35)';x.fillRect(6,8,w-8,h-8);
+    x.fillStyle='#161a28';x.fillRect(0,0,w-6,h-8);x.fillStyle='#f4f0e2';x.fillRect(6,6,w-18,h-20);
+    x.strokeStyle='#161a28';x.lineWidth=3;x.strokeRect(14,14,w-34,h-36);
+    x.fillStyle='#8a8678';for(const [px,py] of [[10,10],[w-16,10],[10,h-18],[w-16,h-18]]){x.beginPath();x.arc(px,py,2.4,0,6.3);x.fill()}
+    x.textAlign='center';x.textBaseline='middle';
+    const fit=(t,y,fs0,font,col)=>{let fs=fs0;x.font=font+' '+fs+'px Georgia,serif';while(x.measureText(t).width>w-60&&fs>10){fs-=2;x.font=font+' '+fs+'px Georgia,serif'}x.fillStyle=col;x.fillText(t,(w-6)/2,y)};
+    fit(d.txt[0],d.txt[1]?h*.42:h*.5,50,'bold','#161a28');
+    if(d.txt[1])fit(d.txt[1],h*.7,24,'italic','#3a3a46');
+  });
+}
+{const _s=shopSign;shopSign=function(d){if(d&&d.k==='sign_wlst'&&d.txt)return wlnStreetPlate(d);return _s.apply(this,arguments)}}
+/* a freestanding street sign: a painted signpost (walk up and read it) with a plate on each of the two ways it faces */
+let WLN_POSTS=0;
+function wlnPost(C,x,y,plates,talk,rad){
+  const q=C.free(x,y)?[x,y]:C.near(x,y,rad||2);if(!q)return null;
+  const id='wlo_post'+(WLN_POSTS++);khNpc(id,'A signpost','greensign',()=>say(talk,[BYE]));
+  C.dc('greensign',q[0],q[1],{npc:id,deco:false});
+  for(const [wd,t1,t2] of plates)C.decor.push({k:'sign_wlst',x:q[0],y:q[1],block:false,wd,txt:[t1,t2||''],plate:'street',sc:.85});
+  return q;
+}
+/* ---- the pass ---- */
+function wlnPass(C){
+  const {houses,rows,chars,ch,hs}=C;
+  // 1. numbers: counted from the west (or the north) along each side of each street
+  const sideOf=h=>{const lot=WL_LOTS[h.k];return lot?lot[0]:null};
+  const seq={};
+  houses.forEach(h=>{const s=sideOf(h);if(!s)return;(seq[s]=seq[s]||[]).push(h)});
+  for(const s in seq){const odd=WLN_ODD[s]?1:0;seq[s].sort((a,b)=>(a.x0-b.x0)||(a.y0-b.y0));seq[s].forEach((h,i)=>{h.num=2*i+(odd?1:2);h.street=WLN_STREET[s];h.sideKey=s})}
+  // 2. names: the preferred ones where they fit, about forty of the cottages
+  const homes=houses.filter(h=>h.num&&!h.sp);
+  const pool=WLN_NAMES.slice(),take=hint=>{let i=pool.findIndex(n=>n[1]===hint);if(i<0)i=pool.findIndex(n=>n[1]==='any');if(i<0)i=0;return pool.splice(i,1)[0][0]};
+  const forge=homes.find(h=>h.sideKey==='N'&&h.x0===14);if(forge)forge.hname='The Old Forge House';
+  homes.forEach((h,i)=>{if(h.hname)return;if(hs(h.x0,h.y0,44)<.1)return;h.hname=take(WLN_HINT[h.sideKey]);});
+  // 3. doors: colour, knocker, number, fan-light; and the name board beside the door
+  const FAN={chandler:3,school:1,almshouse:4};
+  houses.forEach((h,k)=>{
+    if(!h.num)return;
+    const dc=rows[h.door[1]][h.door[0]],gid=chars[dc];if(!gid)return;
+    const pal=h.sp?-1:((hs(h.x0,h.y0,51)*WLN_DOORS.length)|0),fan=h.sp&&FAN[h.sp.kind]!==undefined?FAN[h.sp.kind]:(!h.sp&&hs(h.x0,h.y0,52)<.12?((hs(h.x0,h.y0,53)*6)|0):undefined);
+    const g2=wlnDoorTile(gid,h,pal,h.num,fan);if(g2!==gid&&KH_DOOR[gid])KH_DOOR[g2]=KH_DOOR[gid];   // the new tile opens the same door
+    rows[h.door[1]][h.door[0]]=ch(g2);
+    h.doorCol=pal>=0?WLN_DOORS[pal][0]:null;
+    if(h.hname){
+      const horizontal=h.face==='N'||h.face==='S';
+      for(const sgn of [1,-1]){
+        const sx=horizontal?h.front[0]+sgn:h.front[0],sy=horizontal?h.front[1]:h.front[1]+sgn;
+        const wallCell=horizontal?[sx,h.face==='S'?h.y1:h.y0]:[h.face==='E'?h.x1:h.x0,sy];
+        if(!rows[wallCell[1]]||rows[wallCell[1]][wallCell[0]]==='.')continue;
+        C.decor.push({k:'sign_wlh'+h.id,x:sx,y:sy,block:false,wd:h.wall,txt:[h.hname,h.num+' '+h.street],sc:.78});break}
+    }
+  });
+  // 4. the street signs at the corners
+  wlnPost(C,23,49,[[[1,0],'CHURCH LANE','North to the church'],[[0,1],'HIGH STREET','Nos 1 to 35']],'A signpost at the corner. One board reads CHURCH LANE, north to the church. The other reads HIGH STREET.');
+  wlnPost(C,71,51,[[[1,0],'MILL LANE','South to the mill'],[[0,-1],'HIGH STREET','Nos 2 to 24']],'A signpost at the corner. One board reads MILL LANE, south to the brook and the mill. The other reads HIGH STREET.');
+  wlnPost(C,83,49,[[[1,0],'GREEN LANE','North to the back track'],[[0,1],'HIGH STREET','The east end']],'A signpost at the corner. One board reads GREEN LANE, north to the back track. The other reads HIGH STREET.');
+  wlnPost(C,25,31,[[[-1,0],'CHURCHYARD LANE','To the old graveyard'],[[0,1],'CHURCH LANE','South to High Street']],'A signpost. CHURCHYARD LANE goes west to the old graveyard. CHURCH LANE goes south to High Street.');
+  wlnPost(C,39,13,[[[-1,0],'BLACKBRIAR LANE','To the witch\'s wood'],[[0,1],'BACK TRACK','East to the farms']],'A signpost. BLACKBRIAR LANE goes north to the witch\'s wood, and the board says to think twice. BACK TRACK goes east to the farms.');
+  wlnPost(C,85,15,[[[-1,0],'GREEN LANE','South to High Street'],[[0,-1],'BACK TRACK','West to Blackbriar Lane']],'A signpost at the end of the back track. GREEN LANE goes south to High Street.');
+  wlnPost(C,40,49,[[[1,0],'MARKET SQUARE','Market day on Saturday'],[[0,1],'HIGH STREET','Nos 1 to 35']],'A signpost at the edge of the market square. MARKET SQUARE, market day on Saturday, and HIGH STREET.');
+  wlnPost(C,29,52,[[[1,0],'THE VILLAGE GREEN','Duck pond. Please do not feed the ducks.'],[[0,-1],'HIGH STREET','Back to the square']],'A signpost at the head of the path. THE VILLAGE GREEN, with a duck pond. Underneath: please do not feed the ducks. Somebody has added: they feed themselves.');
+  wlnPost(C,73,83,[[[-1,0],'MILL LANE','The brook and the mill'],[[0,-1],'HIGH STREET','Back up the lane']],'A signpost by the bridge. MILL LANE, over the old bridge to the mill. HIGH STREET is back up the lane.');
+  // the bridge: plates on the low parapets
+  C.decor.push({k:'sign_wlst',x:72,y:84,block:false,wd:[-1,0],txt:['THE OLD BRIDGE','Built 1412'],plate:'street',sc:.8});
+  C.decor.push({k:'sign_wlst',x:72,y:85,block:false,wd:[1,0],txt:['WENLOCK BROOK','Mind the ducks'],plate:'street',sc:.8});
+  wlnGate(C);
+}
+/* the west gate, a proper one: oak leaves bound in iron under the arch, a lamp each side, a board overhead */
+function wlnGate(C){
+  const tex=T_DOORS.wlgate2;if(tex===undefined||!TEX[tex]||!TEX[tex].d)return;
+  const T=TEX[tex],w=128,h=(T.d.length/512)|0,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.putImageData(new ImageData(new Uint8ClampedArray(T.d),w,h),0,0);
+  const top=h-128*2.05,bot=h-4;
+  // the arch of the opening and two oak leaves
+  x.save();x.beginPath();x.moveTo(10,bot);x.lineTo(10,top+60);x.arc(64,top+60,54,Math.PI,0);x.lineTo(118,bot);x.closePath();x.clip();
+  for(let i=0;i<2;i++){const lx=10+i*54,g=x.createLinearGradient(lx,0,lx+54,0);g.addColorStop(0,'#4a3018');g.addColorStop(.5,'#6a4824');g.addColorStop(1,'#42281a');x.fillStyle=g;x.fillRect(lx,top,54,bot-top);
+    for(let p=0;p<4;p++){x.fillStyle='rgba(20,10,4,.55)';x.fillRect(lx+p*13.5,top,1.6,bot-top);x.fillStyle='rgba(255,220,160,.12)';x.fillRect(lx+p*13.5+2,top,1.2,bot-top)}
+    x.fillStyle='#1c1c22';for(const fy of [top+70,top+(bot-top)*.5+20,bot-34]){x.fillRect(lx,fy,54,7);x.fillStyle='#3a3a44';x.fillRect(lx,fy,54,1.8);x.fillStyle='#1c1c22';for(let r=0;r<4;r++){x.beginPath();x.arc(lx+6+r*14,fy+3.5,1.9,0,6.3);x.fill()}}}
+  x.fillStyle='#0c0a08';x.fillRect(63,top,2,bot-top);
+  x.strokeStyle='#d0a840';x.lineWidth=3;for(const rx of [56,72]){x.beginPath();x.arc(rx,bot-(bot-top)*.38,5,0,6.3);x.stroke()}
+  x.restore();
+  x.strokeStyle='#14110e';x.lineWidth=5;x.beginPath();x.moveTo(10,bot);x.lineTo(10,top+60);x.arc(64,top+60,54,Math.PI,0);x.lineTo(118,bot);x.stroke();
+  const id=addTex(x.getImageData(0,0,w,h).data,null);TEX[id].h=h;TEX[id].wh=T.wh;T_DOORS.wlgate2=id;
+  // a lamp each side of the gate and a board over it
+  for(const [lx,ly] of [[3,49],[3,51]])C.lamp(lx,ly);
+  C.decor.push({k:'sign_wlst',x:3,y:50,block:false,wd:[-1,0],txt:['WEST GATE','Not yet open'],plate:'street',sc:.9});
+}
+
+/* ---- src/desert/wenlock_chapel.js ---- */
+/* ==========================================================================
+   WENLOCK: THE QUIET CHAPEL (prefix WLCH). A little stone chapel in the quiet north-west corner of the town, three squares by three (x 7 to 9, y 20 to 22), with its door on the south
+   at (8,22) and a footpath of gravel from Churchyard Lane (8,31) up to the door (8,23). Inside (room 7095, WLX.CHAPEL): an altar, two stained glass panels, a stand of votive candles
+   that glow, a few pews, a bookstand, and Sister Agnes, who keeps it. She has one small quest (wlq15, A Candle for Saint Wenna): fetch the chapel candle from Wick the chandler in
+   Mill Lane, and light it on the votive stand.
+   ========================================================================== */
+const WLCH={x0:7,x1:9,y0:20,y1:22,door:[8,22],front:[8,23]};
+/* ---- the outside ---- */
+function wlcPass(C){
+  const {rows,ch,TM,hs}=C,sty='flint',wh=2.6,mk=k=>TM.make(k,sty,wh);
+  // clear the ground: the block, a margin round it, and the footpath
+  const clear=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(d.x===x&&d.y===y&&!/^sign_/.test(d.k))C.decor.splice(i,1)}
+    for(let i=C.scenery.length-1;i>=0;i--){const s=C.scenery[i];if(Math.floor(s.wx)===x&&Math.floor(s.wy)===y)C.scenery.splice(i,1)}}};
+  clear(5,18,11,24);clear(8,23,8,31);C.used.delete('8,31');
+  // walls: stone, stained glass in the sides, a rose over the back, and the door
+  const plain=mk('plain').gid,glass=(s,k)=>wlgTile(plain,'cw'+s+k,(x,w,h)=>{wlgBand(x,w,h);wlgWindow(x,64,h-84,44,150,s,k,s+k)});
+  const rose=wlgTile(plain,'cr',(x,w,h)=>{wlgBand(x,w,h);wlgRose(x,64,h-190,36,2,7)});
+  const butt=wlgTile(plain,'cb',(x,w,h)=>{wlgBand(x,w,h);wlgButtress(x,w,h,40)});
+  const dt=mk('door'),dg=wlwDoorGid(dt.tex,WLX.CHAPEL);
+  const put=(x,y,g)=>{rows[y][x]=ch(g);C.block[y*C.W+x]=1};
+  for(let y=WLCH.y0;y<=WLCH.y1;y++)for(let x=WLCH.x0;x<=WLCH.x1;x++)put(x,y,plain);
+  put(7,22,glass(1,1));put(8,22,dg);put(9,22,glass(4,2));put(7,21,glass(0,0));put(9,21,glass(3,1));put(8,21,butt);put(7,20,butt);put(8,20,rose);put(9,20,butt);
+  C.sky.push({x:8.5,y:21.5,k:wlRoofFor('slate'),w:3.7,z:wh-.03});
+  // the footpath of gravel, lamps, yews, flowers and a bench
+  C.setF(8,23,8,30,'3');
+  for(const [x,y] of [[7,25],[9,28]])C.lamp(x,y);
+  for(const [x,y] of [[6,21],[10,21],[6,24],[10,24]])C.tree(x,y,'ltree12');
+  for(const [x,y] of [[7,24],[9,24],[7,27],[9,26],[7,29],[9,30]])C.flowers(x,y,1.15);
+  C.tryDc('kh_ohgard1_3',9,23);for(let y=23;y<=30;y++)C.used.add('8,'+y);
+  C.decor.push({k:'sign_wlst',x:7,y:23,block:false,wd:[0,-1],txt:['THE QUIET CHAPEL','All are welcome'],sc:.85});
+  wlnPost(C,9,31,[[[-1,0],'TO THE QUIET CHAPEL','The footpath north'],[[0,1],'CHURCHYARD LANE','East to Church Lane']],'A signpost at the start of a footpath. TO THE QUIET CHAPEL, north up the gravel. Churchyard Lane runs on east to Church Lane.');
+  // on the map
+  C.houses.push({x0:WLCH.x0,x1:WLCH.x1,y0:WLCH.y0,y1:WLCH.y1,face:'S',door:WLCH.door,front:WLCH.front,wall:[0,-1],out:2,sty:'flint',rk:'slate',sp:null,id:WLX.CHAPEL,w:3,num:0});
+  WL_MAPX.push({t:'The Quiet Chapel',x:8,y:18,k:'place'});
+}
+const WL_MAPX=[];
+/* ---- the inside ---- */
+WLIR('chapel',{w:7,h:7,look:'church',amb:.46,lights:[[3,2],[1,3],[5,3],[3,5]],keeper:[3,2],
+  props:[['altar',3,1],['glasswin',1,1],['glasswin',5,1],['votive',1,3,{npc:'wlc_votive'}],['votive',5,3,{npc:'wlc_votive2'}],['pew',2,4],['pew',4,4],['pew',2,5],['pew',4,5],['lectern',5,5,{npc:'wlc_book',h:.8}]],
+  folk:[['wli_church_cat',1,5]],win:[[2,0],[4,0],[0,3],[6,3]],raw:[]});
+khNpc('wlc_sister','Sister Agnes, keeper of the chapel','wl2_folk2_3',()=>yrLines('wlc_sister',[
+  "Peace to you. It is a very small chapel and very quiet. People come in to be quiet, and I stay to make sure it stays that way.",
+  "I have kept this chapel for thirty years. In that time two people have shouted in it. One of them was a goose.",
+  "Saint Wenna was a shepherdess who sat in a field for a week without saying a word, and a spring came up where she sat. We take the hint."]),{sc:1});
+KH_LAZY[WLX.CHAPEL]=()=>{if(!LEVELS[WLX.CHAPEL])wlmMake(WLX.CHAPEL,'chapel','The Quiet Chapel',[8,23],2,'wlc_sister')};
+khNpc('wlc_votive','A stand of votive candles','wl2_church_5',d=>{const F=wlF();
+  if(qSt('wlq15')==='active'&&F.wlq15a&&!F.wlq15b){F.wlq15b=1;yrStep('You have lit the candle on the votive stand.');return say("You set the chapel candle in the middle of the dark stand and light it from the one beside. The flame leans, steadies, and stands up straight. The whole chapel goes a little warmer, and a little quieter, which you would not have thought possible.",[BYE])}
+  return say(F.wlq15b?'A stand of little flames. In the middle one burns the chapel candle, bright and steady.':'A stand of votive candles. Most are lit. A gap in the middle row is waiting for a candle.',[BYE])},{sc:1});
+khNpc('wlc_votive2','Votive candles','wl2_church_5',()=>say('Little flames in a row, each one somebody\'s quiet wish. They smell of warm wax.',[BYE]),{sc:1});
+khNpc('wlc_book','A hymn book on its stand','wl2_church_4',()=>say("A hymn book, open at the harvest hymn. Someone has marked a verse in pencil and written beside it: too fast. Beside that, in another hand: you try it.",[BYE]),{sc:1});
+/* ---- the quest ---- */
+Object.assign(WL_REW,{wlq15:{gold:900,xp:9000,items:['potion5']}});
+WL_QUESTS.push({id:'wlq15',giver:'Sister Agnes',title:'A Candle for Saint Wenna',desc:'The votive stand in the quiet chapel has gone dark. Fetch the chapel candle from Wick the chandler in Mill Lane and light it.'});
+const WLD15=khQD("Peace to you. I have a small trouble, and a small chapel to go with it. The stand of votive candles has gone dark, all but the one in the middle row, which has a gap in it, because the candle that stood there has burned down to a puddle. Wick the chandler in Mill Lane makes the only candles that burn without sulking. Would you fetch one for me? Ask him for the chapel candle. And then light it yourself, if you would. My knees are not what they were, and the stand is a long way down.",
+  "Thank you. Mill Lane, the chandlery, the door with the fan of coloured glass over it. Tell him it is for the chapel and he will charge you only twice what it is worth.",
+  (n,m)=>wlF().wlq15a?'Wick has given you the chapel candle. Light it on the stand of votive candles, to the left of the altar.':'Ask Wick the chandler in Mill Lane for the chapel candle, then light it on the votive stand in the chapel.',
+  "It is lit? I could feel it from here. A chapel can tell, you know. It goes a little less cold.",
+  "Thank you. It is a very small thing and I shall not forget it. Take this, with the thanks of Saint Wenna, who said nothing for a week and meant it.",
+  "The candle burns, the chapel is warm, and I have not had to climb the steps. You are always welcome here.","The candle is lit.");
+wlQ('wlq15','Sister Agnes',[["Ask Wick the chandler, in Mill Lane, for the chapel candle.",()=>wlF().wlq15a,['wli_k_chandler']],["Light the chapel candle on the votive stand in the Quiet Chapel.",()=>wlF().wlq15b,['wlc_votive']]]);
+wlGive('wlc_sister','wlq15','wlq1',WLD15);
+wlTalk('wli_k_chandler','wlq15','wlq15a','Wick has given you the chapel candle.',"The chapel candle? For Sister Agnes? Of course. Here, the one with the very straight wick, wrapped in cloth. Tell her I did not charge her twice. Tell her I only thought about it.");
+
+/* ---- src/desert/wenlock_mill.js ---- */
+/* ==========================================================================
+   WENLOCK: THE MILL, THE WINDMILL, THE BARN AND THE DOVECOTE (prefix wlm). The four painted buildings at the edges of the town used to be a picture on a slab with a door that did
+   nothing. Now each door opens into a small room (levels 7092 mill, 7096 windmill, 7093 barn, 7094 dovecote), built with the same room data as every other Wenlock room (WLIR in
+   wenlock_in.js). The doors in the town are made by wenlock_walls.js (WLX has the room numbers). The millstone and the stair are composed from the painted wood and stone textures
+   of the rooms (wl2_floor_0 and wl2_floor_1), because there is no painted millstone yet.
+   ========================================================================== */
+Object.assign(WLIN_LOOK,{barn:{wall:'wl2_wall_1',floor:'wl2f4',ff:'floor_4',win:3},mill:{wall:'wl2_wall_3',floor:'wl2f1',ff:'floor_1',win:4},windmill:{wall:'wl2_wall_2',floor:'wl2f1',ff:'floor_1',win:5}});
+Object.assign(WLIN_P,{millstone:['mill_0',1.15,0,0,'oven'],stair:['mill_1',1.5,0,0,'wardrobe']});
+function wlmPieces(){
+  if(IMG.wl2_mill_0||!IMG.wl2_floor_0)return;
+  const pat=(x,im,tone)=>{try{return x.createPattern(im,'repeat')}catch(e){return tone}};
+  IMG.wl2_mill_0=mkCanvas(256,256,(x,w,h)=>{
+    const wood=pat(x,IMG.wl2_floor_0,'#6a4a28'),stone=pat(x,IMG.wl2_floor_1,'#8a8478');
+    // the hopper: a wooden funnel that feeds the stones
+    x.fillStyle=wood;x.beginPath();x.moveTo(70,14);x.lineTo(186,14);x.lineTo(150,84);x.lineTo(106,84);x.closePath();x.fill();x.strokeStyle='#2a1a0c';x.lineWidth=3;x.stroke();
+    x.fillStyle='rgba(0,0,0,.25)';x.beginPath();x.moveTo(186,14);x.lineTo(150,84);x.lineTo(166,84);x.lineTo(194,14);x.closePath();x.fill();x.fillStyle='#d8cfa8';x.fillRect(76,14,104,8);
+    // the running stone, with the furrows cut in its edge
+    x.fillStyle=stone;x.beginPath();x.roundRect?x.roundRect(30,82,196,52,8):x.rect(30,82,196,52);x.fill();x.strokeStyle='#2a2620';x.lineWidth=3;x.stroke();
+    const g=x.createLinearGradient(0,82,0,134);g.addColorStop(0,'rgba(255,250,230,.3)');g.addColorStop(1,'rgba(0,0,0,.3)');x.fillStyle=g;x.fillRect(31,83,194,50);
+    x.strokeStyle='rgba(30,26,20,.55)';x.lineWidth=1.4;for(let i=0;i<24;i++){const px=40+i*7.8;x.beginPath();x.moveTo(px,90);x.lineTo(px+6,126);x.stroke()}
+    // the wooden casing round the bed stone, banded in iron
+    x.fillStyle=wood;x.fillRect(22,130,212,112);x.fillStyle='rgba(30,16,6,.35)';x.fillRect(22,130,212,112);x.fillStyle=wood;x.globalAlpha=.55;x.fillRect(22,130,212,112);x.globalAlpha=1;
+    x.strokeStyle='rgba(20,10,4,.6)';x.lineWidth=1.6;for(let i=1;i<9;i++){x.beginPath();x.moveTo(22+i*23.5,130);x.lineTo(22+i*23.5,242);x.stroke()}
+    x.strokeStyle='#17140f';x.lineWidth=3;x.strokeRect(22,130,212,112);
+    for(const by of [146,224]){x.fillStyle='#26262c';x.fillRect(20,by,216,9);x.fillStyle='#4a4a54';x.fillRect(20,by,216,2);x.fillStyle='#8a8a96';for(let i=0;i<8;i++){x.beginPath();x.arc(34+i*27,by+5,1.8,0,6.3);x.fill()}}
+    // the spout and the flour that has come out of it
+    x.fillStyle='#2a1a0c';x.fillRect(190,196,46,28);x.fillStyle='#3e2a16';x.fillRect(194,200,38,20);
+    x.fillStyle='#f4efe4';x.beginPath();x.ellipse(60,242,52,14,0,Math.PI,0);x.fill();x.fillStyle='#e0d8c4';x.beginPath();x.ellipse(70,242,34,8,0,Math.PI,0);x.fill();
+    x.fillStyle='rgba(255,252,240,.5)';for(let i=0;i<40;i++){x.fillRect(30+hash2(i,1,5)*190,100+hash2(i,2,5)*140,2+hash2(i,3,5)*3,2)}
+  });
+  IMG.wl2_mill_1=mkCanvas(150,256,(x,w,h)=>{
+    const wood=pat(x,IMG.wl2_floor_0,'#6a4a28');
+    for(const rx of [10,118]){x.fillStyle=wood;x.fillRect(rx,6,22,244);x.fillStyle='rgba(0,0,0,.3)';x.fillRect(rx+16,6,6,244);x.strokeStyle='#17140f';x.lineWidth=2.4;x.strokeRect(rx,6,22,244)}
+    for(let i=0;i<8;i++){const y=34+i*27,sh=i*2;x.fillStyle='#17140f';x.fillRect(30,y,90,24);x.fillStyle=wood;x.fillRect(31,y+1,88,13);x.fillStyle='rgba(0,0,0,.35)';x.fillRect(31,y+14,88,9);x.fillStyle='rgba(255,235,190,.2)';x.fillRect(31,y+1,88,2)}
+    x.fillStyle='#26262c';for(const by of [60,150,230]){x.fillRect(8,by,26,5);x.fillRect(116,by,26,5)}
+  });
+}
+const WLM_FOLK=[
+  ['wlm_miller','Dusty the miller, at his stones','kh_ohfolk4_3',["Mind the stones. They go round all day and do not care who is in the way. They have never once said sorry.","Wheat goes in the top and flour comes out at the bottom, and in between there is a noise like the end of the world. It is lovely.","The brook turns the wheel, the wheel turns the stones, and I turn up in the morning. That is the whole mill."],{sc:1}],
+  ['wlm_boy','Wat, the miller\'s boy','wl2_folk1_3',["I carry the sacks. Some days the sacks carry me.","Dusty says a good miller can tell the wheat by the smell. I can tell it by the sneeze.","There is a rat in the loft who has a name, and the name is Gerald."],{sc:.8}],
+  ['wlm_cat','The mill cat','wl2_home_2',["Mrr. (She is white with flour to the ears and walks away leaving small prints.)","Miaow. (She has caught nothing today. She has had help with that.)"]],
+  ['wlm_cow','Buttercup, a cow','cow',["Moo. (She is chewing a long, slow thought.)","Moo. (She has looked at you for a long time and has decided you are not food.)"],{sc:1}],
+  ['wlm_barncat','The barn cat','wl2_home_2',["Mrr. (She sits on the highest bale and judges the mice.)","Miaow. (There is straw in her fur and no worry in her heart.)"]],
+  ['wlm_goat','A goat in the barn','kh_anim1_3',["Maaa. (He is eating the corner of a sack and looking at you while he does it.)","Maaa. (He wants it known that this is his barn.)"],{sc:.9}],
+  ['wlm_dove1','A dove','kh_anim1_5',["Coo. (She is sitting on one egg and one very small grudge.)","Coo. (She looks at you with one orange eye, then the other.)"],{sc:.8}],
+  ['wlm_dove2','A dove','kh_anim1_5',["Coo. (He puffs out his chest and walks in a circle, to show you the shape of the circle.)","Coo, coo. (He has found one seed and is making a speech about it.)"],{sc:.8}],
+  ['wlm_dove3','A dove','kh_anim1_5',["Coo. (She is asleep on the ladder.)","Coo. (She opens one eye. It is the wrong eye for you.)"],{sc:.8}],
+  ['wlm_stair','A steep wooden stair','wl2_mill_1',null],
+  ['wlm_stone','The great millstones','wl2_mill_0',null]
+];
+for(const [id,n,face,lines,o] of WLM_FOLK){
+  if(lines)khNpc(id,n,face,()=>yrLines(id,lines),o);
+}
+khNpc('wlm_stair','A steep wooden stair','wl2_mill_1',()=>say('A very steep wooden stair up to the loft. A board is nailed across it: LOFT FULL. Under that, in a different hand: RATS TOO. Under that, in a small neat hand: GERALD.',[BYE]),{sc:1});
+khNpc('wlm_stone','The great millstones','wl2_mill_0',()=>say('The runner stone turns on the bed stone, and the grain falls between them. The grooves are cut fresh every autumn. A fine white dust lies over everything, and over you, after a minute.',[BYE]),{sc:1});
+/* the rooms */
+WLIR('mill',{w:11,h:8,look:'mill',amb:.6,lights:[[2,2],[8,2],[5,5]],keeper:[5,3],
+  props:[['millstone',3,1,{npc:'wlm_stone'}],['millstone',7,1],['stair',9,1,{npc:'wlm_stair'}],['shelving',1,1],['bakertable',5,6,{h:.55}],['veg',9,5,{h:.55}],['waterbarrel',1,3]],
+  folk:[['wlm_boy',8,4],['wlm_cat',3,5]],win:[[3,0],[7,0],[0,4],[10,4]],raw:[['sacks',1,5],['sacks',1,6],['sacks',10,3],['sacks',10,2],['sacks',9,6],['crate',1,4],['barrel',10,6]]});
+WLIR('windmill',{w:7,h:7,look:'windmill',amb:.62,lights:[[2,2],[4,2],[3,4]],keeper:null,noExtras:0,
+  props:[['millstone',2,1],['stair',5,1,{npc:'wlm_stair'}],['waterbarrel',1,4,{h:.55}]],
+  folk:[['wlm_cat',4,4]],win:[[3,0],[0,3],[6,3]],raw:[['sacks',1,5],['sacks',2,5],['sacks',5,5],['crate',5,3]]});
+WLIR('barn',{w:11,h:8,look:'barn',amb:.62,lights:[[2,2],[8,2],[5,5]],keeper:null,
+  props:[['hangstand',2,1],['hangstand',8,1,{h:1.0}],['coopstack',1,5,{h:.8}],['coopstack',10,5,{h:.8}],['bakertable',5,1,{h:.5}]],
+  folk:[['wlm_cow',4,4],['wlm_barncat',7,2],['wlm_goat',8,5]],win:[[3,0],[7,0],[0,4],[10,4]],raw:[['hay',4,1],['hay',6,1],['hay',1,2],['hay',10,2],['hay',1,6],['hay',10,3],['cart',8,3]]});
+WLIR('dovecote',{w:7,h:7,look:'mill',amb:.66,lights:[[2,2],[4,2],[3,4]],keeper:null,
+  props:[['shelving',1,1],['shelving',2,1],['shelving',4,1],['shelving',5,1],['stair',5,3,{npc:'wlm_stair',h:1.2}],['coopstack',1,5,{h:.55}]],
+  folk:[['wlm_dove1',2,3],['wlm_dove2',3,5],['wlm_dove3',4,5],['wlm_dovestuck',5,4]],win:[[3,0],[0,3],[6,3]],raw:[['sacks',1,4],['crate',5,5]]});
+/* one door of the town, one room */
+function wlmMake(id,room,name,front,out,keeper){
+  wlmPieces();
+  const b={id:'wlin'+id,wlin:room,name,room:'home',keeper:keeper||null,floor:'wood',wallImg:'kh_ohwall1_2'};
+  const R=khRoom(b,id,{to:WL.ID,x:front[0],y:front[1],f:out});LEVELS[id]=R.level;LEVELS[id].diff=80;LEVEL_NAMES[id]=name;LEVEL_RATING[id]=80;return R.level;
+}
+KH_LAZY[WLX.MILL]=()=>{if(!LEVELS[WLX.MILL])wlmMake(WLX.MILL,'mill','Wenlock Mill',[79,87],0,'wlm_miller')};
+KH_LAZY[WLX.WIND]=()=>{if(!LEVELS[WLX.WIND])wlmMake(WLX.WIND,'windmill','The Windmill',[86,88],0)};
+KH_LAZY[WLX.BARN]=()=>{if(!LEVELS[WLX.BARN])wlmMake(WLX.BARN,'barn','The Barn',[63,17],0)};
+KH_LAZY[WLX.DOVE]=()=>{if(!LEVELS[WLX.DOVE])wlmMake(WLX.DOVE,'dovecote','The Dovecote',[54,37],0)};
+for(const id of [WLX.MILL,WLX.WIND,WLX.BARN,WLX.DOVE,WLX.CHAPEL]){LEVEL_NAMES[id]=LEVEL_NAMES[id]||'Wenlock';LEVEL_RATING[id]=80}
+LEVEL_NAMES[WLX.MILL]='Wenlock Mill';LEVEL_NAMES[WLX.WIND]='The Windmill';LEVEL_NAMES[WLX.BARN]='The Barn';LEVEL_NAMES[WLX.DOVE]='The Dovecote';LEVEL_NAMES[WLX.CHAPEL]='The Quiet Chapel';
+
+/* ---- src/desert/wenlock_air.js ---- */
+/* ==========================================================================
+   WENLOCK: THE AIR (prefix WLAIR). The things that make the town feel lived in rather than built:
+   - sunbeams: soft gold shafts (a soft layered shaft of light, wl_beam) at the churchyard yews, on the green, in the square, and indoors in the church nave, the library and the chapel;
+   - blowing leaves: about sixty small leaves drifting along the ground in the churchyard, on the green, on the back track and by the square (decor with a cloudid 'wlf<n>', moved
+     every frame by an update wrapper, the same trick as the garden's butterflies);
+   - lamp pools and lit windows at dusk and night: warm lights by the doors of about half of the houses (lights flagged lamp, which the engine already dims by day);
+   - coloured light from the stained glass in the church, and warm sun patches on the floor under every window of every room, by day;
+   - a warm golden haze for Wenlock in the day, subtle, wrapped round weatherNow (rain, fog and storm are left alone).
+   ========================================================================== */
+const WLAIR={fly:[],beams:0};
+function wlaImgs(){
+  if(IMG.wl_leaf0)return;
+  // a soft slanted shaft of sunlight, layered so its edges fade out
+  IMG.wl_beam=mkCanvas(170,320,(x,w,h)=>{
+    for(let i=0;i<10;i++){const inset=i*3.4,a=.06;const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'rgba(255,238,170,0)');g.addColorStop(.18,'rgba(255,236,160,'+a*1.3+')');g.addColorStop(.75,'rgba(255,228,140,'+a*1.6+')');g.addColorStop(1,'rgba(255,224,130,'+a+')');
+      x.fillStyle=g;x.beginPath();x.moveTo(34+inset,0);x.lineTo(86-inset,0);x.lineTo(160-inset*1.6,h);x.lineTo(30+inset*1.6,h);x.closePath();x.fill()}
+    x.fillStyle='rgba(255,250,215,.5)';for(let i=0;i<22;i++){const u=hash2(i,1,2),v=hash2(i,2,2),px=50+v*70*(.4+u)+u*34,py=40+u*250;x.beginPath();x.arc(px,py,1.1+hash2(i,3,2)*1.4,0,6.3);x.fill()}});
+  NPC_H.wl_beam=3.0;
+  [['#a8641c','#6a3a0c'],['#c89a2c','#7a5810'],['#7a8c2c','#44541a'],['#b0481c','#6a2410']].forEach(([a,b],i)=>{
+    IMG['wl_leaf'+i]=mkCanvas(30,20,(x,w,h)=>{x.fillStyle=a;x.beginPath();x.moveTo(2,10);x.quadraticCurveTo(14,-2,28,10);x.quadraticCurveTo(14,22,2,10);x.fill();x.strokeStyle=b;x.lineWidth=1.4;x.beginPath();x.moveTo(3,10);x.lineTo(27,10);x.stroke();
+      x.lineWidth=.9;for(let k=0;k<3;k++){x.beginPath();x.moveTo(9+k*6,10);x.lineTo(13+k*6,4+k);x.moveTo(9+k*6,10);x.lineTo(13+k*6,16-k);x.stroke()}});
+    NPC_H['wl_leaf'+i]=.1});
+}
+function wlaPass(C){
+  const {hs}=C;
+  wlaImgs();
+  // sunbeams out of doors: between the churchyard yews, on the green, in the square, in the orchard
+  const beams=[[18,15],[26,17],[32,19],[15,21],[20,19],[34,24],[23,63],[33,62],[27,75],[21,72],[37,68],[46,48],[51,52],[44,53],[84,64],[88,69],[56,24],[45,32]];
+  for(const [x,y] of beams)if(C.free(x,y))C.dc('wl_beam',x,y,{bob:0,sc:1});
+  // blowing leaves
+  const zones=[[14,13,34,25,16],[18,57,39,79,16],[40,14,91,14,12],[41,46,55,54,10],[4,49,96,51,8],[24,27,24,49,4]];
+  let n=0;for(const [x0,y0,x1,y1,cnt] of zones)for(let i=0;i<cnt;i++){
+    const x=x0+((hs(i,n,81)*(x1-x0+1))|0),y=y0+((hs(i,n,82)*(y1-y0+1))|0);if(C.rows[y][x]!=='.'||C.block[y*C.W+x])continue;
+    const id='wlf'+WLAIR.fly.length;C.decor.push({k:'wl_leaf'+((hs(x,y,83)*4)|0),x,y,block:false,walk:true,deco:true,bob:.04,sc:.8+hs(x,y,84)*.5,cloudid:id});
+    WLAIR.fly.push({sp:.07+hs(x,y,85)*.08,ph:hs(x,y,86),sc:.8+hs(x,y,84)*.5,len:1.6+hs(x,y,87)*1.4});n++}
+  C.lv._wla={fly:WLAIR.fly};
+  // the lit windows: a warm light by the door of about half the houses, which the engine only lets shine when it is not day
+  C.lv._wlaLights=[];
+  for(const h of C.houses){if(!h.front||hs(h.x0,h.y0,88)>.55)continue;C.lv._wlaLights.push([h.front[0]+.5-h.wall[0]*.35,h.front[1]+.5-h.wall[1]*.35])}
+}
+/* ---- the update wrapper: leaves blow, the house lights go in, and the church and the rooms get their light ---- */
+{const _u=update;let fdec=null,fl=[],lightLv=-1;
+  update=function(dt){
+    try{
+      if(G.state==='play'&&G.decor){
+        if(LEVEL===496){
+          const L=LEVELS[496];
+          if(L&&L._wla){
+            if(fdec!==G.decor){fdec=G.decor;fl=[];const by=new Map();for(const q of G.decor)if(q.cloudid&&q.cloudid.startsWith('wlf'))by.set(q.cloudid,q);L._wla.fly.forEach((f,i)=>{const d=by.get('wlf'+i);if(d)fl.push([d,f])})}
+            const t=G.time;for(const [d,f] of fl){const u=(t*f.sp+f.ph)%1,a=u*Math.PI*2;d.ox=(u-.5)*f.len;d.oy=Math.sin(a*2+f.ph*9)*.2;d.bob=.03+Math.abs(Math.sin(a*5+f.ph*7))*.1;d.sc=f.sc*Math.max(.05,1-Math.pow(Math.abs(2*u-1),6))}
+          }
+          if(L&&L._wlaLights&&lightLv!==LIGHTS){lightLv=LIGHTS;for(const [x,y] of L._wlaLights)LIGHTS.push({x,y,ph:hash2(x|0,y|0,9)*6.28,key:-5000-LIGHTS.length,taken:false,red:false,free:true,lamp:true,calm:true,col:[1.35,.95,.42],range2:14,kI:.85,wlx:1})}
+        }else if(LEVEL>=WL.H0&&LEVEL<=WL.H0+99){
+          if(lightLv!==LIGHTS){lightLv=LIGHTS;wlaRoomLights()}
+          const hr=(G.clock%1440)/60,sun=hr>6.5&&hr<19?Math.sin((hr-6.5)/12.5*Math.PI):0;
+          for(const l of LIGHTS)if(l.wlsun)l.kI=l.wlsun*sun;
+        }
+      }
+    }catch(e){console.error('WLAIR',e)}
+    return _u.apply(this,arguments)}}
+/* sun patches under the windows (golden, by day only) and the coloured light of the church glass */
+function wlaRoomLights(){
+  const L=LEVELS[LEVEL];if(!L||!L.rows)return;const D=WLIN_ROOMS[L.wlin],W=L.rows[0].length,H=L.rows.length;if(!D)return;
+  const add=(x,y,col,kI,sun,r2)=>LIGHTS.push({x:x+.5,y:y+.5,ph:hash2(x,y,9)*6.28,key:-6000-LIGHTS.length,taken:false,red:false,free:true,calm:true,col,range2:r2||6,kI,wlsun:sun});
+  for(const [x,y] of (D.win||[])){const ix=x===0?1:x===W-1?W-2:x,iy=y===0?1:y===H-1?H-2:y;add(ix,iy,[1.4,1.15,.55],.4,.9,5)}
+  if(LEVEL===WL.H0){   // the church: glass in red, blue, gold and green on the nave floor
+    const gl=[[3,2,[1.5,.3,.3]],[9,2,[.35,.55,1.5]],[1,4,[1.45,1.1,.3]],[11,4,[.4,1.3,.5]],[1,7,[.7,.4,1.4]],[11,7,[1.5,.5,.3]]];
+    for(const [x,y,c] of gl)add(x,y,c,.35,1,7)}
+  if(LEVEL===WLX.CHAPEL){for(const [x,y,c] of [[1,2,[1.5,.3,.3]],[5,2,[.4,.55,1.5]],[1,3,[1.4,1.0,.35]]])add(x,y,c,.4,1,7)}
+}
+/* a warm golden haze for the town by day, rain and fog and storm left as they are */
+{const _w=weatherNow;weatherNow=function(){const w=_w.apply(this,arguments);
+  if(LEVEL===496&&(!w||w.id==='clear'||w.id==='haze'||w.id==='mist'))return {id:'mist',n:'Golden light',fog:.004,haze:.1,dark:0,mix:.13,col:[255,228,165],text:'The air is warm and golden, and full of woodsmoke and birdsong.'};
+  return w}}
+/* sunbeams indoors: the church nave, the library desks */
+if(typeof WLIN_ROOMS!=='undefined'){
+  const beam=(C,xs)=>{wlaImgs();for(const [x,y] of xs)C.raw('wl_beam',x,y,{block:false,walk:true,deco:true,bob:0,sc:.7})};
+  WLIN_ROOMS.church.extra=(C,b)=>beam(C,[[1,6],[11,6],[1,9],[11,9]]);
+  WLIN_ROOMS.library.extra=(C,b)=>beam(C,[[2,3],[12,4],[2,6]]);
+  WLIN_ROOMS.chapel&&(WLIN_ROOMS.chapel.extra=(C,b)=>beam(C,[[1,3]]));
+}
+
+/* ---- src/desert/wenlock_meadow.js ---- */
+/* ==========================================================================
+   WENLOCK: THE EMPTY MEADOWS (prefix wle). Detail for the big flat fields, five small quests for the people who live near them, and the people and things those quests need.
+   Detail: cattails at the pond and the brook, flower clumps, a few more trees (never close to another), benches, stumps and logs, mossy stones, a haystack or two. Kept light.
+   Quests (all open once the mayor's welcome is done, rewards for a party of level 80):
+   wlq16 The Stuck Dove       Dobbs the farmhand, north-east meadow: a dove is tangled in the netting of the dovecote (room 7094).
+   wlq17 Scarecrow Duty       Rafe the woodsman: three old scarecrows in the north-east meadow need their hats put right.
+   wlq18 A Muddy Letter       Meg the shepherd: a letter with paw prints in a wheelbarrow at the east end of the back track, for Old Bracken in his den in the north-east corner.
+   wlq19 The Lost Duckling    Hetty the dairymaid, south meadow: carry a duckling over the bridge to its mother on the village green pond.
+   wlq20 The Evening Rounds   Brother Tuck: light the five lanterns of Churchyard Lane, and lay a wildflower on old Hester's grave, where a mourning dove sits.
+   (There is no painted owl or fox yet, so the dove and a hermit stand in for them; the scarecrows are the painted coat stand.)
+   ========================================================================== */
+for(const [k,h] of [['pet_duck_0',.45],['pet_duck_1',.4],['pet_parrot_0',.5],['wd_rock0',1.1]])if(NPC_H[k]===undefined)NPC_H[k]=h;
+function wleObj(npc,k,at,rad,o){WL_QOBJ.push({npc,k:typeof k==='function'?k:()=>k,at,rad:rad||3,o:o||{}})}
+Object.assign(WL_REW,{wlq16:{gold:800,xp:8000},wlq17:{gold:700,xp:7000},wlq18:{gold:900,xp:9000,items:['potion5']},wlq19:{gold:800,xp:8000},wlq20:{gold:1000,xp:10000,items:['potion5']}});
+WL_QUESTS.push(
+  {id:'wlq16',giver:'Dobbs the farmhand',title:'The Stuck Dove',desc:'A dove is tangled in the netting inside the old dovecote in the north-east meadow. Go in and free it.'},
+  {id:'wlq17',giver:'Rafe the woodsman',title:'Scarecrow Duty',desc:'Three old scarecrows in the north-east meadow have lost their hats and their dignity. Put each right.'},
+  {id:'wlq18',giver:'Meg the shepherd',title:'A Muddy Letter',desc:'A letter with muddy paw prints has been left at the east end of the back track. Take it to Old Bracken, the hermit.'},
+  {id:'wlq19',giver:'Hetty the dairymaid',title:'The Lost Duckling',desc:'A duckling has wandered into the south meadow, far from its mother. Carry it over the bridge to the pond on the green.'},
+  {id:'wlq20',giver:'Brother Tuck',title:'The Evening Rounds',desc:'Light the five lanterns along Churchyard Lane, and lay a wildflower on old Hester\'s grave.'});
+const wleF=()=>G.flags;
+const wleDup=(F,k,n)=>{let c=0;for(let i=1;i<=n;i++)if(F[k+i])c++;return c};
+/* ---- wlq16: the stuck dove ---- */
+khNpc('wlm_dovestuck','A dove, caught in the netting','kh_anim1_5',d=>{const F=wleF();
+  if(qSt('wlq16')==='active'&&!F.wlq16a){F.wlq16a=1;yrStep('You have freed the dove.');d.found=true;d.block=false;return say("A grey-white dove, one wing folded the wrong way into the old netting, looking at you with one very round orange eye. You lift the cord off her, strand by strand. She sits quite still until the last strand is off, and then she is gone out of the loft window in a clatter of wings, and a feather floats down to land on your boot.",[BYE])}
+  if(F.wlq16a){d.found=true;d.block=false;return say('The netting hangs empty. A single feather lies under it.',[BYE])}
+  return say('A dove, tangled in the old netting, watching you with one eye. She cannot get out. Nobody has asked you to help yet, but she does not know that.',[BYE])},{sc:.9});
+const WLD16=khQD("Oh, good, somebody with two hands. There is a dove stuck in the dovecote, in the netting at the back of the loft, and I can hear her from here. I would go myself, but I am afraid of birds, which is a bad thing in a farmhand. They are only little. They look at me. Would you go in and let her out? The dovecote is the round stone tower in the middle of the north-east meadow, with the little arched door. Just lift the cord off her, and mind she does not have your eye.",
+  "Thank you. The round tower in the meadow, the arched door. Mind the step.",
+  (n,m)=>'The dove is in the dovecote, the round stone tower in the north-east meadow. Go in and lift the netting off her.',
+  "She is out? She flew? And she did not mind? Well. I may have been a little unfair to birds.",
+  "Here. It is not much, but it is honest, and it is mostly money. The doves will be very pleased. They will not say so. They will coo, which is the same.",
+  "The dove has been seen on the barn roof, looking pleased, and not at all like a bird who ever got stuck.","The dove is free.");
+wlQ('wlq16','Dobbs the farmhand',[["Go into the dovecote, the round stone tower in the north-east meadow, and free the dove from the netting.",()=>wleF().wlq16a,['wlm_dovestuck']]]);
+wlGive('wlo_farmhand','wlq16','wlq1',WLD16);
+/* ---- wlq17: scarecrow duty ---- */
+const WLE_SCARE=[[41,22],[53,31],[66,38]];
+WLE_SCARE.forEach((at,i)=>{const id='wlo_scare'+(i+1);
+  khNpc(id,'An old scarecrow','wl2_hall_5',d=>{const F=wleF(),flag='wlq17_'+(i+1);
+    if(qSt('wlq17')==='active'&&!F[flag]){F[flag]=1;yrStep('You have put a scarecrow right. ('+wleDup(F,'wlq17_',3)+'/3)');return say(["The scarecrow leans in a crooked line. You set the pole straight, push the hat down on its head and stuff a fistful of fresh straw back up its sleeve. It looks a great deal more threatening. A crow on the next fence post looks at it, and then at you, and moves house.","The scarecrow has slipped down its pole and its hat is over one eye. You hitch it up, find the hat a better angle, and tie the coat shut with a bit of string. It looks quite smug now.","The scarecrow has lost most of an arm. You find the arm in the grass, and put it back. It is not the same arm, but it is a good arm. The crows will not know."][i],[BYE])}
+    return say(F[flag]?'The scarecrow stands very straight, hat at a fine angle, and glares at the whole sky.':'An old scarecrow, a coat on a pole. It has seen better years, and the crows have noticed.',[BYE])},{sc:1.15});
+  wleObj(id,'wl2_hall_5',at,3,{sc:1.15})});
+const WLD17=khQD("Three scarecrows, and I put up every one of them myself, years ago, for Farmer Giles, and nobody has said a word of thanks since. Now look at them. One has its hat over its eyes, one has lost an arm, and the third is leaning on its pole like it has been at the ale. The crows have noticed. A crow can tell a bad scarecrow from three fields away. They are out in the meadow in the north-east, east of the square and west of the barn, one, two, three, in a line, more or less. Would you go and put them right? Straw, string, a straight pole, a hat at a good angle, and a stern look. That is all it takes.",
+  "Bless you. In the meadow east of the square. If a crow gives you any trouble, tell it Rafe is watching.",
+  (n,m)=>`${n} of ${m} scarecrows put right. They are in the north-east meadow, east of the square and west of the barn.`,
+  "All three? And standing straight? Then the barley is saved, and my work is respected at last.",
+  "Here, for your trouble, and my thanks, and a very hard look from every scarecrow in the county. They will remember this.",
+  "The crows are going round the field the long way. I have never been so pleased with a coat on a pole.","All three are right.");
+wlQ('wlq17','Rafe the woodsman',WLE_SCARE.map((a,i)=>['Put scarecrow '+(i+1)+' of 3 right, in the north-east meadow.',()=>wleF()['wlq17_'+(i+1)],['wlo_scare'+(i+1)]]));
+wlGive('wlo_hunter','wlq17','wlq1',WLD17);
+/* ---- wlq18: a muddy letter ---- */
+khNpc('wlo_letter','A wheelbarrow','kh_ohgard2_3',d=>{const F=wleF();
+  if(qSt('wlq18')==='active'&&!F.wlq18a){F.wlq18a=1;yrStep('You have picked up the muddy letter.');return say("In the wheelbarrow, under a cabbage leaf, a letter folded small and sealed with a blob of wax. It is covered in neat, muddy paw prints, and on the front, in careful, wobbly capitals, it says BRACKEN. Somebody has gone a long way round to deliver it, and has given up here. You put it in your pocket.",[BYE])}
+  return say(F.wlq18a?'An empty wheelbarrow with one cabbage leaf in it and a lot of paw prints around it.':'An old wheelbarrow, with a cabbage leaf in it and a lot of small paw prints around it. The prints go off towards the hedge.',[BYE])},{sc:1});
+khNpc('wlo_hermit','Old Bracken, a hermit','kh_ohfolk3_3',d=>{const F=wleF();
+  if(qSt('wlq18')==='active'&&F.wlq18a&&!F.wlq18b){F.wlq18b=1;yrStep('Old Bracken has the letter.');return say("Old Bracken holds the letter in both hands and turns it over, and looks at the paw prints, and his face does something complicated. 'From my sister,' he says. 'Fifteen years. She cannot write, you know, and she sent a fox with it. Or the fox sent itself. I never could tell with that family.' He breaks the wax with a thumbnail, reads for a long moment, and then he laughs, very quietly. 'She says the pie was good. She says nothing else. Tell Meg I said thank you.'",[BYE])}
+  return yrLines('wlo_hermit',["I live in a den. It is a very good den. It has a door, and a roof, and a woodpile, and I have never once had to answer it.","The people of Wenlock leave me bread on the stump. I leave them a nod. It is the fairest trade in the county.","I like it quiet. It is not quiet when you are here, but it is a good sort of not quiet."])},{sc:1});
+const WLD18=khQD("It is a small thing, and a stupid one, and I have been looking at it for a week. There was a letter in a wheelbarrow at the east end of the back track, last time I went that way, with paw prints all over it, and I cannot read, and I did not like to pick it up. The only person I know who gets letters from a fox is Old Bracken, who lives in the den in the north-east corner, past the end of the track. I do not go that way. It is full of hedge. Would you take it to him? The wheelbarrow is just where the track runs out, and it is a lovely walk, if you do not mind brambles.",
+  "Thank you. The east end of the back track, the wheelbarrow, and then the den in the north-east corner. Mind the hedge. It bites.",
+  (n,m)=>wleF().wlq18a?'You have the letter. Take it to Old Bracken, in his den in the north-east corner of the town, beyond the end of the back track.':'The letter is in a wheelbarrow at the east end of the back track. Then it is on to Old Bracken, in the north-east corner.',
+  "He has read it? And he said thank you? And laughed? Well. That is a better ending than I expected from a letter with paw prints on.",
+  "Here. It is something from the shop. It is not much, but it is honest. You are very good to take the long way.",
+  "Bracken has put a loaf out on the stump for the fox. The fox has not taken it. The fox is a gentleman.","The letter is delivered.");
+wlQ('wlq18','Meg the shepherd',[["Pick up the muddy letter from the wheelbarrow at the east end of the back track.",()=>wleF().wlq18a,['wlo_letter']],["Take the letter to Old Bracken, the hermit, in his den in the north-east corner of the town.",()=>wleF().wlq18b,['wlo_hermit']]]);
+wlGive('wlo_shepherd','wlq18','wlq1',WLD18);
+wleObj('wlo_letter','kh_ohgard2_3',[91,15],2,{sc:1});
+wleObj('wlo_hermit','kh_ohfolk3_3',[88,7],3,{sc:1});
+/* ---- wlq19: the lost duckling ---- */
+const WLE_DUCK=IMG.pet_duck_1?'pet_duck_1':'kh_anim1_5';
+khNpc('wlo_duckling','A lost duckling','pet_duck_1',d=>{const F=wleF();
+  if(qSt('wlq19')==='active'&&!F.wlq19a){F.wlq19a=1;yrStep('You have the duckling.');d.found=true;d.block=false;return say("A duckling no bigger than your fist, stuck fast in a bramble and quacking at the whole meadow. You free it a thorn at a time. It climbs up your arm, sits on your shoulder, and makes it quite clear that this is where it will be staying, until further notice.",[BYE])}
+  return say('A tiny duckling, stuck in a bramble, quacking at nobody in particular.',[BYE])},{sc:.7});
+khNpc('wlo_motherduck','A duck, looking worried','pet_duck_0',d=>{const F=wleF();
+  if(qSt('wlq19')==='active'&&F.wlq19a&&!F.wlq19b){F.wlq19b=1;yrStep('The duckling is home.');return say("You set the duckling down at the edge of the pond. The mother duck looks at it, and at you, and at it again, and says something short and furious. The duckling says something short and furious back. Then they go off across the pond together, one big and one small, the small one doing most of the talking.",[BYE])}
+  return say('A duck at the edge of the pond, looking over her shoulder at nothing, as if she has lost count of something.',[BYE])},{sc:.9});
+const WLD19=khQD("Oh, there is a duckling in my south meadow, and it should not be. I heard it yesterday morning, a small, cross quack, from the brambles by the hedge. I cannot reach it, for I have a bucket and a bad knee. I am quite sure it is one of the pond ducks from the green, because mine are all hens, and the pond is a very long way off, over the bridge and up Mill Lane and down to the green. Would you fetch it? It is only little. It will not bite, though it will want to.",
+  "Thank you. It is somewhere in the south meadow, in the brambles. When you have it, take it over the bridge and up to the pond on the village green. The mother will be the one who looks worried.",
+  (n,m)=>wleF().wlq19a?'You have the duckling. Carry it over the old bridge, up Mill Lane and across to the pond on the village green.':'The duckling is in the brambles somewhere in the south meadow, across the brook. Then it is a long way to the pond on the green.',
+  "It is home? And the mother was pleased? I thought she looked very worried, last time I passed.",
+  "Here, with my thanks. A very small quack is a very big thing, if it is yours.",
+  "I hear the pond has got a new voice. It is very high. It has opinions about the bread.","The duckling is home.");
+wlQ('wlq19','Hetty the dairymaid',[["Find the lost duckling in the brambles of the south meadow, across the brook, and pick it up.",()=>wleF().wlq19a,['wlo_duckling']],["Carry the duckling over the bridge and up to its mother at the duck pond on the village green.",()=>wleF().wlq19b,['wlo_motherduck']]]);
+wlGive('wlo_dairymaid','wlq19','wlq1',WLD19);
+wleObj('wlo_duckling','pet_duck_1',[50,91],4,{sc:.7});
+wleObj('wlo_motherduck','pet_duck_0',[30,68],3,{sc:.9});
+/* ---- wlq20: the evening rounds ---- */
+const WLE_LAMPS=[[7,30],[10,32],[13,30],[16,32],[19,30]];
+WLE_LAMPS.forEach((at,i)=>{const id='wlo_lantern'+(i+1);
+  khNpc(id,'A lantern','lamp',d=>{const F=wleF(),flag='wlq20_'+(i+1);
+    if(qSt('wlq20')==='active'&&!F[flag]){F[flag]=1;yrStep('You have lit a lantern. ('+wleDup(F,'wlq20_',5)+'/5)');return say('You open the little glass door, trim the wick with your thumbnail, and light it from your own flame. It catches, steadies, and throws a small gold circle on the lane.',[BYE])}
+    return say(F[flag]?'The lantern burns steadily, a small gold circle on the lane.':'A lantern on a post along Churchyard Lane. It is not lit.',[BYE])},{sc:1});
+  wleObj(id,'lamp',at,1,{})});
+khNpc('wlo_hester','Hester\'s grave','grave',d=>{const F=wleF();
+  if(qSt('wlq20')==='active'&&!F.wlq20g){if(typeof bagCount==='function'&&bagCount('wildflower')>0){bagRemove('wildflower',1);F.wlq20g=1;yrStep('You have laid a wildflower on Hester\'s grave.');return say('You lay the wildflower on the grass under the plain stone. The dove on the wall tilts her head, and then, quite slowly, turns round once and settles with her back to you, as if to say it is all right.',[BYE])}
+    return say("A small plain stone, much weathered: HESTER MOSS, who loved a quiet corner. Somebody has kept the grass short. There is no flower on it today. A mourning dove sits on the wall behind, looking at the stone. (You need a wildflower. The greengrocer and the herb shop have them.)",[BYE])}
+  return say(F.wlq20g?'A small plain stone, with a wildflower on the grass in front of it, and a dove sitting quietly on the wall behind.':'A small plain stone, much weathered: HESTER MOSS, who loved a quiet corner.',[BYE])},{sc:.9});
+khNpc('wlo_mourndove','A mourning dove','kh_anim1_5',()=>yrLines('wlo_mourndove',["Coo. (She looks at the stone, and then at you, and then at the stone.)","Coo, coo. (She is here every evening. Nobody has told her she does not have to be.)"]),{sc:.85});
+wleObj('wlo_hester','grave',[6,37],2,{sc:.9,block:true,walk:false});
+wleObj('wlo_mourndove','kh_anim1_5',[6,36],2,{sc:.85});
+const WLD20=khQD("A friar walks a great deal and my feet are not what they were. There are five lanterns along Churchyard Lane, on posts, and Sexton Moss lights them every evening, and this week his back is bad and he will not say so. And there is a grave. It is his wife's, Hester's, in the quiet corner at the west end of the town, where the lane gives out, and there is a dove that sits by it. He has not had a flower for it in a month and he will never ask. Would you go along the lane, light the five lanterns, and then lay a wildflower on Hester? The greengrocer has them. The herb shop has them. Nobody need know who it was.",
+  "Thank you. The lane runs west from Church Lane. The lanterns are on the posts, and Hester is at the far end, past the last of them, under the little stone. I shall say nothing to Moss, and neither will you.",
+  (n,m)=>`${n} of 2 done. Light five lanterns along Churchyard Lane (the lane running west from Church Lane) and lay a wildflower on Hester's grave in the quiet west corner.`,
+  "Five lanterns, and a flower. You can tell by the quiet that something has been put right. Come, let me shake your hand.",
+  "Here. It is little. Hester would have called it a good deal more than that. Thank you. I shall tell her you came.",
+  "The lane is lit, the flower is by the stone, and the dove has gone to sleep. It is a good evening.","The rounds are done.");
+wlQ('wlq20','Brother Tuck',[["Light the five lanterns along Churchyard Lane, the lane that runs west from Church Lane.",()=>wleDup(wleF(),'wlq20_',5)>=5,WLE_LAMPS.map((a,i)=>'wlo_lantern'+(i+1))],["Lay a wildflower on Hester's grave, in the quiet corner at the west end of the town. The greengrocer and the herb shop sell them.",()=>wleF().wlq20g,['wlo_hester']]]);
+wlGive('wlo_friar','wlq20','wlq1',WLD20);
+/* ---- detail in the meadows (called from the polish pass) ---- */
+function wlePass(C){
+  const {hs,decor,rows,block,W}=C;
+  const get=k=>IMG[k]?k:null,thin=['art_hgthin3','art_hgthin5','art_hgthin0'].filter(get),stumps=['pstump','plog','glogm','stumpm'].filter(get),stones=['mossstone','gstone','grocks'].filter(get);
+  for(const k of thin)NPC_H[k]=NPC_H[k]||1.35;for(const k of stumps)NPC_H[k]=NPC_H[k]||.5;for(const k of stones)NPC_H[k]=NPC_H[k]||(k==='mossstone'?1.1:.55);
+  const trees=[];for(const d of decor)if(/tree/.test(d.k))trees.push([d.x,d.y]);
+  const sparse=(x,y,r)=>{for(const [a,b] of trees)if(Math.abs(a-x)<r&&Math.abs(b-y)<r)return false;return true};
+  const ok=(x,y)=>x>3&&y>3&&x<96&&y<96&&C.free(x,y)&&!C.isRoad(x-1,y)&&!C.isRoad(x+1,y)&&!C.isRoad(x,y-1)&&!C.isRoad(x,y+1);
+  const scatter=(x0,y0,x1,y1,n,fn,seed)=>{let placed=0;for(let i=0;i<n*5&&placed<n;i++){const x=x0+((hs(i,seed,91)*(x1-x0+1))|0),y=y0+((hs(i,seed,92)*(y1-y0+1))|0);if(ok(x,y)&&fn(x,y,i)!==false)placed++}};
+  // flower clumps and the odd tree in the big flat meadows
+  scatter(33,15,72,44,34,(x,y)=>{C.flowers(x,y,1+hs(x,y,93)*.3)},1);
+  scatter(33,15,72,44,9,(x,y)=>{if(!sparse(x,y,5))return false;C.tree(x,y);trees.push([x,y])},2);
+  scatter(3,12,13,45,16,(x,y)=>{C.flowers(x,y,1+hs(x,y,93)*.3)},3);
+  scatter(3,12,13,45,5,(x,y)=>{if(!sparse(x,y,5))return false;C.tree(x,y);trees.push([x,y])},4);
+  scatter(4,4,92,12,12,(x,y)=>{C.flowers(x,y,1)},5);
+  scatter(4,87,95,96,16,(x,y)=>{C.flowers(x,y,1.05)},6);
+  // benches, stumps and logs, mossy stones, a haystack or two
+  for(const [x,y] of [[44,20],[58,29],[40,37],[9,33],[8,43],[46,44]])C.tryDc('kh_ohgard1_3',x,y);
+  scatter(33,15,72,44,6,(x,y,i)=>{const k=stumps[i%Math.max(1,stumps.length)];if(!k)return false;C.dc(k,x,y,{block:false,walk:true,sc:1})},7);
+  scatter(3,12,13,45,3,(x,y,i)=>{const k=stones[i%Math.max(1,stones.length)];if(!k)return false;C.dc(k,x,y,{block:true,walk:false,sc:1})},8);
+  scatter(33,15,72,44,3,(x,y)=>{C.dc('hay',x,y,{block:true,walk:false,sc:1.2})},9);
+  // Old Bracken's den, in the north-east corner: an earth-banked hut with a woodpile
+  if(IMG.wd_rock0){NPC_H.wd_rock0=NPC_H.wd_rock0||1.1;C.dc('wd_rock0',89,6,{block:true,walk:false,sc:1.2});C.tryDc('hay',87,5,{block:true,walk:false});C.tryDc(IMG.pstump?'pstump':null,91,7,{block:false})}
+  // cattails at the pond and at the brook
+  const P=WL_GREEN.pond,reed=(x,y,i)=>{const k=thin[i%Math.max(1,thin.length)];if(k&&C.free(x,y))C.dc(k,x,y,{block:false,walk:true,sc:.85+hs(x,y,94)*.35})};
+  let ri=0;for(let y=P[1]-1;y<=P[3]+1;y++)for(let x=P[0]-1;x<=P[2]+1;x++){const edge=x<P[0]||x>P[2]||y<P[1]||y>P[3];if(edge&&hs(x,y,95)<.45)reed(x,y,ri++)}
+  for(let x=4;x<=95;x++){if(x>=69&&x<=75)continue;const by=WL_BROOK(x);if(hs(x,by,96)<.34)reed(x,by-1,ri++);if(hs(x,by,97)<.3)reed(x,by+2,ri++)}
+}
 
 /* ---- src/desert/maps_wenlock.js ---- */
 /* Area map for Wenlock (level 496): an English market town. Drawn from the real level data: the meadows and the green, the brook with its two rows of water and the stone bridge, the duck pond,
