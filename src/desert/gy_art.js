@@ -77,15 +77,15 @@ function gyTile(tex,wh,opt){
 /* ---- the creatures. hp is only a size (ordinary creatures take their health from the balance code); the four ghost-enemies are sized to the old boss formula so they come out at 15,000 to 20,000 health ---- */
 function gyW(img,h){const e=typeof GY_LIST!=='undefined'&&GY_LIST[img];return e?+(h*e[1]/e[2]).toFixed(2):h*.7}
 Object.assign(ENEMY_DEF,{
-  gyskel:{name:'Grave Skeleton',hp:44,dmg:[5,9],hit:.84,w:gyW('crA_0',.8),img:'gyi_skel',xp:20,gold:[0,0],speed:1,verb:'slashes',gy:1},
-  gypike:{name:'Skeleton Pikeman',hp:52,dmg:[6,10],hit:.84,w:gyW('crA_1',.9),img:'gyi_pike',xp:22,gold:[0,0],speed:1,verb:'jabs',gy:1},
-  gybmage:{name:'Bone Mage',hp:40,dmg:[6,11],hit:.86,w:gyW('crA_2',.85),img:'gyi_bmage',xp:24,gold:[0,0],speed:1,ranged:2,verb:'blasts',gy:1,glow:.4},
-  gyghoul:{name:'Ghoul',hp:50,dmg:[6,10],hit:.85,w:gyW('crA_3',.75),img:'gyi_ghoul',xp:22,gold:[0,0],speed:2,verb:'claws',gy:1},
-  gyzombie:{name:'Rotting Zombie',hp:60,dmg:[5,9],hit:.82,w:gyW('crA_4',.8),img:'gyi_zombie',xp:20,gold:[0,0],speed:1,verb:'pummels',gy:1},
+  gyskel:{name:'Grave Skeleton',hp:44,dmg:[5,9],hit:.84,w:gyW('crA_0',.68),img:'gyi_skel',xp:20,gold:[0,0],speed:1,verb:'slashes',gy:1},
+  gypike:{name:'Skeleton Pikeman',hp:52,dmg:[6,10],hit:.84,w:gyW('crA_1',.74),img:'gyi_pike',xp:22,gold:[0,0],speed:1,verb:'jabs',gy:1},
+  gybmage:{name:'Bone Mage',hp:40,dmg:[6,11],hit:.86,w:gyW('crA_2',.7),img:'gyi_bmage',xp:24,gold:[0,0],speed:1,ranged:2,verb:'blasts',gy:1,glow:.4},
+  gyghoul:{name:'Ghoul',hp:50,dmg:[6,10],hit:.85,w:gyW('crA_3',.55),img:'gyi_ghoul',xp:22,gold:[0,0],speed:2,verb:'claws',gy:1},
+  gyzombie:{name:'Rotting Zombie',hp:60,dmg:[5,9],hit:.82,w:gyW('crA_4',.62),img:'gyi_zombie',xp:20,gold:[0,0],speed:1,verb:'pummels',gy:1},
   gygiant:{name:'Bloated Corpse',hp:84,dmg:[7,12],hit:.84,w:gyW('crA_5',1.2),img:'gyi_giant',xp:30,gold:[0,0],speed:1,verb:'crushes',gy:1},
-  gywraith:{name:'Barrow Wraith',hp:52,dmg:[6,11],hit:.86,w:gyW('crB_0',.9),img:'gyi_wraith',xp:26,gold:[0,0],speed:1,fly:true,floatH:.1,verb:'reaps',gy:1,glow:.5},
-  gyshade:{name:'Shade',hp:44,dmg:[6,10],hit:.87,w:gyW('crB_1',.8),img:'gyi_shade',xp:24,gold:[0,0],speed:2,fly:true,floatH:.2,verb:'rakes',gy:1,glow:.35},
-  gybanshee:{name:'Banshee',hp:46,dmg:[6,11],hit:.86,w:gyW('crB_2',.8),img:'gyi_banshee',xp:26,gold:[0,0],speed:1,fly:true,floatH:.15,verb:'wails at',gy:1,glow:.6},
+  gywraith:{name:'Barrow Wraith',hp:52,dmg:[6,11],hit:.86,w:gyW('crB_0',.76),img:'gyi_wraith',xp:26,gold:[0,0],speed:1,fly:true,floatH:.1,verb:'reaps',gy:1,glow:.5},
+  gyshade:{name:'Shade',hp:44,dmg:[6,10],hit:.87,w:gyW('crB_1',.68),img:'gyi_shade',xp:24,gold:[0,0],speed:2,fly:true,floatH:.2,verb:'rakes',gy:1,glow:.35},
+  gybanshee:{name:'Banshee',hp:46,dmg:[6,11],hit:.86,w:gyW('crB_2',.68),img:'gyi_banshee',xp:26,gold:[0,0],speed:1,fly:true,floatH:.15,verb:'wails at',gy:1,glow:.6},
   gyrats:{name:'Rat Swarm',hp:40,dmg:[5,8],hit:.86,w:gyW('crB_3',.5),img:'gyi_rats',xp:22,gold:[0,0],speed:2,verb:'gnaws',gy:1},
   gyhound:{name:'Bone Hound',hp:46,dmg:[6,10],hit:.86,w:gyW('crB_4',.5),img:'gyi_hound',xp:24,gold:[0,0],speed:2,verb:'savages',gy:1},
   gyrat:{name:'Corpse Rat',hp:38,dmg:[5,9],hit:.85,w:gyW('crB_5',.6),img:'gyi_rat',xp:20,gold:[0,0],speed:2,verb:'bites',gy:1},
