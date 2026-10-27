@@ -5,12 +5,12 @@
    ========================================================================== */
 const wliHas=r=>ITEMDEF[r[0]];
 KH_STOCK.wli_potion=()=>[['healdraught',6],['greaterheal',5],['superiorheal',4],['elixir',3],['manadraught',6],['greatermana',5],['supermana',3],['might',3],['swiftness',3],['ironskin',3],['keeneye',3],['antidote',6],['salve',6],['holywater',3],['sleeptea',3],['hgescape',2],['potion',2]].concat(potionStockRows()).filter(wliHas);
-KH_STOCK.wli_scrolls=()=>{const sp=Object.keys(ITEMDEF).filter(id=>ITEMDEF[id].k==='spell'),rg=Object.keys(ITEMDEF).filter(id=>ITEMDEF[id].k==='ring'&&(ITEMDEF[id].price||0)<=6000).slice(0,6);
+KH_STOCK.wli_scrolls=()=>{const sp=Object.keys(ITEMDEF).filter(id=>ITEMDEF[id].k==='spell'),rg=Object.keys(ITEMDEF).filter(id=>ITEMDEF[id].k==='ring'&&!ITEMDEF[id].rar&&(ITEMDEF[id].price||0)>0).sort((a,b)=>ITEMDEF[a].price-ITEMDEF[b].price);
   return KH_STOCK.scroll().concat(sp.map(id=>[id,2]),rg.map(id=>[id,1]),[['manadraught',4],['greatermana',3],['supermana',2]].filter(wliHas))};
-KH_STOCK.wli_weapons=()=>{const hi=Object.keys(ITEMDEF).filter(id=>{const d=ITEMDEF[id];return !d.rar&&d.k==='weapon'&&d.lvl>=20&&d.lvl<=85&&(d.price||0)>0&&(d.price||0)<=30000&&!/Harpoon|Scimitar/.test(d.n||'')}).sort((a,b)=>ITEMDEF[a].lvl-ITEMDEF[b].lvl);
-  return GEAR_STOCK.sword().concat(hi.slice(-14).map(id=>[id,1]))};
-KH_STOCK.wli_armour=()=>{const hi=Object.keys(ITEMDEF).filter(id=>{const d=ITEMDEF[id];return (d.k==='shield'||d.k==='head'||d.k==='chest'||d.k==='legs'||d.k==='armor'||d.k==='armour')&&!d.rar&&d.lvl>=20&&d.lvl<=85&&(d.price||0)>0&&(d.price||0)<=30000}).sort((a,b)=>ITEMDEF[a].lvl-ITEMDEF[b].lvl);
-  return GEAR_STOCK.armour().concat(hi.slice(-14).map(id=>[id,1])).concat(KH_STOCK.armour())};
+/* Wenlock sells every tier of gear the game has so far, white to orange, for every class: all the ordinary (not unique) weapons, shields and armour that have a price, from the lowest level to the highest, two of the cheap pieces and one of the rest */
+const wliGear=kinds=>Object.keys(ITEMDEF).filter(id=>{const d=ITEMDEF[id];return d&&!d.rar&&kinds.includes(d.k)&&(d.price||0)>0&&(d.lvl||1)<=90}).sort((a,b)=>(ITEMDEF[a].lvl||1)-(ITEMDEF[b].lvl||1)||ITEMDEF[a].price-ITEMDEF[b].price).map(id=>[id,ITEMDEF[id].price<400?2:1]);
+KH_STOCK.wli_weapons=()=>wliGear(['weapon']);
+KH_STOCK.wli_armour=()=>wliGear(['shield','head','chest','legs','arms','armor','armour']);
 KH_STOCK.wli_general=()=>[['torch',14],['lantern',5],['bread',10],['cheese',8],['water',12],['herb',6],['honeycomb',4],['wildflower',8],['potion',4],['antidote',4],['ore',3],['apple',8],['ale',8],['hgescape',2]].filter(wliHas);
 KH_STOCK.wli_green=()=>[['apple',20],['wildflower',10],['herb',8],['nuts',10],['dates',6],['pottage',6],['water',10],['cheese',6],['honeycomb',6]].filter(wliHas);
 KH_STOCK.wli_butcher=()=>[['sausage',16],['roast',10],['pie',8],['herring',8],['pottage',8],['cheese',6]].filter(wliHas);
