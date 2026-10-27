@@ -95,7 +95,7 @@ function gyYardBuild(){
   const isOpen=(x,y)=>x>=2&&y>=2&&x<=67&&y<=67&&rows[y][x]==='.';
   const free=(x,y)=>isOpen(x,y)&&!used.has(x+','+y);
   const setF=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(x>=0&&y>=0&&x<W&&y<H)fm[y*W+x]=f};
-  const pth=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){path.add(x+','+y);fm[y*W+x]=f||'3'}};
+  const pth=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){path.add(x+','+y);fm[y*W+x]=f||'5'}};
   const dec=(a,x,y,o)=>{o=o||{};const k=GYA[a]?'gy_'+a:a;if(!isOpen(x,y))return null;const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}
     if(o.sc)d.sc=o.sc;if(o.npc){d.npc=o.npc;d.deco=false}if(o.i!==undefined)d.i=o.i;if(o.wd){d.wd=o.wd;d.pic=1}if(o.txt)d.txt=o.txt;
     decor.push(d);used.add(x+','+y);return d};
@@ -104,13 +104,13 @@ function gyYardBuild(){
   const foe=(t,x,y)=>{if(!free(x,y))return false;enemies.push({t,x,y,lvl:84});used.add(x+','+y);return true};
   const lamp=(x,y)=>{if(isOpen(x,y)){lights.push([x,y])}};
   // ---- the ground: grass; gravel paths; a flagged plaza; bare earth round the gravedigger ----
-  pth(3,35,67,35,'3');pth(35,3,35,66,'3');
-  pth(58,8,58,34,'3');pth(58,36,58,62,'3');pth(12,8,12,34,'3');pth(12,36,12,62,'3');
-  pth(12,8,58,8,'3');pth(12,62,58,62,'3');   // the paths ring the yard, so that every door can be reached from either side
+  pth(3,35,67,35,'5');pth(35,3,35,66,'5');
+  pth(58,8,58,34,'5');pth(58,36,58,62,'5');pth(12,8,12,34,'5');pth(12,36,12,62,'5');
+  pth(12,8,58,8,'5');pth(12,62,58,62,'5');   // the paths ring the yard, so that every door can be reached from either side
   pth(GY_Y.plaza.x0,GY_Y.plaza.y0,GY_Y.plaza.x1,GY_Y.plaza.y1,'0');   // the ground round the tomb is grass; only the two cobbled lanes cross it
-  pth(29,35,41,35,'3');pth(35,29,35,41,'3');
-  pth(30,46,40,54,'3');   // the family plot
-  setF(54,40,66,48,'1');   // the gravedigger's yard
+  pth(29,35,41,35,'5');pth(35,29,35,41,'5');
+  pth(30,46,40,54,'0');   // the family plot
+  setF(54,40,66,48,'0');   // the gravedigger's yard
   // ---- the boundary: a stone wall two squares thick, with the lych-gate in the east side ----
   const wallH=2.1,wt=v=>ch((typeof wwTile==='function'&&IMG.tex_1)?wwTile(['tex_1','tex_2','tex_1'][v%3],2.6,{gain:.62}):gyTile('texGrey_'+v,wallH,{gain:.62}));   // the boundary is a bank of dark leaves and mossy bark, not stone   // the boundary wall is darker, so that the far wall does not shine in the mist as pale stripes
   const WC=[0,0,0,1,3,5,0,3,2].map(wt);
@@ -134,12 +134,12 @@ function gyYardBuild(){
     T.front=[fx,fy];
     for(let a=-2;a<=2;a++)for(let b=0;b<=1;b++){const x=T.side==='W'?fx+b:fx+a,y=T.side==='W'?fy+a:T.side==='N'?fy+b:fy-b;used.add(x+','+y)}
     // a short cobbled walk from the lane to the door
-    if(T.side==='N')pth(T.x,3,T.x,8,'3');else if(T.side==='S')pth(T.x,62,T.x,66,'3');else pth(3,T.y,12,T.y,'3')}
+    if(T.side==='N')pth(T.x,3,T.x,8,'5');else if(T.side==='S')pth(T.x,62,T.x,66,'5');else pth(3,T.y,12,T.y,'5')}
   // ---- the entrance is a Gothic gatehouse: carved stone round the iron gate ----
   for(const y of [33,34,36,37]){const gid=gyTile('texGrey_0',3.4,{fac:{img:'sceneB_4',i:y-33,n:5},gain:1.0});if(rows[y][68]!=='.'||true){rows[y][68]=ch(gid);block[y*W+68]=1}}
   // ---- THE OVERGROWN WALK (south west): a narrow earth path winding between leaning, ivy-covered stones, under dark bushes and trees ----
   {const wp=[[20,36],[20,40],[17,40],[17,45],[22,45],[22,50],[18,50],[18,56],[22,56]];
-   for(let i=1;i<wp.length;i++){const [a,b]=wp[i-1],[c,d]=wp[i];pth(Math.min(a,c),Math.min(b,d),Math.max(a,c),Math.max(b,d),'1')}
+   for(let i=1;i<wp.length;i++){const [a,b]=wp[i-1],[c,d]=wp[i];pth(Math.min(a,c),Math.min(b,d),Math.max(a,c),Math.max(b,d),'5')}
    const BUSH=['lbush0','lbush0_2','pbracken'].filter(k=>IMG[k]),TR=['ltree20','ltree21','ltree2','ltree6','ltree0','ltree12','ltree19','ltree15'],ST=['lean','stone1','stone2','wcross','lean','slab','ccross'];
    for(let y=36;y<=60;y++)for(let x=14;x<=27;x++){if(path.has(x+','+y))continue;
      let dmin=9;for(const k of path){const [px,py]=k.split(',').map(Number);if(Math.abs(px-x)<=4&&Math.abs(py-y)<=4){const d=Math.max(Math.abs(px-x),Math.abs(py-y));if(d<dmin)dmin=d}}
@@ -148,7 +148,7 @@ function gyYardBuild(){
      else if(dmin<=3&&BUSH.length&&r<.7)D(BUSH[(hs(x,y,34)*BUSH.length)|0],x,y,{block:false,sc:.8+hs(x,y,35)*.6});
      else if(dmin>=3&&r<.55)DB(TR[(hs(x,y,36)*TR.length)|0],x,y,{sc:.95+hs(x,y,37)*.4})}}
   // ---- THE AVENUE OF VAULTS (north east): a cobbled lane between two rows of tomb fronts, under an arch ----
-  {pth(51,9,53,34,'3');
+  {pth(51,9,53,34,'5');
    for(let y=11;y<=33;y++)for(const x of [50,54]){const gid=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:(y+(x===54?1:0))%3,n:3},gain:1.0});rows[y][x]=ch(gid);block[y*W+x]=1;path.add(x+','+y)}
    dec('arch',52,10,{sc:1.45});for(const x of [51,53])for(const y of [18,26])lamp(x,y);
    for(const y of [14,22,30]){if(free(52,y)&&false)dec('lantern',52,y)}
@@ -214,6 +214,9 @@ function gyYardBuild(){
    for(const d of st)for(const [a,b] of [[2,0],[0,2]]){const o=at.get((d.x+a)+','+(d.y+b)),x=d.x+a/2,y=d.y+b/2;if(o&&free(x,y)&&!path.has(x+','+y)&&hs(x,y,27)<.6&&n<70){D('web',x,y,{sc:.5});n++}}}
   for(let x=14;x<=56;x+=10){lamp(x,7);lamp(x,63)}
   for(const g of GY_Y.doors){for(let k=1;k<=3;k++)lamp(g.x+(g.x>35?-1:1),g.y+(g.y<35?k*5:-k*5))}
+  // ---- grass, flowers and clover everywhere there is no path: soft, bright and peaceful ----
+  {const GR=['pgrass0','pgrass1','pgrass2','pgrass3','lflora0','lflora0_1','lflora0_2','pflw0_0','pflw1_0','pflw2_1','pflw3_0','pflw4_1','pflw5_0'].filter(k=>IMG[k]);
+   if(GR.length)for(let n=0;n<460;n++){const x=3+((hs(n,1,29)*64)|0),y=3+((hs(n,2,29)*64)|0);if(path.has(x+','+y))continue;const k=GR[(hs(n,3,29)*GR.length)|0],d=D(k,x,y,{block:false,sc:/^pgrass/.test(k)?1+hs(n,4,29)*1.2:.8+hs(n,4,29)*.7});if(d){d.ox=(hs(n,5,29)-.5)*.7;d.oy=(hs(n,6,29)-.5)*.7}}}
   // ---- the living: the gravedigger's apprentice, and the things that live here ----
   {const q=(x,y)=>{for(let r=0;r<4;r++)for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;if(free(x+a,y+b)){return [x+a,y+b]}}return null};
    const kp=KH_KEEPERS.gyo_digger,p=q(62,45);if(kp&&p){decor.push({k:khFaceKey(kp.face),x:p[0],y:p[1],block:false,walk:true,npc:'gyo_digger',sc:kp.sc||1});used.add(p[0]+','+p[1])}}
@@ -223,7 +226,7 @@ function gyYardBuild(){
   const rowsS=[],fmS=[];for(let y=0;y<H;y++){rowsS.push(rows[y].join(''));let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmS.push(s)}
   const mapNames=[{t:'The Lych-gate',x:65,y:35,k:'place'},{t:'The Tomb of the Crypt',x:35,y:32,k:'place'},{t:'The Mossy Iron Gate',x:58,y:9,k:'place'},{t:'The Sunken Stair',x:58,y:61,k:'place'},{t:'The Stone Archway',x:12,y:61,k:'place'},{t:'The Trapdoor',x:12,y:9,k:'place'},
     {t:'The Overgrown Walk',x:20,y:46,k:'place'},{t:'The Avenue of Vaults',x:52,y:22,k:'place'},{t:'The Autumn Corner',x:50,y:57,k:'place'},{t:'The Ruined Chapel',x:19,y:19,k:'place'},{t:"The Gravedigger's Hut",x:60,y:42,k:'place'},{t:'The Wenlock Family Plot',x:35,y:49,k:'place'},{t:'Lady Aldith\'s Grave',x:36,y:51,k:'place'}];
-  const lv={rows:rowsS,chars,fmap:fmS,floorSet:GY_FLOORSET,floor:GY_FLOORSET[0],ceil:'cloud',start:{x:GY_Y.start.x,y:GY_Y.start.y,f:GY_Y.start.f},enemies,items,decor,lights,portals:[],day:.78,outdoor:true,amb:.92,
+  const lv={rows:rowsS,chars,fmap:fmS,floorSet:GY_FLOORSET.slice(0,5).concat(['gyf_cobble']),floor:GY_FLOORSET[0],ceil:'cloud',start:{x:GY_Y.start.x,y:GY_Y.start.y,f:GY_Y.start.f},enemies,items,decor,lights,portals:[],day:.78,outdoor:true,amb:.92,
     name:GY.NAMES[530],label:GY.NAMES[530],noExtras:true,diff:84,ceilH:5.2,noTele:true,torchGap:1e9,mapNames,
     _gy:{kind:'yard',glow,lcol:{},epitaphs:readable.length,placed:ri}};
   // ---- check: everything that can be walked to can be reached from the lych-gate; a piece that walls something in is made walk-through ----

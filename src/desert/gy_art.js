@@ -31,10 +31,12 @@ function gyIvy(){
   const t=IMG.gyp_texFloor_0;if(!t)return;GY._ivy={};
   for(const a of ['stone1','stone2','lean','slab','wcross','ccross','tomb','urn','obelisk','column','mausoleum','angel','chapel','hut','crypt','barrow','fence']){
     const s=IMG['gy_'+a];if(!s)continue;try{
-    const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.drawImage(s,0,0);
-    const v=document.createElement('canvas');v.width=c.width;v.height=c.height;const y=v.getContext('2d');y.drawImage(t,0,0,v.width,v.height);y.globalCompositeOperation='destination-in';
-    const g=y.createLinearGradient(0,0,0,v.height);g.addColorStop(0,'rgba(0,0,0,.3)');g.addColorStop(.35,'rgba(0,0,0,.65)');g.addColorStop(1,'rgba(0,0,0,1)');y.fillStyle=g;y.fillRect(0,0,v.width,v.height);
-    x.globalCompositeOperation='source-atop';x.drawImage(v,0,0);GY._ivy[a]=c;IMG['gy_'+a]=c}catch(e){console.error('gyIvy',a,e)}}}
+    const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.drawImage(s,0,0);x.globalCompositeOperation='source-atop';
+    const w=c.width,h=c.height,n=Math.round(w*h/(a==='fence'?110:52)),G=['#2a5a26','#3b7f31','#58a03e','#244c24','#6fb04a'];
+    // vines running up from the foot, then leaves over them, thickest low down
+    for(let k=0;k<Math.round(w/16);k++){let px=hash2(k,1,620)*w,py=h;x.strokeStyle='#27481f';x.lineWidth=1.6+hash2(k,2,620)*1.6;x.beginPath();x.moveTo(px,py);for(let t=0;t<9;t++){px+=(hash2(k,t+3,621)-.5)*10;py-=h*(.04+hash2(k,t+4,622)*.08);x.lineTo(px,py)}x.stroke()}
+    for(let k=0;k<n;k++){const px=hash2(k,1,623)*w,py=h*(1-Math.pow(hash2(k,2,623),1.9)),r=2.2+hash2(k,3,623)*3.6;x.fillStyle=G[(hash2(k,4,623)*G.length)|0];x.globalAlpha=.9;x.beginPath();x.ellipse(px,py,r,r*.62,hash2(k,5,623)*3.14,0,6.3);x.fill()}
+    x.globalAlpha=1;GY._ivy[a]=c;IMG['gy_'+a]=c}catch(e){console.error('gyIvy',a,e)}}}
 /* cobwebs are drawn faint and fine: the painted web at half strength */
 function gyWeb(){const s=IMG.gyp_bonesH_1;if(!s)return;if(!GY._web){const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.globalAlpha=.5;x.drawImage(s,0,0);GY._web=c}IMG.gy_web=GY._web}
 function gyLoad(){
@@ -60,13 +62,30 @@ function gySlab(){
     const g=x.createLinearGradient(0,0,0,c.height);g.addColorStop(0,'rgb(205,208,205)');g.addColorStop(.6,'rgb(170,172,168)');g.addColorStop(1,'rgb(118,120,116)');x.fillStyle=g;x.fillRect(0,0,c.width,c.height);
     x.globalCompositeOperation='destination-in';x.drawImage(s,0,0);GY._slabC=c;IMG.gy_slab=c}catch(e){console.error('gySlab',e)}}
 /* the ground and the ceilings, from the painted textures */
-const GY_FLOORSET=['gyf_grass','gyf_dirt','gyf_gravel','gyf_flag','gyf_bone','gyf_slate'];
+const GY_FLOORSET=['gyf_grass','gyf_dirt','gyf_gravel','gyf_flag','gyf_bone','gyf_slate','gyf_cobble'];
 function gyFloors(){
   if(GY._floors)return;
   const mk=(nm,key,gain,t)=>{const im=IMG['gyp_'+key];if(!im||FLOORS[nm])return;const base=dsPaintedTex(im),d=new Uint8ClampedArray(base.length);
     for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,base[i]*gain*t[0]);d[i+1]=Math.min(255,base[i+1]*gain*t[1]);d[i+2]=Math.min(255,base[i+2]*gain*t[2]);d[i+3]=255}FLOORS[nm]=d};
   const T1=[1,1,1];
+  // peaceful, lush grass made in code: soft greens in drifting patches, fine blades, sunlit dapples and the odd tiny white, yellow or pink flower; it tiles
+  if(!FLOORS.gyf_grass){const N=128,d=new Uint8ClampedArray(N*N*4),hh=(a,b,c)=>hash2(a,b,c),vn=(x,y,cs,sd)=>{const P=N/cs,u=x/cs,v=y/cs,i=Math.floor(u),j=Math.floor(v),fx=u-i,fy=v-j,sx=fx*fx*(3-2*fx),sy=fy*fy*(3-2*fy),g=(a,b)=>hh(((a%P)+P)%P,((b%P)+P)%P,sd),t=g(i,j)*(1-sx)+g(i+1,j)*sx,bt=g(i,j+1)*(1-sx)+g(i+1,j+1)*sx;return t*(1-sy)+bt*sy};
+    for(let y=0;y<N;y++)for(let x=0;x<N;x++){const o=(y*N+x)*4,n1=vn(x,y,32,611),n2=vn(x,y,16,612),n3=vn(x,y,8,613),blade=hh(x,y>>1,614)-.5,dap=Math.max(0,vn(x,y,32,615)-.62)*70;
+      let r=78+n1*26+n2*14+blade*18+dap*.7,g=146+n1*34+n2*20+blade*30+dap,b=50+n1*14+n3*8+blade*10;
+      if(hh(x>>2,y>>2,616)<.014){const k=hh(x>>2,y>>2,617);r=k<.5?238:k<.8?240:236;g=k<.5?238:k<.8?214:170;b=k<.5?230:k<.8?90:196}
+      d[o]=r;d[o+1]=g;d[o+2]=b;d[o+3]=255}
+    FLOORS.gyf_grass=d}
   mk('gyf_grass','texFloor_0',1.5,[.92,1.06,.9]);mk('gyf_dirt','texFloor_1',1.1,[1.05,.95,.85]);mk('gyf_gravel','texFloor_2',1.35,T1);mk('gyf_flag','texFloor_3',1.3,T1);mk('gyf_bone','texFloor_4',.95,T1);mk('gyf_slate','texFloor_5',1.0,T1);
+  // real cobbles: small rounded stones of warm grey and brown with dark joints, a little moss in the joints and the odd fallen leaf (about eight stones across each square)
+  if(!FLOORS.gyf_cobble){const N=128,S=16,d=new Uint8ClampedArray(N*N*4),hh=(a,b,c)=>hash2(a,b,c),ctr=[];
+    for(let j=0;j<N/S;j++)for(let i=0;i<N/S;i++)ctr.push([(i+.5+(hh(i,j,601)-.5)*.5)*S,(j+.5+(hh(i,j,602)-.5)*.5)*S,hh(i,j,603)]);
+    for(let y=0;y<N;y++)for(let x=0;x<N;x++){let d1=1e9,d2=1e9,id=0;const gi=Math.floor(x/S),gj=Math.floor(y/S);
+      for(let dj=-1;dj<=1;dj++)for(let di=-1;di<=1;di++){const ii=(gi+di+N/S)%(N/S),jj=(gj+dj+N/S)%(N/S),c=ctr[jj*(N/S)+ii];let dx=Math.abs(x-(c[0]+(gi+di-ii)*S)),dy=Math.abs(y-(c[1]+(gj+dj-jj)*S));const dd=Math.hypot(dx,dy*1.15);if(dd<d1){d2=d1;d1=dd;id=c[2]}else if(dd<d2)d2=dd}
+      const e=d2-d1,o=(y*N+x)*4,base=128+id*60,round=Math.min(1,e/5),shade=base*(.55+.45*round)*(1+.08*(hh(x,y,604)-.5));
+      let r=shade*1.02,g=shade*.97,b=shade*.9;if(e<2.1){r=34;g=32;b=26;if(hh(x>>1,y>>1,605)<.35){g+=14;r+=2}}
+      if(hh(x>>2,y>>2,606)<.025){r=150+hh(x,y,607)*60;g=70+hh(x,y,608)*50;b=26}
+      d[o]=r;d[o+1]=g;d[o+2]=b;d[o+3]=255}
+    FLOORS.gyf_cobble=d}
   for(const nm of GY_FLOORSET)if(!FLOORS[nm])FLOORS[nm]=FLOORS.cobble||FLOORS.grass;
   const cl=(nm,key,gain,t)=>{const im=IMG['gyp_'+key];if(!im||CEILS[nm])return;const base=dsPaintedTex(im),d=new Uint8ClampedArray(base.length);
     for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,base[i]*gain*t[0]);d[i+1]=Math.min(255,base[i+1]*gain*t[1]);d[i+2]=Math.min(255,base[i+2]*gain*t[2]);d[i+3]=255}CEILS[nm]=d};
@@ -127,7 +146,7 @@ if(typeof CONTAINERS!=='undefined'&&!CONTAINERS.includes('gy_chest'))CONTAINERS.
 if(typeof DS_LOOTNAME!=='undefined')DS_LOOTNAME.gy_chest='Old chest';
 /* the look: dusk mist in the graveyard, nothing outdoors elsewhere */
 {const _w=weatherNow;weatherNow=function(){
-  if(LEVEL===GY.ID)return {id:'fog',n:'Dusk mist',fog:.03,haze:.55,dark:.1,mix:.4,col:[196,174,126],text:'A cold blue mist lies low between the stones, and the last of the daylight is going. Somewhere a raven clears its throat.'};
+  if(LEVEL===GY.ID)return {id:'fog',n:'Dusk mist',fog:.022,haze:.38,dark:.04,mix:.35,col:[214,196,140],text:'A cold blue mist lies low between the stones, and the last of the daylight is going. Somewhere a raven clears its throat.'};
   if(gyIs(LEVEL))return null;
   return _w.apply(this,arguments)}}
 /* arrival: the pictures first, then the level; no door ever opens on a level that is not built */
