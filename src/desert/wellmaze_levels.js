@@ -51,7 +51,7 @@ WM.build=function(k){
   const fmr=c.fm.map(r=>r.join(''));
   const names=[];for(const r of M.rooms){if(r.sealed||!WM.ROOMNAMES[r.kind])continue;names.push({t:WM.ROOMNAMES[r.kind],x:(r.x0+r.x1)>>1,y:(r.y0+r.y1)>>1,k:'place'})}
   const L={rows,start:{x:arr.x,y:arr.y,f:arr.f},enemies:c.enemies,items:c.items,decor:c.dec,chars:wl.chars,fmap:fmr,floor:'wmflag',floor2:'wmcobble',floorSet:['wmflag','wmcobble','wmmoss','wmwater','wmflag','wmflag'],
-    ceil:k===3?'wmceilx':'wmceil',ceilH:WM.WH,day:0,amb:0,torchGap:1e9,noTele:true,noExtras:true,portals:[],lights:c.lights,name:WM.NAMES[k],label:WM.NAMES[k],diff:WM.DIFF,mapNames:names,
+    ceil:k===3?'wmceilx':'wmceil',ceilH:WM.WH,day:0,amb:0,torchGap:1e9,noTele:true,noExtras:true,portals:[],lights:c.lights,name:WM.NAMES[k],label:WM.NAMES[k],diff:WM.RATING[k],mapNames:names,
     _wm:Object.assign({k,M,seed:M.seedUsed,tier:c.meta.tier,loot:c.meta.loot,notes:c.meta.notes,lcol:c.meta.lcol||{},doors:{},switches:[],pits:{}},c.meta.wm||{})};
   LEVELS[id]=L;WM.checks(k,c)};
 WM.ROOMNAMES={shaft:'The Well Shaft',start:null,camp:"The Diggers' Camp",cistern:'The Flooded Cistern',cellar:'The Wine Cellar',shrine:'The Forgotten Shrine',mine:'The Collapsed Mine',grotto:'The Crystal Grotto',library:'The Dripping Library',

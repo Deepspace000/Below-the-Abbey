@@ -16,7 +16,7 @@ with sync_playwright() as p:
     info = pg.evaluate('''()=>({houses:WL.houses.map(h=>({id:h.id,spk:h.spk,name:h.name,front:h.front,out:h.out,door:h.door,keeper:h.sp&&h.sp.keeper}))})''')
     json.dump(info, open(OUT / 'houses.json', 'w'))
     print('houses', len(info['houses']))
-    ids = only or [7100] + [h['id'] for h in info['houses']]
+    ids = only or [7000] + [h['id'] for h in info['houses']]
     for id_ in ids:
         r = pg.evaluate('''async(id)=>{try{G.cut=null;G.talk=null;if(!LEVELS[id]&&KH_LAZY[id])KH_LAZY[id]();const L=LEVELS[id];if(!L)return 'nolevel';goToLevel(id,{x:L.start.x,y:L.start.y,f:0});return 'ok '+(L.wlin||'')+' '+L.rows.length+'x'+L.rows[0].length+' decor '+L.decor.length}catch(e){return 'ERR '+e.message}}''', id_)
         pg.wait_for_timeout(2600)

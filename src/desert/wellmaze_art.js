@@ -4,11 +4,11 @@
    Pictures: painted by Gemini, cut with tools/wm_ingest.py (props and creatures on green) and tools/ingest_tex.py (walls, floors, ceilings). They are assets/ds_wm_*.png and
    assets/ds_tex_wm_*.png, so the game has them as IMG['art_wm_*'] and IMG['art_tex_wm_*'] (the list is written by tools/inject.py). Raw copies of the cut pieces are in assets/wm/.
    ========================================================================== */
-const WM={IDS:[497,498,499,502],NAMES:['Under the Wenlock Well','The Violet Maze','The Bell Vaults','The Amethyst Deep'],DIFF:80,W:61,H:61,CH:String.fromCharCode(0x2c0)};
+const WM={IDS:[497,498,499,502],NAMES:['Under the Wenlock Well','The Violet Maze','The Bell Vaults','The Amethyst Deep'],DIFF:80,RATING:[80,81,82,83],W:61,H:61,CH:String.fromCharCode(0x2c0)};
 WM.k=id=>WM.IDS.indexOf(id);
 const wmIn=()=>WM.IDS.includes(LEVEL);
 try{WK.WELL=WM.IDS.slice()}catch(e){} // the contract file says 497..499 (500 in a later note); 500 is the Ruby Maze, so the four levels are these
-WM.IDS.forEach((id,i)=>{LEVEL_NAMES[id]=WM.NAMES[i];LEVEL_RATING[id]=WM.DIFF});
+WM.IDS.forEach((id,i)=>{LEVEL_NAMES[id]=WM.NAMES[i];LEVEL_RATING[id]=WM.RATING[i]});
 /* ---------- the look: violet haze, violet lamps, violet motes (the cold look of the Hollow cities, tuned) ---------- */
 if(typeof HGTE!=='undefined'){
   for(const id of WM.IDS){HGTE.cold.add(id);HGTE.look[id]={ambient:.62,haze:.5,hazeRate:.04,hazeCol:[86,46,146],roofHaze:[38,20,70],tint:[1.12,.86,1.28],lamp:[1.1,.55,1.4],wallGain:1.0,wallSat:1.2,wallAO:.4,
@@ -39,10 +39,10 @@ Object.assign(ENEMY_DEF,{
   wmwraith:{name:'Well-Wraith',hp:56,dmg:[6,10],hit:.86,w:1.15,img:'art_wm_wraith',xp:24,gold:[0,0],speed:1,verb:'rakes',glow:.7},
   wmgolem:{name:'Amethyst Golem',hp:64,dmg:[6,11],hit:.84,w:1.9,img:'art_wm_golem',xp:30,gold:[0,0],speed:1,verb:'crushes',glow:.15},
   wmmimic:{name:'Mimic',hp:60,dmg:[8,14],hit:.88,w:1.35,img:'art_wm_mimic',xp:35,gold:[40,160],speed:1,verb:'chomps'},
-  wmwarden:{name:'The Well-Warden',hp:820,dmg:[5,8],hit:.9,w:3.2,img:'art_wm_warden',xp:600,gold:[0,0],speed:1,verb:'smashes',boss:true,glow:.5}});
+  wmwarden:{name:'The Well-Warden',hp:830,dmg:[5,8],hit:.9,w:3.2,img:'art_wm_warden',xp:600,gold:[0,0],speed:1,verb:'smashes',boss:true,glow:.5}});
 if(typeof NO_VARY!=='undefined')NO_VARY.push('wmwarden');
 if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push('wmwarden');
-if(typeof BOSS_GOLD!=='undefined')BOSS_GOLD.wmwarden=[5000,6500];
+if(typeof BOSS_GOLD!=='undefined')BOSS_GOLD.wmwarden=[5600,7200];
 if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^wmspider/,'poisoned',.3],[/^wmslime/,'poisoned',.15],[/^wmfungus/,'tomblung',.2],[/^wmwraith/,'shaken',.2],[/^wmbat/,'bleeding',.15],[/^wmcrab/,'bleeding',.12],[/^wmwarden$/,'shaken',.15]);
 /* ---------- gear and finds ---------- */
 ITEMDEF.wmkey1={n:'Violet Key',k:'quest',t:'Key',ic:'ore',c:'#a064e8',stack:1,price:0,sw:.2,d:'A heavy iron key with a violet stone in its bow. It fits the lock of the arched door that leads down from Under the Wenlock Well to the Violet Maze, and no other lock.'};

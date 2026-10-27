@@ -1,0 +1,25 @@
+WIPE {"area": 19, "areaName": "Ironhill Moor", "avgLvl": 23, "state": "dead", "round": 2167, "fightRounds": 23, "potions": 12, "last": ["Bandit Archer L31", "Bandit L32", "Bandit L31", "Bounty Hunter L30"], "time": 154, "restored": true, "afterLvl": 19, "afterGold": 7594}
+WIPE {"area": 19, "areaName": "Ironhill Moor", "avgLvl": 23, "state": "dead", "round": 2176, "fightRounds": 29, "potions": 12, "last": ["Bandit L30", "Bandit L31", "Bandit L31", "Bandit L30"], "time": 243, "restored": true, "afterLvl": 19, "afterGold": 7594}
+WIPE {"area": 19, "areaName": "Ironhill Moor", "avgLvl": 23, "state": "dead", "round": 2173, "fightRounds": 26, "potions": 12, "last": ["Bandit L32", "Bandit L30", "Bandit L31", "Bandit Archer L31"], "time": 328, "restored": true, "afterLvl": 19, "afterGold": 7594}
+WIPE {"area": 19, "areaName": "Ironhill Moor", "avgLvl": 23, "state": "dead", "round": 2176, "fightRounds": 29, "potions": 12, "last": ["Bandit L31", "Bandit L31", "Bandit L30", "Bandit L31"], "time": 419, "restored": true, "afterLvl": 19, "afterGold": 7594}
+restarting browser after repeated reloads
+restart 1
+WIPE {"area": 19, "areaName": "Ironhill Moor", "avgLvl": 23, "state": "dead", "round": 2102, "fightRounds": 22, "potions": 11, "last": ["Hitman L31", "Bounty Hunter L30", "Hitman L31", "Hitman L31"], "time": 45, "restored": true, "afterLvl": 19, "afterGold": 7594}
+WIPE {"area": 19, "areaName": "Ironhill Moor", "avgLvl": 23, "state": "dead", "round": 2172, "fightRounds": 24, "potions": 12, "last": ["Bounty Hunter L30", "Bandit L31", "Bandit L31", "Bandit L31"], "time": 148, "restored": true, "afterLvl": 19, "afterGold": 7594}
+WIPE {"area": 19, "areaName": "Ironhill Moor", "avgLvl": 23, "state": "dead", "round": 2176, "fightRounds": 29, "potions": 12, "last": ["Bandit L32", "Bandit L31", "Bandit L31", "Bandit Archer L31"], "time": 239, "restored": true, "afterLvl": 19, "afterGold": 7594}
+WIPE {"area": 19, "areaName": "Ironhill Moor", "avgLvl": 23, "state": "dead", "round": 2176, "fightRounds": 29, "potions": 11, "last": ["Bandit L30", "Bandit L30", "Bandit L30", "Bandit Archer L31"], "time": 331, "restored": true, "afterLvl": 19, "afterGold": 7594}
+restarting browser after repeated reloads
+restart 2
+WIPE {"area": 19, "areaName": "Ironhill Moor", "avgLvl": 23, "state": "dead", "round": 2089, "fightRounds": 15, "potions": 11, "last": ["Hitman L31", "Hitman L31", "Hitman L31", "Hitman L31"], "time": 26, "restored": true, "afterLvl": 19, "afterGold": 7594}
+WIPE {"area": 19, "areaName": "Ironhill Moor", "avgLvl": 23, "state": "dead", "round": 2110, "fightRounds": 29, "potions": 10, "last": ["Hitman L31", "Hitman L31", "Hitman L31", "Bounty Hunter L30"], "time": 73, "restored": true, "afterLvl": 19, "afterGold": 7594}
+WIPE {"area": 19, "areaName": "Ironhill Moor", "avgLvl": 23, "state": "dead", "round": 2144, "fightRounds": 15, "potions": 8, "last": ["Hitman L31", "Hitman L31", "Hitman L31", "Bounty Hunter L30"], "time": 126, "restored": true, "afterLvl": 19, "afterGold": 7594}
+WIPE {"area": 22, "areaName": "The Greyfang Pass", "avgLvl": 23, "state": "dead", "round": 2138, "fightRounds": 33, "potions": 12, "last": ["Hitman L34", "Hitman L35", "Hitman L35", "Hitman L34"], "time": 182, "restored": true, "afterLvl": 22, "afterGold": 7594}
+restarting browser after repeated reloads
+restart 3
+WIPE {"area": 22, "areaName": "The Greyfang Pass", "avgLvl": 23, "state": "dead", "round": 2187, "fightRounds": 28, "potions": 12, "last": ["Bounty Hunter L35", "Bounty Hunter L35", "Bounty Hunter L35", "Bounty Hunter L35"], "time": 85, "restored": true, "afterLvl": 22, "afterGold": 7594}
+WIPE {"area": 22, "areaName": "The Greyfang Pass", "avgLvl": 23, "state": "dead", "round": 2254, "fightRounds": 72, "potions": 11, "last": ["Bounty Hunter L34", "Bounty Hunter L34", "Bounty Hunter L34", "Bounty Hunter L34"], "time": 201, "restored": true, "afterLvl": 22, "afterGold": 7594}
+{"giveup": false, "name": "pass", "wall": 712.4, "human_s": 3298, "hero_deaths": 56, "wipes": 14, "lvl_start": [23, 23, 23, 23], "lvl_end": [23, 23, 23, 23], "gold_start": 8082, "gold": 8044, "area_start": 21, "area_end": 32, "out": {"shop": {"15": 1, "17": 1, "16": 3}, "rest": true, "l19": {"exit": "skipped", "lvl": 22}, "l22": {"exit": "stay:play:cut", "lvl": 32}, "after": {"lvl": 32, "q": "active", "st": "play", "cut": false, "passDone": 1}}}
+[{'lvl': 16, 'pages': 1, 'first': 'A drunk patron', 'quests': {}, 'goldDelta': 0}, {'lvl': 16, 'pages': 1, 'first': 'A miner', 'quests': {}, 'goldDelta': 0}]
+['The Cave Bat bites Gruff for 28.', 'Sigrid hits the Cave Bat for 17.', 'The Cave Bat dies. +1680 XP, +450 gold.', 'There is nothing within reach.', 'The party waits.', 'A hitman drops from the rocks. "Nothing personal."', 'Greendale Forest', 'Greendale. Birdsong, and the smell of green.']
+[32, 'play', False]
+finished

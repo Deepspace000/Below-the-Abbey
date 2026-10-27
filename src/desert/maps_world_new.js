@@ -46,7 +46,7 @@ function wmnShape(l){
   return {parts:s.slice().sort((a,b)=>a[2]-b[2]),off,fi,ib:[l.x+x0,y0+off,l.x+x1,y1+off]}}
 
 /* ---------- the layout: pictures, then names ---------- */
-const WMN_REG=[['The Unknown Lands',476,-16,19],['The Known Lands',196,12,19],['The Sea Lands',652,16,19],['The Hollow Lands',-60,150,16],['The Western Reaches',-330,120,19],['The Far West',-760,100,19],['The Grey Downs',-560,250,15],['The Eastern Lands',1230,16,19]];
+const WMN_REG=[['The Unknown Lands',476,-16,19],['The Known Lands',196,12,19],['The Sea Lands',652,16,19],['The Hollow Lands',-60,150,16],['The Western Reaches',-300,64,19],['The Far West',-760,100,19],['The Grey Downs',-560,250,15],['The Eastern Lands',1230,16,19]];
 const wmnHit=(a,b)=>a[0]<b[2]&&a[2]>b[0]&&a[1]<b[3]&&a[3]>b[1];
 function wmnLayout(){
   let fo=true;try{fo=!document.fonts||document.fonts.check("bold 10px 'IM Fell English SC'")}catch(e){}

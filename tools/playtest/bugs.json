@@ -1,0 +1,42 @@
+[
+ {
+  "sev": "HIGH",
+  "title": "Opened locked doors are not saved (Gandrick's Cave, level 8): possible softlock after reload",
+  "text": "snapshot() in index.html stores `grid` only for LEVEL===1. A locked door (tile 4) opened with the cave key is locked again after a load, and the key is already used. Reproduce: Gandrick's Cave, take the key at (20,3), open the door at (24,5), enter Gandrick's room, let the autosave run (or save), then load. The party is inside the vault, the door is locked and there is no key; the only way out found was the harness travel fallback. The same risk applies to every locked door outside level 1."
+ },
+ {
+  "sev": "HIGH",
+  "title": "Gandrick's Wood (level 7): the portal to the Ironhill Road is sealed by tree decor",
+  "text": "Portal 2 (to level 10) is the tile at (8,19). Tree decor with block=true stands at x=11 on y=18..20 and on rows 17 and 21 around it, so the 18 cells holding the portal form an island (flood fill, and walking into (11,19) bumps). The route to Ironhill is not walkable. The harness used the portal's own destination as a logged fallback. Files: index.html and the forest decor passes in src/desert."
+ },
+ {
+  "sev": "MEDIUM",
+  "title": "A surrendered bandit can block the way for ever",
+  "text": "mercyCheck sets e.surr; mercyBroken sets e.mercyDone when a surrendered bandit is struck again. mercyTick skips creatures with mercyDone, so a surrendered bandit who survives the blow stays (alert, surr=true) and never leaves. Reproduce in Gandrick's Wood at (24,20): 'The Bandit blocks the way!' repeats until he is killed."
+ },
+ {
+  "sev": "MEDIUM",
+  "title": "Gear never keeps up with creatures between Thornwick and Khemetra (design finding)",
+  "text": "Hero damage comes only from the weapon plus floor((STR-8)/4); creature health grows x(1+0.45(L-1)). Every shop in Thornwick, Ironhill, Greendale and Anaea sells only tier 0 gear (dagger 3-5 up to axe 5-9, helm armour 2) and 3 or 4 healing potions each. At level 25 the party hits for 12-17, 5-8, 2-4 and 7-11 against a level 19 skeleton with 728 hp. Gold piles up unused: 2,468 at level 16, about 7,600 at level 31. The tiered weapons (tempered, greatsword and so on) are sold only from Khemetra on (KH_STOCK and GEAR_STOCK)."
+ },
+ {
+  "sev": "LOW",
+  "title": "404s for sprite sheets on load",
+  "text": "assets/sp_m30b.png, sp_z30b.png, sp_c30b.png (and similar) return 404 when the page is served from the repo root."
+ },
+ {
+  "sev": "LOW",
+  "title": "MAIN_QUEST_LINE.md differs from the game",
+  "text": "The crypt is rated 4 (doc says 1 to 3). Kill Gandrick pays 250 gold and 1000 xp (doc lists the pre-doubling 125 and 500; every quest pays double, QREW_MUL). Over the Pass is handed out automatically after Out of the Dungeons (doc: Captain Rowan)."
+ },
+ {
+  "sev": "LOW",
+  "title": "Route to Ironhill Castle sometimes unreachable on foot from the arrival point ('route to 14 => noexit')",
+  "text": "Seen once in run 3 in Ironhill (level 13); the harness used the portal destination. Not investigated."
+ },
+ {
+  "sev": "INFO",
+  "title": "Rest is a free full heal, full mana and a revive",
+  "text": "restParty(false) anywhere without enemies close heals everyone, refills mana and raises the dead to half health for 8 hours of game time and about 33 food. Pulls one at a time are therefore very safe and potions are rarely needed outside long fights."
+ }
+]

@@ -1,0 +1,12 @@
+from common import *
+r=Run();r.budget=60000;r.start(True)
+r.ev("goToLevel(33,LEVELS[33].start);PT.pump(5)")
+r.ev("goToLevel(42,LEVELS[42].start);PT.pump(5)")
+print(r.ev("[LEVEL,G.P.x,G.P.y,MW,MH,G.portals.map(p=>p&&p.to).join(',')]"))
+print(r.ev("G.items.map(i=>i.k+'@'+i.x+','+i.y).join(' ')"))
+print(r.ev("G.enemies.map(e=>e.t+e.lvl).join(',')"))
+print(r.ev("G.decor.filter(d=>d.enter||d.npc).map(d=>(d.npc||d.k)+'@'+d.x+','+d.y+(d.enter?'->'+d.enter.to:'')).join(' ')"))
+print(r.ev("PT.findTiles(g=>g>=3&&g<1000&&g!==6&&g!==2&&g!==1).map(t=>t.join(':')).slice(0,40).join(' ')"))
+r.ev("goToLevel(41,LEVELS[41].start);PT.pump(5)")
+print(r.ev("G.decor.filter(d=>d.enter||d.npc).map(d=>(d.npc||d.k)+'@'+d.x+','+d.y+(d.enter?'->'+d.enter.to:'')).join(' ')"))
+r.close()

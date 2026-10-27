@@ -79,7 +79,7 @@ function mpWorldInit(){
   const dense=(pts)=>{for(let i=0;i<pts.length-1;i++){const a=pts[i],b=pts[i+1],L=Math.hypot(b[0]-a[0],b[1]-a[1]),m=Math.max(1,Math.ceil(L/3));for(let k=0;k<m;k++)ap(a[0]+(b[0]-a[0])*k/m,a[1]+(b[1]-a[1])*k/m)}};
   rd.forEach(r=>dense(r.pts));for(const q of (M.rvAvoid||[]))ap(q[0],q[1]);
   const nearLine=(x,y,d)=>{const gx=Math.floor(x/10),gy=Math.floor(y/10),m=Math.ceil(d/10);for(let a=-m;a<=m;a++)for(let b=-m;b<=m;b++){const l=av.get((gx+a)*10007+gy+b);if(l)for(const q of l){if(Math.hypot(q[0]-x,q[1]-y)<d)return true}}return false};
-  const regionLab=[[-330,120,80,14],[-760,100,80,14],[-560,250,70,14],[210,16,64,12],[652,16,70,12],[476,-10,80,14],[-6,208,56,13],[1230,18,70,12],[930,-138,130,7],[530,264,50,5]];
+  const regionLab=[[-300,64,80,14],[-760,100,80,14],[-560,250,70,14],[210,16,64,12],[652,16,70,12],[476,-10,80,14],[-6,208,56,13],[1230,18,70,12],[930,-138,130,7],[530,264,50,5]];
   const blocked=(x,y,d)=>{
     if(wmnBlocked(x,y,d))return true;
     for(const r of regionLab)if(Math.abs(x-r[0])<r[2]&&Math.abs(y-r[1])<r[3])return true;
@@ -237,7 +237,7 @@ function mpWorldNames(V,z){
   fx('The Known Lands',196,12,19,ink,1.5);
   fx('The Sea Lands',652,16,19,ink,1.5);
   fx('The Hollow Lands',-60,150,16,ink,1);wmnSmallWords();
-  fx('The Western Reaches',-330,120,19,ink,1.5);
+  fx('The Western Reaches',-300,64,19,ink,1.5);
   fx('The Far West',-760,100,19,ink,1.5);
   fx('The Grey Downs',-560,250,15,ink,1);
   fx('The Eastern Lands',1230,16,19,ink,1.5);

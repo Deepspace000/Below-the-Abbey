@@ -51,7 +51,7 @@ const WL_GREEN={x0:17,y0:56,x1:40,y1:80,pond:[24,66,29,71]};
 const WL_CHURCH={x0:21,x1:27,y0:20,y1:25,door:[24,25]};
 const WL_HALL={x0:25,x1:28,y0:33,y1:36};
 const WL_TRACK={y:14,x0:38,x1:92};
-const WL_ROAD=(x,y)=>y===WL_Y&&x>=3&&x<=96||(x===24&&y>=26&&y<=49)||(x===72&&y>=51&&y<=86)||(x===84&&y>=14&&y<=49)||(y===14&&x>=38&&x<=92);
+const WL_ROAD=(x,y)=>y===WL_Y&&x>=3&&x<=96||(x===24&&y>=26&&y<=49)||(x===72&&y>=51&&y<=86)||(x===84&&y>=14&&y<=49)||(y===14&&x>=38&&x<=92)||(x===38&&y>=3&&y<=13);   // the last one is Blackbriar Lane, north to the gate of the witch's wood
 /* where a lot stands and where its door is: x0..y1 are the wall cells, door the door tile, front the square outside it (in the road), out the way the party faces on leaving, wall the direction from the front square to the wall */
 function wlLotRect(side,pos,w){
   let x0,y0,x1,y1,face;
@@ -72,16 +72,16 @@ function wlLotDoor(h){
   else{h.door=[h.x0,ci];h.front=[h.x0-1,ci];h.out=3;h.wall=[1,0]}
   return h;
 }
-/* every building of the town, in a fixed order; WL_HOUSES[k].id is the number of its interior level (7100 is the church) */
+/* every building of the town, in a fixed order; WL_HOUSES[k].id is the number of its interior level (7000 is the church) */
 const WL_HOUSES=[];
 {for(const [side,pos,w,sp] of WL_LOTS){const r=wlLotRect(side,pos,w);WL_HOUSES.push(Object.assign(r,{w,spk:sp||null,sp:sp?WL_SPEC[sp]:null}))}
  WL_HOUSES.push({x0:WL_HALL.x0,x1:WL_HALL.x1,y0:WL_HALL.y0,y1:WL_HALL.y1,face:'W',w:4,spk:'hall',sp:WL_SPEC.hall});
- let n=7101;for(const h of WL_HOUSES){wlLotDoor(h);h.id=n++}
+ let n=7001;for(const h of WL_HOUSES){wlLotDoor(h);h.id=n++}
 }
 /* the enterable buildings, for the interior builder (src/desert/wenlock_in_*.js): id = the level number of the interior; door = the door tile in the wall;
    front = the square outside the door in the town (level 496) where the party stands on coming out, and out = the way it faces (0 north, 1 east, 2 south, 3 west).
    kinds: inn, general, smith, armour, weapons, potion, herb, scroll, library, bakery, butcher, greengrocer, tailor, cobbler, chandler, cooper, hall, school, church, almshouse, house */
-const WL_DOORS=[{id:7100,kind:'church',name:"Saint Wenna's Church",keeper:'Reverend Alder',door:{x:WL_CHURCH.door[0],y:WL_CHURCH.door[1]},front:{x:WL_CHURCH.door[0],y:WL_CHURCH.door[1]+1},out:2}];
+const WL_DOORS=[{id:7000,kind:'church',name:"Saint Wenna's Church",keeper:'Reverend Alder',door:{x:WL_CHURCH.door[0],y:WL_CHURCH.door[1]},front:{x:WL_CHURCH.door[0],y:WL_CHURCH.door[1]+1},out:2}];
 for(const h of WL_HOUSES){if(h.spk==='cellar'||h.spk==='granary')continue;
   WL_DOORS.push({id:h.id,kind:h.sp&&h.sp.kind||'house',name:h.sp?h.sp.name:'A Cottage',keeper:h.sp?h.sp.keeper:null,door:{x:h.door[0],y:h.door[1]},front:{x:h.front[0],y:h.front[1]},out:h.out,w:h.w})}
 /* the ten town quests of Wenlock, a chain of little stories, each handed on to the next person (the code is in wenlock_quests.js). The eighth sends the party down the town well
@@ -294,6 +294,10 @@ function wlBuild(){
    }}
   // ---- the cats and dogs, the people ----
   if(typeof wlPlaceFolk==='function')wlPlaceFolk({person,near,free,walk,dc,tryDc,solidDc,A,hs,decor});
+  // ---- Blackbriar Lane: a gate in the north wall that leads to the Witch's Wood (src/desert/ww_wood.js) ----
+  if(typeof wwWenlockGate==='function')wwWenlockGate({W,rows,block,fm,street,decor,ch});
+  // ---- Churchyard Lane: a lane west of Church Lane to the lych-gate of the old graveyard (src/desert/gy_yard.js) ----
+  if(typeof gyWenlockGate==='function')gyWenlockGate({W,rows,block,fm,street,decor,ch});
   // ---- the level ----
   lv.rows=rows.map(r=>r.join(''));
   const fmap=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmap.push(s)}lv.fmap=fmap;

@@ -1,0 +1,10 @@
+from h import *
+h=H();print(h.load());h.lib()
+h.ev("act()");h.ev("crBtn('cr_pick_def')")
+t=time.time()
+print(h.ev("PT.clearLevel({cap:40})"))
+print(json.dumps(h.ev("PT.snap()")))
+print(h.ev("PT.deaths"),time.time()-t)
+print(h.ev("(()=>{const r=[];for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const g=G.grid[y][x];if(g>=3)r.push(g+'@'+x+','+y)}return r.slice(0,40)})()"))
+print(h.ev("G.decor.filter(d=>d.npc||d.loot).map(d=>d.k+(d.npc?':'+d.npc:'')+'@'+d.x+','+d.y)"))
+print([e for e in h.errs if 'HTTP' not in e and 'Failed' not in e][:5]);h.close()

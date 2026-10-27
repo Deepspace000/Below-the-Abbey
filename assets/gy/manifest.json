@@ -1,0 +1,702 @@
+{
+"ghost_0": {
+"file": "ghost_0.webp",
+"w": 297,
+"h": 493,
+"kind": "sprite",
+"sheet": "ghost"
+},
+"ghost_1": {
+"file": "ghost_1.webp",
+"w": 277,
+"h": 493,
+"kind": "sprite",
+"sheet": "ghost"
+},
+"ghost_2": {
+"file": "ghost_2.webp",
+"w": 280,
+"h": 494,
+"kind": "sprite",
+"sheet": "ghost"
+},
+"boss_0": {
+"file": "boss_0.webp",
+"w": 99,
+"h": 223,
+"kind": "sprite",
+"sheet": "boss"
+},
+"boss_1": {
+"file": "boss_1.webp",
+"w": 175,
+"h": 226,
+"kind": "sprite",
+"sheet": "boss"
+},
+"boss_2": {
+"file": "boss_2.webp",
+"w": 87,
+"h": 220,
+"kind": "sprite",
+"sheet": "boss"
+},
+"boss_3": {
+"file": "boss_3.webp",
+"w": 160,
+"h": 219,
+"kind": "sprite",
+"sheet": "boss"
+},
+"crA_0": {
+"file": "crA_0.webp",
+"w": 176,
+"h": 217,
+"kind": "sprite",
+"sheet": "crA"
+},
+"crA_1": {
+"file": "crA_1.webp",
+"w": 102,
+"h": 244,
+"kind": "sprite",
+"sheet": "crA"
+},
+"crA_2": {
+"file": "crA_2.webp",
+"w": 140,
+"h": 208,
+"kind": "sprite",
+"sheet": "crA"
+},
+"crA_3": {
+"file": "crA_3.webp",
+"w": 127,
+"h": 214,
+"kind": "sprite",
+"sheet": "crA"
+},
+"crA_4": {
+"file": "crA_4.webp",
+"w": 109,
+"h": 219,
+"kind": "sprite",
+"sheet": "crA"
+},
+"crA_5": {
+"file": "crA_5.webp",
+"w": 164,
+"h": 231,
+"kind": "sprite",
+"sheet": "crA"
+},
+"crB_0": {
+"file": "crB_0.webp",
+"w": 234,
+"h": 271,
+"kind": "sprite",
+"sheet": "crB"
+},
+"crB_1": {
+"file": "crB_1.webp",
+"w": 254,
+"h": 260,
+"kind": "sprite",
+"sheet": "crB"
+},
+"crB_2": {
+"file": "crB_2.webp",
+"w": 117,
+"h": 276,
+"kind": "sprite",
+"sheet": "crB"
+},
+"crB_3": {
+"file": "crB_3.webp",
+"w": 285,
+"h": 165,
+"kind": "sprite",
+"sheet": "crB"
+},
+"crB_4": {
+"file": "crB_4.webp",
+"w": 58,
+"h": 194,
+"kind": "sprite",
+"sheet": "crB"
+},
+"crB_5": {
+"file": "crB_5.webp",
+"w": 148,
+"h": 201,
+"kind": "sprite",
+"sheet": "crB"
+},
+"crB_6": {
+"file": "crB_6.webp",
+"w": 242,
+"h": 190,
+"kind": "sprite",
+"sheet": "crB"
+},
+"stonesA_0": {
+"file": "stonesA_0.webp",
+"w": 178,
+"h": 280,
+"kind": "sprite",
+"sheet": "stonesA"
+},
+"stonesA_1": {
+"file": "stonesA_1.webp",
+"w": 158,
+"h": 274,
+"kind": "sprite",
+"sheet": "stonesA"
+},
+"stonesA_2": {
+"file": "stonesA_2.webp",
+"w": 133,
+"h": 301,
+"kind": "sprite",
+"sheet": "stonesA"
+},
+"stonesA_3": {
+"file": "stonesA_3.webp",
+"w": 118,
+"h": 286,
+"kind": "sprite",
+"sheet": "stonesA"
+},
+"stonesA_4": {
+"file": "stonesA_4.webp",
+"w": 308,
+"h": 165,
+"kind": "sprite",
+"sheet": "stonesA"
+},
+"stonesA_5": {
+"file": "stonesA_5.webp",
+"w": 230,
+"h": 286,
+"kind": "sprite",
+"sheet": "stonesA"
+},
+"sceneB_0": {
+"file": "sceneB_0.webp",
+"w": 307,
+"h": 297,
+"kind": "sprite",
+"sheet": "sceneB"
+},
+"sceneB_1": {
+"file": "sceneB_1.webp",
+"w": 264,
+"h": 282,
+"kind": "sprite",
+"sheet": "sceneB"
+},
+"sceneB_2": {
+"file": "sceneB_2.webp",
+"w": 326,
+"h": 163,
+"kind": "sprite",
+"sheet": "sceneB"
+},
+"sceneB_3": {
+"file": "sceneB_3.webp",
+"w": 248,
+"h": 272,
+"kind": "sprite",
+"sheet": "sceneB"
+},
+"sceneB_4": {
+"file": "sceneB_4.webp",
+"w": 269,
+"h": 271,
+"kind": "sprite",
+"sheet": "sceneB"
+},
+"sceneB_5": {
+"file": "sceneB_5.webp",
+"w": 177,
+"h": 264,
+"kind": "sprite",
+"sheet": "sceneB"
+},
+"gatesC_0": {
+"file": "gatesC_0.webp",
+"w": 305,
+"h": 203,
+"kind": "sprite",
+"sheet": "gatesC"
+},
+"gatesC_1": {
+"file": "gatesC_1.webp",
+"w": 210,
+"h": 244,
+"kind": "sprite",
+"sheet": "gatesC"
+},
+"gatesC_2": {
+"file": "gatesC_2.webp",
+"w": 284,
+"h": 241,
+"kind": "sprite",
+"sheet": "gatesC"
+},
+"gatesC_3": {
+"file": "gatesC_3.webp",
+"w": 310,
+"h": 183,
+"kind": "sprite",
+"sheet": "gatesC"
+},
+"gatesC_4": {
+"file": "gatesC_4.webp",
+"w": 299,
+"h": 279,
+"kind": "sprite",
+"sheet": "gatesC"
+},
+"gatesC_5": {
+"file": "gatesC_5.webp",
+"w": 239,
+"h": 255,
+"kind": "sprite",
+"sheet": "gatesC"
+},
+"cryptD_0": {
+"file": "cryptD_0.webp",
+"w": 298,
+"h": 176,
+"kind": "sprite",
+"sheet": "cryptD"
+},
+"cryptD_1": {
+"file": "cryptD_1.webp",
+"w": 331,
+"h": 239,
+"kind": "sprite",
+"sheet": "cryptD"
+},
+"cryptD_2": {
+"file": "cryptD_2.webp",
+"w": 191,
+"h": 276,
+"kind": "sprite",
+"sheet": "cryptD"
+},
+"cryptD_3": {
+"file": "cryptD_3.webp",
+"w": 296,
+"h": 271,
+"kind": "sprite",
+"sheet": "cryptD"
+},
+"cryptD_4": {
+"file": "cryptD_4.webp",
+"w": 165,
+"h": 245,
+"kind": "sprite",
+"sheet": "cryptD"
+},
+"cryptD_5": {
+"file": "cryptD_5.webp",
+"w": 270,
+"h": 275,
+"kind": "sprite",
+"sheet": "cryptD"
+},
+"relicsE_0": {
+"file": "relicsE_0.webp",
+"w": 261,
+"h": 113,
+"kind": "sprite",
+"sheet": "relicsE"
+},
+"relicsE_1": {
+"file": "relicsE_1.webp",
+"w": 242,
+"h": 148,
+"kind": "sprite",
+"sheet": "relicsE"
+},
+"relicsE_2": {
+"file": "relicsE_2.webp",
+"w": 237,
+"h": 194,
+"kind": "sprite",
+"sheet": "relicsE"
+},
+"relicsE_3": {
+"file": "relicsE_3.webp",
+"w": 175,
+"h": 234,
+"kind": "sprite",
+"sheet": "relicsE"
+},
+"relicsE_4": {
+"file": "relicsE_4.webp",
+"w": 161,
+"h": 238,
+"kind": "sprite",
+"sheet": "relicsE"
+},
+"relicsE_5": {
+"file": "relicsE_5.webp",
+"w": 120,
+"h": 244,
+"kind": "sprite",
+"sheet": "relicsE"
+},
+"texRed_0": {
+"file": "texRed_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texRed"
+},
+"texRed_1": {
+"file": "texRed_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texRed"
+},
+"texRed_2": {
+"file": "texRed_2.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texRed"
+},
+"texRed_3": {
+"file": "texRed_3.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texRed"
+},
+"texRed_4": {
+"file": "texRed_4.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texRed"
+},
+"texRed_5": {
+"file": "texRed_5.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texRed"
+},
+"stairFix_0": {
+"file": "stairFix_0.webp",
+"w": 234,
+"h": 189,
+"kind": "sprite",
+"sheet": "stairFix"
+},
+"stairFix_1": {
+"file": "stairFix_1.webp",
+"w": 223,
+"h": 145,
+"kind": "sprite",
+"sheet": "stairFix"
+},
+"stairFix_2": {
+"file": "stairFix_2.webp",
+"w": 227,
+"h": 166,
+"kind": "sprite",
+"sheet": "stairFix"
+},
+"stairFix_3": {
+"file": "stairFix_3.webp",
+"w": 216,
+"h": 76,
+"kind": "sprite",
+"sheet": "stairFix"
+},
+"stonesB_0": {
+"file": "stonesB_0.webp",
+"w": 102,
+"h": 120,
+"kind": "sprite",
+"sheet": "stonesB"
+},
+"stonesB_1": {
+"file": "stonesB_1.webp",
+"w": 126,
+"h": 172,
+"kind": "sprite",
+"sheet": "stonesB"
+},
+"stonesB_2": {
+"file": "stonesB_2.webp",
+"w": 104,
+"h": 157,
+"kind": "sprite",
+"sheet": "stonesB"
+},
+"stonesB_3": {
+"file": "stonesB_3.webp",
+"w": 140,
+"h": 243,
+"kind": "sprite",
+"sheet": "stonesB"
+},
+"stonesB_4": {
+"file": "stonesB_4.webp",
+"w": 157,
+"h": 235,
+"kind": "sprite",
+"sheet": "stonesB"
+},
+"stonesB_5": {
+"file": "stonesB_5.webp",
+"w": 117,
+"h": 243,
+"kind": "sprite",
+"sheet": "stonesB"
+},
+"fenceG_0": {
+"file": "fenceG_0.webp",
+"w": 268,
+"h": 159,
+"kind": "sprite",
+"sheet": "fenceG"
+},
+"fenceG_1": {
+"file": "fenceG_1.webp",
+"w": 229,
+"h": 114,
+"kind": "sprite",
+"sheet": "fenceG"
+},
+"fenceG_2": {
+"file": "fenceG_2.webp",
+"w": 36,
+"h": 191,
+"kind": "sprite",
+"sheet": "fenceG"
+},
+"fenceG_3": {
+"file": "fenceG_3.webp",
+"w": 231,
+"h": 75,
+"kind": "sprite",
+"sheet": "fenceG"
+},
+"bonesH_0": {
+"file": "bonesH_0.webp",
+"w": 311,
+"h": 148,
+"kind": "sprite",
+"sheet": "bonesH"
+},
+"bonesH_1": {
+"file": "bonesH_1.webp",
+"w": 305,
+"h": 184,
+"kind": "sprite",
+"sheet": "bonesH"
+},
+"bonesH_2": {
+"file": "bonesH_2.webp",
+"w": 262,
+"h": 161,
+"kind": "sprite",
+"sheet": "bonesH"
+},
+"bonesH_3": {
+"file": "bonesH_3.webp",
+"w": 230,
+"h": 158,
+"kind": "sprite",
+"sheet": "bonesH"
+},
+"bonesH_4": {
+"file": "bonesH_4.webp",
+"w": 158,
+"h": 230,
+"kind": "sprite",
+"sheet": "bonesH"
+},
+"bonesH_5": {
+"file": "bonesH_5.webp",
+"w": 158,
+"h": 141,
+"kind": "sprite",
+"sheet": "bonesH"
+},
+"texGrey_0": {
+"file": "texGrey_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texGrey"
+},
+"texGrey_1": {
+"file": "texGrey_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texGrey"
+},
+"texGrey_2": {
+"file": "texGrey_2.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texGrey"
+},
+"texGrey_3": {
+"file": "texGrey_3.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texGrey"
+},
+"texGrey_4": {
+"file": "texGrey_4.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texGrey"
+},
+"texGrey_5": {
+"file": "texGrey_5.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texGrey"
+},
+"texBlack_0": {
+"file": "texBlack_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texBlack"
+},
+"texBlack_1": {
+"file": "texBlack_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texBlack"
+},
+"texBlack_2": {
+"file": "texBlack_2.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texBlack"
+},
+"texBlack_3": {
+"file": "texBlack_3.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texBlack"
+},
+"texBlack_4": {
+"file": "texBlack_4.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texBlack"
+},
+"texBlack_5": {
+"file": "texBlack_5.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texBlack"
+},
+"texBone_0": {
+"file": "texBone_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texBone"
+},
+"texBone_1": {
+"file": "texBone_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texBone"
+},
+"texBone_2": {
+"file": "texBone_2.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texBone"
+},
+"texBone_3": {
+"file": "texBone_3.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texBone"
+},
+"texBone_4": {
+"file": "texBone_4.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texBone"
+},
+"texBone_5": {
+"file": "texBone_5.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texBone"
+},
+"texFloor_0": {
+"file": "texFloor_0.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texFloor"
+},
+"texFloor_1": {
+"file": "texFloor_1.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texFloor"
+},
+"texFloor_2": {
+"file": "texFloor_2.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texFloor"
+},
+"texFloor_3": {
+"file": "texFloor_3.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texFloor"
+},
+"texFloor_4": {
+"file": "texFloor_4.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texFloor"
+},
+"texFloor_5": {
+"file": "texFloor_5.jpg",
+"w": 256,
+"h": 256,
+"kind": "tex",
+"sheet": "texFloor"
+}
+}

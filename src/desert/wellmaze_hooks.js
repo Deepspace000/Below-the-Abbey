@@ -74,13 +74,13 @@ for(const n of WM_CONT)if(!CONTAINERS.includes(n))CONTAINERS.push(n);
 if(typeof DS_LOOTNAME!=='undefined')Object.assign(DS_LOOTNAME,{wm_chest:'Old chest',wm_treasure_chest:'Treasure chest',wm_cask:'Wine cask',wm_barrel_tall:'Barrel',wm_keg:'Keg',wm_crate_lid:'Crate'});
 {const _lf=lootFor;lootFor=function(d){
   if(wmIn()&&d&&WM_CONT.includes(d.k)){
-    const L=LEVELS[LEVEL],key=d.x+','+d.y,r=q=>hash2(d.x,d.y,900+q),items=[],add=(id,n)=>{if(ITEMDEF[id])items.push({id,n:ITEMDEF[id].stack?(n||1):1})},tier=(L._wm.tier&&L._wm.tier[key])||0,loot=L._wm.loot&&L._wm.loot[key];
+    const L=LEVELS[LEVEL],gm=1+.07*(L._wm.k||0),key=d.x+','+d.y,r=q=>hash2(d.x,d.y,900+q),items=[],add=(id,n)=>{if(ITEMDEF[id])items.push({id,n:ITEMDEF[id].stack?(n||1):1})},tier=(L._wm.tier&&L._wm.tier[key])||0,loot=L._wm.loot&&L._wm.loot[key];
     if(loot)for(const id of loot)add(id,1);
     if(tier===0){ // casks and barrels
-      add(['potion5','potion6','greatermana'][(r(1)*3)|0],1);if(r(2)<.5)add(foodFor?foodFor(r(3)):'cheese',2);d.gold=60+Math.floor(r(4)*200);return items}
-    if(tier===1){add('potion6',1);add(['potion5','greatermana'][(r(5)*2)|0],2);const a=typeof armourDrop==='function'&&r(6)<.4?armourDrop(r(7)):null;if(a)add(a);d.gold=300+Math.floor(r(8)*500);return items}
-    if(tier===2){add('potion6',2);add('greatermana',1);if(!loot||!loot.length){add(r(9)<.5?'supermana':'elixir',1)}const a=typeof armourDrop==='function'?armourDrop(r(10)):null;if(a)add(a);d.gold=900+Math.floor(r(11)*900);return items}
-    add('potion6',2);add('supermana',1);const a=typeof armourDrop==='function'?armourDrop(r(12)):null;if(a)add(a);d.gold=2000+Math.floor(r(13)*2200);return items}
+      add(['potion5','potion6','greatermana'][(r(1)*3)|0],1);if(r(2)<.5)add(foodFor?foodFor(r(3)):'cheese',2);d.gold=Math.round((60+Math.floor(r(4)*200))*gm);return items}
+    if(tier===1){add('potion6',1);add(['potion5','greatermana'][(r(5)*2)|0],2);const a=typeof armourDrop==='function'&&r(6)<.4?armourDrop(r(7)):null;if(a)add(a);d.gold=Math.round((300+Math.floor(r(8)*500))*gm);return items}
+    if(tier===2){add('potion6',2);add('greatermana',1);if(!loot||!loot.length){add(r(9)<.5?'supermana':'elixir',1)}const a=typeof armourDrop==='function'?armourDrop(r(10)):null;if(a)add(a);d.gold=Math.round((900+Math.floor(r(11)*900))*gm);return items}
+    add('potion6',2);add('supermana',1);const a=typeof armourDrop==='function'?armourDrop(r(12)):null;if(a)add(a);d.gold=Math.round((2000+Math.floor(r(13)*2200))*gm);return items}
   return _lf.apply(this,arguments)}}
 /* ---------- the lists, the world, the test link ---------- */
 {const _g=gotoListRaw;gotoListRaw=function(){
@@ -91,13 +91,14 @@ if(typeof DS_LOOTNAME!=='undefined')Object.assign(DS_LOOTNAME,{wm_chest:'Old che
 {const _j=jumpFromUrl;jumpFromUrl=function(){
   const q=new URLSearchParams(location.search),town=(q.get('town')||'').toLowerCase().replace(/[^a-z]/g,'');
   if(town!=='wellmaze')return _j.apply(this,arguments);
-  const orig=location.pathname+location.search+location.hash,target=Math.max(1,Math.min(80,parseInt(q.get('lvl')||'80',10)||80));
+  const orig=location.pathname+location.search+location.hash,target=Math.max(1,Math.min(83,parseInt(q.get('lvl')||'80',10)||80));
   q.set('town','ironhill');q.set('lvl','40');
   try{history.replaceState(null,'',location.pathname+'?'+q.toString()+location.hash)}catch(e){}
   try{_j.apply(this,arguments)}finally{try{history.replaceState(null,'',orig)}catch(e){}}
   G.heroes.forEach((h,i)=>{while(h.lvl<target){h.xp=xpNeed(h.lvl);levelUp(i)}h.alive=true;h.hp=h.max;h.mp=h.mpMax;h.food=Math.max(h.food||0,100)});
   if(q.get('gear')!=='0')try{giveJumpGear(target)}catch(e){console.error(e)}
   const k=Math.max(0,Math.min(3,(parseInt(q.get('k')||'1',10)||1)-1)),F=wmF();
+  G.heroes.forEach((h,i)=>{while(h.lvl<WM.RATING[k]){h.xp=xpNeed(h.lvl);levelUp(i)}h.hp=h.max;h.mp=h.mpMax}); // a party at the level's own rating
   if(q.get('keys')){for(const id of ['wmkey1','wmkey2','wmkey3'])bagAdd(mkItem(id))}
   if(q.get('dead')){F.bossDead=1}
   KH_LAZY[WM.IDS[k]]&&!LEVELS[WM.IDS[k]]&&KH_LAZY[WM.IDS[k]]();

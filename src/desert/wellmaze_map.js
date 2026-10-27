@@ -78,7 +78,7 @@ function wmmDraw(c,x,L,api){
   for(const r of M.rooms){if(r.sealed||!WM.ROOMNAMES[r.kind])continue;if(r.kind==='shaft')continue;api.text(x,WM.ROOMNAMES[r.kind],X((r.x0+r.x1+1)/2),Y((r.y0+r.y1+1)/2)-(r.kind==='boss'?s*3:0),5.4,'#3a1a5c','center')}
   const sh=M.rooms.find(r=>r.kind==='start');if(k===0&&sh)api.text(x,'The Well Shaft',X((sh.x0+sh.x1+1)/2),Y(sh.y1+2.5),5.6,'#3a1a5c','center');
   // margins: title, compass, key
-  api.title(x,WM.NAMES[k],'Under the town well of Wenlock, level 80');api.compass(x,436,262,12);
+  api.title(x,WM.NAMES[k],'Under the town well of Wenlock, level '+WM.RATING[k]);api.compass(x,436,262,12);
   const key=[['Brick wall','#7a54a8'],['Passage','#f1e9f7'],['Still water','#a8a4e6'],['Chest','#d8b038'],['Crystal','#9a58e0'],['Brazier','#ff9a3a'],['Stairs down','#b8321e']];
   if(k>0)key.push(['Stairs up','#274a9a']);key.push(['Key (a hint found)','#f0c030'],['Switch used','#4ad8a0'],['Vault opened','#ffe070']);
   api.panel(x,392,34,86,14+key.length*11.4);api.text(x,'Key',435,44,7.2,MPL.VERM,'center');let yy=55;

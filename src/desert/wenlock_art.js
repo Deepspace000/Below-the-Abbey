@@ -1,9 +1,9 @@
 /* ==========================================================================
-   WENLOCK: THE PICTURES (prefix wl / WL). Wenlock is an English country market town in the western kingdoms (level 496, houses 7100 to 7199).
+   WENLOCK: THE PICTURES (prefix wl / WL). Wenlock is an English country market town in the western kingdoms (level 496, houses 7000 to 7099).
    Its own painted pictures are in assets/wl (manifest.json lists them; cut from Gemini sheets by tools/ingest_wl.py) and are loaded as IMG['wl_<name>'].
    Every piece has a fall-back among the older pictures (the Oldhaven walls, roofs and folk), so the town always builds, with or without the new art.
    ========================================================================== */
-const WL={ID:496,W:100,H:100,H0:7100,CELLAR:7190,GRANARY:7191,KEY:{}};
+const WL={ID:496,W:100,H:100,H0:7000,CELLAR:7090,GRANARY:7091,KEY:{}};
 const WLART={man:null,loading:null,ready:false};
 function wlLoad(){
   if(WLART.loading)return WLART.loading;

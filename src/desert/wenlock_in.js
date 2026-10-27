@@ -1,5 +1,5 @@
 /* ==========================================================================
-   WENLOCK: THE INSIDES (prefix wlin / WLIN). Every room behind a door in Wenlock (levels 7100 to 7199): the church, the inn, the shops, the hall, the school, the
+   WENLOCK: THE INSIDES (prefix wlin / WLIN). Every room behind a door in Wenlock (levels 7000 to 7099): the church, the inn, the shops, the hall, the school, the
    almshouse, the cellar, the granary and the homes. The town (wenlock_town.js) builds each room through khRoom() when its door is first opened; this file
    (1) loads the painted pieces in assets/wl2 (made with Gemini, cut by tools/ingest_wl2.py), (2) wraps khRoom so that every Wenlock room gets its own walls, floor,
    windows, furniture and people, from the data in WLIN_ROOMS below, and (3) gives the small folk of the rooms things to say.
@@ -187,7 +187,7 @@ function wlinMake(d){ // d: one entry of WL_DOORS
   const R=khRoom(b,id,back);LEVELS[id]=R.level;LEVELS[id].diff=80;LEVEL_NAMES[id]=name;LEVEL_RATING[id]=80;return R.level;
 }
 for(const d of WL_DOORS){const id=d.id;KH_LAZY[id]=()=>{if(!LEVELS[id])wlinMake(d)}}
-/* the inn cellar (7190) is down a trapdoor-door in the inn's west wall; a smugglers' tunnel leads on to the old granary (7191) */
+/* the inn cellar (7090) is down a trapdoor-door in the inn's west wall; a smugglers' tunnel leads on to the old granary (7091) */
 function wlinCellar(which){
   const inn=WL_DOORS.find(d=>d.kind==='inn'),id=which?WL.GRANARY:WL.CELLAR,nm=which?'The Old Granary':'The Inn Cellar',name=which?'granary':'cellar';
   const b={id:'wlin'+id,wlin:name,name:nm,room:'cellar',keeper:null,floor:'wood',wallImg:'kh_ohwall1_0'};

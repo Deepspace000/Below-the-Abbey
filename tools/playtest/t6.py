@@ -1,0 +1,10 @@
+from common import *
+r=Run();r.start(False)
+print(crypt_stage(r));r.ev("PT.cut()")
+o=sweep(r,talk=False)
+print(r.ev("[G.P.x,G.P.y,Object.keys(PT.bad||{}).length]"), r.ev("Object.keys(PT.bad||{}).slice(0,20)"))
+print(r.ev("(()=>{const e=PT.findTiles((g)=>g===7)[0];return [e, PT.bfs(e[0],e[1],{adj:true})&&1]})()"))
+print(r.ev("G.items.filter(i=>!i.taken).map(i=>i.k+'@'+i.x+','+i.y)"))
+print(r.ev("G.enemies.filter(e=>e.hp>0).map(e=>e.t+'@'+e.x+','+e.y+' '+(PT.bfs(e.x,e.y,{adj:true})?1:0))"))
+print(r.ev("G.timers.length+' '+G.state+' '+!!G.talk+' '+!!G.loot+' '+canAct()"))
+r.close()

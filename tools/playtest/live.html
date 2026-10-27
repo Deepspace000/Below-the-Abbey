@@ -1,0 +1,48 @@
+<!doctype html><meta charset="utf-8"><title>Playtest live map</title>
+<style>
+:root{--bg:#14110d;--ink:#e8dcc0;--mute:#9c8f74;--gold:#d9a84a;--red:#c8503a;--grn:#6fae6a;--card:#201b14}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Georgia,serif;padding:16px}
+h1{font-size:20px;margin:0 0 4px;font-weight:500;color:var(--gold)}
+.sub{color:var(--mute);margin-bottom:12px}
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.card{background:var(--card);border:1px solid #3a3022;border-radius:10px;padding:10px 14px;min-width:120px}
+.card b{display:block;font-size:22px;color:var(--gold);font-weight:500}
+svg{width:100%;background:#1b1610;border:1px solid #3a3022;border-radius:10px}
+text{fill:var(--ink);font-family:Georgia,serif}
+.pulse{animation:p 1.2s ease-in-out infinite}@keyframes p{50%{opacity:.35}}
+table{border-collapse:collapse;width:100%}td,th{padding:3px 8px;text-align:left;border-bottom:1px solid #2c241a}th{color:var(--mute);font-weight:400}
+</style>
+<h1>Playtest: where the party is</h1><div class="sub" id="sub">loading...</div>
+<div class="row" id="cards"></div>
+<svg id="map" viewBox="0 0 900 330"></svg>
+<h3 style="font-weight:500;color:var(--gold)">Wipes by area (whole party down), worst first</h3><div id="deaths"></div>
+<script>
+const NS='http://www.w3.org/2000/svg';
+function fmt(s){s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return (h?h+'h ':'')+m+'m'}
+async function tick(){
+ let s;try{s=await (await fetch('state.json?'+Date.now())).json()}catch(e){document.getElementById('sub').textContent='cannot read state.json';return}
+ const st=s.res.stages||[],pt=s.pt||{},stats=pt.stats||{},cur=s.stage;
+ const last=st[st.length-1]||{};
+ document.getElementById('sub').textContent='Updated '+new Date().toLocaleTimeString()+'. Now playing: '+cur+'. Autoscaling off, new game, no advantages.';
+ const human=st.reduce((a,x)=>a+(x.human_s||0),0),lvl=last.lvl_end?Math.round(last.lvl_end.reduce((a,b)=>a+b,0)/last.lvl_end.length):'?';
+ const hd=(pt.deaths||[]).length,wp=(pt.wipes||[]).length;
+ document.getElementById('cards').innerHTML=[['Wipes',wp||stats.wipes||0],['Party level',lvl],['Stages done',st.length],['Fights',stats.fights||0],['Human time',fmt(human)],['Gold',last.gold??'?']].map(a=>'<div class="card">'+a[0]+'<b>'+a[1]+'</b></div>').join('');
+ const m=document.getElementById('map');m.innerHTML='';
+ const n=st.length+1,W=860,per=Math.ceil(n/2),dx=W/Math.max(per,1);
+ const pts=[];for(let i=0;i<n;i++){const row=i<per?0:1,c=row?per-1-(i-per):i;pts.push([40+c*dx+dx/2-20,row?250:90])}
+ const mk=(t,a,tx)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(tx!==undefined)e.textContent=tx;m.appendChild(e);return e};
+ for(let i=1;i<n;i++)mk('line',{x1:pts[i-1][0],y1:pts[i-1][1],x2:pts[i][0],y2:pts[i][1],stroke:'#5a4a30','stroke-width':3,'stroke-dasharray':i<n-1?'0':'6 6'});
+ st.forEach((x,i)=>{const [px,py]=pts[i],d=x.hero_deaths||0,w=x.wipes||0,col=w>=5?'#c8503a':w?'#d9a84a':'#6fae6a';
+  mk('circle',{cx:px,cy:py,r:14,fill:col,stroke:'#14110d','stroke-width':2});
+  mk('text',{x:px,y:py+4,'text-anchor':'middle','font-size':11,fill:'#14110d',style:'fill:#14110d;font-weight:bold'},x.lvl_end?x.lvl_end[0]:'');
+  mk('text',{x:px,y:py+(i<per?-24:36),'text-anchor':'middle','font-size':11},x.name.replace(/_/g,' '));
+  if(w)mk('text',{x:px,y:py+(i<per?-36:48),'text-anchor':'middle','font-size':11,style:'fill:#c8503a'},'wipes '+w)});
+ const [cx,cy]=pts[n-1];mk('circle',{cx,cy,r:20,fill:'none',stroke:'#d9a84a','stroke-width':3,class:'pulse'});
+ mk('circle',{cx,cy,r:7,fill:'#d9a84a'});mk('text',{x:cx,y:cy+(n-1<per?-30:44),'text-anchor':'middle','font-size':13,style:'fill:#d9a84a;font-weight:bold'},'PARTY: '+cur);
+ mk('text',{x:20,y:318,'font-size':11,style:'fill:#9c8f74'},'Dots: green no wipes, gold 1 to 4 wipes, red 5 or more. Number is the party level at the end of the stage.');
+ const by={};(pt.wipes||[]).forEach(d=>{const k=d.areaName||d.area;by[k]=by[k]||{n:0,k:{},l:0};by[k].n++;by[k].l+=d.avgLvl||0;(d.last||[]).forEach(x=>{by[k].k[x]=(by[k].k[x]||0)+1})});
+ const rows=Object.entries(by).sort((a,b)=>b[1].n-a[1].n).slice(0,12);
+ document.getElementById('deaths').innerHTML='<table><tr><th>Area</th><th>Wipes</th><th>Avg party lvl</th><th>Last creatures standing</th></tr>'+rows.map(([k,v])=>'<tr><td>'+k+'</td><td>'+v.n+'</td><td>'+Math.round(v.l/v.n)+'</td><td>'+Object.entries(v.k).sort((a,b)=>b[1]-a[1]).slice(0,4).map(e=>e[0]+' x'+e[1]).join(', ')+'</td></tr>').join('')+'</table>';
+}
+tick();setInterval(tick,3000);
+</script>

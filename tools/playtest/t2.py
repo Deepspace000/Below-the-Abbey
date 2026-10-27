@@ -1,0 +1,10 @@
+from h import *
+h=H();print(h.load());h.lib()
+h.ev("act()");h.ev("crBtn('cr_pick_def')")
+print(h.ev("PT.lootAll()"))
+print(h.ev("G.bag.map(b=>b.id)"),h.ev("G.gold"))
+cart=h.ev("(()=>{const d=G.decor.find(d=>d.shop);return PT.openDecor(d)})()");print(cart)
+print(h.ev("PT.shop()"))
+print(h.ev("PT.gearUp()"))
+print(json.dumps(h.ev("PT.snap()")))
+print([e for e in h.errs if 'HTTP' not in e and 'Failed' not in e][:5]);h.close()

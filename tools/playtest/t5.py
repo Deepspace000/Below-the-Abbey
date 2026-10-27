@@ -1,0 +1,11 @@
+from common import *
+r=Run();r.start(False)
+print(crypt_stage(r));r.ev("PT.cut()")
+t=time.time()
+o=sweep(r,talk=False)
+print(json.dumps(o)[:1500],time.time()-t)
+print(json.dumps(r.ev("PT.snap()"))[:1800])
+print(r.ev("PT.deaths.map(d=>d.hero+' '+d.killer+' '+d.killerLvl+' '+d.area)"))
+print(r.ev("PT.talkAllNpcs({filter:d=>!/^(epitaph|shr_|grave)/.test(d.npc)})"))
+print(r.ev("PT.takeExit()"),r.ev('LEVEL'))
+r.close()
