@@ -302,7 +302,7 @@ function wmwAtlasData(){
   G1.push({t:'Towns and cities',sw:'wenlock',rows:[[3,null,'by the abbey, with its shops and the Bickering Goat'],[13,null,'with its castle, forge and church'],[33,null,'a town of the south, with its temple'],[44,null,'the great desert city'],[290,null,'the harbour town'],[300],[301],[302],[303],[305,null,'with the court of King Osric'],[430,null,'on the pilgrim road'],[I.wenlock,'Wenlock','a market town of the west'],[481,null,'a terrace town of the Hollow Grasslands'],[482,null,'a terrace town of the Hollow Grasslands'],[483,null,'a terrace town of the Hollow Grasslands'],[484,null,'a terrace town of the Hollow Grasslands']].filter(r=>r[0]===I.wenlock||LEVEL_NAMES[r[0]])});
   G1.push({t:'The Terrace test levels',sw:'hollowgrass',rows:[[480],[485],[486],[487]]});
   G1.push({t:'Hidden places',sw:'cave',rows:[[39,null,"a hollow behind a nymph's gift"],[40,null,'the cellars of the Prism Wizard']]});
-  if(typeof WD_CAVES!=='undefined')G1.push({t:'The hidden caves',sw:'cave',rows:WD_CAVES.map((c,i)=>{const id=(typeof WD_CAVE0!=='undefined'?WD_CAVE0:7200)+i,P=WORLD_LOCS.find(l=>l.lv.includes(c[0]));if(LEVEL_RATING[id]===undefined&&LEVEL_RATING[c[0]]!==undefined)LEVEL_RATING[id]=LEVEL_RATING[c[0]];return seen(id)?[id,null,'in '+(P?P.n:'the woods')]:[id,'? A hidden cave','somewhere in '+(P?P.n:'the woods')]})});
+  if(typeof WD_CAVES!=='undefined')G1.push({t:'The hidden caves',sw:'cave',rows:WD_CAVES.map((c,i)=>{const id=(typeof WD_CAVE0!=='undefined'?WD_CAVE0:7200)+i,P=WORLD_LOCS.find(l=>l.lv.includes(c[0]));if(LEVEL_RATING[id]===undefined&&LEVEL_RATING[c[0]]!==undefined)LEVEL_RATING[id]=LEVEL_RATING[c[0]];return seen(id)?[id,null,'in '+(P?P.n:'the woods')]:[id,'Hidden cave - '+c[2],'somewhere in '+(P?P.n:'the woods')]})});
   G1.push({t:'The burrows of the Sand Road',sw:'dungeon',rows:[50,51,52,53,54,55,56,57,58,59].filter(n=>LEVEL_NAMES[n]).map(n=>[n])});
   for(const dn of Object.keys(dng))G1.push({t:'Little dungeons of '+dn,sw:'dungeon',rows:dng[dn].map(id=>[id])});
   // the wild ruins hidden in the woods and moors (a question mark until the party has found one)
@@ -310,7 +310,7 @@ function wmwAtlasData(){
     const maps=WD_OUT.concat(typeof LP!=='undefined'?Array.from({length:LP.N},(_,i)=>LP.BASE+i):[]),rows=[],rowsLP=[];
     for(const n of maps){const cnt=wdCount(n),P=WORLD_LOCS.find(l=>l.lv.includes(n)),area=(P&&P.n)||LEVEL_NAMES[n]||'the wilds',lpm=typeof LP!=='undefined'&&n>=LP.BASE&&n<LP.BASE+LP.N;
       for(let k=0;k<cnt;k++){const id=wdRuinId(n,k);if(LEVEL_RATING[id]===undefined&&LEVEL_RATING[n]!==undefined)LEVEL_RATING[id]=LEVEL_RATING[n];
-        (lpm?rowsLP:rows).push(seen(id)&&LEVEL_NAMES[id]?[id,null,'in '+area]:[id,'? A hidden ruin','somewhere in '+area])}}
+        {const nm=WD_RUIN_NAMES[(hash2(id,8,732)*WD_RUIN_NAMES.length)|0];(lpm?rowsLP:rows).push(seen(id)?[id,nm,'in '+area]:[id,'Hidden ruin - '+nm,'somewhere in '+area])}}}
     if(rows.length)G1.push({t:'Wild ruins of the outdoor lands',sw:'cave',rows});
     if(rowsLP.length)G1.push({t:"Wild ruins of the Pilgrim's Path",sw:'cave',rows:rowsLP})}
   // the earlier places, from the first crypts to the great tombs of the desert
