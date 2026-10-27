@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.675';
+const VERSION='3.676';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -1299,7 +1299,7 @@ function areaAudio(){
     else if(LEVEL===476){T.music_underlevel=.6;loadLazy('music_underlevel')} // the Underlevel: Dark Cavern Ambient
     else if(LEVEL===35){T.music_tavern=.5;T.village_ambience=.15}
     else if(LEVEL===44){T.village_ambience=.8}
-    else if(LEVEL===496){T.village_ambience=.16;T.wind_loop=.04}
+    else if(LEVEL===496){T.village_ambience=.26;T.wind_loop=.05}
     else if(LEVEL===305){T.village_ambience=.5}
     else if(typeof yarSea==='function'&&yarSea(LEVEL)){T.village_ambience=LEVEL===290||LEVEL===304?.22:.06}
     else if(STREAM_LISTS[LEVEL]&&LEVEL>=50&&!(LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor)){T.dungeon_ambience=.18}
@@ -1318,12 +1318,12 @@ function areaAudio(){
   }
   for(const n of Object.keys(T)){T[n]*=SNDOPT[SND_CAT(n)];if(!(T[n]>0))delete T[n]}
   for(const n of SNDLIST.concat(['music_mithral','music_wanderer','music_embers','music_andorios','music_underlevel','music_hollowland','music_deeperhollow'])){if(n in T||LAYERS[n])setLayer(n,T[n]||0)}
-  if(G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===3||LEVEL===13||LEVEL===29||LEVEL===30)){
+  if(G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===3||LEVEL===13||LEVEL===29||LEVEL===30||LEVEL===496)){
     if(!G.bellNext)G.bellNext=G.time+50+Math.random()*60;
-    if(G.time>G.bellNext){G.bellNext=G.time+150+Math.random()*100;const v=(LEVEL===29||LEVEL===30)?.3:.6;playSmp('church_bell1',v);setTimeout(()=>playSmp('church_bell2',v*.8),2600);if(LEVEL===3||LEVEL===13)msg('The church bell tolls.','#d8c88e')}
+    if(G.time>G.bellNext){G.bellNext=G.time+150+Math.random()*100;const v=(LEVEL===29||LEVEL===30||LEVEL===496)?.3:.6;playSmp('church_bell1',v);setTimeout(()=>playSmp('church_bell2',v*.8),2600);if(LEVEL===3||LEVEL===13)msg('The church bell tolls.','#d8c88e')}
   }
   // now and then a village noise
-  if(G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===3||LEVEL===13)){
+  if(G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===3||LEVEL===13||LEVEL===496)){
     if(!G.sndNext)G.sndNext=G.time+6+Math.random()*10;
     if(G.time>G.sndNext){
       G.sndNext=G.time+12+Math.random()*28;
@@ -2772,22 +2772,26 @@ function vividImg(k,d){ // each person is one colour, head to foot, a different 
   }
   x.putImageData(id2,0,0);return VIVID_CACHE[id]=c;
 }
-const SIGN_CACHE={};
+const SIGN_CACHE={},SIGN_TINTS=['132,158,204','204,152,82','116,166,110','188,92,82','152,122,170','96,152,176'],SIGN_FONTS=['Georgia,serif','"Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif','"Times New Roman",Times,Georgia,serif']; // muted paints and three related serif faces for the signs of Wenlock
 const WALKTREE=/^([glp]?tree\d|pt_|lbush)/,BURNABLE=/^[gp]?tree\d/,NOSHADOW=/^[glp]?tree\d/,SKYLINE=/^(abbeyspire|dcity|kroof)$/; // skyline sprites stand behind a wall and only the part above it shows // dead trees can be burned; no tree casts a round shadow
+function signFlip(im){return im.alt||im}   // the sign made the other way round (bracket on the right), its lettering still reading the right way
 function shopSign(d){
-  const key=(d.x*31+d.y)%2,id=key+'|'+d.txt.join('|');if(SIGN_CACHE[id])return SIGN_CACHE[id];
+  const key=(d.x*31+d.y)%2,wl=/^sign_wl/.test(d.k),nm=d.txt[0],hs=((nm.length*131+nm.charCodeAt(0)*17+nm.charCodeAt(nm.length-1)*7)>>>0),ti=hs%SIGN_TINTS.length,fi=(hs>>3)%SIGN_FONTS.length,id=key+'|'+(wl?nm+'|'+ti+'|'+fi:d.txt.join('|'));if(SIGN_CACHE[id])return SIGN_CACHE[id];
   const base=IMG['signb'+key];if(!base)return IMG[d.k];
   const w=base.width,h=base.height;
-  return SIGN_CACHE[id]=mkCanvas(w,h,(x)=>{
-    x.drawImage(base,0,0);
-    const TINT={sign_church:'112,134,176',sign_bakery:'196,148,64',sign_store:'92,142,84',sign_inn:'168,70,62',sign_smith:'124,100,140',sign_bath:'60,130,200'}[d.k]||'140,120,90';
-    x.save();x.globalCompositeOperation='source-atop';x.fillStyle=`rgba(${TINT},.4)`;x.fillRect(w*.08,h*.44,w*.88,h*.56);x.restore();
+  const mk=flip=>mkCanvas(w,h,(x)=>{
+    if(flip){x.save();x.translate(w,0);x.scale(-1,1);x.drawImage(base,0,0);x.restore()}else x.drawImage(base,0,0);
+    const TINT=wl?SIGN_TINTS[ti]:{sign_church:'112,134,176',sign_bakery:'196,148,64',sign_store:'92,142,84',sign_inn:'168,70,62',sign_smith:'124,100,140',sign_bath:'60,130,200'}[d.k]||'140,120,90';
+    x.save();x.globalCompositeOperation='source-atop';x.fillStyle=`rgba(${TINT},${wl?.78:.4})`;x.fillRect(w*.08,h*.44,w*.88,h*.56);x.restore();
     x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';
-    const cx=w*.535,mw=w*.68;
-    const line=(t,y,fs0,font,col)=>{let fs=fs0;x.font=`${font} ${fs}px Georgia,serif`;while(x.measureText(t).width>mw&&fs>10){fs-=2;x.font=`${font} ${fs}px Georgia,serif`}x.lineWidth=Math.max(3,fs*.16);x.strokeStyle='rgba(18,12,6,.9)';x.strokeText(t,cx,y);x.fillStyle=col;x.fillText(t,cx,y)};
-    line(d.txt[0],h*.67,h*.16,'bold','#d6c9a0');
-    if(d.txt[1])line(d.txt[1],h*.84,h*.1,'italic','#b0a47e');
+    const cx=w*(flip?.465:.535),mw=w*.7,fam=wl?SIGN_FONTS[fi]:'Georgia,serif';
+    // Wenlock: one line only, big and bold; a long name is narrowed a little and then shrunk so it always sits inside the board with a margin
+    const line=(t,y,fs0,font,col)=>{let fs=fs0,sx=1;x.font=`${font} ${fs}px ${fam}`;let tw=x.measureText(t).width;if(wl&&tw>mw){sx=Math.max(.64,mw/tw);tw*=sx}while(tw>mw&&fs>10){fs-=2;x.font=`${font} ${fs}px ${fam}`;tw=x.measureText(t).width*sx}
+      x.save();x.translate(cx,y);x.scale(sx,1);x.lineWidth=Math.max(3,fs*.16);x.strokeStyle='rgba(18,12,6,.9)';x.strokeText(t,0,0);x.fillStyle=col;x.fillText(t,0,0);x.restore()};
+    line(d.txt[0],h*.7,h*(wl?.27:.16),'bold','#f0e6c2');
+    if(d.txt[1]&&!wl)line(d.txt[1],h*.84,h*.1,'italic','#b0a47e');
   });
+  const c0=mk(false);c0.alt=mk(true);return SIGN_CACHE[id]=c0;
 }
 /* creatures fit the window: seen from the next square, one taller than about .9 of a wall is cut off at the top. Only the truly huge ones are allowed to be bigger. */
 const HUGE_FOES=['kraken','uwgiant','uwmega','uweelboss','uwgulper','cyclops','cinder','firelizard','sut'],FIT_MAX=.8,fitCache=new Map();
@@ -2813,7 +2817,7 @@ function spriteList(){
   if(G.flora&&G.flora.length){const px=G.C.x+.5,py=G.C.y+.5;for(const f of G.flora){const dx=f.wx-px,dy=f.wy-py;if(dx*dx+dy*dy>256)continue;const im=IMG[f.k];if(!im)continue;L.push({x:f.wx,y:f.wy,img:im,w:(NPC_H[f.k]?NPC_H[f.k]*im.width/im.height:decorW(f.k))*f.sc,decor:f.decor})}} // lots of tiny tufts: only those within sixteen cells are drawn
   const DROP={well:.07,fountain:.1,chest:.05,cart:.05,barrel:.03,crate:.03,bench:.04,urn:.03,memorial:.04,statue:.03,coffin:.03,gate:.02,tree0:.15,tree1:.13,tree2:.09,tree3:.14,tree4:.15,tree5:.16,tree6:.13,tree7:.14};
   const cam=G.C||{x:0,y:0};
-  for(const d of (LEVEL===44&&G.khB?khNearDecor(cam.x,cam.y):G.decor)){if(d.found)continue;if(d.hidden)continue;if(G.decor.length>250&&((d.x-cam.x)*(d.x-cam.x)+(d.y-cam.y)*(d.y-cam.y))>1300)continue;const k=(d.wind&&IMG[d.k+'f'])?(Math.sin(G.C.a)<0?d.k+'f':d.k):(d.lk&&IMG[d.lk])?d.lk:(d.k==='grave'&&IMG.grave2&&hash2(d.x,d.y,5)>.5)?'grave2':d.k;if(d.wd&&d.txt){L.push({x:d.x+.5+d.wd[0]*.1,y:d.y+.5+d.wd[1]*.1,img:shopSign(d),w:.8*(d.sc||1),bob:.3,hang:[d.wd[0],d.wd[1]],decor:d});continue}
+  for(const d of (LEVEL===44&&G.khB?khNearDecor(cam.x,cam.y):G.decor)){if(d.found)continue;if(d.hidden)continue;if(G.decor.length>250&&((d.x-cam.x)*(d.x-cam.x)+(d.y-cam.y)*(d.y-cam.y))>1300)continue;const k=(d.wind&&IMG[d.k+'f'])?(Math.sin(G.C.a)<0?d.k+'f':d.k):(d.lk&&IMG[d.lk])?d.lk:(d.k==='grave'&&IMG.grave2&&hash2(d.x,d.y,5)>.5)?'grave2':d.k;if(d.wd&&d.txt){{const hx=/^sign_wl/.test(d.k)&&d.k!=='sign_wlst'?.18:.1;L.push({x:d.x+.5+d.wd[0]*hx,y:d.y+.5+d.wd[1]*hx,img:shopSign(d),w:.8*(d.sc||1),bob:(d.bob===undefined?.3:d.bob)+.2,hang:[d.wd[0],d.wd[1]],mount:[d.wd[0],d.wd[1]],decor:d})}continue}
     if(d.pic&&d.wd&&IMG[d.k]){const im=(d.lk&&IMG[d.lk])?IMG[d.lk]:IMG[d.k],hh=NPC_H[d.k]||.6;L.push({x:d.x+.5+d.wd[0]*.47,y:d.y+.5+d.wd[1]*.47,img:im,w:hh*im.width/im.height,bob:d.bob===undefined?.45:d.bob,flat:[d.wd[0],d.wd[1]],pic:1,decor:d});continue}
     if(d.msgr&&IMG[d.k]){L.push({x:d.x+.5+d.wd[0]*.46,y:d.y+.5+d.wd[1]*.46,img:IMG[d.k],w:.55,bob:.45,flat:[d.wd[0],d.wd[1]],decor:d});continue}
     if(d.k==='lever'){const lk=IMG.hl_lever0?(d.pulled?((G.time-(d.pullT||0))<.14?'hl_lever1':'hl_lever2'):'hl_lever0'):'lever',li=IMG[lk]||IMG.lever;L.push({x:d.x+.5+d.wd[0]*.43,y:d.y+.5+d.wd[1]*.43,img:li,w:.34,bob:.34,flat:[d.wd[0],d.wd[1]],decor:d});continue} // a lever: old wood, with its off, halfway and on pictures
@@ -2843,10 +2847,11 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
   for(const s of proj){
     while(hmi<HM.length&&HM[hmi].tY>=s.tY)hgtmDraw(HM[hmi++]);
     if(s.custom){s.custom.draw(cx,cy,dX,dY,pX,pY);continue}
-    const img=s.img;if(!img)continue;
+    let img=s.img;if(!img)continue;
+    if(s.mount){const side=inv*(dY*s.mount[0]-dX*s.mount[1]);if(side>0)img=signFlip(img)}   // a hanging shop sign: its iron bracket is always on the wall (shop) side
     const iw=img.width,ih=img.height,ty=s.tY;
     if(s.decor&&s.decor.burn>0){const bp=s.decor.burn/5;s.fade=bp>.82?clamp((1-bp)/.18,0,1):1;if(s.fade<.03)continue}
-    if(s.hang||(s.decor&&(s.decor.walk||/^sign_|^lamp$/.test(s.decor.k)))){const f=s.decor&&s.decor.walk&&WALKTREE.test(s.decor.k)?clamp((ty-1.15)/1,0,1):clamp((ty-.35)/.55,0,1);if(f<.03)continue;s.fade=f} // signs, lanterns and walk-through people melt away when you stand beside them
+    if(s.hang||(s.decor&&(s.decor.walk||/^sign_|^lamp$/.test(s.decor.k)))){const f=s.decor&&s.decor.walk&&WALKTREE.test(s.decor.k)?(LEVEL===496?clamp((ty-1.7)/1.8,0,1):clamp((ty-1.15)/1,0,1)):clamp((ty-.35)/.55,0,1);if(f<.03)continue;s.fade=f} // signs, lanterns and walk-through people melt away when you stand beside them
     let sw=F*s.w/ty;sw*=(1+(s.lunge||0)*.28);
     if(s.smallSky&&sw<7)continue; // a far roof too small to see is not painted
     if(s.flat&&!(s.pic&&!TERR_NOW)){const rx=s.x-cx,ry=s.y-cy,dl=Math.hypot(rx,ry)||1;sw*=Math.max(.06,Math.abs((rx*s.flat[0]+ry*s.flat[1])/dl))}
@@ -44262,7 +44267,7 @@ function hgduArt(){for(const [id,,img] of HGDU_KINDS){const src=IMG[img];if(IMG[
   IMG['hgu_'+id]=c}catch(e){console.error('hgduArt',e)}}}
 // what the bites leave behind
 AFFL_HITS.push([/^hgusl/,'poisoned',.22],[/^hguyk/,'bleeding',.22],[/^hguyk[35]/,'fever',.14],[/^hgusl[37]/,'stung',.2],[/^hgu/,'shaken',.1],[/^hgu/,'graverot',.07]);
-{const _aa=afflArea;afflArea=function(n,L){const r=_aa.apply(this,arguments);if(n===HGDU.ID){r.msgText='The air is close and sour, and something is clicking in the walls. You cannot see more than a step.';r.out.push(['tomblung',.3],['shaken',.2],['fleas',.2],['fever',.08])}return r}}
+{const _aa=afflArea;afflArea=function(n,L){const r=_aa.apply(this,arguments);if(n===HGDU.ID){r.msgText='The air is close and sour, and something is clicking in the walls. You cannot see more than a step.'}return r}} // only a line of text on arrival: the party is no longer afflicted with nobody near (it used to roll tomblung, shaken, fleas and fever at every arrival; the bites of the creatures still leave afflictions)
 /* ---------- the ladders: wall tiles ---------- */
 function hgduTex(up){const P=IMG['art_tex_hgdp_ladder'+(up?'up':'dn')];if(P&&P.width)return 'art_tex_hgdp_ladder'+(up?'up':'dn');const key='hgdu_ladder_'+(up?'up':'down');if(IMG[key])return key;
   IMG[key]=mkCanvas(128,128,(x,w,h)=>{const b=IMG.tex_abbeywall;if(b)x.drawImage(b,0,0,w,h);else{x.fillStyle='#3a3630';x.fillRect(0,0,w,h)}
@@ -46543,7 +46548,7 @@ function hgdnPlace(L){
   ims.forEach((c,i)=>{IMG['hgdn_st'+i]=c;NPC_H['hgdn_st'+i]=1.45});
   const rows=L.rows,H=rows.length,W=rows[0].length,rnd=hgdmRng(476444),open=(x,y)=>rows[y]&&rows[y][x]==='.'&&!(typeof hgoWater==='function'&&hgoWater(x,y)),res=[];
   const lad=(L._hgdu&&L._hgdu.ladders)||[],keep=[].concat(lad.map(l=>[l.ax,l.ay]),(L._hgdu&&L._hgdu.letters||[]).map(l=>[l.x,l.y]),L._msgr?[[L._msgr.x,L._msgr.y]]:[]);
-  const occ=new Set(L.enemies.concat(L.decor).map(e=>e.x+','+e.y)),tooNear=(x,y)=>keep.some(k=>Math.hypot(k[0]-x,k[1]-y)<4)||res.some(r=>Math.abs(r.x-x)+Math.abs(r.y-y)<9);
+  const occ=new Set(L.enemies.concat(L.decor).map(e=>e.x+','+e.y)),tooNear=(x,y)=>keep.some(k=>Math.hypot(k[0]-x,k[1]-y)<4)||res.some(r=>Math.abs(r.x-x)+Math.abs(r.y-y)<9)||(L._bsw&&Math.hypot(L._bsw.cx-x,L._bsw.cy-y)<L._bsw.R+2.5);
   const DV=[[0,-1],[1,0],[0,1],[-1,0]],cand=[];
   for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!open(x,y)||occ.has(x+','+y))continue;
     const deg=DV.filter(d=>open(x+d[0],y+d[1])).length;
@@ -49160,8 +49165,16 @@ function twBuild(){
   const info={ok:reach===floors&&edges===floors-1&&enemies.length===8&&g[H-1][sx]==='0',floors,reach,edges,rats:enemies.length,chest,chestWalk:d[chest[1]*W+chest[0]]};
   if(!info.ok)console.error('Under the Well failed its own checks',info);
   // the chest's dead end is dressed (the maze is cut so tight that no room fits round it): bones, a barrel and a light on the way in
-  {const nb=D4.find(([a,b])=>g[chest[1]+b][chest[0]+a]==='.');if(nb){const px=chest[0]+nb[0],py=chest[1]+nb[1];decor.push({k:'bones',x:px,y:py,block:false});lights.push([chest[0],chest[1]]);
-     const nn=D4.find(([a,b])=>(a!==-nb[0]||b!==-nb[1])&&g[py+b][px+a]==='.');if(nn)decor.push({k:'barrel',x:px+nn[0],y:py+nn[1],block:false,walk:true,deco:true,sc:.8})}}
+  // the chest's dead end is widened into a small chamber: the nine squares round the chest are cleared (the chest stands in the middle, the way in is where the passage met it), with a light in the room and a few bones
+  {const nb=D4.find(([a,b])=>g[chest[1]+b][chest[0]+a]==='.');
+   for(let y=chest[1]-1;y<=chest[1]+1;y++)for(let x=chest[0]-1;x<=chest[0]+1;x++)if(x>=1&&y>=1&&x<=W-2&&y<=H-2&&g[y][x]==='#')g[y][x]='.';
+   // the room is walkable all round the chest, and still joined to the stair
+   const d2=new Int16Array(W*H).fill(-1),q2=[sy*W+sx];d2[q2[0]]=0;for(let i=0;i<q2.length;i++){const c=q2[i],x=c%W,y=(c/W)|0;for(const [a,b] of D4){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||g[ny][nx]!=='.'||d2[ny*W+nx]>=0)continue;d2[ny*W+nx]=d2[c]+1;q2.push(ny*W+nx)}}
+   let ring=0;for(let y=chest[1]-1;y<=chest[1]+1;y++)for(let x=chest[0]-1;x<=chest[0]+1;x++)if(g[y][x]==='.'&&d2[y*W+x]>=0)ring++;
+   info.chamber={cells:ring,solvable:d2[chest[1]*W+chest[0]]>=0};
+   if(ring!==9)console.error('Under the Well: the chest chamber is not whole',info.chamber);
+   const lx=chest[0]+(nb&&nb[0]===1?-1:1),ly=chest[1]+(nb&&nb[1]===1?-1:1);lights.push([lx,ly]);
+   decor.push({k:'bones',x:chest[0]+(nb?nb[0]:1),y:chest[1]+(nb?nb[1]:0),block:false});decor.push({k:'barrel',x:lx,y:ly,block:false,walk:true,deco:true,sc:.8})}
   const near=(x,y)=>decor.some(q=>q.x===x&&q.y===y)||(x===chest[0]&&y===chest[1])||items.some(q=>q.x===x&&q.y===y);
   floor.forEach(([x,y],i)=>{if(near(x,y)||d[y*W+x]<5)return;const h=hash2(x,y,9917);
     if(h<.045)decor.push({k:'bones',x,y,block:false});
@@ -49783,6 +49796,191 @@ function bswSpot(){
   if(F.bswDead){bswSurface();const g=bswGateFoot();return [BSW.SURF,g.x,g.y,g.f]}
   const b=L&&L._bsw;return b?[BSW.ID,b.landing.x,b.landing.y,b.landing.f]:[BSW.ID,L?L.start.x:100,L?L.start.y:100,0]}
 
+/* ---- src/desert/blackswill_under.js ---- */
+/* ==========================================================================
+   THE UNDERLEVEL, FINISHED (prefix bsu / BSU), level 476. The last pass over the Underlevel and its sea, run after every other builder (it wraps hgduBuild last):
+   1. the corridors carry about 230 pieces of existing painted decor (bones, rubble, roots, old crates and barrels, chained posts, cobwebs on the walls, seated skeletons, eight small shrines with candles), and wet patches of floor;
+   2. the Black Swill's island has a pale flagstone floor of its own (the old floor was black rock), real broken columns instead of thin wall pillars, braziers and lights, and a slime pool under the boss;
+   3. the sea horrors keep at least 3 squares from every landing, dock and anchored boat (placed that way, and held there while they swim);
+   4. the docks and landings have mooring posts, lanterns, crates, barrels, ropes and beached boats;
+   5. the air: dripping water (a sound and a falling drop) and a low drifting mist on the floor;
+   6. two small quests: Tolland, a stranded boatman on a small island (bsu1), and Brother Orrin and the candles of the shrines (bsu2).
+   Deterministic (hgdmRng 476321). Exposes L._bsu for testing.
+   ========================================================================== */
+const BSU={ID:476,ZONE:3.6};
+Object.assign(NPC_H,{art_wm_crate:.5,art_wm_crate_lid:.46,art_wm_barrel:.58,art_wm_bucket:.36,art_wm_chain:1.05,art_wm_web:.6,art_wm_shrine:.95,art_wm_skeleton:.5,art_wm_cage_lantern:.5,art_wm_boat:.62,art_dbones:.3,art_wm_candelabra:.7});
+ENEMY_DEF.bsw.w=3.5; // it used to be taller than the cave and looked as if it hung in the air; now it sits on the island floor
+/* ---------- floors made in code: pale flagstones for the island, wet floor for the puddles ---------- */
+function bsuFloors(L){
+  if(typeof FLOORS==='undefined')return;const hs=(x,y,s)=>{let h=(x*374761393+y*668265263+s*2147483647)|0;h=(h^(h>>>13))*1274126177|0;return((h^(h>>>16))>>>0)/4294967296};
+  if(!FLOORS.bsw_flag){const P=[];for(let i=0;i<14;i++)P.push([hs(i,1,61)*128,hs(i,2,61)*128]);const d=new Uint8ClampedArray(128*128*4);
+    for(let y=0;y<128;y++)for(let x=0;x<128;x++){let d1=1e9,d2=1e9,id=0;for(let i=0;i<P.length;i++){let dx=Math.abs(x-P[i][0]),dy=Math.abs(y-P[i][1]);if(dx>64)dx=128-dx;if(dy>64)dy=128-dy;const q=Math.hypot(dx,dy);if(q<d1){d2=d1;d1=q;id=i}else if(q<d2)d2=q}
+      const e=d2-d1,n=hs(x,y,5),v=(88+hs(id,3,9)*30+n*10)*(e<1.6?.4:e<3?1.12:1),o=(y*128+x)*4;d[o]=v;d[o+1]=v*.95;d[o+2]=v*.86;d[o+3]=255}
+    FLOORS.bsw_flag=d}
+  if(!FLOORS.hgu_wet){const b=FLOORS[L.floor]||FLOORS.dirt;if(b){const d=new Uint8ClampedArray(b.length),T=Math.PI*2;
+      for(let y=0;y<128;y++)for(let x=0;x<128;x++){const o=(y*128+x)*4,lum=(b[o]+b[o+1]+b[o+2])/3,s=Math.sin(T*(x*2/128)+1.6*Math.sin(T*(y*3/128)))*Math.sin(T*(y*2/128)+1.2*Math.sin(T*(x*3/128)+.5)),gl=Math.max(0,s-.35)*95;
+        d[o]=lum*.42+gl*.55;d[o+1]=lum*.5+gl*.72;d[o+2]=lum*.72+8+gl;d[o+3]=255}
+      FLOORS.hgu_wet=d}}}
+/* ---------- the places the horrors keep away from ---------- */
+function bsuPts(L){
+  if(L._bsuPts)return L._bsuPts;const O=L._hgdo,B=L._bsw,p=[];
+  for(const d of O.docks){p.push([d.wx,d.wy],[d.bx,d.by])}for(const l of O.landings){p.push([l.wx,l.wy],[l.x,l.y])}for(const b of O.boats)p.push([b[0],b[1]]);
+  if(B){p.push([B.boat[0],B.boat[1]],[B.landing.x,B.landing.y])}return L._bsuPts=p}
+function bsuNear(x,y){
+  const L=LEVELS[BSU.ID];if(!L||!L._hgdo)return 99;let m=99;
+  for(const q of bsuPts(L)){const d=Math.hypot(q[0]-x,q[1]-y);if(d<m)m=d}
+  try{const F=G.flags&&G.flags.hgdOcean;if(F&&F.boats)for(const q of F.boats){if(!q)continue;const d=Math.hypot(q[0]-x,q[1]-y);if(d<m)m=d}}catch(e){}
+  return m}
+{const _t=terrStepOK;terrStepOK=function(x0,y0,x1,y1){
+  try{if(LEVEL===BSU.ID&&typeof HGO_CUR!=='undefined'&&HGO_CUR&&/^hgo/.test(HGO_CUR.t)){const a=bsuNear(x0,y0),b=bsuNear(x1,y1);if(b<BSU.ZONE&&b<=a)return false}}catch(e){}
+  return _t.apply(this,arguments)}}
+function bsuClearHorrors(L){ // a horror that was placed close to a landing is moved to the nearest water that is far enough from every landing
+  const O=L._hgdo,W=201,H=201,ix=(x,y)=>y*W+x,occ=new Set(L.enemies.map(e=>e.x+','+e.y));let moved=0;
+  for(const e of L.enemies){if(!/^hgo/.test(e.t)||bsuNear(e.x,e.y)>=BSU.ZONE+.2)continue;
+    let best=null;for(let r=2;r<=16&&!best;r++)for(let dy=-r;dy<=r&&!best;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=e.x+dx,y=e.y+dy;
+      if(x<1||y<1||x>=W-1||y>=H-1||!O.wm[ix(x,y)]||occ.has(x+','+y)||bsuNear(x,y)<BSU.ZONE+.8)continue;best=[x,y];break}
+    if(best){occ.delete(e.x+','+e.y);e.x=best[0];e.y=best[1];occ.add(best[0]+','+best[1]);moved++}}
+  return moved}
+/* ---------- the build ---------- */
+function bsuBuild(L){
+  if(L._bsu)return;const O=L._hgdo,B=L._bsw;if(!O)return;
+  const W=201,H=201,ix=(x,y)=>y*W+x,rnd=hgdmRng(476321),rows=L.rows.map(r=>r.split('')),fm=L.fmap.map(r=>r.split('')),DV=[[0,-1],[1,0],[0,1],[-1,0]];
+  bsuFloors(L);L.floorSet=L.floorSet.slice();L.floorSet[4]='hgu_wet';if(FLOORS.bsw_flag)L.floorSet[5]='bsw_flag';
+  const land=(x,y)=>x>0&&y>0&&x<W-1&&y<H-1&&rows[y][x]==='.'&&!O.wm[ix(x,y)];
+  const info={lk:{},shrines:[],docks:0,landings:0,pieces:0,puddles:0,horrors:0,counts:{}};
+  const add=(k,x,y,o)=>{o=o||{};const e={k,x,y,hx:1,block:!!o.block,walk:!o.block,deco:true,sc:o.sc||1};if(o.ox)e.ox=o.ox;if(o.oy)e.oy=o.oy;if(o.bob!==undefined)e.bob=o.bob;if(o.npc)e.npc=o.npc;if(o.wd){e.wd=o.wd;e.pic=1;e.block=false;e.walk=true}L.decor.push(e);info.pieces++;const c=o.cat||'misc';info.counts[c]=(info.counts[c]||0)+1;return e};
+  const light=(x,y,k)=>{(L.lights||(L.lights=[])).push([x,y]);info.lk[x+','+y]=k||.4}; // k: how strong the light is (a candle or a lantern is a small light)
+  /* ---- 1. the island ---- */
+  if(B){const cx=B.cx,cy=B.cy,R=B.R;
+    for(let y=cy-13;y<=cy+13;y++)for(let x=cx-13;x<=cx+13;x++){if(x<1||y<1||x>=W-1||y>=H-1)continue;const d=Math.hypot(x-cx,y-cy);
+      if(d<R+1.5&&O.isle[ix(x,y)]&&!O.wm[ix(x,y)])fm[y][x]=d<2.4?'4':'5';else if(d<R&&land(x,y)&&fm[y][x]==='0')fm[y][x]='5'}
+    // the six pillars were wall squares, which looked like thin dark slivers: they become broken stone columns standing on the floor
+    const pil=[];for(const [px,py] of B.pillars){rows[py][px]='.';fm[py][px]='5';add('art_hgxrock5',px,py,{block:true,sc:2.5,cat:'column'});pil.push([px,py])}
+    // braziers and lights round the island, and by the landing
+    const ring=[];for(let k=0;k<6;k++){const a=k*Math.PI/3+Math.PI/6,x=Math.round(cx+Math.cos(a)*4.6),y=Math.round(cy+Math.sin(a)*4.6);if(land(x,y)&&O.isle[ix(x,y)]){add('brazier',x,y,{block:true,sc:.7,cat:'brazier'});light(x,y,.9);ring.push([x,y])}}
+    for(const [px,py] of pil)light(px,py,.6);
+    light(cx,cy-3,.7);light(cx-3,cy+3,.7);light(cx+3,cy+3,.7);light(B.landing.x,B.landing.y,.6);
+    info.island={braziers:ring.length,pillars:pil.length}}
+  /* ---- 2. the docks and landings: posts, lanterns, crates, barrels, ropes and boats ---- */
+  const water=(x,y)=>x>0&&y>0&&x<W-1&&y<H-1&&O.wm[ix(x,y)]===1;
+  const dress=(wx,wy,lx,ly,full,both)=>{ // (wx,wy) the water square beside the shore, (lx,ly) the shore square
+    const dx=Math.sign(lx-wx),dy=Math.sign(ly-wy);if(!dx&&!dy)return;const px=-dy,py=dx;
+    const cell=k=>{const x=lx+dx*k,y=ly+dy*k;return land(x,y)?[x,y]:null};
+    const c0=cell(0),c1=cell(1),c2=cell(2);
+    if(c0){add('art_wm_chain',c0[0],c0[1],{ox:px*.4,oy:py*.4,sc:.85,cat:'post'});add('art_wm_cage_lantern',c0[0],c0[1],{ox:-px*.4,oy:-py*.4,sc:.75,cat:'lantern'});light(c0[0],c0[1])}
+    if(c1){add('art_wm_crate',c1[0],c1[1],{ox:px*.38,oy:py*.38,sc:.8,cat:'crate'});if(full||rnd()<.5)add('art_wm_barrel',c1[0],c1[1],{ox:-px*.38,oy:-py*.38,sc:.8,cat:'crate'});if(full)add('art_wm_chain',c1[0],c1[1],{ox:-px*.4,oy:-py*.4,sc:.9,cat:'post'})}
+    if(c2&&full){add('art_wm_bucket',c2[0],c2[1],{ox:px*.3,oy:py*.3,sc:1,cat:'rope'});add('art_wm_crate_lid',c2[0],c2[1],{ox:-px*.3,oy:-py*.3,sc:1,cat:'crate'})}
+    else if(c1&&!full)add('art_wm_bucket',c1[0],c1[1],{ox:px*.1,oy:py*.1+(dy?0:0),sc:.9,cat:'rope'});
+    // a rowing boat drawn up in the water two squares along the shore (the party's own boats are the ones that move)
+    for(const s of both?[1,-1]:[1]){const bx=wx+px*2*s,by=wy+py*2*s;if(water(bx,by)&&water(bx+dx*-0,by)&&L.decor.every(d=>!(d.x===bx&&d.y===by)))add('art_wm_boat',bx,by,{sc:1,bob:-.2,cat:'boat'})}};
+  for(const d of O.docks){dress(d.wx,d.wy,d.bx,d.by,true,true);info.docks++}
+  for(const l of O.landings){dress(l.wx,l.wy,l.x,l.y,false,false);info.landings++}
+  if(B){ // the island landing: a post on each side of the way up, and a lantern
+    const lx=B.landing.x,ly=B.landing.y;add('art_wm_chain',lx,ly,{ox:-.42,sc:.85,cat:'post'});add('art_wm_chain',lx,ly,{ox:.42,sc:.85,cat:'post'});add('art_wm_cage_lantern',lx,ly-1,{ox:.4,sc:.75,cat:'lantern'});add('art_wm_crate',lx,ly-1,{ox:-.4,sc:.75,cat:'crate'});add('art_wm_bucket',lx,ly-2,{ox:.3,sc:.9,cat:'rope'});light(lx,ly-1,.4);
+    for(const s of [1,-1]){const bx=B.boat[0]+2*s,by=B.boat[1];if(water(bx,by))add('art_wm_boat',bx,by,{sc:1,bob:-.2,cat:'boat'})}}
+  /* ---- 3. the horrors keep away from every landing ---- */
+  info.horrors=bsuClearHorrors(L);
+  /* ---- 4. the corridors ---- */
+  const occ=new Set(L.decor.concat(L.items||[],L.enemies).map(d=>d.x+','+d.y));
+  const keepPts=(O.keep||[]).map(k=>[k.x,k.y,k.lad?7:4]),pts=bsuPts(L);
+  const open=(x,y)=>land(x,y),deg=(x,y)=>DV.filter(d=>open(x+d[0],y+d[1])).length;
+  const wallDirs=(x,y)=>DV.filter(d=>!open(x+d[0],y+d[1])&&rows[y+d[1]]&&rows[y+d[1]][x+d[0]]!=='.');
+  const room=(x,y)=>{for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++)if(!open(x+i,y+j))return false;return true};
+  const cand=[];for(let y=4;y<H-4;y++)for(let x=4;x<W-4;x++){if(!open(x,y)||O.isle[ix(x,y)]||occ.has(x+','+y))continue;if(fm[y][x]!=='0')continue;
+    if(keepPts.some(k=>Math.hypot(k[0]-x,k[1]-y)<k[2]))continue;if(pts.some(q=>Math.hypot(q[0]-x,q[1]-y)<4))continue;cand.push([x,y])}
+  for(let i=cand.length-1;i>0;i--){const j=(rnd()*(i+1))|0;const t=cand[i];cand[i]=cand[j];cand[j]=t}
+  const placed=[],free=(x,y,g)=>!occ.has(x+','+y)&&placed.every(p=>Math.abs(p[0]-x)>=g||Math.abs(p[1]-y)>=g);
+  const take=(n,pred,mk,g)=>{let c=0;for(const [x,y] of cand){if(c>=n)break;if(!free(x,y,g||2)||!pred(x,y))continue;if(mk(x,y)!==false){occ.add(x+','+y);placed.push([x,y]);c++}}return c};
+  const pick=a=>a[(rnd()*a.length)|0],off=()=>+((rnd()-.5)*.56).toFixed(2),towards=(x,y,k)=>{const w=wallDirs(x,y);if(!w.length)return {ox:off(),oy:off()};const d=pick(w);return {ox:d[0]*k+(d[1]?off()*.6:0),oy:d[1]*k+(d[0]?off()*.6:0)}};
+  // shrines first (they need dead ends or rooms, spaced far apart): a small shrine, two candles in front of it, and a flickering light
+  {const sites=[];const want=8;
+    for(const gap of [34,26,20,14]){for(const [x,y] of cand){if(sites.length>=want)break;if(occ.has(x+','+y))continue;
+        const dg=deg(x,y);if(dg!==1)continue;const nb=DV.find(d=>open(x+d[0],y+d[1]));if(!nb)continue;const fx=x+nb[0],fy=y+nb[1];if(occ.has(fx+','+fy)||fm[fy][fx]!=='0')continue;
+        if(sites.some(s=>Math.hypot(s.x-x,s.y-y)<gap))continue;sites.push({x,y,fx,fy,nb})}if(sites.length>=want)break}
+    sites.forEach((s,i)=>{const px=-s.nb[1],py=s.nb[0],q=i<3?'bsu_shr'+(i+1):null;
+      add('art_wm_shrine',s.x,s.y,{block:true,sc:1,npc:q||undefined,cat:'shrine'});occ.add(s.x+','+s.y);occ.add(s.fx+','+s.fy);placed.push([s.x,s.y],[s.fx,s.fy]);
+      add('art_hgxprop2',s.fx,s.fy,{ox:px*.3,oy:py*.3,sc:1.15,cat:'candle'});add('art_hgxprop2',s.fx,s.fy,{ox:-px*.3,oy:-py*.3,sc:1,cat:'candle'});
+      if(i%2===0)add('art_hgxprop0',s.fx-s.nb[0]*0,s.fy,{ox:s.nb[0]*.28,oy:s.nb[1]*.28,sc:1.2,cat:'bones'});
+      light(s.fx,s.fy,.3);info.shrines.push({x:s.x,y:s.y,fx:s.fx,fy:s.fy,q:q})})}
+  take(30,(x,y)=>true,(x,y)=>add(pick(['art_hgxprop0','art_dbones','art_hgxprop0','art_hgxprop13']),x,y,{sc:+(1.2+rnd()*.5).toFixed(2),ox:off(),oy:off(),cat:'bones'}),3);
+  take(34,(x,y)=>wallDirs(x,y).length>0,(x,y)=>{const t=pick(['art_hgxrock6','art_hgxrock3','art_hgxrock6','art_hgxrock0']);const o=towards(x,y,.3);return add(t,x,y,{sc:t==='art_hgxrock0'?.8:+(1.1+rnd()*.4).toFixed(2),ox:o.ox,oy:o.oy,cat:'rubble'})},3);
+  take(24,(x,y)=>wallDirs(x,y).length>0,(x,y)=>{const o=towards(x,y,.3);return add('art_hgxprop12',x,y,{sc:+(1.3+rnd()*.4).toFixed(2),ox:o.ox,oy:o.oy,cat:'root'})},4);
+  take(30,(x,y)=>deg(x,y)<=2||room(x,y),(x,y)=>{const t=pick(['art_wm_crate','art_wm_crate_lid','art_wm_barrel','art_wm_bucket','art_hgxprop6','art_wm_crate','art_hgxprop1']);const rm=room(x,y)&&rnd()<.35&&/crate|barrel/.test(t);const o=towards(x,y,.3);
+    return add(t,x,y,{block:rm,sc:/hgxprop/.test(t)?1.3:1,ox:rm?0:o.ox,oy:rm?0:o.oy,cat:'crate'})},3);
+  take(14,(x,y)=>wallDirs(x,y).length>0&&deg(x,y)>=2,(x,y)=>{const o=towards(x,y,.36);return add('art_wm_chain',x,y,{sc:.95,ox:o.ox,oy:o.oy,cat:'chain'})},5);
+  take(16,(x,y)=>deg(x,y)===1||room(x,y),(x,y)=>{const o=towards(x,y,.2);add('art_wm_skeleton',x,y,{sc:1,ox:o.ox,oy:o.oy,cat:'skeleton'});if(rnd()<.6){const f=DV.find(d=>open(x+d[0],y+d[1]));if(f&&free(x+f[0],y+f[1],1)){add('art_hgxprop0',x+f[0],y+f[1],{sc:1.2,ox:off(),oy:off(),cat:'bones'});occ.add((x+f[0])+','+(y+f[1]))}}},4);
+  // cobwebs hang on the wall faces, in corners and dead ends
+  take(30,(x,y)=>wallDirs(x,y).length>0&&deg(x,y)<=2,(x,y)=>{const d=pick(wallDirs(x,y));return add('art_wm_web',x,y,{wd:[d[0],d[1]],bob:.5,cat:'web'})},3);
+  /* ---- 5. wet patches of floor (puddles) ---- */
+  {let n=0;for(let t=0;t<2600&&n<46;t++){const x=6+((rnd()*(W-12))|0),y=6+((rnd()*(H-12))|0);if(!open(x,y)||O.isle[ix(x,y)]||fm[y][x]!=='0'||keepPts.some(k=>Math.hypot(k[0]-x,k[1]-y)<3)||pts.some(q=>Math.hypot(q[0]-x,q[1]-y)<3))continue;
+      fm[y][x]='4';for(const d of DV)if(open(x+d[0],y+d[1])&&fm[y+d[1]][x+d[0]]==='0'&&rnd()<.55)fm[y+d[1]][x+d[0]]='4';if(rnd()<.5){const d=pick(DV),e=pick(DV);const a=x+d[0]+e[0],b=y+d[1]+e[1];if(open(a,b)&&fm[b][a]==='0')fm[b][a]='4'}n++}info.puddles=n}
+  /* ---- 6. the quests: the boatman on a small island, the hermit among the shrines ---- */
+  try{bsuPlaceQuests(L,rows,fm,add,light,land,water,info,rnd)}catch(e){console.error('bsu quests',e)}
+  L.rows=rows.map(r=>r.join(''));L.fmap=fm.map(r=>r.join(''));
+  L._bsu=info}
+{const _b=hgduBuild;hgduBuild=function(){const had=!!LEVELS[HGDU.ID];_b.apply(this,arguments);const L=LEVELS[HGDU.ID];if(!had&&L&&L._hgdo)try{bsuBuild(L)}catch(e){console.error('bsuBuild',e)}}}
+/* the candles and lanterns are small lights: dimmer and shorter than the lamps at the ladders */
+{const _s=setupLights;setupLights=function(){_s.apply(this,arguments);
+  try{const U=LEVEL===BSU.ID&&LEVELS[BSU.ID]&&LEVELS[BSU.ID]._bsu;if(U&&U.lk)for(const l of LIGHTS){if(!l.free)continue;const k=U.lk[(l.x-.5)+','+(l.y-.5)];if(k){l.kI=k;l.range2=k>=.8?64:k>=.6?42:k>=.4?24:14}}}catch(e){}}}
+/* ---------- the air: dripping water and a low mist ---------- */
+const BSUA={mist:null,next:0,drops:[]};
+function bsuMistImg(){
+  if(BSUA.mist)return BSUA.mist;const c=document.createElement('canvas');c.width=512;c.height=64;const x=c.getContext('2d'),r=hgdmRng(4761);
+  for(let i=0;i<24;i++){const px=r()*512,py=16+r()*32,rx=40+r()*70,ry=6+r()*9;for(const o of [-512,0,512]){const g=x.createRadialGradient(0,0,0,0,0,rx);g.addColorStop(0,'rgba(190,200,215,.55)');g.addColorStop(1,'rgba(190,200,215,0)');x.save();x.translate(px+o,py);x.scale(1,ry/rx);x.fillStyle=g;x.fillRect(-rx,-rx,2*rx,2*rx);x.restore()}}
+  return BSUA.mist=c}
+function bsuAirOn(){return LEVEL===BSU.ID&&G.state==='play'&&!G.cut&&!G.talk&&!G.menu&&!(G.inv&&G.inv.open)&&!G.loot&&!G.overview&&!(typeof TP!=='undefined'&&TP)}
+function bsuDrip(){
+  const t=G.time;if(t<BSUA.next)return;BSUA.next=t+2.2+Math.random()*5;
+  BSUA.drops.push({x:24+Math.random()*372,y:128+Math.random()*52,t0:t});if(BSUA.drops.length>6)BSUA.drops.shift();
+  try{if(AC&&!G.mute&&SNDOPT.amb){const f=1500+Math.random()*900;tone(f,f*.62,.07,'sine',.05,.3);tone(f*.8,f*.5,.06,'sine',.022,.42)}}catch(e){}}
+function bsuAtmos(){
+  if(!bsuAirOn())return;const t=G.time;bsuDrip();
+  ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();
+  const m=bsuMistImg(),pr=typeof hgoProx==='function'?hgoProx():0;
+  for(const [sp,y,al,sc] of [[5,112,.2,1.15],[-3.4,126,.15,1.4],[8,142,.12,1.7]]){const a=Math.min(.34,al+.08*pr),w=512*sc,h=64*sc,x0=-(((t*sp)%512)+512)%512*sc;ctx.globalAlpha=a;for(let k=-1;k<=2;k++)ctx.drawImage(m,x0+k*w,y,w,h*.8)}
+  ctx.globalAlpha=1;
+  for(const d of BSUA.drops){const a=t-d.t0;if(a<.3){const yy=20+(d.y-20)*(a/.3)*(a/.3);ctx.strokeStyle='rgba(200,215,230,.55)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(d.x,yy-5);ctx.lineTo(d.x,yy);ctx.stroke()}
+    else if(a<.8){const k=(a-.3)/.5;ctx.strokeStyle='rgba(190,205,225,'+(.5*(1-k)).toFixed(3)+')';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(d.x,d.y,2+k*9,.6+k*2.2,0,0,6.3);ctx.stroke()}}
+  ctx.restore()}
+{const _h=uwHud;uwHud=function(){_h.apply(this,arguments);try{bsuAtmos()}catch(e){}}}
+/* ---------- the quests ---------- */
+const BSUD1=khQD("Tolland, boatman. I was ferrying a sack of salt across the Black Sea when something took my oar and my boat with it. I swam here and I have been on this rock since. The torches ran out days ago, and it is very dark. Bring me 4 torches and I will pay you what I have, which is more than you would think. I put a good deal away over the years.",
+  'Four torches. Thank you. The island is out on the Black Sea, so you will have come by boat. Keep it moored.',
+  (n,m)=>'I need 4 torches. You have '+Math.min(n||0,m)+'. Bring the rest and I will pay you.',
+  'Four torches! I can see my own hands again.',
+  'Light at last. Here is what I put away. I will wait for a boat to come by, and sit here in the light until it does.',
+  'The torches burn well. I will not be going anywhere until a boat comes.',"Here are your torches.");
+QUESTS.bsu1={title:'Torches for the Boatman',who:'Tolland, a stranded boatman',desc:'Tolland the boatman is stuck on a small island in the Black Sea, in the dark, because his torches ran out. Bring him 4 torches. The island is out on the sea near the first dock, so a boat is needed.',need:4,goal:()=>bagCount('torch'),take:{torch:4},reward:{gold:4000,xp:25000,items:['potion6']}};
+QAREA.bsu1='The Deeper Hollow';
+khNpc('bsu_boatman','Tolland, a stranded boatman','fisher',d=>qNode('bsu1',BSUD1),{sc:1,q:['bsu1']});
+const BSUD2=khQD("I am Brother Orrin. Years ago I came down with a sack of candles to light the little shrines along these corridors, so that nobody dies in the dark without one light near. My knees have gone and I cannot walk the corridors now. Will you light the candles at three of the shrines for me? Each one is a small stone shrine at a dead end, with two candles in front of it. Touch the shrine and it will be lit.",
+  'Thank you. The three shrines are in different parts of the Underlevel, each at the end of a dead-end corridor. The quest log says where the next one is.',
+  (n,m)=>(n||0)+' of '+m+' shrines are lit. The others are at the ends of dead-end corridors. Touch a shrine to light it.',
+  'You have lit all three. I can see them from here, I think. A very small glow.',
+  'Three lights, and nobody has to die in the dark now. Here is what the pilgrims left in the box. I have no use for it.',
+  'The candles are burning. I will sit here and watch the glow.',"All three are lit.");
+{const F=()=>G.flags,names=['first','second','third'];
+  const where=n=>{const L=LEVELS[BSU.ID],s=L&&L._bsu&&L._bsu.shrines.find(q=>q.q==='bsu_shr'+n);if(!s)return 'in a dead end somewhere in the Underlevel';const v=s.y<67?'north':s.y>133?'south':'',h=s.x<67?'west':s.x>133?'east':'';const r=(v&&h)?v+'-'+h:v||h||'centre';
+    return 'in a dead-end corridor in the '+r+' of the Underlevel';};
+  const q={title:'Candles for the Shrines',who:'Brother Orrin, a hermit',need:3,goal:()=>[1,2,3].reduce((n,i)=>n+(F()['bsuShr'+i]?1:0),0),reward:{gold:5000,xp:30000,items:['potion6','potion6']}};
+  Object.defineProperty(q,'desc',{enumerable:true,get(){const i=[1,2,3].find(i=>!F()['bsuShr'+i]);return i?'Light the candles at the '+names[i-1]+' of three shrines: a small stone shrine with two candles in front of it, '+where(i)+'. Touch the shrine to light it.':'Go back to Brother Orrin. All three shrines are lit.'}});
+  Object.defineProperty(q,'targets',{enumerable:false,get(){const i=[1,2,3].find(i=>!F()['bsuShr'+i]);return i?['bsu_shr'+i]:[]}});
+  QUESTS.bsu2=q;QAREA.bsu2='The Deeper Hollow';
+  khNpc('bsu_orrin','Brother Orrin, a hermit','monk',d=>qNode('bsu2',BSUD2),{sc:1,q:['bsu2']});
+  [1,2,3].forEach(i=>khNpc('bsu_shr'+i,'A small shrine','art_wm_shrine',d=>{const f=F();
+    if(qSt('bsu2')==='active'&&!f['bsuShr'+i]){f['bsuShr'+i]=1;yrStep('You light the candles at the shrine. ('+q.goal()+'/3)');return say('A small stone shrine at the end of the corridor, with two stubs of candle in front of it. You light them. The flames stand straight up in the still air.',[BYE])}
+    return say(f['bsuShr'+i]?'The candles at the shrine are burning.':'A small stone shrine at the end of the corridor, with two stubs of candle in front of it. They are unlit.',[BYE])},{sc:1}))}
+function bsuPlaceQuests(L,rows,fm,add,light,land,water,info,rnd){
+  const O=L._hgdo,W=201,ix=(x,y)=>y*W+x,occ=new Set(L.decor.concat(L.enemies).map(d=>d.x+','+d.y));
+  // the boatman: the small island nearest the first dock (a land square with water all round it)
+  const dk=O.docks[0],isl=(O.islets||[]).filter(p=>water(p[0]-2,p[1])&&water(p[0]+2,p[1])&&water(p[0],p[1]-2)&&water(p[0],p[1]+2)&&!occ.has(p[0]+','+p[1])).sort((a,b)=>Math.hypot(a[0]-dk.wx,a[1]-dk.wy)-Math.hypot(b[0]-dk.wx,b[1]-dk.wy))[0];
+  if(isl){const [x,y]=isl;
+    add('fisher',x,y,{npc:'bsu_boatman',sc:1,cat:'npc'});
+    for(const [k,dx,dy,o] of [['art_wm_crate',0,1,{ox:.25}],['art_wm_bucket',1,0,{ox:.2,sc:.9}],['art_hgxprop0',-1,0,{sc:1.3}],['art_wm_barrel',1,1,{ox:-.2}]]){if(land(x+dx,y+dy))add(k,x+dx,y+dy,Object.assign({cat:'islet'},o))}
+    add('brazier',x,y-1,{block:true,sc:.7,cat:'brazier'});light(x,y,.7);info.boatman={x,y}}
+  // the hermit: standing in front of the fourth shrine (a dead end), so that the shrines and the man lie close together; the other three shrines are the ones to light
+  const s4=info.shrines[3];if(s4){add('monk',s4.fx,s4.fy,{npc:'bsu_orrin',sc:1,cat:'npc'});info.orrin={x:s4.fx,y:s4.fy}}}
+
 /* ---- src/desert/wenlock_art.js ---- */
 /* ==========================================================================
    WENLOCK: THE PICTURES (prefix wl / WL). Wenlock is an English country market town in the western kingdoms (level 496, houses 7000 to 7099).
@@ -49806,7 +50004,7 @@ const wlHas=k=>!!IMG['wl_'+k];
 function wlPick(...keys){for(const k of keys){if(IMG[k])return k;if(IMG['wl_'+k])return 'wl_'+k}return null}
 /* heights (in cells) of everything that stands about */
 function wlHeights(){
-  Object.assign(NPC_H,{cow:.62,wl_cow:.62,hay:.72,kh_ohgard1_0:1.7,kh_ohgard1_2:2.3,kh_ohgard1_3:.62,kh_ohgard1_4:1.0,kh_ohgard1_5:.95,kh_ohgard2_0:1.15,kh_ohgard2_1:.95,kh_ohgard2_2:1.35,kh_ohgard2_3:.7,kh_ohgard2_4:.75,kh_ohgard2_5:1.1,
+  Object.assign(NPC_H,{cow:.62,wl_cow:.62,hay:.72,kh_ohgard1_0:1.7,kh_ohgard1_2:2.3,kh_ohgard1_3:.5,kh_ohgard1_4:1.0,kh_ohgard1_5:.95,kh_ohgard2_0:1.15,kh_ohgard2_1:.95,kh_ohgard2_2:1.35,kh_ohgard2_3:.7,kh_ohgard2_4:.75,kh_ohgard2_5:1.1,
     kh_oqdogs_0:.5,kh_oqdogs_1:.62,kh_oqdogs_2:.5,kh_oqdogs_3:.36,kh_oqdogs_4:.46,kh_oqdogs_5:.44,kh_anim1_0:.3,kh_anim1_3:.55,kh_anim1_4:.7,kh_anim1_5:.26,
     kh_stall1_0:1.5,kh_stall1_1:1.5,kh_stall1_2:1.5,kh_stall1_3:1.5,kh_stall1_4:1.5,kh_stall1_5:1.5,kh_stall2_0:.8,kh_stall2_1:.8,kh_stall2_2:.9,kh_stall2_3:.8,kh_oqstuff_0:1.2,kh_oqstuff_1:.4,kh_oqstuff_2:.6,kh_oqstuff_4:.4,kh_oqstuff_6:.3,kh_oqstuff_8:.7,kh_oqstuff_9:.55,kh_oqstuff_10:.6,
     kh_city1_1:1.5,kh_city2_1:1.7,kh_city2_2:.8,kh_city2_3:.9,kh_city2_4:2.4,kh_city2_5:.55,kh_ohtower1_1:3.4,kh_ohtower1_4:3.4,kh_ohtower1_0:3.2,kh_ytree1_0:1.5,kh_fire1_0:.7,kh_fire1_4:1.0,kh_fire1_3:.7,kh_ohprops1_7:.62,kh_cart1_0:.8,
@@ -49840,7 +50038,19 @@ function wlRoofs(){
 /* the floors of Wenlock: cobbles, pale paving, lawn, gravel, brook water, meadow (the order of floorSet) */
 function wlFloors(){
   if(typeof ohFloors==='function')ohFloors();
-  return ['ohCobble','ohPale','ohLawn','ohGravel',FLOORS.bluewater?'bluewater':'ohMoss','ohMeadow'];
+  // painted-quality ground: the thin seams and dither of the old tiles broke up into dots at a distance, so the paving is softened, the lane is packed earth with grass in it, the water is a rippled green-grey pond
+  const blur=(src,r)=>{const n=2*r+1,t=new Uint8ClampedArray(src.length),o=new Uint8ClampedArray(src.length);
+    for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){let R=0,G=0,B=0;for(let k=-r;k<=r;k++){const i=(y*TS+((x+k+TS)%TS))*4;R+=src[i];G+=src[i+1];B+=src[i+2]}const j=(y*TS+x)*4;t[j]=R/n;t[j+1]=G/n;t[j+2]=B/n}
+    for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){let R=0,G=0,B=0;for(let k=-r;k<=r;k++){const i=(((y+k+TS)%TS)*TS+x)*4;R+=t[i];G+=t[i+1];B+=t[i+2]}const j=(y*TS+x)*4;o[j]=R/n;o[j+1]=G/n;o[j+2]=B/n;o[j+3]=255}
+    return o};
+  const mix=(a,b,f)=>{const d=new Uint8ClampedArray(a.length);for(let i=0;i<a.length;i+=4){const k=typeof f==='function'?f((i>>2)%TS,((i>>2)/TS)|0):f;d[i]=a[i]*(1-k)+b[i]*k;d[i+1]=a[i+1]*(1-k)+b[i+1]*k;d[i+2]=a[i+2]*(1-k)+b[i+2]*k;d[i+3]=255}return d};
+  const mul=(a,m)=>{const d=new Uint8ClampedArray(a.length);for(let i=0;i<a.length;i+=4){d[i]=a[i]*m[0];d[i+1]=a[i+1]*m[1];d[i+2]=a[i+2]*m[2];d[i+3]=255}return d};
+  if(!FLOORS.wlPale&&FLOORS.ohPale)FLOORS.wlPale=mul(mix(FLOORS.ohPale,blur(FLOORS.ohPale,3),.93),[.97,.93,.86]);
+  if(!FLOORS.wlEarth&&FLOORS.ohGravel&&FLOORS.ohLawn){const gb=blur(FLOORS.ohGravel,2),lb=blur(FLOORS.ohLawn,3);
+    FLOORS.wlEarth=mul(mix(gb,lb,(x,y)=>Math.max(0,Math.min(.85,dsNoise(x,y,8,771)*2.2-.75))),[1,.94,.84])}
+  if(!FLOORS.wlMeadow&&FLOORS.ohLawn&&FLOORS.ohMeadow)FLOORS.wlMeadow=mix(FLOORS.ohLawn,blur(FLOORS.ohMeadow,1),(x,y)=>.3+.5*dsNoise(x,y,3,772));
+  if(!FLOORS.wlWater)FLOORS.wlWater=dsFloor((x,y)=>{const n=dsNoise(x,y,4,331),m=dsNoise(x,y,8,332),r=Math.sin(TAU*(1*x/TS+3*y/TS+n*1.4))*.5+.5,k=.98+.26*r+.3*(m-.5);return [70*k+14,104*k+16,104*k+10]});
+  return ['ohCobble',FLOORS.wlPale?'wlPale':'ohPale','ohLawn',FLOORS.wlEarth?'wlEarth':'ohGravel',FLOORS.wlWater?'wlWater':(FLOORS.bluewater?'bluewater':'ohMoss'),FLOORS.wlMeadow?'wlMeadow':'ohMeadow'];
 }
 /* the wall styles: the Oldhaven sheets, and the new English ones when they have been painted */
 function wlStyles(){
@@ -50041,6 +50251,10 @@ function wlBuild(){
   houses.forEach((h,k)=>{
     h.k=k;const sp=h.sp;
     h.sty=sp?sp.sty:pick(STY,h.x0,h.y0,14);h.rk=sp?sp.roof:pick(ROOFS,h.x0,h.y0,15);
+    // no two houses in a row on the same street share a wall style or a roof: step on to the next one if they would
+    {const pv=houses[k-1],pv2=houses[k-2];
+     if(!sp&&pv&&pv.face===h.face){for(let t=1;t<=STY.length&&(h.sty===pv.sty||(pv2&&pv2.face===h.face&&h.sty===pv2.sty));t++)h.sty=STY[(STY.indexOf(h.sty)+t)%STY.length];
+       for(let t=1;t<=ROOFS.length&&(h.rk===pv.rk||(pv2&&pv2.face===h.face&&h.rk===pv2.rk));t++)h.rk=ROOFS[(ROOFS.indexOf(h.rk)+t)%ROOFS.length]}}
     h.wh=sp?sp.wh:Math.round((1.9+hs(h.x0,h.y0,16)*.5)*10)/10;
     h.name=sp?sp.name:null;
   });
@@ -50063,7 +50277,9 @@ function wlBuild(){
     // tubs and window boxes either side of the door, on the verge beside the wall, never in the road
     const side2=horiz?[[h.front[0]-1,h.front[1]],[h.front[0]+1,h.front[1]]]:[[h.front[0],h.front[1]-1],[h.front[0],h.front[1]+1]];
     const wallRow=horiz?[[h.x0-1,h.face==='S'?h.y1:h.y0],[h.x1+1,h.face==='S'?h.y1:h.y0]]:[[h.face==='E'?h.x1:h.x0,h.y0-1],[h.face==='E'?h.x1:h.x0,h.y1+1]];
-    for(const [tx,ty] of wallRow)if(free(tx,ty)&&hs(tx,ty,96)<.8){const k=hs(tx,ty,97)<.5?'kh_city2_5':'kh_city2_3';if(IMG[k]){used.add(tx+','+ty);scenery.push({k,wx:tx+.5,wy:ty+.5,sc:.85+hs(tx,ty,99)*.3,decor:{k,walk:true,x:tx,y:ty}})}}
+    // a different thing by each door, none taller than a man's waist: tubs, window boxes, herb benches, barrels, shrubs, and only rarely a palm in a pot
+    for(const [tx,ty] of wallRow)if(free(tx,ty)&&hs(tx,ty,96)<.7){const r=hs(tx,ty,97),PL=[['yar_tub',.78],['kh_city2_5',.8],['kh_ohgard2_4',.7],['kh_ohgard2_1',.62],['kh_city2_2',.7],['lbush0',.9],['vase0',.8],['kh_ohgard2_3',.7],['kh_city2_3',.5]],pi=r<.04?8:((hs(tx,ty,98)*8)|0),[k,psc]=PL[pi];
+      if(IMG[k]){used.add(tx+','+ty);scenery.push({k,wx:tx+.5,wy:ty+.5,sc:psc*(.9+hs(tx,ty,99)*.2),decor:{k,walk:true,x:tx,y:ty}})}}
   }
   // ---- the signs of the buildings with something to sell, and the names of the rest ----
   for(const h of houses){
@@ -50073,11 +50289,11 @@ function wlBuild(){
       const sx=horizontal?h.front[0]+sgn:h.front[0],sy=horizontal?h.front[1]:h.front[1]+sgn;
       const wallCell=horizontal?[sx,h.face==='S'?h.y1:h.y0]:[h.face==='E'?h.x1:h.x0,sy];
       if(rows[wallCell[1]]&&rows[wallCell[1]][wallCell[0]]==='.')continue;
-      decor.push({k:'sign_wl'+h.id,x:sx,y:sy,block:false,wd:h.wall,txt:[h.name.toUpperCase(),h.sp.keeper||'']});break;
+      decor.push({k:'sign_wl'+h.id,x:sx,y:sy,block:false,wd:h.wall,txt:[(h.name.length>24?h.name.split(',')[0]:h.name).toUpperCase()],sc:.7,bob:(h.wall[0]+h.wall[1])>0?.4:.26});break;
     }
   }
   // the church's own sign, on the lane
-  decor.push({k:'sign_wlchurch',x:24,y:26,block:false,wd:[0,-1],txt:['SAINT WENNA\'S CHURCH','Reverend Alder']});
+  decor.push({k:'sign_wlchurch',x:24,y:26,block:false,wd:[0,-1],txt:['SAINT WENNA\'S CHURCH']});
   // ---- the churchyard: yews, graves, a stone cross, a lych-gate of its own, a low wall ----
   {const gy={x0:13,x1:35,y0:12,y1:26};
     for(let y=gy.y0;y<=gy.y1;y++)for(let x=gy.x0;x<=gy.x1;x++)if(free(x,y)){fm[y*W+x]='2'}
@@ -50097,7 +50313,7 @@ function wlBuild(){
       for(const [x,y] of [[44,52],[46,52],[44,51],[46,51],[44,53],[46,53],[45,51]])flowers(x,y,1.25);
       tryDc('kh_ohgard1_3',43,53);tryDc('kh_ohgard1_3',47,51);}
     solidDc('kh_ohgard1_0',52,53,{});
-    for(const [x,y,k] of [[43,46,'kh_stall1_0'],[46,46,'kh_stall1_1'],[50,46,'kh_stall1_3'],[53,46,'kh_stall1_4'],[43,54,'kh_stall1_2'],[54,54,'kh_stall1_5']])solidDc(k,x,y);
+    for(const [x,y,k] of [[43,46,'kh_stall1_0'],[46,46,'kh_stall1_1'],[50,46,'kh_stall1_3'],[53,46,'kh_stall1_4'],[43,54,'kh_stall1_2'],[54,54,'kh_stall1_5']])solidDc(k,x,y,{sc:1.28});
     for(const [x,y,k] of [[41,48,'kh_stall2_3'],[55,48,'kh_stall2_0'],[41,52,'kh_stall2_1'],[55,52,'kh_stall2_2'],[44,48,'kh_oqstuff_9'],[52,48,'kh_oqstuff_2'],[47,54,'kh_oqstuff_8']])tryDc(k,x,y,{block:true,walk:false});
     for(const [x,y] of [[46,48],[50,54],[56,47],[40,53]])tryDc('kh_ohgard1_3',x,y);
     for(const [x,y] of [[41,45],[55,45],[41,55],[55,55],[48,45],[48,55]])lamp(x,y);
@@ -50128,7 +50344,7 @@ function wlBuild(){
     for(let n=0;n<14;n++){const x=44+((hs(n,1,8)*20)|0),y=60+((hs(n,2,8)*20)|0);if(hs(n,3,8)<.5)tree(x,y);else bush(x,y)}
     // across the brook: meadow with the mill and the windmill, cows and sheep
     setF(3,87,96,96,'5');
-    for(const [x,y,i] of [[60,91,0],[64,89,1],[56,93,2],[68,93,3]])tryDc(i%2?'cow':A('sheep0','kh_anim1_3'),x,y,{block:false});
+    for(const [x,y,i] of [[60,91,0],[64,89,1],[56,93,2],[68,93,3]])tryDc(i%2?'cow':A('sheep','sheep0','kh_anim1_3'),x,y,{block:false});
     for(let n=0;n<26;n++){const x=4+((hs(n,1,9)*90)|0),y=87+((hs(n,2,9)*9)|0);if(free(x,y)&&!(x>=68&&x<=76)){if(hs(n,3,9)<.5)tree(x,y);else bush(x,y)}}
     for(let x=4;x<=95;x+=2)for(const y of [WL_BROOK(x)-1])if(hs(x,y,10)<.35&&free(x,y))flowers(x,y,.9);
   }
@@ -50247,7 +50463,9 @@ const WL_ANIMALS=[
   {id:'wlo_goat',n:'A goat',face:'kh_anim1_3',sc:.9,out:[86,52],lines:["Maaa. (He has just eaten a hat, and is thinking about the other one.)","Maaa. (He gives you a look of calm, patient contempt.)"]},
   {id:'wlo_donkey',n:'Neddy, the donkey',face:'kh_anim1_4',sc:.9,out:[66,47],lines:["Hee-haw. (He has a strong opinion and has decided not to share it.)","Hee-haw. (The donkey looks, you suspect, at the world's long list of unfinished business.)"]}
 ];
-for(const f of WL_FOLK.concat(WL_ANIMALS))if(f.id!=='wlo_mayor')khNpc(f.id,f.n,f.face,()=>yrLines(f.id,f.lines),{sc:f.sc});
+/* grown-ups were drawn a little too big beside the doors and stalls: every adult is brought down a tenth, the children and animals stay as they are */
+const wlFolkSc=f=>f.sc>.9&&!/^wlo_(dog|cat|goat|donkey)/.test(f.id)?Math.round(f.sc*.88*100)/100:f.sc;
+for(const f of WL_FOLK.concat(WL_ANIMALS))if(f.id!=='wlo_mayor')khNpc(f.id,f.n,f.face,()=>yrLines(f.id,f.lines),{sc:wlFolkSc(f)});
 /* ---- placement: each person stands near their place, off the roads (wenlock_town.js calls this) ---- */
 function wlPlaceFolk(C){
   C.person('wlo_mayor',27,31,4);
@@ -50301,7 +50519,20 @@ const WLIN_P={
 const WLIN_S=1.2; // every prop is drawn a fifth larger than its table height, so the rooms are not bare
 const WLIN_FOLK={wife:'folk1_0',vicar:'folk1_1',teacher:'folk1_2',boy:'folk1_3',girl:'folk1_4',baker:'folk1_5',minstrel:'folk2_0',smith:'folk2_1',farmer:'folk2_2',gran:'folk2_3',merchant:'folk2_4',maid:'folk2_5'};
 /* fall-back looks: the older props are used while a picture is missing */
+/* the painted pieces were cut from a magenta ground and kept a thin purple line round their edges: every edge pixel that is still pink or violet is pulled back to the colour of the thing it borders and darkened */
+function wlinDefringe(k){
+  const im=IMG[k];if(!im||!im.width||im._wlfd)return;
+  try{const w=im.width,h=im.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(im,0,0);const d=x.getImageData(0,0,w,h),p=d.data;let n=0;
+    const A=(xx,yy)=>xx<0||yy<0||xx>=w||yy>=h?0:p[(yy*w+xx)*4+3];
+    for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){const i=(yy*w+xx)*4,a=p[i+3];if(a===0)continue;
+      let edge=a<250;if(!edge){for(let r=1;r<=2&&!edge;r++)if(A(xx-r,yy)<40||A(xx+r,yy)<40||A(xx,yy-r)<40||A(xx,yy+r)<40)edge=true}
+      if(!edge)continue;
+      const R=p[i],G=p[i+1],B=p[i+2],m=(R+B)/2;
+      if(m>G*1.1+6&&Math.min(R,B)>G*.9){const g=G*.85;p[i]=Math.min(R,g*1.08+4)*.8;p[i+1]=g*.8;p[i+2]=Math.min(B,g*1.02+4)*.8;n++}}
+    if(n){x.putImageData(d,0,0);c._wlfd=1;IMG[k]=c}else im._wlfd=1}catch(e){}
+}
 function wlinPrep(){
+  for(const k of Object.keys(IMG))if(/^wl2_/.test(k)&&!/^wl2_(wall|floor|ww)_/.test(k))wlinDefringe(k);
   for(const k in WLIN_P){const p=WLIN_P[k];NPC_H['wl2_'+p[0]]=p[1]*WLIN_S}
   for(const k in WLIN_FOLK)NPC_H['wl2_'+WLIN_FOLK[k]]=.98;
   for(let i=0;i<6;i++){const im=IMG['wl2_floor_'+i];if(im&&!FLOORS['wl2f'+i])FLOORS['wl2f'+i]=dsPaintedTex(im)}
@@ -50341,7 +50572,7 @@ WLIR('inn',{w:15,h:11,look:'timber',amb:.62,lights:[[3,2],[11,2],[7,6,1],[2,8],[
   folk:[['wli_nell',6,4],['wli_farmers',9,4],['wli_traveller2',5,5],['wli_minstrel',12,9],['wli_innkeeper_dog',8,6],['wli_inn_cat',2,4]],win:[[4,0],[10,0],[0,4],[0,8],[14,4],[14,8]]});
 /* THE GENERAL STORE */
 WLIR('general',{w:11,h:8,look:'timber2',amb:.64,lights:[[2,2],[8,2],[5,5]],keeper:[5,2],
-  props:[['shelving',1,1],['shelving',2,1],['shelving',8,1],['shelving',9,1],['hangstand',5,1],['shopcounter',3,3],['shopcounter',4,3],['shopcounter',6,3],['shopcounter',7,3],['coopstack',9,5],['veg',1,5],['bookshelf',9,3,{h:1.0}]],
+  props:[['shelving',1,1,{h:.95}],['shelving',2,1,{h:.95}],['shelving',8,1,{h:.95}],['shelving',9,1,{h:.95}],['hangstand',5,1,{h:.7}],['shopcounter',3,3],['shopcounter',4,3],['shopcounter',6,3],['shopcounter',7,3],['coopstack',9,5],['veg',1,5],['bookshelf',9,3,{h:1.0}]],
   folk:[['wli_dibble_cat',2,6]],win:[[3,0],[7,0],[0,4],[10,4]],raw:[['barrel',1,3],['sacks',9,6],['crate',1,6],['sacks',10,2]]});
 /* THE SMITHY: forge glow, anvil, bellows, racks of blades */
 WLIR('forge',{w:13,h:9,look:'cellar',amb:.5,lights:[[5,1,1],[7,1,1],[2,4],[10,4],[6,6,1]],keeper:[6,2],
@@ -50414,7 +50645,7 @@ WLIR('almshouse',{w:11,h:8,look:'plaster2',amb:.64,lights:[[2,2],[8,2],[5,5]],ke
   folk:[['wli_gran',3,3],['wli_oldfarmer',7,5],['wli_almscat',3,6]],win:[[3,0],[7,0],[0,4],[10,4]],raw:[]});
 /* THE CHURCH OF SAINT WENNA: nave, pews, stained glass, altar, a font, a priest */
 WLIR('church',{w:13,h:13,look:'church',amb:.62,lights:[[3,2],[9,2],[6,3],[3,7],[9,7],[2,10],[10,10]],keeper:[6,2],
-  props:[['altar',6,1],['glasswin',3,1],['glasswin',9,1],['votive',2,2,{npc:'wli_votive'}],['votive',10,2,{npc:'wli_votive'}],['pew',3,5],['pew',4,5],['pew',8,5],['pew',9,5],['pew',3,7],['pew',4,7],['pew',8,7],['pew',9,7],['pew',3,9],['pew',4,9],['pew',8,9],['pew',9,9],
+  props:[['altar',6,1],['banner',3,1,{h:1.25}],['banner',9,1,{h:1.25}],['votive',2,2,{npc:'wli_votive'}],['votive',10,2,{npc:'wli_votive'}],['pew',3,5],['pew',4,5],['pew',8,5],['pew',9,5],['pew',3,7],['pew',4,7],['pew',8,7],['pew',9,7],['pew',3,9],['pew',4,9],['pew',8,9],['pew',9,9],
     ['font',10,11],['lectern',5,3,{npc:'wli_lectern'}],['banner',1,5,{h:1.2}],['banner',11,5,{h:1.2}]],
   folk:[['wli_widow',3,6],['wli_choirboy',9,8],['wli_church_cat',7,10]],win:[[2,0],[4,0],[6,0],[8,0],[10,0],[0,3],[0,6],[0,9],[12,3],[12,6],[12,9]],raw:[]});
 /* THE INN CELLAR and THE OLD GRANARY */
@@ -50433,16 +50664,34 @@ const WLIN_HOME={
   messy:{look:'oak',amb:.6,res:[4,3],props:[['bookshelf',1,1],['bookshelf',2,1],['bookshelf',7,1],['readdesk',4,1],['globe',6,3,{h:.55}],['bed',7,4],['scrollrack',1,4,{h:.8}]],folk:[['wli_home_cat',3,4]],win:[[3,0],[0,3]],raw:[['crate',6,5],['crate',2,5],['sacks',8,5]]},
   scholar:{look:'oak',amb:.6,res:[4,3],props:[['bookshelf',1,1],['bookshelf',2,1],['bookshelf',3,1],['bookshelf',7,1],['readdesk',5,1],['globe',2,4],['rocker',7,4],['lectern',6,3,{h:.8}]],folk:[['wli_home_cat',5,5]],win:[[4,0],[8,3]]},
   merchant:{look:'timber',amb:.62,res:[4,3],props:[['dresser',1,1],['shelving',3,1],['tapestry',5,1,{h:.9}],['bed',7,1],['pietable',2,4],['clock',8,3,{h:1.1}]],folk:[['wli_home_dog',5,5]],win:[[4,0],[0,3],[8,3]],raw:[['chest',1,3],['chest',2,3],['sacks',6,3],['sacks',7,3]]},
-  healer:{look:'plaster2',amb:.62,res:[4,3],props:[['herbrack',1,1],['herbrack',2,1],['apothcab',4,1],['cauldron',7,3,{h:.6}],['bed',7,1],['herbrack',1,4,{h:.8}]],folk:[['wli_home_cat',3,5]],win:[[3,0],[6,0],[0,3]]},
+  healer:{look:'plaster2',amb:.62,res:[4,3],props:[['herbrack',1,1,{h:.9}],['dresser',3,1,{h:.85}],['cothearth',5,1],['cauldron',7,3,{h:.6}],['bed',7,1],['rocker',2,4]],folk:[['wli_home_cat',3,5]],win:[[3,0],[6,0],[0,3]]},
   children:{look:'timber2',amb:.68,res:[4,3],props:[['cot',1,1],['bed',7,1],['cothearth',4,1],['cot',7,4,{h:.5}],['rocker',2,4],['pietable',5,5,{h:.55}]],folk:[['wli_home_cat',3,3],['wli_home_dog',6,5],['wli_home_kid',2,6]],win:[[2,0],[6,0],[0,3],[8,3]]},
-  potter:{look:'brick2',amb:.62,res:[4,3],props:[['oven',1,1],['bakertable',4,1],['bed',7,1],['shelving',8,3,{h:.9}],['veg',1,4,{h:.5}]],folk:[['wli_home_dog',6,5]],win:[[3,0],[6,0],[8,3]],raw:[['sacks',2,4],['sacks',7,4]]},
+  potter:{look:'brick2',amb:.62,res:[4,3],props:[['cothearth',1,1],['pietable',4,1,{h:.6}],['bed',7,1],['dresser',8,3,{h:.9}],['veg',1,4,{h:.5}],['rocker',5,5]],folk:[['wli_home_dog',6,5]],win:[[3,0],[6,0],[8,3]],raw:[['sacks',2,4],['sacks',7,4]]},
   cats:{look:'plaster',amb:.64,res:[4,3],props:[['cat',1,1,{h:.3}],['cat',2,3,{h:.3}],['cat',6,1,{h:.3}],['cat',7,4,{h:.3}],['rocker',2,1],['bed',7,1,{h:.6}],['pietable',4,5,{h:.55}],['dresser',8,2,{h:.9}]],folk:[['wli_home_cat',3,5],['wli_cat2',5,3]],win:[[4,0],[0,3],[8,3]]},
-  soldier:{look:'stone',amb:.58,res:[4,3],props:[['weaponrack',1,1],['mannequin',3,1],['bed',7,1],['shields',5,1],['pietable',2,4],['ale',7,4,{h:.55}]],folk:[['wli_home_dog',5,5]],win:[[4,0],[0,3],[8,3]]},
+  soldier:{look:'stone',amb:.58,res:[4,3],props:[['cothearth',1,1],['bed',7,1],['banner',4,1,{h:1.2}],['pietable',2,4],['rocker',6,4],['dresser',8,3,{h:.9}]],folk:[['wli_home_dog',5,5]],win:[[4,0],[0,3],[8,3]]},
   fisher:{look:'timber2',amb:.6,res:[4,3],props:[['hangstand',1,1],['bed',7,1],['cothearth',4,1],['ale',7,4,{h:.7}],['coopstack',1,4,{h:.8}],['pietable',2,4]],folk:[['wli_home_cat',5,5]],win:[[2,0],[6,0],[8,3]]},
   noble:{look:'oak',amb:.66,res:[4,3],props:[['dresser',1,1],['tapestry',4,1,{h:.95}],['clock',7,1],['bed',7,4,{h:.8}],['pietable',2,4],['bookshelf',1,4,{h:1.0}],['mannequin',3,1,{h:.9}]],folk:[['wli_home_dog',5,5]],win:[[3,0],[6,0],[0,3],[8,3]]},
   musician:{look:'timber',amb:.64,res:[4,3],props:[['lute',1,1],['lute',2,1,{h:.5}],['bed',7,1],['tapestry',4,1,{h:.9}],['rocker',2,4],['pietable',7,4,{h:.55}]],folk:[['wli_home_cat',5,5]],win:[[4,0],[0,3],[8,3]]}
 };
 for(const k in WLIN_HOME)WLIR('home_'+k,Object.assign({w:9,h:7,keeper:null},WLIN_HOME[k]));
+/* ---- a home is never the same room twice: its size, its mirror and its wall hangings come from its door number ---- */
+function wlinHomeVariant(scene,id){
+  const base=WLIN_ROOMS['home_'+scene];if(!base||scene==='cats'||scene==='children')return 'home_'+scene;
+  const name='home_'+scene+'_'+id;if(WLIN_ROOMS[name])return name;
+  const dw=(hash2(id,21,5)*3)|0,dh=hash2(id,22,5)<.4?1:0,mir=hash2(id,23,5)<.5,W0=base.w,H0=base.h;
+  const mx=x=>{if(x>=W0-4)x+=dw;else if(x>3)x+=(dw>>1);return mir?W0+dw-1-x:x},my=y=>y>2?y+dh:y;
+  const mp=a=>a.map(q=>{q=q.slice();q[1]=mx(q[1]);q[2]=my(q[2]);return q});
+  const D=Object.assign({},base,{w:W0+dw,h:H0+dh,props:mp(base.props),raw:base.raw&&mp(base.raw),folk:base.folk&&mp(base.folk),win:base.win&&base.win.map(q=>[mx(q[0]),q[1]===0?0:my(q[1])]),res:base.res&&[mx(base.res[0]),my(base.res[1])],lights:(base.lights||[[2,2],[W0-3,2],[W0>>1,H0>>1]]).map(q=>[mx(q[0]),my(q[1])].concat(q.slice(2)))});
+  D.dress=1;WLIN_ROOMS[name]=D;return name;
+}
+/* pictures, a tapestry or a shelf on the long bare wall of a home */
+function wlinDress(C,D,id){
+  if(!D.dress)return;const HANG=['tapestry','noticeboard','tapestry','clock'],y=1;let n=0;
+  for(let x=1;x<D.w-1&&n<3;x++){const k=HANG[(hash2(id,x,31)*HANG.length)|0];
+    if(hash2(id,x,32)<.5||C.has(x,y)||C.has(x+1,y)||(C.has(x-1,y)&&false))continue;
+    if(k==='clock'&&C.has(x,y+1))continue;
+    wlinProp(C,k,x,y,{h:k==='clock'?1.0:.8,free:1,bob:k==='clock'?0:.35});n++;x+=2}
+}
 /* ---- every door of the town (WL_DOORS in wenlock_town.js) gets its room, built when first entered (KH_LAZY) ---- */
 const WLIN_BY_KIND={church:'church',inn:'inn',smith:'forge',bakery:'bakery',butcher:'butcher',library:'library',scroll:'scrolls',tailor:'tailor',armour:'armour',weapons:'weapons',general:'general',greengrocer:'green',potion:'potion',herb:'herbs',cooper:'cooper',chandler:'chandler',cobbler:'cobbler',almshouse:'almshouse',school:'school',hall:'hall'};
 const WLIN_KEEPER={church:'wli_k_church',inn:'wli_k_inn',smith:'wli_k_smith',bakery:'wli_k_bakery',butcher:'wli_k_butcher',library:'wli_k_library',scroll:'wli_k_scrolls',tailor:'wli_k_tailor',armour:'wli_k_armour',weapons:'wli_k_weapons',general:'wli_k_general',greengrocer:'wli_k_green',potion:'wli_k_potion',herb:'wli_k_herbs',cooper:'wli_k_cooper',chandler:'wli_k_chandler',cobbler:'wli_k_cobbler',almshouse:'wli_k_almshouse',school:'wli_k_school',hall:'wli_k_hall'};
@@ -50450,9 +50699,9 @@ const WLIN_SCENES=['warm','worker','spartan','messy','scholar','merchant','heale
 const WLIN_HOMENAME={warm:'A Warm Cottage',worker:"A Farmer's Kitchen",spartan:"A Widow's Parlour",messy:'A Cluttered Cottage',scholar:"A Scholar's Cottage",merchant:"A Wool Merchant's House",healer:"A Healer's Cottage",children:"A Family's Cottage",potter:"A Baker's Flat",cats:'A House of Cats',soldier:"A Retired Soldier's House",fisher:"A Brook Fisher's Cottage",noble:"A Gentleman's House",musician:"A Fiddler's Cottage"};
 const WLIN_RES={warm:['wli_r_wife','wli_r_cook'],worker:['wli_r_wife','wli_r_man'],spartan:['wli_r_old','wli_r_nun'],messy:['wli_r_scholar','wli_r_fiddler'],scholar:['wli_r_scholar','wli_r_girl'],merchant:['wli_r_wife','wli_r_cook'],healer:['wli_r_nun','wli_r_old'],children:['wli_r_mum','wli_r_wife'],potter:['wli_r_weaver','wli_r_cook'],cats:['wli_r_old','wli_r_weaver'],soldier:['wli_r_man','wli_r_old'],fisher:['wli_r_old','wli_r_man'],noble:['wli_r_wife','wli_r_scholar'],musician:['wli_r_fiddler','wli_r_girl']};
 function wlinMake(d){ // d: one entry of WL_DOORS
-  const id=d.id,home=!WLIN_BY_KIND[d.kind],r=hash2(id,7,3),scene=home?WLIN_SCENES[(r*WLIN_SCENES.length)|0]:null;
+  const id=d.id,home=!WLIN_BY_KIND[d.kind],hi=WL_DOORS.filter(q=>!WLIN_BY_KIND[q.kind]).findIndex(q=>q.id===id),scene=home?WLIN_SCENES[(hi*5+(hi>>4))%WLIN_SCENES.length]:null;   // the kinds of home go round in turn, so no street gets one kind over and over
   const name=home?WLIN_HOMENAME[scene]:d.name,back={to:WL.ID,x:d.front.x,y:d.front.y,f:d.out};
-  const b={id:'wlin'+id,wlin:home?'home_'+scene:WLIN_BY_KIND[d.kind],name,room:home?'home':'shop',keeper:home?(hash2(id,9,4)<.8?WLIN_RES[scene][(hash2(id,5,5)*WLIN_RES[scene].length)|0]:null):WLIN_KEEPER[d.kind],floor:'wood',wallImg:'kh_ohwall1_2'};
+  const b={id:'wlin'+id,wlin:home?wlinHomeVariant(scene,id):WLIN_BY_KIND[d.kind],name,room:home?'home':'shop',keeper:home?(hash2(id,9,4)<.8?WLIN_RES[scene][(hash2(id,5,5)*WLIN_RES[scene].length)|0]:null):WLIN_KEEPER[d.kind],floor:'wood',wallImg:'kh_ohwall1_2'};
   const R=khRoom(b,id,back);LEVELS[id]=R.level;LEVELS[id].diff=80;LEVEL_NAMES[id]=name;LEVEL_RATING[id]=80;return R.level;
 }
 for(const d of WL_DOORS){const id=d.id;KH_LAZY[id]=()=>{if(!LEVELS[id])wlinMake(d)}}
@@ -50477,6 +50726,7 @@ function wlinBuild(D,name,b,C){
   if(b.keeper&&kp)npc(b.keeper,kp[0],kp[1]);
   for(const f of (D.folk||[]))npc(f[0],f[1],f[2],f[3]);
   if(D.extra)D.extra(C,b);
+  try{wlinDress(C,D,+String(b.id).replace(/\D/g,'')||0)}catch(e){console.error('wlinDress',e)}
 }
 /* wrap khRoom: a Wenlock room is built from the data above, with its own walls, floor and windows */
 {const _kr=khRoom;khRoom=function(b,lvl,back){
@@ -50749,7 +50999,7 @@ for(const [id,n,face,title,greet,key,sc] of WLSTALLS){
   khNpc(id,n,face,d=>{
     let g=greet;
     try{if((id==='wlo_pedlar'||id==='wlo_potter')&&typeof wwF==='function'&&wwF().wwDead)g=id==='wlo_pedlar'?'Silas has gingerbread men for a penny, and they are certified, by a goat, as safe. Cloth, rugs, ribbons and one very good boot too.':'I have made a gingerbread mould for Pip\'s stall, shaped like a small man. It came out with a small, unhappy face, and I could not make it stop. Jugs, bowls and honey are over here.'}catch(e){}
-    return say(g,[['Browse the wares',()=>{openShop(d,KH_STOCK[key](),title);return null}],BYE])},{sc});
+    return say(g,[['Browse the wares',()=>{openShop(d,KH_STOCK[key](),title);return null}],BYE])},{sc:Math.round(sc*.84*100)/100});
 }
 
 /* ---- src/desert/wenlock_quests.js ---- */
@@ -50916,14 +51166,15 @@ const WL_QOBJ=[
 
 /* ---- src/desert/wenlock_strays.js ---- */
 /* ==========================================================================
-   WENLOCK: THE STRAYS (quests wlq11 and wlq12, ids wlo_goat1..5 and wlo_llama1..5). Two more fetch quests, open as soon as the mayor's welcome is done:
-   Farmer Giles has lost five goats and the wool merchant has lost five llamas, dotted about the town. Each animal is a step of its own (the log shows the next one and where it was
+   WENLOCK: THE STRAYS (quests wlq11 and wlq12, ids wlo_goat1..5 and wlo_sheep1..5). Two more fetch quests, open as soon as the mayor's welcome is done:
+   Farmer Giles has lost five goats and the wool merchant has lost five sheep, dotted about the town. Each animal is a step of its own (the log shows the next one and where it was
    last seen); clicking one when its quest is active sends it home. The town builder puts each one near its spot, off the roads (WL_QOBJ in wenlock_quests.js).
    ========================================================================== */
 Object.assign(WL_REW,{wlq11:{gold:700,xp:7000},wlq12:{gold:800,xp:8000}});
 WL_QUESTS.push(
   {id:'wlq11',giver:'Farmer Giles',title:'Five Runaway Goats',desc:'Five of Farmer Giles\' goats have got out of the top field and are somewhere about the town. Find them all.'},
-  {id:'wlq12',giver:'A wool merchant',title:'Five Lost Llamas',desc:'Five of the wool merchant\'s llamas have wandered off from the wool yard. Find them all.'});
+  {id:'wlq12',giver:'A wool merchant',title:'Five Lost Sheep',desc:'Five of the wool merchant\'s sheep have wandered off from the wool yard. Find them all.'});
+if(NPC_H.sheep===undefined)NPC_H.sheep=.5;
 const WL_STRAYS=[
   {q:'wlq11',who:'Farmer Giles',kind:'goat',flag:'wlg',face:'kh_anim1_3',sc:.9,list:[
     ['Gruff',[46,16],'in the fields at the north end of town, near Farmer Giles.','Gruff looks at you, chews, and trots off home by himself. He does not say thank you.','Maaa. (Gruff is eating a hedge, and wants you to know it is his hedge.)'],
@@ -50931,21 +51182,21 @@ const WL_STRAYS=[
     ['Thistle',[14,56],'in the meadow at the west end of town, below the High Street.','Thistle sighs, as if you have spoiled a very good plan, and ambles off home.','Maaa. (Thistle is staring at the horizon, planning something.)'],
     ['Barnaby',[38,33],'on the grass between the church and the market square.','Barnaby bleats once, loudly, to tell the whole town he is leaving on his own terms, and goes.','Maaa. (Barnaby is standing very still, in the hope that nobody has noticed him.)'],
     ['Nettle',[58,76],'in the meadow south of the village green, near the brook.','Nettle lets you hold a very small piece of her rope, and then leads you home. It was her idea.','Maaa. (Nettle is paddling in the brook, looking pleased with herself.)']]},
-  {q:'wlq12',who:'A wool merchant',kind:'llama',flag:'wll',face:'pet_llama_0',sc:1.05,list:[
-    ['Dolores',[76,86],'near Wenlock Mill, at the far south-east.','Dolores looks down at you from a great height, spits very slightly, and strolls back to the wool yard.','Hmmm. (Dolores is looking at the mill wheel as if it owes her money.)'],
-    ['Lord Fluff',[90,48],'at the east end of the High Street.','Lord Fluff allows you to say a few words, then turns, and processes back to the yard like a small, woolly bishop.','Hmmm. (Lord Fluff is standing in the road, blocking a cart, and does not care.)'],
-    ['Pachamama',[68,60],'in the fields east of the market square.','Pachamama hums, flicks an ear, and wanders home. The cart behind her is very relieved.','Hmmm. (Pachamama is chewing something, and is not going to explain.)'],
-    ['Alpaco',[66,24],'beside the big barn, in the north-east.','Alpaco bows his long neck, turns about, and goes home with very great dignity indeed.','Hmmm. (Alpaco has got his head in a sack of oats, and is not coming out.)'],
-    ['Brenda',[32,88],'in the south meadow across the brook.','Brenda sniffs, looks at the brook, looks at you, and decides you are almost as good as a bridge.','Hmmm. (Brenda is lying in the grass like a very large cat.)']]}];
+  {q:'wlq12',who:'A wool merchant',kind:'sheep',flag:'wll',face:'sheep',sc:1.2,list:[
+    ['Dolores',[76,86],'near Wenlock Mill, at the far south-east.','Dolores gives you a long, flat look, says nothing at all, and strolls back to the wool yard.','Baa. (Dolores is looking at the mill wheel as if it owes her money.)'],
+    ['Lord Fluff',[90,48],'at the east end of the High Street.','Lord Fluff allows you to say a few words, then turns, and processes back to the yard like a small, woolly bishop.','Baa. (Lord Fluff is standing in the road, blocking a cart, and does not care.)'],
+    ['Pachamama',[68,60],'in the fields east of the market square.','Pachamama baas, flicks an ear, and wanders home. The cart behind her is very relieved.','Baa. (Pachamama is chewing something, and is not going to explain.)'],
+    ['Alpaco',[66,24],'beside the big barn, in the north-east.','Alpaco bows his woolly head, turns about, and goes home with very great dignity indeed.','Baa. (Alpaco has got his head in a sack of oats, and is not coming out.)'],
+    ['Brenda',[32,88],'in the south meadow across the brook.','Brenda sniffs, looks at the brook, looks at you, and decides you are almost as good as a bridge.','Baa. (Brenda is lying in the grass like a very large, very round cat.)']]}];
 for(const S of WL_STRAYS){
   const ids=S.list.map((a,i)=>'wlo_'+S.kind+(i+1)),got=()=>S.list.reduce((n,a,i)=>n+(wlF()[S.flag+(i+1)]?1:0),0);
   S.list.forEach(([name,at,hint,foundLine,flavour],i)=>{
     const id=ids[i],flag=S.flag+(i+1);
-    khNpc(id,name+(S.kind==='goat'?', a goat':', a llama'),S.face,d=>{const F=wlF();
+    khNpc(id,name+(S.kind==='goat'?', a goat':', a sheep'),S.face,d=>{const F=wlF();
       if(qSt(S.q)==='active'&&!F[flag]){F[flag]=1;d.found=true;d.block=false;yrStep('You have found '+name+'. ('+got()+'/5)');return say(foundLine,[BYE])}
       return say(flavour,[BYE])},{sc:S.sc});
     WL_QOBJ.push({npc:id,k:()=>S.face,at,rad:6,o:{sc:S.sc}})});
-  wlQ(S.q,S.who,S.list.map(([name,at,hint],i)=>['Find '+name+', '+(S.kind==='goat'?'a goat':'a llama')+', last seen '+hint,()=>wlF()[S.flag+(i+1)],[ids[i]]]));
+  wlQ(S.q,S.who,S.list.map(([name,at,hint],i)=>['Find '+name+', '+(S.kind==='goat'?'a goat':'a sheep')+', last seen '+hint,()=>wlF()[S.flag+(i+1)],[ids[i]]]));
 }
 const WLD11=khQD("Five goats, gone! They were in the top field at breakfast, and by elevenses there was a hole in the hedge and a very smug sheep. They do it every spring, but never all five, and never in market week. They answer to Gruff, Clover, Thistle, Barnaby and Nettle, and to nothing else. Could you find them and send them home? They will not hurt you. They will only look at you as if you owe them rent.",
   "Bless you. They will be somewhere in town, wherever there is grass, or a hedge, or a bin. Tell them Giles sent you. They will not listen, but it is polite.",
@@ -50953,12 +51204,12 @@ const WLD11=khQD("Five goats, gone! They were in the top field at breakfast, and
   "All five? Let me count. One, two, three, four, five. And not one of them has said thank you. That is how I know they are mine.",
   "They are back in the top field, and already looking at the hedge. I shall mend it. I shall mend it badly. Take this, with my thanks.",
   "The goats are home. The hedge has a new hole. I have decided not to look at it.","All five are home.");
-const WLD12=khQD("Llamas! Five of them, my best fleece-bearers, gone from the wool yard. Somebody left the gate open, and I will not say who, because it was me. They are called Dolores, Lord Fluff, Pachamama, Alpaco and Brenda, and each is worth more than the shop. They are not fast, but they are very, very stubborn, and they spit. Find them and send them home. Do not argue with them. They always win.",
-  "Thank you. They will be about the town, wherever it is quiet and there is something to look down on. If one spits, take it as a mark of respect.",
-  (n,m)=>n?n+' of '+m+' found. The others are about the town, looking down at something.':'Look in the quiet places, the edges of town, and wherever a cart is blocked.',
+const WLD12=khQD("Sheep! Five of them, my best fleece-bearers, gone from the wool yard. Somebody left the gate open, and I will not say who, because it was me. They are called Dolores, Lord Fluff, Pachamama, Alpaco and Brenda, and each is worth more than the shop. They are not fast, but they are very, very stubborn, and they bite the hands that count them. Find them and send them home. Do not argue with them. They always win.",
+  "Thank you. They will be about the town, wherever it is quiet and there is grass to be eaten. If one stares at you, take it as a mark of respect.",
+  (n,m)=>n?n+' of '+m+' found. The others are about the town, looking at the grass.':'Look in the quiet places, the edges of town, and wherever a cart is blocked.',
   "All five home? Dolores, Fluff, Pachamama, Alpaco and Brenda? I shall count them twice, and then again, to be sure.",
   "They are in the yard, and all of them look as if the whole business was my fault. Which it was. Here, with my thanks, and a very fine bit of wool.",
-  "The llamas are home, the gate is shut, and I have put a sign on it. The sign says SHUT. Dolores has read it, and is not impressed.","All five are home.");
+  "The sheep are home, the gate is shut, and I have put a sign on it. The sign says SHUT. Dolores has read it, and is not impressed.","All five are home.");
 wlGive('wlo_farmer','wlq11','wlq1',WLD11);
 wlGive('wlo_merchant','wlq12','wlq1',WLD12);
 
@@ -51201,7 +51452,9 @@ function wlwPass(C){
   // 1. the hidden blocks under the big pictures: boarding, pigeon holes, honey stone, whitewash. Door squares lead into rooms.
   const defs={
     'The Barn':{wh:2.4,tiles:()=>[wlwBoards('b',2.4,0),wlwBoards('b',2.4,1),wlwBoards('b',2.4,2),wlwBoards('b',2.4,0)],doors:[[63,18],[64,18]],lvl:WLX.BARN},
-    'The Dovecote':{wh:2.4,tiles:()=>{const b=TM.make('plain','golden',2.4).gid;return [wlwHoles(b,'a',2.4,3),wlwHoles(b,'a',2.4,2),b,wlwHoles(b,'a',2.4,3)]},doors:[[54,38],[55,38]],lvl:WLX.DOVE},
+    'The Dovecote':{wh:2.4,tiles:()=>{const b=TM.make('plain','golden',2.4).gid,im=IMG.wl_bldg1_4;if(!im)return [wlwHoles(b,'a',2.4,3),wlwHoles(b,'a',2.4,2),b,wlwHoles(b,'a',2.4,3)];
+      // the sides of the tower are cut from its own painted stonework, so the slab behind the picture matches it
+      const cut=(n,sx)=>wlwNew('dove'+n,2.4,(x,w,h)=>{x.drawImage(im,sx,214,90,216,0,0,w,h)});return [cut(0,22),cut(1,195),cut(2,22),cut(3,195)]},doors:[[54,38],[55,38]],lvl:WLX.DOVE},
     'Wenlock Mill':{wh:2.4,tiles:()=>{const s='golden';return [TM.make('plain',s,2.4).gid,TM.make('gwin',s,2.4).gid,TM.make('window',s,2.4).gid,TM.make('plain2',s,2.4).gid,TM.make('window2',s,2.4).gid]},doors:[[79,88],[80,88]],lvl:WLX.MILL},
     'The Windmill':{wh:2.4,tiles:()=>{const s=OSTY.white||'cottage';return [TM.make('plain',s,2.4).gid,TM.make('gwin',s,2.4).gid,TM.make('window',s,2.4).gid,TM.make('plain2',s,2.4).gid]},doors:[[86,89],[87,89]],lvl:WLX.WIND}
   };
@@ -51252,9 +51505,9 @@ const WLP_PASSES=[
   ['meadow',C=>{if(typeof wlePass==='function')wlePass(C)}]
 ];
 function wlPolish(C){for(const [n,f] of WLP_PASSES){try{f(C)}catch(e){console.error('wlPolish '+n,e)}}}
-/* distant roofs: a house roof is drawn out to forty squares, but the walls under it only out to the fog, so far houses floated as bare roofs. Roofs are kept only as far as walls are drawn. */
-{const _k=khSkyList;khSkyList=function(cx,cy,dX,dY,L,md){const out=_k.apply(this,arguments);if(LEVEL!==496||typeof RANGE==='undefined'||!RANGE)return out;const r2=(RANGE+1.5)*(RANGE+1.5);
-  return out.filter(s=>!s.smallSky||((s.x-cx)*(s.x-cx)+(s.y-cy)*(s.y-cy))<=r2)}}
+/* distant roofs: a house roof is a separate sky picture, and it used to be dropped past seven squares while the walls under it are drawn out to about thirty-four, so every far house was a roofless slab. Roofs now reach as far as the walls do and melt away over the last six squares (s.fade), so none floats alone beyond them. */
+{const _k=khSkyList;khSkyList=function(cx,cy,dX,dY,L,md){const out=_k.apply(this,arguments);if(LEVEL!==496)return out;const far=(G.day||0)>0?34:20,f2=far*far,n2=(far-6)*(far-6);
+  return out.filter(s=>{if(!s.smallSky)return true;const d2=(s.x-cx)*(s.x-cx)+(s.y-cy)*(s.y-cy);if(d2>f2)return false;if(d2>n2)s.fade=clamp((far-Math.sqrt(d2))/6,0,1);return true})}}
 /* the waystone: every room has one in a corner, which looked like a stray post. In a Wenlock room it is a plain wooden bench (it still wakes and still works, T to travel). */
 {const _pt=placeTeleporter;placeTeleporter=function(){const r=_pt.apply(this,arguments);
   try{if(LEVEL>=WL.H0&&LEVEL<=WL.H0+99&&G.tele){const d=G.decor.find(q=>q.tele&&q.k==='teleporter');if(d){d.k='kh_ohgard1_3';d.sc=1.1;d.deco=true;NPC_H.kh_ohgard1_3=NPC_H.kh_ohgard1_3||.62}}}catch(e){console.error(e)}
@@ -51301,66 +51554,108 @@ for(const [id,n,face,lines,o] of [
 const WLN_STREET={N:'High Street',S:'High Street',MW:'Mill Lane',ME:'Mill Lane',CW:'Church Lane',CE:'Church Lane',GW:'Green Lane',GE:'Green Lane',TN:'Back Track',TS:'Back Track'};
 const WLN_HINT={N:'high',S:'high',MW:'mill',ME:'mill',CW:'church',CE:'church',GW:'green',GE:'green',TN:'track',TS:'track'};
 const WLN_ODD={N:1,MW:1,CW:1,GW:1,TN:1};   // the sides that carry the odd numbers
-/* ten door colours: [name, r, g, b] */
-const WLN_DOORS=[['racing green',38,92,60],['navy blue',38,60,124],['oxblood',124,34,38],['black',36,34,36],['cream',230,216,180],['mustard',200,152,40],['plum',96,48,104],['teal',36,122,128],['slate grey',98,106,114],['terracotta',194,98,46]];
+/* eight muted door colours: [name, r, g, b] */
+const WLN_DOORS=[['racing green',44,96,66],['navy blue',44,66,128],['oxblood',128,42,44],['charcoal',54,54,60],['plum',100,56,108],['teal',40,118,122],['slate grey',104,112,122],['terracotta',190,100,56]];
 /* the house names: [name, where it likes to stand] */
 const WLN_NAMES=[['Pear Tree Cottage','any'],['Wren\'s Rest','any'],['Honeysuckle Cottage','any'],['Mill View','mill'],['The Nook','any'],['Rose Cottage','any'],['Bramble Cottage','any'],['Hollyhock House','any'],
   ['Church View','church'],['Tansy Cottage','any'],['Dove Cottage','church'],['Fiddler\'s Rest','any'],['Lavender Cottage','any'],['The Old Dairy','track'],['Sparrow Hall','any'],['Elm Tree House','any'],['Primrose Cottage','any'],
   ['Brook Cottage','mill'],['Thimble Cottage','any'],['The Sheepfold','track'],['Foxglove Cottage','any'],['Marigold House','any'],['Ivy Cottage','any'],['The Hollies','any'],['Cobbler\'s Rest','high'],['The Willows','mill'],
   ['Jasmine Cottage','any'],['Damson Cottage','green'],['Quince House','any'],['Robin\'s Nest','any'],['Bluebell Cottage','green'],['Meadow View','track'],['Orchard End','green'],['Little Thatch','any'],['Brewer\'s Cottage','high'],
   ['Lamplighter\'s Cottage','high'],['Thrush Cottage','any'],['Hazel Cottage','any'],['Apple Loft','green'],['Barley Mow','track'],['Gable End','any'],['Green View','green'],['Weaver\'s Cottage','high'],['Swallow\'s Rest','any'],['Sexton\'s Cottage','church']];
-/* ---- the brass numeral plate, the knocker, and the colour of the door, painted into a copy of the door tile ---- */
+/* ---- the colour of the door, a small brass numeral, a knocker and a letter slot, all measured from the door in the tile and painted into a copy of it ---- */
+/* where is the door in this tile? scan the bottom rows for the edges of the opening (the wall changes at the jambs) and a column up the middle for the top of the arch */
+function wlnDoorBox(x,w,hh){
+  const d=x.getImageData(0,0,w,hh).data,L=(px,py)=>{const i=(py*w+px)*4;return .3*d[i]+.59*d[i+1]+.11*d[i+2]};
+  const colM=(px,y0,y1)=>{let s=0,n=0;for(let y=y0;y<=y1;y++){s+=L(px,y);n++}return s/n};
+  const row=px=>colM(px,hh-16,hh-6);
+  let le=64-29,re=64+29;
+  for(let px=64-16;px>16;px--){if(Math.abs((row(px-1)+row(px-2)+row(px-3))/3-(row(px+1)+row(px)+row(px+2))/3)>26){le=px;break}}
+  for(let px=64+16;px<112;px++){if(Math.abs((row(px+1)+row(px+2)+row(px+3))/3-(row(px-1)+row(px)+row(px-2))/3)>26){re=px;break}}
+  let cx=(le+re)/2,hw=(re-le)/2;if(hw<20||hw>38||Math.abs(cx-64)>12){cx=64;hw=29}
+  let top=hh-100;const rowM=py=>{let s=0;for(let px=(cx-6)|0;px<=cx+6;px++)s+=L(px,py);return s/13};
+  for(let py=hh-72;py>hh-132;py--){if(Math.abs((rowM(py-1)+rowM(py-2)+rowM(py-3))/3-(rowM(py+1)+rowM(py+2)+rowM(py+3))/3)>30){top=py;break}}
+  top=Math.max(hh-118,Math.min(hh-78,top));
+  return {cx,hw,top,bot:hh-3};
+}
 function wlnDoorTile(gid,h,pal,num,fan){
-  return wlgTile(gid,'door|'+pal+'|'+num+'|'+(fan===undefined?'-':fan),(x,w,hh)=>{
-    const top=hh-128,c=WLN_DOORS[pal];
-    // the door itself: the darker pixels inside the arch of the opening take the new colour, keeping the grain and the panels
-    if(c){const X0=36,X1=94,Y0=top+28,Y1=hh-2,id=x.getImageData(X0,Y0,X1-X0,Y1-Y0),d=id.data,iw=X1-X0;
-      for(let yy=0;yy<Y1-Y0;yy++)for(let xx=0;xx<iw;xx++){const wx=X0+xx,wy=Y0+yy;
-        if(wy<top+58){const dx=wx-65,dy=wy-(top+58);if(dx*dx+dy*dy>29*29)continue}
-        const i=(yy*iw+xx)*4,r=d[i],g=d[i+1],b=d[i+2],l=.3*r+.59*g+.11*b;
-        if(l<138){const k=Math.min(1.45,.35+l/80);d[i]=Math.min(255,c[1]*k);d[i+1]=Math.min(255,c[2]*k);d[i+2]=Math.min(255,c[3]*k)}}
+  return wlgTile(gid,'door2|'+pal+'|'+num+'|'+(fan===undefined?'-':fan),(x,w,hh)=>{
+    const B=wlnDoorBox(x,w,hh),c=WLN_DOORS[pal],cx=B.cx,hw=B.hw-2,top=B.top,bot=B.bot,dh=bot-top;
+    // the door itself: every pixel inside the opening (a rectangle with a round top) is dyed, keeping its light and shade, so pale doors get a colour too
+    if(c){const X0=Math.max(0,Math.floor(cx-hw)),X1=Math.min(w,Math.ceil(cx+hw)),Y0=top,Y1=bot,id=x.getImageData(X0,Y0,X1-X0,Y1-Y0),d=id.data,iw=X1-X0;
+      for(let yy=0;yy<Y1-Y0;yy++)for(let xx=0;xx<iw;xx++){const wx=X0+xx+.5,wy=Y0+yy,ay=wy-(top+hw);
+        if(ay<0){const dx=wx-cx;if(dx*dx+ay*ay>hw*hw)continue}
+        const i=(yy*iw+xx)*4,l=(.3*d[i]+.59*d[i+1]+.11*d[i+2])/255,k=.55+.9*l;
+        d[i]=d[i]*.12+Math.min(255,c[1]*k)*.88;d[i+1]=d[i+1]*.12+Math.min(255,c[2]*k)*.88;d[i+2]=d[i+2]*.12+Math.min(255,c[3]*k)*.88}
       x.putImageData(id,X0,Y0)}
-    // the engine shows a wall tile mirrored left to right, so the things painted on it are painted in a mirror (and read the right way round in the game)
-    x.save();x.translate(w,0);x.scale(-1,1);
-    // a stained fan-light in the top of the doorway
-    if(fan!==undefined&&fan!==null){const cx=65,cy=top+62,r=21;x.save();x.beginPath();x.arc(cx,cy,r,Math.PI,0);x.lineTo(cx+r,cy+3);x.lineTo(cx-r,cy+3);x.closePath();x.clip();
-      const pal2=WLGS_SETS[fan%WLGS_SETS.length];for(let i=0;i<7;i++){const a0=Math.PI+i*Math.PI/7,a1=Math.PI+(i+1)*Math.PI/7,cc=WLGS_COL[pal2[i%pal2.length]];x.beginPath();x.moveTo(cx,cy+3);x.arc(cx,cy+3,r+4,a0,a1);x.closePath();
-        const g=x.createRadialGradient(cx,cy,2,cx,cy,r);g.addColorStop(0,cc[1]);g.addColorStop(1,cc[0]);x.fillStyle=g;x.fill();x.strokeStyle='#17140f';x.lineWidth=1.8;x.stroke()}
-      x.restore();x.strokeStyle='#17140f';x.lineWidth=2.4;x.beginPath();x.arc(cx,cy,r+1,Math.PI,0);x.lineTo(cx+r+1,cy+4);x.lineTo(cx-r-1,cy+4);x.stroke()}
-    // the knocker: a brass ring on a plate, and a letter slot
-    x.fillStyle='#b8862c';x.beginPath();x.arc(80,top+70,3.4,0,6.3);x.fill();x.strokeStyle='#e8c060';x.lineWidth=2.1;x.beginPath();x.arc(80,top+76,4.6,0,6.3);x.stroke();x.fillStyle='#8a6420';x.fillRect(52,top+86,22,4);x.fillStyle='#e0b850';x.fillRect(53,top+86,20,1.5);
-    // the number: a brass-rimmed oval of cream enamel beside the door
-    if(num){const px=111,py=top+50,s=String(num),fs=s.length>2?12:s.length>1?15:17;
-      x.save();x.fillStyle='#6a4a14';x.beginPath();x.ellipse(px,py,16.5,12,0,0,6.3);x.fill();x.fillStyle='#d8a838';x.beginPath();x.ellipse(px,py,15,10.8,0,0,6.3);x.fill();x.fillStyle='#f6eed4';x.beginPath();x.ellipse(px,py,12.6,8.6,0,0,6.3);x.fill();
-      x.strokeStyle='#8a6a20';x.lineWidth=.9;x.beginPath();x.ellipse(px,py,11,7.2,0,0,6.3);x.stroke();
-      x.font='bold '+fs+'px Georgia,serif';x.textAlign='center';x.textBaseline='middle';x.fillStyle='#1c1208';x.fillText(s,px,py+1);
-      x.fillStyle='#e8c860';for(const sx of [-15,15]){x.beginPath();x.arc(px+sx,py,1.4,0,6.3);x.fill()}x.restore()}
+    // the engine shows a wall tile mirrored left to right, so the things painted on it are painted in a mirror (and read the right way round in the game); M turns a tile x into a painting x
+    x.save();x.translate(w,0);x.scale(-1,1);const M=t=>w-t;
+    if(fan!==undefined&&fan!==null){const fx=M(cx),fy=top+hw,r=Math.min(21,hw-3);x.save();x.beginPath();x.arc(fx,fy,r,Math.PI,0);x.lineTo(fx+r,fy+3);x.lineTo(fx-r,fy+3);x.closePath();x.clip();
+      const pal2=WLGS_SETS[fan%WLGS_SETS.length];for(let i=0;i<7;i++){const a0=Math.PI+i*Math.PI/7,a1=Math.PI+(i+1)*Math.PI/7,cc=WLGS_COL[pal2[i%pal2.length]];x.beginPath();x.moveTo(fx,fy+3);x.arc(fx,fy+3,r+4,a0,a1);x.closePath();
+        const g=x.createRadialGradient(fx,fy,2,fx,fy,r);g.addColorStop(0,cc[1]);g.addColorStop(1,cc[0]);x.fillStyle=g;x.fill();x.strokeStyle='#17140f';x.lineWidth=1.8;x.stroke()}
+      x.restore();x.strokeStyle='#17140f';x.lineWidth=2.4;x.beginPath();x.arc(fx,fy,r+1,Math.PI,0);x.lineTo(fx+r+1,fy+4);x.lineTo(fx-r-1,fy+4);x.stroke()}
+    // the knocker: a small brass ring hung on the middle of the door, and a letter slot below it, both measured from the door
+    {const kx=M(cx),ky=top+dh*.46,sy=top+dh*.64,sw=Math.min(20,hw*.7);
+      x.fillStyle='#8a6420';x.beginPath();x.arc(kx,ky,2.6,0,6.3);x.fill();x.strokeStyle='#d8a838';x.lineWidth=1.7;x.beginPath();x.arc(kx,ky+4.2,3.6,0,6.3);x.stroke();
+      x.fillStyle='#6a4a14';x.fillRect(kx-sw/2,sy,sw,3.4);x.fillStyle='#e0b850';x.fillRect(kx-sw/2+.8,sy,sw-1.6,1.2)}
+    // the number: a small brass-rimmed oval on the wall beside the door, kept inside the tile and clear of the frame
+    if(num){const s=String(num),fs=s.length>2?9:s.length>1?11:12,rx=s.length>2?10.5:9,ry=7.4;
+      let pxT=cx+hw+rx+9;if(pxT+rx>w-6)pxT=cx-hw-rx-9;if(pxT-rx<6)pxT=w-rx-6;
+      const px=M(pxT),py=top+dh*.5;
+      x.save();x.fillStyle='#6a4a14';x.beginPath();x.ellipse(px,py,rx+1.2,ry+1.2,0,0,6.3);x.fill();x.fillStyle='#d8a838';x.beginPath();x.ellipse(px,py,rx,ry,0,0,6.3);x.fill();x.fillStyle='#f6eed4';x.beginPath();x.ellipse(px,py,rx-1.8,ry-1.8,0,0,6.3);x.fill();
+      x.font='bold '+fs+'px Georgia,serif';x.textAlign='center';x.textBaseline='middle';x.fillStyle='#1c1208';x.fillText(s,px,py+.6);x.restore()}
     x.restore();
   });
 }
-/* ---- white enamel street plates, in the way of the shop signs: decor with wd, txt and plate:'street' ---- */
+/* ---- white enamel street plates, in the way of the shop signs: decor with wd, txt and plate:'street'. One line only, large, shrunk to fit with a margin ---- */
 const WLN_PLATES={};
 function wlnStreetPlate(d){
-  const id=d.txt.join('|');if(WLN_PLATES[id])return WLN_PLATES[id];
-  return WLN_PLATES[id]=mkCanvas(320,150,(x,w,h)=>{
-    x.fillStyle='rgba(0,0,0,.35)';x.fillRect(6,8,w-8,h-8);
-    x.fillStyle='#161a28';x.fillRect(0,0,w-6,h-8);x.fillStyle='#f4f0e2';x.fillRect(6,6,w-18,h-20);
-    x.strokeStyle='#161a28';x.lineWidth=3;x.strokeRect(14,14,w-34,h-36);
-    x.fillStyle='#8a8678';for(const [px,py] of [[10,10],[w-16,10],[10,h-18],[w-16,h-18]]){x.beginPath();x.arc(px,py,2.4,0,6.3);x.fill()}
+  const id=d.txt[0];if(WLN_PLATES[id])return WLN_PLATES[id];
+  return WLN_PLATES[id]=mkCanvas(480,190,(x,w,h)=>{
+    x.fillStyle='rgba(0,0,0,.35)';x.fillRect(8,10,w-10,h-10);
+    x.fillStyle='#161a28';x.fillRect(0,0,w-8,h-10);x.fillStyle='#f4f0e2';x.fillRect(8,8,w-24,h-26);
+    x.strokeStyle='#161a28';x.lineWidth=4;x.strokeRect(20,20,w-48,h-50);
+    x.fillStyle='#8a8678';for(const [px,py] of [[13,13],[w-21,13],[13,h-23],[w-21,h-23]]){x.beginPath();x.arc(px,py,3,0,6.3);x.fill()}
     x.textAlign='center';x.textBaseline='middle';
-    const fit=(t,y,fs0,font,col)=>{let fs=fs0;x.font=font+' '+fs+'px Georgia,serif';while(x.measureText(t).width>w-60&&fs>10){fs-=2;x.font=font+' '+fs+'px Georgia,serif'}x.fillStyle=col;x.fillText(t,(w-6)/2,y)};
-    fit(d.txt[0],d.txt[1]?h*.42:h*.5,50,'bold','#161a28');
-    if(d.txt[1])fit(d.txt[1],h*.7,24,'italic','#3a3a46');
+    const t=d.txt[0],mw=w-96;let fs=84,sx=1;x.font='bold '+fs+'px Georgia,serif';
+    let tw=x.measureText(t).width;if(tw>mw){sx=Math.max(.78,mw/tw);tw*=sx}
+    while(tw>mw&&fs>16){fs-=2;x.font='bold '+fs+'px Georgia,serif';tw=x.measureText(t).width*sx}
+    x.save();x.translate((w-8)/2,(h-10)/2+3);x.scale(sx,1);x.fillStyle='#161a28';x.fillText(t,0,0);x.restore();
   });
 }
 {const _s=shopSign;shopSign=function(d){if(d&&d.k==='sign_wlst'&&d.txt)return wlnStreetPlate(d);return _s.apply(this,arguments)}}
-/* a freestanding street sign: a painted signpost (walk up and read it) with a plate on each of the two ways it faces */
+/* a freestanding street sign: a signpost whose two boards are painted at three times the size, one board to a street, each post with its own shapes and colours; the boards are in the picture of the post itself, so the letters read from every side (never mirrored) */
 let WLN_POSTS=0;
+const WLN_BOARD=[[[104,70,44],[236,222,184]],[[60,96,70],[240,232,196]],[[110,50,46],[240,226,190]],[[44,70,108],[238,232,206]],[[84,64,104],[236,226,196]],[[52,92,98],[240,232,200]]];
+function wlnPostPic(i,names){
+  const S=3,W=825,H=849,src=IMG.greensign,c=document.createElement('canvas');c.width=550;c.height=566;const x=c.getContext('2d');x.scale(2/3,2/3);
+  x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';
+  if(src)x.drawImage(src,70,0,135,283,414-68*S,0,135*S,H);
+  const board=(bx,by,bw,bh,dir,shape,name,pal)=>{
+    x.save();x.shadowColor='rgba(0,0,0,.45)';x.shadowBlur=10;x.shadowOffsetY=6;
+    x.beginPath();const t=shape===0?bh*.42:0,L=bx,R=bx+bw,T=by,B=by+bh;
+    if(shape===2){const r=bh*.3;x.moveTo(L+r,T);x.lineTo(R-r,T);x.quadraticCurveTo(R,T,R,T+r);x.lineTo(R,B-r);x.quadraticCurveTo(R,B,R-r,B);x.lineTo(L+r,B);x.quadraticCurveTo(L,B,L,B-r);x.lineTo(L,T+r);x.quadraticCurveTo(L,T,L+r,T)}
+    else if(dir<0){x.moveTo(L+t,T);x.lineTo(R,T);x.lineTo(R,B);x.lineTo(L+t,B);if(t){x.lineTo(L,(T+B)/2)}else{x.lineTo(L,B);x.lineTo(L,T)}}
+    else{x.moveTo(L,T);x.lineTo(R-t,T);if(t){x.lineTo(R,(T+B)/2)}else{x.lineTo(R,T);x.lineTo(R,B)}x.lineTo(R-t,B);x.lineTo(L,B)}
+    x.closePath();x.fillStyle='rgb('+pal[0][0]+','+pal[0][1]+','+pal[0][2]+')';x.fill();x.restore();
+    x.save();x.clip();for(let g=0;g<14;g++){x.fillStyle='rgba(255,240,210,'+(.05+.04*((g*7+i)%3))+')';x.fillRect(L,T+g*bh/14+2,bw,2.2)}x.restore();
+    x.strokeStyle='rgb('+pal[1][0]+','+pal[1][1]+','+pal[1][2]+')';x.lineWidth=6;x.stroke();
+    // the name: one line, shrunk (and a little narrowed) to fit with a margin
+    const ix=L+(dir<0?t:0)+22,iw=bw-t-44,fonts=['Georgia','"Palatino Linotype",Palatino,"Book Antiqua",Georgia','"Times New Roman",Times,Georgia'];
+    let fs=Math.round(bh*.5),sx=1;const fam=fonts[(i+name.length)%3];x.font='bold '+fs+'px '+fam;let tw=x.measureText(name).width;
+    if(tw>iw){sx=Math.max(.76,iw/tw);tw*=sx}while(tw>iw&&fs>16){fs-=2;x.font='bold '+fs+'px '+fam;tw=x.measureText(name).width*sx}
+    x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';x.save();x.translate(ix+iw/2,(T+B)/2+3);x.scale(sx,1);
+    x.lineWidth=Math.max(5,fs*.16);x.strokeStyle='rgba(20,14,8,.85)';x.strokeText(name,0,0);x.fillStyle='rgb('+pal[1][0]+','+pal[1][1]+','+pal[1][2]+')';x.fillText(name,0,0);x.restore();
+  };
+  const pal=WLN_BOARD[i%WLN_BOARD.length],pal2=WLN_BOARD[(i+2)%WLN_BOARD.length],sh=i%3;
+  board(40,104,640,198,-1,sh,names[0],pal);
+  if(names[1])board(150,330,640,198,1,(sh+1)%3,names[1],pal2);
+  return c;
+}
 function wlnPost(C,x,y,plates,talk,rad){
   const q=C.free(x,y)?[x,y]:C.near(x,y,rad||2);if(!q)return null;
-  const id='wlo_post'+(WLN_POSTS++);khNpc(id,'A signpost','greensign',()=>say(talk,[BYE]));
-  C.dc('greensign',q[0],q[1],{npc:id,deco:false});
-  for(const [wd,t1,t2] of plates)C.decor.push({k:'sign_wlst',x:q[0],y:q[1],block:false,wd,txt:[t1,t2||''],plate:'street',sc:.85});
+  const n=WLN_POSTS++,id='wlo_post'+n,key='wlpost'+n;khNpc(id,'A signpost',key,()=>say(talk,[BYE]));
+  IMG[key]=wlnPostPic(n,plates.map(p=>p[1]));NPC_H[key]=1.35;
+  C.dc(key,q[0],q[1],{npc:id,deco:false});
   return q;
 }
 /* ---- the pass ---- */
@@ -51377,7 +51672,7 @@ function wlnPass(C){
   const forge=homes.find(h=>h.sideKey==='N'&&h.x0===14);if(forge)forge.hname='The Old Forge House';
   homes.forEach((h,i)=>{if(h.hname)return;if(hs(h.x0,h.y0,44)<.1)return;h.hname=take(WLN_HINT[h.sideKey]);});
   // 3. doors: colour, knocker, number, fan-light; and the name board beside the door
-  const FAN={chandler:3,school:1,almshouse:4};
+  const FAN={chandler:3,school:1,almshouse:4},cand=[];
   houses.forEach((h,k)=>{
     if(!h.num)return;
     const dc=rows[h.door[1]][h.door[0]],gid=chars[dc];if(!gid)return;
@@ -51391,9 +51686,15 @@ function wlnPass(C){
         const sx=horizontal?h.front[0]+sgn:h.front[0],sy=horizontal?h.front[1]:h.front[1]+sgn;
         const wallCell=horizontal?[sx,h.face==='S'?h.y1:h.y0]:[h.face==='E'?h.x1:h.x0,sy];
         if(!rows[wallCell[1]]||rows[wallCell[1]][wallCell[0]]==='.')continue;
-        C.decor.push({k:'sign_wlh'+h.id,x:sx,y:sy,block:false,wd:h.wall,txt:[h.hname,h.num+' '+h.street],sc:.78});break}
+        cand.push({k:'sign_wlh'+h.id,x:sx,y:sy,block:false,wd:h.wall,txt:[h.hname],sc:.56,bob:(k%2)?.4:.22});break}
     }
   });
+  // a hanging board hides the ones behind it when you look along a street, so two boards never share a stretch of street: a house name is left off when another board (a shop, a notice, a name already kept)
+  // hangs on the same street within five squares, on either wall
+  {const kept=C.decor.filter(d=>d.wd&&d.txt&&/^sign_wl/.test(d.k)&&d.k!=='sign_wlst');
+    for(const c of cand){const ax=c.wd[0]?0:1;
+      const clash=kept.some(s=>{if((s.wd[0]?0:1)!==ax)return false;const across=ax===0?Math.abs(s.x-c.x):Math.abs(s.y-c.y),along=ax===0?Math.abs(s.y-c.y):Math.abs(s.x-c.x);return across<=1&&along<5});
+      if(!clash){kept.push(c);C.decor.push(c)}}}
   // 4. the street signs at the corners
   wlnPost(C,23,49,[[[1,0],'CHURCH LANE','North to the church'],[[0,1],'HIGH STREET','Nos 1 to 35']],'A signpost at the corner. One board reads CHURCH LANE, north to the church. The other reads HIGH STREET.');
   wlnPost(C,71,51,[[[1,0],'MILL LANE','South to the mill'],[[0,-1],'HIGH STREET','Nos 2 to 24']],'A signpost at the corner. One board reads MILL LANE, south to the brook and the mill. The other reads HIGH STREET.');
@@ -51405,8 +51706,7 @@ function wlnPass(C){
   wlnPost(C,29,52,[[[1,0],'THE VILLAGE GREEN','Duck pond. Please do not feed the ducks.'],[[0,-1],'HIGH STREET','Back to the square']],'A signpost at the head of the path. THE VILLAGE GREEN, with a duck pond. Underneath: please do not feed the ducks. Somebody has added: they feed themselves.');
   wlnPost(C,73,83,[[[-1,0],'MILL LANE','The brook and the mill'],[[0,-1],'HIGH STREET','Back up the lane']],'A signpost by the bridge. MILL LANE, over the old bridge to the mill. HIGH STREET is back up the lane.');
   // the bridge: plates on the low parapets
-  C.decor.push({k:'sign_wlst',x:72,y:84,block:false,wd:[-1,0],txt:['THE OLD BRIDGE','Built 1412'],plate:'street',sc:.8});
-  C.decor.push({k:'sign_wlst',x:72,y:85,block:false,wd:[1,0],txt:['WENLOCK BROOK','Mind the ducks'],plate:'street',sc:.8});
+  C.decor.push({k:'sign_wlst',x:72,y:84,block:false,wd:[-1,0],txt:['THE OLD BRIDGE'],plate:'street',sc:.8});
   wlnGate(C);
 }
 /* the west gate, a proper one: oak leaves bound in iron under the arch, a lamp each side, a board overhead */
@@ -51426,7 +51726,7 @@ function wlnGate(C){
   const id=addTex(x.getImageData(0,0,w,h).data,null);TEX[id].h=h;TEX[id].wh=T.wh;T_DOORS.wlgate2=id;
   // a lamp each side of the gate and a board over it
   for(const [lx,ly] of [[3,49],[3,51]])C.lamp(lx,ly);
-  C.decor.push({k:'sign_wlst',x:3,y:50,block:false,wd:[-1,0],txt:['WEST GATE','Not yet open'],plate:'street',sc:.9});
+  C.decor.push({k:'sign_wlst',x:3,y:50,block:false,wd:[-1,0],txt:['WEST GATE'],plate:'street',sc:.9});
 }
 
 /* ---- src/desert/wenlock_chapel.js ---- */
@@ -51459,7 +51759,7 @@ function wlcPass(C){
   for(const [x,y] of [[6,21],[10,21],[6,24],[10,24]])C.tree(x,y,'ltree12');
   for(const [x,y] of [[7,24],[9,24],[7,27],[9,26],[7,29],[9,30]])C.flowers(x,y,1.15);
   C.tryDc('kh_ohgard1_3',9,23);for(let y=23;y<=30;y++)C.used.add('8,'+y);
-  C.decor.push({k:'sign_wlst',x:7,y:23,block:false,wd:[0,-1],txt:['THE QUIET CHAPEL','All are welcome'],sc:.85});
+  C.decor.push({k:'sign_wlst',x:7,y:23,block:false,wd:[0,-1],txt:['THE QUIET CHAPEL'],sc:.85});
   wlnPost(C,9,31,[[[-1,0],'TO THE QUIET CHAPEL','The footpath north'],[[0,1],'CHURCHYARD LANE','East to Church Lane']],'A signpost at the start of a footpath. TO THE QUIET CHAPEL, north up the gravel. Churchyard Lane runs on east to Church Lane.');
   // on the map
   C.houses.push({x0:WLCH.x0,x1:WLCH.x1,y0:WLCH.y0,y1:WLCH.y1,face:'S',door:WLCH.door,front:WLCH.front,wall:[0,-1],out:2,sty:'flint',rk:'slate',sp:null,id:WLX.CHAPEL,w:3,num:0});
@@ -51594,6 +51894,11 @@ function wlaImgs(){
       x.fillStyle=g;x.beginPath();x.moveTo(34+inset,0);x.lineTo(86-inset,0);x.lineTo(160-inset*1.6,h);x.lineTo(30+inset*1.6,h);x.closePath();x.fill()}
     x.fillStyle='rgba(255,250,215,.5)';for(let i=0;i<22;i++){const u=hash2(i,1,2),v=hash2(i,2,2),px=50+v*70*(.4+u)+u*34,py=40+u*250;x.beginPath();x.arc(px,py,1.1+hash2(i,3,2)*1.4,0,6.3);x.fill()}});
   NPC_H.wl_beam=3.0;
+  // out of doors the light starts on the ground: a low warm pool of sun (the tall shaft hung in the sky as a grey smudge), and a low bank of pale mist
+  IMG.wl_glow=mkCanvas(240,80,(x,w,h)=>{x.translate(w/2,h*.62);x.scale(1,h*.34/(w*.46));const g=x.createRadialGradient(0,0,0,0,0,w*.46);g.addColorStop(0,'rgba(255,226,120,.62)');g.addColorStop(.45,'rgba(255,214,100,.3)');g.addColorStop(1,'rgba(255,205,90,0)');x.fillStyle=g;x.beginPath();x.arc(0,0,w*.46,0,6.3);x.fill()});
+  NPC_H.wl_glow=.5;
+  IMG.wl_mist=mkCanvas(260,90,(x,w,h)=>{for(let i=0;i<7;i++){const cx=w*(.18+hash2(i,1,6)*.64),cy=h*(.5+hash2(i,2,6)*.2),r=w*(.14+hash2(i,3,6)*.1);x.save();x.translate(cx,cy);x.scale(1,.42);const g=x.createRadialGradient(0,0,0,0,0,r);g.addColorStop(0,'rgba(226,236,222,.2)');g.addColorStop(1,'rgba(226,236,222,0)');x.fillStyle=g;x.beginPath();x.arc(0,0,r,0,6.3);x.fill();x.restore()}});
+  NPC_H.wl_mist=.8;
   [['#a8641c','#6a3a0c'],['#c89a2c','#7a5810'],['#7a8c2c','#44541a'],['#b0481c','#6a2410']].forEach(([a,b],i)=>{
     IMG['wl_leaf'+i]=mkCanvas(30,20,(x,w,h)=>{x.fillStyle=a;x.beginPath();x.moveTo(2,10);x.quadraticCurveTo(14,-2,28,10);x.quadraticCurveTo(14,22,2,10);x.fill();x.strokeStyle=b;x.lineWidth=1.4;x.beginPath();x.moveTo(3,10);x.lineTo(27,10);x.stroke();
       x.lineWidth=.9;for(let k=0;k<3;k++){x.beginPath();x.moveTo(9+k*6,10);x.lineTo(13+k*6,4+k);x.moveTo(9+k*6,10);x.lineTo(13+k*6,16-k);x.stroke()}});
@@ -51604,13 +51909,14 @@ function wlaPass(C){
   wlaImgs();
   // sunbeams out of doors: between the churchyard yews, on the green, in the square, in the orchard
   const beams=[[18,15],[26,17],[32,19],[15,21],[20,19],[34,24],[23,63],[33,62],[27,75],[21,72],[37,68],[46,48],[51,52],[44,53],[84,64],[88,69],[56,24],[45,32]];
-  for(const [x,y] of beams)if(C.free(x,y))C.dc('wl_beam',x,y,{bob:0,sc:1});
+  for(const [x,y] of beams)if(C.free(x,y))C.dc('wl_glow',x,y,{bob:0,sc:1.3});
   // blowing leaves
   const zones=[[14,13,34,25,16],[18,57,39,79,16],[40,14,91,14,12],[41,46,55,54,10],[4,49,96,51,8],[24,27,24,49,4]];
   let n=0;for(const [x0,y0,x1,y1,cnt] of zones)for(let i=0;i<cnt;i++){
     const x=x0+((hs(i,n,81)*(x1-x0+1))|0),y=y0+((hs(i,n,82)*(y1-y0+1))|0);if(C.rows[y][x]!=='.'||C.block[y*C.W+x])continue;
     const id='wlf'+WLAIR.fly.length;C.decor.push({k:'wl_leaf'+((hs(x,y,83)*4)|0),x,y,block:false,walk:true,deco:true,bob:.04,sc:.8+hs(x,y,84)*.5,cloudid:id});
     WLAIR.fly.push({sp:.07+hs(x,y,85)*.08,ph:hs(x,y,86),sc:.8+hs(x,y,84)*.5,len:1.6+hs(x,y,87)*1.4});n++}
+  for(const [n,f] of [['edge',wlaEdge],['gate',wlaGate],['hall',wlaHall],['roofs',wlaRoofs],['back',wlaBack]])try{f(C)}catch(e){console.error('wla '+n,e)}
   C.lv._wla={fly:WLAIR.fly};
   // the lit windows: a warm light by the door of about half the houses, which the engine only lets shine when it is not day
   C.lv._wlaLights=[];
@@ -51656,6 +51962,96 @@ if(typeof WLIN_ROOMS!=='undefined'){
   WLIN_ROOMS.church.extra=(C,b)=>beam(C,[[1,6],[11,6],[1,9],[11,9]]);
   WLIN_ROOMS.library.extra=(C,b)=>beam(C,[[2,3],[12,4],[2,6]]);
   WLIN_ROOMS.chapel&&(WLIN_ROOMS.chapel.extra=(C,b)=>beam(C,[[1,3]]));
+}
+/* ==========================================================================
+   ROOFS, EDGES AND THE BLACKBRIAR GATE (added with the roof fixes).
+   - far roofs: wenlock_polish.js keeps house roofs as far as the walls; here every house roof gets its own look (a mirror, a tint, a chimney, a little more or less width) so the skyline does not repeat;
+   - the painted barn, dovecote, mill and village hall are pictures of one face. Seen from behind or the side they were flat slabs, so each has a roof made from its own picture, shown only from behind and the sides;
+   - the town wall (a flat grey band): a coping, ivy, buttresses and a line of trees behind it; the dark stripes that read as an arcade at the horizon are gone;
+   - the Blackbriar Lane gate: edges faded into the wall, stone gate posts and steps either side, bushes and a little mist at its foot.
+   ========================================================================== */
+const WLRV={tints:[null,null,[1.08,.98,.86],[.88,.96,1.1],[.8,.8,.82],[1.14,1.12,1.06],[.88,1.06,.84],[1.1,.9,.92]]};
+function wlaRoofVar(k,flip,ti,ch){
+  const key=k+'~'+(flip?1:0)+'t'+ti+'c'+(ch?(ch.u*100|0)+'_'+ch.c:0),src=IMG[k];
+  if(IMG[key])return key;if(!src)return k;
+  const iw=src.width,ih=src.height,ext=ch?Math.round(ih*.2):0,H=ih+ext;
+  let c=document.createElement('canvas');c.width=iw;c.height=H;let x=c.getContext('2d');
+  if(ch){const cx=iw*ch.u,sy=ext+Math.abs(cx-iw/2)/(iw/2)*ih*.9,cw=iw*.075,top=sy-ih*.17,bot=sy+ih*.1;
+    const cols=[['#8a4a32','#5a2a1a'],['#9a9084','#625a50'],['#a8623a','#6a3820']][ch.c];
+    x.fillStyle=cols[0];x.fillRect(cx-cw/2,top,cw,bot-top);x.fillStyle=cols[1];x.fillRect(cx+cw*.22,top,cw*.28,bot-top);
+    x.strokeStyle='rgba(30,16,8,.45)';x.lineWidth=1;for(let y=top+6;y<bot;y+=7){x.beginPath();x.moveTo(cx-cw/2,y);x.lineTo(cx+cw/2,y);x.stroke()}
+    x.fillStyle='#3a2a20';x.fillRect(cx-cw*.62,top-4,cw*1.24,6);x.fillStyle='#16100c';x.fillRect(cx-cw*.3,top-3,cw*.6,2)}
+  x.drawImage(src,0,ext);
+  const m=WLRV.tints[ti];
+  if(m){const d=x.getImageData(0,0,iw,H),a=d.data;for(let i=0;i<a.length;i+=4){if(!a[i+3])continue;a[i]=Math.min(255,a[i]*m[0]);a[i+1]=Math.min(255,a[i+1]*m[1]);a[i+2]=Math.min(255,a[i+2]*m[2])}x.putImageData(d,0,0)}
+  if(flip){const c2=document.createElement('canvas');c2.width=iw;c2.height=H;const x2=c2.getContext('2d');x2.translate(iw,0);x2.scale(-1,1);x2.drawImage(c,0,0);c=c2}
+  IMG[key]=c;NPC_H[key]=NPC_H[k];return key;
+}
+function wlaRoofs(C){
+  const {sky,hs}=C;
+  for(const e of sky){
+    if(e.big||!(e.z>1.2)||!IMG[e.k]||/^wl_(bldg|back)/.test(e.k))continue;
+    if(e.y===50.5&&(e.x<5||e.x>95))continue;   // the gate roofs
+    const flip=hs(e.x,e.y,202)<.5,ti=hs(e.x,e.y,203)<.32?0:1+((hs(e.x,e.y,204)*7)|0)%7;
+    const wide=hs(e.x,e.y,205),chim=(e.k!=='wl_roof1_0'&&e.w<3.8&&hs(e.x,e.y,206)<.42)?{u:(hs(e.x,e.y,207)<.5?.2+hs(e.x,e.y,208)*.15:.65+hs(e.x,e.y,208)*.15),c:(hs(e.x,e.y,209)*3)|0}:null;
+    e.k=wlaRoofVar(e.k,flip,Math.min(7,ti),chim);e.w*=.95+wide*.12;
+  }
+}
+/* back and side roofs of the four painted buildings and the hall */
+function wlaBack(C){
+  const L=C.lv;L._wlaBack=[];
+  const pat=(s,sx,sy,sw,sh)=>{const p=document.createElement('canvas');p.width=sw;p.height=sh;p.getContext('2d').drawImage(s,sx,sy,sw,sh,0,0,sw,sh);return p};
+  const shade=(x,w,h)=>{const g=x.createLinearGradient(0,h-26,0,h);g.addColorStop(0,'rgba(30,18,6,0)');g.addColorStop(1,'rgba(30,18,6,.5)');x.fillStyle=g;x.fillRect(0,h-26,w,26)};
+  let s=IMG.wl_bldg1_5;
+  if(s&&!IMG.wl_back_barn){IMG.wl_back_barn=mkCanvas(517,214,(x,w,h)=>{x.fillStyle=x.createPattern(pat(s,130,36,260,56),'repeat');x.beginPath();x.moveTo(104,3);x.lineTo(414,3);x.lineTo(w-2,h-6);x.lineTo(2,h-6);x.closePath();x.fill();x.drawImage(s,96,0,326,30,96,0,326,30);shade(x,w,h)});NPC_H.wl_back_barn=1}
+  s=IMG.wl_bldg1_4;
+  if(s&&!IMG.wl_back_dove){IMG.wl_back_dove=mkCanvas(315,186,(x,w,h)=>{x.drawImage(s,0,0,315,186,0,0,315,186);shade(x,w,h)});NPC_H.wl_back_dove=1}
+  s=IMG.wl_bldg1_3;
+  if(s&&!IMG.wl_back_mill){IMG.wl_back_mill=mkCanvas(459,172,(x,w,h)=>{x.fillStyle=x.createPattern(pat(s,90,90,85,56),'repeat');x.beginPath();x.moveTo(30,62);x.lineTo(436,62);x.lineTo(452,h);x.lineTo(8,h);x.closePath();x.fill();x.drawImage(s,28,0,48,96,28,0,48,96);shade(x,w,h)});NPC_H.wl_back_mill=1}
+  s=IMG.wl_bldg1_1;
+  if(s&&!IMG.wl_back_hall){IMG.wl_back_hall=mkCanvas(429,300,(x,w,h)=>{x.drawImage(s,178,0,74,132,178,0,74,132);x.fillStyle=x.createPattern(pat(s,8,140,120,60),'repeat');x.fillRect(0,130,w,h-130);x.fillStyle='rgba(40,16,8,.4)';x.fillRect(0,130,w,3);shade(x,w,h)});NPC_H.wl_back_hall=1}
+  // k, centre x, centre y, width, base height, where the picture's face looks: 'N' (shown only from the south of its line) or 'W' (only from the east)
+  for(const [k,x,y,w,z,face,line] of [['wl_back_barn',64,19.5,4.5,2.37,'N',17.8],['wl_back_dove',55,39,2.7,2.37,'N',37.8],['wl_back_mill',78,90,5.9,2.37,'N',87.8],['wl_back_hall',27,35,4.8,2.97,'W',25.6]])
+    if(IMG[k])L._wlaBack.push({k,x,y,w,z,face,line});
+}
+{const _k=khSkyList;khSkyList=function(cx,cy,dX,dY,L,md){const out=_k.apply(this,arguments);if(LEVEL!==496)return out;const B=LEVELS[496]&&LEVELS[496]._wlaBack;if(!B)return out;
+  const far=(G.day||0)>0?34:20;
+  for(const e of B){if(e.face==='N'?cy<e.line+.3:cx<e.line)continue;const rx=e.x-cx,ry=e.y-cy,d2=rx*rx+ry*ry,dot=rx*dX+ry*dY;if(dot<=0||d2>far*far||d2<.6)continue;if(Math.abs(rx*dY-ry*dX)>dot*1.1+e.w*.6)continue;
+    const s={x:e.x,y:e.y,img:IMG[e.k],w:e.w,bob:e.z,decor:KH_SKYD,sky:true,smallSky:true};const d=Math.sqrt(d2);if(d>far-6)s.fade=clamp((far-d)/6,0,1);out.push(s)}
+  return out}}
+/* the town wall: coping, ivy, buttresses, a line of trees behind; no dark stripes */
+function wlaEdge(C){
+  const {rows,ch,TM,hs,W,H,sky}=C,base=TM.make('plain','wlgrey',1.5).gid;
+  const cap=(x,w,h)=>{x.fillStyle='rgba(238,230,208,.34)';x.fillRect(0,0,w,10);x.fillStyle='rgba(30,24,16,.4)';x.fillRect(0,10,w,2);x.fillStyle='rgba(30,24,16,.18)';x.fillRect(0,h-14,w,14)};
+  const T=[wlgTile(base,'edge0',cap),wlgTile(base,'edge1',(x,w,h)=>{cap(x,w,h);wlwIvy(x,w,h,11,.7,0)}),wlgTile(base,'edge2',(x,w,h)=>{cap(x,w,h);wlwIvy(x,w,h,23,.4,-1)}),
+    wlgTile(base,'edge3',(x,w,h)=>{cap(x,w,h);x.fillStyle='rgba(70,92,50,.28)';x.fillRect(0,h*.45,w,h*.55)}),wlgTile(base,'edgeB',(x,w,h)=>{cap(x,w,h);wlgButtress(x,w,h,14)})];
+  const ids=new Set();for(let x=5;x<=30;x++)ids.add(rows[2][x]);
+  const set=(x,y)=>{if(!ids.has(rows[y][x]))return;const r=hs(x,y,211);rows[y][x]=ch(((x+y)%7===0)?T[4]:r<.22?T[1]:r<.34?T[2]:r<.6?T[3]:T[0])};
+  for(let x=2;x<=97;x++){set(x,2);set(x,97)}for(let y=2;y<=97;y++){set(2,y);set(97,y)}
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(!(x>=3&&x<=96&&y>=3&&y<=96)&&ids.has(rows[y][x]))rows[y][x]=ch(T[0]);   // the dark stones that read as stripes at a distance
+  const keys=Object.keys(IMG).filter(k=>/^ltree(0|4|8|12|19|17)$/.test(k));
+  if(keys.length){const add=(x,y)=>{const k=keys[(hs(x,y,213)*keys.length)|0],im=IMG[k],hh=(NPC_H[k]||3.4)*(.85+hs(x,y,214)*.45);
+      if(Math.abs(y-50)<4&&(x<6||x>94))return;if(x>33&&x<44&&y<5)return;sky.push({x,y,k,w:hh*im.width/im.height,z:1.1})};
+    for(let i=4;i<96;i+=3){const j=hs(i,1,215)*2;add(i+j,.7+hs(i,2,215));add(i+j,99.3-hs(i,3,215));add(.7+hs(i,4,215),i+j);add(99.3-hs(i,5,215),i+j)}}
+}
+/* the Blackbriar Lane gate: the painted gate had a hard black edge and stood taller than the wall beside it */
+function wlaGate(C){
+  const {rows,ch,TM,chars}=C,x0=38;
+  const g3=[x0-1,x0,x0+1].map(x=>chars[rows[2][x]]);if(g3.some(g=>g===undefined))return;
+  const wall=TEX[T_TILE[TM.make('plain','wlgrey',2.5).gid]];
+  for(let i=0;i<3;i++){const T=TEX[T_TILE[g3[i]]];if(!T||!T.d||T._wla||!wall||!wall.d||wall.d.length!==T.d.length)continue;T._wla=1;
+    const w=128,h=(T.d.length/512)|0,d=T.d,m=wall.d,sm=t=>t<=0?0:t>=1?1:t*t*(3-2*t);
+    for(let y=0;y<h;y++)for(let x=0;x<w;x++){const ax=i===0?1-x/44:i===2?(x-(w-44))/44:0,ay=1-y/34,a=Math.max(sm(ax),sm(ay));if(a<=0)continue;const k=(y*w+x)*4;for(let c=0;c<3;c++)d[k+c]=d[k+c]*(1-a)+m[k+c]*a}}
+  const pil=wlgTile(TM.make('plain','wlgrey',2.5).gid,'bbpil',(x,w,h)=>{wlgButtress(x,w,h,16);x.fillStyle='rgba(238,230,208,.3)';x.fillRect(0,0,w,8)});
+  const stp=wlgTile(TM.make('plain','wlgrey',2.0).gid,'bbstep',(x,w,h)=>{x.fillStyle='rgba(238,230,208,.3)';x.fillRect(0,0,w,8);wlwIvy(x,w,h,5,.55,1)});
+  rows[2][x0-2]=ch(pil);rows[2][x0+2]=ch(pil);rows[2][x0-3]=ch(stp);rows[2][x0+3]=ch(stp);
+  for(const [x,y,k,sc] of [[x0-1,3,'lbush0',1.15],[x0+1,3,'lbush0',1.15],[x0-1,5,'lbush0_2',1],[x0+1,6,'lbush0',1],[x0,3,'wl_mist',1.5],[x0-1,4,'wl_mist',1.2],[x0+1,4,'wl_mist',1.2],[x0,5,'wl_mist',1.4]])
+    if(IMG[k])C.decor.push({k,x,y,block:false,walk:true,deco:true,sc,bob:0});
+}
+/* the village hall's back (the east face) had no windows */
+function wlaHall(C){
+  const {rows,ch,TM}=C,H=WL_HALL,sty=WL.sty.honey||'golden',mk=k=>TM.make(k,sty,3.0).gid;
+  [['gwin',H.y0],['window',H.y0+1],['window',H.y0+2],['gwin',H.y1]].forEach(([k,y])=>{if(rows[y][H.x1]!=='.')rows[y][H.x1]=ch(mk(k))});
 }
 
 /* ---- src/desert/wenlock_meadow.js ---- */
@@ -51767,10 +52163,38 @@ const WLD20=khQD("A friar walks a great deal and my feet are not what they were.
 wlQ('wlq20','Brother Tuck',[["Light the five lanterns along Churchyard Lane, the lane that runs west from Church Lane.",()=>wleDup(wleF(),'wlq20_',5)>=5,WLE_LAMPS.map((a,i)=>'wlo_lantern'+(i+1))],["Lay a wildflower on Hester's grave, in the quiet corner at the west end of the town. The greengrocer and the herb shop sell them.",()=>wleF().wlq20g,['wlo_hester']]]);
 wlGive('wlo_friar','wlq20','wlq1',WLD20);
 /* ---- detail in the meadows (called from the polish pass) ---- */
+/* ---- the ground: kerbs round the square, worn verges beside the roads, mud banks at the brook and the pond, drifts of flowery meadow ---- */
+function wleGround(C){
+  const {fm,block,rows,street,hs,W,H}=C,at=(x,y)=>x<0||y<0||x>=W||y>=H?'x':fm[y*W+x],isSt=(x,y)=>street.has(x+','+y);
+  const open=(x,y)=>x>2&&y>2&&x<97&&y<97&&!block[y*W+x]&&rows[y][x]==='.';
+  const set=[];
+  const nb4=[[1,0],[-1,0],[0,1],[0,-1]],nb8=nb4.concat([[1,1],[-1,1],[1,-1],[-1,-1]]);
+  for(let y=3;y<97;y++)for(let x=3;x<97;x++){
+    const f=at(x,y);if(f!=='2'&&f!=='5'||!open(x,y))continue;
+    let road=false,sq=false,wat=false,gl=false;
+    for(const [dx,dy] of nb4){if(isSt(x+dx,y+dy))road=true;const g=at(x+dx,y+dy);if(g==='1')sq=true;if(g==='4')wat=true}
+    for(const [dx,dy] of nb8){if(at(x+dx,y+dy)==='4')wat=true}
+    const r=hs(x,y,201);
+    if(sq&&r<.9)set.push([x,y,'0']);                    // a cobbled kerb round the paving of the square
+    else if(wat&&r<.88)set.push([x,y,'3']);             // mud and earth at the water's edge
+    else if(road&&r<.62)set.push([x,y,'3']);            // the verge beside a road, worn bare in patches
+  }
+  // the cobbled ribbon of High Street frays into the paving where it crosses the square
+  for(let y=44;y<=56;y++)for(let x=40;x<=56;x++){if(at(x,y)!=='1')continue;let n=0;for(const [dx,dy] of nb4)if(at(x+dx,y+dy)==='0')n++;if(n&&hs(x,y,206)<.45)set.push([x,y,'0'])}
+  for(const [x,y,c] of set)fm[y*W+x]=c;
+  // a second, thinner ring of worn ground round the verges and the banks, so the edge frays into the grass
+  const ring=[];
+  for(let y=3;y<97;y++)for(let x=3;x<97;x++){if(at(x,y)!=='2'||!open(x,y))continue;let n=0;for(const [dx,dy] of nb4)if(at(x+dx,y+dy)==='3')n++;if(n&&hs(x,y,202)<.2+.08*n)ring.push([x,y])}
+  for(const [x,y] of ring)fm[y*W+x]='3';
+  // drifts of flowery meadow in the big open fields, so the lawn is not one flat green
+  const blob=(x,y)=>{const a=hs((x/4)|0,(y/4)|0,203),b=hs(((x+2)/4)|0,((y+2)/4)|0,204);return (a+b)/2};
+  for(let y=3;y<97;y++)for(let x=3;x<97;x++){if(at(x,y)==='2'&&open(x,y)&&blob(x,y)>.62&&hs(x,y,205)<.8&&!isSt(x,y))fm[y*W+x]='5'}
+}
 function wlePass(C){
+  try{wleGround(C)}catch(e){console.error('wleGround',e)}
   const {hs,decor,rows,block,W}=C;
   const get=k=>IMG[k]?k:null,thin=['art_hgthin3','art_hgthin5','art_hgthin0'].filter(get),stumps=['pstump','plog','glogm','stumpm'].filter(get),stones=['mossstone','gstone','grocks'].filter(get);
-  for(const k of thin)NPC_H[k]=NPC_H[k]||1.35;for(const k of stumps)NPC_H[k]=NPC_H[k]||.5;for(const k of stones)NPC_H[k]=NPC_H[k]||(k==='mossstone'?1.1:.55);
+  for(const k of thin)NPC_H[k]=.75;for(const k of stumps)NPC_H[k]=NPC_H[k]||.5;for(const k of stones)NPC_H[k]=NPC_H[k]||(k==='mossstone'?1.1:.55);
   const trees=[];for(const d of decor)if(/tree/.test(d.k))trees.push([d.x,d.y]);
   const sparse=(x,y,r)=>{for(const [a,b] of trees)if(Math.abs(a-x)<r&&Math.abs(b-y)<r)return false;return true};
   const ok=(x,y)=>x>3&&y>3&&x<96&&y<96&&C.free(x,y)&&!C.isRoad(x-1,y)&&!C.isRoad(x+1,y)&&!C.isRoad(x,y-1)&&!C.isRoad(x,y+1);
@@ -51790,9 +52214,14 @@ function wlePass(C){
   // Old Bracken's den, in the north-east corner: an earth-banked hut with a woodpile
   if(IMG.wd_rock0){NPC_H.wd_rock0=NPC_H.wd_rock0||1.1;C.dc('wd_rock0',89,6,{block:true,walk:false,sc:1.2});C.tryDc('hay',87,5,{block:true,walk:false});C.tryDc(IMG.pstump?'pstump':null,91,7,{block:false})}
   // cattails at the pond and at the brook
-  const P=WL_GREEN.pond,reed=(x,y,i)=>{const k=thin[i%Math.max(1,thin.length)];if(k&&C.free(x,y))C.dc(k,x,y,{block:false,walk:true,sc:.85+hs(x,y,94)*.35})};
+  const P=WL_GREEN.pond,reed=(x,y,i)=>{const k=thin[i%Math.max(1,thin.length)];if(k&&C.free(x,y))C.dc(k,x,y,{block:false,walk:true,sc:.7+hs(x,y,94)*.25})};
   let ri=0;for(let y=P[1]-1;y<=P[3]+1;y++)for(let x=P[0]-1;x<=P[2]+1;x++){const edge=x<P[0]||x>P[2]||y<P[1]||y>P[3];if(edge&&hs(x,y,95)<.45)reed(x,y,ri++)}
   for(let x=4;x<=95;x++){if(x>=69&&x<=75)continue;const by=WL_BROOK(x);if(hs(x,by,96)<.34)reed(x,by-1,ri++);if(hs(x,by,97)<.3)reed(x,by+2,ri++)}
+  // trees and bushes are walk-through and melt away as the party comes close (index.html, WALKTREE), and none stands within a square of a road, so nothing fills the screen or walls in a path
+  const roadNear=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(C.street.has((x+dx)+','+(y+dy)))return true;return false};
+  for(let i=decor.length-1;i>=0;i--){const d=decor[i];if(!/^(ltree|lbush)/.test(d.k))continue;
+    if(roadNear(d.x,d.y)){decor.splice(i,1);continue}
+    d.block=false;d.walk=true}
 }
 
 /* ---- src/desert/maps_wenlock.js ---- */
@@ -53095,7 +53524,9 @@ WMFU.stairOut=function(c,r){const R=c.rect(r);c.prop('brazier',R.x0,R.y1,{});c.l
 WMFU.camp=function(c,r){const R=c.rect(r);
   c.note('camp1',R.x0,R.y0,'noticeboard');c.prop('tools',R.x1,R.y0,{});c.prop('bucket',R.x1,R.y1,{block:false,walk:true});
   c.D('wm_barrel',R.x0,R.y1,{block:true,npc:'wmw_barrel'});c.D('wm_crate',R.cx,R.y0,{block:true,npc:'wmw_crate'});
-  c.deco('skeleton',R.cx,R.y1,{});c.light(R.cx,R.cy,WM_COL.gold);wmFoes(c,r,['wmbat','wmslime'],2)};
+  c.deco('skeleton',R.cx,R.y1,{});
+  if(c.k===0){const q=c.free(R.x1-1,R.cy)?[R.x1-1,R.cy]:c.pick(c.rim(r),1)[0];if(q)c.D('sack2',q[0],q[1],{block:true,npc:'wm_hoblunch',sc:.7})}   // Hobb's lunchbox (the quest Hobb's Lunch, hobs_lunch.js)
+  c.light(R.cx,R.cy,WM_COL.gold);wmFoes(c,r,['wmbat','wmslime'],2)};
 WMFU.cistern=function(c,r){const R=c.rect(r);
   if(c.k===0){c.D('wm_boat',R.x0,R.cy,{block:true,npc:'wmrow_a'});c.note('cistern1',R.x0,R.y0,'signpost')}
   for(const [x,y] of c.pick(c.inner(r),4))c.deco('crystal_small',x,y,{});
@@ -53119,6 +53550,7 @@ WMFU.mine=function(c,r){const R=c.rect(r);
   c.prop('mine_cart',R.x0,R.y0,{});c.prop('ore_cart',R.x1,R.y0,{});c.prop('tools',R.x0,R.y1,{});c.deco('ladder',R.cx,R.y0,{block:true,walk:false});
   for(const [x,y] of c.pick(c.inner(r),3))c.deco('crystal_small',x,y,{});
   c.note(c.k===2?'lantern_order':'mine'+c.k,R.x1,R.y1,'signpost');
+  if(c.k===0){const q=c.free(R.cx,R.y1)?[R.cx,R.y1]:c.pick(c.inner(r),1)[0];if(q)c.D('wm_gold',q[0],q[1],{block:true,npc:'wm_hobring',sc:.45})}   // the family ring (the quest Hobb's Lunch)
   if(c.k===0){ // the foreman's strongbox at the far corner: the Violet Key, and a mimic
     const q=c.free(R.x1-1,R.y1)?[R.x1-1,R.y1]:c.pick(c.rim(r),1)[0];
     const kc=c.chest('chest',q[0],q[1],2,['wmkey1'],{ambush:['wmmimic'],goldAmt:0});c.meta.keyAt=c.meta.keyAt||{};if(kc)c.meta.keyAt.wmkey1={x:kc.x,y:kc.y}}
@@ -53796,9 +54228,24 @@ function wwLoad(){
 function wwAlias(){
   for(const a in WWA){const [n,h]=WWA[a];if(IMG[n]){IMG['ww_'+a]=WW_TREEA.includes(a)?wwDarken(IMG[n],.86):IMG[n];NPC_H['ww_'+a]=h}}
   for(const [k,n] of [['wwi_scare','guardA_0'],['wwi_hound','guardA_1'],['wwi_spider','guardA_2'],['wwi_golem','guardA_3'],['wwi_crows','guardA_4'],['wwi_toad','guardA_5'],['wwi_revenant','guardB_0'],['wwi_root','guardB_1'],['wwi_abom','guardB_2'],['wwi_wisp','guardB_3'],['wwi_crow','guardB_4'],['wwi_witch','witch_1'],['wwi_witchA','witch_0']])if(IMG[n])IMG[k]=IMG[n];
-  NPC_H.wwi_witch=1.7;NPC_H.wwi_witchA=2.6;
+  NPC_H.wwi_witch=1.45;NPC_H.wwi_witchA=2.6;
+  wwLeafImgs();
   wwFloors();
 }
+/* drifting leaves: four small ochre and brown leaves painted in code (a speck of colour, not a creature or an item), moved slowly along the ground by the update below */
+function wwLeafImgs(){
+  if(IMG.ww_leaf0)return;
+  [['#9a6a24','#5a3a10'],['#b88a30','#6a4a14'],['#7a5a20','#40280c'],['#a8541c','#5e2a0c']].forEach(([a,b],i)=>{
+    IMG['ww_leaf'+i]=mkCanvas(30,20,(x)=>{x.fillStyle=a;x.beginPath();x.moveTo(2,10);x.quadraticCurveTo(14,-2,28,10);x.quadraticCurveTo(14,22,2,10);x.fill();x.strokeStyle=b;x.lineWidth=1.3;x.beginPath();x.moveTo(3,10);x.lineTo(27,10);x.stroke();
+      x.lineWidth=.8;for(let k=0;k<3;k++){x.beginPath();x.moveTo(9+k*6,10);x.lineTo(13+k*6,4+k);x.moveTo(9+k*6,10);x.lineTo(13+k*6,16-k);x.stroke()}});
+    NPC_H['ww_leaf'+i]=.1});
+}
+{const _u=update;let fdec=null,fl=[];update=function(dt){
+  try{if(typeof LEVEL!=='undefined'&&LEVEL===WW.ID&&G.state==='play'&&G.decor){const L=LEVELS[WW.ID];if(L&&L._ww&&L._ww.leaves){
+    wwLeafImgs();
+    if(fdec!==G.decor){fdec=G.decor;fl=[];const by=new Map();for(const q of G.decor)if(q.cloudid&&q.cloudid.startsWith('wwlf'))by.set(q.cloudid,q);L._ww.leaves.forEach((f,i)=>{const d=by.get('wwlf'+i);if(d)fl.push([d,f])})}
+    const t=G.time;for(const [d,f] of fl){const u=(t*f.sp+f.ph)%1,a=u*Math.PI*2;d.ox=(u-.5)*f.len;d.oy=Math.sin(a*2+f.ph*9)*.2;d.bob=.03+Math.abs(Math.sin(a*5+f.ph*7))*.1;d.sc=f.sc*Math.max(.05,1-Math.pow(Math.abs(2*u-1),6))}}}}catch(e){}
+  return _u.apply(this,arguments)}}
 /* the ground: six pictures, brightened (the originals are very dark), as floors */
 const WW_FLOORSET=['wwf_moss','wwf_leaf','wwf_dirt','wwf_brook','wwf_grave','wwf_board'];
 function wwFloors(){
@@ -53806,8 +54253,8 @@ function wwFloors(){
   const mk=(nm,key,gain,tint)=>{const im=IMG[key];if(!im||FLOORS[nm])return;const base=dsPaintedTex(im),d=new Uint8ClampedArray(base.length);
     for(let i=0;i<d.length;i+=4){const l=(base[i]+base[i+1]+base[i+2])/3,k=tint.sat===undefined?1:tint.sat;d[i]=(l+(base[i]-l)*k)*gain*tint.r;d[i+1]=(l+(base[i+1]-l)*k)*gain*tint.g;d[i+2]=(l+(base[i+2]-l)*k)*gain*tint.b;d[i+3]=255}FLOORS[nm]=d};
   mk('wwf_moss','tex_1',.9,{r:.95,g:1.05,b:.9});mk('wwf_leaf','tex_2',1.4,{r:1.02,g:.95,b:.88});mk('wwf_dirt','tex_5',2.6,{r:1.05,g:1,b:.9});
-  mk('wwf_kit','tex_3',2.1,{r:1.3,g:.95,b:.78,sat:.15});mk('wwf_brook','tex_5',2.7,{r:1.1,g:1.04,b:.92,sat:.4});mk('wwf_grave','tex_3',1.9,{r:.9,g:1,b:.95});mk('wwf_board','tex_0',1.8,{r:1.2,g:.92,b:.65,sat:.1});
-  const fb={wwf_moss:'lush',wwf_leaf:'dirt',wwf_dirt:'dirt',wwf_brook:'dirt',wwf_grave:'mosscobble',wwf_board:'cobble'};
+  mk('wwf_kit','tex_3',2.1,{r:1.3,g:.95,b:.78,sat:.15});mk('wwf_brook','tex_5',2.7,{r:1.1,g:1.04,b:.92,sat:.4});mk('wwf_grave','tex_3',1.9,{r:.9,g:1,b:.95});mk('wwf_cellar','tex_3',1.7,{r:1.06,g:.97,b:.96,sat:0});mk('wwf_board','tex_0',1.8,{r:1.2,g:.92,b:.65,sat:.1});
+  const fb={wwf_moss:'lush',wwf_leaf:'dirt',wwf_dirt:'dirt',wwf_brook:'dirt',wwf_grave:'mosscobble',wwf_cellar:'cobble',wwf_board:'cobble'};
   for(const nm of WW_FLOORSET)if(!FLOORS[nm])FLOORS[nm]=FLOORS[fb[nm]]||FLOORS.cobble;
   WW._floors=1;
 }
@@ -53872,13 +54319,38 @@ if(typeof AFFL!=='undefined'&&!AFFL.hagblind){AFFL.hagblind={n:'Hag-blinded',kin
 
 /* the little hills that hide the caves and ruins of the wood: painted again in the wood's own colours, with a dark patch of ground under them (the art is the usual hill; the colour and the shadow are the wood's) */
 function wwHillArt(i){
-  const key='wd_hillw'+i;if(IMG[key])return key;const im=IMG['wd_hill'+i];if(!im||!im.width)return null;
-  const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');
-  x.drawImage(im,0,0);x.globalCompositeOperation='source-atop';x.fillStyle='rgba(18,30,22,.55)';x.fillRect(0,0,c.width,c.height);
-  x.globalCompositeOperation='multiply';x.fillStyle='rgb(190,215,190)';x.fillRect(0,0,c.width,c.height);
-  x.globalCompositeOperation='destination-in';x.drawImage(im,0,0);
-  x.globalCompositeOperation='destination-over';const g=x.createRadialGradient(c.width/2,c.height-3,2,c.width/2,c.height-3,c.width*.62);g.addColorStop(0,'rgba(4,8,5,.8)');g.addColorStop(1,'rgba(4,8,5,0)');
-  x.save();x.translate(0,c.height-3);x.scale(1,.12);x.translate(0,-(c.height-3));x.fillStyle=g;x.fillRect(0,0,c.width,c.height);x.restore();
+  /* a Gothic pointed-arch stone doorway in a dark, mossy block of old wall: the chapel's own painted doorway (front_0) set into a wall of the painted grey stone (tex_3), with a ground shadow and no halo */
+  const key='wd_hillw'+i;if(IMG[key])return key;const im=IMG['wd_hill'+i],T=IMG.tex_3,F=IMG.front_0;if(!im||!im.width||!T||!F)return null;
+  const W=im.width,H=im.height,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d'),hs=(a,b,s)=>hash2(a,b,s+i*13);
+  const x0=34+hs(1,1,1)*10,x1=W-34-hs(2,2,1)*10,top=64+hs(3,3,1)*14,bot=H-4;
+  // the block of wall: a low ruined front with rounded shoulders, its top lower at one side
+  x.beginPath();x.moveTo(x0,bot);x.lineTo(x0,top+70);x.quadraticCurveTo(x0,top+8,x0+60,top+2);x.lineTo(x1-70,top+(i%2?14:0));x.quadraticCurveTo(x1,top+8,x1,top+66);x.lineTo(x1,bot);x.closePath();
+  x.save();x.clip();
+  x.fillStyle='#3c3f3a';x.fillRect(0,0,W,H);for(let yy=0;yy<H;yy+=128)for(let xx=0;xx<W;xx+=128)x.drawImage(T,xx,yy,128,128);
+  x.globalCompositeOperation='multiply';x.fillStyle='rgb(185,198,178)';x.fillRect(0,0,W,H);x.globalCompositeOperation='source-over';
+  x.strokeStyle='rgba(10,14,10,.5)';x.lineWidth=1.6;for(let yy=top+18,r=0;yy<bot;yy+=30,r++){x.beginPath();x.moveTo(x0,yy);x.lineTo(x1,yy);x.stroke();for(let xx=x0+(r%2)*26;xx<x1;xx+=52){x.beginPath();x.moveTo(xx+hs(xx,yy,2)*6,yy);x.lineTo(xx+hs(xx,yy,3)*6,yy+30);x.stroke()}}
+  // dark at both sides and the foot, green damp rising from the ground
+  let g=x.createLinearGradient(x0,0,x1,0);g.addColorStop(0,'rgba(4,8,5,.5)');g.addColorStop(.2,'rgba(4,8,5,0)');g.addColorStop(.8,'rgba(4,8,5,0)');g.addColorStop(1,'rgba(4,8,5,.5)');x.fillStyle=g;x.fillRect(0,0,W,H);
+  g=x.createLinearGradient(0,bot-110,0,bot);g.addColorStop(0,'rgba(24,60,28,0)');g.addColorStop(1,'rgba(24,64,30,.6)');x.fillStyle=g;x.fillRect(0,bot-110,W,110);
+  x.restore();
+  // the doorway: the chapel's pointed arch (a crop of its front picture), feathered into the wall and darkened
+  const sw=84,sh=140,sx=172,sy=299,dw=Math.round(W*.34),dh=Math.round(dw*sh/sw),dx=(W-dw)/2,dy=bot-dh+2,d=document.createElement('canvas');d.width=dw;d.height=dh;const y=d.getContext('2d');
+  y.drawImage(F,sx,sy,sw,sh,0,0,dw,dh);y.globalCompositeOperation='multiply';y.fillStyle='rgb(150,165,150)';y.fillRect(0,0,dw,dh);
+  y.globalCompositeOperation='destination-in';const m=y.createLinearGradient(0,0,0,dh);y.fillStyle='#000';
+  y.beginPath();y.moveTo(0,dh);y.lineTo(0,dh*.36);y.quadraticCurveTo(0,dh*.1,dw*.5,0);y.quadraticCurveTo(dw,dh*.1,dw,dh*.36);y.lineTo(dw,dh);y.closePath();y.fill();
+  x.drawImage(d,dx,dy);
+  // the opening gets a deep shade at the top of the door, and a worn step at the foot
+  x.save();x.beginPath();x.moveTo(dx+dw*.2,bot-6);x.lineTo(dx+dw*.2,dy+dh*.5);x.quadraticCurveTo(dx+dw*.22,dy+dh*.2,dx+dw*.5,dy+dh*.1);x.quadraticCurveTo(dx+dw*.78,dy+dh*.2,dx+dw*.8,dy+dh*.5);x.lineTo(dx+dw*.8,bot-6);x.closePath();x.clip();
+  g=x.createLinearGradient(0,dy,0,bot);g.addColorStop(0,'rgba(2,4,3,.55)');g.addColorStop(.6,'rgba(2,4,3,.1)');g.addColorStop(1,'rgba(2,4,3,0)');x.fillStyle=g;x.fillRect(dx,dy,dw,dh);x.restore();
+  x.fillStyle='#34362f';x.fillRect(dx-6,bot-8,dw+12,8);x.fillStyle='#22241f';x.fillRect(dx-6,bot-2,dw+12,2);
+  // moss on the shoulders, ivy hanging from the top
+  const GR=['#1f4a22','#2e6a2c','#3f7f34','#173a1b'];
+  for(let k=0;k<90;k++){const px=x0+hs(k,1,5)*(x1-x0),py=top+hs(k,2,5)*18+(px<x0+50||px>x1-50?22:0);x.fillStyle=GR[(hs(k,3,5)*4)|0];x.globalAlpha=.85;x.beginPath();x.ellipse(px,py,3+hs(k,4,5)*6,1.8+hs(k,5,5)*2.6,hs(k,7,5)*3,0,6.3);x.fill()}
+  x.globalAlpha=1;for(let k=0;k<12;k++){const px=x0+10+hs(k,6,6)*(x1-x0-20);if(Math.abs(px-W/2)<dw*.5)continue;let qx=px,qy=top+8;x.strokeStyle='#1b3a1b';x.lineWidth=1.6;x.beginPath();x.moveTo(qx,qy);for(let t=0;t<7;t++){qx+=(hs(k,t+7,7)-.5)*7;qy+=8+hs(k,t+9,7)*10;x.lineTo(qx,qy)}x.stroke();
+    for(let t=0;t<5;t++){x.fillStyle=GR[(hs(k,t+20,8)*4)|0];x.beginPath();x.ellipse(qx+(hs(k,t+30,9)-.5)*10,qy-t*9,3.5,2.4,hs(k,t+40,9)*3,0,6.3);x.fill()}}
+  // ground shadow under the foot (soft and flat, under the stone so nothing glows round it)
+  x.globalCompositeOperation='destination-over';g=x.createRadialGradient(W/2,H-3,2,W/2,H-3,W*.55);g.addColorStop(0,'rgba(3,6,4,.85)');g.addColorStop(1,'rgba(3,6,4,0)');
+  x.save();x.translate(0,H-3);x.scale(1,.1);x.translate(0,-(H-3));x.fillStyle=g;x.fillRect(0,0,W,H);x.restore();
   IMG[key]=c;NPC_H[key]=NPC_H['wd_hill'+i]||1.9;return key}
 function wwTintHills(){
   const L=LEVELS[WW.ID];if(!L||!L.decor||L._wwHillDone)return;let n=0;
@@ -53958,7 +54430,7 @@ function wwBuild(){
   for(let x=0;x<W;x++){for(const dy of [0,1]){const y=brookY(x)+dy;if(y>0&&y<H-1&&isOpen(x,y)&&!roomAt[x+','+y])fl[y*W+x]=3}}
   const inBrook=(x,y)=>fl[y*W+x]===3;
   // ---- decor, foes, items ----
-  const decor=[],enemies=[],items=[],lights=[],occ=new Set(),wglow=[];
+  const decor=[],enemies=[],items=[],lights=[],occ=new Set(),wglow=[];let lv_leaves=[];
   const near4=new Set();for(const [a,b] of [[sx,sy],[sx,sy-1],[sx,sy+1],[doorX,1],[doorX,2]])for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++)near4.add((a+i)+','+(b+j));
   const free=(x,y)=>isOpen(x,y)&&!occ.has(x+','+y);
   const dec=(a,x,y,o)=>{o=o||{};const k=WWA[a]?'ww_'+a:a;if(!isOpen(x,y))return null;const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}if(o.sc)d.sc=o.sc;if(o.bob)d.bob=o.bob;if(o.npc){d.npc=o.npc;d.deco=false}if(o.goldAmt)d.goldAmt=o.goldAmt;if(o.wd){d.wd=o.wd;d.pic=1}if(o.txt)d.txt=o.txt;if(o.i!==undefined)d.i=o.i;
@@ -54011,6 +54483,10 @@ function wwBuild(){
       const k=TIER[t][(hs(x,y,97)*TIER[t].length)|0];if(foe(k,x,y)){placed.push([x,y]);cnt[t]++}}}
   // dressing along the paths (walk through): only twisted branches on the dark ground; bridges over the brook
   for(const [x,y] of corr){if(occ.has(x+','+y))continue;const r=hs(x,y,63);if(r<.16)dec(r<.08?'twig':'twig2',x,y,{sc:.8+hs(x,y,67)*.5});else if(r<.2)dec('dbones',x,y,{sc:.3+hs(x,y,68)*.3})} // small bones here and there
+  // drifting leaves, ochre and brown, blown slowly along the ground (walk through; moved by the update in ww_art.js)
+  {const LF=[];let n=0;for(const [x,y] of corr.concat(Object.keys(roomAt).map(k=>k.split(',').map(Number)))){if(n>=70)break;if(occ.has(x+','+y)||hs(x,y,141)>.14)continue;
+      const d=dec('leaf'+((hs(x,y,142)*4)|0),x,y,{bob:.04,sc:.8+hs(x,y,143)*.5});if(!d)continue;d.k='ww_leaf'+((hs(x,y,142)*4)|0);d.cloudid='wwlf'+LF.length;LF.push({sp:.06+hs(x,y,144)*.07,ph:hs(x,y,145),sc:d.sc,len:1.4+hs(x,y,146)*1.4});n++}
+   lv_leaves=LF}
   // bridges: on the track where it crosses the brook, and a couple of others
   {let n=0;for(const [x,y] of pathList){if(inBrook(x,y)&&!roomAt[x+','+y]&&n<2&&!occ.has(x+','+y)){dec('bridge',x,y,{sc:1});n++;x+=0}}
    for(const [x,y] of corr){if(n>=4)break;if(inBrook(x,y)&&!occ.has(x+','+y)&&hs(x,y,65)<.06){dec('bridge',x,y,{sc:.9});n++}}}
@@ -54045,7 +54521,7 @@ function wwBuild(){
   const mapNames=[];for(const id in Q)mapNames.push({t:WW_RNAME[id],x:Q[id].cx,y:Q[id].cy,k:'place'});
   const lv={rows,chars,fmap:fm,floorSet:WW_FLOORSET,floor:WW_FLOORSET[0],ceil:'cloud',start:{x:sx,y:sy,f:0},enemies,items,decor,lights,portals:[],day:.44,outdoor:true,amb:.36,
     name:"Blackbriar Wood",label:"Blackbriar Wood",noExtras:true,diff:82,ceilH:5.2,noTele:true,mapNames,
-    _ww:{wshaft,Q,roomAt,track:[...track],pathList,hag,clue1,clue2,clue3,dead:dead.length,wglow,brookY,dDoor,foes:enemies.length,decor:decor.length}};
+    _ww:{wshaft,Q,roomAt,track:[...track],pathList,hag,clue1,clue2,clue3,dead:dead.length,wglow,brookY,dDoor,foes:enemies.length,decor:decor.length,leaves:lv_leaves}};
   // ---- checks: every open square is reachable; nothing that stands in the way cuts a clearing off ----
   {const blockSet=()=>{const s=new Set();for(const d of decor)if(d.block)s.add(d.x+','+d.y);return s};   // creatures can be fought through, so only the standing things count
    const flood=bs=>{const seen=new Uint8Array(W*H),q=[sy*W+sx];seen[q[0]]=1;for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [a,b] of WW_DIRS){const nx=x+a,ny=y+b;if(!isOpen(nx,ny)||seen[ny*W+nx]||bs.has(nx+','+ny))continue;seen[ny*W+nx]=1;q.push(ny*W+nx)}}return seen};
@@ -54143,7 +54619,7 @@ function wwBuildRooms(){
    decor.push({k:'kh_oqdogs_3',x:13,y:5,block:true,npc:'wwo_button',sc:1});NPC_H.kh_oqdogs_3=NPC_H.kh_oqdogs_3||.36;
    decor.push({k:'ww_charm',x:2,y:5,block:false,walk:true,deco:true},{k:'ww_ring',x:9,y:5,block:false,walk:true,deco:true},{k:'ww_crumbs',x:5,y:6,block:false,walk:true,deco:true});
    for(const [r,x,y] of [['rack',1,1],['rack',13,1],['shelf',1,7],['chest',13,7]])prop(decor,r,x,y);
-   LEVELS[WW.CELLAR]=base({rows,chars:{w:gid},start:{x:7,y:7,f:0},decor,floor:'wwf_grave',name:"Grisselda's Cellar",label:"Grisselda's Cellar",lights:[[3,3],[7,3],[11,3],[7,6]],
+   LEVELS[WW.CELLAR]=base({rows,chars:{w:gid},start:{x:7,y:7,f:0},decor,floor:'wwf_cellar',name:"Grisselda's Cellar",label:"Grisselda's Cellar",lights:[[3,3],[7,3],[11,3],[7,6]],
      portals:[{to:WW.COTTAGE,x:1,y:5,f:1,tex:'in'}],_wwl:[[7,4],[2,5]]});LEVEL_NAMES[WW.CELLAR]="Grisselda's Cellar"}
   // ---- 523: the kitchen and the oven ----
   {const W=13,H=9,gid=wall('tex_3',[1.55,1.05,.78]);   // warm terracotta kitchen
@@ -54448,6 +54924,36 @@ function wwsTick(){
 }
 {const _ys=yarSoundTick;yarSoundTick=function(){_ys.apply(this,arguments);try{wwsTick()}catch(e){console.error('wws',e)}}}
 
+/* ---- src/desert/hobs_lunch.js ---- */
+/* ==========================================================================
+   HOBB'S LUNCH (quest wlq21, prefix hl). Maud Pike, Hobb's sister, stands in the quiet north-west corner of Wenlock, on the footpath south of the Quiet Chapel.
+   Her brother Hobb was one of the diggers of the well (the diggers' tally in the camp on level 497 names him). She wants his lunchbox, which still lies in the diggers' camp, and the ring
+   that belonged to the family, which lies in the collapsed mine on the same level. Both objects are put into level 497 by WMFU.camp and WMFU.mine (wellmaze_rooms.js). Plain text, rewards for a party of level 80.
+   ========================================================================== */
+if(NPC_H.sack2===undefined)NPC_H.sack2=.6;
+Object.assign(WL_REW,{wlq21:{gold:1400,xp:14000,items:['potion5','potion5']}});
+WL_QUESTS.push({id:'wlq21',giver:'Maud Pike',title:"Hobb's Lunch",desc:"Maud Pike, in the quiet corner of Wenlock, wants her brother Hobb's lunchbox from the diggers' camp under the well, and the family ring from the collapsed mine."});
+const hlF=()=>G.flags;
+khNpc('wlo_maud','Maud Pike','kh_ohfolk4_2',()=>yrLines('wlo_maud',["I come up here because it is quiet. My brother Hobb dug the well, and he did not come back up.","It is a good place to sit and think about him."]),{sc:1});
+WL_QOBJ.push({npc:'wlo_maud',k:()=>'kh_ohfolk4_2',at:[10,27],rad:4,o:{sc:1}});
+const HLD=khQD("Excuse me. Are you the people who go down the well? My brother Hobb was one of the diggers, years ago. He went down with the others and never came up. I am not asking you to find him. I know what happened. But Hobb always took his lunch down in a tin lunchbox with his name scratched on the lid, and I would like it back. It will be in the diggers' camp, the first big room you find at the bottom. There is also a ring. It was our mother's, and Hobb carried it for luck. He would have kept it near him when he worked, so look in the collapsed mine on the same level. Will you bring me both?",
+  "Thank you. The lunchbox is in the diggers' camp, the first big room below the well. The ring should be in the collapsed mine, on the same level.",
+  (n,m)=>hlF().wlq21a&&hlF().wlq21b?'You have both. Take them back to Maud Pike, in the quiet corner south of the Quiet Chapel.':(hlF().wlq21a?'You have the lunchbox. The ring should be in the collapsed mine, on the level under the well.':(hlF().wlq21b?"You have the ring. The lunchbox should be in the diggers' camp, the first big room under the well.":"The lunchbox is in the diggers' camp, the first big room below the well. The ring is in the collapsed mine on the same level.")),
+  "You found them. His name is still on the lid. And the ring. Thank you. I did not think I would ever hold either of them again.",
+  "Please take this. It is all I have put by, and Hobb would have wanted you to have the lunch money.",
+  "I keep the lunchbox on my knee when I sit here. The ring is on my finger. Thank you again.","Both are back with Maud.");
+wlQ('wlq21','Maud Pike',[["Find Hobb's lunchbox in the diggers' camp, the first big room under the well.",()=>hlF().wlq21a,['wm_hoblunch']],["Find the family ring in the collapsed mine, on the same level under the well.",()=>hlF().wlq21b,['wm_hobring']]]);
+wlGive('wlo_maud','wlq21','wlq8',HLD);
+/* the two things in level 497 */
+NPCS.wm_hoblunch={name:"Hobb's lunchbox",img:'sack2',root:d=>{const F=hlF();
+  if(qSt('wlq21')==='active'&&!F.wlq21a){F.wlq21a=1;yrStep("You have Hobb's lunchbox.");d.found=true;d.block=false;sfx('equip');return say("A tin lunchbox with HOBB scratched on the lid. Inside is a crust of bread gone hard as stone, and a folded cloth. You put it in your pack to take back to his sister.",[BYE])}
+  if(F.wlq21a){d.found=true;d.block=false;return say('An empty patch of floor where the lunchbox lay.',[BYE])}
+  return say('A tin lunchbox with HOBB scratched on the lid. Nobody has asked you to fetch it yet, so you leave it where it is.',[BYE])}};
+NPCS.wm_hobring={name:'A ring on the floor',img:'wm_gold',root:d=>{const F=hlF();
+  if(qSt('wlq21')==='active'&&!F.wlq21b){F.wlq21b=1;yrStep('You have the family ring.');d.found=true;d.block=false;sfx('equip');return say('A plain silver ring lies in the dust under a fallen beam. It is worn thin on one side. You put it in your pack.',[BYE])}
+  if(F.wlq21b){d.found=true;d.block=false;return say('Dust and a fallen beam. The ring is gone.',[BYE])}
+  return say('A plain silver ring lies in the dust under a fallen beam. Nobody has asked you to fetch it yet, so you leave it where it is.',[BYE])}};
+
 /* ---- src/desert/maps_witchwood.js ---- */
 /* ==========================================================================
    BLACKBRIAR WOOD (the Witch's Wood), area map (level 520). One illuminated sheet in a dark, spooky hand, drawn from the real level rows, fmap and decor: the walls of bark, bramble and old stone as inked
@@ -54530,13 +55036,21 @@ const GYA={ // alias: [piece, height of the thing in squares (one square is abou
 function gyIvy(){
   if(GY._ivy){for(const a in GY._ivy)IMG['gy_'+a]=GY._ivy[a];return}
   const t=IMG.gyp_texFloor_0;if(!t)return;GY._ivy={};
-  for(const a of ['stone1','stone2','lean','slab','wcross','ccross','tomb','urn','obelisk','column','mausoleum','angel','chapel','hut','crypt','barrow','fence']){
+  for(const a of ['stone1','stone2','lean','slab','wcross','ccross','tomb','urn','obelisk','column','mausoleum','angel','crypt','barrow','fence']){
     const s=IMG['gy_'+a];if(!s)continue;try{
     const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.drawImage(s,0,0);x.globalCompositeOperation='source-atop';
     const w=c.width,h=c.height,n=Math.round(w*h/(a==='fence'?110:52)),G=['#2a5a26','#3b7f31','#58a03e','#244c24','#6fb04a'];
     // vines running up from the foot, then leaves over them, thickest low down
     for(let k=0;k<Math.round(w/16);k++){let px=hash2(k,1,620)*w,py=h;x.strokeStyle='#27481f';x.lineWidth=1.6+hash2(k,2,620)*1.6;x.beginPath();x.moveTo(px,py);for(let t=0;t<9;t++){px+=(hash2(k,t+3,621)-.5)*10;py-=h*(.04+hash2(k,t+4,622)*.08);x.lineTo(px,py)}x.stroke()}
     for(let k=0;k<n;k++){const px=hash2(k,1,623)*w,py=h*(1-Math.pow(hash2(k,2,623),1.9)),r=2.2+hash2(k,3,623)*3.6;x.fillStyle=G[(hash2(k,4,623)*G.length)|0];x.globalAlpha=.9;x.beginPath();x.ellipse(px,py,r,r*.62,hash2(k,5,623)*3.14,0,6.3);x.fill()}
+    x.globalAlpha=1;GY._ivy[a]=c;IMG['gy_'+a]=c}catch(e){console.error('gyIvy',a,e)}}
+  // the ruined chapel and the hut keep their own shape: only a little ivy at the foot corners, nothing over the roof, the window or the door
+  for(const a of ['chapel','hut']){
+    const s=IMG['gy_'+a];if(!s)continue;try{
+    const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.drawImage(s,0,0);x.globalCompositeOperation='source-atop';
+    const w=c.width,h=c.height,n=Math.round(w*h/(a==='hut'?900:700)),G=['#2a5a26','#3b7f31','#58a03e','#244c24','#6fb04a'];
+    for(let k=0;k<n;k++){const side=hash2(k,6,624)<.5,ex=Math.pow(hash2(k,1,624),2.2)*w*.14,px=side?ex:w-ex,py=h*(1-Math.pow(hash2(k,2,624),2.4)*(a==='hut'?.3:.42)),r=2.2+hash2(k,3,624)*3.2;
+      x.fillStyle=G[(hash2(k,4,624)*G.length)|0];x.globalAlpha=.9;x.beginPath();x.ellipse(px,py,r,r*.62,hash2(k,5,624)*3.14,0,6.3);x.fill()}
     x.globalAlpha=1;GY._ivy[a]=c;IMG['gy_'+a]=c}catch(e){console.error('gyIvy',a,e)}}}
 /* cobwebs are drawn faint and fine: the painted web at half strength */
 function gyWeb(){const s=IMG.gyp_bonesH_1;if(!s)return;if(!GY._web){const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.globalAlpha=.5;x.drawImage(s,0,0);GY._web=c}IMG.gy_web=GY._web}
@@ -54592,14 +55106,28 @@ function gyFloors(){
     for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,base[i]*gain*t[0]);d[i+1]=Math.min(255,base[i+1]*gain*t[1]);d[i+2]=Math.min(255,base[i+2]*gain*t[2]);d[i+3]=255}CEILS[nm]=d};
   cl('gyc_0','texRed_3',.5,T1);cl('gyc_1','texGrey_3',.5,T1);cl('gyc_2','texBlack_3',.55,T1);cl('gyc_3','texBone_3',.5,T1);cl('gyc_crypt','texGrey_0',.5,[.9,.95,1]);
   GY._floors=1}
+/* a floor made from another one: darker and tinted (the crypts, the Pale Catacombs) or with puddles of standing water (the mazes) */
+function gyFloorTone(out,src,g,t){
+  if(FLOORS[out])return out;const b=FLOORS[src];if(!b)return src;t=t||[1,1,1];const d=new Uint8ClampedArray(b.length);
+  for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,b[i]*g*t[0]);d[i+1]=Math.min(255,b[i+1]*g*t[1]);d[i+2]=Math.min(255,b[i+2]*g*t[2]);d[i+3]=255}
+  FLOORS[out]=d;return out}
+function gyFloorWet(out,src,tint,seed){
+  if(FLOORS[out])return out;const b=FLOORS[src];if(!b)return src;const N=Math.round(Math.sqrt(b.length/4)),d=new Uint8ClampedArray(b),hh=(a,c,e)=>hash2(a,c,e),sm=(e0,e1,v)=>{v=Math.max(0,Math.min(1,(v-e0)/(e1-e0)));return v*v*(3-2*v)};
+  const P=[];for(let n=0;n<3;n++)P.push({cx:N*(.3+.4*hh(n,1,seed)),cy:N*(.3+.4*hh(n,2,seed)),rx:N*(.17+.11*hh(n,3,seed)),ry:N*(.1+.08*hh(n,4,seed))});
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){let m=0,hi=0;
+    for(const p of P){const dx=(x-p.cx)/p.rx,dy=(y-p.cy)/p.ry,v=1-(dx*dx+dy*dy)+(hh(x>>2,y>>2,seed+9)-.5)*.5;const mm=sm(0,.22,v);if(mm>m)m=mm;if(v>.05&&v<.3&&dy<0)hi=Math.max(hi,.7)}
+    if(m<=0)continue;const o=(y*N+x)*4,k=m*.9;
+    for(let c=0;c<3;c++){const dark=b[o+c]*.22+tint[c]*62+hi*tint[c]*80;d[o+c]=Math.min(255,b[o+c]*(1-k)+dark*k)}}
+  FLOORS[out]=d;return out}
 /* wall tiles: a painted texture stood up into a tall tile (stacked, each copy slid sideways), or one slice of a big front picture */
 function gyTile(tex,wh,opt){
-  opt=opt||{};const key=tex+'|'+wh+'|'+(opt.fac?opt.fac.img+opt.fac.i+'/'+opt.fac.n:'')+(opt.rgb?opt.rgb.join(','):'')+(opt.gain||'');if(GY.tiles[key]!==undefined)return GY.tiles[key];
+  opt=opt||{};const key=tex+'|'+wh+'|'+(opt.fac?opt.fac.img+opt.fac.i+'/'+opt.fac.n:'')+(opt.rgb?opt.rgb.join(','):'')+(opt.gain||'')+(opt.tag||'');if(GY.tiles[key]!==undefined)return GY.tiles[key];
   const im=IMG['gyp_'+tex],Hp=Math.round(128*wh),c=document.createElement('canvas');c.width=128;c.height=Hp;const x=c.getContext('2d');
   x.fillStyle='#14120f';x.fillRect(0,0,128,Hp);
   if(im){const units=Math.ceil(wh);for(let u=0;u<units;u++){const y=Hp-(u+1)*128,sh=((u*.37+(tex.length%5)*.11)%1)*128;
       x.save();if(u%2){x.translate(128,0);x.scale(-1,1)}for(const dx of [-sh,128-sh])x.drawImage(im,0,0,im.width,im.height,dx,y,128,128);x.restore()}}
-  if(opt.fac){const f=IMG['gyp_'+opt.fac.img];if(f){const n=opt.fac.n,i=opt.fac.i,s=n*128/f.width,fh=f.height*s,sw=f.width/n;x.drawImage(f,i*sw,0,sw,f.height,0,Hp-fh,128,fh)}}
+  if(opt.fac){const f=IMG['gyp_'+opt.fac.img];if(f){const n=opt.fac.n,i=opt.fac.i,s=n*128/f.width,fh=f.height*s,sw=f.width/n;x.imageSmoothingQuality='high';x.drawImage(f,i*sw,0,sw,f.height,0,Hp-fh,128,fh)}}
+  if(opt.draw)try{opt.draw(x,128,Hp)}catch(e){console.error('gyTile draw',e)}   // paint more on the tile (a plaque, ivy, candles in a niche) before the shading
   x.globalCompositeOperation='multiply';const gr=x.createLinearGradient(0,0,0,Hp);gr.addColorStop(0,'rgb(255,255,255)');gr.addColorStop(.7,'rgb(236,238,240)');gr.addColorStop(1,'rgb(176,178,180)');x.fillStyle=gr;x.fillRect(0,0,128,Hp);x.globalCompositeOperation='source-over';
   const d=x.getImageData(0,0,128,Hp).data,gain=opt.gain||1.05,m=opt.rgb||[1,1,1];
   for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,d[i]*gain*m[0]);d[i+1]=Math.min(255,d[i+1]*gain*m[1]);d[i+2]=Math.min(255,d[i+2]*gain*m[2])}
@@ -54808,17 +55336,27 @@ function gyYardBuild(){
   pth(3,35,67,35,'5');pth(35,3,35,66,'5');
   pth(58,8,58,34,'5');pth(58,36,58,62,'5');pth(12,8,12,34,'5');pth(12,36,12,62,'5');
   pth(12,8,58,8,'5');pth(12,62,58,62,'5');   // the paths ring the yard, so that every door can be reached from either side
-  pth(GY_Y.plaza.x0,GY_Y.plaza.y0,GY_Y.plaza.x1,GY_Y.plaza.y1,'0');   // the ground round the tomb is grass; only the two cobbled lanes cross it
-  pth(29,35,41,35,'5');pth(35,29,35,41,'5');
+  pth(GY_Y.plaza.x0,GY_Y.plaza.y0,GY_Y.plaza.x1,GY_Y.plaza.y1,'5');   // the plaza round the tomb is cobbled, with four grass beds of flowers; two lanes cross it
+  const BEDS=[[30,32,32,34],[38,40,32,34],[30,32,36,38],[38,40,36,38]];   // [x0,x1,y0,y1]
+  for(const [x0,x1,y0,y1] of BEDS)for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){path.delete(x+','+y);fm[y*W+x]='0'}
+  // a ring of cobbled lanes round the middle of the yard (the plaza lies in the middle of it), joined to the two crossing lanes
+  pth(25,26,45,26,'5');pth(25,44,45,44,'5');pth(25,26,25,44,'5');pth(45,26,45,44,'5');
   pth(30,46,40,54,'0');   // the family plot
   setF(54,40,66,48,'0');   // the gravedigger's yard
   // ---- the boundary: a stone wall two squares thick, with the lych-gate in the east side ----
   const wallH=2.1,wt=v=>ch((typeof wwTile==='function'&&IMG.tex_1)?wwTile(['tex_1','tex_2','tex_1'][v%3],2.6,{gain:.62}):gyTile('texGrey_'+v,wallH,{gain:.62}));   // the boundary is a bank of dark leaves and mossy bark, not stone   // the boundary wall is darker, so that the far wall does not shine in the mist as pale stripes
   const WC=[0,0,0,1,3,5,0,3,2].map(wt);
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(x>=2&&x<=67&&y>=2&&y<=67)continue;solid(x,y,WC[(hs(x,y,7)*WC.length)|0])}
-  {const gid=gyTile('texGrey_0',2.5,{fac:{img:'gatesC_0',i:0,n:1},gain:1.1});KH_DOOR[gid]={lvl:WL.ID,get at(){return WK.GRAVEBACK||{x:3,y:31,f:1}},gy:'lane'};
-   const c=ch(gid);rows[GY_Y.gate.y][GY_Y.gate.x]=c;block[GY_Y.gate.y*W+GY_Y.gate.x]=1;
-   dec('lych',67,35);used.add('67,35')}
+  // the lych-gate: a built front five squares wide in the east wall: a round arch of cut stones in a high wall under a cornice with the churchyard's name, iron gates in the opening, lamps and ivy (painted once, see gyEntryPic 'gate'); the door is in the middle
+  {IMG['gyp_entry_gate']=gyEntryPic('gate');
+   for(let q=0;q<5;q++){const y=33+q,gid=gyTile('texGrey_0',3.0,{fac:{img:'entry_gate',i:q,n:5},gain:1.0,tag:'gate'+q});
+     if(q===2)KH_DOOR[gid]={lvl:WL.ID,get at(){return WK.GRAVEBACK||{x:3,y:31,f:1}},gy:'lane'};
+     rows[y][68]=ch(gid);block[y*W+68]=1}
+   for(const y of [34,36]){dec('lantern',67,y,{block:true});lights.push([67,y])}
+   for(const y of [32,33,37,38])dec('fence',67,y,{block:true,sc:.95});
+   dec('urn',67,31,{block:true});dec('urn',67,39,{block:true});
+   for(const y of [32,38])dec('bench',65,y,{block:false});
+   for(const y of [33,37])dec('rose',65,y,{sc:.5})}
   // ---- the tomb and its plaza ----
   {const cx=GY_Y.crypt.x,cy=GY_Y.crypt.y;const cd=dec('crypt',cx,cy,{block:false,npc:'gyo_crypt'});if(cd)cd.sc=.0001;   // an unseen marker for the quest signs; the tomb itself is built into the ground below
    {const mk=i=>gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i,n:3},gain:1.0}),dg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:1,n:3},gain:1.0,rgb:[1,1,1.00099]});   // the tomb's own door tile (the Avenue fronts use the plain middle slice and must not share it)
@@ -54828,9 +55366,16 @@ function gyYardBuild(){
    for(const [x,y] of [[31,30],[39,30],[31,40],[39,40]])dec('lantern',x,y,{block:true});
    for(const [x,y] of [[31,35],[39,35]])dec('bench',x,y,{block:false});
    for(const [x,y] of [[32,31],[38,31],[32,39],[38,39]])dec('urn',x,y,{block:true});
+   // the plaza is furnished: benches along the lanes, a flower bed in each corner with an urn in its middle, lanterns and angels round the tomb
+   for(const [x,y] of [[33,32],[37,32],[33,38],[37,38],[29,33],[41,33],[29,37],[41,37]])dec('bench',x,y,{block:false});
+   {const FL=['lflora0','pflw1_0','pflw3_0','pflw0_0','pflw2_1'].filter(k=>IMG[k]);
+    for(const [x0,x1,y0,y1] of BEDS){const mx=(x0+x1)>>1,my=(y0+y1)>>1;dec('urn',mx,my,{block:true,sc:.8});
+      for(const [dx,dy] of [[-1,-1],[1,-1],[-1,1],[1,1],[0,-1],[0,1]]){const k=(dx+dy+mx+my)&3;if(k===0||!FL.length)dec('rose',mx+dx,my+dy,{sc:.5});else dec(FL[k%FL.length],mx+dx,my+dy,{sc:.85})}}}
+   for(const [x,y] of [[29,30],[41,30],[29,40],[41,40],[29,32],[41,32],[29,38],[41,38]]){dec('lantern',x,y,{block:true});lamp(x,y)}
+   for(const [x,y] of [[33,31],[37,31]])dec('angel',x,y,{block:true,sc:.9});
    lights.push([cx-1,cy+2],[cx+1,cy+2]);glow.push([cx,cy+1])}
-  // ---- six small tombs built into the edge of the yard: a vine-covered front, and a door to walk into ----
-  for(const T of GY_TOMBS){const gid=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:1,n:3},gain:1.0}),dg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:1,n:3},gain:1.0,rgb:[1,1,1+T.id*.00001]}),lg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:0,n:3},gain:1.0}),rg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:2,n:3},gain:1.0});
+  // ---- six small tombs built into the edge of the yard: each has its own front (stone, tint, ivy, name plaque), its own pair of statues or urns, its own lamp colour, and a door to walk into ----
+  for(const T of GY_TOMBS){const st=GY_TSTYLE[T.id],lg=gyTombTile(T,st,0),dg=gyTombTile(T,st,1),rg=gyTombTile(T,st,2);
     KH_DOOR[dg]={lvl:T.id,get at(){return {x:5,y:9,f:0}},gy:'tomb'};
     const sq=T.side==='N'?[[T.x-1,2,lg],[T.x,2,dg],[T.x+1,2,rg]]:T.side==='S'?[[T.x-1,67,lg],[T.x,67,dg],[T.x+1,67,rg]]:[[2,T.y-1,lg],[2,T.y,dg],[2,T.y+1,rg]];
     for(const [x,y,t] of sq){rows[y][x]=ch(t);block[y*W+x]=1}
@@ -54838,9 +55383,13 @@ function gyYardBuild(){
     T.front=[fx,fy];
     for(let a=-2;a<=2;a++)for(let b=0;b<=1;b++){const x=T.side==='W'?fx+b:fx+a,y=T.side==='W'?fy+a:T.side==='N'?fy+b:fy-b;used.add(x+','+y)}
     // a short cobbled walk from the lane to the door
-    if(T.side==='N')pth(T.x,3,T.x,8,'5');else if(T.side==='S')pth(T.x,62,T.x,66,'5');else pth(3,T.y,12,T.y,'5')}
-  // ---- the entrance is a Gothic gatehouse: carved stone round the iron gate ----
-  for(const y of [33,34,36,37]){const gid=gyTile('texGrey_0',3.4,{fac:{img:'sceneB_4',i:y-33,n:5},gain:1.0});if(rows[y][68]!=='.'||true){rows[y][68]=ch(gid);block[y*W+68]=1}}
+    if(T.side==='N')pth(T.x,3,T.x,8,'5');else if(T.side==='S')pth(T.x,62,T.x,66,'5');else pth(3,T.y,12,T.y,'5')
+    // the dressing of the front: along = the way the front runs, deep = away from the door into the yard
+    const al=T.side==='W'?[0,1]:[1,0],dp=T.side==='N'?[0,1]:T.side==='S'?[0,-1]:[1,0],at=(o,d)=>[fx+al[0]*o+dp[0]*d,fy+al[1]*o+dp[1]*d];
+    for(const o of [-2,2]){const [x,y]=at(o,0);dec(st.stat[o<0?0:1],x,y,{block:true,sc:st.sc||.9})}
+    for(const o of [-1,1]){const [x,y]=at(o,0);dec('lantern',x,y,{block:true})}
+    {const [lx,ly]=at(0,1);lights.push([lx,ly]);YG_LC[lx+','+ly]=st.lamp;const [mx,my]=at(0,3);lights.push([mx,my]);YG_LC[mx+','+my]=st.lamp}
+    for(const e of st.ext||[]){const [x,y]=at(e[1],e[2]);dec(e[0],x,y,{block:!!e[3],sc:e[4]})}}
   // ---- THE OVERGROWN WALK (south west): a narrow earth path winding between leaning, ivy-covered stones, under dark bushes and trees ----
   {const wp=[[20,36],[20,40],[17,40],[17,45],[22,45],[22,50],[18,50],[18,56],[22,56]];
    for(let i=1;i<wp.length;i++){const [a,b]=wp[i-1],[c,d]=wp[i];pth(Math.min(a,c),Math.min(b,d),Math.max(a,c),Math.max(b,d),'5')}
@@ -54880,14 +55429,25 @@ function gyYardBuild(){
     const dy=g.y<35?1:-1;for(const dx of [-2,2])D('lean',g.x+dx,g.y+dy*2);
     for(const dx of [-3,3])D('ww_pine',g.x+dx,g.y,{block:true,sc:1})}
   // ---- the ruined chapel, the family plot, the gravedigger ----
-  {const c=GY_Y.chapel;dec('chapel',c.x,c.y,{block:true,npc:'gyo_chapel'});for(const [x,y] of [[c.x-3,c.y+2],[c.x+3,c.y+2],[c.x-2,c.y+3],[c.x+2,c.y+3]])D('lean',x,y);D('dead',c.x-4,c.y-1,{block:true});D('dead',c.x+4,c.y-1,{block:true});D('rpost',c.x+2,c.y+1,{block:true});lamp(c.x,c.y+3)}
+  {const c=GY_Y.chapel;dec('chapel',c.x,c.y,{block:true,npc:'gyo_chapel'});for(const [x,y] of [[c.x-3,c.y+2],[c.x+3,c.y+2],[c.x-2,c.y+3],[c.x+2,c.y+3]])D('lean',x,y);D('dead',c.x-4,c.y-1,{block:true});D('dead',c.x+4,c.y-1,{block:true});D('rpost',c.x+2,c.y+1,{block:true});lamp(c.x,c.y+3);   // pews in front of the open end, broken pillars, candles at the door
+   for(const [x,y] of [[c.x-1,c.y+4],[c.x+1,c.y+4]])dec('bench',x,y,{block:false,sc:.8});
+   for(const x of [c.x-3,c.x+3])dec('column',x,c.y+1,{block:true,sc:.7});dec('candles',c.x-2,c.y+1,{block:true,sc:.6});dec('candles',c.x+2,c.y+2,{block:true,sc:.6});lights.push([c.x-2,c.y+2]);YG_LC[(c.x-2)+','+(c.y+2)]=[1.5,1.0,.5]}
   {const e=GY_Y.edmund,g=GY_Y.grave;
    dec('edmund',e.x,e.y,{block:true,npc:'gyo_edmund'});dec('slab',g.x,g.y,{block:true,npc:'gyo_grave'});dec('angel',35,52,{block:true,npc:'gyo_angel'});
    
    D('bench',35,48,{block:false});D('rose',34,50);D('rose',37,50);lamp(35,50);lamp(33,52);lamp(38,52);glow.push([g.x,g.y+1]);
-   dec('ww_sign',35,47,{block:true,npc:'gyo_sign',i:2})}
+   dec('ww_sign',35,47,{block:true,npc:'gyo_sign',i:2});
+   // the plot is railed in (a gap in the north side), with the family's headstones in rows, urns and lanterns in the corners, and flowers along the railings
+   for(let x=30;x<=40;x++){if(x>=34&&x<=36)continue;dec('fence',x,46,{block:true,sc:.95});dec('fence',x,54,{block:true,sc:.95})}
+   for(let y=47;y<=53;y++){dec('fence',30,y,{block:true,sc:.95});dec('fence',40,y,{block:true,sc:.95})}
+   for(const [x,y] of [[31,47],[39,47],[31,53],[39,53]])dec('urn',x,y,{block:true,sc:.85});
+   for(const [x,y] of [[30,46],[40,46],[30,54],[40,54]]){dec('lantern',x,y,{block:true});lights.push([x,y])}
+   for(const [x,y,k] of [[32,48,'stone1'],[33,48,'lean'],[37,48,'stone2'],[38,48,'lean'],[32,52,'stone2'],[38,52,'stone1'],[32,50,'wcross'],[39,50,'wcross'],[34,53,'slab'],[37,53,'slab']])dec(k,x,y,{block:true,sc:.9});
+   for(const [x,y] of [[31,49],[31,51],[39,49],[39,51],[33,47],[37,47],[34,52],[36,53]])dec(hs(x,y,61)<.5?'rose':(IMG.lflora0?'lflora0':'rose'),x,y,{sc:hs(x,y,61)<.5?.5:.85});
+   for(const [x,y] of [[33,54],[37,54]])lamp(x,y)}
   {const h=GY_Y.hut;dec('hut',h.x,h.y,{block:true,npc:'gyo_hut'});dec('mound',56,44,{block:true,npc:'gyo_opengrave'});dec('barrow',58,42,{block:true});dec('rpost',63,42,{block:true});lamp(h.x-2,h.y+2);lamp(55,46);
-   dec('ww_sign',57,41,{block:true,npc:'gyo_sign',i:3})}
+   dec('ww_sign',57,41,{block:true,npc:'gyo_sign',i:3});
+   dec('lantern',h.x+2,h.y+1,{block:true});lights.push([h.x+2,h.y+2]);for(const x of [h.x-3,h.x+3])dec('fence',x,h.y+1,{block:true,sc:.9});dec('urn',h.x+3,h.y+2,{block:true,sc:.8})}
   // the lanes' signs
   dec('ww_sign',65,36,{block:true,npc:'gyo_sign',i:0});dec('ww_sign',34,34,{block:true,npc:'gyo_sign',i:1});dec('ww_sign',34,12,{block:true,npc:'gyo_sign',i:4});
   // ---- the plots of graves: stones at the crossings of a lattice, with gaps so that the plots can be walked ----
@@ -54984,6 +55544,8 @@ khNpc('gyo_lanesign','A signpost','greensign',()=>say('CHURCHYARD LANE. To the o
    an altar at the north end where Lady Aldith's ghost waits, a transept with wall niches of bones, and two small side chambers. The stair up to the graveyard is in the south wall.
    When she has found peace (G.flags.gy.peace) the ghost is gone and the crypt is a quiet lit shrine: all the candles burn, a rose lies on the altar, the light is warm gold and nothing here fights.
    ========================================================================== */
+/* the crypt floor: the painted flagstone is pale and its big slabs show as light rectangles under the candles, so the crypts, tombs and vaults use it darker, with a cool tint */
+function gyCryptFloors(){const n=gyFloorTone('gyf_cflag','gyf_flag',.46,[.88,.92,1]);return GY_FLOORSET.map((f,i)=>i===3?n:f)}
 const GY_C={W:25,H:21,start:{x:12,y:17,f:0},ghost:{x:12,y:6},altar:{x:12,y:2}};
 function gyCryptBuild(){
   if(LEVELS[GY.CRYPT])return LEVELS[GY.CRYPT];
@@ -55024,7 +55586,7 @@ function gyCryptBuild(){
   lights.push([GY_C.ghost.x,GY_C.ghost.y+1]);lcol[GY_C.ghost.x+','+(GY_C.ghost.y+1)]=[.6,.85,1.5];
   const names=[{t:'The Apse',x:12,y:2,k:'place'},{t:'The Nave',x:12,y:11,k:'place'},{t:'The Transept',x:5,y:10,k:'place'},{t:'The Western Chamber',x:4,y:16,k:'place'},{t:'The Eastern Chamber',x:20,y:16,k:'place'}];
   const fm=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=(open(x,y)&&(x>=10&&x<=14&&y<=3))?'3':'3';fm.push(s)}
-  const L={rows,chars,fmap:fm,floorSet:GY_FLOORSET,floor:GY_FLOORSET[3],ceil:'gyc_crypt',ceilH:WH+1,start:{x:GY_C.start.x,y:GY_C.start.y,f:GY_C.start.f},enemies:[],items:[],decor,lights,portals:[],day:0,amb:.04,torchGap:1e9,noTele:true,noExtras:true,
+  const L={rows,chars,fmap:fm,floorSet:gyCryptFloors(),floor:gyCryptFloors()[3],ceil:'gyc_crypt',ceilH:WH+1,start:{x:GY_C.start.x,y:GY_C.start.y,f:GY_C.start.f},enemies:[],items:[],decor,lights,portals:[],day:0,amb:.04,torchGap:1e9,noTele:true,noExtras:true,
     name:GY.NAMES[531],label:GY.NAMES[531],diff:84,mapNames:names,peaceful:true,_gy:{kind:'crypt',lcol}};
   LEVELS[GY.CRYPT]=L;
   return L}
@@ -55037,14 +55599,14 @@ KH_LAZY[GY.CRYPT]=gyCryptBuild;
    glow behind the bars; the Grey Charnel is a damp stair arch between two lengths of iron fence and lamps; the Black Barrow is a dark arch set in a grassy barrow between obelisks; the Pale Catacombs are
    the double wooden doors of a grassy mound between urns. gyEntryPic(kind) returns the canvas (kinds: red, grey, black, pale); GY_ENTRY says how many tiles wide and how tall each is.
    ========================================================================== */
-const GY_ENTRY={red:[5,3.4,'THE RED OSSUARY'],grey:[5,3.0,'THE GREY CHARNEL'],black:[5,3.0,'THE BLACK BARROW'],pale:[3,1.9,'THE PALE CATACOMBS']};
+const GY_ENTRY={red:[5,3.4,'THE RED OSSUARY'],grey:[5,3.0,'THE GREY CHARNEL'],black:[5,3.0,'THE BLACK BARROW'],pale:[3,1.9,'THE PALE CATACOMBS'],gate:[5,3.0,'SAINT WENNA']};   // gate: the lych-gate of the yard (built by gy_yard.js)
 function gyEntryPic(kind){
   const K=GY._entry=GY._entry||{};if(K[kind])return K[kind];
-  const [n,wh,title]=GY_ENTRY[kind],W=n*128,H=Math.round(wh*128),c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d'),I=k=>IMG['gyp_'+k],hs=(a,b,s)=>hash2(a,b,s+n*7);
+  const [n,wh,title]=GY_ENTRY[kind],W=n*128,H=Math.round(wh*128),c=document.createElement('canvas');c.width=W*2;c.height=H*2;const x=c.getContext('2d');x.scale(2,2);x.imageSmoothingQuality='high';const I=k=>IMG['gyp_'+k],hs=(a,b,s)=>hash2(a,b,s+n*7);
   const putW=(k,cx,bottom,w)=>{const im=I(k);if(!im)return null;const h=w*im.height/im.width;x.drawImage(im,cx-w/2,bottom-h,w,h);return h};
   const putH=(k,cx,bottom,h)=>{const im=I(k);if(!im)return null;const w=h*im.width/im.height;x.drawImage(im,cx-w/2,bottom-h,w,h);return w};
   // the stone wall: the painted grey stone, tinted, with the joints of the blocks and damp at the foot
-  const wall=tint=>{const t=I('texGrey_0');x.fillStyle='#55534f';x.fillRect(0,0,W,H);if(t)for(let yy=0;yy<H;yy+=128)for(let xx=0;xx<W;xx+=128)x.drawImage(t,xx,yy,128,128);
+  const wall=tint=>{const t=I('texGrey_0');x.fillStyle='#55534f';x.fillRect(0,0,W,H);if(t)for(let yy=0;yy<H;yy+=128)for(let xx=0;xx<W;xx+=128)x.drawImage(t,xx,yy,129,129);
     x.globalCompositeOperation='multiply';x.fillStyle=tint;x.fillRect(0,0,W,H);x.globalCompositeOperation='source-over';
     x.strokeStyle='rgba(18,16,14,.4)';x.lineWidth=1.4;for(let yy=22,r=0;yy<H;yy+=34,r++){x.beginPath();x.moveTo(0,yy);x.lineTo(W,yy);x.stroke();for(let xx=(r%2)*28;xx<W;xx+=56){x.beginPath();x.moveTo(xx+hs(xx,yy,1)*6,yy);x.lineTo(xx+hs(xx,yy,2)*6,yy+34);x.stroke()}}
     const g=x.createLinearGradient(0,H*.6,0,H);g.addColorStop(0,'rgba(20,40,20,0)');g.addColorStop(1,'rgba(20,50,24,.55)');x.fillStyle=g;x.fillRect(0,H*.6,W,H*.4)};
@@ -55065,24 +55627,44 @@ function gyEntryPic(kind){
     putH('stonesB_4',46,H,330);putH('stonesB_4',W-46,H,330);
     x.fillStyle='rgba(120,20,12,.18)';x.fillRect(W*.2,60,W*.6,H);
     archGate(W/2,H,330,['rgba(255,70,40,.75)','rgba(60,6,4,.95)']);
-    plaque(52,title);ivy(26,'sides');ivy(10,'top');
+    ivy(26,'sides');ivy(10,'top');plaque(52,title);
   }else if(kind==='grey'){
     wall('#8a948f');cornice('#4a6a60');
     for(const px of [W*.17,W*.83]){putW('fenceG_0',px,H-4,190)}
     for(const px of [W*.31,W*.69]){putH('fenceG_2',px,H,230)}
     putW('gatesC_2',W/2,H,300);x.fillStyle='rgba(30,70,60,.22)';x.fillRect(0,H*.4,W,H*.6);
-    plaque(52,title);ivy(14,'sides');
+    ivy(14,'sides');plaque(52,title);
   }else if(kind==='black'){
     wall('#5e5e6c');cornice('#3a3a4c');
     const mw=putW('stairFix_1',W/2,H+10,W*1.02);
     x.globalCompositeOperation='source-atop';x.fillStyle='rgba(20,20,40,.35)';x.fillRect(0,0,W,H);x.globalCompositeOperation='source-over';
     putH('stonesB_3',60,H,300);putH('stonesB_3',W-60,H,300);
     archGate(W/2,H-4,270,['rgba(140,110,255,.55)','rgba(8,6,20,.95)']);
-    plaque(52,title);ivy(10,'sides');
+    ivy(10,'sides');plaque(52,title);
+  }else if(kind==='gate'){ // the gate of the churchyard: a round arch of cut stones in a wall under a cornice, iron gates in the opening, lamps and ivy
+    wall('#8f938d');cornice('#3f5a4a');
+    const cx=W/2,r=112,ys=H-118,base=H-6,vc=['#6e6a62','#85817a','#77736b','#8d897f'],N=13;
+    x.lineWidth=1.3;x.strokeStyle='#1a1816';
+    for(let t=0;t<N;t++){const a0=Math.PI+t*Math.PI/N,a1=Math.PI+(t+1)*Math.PI/N,o=t===(N>>1)?34:26;x.fillStyle=vc[(t+(t===(N>>1)?1:0))%4];x.beginPath();x.arc(cx,ys,r,a0,a1);x.arc(cx,ys,r+o,a1,a0,true);x.closePath();x.fill();x.stroke()}
+    for(const sd of [-1,1])for(let yy=ys,j=0;yy<base;yy+=24,j++){x.fillStyle=vc[(j+(sd>0?1:0))%4];const bx=sd<0?cx-r-26:cx+r,w2=26+(j%2)*5;x.fillRect(sd<0?bx-(j%2)*5:bx,yy,w2,Math.min(24,base-yy));x.strokeRect(sd<0?bx-(j%2)*5:bx,yy,w2,Math.min(24,base-yy))}
+    x.save();x.beginPath();x.moveTo(cx-r,base);x.lineTo(cx-r,ys);x.arc(cx,ys,r,Math.PI,0);x.lineTo(cx+r,base);x.closePath();x.clip();
+    const g=x.createLinearGradient(0,ys-r,0,base);g.addColorStop(0,'#0a0c0b');g.addColorStop(1,'#1c2420');x.fillStyle=g;x.fillRect(cx-r,ys-r,2*r,base-ys+r);
+    const gi=I('gatesC_0');if(gi){const sx=gi.width*.2,sw=gi.width*.6,sc=2*r/sw,gh=gi.height*sc;x.drawImage(gi,sx,0,sw,gi.height,cx-r,base-gh,2*r,gh)}
+    x.restore();
+    x.fillStyle='#4a4741';x.fillRect(cx-r-34,H-8,2*r+68,8);x.fillStyle='#2c2a27';x.fillRect(cx-r-34,H-8,2*r+68,2);
+    putH('fenceG_2',cx-r-86,H-2,230);putH('fenceG_2',cx+r+86,H-2,230);putW('fenceG_0',W*.1,H-2,150);putW('fenceG_0',W*.9,H-2,150);
+    ivy(18,'sides');ivy(6,'top');plaque(58,title);
   }else{ // pale
     x.fillStyle='rgba(0,0,0,0)';x.fillRect(0,0,W,H);
     putW('gatesC_3',W/2,H,W*.98);putH('stonesB_5',26,H,110);putH('stonesB_5',W-26,H,110);ivy(8,'top');
   }
+  // the finishing, at the full 256 pixels to a tile: chips and grain in the stone, then a sharpening pass (the painted pieces are only about 200 to 300 pixels wide, so they are scaled up and sharpened)
+  x.setTransform(1,0,0,1,0,0);
+  if(kind!=='pale'){for(let k=0;k<W*H/22;k++){const px=hs(k,1,11)*c.width,py=hs(k,2,11)*c.height,dk=hs(k,3,11)<.6;x.fillStyle=dk?'rgba(10,8,6,'+(.12+hs(k,4,11)*.2)+')':'rgba(230,220,200,'+(.05+hs(k,4,11)*.1)+')';x.fillRect(px,py,1+((hs(k,5,11)*2)|0),1)}}
+  try{const t=document.createElement('canvas');t.width=c.width;t.height=c.height;const tx=t.getContext('2d');tx.filter='blur(1.3px)';tx.drawImage(c,0,0);tx.filter='none';
+    const a=x.getImageData(0,0,c.width,c.height),b=tx.getImageData(0,0,c.width,c.height),A=a.data,B=b.data;
+    for(let i=0;i<A.length;i+=4){if(A[i+3]<8)continue;for(let q=0;q<3;q++){const v=A[i+q]+(A[i+q]-B[i+q])*1.25;A[i+q]=v<0?0:v>255?255:v}}
+    x.putImageData(a,0,0)}catch(e){console.error('gyEntryPic sharpen',e)}
   return K[kind]=c}
 
 /* ---- src/desert/gy_tombs.js ---- */
@@ -55091,6 +55673,26 @@ function gyEntryPic(kind){
    Each is a small vaulted room (11 by 11) that you walk into from the yard: sarcophagi, candle stands, cobwebs, bones, a cold blue-green glow in the corners, and in some a little treasure.
    Nothing here fights. The door in the south wall leads back out to the lane beside the tomb's front.
    ========================================================================== */
+/* The fronts of the six tombs in the yard are all different: each has its own stone and tint, its own ivy, a name plaque over the door, a pair of statues or urns (stat: left, right), a lamp colour, and a few extras (ext: [piece, along, deep, solid, scale]).
+   The picture used for the front is the mausoleum (gatesC_4), the grassy barrow with its dark arch (stairFix_1) or the grassy mound with wooden doors (gatesC_3). */
+const GY_TSTYLE={
+  536:{tex:'texGrey_0',rgb:[.92,1,1.12],img:'gatesC_4',ivy:26,stat:['angel','angel'],sc:.95,lamp:[.5,1.05,1.45],pl:'VANE',ext:[['rose',-1,2,false,.55],['rose',1,2,false,.55],['bench',-3,3]]},
+  537:{tex:'texGrey_2',rgb:[1.12,1.02,.84],img:'gatesC_4',ivy:70,stat:['urn','urn'],sc:1,lamp:[1.55,1.0,.45],pl:'ASHBY',ext:[['bench',-2,3],['bench',2,3],['rose',-1,2,false,.55],['rose',1,2,false,.55]]},
+  538:{tex:'texBlack_1',rgb:[1.35,1.35,1.5],img:'gatesC_4',ivy:8,stat:['obelisk','obelisk'],sc:.9,lamp:[.85,.6,1.5],pl:'THORNE',ext:[['urn',-1,3,true],['urn',1,3,true]]},
+  539:{tex:'texBone_2',rgb:[.78,.92,.8],img:'stairFix_1',ivy:90,stat:['ccross','ccross'],sc:.95,lamp:[.45,1.3,.7],pl:'MARSH',ext:[['mound',-2,2,true,.8],['mound',2,2,true,.8],['web',-1,2]]},
+  540:{tex:'texRed_0',rgb:[1,.84,.78],img:'gatesC_3',ivy:44,stat:['column','column'],sc:.95,lamp:[1.55,.5,.34],pl:'COBB',ext:[['bench',2,3],['rose',-1,2,false,.55],['rose',1,2,false,.55]]},
+  541:{tex:'texGrey_4',rgb:[1,.94,1.14],img:'gatesC_4',ivy:56,stat:['angel','ccross'],sc:.9,lamp:[1.35,1.25,.95],pl:'FELL',ext:[['rose',-1,2,false,.55],['bench',-2,3],['urn',2,3,true]]}};
+/* one tile of a tomb front (0 left, 1 door, 2 right): the stone, the front picture, ivy hanging from the top and growing from the foot, and over the door the name plaque */
+function gyTombTile(T,st,i){
+  return gyTile(st.tex,3.4,{fac:{img:st.img,i,n:3},gain:1.0,rgb:st.rgb,tag:'tomb'+T.id+'_'+i,draw:(x,w,h)=>{
+    const G=['#2a5a26','#3b7f31','#58a03e','#244c24','#6fb04a'],hs=(a,b,c)=>hash2(a,b,c+T.id*3+i*11);
+    const nv=Math.round(st.ivy/3);
+    for(let k=0;k<nv;k++){const edge=i===0?hs(k,1,1)*.55:i===2?1-hs(k,1,1)*.55:hs(k,1,1),px=edge*w,top=hs(k,2,1)<.5,len=h*(top?(.08+hs(k,3,1)*.28):(.1+hs(k,3,1)*.3));
+      let qx=px,qy=top?0:h;x.strokeStyle='#27481f';x.lineWidth=1.3+hs(k,4,1)*1.4;x.beginPath();x.moveTo(qx,qy);
+      for(let t=1;t<=6;t++){qx+=(hs(k,t+5,2)-.5)*8;qy+=(top?1:-1)*len/6;x.lineTo(qx,qy)}x.stroke();
+      for(let t=0;t<7;t++){x.fillStyle=G[(hs(k,t+9,3)*5)|0];x.beginPath();x.ellipse(px+(hs(k,t+20,4)-.5)*12,top?len*t/7:h-len*t/7,2.5+hs(k,t+30,5)*3.5,2+hs(k,t+40,5)*2,hs(k,t+50,6)*3,0,6.3);x.fill()}}
+    if(i===1){const pw=84,ph=17,px=(w-pw)/2,py=h*(st.img==='gatesC_4'?.405:.56);x.fillStyle='#24211d';x.fillRect(px,py,pw,ph);x.strokeStyle='#9a8858';x.lineWidth=1.4;x.strokeRect(px+1.5,py+1.5,pw-3,ph-3);
+      x.fillStyle='#e0d08e';x.font='bold 12px '+(typeof FTITLE!=='undefined'?FTITLE:'serif');x.textAlign='center';x.textBaseline='middle';x.fillText(st.pl,w/2,py+ph/2+.5)}}})}
 const GY_TOMB_NAMES={536:'The Vane Tomb',537:'The Ashby Vault',538:'The Thorne Mausoleum',539:'The Marsh Crypt',540:'The Cobb Vault',541:'The Fell Tomb'};
 function gyTombBuild(id){
   if(LEVELS[id])return LEVELS[id];
@@ -55118,7 +55720,7 @@ function gyTombBuild(id){
   // some hold a little treasure on the floor at the back
   if(id%2===0)dec('chest',5,4,{block:true,goldAmt:2500+(id%7)*400});
   const fm=[];for(let y=0;y<H;y++)fm.push('3'.repeat(W));
-  const L={rows,chars,fmap:fm,floorSet:GY_FLOORSET,floor:GY_FLOORSET[3],ceil:'gyc_crypt',ceilH:WH+1,start:{x:5,y:9,f:0},enemies:[],items:[],decor,lights,portals:[],day:0,amb:.05,torchGap:1e9,noTele:true,noExtras:true,
+  const L={rows,chars,fmap:fm,floorSet:gyCryptFloors(),floor:gyCryptFloors()[3],ceil:'gyc_crypt',ceilH:WH+1,start:{x:5,y:9,f:0},enemies:[],items:[],decor,lights,portals:[],day:0,amb:.05,torchGap:1e9,noTele:true,noExtras:true,
     name:GY_TOMB_NAMES[id],label:GY_TOMB_NAMES[id],diff:84,mapNames:[{t:GY_TOMB_NAMES[id],x:5,y:5,k:'place'}],peaceful:true,_gy:{kind:'crypt',lcol}};
   LEVELS[id]=L;LEVEL_NAMES[id]=GY_TOMB_NAMES[id];LEVEL_RATING[id]=84;
   return L}
@@ -55164,7 +55766,7 @@ function gyAvenueBuild(){
     enemies.push({t:GY_AV_FOES[i],x:cx,y:v.mid,lvl:86})});
   const fm=[];for(let y=0;y<H;y++)fm.push('3'.repeat(W));
   const names=[{t:'The Hall of the Avenue',x:15,y:9,k:'place'}];vaults.forEach((v,i)=>names.push({t:'Vault '+(i+1),x:v.x0+2,y:v.mid,k:'place'}));
-  const L={rows,chars,fmap:fm,floorSet:GY_FLOORSET,floor:GY_FLOORSET[3],ceil:'gyc_crypt',ceilH:WH+1,start:{x:GY_AV.start.x,y:GY_AV.start.y,f:GY_AV.start.f},enemies,items:[],decor,lights,portals:[],day:0,amb:.05,torchGap:1e9,noTele:true,noExtras:true,
+  const L={rows,chars,fmap:fm,floorSet:gyCryptFloors(),floor:gyCryptFloors()[3],ceil:'gyc_crypt',ceilH:WH+1,start:{x:GY_AV.start.x,y:GY_AV.start.y,f:GY_AV.start.f},enemies,items:[],decor,lights,portals:[],day:0,amb:.05,torchGap:1e9,noTele:true,noExtras:true,
     name:GY.NAMES[542],label:GY.NAMES[542],diff:85,mapNames:names,_gy:{kind:'crypt',lcol}};
   LEVELS[GY_AV.ID]=L;LEVEL_NAMES[GY_AV.ID]=GY.NAMES[542];LEVEL_RATING[GY_AV.ID]=85;
   return L}
@@ -55202,7 +55804,7 @@ const GYM_SPEC=[
  {seed:86043,brick:'texBlack',vars:[2,3,5,5,1,3,2,4,3,5],name:GY.NAMES[534],lcol:[.45,.78,1.6],torch:{fl:3,col:[.45,.8,1.7],name:'blue',css:'#4f9cff'},floor:'5',floor2:'3',ceil:'gyc_2',
   rooms:[{id:'start',kind:'start',i:0,j:13,w:2,h:2},{id:'boss',kind:'boss',i:11,j:0,w:4,h:3},{id:'moot',kind:'hall',w:3,h:3,zone:[3,8,4,9]},{id:'sorrow',kind:'hall',w:3,h:2,zone:[8,12,7,12]},{id:'vigil',kind:'chapel',w:2,h:2,zone:[1,5,1,5]}],
   foes:[['gywraith',4],['gyshade',4],['gybanshee',4]],count:24},
- {seed:87057,brick:'texBone',name:GY.NAMES[535],lcol:[.96,.62,1.22],torch:{fl:2,col:[.96,.6,1.26],name:'purple',css:'#b06cf0'},floor:'4',floor2:'2',ceil:'gyc_3',
+ {seed:87057,brick:'texBone',name:GY.NAMES[535],lcol:[.68,.45,.88],torch:{fl:2,col:[.56,.36,.74],name:'purple',css:'#b06cf0'},floor:'4',floor2:'2',ceil:'gyc_3',wall:.55,floorGain:.55,
   rooms:[{id:'start',kind:'start',i:0,j:13,w:2,h:2},{id:'boss',kind:'boss',i:11,j:0,w:4,h:3},{id:'reliquary',kind:'reliquary',w:2,h:2,zone:[3,9,5,10]},{id:'nest',kind:'hall',w:3,h:3,zone:[5,10,9,12]},{id:'bonehall',kind:'ossuary',w:3,h:2,zone:[1,5,2,6]}],
   foes:[['gyrats',4],['gyhound',4],['gyrat',3],['gyraven',3]],count:24}
 ];
@@ -55251,7 +55853,7 @@ function gyMazeBuild(k){
   gyAlias();
   const spec=GYM_SPEC[k],M=gyMazeGen(spec),W=GYM.W,H=GYM.H,g=M.g,WH=GYM.WH,hs=(a,b,c)=>hash2(a,b,c),R=gyRng(M.seed*7+k);
   const chars={},chMap=new Map();let nextCh=0x300;const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
-  const vt=v=>ch(gyTile(spec.brick+'_'+v,WH));
+  const vt=v=>ch(gyTile(spec.brick+'_'+v,WH,spec.wall?{gain:1.05*spec.wall}:undefined));
   const VAR=(spec.vars||[0,0,0,3,3,5,5,1,0,3,2,4]).map(vt),RIM=[4,5,1,4,2].map(vt);
   const open=(x,y)=>g[y]&&g[y][x]==='.',near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(open(x+dx,y+dy))return true;return false};
   const rimCell=new Set();for(const r of M.rooms)for(let y=r.y0-1;y<=r.y1+1;y++)for(let x=r.x0-1;x<=r.x1+1;x++)if(g[y]&&g[y][x]==='#')rimCell.add(y*W+x);
@@ -55319,7 +55921,7 @@ function gyMazeBuild(k){
   // small chests at dead ends (potions, gold, a piece of gear)
   {const cs=pick(ends.filter(e=>free(e[0],e[1])),3);for(const [x,y] of cs)dec('chest',x,y,{block:true,sc:.9})}
   // light: a lamp every few squares along the way
-  {const have=lights.slice();for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!open(x,y)||M.dist[y*W+x]<0||M.dist[y*W+x]%6!==2)continue;if(have.every(l=>Math.hypot(l[0]-x,l[1]-y)>=5)){have.push([x,y]);light(x,y,spec.lcol)}}}
+  {const have=lights.slice();for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!open(x,y)||M.dist[y*W+x]<0||false)continue;if(have.every(l=>Math.hypot(l[0]-x,l[1]-y)>=4.2)){have.push([x,y]);light(x,y,spec.lcol)}}}
   // cobwebs and bones in corners of corridors (walk through)
   for(const [x,y] of ends){if(free(x,y)&&hs(x,y,k+70)<.35)dec(hs(x,y,k+71)<.5?'bones':'web',x,y,{sc:.8})}
   // ---- the creatures: not near the start, not in the boss room, spread out ----
@@ -55334,7 +55936,11 @@ function gyMazeBuild(k){
   const bt=['gyvane','gygrimsby','gyaldric','gymorwenna'][k];
   {const r=M.boss,cx=(r.x0+r.x1)>>1,cy=(r.y0+r.y1)>>1;enemies.push({t:bt,x:cx,y:cy,lvl:84+k});occ.add(cx+','+cy);Q.boss={x:cx,y:cy,t:bt}}
   // ---- floors ----
-  const fm=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++){let f=spec.floor;if(open(x,y)&&hs(x,y,k+80)<.16)f=spec.floor2;if(open(x,y)){const r=roomOf(x,y);if(r&&(r.kind==='chapel'||r.kind==='boss'))f='3'}s+=f}fm.push(s)}
+  // the floor set of this maze: 0 the floor, 1 the second floor, 2 and 4 the same with puddles of standing water, 3 the dim flagstone of chapels and boss rooms
+  const fb0=spec.floorGain?gyFloorTone('gyf_m'+k+'a',GY_FLOORSET[+spec.floor],spec.floorGain):GY_FLOORSET[+spec.floor],fb1=spec.floorGain?gyFloorTone('gyf_m'+k+'b',GY_FLOORSET[+spec.floor2],spec.floorGain):GY_FLOORSET[+spec.floor2],
+    fw0=gyFloorWet('gyf_m'+k+'w0',fb0,spec.lcol,k*17+3),fw1=gyFloorWet('gyf_m'+k+'w1',fb1,spec.lcol,k*17+8),fSet=[fb0,fb1,fw0,gyFloorTone('gyf_cflag','gyf_flag',.46,[.88,.92,1]),fw1,fb0];
+  const fm=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++){let f='0';if(open(x,y)&&hs(x,y,k+80)<.16)f='1';
+      if(open(x,y)){const r=roomOf(x,y);if(r&&(r.kind==='chapel'||r.kind==='boss'))f='3';else if(!r&&hs(x,y,k+90)<.2&&!mouths.has(x+','+y))f=f==='1'?'4':'2'}s+=f}fm.push(s)}
   const names=[];   // every room of a maze has its own name on the map
   for(const r of M.rooms){const nm={start:null,boss:{0:"The Vane Hall",1:"The Gravedigger's Pit",2:"The Knight's Vigil",3:"The Prioress's Chapel"}[k],cell:"The Warden's Cell",hall:'The Charnel Hall',chapel:'The Little Chapel',ossuary:'The Bone Room',lever:'The Lever Room',reliquary:'The Reliquary'}[r.kind];
     const own={lev0:'The Cross Lever Room',lev1:'The Crown Lever Room',lev2:'The Candle Lever Room',moot:'The Moot Hall',sorrow:'The Hall of Sorrow',nest:"The Rats' Nest",bonehall:'The Bone Hall'}[r.id];if(own||nm)names.push({t:own||nm,x:(r.x0+r.x1)>>1,y:(r.y0+r.y1)>>1,k:'place'})}
@@ -55350,10 +55956,21 @@ function gyMazeBuild(k){
        cand.push({x,y,f,nx,ny,nar,pri,h:hs(x,y,f*7+k)})}}
    cand.sort((a,b)=>a.pri-b.pri||a.h-b.h);
    const near=(c,g)=>torches.some(t=>Math.hypot(t[0]-c.x,t[1]-c.y)<g);
-   for(const c of cand){const g=c.pri===0?3.2:c.pri===1?3.4:c.pri===2?4.2:(c.nar?5.2:6);if(near(c,g))continue;torches.push([c.x,c.y,c.f,c.nar?1:0])}}
+   for(const c of cand){const g=c.pri===0?1.6:c.pri===1?1.7:c.pri===2?2.1:(c.nar?2.6:3);if(near(c,g))continue;torches.push([c.x,c.y,c.f,c.nar?1:0])}}
+  // ---- wall niches with candles: a few alcoves cut into the corridor walls, each lit by its own little warm light and one more candle-lit pool of colour ----
+  const NICHES=[];
+  {const nic=NICHES,tor=torches,bossD=(x,y)=>Math.hypot(x-M.door.x,y-M.door.y)<3.2,tk=new Set(tor.map(t=>t[0]+','+t[1]));
+   const NIL=gyTile(spec.brick+'_0',WH,{fac:{img:'cryptD_3',i:0,n:1},gain:.92*(spec.wall||1),tag:'niche'+k,draw:(x,w,h)=>{
+     const c=IMG.gyp_cryptD_2;x.globalCompositeOperation='lighter';const g=x.createRadialGradient(64,h-62,2,64,h-62,46);g.addColorStop(0,'rgba(255,170,70,.2)');g.addColorStop(1,'rgba(255,140,40,0)');x.fillStyle=g;x.fillRect(0,h-120,w,120);x.globalCompositeOperation='source-over';
+     if(c){x.drawImage(c,0,0,c.width,c.height*.5,46,h-84,36,25)}}});
+   const cand=[];for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(open(x,y)||rows[y][x]==='.'||tk.has(x+','+y)||bossD(x,y)||(x===ex.x&&Math.abs(y-ex.y)<3))continue;
+     const ns=GYM_D.filter(([a,b])=>open(x+a,y+b));if(ns.length!==1)continue;const [a,b]=ns[0],nx=x+a,ny=y+b;if(roomOf(nx,ny)&&roomOf(nx,ny).kind==='boss')continue;if(M.dist[ny*W+nx]<5)continue;
+     if(tor.some(t=>Math.hypot(t[0]-x,t[1]-y)<1.5))continue;cand.push({x,y,nx,ny,h:hs(x,y,k+95)})}
+   cand.sort((p,q)=>p.h-q.h);
+   for(const c of cand){if(nic.length>=16)break;if(nic.some(n=>Math.hypot(n.x-c.x,n.y-c.y)<4))continue;nic.push(c);put(c.x,c.y,ch(NIL));light(c.nx,c.ny,[1.15,.8,.42])}}
   const arr={x:sr.x0,y:ex.y,f:1};
-  const L={rows,chars,fmap:fm,floorSet:GY_FLOORSET,floor:GY_FLOORSET[+spec.floor],floor2:GY_FLOORSET[+spec.floor2],ceil:spec.ceil,ceilH:GYM.WH,start:arr,enemies,items,decor,lights,portals:[],day:0,amb:0,torchGap:1e9,noTele:true,noExtras:true,
-    name:spec.name,label:spec.name,diff:84+k,mapNames:names,_gy:{kind:'maze',k,M,Q,lcol,seed:M.seed,exit:ex,torches,torch:spec.torch}};
+  const L={rows,chars,fmap:fm,floorSet:fSet,floor:fb0,floor2:fb1,ceil:spec.ceil,ceilH:GYM.WH,start:arr,enemies,items,decor,lights,portals:[],day:0,amb:0,torchGap:1e9,noTele:true,noExtras:true,
+    name:spec.name,label:spec.name,diff:84+k,mapNames:names,_gy:{kind:'maze',k,M,Q,lcol,niches:NICHES,ground:(()=>{const c=GYMP.ground[spec.floor],o={};for(const f of '012345')o[f]=c;return o})(),seed:M.seed,exit:ex,torches,torch:spec.torch}};
   LEVELS[id]=L;
   gyMazeCheck(k,L);
   return L}
@@ -55686,7 +56303,7 @@ function gyMapDraw(c,x,L,api){
   x.save();x.beginPath();x.rect(PX,PY,PW,PH);x.clip();
   for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){
     if(wall(cx,cy)){const k=col(cx,cy),v=hash2(cx,cy,5)*12-6;x.fillStyle=`rgb(${Math.max(0,Math.min(255,k[0]*.8+v))|0},${Math.max(0,Math.min(255,k[1]*.8+v))|0},${Math.max(0,Math.min(255,k[2]*.8+v))|0})`}
-    else{const f=L.fmap[cy][cx];x.fillStyle=GYMP.ground[f]||'#cfc8b6'}
+    else{const f=L.fmap[cy][cx];x.fillStyle=((L._gy&&L._gy.ground)||GYMP.ground)[f]||'#cfc8b6'}
     x.fillRect(X(cx)-.1,Y(cy)-.1,s+.2,s+.2)}
   // the edge of every wall in ink
   x.strokeStyle=GYMP.ink;x.lineWidth=yard?.5:.7;x.lineCap='round';x.beginPath();
@@ -55712,7 +56329,7 @@ function gyMapDraw(c,x,L,api){
   {const a=392,b=40,w=82,lh=10.4,h=14+names.length*lh;api.panel(x,a,b,w,h);api.text(x,'Places',a+w/2,b+8,6.6,'#6a1a0e');
     names.forEach((n,i)=>{api.text(x,(i+1)+'  '+n.t.replace(/^The /,''),a+5,b+17+i*lh,5.2,INK,'left')})}
   {const a=6,b=46,w=84,h=yard?72:(L._gy&&L._gy.torch?72:58);api.panel(x,a,b,w,h);api.text(x,'Key',a+w/2,b+8,6.6,'#6a1a0e');
-    const rows=yard?[['Grass',GYMP.ground['0']],['Gravel',GYMP.ground['2']],['Flags',GYMP.ground['3']],['Bare earth',GYMP.ground['1']]]:[['Floor',GYMP.ground[(L.fmap[1]||'0')[1]]||'#cfc8b6'],['Wall',(()=>{const k=col(0,0);return `rgb(${k[0]*.8|0},${k[1]*.8|0},${k[2]*.8|0})`})()]];
+    const rows=yard?[['Grass',GYMP.ground['0']],['Gravel',GYMP.ground['2']],['Flags',GYMP.ground['3']],['Bare earth',GYMP.ground['1']]]:[['Floor',((L._gy&&L._gy.ground)||GYMP.ground)[(L.fmap[1]||'0')[1]]||'#cfc8b6'],['Wall',(()=>{const k=col(0,0);return `rgb(${k[0]*.8|0},${k[1]*.8|0},${k[2]*.8|0})`})()]];
     if(L._gy&&L._gy.torch)rows.push([L._gy.torch.name.replace(/^./,m=>m.toUpperCase())+' torch',L._gy.torch.css]);
     rows.forEach(([t,cc],i)=>{x.fillStyle=cc;x.strokeStyle=INK;x.lineWidth=.5;if(/ torch$/.test(t)){x.beginPath();x.arc(a+11,b+19+i*13,3,0,6.3);x.fill();x.stroke()}else{x.fillRect(a+6,b+16+i*13,10,6);x.strokeRect(a+6,b+16+i*13,10,6)}api.text(x,t,a+22,b+19+i*13,6,INK,'left')})}
 }
