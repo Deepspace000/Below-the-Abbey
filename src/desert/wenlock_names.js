@@ -65,11 +65,20 @@ function wlnStreetPlate(d){
 {const _s=shopSign;shopSign=function(d){if(d&&d.k==='sign_wlst'&&d.txt)return wlnStreetPlate(d);return _s.apply(this,arguments)}}
 /* a freestanding street sign: a painted signpost (walk up and read it) with a plate on each of the two ways it faces */
 let WLN_POSTS=0;
+function wlnPostPic(plates){   // the painted wooden signpost with the street names lettered straight onto its two boards
+  const base=IMG.greensign;if(!base||!base.width)return 'greensign';
+  const key='wlpost_'+plates.map(p=>p[1]).join('|');if(IMG[key])return key;
+  const S=2,w=base.width*S,h=base.height*S;
+  IMG[key]=mkCanvas(w,h,x=>{x.imageSmoothingEnabled=true;x.drawImage(base,0,0,w,h);
+    x.textAlign='center';x.textBaseline='middle';
+    for(const [wd,t,t2] of plates){const left=plates[0][1]===t;
+      const cx=left?w*.215:w*.785,cy=h*.265,mw=w*.33;let fs=32*S,f=()=>'bold '+fs+'px Georgia,serif';x.font=f();while(x.measureText(t).width>mw&&fs>8*S){fs-=S;x.font=f()}
+      x.lineJoin='round';x.lineWidth=Math.max(1.5,fs*.05);x.strokeStyle='rgba(255,226,170,.25)';x.strokeText(t,cx,cy+1);x.fillStyle='#2a1608';x.fillText(t,cx,cy)}});
+  NPC_H[key]=NPC_H.greensign||.8;return key}
 function wlnPost(C,x,y,plates,talk,rad){
   const q=C.free(x,y)?[x,y]:C.near(x,y,rad||2);if(!q)return null;
-  const id='wlo_post'+(WLN_POSTS++);khNpc(id,'A signpost','greensign',()=>say(talk,[BYE]));
-  C.dc('greensign',q[0],q[1],{npc:id,deco:false});
-  for(const [wd,t1,t2] of plates)C.decor.push({k:'sign_wlst',x:q[0],y:q[1],block:false,wd,txt:[t1,t2||''],plate:'street',sc:.85});
+  const id='wlo_post'+(WLN_POSTS++),pic=wlnPostPic(plates.map(p=>[p[0],p[1],p[2]]));khNpc(id,'A signpost',pic,()=>say(talk,[BYE]));
+  C.dc('greensign',q[0],q[1],{npc:id,deco:false});const dd=C.decor[C.decor.length-1];if(dd&&pic!=='greensign')dd.lk=pic;
   return q;
 }
 /* ---- the pass ---- */

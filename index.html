@@ -1299,7 +1299,7 @@ function areaAudio(){
     else if(LEVEL===476){T.music_underlevel=.6;loadLazy('music_underlevel')} // the Underlevel: Dark Cavern Ambient
     else if(LEVEL===35){T.music_tavern=.5;T.village_ambience=.15}
     else if(LEVEL===44){T.village_ambience=.8}
-    else if(LEVEL===496){T.village_ambience=.16;T.wind_loop=.04}
+    else if(LEVEL===496){T.village_ambience=.26;T.wind_loop=.05}
     else if(LEVEL===305){T.village_ambience=.5}
     else if(typeof yarSea==='function'&&yarSea(LEVEL)){T.village_ambience=LEVEL===290||LEVEL===304?.22:.06}
     else if(STREAM_LISTS[LEVEL]&&LEVEL>=50&&!(LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor)){T.dungeon_ambience=.18}
@@ -1318,12 +1318,12 @@ function areaAudio(){
   }
   for(const n of Object.keys(T)){T[n]*=SNDOPT[SND_CAT(n)];if(!(T[n]>0))delete T[n]}
   for(const n of SNDLIST.concat(['music_mithral','music_wanderer','music_embers','music_andorios','music_underlevel','music_hollowland','music_deeperhollow'])){if(n in T||LAYERS[n])setLayer(n,T[n]||0)}
-  if(G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===3||LEVEL===13||LEVEL===29||LEVEL===30)){
+  if(G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===3||LEVEL===13||LEVEL===29||LEVEL===30||LEVEL===496)){
     if(!G.bellNext)G.bellNext=G.time+50+Math.random()*60;
-    if(G.time>G.bellNext){G.bellNext=G.time+150+Math.random()*100;const v=(LEVEL===29||LEVEL===30)?.3:.6;playSmp('church_bell1',v);setTimeout(()=>playSmp('church_bell2',v*.8),2600);if(LEVEL===3||LEVEL===13)msg('The church bell tolls.','#d8c88e')}
+    if(G.time>G.bellNext){G.bellNext=G.time+150+Math.random()*100;const v=(LEVEL===29||LEVEL===30||LEVEL===496)?.3:.6;playSmp('church_bell1',v);setTimeout(()=>playSmp('church_bell2',v*.8),2600);if(LEVEL===3||LEVEL===13)msg('The church bell tolls.','#d8c88e')}
   }
   // now and then a village noise
-  if(G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===3||LEVEL===13)){
+  if(G.state==='play'&&!G.mute&&SNDOPT.amb&&(LEVEL===3||LEVEL===13||LEVEL===496)){
     if(!G.sndNext)G.sndNext=G.time+6+Math.random()*10;
     if(G.time>G.sndNext){
       G.sndNext=G.time+12+Math.random()*28;
@@ -2774,23 +2774,25 @@ function vividImg(k,d){ // each person is one colour, head to foot, a different 
 }
 const SIGN_CACHE={};
 const WALKTREE=/^([glp]?tree\d|pt_|lbush)/,BURNABLE=/^[gp]?tree\d/,NOSHADOW=/^[glp]?tree\d/,SKYLINE=/^(abbeyspire|dcity|kroof)$/; // skyline sprites stand behind a wall and only the part above it shows // dead trees can be burned; no tree casts a round shadow
+function signFlip(im){return im.alt||im}   // the sign made the other way round (bracket on the right), its lettering still reading the right way
 function shopSign(d){
   const key=(d.x*31+d.y)%2,hv=Math.abs((d.x*73856093)^(d.y*19349663)^((d.txt[0]||'').length*83492791)),id=key+'|'+(d.sc||1)+'|'+(hv%997)+'|'+d.txt.join('|');if(SIGN_CACHE[id])return SIGN_CACHE[id];
   const base=IMG['signb'+key];if(!base)return IMG[d.k];
   const w=base.width,h=base.height;
-  return SIGN_CACHE[id]=mkCanvas(w,h,(x)=>{
-    x.drawImage(base,0,0);
+  const mk=flip=>mkCanvas(w,h,(x)=>{
+    if(flip){x.save();x.translate(w,0);x.scale(-1,1);x.drawImage(base,0,0);x.restore()}else x.drawImage(base,0,0);
     // every sign its own colour and its own lettering: a colour from a wide palette, a typeface and a letter colour picked from the position
     const TP=['112,134,176','196,148,64','92,142,84','168,70,62','124,100,140','60,130,200','190,90,40','70,150,140','160,60,110','200,170,50','100,110,60','150,80,50','80,90,160','180,120,140'],TINT=TP[(hv>>3)%TP.length],
       FONTS=['Georgia','Palatino Linotype,Book Antiqua,Palatino','Garamond,Baskerville','Cambria,Constantia','Times New Roman,Times','Trebuchet MS,Verdana','Copperplate,Papyrus,fantasy','Courier New,monospace'],FF=FONTS[(hv>>7)%FONTS.length],
       LC=['#d6c9a0','#efe2b8','#e8d8c0','#f0e8d0','#cfd8b0','#e8c8a8'][(hv>>11)%6];
     x.save();x.globalCompositeOperation='source-atop';x.fillStyle=`rgba(${TINT},.4)`;x.fillRect(w*.08,h*.44,w*.88,h*.56);x.restore();
     x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';
-    const cx=w*.535,mw=w*.68;
+    const cx=w*(flip?.465:.535),mw=w*.68;
     const line=(t,y,fs0,font,col)=>{let fs=fs0;x.font=`${font} ${fs}px ${FF},serif`;while(x.measureText(t).width>mw&&fs>10){fs-=2;x.font=`${font} ${fs}px ${FF},serif`}x.lineWidth=Math.max(3,fs*.16);x.strokeStyle='rgba(18,12,6,.9)';x.strokeText(t,cx,y);x.fillStyle=col;x.fillText(t,cx,y)};
     line(d.txt[0],h*.67,h*.16,'bold',LC);
     if(d.txt[1])line(d.txt[1],h*.84,h*.1,'italic','#b0a47e');
   });
+  const c0=mk(false);c0.alt=mk(true);return SIGN_CACHE[id]=c0;
 }
 /* creatures fit the window: seen from the next square, one taller than about .9 of a wall is cut off at the top. Only the truly huge ones are allowed to be bigger. */
 const HUGE_FOES=['kraken','uwgiant','uwmega','uweelboss','uwgulper','cyclops','cinder','firelizard','sut'],FIT_MAX=.8,fitCache=new Map();
@@ -2816,7 +2818,7 @@ function spriteList(){
   if(G.flora&&G.flora.length){const px=G.C.x+.5,py=G.C.y+.5;for(const f of G.flora){const dx=f.wx-px,dy=f.wy-py;if(dx*dx+dy*dy>256)continue;const im=IMG[f.k];if(!im)continue;L.push({x:f.wx,y:f.wy,img:im,w:(NPC_H[f.k]?NPC_H[f.k]*im.width/im.height:decorW(f.k))*f.sc,decor:f.decor})}} // lots of tiny tufts: only those within sixteen cells are drawn
   const DROP={well:.07,fountain:.1,chest:.05,cart:.05,barrel:.03,crate:.03,bench:.04,urn:.03,memorial:.04,statue:.03,coffin:.03,gate:.02,tree0:.15,tree1:.13,tree2:.09,tree3:.14,tree4:.15,tree5:.16,tree6:.13,tree7:.14};
   const cam=G.C||{x:0,y:0};
-  for(const d of (LEVEL===44&&G.khB?khNearDecor(cam.x,cam.y):G.decor)){if(d.found)continue;if(d.hidden)continue;if(G.decor.length>250&&((d.x-cam.x)*(d.x-cam.x)+(d.y-cam.y)*(d.y-cam.y))>1300)continue;const k=(d.wind&&IMG[d.k+'f'])?(Math.sin(G.C.a)<0?d.k+'f':d.k):(d.lk&&IMG[d.lk])?d.lk:(d.k==='grave'&&IMG.grave2&&hash2(d.x,d.y,5)>.5)?'grave2':d.k;if(d.wd&&d.txt){L.push({x:d.x+.5+d.wd[0]*.3,y:d.y+.5+d.wd[1]*.3,img:shopSign(d),w:.74*(d.sc||1),bob:.62,hang:[d.wd[0],d.wd[1]],decor:d});continue}
+  for(const d of (LEVEL===44&&G.khB?khNearDecor(cam.x,cam.y):G.decor)){if(d.found)continue;if(d.hidden)continue;if(G.decor.length>250&&((d.x-cam.x)*(d.x-cam.x)+(d.y-cam.y)*(d.y-cam.y))>1300)continue;const k=(d.wind&&IMG[d.k+'f'])?(Math.sin(G.C.a)<0?d.k+'f':d.k):(d.lk&&IMG[d.lk])?d.lk:(d.k==='grave'&&IMG.grave2&&hash2(d.x,d.y,5)>.5)?'grave2':d.k;if(d.wd&&d.txt){L.push({x:d.x+.5+d.wd[0]*.3,y:d.y+.5+d.wd[1]*.3,img:shopSign(d),w:.6*(d.sc||1),bob:.5,hang:[d.wd[0],d.wd[1]],mount:[d.wd[0],d.wd[1]],decor:d});continue}
     if(d.pic&&d.wd&&IMG[d.k]){const im=(d.lk&&IMG[d.lk])?IMG[d.lk]:IMG[d.k],hh=NPC_H[d.k]||.6;L.push({x:d.x+.5+d.wd[0]*.47,y:d.y+.5+d.wd[1]*.47,img:im,w:hh*im.width/im.height,bob:d.bob===undefined?.45:d.bob,flat:[d.wd[0],d.wd[1]],pic:1,decor:d});continue}
     if(d.msgr&&IMG[d.k]){L.push({x:d.x+.5+d.wd[0]*.46,y:d.y+.5+d.wd[1]*.46,img:IMG[d.k],w:.55,bob:.45,flat:[d.wd[0],d.wd[1]],decor:d});continue}
     if(d.k==='lever'){const lk=IMG.hl_lever0?(d.pulled?((G.time-(d.pullT||0))<.14?'hl_lever1':'hl_lever2'):'hl_lever0'):'lever',li=IMG[lk]||IMG.lever;L.push({x:d.x+.5+d.wd[0]*.43,y:d.y+.5+d.wd[1]*.43,img:li,w:.34,bob:.34,flat:[d.wd[0],d.wd[1]],decor:d});continue} // a lever: old wood, with its off, halfway and on pictures
@@ -2846,7 +2848,8 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
   for(const s of proj){
     while(hmi<HM.length&&HM[hmi].tY>=s.tY)hgtmDraw(HM[hmi++]);
     if(s.custom){s.custom.draw(cx,cy,dX,dY,pX,pY);continue}
-    const img=s.img;if(!img)continue;
+    let img=s.img;if(!img)continue;
+    if(s.mount){const side=inv*(dY*s.mount[0]-dX*s.mount[1]);if(side>0)img=signFlip(img)}   // a hanging shop sign: its iron bracket is always on the wall (shop) side
     const iw=img.width,ih=img.height,ty=s.tY;
     if(s.decor&&s.decor.burn>0){const bp=s.decor.burn/5;s.fade=bp>.82?clamp((1-bp)/.18,0,1):1;if(s.fade<.03)continue}
     if(s.hang||(s.decor&&(s.decor.walk||/^sign_|^lamp$/.test(s.decor.k)))){const f=s.decor&&s.decor.walk&&WALKTREE.test(s.decor.k)?clamp((ty-1.15)/1,0,1):clamp((ty-.35)/.55,0,1);if(f<.03)continue;s.fade=f} // signs, lanterns and walk-through people melt away when you stand beside them
@@ -51359,11 +51362,20 @@ function wlnStreetPlate(d){
 {const _s=shopSign;shopSign=function(d){if(d&&d.k==='sign_wlst'&&d.txt)return wlnStreetPlate(d);return _s.apply(this,arguments)}}
 /* a freestanding street sign: a painted signpost (walk up and read it) with a plate on each of the two ways it faces */
 let WLN_POSTS=0;
+function wlnPostPic(plates){   // the painted wooden signpost with the street names lettered straight onto its two boards
+  const base=IMG.greensign;if(!base||!base.width)return 'greensign';
+  const key='wlpost_'+plates.map(p=>p[1]).join('|');if(IMG[key])return key;
+  const S=2,w=base.width*S,h=base.height*S;
+  IMG[key]=mkCanvas(w,h,x=>{x.imageSmoothingEnabled=true;x.drawImage(base,0,0,w,h);
+    x.textAlign='center';x.textBaseline='middle';
+    for(const [wd,t,t2] of plates){const left=plates[0][1]===t;
+      const cx=left?w*.215:w*.785,cy=h*.265,mw=w*.33;let fs=32*S,f=()=>'bold '+fs+'px Georgia,serif';x.font=f();while(x.measureText(t).width>mw&&fs>8*S){fs-=S;x.font=f()}
+      x.lineJoin='round';x.lineWidth=Math.max(1.5,fs*.05);x.strokeStyle='rgba(255,226,170,.25)';x.strokeText(t,cx,cy+1);x.fillStyle='#2a1608';x.fillText(t,cx,cy)}});
+  NPC_H[key]=NPC_H.greensign||.8;return key}
 function wlnPost(C,x,y,plates,talk,rad){
   const q=C.free(x,y)?[x,y]:C.near(x,y,rad||2);if(!q)return null;
-  const id='wlo_post'+(WLN_POSTS++);khNpc(id,'A signpost','greensign',()=>say(talk,[BYE]));
-  C.dc('greensign',q[0],q[1],{npc:id,deco:false});
-  for(const [wd,t1,t2] of plates)C.decor.push({k:'sign_wlst',x:q[0],y:q[1],block:false,wd,txt:[t1,t2||''],plate:'street',sc:.85});
+  const id='wlo_post'+(WLN_POSTS++),pic=wlnPostPic(plates.map(p=>[p[0],p[1],p[2]]));khNpc(id,'A signpost',pic,()=>say(talk,[BYE]));
+  C.dc('greensign',q[0],q[1],{npc:id,deco:false});const dd=C.decor[C.decor.length-1];if(dd&&pic!=='greensign')dd.lk=pic;
   return q;
 }
 /* ---- the pass ---- */
