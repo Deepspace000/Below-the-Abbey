@@ -18,7 +18,7 @@ const WL_STRAYS=[
     ['Dolores',[76,86],'near Wenlock Mill, at the far south-east.','Dolores looks down at you from a great height, spits very slightly, and strolls back to the wool yard.','Hmmm. (Dolores is looking at the mill wheel as if it owes her money.)'],
     ['Lord Fluff',[90,48],'at the east end of the High Street.','Lord Fluff allows you to say a few words, then turns, and processes back to the yard like a small, woolly bishop.','Hmmm. (Lord Fluff is standing in the road, blocking a cart, and does not care.)'],
     ['Pachamama',[68,60],'in the fields east of the market square.','Pachamama hums, flicks an ear, and wanders home. The cart behind her is very relieved.','Hmmm. (Pachamama is chewing something, and is not going to explain.)'],
-    ['Alpaco',[66,24],'by the granary, in the north-east.','Alpaco bows his long neck, turns about, and goes home with very great dignity indeed.','Hmmm. (Alpaco has got his head in a sack of grain, and is not coming out.)'],
+    ['Alpaco',[66,24],'beside the big barn, in the north-east.','Alpaco bows his long neck, turns about, and goes home with very great dignity indeed.','Hmmm. (Alpaco has got his head in a sack of oats, and is not coming out.)'],
     ['Brenda',[32,88],'in the south meadow across the brook.','Brenda sniffs, looks at the brook, looks at you, and decides you are almost as good as a bridge.','Hmmm. (Brenda is lying in the grass like a very large cat.)']]}];
 for(const S of WL_STRAYS){
   const ids=S.list.map((a,i)=>'wlo_'+S.kind+(i+1)),got=()=>S.list.reduce((n,a,i)=>n+(wlF()[S.flag+(i+1)]?1:0),0);
