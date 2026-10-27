@@ -39,6 +39,12 @@ function twBuild(){
   // a potion in the second longest dead end
   const items=[];{const e2=ends.find(p=>!taken.has(p[0]+','+p[1])&&d[p[1]*W+p[0]]>=14);if(e2)items.push({k:'potion',x:e2[0],y:e2[1]})}
   const decor=[{k:'chest',x:chest[0],y:chest[1],block:true,goldAmt:35}];
+  // a hungry cat in one dead end, and a salt herring lying in another (The Rat Catcher's Cat)
+  {const used=new Set(items.map(q=>q.x+','+q.y));used.add(chest[0]+','+chest[1]);
+   const cat=ends.find(p=>!used.has(p[0]+','+p[1])&&!taken.has(p[0]+','+p[1])&&d[p[1]*W+p[0]]>=10);
+   if(cat){used.add(cat[0]+','+cat[1]);decor.push({k:'pet_cat_0',x:cat[0],y:cat[1],block:true,npc:'twcat',sc:.9})}
+   const fish=ends.find(p=>!used.has(p[0]+','+p[1])&&!taken.has(p[0]+','+p[1])&&d[p[1]*W+p[0]]>=6);
+   if(fish)items.push({k:'herring',x:fish[0],y:fish[1]})}
   // a torch light every so often along the passages
   const lights=[];for(const [x,y] of floor)if(d[y*W+x]%9===4&&lights.every(l=>Math.hypot(l[0]-x,l[1]-y)>=5))lights.push([x,y]);
   const fm=[];for(let y=0;y<H;y++)fm.push('0'.repeat(W));
@@ -47,13 +53,9 @@ function twBuild(){
   let edges=0;for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(g[y][x]!=='.')continue;for(const [a,b] of [[1,0],[0,1]])if(g[y+b]&&g[y+b][x+a]==='.')edges++}
   const info={ok:reach===floors&&edges===floors-1&&enemies.length===8&&g[H-1][sx]==='0',floors,reach,edges,rats:enemies.length,chest,chestWalk:d[chest[1]*W+chest[0]]};
   if(!info.ok)console.error('Under the Well failed its own checks',info);
-  // a small vault for the chest (3 by 3, grown off the end of the dead end when the walls beyond it are solid), and some dressing along the passages (bones everywhere, a few barrels at dead ends)
-  {const nb=D4.find(([a,b])=>g[chest[1]+b][chest[0]+a]==='.');
-   if(nb){const dx=-nb[0],dy=-nb[1],cx=chest[0]+dx*2,cy=chest[1]+dy*2;let ok=true;
-     for(let y=cy-1;y<=cy+1&&ok;y++)for(let x=cx-1;x<=cx+1;x++){if(x<1||y<1||x>W-2||y>H-2||g[y][x]!=='#'){ok=false;break}}
-     if(ok){for(let y=cy-1;y<=cy+1;y++)for(let x=cx-1;x<=cx+1;x++)g[y][x]='.';g[chest[1]+dy][chest[0]+dx]='.';
-       const ch=decor[0];ch.x=cx;ch.y=cy;info.chamber=[cx,cy];
-       decor.push({k:'bones',x:cx-1,y:cy+(dy?-dy:1),block:false},{k:'barrel',x:cx+1,y:cy-1,block:true},{k:'bones',x:cx+1,y:cy+1,block:false});lights.push([cx,cy])}}}
+  // the chest's dead end is dressed (the maze is cut so tight that no room fits round it): bones, a barrel and a light on the way in
+  {const nb=D4.find(([a,b])=>g[chest[1]+b][chest[0]+a]==='.');if(nb){const px=chest[0]+nb[0],py=chest[1]+nb[1];decor.push({k:'bones',x:px,y:py,block:false});lights.push([chest[0],chest[1]]);
+     const nn=D4.find(([a,b])=>(a!==-nb[0]||b!==-nb[1])&&g[py+b][px+a]==='.');if(nn)decor.push({k:'barrel',x:px+nn[0],y:py+nn[1],block:false,walk:true,deco:true,sc:.8})}}
   const near=(x,y)=>decor.some(q=>q.x===x&&q.y===y)||(x===chest[0]&&y===chest[1])||items.some(q=>q.x===x&&q.y===y);
   floor.forEach(([x,y],i)=>{if(near(x,y)||d[y*W+x]<5)return;const h=hash2(x,y,9917);
     if(h<.045)decor.push({k:'bones',x,y,block:false});
@@ -176,3 +178,16 @@ draw(c,x,L,api){
   mpQhDoor(x,kx,82,.8);api.text(x,'Way out',kx+9,82,5.6,'#2a1a0c','left');
   api.compass(x,436,130,13);
 }});
+
+/* ---- The Rat Catcher's Cat: a hungry cat sits in a dead end under the well, and a salt herring lies in another ---- */
+QUESTS.twq_cat={title:"The Rat Catcher's Cat",who:'A hungry cat',desc:"A thin tabby cat sits in a dead end in the tunnels under the Thornwick well. She is hungry. Find a salt herring, which is lying in another dead end in the tunnels (or buy one), and bring it to her.",need:1,goal:()=>(bagCount('herring')>0||G.flags.twCatFed)?1:0,reward:{gold:1200,xp:4500,items:['potion5']}};
+QAREA.twq_cat='Thornwick';
+const TWCAT=khQD("Mrrow. (A thin tabby cat sits in the dead end with her paws together. She has the look of a cat who used to catch the rats down here and has now run out of rats she is brave enough to catch. She looks at your bag, and then at you.)",
+  "Mrr. (She settles down to wait.)",
+  (n,m)=>'She wants a salt herring. One lies in another dead end somewhere in the tunnels, and the shops in Thornwick may sell them too.',
+  "Mrrow! (She smells the herring through your bag and stands up at once.)",
+  "(She eats the herring in four bites, washes her face, and leaves something for you on the floor.)",
+  "(The cat is asleep in the corner with a full stomach and a very small smile.)","Give her the herring.");
+NPCS.twcat={name:'A hungry cat',img:'pet_cat_0',root:d=>qNode('twq_cat',TWCAT)};
+Object.defineProperty(QGIVER,'twcat',{enumerable:true,configurable:true,get(){return qSt('twq_cat')==='done'?null:['twq_cat']}});
+{const _t=qTurnIn;qTurnIn=function(id){const r=_t.apply(this,arguments);try{if(r&&id==='twq_cat'){G.flags.twCatFed=1;if(bagCount('herring')>0)bagRemove('herring',1)}}catch(e){console.error(e)}return r}}
