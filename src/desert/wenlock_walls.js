@@ -81,7 +81,9 @@ function wlwPass(C){
   // 1. the hidden blocks under the big pictures: boarding, pigeon holes, honey stone, whitewash. Door squares lead into rooms.
   const defs={
     'The Barn':{wh:2.4,tiles:()=>[wlwBoards('b',2.4,0),wlwBoards('b',2.4,1),wlwBoards('b',2.4,2),wlwBoards('b',2.4,0)],doors:[[63,18],[64,18]],lvl:WLX.BARN},
-    'The Dovecote':{wh:2.4,tiles:()=>{const b=TM.make('plain','golden',2.4).gid;return [wlwHoles(b,'a',2.4,3),wlwHoles(b,'a',2.4,2),b,wlwHoles(b,'a',2.4,3)]},doors:[[54,38],[55,38]],lvl:WLX.DOVE},
+    'The Dovecote':{wh:2.4,tiles:()=>{const b=TM.make('plain','golden',2.4).gid,im=IMG.wl_bldg1_4;if(!im)return [wlwHoles(b,'a',2.4,3),wlwHoles(b,'a',2.4,2),b,wlwHoles(b,'a',2.4,3)];
+      // the sides of the tower are cut from its own painted stonework, so the slab behind the picture matches it
+      const cut=(n,sx)=>wlwNew('dove'+n,2.4,(x,w,h)=>{x.drawImage(im,sx,214,90,216,0,0,w,h)});return [cut(0,22),cut(1,195),cut(2,22),cut(3,195)]},doors:[[54,38],[55,38]],lvl:WLX.DOVE},
     'Wenlock Mill':{wh:2.4,tiles:()=>{const s='golden';return [TM.make('plain',s,2.4).gid,TM.make('gwin',s,2.4).gid,TM.make('window',s,2.4).gid,TM.make('plain2',s,2.4).gid,TM.make('window2',s,2.4).gid]},doors:[[79,88],[80,88]],lvl:WLX.MILL},
     'The Windmill':{wh:2.4,tiles:()=>{const s=OSTY.white||'cottage';return [TM.make('plain',s,2.4).gid,TM.make('gwin',s,2.4).gid,TM.make('window',s,2.4).gid,TM.make('plain2',s,2.4).gid]},doors:[[86,89],[87,89]],lvl:WLX.WIND}
   };
