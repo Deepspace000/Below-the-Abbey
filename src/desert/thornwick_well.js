@@ -54,8 +54,16 @@ function twBuild(){
   const info={ok:reach===floors&&edges===floors-1&&enemies.length===8&&g[H-1][sx]==='0',floors,reach,edges,rats:enemies.length,chest,chestWalk:d[chest[1]*W+chest[0]]};
   if(!info.ok)console.error('Under the Well failed its own checks',info);
   // the chest's dead end is dressed (the maze is cut so tight that no room fits round it): bones, a barrel and a light on the way in
-  {const nb=D4.find(([a,b])=>g[chest[1]+b][chest[0]+a]==='.');if(nb){const px=chest[0]+nb[0],py=chest[1]+nb[1];decor.push({k:'bones',x:px,y:py,block:false});lights.push([chest[0],chest[1]]);
-     const nn=D4.find(([a,b])=>(a!==-nb[0]||b!==-nb[1])&&g[py+b][px+a]==='.');if(nn)decor.push({k:'barrel',x:px+nn[0],y:py+nn[1],block:false,walk:true,deco:true,sc:.8})}}
+  // the chest's dead end is widened into a small chamber: the nine squares round the chest are cleared (the chest stands in the middle, the way in is where the passage met it), with a light in the room and a few bones
+  {const nb=D4.find(([a,b])=>g[chest[1]+b][chest[0]+a]==='.');
+   for(let y=chest[1]-1;y<=chest[1]+1;y++)for(let x=chest[0]-1;x<=chest[0]+1;x++)if(x>=1&&y>=1&&x<=W-2&&y<=H-2&&g[y][x]==='#')g[y][x]='.';
+   // the room is walkable all round the chest, and still joined to the stair
+   const d2=new Int16Array(W*H).fill(-1),q2=[sy*W+sx];d2[q2[0]]=0;for(let i=0;i<q2.length;i++){const c=q2[i],x=c%W,y=(c/W)|0;for(const [a,b] of D4){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||g[ny][nx]!=='.'||d2[ny*W+nx]>=0)continue;d2[ny*W+nx]=d2[c]+1;q2.push(ny*W+nx)}}
+   let ring=0;for(let y=chest[1]-1;y<=chest[1]+1;y++)for(let x=chest[0]-1;x<=chest[0]+1;x++)if(g[y][x]==='.'&&d2[y*W+x]>=0)ring++;
+   info.chamber={cells:ring,solvable:d2[chest[1]*W+chest[0]]>=0};
+   if(ring!==9)console.error('Under the Well: the chest chamber is not whole',info.chamber);
+   const lx=chest[0]+(nb&&nb[0]===1?-1:1),ly=chest[1]+(nb&&nb[1]===1?-1:1);lights.push([lx,ly]);
+   decor.push({k:'bones',x:chest[0]+(nb?nb[0]:1),y:chest[1]+(nb?nb[1]:0),block:false});decor.push({k:'barrel',x:lx,y:ly,block:false,walk:true,deco:true,sc:.8})}
   const near=(x,y)=>decor.some(q=>q.x===x&&q.y===y)||(x===chest[0]&&y===chest[1])||items.some(q=>q.x===x&&q.y===y);
   floor.forEach(([x,y],i)=>{if(near(x,y)||d[y*W+x]<5)return;const h=hash2(x,y,9917);
     if(h<.045)decor.push({k:'bones',x,y,block:false});
