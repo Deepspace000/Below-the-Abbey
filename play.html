@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.676';
+const VERSION='3.677';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -52224,6 +52224,78 @@ function wlePass(C){
     d.block=false;d.walk=true}
 }
 
+/* ---- src/desert/wenlock_river.js ---- */
+/* ==========================================================================
+   WENLOCK: THE RIVER SIDE (prefix wlr). Tall reeds, grass, willows and flowers along both banks of the brook and round the duck pond, and a small wooden pier
+   west of the old bridge, with a rowing boat tied up, a lantern, a crate and a barrel. Runs after the other passes by wrapping wlPolish (wenlock_polish.js).
+   Everything that grows is walk-through and melts away when you stand beside it (walk:true, like the trees in the meadows), so the lane, the bridge and the pier stay clear.
+   The pier: planks are the floor slot 5 (the south meadow, which used slot 5, is now plain lawn). WLR_PIER = {x,y,dx,dy} is the last plank at the end of the pier and the
+   direction out over the water; the water squares beside and beyond it are left open (for fishing spots).
+   ========================================================================== */
+const WLR_PIER={x:68,y:84,dx:0,dy:1};
+function wlrPass(C){
+  const {hs,decor,block,fm,hgt,rows,W,lv}=C;
+  const get=k=>IMG[k]?k:null;
+  for(const [k,h] of [['hgwm_reed0',1.5],['hgwm_grass0',1.3],['pt_willow',2.5],['reeds',.85],['pgrass0',.3],['yar_boat_row',.5],['gy_rpost',.8]])if(NPC_H[k]===undefined)NPC_H[k]=h;
+  // ---- the pier: planks as floor slot 5 ----
+  const PIMG=IMG.art_tex_hgdp_planks||IMG.art_tex_hgdp_dock;if(PIMG&&!FLOORS.wlPlank)FLOORS.wlPlank=dsPaintedTex(PIMG);
+  const FL=FLOORS.wlPlank?'wlPlank':FLOORS.wood?'wood':null;
+  if(FL&&lv.floorSet){
+    for(let i=0;i<fm.length;i++)if(fm[i]==='5')fm[i]='2';   // the south meadow was slot 5: plain lawn now
+    lv.floorSet=lv.floorSet.slice();lv.floorSet[5]=FL;
+  }
+  const P=WLR_PIER,planks=[[68,82],[69,82],[68,83],[69,83],[68,84],[69,84]];
+  for(const [x,y] of planks){const i=y*W+x;fm[i]='5';block[i]=0;hgt[i]=.3;rows[y][x]='.';C.used.add(x+','+y)}
+  const water=(x,y)=>fm[y*W+x]==='4';
+  // posts at the sides of the planks, a rowing boat tied along the end, a lantern, a crate and a barrel
+  const post=get('gy_rpost');
+  const D=(k,x,y,o)=>{if(!k)return;C.used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true,deco:true},o||{}))};
+  D('crate',69,84,{block:true,walk:false,sc:.85});
+  D('barrel',69,83,{block:true,walk:false,sc:.85});
+  D('lamp',69,82,{sc:1,ox:.15,oy:0});C.lights.push([69,82]);
+  D('yar_boat_row',67,84,{block:false,walk:false,sc:1.2,ox:-.1,oy:0});
+  if(post)for(const [x,y,ox,oy] of [[68,82,-.42,0],[68,84,-.42,0]])D(post,x,y,{ox,oy,sc:.8,block:false,walk:true});
+  // ---- the banks ----
+  const ok=(x,y)=>x>3&&y>3&&x<96&&y<96&&C.free(x,y)&&!C.isRoad(x-1,y)&&!C.isRoad(x+1,y);
+  const lane=x=>x>=69&&x<=75;       // the bridge and Mill Lane: only low things
+  const put=(k,x,y,sc,o)=>{if(!get(k)||!ok(x,y))return false;D(k,x,y,Object.assign({sc,block:false,walk:true,ox:(hs(x,y,201)-.5)*.5,oy:(hs(x,y,202)-.5)*.4},o||{}));return true};
+  const TALL=['hgwm_reed0','reeds','hgwm_grass0','pgrass1','hgwm_reed0','pgrass2'];
+  for(let x=4;x<=95;x++){
+    const by=WL_BROOK(x),near=x>=66&&x<=78;
+    for(const [row,r1,r2] of [[by-1,0,1],[by+2,2,3]]){          // the first dry row on each side
+      for(let k=0;k<2;k++){
+        const h=hs(x,row,210+k+r1*7);if(h>(lane(x)?.2:.6))continue;
+        const key=lane(x)?(hs(x,row,215)<.5?'pgrass1':'pflw0_0'):TALL[(hs(x,row,216+k)*TALL.length)|0];
+        const tall=/reed|grass0/.test(key);
+        put(key,x,row,lane(x)?1.1:(tall?1+hs(x,row,217)*.55:1.1+hs(x,row,218)*.6));
+      }
+    }
+    // second row back: grass and flowers, the odd fern
+    for(const row of [by-2,by+3]){const h=hs(x,row,220);if(lane(x)){if(h<.25)put(h<.12?'pflw3_0':'pgrass3',x,row,1.2);continue}
+      if(h<.4)put(['pgrass0','pgrass3','pflw0_0','pflw4_0','lflora0'][(hs(x,row,221)*5)|0],x,row,1.2+hs(x,row,222)*.4);else if(h<.5)put('hgwm_grass0',x,row,1.1)}
+  }
+  // willows and other waterside trees, every nine squares or so, never beside the lane or the pier
+  for(let x=6;x<=94;x+=5){
+    if(x>=64&&x<=80)continue;
+    const by=WL_BROOK(x),x2=x+((hs(x,1,230)*3)|0);
+    const north=hs(x,2,231)<.6,y=north?by-3:by+4;
+    put('pt_willow',x2,y,1.1+hs(x,3,232)*.4);
+    if(hs(x,4,233)<.5)put(['ltree12','ltree0','ltree8','ltree19'][(hs(x,5,234)*4)|0],x2+2,north?by-4:by+5,1);
+  }
+  // beside the bridge and the mill: a willow on each bank, set back from the lane
+  put('pt_willow',65,81,1.3);put('pt_willow',78,81,1.2);put('pt_willow',66,88,1.3);put('pt_willow',70,89,1.1);put('pt_willow',74,89,1.2);
+  // ---- the duck pond ----
+  const PD=WL_GREEN.pond;
+  for(let y=PD[1]-2;y<=PD[3]+2;y++)for(let x=PD[0]-2;x<=PD[2]+2;x++){
+    const edge=Math.max(Math.max(PD[0]-x,x-PD[2]),Math.max(PD[1]-y,y-PD[3]));if(edge<1||edge>2)continue;
+    const h=hs(x,y,240);
+    if(edge===1&&h<.55)put(TALL[(hs(x,y,241)*TALL.length)|0],x,y,1+hs(x,y,242)*.5);
+    else if(edge===2&&h<.3)put(['pgrass1','pflw0_0','pflw3_0','lflora0'][(hs(x,y,243)*4)|0],x,y,1.2);
+  }
+  put('pt_willow',PD[0]-2,PD[1]-1,1.3);put('pt_willow',PD[2]+2,PD[3]+1,1.2);put('pt_willow',PD[0]-1,PD[3]+2,1.1);
+}
+{const _p=wlPolish;wlPolish=function(C){_p.apply(this,arguments);try{wlrPass(C)}catch(e){console.error('wlPolish river',e)}}}
+
 /* ---- src/desert/maps_wenlock.js ---- */
 /* Area map for Wenlock (level 496): an English market town. Drawn from the real level data: the meadows and the green, the brook with its two rows of water and the stone bridge, the duck pond,
    the cobbled High Street, the gravel lanes and the dirt back track, the square with its well, cross and stalls, every cottage and shop with its own walls and roof, the church of Saint Wenna with its tower and the graves, the trees,
@@ -57008,6 +57080,696 @@ const BOSS_PLUS={sut:1};
   try{for(const e of G.enemies){const up=BOSS_PLUS[e.t];if(!up||e.hp<=0||e.dying||e.base===undefined)continue;
     const nl=e.base+up;if(e.lvl!==nl){const fr=e.hp/Math.max(1,e.maxhp);e.lvl=nl;e.vd=-up;e.maxhp=enemyStat(e.t,nl).hp;e.hp=Math.max(1,Math.ceil(e.maxhp*fr))}}}catch(x){console.error('bossplus',x)}
   return r}}
+
+/* ---- src/desert/fishing_data.js ---- */
+/* ==========================================================================
+   FISHING: THE DATA (prefix fsh / FSH). Five rods and thirty fish, as ordinary items. The rules are in fishing.js.
+   A rod gives the chance that a fish is landed once the line game was won: 20, 32, 45, 58 and 70 percent.
+   The Simple Rod (300 gold) is stocked by the general merchants (Thornwick, Ironhill, Greendale, Wenlock, Khemetra and the traders of the Hollow).
+   The better rods are added to the same shops as the party's level rises (see fsh_openLoot in fishing.js).
+   The fish icons are the painted fish of the freshwater pack (assets/ds_fw_*, ds_hgtb_fish_*, ds_hgf*), cropped, and recoloured for the kinds that share a picture.
+   The rod icons are drawn in code (there is no painted rod yet).
+   ========================================================================== */
+const FSH_RODS=[ // [id, name, chance (percent), price, party level at which shops start to sell it, shaft colour, description]
+  ['fishrod_1','Simple Rod',20,300,0,'#9a7a4a','A plain hazel pole with a cord, a cork bobber and a bent pin for a hook. A fish is landed 20 percent of the time after a good pull.'],
+  ['fishrod_2','Hazel Rod',32,800,5,'#7a8a4a','A springy, well-seasoned rod with a brass reel. A fish is landed 32 percent of the time after a good pull.'],
+  ['fishrod_3','Yew Rod',45,1800,15,'#a86a3a','A rod of yew with a steady tip and a waxed line. A fish is landed 45 percent of the time after a good pull.'],
+  ['fishrod_4','Steel-Tipped Rod',58,4200,25,'#8a98aa','A long rod with a steel tip and silk line, made for big water. A fish is landed 58 percent of the time after a good pull.'],
+  ['fishrod_5',"Master Angler's Rod",70,8000,35,'#d8b84a','A gilded rod, light as a feather and strong as a chain. A fish is landed 70 percent of the time after a good pull.']];
+const FSH_TIERS=[ // [name, colour, weight in a catch, hunger range label]
+  ['Common','#d8d0b8',60],['Uncommon','#8ad88a',24],['Rare','#7ab8f0',10],['Very rare','#d8a0f0',4],['Legendary','#ffd76a',1.6]];
+/* [id, name, tier, picture, hue turn (degrees), saturation, brightness, hunger, percent of max health, price, text] */
+const FSH_FISH=[
+  ['fish_minnow','Minnow',0,'fw_minnows',0,1,1,14,3,4,'A tiny silver fish that swims in shoals. Small, but it is food.','fd'],
+  ['fish_bleak','Bleak',0,'hgtb_fish_glassfish',20,.5,1.05,16,3,4,'A thin, bright fish that skims the top of the water.','f'],
+  ['fish_roach','Roach',0,'fw_bream',0,.35,1.3,18,3,5,'A silver fish with red fins, common in every slow river.','f'],
+  ['fish_gudgeon','Gudgeon',0,'fw_tench',20,.7,1.45,18,4,5,'A small, spotted bottom fish with a little beard at the mouth.','f'],
+  ['fish_rudd','Rudd',0,'fw_goldfish',-8,.55,.85,20,4,6,'A golden-bronze fish with red fins that feeds near the reeds.','f'],
+  ['fish_stickleback','Stickleback',0,'hgtb_fish_neon',150,.4,.95,16,3,4,'A prickly little fish. There is not much on it, but it is quick to cook.','fsd'],
+  ['fish_perch','Perch',0,'fw_perch',0,1,1,24,5,7,'A striped fish with a spiny back fin and sweet white meat.','f'],
+  ['fish_bream','Bream',0,'fw_bream',0,1,1,26,5,8,'A deep, flat, bronze fish that feeds on the bottom of slow water.','f'],
+  ['fish_tench','Tench',0,'fw_tench',0,1,1,26,6,8,'A thick green fish of muddy ponds, slimy but filling.','fd'],
+  ['fish_crucian','Crucian Carp',0,'fw_carp',25,.9,1.2,28,6,9,'A small, round, golden carp from still ponds.','f'],
+  ['fish_trout','Brown Trout',1,'fw_trout',0,1,1,34,8,16,'A speckled fish of fast, clear water, with firm pink flesh.','f'],
+  ['fish_chub','Chub',1,'fw_carp',-20,.7,.9,34,8,16,'A heavy-headed river fish that takes almost any bait.','f'],
+  ['fish_dace','Dace',1,'fw_bream',60,.4,1.4,32,8,15,'A quick, slim, silver fish of the upper river.','f'],
+  ['fish_grayling','Grayling',1,'fw_trout',55,.7,1.2,36,9,18,'A silver fish with a tall, sail-like back fin.','f'],
+  ['fish_eel','River Eel',1,'hgtb_fish_eel',0,1,1,38,10,20,'A long, muscular fish that slides through the mud. It is rich and oily.','fsd'],
+  ['fish_flounder','Flounder',1,'hgtb_fish_flounder',0,1,1,36,9,18,'A flat fish with both eyes on one side, found near river mouths.','fs'],
+  ['fish_crayfish','River Crayfish',1,'hgfcrayfish',0,1,1,38,10,22,'A small freshwater lobster with sweet tail meat.','fd'],
+  ['fish_pike','Pike',1,'fw_pike',0,1,1,42,11,24,'A long, green, toothy hunter of the weeds, with firm white meat.','f'],
+  ['fish_salmon','Salmon',2,'fw_trout',-60,1.1,1.15,56,16,48,'A strong silver fish with rich pink flesh, caught as it swims upstream.','fs'],
+  ['fish_wels','Wels Catfish',2,'hgfcatfish',0,1,1,62,17,56,'A huge, whiskered, scaleless fish that lies in deep holes.','fd'],
+  ['fish_ray','River Ray',2,'hgtb_fish_pearlray',0,1,.95,58,16,52,'A flat, pale fish with a long tail that glides along the bottom.','fsd'],
+  ['fish_angelfish','Striped Angelfish',2,'hgtb_fish_angel',0,1,1,52,15,46,'A tall, thin fish with long fins and gold and white stripes.','fs'],
+  ['fish_sturgeon','Sturgeon',2,'fw_pike',30,.5,.8,66,18,64,'An ancient fish with bony plates on its back and fine, dark meat.','fs'],
+  ['fish_piranha','Red Piranha',2,'hgfpiranha',0,1,1,60,16,54,'A deep-bellied fish with a mouth of sharp teeth. Handle it with care.','fd'],
+  ['fish_goldencarp','Golden Carp',3,'fw_carp',-20,1.8,1.25,76,22,150,'A carp with scales the colour of old gold. It is rare and very good eating.','f'],
+  ['fish_anglerfish','Lantern Angler',3,'hgtb_fish_lanternfish',0,1,1,80,24,170,'A dark fish with a glowing lure that hangs over its mouth.','sd'],
+  ['fish_leafdragon','Leaf Dragon',3,'hgtb_fish_seadragon',0,1,1,72,21,160,'A strange fish covered in leaf-shaped fins like floating weed.','sd'],
+  ['fish_pufferfish','Pearl Pufferfish',3,'hgtb_fish_puffer',0,1,1,78,23,180,'A round, pale, spiny fish that swells when it is afraid.','sd'],
+  ['fish_moonpike','Moonscale Pike',4,'fw_pike',150,1.1,1.5,100,32,500,'A huge pike with silver-blue scales that shine in moonlight.','fsd'],
+  ['fish_embercarp','Emberscale Koi',4,'fw_goldfish',10,1.6,1.15,100,35,600,'A bright orange koi with scales like glowing coals. It is said to be lucky.','f'],['fish_sardine','Sardine',0,'hgtb_fish_glassfish',0,.6,1.15,16,3,4,'A small, oily silver sea fish that swims in huge shoals.','s'],
+  ['fish_herring','Herring',0,'fw_bream',0,.25,1.5,20,4,6,'A slim silver sea fish that travels in great shoals.','s'],
+  ['fish_sandgoby','Sand Goby',0,'fw_tench',20,.7,1.45,18,4,5,'A small, spotted fish that hides in the sand of the shore.','s'],
+  ['fish_mackerel','Mackerel',1,'fw_trout',120,.8,.9,32,8,15,'A fast, striped sea fish with oily flesh.','s'],
+  ['fish_plaice','Plaice',1,'hgtb_fish_flounder',-25,1.7,1.05,36,9,18,'A flat sea fish with orange spots on its back.','s'],
+  ['fish_seabream','Sea Bream',1,'fw_bream',200,.9,1.2,34,9,17,'A deep, silver-pink fish of rocky shores.','s'],
+  ['fish_cod','Cod',2,'fw_carp',60,.5,.95,60,17,52,'A big, heavy sea fish with thick white flesh and a chin whisker.','s'],
+  ['fish_seabass','Sea Bass',2,'fw_perch',0,.2,1.45,56,16,50,'A strong silver fish of the surf, with firm, sweet meat.','s'],
+  ['fish_swordfish','Swordfish',3,'fw_pike',200,1.1,1.1,80,23,170,'A long, fast sea fish with a flat blade of bone on its nose.','s'],
+  ['fish_tuna','Giant Bluefin Tuna',4,'fw_trout',200,1.5,.8,100,34,550,'A huge, dark blue fish as heavy as a man, the pride of every deep-sea fisher.','s']];
+for(const [id,n,ch,pr,lv,col,d] of FSH_RODS)ITEMDEF[id]={n,k:'tool',t:'Fishing rod',ic:'fishrod',c:col,stack:0,price:pr,frod:ch,flv:lv,d:d+' Stand at the shore, face a dark patch of water and press G, Space or click the patch.',sw:.4};
+for(const [id,n,tier,src,hue,sat,lit,feed,pct,price,txt,hab] of FSH_FISH)ITEMDEF[id]={n,k:'food',t:'Fish',ic:'herring',c:'#9aa4aa',heal:Math.round(pct*2.2),feed,hpct:pct,fdhp:1,fdprx2:1,fish:1,tier,stack:1,price,
+  d:FSH_TIERS[tier][0]+' fish. '+txt+' Fills '+feed+' hunger and restores '+pct+' percent of maximum health.',sw:.3};
+const FSH_BY_TIER=FSH_TIERS.map((_,t)=>FSH_FISH.filter(f=>f[2]===t));
+const FSH_POOL={fresh:FSH_FISH.filter(f=>f[11].includes('f')),salt:FSH_FISH.filter(f=>f[11].includes('s')),deep:FSH_FISH.filter(f=>f[11].includes('d'))}; // the fish of each kind of water
+/* ---- baits: one is used per cast; it adds to the chance of landing a fish and pushes the catch towards rarer fish (the bias multiplies the weight of each tier by bias to the power of the tier number) ---- */
+const FSH_BAITS=[ // [id, name, price, percent added, rarity bias, water it suits (fresh, salt, any), text, colour, picture]
+  ['bait_crumbs','Bread Crumbs',5,3,1.08,'fresh','Stale bread crumbs rolled into a ball.','#c8a060','crumbs'],
+  ['bait_worms','Worms',12,6,1.15,'fresh','A pinch of wriggling garden worms.','#c07070','worm'],
+  ['bait_maggots','Maggots',30,10,1.25,'fresh','Fat, pale maggots in a little tin. Fish cannot resist them.','#e8e0b0','maggot'],
+  ['bait_shrimp','Shrimp Bits',70,14,1.4,'salt','Chopped shrimp in brine, the smell of the sea.','#e8906a','shrimp'],
+  ['bait_silver','Silver Lure',180,18,1.7,'any','A silver fish of tin with a hook, bright in any water.','#c8d0dc','lure'],
+  ['bait_gold','Golden Lure',400,22,2.1,'any','A fish of real gold leaf with a sharp hook, the best bait there is.','#f0c840','lure']];
+for(const [id,n,pr,pct,bias,wt,txt,col] of FSH_BAITS)ITEMDEF[id]={n,k:'quest',t:'Fishing bait',ic:'herb',c:col,stack:1,price:pr,fbait:pct,fbias:bias,fwater:wt,
+  d:txt+' One is used each cast. Adds '+pct+' percent to the chance of landing a fish and makes rare fish likelier.'+(wt==='fresh'?' Best in fresh water; half as good in salt water.':wt==='salt'?' Best in salt water; half as good in fresh water.':' Works in any water.'),sw:.1};
+/* ---- things that are not fish: an old boot (the existing item), a bottle with a message, and a jewel (a gem from the Collection) ---- */
+const FSH_NOTES=[
+  'To whoever finds this: the mill at Wenlock is not haunted. The noise is the miller\'s goat. Please tell him to stop feeding it the bells.',
+  'I am stuck on a rock in the Narrow Sea with one biscuit and a very rude gull. If you read this, send a boat. Not a small one.',
+  'My treasure is under the third flat stone west of the old bridge. I have forgotten which bridge. Good luck.',
+  'The monastery on the Pilgrim\'s Path has a hidden stair behind the statue. The monks know. They do not mind. Bring cheese.',
+  'Dear Mary, I am sorry about the boat. I will pay for the boat. Please stop writing to my mother.',
+  'The best fishing is at dawn, by the reeds, with the wind behind you. Everything else is luck. I have had no luck since spring.',
+  'Do not dig by the Oakwood road. I dug there. It was only roots. I want my weekend back.',
+  'Gold coins are buried near the Isle of Bells, under the one tree that leans to the east. Take a shovel and a friend.',
+  'If you are reading this, you have a good bottle. I want it back. Please post it to the Plough and Pigeon in Wenlock, care of Joss.',
+  'A kraken lives under the sea gate. It is not as large as they say. It is larger. Do not look at it.'];
+ITEMDEF.fish_bottle={n:'Bottle with a Message',k:'quest',t:'Message',ic:'potion',c:'#a8d8c8',stack:0,price:8,fread:1,d:'A corked green bottle with a rolled note inside. Select it and press Read to open the message.',sw:.3};
+function fshBottleIcon(){const c=document.createElement('canvas');c.width=c.height=64;const X=c.getContext('2d');X.lineJoin='round';X.strokeStyle='#120c08';X.lineWidth=2;
+  X.fillStyle='rgba(150,215,190,.85)';X.beginPath();X.moveTo(26,22);X.lineTo(26,14);X.lineTo(38,14);X.lineTo(38,22);X.quadraticCurveTo(50,28,50,40);X.lineTo(50,54);X.quadraticCurveTo(50,60,44,60);X.lineTo(20,60);X.quadraticCurveTo(14,60,14,54);X.lineTo(14,40);X.quadraticCurveTo(14,28,26,22);X.closePath();X.fill();X.stroke();
+  X.fillStyle='#8a6038';X.fillRect(25,6,14,9);X.strokeRect(25,6,14,9);X.fillStyle='#f0e4c0';X.fillRect(24,32,16,20);X.strokeStyle='#8a7448';X.lineWidth=1;X.strokeRect(24,32,16,20);
+  X.strokeStyle='#6a5a3a';for(const y of [37,42,47]){X.beginPath();X.moveTo(27,y);X.lineTo(37,y);X.stroke()}return c}
+function fshBaitIcon(kind,col){const c=document.createElement('canvas');c.width=c.height=64;const X=c.getContext('2d');X.lineCap='round';X.lineJoin='round';X.strokeStyle='#120c08';X.lineWidth=2;X.fillStyle=col;
+  if(kind==='crumbs'){for(const [x,y,r] of [[22,38,8],[38,34,7],[30,48,6],[44,48,5],[18,50,4],[34,22,5]]){X.beginPath();X.arc(x,y,r,0,6.3);X.fill();X.stroke()}}
+  else if(kind==='worm'){X.lineWidth=7;X.strokeStyle='#120c08';for(const [y,a] of [[22,0],[36,1],[50,0]]){X.beginPath();X.moveTo(12,y);X.bezierCurveTo(26,y-12*(a?-1:1),38,y+12*(a?-1:1),52,y);X.stroke()}X.lineWidth=4.5;X.strokeStyle=col;for(const [y,a] of [[22,0],[36,1],[50,0]]){X.beginPath();X.moveTo(12,y);X.bezierCurveTo(26,y-12*(a?-1:1),38,y+12*(a?-1:1),52,y);X.stroke()}}
+  else if(kind==='maggot'){for(const [x,y,a] of [[22,26,.5],[40,24,-.4],[30,40,.1],[46,44,.7],[16,48,-.6]]){X.save();X.translate(x,y);X.rotate(a);X.beginPath();X.ellipse(0,0,10,4.5,0,0,6.3);X.fill();X.stroke();X.restore()}}
+  else if(kind==='shrimp'){X.lineWidth=2;X.beginPath();X.moveTo(14,40);X.quadraticCurveTo(14,14,40,18);X.quadraticCurveTo(54,22,50,38);X.quadraticCurveTo(44,32,36,32);X.quadraticCurveTo(24,32,26,46);X.quadraticCurveTo(18,50,14,40);X.closePath();X.fill();X.stroke();
+    X.beginPath();X.moveTo(50,38);X.lineTo(58,46);X.lineTo(48,46);X.closePath();X.fill();X.stroke()}
+  else{X.beginPath();X.moveTo(8,32);X.quadraticCurveTo(26,10,46,28);X.lineTo(58,16);X.lineTo(58,48);X.lineTo(46,36);X.quadraticCurveTo(26,54,8,32);X.closePath();X.fill();X.stroke();X.fillStyle='#120c08';X.beginPath();X.arc(18,30,2.4,0,6.3);X.fill();
+    X.strokeStyle='#8a8a92';X.lineWidth=2;X.beginPath();X.moveTo(30,44);X.quadraticCurveTo(34,60,22,60);X.stroke()}
+  return c}
+/* ---- the pictures ---- */
+function fshHue(c,deg,sat,lit){ // turn the hue, scale the saturation and brightness of a canvas, keeping its alpha
+  const x=c.getContext('2d'),im=x.getImageData(0,0,c.width,c.height),p=im.data,a=deg*Math.PI/180,co=Math.cos(a),si=Math.sin(a);
+  const m=[.213+co*.787-si*.213,.715-co*.715-si*.715,.072-co*.072+si*.928,.213-co*.213+si*.143,.715+co*.285+si*.140,.072-co*.072-si*.283,.213-co*.213-si*.787,.715-co*.715+si*.715,.072+co*.928+si*.072];
+  for(let i=0;i<p.length;i+=4){if(!p[i+3])continue;let r=p[i],g=p[i+1],b=p[i+2];
+    const l=r*.3+g*.59+b*.11;r=l+(r-l)*sat;g=l+(g-l)*sat;b=l+(b-l)*sat;
+    const R=r*m[0]+g*m[1]+b*m[2],G2=r*m[3]+g*m[4]+b*m[5],B=r*m[6]+g*m[7]+b*m[8];
+    p[i]=Math.max(0,Math.min(255,R*lit));p[i+1]=Math.max(0,Math.min(255,G2*lit));p[i+2]=Math.max(0,Math.min(255,B*lit))}
+  x.putImageData(im,0,0)}
+function fshCrop(im,size){ // the picture cropped to what is drawn, fitted into a square canvas
+  const w=im.width,h=im.height,t=document.createElement('canvas');t.width=w;t.height=h;const tx=t.getContext('2d');tx.drawImage(im,0,0);
+  const d=tx.getImageData(0,0,w,h).data;let x0=w,y0=h,x1=0,y1=0;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(d[(y*w+x)*4+3]>24){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}
+  if(x1<x0)return null;const cw=x1-x0+1,ch=y1-y0+1,s=Math.min((size-4)/cw,(size-4)/ch),c=document.createElement('canvas');c.width=c.height=size;
+  const X=c.getContext('2d');X.imageSmoothingQuality='high';X.drawImage(im,x0,y0,cw,ch,(size-cw*s)/2,(size-ch*s)/2,cw*s,ch*s);return c}
+function fshRodIcon(col){
+  const c=document.createElement('canvas');c.width=c.height=64;const X=c.getContext('2d');X.lineCap='round';
+  X.strokeStyle='#120c08';X.lineWidth=5;X.beginPath();X.moveTo(8,58);X.quadraticCurveTo(34,30,58,6);X.stroke();
+  X.strokeStyle=col;X.lineWidth=3;X.beginPath();X.moveTo(8,58);X.quadraticCurveTo(34,30,58,6);X.stroke();
+  X.strokeStyle='#5a3a1a';X.lineWidth=5.5;X.beginPath();X.moveTo(8,58);X.lineTo(19,47);X.stroke();                       // the handle
+  X.fillStyle='#8a8a92';X.strokeStyle='#120c08';X.lineWidth=1.4;X.beginPath();X.arc(24,46,5.5,0,6.3);X.fill();X.stroke();   // the reel
+  X.strokeStyle='rgba(235,235,225,.85)';X.lineWidth=1;X.beginPath();X.moveTo(58,6);X.quadraticCurveTo(61,34,56,50);X.stroke(); // the line
+  X.fillStyle='#d84030';X.beginPath();X.arc(56,52,4.2,0,6.3);X.fill();X.fillStyle='#f4f0e4';X.beginPath();X.arc(56,52,4.2,Math.PI,6.3);X.fill();X.strokeStyle='#120c08';X.lineWidth=1.2;X.beginPath();X.arc(56,52,4.2,0,6.3);X.stroke();
+  return c}
+function fshIcons(){
+  let todo=0;
+  for(const [id,,,col] of FSH_RODS.map(r=>[r[0],0,0,r[5]])){if(IMG['ic_'+id]&&IMG['ic_'+id]._fsh&&IMG['icn_'+id]&&IMG['icn_'+id]._fsh&&IMG['it_'+id]&&IMG['it_'+id]._fsh)continue;const c=fshRodIcon(col);c._fsh=1;IMG['icn_'+id]=c;IMG['ic_'+id]=c;IMG['it_'+id]=c}
+  {const set=(id,mk)=>{if(IMG['ic_'+id]&&IMG['ic_'+id]._fsh&&IMG['icn_'+id]&&IMG['icn_'+id]._fsh&&IMG['it_'+id]&&IMG['it_'+id]._fsh)return;const c=mk();c._fsh=1;IMG['icn_'+id]=c;IMG['ic_'+id]=c;IMG['it_'+id]=c};
+    set('fish_bottle',fshBottleIcon);for(const b of FSH_BAITS)set(b[0],()=>fshBaitIcon(b[8],b[7]))}
+  for(const f of FSH_FISH){const id=f[0];if(IMG['ic_'+id]&&IMG['ic_'+id]._fsh&&IMG['icn_'+id]&&IMG['icn_'+id]._fsh&&IMG['it_'+id]&&IMG['it_'+id]._fsh)continue;
+    const src=IMG['art_'+f[3]+(/^fw_/.test(f[3])?'_0':'')];if(!src||!src.width){todo++;continue}
+    try{const c=fshCrop(src,64);if(!c){todo++;continue}if(f[4]||f[5]!==1||f[6]!==1)fshHue(c,f[4],f[5],f[6]);c._fsh=1;IMG['icn_'+id]=c;IMG['ic_'+id]=c;IMG['it_'+id]=c}catch(e){todo++}}
+  return todo}
+{fshIcons();const t=setInterval(()=>{if(fshIcons()===0)clearInterval(t)},700);setTimeout(()=>clearInterval(t),180000)}
+/* the fish icon in the code-drawn fallback (until the painted fish has loaded): the salt herring */
+/* ---- what the shops sell: the Simple Rod everywhere the general stock is used ---- */
+SHOP_STOCK.push(['fishrod_1',2]);MERCHANT_STOCK.push(['fishrod_1',2]);
+if(typeof KH_STOCK!=='undefined'){for(const k of ['general','trader','seagoods','wli_general']){const f=KH_STOCK[k];if(f)KH_STOCK[k]=()=>f().concat([['fishrod_1',3]])}}
+
+/* ---- src/desert/fishing.js ---- */
+/* ==========================================================================
+   FISHING (prefix fsh / FSH). Data is in fishing_data.js (5 rods, 40 fish, 6 baits, a bottle with a message). The rules:
+   - Water next to the shore has darker patches (fishing spots), drawn on the water in the 3D view. They can be clicked.
+   - With a rod in the bag, stand at the shore facing a patch and press G, Space or Enter (or click the patch, or press the Fish button).
+   - A cast: the rod swings, the bobber lands on the patch, there is a wait, a bite, and then a line game: a cursor runs along a bar and one press
+     while it is over the gold zone pulls the line in. A miss lets the fish go. A good pull must then beat the odds: the rod's chance (20, 32, 45, 58, 70 percent)
+     plus the bait's. Then: about 6 percent an old boot, 3 percent a bottle with a message, 1 percent a jewel (rods nudge the jewel), otherwise a fish by rarity.
+   - Esc reels in at any time. One bait is used per cast (pick it with the Bait button on the fishing prompt).
+
+   API FOR MORE SPOTS (any level, call at load time from any file loaded after this one; the level need not be built yet):
+     fshAddSpots(levelId, [ {x,y}, {x,y,dx,dy}, ... ], {water:'fresh'|'salt'|'deep'});
+        {x,y}          the WATER square that is a fishing spot (a dark patch is drawn on it).
+        {x,y,dx,dy}    (x,y) is the square the party STANDS on (shore, pier end, quay edge); the patch goes on the two water squares (x+dx,y+dy) and
+                       (x+2dx,y+2dy). (dx,dy) is the direction toward the water: (0,-1) north, (1,0) east, (0,1) south, (-1,0) west.
+        These squares need not be water in the level's floor data (use it for lakes drawn as scenery, quays, piers). They are drawn as patches, can be clicked,
+        and are fished by pressing G / Space / Enter when the party faces them within three squares.
+     fshSetWater(levelId, 'fresh'|'salt'|'deep');   the kind of water of a whole level (default: fresh; salt for the sea levels, deep for the Deeper Hollow)
+     fshAuto(levelId, false);                       switch off the automatic patches found along every shore of the level's water floors (default on)
+   FISH BY HABITAT (letter in the 12th field of FSH_FISH: f fresh, s salt, d deep). Every habitat has every rarity.
+     FRESH  Common: Minnow, Bleak, Roach, Gudgeon, Rudd, Stickleback, Perch, Bream, Tench, Crucian Carp. Uncommon: Brown Trout, Chub, Dace, Grayling, River Eel, Flounder, River Crayfish, Pike.
+            Rare: Salmon, Wels Catfish, River Ray, Striped Angelfish, Sturgeon, Red Piranha. Very rare: Golden Carp. Legendary: Moonscale Pike, Emberscale Koi.
+     SALT   (10 salt-only) Common: Sardine, Herring, Sand Goby. Uncommon: Mackerel, Plaice, Sea Bream. Rare: Cod, Sea Bass. Very rare: Swordfish. Legendary: Giant Bluefin Tuna.
+            Shared with other water: Stickleback, River Eel, Flounder, Salmon, River Ray, Striped Angelfish, Sturgeon, Lantern Angler, Leaf Dragon, Pearl Pufferfish, Moonscale Pike.
+     DEEP   (the Hollow's dark waters) Common: Minnow, Tench, Stickleback. Uncommon: River Eel, River Crayfish. Rare: Wels Catfish, River Ray, Red Piranha.
+            Very rare: Lantern Angler, Leaf Dragon, Pearl Pufferfish. Legendary: Moonscale Pike.
+   ========================================================================== */
+const FSH_WATER=['bluewater','wmwater','water','hgo_water']; // floors that are water (the Deeper Hollow lakes are floor 6, handled below)
+const FSHV={hits:[],cache:{},t:0};
+const FSH_ADD={},FSH_LW={},FSH_NOAUTO={};let FSH_VER=0;
+for(const n of [290,300,301,302,303,304,330,331,332,333,334,335,336,337,338,339,340,341,342,343])FSH_LW[n]='salt'; // Yarrim, the sea isles, Oldhaven Quay
+for(const n of [475,476])FSH_LW[n]='deep';                                                                         // the Deeper Hollow and the Underlevel
+function fshAddSpots(lv,list,opts){const w=(opts&&opts.water)||FSH_LW[lv]||'fresh',A=FSH_ADD[lv]||(FSH_ADD[lv]=[]);for(const q of list)A.push({x:q.x,y:q.y,dx:q.dx||0,dy:q.dy||0,water:w});FSH_VER++;delete FSHV.cache[lv]}
+function fshSetWater(lv,w){FSH_LW[lv]=w;FSH_VER++;delete FSHV.cache[lv]}
+function fshAuto(lv,on){FSH_NOAUTO[lv]=!on;FSH_VER++;delete FSHV.cache[lv]}
+fshAddSpots(496,[[67,84],[68,84],[69,84],[70,84],[75,84],[76,84],[77,84],[66,85],[67,85],[68,85],[69,85],[70,85],[75,85],[76,85],[77,85]].map(q=>({x:q[0],y:q[1]})),{water:'fresh'}); // Wenlock brook beside the old bridge (72,84)
+function fshWaterAt(L,n,x,y){
+  const r=L.fmap&&L.fmap[y];if(!r)return false;const ch=r[x];if(ch===undefined)return false;
+  if(typeof HGD!=='undefined'&&HGD&&n===HGD.ID)return ch==='6';
+  const fs=L.floorSet;if(!fs)return false;return FSH_WATER.includes(fs[ch.charCodeAt(0)-48])}
+function fshPierKey(){try{return typeof WLR_PIER!=='undefined'&&WLR_PIER?WLR_PIER.x+','+WLR_PIER.y+','+WLR_PIER.dx+','+WLR_PIER.dy:''}catch(e){return ''}}
+function fshSpots(n){
+  const L=LEVELS[n];if(!L||!L.rows)return new Map();
+  const pk=(n===496?fshPierKey():'')+'|'+FSH_VER+'|'+(L.fmap?1:0),c=FSHV.cache[n];if(c&&c.pk===pk)return c.m;
+  const m=new Map(),H=L.rows.length,W=L.rows[0].length,lw=FSH_LW[n]||'fresh',key=(x,y)=>x+','+y,add=(x,y,w)=>{if(x>0&&y>0&&x<W-1&&y<H-1)m.set(key(x,y),{x,y,water:w||lw})};
+  if(W*H>200000){FSHV.cache[n]={pk,m};return m} // the open Narrow Sea is sailed, not fished from the shore
+  const fs=L.floorSet,isHgd=typeof HGD!=='undefined'&&HGD&&n===HGD.ID;
+  if(L.fmap&&!FSH_NOAUTO[n]&&(isHgd||(fs&&fs.some(f=>FSH_WATER.includes(f))))){
+    const stand=(x,y)=>x>0&&y>0&&x<W-1&&y<H-1&&L.rows[y][x]==='.'&&!fshWaterAt(L,n,x,y);
+    for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){
+      if(!fshWaterAt(L,n,x,y))continue;
+      let near=false;for(let dy=-3;dy<=3&&!near;dy++)for(let dx=-3;dx<=3;dx++){if(Math.abs(dx)+Math.abs(dy)>3)continue;if(stand(x+dx,y+dy)){near=true;break}}
+      if(near&&hash2(x>>1,y>>1,771+n)<.3)add(x,y)}}
+  for(const q of (FSH_ADD[n]||[])){if(q.dx||q.dy){for(let k=1;k<=2;k++)add(q.x+q.dx*k,q.y+q.dy*k,q.water)}else if(!L.fmap||fshWaterAt(L,n,q.x,q.y)||q.water)add(q.x,q.y,q.water)}
+  if(pk.split('|')[0]){const P=WLR_PIER,px=-P.dy,py=P.dx;for(const [a,b] of [[1,0],[2,0],[1,1],[1,-1],[0,1],[0,-1],[2,1],[2,-1]]){const x=P.x+P.dx*a+px*b,y=P.y+P.dy*a+py*b;if(fshWaterAt(L,n,x,y))add(x,y,'fresh')}}
+  FSHV.cache[n]={pk,m};return m}
+const fshFaced=()=>{if(G.state!=='play'||!G.P||!G.grid)return null;const d=DIRS[G.P.f],sp=fshSpots(LEVEL);if(!sp.size)return null; // the nearest spot in the three squares ahead (the near water is below the bottom of the view)
+  for(let k=1;k<=3;k++){const x=G.P.x+d[0]*k,y=G.P.y+d[1]*k;if(!G.grid[y]||G.grid[y][x]>0)return null;const s=sp.get(x+','+y);if(s)return s}return null};
+const fshBestRod=()=>{let b=null;for(const r of FSH_RODS)if(bagCount(r[0])>0)b=r;return b};
+const fshFree=()=>G.state==='play'&&!G.cut&&!G.talk&&!G.menu&&!G.inv.open&&!G.loot&&!G.overview&&!G.saves&&!G.map&&!TP;
+/* ---------- the view: projecting a water square onto the screen ---------- */
+function fshCam(){const C=G.C,LA=C.a+(typeof LKYAW==='number'?LKYAW:0),dX=Math.cos(LA),dY=Math.sin(LA);return {dX,dY,pX:-dY,pY:dX,cx:C.x+.5-dX*.28,cy:C.y+.5-dY*.28}}
+function fshGroundZ(x,y){try{if(typeof TERR_NOW!=='undefined'&&TERR_NOW&&typeof terrH==='function')return terrH(x,y)}catch(e){}return 0}
+function fshProj(cam,wx,wy,z){const vx=wx-cam.cx,vy=wy-cam.cy,dep=vx*cam.dX+vy*cam.dY;if(dep<.12)return null;
+  const lat=vx*cam.pX+vy*cam.pY;return {x:(lat/(dep*PL)+1)*VW/2,y:HH+((typeof CAMZ==='number'?CAMZ:EYE)-z)*F/dep,d:dep}}
+function fshRing(cam,s,r,z,n){const o=[];for(let k=0;k<n;k++){const a=k/n*6.2832,p=fshProj(cam,s.x+.5+Math.cos(a)*r,s.y+.5+Math.sin(a)*r,z);if(!p)return null;o.push(p)}return o}
+function fshPoly(ctx2,P){ctx2.beginPath();P.forEach((p,i)=>i?ctx2.lineTo(p.x,p.y):ctx2.moveTo(p.x,p.y));ctx2.closePath()}
+function fshClipCols(P,dep){ // keep only the screen columns where no wall stands in front of the patch
+  let a=1e9,b=-1e9;for(const p of P){if(p.x<a)a=p.x;if(p.x>b)b=p.x}a=Math.max(0,Math.floor(a));b=Math.min(VW-1,Math.ceil(b));
+  const hill=typeof TERR_NOW!=='undefined'&&TERR_NOW&&typeof YB!=='undefined',kb=Math.max(0,Math.min(YBK-1,((dep*YBS)|0)-1));
+  ctx.beginPath();for(let x=a;x<=b;x++){if(zbuf[x]&&zbuf[x]<=dep-.3)continue;const cut=hill?YB[x*YBK+kb]:VH;if(cut>0)ctx.rect(x,0,1,cut)}ctx.clip()}
+function fshDrawSpots(){
+  FSHV.hits=[];if(G.state!=='play'||!G.C||!LEVELS[LEVEL])return;
+  const sp=fshSpots(LEVEL);if(!sp.size)return;const cam=fshCam(),t=G.time;
+  for(const s of sp.values()){
+    const vx=s.x+.5-cam.cx,vy=s.y+.5-cam.cy,dep=vx*cam.dX+vy*cam.dY;if(dep<.35||dep>9||Math.abs(vx*cam.pX+vy*cam.pY)>dep*PL*1.3+1)continue;
+    const z=fshGroundZ(s.x+.5,s.y+.5),outer=fshRing(cam,s,1.0,z,18);if(!outer)continue;
+    const fade=Math.max(.25,1-dep/10);
+    ctx.save();fshClipCols(outer,dep);
+    for(const [r,a] of [[1.0,.5],[.78,.5],[.55,.5]]){const P=fshRing(cam,s,r,z,18);if(!P)continue;ctx.fillStyle=`rgba(4,18,32,${a*Math.max(.55,fade)*1.1})`;fshPoly(ctx,P);ctx.fill()}
+    const ph=((t*.45+hash2(s.x,s.y,5))%1),P=fshRing(cam,s,.25+ph*.6,z,18);if(P){ctx.strokeStyle=`rgba(225,240,255,${.28*(1-ph)*fade})`;ctx.lineWidth=1;fshPoly(ctx,P);ctx.stroke()}
+    {const a=t*.5+hash2(s.x,s.y,9)*6.3,r=.3,h1=fshProj(cam,s.x+.5+Math.cos(a)*r+Math.cos(a+1.57)*.08,s.y+.5+Math.sin(a)*r+Math.sin(a+1.57)*.08,z),t1=fshProj(cam,s.x+.5+Math.cos(a-.5)*r,s.y+.5+Math.sin(a-.5)*r,z);
+     if(h1&&t1){ctx.lineCap='round';ctx.strokeStyle=`rgba(0,8,18,${.55*fade})`;ctx.lineWidth=Math.max(1.5,F/dep*.09);ctx.beginPath();ctx.moveTo(t1.x,t1.y);ctx.lineTo(h1.x,h1.y);ctx.stroke()}}
+    ctx.restore();
+    const pc=fshProj(cam,s.x+.5,s.y+.5,z);let seen=false;if(pc&&pc.x>=6&&pc.x<VW-6&&pc.y>=HH&&pc.y<VH-4){const xi=Math.max(0,Math.min(VW-1,Math.round(pc.x))),kb=Math.max(0,Math.min(YBK-1,((dep*YBS)|0)-1));seen=(!zbuf[xi]||zbuf[xi]>dep-.3)&&(!(typeof TERR_NOW!=='undefined'&&TERR_NOW)||YB[xi*YBK+kb]>pc.y)}
+    if(seen)FSHV.hits.push({s,dep,poly:fshRing(cam,s,1.05,z,12)})}
+}
+const fshInPoly=(P,x,y)=>{let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){if(((P[i].y>y)!==(P[j].y>y))&&x<(P[j].x-P[i].x)*(y-P[i].y)/(P[j].y-P[i].y)+P[i].x)c=!c}return c};
+/* where the bobber lands on the screen: the middle of the patch being fished */
+function fshTarget(s){const p=fshProj(fshCam(),s.x+.5,s.y+.5,fshGroundZ(s.x+.5,s.y+.5));return p?{x:Math.max(40,Math.min(380,p.x)),y:Math.max(HH+6,Math.min(190,p.y))}:{x:210,y:140}}
+/* ---------- casting ---------- */
+function fshNeedRod(){msg('You need a fishing rod to fish here. Any general merchant sells the Simple Rod for 300 gold.','#d0c090')}
+function fshHelpOnce(){const F0=G.flags;if(F0.fishHelp)return;F0.fishHelp=1;
+  msg('To fish, face a dark patch of water and press G or Space. When a fish bites, press again with the cursor in the gold zone.','#a8d8f0')}
+/* the bait chosen on the fishing prompt (G.flags.fishBait), if the bag still has one */
+const fshBaitOwned=()=>FSH_BAITS.filter(b=>bagCount(b[0])>0);
+function fshBaitNow(){const id=G.flags&&G.flags.fishBait;if(!id||!ITEMDEF[id]||bagCount(id)<1)return null;return FSH_BAITS.find(b=>b[0]===id)||null}
+function fshBaitFit(b,water){return b[5]==='any'||(b[5]==='salt'?water==='salt':water!=='salt')}
+function fshOdds(rod,bait,water){const fit=bait?(fshBaitFit(bait,water)?1:.5):0,bonus=bait?bait[3]*fit:0;return {rod:rod[2],bonus,total:Math.min(95,rod[2]+bonus),bias:bait?Math.pow(bait[4],fit||1):1}}
+function fshBaitCycle(){const own=fshBaitOwned(),cur=fshBaitNow(),i=cur?own.findIndex(b=>b[0]===cur[0]):-1;
+  if(!own.length){msg('You have no bait. A bait seller or a general merchant may sell some.','#c8b898');G.flags.fishBait='';return}
+  const nx=own[i+1];G.flags.fishBait=nx?nx[0]:'';msg(nx?'Bait: '+nx[1]+'.':'Bait: none.','#bfe0f4')}
+function fshStart(s){
+  if(!s)return false;if(!fshFree())return false;
+  const rod=fshBestRod();if(!rod){fshNeedRod();return false}
+  if(hostileNear()){msg('You cannot fish with enemies close by.','#d09a80');return false}
+  const w=.16+.04*Math.random(),water=s.water||'fresh';let bait=fshBaitNow();
+  if(G.flags.fishBait&&!bait){G.flags.fishBait='';msg('You are out of that bait.','#c8b898')}
+  const od=fshOdds(rod,bait,water);if(bait){bagRemove(bait[0],1);if(!fshBaitFit(bait,water))msg(bait[1]+' work only half as well in '+(water==='salt'?'salt':'fresh')+' water.','#c8b898')}
+  G.fishing={phase:'cast',t:0,cell:s,water,rod,id:rod[0],bait,odds:od,chance:od.total,zone:{c:.22+Math.random()*.56,w},cur:0,dir:1,spd:1.0+Math.random()*.35,wait:1.6+Math.random()*2.6,res:null,show:null,tgt:fshTarget(s)};
+  G.menu='fishing';G.hold=null;G.queued=null;advanceTime(10);sfx('step');fshHelpOnce();return true}
+/* the fish of one kind of water, by rarity: common much likelier; a better rod and a better bait lean towards the rarer tiers */
+function fshPick(rodIdx,water,bias){
+  const pool=FSH_POOL[water]||FSH_POOL.fresh,bs=bias||1;
+  const w=FSH_TIERS.map((T,i)=>pool.some(f=>f[2]===i)?T[2]*(1+.14*rodIdx*i)*Math.pow(bs,i):0);let tot=0;for(const v of w)tot+=v;let u=Math.random()*tot,tier=0;for(let i=0;i<w.length;i++){u-=w[i];if(u<=0){tier=i;break}}
+  const L=pool.filter(f=>f[2]===tier);return L[Math.floor(Math.random()*L.length)]}
+function fshGive(F0,id,extra){const it=mkItem(id);if(extra)Object.assign(it,extra);F0.bag=bagAdd(it);if(!F0.bag)G.items.push({k:id,x:G.P.x,y:G.P.y,taken:false,m:extra&&extra.m})}
+/* what comes up on a good pull: a boot, a bottle, a jewel, or a fish */
+function fshCatch(F0){
+  const ri=Math.max(0,FSH_RODS.findIndex(r=>r[0]===F0.id)),r=Math.random(),pBoot=.06,pBottle=.03,pJewel=.01+.003*ri,fl=G.flags;F0.res='catch';
+  if(r<pBoot){fshGive(F0,'odd_boot');const d=ITEMDEF.odd_boot;F0.show={id:'odd_boot',name:'An Old Boot',tag:'Junk',col:'#a89878',l1:'Worth almost nothing.',l2:'',desc:d.d};sfx('miss');return}
+  if(r<pBoot+pBottle){const m=Math.floor(Math.random()*FSH_NOTES.length);fshGive(F0,'fish_bottle',{m});F0.show={id:'fish_bottle',name:'Bottle with a Message',tag:'Message',col:'#a8d8c8',l1:'There is a note inside.',l2:'Select it in the bag and press Read.',desc:ITEMDEF.fish_bottle.d};sfx('level');return}
+  if(r<pBoot+pBottle+pJewel){const g=GEM_BY_VALUE[Math.min(GEM_BY_VALUE.length-1,Math.floor(GEM_BY_VALUE.length*.55+Math.random()*GEM_BY_VALUE.length*.45))],id='gem_'+g[0];fshGive(F0,id);try{collFound(id)}catch(e){}
+    F0.show={id,name:g[1],tag:'Jewel',col:'#ffd76a',l1:'A jewel, worth about '+g[2]+' gold.',l2:'',desc:ITEMDEF[id].d};fl.fishJewels=(fl.fishJewels||0)+1;sfx('level');return}
+  const f=fshPick(ri,F0.water,F0.odds.bias),id=f[0];fl.fishCaught=fl.fishCaught||{};fl.fishCaught[id]=(fl.fishCaught[id]||0)+1;fl.fishTotal=(fl.fishTotal||0)+1;
+  fshGive(F0,id);F0.fish=f;F0.show={id,name:f[1],tag:FSH_TIERS[f[2]][0],col:FSH_TIERS[f[2]][1],l1:'Fills '+f[7]+' hunger',l2:'Heals '+f[8]+' percent of max health',desc:f[10]};sfx(f[2]>=3?'level':'potion')}
+function fshPress(){
+  const F0=G.fishing;if(!F0)return;
+  if(F0.phase==='wait'){F0.res='early';F0.phase='flick';F0.t=0;msg('You pulled in too soon. Nothing was on the line.','#c8b898');sfx('miss');return}
+  if(F0.phase==='bite'){F0.phase='line';F0.t=0;F0.cur=0;F0.dir=1}
+  else if(F0.phase==='line'){
+    const hit=Math.abs(F0.cur-F0.zone.c)<=F0.zone.w/2;F0.phase='flick';F0.t=0;
+    if(!hit){F0.res='miss';msg('The cursor was off the gold zone. The fish got away.','#c8b898');sfx('miss');return}
+    if(Math.random()*100<F0.chance)fshCatch(F0);
+    else{F0.res='slip';msg('A good pull, but the hook slipped and the fish was gone.','#c8b898');sfx('miss')}}
+}
+function fshEnd(){G.fishing=null;if(G.menu==='fishing')G.menu=false}
+function fshTick(dt){
+  const F0=G.fishing;if(!F0)return;
+  if(G.menu!=='fishing'||G.state!=='play'||F0.lvl!==undefined&&F0.lvl!==LEVEL){G.fishing=null;return}
+  F0.t+=dt;
+  if(F0.phase==='cast'&&F0.t>=1.0){F0.phase='wait';F0.t=0}
+  else if(F0.phase==='wait'&&F0.t>=F0.wait){F0.phase='bite';F0.t=0;msg('Something bites!','#ffe36a');sfx('hit')}
+  else if(F0.phase==='bite'&&F0.t>=.8){F0.phase='line';F0.t=0;F0.cur=0;F0.dir=1}
+  else if(F0.phase==='line'){F0.cur+=F0.dir*F0.spd*dt;if(F0.cur>=1){F0.cur=1;F0.dir=-1}else if(F0.cur<=0){F0.cur=0;F0.dir=1}
+    if(F0.t>9){F0.res='miss';F0.phase='flick';F0.t=0;msg('The fish spat the hook and got away.','#c8b898')}}
+  else if(F0.phase==='flick'&&F0.t>=.95){if(F0.res==='catch'){F0.phase='result';F0.t=0}else fshEnd()}
+}
+{let icT=0;const _u=update;update=function(dt){try{icT+=dt;if(icT>1){icT=0;fshIcons()}fshTick(dt)}catch(e){console.error('fsh',e);G.fishing=null}return _u.apply(this,arguments)}}
+/* ---------- the rod, drawn at the bottom of the view ---------- */
+const fshEase=u=>u<0?0:u>1?1:u*u*(3-2*u);
+function fshRod(F0){
+  const col=ITEMDEF[F0.id].c||'#9a7a4a',B={x:352,y:226},T0={x:262,y:112};let T={x:T0.x,y:T0.y},bend=.06,u=F0.t,bob=null,lineSag=16,dip=0,spl=0;
+  const tg=F0.tgt;
+  if(F0.phase==='cast'){u=F0.t/1.0;
+    if(u<.4){const k=fshEase(u/.4);T={x:T0.x+(392-T0.x)*k,y:T0.y+(58-T0.y)*k};bend=.06-.18*k}
+    else if(u<.62){const k=fshEase((u-.4)/.22);T={x:392+(228-392)*k,y:58+(96-58)*k};bend=-.12+.34*k}
+    else{const k=fshEase((u-.62)/.38);T={x:228+(T0.x-228)*k,y:96+(T0.y-96)*k};bend=.22-.16*k}
+    if(u>=.5){const k=fshEase((u-.5)/.5),ax=T.x+(tg.x-T.x)*k,ay=T.y+(tg.y-T.y)*k-Math.sin(k*Math.PI)*44;bob={x:ax,y:ay};lineSag=10*(1-k)+4;if(k>=1)spl=1}
+    else{bob={x:T.x-4,y:T.y+22};lineSag=2}}
+  else{
+    bob={x:tg.x,y:tg.y};
+    if(F0.phase==='wait'){bob.y+=Math.sin(F0.t*2.6)*1.2;T={x:T0.x+Math.sin(F0.t*.9)*1.5,y:T0.y+Math.sin(F0.t*1.3)*1.5}}
+    else if(F0.phase==='bite'){const s=Math.min(1,F0.t/.8);dip=Math.sin(s*Math.PI*3)*(1-s*.4);bob.y+=Math.max(0,dip)*6;T={x:T0.x,y:T0.y+Math.abs(dip)*12};bend=.06+.08*Math.abs(dip);spl=1}
+    else if(F0.phase==='line'){const ph=F0.t*17;bob.x+=Math.sin(ph)*5;bob.y+=Math.abs(Math.sin(ph*.7))*3;T={x:T0.x-14+Math.sin(ph*.5)*3,y:T0.y+30};bend=.34;lineSag=1;spl=1}
+    else if(F0.phase==='flick'||F0.phase==='result'){const k=F0.phase==='result'?1:Math.min(1,F0.t/.95),up=Math.sin(Math.min(1,k*1.5)*Math.PI);T={x:T0.x+(300-T0.x)*up,y:T0.y+(34-T0.y)*up};bend=-.1*up+.05;
+      if(F0.res==='catch'){const q=fshEase(Math.min(1,k*1.15));bob={x:tg.x+(T.x-tg.x)*q,y:tg.y+(T.y+30-tg.y)*q-Math.sin(q*Math.PI)*30};lineSag=3}
+      else{bob={x:tg.x+(T.x+4-tg.x)*fshEase(k),y:tg.y+(T.y+24-tg.y)*fshEase(k)-Math.sin(k*Math.PI)*26};lineSag=8}}}
+  // ripples where the bobber floats
+  if((spl||F0.phase==='wait')&&F0.phase!=='flick'&&F0.phase!=='result'){const a=(F0.t*(F0.phase==='bite'||F0.phase==='line'?1.6:.6))%1;ctx.save();ctx.strokeStyle=`rgba(230,242,255,${.45*(1-a)})`;ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(tg.x,tg.y+3,5+a*16,1.6+a*5,0,0,6.3);ctx.stroke();ctx.restore()}
+  // the line
+  const mx=(T.x+bob.x)/2,my=(T.y+bob.y)/2+lineSag;ctx.save();ctx.strokeStyle='rgba(240,240,230,.8)';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(T.x,T.y);ctx.quadraticCurveTo(mx,my,bob.x,bob.y);ctx.stroke();
+  // the bobber
+  ctx.fillStyle='#e8e4d6';ctx.beginPath();ctx.arc(bob.x,bob.y,3.2,Math.PI,6.3);ctx.fill();ctx.fillStyle='#d83a2c';ctx.beginPath();ctx.arc(bob.x,bob.y,3.2,0,Math.PI);ctx.fill();ctx.strokeStyle='#120c08';ctx.lineWidth=.8;ctx.beginPath();ctx.arc(bob.x,bob.y,3.2,0,6.3);ctx.stroke();
+  // a caught fish rises with the line
+  if(F0.phase!=='cast'&&F0.res==='catch'&&F0.show&&(F0.phase==='flick'||F0.phase==='result')){const im=IMG['ic_'+F0.show.id];if(im)ctx.drawImage(im,bob.x-14,bob.y-6,28,28)}
+  // the rod: a tapering curve from the hand to the tip
+  const len=Math.hypot(T.x-B.x,T.y-B.y),nx=-(T.y-B.y)/len,ny=(T.x-B.x)/len,cxp=(B.x+T.x)/2+nx*bend*len,cyp=(B.y+T.y)/2+ny*bend*len,N=14;
+  let px=B.x,py=B.y;ctx.lineCap='round';
+  for(let i=1;i<=N;i++){const k=i/N,x=(1-k)*(1-k)*B.x+2*(1-k)*k*cxp+k*k*T.x,y=(1-k)*(1-k)*B.y+2*(1-k)*k*cyp+k*k*T.y,w=9-7*k;
+    ctx.strokeStyle='#120c08';ctx.lineWidth=w+1.8;ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(x,y);ctx.stroke();
+    ctx.strokeStyle=k<.22?'#5a3a1a':col;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(x,y);ctx.stroke();px=x;py=y}
+  // the reel and the hand
+  const rk=.16,rx=(1-rk)*(1-rk)*B.x+2*(1-rk)*rk*cxp+rk*rk*T.x,ry=(1-rk)*(1-rk)*B.y+2*(1-rk)*rk*cyp+rk*rk*T.y;
+  ctx.fillStyle='#8a8a92';ctx.strokeStyle='#120c08';ctx.lineWidth=1;ctx.beginPath();ctx.arc(rx-5,ry+2,4.5,0,6.3);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#d8b890';ctx.beginPath();ctx.roundRect(B.x-11,B.y-26,22,26,6);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#4a3a28';ctx.fillRect(B.x-13,B.y-6,26,14);
+  ctx.restore()}
+{const _dw=drawWorld;drawWorld=function(){const r=_dw.apply(this,arguments);try{fshDrawSpots();if(G.fishing&&G.state==='play')fshRod(G.fishing)}catch(e){console.error('fsh draw',e)}return r}}
+/* ---------- the line game and the result, drawn over the view ---------- */
+function fshHud(){
+  const F0=G.fishing;if(!F0)return;
+  BTNS.length=0;
+  const rodN=ITEMDEF[F0.id].n;
+  if(F0.phase!=='result'){
+    btn('fishpress',0,0,DW,DH);btnText('fishquit','Reel in (Esc)',330,193,84,16);
+    const msgs={cast:'You cast the line...',wait:'Waiting for a bite...',bite:'SOMETHING BITES!',line:'Press Space, Enter or click when the cursor is over the gold zone.',flick:F0.res==='catch'?'You pull the fish in!':'...'};
+    txtS(msgs[F0.phase]||'',210,30,9,F0.phase==='bite'?'#ffe36a':'#f0e8c8','center',true);
+    txtS(F0.bait?`${rodN} ${F0.odds.rod} percent + ${F0.bait[1]} ${Math.round(F0.odds.bonus*10)/10} percent = ${Math.round(F0.chance)} percent to land a catch after a good pull`:`${rodN}: ${F0.chance} percent to land a catch after a good pull (no bait)`,210,42,7.4,'#bfd8ea','center',true);
+    if(F0.phase==='line'||F0.phase==='bite'){
+      const x=90,y=54,w=240,h=13;ctx.save();ctx.fillStyle='rgba(8,6,4,.82)';rrect(ctx,x-4,y-4,w+8,h+8,5);ctx.fill();ctx.strokeStyle='#8a7448';ctx.lineWidth=1.4;rrect(ctx,x-4,y-4,w+8,h+8,5);ctx.stroke();
+      ctx.fillStyle='#2a3a4a';ctx.fillRect(x,y,w,h);
+      const zx=x+(F0.zone.c-F0.zone.w/2)*w,zw=F0.zone.w*w;ctx.fillStyle='#e8c040';ctx.fillRect(zx,y,zw,h);ctx.fillStyle='rgba(255,255,200,.5)';ctx.fillRect(zx,y,zw,3);
+      if(F0.phase==='line'){const cx2=x+F0.cur*w;ctx.fillStyle='#fff';ctx.fillRect(cx2-1.5,y-4,3,h+8);ctx.beginPath();ctx.moveTo(cx2-4,y-6);ctx.lineTo(cx2+4,y-6);ctx.lineTo(cx2,y);ctx.closePath();ctx.fill()}
+      ctx.restore()}
+  } else {
+    const sh=F0.show;
+    btn('fishnone',0,0,DW,DH);
+    ctx.save();ctx.fillStyle='rgba(4,3,2,.55)';ctx.fillRect(0,0,420,210);ctx.restore();
+    bigPanel(100,28,220,150);txt(sh.tag==='Junk'||sh.tag==='Message'||sh.tag==='Jewel'?'YOU CAUGHT SOMETHING':'YOU CAUGHT A FISH',210,44,11,'#d8c88e','center',true);
+    const im=IMG['ic_'+sh.id];panel(118,56,64,64,false,false);if(im)ctx.drawImage(im,120,58,60,60);
+    txt(sh.name,250,66,12,'#f0e8c8','center',true,undefined,120);txt(sh.tag,250,82,10,sh.col,'center',true);
+    txt(sh.l1,250,98,8.5,'#e8c890','center',false,undefined,130);txt(sh.l2,250,110,8.5,'#9ae0a0','center',false,undefined,130);
+    const t2=String(sh.desc||'');txt(t2.length>56?t2.slice(0,t2.lastIndexOf(' ',56)):t2,210,134,7.6,'#c8bc98','center',false,undefined,200);if(t2.length>56)txt(t2.slice(t2.lastIndexOf(' ',56)+1),210,144,7.6,'#c8bc98','center',false,undefined,200);
+    txt(F0.bag?(F0.fish?'It is in your bag. Eat it from the bag (select it, then Eat).':'It is in your bag.'):'Your bag is full: it lies on the ground.',210,156,7.4,'#a89878','center',false,undefined,200);
+    btnText('fishagain','Cast again',112,163,92,18);btnText('fishdone','Done',216,163,92,18)}
+}
+{const _dm=drawMenu;drawMenu=function(){if(G.menu==='fishing'&&G.fishing){try{fshHud()}catch(e){console.error('fsh hud',e)}return}return _dm.apply(this,arguments)}}
+{const _hb=handleBtn;handleBtn=function(id){
+  if(G.menu==='fishing'&&G.fishing){
+    if(id==='fishpress')fshPress();else if(id==='fishquit'||id==='fishdone'||id==='menu'||id==='menuclose')fshEnd();
+    else if(id==='fishagain'){const c=G.fishing.cell;G.fishing=null;G.menu=false;if(!fshStart(c))fshEnd()}
+    return}
+  if(id==='fishbait'){fshBaitCycle();return}
+  if(id==='fishcast'){const s=fshFaced();if(s)fshStart(s);else msg('Face a dark patch of water at the shore first.','#c8b898');return}
+  return _hb.apply(this,arguments)}}
+addEventListener('keydown',e=>{
+  if(!G.fishing||G.menu!=='fishing'||e.ctrlKey||e.metaKey||e.altKey)return;
+  const k=e.key,lk=k.length===1?k.toLowerCase():k;if(!(k==='Escape'||k===' '||k==='Enter'||lk==='g'))return;
+  e.preventDefault();e.stopImmediatePropagation();if(e.repeat)return;
+  if(k==='Escape'){fshEnd();return}
+  if(G.fishing.phase==='result'){const c=G.fishing.cell;G.fishing=null;G.menu=false;if(!fshStart(c))fshEnd();return}
+  fshPress()},true);
+/* ---------- starting a cast: the interact key, G, a click on the patch, and the Fish button ---------- */
+{const _a=act;act=function(id){
+  try{if(id==='attack'&&fshFree()&&!hostileNear()&&canAct()){const s=fshFaced();if(s){if(fshStart(s))return;return}}}catch(e){console.error(e)}
+  return _a.apply(this,arguments)}}
+{const _cd=canDigHere;canDigHere=function(){return _cd.apply(this,arguments)||(fshFree()&&!!fshFaced())}}
+{const _dd=doDig;doDig=function(){const s=fshFaced();if(s&&fshFree()){fshStart(s);return}return _dd.apply(this,arguments)}}
+{const _vt=viewTap;viewTap=function(x,y){
+  try{if(fshFree()){for(const h of FSHV.hits.slice().sort((a,b)=>a.dep-b.dep)){if(!h.poly||!fshInPoly(h.poly,x,y))continue;
+    if(!fshBestRod()){fshNeedRod();return}
+    if(h.dep>5.2){msg('Too far away. Step closer to the water.','#d09a80');return}
+    fshStart(h.s);return}}}catch(e){console.error(e)}
+  return _vt.apply(this,arguments)}}
+{const _ui=ui;ui=function(dt){_ui.apply(this,arguments);try{
+  if(!fshFree())return;const s=fshFaced();
+  if(s){const bt=fshBaitNow();btnText('fishcast','Fish',24,192,52,20);btnText('fishbait','Bait: '+(bt?bt[1]+' x'+bagCount(bt[0]):'none'),300,168,114,18);txtS(fshBestRod()?'A fishing spot. Press G, Space or click it.':'A fishing spot. You need a rod.',210,196,7.6,'#bfe0f4','center',true)}
+}catch(e){}}}
+/* ---------- the better rods come to the shops as the party's level rises; the first-time help line ---------- */
+{const _ol=openLoot;openLoot=function(d){const r=_ol.apply(this,arguments);
+  try{if(d&&d.shop&&d.contents&&(d.fishSeen||d.contents.some(x=>x.id==='lockpick'||x.id==='butterflycage'||/^(shovel_|fishrod_)/.test(x.id)))){
+    const L=partyLevel(),seen=d.fishSeen||(d.fishSeen={});
+    for(const rd of FSH_RODS){if(seen[rd[0]])continue;if(d.contents.some(x=>x.id===rd[0])){seen[rd[0]]=1;continue}if(L>=rd[4]){d.contents.push({id:rd[0],n:rd[0]==='fishrod_1'?2:1});seen[rd[0]]=1}}}}catch(e){console.error(e)}
+  return r}}
+{const _ba=bagAdd;bagAdd=function(it){const r=_ba.apply(this,arguments);try{if(r&&it&&/^fishrod_/.test(it.id)&&G.flags&&!G.flags.fishHelp){fshHelpOnce();msg('You have a fishing rod. Dark patches near the water edge are fishing spots.','#a8d8f0')}}catch(e){}return r}}
+if(typeof SHORTCUTS!=='undefined')for(const s of SHORTCUTS)if(s[1]==='G')s[2]='Dig with a shovel, or fish at a dark patch of water';
+/* a test link: ?town=wenlock&lvl=34&fish=1 stands on the north bank of the brook by the old bridge, facing the water, with 1000 gold */
+{const _j=jumpFromUrl;jumpFromUrl=function(){const r=_j.apply(this,arguments);try{const q=new URLSearchParams(location.search);
+  if(q.get('fish')&&(q.get('town')||'').toLowerCase().startsWith('wenlock')){let n=0;const t=setInterval(()=>{n++;try{
+    if(LEVEL===496&&G.state==='play'&&!G.cut&&!G.talk&&G.P&&G.P.x===95&&G.P.y===50){clearInterval(t);G.gold+=1000;goToLevel(496,{x:69,y:81,f:2});G.state='play';G.menu=false;msg('Fishing test spot: the brook by the old bridge. Buy a rod at the general store, or walk on.','#a8d8f0')}}catch(e){}
+    if(n>60)clearInterval(t)},1000)}}catch(e){console.error(e)}return r}}
+/* ---------- reading a bottle's message from the bag ---------- */
+function fshNoteText(it){const i=it&&typeof it.m==='number'?it.m:0;return FSH_NOTES[i%FSH_NOTES.length]}
+{const _di=drawInventory;drawInventory=function(){const r=_di.apply(this,arguments);
+  try{const I=G.inv;if(I.open&&I.sel&&I.sel.src==='bag'&&I.tab!=='powers'){const it=selItem(),d=it&&ITEMDEF[it.id];if(d&&d.fread&&I.dropKey!=='b'+I.sel.i)btnText('fshread','Read',338,141,112,26)}}catch(e){}
+  return r}}
+{const _hb=handleBtn;handleBtn=function(id){
+  if(id==='fshread'){const it=selItem();if(it&&ITEMDEF[it.id]&&ITEMDEF[it.id].fread){G.inv.open=false;G.talk={d:{},n:{name:'A message in a bottle'},node:say('You pull the cork and unroll the note. It says: "'+fshNoteText(it)+'"',[BYE]),t:G.time,btns:[]};G.hold=null;G.queued=null}return}
+  return _hb.apply(this,arguments)}}
+/* ---------- the bait seller on the Wenlock brook (north bank, west of the old bridge) ---------- */
+KH_STOCK.fsh_bait=()=>[['bait_crumbs',30],['bait_worms',30],['bait_maggots',20],['bait_shrimp',15],['bait_silver',8],['bait_gold',4],['fishrod_1',2]];
+khNpc('fsh_baitseller','Old Reg, the bait seller','kh_ohfolk3_5',d=>say('Worms, maggots and lures, dug and tinned this morning. Bread crumbs for the quiet fish, shrimp for the salty ones, and a golden lure for the fish that has seen everything. I also keep a few rods, in case you came without one.',
+  [['Browse the wares',()=>{openShop(d,KH_STOCK.fsh_bait(),"Reg's Bait and Tackle");return null}],['How do I fish?',()=>say('Face a dark patch of water on the bank, press G or Space, and wait. When the fish bites, press again while the cursor is on the gold zone. Choose your bait with the Bait button first. A better rod and a better bait both help.',[BYE])],BYE]),{sc:1});
+{const _g=goToLevel;goToLevel=function(n,e){
+  try{if(n===496){if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();const L=LEVELS[n];if(L&&L.decor&&!L.decor.some(d=>d.npc==='fsh_baitseller'))L.decor.push({k:'kh_ohfolk3_5',x:66,y:82,block:false,walk:true,npc:'fsh_baitseller',sc:1})}}catch(x){console.error('fsh seller',x)}
+  return _g.apply(this,arguments)}}
+
+
+/* ---- src/desert/fishing_places.js ---- */
+/* ==========================================================================
+   FISHING PLACES (prefix fpl / FPL): fishing spots and little lakes in the older areas (see fishing.js for the spot API).
+   Every area has a recipe, fplDef(levelId, c => {...}), run ONCE on the built level just before the level is loaded (loadLevel is wrapped at the bottom), so lazy levels are built first.
+   The recipe gets a context c with these tools (all of them keep the walkable ground connected; the test tools/fishing_places_test.py asserts it):
+     c.lake(cells, {slot})     turn the squares into water: the floor becomes water, the square is blocked (an invisible blocker in a plain level, T.block in a terrain level, and the ground dips),
+                               trees, grass and other plants on it are hidden. Nothing else (people, doors, chests, signs) may stand on it, or the lake is refused and logged.
+     c.ellipse(cx,cy,rx,ry,seed)   an irregular ellipse of squares.     c.clear(x0,y0,x1,y1)   hide the trees and plants in a rectangle (a glade).
+     c.jetty(x,y,dx,dy,len)    planks laid from (x,y) going (dx,dy) over squares that would be water, so the party can walk out on them.
+     c.bank(cells, opts)       reeds, grass, flowers and willows round a lake (never on a stand square), c.deco(k,x,y,o) one prop.
+     c.stand(x,y,dx,dy,water)  a fishing spot: the party stands on (x,y) and fishes the two squares in direction (dx,dy). Refused unless (x,y) can be reached on foot and the next square is water.
+     c.shore({...})            scans the shore of existing water (terrain levels, seas) and adds spots at stand squares spaced out along it.
+   FPL.rep[levelId] = what was done (lakes, spots, refused things), for the test.
+   ========================================================================== */
+const FPL={cfg:{},rep:{},done:{}};
+function fplDef(n,fn){FPL.cfg[n]=fn}
+const FPL_VEG=/^(l?tree\d|[lgp]tree\d|pt_|lbush|lflora|flora\d|bush$|pgrass|pflw|hgwm_|reeds?$|greeds|pbracken|pheather|pjuniper|grocks|gboulder|rocks$|boulder$|stump|logm|pstump|wd_hill|lavender|hg_grass|dpalm|hg_reed|yar_wtree|yar_olive)/;
+function fplCtx(n){
+  const L=LEVELS[n],W=L.rows[0].length,H=L.rows.length,T=(typeof TERRS!=='undefined'&&TERRS[n])||null,I=(x,y)=>y*W+x;
+  const c={n,L,W,H,T,I,wset:new Set(),stands:[],lakes:[],refused:[],props:0,planks:new Set()};
+  if(!Array.isArray(L.fmap))L.fmap=L.fmap?String(L.fmap).match(new RegExp('.{'+W+'}','g')):null;
+  c.hasFm=!!L.fmap;
+  // ---- decor lookup, kept up to date as we add and hide things
+  const dm=new Map();const dAdd=d=>{const k=I(Math.round(d.x),Math.round(d.y));let a=dm.get(k);if(!a)dm.set(k,a=[]);a.push(d)};
+  for(const d of L.decor)if(d)dAdd(d);
+  c.decAt=(x,y)=>(dm.get(I(x,y))||[]).filter(d=>!d.hidden&&!d.pfCut||d.block);
+  c.isWall=(x,y)=>x<0||y<0||x>=W||y>=H||L.rows[y][x]!=='.'||!!(T&&T.block[I(x,y)]&&!c.wset.has(I(x,y)));
+  c.blocked=(x,y)=>{if(x<0||y<0||x>=W||y>=H||L.rows[y][x]!=='.')return true;if(c.wset.has(I(x,y)))return true;if(T&&T.block[I(x,y)])return true;
+    const a=dm.get(I(x,y));if(a)for(const d of a)if(d.block&&!d.hidden)return true;return false};
+  c.walk=(x,y)=>!c.blocked(x,y);
+  c.hide=d=>{c._v++;d.block=false;d.sc=.0001;d.hidden=true;d.pfCut=1;if(d.walk)d.walk=undefined};
+  c.add=(d)=>{L.decor.push(d);dAdd(d);c._v++;return d};
+  // ---- the floor slot of a named floor (find it, or take an unused digit, or the least used one)
+  c.slot=(name,notIn,into)=>{
+    if(!L.floorSet){L.floorSet=[L.floor||'grass',L.floor2||'grass','dirt','mosscobble','stainedcobble','wetcobble'].map((f,i)=>FLOORS[f]?f:(i?'dirt':'grass'));c._madeFs=1}
+    const fs=L.floorSet=L.floorSet.slice();const names=Array.isArray(name)?name:[name];
+    for(const nm of names){const i=fs.indexOf(nm);if(i>=0&&i<6)return String(i)}
+    const nm=names[0];if(!FLOORS[nm])return null;
+    const cnt=new Array(8).fill(0);if(L.fmap)for(const r of L.fmap)for(const ch of r){const v=ch.charCodeAt(0)-48;if(v>=0&&v<8)cnt[v]++}
+    let best=-1;for(let i=5;i>=1;i--){if(notIn&&notIn.includes(i))continue;if(i>=fs.length&&!cnt[i]){best=i;break}}
+    if(best<0)for(let i=5;i>=1;i--){if(notIn&&notIn.includes(i))continue;if(!cnt[i]&&i<fs.length){best=i;break}}
+    if(best<0){let m=1e9;for(let i=5;i>=1;i--){if(notIn&&notIn.includes(i))continue;if(cnt[i]<m){m=cnt[i];best=i}}
+      const old=String(best);for(let y=0;y<H;y++)if(L.fmap[y].includes(old))L.fmap[y]=L.fmap[y].split(old).join(into||'0')}  // the few squares that used it become another floor (into, or the main floor)
+    while(fs.length<=best)fs.push(fs[0]);fs[best]=nm;return String(best)};
+  c.setFloor=(x,y,ch)=>{const r=L.fmap[y];L.fmap[y]=r.slice(0,x)+ch+r.slice(x+1)};
+  // ---- an irregular ellipse
+  c.ellipse=(cx,cy,rx,ry,seed)=>{const o=[];const s=seed||7;for(let y=Math.floor(cy-ry-1);y<=Math.ceil(cy+ry+1);y++)for(let x=Math.floor(cx-rx-1);x<=Math.ceil(cx+rx+1);x++){
+      const dx=(x-cx)/rx,dy=(y-cy)/ry,d=dx*dx+dy*dy,w=1+(hash2(x,y,s)-.5)*.34;if(d<=w)o.push([x,y])}return o};
+  // ---- a clearing
+  c.clear=(x0,y0,x1,y1,extra)=>{let bad=[];for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){for(const d of (dm.get(I(x,y))||[])){if(d.hidden)continue;
+      if((FPL_VEG.test(d.k)||(extra&&extra.test(d.k)))&&!d.npc&&!d.enter&&!d.shop&&!d.loot)c.hide(d);else if(d.block||d.npc||d.enter||d.shop||d.loot)bad.push(d.k+'@'+x+','+y)}}
+    if(bad.length)c.refused.push('clear '+bad.join(' '));return !bad.length};
+  // ---- the lake itself
+  c.tried=[];
+  const canHide=d=>!d.npc&&!d.enter&&!d.shop&&!d.loot&&!d.contents&&(FPL_VEG.test(d.k)||(d.walk&&!d.block)||d.deco);
+  c.lake=(cells,o)=>{o=o||{};
+    const wname=o.floor||'water',fail=m=>{(o.quiet?c.tried:c.refused).push(m);return false};
+    for(const [x,y] of cells){
+      if(x<2||y<2||x>=W-2||y>=H-2||L.rows[y][x]!=='.')return fail('lake wall '+x+','+y);
+      for(const d of (dm.get(I(x,y))||[])){if(d.hidden)continue;if(!canHide(d))return fail('lake decor '+d.k+'@'+x+','+y)}
+      for(const p of (L.portals||[]))if(p&&p.x===x&&p.y===y)return fail('lake portal '+x+','+y);
+      for(const q of (L.items||[]))if(q&&q.x===x&&q.y===y)return fail('lake item '+x+','+y);
+      for(const q of (L.enemies||[]))if(q&&q.x===x&&q.y===y)return fail('lake enemy '+x+','+y);
+      if(L.start&&L.start.x===x&&L.start.y===y)return fail('lake start');
+      if(c.planks.has(I(x,y)))return fail('lake plank')}
+    {const r0=c.reachSet(),ids=cells.map(([x,y])=>I(x,y));let n0=0;for(let i=0;i<r0.length;i++)if(r0[i])n0++;
+     let inLake=0;for(const i of ids)if(r0[i])inLake++;
+     for(const i of ids)c.wset.add(i);const r1=c.reachSet();let n1=0;for(let i=0;i<r1.length;i++)if(r1[i])n1++;for(const i of ids)c.wset.delete(i);
+     if(n1!==n0-inLake)return fail('lake would cut off ground ('+(n0-inLake-n1)+')')}
+    const ch=c.slot(wname,o.notIn,o.into);if(ch===null)return fail('no floor '+wname);
+    const avg=(()=>{if(!T)return 0;let s=0,k=0;for(const [x,y] of cells)for(const [dx,dy] of [[-2,0],[2,0],[0,-2],[0,2]]){const xx=x+dx,yy=y+dy;if(xx>0&&yy>0&&xx<W&&yy<H&&!T.block[I(xx,yy)]){s+=T.h[I(xx,yy)];k++}}return k?s/k:0})();
+    for(const [x,y] of cells){
+      for(const d of (dm.get(I(x,y))||[]))if(!d.hidden)c.hide(d);
+      c.setFloor(x,y,ch);c.wset.add(I(x,y));if(L.khWalkOK){L.khWalkOK[I(x,y)]=0;if(L.khWalkQuiet)L.khWalkQuiet[I(x,y)]=0}
+      if(T){T.block[I(x,y)]=1;T.h[I(x,y)]=Math.min(T.h[I(x,y)],avg-.32)}
+      else c.add({k:'pstump',x,y,block:true,sc:.0001,wdh:1,hidden:false,fplWater:1})}
+    if(T){let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(const [x,y] of cells){x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)}
+      for(let y=y0-3;y<=y1+3;y++)for(let x=x0-3;x<=x1+3;x++){const i=I(x,y);if(x<1||y<1||x>=W-1||y>=H-1||c.wset.has(i)||T.block[i])continue;T.h[i]=avg+(T.h[i]-avg)*.35}   // the banks are levelled so the lake lies in a shallow dish
+      for(const [x,y] of cells){for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const xx=x+dx,yy=y+dy,i=I(xx,yy);if(!c.wset.has(i)&&xx>0&&yy>0&&xx<W&&yy<H&&!T.block[i])T.h[i]=Math.min(T.h[i],avg-.08)}}}
+    c._v++;c.lakes.push(cells.length);return true};
+  c.isWater=(x,y)=>{if(x<0||y<0||x>=W||y>=H)return false;const i=I(x,y);return c.wset.has(i)||(typeof fshWaterAt==='function'&&fshWaterAt(L,n,x,y))||!!(T&&T.block[i]&&T.h[i]<-.05&&L.rows[y][x]==='.')}; // water floor, or a blocked square of a sea terrain lying below the waterline
+  // ---- planks
+  c.jetty=(x,y,dx,dy,len,name)=>{const ch=c.slot(name||'wood');if(ch===null)return false;const o=[];
+    for(let k=0;k<len;k++){const xx=x+dx*k,yy=y+dy*k;if(c.wset.has(I(xx,yy)))return false;o.push([xx,yy])}
+    for(const [xx,yy] of o){c.setFloor(xx,yy,ch);c.planks.add(I(xx,yy));for(const d of (dm.get(I(xx,yy))||[]))if(!d.hidden&&FPL_VEG.test(d.k))c.hide(d)}return o};
+  // ---- props
+  c.deco=(k,x,y,o)=>{if(!IMG[k]||c.blocked(x,y)&&!(o&&o.force))return false;c.props++;return c.add(Object.assign({k,x,y,block:false,walk:true,deco:true,sc:1},o||{}))};
+  c.reachSet=()=>{const L2=L.start,seen=new Uint8Array(W*H),q=[];if(!L2)return seen;const s=I(L2.x,L2.y);seen[s]=1;q.push(L2.x,L2.y);
+    while(q.length){const y=q.pop(),x=q.pop();for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=W||yy>=H)continue;const i=I(xx,yy);if(seen[i]||c.blocked(xx,yy))continue;seen[i]=1;q.push(xx,yy)}}return seen};
+  c._v=0;c.reachC=()=>{if(c._rc&&c._rcv===c._v)return c._rc;c._rcv=c._v;return c._rc=c.reachSet()};
+  c.before=c.reachSet();
+  // ---- a fishing spot
+  c.stand=(x,y,dx,dy,water)=>{
+    const rf=m=>(c.quietStands?c.tried:c.refused).push(m);
+    if(c.blocked(x,y)){rf('stand blocked '+x+','+y);return false}
+    if(!c.reachC()[I(x,y)]){rf('stand unreachable '+x+','+y);return false}
+    if(c.isWater(x,y)){rf('stand in water '+x+','+y);return false}
+    let k=0;for(let j=1;j<=3;j++)if(c.isWater(x+dx*j,y+dy*j)){k=j;break}
+    if(!k){rf('stand no water '+x+','+y+' '+dx+','+dy);return false}
+    for(let j=1;j<k;j++)if(c.walk(x+dx*j,y+dy*j)&&!c.isWater(x+dx*j,y+dy*j)){rf('stand far from water '+x+','+y);return false}
+    for(let j=1;j<=3;j++){const xx=x+dx*j,yy=y+dy*j;if(xx>=0&&yy>=0&&xx<W&&yy<H&&L.rows[yy][xx]!=='.'&&j<=k+0){rf('stand wall before water '+x+','+y);return false}}  // the game looks along the row: a wall square in the way hides the patch
+    c.stands.push({x,y,dx,dy,k,water:water||null});return true};
+  // ---- finding room for lakes in open country: a lake needs flat ground and nothing important near it
+  const imp=[],impS=[];for(const d of L.decor)if(d&&(d.npc||d.enter||d.shop||d.loot||d.contents||d.block&&!FPL_VEG.test(d.k)))((/rock|frog|stone|boulder|stump|log/.test(d.k)&&!d.npc&&!d.enter)?impS:imp).push([d.x,d.y]);
+  for(const p of (L.portals||[]))if(p)imp.push([p.x,p.y]);const impM=[];for(const q of (L.items||[]))if(q)impS.push([q.x,q.y]);for(const q of (L.enemies||[]))if(q)impM.push([q.x,q.y]);
+  c.roomFor=(cells,margin,tol,pathDigit)=>{
+    let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(const [x,y] of cells){x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)}
+    for(const [x,y] of imp)if(x>=x0-margin&&x<=x1+margin&&y>=y0-margin&&y<=y1+margin)return false;
+    for(const [x,y] of impM)if(x>=x0-4&&x<=x1+4&&y>=y0-4&&y<=y1+4)return false;
+    for(const [x,y] of impS)if(x>=x0-1&&x<=x1+1&&y>=y0-1&&y<=y1+1)return false;
+    if(T&&tol){let lo=1e9,hi=-1e9;for(let y=y0-2;y<=y1+2;y++)for(let x=x0-2;x<=x1+2;x++){const v=T.h[I(x,y)];lo=Math.min(lo,v);hi=Math.max(hi,v)}if(hi-lo>tol)return false}
+    if(L.fmap&&pathDigit)for(let y=y0-2;y<=y1+2;y++)for(let x=x0-2;x<=x1+2;x++)if(L.fmap[y]&&L.fmap[y][x]===pathDigit)return false;
+    for(let y=y0-1;y<=y1+1;y++)for(let x=x0-1;x<=x1+1;x++){if(x<2||y<2||x>=W-2||y>=H-2||L.rows[y][x]!=='.')return false}
+    return true};
+  // ---- sand or pebbles round a lake: the floor of the ring of walkable squares round the water becomes the named floor (never a road square)
+  c.rim=(name,keepDigit)=>{const ch=c.slot(name);if(ch===null)return;for(const i of c.wset){const x=i%W,y=(i/W)|0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const xx=x+dx,yy=y+dy,j=I(xx,yy);if(c.wset.has(j)||c.planks.has(j)||c.isWall(xx,yy))continue;if(keepDigit&&L.fmap[yy][xx]===keepDigit)continue;c.setFloor(xx,yy,ch)}}};
+  // ---- a spot on one side of a lake given as a list of cells: side N S E W, along = the x (N, S) or y (E, W) of the line to look along
+  c.edgeStand=(cells,side,along,water)=>{
+    const col=side==='N'||side==='S',sel=cells.filter(q=>col?q[0]===along:q[1]===along);if(!sel.length){c.refused.push('edge none '+side+along);return false}
+    if(side==='N'){const y=Math.min(...sel.map(q=>q[1]));return c.stand(along,y-1,0,1,water)}
+    if(side==='S'){const y=Math.max(...sel.map(q=>q[1]));return c.stand(along,y+1,0,-1,water)}
+    if(side==='W'){const x=Math.min(...sel.map(q=>q[0]));return c.stand(x-1,along,1,0,water)}
+    const x=Math.max(...sel.map(q=>q[0]));return c.stand(x+1,along,-1,0,water)};
+  // ---- windows: where a lake lies behind a wall (one or two squares thick) from a walkable corridor, cut the wall through so the party can stand at the water
+  c.windows=(o)=>{
+    const reach=c.reachC(),cand=[],D=[[1,0],[-1,0],[0,1],[0,-1]];
+    const open=(x,y)=>x>=2&&y>=2&&x<W-2&&y<H-2&&L.rows[y][x]==='.'&&!c.isWater(x,y)&&reach[I(x,y)];
+    const solid=(x,y)=>x>=3&&y>=3&&x<W-3&&y<H-3&&L.rows[y][x]!=='.'&&!c.isWater(x,y)&&!c.decAt(x,y).some(d=>d.block||d.enter||d.npc);
+    const box=o.box||[2,2,W-3,H-3];
+    for(let y=box[1];y<=box[3];y++)for(let x=box[0];x<=box[2];x++){
+      if(!c.isWater(x,y)||L.rows[y][x]!=='.')continue;
+      for(const [dx,dy] of D){const w2x=x-dx,w2y=y-dy;if(!c.isWater(w2x,w2y))continue;   // two water squares in a row behind the opening
+        const p1=[x+dx,y+dy],p2=[x+dx*2,y+dy*2],p3=[x+dx*3,y+dy*3];
+        if(!solid(p1[0],p1[1]))continue;
+        let cut=null;
+        if(open(p2[0],p2[1]))cut=[p1];else if(solid(p2[0],p2[1])&&open(p3[0],p3[1]))cut=[p1,p2];
+        if(cut)cand.push({cut,x:p1[0],y:p1[1],dx:-dx,dy:-dy,h:hash2(x,y,o.seed||9)})}}
+    cand.sort((p,q)=>p.h-q.h);const got=[];
+    for(const p of cand){if(got.length>=(o.max||8))break;if(got.some(g=>Math.max(Math.abs(g.x-p.x),Math.abs(g.y-p.y))<(o.step||12)))continue;
+      for(const [x,y] of p.cut){for(const d of c.decAt(x,y))if(d.block)c.hide(d);const r=L.rows[y];L.rows[y]=r.slice(0,x)+'.'+r.slice(x+1);if(c.hasFm&&o.floor){const ch=c.slot(o.floor);if(ch!==null)c.setFloor(x,y,ch)}}
+      c._v++;
+      if(c.stand(p.x,p.y,p.dx,p.dy,o.water)){got.push(p);c.windowCells=(c.windowCells||[]).concat(p.cut)}}
+    return got};
+  // ---- scanning a shore
+  c.shore=(o)=>{
+    const reach=c.reachC(),want=o.max||20,step=o.step||6,box=o.box||[2,2,W-3,H-3],dirs=o.dirs||[[1,0],[-1,0],[0,1],[0,-1]],cand=[];
+    for(let y=box[1];y<=box[3];y++)for(let x=box[0];x<=box[2];x++){const i=I(x,y);if(!reach[i]||c.isWater(x,y))continue;
+      if(c.decAt(x,y).some(d=>d.block))continue;
+      for(const [dx,dy] of dirs){let k=0;for(let j=1;j<=3;j++){const bx=x+dx*j,by=y+dy*j;if(bx<2||by<2||bx>=W-2||by>=H-2)break;if(c.isWater(bx,by)){k=j;break}}
+        if(!k)continue;
+        let ok=true;for(let j=1;j<k;j++)if(c.walk(x+dx*j,y+dy*j)||L.rows[y+dy*j][x+dx*j]!=='.'){ok=false;break}  // the squares before the water must be shore that cannot be walked but is not a wall
+        if(!ok)continue;
+        // two water squares in a row at least, so the patch has room
+        if(!c.isWater(x+dx*(k+1),y+dy*(k+1)))continue;
+        cand.push({x,y,dx,dy,h:hash2(x,y,o.seed||5)})}}
+    cand.sort((p,q)=>p.h-q.h);const got=[];
+    for(const p of cand){if(got.length>=want)break;if(got.some(g=>Math.max(Math.abs(g.x-p.x),Math.abs(g.y-p.y))<step))continue;
+      if(o.min&&Math.abs(p.x-L.start.x)+Math.abs(p.y-L.start.y)<o.min)continue;
+      if(c.stand(p.x,p.y,p.dx,p.dy,o.water))got.push(p)}
+    return got};
+  return c}
+/* the shared bank planting: reeds and grass round the water, a willow or two, flowers; never on a stand square, a plank or the square in front of a stand */
+function fplBank(c,o){
+  o=o||{};const keep=new Set(),W=c.W;for(const s of c.stands){keep.add(c.I(s.x,s.y))}
+  const ring=new Map();for(const i of c.wset){const x=i%W,y=(i/W)|0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const xx=x+dx,yy=y+dy,j=c.I(xx,yy);if(!c.wset.has(j)&&!c.planks.has(j)&&!keep.has(j)&&c.walk(xx,yy))ring.set(j,[xx,yy])}}
+  const reeds=['reeds','hgwm_reed0','greeds'].filter(k=>IMG[k]),grass=['pgrass1','pgrass0','pgrass2'].filter(k=>IMG[k]),flw=['pflw0_0','pflw3_0','lflora0'].filter(k=>IMG[k]);
+  let n=0;for(const [j,[x,y]] of ring){const h=hash2(x,y,o.seed||31);
+    if(c.decAt(x,y).some(d=>d.block))continue;
+    if(h<(o.reedP||.45)&&reeds.length){c.deco(reeds[(hash2(x,y,3)*reeds.length)|0],x,y,{sc:.9+hash2(x,y,4)*.5,ox:(hash2(x,y,5)-.5)*.5,oy:(hash2(x,y,6)-.5)*.4});n++}
+    else if(h<.75&&grass.length){c.deco(grass[(hash2(x,y,7)*grass.length)|0],x,y,{sc:1+hash2(x,y,8)*.5,ox:(hash2(x,y,9)-.5)*.6,oy:(hash2(x,y,10)-.5)*.5});n++}
+    else if(h<.88&&flw.length){c.deco(flw[(hash2(x,y,11)*flw.length)|0],x,y,{sc:1.1,ox:(hash2(x,y,12)-.5)*.5,oy:(hash2(x,y,13)-.5)*.5});n++}}
+  return n}
+function fplFinish(c){
+  const after=c.reachSet(),lost=[];
+  for(let i=0;i<c.W*c.H;i++)if(c.before[i]&&!after[i]&&!c.wset.has(i))lost.push((i%c.W)+','+((i/c.W)|0));
+  const spots=[];for(const s of c.stands){spots.push({x:s.x,y:s.y,dx:s.dx,dy:s.dy});}
+  const byW={};for(const s of c.stands){const w=s.water||'';(byW[w]=byW[w]||[]).push(s.k===1?{x:s.x,y:s.y,dx:s.dx,dy:s.dy}:{x:s.x+s.dx*s.k,y:s.y+s.dy*s.k})}
+  for(const w in byW)fshAddSpots(c.n,byW[w],w?{water:w}:undefined);
+  FPL.rep[c.n]={lakes:c.lakes.slice(),water:c.wset.size,stands:c.stands.slice(),refused:c.refused.slice(),lost,props:c.props,prepared:true};
+  if(lost.length||c.refused.length)console.error('fishing places',c.n,'lost',lost.slice(0,6),'refused',c.refused.slice(0,6));
+  return FPL.rep[c.n]}
+function fplPrep(n){
+  const fn=FPL.cfg[n];if(!fn||FPL.done[n])return;
+  if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();
+  const L=LEVELS[n];if(!L||L.stub||!L.rows)return;
+  FPL.done[n]=1;
+  const c=fplCtx(n);try{fn(c)}catch(e){console.error('fishing places',n,e);c.refused.push('exception '+e)}
+  fplFinish(c)}
+{const _ll=loadLevel;loadLevel=function(n){try{fplPrep(n)}catch(e){console.error('fishing places prep',n,e)}return _ll.apply(this,arguments)}}
+
+/* ---- src/desert/fishing_places_areas.js ---- */
+/* ==========================================================================
+   FISHING PLACES, THE RECIPES (prefix fpl): one fplDef per area, using the tools of fishing_places.js.
+   ========================================================================== */
+/* Ironhill (13): a glade in the trees south of the town, reached by a gap in the fence at the end of the lane at x 23, with a small lake, reeds, a bench and three spots */
+fplDef(13,c=>{
+  c.clear(22,27,24,27,/^fence$/);c.clear(17,28,29,34);
+  const cells=c.ellipse(23,31,3.2,2.1,11);
+  if(!c.lake(cells,{floor:'water'}))return;
+  c.edgeStand(cells,'N',23);c.edgeStand(cells,'W',31);c.edgeStand(cells,'E',31);
+  fplBank(c,{seed:41});
+  c.deco('bench',20,29,{block:true,walk:false,sc:1});c.deco('pt_willow',27,29,{sc:1.2});c.deco('lamp',25,28,{sc:1});
+});
+/* Khemetra (44): a pond in the lawn of the parks and the three named gardens (every pond has a bit of reed round it and two to four spots) */
+fplDef(44,c=>{
+  const C=typeof KH_CITY!=='undefined'?KH_CITY:null;if(!C)return;
+  const plz=C.plazas.filter(p=>p.z===2),parks=plz.filter(p=>p.park).filter((p,i)=>i%2===0),gardens=plz.filter(p=>!p.park);
+  const offs=[[0,0],[4,0],[-4,0],[0,4],[0,-4],[5,4],[-5,-4],[5,-4],[-5,4],[0,7],[0,-7]];
+  let n=0;
+  for(const p of [...gardens,...parks]){
+    const cx=(p.x0+p.x1)>>1,cy=(p.y0+p.y1)>>1;let done=false;
+    for(let k=0;k<offs.length&&!done;k++){
+      const px=cx+offs[k][0],py=cy+offs[k][1],cells=c.ellipse(px,py,3.4,2.3,(px*7+py)|0);
+      if(!c.lake(cells,{floor:'water',quiet:true,into:'2'}))continue;
+      done=true;c.quietStands=true;let s=0;
+      s+=c.edgeStand(cells,'N',px)?1:0;s+=c.edgeStand(cells,'S',px)?1:0;s+=c.edgeStand(cells,'W',py)?1:0;s+=c.edgeStand(cells,'E',py)?1:0;
+      c.quietStands=false;n++;
+      if(!s)c.refused.push('khemetra pond without a spot '+px+','+py)}
+  }
+  fplBank(c,{seed:47,reedP:.4});
+  c.refused.length||0;
+});
+/* Yarrim (290): the beach on the east shore, salt water */
+fplDef(290,c=>{c.shore({box:[54,12,76,72],step:5,max:16,water:'salt',seed:3})});
+/* Oldhaven Quay (304): along the quay edge and the ends of the jetties, salt water */
+fplDef(304,c=>{c.shore({box:[2,30,78,66],step:4,max:30,water:'salt',seed:4,dirs:[[0,1],[1,0],[-1,0]]})});
+/* the Pilgrim's Path: the sea legs run along the coast (salt, beach spots), the mountain legs along their rivers and ponds (fresh) */
+for(let n=400;n<=423;n++){
+  const sea=(n>=400&&n<=407)||(n>=416&&n<=421);
+  if(sea)fshSetWater(n,'salt');
+  fplDef(n,c=>{c.shore({box:[2,4,c.W-3,c.H-6],step:sea?13:10,max:sea?14:12,water:sea?'salt':'fresh',seed:n});
+    // the mountain legs with only puddles of water get a couple of small ponds in the flat verge, away from the road
+    if(!sea&&c.stands.length<10){const before=c.stands.length;fplLakes(c,{n:3,seed:n*3,rx:[2.6,3.6],ry:[1.8,2.6],margin:5,tol:.7,path:'1',floor:'bluewater',water:'fresh',sep:60,box:[56,60,94,c.H-60]});c.refused=c.refused.filter(m=>!/lakes found room/.test(m))}});
+}
+/* a few lakes in open country: tries positions in a fixed random order, keeps each one that has room, and puts spots on its four sides */
+function fplLakes(c,o){
+  const got=[];const box=o.box||[8,8,c.W-9,c.H-9];
+  for(let t=0;t<4000&&got.length<o.n;t++){
+    const cx=box[0]+((hash2(t,1,o.seed)*(box[2]-box[0]))|0),cy=box[1]+((hash2(t,2,o.seed)*(box[3]-box[1]))|0);
+    if(got.some(g=>Math.hypot(g[0]-cx,g[1]-cy)<(o.sep||24)))continue;
+    const rx=o.rx[0]+hash2(t,3,o.seed)*(o.rx[1]-o.rx[0]),ry=o.ry[0]+hash2(t,4,o.seed)*(o.ry[1]-o.ry[0]),cells=c.ellipse(cx,cy,rx,ry,t+o.seed);
+    if(!c.roomFor(cells,o.margin||8,o.tol||0,o.path||null))continue;
+    if(!c.lake(cells,{floor:o.floor||'water',quiet:true}))continue;
+    got.push([cx,cy]);c.quietStands=true;let s=0;
+    for(const [side,al] of [['N',cx],['S',cx],['W',cy],['E',cy]])s+=c.edgeStand(cells,side,al,o.water)?1:0;
+    c.quietStands=false;if(o.rim)c.rim(o.rim,o.path);
+    if(!s)c.refused.push('pond without a spot '+cx+','+cy)}
+  if(got.length<o.n)c.refused.push('only '+got.length+' of '+o.n+' lakes found room');
+  fplBank(c,{seed:o.seed+5,reedP:.5});return got}
+/* the Hollow Land (364): four black pools in the great dark hall, deep water */
+fplDef(364,c=>{
+  const spots=[[20,24,4.2,2.8],[51,31,4.2,2.8],[19,40,3.6,2.4],[54,54,4.4,2.6]];
+  for(const [cx,cy,rx,ry] of spots){const cells=c.ellipse(cx,cy,rx,ry,cx*3+cy);
+    if(!c.lake(cells,{floor:'water'}))continue;c.quietStands=true;
+    for(const [side,al] of [['N',cx],['S',cx],['W',cy],['E',cy]])c.edgeStand(cells,side,al,'deep');c.quietStands=false}
+  fplBank(c,{seed:61,reedP:.5});
+});
+/* the Hollow Grasslands (470): six ponds on flat grass, away from paths, villages and hives, sand round them (fresh) */
+fplDef(470,c=>{fplLakes(c,{n:5,seed:71,rx:[3.4,4.6],ry:[2.4,3.2],margin:7,tol:.5,path:'1',rim:'bluesand',water:'fresh',sep:28})});
+/* the Deeper Hollow (475) and the Underlevel (476): spots along the edges of the dark waters, deep water */
+fplDef(475,c=>{c.windows({max:12,step:14,water:'deep',seed:75});c.shore({step:7,max:10,water:'deep',seed:75})});
+fplDef(476,c=>{c.shore({step:8,max:30,water:'deep',seed:76})});
+/* Greendale (32): a small lake in the east meadow, a rowing boat, and a little plank jetty */
+fplDef(32,c=>{
+  const cells=c.ellipse(47,10.5,3.3,2,17).filter(([x,y])=>!(x===47&&y<=10));
+  if(!c.lake(cells,{floor:'water'}))return;
+  c.jetty(47,8,0,1,3);
+  c.stand(47,10,-1,0);c.stand(47,10,1,0);c.edgeStand(cells,'W',11);c.edgeStand(cells,'E',11);
+  fplBank(c,{seed:43});
+  c.deco('yar_boat_row',50,12,{block:false,walk:false,sc:1.1,force:1});
+  c.deco('bench',45,7,{block:true,walk:false});c.deco('pt_willow',51,8,{sc:1.2});
+});
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
