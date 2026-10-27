@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.679';
+const VERSION='3.680';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -56724,12 +56724,31 @@ function wmwUnderMake(){
 function wmwUnderIco(c,x,y){const im=wmwUnderMake(),w=50,h=w*im.height/im.width;c.save();c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.drawImage(im,x-w/2,y+4-h,w,h);c.restore()}
 const WMW_ICO={gardens:wmwHedgeIso,witchwood:wmwForest,underlevel:wmwUnderIco,drowned:wmwDrownIso,westgate:wmwGate};
 /* each of the four graveyard mazes is drawn as its own door from the yard (the painted pictures of the game): the mossy iron gate, the sunken stair, the stone archway and the trapdoor */
+/* the four brick mazes of the graveyard, each with its OWN LAYOUT (a plan seen from above, walls in the brick colour of the maze): a spiral, four chambers round a cross, a switchback and a hall of pillars */
+const WMW_GMPLAN=[
+  ['###########','#.........#','#.#######.#','#.#.....#.#','#.#.###.#.#','#.#.#.#.#.#','#.#.#.###.#','#.#.#.....#','#.#.#######','#.#.......#','#####.#####'],
+  ['###########','#....#....#','#.##.#.##.#','#.#.....#.#','#.#.###.#.#','.....#.....','#.#.###.#.#','#.#.....#.#','#.##.#.##.#','#....#....#','###########'],
+  ['###########','#.........#','#########.#','#.........#','#.#########','#.........#','#########.#','#.........#','#.#########','#.........#','###.#######'],
+  ['###########','#.........#','#.#.#.#.#.#','#.........#','#.#.#.#.#.#','#.........#','#.#.#.#.#.#','#.........#','#.#.#.#.#.#','#.........#','#####.#####']];
+const WMW_GMCOL=[['#a4553e','#d98a6e','#5a2a1e'],['#8c8c94','#c2c2ca','#4a4a52'],['#3e3e48','#6a6a78','#16161c'],['#d8d0b4','#f2ecd6','#8a8468']];
+function wmwGmPlan(c,l,i){
+  const S=32,n=11,u=S/n,col=WMW_GMCOL[i],pl=WMW_GMPLAN[i%4];
+  const sp=wmwSprite('gmplan'+i,S+4,S+4,g=>{
+    g.fillStyle='rgba(40,28,14,.32)';g.fillRect(2.2,2.4,S,S);
+    g.fillStyle='#2a2218';g.fillRect(.5,.5,S,S);
+    for(let y=0;y<n;y++)for(let x=0;x<n;x++){
+      if(pl[y][x]!=='#')continue;const px=.5+x*u,py=.5+y*u;
+      g.fillStyle=col[0];g.fillRect(px,py,u,u);
+      g.fillStyle=col[1];g.fillRect(px,py,u,.55);
+      g.strokeStyle=col[2];g.lineWidth=.22;g.beginPath();g.moveTo(px,py+u/2);g.lineTo(px+u,py+u/2);const o=(y%2)?u*.3:u*.7;g.moveTo(px+o,py);g.lineTo(px+o,py+u/2);g.moveTo(px+(o+u/2)%u,py+u/2);g.lineTo(px+(o+u/2)%u,py+u);g.stroke()}
+    g.strokeStyle=col[2];g.lineWidth=.5;g.strokeRect(.5,.5,S,S)});
+  if(!sp)return false;c.drawImage(sp.cv,l.x-S/2-.5,l.y+9-S-.5,sp.w,sp.h);return true}
 const WMW_GMPIC=['stairFix_2','gatesC_4','gatesC_1','stairFix_3'];
 function wmwGmIco(c,l,i){const im=IMG['gyp_'+WMW_GMPIC[i]];if(!im||!im.width)return false;const h=i===3?20:32,w=h*im.width/im.height,by=l.y+9;
   c.save();c.fillStyle='rgba(40,28,14,.3)';c.beginPath();c.ellipse(l.x,by-.5,w*.45,2.6,0,0,6.3);c.fill();c.drawImage(im,l.x-w/2,by-h,w,h);c.restore();return true}
 {const _ico=wmnIco;wmnIco=function(l){
   const f=WMW_ICO[l.k];if(f){const L=wmnLay(l);if(L){f(ctx,l.x,l.y+(L.off||0)*0,l)}return}
-  const m=/^gm(\d)$/.exec(l.k);if(m){if(!wmwGmIco(ctx,l,+m[1]-1)){ctx.save();ctx.filter=wmwBrickFilter(+m[1]-1);_ico(l);ctx.restore()}return}
+  const m=/^gm(\d)$/.exec(l.k);if(m){if(!wmwGmPlan(ctx,l,+m[1]-1)){ctx.save();ctx.filter=wmwBrickFilter(+m[1]-1);_ico(l);ctx.restore()}return}
   if(l.k==='wellmaze'){ // four floors of purple maze stacked down, under the painted well of Wenlock
     ctx.save();ctx.filter='hue-rotate(250deg) saturate(1.25) brightness(.82)';_ico(l);ctx.restore();
     const L=wmnLay(l),w=IMG.kh_city1_1;if(L&&L.ib&&w&&w.width){const h=18,ww=h*w.width/w.height,top=L.ib[1];ctx.save();ctx.fillStyle='rgba(40,28,14,.28)';ctx.beginPath();ctx.ellipse(l.x,top+8.5,ww*.42,2,0,0,6.3);ctx.fill();ctx.drawImage(w,l.x-ww/2,top+8-h,ww,h);ctx.restore()}return}
