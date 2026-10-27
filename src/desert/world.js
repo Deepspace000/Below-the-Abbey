@@ -171,13 +171,14 @@ journalPage({id:'luck',title:'Luck and Omens',
 
 /* ---------------------------------------------------------------- mercy: a beaten bandit may beg ---------------------------------------------------------------- */
 function mercyCheck(e){
-  const d=ENEMY_DEF[e.t];if(!d||d.kind!=='bandit'||e.surr||mxIsBoss(e)||e.poly)return;
-  if(e.hp>e.maxhp*.22||Math.random()>.45)return;
+  const d=ENEMY_DEF[e.t];if(!d||d.kind!=='bandit'||e.surr||e.noMercy||mxIsBoss(e)||e.poly)return;
+  if(e.hp>e.maxhp*.22||Math.random()>.12)return; // only now and then: about one beaten bandit in eight begs
   e.surr=true;e.surrT=0;e.alert=false;(e.st=e.st||{}).hold=0;
   msg(`The ${d.name} throws down his weapon and begs for mercy!`,'#e8d890');if(typeof mxFloat==='function')mxFloat(e,'Mercy!','#e8d890');
 }
 function mercyBroken(e){
   if(!e.surr||e.mercyDone)return;e.mercyDone=true;
+  e.surr=false;e.noMercy=true;e.alert=true; // struck again: he fights on (or can simply be killed), never stands in the way surrendered
   honourAdd(-3,'you struck down a man who had surrendered');luckAdd(-1);const t=repTownOf(LEVEL);if(t)repAdd(t,-2,'word gets round');
 }
 function mercyTick(){
