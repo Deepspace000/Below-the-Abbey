@@ -97,8 +97,10 @@ if(typeof AFFL!=='undefined'&&!AFFL.hagblind){AFFL.hagblind={n:'Hag-blinded',kin
 {const _wd=wdDoorLevel;wdDoorLevel=function(n){return _wd.apply(this,arguments)||wwIs(n)}}
 /* Wenlock's own loader also loads the wood's pictures, so that the gate in Wenlock can be painted when the town is built */
 {const _wl=wlLoad;wlLoad=function(){if(WW._both)return WW._both;return WW._both=Promise.resolve(_wl.apply(this,arguments)).then(()=>wwLoad())}}
+/* the party always has a small warm lantern light in the wood, so the corridors read even without a torch */
+{const _pl=partyLight;partyLight=function(){const l=_pl.apply(this,arguments);return (typeof LEVEL!=='undefined'&&wwIs(LEVEL))?Math.max(l,.75):l}}
 /* fog: the wood lives under a thick, cold, green-grey murk; the party sees a few squares and creatures alert late (ambushers in the fog) */
 {const _w=weatherNow;weatherNow=function(){
-  if(LEVEL===WW.ID)return {id:'fog',n:'Murk',fog:.16,haze:.92,dark:.84,mix:.92,col:[14,24,18],text:'A thick, cold murk lies between the trees. The view is a few squares, and things stand very close before they are seen.'};
+  if(LEVEL===WW.ID)return {id:'fog',n:'Murk',fog:.09,haze:.62,dark:.7,mix:.8,col:[22,34,26],text:'A thick, cold murk lies between the trees. The view is a few squares, and things stand very close before they are seen.'};
   if(wwIs(LEVEL))return null;
   return _w.apply(this,arguments)}}
