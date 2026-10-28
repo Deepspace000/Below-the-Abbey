@@ -82,7 +82,7 @@ check('zone: ghoul wakes when the party is in the dead quarter', R['zoneInside']
 check('zone: ghoul loses the party when it leaves and goes home', R['zoneLeft'] == [False, True], R['zoneLeft'])
 check('zone: farm ghoul quiet from the Back Track', R['farmOutside'] is False)
 check('small levels and stubs build', all(isinstance(v, list) for v in R['small'].values()) and R['small']['601'][1] >= 3 and R['small']['602'][1] >= 5 and R['small']['603'][1] >= 3, R['small'])
-check('east gate is shut until a road is attached', 'saRoadOpen' in R['east'], R['east'])
+check('east gate leads out to the Blighted Road (the Pale Bridge, 9700)', isinstance(R['east'], dict) and R['east'].get('to') == 9700, R['east'])
 
 # ---- the ten quests ----
 QJS = r"""async () => {
