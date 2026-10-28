@@ -305,7 +305,7 @@ function blcCrypt(){
   blRoom({id:BLC.CRYPT,name:'The Crypt of the Hollow Saint',w:21,h:15,amb:.38,rating:86,floor:FLOORS.mosscobble?'mosscobble':'cobble',wall:IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0',
     back:{to:BLC.NAVE,x:3,y:12,f:0},
     lights:[[3,3],[10,2],[17,3],[3,9],[17,9],[10,8],[10,12]],lcol:{'3,3':[.7,1.1,.95],'10,2':[.7,1.1,.95],'17,3':[.75,1.1,.95],'3,9':[1.3,.95,.6],'17,9':[.7,1.1,.95],'10,8':[.75,1.1,.95],'10,12':[1.3,.95,.6]},col:[.72,1.05,.92],
-    enemies:[['blbones',5,5],['blbones',15,5],['blghoul',4,9],['blghoul',16,9],['blshade',10,6],['blbones',6,11],['blcantor',10,2]],
+    enemies:[['blbones',5,5],['blbones',15,5],['blghoul',4,9],['blghoul',16,9],['blshade',10,6],['blbones',6,11],['blcantor',10,3]],
     build:C=>{
       // the stair up is the door in the south wall (middle); the stair set into the wall is decoration to match
       for(const [x,y] of [[2,3],[2,5],[18,3],[18,5],[2,9],[18,9]])C.raw('gy_niche',x,y,{npc:'blc_niche',solid:1,deco:false,sc:.9});

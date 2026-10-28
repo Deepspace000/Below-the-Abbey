@@ -10,7 +10,7 @@ function blMapDraw(c,x,L,api){
   x.save();x.beginPath();x.rect(PX,PY,PW,PH);x.clip();
   for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){
     if(wall(cx,cy)){const k=col(cx,cy),v=hash2(cx,cy,5)*12-6;x.fillStyle=`rgb(${Math.max(0,Math.min(255,k[0]*.8+v))|0},${Math.max(0,Math.min(255,k[1]*.8+v))|0},${Math.max(0,Math.min(255,k[2]*.8+v))|0})`}
-    else{const f=L.fmap&&L.fmap[cy]?L.fmap[cy][cx]:'x';x.fillStyle=out?(BLMP.ground[f]||'#cfc8b6'):'#c9b896'}
+    else{const f=L.fmap&&L.fmap[cy]?L.fmap[cy][cx]:'x';x.fillStyle=out?((L._ground&&L._ground[f])||BLMP.ground[f]||'#cfc8b6'):'#c9b896'}
     x.fillRect(X(cx)-.1,Y(cy)-.1,s+.2,s+.2)}
   x.strokeStyle=BLMP.ink;x.lineWidth=.6;x.lineCap='round';x.beginPath();
   for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){if(wall(cx,cy))continue;const X0=X(cx),Y0=Y(cy);
