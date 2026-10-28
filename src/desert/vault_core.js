@@ -12,7 +12,7 @@
 const VT={ID:9670,F:[9671,9672,9673,9674,9675,9676],SANCT:9677,ARCH:9678,LAST:9678,ready:false,loading:null,
   LV:{9670:88,9671:88,9672:88,9673:88,9674:89,9675:89,9676:89,9677:89,9678:89},
   NAMES:{9670:'The Barrow Hill',9671:'The Barrow Stair',9672:'The Ossuary of the Roll',9673:'The Bell Gallery',9674:'The Silvered Cellars',9675:'The Hall of Underhill',9676:'The Stair of Quiet',9677:"Maldrake's Sanctum",9678:'The Secret Archive'},
-  link:{east:9660,west:9680},arrive:{east:{x:60,y:41,f:3},west:{x:3,y:41,f:1}},hillBack:{x:34,y:11,f:2}};
+  link:{east:9660,west:9680},arrive:{east:{x:60,y:45,f:3},west:{x:3,y:45,f:1}},hillBack:{x:34,y:13,f:2}};
 const vtIs=n=>n>=9670&&n<=9678;
 const vtInside=n=>n>=9671&&n<=9678;
 for(const n in VT.LV){LEVEL_RATING[n]=VT.LV[n];LEVEL_NAMES[n]=VT.NAMES[n]}
