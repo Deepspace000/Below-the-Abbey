@@ -10,6 +10,7 @@ Cause of the "blank" fronts (AUDIT.md): dark pieces, no self light. Fixes made:
    plaque lower on the gothic and vault door, on the architrave of the classical); Avenue of Vaults = blocks of three tiles cycling vault, classical, gothic, the north end
    vault; Pale Catacombs entry = the dungeon gate (GY_ENTRY pale is now 3 wide, 2.6 high). Door tiles keep their KH_DOOR registration (checked: crypt, pale, red, stair).
 Checked with shoot.py (BTA_CHROME + GY_PORT env): no console errors, fronts readable at 3 squares.
-Remaining: red, grey and black entry arches still use the composed gyEntryPic (now lit, but not repainted); the dungeon gate could also replace the grey and black ones;
-the dungeon gate is not centred exactly (at:.34 is about right); world map, Atlas and area map icons of the tombs were not checked; no save-game check was done;
-south and west tomb slice order was not mirrored-tested (the painted pieces are symmetric so it does not show).
+29 Oct update: all four maze entries are now painted. Red = new Gemini piece assets/gy2/f_redgate.webp (red sandstone dungeon gate, ingest with up=0.45, raw in tools/gy_fronts/raw/redgate.jpg);
+grey and black = f_dungeongate (black tinted dark blue-violet); pale unchanged. All use at:.5 so the gate is exactly centred on the door tile (the old at:.34 was off).
+gyEntryPic is still used for the lych-gate only. Door tiles keep KH_DOOR (untouched). Greendale fishing: see fishing_places_areas.js (lake moved east of the for-sale plots).
+Remaining: world map, Atlas and area map icons of the tombs were not checked; no save-game check; south and west tomb slice order not mirrored-tested.

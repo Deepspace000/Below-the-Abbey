@@ -47,7 +47,7 @@ function gyIvy(){
     x.globalAlpha=1;GY._ivy[a]=c;IMG['gy_'+a]=c}catch(e){console.error('gyIvy',a,e)}}}
 /* cobwebs are drawn faint and fine: the painted web at half strength */
 function gyWeb(){const s=IMG.gyp_bonesH_1;if(!s)return;if(!GY._web){const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.globalAlpha=.5;x.drawImage(s,0,0);GY._web=c}IMG.gy_web=GY._web}
-const GY_FRONTS=['gothic','classical','vault','dungeongate'];   // assets/gy2/f_<name>.webp, cut by tools/gy_fronts/ingest.py
+const GY_FRONTS=['gothic','classical','vault','dungeongate','redgate'];   // assets/gy2/f_<name>.webp, cut by tools/gy_fronts/ingest.py
 function gyLoad(){
   if(GY.loading)return GY.loading;
   GY.loading=new Promise(res=>{
