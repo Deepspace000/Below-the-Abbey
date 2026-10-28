@@ -15,6 +15,8 @@ Written down so that every later session builds the same thing. Status: design o
 * The Blighted Lands are a ROAD OF LINKED AREAS of increasing level (about 84 up to 90), in the style of the Pilgrim's Path: farmhouses, crypts, churches and undead villages as places along the way, ending at Sale.
 * The Pale Spire is a BIG MULTI-LEVEL CASTLE like the Orange Spire (many floors, climbed to the top, the Pale Sovereign at the summit).
 
+* Sale has shops, but each is barricaded in. The party must earn each shopkeeper's trust with quests (collect supplies, kill certain creatures, rescue certain people) before the shop opens. Every shop gets its own trust quest(s).
+
 ## Open design questions (not answered yet)
 
 * What is the pact between Wren and Aldous Wend, and what does Sale's unlocking of the Pale Lands need from the party?
