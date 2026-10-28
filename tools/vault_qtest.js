@@ -40,6 +40,10 @@ async () => {
       } else {
         ok(!!L.tele && L.rows[L.tele.y][L.tele.x] === '.', '9670 has a teleporter stone at ' + JSON.stringify(L.tele));
         ok(!L.decor.some(d => d.block && d.x === L.tele.x && d.y === L.tele.y), '9670 the stone square is free');
+        {const r = vtReach(9670, {}), has = (x, y) => r.seen.has(x + ',' + y);
+         ok(r.unreached.length === 0, '9670 every open square of the hill can be walked to from the road (unreached ' + r.unreached.length + ')');
+         ok(has(VT.hillBack.x, VT.hillBack.y) && has(VTH.hale.x, VTH.hale.y) && has(L.tele.x, L.tele.y) && has(VT.arrive.east.x, VT.arrive.east.y), '9670 the door of the Vault, Hale, the stone and both road gates are reachable');
+         ok(L.rows[VTH.gateW.y][VTH.gateW.x] !== '.' && L.rows[VTH.gateE.y][VTH.gateE.x] !== '.' && has(VTH.gateW.x + 1, VTH.gateW.y) && has(VTH.gateE.x - 1, VTH.gateE.y), '9670 both road gates have floor in front of them')}
       }
     });
     // stairs link both ways, and the arrival is next to the stair taken
@@ -59,8 +63,8 @@ async () => {
     const used = new Set(); for (const id of [9670, 9671, 9672, 9673, 9674, 9675, 9676, 9677, 9678]) for (const d of LEVELS[id].decor) if (d.npc) used.add(d.npc);
     const lost = [...used].filter(n => !NPCS[n]); ok(!lost.length, 'every npc on every floor is defined (' + lost.join(',') + ')');
     // every text in the vault has no em dash
-    const em = []; for (const k of Object.keys(ITEMDEF)) if (/^vt/.test(k) && /—/.test(JSON.stringify(ITEMDEF[k]))) em.push(k); ok(!em.length, 'no em dash in the items');
-    ok(!/—/.test(JSON.stringify(VT_BOOK) + JSON.stringify(VT_SARC) + JSON.stringify(VT_VILLAGERS) + JSON.stringify(VT_HALE)), 'no em dash in the books and talk');
+    const em = []; for (const k of Object.keys(ITEMDEF)) if (/^vt/.test(k) && /\u2014/.test(JSON.stringify(ITEMDEF[k]))) em.push(k); ok(!em.length, 'no em dash in the items');
+    ok(!/\u2014/.test(JSON.stringify(VT_BOOK) + JSON.stringify(VT_SARC) + JSON.stringify(VT_VILLAGERS) + JSON.stringify(VT_HALE)), 'no em dash in the books and talk');
   }
 
   if (mode === 'sympathy' || mode === 'fight') {
@@ -73,6 +77,9 @@ async () => {
       ok(/Halt/.test(say(npcRoot('vto_hale', 9670))), 'Hale introduces himself');
       const t = fin(npcRoot('vto_hale', 9670)); ok(/door|Maldrake/.test(say(npcRoot('vto_hale', 9670))), 'Hale tells of the door and Maldrake');
       const r = pick(t, /We will go/); const r2 = pick(r, /clear the hill/); ok(qSt('bl7a') === 'active', 'bl7a taken from Hale (' + qSt('bl7a') + ')');
+      {const live = id => { const o = []; for (const st of ['give', 'act', 'ready']) { const sp = QRF.specs(id, st) || []; let n = 0; for (const x of sp) n += QRF.live(x).length; o.push(st + ':' + n) } return o.join(' ') };
+       ok(QRF.live(QRF.specs('bl7a', 'ready')[0]).length === 1, 'the quest ring for bl7a stands on Hale'); ok(QRF.live(QRF.specs('bl7a', 'act')[0]).length >= 5, 'the ring marks the dead on the hill (' + live('bl7a') + ')');
+       ok(G.decor.some(d => d.k === 'teleporter'), 'the stone of the hill is in the level (teleporter decor)'); }
       const foes = G.enemies.filter(e => e.hp > 0 && ENEMY_DEF[e.t].gy && !ENEMY_DEF[e.t].vtb); ok(foes.length >= 20, 'the hill holds the dead (' + foes.length + ')');
       for (let i = 0; i < 8; i++) kill(foes[i]);
       ok((G.flags.vtHill | 0) >= 8 && qReady('bl7a'), 'eight dead killed, bl7a ready (' + G.flags.vtHill + ')');
@@ -91,6 +98,8 @@ async () => {
       kill(w); ok(bagCount('vtkey1') === 1, 'the Warden dropped the Pale Silver Key');
       ok(vtLockTry('L1') === true && vtF().locks.L1 === 1 && gridOpen(9671, L1.x, L1.y), 'the key opens the first lock');
       ok(bagCount('vtkey1') === 0, 'the key is used up');
+      {const ch = LEVELS[9671].decor.find(d => d.k === 'gy_chest'); ok(!!ch, 'floor 1 has a chest'); const gd = G.decor.find(d => d.k === 'gy_chest'); ok(!!gd && gd.loot, 'the chest is a container');
+       const it = lootFor(gd); ok(Array.isArray(it) && it.length >= 3 && gd.gold > 1000, 'the chest holds potions, mana and gold (' + it.length + ' things, ' + gd.gold + ' gold)')}
       // the people
       const fenn = say(npcRoot('vto_fenn', 9671)); ok(/Walk down the middle|Fenn/.test(fenn), 'Private Fenn talks'); ok(bagCount('potion6') >= 1 || true, 'his flask');
       // a spike plate

@@ -50,7 +50,9 @@ function vtHillBuild(){
   const free=(x,y)=>isOpen(x,y)&&!used.has(x+','+y);
   const setF=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(x>=0&&y>=0&&x<W&&y<H)fm[y*W+x]=f};
   const pth=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){path.add(x+','+y);fm[y*W+x]=f||'2'}};
-  const dec=(a,x,y,o)=>{o=o||{};const k=GYA[a]?'gy_'+a:a;if(!isOpen(x,y))return null;const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}
+  const dec=(a,x,y,o)=>{o=o||{};const k=GYA[a]?'gy_'+a:a;if(!isOpen(x,y))return null;
+    if(used.has(x+','+y)){const j=decor.findIndex(q=>q.x===x&&q.y===y);if(j>=0){if(decor[j].npc)return null;decor.splice(j,1)}}   // a piece put there on purpose takes the place of scenery that was scattered
+    const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}
     if(o.block&&o.npc)d.solid=1;if(o.sc)d.sc=o.sc;if(o.npc){d.npc=o.npc;d.deco=false}if(o.i!==undefined)d.i=o.i;if(o.wd)d.wd=o.wd;if(o.txt)d.txt=o.txt;if(o.ox!==undefined){d.ox=o.ox;d.oy=o.oy}decor.push(d);used.add(x+','+y);return d};
   const D=(a,x,y,o)=>free(x,y)&&!path.has(x+','+y)?dec(a,x,y,o):null,DB=(a,x,y,o)=>D(a,x,y,Object.assign({block:true},o||{}));
   const foe=(t,x,y)=>{if(!free(x,y))return false;enemies.push({t,x,y,lvl:88});used.add(x+','+y);return true};
@@ -70,7 +72,8 @@ function vtHillBuild(){
   const wallH=2.1,wt=v=>ch((typeof wwTile==='function'&&IMG.tex_1)?wwTile(['tex_1','tex_2','tex_1'][v%3],2.6,{gain:.55}):gyTile('texBlack_'+(v%6),wallH,{gain:.7})),WC=[0,0,0,1,3,5,0,3,2].map(wt);
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(inside(x,y))continue;solid(x,y,WC[(hs(x,y,7)*WC.length)|0])}
   for(const [dir,g] of [['west',VTH.gateW],['east',VTH.gateE]]){
-    const gid=gyTile('texGrey_1',2.6,{fac:{img:'stairFix_2',i:0,n:1},gain:1.15,tag:'vtroadgate'+dir,draw:(x,w,h)=>{x.fillStyle='#24211d';x.fillRect(14,h*.2,100,22);x.strokeStyle='#9a8858';x.lineWidth=1.4;x.strokeRect(15.5,h*.2+1.5,97,19);
+    const gid=gyTile('texBlack_1',2.6,{fac:{img:'stairFix_2',i:0,n:1},gain:.9,rgb:[1.1,1.1,1.05],tag:'vtroadgate'+dir,draw:(x,w,h)=>{if(dir==='east'){x.translate(w,0);x.scale(-1,1)}   // seen looking east the engine turns a wall's texture round, so the east gate's lettering is drawn mirrored
+      x.fillStyle='#24211d';x.fillRect(14,h*.2,100,22);x.strokeStyle='#9a8858';x.lineWidth=1.4;x.strokeRect(15.5,h*.2+1.5,97,19);
       x.fillStyle='#e0d08e';x.font='bold 10px '+(typeof FTITLE!=='undefined'?FTITLE:'serif');x.textAlign='center';x.textBaseline='middle';x.fillText(dir==='east'?'LANTERNREST':'HOLLOWBELL',64,h*.2+11.5)}});KH_DOOR[gid]={vt:'road',dir};rows[g.y][g.x]=ch(gid);block[g.y*W+g.x]=1}
   for(const [x,y] of [[3,43],[3,47],[60,43],[60,47]]){dec('lantern',x,y,{block:true});lamp(x,y,[1.15,1.0,.7])}
   for(const [x,y,t] of [[4,44,0],[59,44,1]]){}

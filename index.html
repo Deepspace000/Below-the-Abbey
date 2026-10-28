@@ -3766,6 +3766,7 @@ function jumpFromUrl(){
   try{for(const w of ['infested','infestedcellar'])Object.defineProperty(AREAS,w,{enumerable:true,configurable:true,get(){return infSpot(w==='infestedcellar'?'cellar':'house')}})}catch(e){console.error(e)} // an infested house in Oldhaven, and its cellar (infested.js)
   try{for(const tk of ['wenlock','yarrim','thornwick','ironhill','anaea'])for(const c of ['','cellar'])Object.defineProperty(AREAS,'infested'+tk+c,{enumerable:true,configurable:true,get(){return infSpot(c?'cellar':'house',tk)}})}catch(e){console.error(e)} // the same in the other towns: ?town=infestedwenlock&lvl=8 (infested.js)
   try{Object.defineProperty(AREAS,'blackswill',{enumerable:true,configurable:true,get(){return bswSpot()}})}catch(e){console.error(e)} // the Black Swill's island (blackswill.js)
+  try{for(const w of ['vault','vaultboss'])Object.defineProperty(AREAS,w,{enumerable:true,configurable:true,get(){return typeof vtSpot==='function'?vtSpot(w):[9670,30,44,0]}})}catch(e){console.error(e)} // the Vault of Maldrake: ?town=vault (the garrison picket on the Barrow Hill), ?town=vaultboss (the Sanctum); the party's level comes from vault_story.js (vtSpot)
   if(!AREAS[town]&&town.length>=4){const m=Object.keys(AREAS).filter(k=>k.startsWith(town)||town.startsWith(k));if(m.length===1)town=m[0]} // near-misses like whitedune find the right area
   if(AREAS[town]&&town!=='thornwood'){const [lv,ax,ay,af]=AREAS[town];F.gandrickDead=1;F.northGate=1;F.mayorKilled=1;F.mayorDown=1;F.ironRoad=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};if(lv===44&&LEVELS[44].stub){khEnter(()=>{goToLevel(lv,{x:ax,y:ay,f:af});G.state='play';G.menu=false});return}goToLevel(lv,{x:ax,y:ay,f:af});if(town==='orangeboss'){let tries=0;const iv=setInterval(()=>{const b=LEVEL===lv&&!TP&&G.enemies.find(e=>e.t==='hlboss0');if(b){clearInterval(iv);let py=b.y+3;while(py>b.y+1&&!(G.grid[py]&&G.grid[py][b.x]===0))py--;G.P.x=b.x;G.P.y=py;G.P.f=0;G.P.angT=-Math.PI/2;G.C={x:G.P.x,y:G.P.y,a:G.P.angT}}else if(++tries>100)clearInterval(iv)},100)}G.state='play';G.menu=false;return}
   if(town==='greendale'||town==='anaea'){F.passDone=1;F.passSeen=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};goToLevel(town==='anaea'?33:32,town==='anaea'?sq(ANAEAJ):{x:2,y:36,f:1});G.state='play';G.menu=false;return}
@@ -64350,20 +64351,20 @@ function vtPics(){
   const aw=(k,h)=>IMG[k]?+(h*IMG[k].width/IMG[k].height).toFixed(2):.7;   // the creature's width from its picture, for the height wanted
   ENEMY_DEF.vtwarden.w=aw('vti_warden',1.35);ENEMY_DEF.vtsilver.w=aw('vti_silver',1.55);ENEMY_DEF.vtmaldrake.w=aw('vti_maldrake',1.25)}
 /* ---------- the things the party carries ---------- */
-ITEMDEF.vtkey1={n:'Pale Silver Key',k:'quest',t:'Key',ic:'key',c:'#c8d4e4',stack:1,price:0,sw:.2,d:"A key of pale silver, cold as a stone in a stream. It opens the first pale-silver lock of the Vault, at the foot of the Barrow Stair. The Barrow Warden wore it on a chain round his neck."};
-ITEMDEF.vtsigil={n:'Silver Sigil of Underhill',k:'quest',t:'Key',ic:'ore',c:'#d8e2f0',stack:1,price:0,sw:.2,d:"A flat disc of pale silver stamped with a small house and a well, the mark of the village of Underhill. Three of them fit the three seats of the pale-silver lock in the Silvered Cellars."};
-ITEMDEF.vtseal={n:"The Sanctum Seal",k:'quest',t:'Key',ic:'ore',c:'#e8eef8',stack:1,price:0,sw:.2,d:"A heavy seal of pale silver on a cord. It opens the last pale-silver lock of the Vault, the one on the door to Maldrake's Sanctum. The Silver Warden never took it off."};
-ITEMDEF.vtcontract={n:'The Silver Contract',k:'quest',t:'Lore',ic:'book',c:'#d8d0b8',stack:1,price:0,sw:.1,d:"A single sheet of grey vellum, written in silver ink, signed with a farmer's careful hand and sealed with a pale crown. The last clause is the one that matters. It is the paper Wystan Maldrake has been trying to forget."};
-ITEMDEF.vtgatekey={n:'The Gate Key of Sale',k:'quest',t:'Key',ic:'key',c:'#e6ecf6',stack:1,price:0,rar:1,sw:.3,d:"A long key of pale silver with a crown for a bow. It opens the great gate of Sale, at the far end of the Blighted Road. Maldrake kept it for the Pale Sovereign, and for three winters it has been the heaviest thing he owned."};
-ITEMDEF.vtring={n:"Maldrake's Silver Ring",k:'quest',t:'Lore',ic:'ring',c:'#e4ecf8',stack:1,price:0,sw:.1,d:"A plain band of pale silver, thin as a wire, that never warms. It was put on his finger the night he signed. The dead of Underhill rose when it turned, and lay down when it stopped."};
-ITEMDEF.vtbroken={n:'The Broken Ring',k:'quest',t:'Lore',ic:'ring',c:'#c0c8d4',stack:1,price:0,sw:.1,d:"Two curved pieces of grey silver, and a dull gap between them. Nothing answers to it now."};
-for(let i=1;i<=6;i++)ITEMDEF['vtpg'+i]={n:'Maldrake\'s Journal, page '+i,k:'quest',t:'Lore',ic:'book',c:'#b8a888',stack:1,price:0,sw:.05,d:'A page torn from the journal of Wystan Maldrake, in a small, tidy, tired hand. Read it again at the lectern where you found it, or in the Story So Far.'};
-ITEMDEF.vtpg0={n:'The Roll of Underhill',k:'quest',t:'Lore',ic:'book',c:'#c8b898',stack:1,price:0,sw:.1,d:'The parish roll of Underhill, kept by the village clerk, with the dead of the fever written in the order they went. Eight names are underlined.'};
-ITEMDEF.vtstaff={n:"Maldrake's Black Staff",k:'weapon',t:'Staff',ic:'staff',c:'#9aa4b8',dmg:[188,262],magic:118,req:{int:74},lvl:89,price:0,rar:1,eff:{bossdmg:.5,daze:.3,undeadPct:.3},sw:.44,d:"The ash staff of the hedge-wizard of Underhill, blackened where the silver ring lay against it. Adds 118 to the power of spells, bosses take 50% more, and one blow in three leaves the foe dazed. Needs level 89."};
-ITEMDEF.vtring2={n:'Ring of the Quiet Silver',k:'ring',t:'Ring',ic:'ring',c:'#cfe0f6',price:0,lvl:89,pas:{ward:16,dodge:.07,regen:.7,mpRegen:.5},int:7,hp:80,rar:1,sw:.1,d:"The silver of Maldrake's ring, run into a clean band by a thankful hand and blessed at the barrow door. Adds 7 Intelligence and 80 health, every blow on the wearer is 16 lighter, enemies miss 7% more, and wounds and weariness close steadily. Needs level 89."};
-ITEMDEF.vtamulet={n:"Underhill Well-charm",k:'amulet',t:'Amulet',ic:'amulet',c:'#b8d0e8',price:0,lvl:88,pas:{ward:10,dodge:.04},hp:60,rar:1,sw:.1,d:"A small silver well, hung on a thread, that the children of Underhill wore for luck. Adds 60 health and every blow on the wearer is 10 lighter. Needs level 88."};
+ITEMDEF.vtkey1={n:'Pale Silver Key',k:'quest',t:'Key',ic:'key',c:'#c8d4e4',stack:1,price:0,sw:.2,d:"A key of pale silver. It opens the first pale-silver lock of the Vault of Maldrake, at the south end of the Warden's Hall on the first floor."};
+ITEMDEF.vtsigil={n:'Silver Sigil of Underhill',k:'quest',t:'Key',ic:'ore',c:'#d8e2f0',stack:1,price:0,sw:.2,d:"A flat silver disc stamped with a small house and a well. Three of them open the third pale-silver lock, on the fourth floor of the Vault of Maldrake."};
+ITEMDEF.vtseal={n:"The Sanctum Seal",k:'quest',t:'Key',ic:'ore',c:'#e8eef8',stack:1,price:0,sw:.2,d:"A silver seal on a cord. It opens the last pale-silver lock of the Vault of Maldrake, the door to Maldrake's Sanctum on the sixth floor."};
+ITEMDEF.vtcontract={n:'The Silver Contract',k:'quest',t:'Lore',ic:'book',c:'#d8d0b8',stack:1,price:0,sw:.1,d:"A sheet of grey vellum: the contract between Wystan Maldrake and the Pale Sovereign. The last clause says how it ends. Read all of it aloud to Maldrake in his Sanctum, and he must agree that it is over."};
+ITEMDEF.vtgatekey={n:'The Gate Key of Sale',k:'quest',t:'Key',ic:'key',c:'#e6ecf6',stack:1,price:0,rar:1,sw:.3,d:"A long silver key with a crown for a bow. It opens the great gate of Sale at the west end of the Blighted Road. The Pale Sovereign left it with Maldrake."};
+ITEMDEF.vtring={n:"Maldrake's Silver Ring",k:'quest',t:'Lore',ic:'ring',c:'#e4ecf8',stack:1,price:0,sw:.1,d:"Maldrake's ring, a plain band of pale silver that is always cold. The dead of Underhill walk when it turns. It cannot be taken off, except by killing the one who wears it."};
+ITEMDEF.vtbroken={n:'The Broken Ring',k:'quest',t:'Lore',ic:'ring',c:'#c0c8d4',stack:1,price:0,sw:.1,d:"The two halves of Maldrake's silver ring. It has no power now."};
+for(let i=1;i<=7;i++)ITEMDEF['vtpg'+i]={n:"Maldrake's Journal, page "+i,k:'quest',t:'Lore',ic:'book',c:'#b8a888',stack:1,price:0,sw:.05,d:'A page of the journal of Wystan Maldrake. Read it again at the lectern or desk where you found it.'};
+ITEMDEF.vtpg0={n:'The Roll of Underhill',k:'quest',t:'Lore',ic:'book',c:'#c8b898',stack:1,price:0,sw:.1,d:'The parish roll of Underhill. It lists, in order, the eight villagers the grey fever took first. The eight coffins in the Ring open in that order.'};
+ITEMDEF.vtstaff={n:"Maldrake's Black Staff",k:'weapon',t:'Staff',ic:'staff',c:'#9aa4b8',dmg:[188,262],magic:118,req:{int:74},lvl:89,price:0,rar:1,eff:{bossdmg:.5,daze:.3},sw:.44,d:"The staff of black ash that Maldrake carried. Adds 118 to the power of spells, bosses take 50% more, and one blow in three leaves the foe dazed. Needs level 89."};
+ITEMDEF.vtring2={n:'Ring of the Quiet Silver',k:'ring',t:'Ring',ic:'ring',c:'#cfe0f6',price:0,lvl:89,pas:{ward:16,dodge:.07,regen:.7,mpRegen:.5},int:7,hp:80,rar:1,sw:.1,d:"A clean silver band made from the metal of Maldrake's broken ring. Adds 7 Intelligence and 80 health, every blow on the wearer is 16 lighter, enemies miss 7% more, and wounds and tiredness heal steadily. Needs level 89."};
+ITEMDEF.vtamulet={n:'Underhill Well Ring',k:'ring',t:'Ring',ic:'ring',c:'#b8d0e8',price:0,lvl:88,pas:{ward:10,dodge:.04},hp:60,rar:1,sw:.1,d:"A silver ring stamped with a small well, a keepsake of Underhill. Adds 60 health and every blow on the wearer is 10 lighter. Needs level 88."};
 /* ---------- the spell Maldrake leaves: every hero may learn it (the sympathy ending) ---------- */
-{const id='vtquiet',s={cls:'Vault',lv:88,id,name:'Quiet the Dead',aim:['area',5],fx:[['undead',12,[110,150]],['sleep',3]],d:'The words that let the dead lie down. Undead within 5 squares flee for 12 rounds or are destroyed outright, and the living cower for 3. It cost Maldrake a village to learn it.',col:'#cfe0ff',cost:30,price:0};
+{const id='vtquiet',s={cls:'Vault',lv:88,id,name:'Quiet the Dead',aim:['area',5],fx:[['undead',12,[110,150]],['sleep',3]],d:'Undead within 5 squares flee for 12 rounds or are destroyed outright, and the living cower for 3 rounds. Learned from Maldrake.',col:'#cfe0ff',cost:30,price:0};
   if(typeof MX!=='undefined'&&!MX.some(m=>m.id===id)){MX.push(s);MX_POWER[id]={lv:s.lv,act:true,cost:s.cost,type:'mx',name:s.name,d:s.d,col:s.col,mx:id,aim:s.aim,fx:s.fx,icn:'sp_c20'}}}
 /* ---------- loading: the pictures first, then the level; the Wenlock graveyard's pictures are used, so they are loaded with it ---------- */
 function vtLoad(){
@@ -64524,11 +64525,16 @@ function vtFoe(L,t,x,y,lvl){L.enemies.push({t,x,y,lvl:lvl||L.diff});return true}
 const VTB={WH:1.5,S:.8};
 /* the stone of a spike plate: the dim slate, a little bluer, with a dark seam inset from the edge and a pale rune cross in the middle, so that it can be seen and walked round */
 function vtPlateFloor(){
-  if(FLOORS.vtf_plate)return 'vtf_plate';const src=FLOORS[gyFloorTone('vtf_slate','gyf_slate',.78,[.85,.95,1.2])];if(!src)return 'gyf_slate';
+  if(FLOORS.vtf_plate)return 'vtf_plate';const src=FLOORS[gyFloorTone('vtf_slate','gyf_slate',1.12,[.82,.95,1.3])];if(!src)return 'gyf_slate';
   const N=Math.round(Math.sqrt(src.length/4)),d=new Uint8ClampedArray(src);
-  for(let y=0;y<N;y++)for(let x=0;x<N;x++){const i=(y*N+x)*4,e=Math.min(x,y,N-1-x,N-1-y),c=Math.min(Math.abs(x-N/2),Math.abs(y-N/2));
-    let k=1;if(e>=N*.05&&e<=N*.07)k=.34;else if(e===(N*.05|0)-1||e===(N*.07|0)+1)k=1.22;else if(c<2&&e>N*.18)k=1.45;
-    d[i]=Math.min(255,src[i]*k);d[i+1]=Math.min(255,src[i+1]*k);d[i+2]=Math.min(255,src[i+2]*k*(k>1?1.1:1))}
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){const i=(y*N+x)*4,e=Math.min(x,y,N-1-x,N-1-y),c=Math.min(Math.abs(x-N/2),Math.abs(y-N/2)),dg=Math.abs(x-N/2)+Math.abs(y-N/2);
+    let k=1,add=0;
+    if(e<N*.04)k=.2;                                      // the seam between this stone and the next
+    else if(e<N*.09)add=70;                               // a pale raised rim all round
+    else if(c<2&&e>N*.14)add=95;                          // the rune cross
+    else if(dg<N*.1)add=60;                               // a small bright diamond in the middle
+    else k=1.04;
+    d[i]=Math.min(255,src[i]*k+add*.85);d[i+1]=Math.min(255,src[i+1]*k+add*.95);d[i+2]=Math.min(255,src[i+2]*k+add*1.15)}
   FLOORS.vtf_plate=d;return 'vtf_plate'}
 const VT_SPEC={};
 const vtI=d=>{const L=LEVELS[LEVEL],q=L&&L.decor.find(z=>z.x===d.x&&z.y===d.y&&z.npc===d.npc);return q&&q.i!==undefined?q.i:(d.i||0)};   // the number of a piece, looked up by its square
@@ -64920,7 +64926,9 @@ function vtHillBuild(){
   const free=(x,y)=>isOpen(x,y)&&!used.has(x+','+y);
   const setF=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(x>=0&&y>=0&&x<W&&y<H)fm[y*W+x]=f};
   const pth=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){path.add(x+','+y);fm[y*W+x]=f||'2'}};
-  const dec=(a,x,y,o)=>{o=o||{};const k=GYA[a]?'gy_'+a:a;if(!isOpen(x,y))return null;const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}
+  const dec=(a,x,y,o)=>{o=o||{};const k=GYA[a]?'gy_'+a:a;if(!isOpen(x,y))return null;
+    if(used.has(x+','+y)){const j=decor.findIndex(q=>q.x===x&&q.y===y);if(j>=0){if(decor[j].npc)return null;decor.splice(j,1)}}   // a piece put there on purpose takes the place of scenery that was scattered
+    const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}
     if(o.block&&o.npc)d.solid=1;if(o.sc)d.sc=o.sc;if(o.npc){d.npc=o.npc;d.deco=false}if(o.i!==undefined)d.i=o.i;if(o.wd)d.wd=o.wd;if(o.txt)d.txt=o.txt;if(o.ox!==undefined){d.ox=o.ox;d.oy=o.oy}decor.push(d);used.add(x+','+y);return d};
   const D=(a,x,y,o)=>free(x,y)&&!path.has(x+','+y)?dec(a,x,y,o):null,DB=(a,x,y,o)=>D(a,x,y,Object.assign({block:true},o||{}));
   const foe=(t,x,y)=>{if(!free(x,y))return false;enemies.push({t,x,y,lvl:88});used.add(x+','+y);return true};
@@ -64940,7 +64948,8 @@ function vtHillBuild(){
   const wallH=2.1,wt=v=>ch((typeof wwTile==='function'&&IMG.tex_1)?wwTile(['tex_1','tex_2','tex_1'][v%3],2.6,{gain:.55}):gyTile('texBlack_'+(v%6),wallH,{gain:.7})),WC=[0,0,0,1,3,5,0,3,2].map(wt);
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(inside(x,y))continue;solid(x,y,WC[(hs(x,y,7)*WC.length)|0])}
   for(const [dir,g] of [['west',VTH.gateW],['east',VTH.gateE]]){
-    const gid=gyTile('texGrey_1',2.6,{fac:{img:'stairFix_2',i:0,n:1},gain:1.15,tag:'vtroadgate'+dir,draw:(x,w,h)=>{x.fillStyle='#24211d';x.fillRect(14,h*.2,100,22);x.strokeStyle='#9a8858';x.lineWidth=1.4;x.strokeRect(15.5,h*.2+1.5,97,19);
+    const gid=gyTile('texBlack_1',2.6,{fac:{img:'stairFix_2',i:0,n:1},gain:.9,rgb:[1.1,1.1,1.05],tag:'vtroadgate'+dir,draw:(x,w,h)=>{if(dir==='east'){x.translate(w,0);x.scale(-1,1)}   // seen looking east the engine turns a wall's texture round, so the east gate's lettering is drawn mirrored
+      x.fillStyle='#24211d';x.fillRect(14,h*.2,100,22);x.strokeStyle='#9a8858';x.lineWidth=1.4;x.strokeRect(15.5,h*.2+1.5,97,19);
       x.fillStyle='#e0d08e';x.font='bold 10px '+(typeof FTITLE!=='undefined'?FTITLE:'serif');x.textAlign='center';x.textBaseline='middle';x.fillText(dir==='east'?'LANTERNREST':'HOLLOWBELL',64,h*.2+11.5)}});KH_DOOR[gid]={vt:'road',dir};rows[g.y][g.x]=ch(gid);block[g.y*W+g.x]=1}
   for(const [x,y] of [[3,43],[3,47],[60,43],[60,47]]){dec('lantern',x,y,{block:true});lamp(x,y,[1.15,1.0,.7])}
   for(const [x,y,t] of [[4,44,0],[59,44,1]]){}

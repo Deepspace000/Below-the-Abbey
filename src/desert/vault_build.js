@@ -7,11 +7,16 @@
 const VTB={WH:1.5,S:.8};
 /* the stone of a spike plate: the dim slate, a little bluer, with a dark seam inset from the edge and a pale rune cross in the middle, so that it can be seen and walked round */
 function vtPlateFloor(){
-  if(FLOORS.vtf_plate)return 'vtf_plate';const src=FLOORS[gyFloorTone('vtf_slate','gyf_slate',.78,[.85,.95,1.2])];if(!src)return 'gyf_slate';
+  if(FLOORS.vtf_plate)return 'vtf_plate';const src=FLOORS[gyFloorTone('vtf_slate','gyf_slate',1.12,[.82,.95,1.3])];if(!src)return 'gyf_slate';
   const N=Math.round(Math.sqrt(src.length/4)),d=new Uint8ClampedArray(src);
-  for(let y=0;y<N;y++)for(let x=0;x<N;x++){const i=(y*N+x)*4,e=Math.min(x,y,N-1-x,N-1-y),c=Math.min(Math.abs(x-N/2),Math.abs(y-N/2));
-    let k=1;if(e>=N*.05&&e<=N*.07)k=.34;else if(e===(N*.05|0)-1||e===(N*.07|0)+1)k=1.22;else if(c<2&&e>N*.18)k=1.45;
-    d[i]=Math.min(255,src[i]*k);d[i+1]=Math.min(255,src[i+1]*k);d[i+2]=Math.min(255,src[i+2]*k*(k>1?1.1:1))}
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){const i=(y*N+x)*4,e=Math.min(x,y,N-1-x,N-1-y),c=Math.min(Math.abs(x-N/2),Math.abs(y-N/2)),dg=Math.abs(x-N/2)+Math.abs(y-N/2);
+    let k=1,add=0;
+    if(e<N*.04)k=.2;                                      // the seam between this stone and the next
+    else if(e<N*.09)add=70;                               // a pale raised rim all round
+    else if(c<2&&e>N*.14)add=95;                          // the rune cross
+    else if(dg<N*.1)add=60;                               // a small bright diamond in the middle
+    else k=1.04;
+    d[i]=Math.min(255,src[i]*k+add*.85);d[i+1]=Math.min(255,src[i+1]*k+add*.95);d[i+2]=Math.min(255,src[i+2]*k+add*1.15)}
   FLOORS.vtf_plate=d;return 'vtf_plate'}
 const VT_SPEC={};
 const vtI=d=>{const L=LEVELS[LEVEL],q=L&&L.decor.find(z=>z.x===d.x&&z.y===d.y&&z.npc===d.npc);return q&&q.i!==undefined?q.i:(d.i||0)};   // the number of a piece, looked up by its square
