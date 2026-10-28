@@ -190,7 +190,7 @@ function gyYardBuild(){
   for(const g of GY_Y.doors){
     {const md=dec(g.pic,g.x,g.y,{block:false,npc:'gyo_door'+g.k});if(md)md.sc=.0001;   // an unseen marker for the quest signs
      const kind=['red','grey','black','pale'][g.k],[nw,wh]=GY_ENTRY[kind],id=GY.M[g.k],half=(nw-1)/2;IMG['gyp_entry_'+kind]=gyEntryPic(kind);
-     for(let q=0;q<nw;q++){const x=g.x-half+q,gid=gyTile('texGrey_0',wh,{fac:kind==='pale'?{img:'f_dungeongate',i:q,n:nw,fit:1,at:.34}:{img:'entry_'+kind,i:q,n:nw},gain:1.0,rgb:[1,1,1+(g.k*8+q)*.00001]});
+     for(let q=0;q<nw;q++){const x=g.x-half+q,gid=gyTile('texGrey_0',wh,{fac:{img:kind==='red'?'f_redgate':'f_dungeongate',i:q,n:nw,fit:1,at:.5},gain:1.0,rgb:kind==='black'?[.6,.58,.76+(g.k*8+q)*.00001]:[1,1,1+(g.k*8+q)*.00001]});
        if(q===half)KH_DOOR[gid]={lvl:id,get at(){if(!LEVELS[id]&&KH_LAZY[id])KH_LAZY[id]();const st=LEVELS[id].start;return {x:st.x,y:st.y,f:st.f}},gy:'mazedoor',k:g.k};
        rows[g.y][x]=ch(gid);block[g.y*W+x]=1}   // a built front five tiles wide (three for the trapdoor) with the door in the middle: solid, you go in by walking up and pressing on
      const fy=g.y+(g.y<35?1:-1);

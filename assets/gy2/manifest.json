@@ -18,5 +18,10 @@
   "file": "f_dungeongate.webp",
   "w": 640,
   "h": 852
+ },
+ "f_redgate": {
+  "file": "f_redgate.webp",
+  "w": 714,
+  "h": 662
  }
 }
