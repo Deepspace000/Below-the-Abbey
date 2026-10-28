@@ -1,7 +1,7 @@
 /* ==========================================================================
    FLYING CROWS. The Crow Swarm and the Carrion Crow of Blackbriar Wood (wwcrows, wwcrow) and the Carrion Raven of the graveyard and the Pale Catacombs
    (gyraven) are all creatures with fly:true, but their old pictures were crows STANDING with their feet on nothing. They now use painted
-   crows seen from the FRONT with their wings spread (assets/crow, made with Canva and cut by tools/crows/ingest_crows.py):
+   crows seen from the FRONT with their wings spread (assets/crow, made with Gemini and cut by tools/crows/ingest_crows.py):
      crow_0..2     one crow, wings up, wings level, wings down        (the Carrion Raven, and the old single crow)
      flock_0..2    five to seven crows at different sizes, three wing poses     (the Crow Swarm)
      carrion_0..3  a bigger, scruffier crow: wings up, level, down, and a dive with the wings swept wide (the Carrion Crow; the dive shows while it lunges)
@@ -15,9 +15,9 @@ const CROW={on:false,files:{crow:3,flock:3,carrion:4},got:{},rate:{crow:9,flock:
 /* span: width of the picture in squares (one square is about a person); body: where the body centre sits in the picture, from the top (0..1);
    rise: how high the BODY floats above the ground, in squares (about shoulder height is .75); */
 const CROW_KIND={
-  wwcrows:{set:'flock',span:1.55,body:.5,rise:.62,sh:.95},
-  wwcrow:{set:'carrion',span:1.4,body:.5,rise:.66,sh:.8},
-  gyraven:{set:'crow',span:.8,body:.5,rise:.66,sh:.7}};
+  wwcrows:{set:'flock',span:1.55,body:.576,rise:.62,sh:.95},
+  wwcrow:{set:'carrion',span:1.4,body:.71,rise:.66,sh:.8},
+  gyraven:{set:'crow',span:.8,body:.709,rise:.66,sh:.7}};
 function crowLoad(){
   if(CROW._started)return;CROW._started=true;
   const ver=typeof VERSION!=='undefined'?VERSION:'';
