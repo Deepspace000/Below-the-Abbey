@@ -32,6 +32,8 @@ A big winding road west from Wenlock's west gate to Sale, in linked areas of ris
 9. **The Rookery Mill (89).** A windmill and a court of crows that watch the road for the Sovereign; a crow queen.
 10. **The Pale Bridge and the Gate of Sale (90).** The last bridge before Sale, held by a pale knight, with Sale's outer wall and gatehouse beyond.
 
+**Added by the owner (29 Oct 2026):** a garrison of soldiers sent from Oldhaven (King Osric's men) is somewhere on the road. Suggested home: Lanternrest Waystation (place 6) as their fort, or a separate Oldhaven Outpost between places 5 and 6. They are cut off, short of supplies, and want help; they can give quests, sell army gear and keep the road clear around them.
+
 Sale is the furthest town west; beyond it lie the Pale Lands.
 
 ## Open design questions (not answered yet)
