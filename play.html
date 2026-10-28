@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.684';
+const VERSION='3.685';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -7285,7 +7285,7 @@ function crtPass(t){
   const W=cv.width,H=cv.height;
   if(!G.crt||LEVEL===44){if(GFX.scan){ctx.fillStyle=SCANP[GFX.scan];ctx.fillRect(0,0,W,H)}ctx.restore();return} // the big city skips the glow, the rolling band and the flicker
   if(!PERF_CRT&&hgtLook(LEVEL)){crtX.clearRect(0,0,240,160);crtX.drawImage(LOWC,0,0,LOWC.width,LOWC.height,0,0,210,105)} // phosphor bloom of the 3D picture, taken from its own canvas: reading the screen canvas back stalled the frame 25 to 60 ms now and then
-  else crtX.drawImage(cv,0,0,240,160);                       // phosphor bloom
+  else if((crtPass.n=(crtPass.n||0)+1)%4===1)crtX.drawImage(cv,0,0,240,160);   // phosphor bloom, refreshed every 4th frame: the readback of the screen canvas was the biggest cost
   ctx.globalCompositeOperation='screen';ctx.globalAlpha=.22;ctx.drawImage(crtC,0,0,W,H);
   ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
   if(GFX.scan){ctx.fillStyle=SCANP[GFX.scan];ctx.fillRect(0,0,W,H)}             // scanlines
@@ -7345,6 +7345,7 @@ function drawQSave(){ // a little floppy disk in the top left corner: one tap sa
   btn('qsave',x-2,y-2,w+4,w+4);
 }
 function frame(now){
+  if(now-last<15.5){requestAnimationFrame(frame);return}   // 60 frames a second at most (a 144 Hz screen drew 144)
   const dt=Math.min(.05,(now-last)/1000);last=now;
   const w0=performance.now();
   update(dt);
