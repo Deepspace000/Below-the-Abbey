@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.689';
+const VERSION='3.690';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2777,7 +2777,7 @@ function vividImg(k,d){ // each person is one colour, head to foot, a different 
   x.putImageData(id2,0,0);return VIVID_CACHE[id]=c;
 }
 const SIGN_CACHE={},SIGN_TINTS=['132,158,204','204,152,82','116,166,110','188,92,82','152,122,170','96,152,176'],SIGN_FONTS=['Georgia,serif','"Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif','"Times New Roman",Times,Georgia,serif']; // muted paints and three related serif faces for the signs of Wenlock
-const WALKTREE=/^([glp]?tree\d|pt_|lbush)/,BURNABLE=/^[gp]?tree\d/,NOSHADOW=/^[glp]?tree\d/,SKYLINE=/^(abbeyspire|dcity|kroof)$/; // skyline sprites stand behind a wall and only the part above it shows // dead trees can be burned; no tree casts a round shadow
+const WALKTREE=/^([glp]?tree\d|pt_|lbush)/,BURNABLE=/^([gp]?tree\d|ww_(oakface|oakmoss|pine2?|willow|thorn)$)/,NOSHADOW=/^[glp]?tree\d/,SKYLINE=/^(abbeyspire|dcity|kroof)$/; // skyline sprites stand behind a wall and only the part above it shows // dead trees can be burned; no tree casts a round shadow
 function signFlip(im){return im.alt||im}   // the sign made the other way round (bracket on the right), its lettering still reading the right way
 function shopSign(d){
   const key=(d.x*31+d.y)%2,wl=/^sign_wl/.test(d.k),nm=d.txt[0],hs=((nm.length*131+nm.charCodeAt(0)*17+nm.charCodeAt(nm.length-1)*7)>>>0),ti=hs%SIGN_TINTS.length,fi=(hs>>3)%SIGN_FONTS.length,id=key+'|'+(wl?nm+'|'+ti+'|'+fi:d.txt.join('|'));if(SIGN_CACHE[id])return SIGN_CACHE[id];
