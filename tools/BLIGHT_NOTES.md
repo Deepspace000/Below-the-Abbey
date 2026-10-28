@@ -7,7 +7,8 @@ The road west from the open gate of Wenlock to Sale: ten places, each its own ma
 - `blight_kit.js`   the shared look and the level builder: floors (dead grass, mud, flags), `weatherNow` fog (grey green), lamp colours (`lv._bl.lcol`), sound (`blsTick`: crows, creaks, a far bell), creatures `bl*` (ENEMY_DEF), lettered pictures (`blPost`, `blSlab`, `blMilestone`), `blKit(spec)` (the builder kit C), `blRoom(spec)` (interiors), `blStubBuild`.
 - `blight_toll.js`  place 1, the Toll House (9610, room 9611, rating 84).
 - `blight_ashenfold.js` place 2, Ashenfold Farm (9620, farmhouse 9621, cellar 9622, barn 9623, rating 85).
-- `tools/blight_test.py` headless tests (`load`, `links`, `quests`, `shots`). `tools/blight_probe.py` runs a bit of JS in the game. `tools/blight_contact.py` makes a contact sheet of existing pictures.
+- `blight_maps.js` parchment area maps for every id of the road (fill `C.mapNames` and a builder gets a map) and one world map entry.
+- `tools/blight_test.py` headless tests (`load`, `links`, `quests`, `walk`, `gate`, `save`, `shots`, `all`). `tools/blight_probe.py` runs a bit of JS in the game. `tools/blight_contact.py` makes a contact sheet of existing pictures.
 
 ## How a place is added (for the Vault of Maldrake, the church, and so on)
 ```
@@ -29,3 +30,16 @@ Use your own port (`python -m http.server 8447` from the worktree root); another
 
 ## Progress and gaps
 See the end of this file (updated as places are built).
+
+### Built (28 Oct 2026)
+- Framework: table, stubs for all 100 ids, level kit, look (grey green haze, dead grass, dead stone copies, bare trees), sound, west gate hook (tested both ways), story hint, Go to area rows, jump links, area maps, world map entry (placed west of the western-kingdoms gate; not checked by eye, it is outside the opening view).
+- Place 1 Toll House (9610 rating 84, room 9611): 72x64, toll yard, toll house you can enter (ledger desk, strongbox, dead warden), graves of nine Wardens, ruined shrine, roadmender hut, crow tree, hedges, milestone SALE 9 STAGES. Quests blq1 (ledger), blq2 (five Dead Road Wardens), blq3 (shrine candle). People: Wat Harrow, Marl Quill, Sister Anwen.
+- Place 2 Ashenfold Farm (9620 rating 85, rooms 9621 kitchen, 9622 cellar, 9623 barn): 80x70, farmyard, farmhouse with the dead family at supper, barn (Wenlock barn picture), well, haystacks, dead fields with walking scarecrows (they wait, then wake), orchard. Quests blq4 (Tilly in the cellar), blq5 (Heart-Scarecrow, burn the heart in the hearth), blq6 (the farmer's ring). Milestone SALE 8 STAGES.
+- Tests: all pass (load, links, quests, walk, gate, save).
+
+### Gaps and ideas
+- No new painted art was made (no Gemini): everything reuses graveyard, witch wood, Wenlock and engine pictures. A dedicated painted scarecrow-on-a-pole, a farmhouse front and a milestone would raise the finish. Dead hedges are tinted Wenlock bushes (read as ferns).
+- The sprite pass for roofs and painted buildings needed one core edit in index.html (the sky list condition now includes levels 9610 to 9709), plus the jump link parse and the cap/default level in jumpFromUrl and one line calling blAreas.
+- Lit windows are only light colours on the ground in front of the houses. The toll house walls are the pale Wenlock flint.
+- No teleport stones yet (Lanternrest, place 6, is meant to have the road's one).
+- If `wenlock_seals.js` is not in ORDER before blight_road.js the gate hook does nothing (the hook needs G.portals[2].wsWest).

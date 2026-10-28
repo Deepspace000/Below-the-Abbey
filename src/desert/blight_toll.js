@@ -163,7 +163,7 @@ function bltBuild(p){
   C.dress({trees:150,scrub:260,stones:20,bones:8,posts:5,keep:(x,y)=>(x>=35&&x<=53&&y>=26&&y<=37)||(y>=29&&y<=35)||(x>=49&&x<=61&&y>=18&&y<=28)});
   // the creatures: Dead Road Wardens on the road and in the yard, husks in the fields, bones at the shrine, a flock in the crow tree
   C.foes([['bldeadwarden',56,31],['bldeadwarden',38,34],['bldeadwarden',30,32],['bldeadwarden',17,31],['bldeadwarden',52,25],['bldeadwarden',8,33],
-    ['blbones',16,38],['blbones',24,39],['blbones',19,46],['blhusk',34,16],['blhusk',46,10],['blhusk',24,50],['blhusk',58,46],['blghoul',9,45],['blcrow',30,28],['blcrow',62,36]]);
+    ['blbones',16,38],['blbones',24,39],['blbones',19,46],['blhusk',34,16],['blhusk',46,10],['blhusk',24,50],['blhusk',58,46],['blghoul',9,45],['blcrow',30,28],['blcrow',52,38]]);
   enemiesAdd(C,[['blcrowflock',58,15]]);
   for(const [k,x,y] of [['potion6',27,13],['potion6',48,50],['potion6',8,12]])C.items.push({k,x,y,taken:false});
   C.mapNames.push({t:"The Wardens' Toll House",x:42,y:23,k:'place'},{t:'The Toll Yard',x:44,y:32,k:'place'},{t:'The Wayside Shrine',x:20,y:40,k:'place'},{t:"The Wardens' Graves",x:55,y:24,k:'place'},{t:"The Roadmender's Hut",x:13,y:13,k:'place'},{t:'The Crow Tree',x:58,y:13,k:'place'},{t:'To Wenlock',x:66,y:30,k:'place'},{t:'To Ashenfold Farm',x:6,y:30,k:'place'});

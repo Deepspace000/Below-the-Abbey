@@ -79,7 +79,7 @@ PLACES = [  # name, level, x, y, facing (0 north, 1 east, 2 south, 3 west)
     ('t05_shrine', 9610, 20, 45, 0), ('t06_west', 9610, 14, 32, 3), ('t07_milestone', 9610, 10, 32, 3), ('t08_crowtree', 9610, 58, 20, 0),
     ('t09_hut', 9610, 13, 22, 0), ('t10_inside', 9611, 6, 7, 0), ('t11_desk', 9611, 6, 5, 0),
     ('a01_east_gate', 9620, 74, 35, 3), ('a02_farmyard', 9620, 55, 35, 3), ('a03_house', 9620, 48, 29, 0), ('a04_field', 9620, 30, 20, 3),
-    ('a05_well', 9620, 45, 32, 3), ('a06_barn', 9620, 58, 30, 0), ('a07_house_in', 9621, 7, 9, 0), ('a08_cellar', 9622, 6, 7, 0), ('a09_barn_in', 9623, 7, 9, 0), ('a10_west', 9620, 8, 35, 3)]
+    ('a05_well', 9620, 45, 32, 3), ('a06_barn', 9620, 58, 30, 0), ('a07_house_in', 9621, 7, 9, 0), ('a08_cellar', 9622, 6, 7, 0), ('a09_barn_in', 9623, 7, 9, 0), ('a10_west', 9620, 8, 35, 3), ('t12_map', 9610, 42, 33, 0), ('a11_map', 9620, 48, 36, 0), ('t13_map_in', 9611, 6, 7, 0)]
 
 
 def run_shots(sel=None):
@@ -89,8 +89,8 @@ def run_shots(sel=None):
             if sel and not any(s in name for s in sel): continue
             pg.evaluate("([lv,x,y,f]) => { G.menu=false; G.talk=null; G.cut=null; goToLevel(lv,{x,y,f}); G.state='play'; setTimeout(()=>{G.P.f=f;G.P.angT=(f-1)*Math.PI/2;G.C.a=G.P.angT},300); }", [lv, x, y, f])
             pg.wait_for_timeout(2600)
-            pg.evaluate("() => { G.talk=null; G.msgs=[]; G.lvlBanners.length=0 }")
-            pg.wait_for_timeout(300)
+            pg.evaluate("() => { G.talk=null; G.msgs=[]; G.lvlBanners.length=0; G.overview=%s }" % ('true' if name.endswith('_map') else 'false'))
+            pg.wait_for_timeout(500)
             path = os.path.join(SHOTS, name + '.png'); pg.screenshot(path=path); print('shot', path)
         print('errors', real(errs)[:10])
         b.close()
@@ -169,4 +169,93 @@ def run_quests():
 
 
 if what in ('quests', 'all'): print('QUESTS', 'OK' if run_quests() else 'FAIL')
+
+
+
+def run_walk():
+    """Flood fill over the real levels: gates, doors, people and objects with something to say are all reached; no creature stands within 9 squares of an arrival square."""
+    with sync_playwright() as p:
+        b, pg, errs = boot(p)
+        r = pg.evaluate("""() => {
+          const out = [];
+          for (const id of [9610, 9620, 9611, 9621, 9622, 9623]) {
+            if (!LEVELS[id]) KH_LAZY[id]();
+            const L = LEVELS[id], W = L.rows[0].length, H = L.rows.length, bs = new Set();
+            for (const d of L.decor) if (d.block && !d.found) bs.add(d.x + ',' + d.y);
+            const st = L.start, seen = new Uint8Array(W * H), q = [st.y * W + st.x]; seen[q[0]] = 1;
+            for (let i = 0; i < q.length; i++) { const c = q[i], x = c % W, y = (c / W) | 0;
+              for (const [a, b] of [[1,0],[-1,0],[0,1],[0,-1]]) { const nx = x + a, ny = y + b; if (nx < 0 || ny < 0 || nx >= W || ny >= H || seen[ny*W+nx] || L.rows[ny][nx] !== '.' || bs.has(nx + ',' + ny)) continue; seen[ny*W+nx] = 1; q.push(ny*W+nx) } }
+            const reach = (x, y) => [[0,0],[1,0],[-1,0],[0,1],[0,-1]].some(([a,b]) => seen[(y+b)*W + x + a]);
+            const bad = [];
+            for (const d of L.decor) if (d.npc && !d.found && !reach(d.x, d.y)) bad.push('npc ' + d.npc + ' ' + d.x + ',' + d.y);
+            for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const g = L.chars[L.rows[y][x]]; if (g !== undefined && KH_DOOR[g] && !reach(x, y)) bad.push('door ' + x + ',' + y) }
+            const near = L.enemies.filter(e => Math.hypot(e.x - st.x, e.y - st.y) < 9).map(e => e.t + '@' + e.x + ',' + e.y);
+            const unreachFoes = L.enemies.filter(e => !seen[e.y*W+e.x]).map(e => e.t + '@' + e.x + ',' + e.y);
+            out.push({id, size: W + 'x' + H, decor: L.decor.length, foes: L.enemies.length, bad, near, unreachFoes}) }
+          return out }""")
+        ok = True
+        for x in r:
+            print(x)
+            if x['bad'] or (x['near'] and x['id'] in (9610, 9620)) or x['unreachFoes']: ok = False
+        print('errors', real(errs)[:10])
+        b.close()
+        return ok and not real(errs)
+
+
+def run_gate():
+    """Wenlock's open west gate leads to the Toll House (quest wk8 done: ?town=wenlock&lvl=80&ws=gate)."""
+    with sync_playwright() as p:
+        b = p.chromium.launch(args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader'], executable_path=os.environ.get('BTA_CHROME') or None)
+        pg = b.new_page(viewport={'width': 900, 'height': 600})
+        errs = []
+        pg.on('pageerror', lambda e: errs.append('PAGE ' + str(e)))
+        pg.on('console', lambda m: errs.append('CON ' + m.text) if m.type == 'error' else None)
+        pg.goto('http://localhost:%s/index.html?town=wenlock&lvl=80&ws=gate&v=%d' % (PORT, time.time()), wait_until='domcontentloaded', timeout=90000)
+        pg.wait_for_function("()=>typeof G!=='undefined'&&G.state==='play'&&LEVEL===496&&G.flags&&G.flags.wsGate", timeout=120000)
+        pg.wait_for_timeout(2500)
+        pg.evaluate("() => { G.talk=null; goToLevel(496,{x:5,y:50,f:3}); G.state='play' }")
+        pg.wait_for_timeout(1500)
+        pg.evaluate("() => usePortal(2)")
+        pg.wait_for_function("()=>LEVEL===9610", timeout=60000)
+        pg.wait_for_timeout(1500)
+        r = pg.evaluate("() => ({lvl: LEVEL, pos: [G.P.x, G.P.y], name: LEVEL_NAMES[LEVEL], hint: storyNext()})")
+        print(r)
+        # and back: walk to the east gate door of the Toll House
+        pg.evaluate("() => { const L=LEVELS[9610]; for (const c in L.chars) { const d=KH_DOOR[L.chars[c]]; if (d && d.bl && d.side==='E') { goToLevel(d.lvl, d.at); } } }")
+        pg.wait_for_function("()=>LEVEL===496", timeout=60000)
+        r2 = pg.evaluate("() => ({lvl: LEVEL, pos: [G.P.x, G.P.y]})")
+        print(r2)
+        print('errors', real(errs)[:10])
+        b.close()
+        return r['lvl'] == 9610 and r2['lvl'] == 496 and r2['pos'][0] > 2 and not real(errs)
+
+
+if what in ('walk', 'all'): print('WALK', 'OK' if run_walk() else 'FAIL')
+if what in ('gate', 'all'): print('GATE', 'OK' if run_gate() else 'FAIL')
+
+
+
+def run_save():
+    """A game saved inside each built place and its rooms is loaded again in the same place, with the same flags."""
+    with sync_playwright() as p:
+        b, pg, errs = boot(p)
+        res = []
+        for lv, x, y in [(9610, 30, 32), (9611, 6, 6), (9620, 40, 35), (9621, 7, 8), (9622, 5, 4), (9623, 6, 7), (9650, 20, 10)]:
+            pg.evaluate("([lv,x,y]) => { goToLevel(lv,{x,y,f:3}); G.state='play'; G.talk=null; blF().marker=lv }", [lv, x, y])
+            pg.wait_for_function("(lv)=>LEVEL===lv", arg=lv, timeout=60000)
+            pg.wait_for_timeout(1200)
+            ok = pg.evaluate("""async (lv) => {
+              const sv = JSON.parse(JSON.stringify(snapshot()));
+              goToLevel(2, null); await new Promise(r => setTimeout(r, 800));
+              restore(sv); for (let i = 0; i < 60 && LEVEL !== lv; i++) await new Promise(r => setTimeout(r, 300));
+              await new Promise(r => setTimeout(r, 600));
+              return {lvl: LEVEL, marker: blF().marker, state: G.state} }""", lv)
+            print(lv, ok)
+            res.append(ok['lvl'] == lv and ok['marker'] == lv)
+        print('errors', real(errs)[:10])
+        b.close()
+        return all(res) and not real(errs)
+
+
+if what in ('save', 'all'): print('SAVE', 'OK' if run_save() else 'FAIL')
 

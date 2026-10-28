@@ -148,7 +148,7 @@ function blaBuild(p){
   C.dress({trees:130,scrub:180,stones:14,bones:8,posts:6,keep:(x,y)=>(x>=34&&x<=66&&y>=17&&y<=34)||(y>=32&&y<=38)||(x>=6&&x<=34&&y>=3&&y<=29)||(x>=6&&x<=34&&y>=41&&y<=65)});
   // the creatures
   C.foes([['blscare',12,12],['blscare',24,8],['blscare',30,18],['blscare',8,20],['blscare',22,24],['blscare',14,46],['blscare',24,56],['blscare',32,50],['blscarebig',18,10],
-    ['blhusk',66,40],['blhusk',50,40],['blhusk',72,50],['blghoul',44,58],['blbones',38,36],['blbones',62,36],['blbones',20,34],['blhound',54,46],['blcrow',30,32],['blcrow',66,30],['blcrowflock',56,60]]);
+    ['blhusk',62,42],['blhusk',50,40],['blhusk',72,50],['blghoul',44,58],['blbones',38,36],['blbones',62,36],['blbones',20,34],['blhound',54,46],['blcrow',30,32],['blcrow',60,29],['blcrowflock',56,60]]);
   for(const [k,x,y] of [['potion6',30,26],['potion6',20,60],['potion6',68,60]])C.items.push({k,x,y,taken:false});
   C.mapNames.push({t:'Ashenfold Farmhouse',x:46,y:21,k:'place'},{t:'The Barn',x:58,y:22,k:'place'},{t:'The Well',x:39,y:28,k:'place'},{t:'The North Field',x:18,y:12,k:'place'},{t:'The Long Furrow',x:18,y:51,k:'place'},{t:'The Old Stone',x:27,y:50,k:'place'},{t:'The Dead Orchard',x:52,y:56,k:'place'},{t:'To the Toll House',x:73,y:33,k:'place'},{t:'To the Church',x:6,y:33,k:'place'});
   const lv=C.finish({start:{x:73,y:35,f:3}});
