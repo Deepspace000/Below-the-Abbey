@@ -66115,8 +66115,7 @@ function bltBuild(p){
   // lamps along the road: pale, one every eight squares, on the south side
   for(let x=10;x<=66;x+=8){if(x>34&&x<54)continue;C.dec('gy_lantern',x,36,{block:true});C.light(x,36,C.pale)}
   // dead fields: stalks of corn gone grey, a few wheelbarrows, stones
-  for(const [x0,y0,x1,y1] of [[28,5,50,26],[14,38,34,58],[40,40,68,58],[4,5,10,27]]){
-    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){if(C.path.has(x+','+y)||hs(x,y,41)>.22)continue;const d=C.D('ww_twig2',x,y,{sc:.5+hs(x,y,42)*.4});if(d){d.ox=(hs(x,y,43)-.5)*.6;d.oy=(hs(x,y,44)-.5)*.6}}}
+  for(const [x0,y0,x1,y1] of [[28,5,50,26],[14,38,34,58],[40,40,68,58],[4,5,10,27]])b14Furrows(C,x0,y0,x1,y1,.55);   // ploughed dead fields (round 1 to 4)
   C.dec('kh_ohgard1_5',30,12,{block:true,sc:.8});C.dec('kh_ohgard2_3',45,52,{block:true,sc:.8});
   b14TollDress(C);
   b14Patches(C,{keep:(x,y)=>x>=35&&x<=53&&y>=26&&y<=37||x>=49&&x<=61&&y>=18&&y<=28});
@@ -66168,7 +66167,7 @@ function b14TollDress(C){
   b14Place(C,[[stocks,38,34],[cart,33,34,{sc:1}],[gcart,56,34],['barrel',40,27,{sc:.9}],['barrel',41,27,{sc:.8}],['crate',45,27,{sc:.9}],[sacks,46,28,{sc:.9}],
     [ban,36,31],[ban,36,33],[ban,52,31],[ban,52,33],[cage,51,29],[cage,51,35],['gy_lantern',41,28],['gy_lantern',43,28]]);
   C.light(41,28,C.warm);C.light(43,28,C.warm);
-  for(const [x,y] of [[39,32],[44,31],[50,33],[34,32],[57,32],[26,33],[14,31],[62,31]])C.dec('gy_bones',x,y,{sc:.4});
+  for(const [x,y] of [[39,32],[44,31],[50,33],[34,32],[57,32],[26,33],[14,31],[62,31]])C.dec('gy_bones',x,y,{sc:.25});
   // the road verges: wrecked carts and crate stacks, every so often, never in the road
   for(const [x,y] of [[22,34],[30,30],[60,30],[66,30]])C.dec(x%2?cart:gcart,x,y,{block:true,sc:.9});
   for(const [x,y] of [[16,30],[44,36],[64,34]])C.dec('crate',x,y,{block:true,sc:.8})}
@@ -66391,7 +66390,7 @@ function b14AshDress(C){
   b14Place(C,[[gcart,54,31,{sc:1}],[sacks,56,27,{sc:.9}],['barrel',60,27,{sc:.9}],['barrel',61,27,{sc:.8}],['crate',57,27,{sc:.9}],[wash,38,32,{sc:1}],[pots,41,31,{sc:1}],['barrel',37,26],['crate',38,26],
     [cart,52,30,{sc:.9}],['gy_lantern',45,26],['gy_lantern',48,26]]);
   C.light(45,26,C.warm);C.light(48,26,C.warm);
-  for(const [x,y] of [[46,32],[59,31],[40,28],[51,32],[44,29]])C.dec('gy_bones',x,y,{sc:.4});
+  for(const [x,y] of [[46,32],[59,31],[40,28],[51,32],[44,29]])C.dec('gy_bones',x,y,{sc:.25});
   // the lane and the road: a broken cart and a crate stack at the verges
   for(const [x,y] of [[20,33],[66,37],[30,37]])C.dec(x%2?cart:gcart,x,y,{block:true,sc:.9});
   for(const [x,y] of [[14,33],[54,37],[72,33]])C.dec('crate',x,y,{block:true,sc:.8})}
@@ -68256,7 +68255,7 @@ function b14GalDress(C,land,ix){
   put(nets,49,46);put(pots,52,47);put(crates,48,50);put(nets,58,36);put(pots,64,36);put(crates,70,36);put(pots,76,36);
   // the banks: a wrecked cart each end, sacks and barrels by the toll hut and the bone orchard road
   put(cart,78,36,{sc:.9});put(cart,8,36,{sc:.9});put('barrel',79,34,{sc:.8});put(sacks,81,34);put('barrel',6,36,{sc:.8});put(crates,10,36);
-  for(const [x,y] of [[34,38],[40,38],[44,38],[48,38],[56,38],[66,38],[10,38],[78,38]])if(ok(x,y))C.dec('gy_bones',x,y,{sc:.4})}
+  for(const [x,y] of [[34,38],[40,38],[44,38],[48,38],[56,38],[66,38],[10,38],[78,38]])if(ok(x,y))C.dec('gy_bones',x,y,{sc:.25})}
 
 /* ---- src/desert/blight_orchard.js ---- */
 /* ==========================================================================
@@ -69958,7 +69957,7 @@ function b14Noise(hs,x,y,cs,sd){const u=x/cs,v=y/cs,i=Math.floor(u),j=Math.floor
   return(hs(i,j,sd)*(1-sx)+hs(i+1,j,sd)*sx)*(1-sy)+(hs(i,j+1,sd)*(1-sx)+hs(i+1,j+1,sd)*sx)*sy}
 /* patches of bare earth ('1') and wet mud ('5') on the grass ('0'): never on a path, a reserved square or the boundary. opt: {earth:.66, mud:.78, cs:6, keep:fn} */
 function b14Patches(C,opt){
-  opt=opt||{};const hs=C.hs,W=C.W,H=C.H,E=opt.earth===undefined?.66:opt.earth,M=opt.mud===undefined?.8:opt.mud,cs=opt.cs||6;
+  opt=opt||{};const hs=C.hs,W=C.W,H=C.H,E=opt.earth===undefined?.58:opt.earth,M=opt.mud===undefined?.72:opt.mud,cs=opt.cs||5;
   for(let y=C.Y0;y<=C.Y1;y++)for(let x=C.X0;x<=C.X1;x++){
     const i=y*W+x;if(C.fm[i]!=='0'||C.path.has(x+','+y)||(opt.keep&&opt.keep(x,y)))continue;
     const n=b14Noise(hs,x,y,cs,C.id+91)*.75+b14Noise(hs,x,y,2.5,C.id+92)*.25;

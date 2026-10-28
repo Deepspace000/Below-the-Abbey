@@ -215,7 +215,7 @@ function b14AshDress(C){
   b14Place(C,[[gcart,54,31,{sc:1}],[sacks,56,27,{sc:.9}],['barrel',60,27,{sc:.9}],['barrel',61,27,{sc:.8}],['crate',57,27,{sc:.9}],[wash,38,32,{sc:1}],[pots,41,31,{sc:1}],['barrel',37,26],['crate',38,26],
     [cart,52,30,{sc:.9}],['gy_lantern',45,26],['gy_lantern',48,26]]);
   C.light(45,26,C.warm);C.light(48,26,C.warm);
-  for(const [x,y] of [[46,32],[59,31],[40,28],[51,32],[44,29]])C.dec('gy_bones',x,y,{sc:.4});
+  for(const [x,y] of [[46,32],[59,31],[40,28],[51,32],[44,29]])C.dec('gy_bones',x,y,{sc:.25});
   // the lane and the road: a broken cart and a crate stack at the verges
   for(const [x,y] of [[20,33],[66,37],[30,37]])C.dec(x%2?cart:gcart,x,y,{block:true,sc:.9});
   for(const [x,y] of [[14,33],[54,37],[72,33]])C.dec('crate',x,y,{block:true,sc:.8})}

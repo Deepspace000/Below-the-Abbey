@@ -32,7 +32,7 @@ function b14Noise(hs,x,y,cs,sd){const u=x/cs,v=y/cs,i=Math.floor(u),j=Math.floor
   return(hs(i,j,sd)*(1-sx)+hs(i+1,j,sd)*sx)*(1-sy)+(hs(i,j+1,sd)*(1-sx)+hs(i+1,j+1,sd)*sx)*sy}
 /* patches of bare earth ('1') and wet mud ('5') on the grass ('0'): never on a path, a reserved square or the boundary. opt: {earth:.66, mud:.78, cs:6, keep:fn} */
 function b14Patches(C,opt){
-  opt=opt||{};const hs=C.hs,W=C.W,H=C.H,E=opt.earth===undefined?.66:opt.earth,M=opt.mud===undefined?.8:opt.mud,cs=opt.cs||6;
+  opt=opt||{};const hs=C.hs,W=C.W,H=C.H,E=opt.earth===undefined?.58:opt.earth,M=opt.mud===undefined?.72:opt.mud,cs=opt.cs||5;
   for(let y=C.Y0;y<=C.Y1;y++)for(let x=C.X0;x<=C.X1;x++){
     const i=y*W+x;if(C.fm[i]!=='0'||C.path.has(x+','+y)||(opt.keep&&opt.keep(x,y)))continue;
     const n=b14Noise(hs,x,y,cs,C.id+91)*.75+b14Noise(hs,x,y,2.5,C.id+92)*.25;

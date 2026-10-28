@@ -157,8 +157,7 @@ function bltBuild(p){
   // lamps along the road: pale, one every eight squares, on the south side
   for(let x=10;x<=66;x+=8){if(x>34&&x<54)continue;C.dec('gy_lantern',x,36,{block:true});C.light(x,36,C.pale)}
   // dead fields: stalks of corn gone grey, a few wheelbarrows, stones
-  for(const [x0,y0,x1,y1] of [[28,5,50,26],[14,38,34,58],[40,40,68,58],[4,5,10,27]]){
-    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){if(C.path.has(x+','+y)||hs(x,y,41)>.22)continue;const d=C.D('ww_twig2',x,y,{sc:.5+hs(x,y,42)*.4});if(d){d.ox=(hs(x,y,43)-.5)*.6;d.oy=(hs(x,y,44)-.5)*.6}}}
+  for(const [x0,y0,x1,y1] of [[28,5,50,26],[14,38,34,58],[40,40,68,58],[4,5,10,27]])b14Furrows(C,x0,y0,x1,y1,.55);   // ploughed dead fields (round 1 to 4)
   C.dec('kh_ohgard1_5',30,12,{block:true,sc:.8});C.dec('kh_ohgard2_3',45,52,{block:true,sc:.8});
   b14TollDress(C);
   b14Patches(C,{keep:(x,y)=>x>=35&&x<=53&&y>=26&&y<=37||x>=49&&x<=61&&y>=18&&y<=28});
@@ -210,7 +209,7 @@ function b14TollDress(C){
   b14Place(C,[[stocks,38,34],[cart,33,34,{sc:1}],[gcart,56,34],['barrel',40,27,{sc:.9}],['barrel',41,27,{sc:.8}],['crate',45,27,{sc:.9}],[sacks,46,28,{sc:.9}],
     [ban,36,31],[ban,36,33],[ban,52,31],[ban,52,33],[cage,51,29],[cage,51,35],['gy_lantern',41,28],['gy_lantern',43,28]]);
   C.light(41,28,C.warm);C.light(43,28,C.warm);
-  for(const [x,y] of [[39,32],[44,31],[50,33],[34,32],[57,32],[26,33],[14,31],[62,31]])C.dec('gy_bones',x,y,{sc:.4});
+  for(const [x,y] of [[39,32],[44,31],[50,33],[34,32],[57,32],[26,33],[14,31],[62,31]])C.dec('gy_bones',x,y,{sc:.25});
   // the road verges: wrecked carts and crate stacks, every so often, never in the road
   for(const [x,y] of [[22,34],[30,30],[60,30],[66,30]])C.dec(x%2?cart:gcart,x,y,{block:true,sc:.9});
   for(const [x,y] of [[16,30],[44,36],[64,34]])C.dec('crate',x,y,{block:true,sc:.8})}

@@ -319,4 +319,4 @@ function b14GalDress(C,land,ix){
   put(nets,49,46);put(pots,52,47);put(crates,48,50);put(nets,58,36);put(pots,64,36);put(crates,70,36);put(pots,76,36);
   // the banks: a wrecked cart each end, sacks and barrels by the toll hut and the bone orchard road
   put(cart,78,36,{sc:.9});put(cart,8,36,{sc:.9});put('barrel',79,34,{sc:.8});put(sacks,81,34);put('barrel',6,36,{sc:.8});put(crates,10,36);
-  for(const [x,y] of [[34,38],[40,38],[44,38],[48,38],[56,38],[66,38],[10,38],[78,38]])if(ok(x,y))C.dec('gy_bones',x,y,{sc:.4})}
+  for(const [x,y] of [[34,38],[40,38],[44,38],[48,38],[56,38],[66,38],[10,38],[78,38]])if(ok(x,y))C.dec('gy_bones',x,y,{sc:.25})}
