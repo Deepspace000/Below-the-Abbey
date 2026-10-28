@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.690';
+const VERSION='3.691';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -3264,17 +3264,17 @@ function drawSpecialBtn(){
   panel(248,264,38,34,false,false);iconHourglass(267,279,.7);txt('Wait',267,293,6.4,'#c9ba8e','center',true,undefined,34);btn('wait',248,264,38,34);
 }
 function hudRight(){
-  // the second and third potion (or food) shortcuts, then the first, down the right-hand side
-  for(let q=0;q<2;q++){const y=56+q*48,pid=(G.potBack||[])[q],ok=pid&&ITEMDEF[pid];
+  // the first potion (or food) shortcut, then the second and third, down the right-hand side: the same order as the inventory
+  for(let q=0;q<2;q++){const y=112+q*48,pid=(G.potBack||[])[q],ok=pid&&ITEMDEF[pid];
     panel(424,y,54,44,false,false);
     if(ok){const n=G.bag.reduce((a,b)=>a+(b.id===pid?b.n:0),0);ctx.globalAlpha=n>0?1:.4;itemIcon(ITEMDEF[pid],451,y+19,1.15);ctx.globalAlpha=1;txt('x'+n,451,y+38,8,'#c9ba8e','center',true,undefined,48)}
     else{txt('+',451,y+23,13,'rgba(220,200,160,.3)','center');txt(q?'Third':'Second',451,y+38,6.5,'#8a7a58','center',true,undefined,48)}
     btn('potb'+q,424,y,54,44);txt(String(6+q),429,y+6,5.5,'#8a7a58','left',true)}
-  panel(424,152,54,52,false,false);
+  panel(424,56,54,52,false,false);
   const pc=countPotions();
-  ctx.globalAlpha=(G.potFav?favIndex()>=0:pc>0)?1:.4;if(G.potFav&&ITEMDEF[G.potFav])itemIcon(ITEMDEF[G.potFav],451,174,1.4);else iconPotion(451,174,1.4);ctx.globalAlpha=1;
-  txt('Potion',451,161,7.5,'#c9ba8e','center',true,undefined,48);txt('x'+(G.potFav?G.bag.reduce((a,b)=>a+(b.id===G.potFav?b.n:0),0):pc),451,196,9,'#c9ba8e','center',true,undefined,48);
-  btn('potion',424,152,54,52);txt('5',429,158,5.5,'#8a7a58','left',true);
+  ctx.globalAlpha=(G.potFav?favIndex()>=0:pc>0)?1:.4;if(G.potFav&&ITEMDEF[G.potFav])itemIcon(ITEMDEF[G.potFav],451,78,1.4);else iconPotion(451,78,1.4);ctx.globalAlpha=1;
+  txt('Potion',451,65,7.5,'#c9ba8e','center',true,undefined,48);txt('x'+(G.potFav?G.bag.reduce((a,b)=>a+(b.id===G.potFav?b.n:0),0):pc),451,100,9,'#c9ba8e','center',true,undefined,48);
+  btn('potion',424,56,54,52);txt('5',429,62,5.5,'#8a7a58','left',true);
   if(G.keys>0)txt('KEY',451,210,7,'#ffd76a','center',true);
   if(G.flags.goldKey)txt('GOLD KEY',451,200,6.5,'#ffe070','center',true);
 }
