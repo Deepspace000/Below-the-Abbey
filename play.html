@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.687';
+const VERSION='3.688';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -51793,7 +51793,7 @@ function wlnPass(C){
   wlnPost(C,29,52,[[[1,0],'THE VILLAGE GREEN','Duck pond. Please do not feed the ducks.'],[[0,-1],'HIGH STREET','Back to the square']],'A signpost at the head of the path. THE VILLAGE GREEN, with a duck pond. Underneath: please do not feed the ducks. Somebody has added: they feed themselves.');
   wlnPost(C,73,83,[[[-1,0],'MILL LANE','The brook and the mill'],[[0,-1],'HIGH STREET','Back up the lane']],'A signpost by the bridge. MILL LANE, over the old bridge to the mill. HIGH STREET is back up the lane.');
   // the bridge: plates on the low parapets
-  C.decor.push({k:'sign_wlst',x:72,y:84,block:false,wd:[-1,0],txt:['THE OLD BRIDGE'],plate:'street',sc:.8});
+  C.decor.push({k:'sign_wlst',x:71,y:83,block:false,wd:[0,1],txt:['THE OLD BRIDGE'],plate:'street',sc:1.1});
   wlnGate(C);
 }
 /* the west gate, a proper one: oak leaves bound in iron under the arch, a lamp each side, a board overhead */
@@ -55339,7 +55339,7 @@ function gyIvy(){
     x.globalAlpha=1;GY._ivy[a]=c;IMG['gy_'+a]=c}catch(e){console.error('gyIvy',a,e)}}}
 /* cobwebs are drawn faint and fine: the painted web at half strength */
 function gyWeb(){const s=IMG.gyp_bonesH_1;if(!s)return;if(!GY._web){const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.globalAlpha=.5;x.drawImage(s,0,0);GY._web=c}IMG.gy_web=GY._web}
-const GY_FRONTS=['gothic','classical','vault','dungeongate'];   // assets/gy2/f_<name>.webp, cut by tools/gy_fronts/ingest.py
+const GY_FRONTS=['gothic','classical','vault','dungeongate','redgate'];   // assets/gy2/f_<name>.webp, cut by tools/gy_fronts/ingest.py
 function gyLoad(){
   if(GY.loading)return GY.loading;
   GY.loading=new Promise(res=>{
@@ -55710,7 +55710,7 @@ function gyYardBuild(){
   for(const g of GY_Y.doors){
     {const md=dec(g.pic,g.x,g.y,{block:false,npc:'gyo_door'+g.k});if(md)md.sc=.0001;   // an unseen marker for the quest signs
      const kind=['red','grey','black','pale'][g.k],[nw,wh]=GY_ENTRY[kind],id=GY.M[g.k],half=(nw-1)/2;IMG['gyp_entry_'+kind]=gyEntryPic(kind);
-     for(let q=0;q<nw;q++){const x=g.x-half+q,gid=gyTile('texGrey_0',wh,{fac:kind==='pale'?{img:'f_dungeongate',i:q,n:nw,fit:1,at:.34}:{img:'entry_'+kind,i:q,n:nw},gain:1.0,rgb:[1,1,1+(g.k*8+q)*.00001]});
+     for(let q=0;q<nw;q++){const x=g.x-half+q,gid=gyTile('texGrey_0',wh,{fac:{img:kind==='red'?'f_redgate':'f_dungeongate',i:q,n:nw,fit:1,at:.5},gain:1.0,rgb:kind==='black'?[.6,.58,.76+(g.k*8+q)*.00001]:[1,1,1+(g.k*8+q)*.00001]});
        if(q===half)KH_DOOR[gid]={lvl:id,get at(){if(!LEVELS[id]&&KH_LAZY[id])KH_LAZY[id]();const st=LEVELS[id].start;return {x:st.x,y:st.y,f:st.f}},gy:'mazedoor',k:g.k};
        rows[g.y][x]=ch(gid);block[g.y*W+x]=1}   // a built front five tiles wide (three for the trapdoor) with the door in the middle: solid, you go in by walking up and pressing on
      const fy=g.y+(g.y<35?1:-1);
@@ -58049,15 +58049,14 @@ fplDef(470,c=>{fplLakes(c,{n:5,seed:71,rx:[3.4,4.6],ry:[2.4,3.2],margin:7,tol:.5
 /* the Deeper Hollow (475) and the Underlevel (476): spots along the edges of the dark waters, deep water */
 fplDef(475,c=>{c.windows({max:12,step:14,water:'deep',seed:75});c.shore({step:7,max:10,water:'deep',seed:75})});
 fplDef(476,c=>{c.shore({step:8,max:30,water:'deep',seed:76})});
-/* Greendale (32): a small lake in the east meadow, a rowing boat, and a little plank jetty */
+/* Greendale (32): a small lake in the east meadow beyond the plots (the large and medium for-sale houses stand at x 42 to 49, so the lake is a two-row pond at x 56 to 62 with a walkable north bank) and a rowing boat */
 fplDef(32,c=>{
-  const cells=c.ellipse(47,10.5,3.3,2,17).filter(([x,y])=>!(x===47&&y<=10));
+  c.clear(55,8,62,8);   // the north bank is walkable, so the pond never cuts the east end off
+  const cells=c.ellipse(59,9.5,3.2,1.25,17);
   if(!c.lake(cells,{floor:'water'}))return;
-  c.jetty(47,8,0,1,3);
-  c.stand(47,10,-1,0);c.stand(47,10,1,0);c.edgeStand(cells,'W',11);c.edgeStand(cells,'E',11);
+  c.edgeStand(cells,'N',58);c.edgeStand(cells,'N',60);c.edgeStand(cells,'W',9);
   fplBank(c,{seed:43});
-  c.deco('yar_boat_row',50,12,{block:false,walk:false,sc:1.1,force:1});
-  c.deco('bench',45,7,{block:true,walk:false});c.deco('pt_willow',51,8,{sc:1.2});
+  c.deco('yar_boat_row',60,10,{block:false,walk:false,sc:1.1,force:1});
 });
 
 /* ---- src/desert/housing_data.js ---- */
@@ -59577,7 +59576,7 @@ const HGDPC_BOARD=[ // lost, wanted, notice: one board in every town
 const HGDPC_VIG=[
  {title:'The Gardener\'s Rest',text:'Here stands Orrin Hedge, who trimmed the hedge of Hedgefoot for forty years. He was last seen trimming it from the inside. We think he is still at it.',p:[[0,0,'wm_statue',1,'b'],[-2,1,'hgtb_bench',1.1],[2,1,'urn',1],[-2,-1,'hgt_gardenlantern',1,'l'],[2,-1,'hgt_gardenlantern',1,'l'],[0,2,'noticeboard',.9,'n']]},
  {title:'The Bell of the Lost',text:'Ring once for every one the maze has kept. It has been rung 211 times. The rope wore through, so we ring it with a spoon. A scratch beside the bell says: the cairn pays its tithe to whoever kneels at the bell.',p:[[0,0,'wm_bell',1,'b'],[-2,0,'wm_brazier',1,'l'],[2,0,'wm_brazier',1,'l'],[-1,2,'hgtb_bench',1.1],[2,2,'urn',1],[0,-2,'hg_chestwax',1,'c'],[1,2,'noticeboard',.9,'n']]},
- {title:'The Honey Press',text:'Sticky, loud and strictly no tasting. A smaller notice beneath says: whoever tasted is still stuck.',p:[[0,0,'hgtb_stall_orange_pottery',.85],[-2,1,'wm_barrel_tall',1],[2,1,'hg_waxbarrel',1],[-1,2,'hg_jar',1],[2,-1,'hg_jar',.9],[-2,-1,'hl_p_candle',1,'l'],[0,2,'noticeboard',.9,'n']]},
+ {title:'The Honey Press',text:'Sticky, loud and strictly no tasting. A smaller notice beneath says: whoever tasted is still stuck.',p:[[0,0,'hpa_waxbarrel',1.7,'b'],[-2,0,'hg_hive',1],[2,0,'hg_hive',.8],[-2,2,'icn_hgcomb',.55],[2,2,'hg_jar',1],[-1,-2,'hl_p_candle',1,'l'],[1,-2,'hg_wax0',.8],[0,2,'noticeboard',.9,'n']]},
  {title:'The Pearl Fountain',text:'Throw one coin for luck. The keeper collects on Thursdays, whatever day it is.',p:[[0,0,'hgtb_deco_fountain',.95,'b'],[-2,1,'hgtb_bench',1.1],[2,1,'hgtb_bench',1.1],[-2,-1,'hgtb_deco_lanterns',.75,'l'],[1,-2,'hgt_pearlbush',1],[0,2,'noticeboard',.9,'n']]},
  {title:'The Old Well',text:'Forty fathoms deep. Do not drop anything you want back, and do not drop anything you do not. A mark by the stones says: look below the second crate.',p:[[0,0,'well',1,'b'],[-1,1,'wm_bucket',1],[-2,0,'wm_barrel',1],[2,0,'hg_jar',1],[2,2,'sacks',1],[0,-2,'hg_chestwax',1,'c'],[0,2,'noticeboard',.9,'n']]},
  {title:'The Lamplighters\' Post',text:'Two lamplighters, one ladder and forty years of disagreement. The ladder is winning.',p:[[0,0,'hgt_lamppost',.8,'bl'],[-2,1,'wm_lantern_gold',1,'l'],[2,1,'hgtb_lantern',.9,'l'],[-2,-1,'wm_crate',1],[2,-1,'hgtb_bench',1.1],[0,2,'noticeboard',.9,'n']]},
@@ -59754,7 +59753,7 @@ const HGDPC_CH=[ // round 3: real painted fronts, no flattening tints (a gentle 
  {src:'icn_shrine_moor',h:2.7,f:'brightness(1.5) saturate(1.1)',glow:[[.5,.88,.2,'rgba(255,200,120,.55)']]},
  {src:'hg_house1',h:2.8,f:'sepia(.4) saturate(1.6) brightness(1.2)',glow:[[.27,.82,.07,'rgba(255,220,130,.9)'],[.73,.82,.07,'rgba(255,220,130,.9)']]},
  {src:'hgtb_shrine',h:2.5,f:'brightness(1.35) saturate(1.2)',glow:[[.5,.5,.3,'rgba(150,255,230,.35)']]},
- {src:'icn_shrine_sand',h:2.7,f:'brightness(1.5) saturate(1.2)',glow:[[.5,.8,.2,'rgba(255,205,120,.5)']]},
+ {src:'icn_shrine_golden',h:3.1,f:'brightness(1.55) saturate(1.2)',glow:[[.3,.97,.1,'rgba(255,210,130,.9)'],[.7,.97,.1,'rgba(255,210,130,.9)'],[.5,.3,.12,'rgba(255,215,140,.6)']]},
  {src:'hg_tower4',h:4.2,f:'brightness(1.3) saturate(1.2)',glow:[[.5,.9,.14,'rgba(200,230,255,.6)']]},
  {src:'hg_tower7',h:4.4,f:'brightness(1.3) saturate(1.15)',glow:[[.5,.93,.1,'rgba(255,215,255,.6)']]},
  {src:'icn_shrine_sut',h:2.7,f:'brightness(1.4) saturate(1.25)',glow:[[.5,.5,.25,'rgba(255,225,130,.45)']]}];
@@ -60513,7 +60512,7 @@ function hgpdWallVar(L){
 {const _s=setupLights;setupLights=function(){_s.apply(this,arguments);
   try{if(LEVEL!==HGPD.ID||!HGPD.cl)return;for(const l of LIGHTS){if(!l.free||l.lamp)continue;const c=HGPD.cl[(l.x-.5)+','+(l.y-.5)];if(c){l.col=c[0];l.calm=true;l.kI=Math.max(1.05,c[1]*1.7);l.range2=c[1]>=.9?150:c[1]>=.6?80:56}}}catch(e){}}}
 {const _sl=setLightLevel;setLightLevel=function(l){_sl.apply(this,arguments);
-  if(HGPD_R2&&LEVEL===HGPD.ID){RANGE*=1.8;for(let i=0;i<=1024;i++)LUT[i]+=.27+.1*(i/1024)}}}
+  if(HGPD_R2&&LEVEL===HGPD.ID){RANGE*=1.8;for(let i=0;i<=1024;i++)LUT[i]+=.6+.12*(i/1024)}}}
 function hgpdGlows(){
   if(LEVEL!==HGPD.ID||!HGPD.glows||typeof bsuAirOn!=='function'||!bsuAirOn())return;
   const C=G.C,LA=C.a+(typeof LKYAW==='number'?LKYAW:0),dX=Math.cos(LA),dY=Math.sin(LA),pX=-dY*PL,pY=dX*PL,cx=C.x+.5-dX*.28,cy=C.y+.5-dY*.28,T=G.time,taken=(G.flags&&G.flags.orbTaken)||{};
@@ -61104,7 +61103,7 @@ function hgtClean(s){return String(s).replace(/[—–]/g,', ').replace(/\s+/g,'
 function hgtTitle(txt){
   let s=hgtClean(txt).replace(/^(A |An )?(child's|neat|note|scrap|torn|Carved|Chalked|Scratched|Scribbled|Written|Etched|Painted|Pinned)[^:]{0,40}:\s*/i,'');
   const m=/^(.+?[.!?])(\s|$)/.exec(s);let t=(m?m[1]:s).replace(/[.!?]+$/,'');
-  if(t.length>36){const c=t.search(/[,;]| and | but | then | when | until | because | so | though | while /);if(c>=10&&c<=36)t=t.slice(0,c);else{const w=t.split(' ');let o='';for(const x of w){if((o+' '+x).trim().length>32)break;o=(o+' '+x).trim()}t=(o||t.slice(0,30)).replace(/\s+(a|an|the|of|to|and|or|in|on|at|is|was|for|my|i)$/i,'')+'...'}}
+  if(t.length>36){const c=t.search(/[,;]| and | but | then | when | until | because | so | though | while /);if(c>=14&&c<=36)t=t.slice(0,c);else{const w=t.split(' ');let o='';for(const x of w){if((o+' '+x).trim().length>26||o.split(' ').length>=5)break;o=(o+' '+x).trim()}t=(o||t.slice(0,24)).replace(/(\s+(a|an|the|of|to|and|or|in|on|at|is|was|for|my|i|me|us|not|as|than|that|with|from|by|has|had|are|be|it|its|this|your|you|we|our))+$/i,'')}}
   return t||'Note';
 }
 function hgtCase(t){return t.split('|').map(u=>/^[A-Z0-9 ,'!?.-]{6,}$/.test(u)?u.charAt(0)+u.slice(1).toLowerCase():u).join('|')}
@@ -61180,7 +61179,7 @@ function hgtOne(d){
   const cv=hgtPaint(kind,label,hm?d.k:null);if(!cv)return false; // picture not loaded yet: try again later
   const key='hgt_'+(hm?d.k:kind)+'_'+hgtHash(label).toString(36);
   IMG[key]=cv;NPC_H[key]=NPC_H[hm?d.k:'art_hs_'+kind];
-  d.hgtBase=d.k;d.hgt=label;if(d.pic&&d.wd)d.lk=key;else d.k=key; // a wall picture keeps its id (maps and quests read it) and shows the lettered copy through d.lk
+  d.hgtBase=d.k;d.hgt=label;if(!d.label&&(d.npc==='hgd_pa_note'||d.npc==='hgd_note'))d.label=label;if(d.pic&&d.wd)d.lk=key;else d.k=key; // a wall picture keeps its id (maps and quests read it) and shows the lettered copy through d.lk
   HGTX.n++;return true;
 }
 function hgtApply(L){if(!L||!L.decor)return 0;let n=0;for(const d of L.decor)if(hgtOne(d))n++;return n}
@@ -61747,6 +61746,16 @@ const HGW4_BOAT=[{col:'#e08a2a',a:.3,sc:.5,flip:0,ox:-.22,bob:.03},{col:'#2bd0bc
   return r}}
 /* ---------- 5b. big fish keep their distance from the camera (the fish themselves are drawn in hgd_polish_e.js) ---------- */
 HGW4.fishMin=2.6;
+
+/* ---------- round 4 critic fixes (zones north and towns): the three darkest danger halls get a hanging lamp each, with a warm pool ---------- */
+{const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];const r=_b.apply(this,arguments);const L=LEVELS[HGD.ID];
+  if(!had&&L&&L._hgdp&&L.decor&&!L._hgr4)try{L._hgr4=1;const open=(x,y)=>L.rows[y]&&L.rows[y][x]==='.';
+    for(const nm of ['Beetle Row','The Bug Nest','Blue Bug Nest 2','The Lamp Clearing']){const z=L._hgdp.zones.find(q=>q.name===nm);if(!z)continue;let n=0;
+      for(let rr=0;rr<=6&&n<2;rr+=2)for(let dy=-rr;dy<=rr&&n<2;dy+=2)for(let dx=-rr;dx<=rr&&n<2;dx+=2){const x=z.x+dx,y=z.y+dy;if(!open(x,y)||L.decor.some(d=>d.x===x&&d.y===y&&(d.block||d.npc)))continue;
+        if(HGDPC.lights.some(q=>Math.hypot(q.x-x,q.y-y)<3))continue;
+        L.decor.push({k:'hgt_hanglamp',x,y,block:false,walk:true,deco:true,sc:1,cl:1});L.lights=L.lights||[];L.lights.push([x,y]);HGDPC.lights.push({x,y,col:[1,.78,.45],kI:.95,r2:64});n++}}}
+  catch(e){console.error('hgr4 lights',e)}
+  return r}}
 
 /* ---- src/desert/spellfx.js ---- */
 /* ==========================================================================
