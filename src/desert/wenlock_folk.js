@@ -55,7 +55,7 @@ const WL_ANIMALS=[
   {id:'wlo_dog2',n:'Admiral, a large wolfhound',face:'kh_oqdogs_1',sc:1,out:[30,52],lines:["Woof. (He leans on your knee until you scratch his ears.)","Woof. (This is the dog who is, apparently, in charge of the square.)"]},
   {id:'wlo_dog3',n:'Mutt, a sheepdog',face:'kh_oqdogs_2',sc:1,out:[46,12],lines:["Woof. (He wants to herd you towards the pub.)","Woof. (He has noticed a sheep. He is trying to look as though he has not.)"]},
   {id:'wlo_cat2',n:'Duchess, a tabby',face:'kh_anim1_0',sc:1,out:[63,53],lines:["Miaow. (She looks at you as a queen looks at a very small stool.)","Mrr. (She is sitting in the exact middle of the sun, and has no intention of moving.)"]},
-  {id:'wlo_goat',n:'A goat',face:'kh_anim1_3',sc:.9,out:[86,52],lines:["Maaa. (He has just eaten a hat, and is thinking about the other one.)","Maaa. (He gives you a look of calm, patient contempt.)"]},
+  {id:'wlo_goat',n:'A goat',face:'kh_anim1_3',sc:.9,out:[86,52],lines:["Maaa. (He has just eaten a hat, and is thinking about the other one. This goat is not part of the goat quest. He lives here.)","Maaa. (He gives you a look of calm, patient contempt. This goat is not part of the goat quest. He lives here.)"]},
   {id:'wlo_donkey',n:'Neddy, the donkey',face:'kh_anim1_4',sc:.9,out:[66,47],lines:["Hee-haw. (He has a strong opinion and has decided not to share it.)","Hee-haw. (The donkey looks, you suspect, at the world's long list of unfinished business.)"]}
 ];
 /* grown-ups were drawn a little too big beside the doors and stalls: every adult is brought down a tenth, the children and animals stay as they are */
