@@ -48,8 +48,18 @@ function blrArt(){
   if(!mk('blr_tent1',IMG.wl_prop1_3,'sepia(.5) saturate(.5) brightness(.6) hue-rotate(160deg)',1.7))IMG.blr_tent1=null;
   if(!mk('blr_stocks',IMG.wl_prop1_2,'sepia(.5) saturate(.7) brightness(.8)',1.15))IMG.blr_stocks=IMG.wl_prop1_2;
   if(!mk('blr_stew',IMG.propsA_0||IMG.ww_cauldron,'hue-rotate(-95deg) saturate(.85) brightness(.9)',.9))IMG.blr_stew=IMG.ww_cauldron;
+  // the painted market tent with its flowers painted over in the dark of a tent mouth (a filter over the painting, nothing drawn)
+  for(const k of ['blr_tent0','blr_tent1']){const c=IMG[k];if(!c||!c.getContext)continue;const x=c.getContext('2d');x.save();x.globalCompositeOperation='source-atop';
+    const g=x.createLinearGradient(0,c.height*.4,0,c.height*.95);g.addColorStop(0,'rgba(18,12,8,0)');g.addColorStop(.12,'rgba(18,12,8,.95)');g.addColorStop(1,'rgba(10,7,5,.97)');x.fillStyle=g;x.fillRect(c.width*.2,c.height*.4,c.width*.6,c.height*.56);x.restore()}
   BLR._art=1}
 function blrBanner(){return IMG.wl2_hall_0?'wl2_hall_0':IMG.kh_throne1_1?'kh_throne1_1':null}
+/* Lanternrest is warm and lit: its haze is thin and golden, not the grey green of the road */
+{const _w=weatherNow;weatherNow=function(){
+  if(LEVEL===BLR.ID)return {id:'fog',n:'Lantern haze',fog:.007,haze:.18,dark:0,mix:.25,col:[168,150,118],text:'Lamp smoke and cook-fire smoke hang under the wall, and the light is warm. For the first time in a long way the air smells of stew.'};
+  return _w.apply(this,arguments)}}
+{const _sl=setupLights;setupLights=function(){const r=_sl.apply(this,arguments);
+  try{if(LEVEL===BLR.ID){for(const l of LIGHTS){if(!l.free||l.lamp)continue;l.kI=1.7;l.range2=100;l.calm=true}}}catch(e){console.error('blr lights',e)}
+  return r}}
 /* ---------- the people ---------- */
 const blrMen=(id,name,face,lines,o)=>khNpc(id,name,face,()=>yrLines(id,lines),o);
 khNpc('blr_marsh','Captain Eldred Marsh, of Oldhaven','kh_ohsold1_1',()=>{
@@ -119,13 +129,13 @@ for(const r of BLR_REF)blrMen(r[0],r[1],r[2],r[3]);
 function blrQ(id,title,who,steps,reward,extra){const q=yrQ(id,title,who,steps,reward,extra);QAREA[id]=BL.REGION;return q}
 blrQ('blq54','Bread for the Garrison','Quartermaster Hob Tolliver',[
   ['Bring twelve loaves of bread to Quartermaster Tolliver at Lanternrest. You can buy them in Wenlock, or from bakers on the road.',()=>bagCount('bread')>=12,['blr_tolliver']]],
-  {gold:2400,xp:20000,items:['potion6','potion6'],take:{bread:12}});
+  {gold:2400,xp:20000,items:['potion6','potion6']},{take:{bread:12}});
 blrQ('blq55','Medicine for the Infirmary','Surgeon Ysolde Fenn',[
   ['Bring six cleansing salves and four antidotes to Surgeon Fenn in the infirmary at Lanternrest.',()=>bagCount('salve')>=6&&bagCount('antidote')>=4,['blr_surgeon']]],
-  {gold:2600,xp:22000,items:['potion6','potion6'],take:{salve:6,antidote:4}});
+  {gold:2600,xp:22000,items:['potion6','potion6']},{take:{salve:6,antidote:4}});
 blrQ('blq56','Torches for the Walls','Nell Wick, chandler',[
   ['Bring fifteen torches to Nell Wick in the camp at Lanternrest, for the walls.',()=>bagCount('torch')>=15,['blr_nell']]],
-  {gold:2400,xp:20000,items:['potion6','potion6'],take:{torch:15}});
+  {gold:2400,xp:20000,items:['potion6','potion6']},{take:{torch:15}});
 blrQ('blq57','The Patrols That Never Came Back','Captain Eldred Marsh, of Oldhaven',[
   ['Find what ate the patrols: the Road-Maw, in a hollow south east of the fort, off the road. Kill it, and take back the patrol colours.',()=>!!blrF().maw,['blr_mawspot']]],
   {gold:4500,xp:38000,items:['blgarrisonring','potion6','potion6']});
@@ -228,7 +238,7 @@ function blrStores(){
   const st=blrStage(),hi=79+st*3;   // 79, 82, 85, 88
   return blrGear(BLR_ARMOUR,58,hi).slice(0,34).concat([['healdraught',8],['greaterheal',st>=1?6:3],['superiorheal',st>=2?4:0],['antidote',8],['salve',8],['bread',20],['torch',20]].filter(r=>ITEMDEF[r[0]]&&r[1]>0))}
 function blrReserve(){return blrGear(BLR_ARMOUR,80,92).slice(0,26).concat([['superiorheal',6],['elixir',5],['supermana',3],['potion6',4]].filter(r=>ITEMDEF[r[0]]))}
-function blrSmith(){const st=blrStage(),hi=80+st*3;return blrGear(['weapon'],58,hi).slice(0,30).concat([['torch',20]].filter(r=>ITEMDEF[r[0]]))}
+function blrSmith(){const st=blrStage(),hi=st>=3?95:56+st*8;return blrGear(['weapon'],40,hi).slice(0,30).concat([['torch',20]].filter(r=>ITEMDEF[r[0]]))}
 function blrTop(d,rows,name){   // a shop opened before gets the goods of a higher stage added once
   if(!d.contents){openShop(d,rows,name);d.blrSeen={};for(const c of d.contents)d.blrSeen[c.id]=1;return}
   const seen=d.blrSeen||(d.blrSeen=Object.fromEntries(d.contents.map(c=>[c.id,1])));
@@ -278,7 +288,7 @@ function blrBuild(p){
   C.person('blr_wall1',24,41,2);C.person('blr_wall2',64,41,2);
   /* tents: rows of soldier tents in the west and refugee tents in the east, with the stew pot and the well between */
   const tents=[[24,18],[27,20],[30,23],[24,21],[26,34],[29,36],[32,34],[24,37],[28,40],[34,41],[58,20],[61,17],[64,20],[60,22],[57,34],[60,36],[63,34],[58,40],[62,40],[66,36]];
-  tents.forEach(([x,y],i)=>{if(!C.dec(IMG.blr_tent0&&i%3?'blr_tent'+((i%3)%2):'blr_tent0',x,y,{block:true,npc:'blr_tent',sc:1,i}))console.error('tent',x,y)});
+  tents.forEach(([x,y],i)=>{if(!C.dec(IMG.blr_tent0&&i%3?'blr_tent'+((i%3)%2):'blr_tent0',x,y,{block:true,npc:'blr_tent',sc:.72,i}))console.error('tent',x,y)});
   /* people */
   C.person('blr_drill',33,38,2);C.person('blr_cook',39,22,2);C.person('blr_stable',62,16,2);
   C.person('blr_nell',60,30,2);C.person('blr_pell',22,14,2);
@@ -299,10 +309,11 @@ function blrBuild(p){
   C.dress({trees:60,scrub:140,stones:10,bones:12,posts:4,keep:(x,y)=>(x>=16&&x<=72&&y>=4&&y<=48)||(x>=2&&x<=88&&y>=56&&y<=64)});
   /* the creatures: only outside the walls, away from the gate; the Road-Maw in its hollow */
   C.foes([['blmaw',66,72],
-    ['blhusk',20,54],['blhusk',58,54],['blghoul',34,54],['blghoul',72,66],['blbones',22,66],['blbones',46,68],['blbones',10,58],['blhound',50,66],['blhound',78,57],['blcrow',30,56],['blcrow',68,56],['blshade',14,72],['blbloat',40,70],['blhusk',80,68],['blghoul',6,66],['blbones',84,50],['blhusk',10,40],['blhusk',78,36],['blhound',8,28],['blcrow',80,28]]);
+    ['blhusk',20,54],['blhusk',58,54],['blghoul',34,54],['blghoul',72,66],['blbones',22,66],['blbones',46,68],['blbones',10,58],['blhound',50,66],['blhound',70,67],['blcrow',30,56],['blcrow',68,56],['blshade',14,72],['blbloat',40,70],['blhusk',72,69],['blghoul',6,66],['blbones',84,50],['blhusk',10,40],['blhusk',78,36],['blhound',8,28],['blcrow',80,28]]);
   for(const [k,x,y] of [['potion6',24,54],['potion6',54,68],['potion6',80,44]])C.items.push({k,x,y,taken:false});
   C.mapNames.push({t:'The Gate',x:44,y:46,k:'place'},{t:"The Captain's Hall",x:44,y:11,k:'place'},{t:'The Last Lantern (Inn)',x:28,y:12,k:'place'},{t:'The Armoury',x:24,y:26,k:'place'},{t:'Stable and Forge',x:62,y:11,k:'place'},{t:'The Infirmary',x:64,y:26,k:'place'},{t:'The Beacon Tower',x:22,y:10,k:'place'},{t:'The Tents',x:60,y:30,k:'place'},{t:'The Well',x:52,y:20,k:'place'},{t:"The Scout's Hut",x:8,y:49,k:'place'},{t:'The Burnt Wagon',x:76,y:52,k:'place'},{t:'The Ruined Camp',x:12,y:69,k:'place'},{t:"The Road-Maw's Hollow",x:66,y:70,k:'place'},{t:'To the Bone Orchard',x:84,y:57,k:'place'},{t:'To the Vault of Maldrake',x:5,y:57,k:'place'});
-  const lv=C.finish({start:{x:84,y:60,f:3}});
+  const lv=C.finish({start:{x:84,y:60,f:3},col:C.warm});
+  lv.day=.8;lv.amb=.98;   // the fort is lit: brighter than the road
   if(F.maw)lv.enemies=lv.enemies.filter(e=>e.t!=='blmaw');
   return lv}
 /* ---------- the rooms ---------- */
@@ -353,8 +364,8 @@ function blrInfirmary(){
     build:C=>{
       blrP(C,'cot',2,3,{h:.55});blrP(C,'cot',2,5,{h:.55});blrP(C,'cot',10,3,{h:.55});blrP(C,'cot',10,5,{h:.55});blrP(C,'bed',7,3,{h:.7});blrP(C,'bed',9,6,{h:.7});
       blrP(C,'herbrack',4,1,{h:1.1});blrP(C,'apothcab',6,1,{h:.95});blrP(C,'potshelf',8,1,{h:1.2});blrP(C,'cauldron',11,1,{h:.9});blrP(C,'waterbarrel',1,7,{h:.7});blrP(C,'shelving',12,5,{h:1.0});
-      C.npc('blr_surgeon',5,4);
-      blrDaceAdd()}})}
+      C.npc('blr_surgeon',5,4)}});
+  blrDaceAdd()}
 function blrBeacon(){
   const f=BLR_BEACON.front;
   blRoom({id:BLR.BEACON,name:'The Beacon Room',w:9,h:9,amb:.45,rating:87,floor:'wood',wall:'kh_ohwall1_0',
