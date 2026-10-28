@@ -1,0 +1,2 @@
+(()=>{const out={};for(const n of Object.keys(LEVELS)){const L=LEVELS[n];if(!L||!L.decor)continue;const c={};for(const d of L.decor){if(d.k==='hl_p_note'||/note|post|sign|board|tablet|plaque/.test(d.npc||'')){const key=d.k+'|'+(d.npc||'').replace(/\d+$/,'#');c[key]=(c[key]||0)+1}}if(Object.keys(c).length)out[n]=c}
+out.hgdLevels=Object.keys(LEVELS).filter(n=>LEVELS[n]&&(LEVELS[n]._hgdm||/hollow|hgd/i.test(LEVELS[n].name||''))).map(n=>n+':'+LEVELS[n].name);return out})()

@@ -1,0 +1,2439 @@
+{
+ "zoneDecor": 1152,
+ "npcs": [
+  {
+   "npc": "hgd_q0",
+   "name": "Warden Pell",
+   "k": "hg_npc0",
+   "x": 112,
+   "y": 179,
+   "sc": 0.7259259259259259,
+   "h": 0.98,
+   "zone": "Hedgefoot",
+   "text": "The old creze nacdzox was xsso when a ltac nest swallowed the lower menc. Bring it back from the glarxr beyond the cgnox, and the whole garg can see its way again. If you hear squelching toward The Flooded Dcasren Hunters, it is not the soup."
+  },
+  {
+   "npc": "hgd_q1",
+   "name": "Mother Brask",
+   "k": "hg_npc0",
+   "x": 18,
+   "y": 168,
+   "sc": 0.7259259259259259,
+   "h": 0.98,
+   "zone": "Cairnhold",
+   "text": "Hollow ltacx have eaten through the oxlsa eixmgaxx, and the walls are soft where they crawl. Kill 6 of them. I would not go near Oxlsa Znoss Nest with a lamp, a sword or a good attitude."
+  },
+  {
+   "npc": "hgd_q2",
+   "name": "Tuck the Lamplighter",
+   "k": "hg_npc0",
+   "x": 64,
+   "y": 135,
+   "sc": 0.7259259259259259,
+   "h": 0.98,
+   "zone": "Combwick",
+   "text": "We keep the ncoex feast every year in the honeycomb dcasren. We are short of 4 pieces of honeycomb. There is some lying in the open eixmgaxx. They say Comb Beetle Nest is not so bad. They said it before they went in."
+  },
+  {
+   "npc": "hgd_q3",
+   "name": "Old Orm",
+   "k": "hg_npc0",
+   "x": 76,
+   "y": 101,
+   "sc": 0.7259259259259259,
+   "h": 0.98,
+   "zone": "Nacre Landing",
+   "text": "Hollow jellies float through the gense galleries and sting whoever they touch. Kill 5 of them, and be careful, they are slow but they hurt. Stay clear of Comb Spider Nest. It is quiet there, and quiet is how it starts."
+  },
+  {
+   "npc": "hgd_q4",
+   "name": "Seeker Yll",
+   "k": "hg_npc0",
+   "x": 42,
+   "y": 90,
+   "sc": 0.7259259259259259,
+   "h": 0.98,
+   "zone": "Dunewell",
+   "text": "The sandstone dcasren is dry. Bring 3 flasks of cmic water from the cmicx in the xogessx, and the well-keeper will refill the well. Keep clear of Spider Gully. Nobody comes back from there with the same number of boots."
+  },
+  {
+   "npc": "hgd_q5",
+   "name": "Ferrik the Mender",
+   "k": "hg_npc0",
+   "x": 28,
+   "y": 45,
+   "sc": 0.7259259259259259,
+   "h": 0.98,
+   "zone": "Blue Lantern",
+   "text": "Hollow songx have tunnelled under the Blue Dcasren and lamps keep going out. Kill 4 of them. The cgnox around Blue Ntx Nest 2 are not decoration. Believe the cgnox."
+  },
+  {
+   "npc": "hgd_q6",
+   "name": "Nessa Longstep",
+   "k": "hg_npc0",
+   "x": 121,
+   "y": 16,
+   "sc": 0.7259259259259259,
+   "h": 0.98,
+   "zone": "Tessera",
+   "text": "A great mosaic was smashed by something large. Bring back 5 mosaic shards from the glarxr beyond the cgnox. If you hear squelching toward The Black Hall, it is not the soup."
+  },
+  {
+   "npc": "hgd_q7",
+   "name": "Brother Dun",
+   "k": "hg_npc0",
+   "x": 143,
+   "y": 28,
+   "sc": 0.7259259259259259,
+   "h": 0.98,
+   "zone": "Gildmere",
+   "text": "The gilder needs 2 jars of royal znoss to mix the gold paint. Bring them, and be paid in gold. I would not go near Gilt Ltac Nest with a lamp, a sword or a good attitude."
+  },
+  {
+   "npc": "hgd_q8",
+   "name": "Hob the Tileman",
+   "k": "hg_npc0",
+   "x": 52,
+   "y": 168,
+   "sc": 0.7259259259259259,
+   "h": 0.98,
+   "zone": "The Quiet Room",
+   "text": "Big ntxx have been scratching at the creg of my room. Kill 5 of them, so a person can sleep. They say Comb Beetle Nest is not so bad. They said it before they went in."
+  },
+  {
+   "npc": "hgd_q9",
+   "name": "Ostrel the Gilder",
+   "k": "hg_npc0",
+   "x": 75,
+   "y": 25,
+   "sc": 0.7259259259259259,
+   "h": 0.98,
+   "zone": "The Lamp Clearing",
+   "text": "The old woman in the clearing needs 4 water-lily roots for her soup. They grow in the cmic eixmgaxx. Stay clear of Tile Song Nest. It is quiet there, and quiet is how it starts."
+  },
+  {
+   "npc": "hgd_q10",
+   "name": "Madam Voss",
+   "k": "hg_npc0",
+   "x": 172,
+   "y": 35,
+   "sc": 0.7259259259259259,
+   "h": 0.98,
+   "zone": "The Pond Enclave",
+   "text": "The surveyor wants the gosr walked, from garg to garg. Visit 4 of the eight gargx of the gosr, and tell her what you saw. I would not go near Gilt Znoss Nest with a lamp, a sword or a good attitude."
+  },
+  {
+   "npc": "hgd_q11",
+   "name": "Quill the Surveyor",
+   "k": "hg_npc0",
+   "x": 14,
+   "y": 70,
+   "sc": 0.7259259259259259,
+   "h": 0.98,
+   "zone": "The Reading Room",
+   "text": "The Hollowed Xcdace sits in the great xogess at the top of the gosr, and the corruption comes from it. Kill it, and the gosr can breathe. They say Spider Gully is not so bad. They said it before they went in."
+  },
+  {
+   "npc": "hgd_shop0",
+   "name": "Marl, the Hedgefoot grocer",
+   "k": "hg_npc6",
+   "x": 112,
+   "y": 181,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Hedgefoot",
+   "text": "Everything for the road into the gosr. Mind the cgnox. I would not go near The Flooded Dcasren Hunters with a lamp, a sword or a good attitude."
+  },
+  {
+   "npc": "hgd_shop1",
+   "name": "Dwen, the stone-smith",
+   "k": "hg_npc6",
+   "x": 20,
+   "y": 167,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Cairnhold",
+   "text": "Chitin and wax, worked into proper gear. Nothing but the best for the glarxr ahead. If you hear squelching toward Oxlsa Znoss Nest, it is not the soup."
+  },
+  {
+   "npc": "hgd_shop2",
+   "name": "Sela, the comb-seller",
+   "k": "hg_npc6",
+   "x": 65,
+   "y": 137,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Combwick",
+   "text": "Ncoex and znoss, fresh from the combs. The cgnox around Comb Beetle Nest are not decoration. Believe the cgnox."
+  },
+  {
+   "npc": "hgd_shop3",
+   "name": "Pearla, the shell-trader",
+   "k": "hg_npc6",
+   "x": 78,
+   "y": 100,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Nacre Landing",
+   "text": "From the gense galleries: kelp, roots and water. Keep clear of Comb Spider Nest. Nobody comes back from there with the same number of boots."
+  },
+  {
+   "npc": "hgd_shop4",
+   "name": "Hask, the well-keeper",
+   "k": "hg_npc6",
+   "x": 40,
+   "y": 91,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Dunewell",
+   "text": "Water is worth more than gold in the sandstone dcasren. Stay clear of Spider Gully. It is quiet there, and quiet is how it starts."
+  },
+  {
+   "npc": "hgd_shop5",
+   "name": "Ilse, the apothecary",
+   "k": "hg_npc6",
+   "x": 30,
+   "y": 45,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Blue Lantern",
+   "text": "Healing, and mana for those who need it. They say Blue Ntx Nest 2 is not so bad. They said it before they went in."
+  },
+  {
+   "npc": "hgd_shop6",
+   "name": "Tomm, the tile-trader",
+   "k": "hg_npc6",
+   "x": 123,
+   "y": 18,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Tessera",
+   "text": "Tiles, glue, and potions for the tired. I would not go near Tile Spider Nest with a lamp, a sword or a good attitude."
+  },
+  {
+   "npc": "hgd_shop7",
+   "name": "Orbin, the gold-trader",
+   "k": "hg_npc6",
+   "x": 143,
+   "y": 30,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Gildmere",
+   "text": "The finest. Gold only. If you hear squelching toward Gilt Ltac Nest, it is not the soup."
+  },
+  {
+   "npc": "hgd_rest0",
+   "name": "Wanderer Aldous",
+   "k": "hg_npc6",
+   "x": 178,
+   "y": 92,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "The Rest Stop",
+   "text": "Sit a while. The benches here have held many tired people, and they are still smug about it. Stay clear of The Ntx Nest. It is quiet there, and quiet is how it starts."
+  },
+  {
+   "npc": "hgd_rest1",
+   "name": "Sister Pim, resting",
+   "k": "hg_npc6",
+   "x": 132,
+   "y": 98,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "The Sleeping Nook",
+   "text": "I have walked three dcasrenx of the gosr and slept in four of them. I recommend this one. They say The Crawling Court is not so bad. They said it before they went in."
+  },
+  {
+   "npc": "hgd_rest2",
+   "name": "Old Cobb the tea-maker",
+   "k": "hg_npc6",
+   "x": 15,
+   "y": 11,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "The Lantern Landing",
+   "text": "This is the only quiet spot I have found. If you hear someone coming, it is me, making more tea. I would not go near Blue Ntx Nest 2 with a lamp, a sword or a good attitude."
+  },
+  {
+   "npc": "hgd_rest3",
+   "name": "Maren Quickfoot",
+   "k": "hg_npc6",
+   "x": 93,
+   "y": 134,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "The Mossy Corner",
+   "text": "There is a creg ahead that wants a nmo. I have been staring at it for a week. It has not blinked. If you hear squelching toward Comb Spider Nest, it is not the soup."
+  },
+  {
+   "npc": "hgd_rest4",
+   "name": "Tolliver the mapless",
+   "k": "hg_npc6",
+   "x": 46,
+   "y": 63,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "The Waiting Room",
+   "text": "The gargx sell nmox and some cessx sell cnex. They are not cheap. Everyone says that, and everyone is right. The cgnox around The Pale Burrows are not decoration. Believe the cgnox."
+  },
+  {
+   "npc": "hgd_rest5",
+   "name": "Hester Bellwether",
+   "k": "hg_npc6",
+   "x": 182,
+   "y": 124,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "The Safe Hollow",
+   "text": "I rest here because the lamp is warm and the eixmgax is not. That is my whole philosophy. Keep clear of The Mud Nest. Nobody comes back from there with the same number of boots."
+  },
+  {
+   "npc": "hgd_vill0",
+   "name": "Tilda",
+   "k": "hg_npc2",
+   "x": 110,
+   "y": 182,
+   "sc": 0.6153846153846154,
+   "h": 0.8,
+   "zone": "Hedgefoot",
+   "text": "I have lived in Hedgefoot all my life. That is a lie. I have lived in one corner of it, and I refuse to visit the others. Keep clear of The Flooded Dcasren Hunters. Nobody comes back from there with the same number of boots."
+  },
+  {
+   "npc": "hgd_vill3",
+   "name": "Pike",
+   "k": "hg_npc2",
+   "x": 21,
+   "y": 165,
+   "sc": 0.6153846153846154,
+   "h": 0.8,
+   "zone": "Cairnhold",
+   "text": "I carry a oxlsa in my pocket for luck. It is a very heavy oxlsa and I have terrible luck. I am starting to see the connection. I would not go near Oxlsa Znoss Nest with a lamp, a sword or a good attitude."
+  },
+  {
+   "npc": "hgd_vill4",
+   "name": "Orla",
+   "k": "hg_npc6",
+   "x": 20,
+   "y": 169,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Cairnhold",
+   "text": "A cairn is a great thing to sit by. Quiet, sturdy, and it never asks how your day was. If you hear squelching toward Oxlsa Znoss Nest, it is not the soup."
+  },
+  {
+   "npc": "hgd_vill5",
+   "name": "Fenn",
+   "k": "hg_npc3",
+   "x": 17,
+   "y": 164,
+   "sc": 0.95,
+   "h": 0.95,
+   "zone": "Cairnhold",
+   "text": "Cairnhold has no mayor. We tried one. He kept making speeches and we put a oxlsa on him. A small one. The cgnox around Oxlsa Znoss Nest are not decoration. Believe the cgnox."
+  },
+  {
+   "npc": "hgd_vill6",
+   "name": "Dilly",
+   "k": "hg_npc2",
+   "x": 60,
+   "y": 135,
+   "sc": 0.6153846153846154,
+   "h": 0.8,
+   "zone": "Combwick",
+   "text": "I make candles. People say they are too sweet. I say they are not sweet enough and I keep adding ncoex. Keep clear of Comb Beetle Nest. Nobody comes back from there with the same number of boots."
+  },
+  {
+   "npc": "hgd_vill7",
+   "name": "Hobb",
+   "k": "hg_npc6",
+   "x": 62,
+   "y": 136,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Combwick",
+   "text": "Bees are very polite. They only sting you if you are rude or if you are me. Stay clear of Comb Beetle Nest. It is quiet there, and quiet is how it starts."
+  },
+  {
+   "npc": "hgd_vill8",
+   "name": "Mara",
+   "k": "hg_npc3",
+   "x": 65,
+   "y": 141,
+   "sc": 0.95,
+   "h": 0.95,
+   "zone": "Combwick",
+   "text": "I once sold a jar of ncoex to a traveller and he never came back for the lid. I keep the lid. They say Comb Beetle Nest is not so bad. They said it before they went in."
+  },
+  {
+   "npc": "hgd_vill9",
+   "name": "Corwin",
+   "k": "hg_npc2",
+   "x": 78,
+   "y": 103,
+   "sc": 0.6153846153846154,
+   "h": 0.8,
+   "zone": "Nacre Landing",
+   "text": "I came here for the gensex. I stayed for the quiet. The quiet turned out to be the gensex. I would not go near Comb Spider Nest with a lamp, a sword or a good attitude."
+  },
+  {
+   "npc": "hgd_vill10",
+   "name": "Sable",
+   "k": "hg_npc3",
+   "x": 73,
+   "y": 105,
+   "sc": 0.95,
+   "h": 0.95,
+   "zone": "Nacre Landing",
+   "text": "The pearls in the wall are not pearls. I have been told this three times and I still check every morning. The cgnox around Comb Spider Nest are not decoration. Believe the cgnox."
+  },
+  {
+   "npc": "hgd_vill12",
+   "name": "Nim",
+   "k": "hg_npc2",
+   "x": 40,
+   "y": 89,
+   "sc": 0.6153846153846154,
+   "h": 0.8,
+   "zone": "Dunewell",
+   "text": "I walked a very long way to get to Dunewell, and it xsxax out I walked a very long way to get thirsty. I would not go near Spider Gully with a lamp, a sword or a good attitude."
+  },
+  {
+   "npc": "hgd_vill13",
+   "name": "Rook",
+   "k": "hg_npc6",
+   "x": 45,
+   "y": 94,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Dunewell",
+   "text": "The well-keeper lets me draw one bucket a day. I draw it very slowly, to make it last. They say Spider Gully is not so bad. They said it before they went in."
+  },
+  {
+   "npc": "hgd_vill14",
+   "name": "Yara",
+   "k": "hg_npc3",
+   "x": 42,
+   "y": 88,
+   "sc": 0.95,
+   "h": 0.95,
+   "zone": "Dunewell",
+   "text": "I carry naxo in my boots as a reminder of home. I am not from here. The naxo is. Stay clear of Spider Gully. It is quiet there, and quiet is how it starts."
+  },
+  {
+   "npc": "hgd_vill15",
+   "name": "Pell",
+   "k": "hg_npc2",
+   "x": 23,
+   "y": 44,
+   "sc": 0.6153846153846154,
+   "h": 0.8,
+   "zone": "Blue Lantern",
+   "text": "I am the lamplighter. Do not ask me about the other lamplighter. I will not stop. Keep clear of Blue Ntx Nest. Nobody comes back from there with the same number of boots."
+  },
+  {
+   "npc": "hgd_vill18",
+   "name": "Ness",
+   "k": "hg_npc2",
+   "x": 118,
+   "y": 21,
+   "sc": 0.6153846153846154,
+   "h": 0.8,
+   "zone": "Tessera",
+   "text": "I lay tiles. I am told I lay them crooked. I say that is called style. I would not go near Tile Spider Nest with a lamp, a sword or a good attitude."
+  },
+  {
+   "npc": "hgd_vill19",
+   "name": "Tam",
+   "k": "hg_npc6",
+   "x": 120,
+   "y": 10,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Tessera",
+   "text": "A mosaic is just a lot of small mistakes that agree with each other. They say The Black Hall is not so bad. They said it before they went in."
+  },
+  {
+   "npc": "hgd_vill20",
+   "name": "Ivo",
+   "k": "hg_npc3",
+   "x": 123,
+   "y": 16,
+   "sc": 0.95,
+   "h": 0.95,
+   "zone": "Tessera",
+   "text": "I found a shard in my soup last week. I am not sure which of us was more surprised. If you hear squelching toward The Black Hall, it is not the soup."
+  },
+  {
+   "npc": "hgd_vill21",
+   "name": "Lotte",
+   "k": "hg_npc2",
+   "x": 141,
+   "y": 32,
+   "sc": 0.6153846153846154,
+   "h": 0.8,
+   "zone": "Gildmere",
+   "text": "I came to Gildmere to get rich. I am now very good at polishing the people who already are. I would not go near Gilt Ltac Nest with a lamp, a sword or a good attitude."
+  },
+  {
+   "npc": "hgd_vill22",
+   "name": "Mab",
+   "k": "hg_npc3",
+   "x": 148,
+   "y": 24,
+   "sc": 0.95,
+   "h": 0.95,
+   "zone": "Gildmere",
+   "text": "Gold leaf comes off on the fingers. I am the richest man in garg after a handshake. They say Beetle Row is not so bad. They said it before they went in."
+  },
+  {
+   "npc": "hgd_vill23",
+   "name": "Dunstan",
+   "k": "hg_npc4",
+   "x": 138,
+   "y": 25,
+   "sc": 0.7142857142857143,
+   "h": 1,
+   "zone": "Gildmere",
+   "text": "They say the ember xcdace is a friend. I say he is a friend I do not stand near. Stay clear of Tile Spider Nest. It is quiet there, and quiet is how it starts."
+  },
+  {
+   "npc": "hgd_think5",
+   "name": "The Slow Surveyor",
+   "k": "hg_npc1",
+   "x": 73,
+   "y": 19,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "The Lamp Clearing",
+   "text": "Patience is a shortcut that takes the long way round."
+  },
+  {
+   "npc": "hgd_fwsexton",
+   "name": "Anselm Dray, the sexton",
+   "k": "hg_npc6",
+   "x": 36,
+   "y": 44,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Blue Lantern",
+   "text": "Quietly, please. This is a place of rest. I keep the dead of this clearing. A funeral urn, sealed and painted with reeds, went down in the drowned gosr when the old boat sank. The family will not rest until it is back in the ground. It lies in one of the chambers below the steps. Please bring it to me."
+  },
+  {
+   "npc": "hgd_fwcook",
+   "name": "Brannoc Gule, the cook",
+   "k": "hg_npc5",
+   "x": 28,
+   "y": 32,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Blue Lantern",
+   "text": "Wipe your boots. I have flour on my hands. I cook for this clearing, and I have heard of one fish all my life: the Moonscale Carp. Pale silver, fat as a loaf, and sweeter than any fish a cmic can raise. One is said to live in a hidden chamber in the drowned gosr, with something big guarding it. Bring me one."
+  },
+  {
+   "npc": "hgd_diver",
+   "name": "Old Gill, the diver",
+   "k": "hg_npc6",
+   "x": 80,
+   "y": 104,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Nacre Landing",
+   "text": "Come in, come in. Mind the dripping. I dived these waters forty years, before my lungs gave up. There is a flooded part of the gosr, down the steps in the cmic clearings, and it is full of gense chests. Bring me 4 pearls from them. Mind you wear helms, all of you, or the water will have you."
+  },
+  {
+   "npc": "hgd_cinder",
+   "name": "Cinder, the ember warden",
+   "k": "hg_npc6",
+   "x": 149,
+   "y": 30,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Gildmere",
+   "text": "Six great spheres of fire drift through the gosr. They are slow, but there is nothing slow about what they do to a party. Kill all six, and the Sunfire Blade is yours. Watch your xdm: they show as big orange rings."
+  },
+  {
+   "npc": "hgd_s2_arms0",
+   "name": "Brand, the weaponsmith of Hedgefoot",
+   "k": "hg_npc4",
+   "x": 110,
+   "y": 180,
+   "sc": 0.7142857142857143,
+   "h": 1,
+   "zone": "Hedgefoot",
+   "text": "Welcome, traveller. Shears sold as shears, swords sold as swords. Please do not confuse the two."
+  },
+  {
+   "npc": "hgd_s2_armour0",
+   "name": "Gunnar, the armourer of Hedgefoot",
+   "k": "hg_npc5",
+   "x": 103,
+   "y": 174,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Hedgefoot",
+   "text": "Welcome, traveller. Creze-green plate. Hard to spot and hard to hit."
+  },
+  {
+   "npc": "hgd_s2_magic0",
+   "name": "Syl, the magic seller of Hedgefoot",
+   "k": "hg_wizard",
+   "x": 102,
+   "y": 172,
+   "sc": 0.7407407407407407,
+   "h": 1,
+   "zone": "Hedgefoot",
+   "text": "Welcome, traveller. Scrolls, rings and a little creze sage. Ask me nothing about the sage."
+  },
+  {
+   "npc": "hgd_s2_trader0",
+   "name": "Pim, the trader of Hedgefoot",
+   "k": "hg_npc3",
+   "x": 102,
+   "y": 177,
+   "sc": 0.95,
+   "h": 0.95,
+   "zone": "Hedgefoot",
+   "text": "Welcome, traveller. Rope, torches and bread. Ltacx not included."
+  },
+  {
+   "npc": "hgd_s2_inn0",
+   "name": "Mother Tansy, the innkeeper of Hedgefoot",
+   "k": "hg_npc1",
+   "x": 112,
+   "y": 168,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Hedgefoot",
+   "text": "Welcome, traveller. Clean beds, warm soup and a creze to hide behind."
+  },
+  {
+   "npc": "hgd_s2_arms1",
+   "name": "Hild, the weaponsmith of Cairnhold",
+   "k": "hg_npc4",
+   "x": 16,
+   "y": 168,
+   "sc": 0.7142857142857143,
+   "h": 1,
+   "zone": "Cairnhold",
+   "text": "Well met. Oxlsa-ground edges that outlast the oxlsa."
+  },
+  {
+   "npc": "hgd_s2_armour1",
+   "name": "Sigrun, the armourer of Cairnhold",
+   "k": "hg_npc5",
+   "x": 19,
+   "y": 165,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Cairnhold",
+   "text": "Well met. Heavy as a cairn, and nearly as hard to knock over."
+  },
+  {
+   "npc": "hgd_s2_magic1",
+   "name": "Orrin, the magic seller of Cairnhold",
+   "k": "hg_wizard",
+   "x": 14,
+   "y": 171,
+   "sc": 0.7407407407407407,
+   "h": 1,
+   "zone": "Cairnhold",
+   "text": "Well met. Cold oxlsa charms. They hum when someone lies to you."
+  },
+  {
+   "npc": "hgd_s2_trader1",
+   "name": "Sabel, the trader of Cairnhold",
+   "k": "hg_npc3",
+   "x": 19,
+   "y": 163,
+   "sc": 0.95,
+   "h": 0.95,
+   "zone": "Cairnhold",
+   "text": "Well met. Chalk, rope and one good strong nacdzox."
+  },
+  {
+   "npc": "hgd_s2_inn1",
+   "name": "Old Garrick, the innkeeper of Cairnhold",
+   "k": "hg_npc1",
+   "x": 16,
+   "y": 173,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Cairnhold",
+   "text": "Well met. Oxlsa walls a yard thick. Nothing comes through, including the noise."
+  },
+  {
+   "npc": "hgd_s2_arms2",
+   "name": "Ketter, the weaponsmith of Combwick",
+   "k": "hg_npc4",
+   "x": 64,
+   "y": 133,
+   "sc": 0.7142857142857143,
+   "h": 1,
+   "zone": "Combwick",
+   "text": "Come in, come in. Wax-polished blades. They slide out clean and slide in cleaner."
+  },
+  {
+   "npc": "hgd_s2_armour2",
+   "name": "Aldric, the armourer of Combwick",
+   "k": "hg_npc5",
+   "x": 66,
+   "y": 135,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Combwick",
+   "text": "Come in, come in. Honeycomb mail: light, strong and faintly sticky."
+  },
+  {
+   "npc": "hgd_s2_magic2",
+   "name": "Vesper, the magic seller of Combwick",
+   "k": "hg_wizard",
+   "x": 71,
+   "y": 135,
+   "sc": 0.7407407407407407,
+   "h": 1,
+   "zone": "Combwick",
+   "text": "Come in, come in. Ncoex draughts and sweet charms. Stir well, drink slowly."
+  },
+  {
+   "npc": "hgd_s2_trader2",
+   "name": "Tobb, the trader of Combwick",
+   "k": "hg_npc3",
+   "x": 54,
+   "y": 143,
+   "sc": 0.95,
+   "h": 0.95,
+   "zone": "Combwick",
+   "text": "Come in, come in. Comb ncoex, candles and spare wicks."
+  },
+  {
+   "npc": "hgd_s2_arms3",
+   "name": "Osk, the weaponsmith of Nacre Landing",
+   "k": "hg_npc4",
+   "x": 68,
+   "y": 100,
+   "sc": 0.7142857142857143,
+   "h": 1,
+   "zone": "Nacre Landing",
+   "text": "Welcome, traveller. Pearl-handled and ltac-tested."
+  },
+  {
+   "npc": "hgd_s2_armour3",
+   "name": "Edda, the armourer of Nacre Landing",
+   "k": "hg_npc5",
+   "x": 77,
+   "y": 109,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Nacre Landing",
+   "text": "Welcome, traveller. Gense plate, polished daily by someone who should be doing something else."
+  },
+  {
+   "npc": "hgd_s2_magic3",
+   "name": "Mirel, the magic seller of Nacre Landing",
+   "k": "hg_wizard",
+   "x": 85,
+   "y": 108,
+   "sc": 0.7407407407407407,
+   "h": 1,
+   "zone": "Nacre Landing",
+   "text": "Welcome, traveller. Tide charms and pearl rings. Mind the pearls, they watch."
+  },
+  {
+   "npc": "hgd_s2_inn3",
+   "name": "Little Joss, the innkeeper of Nacre Landing",
+   "k": "hg_npc1",
+   "x": 75,
+   "y": 100,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Nacre Landing",
+   "text": "Welcome, traveller. Beds shaped like gensex. Please do not curl up in one and get carried off."
+  },
+  {
+   "npc": "hgd_s2_arms4",
+   "name": "Varn, the weaponsmith of Dunewell",
+   "k": "hg_npc4",
+   "x": 38,
+   "y": 89,
+   "sc": 0.7142857142857143,
+   "h": 1,
+   "zone": "Dunewell",
+   "text": "Well met. Dry steel, never a speck of rust. We have no water to rust it."
+  },
+  {
+   "npc": "hgd_s2_armour4",
+   "name": "Rolf, the armourer of Dunewell",
+   "k": "hg_npc5",
+   "x": 36,
+   "y": 88,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Dunewell",
+   "text": "Well met. Naxo-hardened leather for people who like walking out alive."
+  },
+  {
+   "npc": "hgd_s2_magic4",
+   "name": "Quill, the magic seller of Dunewell",
+   "k": "hg_wizard",
+   "x": 40,
+   "y": 96,
+   "sc": 0.7407407407407407,
+   "h": 1,
+   "zone": "Dunewell",
+   "text": "Well met. Dust of the old dunes in little jars. It is mostly dust."
+  },
+  {
+   "npc": "hgd_s2_trader4",
+   "name": "Cask, the trader of Dunewell",
+   "k": "hg_npc3",
+   "x": 35,
+   "y": 86,
+   "sc": 0.95,
+   "h": 0.95,
+   "zone": "Dunewell",
+   "text": "Well met. Water skins, dates and naxo boots."
+  },
+  {
+   "npc": "hgd_s2_inn4",
+   "name": "Marta, the innkeeper of Dunewell",
+   "k": "hg_npc1",
+   "x": 50,
+   "y": 93,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Dunewell",
+   "text": "Well met. The coolest cellar in the gosr, and the only cool thing in Dunewell."
+  },
+  {
+   "npc": "hgd_s2_arms5",
+   "name": "Mara, the weaponsmith of Blue Lantern",
+   "k": "hg_npc4",
+   "x": 36,
+   "y": 48,
+   "sc": 0.7142857142857143,
+   "h": 1,
+   "zone": "Blue Lantern",
+   "text": "Come in, come in. Blades that flash blue by lamplight. Very good for morale."
+  },
+  {
+   "npc": "hgd_s2_magic5",
+   "name": "Anwen, the magic seller of Blue Lantern",
+   "k": "hg_wizard",
+   "x": 28,
+   "y": 44,
+   "sc": 0.7407407407407407,
+   "h": 1,
+   "zone": "Blue Lantern",
+   "text": "Come in, come in. Blue-lamp charms, brightest in the xlri and bad at everything else."
+  },
+  {
+   "npc": "hgd_s2_trader5",
+   "name": "Nell, the trader of Blue Lantern",
+   "k": "hg_npc3",
+   "x": 28,
+   "y": 46,
+   "sc": 0.95,
+   "h": 0.95,
+   "zone": "Blue Lantern",
+   "text": "Come in, come in. Lamp oil by the pint, wicks by the yard."
+  },
+  {
+   "npc": "hgd_s2_inn5",
+   "name": "Ferris, the innkeeper of Blue Lantern",
+   "k": "hg_npc1",
+   "x": 29,
+   "y": 43,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Blue Lantern",
+   "text": "Come in, come in. A lamp in every window and a bed beneath every lamp."
+  },
+  {
+   "npc": "hgd_s2_arms6",
+   "name": "Dagny, the weaponsmith of Tessera",
+   "k": "hg_npc4",
+   "x": 127,
+   "y": 15,
+   "sc": 0.7142857142857143,
+   "h": 1,
+   "zone": "Tessera",
+   "text": "Welcome, traveller. Every edge set like a tile: true, flat and level."
+  },
+  {
+   "npc": "hgd_s2_armour6",
+   "name": "Bram, the armourer of Tessera",
+   "k": "hg_npc5",
+   "x": 120,
+   "y": 16,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Tessera",
+   "text": "Welcome, traveller. Plate with a mosaic trim. Dying in style is still dying, so please do not."
+  },
+  {
+   "npc": "hgd_s2_magic6",
+   "name": "Lorn, the magic seller of Tessera",
+   "k": "hg_wizard",
+   "x": 122,
+   "y": 16,
+   "sc": 0.7407407407407407,
+   "h": 1,
+   "zone": "Tessera",
+   "text": "Welcome, traveller. Glass-bead charms, a different colour for each problem."
+  },
+  {
+   "npc": "hgd_s2_trader6",
+   "name": "Harl, the trader of Tessera",
+   "k": "hg_npc3",
+   "x": 121,
+   "y": 14,
+   "sc": 0.95,
+   "h": 0.95,
+   "zone": "Tessera",
+   "text": "Welcome, traveller. Tile glue, nails and a great deal of string."
+  },
+  {
+   "npc": "hgd_s2_inn6",
+   "name": "Dame Orla, the innkeeper of Tessera",
+   "k": "hg_npc1",
+   "x": 119,
+   "y": 16,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Tessera",
+   "text": "Welcome, traveller. Mosaic headboards. Count the tiles till you fall asleep."
+  },
+  {
+   "npc": "hgd_s2_arms7",
+   "name": "Tor, the weaponsmith of Gildmere",
+   "k": "hg_npc4",
+   "x": 142,
+   "y": 28,
+   "sc": 0.7142857142857143,
+   "h": 1,
+   "zone": "Gildmere",
+   "text": "Well met. Gilded hilts, honest edges."
+  },
+  {
+   "npc": "hgd_s2_armour7",
+   "name": "Hedda, the armourer of Gildmere",
+   "k": "hg_npc5",
+   "x": 144,
+   "y": 26,
+   "sc": 0.7307692307692307,
+   "h": 0.95,
+   "zone": "Gildmere",
+   "text": "Well met. Gold-leaf cuirasses. Not for the thrifty, not for the ltac."
+  },
+  {
+   "npc": "hgd_s2_magic7",
+   "name": "Isolde, the magic seller of Gildmere",
+   "k": "hg_wizard",
+   "x": 141,
+   "y": 28,
+   "sc": 0.7407407407407407,
+   "h": 1,
+   "zone": "Gildmere",
+   "text": "Well met. Gilded rings and gilded staves. Gold outside, magic inside."
+  },
+  {
+   "npc": "hgd_s2_trader7",
+   "name": "Dorrit, the trader of Gildmere",
+   "k": "hg_npc3",
+   "x": 145,
+   "y": 29,
+   "sc": 0.95,
+   "h": 0.95,
+   "zone": "Gildmere",
+   "text": "Well met. Fine bread, fine cheese, fine prices."
+  },
+  {
+   "npc": "hgd_s2_inn7",
+   "name": "Cob, the innkeeper of Gildmere",
+   "k": "hg_npc1",
+   "x": 141,
+   "y": 30,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Gildmere",
+   "text": "Well met. Gilded beds, plain porridge."
+  },
+  {
+   "npc": "hgd_church1",
+   "name": "Sister Reed, the priest of Cairnhold",
+   "k": "hg_npc0",
+   "x": 16,
+   "y": 162,
+   "sc": 0.7259259259259259,
+   "h": 0.98,
+   "zone": "Cairnhold",
+   "text": "Welcome to the church of Cairnhold. A oxlsa stands by the creg for every one the gosr kept. Do you need healing, or a prayer?"
+  },
+  {
+   "npc": "hgd_church3",
+   "name": "Mother Brook, the priest of Nacre Landing",
+   "k": "hg_npc0",
+   "x": 77,
+   "y": 104,
+   "sc": 0.7259259259259259,
+   "h": 0.98,
+   "zone": "Nacre Landing",
+   "text": "Welcome to the church of Nacre Landing. The font is a gense the size of a bath. Please do not use it as one. Do you need healing, or a prayer?"
+  },
+  {
+   "npc": "hgd_church6",
+   "name": "Father Lilywick, the priest of Tessera",
+   "k": "hg_npc0",
+   "x": 124,
+   "y": 16,
+   "sc": 0.7259259259259259,
+   "h": 0.98,
+   "zone": "Tessera",
+   "text": "Welcome to the church of Tessera. Every tile in the floor is a prayer. Please do not stand on the loud ones. Do you need healing, or a prayer?"
+  },
+  {
+   "npc": "hgdb_post",
+   "name": "A signpost",
+   "k": "hl_p_note",
+   "x": 25,
+   "y": 36,
+   "sc": null,
+   "h": 0.45,
+   "zone": "Blue Lantern",
+   "text": "SIGNPOST. BLUE LANTERN PRECINCT. North: The Great Atrium, about 95 paces. East: Blue Lantern, about 10 paces."
+  },
+  {
+   "npc": "hgdb_post",
+   "name": "A signpost",
+   "k": "hl_p_note",
+   "x": 125,
+   "y": 7,
+   "sc": null,
+   "h": 0.45,
+   "zone": "Tessera",
+   "text": "SIGNPOST. TESSERA PRECINCT. North: Gildmere, about 45 paces. East: Tessera, about 15 paces. West: The Great Atrium, about 35 paces."
+  }
+ ],
+ "dupText": [],
+ "emptyText": [],
+ "sameImg": {
+  "Cairnhold": [
+   [
+    "hg_npc0",
+    2
+   ],
+   [
+    "hg_npc6",
+    2
+   ],
+   [
+    "hg_npc3",
+    2
+   ]
+  ],
+  "Combwick": [
+   [
+    "hg_npc6",
+    2
+   ],
+   [
+    "hg_npc3",
+    2
+   ]
+  ],
+  "Nacre Landing": [
+   [
+    "hg_npc0",
+    2
+   ],
+   [
+    "hg_npc6",
+    2
+   ]
+  ],
+  "Dunewell": [
+   [
+    "hg_npc6",
+    2
+   ],
+   [
+    "hg_npc3",
+    2
+   ]
+  ],
+  "Blue Lantern": [
+   [
+    "hg_npc6",
+    2
+   ]
+  ],
+  "Tessera": [
+   [
+    "hg_npc0",
+    2
+   ],
+   [
+    "hg_npc6",
+    2
+   ],
+   [
+    "hg_npc3",
+    2
+   ]
+  ],
+  "Gildmere": [
+   [
+    "hg_npc6",
+    2
+   ],
+   [
+    "hg_npc3",
+    2
+   ],
+   [
+    "hg_npc4",
+    2
+   ]
+  ]
+ },
+ "stacked": [
+  "73,19 hg_npc1+art_hgdf_wsym6",
+  "55,133 hgtb_deco_pearlplinth+art_hgdf_wsym9",
+  "131,25 hgtb_lilacmoth+art_hgdf_shield7",
+  "117,188 art_hgdf_wsym0+art_hgdf_vine2",
+  "107,171 art_hgdf_wsym0+art_hgdf_shield0",
+  "118,169 art_hgdf_shield1+art_hgdf_vine2",
+  "99,197 art_hgdf_vine1+art_hgdf_plant2",
+  "103,185 art_hgdf_plant0+art_hgdf_wsym9",
+  "101,181 art_hgxprop5+art_hgdf_wsym14",
+  "7,173 art_hgxrock3+art_hgdf_wsym1",
+  "76,31 art_hgxrock2+art_hgdf_wsym13",
+  "75,91 art_hgxprop14+hl_p_note",
+  "57,125 art_hgxprop7+hl_p_note"
+ ],
+ "onWall": [],
+ "unreach": [],
+ "itemsUnreach": [],
+ "blockNarrow": [
+  "hg_chestwax@115,189",
+  "hg_chestwax@15,157",
+  "hgtb_deco_shellstatue@119,179",
+  "hgtb_deco_shellstatue@49,171",
+  "hgtb_deco_pearlplinth@55,133",
+  "hgtb_deco_shellstatue@101,193",
+  "hgtb_deco_pearlplinth@17,41",
+  "hgtb_deco_shellstatue@67,107",
+  "hgtb_deco_shellstatue@177,125",
+  "art_hgxstat6@93,195",
+  "art_hgxstat7@147,37",
+  "art_hgxstat7@59,145",
+  "art_hgxstat1@67,145",
+  "art_hgxstat6@119,5"
+ ],
+ "npcNarrow": [],
+ "clusters": [
+  "hgtb_plant_spiralfern x3 near 48,95",
+  "hgtb_plant_spiralfern x3 near 37,97",
+  "hgtb_plant_spiralfern x3 near 41,98",
+  "hgtb_plant_spiralfern x4 near 74,95",
+  "hgtb_plant_spiralfern x3 near 75,96",
+  "hgtb_plant_spiralfern x3 near 21,172",
+  "hgtb_plant_spiralfern x3 near 62,132",
+  "hgtb_plant_spiralfern x3 near 22,47",
+  "hgtb_plant_spiralfern x3 near 32,47",
+  "hg_lamp x4 near 141,29",
+  "hg_lamp x3 near 139,28",
+  "hg_lamp x3 near 145,28"
+ ],
+ "prop": [
+  [
+   "hgtb_plant_spiralfern",
+   45,
+   1.6,
+   1.6,
+   1.6
+  ],
+  [
+   "hgtb_plant_belltree",
+   52,
+   3,
+   3,
+   3
+  ],
+  [
+   "hgt_fairytree",
+   56,
+   3,
+   3.2,
+   3.2
+  ],
+  [
+   "hgt_bulbflower",
+   23,
+   1.9,
+   1.9,
+   1.9
+  ],
+  [
+   "hgt_shellflower",
+   20,
+   2.1,
+   2.1,
+   2.1
+  ],
+  [
+   "hgt_fern",
+   18,
+   1.1,
+   1.1,
+   1.1
+  ],
+  [
+   "hgtb_plantbed",
+   13,
+   1.15,
+   1.15,
+   1.15
+  ],
+  [
+   "hgt_reeds",
+   20,
+   0.98,
+   1.4,
+   1.4
+  ],
+  [
+   "hgt_pearlbush",
+   12,
+   1,
+   1,
+   1
+  ],
+  [
+   "hgt_mushrooms",
+   22,
+   0.9,
+   0.9,
+   0.9
+  ],
+  [
+   "hg_lamp",
+   29,
+   2.2,
+   2.2,
+   2.2
+  ],
+  [
+   "NPC:gate",
+   2,
+   0.59,
+   0.59,
+   0.59
+  ],
+  [
+   "NPC:hg_npc0",
+   15,
+   0.98,
+   0.98,
+   0.98
+  ],
+  [
+   "NPC:hg_npc6",
+   21,
+   0.95,
+   0.95,
+   0.95
+  ],
+  [
+   "hg_chestwax",
+   6,
+   0.43,
+   0.62,
+   0.46
+  ],
+  [
+   "NPC:hl_p_note",
+   12,
+   0.45,
+   0.45,
+   0.45
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   12,
+   1.44,
+   2,
+   2
+  ],
+  [
+   "hgtb_deco_pearlplinth",
+   9,
+   1.15,
+   1.8,
+   1.15
+  ],
+  [
+   "NPC:hg_npc2",
+   8,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "NPC:hg_npc3",
+   13,
+   0.95,
+   0.95,
+   0.95
+  ],
+  [
+   "NPC:hg_npc4",
+   9,
+   1,
+   1,
+   1
+  ],
+  [
+   "teleporter",
+   18,
+   0.62,
+   0.62,
+   0.62
+  ],
+  [
+   "NPC:hg_npc1",
+   8,
+   0.9,
+   0.9,
+   0.9
+  ],
+  [
+   "hgtb_lilacmoth",
+   2,
+   0.52,
+   0.52,
+   0.52
+  ],
+  [
+   "hgtb_fishbeetle",
+   1,
+   0.56,
+   0.56,
+   0.56
+  ],
+  [
+   "NPC:hg_npc5",
+   8,
+   0.95,
+   0.95,
+   0.95
+  ],
+  [
+   "art_hgdf_wsym6",
+   11,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym4",
+   4,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym0",
+   5,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym5",
+   10,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym3",
+   8,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym13",
+   2,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym12",
+   5,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym7",
+   8,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym1",
+   5,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym2",
+   7,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_shield0",
+   11,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "art_hgdf_shield4",
+   7,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "art_hgdf_shield3",
+   4,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "art_hgdf_shield1",
+   5,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "art_hgdf_shield7",
+   7,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "art_hgdf_shield5",
+   8,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "art_hgdf_shield6",
+   13,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "art_hgdf_shield2",
+   12,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "art_hgdf_shield8",
+   5,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "art_hgdf_vine2",
+   5,
+   1.8,
+   1.8,
+   1.8
+  ],
+  [
+   "art_hgdf_vine1",
+   4,
+   1.8,
+   1.8,
+   1.8
+  ],
+  [
+   "art_hgdf_vine0",
+   5,
+   1.8,
+   1.8,
+   1.8
+  ],
+  [
+   "art_hgdf_vine3",
+   3,
+   1.8,
+   1.8,
+   1.8
+  ],
+  [
+   "art_hgdf_plant4",
+   14,
+   0.45,
+   0.59,
+   0.53
+  ],
+  [
+   "art_hgdf_plant1",
+   26,
+   0.31,
+   0.44,
+   0.39
+  ],
+  [
+   "art_hgdf_plant2",
+   5,
+   0.52,
+   0.68,
+   0.64
+  ],
+  [
+   "art_hgdf_plant7",
+   8,
+   0.6,
+   0.83,
+   0.73
+  ],
+  [
+   "art_hgdf_plant0",
+   24,
+   0.57,
+   0.83,
+   0.71
+  ],
+  [
+   "art_hgdf_plant3",
+   11,
+   0.34,
+   0.41,
+   0.38
+  ],
+  [
+   "art_hgdf_plant5",
+   8,
+   0.57,
+   0.71,
+   0.65
+  ],
+  [
+   "art_hgdf_plant6",
+   7,
+   0.22,
+   0.3,
+   0.28
+  ],
+  [
+   "hgdfc_aqua2",
+   1,
+   1.6,
+   1.6,
+   1.6
+  ],
+  [
+   "hgdfc_pink1",
+   3,
+   0.67,
+   1.68,
+   0.67
+  ],
+  [
+   "hgdfc_cream1",
+   2,
+   1.29,
+   1.29,
+   1.29
+  ],
+  [
+   "NPC:hg_wizard",
+   8,
+   1,
+   1,
+   1
+  ],
+  [
+   "art_hgxrock4",
+   4,
+   0.77,
+   0.82,
+   0.82
+  ],
+  [
+   "art_hgxstat4",
+   1,
+   1.26,
+   1.26,
+   1.26
+  ],
+  [
+   "art_hgxstat3",
+   2,
+   1.27,
+   1.31,
+   1.31
+  ],
+  [
+   "art_hgxstat1",
+   4,
+   1.2,
+   1.31,
+   1.29
+  ],
+  [
+   "art_hgxstat7",
+   5,
+   1.21,
+   1.29,
+   1.23
+  ],
+  [
+   "art_hgxstat6",
+   6,
+   1.21,
+   1.3,
+   1.27
+  ],
+  [
+   "art_hgxstat5",
+   5,
+   1.2,
+   1.3,
+   1.24
+  ],
+  [
+   "art_hgxstat0",
+   2,
+   1.2,
+   1.21,
+   1.21
+  ],
+  [
+   "art_hgxstat2",
+   1,
+   1.26,
+   1.26,
+   1.26
+  ],
+  [
+   "art_hgxrock0",
+   11,
+   0.42,
+   0.48,
+   0.44
+  ],
+  [
+   "art_hgxrock5",
+   13,
+   0.54,
+   0.65,
+   0.59
+  ],
+  [
+   "art_hgxrock1",
+   17,
+   0.39,
+   0.56,
+   0.47
+  ],
+  [
+   "art_hgxrock3",
+   15,
+   0.17,
+   0.24,
+   0.2
+  ],
+  [
+   "art_hgxrock6",
+   17,
+   0.25,
+   0.35,
+   0.31
+  ],
+  [
+   "art_hgxprop10",
+   7,
+   0.13,
+   0.17,
+   0.15
+  ],
+  [
+   "art_hgxprop9",
+   6,
+   0.22,
+   0.29,
+   0.29
+  ],
+  [
+   "art_hgxprop8",
+   8,
+   0.22,
+   0.3,
+   0.26
+  ],
+  [
+   "art_hgxprop1",
+   8,
+   0.22,
+   0.3,
+   0.27
+  ],
+  [
+   "art_hgxprop15",
+   5,
+   0.21,
+   0.26,
+   0.26
+  ],
+  [
+   "art_hgxrock2",
+   19,
+   0.31,
+   0.45,
+   0.36
+  ],
+  [
+   "art_hgxprop7",
+   11,
+   0.12,
+   0.18,
+   0.15
+  ],
+  [
+   "art_hgxprop6",
+   8,
+   0.21,
+   0.3,
+   0.26
+  ],
+  [
+   "art_hgxprop0",
+   12,
+   0.21,
+   0.3,
+   0.24
+  ],
+  [
+   "art_hgxprop13",
+   5,
+   0.29,
+   0.34,
+   0.3
+  ],
+  [
+   "art_hgxprop11",
+   5,
+   0.17,
+   0.23,
+   0.19
+  ],
+  [
+   "art_hgxprop14",
+   8,
+   0.21,
+   0.29,
+   0.25
+  ],
+  [
+   "art_hgxrock7",
+   5,
+   0.41,
+   0.61,
+   0.5
+  ],
+  [
+   "art_hgxprop4",
+   6,
+   0.22,
+   0.29,
+   0.24
+  ],
+  [
+   "art_hgxprop12",
+   3,
+   0.31,
+   0.41,
+   0.33
+  ],
+  [
+   "art_hgxprop5",
+   12,
+   0.24,
+   0.35,
+   0.32
+  ],
+  [
+   "art_hgdf_wsym8",
+   3,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym15",
+   4,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym9",
+   3,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym14",
+   5,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym10",
+   4,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym11",
+   1,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "hpa_post",
+   3,
+   1.15,
+   1.15,
+   1.15
+  ],
+  [
+   "hpa_lamp",
+   4,
+   0.4,
+   0.4,
+   0.4
+  ],
+  [
+   "hpa_cage",
+   5,
+   0.45,
+   0.45,
+   0.45
+  ],
+  [
+   "NPC:sign_store",
+   14,
+   1.05,
+   1.05,
+   1.05
+  ],
+  [
+   "NPC:sign_smith",
+   8,
+   1.05,
+   1.05,
+   1.05
+  ],
+  [
+   "NPC:hgdpc_sg_armour",
+   7,
+   1.05,
+   1.05,
+   1.05
+  ],
+  [
+   "NPC:hgdpc_sg_magic",
+   8,
+   1.05,
+   1.05,
+   1.05
+  ],
+  [
+   "NPC:sign_inn",
+   7,
+   1.05,
+   1.05,
+   1.05
+  ],
+  [
+   "NPC:sign_church",
+   3,
+   1.09,
+   1.09,
+   1.09
+  ],
+  [
+   "NPC:wm_noticeboard",
+   8,
+   0.95,
+   0.95,
+   0.95
+  ],
+  [
+   "NPC:hgdpc_post0",
+   1,
+   1.25,
+   1.25,
+   1.25
+  ],
+  [
+   "NPC:hgdpc_post1",
+   1,
+   1.25,
+   1.25,
+   1.25
+  ],
+  [
+   "NPC:hgdpc_post2",
+   1,
+   1.25,
+   1.25,
+   1.25
+  ],
+  [
+   "NPC:hgdpc_post3",
+   1,
+   1.25,
+   1.25,
+   1.25
+  ],
+  [
+   "NPC:hgdpc_post4",
+   1,
+   1.25,
+   1.25,
+   1.25
+  ],
+  [
+   "NPC:hgdpc_post5",
+   1,
+   1.25,
+   1.25,
+   1.25
+  ],
+  [
+   "NPC:hgdpc_post6",
+   1,
+   1.25,
+   1.25,
+   1.25
+  ],
+  [
+   "NPC:hgdpc_post7",
+   1,
+   1.25,
+   1.25,
+   1.25
+  ],
+  [
+   "wm_statue",
+   1,
+   1.7,
+   1.7,
+   1.7
+  ],
+  [
+   "hgtb_bench",
+   12,
+   0.66,
+   0.66,
+   0.66
+  ],
+  [
+   "urn",
+   5,
+   0.55,
+   0.55,
+   0.55
+  ],
+  [
+   "hgt_gardenlantern",
+   2,
+   0.9,
+   0.9,
+   0.9
+  ],
+  [
+   "NPC:noticeboard",
+   18,
+   0.77,
+   0.77,
+   0.77
+  ],
+  [
+   "wm_bell",
+   1,
+   0.95,
+   0.95,
+   0.95
+  ],
+  [
+   "wm_brazier",
+   4,
+   1.05,
+   1.05,
+   1.05
+  ],
+  [
+   "hgtb_stall_orange_pottery",
+   1,
+   1.36,
+   1.36,
+   1.36
+  ],
+  [
+   "wm_barrel_tall",
+   1,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "hg_waxbarrel",
+   1,
+   0.95,
+   0.95,
+   0.95
+  ],
+  [
+   "hg_jar",
+   2,
+   0.99,
+   1.1,
+   1.1
+  ],
+  [
+   "hl_p_candle",
+   4,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "hgtb_deco_fountain",
+   1,
+   1.71,
+   1.71,
+   1.71
+  ],
+  [
+   "hgtb_deco_lanterns",
+   2,
+   1.35,
+   1.44,
+   1.44
+  ],
+  [
+   "well",
+   1,
+   0.78,
+   0.78,
+   0.78
+  ],
+  [
+   "wm_bucket",
+   1,
+   0.36,
+   0.36,
+   0.36
+  ],
+  [
+   "wm_crate",
+   6,
+   0.5,
+   0.5,
+   0.5
+  ],
+  [
+   "sacks",
+   2,
+   0.6,
+   0.6,
+   0.6
+  ],
+  [
+   "hgt_lamppost",
+   3,
+   1.84,
+   1.84,
+   1.84
+  ],
+  [
+   "wm_lantern_gold",
+   3,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "hgtb_lantern",
+   1,
+   1.03,
+   1.03,
+   1.03
+  ],
+  [
+   "hgtb_table",
+   2,
+   0.7,
+   0.7,
+   0.7
+  ],
+  [
+   "hgtb_chair",
+   4,
+   0.9,
+   0.9,
+   0.9
+  ],
+  [
+   "vase0",
+   1,
+   0.52,
+   0.52,
+   0.52
+  ],
+  [
+   "hgtb_deco_banner",
+   2,
+   1.92,
+   1.92,
+   1.92
+  ],
+  [
+   "hgtb_stall_rose_lanterns",
+   1,
+   1.36,
+   1.36,
+   1.36
+  ],
+  [
+   "hgtb_furn_table_chairs",
+   1,
+   1,
+   1,
+   1
+  ],
+  [
+   "hgtb_furn_clock",
+   2,
+   1.3,
+   1.3,
+   1.3
+  ],
+  [
+   "hgt_hanglamp",
+   1,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "hgt_fountain",
+   1,
+   1.3,
+   1.3,
+   1.3
+  ],
+  [
+   "wm_bookshelf",
+   1,
+   1.71,
+   1.71,
+   1.71
+  ],
+  [
+   "hgtb_furn_bookshelf",
+   1,
+   1.6,
+   1.6,
+   1.6
+  ],
+  [
+   "hg_lectern",
+   1,
+   1.1,
+   1.1,
+   1.1
+  ],
+  [
+   "hgtb_furn_books_globe",
+   1,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "yar_tent",
+   1,
+   1,
+   1,
+   1
+  ],
+  [
+   "hgtb_plant_barrel",
+   2,
+   0.6,
+   0.6,
+   0.6
+  ],
+  [
+   "hgtb_furn_bed",
+   1,
+   1.1,
+   1.1,
+   1.1
+  ],
+  [
+   "hgtb_furn_bunk",
+   1,
+   1.12,
+   1.12,
+   1.12
+  ],
+  [
+   "sack2",
+   1,
+   0.5,
+   0.5,
+   0.5
+  ],
+  [
+   "wm_lantern_hang",
+   1,
+   0.9,
+   0.9,
+   0.9
+  ],
+  [
+   "wm_cage_lantern",
+   1,
+   0.5,
+   0.5,
+   0.5
+  ],
+  [
+   "wm_barrel",
+   1,
+   0.58,
+   0.58,
+   0.58
+  ],
+  [
+   "dbones",
+   1,
+   0.3,
+   0.3,
+   0.3
+  ]
+ ],
+ "notes": [
+  [
+   "hgd_sign",
+   114,
+   9,
+   "Glarxr. The Black Hall lies ahead. Ltacx, jellies, songx and"
+  ],
+  [
+   "hgd_sign",
+   113,
+   16,
+   "Glarxr. The Black Hall lies ahead. Ltacx, jellies, songx and"
+  ],
+  [
+   "hgd_note",
+   106,
+   183,
+   "Chalked on the wall: The creze gosr is the easy part. Do not"
+  ],
+  [
+   "hgd_note",
+   17,
+   17,
+   "A neat note: If you are reading this, you are xsso. So was I"
+  ],
+  [
+   "hgd_note",
+   129,
+   9,
+   "Chalked on the oxlsa: HEDGEFOOT IS THIS WAY. NO. THAT WAY. I"
+  ],
+  [
+   "hgd_note",
+   153,
+   24,
+   "Carved: I found a gold nmo in a vault and a gold creg two ho"
+  ],
+  [
+   "hgd_note",
+   131,
+   33,
+   "A child's writing: MY MOTHER SAYS NOT TO GO PAST THE Cgnox. "
+  ],
+  [
+   "hgd_note",
+   115,
+   26,
+   "Scratched: Something large went past here in the night, and "
+  ],
+  [
+   "hgd_pa_note",
+   75,
+   91,
+   "The writing has worn away."
+  ],
+  [
+   "hgd_pa_note",
+   69,
+   93,
+   "The writing has worn away."
+  ],
+  [
+   "hgd_pa_note",
+   57,
+   125,
+   "The writing has worn away."
+  ],
+  [
+   "hgd_pa_note",
+   53,
+   137,
+   "The writing has worn away."
+  ]
+ ],
+ "bad": [],
+ "townKinds": {
+  "Hedgefoot": {
+   "hgd_q": 1,
+   "hgd_shop": 1,
+   "hgd_vill": 1,
+   "hgd_s2_arms": 1,
+   "hgd_s2_armour": 1,
+   "hgd_s2_magic": 1,
+   "hgd_s2_trader": 1,
+   "hgd_s2_inn": 1
+  },
+  "Cairnhold": {
+   "hgd_q": 1,
+   "hgd_shop": 1,
+   "hgd_vill": 3,
+   "hgd_s2_arms": 1,
+   "hgd_s2_armour": 1,
+   "hgd_s2_magic": 1,
+   "hgd_s2_trader": 1,
+   "hgd_s2_inn": 1,
+   "hgd_church": 1
+  },
+  "Combwick": {
+   "hgd_q": 1,
+   "hgd_shop": 1,
+   "hgd_vill": 3,
+   "hgd_s2_arms": 1,
+   "hgd_s2_armour": 1,
+   "hgd_s2_magic": 1,
+   "hgd_s2_trader": 1
+  },
+  "Nacre Landing": {
+   "hgd_q": 1,
+   "hgd_shop": 1,
+   "hgd_vill": 2,
+   "hgd_diver": 1,
+   "hgd_s2_arms": 1,
+   "hgd_s2_armour": 1,
+   "hgd_s2_magic": 1,
+   "hgd_s2_inn": 1,
+   "hgd_church": 1
+  },
+  "Dunewell": {
+   "hgd_q": 1,
+   "hgd_shop": 1,
+   "hgd_vill": 3,
+   "hgd_s2_arms": 1,
+   "hgd_s2_armour": 1,
+   "hgd_s2_magic": 1,
+   "hgd_s2_trader": 1,
+   "hgd_s2_inn": 1
+  },
+  "Blue Lantern": {
+   "hgd_q": 1,
+   "hgd_shop": 1,
+   "hgd_vill": 1,
+   "hgd_fwsexton": 1,
+   "hgd_fwcook": 1,
+   "hgd_s2_arms": 1,
+   "hgd_s2_magic": 1,
+   "hgd_s2_trader": 1,
+   "hgd_s2_inn": 1,
+   "hgdb_post": 1
+  },
+  "Tessera": {
+   "hgd_q": 1,
+   "hgd_shop": 1,
+   "hgd_vill": 3,
+   "hgd_s2_arms": 1,
+   "hgd_s2_armour": 1,
+   "hgd_s2_magic": 1,
+   "hgd_s2_trader": 1,
+   "hgd_s2_inn": 1,
+   "hgd_church": 1,
+   "hgdb_post": 1
+  },
+  "Gildmere": {
+   "hgd_q": 1,
+   "hgd_shop": 1,
+   "hgd_vill": 3,
+   "hgd_cinder": 1,
+   "hgd_s2_arms": 1,
+   "hgd_s2_armour": 1,
+   "hgd_s2_magic": 1,
+   "hgd_s2_trader": 1,
+   "hgd_s2_inn": 1
+  }
+ },
+ "cutOff": [
+  0,
+  []
+ ],
+ "stats": {
+  "peopleRescaled": 97,
+  "peopleSwapped": 81,
+  "groveSwapped": 54,
+  "groveRemoved": 32,
+  "stackedRemoved": 64,
+  "movedBlockers": 0,
+  "freedBlockers": 0,
+  "shopSigns": 56,
+  "boards": 8,
+  "signposts": 8,
+  "vignettes": 18,
+  "vignettePieces": 112,
+  "vignetteChests": 4
+ }
+}
+ERRS []

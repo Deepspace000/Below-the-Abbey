@@ -1,0 +1,93 @@
+L1 Heal: overheal counted: log/float shows 9 but only 1 was healed
+L1 Heal: description states no real percent ("Heals the most wounded ally for 8-12, and far more as the pr")
+L10 Heal: overheal counted: log/float shows 36 but only 1 was healed
+L10 Heal: description states no real percent ("Heals the most wounded ally for 8-12, and far more as the pr")
+L10 Purify: mana deducted (12) when nobody was hurt
+L10 Purify: overheal counted: log/float shows 37 but only 1 was healed
+L10 Purify: description says 18 percent, real heal is 27.1 percent
+L20 Heal: overheal counted: log/float shows 82 but only 1 was healed
+L20 Heal: description states no real percent ("Heals the most wounded ally for 8-12, and far more as the pr")
+L20 Purify: mana deducted (12) when nobody was hurt
+L20 Purify: overheal counted: log/float shows 76 but only 1 was healed
+L20 Purify: description says 18 percent, real heal is 24.2 percent
+L30 Heal: overheal counted: log/float shows 120 but only 1 was healed
+L30 Heal: description states no real percent ("Heals the most wounded ally for 8-12, and far more as the pr")
+L30 Mend: overheal counted: log/float shows 174 but only 1 was healed
+L30 Mend: description states no real percent ("Heals every living ally for 6-10.")
+L30 Purify: mana deducted (12) when nobody was hurt
+L30 Purify: overheal counted: log/float shows 110 but only 1 was healed
+L30 Purify: description says 18 percent, real heal is 23.9 percent
+L40 Heal: overheal counted: log/float shows 174 but only 1 was healed
+L40 Heal: description states no real percent ("Heals the most wounded ally for 8-12, and far more as the pr")
+L40 Mend: overheal counted: log/float shows 253 but only 1 was healed
+L40 Mend: description states no real percent ("Heals every living ally for 6-10.")
+L40 Purify: mana deducted (12) when nobody was hurt
+L40 Purify: overheal counted: log/float shows 147 but only 1 was healed
+L40 Purify: description says 18 percent, real heal is 23.8 percent
+L50 Heal: overheal counted: log/float shows 276 but only 1 was healed
+L50 Heal: description states no real percent ("Heals the most wounded ally for 8-12, and far more as the pr")
+L50 Mend: overheal counted: log/float shows 275 but only 1 was healed
+L50 Mend: description states no real percent ("Heals every living ally for 6-10.")
+L50 Purify: mana deducted (12) when nobody was hurt
+L50 Purify: overheal counted: log/float shows 181 but only 1 was healed
+L50 Purify: description says 18 percent, real heal is 24.8 percent
+L60 Heal: overheal counted: log/float shows 370 but only 1 was healed
+L60 Heal: description states no real percent ("Heals the most wounded ally for 8-12, and far more as the pr")
+L60 Mend: overheal counted: log/float shows 347 but only 1 was healed
+L60 Mend: description states no real percent ("Heals every living ally for 6-10.")
+L60 Greater Heal: overheal counted: log/float shows 416 but only 1 was healed
+L60 Greater Heal: description states no real percent ("Heals the most wounded ally for 24-34.")
+L60 Purify: mana deducted (12) when nobody was hurt
+L60 Purify: overheal counted: log/float shows 187 but only 1 was healed
+L60 Purify: description says 18 percent, real heal is 25.6 percent
+L70 Heal: overheal counted: log/float shows 414 but only 1 was healed
+L70 Heal: description states no real percent ("Heals the most wounded ally for 8-12, and far more as the pr")
+L70 Mend: overheal counted: log/float shows 421 but only 1 was healed
+L70 Mend: description states no real percent ("Heals every living ally for 6-10.")
+L70 Greater Heal: overheal counted: log/float shows 547 but only 1 was healed
+L70 Greater Heal: description states no real percent ("Heals the most wounded ally for 24-34.")
+L70 Divine Intervention: overheal counted: log/float shows 466 but only 1 was healed
+L70 Divine Intervention: description states no real percent ("Heals every living ally for 35% of their maximum health.")
+L70 Purify: mana deducted (12) when nobody was hurt
+L70 Purify: overheal counted: log/float shows 256 but only 1 was healed
+L70 Purify: description says 18 percent, real heal is 26.7 percent
+L80 Heal: overheal counted: log/float shows 699 but only 1 was healed
+L80 Heal: description states no real percent ("Heals the most wounded ally for 8-12, and far more as the pr")
+L80 Mend: overheal counted: log/float shows 639 but only 1 was healed
+L80 Mend: description states no real percent ("Heals every living ally for 6-10.")
+L80 Greater Heal: overheal counted: log/float shows 673 but only 1 was healed
+L80 Greater Heal: description states no real percent ("Heals the most wounded ally for 24-34.")
+L80 Divine Intervention: overheal counted: log/float shows 678 but only 1 was healed
+L80 Divine Intervention: description states no real percent ("Heals every living ally for 35% of their maximum health.")
+L80 Purify: mana deducted (12) when nobody was hurt
+L80 Purify: overheal counted: log/float shows 371 but only 1 was healed
+L80 Purify: description says 18 percent, real heal is 35.1 percent
+L10 Heal: mana per percent healed is -20 percent from the line average (7.39 vs 9.24)
+L10 Purify: mana per percent healed is 20 percent from the line average (11.08 vs 9.24)
+L20 Heal: mana per percent healed is -32 percent from the line average (6.34 vs 9.36)
+L20 Purify: mana per percent healed is 32 percent from the line average (12.39 vs 9.36)
+L30 Heal: mana per percent healed is -42 percent from the line average (5.53 vs 9.49)
+L30 Purify: mana per percent healed is 32 percent from the line average (12.54 vs 9.49)
+L40 Heal: mana per percent healed is -47 percent from the line average (4.88 vs 9.28)
+L40 Purify: mana per percent healed is 36 percent from the line average (12.59 vs 9.28)
+L50 Heal: mana per percent healed is -51 percent from the line average (4.33 vs 8.92)
+L50 Purify: mana per percent healed is 35 percent from the line average (12.09 vs 8.92)
+L50 Mend: mana per percent healed is 16 percent from the line average (10.34 vs 8.92)
+L60 Heal: mana per percent healed is -64 percent from the line average (3.92 vs 10.93)
+L60 Greater Heal: mana per percent healed is 61 percent from the line average (17.63 vs 10.93)
+L70 Heal: mana per percent healed is -71 percent from the line average (3.60 vs 12.36)
+L70 Greater Heal: mana per percent healed is 41 percent from the line average (17.43 vs 12.36)
+L70 Mend: mana per percent healed is -15 percent from the line average (10.46 vs 12.36)
+L70 Divine Intervention: mana per percent healed is 54 percent from the line average (19.05 vs 12.36)
+L80 Greater Heal: does not heal a larger percent than Heal (99.9 vs 99.9, uncapped 100 vs 100)
+L80 Greater Heal: does not heal more than Heal in absolute amount (1291 vs 1291)
+L80 Heal: mana per percent healed is -71 percent from the line average (3.00 vs 10.43)
+L80 Greater Heal: mana per percent healed is 63 percent from the line average (17.01 vs 10.43)
+L80 Purify: mana per percent healed is -18 percent from the line average (8.55 vs 10.43)
+L80 Mend: mana per percent healed is -20 percent from the line average (8.32 vs 10.43)
+L80 Divine Intervention: mana per percent healed is 46 percent from the line average (15.24 vs 10.43)
+L20 Purify: percent healed did not rise with level (24.2 after 27.1)
+L30 Purify: percent healed did not rise with level (23.9 after 24.2)
+L40 Purify: percent healed did not rise with level (23.8 after 23.9)
+L60 Mend: percent healed did not rise with level (35.9 after 36.3)
+L70 Mend: percent healed did not rise with level (35.8 after 35.9)

@@ -26,7 +26,14 @@ def rope(draw_img, mask, y, tilt, w, seed):
     a[..., 3] = np.where(m, a[..., 3], 0)
     draw_img.alpha_composite(Image.fromarray(a))
 
-def make(i, n):
+# the honey of each hive: top and bottom colour of the coat, the drips, and the darker rim
+PAL = {
+    'buckwheat': dict(top=(176, 104, 44), bot=(92, 48, 16), drip=(122, 66, 22), edge=(60, 30, 8), hi=(255, 220, 150)),   # the Queen's Hive (dark royal honey)
+    'clover': dict(top=(255, 232, 160), bot=(214, 176, 96), drip=(236, 206, 124), edge=(150, 112, 44), hi=(255, 255, 230)),  # the Hush Hive
+}
+
+def make(i, n, pal='buckwheat', out_name=None):
+    P = PAL[pal]
     im = Image.open(os.path.join(ROOT, 'assets', 'hg_npc%d.png' % n)).convert('RGBA')
     pad = 26
     base = Image.new('RGBA', (im.width + 2 * pad, im.height + 2 * pad + 14), (0, 0, 0, 0)); base.paste(im, (pad, pad), im)
@@ -42,7 +49,9 @@ def make(i, n):
     bm = np.asarray(blob).astype(float) / 255
     ys = np.linspace(0, 1, H)[:, None]
     # amber colour, lighter at the top and darker below
-    col = np.zeros((H, W, 3)); col[..., 0] = 248 - 50 * ys; col[..., 1] = 168 - 80 * ys; col[..., 2] = 30 - 20 * ys
+    col = np.zeros((H, W, 3))
+    for c in range(3):
+        col[..., c] = P['top'][c] + (P['bot'][c] - P['top'][c]) * ys
     inner = np.asarray(blob.filter(ImageFilter.MinFilter(11)).filter(ImageFilter.GaussianBlur(4))).astype(float) / 255
     rim = np.clip(bm - inner, 0, 1)                      # the thick edge of the coat
     a = bm * .52 + rim * .55                              # see-through in the middle, thicker at the rim
@@ -63,11 +72,11 @@ def make(i, n):
     # darker amber edge and the shine along the top left of the coat
     arr = np.asarray(res).astype(float)
     edge = np.clip(rim, 0, 1)[..., None]
-    arr[..., :3] = arr[..., :3] * (1 - edge * .28) + np.array([120, 60, 8]) * edge * .28
+    arr[..., :3] = arr[..., :3] * (1 - edge * .28) + np.array(P['edge']) * edge * .28 * 1.0
     gx = np.asarray(blob.filter(ImageFilter.GaussianBlur(3))).astype(float) / 255
     sh = np.clip(gx - np.roll(np.roll(gx, 5, 0), 5, 1), 0, 1)
     sh = np.clip(sh * 2.2, 0, 1)[..., None] * (np.asarray(blob)[..., None] > 0)
-    arr[..., :3] = arr[..., :3] * (1 - sh * .8) + 255 * sh * .8
+    arr[..., :3] = arr[..., :3] * (1 - sh * .8) + np.array(P['hi']) * sh * .8
     res = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), 'RGBA')
     # a few drips hanging from the pool
     d = ImageDraw.Draw(res)
@@ -75,13 +84,14 @@ def make(i, n):
     for k in range(4):
         x = rnd.randint(bb[0] + 10, bb[2] - 10); y = bb[3] - 6
         L = rnd.randint(8, 16)
-        d.ellipse([x - 3, y + L - 3, x + 3, y + L + 3], fill=(214, 138, 30, 235))
-        d.rectangle([x - 2, y - 2, x + 2, y + L], fill=(214, 138, 30, 235))
-        d.ellipse([x - 1, y + L - 2, x + 0, y + L], fill=(255, 235, 170, 255))
-    out_p = os.path.join(ROOT, 'assets', 'hg_bound%d.png' % i)
+        d.ellipse([x - 3, y + L - 3, x + 3, y + L + 3], fill=P['drip'] + (235,))
+        d.rectangle([x - 2, y - 2, x + 2, y + L], fill=P['drip'] + (235,))
+        d.ellipse([x - 1, y + L - 2, x + 0, y + L], fill=P['hi'] + (255,))
+    out_p = os.path.join(ROOT, 'assets', out_name or ('hg_bound%d.png' % i))
     res.save(out_p, optimize=True)
     return out_p
 
 if __name__ == '__main__':
     for i, n in enumerate(SRC):
-        print(make(i, n))
+        print(make(i, n, 'buckwheat'))
+        print(make(i, n, 'clover', 'hg_bh0_%d.png' % i))

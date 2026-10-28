@@ -13,6 +13,7 @@ function wmKeyish(){const id=['wmkey1','wmkey2','wmkey3'];return id.some(i=>bagC
 function wmDoorBump(L,dd,nx,ny){
   const F=wmF(),k=L._wm.k;
   if(dd.type==='secret'){G.shake=.3;sfx('door');msg('The wall gives way. A hidden door grinds open.','#ffe9a0');wmOpenCell(nx,ny);later(300,endRound);return true}
+  if(dd.type==='exit'){sfx('equip');later(250,()=>{sfx('door');G.shake=.3});msg('You press the brass button. Click. Deep in the wall something shifts, and a hidden door grinds open.','#ffe9a0');wmOpenCell(nx,ny);wmF().pin[LEVEL+':exit']=1;later(300,endRound);return true}
   if(dd.type==='sealed'){sfx('locked');G.shake=.1;msg('The wall is cold and solid. Something far away holds it shut.','#d09a80');return true}
   if(dd.type==='riddle'){wmRiddle();return true}
   if(dd.type==='up'){sfx('door');msg('You climb the stair up.','#cfe0ff');goToLevel(WM.IDS[k-1],WM.M[k-1].back);return true}
@@ -32,9 +33,12 @@ function wmRiddle(){
   const ans=(good)=>()=>{if(good){wmOpenCell(v.x,v.y);F.pin[LEVEL+':riddle']=1;sfx('door');return say('The plaque glows violet. "Well answered." The door swings open.',[['Go in.',()=>null]])}
     sfx('locked');return say('The plaque dims. Nothing happens. You may try again.',[['Think again.',()=>null]])};
   wmTalk('The plaque on the door',say('Letters are cut into the plaque: "I AM DUG BUT NEVER BURIED. I AM DEEP, AND HAVE NO FLOOR OF MY OWN. FILL ME AND I GIVE. LEAVE ME EMPTY AND I WAIT. WHAT AM I?"',[['A grave.',ans(false)],['A cellar.',ans(false)],['A well.',ans(true)],['A bucket.',ans(false)],['Leave.',()=>null]]),'wm_keydoor')}
+/* ---------- the stone behind the hidden door (499): it carries the party up to the well of Wenlock, and only that. It is not part of the teleport network. ---------- */
+NPCS.wm_exit_stone={name:'A carved stone',img:'teleporter',root:d=>say('A round stone with runes round its rim, set in a niche as small as a cupboard. It hums, very quietly. Scratched beside it: "UP. For diggers only. Hold on to your hat."',[['Step onto the stone.',()=>{G.talk=null;sfx('level');msg('The runes flare. The world spins, and then there is daylight.','#a8d8ff');wmClimb(0);return null}],['Leave it.',()=>null]])};
+NPCS.wm_orbframe={name:'An orb in its frame',img:'wm_orbframe0',root:d=>{if(typeof orbTake==='function')orbTake(d);else msg('A glowing orb sits in an ornate iron frame.','#9ad8ff');return null}};
 /* ---------- the ladder up to Wenlock ---------- */
 function wmClimb(n){ // the town builds itself when its pictures are ready, so a ladder used straight after a load waits for it a moment
-  const back=(typeof WK!=='undefined'&&WK.WELLBACK)||{x:2,y:2,f:0};
+  const back=(typeof WK!=='undefined'&&WK.WELLBACK)||{x:45,y:53,f:2};
   if(!LEVELS[WK.WENLOCK]&&KH_LAZY[WK.WENLOCK])try{KH_LAZY[WK.WENLOCK]()}catch(e){console.error(e)}
   if(!LEVELS[WK.WENLOCK]){if(n===0)msg('You start up the ladder. The daylight above is slow to come.','#cfe0ff');if(n<60)later(300,()=>wmClimb(n+1));else msg('The ladder will not take your weight. Try again in a moment.','#d09a80');return}
   sfx('door');goToLevel(WK.WENLOCK,back);G.state='play'}

@@ -1,0 +1,1946 @@
+{
+ "zoneDecor": 708,
+ "npcs": [
+  {
+   "npc": "hgd_q0",
+   "name": "Warden Pell",
+   "k": "hg_npc1",
+   "x": 112,
+   "y": 179,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Hedgefoot",
+   "text": "ERR Cannot read properties of undefined (reading 'dq1')"
+  },
+  {
+   "npc": "hgd_q1",
+   "name": "Mother Brask",
+   "k": "hg_npc2",
+   "x": 18,
+   "y": 168,
+   "sc": 0.72,
+   "h": 0,
+   "zone": "Cairnhold",
+   "text": "ERR Cannot read properties of undefined (reading 'dq2')"
+  },
+  {
+   "npc": "hgd_q2",
+   "name": "Tuck the Lamplighter",
+   "k": "hg_npc3",
+   "x": 64,
+   "y": 135,
+   "sc": 0.72,
+   "h": 0.72,
+   "zone": "Combwick",
+   "text": "ERR Cannot read properties of undefined (reading 'dq3')"
+  },
+  {
+   "npc": "hgd_q3",
+   "name": "Old Orm",
+   "k": "hg_npc4",
+   "x": 76,
+   "y": 101,
+   "sc": 0.72,
+   "h": 1.01,
+   "zone": "Nacre Landing",
+   "text": "ERR Cannot read properties of undefined (reading 'dq4')"
+  },
+  {
+   "npc": "hgd_q4",
+   "name": "Seeker Yll",
+   "k": "hg_npc5",
+   "x": 42,
+   "y": 90,
+   "sc": 0.72,
+   "h": 0.94,
+   "zone": "Dunewell",
+   "text": "ERR Cannot read properties of undefined (reading 'dq5')"
+  },
+  {
+   "npc": "hgd_q5",
+   "name": "Ferrik the Mender",
+   "k": "hg_npc1",
+   "x": 28,
+   "y": 45,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Blue Lantern",
+   "text": "ERR Cannot read properties of undefined (reading 'dq6')"
+  },
+  {
+   "npc": "hgd_q6",
+   "name": "Nessa Longstep",
+   "k": "hg_npc2",
+   "x": 121,
+   "y": 16,
+   "sc": 0.72,
+   "h": 0,
+   "zone": "Tessera",
+   "text": "ERR Cannot read properties of undefined (reading 'dq7')"
+  },
+  {
+   "npc": "hgd_q7",
+   "name": "Brother Dun",
+   "k": "hg_npc3",
+   "x": 143,
+   "y": 28,
+   "sc": 0.72,
+   "h": 0.72,
+   "zone": "Gildmere",
+   "text": "ERR Cannot read properties of undefined (reading 'dq8')"
+  },
+  {
+   "npc": "hgd_q8",
+   "name": "Hob the Tileman",
+   "k": "hg_npc4",
+   "x": 52,
+   "y": 168,
+   "sc": 0.72,
+   "h": 1.01,
+   "zone": "The Quiet Room",
+   "text": "ERR Cannot read properties of undefined (reading 'dq9')"
+  },
+  {
+   "npc": "hgd_q9",
+   "name": "Ostrel the Gilder",
+   "k": "hg_npc5",
+   "x": 75,
+   "y": 25,
+   "sc": 0.72,
+   "h": 0.94,
+   "zone": "The Lamp Clearing",
+   "text": "ERR Cannot read properties of undefined (reading 'dq10')"
+  },
+  {
+   "npc": "hgd_q10",
+   "name": "Madam Voss",
+   "k": "hg_npc1",
+   "x": 172,
+   "y": 35,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "The Pond Enclave",
+   "text": "ERR Cannot read properties of undefined (reading 'dq11')"
+  },
+  {
+   "npc": "hgd_q11",
+   "name": "Quill the Surveyor",
+   "k": "hg_npc2",
+   "x": 14,
+   "y": 70,
+   "sc": 0.72,
+   "h": 0,
+   "zone": "The Reading Room",
+   "text": "ERR Cannot read properties of undefined (reading 'dq12')"
+  },
+  {
+   "npc": "hgd_shop0",
+   "name": "Marl, the Hedgefoot grocer",
+   "k": "hg_npc1",
+   "x": 112,
+   "y": 181,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Hedgefoot",
+   "text": "Everything for the road into the gosr. Mind the cgnox. The glarxr is the same in every dcasren: past the cgnox, the creatures are thick, and they do not stop."
+  },
+  {
+   "npc": "hgd_shop1",
+   "name": "Dwen, the stone-smith",
+   "k": "hg_npc2",
+   "x": 20,
+   "y": 167,
+   "sc": 0.72,
+   "h": 0,
+   "zone": "Cairnhold",
+   "text": "Chitin and wax, worked into proper gear. Nothing but the best for the glarxr ahead. We keep to the lera eixmgaxx, and the lera eixmgaxx keep us."
+  },
+  {
+   "npc": "hgd_shop2",
+   "name": "Sela, the comb-seller",
+   "k": "hg_npc3",
+   "x": 65,
+   "y": 137,
+   "sc": 0.72,
+   "h": 0.72,
+   "zone": "Combwick",
+   "text": "Ncoex and znoss, fresh from the combs. Never walk the gosr at night without a nacdzox, and never past a cgno."
+  },
+  {
+   "npc": "hgd_shop3",
+   "name": "Pearla, the shell-trader",
+   "k": "hg_npc4",
+   "x": 78,
+   "y": 100,
+   "sc": 0.72,
+   "h": 1.01,
+   "zone": "Nacre Landing",
+   "text": "From the gense galleries: kelp, roots and water. Some ladders go down to a level under the gosr. Nobody who goes down without food and torches comes back with both."
+  },
+  {
+   "npc": "hgd_shop4",
+   "name": "Hask, the well-keeper",
+   "k": "hg_npc5",
+   "x": 40,
+   "y": 91,
+   "sc": 0.72,
+   "h": 0.94,
+   "zone": "Dunewell",
+   "text": "Water is worth more than gold in the sandstone dcasren. Stay out of the signed places. Whatever lives in there has not seen a friendly face in a long time."
+  },
+  {
+   "npc": "hgd_shop5",
+   "name": "Ilse, the apothecary",
+   "k": "hg_npc1",
+   "x": 30,
+   "y": 45,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Blue Lantern",
+   "text": "Healing, and mana for those who need it. If you see a cgno, xsxa back. The cgnox are put up by people who did not."
+  },
+  {
+   "npc": "hgd_shop6",
+   "name": "Tomm, the tile-trader",
+   "k": "hg_npc2",
+   "x": 123,
+   "y": 18,
+   "sc": 0.72,
+   "h": 0,
+   "zone": "Tessera",
+   "text": "Tiles, glue, and potions for the tired. The glarxr is the same in every dcasren: past the cgnox, the creatures are thick, and they do not stop."
+  },
+  {
+   "npc": "hgd_shop7",
+   "name": "Orbin, the gold-trader",
+   "k": "hg_npc3",
+   "x": 143,
+   "y": 30,
+   "sc": 0.72,
+   "h": 0.72,
+   "zone": "Gildmere",
+   "text": "The finest. Gold only. We keep to the lera eixmgaxx, and the lera eixmgaxx keep us."
+  },
+  {
+   "npc": "hgd_rest0",
+   "name": "A traveller",
+   "k": "hg_npc1",
+   "x": 178,
+   "y": 92,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "The Rest Stop",
+   "text": "Sit a while. This is a lera place, and the lera places are few. Stay out of the signed places. Whatever lives in there has not seen a friendly face in a long time."
+  },
+  {
+   "npc": "hgd_rest1",
+   "name": "A traveller",
+   "k": "hg_npc2",
+   "x": 132,
+   "y": 98,
+   "sc": 0.72,
+   "h": 0,
+   "zone": "The Sleeping Nook",
+   "text": "I have walked three dcasrenx of the gosr, and I keep to the lera places. So should you. If you see a cgno, xsxa back. The cgnox are put up by people who did not."
+  },
+  {
+   "npc": "hgd_rest2",
+   "name": "A traveller",
+   "k": "hg_npc3",
+   "x": 15,
+   "y": 11,
+   "sc": 0.72,
+   "h": 0.72,
+   "zone": "The Lantern Landing",
+   "text": "If a wall is a shade off from its neighbours, walk into it. Half the gdedrgx of this place are hidden that way. The glarxr is the same in every dcasren: past the cgnox, the creatures are thick, and they do not stop."
+  },
+  {
+   "npc": "hgd_rest3",
+   "name": "A traveller",
+   "k": "hg_npc4",
+   "x": 93,
+   "y": 134,
+   "sc": 0.72,
+   "h": 1.01,
+   "zone": "The Mossy Corner",
+   "text": "There is a creg ahead that wants a nmo, and another that wants a cne. I have never found either. Ask in the gargx. We keep to the lera eixmgaxx, and the lera eixmgaxx keep us."
+  },
+  {
+   "npc": "hgd_rest4",
+   "name": "A traveller",
+   "k": "hg_npc5",
+   "x": 46,
+   "y": 63,
+   "sc": 0.72,
+   "h": 0.94,
+   "zone": "The Waiting Room",
+   "text": "The gargx sell nmox, and some of the cessx sell cnex. They are not cheap. Never walk the gosr at night without a nacdzox, and never past a cgno."
+  },
+  {
+   "npc": "hgd_rest5",
+   "name": "A traveller",
+   "k": "hg_npc1",
+   "x": 182,
+   "y": 124,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "The Safe Hollow",
+   "text": "Sit a while. This is a lera place, and the lera places are few. Some ladders go down to a level under the gosr. Nobody who goes down without food and torches comes back with both."
+  },
+  {
+   "npc": "hgd_vill0",
+   "name": "Tilda",
+   "k": "hg_npc1",
+   "x": 110,
+   "y": 182,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Hedgefoot",
+   "text": "I was born in the gosr and I have never seen the end of it. I hear it is very big. We keep to the lera eixmgaxx, and the lera eixmgaxx keep us."
+  },
+  {
+   "npc": "hgd_vill3",
+   "name": "Pike",
+   "k": "hg_npc4",
+   "x": 21,
+   "y": 165,
+   "sc": 0.72,
+   "h": 1.01,
+   "zone": "Cairnhold",
+   "text": "I keep a lamp lit all night. The xlri does not like a lamp. Stay out of the signed places. Whatever lives in there has not seen a friendly face in a long time."
+  },
+  {
+   "npc": "hgd_vill4",
+   "name": "Orla",
+   "k": "hg_npc5",
+   "x": 20,
+   "y": 169,
+   "sc": 0.72,
+   "h": 0.94,
+   "zone": "Cairnhold",
+   "text": "There is a creg in the Blue Dcasren that nobody has opened. Some say a cne would do it. If you see a cgno, xsxa back. The cgnox are put up by people who did not."
+  },
+  {
+   "npc": "hgd_vill5",
+   "name": "Fenn",
+   "k": "hg_npc1",
+   "x": 17,
+   "y": 164,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Cairnhold",
+   "text": "My cousin walked into a wall on purpose and found a room full of enecdma. We do not speak of it. The glarxr is the same in every dcasren: past the cgnox, the creatures are thick, and they do not stop."
+  },
+  {
+   "npc": "hgd_vill6",
+   "name": "Dilly",
+   "k": "hg_npc2",
+   "x": 60,
+   "y": 135,
+   "sc": 0.72,
+   "h": 0,
+   "zone": "Combwick",
+   "text": "The soup here is the best in the gosr. It is also the only soup. We keep to the lera eixmgaxx, and the lera eixmgaxx keep us."
+  },
+  {
+   "npc": "hgd_vill7",
+   "name": "Hobb",
+   "k": "hg_npc3",
+   "x": 62,
+   "y": 136,
+   "sc": 0.72,
+   "h": 0.72,
+   "zone": "Combwick",
+   "text": "If you find a golden nmo, bring it to Gildmere. They will pay a great deal. Never walk the gosr at night without a nacdzox, and never past a cgno."
+  },
+  {
+   "npc": "hgd_vill8",
+   "name": "Mara",
+   "k": "hg_npc4",
+   "x": 65,
+   "y": 141,
+   "sc": 0.72,
+   "h": 1.01,
+   "zone": "Combwick",
+   "text": "A song came through the garg last year. We built a wall. It was not a good wall. Some ladders go down to a level under the gosr. Nobody who goes down without food and torches comes back with both."
+  },
+  {
+   "npc": "hgd_vill9",
+   "name": "Corwin",
+   "k": "hg_npc5",
+   "x": 78,
+   "y": 103,
+   "sc": 0.72,
+   "h": 0.94,
+   "zone": "Nacre Landing",
+   "text": "I like the lera places. I like them very much. Stay out of the signed places. Whatever lives in there has not seen a friendly face in a long time."
+  },
+  {
+   "npc": "hgd_vill10",
+   "name": "Sable",
+   "k": "hg_npc1",
+   "x": 73,
+   "y": 105,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Nacre Landing",
+   "text": "The jellies hum when they are angry. Learn the hum. If you see a cgno, xsxa back. The cgnox are put up by people who did not."
+  },
+  {
+   "npc": "hgd_vill12",
+   "name": "Nim",
+   "k": "hg_npc3",
+   "x": 40,
+   "y": 89,
+   "sc": 0.72,
+   "h": 0.72,
+   "zone": "Dunewell",
+   "text": "I was born in the gosr and I have never seen the end of it. I hear it is very big. We keep to the lera eixmgaxx, and the lera eixmgaxx keep us."
+  },
+  {
+   "npc": "hgd_vill13",
+   "name": "Rook",
+   "k": "hg_npc4",
+   "x": 45,
+   "y": 94,
+   "sc": 0.72,
+   "h": 1.01,
+   "zone": "Dunewell",
+   "text": "The creze folk and the oxlsa folk do not get on. It is mostly about the walls. Never walk the gosr at night without a nacdzox, and never past a cgno."
+  },
+  {
+   "npc": "hgd_vill14",
+   "name": "Yara",
+   "k": "hg_npc5",
+   "x": 42,
+   "y": 88,
+   "sc": 0.72,
+   "h": 0.94,
+   "zone": "Dunewell",
+   "text": "Do not go past the cgnox. I say that to everyone. Nobody listens. Some ladders go down to a level under the gosr. Nobody who goes down without food and torches comes back with both."
+  },
+  {
+   "npc": "hgd_vill15",
+   "name": "Pell",
+   "k": "hg_npc1",
+   "x": 23,
+   "y": 44,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Blue Lantern",
+   "text": "I keep a lamp lit all night. The xlri does not like a lamp. Stay out of the signed places. Whatever lives in there has not seen a friendly face in a long time."
+  },
+  {
+   "npc": "hgd_vill18",
+   "name": "Ness",
+   "k": "hg_npc4",
+   "x": 118,
+   "y": 21,
+   "sc": 0.72,
+   "h": 1.01,
+   "zone": "Tessera",
+   "text": "The soup here is the best in the gosr. It is also the only soup. We keep to the lera eixmgaxx, and the lera eixmgaxx keep us."
+  },
+  {
+   "npc": "hgd_vill19",
+   "name": "Tam",
+   "k": "hg_npc5",
+   "x": 120,
+   "y": 10,
+   "sc": 0.72,
+   "h": 0.94,
+   "zone": "Tessera",
+   "text": "If you find a golden nmo, bring it to Gildmere. They will pay a great deal. Never walk the gosr at night without a nacdzox, and never past a cgno."
+  },
+  {
+   "npc": "hgd_vill20",
+   "name": "Ivo",
+   "k": "hg_npc1",
+   "x": 123,
+   "y": 16,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Tessera",
+   "text": "A song came through the garg last year. We built a wall. It was not a good wall. Some ladders go down to a level under the gosr. Nobody who goes down without food and torches comes back with both."
+  },
+  {
+   "npc": "hgd_vill21",
+   "name": "Lotte",
+   "k": "hg_npc2",
+   "x": 141,
+   "y": 32,
+   "sc": 0.72,
+   "h": 0,
+   "zone": "Gildmere",
+   "text": "I like the lera places. I like them very much. Stay out of the signed places. Whatever lives in there has not seen a friendly face in a long time."
+  },
+  {
+   "npc": "hgd_vill22",
+   "name": "Mab",
+   "k": "hg_npc3",
+   "x": 148,
+   "y": 24,
+   "sc": 0.72,
+   "h": 0.72,
+   "zone": "Gildmere",
+   "text": "The jellies hum when they are angry. Learn the hum. If you see a cgno, xsxa back. The cgnox are put up by people who did not."
+  },
+  {
+   "npc": "hgd_vill23",
+   "name": "Dunstan",
+   "k": "hg_npc4",
+   "x": 138,
+   "y": 25,
+   "sc": 0.72,
+   "h": 1.01,
+   "zone": "Gildmere",
+   "text": "Walk into a wall that looks a shade off. Half the gdedrgx of the gosr are behind such walls. The glarxr is the same in every dcasren: past the cgnox, the creatures are thick, and they do not stop."
+  },
+  {
+   "npc": "hgd_think5",
+   "name": "The Slow Surveyor",
+   "k": "hg_npc1",
+   "x": 73,
+   "y": 19,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "The Lamp Clearing",
+   "text": "Patience is a shortcut that takes the long way round."
+  },
+  {
+   "npc": "hgd_fwsexton",
+   "name": "Anselm Dray, the sexton",
+   "k": "hg_npc3",
+   "x": 36,
+   "y": 44,
+   "sc": 0.72,
+   "h": 0.72,
+   "zone": "Blue Lantern",
+   "text": "ERR Cannot read properties of undefined (reading 'fw1')"
+  },
+  {
+   "npc": "hgd_fwcook",
+   "name": "Brannoc Gule, the cook",
+   "k": "hg_npc1",
+   "x": 28,
+   "y": 32,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Blue Lantern",
+   "text": "ERR Cannot read properties of undefined (reading 'fw5')"
+  },
+  {
+   "npc": "hgd_diver",
+   "name": "Old Gill, the diver",
+   "k": "hg_npc4",
+   "x": 80,
+   "y": 104,
+   "sc": 0.72,
+   "h": 1.01,
+   "zone": "Nacre Landing",
+   "text": "ERR Cannot read properties of undefined (reading 'wq1')"
+  },
+  {
+   "npc": "hgd_cinder",
+   "name": "Cinder, the ember warden",
+   "k": "hg_npc5",
+   "x": 149,
+   "y": 30,
+   "sc": 0.72,
+   "h": 0.94,
+   "zone": "Gildmere",
+   "text": "ERR Cannot read properties of undefined (reading 'hgsph')"
+  },
+  {
+   "npc": "hgd_s2_arms0",
+   "name": "Brand, the weaponsmith of Hedgefoot",
+   "k": "hg_npc3",
+   "x": 110,
+   "y": 180,
+   "sc": 0.72,
+   "h": 0.72,
+   "zone": "Hedgefoot",
+   "text": "Swords, maces, axes and bows, made for this gosr. Nothing here will snap on the first ltac."
+  },
+  {
+   "npc": "hgd_s2_armour0",
+   "name": "Gunnar, the armourer of Hedgefoot",
+   "k": "hg_npc4",
+   "x": 103,
+   "y": 174,
+   "sc": 0.72,
+   "h": 1.01,
+   "zone": "Hedgefoot",
+   "text": "Helms, plate, shields and greaves. A good set of armour is cheaper than a bad funeral."
+  },
+  {
+   "npc": "hgd_s2_magic0",
+   "name": "Syl, the magic seller of Hedgefoot",
+   "k": "hg_npc5",
+   "x": 102,
+   "y": 172,
+   "sc": 0.72,
+   "h": 0.94,
+   "zone": "Hedgefoot",
+   "text": "Scrolls, rings, staves and draughts of mana. I do not take questions about where I got them."
+  },
+  {
+   "npc": "hgd_s2_trader0",
+   "name": "Pim, the trader of Hedgefoot",
+   "k": "hg_npc2",
+   "x": 102,
+   "y": 177,
+   "sc": 0.72,
+   "h": 0,
+   "zone": "Hedgefoot",
+   "text": "Torches, nacdzoxx, rope, food, herbs. Everything a traveller forgets until it is xlri."
+  },
+  {
+   "npc": "hgd_s2_inn0",
+   "name": "Mother Tansy, the innkeeper of Hedgefoot",
+   "k": "hg_npc1",
+   "x": 112,
+   "y": 168,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Hedgefoot",
+   "text": "A bed, a hot meal and a roof with no ltacx in it. Sixty gold a night, and you wake healed."
+  },
+  {
+   "npc": "hgd_s2_arms1",
+   "name": "Hild, the weaponsmith of Cairnhold",
+   "k": "hg_npc1",
+   "x": 16,
+   "y": 168,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Cairnhold",
+   "text": "Swords, maces, axes and bows, made for this gosr. Nothing here will snap on the first ltac."
+  },
+  {
+   "npc": "hgd_s2_armour1",
+   "name": "Sigrun, the armourer of Cairnhold",
+   "k": "hg_npc2",
+   "x": 19,
+   "y": 165,
+   "sc": 0.72,
+   "h": 0,
+   "zone": "Cairnhold",
+   "text": "Helms, plate, shields and greaves. A good set of armour is cheaper than a bad funeral."
+  },
+  {
+   "npc": "hgd_s2_magic1",
+   "name": "Orrin, the magic seller of Cairnhold",
+   "k": "hg_wizard",
+   "x": 14,
+   "y": 171,
+   "sc": 0.72,
+   "h": 0.97,
+   "zone": "Cairnhold",
+   "text": "Scrolls, rings, staves and draughts of mana. I do not take questions about where I got them."
+  },
+  {
+   "npc": "hgd_s2_trader1",
+   "name": "Sabel, the trader of Cairnhold",
+   "k": "hg_npc4",
+   "x": 19,
+   "y": 163,
+   "sc": 0.72,
+   "h": 1.01,
+   "zone": "Cairnhold",
+   "text": "Torches, nacdzoxx, rope, food, herbs. Everything a traveller forgets until it is xlri."
+  },
+  {
+   "npc": "hgd_s2_inn1",
+   "name": "Old Garrick, the innkeeper of Cairnhold",
+   "k": "hg_npc3",
+   "x": 16,
+   "y": 173,
+   "sc": 0.72,
+   "h": 0.72,
+   "zone": "Cairnhold",
+   "text": "A bed, a hot meal and a roof with no ltacx in it. Sixty gold a night, and you wake healed."
+  },
+  {
+   "npc": "hgd_s2_arms2",
+   "name": "Ketter, the weaponsmith of Combwick",
+   "k": "hg_npc4",
+   "x": 64,
+   "y": 133,
+   "sc": 0.72,
+   "h": 1.01,
+   "zone": "Combwick",
+   "text": "Swords, maces, axes and bows, made for this gosr. Nothing here will snap on the first ltac."
+  },
+  {
+   "npc": "hgd_s2_armour2",
+   "name": "Aldric, the armourer of Combwick",
+   "k": "hg_npc5",
+   "x": 66,
+   "y": 135,
+   "sc": 0.72,
+   "h": 0.94,
+   "zone": "Combwick",
+   "text": "Helms, plate, shields and greaves. A good set of armour is cheaper than a bad funeral."
+  },
+  {
+   "npc": "hgd_s2_magic2",
+   "name": "Vesper, the magic seller of Combwick",
+   "k": "hg_npc1",
+   "x": 71,
+   "y": 135,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Combwick",
+   "text": "Scrolls, rings, staves and draughts of mana. I do not take questions about where I got them."
+  },
+  {
+   "npc": "hgd_s2_trader2",
+   "name": "Tobb, the trader of Combwick",
+   "k": "hg_npc3",
+   "x": 54,
+   "y": 143,
+   "sc": 0.72,
+   "h": 0.72,
+   "zone": "Combwick",
+   "text": "Torches, nacdzoxx, rope, food, herbs. Everything a traveller forgets until it is xlri."
+  },
+  {
+   "npc": "hgd_s2_arms3",
+   "name": "Osk, the weaponsmith of Nacre Landing",
+   "k": "hg_npc3",
+   "x": 68,
+   "y": 100,
+   "sc": 0.72,
+   "h": 0.72,
+   "zone": "Nacre Landing",
+   "text": "Swords, maces, axes and bows, made for this gosr. Nothing here will snap on the first ltac."
+  },
+  {
+   "npc": "hgd_s2_armour3",
+   "name": "Edda, the armourer of Nacre Landing",
+   "k": "hg_npc4",
+   "x": 77,
+   "y": 109,
+   "sc": 0.72,
+   "h": 1.01,
+   "zone": "Nacre Landing",
+   "text": "Helms, plate, shields and greaves. A good set of armour is cheaper than a bad funeral."
+  },
+  {
+   "npc": "hgd_s2_magic3",
+   "name": "Mirel, the magic seller of Nacre Landing",
+   "k": "hg_npc5",
+   "x": 85,
+   "y": 108,
+   "sc": 0.72,
+   "h": 0.94,
+   "zone": "Nacre Landing",
+   "text": "Scrolls, rings, staves and draughts of mana. I do not take questions about where I got them."
+  },
+  {
+   "npc": "hgd_s2_inn3",
+   "name": "Little Joss, the innkeeper of Nacre Landing",
+   "k": "hg_npc1",
+   "x": 75,
+   "y": 100,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Nacre Landing",
+   "text": "A bed, a hot meal and a roof with no ltacx in it. Sixty gold a night, and you wake healed."
+  },
+  {
+   "npc": "hgd_s2_arms4",
+   "name": "Varn, the weaponsmith of Dunewell",
+   "k": "hg_npc1",
+   "x": 38,
+   "y": 89,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Dunewell",
+   "text": "Swords, maces, axes and bows, made for this gosr. Nothing here will snap on the first ltac."
+  },
+  {
+   "npc": "hgd_s2_armour4",
+   "name": "Rolf, the armourer of Dunewell",
+   "k": "hg_npc2",
+   "x": 36,
+   "y": 88,
+   "sc": 0.72,
+   "h": 0,
+   "zone": "Dunewell",
+   "text": "Helms, plate, shields and greaves. A good set of armour is cheaper than a bad funeral."
+  },
+  {
+   "npc": "hgd_s2_magic4",
+   "name": "Quill, the magic seller of Dunewell",
+   "k": "hg_wizard",
+   "x": 40,
+   "y": 96,
+   "sc": 0.72,
+   "h": 0.97,
+   "zone": "Dunewell",
+   "text": "Scrolls, rings, staves and draughts of mana. I do not take questions about where I got them."
+  },
+  {
+   "npc": "hgd_s2_trader4",
+   "name": "Cask, the trader of Dunewell",
+   "k": "hg_npc4",
+   "x": 35,
+   "y": 86,
+   "sc": 0.72,
+   "h": 1.01,
+   "zone": "Dunewell",
+   "text": "Torches, nacdzoxx, rope, food, herbs. Everything a traveller forgets until it is xlri."
+  },
+  {
+   "npc": "hgd_s2_inn4",
+   "name": "Marta, the innkeeper of Dunewell",
+   "k": "hg_npc3",
+   "x": 50,
+   "y": 93,
+   "sc": 0.72,
+   "h": 0.72,
+   "zone": "Dunewell",
+   "text": "A bed, a hot meal and a roof with no ltacx in it. Sixty gold a night, and you wake healed."
+  },
+  {
+   "npc": "hgd_s2_arms5",
+   "name": "Mara, the weaponsmith of Blue Lantern",
+   "k": "hg_npc4",
+   "x": 36,
+   "y": 48,
+   "sc": 0.72,
+   "h": 1.01,
+   "zone": "Blue Lantern",
+   "text": "Swords, maces, axes and bows, made for this gosr. Nothing here will snap on the first ltac."
+  },
+  {
+   "npc": "hgd_s2_magic5",
+   "name": "Anwen, the magic seller of Blue Lantern",
+   "k": "hg_npc1",
+   "x": 28,
+   "y": 44,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Blue Lantern",
+   "text": "Scrolls, rings, staves and draughts of mana. I do not take questions about where I got them."
+  },
+  {
+   "npc": "hgd_s2_trader5",
+   "name": "Nell, the trader of Blue Lantern",
+   "k": "hg_npc3",
+   "x": 28,
+   "y": 46,
+   "sc": 0.72,
+   "h": 0.72,
+   "zone": "Blue Lantern",
+   "text": "Torches, nacdzoxx, rope, food, herbs. Everything a traveller forgets until it is xlri."
+  },
+  {
+   "npc": "hgd_s2_inn5",
+   "name": "Ferris, the innkeeper of Blue Lantern",
+   "k": "hg_npc5",
+   "x": 29,
+   "y": 43,
+   "sc": 0.72,
+   "h": 0.94,
+   "zone": "Blue Lantern",
+   "text": "A bed, a hot meal and a roof with no ltacx in it. Sixty gold a night, and you wake healed."
+  },
+  {
+   "npc": "hgd_s2_arms6",
+   "name": "Dagny, the weaponsmith of Tessera",
+   "k": "hg_npc3",
+   "x": 127,
+   "y": 15,
+   "sc": 0.72,
+   "h": 0.72,
+   "zone": "Tessera",
+   "text": "Swords, maces, axes and bows, made for this gosr. Nothing here will snap on the first ltac."
+  },
+  {
+   "npc": "hgd_s2_armour6",
+   "name": "Bram, the armourer of Tessera",
+   "k": "hg_npc4",
+   "x": 120,
+   "y": 16,
+   "sc": 0.72,
+   "h": 1.01,
+   "zone": "Tessera",
+   "text": "Helms, plate, shields and greaves. A good set of armour is cheaper than a bad funeral."
+  },
+  {
+   "npc": "hgd_s2_magic6",
+   "name": "Lorn, the magic seller of Tessera",
+   "k": "hg_npc5",
+   "x": 122,
+   "y": 16,
+   "sc": 0.72,
+   "h": 0.94,
+   "zone": "Tessera",
+   "text": "Scrolls, rings, staves and draughts of mana. I do not take questions about where I got them."
+  },
+  {
+   "npc": "hgd_s2_trader6",
+   "name": "Harl, the trader of Tessera",
+   "k": "hg_npc2",
+   "x": 121,
+   "y": 14,
+   "sc": 0.72,
+   "h": 0,
+   "zone": "Tessera",
+   "text": "Torches, nacdzoxx, rope, food, herbs. Everything a traveller forgets until it is xlri."
+  },
+  {
+   "npc": "hgd_s2_inn6",
+   "name": "Dame Orla, the innkeeper of Tessera",
+   "k": "hg_npc1",
+   "x": 119,
+   "y": 16,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Tessera",
+   "text": "A bed, a hot meal and a roof with no ltacx in it. Sixty gold a night, and you wake healed."
+  },
+  {
+   "npc": "hgd_s2_arms7",
+   "name": "Tor, the weaponsmith of Gildmere",
+   "k": "hg_npc1",
+   "x": 142,
+   "y": 28,
+   "sc": 0.72,
+   "h": 0.9,
+   "zone": "Gildmere",
+   "text": "Swords, maces, axes and bows, made for this gosr. Nothing here will snap on the first ltac."
+  },
+  {
+   "npc": "hgd_s2_armour7",
+   "name": "Hedda, the armourer of Gildmere",
+   "k": "hg_npc2",
+   "x": 144,
+   "y": 26,
+   "sc": 0.72,
+   "h": 0,
+   "zone": "Gildmere",
+   "text": "Helms, plate, shields and greaves. A good set of armour is cheaper than a bad funeral."
+  },
+  {
+   "npc": "hgd_s2_magic7",
+   "name": "Isolde, the magic seller of Gildmere",
+   "k": "hg_wizard",
+   "x": 141,
+   "y": 28,
+   "sc": 0.72,
+   "h": 0.97,
+   "zone": "Gildmere",
+   "text": "Scrolls, rings, staves and draughts of mana. I do not take questions about where I got them."
+  },
+  {
+   "npc": "hgd_s2_trader7",
+   "name": "Dorrit, the trader of Gildmere",
+   "k": "hg_npc4",
+   "x": 145,
+   "y": 29,
+   "sc": 0.72,
+   "h": 1.01,
+   "zone": "Gildmere",
+   "text": "Torches, nacdzoxx, rope, food, herbs. Everything a traveller forgets until it is xlri."
+  },
+  {
+   "npc": "hgd_s2_inn7",
+   "name": "Cob, the innkeeper of Gildmere",
+   "k": "hg_npc3",
+   "x": 141,
+   "y": 30,
+   "sc": 0.72,
+   "h": 0.72,
+   "zone": "Gildmere",
+   "text": "A bed, a hot meal and a roof with no ltacx in it. Sixty gold a night, and you wake healed."
+  },
+  {
+   "npc": "hgd_church0",
+   "name": "Father Ripple, the priest of Hedgefoot",
+   "k": "hg_npc2",
+   "x": 112,
+   "y": 166,
+   "sc": 0.72,
+   "h": 0,
+   "zone": "Hedgefoot",
+   "text": "Welcome to the church of Hedgefoot. The roof leaks, the bell is cracked, and the door is always open. Do you need healing, or a prayer?"
+  },
+  {
+   "npc": "hgd_church1",
+   "name": "Sister Reed, the priest of Cairnhold",
+   "k": "hg_npc4",
+   "x": 16,
+   "y": 162,
+   "sc": 0.72,
+   "h": 1.01,
+   "zone": "Cairnhold",
+   "text": "Welcome to the church of Cairnhold. The roof leaks, the bell is cracked, and the door is always open. Do you need healing, or a prayer?"
+  }
+ ],
+ "dupText": [
+  [
+   2,
+   "I was born in the gosr and I have never seen the end of it. I hear it "
+  ],
+  [
+   2,
+   "I keep a lamp lit all night. The xlri does not like a lamp. Stay out o"
+  ],
+  [
+   2,
+   "The soup here is the best in the gosr. It is also the only soup. We ke"
+  ],
+  [
+   2,
+   "If you find a golden nmo, bring it to Gildmere. They will pay a great "
+  ],
+  [
+   2,
+   "A song came through the garg last year. We built a wall. It was not a "
+  ],
+  [
+   2,
+   "I like the lera places. I like them very much. Stay out of the signed "
+  ],
+  [
+   2,
+   "The jellies hum when they are angry. Learn the hum. If you see a cgno,"
+  ],
+  [
+   8,
+   "Swords, maces, axes and bows, made for this gosr. Nothing here will sn"
+  ],
+  [
+   7,
+   "Helms, plate, shields and greaves. A good set of armour is cheaper tha"
+  ],
+  [
+   8,
+   "Scrolls, rings, staves and draughts of mana. I do not take questions a"
+  ],
+  [
+   7,
+   "Torches, nacdzoxx, rope, food, herbs. Everything a traveller forgets u"
+  ],
+  [
+   7,
+   "A bed, a hot meal and a roof with no ltacx in it. Sixty gold a night, "
+  ]
+ ],
+ "emptyText": [
+  [
+   "hgd_q0",
+   "ERR Cannot read properties of undefined (reading 'dq1')"
+  ],
+  [
+   "hgd_q1",
+   "ERR Cannot read properties of undefined (reading 'dq2')"
+  ],
+  [
+   "hgd_q2",
+   "ERR Cannot read properties of undefined (reading 'dq3')"
+  ],
+  [
+   "hgd_q3",
+   "ERR Cannot read properties of undefined (reading 'dq4')"
+  ],
+  [
+   "hgd_q4",
+   "ERR Cannot read properties of undefined (reading 'dq5')"
+  ],
+  [
+   "hgd_q5",
+   "ERR Cannot read properties of undefined (reading 'dq6')"
+  ],
+  [
+   "hgd_q6",
+   "ERR Cannot read properties of undefined (reading 'dq7')"
+  ],
+  [
+   "hgd_q7",
+   "ERR Cannot read properties of undefined (reading 'dq8')"
+  ],
+  [
+   "hgd_q8",
+   "ERR Cannot read properties of undefined (reading 'dq9')"
+  ],
+  [
+   "hgd_q9",
+   "ERR Cannot read properties of undefined (reading 'dq10')"
+  ],
+  [
+   "hgd_q10",
+   "ERR Cannot read properties of undefined (reading 'dq11')"
+  ],
+  [
+   "hgd_q11",
+   "ERR Cannot read properties of undefined (reading 'dq12')"
+  ],
+  [
+   "hgd_fwsexton",
+   "ERR Cannot read properties of undefined (reading 'fw1')"
+  ],
+  [
+   "hgd_fwcook",
+   "ERR Cannot read properties of undefined (reading 'fw5')"
+  ],
+  [
+   "hgd_diver",
+   "ERR Cannot read properties of undefined (reading 'wq1')"
+  ],
+  [
+   "hgd_cinder",
+   "ERR Cannot read properties of undefined (reading 'hgsph')"
+  ]
+ ],
+ "sameImg": {
+  "Hedgefoot": [
+   [
+    "hg_npc1",
+    4
+   ],
+   [
+    "hg_npc2",
+    2
+   ]
+  ],
+  "Cairnhold": [
+   [
+    "hg_npc2",
+    3
+   ],
+   [
+    "hg_npc4",
+    3
+   ],
+   [
+    "hg_npc1",
+    2
+   ]
+  ],
+  "Combwick": [
+   [
+    "hg_npc3",
+    4
+   ],
+   [
+    "hg_npc4",
+    2
+   ]
+  ],
+  "Nacre Landing": [
+   [
+    "hg_npc4",
+    4
+   ],
+   [
+    "hg_npc5",
+    2
+   ],
+   [
+    "hg_npc1",
+    2
+   ]
+  ],
+  "Dunewell": [
+   [
+    "hg_npc5",
+    3
+   ],
+   [
+    "hg_npc3",
+    2
+   ],
+   [
+    "hg_npc4",
+    2
+   ]
+  ],
+  "Blue Lantern": [
+   [
+    "hg_npc1",
+    5
+   ],
+   [
+    "hg_npc3",
+    2
+   ]
+  ],
+  "Tessera": [
+   [
+    "hg_npc2",
+    3
+   ],
+   [
+    "hg_npc4",
+    2
+   ],
+   [
+    "hg_npc5",
+    2
+   ],
+   [
+    "hg_npc1",
+    2
+   ]
+  ],
+  "Gildmere": [
+   [
+    "hg_npc3",
+    4
+   ],
+   [
+    "hg_npc2",
+    2
+   ],
+   [
+    "hg_npc4",
+    2
+   ]
+  ]
+ },
+ "stacked": [
+  "70,106 hgt_fairytree+hgdfc_lilac1",
+  "73,19 hg_npc1+art_hgdf_wsym6",
+  "131,25 hgtb_lilacmoth+art_hgdf_shield7",
+  "117,188 art_hgdf_wsym0+art_hgdf_vine2",
+  "107,171 art_hgdf_wsym0+art_hgdf_shield0",
+  "118,169 art_hgdf_shield1+art_hgdf_vine2",
+  "136,95 art_hgdf_shield5+art_hgdf_plant1",
+  "150,32 art_hgdf_shield8+art_hgdf_plant7",
+  "105,191 art_hgdf_shield0+art_hgdf_plant1",
+  "130,95 art_hgdf_shield5+art_hgdf_plant1",
+  "99,197 art_hgdf_vine1+art_hgdf_plant2",
+  "135,93 art_hgdf_plant0+hgdfc_aqua2"
+ ],
+ "onWall": [],
+ "unreach": [],
+ "itemsUnreach": [
+  "hglreed@39,126",
+  "hglreed@40,123",
+  "hglreed@27,119",
+  "hglreed@25,118",
+  "hglreed@23,119",
+  "hgllily@22,119",
+  "hgllily@38,126",
+  "hgllily@22,120",
+  "hgllily@32,127",
+  "hgllily@32,125",
+  "hglnet@29,123",
+  "hglreed@165,75",
+  "hglreed@150,74",
+  "hglreed@164,94",
+  "hglreed@165,77",
+  "hglreed@145,86",
+  "hgllily@146,80",
+  "hgllily@158,76",
+  "hgllily@150,91",
+  "hgllily@161,92",
+  "hgllily@165,92",
+  "hglreed@125,60",
+  "hglreed@101,67",
+  "hglreed@107,66",
+  "hglreed@118,46",
+  "hglreed@119,67",
+  "hgllily@103,50",
+  "hgllily@118,51",
+  "hgllily@123,56",
+  "hgllily@119,60",
+  "hgllily@101,58",
+  "hglegg@183,154",
+  "hglegg@133,146",
+  "hglegg@154,183",
+  "hglegg@162,165",
+  "hglegg@179,184",
+  "hglegg@167,148",
+  "hglegg@128,175",
+  "hgllily@165,147",
+  "hgllily@184,153",
+  "hgllily@163,167"
+ ],
+ "blockNarrow": [
+  "hg_chestwax@115,189",
+  "hg_chestwax@15,157",
+  "hgtb_deco_shellstatue@119,179",
+  "hgtb_deco_shellstatue@49,171",
+  "hgtb_deco_pearlplinth@55,133",
+  "hgtb_deco_shellstatue@101,193",
+  "hgtb_deco_pearlplinth@17,41",
+  "hgtb_deco_shellstatue@67,107",
+  "hgtb_deco_shellstatue@177,125"
+ ],
+ "npcNarrow": [],
+ "clusters": [
+  "hgtb_plant_belltree x4 near 43,81",
+  "hgt_fairytree x3 near 41,82",
+  "hgtb_plant_belltree x4 near 47,82",
+  "hgt_fairytree x4 near 38,83",
+  "hgt_fern x3 near 44,85",
+  "hgt_fairytree x4 near 34,88",
+  "hgt_fairytree x3 near 36,90",
+  "hgt_fairytree x3 near 50,91",
+  "hgt_fairytree x3 near 37,95",
+  "hgt_fairytree x4 near 49,95",
+  "hgt_fairytree x5 near 44,96",
+  "hgt_fairytree x3 near 70,97",
+  "hgtb_plant_belltree x4 near 77,97",
+  "hgt_fairytree x3 near 83,99",
+  "hgt_fairytree x3 near 70,100",
+  "hgt_fairytree x3 near 69,103",
+  "hgt_fairytree x3 near 22,160",
+  "hgt_fairytree x4 near 12,163",
+  "hgt_fairytree x3 near 25,163",
+  "hgt_fairytree x4 near 11,165",
+  "hgt_fairytree x3 near 9,166",
+  "hgtb_plant_belltree x5 near 11,167",
+  "hgtb_plant_belltree x3 near 22,168",
+  "hgtb_plant_belltree x3 near 26,168",
+  "hgtb_plant_belltree x5 near 9,169",
+  "hgt_fairytree x4 near 22,170",
+  "hgtb_plant_belltree x6 near 12,171",
+  "hgt_fairytree x3 near 16,171",
+  "hgtb_plant_belltree x4 near 24,172",
+  "hgtb_plant_belltree x3 near 19,174",
+  "hgtb_plant_belltree x4 near 16,175",
+  "hgtb_plant_belltree x4 near 20,176",
+  "hgtb_plant_belltree x3 near 146,22",
+  "hgtb_plant_belltree x3 near 144,25",
+  "hgtb_plant_belltree x4 near 150,26",
+  "hgtb_plant_belltree x3 near 137,27",
+  "hgtb_plant_belltree x5 near 147,28",
+  "hgtb_plant_belltree x4 near 148,32",
+  "hgtb_plant_belltree x3 near 63,128",
+  "hgt_fairytree x3 near 64,131",
+  "hgtb_plant_belltree x3 near 58,133",
+  "hgt_bulbflower x3 near 60,137",
+  "hgtb_plant_belltree x3 near 64,139",
+  "hgt_bulbflower x3 near 60,140",
+  "hgtb_plant_belltree x3 near 63,141",
+  "hgtb_plant_belltree x3 near 67,141",
+  "hgt_fairytree x4 near 119,18",
+  "hgt_fairytree x3 near 116,20",
+  "hgt_fairytree x3 near 120,21",
+  "hgt_fairytree x4 near 26,37",
+  "hgt_fairytree x3 near 30,37",
+  "hgt_fairytree x4 near 25,41",
+  "hgtb_plant_belltree x4 near 36,46",
+  "hgt_fairytree x3 near 22,47",
+  "hgtb_plant_belltree x5 near 28,48",
+  "hgt_fairytree x3 near 31,48",
+  "hgtb_plant_belltree x3 near 34,49",
+  "hgt_fairytree x3 near 25,50",
+  "hgtb_plant_belltree x4 near 28,50",
+  "hgtb_plant_belltree x6 near 32,50",
+  "hgt_fairytree x5 near 45,101",
+  "hg_lamp x4 near 141,29",
+  "hg_lamp x3 near 139,28",
+  "hg_lamp x3 near 145,28",
+  "art_hgdf_shield0 x3 near 121,182",
+  "art_hgdf_shield7 x3 near 127,26",
+  "art_hgdf_shield8 x3 near 153,27",
+  "art_hgdf_shield7 x3 near 124,9",
+  "art_hgdf_shield0 x3 near 119,175",
+  "art_hgdf_shield0 x3 near 123,179",
+  "art_hgdf_shield8 x3 near 150,24",
+  "art_hgdf_plant1 x4 near 108,195",
+  "art_hgdf_plant1 x6 near 109,191",
+  "art_hgdf_plant1 x3 near 113,191",
+  "art_hgdf_plant0 x5 near 131,104",
+  "art_hgdf_plant7 x3 near 130,102",
+  "art_hgdf_plant1 x3 near 133,104",
+  "art_hgdf_plant1 x3 near 135,103",
+  "art_hgdf_plant0 x6 near 129,100",
+  "art_hgdf_plant1 x5 near 129,99",
+  "art_hgdf_plant1 x8 near 132,97",
+  "art_hgdf_plant0 x5 near 136,100",
+  "art_hgdf_plant0 x9 near 133,97",
+  "art_hgdf_plant0 x6 near 136,99",
+  "art_hgdf_plant1 x6 near 136,97",
+  "art_hgdf_plant1 x7 near 132,93",
+  "art_hgdf_plant0 x4 near 135,93",
+  "art_hgdf_plant0 x3 near 81,23",
+  "art_hgdf_plant1 x5 near 109,19",
+  "art_hgdf_plant1 x5 near 110,18"
+ ],
+ "prop": [
+  [
+   "hgtb_plant_spiralfern",
+   19,
+   1.6,
+   1.6,
+   1.6
+  ],
+  [
+   "hgtb_plant_belltree",
+   71,
+   3,
+   3,
+   3
+  ],
+  [
+   "hgt_fairytree",
+   79,
+   3.2,
+   3.2,
+   3.2
+  ],
+  [
+   "hgt_bulbflower",
+   13,
+   1.9,
+   1.9,
+   1.9
+  ],
+  [
+   "hgt_shellflower",
+   15,
+   2.1,
+   2.1,
+   2.1
+  ],
+  [
+   "hgt_fern",
+   17,
+   1.1,
+   1.1,
+   1.1
+  ],
+  [
+   "hgt_reeds",
+   18,
+   1.4,
+   1.4,
+   1.4
+  ],
+  [
+   "hgt_mushrooms",
+   21,
+   0.9,
+   0.9,
+   0.9
+  ],
+  [
+   "hgt_pearlbush",
+   9,
+   1,
+   1,
+   1
+  ],
+  [
+   "hgtb_plantbed",
+   12,
+   1.15,
+   1.15,
+   1.15
+  ],
+  [
+   "hg_lamp",
+   29,
+   2.2,
+   2.2,
+   2.2
+  ],
+  [
+   "NPC:gate",
+   2,
+   0.76,
+   0.76,
+   0.76
+  ],
+  [
+   "NPC:hg_npc1",
+   22,
+   0.9,
+   0.9,
+   0.9
+  ],
+  [
+   "NPC:hg_npc2",
+   14,
+   null,
+   null,
+   null
+  ],
+  [
+   "NPC:hg_npc3",
+   17,
+   0.72,
+   0.72,
+   0.72
+  ],
+  [
+   "NPC:hg_npc4",
+   19,
+   1.01,
+   1.01,
+   1.01
+  ],
+  [
+   "NPC:hg_npc5",
+   14,
+   0.94,
+   0.94,
+   0.94
+  ],
+  [
+   "hg_chestwax",
+   2,
+   0.62,
+   0.62,
+   0.62
+  ],
+  [
+   "NPC:hl_p_note",
+   6,
+   0.45,
+   0.45,
+   0.45
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   12,
+   2,
+   2,
+   2
+  ],
+  [
+   "hgtb_deco_pearlplinth",
+   9,
+   1.8,
+   1.8,
+   1.8
+  ],
+  [
+   "teleporter",
+   18,
+   0.62,
+   0.62,
+   0.62
+  ],
+  [
+   "hgtb_lilacmoth",
+   2,
+   0.52,
+   0.52,
+   0.52
+  ],
+  [
+   "hgtb_fishbeetle",
+   1,
+   0.56,
+   0.56,
+   0.56
+  ],
+  [
+   "art_hgdf_wsym6",
+   5,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym4",
+   4,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym0",
+   5,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym5",
+   6,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym3",
+   3,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym13",
+   1,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym12",
+   1,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym7",
+   5,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym1",
+   1,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_wsym2",
+   1,
+   0.85,
+   0.85,
+   0.85
+  ],
+  [
+   "art_hgdf_shield0",
+   10,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "art_hgdf_shield4",
+   6,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "art_hgdf_shield3",
+   4,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "art_hgdf_shield1",
+   5,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "art_hgdf_shield7",
+   9,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "art_hgdf_shield5",
+   8,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "art_hgdf_shield6",
+   13,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "art_hgdf_shield8",
+   8,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "art_hgdf_shield2",
+   12,
+   0.8,
+   0.8,
+   0.8
+  ],
+  [
+   "art_hgdf_vine2",
+   5,
+   1.8,
+   1.8,
+   1.8
+  ],
+  [
+   "art_hgdf_vine1",
+   3,
+   1.8,
+   1.8,
+   1.8
+  ],
+  [
+   "art_hgdf_vine0",
+   3,
+   1.8,
+   1.8,
+   1.8
+  ],
+  [
+   "art_hgdf_vine3",
+   3,
+   1.8,
+   1.8,
+   1.8
+  ],
+  [
+   "art_hgdf_plant4",
+   14,
+   0.45,
+   0.61,
+   0.53
+  ],
+  [
+   "art_hgdf_plant1",
+   47,
+   0.3,
+   0.44,
+   0.39
+  ],
+  [
+   "art_hgdf_plant2",
+   4,
+   0.52,
+   0.68,
+   0.64
+  ],
+  [
+   "art_hgdf_plant7",
+   9,
+   0.6,
+   0.83,
+   0.71
+  ],
+  [
+   "art_hgdf_plant0",
+   38,
+   0.57,
+   0.83,
+   0.69
+  ],
+  [
+   "art_hgdf_plant3",
+   10,
+   0.33,
+   0.45,
+   0.38
+  ],
+  [
+   "art_hgdf_plant5",
+   7,
+   0.57,
+   0.73,
+   0.63
+  ],
+  [
+   "art_hgdf_plant6",
+   7,
+   0.22,
+   0.3,
+   0.28
+  ],
+  [
+   "hgdfc_aqua2",
+   1,
+   null,
+   null,
+   null
+  ],
+  [
+   "hgdfc_pink1",
+   3,
+   null,
+   null,
+   null
+  ],
+  [
+   "hgdfc_cream1",
+   2,
+   null,
+   null,
+   null
+  ],
+  [
+   "hgdfc_lilac1",
+   1,
+   null,
+   null,
+   null
+  ],
+  [
+   "NPC:hg_wizard",
+   3,
+   0.97,
+   0.97,
+   0.97
+  ]
+ ],
+ "notes": [
+  [
+   "hgd_sign",
+   114,
+   9,
+   "Glarxr. The glarxr lies ahead. Creatures live beyond this cg"
+  ],
+  [
+   "hgd_sign",
+   113,
+   16,
+   "Glarxr. The glarxr lies ahead. Creatures live beyond this cg"
+  ],
+  [
+   "hgd_note",
+   106,
+   183,
+   "Someone has scratched into the wall: I WALKED PAST THE SAME "
+  ],
+  [
+   "hgd_note",
+   17,
+   17,
+   "Someone has scratched into the wall: I WALKED PAST THE SAME "
+  ],
+  [
+   "hgd_note",
+   129,
+   9,
+   "Someone has scratched into the wall: I WALKED PAST THE SAME "
+  ],
+  [
+   "hgd_note",
+   153,
+   24,
+   "Someone has scratched into the wall: I WALKED PAST THE SAME "
+  ],
+  [
+   "hgd_note",
+   131,
+   33,
+   "Someone has scratched into the wall: I WALKED PAST THE SAME "
+  ],
+  [
+   "hgd_note",
+   115,
+   26,
+   "Someone has scratched into the wall: I WALKED PAST THE SAME "
+  ]
+ ],
+ "bad": [
+  "hgd_q0",
+  "hgd_q1",
+  "hgd_q2",
+  "hgd_q3",
+  "hgd_q4",
+  "hgd_q5",
+  "hgd_q6",
+  "hgd_q7",
+  "hgd_q8",
+  "hgd_q9",
+  "hgd_q10",
+  "hgd_q11",
+  "hgd_fwsexton",
+  "hgd_fwcook",
+  "hgd_diver",
+  "hgd_cinder"
+ ],
+ "townKinds": {
+  "Hedgefoot": {
+   "hgd_q": 1,
+   "hgd_shop": 1,
+   "hgd_vill": 1,
+   "hgd_s2_arms": 1,
+   "hgd_s2_armour": 1,
+   "hgd_s2_magic": 1,
+   "hgd_s2_trader": 1,
+   "hgd_s2_inn": 1,
+   "hgd_church": 1
+  },
+  "Cairnhold": {
+   "hgd_q": 1,
+   "hgd_shop": 1,
+   "hgd_vill": 3,
+   "hgd_s2_arms": 1,
+   "hgd_s2_armour": 1,
+   "hgd_s2_magic": 1,
+   "hgd_s2_trader": 1,
+   "hgd_s2_inn": 1,
+   "hgd_church": 1
+  },
+  "Combwick": {
+   "hgd_q": 1,
+   "hgd_shop": 1,
+   "hgd_vill": 3,
+   "hgd_s2_arms": 1,
+   "hgd_s2_armour": 1,
+   "hgd_s2_magic": 1,
+   "hgd_s2_trader": 1
+  },
+  "Nacre Landing": {
+   "hgd_q": 1,
+   "hgd_shop": 1,
+   "hgd_vill": 2,
+   "hgd_diver": 1,
+   "hgd_s2_arms": 1,
+   "hgd_s2_armour": 1,
+   "hgd_s2_magic": 1,
+   "hgd_s2_inn": 1
+  },
+  "Dunewell": {
+   "hgd_q": 1,
+   "hgd_shop": 1,
+   "hgd_vill": 3,
+   "hgd_s2_arms": 1,
+   "hgd_s2_armour": 1,
+   "hgd_s2_magic": 1,
+   "hgd_s2_trader": 1,
+   "hgd_s2_inn": 1
+  },
+  "Blue Lantern": {
+   "hgd_q": 1,
+   "hgd_shop": 1,
+   "hgd_vill": 1,
+   "hgd_fwsexton": 1,
+   "hgd_fwcook": 1,
+   "hgd_s2_arms": 1,
+   "hgd_s2_magic": 1,
+   "hgd_s2_trader": 1,
+   "hgd_s2_inn": 1
+  },
+  "Tessera": {
+   "hgd_q": 1,
+   "hgd_shop": 1,
+   "hgd_vill": 3,
+   "hgd_s2_arms": 1,
+   "hgd_s2_armour": 1,
+   "hgd_s2_magic": 1,
+   "hgd_s2_trader": 1,
+   "hgd_s2_inn": 1
+  },
+  "Gildmere": {
+   "hgd_q": 1,
+   "hgd_shop": 1,
+   "hgd_vill": 3,
+   "hgd_cinder": 1,
+   "hgd_s2_arms": 1,
+   "hgd_s2_armour": 1,
+   "hgd_s2_magic": 1,
+   "hgd_s2_trader": 1,
+   "hgd_s2_inn": 1
+  }
+ },
+ "allDecorH": null
+}
+ERRS []

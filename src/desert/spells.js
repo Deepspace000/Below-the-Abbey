@@ -82,7 +82,7 @@ function mxTintIcons(){ // the grand spells borrow the painted picture of a high
 }
 const MX_BY_CLASS={};for(const s of MX)(MX_BY_CLASS[s.cls]=MX_BY_CLASS[s.cls]||[]).push(s); for(const k in MX_BY_CLASS)MX_BY_CLASS[k].sort((p,q)=>p.lv-q.lv||p.price-q.price); // the grand spell stands after the ordinary one of its level
 ['sheep','cow','frog'].forEach(n=>{if(typeof loadImg==='function')loadImg(n,'assets/'+n+'.png')});
-for(const s of MX){if(typeof loadImg==='function')loadImg('sp_'+s.id,'assets/sp_'+s.id+'.png')}
+for(const s of MX){if(typeof loadImg==='function'&&(typeof ICN_FILES==='undefined'||ICN_FILES.includes('sp_'+s.id)))loadImg('sp_'+s.id,'assets/sp_'+s.id+'.png')} // only the spell pictures that exist (the 30b ones are made from the 40 ones below)
 /* a hero's powers: the class powers, then every spell they have memorised */
 function heroPowers(hi){
   const c=CLASSES[HERO_DEF[hi].clsId],h=G.heroes[hi];
@@ -151,7 +151,7 @@ function mxApplyParty(hi,fx,P){
     G.buffs.push({name:P.name,b:key,amt:fx[2],left:fx[3],hi:self?hi:-1});
   }else if(k==='heal'){
     const who=fx[2]?livingHeroes():(()=>{const l=livingHeroes().filter(j=>G.heroes[j].hp<G.heroes[j].max);if(!l.length)return livingHeroes().slice(0,1);let b=l[0];for(const j of l)if(G.heroes[j].hp/G.heroes[j].max<G.heroes[b].hp/G.heroes[b].max)b=j;return [b]})();
-    for(const j of (P&&P.aim==='self'?[hi]:who)){const g=G.heroes[j],a=healScaled(hi,g,Math.round((rnd(fx[1][0],fx[1][1])+Math.floor(Math.max(0,G.heroes[hi].int-8)/3)+(HERO_DEF[hi].cls==='Priest'?priestHealBonus(G.heroes[hi])/2:0))*(1+pas(hi,'healPct'))),(P&&P.lv)||G.heroes[hi].lvl,!!fx[2]);g.hp=Math.min(g.max,g.hp+a);if(typeof addFloat==='function')addFloat(portraitX(j)+19,250,'+'+a,'#7fe08a')}
+    for(const j of (P&&P.aim==='self'?[hi]:who)){const g=G.heroes[j],a=healScaled(hi,g,Math.round((rnd(fx[1][0],fx[1][1])+Math.floor(Math.max(0,G.heroes[hi].int-8)/3)+(HERO_DEF[hi].cls==='Priest'?priestHealBonus(G.heroes[hi])/2:0))*(1+pas(hi,'healPct'))),(P&&P.lv)||G.heroes[hi].lvl,!!fx[2],P);g.hp=Math.min(g.max,g.hp+a);if(typeof addFloat==='function')addFloat(portraitX(j)+19,250,'+'+a,'#7fe08a')}
     sfx('heal');
   }else if(k==='healpct'){for(const j of livingHeroes()){const g=G.heroes[j];g.hp=Math.min(g.max,g.hp+Math.round(g.max*fx[1]));if(typeof addFloat==='function')addFloat(portraitX(j)+19,250,'+',' #7fe08a'.trim())}sfx('heal')}
   else if(k==='cleanse'){
@@ -178,6 +178,10 @@ function mxCast(i,P){
     T=mxTargets(i,P.aim==='front|ally'?'front':P.aim);
     if(!T.length&&P.aim!=='front|ally'){msg('No foe in range.','#d09a80');return false}
     if(P.aim==='front|ally'&&!T.length)T=[];
+  }
+  if(P.fx&&P.fx.some(f=>f[0]==='heal')&&P.fx.every(f=>f[0]==='heal'||f[0]==='cleanse')&&(P.aim==='party'||P.aim==='self')){ // a pure heal or cleanse with nobody hurt and nothing to lift costs no mana
+    const sel=P.aim==='self'?[i]:livingHeroes();
+    if(!sel.some(j=>G.heroes[j].hp<G.heroes[j].max)&&!afflList().some(e=>{const A=AFFL[e.id];return A&&A.kind==='bad'&&sel.includes(e.hi)})){msg('Everyone is already healthy.');return false}
   }
   h.mp-=P.cost;sfx('spell');
   msg(`${def.name} casts ${P.name}!`,P.col||'#ffe9a0');

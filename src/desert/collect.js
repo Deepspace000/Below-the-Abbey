@@ -143,7 +143,7 @@ function drawHand(cx,cy,s,col){ctx.save();ctx.translate(cx,cy);ctx.scale(s,s);ct
   if(G.state!=='play'||G.cut||G.talk||G.menu||G.inv.open||G.loot||G.overview||G.saves||G.map||TP)return;
   if(bagCount('butterflycage')>0&&!hostileNear()){const n=bfNear();if(n){const on=n.on,a=.7+.3*Math.sin(G.time*8),bx=VW-68-8,by=154;ctx.save();ctx.globalAlpha=on?1:.65;ctx.fillStyle='rgba(8,6,4,.72)';rrect(ctx,bx,by,68,34,6);ctx.fill();ctx.lineWidth=on?2.4:1.4;ctx.strokeStyle=on?'#ffe36a':'#8a7448';rrect(ctx,bx,by,68,34,6);ctx.stroke();
     drawHand(bx+22,by+22+(on?Math.sin(G.time*9)*1.5:0),1,on?'#f4d8b0':'#a89a80');txt(on?'CATCH!':'Closer...',bx+45,by+17,on?8:7,on?'#ffe36a':'#c8b898','center',true);ctx.restore();btn('bfcatch',bx,by,68,34)}}
-  if(canDigHere()){btnText('bfdig','Dig',24,168,52,20)}
+  if(canDigHere()){btnText('bfdig','Dig',6,154,52,20)}
 }catch(e){}}}
 {const _hb=handleBtn;handleBtn=function(id){if(id==='bfcatch'){bfCatch();return}if(id==='bfdig'){doDig();return}return _hb.apply(this,arguments)}}
 {const _g=goToLevel;goToLevel=function(n,e){try{if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();herbPlace(n,false);shovelIcons();for(const id in ((G.flags||{}).bottles||{}))bottleQuest(id)}catch(x){console.error(x)}

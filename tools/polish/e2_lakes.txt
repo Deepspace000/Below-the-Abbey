@@ -1,0 +1,65 @@
+
+/* ==========================================================================
+   THE THREE BOAT LAKES OF THE MAZE (level 475), each given its own look: a coloured light over the water, its own jetty details at both docks, its own landmark standing in the open water
+   (with a faded upside-down copy under it, the reflection), and its own small life along the shore. Runs after hgd_lakes.js has filled the lakes (hgdBuild wrapper), so nothing here is swept away:
+   everything that stands on water carries hgdl:1. Lights are kept in HGDWL.lights and added by the setupLights wrapper at the end of the file.
+   ========================================================================== */
+const HGDWL={lights:[],refl:new Map(),n:0};
+// a faded, upside-down, water-tinted copy of a picture, hung under it at the water line
+function hgweRefl(k,h,col){const im=IMG[k];if(!im||!im.width)return null;const id=k+'|'+Math.round(h*100);let key=HGDWL.refl.get(id);
+  if(!key){key='ltree7'+(HGDWL.n++); // a name the engine draws without a ground shadow
+    const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.translate(0,im.height);x.scale(1,-1);x.drawImage(im,0,0);
+    x.globalCompositeOperation='source-atop';x.globalAlpha=.4;x.fillStyle=col||'#2a6a70';x.fillRect(0,0,c.width,c.height);
+    x.globalCompositeOperation='destination-in';x.globalAlpha=1;const g=x.createLinearGradient(0,im.height,0,0);g.addColorStop(0,'rgba(0,0,0,.5)');g.addColorStop(.7,'rgba(0,0,0,.12)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,c.width,c.height);
+    IMG[key]=c;HGDWL.refl.set(id,key)}
+  NPC_H[key]=h;return key}
+const HGDWL_T=[ // one theme per lake (index = lake number): colour of the light on the water, reflection tint, the lamp at the docks, what stands on the landings, the landmark, the shore life
+  {name:'Lantern Lake',col:[1,.78,.4],rcol:'#c8863a',lamp:['art_hgtb_lamp_tall',1.15],land:[['yar_nets',.8],['yar_pots',.3],['art_wm_barrel',.42],['art_wm_bucket',.26]],mark:['art_hgt_lamppost',1.9],mark2:null,shore:[['yar_gull_stand',.3],['uw_buoy',.45]]},
+  {name:'Statue Lake',col:[.45,.95,.95],rcol:'#3a9aa0',lamp:['art_hgt_gardenlantern',1.0],land:[['uw_clam',.3],['art_hgxprop8',.2],['art_hgxprop9',.34],['art_hgdf_plant3',.5]],mark:['art_hgtb_deco_shellstatue',1.35],mark2:['art_hgtb_tank_ruinarch',1.5],shore:[['uw_clam',.28],['art_hgxprop9',.34],['art_hgdf_plant3',.5]]},
+  {name:'Crystal Lake',col:[.78,.55,1],rcol:'#7a50b8',lamp:['art_wm_lamp_post',1.1],land:[['art_wm_crystal_small',.35],['art_wm_crate',.4],['art_wm_crystal_teal',.4],['art_hgxprop2',.22]],mark:['art_wm_crystal_tall',1.5],mark2:['art_wm_crystal_pillar',1.35],shore:[['art_hgfturtle',.4],['art_wm_crystal_small',.3]]}];
+function hgdweLakes(L){
+  if(L._hgdwl||!L._hgdl||!L._hgdlDone)return;const M=L._hgdm,W=M.W,m=hgdlMask(L),water=(x,y)=>m[y*W+x]===1,open=(x,y)=>L.rows[y]&&L.rows[y][x]==='.';
+  const info=L._hgdwl={lakes:[],boats:0};
+  const dec=(k,x,y,h,o)=>{if(!IMG[k]||!IMG[k].width)return false;L.decor.push(Object.assign({k,x,y,block:false,walk:true,deco:true,hgdl:1,hgdwl:1,sc:hgweSc(k,h)},o||{}));return true};
+  const refl=(k,x,y,h,col,o)=>{const rk=hgweRefl(k,h,col);if(rk)L.decor.push(Object.assign({k:rk,x,y,block:false,walk:true,deco:true,hgdl:1,hgdwl:1,bob:-h*.97},o||{}))};
+  const lt=(x,y,col,kI,r2)=>HGDWL.lights.push({x,y,col,kI,r2});
+  for(const k of L._hgdl.lakes){if(k.wm||!k.docks)continue;const T=HGDWL_T[k.i%HGDWL_T.length],rec={name:T.name,lake:k.i,props:0};info.lakes.push(rec);
+    const cells=[];for(let y=k.y0;y<=k.y1;y++)for(let x=k.x0;x<=k.x1;x++)if(water(x,y))cells.push([x,y]);
+    const dist=new Map(),q=[];for(const [x,y] of cells){let edge=false;for(let a=-1;a<=1&&!edge;a++)for(let b=-1;b<=1;b++)if(!water(x+a,y+b)){edge=true;break}if(edge){dist.set(x+','+y,1);q.push([x,y])}}
+    for(let i=0;i<q.length;i++){const [x,y]=q[i],dd=dist.get(x+','+y);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const nx=x+a,ny=y+b,kk=nx+','+ny;if(water(nx,ny)&&!dist.has(kk)){dist.set(kk,dd+1);q.push([nx,ny])}}}
+    const docks=[k.docks.dep,k.docks.far],nearDock=(x,y,r)=>docks.some(d=>Math.abs(d.wx-x)<=r&&Math.abs(d.wy-y)<=r);
+    const usedBlock=new Set(L.decor.filter(d=>d.block&&water(d.x,d.y)).map(d=>d.x+','+d.y));
+    const connected=ex=>{const b=new Set(usedBlock);for(const c of ex)b.add(c);const s=[docks[0].wx,docks[0].wy],seen=new Set([s.join(',')]),qq=[s];for(let i=0;i<qq.length;i++){const [x,y]=qq[i];for(const [a,b2] of [[0,-1],[1,0],[0,1],[-1,0]]){const nx=x+a,ny=y+b2,kk=nx+','+ny;if(!seen.has(kk)&&water(nx,ny)&&!b.has(kk)){seen.add(kk);qq.push([nx,ny])}}}return seen.has(docks[1].wx+','+docks[1].wy)};
+    const cx=(k.x0+k.x1)/2,cy=(k.y0+k.y1)/2;
+    // 1. the landmark: in the open water, away from the docks, never cutting the way between them
+    let lm=null,bs=-1e9;for(const [x,y] of cells){const dd=dist.get(x+','+y)||0;if(dd<4||nearDock(x,y,6)||usedBlock.has(x+','+y))continue;const sc=dd*10-Math.hypot(x-cx,y-cy)+hash2(x,y,5);if(sc>bs&&connected([x+','+y])){bs=sc;lm=[x,y]}}
+    if(lm){const [x,y]=lm,[mk,mh]=T.mark;if(dec(mk,x,y,mh,{block:true,walk:false,deco:false,hgdwm:1})){rec.landmark=[mk,x,y];rec.props++;refl(mk,x,y,mh,T.rcol);usedBlock.add(x+','+y);lt(x,y,T.col,1.5,90)}
+      if(T.mark2){const sp=[[2,0],[-2,1],[1,2],[0,-2],[-1,-2],[2,2]].map(([a,b])=>[x+a,y+b]).find(([a,b])=>water(a,b)&&(dist.get(a+','+b)||0)>=3&&!usedBlock.has(a+','+b)&&!nearDock(a,b,3)&&!L.decor.some(d=>d.x===a&&d.y===b&&d.block));
+        if(sp){const [a,b]=sp,[k2,h2]=T.mark2;if(dec(k2,a,b,h2,{block:false,walk:true,hgdwm:1})){rec.props++;refl(k2,a,b,h2,T.rcol);lt(a,b,T.col,.9,40)}}}}
+    // 2. lights over the open water, so every part of the lake takes the colour of the lake
+    const lc=cells.filter(([x,y])=>(dist.get(x+','+y)||0)>=2).sort((a,b)=>hash2(a[0],a[1],12)-hash2(b[0],b[1],12)),placedL=[];
+    for(const [x,y] of lc){if(placedL.length>=9)break;if(placedL.some(p=>Math.hypot(p[0]-x,p[1]-y)<6.5))continue;placedL.push([x,y]);lt(x,y,T.col,.95,52)}
+    rec.lights=placedL.length+1;
+    // 3. both docks: pilings and a lamp on the water side with its reflection, a buoy, and something of the lake on the landing
+    docks.forEach((d,di)=>{const px=-d.dy,py=d.dx,W0=[d.wx,d.wy],fl=[[W0[0]+px,W0[1]+py],[W0[0]-px,W0[1]-py]];
+      fl.forEach(([x,y],i)=>{if(!water(x,y)||usedBlock.has(x+','+y))return;
+        if(i===0){const [lk,lh]=T.lamp;if(dec(lk,x,y,lh,{hgdwm:1})){rec.props++;refl(lk,x,y,lh,T.rcol)}}
+        else if(dec('uw_timber',x,y,.62)){rec.props++;if(T.shore[0][0]==='yar_gull_stand')dec('yar_gull_stand',x,y,.28,{bob:.58,oy:.05});else refl('uw_timber',x,y,.62,T.rcol)}});
+      const bx=W0[0]+d.dx*2+px*(di?-1:1),by=W0[1]+d.dy*2+py*(di?-1:1);if(water(bx,by)&&!usedBlock.has(bx+','+by)&&dec('uw_buoy',bx,by,.5,{bob:-.08}))rec.props++;
+      lt(W0[0],W0[1],T.col,1.2,40);
+      // the landing: things beside the way, not in it
+      const land=[[d.ax+px,d.ay+py],[d.ax-px,d.ay-py]].filter(([x,y])=>open(x,y)&&!water(x,y));
+      land.forEach(([x,y],i)=>{const [lk,lh]=T.land[(i+di*2)%T.land.length];if(!L.decor.some(e=>e.x===x&&e.y===y&&e.block)&&dec(lk,x,y,lh,{ox:(i?.12:-.12),oy:.1,hgdl:0}))rec.props++});
+      lt(d.ax,d.ay,T.col,1.1,34)});
+    // 4. the landing of the departure dock: a few more things along the two edges of the way, never the middle, no two in a row alike
+    (k.plaza||[]).filter(c=>c[3]!==0&&c[2]>=2&&c[2]%2===0&&open(c[0],c[1])).forEach((c,i)=>{const [lk,lh]=T.land[(i+1)%T.land.length];if(!L.decor.some(e=>e.x===c[0]&&e.y===c[1]&&e.block)&&dec(lk,c[0],c[1],lh,{ox:c[3]*.2,hgdl:0}))rec.props++});
+    // 5. the life along the shore: seven small things at the edge, each different
+    let ns=0;for(const [x,y] of cells.filter(([x,y])=>dist.get(x+','+y)===1&&!nearDock(x,y,3)).sort((a,b)=>hash2(a[0],a[1],14)-hash2(b[0],b[1],14))){if(ns>=7)break;if(usedBlock.has(x+','+y)||L.decor.some(d=>d.x===x&&d.y===y&&(d.block||/uw_|art_hgxprop|yar_|art_hgfturtle|art_wm|art_hgdf_plant3/.test(d.k))))continue;
+      const [sk,sh]=T.shore[ns%T.shore.length];if(sk==='art_hgfturtle'){if(dec('uw_timber',x,y,.28)&&dec(sk,x,y,sh,{bob:.16}))ns++}else if(dec(sk,x,y,sh,{ox:(hash2(x,y,3)-.5)*.4})){ns++;if(ns%3===0)lt(x,y,T.col,.8,22)}}
+    rec.props+=ns}
+  info.props=info.lakes.reduce((a,l)=>a+l.props,0)}
+{const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];const r=_b.apply(this,arguments);const L=LEVELS[HGD.ID];if(!had&&L&&L._hgdl&&L._hgdlDone)try{hgdweLakes(L)}catch(e){console.error('hgdwe lakes',e)}return r}}
+// the boats at anchor are drawn smaller (they were wider than the landing)
+{const _s=hgdbSync;hgdbSync=function(){const r=_s.apply(this,arguments);try{if(G.decor)for(const d of G.decor)if(d.hgdBoatSpr&&d.sc!==.82){d.sc=.82;d.bob=-.14}}catch(e){}return r}}
+// the coloured pools of light on the lakes
+{const _sl=setupLights;setupLights=function(){_sl.apply(this,arguments);try{if(LEVEL===HGD.ID)for(const q of HGDWL.lights)LIGHTS.push({x:q.x+.5,y:q.y+.5,ph:hash2(q.x,q.y,22)*6.28,key:-6500-LIGHTS.length,taken:false,red:false,free:true,calm:true,col:q.col,kI:q.kI,range2:q.r2})}catch(e){console.error('hgdwl lights',e)}}}

@@ -1,0 +1,46 @@
+  // ---------- 5. light and bespoke detail: a pool of coloured light every few squares, something small and different along the long passages ----------
+  const wallPic=(k,x,y,o)=>{o=o||{}; // a picture hung on the first wall face of the square that has no sign on it (a vine on that face makes way)
+    for(const [a,b] of D){if(!L.rows[y+b]||L.rows[y+b][x+a]!=='#')continue;
+      if(L.decor.some(d=>d.pic&&d.x===x&&d.y===y&&d.wd&&d.wd[0]===a&&d.wd[1]===b&&!/^art_hgdf_vine/.test(d.k)))continue;
+      for(let i=L.decor.length-1;i>=0;i--){const d=L.decor[i];if(d.pic&&d.x===x&&d.y===y&&d.wd&&d.wd[0]===a&&d.wd[1]===b)L.decor.splice(i,1)}
+      L.decor.push({k,x,y,wd:[a,b],pic:1,block:false,walk:true,deco:true,bob:o.bob||.85,hgdwe:1});info.props++;return true}return false};
+  {const L_WARM=[1,.86,.62],L_AQUA=[.45,.95,1],cells=[];for(let y=1;y<S-1;y++)for(let x=1;x<S-1;x++)if(open(x,y))cells.push([x,y]);
+   cells.sort((a,b)=>hash2(a[0],a[1],31)-hash2(b[0],b[1],31));
+   const lit=(x,y,r)=>HGDWE.lights.some(q=>Math.hypot(q.x-x,q.y-y)<r);
+   const SRC=[ // kind of light source: [weight, how it is made, colour, strength, reach]
+     [3,(x,y)=>wallPic('art_wm_lantern_gold',x,y),L_AMB,1.15,36],[1.4,(x,y)=>wallPic('art_wm_lantern_violet',x,y),L_VIO,1.1,34],[1.2,(x,y)=>wallPic('art_wm_lantern_lilac',x,y),L_PINK,1.05,34],
+     [1.6,(x,y)=>prop('art_hgxprop4',x,y,.34),L_AQUA,1,30],[1.4,(x,y)=>prop('art_hgtb_plant_glowshrooms',x,y,.36,{ox:.1}),L_TEAL,1,30],[1.2,(x,y)=>prop('art_wm_crystal_small',x,y,.3,{oy:.1}),L_VIO,1.1,32],
+     [1.8,(x,y)=>prop('art_hgtb_lamp_tall',x,y,1.15,{ox:.28}),L_WARM,1.2,40],[.8,(x,y)=>prop('art_hgtb_glasspost',x,y,1.3,{ox:-.3}),L_AQUA,1.1,38],[1,(x,y)=>prop('art_hgdf_plant3',x,y,.5,{ox:-.2}),L_AQUA,.95,28]];
+   const TW=SRC.reduce((a,q)=>a+q[0],0),pickSrc=(x,y)=>{let r=hash2(x,y,41)*TW;for(const q of SRC){if((r-=q[0])<=0)return q}return SRC[0]};
+   let nl=0;
+   for(const pass of [0,1]){for(const [x,y] of cells){if(occupied.has(x+','+y)&&!(pass===1&&!blocked.has(x+','+y)))continue;const dg=deg(x,y);if(pass===0&&dg<3)continue;if(lit(x,y,pass===0?5:4.6))continue;
+       if(L._hgdw&&st.some(q=>Math.hypot(q.ax-x,q.ay-y)<2.5))continue;
+       let q=pickSrc(x,y);if(q[1].toString().indexOf('wallPic')>=0&&!D.some(([a,b])=>L.rows[y+b]&&L.rows[y+b][x+a]==='#'))q=SRC[3];
+       const ok=q[1](x,y);if(ok===false){continue}
+       light(x,y,q[2],q[3],q[4]);nl++}}
+   info.glow=nl;
+   // the stairs up each get a warm landing lamp and a small thing to mark the way
+   st.forEach((s,i)=>{if(!lit(s.ax,s.ay,2.5)){light(s.ax,s.ay,L_WARM,1.3,44)}
+     const o=D.find(([a,b])=>open(s.ax+a,s.ay+b));prop(['art_hgxprop7','art_hgxprop8','art_hgxprop9','art_hgxprop12'][i%4],s.ax,s.ay,[.18,.2,.3,.3][i%4],{ox:-.3,oy:.25});wallPic('art_wm_lantern_gold',s.ax,s.ay,{bob:.95})});
+   // small things in the long passages: no two in a row alike
+   const DET=[['art_hgxprop0',.12],['art_hgxprop1',.22],['art_hgxprop6',.24],['art_hgxprop7',.18],['art_hgxprop8',.2],['art_hgxprop9',.34],['art_hgxprop11',.12],['art_hgxprop12',.3],['art_hgxprop15',.2],['art_hgxprop13',.14],['uw_timber',.55],['yar_pots',.3],['uw_clam',.28],['uw_amphora',.42],['art_wm_skeleton',.3],['art_wm_crate_lid',.15],['art_hgxprop5',.4],['art_hgxprop2',.2]];
+   const dsh=DET.map((e,i)=>[hash2(i,5,9),e]).sort((a,b)=>a[0]-b[0]).map(q=>q[1]);let di=0,nd=0;const placedD=[];
+   const straight=(x,y)=>(open(x-1,y)&&open(x+1,y)&&!open(x,y-1)&&!open(x,y+1))||(open(x,y-1)&&open(x,y+1)&&!open(x-1,y)&&!open(x+1,y));
+   for(const [x,y] of cells){if(occupied.has(x+','+y)||!straight(x,y)||placedD.some(q=>Math.abs(q[0]-x)+Math.abs(q[1]-y)<6)||st.some(q=>Math.abs(q.ax-x)+Math.abs(q.ay-y)<3))continue;
+     const [k,h]=dsh[di%dsh.length];if(prop(k,x,y,h,{ox:(hash2(x,y,2)-.5)*.5,oy:(hash2(x,y,3)-.5)*.3})){di++;nd++;placedD.push([x,y]);occupied.add(x+','+y)}}
+   info.details=nd}
+  // ---------- 6. dead ends that still hold nothing, and the barrel that stood in a corridor ----------
+  {for(const d of L.decor)if(d.k==='art_wm_barrel'&&d.block&&deg(d.x,d.y)<3&&rooms.some(r=>d.x>=r.x&&d.x<r.x+r.w&&d.y>=r.y&&d.y<r.y+r.h)){const r=rooms.find(r=>d.x>=r.x&&d.x<r.x+r.w&&d.y>=r.y&&d.y<r.y+r.h);
+     const c=[];for(let y=r.y+1;y<r.y+r.h-1;y++)for(let x=r.x+1;x<r.x+r.w-1;x++)if(!occupied.has(x+','+y)&&!blocked.has(x+','+y)&&deg(x,y)>=4)c.push([x,y]);
+     if(c.length){blocked.delete(d.x+','+d.y);occupied.delete(d.x+','+d.y);const t=c[(hash2(d.x,d.y,6)*c.length)|0];d.x=t[0];d.y=t[1];blocked.add(t[0]+','+t[1]);occupied.add(t[0]+','+t[1])}}
+   let n=0;for(let y=1;y<S-1;y++)for(let x=1;x<S-1;x++)if(open(x,y)&&deg(x,y)===1&&!L.decor.some(d=>d.x===x&&d.y===y&&!isPlant(d)&&!/^art_hgdf_vine|^uw_vent/.test(d.k))&&!L.items.some(i=>i.x===x&&i.y===y)&&!L.enemies.some(e=>e.x===x&&e.y===y)){
+       const ks=[['art_hgxprop12',.3],['art_hgxprop9',.34],['art_wm_skeleton',.3],['art_hgxprop8',.2]][(n++)%4];clearAt(x,y);prop(ks[0],x,y,ks[1],{ox:.1});if(!lit0(x,y))light(x,y,L_TEAL,.9,24)}}
+  // ---------- 7. creatures keep off the set pieces: three squares clear of every prop and sign worth looking at ----------
+  {const prot=[];for(const v of info.vignettes)prot.push([v.x,v.y]);for(const d of L.decor)if(d.hgdwe&&(d.block||d.npc||(d.pic&&/hl_p_note|noticeboard/.test(d.k))))prot.push([d.x,d.y]);
+   for(const d of L.decor)if(d.k==='uw_shellchest')prot.push([d.x,d.y]);for(const i of L.items)prot.push([i.x,i.y]);for(const s of st)prot.push([s.ax,s.ay]);
+   const clear=(x,y)=>prot.every(q=>Math.hypot(q[0]-x,q[1]-y)>=3.1),isFar=e=>Math.abs(e.x-far.x)<=3&&Math.abs(e.y-far.y)<=3;let moved=0;
+   const taken=new Set(L.enemies.map(e=>e.x+','+e.y));
+   for(const e of L.enemies){if(isFar(e)||clear(e.x,e.y))continue;let best=null,bd=1e9;
+     for(let y=1;y<S-1;y++)for(let x=1;x<S-1;x++){if(!open(x,y)||blocked.has(x+','+y)||taken.has(x+','+y)||!clear(x,y)||isFar({x,y}))continue;const d=Math.hypot(x-e.x,y-e.y);if(d<bd){bd=d;best=[x,y]}}
+     if(best){taken.delete(e.x+','+e.y);e.x=best[0];e.y=best[1];taken.add(best[0]+','+best[1]);moved++}}
+   info.enemiesMoved=moved}

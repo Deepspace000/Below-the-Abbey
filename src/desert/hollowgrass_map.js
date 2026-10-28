@@ -55,7 +55,7 @@ function hgmDraw(){
     lab(t.n.toUpperCase(),cx,cy-r-6,ti===0?9.5:8,ti===0?'#2a1a50':ink);
     });
   // the four hives
-  HG_HIVE_AT.forEach((p,i)=>{const a=PX(p[0]),b=PY(p[1]);x.save();x.translate(a,b);for(let k=0;k<4;k++){x.fillStyle=k%2?'#d89c30':'#e8b848';x.strokeStyle=ink;x.lineWidth=.9;x.beginPath();x.ellipse(0,3-k*3.1,8-k*1.5,3.4,0,0,Math.PI*2);x.fill();x.stroke()}
+  HG_HIVE_AT.forEach((p,i)=>{const a=PX(p[0]),b=PY(p[1]);x.save();x.translate(a,b);for(let k=0;k<4;k++){x.fillStyle=k%2?HG_HONEY[i].icn[0]:HG_HONEY[i].icn[1];x.strokeStyle=ink;x.lineWidth=.9;x.beginPath();x.ellipse(0,3-k*3.1,8-k*1.5,3.4,0,0,Math.PI*2);x.fill();x.stroke()}
     x.fillStyle='#2a1c0e';x.beginPath();x.ellipse(0,5.5,2.2,1.7,0,0,Math.PI*2);x.fill();x.strokeStyle='rgba(120,70,10,.7)';x.lineWidth=.5;for(let k=-1;k<=1;k++){x.beginPath();x.arc(k*2.8,-.4,1.1,0,Math.PI*2);x.stroke()}
     x.fillStyle='#d03a2a';x.strokeStyle=ink;x.lineWidth=.8;x.beginPath();x.arc(10,-8,3.6,0,Math.PI*2);x.fill();x.stroke();x.restore();x.save();x.font=`bold 7px ${FUI}`;x.textAlign='center';x.textBaseline='middle';x.fillStyle='#fff6e0';x.fillText(String(i+1),a+10,b-7.6);x.restore();
     lab(HG_HIVE_NAMES[i].toUpperCase(),a,b+14,7.2,'#6a1a10')});

@@ -16,6 +16,18 @@ function wmNoise(x,y,sd){const f=.2,gx=x*f,gy=y*f,x0=Math.floor(gx),y0=Math.floo
 function wmPicTex(key){return 'art_tex_wm_'+WM_STY[key]}
 function wmSecretTex(){const key='wm_secret';if(IMG[key])return key;const b=IMG.art_tex_wm_brick_old,P=IMG.art_tex_hgdp_secret;
   IMG[key]=mkCanvas(128,128,(x,w,h)=>{if(b)x.drawImage(b,0,0,w,h);else{x.fillStyle='#4a3860';x.fillRect(0,0,w,h)}if(P){x.globalCompositeOperation='multiply';x.globalAlpha=.8;x.drawImage(P,0,0,w,h)}});return key}
+/* the hidden way out: brick like its neighbours, with a faint ring of a slightly lighter violet round a little brass push-button that stands a tiny bit out of the wall */
+function wmExitTex(){const key='wm_exit';if(IMG[key])return key;const b=IMG.art_tex_wm_brick_old;
+  IMG[key]=mkCanvas(128,128,(x,w,h)=>{if(b)x.drawImage(b,0,0,w,h);else{x.fillStyle='#4a3860';x.fillRect(0,0,w,h)}
+    x.save();x.beginPath();x.arc(64,66,34,0,6.3);x.arc(64,66,24,0,6.3,true);x.clip('evenodd');x.globalCompositeOperation='lighter';x.fillStyle='rgba(110,70,160,.2)';x.fillRect(0,0,w,h);x.restore();   // the ring of brighter bricks
+    x.save();x.strokeStyle='rgba(20,10,40,.45)';x.lineWidth=1;x.beginPath();x.arc(64,66,34,0,6.3);x.stroke();x.beginPath();x.arc(64,66,24,0,6.3);x.stroke();x.restore();
+    x.save();x.fillStyle='rgba(0,0,0,.55)';x.beginPath();x.ellipse(67,72,15,14,0,0,6.3);x.fill();x.restore();   // its shadow on the wall
+    let g=x.createRadialGradient(60,60,2,64,66,16);g.addColorStop(0,'#fff0a0');g.addColorStop(.55,'#f0b818');g.addColorStop(1,'#9a6400');x.fillStyle=g;x.beginPath();x.arc(64,66,15,0,6.3);x.fill();   // the brass collar
+    x.strokeStyle='rgba(255,244,200,.8)';x.lineWidth=1.4;x.beginPath();x.arc(64,66,14.2,3.4,5.4);x.stroke();
+    g=x.createRadialGradient(61,62,1,64,66,9);g.addColorStop(0,'#fffbd8');g.addColorStop(.5,'#ffd040');g.addColorStop(1,'#b87800');x.fillStyle=g;x.beginPath();x.arc(64,66,9,0,6.3);x.fill();   // the stud
+    x.fillStyle='rgba(255,255,255,.9)';x.beginPath();x.arc(60,62,2.2,0,6.3);x.fill();
+    x.strokeStyle='rgba(255,250,220,.7)';x.lineWidth=.8;for(const [a,bb] of [[80,50],[46,80],[84,84]]){x.beginPath();x.moveTo(a-3,bb);x.lineTo(a+3,bb);x.moveTo(a,bb-3);x.lineTo(a,bb+3);x.stroke()}});   // a very faint sparkle
+  return key}
 /* a style for ohTiles: plain wall, door picture, window picture */
 function wmSty(name,plain,door,win){OH_STY[name]=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain,door:door||plain,win:win||plain,alt:plain,zoom:1,contrast:1.0,tint:[255,255,255,0]});return name}
 /* ---------- the doors, painted over the arch picture: steps and a lock plate down, a bricked arch for a sealed vault, a plaque on the riddle door ---------- */
@@ -55,6 +67,7 @@ function wmWalls(k,M){
   const secret=()=>ch('secret',()=>TM.make('plain',wmSty('wm_secret',wmSecretTex()),WH).gid);
   const doorDown=(k2)=>special('down'+(k2||0),'door',wmPicTex('bo'),wmDoorArt('down',['#a064e8','#c488ff','#e0b84a'][k2||0]),'art_tex_wm_plaque');
   const sealed=()=>special('sealed','door',wmPicTex('bo'),wmDoorArt('sealed'),'art_tex_wm_plaque');
+  const exitDoor=()=>ch('exit',()=>TM.make('plain',wmSty('wm_exit',wmExitTex()),WH).gid);
   const doorUp=()=>special('up','door',wmPicTex('bo'),'art_tex_wm_door','art_tex_wm_niche');
   const doorRiddle=()=>special('riddle','door',wmPicTex('bb'),wmDoorArt('riddle'),'art_tex_wm_plaque');
   const g=M.g,rows=[],ringOf=new Map();
@@ -75,7 +88,7 @@ function wmWalls(k,M){
       if(h>.985){row+=grate();continue}}
     row+=plain(key)}rows.push(row)}
   const put=(x,y,c)=>{rows[y]=rows[y].slice(0,x)+c+rows[y].slice(x+1)};
-  const tiles={put,secret,sealed,doorDown,doorUp,doorRiddle,plain};
+  const tiles={put,secret,exit:exitDoor,sealed,doorDown,doorUp,doorRiddle,plain};
   return {rows,chars,tiles,idx}}
 /* ---------- creatures: what lives where ---------- */
 const WM_FOES=[ // by level: [type, weight]
@@ -86,7 +99,7 @@ const WM_FOES=[ // by level: [type, weight]
 WM.COUNT=[30,38,36,32];
 /* ---------- the context handed to every room's furnisher ---------- */
 function wmContext(k,M){
-  const W=WMG.W,H=WMG.H,g=M.g,rnd=wmgRng(M.seedUsed*3+k),occ=new Set(),dec=[],enemies=[],items=[],lights=[],meta={tier:{},loot:{},notes:{},npcs:{}};
+  const W=WMG.W,H=WMG.H,g=M.g,rnd=wmgRng(WM.SPECS[k].seed*3+k),occ=new Set(),dec=[],enemies=[],items=[],lights=[],meta={tier:{},loot:{},notes:{},npcs:{}};
   const c={k,M,g,W,H,rnd,dec,enemies,items,lights,meta,occ,fm:null};
   c.open=(x,y)=>g[y]&&g[y][x]==='.';
   c.free=(x,y)=>c.open(x,y)&&!occ.has(x+','+y);

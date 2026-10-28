@@ -4,7 +4,7 @@
    ========================================================================== */
 WM.SPECS=[
  {seed:49711,rooms:[ // 0: 497 Under the Wenlock Well
-  {id:'shaft',kind:'start',nw:3,nh:3,fixed:[13,0],maxDoors:2},
+  {id:'shaft',kind:'start',nw:3,nh:3,fixed:[9,0],maxDoors:2},
   {id:'down',kind:'stairOut',nw:2,nh:2,zone:[0,1,.62,1],maxDoors:1},
   {id:'camp',kind:'camp',nw:3,nh:2,zone:[.15,.85,.12,.4]},
   {id:'cistern',kind:'cistern',nw:4,nh:3,zone:[0,.45,.3,.75]},
@@ -52,13 +52,22 @@ WM.SPECS=[
   {id:'v8',kind:'vault',nw:3,nh:2,sealed:true,vault:'chain',zone:[0,1,.1,.9]},
   {id:'v9',kind:'vault',nw:3,nh:2,sealed:true,vault:'lanterns',zone:[0,1,.1,.9]}]}];
 /* ---------- make the four mazes now, and find the stairs ---------- */
+WM.TRIES=600;
+WM.WANT=[{to:'stairOut',lo:105,hi:125,max:190},{to:'stairOut',lo:76,hi:92,max:125},{to:'stairOut',lo:46,hi:62,max:125},{to:'boss',lo:52,hi:66,max:90}]; // about half the old walks (229, 167, 97, 120) and half the old longest walks
 WM.M=[];
 {const D4=[[0,-1],[1,0],[0,1],[-1,0]];
   const faceOf=(dx,dy)=>D4.findIndex(d=>d[0]===dx&&d[1]===dy);
   WM.SPECS.forEach((sp,k)=>{
     let M=null,seed=sp.seed;
     const isl=sp.rooms.filter(r=>r.noDoor).reduce((n,r)=>n+(2*r.nw-1)*(2*r.nh-1),0);
-    for(let t=0;t<40&&!M;t++){try{const m=wmgBuild(seed+t*7,sp.rooms,{doors:3});if(m.reached>=m.floors-isl){M=m;M.seedUsed=seed+t*7}}catch(e){}}
+    // the walk from the arrival to the way down (or to the boss court) and the longest walk in the level are held to the aims in WM.WANT, so each floor stays short
+    const want=WM.WANT[k];let bestM=null,bestE=1e9;
+    for(let t=0;t<WM.TRIES&&!M;t++){try{const m=wmgBuild(seed+t*7,sp.rooms,{doors:3});if(m.reached<m.floors-isl)continue;
+      const tr=m.rooms.find(r=>r.kind===want.to),dd=m.dist[((tr.y0+tr.y1)>>1)*WMG.W+((tr.x0+tr.x1)>>1)];let mx=0;for(let i=0;i<m.dist.length;i++)if(m.dist[i]>mx)mx=m.dist[i];
+      const e=Math.max(0,want.lo-dd)+Math.max(0,dd-want.hi)+Math.max(0,mx-want.max)*.5;
+      if(e<bestE){bestE=e;bestM=m;m.seedUsed=seed+t*7}
+      if(e===0){M=m;break}}catch(e){}}
+    if(!M)M=bestM;
     if(!M)throw new Error('The well maze '+k+' could not be made');
     // a door tile for a stair: a wall cell on the rim of the room, with the open square in front of it
     const stairWall=(room,prefer)=>{const cells=[];

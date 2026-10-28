@@ -1,0 +1,2 @@
+([x0,y0,x1,y1])=>{const L=LEVELS[475];const m={};const P='Q$+vnBso';for(const d of L.decor){const k=d.x+','+d.y;let c=d.npc?(/hgdpc_text/.test(d.npc)?'s':/q\d/.test(d.npc)?'Q':/s2_|shop/.test(d.npc)?'$':/church/.test(d.npc)?'+':/vill/.test(d.npc)?'v':'n'):d.block?'B':'o';if(!m[k]||P.indexOf(c)<P.indexOf(m[k]))m[k]=c}
+const rows=[];for(let y=y0;y<=y1;y++){let s=String(y).padStart(3)+' ';for(let x=x0;x<=x1;x++){const o=L.rows[y]&&L.rows[y][x]==='.';s+=m[x+','+y]||(o?'.':'#')}rows.push(s)}return rows.join('\n')}

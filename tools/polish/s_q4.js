@@ -1,0 +1,2 @@
+(()=>{const L=LEVELS[475],M=L._hgdm,W=M.W;const o={};for(const [x,y] of [[5,4],[21,62]]){o['k'+x]=M.kind[y*W+x];o['b'+x]=M.bio[y*W+x];o['d'+x]=L.decor.filter(d=>Math.abs(d.x-x)<=2&&Math.abs(d.y-y)<=2).map(d=>[d.k,d.x,d.y,d.ox||0,d.oy||0,d.pic?1:0]);o['i'+x]=L.items.filter(d=>Math.abs(d.x-x)<=2&&Math.abs(d.y-y)<=2).map(d=>[d.k,d.x,d.y]);o['r'+x]=[-2,-1,0,1,2].map(dy=>[-2,-1,0,1,2].map(dx=>L.rows[y+dy][x+dx]==='.'?'.':'#').join('')).join('/')}
+return o})()

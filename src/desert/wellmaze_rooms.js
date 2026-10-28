@@ -122,10 +122,11 @@ WMFU.lake=function(c,r){const R=c.rect(r);
   wmFoes(c,r,['wmslime','wmcrab','wmslime','wmwraith'],5)};
 WMFU.island=function(c,r){const R=c.rect(r);
   c.D('wm_boat',R.x0,R.cy,{block:true,npc:'wmrow_b'});c.chest('treasure_chest',R.x1,R.cy,3,null,{});c.prop('candelabra',R.cx,R.y0,{});c.light(R.cx,R.cy,WM_COL.gold)};
+WM.VVAR={v1:1,v2:4,v3:0,v4:3,v5:3,v6:3,v7:1,v8:0,v9:2}; // which of the five dressings each vault has (fixed, so a vault keeps its look wherever it stands)
 WMFU.vault=function(c,r){const R=c.rect(r);
   const cells=c.pick(c.rim(r),4);let n=0;
   for(const [x,y] of cells){if(n>=3)break;c.chest(n===0?'treasure_chest':'chest',x,y,3,null,{});n++}
-  const v=(hash2(r.x0,r.y0,c.k*17+3)*5)|0;   // five dressings, so the vaults do not all look alike
+  const v=WM.VVAR[r.id]!==undefined?WM.VVAR[r.id]:(hash2(r.x0,r.y0,c.k*17+3)*5)|0;   // five dressings, so the vaults do not all look alike
   if(v===0){c.D('wm_gold',R.cx,R.cy,{block:false,walk:true,deco:true});c.prop('candelabra',R.x0,R.y0,{})}
   else if(v===1){for(const x of [R.x0,R.x1])c.prop('bookshelf',x,R.y0,{});c.prop('statue',R.cx,R.cy,{});c.prop('candelabra',R.x0,R.y1,{})}
   else if(v===2){for(const [x,y] of c.pick(c.inner(r),3))c.prop('crystal_tall',x,y,{});c.prop('shrine',R.cx,R.y0,{});c.deco('skeleton',R.cx,R.cy,{})}

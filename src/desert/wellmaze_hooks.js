@@ -107,9 +107,14 @@ if(typeof DS_LOOTNAME!=='undefined')Object.assign(DS_LOOTNAME,{wm_chest:'Old che
 }}
 
 /* ---------- the pieces carry a little light of their own, so nothing stands in the dark as a black cut-out ---------- */
-const WM_LIFT=[[/brazier|candelabra|lantern|lamp_post|cage|orb_pedestal/,.9],[/crystal|geode|mush|bellflower|bulb/,.72],[/web|skeleton|moss/,.5]];
+const WM_LIFT=[[/orbframe[0-3]$/,1.5],[/brazier|candelabra|lantern|lamp_post|cage|orb_pedestal/,.9],[/crystal|geode|mush|bellflower|bulb/,.72],[/web|skeleton|moss/,.5]];
 {const _sl=spriteList;spriteList=function(){const out=_sl.apply(this,arguments);
   try{if(wmIn())for(const s of out){const d=s.decor;if(!d||!d.k||d.k.indexOf('wm_')!==0)continue;let v=.55;for(const [re,l] of WM_LIFT)if(re.test(d.k)){v=l;break}s.lift=Math.max(s.lift||0,v)}}catch(e){}
   return out}}
 for(const t of Object.keys(ENEMY_DEF))if(/^wm/.test(t)&&t!=='wmwarden'&&!ENEMY_DEF[t].glow)ENEMY_DEF[t].glow=.3;
 for(const t of ['wmcultist','wmgolem','wmbeetle','wmcrab','wmspider','wmfungus','wmmimic'])ENEMY_DEF[t].glow=Math.max(ENEMY_DEF[t].glow||0,.34);
+
+/* the game copies only some decor fields into G.decor (and may rebuild the list), so the orb frames get their flags again whenever the list changes (orbs.js reads orbFrame) */
+{let seen=null,seenN=-1;const _uo=update;update=function(dt){const r=_uo.apply(this,arguments);
+  try{if(wmIn()&&G.decor&&(G.decor!==seen||G.decor.length!==seenN)){seen=G.decor;seenN=G.decor.length;for(const d of G.decor){const m=/^wm_orbframe(\d)$/.exec(d.k||'');if(m&&!d.orbFrame){d.orbFrame=true;d.orbColor=WM.ORBS[+m[1]].css;d.emptyK='wm_orbframeE'+m[1]}}}}catch(e){}
+  return r}}

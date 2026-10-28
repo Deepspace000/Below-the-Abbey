@@ -1,0 +1,1 @@
+()=>{const L=LEVELS[477];const c={};for(const d of G.decor){if((d.bob||0)>.3&&!d.pic){c[d.k]=(c[d.k]||0)+1}}const sp=spriteList();const k2={};for(const s of sp){const key=s.decor?s.decor.k:(s.e?'E:'+s.e.t:'?');k2[key]=(k2[key]||0)+1}return {hi:c,sprites:k2,swim:UWS[477].swim.length,fish:(L._hgdweFish||[]).length,keys:Object.keys(UWS[477])}}

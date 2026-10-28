@@ -1,0 +1,1 @@
+(()=>{const L=LEVELS[475];return L.decor.filter(d=>/notice|board/i.test(d.k+(d.npc||''))&&Math.abs(d.x-178)<=6&&Math.abs(d.y-92)<=6).map(d=>[d.k,d.npc,d.x,d.y,d.sc,(d.pbt||d.text||d.name||'').slice(0,60)])})()

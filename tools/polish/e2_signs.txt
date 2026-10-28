@@ -1,0 +1,20 @@
+  // ---------- 3. signposts at the junctions, each one true: real path lengths and the first turn to take, in eight different voices ----------
+  {const dist=(tx,ty)=>{const m=new Map([[tx+','+ty,0]]),q=[[tx,ty]];for(let i=0;i<q.length;i++){const [x,y]=q[i],dd=m.get(x+','+y);for(const [a,b] of D){const nx=x+a,ny=y+b,k=nx+','+ny;if(!m.has(k)&&open(nx,ny)){m.set(k,dd+1);q.push([nx,ny])}}}return m};
+   const dS=st.map(s=>dist(s.ax,s.ay)),dF=dist(far.x,far.y),CD=['north','east','south','west'];
+   const first=(m,x,y)=>{let best=0,bd=1e9;D.forEach(([a,b],i)=>{const v=m.get((x+a)+','+(y+b));if(v!==undefined&&v<bd){bd=v;best=i}});return CD[best]};
+   const VOICE=[
+    (n,d1,m,d2)=>'Carved in the wall at the crossing: THE STEPS UP, '+n+' squares on, by the '+d1+' passage. THE WARDEN, '+m+' squares on, by the '+d2+' passage.',
+    (n,d1,m,d2)=>'A lantern-maker\'s mark and two lines of chalk: Up and out is '+n+' squares, '+d1+' first. The Warden sleeps '+m+' squares off, '+d2+' first.',
+    (n,d1,m,d2)=>'Painted on the stone in fading white: Dry land, '+n+' squares away, start '+d1+'. The big room with the Warden in it, '+m+' squares away, start '+d2+'.',
+    (n,d1,m,d2)=>'Scratched with a spoon handle: If you are tired, the steps up are '+n+' squares, '+d1+'. If you are brave, the Warden is '+m+' squares, '+d2+'.',
+    (n,d1,m,d2)=>'A ferryman\'s tally, cut deep: Air above, '+n+', leave '+d1+'. Trouble below, '+m+', leave '+d2+'. The numbers are squares.',
+    (n,d1,m,d2)=>'Chiselled in neat capitals: STAIRS '+n+' ('+d1.toUpperCase()+'). WARDEN '+m+' ('+d2.toUpperCase()+'). KEEP TO THE MIDDLE OF THE PASSAGE.',
+    (n,d1,m,d2)=>'Written in lamp oil on a wet beam: I counted it twice. '+n+' squares to the stairs, going '+d1+'. '+m+' squares to the Warden, going '+d2+'.',
+    (n,d1,m,d2)=>'A sailor\'s rhyme, scratched small: '+n+' to the light, '+m+' to the dark. The light lies '+d1+' from here, the dark lies '+d2+'.']; 
+   const js=[];for(let y=1;y<S-1;y++)for(let x=1;x<S-1;x++)if(open(x,y)&&deg(x,y)>=3&&!occupied.has(x+','+y)&&!rooms.some(r=>x>=r.x-1&&x<=r.x+r.w&&y>=r.y-1&&y<=r.y+r.h))js.push([x,y]);
+   js.sort((a,b)=>hash2(a[0],a[1],4)-hash2(b[0],b[1],4));const got=[];
+   for(const [x,y] of js){if(got.length>=8)break;if(got.some(q=>Math.abs(q[0]-x)+Math.abs(q[1]-y)<8))continue;
+     let bi=0,bd=1e9;dS.forEach((m,i)=>{const v=m.get(x+','+y);if(v!==undefined&&v<bd){bd=v;bi=i}});
+     const n=bd,m=dF.get(x+','+y);if(m===undefined||n>=1e9)continue;
+     const txt=VOICE[got.length%VOICE.length](n,first(dS[bi],x,y),m,first(dF,x,y))+' '+HGDWE_TAIL[got.length%HGDWE_TAIL.length];
+     if(wallNote(x,y,txt,{bob:.7})){got.push([x,y]);info.signs++;occupied.add(x+','+y)}}}

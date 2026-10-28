@@ -37,3 +37,22 @@ Balance: ordinary creature health comes from `hgd_balance.js` by the written hp 
 - The art is 17 Gemini sheets (4 of textures, 10 of props, 2 of creatures, 1 boss) cut into pieces about 250 px high, scaled up 1.5 to 2 times, so props are a little soft close up. One candle block (drawn with its top visible) and one barrel stack were thrown away as angled.
 - The cultist and the fungus walker stay dark at a distance (their paintings are dark); they carry extra glow in `wellmaze_hooks.js`.
 - No sounds of its own (pits, levers and bells reuse existing effects).
+
+## Smaller floors (v3.682 work): 61 by 61 down to 43 by 43
+The owner found the well maze too vast, so every floor is now 43 by 43 cells (a lattice of 21 by 21 nodes, `WMG={N:21,W:43,H:43}`), about 55 percent of the old area. Rooms keep their sizes.
+The seed search in `wellmaze_specs.js` (`WM.WANT`, `WM.TRIES`) tries the seeds seed+7t and keeps the first layout whose walk from the arrival to the way down (to the boss court on 502) and whose longest walk are inside the aims. Distances inside the builders (dead ends, pits, spawns, lamps) are scaled by `WM.S(n)` (x0.7).
+Before and after, shortest walk from the arrival to the stair down (502: to the boss court), the longest walk in the floor, floor squares:
+| level | walk before | walk after | longest before | longest after | floor squares before / after |
+|---|---|---|---|---|---|
+| 497 | 229 | 123 | 366 | 174 | 1891 / 964 |
+| 498 | 167 | 93 | 234 | 118 | 1960 / 1023 |
+| 499 | 97 | 49 | 234 | 122 | 1913 / 982 |
+| 502 | 120 (boss) | 54 (boss) | 172 | 90 | 1977 / 1057 |
+Items are kept exactly: `WM.MAN` (wellmaze_levels.js) holds the decor and creature counts by kind of the old floors and `wmEqualize` makes a rebuilt floor match them (a spare piece of random dressing takes the kind of a missing one; the surplus goes). Chests, enemies by kind, notes, doors, keys, switches, closets and pits match the old floors exactly. Lights stay at the old counts (`WM.LIGHTS`). The room dressing is drawn from the plan's own seed (`WM.SPECS[k].seed`) and the vault dressings are fixed (`WM.VVAR`).
+Count check: run `python` with Playwright on the page, build each level by `KH_LAZY[id]()` and tally `LEVELS[id].decor`, `.enemies`, `._wm.doors`, `._wm.tier`, `._wm.notes`, `._wm.keyAt`.
+
+## The way out (499, new)
+A hidden door at a far dead end of the Bell Vaults (chosen as the dead end farthest from both the arrival and the stair down) with a tiny alcove behind it holding the game's teleport stone (decor `teleporter`, npc `wm_exit_stone`). The wall shows slightly lighter bricks in a ring round a brass push-button (tile `exit`, `wmExitTex` in wellmaze_build.js); walking into it presses the button, plays a click and opens the door (`dd.type==='exit'`). The stone takes the party up to Wenlock (`wmClimb`, WK.WELLBACK); it is not in the teleport network (the level is `noTele`). A note, "A Digger's Scribble" (`WM_NOTES.exit2`), stands in the first room on the main route from the arrival to the stair, before the door is reached. `L._wm.exit` holds the squares. It only goes out, never forward.
+
+## Orb frames (new)
+Eight per floor (`WM.ORBN`, `wmOrbs` in wellmaze_levels.js): beside the keys, in the puzzle rooms and rooms, and at dead ends. Each is the painted cage lantern with the teal of its glow turned to the floor's own orb colour (`WM.ORBS`: 497 amber gold, 498 violet pink, 499 cyan blue, 502 emerald green; no new painting was made, `wmOrbArt` recolours `art_wm_cage_lantern` and builds a dim empty copy). Decor flags `orbFrame`, `orbColor`, `emptyK` are set again by an update hook in wellmaze_hooks.js because the game copies only some decor fields. orbs.js lifts the orb out when the frame is used.

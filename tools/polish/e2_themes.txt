@@ -1,0 +1,26 @@
+  const THEMES=[
+   ['Garden of Saints',r=>{ // four saints in a ring round the vent, each a different height, the ring not even
+     const o=[['art_hgxstat0',-2,-1,1.45],['art_hgxstat7',2,1,1.3],['art_hgxstat3',0,-2,1.5],['art_hgxstat6',-1,2,1.35]];
+     for(const [k,dx,dy,h] of o){const x=Math.max(r.x,Math.min(r.x+r.w-1,r.cx+dx)),y=Math.max(r.y,Math.min(r.y+r.h-1,r.cy+dy));prop(k,x,y,h,{block:true})}
+     at(r,0,-1,(x,y)=>prop('art_hgxprop8',x,y,.2)); at(r,-2,-2,(x,y)=>prop('art_hgxprop9',x,y,.34)); at(r,r.w-1,1,(x,y)=>prop('art_hgdf_plant3',x,y,.45));
+     at(r,0,0,(x,y)=>wallNote(x,y,HGDWE_N.garden,{pref:[[0,-1],[-1,0],[1,0],[0,1]]}));
+     const [lx,ly]=R(r,-1,-1);light(lx,ly,L_TEAL,1.2,40);return [r.cx,r.cy]}],
+   ['Drowned Library',r=>{ // three different pieces of furniture, never three of one kind in a row
+     const ks=['art_wm_bookshelf','art_hgtb_furn_cabinet','art_hgtb_furn_bookshelf'],hs=[1.12,.82,1.1];
+     for(let i=0;i<3;i++)at(r,1+2*i,0,(x,y)=>prop(ks[i],x,y,hs[i],{block:true}));
+     at(r,r.w-2,1,(x,y)=>prop('art_hgxprop3',x,y,.1));at(r,1,r.h-2,(x,y)=>prop('art_hgxprop3',x,y,.09,{ox:.2}));at(r,2,2,(x,y)=>prop('art_hgxprop2',x,y,.24,{ox:-.1}));
+     at(r,r.w-1,r.h-1,(x,y)=>prop('art_wm_skeleton',x,y,.34,{block:true}));
+     at(r,0,r.h-1,(x,y)=>prop('art_wm_cage_lantern',x,y,.55));
+     const [nx,ny]=R(r,0,2);wallNote(nx,ny,HGDWE_N.lib,{pref:[[-1,0],[0,-1]]});const [mx,my]=R(r,r.w-1,3);wallNote(mx,my,HGDWE_N.lib2,{pref:[[1,0],[0,1]]});
+     const [lx,ly]=R(r,0,r.h-1);light(lx,ly,L_AMB,1.25,46);return [r.cx,r.cy]}],
+   ['Sunken Bell',r=>{ // the bell hangs from its old frame; reading the bell gives its story
+     const x=r.cx,y=r.cy-1;prop('art_wm_bell',x,y,.75,{block:true,npc:'hgdw_note',hgdwText:HGDWE_N.bell});
+     at(r,0,0,(a,b)=>prop('art_wm_crystal_teal',a,b,.55,{block:true}));at(r,r.w-1,r.h-1,(a,b)=>prop('art_wm_crystal_teal',a,b,.34));
+     at(r,r.w-1,0,(a,b)=>prop('art_hgxprop10',a,b,.1));at(r,0,r.h-1,(a,b)=>prop('art_hgxprop9',a,b,.36));at(r,r.w-1,2,(a,b)=>prop('art_hgxprop6',a,b,.24));
+     const fx=r.cx+1,fy=r.cy-1;prop('art_wm_chain',fx,fy,1.05,{block:true});
+     const [lx,ly]=R(r,0,0);light(lx,ly,L_TEAL,1.4,50);return [x,y]}],
+   ['Wreck of the Ferry',r=>{
+     const x=Math.max(r.x,r.cx-1),y=Math.min(r.y+r.h-1,r.cy+1);anyProp('art_wm_boat',[[x,y],[r.cx+1,r.cy+1],[r.cx-1,r.cy-1],[r.cx+1,r.cy-1],[r.cx,r.cy+2]],.85,{block:true,npc:'hgdw_note',hgdwText:HGDWE_N.wreck});
+     at(r,r.w-1,r.h-1,(a,b)=>prop('art_wm_skeleton',a,b,.34));at(r,1,1,(a,b)=>prop('art_wm_barrel',a,b,.45,{block:true}));
+     at(r,r.w-1,0,(a,b)=>prop('uw_amphora',a,b,.48));at(r,1,0,(a,b)=>prop('art_wm_bucket',a,b,.26,{ox:-.15}));at(r,0,r.h-2,(a,b)=>prop('art_hgxprop12',a,b,.3));
+     const [lx,ly]=R(r,-1,-1);light(lx,ly,L_AMB,1.2,40);return [x,y]}]];

@@ -70,24 +70,34 @@ if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push(...HG_FOOD.map(f=>f[0]),'
     d.gold=chest?60+Math.floor(r(10)*180):10+Math.floor(r(11)*50);return it}
   return _lf.apply(this,arguments)}}
 /* ---------- the walls of the hives: honeycomb, drawn in code ---------- */
-function hgWaxTex(){
-  if(IMG.hg_wax)return;
-  IMG.hg_wax=mkCanvas(128,128,(x,w,h)=>{
-    x.fillStyle='#3a2208';x.fillRect(0,0,w,h);const R=15,hh=R*Math.sqrt(3);
+/* the four honeys: each hive has its own hue (clover, heather, deep amber, buckwheat). wax = [inner stop, outer stop] as [dr,dg,db] added to the cell's shade sh (b = base blue + v*bv), bg = the wall behind the cells,
+   lcol = light colour multipliers, flr = floor multipliers, map = the colour on the maps, glow = [r,g,b] of the halo of the book and the honey of the captives */
+const HG_HONEY=[
+ {n:'clover',icn:['#e0c880','#f2e2a8'],wax:[[70,48,85,35],[15,-12,45,0]],bg:'#6a5a2c',lcol:[1.55,1.38,.8],flr:[2.0,1.8,1.2],map:'#e8d9a0',glow:[255,238,170],door:[255,236,170]},
+ {n:'heather',icn:['#c47e34','#dc9648'],wax:[[45,-25,25,25],[-10,-80,14,0]],bg:'#3a1c06',lcol:[1.8,.95,.3],flr:[1.7,1.0,.45],map:'#d89048',glow:[255,176,80],door:[255,170,90]},
+ {n:'amber',icn:['#b04a24','#cc6a30'],wax:[[30,-60,20,15],[-30,-120,10,0]],bg:'#3a1004',lcol:[1.9,.5,.22],flr:[1.8,.6,.32],map:'#c8602c',glow:[255,150,70],door:[255,120,70]},
+ {n:'buckwheat',icn:['#6a3a1a','#8c5424'],wax:[[-.3,0,0,0],[-.55,0,0,0]],bg:'#1e0c04',lcol:[1.5,1.15,.3],flr:[1.0,.6,.3],map:'#7a4420',glow:[255,200,70],door:[210,140,70]}];
+function hgWaxTex(i){
+  i=i|0;const K='hg_wax'+i,HN=HG_HONEY[i];
+  if(IMG[K])return;
+  const wx=(sh,v,o,q)=>{if(i===3)return q?[sh*.4,sh*.18,12]:[sh*.62+34,sh*.36,26+v*16];const e=HN.wax[q?1:0];return [sh+e[0],sh+e[1],e[2]+v*e[3]]};
+  IMG[K]=mkCanvas(128,128,(x,w,h)=>{
+    x.fillStyle=HN.bg;x.fillRect(0,0,w,h);const R=15,hh=R*Math.sqrt(3);
     for(let r=-1;r<9;r++)for(let c=-1;c<9;c++){const cx=c*R*1.5+8,cy=r*hh+(c%2?hh/2:0)+6,v=hash2(c+9,r+9,61),sh=Math.floor(185+v*60);
       x.beginPath();for(let k=0;k<6;k++){const a=k*Math.PI/3;x.lineTo(cx+(R-1.5)*Math.cos(a),cy+(R-1.5)*Math.sin(a))}x.closePath();
-      const gr=x.createRadialGradient(cx-3,cy-4,2,cx,cy,R);gr.addColorStop(0,`rgb(${sh+50},${sh-10},${Math.floor(30+v*30)})`);gr.addColorStop(1,`rgb(${sh-50},${sh-90},18)`);x.fillStyle=gr;x.fill()}
+      const gr=x.createRadialGradient(cx-3,cy-4,2,cx,cy,R),c0=wx(sh,v,0,0),c1=wx(sh,v,0,1);gr.addColorStop(0,`rgb(${c0[0]|0},${c0[1]|0},${c0[2]|0})`);gr.addColorStop(1,`rgb(${c1[0]|0},${c1[1]|0},${c1[2]|0})`);x.fillStyle=gr;x.fill()}
     x.fillStyle='rgba(255,200,80,.18)';for(let i=0;i<9;i++)x.fillRect(hash2(i,1,62)*w,hash2(i,2,62)*h,2,12+hash2(i,3,62)*30)}); // the odd drip of honey
 }
 /* ---------- the four hives ---------- */
+const HG_SDX=[0,19,26,18]; // a small seed shift per hive, chosen so that the walk to the book is short
 function hgHive(i){
-  const id=HG.HIVES[i];if(LEVELS[id])return;hgWaxTex();
-  const W=62,H=62,sd=id*11+5,hs=hash2,g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
-  OH_STY.hgwax=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:'hg_wax',door:'hg_wax',win:'hg_wax',alt:'hg_wax',zoom:1,contrast:1.05,tint:[255,255,255,0]});
-  const TM=ohTiles(),wall=TM.make('plain','hgwax',2.7).gid,door=String.fromCharCode(0x2f0),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(2.7,'cave',[255,200,120]);KH_DOOR[dgid]={lvl:HG.ID,at:{x:HG_HIVE_AT[i][0],y:HG_HIVE_AT[i][1]+2,f:2}};
+  const id=HG.HIVES[i];if(LEVELS[id])return;hgWaxTex(i);const HN=HG_HONEY[i];
+  const W=47,H=47,sd=id*11+5+HG_SDX[i],hs=hash2,g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
+  OH_STY['hgwax'+i]=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:'hg_wax'+i,door:'hg_wax'+i,win:'hg_wax'+i,alt:'hg_wax'+i,zoom:1,contrast:1.05,tint:[255,255,255,0]});
+  const TM=ohTiles(),wall=TM.make('plain','hgwax'+i,2.7).gid,door=String.fromCharCode(0x2f0),dgid=KH_NEXT_GID++;T_TILE[dgid]=wdExitTile(2.7,'cave',HN.door);KH_DOOR[dgid]={lvl:HG.ID,at:{x:HG_HIVE_AT[i][0],y:HG_HIVE_AT[i][1]+2,f:2}};
   const chars={'#':wall};chars[door]=dgid;
   // the cells of the hive: centres on a staggered lattice, joined by short tunnels
-  const cols=6,rowsN=7,cell=(c,r)=>({c,r,x:Math.round(6+c*9+(r%2?4.5:0)),y:Math.round(6+r*8.2),on:false}),nodes=[];
+  const cols=5,rowsN=6,cell=(c,r)=>({c,r,x:Math.round(5+c*8+(r%2?4:0)),y:Math.round(5+r*7.2),on:false}),nodes=[];
   for(let r=0;r<rowsN;r++)for(let c=0;c<cols;c++)nodes.push(cell(c,r));
   const at=(c,r)=>nodes.find(n=>n.c===c&&n.r===r);
   const nbrs=n=>{const o=[[n.c-1,n.r],[n.c+1,n.r]],e=n.r%2?[0,1]:[-1,0];for(const dr of [-1,1])for(const dc of e)o.push([n.c+dc,n.r+dr]);return o.map(([c,r])=>at(c,r)).filter(Boolean)};
@@ -106,17 +116,22 @@ function hgHive(i){
   const pick=k=>{for(let t=0;t<80;t++){const c=cells[(hs(k,t,sd+4)*cells.length)|0];if(c&&!used.has(c[0]+','+c[1])){used.add(c[0]+','+c[1]);return c}}return null};
   const inFar=(x,y)=>Math.hypot(x-far.x,y-far.y)<=rad(far)+1;
   const decor=[],enemies=[],items=[],lights=[];
-  for(const n of q){lights.push([n.x,n.y]);if(n!==start)decor.push({k:'hg_eggs',x:n.x,y:n.y,block:false,walk:true,deco:true,sc:.9})}
+  /* a block (chest, barrel, egg, lectern) is only set where it keeps every open square reachable from the door (a flood fill checks it) */
+  const bl=new Set(),reachN=()=>{const sn=new Set([sp.x+','+sp.y]),st=[[sp.x,sp.y]];while(st.length){const [x,y]=st.pop();for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy,K=nx+','+ny;if(g[ny]&&g[ny][nx]==='.'&&!bl.has(K)&&!sn.has(K)){sn.add(K);st.push([nx,ny])}}}return sn.size};
+  const baseReach=reachN(),blockOk=(x,y)=>{bl.add(x+','+y);const ok=reachN()===baseReach-bl.size;if(!ok)bl.delete(x+','+y);return ok};
+  for(const n of q){lights.push([n.x,n.y]);if(n!==start&&n!==far)decor.push({k:'hg_eggs',x:n.x,y:n.y,block:false,walk:true,deco:true,sc:.9})}
   const kinds=[['hglarva','hgswarm0'],['hglarva','hgwasp','hgswarm0','hgswarm1'],['hgwasp','hggolem','hgswarm1','hglarva'],['hgwasp','hggolem','hglarva','hgswarm0','hgswarm1']][i];
-  const nFoe=12+i*4;for(let k=0;k<nFoe;k++){const c=pick(100+k);if(c&&!inFar(c[0],c[1])||(c&&k%3===0))enemies.push({t:kinds[(hs(k,i,sd+5)*kinds.length)|0],x:c[0],y:c[1]})}
+  const nFoe=Math.round((12+i*4)*.6);for(let k=0;k<nFoe;k++){const c=pick(100+k);if(c&&!inFar(c[0],c[1])||(c&&k%3===0))enemies.push({t:kinds[(hs(k,i,sd+5)*kinds.length)|0],x:c[0],y:c[1]})}
   const bossT='hgboss'+(i+1);enemies.push({t:bossT,x:far.x,y:far.y+1});
+  bl.add(far.x+','+(far.y-2));
   decor.push({k:'hg_lectern',x:far.x,y:far.y-2,block:true});items.push({k:'hgbook'+(i+1),x:far.x+1,y:far.y-2});used.add(far.x+','+(far.y-2));used.add((far.x+1)+','+(far.y-2));
   const CH=['hg_chestwax','hg_chestweed','hg_chestjelly'];
-  for(let k=0;k<4+i;k++){const c=pick(200+k);if(c)decor.push({k:CH[(hs(k,i,sd+6)*3)|0],x:c[0],y:c[1],block:true})}
-  for(let k=0;k<9;k++){const c=pick(300+k);if(c)decor.push({k:k%2?'hg_waxbarrel':'hg_jar',x:c[0],y:c[1],block:true})}
-  for(let k=0;k<26;k++){const c=pick(400+k);if(c)decor.push({k:'hg_eggs',x:c[0],y:c[1],block:true,sc:.7+hs(k,3,sd+7)*.4})}
+  const pickB=k=>{for(let t=0;t<60;t++){const c=pick(k+t*1000);if(c&&blockOk(c[0],c[1]))return c}return null};
+  for(let k=0;k<4+i;k++){const c=pickB(200+k);if(c)decor.push({k:CH[(hs(k,i,sd+6)*3)|0],x:c[0],y:c[1],block:true})}
+  for(let k=0;k<9;k++){const c=pickB(300+k);if(c)decor.push({k:k%2?'hg_waxbarrel':'hg_jar',x:c[0],y:c[1],block:true})}
+  for(let k=0;k<26;k++){const c=pickB(400+k);if(c)decor.push({k:'hg_eggs',x:c[0],y:c[1],block:true,sc:.7+hs(k,3,sd+7)*.4})}
   for(let k=0;k<12;k++){const c=pick(500+k);if(c)items.push({k:['hgcomb','hgcomb','hgjelly','hggrubs'][k%4],x:c[0],y:c[1]})}
-  const lv={rows:g.map(r=>r.join('')),start:{x:sp.x,y:sp.y-1,f:0},enemies,items,decor,chars,day:0,floor:'wood',name:HG_HIVE_NAMES[i],label:HG_HIVE_NAMES[i],diff:HG.DIFF+i+1,ceilH:2.7,torchGap:1e9,noTele:true,portals:[],lights,
+  const lv={rows:g.map(r=>r.join('')),start:{x:sp.x,y:sp.y-1,f:0},enemies,items,decor,chars,day:0,floor:hgHoneyFloor(i),name:HG_HIVE_NAMES[i],label:HG_HIVE_NAMES[i],diff:HG.DIFF+i+1,ceilH:2.7,torchGap:1e9,noTele:true,portals:[],lights,
     mapNames:[{t:HG_HIVE_NAMES[i],x:sp.x,y:H-1,k:'place'},{t:i===3?'The Queen’s Cell':'The Heart of the Hive',x:far.x,y:far.y-4,k:'place'}]};
   LEVELS[id]=lv;
 }

@@ -1,0 +1,3181 @@
+[
+ {
+  "id": "gandrick",
+  "title": "Kill Gandrick",
+  "who": "Mayor Corbin",
+  "need": 1,
+  "gi": [
+   "corbin"
+  ],
+  "byname": [
+   "corbin"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "corbin",
+    "lvl": 5,
+    "x": 6,
+    "y": 3,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "corbin",
+    "lvl": 5,
+    "x": 6,
+    "y": 3,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Thornwick"
+ },
+ {
+  "id": "ironhill",
+  "title": "Word for Ironhill",
+  "who": "The king's captain",
+  "need": 1,
+  "gi": [
+   "halbrecht"
+  ],
+  "byname": [],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "halbrecht",
+    "lvl": 14,
+    "x": 8,
+    "y": 2,
+    "hid": false
+   }
+  ],
+  "npos": [],
+  "tpos": [],
+  "area": "The Road to Ironhill"
+ },
+ {
+  "id": "mines",
+  "title": "Clear the Mines",
+  "who": "Mayor Halbrecht",
+  "need": 8,
+  "gi": [
+   "halbrecht"
+  ],
+  "byname": [
+   "halbrecht",
+   "oh_halb"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "halbrecht",
+    "lvl": 14,
+    "x": 8,
+    "y": 2,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "halbrecht",
+    "lvl": 14,
+    "x": 8,
+    "y": 2,
+    "hid": false
+   },
+   {
+    "n": "oh_halb",
+    "lvl": 306,
+    "x": 22,
+    "y": 10,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Ironhill"
+ },
+ {
+  "id": "overseer",
+  "title": "The Overseer",
+  "who": "Foreman Bryn",
+  "need": 1,
+  "gi": [
+   "bryn"
+  ],
+  "byname": [
+   "bryn"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "bryn",
+    "lvl": 13,
+    "x": 36,
+    "y": 13,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "bryn",
+    "lvl": 13,
+    "x": 36,
+    "y": 13,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Ironhill"
+ },
+ {
+  "id": "escape",
+  "title": "Out of the Dungeons",
+  "who": "Nobody",
+  "need": 1,
+  "gi": [],
+  "byname": [],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [],
+  "tpos": [],
+  "area": "Ironhill"
+ },
+ {
+  "id": "pass",
+  "title": "Over the Pass",
+  "who": "Captain Rowan",
+  "need": 1,
+  "gi": [],
+  "byname": [
+   "rowan"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "rowan",
+    "lvl": 13,
+    "x": 23,
+    "y": 16,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Greyfang Pass"
+ },
+ {
+  "id": "scoria",
+  "title": "Counsel in Scoria",
+  "who": "Mayor Marigold",
+  "need": 1,
+  "gi": [
+   "marigold",
+   "kh_ishkander"
+  ],
+  "byname": [
+   "marigold"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "marigold",
+    "lvl": 34,
+    "x": 6,
+    "y": 2,
+    "hid": false
+   },
+   {
+    "n": "kh_ishkander",
+    "lvl": 261,
+    "x": 7,
+    "y": 2,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "marigold",
+    "lvl": 34,
+    "x": 6,
+    "y": 2,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Greendale"
+ },
+ {
+  "id": "kh_c1",
+  "title": "The Compass of Dawn",
+  "who": "Neferet, the cartographer",
+  "need": 1,
+  "gi": [
+   "kh_neferet"
+  ],
+  "byname": [
+   "kh_neferet"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "kh_neferet",
+    "lvl": 199,
+    "x": 5,
+    "y": 5,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "kh_neferet",
+    "lvl": 199,
+    "x": 5,
+    "y": 5,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Khemetra"
+ },
+ {
+  "id": "kh_c2",
+  "title": "The Sphinx Scroll Case",
+  "who": "Neferet, the cartographer",
+  "need": 1,
+  "gi": [
+   "kh_neferet"
+  ],
+  "byname": [
+   "kh_neferet"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "kh_neferet",
+    "lvl": 199,
+    "x": 5,
+    "y": 5,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "kh_neferet",
+    "lvl": 199,
+    "x": 5,
+    "y": 5,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Khemetra"
+ },
+ {
+  "id": "kh_c3",
+  "title": "The Copper Serpent Amulet",
+  "who": "Neferet, the cartographer",
+  "need": 1,
+  "gi": [
+   "kh_neferet"
+  ],
+  "byname": [
+   "kh_neferet"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "kh_neferet",
+    "lvl": 199,
+    "x": 5,
+    "y": 5,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "kh_neferet",
+    "lvl": 199,
+    "x": 5,
+    "y": 5,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Khemetra"
+ },
+ {
+  "id": "kh_c4",
+  "title": "The Sand Mother Astrolabe",
+  "who": "Neferet, the cartographer",
+  "need": 1,
+  "gi": [
+   "kh_neferet"
+  ],
+  "byname": [
+   "kh_neferet"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "kh_neferet",
+    "lvl": 199,
+    "x": 5,
+    "y": 5,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "kh_neferet",
+    "lvl": 199,
+    "x": 5,
+    "y": 5,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Khemetra"
+ },
+ {
+  "id": "kh_c5",
+  "title": "The Jade Scarab",
+  "who": "Neferet, the cartographer",
+  "need": 1,
+  "gi": [
+   "kh_neferet"
+  ],
+  "byname": [
+   "kh_neferet"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "kh_neferet",
+    "lvl": 199,
+    "x": 5,
+    "y": 5,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "kh_neferet",
+    "lvl": 199,
+    "x": 5,
+    "y": 5,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Khemetra"
+ },
+ {
+  "id": "kh_c6",
+  "title": "The Lens of the Twin Suns",
+  "who": "Neferet, the cartographer",
+  "need": 1,
+  "gi": [
+   "kh_neferet"
+  ],
+  "byname": [
+   "kh_neferet"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "kh_neferet",
+    "lvl": 199,
+    "x": 5,
+    "y": 5,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "kh_neferet",
+    "lvl": 199,
+    "x": 5,
+    "y": 5,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Khemetra"
+ },
+ {
+  "id": "kh_c7",
+  "title": "The Ankh Key",
+  "who": "Neferet, the cartographer",
+  "need": 1,
+  "gi": [
+   "kh_neferet"
+  ],
+  "byname": [
+   "kh_neferet"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "kh_neferet",
+    "lvl": 199,
+    "x": 5,
+    "y": 5,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "kh_neferet",
+    "lvl": 199,
+    "x": 5,
+    "y": 5,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Khemetra"
+ },
+ {
+  "id": "kh_seal",
+  "title": "The Stolen Seal",
+  "who": "Hotep-Ra, the grand vizier",
+  "need": 1,
+  "gi": [
+   "kh_vizier"
+  ],
+  "byname": [
+   "kh_vizier"
+  ],
+  "tg": [],
+  "hasSpot": true,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "kh_vizier",
+    "lvl": 199,
+    "x": 27,
+    "y": 3,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "kh_vizier",
+    "lvl": 199,
+    "x": 27,
+    "y": 3,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Khemetra"
+ },
+ {
+  "id": "yar2",
+  "title": "The Warden's Key",
+  "who": "Hotep-Ra, the grand vizier",
+  "need": 1,
+  "gi": [],
+  "byname": [
+   "kh_vizier"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "kh_vizier",
+    "lvl": 199,
+    "x": 27,
+    "y": 3,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Yarrim"
+ },
+ {
+  "id": "kh_sea",
+  "title": "The Road to the Narrow Sea",
+  "who": "Captain Menkaure",
+  "need": 1,
+  "gi": [
+   "kh_captain"
+  ],
+  "byname": [],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "kh_captain",
+    "lvl": 213,
+    "x": 6,
+    "y": 2,
+    "hid": false
+   }
+  ],
+  "npos": [],
+  "tpos": [],
+  "area": "Khemetra"
+ },
+ {
+  "id": "yar3",
+  "title": "Salt and Bones",
+  "who": "Menkaure, the shipwright",
+  "need": 8,
+  "gi": [],
+  "byname": [
+   "kh_captain",
+   "yr_menkaure"
+  ],
+  "tg": [],
+  "hasSpot": true,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "kh_captain",
+    "lvl": 213,
+    "x": 6,
+    "y": 2,
+    "hid": false
+   },
+   {
+    "n": "yr_menkaure",
+    "lvl": 290,
+    "x": 85,
+    "y": 38,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Yarrim"
+ },
+ {
+  "id": "yar4",
+  "title": "Washed Ashore",
+  "who": "Tamsin Kell, the harbourmaster",
+  "need": 4,
+  "gi": [
+   "yr_harbour"
+  ],
+  "byname": [
+   "yr_harbour"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "yr_harbour",
+    "lvl": 292,
+    "x": 4,
+    "y": 2,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "yr_harbour",
+    "lvl": 292,
+    "x": 4,
+    "y": 2,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Yarrim"
+ },
+ {
+  "id": "yar5",
+  "title": "Rats in the Net Loft",
+  "who": "Tamsin Kell, the harbourmaster",
+  "need": 6,
+  "gi": [
+   "yr_harbour"
+  ],
+  "byname": [
+   "yr_harbour"
+  ],
+  "tg": [],
+  "hasSpot": true,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "yr_harbour",
+    "lvl": 292,
+    "x": 4,
+    "y": 2,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "yr_harbour",
+    "lvl": 292,
+    "x": 4,
+    "y": 2,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Yarrim"
+ },
+ {
+  "id": "yar6",
+  "title": "The Lamp of Yarrim",
+  "who": "Orsa, keeper of the Yarrim Light",
+  "need": 3,
+  "gi": [
+   "yr_orsa"
+  ],
+  "byname": [
+   "yr_orsa"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "yr_orsa",
+    "lvl": 298,
+    "x": 3,
+    "y": 2,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "yr_orsa",
+    "lvl": 298,
+    "x": 3,
+    "y": 2,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Yarrim"
+ },
+ {
+  "id": "yar7",
+  "title": "Cast Off",
+  "who": "Menkaure, the shipwright",
+  "need": 1,
+  "gi": [
+   "yr_menkaure"
+  ],
+  "byname": [
+   "kh_captain",
+   "yr_menkaure"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "yr_menkaure",
+    "lvl": 290,
+    "x": 85,
+    "y": 38,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "kh_captain",
+    "lvl": 213,
+    "x": 6,
+    "y": 2,
+    "hid": false
+   },
+   {
+    "n": "yr_menkaure",
+    "lvl": 290,
+    "x": 85,
+    "y": 38,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Narrow Sea"
+ },
+ {
+  "id": "vq1",
+  "title": "The Pirate Queen",
+  "who": "Sable Maeve",
+  "need": 10,
+  "gi": [
+   "sb_maeve"
+  ],
+  "byname": [
+   "sb_maeve"
+  ],
+  "tg": [],
+  "hasSpot": true,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "sb_maeve",
+    "lvl": 300,
+    "x": 49,
+    "y": 43,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "sb_maeve",
+    "lvl": 300,
+    "x": 49,
+    "y": 43,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Narrow Sea"
+ },
+ {
+  "id": "vq2",
+  "title": "The Bells of the Drowned Abbey",
+  "who": "Brother Aldous",
+  "need": 3,
+  "gi": [
+   "ib_aldous"
+  ],
+  "byname": [
+   "ib_aldous"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "ib_aldous",
+    "lvl": 301,
+    "x": 46,
+    "y": 35,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "ib_aldous",
+    "lvl": 301,
+    "x": 46,
+    "y": 35,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Narrow Sea"
+ },
+ {
+  "id": "vq3",
+  "title": "Fire and Ash",
+  "who": "Ketra, the ash-priestess",
+  "need": 4,
+  "gi": [
+   "ci_ketra"
+  ],
+  "byname": [
+   "ci_ketra"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "ci_ketra",
+    "lvl": 302,
+    "x": 44,
+    "y": 52,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "ci_ketra",
+    "lvl": 302,
+    "x": 44,
+    "y": 52,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Narrow Sea"
+ },
+ {
+  "id": "vq4",
+  "title": "The Last Page",
+  "who": "Isolde",
+  "need": 1,
+  "gi": [
+   "ll_isolde"
+  ],
+  "byname": [
+   "ll_isolde",
+   "hgd_s2_magic7"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "ll_isolde",
+    "lvl": 303,
+    "x": 41,
+    "y": 46,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "ll_isolde",
+    "lvl": 303,
+    "x": 41,
+    "y": 46,
+    "hid": false
+   },
+   {
+    "n": "hgd_s2_magic7",
+    "lvl": 475,
+    "x": 141,
+    "y": 28,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Narrow Sea"
+ },
+ {
+  "id": "vq5",
+  "title": "Home Waters",
+  "who": "Menkaure, the shipwright",
+  "need": 1,
+  "gi": [],
+  "byname": [
+   "kh_captain",
+   "yr_menkaure"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "kh_captain",
+    "lvl": 213,
+    "x": 6,
+    "y": 2,
+    "hid": false
+   },
+   {
+    "n": "yr_menkaure",
+    "lvl": 290,
+    "x": 85,
+    "y": 38,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Narrow Sea"
+ },
+ {
+  "id": "kg0",
+  "title": "The Kraken Guns",
+  "who": "Menkaure, the shipwright",
+  "need": 4,
+  "gi": [],
+  "byname": [
+   "kh_captain",
+   "yr_menkaure"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "kh_captain",
+    "lvl": 213,
+    "x": 6,
+    "y": 2,
+    "hid": false
+   },
+   {
+    "n": "yr_menkaure",
+    "lvl": 290,
+    "x": 85,
+    "y": 38,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Narrow Sea"
+ },
+ {
+  "id": "kg1",
+  "title": "Smoke on the Red Cliffs",
+  "who": "Ketra, the ash-priestess",
+  "need": 1,
+  "gi": [],
+  "byname": [
+   "ci_ketra"
+  ],
+  "tg": [],
+  "hasSpot": true,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "ci_ketra",
+    "lvl": 302,
+    "x": 44,
+    "y": 52,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Narrow Sea"
+ },
+ {
+  "id": "kg2",
+  "title": "The Admiral's Flagship",
+  "who": "Sable Maeve",
+  "need": 1,
+  "gi": [],
+  "byname": [
+   "sb_maeve"
+  ],
+  "tg": [],
+  "hasSpot": true,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "sb_maeve",
+    "lvl": 300,
+    "x": 49,
+    "y": 43,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Narrow Sea"
+ },
+ {
+  "id": "kg3",
+  "title": "The Chaplain's Stones",
+  "who": "Brother Aldous",
+  "need": 1,
+  "gi": [],
+  "byname": [
+   "ib_aldous"
+  ],
+  "tg": [],
+  "hasSpot": true,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "ib_aldous",
+    "lvl": 301,
+    "x": 46,
+    "y": 35,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Narrow Sea"
+ },
+ {
+  "id": "kg4",
+  "title": "The Beacon Wreck",
+  "who": "Isolde",
+  "need": 1,
+  "gi": [],
+  "byname": [
+   "ll_isolde",
+   "hgd_s2_magic7"
+  ],
+  "tg": [
+   "uw_dive_303"
+  ],
+  "hasSpot": true,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "ll_isolde",
+    "lvl": 303,
+    "x": 41,
+    "y": 46,
+    "hid": false
+   },
+   {
+    "n": "hgd_s2_magic7",
+    "lvl": 475,
+    "x": 141,
+    "y": 28,
+    "hid": false
+   }
+  ],
+  "tpos": [
+   {
+    "n": "uw_dive_303",
+    "lvl": 303,
+    "x": 58,
+    "y": 54,
+    "hid": false
+   }
+  ],
+  "area": "The Narrow Sea"
+ },
+ {
+  "id": "sd2",
+  "title": "Kraken Slayer",
+  "who": "Menkaure, the shipwright",
+  "need": 1,
+  "gi": [
+   "yr_menkaure"
+  ],
+  "byname": [
+   "kh_captain",
+   "yr_menkaure"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "yr_menkaure",
+    "lvl": 290,
+    "x": 85,
+    "y": 38,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "kh_captain",
+    "lvl": 213,
+    "x": 6,
+    "y": 2,
+    "hid": false
+   },
+   {
+    "n": "yr_menkaure",
+    "lvl": 290,
+    "x": 85,
+    "y": 38,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Narrow Sea"
+ },
+ {
+  "id": "vq6",
+  "title": "The Court of King Osric",
+  "who": "King Osric",
+  "need": 1,
+  "gi": [
+   "oh_cap"
+  ],
+  "byname": [
+   "oh_king"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "oh_cap",
+    "lvl": 305,
+    "x": 74,
+    "y": 22,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "oh_king",
+    "lvl": 306,
+    "x": 17,
+    "y": 3,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Narrow Sea"
+ },
+ {
+  "id": "oq0",
+  "title": "The Six Names",
+  "who": "Captain Aldwyn, of the Gate",
+  "need": 6,
+  "gi": [],
+  "byname": [
+   "oh_cap"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "oh_cap",
+    "lvl": 305,
+    "x": 74,
+    "y": 22,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Oldhaven"
+ },
+ {
+  "id": "sg1",
+  "title": "Smoke at the East Gate",
+  "who": "Captain Aldwyn, of the Gate",
+  "need": 6,
+  "gi": [],
+  "byname": [
+   "oh_cap"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "oh_cap",
+    "lvl": 305,
+    "x": 74,
+    "y": 22,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Oldhaven"
+ },
+ {
+  "id": "sg2",
+  "title": "Bread for the Wall",
+  "who": "Sergeant Cade, of the garrison",
+  "need": 8,
+  "gi": [],
+  "byname": [
+   "oh_sergeant"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "oh_sergeant",
+    "lvl": 6074,
+    "x": 5,
+    "y": 2,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Oldhaven"
+ },
+ {
+  "id": "sg3",
+  "title": "Mend the Wall",
+  "who": "Dunstan, the mason",
+  "need": 5,
+  "gi": [
+   "oh_s_mason"
+  ],
+  "byname": [
+   "oh_s_mason",
+   "hgd_vill23"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "oh_s_mason",
+    "lvl": 305,
+    "x": 70,
+    "y": 60,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "oh_s_mason",
+    "lvl": 305,
+    "x": 70,
+    "y": 60,
+    "hid": false
+   },
+   {
+    "n": "hgd_vill23",
+    "lvl": 475,
+    "x": 138,
+    "y": 25,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Oldhaven"
+ },
+ {
+  "id": "sg4",
+  "title": "The Cats Guild",
+  "who": "Gammer Wick, of the Cats Guild",
+  "need": 3,
+  "gi": [
+   "oh_s_cats"
+  ],
+  "byname": [
+   "oh_s_cats"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "oh_s_cats",
+    "lvl": 305,
+    "x": 85,
+    "y": 59,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "oh_s_cats",
+    "lvl": 305,
+    "x": 85,
+    "y": 59,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Oldhaven"
+ },
+ {
+  "id": "sg5",
+  "title": "Pigeon Post",
+  "who": "Captain Aldwyn, of the Gate",
+  "need": 3,
+  "gi": [],
+  "byname": [
+   "oh_cap"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "oh_cap",
+    "lvl": 305,
+    "x": 74,
+    "y": 22,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Oldhaven"
+ },
+ {
+  "id": "sg6",
+  "title": "Out of the Fire",
+  "who": "Sergeant Cade, of the garrison",
+  "need": 4,
+  "gi": [],
+  "byname": [
+   "oh_sergeant"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "oh_sergeant",
+    "lvl": 6074,
+    "x": 5,
+    "y": 2,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Oldhaven"
+ },
+ {
+  "id": "sg7",
+  "title": "The Bakery Tunnel",
+  "who": "Perrin, the baker",
+  "need": 3,
+  "gi": [],
+  "byname": [
+   "oh_x_baker"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "oh_x_baker",
+    "lvl": 305,
+    "x": 121,
+    "y": 79,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Oldhaven"
+ },
+ {
+  "id": "sg8",
+  "title": "The Sortie",
+  "who": "Captain Aldwyn, of the Gate",
+  "need": 10,
+  "gi": [],
+  "byname": [
+   "oh_cap"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "oh_cap",
+    "lvl": 305,
+    "x": 74,
+    "y": 22,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Oldhaven"
+ },
+ {
+  "id": "oa1",
+  "title": "Through the East Gate",
+  "who": "Captain Aldwyn, of the Gate",
+  "need": 1,
+  "gi": [],
+  "byname": [
+   "oh_cap"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "oh_cap",
+    "lvl": 305,
+    "x": 74,
+    "y": 22,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Oakwood"
+ },
+ {
+  "id": "oa2",
+  "title": "Wolves at the Glade",
+  "who": "Hale, captain of the woodwardens",
+  "need": 6,
+  "gi": [
+   "oa_hale"
+  ],
+  "byname": [
+   "hale",
+   "oh_armrer",
+   "oa_hale"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "oa_hale",
+    "lvl": 311,
+    "x": 22,
+    "y": 20,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "hale",
+    "lvl": 33,
+    "x": 21,
+    "y": 17,
+    "hid": false
+   },
+   {
+    "n": "oh_armrer",
+    "lvl": 306,
+    "x": 29,
+    "y": 16,
+    "hid": false
+   },
+   {
+    "n": "oa_hale",
+    "lvl": 311,
+    "x": 22,
+    "y": 20,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Oakwood"
+ },
+ {
+  "id": "oa3",
+  "title": "Acorns for the Oakwrights",
+  "who": "Master Joss, of the Oakwrights",
+  "need": 6,
+  "gi": [
+   "oa_master"
+  ],
+  "byname": [
+   "oa_master"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "oa_master",
+    "lvl": 311,
+    "x": 22,
+    "y": 54,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "oa_master",
+    "lvl": 311,
+    "x": 22,
+    "y": 54,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Oakwood"
+ },
+ {
+  "id": "oa4",
+  "title": "Herbs for the Hedge-Wizard",
+  "who": "Bramwick, the hedge-wizard",
+  "need": 5,
+  "gi": [
+   "oa_wizard"
+  ],
+  "byname": [
+   "oa_wizard"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "oa_wizard",
+    "lvl": 311,
+    "x": 46,
+    "y": 36,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "oa_wizard",
+    "lvl": 311,
+    "x": 46,
+    "y": 36,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Oakwood"
+ },
+ {
+  "id": "oa6",
+  "title": "Ash in the Oakwood",
+  "who": "Hale, captain of the woodwardens",
+  "need": 8,
+  "gi": [
+   "oa_hale"
+  ],
+  "byname": [
+   "hale",
+   "oh_armrer",
+   "oa_hale"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "oa_hale",
+    "lvl": 311,
+    "x": 22,
+    "y": 20,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "hale",
+    "lvl": 33,
+    "x": 21,
+    "y": 17,
+    "hid": false
+   },
+   {
+    "n": "oh_armrer",
+    "lvl": 306,
+    "x": 29,
+    "y": 16,
+    "hid": false
+   },
+   {
+    "n": "oa_hale",
+    "lvl": 311,
+    "x": 22,
+    "y": 20,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Oakwood"
+ },
+ {
+  "id": "oa7",
+  "title": "Timber for the Oakwrights",
+  "who": "Master Joss, of the Oakwrights",
+  "need": 4,
+  "gi": [
+   "oa_master"
+  ],
+  "byname": [
+   "oa_master"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "oa_master",
+    "lvl": 311,
+    "x": 22,
+    "y": 54,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "oa_master",
+    "lvl": 311,
+    "x": 22,
+    "y": 54,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Oakwood"
+ },
+ {
+  "id": "oa5",
+  "title": "The Heir in the Woods",
+  "who": "Wren, a young woodwarden",
+  "need": 1,
+  "gi": [
+   "oa_wren"
+  ],
+  "byname": [
+   "wren",
+   "oa_wren",
+   "sn_wren",
+   "hgd_s2_trader3",
+   "rubysorceress",
+   "wli_page2"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "oa_wren",
+    "lvl": 311,
+    "x": 22,
+    "y": 17,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "wren",
+    "lvl": 33,
+    "x": 15,
+    "y": 17,
+    "hid": false
+   },
+   {
+    "n": "oa_wren",
+    "lvl": 311,
+    "x": 22,
+    "y": 17,
+    "hid": false
+   },
+   {
+    "n": "sn_wren",
+    "lvl": 336,
+    "x": 26,
+    "y": 17,
+    "hid": false
+   },
+   {
+    "n": "hgd_s2_trader3",
+    "lvl": 475,
+    "x": 87,
+    "y": 109,
+    "hid": false
+   },
+   {
+    "n": "rubysorceress",
+    "lvl": 500,
+    "x": 18,
+    "y": 13,
+    "hid": false
+   },
+   {
+    "n": "wli_page2",
+    "lvl": 7062,
+    "x": 9,
+    "y": 5,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Oakwood"
+ },
+ {
+  "id": "oa8",
+  "title": "Three Questions of the Great Oak",
+  "who": "Ysolt, keeper of the Great Oak",
+  "need": 3,
+  "gi": [
+   "oa_ysolt"
+  ],
+  "byname": [
+   "oa_ysolt"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "oa_ysolt",
+    "lvl": 311,
+    "x": 68,
+    "y": 57,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "oa_ysolt",
+    "lvl": 311,
+    "x": 68,
+    "y": 57,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Oakwood"
+ },
+ {
+  "id": "oa9",
+  "title": "The Oak Crown",
+  "who": "Ysolt, keeper of the Great Oak",
+  "need": 1,
+  "gi": [
+   "oa_ysolt"
+  ],
+  "byname": [
+   "oa_ysolt"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "oa_ysolt",
+    "lvl": 311,
+    "x": 68,
+    "y": 57,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "oa_ysolt",
+    "lvl": 311,
+    "x": 68,
+    "y": 57,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Oakwood"
+ },
+ {
+  "id": "ad1",
+  "title": "The Orrery of Hours",
+  "who": "Captain Aldwyn, of the Gate",
+  "need": 6,
+  "gi": [],
+  "byname": [
+   "oh_cap"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "oh_cap",
+    "lvl": 305,
+    "x": 74,
+    "y": 22,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Below the Abbey"
+ },
+ {
+  "id": "ad2",
+  "title": "Home to the Abbey",
+  "who": "The Sealed Door",
+  "need": 1,
+  "gi": [
+   "ab_door"
+  ],
+  "byname": [],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [],
+  "tpos": [],
+  "area": "Below the Abbey"
+ },
+ {
+  "id": "ad3",
+  "title": "The Four Floors",
+  "who": "Brother Sevrin",
+  "need": 1,
+  "gi": [
+   "ab_sevrin"
+  ],
+  "byname": [
+   "ab_sevrin"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "ab_sevrin",
+    "lvl": 363,
+    "x": 21,
+    "y": 25,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "ab_sevrin",
+    "lvl": 363,
+    "x": 21,
+    "y": 25,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Below the Abbey"
+ },
+ {
+  "id": "ad4",
+  "title": "The Hollow Abbot",
+  "who": "Brother Sevrin",
+  "need": 1,
+  "gi": [
+   "ab_sevrin"
+  ],
+  "byname": [
+   "ab_sevrin"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "ab_sevrin",
+    "lvl": 363,
+    "x": 21,
+    "y": 25,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "ab_sevrin",
+    "lvl": 363,
+    "x": 21,
+    "y": 25,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Below the Abbey"
+ },
+ {
+  "id": "hc1",
+  "title": "Vance\u2019s Letters",
+  "who": "Brother Sevrin",
+  "need": 3,
+  "gi": [
+   "ab_sevrin"
+  ],
+  "byname": [
+   "ab_sevrin"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "ab_sevrin",
+    "lvl": 363,
+    "x": 21,
+    "y": 25,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "ab_sevrin",
+    "lvl": 363,
+    "x": 21,
+    "y": 25,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Below the Abbey"
+ },
+ {
+  "id": "hc2",
+  "title": "The Question at the Top",
+  "who": "The Wizard at the top of the tower",
+  "need": 1,
+  "gi": [
+   "hl_wizard"
+  ],
+  "byname": [
+   "hl_wizard"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "hl_wizard",
+    "lvl": 459,
+    "x": 12,
+    "y": 5,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "hl_wizard",
+    "lvl": 459,
+    "x": 12,
+    "y": 5,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Below the Abbey"
+ },
+ {
+  "id": "hgb1",
+  "title": "The Book: The Primer of Ripples",
+  "who": "Aldous Wend",
+  "need": 1,
+  "gi": [
+   "hg_aldous"
+  ],
+  "byname": [
+   "hg_aldous0",
+   "hg_aldous"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "hg_aldous",
+    "lvl": 481,
+    "x": 70,
+    "y": 98,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 4866,
+    "x": 7,
+    "y": 4,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "hg_aldous0",
+    "lvl": 470,
+    "x": 75,
+    "y": 133,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 481,
+    "x": 70,
+    "y": 98,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 4866,
+    "x": 7,
+    "y": 4,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Hollow Grasslands"
+ },
+ {
+  "id": "hgb2",
+  "title": "The Book: The Book of Small Courtesies",
+  "who": "Aldous Wend",
+  "need": 1,
+  "gi": [
+   "hg_aldous"
+  ],
+  "byname": [
+   "hg_aldous0",
+   "hg_aldous"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "hg_aldous",
+    "lvl": 481,
+    "x": 70,
+    "y": 98,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 4866,
+    "x": 7,
+    "y": 4,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "hg_aldous0",
+    "lvl": 470,
+    "x": 75,
+    "y": 133,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 481,
+    "x": 70,
+    "y": 98,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 4866,
+    "x": 7,
+    "y": 4,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Hollow Grasslands"
+ },
+ {
+  "id": "hgb3",
+  "title": "The Book: The Grammar of the Deep Water",
+  "who": "Aldous Wend",
+  "need": 1,
+  "gi": [
+   "hg_aldous"
+  ],
+  "byname": [
+   "hg_aldous0",
+   "hg_aldous"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "hg_aldous",
+    "lvl": 481,
+    "x": 70,
+    "y": 98,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 4866,
+    "x": 7,
+    "y": 4,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "hg_aldous0",
+    "lvl": 470,
+    "x": 75,
+    "y": 133,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 481,
+    "x": 70,
+    "y": 98,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 4866,
+    "x": 7,
+    "y": 4,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Hollow Grasslands"
+ },
+ {
+  "id": "hgb4",
+  "title": "The Book: The Queen\u2019s Dictionary",
+  "who": "Aldous Wend",
+  "need": 1,
+  "gi": [
+   "hg_aldous"
+  ],
+  "byname": [
+   "hg_aldous0",
+   "hg_aldous"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "hg_aldous",
+    "lvl": 481,
+    "x": 70,
+    "y": 98,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 4866,
+    "x": 7,
+    "y": 4,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "hg_aldous0",
+    "lvl": 470,
+    "x": 75,
+    "y": 133,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 481,
+    "x": 70,
+    "y": 98,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 4866,
+    "x": 7,
+    "y": 4,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Hollow Grasslands"
+ },
+ {
+  "id": "hgrescue",
+  "title": "Freed from the Honey",
+  "who": "Aldous Wend",
+  "need": 8,
+  "gi": [],
+  "byname": [
+   "hg_aldous0",
+   "hg_aldous"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "hg_aldous0",
+    "lvl": 470,
+    "x": 75,
+    "y": 133,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 481,
+    "x": 70,
+    "y": 98,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 4866,
+    "x": 7,
+    "y": 4,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Hollow Grasslands"
+ },
+ {
+  "id": "dh1",
+  "title": "The Corruption in the Deep",
+  "who": "Aldous Wend",
+  "need": 1,
+  "gi": [],
+  "byname": [
+   "hg_aldous0",
+   "hg_aldous"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "hg_aldous0",
+    "lvl": 470,
+    "x": 75,
+    "y": 133,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 481,
+    "x": 70,
+    "y": 98,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 4866,
+    "x": 7,
+    "y": 4,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Hollow Grasslands"
+ },
+ {
+  "id": "dh2",
+  "title": "Jelly for the Moth",
+  "who": "Old Lilac, the great moth",
+  "need": 6,
+  "gi": [
+   "hgd_moth"
+  ],
+  "byname": [],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [],
+  "tpos": [],
+  "area": "The Hollow Grasslands"
+ },
+ {
+  "id": "dh3",
+  "title": "The Whale's Errand",
+  "who": "Bulb, the great whale",
+  "need": 8,
+  "gi": [
+   "hgd_whale"
+  ],
+  "byname": [],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [],
+  "tpos": [],
+  "area": "The Hollow Grasslands"
+ },
+ {
+  "id": "dq11",
+  "title": "The Road of Towns",
+  "who": "Madam Voss",
+  "need": 4,
+  "gi": [
+   "hgd_q10"
+  ],
+  "byname": [
+   "hgd_q10"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "hgd_q10",
+    "lvl": 475,
+    "x": 172,
+    "y": 35,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "hgd_q10",
+    "lvl": 475,
+    "x": 172,
+    "y": 35,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Deeper Hollow"
+ },
+ {
+  "id": "dq12",
+  "title": "The Warden in the Dark",
+  "who": "Quill the Surveyor",
+  "need": 1,
+  "gi": [
+   "hgd_q11"
+  ],
+  "byname": [
+   "hgd_q11"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "hgd_q11",
+    "lvl": 475,
+    "x": 14,
+    "y": 70,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "hgd_q11",
+    "lvl": 475,
+    "x": 14,
+    "y": 70,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Deeper Hollow"
+ },
+ {
+  "id": "hgsph",
+  "title": "Six Burning Spheres",
+  "who": "Cinder, the ember warden",
+  "need": 6,
+  "gi": [
+   "hgd_cinder"
+  ],
+  "byname": [
+   "hgd_cinder"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "hgd_cinder",
+    "lvl": 475,
+    "x": 149,
+    "y": 30,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "hgd_cinder",
+    "lvl": 475,
+    "x": 149,
+    "y": 30,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Deeper Hollow"
+ },
+ {
+  "id": "bsw1",
+  "title": "The Black Swill",
+  "who": "Cinder, the ember warden",
+  "need": 1,
+  "gi": [
+   "hgd_cinder"
+  ],
+  "byname": [
+   "hgd_cinder"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "hgd_cinder",
+    "lvl": 475,
+    "x": 149,
+    "y": 30,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "hgd_cinder",
+    "lvl": 475,
+    "x": 149,
+    "y": 30,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Deeper Hollow"
+ },
+ {
+  "id": "wk1",
+  "title": "The Western Kingdoms",
+  "who": "Aldous Wend, wizard",
+  "need": 1,
+  "gi": [
+   "bsw_aldous"
+  ],
+  "byname": [
+   "hg_aldous0",
+   "hg_aldous"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "hg_aldous0",
+    "lvl": 470,
+    "x": 75,
+    "y": 133,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 481,
+    "x": 70,
+    "y": 98,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 4866,
+    "x": 7,
+    "y": 4,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Western Kingdoms"
+ },
+ {
+  "id": "wk2",
+  "title": "The Town of Wenlock",
+  "who": "Aldous Wend, wizard",
+  "need": 1,
+  "gi": [],
+  "byname": [
+   "hg_aldous0",
+   "hg_aldous"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "hg_aldous0",
+    "lvl": 470,
+    "x": 75,
+    "y": 133,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 481,
+    "x": 70,
+    "y": 98,
+    "hid": false
+   },
+   {
+    "n": "hg_aldous",
+    "lvl": 4866,
+    "x": 7,
+    "y": 4,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "The Western Kingdoms"
+ },
+ {
+  "id": "wk3",
+  "title": "The Mayor of Wenlock",
+  "who": "The mayor of Wenlock",
+  "need": 1,
+  "gi": [],
+  "byname": [],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [],
+  "tpos": [],
+  "area": "The Western Kingdoms"
+ },
+ {
+  "id": "gyq1",
+  "title": "The Wedding Ring",
+  "who": "Lady Aldith, in the crypt",
+  "need": 2,
+  "gi": [
+   "gyo_ghost"
+  ],
+  "byname": [
+   "gyo_ghost"
+  ],
+  "tg": [
+   "gyo_door0",
+   "gyo_keychest"
+  ],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "gyo_ghost",
+    "lvl": 531,
+    "x": 12,
+    "y": 6,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "gyo_ghost",
+    "lvl": 531,
+    "x": 12,
+    "y": 6,
+    "hid": false
+   }
+  ],
+  "tpos": [
+   {
+    "n": "gyo_door0",
+    "lvl": 530,
+    "x": 58,
+    "y": 6,
+    "hid": false
+   },
+   {
+    "n": "gyo_keychest",
+    "lvl": 532,
+    "x": 17,
+    "y": 7,
+    "hid": false
+   }
+  ],
+  "area": "Wenlock Graveyard"
+ },
+ {
+  "id": "gyq2",
+  "title": "The Name-stone",
+  "who": "Lady Aldith, in the crypt",
+  "need": 2,
+  "gi": [
+   "gyo_ghost"
+  ],
+  "byname": [
+   "gyo_ghost"
+  ],
+  "tg": [
+   "gyo_door1",
+   "gyo_lever",
+   "gyo_riddle"
+  ],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "gyo_ghost",
+    "lvl": 531,
+    "x": 12,
+    "y": 6,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "gyo_ghost",
+    "lvl": 531,
+    "x": 12,
+    "y": 6,
+    "hid": false
+   }
+  ],
+  "tpos": [
+   {
+    "n": "gyo_door1",
+    "lvl": 530,
+    "x": 58,
+    "y": 63,
+    "hid": false
+   },
+   {
+    "n": "gyo_lever",
+    "lvl": 533,
+    "x": 6,
+    "y": 8,
+    "hid": false
+   },
+   {
+    "n": "gyo_lever",
+    "lvl": 533,
+    "x": 13,
+    "y": 26,
+    "hid": false
+   },
+   {
+    "n": "gyo_lever",
+    "lvl": 533,
+    "x": 28,
+    "y": 18,
+    "hid": false
+   },
+   {
+    "n": "gyo_riddle",
+    "lvl": 533,
+    "x": 1,
+    "y": 29,
+    "hid": false
+   }
+  ],
+  "area": "Wenlock Graveyard"
+ },
+ {
+  "id": "gyq3",
+  "title": "The Locket",
+  "who": "Lady Aldith, in the crypt",
+  "need": 2,
+  "gi": [
+   "gyo_ghost"
+  ],
+  "byname": [
+   "gyo_ghost"
+  ],
+  "tg": [
+   "gyo_door2"
+  ],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "gyo_ghost",
+    "lvl": 531,
+    "x": 12,
+    "y": 6,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "gyo_ghost",
+    "lvl": 531,
+    "x": 12,
+    "y": 6,
+    "hid": false
+   }
+  ],
+  "tpos": [
+   {
+    "n": "gyo_door2",
+    "lvl": 530,
+    "x": 12,
+    "y": 63,
+    "hid": false
+   }
+  ],
+  "area": "Wenlock Graveyard"
+ },
+ {
+  "id": "gyq4",
+  "title": "The Book of Rest",
+  "who": "Lady Aldith, in the crypt",
+  "need": 2,
+  "gi": [
+   "gyo_ghost"
+  ],
+  "byname": [
+   "gyo_ghost"
+  ],
+  "tg": [
+   "gyo_door3",
+   "gyo_trapchest"
+  ],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "gyo_ghost",
+    "lvl": 531,
+    "x": 12,
+    "y": 6,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "gyo_ghost",
+    "lvl": 531,
+    "x": 12,
+    "y": 6,
+    "hid": false
+   }
+  ],
+  "tpos": [
+   {
+    "n": "gyo_door3",
+    "lvl": 530,
+    "x": 12,
+    "y": 6,
+    "hid": false
+   },
+   {
+    "n": "gyo_trapchest",
+    "lvl": 535,
+    "x": 14,
+    "y": 12,
+    "hid": false
+   }
+  ],
+  "area": "Wenlock Graveyard"
+ },
+ {
+  "id": "gyq5",
+  "title": "A Place to Rest",
+  "who": "Lady Aldith, in the crypt",
+  "need": 1,
+  "gi": [
+   "gyo_ghost"
+  ],
+  "byname": [
+   "gyo_ghost"
+  ],
+  "tg": [
+   "gyo_grave"
+  ],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "gyo_ghost",
+    "lvl": 531,
+    "x": 12,
+    "y": 6,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "gyo_ghost",
+    "lvl": 531,
+    "x": 12,
+    "y": 6,
+    "hid": false
+   }
+  ],
+  "tpos": [
+   {
+    "n": "gyo_grave",
+    "lvl": 530,
+    "x": 36,
+    "y": 50,
+    "hid": false
+   }
+  ],
+  "area": "Wenlock Graveyard"
+ },
+ {
+  "id": "wwq1",
+  "title": "The Boy Who Followed the Smell",
+  "who": "Goodwife Marrow",
+  "need": 3,
+  "gi": [
+   "wwo_marrow"
+  ],
+  "byname": [],
+  "tg": [
+   "wwo_boot"
+  ],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [],
+  "tpos": [
+   {
+    "n": "wwo_boot",
+    "lvl": 520,
+    "x": 23,
+    "y": 48,
+    "hid": false
+   }
+  ],
+  "area": "Wenlock"
+ },
+ {
+  "id": "wwq2",
+  "title": "Salt and Iron",
+  "who": "Goody Prue",
+  "need": 2,
+  "gi": [],
+  "byname": [],
+  "tg": [
+   "wlo_friar"
+  ],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [],
+  "tpos": [],
+  "area": "Wenlock"
+ },
+ {
+  "id": "wwq3",
+  "title": "The Hag-Stone and the Rowan",
+  "who": "Sexton Moss",
+  "need": 3,
+  "gi": [],
+  "byname": [],
+  "tg": [
+   "wwo_hagstone"
+  ],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [],
+  "tpos": [
+   {
+    "n": "wwo_hagstone",
+    "lvl": 520,
+    "x": 19,
+    "y": 29,
+    "hid": false
+   }
+  ],
+  "area": "Wenlock"
+ },
+ {
+  "id": "wwq4",
+  "title": "Break the Witch's Wards",
+  "who": "Brother Tuck",
+  "need": 3,
+  "gi": [],
+  "byname": [],
+  "tg": [
+   "wwo_totem1"
+  ],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [],
+  "tpos": [
+   {
+    "n": "wwo_totem1",
+    "lvl": 520,
+    "x": 6,
+    "y": 38,
+    "hid": false
+   }
+  ],
+  "area": "Wenlock"
+ },
+ {
+  "id": "wwq5",
+  "title": "The Key to the Cellar",
+  "who": "Constable Fudge",
+  "need": 1,
+  "gi": [],
+  "byname": [],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [],
+  "tpos": [],
+  "area": "Wenlock"
+ },
+ {
+  "id": "wwq6",
+  "title": "Little Prisoners",
+  "who": "Goodwife Marrow",
+  "need": 3,
+  "gi": [],
+  "byname": [],
+  "tg": [
+   "wwo_cage1"
+  ],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [],
+  "tpos": [
+   {
+    "n": "wwo_cage1",
+    "lvl": 522,
+    "x": 3,
+    "y": 2,
+    "hid": false
+   }
+  ],
+  "area": "Wenlock"
+ },
+ {
+  "id": "wwq7",
+  "title": "Into the Oven",
+  "who": "Mayor Aldous Thistlewood",
+  "need": 3,
+  "gi": [],
+  "byname": [],
+  "tg": [
+   "wwo_grisselda"
+  ],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [],
+  "tpos": [
+   {
+    "n": "wwo_grisselda",
+    "lvl": 521,
+    "x": 8,
+    "y": 6,
+    "hid": false
+   }
+  ],
+  "area": "Wenlock"
+ },
+ {
+  "id": "wwq8",
+  "title": "The Last Crumbs",
+  "who": "Goody Prue",
+  "need": 2,
+  "gi": [],
+  "byname": [],
+  "tg": [
+   "wwo_recipe"
+  ],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [],
+  "tpos": [
+   {
+    "n": "wwo_recipe",
+    "lvl": 523,
+    "x": 4,
+    "y": 7,
+    "hid": false
+   }
+  ],
+  "area": "Wenlock"
+ },
+ {
+  "id": "wwq9",
+  "title": "The Lost Washing",
+  "who": "Goody Prue",
+  "need": 3,
+  "gi": [],
+  "byname": [],
+  "tg": [
+   "wwo_smock1"
+  ],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [],
+  "tpos": [
+   {
+    "n": "wwo_smock1",
+    "lvl": 520,
+    "x": 31,
+    "y": 43,
+    "hid": false
+   }
+  ],
+  "area": "Wenlock"
+ },
+ {
+  "id": "mq1",
+  "title": "Meet the Brothers",
+  "who": "Abbot Anselm",
+  "need": 4,
+  "gi": [
+   "mon_abbot"
+  ],
+  "byname": [
+   "mon_abbot"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "mon_abbot",
+    "lvl": 430,
+    "x": 44,
+    "y": 17,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "mon_abbot",
+    "lvl": 430,
+    "x": 44,
+    "y": 17,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Saint Elen\u2019s Monastery"
+ },
+ {
+  "id": "mq2",
+  "title": "Herbs for the Infirmary",
+  "who": "Brother Herbert, the herbalist",
+  "need": 6,
+  "gi": [
+   "kh_king",
+   "mon_herb"
+  ],
+  "byname": [
+   "mon_herb"
+  ],
+  "tg": [],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [
+   {
+    "n": "kh_king",
+    "lvl": 199,
+    "x": 16,
+    "y": 3,
+    "hid": true
+   },
+   {
+    "n": "mon_herb",
+    "lvl": 430,
+    "x": 16,
+    "y": 56,
+    "hid": false
+   }
+  ],
+  "npos": [
+   {
+    "n": "mon_herb",
+    "lvl": 430,
+    "x": 16,
+    "y": 56,
+    "hid": false
+   }
+  ],
+  "tpos": [],
+  "area": "Saint Elen\u2019s Monastery"
+ },
+ {
+  "id": "shell",
+  "title": "The Singing Shell",
+  "who": "Brother Aldous",
+  "need": 4,
+  "gi": [],
+  "byname": [
+   "ib_aldous"
+  ],
+  "tg": [
+   "uw_shellpc",
+   "uw_dive_300",
+   "uw_dive_301",
+   "uw_dive_302",
+   "uw_dive_303"
+  ],
+  "hasSpot": false,
+  "goalLevel": null,
+  "gpos": [],
+  "npos": [
+   {
+    "n": "ib_aldous",
+    "lvl": 301,
+    "x": 46,
+    "y": 35,
+    "hid": false
+   }
+  ],
+  "tpos": [
+   {
+    "n": "uw_shellpc",
+    "lvl": 320,
+    "x": 94,
+    "y": 18,
+    "hid": false
+   },
+   {
+    "n": "uw_shellpc",
+    "lvl": 321,
+    "x": 14,
+    "y": 22,
+    "hid": false
+   },
+   {
+    "n": "uw_shellpc",
+    "lvl": 322,
+    "x": 92,
+    "y": 68,
+    "hid": false
+   },
+   {
+    "n": "uw_shellpc",
+    "lvl": 323,
+    "x": 16,
+    "y": 64,
+    "hid": false
+   },
+   {
+    "n": "uw_dive_300",
+    "lvl": 300,
+    "x": 60,
+    "y": 55,
+    "hid": false
+   },
+   {
+    "n": "uw_dive_301",
+    "lvl": 301,
+    "x": 58,
+    "y": 57,
+    "hid": false
+   },
+   {
+    "n": "uw_dive_302",
+    "lvl": 302,
+    "x": 60,
+    "y": 58,
+    "hid": false
+   },
+   {
+    "n": "uw_dive_303",
+    "lvl": 303,
+    "x": 58,
+    "y": 54,
+    "hid": false
+   }
+  ],
+  "area": "The Narrow Sea"
+ }
+]

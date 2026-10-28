@@ -3,6 +3,7 @@
    shows a pin for it. No em dashes anywhere.
    ========================================================================== */
 const WM_NOTES={
+  exit2:["A Digger's Scribble",'Scratched into a brick: If you ever want out the quick way, look for the brick that is a shade too bright, with a little brass button that sticks out of it. It is deep down here, at the end of a lonely passage, far from the bells and far from the stair. It was meant for the diggers, and it goes up to the daylight.'],
   shaft1:['Sign on the Shaft','UNDER THE WELL. Dug by the diggers of Wenlock, forty fathoms down. The bucket is for water. The ladder is for you. Mind the scale, the foreman is particular about weights.'],
   weights:["The Foreman's Notice",'FOR THE BUCKET TO RISE the scale must read EIGHTY, no more and no less. A barrel of sand weighs 25. A crate of shot weighs 15. Barrels and crates were left in the camp, the cellar and the shrine. Put the right mix on the pan and the old store door will open. Too heavy and it jams.','weights'],
   camp1:["The Diggers' Tally",'Day 40: struck brick under the clay. Day 41: the brick goes on and on. Someone built this before us. Day 43: Hobb says the walls hum at night. Day 44: nobody goes down alone. Hobb put a lever at the far end of the east tunnels to open the store where we kept our pay. I never found it again.','lever1'],

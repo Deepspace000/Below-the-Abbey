@@ -1,0 +1,14 @@
+  const NOOKS=[
+   ['Saint\'s shrine',(x,y)=>{prop('art_wm_shrine',x,y,1.0,{block:true,npc:'hgdw_note',hgdwText:HGDWE_N.shrine});prop('art_hgxprop2',x,y,.22,{ox:-.3,oy:.2});prop('art_hgxprop2',x,y,.16,{ox:.32,oy:.22});light(x,y,L_VIO,1.4,40)}],
+   ['Diver\'s camp',(x,y)=>{prop('uw_shellchest',x,y,.45,{block:true,hgdwTier:2});prop('art_wm_skeleton',x,y,.34,{ox:-.25,oy:.12,block:false});prop('art_wm_bucket',x,y,.26,{ox:.3,oy:.2});wallNote(x,y,HGDWE_N.diver,{pref:endWall(x,y)});light(x,y,L_TEAL,1.0,30)}],
+   ['Pearl grotto',(x,y)=>{prop('uw_clam',x,y,.38,{block:true,ox:-.1,npc:'hgdw_note',hgdwText:HGDWE_N.grotto});prop('art_hgxprop8',x,y,.2,{ox:.25,oy:.15});prop('art_wm_crystal_teal',x,y,.4,{ox:.28,oy:-.2});light(x,y,L_TEAL,1.3,34)}],
+   ['The scales',(x,y)=>{prop('art_wm_scale',x,y,.7,{block:true,npc:'hgdw_note',hgdwText:HGDWE_N.scales});prop('art_hgxprop10',x,y,.08,{ox:.3,oy:.2});light(x,y,L_AMB,1.0,30)}],
+   ['Smugglers\' cache',(x,y)=>{prop('art_wm_crate',x,y,.42,{block:true,ox:-.15,npc:'hgdw_note',hgdwText:HGDWE_N.cache});prop('art_wm_keg',x,y,.4,{ox:.3,oy:.08});prop('art_wm_crate_lid',x,y,.14,{ox:.05,oy:.3});light(x,y,L_AMB,1.0,30)}],
+   ['Lantern nook',(x,y)=>{prop('art_hgtb_lantern',x,y,.72,{ox:-.2,block:true});prop('art_hgxprop2',x,y,.24,{ox:.3,oy:.12});prop('uw_amphora',x,y,.42,{ox:.0,oy:.22});wallNote(x,y,HGDWE_N.lantern,{pref:endWall(x,y)});light(x,y,L_AMB,1.4,46)}],
+   ['Rune stone',(x,y)=>{prop('art_wm_rune',x,y,.85,{block:true,npc:'hgdw_note',hgdwText:HGDWE_N.rune,deco:false});light(x,y,L_VIO,1.1,34)}],
+   ['Mirror',(x,y)=>{prop('art_wm_mirror',x,y,1.2,{block:true,npc:'hgdw_note',hgdwText:HGDWE_N.mirror});light(x,y,L_VIO,1.1,34)}],
+   ['The owl',(x,y)=>{prop('art_hgxstat5',x,y,1.3,{block:true});wallNote(x,y,HGDWE_N.owl,{pref:endWall(x,y)});light(x,y,L_TEAL,1.0,30)}],
+   ['Orb pedestal',(x,y)=>{prop('art_wm_orb_pedestal',x,y,.8,{block:true});prop('art_hgxprop9',x,y,.3,{ox:-.3,oy:.2});wallNote(x,y,HGDWE_N.orb,{pref:endWall(x,y)});light(x,y,L_VIO,1.4,40)}],
+   ['Fisher\'s net rack',(x,y)=>{prop('yar_nets',x,y,.8,{block:true,ox:-.1});prop('yar_pots',x,y,.3,{ox:.3,oy:.2});prop('art_wm_bucket',x,y,.24,{ox:-.3,oy:.25});wallNote(x,y,HGDWE_N.nets,{pref:endWall(x,y)});light(x,y,L_AMB,.9,26)}],
+   ['Anemone bed',(x,y)=>{prop('uw_anemone',x,y,.36,{block:true,ox:-.15});prop('uw_anemone',x,y,.26,{ox:.3,oy:.15});prop('art_hgxprop9',x,y,.3,{ox:.05,oy:.3});wallNote(x,y,HGDWE_N.anem,{pref:endWall(x,y)});light(x,y,L_PINK,1.1,30)}],
+   ['Candles for the lost',(x,y)=>{prop('art_wm_candelabra',x,y,.8,{block:true});prop('art_hgxprop2',x,y,.2,{ox:.3,oy:.2});prop('art_hgxprop0',x,y,.1,{ox:-.3,oy:.25});wallNote(x,y,HGDWE_N.candles,{pref:endWall(x,y)});light(x,y,L_AMB,1.3,40)}]];

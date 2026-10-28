@@ -1,0 +1,1 @@
+(()=>{const L=LEVELS[475];const l=L._hgpb.log;return {ms:L._hgpb.ms,p2:l.p2,posts:l.posts,vign:l.vign.length,lamps:l.lamps,lights:L.lights.length,decor:L.decor.length,col:Object.keys(L._hgpbCol).length}})()

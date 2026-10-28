@@ -1,11 +1,11 @@
 /* ==========================================================================
    THE PURPLE MAZE UNDER THE WELL OF WENLOCK, the maze maker (prefix wmg / WMG). Pure code, no pictures and no page: it runs in node too (tools/wm_test.js).
-   A lattice of 30 by 30 nodes (61 by 61 cells, a node is the cell 2i+1,2j+1). Rooms are blocks of nodes cut out of the lattice; the rest is a maze of one-square corridors made
+   A lattice of 21 by 21 nodes (43 by 43 cells, a node is the cell 2i+1,2j+1). Rooms are blocks of nodes cut out of the lattice; the rest is a maze of one-square corridors made
    by a depth-first walk that likes to go straight on. A room is one unit of the walk and is given only a few doors, so a room is a place and not a crossroads.
    A SEALED room is left out of the walk altogether: it is joined to the maze by one door cell (a wall that opens later: a switch, a puzzle, a secret door, a riddle, a key).
    wmgBuild(seed,specs) returns {g,rooms,sdoors,dist,start,...}. A spec is {id,kind,nw,nh,sealed,fixed:[i0,j0],zone:[x0,x1,y0,y1] (fractions of the lattice),maxDoors}.
    ========================================================================== */
-const WMG={N:30,W:61,H:61};
+const WMG={N:21,W:43,H:43};
 function wmgRng(seed){let a=(seed*2654435761)>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}}
 function wmgBuild(seed,specs,opt){
   opt=opt||{};const N=WMG.N,W=WMG.W,H=WMG.H,R=wmgRng(seed),NN=N*N,D=[[0,-1],[1,0],[0,1],[-1,0]],straight=opt.straight===undefined?.62:opt.straight;

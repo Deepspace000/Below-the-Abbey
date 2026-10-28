@@ -244,7 +244,7 @@ addEventListener('keydown',e=>{
   return _vt.apply(this,arguments)}}
 {const _ui=ui;ui=function(dt){_ui.apply(this,arguments);try{
   if(!fshFree())return;const s=fshFaced();
-  if(s){const bt=fshBaitNow();btnText('fishcast','Fish',24,192,52,20);btnText('fishbait','Bait: '+(bt?bt[1]+' x'+bagCount(bt[0]):'none'),300,168,114,18);txtS(fshBestRod()?'A fishing spot. Press G, Space or click it.':'A fishing spot. You need a rod.',210,196,7.6,'#bfe0f4','center',true)}
+  if(s){const bt=fshBaitNow();btnText('fishcast','Fish',62,154,52,20);btnText('fishbait','Bait: '+(bt?bt[1]+' x'+bagCount(bt[0]):'none'),300,168,114,18);txtS(fshBestRod()?'A fishing spot. Press G, Space or click it.':'A fishing spot. You need a rod.',210,196,7.6,'#bfe0f4','center',true)}
 }catch(e){}}}
 /* ---------- the better rods come to the shops as the party's level rises; the first-time help line ---------- */
 {const _ol=openLoot;openLoot=function(d){const r=_ol.apply(this,arguments);

@@ -38,13 +38,13 @@ WM.mech=function(c,wl){
     if(tc&&WM.VLOOT[r.vault])c.meta.loot[tc.x+','+tc.y]=WM.VLOOT[r.vault].slice()}
   {const rr=M.rooms.find(r=>r.kind==='riddle'),dq=rr&&rr.door;if(rr){const cells=c.cells(rr).sort((a,b)=>Math.hypot(b[0]-dq.inside.x,b[1]-dq.inside.y)-Math.hypot(a[0]-dq.inside.x,a[1]-dq.inside.y));const kd=c.chest('treasure_chest',cells[0][0],cells[0][1],3,['wmkey2'],{force:true});if(kd)L.keyAt.wmkey2={x:kd.x,y:kd.y}}}
   // ---- dead ends: secret closets, then the switches ----
-  const ends=[];for(let y=2;y<c.H-2;y++)for(let x=2;x<c.W-2;x++)if(c.free(x,y)&&wmDeg(c,x,y)===1&&M.dist[y*W+x]>=24&&!inRoomRect(x,y)&&!M.sdoors.some(q=>Math.abs(q.outside.x-x)+Math.abs(q.outside.y-y)<6))ends.push([x,y]);
+  const ends=[];for(let y=2;y<c.H-2;y++)for(let x=2;x<c.W-2;x++)if(c.free(x,y)&&wmDeg(c,x,y)===1&&M.dist[y*W+x]>=WM.S(24)&&!inRoomRect(x,y)&&!M.sdoors.some(q=>Math.abs(q.outside.x-x)+Math.abs(q.outside.y-y)<4))ends.push([x,y]);
   for(let i=ends.length-1;i>0;i--){const j=(rnd()*(i+1))|0;[ends[i],ends[j]]=[ends[j],ends[i]]}
   const usedEnd=[],farFrom=(x,y,d)=>usedEnd.every(e=>Math.abs(e[0]-x)+Math.abs(e[1]-y)>=d);
-  const takeEnd=(pred,gap)=>{const i=ends.findIndex(e=>c.free(e[0],e[1])&&farFrom(e[0],e[1],gap||10)&&(!pred||pred(e)));if(i<0)return null;const e=ends.splice(i,1)[0];usedEnd.push(e);return e};
+  const takeEnd=(pred,gap)=>{const i=ends.findIndex(e=>c.free(e[0],e[1])&&farFrom(e[0],e[1],WM.S(gap||10))&&(!pred||pred(e)));if(i<0)return null;const e=ends.splice(i,1)[0];usedEnd.push(e);return e};
   const distFromVault=v=>{const q=L.vault[v];return q?wmBfs(c,q.outside.x,q.outside.y):null};
   const addSw=(vault,type,x,y,need)=>{const n=L.sw.length;L.sw.push({n,vault,type,x,y,need:need||1});c.D(type==='crank'?'wm_crank':type==='chain'?'wm_chain':'wm_lever_up',x,y,{block:true,npc:'wmsw_'+n});return n};
-  const farthestEnd=(vault,gap)=>{const d=distFromVault(vault);if(!d)return null;let best=null;for(const e of ends){if(!c.free(e[0],e[1])||!farFrom(e[0],e[1],gap||10))continue;const v=d[e[1]*W+e[0]];if(v<0)continue;if(!best||v>best.v)best={v,e}}
+  const farthestEnd=(vault,gap)=>{const d=distFromVault(vault);if(!d)return null;let best=null;for(const e of ends){if(!c.free(e[0],e[1])||!farFrom(e[0],e[1],WM.S(gap||10)))continue;const v=d[e[1]*W+e[0]];if(v<0)continue;if(!best||v>best.v)best={v,e}}
     if(!best)return null;ends.splice(ends.indexOf(best.e),1);usedEnd.push(best.e);return best.e};
   const CL={0:['chest','chest'],1:['lever:hidden','chest','chest'],2:['key3','chest','chest'],3:['chest','chest']}[k];
   for(const kind of CL){const D=kind.startsWith('lever')?farthestEnd('hidden',12):takeEnd(null,12);if(!D)continue;
@@ -55,7 +55,7 @@ WM.mech=function(c,wl){
     else if(kind.startsWith('lever')){c.D('wm_lever_up',D[0],D[1],{block:true,npc:'wmsw_'+L.sw.length});L.sw.push({n:L.sw.length,vault:'hidden',type:'lever',x:D[0],y:D[1],need:1,hidden:true})}}
   // ---- the switches in plain sight at far dead ends ----
   if(k===0){const e=farthestEnd('lever1');if(e)addSw('lever1','lever',e[0],e[1])}
-  if(k===1){const a=farthestEnd('pair',10);if(a){addSw('pair','crank',a[0],a[1],2);const b=takeEnd(e=>Math.abs(e[0]-a[0])+Math.abs(e[1]-a[1])>=34,10);if(b)addSw('pair','crank',b[0],b[1],2)}}
+  if(k===1){const a=farthestEnd('pair',10);if(a){addSw('pair','crank',a[0],a[1],2);const b=takeEnd(e=>Math.abs(e[0]-a[0])+Math.abs(e[1]-a[1])>=WM.S(34),10);if(b)addSw('pair','crank',b[0],b[1],2)}}
   const guard=(e,types,pits)=>{ // pits in the approach and watchers close by
     const N=WM_D4.map(([a,b])=>[e[0]+a,e[1]+b]).find(([x,y])=>c.open(x,y));if(!N)return;let p=[N[0],N[1]],prev=[e[0],e[1]],n=0;
     while(n<pits){const nx=WM_D4.map(([a,b])=>[p[0]+a,p[1]+b]).filter(([x,y])=>c.open(x,y)&&!(x===prev[0]&&y===prev[1]));if(!nx.length)break;if(wmDeg(c,p[0],p[1])<=2){L.pits[p[0]+','+p[1]]=2;n++}prev=p;p=nx[0]}
@@ -64,9 +64,9 @@ WM.mech=function(c,wl){
   if(k===3){const e=farthestEnd('chain',12);if(e){addSw('chain','chain',e[0],e[1]);guard(e,['wmgolem','wmgolem'],0)}}
   // ---- pits: a few hollow slabs in the corridors, never in a room, never near a stair ----
   const stair=[M.arrive,M.back].filter(Boolean);
-  const cand=[];for(let y=2;y<c.H-2;y++)for(let x=2;x<c.W-2;x++)if(c.free(x,y)&&wmDeg(c,x,y)===2&&M.dist[y*W+x]>=18&&!inRoomRect(x,y)&&stair.every(s=>Math.abs(s.x-x)+Math.abs(s.y-y)>=14))cand.push([x,y]);
+  const cand=[];for(let y=2;y<c.H-2;y++)for(let x=2;x<c.W-2;x++)if(c.free(x,y)&&wmDeg(c,x,y)===2&&M.dist[y*W+x]>=WM.S(18)&&!inRoomRect(x,y)&&stair.every(s=>Math.abs(s.x-x)+Math.abs(s.y-y)>=WM.S(14)))cand.push([x,y]);
   for(let i=cand.length-1;i>0;i--){const j=(rnd()*(i+1))|0;[cand[i],cand[j]]=[cand[j],cand[i]]}
-  const pits=[];for(const [x,y] of cand){if(pits.length>=6)break;if(pits.every(p=>Math.abs(p[0]-x)+Math.abs(p[1]-y)>=9)&&!L.pits[x+','+y]){pits.push([x,y]);L.pits[x+','+y]=1}}
+  const pits=[];for(const [x,y] of cand){if(pits.length>=6)break;if(pits.every(p=>Math.abs(p[0]-x)+Math.abs(p[1]-y)>=WM.S(9))&&!L.pits[x+','+y]){pits.push([x,y]);L.pits[x+','+y]=1}}
   // ---- the mirror walk (498): a white crystal at a dead end near the hall marks the start; the glass shows the walk with left and right turned about ----
   if(k===1){const mr=M.rooms.find(r=>r.kind==='mirror'),v=L.vault.mirror;if(mr&&v){
     let best=null;
@@ -85,4 +85,23 @@ WM.mech=function(c,wl){
     if(best){L.mirror={start:best.start,runs:best.runs,side:best.side,len:best.len};
       c.D('wm_crystal_white',best.start.x,best.start.y,{block:false,walk:true,deco:true,sc:.9});c.light(best.start.x,best.start.y,WM_COL.wht)}
     else console.error('wm: no mirror walk found')}}
+  // ---- the way out (499): a hidden door at a far dead end, found by the button that stands out of the brick; behind it a stone that carries the party up to Wenlock. It only ever goes OUT. ----
+  if(k===2&&M.down){
+    const dd=wmBfs(c,M.down.ax,M.down.ay),da=wmBfs(c,M.arrive.x,M.arrive.y),cands=[];
+    for(let y=2;y<c.H-2;y++)for(let x=2;x<c.W-2;x++)if(c.free(x,y)&&wmDeg(c,x,y)===1&&!inRoomRect(x,y)&&da[y*W+x]>=0&&dd[y*W+x]>=0&&!L.pits[x+','+y]&&!M.sdoors.some(q=>Math.abs(q.outside.x-x)+Math.abs(q.outside.y-y)<4)&&!L.closets.some(q=>Math.abs(q.x-x)+Math.abs(q.y-y)<8)&&!L.sw.some(q=>Math.abs(q.x-x)+Math.abs(q.y-y)<6))
+      cands.push([x,y,Math.min(da[y*W+x],dd[y*W+x])+(da[y*W+x]+dd[y*W+x])*.1]);
+    cands.sort((a,b)=>b[2]-a[2]);
+    for(const [x,y] of cands){const E=WM_D4.map(([a,b])=>[x+a,y+b]).find(([ex,ey])=>c.open(ex,ey));if(!E)continue;
+      const O=[2*E[0]-x,2*E[1]-y];if(!c.open(O[0],O[1]))continue;
+      T.put(E[0],E[1],T.exit());g[E[1]][E[0]]='#';addDoor(E[0],E[1],{type:'exit'});L.closets.push({kind:'exit',x,y,door:{x:E[0],y:E[1]}});
+      c.D('teleporter',x,y,{block:true,npc:'wm_exit_stone',force:true,sc:1});c.light(x,y,[.5,1.1,1.5]);c.light(O[0],O[1],[1.2,1.1,.6]);
+      L.exit={x,y,door:{x:E[0],y:E[1]},front:{x:O[0],y:O[1]}};break}
+    if(!L.exit)console.error('wm: no place for the way out');
+    else{ // the digger's scribble stands in the first room on the main route (arrival to the stair down), so it is read well before the hidden door is reached
+      let p=[M.arrive.x,M.arrive.y],route=[p];while(dd[p[1]*W+p[0]]>0){const n=WM_D4.map(([a,b])=>[p[0]+a,p[1]+b]).find(([x,y])=>c.open(x,y)&&dd[y*W+x]===dd[p[1]*W+p[0]]-1);if(!n)break;route.push(n);p=n}
+      const seen=new Set();let done=false;
+      for(const [x,y] of route){const r=M.rooms.find(q=>!q.sealed&&q.kind!=='start'&&q.kind!=='stairOut'&&x>=q.x0&&x<=q.x1&&y>=q.y0&&y<=q.y1);if(!r||seen.has(r.id)||done)continue;seen.add(r.id);
+        const cells=c.rim(r).filter(([qx,qy])=>da[qy*W+qx]<da[L.exit.y*W+L.exit.x]).sort((a,b)=>Math.abs(a[0]-x)+Math.abs(a[1]-y)-Math.abs(b[0]-x)-Math.abs(b[1]-y));
+        if(cells.length){const q=cells[0];if(c.note('exit2',q[0],q[1],'signpost')){L.exit.note={x:q[0],y:q[1],room:r.id};done=true}}}
+      if(!done)console.error('wm: no place for the scribble')}}
 };

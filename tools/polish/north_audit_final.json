@@ -1,0 +1,3328 @@
+{
+ "zoneDecor": 3843,
+ "zoneOpenCells": 13521,
+ "signs": 7,
+ "signsNoZone": [],
+ "notes": 24,
+ "noteTexts": [
+  [
+   106,
+   183,
+   1,
+   "Chalked on the wall: The hedge maze is the easy part. Do not get cocky."
+  ],
+  [
+   109,
+   131,
+   3,
+   "Scratched small: There is a shortcut here. I walked into the wall to find it, and I was right. Try the walls that look a shade off."
+  ],
+  [
+   56,
+   179,
+   4,
+   "Written in charcoal: The slug is not slow. The slug is patient. There is a difference."
+  ],
+  [
+   57,
+   123,
+   7,
+   "Chalked: Gem doors are worth the trouble. The treasure behind them is better than anything you can buy."
+  ],
+  [
+   95,
+   104,
+   9,
+   "A note pinned to the wall: LOST: one lantern, brass, very dear to me. If found, please do not return it, I am never going back there."
+  ],
+  [
+   83,
+   197,
+   12,
+   "Scribbled: I came for the treasure and stayed for the soup. Ask in the towns."
+  ],
+  [
+   115,
+   197,
+   14,
+   "Written small: The ponds are shallow and the fish are not real. Do not ask me how I know."
+  ],
+  [
+   15,
+   121,
+   18,
+   "Chalked: The warden at the top is not as clever as he looks. He is bigger than he looks, though."
+  ],
+  [
+   31,
+   175,
+   20,
+   "A scrap of cloth nailed up: The Hollowed Warden was a gardener once. We do not talk about the hedge."
+  ],
+  [
+   103,
+   79,
+   21,
+   "Written in a neat hand: Rest in the safe places. Fight in the dangerous ones. Never confuse the two."
+  ],
+  [
+   185,
+   131,
+   22,
+   "Scratched: Blue door, blue key. Red door, red key. Gem door, gem. Nobody has ever been this organised before."
+  ],
+  [
+   65,
+   89,
+   25,
+   "A note: If the lamp goes out, stand still. If the lamp goes out and something breathes, run."
+  ],
+  [
+   171,
+   190,
+   27,
+   "Chalked: Atriums are full of trees and quiet. Quiet is good. Trees are better. Ponds are best."
+  ],
+  [
+   127,
+   91,
+   29,
+   "Carved by a careful hand: The Gilded Quarter is the richest and the most dangerous. They are the same thing."
+  ],
+  [
+   45,
+   136,
+   32,
+   "A note: To whoever finds my gem: it was a gift. Please do not use it on a door. Marry someone with it."
+  ],
+  [
+   37,
+   195,
+   33,
+   "Written small: The mosaic was beautiful once. Then the dark came and the tiles began to fall."
+  ],
+  [
+   179,
+   115,
+   34,
+   "Scratched: There are twelve people in the maze who will give you a task. I have done two. I am very tired."
+  ],
+  [
+   125,
+   168,
+   35,
+   "Chalked: Every shop is better than the last, but the last is dearer. Choose wisely."
+  ],
+  [
+   131,
+   116,
+   36,
+   "Carved: The hollow slugs came up through the floor at the same time as the dark. Make of that what you will."
+  ],
+  [
+   130,
+   131,
+   37,
+   "A note: Do not trust a corridor that is too straight. Nobody built one."
+  ],
+  [
+   30,
+   115,
+   39,
+   "Chalked on the wall: The hedge maze is the easy part. Do not get cocky."
+  ],
+  [
+   89,
+   142,
+   41,
+   "Scratched small: There is a shortcut here. I walked into the wall to find it, and I was right. Try the walls that look a shade off."
+  ],
+  [
+   75,
+   158,
+   42,
+   "Written in charcoal: The slug is not slow. The slug is patient. There is a difference."
+  ],
+  [
+   7,
+   134,
+   43,
+   "A child's drawing of a worm, with a sign: DO NOT FEED. Underneath, someone has added: TOO LATE."
+  ]
+ ],
+ "emptyNotes": [],
+ "dupNoteIdx": [
+  [
+   "Chalked on the wall: The hedge maze is the easy pa",
+   2
+  ],
+  [
+   "Scratched small: There is a shortcut here. I walke",
+   2
+  ],
+  [
+   "Written in charcoal: The slug is not slow. The slu",
+   2
+  ]
+ ],
+ "notesTotal": 38,
+ "npcs": 190,
+ "npcBad": [],
+ "onWall": [],
+ "reachNoBlock": 25588,
+ "reachBlock": 24625,
+ "cutOff": [],
+ "blockersCorr": [
+  [
+   "hg_chestwax",
+   195,
+   109
+  ],
+  [
+   "hg_chestweed",
+   47,
+   127
+  ],
+  [
+   "hg_chestjelly",
+   159,
+   129
+  ],
+  [
+   "hg_chestweed",
+   159,
+   197
+  ],
+  [
+   "hg_chestwax",
+   25,
+   103
+  ],
+  [
+   "hg_chestjelly",
+   115,
+   79
+  ],
+  [
+   "hg_chestjelly",
+   59,
+   97
+  ],
+  [
+   "hg_chestweed",
+   113,
+   115
+  ],
+  [
+   "hg_chestwax",
+   57,
+   117
+  ],
+  [
+   "hg_chestweed",
+   35,
+   141
+  ],
+  [
+   "hg_chestwax",
+   7,
+   123
+  ],
+  [
+   "hg_chestwax",
+   87,
+   129
+  ],
+  [
+   "hg_chestwax",
+   91,
+   99
+  ],
+  [
+   "hg_chestwax",
+   195,
+   167
+  ],
+  [
+   "hg_chestwax",
+   125,
+   103
+  ],
+  [
+   "hg_chestwax",
+   47,
+   161
+  ],
+  [
+   "hg_chestweed",
+   33,
+   167
+  ],
+  [
+   "hg_chestwax",
+   115,
+   189
+  ],
+  [
+   "hg_chestweed",
+   177,
+   117
+  ],
+  [
+   "hg_chestwax",
+   67,
+   149
+  ],
+  [
+   "hg_chestweed",
+   169,
+   191
+  ],
+  [
+   "hg_chestwax",
+   133,
+   189
+  ],
+  [
+   "hg_chestwax",
+   149,
+   191
+  ],
+  [
+   "hg_chestwax",
+   69,
+   119
+  ],
+  [
+   "hg_chestwax",
+   125,
+   135
+  ],
+  [
+   "hg_chestweed",
+   93,
+   173
+  ],
+  [
+   "hg_chestwax",
+   15,
+   157
+  ],
+  [
+   "hg_chestweed",
+   195,
+   141
+  ],
+  [
+   "hg_chestwax",
+   23,
+   183
+  ],
+  [
+   "hg_chestwax",
+   103,
+   73
+  ],
+  [
+   "hg_chestweed",
+   187,
+   187
+  ],
+  [
+   "hg_chestwax",
+   77,
+   165
+  ],
+  [
+   "hg_chestweed",
+   59,
+   193
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   91,
+   117
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   109,
+   71
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   181,
+   113
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   111,
+   125
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   141,
+   197
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   119,
+   179
+  ],
+  [
+   "hgtb_deco_pearlplinth",
+   27,
+   141
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   49,
+   171
+  ],
+  [
+   "hgtb_deco_pearlplinth",
+   83,
+   127
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   107,
+   139
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   189,
+   149
+  ],
+  [
+   "hgtb_deco_pearlplinth",
+   63,
+   165
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   31,
+   177
+  ],
+  [
+   "hgtb_deco_pearlplinth",
+   55,
+   133
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   17,
+   111
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   119,
+   157
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   101,
+   193
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   167,
+   195
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   67,
+   107
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   85,
+   187
+  ],
+  [
+   "hgtb_deco_pearlplinth",
+   193,
+   159
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   75,
+   83
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   95,
+   107
+  ],
+  [
+   "hgtb_deco_pearlplinth",
+   123,
+   125
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   45,
+   123
+  ],
+  [
+   "hgtb_deco_pearlplinth",
+   189,
+   181
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   177,
+   125
+  ],
+  [
+   "hgtb_deco_shellstatue",
+   65,
+   85
+  ],
+  [
+   "hgtb_deco_pearlplinth",
+   103,
+   149
+  ],
+  [
+   "art_hgxstat6",
+   93,
+   195
+  ],
+  [
+   "art_hgxstat1",
+   3,
+   193
+  ],
+  [
+   "art_hgxstat1",
+   133,
+   127
+  ],
+  [
+   "art_hgxstat1",
+   91,
+   125
+  ],
+  [
+   "art_hgxstat7",
+   59,
+   145
+  ],
+  [
+   "art_hgxstat6",
+   25,
+   193
+  ],
+  [
+   "art_hgxstat1",
+   197,
+   149
+  ],
+  [
+   "art_hgxstat1",
+   67,
+   145
+  ],
+  [
+   "art_hgxstat3",
+   133,
+   91
+  ],
+  [
+   "art_hgxstat2",
+   13,
+   135
+  ],
+  [
+   "art_hgxstat0",
+   183,
+   193
+  ],
+  [
+   "art_hgxstat6",
+   121,
+   195
+  ],
+  [
+   "art_hgxstat2",
+   119,
+   105
+  ],
+  [
+   "art_hgxstat0",
+   93,
+   177
+  ],
+  [
+   "art_hgxstat1",
+   73,
+   125
+  ]
+ ],
+ "stacked": [],
+ "clusters": [],
+ "clusterObjs": 28,
+ "clusterByKind": [
+  [
+   "hgt_reeds",
+   4
+  ],
+  [
+   "hgtb_plant_belltree",
+   4
+  ],
+  [
+   "hgt_fairytree",
+   4
+  ],
+  [
+   "art_hgthin3",
+   4
+  ],
+  [
+   "art_hgthin2",
+   3
+  ],
+  [
+   "art_hgdf_plant0",
+   2
+  ],
+  [
+   "hgt_vine_roundleaf",
+   2
+  ],
+  [
+   "art_hgdf_plant6",
+   1
+  ],
+  [
+   "art_hgxrock4",
+   1
+  ],
+  [
+   "art_hgthin0",
+   1
+  ],
+  [
+   "art_hgthin5",
+   1
+  ],
+  [
+   "art_hgthin4",
+   1
+  ]
+ ],
+ "noHeight": {
+  "art_hgt_lamppost": 1,
+  "art_hgtb_lamp_tall": 2,
+  "art_hgtb_deco_shellstatue": 1,
+  "art_hgt_gardenlantern": 1
+ },
+ "props": [
+  {
+   "k": "hgtb_plant_belltree",
+   "n": 78,
+   "min": 1.599,
+   "max": 3.501,
+   "med": 2.4,
+   "base": 3,
+   "ratio": 2.189
+  },
+  {
+   "k": "hgt_fairytree",
+   "n": 80,
+   "min": 1.6,
+   "max": 3.501,
+   "med": 2.4,
+   "base": 3.2,
+   "ratio": 2.188
+  },
+  {
+   "k": "hg_house0",
+   "n": 2,
+   "min": 2.201,
+   "max": 2.254,
+   "med": 2.254,
+   "base": 3.1,
+   "ratio": 1.024
+  },
+  {
+   "k": "hg_house1",
+   "n": 2,
+   "min": 1.93,
+   "max": 2.2,
+   "med": 2.2,
+   "base": 2.5,
+   "ratio": 1.14
+  },
+  {
+   "k": "ltree70",
+   "n": 1,
+   "min": 1.9,
+   "max": 1.9,
+   "med": 1.9,
+   "base": 1.9,
+   "ratio": 1
+  },
+  {
+   "k": "wm_statue",
+   "n": 1,
+   "min": 1.7,
+   "max": 1.7,
+   "med": 1.7,
+   "base": 1.7,
+   "ratio": 1
+  },
+  {
+   "k": "hgt_vine_roundleaf",
+   "n": 61,
+   "min": 1.503,
+   "max": 1.899,
+   "med": 1.643,
+   "base": 4.5,
+   "ratio": 1.263
+  },
+  {
+   "k": "hgdfc_cream2",
+   "n": 1,
+   "min": 1.515,
+   "max": 1.515,
+   "med": 1.515,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgtb_deco_fountain",
+   "n": 1,
+   "min": 1.499,
+   "max": 1.499,
+   "med": 1.499,
+   "base": 1.8,
+   "ratio": 1
+  },
+  {
+   "k": "hgdfc_pink1",
+   "n": 3,
+   "min": 1.433,
+   "max": 1.676,
+   "med": 1.487,
+   "base": 0.75,
+   "ratio": 1.17
+  },
+  {
+   "k": "art_hgxstat7",
+   "n": 6,
+   "min": 1.336,
+   "max": 1.496,
+   "med": 1.436,
+   "base": 1.25,
+   "ratio": 1.12
+  },
+  {
+   "k": "art_hgxstat6",
+   "n": 6,
+   "min": 1.345,
+   "max": 1.475,
+   "med": 1.434,
+   "base": 1.25,
+   "ratio": 1.097
+  },
+  {
+   "k": "icn_hgdi_thouse",
+   "n": 2,
+   "min": 1.382,
+   "max": 1.426,
+   "med": 1.426,
+   "base": 1,
+   "ratio": 1.032
+  },
+  {
+   "k": "hgtb_deco_shellstatue",
+   "n": 28,
+   "min": 1.35,
+   "max": 1.5,
+   "med": 1.414,
+   "base": 2,
+   "ratio": 1.111
+  },
+  {
+   "k": "art_hgxstat3",
+   "n": 5,
+   "min": 1.316,
+   "max": 1.491,
+   "med": 1.409,
+   "base": 1.25,
+   "ratio": 1.133
+  },
+  {
+   "k": "hg_lamp",
+   "n": 27,
+   "min": 1.309,
+   "max": 1.485,
+   "med": 1.399,
+   "base": 2.2,
+   "ratio": 1.134
+  },
+  {
+   "k": "art_hgxstat1",
+   "n": 14,
+   "min": 1.303,
+   "max": 1.49,
+   "med": 1.374,
+   "base": 1.25,
+   "ratio": 1.144
+  },
+  {
+   "k": "art_hgxstat0",
+   "n": 7,
+   "min": 1.301,
+   "max": 1.496,
+   "med": 1.361,
+   "base": 1.25,
+   "ratio": 1.15
+  },
+  {
+   "k": "hgtb_stall_orange_pottery",
+   "n": 2,
+   "min": 1.28,
+   "max": 1.36,
+   "med": 1.36,
+   "base": 1.6,
+   "ratio": 1.062
+  },
+  {
+   "k": "art_hgxstat2",
+   "n": 12,
+   "min": 1.306,
+   "max": 1.476,
+   "med": 1.35,
+   "base": 1.25,
+   "ratio": 1.13
+  },
+  {
+   "k": "ltree72",
+   "n": 1,
+   "min": 1.35,
+   "max": 1.35,
+   "med": 1.35,
+   "base": 1.35,
+   "ratio": 1
+  },
+  {
+   "k": "hgtb_deco_lanterns",
+   "n": 2,
+   "min": 1.35,
+   "max": 1.35,
+   "med": 1.35,
+   "base": 1.8,
+   "ratio": 1
+  },
+  {
+   "k": "hgtb_plant_spiralfern",
+   "n": 32,
+   "min": 0.752,
+   "max": 1.301,
+   "med": 1.301,
+   "base": 1.6,
+   "ratio": 1.73
+  },
+  {
+   "k": "hpa_arch",
+   "n": 1,
+   "min": 1.3,
+   "max": 1.3,
+   "med": 1.3,
+   "base": 1.3,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_lampT",
+   "n": 36,
+   "min": 1.3,
+   "max": 1.3,
+   "med": 1.3,
+   "base": 1.3,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_lampost",
+   "n": 14,
+   "min": 1.3,
+   "max": 1.3,
+   "med": 1.3,
+   "base": 1.3,
+   "ratio": 1
+  },
+  {
+   "k": "hgtb_furn_clock",
+   "n": 1,
+   "min": 1.3,
+   "max": 1.3,
+   "med": 1.3,
+   "base": 2,
+   "ratio": 1
+  },
+  {
+   "k": "hgdfc_cream1",
+   "n": 2,
+   "min": 1.29,
+   "max": 1.291,
+   "med": 1.291,
+   "base": 0.75,
+   "ratio": 1.001
+  },
+  {
+   "k": "hgt_shellflower",
+   "n": 18,
+   "min": 1.105,
+   "max": 1.6,
+   "med": 1.287,
+   "base": 2.1,
+   "ratio": 1.449
+  },
+  {
+   "k": "hgdpc_post0",
+   "n": 1,
+   "min": 1.25,
+   "max": 1.25,
+   "med": 1.25,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_post1",
+   "n": 1,
+   "min": 1.25,
+   "max": 1.25,
+   "med": 1.25,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_post2",
+   "n": 1,
+   "min": 1.25,
+   "max": 1.25,
+   "med": 1.25,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_post3",
+   "n": 1,
+   "min": 1.25,
+   "max": 1.25,
+   "med": 1.25,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "icn_hgdi_hut2",
+   "n": 2,
+   "min": 1.153,
+   "max": 1.217,
+   "med": 1.217,
+   "base": 1,
+   "ratio": 1.056
+  },
+  {
+   "k": "hgt_bulbflower",
+   "n": 22,
+   "min": 1.003,
+   "max": 1.499,
+   "med": 1.201,
+   "base": 1.9,
+   "ratio": 1.494
+  },
+  {
+   "k": "hpa_lampV",
+   "n": 38,
+   "min": 1.2,
+   "max": 1.2,
+   "med": 1.2,
+   "base": 1.2,
+   "ratio": 1
+  },
+  {
+   "k": "icn_hgdi_hut1",
+   "n": 2,
+   "min": 1.197,
+   "max": 1.197,
+   "med": 1.197,
+   "base": 1,
+   "ratio": 1
+  },
+  {
+   "k": "gate",
+   "n": 7,
+   "min": 1.15,
+   "max": 1.15,
+   "med": 1.15,
+   "base": 0.95,
+   "ratio": 1
+  },
+  {
+   "k": "ltree71",
+   "n": 2,
+   "min": 1.15,
+   "max": 1.15,
+   "med": 1.15,
+   "base": 1.15,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_post",
+   "n": 31,
+   "min": 1.15,
+   "max": 1.15,
+   "med": 1.15,
+   "base": 1.15,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_ribbon",
+   "n": 1,
+   "min": 1.15,
+   "max": 1.15,
+   "med": 1.15,
+   "base": 1.15,
+   "ratio": 1
+  },
+  {
+   "k": "icn_hgdi_hut0",
+   "n": 3,
+   "min": 1.066,
+   "max": 1.222,
+   "med": 1.146,
+   "base": 1,
+   "ratio": 1.146
+  },
+  {
+   "k": "icn_hgdi_hut3",
+   "n": 3,
+   "min": 1.114,
+   "max": 1.187,
+   "med": 1.124,
+   "base": 1,
+   "ratio": 1.066
+  },
+  {
+   "k": "icn_hgdi_hut4",
+   "n": 2,
+   "min": 1.057,
+   "max": 1.123,
+   "med": 1.123,
+   "base": 1,
+   "ratio": 1.062
+  },
+  {
+   "k": "hgtb_furn_bunk",
+   "n": 1,
+   "min": 1.12,
+   "max": 1.12,
+   "med": 1.12,
+   "base": 1.6,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_crysTall",
+   "n": 34,
+   "min": 1.1,
+   "max": 1.1,
+   "med": 1.1,
+   "base": 1.1,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_crysP",
+   "n": 29,
+   "min": 1.1,
+   "max": 1.1,
+   "med": 1.1,
+   "base": 1.1,
+   "ratio": 1
+  },
+  {
+   "k": "hg_jar",
+   "n": 4,
+   "min": 0.99,
+   "max": 1.1,
+   "med": 1.1,
+   "base": 1.1,
+   "ratio": 1.111
+  },
+  {
+   "k": "hgtb_furn_bed",
+   "n": 1,
+   "min": 1.1,
+   "max": 1.1,
+   "med": 1.1,
+   "base": 1.1,
+   "ratio": 1
+  },
+  {
+   "k": "yar_p_aldwyn",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 1,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss0",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss1",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss2",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss3",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss8",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss9",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss10",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss11",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss12",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss13",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss14",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss15",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss16",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss17",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss18",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss19",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss20",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss21",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss22",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss23",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss24",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss25",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss26",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_ss27",
+   "n": 1,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "wm_brazier",
+   "n": 4,
+   "min": 1.05,
+   "max": 1.05,
+   "med": 1.05,
+   "base": 1.05,
+   "ratio": 1
+  },
+  {
+   "k": "smith",
+   "n": 1,
+   "min": 1.02,
+   "max": 1.02,
+   "med": 1.02,
+   "base": 0.86,
+   "ratio": 1
+  },
+  {
+   "k": "guard",
+   "n": 1,
+   "min": 1.02,
+   "max": 1.02,
+   "med": 1.02,
+   "base": 0.86,
+   "ratio": 1
+  },
+  {
+   "k": "farmer",
+   "n": 2,
+   "min": 1,
+   "max": 1,
+   "med": 1,
+   "base": 0.82,
+   "ratio": 1
+  },
+  {
+   "k": "yar_p_isolde",
+   "n": 2,
+   "min": 1,
+   "max": 1,
+   "med": 1,
+   "base": 0.9,
+   "ratio": 1
+  },
+  {
+   "k": "hg_npc4",
+   "n": 2,
+   "min": 0.902,
+   "max": 1,
+   "med": 1,
+   "base": 1.4,
+   "ratio": 1.109
+  },
+  {
+   "k": "yar_p_diver",
+   "n": 1,
+   "min": 1,
+   "max": 1,
+   "med": 1,
+   "base": 0.95,
+   "ratio": 1
+  },
+  {
+   "k": "hg_wizard",
+   "n": 2,
+   "min": 1,
+   "max": 1,
+   "med": 1,
+   "base": 1.35,
+   "ratio": 1
+  },
+  {
+   "k": "innkeeper",
+   "n": 2,
+   "min": 1,
+   "max": 1,
+   "med": 1,
+   "base": 0.78,
+   "ratio": 1
+  },
+  {
+   "k": "priest",
+   "n": 1,
+   "min": 1,
+   "max": 1,
+   "med": 1,
+   "base": 0.84,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_lampS",
+   "n": 33,
+   "min": 1,
+   "max": 1,
+   "med": 1,
+   "base": 1,
+   "ratio": 1
+  },
+  {
+   "k": "hgtb_furn_table_chairs",
+   "n": 1,
+   "min": 1,
+   "max": 1,
+   "med": 1,
+   "base": 1,
+   "ratio": 1
+  },
+  {
+   "k": "baker",
+   "n": 1,
+   "min": 0.98,
+   "max": 0.98,
+   "med": 0.98,
+   "base": 0.76,
+   "ratio": 1
+  },
+  {
+   "k": "fisher",
+   "n": 2,
+   "min": 0.98,
+   "max": 0.98,
+   "med": 0.98,
+   "base": 0.8,
+   "ratio": 1
+  },
+  {
+   "k": "monk",
+   "n": 2,
+   "min": 0.98,
+   "max": 0.98,
+   "med": 0.98,
+   "base": 0.84,
+   "ratio": 1
+  },
+  {
+   "k": "hg_npc0",
+   "n": 1,
+   "min": 0.98,
+   "max": 0.98,
+   "med": 0.98,
+   "base": 1.35,
+   "ratio": 1
+  },
+  {
+   "k": "hg_npc1",
+   "n": 2,
+   "min": 0.9,
+   "max": 0.963,
+   "med": 0.963,
+   "base": 1.25,
+   "ratio": 1.069
+  },
+  {
+   "k": "hg_npc3",
+   "n": 4,
+   "min": 0.913,
+   "max": 0.973,
+   "med": 0.957,
+   "base": 1,
+   "ratio": 1.066
+  },
+  {
+   "k": "miner",
+   "n": 2,
+   "min": 0.95,
+   "max": 0.95,
+   "med": 0.95,
+   "base": 0.82,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgtb_fisher",
+   "n": 2,
+   "min": 0.95,
+   "max": 0.95,
+   "med": 0.95,
+   "base": 0.95,
+   "ratio": 1
+  },
+  {
+   "k": "merchant",
+   "n": 3,
+   "min": 0.95,
+   "max": 0.95,
+   "med": 0.95,
+   "base": 0.74,
+   "ratio": 1
+  },
+  {
+   "k": "hg_npc5",
+   "n": 3,
+   "min": 0.922,
+   "max": 0.95,
+   "med": 0.95,
+   "base": 1.3,
+   "ratio": 1.031
+  },
+  {
+   "k": "prismwiz",
+   "n": 1,
+   "min": 0.95,
+   "max": 0.95,
+   "med": 0.95,
+   "base": 0.95,
+   "ratio": 1
+  },
+  {
+   "k": "hg_npc6",
+   "n": 1,
+   "min": 0.95,
+   "max": 0.95,
+   "med": 0.95,
+   "base": 1.3,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_mushT",
+   "n": 15,
+   "min": 0.95,
+   "max": 0.95,
+   "med": 0.95,
+   "base": 0.95,
+   "ratio": 1
+  },
+  {
+   "k": "wm_bell",
+   "n": 2,
+   "min": 0.855,
+   "max": 0.95,
+   "med": 0.95,
+   "base": 0.95,
+   "ratio": 1.111
+  },
+  {
+   "k": "hg_waxbarrel",
+   "n": 1,
+   "min": 0.95,
+   "max": 0.95,
+   "med": 0.95,
+   "base": 0.95,
+   "ratio": 1
+  },
+  {
+   "k": "art_hs_post",
+   "n": 2,
+   "min": 0.924,
+   "max": 0.934,
+   "med": 0.934,
+   "base": 1.02,
+   "ratio": 1.012
+  },
+  {
+   "k": "oldman",
+   "n": 2,
+   "min": 0.9,
+   "max": 0.9,
+   "med": 0.9,
+   "base": 0.78,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_glamp",
+   "n": 17,
+   "min": 0.9,
+   "max": 0.9,
+   "med": 0.9,
+   "base": 0.9,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_wguard",
+   "n": 1,
+   "min": 0.9,
+   "max": 0.9,
+   "med": 0.9,
+   "base": 0.9,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_crysW",
+   "n": 28,
+   "min": 0.9,
+   "max": 0.9,
+   "med": 0.9,
+   "base": 0.9,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_nb0",
+   "n": 1,
+   "min": 0.9,
+   "max": 0.9,
+   "med": 0.9,
+   "base": 0.95,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_nb1",
+   "n": 1,
+   "min": 0.9,
+   "max": 0.9,
+   "med": 0.9,
+   "base": 0.95,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_nb2",
+   "n": 1,
+   "min": 0.9,
+   "max": 0.9,
+   "med": 0.9,
+   "base": 0.95,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_nb3",
+   "n": 1,
+   "min": 0.9,
+   "max": 0.9,
+   "med": 0.9,
+   "base": 0.95,
+   "ratio": 1
+  },
+  {
+   "k": "hgt_gardenlantern",
+   "n": 3,
+   "min": 0.9,
+   "max": 0.9,
+   "med": 0.9,
+   "base": 0.9,
+   "ratio": 1
+  },
+  {
+   "k": "hgt_fern",
+   "n": 36,
+   "min": 0.803,
+   "max": 1.1,
+   "med": 0.893,
+   "base": 1.1,
+   "ratio": 1.37
+  },
+  {
+   "k": "art_hgxrock4",
+   "n": 28,
+   "min": 0.774,
+   "max": 0.935,
+   "med": 0.884,
+   "base": 0.85,
+   "ratio": 1.209
+  },
+  {
+   "k": "oldwoman",
+   "n": 1,
+   "min": 0.88,
+   "max": 0.88,
+   "med": 0.88,
+   "base": 0.72,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgtb_elder",
+   "n": 1,
+   "min": 0.88,
+   "max": 0.88,
+   "med": 0.88,
+   "base": 0.88,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_eggs",
+   "n": 23,
+   "min": 0.85,
+   "max": 0.85,
+   "med": 0.85,
+   "base": 0.85,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_brazier",
+   "n": 29,
+   "min": 0.85,
+   "max": 0.85,
+   "med": 0.85,
+   "base": 0.85,
+   "ratio": 1
+  },
+  {
+   "k": "hgt_pearlbush",
+   "n": 21,
+   "min": 0.752,
+   "max": 1,
+   "med": 0.838,
+   "base": 1,
+   "ratio": 1.33
+  },
+  {
+   "k": "art_hgdf_plant7",
+   "n": 42,
+   "min": 0.679,
+   "max": 0.88,
+   "med": 0.803,
+   "base": 1,
+   "ratio": 1.296
+  },
+  {
+   "k": "child",
+   "n": 3,
+   "min": 0.8,
+   "max": 0.8,
+   "med": 0.8,
+   "base": 0.62,
+   "ratio": 1
+  },
+  {
+   "k": "hg_npc2",
+   "n": 5,
+   "min": 0.8,
+   "max": 0.956,
+   "med": 0.8,
+   "base": 1.3,
+   "ratio": 1.195
+  },
+  {
+   "k": "pickpocket",
+   "n": 4,
+   "min": 0.8,
+   "max": 0.8,
+   "med": 0.8,
+   "base": 0.76,
+   "ratio": 1
+  },
+  {
+   "k": "yar_nets",
+   "n": 2,
+   "min": 0.8,
+   "max": 0.8,
+   "med": 0.8,
+   "base": 0.95,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_crysT",
+   "n": 31,
+   "min": 0.8,
+   "max": 0.8,
+   "med": 0.8,
+   "base": 0.8,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_bulb",
+   "n": 31,
+   "min": 0.8,
+   "max": 0.8,
+   "med": 0.8,
+   "base": 0.8,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_vn0",
+   "n": 1,
+   "min": 0.8,
+   "max": 0.8,
+   "med": 0.8,
+   "base": 0.85,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_vn1",
+   "n": 1,
+   "min": 0.8,
+   "max": 0.8,
+   "med": 0.8,
+   "base": 0.85,
+   "ratio": 1
+  },
+  {
+   "k": "wm_barrel_tall",
+   "n": 1,
+   "min": 0.8,
+   "max": 0.8,
+   "med": 0.8,
+   "base": 0.8,
+   "ratio": 1
+  },
+  {
+   "k": "hl_p_candle",
+   "n": 4,
+   "min": 0.8,
+   "max": 0.8,
+   "med": 0.8,
+   "base": 0.8,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_vn2",
+   "n": 1,
+   "min": 0.8,
+   "max": 0.8,
+   "med": 0.8,
+   "base": 0.85,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_vn3",
+   "n": 1,
+   "min": 0.8,
+   "max": 0.8,
+   "med": 0.8,
+   "base": 0.85,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_vn8",
+   "n": 1,
+   "min": 0.8,
+   "max": 0.8,
+   "med": 0.8,
+   "base": 0.85,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_vn13",
+   "n": 1,
+   "min": 0.8,
+   "max": 0.8,
+   "med": 0.8,
+   "base": 0.85,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_vn15",
+   "n": 1,
+   "min": 0.8,
+   "max": 0.8,
+   "med": 0.8,
+   "base": 0.85,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_vn17",
+   "n": 1,
+   "min": 0.8,
+   "max": 0.8,
+   "med": 0.8,
+   "base": 0.85,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_hp0_0",
+   "n": 1,
+   "min": 0.775,
+   "max": 0.775,
+   "med": 0.775,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_hp0_1",
+   "n": 1,
+   "min": 0.775,
+   "max": 0.775,
+   "med": 0.775,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_hp0_2",
+   "n": 1,
+   "min": 0.775,
+   "max": 0.775,
+   "med": 0.775,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_hp0_3",
+   "n": 1,
+   "min": 0.775,
+   "max": 0.775,
+   "med": 0.775,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_hp1_0",
+   "n": 1,
+   "min": 0.775,
+   "max": 0.775,
+   "med": 0.775,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_hp1_1",
+   "n": 1,
+   "min": 0.775,
+   "max": 0.775,
+   "med": 0.775,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_hp1_2",
+   "n": 1,
+   "min": 0.775,
+   "max": 0.775,
+   "med": 0.775,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_hp1_3",
+   "n": 1,
+   "min": 0.775,
+   "max": 0.775,
+   "med": 0.775,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_hp2_0",
+   "n": 1,
+   "min": 0.775,
+   "max": 0.775,
+   "med": 0.775,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_hp2_1",
+   "n": 1,
+   "min": 0.775,
+   "max": 0.775,
+   "med": 0.775,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_hp2_2",
+   "n": 1,
+   "min": 0.775,
+   "max": 0.775,
+   "med": 0.775,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_hp2_3",
+   "n": 1,
+   "min": 0.775,
+   "max": 0.775,
+   "med": 0.775,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_hp3_0",
+   "n": 1,
+   "min": 0.775,
+   "max": 0.775,
+   "med": 0.775,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_hp3_1",
+   "n": 1,
+   "min": 0.775,
+   "max": 0.775,
+   "med": 0.775,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_hp3_2",
+   "n": 1,
+   "min": 0.775,
+   "max": 0.775,
+   "med": 0.775,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_hp3_3",
+   "n": 1,
+   "min": 0.775,
+   "max": 0.775,
+   "med": 0.775,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgdpc_hp4_3",
+   "n": 1,
+   "min": 0.775,
+   "max": 0.775,
+   "med": 0.775,
+   "base": 1.25,
+   "ratio": 1
+  },
+  {
+   "k": "hgt_mushrooms",
+   "n": 47,
+   "min": 0.653,
+   "max": 0.9,
+   "med": 0.756,
+   "base": 0.9,
+   "ratio": 1.377
+  },
+  {
+   "k": "sign_church",
+   "n": 4,
+   "min": 0.75,
+   "max": 0.75,
+   "med": 0.75,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "hgt_reeds",
+   "n": 168,
+   "min": 0.602,
+   "max": 0.896,
+   "med": 0.748,
+   "base": 1.4,
+   "ratio": 1.488
+  },
+  {
+   "k": "hpa_pplinth",
+   "n": 30,
+   "min": 0.7,
+   "max": 0.7,
+   "med": 0.7,
+   "base": 0.7,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_crysV",
+   "n": 33,
+   "min": 0.7,
+   "max": 0.7,
+   "med": 0.7,
+   "base": 0.7,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_glow",
+   "n": 45,
+   "min": 0.7,
+   "max": 0.7,
+   "med": 0.7,
+   "base": 0.7,
+   "ratio": 1
+  },
+  {
+   "k": "hgtb_deco_pearlplinth",
+   "n": 13,
+   "min": 0.65,
+   "max": 0.65,
+   "med": 0.65,
+   "base": 1.8,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgdf_plant0",
+   "n": 152,
+   "min": 0.559,
+   "max": 0.754,
+   "med": 0.65,
+   "base": 0.95,
+   "ratio": 1.349
+  },
+  {
+   "k": "hgtb_creamjelly",
+   "n": 1,
+   "min": 0.63,
+   "max": 0.63,
+   "med": 0.63,
+   "base": 0.9,
+   "ratio": 1
+  },
+  {
+   "k": "teleporter",
+   "n": 8,
+   "min": 0.62,
+   "max": 0.62,
+   "med": 0.62,
+   "base": 0.62,
+   "ratio": 1
+  },
+  {
+   "k": "uw_timber",
+   "n": 3,
+   "min": 0.62,
+   "max": 0.62,
+   "med": 0.62,
+   "base": 1.3,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_ctable",
+   "n": 1,
+   "min": 0.62,
+   "max": 0.62,
+   "med": 0.62,
+   "base": 0.62,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgxrock5",
+   "n": 13,
+   "min": 0.553,
+   "max": 0.643,
+   "med": 0.601,
+   "base": 0.595,
+   "ratio": 1.161
+  },
+  {
+   "k": "hpa_mushC",
+   "n": 38,
+   "min": 0.6,
+   "max": 0.6,
+   "med": 0.6,
+   "base": 0.6,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_waxbarrel",
+   "n": 1,
+   "min": 0.6,
+   "max": 0.6,
+   "med": 0.6,
+   "base": 0.6,
+   "ratio": 1
+  },
+  {
+   "k": "hgtb_plant_barrel",
+   "n": 2,
+   "min": 0.6,
+   "max": 0.6,
+   "med": 0.6,
+   "base": 0.6,
+   "ratio": 1
+  },
+  {
+   "k": "sacks",
+   "n": 2,
+   "min": 0.6,
+   "max": 0.6,
+   "med": 0.6,
+   "base": 0.6,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgdf_plant2",
+   "n": 26,
+   "min": 0.497,
+   "max": 0.66,
+   "med": 0.597,
+   "base": 0.8,
+   "ratio": 1.329
+  },
+  {
+   "k": "wm_barrel",
+   "n": 3,
+   "min": 0.58,
+   "max": 0.58,
+   "med": 0.58,
+   "base": 0.58,
+   "ratio": 1
+  },
+  {
+   "k": "art_hs_warning",
+   "n": 5,
+   "min": 0.531,
+   "max": 0.59,
+   "med": 0.575,
+   "base": 0.56,
+   "ratio": 1.112
+  },
+  {
+   "k": "art_hgthin0",
+   "n": 51,
+   "min": 0.437,
+   "max": 0.665,
+   "med": 0.569,
+   "base": 1,
+   "ratio": 1.52
+  },
+  {
+   "k": "hgtb_jadefinmoth",
+   "n": 1,
+   "min": 0.56,
+   "max": 0.56,
+   "med": 0.56,
+   "base": 0.8,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgdf_plant5",
+   "n": 77,
+   "min": 0.48,
+   "max": 0.647,
+   "med": 0.559,
+   "base": 0.85,
+   "ratio": 1.349
+  },
+  {
+   "k": "art_hgthin5",
+   "n": 26,
+   "min": 0.441,
+   "max": 0.664,
+   "med": 0.555,
+   "base": 1,
+   "ratio": 1.504
+  },
+  {
+   "k": "art_hgthin6",
+   "n": 30,
+   "min": 0.435,
+   "max": 0.667,
+   "med": 0.552,
+   "base": 1,
+   "ratio": 1.532
+  },
+  {
+   "k": "hgtb_plantbed",
+   "n": 23,
+   "min": 0.55,
+   "max": 0.55,
+   "med": 0.55,
+   "base": 1.15,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgtb_peachwhale",
+   "n": 2,
+   "min": 0.55,
+   "max": 0.55,
+   "med": 0.55,
+   "base": 0.55,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgtb_aquawhale",
+   "n": 1,
+   "min": 0.55,
+   "max": 0.55,
+   "med": 0.55,
+   "base": 0.55,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgtb_lilacmoth",
+   "n": 1,
+   "min": 0.55,
+   "max": 0.55,
+   "med": 0.55,
+   "base": 0.55,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_tools",
+   "n": 1,
+   "min": 0.55,
+   "max": 0.55,
+   "med": 0.55,
+   "base": 0.55,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_globe",
+   "n": 1,
+   "min": 0.55,
+   "max": 0.55,
+   "med": 0.55,
+   "base": 0.55,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_bell",
+   "n": 1,
+   "min": 0.55,
+   "max": 0.55,
+   "med": 0.55,
+   "base": 0.55,
+   "ratio": 1
+  },
+  {
+   "k": "hgtb_bench",
+   "n": 7,
+   "min": 0.55,
+   "max": 0.55,
+   "med": 0.55,
+   "base": 0.6,
+   "ratio": 1
+  },
+  {
+   "k": "urn",
+   "n": 6,
+   "min": 0.55,
+   "max": 0.55,
+   "med": 0.55,
+   "base": 0.55,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgdf_plant4",
+   "n": 23,
+   "min": 0.438,
+   "max": 0.591,
+   "med": 0.547,
+   "base": 0.7,
+   "ratio": 1.349
+  },
+  {
+   "k": "art_hgthin1",
+   "n": 24,
+   "min": 0.437,
+   "max": 0.65,
+   "med": 0.541,
+   "base": 1,
+   "ratio": 1.487
+  },
+  {
+   "k": "art_hgthin3",
+   "n": 56,
+   "min": 0.441,
+   "max": 0.66,
+   "med": 0.54,
+   "base": 1,
+   "ratio": 1.497
+  },
+  {
+   "k": "art_hgthin4",
+   "n": 33,
+   "min": 0.447,
+   "max": 0.66,
+   "med": 0.531,
+   "base": 1,
+   "ratio": 1.477
+  },
+  {
+   "k": "hgtb_spindleray",
+   "n": 1,
+   "min": 0.525,
+   "max": 0.525,
+   "med": 0.525,
+   "base": 0.75,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgthin7",
+   "n": 31,
+   "min": 0.442,
+   "max": 0.654,
+   "med": 0.52,
+   "base": 1,
+   "ratio": 1.48
+  },
+  {
+   "k": "art_hgthin2",
+   "n": 28,
+   "min": 0.44,
+   "max": 0.645,
+   "med": 0.506,
+   "base": 1,
+   "ratio": 1.468
+  },
+  {
+   "k": "uw_buoy",
+   "n": 4,
+   "min": 0.45,
+   "max": 0.5,
+   "med": 0.5,
+   "base": 1.25,
+   "ratio": 1.111
+  },
+  {
+   "k": "hpa_coldfire",
+   "n": 1,
+   "min": 0.5,
+   "max": 0.5,
+   "med": 0.5,
+   "base": 0.5,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_bench",
+   "n": 4,
+   "min": 0.5,
+   "max": 0.5,
+   "med": 0.5,
+   "base": 0.5,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_pots",
+   "n": 1,
+   "min": 0.5,
+   "max": 0.5,
+   "med": 0.5,
+   "base": 0.5,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_vase",
+   "n": 1,
+   "min": 0.5,
+   "max": 0.5,
+   "med": 0.5,
+   "base": 0.5,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_keg",
+   "n": 3,
+   "min": 0.5,
+   "max": 0.5,
+   "med": 0.5,
+   "base": 0.5,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_crate",
+   "n": 1,
+   "min": 0.5,
+   "max": 0.5,
+   "med": 0.5,
+   "base": 0.5,
+   "ratio": 1
+  },
+  {
+   "k": "sack2",
+   "n": 1,
+   "min": 0.5,
+   "max": 0.5,
+   "med": 0.5,
+   "base": 0.5,
+   "ratio": 1
+  },
+  {
+   "k": "wm_crate",
+   "n": 8,
+   "min": 0.5,
+   "max": 0.5,
+   "med": 0.5,
+   "base": 0.5,
+   "ratio": 1
+  },
+  {
+   "k": "hgtb_fishfly",
+   "n": 2,
+   "min": 0.49,
+   "max": 0.49,
+   "med": 0.49,
+   "base": 0.7,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgxrock1",
+   "n": 65,
+   "min": 0.414,
+   "max": 0.556,
+   "med": 0.482,
+   "base": 0.4675,
+   "ratio": 1.343
+  },
+  {
+   "k": "art_hgxrock0",
+   "n": 28,
+   "min": 0.421,
+   "max": 0.505,
+   "med": 0.472,
+   "base": 0.4675,
+   "ratio": 1.2
+  },
+  {
+   "k": "hpa_cask",
+   "n": 1,
+   "min": 0.46,
+   "max": 0.46,
+   "med": 0.46,
+   "base": 0.46,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_cage",
+   "n": 26,
+   "min": 0.45,
+   "max": 0.45,
+   "med": 0.45,
+   "base": 0.45,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_lid",
+   "n": 4,
+   "min": 0.45,
+   "max": 0.45,
+   "med": 0.45,
+   "base": 0.45,
+   "ratio": 1
+  },
+  {
+   "k": "hg_chestweed",
+   "n": 19,
+   "min": 0.382,
+   "max": 0.475,
+   "med": 0.434,
+   "base": 0.62,
+   "ratio": 1.244
+  },
+  {
+   "k": "hg_chestwax",
+   "n": 21,
+   "min": 0.388,
+   "max": 0.5,
+   "med": 0.433,
+   "base": 0.62,
+   "ratio": 1.29
+  },
+  {
+   "k": "hg_chestjelly",
+   "n": 3,
+   "min": 0.386,
+   "max": 0.458,
+   "med": 0.43,
+   "base": 0.62,
+   "ratio": 1.185
+  },
+  {
+   "k": "art_wm_barrel",
+   "n": 3,
+   "min": 0.42,
+   "max": 0.42,
+   "med": 0.42,
+   "base": 0.58,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_rack",
+   "n": 2,
+   "min": 0.42,
+   "max": 0.42,
+   "med": 0.42,
+   "base": 0.42,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgdf_plant3",
+   "n": 24,
+   "min": 0.348,
+   "max": 0.469,
+   "med": 0.404,
+   "base": 0.55,
+   "ratio": 1.349
+  },
+  {
+   "k": "hpa_chestwax",
+   "n": 3,
+   "min": 0.4,
+   "max": 0.4,
+   "med": 0.4,
+   "base": 0.4,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_lamp",
+   "n": 79,
+   "min": 0.4,
+   "max": 0.4,
+   "med": 0.4,
+   "base": 0.4,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgxrock2",
+   "n": 63,
+   "min": 0.336,
+   "max": 0.453,
+   "med": 0.39,
+   "base": 0.3825,
+   "ratio": 1.349
+  },
+  {
+   "k": "hgtb_lanternbeetle",
+   "n": 1,
+   "min": 0.385,
+   "max": 0.385,
+   "med": 0.385,
+   "base": 0.55,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_sack",
+   "n": 1,
+   "min": 0.38,
+   "max": 0.38,
+   "med": 0.38,
+   "base": 0.38,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_bucket",
+   "n": 1,
+   "min": 0.36,
+   "max": 0.36,
+   "med": 0.36,
+   "base": 0.36,
+   "ratio": 1
+  },
+  {
+   "k": "wm_bucket",
+   "n": 1,
+   "min": 0.36,
+   "max": 0.36,
+   "med": 0.36,
+   "base": 0.36,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgdf_plant1",
+   "n": 102,
+   "min": 0.31,
+   "max": 0.418,
+   "med": 0.355,
+   "base": 0.5,
+   "ratio": 1.349
+  },
+  {
+   "k": "hgtb_creammoth",
+   "n": 1,
+   "min": 0.35,
+   "max": 0.35,
+   "med": 0.35,
+   "base": 0.5,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgxprop12",
+   "n": 17,
+   "min": 0.296,
+   "max": 0.401,
+   "med": 0.337,
+   "base": 0.34,
+   "ratio": 1.356
+  },
+  {
+   "k": "hpa_gold",
+   "n": 3,
+   "min": 0.32,
+   "max": 0.32,
+   "med": 0.32,
+   "base": 0.32,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgxrock6",
+   "n": 53,
+   "min": 0.258,
+   "max": 0.349,
+   "med": 0.3,
+   "base": 0.2975,
+   "ratio": 1.349
+  },
+  {
+   "k": "yar_pots",
+   "n": 3,
+   "min": 0.3,
+   "max": 0.3,
+   "med": 0.3,
+   "base": 0.5,
+   "ratio": 1
+  },
+  {
+   "k": "yar_gull_stand",
+   "n": 2,
+   "min": 0.3,
+   "max": 0.3,
+   "med": 0.3,
+   "base": 0.24,
+   "ratio": 1
+  },
+  {
+   "k": "uw_clam",
+   "n": 3,
+   "min": 0.28,
+   "max": 0.3,
+   "med": 0.3,
+   "base": 0.5,
+   "ratio": 1.071
+  },
+  {
+   "k": "hpa_bones",
+   "n": 2,
+   "min": 0.3,
+   "max": 0.3,
+   "med": 0.3,
+   "base": 0.3,
+   "ratio": 1
+  },
+  {
+   "k": "dbones",
+   "n": 1,
+   "min": 0.3,
+   "max": 0.3,
+   "med": 0.3,
+   "base": 0.3,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgxprop5",
+   "n": 28,
+   "min": 0.238,
+   "max": 0.354,
+   "med": 0.295,
+   "base": 0.2975,
+   "ratio": 1.488
+  },
+  {
+   "k": "art_hgxprop13",
+   "n": 13,
+   "min": 0.244,
+   "max": 0.339,
+   "med": 0.286,
+   "base": 0.2975,
+   "ratio": 1.39
+  },
+  {
+   "k": "hgtb_pearlslug",
+   "n": 1,
+   "min": 0.28,
+   "max": 0.28,
+   "med": 0.28,
+   "base": 0.4,
+   "ratio": 1
+  },
+  {
+   "k": "hpa_shells",
+   "n": 1,
+   "min": 0.28,
+   "max": 0.28,
+   "med": 0.28,
+   "base": 0.28,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgxprop1",
+   "n": 44,
+   "min": 0.207,
+   "max": 0.303,
+   "med": 0.268,
+   "base": 0.255,
+   "ratio": 1.469
+  },
+  {
+   "k": "art_hgxprop9",
+   "n": 27,
+   "min": 0.209,
+   "max": 0.34,
+   "med": 0.265,
+   "base": 0.255,
+   "ratio": 1.626
+  },
+  {
+   "k": "art_wm_bucket",
+   "n": 2,
+   "min": 0.26,
+   "max": 0.26,
+   "med": 0.26,
+   "base": 0.36,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgxprop6",
+   "n": 33,
+   "min": 0.209,
+   "max": 0.306,
+   "med": 0.255,
+   "base": 0.255,
+   "ratio": 1.463
+  },
+  {
+   "k": "art_hgxprop14",
+   "n": 27,
+   "min": 0.209,
+   "max": 0.288,
+   "med": 0.255,
+   "base": 0.255,
+   "ratio": 1.378
+  },
+  {
+   "k": "art_hgxprop0",
+   "n": 42,
+   "min": 0.207,
+   "max": 0.306,
+   "med": 0.25,
+   "base": 0.255,
+   "ratio": 1.481
+  },
+  {
+   "k": "art_hgxprop15",
+   "n": 24,
+   "min": 0.207,
+   "max": 0.296,
+   "med": 0.247,
+   "base": 0.255,
+   "ratio": 1.432
+  },
+  {
+   "k": "hgtb_amberpup",
+   "n": 3,
+   "min": 0.245,
+   "max": 0.245,
+   "med": 0.245,
+   "base": 0.35,
+   "ratio": 1
+  },
+  {
+   "k": "art_hgxprop8",
+   "n": 25,
+   "min": 0.2,
+   "max": 0.301,
+   "med": 0.245,
+   "base": 0.255,
+   "ratio": 1.505
+  },
+  {
+   "k": "art_hgdf_plant6",
+   "n": 58,
+   "min": 0.194,
+   "max": 0.296,
+   "med": 0.242,
+   "base": 0.35,
+   "ratio": 1.53
+  },
+  {
+   "k": "art_hgxprop4",
+   "n": 21,
+   "min": 0.207,
+   "max": 0.301,
+   "med": 0.237,
+   "base": 0.255,
+   "ratio": 1.457
+  },
+  {
+   "k": "art_hgxprop11",
+   "n": 15,
+   "min": 0.161,
+   "max": 0.23,
+   "med": 0.209,
+   "base": 0.085,
+   "ratio": 1.434
+  },
+  {
+   "k": "art_hgxrock3",
+   "n": 73,
+   "min": 0.179,
+   "max": 0.242,
+   "med": 0.208,
+   "base": 0.2125,
+   "ratio": 1.349
+  },
+  {
+   "k": "art_hgxprop7",
+   "n": 22,
+   "min": 0.139,
+   "max": 0.182,
+   "med": 0.162,
+   "base": 0.153,
+   "ratio": 1.308
+  },
+  {
+   "k": "art_hgxprop10",
+   "n": 18,
+   "min": 0.125,
+   "max": 0.18,
+   "med": 0.141,
+   "base": 0.068,
+   "ratio": 1.435
+  }
+ ],
+ "propOutliers": [
+  "hgtb_plant_belltree x78 1.599-3.501",
+  "hgt_fairytree x80 1.6-3.501",
+  "hgtb_plant_spiralfern x32 0.752-1.301",
+  "art_hgthin0 x51 0.437-0.665",
+  "art_hgthin5 x26 0.441-0.664",
+  "art_hgthin6 x30 0.435-0.667",
+  "art_hgxprop9 x27 0.209-0.34",
+  "art_hgxprop8 x25 0.2-0.301",
+  "art_hgdf_plant6 x58 0.194-0.296"
+ ],
+ "enemies": 229,
+ "enemyKinds": {
+  "hgdspider": 19,
+  "hgdswarm": 10,
+  "hgdbeetle": 19,
+  "hgdguard": 17,
+  "hgdb_spider": 1,
+  "hgdb_beetle": 1,
+  "hgmhorsefly": 4,
+  "hgmtoad": 6,
+  "hgmhornet": 4,
+  "hgmmosquito": 2,
+  "hgmlocust": 9,
+  "hgmcricket": 3,
+  "hgmbeetle": 3,
+  "hgmdragonfly": 4,
+  "hgmini2": 1,
+  "hgmini3": 1,
+  "hgmini4": 1,
+  "hgwcroc": 25,
+  "hgweel": 27,
+  "hgwsnake": 22,
+  "hgdbug": 13,
+  "hgdslug": 14,
+  "hgdgrub": 10,
+  "hgdworm": 8,
+  "hgdjelly": 5
+ },
+ "itemsZone": 217,
+ "itemsUnreach": [],
+ "chests": 46,
+ "chestsUnreach": [],
+ "deadEnds": [
+  [
+   27,
+   141,
+   8
+  ],
+  [
+   193,
+   159,
+   4
+  ],
+  [
+   63,
+   165,
+   6
+  ]
+ ],
+ "dullCells": [
+  [
+   188,
+   119,
+   13
+  ]
+ ],
+ "lightsZone": 0,
+ "lightSample": [
+  133,
+  147
+ ],
+ "emDash": [],
+ "placeholders": [],
+ "precincts": [
+  [
+   "Hedgefoot Precinct",
+   98,
+   185,
+   0
+  ],
+  [
+   "Lowhedge Ward",
+   155,
+   194,
+   0
+  ],
+  [
+   "The Thorn Reach",
+   44,
+   194,
+   0
+  ],
+  [
+   "Cairn Precinct",
+   101,
+   158,
+   1
+  ],
+  [
+   "The Mason's Ward",
+   176,
+   179,
+   1
+  ],
+  [
+   "Cairnhold Precinct",
+   23,
+   182,
+   1
+  ],
+  [
+   "Combwick Precinct",
+   98,
+   125,
+   2
+  ],
+  [
+   "Droneside Precinct",
+   173,
+   149,
+   2
+  ],
+  [
+   "The Brood Rows",
+   23,
+   152,
+   2
+  ],
+  [
+   "Nacre Landing Precinct",
+   101,
+   95,
+   3
+  ],
+  [
+   "The Whelk Court",
+   176,
+   116,
+   3
+  ],
+  [
+   "Pearl Ward",
+   23,
+   119,
+   3
+  ]
+ ],
+ "kinds": {
+  "0": 9011,
+  "1": 1891,
+  "2": 987,
+  "3": 1632
+ },
+ "lightsMine": 698,
+ "lightsByBio": [
+  81,
+  252,
+  156,
+  209
+ ],
+ "unlit": [
+  2,
+  4,
+  2,
+  1
+ ],
+ "unlitCells": [
+  [
+   105,
+   93,
+   8
+  ],
+  [
+   133,
+   127,
+   8
+  ],
+  [
+   107,
+   139,
+   6
+  ],
+  [
+   27,
+   141,
+   8
+  ],
+  [
+   63,
+   165,
+   6
+  ],
+  [
+   33,
+   167,
+   6
+  ],
+  [
+   163,
+   188,
+   6
+  ],
+  [
+   115,
+   189,
+   9
+  ],
+  [
+   59,
+   193,
+   9
+  ]
+ ],
+ "maxLightDist": [
+  9,
+  6,
+  8,
+  8
+ ],
+ "scaleTable": [
+  [
+   "villager",
+   30,
+   0.8,
+   1.676,
+   0.95
+  ],
+  [
+   "door/gate",
+   7,
+   1.15,
+   1.15,
+   1.15
+  ],
+  [
+   "house",
+   4,
+   1.93,
+   2.254,
+   2.201
+  ],
+  [
+   "statue",
+   79,
+   1.301,
+   1.7,
+   1.396
+  ],
+  [
+   "plinth",
+   43,
+   0.65,
+   0.7,
+   0.7
+  ],
+  [
+   "lamp",
+   258,
+   0.4,
+   1.485,
+   1.15
+  ],
+  [
+   "chest",
+   43,
+   0.382,
+   0.5,
+   0.433
+  ],
+  [
+   "table/bench/crate",
+   18,
+   0.45,
+   1,
+   0.55
+  ],
+  [
+   "tree",
+   158,
+   1.599,
+   3.501,
+   2.4
+  ],
+  [
+   "vine",
+   61,
+   1.503,
+   1.899,
+   1.643
+  ],
+  [
+   "shellflower",
+   40,
+   1.003,
+   1.6,
+   1.201
+  ],
+  [
+   "sign",
+   4,
+   0.75,
+   0.75,
+   0.75
+  ],
+  [
+   "reeds",
+   168,
+   0.602,
+   0.896,
+   0.748
+  ],
+  [
+   "crystal/fungus light",
+   336,
+   0.6,
+   1.1,
+   0.8
+  ]
+ ],
+ "enemyH": [
+  [
+   "hgdguard",
+   0.64,
+   0.993
+  ],
+  [
+   "hgdbug",
+   1.12,
+   1.004
+  ],
+  [
+   "hgdworm",
+   1.02,
+   0.953
+  ],
+  [
+   "hgdjelly",
+   0.69,
+   0.945
+  ],
+  [
+   "hgdspider",
+   1.3,
+   0.9
+  ],
+  [
+   "hgdb_spider",
+   2.75,
+   1.903
+  ],
+  [
+   "hgdb_beetle",
+   3,
+   1.899
+  ],
+  [
+   "hgmini2",
+   1.41,
+   1.805
+  ],
+  [
+   "hgmini3",
+   1.34,
+   1.705
+  ],
+  [
+   "hgmini4",
+   1.38,
+   1.794
+  ]
+ ],
+ "noteN": 96,
+ "noteDup": 0,
+ "noteBlank": 0,
+ "noteEmDash": 0,
+ "signBlankText": 0,
+ "house2": 0,
+ "board": 0,
+ "vigSets": [
+  [
+   "The Gardener's Rest",
+   [
+    "hpa_tools"
+   ]
+  ],
+  [
+   "The Ribbon Corner",
+   [
+    "hpa_glamp"
+   ]
+  ],
+  [
+   "The Thorn Barricade",
+   [
+    "hpa_rack"
+   ]
+  ],
+  [
+   "The Tally Wall",
+   [
+    "hpa_ctable"
+   ]
+  ],
+  [
+   "The Unfinished Arch",
+   [
+    "hpa_arch"
+   ]
+  ],
+  [
+   "The Cold Camp",
+   [
+    "hpa_coldfire"
+   ]
+  ],
+  [
+   "The Beekeeper's Lantern",
+   []
+  ],
+  [
+   "The Drone's Vigil",
+   [
+    "hpa_chestwax",
+    "hpa_lamp",
+    "hpa_wguard"
+   ]
+  ],
+  [
+   "The Nursery Door",
+   [
+    "hpa_eggs"
+   ]
+  ],
+  [
+   "The Shell Collector",
+   []
+  ],
+  [
+   "The Drowned Shrine",
+   [
+    "art_hs_warning",
+    "hpa_pplinth"
+   ]
+  ],
+  [
+   "The Pearl Thief's Stash",
+   [
+    "hpa_gold"
+   ]
+  ]
+ ],
+ "vigShared": 0,
+ "rows3": 0,
+ "lightsEngine": null
+}

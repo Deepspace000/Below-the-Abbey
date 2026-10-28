@@ -4,7 +4,7 @@
    Pictures: painted by Gemini, cut with tools/wm_ingest.py (props and creatures on green) and tools/ingest_tex.py (walls, floors, ceilings). They are assets/ds_wm_*.png and
    assets/ds_tex_wm_*.png, so the game has them as IMG['art_wm_*'] and IMG['art_tex_wm_*'] (the list is written by tools/inject.py). Raw copies of the cut pieces are in assets/wm/.
    ========================================================================== */
-const WM={IDS:[497,498,499,502],NAMES:['Under the Wenlock Well','The Violet Maze','The Bell Vaults','The Amethyst Deep'],DIFF:80,RATING:[80,81,82,83],W:61,H:61,CH:String.fromCharCode(0x2c0)};
+const WM={IDS:[497,498,499,502],NAMES:['Under the Wenlock Well','The Violet Maze','The Bell Vaults','The Amethyst Deep'],DIFF:80,RATING:[80,81,82,83],W:43,H:43,S:n=>Math.max(3,Math.round(n*.7)),CH:String.fromCharCode(0x2c0)};
 WM.k=id=>WM.IDS.indexOf(id);
 const wmIn=()=>WM.IDS.includes(LEVEL);
 try{WK.WELL=WM.IDS.slice()}catch(e){} // the contract file says 497..499 (500 in a later note); 500 is the Ruby Maze, so the four levels are these
@@ -25,7 +25,19 @@ function wmArt(){
   const fl=(n,src,k)=>{const d=mk(n,src,k?(p=>{for(let i=0;i<p.length;i+=4){p[i]*=k[0];p[i+1]*=k[1];p[i+2]*=k[2]}}):null);if(d)FLOORS[n]=d};
   fl('wmflag','art_floor_wm_flag');fl('wmcobble','art_floor_wm_cobble');fl('wmmoss','art_floor_wm_moss');fl('wmwater','art_floor_wm_water',[1.1,1.05,1.2]);
   {const d=mk('wmceil','art_ceil_wm_brick');if(d)CEILS.wmceil=d;const e=mk('wmceilx','art_ceil_wm_crystal');if(e)CEILS.wmceilx=e}
+  wmOrbArt();
   WM.art=true}
+/* ---------- the orb frames: the painted cage lantern (an orb in an ornate iron frame), with the teal of its glow turned to this floor's orb colour; a dim copy for the empty frame ---------- */
+WM.ORBS=[{n:'amber gold',hue:42,sat:1.25,css:'#ffb838',col:[1.5,1.05,.4]},{n:'violet pink',hue:318,sat:1.1,css:'#ff6ad8',col:[1.5,.55,1.15]},{n:'cyan blue',hue:200,sat:1.2,css:'#46c8ff',col:[.45,1.0,1.55]},{n:'emerald green',hue:132,sat:1.15,css:'#40e070',col:[.5,1.4,.6]}];
+function wmOrbArt(){
+  const src=IMG.art_wm_cage_lantern;if(!src||!src.width||WM.orbArt)return;WM.orbArt=true;
+  const w=src.width,h=src.height,mk=fn=>{const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(src,0,0);const im=x.getImageData(0,0,w,h),d=im.data;fn(d);x.putImageData(im,0,0);return c};
+  const hsl=(r,g,b)=>{r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2;let hh=0,ss=0;if(mx!==mn){const dd=mx-mn;ss=l>.5?dd/(2-mx-mn):dd/(mx+mn);hh=mx===r?(g-b)/dd+(g<b?6:0):mx===g?(b-r)/dd+2:(r-g)/dd+4;hh*=60}return [hh,ss,l]};
+  const rgb=(hh,ss,l)=>{const f=n=>{const k=(n+hh/30)%12,a=ss*Math.min(l,1-l);return l-a*Math.max(-1,Math.min(k-3,9-k,1))};return [f(0)*255,f(8)*255,f(4)*255]};
+  WM.ORBS.forEach((o,i)=>{
+    const lit=mk(d=>{for(let q=0;q<d.length;q+=4){if(!d[q+3])continue;const [hh,ss,l]=hsl(d[q],d[q+1],d[q+2]);if(hh>130&&hh<230&&ss>.18){const c=rgb(o.hue,Math.min(1,Math.max(.7,ss*o.sat)),Math.min(.8,l*1.2+.03));d[q]=c[0];d[q+1]=c[1];d[q+2]=c[2]}}});
+    const dim=mk(d=>{for(let q=0;q<d.length;q+=4){if(!d[q+3])continue;const g=(d[q]*.3+d[q+1]*.59+d[q+2]*.11)*.55;d[q]=g;d[q+1]=g;d[q+2]=g*1.05}});
+    IMG['wm_orbframe'+i]=lit;NPC_H['wm_orbframe'+i]=.85;IMG['wm_orbframeE'+i]=dim;NPC_H['wm_orbframeE'+i]=.85})}
 /* ---------- the creatures: level 80. An ordinary creature's health comes from the balance code (hgd_balance.js) by the KIND's written health (hp/48, between .6 and 1.4), so hp here is only a size: 30 is about 1700 health at level 80, 64 about 3400.
    Blows are the written range times 12.35 times 2.1 times 1.23 at level 80. The boss is sized by the old formula (820 gives about 31000 health, like the Black Swill). xp is paid times 80. ---------- */
 Object.assign(ENEMY_DEF,{
