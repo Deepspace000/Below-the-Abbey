@@ -17,6 +17,23 @@ Written down so that every later session builds the same thing. Status: design o
 
 * Sale has shops, but each is barricaded in. The party must earn each shopkeeper's trust with quests (collect supplies, kill certain creatures, rescue certain people) before the shop opens. Every shop gets its own trust quest(s).
 
+## The Blighted Road: ten places (proposed 29 Oct 2026, awaiting the owner's yes)
+
+A big winding road west from Wenlock's west gate to Sale, in linked areas of rising level (84 up to 90), with side tracks, milestones that count down to Sale, grave markers and a plague cart. The places, in road order:
+
+1. **The Toll House of the Road Wardens (84).** The first blighted ground just outside Wenlock's gate: dead hedges, the Wardens' toll house (ties to the three seals), a ruined wayside shrine.
+2. **Ashenfold Farm (85).** A gothic farmhouse where the dead farm family still sit at supper. Scarecrows that walk. Barns and a cellar.
+3. **The Church of the Hollow Saint (86).** An unholy church: inverted bells, a choir of the dead, a priest who will not stop preaching.
+4. **Gallowmere (86).** A drowned fen village with gibbet trees, bog bodies and wisps, reached by a causeway.
+5. **The Bone Orchard (87).** Orchards of white trees fruiting skulls, a field of crypts, and the Reaper-Farmer who keeps the harvest.
+6. **Lanternrest Waystation (87).** A walled coaching inn that is the one safe place on the road: living refugees, a teleporter, a shop, quests.
+7. **The Necromancer's Crypt: the Vault of Maldrake (88 to 89).** A multi-floor crypt under a hill of barrows; Maldrake, the necromancer who took the Sovereign's silver, keeps the key to Sale's gate.
+8. **Hollowbell Abbey (88).** A ruined monastery of undead monks and a plague bell that tolls the dead up (ties to Brother Sevrin).
+9. **The Rookery Mill (89).** A windmill and a court of crows that watch the road for the Sovereign; a crow queen.
+10. **The Pale Bridge and the Gate of Sale (90).** The last bridge before Sale, held by a pale knight, with Sale's outer wall and gatehouse beyond.
+
+Sale is the furthest town west; beyond it lie the Pale Lands.
+
 ## Open design questions (not answered yet)
 
 * What is the pact between Wren and Aldous Wend, and what does Sale's unlocking of the Pale Lands need from the party?
