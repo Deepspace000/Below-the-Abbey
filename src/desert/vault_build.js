@@ -20,7 +20,7 @@ function vtPlateFloor(){
   FLOORS.vtf_plate=d;return 'vtf_plate'}
 /* an iron gate set in the wall: the brick above it, the gate itself over darkness (not over brick, which showed through the bars as a blank pale panel); extra paints on top (the glowing locks) */
 function vtGateTile(brick,WH,tag,gain,rgb,glow){
-  return gyTile('vtdark',WH,{fac:{img:'stairFix_2',i:0,n:1},gain:gain,rgb:rgb,tag:tag,emit:.3,draw:(x,w,h)=>{
+  return gyTile('vtdark',WH,{fac:{img:'stairFix_2',i:0,n:1},gain:gain,rgb:rgb,tag:tag,emit:.14,draw:(x,w,h)=>{
     const im=IMG['gyp_'+brick+'_0'],f=IMG.gyp_stairFix_2,gh=f?f.height*128/f.width:94,top=Math.max(0,h-gh-1);
     if(im&&top>0){x.save();x.beginPath();x.rect(0,0,w,top);x.clip();for(let yy=0;yy<top;yy+=128)x.drawImage(im,0,yy,128,128);x.restore()}
     if(glow)glow(x,w,h)}})}
@@ -57,7 +57,7 @@ function vtMake(id){
       }
     else if(D.kind==='lock'){
       const L=VT_LOCKS[D.lock],seats=D.lock==='L3'?3:1;
-      gid=vtGateTile(S.brick,WH,'vtlock'+D.lock,1.5,[1.05,1.2,1.6],(x,w,h)=>{
+      gid=vtGateTile(S.brick,WH,'vtlock'+D.lock,1.1,[.8,.95,1.25],(x,w,h)=>{
         for(let s=0;s<seats;s++){const cx=seats===1?64:34+s*30,cy=h-(seats===1?56:62),R=seats===1?11:9;const gr=x.createRadialGradient(cx,cy,1,cx,cy,R+5);gr.addColorStop(0,'rgba(235,246,255,1)');gr.addColorStop(.45,'rgba(160,200,250,.75)');gr.addColorStop(1,'rgba(90,130,200,0)');
           x.fillStyle=gr;x.beginPath();x.arc(cx,cy,R+5,0,6.3);x.fill();x.strokeStyle='rgba(240,248,255,1)';x.lineWidth=1.8;x.beginPath();x.arc(cx,cy,R*.55,0,6.3);x.stroke();x.beginPath();x.arc(cx,cy,R,0,6.3);x.stroke()}});
       KH_DOOR[gid]={vt:'lock',id:D.lock};locks[D.lock]={x:dx,y:dy}}

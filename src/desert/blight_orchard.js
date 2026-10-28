@@ -38,9 +38,10 @@ ENEMY_DEF.blreaper.act=e=>gyBossAct(e,{moves:[
 /* ---------- white trees: the painted dead trees of the wood and the graveyard, bleached (a filter over the painting) ---------- */
 function boArt(){
   if(BO._art)return;
-  const mk=(key,src,h)=>{if(!src||!src.width)return false;const c=document.createElement('canvas');c.width=src.width;c.height=src.height;const x=c.getContext('2d');try{x.filter='grayscale(1) brightness(2.3) contrast(.72)'}catch(e){}x.drawImage(src,0,0);IMG[key]=c;NPC_H[key]=h;return true};
+  const mk=(key,src,h)=>{if(!src||!src.width)return false;const c=document.createElement('canvas');c.width=src.width;c.height=src.height;const x=c.getContext('2d');try{x.filter='grayscale(1) brightness(.98) contrast(.9)'}catch(e){}x.drawImage(src,0,0);IMG[key]=c;NPC_H[key]=h;return true};
   mk('bo_tree0',IMG.trees_5,2.6);mk('bo_tree1',IMG.trees_1,2.9);mk('bo_tree2',IMG.gyp_sceneB_1,2.8);mk('bo_tree3',IMG.trees_3,2.9);
   for(let i=0;i<4;i++)if(!IMG['bo_tree'+i]){IMG['bo_tree'+i]=IMG.gy_dead||IMG.ww_twig;NPC_H['bo_tree'+i]=NPC_H.gy_dead||2.6}
+  if(IMG.hpb_bell_4&&IMG.hpb_bell_4.width){const c=document.createElement('canvas'),b=IMG.hpb_bell_4;c.width=b.width;c.height=b.height;const x=c.getContext('2d');try{x.filter='sepia(.4) saturate(.5) brightness(.6) contrast(1.15)'}catch(e){}x.drawImage(b,0,0);IMG.bo_bell=c;NPC_H.bo_bell=1.25}else{IMG.bo_bell=IMG.gy_bell;NPC_H.bo_bell=NPC_H.gy_bell}
   BO._art=1}
 const BO_FRUIT=[[11,13],[23,19],[14,25],[29,10],[61,16]];   // the five trees that bear skull-apples (on the rows of the orchards)
 const BO_WHITE=['bo_tree0','bo_tree1','bo_tree2','bo_tree3','bo_tree0','bo_tree2'];
@@ -137,7 +138,7 @@ BO_REMAINS.forEach((r,i)=>khNpc('bo_rem'+i,r[0],'gy_bones',d=>{
   const F=boF();F.crestTaken=F.crestTaken||{};
   if(F.crestTaken[i])return say(r[0]+' lies in his place on the slab, with his collar bare. Somebody has closed his eyes.',[BYE]);
   return say(r[1],[['Take the crest.',()=>{F.crestTaken[i]=1;F.crests=(F.crests|0)+1;if(!bagAdd(mkItem('blcrest')))G.items.push({k:'blcrest',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg('You take the crest of '+r[0]+' ('+F.crests+' of 3).','#ffe36a');return null}],BYE])}));
-khNpc('bo_bell','The harvest bell','gy_bell',()=>{
+khNpc('bo_bell','The harvest bell','bo_bell',()=>{
   const F=boF();
   if(F.bell)return say('The harvest bell lies in three pieces on the trampled grass. It has a dull sound now, a flat clack, when the wind moves it.',[BYE]);
   if(bagCount('blmallet')>0)return say('A bronze bell the size of a barrel hangs from a post of white wood. A rope as thick as your wrist hangs from the clapper, and the rope is slightly warm. You have the cellar mallet.',[['Break the bell with the mallet.',()=>{F.bell=1;bagRemove('blmallet',1);sfx('win');G.shake=.6;msg('The bell cracks right through, with a sound like a stone going down a well, and every picker in the orchard sits down.','#ffe9a0');
@@ -194,7 +195,7 @@ function boBuild(p){
   for(let x=36;x<=52;x++){if(x>=43&&x<=45)continue;C.dec('bl_wfence',x,33,{block:true,sc:.9})}
   for(let x=36;x<=52;x++)C.dec('bl_wfence',x,19,{block:true,sc:.9});
   for(let y=20;y<=32;y++){C.dec('bl_wfence',36,y,{block:true,sc:.9});C.dec('bl_wfence',52,y,{block:true,sc:.9})}
-  C.thing('gy_bell','bo_bell',44,28,{sc:2.8});C.dec('bl_fence',43,28,{block:true,sc:.7});C.dec('bl_fence',45,28,{block:true,sc:.7});C.dec('bl_fence',44,29,{block:true,sc:.7});
+  C.thing('bo_bell','bo_bell',44,28,{sc:1});C.dec('bl_fence',43,28,{block:true,sc:.7});C.dec('bl_fence',45,28,{block:true,sc:.7});C.dec('bl_fence',44,29,{block:true,sc:.7});
   for(const [x,y] of [[40,26],[48,26],[40,32],[48,32]]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.pale)}
   C.dec('hay',50,30,{block:true,sc:1.2});C.dec('hay',38,30,{block:true,sc:1.1});C.dec('bl_barrow',48,31,{block:true,sc:.8});
   C.post(42,34,'bo_yard',[{n:'HARVEST YARD',d:0},{n:'THE ROAD',d:2}],'bo_sign_yard',BO_SIGNS.yard[0],{i:1});
@@ -260,7 +261,7 @@ function boShed(){
       boP(C,'shelving',3,1,{h:1.1});boP(C,'shelving',11,1,{h:1.1});boP(C,'longtable',9,5,{h:.7});boP(C,'longtable',5,5,{h:.7});boP(C,'waterbarrel',13,6,{h:.7});boP(C,'veg',12,3,{h:.6});
       C.raw('gy_hatch2',3,5,{npc:'bo_trap',solid:1,deco:false,sc:1});C.raw('gy_bones',7,6,{block:false,sc:.7});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_bones',10,3,{block:false,sc:.6});C.raw('gy_bones',2,5,{block:false,sc:.55})}})}
 function boCellar(){
-  blRoom({id:BO.CELLAR,name:'The Cider Cellar',w:13,h:9,amb:.38,rating:87,floor:'wood',wall:'kh_ohwall1_0',
+  blRoom({id:BO.CELLAR,name:'The Cider Cellar',w:13,h:9,amb:.38,rating:87,floor:FLOORS.cobble?'cobble':'wood',wall:IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0',
     back:{to:BO.SHED,x:3,y:6,f:0},
     lights:[[3,2],[9,2],[6,5],[10,7]],lcol:{'3,2':[1.35,.98,.58],'9,2':[.75,1.1,.95],'6,5':[1.3,.95,.6],'10,7':[.75,1.1,.95]},col:[1.2,.95,.65],
     enemies:[['blghoul',11,3],['blbones',2,2]],
@@ -271,7 +272,7 @@ function boCellar(){
       C.raw('gy_hatch2',6,1,{npc:'bo_cellarup',solid:1,deco:false,sc:.9,hidden:true});C.raw('gy_web',1,1,{block:false,sc:.5});
       C.npc('bo_bartle',4,5)}})}
 function boCrypt(){
-  blRoom({id:BO.CRYPT,name:'The Crypt of the Lost Patrol',w:13,h:9,amb:.35,rating:87,floor:'wood',wall:'kh_ohwall1_0',
+  blRoom({id:BO.CRYPT,name:'The Crypt of the Lost Patrol',w:13,h:9,amb:.35,rating:87,floor:FLOORS.mosscobble?'mosscobble':FLOORS.cobble?'cobble':'wood',wall:IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0',
     back:{to:BO.ID,x:BO_CRYPTH.front[0],y:BO_CRYPTH.front[1],f:2},
     lights:[[2,2],[10,2],[6,4],[2,7],[10,7]],lcol:{'2,2':[.7,1.1,.95],'10,2':[.7,1.1,.95],'6,4':[1.3,.95,.6],'2,7':[.7,1.1,.95],'10,7':[.75,1.1,.95]},col:[1.1,.95,.8],
     enemies:[['blghoul',10,5],['blbones',2,5],['blbones',10,2],['blhusk',10,7]],

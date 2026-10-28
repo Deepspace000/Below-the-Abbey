@@ -50,12 +50,12 @@ function blrArt(){
   if(!mk('blr_stew',IMG.propsA_0||IMG.ww_cauldron,'hue-rotate(-95deg) saturate(.85) brightness(.9)',.9))IMG.blr_stew=IMG.ww_cauldron;
   // the painted market tent with its flowers painted over in the dark of a tent mouth (a filter over the painting, nothing drawn)
   for(const k of ['blr_tent0','blr_tent1']){const c=IMG[k];if(!c||!c.getContext)continue;const x=c.getContext('2d');x.save();x.globalCompositeOperation='source-atop';
-    const g=x.createLinearGradient(0,c.height*.4,0,c.height*.95);g.addColorStop(0,'rgba(18,12,8,0)');g.addColorStop(.12,'rgba(18,12,8,.95)');g.addColorStop(1,'rgba(10,7,5,.97)');x.fillStyle=g;x.fillRect(c.width*.2,c.height*.4,c.width*.6,c.height*.56);x.restore()}
+    const g=x.createLinearGradient(0,c.height*.4,0,c.height*.95);g.addColorStop(0,'rgba(18,12,8,0)');g.addColorStop(.12,'rgba(40,26,16,.68)');g.addColorStop(1,'rgba(26,17,11,.8)');x.fillStyle=g;x.fillRect(c.width*.2,c.height*.4,c.width*.6,c.height*.56);x.restore()}
   BLR._art=1}
 function blrBanner(){return IMG.wl2_hall_0?'wl2_hall_0':IMG.kh_throne1_1?'kh_throne1_1':null}
 /* Lanternrest is warm and lit: its haze is thin and golden, not the grey green of the road */
 {const _w=weatherNow;weatherNow=function(){
-  if(LEVEL===BLR.ID)return {id:'fog',n:'Lantern haze',fog:.007,haze:.18,dark:0,mix:.25,col:[168,150,118],text:'Lamp smoke and cook-fire smoke hang under the wall, and the light is warm. For the first time in a long way the air smells of stew.'};
+  if(LEVEL===BLR.ID)return {id:'fog',n:'Lantern haze',fog:.0055,haze:.13,dark:0,mix:.2,col:[168,150,118],text:'Lamp smoke and cook-fire smoke hang under the wall, and the light is warm. For the first time in a long way the air smells of stew.'};
   return _w.apply(this,arguments)}}
 {const _sl=setupLights;setupLights=function(){const r=_sl.apply(this,arguments);
   try{if(LEVEL===BLR.ID){for(const l of LIGHTS){if(!l.free||l.lamp)continue;l.kI=1.7;l.range2=100;l.calm=true}}}catch(e){console.error('blr lights',e)}
@@ -296,6 +296,7 @@ function blrBuild(p){
   /* tents: rows of soldier tents in the west and refugee tents in the east, with the stew pot and the well between */
   const tents=[[24,18],[27,20],[30,23],[24,21],[26,34],[29,36],[32,34],[24,37],[28,40],[34,41],[58,20],[61,17],[64,20],[60,22],[57,34],[60,36],[63,34],[58,40],[62,40],[66,36]];
   tents.forEach(([x,y],i)=>{if(!C.dec(IMG.blr_tent0&&i%3?'blr_tent'+((i%3)%2):'blr_tent0',x,y,{block:true,npc:'blr_tent',sc:.72,i}))console.error('tent',x,y)});
+  tents.forEach(([x,y],i)=>{if(i%2===0)C.light(x,y+1,WARM)});
   /* people */
   C.person('blr_drill',33,38,2);C.person('blr_cook',39,22,2);C.person('blr_stable',62,16,2);
   C.person('blr_nell',60,30,2);C.person('blr_pell',22,14,2);

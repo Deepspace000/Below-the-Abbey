@@ -2652,7 +2652,7 @@ function render3D(){
     let side=0,g=0,guard=0,nHit=1;
     if(TERRACE){nHit=terrTerrace(x,rX,rY);if(nHit===0){zbuf[x]=99;wtop[x]=-1e9;continue}terrCover(nHit,rX,rY,cx,cy)} // terraced town: the ground is walked cell by cell and every wall that can be seen is listed, nearest first
     else{
-    while(guard++<(LEVEL>=9610&&LEVEL<=9709?180:LEVEL===530||LEVEL===9670?100:64)){
+    while(guard++<((LEVEL>=9610&&LEVEL<=9709)||LEVEL===600||LEVEL===496?180:LEVEL===530||LEVEL===9670?100:64)){
       if(sdx<sdy){sdx+=ddx;mx+=stx;side=0}else{sdy+=ddy;my+=sty;side=1}
       if(mx<0||my<0||mx>=MW||my>=MH){g=1;break}
       g=grid[my][mx];if(g>0)break;
@@ -66702,7 +66702,7 @@ function vtPlateFloor(){
   FLOORS.vtf_plate=d;return 'vtf_plate'}
 /* an iron gate set in the wall: the brick above it, the gate itself over darkness (not over brick, which showed through the bars as a blank pale panel); extra paints on top (the glowing locks) */
 function vtGateTile(brick,WH,tag,gain,rgb,glow){
-  return gyTile('vtdark',WH,{fac:{img:'stairFix_2',i:0,n:1},gain:gain,rgb:rgb,tag:tag,emit:.3,draw:(x,w,h)=>{
+  return gyTile('vtdark',WH,{fac:{img:'stairFix_2',i:0,n:1},gain:gain,rgb:rgb,tag:tag,emit:.14,draw:(x,w,h)=>{
     const im=IMG['gyp_'+brick+'_0'],f=IMG.gyp_stairFix_2,gh=f?f.height*128/f.width:94,top=Math.max(0,h-gh-1);
     if(im&&top>0){x.save();x.beginPath();x.rect(0,0,w,top);x.clip();for(let yy=0;yy<top;yy+=128)x.drawImage(im,0,yy,128,128);x.restore()}
     if(glow)glow(x,w,h)}})}
@@ -66739,7 +66739,7 @@ function vtMake(id){
       }
     else if(D.kind==='lock'){
       const L=VT_LOCKS[D.lock],seats=D.lock==='L3'?3:1;
-      gid=vtGateTile(S.brick,WH,'vtlock'+D.lock,1.5,[1.05,1.2,1.6],(x,w,h)=>{
+      gid=vtGateTile(S.brick,WH,'vtlock'+D.lock,1.1,[.8,.95,1.25],(x,w,h)=>{
         for(let s=0;s<seats;s++){const cx=seats===1?64:34+s*30,cy=h-(seats===1?56:62),R=seats===1?11:9;const gr=x.createRadialGradient(cx,cy,1,cx,cy,R+5);gr.addColorStop(0,'rgba(235,246,255,1)');gr.addColorStop(.45,'rgba(160,200,250,.75)');gr.addColorStop(1,'rgba(90,130,200,0)');
           x.fillStyle=gr;x.beginPath();x.arc(cx,cy,R+5,0,6.3);x.fill();x.strokeStyle='rgba(240,248,255,1)';x.lineWidth=1.8;x.beginPath();x.arc(cx,cy,R*.55,0,6.3);x.stroke();x.beginPath();x.arc(cx,cy,R,0,6.3);x.stroke()}});
       KH_DOOR[gid]={vt:'lock',id:D.lock};locks[D.lock]={x:dx,y:dy}}
@@ -66959,7 +66959,7 @@ VT_SPEC[9674]={W:35,H:30,diff:89,brick:'texGrey',rgb:[.9,1,1.22],lcol:[.78,.72,1
     light(13,19,[.8,.75,1.5]);light(21,20,[.8,.75,1.5]);light(21,23,[.8,.75,1.5]);sign(20,16,[0,1],'THE THIRD LOCK','Three seats, three sigils');
     C.setF(12,8,22,16,'3')}};
 /* ===== 9675 THE HALL OF UNDERHILL: the village sits down to supper; the old study and the red-eyed book ===== */
-VT_SPEC[9675]={W:37,H:28,diff:89,brick:'texRed',lcol:[1.5,.8,.48],torch:{fl:0,col:[1.5,.8,.4],name:'orange',css:'#e0803a'},fgain:.5,ftint:[1,.92,.9],ceil:'gyc_0',wall:.88,
+VT_SPEC[9675]={W:37,H:28,diff:89,brick:'texRed',rgb:[.82,.66,.62],lcol:[1.5,.8,.48],torch:{fl:0,col:[1.5,.8,.4],name:'orange',css:'#e0803a'},fgain:.5,ftint:[1,.92,.9],ceil:'gyc_0',wall:.88,
   rects:[[16,2,20,4],[17,5,19,5],[5,6,31,17],[9,18,10,18],[5,19,14,25],[17,18,19,18],[18,19,18,23],[27,18,28,18],[24,19,33,25],[35,22,35,22]],
   doors:[{x:18,y:1,kind:'stair',to:9674,at:vtUp(9674),start:true},{x:18,y:24,kind:'stair',to:9676,at:vtDown(9676),down:true},{x:34,y:22,kind:'secret',v:2},{x:36,y:22,kind:'stair',to:9678,at:vtDown(9678),secretStair:true}],
   names:[{t:'The Vestibule',x:18,y:3,k:'place'},{t:'The Hall of Underhill',x:18,y:11,k:'place'},{t:'The Chapel',x:9,y:22,k:'place'},{t:"Maldrake's Old Study",x:28,y:22,k:'place'}],
@@ -68329,9 +68329,10 @@ ENEMY_DEF.blreaper.act=e=>gyBossAct(e,{moves:[
 /* ---------- white trees: the painted dead trees of the wood and the graveyard, bleached (a filter over the painting) ---------- */
 function boArt(){
   if(BO._art)return;
-  const mk=(key,src,h)=>{if(!src||!src.width)return false;const c=document.createElement('canvas');c.width=src.width;c.height=src.height;const x=c.getContext('2d');try{x.filter='grayscale(1) brightness(2.3) contrast(.72)'}catch(e){}x.drawImage(src,0,0);IMG[key]=c;NPC_H[key]=h;return true};
+  const mk=(key,src,h)=>{if(!src||!src.width)return false;const c=document.createElement('canvas');c.width=src.width;c.height=src.height;const x=c.getContext('2d');try{x.filter='grayscale(1) brightness(.98) contrast(.9)'}catch(e){}x.drawImage(src,0,0);IMG[key]=c;NPC_H[key]=h;return true};
   mk('bo_tree0',IMG.trees_5,2.6);mk('bo_tree1',IMG.trees_1,2.9);mk('bo_tree2',IMG.gyp_sceneB_1,2.8);mk('bo_tree3',IMG.trees_3,2.9);
   for(let i=0;i<4;i++)if(!IMG['bo_tree'+i]){IMG['bo_tree'+i]=IMG.gy_dead||IMG.ww_twig;NPC_H['bo_tree'+i]=NPC_H.gy_dead||2.6}
+  if(IMG.hpb_bell_4&&IMG.hpb_bell_4.width){const c=document.createElement('canvas'),b=IMG.hpb_bell_4;c.width=b.width;c.height=b.height;const x=c.getContext('2d');try{x.filter='sepia(.4) saturate(.5) brightness(.6) contrast(1.15)'}catch(e){}x.drawImage(b,0,0);IMG.bo_bell=c;NPC_H.bo_bell=1.25}else{IMG.bo_bell=IMG.gy_bell;NPC_H.bo_bell=NPC_H.gy_bell}
   BO._art=1}
 const BO_FRUIT=[[11,13],[23,19],[14,25],[29,10],[61,16]];   // the five trees that bear skull-apples (on the rows of the orchards)
 const BO_WHITE=['bo_tree0','bo_tree1','bo_tree2','bo_tree3','bo_tree0','bo_tree2'];
@@ -68428,7 +68429,7 @@ BO_REMAINS.forEach((r,i)=>khNpc('bo_rem'+i,r[0],'gy_bones',d=>{
   const F=boF();F.crestTaken=F.crestTaken||{};
   if(F.crestTaken[i])return say(r[0]+' lies in his place on the slab, with his collar bare. Somebody has closed his eyes.',[BYE]);
   return say(r[1],[['Take the crest.',()=>{F.crestTaken[i]=1;F.crests=(F.crests|0)+1;if(!bagAdd(mkItem('blcrest')))G.items.push({k:'blcrest',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg('You take the crest of '+r[0]+' ('+F.crests+' of 3).','#ffe36a');return null}],BYE])}));
-khNpc('bo_bell','The harvest bell','gy_bell',()=>{
+khNpc('bo_bell','The harvest bell','bo_bell',()=>{
   const F=boF();
   if(F.bell)return say('The harvest bell lies in three pieces on the trampled grass. It has a dull sound now, a flat clack, when the wind moves it.',[BYE]);
   if(bagCount('blmallet')>0)return say('A bronze bell the size of a barrel hangs from a post of white wood. A rope as thick as your wrist hangs from the clapper, and the rope is slightly warm. You have the cellar mallet.',[['Break the bell with the mallet.',()=>{F.bell=1;bagRemove('blmallet',1);sfx('win');G.shake=.6;msg('The bell cracks right through, with a sound like a stone going down a well, and every picker in the orchard sits down.','#ffe9a0');
@@ -68485,7 +68486,7 @@ function boBuild(p){
   for(let x=36;x<=52;x++){if(x>=43&&x<=45)continue;C.dec('bl_wfence',x,33,{block:true,sc:.9})}
   for(let x=36;x<=52;x++)C.dec('bl_wfence',x,19,{block:true,sc:.9});
   for(let y=20;y<=32;y++){C.dec('bl_wfence',36,y,{block:true,sc:.9});C.dec('bl_wfence',52,y,{block:true,sc:.9})}
-  C.thing('gy_bell','bo_bell',44,28,{sc:2.8});C.dec('bl_fence',43,28,{block:true,sc:.7});C.dec('bl_fence',45,28,{block:true,sc:.7});C.dec('bl_fence',44,29,{block:true,sc:.7});
+  C.thing('bo_bell','bo_bell',44,28,{sc:1});C.dec('bl_fence',43,28,{block:true,sc:.7});C.dec('bl_fence',45,28,{block:true,sc:.7});C.dec('bl_fence',44,29,{block:true,sc:.7});
   for(const [x,y] of [[40,26],[48,26],[40,32],[48,32]]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.pale)}
   C.dec('hay',50,30,{block:true,sc:1.2});C.dec('hay',38,30,{block:true,sc:1.1});C.dec('bl_barrow',48,31,{block:true,sc:.8});
   C.post(42,34,'bo_yard',[{n:'HARVEST YARD',d:0},{n:'THE ROAD',d:2}],'bo_sign_yard',BO_SIGNS.yard[0],{i:1});
@@ -68551,7 +68552,7 @@ function boShed(){
       boP(C,'shelving',3,1,{h:1.1});boP(C,'shelving',11,1,{h:1.1});boP(C,'longtable',9,5,{h:.7});boP(C,'longtable',5,5,{h:.7});boP(C,'waterbarrel',13,6,{h:.7});boP(C,'veg',12,3,{h:.6});
       C.raw('gy_hatch2',3,5,{npc:'bo_trap',solid:1,deco:false,sc:1});C.raw('gy_bones',7,6,{block:false,sc:.7});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_bones',10,3,{block:false,sc:.6});C.raw('gy_bones',2,5,{block:false,sc:.55})}})}
 function boCellar(){
-  blRoom({id:BO.CELLAR,name:'The Cider Cellar',w:13,h:9,amb:.38,rating:87,floor:'wood',wall:'kh_ohwall1_0',
+  blRoom({id:BO.CELLAR,name:'The Cider Cellar',w:13,h:9,amb:.38,rating:87,floor:FLOORS.cobble?'cobble':'wood',wall:IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0',
     back:{to:BO.SHED,x:3,y:6,f:0},
     lights:[[3,2],[9,2],[6,5],[10,7]],lcol:{'3,2':[1.35,.98,.58],'9,2':[.75,1.1,.95],'6,5':[1.3,.95,.6],'10,7':[.75,1.1,.95]},col:[1.2,.95,.65],
     enemies:[['blghoul',11,3],['blbones',2,2]],
@@ -68562,7 +68563,7 @@ function boCellar(){
       C.raw('gy_hatch2',6,1,{npc:'bo_cellarup',solid:1,deco:false,sc:.9,hidden:true});C.raw('gy_web',1,1,{block:false,sc:.5});
       C.npc('bo_bartle',4,5)}})}
 function boCrypt(){
-  blRoom({id:BO.CRYPT,name:'The Crypt of the Lost Patrol',w:13,h:9,amb:.35,rating:87,floor:'wood',wall:'kh_ohwall1_0',
+  blRoom({id:BO.CRYPT,name:'The Crypt of the Lost Patrol',w:13,h:9,amb:.35,rating:87,floor:FLOORS.mosscobble?'mosscobble':FLOORS.cobble?'cobble':'wood',wall:IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0',
     back:{to:BO.ID,x:BO_CRYPTH.front[0],y:BO_CRYPTH.front[1],f:2},
     lights:[[2,2],[10,2],[6,4],[2,7],[10,7]],lcol:{'2,2':[.7,1.1,.95],'10,2':[.7,1.1,.95],'6,4':[1.3,.95,.6],'2,7':[.7,1.1,.95],'10,7':[.75,1.1,.95]},col:[1.1,.95,.8],
     enemies:[['blghoul',10,5],['blbones',2,5],['blbones',10,2],['blhusk',10,7]],
@@ -68653,12 +68654,12 @@ function blrArt(){
   if(!mk('blr_stew',IMG.propsA_0||IMG.ww_cauldron,'hue-rotate(-95deg) saturate(.85) brightness(.9)',.9))IMG.blr_stew=IMG.ww_cauldron;
   // the painted market tent with its flowers painted over in the dark of a tent mouth (a filter over the painting, nothing drawn)
   for(const k of ['blr_tent0','blr_tent1']){const c=IMG[k];if(!c||!c.getContext)continue;const x=c.getContext('2d');x.save();x.globalCompositeOperation='source-atop';
-    const g=x.createLinearGradient(0,c.height*.4,0,c.height*.95);g.addColorStop(0,'rgba(18,12,8,0)');g.addColorStop(.12,'rgba(18,12,8,.95)');g.addColorStop(1,'rgba(10,7,5,.97)');x.fillStyle=g;x.fillRect(c.width*.2,c.height*.4,c.width*.6,c.height*.56);x.restore()}
+    const g=x.createLinearGradient(0,c.height*.4,0,c.height*.95);g.addColorStop(0,'rgba(18,12,8,0)');g.addColorStop(.12,'rgba(40,26,16,.68)');g.addColorStop(1,'rgba(26,17,11,.8)');x.fillStyle=g;x.fillRect(c.width*.2,c.height*.4,c.width*.6,c.height*.56);x.restore()}
   BLR._art=1}
 function blrBanner(){return IMG.wl2_hall_0?'wl2_hall_0':IMG.kh_throne1_1?'kh_throne1_1':null}
 /* Lanternrest is warm and lit: its haze is thin and golden, not the grey green of the road */
 {const _w=weatherNow;weatherNow=function(){
-  if(LEVEL===BLR.ID)return {id:'fog',n:'Lantern haze',fog:.007,haze:.18,dark:0,mix:.25,col:[168,150,118],text:'Lamp smoke and cook-fire smoke hang under the wall, and the light is warm. For the first time in a long way the air smells of stew.'};
+  if(LEVEL===BLR.ID)return {id:'fog',n:'Lantern haze',fog:.0055,haze:.13,dark:0,mix:.2,col:[168,150,118],text:'Lamp smoke and cook-fire smoke hang under the wall, and the light is warm. For the first time in a long way the air smells of stew.'};
   return _w.apply(this,arguments)}}
 {const _sl=setupLights;setupLights=function(){const r=_sl.apply(this,arguments);
   try{if(LEVEL===BLR.ID){for(const l of LIGHTS){if(!l.free||l.lamp)continue;l.kI=1.7;l.range2=100;l.calm=true}}}catch(e){console.error('blr lights',e)}
@@ -68899,6 +68900,7 @@ function blrBuild(p){
   /* tents: rows of soldier tents in the west and refugee tents in the east, with the stew pot and the well between */
   const tents=[[24,18],[27,20],[30,23],[24,21],[26,34],[29,36],[32,34],[24,37],[28,40],[34,41],[58,20],[61,17],[64,20],[60,22],[57,34],[60,36],[63,34],[58,40],[62,40],[66,36]];
   tents.forEach(([x,y],i)=>{if(!C.dec(IMG.blr_tent0&&i%3?'blr_tent'+((i%3)%2):'blr_tent0',x,y,{block:true,npc:'blr_tent',sc:.72,i}))console.error('tent',x,y)});
+  tents.forEach(([x,y],i)=>{if(i%2===0)C.light(x,y+1,WARM)});
   /* people */
   C.person('blr_drill',33,38,2);C.person('blr_cook',39,22,2);C.person('blr_stable',62,16,2);
   C.person('blr_nell',60,30,2);C.person('blr_pell',22,14,2);
@@ -69091,8 +69093,8 @@ function blhArt(){
   bl3Tint('bl_abbot','gyp_boss_3','saturate(.25) brightness(.95) contrast(1.05)',null);
   bl3Tint('bl_hall','wl_bldg1_1','saturate(.4) brightness(.68) sepia(.15)',null);
   bl3Tint('bl_tower','wl_bldg1_4','saturate(.35) brightness(.66) sepia(.1)',null);
-  bl3Tint('bl_silverbell','gy_bell','saturate(.1) brightness(1.5) contrast(.9)',1.0);
-  bl3Tint('bl_silverbellL','gy_bell','saturate(.1) brightness(1.5) contrast(.9)',1.0);
+  bl3Tint('bl_silverbell',IMG.hpb_bell_4?'hpb_bell_4':'gy_bell','grayscale(.85) brightness(1.4) contrast(.95)',IMG.hpb_bell_4?.85:1.0);
+  bl3Tint('bl_silverbellL',IMG.hpb_bell_4?'hpb_bell_4':'gy_bell','grayscale(.85) brightness(1.4) contrast(.95)',IMG.hpb_bell_4?.85:1.0);
   bl3Tint('bl_rope','ww_ribbon','saturate(.3) brightness(.7) sepia(.5)',.9);
   bl3Ghost('bl_g_prior','kh_ohcourt1_5');bl3Ghost('bl_g_cuth','kh_ohfolk5_3');bl3Ghost('bl_g_anselm','kh_ohfolk2_2');bl3Ghost('bl_g_osmund','kh_ohfolk2_1');bl3Ghost('bl_g_monk','kh_ohfolk1_4');bl3Ghost('bl_g_monk2','kh_ohfolk5_4');
   for(const [k,h] of [['bl_g_prior',.98],['bl_g_cuth',.98],['bl_g_anselm',.98],['bl_g_osmund',.98],['bl_g_monk',.98],['bl_g_monk2',.98],['gy_ghost0',1.1],['gy_ghost1',1.1],['gy_ghost2',1.1],['gy_banshee',1.0],['ww_cauldron',.95],['kh_cart1_0',1.1],['mi_pew',.8]])if(NPC_H[k]===undefined||k.startsWith('bl_g_'))NPC_H[k]=h;
@@ -69620,7 +69622,7 @@ function blrkBuild(p){
   const ell=(cx,cy,rx,ry)=>{for(let y=cy-ry-1;y<=cy+ry+1;y++)for(let x=cx-rx-1;x<=cx+rx+1;x++){if(x<3||y<3||x>76||y>66)continue;if(((x-cx)/rx)**2+((y-cy)/ry)**2<=1+(hs(x,y,9)-.5)*.3)wat[ix(x,y)]=1}};
   ell(25,57,10,7);ell(25,9,5,4);
   for(let y=34;y<=36;y++)for(let x=18;x<=32;x++)wat[ix(x,y)]=0;
-  for(let y=3;y<=66;y++)for(let x=3;x<=76;x++){if(wat[ix(x,y)]){fm[ix(x,y)]='6';hgt[ix(x,y)]=-.3;block[ix(x,y)]=1;C.used.add(x+','+y)}}
+  for(let y=3;y<=66;y++)for(let x=3;x<=76;x++){if(wat[ix(x,y)]){fm[ix(x,y)]='5';hgt[ix(x,y)]=-.3;block[ix(x,y)]=1;C.used.add(x+','+y)}}
   for(let y=34;y<=36;y++)for(let x=24;x<=26;x++)fm[ix(x,y)]='3';
   for(let x=23;x<=27;x++){if(x!==25)C.dec('b9_fence',x,33,{block:true,sc:.8});C.dec('b9_fence',x,37,{block:true,sc:.8})}
   C.dec('gy_lantern',23,33,{block:true});C.light(23,33,C.pale);C.dec('gy_lantern',27,37,{block:true});C.light(27,37,C.pale);
@@ -69673,7 +69675,7 @@ function blrkBuild(p){
   {const race=[],bank=[];for(let y=4;y<=66;y+=2){if(y>=32&&y<=38)continue;race.push([24+(y%4?0:1),y]);race.push([26-(y%4?0:1),y]);bank.push([23,y],[27,y])}
    for(let a=0;a<14;a++){race.push([17+((hs(a,1,3)*16)|0),50+((hs(a,2,3)*14)|0)])}
    b9Mist(lv,race,{sc:1.25,bob:0,bobr:.12});b9Mist(lv,bank,{k:'b9_twig',sc:.7,bob:0,bobr:0})}
-  lv.tele=undefined;lv.floorSet=lv.floorSet.slice();lv.floorSet[6]='blf_water';lv._ground={'6':'#5f7c7c','5':'#8a7e5e','4':'#cbc6b2'};
+  lv.tele=undefined;lv.floorSet=lv.floorSet.slice();lv.floorSet[5]=b14Mere();lv._ground={'5':'#5f7c7c','4':'#cbc6b2'};   // the engine has six floor slots (0 to 5): water takes slot 5 with the cold mere floor of blight_polish14.js
   return lv}
 /* ---------- the rooms ---------- */
 const blrWall=()=>{b9Art();return IMG.b9_wall?'b9_wall':IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0'};
@@ -70102,6 +70104,109 @@ function b14RoomDress(id,b){
     if(spec.lights&&!spec.b14){spec.b14=1;const w=spec.w,h=spec.h;spec.lights=spec.lights.concat([[w-2,h-2]]);spec.lcol=Object.assign({},spec.lcol||{});spec.lcol[(w-2)+','+(h-2)]=[.7,1.1,.95]}}
   const L=_r.apply(this,arguments);
   return L}}
+
+/* ---- src/desert/blight58_polish.js ---- */
+/* ==========================================================================
+   POLISH FOR PLACES 5 TO 8 OF THE BLIGHTED ROAD (critic round, 29 Oct 2026): the Bone Orchard 9650, Lanternrest 9660, the Vault of Maldrake 9670 to 9678, Hollowbell Abbey 9680.
+   Everything here is added to a level after its own builder has run (wrap of KH_LAZY), so the place files stay as they were: ground variety (mud and bare patches), crows on the ground,
+   braziers and lit pools, crates and carts in the Lanternrest yard, tomb ceilings in the crypts. Pictures are painted pieces of the game (the bell, the brazier, the raven) with filters.
+   Prefix b58. No prop that blocks is added unless the check below shows the walkable area is the same afterwards.
+   ========================================================================== */
+const B58={};
+function b58Mk(key,src,filter,h){const s=IMG[src];if(!s||!s.width)return false;const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');try{x.filter=filter}catch(e){}x.drawImage(s,0,0);IMG[key]=c;if(h)NPC_H[key]=h;return true}
+function b58Art(){
+  if(B58._a)return;
+  if(!b58Mk('b58_brazier','hpb_brazier_4','hue-rotate(42deg) saturate(1.25) brightness(.95)',1.25)){IMG.b58_brazier=IMG.brazier0||IMG.gy_lantern;NPC_H.b58_brazier=NPC_H.brazier0||NPC_H.gy_lantern}
+  if(!b58Mk('b58_lych','gy_lych','saturate(.3) brightness(.72) sepia(.15)',NPC_H.gy_lych)){}
+  for(const k of ['ww_willow','ww_oakmoss','ww_oakface'])b58Mk('b58_'+k,k,'brightness(.66) saturate(.75)',NPC_H[k]);
+  B58._a=1}
+const b58vn=(x,y,cs,sd)=>{const u=x/cs,v=y/cs,i=Math.floor(u),j=Math.floor(v),fx=u-i,fy=v-j,sx=fx*fx*(3-2*fx),sy=fy*fy*(3-2*fy);return(hash2(i,j,sd)*(1-sx)+hash2(i+1,j,sd)*sx)*(1-sy)+(hash2(i,j+1,sd)*(1-sx)+hash2(i+1,j+1,sd)*sx)*sy};
+/* ground: patches of mud and bare earth on open grass (only cells that are grass now), so that the dead grass is not one flat green */
+function b58Ground(L,seed,o){
+  o=o||{};const W=L.rows[0].length,H=L.rows.length,fm=L.fmap.map(s=>s.split(''));let n=0;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    if(L.rows[y][x]!=='.')continue;const c=fm[y][x];
+    if(c==='0'){const a=b58vn(x,y,6,seed),b=b58vn(x,y,4,seed+9);
+      if(a>(o.mud||.7)+.1){fm[y][x]='5';n++}else if(a>(o.mud||.7)){fm[y][x]='1';n++}else if(b<(o.bare||.2)){fm[y][x]=(hash2(x,y,seed)<.6)?'2':'1';n++}}
+    else if(c==='4'&&o.cobbleMud&&o.cobbleMud(x,y)){fm[y][x]='5';n++}}
+  L.fmap=fm.map(r=>r.join(''));return n}
+function b58Reach(L,extra){
+  const W=L.rows[0].length,H=L.rows.length,bs=new Set(extra||[]);for(const d of L.decor)if(d.block)bs.add(d.x+','+d.y);
+  const seen=new Uint8Array(W*H),q=[L.start.y*W+L.start.x];seen[q[0]]=1;
+  for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||seen[ny*W+nx]||L.rows[ny][nx]!=='.'||bs.has(nx+','+ny))continue;seen[ny*W+nx]=1;q.push(ny*W+nx)}}
+  return q.length}
+/* add a prop to a built level; a blocking prop is only kept when the walkable area stays the same size (minus its own cell) */
+function b58Add(L,occ,k,x,y,o){
+  o=o||{};if(!k||!L.rows[y]||L.rows[y][x]!=='.'||occ.has(x+','+y))return null;
+  const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}if(o.sc)d.sc=o.sc;
+  if(o.block){const a=b58Reach(L);L.decor.push(d);if(b58Reach(L)<a-1){L.decor.pop();return null}}else L.decor.push(d);
+  occ.add(x+','+y);return d}
+const b58Occ=L=>{const s=new Set();for(const d of L.decor)s.add(d.x+','+d.y);for(const e of L.enemies)s.add(e.x+','+e.y);for(const p of L.portals||[])s.add(p.x+','+p.y);return s};
+function b58Light(L,x,y,col){L.lights.push([x,y]);if(col&&L._bl)L._bl.lcol[x+','+y]=col}
+const B58_WARM=[1.5,1.05,.55];
+/* crows on the ground: n ravens at random open cells of the given region that are free, not on a path of flags (so that none stands in a doorway) */
+function b58Crows(L,occ,seed,n,reg,sc){
+  let put=0;for(let t=0;t<n*40&&put<n;t++){const x=reg[0]+((hash2(t,1,seed)*(reg[2]-reg[0]+1))|0),y=reg[1]+((hash2(t,2,seed)*(reg[3]-reg[1]+1))|0);
+    if(L.fmap[y][x]==='3'||L.fmap[y][x]==='1')continue;
+    if(b58Add(L,occ,'gy_raven',x,y,{sc:sc||.3}))put++}
+  return put}
+/* ---------- wrap a level builder: the fix runs once, after the level exists ---------- */
+function b58Wrap(id,fn){
+  const o=KH_LAZY[id];if(!o)return;
+  KH_LAZY[id]=function(){const had=!!LEVELS[id];const r=o.apply(this,arguments);const L=LEVELS[id];
+    if(L&&!L._b58){L._b58=1;try{b58Art();fn(L)}catch(e){console.error('b58 '+id,e)}}return r}}
+/* the wall stairs of Lanternrest lead up to a wall walk that is closed: a board says so, so that nobody looks for a way up */
+khNpc('b58_wallsign','Notice at the wall stair','greensign',()=>say('A board nailed above the wall stair: WALL WALK. SENTRIES ONLY. BY ORDER OF CAPT. MARSH. The stair is chained shut at the top, and a sentry stands guard at the foot.',[BYE]));
+/* ----- the Bone Orchard ----- */
+b58Wrap(9650,L=>{
+  b58DarkTrees(L);
+  b58Ground(L,50,{mud:.74,bare:.14});
+  // the bell stood inside a box of three iron fences and could not be seen: the bell now stands in the open on its own
+  L.decor=L.decor.filter(d=>!(d.k==='bl_fence'&&d.x>=43&&d.x<=45&&d.y>=28&&d.y<=29));
+  const occ=b58Occ(L);
+  // braziers in the Harvest Yard: warm pools in the cold, round the bell
+  for(const [x,y] of [[38,24],[50,24],[41,30],[47,30]]){if(b58Add(L,occ,'b58_brazier',x,y,{sc:1})){b58Light(L,x,y,B58_WARM)}}
+  // a lit brazier at each end of the lane, and by the press shed
+  for(const [x,y] of [[43,35],[45,35],[63,33]]){if(b58Add(L,occ,'b58_brazier',x,y,{sc:.9}))b58Light(L,x,y,B58_WARM)}
+  b58Crows(L,occ,7,9,[6,6,32,30],.3);b58Crows(L,occ,8,6,[56,6,78,22],.3);b58Crows(L,occ,9,8,[6,42,56,66],.3);
+  for(const [x,y] of [[38,23],[42,23],[62,28],[66,28],[70,15],[72,15]])b58Light(L,x,y,[1.5,1.0,.5]);
+  b58Wheel(L,occ,[[60,30],[66,33]]);
+  // the crypt field has no warm light at all: two candle lights on the crypt path
+  b58Light(L,24,45,[1.3,.95,.6]);b58Light(L,24,58,[1.3,.95,.6])});
+/* the willows and moss oaks of the dress are pale at a distance and read as white fences: darker copies */
+function b58DarkTrees(L){for(const d of L.decor)if(IMG['b58_'+d.k])d.k='b58_'+d.k}
+function b58Wheel(L,occ,cells){for(const [x,y] of cells)if(b58Add(L,occ,'bl_barrow',x,y,{block:false,sc:.8}))break}
+/* ----- Lanternrest ----- */
+b58Wrap(9660,L=>{
+  b58DarkTrees(L);
+  const occ=b58Occ(L);
+  // braziers along the inside of the wall and beside every wall stair: a lit wall is a wall you can read
+  const bra=[];for(const y of [12,19,26,33,43])bra.push([20,y],[68,y]);for(const x of [26,34,52,60])bra.push([x,8]);for(const [x,y] of [[22,15],[66,15],[22,40],[66,40],[44,9]])bra.push([x+(x<40?1:-1),y],[x,y+1]);
+  for(const [x,y] of bra)if(b58Add(L,occ,'b58_brazier',x,y,{sc:.9}))b58Light(L,x,y,B58_WARM);
+  // the outside of the wall was one blank grey face: banners and braziers on the road side of the south wall, and on the east and west faces
+  const ban=IMG.wl2_hall_0?'wl2_hall_0':(IMG.kh_throne1_1?'kh_throne1_1':null);
+  for(const x of [22,28,34,38,50,54,60,66]){if(ban)b58Add(L,occ,ban,x,47,{sc:.9});if(x%12===10||x===34||x===60)if(b58Add(L,occ,'b58_brazier',x+2,47,{sc:.9}))b58Light(L,x+2,47,B58_WARM)}
+  for(const y of [14,22,30,38]){if(ban){b58Add(L,occ,ban,17,y,{sc:.9});b58Add(L,occ,ban,71,y,{sc:.9})}}
+  for(const [x,y] of [[22,15],[66,15],[22,40],[66,40]]){const sx=x+(x<40?2:-2);if(L.rows[y][sx]==='.'&&!occ.has(sx+','+y)){L.decor.push({k:'greensign',x:sx,y,block:true,solid:1,npc:'b58_wallsign',deco:false,sc:.8});occ.add(sx+','+y)}}
+  // stores and carts: crates, barrels, sacks by the hall, the stable and the stew
+  const clutter=[['kh_oqstuff_8',43,16],['kh_oqstuff_2',45,16],['kh_oqstuff_9',47,17],['kh_oqstuff_2',58,12],['kh_oqstuff_8',59,13],['kh_oqstuff_9',65,12],['kh_oqstuff_2',36,20],['kh_oqstuff_9',37,19],['kh_oqstuff_6',40,24],
+    ['kh_oqstuff_8',26,13],['kh_oqstuff_2',25,29],['kh_oqstuff_9',60,28],['kh_oqstuff_6',56,29],['kh_oqstuff_4',50,22],['kh_oqstuff_5',62,33],['kh_oqstuff_2',33,40],['kh_oqstuff_8',66,33],['kh_oqstuff_9',27,36],['kh_oqstuff_6',36,34],['bl_barrow',55,16]];
+  for(const [k,x,y] of clutter)b58Add(L,occ,k,x,y,{block:true,sc:.8});
+  for(const [x,y] of [[38,30],[50,30],[44,36]])if(b58Add(L,occ,'b58_brazier',x,y,{sc:.95}))b58Light(L,x,y,B58_WARM);
+  // crows on the road side only (the fort is kept clear of them)
+  b58Crows(L,occ,11,10,[3,53,87,65],.3)});
+/* ----- Hollowbell Abbey ----- */
+b58Wrap(9680,L=>{
+  b58DarkTrees(L);
+  b58Ground(L,80,{mud:.76,bare:.14});
+  const occ=b58Occ(L);
+  for(const d of L.decor)if(d.k==='gy_lych'&&IMG.b58_lych){d.k='b58_lych'}
+  for(const [x,y] of [[53,22],[56,22],[21,46],[23,46],[24,16],[28,16]])b58Light(L,x,y,[1.4,1.05,.6]);
+  for(const [x,y] of [[39,30],[43,30],[39,26],[43,26]])if(b58Add(L,occ,'b58_brazier',x,y,{sc:.95}))b58Light(L,x,y,[1.25,1.1,.8]);
+  b58Crows(L,occ,13,12,[16,6,68,30],.3);b58Crows(L,occ,14,8,[4,41,80,68],.3)});
+/* ----- crypts and cellars get a tomb ceiling instead of house beams ----- */
+for(const id of [9652,9653,9686]){const o=KH_LAZY[id];if(!o)continue;
+  KH_LAZY[id]=function(){const r=o.apply(this,arguments);const L=LEVELS[id];if(L&&!L._b58c){L._b58c=1;L.ceil='tomb'}return r}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

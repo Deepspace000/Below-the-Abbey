@@ -34,8 +34,8 @@ function blhArt(){
   bl3Tint('bl_abbot','gyp_boss_3','saturate(.25) brightness(.95) contrast(1.05)',null);
   bl3Tint('bl_hall','wl_bldg1_1','saturate(.4) brightness(.68) sepia(.15)',null);
   bl3Tint('bl_tower','wl_bldg1_4','saturate(.35) brightness(.66) sepia(.1)',null);
-  bl3Tint('bl_silverbell','gy_bell','saturate(.1) brightness(1.5) contrast(.9)',1.0);
-  bl3Tint('bl_silverbellL','gy_bell','saturate(.1) brightness(1.5) contrast(.9)',1.0);
+  bl3Tint('bl_silverbell',IMG.hpb_bell_4?'hpb_bell_4':'gy_bell','grayscale(.85) brightness(1.4) contrast(.95)',IMG.hpb_bell_4?.85:1.0);
+  bl3Tint('bl_silverbellL',IMG.hpb_bell_4?'hpb_bell_4':'gy_bell','grayscale(.85) brightness(1.4) contrast(.95)',IMG.hpb_bell_4?.85:1.0);
   bl3Tint('bl_rope','ww_ribbon','saturate(.3) brightness(.7) sepia(.5)',.9);
   bl3Ghost('bl_g_prior','kh_ohcourt1_5');bl3Ghost('bl_g_cuth','kh_ohfolk5_3');bl3Ghost('bl_g_anselm','kh_ohfolk2_2');bl3Ghost('bl_g_osmund','kh_ohfolk2_1');bl3Ghost('bl_g_monk','kh_ohfolk1_4');bl3Ghost('bl_g_monk2','kh_ohfolk5_4');
   for(const [k,h] of [['bl_g_prior',.98],['bl_g_cuth',.98],['bl_g_anselm',.98],['bl_g_osmund',.98],['bl_g_monk',.98],['bl_g_monk2',.98],['gy_ghost0',1.1],['gy_ghost1',1.1],['gy_ghost2',1.1],['gy_banshee',1.0],['ww_cauldron',.95],['kh_cart1_0',1.1],['mi_pew',.8]])if(NPC_H[k]===undefined||k.startsWith('bl_g_'))NPC_H[k]=h;

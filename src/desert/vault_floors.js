@@ -134,7 +134,7 @@ VT_SPEC[9674]={W:35,H:30,diff:89,brick:'texGrey',rgb:[.9,1,1.22],lcol:[.78,.72,1
     light(13,19,[.8,.75,1.5]);light(21,20,[.8,.75,1.5]);light(21,23,[.8,.75,1.5]);sign(20,16,[0,1],'THE THIRD LOCK','Three seats, three sigils');
     C.setF(12,8,22,16,'3')}};
 /* ===== 9675 THE HALL OF UNDERHILL: the village sits down to supper; the old study and the red-eyed book ===== */
-VT_SPEC[9675]={W:37,H:28,diff:89,brick:'texRed',lcol:[1.5,.8,.48],torch:{fl:0,col:[1.5,.8,.4],name:'orange',css:'#e0803a'},fgain:.5,ftint:[1,.92,.9],ceil:'gyc_0',wall:.88,
+VT_SPEC[9675]={W:37,H:28,diff:89,brick:'texRed',rgb:[.82,.66,.62],lcol:[1.5,.8,.48],torch:{fl:0,col:[1.5,.8,.4],name:'orange',css:'#e0803a'},fgain:.5,ftint:[1,.92,.9],ceil:'gyc_0',wall:.88,
   rects:[[16,2,20,4],[17,5,19,5],[5,6,31,17],[9,18,10,18],[5,19,14,25],[17,18,19,18],[18,19,18,23],[27,18,28,18],[24,19,33,25],[35,22,35,22]],
   doors:[{x:18,y:1,kind:'stair',to:9674,at:vtUp(9674),start:true},{x:18,y:24,kind:'stair',to:9676,at:vtDown(9676),down:true},{x:34,y:22,kind:'secret',v:2},{x:36,y:22,kind:'stair',to:9678,at:vtDown(9678),secretStair:true}],
   names:[{t:'The Vestibule',x:18,y:3,k:'place'},{t:'The Hall of Underhill',x:18,y:11,k:'place'},{t:'The Chapel',x:9,y:22,k:'place'},{t:"Maldrake's Old Study",x:28,y:22,k:'place'}],

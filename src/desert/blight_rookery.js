@@ -225,7 +225,7 @@ function blrkBuild(p){
   const ell=(cx,cy,rx,ry)=>{for(let y=cy-ry-1;y<=cy+ry+1;y++)for(let x=cx-rx-1;x<=cx+rx+1;x++){if(x<3||y<3||x>76||y>66)continue;if(((x-cx)/rx)**2+((y-cy)/ry)**2<=1+(hs(x,y,9)-.5)*.3)wat[ix(x,y)]=1}};
   ell(25,57,10,7);ell(25,9,5,4);
   for(let y=34;y<=36;y++)for(let x=18;x<=32;x++)wat[ix(x,y)]=0;
-  for(let y=3;y<=66;y++)for(let x=3;x<=76;x++){if(wat[ix(x,y)]){fm[ix(x,y)]='6';hgt[ix(x,y)]=-.3;block[ix(x,y)]=1;C.used.add(x+','+y)}}
+  for(let y=3;y<=66;y++)for(let x=3;x<=76;x++){if(wat[ix(x,y)]){fm[ix(x,y)]='5';hgt[ix(x,y)]=-.3;block[ix(x,y)]=1;C.used.add(x+','+y)}}
   for(let y=34;y<=36;y++)for(let x=24;x<=26;x++)fm[ix(x,y)]='3';
   for(let x=23;x<=27;x++){if(x!==25)C.dec('b9_fence',x,33,{block:true,sc:.8});C.dec('b9_fence',x,37,{block:true,sc:.8})}
   C.dec('gy_lantern',23,33,{block:true});C.light(23,33,C.pale);C.dec('gy_lantern',27,37,{block:true});C.light(27,37,C.pale);
@@ -278,7 +278,7 @@ function blrkBuild(p){
   {const race=[],bank=[];for(let y=4;y<=66;y+=2){if(y>=32&&y<=38)continue;race.push([24+(y%4?0:1),y]);race.push([26-(y%4?0:1),y]);bank.push([23,y],[27,y])}
    for(let a=0;a<14;a++){race.push([17+((hs(a,1,3)*16)|0),50+((hs(a,2,3)*14)|0)])}
    b9Mist(lv,race,{sc:1.25,bob:0,bobr:.12});b9Mist(lv,bank,{k:'b9_twig',sc:.7,bob:0,bobr:0})}
-  lv.tele=undefined;lv.floorSet=lv.floorSet.slice();lv.floorSet[6]='blf_water';lv._ground={'6':'#5f7c7c','5':'#8a7e5e','4':'#cbc6b2'};
+  lv.tele=undefined;lv.floorSet=lv.floorSet.slice();lv.floorSet[5]=b14Mere();lv._ground={'5':'#5f7c7c','4':'#cbc6b2'};   // the engine has six floor slots (0 to 5): water takes slot 5 with the cold mere floor of blight_polish14.js
   return lv}
 /* ---------- the rooms ---------- */
 const blrWall=()=>{b9Art();return IMG.b9_wall?'b9_wall':IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0'};
