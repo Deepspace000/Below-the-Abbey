@@ -25,7 +25,7 @@ JS = """()=>{const ids=new Set(Object.keys(LEVELS).map(Number));if(typeof KH_LAZ
 JS2 = """(ids)=>ids.map(i=>[i,wmwCoverage(i)])"""
 try:
     with sync_playwright() as pw:
-        b = pw.chromium.launch(args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader']); pg = b.new_page(viewport={'width': 960, 'height': 640})
+        b = pw.chromium.launch(executable_path=__import__('os').environ.get('BTA_CHROME') or None, args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader']); pg = b.new_page(viewport={'width': 960, 'height': 640})
         errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
         pg.goto('http://localhost:%d/index.html?v=%d' % (port, time.time()), timeout=90000, wait_until='domcontentloaded')
         pg.wait_for_function('()=>typeof wmwCoverage==="function"&&typeof LEVELS!=="undefined"&&Object.keys(LEVELS).length>50', timeout=90000); pg.wait_for_timeout(3000)
