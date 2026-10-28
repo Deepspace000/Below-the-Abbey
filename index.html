@@ -57501,7 +57501,7 @@ if(typeof KH_STOCK!=='undefined'){for(const k of ['general','trader','seagoods',
      DEEP   (the Hollow's dark waters) Common: Minnow, Tench, Stickleback. Uncommon: River Eel, River Crayfish. Rare: Wels Catfish, River Ray, Red Piranha.
             Very rare: Lantern Angler, Leaf Dragon, Pearl Pufferfish. Legendary: Moonscale Pike.
    ========================================================================== */
-const FSH_WATER=['bluewater','wmwater','water','hgo_water']; // floors that are water (the Deeper Hollow lakes are floor 6, handled below)
+const FSH_WATER=['bluewater','wmwater','water','hgo_water','wlWater']; // floors that are water (the Deeper Hollow lakes are floor 6, handled below)
 const FSHV={hits:[],cache:{},t:0};
 const FSH_ADD={},FSH_LW={},FSH_NOAUTO={};let FSH_VER=0;
 for(const n of [290,300,301,302,303,304,330,331,332,333,334,335,336,337,338,339,340,341,342,343])FSH_LW[n]='salt'; // Yarrim, the sea isles, Oldhaven Quay
@@ -57517,8 +57517,8 @@ function fshWaterAt(L,n,x,y){
 function fshPierKey(){try{return typeof WLR_PIER!=='undefined'&&WLR_PIER?WLR_PIER.x+','+WLR_PIER.y+','+WLR_PIER.dx+','+WLR_PIER.dy:''}catch(e){return ''}}
 function fshSpots(n){
   const L=LEVELS[n];if(!L||!L.rows)return new Map();
-  const pk=(n===496?fshPierKey():'')+'|'+FSH_VER+'|'+(L.fmap?1:0),c=FSHV.cache[n];if(c&&c.pk===pk)return c.m;
-  const m=new Map(),H=L.rows.length,W=L.rows[0].length,lw=FSH_LW[n]||'fresh',key=(x,y)=>x+','+y,add=(x,y,w)=>{if(x>0&&y>0&&x<W-1&&y<H-1)m.set(key(x,y),{x,y,water:w||lw})};
+  const pk=(n===496?fshPierKey():'')+'|'+FSH_VER+'|'+(L.fmap?1:0)+'|'+(((n===LEVEL&&G.decor)?G.decor:L.decor)||[]).length,c=FSHV.cache[n];if(c&&c.pk===pk)return c.m;
+  const keep=new Set(),m=new Map(),H=L.rows.length,W=L.rows[0].length,lw=FSH_LW[n]||'fresh',key=(x,y)=>x+','+y,add=(x,y,w)=>{if(x>0&&y>0&&x<W-1&&y<H-1)m.set(key(x,y),{x,y,water:w||lw})};
   if(W*H>200000){FSHV.cache[n]={pk,m};return m} // the open Narrow Sea is sailed, not fished from the shore
   const fs=L.floorSet,isHgd=typeof HGD!=='undefined'&&HGD&&n===HGD.ID;
   if(L.fmap&&!FSH_NOAUTO[n]&&(isHgd||(fs&&fs.some(f=>FSH_WATER.includes(f))))){
@@ -57527,12 +57527,15 @@ function fshSpots(n){
       if(!fshWaterAt(L,n,x,y))continue;
       let near=false;for(let dy=-3;dy<=3&&!near;dy++)for(let dx=-3;dx<=3;dx++){if(Math.abs(dx)+Math.abs(dy)>3)continue;if(stand(x+dx,y+dy)){near=true;break}}
       if(near&&hash2(x>>1,y>>1,771+n)<.3)add(x,y)}}
-  for(const q of (FSH_ADD[n]||[])){if(q.dx||q.dy){for(let k=1;k<=2;k++)add(q.x+q.dx*k,q.y+q.dy*k,q.water)}else if(!L.fmap||fshWaterAt(L,n,q.x,q.y)||q.water)add(q.x,q.y,q.water)}
+  for(const q of (FSH_ADD[n]||[])){if(q.dx||q.dy){for(let k=1;k<=2;k++){add(q.x+q.dx*k,q.y+q.dy*k,q.water);keep.add((q.x+q.dx*k)+','+(q.y+q.dy*k))}}else if(!L.fmap||fshWaterAt(L,n,q.x,q.y))add(q.x,q.y,q.water)}
   if(pk.split('|')[0]){const P=WLR_PIER,px=-P.dy,py=P.dx;for(const [a,b] of [[1,0],[2,0],[1,1],[1,-1],[0,1],[0,-1],[2,1],[2,-1]]){const x=P.x+P.dx*a+px*b,y=P.y+P.dy*a+py*b;if(fshWaterAt(L,n,x,y))add(x,y,'fresh')}}
+  // nothing may stand on a patch: a boat, a post, a crate or a person on the square takes the patch away
+  const dl=(n===LEVEL&&G.decor)?G.decor:L.decor;if(dl)for(const d of dl){if(d.found||d.hidden||(d.sc!==undefined&&d.sc<.05)||d.npc||/reed|lily|weed|rush|flow|grass|ripple|fish/i.test(String(d.k||'')))continue;const k=Math.floor(d.x)+','+Math.floor(d.y);if(!keep.has(k)&&m.has(k))m.delete(k)}
   FSHV.cache[n]={pk,m};return m}
 const fshFaced=()=>{if(G.state!=='play'||!G.P||!G.grid)return null;const d=DIRS[G.P.f],sp=fshSpots(LEVEL);if(!sp.size)return null; // the nearest spot in the three squares ahead (the near water is below the bottom of the view)
   for(let k=1;k<=3;k++){const x=G.P.x+d[0]*k,y=G.P.y+d[1]*k;if(!G.grid[y]||G.grid[y][x]>0)return null;const s=sp.get(x+','+y);if(s)return s}return null};
-const fshBestRod=()=>{let b=null;for(const r of FSH_RODS)if(bagCount(r[0])>0)b=r;return b};
+const fshHeld=id=>(G.heroes||[]).some(h=>h&&h.eq&&Object.values(h.eq).some(i=>i&&i.id===id));
+const fshBestRod=()=>{let b=null;for(const r of FSH_RODS)if(bagCount(r[0])>0||fshHeld(r[0]))b=r;return b}; // a rod in a hero's hand counts as well as one in the bag
 const fshFree=()=>G.state==='play'&&!G.cut&&!G.talk&&!G.menu&&!G.inv.open&&!G.loot&&!G.overview&&!G.saves&&!G.map&&!TP;
 /* ---------- the view: projecting a water square onto the screen ---------- */
 function fshCam(){const C=G.C,LA=C.a+(typeof LKYAW==='number'?LKYAW:0),dX=Math.cos(LA),dY=Math.sin(LA);return {dX,dY,pX:-dY,pY:dX,cx:C.x+.5-dX*.28,cy:C.y+.5-dY*.28}}
@@ -57545,22 +57548,25 @@ function fshClipCols(P,dep){ // keep only the screen columns where no wall stand
   let a=1e9,b=-1e9;for(const p of P){if(p.x<a)a=p.x;if(p.x>b)b=p.x}a=Math.max(0,Math.floor(a));b=Math.min(VW-1,Math.ceil(b));
   const hill=typeof TERR_NOW!=='undefined'&&TERR_NOW&&typeof YB!=='undefined',kb=Math.max(0,Math.min(YBK-1,((dep*YBS)|0)-1));
   ctx.beginPath();for(let x=a;x<=b;x++){if(zbuf[x]&&zbuf[x]<=dep-.3)continue;const cut=hill?YB[x*YBK+kb]:VH;if(cut>0)ctx.rect(x,0,1,cut)}ctx.clip()}
-function fshDrawSpots(){
-  FSHV.hits=[];if(G.state!=='play'||!G.C||!LEVELS[LEVEL])return;
-  const sp=fshSpots(LEVEL);if(!sp.size)return;const cam=fshCam(),t=G.time;
-  for(const s of sp.values()){
-    const vx=s.x+.5-cam.cx,vy=s.y+.5-cam.cy,dep=vx*cam.dX+vy*cam.dY;if(dep<.35||dep>9||Math.abs(vx*cam.pX+vy*cam.pY)>dep*PL*1.3+1)continue;
-    const z=fshGroundZ(s.x+.5,s.y+.5),outer=fshRing(cam,s,1.0,z,18);if(!outer)continue;
-    const fade=Math.max(.25,1-dep/10);
-    ctx.save();fshClipCols(outer,dep);
-    for(const [r,a] of [[1.0,.5],[.78,.5],[.55,.5]]){const P=fshRing(cam,s,r,z,18);if(!P)continue;ctx.fillStyle=`rgba(4,18,32,${a*Math.max(.55,fade)*1.1})`;fshPoly(ctx,P);ctx.fill()}
-    const ph=((t*.45+hash2(s.x,s.y,5))%1),P=fshRing(cam,s,.25+ph*.6,z,18);if(P){ctx.strokeStyle=`rgba(225,240,255,${.28*(1-ph)*fade})`;ctx.lineWidth=1;fshPoly(ctx,P);ctx.stroke()}
-    {const a=t*.5+hash2(s.x,s.y,9)*6.3,r=.3,h1=fshProj(cam,s.x+.5+Math.cos(a)*r+Math.cos(a+1.57)*.08,s.y+.5+Math.sin(a)*r+Math.sin(a+1.57)*.08,z),t1=fshProj(cam,s.x+.5+Math.cos(a-.5)*r,s.y+.5+Math.sin(a-.5)*r,z);
-     if(h1&&t1){ctx.lineCap='round';ctx.strokeStyle=`rgba(0,8,18,${.55*fade})`;ctx.lineWidth=Math.max(1.5,F/dep*.09);ctx.beginPath();ctx.moveTo(t1.x,t1.y);ctx.lineTo(h1.x,h1.y);ctx.stroke()}}
-    ctx.restore();
-    const pc=fshProj(cam,s.x+.5,s.y+.5,z);let seen=false;if(pc&&pc.x>=6&&pc.x<VW-6&&pc.y>=HH&&pc.y<VH-4){const xi=Math.max(0,Math.min(VW-1,Math.round(pc.x))),kb=Math.max(0,Math.min(YBK-1,((dep*YBS)|0)-1));seen=(!zbuf[xi]||zbuf[xi]>dep-.3)&&(!(typeof TERR_NOW!=='undefined'&&TERR_NOW)||YB[xi*YBK+kb]>pc.y)}
-    if(seen)FSHV.hits.push({s,dep,poly:fshRing(cam,s,1.05,z,12)})}
-}
+/* The dark patches are custom sprites of the depth sort (see spriteList below): a patch is painted flat on its own water square, behind anything nearer
+   (boats, posts, people, the pier) and only where no wall or hill stands in front of it. Nothing is drawn outside the square. */
+function fshDrawSpot(s,cx,cy,dX,dY){
+  const cam=fshCam(),t=G.time,vx=s.x+.5-cam.cx,vy=s.y+.5-cam.cy,dep=vx*cam.dX+vy*cam.dY;
+  if(dep<.35||dep>9||Math.abs(vx*cam.pX+vy*cam.pY)>dep*PL*1.3+1)return;
+  const z=fshGroundZ(s.x+.5,s.y+.5),outer=fshRing(cam,s,.48,z,16);if(!outer)return;
+  const fade=Math.max(.25,1-dep/10);
+  ctx.save();fshClipCols(outer,dep);
+  for(const [r,a] of [[.48,.5],[.37,.5],[.26,.5]]){const P=fshRing(cam,s,r,z,16);if(!P)continue;ctx.fillStyle=`rgba(4,18,32,${a*Math.max(.55,fade)*1.1})`;fshPoly(ctx,P);ctx.fill()}
+  const ph=((t*.45+hash2(s.x,s.y,5))%1),P=fshRing(cam,s,.08+ph*.34,z,16);if(P){ctx.strokeStyle=`rgba(225,240,255,${.28*(1-ph)*fade})`;ctx.lineWidth=1;fshPoly(ctx,P);ctx.stroke()}
+  {const a=t*.5+hash2(s.x,s.y,9)*6.3,r=.16,h1=fshProj(cam,s.x+.5+Math.cos(a)*r+Math.cos(a+1.57)*.05,s.y+.5+Math.sin(a)*r+Math.sin(a+1.57)*.05,z),t1=fshProj(cam,s.x+.5+Math.cos(a-.5)*r,s.y+.5+Math.sin(a-.5)*r,z);
+   if(h1&&t1){ctx.lineCap='round';ctx.strokeStyle=`rgba(0,8,18,${.55*fade})`;ctx.lineWidth=Math.max(1.2,F/dep*.06);ctx.beginPath();ctx.moveTo(t1.x,t1.y);ctx.lineTo(h1.x,h1.y);ctx.stroke()}}
+  ctx.restore();
+  const pc=fshProj(cam,s.x+.5,s.y+.5,z);let seen=false;if(pc&&pc.x>=6&&pc.x<VW-6&&pc.y>=HH&&pc.y<VH-4){const xi=Math.max(0,Math.min(VW-1,Math.round(pc.x))),kb=Math.max(0,Math.min(YBK-1,((dep*YBS)|0)-1));seen=(!zbuf[xi]||zbuf[xi]>dep-.3)&&(!(typeof TERR_NOW!=='undefined'&&TERR_NOW)||YB[xi*YBK+kb]>pc.y)}
+  if(seen)FSHV.hits.push({s,dep,poly:fshRing(cam,s,.52,z,12)})}
+{const _sl=spriteList;spriteList=function(){const L=_sl.apply(this,arguments);
+  try{if(G.state==='play'&&G.C&&LEVELS[LEVEL]){const sp=fshSpots(LEVEL);if(sp.size)for(const s of sp.values()){
+    const wx=s.x+.5,wy=s.y+.5;L.push({x:wx,y:wy,custom:{prep:(cx,cy,dX,dY)=>{const q=dX*(wx-cx)+dY*(wy-cy);return q>.3&&q<9.5?q:0},draw:(cx,cy,dX,dY)=>{try{fshDrawSpot(s,cx,cy,dX,dY)}catch(e){console.error('fsh spot',e)}}}})}}}catch(e){console.error('fsh sprites',e)}
+  return L}}
 const fshInPoly=(P,x,y)=>{let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){if(((P[i].y>y)!==(P[j].y>y))&&x<(P[j].x-P[i].x)*(y-P[i].y)/(P[j].y-P[i].y)+P[i].x)c=!c}return c};
 /* where the bobber lands on the screen: the middle of the patch being fished */
 function fshTarget(s){const p=fshProj(fshCam(),s.x+.5,s.y+.5,fshGroundZ(s.x+.5,s.y+.5));return p?{x:Math.max(40,Math.min(380,p.x)),y:Math.max(HH+6,Math.min(190,p.y))}:{x:210,y:140}}
@@ -57662,7 +57668,7 @@ function fshRod(F0){
   ctx.fillStyle='#d8b890';ctx.beginPath();ctx.roundRect(B.x-11,B.y-26,22,26,6);ctx.fill();ctx.stroke();
   ctx.fillStyle='#4a3a28';ctx.fillRect(B.x-13,B.y-6,26,14);
   ctx.restore()}
-{const _dw=drawWorld;drawWorld=function(){const r=_dw.apply(this,arguments);try{fshDrawSpots();if(G.fishing&&G.state==='play')fshRod(G.fishing)}catch(e){console.error('fsh draw',e)}return r}}
+{const _dw=drawWorld;drawWorld=function(){FSHV.hits=[];const r=_dw.apply(this,arguments);try{if(G.fishing&&G.state==='play')fshRod(G.fishing)}catch(e){console.error('fsh draw',e)}return r}}
 /* ---------- the line game and the result, drawn over the view ---------- */
 function fshHud(){
   const F0=G.fishing;if(!F0)return;
@@ -57715,6 +57721,7 @@ addEventListener('keydown',e=>{
 {const _dd=doDig;doDig=function(){const s=fshFaced();if(s&&fshFree()){fshStart(s);return}return _dd.apply(this,arguments)}}
 {const _vt=viewTap;viewTap=function(x,y){
   try{if(fshFree()){for(const h of FSHV.hits.slice().sort((a,b)=>a.dep-b.dep)){if(!h.poly||!fshInPoly(h.poly,x,y))continue;
+    if((G.hits||[]).some(q=>q.ty<h.dep-.05&&x>=q.x0&&x<=q.x1&&y>=q.y0&&y<=q.y1))continue; // something nearer covers the patch there
     if(!fshBestRod()){fshNeedRod();return}
     if(h.dep>5.2){msg('Too far away. Step closer to the water.','#d09a80');return}
     fshStart(h.s);return}}}catch(e){console.error(e)}
@@ -63090,6 +63097,48 @@ function crowFrame(t,e){
   }catch(err){}
   return L}}
 crowLoad();
+
+/* ---- src/desert/fishing_rod.js ---- */
+/* ==========================================================================
+   FISHING RODS IN THE HAND, BAIT ON THE ROD (prefix frd). A rod (item kind 'tool', frod set) fits the MAIN HAND of any hero: the Equip button, the E key,
+   a tap on the main hand slot and a drag to it all work. A hero who holds a rod fights bare-handed, as with a torch; the weapon it replaced goes back to the
+   hand when the rod is taken off, if it is still in the bag. fshBestRod (fishing.js) counts a rod in any hero's hand as well as one in the bag.
+   A bait (fbait set) gets an 'Add to the rod' button on its card in the bag (and the E key): it becomes the bait of the next casts (G.flags.fishBait,
+   which the Bait button on the fishing prompt shows and cycles). On the card of the chosen bait the button reads 'Take off the rod'.
+   ========================================================================== */
+const frdRod=d=>!!d&&d.frod!==undefined;
+const frdIsBait=d=>!!d&&d.fbait!==undefined;
+{const _sf=slotFits;slotFits=function(slot,d,hi){if(frdRod(d))return slot==='main';return _sf.apply(this,arguments)}}
+{const _as=autoSlot;autoSlot=function(hi,d){if(frdRod(d))return 'main';return _as.apply(this,arguments)}}
+{const _et=equipTo;equipTo=function(hi,slot,bagIdx){
+  const it=G.bag[bagIdx],d=it&&idef(it);
+  if(frdRod(d)){
+    if(slot!=='main'){msg('A fishing rod is held in the main hand.','#d09a80');return false}
+    const h=G.heroes[hi],old=h.eq.main,ok=_et.apply(this,arguments);
+    if(ok){if(old&&!frdRod(idef(old)))h.prevMain=old.id;msg(HERO_DEF[hi].name+' fights bare-handed while the '+d.n+' is in the hand.','#a8d8f0')}
+    return ok}
+  return _et.apply(this,arguments)}}
+{const _ue=unequip;unequip=function(hi,slot){
+  const h=G.heroes[hi],it=h.eq[slot],wasRod=it&&slot==='main'&&frdRod(idef(it)),ok=_ue.apply(this,arguments);
+  if(ok&&wasRod&&h.prevMain){const i=G.bag.findIndex(b=>b.id===h.prevMain);h.prevMain=null;if(i>=0&&!h.eq.main)equipTo(hi,'main',i)}
+  return ok}}
+/* the bait: put on the rod, or taken off */
+function frdBaitToggle(it){
+  const d=ITEMDEF[it.id],rod=typeof fshBestRod==='function'?fshBestRod():null;
+  if(!rod){msg('You need a fishing rod first.','#d09a80');return}
+  const rn=ITEMDEF[rod[0]].n;
+  if(G.flags.fishBait===it.id){G.flags.fishBait='';msg('You take the '+d.n+' off the line of the '+rn+'.','#bfe0f4');sfx('equip');return}
+  G.flags.fishBait=it.id;sfx('equip');msg('You fix the '+d.n+' to the line of the '+rn+'.','#bfe0f4')}
+const frdSelBait=()=>{const I=G.inv;if(!I||!I.open||!I.sel||I.sel.src!=='bag'||I.tab==='powers'||I.tab==='char')return null;const it=G.bag[I.sel.i];return it&&frdIsBait(ITEMDEF[it.id])?it:null};
+{const _di=drawInventory;drawInventory=function(){const r=_di.apply(this,arguments);
+  try{const it=frdSelBait();if(it&&G.inv.dropKey!=='b'+G.inv.sel.i)btnText('frdbait',G.flags.fishBait===it.id?'Take off the rod':'Add to the rod',338,141,112,26)}catch(e){}
+  return r}}
+{const _hb=handleBtn;handleBtn=function(id){
+  if(id==='frdbait'){const it=frdSelBait();if(it)frdBaitToggle(it);return}
+  return _hb.apply(this,arguments)}}
+{const _ib=invBtn;invBtn=function(id){
+  if(id==='iequip'){const it=frdSelBait();if(it){frdBaitToggle(it);return}}
+  return _ib.apply(this,arguments)}}
 
 /* ---- src/desert/jump_ready.js ---- */
 /* ==========================================================================
