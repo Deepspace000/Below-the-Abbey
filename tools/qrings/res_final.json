@@ -13043,4 +13043,4260 @@
       "Third",
       "7",
       "Potion",
-      
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 17,
+       "y": 3,
+       "k": "goal"
+      }
+     ],
+     "target": 306,
+     "stg": "act",
+     "expLevels": [
+      306
+     ],
+     "exp": [
+      {
+       "x": 17,
+       "y": 3
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "vq6",
+    "stage": "active",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "vq6",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 22.238501061741854
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 306,
+    "stg": "act",
+    "expLevels": [
+     306
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    306
+   ]
+  },
+  {
+   "id": "vq6",
+   "stage": "ready",
+   "on": [
+    {
+     "id": "vq6",
+     "stage": "ready",
+     "lvl": 306,
+     "level": 306,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "vq6",
+      "lvl": 306,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 17,
+      "cy": 3,
+      "px": 240,
+      "py": 72,
+      "pr": 24.097497018737194
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "The Court of King Osric",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 17,
+       "y": 3,
+       "k": "ready"
+      }
+     ],
+     "target": 306,
+     "stg": "ready",
+     "expLevels": [
+      306
+     ],
+     "exp": [
+      {
+       "x": 17,
+       "y": 3
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "vq6",
+    "stage": "ready",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "vq6",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 25.868209360957845
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 306,
+    "stg": "ready",
+    "expLevels": [
+     306
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    306
+   ]
+  },
+  {
+   "id": "oq0",
+   "stage": "give",
+   "on": [
+    {
+     "id": "oq0",
+     "stage": "give",
+     "lvl": 305,
+     "level": 305,
+     "panel": false,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "oq0",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 74,
+      "cy": 22,
+      "px": 239.15333333333294,
+      "py": 72.09999999999988,
+      "pr": 10.387034964930635
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "A new entry in the Wandering Monsters menu: Mother Mossback.",
+      "Mother Mossback stands in the dark ahead.",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion"
+     ],
+     "spots": [
+      {
+       "x": 74,
+       "y": 22,
+       "k": "goal"
+      }
+     ],
+     "target": 305,
+     "stg": "give",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 74,
+       "y": 22
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "oq0",
+    "stage": "give",
+    "lvl": 1,
+    "level": 1,
+    "panel": false,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "oq0",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 23.80563618821545
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "give",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "oq0",
+   "stage": "act",
+   "on": [
+    {
+     "id": "oq0",
+     "stage": "active",
+     "lvl": 305,
+     "level": 305,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "oq0",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 108.00000000000001,
+      "cy": 94,
+      "px": 296.7266666666661,
+      "py": 194.0199999999995,
+      "pr": 13.362015455748502
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 108,
+       "y": 80,
+       "k": "goal"
+      },
+      {
+       "x": 115,
+       "y": 80,
+       "k": "goal"
+      },
+      {
+       "x": 121,
+       "y": 79,
+       "k": "goal"
+      },
+      {
+       "x": 108,
+       "y": 94,
+       "k": "goal"
+      }
+     ],
+     "target": 305,
+     "stg": "act",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 108,
+       "y": 80
+      },
+      {
+       "x": 115,
+       "y": 80
+      },
+      {
+       "x": 121,
+       "y": 79
+      },
+      {
+       "x": 108,
+       "y": 94
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "oq0",
+    "stage": "active",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "oq0",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 22.62060411812778
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "act",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "oq0",
+   "stage": "ready",
+   "on": [
+    {
+     "id": "oq0",
+     "stage": "ready",
+     "lvl": 305,
+     "level": 305,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "oq0",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 74,
+      "cy": 22,
+      "px": 239.15333333333294,
+      "py": 72.09999999999988,
+      "pr": 11.67223650853486
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 74,
+       "y": 22,
+       "k": "ready"
+      }
+     ],
+     "target": 305,
+     "stg": "ready",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 74,
+       "y": 22
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "oq0",
+    "stage": "ready",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "oq0",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 25.99763044944706
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "ready",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "sg1",
+   "stage": "give",
+   "on": [
+    {
+     "id": "sg1",
+     "stage": "give",
+     "lvl": 305,
+     "level": 305,
+     "panel": false,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg1",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 74,
+      "cy": 22,
+      "px": 239.15333333333294,
+      "py": 72.09999999999988,
+      "pr": 10.735736850775103
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 74,
+       "y": 22,
+       "k": "goal"
+      }
+     ],
+     "target": 305,
+     "stg": "give",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 74,
+       "y": 22
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg1",
+    "stage": "give",
+    "lvl": 1,
+    "level": 1,
+    "panel": false,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg1",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 22.767919081624434
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "give",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "sg1",
+   "stage": "act",
+   "on": [
+    {
+     "id": "sg1",
+     "stage": "active",
+     "lvl": 305,
+     "level": 305,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg1",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 138.00000000000003,
+      "cy": 74,
+      "px": 347.52666666666596,
+      "py": 160.15333333333294,
+      "pr": 13.602102617674676
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 140,
+       "y": 73,
+       "k": "goal"
+      },
+      {
+       "x": 140,
+       "y": 74,
+       "k": "goal"
+      },
+      {
+       "x": 139,
+       "y": 73,
+       "k": "goal"
+      },
+      {
+       "x": 139,
+       "y": 74,
+       "k": "goal"
+      },
+      {
+       "x": 138,
+       "y": 73,
+       "k": "goal"
+      },
+      {
+       "x": 138,
+       "y": 74,
+       "k": "goal"
+      }
+     ],
+     "target": 305,
+     "stg": "act",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 140,
+       "y": 73
+      },
+      {
+       "x": 140,
+       "y": 74
+      },
+      {
+       "x": 139,
+       "y": 73
+      },
+      {
+       "x": 139,
+       "y": 74
+      },
+      {
+       "x": 138,
+       "y": 73
+      },
+      {
+       "x": 138,
+       "y": 74
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg1",
+    "stage": "active",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg1",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 23.613053215920775
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "act",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "sg1",
+   "stage": "ready",
+   "on": [
+    {
+     "id": "sg1",
+     "stage": "ready",
+     "lvl": 305,
+     "level": 305,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg1",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 74,
+      "cy": 22,
+      "px": 239.15333333333294,
+      "py": 72.09999999999988,
+      "pr": 10.776785199400452
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 74,
+       "y": 22,
+       "k": "ready"
+      }
+     ],
+     "target": 305,
+     "stg": "ready",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 74,
+       "y": 22
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg1",
+    "stage": "ready",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg1",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 25.92877012378073
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "ready",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "sg2",
+   "stage": "give",
+   "on": [
+    {
+     "id": "sg2",
+     "stage": "give",
+     "lvl": 6074,
+     "level": 6074,
+     "panel": false,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg2",
+      "lvl": 6074,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 5,
+      "cy": 2,
+      "px": 240,
+      "py": 101.375,
+      "pr": 24.00000326655462
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "The Garrison Hall",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 5,
+       "y": 2,
+       "k": "goal"
+      }
+     ],
+     "target": 6074,
+     "stg": "give",
+     "expLevels": [
+      6074
+     ],
+     "exp": [
+      {
+       "x": 5,
+       "y": 2
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg2",
+    "stage": "give",
+    "lvl": 1,
+    "level": 1,
+    "panel": false,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg2",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 22.338919752092085
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 6074,
+    "stg": "give",
+    "expLevels": [
+     6074
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    6074
+   ]
+  },
+  {
+   "id": "sg2",
+   "stage": "act",
+   "on": [
+    {
+     "id": "sg2",
+     "stage": "active",
+     "lvl": 6074,
+     "level": 6074,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg2",
+      "lvl": 6074,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 5,
+      "cy": 2,
+      "px": 240,
+      "py": 101.375,
+      "pr": 29.08154291572043
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "The Garrison Hall",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 5,
+       "y": 2,
+       "k": "goal"
+      }
+     ],
+     "target": 6074,
+     "stg": "act",
+     "expLevels": [
+      6074
+     ],
+     "exp": [
+      {
+       "x": 5,
+       "y": 2
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg2",
+    "stage": "active",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg2",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 24.242738891794236
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 6074,
+    "stg": "act",
+    "expLevels": [
+     6074
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    6074
+   ]
+  },
+  {
+   "id": "sg2",
+   "stage": "ready",
+   "on": [
+    {
+     "id": "sg2",
+     "stage": "ready",
+     "lvl": 6074,
+     "level": 6074,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg2",
+      "lvl": 6074,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 5,
+      "cy": 2,
+      "px": 240,
+      "py": 101.375,
+      "pr": 22.317891374025848
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "The Garrison Hall",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 5,
+       "y": 2,
+       "k": "ready"
+      }
+     ],
+     "target": 6074,
+     "stg": "ready",
+     "expLevels": [
+      6074
+     ],
+     "exp": [
+      {
+       "x": 5,
+       "y": 2
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg2",
+    "stage": "ready",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg2",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 25.668463343225778
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 6074,
+    "stg": "ready",
+    "expLevels": [
+     6074
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    6074
+   ]
+  },
+  {
+   "id": "sg3",
+   "stage": "give",
+   "on": [
+    {
+     "id": "sg3",
+     "stage": "give",
+     "lvl": 305,
+     "level": 305,
+     "panel": false,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg3",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 70,
+      "cy": 60,
+      "px": 232.37999999999963,
+      "py": 136.44666666666635,
+      "pr": 12.169913976642544
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "!",
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7"
+     ],
+     "spots": [
+      {
+       "x": 70,
+       "y": 60,
+       "k": "goal"
+      }
+     ],
+     "target": 305,
+     "stg": "give",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 70,
+       "y": 60
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg3",
+    "stage": "give",
+    "lvl": 1,
+    "level": 1,
+    "panel": false,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg3",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 22.074796433872137
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "give",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "sg3",
+   "stage": "act",
+   "on": [
+    {
+     "id": "sg3",
+     "stage": "active",
+     "lvl": 305,
+     "level": 305,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg3",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 70,
+      "cy": 60,
+      "px": 232.37999999999963,
+      "py": 136.44666666666635,
+      "pr": 13.327084523854559
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 70,
+       "y": 60,
+       "k": "goal"
+      }
+     ],
+     "target": 305,
+     "stg": "act",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 70,
+       "y": 60
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg3",
+    "stage": "active",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg3",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 24.3738676611796
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "act",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "sg3",
+   "stage": "ready",
+   "on": [
+    {
+     "id": "sg3",
+     "stage": "ready",
+     "lvl": 305,
+     "level": 305,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg3",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 70,
+      "cy": 60,
+      "px": 232.37999999999963,
+      "py": 136.44666666666635,
+      "pr": 10.356876917075398
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 70,
+       "y": 60,
+       "k": "ready"
+      }
+     ],
+     "target": 305,
+     "stg": "ready",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 70,
+       "y": 60
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg3",
+    "stage": "ready",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg3",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 25.242547717825136
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "ready",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "sg4",
+   "stage": "give",
+   "on": [
+    {
+     "id": "sg4",
+     "stage": "give",
+     "lvl": 305,
+     "level": 305,
+     "panel": false,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg4",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 84.99999999999999,
+      "cy": 59,
+      "px": 257.7799999999995,
+      "py": 134.75333333333302,
+      "pr": 12.28399420216054
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 85,
+       "y": 59,
+       "k": "goal"
+      }
+     ],
+     "target": 305,
+     "stg": "give",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 85,
+       "y": 59
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg4",
+    "stage": "give",
+    "lvl": 1,
+    "level": 1,
+    "panel": false,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg4",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 22.04309929841385
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "give",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "sg4",
+   "stage": "act",
+   "on": [
+    {
+     "id": "sg4",
+     "stage": "active",
+     "lvl": 305,
+     "level": 305,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg4",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 84.99999999999999,
+      "cy": 59,
+      "px": 257.7799999999995,
+      "py": 134.75333333333302,
+      "pr": 13.256766232140357
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 85,
+       "y": 59,
+       "k": "goal"
+      }
+     ],
+     "target": 305,
+     "stg": "act",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 85,
+       "y": 59
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg4",
+    "stage": "active",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg4",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 24.966583127454324
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "act",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "sg4",
+   "stage": "ready",
+   "on": [
+    {
+     "id": "sg4",
+     "stage": "ready",
+     "lvl": 305,
+     "level": 305,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg4",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 84.99999999999999,
+      "cy": 59,
+      "px": 257.7799999999995,
+      "py": 134.75333333333302,
+      "pr": 10.15494674464521
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 85,
+       "y": 59,
+       "k": "ready"
+      }
+     ],
+     "target": 305,
+     "stg": "ready",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 85,
+       "y": 59
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg4",
+    "stage": "ready",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg4",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 24.20761869595407
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "ready",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "sg5",
+   "stage": "give",
+   "on": [
+    {
+     "id": "sg5",
+     "stage": "give",
+     "lvl": 305,
+     "level": 305,
+     "panel": false,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg5",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 74,
+      "cy": 22,
+      "px": 239.15333333333294,
+      "py": 72.09999999999988,
+      "pr": 13.140153495317943
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 74,
+       "y": 22,
+       "k": "goal"
+      }
+     ],
+     "target": 305,
+     "stg": "give",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 74,
+       "y": 22
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg5",
+    "stage": "give",
+    "lvl": 1,
+    "level": 1,
+    "panel": false,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg5",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 22.358864056159984
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "give",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "sg5",
+   "stage": "act",
+   "on": [
+    {
+     "id": "sg5",
+     "stage": "active",
+     "lvl": 305,
+     "level": 305,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg5",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 76,
+      "cy": 64,
+      "px": 242.5399999999996,
+      "py": 143.21999999999966,
+      "pr": 11.588095356567619
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 65,
+       "y": 62,
+       "k": "goal"
+      },
+      {
+       "x": 80,
+       "y": 62,
+       "k": "goal"
+      },
+      {
+       "x": 76,
+       "y": 64,
+       "k": "goal"
+      }
+     ],
+     "target": 305,
+     "stg": "act",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 65,
+       "y": 62
+      },
+      {
+       "x": 80,
+       "y": 62
+      },
+      {
+       "x": 76,
+       "y": 64
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg5",
+    "stage": "active",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg5",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 25.99999999977283
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "act",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "sg5",
+   "stage": "ready",
+   "on": [
+    {
+     "id": "sg5",
+     "stage": "ready",
+     "lvl": 305,
+     "level": 305,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg5",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 74,
+      "cy": 22,
+      "px": 239.15333333333294,
+      "py": 72.09999999999988,
+      "pr": 11.171719052214373
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 74,
+       "y": 22,
+       "k": "ready"
+      }
+     ],
+     "target": 305,
+     "stg": "ready",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 74,
+       "y": 22
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg5",
+    "stage": "ready",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg5",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 22.69273557174367
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "ready",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "sg6",
+   "stage": "give",
+   "on": [
+    {
+     "id": "sg6",
+     "stage": "give",
+     "lvl": 6074,
+     "level": 6074,
+     "panel": false,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg6",
+      "lvl": 6074,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 5,
+      "cy": 2,
+      "px": 240,
+      "py": 101.375,
+      "pr": 29.247937193227497
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "The Garrison Hall",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 5,
+       "y": 2,
+       "k": "goal"
+      }
+     ],
+     "target": 6074,
+     "stg": "give",
+     "expLevels": [
+      6074
+     ],
+     "exp": [
+      {
+       "x": 5,
+       "y": 2
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg6",
+    "stage": "give",
+    "lvl": 1,
+    "level": 1,
+    "panel": false,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg6",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 24.207558732877537
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 6074,
+    "stg": "give",
+    "expLevels": [
+     6074
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    6074
+   ]
+  },
+  {
+   "id": "sg6",
+   "stage": "act",
+   "on": [
+    {
+     "id": "sg6",
+     "stage": "active",
+     "lvl": 305,
+     "level": 305,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg6",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 82,
+      "cy": 76,
+      "px": 252.69999999999956,
+      "py": 163.5399999999996,
+      "pr": 10.431639173552048
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 60,
+       "y": 68,
+       "k": "goal"
+      },
+      {
+       "x": 83,
+       "y": 69,
+       "k": "goal"
+      },
+      {
+       "x": 66,
+       "y": 76,
+       "k": "goal"
+      },
+      {
+       "x": 82,
+       "y": 76,
+       "k": "goal"
+      }
+     ],
+     "target": 305,
+     "stg": "act",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 60,
+       "y": 68
+      },
+      {
+       "x": 83,
+       "y": 69
+      },
+      {
+       "x": 66,
+       "y": 76
+      },
+      {
+       "x": 82,
+       "y": 76
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg6",
+    "stage": "active",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg6",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 25.687724091916838
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "act",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "sg6",
+   "stage": "ready",
+   "on": [
+    {
+     "id": "sg6",
+     "stage": "ready",
+     "lvl": 6074,
+     "level": 6074,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg6",
+      "lvl": 6074,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 5,
+      "cy": 2,
+      "px": 240,
+      "py": 101.375,
+      "pr": 26.012708578437795
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "The Garrison Hall",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 5,
+       "y": 2,
+       "k": "ready"
+      }
+     ],
+     "target": 6074,
+     "stg": "ready",
+     "expLevels": [
+      6074
+     ],
+     "exp": [
+      {
+       "x": 5,
+       "y": 2
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg6",
+    "stage": "ready",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg6",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 22.001768093664417
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 6074,
+    "stg": "ready",
+    "expLevels": [
+     6074
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    6074
+   ]
+  },
+  {
+   "id": "sg7",
+   "stage": "give",
+   "on": [
+    {
+     "id": "sg7",
+     "stage": "give",
+     "lvl": 305,
+     "level": 305,
+     "panel": false,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg7",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 120.99999999999999,
+      "cy": 79,
+      "px": 318.7399999999993,
+      "py": 168.61999999999958,
+      "pr": 12.694509226044325
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 121,
+       "y": 79,
+       "k": "goal"
+      }
+     ],
+     "target": 305,
+     "stg": "give",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 121,
+       "y": 79
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg7",
+    "stage": "give",
+    "lvl": 1,
+    "level": 1,
+    "panel": false,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg7",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 25.591611685839915
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "give",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "sg7",
+   "stage": "act",
+   "on": [
+    {
+     "id": "sg7",
+     "stage": "active",
+     "lvl": 305,
+     "level": 305,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg7",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 120.99999999999999,
+      "cy": 79,
+      "px": 318.7399999999993,
+      "py": 168.61999999999958,
+      "pr": 10.200631150011137
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 121,
+       "y": 79,
+       "k": "goal"
+      }
+     ],
+     "target": 305,
+     "stg": "act",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 121,
+       "y": 79
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg7",
+    "stage": "active",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg7",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 23.876219498561085
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "act",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "sg7",
+   "stage": "ready",
+   "on": [
+    {
+     "id": "sg7",
+     "stage": "ready",
+     "lvl": 305,
+     "level": 305,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg7",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 120.99999999999999,
+      "cy": 79,
+      "px": 318.7399999999993,
+      "py": 168.61999999999958,
+      "pr": 13.327053990535363
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "A new entry in the Wandering Monsters menu: The Unfinished Man.",
+      "The Unfinished Man stands in the dark ahead.",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion"
+     ],
+     "spots": [
+      {
+       "x": 121,
+       "y": 79,
+       "k": "ready"
+      }
+     ],
+     "target": 305,
+     "stg": "ready",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 121,
+       "y": 79
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg7",
+    "stage": "ready",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg7",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 22.268669675893648
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "ready",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "sg8",
+   "stage": "give",
+   "on": [
+    {
+     "id": "sg8",
+     "stage": "give",
+     "lvl": 305,
+     "level": 305,
+     "panel": false,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg8",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 74,
+      "cy": 22,
+      "px": 239.15333333333294,
+      "py": 72.09999999999988,
+      "pr": 12.169966097898303
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 74,
+       "y": 22,
+       "k": "goal"
+      }
+     ],
+     "target": 305,
+     "stg": "give",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 74,
+       "y": 22
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg8",
+    "stage": "give",
+    "lvl": 1,
+    "level": 1,
+    "panel": false,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg8",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 25.668430098424125
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "give",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "sg8",
+   "stage": "act",
+   "on": [
+    {
+     "id": "sg8",
+     "stage": "active",
+     "lvl": 305,
+     "level": 305,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg8",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 136.00000000000003,
+      "cy": 73,
+      "px": 344.1399999999993,
+      "py": 158.4599999999996,
+      "pr": 10.232089011517946
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "!",
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7"
+     ],
+     "spots": [
+      {
+       "x": 140,
+       "y": 73,
+       "k": "goal"
+      },
+      {
+       "x": 140,
+       "y": 74,
+       "k": "goal"
+      },
+      {
+       "x": 139,
+       "y": 73,
+       "k": "goal"
+      },
+      {
+       "x": 139,
+       "y": 74,
+       "k": "goal"
+      },
+      {
+       "x": 138,
+       "y": 73,
+       "k": "goal"
+      },
+      {
+       "x": 138,
+       "y": 74,
+       "k": "goal"
+      },
+      {
+       "x": 137,
+       "y": 73,
+       "k": "goal"
+      },
+      {
+       "x": 137,
+       "y": 74,
+       "k": "goal"
+      },
+      {
+       "x": 137,
+       "y": 75,
+       "k": "goal"
+      },
+      {
+       "x": 136,
+       "y": 73,
+       "k": "goal"
+      }
+     ],
+     "target": 305,
+     "stg": "act",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 140,
+       "y": 73
+      },
+      {
+       "x": 140,
+       "y": 74
+      },
+      {
+       "x": 139,
+       "y": 73
+      },
+      {
+       "x": 139,
+       "y": 74
+      },
+      {
+       "x": 138,
+       "y": 73
+      },
+      {
+       "x": 138,
+       "y": 74
+      },
+      {
+       "x": 137,
+       "y": 73
+      },
+      {
+       "x": 137,
+       "y": 74
+      },
+      {
+       "x": 137,
+       "y": 75
+      },
+      {
+       "x": 136,
+       "y": 73
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg8",
+    "stage": "active",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg8",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 23.744102517303602
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "act",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "sg8",
+   "stage": "ready",
+   "on": [
+    {
+     "id": "sg8",
+     "stage": "ready",
+     "lvl": 305,
+     "level": 305,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "sg8",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 74,
+      "cy": 22,
+      "px": 239.15333333333294,
+      "py": 72.09999999999988,
+      "pr": 13.391091119096487
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 74,
+       "y": 22,
+       "k": "ready"
+      }
+     ],
+     "target": 305,
+     "stg": "ready",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 74,
+       "y": 22
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "sg8",
+    "stage": "ready",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "sg8",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 22.666101415895078
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "ready",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "oa1",
+   "stage": "give",
+   "on": [
+    {
+     "id": "oa1",
+     "stage": "give",
+     "lvl": 305,
+     "level": 305,
+     "panel": false,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "oa1",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 74,
+      "cy": 22,
+      "px": 239.15333333333294,
+      "py": 72.09999999999988,
+      "pr": 11.618626592233934
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 74,
+       "y": 22,
+       "k": "goal"
+      }
+     ],
+     "target": 305,
+     "stg": "give",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 74,
+       "y": 22
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "oa1",
+    "stage": "give",
+    "lvl": 1,
+    "level": 1,
+    "panel": false,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "oa1",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 25.99968608345523
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "give",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "oa1",
+   "stage": "act",
+   "on": [
+    {
+     "id": "oa1",
+     "stage": "active",
+     "lvl": 311,
+     "level": 311,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "oa1",
+      "lvl": 311,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 22,
+      "cy": 20,
+      "px": 240,
+      "py": 131,
+      "pr": 21.968939198222248
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "The Oakwood",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 22,
+       "y": 20,
+       "k": "goal"
+      }
+     ],
+     "target": 311,
+     "stg": "act",
+     "expLevels": [
+      311
+     ],
+     "exp": [
+      {
+       "x": 22,
+       "y": 20
+      }
+     ],
+     "door": false,
+     "loc": "oakwood"
+    }
+   ],
+   "off": {
+    "id": "oa1",
+    "stage": "active",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "oa1",
+     "lvl": 1,
+     "loc": "oakwood"
+    },
+    "note": null,
+    "wring": {
+     "x": 1244,
+     "y": 190,
+     "r": 22.71973447974373
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 311,
+    "stg": "act",
+    "expLevels": [
+     311
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oakwood"
+   },
+   "levels": [
+    311
+   ]
+  },
+  {
+   "id": "oa1",
+   "stage": "ready",
+   "on": [
+    {
+     "id": "oa1",
+     "stage": "ready",
+     "lvl": 305,
+     "level": 305,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "oa1",
+      "lvl": 305,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 74,
+      "cy": 22,
+      "px": 239.15333333333294,
+      "py": 72.09999999999988,
+      "pr": 13.649790669167414
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "Oldhaven",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 74,
+       "y": 22,
+       "k": "ready"
+      }
+     ],
+     "target": 305,
+     "stg": "ready",
+     "expLevels": [
+      305
+     ],
+     "exp": [
+      {
+       "x": 74,
+       "y": 22
+      }
+     ],
+     "door": false,
+     "loc": "oldhaven"
+    }
+   ],
+   "off": {
+    "id": "oa1",
+    "stage": "ready",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "oa1",
+     "lvl": 1,
+     "loc": "oldhaven"
+    },
+    "note": null,
+    "wring": {
+     "x": 1170,
+     "y": 176,
+     "r": 23.195933669550563
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 305,
+    "stg": "ready",
+    "expLevels": [
+     305
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oldhaven"
+   },
+   "levels": [
+    305
+   ]
+  },
+  {
+   "id": "oa2",
+   "stage": "give",
+   "on": [
+    {
+     "id": "oa2",
+     "stage": "give",
+     "lvl": 311,
+     "level": 311,
+     "panel": false,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "oa2",
+      "lvl": 311,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 22,
+      "cy": 20,
+      "px": 240,
+      "py": 131,
+      "pr": 21.164816007061532
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "The Oakwood",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 22,
+       "y": 20,
+       "k": "goal"
+      }
+     ],
+     "target": 311,
+     "stg": "give",
+     "expLevels": [
+      311
+     ],
+     "exp": [
+      {
+       "x": 22,
+       "y": 20
+      }
+     ],
+     "door": false,
+     "loc": "oakwood"
+    }
+   ],
+   "off": {
+    "id": "oa2",
+    "stage": "give",
+    "lvl": 1,
+    "level": 1,
+    "panel": false,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "oa2",
+     "lvl": 1,
+     "loc": "oakwood"
+    },
+    "note": null,
+    "wring": {
+     "x": 1244,
+     "y": 190,
+     "r": 25.706455937066348
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 311,
+    "stg": "give",
+    "expLevels": [
+     311
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oakwood"
+   },
+   "levels": [
+    311
+   ]
+  },
+  {
+   "id": "oa2",
+   "stage": "act",
+   "on": [
+    {
+     "id": "oa2",
+     "stage": "active",
+     "lvl": 311,
+     "level": 311,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "oa2",
+      "lvl": 311,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 63,
+      "cy": 20,
+      "px": 768,
+      "py": 95,
+      "pr": 23.871119838866658
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "The Oakwood",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 15,
+       "y": 23,
+       "k": "goal"
+      },
+      {
+       "x": 22,
+       "y": 49,
+       "k": "goal"
+      },
+      {
+       "x": 25,
+       "y": 59,
+       "k": "goal"
+      },
+      {
+       "x": 33,
+       "y": 26,
+       "k": "goal"
+      },
+      {
+       "x": 29,
+       "y": 14,
+       "k": "goal"
+      },
+      {
+       "x": 43,
+       "y": 37,
+       "k": "goal"
+      },
+      {
+       "x": 39,
+       "y": 13,
+       "k": "goal"
+      },
+      {
+       "x": 51,
+       "y": 11,
+       "k": "goal"
+      },
+      {
+       "x": 57,
+       "y": 40,
+       "k": "goal"
+      },
+      {
+       "x": 59,
+       "y": 28,
+       "k": "goal"
+      },
+      {
+       "x": 61,
+       "y": 25,
+       "k": "goal"
+      },
+      {
+       "x": 63,
+       "y": 20,
+       "k": "goal"
+      }
+     ],
+     "target": 311,
+     "stg": "act",
+     "expLevels": [
+      311
+     ],
+     "exp": [
+      {
+       "x": 15,
+       "y": 23
+      },
+      {
+       "x": 22,
+       "y": 49
+      },
+      {
+       "x": 25,
+       "y": 59
+      },
+      {
+       "x": 33,
+       "y": 26
+      },
+      {
+       "x": 29,
+       "y": 14
+      },
+      {
+       "x": 43,
+       "y": 37
+      },
+      {
+       "x": 39,
+       "y": 13
+      },
+      {
+       "x": 51,
+       "y": 11
+      },
+      {
+       "x": 57,
+       "y": 40
+      },
+      {
+       "x": 59,
+       "y": 28
+      },
+      {
+       "x": 61,
+       "y": 25
+      },
+      {
+       "x": 63,
+       "y": 20
+      }
+     ],
+     "door": false,
+     "loc": "oakwood"
+    }
+   ],
+   "off": {
+    "id": "oa2",
+    "stage": "active",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "oa2",
+     "lvl": 1,
+     "loc": "oakwood"
+    },
+    "note": null,
+    "wring": {
+     "x": 1244,
+     "y": 190,
+     "r": 22.00356955635412
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 311,
+    "stg": "act",
+    "expLevels": [
+     311
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oakwood"
+   },
+   "levels": [
+    311
+   ]
+  },
+  {
+   "id": "oa2",
+   "stage": "ready",
+   "on": [
+    {
+     "id": "oa2",
+     "stage": "ready",
+     "lvl": 311,
+     "level": 311,
+     "panel": true,
+     "err": null,
+     "overview": true,
+     "world": false,
+     "focus": {
+      "id": "oa2",
+      "lvl": 311,
+      "loc": null
+     },
+     "note": null,
+     "ring": {
+      "cx": 22,
+      "cy": 20,
+      "px": 240,
+      "py": 131,
+      "pr": 25.0804875313985
+     },
+     "reach": true,
+     "goto": false,
+     "texts": [
+      "The Oakwood",
+      "Menu",
+      "Day 1  08:00",
+      "Spring",
+      "+",
+      "Second",
+      "6",
+      "Third",
+      "7",
+      "Potion",
+      "x7",
+      "5"
+     ],
+     "spots": [
+      {
+       "x": 22,
+       "y": 20,
+       "k": "ready"
+      }
+     ],
+     "target": 311,
+     "stg": "ready",
+     "expLevels": [
+      311
+     ],
+     "exp": [
+      {
+       "x": 22,
+       "y": 20
+      }
+     ],
+     "door": false,
+     "loc": "oakwood"
+    }
+   ],
+   "off": {
+    "id": "oa2",
+    "stage": "ready",
+    "lvl": 1,
+    "level": 1,
+    "panel": true,
+    "err": null,
+    "overview": true,
+    "world": true,
+    "focus": {
+     "id": "oa2",
+     "lvl": 1,
+     "loc": "oakwood"
+    },
+    "note": null,
+    "wring": {
+     "x": 1244,
+     "y": 190,
+     "r": 25.214562895987438
+    },
+    "goto": true,
+    "texts": [
+     "The crypts below the abbey",
+     "Menu",
+     "Day 1  08:00",
+     "Spring",
+     "+",
+     "Second",
+     "6",
+     "Third",
+     "7",
+     "Potion",
+     "x7",
+     "5"
+    ],
+    "spots": [],
+    "target": 311,
+    "stg": "ready",
+    "expLevels": [
+     311
+    ],
+    "exp": [],
+    "door": false,
+    "loc": "oakwood"
+   },
+   "levels": [
+    311
+   ]
+  }
+ ],
+ "errs": [
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED"
+ ]
+}

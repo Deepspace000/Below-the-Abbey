@@ -121,3 +121,15 @@ Main causes of the local failures:
 - The panel only lists quests the party has taken, so the "not taken" stage is checked through `questShow` directly (the same function the panel calls). Done quests show no ring and a note "is done".
 - Harness files: qlib.py (browser), qr_page.js (injected helpers and canvas hooks), run2.py (all stages), doors.py (walk the doors step by step), lifecycle.py (ring goes when done or when the map is left), shots.py (screenshots), analyze.py, make_report.py, meta.py, dump_data.py (levels, people, doors to JSON).
 - Known: the Exsce map (level 481, hgt_town_exsce.js `exmDraw`) throws when opened (EXTINT has no entry for some wall type) and froze the game; quest_rings_fix.js now catches a throwing level map and draws a plain map of the level with the rings and a Close button, and a separate task was opened to fix `exmDraw` itself. In the Khemetra sea tunnel (level 266) the ring target is reached through a teleporter.
+
+## Status when work was paused (the owner asked for a stop)
+
+Done:
+- Harness in tools/qrings (run2.py, doors.py, lifecycle.py, analyze.py, make_report.py, shots.py, qr_page.js, qlib.py). 90 quests, 270 stage checks.
+- Fix in src/desert/quest_rings_fix.js (last in tools/inject.py ORDER): ring table for every main quest, door-path finder, "Go to ..." text, ring gone when the quest is done, plain-map safety net.
+- Full run before the fix and a full run after it (results_before.json, results_after.json: 0 failures of 270 at that time). The table above is from the after run. lifecycle.py: 8 of 8 ok. doors.py (walk the doors step by step): 80 walks, 0 bad.
+
+Not done:
+- A last full re-run after the final small edits (sd2 Kraken spot, door finder cache, sea islands for vq1 to vq4). tools/qrings/res_final.json holds 45 of 90 quests of that run (resume with `QR_SECONDS=420 python tools/qrings/run2.py tools/qrings/res_final.json`, own server on port 8359). The giver and level columns of the table need `python tools/qrings/meta.py` first, then make_report.py again.
+- The 12 or more screenshots (python tools/qrings/shots.py, files go to tools/qrings/shots) were not taken.
+- Not committed, not pushed, version not bumped (as instructed). The Exsce map crash (exmDraw, hgt_town_exsce.js) is still open as a separate task.
