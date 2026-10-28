@@ -66377,7 +66377,7 @@ function blMapDraw(c,x,L,api){
   x.save();x.beginPath();x.rect(PX,PY,PW,PH);x.clip();
   for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){
     if(wall(cx,cy)){const k=col(cx,cy),v=hash2(cx,cy,5)*12-6;x.fillStyle=`rgb(${Math.max(0,Math.min(255,k[0]*.8+v))|0},${Math.max(0,Math.min(255,k[1]*.8+v))|0},${Math.max(0,Math.min(255,k[2]*.8+v))|0})`}
-    else{const f=L.fmap&&L.fmap[cy]?L.fmap[cy][cx]:'x';x.fillStyle=out?(BLMP.ground[f]||'#cfc8b6'):'#c9b896'}
+    else{const f=L.fmap&&L.fmap[cy]?L.fmap[cy][cx]:'x';x.fillStyle=out?((L._ground&&L._ground[f])||BLMP.ground[f]||'#cfc8b6'):'#c9b896'}
     x.fillRect(X(cx)-.1,Y(cy)-.1,s+.2,s+.2)}
   x.strokeStyle=BLMP.ink;x.lineWidth=.6;x.lineCap='round';x.beginPath();
   for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){if(wall(cx,cy))continue;const X0=X(cx),Y0=Y(cy);
@@ -67532,6 +67532,668 @@ if(typeof BL_ROAD!=='undefined'&&typeof VT!=='undefined'){
   VT.neighbour=function(dir){const j=bgJ(),q=BL_ROAD[dir==='east'?j-1:j+1];if(!q)return null;
     return {id:q.id,at:dir==='east'?q.fromW:q.fromE}};
 }
+
+/* ---- src/desert/blight_church.js ---- */
+/* ==========================================================================
+   PLACE 3 OF THE BLIGHTED ROAD: THE CHURCH OF THE HOLLOW SAINT (level 9630, rated 86; prefix blc / BLC). 80 by 70.
+   Rooms: 9631 the nave (Father Alder at his lectern, the choir of the dead in their stalls, the saint's statue, doors down to the crypt, up to the belfry and into the vestry),
+   9632 the crypt (sarcophagi, ossuary niches, the Pale Cantor), 9633 the belfry (three upside-down bells, only one of them true), 9634 the vestry (the Life of the Saint, the offering box).
+   The road runs east to west along y 34 to 36 (east gate x 78 back to Ashenfold Farm, west gate x 1 on to Gallowmere, 9640). North of the road a lych-gate and a flagged path lead up through the churchyard
+   (a railed yard of leaning graves, six grave boards with the names of the last congregation, the mausoleum, the sexton's hut) to the painted church. Four bells stand mouth upward at the path,
+   and toll (an inverted bell tolls the dead up). South of the road: Peggy's lean-to, the plague pit, the poor chapel.
+   People: Father Alder (blc_alder), Gideon Mould the sexton (blc_gideon), Precentor Ambrose Lark the ghost (blc_ambrose), Peggy Thripp the almswoman (blc_peggy), the statue of the Hollow Saint (blc_saint).
+   Quests: blq7 The True Bell (Gideon), blq8 The Choir's Hymn (Ambrose), blq9 The Last Congregation (Father Alder), blq10 The Saint's Alms Bowl (the statue).
+   Flags: G.flags.bl = {trueBell, wrongBells, pg1, pg2, pg3, choirRest, nm (bitmask of grave boards read), namesGiven, bowl, bowlGiven, offer (offering box), cryptChest}.
+   ========================================================================== */
+const BLC={ID:9630,NAVE:9631,CRYPT:9632,BELFRY:9633,VESTRY:9634,W:80,H:70};
+BL_ROAD[2].W=BLC.W;BL_ROAD[2].H=BLC.H;
+for(const [id,n] of [[9631,'The Nave of the Hollow Saint'],[9632,'The Crypt of the Hollow Saint'],[9633,'The Belfry'],[9634,'The Vestry']]){LEVEL_NAMES[id]=n;LEVEL_RATING[id]=86}
+const BLC_CH={img:'bl_church',x0:34,x1:41,y0:15,y1:20,w:8.3,wh:2.8,to:BLC.NAVE,door:[37,20]};
+/* ---------- things carried ---------- */
+ITEMDEF.blalmsbowl={n:"The Hollow Saint's Alms Bowl",k:'quest',t:'Quest item',ic:'ore',c:'#c8c0a8',stack:1,price:0,sw:.4,d:'A shallow wooden bowl, black with age, with a rim worn smooth by a great many thumbs. It is the bowl the Hollow Saint begged with. It belongs in the hands of her statue in the nave.'};
+ITEMDEF.blhymnring={n:"Precentor's Tuning Ring",k:'ring',t:'Ring',ic:'ring',c:'#b8c8d8',price:0,lvl:86,pas:{ward:17,dodge:.06,regen:.7,mpRegen:.5},int:6,hp:80,rar:1,sw:.1,d:'A thin silver ring that hums a little when you tap it, the pitch the choir always began on. Adds 6 Intelligence and 80 health, every blow on the wearer is 17 lighter, enemies miss 6% more, and wounds and weariness close steadily. Needs level 86.'};
+ITEMDEF.blspade={n:"Gideon's Grave Spade",k:'weapon',t:'Sword',ic:'sword',c:'#a8acac',dmg:[460,560],hit:.2,req:{str:70},lvl:86,price:0,rar:1,eff:{bleed:[.3,6,40],bossdmg:.32},dbl:.2,sw:.5,d:'A long sexton\'s spade with an edge ground sharp, and a handle worn pale by forty years of digging. Wounds bleed, and bosses take 32% more. Needs level 86.'};
+ITEMDEF.blsaintcowl={n:'Cowl of the Hollow Saint',k:'head',t:'Helm',ic:'head',c:'#c8c4b4',armor:17,price:0,lvl:86,pas:{dmgPct:.06,dodge:.03,regen:.5},rar:1,gear:1,sw:.3,d:'A plain grey hood of undyed wool, hanging a little empty at the front. Whoever wore it gave everything else away. Armour 17, damage +6%, enemies miss 3% more, and wounds close steadily. Needs level 86.'};
+/* ---------- upside-down bells and a darker church (filters over the painted pieces; nothing is drawn) ---------- */
+function blcArt(){
+  if(BLC._art)return;
+  try{if(typeof wlgPaintFront==='function')wlgPaintFront()}catch(e){}
+  const mk=(key,src,filter,h,flip)=>{if(!src||!src.width)return false;const c=document.createElement('canvas');c.width=src.width;c.height=src.height;const x=c.getContext('2d');if(flip){x.translate(0,src.height);x.scale(1,-1)}try{x.filter=filter}catch(e){}x.drawImage(src,0,0);IMG[key]=c;if(h)NPC_H[key]=h;return true};
+  mk('bl_church',IMG.wl_bldg1_0,'saturate(.42) brightness(.7) sepia(.15)',null,false);
+  mk('bl_ibell',IMG.gy_bell,'saturate(.7) brightness(.85)',1.0,true);
+  mk('bl_ibellS',IMG.gy_bell,'saturate(.6) brightness(.78)',.62,true);
+  mk('bl_bellbad',IMG.gy_bell,'saturate(.4) brightness(.55)',1.0,true);
+  for(const [k,h] of [['mi_altar',1.5],['mi_pew',.8],['mi_saint',1.7],['priest',.9],['gy_ghost0',1.1],['gy_ghost1',1.1],['gy_ghost2',1.1],['gy_banshee',1.0],['hl_p_window',1.9],['hl_p_candle',.7]])if(NPC_H[k]===undefined)NPC_H[k]=h;
+  BLC._art=1}
+/* ---------- the sound: the bells that toll the dead up, and the choir ---------- */
+const BLCS={nextToll:0,nextSing:0};
+function blcSing(vol){ // a slow, soft chord of voices: a long attack and a long release, glassy
+  if(!AC||!MASTER||G.mute)return;const t=AC.currentTime,roots=[[220,261.6,329.6,440],[196,246.9,293.7,392],[174.6,220,261.6,349.2]],ch=roots[(Math.random()*roots.length)|0];
+  ch.forEach((f,i)=>{const o=AC.createOscillator(),o2=AC.createOscillator(),g=AC.createGain(),lf=AC.createOscillator(),lg=AC.createGain();
+    o.type='sine';o2.type='triangle';o.frequency.value=f;o2.frequency.value=f*2.003;lf.frequency.value=4.6+i*.3;lg.gain.value=f*.006;lf.connect(lg);lg.connect(o.frequency);
+    const v=.018*vol*(typeof SFXM==='number'?SFXM:1),a=2.6+i*.3,h=a+2.2,end=h+4.2;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+a);g.gain.setValueAtTime(v,t+h);g.gain.linearRampToValueAtTime(0,t+end);
+    const g2=AC.createGain();g2.gain.value=.25;o2.connect(g2);g2.connect(g);o.connect(g);g.connect(MASTER);
+    for(const q of [o,o2,lf]){q.start(t);q.stop(t+end+.1)}})}
+function blcToll(vol,low){try{playSmp('church_bell1',vol,low?.5:.62)}catch(e){blsToll(1,vol)}}
+function blcTick(){
+  if(!AC||!NB||!MASTER||G.state!=='play'||G.mute||!SNDOPT.amb)return;
+  const now=AC.currentTime,F=blF();
+  if(LEVEL===BLC.ID){
+    if(now>BLCS.nextToll){BLCS.nextToll=now+30+Math.random()*30;blcToll(.55+Math.random()*.25);setTimeout(()=>blcToll(.35,true),3300);if(Math.random()<.3)try{msg('An upside-down bell tolls, deep in the church, and the ground answers.','#b8d0a8')}catch(e){}}
+    if(!F.choirRest&&now>BLCS.nextSing&&Math.hypot(G.P.x-37,G.P.y-20)<22){BLCS.nextSing=now+22+Math.random()*16;blcSing(.4)}}
+  else if(LEVEL===BLC.NAVE){
+    if(!F.choirRest&&now>BLCS.nextSing){BLCS.nextSing=now+13+Math.random()*10;blcSing(1)}}
+  else if(LEVEL===BLC.CRYPT||LEVEL===BLC.BELFRY){
+    if(now>BLCS.nextToll){BLCS.nextToll=now+40+Math.random()*30;blcToll(LEVEL===BLC.BELFRY?.7:.3,true)}
+    if(LEVEL===BLC.BELFRY&&Math.random()<.01)try{wwsCrow(.6)}catch(e){}}}
+{const _ys=yarSoundTick;yarSoundTick=function(){_ys.apply(this,arguments);try{if(blIs(LEVEL))blcTick()}catch(e){console.error('blc tick',e)}}}
+/* ---------- the people ---------- */
+const BLC_ALDER_LINES=[
+  '...and ninthly, dearly beloved, on the matter of the collection plate. Eighthly I have already said. I am nearly at the end. Nobody leave. Is it still Sunday? I was told this would be a short one.',
+  'Where was I? The Saint took a handful of silver for the poor. Then she took another handful. Then, brethren, she could not put it down. A warning to us all, and I have given it forty times, and the front pew has not once told me it was a good one.',
+  'I do not mind the choir. I mind that they have only ever learned the one hymn, and that they sing it during the sermon. I have said, in a firm and Christian voice, that there are rules.',
+  'Somebody was sitting at the back a while ago. I do believe he was the churchwarden. Very quiet man. I looked again and the bench was empty. People do slip out. I never see them go.',
+  'You will have a seat, I hope. There are plenty. The nave is wonderfully full, though if I am honest it has been wonderfully full of the same people for some years.'];
+khNpc('blc_alder','Father Alder','priest',()=>yrLines('blc_alder',BLC_ALDER_LINES),{sc:1});
+const BLC_GIDEON_LINES=[
+  'Gideon Mould, sexton. Forty-one years I have dug this yard, and I have never once buried a man who stayed buried. I stopped taking it personally round about the fortieth.',
+  'Father Alder is preaching his last sermon. He has been preaching it since the harvest forty years back, the night the pale riders came. I take him tea. He does not drink it, but I think he likes to be asked.',
+  'Mind the bells at the path. They stand with their mouths to the sky, to catch the weather, the old people said. They toll by themselves now, and they toll the dead up out of the ground. I do not like to say how fast I am digging them back in.',
+  'The true bell hangs in the belfry, over the nave. It is the small one, with no name cut in it. The Saint cast it from poor men\'s pennies and would not put her own name on it. The other two are greedy, and ring up everything that has ever lain here.'];
+khNpc('blc_gideon','Gideon Mould, the sexton','kh_ohfolk7_0',()=>yrLines('blc_gideon',BLC_GIDEON_LINES));
+const BLC_AMBROSE_LINES=[
+  '(The ghost in the grey surplice lifts one finger and hums a note, and the rest of the stalls find it, and hold it.) Forgive us. We are rather good, and we do not stop. It is the worst thing about being good.',
+  'We had a hymn book, once, and a hymn for the very end of things. The pages were taken from the book and hidden. We were not allowed to finish. A choir that cannot finish is a very long evening indeed.',
+  'Father Alder is a dear man. A little long. I have been counting the sermon in my head for forty years, and it is somewhere past eight thousand heads.'];
+khNpc('blc_ambrose','Precentor Ambrose Lark','gy_ghost2',()=>yrLines('blc_ambrose',BLC_AMBROSE_LINES),{sc:1});
+const BLC_CHOIR_LINES=[
+  '(The singers sing on, soft and low, with their eyes shut. The words are old and have no ending, and they are about a long road, and somebody waiting at the end of it with a light.)',
+  '(One of the singers opens her eyes, and finds you, and for a moment the hymn is sung only to you. Then she shuts them again.)',
+  '(A thin boy in the second row waves, very slightly, without losing the note.)',
+  '(They go on singing. The same verse. The same turn at the end, and then back to the beginning, as though the page had been torn off right there.)'];
+khNpc('blc_choir','A singer of the choir','gy_ghost0',()=>yrLines('blc_choir',BLC_CHOIR_LINES),{sc:1});
+const BLC_PEGGY_LINES=[
+  'Peggy Thripp. I beg, dear, I always have. The Saint begged too, so I am in good company. There is not much to beg from out here. The dead do not carry purses.',
+  'They say the Saint was a poor girl who walked the road and took the Sovereign\'s pale silver for the poor, a handful at first. But the silver wanted more of her every day, and in the end it was all she was. There was nothing inside her but the silver, and that is why they call her Hollow.',
+  'Down in the crypt, where they buried the paupers, there is a plain niche with a mark on it, a little bowl. The old women say the Saint hid her begging bowl there so that nobody would ever beg with it for themselves. I never went down to look. I am not so poor as that.'];
+khNpc('blc_peggy','Peggy Thripp, almswoman','kh_ohfolk2_0',()=>yrLines('blc_peggy',BLC_PEGGY_LINES));
+/* ---------- the quests ---------- */
+function blcQ(id,title,who,steps,reward,extra){const q=yrQ(id,title,who,steps,reward,extra);QAREA[id]=BL.REGION;return q}
+const blcPages=()=>{const F=blF();return (F.pg1?1:0)+(F.pg2?1:0)+(F.pg3?1:0)};
+const blcNames=()=>{const F=blF();let n=0;for(let i=0;i<6;i++)if((F.nm|0)&(1<<i))n++;return n};
+blcQ('blq7','The True Bell','Gideon Mould, the sexton',[
+  ['Climb to the belfry above the nave (the trapdoor in the nave\'s east corner) and ring the true bell. Gideon says it is the small one with no name on it.',()=>!!blF().trueBell,['blc_bellC','blc_belfrydoor']]],
+  {gold:3600,xp:30000,items:['blspade','potion6']});
+blcQ('blq8',"The Choir's Hymn",'Precentor Ambrose Lark',[
+  ['Find the three lost pages of the choir\'s last hymn: one on the sarcophagus in the crypt, one in the belfry, one on a grave in the churchyard.',()=>blcPages()>=3,['blc_page1','blc_page2','blc_page3']],
+  ['Give the three pages to Precentor Ambrose in the nave.',()=>!!blF().choirRest,['blc_ambrose']]],
+  {gold:3800,xp:32000,items:['blhymnring','potion6']});
+blcQ('blq9','The Last Congregation','Father Alder',[
+  ['Read the names on the six grave boards in the churchyard, then tell them to Father Alder.',()=>blcNames()>=6,['blc_name']],
+  ['Read the names to Father Alder in the nave.',()=>!!blF().namesGiven,['blc_alder']]],
+  {gold:3800,xp:31000,items:['potion6','potion6','potion6']});
+blcQ('blq10',"The Saint's Alms Bowl",'The statue of the Hollow Saint',[
+  ['Find the Hollow Saint\'s begging bowl, hidden in a pauper\'s niche in the crypt.',()=>!!(blF().bowl||blF().bowlGiven),['blc_pauper']],
+  ['Set the bowl in the hands of the Saint\'s statue in the nave.',()=>!!blF().bowlGiven,['blc_saint']]],
+  {gold:4600,xp:36000,items:['blsaintcowl','potion6']});
+wwGive('blc_gideon','blq7',()=>true,{
+  offer:'Would you do me a kindness? The bells at the path toll the dead up, and it is the belfry that sets them off. There are three bells up there. Two of them are false, and ring up every sleeper in the yard. One is true, and rings them down. I am too old for the ladder, and I will not guess. Ring the true one for me.',
+  accept:'Good. The trapdoor is in the nave, in the east corner by the vestry door. Up the ladder, and you will see them. The true bell is the small one. It has no name cut in it. The Saint would not put her name to it. Do not ring the greedy two.',
+  remind:()=>'The belfry is up the ladder from the nave. The true bell is the small one with no name on it. Have you rung it?',
+  ready:'I heard it from here. A clean note, and the whole yard went still, like a held breath let go. Thank you.',
+  thanks:'Take my spade. I will dig with my hands now. It will be easier on the grief.',
+  after:'The path bells have gone quieter. They still toll. They only toll slower, as if they were not sure of it.'});
+wwGive('blc_ambrose','blq8',()=>true,{
+  offer:'May I ask a great thing? The last hymn was in three pages, and the pages were hidden, one from each of three places, so that we would not finish. We cannot rest until we have sung it to the end. One page lies on a sarcophagus in the crypt. One is up in the belfry. One is on a grave in the churchyard. Would you bring them to me?',
+  accept:'Thank you. You will know them by the staves. Four lines of music, and no words, because we have always known the words.',
+  remind:()=>blcPages()>=3?'You have all three pages. Give them to me, and we will sing it.':'You have '+blcPages()+' of three pages. The crypt, the belfry and the churchyard.',
+  ready:'We have sung it. Right to the end. I do not think I have ever heard a silence like that.',
+  thanks:'The choir is gone, all but me, and I will go in a moment. Take my tuning ring. I will not need to find the note again.',
+  after:'It is very quiet in the stalls. That is what I wanted. Father Alder is still preaching. He has not noticed. Go well.'});
+wwGive('blc_alder','blq9',()=>true,{
+  offer:'Dear friend, I am nearly at the end of my sermon, and I find I cannot remember who the last congregation was. I preached to them, you see, the night the pale riders came. Their names are cut on boards in the churchyard, I am told. If you could read them out to me, I could finish. I have to say their names. It is only right.',
+  accept:'Six boards, in the yard. Read them all, and come and tell me. I will wait. I am very good at waiting. Ask anybody.',
+  remind:()=>blcNames()>=6?'You have read all six boards. Read me the names, and I shall finish.':'You have read '+blcNames()+' of the six boards in the churchyard.',
+  ready:'Amen. Amen, amen. It is done. I have said their names, every one, and there was nobody left in the front pew to hear it but you.',
+  thanks:'Thank you. It has been forty years. I thought I was preaching to keep them in their seats. I think I was preaching so as not to hear the quiet after. Take this, for your trouble, and for theirs.',
+  after:'I shall sit down now. I have not sat down in a very long time. Do you know, it is a wonderfully comfortable pew.'});
+/* the hooks that turn the pages in (they run first) */
+yrHook('blc_ambrose',d=>{const F=blF();
+  if(qSt('blq8')==='active'&&blcPages()>=3&&!F.choirRest)return say('Precentor Ambrose looks at the three pages in your hand, and his whole face changes. Behind him, in the stalls, the singing falters, and stops, and a hush goes round the nave like a drawn breath.',[['Give him the pages.',()=>blcRest()],['Not yet.',()=>null]]);
+  if(F.choirRest&&qSt('blq8')!=='done'&&qSt('blq8')!=='active')return yrLines('blc_ambrose_r',['The stalls are empty. I stayed to say thank you.']);
+  return null});
+function blcRest(){
+  const F=blF();F.choirRest=1;sfx('win');
+  try{const L=LEVELS[BLC.NAVE];if(L)for(const x of L.decor)if(x.npc==='blc_choir')x.found=true;if(LEVEL===BLC.NAVE&&G.decor)for(const x of G.decor)if(x.npc==='blc_choir')x.found=true}catch(e){console.error(e)}
+  try{blcSing(1.6)}catch(e){}
+  try{G.heroes.forEach(h=>{if(h.alive){h.hp=h.max;h.mp=h.mpMax}})}catch(e){}
+  msg('The choir sings the last hymn to its end, and one by one the singers fade. A calm falls over the party, and every hero is healed.','#ffe9a0');
+  return say('They sing it right through, the three pages, the long turn at the end, and the last line that had never been sung. And then the stalls are empty, and the air smells of candle smoke and rain. Precentor Ambrose stays a moment longer, with his head bowed.',[BYE])}
+yrHook('blc_alder',d=>{const F=blF();
+  if(qSt('blq9')==='active'&&blcNames()>=6&&!F.namesGiven)return say('Father Alder stops, with his mouth open on the word NINTHLY. "You have them?" he says. "Oh. You have them. Read them to me, dear friend. Slowly. I want to hear each one."',[['Read out the six names.',()=>{F.namesGiven=1;sfx('win');msg('You read out the names of the last congregation.','#ffe36a');return say('You read them out, one by one, and Father Alder says each name after you, quietly, as if he were laying it down on a table. Then he is silent for a long moment. "Amen," he says, to nobody in particular.',[BYE])}],['Not yet.',()=>null]]);
+  if(F.namesGiven&&qSt('blq9')==='done')return yrLines('blc_alder_d',['I am sitting. I am only sitting. It is very odd. Has the roof always been that colour?','Sexton Mould brings me tea, and I drink it. Yesterday I drank it. It was dreadful. I had two.','I should like to hear the choir. I should like to hear the hymn. They have stopped, I think. How very rude of me not to have noticed. They must have been so tired of my sermon.']);
+  return null});
+/* ---------- the objects ---------- */
+const BLC_NAMES=[
+  ['MARGERY TANNER','Baker. Never gave short weight.'],['WILL AND ELSPETH CROSS','Weavers, of the lane. Together.'],['THE HOLLOWAY CHILDREN','Three of them. The youngest, Nan, was four.'],
+  ['JOHN DAUNT','Churchwarden. He sat at the back.'],['AGNES FOLLET','Widow. Sang in the second row.'],['OLD TOBIAS PIKE','Bellringer, forty years. Rang the true bell last.']];
+khNpc('blc_name','A grave board','bl_slab',d=>{
+  const F=blF(),i=d.i|0,t=BLC_NAMES[i]||BLC_NAMES[0],bit=1<<i;
+  if(!((F.nm|0)&bit)){F.nm=(F.nm|0)|bit;if(qSt('blq9')==='active')yrStep('You read the name on a grave board ('+blcNames()+' of 6).')}
+  return say(t[0]+'. '+t[1]+' Cut under it, smaller: HEARD THE LAST SERMON.',[BYE])});
+function blcPage(n,where,flag){return d=>{const F=blF();
+  if(F[flag])return say('A bare place where the page lay. There is a ring of dust, and a very faint sound of singing.',[BYE]);
+  return say('A single leaf of old paper, brittle and brown, ruled in four-line staves and written all over with notes, and no words. A corner has been torn from the book it came from. '+where,[['Take the page.',()=>{F[flag]=1;d.found=true;d.hidden=true;sfx('key');msg('You take a page of the choir\'s last hymn ('+blcPages()+' of 3).','#ffe36a');return null}],BYE])}}
+khNpc('blc_page1','A page of music','gy_book',blcPage(1,'It lies on the lid of the sarcophagus, under a pale thumbprint.','pg1'));
+khNpc('blc_page2','A page of music','gy_book',blcPage(2,'It is tucked in under the lip of the nameless bell, where nobody would look.','pg2'));
+khNpc('blc_page3','A page of music','gy_book',blcPage(3,'It lies on a low grave, weighted with a stone.','pg3'));
+khNpc('blc_sign_church','A churchyard notice','greensign',()=>say('A notice board at the lych-gate. THE CHURCH OF THE HOLLOW SAINT. ALL WELCOME. SERVICES: ALWAYS. SERMON IN PROGRESS: PLEASE ENTER QUIETLY. Under it, in a different hand: PLEASE ENTER. HE IS VERY LONELY.',[BYE]));
+khNpc('blc_ibell','An upside-down bell','bl_ibell',()=>say('A great bronze bell set on a stone block with its mouth to the sky, full of rain and drowned leaves. It rings by itself, low, when the wind finds it. Moss is grown over the clapper. Somebody has hung a small tin cup on its rim, for drinking.',[BYE]));
+khNpc('blc_mausoleum','The Alder vault','bl_mausoleum',()=>say('A small ivy-black mausoleum. The door is sealed with lead. A plaque reads: THE FAMILY OF ALDER. LET THEM REST, and below it, scratched with a nail: he does not know.',[BYE]));
+khNpc('blc_hut','The sexton\'s hut','bl_hut',()=>say('A hut with a kettle on a hook, three spades, a lantern and a very large number of small crosses stacked neatly in the corner, waiting. A chalk tally on the wall counts something in fives, and has been rubbed out and begun again many times.',[BYE]));
+khNpc('blc_pit','The plague pit','gy_mound',()=>say('A wide shallow pit, ringed with low mounds, and a board with the single word PAUPERS. The earth has settled a little in the middle. It is not entirely still.',[BYE]));
+khNpc('blc_lean','Peggy\'s lean-to','bl_hut',()=>say('A lean-to of planks and sacking, with a blanket, a tin cup and a hand-lettered card that says PLEASE GIVE. Under it somebody has written, in a better hand: THE SAINT GAVE. THE SAINT IS DEAD.',[BYE]));
+khNpc('blc_poorchapel','The poor chapel','bl_chapel',()=>say('A tiny ruined chapel, roofless, with its windows gone to ivy. A board on the door says: THE POOR CHAPEL. NO CHARGE. NO PEWS. NO ROOF. The inside is full of nettles and one very clean candle.',[BYE]));
+khNpc('blc_belfrydoor','A trapdoor with a ladder','gy_hatch2',()=>say('A trapdoor in the corner of the nave, with a ladder hung down through it. The rungs are polished by forty years of the same sexton, and above them, in the dark, something moves with a slow bronze groan.',[['Climb the ladder to the belfry.',()=>{sfx('door');G.talk=null;goToLevel(BLC.BELFRY,{x:5,y:7,f:0});return null}],BYE]));
+khNpc('blc_cryptdoor','Stairs going down','gy_stair',()=>say('A narrow stone stair going down to the crypt of the Hollow Saint. Cold comes up it, and a smell of old stone and candles. Somewhere below, a drip, and the creak of a lid.',[['Go down into the crypt.',()=>{sfx('door');G.talk=null;goToLevel(BLC.CRYPT,{x:10,y:12,f:0});return null}],BYE]));
+khNpc('blc_vestrydoor','The vestry door','gy_arch',()=>say('A low arched door beside the chancel, with a brass handle. Behind it the vestry, where the vestments are kept.',[['Go through into the vestry.',()=>{sfx('door');G.talk=null;goToLevel(BLC.VESTRY,{x:5,y:7,f:0});return null}],BYE]));
+khNpc('blc_cryptup','The stair up','gy_stair',()=>say('The stair back up to the nave. The sound of singing comes down it, thin and patient.',[['Climb up to the nave.',()=>{sfx('door');G.talk=null;goToLevel(BLC.NAVE,{x:3,y:12,f:0});return null}],BYE]));
+khNpc('blc_belfryup','The ladder down','gy_hatch2',()=>say('The ladder down through the trapdoor to the nave.',[['Climb down to the nave.',()=>{sfx('door');G.talk=null;goToLevel(BLC.NAVE,{x:18,y:12,f:0});return null}],BYE]));
+khNpc('blc_saint','The statue of the Hollow Saint','mi_saint',()=>{
+  const F=blF();
+  if(F.bowlGiven)return say('The statue of a young woman in a plain gown, with a bowl in her cupped hands. The stone is cold, and the face is calm. The word cut at her feet still says GIVE.',[BYE]);
+  return say('A statue of a young woman in a plain hood, with her hands cupped in front of her, empty. The stone of the face is worn smooth at the cheeks. At her feet is cut the word GIVE. A very old candle burns in front of her, and has not gone down in forty years.',[F.bowl?['Set the bowl in her hands.',()=>{if(bagCount('blalmsbowl')>0)bagRemove('blalmsbowl',1);F.bowlGiven=1;sfx('win');msg('The bowl rests in the statue\'s hands.','#ffe9a0');return say('The bowl settles into the stone hands with a small sound, like a sigh let out. A warm light fills the nave, and every hero is healed.',[BYE])}]:['Look at her face.',()=>say('Her face is young, and tired, and kind. It has no lines. It is entirely empty, like a bowl.',[BYE])],BYE])},{sc:1});
+wwGive('blc_saint','blq10',()=>true,{
+  offer:'(The statue stands with its hands cupped before it, and they are empty. A word is cut in the stone at its feet. It says: GIVE. Under the word, much smaller, a second line: AND DO NOT KEEP.) A voice that is not a voice says: There was a bowl. I hid it, so that I would not beg with it for myself. It lies where they buried the poor. Bring it back, and put it in my hands.',
+  accept:'(The stone says nothing more. The air in the nave is a little warmer.) The crypt, under the stair. A pauper\'s niche with a bowl cut over it.',
+  remind:()=>blF().bowl?'You have the bowl. Put it in the hands of the statue.':'The bowl is in a pauper\'s niche in the crypt, under the stair.',
+  ready:'(The bowl rests in the stone hands, as if it had never been taken out of them.)',
+  thanks:'(A grey hood lies folded at the statue\'s feet. It was not there a moment ago.) Take it. I wore it when there was nothing left in me but the giving.',
+  after:'(The stone hands are full, and the face above them is, very slightly, less hollow.)'});
+yrHook('blc_saint',d=>{const F=blF();
+  if(qSt('blq10')==='active'&&(F.bowl||bagCount('blalmsbowl')>0)&&!F.bowlGiven)return say('A statue of a young woman in a plain hood, with her hands cupped in front of her, empty. You have the bowl.',[['Set the bowl in her hands.',()=>{bagRemove('blalmsbowl',1);F.bowlGiven=1;F.bowl=1;sfx('win');try{G.heroes.forEach(h=>{if(h.alive){h.hp=h.max;h.mp=h.mpMax}})}catch(e){}msg('The bowl rests in the statue\'s hands. Every hero is healed.','#ffe9a0');return say('The bowl settles into the stone hands with a small sound, like a sigh let out. A warm light fills the nave.',[BYE])}],BYE]);
+  return null});
+/* the crypt: the pauper's niche (the hidden relic) and the sarcophagus chest */
+khNpc('blc_pauper',"A pauper's niche",'gy_rune',d=>{
+  const F=blF();
+  if(F.bowl||F.bowlGiven)return say('A plain niche in the wall, with a small bowl cut over the opening. The shelf inside is empty, and swept.',[BYE]);
+  return say('Under the stair, behind the last of the great sarcophagi, a plain niche is let into the wall, with a small bowl cut over the opening. The stone shelf inside is bare, and a flat slab stands before it, with a loose edge.',[['Lift the slab.',()=>{F.bowl=1;if(!bagAdd(mkItem('blalmsbowl')))G.items.push({k:'blalmsbowl',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg('You take the Hollow Saint\'s alms bowl.','#ffe36a');return null}],BYE])});
+khNpc('blc_cryptchest','A chantry chest','gy_chest',d=>{
+  const F=blF();if(F.cryptChest)return say('The chest is open and empty.',[BYE]);
+  return say('A small iron-bound chest in a niche, with a candle stub on the lid. The lock was forced long ago.',[['Open it.',()=>{F.cryptChest=1;G.gold+=1600;sfx('win');msg('You take 1600 gold.','#ffe36a');return null}],BYE])});
+khNpc('blc_sarc','A sarcophagus','gy_sarc',()=>say('A stone sarcophagus, carved with a sleeping figure in a hood. The inscription reads: SAINT ORLA, CALLED THE HOLLOW. SHE GAVE WHAT SHE TOOK. THEN SHE GAVE WHAT SHE WAS. The lid is not quite closed, and it is very quiet inside.',[BYE]));
+khNpc('blc_niche','An ossuary niche','gy_niche',()=>say('A niche stacked neat as firewood with bones, and a card: SKULLS. THIGHS. THE REST. Somebody has taken great care.',[BYE]));
+khNpc('blc_bellA','The bell called Great Tom','bl_bellbad',()=>blcBell(0));
+khNpc('blc_bellB',"The bell called Saint Orla's Widow",'bl_bellbad',()=>blcBell(1));
+khNpc('blc_bellC','The small bell with no name','bl_ibellS',()=>blcBell(2));
+function blcBell(i){
+  const F=blF(),nm=['GREAT TOM is cut round the shoulder in letters as high as a hand, and a crack the shape of a smile runs from the rim to the crown.',"The words SAINT ORLA'S WIDOW are cut round the shoulder. The widow, the old women say, was a great deal louder than the saint, and rather cheerful about it.",'No name is cut in it at all. On the shoulder there is only a handprint, pressed into the metal when it was cast, small, with the fingers spread. It is a clean, plain, patient bell.'][i];
+  if(i===2&&F.trueBell)return say(nm+' You have rung it. The clapper is still, and the metal is still warm from the sound.',[BYE]);
+  return say('An upside-down bell, mouth to the sky, hung on a heavy beam. '+nm,[['Ring it.',()=>blcRing(i)],['Leave it be.',()=>null]])}
+function blcRing(i){
+  const F=blF();
+  if(i===2){F.trueBell=1;sfx('win');try{playSmp('church_bell1',.9,1)}catch(e){}try{G.heroes.forEach(h=>{if(h.alive){h.hp=h.max;h.mp=h.mpMax}})}catch(e){}msg('The true bell rings out, clean and low. Every hero is healed.','#ffe9a0');
+    return say('The note rolls out over the nave, the yard and the road, and for the length of it nothing in all the churchyard moves. Under your feet the choir in the nave falls silent for a moment, and then, very quietly, goes on.',[BYE])}
+  F.wrongBells=(F.wrongBells|0)+1;try{playSmp('church_bell1',.8,.5);playSmp('church_bell2',.6,.45)}catch(e){}
+  try{G.heroes.forEach(h=>{if(h.alive)h.hp=Math.max(1,Math.round(h.hp-h.max*.12))})}catch(e){}
+  msg('The false bell tolls. The sound goes through your bones, and the dead in the churchyard sit up.','#d09a80');
+  try{const L=LEVELS[BLC.ID];if(L&&LEVEL===BLC.ID)null}catch(e){}
+  return say('A huge, greedy, swelling note, that goes on long after it should. Far below, and a long way off, you hear something in the yard come up out of the ground. Your bones ache with it. That was not the true bell.',[BYE])}
+khNpc('blc_book','The Life of Saint Orla','gy_book',()=>say('A great book on a lectern, open at a page headed THE LIFE OF SAINT ORLA, CALLED THE HOLLOW. "She was a girl of the road, who took the Sovereign\'s pale silver for the poor of the parish, a handful, and then a handful more. It was said that a coin of it never wore, and never warmed, and that she could not set it down. She gave it all away, every piece. And still it came to her hands. In the end she was emptied out by it, like a bowl turned over. She asked to be buried where the poor are buried. She is buried under the high altar. The poor were not told." The next page has been torn out.',[BYE]));
+khNpc('blc_offer','The offering box','gy_chest',()=>{
+  const F=blF();if(F.offer)return say('The offering box is open, and empty, apart from a single button.',[BYE]);
+  return say('A tin offering box, chained to the wall, with a slot in the lid, and a card: FOR THE POOR. It has not been emptied in forty years. It rattles.',[['Take what is in it, for the poor of the road.',()=>{F.offer=1;G.gold+=1100;if(ITEMDEF.potion6&&bagAdd(mkItem('potion6'))){}sfx('win');msg('You take 1100 gold, and a potion somebody left.','#ffe36a');return null}],BYE])});
+khNpc('blc_robes','A cupboard of vestments','gy_chest',()=>say('A tall cupboard of folded vestments. Green for Ordinary Time, white for feasts, black for burials. The black has been worn out, and the white is not much used. A note pinned to the black one says: PLEASE BUY MORE.',[BYE]));
+khNpc('blc_stall','The choir stalls','mi_pew',()=>say('Two rows of dark oak stalls, with hymn boards above them. The numbers on the board all read the same hymn, and the same verse, and it is always the last one.',[BYE]));
+/* the Pale Cantor: the crypt's guardian */
+Object.assign(ENEMY_DEF,{blcantor:{name:'The Pale Cantor',hp:380,dmg:[10,16],hit:.9,w:blW('crB_0',1.15),img:'gyi_wraith',xp:700,gold:[0,0],speed:1,verb:'rakes',boss:true,aboveParty:0,bl:1,still:1,glow:.3,wake:'A tall figure in a pale cope lifts its head from the sarcophagus, and opens its mouth, and a note comes out that is a great deal too low for a throat.'}});
+if(typeof NO_VARY!=='undefined')NO_VARY.push('blcantor');
+if(typeof BOSS_GOLD!=='undefined')BOSS_GOLD.blcantor=[3200,4000];
+if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^blcantor/,'haunted',.3]);
+/* ---------- the level ---------- */
+function blcBuild(p){
+  blcArt();
+  const C=blKit({id:BLC.ID,W:BLC.W,H:BLC.H,name:p.name,lvl:86,start:{x:73,y:35,f:3},wind:.36});
+  const {hs}=C,F=blF();
+  C.hills(.14);C.boundary();C.setF(2,2,77,67,'0');
+  C.pth(2,34,77,36,'1');C.pth(36,21,38,33,'4');C.pth(32,21,42,21,'4');
+  C.pth(19,37,20,52,'2');C.pth(44,37,45,48,'2');C.pth(59,31,60,33,'2');
+  C.flatten(2,8,77,50);
+  C.gate('E',35);C.gate('W',35);
+  // the church, painted over a hidden block of wall; the door is in the middle
+  C.picHouse(Object.assign({},BLC_CH,{img:IMG.bl_church?'bl_church':'wl_bldg1_0'}));
+  C.reserve(30,14,43,22);
+  // the railed churchyard: iron fence, the lych-gate at the path
+  for(let x=18;x<=62;x++){if(x>=36&&x<=38)continue;C.dec('bl_fence',x,31,{block:true,sc:.9})}
+  for(let x=18;x<=62;x++)C.dec('bl_fence',x,10,{block:true,sc:.9});
+  for(let y=11;y<=30;y++){C.dec('bl_fence',18,y,{block:true,sc:.9});C.dec('bl_fence',62,y,{block:true,sc:.9})}
+  C.dec('gy_lych',37,31,{sc:1.0});C.light(36,30,C.pale);C.light(38,30,C.pale);
+  C.post(34,32,'bl_ch_sign',[{n:'THE CHURCH OF THE HOLLOW SAINT',d:0},{n:'THE CHURCHYARD',d:0}],'blc_sign_church','A notice board at the lych-gate. THE CHURCH OF THE HOLLOW SAINT. ALL WELCOME. SERVICES: ALWAYS. SERMON IN PROGRESS: PLEASE ENTER QUIETLY. Under it, in a different hand: PLEASE ENTER. HE IS VERY LONELY.',{i:3});
+  // the four upside-down bells on stone blocks beside the path, with lamps
+  for(const [x,y] of [[35,24],[39,24],[35,29],[39,29]]){C.dec('bl_ibell',x,y,{block:true,npc:'blc_ibell',sc:1.25})}
+  for(const [x,y] of [[35,22],[39,22],[35,27],[39,27]]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.pale)}
+  C.dec('bl_urn',33,18,{block:true,sc:.9});C.dec('bl_urn',42,18,{block:true,sc:.9});C.light(33,21,C.warm);C.light(42,21,C.warm);
+  // the west plot: rows of graves, and the six grave boards of the last congregation
+  const WG=[[21,16],[24,16],[27,16],[30,16],[21,20],[24,20],[30,20],[21,24],[27,24],[24,28],[27,28],[30,28],[21,28]];
+  for(const [x,y] of WG){C.dec('gy_mound',x,y,{block:true,sc:.75});C.dec(['bl_lean','bl_stone1','bl_wcross','bl_stone2'][(hs(x,y,5)*4)|0],x,y-1,{block:true,sc:.85+hs(x,y,6)*.2})}
+  const BLC_SHORT=['M. TANNER','W. AND E. CROSS','HOLLOWAYS','J. DAUNT','A. FOLLET','T. PIKE'];
+  BLC_NAMES.forEach((n,i)=>{const pos=[[22,18],[26,18],[22,22],[28,22],[25,26],[29,26]][i],k=blSlab('bl_cg'+i,[BLC_SHORT[i],'LAST SERMON'],{h:.95,top:.2,span:.55});C.dec(k,pos[0],pos[1],{block:true,npc:'blc_name',i})});
+  // the east plot: the Alder vault, a page on a low grave, crosses; the sexton's hut and Gideon
+  C.dec('bl_mausoleum',52,15,{block:true,npc:'blc_mausoleum',sc:1.0});C.light(50,17,C.pale);C.light(54,17,C.pale);
+  for(const [x,y] of [[46,16],[48,19],[56,19],[58,16],[46,23],[52,22],[58,24],[48,27],[54,27]]){C.dec('gy_mound',x,y,{block:true,sc:.75});C.dec(['bl_ccross','bl_lean','bl_wcross','bl_tomb'][(hs(x,y,7)*4)|0],x,y-1,{block:true,sc:.85})}
+  if(!F.pg3)C.dec('gy_book',50,25,{block:true,npc:'blc_page3',sc:1,bob:.1});
+  C.dec('bl_hut',59,27,{block:true,npc:'blc_hut',sc:.9});C.light(58,29,C.warm);C.dec('gy_bench',56,29,{block:false});
+  C.person('blc_gideon',57,30,2);
+  for(const [x,y] of [[20,12],[60,12],[20,30],[60,30]]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.pale)}
+  // the road: milestone, signs, lamps, dead hedges with gaps
+  C.milestone(8,33);
+  C.post(5,37,'bl_ch_w',[{n:'GALLOWMERE',d:-1}],'blc_signW','A signpost by the west gate. The board reads GALLOWMERE, to the west. Under it somebody has added: KEEP TO THE LIGHTS ON THE CAUSEWAY. THE LIGHTS ARE NOT KIND, BUT THE DARK IS WORSE.',{i:1});
+  C.post(74,37,'bl_ch_e',[{n:'ASHENFOLD FARM',d:1}],'blc_signE','A signpost inside the east gate. The board reads ASHENFOLD FARM, to the east. Below it: NO SCARECROWS PAST THIS POINT. SO FAR.',{i:5});
+  for(let x=3;x<=76;x++){if([19,20,36,37,38,44,45,59,60].includes(x))continue;
+    for(const y of [33,37]){if(hs(x,y,33)<.84&&!(y===33&&x>=33&&x<=43))C.DB('bl_hedge'+((hs(x,y,35)*3)|0),x,y,{sc:.62+hs(x,y,34)*.22})}}
+  for(let x=12;x<=70;x+=9){if(x>30&&x<46)continue;C.dec('gy_lantern',x,38,{block:true});C.light(x,38,C.pale)}
+  // south of the road: Peggy's lean-to, the plague pit, the poor chapel
+  C.dec('bl_hut',17,43,{block:true,npc:'blc_lean',sc:.6});C.light(18,44,C.warm);C.dec('kh_oqstuff_8',15,43,{block:true,sc:.7});C.person('blc_peggy',20,44,2);
+  for(let a=0;a<12;a++){const x=Math.round(54+4.5*Math.cos(a*.5236)),y=Math.round(46+3*Math.sin(a*.5236));C.dec('gy_mound',x,y,{block:true,sc:.7})}
+  C.dec('gy_mound',54,46,{block:true,npc:'blc_pit',sc:.9});C.dec('gy_bones',52,47,{});C.dec('gy_bones',56,45,{});C.light(54,42,C.pale);
+  C.dec('bl_chapel',36,52,{block:true,npc:'blc_poorchapel',sc:.9});C.dec('gy_candles',36,54,{block:true,sc:.7});C.light(36,54,C.warm);C.pth(35,38,37,50,'2');
+  C.dress({trees:130,scrub:240,stones:14,bones:8,posts:6,keep:(x,y)=>(x>=17&&x<=63&&y>=9&&y<=32)||(y>=32&&y<=38)||(x>=33&&x<=39&&y>=38&&y<=56)||(x>=14&&x<=24&&y>=38&&y<=48)||(x>=48&&x<=60&&y>=40&&y<=52)});
+  // the creatures: the dead of the churchyard come up when the party draws near
+  C.foes([['blghoul',24,18],['blghoul',28,26],['blghoul',48,24],['blhusk',22,24],['blhusk',56,24],['blhusk',30,13],['blbones',26,22],['blbones',46,20],['blbones',54,14],['blbones',58,22],['blshade',44,28],['blshade',24,14],['blhound',38,12],['blhound',60,42],
+    ['blghoul',54,44],['blhusk',50,48],['blbones',22,50],['blbones',44,56],['bldeadwarden',30,34],['bldeadwarden',58,35],['blcrow',20,30],['blcrow',60,22],['blcrow',40,44],['blshade',34,58],['blbloat',50,56],['blhusk',66,50],['blghoul',12,48],['blcrowflock',60,14]]);
+  for(const [k,x,y] of [['potion6',22,32],['potion6',60,32],['potion6',40,58]])C.items.push({k,x,y,taken:false});
+  C.mapNames.push({t:'The Church of the Hollow Saint',x:37,y:17,k:'place'},{t:'The Lych-Gate',x:37,y:31,k:'place'},{t:'The Upside-Down Bells',x:37,y:26,k:'place'},{t:'The West Graves',x:25,y:21,k:'place'},{t:'The Alder Vault',x:52,y:15,k:'place'},{t:"The Sexton's Hut",x:59,y:27,k:'place'},{t:"Peggy's Lean-To",x:17,y:43,k:'place'},{t:'The Plague Pit',x:54,y:46,k:'place'},{t:'The Poor Chapel',x:36,y:52,k:'place'},{t:'To Ashenfold Farm',x:73,y:33,k:'place'},{t:'To Gallowmere',x:6,y:33,k:'place'});
+  const lv=C.finish({start:{x:73,y:35,f:3}});
+  lv.tele=undefined;
+  return lv}
+/* ---------- the rooms ---------- */
+const blcFloor=()=>FLOORS.wl2f5?'wl2f5':FLOORS.cobble?'cobble':'wood';
+const blcWall=()=>IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0';
+function blcNave(){
+  const F=blF();
+  blRoom({id:BLC.NAVE,name:'The Nave of the Hollow Saint',w:21,h:15,amb:.5,rating:86,floor:blcFloor(),wall:blcWall(),
+    back:{to:BLC.ID,x:37,y:21,f:2},
+    lights:[[3,2],[10,2],[17,2],[3,8],[17,8],[10,7],[5,12],[15,12]],lcol:{'3,2':[.7,1.1,.95],'10,2':[1.4,1.0,.6],'17,2':[.7,1.1,.95],'3,8':[.75,1.1,.95],'17,8':[.75,1.1,.95],'10,7':[.8,1.1,.95],'5,12':[1.3,.95,.6],'15,12':[1.3,.95,.6]},col:[.9,1.05,.9],
+    enemies:[],
+    build:C=>{
+      const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
+      P('altar',10,1,{h:1.4});P('votive',8,1,{h:1.0});P('votive',12,1,{h:1.0});P('glasswin',5,0,{h:1.3,free:true,block:false});P('glasswin',15,0,{h:1.3,free:true,block:false});
+      P('font',17,5,{h:.9});P('chandelier',10,7,{h:1.0,free:true,block:false});
+      C.raw('mi_saint',3,2,{npc:'blc_saint',solid:1,deco:false,sc:1.0});
+      // the pulpit end: Father Alder at his lectern
+      P('lectern',10,3,{h:1.0});C.npc('blc_alder',10,4);
+      // pews in two blocks with an aisle between
+      for(const y of [8,10,12])for(const x of [3,4,5,6,7,13,14,15,16,17])if(!(y===12&&(x===3||x===17)))C.raw('mi_pew',x,y,{block:true,sc:1});
+      // the stalls of the choir: two rows of singers, the precentor in front
+      if(!F.choirRest){
+        const GK=['gy_ghost0','gy_ghost1','gy_ghost2','gy_banshee'];let n=0;
+        for(const [x,y] of [[2,5],[3,5],[4,5],[5,5],[6,5],[2,6],[4,6],[6,6],[14,5],[15,5],[16,5],[17,5],[18,5],[14,6],[16,6],[18,6]])C.raw(GK[(n++)%4],x,y,{npc:'blc_choir',solid:1,deco:false,sc:.95,bob:.08+(n%3)*.04})}
+      C.raw('mi_pew',7,5,{npc:'blc_stall',solid:1,deco:false,sc:1});
+      C.npc('blc_ambrose',8,6);
+      // the three doors: crypt stair (south west), belfry trapdoor (east corner), vestry (east wall)
+      C.raw('gy_stair',1,13,{npc:'blc_cryptdoor',solid:1,deco:false,sc:.95});
+      C.raw('gy_hatch2',19,13,{npc:'blc_belfrydoor',solid:1,deco:false,sc:1});
+      C.raw('gy_arch',19,7,{npc:'blc_vestrydoor',solid:1,deco:false,sc:.9});
+      P('candlerack',1,4,{h:1.0});P('candlerack',19,4,{h:1.0});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_web',19,1,{block:false,sc:.5});C.raw('gy_bones',9,11,{block:false,sc:.6});C.raw('gy_bones',12,13,{block:false,sc:.5})}})}
+function blcCrypt(){
+  const F=blF();
+  blRoom({id:BLC.CRYPT,name:'The Crypt of the Hollow Saint',w:21,h:15,amb:.38,rating:86,floor:FLOORS.mosscobble?'mosscobble':'cobble',wall:IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0',
+    back:{to:BLC.NAVE,x:3,y:12,f:0},
+    lights:[[3,3],[10,2],[17,3],[3,9],[17,9],[10,8],[10,12]],lcol:{'3,3':[.7,1.1,.95],'10,2':[.7,1.1,.95],'17,3':[.75,1.1,.95],'3,9':[1.3,.95,.6],'17,9':[.7,1.1,.95],'10,8':[.75,1.1,.95],'10,12':[1.3,.95,.6]},col:[.72,1.05,.92],
+    enemies:[['blbones',5,5],['blbones',15,5],['blghoul',4,9],['blghoul',16,9],['blshade',10,6],['blbones',6,11],['blcantor',10,3]],
+    build:C=>{
+      // the stair up is the door in the south wall (middle); the stair set into the wall is decoration to match
+      for(const [x,y] of [[2,3],[2,5],[18,3],[18,5],[2,9],[18,9]])C.raw('gy_niche',x,y,{npc:'blc_niche',solid:1,deco:false,sc:.9});
+      for(const [x,y] of [[5,3],[15,3],[5,8],[15,8],[8,10],[12,10]])C.raw('gy_coffin',x,y,{block:true,sc:.9});
+      C.raw('gy_sarc',10,2,{npc:'blc_sarc',solid:1,deco:false,sc:1.2});
+      if(!F.pg1)C.raw('gy_book',9,1,{npc:'blc_page1',solid:1,deco:false,sc:.9,bob:.55});
+      for(const [x,y] of [[8,1],[12,1],[1,7],[19,7]])C.raw('gy_candles',x,y,{block:true,sc:.85});
+      C.raw('gy_chest',18,12,{npc:'blc_cryptchest',solid:1,deco:false,sc:.9});
+      C.raw('gy_rune',2,12,{npc:'blc_pauper',solid:1,deco:false,sc:.9});
+      C.raw('gy_web',1,1,{block:false,sc:.6});C.raw('gy_web',19,1,{block:false,sc:.6});C.raw('gy_bones',7,6,{block:false,sc:.7});C.raw('gy_bones',13,7,{block:false,sc:.7});C.raw('gy_bones',10,11,{block:false,sc:.6});
+      C.raw('gy_stair',10,13,{npc:'blc_cryptup',solid:1,deco:false,sc:.95})}})}
+function blcBelfry(){
+  const F=blF();
+  blRoom({id:BLC.BELFRY,name:'The Belfry',w:13,h:10,amb:.42,rating:86,floor:'wood',wall:IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0',
+    back:{to:BLC.NAVE,x:18,y:12,f:0},
+    lights:[[3,2],[10,2],[6,6]],lcol:{'3,2':[.75,1.1,.95],'10,2':[.7,1.1,.95],'6,6':[1.3,.95,.6]},col:[.8,1.05,.9],
+    enemies:[['blcrow',3,5],['blcrow',10,5],['blcrow',6,3],['blshade',10,7]],
+    build:C=>{
+      C.raw('bl_bellbad',3,2,{npc:'blc_bellA',solid:1,deco:false,sc:1.7});C.raw('bl_bellbad',6,2,{npc:'blc_bellB',solid:1,deco:false,sc:1.5});C.raw('bl_ibellS',10,2,{npc:'blc_bellC',solid:1,deco:false,sc:1.3});
+      if(!F.pg2)C.raw('gy_book',10,3,{npc:'blc_page2',solid:1,deco:false,sc:.9,bob:.1});
+      for(const x of [1,11])C.raw('hl_p_window',x,4,{block:true,sc:1.0});
+      C.raw('crate',2,7,{block:true,sc:.9});C.raw('barrel',11,7,{block:true,sc:.9});C.raw('gy_bones',5,5,{block:false,sc:.6});C.raw('gy_bones',8,6,{block:false,sc:.5});C.raw('gy_web',1,1,{block:false,sc:.6});C.raw('gy_web',11,1,{block:false,sc:.6});
+      C.raw('gy_hatch2',5,8,{npc:'blc_belfryup',solid:1,deco:false,sc:1})}})}
+function blcVestry(){
+  const F=blF();
+  blRoom({id:BLC.VESTRY,name:'The Vestry',w:11,h:9,amb:.5,rating:86,floor:'wood',wall:'kh_ohwall1_0',
+    back:{to:BLC.NAVE,x:18,y:7,f:3},
+    lights:[[3,2],[8,2],[5,5]],lcol:{'3,2':[1.4,1.0,.6],'8,2':[1.35,.98,.58],'5,5':[1.3,.95,.6]},col:[1.3,.95,.6],
+    enemies:[['blbones',8,6]],
+    build:C=>{
+      const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
+      P('bookshelf',2,1,{h:1.1});P('bookshelf',4,1,{h:1.1});P('dresser',9,1,{h:1.1});P('cot',1,6,{h:.7});P('waterbarrel',9,6,{h:.7});P('candlerack',6,1,{h:1.0});P('clock',8,1,{h:1.1});
+      P('readdesk',5,3,{h:.85});C.raw('gy_book',5,3,{npc:'blc_book',solid:1,deco:false,bob:.4,sc:1});
+      C.raw('gy_chest',9,4,{npc:'blc_offer',solid:1,deco:false,sc:.9});C.raw('gy_chest',1,2,{npc:'blc_robes',solid:1,deco:false,sc:.9});
+      C.raw('gy_web',9,1,{block:false,sc:.5});C.raw('gy_bones',4,6,{block:false,sc:.5})}})}
+for(const [id,fn] of [[BLC.NAVE,blcNave],[BLC.CRYPT,blcCrypt],[BLC.BELFRY,blcBelfry],[BLC.VESTRY,blcVestry]])
+  KH_LAZY[id]=()=>{if(!LEVELS[id]){if(!LEVELS[BLC.ID])KH_LAZY[BLC.ID]();blcArt();fn()}return LEVELS[id]};
+/* the quest rings */
+if(typeof QRF!=='undefined'){const N=(l,...ids)=>({lvl:l,npc:ids}),T=QRF.T;
+  T.blq7={give:[N(9630,'blc_gideon')],act:()=>blF().trueBell?[N(9630,'blc_gideon')]:[N(9631,'blc_belfrydoor'),N(9633,'blc_bellC')],ready:[N(9630,'blc_gideon')]};
+  T.blq8={give:[N(9631,'blc_ambrose')],act:()=>{const F=blF(),o=[];if(blcPages()>=3)return [N(9631,'blc_ambrose')];if(!F.pg1)o.push(N(9632,'blc_page1'));if(!F.pg2)o.push(N(9633,'blc_page2'));if(!F.pg3)o.push(N(9630,'blc_page3'));return o},ready:[N(9631,'blc_ambrose')]};
+  T.blq9={give:[N(9631,'blc_alder')],act:()=>blcNames()>=6?[N(9631,'blc_alder')]:[N(9630,'blc_name')],ready:[N(9631,'blc_alder')]};
+  T.blq10={give:[N(9631,'blc_saint')],act:()=>blF().bowl?[N(9631,'blc_saint')]:[N(9632,'blc_pauper')],ready:[N(9631,'blc_saint')]}}
+blRegister(3,blcBuild,{fromE:{x:73,y:35,f:3},fromW:{x:4,y:35,f:1},exitY:35,rooms:[9631,9632,9633,9634],names:{9631:'The Nave of the Hollow Saint',9632:'The Crypt of the Hollow Saint',9633:'The Belfry',9634:'The Vestry'},rating:{9631:86,9632:86,9633:86,9634:86}});
+
+/* ---- src/desert/blight_gallowmere.js ---- */
+/* ==========================================================================
+   PLACE 4 OF THE BLIGHTED ROAD: GALLOWMERE (level 9640, rated 86; prefix blg / BLG). 90 by 76. A drowned fen village.
+   The east gate (x 88, y 38) opens on the east bank. A causeway of planks runs west across the black water (y 38 and 39, x 51 to 74) with five lamp posts beside it (the lanterns keep the wisps off:
+   lamp 1 lights from the bank, each next one from the one before; a lit lamp burns away the wisps within five squares). The causeway comes ashore in the village on its mud island (houses on stilts,
+   the Gallows Tree, the green, the well, the jetty with the rowing boat). A second causeway leads west (x 14 to 22) to the west bank, the gate (x 1, y 38) and on to the Bone Orchard (9650), and the
+   reed beds and peat fields beyond it. By boat (the jetty at 51,48): Heron Isle (north east, the lost lantern, a grave marker, wisps) and the Reeve's Isle (north west, the Reeve's house 9642 with the Drowned Reeve).
+   Rooms: 9641 the ferryman's house (Osk Brine), 9642 the Reeve's flooded hall (boss), 9643 Nan Sallow's cottage.
+   People: Osk Brine ferryman (blg_osk), Nan Sallow peat-cutter (blg_nan), Tam Corder reed-cutter (blg_tam), three ghosts of the drowned (blg_ghost).
+   Quests: blq11 The Ferryman's Lantern (Osk), blq12 Peat Salt (Nan), blq13 Graves of the Drowned (Tam), blq14 The Drowned Reeve (Nan: put the Reeve to rest; he drops the Reeve's Rod).
+   Flags: G.flags.bl = {lamps (bitmask of lit lamps), lantern, lanternGiven, salt (bitmask), saltGiven, mk (bitmask of grave markers set upright), reeve (the Reeve is dead), blgChest, blgReeveChest}.
+   ========================================================================== */
+const BLG={ID:9640,OSK:9641,REEVE:9642,NAN:9643,W:90,H:76};
+BL_ROAD[3].W=BLG.W;BL_ROAD[3].H=BLG.H;
+for(const [id,n] of [[9641,"Osk Brine's House"],[9642,"The Reeve's Flooded Hall"],[9643,"Nan Sallow's Cottage"]]){LEVEL_NAMES[id]=n;LEVEL_RATING[id]=86}
+const BLG_LAMPS=[[72,37],[67,37],[62,37],[57,37],[52,37]];
+const BLG_HOUSE_NAN={x0:30,x1:32,y0:33,y1:34,face:'S',sty:'timber',roof:'thatch2',wh:2.2,to:BLG.NAN};
+const BLG_HOUSE_OSK={x0:41,x1:43,y0:43,y1:44,face:'N',sty:'timber',roof:'thatch2',wh:2.3,to:BLG.OSK};
+const BLG_HOUSE_REEVE={x0:24,x1:31,y0:8,y1:11,face:'S',sty:'flint',roof:'slate',wh:2.7,to:BLG.REEVE};
+const BLG_DOCK={x:50,y:48,boat:[51,48]},BLG_HERON={boat:[62,19],at:{x:62,y:18}},BLG_REEVEISLE={boat:[28,19],at:{x:28,y:18}};
+/* ---------- things carried ---------- */
+ITEMDEF.blferrylamp={n:"Osk's Ferry Lantern",k:'quest',t:'Quest item',ic:'ore',c:'#e0c080',stack:1,price:0,sw:.4,d:'A tarnished ship\'s lantern with a horn window and a hook for the bow of a boat. The oil has long since gone, but the wick is still dry and the glass has not a crack in it. Osk Brine would like it back.'};
+ITEMDEF.blferryring={n:"Osk's Tide Ring",k:'ring',t:'Ring',ic:'ring',c:'#88a8a8',price:0,lvl:86,pas:{ward:17,dodge:.06,regen:.7,mpRegen:.5},int:5,hp:85,rar:1,sw:.1,d:'A ring of green-grey bronze, a knot of rope in the band, worn smooth by forty years on an oar. Adds 5 Intelligence and 85 health, every blow on the wearer is 17 lighter, enemies miss 6% more, and wounds and weariness close steadily. Needs level 86.'};
+ITEMDEF.blpeathood={n:"Peat-Cutter's Hood",k:'head',t:'Helm',ic:'head',c:'#6a5a44',armor:17,price:0,lvl:86,pas:{dmgPct:.06,dodge:.03,regen:.5},rar:1,gear:1,sw:.3,d:'A hood of oiled brown wool and peat-stained leather, made so that you could cut turf in the rain for a whole day without a thought. It smells faintly of smoke and salt. Armour 17, damage +6%, enemies miss 3% more, and wounds close steadily. Needs level 86.'};
+ITEMDEF.blreevestaff={n:"The Reeve's Rod",k:'weapon',t:'Sword',ic:'sword',c:'#8a9488',dmg:[470,580],hit:.2,req:{str:70},lvl:86,price:0,rar:1,eff:{bleed:[.3,6,40],bossdmg:.35},dbl:.22,sw:.5,d:'The long black rod of the Reeve of Gallowmere, topped with a bronze weight like a plumb-bob. Cold water drips from it and does not stop. Wounds bleed, and bosses take 35% more. Needs level 86.'};
+/* ---------- the pictures and the water ---------- */
+function blgArt(){
+  if(BLG._art)return;
+  if(typeof gyFloorTone==='function'&&FLOORS.water&&!FLOORS.blf_water)try{gyFloorTone('blf_water','water',.95,[.6,.95,.9])}catch(e){console.error(e)}
+  if(!FLOORS.blf_water)FLOORS.blf_water=FLOORS.water||FLOORS.cobble;
+  if(!FLOORS.blf_flood){if(typeof gyFloorTone==='function'&&FLOORS.water)try{gyFloorTone('blf_flood','water',.5,[.7,.9,.8])}catch(e){}if(!FLOORS.blf_flood)FLOORS.blf_flood=FLOORS.blf_water}
+  for(const [k,h] of [['yar_boat_row',.55],['greeds',.9],['reeds',.85],['hgwm_reed0',1.5],['ww_crowtree',1.9],['ww_totem',1.2],['ww_sign',1.2],['ww_willow',2.6],['wm_boat',.8],['gy_ghost0',1.1],['gy_ghost1',1.1],['gy_ghost2',1.1],['lamp',1.5],['kh_oqstuff_9',.5]])if(NPC_H[k]===undefined)NPC_H[k]=h;
+  BLG._art=1}
+/* ---------- the sound: water, drips, the sigh of the wisps ---------- */
+const BLGS={nextDrip:0,nextGlug:0,nextSigh:0,nextCrow:0};
+function blgTick(){
+  if(!AC||!NB||!MASTER||G.state!=='play'||G.mute||!SNDOPT.amb)return;
+  const now=AC.currentTime;
+  if(LEVEL===BLG.ID){
+    if(now>BLGS.nextDrip){BLGS.nextDrip=now+4+Math.random()*6;try{wwsDrip(.5+Math.random()*.3)}catch(e){}}
+    if(now>BLGS.nextGlug){BLGS.nextGlug=now+9+Math.random()*14;const f=110+Math.random()*60;tone(f,f*.55,.28,'sine',.05,0);tone(f*1.6,f*.9,.18,'sine',.03,.12)}
+    if(now>BLGS.nextSigh){BLGS.nextSigh=now+20+Math.random()*25;nz(1.6,.03,'bandpass',700,420,0);nz(1.4,.02,'bandpass',1100,600,.5)}}
+  else if(LEVEL===BLG.REEVE){
+    if(now>BLGS.nextDrip){BLGS.nextDrip=now+3+Math.random()*4;try{wwsDrip(.8)}catch(e){}}
+    if(now>BLGS.nextGlug){BLGS.nextGlug=now+8+Math.random()*10;tone(90,50,.4,'sine',.05,0)}}}
+{const _ys=yarSoundTick;yarSoundTick=function(){_ys.apply(this,arguments);try{if(blIs(LEVEL))blgTick()}catch(e){console.error('blg tick',e)}}}
+/* ---------- the creatures: the wisps ---------- */
+Object.assign(ENEMY_DEF,{
+  blwisp:{name:'Fen Wisp',hp:92,dmg:[9,15],hit:.88,w:blWw('guardB_3',.85),img:'wwi_wisp',xp:34,gold:[0,0],speed:2,fly:true,floatH:.35,verb:'scorches',bl:1,still:1,glow:.4,wake:'A pale green light lifts off the water and drifts towards you, sighing.'},
+  blreeve:{name:'The Drowned Reeve',hp:430,dmg:[10,17],hit:.9,w:blW('crA_5',1.45),img:'gyi_giant',xp:760,gold:[0,0],speed:1,verb:'crushes',boss:true,aboveParty:0,bl:1,still:1,glow:.1,wake:'The Reeve of Gallowmere rises out of the black water in his hall, streaming, with a bronze rod in his hand and weed in his chain of office.'}});
+if(typeof NO_VARY!=='undefined')NO_VARY.push('blreeve');
+if(typeof BOSS_GOLD!=='undefined')BOSS_GOLD.blreeve=[3400,4200];
+if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^blwisp/,'cursed',.15],[/^blreeve/,'foodpoison',.25]);
+/* ---------- the people ---------- */
+const BLG_OSK_LINES=[
+  'Osk Brine. Ferryman. Forty years on the Gallowmere water, and never lost a passenger, until the water came up and took the village. Then I lost all of them, and I have been rather quiet about it since.',
+  'It was the Wardens, they say. The village would not pay the toll, a whole village, to a man. Reeve Marrick stood up in the hall and said, we have paid enough, and the Sovereign\'s clerk smiled, and the dykes opened that night. I was across the mere with a load of eels. I heard it go.',
+  'Keep to the lights on the causeway. Five lamps, and every one lit from the last. The wisps cannot stand a flame carried by a living hand. They are not wicked. They are the village, a little thin, looking for the way home.'];
+khNpc('blg_osk','Osk Brine, the ferryman','kh_oqmen_0',()=>yrLines('blg_osk',BLG_OSK_LINES));
+const BLG_NAN_LINES=[
+  'Nan Sallow. I cut peat, and I salt it, and I salt other things. In a fen, a thing that is salted keeps. I have kept my husband for nine years. He is under the bed. He is a little dry, but he is no trouble.',
+  'The old Reeve is in his hall on the island, in the black water, and he will not come out, and he will not stop paying. That is the worst of it. He keeps saying, I will pay it, I will pay it now. And there is nobody left to take it.',
+  'Do not drink the water, and do not follow the little lights, and do not, whatever you do, offer to pay anyone for anything. It is the one word the fen has never forgiven.'];
+khNpc('blg_nan','Nan Sallow, peat-cutter','kh_ohfolk7_2',()=>yrLines('blg_nan',BLG_NAN_LINES));
+const BLG_TAM_LINES=[
+  'Tam Corder. Reed-cutter. I cut for thatch, and for the dead, and sometimes for those I cannot tell apart. I have a good eye for a reed and a poor one for a living face. If you are alive, nod. Good. That was a fine nod.',
+  'There are three families still lying in the mud with no mark on them: Corder, Peascod and Hay. I cannot rest until they have markers. They are cut, you see, they are only fallen over, and I am not strong enough to put them right.',
+  'I have not left the green in four years. The geese are gone. The bells are gone. I keep waiting for something to ring and it has not, and I think that is all there is of Gallowmere now. A man standing on a green, waiting.'];
+khNpc('blg_tam','Tam Corder, reed-cutter','kh_ohfolk4_4',()=>yrLines('blg_tam',BLG_TAM_LINES));
+const BLG_GHOST_LINES=[
+  ['(A pale woman stands in the reeds with her hands wrung together.) "We did not pay. Everybody says it as if it were a crime. We simply did not pay. We were having supper."','(She does not seem to see you.) "Is it morning? Somebody has left the door open. The whole house is so wet."'],
+  ['(A tall drowned man in a dripping Sunday coat holds his hat in both hands.) "Corder was the name. They never put it up. I would so like it put up, if it is no trouble."','(He weeps without a sound.) "It is not the water. It is that I cannot remember if I locked the door."'],
+  ['(A child stands quite still in the shallows, up to her knees.) "Daddy said we were not to pay. Daddy said we were free. Is that what free is?"','(She looks at her feet.) "I like it here. The fish are my friends. It is only that they are very cold."']];
+for(let i=0;i<3;i++)khNpc('blg_ghost'+i,'A drowned ghost',['gy_ghost0','gy_ghost1','gy_ghost2'][i],()=>yrLines('blg_ghost'+i,BLG_GHOST_LINES[i]));
+/* ---------- the quests ---------- */
+function blgQ(id,title,who,steps,reward,extra){const q=yrQ(id,title,who,steps,reward,extra);QAREA[id]=BL.REGION;return q}
+const blgBits=m=>{let n=0;for(let i=0;i<5;i++)if((m|0)&(1<<i))n++;return n};
+const blgSalt=()=>blgBits(blF().salt),blgMk=()=>blgBits(blF().mk),blgLamps=()=>blgBits(blF().lamps);
+blgQ('blq11',"The Ferryman's Lantern",'Osk Brine, the ferryman',[
+  ["Find Osk's ferry lantern. It was lost on Heron Isle, in the north east of the fen. Take the rowing boat from the jetty in the village.",()=>!!(blF().lantern||blF().lanternGiven),['blg_lantern','blg_boat0']],
+  ['Give the lantern to Osk Brine in his house by the jetty.',()=>!!blF().lanternGiven,['blg_osk']]],
+  {gold:3600,xp:30000,items:['blferryring','potion6']});
+blgQ('blq12','Peat Salt','Nan Sallow, peat-cutter',[
+  ['Bring Nan three sacks of peat salt from the fen: one from the salt pans in the south, one from the south west bank, one from the south east bank.',()=>blgSalt()>=3,['blg_salt']],
+  ['Give the three sacks of salt to Nan Sallow in her cottage.',()=>!!blF().saltGiven,['blg_nan']]],
+  {gold:3400,xp:29000,items:['blpeathood','potion6']});
+blgQ('blq13','Graves of the Drowned','Tam Corder, reed-cutter',[
+  ['Set upright the three grave markers of the drowned families: Corder (in the reed beds, north west), Peascod (on Heron Isle, north east) and Hay (under the Gallows Tree).',()=>blgMk()>=3,['blg_marker']]],
+  {gold:4200,xp:33000,items:['potion6','potion6','potion6']});
+blgQ('blq14','The Drowned Reeve','Nan Sallow, peat-cutter',[
+  ["Put the Drowned Reeve of Gallowmere to rest in his flooded hall on the Reeve's Isle (north west; row there from the jetty).",()=>!!blF().reeve,['blg_boat0']]],
+  {gold:5200,xp:38000,items:['potion6','potion6']});
+wwGive('blg_osk','blq11',()=>true,{
+  offer:'Will you do an old man a favour? I lost my lantern on Heron Isle, the night they took the village. I rowed out after the wisps, and I thought I could shame them home, and I put it down to wave. I have not been able to go back. It is the only light that ever got me over the mere in the dark. The boat is tied at the jetty. Row out to the north east.',
+  accept:'Thank you. You will know it by the horn window. Do not let the lights near the boat. Hold your own light up, and say you are a friend of Osk Brine, and they may not sting.',
+  remind:()=>blF().lantern?'You have the lantern. Bring it to me, here in my house.':'Heron Isle is north east. Take the boat from the jetty, and keep your light in front of you.',
+  ready:'There it is. The very glass, and not a crack in it. Oh. Oh, my old friend.',
+  thanks:'I shall hang it in the window, and light it every night, so that anybody still out there knows where the shore is. Take this. It has pulled me across every night of my life.',
+  after:'The lantern is in the window, and a good many small lights come in the evenings to look at it, and go away again, quietly. I am glad.'});
+wwGive('blg_nan','blq12',()=>true,{
+  offer:'I am running very low on peat salt, dear, and I have a great deal of salting to do. A fen is a hungry thing, and the dead keep walking if they are not looked after. Three sacks. One at the salt pans in the south, one on the south west bank, and one on the south east bank. They were left when the water came up.',
+  accept:'Bless you. They are heavy, so take your time. Mind the wisps in the south east, and do not stand on the pans in the rain.',
+  remind:()=>'You have '+blgSalt()+' of the three sacks of peat salt. The pans in the south, the south west bank, and the south east bank.',
+  ready:'Three good sacks. I can feel the grain of it through the cloth. That will keep the whole of the village, and a bit over.',
+  thanks:'I shall start tonight. Take this hood. I cut turf in it for thirty years, and it never let a drop through. I should like a living person to have it.',
+  after:'I salt as I go now. One by one they lie down, and stay down, and say thank you in their way. It is rather lovely.'});
+wwGive('blg_tam','blq13',()=>true,{
+  offer:'May I ask a thing? There are three families of Gallowmere who were drowned in the dyke-break, and their grave markers lie flat in the mud. Corder, in the reed beds in the north west. Peascod, on Heron Isle. Hay, under the Gallows Tree here on the green. If someone were to stand them up again, I could stop worrying.',
+  accept:'Thank you. They are only slabs, they are heavy but not stuck. Just lift them and set them in the earth, and say the name.',
+  remind:()=>'You have set up '+blgMk()+' of the three markers. Corder in the north west, Peascod on Heron Isle, Hay under the Gallows Tree.',
+  ready:'All three. I felt every one go in, like a nail into a plank. They are at rest, or as near as a fen allows.',
+  thanks:'It is a small thing. It is all there is left to do for them. Take this, and my thanks.',
+  after:'I go and look at the three of them every evening. Corder, Peascod, Hay. It is a very good arrangement.'});
+wwGive('blg_nan','blq14',()=>qSt('blq12')==='done',{
+  offer:'There is one more thing, and I will not pretend it is a small one. The Reeve is in his hall on the island. He drowned standing up, and he has never sat down. He still says, I will pay, I will pay it now, and the water in his hall rises every night. Put him to rest. His rod is a good thing, and nobody else is going to use it. The boat will take you to the island, and you go in at the door of the stilt house.',
+  accept:'You are a brave fool, and I like it. He is big, and wet, and not at all angry. That is what makes him dangerous. He means well.',
+  remind:()=>blF().reeve?'The Reeve is at rest. Come and tell me.':'The Reeve is in his flooded hall on the north west island. Row from the jetty, then go in at the door of the stilt house.',
+  ready:'I felt the water go down. All the way down the fen. Like a long breath let out.',
+  thanks:'Thank you. He was a good man. He just would not pay. Here: for your trouble, and for the rest of us.',
+  after:'The fen is quieter. The wisps are fewer. The peat is only peat again. It is a very good evening, for Gallowmere.'});
+/* ---------- the objects ---------- */
+khNpc('blg_boat0','The ferry boat','yar_boat_row',()=>say('A flat rowing boat tied to the end of the jetty, with a pair of oars in it, a bailer, and an inch of black water. The rope has been repaired many times by the same patient hand.',[['Row to Heron Isle, north east.',()=>blgRow(BLG_HERON.at,'You row out across the black water. The little lights part round the boat and close again behind it.')],["Row to the Reeve's Isle, north west.",()=>blgRow(BLG_REEVEISLE.at,'You row out across the black water, past a line of old stakes that were a fence once. The Reeve\'s house stands on stilts on its island, and one window is lit.')],['Not yet.',()=>null]]),{sc:1});
+khNpc('blg_boat1','The ferry boat','yar_boat_row',()=>say('The ferry boat, tied up on Heron Isle.',[['Row back to the village.',()=>blgRow({x:50,y:48},'You row back over the water, and the village lights rise up out of the reeds.')],['Not yet.',()=>null]]));
+khNpc('blg_boat2','The ferry boat','yar_boat_row',()=>say("The ferry boat, tied up at the Reeve's Isle.",[['Row back to the village.',()=>blgRow({x:50,y:48},'You row back over the water, and the village lights rise up out of the reeds.')],['Not yet.',()=>null]]));
+function blgRow(at,txt){
+  G.talk=null;sfx('door');G.P.x=at.x;G.P.y=at.y;G.P.f=at.y<30?2:(at.y>40?0:2);G.P.angT=(G.P.f-1)*Math.PI/2;G.C={x:G.P.x,y:G.P.y,a:G.P.angT};try{reveal()}catch(e){}
+  try{msg(txt,'#b8d0a8')}catch(e){}return null}
+/* the lamps of the causeway */
+function blgLampLight(i){
+  const [x,y]=BLG_LAMPS[i];
+  try{const L=LEVELS[BLG.ID];if(L&&L._bl)L._bl.lcol[x+','+y]=[1.5,1.05,.55];for(const l of LIGHTS)if(Math.floor(l.x)===x&&Math.floor(l.y)===y)l.col=[1.5,1.05,.55]}catch(e){}}
+function blgBanish(i){
+  const [x,y]=BLG_LAMPS[i];let n=0;
+  try{for(const e of G.enemies)if(e.t==='blwisp'&&e.hp>0&&Math.hypot(e.x-x,e.y-y)<=5.5){hurtEnemy(e,99999999);n++}}catch(e){console.error(e)}
+  return n}
+khNpc('blg_lamp','A causeway lamp','gy_lantern',d=>{
+  const F=blF(),i=d.i|0,bit=1<<i;
+  if(((F.lamps|0)&bit))return say('The lamp burns steady and warm, a small gold flame behind horn. The pale lights in the reeds keep well back from it.',[BYE]);
+  if(i>0&&!((F.lamps|0)&(1<<(i-1))))return say('A lamp on a post, cold, with a dry wick. A card hangs from it, in a careful hand: LIGHT FROM THE LAST. The last lamp is further along the causeway to the east, and the flame must come from it.',[BYE]);
+  return say(i===0?'A lamp on a post at the foot of the causeway. The wick is dry, and a tinder-box hangs beside it on a string. A card says: LIGHT ME FIRST. ALL THE OTHERS LIGHT FROM ME.':'A lamp on a post. The wick is dry. A card hangs from it: LIGHT FROM THE LAST. The lamp behind you burns, and a spill hangs ready.',[['Light the lamp.',()=>{F.lamps=(F.lamps|0)|bit;blgLampLight(i);const n=blgBanish(i);sfx('win');msg('The lamp takes a flame. '+(n?n+(n>1?' wisps burn':' wisp burns')+' away in the light.':'The pale lights in the reeds draw back.'),'#ffe9a0');return null}],BYE])});
+khNpc('blg_lantern',"Osk's lantern",'lamp',d=>{
+  const F=blF();if(F.lantern||F.lanternGiven)return say('A bare patch of grass where the lantern lay, with a ring of pressed reeds round it.',[BYE]);
+  return say('A ship\'s lantern lies on its side in the sedge at the water\'s edge, with its horn window turned up to the sky, quite unbroken. Nobody has touched it in forty years. Round it the grass is very flat, as if something had sat beside it, waiting.',[['Take the lantern.',()=>{F.lantern=1;if(!bagAdd(mkItem('blferrylamp')))G.items.push({k:'blferrylamp',x:G.P.x,y:G.P.y,taken:false});d.found=true;d.hidden=true;sfx('key');msg("You take Osk's ferry lantern.",'#ffe36a');return null}],BYE])});
+yrHook('blg_osk',d=>{const F=blF();
+  if(qSt('blq11')==='active'&&F.lantern&&!F.lanternGiven&&bagCount('blferrylamp')>0)return say('Osk Brine looks at the lantern in your hand, and for a moment he cannot speak. The window is clean. The wick is dry. It is all there.',[['Give him the lantern.',()=>{bagRemove('blferrylamp',1);F.lanternGiven=1;sfx('win');msg('You give Osk Brine his lantern.','#ffe36a');return say('He takes it in both hands, and turns it to the light, and for a moment you think he will weep. Then he rubs the glass with his sleeve, and nods once, and says nothing at all.',[BYE])}],['Not yet.',()=>null]]);
+  return null});
+const BLG_MARKS=[['CORDER','Reed-cutters, six'],['PEASCOD','Fishers, five'],['HAY','Thatchers, four']];
+khNpc('blg_marker','A fallen grave marker',blSlab('bl_mk0',['CORDER','FAMILY'],{h:.7,top:.2,span:.55}),d=>{
+  const F=blF(),i=d.i|0,bit=1<<i,t=BLG_MARKS[i]||BLG_MARKS[0];
+  if((F.mk|0)&bit)return say('A grave marker, set upright in the mud: '+t[0]+'. '+t[1]+'. Someone has pressed a handful of reeds against its foot.',[BYE]);
+  return say('A flat slab of grey stone lying in the mud, with a name cut in it: '+t[0]+'. Below it, the cut is a tally of the drowned: '+t[1]+'. It has been lying here a long time.',[['Set the marker upright.',()=>{F.mk=(F.mk|0)|bit;d.k=blgMarkKey(i,true);try{if(LEVEL===BLG.ID)for(const q of G.decor)if(q.npc==='blg_ghost'+i)q.found=true}catch(e){}sfx('win');if(qSt('blq13')==='active')yrStep('You set a grave marker upright ('+blgMk()+' of 3).');return say('You set your shoulder under the slab and heave it upright, and it settles into the mud with a long sigh. The water in the reeds goes very still.',[BYE])}],BYE])});
+function blgMarkKey(i,up){return blSlab('bl_mk'+i+(up?'u':''),[BLG_MARKS[i][0],up?'AT REST':'FAMILY'],{h:up?1.0:.7,top:.2,span:.55})}
+khNpc('blg_salt','A sack of peat salt','kh_oqstuff_9',d=>{
+  const F=blF(),i=d.i|0,bit=1<<i;
+  if((F.salt|0)&bit)return say('Bare flagstones, and a few grains of grey salt where the sack lay.',[BYE]);
+  return say('A sack of grey peat salt, left where it was dropped. The cloth is stiff with damp, and the salt inside is as hard as sugar. A tag is tied to the neck: SALLOW. DO NOT LET THE WET GET IN.',[['Take the sack.',()=>{F.salt=(F.salt|0)|bit;d.found=true;d.hidden=true;sfx('key');msg('You take a sack of peat salt ('+blgSalt()+' of 3).','#ffe36a');return null}],BYE])});
+yrHook('blg_nan',d=>{const F=blF();
+  if(qSt('blq12')==='active'&&blgSalt()>=3&&!F.saltGiven)return say('Nan Sallow looks at the three grey sacks, and her face goes soft. "Oh, you dear things," she says. "Give them here."',[['Give her the three sacks of salt.',()=>{F.saltGiven=1;sfx('win');msg('You give Nan Sallow the peat salt.','#ffe36a');return say('She hefts each sack in turn, and sniffs it, and puts it carefully on the shelf. "Bless you," she says. "That will keep the lot of us."',[BYE])}],['Not yet.',()=>null]]);
+  return null});
+khNpc('blg_gibbet','The Gallows Tree','ww_crowtree',()=>say('A great black tree on the village green, with an iron cage hanging from a limb, and three ropes. A board nailed to the trunk says: TO WHOM IT MAY CONCERN. WHOEVER REFUSES THE TOLL. Under it, fresh paint: WE DID NOT. Nobody hangs here now. It is only that the tree has not forgotten.',[BYE]));
+khNpc('blg_hanged','A hanged scarecrow','ww_totem',()=>say('A scarecrow hung from a beam by its neck, in a drowned man\'s Sunday coat, with a placard: I DID NOT PAY. The straw of its face is green with damp, and somebody has put a clay pipe in its mouth, kindly.',[BYE]));
+khNpc('blg_bog','A bog body','gy_mound',d=>{const t=['A man lies in the peat, flat on his back, tanned dark as a saddle, with a rope still round his neck. Somebody has laid a few reeds over his face. He has been here a very long time, and he is in surprisingly good order.','A woman lies curled on her side in the black earth, with her knees drawn up and a plait of red hair still on her shoulder. Her hands are over her ears. The peat has kept every line of her face.','A boy lies in the peat, small and brown, in a wool cap. A reed has been placed in his hand. A stake at his foot says, in Nan Sallow\'s hand: SALTED.'];return say(t[(d.i|0)%3],[BYE])});
+khNpc('blg_well','The village well','ww_well',()=>say('A stone well with a little roof, in the middle of the green. The water in it is perfectly black and perfectly still. Written on the lid: DO NOT PAY. Somebody has crossed out DO NOT and written DID NOT.',[BYE]));
+khNpc('blg_tollhut','The toll hut','bl_hut',()=>say('A toll hut at the foot of the causeway, door nailed open. Inside, a table, and a ledger, and a very long list of names, each with a mark beside it. The marks are all the same: NO. The last name on the list is GALLOWMERE.',[BYE]));
+khNpc('blg_sign_e','A signpost','greensign',()=>say('A signpost at the east gate. The board reads GALLOWMERE, to the west, across the causeway. Under it, nailed on lower: KEEP TO THE LIGHTS. NO WADING. NO PAYING.',[BYE]));
+khNpc('blg_sign_w','A signpost','greensign',()=>say('A signpost by the west gate. The board reads THE BONE ORCHARD, to the west. Below it: WE WOULD NOT RECOMMEND IT. Below that, in a better hand: BUT THE FRUIT IS VERY FINE.',[BYE]));
+khNpc('blg_sign_v','A signpost','greensign',()=>say('A signpost at the head of the village. The board reads GALLOWMERE, A FREE VILLAGE. Under it somebody has added: POPULATION 212. Under that, with a nail: 3.',[BYE]));
+khNpc('blg_reevedoor',"The Reeve's door",'gy_arch',()=>say('The stilt door of the Reeve\'s house, a low arch set in black planks, with a bronze plumb-bob for a knocker. Water runs steadily out underneath it, over the step, and into the mere. A voice on the other side says, very distinctly and a little hopefully: "Is that the clerk? I have it here. I have it all here."',[['Open the door and go in.',()=>{sfx('door');G.talk=null;goToLevel(BLG.REEVE,{x:7,y:10,f:0});return null}],BYE]));
+khNpc('blg_reevechest',"The Reeve's strongbox",'gy_chest',()=>{
+  const F=blF();if(F.blgReeveChest)return say('The strongbox is open, and the toll money inside has gone to rust and weed.',[BYE]);
+  return say('A bronze-bound strongbox on the dais, under the Reeve\'s chair, full of coins that have been counted and recounted. There is a ribbon on it, and a label: FOR THE TOLL.',[['Take the money.',()=>{F.blgReeveChest=1;G.gold+=2200;sfx('win');msg('You take 2200 gold.','#ffe36a');return null}],BYE])});
+khNpc('blg_reevechair',"The Reeve's chair",'mi_pew',()=>say('A heavy chair of black oak, with a seat worn hollow. The arms are carved with reeds. A little pool of black water has gathered on the seat.',[BYE]));
+khNpc('blg_chest','A fen chest','gy_chest',()=>{
+  const F=blF();if(F.blgChest)return say('The chest is empty, apart from silt.',[BYE]);
+  return say('A sea-chest on the jetty, green with weed, left behind by the water. The lock has long since rusted through.',[['Open it.',()=>{F.blgChest=1;G.gold+=1500;sfx('win');msg('You take 1500 gold.','#ffe36a');return null}],BYE])});
+khNpc('blg_hoblid','Nan\'s husband','gy_coffin',()=>say('A neat pine box under the bed, with a lid held down by two nails, and a card in Nan Sallow\'s hand: HOB. SALTED. DO NOT OPEN. A thin knocking comes from the inside, once, and stops, as though he knew you were looking.',[BYE]));
+khNpc('blg_nets','Nets','hay',()=>say('A heap of fishing nets, with the floats still on them and a good deal of weed. Not one is whole. They have all been cut, neatly, with something sharp.',[BYE]));
+khNpc('blg_chart','A chart of the mere','greensign',()=>say('A chart of the Gallowmere water, drawn on oiled cloth. The village is a small black square. The dykes are marked in red, and every one of them is crossed through. A note at the margin: THEY WERE OPENED FROM THE INSIDE.',[BYE]));
+/* the Reeve's rod falls when the Reeve falls */
+{const _h=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;const r=_h.apply(this,arguments);
+  try{if(was&&e.hp<=0&&e.t==='blreeve'){const F=blF();if(!F.reeve){F.reeve=1;if(!bagAdd(mkItem('blreevestaff')))G.items.push({k:'blreevestaff',x:Math.round(e.x),y:Math.round(e.y),taken:false});msg("The Drowned Reeve sinks, and the water goes down round him. His rod floats up. You take the Reeve's Rod.",'#ffe36a');sfx('win')}}}catch(x){console.error(x)}
+  return r}}
+/* ---------- the level ---------- */
+function blgBuild(p){
+  blgArt();
+  const C=blKit({id:BLG.ID,W:BLG.W,H:BLG.H,name:p.name,lvl:86,start:{x:84,y:38,f:3},wind:.32});
+  const {hs,decor,fm,hgt,block}=C,W=BLG.W,H=BLG.H,F=blF(),X0=C.X0,X1=C.X1,Y0=C.Y0,Y1=C.Y1;
+  C.hills(.08);C.boundary();
+  const land=new Uint8Array(W*H),ix=(x,y)=>y*W+x;
+  const ell=(cx,cy,rx,ry,j)=>{for(let y=Math.floor(cy-ry-2);y<=cy+ry+2;y++)for(let x=Math.floor(cx-rx-2);x<=cx+rx+2;x++){if(x<X0||y<Y0||x>X1||y>Y1)continue;const d=((x-cx)/rx)**2+((y-cy)/ry)**2;if(d<=1+(hs(x,y,9)-.5)*(j||.3))land[ix(x,y)]=1}};
+  const box=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(x>=X0&&x<=X1&&y>=Y0&&y<=Y1)land[ix(x,y)]=1};
+  ell(36,40,15,15);                       // the village island
+  box(74,28,87,62);ell(80,45,8,18,.2);    // the east bank
+  box(50,38,74,39);                       // the causeway
+  box(14,38,22,39);box(2,28,14,62);ell(8,18,8,12,.25);   // the west causeway, the west bank, the north west reed beds
+  ell(66,13,7,5);                         // Heron Isle
+  ell(28,12,8,6);                         // the Reeve's Isle
+  ell(38,62,10,7);box(35,52,38,58);       // the south salt pans and their neck
+  box(49,48,50,48);box(62,17,62,18);box(28,17,28,18);   // the three piers
+  // the house stilts: a ring of water round each of the two stilt houses on the island, open at the front
+  box(BLG_HOUSE_OSK.x0-1,BLG_HOUSE_OSK.y0-1,BLG_HOUSE_OSK.x1+1,BLG_HOUSE_OSK.y1+1);box(BLG_HOUSE_NAN.x0-1,BLG_HOUSE_NAN.y0-1,BLG_HOUSE_NAN.x1+1,BLG_HOUSE_NAN.y1+1);
+  box(BLG_HOUSE_REEVE.x0-1,BLG_HOUSE_REEVE.y0-1,BLG_HOUSE_REEVE.x1+1,BLG_HOUSE_REEVE.y1+2);
+  // ground and water
+  for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=ix(x,y);if(land[i]){fm[i]='5';hgt[i]=.3}else{fm[i]='6';hgt[i]=-.3;block[i]=1}}
+  C.setF(74,28,87,62,'0');C.setF(2,28,14,62,'0');
+  C.pth(50,38,74,39,'2');C.pth(14,38,22,39,'2');C.pth(22,38,50,39,'1');C.pth(75,37,87,39,'1');C.pth(2,37,13,39,'1');
+  C.pth(33,35,40,41,'3');C.pth(47,40,48,47,'1');C.pth(49,48,50,48,'2');C.pth(62,17,62,18,'2');C.pth(28,17,28,18,'2');C.pth(35,52,38,58,'1');C.pth(36,40,36,33,'1');C.pth(42,40,42,41,'1');C.pth(31,35,31,37,'1');
+  C.pth(28,13,28,16,'1');C.pth(62,12,62,16,'1');for(let y=58;y<=66;y++)for(let x=30;x<=46;x++)if(land[ix(x,y)]){fm[ix(x,y)]='4';C.path.add(x+','+y)}
+  const wat=(x,y)=>!land[ix(x,y)],ok=(x,y)=>x>=X0&&y>=Y0&&x<=X1&&y<=Y1&&land[ix(x,y)]&&!C.used.has(x+','+y);
+  C.gate('E',38);C.gate('W',38);
+  // the houses: two stilt houses with enterable doors, a few shut ones
+  C.house(BLG_HOUSE_NAN);C.house(BLG_HOUSE_OSK);C.house(BLG_HOUSE_REEVE);
+  for(const h of [{x0:40,x1:41,y0:33,y1:34,face:'S',sty:'timber',roof:'thatch2',wh:2.1},{x0:26,x1:27,y0:42,y1:43,face:'N',sty:'timber',roof:'thatch2',wh:2.1},{x0:46,x1:47,y0:32,y1:33,face:'S',sty:'timber',roof:'thatch2',wh:2.1},{x0:30,x1:31,y0:44,y1:45,face:'N',sty:'timber',roof:'thatch2',wh:2.1}])C.house(Object.assign({lit:false},h));
+  for(const h of [BLG_HOUSE_NAN,BLG_HOUSE_OSK,BLG_HOUSE_REEVE]){for(const [x,y] of [[h.x0-1,h.y0-1],[h.x1+1,h.y0-1],[h.x0-1,h.y1+1],[h.x1+1,h.y1+1]])C.dec('gy_rpost',x,y,{block:true,sc:.9})}
+  C.dec('gy_lantern',25,12,{block:true});C.light(25,12,C.pale);C.dec('gy_lantern',29,12,{block:true});C.light(29,12,C.warm);
+  // the village green: the Gallows Tree, the hanged, the well, signs, lamps
+  C.dec('ww_crowtree',36,31,{block:true,npc:'blg_gibbet',sc:1.1});C.dec('ww_totem',34,32,{block:true,npc:'blg_hanged',sc:.9});C.dec('ww_totem',38,32,{block:true,npc:'blg_hanged',sc:.9});
+  C.dec('ww_well',34,37,{block:true,npc:'blg_well',sc:.9});C.light(36,36,C.pale);C.light(33,40,C.pale);
+  C.post(40,37,'bl_gm_v',[{n:'GALLOWMERE',d:0},{n:'A FREE VILLAGE',d:0}],'blg_sign_v','A signpost at the head of the village. The board reads GALLOWMERE, A FREE VILLAGE. Under it somebody has added: POPULATION 212. Under that, with a nail: 3.',{i:2});
+  C.dec('ww_sign',45,37,{block:true,sc:.8,npc:'blg_sign_v'});
+  for(const x of [26,30,44,48]){C.dec('gy_lantern',x,37,{block:true});C.light(x,37,C.pale)}
+  for(const x of [28,32,46]){C.dec('gy_lantern',x,40,{block:true});C.light(x,40,C.pale)}
+  C.dec('hay',44,41,{block:true,sc:.9,npc:'blg_nets'});C.dec('barrel',45,42,{block:true,sc:.9});C.dec('crate',46,42,{block:true,sc:.9});
+  C.person('blg_tam',37,34,2);
+  // the jetty, the boat and the chest
+  C.dec('yar_boat_row',BLG_DOCK.boat[0],BLG_DOCK.boat[1],{block:true,npc:'blg_boat0',sc:1.5});
+  C.dec('gy_chest',49,47,{block:true,npc:'blg_chest',sc:.9});C.dec('gy_lantern',48,49,{block:true});C.light(48,49,C.warm);C.dec('gy_rpost',51,49,{block:true,sc:.9});C.dec('gy_rpost',51,47,{block:true,sc:.9});
+  // the causeway lamps and the east bank
+  BLG_LAMPS.forEach(([x,y],i)=>{const lit=(F.lamps|0)&(1<<i);C.dec('gy_lantern',x,y,{block:true,npc:'blg_lamp',i});C.light(x,y,lit?C.warm:C.pale)});
+  C.dec('bl_hut',80,34,{block:true,npc:'blg_tollhut',sc:.9});C.light(80,36,C.warm);
+  C.post(83,40,'bl_gm_e',[{n:'GALLOWMERE',d:-1}],'blg_sign_e','A signpost at the east gate. The board reads GALLOWMERE, to the west, across the causeway. Under it, nailed on lower: KEEP TO THE LIGHTS. NO WADING. NO PAYING.',{i:3});
+  C.milestone(84,35);
+  for(let y=30;y<=46;y+=4){C.dec('gy_lantern',77,y,{block:true});C.light(77,y,C.pale)}
+  // the west bank
+  C.post(6,40,'bl_gm_w',[{n:'THE BONE ORCHARD',d:-1}],'blg_sign_w','A signpost by the west gate. The board reads THE BONE ORCHARD, to the west. Below it: WE WOULD NOT RECOMMEND IT. Below that, in a better hand: BUT THE FRUIT IS VERY FINE.',{i:5});
+  for(let x=4;x<=12;x+=4){C.dec('gy_lantern',x,36,{block:true});C.light(x,36,C.pale)}
+  // the lantern, the markers, the salt, the bog bodies
+  if(!F.lantern&&!F.lanternGiven)C.dec('lamp',69,13,{block:true,npc:'blg_lantern',sc:.5});
+  C.dec('yar_boat_row',BLG_HERON.boat[0],BLG_HERON.boat[1],{block:true,npc:'blg_boat1',sc:1.5});C.dec('yar_boat_row',BLG_REEVEISLE.boat[0],BLG_REEVEISLE.boat[1],{block:true,npc:'blg_boat2',sc:1.5});
+  [[8,14],[67,11],[38,33]].forEach(([x,y],i)=>{const set=(F.mk|0)&(1<<i);C.dec(blgMarkKey(i,!!set),x,y,{block:true,npc:'blg_marker',i});if(!set)C.dec(['gy_ghost0','gy_ghost1','gy_ghost2'][i],x+(i===2?-1:1),y+1,{block:true,npc:'blg_ghost'+i,sc:.9})});
+  [[38,64],[8,56],[82,58]].forEach(([x,y],i)=>{if(!((F.salt|0)&(1<<i)))C.dec('kh_oqstuff_9',x,y,{block:true,npc:'blg_salt',i,sc:.9})});
+  [[10,50],[6,52],[12,58],[8,46],[44,58],[41,64],[30,50],[78,52],[84,50],[70,12]].forEach(([x,y],i)=>C.dec('gy_mound',x,y,{block:true,npc:'blg_bog',i,sc:.7}));
+  // reeds along every shore, grey and tall; drowned willows; scrub; pale lights over the water
+  for(let y=Y0+1;y<=Y1-1;y++)for(let x=X0+1;x<=X1-1;x++){
+    const i=ix(x,y),r=hs(x,y,61);
+    if(land[i]){const sh=wat(x-1,y)||wat(x+1,y)||wat(x,y-1)||wat(x,y+1);
+      if(sh&&r<.55&&ok(x,y)&&!C.path.has(x+','+y)){const d=C.D(r<.08?'greeds':r<.3?'hgwm_reed0':'reeds',x,y,{sc:.8+hs(x,y,62)*.5});if(d){d.ox=(hs(x,y,63)-.5)*.5}}
+      else if(!sh&&r>.93&&ok(x,y)&&!C.path.has(x+','+y))C.DB(r>.97?'ww_willow':'gy_dead',x,y,{sc:.85+hs(x,y,64)*.4})
+      else if(!sh&&r<.12&&ok(x,y)&&!C.path.has(x+','+y)){const d=C.D('bl_grass'+((hs(x,y,65)*4)|0),x,y,{sc:.7+hs(x,y,66)*.6});if(d){d.ox=(hs(x,y,67)-.5)*.6;d.oy=(hs(x,y,68)-.5)*.5}}}
+    else if(r<.045){const nb=wat(x-1,y)&&wat(x+1,y)&&wat(x,y-1)&&wat(x,y+1);if(nb&&!(y>=36&&y<=41&&x>=48&&x<=76)){const d=C.dec(r<.02?'hgwm_reed0':'greeds',x,y,{sc:.9+hs(x,y,69)*.5});if(d)d.ox=(hs(x,y,70)-.5)*.4}}}
+  for(let n=0;n<26;n++){const x=X0+2+((hs(n,1,71)*(X1-X0-4))|0),y=Y0+2+((hs(n,2,71)*(Y1-Y0-4))|0);if(wat(x,y)&&!(y>=35&&y<=42&&x>=14&&x<=76))C.light(x,y,[.55,1.15,.8])}
+  // the dead and the wisps (the wisps wait where the lamps have not reached, none within five squares of a lit lamp)
+  const land2=(t,x,y,r)=>{for(let k=0;k<=(r||4);k++)for(let dy=-k;dy<=k;dy++)for(let dx=-k;dx<=k;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==k)continue;const a=x+dx,b=y+dy;if(ok(a,b)&&!C.path.has(a+','+b)){C.foe(t,a,b);return true}}return false};
+  const litNear=(x,y)=>BLG_LAMPS.some(([lx,ly],i)=>((F.lamps|0)&(1<<i))&&Math.hypot(x-lx,y-ly)<=5.5);
+  const wisps=[[68,38],[64,39],[60,38],[56,39],[53,38],[76,29],[76,47],[66,12],[70,15],[64,14],[28,7],[24,13],[34,12],[40,50],[20,30],[10,26],[84,56],[80,60],[30,64]];
+  for(const [x,y] of wisps){if(litNear(x,y))continue;if(y>=38&&y<=39&&x>=50&&x<=74){if(!C.used.has(x+','+y))C.foe('blwisp',x,y)}else land2('blwisp',x,y,3)}
+  for(const [t,x,y] of [['blbloat',12,50],['blbloat',44,60],['blbloat',30,48],['blbloat',82,52],['blhusk',9,44],['blhusk',40,56],['blhusk',76,58],['blhusk',26,38],['blghoul',34,46],['blghoul',10,32],['blghoul',79,53],['blghoul',46,36],
+      ['blcrow',24,30],['blcrow',46,50],['blcrow',78,48],['blshade',20,20],['blshade',36,60],['blshade',6,58],['blbones',30,34],['blcrowflock',60,12]])land2(t,x,y,4);
+  for(const [k,x,y] of [['potion6',9,34],['potion6',38,66],['potion6',84,60]])C.items.push({k,x,y,taken:false});
+  C.mapNames.push({t:'The Causeway',x:62,y:36,k:'place'},{t:'The Village Green',x:36,y:37,k:'place'},{t:'The Gallows Tree',x:36,y:30,k:'place'},{t:"Osk Brine's House",x:42,y:42,k:'place'},{t:"Nan Sallow's Cottage",x:31,y:32,k:'place'},{t:'The Jetty',x:49,y:49,k:'place'},{t:'Heron Isle',x:66,y:12,k:'place'},{t:"The Reeve's Isle",x:28,y:10,k:'place'},{t:'The Salt Pans',x:38,y:63,k:'place'},{t:'The Reed Beds',x:8,y:16,k:'place'},{t:'The Peat Fields',x:9,y:52,k:'place'},{t:'The Toll Hut',x:80,y:33,k:'place'},{t:'To Ashenfold and the Church',x:85,y:36,k:'place'},{t:'To the Bone Orchard',x:6,y:36,k:'place'});
+  const lv=C.finish({start:{x:84,y:38,f:3}});
+  lv.tele=undefined;lv.floorSet=lv.floorSet.slice();lv.floorSet[6]='blf_water';lv._ground={'6':'#6d8c8a','5':'#8a7e5e','4':'#cbc6b2'};
+  return lv}
+/* ---------- the rooms ---------- */
+function blgOsk(){
+  const f=BLG_HOUSE_OSK.front;
+  blRoom({id:BLG.OSK,name:"Osk Brine's House",w:13,h:9,amb:.5,rating:86,floor:'wood',wall:'kh_ohwall1_0',
+    back:{to:BLG.ID,x:f[0],y:f[1],f:0},
+    lights:[[3,2],[9,2],[6,5],[11,7]],lcol:{'3,2':[1.4,1.0,.6],'9,2':[.75,1.1,.95],'6,5':[1.3,.95,.6],'11,7':[1.35,.98,.58]},col:[1.3,.95,.6],
+    enemies:[],
+    build:C=>{
+      const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
+      P('cothearth',6,1,{h:.95});P('clock',3,1,{h:1.1});P('dresser',10,1,{h:1.0});P('bed',2,6,{h:.7});P('longtable',7,5,{h:.7});P('waterbarrel',11,3,{h:.7});P('candlerack',9,1,{h:1.0});P('cat',4,7,{h:.26});
+      C.raw('hay',1,3,{npc:'blg_nets',solid:1,deco:false,sc:.9});C.raw('greensign',4,1,{npc:'blg_chart',solid:1,deco:false,sc:.8});
+      C.raw('yar_boat_row',11,6,{block:true,sc:1.3});C.raw('gy_web',1,1,{block:false,sc:.5});
+      C.npc('blg_osk',5,4)}})}
+function blgReeve(){
+  blRoom({id:BLG.REEVE,name:"The Reeve's Flooded Hall",w:15,h:12,amb:.4,rating:86,floor:'blf_flood',wall:IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0',
+    back:{to:BLG.ID,x:BLG_HOUSE_REEVE.front[0],y:BLG_HOUSE_REEVE.front[1],f:2},
+    lights:[[3,2],[11,2],[7,5],[3,8],[11,8],[7,10]],lcol:{'3,2':[.65,1.15,.85],'11,2':[.65,1.15,.85],'7,5':[.7,1.1,.9],'3,8':[.7,1.1,.9],'11,8':[.65,1.15,.85],'7,10':[1.3,.95,.6]},col:[.7,1.1,.9],
+    enemies:[['blreeve',7,3],['blbloat',3,5],['blbloat',11,5],['blwisp',4,2],['blwisp',10,2]],
+    build:C=>{
+      const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
+      P('banner',3,1,{h:1.6});P('banner',11,1,{h:1.6});P('tapestry',7,0,{h:1.1,free:true,block:false});P('counciltable',7,6,{h:.8});P('chandelier',7,8,{h:1.0,free:true,block:false});
+      C.raw('mi_pew',7,2,{npc:'blg_reevechair',solid:1,deco:false,sc:1.0});C.raw('gy_chest',9,2,{npc:'blg_reevechest',solid:1,deco:false,sc:.9});
+      C.raw('hay',1,9,{block:false,sc:.6});C.raw('gy_bones',5,9,{block:false,sc:.6});C.raw('gy_bones',11,10,{block:false,sc:.5});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_web',13,1,{block:false,sc:.5});
+      C.raw('greeds',2,5,{block:false,sc:.9});C.raw('greeds',12,5,{block:false,sc:.9});C.raw('greeds',1,7,{block:false,sc:.7})}})}
+function blgNan(){
+  const f=BLG_HOUSE_NAN.front;
+  blRoom({id:BLG.NAN,name:"Nan Sallow's Cottage",w:11,h:9,amb:.5,rating:86,floor:'wood',wall:'kh_ohwall1_2',
+    back:{to:BLG.ID,x:f[0],y:f[1],f:2},
+    lights:[[3,2],[8,2],[5,5]],lcol:{'3,2':[1.4,1.0,.6],'8,2':[1.35,.98,.58],'5,5':[1.3,.95,.6]},col:[1.3,.95,.6],
+    enemies:[],
+    build:C=>{
+      const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
+      P('hearth',5,1,{h:1.2});P('potshelf',2,1,{h:1.0});P('potshelf',8,1,{h:1.0});P('bed',8,6,{h:.7});P('dresser',9,3,{h:1.0});P('coopstack',1,4,{h:.95});P('veg',1,6,{h:.6});P('cat',3,7,{h:.26});P('waterbarrel',9,7,{h:.7});P('rocker',3,4,{h:.7});
+      C.raw('gy_coffin',7,7,{npc:'blg_hoblid',solid:1,deco:false,sc:.6});C.raw('gy_web',9,1,{block:false,sc:.5});
+      C.npc('blg_nan',5,4)}})}
+for(const [id,fn] of [[BLG.OSK,blgOsk],[BLG.REEVE,blgReeve],[BLG.NAN,blgNan]])
+  KH_LAZY[id]=()=>{if(!LEVELS[id]){if(!LEVELS[BLG.ID])KH_LAZY[BLG.ID]();blgArt();fn()}return LEVELS[id]};
+/* the quest rings */
+if(typeof QRF!=='undefined'){const N=(l,...ids)=>({lvl:l,npc:ids}),T=QRF.T;
+  T.blq11={give:[N(9641,'blg_osk')],act:()=>blF().lantern?[N(9641,'blg_osk')]:[N(9640,'blg_boat0'),N(9640,'blg_lantern')],ready:[N(9641,'blg_osk')]};
+  T.blq12={give:[N(9643,'blg_nan')],act:()=>blgSalt()>=3?[N(9643,'blg_nan')]:[N(9640,'blg_salt')],ready:[N(9643,'blg_nan')]};
+  T.blq13={give:[N(9640,'blg_tam')],act:[N(9640,'blg_marker')],ready:[N(9640,'blg_tam')]};
+  T.blq14={give:[N(9643,'blg_nan')],act:()=>blF().reeve?[N(9643,'blg_nan')]:[N(9640,'blg_boat0'),{lvl:9642,en:/^blreeve$/}],ready:[N(9643,'blg_nan')]}}
+blRegister(4,blgBuild,{fromE:{x:84,y:38,f:3},fromW:{x:4,y:38,f:1},exitY:38,rooms:[9641,9642,9643],names:{9641:"Osk Brine's House",9642:"The Reeve's Flooded Hall",9643:"Nan Sallow's Cottage"},rating:{9641:86,9642:86,9643:86}});
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

@@ -7,7 +7,7 @@ url = sys.argv[1]
 js = open(sys.argv[2], encoding='utf-8').read()
 with sync_playwright() as p:
     b = p.chromium.launch(args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader'], executable_path=os.environ.get('BTA_CHROME') or None)
-    pg = b.new_page(viewport={'width': 900, 'height': 600})
+    pg = b.new_page(viewport={'width': int(os.environ.get('BL_W','900')), 'height': int(os.environ.get('BL_H','600'))})
     errs = []
     pg.on('pageerror', lambda e: errs.append('PAGE ' + str(e)))
     pg.on('console', lambda m: errs.append('CON ' + m.text) if m.type == 'error' else None)
