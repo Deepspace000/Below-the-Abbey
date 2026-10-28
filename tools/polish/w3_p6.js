@@ -1,0 +1,1 @@
+()=>{const r={boats:G.decor.filter(d=>d.hgdBoatSpr).map(d=>[d.k,d.x,d.y,d.sc,d.ox]),img:!!(IMG.hgw3_boat0&&IMG.hgw3_boat0.width),w3:LEVELS[475]._hgw3,fn:typeof hgdbSync};try{hgdbSync();}catch(e){r.err=String(e)}r.after=G.decor.filter(d=>d.hgdBoatSpr).map(d=>[d.k,d.x,d.y,d.sc,d.ox]);return r}

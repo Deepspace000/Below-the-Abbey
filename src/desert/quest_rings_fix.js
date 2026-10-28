@@ -9,7 +9,7 @@
    Add {via:{<level>:[x,y]}} to a spec when the way there is not an ordinary door (a ladder, a boat, a teleporter): the ring then sits at [x,y] on that level.
    The game's own spots (QUESTS.<id>.spot) are used when an entry has no live spot on the level. Never put an em dash in a text here.
    ========================================================================== */
-const QRF={T:{},LOC:{}};
+const QRF={T:{},LOC:{},undo:[],disable(){for(const f of QRF.undo)f();QRF.undo=[]}}; // disable() puts the game's own ring code back (for the harness 'before' run)
 {
 const N=(l,...ids)=>({lvl:l,npc:ids}),E=(l,rx)=>({lvl:l,en:rx}),I=(l,id)=>({lvl:l,item:id}),K=(l,k)=>({lvl:l,kind:k}),X=(l,x,y)=>({lvl:l,xy:[x,y]}),CH=(l,c)=>({lvl:l,ch:c}),F=(l,fn)=>({lvl:l,fn});
 const T=QRF.T;
@@ -32,10 +32,10 @@ T.yar4={give:[N(292,'yr_harbour')],act:[N(290,'yr_crate')],ready:[N(292,'yr_harb
 T.yar5={give:[N(292,'yr_harbour')],act:[E(297,/^rat$/)],ready:[N(292,'yr_harbour')]};
 T.yar6={give:[N(298,'yr_orsa')]};
 T.yar7={give:[N(290,'yr_menkaure')]};
-T.vq1={give:[N(300,'sb_maeve')],act:[E(300,/^(bandit|archer)$/)],ready:[N(300,'sb_maeve')]};
-T.vq2={give:[N(301,'ib_aldous')],act:[N(301,'ib_bell')],ready:[N(301,'ib_aldous')]};
-T.vq3={give:[N(302,'ci_ketra')],act:[N(302,'ci_crystal'),E(302,/^cinder$/)],ready:[N(302,'ci_ketra')]};
-T.vq4={give:[N(303,'ll_isolde')],act:[N(303,'ll_altar')],ready:[N(303,'ll_isolde')]};
+T.vq1={give:[N(300,'sb_maeve'),N(330,'sea_land_300')],act:[E(300,/^(bandit|archer)$/),N(330,'sea_land_300')],ready:[N(300,'sb_maeve'),N(330,'sea_land_300')]};
+T.vq2={give:[N(301,'ib_aldous'),N(330,'sea_land_301')],act:[N(301,'ib_bell'),N(330,'sea_land_301')],ready:[N(301,'ib_aldous'),N(330,'sea_land_301')]};
+T.vq3={give:[N(302,'ci_ketra'),N(330,'sea_land_302')],act:[N(302,'ci_crystal'),E(302,/^cinder$/),N(330,'sea_land_302')],ready:[N(302,'ci_ketra'),N(330,'sea_land_302')]};
+T.vq4={give:[N(303,'ll_isolde'),N(330,'sea_land_303')],act:[N(303,'ll_altar'),N(330,'sea_land_303')],ready:[N(303,'ll_isolde'),N(330,'sea_land_303')]};
 /* ---- Act 4: the Kraken and Oldhaven (330 is the open Narrow Sea, its islands are decor named sea_land_<level>) ---- */
 T.vq5={give:[N(290,'yr_menkaure')],act:[N(330,'sea_land_oh'),N(290,'yr_ship')],ready:[N(304,'yr_ship')]};
 const harp=n=>({lvl:n.lvl,npc:['kg_harp'],cat:n.cat});
@@ -124,6 +124,19 @@ QRF.live=sp=>{ // the squares of one spec on the level the party is on
   if(sp.fn){try{for(const p of sp.fn()||[])o.push(p)}catch(e){}}
   if(o.length>12){const px=G.C?G.C.x:0,py=G.C?G.C.y:0;o.sort((a,b)=>Math.hypot(a.x-px,a.y-py)-Math.hypot(b.x-px,b.y-py));o.length=12}
   return o};
+QRF.NAMES={199:'The Palace of Khemetra',213:"Menkaure's Shipwrights",235:'A Boarded House',260:'The Cisterns beneath Khemetra',261:"Ishkander's Study",266:'The Tunnel to the Narrow Sea'};
+QRF.nm=l=>{const n=LEVEL_NAMES[l]||(LEVELS[l]&&LEVELS[l].name)||QRF.NAMES[l]||'';return n.replace(/^The /,'the ')};
+/* ---- the door that leads towards another level: a path over doors (portals and hatches, in either direction), up to six doors long; the ring sits in front of the first door of the way ---- */
+QRF.getL=l=>{if(!LEVELS[l]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[l]){try{KH_LAZY[l]()}catch(e){}}return LEVELS[l]||null};
+QRF.adj=l=>{const L=QRF.getL(l),o=new Set();if(!L)return [];for(const p of L.portals||[])if(p&&p.to!==undefined&&+p.to!==l)o.add(+p.to);for(const d of L.decor||[])if(d.enter&&d.enter.to!==undefined&&+d.enter.to!==l)o.add(+d.enter.to);
+  if(QRF._rev===undefined||QRF._revN!==Object.keys(LEVELS).length){QRF._rev={};QRF._revN=Object.keys(LEVELS).length;for(const k in LEVELS){const M=LEVELS[k];if(!M)continue;for(const p of M.portals||[])if(p&&p.to!==undefined)(QRF._rev[+p.to]=QRF._rev[+p.to]||new Set()).add(+k)}}
+  for(const k of QRF._rev[l]||[])if(k!==l)o.add(k);return [...o]};
+QRF.path=(a,b)=>{const prev={[a]:null},q=[a];let n=0;while(q.length&&n++<400){const c=q.shift();if(c===b)break;for(const x of QRF.adj(c)){if(!(x in prev)){prev[x]=c;q.push(x)}}}
+  if(!(b in prev))return null;const out=[];for(let c=b;c!==null;c=prev[c])out.push(c);out.reverse();return out.length<=7?out:null};
+QRF.door=function(Lt){const S=LEVEL,pa=QRF.path(S,Lt);if(!pa||pa.length<2)return null;const N1=pa[1],L1=QRF.getL(N1),LS=LEVELS[S];
+  if(L1){const p=(L1.portals||[]).find(p=>p&&+p.to===S);if(p)return {x:p.x,y:p.y}}
+  if(LS){const d=(LS.decor||[]).find(d=>d.enter&&+d.enter.to===N1);if(d)return {x:d.x,y:d.y}}
+  return null};
 QRF.levels=specs=>{const o=[];for(const s of specs)if(!o.includes(s.lvl))o.push(s.lvl);return o};
 QRF.spots=function(id){
   if(!QRF.T[id])return null;const stg=QRF.stage(id);const specs=QRF.specs(id,stg);if(!specs.length)return null;
@@ -134,10 +147,10 @@ QRF.spots=function(id){
   if(out.length)return out;
   const ls=QRF.levels(specs).filter(l=>l!==LEVEL);if(!ls.length)return out;
   for(const Lt of ls){let d=null;for(const sp of specs)if(sp.lvl===Lt&&sp.via&&sp.via[LEVEL])d={x:sp.via[LEVEL][0],y:sp.via[LEVEL][1]};
-    if(!d)try{d=questDoorTo(Lt)}catch(e){}
-    if(d){const nm=(LEVEL_NAMES[Lt]||'').replace(/^The /,'the ');push(d);push(d,'Go to '+nm);return out}}
+    if(!d)try{d=QRF.door(Lt)||questDoorTo(Lt)}catch(e){}
+    if(d){const nm=QRF.nm(Lt);push(d);if(nm)push(d,'Go to '+nm);return out}}
   return out};
-{const _qs=questSpots;questSpots=function(){
+{const _qs=questSpots;QRF.undo.push(()=>{questSpots=_qs});questSpots=function(){
   const out=_qs.apply(this,arguments);
   try{const F=G.qFocus;
     if(F&&qSt(F.id)==='done'&&QRF.T[F.id])G.qFocus=null;
@@ -147,18 +160,18 @@ QRF.spots=function(id){
       for(const m of mine)out.push(m)}
   }catch(e){console.error('qrings',e)}
   return out}}
-{const _tl=questTargetLevel;questTargetLevel=function(id){
+{const _tl=questTargetLevel;QRF.undo.push(()=>{questTargetLevel=_tl});questTargetLevel=function(id){
   try{if(QRF.T[id]){const sp=QRF.specs(id,QRF.stage(id));if(sp&&sp.length){const ls=QRF.levels(sp);return ls.includes(LEVEL)?LEVEL:ls[0]}}}catch(e){console.error('qrings',e)}
   return _tl.apply(this,arguments)}}
-{const _wl=questWorldLoc;questWorldLoc=function(id){let l=_wl.apply(this,arguments);
+{const _wl=questWorldLoc;QRF.undo.push(()=>{questWorldLoc=_wl});questWorldLoc=function(id){let l=_wl.apply(this,arguments);
   try{if(!l){const Lt=questTargetLevel(id),k=QRF.LOC[Lt];if(k)l=WORLD_LOCS.find(z=>z.k===k)||null}}catch(e){}
   return l}}
-{const _sh=questShow;questShow=function(id){
+{const _sh=questShow;QRF.undo.push(()=>{questShow=_sh});questShow=function(id){
   if(QRF.T[id]&&qSt(id)==='done'){G.qFocus=null;G.qNote={t:G.time,text:'"'+QUESTS[id].title+'" is done.'};return}
   return _sh.apply(this,arguments)}}
-{const _dw=drawWorldMap;drawWorldMap=function(){const r=_dw.apply(this,arguments);
+{const _dw=drawWorldMap;QRF.undo.push(()=>{drawWorldMap=_dw});drawWorldMap=function(){const r=_dw.apply(this,arguments);
   try{const F=G.qFocus;if(F&&F.loc&&QRF.T[F.id]){const fl=WORLD_LOCS.find(z=>z.k===F.loc),Lt=questTargetLevel(F.id);
-    if(fl&&Lt!==null&&LEVEL_NAMES[Lt]){ctx.save();ctx.font=`italic bold 8px ${FUI}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.lineJoin='round';const tt='Go to '+LEVEL_NAMES[Lt].replace(/^The /,'the '),yy=fl.y+48;
+    if(fl&&Lt!==null&&QRF.nm(Lt)){ctx.save();ctx.font=`italic bold 8px ${FUI}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.lineJoin='round';const tt='Go to '+QRF.nm(Lt),yy=fl.y+48;
       ctx.strokeStyle='rgba(236,222,176,.95)';ctx.strokeText(tt,fl.x,yy);ctx.fillStyle='#5a2a08';ctx.fillText(tt,fl.x,yy);ctx.restore()}}}catch(e){}
   return r}}
 /* ---- safety net: if a level's own map throws while it is drawn (the game would freeze), a plain map of the level with the quest rings is drawn instead, once per frame ---- */

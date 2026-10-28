@@ -12,6 +12,7 @@
   const TIER={
     'Heal':{n:'Heal',g:0,base:10,lv:.4,cost:3},
     'Greater Heal':{n:'Greater Heal',g:0,base:270,lv:.5,cost:26},
+    'c40h':{n:'Restoration',g:0,base:560,lv:.6,cost:52},
     'c10':{n:'Purify',g:1,base:8,lv:.3,cost:9},
     'Mend':{n:'Mend',g:1,base:30,lv:.4,cost:19},
     'Divine Intervention':{n:'Divine Intervention',g:1,base:100,lv:.4,cost:45}
@@ -37,6 +38,7 @@
   const TEXT={
     'Heal':()=>`Restores about ${now('Heal')} health to the most wounded ally. A small, cheap heal that is not much use once the party is strong.`,
     'Greater Heal':()=>`Restores about ${now('Greater Heal')} health to the most wounded ally.`,
+    'c40h':()=>`Restores about ${now('c40h')} health to the most wounded ally. The strongest single heal, and it costs a great deal of mana.`,
     'Mend':()=>`Restores about ${now('Mend')} health to every living ally.`,
     'Divine Intervention':()=>`The greatest group heal: every living ally recovers about ${now('Divine Intervention')} health.`,
     'c10':()=>`Cleanses every affliction on the party and restores about ${now('c10')} health to everyone.`
@@ -49,7 +51,9 @@
       for(const p of pr.powers||[]){const t=TIER[p.name];if(t&&p.act!==false){live(p,p.name);setCost(p,t)}}
       if(pr.sp){live(pr.sp,'Heal');setCost(pr.sp,TIER.Heal)}
     }
-    for(const s of MX){if(s.id==='c10'){live(s,'c10');setCost(s,TIER.c10)}}
+    for(const s of MX){if(s.id==='c10'){live(s,'c10');setCost(s,TIER.c10)}if(s.id==='c40h'){live(s,'c40h');setCost(s,TIER.c40h)}}
+    if(MX_POWER.c40h){live(MX_POWER.c40h,'c40h');setCost(MX_POWER.c40h,TIER.c40h)}
+    if(typeof loadImg==='function')loadImg('sp_c40h','assets/sp_c40h.png')
     if(MX_POWER.c10){live(MX_POWER.c10,'c10');setCost(MX_POWER.c10,TIER.c10)}
   }catch(e){console.warn('heal_scaling',e)}
 })();

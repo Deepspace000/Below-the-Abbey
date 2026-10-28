@@ -3,7 +3,7 @@ import json, os
 HERE = os.path.dirname(os.path.abspath(__file__))
 D = json.load(open(os.path.join(HERE, 'raw_after.json')))
 res = D['res']
-SINGLE = ['Heal', 'Greater Heal']
+SINGLE = ['Heal', 'Greater Heal', 'Restoration']
 GROUP = ['Purify', 'Mend', 'Divine Intervention']
 flags = []
 

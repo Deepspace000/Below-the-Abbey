@@ -63,6 +63,7 @@ mx('Priest',20,'c20','Turn Undead',['area',4],[['undead',10,[40,60]]],'Undead wi
 mx('Priest',30,'c30','Sanctuary Ward','party',[['buff','armor',4,10],['buff','dodge',.15,10]],'A sacred ward: armor +4 and enemies miss 15% more for 10 rounds.','#ffe9a0');
 mx('Priest',40,'c40','Divine Wrath',['area',4],[['dmg',[34,50]],['curse',6]],'Light from the heavens strikes every foe within 4 squares, and curses them.','#fffbe0');
 mx('Priest',50,'c50','Resurrection','dead',[['revive',.7],['healpct',.5]],'Raises every fallen hero at 70% health and heals the living for half.','#ffd860');
+mx('Priest',50,'c40h','Restoration','front|ally',[['heal',[60,90]]],'The oldest prayer of the brothers, said over one wounded ally: they are mended where they stand.','#fff0a8',3000,52);
 mx('Priest',30,'c30b','Smiting Light',['area',3],[['dmg',[16,24]],['curse',4]],'Hallowed light on every foe within 3 squares for about 35-50 damage each at level 30, and it curses them.','#fff4c0',2200,16);
 mx('Monk',10,'k10','Pressure Point','front',[['hold',4]],'A finger on the right spot: the foe ahead cannot move for 4 rounds.','#70e0a0');
 mx('Monk',20,'k20','Wholeness of Body','self',[['heal',[50,70]],['cleanse']],'You heal 50-70 and cleanse every affliction on you.','#70e090');
@@ -179,7 +180,7 @@ function mxCast(i,P){
     if(!T.length&&P.aim!=='front|ally'){msg('No foe in range.','#d09a80');return false}
     if(P.aim==='front|ally'&&!T.length)T=[];
   }
-  if(P.fx&&P.fx.some(f=>f[0]==='heal')&&P.fx.every(f=>f[0]==='heal'||f[0]==='cleanse')&&(P.aim==='party'||P.aim==='self')){ // a pure heal or cleanse with nobody hurt and nothing to lift costs no mana
+  if(P.fx&&P.fx.some(f=>f[0]==='heal')&&P.fx.every(f=>f[0]==='heal'||f[0]==='cleanse')&&(P.aim==='party'||P.aim==='self'||P.aim==='front|ally')){ // a pure heal or cleanse with nobody hurt and nothing to lift costs no mana
     const sel=P.aim==='self'?[i]:livingHeroes();
     if(!sel.some(j=>G.heroes[j].hp<G.heroes[j].max)&&!afflList().some(e=>{const A=AFFL[e.id];return A&&A.kind==='bad'&&sel.includes(e.hi)})){msg('Everyone is already healthy.');return false}
   }
@@ -276,7 +277,7 @@ function drawSpellShop(){
   txt(`${def.name} the ${def.cls}: ${list.length} spells for sale`,24+4*58+10,50,8,'#d8c88e','left',true,undefined,200);
   txt('A bought spell is memorised and joins the power page.',24+4*58+10,62,7.5,'#a89878','left',false,undefined,210);
   if(G.ssmsg)txt(G.ssmsg,24+4*58+10,80,8,'#e8a070','left',true,undefined,210);
-  const top=list.length>5?98:106,rh=list.length>5?33:38,cp=list.length>5;
+  const top=list.length>5?98:106,rh=list.length>6?29:list.length>5?33:38,cp=list.length>5;
   list.forEach((s,k)=>{
     const y=top+k*rh,known=(h.learned||[]).includes(s.id),open=h.lvl>=s.lv,can=open&&G.gold>=s.price&&!known;
     ctx.save();rrect(ctx,22,y,436,rh-3,5);ctx.fillStyle=known?'rgba(30,50,24,.92)':'rgba(40,18,14,.92)';ctx.fill();ctx.lineWidth=1.4;ctx.strokeStyle=known?'#7ac060':open?'#a88a48':'#5a4a34';ctx.stroke();ctx.restore();

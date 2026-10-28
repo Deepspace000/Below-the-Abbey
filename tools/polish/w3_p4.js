@@ -1,0 +1,1 @@
+()=>{const L=LEVELS[477];return {w3:L._hgw3,labels:L.decor.filter(d=>d.label).length,notes:L.decor.filter(d=>d.hgdwText).length,empty:L.decor.filter(d=>(d.npc==='hgdw_note')&&!(d.hgdwText&&d.hgdwText.trim())).length,lights:HGDWE.lights.length}}

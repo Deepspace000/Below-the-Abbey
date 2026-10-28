@@ -1,0 +1,1 @@
+()=>{G.flags.hgdwOpened={};const i=G.decor.findIndex(d=>d.k==='uw_shellchest'&&d.hgdwTier);const d=G.decor[i];const n=G.decor.find(d=>d.npc==='hgdw_note');const nd=NPCS.hgdw_note.root(n);openLoot(d);const r={flags:Object.assign({},G.flags.hgdwOpened),gold:d.gold,tier:d.hgdwTier,note:(nd&&nd.text||'').slice(0,60),label:n.label,lvl:LEVEL};G.loot=null;return r}

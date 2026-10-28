@@ -1,0 +1,34 @@
+{"w3": {"vig": 6, "props": 151, "notes": 0, "mossCut": 53, "mossCap": 37, "tallCut": 68, "landmarks": 60, "piranha": 1, "labels": 34, "newNotes": 6, "prot": 56}, "mossNear": 0, "mossMax": 0.25, "pir": [[39, 27, 6], [1, 20, 32.8], [13, 32, 20.6], [7, 9, 31.6], [20, 33, 14.3], [35, 5, 22.1], [11, 7, 29.7], [12, 3, 31.9], [41, 11, 17.9], [29, 35, 8.9], [21, 36, 15], [41, 40, 15.3], [15, 34, 19.3], [31, 5, 22.1], [1, 32, 32.4]], "vig": [{"n": "Garden of Saints", "x": 5, "y": 6, "props": 15}, {"n": "Drowned Library", "x": 18, "y": 7, "props": 18}, {"n": "Sunken Bell", "x": 17, "y": 17, "props": 9}, {"n": "Wreck of the Ferry", "x": 9, "y": 35, "props": 11}, {"n": "Saint's shrine", "x": 33, "y": 1, "props": 4}, {"n": "Mirror", "x": 3, "y": 11, "props": 11}, {"n": "Diver's camp", "x": 21, "y": 39, "props": 10}, {"n": "Pearl grotto", "x": 29, "y": 31, "props": 10}, {"n": "The scales", "x": 3, "y": 25, "props": 13}, {"n": "Smugglers' cache", "x": 13, "y": 29, "props": 15}, {"n": "Lantern nook", "x": 37, "y": 39, "props": 10}, {"n": "Rune stone", "x": 5, "y": 35, "props": 13}, {"n": "Warden's board", "x": 31, "y": 25, "props": 8}], "noLabel": 0, "empty": 0, "dash": 0, "notes": 34, "maxAnchorDist": 10, "at": "29,37", "fishProt": 1, "lights": 153, "decor": 1086}
+Traceback (most recent call last):
+  File "C:\Users\mirko\Downloads\workspace\Below-the-Abbey\tools\polish\w3_all.py", line 107, in <module>
+    res['save']=pg.evaluate(SAVE); print('save',res['save'],flush=True)
+                ~~~~~~~~~~~^^^^^^
+  File "C:\Users\mirko\AppData\Roaming\Python\Python314\site-packages\playwright\sync_api\_generated.py", line 9413, in evaluate
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.evaluate(expression=expression, arg=mapping.to_impl(arg))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\mirko\AppData\Roaming\Python\Python314\site-packages\playwright\_impl\_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "C:\Users\mirko\AppData\Roaming\Python\Python314\site-packages\playwright\_impl\_page.py", line 474, in evaluate
+    return await self._main_frame.evaluate(expression, arg)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mirko\AppData\Roaming\Python\Python314\site-packages\playwright\_impl\_frame.py", line 346, in evaluate
+    await self._channel.send(
+    ...<6 lines>...
+    )
+  File "C:\Users\mirko\AppData\Roaming\Python\Python314\site-packages\playwright\_impl\_connection.py", line 76, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\mirko\AppData\Roaming\Python\Python314\site-packages\playwright\_impl\_connection.py", line 632, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: Page.evaluate: TypeError: Cannot set properties of undefined (setting 'contents')
+    at eval (eval at evaluate (:311:30), <anonymous>:11:51)
+    at UtilityScript.evaluate (<anonymous>:318:18)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)

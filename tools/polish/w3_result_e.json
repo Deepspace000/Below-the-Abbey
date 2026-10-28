@@ -1,0 +1,565 @@
+{
+ "shots": {
+  "v_Garden_of_Saints": {
+   "pos": [
+    5,
+    9
+   ],
+   "f": 0,
+   "cat": "vig",
+   "lum": 58.2
+  },
+  "v_Drowned_Library": {
+   "pos": [
+    15,
+    7
+   ],
+   "f": 1,
+   "cat": "vig",
+   "lum": 71.1
+  },
+  "v_Sunken_Bell": {
+   "pos": [
+    17,
+    20
+   ],
+   "f": 0,
+   "cat": "vig",
+   "lum": 64.7
+  },
+  "v_Wreck_of_the_Ferry": {
+   "pos": [
+    9,
+    38
+   ],
+   "f": 0,
+   "cat": "vig",
+   "lum": 65.6
+  },
+  "v_Saints_shrine": {
+   "pos": [
+    30,
+    1
+   ],
+   "f": 1,
+   "cat": "vig",
+   "lum": 81.0
+  },
+  "v_Mirror": {
+   "pos": [
+    3,
+    8
+   ],
+   "f": 2,
+   "cat": "vig",
+   "lum": 70.7
+  },
+  "v_Divers_camp": {
+   "pos": [
+    21,
+    36
+   ],
+   "f": 2,
+   "cat": "vig",
+   "lum": 71.3
+  },
+  "v_Pearl_grotto": {
+   "pos": [
+    26,
+    31
+   ],
+   "f": 1,
+   "cat": "vig",
+   "lum": 90.0
+  },
+  "v_The_scales": {
+   "pos": [
+    3,
+    22
+   ],
+   "f": 2,
+   "cat": "vig",
+   "lum": 82.5
+  },
+  "v_Smugglers_cache": {
+   "pos": [
+    13,
+    26
+   ],
+   "f": 2,
+   "cat": "vig",
+   "lum": 84.4
+  },
+  "v_Lantern_nook": {
+   "pos": [
+    40,
+    39
+   ],
+   "f": 3,
+   "cat": "vig",
+   "lum": 87.7
+  },
+  "v_Rune_stone": {
+   "pos": [
+    5,
+    37
+   ],
+   "f": 0,
+   "cat": "vig",
+   "lum": 74.1
+  },
+  "v_Wardens_board": {
+   "pos": [
+    31,
+    22
+   ],
+   "f": 2,
+   "cat": "vig",
+   "lum": 55.6
+  },
+  "hub0": {
+   "pos": [
+    10,
+    34
+   ],
+   "f": 0,
+   "cat": "hub",
+   "lum": 72.2
+  },
+  "hub1": {
+   "pos": [
+    34,
+    28
+   ],
+   "f": 1,
+   "cat": "hub",
+   "lum": 62.5
+  },
+  "hub2": {
+   "pos": [
+    17,
+    18
+   ],
+   "f": 2,
+   "cat": "hub",
+   "lum": 69.0
+  },
+  "hub3": {
+   "pos": [
+    5,
+    6
+   ],
+   "f": 3,
+   "cat": "hub",
+   "lum": 70.6
+  },
+  "hub4": {
+   "pos": [
+    18,
+    7
+   ],
+   "f": 0,
+   "cat": "hub",
+   "lum": 83.3
+  },
+  "cor0": {
+   "pos": [
+    31,
+    22
+   ],
+   "f": 2,
+   "cat": "corridor",
+   "lum": 55.7
+  },
+  "cor1": {
+   "pos": [
+    1,
+    9
+   ],
+   "f": 0,
+   "cat": "corridor",
+   "lum": 63.8
+  },
+  "cor2": {
+   "pos": [
+    19,
+    24
+   ],
+   "f": 0,
+   "cat": "corridor",
+   "lum": 63.9
+  },
+  "cor3": {
+   "pos": [
+    11,
+    39
+   ],
+   "f": 3,
+   "cat": "corridor",
+   "lum": 58.6
+  },
+  "cor4": {
+   "pos": [
+    24,
+    3
+   ],
+   "f": 1,
+   "cat": "corridor",
+   "lum": 64.7
+  },
+  "cor5": {
+   "pos": [
+    23,
+    11
+   ],
+   "f": 3,
+   "cat": "corridor",
+   "lum": 56.7
+  },
+  "cor6": {
+   "pos": [
+    33,
+    7
+   ],
+   "f": 1,
+   "cat": "corridor",
+   "lum": 59.3
+  },
+  "cor7": {
+   "pos": [
+    25,
+    41
+   ],
+   "f": 3,
+   "cat": "corridor",
+   "lum": 55.1
+  },
+  "cor8": {
+   "pos": [
+    27,
+    15
+   ],
+   "f": 0,
+   "cat": "corridor",
+   "lum": 75.4
+  },
+  "cor9": {
+   "pos": [
+    20,
+    33
+   ],
+   "f": 3,
+   "cat": "corridor",
+   "lum": 68.9
+  },
+  "c7": {
+   "pos": [
+    41,
+    36
+   ],
+   "f": 0,
+   "cat": "corridor",
+   "lum": 55.9
+  },
+  "c11": {
+   "pos": [
+    27,
+    9
+   ],
+   "f": 1,
+   "cat": "corridor",
+   "lum": 60.2
+  },
+  "c9": {
+   "pos": [
+    7,
+    33
+   ],
+   "f": 0,
+   "cat": "corridor",
+   "lum": 62.9
+  },
+  "arch": {
+   "pos": [
+    1,
+    6
+   ],
+   "f": 0,
+   "cat": "corridor",
+   "lum": 74.4
+  },
+  "l0d": {
+   "pos": [
+    39,
+    137
+   ],
+   "f": 0,
+   "cat": "lake",
+   "lum": 68.6
+  },
+  "l0f": {
+   "pos": [
+    19,
+    137
+   ],
+   "f": 0,
+   "cat": "lake",
+   "lum": 62.3
+  },
+  "l1d": {
+   "pos": [
+    147,
+    97
+   ],
+   "f": 0,
+   "cat": "lake",
+   "lum": 66.0
+  },
+  "l1f": {
+   "pos": [
+    147,
+    71
+   ],
+   "f": 2,
+   "cat": "lake",
+   "lum": 74.1
+  },
+  "l2d": {
+   "pos": [
+    97,
+    65
+   ],
+   "f": 1,
+   "cat": "lake",
+   "lum": 62.6
+  },
+  "l2f": {
+   "pos": [
+    123,
+    43
+   ],
+   "f": 2,
+   "cat": "lake",
+   "lum": 60.7
+  },
+  "l0w": {
+   "pos": [
+    39,
+    135
+   ],
+   "f": 0,
+   "cat": "lake",
+   "lum": 54.6
+  },
+  "l1w": {
+   "pos": [
+    147,
+    95
+   ],
+   "f": 0,
+   "cat": "lake",
+   "lum": 57.7
+  },
+  "l2w": {
+   "pos": [
+    99,
+    65
+   ],
+   "f": 1,
+   "cat": "lake",
+   "lum": 58.6
+  }
+ },
+ "audit": {
+  "w3": {
+   "vig": 11,
+   "props": 176,
+   "notes": 0,
+   "mossCut": 53,
+   "mossCap": 37,
+   "tallCut": 218,
+   "landmarks": 59,
+   "piranha": 1,
+   "labels": 39,
+   "newNotes": 11,
+   "prot": 56
+  },
+  "mossNear": 0,
+  "mossMax": 0.25,
+  "pir": [
+   [
+    39,
+    27,
+    6
+   ],
+   [
+    1,
+    20,
+    32.8
+   ],
+   [
+    13,
+    32,
+    20.6
+   ],
+   [
+    7,
+    9,
+    31.6
+   ],
+   [
+    20,
+    33,
+    14.3
+   ],
+   [
+    35,
+    5,
+    22.1
+   ],
+   [
+    11,
+    7,
+    29.7
+   ],
+   [
+    12,
+    3,
+    31.9
+   ],
+   [
+    41,
+    11,
+    17.9
+   ],
+   [
+    29,
+    35,
+    8.9
+   ],
+   [
+    21,
+    36,
+    15
+   ],
+   [
+    41,
+    40,
+    15.3
+   ],
+   [
+    15,
+    34,
+    19.3
+   ],
+   [
+    31,
+    5,
+    22.1
+   ],
+   [
+    1,
+    32,
+    32.4
+   ]
+  ],
+  "vig": [
+   {
+    "n": "Garden of Saints",
+    "x": 5,
+    "y": 6,
+    "props": 15
+   },
+   {
+    "n": "Drowned Library",
+    "x": 18,
+    "y": 7,
+    "props": 18
+   },
+   {
+    "n": "Sunken Bell",
+    "x": 17,
+    "y": 17,
+    "props": 21
+   },
+   {
+    "n": "Wreck of the Ferry",
+    "x": 9,
+    "y": 35,
+    "props": 17
+   },
+   {
+    "n": "Saint's shrine",
+    "x": 33,
+    "y": 1,
+    "props": 10
+   },
+   {
+    "n": "Mirror",
+    "x": 3,
+    "y": 11,
+    "props": 9
+   },
+   {
+    "n": "Diver's camp",
+    "x": 21,
+    "y": 39,
+    "props": 12
+   },
+   {
+    "n": "Pearl grotto",
+    "x": 29,
+    "y": 31,
+    "props": 10
+   },
+   {
+    "n": "The scales",
+    "x": 3,
+    "y": 25,
+    "props": 13
+   },
+   {
+    "n": "Smugglers' cache",
+    "x": 13,
+    "y": 29,
+    "props": 15
+   },
+   {
+    "n": "Lantern nook",
+    "x": 37,
+    "y": 39,
+    "props": 14
+   },
+   {
+    "n": "Rune stone",
+    "x": 5,
+    "y": 35,
+    "props": 16
+   },
+   {
+    "n": "Warden's board",
+    "x": 31,
+    "y": 25,
+    "props": 9
+   }
+  ],
+  "noLabel": 0,
+  "empty": 0,
+  "dash": 0,
+  "notes": 39,
+  "maxAnchorDist": 10,
+  "at": "5,17",
+  "fishProt": 1,
+  "lights": 162,
+  "decor": 965
+ },
+ "save": {
+  "chests": 12,
+  "moved": 7,
+  "oldSaveOpensEmpty": true,
+  "keys": 2,
+  "newSaveRestored": true,
+  "indexIgnored": true
+ },
+ "errs": []
+}

@@ -31,3 +31,25 @@ Lake landmarks are deliberately taller (1.35 to 1.9) so they are seen from acros
 - Old saves: the seven moved chests may be offered again once. No migration written.
 - The rune stone sits in a corner (sight line 2). One piranha still stands 3 squares from the warden chest.
 - Another agent's error appears on every load: hgdpc ReferenceError hgdpcH is not defined (hgd_polish_c.js), not in this zone.
+
+# Round 3 (hgd_polish_e3.js, loaded just before jump_ready.js)
+
+Files: src/desert/hgd_polish_e3.js (all new code), small edits in hgd_polish_e.js (fish capped at .35 high and hidden within 1.3 squares of the camera or 1.6 of a note or set piece; moved chests remember hgdwOrig).
+Tools: tools/polish/w3_all.py (one browser session: audit of 477, save tests, about 40 full size shots with mean luminance of the 3D view, JSON in w3_result_<tag>.json, shots in w3_shots/), w3_run.py and w3_dump.py (copies of the e2 tools on port 8334).
+
+## What changed, critic issue by issue
+1. Lone set pieces: mirror, diver's camp, pearl grotto, scales, rune stone, smugglers' cache each got 6 to 7 supporting props (own kinds, offsets at the sides of the passage, none blocking), two light pools and a new story note; the bell, ferry, shrine, board and lantern nook were thin too and got the same. Every one of the 13 pieces now has 9 or more props within 3 squares (audit table in w3_result_*.json).
+2. Moss within 2.3 squares of any set piece, sign, chest, stairs, arch or board is removed (53), and all other moss is capped at .25 high (37). Tall plants (over .4) within 2.3 squares of those are removed too.
+3. Lakes: boat colour, size, flip and offset per lake (amber 0.64, teal 1.0 flipped, violet .8 flipped), a different tall lit beacon straight ahead of each departure dock (lamp, shell statue, crystal pillar, with reflection and a strong light) and one ahead of each far dock in the next lake's style, darker pots. The dock ARCH itself is wall geometry made by the engine and cannot be changed from a decor pass. Lake 3's docks do face the water (checked with the party facing the dock direction: dep (97,65) faces east f=1, far (123,43) faces south f=2); the critic shot them facing the wrong way.
+4. Long runs: every straight run of 7 or more squares gets a tall lit landmark every 7 squares (8 kinds, rotating, each with a small companion and its own colour of light), after a path-distance pass that puts a landmark wherever the nearest one is more than 10 steps away. Audit: no open square is more than 10 steps from a landmark, sign, set piece or tall prop.
+5. Fish: capped .35 high, never drawn within 1.3 of the camera or 1.6 of a note or set piece.
+6. Fog and second light colour: drawWorld is wrapped; a screen-blended tinted haze and a horizon band are drawn over the 3D view. In the maze the colour is the distance-weighted mix of the nearby light colours (so gardens go teal, camps amber, shrines violet); on the lakes it is the lake colour (amber, teal, violet) fading out 14 squares from the shore. Maze ambient raised from .5 to .58.
+7. Piranha: moved to at least 5.5 squares from the warden chest.
+8. Old saves: the engine copies only a fixed list of fields from the level scenery into the playing copy G.decor, so hgdwTier (chest tier) and hgdwText were LOST in play: chests gave generic loot and never recorded the opened flag, so the Shell Chests quest (wq4) could not be completed. A wrapper on reset() now carries hgdwTier, hgdwOrig, hgdwText, label back by index. Saves: chest state is stored by position ("hgw3:x,y"), numbered scenery records from older saves are ignored for 477 (the order changed in rounds 1 to 3); an old save whose opened-chest flag list holds either the old or the new position of a chest gets that chest back opened and empty. Tested in w3_all.py (oldSaveOpensEmpty, newSaveRestored, indexIgnored all true).
+9. Labels: every note and sign carries d.label (one to four words, e.g. Mirror Frame, Signpost, Scratched Words); none empty, none with a dash.
+10. Luminance (mean of the 3D view, 5..955 x 5..485): see the table in the result JSON; corridors 54 or more, hubs 60 or more.
+
+## Not done
+- The pale flat fish of (19,17) was not found in the fish list (all seven species are painted); the old screenshot object may be a sea creature from another module.
+- No new paintings (no Gemini session); everything reuses existing front-on art.
+- The arch and planks at the three departure docks are still engine geometry and look alike; the lakes differ by boat, beacon, light, haze and landing props.

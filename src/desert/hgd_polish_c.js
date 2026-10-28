@@ -7,6 +7,26 @@
    Cosmetic decor only: quest objects, shops, people's cells and chests that quests use stay where they are.
    ========================================================================== */
 const HGDPC={cur:null,done:false,stats:{}};
+/* ---------- round 3: the honeycomb wall. The wall picture 'hg_wax' never existed, so the whole Honeycomb Reach was a flat beige slab; it is painted here in code (a tileable lattice of waxed hexagons, some capped, some empty) ---------- */
+(function(){try{if(typeof IMG==='undefined'||IMG.hg_wax)return;const S=128,c=document.createElement('canvas');c.width=c.height=S;const x=c.getContext('2d');
+  const r=S/6,hh=S/4,rx=r,ry=hh/1.7320508*1.0;const H=(a,b,k)=>hgdpcH(a,b,k);
+  x.fillStyle='#6b4310';x.fillRect(0,0,S,S);
+  const cell=(cx,cy,i,j)=>{const v=H(i,j,1),kind=v<.18?2:v<.5?1:0;
+    x.beginPath();for(let k=0;k<6;k++){const a=k*Math.PI/3;const px=cx+Math.cos(a)*r*.93,py=cy+Math.sin(a)*(hh/2)/.8660254*.93;x[k?'lineTo':'moveTo'](px,py)}x.closePath();
+    const g=x.createRadialGradient(cx-r*.25,cy-r*.3,1,cx,cy,r);
+    if(kind===2){g.addColorStop(0,'#2b1708');g.addColorStop(.7,'#4a2a0c');g.addColorStop(1,'#7a4c16')}
+    else if(kind===1){g.addColorStop(0,'#f0c765');g.addColorStop(.6,'#d9962f');g.addColorStop(1,'#a8661c')}
+    else{const t=.85+v*.4;g.addColorStop(0,'rgb('+Math.min(255,226*t|0)+','+Math.min(255,170*t|0)+','+(70*t|0)+')');g.addColorStop(.65,'rgb('+(200*t|0)+','+(138*t|0)+','+(48*t|0)+')');g.addColorStop(1,'rgb('+(150*t|0)+','+(94*t|0)+','+(28*t|0)+')')}
+    x.fillStyle=g;x.fill();x.lineWidth=3.2;x.strokeStyle='#5a360c';x.stroke();x.lineWidth=1.2;x.strokeStyle='rgba(255,226,150,.55)';x.save();x.clip();x.translate(-.8,-.9);x.stroke();x.restore();
+    if(kind===1){x.fillStyle='rgba(255,236,170,.35)';x.beginPath();x.ellipse(cx-r*.22,cy-ry*.35,r*.35,ry*.18,-.4,0,6.3);x.fill()}};
+  for(let ox=-S;ox<=S;ox+=S)for(let oy=-S;oy<=S;oy+=S)for(let i=-1;i<5;i++)for(let j=-1;j<5;j++){const cx=ox+i*1.5*r+r*.5+0,cy=oy+j*hh+(i%2?hh/2:0)+hh*.5;if(cx<-r*2||cx>S+r*2||cy<-hh||cy>S+hh)continue;cell(cx,cy,((i%4)+4)%4+(ox?7:0)*0,((j%4)+4)%4)}
+  const d=x.getImageData(0,0,S,S),px=d.data;for(let i=0;i<px.length;i+=4){const n=(hgdpcH(i>>2&127,i>>9,3)-.5)*14;px[i]+=n;px[i+1]+=n*.8;px[i+2]+=n*.5}x.putImageData(d,0,0);
+  IMG.hg_wax=c}catch(e){console.error('hgdpc wax wall',e)}})();
+/* the hedge walls of the Hedge Maze were so dark a green that Hedgefoot read as black; one lighter copy of the picture is made before the maze is built */
+function hgdpcBrighten(){if(HGDPC.bright||typeof IMG==='undefined')return;let n=0;
+  for(const [k,f] of [['lushwall','brightness(1.4) saturate(1.1)'],['art_tex_wall_lapis','brightness(1.35) saturate(1.05)']]){const b=IMG[k];if(!b||!b.width)continue;const c=document.createElement('canvas');c.width=b.width;c.height=b.height;const x=c.getContext('2d');try{x.filter=f}catch(e){}x.drawImage(b,0,0);try{x.filter='none'}catch(e){}IMG[k]=c;n++}
+  if(n)HGDPC.bright=1}
+{const _b0=hgdBuild;hgdBuild=function(){try{hgdpcBrighten()}catch(e){console.error('hgdpc bright',e)}return _b0.apply(this,arguments)}}
 /* ---------- proportions: one scale for people ---------- */
 if(NPC_H.hg_npc2===undefined)NPC_H.hg_npc2=1.0; // the boy picture: width follows its own height now (it was drawn 1.7 high)
 const HGDPC_PIC={hg_npc0:.98,hg_npc1:.9,hg_npc3:.95,hg_npc4:1.0,hg_npc5:.95,hg_npc6:.95,hg_wizard:1.0,hg_npc2:.8}; // wanted height in squares, by picture
@@ -108,7 +128,7 @@ const HGDPC_VIG=[
  {title:'The Bell of the Lost',text:'Ring once for every one the maze has kept. It has been rung 211 times. The rope wore through, so we ring it with a spoon. A scratch beside the bell says: the cairn pays its tithe to whoever kneels at the bell.',p:[[0,0,'wm_bell',1,'b'],[-2,0,'wm_brazier',1,'l'],[2,0,'wm_brazier',1,'l'],[-1,2,'hgtb_bench',1.1],[2,2,'urn',1],[0,-2,'hg_chestwax',1,'c'],[1,2,'noticeboard',.9,'n']]},
  {title:'The Honey Press',text:'Sticky, loud and strictly no tasting. A smaller notice beneath says: whoever tasted is still stuck.',p:[[0,0,'hgtb_stall_orange_pottery',.85],[-2,1,'wm_barrel_tall',1],[2,1,'hg_waxbarrel',1],[-1,2,'hg_jar',1],[2,-1,'hg_jar',.9],[-2,-1,'hl_p_candle',1,'l'],[0,2,'noticeboard',.9,'n']]},
  {title:'The Pearl Fountain',text:'Throw one coin for luck. The keeper collects on Thursdays, whatever day it is.',p:[[0,0,'hgtb_deco_fountain',.95,'b'],[-2,1,'hgtb_bench',1.1],[2,1,'hgtb_bench',1.1],[-2,-1,'hgtb_deco_lanterns',.75,'l'],[1,-2,'hgt_pearlbush',1],[0,2,'noticeboard',.9,'n']]},
- {title:'The Old Well',text:'Forty fathoms deep. Do not drop anything you want back, and do not drop anything you do not. A mark by the stones says: look below the second crate.',p:[[0,0,'well',1,'b'],[-1,1,'wm_bucket',1],[-2,0,'wm_crate',1],[2,0,'wm_crate',1],[2,2,'sacks',1],[0,-2,'hg_chestwax',1,'c'],[0,2,'noticeboard',.9,'n']]},
+ {title:'The Old Well',text:'Forty fathoms deep. Do not drop anything you want back, and do not drop anything you do not. A mark by the stones says: look below the second crate.',p:[[0,0,'well',1,'b'],[-1,1,'wm_bucket',1],[-2,0,'wm_barrel',1],[2,0,'hg_jar',1],[2,2,'sacks',1],[0,-2,'hg_chestwax',1,'c'],[0,2,'noticeboard',.9,'n']]},
  {title:'The Lamplighters\' Post',text:'Two lamplighters, one ladder and forty years of disagreement. The ladder is winning.',p:[[0,0,'hgt_lamppost',.8,'bl'],[-2,1,'wm_lantern_gold',1,'l'],[2,1,'hgtb_lantern',.9,'l'],[-2,-1,'wm_crate',1],[2,-1,'hgtb_bench',1.1],[0,2,'noticeboard',.9,'n']]},
  {title:'The Mosaic Corner',text:'The great mosaic was smashed on this spot. The tile-trader has the pieces he can find. He is looking for the rest, and for whatever did it.',p:[[0,0,'hgtb_table',1],[-1,1,'hgtb_chair',1],[1,1,'hgtb_chair',1],[2,-1,'vase0',1],[-2,-1,'hgtb_deco_banner',.8],[2,2,'hgtb_bench',1.1],[0,-2,'noticeboard',.9,'n']]},
  {title:'The Gilder\'s Bench',text:'Everything here is gold leaf. Please do not lick it. The Gilder has had complaints. A bead of gold behind the bench is a gift, if you are quick.',p:[[0,0,'hgtb_stall_rose_lanterns',.85],[-2,1,'hgtb_bench',1.1],[2,1,'urn',1],[-2,-1,'wm_lantern_gold',1,'l'],[2,-1,'hgtb_deco_banner',.8],[0,-2,'hg_chestwax',1,'c'],[0,2,'noticeboard',.9,'n']]}];
@@ -195,7 +215,7 @@ function hgdpcBuild(L){
     for(const [R,room] of [[3,8],[4,6],[5,0]]){p=spot(keeper.x,keeper.y,R,false,room);if(p&&(p[0]!==keeper.x||p[1]!==keeper.y))break;p=null}
     if(!p)return;reserved.add(p.join());const [k,sc]=SIGN[kind];const T=HGDPC_TOWN[t];
     const nm=firstName(keeper.npc),txt=kind==='church'?'THE CHURCH OF '+T.toUpperCase()+'. '+HGDPC_CHURCH[t]+' '+HGDPC_CSIGN[t]:HGDPC_KIND_ROLE[kind].toUpperCase()+' OF '+T.toUpperCase()+', kept by '+nm+'. '+HGDPC_TAG[kind][t];
-    keeper.__sg=put({k,x:p[0],y:p[1],block:false,walk:true,npc:'hgdpc_text',txt,kname:kind==='church'?'Church sign':HGDPC_KIND_ROLE[kind]+' sign',sc,skind:kind,stown:t});signs++};
+    keeper.__sg=put({k,x:p[0],y:p[1],block:false,walk:true,npc:'hgdpc_text',txt,kname:kind==='church'?'Church sign':HGDPC_KIND_ROLE[kind]+' sign',label:kind==='church'?'Church of '+T:HGDPC_KIND_ROLE[kind]+' of '+T,sc,skind:kind,stown:t});signs++};
   for(const d of people){let m=/^hgd_s2_([a-z]+)(\d)$/.exec(d.npc);if(m){addSign(d,m[1],+m[2]);continue}m=/^hgd_church(\d)$/.exec(d.npc);if(m){addSign(d,'church',+m[1]);continue}m=/^hgd_shop(\d)$/.exec(d.npc);if(m)addSign(d,'general',+m[1])}
   st.shopSigns=signs;
   /* 5. a notice board and a signpost with true directions in every town */
@@ -203,11 +223,11 @@ function hgdpcBuild(L){
   const dirName=(dx,dy)=>{const a=Math.atan2(dy,dx)*180/Math.PI;return ['east','south-east','south','south-west','west','north-west','north','north-east'][(Math.round(a/45)+8)%8]};
   let boards=0,posts=0;
   towns.forEach(z=>{const t=z.town;
-    let p=spot(z.x,z.y,7,false,8);if(p){reserved.add(p.join());put({k:'wm_noticeboard',x:p[0],y:p[1],block:false,walk:true,npc:'hgdpc_text',txt:'NOTICES OF '+HGDPC_TOWN[t].toUpperCase()+'. Lost: '+HGDPC_BOARD[t][0].replace(/^Lost: /,'')+' Wanted: '+HGDPC_BOARD[t][1].replace(/^Wanted: /,'')+' '+HGDPC_BOARD[t][2],kname:'Notice board',sc:1});boards++}
+    let p=spot(z.x,z.y,7,false,8);if(p){reserved.add(p.join());put({k:'wm_noticeboard',x:p[0],y:p[1],block:false,walk:true,npc:'hgdpc_text',txt:'NOTICES OF '+HGDPC_TOWN[t].toUpperCase()+'. Lost: '+HGDPC_BOARD[t][0].replace(/^Lost: /,'')+' Wanted: '+HGDPC_BOARD[t][1].replace(/^Wanted: /,'')+' '+HGDPC_BOARD[t][2],kname:'Notice board',label:'Notices of '+HGDPC_TOWN[t],sc:1});boards++}
     p=spot(z.x+2,z.y-3,8,false,8);if(p){reserved.add(p.join());
       const others=towns.filter(q=>q!==z).map(q=>[q,Math.hypot(q.x-z.x,q.y-z.y)]).sort((a,b)=>a[1]-b[1]).slice(0,3);
       const lines=others.map(([q,dd])=>HGDPC_TOWN[q.town]+': '+dirName(q.x-z.x,q.y-z.y)+', about '+Math.round(dd)+' squares').concat(['The Great Atrium: '+dirName(top.x-z.x,top.y-z.y)+', about '+Math.round(Math.hypot(top.x-z.x,top.y-z.y))+' squares']);
-      put({k:'hgdpc_post'+t,x:p[0],y:p[1],block:false,walk:true,npc:'hgdpc_text',txt:'THE ROAD FROM '+HGDPC_TOWN[t].toUpperCase()+'. '+lines.join('. ')+'. '+HGDPC_PCLOSE[t],kname:'Signpost',sc:1});posts++}});
+      put({k:'hgdpc_post'+t,x:p[0],y:p[1],block:false,walk:true,npc:'hgdpc_text',txt:'THE ROAD FROM '+HGDPC_TOWN[t].toUpperCase()+'. '+lines.join('. ')+'. '+HGDPC_PCLOSE[t],kname:'Signpost',label:'Road from '+HGDPC_TOWN[t],sc:1});posts++}});
   st.boards=boards;st.signposts=posts;
   /* 6. the vignettes */
   let vign=0,pieces=0,chests=0;
@@ -219,9 +239,9 @@ function hgdpcBuild(L){
       for(const [dx0,dy,k,sc,fl] of V.p){const f=fl||'',blk=/[bc]/.test(f);const dx=(/n/.test(f)&&dx0===0)?(hgdpcH(ax,ay,1)<.5?-2:2):dx0;const p=spot(ax+dx,ay+dy,2,blk,0);if(!p){if(/n/.test(f)||blk){good=false;break}continue}reserved.add(p.join());res.push(p.join());plan.push([p,k,sc,f])}
       for(const r of res)reserved.delete(r);
       if(!good||plan.length<Math.ceil(V.p.length*.7)||!plan.some(q=>/n/.test(q[3])))continue;
-      for(const [p,k,sc,fl] of plan){if(/n/.test(fl))put({k:'noticeboard',x:p[0],y:p[1],block:false,walk:true,npc:'hgdpc_text',txt:V.title.toUpperCase()+'. '+V.text,kname:V.title,sc});
+      for(const [p,k,sc,fl] of plan){if(/n/.test(fl))put({k:'noticeboard',x:p[0],y:p[1],block:false,walk:true,npc:'hgdpc_text',txt:V.title.toUpperCase()+'. '+V.text,kname:V.title,label:V.title.replace(/^The /,''),sc});
         else if(/c/.test(fl)){put({k,x:p[0],y:p[1],block:true,hgdTier:3,hgdGive:[],sc:1});chests++}
-        else put({k,x:p[0],y:p[1],block:/b/.test(fl),walk:!/b/.test(fl),deco:true,sc});
+        else put({k,x:p[0],y:p[1],block:/b/.test(fl),walk:!/b/.test(fl),deco:true,sc,vig:V.title,main:p===plan[0][0]?1:0});
         if(/l/.test(fl))L.lights.push([p[0],p[1]]);reserved.add(p.join());pieces++}
       vign++;return true}
     return false};
@@ -253,9 +273,9 @@ function hgdpcLetter(){let todo=0;
    ========================================================================== */
 function hgdpcH(a,b,c){const v=Math.sin(a*127.1+b*311.7+(c||0)*74.7)*43758.5453;return v-Math.floor(v)}
 /* ---------- the people: wanted height in squares for every picture a villager may use (frogs 0.9 to 1.0, folk 0.9 to 1.05, a child 0.8, moths and whale kin hover low) ---------- */
-const HGDPC_PH={hg_npc0:.98,hg_npc1:.9,hg_npc2:.8,hg_npc3:.95,hg_npc4:1,hg_npc5:.95,hg_npc6:.95,hg_wizard:1,baker:.98,farmer:1,guard:1.02,innkeeper:1,merchant:.95,miner:.95,oldman:.9,oldwoman:.88,smith:1.02,waterwoman:1,child:.8,fisher:.98,priest:1,monk:.98,prismwiz:.95,art_hgtb_elder:.88,art_hgtb_fisher:.95,yar_p_aldous:1,yar_p_isolde:1,yar_p_vance:1.02,yar_p_aldwyn:1.05,yar_p_diver:1,art_hgtb_lilacmoth:.55,art_hgtb_creammoth:.55,art_hgtb_aquawhale:.55,art_hgtb_peachwhale:.55};
+const HGDPC_PH={hg_npc0:.98,hg_npc1:.9,hg_npc2:.8,hg_npc3:.95,hg_npc4:1,hg_npc5:.95,hg_npc6:.95,hg_wizard:1,baker:.98,farmer:1,guard:1.02,innkeeper:1,merchant:.95,miner:.95,oldman:.9,oldwoman:.88,smith:1.02,waterwoman:1,child:.8,fisher:.98,priest:1,monk:.98,prismwiz:.95,art_hgtb_elder:.88,art_hgtb_fisher:.95,yar_p_aldous:1,yar_p_isolde:1,yar_p_vance:1.02,yar_p_aldwyn:1.05,yar_p_diver:1,yar_p_osric:1,yar_p_maeve:.98,art_hgtb_lilacmoth:.55,art_hgtb_creammoth:.55,art_hgtb_aquawhale:.55,art_hgtb_peachwhale:.55};
 for(const k in HGDPC_PH)if(NPC_H[k]===undefined)NPC_H[k]=HGDPC_PH[k];
-const HGDPC_PRIEST=['hg_npc0','priest','monk','art_hgtb_elder','yar_p_aldous','oldwoman','art_hgtb_lilacmoth','art_hgtb_creammoth'];
+const HGDPC_PRIEST=['hg_npc0','priest','monk','art_hgtb_elder','yar_p_aldous','yar_p_osric','art_hgtb_lilacmoth','art_hgtb_creammoth'];
 const HGDPC_QUEST=['farmer','miner','baker','art_hgtb_fisher','waterwoman','yar_p_isolde','oldman','yar_p_vance','oldwoman','guard','hg_npc5','prismwiz'];
 const HGDPC_POOL={arms:['smith','guard','hg_npc4','yar_p_aldwyn','miner','hg_npc3'],armour:['guard','yar_p_aldwyn','hg_npc5','smith','hg_npc4','merchant'],magic:['hg_wizard','prismwiz','art_hgtb_lilacmoth','yar_p_aldous','art_hgtb_elder','art_hgtb_creammoth','oldwoman'],
  trader:['merchant','hg_npc3','art_hgtb_peachwhale','yar_p_vance','art_hgtb_aquawhale','waterwoman','fisher'],inn:['innkeeper','hg_npc1','baker','oldwoman','hg_npc6','waterwoman'],general:['merchant','hg_npc6','farmer','hg_npc3','baker','fisher','hg_npc5','yar_p_isolde'],
@@ -278,18 +298,18 @@ const HGDPC_HNOTE=[
  [['THE TILE LAYER','Every step is a different colour, and none of them match.'],['THE GROUT HOUSE','The owner says he holds the town together. Nobody argues, in case he stops.'],['THE PATTERN WIDOW','Her mosaic of the maze is exact, except for one corridor she will not discuss.'],['THE SHARD COLLECTOR','A jar of broken tiles by the door, each one labelled with a date.']],
  [['THE GILDER','A pot of leaf, a pot of glue, and a very serious expression.'],['THE LEAF PRESS','Everything inside is gold, and nothing outside is.'],['THE COUNTING HOUSE','Three locks on the door and a card: come back tomorrow.'],['THE LAST OF THE GILT','A small house with a plain door, because the paint ran out.']]];
 /* ---------- churches: eight silhouettes from the painted chapel, shrines, towers and domes, each with its own tint and window glow ---------- */
-const HGDPC_CH=[
+const HGDPC_CH=[ // round 3: real painted fronts, no flattening tints (a gentle warm lift only); the two tall spires are the landmarks of Blue Lantern and Tessera
  {src:'art_hgstall_church',h:2.5,f:'brightness(1.45) saturate(1.15)',glow:[[.5,.33,.16,'rgba(255,205,120,.85)']]},
- {src:'art_hgstall_shrine',h:2.2,f:'brightness(1.5) saturate(.85)',glow:[[.5,.74,.26,'rgba(255,190,100,.6)']]},
- {src:'hg_house1',h:2.8,f:'sepia(.6) saturate(1.8) brightness(1.2)',glow:[[.27,.82,.07,'rgba(255,220,130,.9)'],[.73,.82,.07,'rgba(255,220,130,.9)']]},
- {src:'art_hgtb_shrine',h:2.3,f:'brightness(1.15) saturate(1.3) hue-rotate(150deg)',glow:[[.5,.5,.32,'rgba(150,255,230,.4)']]},
- {src:'hg_house0',h:3.3,f:'sepia(.75) saturate(1.5) brightness(1.2)',glow:[[.55,.55,.08,'rgba(255,215,120,.95)']]},
- {src:'icn_hgdi_hut5',h:2.4,f:'brightness(1.3) saturate(1.35)',glow:[[.5,.78,.24,'rgba(120,180,255,.7)']]},
- {src:'hg_house2',h:3.5,f:'brightness(1.15) hue-rotate(45deg) saturate(1.5)',glow:[[.5,.9,.1,'rgba(255,200,255,.85)']]},
- {src:'icn_hgdi_hut7',h:2.6,f:'brightness(1.2) saturate(1.25)',glow:[[.5,.76,.2,'rgba(255,215,100,.7)']]}];
+ {src:'icn_shrine_moor',h:2.7,f:'brightness(1.5) saturate(1.1)',glow:[[.5,.88,.2,'rgba(255,200,120,.55)']]},
+ {src:'hg_house1',h:2.8,f:'sepia(.4) saturate(1.6) brightness(1.2)',glow:[[.27,.82,.07,'rgba(255,220,130,.9)'],[.73,.82,.07,'rgba(255,220,130,.9)']]},
+ {src:'hgtb_shrine',h:2.5,f:'brightness(1.35) saturate(1.2)',glow:[[.5,.5,.3,'rgba(150,255,230,.35)']]},
+ {src:'icn_shrine_sand',h:2.7,f:'brightness(1.5) saturate(1.2)',glow:[[.5,.8,.2,'rgba(255,205,120,.5)']]},
+ {src:'hg_tower4',h:4.2,f:'brightness(1.3) saturate(1.2)',glow:[[.5,.9,.14,'rgba(200,230,255,.6)']]},
+ {src:'hg_tower7',h:4.4,f:'brightness(1.3) saturate(1.15)',glow:[[.5,.93,.1,'rgba(255,215,255,.6)']]},
+ {src:'icn_shrine_sut',h:2.7,f:'brightness(1.4) saturate(1.25)',glow:[[.5,.5,.25,'rgba(255,225,130,.45)']]}];
 const HGDPC_CPROP=[ // what stands beside each church: [kind,scale,gives light]
- [['wm_bell',.9,0],['hgt_gardenlantern',1,1],['urn',1,0]],[['wm_brazier',1,1],['hgtb_bench',1,0],['wm_crate',1,0]],[['hg_jar',1,0],['hgtb_stall_orange_pottery',.8,0],['hl_p_candle',1,1]],[['hgt_pearlbush',1,0],['hgtb_deco_lanterns',.75,1],['hgtb_bench',1,0]],
- [['wm_barrel_tall',1,0],['wm_bucket',1,0],['wm_lantern_hang',1,1]],[['wm_lantern_gold',1,1],['hgtb_deco_lanterns',.75,1],['wm_crate',1,0]],[['hgtb_deco_banner',.55,0],['vase0',1,0],['hgt_hanglamp',1,1]],[['wm_lantern_gold',1,1],['hgtb_deco_banner',.55,0],['hg_chestwax',.9,0]]];
+ [['wm_bell',.9,0],['hgt_gardenlantern',1,1],['urn',1,0]],[['wm_brazier',1,1],['hgtb_bench',1,0],['wm_crate',1,0]],[['hg_jar',1,0],['hgtb_stall_orange_pottery',.8,0],['hl_p_candle',1,1]],[['hgt_pearlbush',1,0],['hgt_gardenlantern',1,1],['urn',1,0]],
+ [['wm_barrel_tall',1,0],['wm_bucket',1,0],['wm_lantern_hang',1,1]],[['wm_lantern_gold',1,1],['hgt_gardenlantern',1,1],['urn',1,0]],[['hgtb_deco_banner',.55,0],['vase0',1,0],['hgt_hanglamp',1,1]],[['wm_lantern_gold',1,1],['hgtb_deco_banner',.55,0],['hg_chestwax',.9,0]]];
 function hgdpcChurchImg(t){const V=HGDPC_CH[t];if(V.c)return V.c;const b=IMG[V.src];if(!b||!b.width)return null;
   const c=document.createElement('canvas'),W=Math.min(b.width,420),H=Math.round(b.height*W/b.width);c.width=W;c.height=H;const x=c.getContext('2d');
   try{x.filter=V.f||'none'}catch(e){}x.drawImage(b,0,0,W,H);try{x.filter='none'}catch(e){}
@@ -341,6 +361,16 @@ function hgdpc2Build(L){
   const st={};HGDPC.st2=st;
   const ISP=d=>d.npc&&NPCS[d.npc]&&!/hgdpc_text|hgdb_post|^hgd_sign$|note/.test(d.npc);
   const stallRe=/^hgd_(s2_[a-z]+|shop)\d$/,villRe=/^hgd_vill\d+$/;
+  /* A0. each church moves into its town: on the rim of the square (3 to 9 squares from its centre), with room round it, so it is seen from the square */
+  let churchMoved=0;
+  for(const c of L.decor.filter(d=>/^hgd_church\d$/.test(d.npc))){const t=+c.npc.slice(-1),z=towns.find(q=>q.town===t);if(!z||Math.hypot(c.x-z.x,c.y-z.y)<=8)continue;
+    unreg(c);let best=null,bs=-1e9;const others=L.decor.filter(d=>d!==c&&ISP(d)&&Math.hypot(d.x-z.x,d.y-z.y)<=z.r+3);
+    for(let dy=-10;dy<=10;dy++)for(let dx=-10;dx<=10;dx++){const x=z.x+dx,y=z.y+dy,rho=Math.hypot(dx,dy);if(rho>9.5||rho<3||!ok(x,y,true,6))continue;
+      if(others.some(p=>Math.max(Math.abs(p.x-x),Math.abs(p.y-y))<3))continue;
+      let fr=0;for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++)if(open(x+a,y+b)&&!busy(x+a,y+b))fr++;const sc=fr*.5-Math.abs(rho-6)*1.2;if(sc>bs){bs=sc;best=[x,y]}}
+    if(best){c.x=best[0];c.y=best[1];churchMoved++}else console.warn('hgdpc: church',t,'stays');
+    reg(c);reserved.add(c.x+','+c.y)}
+  st.churchMoved=churchMoved;if(L._hgdch&&L._hgdch.churches)for(const e of L._hgdch.churches){const c=L.decor.find(d=>d.npc==='hgd_church'+e[0]);if(c){e[1]=c.x;e[2]=c.y}}
   /* A. spread the shops and villagers round each square, at least two cells between people */
   let moved=0;
   towns.forEach(z=>{
@@ -376,38 +406,60 @@ function hgdpc2Build(L){
   for(const r of ['arms','armour','magic','trader','inn','general','vill','rest','other'])for(const d of people.filter(d=>!d.__g&&roleOf(d.npc)===r&&!['hgd_fwsexton','hgd_fwcook','hgd_diver'].includes(d.npc)&&!/church|^hgd_q/.test(d.npc))){
     const pool=HGDPC_POOL[r],tk=townKey(d);let best=null,bc=1e9;pool.forEach((p,i)=>{const c=((tcount[tk]||{})[p]||0)*100+(gcount[p]||0)*3+i*.3+hgdpcH(d.x,d.y,i)*.5;if(c<bc){bc=c;best=p}});give(d,best)}
   st.peopleSwapped=swapped;st.pictures=Object.keys(gcount).length;let wi=0;for(const d of L.decor.filter(d=>d.npc&&/^hgd_/.test(d.npc)&&!/^hgd_(s2_|shop|church)/.test(d.npc)&&NPCS[d.npc]&&zoneOf(d)).sort((a,b)=>a.y-b.y||a.x-b.x))d._wi=wi++; // each person a different warning
-  /* C. houses, four to a town, along the edges of the square */
-  let houses=0;const hpos=[];
+  /* C. houses: a short street of four along the rim of each square (one row or one column, one free square between the houses, one frontage line); anything that does not fit the maze stands singly as before */
+  let houses=0,streets=0;const hpos=[];
   towns.forEach((z,t)=>{const kinds=HGDPC_HOUSES[t],notes=HGDPC_HNOTE[t],people=L.decor.filter(d=>ISP(d)&&Math.hypot(d.x-z.x,d.y-z.y)<=z.r+6);
     const base=hgdpcH(z.x,z.y,9)*6.28;
-    kinds.forEach((hk,i)=>{const ang=base+i*1.5708+(hgdpcH(z.x,z.y,10+i)-.5)*.6,rho=z.r*(.62+.3*hgdpcH(z.x,z.y,20+i)),tx=Math.round(z.x+Math.cos(ang)*rho),ty=Math.round(z.y+Math.sin(ang)*rho);
+    const mk=(i,best)=>{const [key,h0]=HGDPC_HK[kinds[i]],h=h0*(.96+.08*hgdpcH(best[0],best[1],3));if(NPC_H[key]===undefined)NPC_H[key]=1;
+      put({k:key,x:best[0],y:best[1],block:true,deco:true,hs:'hgdpc_house',sc:+(h/NPC_H[key]).toFixed(3)});hpos.push(best);reserved.add(best.join());houses++;
+      HGDPC.lights.push({x:best[0],y:best[1],col:[1,.78,.45],kI:.32,r2:16});
+      // a door plate in front of it, and a small thing of its own
+      const pl=spot(best[0],best[1]+1,2,false,0)||spot(best[0],best[1],3,false,0);
+      if(pl){reserved.add(pl.join());const nt=notes[i],kk='hgdpc_hp'+t+'_'+i;HGDPC_LET[kk]={base:'wm_signpost',r:[.08,.16,.84,.3],text:nt[0],maxw:200,small:1};NPC_H[kk]=NPC_H.wm_signpost||1.25;
+        put({k:kk,x:pl[0],y:pl[1],block:false,walk:true,npc:'hgdpc_text',txt:nt[0]+'. '+nt[1],kname:'Door plate',label:nt[0].replace(/^THE /,'').split(' ').slice(0,3).join(' '),sc:.62})}
+      const TH=['wm_barrel','wm_crate','hgtb_plant_barrel','urn','sacks','wm_bucket','hg_jar','hgt_mushrooms'],pp=spot(best[0]+(hgdpcH(best[0],best[1],8)<.5?-1:1),best[1]+1,2,false,0);
+      if(pp){reserved.add(pp.join());put({k:TH[Math.floor(hgdpcH(best[0],best[1],11)*TH.length)],x:pp[0],y:pp[1],block:false,walk:true,deco:true,sc:1})}};
+    // the streets: n cells two apart in a row or column, on the rim of the square; four if the maze allows, else runs of three or two
+    const findStreet=n=>{let street=null,bsc=-1e9;
+      for(const vert of [0,1])for(let dy=-z.r;dy<=z.r;dy++)for(let dx=-z.r;dx<=z.r;dx++){const cells=[];let good=true;
+        for(let k=0;k<n&&good;k++){const x=z.x+dx+(vert?0:2*k),y=z.y+dy+(vert?2*k:0);
+          if(Math.hypot(x-z.x,y-z.y)>z.r+1||!ok(x,y,true,5)||people.some(p=>Math.max(Math.abs(p.x-x),Math.abs(p.y-y))<2)||hpos.some(p=>Math.max(Math.abs(p[0]-x),Math.abs(p[1]-y))<3)){good=false;break}
+          if(k<n-1){const gx=x+(vert?0:1),gy=y+(vert?1:0);if(!free1(gx,gy)||!(free1(gx+(vert?1:0),gy+(vert?0:1))||free1(gx-(vert?1:0),gy-(vert?0:1)))){good=false;break}}
+          if(!free1(x+(vert?1:0),y+(vert?0:1))&&!free1(x-(vert?1:0),y-(vert?0:1))){good=false;break}
+          cells.push([x,y])}
+        if(!good)continue;const mx=cells.reduce((m,c)=>m+c[0],0)/n,my=cells.reduce((m,c)=>m+c[1],0)/n,rho=Math.hypot(mx-z.x,my-z.y);
+        const sc=-Math.abs(rho-6.5)*1.5+hgdpcH(dx,dy,30+t)*.4;if(sc>bsc){bsc=sc;street=cells}}
+      return street};
+    const rem=[0,1,2,3];
+    while(rem.length>=2){let got=null;for(let n=Math.min(4,rem.length);n>=2&&!got;n--)got=findStreet(n);if(!got)break;
+      got.forEach(c=>mk(rem.shift(),c));streets++}
+    rem.forEach(i=>{const hk=kinds[i],ang=base+i*1.5708+(hgdpcH(z.x,z.y,10+i)-.5)*.6,rho=z.r*(.62+.3*hgdpcH(z.x,z.y,20+i)),tx=Math.round(z.x+Math.cos(ang)*rho),ty=Math.round(z.y+Math.sin(ang)*rho);
       let best=null,bs=-1e9;for(let dy=-5;dy<=5;dy++)for(let dx=-5;dx<=5;dx++){const x=tx+dx,y=ty+dy;if(Math.hypot(x-z.x,y-z.y)>z.r+1||!ok(x,y,true,4))continue;
         if(people.some(p=>Math.max(Math.abs(p.x-x),Math.abs(p.y-y))<2))continue;if(hpos.some(p=>Math.max(Math.abs(p[0]-x),Math.abs(p[1]-y))<4))continue;
         let fr=0;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]])if(free1(x+a,y+b))fr++;if(fr<1)continue;const s=-Math.hypot(dx,dy)+fr*.4;if(s>bs){bs=s;best=[x,y]}}
-      if(!best)return;const [key,h0]=HGDPC_HK[hk],h=h0*(.92+.16*hgdpcH(best[0],best[1],3));if(NPC_H[key]===undefined)NPC_H[key]=1;
-      const hd=put({k:key,x:best[0],y:best[1],block:true,deco:true,hs:'hgdpc_house',sc:+(h/NPC_H[key]).toFixed(3)});hpos.push(best);reserved.add(best.join());houses++;
-      HGDPC.lights.push({x:best[0],y:best[1],col:[1,.78,.45],kI:.32,r2:16});
-      // a door plate beside it, and a small thing of its own
-      const pl=spot(best[0],best[1]+1,2,false,0)||spot(best[0],best[1],3,false,0);
-      if(pl){reserved.add(pl.join());const nt=notes[i],kk='hgdpc_hp'+t+'_'+i;HGDPC_LET[kk]={base:'wm_signpost',r:[.08,.16,.84,.3],text:nt[0],maxw:200,small:1};NPC_H[kk]=NPC_H.wm_signpost||1.25;
-        put({k:kk,x:pl[0],y:pl[1],block:false,walk:true,npc:'hgdpc_text',txt:nt[0]+'. '+nt[1],kname:'Door plate',sc:.62})}
-      const TH=['wm_barrel','wm_crate','hgtb_plant_barrel','urn','sacks','wm_bucket','hg_jar','hgt_mushrooms'],pp=spot(best[0]+(hgdpcH(best[0],best[1],8)<.5?-1:1),best[1]+1,2,false,0);
-      if(pp){reserved.add(pp.join());put({k:TH[Math.floor(hgdpcH(best[0],best[1],11)*TH.length)],x:pp[0],y:pp[1],block:false,walk:true,deco:true,sc:1})}})});
+      if(best)mk(i,best)})});
+  st.streets=streets;
   st.houses=houses;
-  /* D. churches: a lamp at the door, a bell or lanterns and other small things of their own */
+  /* D. churches: a lamp, a bell or lanterns and other small things of their own, standing BESIDE the church (never within one square, never in the line of the door) */
   let cprops=0;
   for(const c of L.decor.filter(d=>/^hgd_church\d$/.test(d.npc))){const t=+c.npc.slice(-1),P=HGDPC_CPROP[t];
-    HGDPC.lights.push({x:c.x,y:c.y,col:t===3?[.6,1,.9]:t===5?[.5,.7,1]:t===6?[.9,.6,1]:[1,.8,.45],kI:.7,r2:44});
-    P.forEach(([k,sc,lt],i)=>{const p=spot(c.x+(i-1)*2,c.y+(i===1?1:0),3,false,0);if(!p||(p[0]===c.x&&p[1]===c.y))return;reserved.add(p.join());put({k,x:p[0],y:p[1],block:false,walk:true,deco:true,sc});cprops++;if(lt)L.lights.push([p[0],p[1]])})}
+    HGDPC.lights.push({x:c.x,y:c.y,col:t===3?[.6,1,.9]:t===5?[.5,.7,1]:t===6?[.9,.6,1]:[1,.8,.45],kI:.9,r2:56});
+    const SLOT=[[-2,-1],[2,-1],[-3,1],[3,1]];
+    P.forEach(([k,sc,lt],i)=>{let p=null;for(const [ox,oy] of [SLOT[i],SLOT[(i+1)%4],SLOT[(i+2)%4]]){p=spot(c.x+ox,c.y+oy,1,false,0);if(p&&Math.max(Math.abs(p[0]-c.x),Math.abs(p[1]-c.y))>=2&&!(p[0]===c.x))break;p=null}
+      if(!p)return;reserved.add(p.join());put({k,x:p[0],y:p[1],block:false,walk:true,deco:true,sc,cp:1});cprops++;if(lt)L.lights.push([p[0],p[1]])})}
   st.churchProps=cprops;
   /* E. keep things from hiding people and landmarks; duplicate danger signs; clusters of the same thing */
-  const moveAway=(d,from,R)=>{unreg(d);const p=spot(from.x,from.y,R,false,0);let q=null;
-    for(let r=2;r<=R&&!q;r++)for(let dy=-r;dy<=r&&!q;dy++)for(let dx=-r;dx<=r&&!q;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=from.x+dx,y=from.y+dy;if(ok(x,y,!!d.block,0))q=[x,y]}
+  const moveAway=(d,from,R,r0)=>{unreg(d);let q=null;
+    for(let r=r0||2;r<=R&&!q;r++)for(let dy=-r;dy<=r&&!q;dy++)for(let dx=-r;dx<=r&&!q;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=from.x+dx,y=from.y+dy;if(ok(x,y,!!d.block,0))q=[x,y]}
     if(q){d.x=q[0];d.y=q[1];reserved.add(q.join())}reg(d);return !!q};
   let cleared=0;const tallish=d=>NPC_H[d.k]*(d.sc||1)>.45&&!d.pic&&!/lamp|lantern|brazier|candle|chest/.test(d.k);
   const holders=L.decor.filter(d=>(ISP(d)&&zoneOf(d))||(d.block&&!d.npc&&NPC_H[d.k]*(d.sc||1)>=1.2&&zoneOf(d)&&!/tree|lamp/.test(d.k)&&!d.pic));
   for(const h of holders){for(const d of L.decor.slice()){if(d===h||d.npc&&ISP(d)||d.skind)continue;if(Math.max(Math.abs(d.x-h.x),Math.abs(d.y-h.y))>1||!NPC_H[d.k]||d.hgdTier||d.hs)continue;
       if(!tallish(d))continue;if(d.x===h.x&&d.y===h.y&&!d.pic&&d.block===h.block&&false)continue;if(moveAway(d,h,5))cleared++}}
+  for(const h of L.decor.filter(d=>d.npc&&/^hgd_(q\d+|s2_[a-z]+\d|shop\d)$/.test(d.npc)&&zoneOf(d)))for(const d of L.decor.slice()){if(d===h||d.npc||d.hgdTier||d.hs||d.pic||!d.block||!NPC_H[d.k]||NPC_H[d.k]*(d.sc||1)<.4)continue;
+    if(Math.max(Math.abs(d.x-h.x),Math.abs(d.y-h.y))===2&&(d.x===h.x||d.y===h.y)&&/crate|barrel|sacks|bench|table|chest/.test(d.k)&&moveAway(d,h,7,3))cleared++}
+  for(const c of L.decor.filter(d=>/^hgd_church\d$/.test(d.npc)))for(const d of L.decor.slice()){if(d===c||d.cp||d.hgdTier||d.hs||d.pic||(d.npc&&ISP(d))||!NPC_H[d.k])continue;const cb=Math.max(Math.abs(d.x-c.x),Math.abs(d.y-c.y));
+    if(cb>2)continue;if(d.skind==='church'&&cb>=2)continue;if(cb<=1||(tallish(d)&&!d.skind)||(cb===2&&(d.x===c.x||d.y===c.y)&&/lamp|lantern/.test(d.k)&&!d.skind)){if(moveAway(d,c,7,3))cleared++}}
   st.cleared=cleared;
   const sg=L.decor.filter(d=>d.npc==='hgd_sign'),seenZ=[];let dsg=0;for(const d of sg){if(seenZ.some(q=>q.zone===d.zone&&Math.hypot(q.x-d.x,q.y-d.y)<12)){unreg(d);L.decor.splice(L.decor.indexOf(d),1);dsg++}else seenZ.push(d)}st.dupSigns=dsg;
   /* clusters: three or more of one thing within three cells: swap, then remove */
@@ -421,10 +473,47 @@ function hgdpc2Build(L){
   const pools=[];const addPool=(x,y,col,kI,r2)=>{HGDPC.lights.push({x,y,col,kI,r2});pools.push([x,y])};
   const around=(z,col,reach,gap,maxN)=>{let n=0;const cs=[];for(let dy=-reach;dy<=reach;dy++)for(let dx=-reach;dx<=reach;dx++){const x=z.x+dx,y=z.y+dy;if(!open(x,y)||Math.hypot(dx,dy)>reach)continue;if(n4(x,y)>=3)cs.push([x,y,hgdpcH(x,y,40)])}
     cs.sort((a,b)=>a[2]-b[2]);const got=[];for(const [x,y] of cs){if(got.length>=maxN)break;if(got.some(g=>Math.hypot(g[0]-x,g[1]-y)<gap))continue;got.push([x,y]);addPool(x,y,col,.42,30)}};
-  towns.forEach((z,t)=>{const col=HGDPC_TCOL[t];addPool(z.x,z.y,col,.8,64);around(z,col,z.r+8,6,16);
+  towns.forEach((z,t)=>{const col=HGDPC_TCOL[t];addPool(z.x,z.y,col,1.25,100);around(z,col,z.r+8,6,16);
     for(const d of L.decor.filter(d=>stallRe.test(d.npc||'')&&Math.hypot(d.x-z.x,d.y-z.y)<=z.r+1)){const k=/^hgd_shop/.test(d.npc)?'general':d.npc.match(/s2_([a-z]+)/)[1];addPool(d.x,d.y,HGDPC_KCOL[k]||col,.5,26)}});
-  encl.slice(0,10).forEach((z,i)=>{const col=HGDPC_ECOL[i%10];addPool(z.x,z.y,col,.7,52);around(z,col,z.r+9,6,10)});
+  encl.slice(0,10).forEach((z,i)=>{const col=HGDPC_ECOL[i%10];addPool(z.x,z.y,col,1.7,110);around(z,col,z.r+9,5,14)});
   st.pools=pools.length;
+  /* F2. light along the corridors round every square and enclave: a hanging lamp and a pool of light every four or five squares, so props are seen and no way is black */
+  const allL=pools.concat((L.lights||[]).map(q=>[q[0],q[1]]));let lampsAdded=0;
+  const corr=(z,col,reach,gap,kI,r2)=>{const cs=[];for(let dy=-reach;dy<=reach;dy++)for(let dx=-reach;dx<=reach;dx++){const x=z.x+dx,y=z.y+dy;if(!open(x,y)||Math.hypot(dx,dy)>reach||Math.hypot(dx,dy)<z.r*.6||n4(x,y)>3)continue;cs.push([x,y,hgdpcH(x,y,50)])}
+    cs.sort((a,b)=>a[2]-b[2]);for(const [x,y] of cs){if(allL.some(g=>Math.hypot(g[0]-x,g[1]-y)<gap))continue;if(occ.has(x+','+y)&&occ.get(x+','+y).some(d=>d.block||d.npc))continue;
+      allL.push([x,y]);addPool(x,y,col,kI,r2);if(!busy(x,y)&&!reserved.has(x+','+y)){put({k:'hgt_hanglamp',x,y,block:false,walk:true,deco:true,sc:1,cl:1});lampsAdded++}}};
+  towns.forEach((z,t)=>corr(z,HGDPC_TCOL[t],z.r+9,5,.55,34));
+  encl.slice(0,10).forEach((z,i)=>corr(z,HGDPC_ECOL[i%10],z.r+12,4.5,.6,36));
+  st.corridorLamps=lampsAdded;st.pools=pools.length;
+  /* F3. every landmark of a square says what it is: a named plaque beside the main piece, and a light on it */
+  let plaques=0;
+  towns.forEach((z,t)=>{const V=HGDPC_VIG[t],m=L.decor.find(d=>d.vig===V.title&&d.main)||L.decor.find(d=>d.vig===V.title&&!d.npc);if(!m)return;
+    HGDPC.lights.push({x:m.x,y:m.y,col:HGDPC_TCOL[t],kI:.7,r2:36});if(t===4)return;
+    const p=spot(m.x+1,m.y+1,2,false,0)||spot(m.x-1,m.y+1,3,false,0);if(!p||Math.max(Math.abs(p[0]-m.x),Math.abs(p[1]-m.y))<1)return;reserved.add(p.join());
+    const key='hgdpc_lm'+t;HGDPC_LET[key]={base:'wm_signpost',r:[.1,.18,.8,.24],text:V.title.replace(/^The /,'').toUpperCase(),maxw:260};NPC_H[key]=NPC_H.wm_signpost||1.25;
+    put({k:key,x:p[0],y:p[1],block:false,walk:true,npc:'hgdpc_text',txt:V.title.toUpperCase()+'. '+V.text.split('. ')[0].replace(/\.$/,'')+'.',kname:'Landmark plaque',label:V.title.replace(/^The /,''),sc:.9});plaques++});
+  st.plaques=plaques;
+  /* F4. nothing a pocket the party cannot reach: any blocker that closes off a cell is made walk-through */
+  {const W=L.rows[0].length,H=L.rows.length;let fixedPocket=0;
+   for(let pass=0;pass<4;pass++){const bl=new Set(L.decor.filter(d=>d.block).map(d=>d.x+','+d.y));
+    const fl=u=>{const sn=new Uint8Array(W*H),q=[[L.start.x,L.start.y]];sn[L.start.y*W+L.start.x]=1;while(q.length){const [x,y]=q.pop();for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H||sn[ny*W+nx]||!open(nx,ny))continue;if(u&&bl.has(nx+','+ny))continue;sn[ny*W+nx]=1;q.push([nx,ny])}}return sn};
+    const A=fl(false),B=fl(true);let cuts=0;
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(!A[y*W+x]||B[y*W+x]||bl.has(x+','+y))continue;cuts++;
+      const adj=L.decor.filter(d=>d.block&&Math.abs(d.x-x)+Math.abs(d.y-y)===1).sort((p,q)=>(p.hs?1:0)-(q.hs?1:0)||(p.npc?1:0)-(q.npc?1:0));
+      const t=adj.find(d=>!d.npc&&!d.hs&&!d.hgdTier)||adj.find(d=>!d.npc&&!d.hgdTier);if(t){t.block=false;t.walk=true;fixedPocket++}}
+    if(!cuts)break}
+   st.pocketsOpened=fixedPocket}
+  /* F5. short titles (d.label) for the notes and signs of the towns and enclaves, so the lettering pass has a good heading */
+  {const LAB=[['hedge maze is the easy part','Hedge warning'],['if you are reading this','Lost? So was I'],['gem doors are worth','Gem doors'],['eleven thousand tiles','Tile count'],['i found a gold key in a vault','Gold key luck'],['hollowed warden was a gardener','The old Warden'],['blue door, blue key','Door and key rule'],['i counted the steps','Step count'],['every maze has a middle','The middle'],['my mother says','A child\'s warning'],['gilded quarter is the richest','Gilded Quarter'],['something large went past','Something large'],['twelve people in the maze','Twelve tasks'],['blue lamps do not flicker','Blue lamps'],['slow here','Slug warning'],['rested here. nothing came','Rested here'],['counted forty turns','Forty turns'],['two ways out','Two ways out'],['i do not know where i am','Lost but sure'],['shells under the lamp','Shells and candle'],['dead end is not the end','Dead end'],['one more turn','One more turn'],['here ends the mason','Mason\'s Ward'],['i measured the corridor','Measured corridor'],['moss on the north side','Moss rule'],['honey on the wall is warm','Warm honey'],['i named this corner','Mildred\'s corner'],['lost two days to a wrong turn','Wrong turn'],['dead end has a draught','Rain draught'],['the lamp is not mine','Borrowed lamp'],['counting the tiles','Tile counting'],['stacked all this against the worm','Against the worm'],['blue lantern, blue door','Blue silence'],['follow the red tiles','Red tiles'],['sound of dripping','Dripping'],['came all this way for a dead end','A nice dead end'],['left at the last crossing','Last crossing']];
+   let labelled=0;const tc=w=>w.toLowerCase().replace(/\b[a-z]/g,m=>m.toUpperCase());
+   for(const d of L.decor){if(!d.npc||d.label||!zoneOf(d))continue;
+    if(d.npc==='hgd_sign'){d.label='Danger ahead';labelled++;continue}
+    if(!/^(hgd_note|hgd_pa_note|hgdb_note|hgdb_post)$/.test(d.npc))continue;
+    const t=String(d.pbt||d.text||(d.npc==='hgd_note'&&typeof HGDF_NOTES!=='undefined'?HGDF_NOTES[(d.note||0)%HGDF_NOTES.length]:'')||'').toLowerCase();
+    if(d.npc==='hgdb_post'){const raw=String(d.pbt||''),m=/(?:North|East|South|West): (?!The )([A-Z][a-z]+(?: [A-Z][a-z]+)*)/.exec(raw),p=/^SIGNPOST\. ([A-Z ]+?)\./.exec(raw);
+      d.label=m&&/PRECINCT/.test(raw)&&(L.decor.some(e=>e!==d&&e.npc==='hgdb_post'&&String(e.pbt||'').startsWith(raw.slice(0,30))&&e.label))?'Road to '+m[1]:(p?tc(p[1]).replace(/\bPrecinct\b/,'precinct'):'Signpost');labelled++;continue}
+    const h=LAB.find(e=>t.includes(e[0]));if(h){d.label=h[1];labelled++}}
+   st.labelled=labelled}
   /* G. the heights table */
   const sp=hgdpcScalePass(L,zoneOf);st.scaleFixed=sp.fixed;st.scaleTable=sp.table;
   /* H. lettered boards: the notice board of each town and every plaque carries its own heading */

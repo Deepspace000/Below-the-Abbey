@@ -1,0 +1,969 @@
+{
+ "load_s": 92,
+ "audit1": {
+  "zoneDecor": 1264,
+  "pictures": 35,
+  "picUse": "oldman:4 fisher:4 monk:4 child:4 hg_npc2:4 hg_npc1:4",
+  "giverPictures": "20 of 20",
+  "giverMax": 1,
+  "repeatSent": [
+   "3x They said it before they went in."
+  ],
+  "repeatCount": 1,
+  "maxRepeat": 3,
+  "emptyText": [],
+  "badChars": 0,
+  "npcAdjacent": 0,
+  "npcWithin2": 1,
+  "adjSample": [],
+  "blockerRows": 1,
+  "blockerRowAt": [
+   "14,159"
+  ],
+  "houses": 32,
+  "churchArt": [
+   "hgd_church0:-@106,177",
+   "hgd_church1:-@16,162",
+   "hgd_church2:-@67,130",
+   "hgd_church3:-@71,98",
+   "hgd_church4:-@41,84",
+   "hgd_church5:-@33,49",
+   "hgd_church6:-@124,16",
+   "hgd_church7:-@137,28"
+  ],
+  "stacked": 4,
+  "onWall": 2,
+  "clusters": 0,
+  "clusterList": [],
+  "cutOff": 0,
+  "npcUnreach": 0,
+  "lights": 737,
+  "extraLights": 682,
+  "stats": {
+   "peopleRescaled": 97,
+   "peopleSwapped": 81,
+   "groveSwapped": 52,
+   "groveRemoved": 28,
+   "stackedRemoved": 155,
+   "movedBlockers": 0,
+   "freedBlockers": 0,
+   "shopSigns": 56,
+   "boards": 8,
+   "signposts": 8,
+   "vignettes": 18,
+   "vignettePieces": 112,
+   "vignetteChests": 4
+  }
+ },
+ "audit2": {
+  "churchDist": "0:6 1:6 2:6 3:6 4:6 5:6 6:3 7:6",
+  "houses": 32,
+  "housesInStreet": 29,
+  "churchDoorBlockers": [
+   "line:icn_hgdi_hut0@106,175 of hgd_church0",
+   "line:icn_hgdi_hut0@69,130 of hgd_church2"
+  ],
+  "notesSigns": 169,
+  "noLabel": [
+   "hgd_pa_note@75,91:Scratched: I heard footsteps b",
+   "hgd_pa_note@53,137:Chalked: Stopped here to mend ",
+   "hgd_pa_note@59,145:Chalked: Ate my last biscuit a",
+   "hgd_pa_note@31,163:Chalked: If a wasp asks, I was",
+   "hgd_pa_note@11,177:Chalked: A good place to cry, ",
+   "hgd_pa_note@91,199:Written in charcoal: I was bra",
+   "hgd_pa_note@101,200:Chalked: Rest your feet. Whate"
+  ],
+  "emptyText": [],
+  "longLabels": [],
+  "dupLabelsNear": 0,
+  "pocket": 0,
+  "plaques": 7,
+  "corridorLamps": 235,
+  "emDash": 0
+ },
+ "hgt": {
+  "n": 153,
+  "sample": [
+   {
+    "lvl": 475,
+    "x": 175,
+    "y": 25,
+    "kind": "page",
+    "label": "Not Yours",
+    "text": "Carved with a fine hand: Everything here that shines is not yours. Most of it is not even gold."
+   },
+   {
+    "lvl": 475,
+    "x": 106,
+    "y": 183,
+    "kind": "warning",
+    "label": "Hedge warning",
+    "text": "Chalked on the wall: The hedge maze is the easy part. Do not get cocky."
+   },
+   {
+    "lvl": 475,
+    "x": 17,
+    "y": 17,
+    "kind": "plaque",
+    "label": "Which Left",
+    "text": "A neat note: If you are reading this, you are lost. So was I. Turn left. No, the other left."
+   },
+   {
+    "lvl": 475,
+    "x": 109,
+    "y": 131,
+    "kind": "scroll",
+    "label": "There is a shortcut here",
+    "text": "Scratched small: There is a shortcut here. I walked into the wall to find it, and I was right. Try the walls that look a shade off."
+   },
+   {
+    "lvl": 475,
+    "x": 56,
+    "y": 179,
+    "kind": "slate",
+    "label": "The slug is not slow",
+    "text": "Written in charcoal: The slug is not slow. The slug is patient. There is a difference."
+   },
+   {
+    "lvl": 475,
+    "x": 159,
+    "y": 69,
+    "kind": "slate",
+    "label": "Do Not Feed",
+    "text": "A child's drawing of a worm, with a sign: DO NOT FEED. Underneath, someone has added: TOO LATE."
+   },
+   {
+    "lvl": 475,
+    "x": 161,
+    "y": 48,
+    "kind": "plaque",
+    "label": "Spent Keys",
+    "text": "Carved deep: A KEY IS USED UP IN THE LOCK. SAVE THEM FOR THE GOOD DOORS."
+   },
+   {
+    "lvl": 475,
+    "x": 57,
+    "y": 123,
+    "kind": "scroll",
+    "label": "Gem doors",
+    "text": "Chalked: Gem doors are worth the trouble. The treasure behind them is better than anything you can buy."
+   },
+   {
+    "lvl": 475,
+    "x": 63,
+    "y": 61,
+    "kind": "scroll",
+    "label": "Signs Mean It",
+    "text": "Scratched: The signs mean what they say. I have stood under one and watched a worm go by the other way."
+   },
+   {
+    "lvl": 475,
+    "x": 95,
+    "y": 104,
+    "kind": "page",
+    "label": "LOST: one lantern",
+    "text": "A note pinned to the wall: LOST: one lantern, brass, very dear to me. If found, please do not return it, I am never going back there."
+   },
+   {
+    "lvl": 475,
+    "x": 197,
+    "y": 97,
+    "kind": "page",
+    "label": "Four Towns",
+    "text": "Chalked: Four towns is a good walk. Eight towns is a good life."
+   },
+   {
+    "lvl": 475,
+    "x": 138,
+    "y": 69,
+    "kind": "slate",
+    "label": "Warm Walls",
+    "text": "Scratched into the sandstone: The walls here are warm at noon, and I do not know why. There is no noon."
+   }
+  ]
+ },
+ "shots": {
+  "hub_Hedgefoot": [
+   112,
+   179,
+   [
+    112,
+    182,
+    0
+   ],
+   74.7
+  ],
+  "hub_Cairnhold": [
+   18,
+   168,
+   [
+    18,
+    171,
+    0
+   ],
+   91.3
+  ],
+  "hub_Combwick": [
+   64,
+   135,
+   [
+    64,
+    138,
+    0
+   ],
+   91.0
+  ],
+  "hub_NacreLanding": [
+   76,
+   101,
+   [
+    76,
+    104,
+    0
+   ],
+   116.8
+  ],
+  "hub_Dunewell": [
+   42,
+   90,
+   [
+    42,
+    93,
+    0
+   ],
+   92.8
+  ],
+  "hub_BlueLantern": [
+   28,
+   45,
+   [
+    28,
+    48,
+    0
+   ],
+   88.7
+  ],
+  "hub_Tessera": [
+   121,
+   16,
+   [
+    121,
+    19,
+    0
+   ],
+   82.5
+  ],
+  "hub_Gildmere": [
+   143,
+   28,
+   [
+    143,
+    31,
+    0
+   ],
+   96.4
+  ],
+  "hub_TheFootoftheMaze": [
+   101,
+   199,
+   [
+    98,
+    199,
+    1
+   ],
+   74.5
+  ],
+  "hub_TheQuietRoom": [
+   52,
+   168,
+   [
+    52,
+    171,
+    0
+   ],
+   89.8
+  ],
+  "hub_TheLampClearing": [
+   75,
+   25,
+   [
+    75,
+    28,
+    0
+   ],
+   65.1
+  ],
+  "hub_ThePondEnclave": [
+   172,
+   35,
+   [
+    172,
+    38,
+    0
+   ],
+   73.1
+  ],
+  "hub_TheReadingRoom": [
+   14,
+   70,
+   [
+    14,
+    73,
+    0
+   ],
+   108.2
+  ],
+  "hub_TheRestStop": [
+   178,
+   92,
+   [
+    178,
+    95,
+    0
+   ],
+   82.6
+  ],
+  "hub_TheSleepingNook": [
+   132,
+   99,
+   [
+    132,
+    102,
+    0
+   ],
+   68.5
+  ],
+  "hub_TheLanternLanding": [
+   15,
+   11,
+   [
+    15,
+    14,
+    0
+   ],
+   85.0
+  ],
+  "hub_TheMossyCorner": [
+   93,
+   134,
+   [
+    93,
+    137,
+    0
+   ],
+   86.1
+  ],
+  "hub_TheWaitingRoom": [
+   46,
+   63,
+   [
+    46,
+    66,
+    0
+   ],
+   102.3
+  ],
+  "hub_TheSafeHollow": [
+   182,
+   124,
+   [
+    182,
+    127,
+    0
+   ],
+   104.6
+  ],
+  "q0": [
+   112,
+   179,
+   [
+    112,
+    182,
+    0
+   ],
+   71.4
+  ],
+  "q1": [
+   18,
+   168,
+   [
+    18,
+    171,
+    0
+   ],
+   86.1
+  ],
+  "q2": [
+   64,
+   135,
+   [
+    64,
+    138,
+    0
+   ],
+   91.6
+  ],
+  "q3": [
+   76,
+   101,
+   [
+    76,
+    104,
+    0
+   ],
+   122.1
+  ],
+  "q4": [
+   42,
+   90,
+   [
+    42,
+    93,
+    0
+   ],
+   90.3
+  ],
+  "q5": [
+   28,
+   45,
+   [
+    28,
+    48,
+    0
+   ],
+   85.2
+  ],
+  "q6": [
+   121,
+   16,
+   [
+    121,
+    19,
+    0
+   ],
+   81.9
+  ],
+  "q7": [
+   143,
+   28,
+   [
+    143,
+    31,
+    0
+   ],
+   101.8
+  ],
+  "church0": [
+   106,
+   177,
+   [
+    103,
+    177,
+    1
+   ],
+   75.7
+  ],
+  "church1": [
+   16,
+   162,
+   [
+    16,
+    165,
+    0
+   ],
+   77.0
+  ],
+  "church2": [
+   67,
+   130,
+   [
+    67,
+    133,
+    0
+   ],
+   82.6
+  ],
+  "church3": [
+   71,
+   98,
+   [
+    68,
+    98,
+    1
+   ],
+   94.0
+  ],
+  "church4": [
+   41,
+   84,
+   [
+    41,
+    87,
+    0
+   ],
+   83.1
+  ],
+  "church5": [
+   33,
+   49,
+   [
+    33,
+    52,
+    0
+   ],
+   86.4
+  ],
+  "church6": [
+   124,
+   16,
+   [
+    124,
+    19,
+    0
+   ],
+   81.7
+  ],
+  "church7": [
+   137,
+   28,
+   [
+    137,
+    31,
+    0
+   ],
+   79.0
+  ],
+  "house0": [
+   102,
+   175,
+   [
+    102,
+    178,
+    0
+   ],
+   71.1
+  ],
+  "house7": [
+   23,
+   164,
+   [
+    23,
+    167,
+    0
+   ],
+   79.5
+  ],
+  "house14": [
+   71,
+   101,
+   [
+    71,
+    98,
+    2
+   ],
+   140.3
+  ],
+  "house21": [
+   23,
+   45,
+   [
+    20,
+    45,
+    1
+   ],
+   60.8
+  ],
+  "house28": [
+   138,
+   30,
+   [
+    138,
+    33,
+    0
+   ],
+   66.8
+  ],
+  "sign_page1": [
+   175,
+   25,
+   [
+    175,
+    28,
+    0
+   ],
+   61.3
+  ],
+  "sign_warning1": [
+   106,
+   183,
+   [
+    103,
+    183,
+    1
+   ],
+   73.8
+  ],
+  "sign_plaque1": [
+   17,
+   17,
+   [
+    17,
+    20,
+    0
+   ],
+   66.9
+  ],
+  "sign_scroll1": [
+   57,
+   123,
+   [
+    54,
+    123,
+    1
+   ],
+   61.3
+  ],
+  "sign_scroll2": [
+   129,
+   9,
+   [
+    129,
+    12,
+    0
+   ],
+   59.1
+  ],
+  "sign_plaque2": [
+   153,
+   24,
+   [
+    153,
+    25,
+    0
+   ],
+   93.1
+  ],
+  "sign_slate1": [
+   31,
+   175,
+   [
+    28,
+    175,
+    1
+   ],
+   67.4
+  ],
+  "sign_tablet1": [
+   185,
+   131,
+   [
+    182,
+    131,
+    1
+   ],
+   102.6
+  ],
+  "sign_page2": [
+   17,
+   63,
+   [
+    14,
+    63,
+    1
+   ],
+   69.3
+  ],
+  "sign_tablet2": [
+   176,
+   41,
+   [
+    179,
+    41,
+    3
+   ],
+   63.3
+  ],
+  "sign_slate2": [
+   115,
+   26,
+   [
+    115,
+    29,
+    0
+   ],
+   54.9
+  ],
+  "sign_warning2": [
+   77,
+   125,
+   [
+    77,
+    128,
+    0
+   ],
+   75.4
+  ],
+  "plaque_112_178": [
+   112,
+   178,
+   [
+    112,
+    181,
+    0
+   ],
+   84.1
+  ],
+  "plaque_19_175": [
+   19,
+   175,
+   [
+    19,
+    178,
+    0
+   ],
+   85.7
+  ],
+  "plaque_63_140": [
+   63,
+   140,
+   [
+    60,
+    140,
+    1
+   ],
+   81.2
+  ],
+  "plaque_79_105": [
+   79,
+   105,
+   [
+    76,
+    105,
+    1
+   ],
+   94.9
+  ],
+  "plaque_29_52": [
+   29,
+   52,
+   [
+    29,
+    55,
+    0
+   ],
+   94.8
+  ],
+  "plaque_121_21": [
+   121,
+   21,
+   [
+    121,
+    24,
+    0
+   ],
+   59.0
+  ]
+ },
+ "lum": {
+  "Hedgefoot": {
+   "hubs": [
+    68.0,
+    69.6
+   ],
+   "cors": [
+    82.3,
+    74.6,
+    80.4
+   ]
+  },
+  "Cairnhold": {
+   "hubs": [
+    64.8,
+    58.8
+   ],
+   "cors": [
+    58.5,
+    61.0,
+    56.2
+   ]
+  },
+  "Combwick": {
+   "hubs": [
+    70.0,
+    71.8
+   ],
+   "cors": [
+    45.8,
+    59.2,
+    55.8
+   ]
+  },
+  "Nacre Landing": {
+   "hubs": [
+    67.5,
+    94.1
+   ],
+   "cors": [
+    48.5,
+    103.2,
+    106.6
+   ]
+  },
+  "Dunewell": {
+   "hubs": [
+    76.5,
+    74.0
+   ],
+   "cors": [
+    81.8,
+    111.6,
+    71.7
+   ]
+  },
+  "Blue Lantern": {
+   "hubs": [
+    81.2,
+    78.1
+   ],
+   "cors": [
+    98.5,
+    55.5,
+    52.6
+   ]
+  },
+  "Tessera": {
+   "hubs": [
+    61.4,
+    60.5
+   ],
+   "cors": [
+    59.9,
+    98.7,
+    78.0
+   ]
+  },
+  "Gildmere": {
+   "hubs": [
+    64.9,
+    61.5
+   ],
+   "cors": [
+    56.3,
+    56.5,
+    61.0
+   ]
+  },
+  "The Quiet Room": {
+   "hubs": [
+    84.2,
+    80.9
+   ],
+   "cors": [
+    48.5,
+    44.6,
+    52.9
+   ]
+  },
+  "The Lamp Clearing": {
+   "hubs": [
+    65.6,
+    75.5
+   ],
+   "cors": [
+    90.7,
+    57.5,
+    66.3
+   ]
+  },
+  "The Pond Enclave": {
+   "hubs": [
+    62.3,
+    63.0
+   ],
+   "cors": [
+    64.0,
+    58.2,
+    48.4
+   ]
+  },
+  "The Reading Room": {
+   "hubs": [
+    75.7,
+    78.3
+   ],
+   "cors": [
+    67.8,
+    77.5,
+    63.9
+   ]
+  },
+  "The Rest Stop": {
+   "hubs": [
+    60.1,
+    83.2
+   ],
+   "cors": [
+    96.6,
+    71.5,
+    74.8
+   ]
+  },
+  "The Sleeping Nook": {
+   "hubs": [
+    71.6,
+    61.0
+   ],
+   "cors": [
+    53.5,
+    53.5,
+    69.2
+   ]
+  },
+  "The Lantern Landing": {
+   "hubs": [
+    54.7,
+    62.2
+   ],
+   "cors": [
+    67.8,
+    48.9,
+    44.0
+   ]
+  },
+  "The Mossy Corner": {
+   "hubs": [
+    67.8,
+    90.4
+   ],
+   "cors": [
+    48.8,
+    44.7,
+    42.4
+   ]
+  },
+  "The Waiting Room": {
+   "hubs": [
+    74.9,
+    94.3
+   ],
+   "cors": [
+    88.7,
+    48.0,
+    51.8
+   ]
+  },
+  "The Safe Hollow": {
+   "hubs": [
+    75.2,
+    87.9
+   ],
+   "cors": [
+    75.4,
+    64.3,
+    65.3
+   ]
+  }
+ },
+ "frame_ms": 299.4116666674614,
+ "errs": []
+}

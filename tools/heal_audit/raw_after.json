@@ -93,6 +93,15 @@
      "avail": false,
      "desc": "Raises every fallen hero at 70% health and heals the living for half.",
      "group": false
+    },
+    {
+     "level": 1,
+     "name": "Restoration",
+     "key": "c40h",
+     "listed": 52,
+     "avail": false,
+     "desc": "Restores about 561 health to the most wounded ally. The strongest single heal, and it costs a great deal of mana.",
+     "group": false
     }
    ],
    "checks": [],
@@ -231,6 +240,15 @@
      "avail": false,
      "desc": "Raises every fallen hero at 70% health and heals the living for half.",
      "group": false
+    },
+    {
+     "level": 10,
+     "name": "Restoration",
+     "key": "c40h",
+     "listed": 52,
+     "avail": false,
+     "desc": "Restores about 679 health to the most wounded ally. The strongest single heal, and it costs a great deal of mana.",
+     "group": false
     }
    ],
    "checks": [],
@@ -368,6 +386,15 @@
      "listed": 36,
      "avail": false,
      "desc": "Raises every fallen hero at 70% health and heals the living for half.",
+     "group": false
+    },
+    {
+     "level": 20,
+     "name": "Restoration",
+     "key": "c40h",
+     "listed": 52,
+     "avail": false,
+     "desc": "Restores about 686 health to the most wounded ally. The strongest single heal, and it costs a great deal of mana.",
      "group": false
     }
    ],
@@ -535,6 +562,15 @@
      "avail": false,
      "desc": "Raises every fallen hero at 70% health and heals the living for half.",
      "group": false
+    },
+    {
+     "level": 30,
+     "name": "Restoration",
+     "key": "c40h",
+     "listed": 52,
+     "avail": false,
+     "desc": "Restores about 694 health to the most wounded ally. The strongest single heal, and it costs a great deal of mana.",
+     "group": false
     }
    ],
    "checks": [],
@@ -700,6 +736,15 @@
      "listed": 36,
      "avail": false,
      "desc": "Raises every fallen hero at 70% health and heals the living for half.",
+     "group": false
+    },
+    {
+     "level": 40,
+     "name": "Restoration",
+     "key": "c40h",
+     "listed": 52,
+     "avail": false,
+     "desc": "Restores about 701 health to the most wounded ally. The strongest single heal, and it costs a great deal of mana.",
      "group": false
     }
    ],
@@ -921,6 +966,43 @@
      "descPct": null,
      "descAmt": null,
      "cardCost": 36
+    },
+    {
+     "level": 50,
+     "name": "Restoration",
+     "key": "c40h",
+     "listed": 52,
+     "avail": true,
+     "desc": "Restores about 708 health to the most wounded ally. The strongest single heal, and it costs a great deal of mana.",
+     "group": false,
+     "mana": 52,
+     "manaMin": 52,
+     "manaMax": 52,
+     "avgHeal": 708,
+     "avgPct": 88.1693648816936,
+     "targets": 1,
+     "total": 708,
+     "maxPct": 88.16936488169364,
+     "pct2030": 80.07471980074715,
+     "detPct": 88.16936488169364,
+     "detHeal": 708,
+     "capShown": 1,
+     "capGain": 1,
+     "capOk": true,
+     "capCast": true,
+     "capMana": 52,
+     "fullCast": false,
+     "fullMana": 0,
+     "lowCast": false,
+     "lowMana": 0,
+     "lowHealed": false,
+     "deadMana": 52,
+     "deadHealed": false,
+     "reviveWorked": false,
+     "descPct": null,
+     "descAmt": 708,
+     "cardCost": 52,
+     "model": 708
     }
    ],
    "checks": [],
@@ -1169,6 +1251,43 @@
      "descPct": null,
      "descAmt": null,
      "cardCost": 36
+    },
+    {
+     "level": 60,
+     "name": "Restoration",
+     "key": "c40h",
+     "listed": 52,
+     "avail": true,
+     "desc": "Restores about 715 health to the most wounded ally. The strongest single heal, and it costs a great deal of mana.",
+     "group": false,
+     "mana": 52,
+     "manaMin": 52,
+     "manaMax": 52,
+     "avgHeal": 715,
+     "avgPct": 74.79079497907946,
+     "targets": 1,
+     "total": 715,
+     "maxPct": 74.7907949790795,
+     "pct2030": 74.79079497907946,
+     "detPct": 74.7907949790795,
+     "detHeal": 715,
+     "capShown": 1,
+     "capGain": 1,
+     "capOk": true,
+     "capCast": true,
+     "capMana": 52,
+     "fullCast": false,
+     "fullMana": 0,
+     "lowCast": false,
+     "lowMana": 0,
+     "lowHealed": false,
+     "deadMana": 52,
+     "deadHealed": false,
+     "reviveWorked": false,
+     "descPct": null,
+     "descAmt": 715,
+     "cardCost": 52,
+     "model": 715
     }
    ],
    "checks": [],
@@ -1445,6 +1564,43 @@
      "descPct": null,
      "descAmt": null,
      "cardCost": 36
+    },
+    {
+     "level": 70,
+     "name": "Restoration",
+     "key": "c40h",
+     "listed": 52,
+     "avail": true,
+     "desc": "Restores about 722 health to the most wounded ally. The strongest single heal, and it costs a great deal of mana.",
+     "group": false,
+     "mana": 52,
+     "manaMin": 52,
+     "manaMax": 52,
+     "avgHeal": 722,
+     "avgPct": 65.10369702434626,
+     "targets": 1,
+     "total": 722,
+     "maxPct": 65.10369702434626,
+     "pct2030": 65.10369702434626,
+     "detPct": 65.10369702434626,
+     "detHeal": 722,
+     "capShown": 1,
+     "capGain": 1,
+     "capOk": true,
+     "capCast": true,
+     "capMana": 52,
+     "fullCast": false,
+     "fullMana": 0,
+     "lowCast": false,
+     "lowMana": 0,
+     "lowHealed": false,
+     "deadMana": 52,
+     "deadHealed": false,
+     "reviveWorked": false,
+     "descPct": null,
+     "descAmt": 722,
+     "cardCost": 52,
+     "model": 722
     }
    ],
    "checks": [],
@@ -1721,6 +1877,43 @@
      "descPct": null,
      "descAmt": null,
      "cardCost": 36
+    },
+    {
+     "level": 80,
+     "name": "Restoration",
+     "key": "c40h",
+     "listed": 52,
+     "avail": true,
+     "desc": "Restores about 912 health to the most wounded ally. The strongest single heal, and it costs a great deal of mana.",
+     "group": false,
+     "mana": 52,
+     "manaMin": 52,
+     "manaMax": 52,
+     "avgHeal": 912,
+     "avgPct": 70.58823529411764,
+     "targets": 1,
+     "total": 912,
+     "maxPct": 70.58823529411765,
+     "pct2030": 70.58823529411764,
+     "detPct": 70.58823529411765,
+     "detHeal": 912,
+     "capShown": 1,
+     "capGain": 1,
+     "capOk": true,
+     "capCast": true,
+     "capMana": 52,
+     "fullCast": false,
+     "fullMana": 0,
+     "lowCast": false,
+     "lowMana": 0,
+     "lowHealed": false,
+     "deadMana": 52,
+     "deadHealed": false,
+     "reviveWorked": false,
+     "descPct": null,
+     "descAmt": 912,
+     "cardCost": 52,
+     "model": 912
     }
    ],
    "checks": [],
@@ -1739,7 +1932,5 @@
    ]
   }
  ],
- "errs": [
-  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED"
- ]
+ "errs": []
 }

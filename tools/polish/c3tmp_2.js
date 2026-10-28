@@ -1,0 +1,1 @@
+/*TESTMENU*/try{if(/\.github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname)){var tms=document.createElement('script');tms.src='testmenu.js?v='+VERSION;document.head.appendChild(tms)}}catch(e){}/*ENDTESTMENU*/

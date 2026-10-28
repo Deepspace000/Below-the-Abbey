@@ -1,0 +1,1 @@
+()=>{const o=[];for(const k in IMG){if(/^(art_wm_|art_hgtb_|art_hgx|yar_|uw_|art_hgdf_|art_hgt_|art_hgf|art_hs_|art_hgwm)/.test(k)&&IMG[k]&&IMG[k].width)o.push(k+':'+IMG[k].width+'x'+IMG[k].height+(NPC_H[k]!==undefined?'@'+NPC_H[k]:''))}return o.join(' ')}

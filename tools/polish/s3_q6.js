@@ -1,0 +1,2 @@
+(()=>{const L=LEVELS[475];const near=(x,y,r)=>L.decor.filter(d=>Math.abs(d.x-x)<=r&&Math.abs(d.y-y)<=r).map(d=>[d.k,d.x,d.y,+(d.sc||0).toFixed(2),d.npc||'',d.pic?1:0,d.wd?d.wd.join(','):'',d.bob===undefined?'':d.bob,d.ox||0,d.oy||0,+((NPC_H[d.k]||0)*(d.sc||1)).toFixed(2)].join('|'));
+return {tile:near(123,5,3),gate:near(100,3,3),lights:L.lights.filter(l=>Math.abs(l[0]-123)<4&&Math.abs(l[1]-4)<4),col:Object.entries(L._hgpbCol).filter(([k])=>{const [x,y]=k.split(',').map(Number);return Math.abs(x-123)<3&&Math.abs(y-4)<3})}})()

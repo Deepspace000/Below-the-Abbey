@@ -16,6 +16,7 @@ def main():
         b, pg, errs = boot(p)
         pg.wait_for_function("()=>{khLoadAssets();return KH_READY}", timeout=120000)
         pg.add_script_tag(path=HERE + '/qr_page.js')
+        if os.environ.get('QR_BEFORE'): pg.evaluate('()=>QRF.disable()')  # the game without quest_rings_fix.js: the 'before' run
         for id in ids:
             fl = flagsx.get(id)
             for sk, st in STAGES:

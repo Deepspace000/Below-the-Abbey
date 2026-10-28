@@ -59,15 +59,9 @@ function spotsDoor(id){try{return questSpots().filter(s=>s.q===id&&/^Go to/.test
 QR.reach=function(x,y){if(!G.grid||!G.P)return null;const H=G.grid.length,W=G.grid[0].length,seen=new Uint8Array(W*H),q=[[G.P.x|0,G.P.y|0]];seen[(G.P.y|0)*W+(G.P.x|0)]=1;
  const near=(a,b)=>Math.abs(a-x)+Math.abs(b-y)<=1;
  while(q.length){const [cx,cy]=q.pop();if(near(cx,cy))return true;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=cx+dx,ny=cy+dy;if(nx<0||ny<0||nx>=W||ny>=H||seen[ny*W+nx])continue;seen[ny*W+nx]=1;const v=G.grid[ny][nx];if(v===0||v===3||v===4||v===5||v===7||v===8)q.push([nx,ny])}}
- return false};
-/* path over doors (portals and decor.enter) from level a to level b, as a list of levels */
-QR.path=function(a,b){const adj=l=>{const L=LEVELS[l];if(!L)return [];const o=new Set();for(const p of L.portals||[])if(p&&p.to!==undefined)o.add(+p.to);for(const d of L.decor||[])if(d.enter&&d.enter.to!==undefined)o.add(+d.enter.to);return [...o]};
- const prev={[a]:null},q=[a];while(q.length){const c=q.shift();if(c===b)break;for(const n of adj(c)){if(!(n in prev)){prev[n]=c;q.push(n)}}}
- if(!(b in prev))return null;const out=[];for(let c=b;c!==null;c=prev[c])out.push(c);return out.reverse()};
-QR.starts=function(target){ // levels from which the target is 1 to 3 doors away (walking the doors backwards)
- const rev={};for(const k in LEVELS){const L=LEVELS[k];if(!L)continue;const to=new Set();for(const p of L.portals||[])if(p&&p.to!==undefined)to.add(+p.to);for(const d of L.decor||[])if(d.enter&&d.enter.to!==undefined)to.add(+d.enter.to);for(const t of to)(rev[t]=rev[t]||[]).push(+k)}
- const dist={[target]:0},q=[target];while(q.length){const c=q.shift();if(dist[c]>=3)continue;for(const n of rev[c]||[])if(!(n in dist)){dist[n]=dist[c]+1;q.push(n)}}
- return dist};
-
+ return G.decor.some(d=>d.k==='teleporter')?'tele':false};
+/* path over doors: the game's own (quest_rings_fix.js) path finder, so the test walks the same way the ring points */
+QR.path=function(a,b){return QRF.path(a,b)};
+QR.starts=function(target){const dist={[target]:0},q=[target];while(q.length){const c=q.shift();if(dist[c]>=3)continue;for(const n of QRF.adj(c))if(!(n in dist)){dist[n]=dist[c]+1;q.push(n)}}return dist};
 /* a drawing error must not stop the game loop in the test */
 {const _ui=ui;ui=function(){try{return _ui.apply(this,arguments)}catch(e){QR.uiErr=String(e)}}}

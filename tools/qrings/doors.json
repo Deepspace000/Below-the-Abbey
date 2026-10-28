@@ -1,0 +1,6511 @@
+{
+ "res": [
+  {
+   "id": "gandrick",
+   "stage": "give",
+   "target": 5,
+   "path": [
+    25,
+    7,
+    3,
+    5
+   ],
+   "steps": [
+    {
+     "level": 25,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      3,
+      7
+     ]
+    },
+    {
+     "level": 7,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      22,
+      28
+     ]
+    },
+    {
+     "level": 3,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      25,
+      16
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gandrick",
+   "stage": "act",
+   "target": 8,
+   "path": [
+    3300,
+    3,
+    7,
+    8
+   ],
+   "steps": [
+    {
+     "level": 3300,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 3,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      48,
+      17
+     ]
+    },
+    {
+     "level": 7,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      22,
+      2
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gandrick",
+   "stage": "ready",
+   "target": 5,
+   "path": [
+    25,
+    7,
+    3,
+    5
+   ],
+   "steps": [
+    {
+     "level": 25,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      3,
+      7
+     ]
+    },
+    {
+     "level": 7,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      22,
+      28
+     ]
+    },
+    {
+     "level": 3,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      25,
+      16
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ironhill",
+   "stage": "give",
+   "target": 14,
+   "path": [
+    31,
+    20,
+    13,
+    14
+   ],
+   "steps": [
+    {
+     "level": 31,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      17,
+      23
+     ]
+    },
+    {
+     "level": 20,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      1,
+      13
+     ]
+    },
+    {
+     "level": 13,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      24,
+      16
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ironhill",
+   "stage": "act",
+   "target": 14,
+   "path": [
+    31,
+    20,
+    13,
+    14
+   ],
+   "steps": [
+    {
+     "level": 31,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      17,
+      23
+     ]
+    },
+    {
+     "level": 20,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      1,
+      13
+     ]
+    },
+    {
+     "level": 13,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      24,
+      16
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ironhill",
+   "stage": "ready",
+   "target": 14,
+   "path": [
+    31,
+    20,
+    13,
+    14
+   ],
+   "steps": [
+    {
+     "level": 31,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      17,
+      23
+     ]
+    },
+    {
+     "level": 20,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      1,
+      13
+     ]
+    },
+    {
+     "level": 13,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      24,
+      16
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mines",
+   "stage": "give",
+   "target": 14,
+   "path": [
+    31,
+    20,
+    13,
+    14
+   ],
+   "steps": [
+    {
+     "level": 31,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      17,
+      23
+     ]
+    },
+    {
+     "level": 20,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      1,
+      13
+     ]
+    },
+    {
+     "level": 13,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      24,
+      16
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mines",
+   "stage": "act",
+   "target": 18,
+   "path": [
+    31,
+    20,
+    13,
+    18
+   ],
+   "steps": [
+    {
+     "level": 31,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      17,
+      23
+     ]
+    },
+    {
+     "level": 20,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      1,
+      13
+     ]
+    },
+    {
+     "level": 13,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      35,
+      13
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mines",
+   "stage": "ready",
+   "target": 14,
+   "path": [
+    31,
+    20,
+    13,
+    14
+   ],
+   "steps": [
+    {
+     "level": 31,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      17,
+      23
+     ]
+    },
+    {
+     "level": 20,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      1,
+      13
+     ]
+    },
+    {
+     "level": 13,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      24,
+      16
+     ]
+    }
+   ]
+  },
+  {
+   "id": "overseer",
+   "stage": "give",
+   "target": 13,
+   "path": [
+    32,
+    22,
+    19,
+    13
+   ],
+   "steps": [
+    {
+     "level": 32,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 22,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      1,
+      76
+     ]
+    },
+    {
+     "level": 19,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      1,
+      20
+     ]
+    }
+   ]
+  },
+  {
+   "id": "overseer",
+   "stage": "act",
+   "target": 18,
+   "path": [
+    31,
+    20,
+    13,
+    18
+   ],
+   "steps": [
+    {
+     "level": 31,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      17,
+      23
+     ]
+    },
+    {
+     "level": 20,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      1,
+      13
+     ]
+    },
+    {
+     "level": 13,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      35,
+      13
+     ]
+    }
+   ]
+  },
+  {
+   "id": "overseer",
+   "stage": "ready",
+   "target": 13,
+   "path": [
+    32,
+    22,
+    19,
+    13
+   ],
+   "steps": [
+    {
+     "level": 32,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 22,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      1,
+      76
+     ]
+    },
+    {
+     "level": 19,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      1,
+      20
+     ]
+    }
+   ]
+  },
+  {
+   "id": "escape",
+   "stage": "give",
+   "target": 21,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "escape",
+   "stage": "act",
+   "target": 21,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "escape",
+   "stage": "ready",
+   "target": 21,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "pass",
+   "stage": "give",
+   "target": 13,
+   "path": [
+    32,
+    22,
+    19,
+    13
+   ],
+   "steps": [
+    {
+     "level": 32,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 22,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      1,
+      76
+     ]
+    },
+    {
+     "level": 19,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      1,
+      20
+     ]
+    }
+   ]
+  },
+  {
+   "id": "pass",
+   "stage": "act",
+   "target": 22,
+   "path": [
+    3311,
+    33,
+    32,
+    22
+   ],
+   "steps": [
+    {
+     "level": 3311,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 33,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 32,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "pass",
+   "stage": "ready",
+   "target": 13,
+   "path": [
+    32,
+    22,
+    19,
+    13
+   ],
+   "steps": [
+    {
+     "level": 32,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 22,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      1,
+      76
+     ]
+    },
+    {
+     "level": 19,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      1,
+      20
+     ]
+    }
+   ]
+  },
+  {
+   "id": "scoria",
+   "stage": "give",
+   "target": 34,
+   "path": [
+    3308,
+    32,
+    33,
+    34
+   ],
+   "steps": [
+    {
+     "level": 3308,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 32,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      61,
+      10
+     ]
+    },
+    {
+     "level": 33,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      25,
+      16
+     ]
+    }
+   ]
+  },
+  {
+   "id": "scoria",
+   "stage": "act",
+   "target": 261,
+   "path": [
+    13188,
+    44,
+    260,
+    261
+   ],
+   "steps": [
+    {
+     "level": 13188,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 44,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      108,
+      113
+     ]
+    },
+    {
+     "level": 260,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      39,
+      2
+     ]
+    }
+   ]
+  },
+  {
+   "id": "scoria",
+   "stage": "ready",
+   "target": 34,
+   "path": [
+    3308,
+    32,
+    33,
+    34
+   ],
+   "steps": [
+    {
+     "level": 3308,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 32,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      61,
+      10
+     ]
+    },
+    {
+     "level": 33,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      25,
+      16
+     ]
+    }
+   ]
+  },
+  {
+   "id": "kh_c1",
+   "stage": "give",
+   "target": 199,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kh_c1",
+   "stage": "act",
+   "target": 103,
+   "path": [
+    3311,
+    33,
+    41,
+    103
+   ],
+   "steps": [
+    {
+     "level": 3311,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 33,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      48,
+      18
+     ]
+    },
+    {
+     "level": 41,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      85,
+      29
+     ]
+    }
+   ]
+  },
+  {
+   "id": "kh_c1",
+   "stage": "ready",
+   "target": 199,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kh_c2",
+   "stage": "give",
+   "target": 199,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kh_c2",
+   "stage": "act",
+   "target": 108,
+   "path": [
+    41,
+    42,
+    43,
+    108
+   ],
+   "steps": [
+    {
+     "level": 41,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      96,
+      7
+     ]
+    },
+    {
+     "level": 42,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      48,
+      2
+     ]
+    },
+    {
+     "level": 43,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      46,
+      76
+     ]
+    }
+   ]
+  },
+  {
+   "id": "kh_c2",
+   "stage": "ready",
+   "target": 199,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kh_c3",
+   "stage": "give",
+   "target": 199,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kh_c3",
+   "stage": "act",
+   "target": 120,
+   "path": [
+    143,
+    63,
+    60,
+    120
+   ],
+   "steps": [
+    {
+     "level": 143,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 63,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      125,
+      247
+     ]
+    },
+    {
+     "level": 60,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      74,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "kh_c3",
+   "stage": "ready",
+   "target": 199,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kh_c4",
+   "stage": "give",
+   "target": 199,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kh_c4",
+   "stage": "act",
+   "target": 128,
+   "path": [
+    266,
+    62,
+    61,
+    128
+   ],
+   "steps": [
+    {
+     "level": 266,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 62,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      150,
+      2
+     ]
+    },
+    {
+     "level": 61,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      143,
+      245
+     ]
+    }
+   ]
+  },
+  {
+   "id": "kh_c4",
+   "stage": "ready",
+   "target": 199,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kh_c5",
+   "stage": "give",
+   "target": 199,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kh_c5",
+   "stage": "act",
+   "target": 134,
+   "path": [
+    131,
+    61,
+    62,
+    134
+   ],
+   "steps": [
+    {
+     "level": 131,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 61,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      150,
+      297
+     ]
+    },
+    {
+     "level": 62,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      139,
+      135
+     ]
+    }
+   ]
+  },
+  {
+   "id": "kh_c5",
+   "stage": "ready",
+   "target": 199,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kh_c6",
+   "stage": "give",
+   "target": 199,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kh_c6",
+   "stage": "act",
+   "target": 141,
+   "path": [
+    151,
+    64,
+    63,
+    141
+   ],
+   "steps": [
+    {
+     "level": 151,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 64,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      247,
+      125
+     ]
+    },
+    {
+     "level": 63,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      92,
+      116
+     ]
+    }
+   ]
+  },
+  {
+   "id": "kh_c6",
+   "stage": "ready",
+   "target": 199,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kh_c7",
+   "stage": "give",
+   "target": 199,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kh_c7",
+   "stage": "act",
+   "target": 146,
+   "path": [
+    143,
+    63,
+    64,
+    146
+   ],
+   "steps": [
+    {
+     "level": 143,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 63,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      2,
+      125
+     ]
+    },
+    {
+     "level": 64,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      161,
+      45
+     ]
+    }
+   ]
+  },
+  {
+   "id": "kh_c7",
+   "stage": "ready",
+   "target": 199,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kh_seal",
+   "stage": "give",
+   "target": 199,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kh_seal",
+   "stage": "act",
+   "target": 235,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kh_seal",
+   "stage": "ready",
+   "target": 199,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "yar2",
+   "stage": "give",
+   "target": 199,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "yar2",
+   "stage": "act",
+   "target": 260,
+   "path": [
+    290,
+    289,
+    44,
+    260
+   ],
+   "steps": [
+    {
+     "level": 290,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 289,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 44,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      108,
+      113
+     ]
+    }
+   ]
+  },
+  {
+   "id": "yar2",
+   "stage": "ready",
+   "target": 199,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kh_sea",
+   "stage": "give",
+   "target": 213,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kh_sea",
+   "stage": "act",
+   "target": 266,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kh_sea",
+   "stage": "ready",
+   "target": 213,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "yar3",
+   "stage": "give",
+   "target": 213,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "yar3",
+   "stage": "act",
+   "target": 289,
+   "path": [
+    3314,
+    290,
+    289
+   ],
+   "steps": [
+    {
+     "level": 3314,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 290,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      18,
+      40
+     ]
+    }
+   ]
+  },
+  {
+   "id": "yar3",
+   "stage": "ready",
+   "target": 213,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "yar4",
+   "stage": "give",
+   "target": 292,
+   "path": [
+    3314,
+    290,
+    292
+   ],
+   "steps": [
+    {
+     "level": 3314,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 290,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      49,
+      42
+     ]
+    }
+   ]
+  },
+  {
+   "id": "yar4",
+   "stage": "act",
+   "target": 290,
+   "path": [
+    3314,
+    290
+   ],
+   "steps": [
+    {
+     "level": 3314,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "yar4",
+   "stage": "ready",
+   "target": 292,
+   "path": [
+    3314,
+    290,
+    292
+   ],
+   "steps": [
+    {
+     "level": 3314,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 290,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      49,
+      42
+     ]
+    }
+   ]
+  },
+  {
+   "id": "yar5",
+   "stage": "give",
+   "target": 292,
+   "path": [
+    3314,
+    290,
+    292
+   ],
+   "steps": [
+    {
+     "level": 3314,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 290,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      49,
+      42
+     ]
+    }
+   ]
+  },
+  {
+   "id": "yar5",
+   "stage": "act",
+   "target": 297,
+   "path": [
+    3314,
+    290,
+    297
+   ],
+   "steps": [
+    {
+     "level": 3314,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 290,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      36,
+      33
+     ]
+    }
+   ]
+  },
+  {
+   "id": "yar5",
+   "stage": "ready",
+   "target": 292,
+   "path": [
+    3314,
+    290,
+    292
+   ],
+   "steps": [
+    {
+     "level": 3314,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 290,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      49,
+      42
+     ]
+    }
+   ]
+  },
+  {
+   "id": "yar6",
+   "stage": "give",
+   "target": 298,
+   "path": [
+    3314,
+    290,
+    298
+   ],
+   "steps": [
+    {
+     "level": 3314,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 290,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      56,
+      24
+     ]
+    }
+   ]
+  },
+  {
+   "id": "yar6",
+   "stage": "act",
+   "target": 298,
+   "path": [
+    3314,
+    290,
+    298
+   ],
+   "steps": [
+    {
+     "level": 3314,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 290,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      56,
+      24
+     ]
+    }
+   ]
+  },
+  {
+   "id": "yar6",
+   "stage": "ready",
+   "target": 298,
+   "path": [
+    3314,
+    290,
+    298
+   ],
+   "steps": [
+    {
+     "level": 3314,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 290,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      56,
+      24
+     ]
+    }
+   ]
+  },
+  {
+   "id": "yar7",
+   "stage": "give",
+   "target": 290,
+   "path": [
+    3314,
+    290
+   ],
+   "steps": [
+    {
+     "level": 3314,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "yar7",
+   "stage": "act",
+   "target": 290,
+   "path": [
+    3314,
+    290
+   ],
+   "steps": [
+    {
+     "level": 3314,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "yar7",
+   "stage": "ready",
+   "target": 290,
+   "path": [
+    3314,
+    290
+   ],
+   "steps": [
+    {
+     "level": 3314,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "vq1",
+   "stage": "give",
+   "target": 300,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "vq1",
+   "stage": "act",
+   "target": 300,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "vq1",
+   "stage": "ready",
+   "target": 300,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "vq2",
+   "stage": "give",
+   "target": 301,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "vq2",
+   "stage": "act",
+   "target": 301,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "vq2",
+   "stage": "ready",
+   "target": 301,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "vq3",
+   "stage": "give",
+   "target": 302,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "vq3",
+   "stage": "act",
+   "target": 302,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "vq3",
+   "stage": "ready",
+   "target": 302,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "vq4",
+   "stage": "give",
+   "target": 303,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "vq4",
+   "stage": "act",
+   "target": 303,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "vq4",
+   "stage": "ready",
+   "target": 303,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "vq5",
+   "stage": "give",
+   "target": 290,
+   "path": [
+    3314,
+    290
+   ],
+   "steps": [
+    {
+     "level": 3314,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "vq5",
+   "stage": "act",
+   "target": 330,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "vq5",
+   "stage": "ready",
+   "target": 304,
+   "path": [
+    6310,
+    305,
+    304
+   ],
+   "steps": [
+    {
+     "level": 6310,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      74,
+      141
+     ]
+    }
+   ]
+  },
+  {
+   "id": "kg0",
+   "stage": "give",
+   "target": 290,
+   "path": [
+    3314,
+    290
+   ],
+   "steps": [
+    {
+     "level": 3314,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "kg0",
+   "stage": "act",
+   "target": 330,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kg0",
+   "stage": "ready",
+   "target": 290,
+   "path": [
+    3314,
+    290
+   ],
+   "steps": [
+    {
+     "level": 3314,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "kg1",
+   "stage": "give",
+   "target": 302,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kg1",
+   "stage": "act",
+   "target": 338,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kg1",
+   "stage": "ready",
+   "target": 302,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kg2",
+   "stage": "give",
+   "target": 300,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kg2",
+   "stage": "act",
+   "target": 337,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kg2",
+   "stage": "ready",
+   "target": 300,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kg3",
+   "stage": "give",
+   "target": 301,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kg3",
+   "stage": "act",
+   "target": 341,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kg3",
+   "stage": "ready",
+   "target": 301,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kg4",
+   "stage": "give",
+   "target": 303,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kg4",
+   "stage": "act",
+   "target": 323,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "kg4",
+   "stage": "ready",
+   "target": 303,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "sd2",
+   "stage": "give",
+   "target": 290,
+   "path": [
+    3314,
+    290
+   ],
+   "steps": [
+    {
+     "level": 3314,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "sd2",
+   "stage": "act",
+   "target": 330,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "sd2",
+   "stage": "ready",
+   "target": 290,
+   "path": [
+    3314,
+    290
+   ],
+   "steps": [
+    {
+     "level": 3314,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "vq6",
+   "stage": "give",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "vq6",
+   "stage": "act",
+   "target": 306,
+   "path": [
+    6705,
+    304,
+    305,
+    306
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      74,
+      41
+     ]
+    }
+   ]
+  },
+  {
+   "id": "vq6",
+   "stage": "ready",
+   "target": 306,
+   "path": [
+    6705,
+    304,
+    305,
+    306
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      74,
+      41
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oq0",
+   "stage": "give",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oq0",
+   "stage": "act",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oq0",
+   "stage": "ready",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sg1",
+   "stage": "give",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sg1",
+   "stage": "act",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sg1",
+   "stage": "ready",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sg2",
+   "stage": "give",
+   "target": 6074,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "sg2",
+   "stage": "act",
+   "target": 6074,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "sg2",
+   "stage": "ready",
+   "target": 6074,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "sg3",
+   "stage": "give",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sg3",
+   "stage": "act",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sg3",
+   "stage": "ready",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sg4",
+   "stage": "give",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sg4",
+   "stage": "act",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sg4",
+   "stage": "ready",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sg5",
+   "stage": "give",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sg5",
+   "stage": "act",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sg5",
+   "stage": "ready",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sg6",
+   "stage": "give",
+   "target": 6074,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "sg6",
+   "stage": "act",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sg6",
+   "stage": "ready",
+   "target": 6074,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "sg7",
+   "stage": "give",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sg7",
+   "stage": "act",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sg7",
+   "stage": "ready",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sg8",
+   "stage": "give",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sg8",
+   "stage": "act",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sg8",
+   "stage": "ready",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa1",
+   "stage": "give",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa1",
+   "stage": "act",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa1",
+   "stage": "ready",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa2",
+   "stage": "give",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa2",
+   "stage": "act",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa2",
+   "stage": "ready",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa3",
+   "stage": "give",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa3",
+   "stage": "act",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa3",
+   "stage": "ready",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa4",
+   "stage": "give",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa4",
+   "stage": "act",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa4",
+   "stage": "ready",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa6",
+   "stage": "give",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa6",
+   "stage": "act",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa6",
+   "stage": "ready",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa7",
+   "stage": "give",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa7",
+   "stage": "act",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa7",
+   "stage": "ready",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa5",
+   "stage": "give",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa5",
+   "stage": "act",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa5",
+   "stage": "ready",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa8",
+   "stage": "give",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa8",
+   "stage": "act",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa8",
+   "stage": "ready",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa9",
+   "stage": "give",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa9",
+   "stage": "act",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "oa9",
+   "stage": "ready",
+   "target": 311,
+   "path": [
+    6705,
+    304,
+    305,
+    311
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    },
+    {
+     "level": 305,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      142,
+      73
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ad1",
+   "stage": "give",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ad1",
+   "stage": "act",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ad1",
+   "stage": "ready",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ad2",
+   "stage": "give",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ad2",
+   "stage": "act",
+   "target": 1,
+   "path": [
+    362,
+    361,
+    360,
+    1
+   ],
+   "steps": [
+    {
+     "level": 362,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 361,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 360,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "ad2",
+   "stage": "ready",
+   "target": 305,
+   "path": [
+    6705,
+    304,
+    305
+   ],
+   "steps": [
+    {
+     "level": 6705,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 304,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      40,
+      36
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ad3",
+   "stage": "give",
+   "target": 1,
+   "path": [
+    362,
+    361,
+    360,
+    1
+   ],
+   "steps": [
+    {
+     "level": 362,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 361,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 360,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "ad3",
+   "stage": "act",
+   "target": 363,
+   "path": [
+    441,
+    440,
+    364,
+    363
+   ],
+   "steps": [
+    {
+     "level": 441,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      10,
+      19
+     ]
+    },
+    {
+     "level": 440,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      12,
+      16
+     ]
+    },
+    {
+     "level": 364,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      35,
+      60
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ad3",
+   "stage": "ready",
+   "target": 1,
+   "path": [
+    362,
+    361,
+    360,
+    1
+   ],
+   "steps": [
+    {
+     "level": 362,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 361,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 360,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "ad4",
+   "stage": "give",
+   "target": 363,
+   "path": [
+    441,
+    440,
+    364,
+    363
+   ],
+   "steps": [
+    {
+     "level": 441,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      10,
+      19
+     ]
+    },
+    {
+     "level": 440,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      12,
+      16
+     ]
+    },
+    {
+     "level": 364,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      35,
+      60
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ad4",
+   "stage": "act",
+   "target": 363,
+   "path": [
+    441,
+    440,
+    364,
+    363
+   ],
+   "steps": [
+    {
+     "level": 441,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      10,
+      19
+     ]
+    },
+    {
+     "level": 440,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      12,
+      16
+     ]
+    },
+    {
+     "level": 364,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      35,
+      60
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ad4",
+   "stage": "ready",
+   "target": 363,
+   "path": [
+    441,
+    440,
+    364,
+    363
+   ],
+   "steps": [
+    {
+     "level": 441,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      10,
+      19
+     ]
+    },
+    {
+     "level": 440,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      12,
+      16
+     ]
+    },
+    {
+     "level": 364,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      35,
+      60
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hc1",
+   "stage": "give",
+   "target": 363,
+   "path": [
+    441,
+    440,
+    364,
+    363
+   ],
+   "steps": [
+    {
+     "level": 441,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      10,
+      19
+     ]
+    },
+    {
+     "level": 440,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      12,
+      16
+     ]
+    },
+    {
+     "level": 364,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      35,
+      60
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hc1",
+   "stage": "act",
+   "target": 444,
+   "path": [
+    447,
+    446,
+    445,
+    444
+   ],
+   "steps": [
+    {
+     "level": 447,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      17,
+      30
+     ]
+    },
+    {
+     "level": 446,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      17,
+      30
+     ]
+    },
+    {
+     "level": 445,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      17,
+      19
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hc1",
+   "stage": "ready",
+   "target": 363,
+   "path": [
+    441,
+    440,
+    364,
+    363
+   ],
+   "steps": [
+    {
+     "level": 441,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      10,
+      19
+     ]
+    },
+    {
+     "level": 440,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      12,
+      16
+     ]
+    },
+    {
+     "level": 364,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      35,
+      60
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hc2",
+   "stage": "give",
+   "target": 459,
+   "path": [
+    456,
+    457,
+    458,
+    459
+   ],
+   "steps": [
+    {
+     "level": 456,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      19,
+      2
+     ]
+    },
+    {
+     "level": 457,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      9,
+      2
+     ]
+    },
+    {
+     "level": 458,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      13,
+      10
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hc2",
+   "stage": "act",
+   "target": 459,
+   "path": [
+    456,
+    457,
+    458,
+    459
+   ],
+   "steps": [
+    {
+     "level": 456,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      19,
+      2
+     ]
+    },
+    {
+     "level": 457,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      9,
+      2
+     ]
+    },
+    {
+     "level": 458,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      13,
+      10
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hc2",
+   "stage": "ready",
+   "target": 459,
+   "path": [
+    456,
+    457,
+    458,
+    459
+   ],
+   "steps": [
+    {
+     "level": 456,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      19,
+      2
+     ]
+    },
+    {
+     "level": 457,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      9,
+      2
+     ]
+    },
+    {
+     "level": 458,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      13,
+      10
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hgb1",
+   "stage": "give",
+   "target": 481,
+   "path": [
+    440,
+    364,
+    470,
+    481
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "hgb1",
+   "stage": "act",
+   "target": 471,
+   "path": [
+    440,
+    364,
+    470,
+    471
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "hgb1",
+   "stage": "ready",
+   "target": 481,
+   "path": [
+    440,
+    364,
+    470,
+    481
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "hgb2",
+   "stage": "give",
+   "target": 481,
+   "path": [
+    440,
+    364,
+    470,
+    481
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "hgb2",
+   "stage": "act",
+   "target": 472,
+   "path": [
+    440,
+    364,
+    470,
+    472
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "hgb2",
+   "stage": "ready",
+   "target": 481,
+   "path": [
+    440,
+    364,
+    470,
+    481
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "hgb3",
+   "stage": "give",
+   "target": 481,
+   "path": [
+    440,
+    364,
+    470,
+    481
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "hgb3",
+   "stage": "act",
+   "target": 473,
+   "path": [
+    440,
+    364,
+    470,
+    473
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "hgb3",
+   "stage": "ready",
+   "target": 481,
+   "path": [
+    440,
+    364,
+    470,
+    481
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "hgb4",
+   "stage": "give",
+   "target": 481,
+   "path": [
+    440,
+    364,
+    470,
+    481
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "hgb4",
+   "stage": "act",
+   "target": 474,
+   "path": [
+    440,
+    364,
+    470,
+    474
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "hgb4",
+   "stage": "ready",
+   "target": 481,
+   "path": [
+    440,
+    364,
+    470,
+    481
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "hgrescue",
+   "stage": "give",
+   "target": 481,
+   "path": [
+    440,
+    364,
+    470,
+    481
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "hgrescue",
+   "stage": "act",
+   "target": 474,
+   "path": [
+    440,
+    364,
+    470,
+    474
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "hgrescue",
+   "stage": "ready",
+   "target": 481,
+   "path": [
+    440,
+    364,
+    470,
+    481
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "dh1",
+   "stage": "give",
+   "target": 481,
+   "path": [
+    440,
+    364,
+    470,
+    481
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "dh1",
+   "stage": "act",
+   "target": 483,
+   "path": [
+    440,
+    364,
+    470,
+    483
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "dh1",
+   "stage": "ready",
+   "target": 483,
+   "path": [
+    440,
+    364,
+    470,
+    483
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "dh2",
+   "stage": "give",
+   "target": 483,
+   "path": [
+    440,
+    364,
+    470,
+    483
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "dh2",
+   "stage": "act",
+   "target": 483,
+   "path": [
+    440,
+    364,
+    470,
+    483
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "dh2",
+   "stage": "ready",
+   "target": 483,
+   "path": [
+    440,
+    364,
+    470,
+    483
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "dh3",
+   "stage": "give",
+   "target": 484,
+   "path": [
+    440,
+    364,
+    470,
+    484
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "dh3",
+   "stage": "act",
+   "target": 471,
+   "path": [
+    440,
+    364,
+    470,
+    471
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "dh3",
+   "stage": "ready",
+   "target": 484,
+   "path": [
+    440,
+    364,
+    470,
+    484
+   ],
+   "steps": [
+    {
+     "level": 440,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 364,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 470,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "dq11",
+   "stage": "give",
+   "target": 475,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "dq11",
+   "stage": "act",
+   "target": 475,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "dq11",
+   "stage": "ready",
+   "target": 475,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "dq12",
+   "stage": "give",
+   "target": 475,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "dq12",
+   "stage": "act",
+   "target": 475,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "dq12",
+   "stage": "ready",
+   "target": 475,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "hgsph",
+   "stage": "give",
+   "target": 475,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "hgsph",
+   "stage": "act",
+   "target": 475,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "hgsph",
+   "stage": "ready",
+   "target": 475,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "bsw1",
+   "stage": "give",
+   "target": 475,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "bsw1",
+   "stage": "act",
+   "target": 476,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "bsw1",
+   "stage": "ready",
+   "target": 475,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "wk1",
+   "stage": "give",
+   "target": 475,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "wk1",
+   "stage": "act",
+   "target": 490,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "wk1",
+   "stage": "ready",
+   "target": 475,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "wk2",
+   "stage": "give",
+   "target": 490,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "wk2",
+   "stage": "act",
+   "target": 490,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "wk2",
+   "stage": "ready",
+   "target": 490,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "wk3",
+   "stage": "give",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wk3",
+   "stage": "act",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wk3",
+   "stage": "ready",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "gyq1",
+   "stage": "give",
+   "target": 531,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "gyq1",
+   "stage": "act",
+   "target": 532,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "gyq1",
+   "stage": "ready",
+   "target": 531,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "gyq2",
+   "stage": "give",
+   "target": 531,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "gyq2",
+   "stage": "act",
+   "target": 533,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "gyq2",
+   "stage": "ready",
+   "target": 531,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "gyq3",
+   "stage": "give",
+   "target": 531,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "gyq3",
+   "stage": "act",
+   "target": 534,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "gyq3",
+   "stage": "ready",
+   "target": 531,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "gyq4",
+   "stage": "give",
+   "target": 531,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "gyq4",
+   "stage": "act",
+   "target": 535,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "gyq4",
+   "stage": "ready",
+   "target": 531,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "gyq5",
+   "stage": "give",
+   "target": 531,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "gyq5",
+   "stage": "act",
+   "target": 530,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "gyq5",
+   "stage": "ready",
+   "target": 531,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "wwq1",
+   "stage": "give",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq1",
+   "stage": "act",
+   "target": 520,
+   "path": [
+    523,
+    521,
+    520
+   ],
+   "steps": [
+    {
+     "level": 523,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 521,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq1",
+   "stage": "ready",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq2",
+   "stage": "give",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq2",
+   "stage": "act",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq2",
+   "stage": "ready",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq3",
+   "stage": "give",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq3",
+   "stage": "act",
+   "target": 520,
+   "path": [
+    523,
+    521,
+    520
+   ],
+   "steps": [
+    {
+     "level": 523,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 521,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq3",
+   "stage": "ready",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq4",
+   "stage": "give",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq4",
+   "stage": "act",
+   "target": 520,
+   "path": [
+    523,
+    521,
+    520
+   ],
+   "steps": [
+    {
+     "level": 523,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 521,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq4",
+   "stage": "ready",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq5",
+   "stage": "give",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq5",
+   "stage": "act",
+   "target": 520,
+   "path": [
+    523,
+    521,
+    520
+   ],
+   "steps": [
+    {
+     "level": 523,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 521,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq5",
+   "stage": "ready",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq6",
+   "stage": "give",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq6",
+   "stage": "act",
+   "target": 522,
+   "path": [
+    523,
+    521,
+    522
+   ],
+   "steps": [
+    {
+     "level": 523,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      6,
+      7
+     ]
+    },
+    {
+     "level": 521,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      1,
+      5
+     ]
+    }
+   ]
+  },
+  {
+   "id": "wwq6",
+   "stage": "ready",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq7",
+   "stage": "give",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq7",
+   "stage": "act",
+   "target": 521,
+   "path": [
+    523,
+    521
+   ],
+   "steps": [
+    {
+     "level": 523,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      6,
+      7
+     ]
+    }
+   ]
+  },
+  {
+   "id": "wwq7",
+   "stage": "ready",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq8",
+   "stage": "give",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq8",
+   "stage": "act",
+   "target": 523,
+   "path": [
+    522,
+    521,
+    523
+   ],
+   "steps": [
+    {
+     "level": 522,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      7,
+      7
+     ]
+    },
+    {
+     "level": 521,
+     "ring": true,
+     "door": true,
+     "world": false,
+     "cell": [
+      15,
+      5
+     ]
+    }
+   ]
+  },
+  {
+   "id": "wwq8",
+   "stage": "ready",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq9",
+   "stage": "give",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq9",
+   "stage": "act",
+   "target": 520,
+   "path": [
+    523,
+    521,
+    520
+   ],
+   "steps": [
+    {
+     "level": 523,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 521,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "wwq9",
+   "stage": "ready",
+   "target": 496,
+   "path": [
+    7091,
+    7090,
+    7010,
+    496
+   ],
+   "steps": [
+    {
+     "level": 7091,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7090,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 7010,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "mq1",
+   "stage": "give",
+   "target": 430,
+   "path": [
+    433,
+    432,
+    430
+   ],
+   "steps": [
+    {
+     "level": 433,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 432,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "mq1",
+   "stage": "act",
+   "target": 430,
+   "path": [
+    433,
+    432,
+    430
+   ],
+   "steps": [
+    {
+     "level": 433,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 432,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "mq1",
+   "stage": "ready",
+   "target": 430,
+   "path": [
+    433,
+    432,
+    430
+   ],
+   "steps": [
+    {
+     "level": 433,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 432,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "mq2",
+   "stage": "give",
+   "target": 430,
+   "path": [
+    433,
+    432,
+    430
+   ],
+   "steps": [
+    {
+     "level": 433,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 432,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "mq2",
+   "stage": "act",
+   "target": 430,
+   "path": [
+    433,
+    432,
+    430
+   ],
+   "steps": [
+    {
+     "level": 433,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 432,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "mq2",
+   "stage": "ready",
+   "target": 430,
+   "path": [
+    433,
+    432,
+    430
+   ],
+   "steps": [
+    {
+     "level": 433,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    },
+    {
+     "level": 432,
+     "ring": false,
+     "door": false,
+     "world": true,
+     "cell": null
+    }
+   ]
+  },
+  {
+   "id": "shell",
+   "stage": "give",
+   "target": 301,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "shell",
+   "stage": "act",
+   "target": 320,
+   "note": "no door path into the target level (world map only)"
+  },
+  {
+   "id": "shell",
+   "stage": "ready",
+   "target": 301,
+   "note": "no door path into the target level (world map only)"
+  }
+ ],
+ "errs": [
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON Failed to load resource: net::ERR_CONNECTION_REFUSED",
+  "CON fishing places 32 lost [] refused [lake decor hs_sale_large@45,9]"
+ ]
+}

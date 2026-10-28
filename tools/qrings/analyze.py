@@ -16,7 +16,8 @@ def verdict(r):
         ok = any(abs(ring['cx'] - e['x']) <= 1.3 and abs(ring['cy'] - e['y']) <= 1.3 for e in exp)
         place_all.append(ok)
         if not ok: v['notes'].append('L%s: ring at %.0f,%.0f not on target %s' % (o['lvl'], ring['cx'], ring['cy'], [(e['x'], e['y']) for e in exp][:3]))
-        if o.get('reach') is False: v['notes'].append('L%s: target not reachable on foot' % o['lvl'])
+        if o.get('reach') == 'tele': v['notes'].append('L%s: reached through a teleporter' % o['lvl'])
+        elif o.get('reach') is False: v['notes'].append('L%s: target not reachable on foot' % o['lvl'])
         if ring.get('pr', 0) < 6: v['notes'].append('L%s: ring tiny' % o['lvl'])
     v['ring'] = all(ring_all) if ring_all else False
     v['place'] = all(place_all) if place_all else False

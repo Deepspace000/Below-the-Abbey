@@ -1,0 +1,2 @@
+(()=>{const L=LEVELS[475],M=L._hgdm,W=M.W,o={hgd_note:[],hgd_sign:[],other:{}};for(const d of L.decor){if(M.bio[d.y*W+d.x]<4)continue;if(d.npc==='hgd_note')o.hgd_note.push((d.pbt||HGDF_NOTES[(d.note||0)%HGDF_NOTES.length]).slice(0,90));else if(d.npc==='hgd_sign')o.hgd_sign.push([d.k,d.zone]);else if(d.npc&&/note|post|text/.test(d.npc))o.other[d.npc]=(o.other[d.npc]||0)+1}
+const ps=[];for(const d of L.decor)if(d.npc==='hgdb_post')ps.push(d.pbt.slice(0,100));o.posts=ps.slice(0,6);o.targets=(L._hgpbTargets||[]).map(t=>t.n);o.zones=L_ZONES().map(z=>z.name);return o})()

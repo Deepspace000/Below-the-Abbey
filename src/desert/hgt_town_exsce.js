@@ -716,7 +716,7 @@ function exmDraw(){
       if(k===K.COURT||h<-.4){r=150;g=190;b=214}else if(k===K.STAIR){r=214;g=206;b=186}else if(k===K.TERRACE||k===K.PLAT||k===K.BRIDGE){const t=Math.max(0,Math.min(1,h/13));r=246-t*20;g=226-t*60;b=206-t*100}
       else if(k===K.PLAZA){r=250;g=244;b=228}else{const f=L.fmap[y][xx];if(f==='5'){r=204;g=224;b=208}else{r=246;g=240;b=226}}
       if(h>0.4&&k!==K.TERRACE){const t=Math.min(1,h/6)*.18;r*=1-t;g*=1-t*.5;b*=1-t*.2}}
-    else{const m=META.get(ch),tn=EXTINT[m?m.t:'a'],wh=m?m.wh:4,sh=Math.max(.58,1-wh*.045);[r,g,b]=tn.map(v=>v*sh)}
+    else{const m=META.get(ch),tn=EXTINT[m&&EXTINT[m.t]?m.t:'a'],wh=m&&m.wh!=null?m.wh:4,sh=Math.max(.58,1-wh*.045);[r,g,b]=tn.map(v=>v*sh)}
     x.fillStyle=`rgb(${r|0},${g|0},${b|0})`;x.fillRect(PX(xx),PY(y),S+.35,S+.35)}
   // stairs: a few short hatch strokes
   x.strokeStyle='rgba(60,48,80,.35)';x.lineWidth=.35;x.beginPath();for(let y=1;y<H-1;y+=1)for(let xx=1;xx<W-1;xx+=1){if(B.kind[y*W+xx]!==K.STAIR||L.rows[y][xx]!=='.')continue;x.moveTo(PX(xx),PY(y)+S);x.lineTo(PX(xx)+S,PY(y))}x.stroke();

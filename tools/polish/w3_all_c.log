@@ -1,0 +1,44 @@
+{"w3": {"vig": 11, "props": 148, "notes": 0, "mossCut": 53, "mossCap": 37, "tallCut": 68, "landmarks": 45, "piranha": 1, "labels": 39, "newNotes": 11, "prot": 56}, "mossNear": 0, "mossMax": 0.25, "pir": [[39, 27, 6], [1, 20, 32.8], [13, 32, 20.6], [7, 9, 31.6], [20, 33, 14.3], [35, 5, 22.1], [11, 7, 29.7], [12, 3, 31.9], [41, 11, 17.9], [29, 35, 8.9], [21, 36, 15], [41, 40, 15.3], [15, 34, 19.3], [31, 5, 22.1], [1, 32, 32.4]], "vig": [{"n": "Garden of Saints", "x": 5, "y": 6, "props": 15}, {"n": "Drowned Library", "x": 18, "y": 7, "props": 18}, {"n": "Sunken Bell", "x": 17, "y": 17, "props": 13}, {"n": "Wreck of the Ferry", "x": 9, "y": 35, "props": 15}, {"n": "Saint's shrine", "x": 33, "y": 1, "props": 10}, {"n": "Mirror", "x": 3, "y": 11, "props": 11}, {"n": "Diver's camp", "x": 21, "y": 39, "props": 10}, {"n": "Pearl grotto", "x": 29, "y": 31, "props": 10}, {"n": "The scales", "x": 3, "y": 25, "props": 11}, {"n": "Smugglers' cache", "x": 13, "y": 29, "props": 15}, {"n": "Lantern nook", "x": 37, "y": 39, "props": 10}, {"n": "Rune stone", "x": 5, "y": 35, "props": 16}, {"n": "Warden's board", "x": 31, "y": 25, "props": 11}], "noLabel": 0, "empty": 0, "dash": 0, "notes": 39, "maxAnchorDist": 13, "at": "41,2", "fishProt": 1, "lights": 148, "decor": 1087}
+save {'chests': 12, 'moved': 7, 'oldSaveOpensEmpty': True, 'keys': 2, 'newSaveRestored': True, 'indexIgnored': True}
+v_Garden_of_Saints [5, 9] 0 vig 57.3
+v_Drowned_Library [15, 7] 1 vig 73.1
+v_Sunken_Bell [17, 20] 0 vig 66.9
+v_Wreck_of_the_Ferry [9, 38] 0 vig 60.4
+v_Saints_shrine [30, 1] 1 vig 77.1
+v_Mirror [3, 8] 2 vig 71.9
+v_Divers_camp [21, 36] 2 vig 74.9
+v_Pearl_grotto [26, 31] 1 vig 88.3
+v_The_scales [3, 22] 2 vig 79.8
+v_Smugglers_cache [13, 26] 2 vig 83.2
+v_Lantern_nook [40, 39] 3 vig 81.1
+v_Rune_stone [5, 37] 0 vig 76.3
+v_Wardens_board [31, 22] 2 vig 54.8
+hub0 [10, 34] 0 hub 73.9
+hub1 [34, 28] 1 hub 64.2
+hub2 [17, 18] 2 hub 69.3
+hub3 [5, 6] 3 hub 69.8
+hub4 [18, 7] 0 hub 81.5
+cor0 [31, 22] 2 corridor 54.5
+cor1 [1, 9] 0 corridor 66.7
+cor2 [19, 24] 0 corridor 74.1
+cor3 [11, 39] 3 corridor 59.9
+cor4 [24, 3] 1 corridor 55.1
+cor5 [23, 11] 3 corridor 57.1
+cor6 [33, 7] 1 corridor 60.2
+cor7 [25, 41] 3 corridor 55.9
+cor8 [27, 15] 0 corridor 78.1
+cor9 [20, 33] 3 corridor 67.7
+c7 [41, 13] 0 corridor 58.6
+c11 [27, 9] 1 corridor 62.6
+c9 [7, 33] 0 corridor 61.7
+arch [1, 6] 0 corridor 75.2
+l0d [39, 137] 0 lake 63.0
+l0f [19, 137] 0 lake 59.5
+l1d [147, 97] 0 lake 64.8
+l1f [147, 71] 2 lake 68.2
+l2d [97, 65] 1 lake 57.2
+l2f [123, 43] 2 lake 61.9
+l0w [39, 135] 0 lake 54.7
+l1w [147, 95] 0 lake 56.4
+l2w [99, 65] 1 lake 59.5
+errs []

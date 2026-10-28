@@ -42,3 +42,14 @@ Eleven or twelve, spread round the level in dead ends and three-by-three halls (
 - Frames are 0.53 high and stand on the floor; a stone plinth under them would read better.
 - Enemy sprites in dead ends sometimes hide a set piece.
 - Pools of light are strongest near orb alcoves; junction pools are subtle by design.
+
+# Round 3 (zone under, polish file hgd_polish_d.js, port 8333)
+Scripts: `u3_audit.py after` (round 2 audit plus kit, label, text, wall-pic duplicates, book size), `u3_lum.py tag N M` (mean luminance of corridor and hub screenshots), `u3_sheet.py` (contact sheet of the hgpd_* pictures), `u3_dbg.py`, `u3_q.py "js"`.
+- Grey smear at The Dig: not a halo. A stone demon statue (hgd_dark.js, hgdn_st*) stood in a dead-end nook whose mouth is a junction square, and filled the screen when passed. A wrapper on hgdnPlace drops the 17 of 23 such statues; the horn at the Dig moved to the far end and a windlass added.
+- Wreck: `hgpd_wreck`, a bow half with a ragged break, a stern piece and loose planks, cut from the painted boat on a canvas (hgpdWreck). Skeleton poses `hgpd_skelS` (slumped) and `hgpd_skelL` (reclining) made by turning the painted skeleton; lit and cold lanterns by tinting the painted lantern. Painted pieces not used before: pot, broken bucket, coins, tiles, slab, carved stone, pillar, crag, scale, key, windlass, candelabra, cask (grey copies via HGPD_GREY).
+- Dead ends: 16 kits (FILL), each dead end takes the kit least used within 40 squares; 53 distinct prop sets among the dead ends, top share 7 percent (was a third). Other builders' seated skeletons are split into seated, slumped and reclining (12 down to 4 seated). Ladder kits all have a tall piece; dock cage lanterns and posts vary by dock; vignettes and orb alcoves use their own dominant props (no repeated skeleton, bucket, lantern pair).
+- Book scale 0.14 high (0.38 wide, was 3x the lantern). Wall pictures on the same square as a sign or rune are moved to a free wall square (hooksMoved) so no lantern hides a rune. Captain's Light and Marta's Ribbon orbs are amber and green (no pink orb left).
+- Every readable gets d.text and d.label (one to four words: Still here, Five strokes, The way up, The way to a boat, Journal page N, alcove names ...). Audit: noLabel 0, noText 0. Level 476 signs are not art_hs_* pictures, so hgd_polish_text.js labels them only if it reads d.label on these kinds.
+- Light: wall tint 248/242/255, RANGE x1.8, LUT lift .17 to .27 for this level only. Measured (screenshots, enemies 2+ squares away, torch): corridors mean 76 (min 68), hubs mean 67 (min 50 when facing a bare wall).
+- HGPD.rescale re-runs the scale table once on first play frame (a build before pictures load left some heights unset in the audit page).
+- Unchanged by choice: the red watching eyes (hgd_eyes.js, deliberate), the single rock wall tile.

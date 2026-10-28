@@ -1,0 +1,3 @@
+([cx,cy,R])=>{const L=LEVELS[475];const m={};for(const d of L.decor){const k=d.x+','+d.y;let c='o';if(d.npc&&/church/.test(d.npc))c='C';else if(d.hs==='hgdpc_house')c='H';else if(d.npc&&/hgdpc_text|sign|note/.test(d.npc))c='s';else if(d.npc&&NPCS[d.npc])c='P';else if(/lamp|lantern|brazier/.test(d.k))c='l';else if(d.block)c='B';if(!m[k]||'CHPsBl'.indexOf(c)>=0&&'CHPsBl'.indexOf(c)<'CHPsBl'.indexOf(m[k])||m[k]==='o')m[k]=c}
+let out=[];for(let y=cy-R;y<=cy+R;y++){let s=String(y).padStart(3)+' ';for(let x=cx-R;x<=cx+R;x++){const o=L.rows[y]&&L.rows[y][x]==='.';s+=m[x+','+y]||(o?'.':'#')}out.push(s)}
+return out.join('\n')}

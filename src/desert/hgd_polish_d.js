@@ -19,9 +19,12 @@ const HGPD_ART={book:['art_hgxprop3',.2],candle:['art_hgxprop2',.24],lamp:['art_
   blue:['art_hgxprop4',.5],teal:['art_wm_crystal_teal',.55],cart:['art_wm_mine_cart',.5],tools:['art_wm_tools',.7],wheel:['art_wm_crank',.9],lantern:['art_hgxprop7',.2],cairn:['art_hgxrock2',.5],
   coral:['art_hgxprop9',.4],shells:['art_hgxprop8',.22],gold:['art_wm_gold',.2],keg:['art_wm_keg',.4],hook:['art_wm_lantern_gold',.5],skel:['art_wm_skeleton',.5],bones:['art_hgxprop0',.255],
   tooth:['art_hgxprop13',.3],rubble:['art_hgxrock6',.3],root:['art_hgxprop12',.34],crate:['art_wm_crate',.5],barrel:['art_wm_barrel',.58],bucket:['art_wm_bucket',.36],lid:['art_wm_crate_lid',.46],
-  post:['art_wm_chain',1.05],cage:['art_wm_cage_lantern',.5],boat:['art_wm_boat',.62],straw:['art_hgxprop15',.25],stone:['art_hgxrock0',.4675],chest:['chest',.48]};
+  post:['art_wm_chain',1.05],cage:['art_wm_cage_lantern',.5],boat:['art_wm_boat',.62],straw:['art_hgxprop15',.25],stone:['art_hgxrock0',.4675],chest:['chest',.48],
+  /* round 3: painted pieces that were not used yet, for the dead-end kits */
+  pot:['art_hgxprop1',.34],bbucket:['art_hgxprop6',.3],lanternG:['art_hgxprop7',.2],coins:['art_hgxprop10',.14],tiles:['art_hgxprop11',.12],slab:['art_hgxrock1',.34],carved:['art_hgxrock4',.62],pillar:['art_hgxrock5',.6],crag:['art_hgxrock7',.55],
+  scale:['art_wm_scale',.5],key:['art_wm_key',.3],windlass:['art_wm_windlass',.64],candel:['art_wm_candelabra',.42],cask:['art_wm_cask',.46],sign:['art_wm_signpost',.6]};
 /* grey-blue copies of the violet wm props (the level is grey and teal, the old props were purple), flipped copies (so no two neighbours are the same picture), and the orb frames */
-const HGPD_GREY=[['boat'],['crate'],['barrel'],['chain'],['crank'],['lamp_post',40,1],['bell'],['bookshelf'],['noticeboard'],['rune',182],['skeleton'],['tools'],['mine_cart'],['keg'],['bucket'],['crate_lid'],['shrine',182],['gold'],['cask'],['mirror']],
+const HGPD_GREY=[['boat'],['crate'],['barrel'],['chain'],['crank'],['lamp_post',40,1],['bell'],['bookshelf'],['noticeboard'],['rune',182],['skeleton'],['tools'],['mine_cart'],['keg'],['bucket'],['crate_lid'],['shrine',182],['gold'],['cask'],['mirror'],['scale'],['key',182],['windlass'],['candelabra'],['signpost']],
   HGPD_MIR=['hgpd_skel','hgpd_candle','hgpd_crate','hgpd_barrel','hgpd_bucket','hgpd_tools','hgpd_bones','hgpd_cairn','hgpd_rubble','hgpd_root','hgpd_book','hgpd_lantern','hgpd_straw','hgpd_shells','hgpd_coral','hgpd_keg','hgpd_cart','hgpd_stone','hgpd_lid','hgpd_tooth','hgpd_board','hgpd_rune','hgq_skeleton','hgq_crate','hgq_barrel','hgq_bucket','hgq_keg','hgq_boat','hgq_crate_lid','art_hgxprop0','art_hgxprop12','art_hgxprop13','art_hgxrock6','art_hgxrock3','art_hgxrock0','art_wm_cage_lantern','art_hgxprop2'];
 function hgpdPix(src,fn){try{const w=src.width,h=src.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(src,0,0);const im=x.getImageData(0,0,w,h);fn(im.data,w,h);x.putImageData(im,0,0);return c}catch(e){return null}}
 function hgpdHsl(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2;let h=0,s=0;if(mx!==mn){const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);h=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4;h*=60}return [h,s,l]}
@@ -37,7 +40,35 @@ function hgpdArt(){for(const k in HGPD_ART){const [src,h]=HGPD_ART[k],im=IMG[src
   if(IMG.hgpd_book&&!IMG.hgpd_book2){const f=hgpdFlip(IMG.hgpd_book);if(f){IMG.hgpd_book2=f;NPC_H.hgpd_book2=NPC_H.hgpd_book}const g=hgpdFlip(IMG.hgpd_book,'rgba(40,24,10,.38)');if(g){IMG.hgpd_book3=g;NPC_H.hgpd_book3=NPC_H.hgpd_book}}
   for(const k of HGPD_MIR){const im=IMG[k];if(!im||!im.width||IMG[k+'_m'])continue;const f=hgpdFlip(im);if(f){IMG[k+'_m']=f;NPC_H[k+'_m']=NPC_H[k]}}
   try{if(typeof wmOrbArt==='function'&&!IMG.wm_orbframe0&&IMG.art_wm_cage_lantern&&IMG.art_wm_cage_lantern.width){if(typeof WM!=='undefined')WM.orbArt=false;wmOrbArt()}}catch(e){console.warn('hgpd orb art',e)}
+  try{hgpdDerive()}catch(e){console.warn('hgpd derive',e)}
   HGPD.greyDone=ok}
+/* ---------- round 3: new poses made from the painted pieces (turned, cut, tinted on a canvas): a lying and a slumped skeleton, a broken hull for the wreck, lit and cold lanterns ---------- */
+function hgpdTrim(c){const w=c.width,h=c.height,d=c.getContext('2d').getImageData(0,0,w,h).data;let x0=w,y0=h,x1=0,y1=0;for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(d[(y*w+x)*4+3]>10){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}
+  if(x1<x0)return c;const o=document.createElement('canvas');o.width=x1-x0+1;o.height=y1-y0+1;o.getContext('2d').drawImage(c,x0,y0,o.width,o.height,0,0,o.width,o.height);return o}
+function hgpdTurn(src,deg,sy,shade){const w=src.width,h=src.height,m=Math.ceil(Math.hypot(w,h)),c=document.createElement('canvas');c.width=m;c.height=m;const x=c.getContext('2d');x.translate(m/2,m/2);x.rotate(deg*Math.PI/180);x.scale(1,sy||1);x.drawImage(src,-w/2,-h/2);
+  if(shade){x.globalCompositeOperation='source-atop';x.fillStyle=shade;x.fillRect(-m,-m,m*2,m*2)}return hgpdTrim(c)}
+function hgpdWreck(boat){const w=boat.width,h=boat.height,c=document.createElement('canvas');c.width=Math.round(w*1.25);c.height=Math.round(h*1.15);const x=c.getContext('2d');
+  // the bow half: the right side is torn off along a ragged line, the whole piece leans over on its keel
+  x.save();x.translate(w*.02,h*.96);x.rotate(-.13);x.translate(0,-h*.96);x.beginPath();
+  const P=[[0,0],[.58,0],[.5,.14],[.64,.27],[.52,.42],[.66,.58],[.55,.72],[.7,.86],[.6,1],[0,1]];P.forEach((q,i)=>i?x.lineTo(q[0]*w,q[1]*h):x.moveTo(q[0]*w,q[1]*h));x.closePath();x.clip();x.drawImage(boat,0,0);x.restore();
+  // a piece of the stern, thrown a little way off, on its side
+  x.save();x.translate(w*1.0,h*1.1);x.rotate(.62);x.scale(.5,.5);x.translate(-w*.4,-h);x.beginPath();
+  const Q=[[.46,.12],[1,.0],[1,1],[.5,1],[.62,.8],[.44,.62],[.58,.44],[.4,.3]];Q.forEach((q,i)=>i?x.lineTo(q[0]*w,q[1]*h):x.moveTo(q[0]*w,q[1]*h));x.closePath();x.clip();x.drawImage(boat,0,0);x.restore();
+  // loose planks cut from the planking of the same boat
+  for(const [sx,sy,sw,sh,dx,dy,r] of [[.12,.5,.5,.1,.72,.92,.2],[.2,.62,.45,.09,.5,1.06,-.12],[.1,.38,.4,.08,.95,.7,.5]]){x.save();x.translate(dx*w,dy*h);x.rotate(r);x.drawImage(boat,sx*w,sy*h,sw*w,sh*h,0,0,sw*w*.9,sh*h*.9);x.restore()}
+  x.globalCompositeOperation='source-atop';x.fillStyle='rgba(14,18,24,.34)';x.fillRect(0,0,c.width,c.height);return hgpdTrim(c)}
+function hgpdDerive(){
+  if(HGPD.derived)return;const sk=IMG.hgpd_skel||IMG.hgq_skeleton,bt=IMG.hgq_boat||IMG.art_wm_boat,lt=IMG.art_hgxprop7;
+  if(!sk||!sk.width||!bt||!bt.width||!lt||!lt.width)return;
+  const put=(k,c,h)=>{if(c){IMG[k]=c;NPC_H[k]=h}};
+  put('hgpd_skelL',hgpdTurn(sk,64,.62),.26);       // lying on its side
+  put('hgpd_skelS',hgpdTurn(sk,17,.88,'rgba(10,14,20,.12)'),.44); // slumped against the wall
+  put('hgpd_wreck',hgpdWreck(bt),.78);
+  // the same lantern lit gold, and cold (sea green)
+  const tint=(src,rgba)=>{const c=document.createElement('canvas');c.width=src.width;c.height=src.height;const x=c.getContext('2d');x.drawImage(src,0,0);x.globalCompositeOperation='source-atop';x.fillStyle=rgba;x.fillRect(0,0,c.width,c.height);return c};
+  put('hgpd_lanternW',tint(lt,'rgba(255,196,90,.30)'),.2);put('hgpd_lanternC',tint(lt,'rgba(70,200,170,.34)'),.2);
+  for(const k of ['hgpd_skelL','hgpd_skelS','hgpd_pot','hgpd_bbucket','hgpd_candel','hgpd_lanternW','hgpd_lanternC','hgpd_windlass','hgpd_scale','hgpd_key','hgpd_cask','hgpd_crag','hgpd_slab','hgpd_pillar','hgpd_carved']){const im=IMG[k];if(im&&im.width&&!IMG[k+'_m']){const f=hgpdFlip(im);if(f){IMG[k+'_m']=f;NPC_H[k+'_m']=NPC_H[k]}}if(!HGPD_MIR.includes(k))HGPD_MIR.push(k)}
+  HGPD.derived=true}
 /* ---------- the journal of the Tallow Company ---------- */
 const HGPD_RUNES=['The runes on this stone are worn smooth at one corner, as if many hands have rested on it. Scratched below: "Still here."',
  'Glowing runes nobody can read. Someone has scratched a tally of five strokes beneath them, and then no more.',
@@ -91,7 +122,7 @@ function hgpdBuild(L){
   const nameAt=(t,x,y)=>{info.names.push({t,x,y,k:'place'})};
   /* ---- 0a. the walls: the old tint [4,3,5,.5] multiplied the rock to black and then screened a flat beige over it, so every wall was a smooth blank slab. A plain darkening keeps the cracks and the facets. ---- */
   try{const TM=ohTiles(),chUp=String.fromCharCode(0x331);
-    if(OH_STY.hgdu_rock){OH_STY.hgdu_rock.tint=[132,128,142];L.chars['#']=TM.make('plain','hgdu_rock',2.7).gid}
+    if(OH_STY.hgdu_rock){OH_STY.hgdu_rock.tint=[248,242,255];L.chars['#']=TM.make('plain','hgdu_rock',2.7).gid}
     if(OH_STY.hgdu_up){OH_STY.hgdu_up.tint=[196,186,176];L.chars[chUp]=TM.make('door','hgdu_up',2.7).gid}}catch(e){console.error('hgpd walls',e)}
   /* ---- 0. proportions of the repeated props ---- */
   {const by={};for(const d of L.decor)(by[d.k]=by[d.k]||[]).push(d);
@@ -105,6 +136,9 @@ function hgpdBuild(L){
     const dockBy=O.docks.concat(O.landings.map(l=>({bx:l.x,by:l.y})));
     dockBy.forEach((dk,i)=>{const near=L.decor.filter(d=>!d.pic&&Math.abs(d.x-dk.bx)<=3&&Math.abs(d.y-dk.by)<=3);
       const bar=near.find(d=>d.k==='art_wm_barrel'),cr=near.find(d=>d.k==='art_wm_crate'),bu=near.find(d=>d.k==='art_wm_bucket'),lid=near.find(d=>d.k==='art_wm_crate_lid');
+      const cg=near.find(d=>d.k==='art_wm_cage_lantern'),pst=near.find(d=>d.k==='art_wm_chain');
+      if(cg&&IMG.hgpd_candel&&IMG.hgpd_lanternW){if(i%4===1)cg.k='hgpd_candel';else if(i%4===2)cg.k='hgpd_lanternW';else if(i%4===3&&IMG.hgpd_windlass)cg.k='hgpd_windlass'}
+      if(pst&&i%3===2&&IMG.hgpd_pillar)pst.k='hgpd_pillar';
       if(i%4===1&&bar){bar.k='hgpd_keg';bar.sc=1}else if(i%4===2&&cr&&lid){L.decor.splice(L.decor.indexOf(lid),1);cr.sc=.95;info.removed++}else if(i%4===3&&bu&&lid){bu.k='hgpd_keg';bu.sc=.9;L.decor.splice(L.decor.indexOf(lid),1);info.removed++}})}
   /* ---- 1. sites ---- */
   const dead=[];for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!land(x,y)||O.isle[ix(x,y)])continue;if(deg(x,y)!==1)continue;const n=DV.find(d=>land(x+d[0],y+d[1]));dead.push({x,y,ix:n[0],iy:n[1]})}
@@ -145,11 +179,11 @@ function hgpdBuild(L){
     P('hgpd_candle',a1[0],a1[1],{ox:s[0]*.3,oy:s[1]*.3,sc:.9});P('hgpd_bones',a2[0],a2[1],{ox:-s[0]*.3,oy:-s[1]*.3,sc:1.4});light(a2[0],a2[1],.4);light(a1[0],a1[1],.3)});
   // 3. the crossing post, near the second dock
   vig('The Crossing Post',3,nearTo(deadC.filter(e=>Math.hypot(e.x-O.docks[1].bx,e.y-O.docks[1].by)>=6),O.docks[1].bx,O.docks[1].by),E=>{const s=sd(E),a1=at(E,1);
-    add('hgpd_book',E.x,E.y,{block:true,sc:1.15,read:note(3)});P('hgpd_post',a1[0],a1[1],{ox:s[0]*.34,oy:s[1]*.34,sc:.8});P('hgpd_cage',a1[0],a1[1],{ox:s[0]*.34,oy:s[1]*.34,sc:1,bob:.5});P('hgpd_bucket',at(E,2)[0],at(E,2)[1],{ox:-s[0]*.3,oy:-s[1]*.3,sc:1});light(a1[0],a1[1],.5);nameAt('The Crossing Post',E.x,E.y)});
+    add('hgpd_book',E.x,E.y,{block:true,sc:1.15,read:note(3)});P('hgpd_post',a1[0],a1[1],{ox:s[0]*.34,oy:s[1]*.34,sc:.8});P('hgpd_cage',a1[0],a1[1],{ox:s[0]*.34,oy:s[1]*.34,sc:1,bob:.5});P('hgpd_pillar',at(E,2)[0],at(E,2)[1],{ox:-s[0]*.3,oy:-s[1]*.3,sc:1});light(a1[0],a1[1],.5);nameAt('The Crossing Post',E.x,E.y)});
   // 4. the cold camp: a bedroll's worth of things, no light
   vig('The Cold Camp',4,farPick(deadC,24),E=>{const s=sd(E),a1=at(E,1);
-    add('hgpd_book',E.x,E.y,{block:true,sc:1.15,read:note(4),ox:s[0]*.2,oy:s[1]*.2});P('hgpd_skel',a1[0],a1[1],{ox:-s[0]*.15,oy:-s[1]*.15,sc:1});P('hgpd_candle',E.x,E.y,{ox:-s[0]*.28,oy:-s[1]*.28,sc:.9});
-    P('hgpd_bucket',a1[0],a1[1],{ox:s[0]*.32,oy:s[1]*.32,sc:.9});P('hgpd_lid',at(E,2)[0],at(E,2)[1],{ox:s[0]*.2,oy:s[1]*.2,sc:.9});nameAt('The Cold Camp',E.x,E.y)});
+    add('hgpd_book',E.x,E.y,{block:true,sc:1.15,read:note(4),ox:s[0]*.2,oy:s[1]*.2});P('hgpd_skelS',a1[0],a1[1],{ox:-s[0]*.15,oy:-s[1]*.15,sc:1});P('hgpd_candle',E.x,E.y,{ox:-s[0]*.28,oy:-s[1]*.28,sc:.9});
+    P('hgpd_straw',a1[0],a1[1],{ox:s[0]*.32,oy:s[1]*.32,sc:1.2});P('hgpd_lid',at(E,2)[0],at(E,2)[1],{ox:s[0]*.2,oy:s[1]*.2,sc:.9});nameAt('The Cold Camp',E.x,E.y)});
   // islets: the lighthouse is the islet nearest the middle of the docks, the others are shuffled
   const cen=O.docks.reduce((a,d)=>[a[0]+d.wx/O.docks.length,a[1]+d.wy/O.docks.length],[0,0]);
   const lh=nearTo(isl,cen[0],cen[1]);let rest=isl.filter(q=>q!==lh);rest.sort(()=>rnd()-.5);
@@ -160,8 +194,8 @@ function hgpdBuild(L){
     clight(E.x,E.y,'amber',1,{z:1.2,rw:1.7,a:1,far:46,fr:null});light(E.x,E.y,.9);HGPD.lamp=[E.x,E.y];nameAt('The Keeper\'s Rock',E.x,E.y)});
   // 6. the wreck, with the second purse on it
   vig('The Wreck',6,rest.shift(),E=>{const c=cells(E,2).filter(q=>free(q[0],q[1]));
-    add('hgpd_boat',E.x,E.y,{sc:1.5,block:true,bob:-.05});const o=c.filter(q=>!(q[0]===E.x&&q[1]===E.y));
-    if(o[0])add('hgpd_book',o[0][0],o[0][1],{block:true,sc:1.15,read:note(6)});if(o[1])add('hgpd_skel',o[1][0],o[1][1],{sc:1});if(o[2])add('hgpd_tools',o[2][0],o[2][1],{sc:.8,ox:.2});if(o[3])add('chest',o[3][0],o[3][1],{block:true,gold:1000});
+    add(IMG.hgpd_wreck?'hgpd_wreck':'hgpd_boat',E.x,E.y,{sc:1.5,block:true,bob:-.05});const o=c.filter(q=>!(q[0]===E.x&&q[1]===E.y));
+    if(o[0])add('hgpd_book',o[0][0],o[0][1],{block:true,sc:1.15,read:note(6)});if(o[1])add(IMG.hgpd_skelL?'hgpd_skelL':'hgpd_skel',o[1][0],o[1][1],{sc:1});if(o[2])add('hgpd_bbucket',o[2][0],o[2][1],{sc:.9,ox:.2});if(o[4])add('hgpd_bones',o[4][0],o[4][1],{sc:1.2});if(o[3])add('chest',o[3][0],o[3][1],{block:true,gold:1000});
     light(E.x,E.y,.4);nameAt('The Wreck',E.x,E.y)});
   // 7. the drowned chapel
   vig('The Drowned Chapel',7,rest.shift(),E=>{const c=cells(E,2).filter(q=>free(q[0],q[1])&&!(q[0]===E.x&&q[1]===E.y));
@@ -176,51 +210,51 @@ function hgpdBuild(L){
   // 9. the reading room (a room with a shelf of books on the wall and a reader who stayed)
   vig('The Reading Room',9,farPick(rc,22),E=>{const w=[-1,0],c=[E.x-2,E.y];
     if(rows[E.y][E.x-3]==='#')add('hgpd_shelf',E.x-2,E.y,{wd:[-1,0],bob:.18,sc:1});else{const wd=wallDir(E.x,E.y);if(wd)add('hgpd_shelf',E.x,E.y,{wd,bob:.18,sc:1})}
-    add('hgpd_book',E.x,E.y,{block:true,sc:1.15,read:note(9)});P('hgpd_skel',E.x+1,E.y,{sc:1,ox:.1});P('hgpd_crate',E.x+1,E.y+1,{sc:.9});P('hgpd_candle',E.x+1,E.y+1,{sc:1,oy:-.1,ox:.1});P('hgpd_barrel',E.x-1,E.y+2,{sc:.85});
+    add('hgpd_book',E.x,E.y,{block:true,sc:1.15,read:note(9)});P('hgpd_skelS_m',E.x+1,E.y,{sc:1,ox:.1});P('hgpd_candel',E.x+1,E.y+1,{sc:1,oy:-.1,ox:.1});P('hgpd_pot',E.x-1,E.y+2,{sc:.9});P('hgpd_scale',E.x+2,E.y-1,{sc:.9});
     light(E.x,E.y,.5);nameAt('The Reading Room',E.x,E.y)});
   // 10. the tally wall: marks on both walls of the last corridor
   vig('The Tally Wall',10,farPick(deadC,24),E=>{const s=sd(E),a1=at(E,1),a2=at(E,2);
     add('hgpd_book',E.x,E.y,{block:true,sc:1.15,read:note(10)});
     for(const [c,sg,sc,k] of [[E,1,1.2,'art_hgxrock3'],[a1,-1,.6,'hgpd_cairn'],[a1,1,1.0,'art_hgxrock3'],[a2,-1,.6,'hgpd_stone'],[a2,1,.5,'hgpd_cairn']])P(k,c[0],c[1],{ox:sg*s[0]*.32,oy:sg*s[1]*.32,sc}); // a row of small stone piles, one for each day
-    P('hgpd_skel',a1[0],a1[1],{ox:s[0]*.2,oy:s[1]*.2,sc:1});P('hgpd_candle',a1[0],a1[1],{ox:-s[0]*.3,oy:-s[1]*.3,sc:.8});light(a1[0],a1[1],.3)});
+    P('hgpd_carved',a1[0],a1[1],{ox:s[0]*.22,oy:s[1]*.22,sc:1});P('hgpd_slab',a2[0],a2[1],{ox:s[0]*.1,oy:s[1]*.1,sc:1});P('hgpd_coins',a1[0],a1[1],{ox:-s[0]*.3,oy:-s[1]*.3,sc:1});light(a1[0],a1[1],.3)});
   // 11. the barricade: crates and barrels along both sides of the way (the way itself stays open)
   vig('The Barricade',11,farPick(deadC,24),E=>{const s=sd(E),a1=at(E,1),a2=at(E,2),a3=at(E,3);
     add('hgpd_book',E.x,E.y,{block:true,sc:1.15,read:note(11)});
     for(const [c,i] of [[a1,0],[a2,1],[a3,2]])for(const sg of [1,-1]){const k=(i+(sg>0?0:1))%3===0?'hgpd_barrel':(i%2?'hgpd_lid':'hgpd_crate');P(k,c[0],c[1],{ox:sg*s[0]*.33,oy:sg*s[1]*.33,sc:k==='hgpd_barrel'?.9:.95})}
-    P('hgpd_skel',E.x,E.y,{sc:1,ox:s[0]*.25,oy:s[1]*.25});light(a2[0],a2[1],.3);nameAt('The Barricade',E.x,E.y)});
+    P('hgpd_skelL',E.x,E.y,{sc:1,ox:s[0]*.25,oy:s[1]*.25});P('hgpd_pillar',a3[0],a3[1],{sc:1,ox:-s[0]*.05});light(a2[0],a2[1],.3);nameAt('The Barricade',E.x,E.y)});
   // 12. the dig: a cart, the tools, a great tooth
   vig('The Dig',12,farPick(deadC,24),E=>{const s=sd(E),a1=at(E,1),a2=at(E,2);
     add('hgpd_book',E.x,E.y,{block:true,sc:1.15,read:note(12)});P('hgpd_cart',a1[0],a1[1],{ox:s[0]*.2,oy:s[1]*.2,sc:1});P('hgpd_tools',a1[0],a1[1],{ox:-s[0]*.34,oy:-s[1]*.34,sc:.85});
-    P('hgpd_tooth',a2[0],a2[1],{ox:-s[0]*.2,oy:-s[1]*.2,sc:1.8});P('hgpd_rubble',a2[0],a2[1],{ox:s[0]*.3,oy:s[1]*.3,sc:1.3});P('hgpd_rubble',E.x,E.y,{ox:s[0]*.3,sc:1.1});light(a1[0],a1[1],.35)});
+    P('hgpd_tooth',E.x,E.y,{ox:-s[0]*.3,oy:-s[1]*.3-.1,sc:1.2});P('hgpd_rubble',a2[0],a2[1],{ox:s[0]*.3,oy:s[1]*.3,sc:1.1});P('hgpd_rubble',E.x,E.y,{ox:s[0]*.3,sc:1.1});P('hgpd_windlass',a2[0],a2[1],{ox:-s[0]*.28,oy:-s[1]*.28,sc:1});P('hgpd_tiles',a2[0],a2[1],{sc:1.2});light(a1[0],a1[1],.35)});
   // 13. the company purse, at the far end of the longest dead end
   vig('The Company Purse',13,farPick(deadC.filter(e=>Math.hypot(e.x-100,e.y-100)>45),24),E=>{const s=sd(E),a1=at(E,1);
     add('chest',E.x,E.y,{block:true,gold:1000,read:Object.assign(note(13),{once:1})}); // the first touch reads the last page, the second opens the purse
-    P('hgpd_skel',a1[0],a1[1],{ox:s[0]*.3,oy:s[1]*.3,sc:1});P('hgpd_candle',a1[0],a1[1],{ox:-s[0]*.3,oy:-s[1]*.3,sc:1});
-    P('hgpd_gold',E.x,E.y,{ox:s[0]*.3,oy:s[1]*.28,sc:1});P('hgpd_lantern',at(E,2)[0],at(E,2)[1],{oy:.2,ox:-s[0]*.1,sc:1});light(a1[0],a1[1],.45)});
+    P('hgpd_skelS',a1[0],a1[1],{ox:s[0]*.3,oy:s[1]*.3,sc:1});P('hgpd_key',a1[0],a1[1],{ox:-s[0]*.3,oy:-s[1]*.3,sc:1});
+    P('hgpd_gold',E.x,E.y,{ox:s[0]*.3,oy:s[1]*.28,sc:1});P('hgpd_lanternW',at(E,2)[0],at(E,2)[1],{oy:.2,ox:-s[0]*.1,sc:1});light(a1[0],a1[1],.45)});
   // the waiting rock: statues set facing the water, and a wheel on a rock with the one who steered
   vig('The Waiting Rock',0,rest.shift(),E=>{const c=cells(E,2).filter(q=>free(q[0],q[1])&&!(q[0]===E.x&&q[1]===E.y));
     add('art_hgxstat7',E.x,E.y,{block:true,sc:.95});if(c[0])add('art_hgxstat3',c[0][0],c[0][1],{block:true,sc:1.0});if(c[1])add('hgpd_coral',c[1][0],c[1][1],{sc:1,ox:.2});if(c[2])add('hgpd_shells',c[2][0],c[2][1],{sc:1,ox:-.2});
     if(c[0])HGPD.read[c[0][0]+','+c[0][1]]={n:'A carved woman',t:'Someone carved two figures and set them on this rock, a child with a lantern and a woman, both turned to face the water. The lantern is empty. They look as if they are waiting for a boat that has not come.'};
     light(E.x,E.y,.4);nameAt('The Waiting Rock',E.x,E.y)});
   vig('The Steersman',0,rest.shift(),E=>{const c=cells(E,2).filter(q=>free(q[0],q[1])&&!(q[0]===E.x&&q[1]===E.y));
-    add('hgpd_wheel',E.x,E.y,{block:true,sc:.6});if(c[0])add('hgpd_skel',c[0][0],c[0][1],{sc:1});if(c[1])add('hgpd_keg',c[1][0],c[1][1],{sc:1,ox:.15});if(c[2])add('hgpd_lantern',c[2][0],c[2][1],{sc:1.2});
+    add('hgpd_wheel',E.x,E.y,{block:true,sc:.6});if(c[0])add('hgpd_skelS_m',c[0][0],c[0][1],{sc:1});if(c[1])add('hgpd_keg',c[1][0],c[1][1],{sc:1,ox:.15});if(c[2])add('hgpd_lanternC',c[2][0],c[2][1],{sc:1.2});
     HGPD.read[E.x+','+E.y]={n:'A ship\'s wheel',t:'A ship\'s wheel, bolted to a post of the rock. There is no ship. Whoever stood here steered the dark all the way down to the end, and the rock with them.'};light(E.x,E.y,.35);nameAt('The Steersman',E.x,E.y)});
   /* ---- 2b. ROUND 2: twelve orb alcoves, each a little scene of its own with a note. A Glow Orb sits in an iron cage; lift it out and it is yours. ---- */
   const hsh=(x,y,n)=>{let h=((x*73856093)^(y*19349663)^((n||0)*83492791))>>>0;h=Math.imul(h^(h>>>13),1274126177)>>>0;return ((h^(h>>>16))>>>0)/4294967296};
-  const OCOL=[2,0,3,2,1,3,0,2,3,0,2,1];
+  const OCOL=[2,0,3,2,0,3,0,2,3,0,2,3];
   const ALC=[
-   ['Dunmow\'s Light','A cage of black iron with a glowing orb in it. A scrap tied to the bars says: "Dunmow\'s lantern. He said he would come back for it. Take it, Dunmow, if you can."',[['hgpd_candle',0,.32,.9],['hgpd_skel',1,.34,1]]],
-   ['The Spare Light','An orb in an iron cage, set on a ledge somebody smoothed with a chisel. Scratched under it: "For whoever comes after. The light does not run out. We tried."',[['hgpd_lantern',0,.32,1.2],['hgpd_bucket',1,-.34,.9]]],
-   ['The Lamp Bearer\'s Niche','A pinned note: "The lamp bearer\'s spare. He lost his lamp on the second crossing, and we found this one too late. It is yours."',[['hgpd_bucket',0,-.34,1],['hgpd_candle',1,.34,.8]]],
+   ['Dunmow\'s Light','A cage of black iron with a glowing orb in it. A scrap tied to the bars says: "Dunmow\'s lantern. He said he would come back for it. Take it, Dunmow, if you can."',[['hgpd_candle',0,.32,.9],['hgpd_skelS',1,.34,1]]],
+   ['The Spare Light','An orb in an iron cage, set on a ledge somebody smoothed with a chisel. Scratched under it: "For whoever comes after. The light does not run out. We tried."',[['hgpd_candel',0,.32,1],['hgpd_pot',1,-.34,.9]]],
+   ['The Lamp Bearer\'s Niche','A pinned note: "The lamp bearer\'s spare. He lost his lamp on the second crossing, and we found this one too late. It is yours."',[['hgpd_windlass',0,-.34,1],['hgpd_lanternW',1,.34,1]]],
    ['The Shell Shrine','Someone has ringed an orb with shells, like a small shrine. Scratched on the stone: "A light for the water."',[['hgpd_shells',0,.34,1.3],['hgpd_coral',1,-.34,1]]],
-   ['The Captain\'s Light','A card hangs from the cage: "Captain Ysolt kept this one under her bunk. She said a true captain keeps one light that nobody knows about."',[['hgpd_barrel',0,-.34,.9],['hgpd_tools',1,.34,.8]]],
-   ['The Child\'s Lantern','A small cage hangs where a child could reach it. Beside it, in chalk: "Mind the step." There is no step.',[['hgpd_root',0,.34,1.3],['hgpd_candle',1,-.34,.9]]],
-   ['The Prior\'s Gift','A tag on the cage: "A gift from the Prior. Do not sell it. We sold the first one and the water came to ask for it back."',[['hgpd_keg',0,.34,1],['hgpd_candle',1,-.34,.8]]],
+   ['The Captain\'s Light','A card hangs from the cage: "Captain Ysolt kept this one under her bunk. She said a true captain keeps one light that nobody knows about."',[['hgpd_cask',0,-.34,1],['hgpd_key',1,.34,1]]],
+   ['The Child\'s Lantern','A small cage hangs where a child could reach it. Beside it, in chalk: "Mind the step." There is no step.',[['hgpd_root',0,.34,1.3],['hgpd_coins',1,-.34,1]]],
+   ['The Prior\'s Gift','A tag on the cage: "A gift from the Prior. Do not sell it. We sold the first one and the water came to ask for it back."',[['hgpd_keg',0,.34,1],['hgpd_scale',1,-.34,1]]],
    ['The Stone Stack','An orb in a cage on a cairn of white stones. On the nearest stone someone has written: "Take one, leave a stone." There are no stones left to leave.',[['hgpd_cairn',0,-.36,.7],['hgpd_stone',1,.34,1]]],
    ['Pell\'s Reading Light','The orb glows steady and green. A card under it: "Brother Pell\'s. He said it was for reading by. He mostly looked at it."',[['hgpd_straw',0,.34,1.1],['hgpd_bones',1,-.34,1]]],
-   ['The Spare Shelf','A note under the cage: "Spare light and spare rope, both on the shelf, just as the Captain left them. Someone has used the rope."',[['hgpd_bucket',0,.34,.9],['hgpd_tools',1,-.34,.8]]],
+   ['The Spare Shelf','A note under the cage: "Spare light and spare rope, both on the shelf, just as the Captain left them. Someone has used the rope."',[['hgpd_bbucket',0,.34,1],['hgpd_slab',1,-.34,1]]],
    ['The Dig Light','This orb is set into the wall of the dig itself. Somebody has written FOUND IT on the stone, and a little lower down, NOT WHAT WE WERE LOOKING FOR.',[['hgpd_rubble',0,.34,1.2],['hgpd_tools',1,-.34,.8],['hgpd_tooth',1,.34,1.2]]],
-   ['Marta\'s Ribbon','A faded ribbon is tied round the cage. The tag says: "For Marta, when we reach the sea." The ribbon has lost its colour but not its knot.',[['hgpd_shells',0,-.34,1.2],['hgpd_candle',1,.34,.8]]]];
+   ['Marta\'s Ribbon','A faded ribbon is tied round the cage. The tag says: "For Marta, when we reach the sea." The ribbon has lost its colour but not its knot.',[['hgpd_shells',0,-.34,1.2],['hgpd_carved',1,.34,1]]]];
   if(HGPD_R2&&IMG.wm_orbframe0&&typeof orbTake==='function'){
     const sites=[],okSite=e=>keep.every(k=>Math.hypot(k[0]-e.x,k[1]-e.y)>=6)&&!busy(e.x,e.y,2)&&!chosen.some(q=>Math.hypot(q[0]-e.x,q[1]-e.y)<8);
     const dd=dead.filter(okSite),rr=[];for(let y=6;y<H-6;y++)for(let x=6;x<W-6;x++)if(room(x,y,1)&&!O.isle[ix(x,y)]&&okSite({x,y}))rr.push({x,y,room:1});
@@ -250,9 +284,9 @@ function hgpdBuild(L){
     (E,c)=>{add('hgpd_skel',E.x,E.y,{sc:1});if(c[0])add('hgpd_lantern',c[0][0],c[0][1],{sc:1.3})},(E,c)=>{add('hgpd_barrel',E.x,E.y,{sc:.8,ox:.15});if(c[0])add('hgpd_bucket',c[0][0],c[0][1],{sc:1})}];
   rest.forEach((q,i)=>{const c=cells(q,1).filter(p=>free(p[0],p[1])&&!(p[0]===q.x&&p[1]===q.y));IS[i%IS.length](q,c);info.fills++});
   /* ---- 3. the foot of every ladder ---- */
-  const KIT=[(a,s)=>[['hgpd_bucket',.32,1],['hgpd_candle',-.3,1]],(a,s)=>[['hgpd_crate',.32,.85]],(a,s)=>[['hgpd_barrel',-.32,.85],['hgpd_candle',.3,.9]],(a,s)=>[['hgpd_candle',.3,1.1],['hgpd_candle',-.3,.9]],
-    (a,s)=>[['hgpd_tools',.33,.8]],(a,s)=>[['hgpd_skel',.28,1]],(a,s)=>[['hgpd_lantern',-.3,1.2],['hgpd_bucket',.32,.9]],(a,s)=>[['hgpd_bones',.3,1.4],['hgpd_rubble',-.3,1.2]],
-    (a,s)=>[['hgpd_lid',.3,.9],['hgpd_bucket',-.32,.9]],(a,s)=>[['hgpd_keg',.32,1]],(a,s)=>[['hgpd_post',.36,.7]],(a,s)=>[['hgpd_straw',-.3,1.1],['hgpd_candle',.3,.9]]];
+  const KIT=[(a,s)=>[['hgpd_post',.36,.8],['hgpd_pot',-.3,1]],(a,s)=>[['hgpd_crate',.32,.85],['hgpd_candle',-.3,1]],(a,s)=>[['hgpd_barrel',-.32,.85],['hgpd_lanternW',.3,1]],(a,s)=>[['hgpd_cage',.3,.9],['hgpd_candle',-.3,.9]],
+    (a,s)=>[['hgpd_tools',.33,.8],['hgpd_bbucket',-.3,.9]],(a,s)=>[['hgpd_skelS',.28,1],['hgpd_crate',-.3,.8]],(a,s)=>[['hgpd_windlass',-.3,1],['hgpd_straw',.3,1]],(a,s)=>[['hgpd_post',.34,.8],['hgpd_bones',-.3,1.4]],
+    (a,s)=>[['hgpd_lid',.3,.9],['hgpd_candel',-.32,1]],(a,s)=>[['hgpd_cask',.32,1],['hgpd_coins',-.3,1]],(a,s)=>[['hgpd_scale',.34,.9],['hgpd_rubble',-.3,1.2]],(a,s)=>[['hgpd_pillar',.34,.9],['hgpd_candle',-.3,.9]]];
   // the kit stands in the corridor in front of the ladder (one and two squares back) so it is seen on the way in, not behind the party
   lad.forEach((l,i)=>{const s=[-l.dy,l.dx],cs=[[l.ax-l.dx,l.ay-l.dy],[l.ax,l.ay],[l.ax-2*l.dx,l.ay-2*l.dy]].filter(c=>land(c[0],c[1]));if(!cs.length){info.kits++;return}
     KIT[i%KIT.length]().forEach(([k,o,sc],j)=>{const c=cs[j%cs.length];let oo=o;const wl=(sg)=>rows[c[1]+sg*s[1]]&&rows[c[1]+sg*s[1]][c[0]+sg*s[0]]==='#';
@@ -270,18 +304,29 @@ function hgpdBuild(L){
       const text=up?'A flat stone is set into the wall, covered in glowing runes nobody can read. Under them somebody has scratched the word UP. The nearest ladder to the surface is about '+n+' steps from here. The way starts to the '+dir+'.':'A board is nailed to the wall with scraps of paper pinned on it. The top scrap says BOAT. The nearest boat is about '+n+' steps from here. The way starts to the '+dir+'.';
       add(up?'hgpd_rune':'hgpd_board',c.x,c.y,{wd:c.w,bob:.18,sc:up?.7:.9,read:{n:up?'A rune stone':'A notice board',t:text}});info.signs++})}
   /* ---- 5. dead ends that are still empty get a small scene of their own ---- */
-  const FILL=[(E,s)=>{P('hgpd_bones',E.x,E.y,{sc:1.5,ox:s[0]*.2});P('hgpd_rubble',E.x,E.y,{sc:1.2,ox:-s[0]*.3})},(E,s)=>{P('hgpd_candle',E.x,E.y,{sc:1,ox:s[0]*.25});P('hgpd_cairn',E.x,E.y,{sc:.9,ox:-s[0]*.25});light(E.x,E.y,.25)},
-    (E,s)=>{P('hgpd_crate',E.x,E.y,{sc:.85,ox:s[0]*.2});P('hgpd_bucket',E.x,E.y,{sc:.9,ox:-s[0]*.3})},(E,s)=>{P('hgpd_skel',E.x,E.y,{sc:1});const w=wallDir(E.x,E.y);if(w)add('art_wm_web',E.x,E.y,{wd:w,bob:.5})},
-    (E,s)=>{P('hgpd_root',E.x,E.y,{sc:1.4,ox:s[0]*.2});P('hgpd_tooth',E.x,E.y,{sc:1.3,ox:-s[0]*.3})},(E,s)=>{P('hgpd_lantern',E.x,E.y,{sc:1.3,ox:s[0]*.2,oy:.15});P('hgpd_bucket',E.x,E.y,{sc:.9,ox:-s[0]*.3});light(E.x,E.y,.25)},
-    (E,s)=>{P('hgpd_keg',E.x,E.y,{sc:.9,ox:s[0]*.25});P('hgpd_straw',E.x,E.y,{sc:1.2,ox:-s[0]*.3})},
-    (E,s)=>{P('hgpd_straw',E.x,E.y,{sc:1.3,ox:s[0]*.1});P('hgpd_candle',E.x,E.y,{sc:1,ox:-s[0]*.3});P('hgpd_bucket',E.x,E.y,{sc:.9,ox:s[0]*.32,oy:-.1});light(E.x,E.y,.25)}, // a bedroll
-    (E,s)=>{P('hgpd_cairn',E.x,E.y,{sc:.8,ox:s[0]*.1});P('hgpd_candle',E.x,E.y,{sc:.9,ox:s[0]*.32});P('hgpd_shells',E.x,E.y,{sc:1.2,ox:-s[0]*.3})}, // a grave marker
-    (E,s)=>{P('hgpd_skel',E.x,E.y,{sc:1,ox:-s[0]*.15});P('hgpd_gold',E.x,E.y,{sc:.8,ox:s[0]*.3})}, // died guarding a few coins
-    (E,s)=>{P('hgpd_tools',E.x,E.y,{sc:.9,ox:s[0]*.3});P('hgpd_rubble',E.x,E.y,{sc:1.1,ox:-s[0]*.25})},
-    (E,s)=>{P('hgpd_root',E.x,E.y,{sc:1.2,ox:-s[0]*.15});P('hgpd_shells',E.x,E.y,{sc:1.1,ox:s[0]*.3})},
-    (E,s)=>{P('hgpd_lid',E.x,E.y,{sc:.9,ox:s[0]*.2});P('hgpd_coral',E.x,E.y,{sc:1,ox:-s[0]*.3});light(E.x,E.y,.2)},
-    (E,s)=>{P('hgpd_barrel',E.x,E.y,{sc:.85,ox:-s[0]*.28});P('hgpd_skel',E.x,E.y,{sc:1,ox:s[0]*.18})}];
-  {let n=0;for(const E of dead){if(n>=200)break;if(!okDead(E)||chosen.some(q=>Math.hypot(q[0]-E.x,q[1]-E.y)<7))continue;const s=sd(E);FILL[(E.x*7+E.y*3)%FILL.length](E,s);info.fills++;n++}}
+  // round 3: sixteen different kits (each has its own main piece, no two share both props); a dead end takes the kit used least in its neighbourhood
+  const FILL=[
+    ['bone heap',(E,s)=>{P('hgpd_bones',E.x,E.y,{sc:1.5,ox:s[0]*.2});P('hgpd_pot',E.x,E.y,{sc:1,ox:-s[0]*.3})}],
+    ['stone stack',(E,s)=>{P('hgpd_cairn',E.x,E.y,{sc:.9,ox:-s[0]*.25});P('hgpd_candle',E.x,E.y,{sc:1,ox:s[0]*.25});light(E.x,E.y,.25)}],
+    ['purser',(E,s)=>{P('hgpd_crate',E.x,E.y,{sc:.85,ox:s[0]*.2});P('hgpd_coins',E.x,E.y,{sc:1,ox:-s[0]*.3})}],
+    ['webbed bones',(E,s)=>{P('hgpd_skelL',E.x,E.y,{sc:1});const w=wallDir(E.x,E.y);if(w)add('art_wm_web',E.x,E.y,{wd:w,bob:.5})}],
+    ['root and horn',(E,s)=>{P('hgpd_root',E.x,E.y,{sc:1.4,ox:s[0]*.2});P('hgpd_tooth',E.x,E.y,{sc:1.3,ox:-s[0]*.3})}],
+    ['fallen pillar',(E,s)=>{P('hgpd_pillar',E.x,E.y,{sc:1,ox:s[0]*.15});P('hgpd_rubble',E.x,E.y,{sc:1.2,ox:-s[0]*.3})}],
+    ['well winder',(E,s)=>{P('hgpd_windlass',E.x,E.y,{sc:1,ox:-s[0]*.15});P('hgpd_bbucket',E.x,E.y,{sc:1,ox:s[0]*.32,oy:-.1})}],
+    ['assayer',(E,s)=>{P('hgpd_scale',E.x,E.y,{sc:1,ox:s[0]*.1});P('hgpd_coins',E.x,E.y,{sc:1.2,ox:-s[0]*.3,oy:.1})}],
+    ['key on a slab',(E,s)=>{P('hgpd_slab',E.x,E.y,{sc:1,ox:-s[0]*.1});P('hgpd_key',E.x,E.y,{sc:1,ox:s[0]*.28})}],
+    ['bedroll',(E,s)=>{P('hgpd_straw',E.x,E.y,{sc:1.3,ox:s[0]*.1});P('hgpd_candel',E.x,E.y,{sc:1,ox:-s[0]*.3});light(E.x,E.y,.25)}],
+    ['grave marker',(E,s)=>{P('hgpd_carved',E.x,E.y,{sc:1,ox:s[0]*.05});P('hgpd_shells',E.x,E.y,{sc:1.2,ox:-s[0]*.3})}],
+    ['slumped sentry',(E,s)=>{P('hgpd_skelS',E.x,E.y,{sc:1,ox:-s[0]*.1});P('hgpd_gold',E.x,E.y,{sc:.8,ox:s[0]*.3})}],
+    ['digger',(E,s)=>{P('hgpd_tools',E.x,E.y,{sc:.9,ox:s[0]*.3});P('hgpd_tiles',E.x,E.y,{sc:1.2,ox:-s[0]*.25})}],
+    ['cask and cup',(E,s)=>{P('hgpd_cask',E.x,E.y,{sc:1,ox:-s[0]*.2});P('hgpd_lanternC',E.x,E.y,{sc:1.1,ox:s[0]*.3,oy:.1});light(E.x,E.y,.25)}],
+    ['crag and glow',(E,s)=>{P('hgpd_crag',E.x,E.y,{sc:1,ox:s[0]*.1});P('hgpd_blue',E.x,E.y,{sc:1.3,ox:-s[0]*.3});light(E.x,E.y,.3)}],
+    ['drowned coral',(E,s)=>{P('hgpd_lid',E.x,E.y,{sc:.9,ox:s[0]*.2});P('hgpd_coral',E.x,E.y,{sc:1,ox:-s[0]*.3});light(E.x,E.y,.2)}]];
+  info.kitNames=FILL.map(f=>f[0]);info.kitUse={};
+  {let n=0;const used=[];for(const E of dead){if(n>=200)break;if(!okDead(E)||chosen.some(q=>Math.hypot(q[0]-E.x,q[1]-E.y)<5))continue;const s=sd(E);
+      // the kit that has not been seen within 30 squares (fewest uses, nearest use furthest away)
+      let best=0,bs=-1;FILL.forEach((f,ki)=>{let m=99,c=0;for(const u of used)if(u[2]===ki){const dd=Math.hypot(u[0]-E.x,u[1]-E.y);if(dd<m)m=dd;if(dd<40)c++}const sc=Math.min(m,60)-c*8+hsh(E.x,E.y,ki+20)*6;if(sc>bs){bs=sc;best=ki}});
+      used.push([E.x,E.y,best]);info.kitUse[FILL[best][0]]=(info.kitUse[FILL[best][0]]||0)+1;FILL[best][1](E,s);info.fills++;n++}}
   /* ---- 6. long bare stretches get a landmark about every dozen squares ---- */
   {const marked=(x,y)=>L.decor.some(d=>Math.abs(d.x-x)<=3&&Math.abs(d.y-y)<=3&&!(d.pic&&/web/.test(d.k)))||(L.lights||[]).some(q=>Math.hypot(q[0]-x,q[1]-y)<=5);
     const LM=[(x,y,w)=>{add('hgpd_hook',x,y,{wd:w,bob:.55,sc:1});light(x,y,.4)},(x,y,w)=>{P('hgpd_rubble',x,y,{sc:1.4,ox:w[0]*.3,oy:w[1]*.3});P('hgpd_root',x,y,{sc:1.4,ox:-w[1]*.2,oy:w[0]*.2})},(x,y,w)=>{P('hgpd_crate',x,y,{sc:.85,ox:w[0]*.3,oy:w[1]*.3});P('hgpd_bucket',x,y,{sc:.9,ox:w[0]*.3-w[1]*.0,oy:w[1]*.3})},
@@ -330,20 +375,58 @@ function hgpdBuild(L){
         if(row.length>=2||same.filter(e=>Math.abs(e.x-d.x)<=1&&Math.abs(e.y-d.y)<=1).length>=1&&hsh(d.x,d.y,5)<.5&&c!=='candle'){
           const alt=FAM.filter(f=>f!==c&&f!=='candle'&&IMG['hgpd_'+f]);const nk='hgpd_'+alt[Math.floor(hsh(d.x,d.y,9)*alt.length)];d.k=nk;info.rows=(info.rows||0)+1}}}
     // the scale table: height in squares (a hero is 0.8, a villager 0.84); the engine reads sc as a multiplier on the picture's own height NPC_H
-    const TGT={skel:[.5,.06],chest:[.4,0],crate:[.42,.07],barrel:[.5,.06],keg:[.38,.06],bucket:[.32,.06],lid:[.42,.04],post:[.85,.05],lamp:[1.4,0],bell:[.6,0],wheel:[.54,0],candle:[.15,.2],lantern:[.24,.1],tools:[.52,.08],cart:[.5,0],shrine:[.72,0],stone:[.36,.15],cairn:[.4,.18],stat6:[1.15,0],stat7:[1.1,0],stat3:[.75,0],blue:[.9,.12],teal:[.5,.15],coral:[.4,.1],shells:[.22,.15],bones:[.34,.1],rubble:[.34,.1],root:[.44,.1],tooth:[.4,.1],straw:[.28,.1],cage:[.5,0],book:[.23,0]};
-    for(const d of L.decor){if(d.pic||d.hidden)continue;const c=CAN(d.k),nh=NPC_H[d.k];if(!nh)continue;
+    const TGT={skel:[.5,.06],chest:[.4,0],crate:[.42,.07],barrel:[.5,.06],keg:[.38,.06],bucket:[.32,.06],lid:[.42,.04],post:[.85,.05],lamp:[1.4,0],bell:[.6,0],wheel:[.54,0],candle:[.15,.2],lantern:[.24,.1],tools:[.52,.08],cart:[.5,0],shrine:[.72,0],stone:[.36,.15],cairn:[.4,.18],stat6:[1.15,0],stat7:[1.1,0],stat3:[.75,0],blue:[.9,.12],teal:[.5,.15],coral:[.4,.1],shells:[.22,.15],bones:[.34,.1],rubble:[.34,.1],root:[.44,.1],tooth:[.4,.1],straw:[.28,.1],cage:[.5,0],book:[.14,0],pot:[.3,.1],bbucket:[.28,.08],lanternW:[.24,.1],lanternC:[.24,.1],coins:[.12,.1],tiles:[.1,.1],slab:[.3,.12],carved:[.55,.1],pillar:[.55,.1],crag:[.5,.1],scale:[.46,.06],key:[.26,.1],windlass:[.6,.04],candel:[.4,.08],cask:[.45,.06],skelL:[.3,.06],skelS:[.46,.06],wreck:[.62,0],sign:[.55,.05]};
+    const scaleAll=()=>{for(const d of L.decor){if(d.pic||d.hidden)continue;const c=CAN(d.k),nh=NPC_H[d.k];if(!nh)continue;
       if(c==='boat'||c==='yar_boat_row'){const im=IMG[d.k];if(!im||!im.width)continue;const wt=c==='yar_boat_row'?1.5:1.4;d.sc=+(wt/(im.width/im.height)/nh).toFixed(2);info.scaled=(info.scaled||0)+1;continue}
-      const t=TGT[c];if(!t)continue;const j=1+(hsh(d.x,d.y,7)-.5)*2*t[1];d.sc=+Math.max(.2,t[0]*j/nh).toFixed(2);info.scaled=(info.scaled||0)+1}
+      const t=TGT[c];if(!t)continue;const j=1+(hsh(d.x,d.y,7)-.5)*2*t[1];d.sc=+Math.max(.2,t[0]*j/nh).toFixed(2);info.scaled=(info.scaled||0)+1}};
+    scaleAll();HGPD.rescale=scaleAll; // run again once all pictures are in (a build before a picture has loaded leaves its heights unset)
     // a skeleton does not lie on a heap of stones: the stones are moved aside
     for(const d of L.decor){if(d.pic||CAN(d.k)!=='skel')continue;for(const o of L.decor){if(o===d||o.pic||o.x!==d.x||o.y!==d.y||!/^(cairn|stone|rubble|rock3)$/.test(CAN(o.k)))continue;o.ox=(o.ox||0)-.3;d.ox=(d.ox||0)+.2;info.moved=(info.moved||0)+1}}
+    // seated skeletons that other builders put in dead ends: a third keep the seated pose, a third slump, a third lie
+    for(const d of L.decor){if(d.pic||CAN(d.k)!=='skel'||/^hgpd_skel[LS]/.test(d.k))continue;const h=hsh(d.x,d.y,12);if(h>=.34&&IMG.hgpd_skelS)d.k=h<.67?'hgpd_skelS':(IMG.hgpd_skelL?'hgpd_skelL':'hgpd_skelS');info.poses=(info.poses||0)+1}
+    scaleAll();
     // flipped copies: about half of the loose props face the other way, the open books are in three poses at slightly different places
     for(const d of L.decor){if(d.pic)continue;const h=hsh(d.x,d.y,3);
       if(d.k==='hgpd_book'){const v=Math.floor(hsh(d.x,d.y,4)*3);if(v)d.k='hgpd_book'+(v+1);d.ox=+(((hsh(d.x,d.y,6)-.5)*.3)+(d.ox||0)).toFixed(2);d.oy=+(((hsh(d.x,d.y,8)-.5)*.2)+(d.oy||0)).toFixed(2);continue}
       if(HGPD_MIR.includes(d.k)&&IMG[d.k+'_m']&&h<.5){d.k+='_m';info.mir=(info.mir||0)+1}}}
+  /* ---- 10. ROUND 3: one picture per wall square (a lantern never hides a rune), a title and a text on every sign and note, no missing picture ---- */
+  if(HGPD_R2){
+    const RT=['Still here','Five strokes','It is warm','Boat crossed out','Water on the left','Ladder, not here','Pell was here','Count your steps'];
+    // 10a. the lantern hooks and every other wall picture that sits on the same wall square as a sign or rune are moved to the nearest bare wall square
+    const sg=L.decor.filter(d=>d.pic&&d.wd&&/rune|board/.test(d.k)&&!/hook/.test(d.k));
+    for(const d of L.decor.slice()){if(!d.pic||!d.wd||/rune|board|shelf/.test(d.k))continue;
+      if(!L.decor.some(o=>o!==d&&o.pic&&o.wd&&o.x===d.x&&o.y===d.y&&/rune|board|shelf/.test(o.k)))continue;
+      const nb=[[1,0],[-1,0],[0,1],[0,-1]];let moved=false;
+      for(let r=1;r<=3&&!moved;r++)for(const v of nb){const x=d.x+v[0]*r,y=d.y+v[1]*r;if(land(x,y)&&rows[y+d.wd[1]]&&rows[y+d.wd[1]][x+d.wd[0]]==='#'&&!L.decor.some(o=>o.pic&&o.x===x&&o.y===y)&&!L.decor.some(o=>o.block&&o.x===x&&o.y===y)){d.x=x;d.y=y;moved=true;info.hooksMoved=(info.hooksMoved||0)+1;break}}
+      if(!moved){L.decor.splice(L.decor.indexOf(d),1);info.removed++}}
+    // 10b. every sign and note: text and a short title (one to four words)
+    const ONAME=new Set(ALC.map(a=>a[1]));let ri2=0;
+    for(const d of L.decor){const isSign=d.pic&&d.wd&&/rune|board/.test(d.k),rd=isSign?HGPD.read[(d.x+d.wd[0])+','+(d.y+d.wd[1])]:HGPD.read[d.x+','+d.y];
+      if(!rd||!(isSign||/book|^art_hgxstat|wheel/.test(d.k)))continue;
+      if(!d.text)d.text=rd.t;
+      if(!d.label){let lb=rd.n||'';
+        if(isSign){const ri=HGPD_RUNES.indexOf(rd.t);
+          if(/rune/.test(d.k))lb=ri>=0?RT[ri]:/UP\./.test(rd.t)?'The way up':'Rune stone';
+          else lb=/BOAT/.test(rd.t)?'The way to a boat':/WAIT/.test(rd.t)?'Wait':ONAME.has(rd.t)?(ALC.find(a=>a[1]===rd.t)[0]):'Pinned scraps'}
+        else if(rd.page)lb='Journal, page '+rd.page;
+        else if(ONAME.has(rd.t))lb=ALC.find(a=>a[1]===rd.t)[0];
+        else if(/wheel/.test(d.k)||/wheel/.test(rd.t))lb='A ship\'s wheel';
+        else if(/carved/i.test(rd.n||''))lb='The waiting figures';
+        if(!lb||lb.split(/\s+/).length>4)lb=(lb||'A note').split(/\s+/).slice(0,4).join(' ');
+        d.label=lb.replace(/[—–]/g,',')}}
+    for(const d of L.decor){if(d.pic&&d.wd&&/rune|board/.test(d.k)&&!d.text){d.text=HGPD_RUNES[ri2++%HGPD_RUNES.length];if(!d.label)d.label='Rune stone'}}
+    // 10c. a picture that is missing is swapped for a candle, so the game never draws an empty slot
+    for(const d of L.decor)if(/^hgpd_/.test(d.k)&&!IMG[d.k]){d.k=IMG.hgpd_candle?'hgpd_candle':d.k;info.missing=(info.missing||0)+1}
+  }
   /* ---- 7. names on the map ---- */
   L.mapNames=(L.mapNames||[]).concat(info.names);
   info.pages=info.vig.filter(v=>v.p).length;L._hgpd=info}
 {const _b=hgduBuild;hgduBuild=function(){const had=!!LEVELS[HGDU.ID];_b.apply(this,arguments);const L=LEVELS[HGDU.ID];if(!had&&L&&L._hgdo&&L._bsu)try{const t0=performance.now();hgpdBuild(L);if(L._hgpd)L._hgpd.ms=Math.round(performance.now()-t0)}catch(e){console.error('hgpdBuild',e)}}}
+/* a stone statue in a dead-end nook whose mouth is a junction square fills the whole screen as you pass (the engine scales a sprite by 1/depth): those few are dropped */
+if(typeof hgdnPlace==='function'){const _hp=hgdnPlace;hgdnPlace=function(L){const had=!!L._hgdn,r=_hp.apply(this,arguments);
+  try{if(!had&&r&&L._hgdo){const O=L._hgdo,rows=L.rows,land=(x,y)=>rows[y]&&rows[y][x]==='.'&&O.wm[y*201+x]!==1,DV=[[0,-1],[1,0],[0,1],[-1,0]],dg=(x,y)=>DV.filter(d=>land(x+d[0],y+d[1])).length;
+      for(let i=r.length-1;i>=0;i--){const q=r[i],n=DV.map(v=>[q.x+v[0],q.y+v[1]]).find(c=>land(c[0],c[1]));if(!n)continue;if(dg(n[0],n[1])>=3){const di=L.decor.findIndex(d=>d.x===q.x&&d.y===q.y&&d.k===q.k);if(di>=0)L.decor.splice(di,1);r.splice(i,1);HGPD.statDrop=(HGPD.statDrop||0)+1}}}}catch(e){console.error('hgpd stat',e)}
+  return r}}
 /* ---------- the bell of the drowned chapel, tolling in the dark ---------- */
 {const _u=update;update=function(dt){
   try{if(LEVEL===HGPD.ID&&G.state==='play'&&HGPD.chapel&&G.time>HGPD.bellT){const d=Math.hypot(G.P.x-HGPD.chapel[0],G.P.y-HGPD.chapel[1]);HGPD.bellT=G.time+9+Math.random()*7;
@@ -360,7 +443,7 @@ function hgpdBuild(L){
 {const _s=setupLights;setupLights=function(){_s.apply(this,arguments);
   try{if(LEVEL!==HGPD.ID||!HGPD.cl)return;for(const l of LIGHTS){if(!l.free||l.lamp)continue;const c=HGPD.cl[(l.x-.5)+','+(l.y-.5)];if(c){l.col=c[0];l.calm=true;l.kI=Math.max(1.05,c[1]*1.7);l.range2=c[1]>=.9?150:c[1]>=.6?80:56}}}catch(e){}}}
 {const _sl=setLightLevel;setLightLevel=function(l){_sl.apply(this,arguments);
-  if(HGPD_R2&&LEVEL===HGPD.ID){for(let i=0;i<=1024;i++)LUT[i]+=.028+.02*(i/1024)}}}
+  if(HGPD_R2&&LEVEL===HGPD.ID){RANGE*=1.8;for(let i=0;i<=1024;i++)LUT[i]+=.17+.1*(i/1024)}}}
 function hgpdGlows(){
   if(LEVEL!==HGPD.ID||!HGPD.glows||typeof bsuAirOn!=='function'||!bsuAirOn())return;
   const C=G.C,LA=C.a+(typeof LKYAW==='number'?LKYAW:0),dX=Math.cos(LA),dY=Math.sin(LA),pX=-dY*PL,pY=dX*PL,cx=C.x+.5-dX*.28,cy=C.y+.5-dY*.28,T=G.time,taken=(G.flags&&G.flags.orbTaken)||{};
@@ -383,5 +466,6 @@ function hgpdGlows(){
   ctx.restore()}
 {const _h=uwHud;uwHud=function(){_h.apply(this,arguments);try{hgpdGlows()}catch(e){}}}
 {let seen=null,seenN=-1;const _u=update;update=function(dt){
+  try{if(LEVEL===HGPD.ID&&HGPD.rescale&&!HGPD.rescaled&&G.state==='play'){HGPD.rescaled=1;HGPD.rescale()}}catch(e){}
   try{if(LEVEL===HGPD.ID&&G.decor&&(G.decor!==seen||G.decor.length!==seenN)){seen=G.decor;seenN=G.decor.length;for(const d of G.decor){const m=/^wm_orbframe(\d)$/.exec(d.k||'');if(m&&!d.orbFrame){d.orbFrame=true;d.emptyK='wm_orbframeE'+m[1]}}}}catch(e){}
   return _u.apply(this,arguments)}}

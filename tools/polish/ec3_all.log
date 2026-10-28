@@ -1,0 +1,46 @@
+{"w3": {"vig": 11, "props": 176, "notes": 0, "mossCut": 53, "mossCap": 37, "tallCut": 218, "landmarks": 59, "piranha": 1, "labels": 39, "newNotes": 11, "prot": 56}, "mossNear": 0, "mossMax": 0.25, "pir": [[39, 27, 6], [1, 20, 32.8], [13, 32, 20.6], [7, 9, 31.6], [20, 33, 14.3], [35, 5, 22.1], [11, 7, 29.7], [12, 3, 31.9], [41, 11, 17.9], [29, 35, 8.9], [21, 36, 15], [41, 40, 15.3], [15, 34, 19.3], [31, 5, 22.1], [1, 32, 32.4]], "vig": [{"n": "Garden of Saints", "x": 5, "y": 6, "props": 15}, {"n": "Drowned Library", "x": 18, "y": 7, "props": 18}, {"n": "Sunken Bell", "x": 17, "y": 17, "props": 21}, {"n": "Wreck of the Ferry", "x": 9, "y": 35, "props": 17}, {"n": "Saint's shrine", "x": 33, "y": 1, "props": 10}, {"n": "Mirror", "x": 3, "y": 11, "props": 9}, {"n": "Diver's camp", "x": 21, "y": 39, "props": 12}, {"n": "Pearl grotto", "x": 29, "y": 31, "props": 10}, {"n": "The scales", "x": 3, "y": 25, "props": 13}, {"n": "Smugglers' cache", "x": 13, "y": 29, "props": 15}, {"n": "Lantern nook", "x": 37, "y": 39, "props": 14}, {"n": "Rune stone", "x": 5, "y": 35, "props": 16}, {"n": "Warden's board", "x": 31, "y": 25, "props": 9}], "noLabel": 0, "empty": 0, "dash": 0, "notes": 39, "maxAnchorDist": 10, "at": "5,17", "fishProt": 1, "lights": 162, "decor": 965}
+save {'chests': 12, 'moved': 7, 'oldSaveOpensEmpty': True, 'keys': 2, 'newSaveRestored': True, 'indexIgnored': True}
+quest "Page.evaluate: ReferenceError: HGDQ_DEFS is not defined\n    at eval (eval at evaluate (:311:30), <anonymous>:2:15)\n    at UtilityScript.evaluate (<anonymous>:318:18)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+signs 30 [[3, 4, "hanging", "A brass plate at the foot of...", "A brass plate at the foot of the statues: The Four Saints of"], [15, 6, "page", "The archivist moved the abbey...", "The archivist moved the abbey library down here when the pon"], [21, 39, "warning", "A diver's slate: Hest went...", "A diver's slate: Hest went in for the pearls with one helm b"], [37, 39, "page", "A fisher's note: I hung three...", "A fisher's note: I hung three lanterns here so that nobody w"], [13, 37, "post", "A dead end", "Scratched small: A dead end. I came all this way for a dead "], [39, 3, "slate", "Turn back", "Chalked: Turn back. The reeds are thicker beyond, and there "], [21, 15, "slate", "Two lefts, one right, and you...", "Written in oil: Two lefts, one right, and you are here. Two "], [25, 39, "plaque", "Somebody sat here a long time", "Scratched: Somebody sat here a long time. The weed on the fl"], [3, 17, "plaque", "I counted forty breaths of air...", "Carved: I counted forty breaths of air on this side of the m"], [17, 25, "page", "A fisher's mark", "A fisher's mark, three lines and a hook: Good eels in the we"], [3, 29, "scroll", "My brother says the walls are...", "Chalked: My brother says the walls are the same green as the"], [9, 39, "tablet", "The steps up", "Carved in the wall at the crossing: THE STEPS UP, 22 squares"], [23, 41, "scroll", "A lantern-maker's mark", "A lantern-maker's mark and two lines of chalk: Up and out is"], [3, 15, "warning", "Dry land, 56 squares away, start...", "Painted on the stone in fading white: Dry land, 56 squares a"], [25, 35, "waymarker", "If you are tired", "Scratched with a spoon handle: If you are tired, the steps u"], [15, 25, "page", "A ferryman's tally", "A ferryman's tally, cut deep: Air above, 42, leave south. Tr"], [21, 11, "plaque", "Chiselled in neat capitals:...", "Chiselled in neat capitals: STAIRS 46 (WEST). WARDEN 30 (EAS"], [35, 37, "waymarker", "I counted it twice", "Written in lamp oil on a wet beam: I counted it twice. 97 sq"], [37, 17, "page", "A sailor's rhyme", "A sailor's rhyme, scratched small: 59 to the light, 14 to th"], [17, 15, "scroll", "Cast in the abbey foundry", "Scratched under the bell frame: Cast in the abbey foundry, b"], [8, 36, "slate", "A ticket stub stuck to the hull:...", "A ticket stub stuck to the hull: One crossing, any dawn. Pai"], [32, 1, "page", "Small offerings crowd the niche:...", "Small offerings crowd the niche: a button, a pearl, a child'"], [3, 10, "page", "A second card tuck
+v_Garden_of_Saints [5, 9] 0 vig 56.2
+v_Drowned_Library [15, 7] 1 vig 73.3
+v_Sunken_Bell [17, 20] 0 vig 68.1
+v_Wreck_of_the_Ferry [9, 38] 0 vig 61.1
+v_Saints_shrine [30, 1] 1 vig 78.0
+v_Mirror [3, 8] 2 vig 73.4
+v_Divers_camp [21, 36] 2 vig 72.6
+v_Pearl_grotto [26, 31] 1 vig 90.6
+v_The_scales [3, 22] 2 vig 77.3
+v_Smugglers_cache [13, 26] 2 vig 82.0
+v_Lantern_nook [40, 39] 3 vig 85.3
+v_Rune_stone [5, 37] 0 vig 71.9
+v_Wardens_board [31, 22] 2 vig 57.2
+hub0 [10, 34] 0 hub 71.5
+hub1 [34, 28] 1 hub 61.3
+hub2 [17, 18] 2 hub 65.4
+hub3 [5, 6] 3 hub 67.7
+hub4 [18, 7] 0 hub 83.5
+cor0 [31, 22] 2 corridor 55.4
+cor1 [1, 9] 0 corridor 63.3
+cor2 [19, 24] 0 corridor 62.8
+cor3 [11, 39] 3 corridor 57.4
+cor4 [24, 3] 1 corridor 62.5
+cor5 [23, 11] 3 corridor 55.8
+cor6 [33, 7] 1 corridor 61.4
+cor7 [25, 41] 3 corridor 54.1
+cor8 [27, 15] 0 corridor 75.9
+cor9 [20, 33] 3 corridor 70.1
+c7 [41, 36] 0 corridor 58.5
+c11 [27, 9] 1 corridor 58.7
+c9 [7, 33] 0 corridor 61.6
+arch [1, 6] 0 corridor 74.0
+l0d [39, 137] 0 lake 63.8
+l0f [19, 137] 0 lake 63.8
+l1d [147, 97] 0 lake 66.5
+l1f [147, 71] 2 lake 65.1
+l2d [97, 65] 1 lake 57.7
+l2f [123, 43] 2 lake 62.1
+l0w [39, 135] 0 lake 54.7
+l1w [147, 95] 0 lake 58.4
+l2w [99, 65] 1 lake 57.4
+errs []

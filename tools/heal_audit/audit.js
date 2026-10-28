@@ -5,7 +5,7 @@ window.__healAudit=function(L,N){
   const PI=G.heroes.findIndex((h,i)=>HERO_DEF[i].cls==='Priest'); // Wulfric
   const out={level:L,rows:[],checks:[]};
   G.heroes.forEach((h,i)=>{while(h.lvl<L){h.xp=xpNeed(h.lvl);levelUp(i)}h.alive=true});
-  const pr=G.heroes[PI];pr.learned=['c10','c50'];
+  const pr=G.heroes[PI];pr.learned=['c10','c50','c40h'];
   G.lvlBanners.length=0;
   const realCrit=window.healCrit;window.healCrit=function(){return 0};
   const floats=[];const rf=window.addFloat;window.addFloat=function(x,y,t,c){floats.push(String(t));return rf&&rf.apply(this,arguments)};

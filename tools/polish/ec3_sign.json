@@ -1,0 +1,224 @@
+{
+ "shots": {
+  "sign_hanging_3_4_d3": {
+   "pos": [
+    3,
+    7
+   ],
+   "f": 0,
+   "cat": "sign",
+   "lum": 68.4
+  },
+  "sign_hanging_3_4_d1": {
+   "pos": [
+    3,
+    4
+   ],
+   "f": 0,
+   "cat": "sign",
+   "lum": 70.3
+  },
+  "sign_page_11_21_d3": {
+   "pos": [
+    11,
+    24
+   ],
+   "f": 0,
+   "cat": "sign",
+   "lum": 71.2
+  },
+  "sign_page_11_21_d1": {
+   "pos": [
+    11,
+    22
+   ],
+   "f": 0,
+   "cat": "sign",
+   "lum": 98.1
+  },
+  "sign_post_13_37_d3": {
+   "pos": [
+    16,
+    37
+   ],
+   "f": 3,
+   "cat": "sign",
+   "lum": 60.3
+  },
+  "sign_post_13_37_d1": {
+   "pos": [
+    14,
+    37
+   ],
+   "f": 3,
+   "cat": "sign",
+   "lum": 54.9
+  },
+  "sign_tablet_3_17_d3": {
+   "pos": [
+    3,
+    14
+   ],
+   "f": 2,
+   "cat": "sign",
+   "lum": 54.2
+  },
+  "sign_tablet_3_17_d1": {
+   "pos": [
+    3,
+    16
+   ],
+   "f": 2,
+   "cat": "sign",
+   "lum": 54.9
+  },
+  "sign_tablet_9_39_d3": {
+   "pos": [
+    6,
+    39
+   ],
+   "f": 1,
+   "cat": "sign",
+   "lum": 69.1
+  },
+  "sign_tablet_9_39_d1": {
+   "pos": [
+    8,
+    39
+   ],
+   "f": 1,
+   "cat": "sign",
+   "lum": 54.0
+  },
+  "sign_post_3_15_d1": {
+   "pos": [
+    3,
+    16
+   ],
+   "f": 0,
+   "cat": "sign",
+   "lum": 55.7
+  },
+  "sign_plaque_21_11_d3": {
+   "pos": [
+    18,
+    11
+   ],
+   "f": 1,
+   "cat": "sign",
+   "lum": 68.3
+  },
+  "sign_plaque_21_11_d1": {
+   "pos": [
+    21,
+    12
+   ],
+   "f": 0,
+   "cat": "sign",
+   "lum": 50.7
+  },
+  "sign_slate_8_36_d3": {
+   "pos": [
+    8,
+    33
+   ],
+   "f": 2,
+   "cat": "sign",
+   "lum": 73.0
+  },
+  "sign_slate_8_36_d1": {
+   "pos": [
+    7,
+    36
+   ],
+   "f": 1,
+   "cat": "sign",
+   "lum": 75.0
+  },
+  "sign_tablet_21_38_d3": {
+   "pos": [
+    21,
+    35
+   ],
+   "f": 2,
+   "cat": "sign",
+   "lum": 69.6
+  },
+  "sign_tablet_21_38_d1": {
+   "pos": [
+    21,
+    38
+   ],
+   "f": 0,
+   "cat": "sign",
+   "lum": 71.9
+  },
+  "sign_slate_13_28_d3": {
+   "pos": [
+    13,
+    25
+   ],
+   "f": 2,
+   "cat": "sign",
+   "lum": 71.4
+  },
+  "sign_slate_13_28_d1": {
+   "pos": [
+    13,
+    29
+   ],
+   "f": 0,
+   "cat": "sign",
+   "lum": 83.5
+  }
+ },
+ "quest": {
+  "chests": 12,
+  "moved": 7,
+  "steps": [
+   [
+    1,
+    false,
+    1
+   ],
+   [
+    2,
+    true,
+    3
+   ],
+   [
+    3,
+    false,
+    4
+   ],
+   [
+    4,
+    false,
+    5
+   ],
+   [
+    5,
+    true,
+    7
+   ],
+   [
+    6,
+    true,
+    9
+   ]
+  ],
+  "goal": 9,
+  "keys": [
+   "33,27",
+   "12,3",
+   "9,3",
+   "6,4",
+   "21,21",
+   "12,7",
+   "15,11",
+   "39,28",
+   "37,31"
+  ]
+ },
+ "errs": []
+}

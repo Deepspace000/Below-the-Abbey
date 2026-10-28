@@ -12,31 +12,44 @@ Heal spells restore a **fixed number of health points**, like the healing potion
 |---|---|---|---|---|---|
 | Heal | single, 1 | 10 | 0.4 | 3 | 10 / 26 / 41 / 46 / 63 |
 | Greater Heal | single, 60 | 270 | 0.5 | 26 | - / - / 360 / 366 / 465 |
+| Restoration | single, spell level 50 | 560 | 0.6 | 52 | - / - / 715 / 722 / 912 |
 | Purify | group, spell level 10 | 8 | 0.3 | 9 | - / 20 / 31 / 35 / 48 |
 | Mend | group, 30 | 30 | 0.4 | 19 | - / 50 / 65 / 70 / 93 |
 | Divine Intervention | group, 70 | 100 | 0.4 | 45 | - / - / - / 154 / 198 |
 
 **Mana** is fixed per spell (no level factor): Heal 3, Purify 9, Mend 19, Greater Heal 26, Divine Intervention 45. It is proportional to the health delivered over all allies (a group heal counts every ally), about 0.07 mana per hp at level 60 for every spell; the harness fails if any spell is more than 15 percent away from the line average at any level. Because the cost never grows, a weak spell stays cheap and simply stops mattering.
 
-**Ordering.** Singles are compared with singles (Heal, then Greater Heal) and groups with groups (Purify, Mend, Divine Intervention), in absolute hp, strictly, at every level where both exist; a later spell also costs strictly more. Resurrection and Revive are unchanged.
+**Ordering.** Singles are compared with singles (Heal, Greater Heal, Restoration) and groups with groups (Purify, Mend, Divine Intervention), in absolute hp, strictly, at every level where both exist; a later spell also costs strictly more. Resurrection and Revive are unchanged.
 
 Other classes (Paladin, Monk, Goat, scrolls) keep the old formula. Potions, inn rest, church and regeneration are not touched. Cards say, for example, "Restores about 41 health to the most wounded ally." for the priest in the party at their level, and the card amount equals the real amount at every level (checked). Screenshots: `shot_powers_L1.png`, `shot_powers_L60.png`.
 
 ## Obsolescence: amount as a percent of a typical hero's maximum health (average of the four heroes)
 
-| level | typical max hp | Heal | Purify | Mend | Greater Heal | Divine Intervention |
-|---|---|---|---|---|---|---|
-| 1 | 25 | 40.0% (10 hp) | - | - | - | - |
-| 10 | 130 | 13.1% (17 hp) | 10.0% (13 hp) | - | - | - |
-| 20 | 243 | 9.1% (22 hp) | 7.0% (17 hp) | - | - | - |
-| 30 | 358 | 7.3% (26 hp) | 5.6% (20 hp) | 14.0% (50 hp) | - | - |
-| 40 | 476 | 6.5% (31 hp) | 5.0% (24 hp) | 11.6% (55 hp) | - | - |
-| 50 | 588 | 6.1% (36 hp) | 4.8% (28 hp) | 10.2% (60 hp) | - | - |
-| 60 | 701 | 5.8% (41 hp) | 4.4% (31 hp) | 9.3% (65 hp) | 51.4% (360 hp) | - |
-| 70 | 814 | 5.7% (46 hp) | 4.3% (35 hp) | 8.6% (70 hp) | 45.0% (366 hp) | 18.9% (154 hp) |
-| 80 | 938 | 6.7% (63 hp) | 5.1% (48 hp) | 9.9% (93 hp) | 49.5% (465 hp) | 21.1% (198 hp) |
+| level | typical max hp | Heal | Purify | Mend | Greater Heal | Restoration | Divine Intervention |
+|---|---|---|---|---|---|---|---|
+| 1 | 25 | 40.0% (10 hp) | - | - | - | - | - |
+| 10 | 130 | 13.1% (17 hp) | 10.0% (13 hp) | - | - | - | - |
+| 20 | 243 | 9.1% (22 hp) | 7.0% (17 hp) | - | - | - | - |
+| 30 | 358 | 7.3% (26 hp) | 5.6% (20 hp) | 14.0% (50 hp) | - | - | - |
+| 40 | 476 | 6.5% (31 hp) | 5.0% (24 hp) | 11.6% (55 hp) | - | - | - |
+| 50 | 588 | 6.1% (36 hp) | 4.8% (28 hp) | 10.2% (60 hp) | - | 120.3% (708 hp) | - |
+| 60 | 701 | 5.8% (41 hp) | 4.4% (31 hp) | 9.3% (65 hp) | 51.4% (360 hp) | 102.0% (715 hp) | - |
+| 70 | 814 | 5.7% (46 hp) | 4.3% (35 hp) | 8.6% (70 hp) | 45.0% (366 hp) | 88.8% (722 hp) | 18.9% (154 hp) |
+| 80 | 938 | 6.7% (63 hp) | 5.1% (48 hp) | 9.9% (93 hp) | 49.5% (465 hp) | 97.2% (912 hp) | 21.1% (198 hp) |
 
-Targets met: at level 1 Heal restores 40 percent of a typical hero (wanted 30 to 60); at level 70 Heal restores 5.7 percent (3 to 6), the top single heal Greater Heal 45 percent (35 to 50). The priest has two single heals and three group heals, so the "second and third" single tiers of the brief do not exist; Purify, Mend and Divine Intervention fill the middle as group heals (4 percent, 9 percent and 19 percent per ally at level 70).
+Targets met: at level 1 Heal restores 40 percent of a typical hero (wanted 30 to 60); at level 70 Heal restores 5.7 percent (3 to 6), the top single heal Greater Heal 45 percent (35 to 50). The priest has three single heals (Heal, Greater Heal, Restoration) and three group heals; Purify, Mend and Divine Intervention fill the middle as group heals (4 percent, 9 percent and 19 percent per ally at level 70).
+
+## Restoration (new single heal, spell level 50, bought in the Spells tab like the other spells)
+
+Learned the same way as Purify and the other priest spells: from level 50, for 3000 gold, in the priest's Spells tab (spells are bought there, not in a shop). Mana 52, fixed. It is the strongest single heal: about twice Greater Heal at every level (1.96 to 2.07 times), with the same kind of level and Faith bonus, so the order never inverts. Greater Heal is a power at level 60, so Restoration (level 50) unlocks before it, but it is stronger than both Heal and Greater Heal.
+
+| level | amount | mana | hp per mana | % of typical max | Greater Heal amount | ratio |
+|---|---|---|---|---|---|---|
+| 40 | locked until level 50 (formula: 701) | 52 | 13.5 | 147.2% | 348 (formula) | 2.01 |
+| 50 | 708 | 52 | 13.6 | 120.3% | 354 (not yet learned) | 2.00 |
+| 60 | 715 | 52 | 13.8 | 102.0% | 360 | 1.99 |
+| 70 | 722 | 52 | 13.9 | 88.8% | 366 | 1.97 |
+| 80 | 912 | 52 | 17.5 | 97.2% | 465 | 1.96 |
 
 ## Level 60: old (percent of health) versus new (fixed hp)
 
@@ -52,17 +65,17 @@ The fixed amounts are much smaller than the earlier percent-of-health heals at l
 
 ## Mana per hp healed, all allies counted (the same for every spell within 15 percent)
 
-| level | Heal | Greater Heal | Purify | Mend | Divine Intervention |
-|---|---|---|---|---|---|
-| 1 | 0.300 | - | - | - | - |
-| 10 | 0.176 | - | 0.173 | - | - |
-| 20 | 0.136 | - | 0.132 | - | - |
-| 30 | 0.115 | - | 0.113 | 0.095 | - |
-| 40 | 0.097 | - | 0.094 | 0.086 | - |
-| 50 | 0.083 | - | 0.080 | 0.079 | - |
-| 60 | 0.073 | 0.072 | 0.073 | 0.073 | - |
-| 70 | 0.065 | 0.071 | 0.064 | 0.068 | 0.073 |
-| 80 | 0.048 | 0.056 | 0.047 | 0.051 | 0.057 |
+| level | Heal | Greater Heal | Restoration | Purify | Mend | Divine Intervention |
+|---|---|---|---|---|---|---|
+| 1 | 0.300 | - | - | - | - | - |
+| 10 | 0.176 | - | - | 0.173 | - | - |
+| 20 | 0.136 | - | - | 0.132 | - | - |
+| 30 | 0.115 | - | - | 0.113 | 0.095 | - |
+| 40 | 0.097 | - | - | 0.094 | 0.086 | - |
+| 50 | 0.083 | - | 0.073 | 0.080 | 0.079 | - |
+| 60 | 0.073 | 0.072 | 0.073 | 0.073 | 0.073 | - |
+| 70 | 0.065 | 0.071 | 0.072 | 0.064 | 0.068 | 0.073 |
+| 80 | 0.048 | 0.056 | 0.057 | 0.047 | 0.051 | 0.057 |
 
 ## Checks at every level (1, 10, 20, 30, 40, 50, 60, 70, 80)
 
@@ -89,23 +102,27 @@ Columns: cost = mana listed on the card = mana deducted; amount = health restore
 | 50 | Mend | 19 | 19.0 | 60 | 60 | 4 | 12.6 | 588 | 10.2 | never above max; shows 1, real 1 |
 | 50 | Purify | 9 | 9.0 | 28 | 28 | 4 | 12.4 | 588 | 4.8 | never above max; shows 1, real 1 |
 | 50 | Resurrection | 36 | 36.0 | none | 295 | 4 | 32.8 | 588 | 50.1 | never above max |
+| 50 | Restoration | 52 | 52.0 | 708 | 708 | 1 | 13.6 | 588 | 120.3 | never above max; shows 1, real 1 |
 | 60 | Heal | 3 | 3.0 | 41 | 41 | 1 | 13.7 | 701 | 5.8 | never above max; shows 1, real 1 |
 | 60 | Mend | 19 | 19.0 | 65 | 65 | 4 | 13.7 | 701 | 9.3 | never above max; shows 1, real 1 |
 | 60 | Greater Heal | 26 | 26.0 | 360 | 360 | 1 | 13.8 | 701 | 51.4 | never above max; shows 1, real 1 |
 | 60 | Purify | 9 | 9.0 | 31 | 31 | 4 | 13.8 | 701 | 4.4 | never above max; shows 1, real 1 |
 | 60 | Resurrection | 36 | 36.0 | none | 351 | 4 | 39.0 | 701 | 50.0 | never above max |
+| 60 | Restoration | 52 | 52.0 | 715 | 715 | 1 | 13.8 | 701 | 102.0 | never above max; shows 1, real 1 |
 | 70 | Heal | 3 | 3.0 | 46 | 46 | 1 | 15.3 | 814 | 5.7 | never above max; shows 1, real 1 |
 | 70 | Mend | 19 | 19.0 | 70 | 70 | 4 | 14.7 | 814 | 8.6 | never above max; shows 1, real 1 |
 | 70 | Greater Heal | 26 | 26.0 | 366 | 366 | 1 | 14.1 | 814 | 45.0 | never above max; shows 1, real 1 |
 | 70 | Divine Intervention | 45 | 45.0 | 154 | 154 | 4 | 13.7 | 814 | 18.9 | never above max; shows 1, real 1 |
 | 70 | Purify | 9 | 9.0 | 35 | 35 | 4 | 15.6 | 814 | 4.3 | never above max; shows 1, real 1 |
 | 70 | Resurrection | 36 | 36.0 | none | 407 | 4 | 45.2 | 814 | 50.1 | never above max |
+| 70 | Restoration | 52 | 52.0 | 722 | 722 | 1 | 13.9 | 814 | 88.8 | never above max; shows 1, real 1 |
 | 80 | Heal | 3 | 3.0 | 63 | 63 | 1 | 21.0 | 938 | 6.7 | never above max; shows 1, real 1 |
 | 80 | Mend | 19 | 19.0 | 93 | 93 | 4 | 19.6 | 938 | 9.9 | never above max; shows 1, real 1 |
 | 80 | Greater Heal | 26 | 26.0 | 465 | 465 | 1 | 17.9 | 938 | 49.5 | never above max; shows 1, real 1 |
 | 80 | Divine Intervention | 45 | 45.0 | 198 | 198 | 4 | 17.6 | 938 | 21.1 | never above max; shows 1, real 1 |
 | 80 | Purify | 9 | 9.0 | 48 | 48 | 4 | 21.3 | 938 | 5.1 | never above max; shows 1, real 1 |
 | 80 | Resurrection | 36 | 36.0 | none | 470 | 4 | 52.2 | 938 | 50.0 | never above max |
+| 80 | Restoration | 52 | 52.0 | 912 | 912 | 1 | 17.5 | 938 | 97.2 | never above max; shows 1, real 1 |
 
 Revive (power, not a heal) costs 18 at every level, raises one fallen ally at 40 percent, takes its mana once and refuses when nobody has fallen: unchanged. Resurrection (spell) revives everyone at 70 percent and heals the living for half: unchanged.
 

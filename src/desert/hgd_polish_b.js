@@ -14,31 +14,63 @@ const HGPB={log:null};
 Object.assign(NPC_H,{hg_npc2:1.3,art_hgtb_furn_books_globe:.34,art_hgtb_furn_bookshelf:1.05,art_hgtb_bench:.5,art_hgtb_deco_banner:.95,art_hgobones:.28,art_hgtb_furn_table_chairs:.55});
 const HGPB_ASP={hgdfc_aqua1:2.88,hgdfc_aqua2:1.83,hgdfc_lilac1:1.87,hgdfc_lilac2:1.57,hgdfc_cream1:2.08,hgdfc_cream2:1.08,hgdfc_pink1:1.94,gate:1.47,hgtb_deco_pearlplinth:.84,hgtb_deco_shellstatue:.63};
 /* the twelve vignettes, one per precinct (the order of the precinct names of hgd_maps.js, thirteenth to twenty-fourth). p: [picture, steps in from the dead end, side offset, scale, wall] */
-const HGPB_V=[
- {n:'The Keeper\'s Cache',chest:4,col:'amber',p:[['art_hgxstat5',1,.3,.9],['hpb_candle',2,-.3,1],['art_hgxprop10',2,.2,1.3],['art_hgxprop10',3,-.25,.9]],note:'Carved under the owl: It keeps what the dark gives it. Take a little, and leave the rest. It counts.',lamp:1},
- {n:'The Cold Camp',col:'cold',p:[['hpb_brazier',0,-.3,1],['hpb_barrel',1,.3,1],['art_hgxprop15',1,-.28,1.3],['art_hgxprop2',2,.28,.9],['hpb_crate',3,-.28,1]],note:'Day nineteen. The Dry Ward goes round in circles. I have decided it is the corridors that are wrong and not me. If you read this, I went left.',lamp:1},
- {n:'The Dry Well',col:'pale',p:[['hpb_windlass',0,0,1],['hpb_bucket',1,-.3,1],['art_hgxprop1',2,.3,1.3],['hpb_keg',3,.3,1]],note:'DUNEWELL. Founded beside a well. The well turned out to be a rumour. We kept the name out of stubbornness.',lamp:0},
- {n:'The Last Lamplighter',col:'amber',p:[['art_hgxstat7',0,0,.95],['hpb_ladder',1,-.3,1],['art_hgxprop7',1,.3,1.8],['art_hgxprop7',2,-.25,1.5],['art_hgxprop2',2,.3,.8]],note:'Tuck lit forty lamps here, one a night. She lit the last one, put down her ladder and went home. The statue is her. The lamp is still lit. Do not blow it out.',lamp:1},
- {n:'The Waiting Bench',col:'cold',p:[['art_hgtb_bench',0,0,1],['hpb_cask',1,-.3,1],['art_hgxprop3',2,.3,1.3],['hpb_cage',1,.3,1]],note:'Waiting for the Blue Door to open since spring. The bench is very good. The door is not.',lamp:1},
- {n:'The Scribe\'s Corner',col:'cold',p:[['art_hgtb_furn_bookshelf',0,0,1],['art_hgtb_table',1,-.28,1],['art_hgtb_chair',2,.28,1],['art_hgtb_furn_books_globe',1,.3,1],['hpb_candle',3,-.3,.8]],note:'INKWELL COURT ARCHIVE. Everything is filed. Nothing can be found. Please return books to the shelf they fell from.',lamp:1},
- {n:'The Tile Counter',col:'lilac',p:[['hpb_tools',0,-.28,1],['hpb_lid',1,.28,1],['hpb_bucket',1,-.3,1],['hpb_scale',2,.28,1]],note:'Counting the tiles. Lost count at 3,112. Starting again from the beginning. Please do not talk to me.',lamp:1},
- {n:'The Barricade',col:'lilac',p:[['hpb_orecart',0,0,1],['hpb_crate',1,-.3,1],['hpb_barrel',1,.3,.9],['hpb_crate',2,.28,.8],['art_hgxprop0',2,-.2,1]],note:'We stacked all this against the worm. The worm was behind us the whole time. It is a very good barricade.',lamp:0},
- {n:'The Mortar Mistake',col:'lilac',p:[['hpb_skel',0,.3,1],['hpb_bucket',1,-.3,1],['hpb_tools',2,.3,1],['art_hgxrock3',0,-.25,1.5],['art_hgxrock6',1,.2,1.1]],note:'Grout Court was to have a fine floor by Friday. The mason promised. It is still Friday here, and he is still kneeling in the corner.',lamp:1},
- {n:'The Trophy Wall',col:'amber',w:[['hpb_antler',0,1,.62],['hpb_antler',0,-1,.55],['hpb_sh3',1,1,.5],['hpb_sh4',1,-1,.5]],p:[['hpb_barrel',1,.3,.9],['art_hgxprop13',2,-.28,1.3]],note:'GILDMERE HUNT CLUB. Trophies so far: 3 antlers and 1 boot. Slugs: none. They know why.',lamp:1},
- {n:'The Gilder\'s Hoard',chest:4,col:'gold',p:[['hpb_gold',2,-.2,1],['hpb_gold',1,.25,.8],['hpb_scale',3,.3,1],['art_hgxprop10',0,-.15,1.4]],note:'A coin for the road and a chest for the patient. Not all that glitters is gold, but this is. Mind the lid.',lamp:1},
- {n:'The Little Shrine',col:'amber',p:[['hpb_shrine',0,0,1],['hpb_candle',1,-.3,1],['art_hgxprop2',1,.3,.9],['art_hgxprop8',2,.3,1.1]],note:'Someone leaves a candle here every week. Nobody has ever seen them. Please leave it burning.',lamp:1}];
+const HGPB_V=[ // p: [picture, steps in from the dead end, side offset, HEIGHT in squares (a villager is 0.9)]; every vignette has its own kit, no prop of the Well Maze set appears in two of them. lb: the title of the note
+ {n:'The Keeper\'s Cache',lb:'Keeper\'s Cache',chest:4,col:'amber',p:[['art_hgxstat5',1,.3,1.1],['art_hgxprop2',2,-.3,.42],['art_hgxprop10',2,.2,.2],['art_hgxprop0',3,-.25,.3]],note:'Carved under the owl: It keeps what the dark gives it. Take a little, and leave the rest. It counts.',lamp:1},
+ {n:'The Cold Camp',lb:'Cold Camp Diary',col:'cold',p:[['hpb_brazier',0,-.3,.75],['art_hgxprop15',1,.3,.42],['art_hgxprop1',1,-.28,.4],['art_hgxprop7',2,.28,.34]],note:'Day nineteen. The Dry Ward goes round in circles. I have decided it is the corridors that are wrong and not me. If you read this, I went left.',lamp:1},
+ {n:'The Dry Well',lb:'Dunewell Founding',col:'pale',p:[['hpb_windlass',0,0,.85],['hpb_bucket',1,-.3,.32],['art_hgxrock2',2,.3,.6],['art_hgxprop6',3,.3,.48]],note:'DUNEWELL. Founded beside a well. The well turned out to be a rumour. We kept the name out of stubbornness.',lamp:0},
+ {n:'The Last Lamplighter',lb:'The Lamplighter',col:'amber',p:[['art_hgxstat7',0,0,.95],['hpb_ladder',1,-.3,1.25],['art_hgxprop7',1,.3,.4],['art_hgxprop7',2,-.25,.3]],note:'Tuck lit forty lamps here, one a night. She lit the last one, put down her ladder and went home. The statue is her. The lamp is still lit. Do not blow it out.',lamp:1},
+ {n:'The Waiting Bench',lb:'The Waiting Bench',col:'cold',p:[['art_hgtb_bench',0,0,.5],['hpb_cage',1,.3,.5],['art_hgxprop4',2,-.3,.55],['art_hgxprop3',1,-.3,.24]],note:'Waiting for the Blue Door to open since spring. The bench is very good. The door is not.',lamp:1},
+ {n:'The Scribe\'s Corner',lb:'Archive Notice',col:'cold',p:[['art_hgtb_furn_bookshelf',0,0,1.2],['hgtb_table',1,-.28,.5],['hgtb_chair',2,.28,.55],['art_hgtb_furn_books_globe',1,.3,.34],['hpb_candle',3,-.3,.6]],note:'INKWELL COURT ARCHIVE. Everything is filed. Nothing can be found. Please return books to the shelf they fell from.',lamp:1},
+ {n:'The Tile Counter',lb:'The Tile Counter',col:'lilac',p:[['art_hgxprop11',0,-.28,.3],['art_hgxprop11',1,.28,.26],['hpb_scale',2,.28,.5],['art_hgxrock3',1,-.3,.3],['art_hgxrock6',3,-.25,.36]],note:'Counting the tiles. Lost count at 3,112. Starting again from the beginning. Please do not talk to me.',lamp:1},
+ {n:'The Barricade',lb:'The Barricade',col:'lilac',p:[['hpb_orecart',0,0,.55],['hpb_crate',1,-.3,.42],['hpb_crate',2,.28,.34],['art_hgxprop6',1,.3,.45],['art_hgxrock1',2,-.2,.5]],note:'We stacked all this against the worm. The worm was behind us the whole time. It is a very good barricade.',lamp:0},
+ {n:'The Mortar Mistake',lb:'The Mortar Mistake',col:'lilac',p:[['hpb_skel',0,.3,.5],['hpb_tools',2,.3,.42],['art_hgxrock6',0,-.25,.5],['art_hgxrock0',1,-.2,.4]],note:'Grout Court was to have a fine floor by Friday. The mason promised. It is still Friday here, and he is still kneeling in the corner.',lamp:1},
+ {n:'The Trophy Wall',lb:'Hunt Club Trophies',col:'amber',w:[['hpb_antler',0,1,.62],['hpb_antler',0,-1,.55],['hpb_sh3',1,1,.5],['hpb_sh4',1,-1,.5]],p:[['hpb_keg',1,.3,.42],['hpb_lid',2,-.28,.34]],note:'GILDMERE HUNT CLUB. Trophies so far: 3 antlers and 1 boot. Slugs: none. They know why.',lamp:1},
+ {n:'The Gilder\'s Hoard',lb:'Gilder\'s Hoard',chest:4,col:'gold',p:[['hpb_gold',2,-.2,.24],['hpb_gold',1,.25,.2],['art_hgxprop10',3,.3,.2],['hpb_candle',0,-.18,.62]],note:'A coin for the road and a chest for the patient. Not all that glitters is gold, but this is. Mind the lid.',lamp:1},
+ {n:'The Little Shrine',lb:'The Little Shrine',col:'amber',p:[['hpb_shrine',0,0,.7],['art_hgxprop2',1,-.3,.4],['art_hgxprop8',1,.3,.3],['art_hgxprop9',2,.3,.45]],note:'Someone leaves a candle here every week. Nobody has ever seen them. Please leave it burning.',lamp:1}];
 /* painted pictures borrowed from the other mazes, under names of their own with a fixed height in squares (a villager is 0.9): [alias, picture, height] */
 const HGPB_AL=[['hpb_lan_gold','art_wm_lantern_gold',.55],['hpb_lan_lilac','art_wm_lantern_lilac',.55],['hpb_lan_violet','art_wm_lantern_violet',.55],['hpb_lan_hang','art_wm_lantern_hang',.65],['hpb_cage','art_wm_cage_lantern',.5],
  ['hpb_brazier','art_wm_brazier',.75],['hpb_bucket','art_wm_bucket',.3],['hpb_windlass','art_wm_windlass',.85],['hpb_ladder','art_wm_ladder',1.25],['hpb_tools','art_wm_tools',.38],['hpb_lid','art_wm_crate_lid',.32],['hpb_barrel','art_wm_barrel',.55],
  ['hpb_cask','art_wm_cask',.42],['hpb_keg','art_wm_keg',.4],['hpb_candle','art_wm_candelabra',.62],['hpb_scale','art_wm_scale',.5],['hpb_gold','art_wm_gold',.22],['hpb_orb','art_wm_orb_pedestal',.8],['hpb_bell','art_wm_bell',.6],
  ['hpb_orecart','art_wm_ore_cart',.55],['hpb_minecart','art_wm_mine_cart',.5],['hpb_skel','art_wm_skeleton',.5],['hpb_shrine','art_wm_shrine',.7],['hpb_rune','art_wm_rune',.55],['hpb_antler','art_hgxprop13',.42],['hpb_crate','art_wm_crate',.4],['hpb_signb','art_wm_signpost',.95],['hpb_sh3','art_hgdf_shield3',.5],['hpb_sh4','art_hgdf_shield4',.5]];
 for(const [a,,h] of HGPB_AL)NPC_H[a]=h;
-const HGPB_LET={}; // the signposts: a board with the place names painted on it, made once the blank picture has loaded
+const HGPB_LET={}; // the signposts: a board with the place names painted on it, made once the blank picture has loaded: [biome, line one, line two]
+/* The Well Maze pictures are purple; the Hollow versions (assets/ds_hpb_<prop>_<biome>.png, made by tools/hpb_recolor.py) are recoloured to the precinct: 4 sandstone, 5 Blue Quarter, 6 Mosaic Halls, 7 Gilded Quarter */
+const HPB_MAP={hpb_barrel:'barrel',hpb_crate:'crate',hpb_lid:'crate_lid',hpb_bucket:'bucket',hpb_brazier:'brazier',hpb_cask:'cask',hpb_keg:'keg',hpb_bell:'bell',hpb_orecart:'ore_cart',hpb_minecart:'mine_cart',hpb_tools:'tools',hpb_windlass:'windlass',hpb_ladder:'ladder',hpb_scale:'scale',hpb_shrine:'shrine',hpb_candle:'candelabra',hpb_skel:'skeleton',hpb_rune:'rune',hpb_lan_hang:'lantern_hang',hpb_lan_violet:'lantern_violet',hpb_lan_lilac:'lantern_lilac',hpb_orb:'orb_pedestal'};
+function hpbTint(k,b){const m=HPB_MAP[k];if(!m||!(b>=4&&b<=7))return k;const n='art_hpb_'+m+'_'+b;if(NPC_H[n]===undefined)NPC_H[n]=NPC_H[k];return n}
+/* walls of the Blue Quarter and the Mosaic Halls come in variants (tools/hpb_walls.py); the variant characters live at 0x3a0 and up */
+const HPB_WCH=c=>!!c&&c!=='.'&&c!=='#'&&((c.charCodeAt(0)>=0x2e0&&c.charCodeAt(0)<0x2e8)||(c.charCodeAt(0)>=0x3a0&&c.charCodeAt(0)<0x3b0));
+const HPB_VAR={5:[['art_tex_hpb_blue0',46],['art_tex_hpb_blue1',20],['art_tex_hpb_blue2',16],['art_tex_hpb_blue3',6],['art_tex_hpb_blue4',12]],6:[['art_tex_hpb_mos0',42],['art_tex_hpb_mos1',24],['art_tex_hpb_mos2',16],['art_tex_hpb_mos3',18]]};
+function hpbShort(n,m){n=String(n).replace(/^The\s+/i,'');const u=n.toUpperCase();if(/^GREAT ATRIUM/.test(u))return 'ATRIUM';m=m||13;if(u.length<=m)return u;const w=u.split(' ');return w[0].length>=4?w[0]:u.slice(0,m)}
+/* a title of one to four words for every note and sign: my own lines have a hand-made title, any other line gets its first few telling words */
+const HPB_TITLES=[[/warm at noon/i,'Warm Walls'],[/sand in my boots/i,'Sand Complaint'],[/rumour of one/i,'Rumour of a Well'],[/count the pillars/i,'Pillar Count'],[/older than the dark/i,'Old Dust'],[/the way I came has moved/i,'Moving Corridors'],
+ [/blue lamps do not flicker/i,'Blue Lamps'],[/tiles are cold/i,'Cold Tiles'],[/blue silence/i,'Blue Silence'],[/swept this corridor/i,'Swept Corridor'],[/sound of dripping/i,'Dripping Sound'],[/it was a sock/i,'A Sock'],
+ [/eleven thousand tiles/i,'Tile Count'],[/repeats every nineteen/i,'Repeating Pattern'],[/follow the red tiles/i,'Red Tiles'],[/shows a map of this place/i,'Wrong Map'],[/one tile crooked/i,'Crooked Tile'],[/if the tiles hum/i,'Humming Tiles'],
+ [/everything here that shines/i,'Not Yours'],[/took the ladder/i,'Missing Ladder'],[/mop it|have to mop/i,'Mopping Gold'],[/open to guests/i,'Guest Notice'],[/took one coin/i,'One Coin'],[/wealthy are polite/i,'Polite Warning'],
+ [/came all this way for a dead end/i,'Nice Dead End'],[/^chalked: turn back/i,'Turn Back'],[/good place to sit/i,'Quiet Seat'],[/not a door/i,'Not a Door'],[/dead end got you too/i,'Dead End Warning'],[/left at the last crossing/i,'Wrong Turn'],
+ [/same tree four times/i,'Same Tree Four Times'],[/hedge maze is the easy/i,'Hedge Maze Warning'],[/the other left/i,'Which Left'],[/shortcut here/i,'Shortcut Secret'],[/slug is not slow/i,'Patient Slug'],[/do not feed/i,'Do Not Feed'],[/key is used up/i,'Spent Keys'],[/gem doors are worth/i,'Gem Doors'],[/signs mean what they say/i,'Signs Mean It'],[/one lantern, brass/i,'Lost Lantern'],[/four towns is a good walk/i,'Four Towns'],[/honeycomb walls are warm/i,'Warm and Cold Walls'],[/stayed for the soup/i,'Treasure and Soup'],[/dead ends are not always dead/i,'Press the Wall'],[/ponds are shallow/i,'Shallow Ponds'],[/hedgefoot is this way/i,'Hedgefoot, This Way'],[/keeps moving the walls/i,'Moving Walls'],[/gold key in a vault/i,'Gold Key, Gold Door'],[/warden at the top/i,'Warden Warning'],[/people living in the maze/i,'Maze Dwellers'],[/was a gardener once/i,'The Gardener Warden'],[/rest in the safe places/i,'Safe Places'],[/blue door, blue key/i,'Coloured Doors'],[/counted the steps/i,'Counting Steps'],[/every maze has a middle/i,'Many Middles'],[/if the lamp goes out/i,'Lamp Goes Out'],[/spiders are the worst/i,'Spider Warning'],[/atriums are full of trees/i,'Atrium Trees'],[/past the signs/i,'Child at the Signs'],[/richest and the most dangerous/i,'Gilded Danger'],[/something large went past/i,'Large Night Visitor'],[/blue quarter is quiet/i,'Quiet Blue Quarter'],[/finds my gem/i,'A Gift Gem'],[/mosaic was beautiful/i,'Fallen Tiles'],[/twelve people in the maze/i,'Twelve Tasks'],[/every shop is better/i,'Shops Get Dearer'],[/hollow slugs came up/i,'Hollow Slugs'],[/too straight/i,'Straight Corridors'],
+ [/^SIGNPOST/,'Signpost'],[/^DANGER/,'Danger Sign'],[/pace stone|paces from the lamp|stone marker|marker stone|rune-cut stone|cut into the stone/i,'Pace Stone']];
+function hpbLabel(t){t=String(t||'');for(const [re,l] of HPB_TITLES)if(re.test(t))return l;
+  let r=t.replace(/^(a |an )?(scratched|chalked|carved|written|etched|scrawled|note|painted|inked|stamped|pinned|neatly|small)[^:]{0,40}:\s*/i,'');const stop=/^(the|a|an|i|my|we|our|this|that|it|if|to|in|of|and|is|are|was|were|do|did|not|no|for|on|at|by|with|has|have|be|been|you|your|me|so|as|but|or)$/i;
+  const w=r.replace(/[^A-Za-z' ]/g,' ').split(/\s+/).filter(Boolean);while(w.length&&stop.test(w[0]))w.shift();const o=[];for(const x of w){if(o.length>=3)break;o.push(x[0].toUpperCase()+x.slice(1).toLowerCase())}
+  return o.join(' ')||'Old Note'}
+function hgpbWalls(L,E){const {W,H,bio,rows}=E;if(L._hpbWalls)return;L._hpbWalls=1;const TM=ohTiles(),chars=L.chars,seq={5:[],6:[]};let ch=0x3a0;
+  for(const b of [5,6]){const tot=HPB_VAR[b].reduce((n,v)=>n+v[1],0);HPB_VAR[b].forEach((v,i)=>{const sty='hgpb_wall'+b+'_'+i;OH_STY[sty]=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:v[0],door:v[0],win:v[0],alt:v[0],zoom:1,contrast:1.05,tint:[255,255,255,0]});const c=String.fromCharCode(ch++);chars[c]=TM.make('plain',sty,2.7).gid;seq[b].push([c,v[1]/tot,i])})}
+  const niche={};let n=0;const hs=(x,y,s)=>hgpbHs(x,y,s);
+  for(let y=1;y<H-1;y++){let row=null;for(let x=1;x<W-1;x++){const c=rows[y][x],b=bio[y*W+x];if((c!==String.fromCharCode(0x2e0+5)&&c!==String.fromCharCode(0x2e0+6))||(b!==5&&b!==6)||c.charCodeAt(0)-0x2e0!==b)continue;
+      let r=hs(x,y,41),acc=0,pick=seq[b][0];for(const v of seq[b]){acc+=v[1];if(r<acc){pick=v;break}}
+      if(b===5&&pick[2]===3){if(niche[(x-1)+','+y]||niche[x+','+(y-1)]||niche[(x+1)+','+y]||niche[x+','+(y+1)])pick=seq[b][0];else niche[x+','+y]=1}
+      if(b===6&&pick[2]===3&&(rows[y][x-1]===pick[0]||(rows[y-1]&&rows[y-1][x]===pick[0])))pick=seq[b][0];
+      if(!row)row=rows[y].split('');row[x]=pick[0];n++}
+    if(row)rows[y]=row.join('')}
+  return n}
 function hgpbAlias(){for(const [a,s] of HGPB_AL)if(!IMG[a]){const im=IMG[s]||IMG[s.replace(/^art_/,'')];if(im&&im.width)IMG[a]=im}
-  const b=IMG['art_wm_signpost']||IMG.wm_signpost;if(b&&b.width)for(const k in HGPB_LET){if(IMG[k])continue;const lines=HGPB_LET[k],c=document.createElement('canvas');c.width=b.width;c.height=b.height;const x=c.getContext('2d');x.drawImage(b,0,0);
-    const bx=c.width*.08,bw=c.width*.84,by=c.height*.045,bh=c.height*.37,lh=bh/lines.length;x.textAlign='center';x.textBaseline='middle';
-    lines.forEach((t,i)=>{let fs=lh*.8;x.font=(i?'':'bold ')+fs+'px '+FUI;while(x.measureText(t).width>bw&&fs>7){fs-=2;x.font=(i?'':'bold ')+fs+'px '+FUI}
-      const cx=c.width/2,cy=by+lh*(i+.5);x.lineWidth=Math.max(2,fs*.14);x.strokeStyle='rgba(18,10,6,.9)';x.strokeText(t,cx,cy);x.fillStyle=i?'#e4cf98':'#f3e3b0';x.fillText(t,cx,cy)});
+  for(const k in HGPB_LET){if(IMG[k])continue;const [bi,l1,l2]=HGPB_LET[k],b=IMG['art_hpb_signpost_'+bi]||IMG['hpb_signpost_'+bi]||IMG['art_wm_signpost']||IMG.wm_signpost;if(!(b&&b.width))continue;
+    // the board is stretched wider (the post keeps its width), the two direction lines are laid on it in bold cream with a dark edge so they read from three squares away
+    const SX=1.3,cw=Math.round(b.width*SX),ch=b.height,c=document.createElement('canvas');c.width=cw;c.height=ch;const x=c.getContext('2d'),seam=Math.round(ch*.5);
+    x.drawImage(b,0,0,b.width,seam,0,0,cw,seam);x.drawImage(b,0,seam,b.width,ch-seam,Math.round((cw-b.width)/2),seam,b.width,ch-seam);
+    const bx=cw*.07,bw=cw*.86,by=ch*.125,bh=ch*.335,lines=[l1,l2];x.textAlign='center';x.textBaseline='middle';
+    lines.forEach((t,i)=>{let fs=bh/2*.86;x.font='bold '+fs+'px '+FUI;while(x.measureText(t).width>bw&&fs>9){fs-=2;x.font='bold '+fs+'px '+FUI}
+      const cx=cw/2,cy=by+bh/2*(i+.5);x.lineJoin='round';x.lineWidth=Math.max(3,fs*.2);x.strokeStyle='rgba(14,8,4,.95)';x.strokeText(t,cx,cy);x.fillStyle=i?'#f1dca0':'#fff0c0';x.fillText(t,cx,cy)});
     IMG[k]=c}}
 {const _u=update;update=function(dt){try{if(LEVEL===HGD.ID)hgpbAlias()}catch(e){}return _u.apply(this,arguments)}}
 khNpc('hgdb_note','A note','hl_p_note',d0=>{const d=d0||(G.talk&&G.talk.d);return say(hgdSay(d&&d.pbt?d.pbt:'The writing has worn away.',1),[BYE])});
@@ -53,7 +85,7 @@ khNpc('hgd_plaque','A plaque','gate',()=>{const F=G.flags||{};
   return say('THE GREAT ATRIUM. The Hollowed Warden keeps the north gate, and the gate keeps something else. The way on is under the black water, to the south: ask who the Black Swill is, and who is afraid of it.',[BYE])});
 function hgpbBuild(L){
   if(L._hgpb||(typeof location!=='undefined'&&/[?&]hgpb=0/.test(location.search)))return;const T0=performance.now(),M=L._hgdm,W=M.W,H=M.H,bio=M.bio,kind=M.kind,rows=L.rows,rnd=hgdmRng(475700),N=W*H;
-  const isW=c=>!c||c==='#'||(c!=='.'&&c.charCodeAt(0)>=0x2e0&&c.charCodeAt(0)<0x2e8),open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&rows[y][x]==='.',inZ=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&bio[y*W+x]>=4;
+  const isW=c=>!c||c==='#'||HPB_WCH(c),open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&rows[y][x]==='.',inZ=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&bio[y*W+x]>=4;
   const D4=[[0,-1],[1,0],[0,1],[-1,0]],nbc=(x,y)=>D4.reduce((n,[a,b])=>n+(open(x+a,y+b)?1:0),0),pass8=(x,y)=>{let n=0;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if((a||b)&&x+a>=0&&y+b>=0&&!isW(rows[y+b][x+a]))n++;return n};
   const COLS={amber:[1.4,1,.5],cold:[.5,.9,1.5],pale:[1.15,1.1,.9],lilac:[1.15,.65,1.45],gold:[1.5,1.15,.45],teal:[.5,1.2,1.1]};L._hgpbCol=L._hgpbCol||{};const colAt=(x,y,nm,kI)=>{const c=COLS[nm]||COLS.amber;L._hgpbCol[x+','+y]=[c[0],c[1],c[2],kI||1.3]};
   const log={moved:[],removedStack:0,removedCluster:0,removedPics:0,scaled:0,posts:0,vign:[],lamps:0,blockFixed:0};
@@ -108,11 +140,11 @@ function hgpbBuild(L){
     // clear the cosmetic pieces of the tail and of the cell beside it
     for(const [x,y] of c.t.slice(0,4))for(const d of L.decor)if(d.x===x&&d.y===y&&cos(d)&&(!d.pic||(x===c.x&&y===c.y)))drop.add(d);
     const dir=[-c.ob[0],-c.ob[1]]; // from the open way towards the dead end: the end wall is that way
-    const place=(k,step,side,sc,extra)=>{const cell=c.t[Math.min(step,c.t.length-1)],px=-c.ob[1],py=c.ob[0];const o=Object.assign({k,x:cell[0],y:cell[1],block:false,walk:true,deco:true,sc,ox:px*side,oy:py*side,_pbv:1},extra||{});L.decor.push(o);return o};
-    for(const [k,step,side,sc] of v.p)place(k,step,side,sc);
+    const bi=Math.max(4,Math.min(7,bio[c.y*W+c.x]));const place=(k0,step,side,h,extra)=>{const k=hpbTint(k0,bi),cell=c.t[Math.min(step,c.t.length-1)],px=-c.ob[1],py=c.ob[0];const o=Object.assign({k,x:cell[0],y:cell[1],block:false,walk:true,deco:true,sc:h/(NPC_H[k]||1),ox:px*side,oy:py*side,_pbv:1},extra||{});L.decor.push(o);return o};
+    for(const [k,step,side,h] of v.p)place(k,step,side,h);
     for(const [k,step,sd,bob] of (v.w||[])){const cell=c.t[Math.min(step,c.t.length-1)];L.decor.push({k,x:cell[0],y:cell[1],wd:[-c.ob[1]*sd,c.ob[0]*sd],pic:1,block:false,walk:true,deco:true,bob,lift:.5,_pbv:1})}
     if(v.chest)L.decor.push({k:['hg_chestwax','hg_chestweed','hg_chestjelly'][vi%3],x:c.x,y:c.y,block:true,hgdTier:v.chest,hgdGive:[],sc:.75,_pbs:1});
-    L.decor.push({k:'hl_p_note',x:c.x,y:c.y,wd:[dir[0],dir[1]],pic:1,block:false,walk:true,deco:true,npc:'hgdb_note',pbt:v.note,bob:.6,lift:.45,_pbv:1});
+    L.decor.push({k:'hl_p_note',x:c.x,y:c.y,wd:[dir[0],dir[1]],pic:1,block:false,walk:true,deco:true,npc:'hgdb_note',pbt:v.note,label:v.lb,bob:.6,lift:.45,_pbv:1});
     {const lc=c.t[Math.min(1,c.t.length-1)];L.lights.push([lc[0],lc[1]]);colAt(lc[0],lc[1],v.col,1.5)}
     log.vign.push([v.n,c.x,c.y,c.t.length,M.prec[c.pi]?M.prec[c.pi].name:'?'])}
   // ---- signposts at T junctions (true directions and distances from the maze) ----
@@ -132,8 +164,8 @@ function hgpbBuild(L){
      const seenN={},out=[];lines.sort((p,q)=>p[2]-q[2]);for(const l of lines){if(seenN[l[1]])continue;seenN[l[1]]=1;out.push(l)}
      if(out.length<2)continue;const pn=precOf(x,y),head=M.prec[pn]?M.prec[pn].name.toUpperCase()+'. ':'';
      const txt='SIGNPOST. '+head+out.slice(0,3).sort((p,q)=>p[0]-q[0]).map(l=>compass[l[0]]+': '+l[1]+', about '+(Math.max(5,Math.round(l[2]/5)*5))+' paces.').join(' ');
-     const pk='hpbp'+posts.length,pnm=M.prec[pn]?M.prec[pn].name.toUpperCase():'THE HOLLOW';HGPB_LET[pk]=[pnm].concat(out.slice(0,2).map(l=>compass[l[0]][0]+'  '+l[1].toUpperCase()));NPC_H[pk]=1.1;
-     posts.push([x,y]);L.decor.push({k:pk,x,y,wd:[D4[wi][0],D4[wi][1]],pic:1,block:false,walk:true,deco:true,npc:'hgdb_post',pbt:txt,bob:0,lift:.5,_pbv:1});log.posts++}}
+     const pk='hpbp'+posts.length,pnm=M.prec[pn]?M.prec[pn].name:'The Hollow';HGPB_LET[pk]=[Math.max(4,Math.min(7,bio[y*W+x])),...out.slice(0,2).map(l=>compass[l[0]][0]+'  '+hpbShort(l[1]))];NPC_H[pk]=1.5;
+     posts.push([x,y]);L.decor.push({k:pk,x,y,wd:[D4[wi][0],D4[wi][1]],pic:1,block:false,walk:true,deco:true,npc:'hgdb_post',pbt:txt,label:'Signpost: '+hpbShort(pnm,14),bob:0,lift:.62,_pbv:1});log.posts++}}
   // ---- a lamp at the end of the longest straight way of every precinct (something to walk towards) ----
   {const best={};for(const [x,y] of deadEnds){const t=tail(x,y);if(t.length<2)continue;const pi=precOf(x,y);if(pi<12)continue;
       // a straight run: count the cells of the tail in line with the dead end
@@ -144,6 +176,13 @@ function hgpbBuild(L){
   // ---- the foot of the atrium: a lamp on each side of the gate plaque, so the way out is lit like a gate ----
   {const pl=L.decor.find(d=>d.npc==='hgd_plaque');if(pl)for(const dx of [-3,3]){const x=pl.x+dx,y=pl.y;if(open(x,y)&&!L.decor.some(d=>d.x===x&&d.y===y&&!drop.has(d))){L.decor.push({k:'hg_lamp',x,y,block:true,sc:1,_big:1});L.lights.push([x,y]);colAt(x,y,'gold',1.6);log.lamps++}}}
   try{hgpbPolish2(L,{M,W,H,bio,kind,rows,rnd,N,open,inZ,isW,nbc,bfs,reach,cos,drop,hardAt,deadEnds,tail,precOf,chosen,zones,log,colAt,COLS,D4,targets:L._hgpbTargets||[]})}catch(e){console.error('hgpbPolish2',e)}
+  try{hgpbWalls(L,{W,H,bio,rows})}catch(e){console.error('hgpbWalls',e)}
+  // the Well Maze pieces that other builders left in this zone (crates, barrels, buckets, braziers, a purple bookshelf) become the Hollow versions at the same height
+  {const WM2={wm_crate:'hpb_crate',art_wm_crate:'hpb_crate',wm_bucket:'hpb_bucket',art_wm_bucket:'hpb_bucket',wm_barrel:'hpb_barrel',wm_barrel_tall:'hpb_barrel',wm_brazier:'hpb_brazier',wm_lantern_hang:'hpb_lan_hang'};
+   for(const d of L.decor){if(!inZ(d.x,d.y)||!d.k)continue;const b=Math.max(4,Math.min(7,bio[d.y*W+d.x]));
+     if(WM2[d.k]&&NPC_H[d.k]){const h=NPC_H[d.k]*(d.sc||1),k=hpbTint(WM2[d.k],b);d.k=k;d.sc=h/(NPC_H[k]||1)}
+     else if(d.k==='wm_bookshelf'&&NPC_H.wm_bookshelf&&NPC_H.hgtb_furn_bookshelf){const h=NPC_H.wm_bookshelf*(d.sc||1);d.k='hgtb_furn_bookshelf';d.sc=h/NPC_H.hgtb_furn_bookshelf}
+     else if(HPB_MAP[d.k])d.k=hpbTint(d.k,b)}}
   // ---- apply the removals ----
   if(drop.size){const keep=L.decor.filter(d=>!drop.has(d));L.decor.length=0;for(const d of keep)L.decor.push(d)}
   L._hgpb={log,ms:Math.round(performance.now()-T0)};HGPB.log=log}
@@ -162,11 +201,17 @@ const HGPB_NOTES={
  7:['Carved with a fine hand: Everything here that shines is not yours. Most of it is not even gold.','Scratched: The gilders left in a hurry and took the ladder. Why the ladder?','Chalked: A gold floor is a lovely thing until you have to mop it.','A note, signed with a flourish: The Gilded Ward is open to guests. The guests are not open to us.','Written very small: I took one coin. I am still carrying it. It is very heavy.','Scratched: The wealthy are polite to the end. The end is not far from here.']};
 const HGPB_GEN=['Scratched: I came all this way for a dead end. It is a nice one, I will say that.','Chalked: Turn back. There is nothing here but this note, and I wrote it myself.','Scratched small: A good place to sit. Nobody has found me yet.','Carved: This wall is not a door. I checked it for an hour.','Chalked: If you have read this, the dead end got you too.','Scratched: Left at the last crossing was right. I did not.'];
 const HGPB_PACE=['A pace stone, cut with a number: #. Another hand has added: and still going.','Cut into the stone: # paces from the lamp. I counted twice and got two answers.','A rune-cut stone: #. Somebody has scratched an arrow on it. The arrow points at the wall.','Pace stone #. Underneath, in chalk: Almost there. This is a lie told out of kindness.','A small stone marker: # paces. Please do not sit on the marker. Sit on the bench.','Marker stone, number #. Someone has drawn a face on it. It looks tired.'];
-const HGPB_LANT={4:['hpb_lan_gold','hpb_lan_hang'],5:['hpb_cage','hpb_lan_violet'],6:['hpb_lan_lilac','hpb_lan_violet'],7:['hpb_lan_gold','hpb_lan_hang']},HGPB_COLN={4:'amber',5:'cold',6:'lilac',7:'gold'},HGPB_R={4:8,5:6,6:6,7:7},HGPB_KI={4:1.5,5:2.3,6:1.9,7:1.6};
-const HGPB_DEP=[['hpb_cage',1],['hpb_bucket',1],['hpb_lid',1],['hpb_barrel',1],['hpb_cask',1],['hpb_keg',1],['hpb_candle',1],['hpb_bell',1],['hpb_skel',1],['hpb_orecart',1],['hpb_crate',1],['hpb_gold',1],['hpb_tools',1],['hpb_minecart',1]];
-const HGPB_KITS=[
- [['art_hgtb_bench',-.3,1],['hpb_cage',.3,1]],[['hpb_barrel',.3,1],['hpb_bucket',-.3,1],['art_hgxprop15',.1,1.2]],[['STAT',.32,1],['hpb_candle',-.3,.9]],[['hpb_brazier',.3,1],['sacks',-.3,.9]],
- [['hpb_minecart',-.3,1],['hpb_lid',.3,1]],[['hpb_bell',.3,1],['hpb_keg',-.3,1]],[['hpb_crate',-.3,1],['hpb_cask',.3,1],['hpb_gold',.1,.8]]];
+const HGPB_LANT={4:['hpb_lan_gold','hpb_lan_hang'],5:['hpb_cage','hpb_lan_violet'],6:['hpb_lan_lilac','hpb_lan_violet'],7:['hpb_lan_gold','hpb_lan_hang']},HGPB_COLN={4:'amber',5:'cold',6:'lilac',7:'gold'},HGPB_R={4:7,5:6,6:6,7:7},HGPB_KI={4:2.5,5:2.4,6:.95,7:1.6};
+/* what stands at the end of an ordinary dead end, per biome: [picture, height in squares]. A shuffled deck per biome, so a kind never repeats within twelve squares and no kind is in every other dead end */
+const HGPB_POOL={
+ 4:[['hpb_barrel',.55],['hpb_cask',.45],['hpb_keg',.42],['hpb_crate',.42],['hpb_bucket',.32],['art_hgxprop0',.32],['art_hgxprop1',.42],['art_hgxprop15',.42],['art_hgxprop12',.6],['art_hgxrock0',.45],['art_hgxrock2',.6],['art_hgxrock3',.3],['art_hgxprop7',.36],['hpb_tools',.42],['hpb_orecart',.55],['art_hgxprop6',.5],['hpb_skel',.5]],
+ 5:[['hpb_lid',.34],['hpb_cask',.45],['hpb_bell',.6],['art_hgxprop4',.55],['art_hgxrock1',.5],['art_hgxrock5',.6],['art_hgxprop2',.42],['art_hgxprop3',.24],['hpb_tools',.42],['hpb_scale',.5],['art_hgxprop0',.32],['art_hgxprop8',.3],['art_hgxprop9',.5],['hpb_cage',.5],['hpb_candle',.62],['hpb_crate',.42]],
+ 6:[['art_hgxprop11',.3],['hpb_orecart',.55],['hpb_minecart',.5],['hpb_scale',.5],['art_hgxprop1',.42],['art_hgxrock6',.4],['hpb_tools',.42],['hpb_bucket',.32],['hpb_lid',.34],['hpb_rune',.55],['hpb_candle',.62],['art_hgxprop3',.24],['art_hgxrock3',.3],['hpb_crate',.4],['hpb_cask',.45]],
+ 7:[['art_hgxprop10',.22],['hpb_gold',.24],['hpb_bell',.6],['hpb_scale',.5],['hpb_candle',.62],['art_hgxprop13',.45],['hpb_crate',.42],['hpb_skel',.5],['hpb_rune',.55],['hpb_barrel',.55],['art_hgxprop2',.42],['hpb_lid',.34],['hpb_keg',.42],['art_hgxrock2',.6]]};
+const HGPB_KITS=[ // waysides on the long climbs: [picture, side, height]
+ [['art_hgtb_bench',-.3,.5],['hpb_cage',.3,.5]],[['hpb_barrel',.3,.55],['art_hgxprop15',-.3,.42]],[['STAT',.32,.95],['hpb_candle',-.3,.6]],[['hpb_brazier',.3,.75],['art_hgxprop6',-.3,.45]],
+ [['hpb_minecart',-.3,.5],['hpb_lid',.3,.34]],[['hpb_bell',.3,.6],['art_hgxrock2',-.3,.55]],[['hpb_crate',-.3,.42],['hpb_cask',.3,.45],['art_hgxprop1',.05,.34]],[['hpb_ladder',.3,1.2],['hpb_bucket',-.3,.3]],
+ [['hpb_tools',-.3,.42],['art_hgxprop12',.3,.55]],[['hpb_keg',.3,.42],['art_hgxprop7',-.3,.36],['art_hgxrock0',.05,.4]],[['hpb_orecart',.3,.55],['art_hgxrock5',-.3,.6]],[['hpb_scale',-.3,.5],['art_hgxprop2',.3,.4]]];
 function hgpbPolish2(L,E){
   const {M,W,H,bio,kind,rows,rnd,N,open,inZ,nbc,bfs,reach,cos,drop,hardAt,deadEnds,tail,chosen,zones,log,colAt,D4}=E;
   const hs=(x,y,s)=>{let h=(Math.imul(x+1,374761393)+Math.imul(y+1,668265263)+Math.imul(s+7,2147483647))>>>0;h=Math.imul(h^(h>>>13),1274126177)>>>0;return((h^(h>>>16))>>>0)/4294967296};
@@ -212,13 +257,15 @@ function hgpbPolish2(L,E){
     L.decor.push({k,x,y,wd:[w[0],w[1]],pic:1,block:false,walk:true,deco:true,bob:.3+.12*hs(x,y,13),lift:.62,_pbv:1});picAt.add(x+','+y+','+w[0]+','+w[1]);return true};
   const mustLight=[];
   // ---- 4) every dead end ends in something, on the axis of the corridor, with a light and a line of text ----
-  {const dep=HGPB_DEP.slice();for(let i=dep.length-1;i>0;i--){const j=(rnd()*(i+1))|0;[dep[i],dep[j]]=[dep[j],dep[i]]}let di=0;
+  const putH=(k0,x,y,h,side,ob,extra)=>{const k=hpbTint(k0,Math.max(4,Math.min(7,biomeOf(x,y))));return put(k,x,y,h/(NPC_H[k]||1),side,ob,extra)};
+  {const deck={},placed=[];const draw=(b,x,y)=>{const pl=HGPB_POOL[b]||HGPB_POOL[4];let e=null;for(let t=0;t<6;t++){if(!deck[b]||!deck[b].length){const d2=pl.slice();for(let i=d2.length-1;i>0;i--){const j=(rnd()*(i+1))|0;[d2[i],d2[j]]=[d2[j],d2[i]]}deck[b]=d2}
+       e=deck[b].pop();if(!placed.some(q=>q.k===e[0]&&Math.hypot(q.x-x,q.y-y)<12))break}placed.push({k:e[0],x,y});return e};
    for(const [x,y] of deadEnds){if(chosen.some(h=>h.c.x===x&&h.c.y===y))continue;const ob=D4.find(([a,b])=>open(x+a,y+b));if(!ob)continue;const b=biomeOf(x,y);
      const fur=c=>(cellDec[c]||[]).some(d=>!d.hgdl&&(Math.abs(d.ox||0)<.35&&Math.abs(d.oy||0)<.35)&&hOf(d)>.2)||itemAt.has(c)||enAt.has(c);
      mustLight.push([x+ob[0],y+ob[1]]);
-     if(!fur(x+','+y)&&!fur((x+ob[0])+','+(y+ob[1]))){const t=dep[di++%dep.length];if(t[0]==='hpb_orb'&&b!==6)continue;put(t[0],x,y,1.15+.25*hs(x,y,14),0,ob);P2.dead++}
+     if(!fur(x+','+y)&&!fur((x+ob[0])+','+(y+ob[1]))){const e=draw(b,x,y);putH(e[0],x,y,e[1]*(1+.2*hs(x,y,14)),0,ob);P2.dead++}
      if(!picAt.has(x+','+y+','+(-ob[0])+','+(-ob[1]))){const pl=(E.notePool[b]||[]).concat(HGPB_GEN),q=pl.find(s=>!E.noteUsed.has(s));if(q){E.noteUsed.add(q);const i=E.notePool[b]?E.notePool[b].indexOf(q):-1;if(i>=0)E.notePool[b].splice(i,1);
-       L.decor.push({k:'hl_p_note',x,y,wd:[-ob[0],-ob[1]],pic:1,block:false,walk:true,deco:true,npc:'hgdb_note',pbt:q,bob:.6,lift:.45,_pbv:1});picAt.add(x+','+y+','+(-ob[0])+','+(-ob[1]))}}}}
+       L.decor.push({k:'hl_p_note',x,y,wd:[-ob[0],-ob[1]],pic:1,block:false,walk:true,deco:true,npc:'hgdb_note',pbt:q,label:hpbLabel(q),bob:.6,lift:.45,_pbv:1});picAt.add(x+','+y+','+(-ob[0])+','+(-ob[1]))}}}}
   // ---- 5) the long straight climbs: a wayside every dozen squares (bench and lantern, a pack, a statue, a brazier, a cart, a bell) and a pace stone ----
   {const isC=(x,y,ax)=>open(x,y)&&inZ(x,y)&&!kind[y*W+x]&&reach[y*W+x]>=0&&(ax?(open(x,y-1)&&open(x,y+1)&&(open(x-1,y)?1:0)+(open(x+1,y)?1:0)<=1):(open(x-1,y)&&open(x+1,y)&&(open(x,y-1)?1:0)+(open(x,y+1)?1:0)<=1));
    const sideClosed=(x,y,ax)=>ax?(!open(x-1,y)&&!open(x+1,y)):(!open(x,y-1)&&!open(x,y+1));
@@ -226,29 +273,55 @@ function hgpbPolish2(L,E){
    let ri=0;for(const r of runs){const n=r.e-r.s+1,step=Math.max(11,Math.min(15,Math.round(n/Math.ceil(n/13)))),ob=r.ax?[0,1]:[1,0];let j=0,kit=(ri*3)%HGPB_KITS.length;
      for(let b=r.s+5;b<=r.e-4;b+=step,j++){let cell=null;for(const dd of [0,1,-1,2,-2,3,-3]){const bb=b+dd,x=r.ax?r.a:bb,y=r.ax?bb:r.a;if(bb<r.s+2||bb>r.e-2)continue;let ok=true;for(let u=-1;u<=1&&ok;u++){const xx=r.ax?x:x+u,yy=r.ax?y+u:y;if(((cellDec[xx+','+yy]||[]).some(d=>hOf(d)>.3&&!d.hgdl))||itemAt.has(xx+','+yy)||enAt.has(xx+','+yy))ok=false}if(ok&&sideClosed(x,y,r.ax)){cell=[x,y,bb];break}}
        if(!cell)continue;const [x,y,bb]=cell,K=HGPB_KITS[kit++%HGPB_KITS.length],side0=hs(x,y,15)<.5?1:-1;
-       for(const [k0,side,sc] of K){let k=k0;if(k==='STAT')k='art_hgxstat'+((hs(x,y,16)*8)|0);put(k,x,y,k0==='STAT'?.95:sc,side*side0,ob)}
+       for(const [k0,side,h] of K){let k=k0;if(k==='STAT')k='art_hgxstat'+((hs(x,y,16)*8)|0);putH(k,x,y,h,side*side0,ob)}
        const pw=r.ax?[side0>0?-1:1,0]:[0,side0>0?-1:1];if(!picAt.has(x+','+y+','+pw[0]+','+pw[1])&&isWallCell(x+pw[0],y+pw[1])){const q=HGPB_PACE[(ri+j)%HGPB_PACE.length].replace('#',String(bb-r.s+1)+' of '+n);
-         L.decor.push({k:'hpb_rune',x,y,wd:pw,pic:1,block:false,walk:true,deco:true,npc:'hgdb_note',pbt:q,bob:.5,lift:.5,_pbv:1});picAt.add(x+','+y+','+pw[0]+','+pw[1])}
+         L.decor.push({k:'hpb_rune',x,y,wd:pw,pic:1,block:false,walk:true,deco:true,npc:'hgdb_note',pbt:q,label:'Pace Stone '+(bb-r.s+1),bob:.5,lift:.5,_pbv:1});picAt.add(x+','+y+','+pw[0]+','+pw[1])}
        mustLight.push([x,y]);P2.way++}
      ri++}}
+  // ---- 6) round three: shop signs, notice boards and quest givers in proportion, nothing on the approach to a giver, no bare dead end, a title for every note and sign ----
+  {const givers=L.decor.filter(d=>alive(d)&&d.npc&&!d.pic&&inZ(d.x,d.y)&&!/^hgdb_|^hgd_note|^hgd_sign|^hgd_plaque|^hgd_pa_note/.test(d.npc)&&!(d.npc==='hgdpc_text'&&/^hgdpc_(ss|nb|post|sg)/.test(d.k)));
+   const nearest=d=>{let b=null,bd=9;for(const g of givers){if(g===d)continue;const dd=Math.hypot(g.x-d.x,g.y-d.y);if(dd<bd){bd=dd;b=g}}return b&&bd<=1.6?b:null};
+   for(const d of L.decor){if(!alive(d)||d.pic||!d.k||!inZ(d.x,d.y)||d._pbv)continue;
+     if(d.npc==='hgdpc_text'&&/^hgdpc_(vn|hp)/.test(d.k)&&NPC_H[d.k]){setH(d,.95);P2.fix++}
+     else if(/^hgdpc_(ss|nb|post)/.test(d.k)&&NPC_H[d.k]){setH(d,/^hgdpc_ss/.test(d.k)?.6:/^hgdpc_nb/.test(d.k)?.6:1);d.lift=Math.max(d.lift||0,.34);P2.fix++;
+       const g=nearest(d);if(g){const dx=d.x-g.x,dy=d.y-g.y,px=-dy,py=dx,m=Math.hypot(px,py)||1,sd=hs(d.x,d.y,44)<.5?1:-1;d.ox=(d.ox||0)+px/m*.44*sd-dx*.3;d.oy=(d.oy||0)+py/m*.44*sd-dy*.3;if(dx===0&&dy===0){d.ox=.44*sd}}}}
+   const CLR=/rock|stat|plinth|stone|pillar|mushroom|fern|flower|bush|vine|reeds|plant_|tree|willow/;
+   for(const g of givers)for(const d of L.decor){if(!alive(d)||d.pic||d._pbv||d.npc||!d.k||!cos(d)||!CLR.test(d.k)||hOf(d)<=.45)continue;if(Math.max(Math.abs(d.x-g.x),Math.abs(d.y-g.y))<=2){drop.add(d);P2.nuis++}}
+   // a dead end with nothing within two squares of its end gets one prop
+   {const ones=new Set(L.decor.filter(d=>alive(d)&&d.npc&&d.npc.startsWith('hgdb_note')&&!d.pic).map(d=>d.x+','+d.y));
+    for(const [x,y] of deadEnds){const ob=D4.find(([a,b])=>open(x+a,y+b));if(!ob)continue;let has=false;
+      for(let t=0;t<3&&!has;t++){const c=(x+ob[0]*t)+','+(y+ob[1]*t);if(itemAt.has(c)||enAt.has(c)||(cellDec[c]||[]).some(d=>alive(d)&&!d.pic&&!d.hgdl&&hOf(d)>.25))has=true}
+      if(!has){const b=biomeOf(x,y),pl=HGPB_POOL[b]||HGPB_POOL[4],e=pl[(hs(x,y,46)*pl.length)|0];putH(e[0],x,y,e[1]*1.15,0,ob);P2.dead++;P2.fix++}}}
+   // the cell in front of every key door and gem door gets one prop, to the side (a vault door with nothing in front of it looks unfinished)
+   for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){const cc=rows[y].charCodeAt(x);if(cc<0x308||cc>0x311||!inZ(x,y))continue;
+     for(const [a,b] of D4){const fx=x+a,fy=y+b;if(!open(fx,fy)||!inZ(fx,fy))continue;const c=fx+','+fy;
+       if(itemAt.has(c)||enAt.has(c)||(cellDec[c]||[]).some(d=>alive(d)&&!d.pic&&!d.hgdl&&hOf(d)>.25))continue;
+       const bb=biomeOf(fx,fy),pl=HGPB_POOL[bb]||HGPB_POOL[4],e=pl[(hs(fx,fy,47)*pl.length)|0],side=hs(fx,fy,48)<.5?1:-1;putH(e[0],fx,fy,e[1]*1.1,.3*side,[a,b]);P2.fix++;P2.doorProps=(P2.doorProps||0)+1}}
+   // a title and some text for every note and sign of the zone (the text agent draws the writing; the title is the name the game shows for it)
+   const sgTxt=d=>{const z=d.zone!==undefined?L_ZONES()[d.zone]:null;return 'DANGER. '+(z?z.name:'The danger')+' lies ahead. '+(z?'Slugs, jellies, worms and bugs':'Creatures')+' live beyond this sign, and they do not stop. Turn back.'};
+   for(const d of L.decor){if(!alive(d)||!inZ(d.x,d.y)||!d.npc)continue;
+     if(d.npc==='hgd_note'){if(!d.pbt){const q=(E.notePool[bio[d.y*W+d.x]]||[]).concat(HGPB_GEN).find(t=>!E.noteUsed.has(t));if(q){E.noteUsed.add(q);d.pbt=q}else if(typeof HGDF_NOTES!=='undefined')d.pbt=HGDF_NOTES[(d.note||0)%HGDF_NOTES.length]}
+       if(!d.pbt)d.pbt='Scratched into the wall: Someone was here, and they did not stay.';d.label=hpbLabel(d.pbt);P2.titled=(P2.titled||0)+1}
+     else if(d.npc==='hgdb_note'||d.npc==='hgdb_post'){if(!d.pbt)d.pbt='A worn stone with a few scratches. Someone was here, and they did not stay.';if(!d.label)d.label=hpbLabel(d.pbt);P2.titled=(P2.titled||0)+1}
+     else if(d.npc==='hgd_sign'){if(!d.pbt)d.pbt=sgTxt(d);if(!d.label){const z=d.zone!==undefined?L_ZONES()[d.zone]:null;d.label='Danger: '+(z?z.name.replace(/^The /,'').split(' ').slice(0,2).join(' '):'Ahead');}P2.titled=(P2.titled||0)+1}}}
   L._hgpbMust=mustLight;
 }
 /* The game copies only a fixed list of fields from the level's decor to the live decor (G.decor): the text of a note or signpost (pbt), the note number, the danger zone, a picture's height off the floor (when it is 0) and its glow
    were all dropped, so every note and signpost said the same worn-away line. They are copied back here, once, when the level is set up. */
-function hgpbCopyDecor(){const L=LEVELS[HGD.ID];if(!L||!G.decor||typeof DECOR_SPAWNS==='undefined')return;const F=['pbt','note','zone','lift','bob','text','sc'],map=new Map();
+function hgpbCopyDecor(){const L=LEVELS[HGD.ID];if(!L||!G.decor||typeof DECOR_SPAWNS==='undefined')return;const F=['pbt','note','zone','lift','bob','text','sc','label','ox','oy'],map=new Map();
   for(const s of DECOR_SPAWNS){const k=s.k+'|'+s.x+'|'+s.y+'|'+(s.wd?s.wd[0]+','+s.wd[1]:'')+'|'+(s.ox||0)+'|'+(s.oy||0);(map.get(k)||map.set(k,[]).get(k)).push(s)}
   for(const d of G.decor){const a=map.get(d.k+'|'+d.x+'|'+d.y+'|'+(d.wd?d.wd[0]+','+d.wd[1]:'')+'|'+(d.ox||0)+'|'+(d.oy||0));if(!a)continue;const s=a.length>1&&d.npc?(a.find(q=>q.npc===d.npc)||a[0]):a[0];for(const f of F)if(s[f]!==undefined&&d[f]===undefined)d[f]=s[f]}}
 /* Coloured pools of light. This runs when the level is first set up (not when it is built), because some wall pieces turn into open ways after the build and the light has to reach the final maze:
    the cell farthest from any light gets one, until every corridor has a light within a few squares (path distance, so a wall hides the light). Some get a lantern hung on the wall. */
 function hgpbHs(x,y,s){let h=(Math.imul(x+1,374761393)+Math.imul(y+1,668265263)+Math.imul(s+7,2147483647))>>>0;h=Math.imul(h^(h>>>13),1274126177)>>>0;return((h^(h>>>16))>>>0)/4294967296}
 function hgpbLights(L){if(!L||L._hgpbLit||!L._hgdm)return;L._hgpbLit=1;const M=L._hgdm,W=M.W,H=M.H,bio=M.bio,rows=L.rows,N=W*H,D4=[[0,-1],[1,0],[0,1],[-1,0]],P2=(L._hgpb&&L._hgpb.log&&L._hgpb.log.p2)||{};
-  const isW=c=>!c||c==='#'||(c!=='.'&&c.charCodeAt(0)>=0x2e0&&c.charCodeAt(0)<0x2e8),open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&rows[y][x]==='.',inZ=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&bio[y*W+x]>=4,biomeOf=(x,y)=>bio[y*W+x];
+  const isW=c=>!c||c==='#'||HPB_WCH(c),open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&rows[y][x]==='.',inZ=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&bio[y*W+x]>=4,biomeOf=(x,y)=>bio[y*W+x];
   const nbc=(x,y)=>D4.reduce((n,[a,b])=>n+(open(x+a,y+b)?1:0),0);
   const reach=new Uint8Array(N);{const q=[[L.start.x,L.start.y]];reach[L.start.y*W+L.start.x]=1;for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of D4){const nx=x+a,ny=y+b;if(open(nx,ny)&&!reach[ny*W+nx]){reach[ny*W+nx]=1;q.push([nx,ny])}}}}
   const COLS={amber:[1.4,1,.5],cold:[.5,.9,1.5],pale:[1.15,1.1,.9],lilac:[1.15,.65,1.45],gold:[1.5,1.15,.45],teal:[.5,1.2,1.1]};L._hgpbCol=L._hgpbCol||{};
   const colAt=(x,y,nm,kI)=>{const c=COLS[nm]||COLS.amber;L._hgpbCol[x+','+y]=[c[0],c[1],c[2],kI||1.3]};
   const picAt=new Set();for(const d of L.decor)if(d.pic&&d.wd)picAt.add(d.x+','+d.y+','+d.wd[0]+','+d.wd[1]);
-  const lantern=(x,y)=>{const wd=D4.filter(([a,b])=>!open(x+a,y+b)&&x+a>=0&&y+b>=0&&x+a<W&&y+b<H&&isW(rows[y+b][x+a])&&!picAt.has(x+','+y+','+a+','+b));if(!wd.length)return;const w=wd[(hgpbHs(x,y,11)*wd.length)|0],lst=HGPB_LANT[biomeOf(x,y)]||HGPB_LANT[4],k=lst[(hgpbHs(x,y,12)*lst.length)|0];
+  const lantern=(x,y)=>{const wd=D4.filter(([a,b])=>!open(x+a,y+b)&&x+a>=0&&y+b>=0&&x+a<W&&y+b<H&&isW(rows[y+b][x+a])&&!picAt.has(x+','+y+','+a+','+b));if(!wd.length)return;const w=wd[(hgpbHs(x,y,11)*wd.length)|0],lst=HGPB_LANT[biomeOf(x,y)]||HGPB_LANT[4],k=hpbTint(lst[(hgpbHs(x,y,12)*lst.length)|0],biomeOf(x,y));
     const o={k,x,y,wd:[w[0],w[1]],pic:1,block:false,walk:true,deco:true,bob:.3+.12*hgpbHs(x,y,13),lift:.62,_pbv:1};L.decor.push(o);picAt.add(x+','+y+','+w[0]+','+w[1]);if(typeof G!=='undefined'&&G.decor&&LEVEL===HGD.ID)G.decor.push(Object.assign({},o,{loot:false,shop:false}))};
   const dist=new Int16Array(N).fill(9999);const grow=(x,y,lim)=>{if(!open(x,y))return;const q=[[x,y]];dist[y*W+x]=0;for(let i=0;i<q.length;i++){const [cx,cy]=q[i],dd=dist[cy*W+cx];if(dd>=lim)continue;for(const [a,b] of D4){const nx=cx+a,ny=cy+b;if(open(nx,ny)&&dist[ny*W+nx]>dd+1){dist[ny*W+nx]=dd+1;q.push([nx,ny])}}}};
   for(const l of L.lights)grow(l[0],l[1],14);
