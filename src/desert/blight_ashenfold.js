@@ -9,8 +9,8 @@
    ========================================================================== */
 const BLA={ID:9620,HOUSE:9621,CELLAR:9622,BARN:9623,W:80,H:70};
 for(const [id,n] of [[9621,"The Sedges' Kitchen"],[9622,'The Farmhouse Cellar'],[9623,'The Ashenfold Barn']]){LEVEL_NAMES[id]=n;LEVEL_RATING[id]=85}
-const BLA_HOUSE={x0:42,x1:51,y0:19,y1:24,face:'S',sty:'brick',roof:'thatch2',wh:2.4,to:BLA.HOUSE};
-const BLA_BARN={img:'wl_bldg1_5',x0:56,x1:60,y0:20,y1:24,w:5.2,wh:2.4,to:BLA.BARN};
+const BLA_HOUSE={x0:42,x1:51,y0:19,y1:24,face:'S',sty:'dbrick',roof:'thatch2',wh:2.4,to:BLA.HOUSE};
+const BLA_BARN={img:'b14_barn',x0:56,x1:60,y0:20,y1:24,w:5.2,wh:2.4,to:BLA.BARN};
 ITEMDEF.blheart={n:'Pale Silver Heart',k:'quest',t:'Quest item',ic:'ore',c:'#d8e0e8',stack:1,price:0,sw:.3,d:'A lump of pale silver the size of a fist, shaped roughly like a heart, taken from the chest of the great scarecrow. It is cold, and it is faintly warm when you hold it. Burn it in the hearth of the farmhouse kitchen.'};
 ITEMDEF.blring={n:"The Farmer's Wedding Ring",k:'quest',t:'Quest item',ic:'ring',c:'#e0b050',stack:1,price:0,sw:.1,d:'A plain gold ring worn thin, dug out of the long furrow in the dead field. Inside it is cut: W and E, and a date forty years gone. It belongs on Farmer Wilf Sedge’s finger.'};
 ITEMDEF.blsedgering={n:"Sedge's Wedding Band",k:'ring',t:'Ring',ic:'ring',c:'#d8b868',price:0,lvl:85,pas:{ward:16,dodge:.06,regen:.7,mpRegen:.4},int:5,hp:75,rar:1,sw:.1,d:'A second ring in the Sedge family, thin gold, left on the supper table for whoever finished the quarrel. Adds 5 Intelligence and 75 health, every blow on the wearer is 16 lighter, enemies miss 6% more, and wounds and weariness close steadily. Needs level 85.'};
@@ -109,6 +109,7 @@ khNpc('bla_pigs','A pig sty','bl_fence',()=>say('A sty with a low roof. The pigs
   return r}}
 /* ---------- the level ---------- */
 function blaBuild(p){
+  b14Dead('b14_barn','wl_bldg1_5','saturate(.45) brightness(.66)',NPC_H.wl_bldg1_5);
   const C=blKit({id:BLA.ID,W:BLA.W,H:BLA.H,name:p.name,lvl:85,start:{x:73,y:35,f:3},wind:.36});
   const {hs}=C,F=blF();
   C.hills(.15);C.boundary();C.setF(2,2,77,67,'0');
@@ -137,7 +138,7 @@ function blaBuild(p){
   C.post(5,37,'bl_ash_w',[{n:'THE CHURCH OF THE HOLLOW SAINT',d:-1}],'bla_signW','A signpost by the west gate. The board reads THE CHURCH OF THE HOLLOW SAINT, to the west. Below it somebody has written: THE BELLS ARE UPSIDE DOWN. DO NOT BE ALARMED.',{i:2});
   C.post(74,37,'bl_ash_e',[{n:"THE WARDENS' TOLL HOUSE",d:1}],'bla_signE','A signpost inside the east gate. The board reads THE WARDENS’ TOLL HOUSE, to the east. Below it: NO TOLL TO RETURN.',{i:3});
   // the fields: rows of dead corn, scarecrow poles, the stone and the long furrow, an orchard of dead apple trees
-  for(const [x0,y0,x1,y1] of [[4,5,34,28],[4,42,34,64]])for(let y=y0;y<=y1;y++){if(y%3===0)continue;for(let x=x0;x<=x1;x++){if(C.path.has(x+','+y)||hs(x,y,41)>.5)continue;const d=C.D(hs(x,y,45)<.5?'ww_twig2':'bl_grass'+((hs(x,y,46)*4)|0),x,y,{sc:.7+hs(x,y,42)*.7});if(d){d.ox=(hs(x,y,43)-.5)*.5;d.oy=(hs(x,y,44)-.5)*.2}}}
+  b14Furrows(C,4,5,34,28,.8);b14Furrows(C,4,42,34,64,.8);
   C.reserve(8,44,28,58);
   C.dec('ww_stone',27,51,{block:true,npc:'bla_stone',sc:.8});C.dec('gy_mound',26,52,{block:true,npc:'bla_ringspot',sc:.6});C.light(26,53,C.pale);
   for(const [x,y] of [[12,8],[20,16],[30,10],[8,22],[16,46],[30,58]])C.dec('ww_totem',x,y,{block:true,npc:'bla_scarepole',sc:.8});
@@ -145,6 +146,8 @@ function blaBuild(p){
   for(const [x,y] of [[10,10],[22,12],[28,24],[16,26]])C.dec('hay',x,y,{block:true,sc:1.1});
   C.dec('kh_ohgard2_3',14,30,{block:true,sc:.8});C.dec('kh_ohgard1_5',32,44,{block:true,sc:.8});
   for(const [x,y] of [[40,50],[44,54],[50,52],[56,56],[62,50],[46,60],[54,62],[60,60]])C.DB('ww_oakmoss',x,y,{sc:.8});   // the dead orchard
+  b14AshDress(C);
+  b14Patches(C,{keep:(x,y)=>x>=34&&x<=66&&y>=17&&y<=34||x<=34&&(y>=5&&y<=28||y>=42&&y<=64)});
   C.dress({trees:130,scrub:180,stones:14,bones:8,posts:6,keep:(x,y)=>(x>=34&&x<=66&&y>=17&&y<=34)||(y>=32&&y<=38)||(x>=6&&x<=34&&y>=3&&y<=29)||(x>=6&&x<=34&&y>=41&&y<=65)});
   // the creatures
   C.foes([['blscare',12,12],['blscare',24,8],['blscare',30,18],['blscare',8,20],['blscare',22,24],['blscare',14,46],['blscare',24,56],['blscare',32,50],['blscarebig',18,10],
@@ -181,7 +184,7 @@ function blaCellar(){
       const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
       P('coopstack',2,1,{h:.95});P('coopstack',4,1,{h:.95});P('shelving',7,1,{h:1.2});P('shelving',9,1,{h:1.2});P('waterbarrel',1,3,{h:.7});P('veg',9,4,{h:.6});
       P('cot',8,6,{h:.55});P('coopstack',2,6,{h:.9});
-      C.raw('gy_chest',9,6,{npc:'bla_chest',solid:1,deco:false,sc:.9});C.raw('gy_bones',5,4,{block:false,sc:.6});
+      C.raw('gy_chest',9,6,{npc:'bla_chest',solid:1,deco:false,sc:.9});C.raw('gy_bones',5,4,{block:false,sc:.3});
       if(!blF().tillyFree){const kp=KH_KEEPERS.bla_tilly;C.raw(khFaceKey(kp.face),3,5,{npc:'bla_tilly',solid:1,deco:false,sc:kp.sc||1,block:false,walk:true})}}})}
 function blaBarn(){
   const f=BLA_BARN.front;
@@ -203,3 +206,16 @@ if(typeof QRF!=='undefined'){const N=(l,...ids)=>({lvl:l,npc:ids}),E=(l,rx)=>({l
   T.blq5={give:[N(9623,'bla_hob')],act:()=>blF().heart?[N(9621,'bla_hearth')]:[E(9620,/^blscarebig$/)],ready:[N(9623,'bla_hob')]};
   T.blq6={give:[N(9621,'bla_edda')],act:()=>blF().ring?[N(9621,'bla_wilf')]:[N(9620,'bla_ringspot')],ready:[N(9621,'bla_edda')]}}
 blRegister(2,blaBuild,{fromE:{x:73,y:35,f:3},fromW:{x:4,y:35,f:1},exitY:35,rooms:[9621,9622,9623],names:{9621:"The Sedges' Kitchen",9622:'The Farmhouse Cellar',9623:'The Ashenfold Barn'},rating:{9621:85,9622:85,9623:85}});
+
+/* ---------- polish (round 1 to 4): the farmyard, dressed ---------- */
+function b14AshDress(C){
+  const cart=b14Dead('b14_cart','cart','saturate(.3) brightness(.62)',1.1),gcart=b14Dead('b14_gcart','wl_prop1_5','saturate(.2) brightness(.55)',1.0),sacks=b14Dead('b14_sacks','sacks','saturate(.3) brightness(.6)',.7),
+    wash=b14Dead('b14_wash','yar_washing','saturate(.1) brightness(.7) opacity(.9)',1.3),pots=b14Dead('b14_pots','yar_pots','saturate(.3) brightness(.6)',.4),ban=b14Dead('b14_banner','banner','saturate(.5) brightness(.75)',1.6);
+  // the grain cart left in the yard, sacks and barrels at the barn door, a washing line with grey sheets, a milk-can stack (crates), the water trough side (barrels)
+  b14Place(C,[[gcart,54,31,{sc:1}],[sacks,56,27,{sc:.9}],['barrel',60,27,{sc:.9}],['barrel',61,27,{sc:.8}],['crate',57,27,{sc:.9}],[wash,38,32,{sc:1}],[pots,41,31,{sc:1}],['barrel',37,26],['crate',38,26],
+    [cart,52,30,{sc:.9}],['gy_lantern',45,26],['gy_lantern',48,26]]);
+  C.light(45,26,C.warm);C.light(48,26,C.warm);
+  for(const [x,y] of [[46,32],[59,31],[40,28],[51,32],[44,29]])C.dec('gy_bones',x,y,{sc:.25});
+  // the lane and the road: a broken cart and a crate stack at the verges
+  for(const [x,y] of [[20,33],[66,37],[30,37]])C.dec(x%2?cart:gcart,x,y,{block:true,sc:.9});
+  for(const [x,y] of [[14,33],[54,37],[72,33]])C.dec('crate',x,y,{block:true,sc:.8})}

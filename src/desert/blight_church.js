@@ -262,6 +262,8 @@ function blcBuild(p){
   for(let a=0;a<12;a++){const x=Math.round(54+4.5*Math.cos(a*.5236)),y=Math.round(46+3*Math.sin(a*.5236));C.dec('gy_mound',x,y,{block:true,sc:.7})}
   C.dec('gy_mound',54,46,{block:true,npc:'blc_pit',sc:.9});C.dec('gy_bones',52,47,{});C.dec('gy_bones',56,45,{});C.light(54,42,C.pale);
   C.dec('bl_chapel',36,52,{block:true,npc:'blc_poorchapel',sc:.9});C.dec('gy_candles',36,54,{block:true,sc:.7});C.light(36,54,C.warm);C.pth(35,38,37,50,'2');
+  b14ChurchDress(C);
+  b14Patches(C,{keep:(x,y)=>x>=17&&x<=63&&y>=9&&y<=32});
   C.dress({trees:130,scrub:240,stones:14,bones:8,posts:6,keep:(x,y)=>(x>=17&&x<=63&&y>=9&&y<=32)||(y>=32&&y<=38)||(x>=33&&x<=39&&y>=38&&y<=56)||(x>=14&&x<=24&&y>=38&&y<=48)||(x>=48&&x<=60&&y>=40&&y<=52)});
   // the creatures: the dead of the churchyard come up when the party draws near
   C.foes([['blghoul',24,18],['blghoul',28,26],['blghoul',48,24],['blhusk',22,24],['blhusk',56,24],['blhusk',30,13],['blbones',26,22],['blbones',46,20],['blbones',54,14],['blbones',58,22],['blshade',44,28],['blshade',24,14],['blhound',38,12],['blhound',60,42],
@@ -299,7 +301,7 @@ function blcNave(){
       C.raw('gy_stair',1,13,{npc:'blc_cryptdoor',solid:1,deco:false,sc:.95});
       C.raw('gy_hatch2',19,13,{npc:'blc_belfrydoor',solid:1,deco:false,sc:1});
       C.raw('gy_arch',19,7,{npc:'blc_vestrydoor',solid:1,deco:false,sc:.9});
-      P('candlerack',1,4,{h:1.0});P('candlerack',19,4,{h:1.0});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_web',19,1,{block:false,sc:.5});C.raw('gy_bones',9,11,{block:false,sc:.6});C.raw('gy_bones',12,13,{block:false,sc:.5})}})}
+      P('candlerack',1,4,{h:1.0});P('candlerack',19,4,{h:1.0});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_web',19,1,{block:false,sc:.5});C.raw('gy_bones',9,11,{block:false,sc:.3});C.raw('gy_bones',12,13,{block:false,sc:.3})}})}
 function blcCrypt(){
   const F=blF();
   blRoom({id:BLC.CRYPT,name:'The Crypt of the Hollow Saint',w:21,h:15,amb:.38,rating:86,floor:FLOORS.mosscobble?'mosscobble':'cobble',wall:IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0',
@@ -315,7 +317,7 @@ function blcCrypt(){
       for(const [x,y] of [[8,1],[12,1],[1,7],[19,7]])C.raw('gy_candles',x,y,{block:true,sc:.85});
       C.raw('gy_chest',18,12,{npc:'blc_cryptchest',solid:1,deco:false,sc:.9});
       C.raw('gy_rune',2,12,{npc:'blc_pauper',solid:1,deco:false,sc:.9});
-      C.raw('gy_web',1,1,{block:false,sc:.6});C.raw('gy_web',19,1,{block:false,sc:.6});C.raw('gy_bones',7,6,{block:false,sc:.7});C.raw('gy_bones',13,7,{block:false,sc:.7});C.raw('gy_bones',10,11,{block:false,sc:.6});
+      C.raw('gy_web',1,1,{block:false,sc:.6});C.raw('gy_web',19,1,{block:false,sc:.6});C.raw('gy_bones',7,6,{block:false,sc:.3});C.raw('gy_bones',13,7,{block:false,sc:.3});C.raw('gy_bones',10,11,{block:false,sc:.3});
       C.raw('gy_stair',10,13,{npc:'blc_cryptup',solid:1,deco:false,sc:.95})}})}
 function blcBelfry(){
   const F=blF();
@@ -327,7 +329,7 @@ function blcBelfry(){
       C.raw('bl_bellbad',3,2,{npc:'blc_bellA',solid:1,deco:false,sc:1.7});C.raw('bl_bellbad',6,2,{npc:'blc_bellB',solid:1,deco:false,sc:1.5});C.raw('bl_ibellS',10,2,{npc:'blc_bellC',solid:1,deco:false,sc:1.3});
       if(!F.pg2)C.raw('gy_book',10,3,{npc:'blc_page2',solid:1,deco:false,sc:.9,bob:.1});
       for(const x of [1,11])C.raw('hl_p_window',x,4,{block:true,sc:1.0});
-      C.raw('crate',2,7,{block:true,sc:.9});C.raw('barrel',11,7,{block:true,sc:.9});C.raw('gy_bones',5,5,{block:false,sc:.6});C.raw('gy_bones',8,6,{block:false,sc:.5});C.raw('gy_web',1,1,{block:false,sc:.6});C.raw('gy_web',11,1,{block:false,sc:.6});
+      C.raw('crate',2,7,{block:true,sc:.9});C.raw('barrel',11,7,{block:true,sc:.9});C.raw('gy_bones',5,5,{block:false,sc:.3});C.raw('gy_bones',8,6,{block:false,sc:.3});C.raw('gy_web',1,1,{block:false,sc:.6});C.raw('gy_web',11,1,{block:false,sc:.6});
       C.raw('gy_hatch2',5,8,{npc:'blc_belfryup',solid:1,deco:false,sc:1})}})}
 function blcVestry(){
   const F=blF();
@@ -340,7 +342,7 @@ function blcVestry(){
       P('bookshelf',2,1,{h:1.1});P('bookshelf',4,1,{h:1.1});P('dresser',9,1,{h:1.1});P('cot',1,6,{h:.7});P('waterbarrel',9,6,{h:.7});P('candlerack',6,1,{h:1.0});P('clock',8,1,{h:1.1});
       P('readdesk',5,3,{h:.85});C.raw('gy_book',5,3,{npc:'blc_book',solid:1,deco:false,bob:.4,sc:1});
       C.raw('gy_chest',9,4,{npc:'blc_offer',solid:1,deco:false,sc:.9});C.raw('gy_chest',1,2,{npc:'blc_robes',solid:1,deco:false,sc:.9});
-      C.raw('gy_web',9,1,{block:false,sc:.5});C.raw('gy_bones',4,6,{block:false,sc:.5})}})}
+      C.raw('gy_web',9,1,{block:false,sc:.5});C.raw('gy_bones',4,6,{block:false,sc:.3})}})}
 for(const [id,fn] of [[BLC.NAVE,blcNave],[BLC.CRYPT,blcCrypt],[BLC.BELFRY,blcBelfry],[BLC.VESTRY,blcVestry]])
   KH_LAZY[id]=()=>{if(!LEVELS[id]){if(!LEVELS[BLC.ID])KH_LAZY[BLC.ID]();blcArt();fn()}return LEVELS[id]};
 /* the quest rings */
@@ -350,3 +352,16 @@ if(typeof QRF!=='undefined'){const N=(l,...ids)=>({lvl:l,npc:ids}),T=QRF.T;
   T.blq9={give:[N(9631,'blc_alder')],act:()=>blcNames()>=6?[N(9631,'blc_alder')]:[N(9630,'blc_name')],ready:[N(9631,'blc_alder')]};
   T.blq10={give:[N(9631,'blc_saint')],act:()=>blF().bowl?[N(9631,'blc_saint')]:[N(9632,'blc_pauper')],ready:[N(9631,'blc_saint')]}}
 blRegister(3,blcBuild,{fromE:{x:73,y:35,f:3},fromW:{x:4,y:35,f:1},exitY:35,rooms:[9631,9632,9633,9634],names:{9631:'The Nave of the Hollow Saint',9632:'The Crypt of the Hollow Saint',9633:'The Belfry',9634:'The Vestry'},rating:{9631:86,9632:86,9633:86,9634:86}});
+
+/* ---------- polish (round 1 to 4): the road, the churchyard and the pit, dressed ---------- */
+function b14ChurchDress(C){
+  const cart=b14Dead('b14_cart','cart','saturate(.3) brightness(.62)',1.1),sacks=b14Dead('b14_sacks','sacks','saturate(.3) brightness(.6)',.7),ban=b14Dead('b14_banner','banner','saturate(.5) brightness(.75)',1.6),
+    cage=b14Dead('b14_cage','ww_cagefull','saturate(.4) brightness(.7)',1.1),bones=b14Dead('b14_ybones','yar_bones','saturate(.3) brightness(.7)',.7),charm=b14Dead('b14_charm','ww_charm','saturate(.4) brightness(.7)',1.2);
+  // the pilgrims' road: a cart at each side, sacks and barrels, torn banners at the lych-gate, cages with bones on the fence posts
+  b14Place(C,[[ban,33,32],[ban,41,32],[ban,29,34],[ban,45,34],[cart,24,34],[cart,50,36],[sacks,52,36],['barrel',23,34,{sc:.8}],['barrel',51,36,{sc:.8}],[cage,34,30],[cage,40,30]]);
+  // the plague pit: bone heaps around the ring, a cart tipped at its edge
+  for(const [x,y] of [[50,45],[58,47],[52,49],[56,49],[54,43],[58,44]])C.dec(bones,x,y,{sc:1});
+  C.dec(cart,49,47,{block:true,sc:.9});
+  // bone charms hung on the churchyard railings
+  for(const [x,y] of [[19,12],[19,22],[61,14],[61,24],[28,11],[46,11]])C.dec(charm,x,y,{block:true,sc:.9});
+  for(const [x,y] of [[36,40],[44,40],[56,36],[20,36]])C.dec('crate',x,y,{block:true,sc:.8})}
