@@ -57,3 +57,7 @@ Nothing blocks the turn: the only delay is the 0.3 to 0.5 s the picture takes to
 `python -m http.server 8356` from the repo root, then `python tools/spellfx/spellfx_sheets.py [group ...]` writes a contact sheet per group
 (`sheet_fire.png`, `sheet_frost.png`, ...: one row per spell, six frames across the effect). The game loop is stepped by hand
 (`tools/spellfx/spellfx_lib.py`), so frames are captured at exact times after the cast.
+
+## Paladin, Monk and Goat (elements hallow, ki, goat)
+
+Paladin: hammer slam (Smite, Righteous Blow twice), cross of light (Judgment), sun burst (Sunbrand). Monk: ki fists (palm, stun with dizzy stars, flurry hits via SPIMP.kihit), kick arcs, giant fist (Fist of the Mountain). Goat: ram horns and BONK/CRASH burst, hoof stomp, rock fall. The registry 4th field carries the variant (o.v). Check: python tools/spellfx/spellfx_sheets.py paladin monk goat. Objects added to spObjDraw: hammer rays cross fist hoof horns pow dizzy speed.
