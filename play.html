@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.691';
+const VERSION='3.692';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -3756,7 +3756,7 @@ function jumpFromUrl(){
     msg('The party stands at the Kraken line with all four Kraken harpoons. Walk east.','#ffe36a');return}
   if(town==='abbey'||town==='thornwood'){F.townSeen=0;delete F.abbeyIntroSeen;G.bossDead=true;goToLevel(2);G.state='play';G.menu=false;return}
   F.townSeen=1;F.abbeyIntroSeen=1;F.gwoodSeen=1;
-  const AREAS={hgtest:[480,10,20,0],hgtrooms:[4960,14,4,2],hgtmaze:[486,106,216,0],hgttank:[487,30,45,0],hgtesttwo:[485,10,50,0],ulb:[482,75,3,2],nibb:[484,75,146,0],exsce:[481,75,147,0],glorm:[483,75,144,0],hollowgrass:[470,75,142,0],hollowland:[364,35,60,0],orangetower:[440,12,14,0],orangeboss:[443,17,19,0],oldhaven:[305,74,141,0],wenlock:[496,95,50,3],yarrim:[290,18,40,1],gardens:[490,45,87,0],witchwood:[520,27,52,0],oakwood:[311,2,36,1],landpath:[400,76,555,0],monasterygate:[411,73,306,0],pilgrim:[400,76,555,0],monastery:[430,42,66,0],bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],khemetracity:[44,201,379,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
+  const AREAS={brackenden:[496,89,8,0],hgtest:[480,10,20,0],hgtrooms:[4960,14,4,2],hgtmaze:[486,106,216,0],hgttank:[487,30,45,0],hgtesttwo:[485,10,50,0],ulb:[482,75,3,2],nibb:[484,75,146,0],exsce:[481,75,147,0],glorm:[483,75,144,0],hollowgrass:[470,75,142,0],hollowland:[364,35,60,0],orangetower:[440,12,14,0],orangeboss:[443,17,19,0],oldhaven:[305,74,141,0],wenlock:[496,95,50,3],yarrim:[290,18,40,1],gardens:[490,45,87,0],witchwood:[520,27,52,0],oakwood:[311,2,36,1],landpath:[400,76,555,0],monasterygate:[411,73,306,0],pilgrim:[400,76,555,0],monastery:[430,42,66,0],bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],khemetracity:[44,201,379,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
   // the Deeper Hollow: the door into the maze, and the landing just before the first boat (the maze is built first, then the spot is read from it)
   {const hgdSpot=(which)=>{try{if(typeof hgBuild==='function'){hgBuild();hgdBuild()}}catch(e){console.error(e)}const L=LEVELS[475];if(!L)return [475,101,198,0];
       if(which==='boat'&&L._hgdb&&L._hgdb.docks&&L._hgdb.docks[0]){const d=L._hgdb.docks[0];return [475,d.ax,d.ay,DIRS.findIndex(q=>q[0]===d.dx&&q[1]===d.dy)]}
@@ -3764,6 +3764,7 @@ function jumpFromUrl(){
     Object.defineProperty(AREAS,'deephollow',{enumerable:true,configurable:true,get(){return hgdSpot('door')}});
     Object.defineProperty(AREAS,'boatdock',{enumerable:true,configurable:true,get(){return hgdSpot('boat')}})}
   try{for(const w of ['infested','infestedcellar'])Object.defineProperty(AREAS,w,{enumerable:true,configurable:true,get(){return infSpot(w==='infestedcellar'?'cellar':'house')}})}catch(e){console.error(e)} // an infested house in Oldhaven, and its cellar (infested.js)
+  try{for(const tk of ['wenlock','yarrim','thornwick','ironhill','anaea'])for(const c of ['','cellar'])Object.defineProperty(AREAS,'infested'+tk+c,{enumerable:true,configurable:true,get(){return infSpot(c?'cellar':'house',tk)}})}catch(e){console.error(e)} // the same in the other towns: ?town=infestedwenlock&lvl=8 (infested.js)
   try{Object.defineProperty(AREAS,'blackswill',{enumerable:true,configurable:true,get(){return bswSpot()}})}catch(e){console.error(e)} // the Black Swill's island (blackswill.js)
   if(!AREAS[town]&&town.length>=4){const m=Object.keys(AREAS).filter(k=>k.startsWith(town)||town.startsWith(k));if(m.length===1)town=m[0]} // near-misses like whitedune find the right area
   if(AREAS[town]&&town!=='thornwood'){const [lv,ax,ay,af]=AREAS[town];F.gandrickDead=1;F.northGate=1;F.mayorKilled=1;F.mayorDown=1;F.ironRoad=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};if(lv===44&&LEVELS[44].stub){khEnter(()=>{goToLevel(lv,{x:ax,y:ay,f:af});G.state='play';G.menu=false});return}goToLevel(lv,{x:ax,y:ay,f:af});if(town==='orangeboss'){let tries=0;const iv=setInterval(()=>{const b=LEVEL===lv&&!TP&&G.enemies.find(e=>e.t==='hlboss0');if(b){clearInterval(iv);let py=b.y+3;while(py>b.y+1&&!(G.grid[py]&&G.grid[py][b.x]===0))py--;G.P.x=b.x;G.P.y=py;G.P.f=0;G.P.angT=-Math.PI/2;G.C={x:G.P.x,y:G.P.y,a:G.P.angT}}else if(++tries>100)clearInterval(iv)},100)}G.state='play';G.menu=false;return}
@@ -35586,7 +35587,7 @@ function mpGreendaleDraw(c,x,L,api){
   for(const d of L.decor||[]){const a=cx(d.x),b=cy(d.y);
     if(d.k==='deer')mpGreendaleDeer(x,a,b,(d.sc||1)*1.05,hash2(d.x,d.y,5)<.5);
     else if(d.k==='rabbits'){mpGreendaleRabbit(x,a-2,b,.9);mpGreendaleRabbit(x,a+2.5,b+1.5,.75)}
-    else if(d.k==='greensign')mpGreendaleSign(x,a,b,1);
+    else if(d.k==='greensign'||/^spt_gd/.test(d.k))mpGreendaleSign(x,a,b,1);
     else if(d.k==='mossstone'){x.fillStyle='#8a9a86';x.strokeStyle=MPL.INK;x.lineWidth=.8;x.beginPath();x.moveTo(a-3,b+3);x.lineTo(a-3.4,b-3);x.quadraticCurveTo(a,b-8,a+3.4,b-3);x.lineTo(a+3,b+3);x.closePath();x.fill();x.stroke();x.fillStyle='#5a9a52';x.beginPath();x.arc(a-2,b-1,1.4,0,6.3);x.arc(a+2.2,b+1,1.1,0,6.3);x.fill();MPLI.star(x,a,b-3,.7,MPL.GOLD)}
     else if(d.k==='lamp'){x.fillStyle=MPL.GOLD2;x.strokeStyle=MPL.INK;x.lineWidth=.5;x.beginPath();x.arc(a,b-1,1.5,0,6.3);x.fill();x.stroke();x.beginPath();x.moveTo(a,b);x.lineTo(a,b+3);x.stroke()}}
   /* the hidden door, the gates */
@@ -50548,7 +50549,7 @@ const WL_ANIMALS=[
   {id:'wlo_dog2',n:'Admiral, a large wolfhound',face:'kh_oqdogs_1',sc:1,out:[30,52],lines:["Woof. (He leans on your knee until you scratch his ears.)","Woof. (This is the dog who is, apparently, in charge of the square.)"]},
   {id:'wlo_dog3',n:'Mutt, a sheepdog',face:'kh_oqdogs_2',sc:1,out:[46,12],lines:["Woof. (He wants to herd you towards the pub.)","Woof. (He has noticed a sheep. He is trying to look as though he has not.)"]},
   {id:'wlo_cat2',n:'Duchess, a tabby',face:'kh_anim1_0',sc:1,out:[63,53],lines:["Miaow. (She looks at you as a queen looks at a very small stool.)","Mrr. (She is sitting in the exact middle of the sun, and has no intention of moving.)"]},
-  {id:'wlo_goat',n:'A goat',face:'kh_anim1_3',sc:.9,out:[86,52],lines:["Maaa. (He has just eaten a hat, and is thinking about the other one.)","Maaa. (He gives you a look of calm, patient contempt.)"]},
+  {id:'wlo_goat',n:'A goat',face:'kh_anim1_3',sc:.9,out:[86,52],lines:["Maaa. (He has just eaten a hat, and is thinking about the other one. This goat is not part of the goat quest. He lives here.)","Maaa. (He gives you a look of calm, patient contempt. This goat is not part of the goat quest. He lives here.)"]},
   {id:'wlo_donkey',n:'Neddy, the donkey',face:'kh_anim1_4',sc:.9,out:[66,47],lines:["Hee-haw. (He has a strong opinion and has decided not to share it.)","Hee-haw. (The donkey looks, you suspect, at the world's long list of unfinished business.)"]}
 ];
 /* grown-ups were drawn a little too big beside the doors and stalls: every adult is brought down a tenth, the children and animals stay as they are */
@@ -51714,13 +51715,17 @@ function wlnStreetPlate(d){
 /* a freestanding street sign: a signpost whose two boards are painted at three times the size, one board to a street, each post with its own shapes and colours; the boards are in the picture of the post itself, so the letters read from every side (never mirrored) */
 let WLN_POSTS=0;
 const WLN_BOARD=[[[104,70,44],[236,222,184]],[[60,96,70],[240,232,196]],[[110,50,46],[240,226,190]],[[44,70,108],[238,232,206]],[[84,64,104],[236,226,196]],[[52,92,98],[240,232,200]]];
+/* names: a string per board (the Wenlock street signs: the shape follows the post), or {n:name,d:way} (the signposts to towns and places, see signposts_towns.js): d -1 or 1 is an arrow with its point to the left
+   or the right of whoever looks at it, d 0 a board for a place straight ahead and d 2 one for a place behind, both with a small triangle in front of the name */
 function wlnPostPic(i,names){
   const S=3,W=825,H=849,src=IMG.greensign,c=document.createElement('canvas');c.width=550;c.height=566;const x=c.getContext('2d');x.scale(2/3,2/3);
   x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';
   if(src)x.drawImage(src,70,0,135,283,414-68*S,0,135*S,H);
-  const board=(bx,by,bw,bh,dir,shape,name,pal)=>{
+  const board=(bx,by,bw,bh,dir,shape,name,pal,nobj)=>{
+    const mk=nobj&&(dir===0||dir===2)?dir||1:0;   // 1 = ahead (triangle up), 2 = behind (triangle down)
+    if(nobj){if(mk){shape=2;dir=1}else shape=0}
     x.save();x.shadowColor='rgba(0,0,0,.45)';x.shadowBlur=10;x.shadowOffsetY=6;
-    x.beginPath();const t=shape===0?bh*.42:0,L=bx,R=bx+bw,T=by,B=by+bh;
+    x.beginPath();const t=shape===0?bh*(nobj?.34+.07*((i+bx)%3):.42):0,L=bx,R=bx+bw,T=by,B=by+bh;
     if(shape===2){const r=bh*.3;x.moveTo(L+r,T);x.lineTo(R-r,T);x.quadraticCurveTo(R,T,R,T+r);x.lineTo(R,B-r);x.quadraticCurveTo(R,B,R-r,B);x.lineTo(L+r,B);x.quadraticCurveTo(L,B,L,B-r);x.lineTo(L,T+r);x.quadraticCurveTo(L,T,L+r,T)}
     else if(dir<0){x.moveTo(L+t,T);x.lineTo(R,T);x.lineTo(R,B);x.lineTo(L+t,B);if(t){x.lineTo(L,(T+B)/2)}else{x.lineTo(L,B);x.lineTo(L,T)}}
     else{x.moveTo(L,T);x.lineTo(R-t,T);if(t){x.lineTo(R,(T+B)/2)}else{x.lineTo(R,T);x.lineTo(R,B)}x.lineTo(R-t,B);x.lineTo(L,B)}
@@ -51728,15 +51733,18 @@ function wlnPostPic(i,names){
     x.save();x.clip();for(let g=0;g<14;g++){x.fillStyle='rgba(255,240,210,'+(.05+.04*((g*7+i)%3))+')';x.fillRect(L,T+g*bh/14+2,bw,2.2)}x.restore();
     x.strokeStyle='rgb('+pal[1][0]+','+pal[1][1]+','+pal[1][2]+')';x.lineWidth=6;x.stroke();
     // the name: one line, shrunk (and a little narrowed) to fit with a margin
-    const ix=L+(dir<0?t:0)+22,iw=bw-t-44,fonts=['Georgia','"Palatino Linotype",Palatino,"Book Antiqua",Georgia','"Times New Roman",Times,Georgia'];
+    const ix=L+(dir<0?t:0)+22+(mk?64:0),iw=bw-t-44-(mk?64:0),fonts=['Georgia','"Palatino Linotype",Palatino,"Book Antiqua",Georgia','"Times New Roman",Times,Georgia'];
     let fs=Math.round(bh*.5),sx=1;const fam=fonts[(i+name.length)%3];x.font='bold '+fs+'px '+fam;let tw=x.measureText(name).width;
     if(tw>iw){sx=Math.max(.76,iw/tw);tw*=sx}while(tw>iw&&fs>16){fs-=2;x.font='bold '+fs+'px '+fam;tw=x.measureText(name).width*sx}
     x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';x.save();x.translate(ix+iw/2,(T+B)/2+3);x.scale(sx,1);
     x.lineWidth=Math.max(5,fs*.16);x.strokeStyle='rgba(20,14,8,.85)';x.strokeText(name,0,0);x.fillStyle='rgb('+pal[1][0]+','+pal[1][1]+','+pal[1][2]+')';x.fillText(name,0,0);x.restore();
+    if(mk){const mx=L+22+30,my=(T+B)/2+2,u=24;x.beginPath();if(mk===1){x.moveTo(mx,my-u);x.lineTo(mx+u,my+u*.8);x.lineTo(mx-u,my+u*.8)}else{x.moveTo(mx,my+u);x.lineTo(mx+u,my-u*.8);x.lineTo(mx-u,my-u*.8)}x.closePath();
+      x.fillStyle='rgb('+pal[1][0]+','+pal[1][1]+','+pal[1][2]+')';x.strokeStyle='rgba(20,14,8,.85)';x.lineWidth=7;x.lineJoin='round';x.stroke();x.fill()}
   };
   const pal=WLN_BOARD[i%WLN_BOARD.length],pal2=WLN_BOARD[(i+2)%WLN_BOARD.length],sh=i%3;
-  board(40,104,640,198,-1,sh,names[0],pal);
-  if(names[1])board(150,330,640,198,1,(sh+1)%3,names[1],pal2);
+  const nm=n=>typeof n==='string'?n:n.n,dw=(n,def)=>typeof n==='string'||n.d===undefined?def:n.d,ob=n=>typeof n!=='string';
+  board(40,104,640,198,dw(names[0],-1),sh,nm(names[0]),pal,ob(names[0]));
+  if(names[1])board(150,330,640,198,dw(names[1],1),(sh+1)%3,nm(names[1]),pal2,ob(names[1]));
   return c;
 }
 function wlnPost(C,x,y,plates,talk,rad){
@@ -52199,7 +52207,7 @@ khNpc('wlo_letter','A wheelbarrow','kh_ohgard2_3',d=>{const F=wleF();
   return say(F.wlq18a?'An empty wheelbarrow with one cabbage leaf in it and a lot of paw prints around it.':'An old wheelbarrow, with a cabbage leaf in it and a lot of small paw prints around it. The prints go off towards the hedge.',[BYE])},{sc:1});
 khNpc('wlo_hermit','Old Bracken, a hermit','kh_ohfolk3_3',d=>{const F=wleF();
   if(qSt('wlq18')==='active'&&F.wlq18a&&!F.wlq18b){F.wlq18b=1;yrStep('Old Bracken has the letter.');return say("Old Bracken holds the letter in both hands and turns it over, and looks at the paw prints, and his face does something complicated. 'From my sister,' he says. 'Fifteen years. She cannot write, you know, and she sent a fox with it. Or the fox sent itself. I never could tell with that family.' He breaks the wax with a thumbnail, reads for a long moment, and then he laughs, very quietly. 'She says the pie was good. She says nothing else. Tell Meg I said thank you.'",[BYE])}
-  return yrLines('wlo_hermit',["I live in a den. It is a very good den. It has a door, and a roof, and a woodpile, and I have never once had to answer it.","The people of Wenlock leave me bread on the stump. I leave them a nod. It is the fairest trade in the county.","I like it quiet. It is not quiet when you are here, but it is a good sort of not quiet."])},{sc:1});
+  return yrLines('wlo_hermit',["I live in a den. It is a very good den. It has a door, and a roof, and a woodpile, and I have never once had to answer it.","The people of Wenlock leave me bread on the stump. I leave them a nod. It is the fairest trade in the county.","I like it quiet. It is not quiet when you are here, but it is a good sort of not quiet.","There is a little maze at the back of my den. I have walked it for forty years and never got lost, because I know every turn. At the end of it there is a book on a stand. You may read it. I never learned how."])},{sc:1});
 const WLD18=khQD("It is a small thing, and a stupid one, and I have been looking at it for a week. There was a letter in a wheelbarrow at the east end of the back track, last time I went that way, with paw prints all over it, and I cannot read, and I did not like to pick it up. The only person I know who gets letters from a fox is Old Bracken, who lives in the den in the north-east corner, past the end of the track. I do not go that way. It is full of hedge. Would you take it to him? The wheelbarrow is just where the track runs out, and it is a lovely walk, if you do not mind brambles.",
   "Thank you. The east end of the back track, the wheelbarrow, and then the den in the north-east corner. Mind the hedge. It bites.",
   (n,m)=>wleF().wlq18a?'You have the letter. Take it to Old Bracken, in his den in the north-east corner of the town, beyond the end of the back track.':'The letter is in a wheelbarrow at the east end of the back track. Then it is on to Old Bracken, in the north-east corner.',
@@ -63289,7 +63297,7 @@ const frdSelBait=()=>{const I=G.inv;if(!I||!I.open||!I.sel||I.sel.src!=='bag'||I
 
 /* ---- src/desert/infested.js ---- */
 /* ==========================================================================
-   INFESTED HOUSES (prefix inf / INF). One ordinary house in ten, in Oldhaven and in Khemetra, has been taken over: 1 to 5 low level creatures stand in the room, whoever
+   INFESTED HOUSES (prefix inf / INF). One ordinary house in ten, in Oldhaven, Khemetra, Wenlock, Yarrim, Thornwick, Ironhill and Anaea, has been taken over: 1 to 5 low level creatures stand in the room, whoever
    lived there lies on the floor as a body, and a stair in the north wall goes down to a cellar (a few rooms joined by a corridor, a few creatures, a few chests and barrels).
    Which houses: chosen by a seeded hash of the house's level number (hash2(lvl,3,INF.SEED)<INF.CHANCE), so the same houses every time and in every save.
    Never infested: shops, inns, temples, baths, prayer houses, houses whose keeper gives a quest, hoard houses (500 gold or more), the Yarrim cottages, the houses the party can buy (housing.js, 3300 to 3323),
@@ -63299,24 +63307,70 @@ const frdSelBait=()=>{const I=G.inv;if(!I||!I.open||!I.sel||I.sel.src!=='bag'||I
    room scene is dropped. The cellar builder is registered in KH_LAZY. A stub is registered for every possible cellar so that a save made inside a cellar can be loaded before the town is built.
    Cleared state: the enemies killed are remembered in G.flags.inf[level] (saved with the game) and never come back (the ordinary rule brings some creatures back each visit; infested places are excluded).
    Loot: lootFor is wrapped; chests and barrels in infested places hold low tier things only.
-   Test: python tools/infest_test.py [port]
+   TOWNS: the table INF.TOWNS (one row for each town) says how to recognise an ordinary house of that town as khRoom builds it (match), which creatures live there (low), and which house numbers are candidates
+   (ids; a town with a fixed list of houses always gets at least 2 picks, so a tiny town is never left without). Cellar level numbers: houses 1000-9999 -> N+20000 (21000-29999; this covers Oldhaven, Khemetra and
+   Wenlock 7001-7099 -> 27001-27099), Yarrim cottages 1500-1515 -> N+19000 (20500-20515), locked houses of Thornwick, Ironhill and Anaea (camp.js makeLockedHouse, number 40000+) -> N+6000000.
+   The locked houses are the ordinary dwellings of those towns (each house door tile is one: key = lockedKey(town,x,y)); makeLockedHouse is wrapped so a cellar number asked for first (a save) builds its house.
+   Details in tools/infest_towns.md. Test: python tools/infest_test.py [port] [town,town] (towns: oldhaven khemetra wenlock yarrim thornwick ironhill anaea)
    ========================================================================== */
-const INF={OFF:20000,CHANCE:.1,SEED:4417,stubs:{},kind:{},_k:null,okKinds:['house','mansion','low'],low:['rat','rat','bat','skel','bandit'],
+const INF={OFF:20000,OFF_YR:19000,OFF_LH:6000000,CHANCE:.1,SEED:4417,stubs:{},kind:{},_k:null,okKinds:['house','mansion','low'],low:['rat','rat','bat','skel','bandit'],
   rooms:['The Store Room','The Wine Cellar','The Coal Cellar','The Cold Store']};
-const infPick=lvl=>lvl>=1000&&lvl<10000&&hash2(lvl,3,INF.SEED)<INF.CHANCE;
-const infCellarOf=lvl=>lvl+INF.OFF;
+const INF_EARLY=['rat','rat','bat','bandit'];
+/* the candidate houses of the locked-house towns: every door tile of the town (the same test as lockedDoor in camp.js) */
+function infLockedIds(lv){
+  const L=LEVELS[lv];if(!L||!L.rows)return [];const o=[],H=L.rows.length,W=L.rows[0].length;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const ch=L.rows[y][x];
+    const g=(L.chars&&L.chars[ch]!==undefined)?L.chars[ch]:(ch==='.'||ch==='t')?0:ch==='D'?3:ch==='L'?4:ch==='X'?5:ch==='%'?2:ch==='T'?6:ch==='G'?7:ch==='C'?8:WALLCH[ch]!==undefined?WALLCH[ch]:1;
+    if((g>=15&&g<=19)||(g>=200&&g<1000&&TILE_MSG[g]))o.push(lockedKey(lv,x,y))}
+  return o;
+}
+const infLockedTown=(k,name,lv,low)=>({k,name,town:lv,locked:1,low,ids:()=>infLockedIds(lv),match:(b,l,bk)=>l>=40000&&bk.to===lv&&/^lh\d+$/.test(b.id)});
+INF.TOWNS=[
+  {k:'oldhaven',name:'Oldhaven',match:(b,l,bk)=>bk.to===OH.ID&&/^oh\d+$/.test(b.id)},
+  {k:'khemetra',name:'Khemetra',match:(b,l,bk)=>bk.to===44&&/^house\d+$/.test(b.id)&&INF.okKinds.includes(INF.kind[l])},
+  // Wenlock: the plain lots of the town (no special lot); its homes are rooms made by wlinMake (wenlock_in.js), whose later lines reset the level to 80, so the infested ones are put right again afterwards (infWlFix)
+  {k:'wenlock',name:'Wenlock',range:[7001,7099],wlin:1,tpl:1,match:(b,l,bk)=>bk.to===WL.ID&&/^wlin\d+$/.test(b.id)&&typeof b.wlin==='string'&&b.wlin.indexOf('home_')===0,
+    ids:()=>WL_HOUSES.filter(h=>!h.spk&&h.id>=7001&&h.id<=7099&&![7025,7033,7043,7054].includes(h.id))  /* 7025, 7033, 7043 and 7054 are the thief quest houses (wenlock_thief.js) */.map(h=>h.id),
+    strip:n=>/^wli_(home_(cat|dog)|cat2)$/.test(n)||/^wli_home_kid$/.test(n)},
+  // Yarrim: the fisher cottages (yarrim_town.js, ids 1500-1515, one of which is the Steam House bath)
+  {k:'yarrim',name:'Yarrim',range:[1500,1515],tpl:1,match:(b,l,bk)=>bk.to===290&&/^yc\d+$/.test(b.id),ids:()=>{const o=[];for(let i=1500;i<=1515;i++)if(i!==INF.YR_BATH)o.push(i);return o}},
+  infLockedTown('thornwick','Thornwick',3,INF_EARLY),
+  infLockedTown('ironhill','Ironhill',13,INF_EARLY),
+  infLockedTown('anaea','Anaea',33,['rat','bat','rat'])
+];
+INF.YR_BATH=1505; // the cottage that is really the Steam House (yarrim_town.js), which is a bath and never infested
+const infTownByKey=k=>INF.TOWNS.find(t=>t.k===k);
+/* the picks of a town with a fixed list of candidates: those under the hash chance, and never fewer than 2 (or all, if there are fewer) so a small town always has one */
+function infPicks(T){
+  if(T._p)return T._p;
+  const ids=T.ids(),h=i=>hash2(i,3,INF.SEED),p=new Set(ids.filter(i=>h(i)<INF.CHANCE));
+  if(ids.length&&p.size<Math.min(2,ids.length)){for(const i of ids.slice().sort((a,c)=>h(a)-h(c))){p.add(i);if(p.size>=Math.min(2,ids.length))break}}
+  return T._p=p;
+}
+function infTownFor(lvl){
+  if(lvl>=40000){const lv=Math.floor((lvl-40000)/10000);return INF.TOWNS.find(t=>t.locked&&t.town===lv)||null}
+  return INF.TOWNS.find(t=>t.range&&lvl>=t.range[0]&&lvl<=t.range[1])||null;
+}
+function infPick(lvl){
+  if(lvl<1000||lvl>=INF.OFF_LH)return false;
+  const T=infTownFor(lvl);
+  if(T){if(T.locked&&!LEVELS[T.town])return false;return infPicks(T).has(lvl)}
+  return lvl<10000&&hash2(lvl,3,INF.SEED)<INF.CHANCE;
+}
+const infCellarOf=lvl=>lvl>=40000?lvl+INF.OFF_LH:(lvl>=1500&&lvl<=1515?lvl+INF.OFF_YR:lvl+INF.OFF);
+const infHouseOf=cid=>cid>=INF.OFF_LH?cid-INF.OFF_LH:(cid>=20500&&cid<=20515?cid-INF.OFF_YR:cid-INF.OFF);
 const infIs=n=>{const L=LEVELS[n];return !!(L&&L.infest)};
-/* is this (just built) house an ordinary one that may be infested? */
+/* is this (just built) house an ordinary one that may be infested? returns the town row, or null */
 function infOk(b,lvl,back){
-  if(!b||!back||b.room!=='home'||!infPick(lvl))return false;
-  const ok44=back.to===44&&/^house\d+$/.test(b.id)&&INF.okKinds.includes(INF.kind[lvl]),okOh=back.to===OH.ID&&/^oh\d+$/.test(b.id);
-  if(!ok44&&!okOh)return false;
-  if(b.gold>=500||b.script||b.wlin||b.tpl)return false;
-  if(b.keeper&&typeof QGIVER!=='undefined'&&QGIVER[b.keeper])return false;
+  if(!b||!back||b.room!=='home'||!infPick(lvl))return null;
+  const T=INF.TOWNS.find(t=>t.match(b,lvl,back));
+  if(!T)return null;
+  if(b.gold>=500||b.script||(b.tpl&&!T.tpl)||(b.wlin&&!T.wlin))return null;
+  if(b.keeper&&typeof QGIVER!=='undefined'&&QGIVER[b.keeper])return null;
   const cid=infCellarOf(lvl);
-  if(LEVELS[cid]&&!LEVELS[cid].infest)return false;
-  if(KH_LAZY[cid]&&!INF.stubs[cid]&&!(LEVELS[cid]&&LEVELS[cid].infest))return false;
-  return true;
+  if(LEVELS[cid]&&!LEVELS[cid].infest)return null;
+  if(KH_LAZY[cid]&&!INF.stubs[cid]&&!(LEVELS[cid]&&LEVELS[cid].infest))return null;
+  return T;
 }
 function infReach(L,from,extraBlock){
   const rows=L.rows,H=rows.length,W=rows[0].length,bl=new Set((L.decor||[]).filter(d=>d.block!==false&&!d.walk).map(d=>d.x+','+d.y));
@@ -63331,19 +63385,22 @@ function infReach(L,from,extraBlock){
 // {k:'corpse0'..'corpse3'}, or infCorpse(x,y) for one picked by position. Each is about 1.1 squares wide and lies low on the floor.
 Object.assign(NPC_H,{corpse0:.186,corpse1:.205,corpse2:.42,corpse3:.248});
 function infCorpse(x,y){return 'corpse'+((hash2(x*7+3,y*13+1,(typeof INF!=='undefined'&&INF.SEED||1)+21)*4)|0)}
-function infMake(L,b,lvl,back){
-  const cid=infCellarOf(lvl),town=back.to,rating=Math.max(1,((typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[town])||16)-3),H=L.rows.length,W=L.rows[0].length;
-  L.infest=1;L.infestCellar=cid;L.diff=rating;LEVEL_RATING[lvl]=rating;L.amb=Math.min(L.amb||.66,.4);delete L.scene;
+function infMake(L,b,lvl,back,T){
+  T=T||INF.TOWNS[0];const low=T.low||INF.low,cid=infCellarOf(lvl),town=back.to,rating=Math.max(1,((typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[town])||16)-3),H=L.rows.length,W=L.rows[0].length;
+  L.infest=1;L.infestCellar=cid;L.infestRating=rating;L.infestTown=T.k;L.diff=rating;LEVEL_RATING[lvl]=rating;L.amb=Math.min(L.amb||.66,.4);delete L.scene;
   // the people: each becomes a body lying where they stood
   const bodies=[];
-  L.decor=L.decor.filter(d=>{if(d.npc&&d.npc!=='kh_gold'&&typeof KH_KEEPERS!=='undefined'&&KH_KEEPERS[d.npc]){bodies.push({x:d.x,y:d.y});return false}return true});
+  L.decor=L.decor.filter(d=>{if(!d.npc||d.npc==='kh_gold')return true;if(T.strip&&T.strip(d.npc)){if(d.npc==='wli_home_kid')bodies.push({x:d.x,y:d.y});return false} // a household pet just goes; a child is a body
+    if(typeof KH_KEEPERS!=='undefined'&&KH_KEEPERS[d.npc]){bodies.push({x:d.x,y:d.y});return false}return true});
   if(!bodies.length)bodies.push(null);
   const R=(i,m)=>(hash2(lvl+i*17,i*5+1,INF.SEED+9)*m)|0;
   const st=L.start,occ=new Set(L.decor.map(d=>d.x+','+d.y)),reach=infReach(L,st);
   const free=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const k=x+','+y;if(L.rows[y][x]==='.'&&reach.has(k)&&!occ.has(k))free.push([x,y])}
   // the stair down, in the north wall, in front of a free square that can be reached
   let sx=null;{const cols=[];for(let x=1;x<W-1;x++)cols.push(x);cols.sort((a,c)=>hash2(a+lvl,1,INF.SEED+3)-hash2(c+lvl,1,INF.SEED+3));
-    for(const x of cols)if(reach.has(x+',1')&&!occ.has(x+',1')){sx=x;break}
+    const wallCh=(()=>{const c={};for(const ch of L.rows[0])c[ch]=(c[ch]||0)+1;return Object.keys(c).sort((a,d)=>c[d]-c[a])[0]})(); // not in a window or a torch: a plain stretch of wall
+    for(const x of cols)if(reach.has(x+',1')&&!occ.has(x+',1')&&L.rows[0][x]===wallCh){sx=x;break}
+    if(sx===null)for(const x of cols)if(reach.has(x+',1')&&!occ.has(x+',1')){sx=x;break}
     if(sx===null){sx=cols[0];L.decor=L.decor.filter(d=>!(d.x===sx&&d.y===1))}} // a crowded room: the piece of furniture in front of the stair is taken away
   L.rows[0]=L.rows[0].slice(0,sx)+'1'+L.rows[0].slice(sx+1);
   L.portals=L.portals||[];
@@ -63357,12 +63414,13 @@ function infMake(L,b,lvl,back){
   // 1 to 5 creatures: not near the door, not on the stair, on squares the party can walk to
   const n=1+R(1,5),cand=free.filter(([x,y])=>!occ.has(x+','+y)&&Math.abs(x-st.x)+Math.abs(y-st.y)>=3).sort((a,c)=>hash2(a[0]+lvl,a[1],INF.SEED+7)-hash2(c[0]+lvl,c[1],INF.SEED+7));
   L.enemies=L.enemies||[];
-  for(let i=0;i<n&&i<cand.length;i++)L.enemies.push({t:INF.low[R(10+i,INF.low.length)],x:cand[i][0],y:cand[i][1]});
+  for(let i=0;i<n&&i<cand.length;i++)L.enemies.push({t:low[R(10+i,low.length)],x:cand[i][0],y:cand[i][1]});
   LEVEL_NAMES[cid]='The Cellar';
-  KH_LAZY[cid]=()=>{if(!LEVELS[cid])LEVELS[cid]=infCellar(lvl,cid,rating,sx)};
+  KH_LAZY[cid]=()=>{if(!LEVELS[cid])LEVELS[cid]=infCellar(lvl,cid,rating,sx,T)};
 }
 /* the cellar: an entry room on the west side, a corridor running east, and three or four rooms off it, on alternate sides */
-function infCellar(hid,cid,rating,sx){
+function infCellar(hid,cid,rating,sx,T){
+  T=T||INF.TOWNS[0];
   const W=29,H=17,CY=8,R=(i,m)=>(hash2(hid*7+i,i*13+3,INF.SEED+5)*m)|0;
   const g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
   const cut=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)g[y][x]='.'};
@@ -63389,9 +63447,9 @@ function infCellar(hid,cid,rating,sx){
   decor.forEach(d=>used.add(d.x+','+d.y));
   // creatures, mostly weak: 4 to 7, in the rooms and the corridor
   const cells=[];for(const r of rooms)for(const c of cellsOf(r))cells.push(c);for(let x=9;x<=26;x++)cells.push([x,CY]);
-  const pool=INF.low.concat(['skel','rat','bat']);let cnt=4+R(2,4);
+  const pool=T.low?T.low.concat(['rat','bat']):INF.low.concat(['skel','rat','bat']);let cnt=4+R(2,4);
   for(let i=0;i<60&&cnt>0;i++){const c=cells[R(100+i,cells.length)],k=c[0]+','+c[1];if(used.has(k))continue;used.add(k);cnt--;
-    enemies.push({t:R(200+i,9)===0?'ghost':pool[R(300+i,pool.length)],x:c[0],y:c[1]})}
+    enemies.push({t:R(200+i,9)===0&&!T.low?'ghost':pool[R(300+i,pool.length)],x:c[0],y:c[1]})}
   // a few things on the floor
   for(let i=0,got=0;i<40&&got<2;i++){const c=cells[R(400+i,cells.length)],k=c[0]+','+c[1];if(used.has(k))continue;used.add(k);got++;items.push({k:got===1?'potion':['cheese','torch','bread'][R(410+i,3)],x:c[0],y:c[1]})}
   const names=[{t:'The Stair Up',x:3,y:7,k:'place'},{t:'The Corridor',x:16,y:CY,k:'lane'}].concat(rooms.map((r,i)=>({t:INF.rooms[i],x:(r.x0+r.x1)>>1,y:r.up?r.y0:r.y1,k:'place'})));
@@ -63401,7 +63459,7 @@ function infCellar(hid,cid,rating,sx){
 /* the wrappers */
 {const _kr=khRoom;khRoom=function(b,lvl,back){
   const R=_kr.apply(this,arguments);
-  try{if(infOk(b,lvl,back))infMake(R.level,b,lvl,back)}catch(e){console.error('infest',e)}
+  try{const T=infOk(b,lvl,back);if(T){if(!R.level.decor.some(d=>d.npc&&typeof QGIVER!=='undefined'&&QGIVER[d.npc]))infMake(R.level,b,lvl,back,T)}}catch(e){console.error('infest',e)}
   return R}}
 {const _p=khPickScene;khPickScene=function(m){INF._k=m&&m.kind;return _p.apply(this,arguments)}}
 {const _h=khHouseId;khHouseId=function(){const n=_h.apply(this,arguments);INF.kind[n]=INF._k;INF._k=null;infStub(n);return n}}
@@ -63409,10 +63467,29 @@ function infCellar(hid,cid,rating,sx){
 function infStub(hid){
   if(!infPick(hid))return;const cid=infCellarOf(hid);
   if(LEVELS[cid]||KH_LAZY[cid])return;
-  const stub=()=>{if(LEVELS[cid])return;if(!LEVELS[hid]&&KH_LAZY[hid])KH_LAZY[hid]();if(!LEVELS[cid]&&KH_LAZY[cid]&&KH_LAZY[cid]!==stub)KH_LAZY[cid]()};
+  const T=infTownFor(hid);
+  const stub=()=>{if(LEVELS[cid])return;
+    if(!LEVELS[hid]&&!KH_LAZY[hid]&&T&&T.k==='yarrim'&&KH_LAZY[290])KH_LAZY[290](); // the cottages of Yarrim only exist once the town is built
+    if(!LEVELS[hid]&&KH_LAZY[hid])KH_LAZY[hid]();if(!LEVELS[cid]&&KH_LAZY[cid]&&KH_LAZY[cid]!==stub)KH_LAZY[cid]()};
   INF.stubs[cid]=1;KH_LAZY[cid]=stub;LEVEL_NAMES[cid]='The Cellar';
 }
 for(let i=0;i<OH_SPECIAL.length+640;i++){if(i>=4)infStub(OH.HOME+i-4)}
+// the Yarrim cottage numbers (1500-1515) are only registered when Yarrim is built; if Khemetra is built first its houses take them. They are reserved now: asked for early, a number builds Yarrim first.
+for(let id=1500;id<=1515;id++)if(!KH_LAZY[id]&&!LEVELS[id]){const self=()=>{if(LEVELS[id])return;if(KH_LAZY[290])KH_LAZY[290]();if(!LEVELS[id]&&KH_LAZY[id]&&KH_LAZY[id]!==self)KH_LAZY[id]()};KH_LAZY[id]=self}
+for(const k of ['wenlock','yarrim'])for(const id of infPicks(infTownByKey(k)))infStub(id);
+/* Wenlock: wlinMake sets a room's level to 80 after khRoom has made it; an infested house keeps the level it was given */
+for(const id of infPicks(infTownByKey('wenlock'))){const o=KH_LAZY[id];if(!o)continue;
+  KH_LAZY[id]=function(){const r=o.apply(this,arguments);const L=LEVELS[id];if(L&&L.infest){L.diff=L.infestRating;LEVEL_RATING[id]=L.infestRating}return r}}
+/* a save made in a Wenlock cellar waits for the pictures of Wenlock before the house is built */
+if(typeof restore==='function'){const _r=restore;restore=function(sv){const l=sv&&sv.level;
+  if(l>=20500&&l<=20515&&typeof KH_READY!=='undefined'&&!KH_READY&&typeof khLoadAssets==='function'){khLoadAssets().then(()=>restore(sv));return} // a Yarrim cottage cellar: the pictures first
+  if(l>=27001&&l<=27099&&typeof wlLoad==='function'&&!(WLART.ready&&(typeof KH_READY==='undefined'||KH_READY))){wlLoad().then(()=>restore(sv));return}
+  return _r.apply(this,arguments)}}
+/* the locked houses (camp.js): a cellar number is its house number plus INF.OFF_LH; asked for first (a save), it builds the house, which registers the cellar */
+{const _m=makeLockedHouse;makeLockedHouse=function(n){
+  if(n>=INF.OFF_LH){const h=n-INF.OFF_LH;if(h<40000||!infPick(h))return false;
+    if(!LEVELS[h])_m.call(this,h);if(!LEVELS[n]&&KH_LAZY[n])KH_LAZY[n]();return !!LEVELS[n]}
+  return _m.apply(this,arguments)}}
 /* infested places keep their dead dead, and hold low tier loot */
 {const _ls=levelState;levelState=function(){
   const s=_ls.apply(this,arguments),L=LEVELS[LEVEL];
@@ -63441,15 +63518,791 @@ for(let i=0;i<OH_SPECIAL.length+640;i++){if(i>=4)infStub(OH.HOME+i-4)}
     msg(L.name==='The Cellar'?'The cellar is cold and dark. Something moves in it.':'Nobody answers. There is a body on the floor, and something is in the room. A stair goes down in the north wall.','#e8a090')}}catch(e){console.error(e)}
   return r}}
 /* a link for testing: ?town=infested lands in the first infested house, ?town=infestedcellar in its cellar (the house first builds the town) */
-function infSpot(which){
+function infSpotOldhaven(which){
   if(typeof KH_READY!=='undefined'&&!KH_READY){ // the pictures are not loaded yet: land in Oldhaven now, and go on to the house when they are
-    try{khLoadAssets().then(()=>{const t=infSpot(which);goToLevel(t[0],{x:t[1],y:t[2],f:t[3]})})}catch(e){console.error(e)}
+    try{khLoadAssets().then(()=>{const t=infSpotOldhaven(which);goToLevel(t[0],{x:t[1],y:t[2],f:t[3]})})}catch(e){console.error(e)}
     return [305,108,50,0]}
   try{seaBuild(304);ohBuild()}catch(e){console.error(e)}
   for(let id=OH.HOME;id<OH.HOME+OH_SPECIAL.length+640;id++){if(!infPick(id))continue;try{KH_LAZY[id]&&KH_LAZY[id]()}catch(e){}
     const L=LEVELS[id];if(L&&L.infest){if(which==='cellar'){KH_LAZY[L.infestCellar]();return [L.infestCellar,1,8,1]}return [id,L.start.x,L.start.y,L.start.f||0]}}
   return [305,108,50,0];
 }
+/* the same for every town: ?town=infestedwenlock, infestedyarrim, infestedthornwick, infestedironhill, infestedanaea (and the same with 'cellar' on the end). The town is built, and its first infested house found. */
+function infSpot(which,tk){
+  tk=tk||'oldhaven';if(tk==='oldhaven')return infSpotOldhaven(which);
+  const T=infTownByKey(tk),gate={wenlock:[496,95,50,3],yarrim:[290,18,40,1],thornwick:[3,25,3,1],ironhill:[13,25,3,1],anaea:[33,25,3,1]}[tk]||[3,25,3,1];
+  const ready=tk==='wenlock'?(typeof WLART!=='undefined'&&WLART.ready&&(typeof KH_READY==='undefined'||KH_READY)):(typeof KH_READY==='undefined'||KH_READY);
+  if(!ready){ // the pictures are not loaded yet: land in the town now, and go on to the house when they are
+    try{(tk==='wenlock'?wlLoad():khLoadAssets()).then(()=>setTimeout(()=>{const t=infSpot(which,tk);goToLevel(t[0],{x:t[1],y:t[2],f:t[3]})},700))}catch(e){console.error(e)}
+    return gate}
+  try{if(tk==='yarrim'&&!LEVELS[290])KH_LAZY[290]();if(tk==='wenlock'&&!LEVELS[496])wlBuild()}catch(e){console.error(e)}
+  const ids=Array.from(infPicks(T)).sort((a,c)=>a-c);
+  for(const id of ids){try{if(!LEVELS[id]){if(id>=40000)makeLockedHouse(id);else KH_LAZY[id]&&KH_LAZY[id]()}}catch(e){console.error(e)}
+    const L=LEVELS[id];if(L&&L.infest){if(which==='cellar'){KH_LAZY[L.infestCellar]();return [L.infestCellar,1,8,1]}return [id,L.start.x,L.start.y,L.start.f||0]}}
+  return gate;
+}
+
+/* ---- src/desert/signposts_towns.js ---- */
+/* ==========================================================================
+   SIGNPOSTS TO TOWNS AND PLACES (prefix spt). The plain green signposts (picture greensign) that point to a town or a named place now carry that name
+   lettered on their boards, in the way of the Wenlock street signs (wlnPostPic in wenlock_names.js): one board to a place, an arrow shape pointing the
+   right way, one line of text shrunk to fit, and each post with its own colours and lettering. What each one says, and where it stands, is listed in
+   tools/signposts/INVENTORY.md.
+   - The boards are painted into the picture of the post, so they read from every side. The arrow is right for the way the party usually walks up to the
+     post (the "f" of each post below: 0 north, 1 east, 2 south, 3 west): a place off to the left or right gets an arrow to that side, a place straight
+     ahead gets a rounded board with a triangle pointing up, a place behind gets one with a triangle pointing down.
+   - The examine text names the same places and the same points of the compass as the boards. The game has no distances for these roads, so there are none.
+   - The pictures are made when the level is loaded; the level's decor entries are changed in place (the same index, so saves are not touched).
+   Signs that point to nothing (shop signs, notices, the signs of the Pilgrim's Path that already say TO YARRIM) are left alone.
+   ========================================================================== */
+const SPT_POSTS=[
+  // Greendale Forest (level 32): the three green posts all said the same thing; now each says where it stands. Anaea is through the east gate (63,10), the Old Grove through the cave in the north east (55,3)
+  {id:'spt_gd1',lvl:32,npc:'gsign',at:[14,29],f:1,i:0,boards:[{n:'ANAEA',t:[63,10]},{n:'THE OLD GROVE',t:[55,3]}],
+    say:w=>`A signpost beside the forest road. The old painted arrows had faded, and somebody has lettered the boards again. One reads ANAEA, to the ${w[0]}. The other reads THE OLD GROVE, to the ${w[1]}, and under it, in different handwriting: "Bring bread for the deer."`},
+  {id:'spt_gd2',lvl:32,npc:'gsign',at:[33,13],f:1,i:5,boards:[{n:'ANAEA',t:[63,10]},{n:'THE OLD GROVE',t:[55,3]}],
+    say:w=>`A signpost where the track bends. One board reads ANAEA, to the ${w[0]}, with a little carved house on the post above it. The other reads THE OLD GROVE, to the ${w[1]}, and under it, in different handwriting: "Bring bread for the deer."`},
+  {id:'spt_gd3',lvl:32,npc:'gsign',at:[56,10],f:1,i:1,boards:[{n:'ANAEA',t:[63,10]},{n:'THE OLD GROVE',t:[55,3]}],
+    say:w=>`A signpost close to the east end of the forest. One board reads ANAEA, to the ${w[0]}, and the town gate is only a few steps on. The other reads THE OLD GROVE, to the ${w[1]}, and under it, in different handwriting: "Bring bread for the deer."`},
+  // Wenlock (level 496): the post at the west end of High Street, and the two lane posts by the gates of the wood and the churchyard
+  {id:'spt_wl1',lvl:496,npc:'wlo_signpost',f:3,i:3,boards:[{n:'THE WESTERN KINGDOMS',v:[-1,0]},{n:'THE GARDENS',v:[1,0]}],
+    say:w=>`Two boards on the post at the west end of High Street. One reads THE WESTERN KINGDOMS, to the ${w[0]}, and below it, painted in a wobbly hand, (not yet open). The other reads THE GARDENS, back to the ${w[1]}. Somebody has added: AND GOOD LUCK.`},
+  {id:'spt_wl2',lvl:496,npc:'wwo_lanesign',f:0,i:2,boards:[{n:'BLACKBRIAR WOOD',v:[0,-1]}],
+    say:w=>`A crooked signpost at the top of Blackbriar Lane. The board reads BLACKBRIAR WOOD, to the ${w[0]}, and somebody has underlined it twice. Below, in a smaller hand: NO CHILDREN. Below that, in a hand much wobblier: that means YOU, Pip. At the very bottom, scratched with a nail: THE GATE IS NOT LOCKED. THAT IS THE WORRYING PART.`},
+  {id:'spt_wl3',lvl:496,npc:'gyo_lanesign',f:3,i:4,boards:[{n:'CHURCHYARD LANE',v:[-1,0]}],
+    say:w=>`A signpost at the head of the lane. The board reads CHURCHYARD LANE, to the ${w[0]}, and under it: the old churchyard. The gate closes at dusk. Residents let themselves in.`}
+];
+const SPT_FACE=[[0,-1],[1,0],[0,1],[-1,0]];
+/* the eight points of the compass for a step (dx,dy) on the map, where north is up */
+function sptCompass(dx,dy){const a=Math.atan2(-dy,dx),k=((Math.round(a/(Math.PI/4))%8)+8)%8;return ['east','north east','north','north west','west','south west','south','south east'][k]}
+/* which way a board points for someone facing f: -1 left, 1 right, 0 straight ahead, 2 behind */
+function sptWay(f,dx,dy){const L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L,F=SPT_FACE[f],fw=ux*F[0]+uy*F[1],rt=ux*-F[1]+uy*F[0];return fw>=.92?0:fw<=-.92?2:rt>0?1:-1}
+function sptVec(p,b){return b.t?[b.t[0]-p.at[0],b.t[1]-p.at[1]]:b.v}
+/* make the picture and the examine text of one post, once, and return the decor key */
+function sptMake(p,at){
+  const key=p.id;if(IMG[key])return key;
+  const vs=p.boards.map(b=>sptVec(Object.assign({},p,{at}),b));
+  IMG[key]=wlnPostPic(p.i,p.boards.map((b,k)=>({n:b.n,d:sptWay(p.f,vs[k][0],vs[k][1])})));
+  NPC_H[key]=1.35;
+  const words=vs.map(v=>sptCompass(v[0],v[1]));
+  khNpc(p.id,'A signpost',key,()=>say(p.say(words),[BYE]));
+  p.words=words;p.made=true;
+  return key;
+}
+/* change the decor entries of a level in place, before the level is set up */
+function sptPatch(n){
+  const todo=SPT_POSTS.filter(p=>p.lvl===n&&!p.patched);if(!todo.length)return;
+  if(!LEVELS[n]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[n])KH_LAZY[n]();
+  const L=LEVELS[n];if(!L||!L.decor||!IMG.greensign||!IMG.greensign.width)return;
+  const used=new Set();
+  for(const p of todo){
+    const d=L.decor.find(e=>e.npc===p.npc&&!used.has(e)&&(!p.at||(e.x===p.at[0]&&e.y===p.at[1])));if(!d)continue;
+    used.add(d);const at=[d.x,d.y];
+    d.k=sptMake(p,at);d.npc=p.id;p.patched=true;p.cell=at;
+  }
+}
+{const _ll=loadLevel;loadLevel=function(n){
+  try{sptPatch(n)}catch(e){console.error('sptPatch',e)}
+  return _ll.apply(this,arguments)}}
+
+/* ---- src/desert/wenlock_market.js ---- */
+/* ==========================================================================
+   WENLOCK: MARKET QUARRELS (prefix wm). Six small quests about how the people of the market square get along, and how they do not. Each has a new giver standing in a free square
+   around the market (x 40 to 56, y 45 to 55), 2 to 4 steps (talking to people, carrying a message), and a simple choice where it makes sense. All open once the mayor's welcome (wlq1)
+   is done, like the meadow quests. Flags are wm22a... so an old save is not touched. Rewards for a party of level 80.
+   wlq22 The Price of Apples    Pip Farthing, the runner boy: the apple seller and the melon seller are in a price war.
+   wlq23 A Letter for Maisie    Wat Biddle, the baker's apprentice: a love letter for Maisie Dustwhite, the miller's daughter.
+   wlq24 The Fence at Number Nine  Widow Dunn: her landlord Ambrose Quill moved the fence onto her herb bed.
+   wlq25 The Borrowed Cart      Old Bram Cobb and Old Tam Hobday have not spoken for three years over a cart wheel.
+   wlq26 The Toll and the Tankard  Barnaby Tapp, the inn's cellarman: the mayor and the innkeeper quarrel over the market toll.
+   wlq27 The Wrong Parcel       Mabel Quince, the seamstress: Silas the pedlar swapped two labels.
+   ========================================================================== */
+const wmkF=()=>G.flags;
+Object.assign(WL_REW,{wlq22:{gold:800,xp:8000},wlq23:{gold:900,xp:9000},wlq24:{gold:900,xp:9000,items:['potion5']},wlq25:{gold:1000,xp:10000},wlq26:{gold:1000,xp:10000,items:['potion5']},wlq27:{gold:900,xp:9000}});
+WL_QUESTS.push(
+  {id:'wlq22',giver:'Pip Farthing',title:'The Price of Apples',desc:'The apple seller and the melon seller are in a price war, and Pip Farthing runs the insults between them. Hear both sides and settle it.'},
+  {id:'wlq23',giver:'Wat Biddle',title:'A Letter for Maisie',desc:"The baker's apprentice has written a letter to Maisie Dustwhite, the miller's daughter, and is too shy to hand it over."},
+  {id:'wlq24',giver:'Widow Dunn',title:'The Fence at Number Nine',desc:"Widow Dunn's landlord has moved the fence onto her herb bed. Find out who is right."},
+  {id:'wlq25',giver:'Old Bram Cobb',title:'The Borrowed Cart',desc:'Two old friends, Bram Cobb and Tam Hobday, stopped speaking three years ago over a borrowed cart. Get them talking.'},
+  {id:'wlq26',giver:'Barnaby Tapp',title:'The Toll and the Tankard',desc:"The mayor wants a toll on every barrel crossing the square, and the innkeeper will not pay it. Find a deal both will accept."},
+  {id:'wlq27',giver:'Mabel Quince',title:'The Wrong Parcel',desc:"Silas the pedlar swapped two parcel labels. Mabel has a tin of polish and the squire has her blue cloth. Put them right."});
+/* ---- the new people: id, name, face, height, where they stand, and what they say when there is nothing to ask ---- */
+const WMK_FOLK=[
+  {id:'wmk_pip',n:'Pip Farthing, a runner boy',face:'kh_ohfolk3_2',sc:.78,out:[46,50],lines:["I run messages for anybody who pays a farthing. Lately most of them are insults, and the pay is the same.","If you want to know who is angry at who in this square, ask me. I have the sore feet to prove it."]},
+  {id:'wmk_wat',n:'Wat Biddle, the baker\'s apprentice',face:'kh_ohfolk6_0',sc:1,out:[43,50],lines:["I carry the bread up from the bakery every morning. Then I stand here for an hour and do not look at the flour barrow. It is a very good barrow.","The baker says I have burned eleven loaves this month. I say they were not burned, they were thinking about something else."]},
+  {id:'wmk_maisie',n:'Maisie Dustwhite, the miller\'s daughter',face:'kh_ohfolk2_5',sc:.98,out:[52,50],lines:["Flour, fine and coarse, from my father's mill. A penny a scoop.","The baker's lad buys a lot of flour. I have told him twice that he does not need it. He buys it anyway."]},
+  {id:'wmk_widow',n:'Widow Dunn',face:'kh_ohfolk2_0',sc:1,out:[49,53],lines:["I have grown thyme and sage behind Number Nine for thirty years. I sell a bunch or two at the market and I do not ask anyone for anything.","Mind where you walk. I am in a mood about fences."]},
+  {id:'wmk_landlord',n:'Master Ambrose Quill, a landlord',face:'kh_ohfolk5_0',sc:1.04,out:[41,50],lines:["I own six houses in Wenlock, and every one of them has a tenant who thinks the rent is too high. Rent day is a very tiring day.","A fence is a fence. If it stands on my land, it stays."]},
+  {id:'wmk_bram',n:'Old Bram Cobb, a carter',face:'kh_ohfolk3_3',sc:1,out:[57,50],lines:["I have driven a cart in this town for fifty years. It is a good cart. It is the only thing I have that has not let me down.","See that old man by the cheese stall? We used to share a pint every market day. Now we share a square and look the other way."]},
+  {id:'wmk_tam',n:'Old Tam Hobday',face:'kh_ohfolk4_3',sc:1,out:[53,55],lines:["I sit here every market day, by the cheese. It is a good seat. It has a clear view of the whole square, and of Bram Cobb, whom I am not looking at.","Do not mention carts. I am warning you kindly."]},
+  {id:'wmk_barnaby',n:'Barnaby Tapp, cellarman of the Plough and Pigeon',face:'kh_ohfolk7_3',sc:1.02,out:[47,56],lines:["I roll the barrels from the inn cellar to the market every week. Lately I roll them the long way round, through the mud, and the barrels do not enjoy it.","Joss Pluckrose is the best landlord in the county and the most stubborn man in the world. I work for both of them."]},
+  {id:'wmk_mabel',n:'Mabel Quince, a seamstress',face:'kh_ohfolk3_4',sc:1,out:[50,44],lines:["Seams, hems, buttons and mending. I can do a wedding dress in a week, if the cloth arrives.","Ask me about parcels. Go on. I dare you."]}
+];
+for(const f of WMK_FOLK){khNpc(f.id,f.n,f.face,()=>yrLines(f.id,f.lines),{sc:f.sc>.9?Math.round(f.sc*.88*100)/100:f.sc});WL_FOLK.push({id:f.id,out:f.out})}
+/* ---- helpers ---- */
+/* a step done by talking: needs an earlier flag (or none), sets its own flag, says the line */
+function wmkSay(npcId,qid,need,flag,text,line){
+  yrHook(npcId,d=>{const F=wmkF();if(qSt(qid)!=='active'||F[flag]||(need&&!F[need]))return null;F[flag]=1;yrStep(text);return say(line,[BYE])})}
+/* a step with a choice: picks are [label, value, reply]; the value is kept in the flag, and 'Not now' leaves the step open */
+function wmkPick(npcId,qid,need,flag,text,prompt,picks){
+  yrHook(npcId,d=>{const F=wmkF();if(qSt(qid)!=='active'||F[flag]||(need&&!F[need]))return null;
+    return say(prompt,picks.map(([lab,val,rep])=>[lab,()=>{F[flag]=val;yrStep(text);return say(rep,[BYE])}]).concat([['Not now.',()=>null]]))})}
+/* what a person says once the quest is done */
+function wmkAfter(npcId,qid,lines){yrHook(npcId,d=>qSt(qid)==='done'?yrLines(npcId+'_after',lines):null)}
+/* a giver; the thanks may depend on a choice, so it is read when the party hands in */
+function wmkGive(npcId,qid,dlg,thanks){
+  if(typeof thanks==='function')Object.defineProperty(dlg,'thanks',{enumerable:true,configurable:true,get:thanks});
+  wlGive(npcId,qid,'wlq1',dlg)}
+/* ==== wlq22 The Price of Apples: Pip Farthing ==== */
+const WLD22=khQD("Please, you look like people who can stand still while somebody shouts. I run between the apple stall and the melon stall all day. The apple seller says the melon seller is stealing her customers, so she dropped her price. The melon seller says she started it, so he dropped his. Now an apple costs less than a bean, and I carry insults for both of them. Yesterday I told her 'his melons are mostly water' and she threw an apple at me. Could you hear them both out and settle it?",
+  "Thank you. The apple seller is at the stall on the north side of the square, the melon seller at the next one east. Be polite. Be quick. Duck.",
+  (n,m)=>wmkF().wm22b?'You have heard both of them. Take the answer back to the apple seller, then come and tell me.':'Hear the apple seller first (north side of the square), then the melon seller (the next stall east).',
+  "Both of them have stopped shouting? Just like that? Tell me everything.",
+  "I will not have to carry insults today. I might sit down. I might sit down for a week. Here, this is from the pair of them, and from my feet.",
+  "The apple seller and the melon seller are sharing a bench. They are not talking, but they are sharing it. That is more than I hoped.",'The price war is over.');
+wmkGive('wmk_pip','wlq22',WLD22,()=>wmkF().wm22b==='sorry'?"The melon seller took his sign down and said sorry first. The apple seller put her price back up the same minute. They still argue, but now it is about the weather.":"They agreed to charge a fair price, three apples for a penny and a melon for a penny, and both of them think they won.");
+wlQ('wlq22','Pip Farthing',[["Hear the apple seller out, at the fruit stall on the north side of the square.",()=>wmkF().wm22a,['wlo_stall1']],["Hear the melon seller out, at the next stall east, and suggest a way to end the price war.",()=>wmkF().wm22b,['wlo_stall7']],["Take the answer back to the apple seller.",()=>wmkF().wm22c,['wlo_stall1']]]);
+wmkSay('wlo_stall1','wlq22',null,'wm22a','You have heard the apple seller.',"Price war? He started it. Three weeks ago he put a sign up saying melons are healthier than apples. Healthier! I have sold apples in this square for thirty years and nobody has ever fallen over from one. I will not charge a farthing more until that sign comes down. Go and tell him that. Tell him nicely, though. We shared a cart to market for ten years.");
+wmkPick('wlo_stall7','wlq22','wm22a','wm22b','You have heard the melon seller.',"(He wipes a melon with his sleeve.) She started it. Her apples went from a penny to a half penny to free if you smiled. I put the sign up because I was losing money. I would take it down if she stopped giving things away. I do not want to fight with her. What do you say I should do?",[["Say he should charge a fair price with her: three apples a penny, one melon a penny.",'fair',"A penny a melon, and she charges a penny for three apples? That is what she used to ask. That is fair. Tell her I agree. I will take the sign down on my own, and I will not say it was her idea."],["Say he should take the sign down and say sorry first.",'sorry',"Sorry first. Hm. It would be me who started the sign, I suppose. All right. Tell her I am taking it down this minute, and that I am sorry. Tell her I said it quietly, so she can pretend not to have heard."]]);
+yrHook('wlo_stall1',d=>{const F=wmkF();if(qSt('wlq22')!=='active'||!F.wm22b||F.wm22c)return null;F.wm22c=1;yrStep('The apple seller has agreed.');return say(F.wm22b==='sorry'?"He is taking the sign down and saying sorry first? Then I will put my price back up straight away. Do not tell him I said so. Tell the boy to stop running."
+  :"A penny for three apples, and a penny for a melon. That is what I charged before the sign. All right. Tell the boy the war is over, and that he can have an apple for his trouble. A free one. Do not tell the melon man.",[BYE])});
+wmkAfter('wmk_pip','wlq22',["Do you see them? The apple seller and the melon seller? They are sitting on the same bench. I think they are sharing a bun.","I am a runner with no messages. I am not sure what to do with my feet."]);
+/* ==== wlq23 A Letter for Maisie: Wat Biddle ==== */
+const WLD23=khQD("I have a letter. I wrote it four times. The first was too short, the second was too long, the third had a poem in it, and the poem was bad. It is for Maisie Dustwhite, the miller's daughter. She sells flour from a barrow by the market cross, and every time I walk past I forget how to talk and buy flour I do not need. I have forty pounds of flour. Her father Dusty does not like bakers' lads. Could you take it to her? Do not read it. If you do read it, do not laugh.",
+  "Thank you. She is at the flour barrow, on the east side of the square. Do not tell her my name. Well, tell her my name. It is on the front. Well, then tell her I am not here.",
+  (n,m)=>wmkF().wm23b?'Maisie has read it and given you her answer. Come and tell me, quickly, before I faint.':'The letter is for Maisie Dustwhite, at the flour barrow on the east side of the square.',
+  "You are back. You have a face on. I cannot tell what kind. What did she say? Say it kindly.",
+  "She said what? To me? Oh. Oh dear. Sit down, I need to sit down. Take this, take all of it, it is only what I have. I think I might bake her a loaf.",
+  "I have written back. It was very short. I did not put a poem in. I am told it is the best thing I have ever done.",'Here is her answer.');
+wmkGive('wmk_wat','wlq23',WLD23,()=>wmkF().wm23b==='open'?"She said she would meet me at the market cross on Saturday, in front of everybody, and she will tell her father herself. In front of everybody! I will wear a clean apron. I will wear two.":"She said she would meet me behind the mill on Saturday, and she will not tell her father yet. Behind the mill! I do not mind. I will bring a loaf.");
+wlQ('wlq23','Wat Biddle',[["Ask Maisie Dustwhite, at the flour barrow on the east side of the square, whether she wants to hear from the baker's lad.",()=>wmkF().wm23a,['wmk_maisie']],["Give Wat's letter to Maisie, and bring her answer back to him.",()=>wmkF().wm23b,['wmk_maisie']]]);
+wmkSay('wmk_maisie','wlq23',null,'wm23a',"Maisie knows somebody is writing to her.","Flour, a penny a scoop. (She counts the coins twice, without looking.) The baker's lad has bought forty pounds of flour from me since spring. A baker's lad does not need forty pounds. He is a very bad liar, and a very good boy. If he has something to say, he can say it. Or write it. Writing is fine. I will not mind.");
+wmkPick('wmk_maisie','wlq23','wm23a','wm23b',"Maisie has read the letter.","(You hand over the letter. She reads it, slowly. She reads it again. She goes pink, and then red, and puts it in her apron.) He wrote it four times, did he? I could tell. The third one had a poem in it. I hope he left that one out. What shall I do about my father? He does not like bakers' lads.",[["Tell her to speak to her father herself, and meet Wat in the open.",'open',"In the open. At the market cross, in front of the whole square. That is a very brave thing to say. All right. Tell him Saturday, at noon, and tell him to wear a clean apron. I will tell Father myself. He will shout, and then he will come round."],["Tell her to meet Wat quietly first, and tell her father later.",'quiet',"Quietly first. Yes. That is sensible. Tell him Saturday evening, behind the mill, and tell him to bring a loaf. I will tell Father later, when the baker's lad has had a chance to be sensible in front of him."]]);
+wmkAfter('wmk_wat','wlq23',["Maisie says my flour is the best in the county. I have not told her it is all hers.","I only burned one loaf this week. It was thinking about Saturday."]);
+wmkAfter('wmk_maisie','wlq23',["Wat came by to buy flour. I told him he did not need any. He bought it anyway, and this time he said hello first.","Flour, a penny a scoop. Or a smile. A smile is a penny and a half."]);
+/* ==== wlq24 The Fence at Number Nine: Widow Dunn ==== */
+const WLD24=khQD("I have grown thyme and sage behind Number Nine for thirty years, and the landlord, Master Quill, has put a new fence round the yard. A new fence! It is a very good fence. It is also a foot into my herb bed, and the thyme is on the wrong side of it. I have asked him to move it, and he says it stands where the lease says. I am a widow, not a surveyor. Would you ask him why, and ask the carpenter who built it where he put the posts? Somebody must be right, and I would like it to be somebody I can talk to.",
+  "Thank you. Master Quill collects his rents at the little table at the west end of the square. Jack Joiner, the carpenter, is by his workshop on the east side. I will wait here with my arms folded, which is what I do best.",
+  (n,m)=>wmkF().wm24c?'You have settled it. Come and tell me what was agreed.':(wmkF().wm24b?'Jack says the new fence stands a foot beyond the old one. Go back to Master Quill and put it to him.':'Ask Master Quill (the west end of the square) about the fence, then Jack Joiner, who built it (east side).'),
+  "You have spoken to both of them? Well, what did they say? Do not be gentle with me.",
+  "A foot of thyme back in my own bed, and a landlord who says good morning. I did not think I would see either. Take this, with my thanks, and a bunch of sage. It is very good sage.",
+  "The thyme is thriving. Master Quill and I have a new understanding: he stays on his side of the fence, and I stay on mine, and we both say good morning over the top.",'Here is what they said.');
+wmkGive('wmk_widow','wlq24',WLD24,()=>wmkF().wm24c==='move'?"Master Quill is moving the fence back by a foot. He said it was a mistake on a measuring day, and that he does not make mistakes, and that this one does not count.":"Master Quill is leaving the fence where it is, and taking a foot's worth off my rent. He did not say sorry, but the rent is lower. I will take it, and I will plant the thyme somewhere else.");
+wlQ('wlq24','Widow Dunn',[["Ask Master Ambrose Quill, the landlord, at the west end of the square, why the fence stands where it does.",()=>wmkF().wm24a,['wmk_landlord']],["Ask Jack Joiner, the carpenter on the east side of the square, where he put the fence posts.",()=>wmkF().wm24b,['wlo_carpenter']],["Go back to Master Quill and put it to him what Jack said.",()=>wmkF().wm24c,['wmk_landlord']]]);
+wmkSay('wmk_landlord','wlq24',null,'wm24a','You have heard the landlord.',"The fence? It stands where the lease says. The lease says the herb bed ends at the old pear stump, and the fence is at the pear stump. I did not move it, I mended it. The old one was rotten and leaning. If Mrs Dunn thinks I have been unfair, she can tell me to my face. She will not. She has told the whole market, and not me. Ask Jack Joiner. He built it, and he does not lie about wood.");
+wmkSay('wlo_carpenter','wlq24','wm24a','wm24b','You have heard what the carpenter says.',"Mrs Dunn's fence? Yes. I put the posts in a straight line from the pear stump to the corner, because Master Quill said straight. The old fence was not straight. It leaned in a foot, and went round her herb bed. I did the job as asked. I did not think about the thyme. I should have. Tell him I said so. He pays me, but he can hear the truth for free.");
+wmkPick('wmk_landlord','wlq24','wm24b','wm24c','Master Quill has made up his mind.',"(He listens, frowning.) A foot? Jack said a foot? He measures well, that man, I will give him that. It is a small thing. It is a foot. But a foot of thyme is a foot of Mrs Dunn's life, apparently. What do you think I should do?",[["Tell him to move the fence back the foot.",'move',"Move it back. Yes. It is the simple answer, and I hate simple answers, because they are usually right. Tell her Jack will move the fence on Monday. And tell her good morning from me. I have not said it for a month."],["Tell him to leave the fence and take a foot's worth off her rent.",'rent',"Off the rent. Hm. A foot of ground is worth about a penny a month, and the fence cost two pounds. Yes, I can do that. Tell her. And tell her it is not an apology, it is a rent adjustment. I do not do apologies."]]);
+wmkAfter('wmk_widow','wlq24',["Good morning, Master Quill, I said, and he said it back. We are both very surprised.","The thyme is doing well. Come by on a sunny day and smell it."]);
+wmkAfter('wmk_landlord','wlq24',["I am told the whole market now knows I said good morning to Mrs Dunn. It will ruin my reputation. I am quite fond of it.","A fence is a fence. But I have been looking at the measuring rod a great deal this week."]);
+/* ==== wlq25 The Borrowed Cart: Old Bram Cobb ==== */
+const WLD25=khQD("Do you see that old man at the cheese stall? Tam Hobday. We shared a pint every market day for twenty years. Then I borrowed his cart for my daughter's wedding, and I brought it back three days late with a wheel gone, and he has not said a word to me since. That is three years. I did not know how to say sorry. I went to his door twice. Would you find out what he thinks? I would ask myself, but he looks the other way when I come near, and I am too old to be looked away from.",
+  "Thank you. He sits by the cheese stall, in the south-east of the square. Be gentle. He is a good man. He is just a very stubborn one. So am I, which is the trouble.",
+  (n,m)=>wmkF().wm25d?'Tam has his wheel and has said a kind word. Come and tell me, and sit down, I think I need to.':(wmkF().wm25c?'Jack Joiner has the wheel. Take it to Tam, at the cheese stall.':(wmkF().wm25b?'Jack Joiner, the carpenter on the east side of the square, has something of mine. Ask him for it, and take it to Tam.':'Ask Tam what he thinks, at the cheese stall, then come back and tell me.')),
+  "You are back. You have the look of somebody with news. Is it bad? Tell me it is bad and get it over with.",
+  "He said what? The door is open and the kettle is on? He has not said that in three years. Oh, you have done a good thing. I will go over at once, before he changes his mind. Take this, it is not much, and tell nobody I wept.",
+  "I went round. The kettle was on. We drank tea and said very little, and it was the best conversation I have had in three years. The wheel fits. He is using the cart tomorrow.",'Here is what Tam said.');
+wmkGive('wmk_bram','wlq25',WLD25,null);
+wlQ('wlq25','Old Bram Cobb',[["Ask Old Tam Hobday, who sits by the cheese stall in the south-east of the square, what he thinks of Bram Cobb.",()=>wmkF().wm25a,['wmk_tam']],["Go back to Old Bram Cobb and tell him what Tam said.",()=>wmkF().wm25b,['wmk_bram']],["Ask Jack Joiner, the carpenter on the east side of the square, about the cart wheel.",()=>wmkF().wm25c,['wlo_carpenter']],["Take the new wheel to Old Tam Hobday at the cheese stall.",()=>wmkF().wm25d,['wmk_tam']]]);
+wmkSay('wmk_tam','wlq25',null,'wm25a','You have heard what Tam thinks.',"Bram Cobb? Do not say that name to me. Twenty years we shared a pint every market day. Then he borrowed my cart for his daughter's wedding and brought it back three days late with a wheel missing, and he has not said sorry. It is not the wheel. A wheel is a wheel. It is that he never said sorry. I would have said it was nothing. I would have said it was fine. Go and tell him that, if you like. No, do not. Yes, do.");
+wmkSay('wmk_bram','wlq25','wm25a','wm25b',"Bram has told you about the wheel.","Tam says I never said sorry? I went round to his house twice. The first time he was out. The second time he was in, saw me coming, and shut the door. And I paid Jack Joiner forty pennies for a new wheel three years ago, and told him to keep it until I had worked out what to say. I never did. Ask Jack for it. Take it to Tam. Tell him it is from me. Tell him nothing else. I would only get it wrong.");
+wmkSay('wlo_carpenter','wlq25','wm25b','wm25c','Jack Joiner has given you the wheel.',"A wheel for Tam Hobday's cart? It is behind my bench, under a cloth. Bram Cobb paid for it in advance three years ago, and told me to give it to Tam when he had worked out what to say. Three years! It is taking up a great deal of room. Take it. Tell Bram he owes me three years of storage. No, tell him it is free. I have been getting a lot of pleasure out of watching him not say it.");
+wmkSay('wmk_tam','wlq25','wm25c','wm25d','Tam has his wheel.',"(He takes the wheel and turns it over. His hands stop.) It is a good wheel. It is better than the old one. Who made... Bram. Bram paid for this. Three years ago. He came to say sorry twice, and I shut the door, and he had a wheel made, and could not tell me. I am an old fool. Tell him the door is open, and the kettle is on. No, wait. I will tell him myself. Give me a minute to find my hat.");
+wmkAfter('wmk_tam','wlq25',["I am very sorry about the door. Bram has forgiven me. He says it was a very old door and he did not mind it.","The cart goes out tomorrow. Bram is driving. I am riding in the back, and telling him he is doing it wrong."]);
+wmkAfter('wmk_bram','wlq25',["Tam and I are having a pint on Saturday. He is paying. He says it is for the door.","Fifty years I have driven a cart. It is a very good cart. I have, it turns out, also got a friend."]);
+/* ==== wlq26 The Toll and the Tankard: Barnaby Tapp ==== */
+const WLD26=khQD("It is the toll. The mayor says every barrel that crosses the market square pays a penny into the town chest, to mend the well roof. Joss Pluckrose, the landlord of the Plough and Pigeon, says he fills the cup of every man who comes to market, so the town should pay him. Neither will give way, and neither has spoken to the other for a week. Joss sends me round the long way through the mud with the barrels, and the mayor sends Constable Fudge to count them. Would you find a deal that both of them will take? I am only the cellarman, and a barrel in the mud is a very sad thing.",
+  "Thank you. Start with Constable Fudge, who counts the barrels, and then ask Wren, the mayor's page. The mayor is a good man, and Joss is a good man, and they are being good men at each other very loudly.",
+  (n,m)=>wmkF().wm26c?'Fudge is letting the barrels through. Come and tell me, and I will start rolling.':(wmkF().wm26b?'Wren has the mayor\'s answer. Take it to Constable Fudge, in the market square, so he lets the barrels through.':'Ask Constable Fudge about the toll, then speak to Wren, the mayor\'s page, in the west of the town.'),
+  "You have an answer? The barrels have been in the mud since Monday and they are in a mood. Tell me it is something I can roll.",
+  "A deal! Both of them said yes? Then the barrels go through the square tomorrow, and I will not have to push one through a puddle again. Take this, with thanks from me, from Joss, and, I expect, from the barrels.",
+  "The barrels roll straight across the square, the mayor and Joss have said hello over the top of one, and Constable Fudge has gone back to doing nothing. It is a good week.",'Here is the answer.');
+wmkGive('wmk_barnaby','wlq26',WLD26,()=>wmkF().wm26b==='ale'?"The town takes the toll in ale: one barrel of ale a month for the harvest feast, and the inn crosses the square free. Joss says it is a fair price for peace and a very large barrel.":"The toll is cut to half a penny a barrel, and Joss pays it without a word. The mayor says it is still a toll. Joss says it is still a bargain. Both think they won.");
+wlQ('wlq26','Barnaby Tapp',[["Ask Constable Fudge, in the market square, about the toll on barrels.",()=>wmkF().wm26a,['wlo_watch']],["Ask Wren, the mayor's page, in the west of the town, what the mayor will accept.",()=>wmkF().wm26b,['wlo_page']],["Take the mayor's answer to Constable Fudge in the market square.",()=>wmkF().wm26c,['wlo_watch']]]);
+wmkSay('wlo_watch','wlq26',null,'wm26a','Constable Fudge has told you about the toll.',"The toll? Yes. Every barrel pays a penny, and the money mends the well roof. I stand here and count them. Joss Pluckrose will not pay, so he sends his barrels round the back lane, and I have to count them there too. It means a great deal of walking. I am a man who likes standing. I am not saying who is right. I am saying that my feet hurt, and so do the barrels.");
+wmkPick('wlo_page','wlq26','wm26a','wm26b',"Wren has the mayor's answer.","The mayor and the landlord? Yes. The mayor says he will talk to Joss if Joss says hello first. Joss says he will say hello when the toll is gone. They are both standing at their windows, waiting. I carry the messages. They are mostly 'no'. What should I tell the mayor?",[["Suggest the inn pays the toll in ale, one barrel a month, for the harvest feast.",'ale',"Ale for the harvest feast! The mayor will like that very much. It saves him buying it. I will tell him it was a very good idea and that he thought of it. Tell Constable Fudge the barrels can go through."],["Suggest the toll is cut to half a penny a barrel.",'half',"Half a penny. Hm. The mayor will say half a penny is not a toll, it is a tip. Then he will say yes, because he hates standing at the window. Tell Constable Fudge to let them through. I will make sure the mayor says hello."]]);
+yrHook('wlo_watch',d=>{const F=wmkF();if(qSt('wlq26')!=='active'||!F.wm26b||F.wm26c)return null;F.wm26c=1;yrStep('Constable Fudge will let the barrels through.');return say(F.wm26b==='ale'?"Ale for the feast, and the barrels go straight through? That means no more counting in the back lane. I am so pleased I could cry. I shall not, I am on duty. Tell Barnaby he can roll them across the square from now on.":"Half a penny a barrel, and straight through? Splendid. I shall count them in the square, where there is a nice view. Tell Barnaby to roll them across tomorrow.",[BYE])});
+wmkAfter('wmk_barnaby','wlq26',["The barrels go straight across the square now. They roll very well on the cobbles, and they do not complain about the mud.","The mayor and Joss have said hello. It was over a barrel. They were both very stiff about it, and then they laughed."]);
+/* ==== wlq27 The Wrong Parcel: Mabel Quince ==== */
+const WLD27=khQD("Parcels! Yes, ask me about parcels. Two came off the carrier's cart yesterday and Silas the pedlar carried them round. One was mine, a roll of blue cloth for a wedding dress I have promised for Saturday. The other was for young Piers, the squire, a tin of polish for Sir Gareth's armour. Silas swapped the labels. I have the polish, and I have no idea what to do with it. Piers has my cloth, and he is polishing a helmet with it. I think the helmet is now a little blue. Would you sort it out? I am not allowed near the squire. He is frightened of my scissors.",
+  "Thank you. The polish tin is on my table, and you may have it in the form of this: it will be waiting here. Start with Silas the pedlar, who made the mistake, then go to Piers, who has my cloth.",
+  (n,m)=>wmkF().wm27b?'Piers has given the cloth back, and you took the polish to him. Come and tell me the dress is safe.':(wmkF().wm27a?'Silas owned up. Now find Piers, the squire, by the market stalls, and swap the cloth for the polish.':'Ask Silas the pedlar, in the south-west of the square, how the labels got swapped. Then find Piers.'),
+  "Do you have it? Is it blue? Is it still a roll of cloth, or is it now a very small helmet?",
+  "The cloth, the whole cloth, and nothing but the cloth. It has a bit of polish on one edge, and I can cut that off. The dress will be done by Saturday. Take this, with my thanks, and a very good pin.",
+  "The dress is finished, and it is even better with a blue corner. Piers has bowed to me twice and run away. I think he is still afraid of my scissors.",'Here is the cloth.');
+wmkGive('wmk_mabel','wlq27',WLD27,()=>wmkF().wm27a==='scold'?"Silas has paid for the trouble and promised to read every label twice. I do not think he can read, so I do not hold out much hope, but I will take the money.":"Silas says he will be more careful. I know he will not, but he was so sorry that I could not stay cross. It is a sign of age.");
+wlQ('wlq27','Mabel Quince',[["Ask Silas the pedlar, in the south-west of the square, how the labels got swapped.",()=>wmkF().wm27a,['wlo_pedlar']],["Find Piers, the squire, near the knight in the square. Swap the polish tin for Mabel's cloth.",()=>wmkF().wm27b,['wlo_squire']]]);
+wmkPick('wlo_pedlar','wlq27',null,'wm27a',"Silas has told you about the labels.","(Silas scratches his head.) The labels? Yes. Two parcels, two labels, and the carrier's boy cannot read. I put the labels on in the dark, in a hurry, and I swapped them. The seamstress has the polish and the squire has the cloth. It was an honest mistake. I made it very honestly. What would you like me to do about it?",[["Tell him to pay Mabel for the trouble.",'scold',"Pay for it? Hm. A penny for the cloth, a penny for the trouble, and a penny for being sorry. That is three pennies. I will find them. Tell her I was very honest about it, and that the cloth will come right with Piers."],["Tell him to be more careful, and leave it at that.",'shrug',"More careful. Yes. I will read every label twice. I cannot read, but I will hold them up to the light. Tell her I am sorry, and that the cloth will come right with Piers."]]);
+yrHook('wlo_squire',d=>{const F=wmkF();if(qSt('wlq27')!=='active'||!F.wm27a||F.wm27b)return null;F.wm27b=1;yrStep("Piers has swapped the polish for Mabel's cloth.");return say("The cloth! Yes! I thought it was a very good polishing cloth. It is very soft, and the helmet is very shiny, and also a bit blue. Sir Gareth said it was the colour of the sea at dawn. He likes it. Here, give her the cloth, and I will take the polish. Please tell her I did not know. Please tell her to keep her scissors away from me.",[BYE])});
+wmkAfter('wmk_mabel','wlq27',["Piers walked past and bowed. From a very long way away. I think the scissors are working.","Cloth, thread, buttons and mending. And if a parcel comes, it is mine. Check the label."]);
+/* ---- the quest rings on the local map: the giver, then the person the current step names, then the giver again ---- */
+for(const [qid,giver] of [['wlq22','wmk_pip'],['wlq23','wmk_wat'],['wlq24','wmk_widow'],['wlq25','wmk_bram'],['wlq26','wmk_barnaby'],['wlq27','wmk_mabel']])
+  QRF.T[qid]={give:[{lvl:496,npc:[giver]}],act:()=>[{lvl:496,npc:(QUESTS[qid].targets||[]).slice()}],ready:[{lvl:496,npc:[giver]}]};
+
+/* ---- src/desert/wenlock_watch.js ---- */
+/* ==========================================================================
+   WENLOCK: THE WATCH AND THE CELLS (prefix wlz / WLZ). Four watchmen walk fixed routes along the roads of Wenlock, by day and by night, and stop and look about at the corners.
+   A watchman SEES a place when it is within about five squares (stealth and masks shorten it), he is facing it (within about sixty degrees, or any way round when it is
+   under two squares), nothing solid is in the way and, at night, the place is lit (a lamp, a lit window, or his own lantern, which lights two squares round him).
+   Night is 20:00 to 05:00 (G.clock is in minutes, 1440 to the day, the clock shows 'Day 1 08:00'; resting at an inn or camping passes the time).
+   Theft (src/desert/wenlock_thief.js) inside a house counts as seen when a watchman sees the square outside the door of that house: he is looking in at the window.
+   A thief who is seen is arrested: the party is taken to THE WENLOCK CELLS, level 7097 (a small level beside the Village Hall, in the Wenlock room range 7000 to 7099).
+   The gaoler offers bail (500 gold, then out at the steps of the Village Hall) or the sentence: three nights pass, nobody is healed or rested, every hero is Poorly and Flea-bitten (afflictions.js).
+   Watchmen never fight and cannot be killed (they are walk-through pictures that only talk). Nothing here needs saving beyond G.flags (wlJailed, wlzWarn, wlzWarnT); the routes are rebuilt on load.
+   Quick test link: ?town=wenlock&lvl=80&wlt=1 (also 2, 3, 4, or jail): it is 22:00, the party has 1200 gold and stands at the door of thief house 1 (Church View) with its quest taken; wlt=jail puts it in the cells. Same as wlzDemo(n) in the console.
+   Test hooks: WLZ.g (the four watchmen: x, y, f, s, dir, pause, post), wlzSees(g,x,y), wlzArrest(...), wlzDemo(n).
+   ========================================================================== */
+const WLZ={JAIL:7097,BAIL:500,NIGHTS:3,g:[],blk:null,dec:null,map:null,cue:{}};
+const wlzHour=()=>((G.clock||0)%1440)/60;
+const wlzNight=()=>{const h=wlzHour();return h>=20||h<5};
+/* the beats: waypoints along the roads (axis-aligned legs), walked out and back. ids wlz_g1 to wlz_g4. */
+const WLZ_ROUTES=[
+  {id:'wlz_g1',name:'Watchman Hobbs',face:'kh_ohsold1_0',beat:'Church Lane and the west end of High Street',pts:[[6,50],[24,50],[24,28]],s0:.62,d0:-1},
+  {id:'wlz_g2',name:'Watchman Pell',face:'kh_ohsold1_1',beat:'the market square and Mill Lane',pts:[[42,50],[72,50],[72,80]],s0:.55,d0:1},
+  {id:'wlz_g3',name:'Watchman Crane',face:'kh_ohsold1_0',beat:'Green Lane and the back track',pts:[[84,50],[84,14],[62,14]],s0:.3,d0:1},
+  {id:'wlz_g4',name:'Watchman Dobbin',face:'kh_ohsold1_1',beat:'the east end of High Street',pts:[[58,50],[74,50],[95,50]],s0:.7,d0:-1}
+];
+const WLZ_SPEED=1.05, WLZ_ROT=[[1,0],[0,1],[-1,0],[0,-1]];
+function wlzInit(){
+  WLZ.g=WLZ_ROUTES.map(r=>{
+    const len=[0];for(let i=1;i<r.pts.length;i++)len[i]=len[i-1]+Math.abs(r.pts[i][0]-r.pts[i-1][0])+Math.abs(r.pts[i][1]-r.pts[i-1][1]);
+    const g={id:r.id,name:r.name,face:r.face,beat:r.beat,pts:r.pts,len,total:len[len.length-1],s:len[len.length-1]*r.s0,dir:r.d0,pause:0,lookT:0,post:null,x:0,y:0,f:[1,0]};
+    wlzPlace(g);return g});
+}
+/* position and facing from the distance along the beat */
+function wlzPlace(g){
+  const s=Math.max(0,Math.min(g.total,g.s));let i=0;while(i<g.pts.length-2&&s>g.len[i+1])i++;
+  const a=g.pts[i],b=g.pts[i+1],L=g.len[i+1]-g.len[i],t=L?(s-g.len[i])/L:0;
+  g.x=a[0]+(b[0]-a[0])*t;g.y=a[1]+(b[1]-a[1])*t;
+  if(!g.pause&&!g.post){const sx=Math.sign(b[0]-a[0])*g.dir,sy=Math.sign(b[1]-a[1])*g.dir;if(sx||sy)g.f=[sx,sy]}
+}
+function wlzStep(g,dt){
+  if(g.post){g.post.t-=dt;g.f=g.post.f;if(g.post.t<=0)g.post=null;return}
+  if(g.pause>0){ // stopped at a corner or the end of the beat: turns round a quarter every so often
+    g.pause-=dt;g.lookT-=dt;if(g.lookT<=0){g.lookT=.9;const i=WLZ_ROT.findIndex(q=>q[0]===g.f[0]&&q[1]===g.f[1]);g.f=WLZ_ROT[((i<0?0:i)+1)&3]}
+    if(g.pause<=0){g.pause=0;wlzPlace(g)}return}
+  const ns=Math.max(0,Math.min(g.total,g.s+g.dir*WLZ_SPEED*dt)),last=g.pts.length-1;
+  let hit=-1;  // the first waypoint on the way (a waypoint he is standing on is not "on the way")
+  if(g.dir>0){for(let w=0;w<=last;w++)if(g.len[w]>g.s+1e-9&&g.len[w]<=ns+1e-9){hit=w;break}}
+  else{for(let w=last;w>=0;w--)if(g.len[w]<g.s-1e-9&&g.len[w]>=ns-1e-9){hit=w;break}}
+  if(hit>=0){ // stop and turn
+    g.s=g.len[hit];g.pause=(hit===0||hit===last)?3.6:2.4;g.lookT=.9;
+    const sx=g.f[0],sy=g.f[1];wlzPlace(g);g.f=[sx,sy];
+    if(hit===0)g.dir=1;else if(hit===last)g.dir=-1;
+    return}
+  g.s=ns;wlzPlace(g);
+}
+/* what blocks a line of sight in the town: every wall square and every solid thing */
+function wlzGrid(){
+  const L=LEVELS[496];if(!L||!L.rows)return null;if(WLZ.blk&&WLZ.blk.L===L)return WLZ.blk;
+  const W=L.rows[0].length,H=L.rows.length,b=new Uint8Array(W*H);
+  for(let y=0;y<H;y++){const r=L.rows[y];for(let x=0;x<W;x++)if(r[x]!=='.')b[y*W+x]=1}
+  for(const d of L.decor||[])if(d.block&&!d.npc&&d.x>=0&&d.y>=0&&d.x<W&&d.y<H&&!/^(lamp|sign_)/.test(d.k))b[d.y*W+d.x]=1;
+  return WLZ.blk={L,W,H,b};
+}
+function wlzLOS(ax,ay,bx,by){
+  const G2=wlzGrid();if(!G2)return true;
+  const dx=bx-ax,dy=by-ay,n=Math.ceil(Math.max(Math.abs(dx),Math.abs(dy))*4);
+  const sx=Math.round(ax),sy=Math.round(ay),ex=Math.round(bx),ey=Math.round(by);
+  for(let i=1;i<n;i++){const x=Math.round(ax+dx*i/n),y=Math.round(ay+dy*i/n);if((x===sx&&y===sy)||(x===ex&&y===ey))continue;if(x<0||y<0||x>=G2.W||y>=G2.H||G2.b[y*G2.W+x])return false}
+  return true;
+}
+/* is this place lit at night? a street lamp or lit window near it, or the watchman's own lantern */
+function wlzLit(x,y,g){
+  if(!wlzNight())return true;
+  if(g&&Math.hypot(x-g.x,y-g.y)<=2.4)return true;
+  const L=LEVELS[496];if(!L)return true;
+  for(const l of (L.lights||[]))if(Math.hypot(x-l[0],y-l[1])<=3.3)return true;
+  for(const l of (L._wlaLights||[]))if(Math.hypot(x-(l[0]-.5),y-(l[1]-.5))<=2.6)return true;
+  return false;
+}
+function wlzRange(){
+  let R=5.5;try{if(typeof skLevel==='function')R-=skLevel('stealth')*.25}catch(e){}
+  R=Math.max(3,R);try{if(typeof afflHas==='function'&&afflHas('masked'))R*=.6}catch(e){}
+  return R;
+}
+/* does this watchman see the square (x,y)? */
+function wlzSees(g,x,y){
+  const dx=x-g.x,dy=y-g.y,d=Math.hypot(dx,dy);
+  if(d>wlzRange())return false;
+  if(d>1.7&&(dx*g.f[0]+dy*g.f[1])/d<.5)return false;
+  if(!wlzLOS(g.x,g.y,x,y))return false;
+  return wlzLit(x,y,g);
+}
+/* the first watchman who sees a square, or null */
+function wlzWatcher(x,y){for(const g of WLZ.g)if(wlzSees(g,x,y))return g;return null}
+/* where the party is, for the watch: in the town its own square; in a house, the square outside that house's door */
+function wlzPartySpot(){
+  if(LEVEL===496&&G.P)return [G.P.x,G.P.y];
+  const t=typeof wltHouseOf==='function'?wltHouseOf(LEVEL):null;
+  return t?[t.h.front[0],t.h.front[1]]:null;
+}
+function wlzWatching(){const p=wlzPartySpot();return p?wlzWatcher(p[0],p[1]):null}
+/* the watchman stops where he is, facing a square, for a while (he saw somebody go in) */
+function wlzPost(g,x,y,secs){const dx=x-g.x,dy=y-g.y;g.post={t:secs||150,f:Math.abs(dx)>=Math.abs(dy)?[Math.sign(dx)||1,0]:[0,Math.sign(dy)||1]};g.pause=0}
+/* ---- the talk: watchmen only talk ---- */
+for(const r of WLZ_ROUTES){
+  khNpc(r.id,r.name,r.face,d=>{
+    const night=wlzNight(),F=G.flags;
+    const day=['Morning. I walk '+r.beat+', and back again. Keep your blades sheathed and your boots out of the flower beds.','Nothing to report. Nothing ever is, which is how I like it.','If you lose something, the village hall has a lost property box. It is mostly hats.'];
+    const nt=['Evening. The lamps are lit and I am watching. Anybody who walks into a house that is not theirs, after dark, answers to me.','I walk '+r.beat+' all night. I stop at the corners and look about. People who are up to something tend to stay out of the lamplight.','Thieves get bail at 500 gold or three nights in the cells. I am told the straw has fleas. I do not like to say how I know.'];
+    const L=night?nt:day,k='wlzt_'+r.id,i=(F[k]||0)%L.length;F[k]=i+1;
+    return say(L[i],[BYE])},{sc:1});
+}
+/* ---- the arrest ---- */
+function wlzCatch(g,text,after){
+  G.talk={d:{k:khFaceKey(g?g.face:'kh_ohsold1_0'),x:G.P.x,y:G.P.y},n:{name:g?g.name:'A watchman'},node:say(text,[['Go quietly.',()=>{after();return null}]]),t:G.time,btns:[]};G.hold=null;G.queued=null;
+  sfx('locked');
+}
+/* the watch has seen a theft (or a warning ignored): the party is arrested. why: a line about it. */
+function wlzArrest(g,why,extra){
+  g=g||WLZ.g[0];
+  wlzCatch(g,why||'Halt! Thieves! I saw the whole thing. You are under arrest, all of you. The cells will cool your tempers.',()=>wlzJail(extra));
+}
+function wlzJail(extra){
+  const F=G.flags;F.wlJailed=1;F.wlJails=(F.wlJails||0)+1;F.wlzWarn=0;
+  let lost=[];try{if(typeof wltConfiscate==='function')lost=wltConfiscate(extra)}catch(e){console.error(e)}
+  for(const g of WLZ.g){g.post=null}
+  if(!LEVELS[WLZ.JAIL]&&KH_LAZY[WLZ.JAIL])KH_LAZY[WLZ.JAIL]();
+  sfx('locked');
+  WLZ._arrive=1;goToLevel(WLZ.JAIL,{x:6,y:2,f:2});WLZ._arrive=0;
+  later(300,()=>{msg('The cell door slams. You are in the Wenlock cells.','#d0b090');for(const t of lost)msg(t,'#e0a070')});
+}
+/* released: out of the front of the Village Hall, in the morning or straight away */
+function wlzRelease(){
+  const F=G.flags,hall=WL_HOUSES.find(h=>h.spk==='hall');
+  F.wlJailed=0;WLZ._rel=1;
+  try{sfx('door');goToLevel(496,{x:hall.front[0],y:hall.front[1],f:hall.out})}finally{WLZ._rel=0}
+  later(300,()=>msg('You stand on the steps of the Village Hall, blinking.','#e8d8a0'));
+}
+function wlzBail(){
+  if(G.gold<WLZ.BAIL)return false;
+  G.gold-=WLZ.BAIL;msg(WLZ.BAIL+' gold paid in bail.','#e8c870');wlzRelease();return true;
+}
+/* three nights on straw: the clock moves on to the morning after the third night; nobody heals, nobody rests */
+function wlzServe(){
+  const hrs=G.heroes.map(h=>[h.hp,h.mp]),food=G.heroes.map(h=>h.food);
+  const c=G.clock||0,day=Math.floor(c/1440),hr=(c%1440)/60,target=(day+(hr<5?WLZ.NIGHTS-1:WLZ.NIGHTS))*1440+480;
+  advanceTime(Math.max(60,target-c));
+  G.heroes.forEach((h,i)=>{h.hp=Math.min(h.hp,hrs[i][0]);h.mp=Math.min(h.mp,hrs[i][1]);if(h.alive)h.food=Math.max(food[i],35)}); // thin gruel: nobody starves, nobody mends
+  try{const M=G.flags.affM;if(M)M.lastRest=G.clock}catch(e){}
+  try{afflInflict('poorly',-1);afflInflict('fleas',-1)}catch(e){console.error(e)}
+  msg('Three nights pass on cold straw. Nobody sleeps well.','#d0b090');
+  wlzRelease();
+}
+/* ---- the cells: a small level beside the Village Hall ---- */
+WLIR('jail',{w:13,h:9,look:'cellar',amb:.36,lights:[[2,2],[6,2],[10,2],[3,6],[9,6]],keeper:null,noExtras:1,
+  props:[['bed',1,1,{free:1,h:.55}],['bed',11,1,{free:1,h:.55}],['bed',6,1,{free:1,h:.55}]],
+  folk:[['wlz_gaoler',6,4],['wlz_drunk',2,2],['wlz_poacher',10,2]],win:[],raw:[['barrel',1,7],['crate',11,7],['sacks',11,6],['barrel',2,7],['crate',4,7]]});
+khNpc('wlz_gaoler','Gaoler Grimble','kh_oqmen_1',d=>{
+  const F=G.flags;
+  if(!F.wlJailed)return say('Go on, then. And keep your hands in your own pockets.',[BYE]);
+  const short=Math.max(0,WLZ.BAIL-G.gold);
+  const pay=['Pay 500 gold bail.',()=>{if(!wlzBail())return say('You are '+short+' gold short. I do not give credit.',[BYE]);return null}];
+  const serve=['Serve three nights.',()=>say('Three nights, then. You will be let out in the morning of the fourth day. The bread is stale, the straw has fleas, and it is damp. Nobody gets any rest or healing. Are you sure?',[['Yes, serve the sentence.',()=>{wlzServe();return null}],['Let me think.',()=>null]])];
+  return say('You were seen thieving in Wenlock. The law here is plain. You can pay 500 gold bail and walk out onto the steps of the Village Hall now. Or you can sit out three nights in the cells. The bread is stale, the straw has fleas, and you will come out ill. Anything stolen that you are carrying has been taken from you.'+(short?' You have '+G.gold+' gold, so bail is '+short+' short.':''),[pay,serve,['Let me think.',()=>null]])});
+khNpc('wlz_drunk','A man asleep on the straw','kh_ohfolk3_5',()=>say('He is asleep, on his back, with his mouth open. He smells of ale. A sign on the wall says: DRUNK AND DISORDERLY, ONE NIGHT.',[BYE]),{sc:.9});
+khNpc('wlz_poacher','A man in the end cell','kh_oqmen_5',()=>say('"Three nights for a rabbit," he says. "It was a very small rabbit. Do not take a rabbit, friend. And keep away from the watchman on Church Lane, he has eyes like a hawk."',[BYE]),{sc:.95});
+KH_LAZY[WLZ.JAIL]=()=>{
+  if(LEVELS[WLZ.JAIL])return;
+  const hall=WL_HOUSES.find(h=>h.spk==='hall'),back={to:496,x:hall.front[0],y:hall.front[1],f:hall.out};
+  const b={id:'wlin'+WLZ.JAIL,wlin:'jail',name:'The Wenlock Cells',room:'cellar',keeper:null,floor:'wood',wallImg:'kh_ohwall1_0'};
+  const R=khRoom(b,WLZ.JAIL,back),lv=R.level;
+  // three cells along the north wall, each with an opening on to the corridor; the gaoler stands in the opening of the middle one
+  const rows=lv.rows.map(r=>r.split(''));
+  for(let y=1;y<=3;y++){rows[y][4]='w';rows[y][8]='w'}
+  for(let x=1;x<=11;x++)if(x!==2&&x!==6&&x!==10)rows[4][x]='w';
+  lv.rows=rows.map(r=>r.join(''));
+  lv.portals[0].req='wlzOpen';lv.portals[0].lock='The cell door is locked. Speak to the gaoler.';
+  lv.start={x:6,y:2,f:2};lv.diff=80;lv.noExtras=true;
+  LEVELS[WLZ.JAIL]=lv;LEVEL_NAMES[WLZ.JAIL]='The Wenlock Cells';LEVEL_RATING[WLZ.JAIL]=80;
+};
+LEVEL_NAMES[WLZ.JAIL]='The Wenlock Cells';LEVEL_RATING[WLZ.JAIL]=80;
+/* nobody walks out of the cells by the menu or a jump while jailed */
+{const _g=goToLevel;goToLevel=function(n,entry){
+  if(G.flags&&G.flags.wlJailed&&LEVEL===WLZ.JAIL&&n!==WLZ.JAIL&&!WLZ._rel){try{sfx('locked');msg('You are in a locked cell. Speak to the gaoler.','#d09a80')}catch(e){}return}
+  return _g.apply(this,arguments)}}
+if(typeof jumpToLevel==='function'){const _j=jumpToLevel;jumpToLevel=function(n){if(G.flags&&G.flags.wlJailed&&LEVEL===WLZ.JAIL&&n!==WLZ.JAIL&&!WLZ._rel){try{msg('You are in a locked cell. Speak to the gaoler.','#d09a80')}catch(e){}return}return _j.apply(this,arguments)}}
+/* ---- the pass that puts the four watchmen in the town (the town builder calls the polish passes at the end of wlBuild) ---- */
+function wlzPass(C){
+  if(!WLZ.g.length)wlzInit();
+  WLZ.g.forEach((g,i)=>{const kp=KH_KEEPERS[g.id];if(!kp)return;C.walk(khFaceKey(kp.face),Math.round(g.x),Math.round(g.y),{npc:g.id,sc:.98,cloudid:'wlzg'+i})});
+}
+WLP_PASSES.push(['watch',C=>wlzPass(C)]);
+/* ---- every frame: the watchmen walk (while the party is in the town the pictures move; in a house they go on walking out of sight) ---- */
+function wlzTick(dt){
+  if(G.state!=='play'||!G.heroes)return;
+  dt=Math.min(dt,.1);
+  if(!WLZ.g.length)wlzInit();
+  if(!G.talk&&!G.cut&&!G.menu){for(const g of WLZ.g)wlzStep(g,dt)}
+  if(LEVEL===496){
+    if(WLZ.dec!==G.decor){WLZ.dec=G.decor;WLZ.map=new Map();for(const d of G.decor)if(d.cloudid&&/^wlzg\d$/.test(d.cloudid))WLZ.map.set(d.cloudid,d)}
+    WLZ.g.forEach((g,i)=>{const d=WLZ.map.get('wlzg'+i);if(!d)return;d.x=Math.floor(g.x+.5);d.y=Math.floor(g.y+.5);d.ox=g.x-d.x;d.oy=g.y-d.y;d.bob=g.pause>0||g.post?0:.012+.012*Math.abs(Math.sin(G.time*6+i))});
+    // each watchman carries a lantern: a warm light that moves with him (it only shows at dusk and by night)
+    if(WLZ.lampsIn!==LIGHTS){WLZ.lampsIn=LIGHTS;WLZ.lamps=WLZ.g.map((g,i)=>{const l={x:g.x+.5,y:g.y+.5,ph:i*1.7,key:-7000-i,taken:false,red:false,free:true,lamp:true,calm:true,col:[1.3,.95,.5],range2:10,kI:.7,wlz:1};LIGHTS.push(l);return l})}
+    WLZ.g.forEach((g,i)=>{const l=WLZ.lamps&&WLZ.lamps[i];if(l){l.x=g.x+.5;l.y=g.y+.5}});
+    if(!WLZ._url){WLZ._url=1;const m=/[?&]wlt=(\w+)/.exec(location.search);if(m)try{wlzDemo(m[1]==='jail'?'jail':+m[1])}catch(e){console.error(e)}}
+  }else if(typeof wltHouseOf==='function'&&wltHouseOf(LEVEL)){ // inside a house at night: footsteps and lantern light outside
+    const t=wltHouseOf(LEVEL),h=t.h;let best=null,bd=99;
+    for(const g of WLZ.g){const d=Math.hypot(g.x-h.front[0],g.y-h.front[1]);if(d<bd){bd=d;best=g}}
+    const c=WLZ.cue;
+    if(bd<=8&&!c[LEVEL]){c[LEVEL]=1;msg('Boots in the street outside. A lantern moves past the shutters.','#c8c0a0')}
+    else if(bd>11)c[LEVEL]=0;
+  }
+}
+{const _u=update;update=function(dt){try{wlzTick(dt)}catch(e){if(!WLZ._err){WLZ._err=1;console.error('wlz',e)}}return _u.apply(this,arguments)}}
+function wlzDemo(n){
+  const F=G.flags;G.clock=Math.floor((G.clock||0)/1440)*1440+22*60;if(G.gold<1200)G.gold=1200;
+  if(!G.quests.wlq1)G.quests.wlq1={st:'done',ord:(F.qSeq=(F.qSeq|0)+1),base:0};
+  if(n==='jail'){F.wlJailed=1;if(!LEVELS[WLZ.JAIL])KH_LAZY[WLZ.JAIL]();goToLevel(WLZ.JAIL,{x:6,y:2,f:2});return}
+  const t=wltHouses()[n-1];if(!t)return;
+  const q='wlq'+(59+n);if(qSt(q)===null)qAccept(q);
+  goToLevel(496,{x:t.h.front[0],y:t.h.front[1],f:t.h.out===0?2:t.h.out===2?0:t.h.out===1?3:1});
+}
+
+/* ---- src/desert/wenlock_thief.js ---- */
+/* ==========================================================================
+   WENLOCK: THE SHADY QUESTS (prefix wlt / WLT, quests wlq60 to wlq63). Four small crimes for four back-alley clients, each in a named house that only opens after dark (20:00 to 05:00):
+   wlq60  Gaffer Nettle, a fence by the old bridge: take the silver candlesticks from Church View (number 5 Church Lane).
+   wlq61  Barnaby Pike, a gambler behind the inn: swap loaded dice into the dice cup at Bluebell Cottage (number 6 Green Lane).
+   wlq62  Crispin Vane, a rival's agent in the east of town: copy a page of the order book at Weaver's Cottage (number 14 High Street).
+   wlq63  Old Ned Gudgeon, a poacher by the witch's wood gate: find the loose floorboard at The Willows (number 5 Mill Lane) and take back his wife's locket.
+   By day the doors stay shut or the householder sends the party off (see wltDoor). Inside, every house has the thing the quest asks for, a purse that can be stolen for gold (any time), and a front window to peek through
+   (it says where the watchmen are). Taking, copying or swapping something while a watchman can see the square outside the door (wenlock_watch.js, wlzWatching) is a theft seen: the party is arrested.
+   Leaving with stolen goods in a watchman's sight is the same. A watchman who sees the party go in after a warning stands at the door for two and a half minutes. After an arrest the stolen things are taken (wltConfiscate)
+   and put back where they were, so each quest can still be finished; the gambler hands out a new pair of dice.
+   Flags (G.flags): wlt1_in wlt1_got, wlt2_in wlt2_plant, wlt3_in wlt3_got, wlt4_in wlt4_found wlt4_got (n_in: went in after dark with the quest; _got: the thing is in the bag), wltv1..4 (purse taken), wltHot (this visit's loot).
+   ========================================================================== */
+ITEMDEF.wlt_candle={n:'Silver Candlesticks',k:'quest',t:'Stolen goods',ic:'lantern',c:'#d8d8e8',stack:1,price:1,d:'A pair of tall silver candlesticks, taken from the mantel at Church View. They are heavy, and Mr Hatchley would very much like them back.',sw:.2};
+ITEMDEF.wlt_dice={n:'Loaded Dice',k:'quest',t:'Quest item',ic:'bones',c:'#d8d0c0',stack:1,price:1,d:'A pair of grey bone dice with a little chip out of one corner. They are loaded, and only ever show six. Barnaby Pike wants them put in the dice cup at Bluebell Cottage.',sw:.1};
+ITEMDEF.wlt_copy={n:'Copied Order Page',k:'quest',t:'Stolen goods',ic:'scroll',c:'#e8e0c0',stack:1,price:1,d:'One page of figures copied out by candlelight from the order book of Mistress Fenwick, the weaver: who buys her cloth, how much, and at what price.',sw:.1};
+ITEMDEF.wlt_locket={n:"Old Ned's Locket",k:'quest',t:'Quest item',ic:'amulet',c:'#d8d8e0',stack:1,price:1,d:'A small silver locket with a curl of grey hair inside. It was the wife of Old Ned Gudgeon, and he wants it back.',sw:.1};
+const WLT_CONTRA=['wlt_candle','wlt_dice','wlt_copy','wlt_locket'];
+const wltF=()=>G.flags;
+/* ---- the four houses: found by their lot, named (the street name boards are made by wenlock_names.js, which skips a house that already has a name), numbered as its door plate will be ---- */
+const WLT=[];
+{const defs=[{n:1,side:'CW',pos:37,name:'Church View'},{n:2,side:'GE',pos:32,name:'Bluebell Cottage'},{n:3,side:'S',pos:74,name:"Weaver's Cottage"},{n:4,side:'MW',pos:63,name:'The Willows'}];
+ for(const d of defs){
+   const i=WL_LOTS.findIndex(l=>l[0]===d.side&&l[1]===d.pos),h=WL_HOUSES[i];
+   h.hname=d.name;const k=WLN_NAMES.findIndex(q=>q[0]===d.name);if(k>=0)WLN_NAMES.splice(k,1);
+   const seq=WL_HOUSES.filter((q,j)=>j<WL_LOTS.length&&WL_LOTS[j][0]===d.side).sort((a,b)=>(a.x0-b.x0)||(a.y0-b.y0));
+   const num=2*seq.indexOf(h)+(WLN_ODD[d.side]?1:2),street=WLN_STREET[d.side];
+   WLT.push(Object.assign({h,num,street,addr:'number '+num+', '+street},d))}
+}
+const wltHouses=()=>WLT;
+const wltHouseOf=lvl=>WLT.find(t=>t.h.id===lvl)||null;
+const wltT=n=>WLT[n-1];
+/* ---- the quests ---- */
+Object.assign(WL_REW,{wlq60:{gold:450,xp:5000},wlq61:{gold:500,xp:5500},wlq62:{gold:550,xp:6000},wlq63:{gold:600,xp:6500,items:['potion5']}});
+WL_QUESTS.push(
+  {id:'wlq60',giver:'Gaffer Nettle',title:'The Candlesticks of Church View',desc:'A fence wants the silver candlesticks from a house on Church Lane, taken after dark.'},
+  {id:'wlq61',giver:'Barnaby Pike',title:'A Pair of Loaded Dice',desc:'A gambler wants his loaded dice swapped into a rival\'s dice cup, in a house on Green Lane, after dark.'},
+  {id:'wlq62',giver:'Crispin Vane',title:'A Page from the Order Book',desc:'A rival merchant\'s agent wants a page copied from a weaver\'s order book, in a house on High Street, after dark.'},
+  {id:'wlq63',giver:'Old Ned Gudgeon',title:"The Locket Under the Rug",desc:'A poacher wants his late wife\'s locket taken back from a moneylender\'s hiding place in a house on Mill Lane, after dark.'});
+const WLT_DARK='after dark (from eight in the evening until five in the morning)';
+wlQ('wlq60','Gaffer Nettle, a fence',[
+  ['Go to Church View, '+wltT(1).addr+', '+WLT_DARK+' and get inside without a watchman seeing you. A lamp hangs by the door.',()=>wltF().wlt1_in,['wlt_door1']],
+  ['Take the silver candlesticks from the mantel at Church View, and get out of the house without being seen. If a watchman sees you take them, you are arrested.',()=>bagCount('wlt_candle')>0,['wlt_candle']]],{take:{wlt_candle:1}});
+wlQ('wlq61','Barnaby Pike, a gambler',[
+  ['Go to Bluebell Cottage, '+wltT(2).addr+', '+WLT_DARK+' and get inside without a watchman seeing you.',()=>wltF().wlt2_in,['wlt_door2']],
+  ['Swap the loaded dice into the dice cup on the table at Bluebell Cottage. If a watchman sees you at it, you are arrested.',()=>wltF().wlt2_plant,['wlt_cup']]],{give:'wlt_dice'});
+wlQ('wlq62','Crispin Vane, a merchant\'s agent',[
+  ['Go to Weaver\'s Cottage, '+wltT(3).addr+', '+WLT_DARK+' and get inside without a watchman seeing you.',()=>wltF().wlt3_in,['wlt_door3']],
+  ['Copy a page of the order book on the writing desk at Weaver\'s Cottage, and get out without being seen.',()=>bagCount('wlt_copy')>0,['wlt_ledger']]],{take:{wlt_copy:1}});
+wlQ('wlq63','Old Ned Gudgeon, a poacher',[
+  ['Go to The Willows, '+wltT(4).addr+', '+WLT_DARK+' and get inside without a watchman seeing you.',()=>wltF().wlt4_in,['wlt_door4']],
+  ['Find the loose floorboard under the rug at The Willows.',()=>wltF().wlt4_found,['wlt_rug']],
+  ["Take the locket from the box under the floorboard, and get out without being seen.",()=>bagCount('wlt_locket')>0,['wlt_rug']]],{take:{wlt_locket:1}});
+/* the clients */
+khNpc('wlt_fence','Gaffer Nettle, a dealer in second-hand goods','kh_ohfolk2_3',()=>yrLines('wlt_fence',["Nothing for you today. Come back with something, and I will not ask where it came from.","I am a respectable dealer in second-hand goods. The goods have just had a great many previous owners."]),{sc:.95});
+const WLD60=khQD("Evening to you. Or morning, I never ask. I buy things, I sell things, and I do not ask where they have been. Nettle, they call me. Now, there is a pair of silver candlesticks on the mantel at Church View, "+wltT(1).addr+". Mr Hatchley is away at his sister's until Friday, and the house is empty. I want those candlesticks, and I will pay well. Go after dark, when the door can be opened. By day it is bolted and the neighbours are nosy. Mind the watchman who walks Church Lane. If he sees you with your hand on the silver, it is the cells. Bail is 500 gold, or three nights on straw. And I never heard of you.",
+  "Good. Church View, "+wltT(1).addr+". After dark, not before. There is a lamp by the door. Look through the front window when you are inside, to see where the watch is.",
+  (n,m)=>bagCount('wlt_candle')>0?'You have the candlesticks? Bring them here.':(wltF().wlt1_in?'You are in already? Good. The candlesticks are on the mantel. Take them, and get out before the watchman comes by.':'Church View, '+wltT(1).addr+'. After dark, and keep out of sight of the watch. A lamp hangs by the door.'),
+  'Are those them? Let me look. Silver, and heavy. Oh, that is good silver.',
+  'Lovely. I know a man two counties off who will not ask a single question. Here is your share. And you were never here.',
+  'Business is quiet. If I hear of something else, I will find you. Do not look for me.',
+  'Here they are.');
+wlGive('wlt_fence','wlq60','wlq1',WLD60);
+khNpc('wlt_gambler','Barnaby Pike, a gambler','kh_oqmen_2',()=>yrLines('wlt_gambler',["Fifty gold on a single throw, that is the sort of man I am. Or was. Now it is two coppers and a bad feeling.","I once won a goose in a game of dice. The goose won it back."]),{sc:.98});
+const WLD61=khQD("Sit down. No, stand, it is safer. I am Barnaby Pike, and I have not won a game of dice at the Plough and Pigeon in two years. Dunstan Orme has, every night. He rolls sixes the way other men breathe, and I know why. His dice are loaded, and he keeps them in a cup on the table at Bluebell Cottage, "+wltT(2).addr+". I have a loaded pair of my own, and they only ever show six. Go in after dark and swap them into his cup. When he takes them to the inn on Saturday, the whole bar will watch a pair of dice do something very strange, and Orme will go in the brook. It will be worth your while. A watchman walks Green Lane, so pick your moment.",
+  "Here, the grey pair with the chip. Do not roll them, they only show six and it makes people suspicious. Bluebell Cottage, "+wltT(2).addr+". After dark.",
+  (n,m)=>wltF().wlt2_plant?'Has it been done? Bring me word.':(bagCount('wlt_dice')>0?'Put the dice in the cup on the table at Bluebell Cottage, '+wltT(2).addr+', after dark. Keep clear of the watchman.':'Lost the dice? Ask me for another pair.'),
+  'Is it done? Did you swap them?',
+  'Ha! By Saturday night he will be the most surprised man in Wenlock. Here is your cut. I was at the inn all night, and so were you.',
+  'Orme has not been to the inn for three days. I won a game of dice. It felt wonderful and I am a little ashamed.',
+  'It is done.');
+wlGive('wlt_gambler','wlq61','wlq1',WLD61);
+yrHook('wlt_gambler',d=>{
+  if(qSt('wlq61')==='active'&&!wltF().wlt2_plant&&bagCount('wlt_dice')<1)return say('You have lost the dice? That, or the watch has them. Here is another pair. Do not lose these.',[['Take another pair.',()=>{bagAdd(mkItem('wlt_dice'));return say('The grey pair, with the chip. Bluebell Cottage, '+wltT(2).addr+'. After dark.',[BYE])}],BYE]);
+  return null});
+khNpc('wlt_agent','Crispin Vane, an agent','kh_ohfolk2_4',()=>yrLines('wlt_agent',["I represent a firm of wool merchants who would rather not be named. They are very large, and quite nervous.","Do you know what the price of wool is? Nor do I. That is why I am here."]),{sc:.98});
+const WLD62=khQD("Good evening. Crispin Vane. I represent a firm of wool merchants who would like to stay unnamed, and who would like to know what Mistress Fenwick the weaver charges the big houses for her cloth. She keeps an order book on the writing desk at Weaver's Cottage, "+wltT(3).addr+". The book must not leave the house, and she must not know it was opened. Go after dark, copy out one page, and bring it to me. The house stands right on the High Street, with a lamp at the door, and the watch comes by often. Be quick about it.",
+  "Weaver's Cottage, "+wltT(3).addr+". After dark. One page, copied in a neat hand. Peek through the front window before you start, to see that the watch is away.",
+  (n,m)=>bagCount('wlt_copy')>0?'You have the page? Bring it here.':(wltF().wlt3_in?'You are in? The order book is on the writing desk. Copy one page.':'Weaver\'s Cottage, '+wltT(3).addr+', after dark. Mind the watch.'),
+  'Is that the page? Let me see. Hm. Hm. She is charging them far too little. This is excellent.',
+  'That will help my employers a great deal, and hurt Mistress Fenwick a little. Business is business. Here is your fee.',
+  'I am told the price of wool has gone up. I like to think we had something to do with it.',
+  'Here is the page.');
+wlGive('wlt_agent','wlq62','wlq1',WLD62);
+khNpc('wlt_poacher','Old Ned Gudgeon, a poacher','kh_oqmen_5',()=>yrLines('wlt_poacher',["I never took a rabbit in my life. The rabbits took themselves, and I happened to be carrying a sack.","The best nights for fishing are dark ones. The watch does not agree."]),{sc:.98});
+const WLD63=khQD("I borrowed seven pounds from Old Hargreave the moneylender, and I paid every penny back at Michaelmas. He still has the thing I left as a pledge, my late wife's silver locket, with her hair in it. He says he has lost it. He has not. It is in a box under a loose floorboard beneath the rug at The Willows, "+wltT(4).addr+". I watched him put it there through the window. I cannot go in, the whole watch knows my face. It is only taking back what is mine. He is away all week. Go after dark, and mind the lamp and the watch.",
+  "Thank you. The Willows, "+wltT(4).addr+". The rug is in the back room. Roll it back, and the loose board is under it. After dark, and out before the watchman comes.",
+  (n,m)=>bagCount('wlt_locket')>0?'You have it? Bring it here.':(wltF().wlt4_found?'You found the board? The box is under it. Take the locket and go.':'The Willows, '+wltT(4).addr+', after dark. The rug in the back room, and the board under it.'),
+  'Is that it? Oh. Oh, yes. That is her hair. Thank you.',
+  'I had thought I would never see it again. Here, it is not much, but it is what I have. Go on. And keep out of the cells.',
+  'I wear it every day. The moneylender has not said a word. He knows.',
+  "Here is the locket.");
+wlGive('wlt_poacher','wlq63','wlq1',WLD63);
+/* quest rings: the client, then the door of the house, then the thing in the house, then the client again */
+if(typeof QRF!=='undefined'){
+  const N=(l,...ids)=>({lvl:l,npc:ids}),F=()=>G.flags;
+  QRF.T.wlq60={give:[N(496,'wlt_fence')],act:()=>!F().wlt1_in?[N(496,'wlt_door1')]:[N(wltT(1).h.id,'wlt_candle')],ready:[N(496,'wlt_fence')]};
+  QRF.T.wlq61={give:[N(496,'wlt_gambler')],act:()=>!F().wlt2_in?[N(496,'wlt_door2')]:[N(wltT(2).h.id,'wlt_cup')],ready:[N(496,'wlt_gambler')]};
+  QRF.T.wlq62={give:[N(496,'wlt_agent')],act:()=>!F().wlt3_in?[N(496,'wlt_door3')]:[N(wltT(3).h.id,'wlt_ledger')],ready:[N(496,'wlt_agent')]};
+  QRF.T.wlq63={give:[N(496,'wlt_poacher')],act:()=>!F().wlt4_in?[N(496,'wlt_door4')]:[N(wltT(4).h.id,'wlt_rug')],ready:[N(496,'wlt_poacher')]};
+}
+/* ---- the doors: a lamp by each door (also the quest ring), and what a door does by day and by night ---- */
+for(const t of WLT){
+  khNpc('wlt_door'+t.n,'The lamp at '+t.name,'kh_ohgard2_5',()=>{
+    const night=wlzNight();
+    return say(t.name+', '+t.addr+'. '+(night?'The lamp by the door is lit. The street is quiet, and the door is not bolted.':'The shutters are closed and the door is shut. Nobody answers the knocker.'),[BYE])});
+}
+const WLT_DAY={
+  1:()=>{sfx('locked');msg('The shutters are closed and the door is bolted. A card in the window reads: AWAY. BACK FRIDAY. HATCHLEY.','#d09a80')},
+  2:()=>wltSay('kh_ohfolk3_4','A woman at the window','A woman puts her head out of an upstairs window. "Mr Orme is at the inn, and I am not buying anything," she says, and shuts the window.'),
+  3:()=>wltSay('kh_ohfolk4_2','Mistress Fenwick','The door opens a hand\'s width. A woman in a weaver\'s apron looks you up and down. "The shop is round the back, and it is shut," says Mistress Fenwick. "Come back on market day." The door shuts.'),
+  4:()=>{sfx('locked');msg('Nobody answers. A dog barks inside, a lot, and keeps barking while you stand there.','#d09a80')}
+};
+function wltSay(face,name,text){G.talk={d:{k:khFaceKey(face),x:G.P.x,y:G.P.y},n:{name},node:say(text,[BYE]),t:G.time,btns:[]};G.hold=null;G.queued=null;sfx('locked')}
+/* walking into the door of one of the four houses: true if the door was dealt with here, undefined to go in as usual */
+function wltDoor(t,d){
+  const F=wltF();
+  if(!wlzNight()){WLT_DAY[t.n]();return true}
+  const g=wlzWatching();
+  if(g){
+    if(F.wlzWarnT!==undefined&&G.clock-F.wlzWarnT>2880)F.wlzWarn=0;
+    F.wlzWarn=(F.wlzWarn||0)+1;F.wlzWarnT=G.clock;
+    if(F.wlzWarn>=2){wlzArrest(g,'You again! I told you to keep away from other people\'s doors after dark. That is trespass. You are under arrest, all of you.');return true}
+    const enter=()=>{wlzPost(g,t.h.front[0],t.h.front[1],150);sfx('door');goToLevel(d.lvl,d.at);return null};
+    G.talk={d:{k:khFaceKey(g.face),x:G.P.x,y:G.P.y},n:{name:g.name},node:say('You there! That is '+t.name+', and the owner is not at home. What business have you at that door after dark? Go home. I am watching you. If I catch you at it, you will be in the cells.',[['Sorry, officer. We will go.',()=>null],['We are only going in for a moment.',enter]]),t:G.time,btns:[]};G.hold=null;G.queued=null;sfx('locked');
+    return true}
+  return undefined;
+}
+{const _kb=khBump;khBump=function(nx,ny,g){
+  if(LEVEL===496){const d=KH_DOOR[g],t=d&&d.lvl!==undefined?wltHouseOf(d.lvl):null;if(t){const r=wltDoor(t,d);if(r!==undefined)return r}}
+  return _kb.apply(this,arguments)}}
+/* going into and out of the houses: the entry flags, and the watchman at the window on the way out */
+function wltEnsure(){for(const t of WLT){const id=t.h.id;if(!LEVELS[id]&&KH_LAZY[id])try{KH_LAZY[id]()}catch(e){console.error('wlt build',e)}}}
+/* the room is called by the name of the house (the level banner, the quest ring: "Go to Church View") */
+for(const t of WLT){const id=t.h.id,old=KH_LAZY[id];if(!old)continue;
+  KH_LAZY[id]=()=>{if(LEVELS[id])return;old();const L=LEVELS[id];if(L){L.name=t.name;L.label=t.name}LEVEL_NAMES[id]=t.name}}
+{const _g=goToLevel;goToLevel=function(n,entry){
+  const from=LEVEL,tf=wltHouseOf(from),r=_g.apply(this,arguments);
+  try{
+    if(LEVEL===n){
+      const tt=wltHouseOf(n);
+      if(tt){const F=wltF();F.wltHot=null;if(wlzNight())F['wlt'+tt.n+'_in']=1;try{msg(wlzNight()?'It is dark inside, and quiet. The front window is by the door.':'You are inside.','#c8c0a0')}catch(e){}}
+      if(n===496&&tf){const F=wltF(),H=F.wltHot;
+        if(H&&H.lvl===from){
+          const g=wlzWatching();F.wltHot=null;
+          if(g)later(350,()=>wlzArrest(g,'Stop, thief! I saw you through the window, and now you walk out of that house with your pockets full! You are under arrest, all of you.',{hot:H}));
+          else{try{msg('You slip out into the lamplight. Nobody saw you.','#a8e0a0');skXP('stealth',3)}catch(e){}}}}
+      if(n===496&&!G._wltBuilt){G._wltBuilt=1;wltEnsure()}}
+  }catch(e){console.error('wlt goToLevel',e)}
+  return r}}
+/* every restore starts the build over */
+if(typeof restore==='function'){const _r=restore;restore=function(){G._wltBuilt=0;return _r.apply(this,arguments)}}
+{const _qa=qAccept;qAccept=function(id){const r=_qa.apply(this,arguments);if(/^wlq6[0-3]$/.test(id))try{wltEnsure()}catch(e){console.error(e)}return r}}
+/* ---- inside the houses ---- */
+{const _wb=wlinBuild;wlinBuild=function(D,name,b,C){
+  const id=+String(b&&b.id||'').replace(/\D/g,''),t=wltHouseOf(id);
+  if(t&&b)b.keeper=null;   // nobody is up at this hour: the household is out or asleep
+  const out=_wb.call(this,D,name,b,C);
+  if(t)try{wltFurnish(t,D,C)}catch(e){console.error('wltFurnish',e)}
+  return out}}
+function wltFurnish(t,D,C){
+  const W=D.w,H=D.h,mid=W>>1,taken=new Set();
+  const free=(x,y)=>x>=1&&y>=1&&x<=W-2&&y<=H-2&&!C.has(x,y)&&!taken.has(x+','+y);
+  const spot=(row)=>{let best=null,bs=-1e9;
+    for(let y=row||1;y<=(row?row:H-3);y++)for(let x=1;x<=W-2;x++){if(!free(x,y))continue;if(y>=H-3&&Math.abs(x-mid)<=1)continue;
+      let nb=0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]])if(free(x+dx,y+dy)||(x+dx>=1&&y+dy>=1&&x+dx<=W-2&&y+dy<=H-2&&!C.has(x+dx,y+dy)))nb++;
+      const s=nb*10-y*2-Math.abs(x-mid)*.1;if(s>bs){bs=s;best=[x,y]}}
+    if(best)taken.add(best[0]+','+best[1]);return best};
+  const put=(prop,id,o)=>{const q=spot();if(!q)return;wlinProp(C,prop,q[0],q[1],Object.assign({npc:id,free:1},o||{}))};
+  if(t.n===1)put('votive','wlt_candle',{h:.55});
+  if(t.n===2)put('pietable','wlt_cup',{h:.5});
+  if(t.n===3)put('readdesk','wlt_ledger',{h:.7});
+  if(t.n===4){const q=spot();if(q)C.put('rolledcarpets',q[0],q[1],{npc:'wlt_rug'})}
+  put('dresser','wlt_val',{h:.9});
+  // the front window, in the wall beside the door
+  const wy=H-2,wq=[[mid-3,wy],[mid+3,wy],[mid-2,wy],[mid+2,wy]].find(q=>q[0]>=1&&q[0]<=W-2&&!C.has(q[0],q[1])&&!taken.has(q[0]+','+q[1]));
+  if(wq)wlinProp(C,'glasswin',wq[0],wq[1],{npc:'wlt_peek',free:1,h:.8});
+}
+/* what happens when something is stolen, copied or swapped in a house: the watch looks first */
+function wltCaught(g,text){later(60,()=>wlzArrest(g,text));return null}
+function wltHotAdd(t,gold){const F=wltF(),H=F.wltHot&&F.wltHot.lvl===t.h.id?F.wltHot:(F.wltHot={lvl:t.h.id,gold:0});H.gold+=gold||0}
+function wltNow(){const t=wltHouseOf(LEVEL);return t}
+/* put things back and take them away after an arrest: returns lines for the cell door slamming */
+function wltConfiscate(extra){
+  const F=wltF(),lost=[];
+  for(const id of WLT_CONTRA){const n=bagCount(id);if(n>0){bagRemove(id,n);lost.push('The gaoler takes the '+ITEMDEF[id].n.toLowerCase()+'.')}}
+  const H=(extra&&extra.hot)||F.wltHot;
+  if(H&&H.gold>0){const t=Math.min(G.gold,H.gold);if(t>0){G.gold-=t;lost.push('The gaoler takes '+t+' gold of stolen money.')}}
+  F.wltHot=null;F.wlt1_got=0;F.wlt3_got=0;F.wlt4_got=0;   // the things are back where they were, and the quests can be tried again
+  return lost;
+}
+khNpc('wlt_candle','The silver candlesticks','wl2_church_5',d=>{
+  const F=wltF(),t=wltNow();
+  if(qSt('wlq60')==='active'&&!F.wlt1_got){
+    return say('Two tall silver candlesticks stand on the mantel, polished, with the stubs of white candles in them. They are heavy, and worth a good deal.',[['Take the candlesticks.',()=>{
+      const g=wlzWatching();if(g)return wltCaught(g,'Thief! I saw you through the window, taking the candlesticks off the mantel! You are under arrest, all of you.');
+      if(!bagAdd(mkItem('wlt_candle')))return say('Your bag is full.',[BYE]);
+      F.wlt1_got=1;wltHotAdd(t,0);sfx('key');try{skXP('stealth',2)}catch(e){}
+      return say('You wrap the candlesticks in a cloth and slip them into your bag. Now get out of the house before the watch comes by.',[BYE])}],BYE])}
+  return say(F.wlt1_got?'The mantel is bare where the candlesticks stood.':'Two tall silver candlesticks on the mantel. They are not yours, and nobody has asked you to take them.',[BYE])},{sc:1});
+khNpc('wlt_cup','The dice cup','wl2_home_0',d=>{
+  const F=wltF(),t=wltNow();
+  if(qSt('wlq61')==='active'&&!F.wlt2_plant){
+    if(bagCount('wlt_dice')<1)return say('A leather dice cup on the table, with a pair of dice inside. You have no loaded dice to swap in. Barnaby Pike will give you another pair.',[BYE]);
+    return say('A leather dice cup stands on the table, with two white dice inside. They are a little too round at the corners.',[['Swap in the loaded dice.',()=>{
+      const g=wlzWatching();if(g)return wltCaught(g,'Thief! I saw you through the window, fiddling about with the dice! You are under arrest, all of you.');
+      bagRemove('wlt_dice',1);F.wlt2_plant=1;sfx('key');yrStep('You swapped the loaded dice into the cup.');try{skXP('stealth',2)}catch(e){}
+      return say('You tip the dice out, drop the grey pair in their place and slip the white pair into your sleeve. Now get out of the house.',[BYE])}],BYE])}
+  return say(F.wlt2_plant?'The dice cup holds a grey pair with a chip out of one corner.':'A leather dice cup on the table, with two dice inside.',[BYE])},{sc:1});
+khNpc('wlt_ledger','The order book','wl2_library_1',d=>{
+  const F=wltF(),t=wltNow();
+  if(qSt('wlq62')==='active'&&!F.wlt3_got){
+    return say('A tall writing desk with a thick order book open on it, a pen, an ink pot and a stub of candle. The columns are neat: names, lengths of cloth, prices.',[['Copy a page of the book.',()=>{
+      const g=wlzWatching();if(g)return wltCaught(g,'Thief! I saw you through the window, with the candle, writing in somebody else\'s book! You are under arrest, all of you.');
+      if(!bagAdd(mkItem('wlt_copy')))return say('Your bag is full.',[BYE]);
+      F.wlt3_got=1;wltHotAdd(t,0);sfx('key');try{skXP('stealth',2)}catch(e){}
+      return say('You light the stub of candle and copy a page of the order book, names, lengths and prices, in a neat hand. You blow out the candle and close the book exactly as you found it. Now get out of the house.',[BYE])}],BYE])}
+  return say(F.wlt3_got?'The order book lies closed on the desk. You have the page.':'A writing desk with an order book on it. The writing is small and neat.',[BYE])},{sc:1});
+khNpc('wlt_rug','A rolled rug','kh_int5_4',d=>{
+  const F=wltF(),t=wltNow();
+  if(qSt('wlq63')==='active'){
+    if(!F.wlt4_found)return say('A rug is rolled up against the wall of the back room. Under it, one of the floorboards is a little too clean at the edges.',[['Pull up the loose floorboard.',()=>{
+      F.wlt4_found=1;sfx('key');yrStep('You found the loose floorboard.');
+      return say('The board lifts out with a squeak. Under it, in a gap between the joists, is a small wooden box with a brass catch.',[BYE])}],BYE]);
+    if(!F.wlt4_got)return say('The loose board is up. In the gap between the joists, a small wooden box.',[['Take the locket from the box.',()=>{
+      const g=wlzWatching();if(g)return wltCaught(g,'Thief! I saw you through the window, pulling up the floor! You are under arrest, all of you.');
+      if(!bagAdd(mkItem('wlt_locket')))return say('Your bag is full.',[BYE]);
+      F.wlt4_got=1;wltHotAdd(t,0);sfx('key');try{skXP('stealth',2)}catch(e){}
+      return say('The box holds a small silver locket on a chain, and a curl of grey hair inside it. You close the box, set the board back and slip the locket into your bag. Now get out of the house.',[BYE])}],BYE])}
+  return say('A rug rolled up against the wall.',[BYE])},{sc:1});
+/* the purse in the dresser: any time, never a quest. Four sums, 140 to 260 gold */
+khNpc('wlt_val','A dresser with a purse in it','wl2_home_1',d=>{
+  const F=wltF(),t=wltNow(),k='wltv'+t.n;
+  if(F[k])return say('The drawer of the dresser is open and empty. You took the purse.',[BYE]);
+  const gold=100+t.n*40;
+  return say('The top drawer of the dresser is not quite shut. Inside there is a leather purse that clinks when you touch it.',[['Take the purse.',()=>{
+    const g=wlzWatching();if(g)return wltCaught(g,'Thief! I saw you through the window, with your hand in the drawer! You are under arrest, all of you.');
+    F[k]=1;G.gold+=gold;wltHotAdd(t,gold);sfx('key');msg('Stolen: '+gold+' gold.','#e8c870');try{skXP('stealth',2);honourAdd(-2,'you stole from a house')}catch(e){}
+    return say('The purse holds '+gold+' gold. You slip it into your pocket and shut the drawer. Get out before the watch comes by.',[BYE])}],BYE])},{sc:1});
+/* the front window: a peek at where the watchmen are */
+khNpc('wlt_peek','The front window','wl2_church_2',d=>{
+  const t=wltNow();if(!t)return say('A small window.',[BYE]);
+  const fx=t.h.front[0],fy=t.h.front[1];
+  const near=WLZ.g.map(g=>({g,d:Math.hypot(g.x-fx,g.y-fy)})).sort((a,b)=>a.d-b.d)[0];
+  if(!near||near.d>12)return say('You part the curtain a finger\'s width. The street is empty as far as you can see. No watchman near.',[BYE]);
+  const g=near.g,dx=g.x-fx,dy=g.y-fy,dir=Math.abs(dx)>=Math.abs(dy)?(dx>0?'east':'west'):(dy>0?'south':'north');
+  const look=wlzSees(g,fx,fy)?'He is looking at this house. It is not a good time.':(near.d<=wlzRange()?'He is looking the other way.':'He is some way off.');
+  return say('You part the curtain a finger\'s width. '+g.name+' is about '+Math.round(near.d)+' squares away to the '+dir+(g.pause>0||g.post?', standing still':', walking')+'. '+look,[BYE])},{sc:1});
+/* the pass that places the four clients and the lamps by the doors (called by wenlock_polish.js with the town builder's tools) */
+function wltPass(C){
+  for(const t of WLT){const h=t.h,q=C.near(h.front[0],h.front[1],2);
+    if(q){C.dc('lamp',q[0],q[1],{npc:'wlt_door'+t.n,deco:false});C.lights.push([q[0],q[1]]);t.lamp=q}}
+  C.person('wlt_fence',74,81,4);       // by the old bridge, in the south
+  C.person('wlt_gambler',57,45,4);     // behind the inn
+  C.person('wlt_agent',79,54,4);       // east of Mill Lane, by the wool yard
+  C.person('wlt_poacher',41,11,4);     // by the gate of the witch's wood
+}
+WLP_PASSES.push(['thief',C=>wltPass(C)]);
+
+/* ---- src/desert/wenlock_den.js ---- */
+/* ==========================================================================
+   WENLOCK: OLD BRACKEN'S DEN (prefix wld / WLD). The hermit's den in the north-east corner of the town (the painted rock mound at (89,6), Old Bracken stands in front of it at (88,7))
+   now has a real door in it, behind the painted picture (a hidden block of rock, as under the mill). The door leads into room 7098 (a free number in the Wenlock room range 7000 to 7099):
+   a tiny maze, 15 by 15 squares, lit by a few candle lights, with one room at the end. In the room a book stands on a lectern. Reading it teaches Intelligence: the book asks
+   "Add 1 Intelligence point. Which character gets the point?" and the party picks one hero, who gains +1 INT for good (h.int is saved with the game and level-ups only add to it).
+   The book is used up (G.flags.wldBook = 1, so it works with old saves) and crumbles. If the party walks away without choosing, the book stays.
+   The maze has no enemies. Bracken stays outside and never blocks the door (he stands one square to the left of the way in).
+   Test link: ?town=brackenden&lvl=34 (outside the den). Tests: tools/bracken_den_test.py.
+   ========================================================================== */
+const WLD={ID:7098,door:[89,6],x0:89,x1:89,y0:5,y1:6,front:[89,7],W:15,H:15};
+/* the maze: # wall, . floor, 0 the door out. The way in is at the bottom, the book room at the top (x 5 to 9, y 1 to 3, reached from the square (7,4)). Several dead ends. */
+const WLD_MAZE=[
+  '###############',
+  '#...#.....#...#',
+  '#.###.....#.###',
+  '#.#.#.....#...#',
+  '#.#.###.###.###',
+  '#...#...#.#...#',
+  '#.###.#.#.#.###',
+  '#.....#.....#.#',
+  '###.#####.###.#',
+  '#...#.#.#.....#',
+  '###.#.#.#######',
+  '#...#...#.#.#.#',
+  '###.#.###.#.#.#',
+  '#.............#',
+  '#######0#######'];
+const WLD_LIGHTS=[[7,13],[3,13],[11,13],[1,13],[13,13],[7,11],[5,11],[1,11],[3,9],[1,7],[3,7],[5,5],[1,5],[3,5],[9,7],[11,7],[11,5],[9,9],[13,9],[7,7],[7,5],[7,2],[5,1],[9,1],[5,3],[9,3]];
+const WLD_ROOM={x0:5,x1:9,y0:1,y1:3,book:[7,1]};
+function wldF(){return G.flags||(G.flags={})}
+/* ---- the outside: the rock mound gets a door. The picture stays; a hidden block of rock stands under it, with the door in its front. ---- */
+function wldPass(C){
+  const {rows,ch,TM}=C;
+  const im=IMG.wd_rock0;if(!im)return;
+  // take the old plain rock off the ground, and keep the ground in front of the door clear
+  for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(d.k==='wd_rock0'&&d.x===89&&d.y===6)C.decor.splice(i,1)}
+  // the hidden block: a rock face cut from the painted mound itself, low enough to stay behind the picture
+  const wh=.9;
+  const rock=wlwNew('denrock',wh,(x,w,h)=>{const iw=im.width,ih=im.height;x.fillStyle='#6c6454';x.fillRect(0,0,w,h);x.drawImage(im,iw*.08,ih*.42,iw*.22,ih*.5,0,0,w,h)});
+  const dg=wlwDoorGid(T_TILE[rock],WLD.ID);
+  for(let y=WLD.y0;y<=WLD.y1;y++)for(let x=WLD.x0;x<=WLD.x1;x++){
+    if(C.block[y*C.W+x]&&rows[y][x]!=='.')continue;
+    rows[y][x]=ch(x===WLD.door[0]&&y===WLD.door[1]?dg:rock);C.block[y*C.W+x]=1}
+  C.sky.push({x:89.5,y:7.2,k:'wd_rock0',w:2.1,z:0,big:1});
+  for(let y=WLD.y0-1;y<=WLD.y1+3;y++)for(let x=WLD.x0-1;x<=WLD.x1+1;x++)if(!(x===88&&y===7))C.used.add(x+','+y);
+  if(typeof WL_MAPX!=='undefined')WL_MAPX.push({t:"Old Bracken's Den",x:89,y:4,k:'place'});
+}
+WLP_PASSES.push(['den',C=>wldPass(C)]);
+/* ---- the book ---- */
+const WLD_PAGE="A thick old book lies open on the lectern. It is a hermit's notebook about thinking slowly: how to sit still until a hard problem makes sense, how to hold a long list in your head, and how to remember a lesson after hearing it once. Whoever studies it properly will be wiser for the rest of their life. The pages are so old that the book can only be used once.";
+function wldBookRoot(){
+  const F=wldF();
+  if(F.wldBook)return say('The lectern is bare. A little grey dust lies on it where the book was. Its pages have crumbled away.',[BYE]);
+  return say(WLD_PAGE,[['Read on.',()=>wldPrompt()],['Close the book for now.',()=>null]]);
+}
+function wldPrompt(){
+  const F=wldF();if(F.wldBook)return wldBookRoot();
+  const opts=G.heroes.map((h,i)=>[HERO_DEF[i].name,()=>wldGive(i)]);
+  opts.push(['Not yet.',()=>null]);
+  return say('Add 1 Intelligence point. Which character gets the point?',opts);
+}
+function wldGive(i){
+  const F=wldF();if(F.wldBook)return wldBookRoot();
+  const h=G.heroes[i];if(!h)return null;
+  F.wldBook=1;h.int=(h.int||0)+1;
+  try{sfx('level')}catch(e){}
+  msg(`${HERO_DEF[i].name} gains 1 Intelligence (now ${h.int}).`,'#ffe36a');
+  return say(`${HERO_DEF[i].name} studies the book from the first page to the last, and gains 1 Intelligence. It is now ${h.int}. When ${HERO_DEF[i].name} closes the cover, the old pages crumble to dust.`,[BYE]);
+}
+khNpc('wld_book',"The hermit's book",'wl2_church_4',()=>wldBookRoot(),{sc:1});
+/* ---- the rooms ---- */
+function wldMake(){
+  const b={id:'wldden',name:"Old Bracken's Den",room:'cellar',keeper:null,floor:FLOORS.wl2f1?'wl2f1':'wood',wallImg:IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0'};
+  b.tpl=()=>({w:WLD.W,h:WLD.H,floor:b.floor,amb:.3,noExtras:true,lights:WLD_LIGHTS.map(p=>[p[0],p[1]]),build:C=>{
+    for(const [x,y] of [[5,1],[9,1],[5,3],[9,3]])wlinProp(C,'votive',x,y,{npc:undefined});
+    wlinProp(C,'lectern',WLD_ROOM.book[0],WLD_ROOM.book[1],{npc:'wld_book',h:.95});
+  }});
+  const R=khRoom(b,WLD.ID,{to:WL.ID,x:WLD.front[0],y:WLD.front[1],f:2});
+  const L=R.level;
+  L.rows=WLD_MAZE.slice();L.start={x:7,y:13,f:0};L.ceil='tomb';L.diff=80;L.noTele=true;
+  LEVELS[WLD.ID]=L;LEVEL_NAMES[WLD.ID]="Old Bracken's Den";LEVEL_RATING[WLD.ID]=80;
+  return L;
+}
+KH_LAZY[WLD.ID]=()=>{if(!LEVELS[WLD.ID])wldMake()};
+LEVEL_NAMES[WLD.ID]="Old Bracken's Den";LEVEL_RATING[WLD.ID]=80;
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */

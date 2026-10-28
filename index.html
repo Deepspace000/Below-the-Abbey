@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.691';
+const VERSION='3.692';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -3756,7 +3756,7 @@ function jumpFromUrl(){
     msg('The party stands at the Kraken line with all four Kraken harpoons. Walk east.','#ffe36a');return}
   if(town==='abbey'||town==='thornwood'){F.townSeen=0;delete F.abbeyIntroSeen;G.bossDead=true;goToLevel(2);G.state='play';G.menu=false;return}
   F.townSeen=1;F.abbeyIntroSeen=1;F.gwoodSeen=1;
-  const AREAS={hgtest:[480,10,20,0],hgtrooms:[4960,14,4,2],hgtmaze:[486,106,216,0],hgttank:[487,30,45,0],hgtesttwo:[485,10,50,0],ulb:[482,75,3,2],nibb:[484,75,146,0],exsce:[481,75,147,0],glorm:[483,75,144,0],hollowgrass:[470,75,142,0],hollowland:[364,35,60,0],orangetower:[440,12,14,0],orangeboss:[443,17,19,0],oldhaven:[305,74,141,0],wenlock:[496,95,50,3],yarrim:[290,18,40,1],gardens:[490,45,87,0],witchwood:[520,27,52,0],oakwood:[311,2,36,1],landpath:[400,76,555,0],monasterygate:[411,73,306,0],pilgrim:[400,76,555,0],monastery:[430,42,66,0],bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],khemetracity:[44,201,379,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
+  const AREAS={brackenden:[496,89,8,0],hgtest:[480,10,20,0],hgtrooms:[4960,14,4,2],hgtmaze:[486,106,216,0],hgttank:[487,30,45,0],hgtesttwo:[485,10,50,0],ulb:[482,75,3,2],nibb:[484,75,146,0],exsce:[481,75,147,0],glorm:[483,75,144,0],hollowgrass:[470,75,142,0],hollowland:[364,35,60,0],orangetower:[440,12,14,0],orangeboss:[443,17,19,0],oldhaven:[305,74,141,0],wenlock:[496,95,50,3],yarrim:[290,18,40,1],gardens:[490,45,87,0],witchwood:[520,27,52,0],oakwood:[311,2,36,1],landpath:[400,76,555,0],monasterygate:[411,73,306,0],pilgrim:[400,76,555,0],monastery:[430,42,66,0],bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],khemetracity:[44,201,379,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
   // the Deeper Hollow: the door into the maze, and the landing just before the first boat (the maze is built first, then the spot is read from it)
   {const hgdSpot=(which)=>{try{if(typeof hgBuild==='function'){hgBuild();hgdBuild()}}catch(e){console.error(e)}const L=LEVELS[475];if(!L)return [475,101,198,0];
       if(which==='boat'&&L._hgdb&&L._hgdb.docks&&L._hgdb.docks[0]){const d=L._hgdb.docks[0];return [475,d.ax,d.ay,DIRS.findIndex(q=>q[0]===d.dx&&q[1]===d.dy)]}
@@ -52207,7 +52207,7 @@ khNpc('wlo_letter','A wheelbarrow','kh_ohgard2_3',d=>{const F=wleF();
   return say(F.wlq18a?'An empty wheelbarrow with one cabbage leaf in it and a lot of paw prints around it.':'An old wheelbarrow, with a cabbage leaf in it and a lot of small paw prints around it. The prints go off towards the hedge.',[BYE])},{sc:1});
 khNpc('wlo_hermit','Old Bracken, a hermit','kh_ohfolk3_3',d=>{const F=wleF();
   if(qSt('wlq18')==='active'&&F.wlq18a&&!F.wlq18b){F.wlq18b=1;yrStep('Old Bracken has the letter.');return say("Old Bracken holds the letter in both hands and turns it over, and looks at the paw prints, and his face does something complicated. 'From my sister,' he says. 'Fifteen years. She cannot write, you know, and she sent a fox with it. Or the fox sent itself. I never could tell with that family.' He breaks the wax with a thumbnail, reads for a long moment, and then he laughs, very quietly. 'She says the pie was good. She says nothing else. Tell Meg I said thank you.'",[BYE])}
-  return yrLines('wlo_hermit',["I live in a den. It is a very good den. It has a door, and a roof, and a woodpile, and I have never once had to answer it.","The people of Wenlock leave me bread on the stump. I leave them a nod. It is the fairest trade in the county.","I like it quiet. It is not quiet when you are here, but it is a good sort of not quiet."])},{sc:1});
+  return yrLines('wlo_hermit',["I live in a den. It is a very good den. It has a door, and a roof, and a woodpile, and I have never once had to answer it.","The people of Wenlock leave me bread on the stump. I leave them a nod. It is the fairest trade in the county.","I like it quiet. It is not quiet when you are here, but it is a good sort of not quiet.","There is a little maze at the back of my den. I have walked it for forty years and never got lost, because I know every turn. At the end of it there is a book on a stand. You may read it. I never learned how."])},{sc:1});
 const WLD18=khQD("It is a small thing, and a stupid one, and I have been looking at it for a week. There was a letter in a wheelbarrow at the east end of the back track, last time I went that way, with paw prints all over it, and I cannot read, and I did not like to pick it up. The only person I know who gets letters from a fox is Old Bracken, who lives in the den in the north-east corner, past the end of the track. I do not go that way. It is full of hedge. Would you take it to him? The wheelbarrow is just where the track runs out, and it is a lovely walk, if you do not mind brambles.",
   "Thank you. The east end of the back track, the wheelbarrow, and then the den in the north-east corner. Mind the hedge. It bites.",
   (n,m)=>wleF().wlq18a?'You have the letter. Take it to Old Bracken, in his den in the north-east corner of the town, beyond the end of the back track.':'The letter is in a wheelbarrow at the east end of the back track. Then it is on to Old Bracken, in the north-east corner.',
@@ -64216,6 +64216,93 @@ function wltPass(C){
   C.person('wlt_poacher',41,11,4);     // by the gate of the witch's wood
 }
 WLP_PASSES.push(['thief',C=>wltPass(C)]);
+
+/* ---- src/desert/wenlock_den.js ---- */
+/* ==========================================================================
+   WENLOCK: OLD BRACKEN'S DEN (prefix wld / WLD). The hermit's den in the north-east corner of the town (the painted rock mound at (89,6), Old Bracken stands in front of it at (88,7))
+   now has a real door in it, behind the painted picture (a hidden block of rock, as under the mill). The door leads into room 7098 (a free number in the Wenlock room range 7000 to 7099):
+   a tiny maze, 15 by 15 squares, lit by a few candle lights, with one room at the end. In the room a book stands on a lectern. Reading it teaches Intelligence: the book asks
+   "Add 1 Intelligence point. Which character gets the point?" and the party picks one hero, who gains +1 INT for good (h.int is saved with the game and level-ups only add to it).
+   The book is used up (G.flags.wldBook = 1, so it works with old saves) and crumbles. If the party walks away without choosing, the book stays.
+   The maze has no enemies. Bracken stays outside and never blocks the door (he stands one square to the left of the way in).
+   Test link: ?town=brackenden&lvl=34 (outside the den). Tests: tools/bracken_den_test.py.
+   ========================================================================== */
+const WLD={ID:7098,door:[89,6],x0:89,x1:89,y0:5,y1:6,front:[89,7],W:15,H:15};
+/* the maze: # wall, . floor, 0 the door out. The way in is at the bottom, the book room at the top (x 5 to 9, y 1 to 3, reached from the square (7,4)). Several dead ends. */
+const WLD_MAZE=[
+  '###############',
+  '#...#.....#...#',
+  '#.###.....#.###',
+  '#.#.#.....#...#',
+  '#.#.###.###.###',
+  '#...#...#.#...#',
+  '#.###.#.#.#.###',
+  '#.....#.....#.#',
+  '###.#####.###.#',
+  '#...#.#.#.....#',
+  '###.#.#.#######',
+  '#...#...#.#.#.#',
+  '###.#.###.#.#.#',
+  '#.............#',
+  '#######0#######'];
+const WLD_LIGHTS=[[7,13],[3,13],[11,13],[1,13],[13,13],[7,11],[5,11],[1,11],[3,9],[1,7],[3,7],[5,5],[1,5],[3,5],[9,7],[11,7],[11,5],[9,9],[13,9],[7,7],[7,5],[7,2],[5,1],[9,1],[5,3],[9,3]];
+const WLD_ROOM={x0:5,x1:9,y0:1,y1:3,book:[7,1]};
+function wldF(){return G.flags||(G.flags={})}
+/* ---- the outside: the rock mound gets a door. The picture stays; a hidden block of rock stands under it, with the door in its front. ---- */
+function wldPass(C){
+  const {rows,ch,TM}=C;
+  const im=IMG.wd_rock0;if(!im)return;
+  // take the old plain rock off the ground, and keep the ground in front of the door clear
+  for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(d.k==='wd_rock0'&&d.x===89&&d.y===6)C.decor.splice(i,1)}
+  // the hidden block: a rock face cut from the painted mound itself, low enough to stay behind the picture
+  const wh=.9;
+  const rock=wlwNew('denrock',wh,(x,w,h)=>{const iw=im.width,ih=im.height;x.fillStyle='#6c6454';x.fillRect(0,0,w,h);x.drawImage(im,iw*.08,ih*.42,iw*.22,ih*.5,0,0,w,h)});
+  const dg=wlwDoorGid(T_TILE[rock],WLD.ID);
+  for(let y=WLD.y0;y<=WLD.y1;y++)for(let x=WLD.x0;x<=WLD.x1;x++){
+    if(C.block[y*C.W+x]&&rows[y][x]!=='.')continue;
+    rows[y][x]=ch(x===WLD.door[0]&&y===WLD.door[1]?dg:rock);C.block[y*C.W+x]=1}
+  C.sky.push({x:89.5,y:7.2,k:'wd_rock0',w:2.1,z:0,big:1});
+  for(let y=WLD.y0-1;y<=WLD.y1+3;y++)for(let x=WLD.x0-1;x<=WLD.x1+1;x++)if(!(x===88&&y===7))C.used.add(x+','+y);
+  if(typeof WL_MAPX!=='undefined')WL_MAPX.push({t:"Old Bracken's Den",x:89,y:4,k:'place'});
+}
+WLP_PASSES.push(['den',C=>wldPass(C)]);
+/* ---- the book ---- */
+const WLD_PAGE="A thick old book lies open on the lectern. It is a hermit's notebook about thinking slowly: how to sit still until a hard problem makes sense, how to hold a long list in your head, and how to remember a lesson after hearing it once. Whoever studies it properly will be wiser for the rest of their life. The pages are so old that the book can only be used once.";
+function wldBookRoot(){
+  const F=wldF();
+  if(F.wldBook)return say('The lectern is bare. A little grey dust lies on it where the book was. Its pages have crumbled away.',[BYE]);
+  return say(WLD_PAGE,[['Read on.',()=>wldPrompt()],['Close the book for now.',()=>null]]);
+}
+function wldPrompt(){
+  const F=wldF();if(F.wldBook)return wldBookRoot();
+  const opts=G.heroes.map((h,i)=>[HERO_DEF[i].name,()=>wldGive(i)]);
+  opts.push(['Not yet.',()=>null]);
+  return say('Add 1 Intelligence point. Which character gets the point?',opts);
+}
+function wldGive(i){
+  const F=wldF();if(F.wldBook)return wldBookRoot();
+  const h=G.heroes[i];if(!h)return null;
+  F.wldBook=1;h.int=(h.int||0)+1;
+  try{sfx('level')}catch(e){}
+  msg(`${HERO_DEF[i].name} gains 1 Intelligence (now ${h.int}).`,'#ffe36a');
+  return say(`${HERO_DEF[i].name} studies the book from the first page to the last, and gains 1 Intelligence. It is now ${h.int}. When ${HERO_DEF[i].name} closes the cover, the old pages crumble to dust.`,[BYE]);
+}
+khNpc('wld_book',"The hermit's book",'wl2_church_4',()=>wldBookRoot(),{sc:1});
+/* ---- the rooms ---- */
+function wldMake(){
+  const b={id:'wldden',name:"Old Bracken's Den",room:'cellar',keeper:null,floor:FLOORS.wl2f1?'wl2f1':'wood',wallImg:IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0'};
+  b.tpl=()=>({w:WLD.W,h:WLD.H,floor:b.floor,amb:.3,noExtras:true,lights:WLD_LIGHTS.map(p=>[p[0],p[1]]),build:C=>{
+    for(const [x,y] of [[5,1],[9,1],[5,3],[9,3]])wlinProp(C,'votive',x,y,{npc:undefined});
+    wlinProp(C,'lectern',WLD_ROOM.book[0],WLD_ROOM.book[1],{npc:'wld_book',h:.95});
+  }});
+  const R=khRoom(b,WLD.ID,{to:WL.ID,x:WLD.front[0],y:WLD.front[1],f:2});
+  const L=R.level;
+  L.rows=WLD_MAZE.slice();L.start={x:7,y:13,f:0};L.ceil='tomb';L.diff=80;L.noTele=true;
+  LEVELS[WLD.ID]=L;LEVEL_NAMES[WLD.ID]="Old Bracken's Den";LEVEL_RATING[WLD.ID]=80;
+  return L;
+}
+KH_LAZY[WLD.ID]=()=>{if(!LEVELS[WLD.ID])wldMake()};
+LEVEL_NAMES[WLD.ID]="Old Bracken's Den";LEVEL_RATING[WLD.ID]=80;
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
