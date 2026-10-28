@@ -2652,7 +2652,7 @@ function render3D(){
     let side=0,g=0,guard=0,nHit=1;
     if(TERRACE){nHit=terrTerrace(x,rX,rY);if(nHit===0){zbuf[x]=99;wtop[x]=-1e9;continue}terrCover(nHit,rX,rY,cx,cy)} // terraced town: the ground is walked cell by cell and every wall that can be seen is listed, nearest first
     else{
-    while(guard++<(LEVEL===530?100:64)){
+    while(guard++<(LEVEL===530||LEVEL===9670?100:64)){
       if(sdx<sdy){sdx+=ddx;mx+=stx;side=0}else{sdy+=ddy;my+=sty;side=1}
       if(mx<0||my<0||mx>=MW||my>=MH){g=1;break}
       g=grid[my][mx];if(g>0)break;
@@ -3769,6 +3769,7 @@ function jumpFromUrl(){
   try{for(const tk of ['wenlock','yarrim','thornwick','ironhill','anaea'])for(const c of ['','cellar'])Object.defineProperty(AREAS,'infested'+tk+c,{enumerable:true,configurable:true,get(){return infSpot(c?'cellar':'house',tk)}})}catch(e){console.error(e)} // the same in the other towns: ?town=infestedwenlock&lvl=8 (infested.js)
   try{if(typeof blAreas==='function')blAreas(AREAS)}catch(e){console.error(e)} // the ten places of the Blighted Road (blight_road.js)
   try{Object.defineProperty(AREAS,'blackswill',{enumerable:true,configurable:true,get(){return bswSpot()}})}catch(e){console.error(e)} // the Black Swill's island (blackswill.js)
+  try{for(const w of ['vault','vaultboss'])Object.defineProperty(AREAS,w,{enumerable:true,configurable:true,get(){return typeof vtSpot==='function'?vtSpot(w):[9670,30,44,0]}})}catch(e){console.error(e)} // the Vault of Maldrake: ?town=vault (the garrison picket on the Barrow Hill), ?town=vaultboss (the Sanctum); the party's level comes from vault_story.js (vtSpot)
   if(!AREAS[town]&&town.length>=4){const m=Object.keys(AREAS).filter(k=>k.startsWith(town)||town.startsWith(k));if(m.length===1)town=m[0]} // near-misses like whitedune find the right area
   if(AREAS[town]&&town!=='thornwood'){const [lv,ax,ay,af]=AREAS[town];F.gandrickDead=1;F.northGate=1;F.mayorKilled=1;F.mayorDown=1;F.ironRoad=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};if(lv===44&&LEVELS[44].stub){khEnter(()=>{goToLevel(lv,{x:ax,y:ay,f:af});G.state='play';G.menu=false});return}goToLevel(lv,{x:ax,y:ay,f:af});if(town==='orangeboss'){let tries=0;const iv=setInterval(()=>{const b=LEVEL===lv&&!TP&&G.enemies.find(e=>e.t==='hlboss0');if(b){clearInterval(iv);let py=b.y+3;while(py>b.y+1&&!(G.grid[py]&&G.grid[py][b.x]===0))py--;G.P.x=b.x;G.P.y=py;G.P.f=0;G.P.angT=-Math.PI/2;G.C={x:G.P.x,y:G.P.y,a:G.P.angT}}else if(++tries>100)clearInterval(iv)},100)}G.state='play';G.menu=false;return}
   if(town==='greendale'||town==='anaea'){F.passDone=1;F.passSeen=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};goToLevel(town==='anaea'?33:32,town==='anaea'?sq(ANAEAJ):{x:2,y:36,f:1});G.state='play';G.menu=false;return}
@@ -66405,6 +66406,1132 @@ mplInstall({name:'blight',levels:BL_IDS,draw:blMapDraw,tint:[2,6,0],foot:'You ar
 function blWorldAdd(){try{if(typeof WORLD_LOCS==='undefined'||WORLD_LOCS.find(l=>l.k==='blightroad'))return;const g=WORLD_LOCS.find(l=>l.k==='westgate');if(!g)return;WORLD_LOCS.push({k:'blightroad',n:'The Blighted Lands',lv:BL_ROAD.map(p=>p.id),x:g.x-92,y:g.y+8,ic:'graves'})}catch(e){console.error('bl world',e)}}
 blWorldAdd();
 if(typeof wmwBuild==='function'){const _wb=wmwBuild;wmwBuild=function(){const r=_wb.apply(this,arguments);blWorldAdd();return r}}
+
+/* ---- src/desert/vault_core.js ---- */
+/* ==========================================================================
+   THE VAULT OF MALDRAKE, place 7 of the Blighted Road (levels 9670 to 9678; prefix vt / VT). Core: ids, names, ratings, creatures, items, the lighting and sound of the place, the pale-silver locks,
+   the traps, the road links to the neighbouring places, loading and saving.
+   9670 The Barrow Hill (outside, rated 88)       9671 The Barrow Stair   9672 The Ossuary of the Roll (the ring of coffins)   9673 The Bell Gallery (the bell room)
+   9674 The Silvered Cellars (89)                  9675 The Hall of Underhill   9676 The Stair of Quiet   9677 Maldrake's Sanctum   9678 The Secret Archive.
+   Pictures are the Wenlock graveyard's (gy_art.js, loaded by gyLoad), the Witch's Wood trees, the Orange Spire props (hl_p_*) and Oldhaven's soldiers (kh_*): nothing new is painted.
+   Files: vault_core.js (this), vault_build.js (the floors), vault_hill.js (the hill), vault_boss.js (Maldrake), vault_story.js (people, books, quests, maps, jump links). Notes: tools/VAULT_NOTES.md.
+   THE SEAM WITH THE ROAD FRAMEWORK (src/desert/blight_road.js, written by someone else): this place stands on its own. VT.link = {east:9660, west:9680} are the neighbouring places; VT.arrive says where the party
+   stands when it comes in from the east or the west. The framework may set VT.neighbour(dir) or fill BL_ARRIVE[id] = {east:{x,y,f}, west:{x,y,f}} for each place; if neither exists the place on the other side
+   is entered at its start square, and if it is not there at all the road says that it is closed.
+   ========================================================================== */
+const VT={ID:9670,F:[9671,9672,9673,9674,9675,9676],SANCT:9677,ARCH:9678,LAST:9678,ready:false,loading:null,
+  LV:{9670:88,9671:88,9672:88,9673:88,9674:89,9675:89,9676:89,9677:89,9678:89},
+  NAMES:{9670:'The Barrow Hill',9671:'The Barrow Stair',9672:'The Ossuary of the Roll',9673:'The Bell Gallery',9674:'The Silvered Cellars',9675:'The Hall of Underhill',9676:'The Stair of Quiet',9677:"Maldrake's Sanctum",9678:'The Secret Archive'},
+  link:{east:9660,west:9680},arrive:{east:{x:60,y:45,f:3},west:{x:3,y:45,f:1}},hillBack:{x:34,y:13,f:2}};
+const vtIs=n=>n>=9670&&n<=9678;
+const vtInside=n=>n>=9671&&n<=9678;
+for(const n in VT.LV){LEVEL_RATING[n]=VT.LV[n];LEVEL_NAMES[n]=VT.NAMES[n]}
+const vtF=()=>G.flags.vt||(G.flags.vt={locks:{},ring:[],bells:[],pages:{},hill:0,tr:{},open:{},reach:{},sig:{}});
+const vtLvlK=n=>VT.F.indexOf(n);
+/* ---------- the creatures: the graveyard's dead at rating 88 and 89, three named ones above them ---------- */
+Object.assign(ENEMY_DEF,{
+  vtwarden:{name:'The Barrow Warden',hp:300,dmg:[8,13],hit:.9,w:gyW('boss_0',1.25)*1.05,img:'vti_warden',xp:600,gold:[0,0],speed:1,verb:'hews',boss:true,gy:1,vtb:1,glow:.3},
+  vtsilver:{name:'The Silver Warden',hp:430,dmg:[9,14],hit:.9,w:gyW('boss_2',1.55),img:'vti_silver',xp:600,gold:[0,0],speed:1,verb:'cleaves',boss:true,gy:1,vtb:2,glow:.5},
+  vtmaldrake:{name:'Wystan Maldrake',hp:640,dmg:[9,15],hit:.92,w:.7,img:'vti_maldrake',xp:900,gold:[0,0],speed:1,verb:'smites',boss:true,gy:1,vtb:3,glow:.6,noFlee:1}});
+if(typeof NO_VARY!=='undefined')NO_VARY.push('vtwarden','vtsilver','vtmaldrake');
+if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push('vtwarden','vtsilver','vtmaldrake');
+if(typeof BOSS_GOLD!=='undefined'){BOSS_GOLD.vtwarden=[3600,4400];BOSS_GOLD.vtsilver=[4200,5000];BOSS_GOLD.vtmaldrake=[6000,7500]}
+if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^vtmaldrake/,'cursed',.25],[/^vtsilver/,'shaken',.2],[/^vtwarden/,'bleeding',.2]);
+/* the pictures of the three: the graveyard's knights and the Orange Spire's wizard-king stand in, toned to pale silver (a painted Maldrake of his own is a gap, see tools/VAULT_NOTES.md) */
+function vtTone(src,key,mul,add,sat){
+  const im=IMG[src];if(!im||IMG[key])return;
+  try{const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);const d=x.getImageData(0,0,c.width,c.height),p=d.data;
+    for(let i=0;i<p.length;i+=4){if(p[i+3]<8)continue;const l=p[i]*.3+p[i+1]*.59+p[i+2]*.11,s=sat===undefined?.35:sat,k=Math.pow(p[i+3]/255,3);   // the soft edge of the picture is toned but not brightened, so no halo
+      p[i]=Math.min(255,(l+(p[i]-l)*s)*mul[0]+add[0]*k);p[i+1]=Math.min(255,(l+(p[i+1]-l)*s)*mul[1]+add[1]*k);p[i+2]=Math.min(255,(l+(p[i+2]-l)*s)*mul[2]+add[2]*k)}
+    x.putImageData(d,0,0);IMG[key]=c}catch(e){console.error('vtTone',key,e)}}
+function vtPics(){
+  vtTone('hl_boss0','vti_warden',[1.15,1.22,1.4],[26,30,42],.12);        // the skeleton king of the Orange Spire, silvered and made the old barrow guard
+  vtTone('gyp_boss_2','vti_silver',[1.12,1.18,1.32],[22,28,40],.18);       // the armoured knight, pale as moonlit silver
+  vtTone('hg_wizard','vti_maldrake',[1.08,1.12,1.22],[26,28,36],.2);       // Aldous Wend's figure, leached grey by the silver (the painted pieces are a stand-in)
+  NPC_H.vti_warden=NPC_H.vti_warden||1.25;NPC_H.vti_silver=NPC_H.vti_silver||1.55;NPC_H.vti_maldrake=1.1;
+  IMG.vti_wizard=IMG.vti_maldrake;
+  const aw=(k,h)=>IMG[k]?+(h*IMG[k].width/IMG[k].height).toFixed(2):.7;   // the creature's width from its picture, for the height wanted
+  ENEMY_DEF.vtwarden.w=aw('vti_warden',1.35);ENEMY_DEF.vtsilver.w=aw('vti_silver',1.55);ENEMY_DEF.vtmaldrake.w=aw('vti_maldrake',1.25)}
+/* ---------- the things the party carries ---------- */
+ITEMDEF.vtkey1={n:'Pale Silver Key',k:'quest',t:'Key',ic:'key',c:'#c8d4e4',stack:1,price:0,sw:.2,d:"A key of pale silver. It opens the first pale-silver lock of the Vault of Maldrake, at the south end of the Warden's Hall on the first floor."};
+ITEMDEF.vtsigil={n:'Silver Sigil of Underhill',k:'quest',t:'Key',ic:'ore',c:'#d8e2f0',stack:1,price:0,sw:.2,d:"A flat silver disc stamped with a small house and a well. Three of them open the third pale-silver lock, on the fourth floor of the Vault of Maldrake."};
+ITEMDEF.vtseal={n:"The Sanctum Seal",k:'quest',t:'Key',ic:'ore',c:'#e8eef8',stack:1,price:0,sw:.2,d:"A silver seal on a cord. It opens the last pale-silver lock of the Vault of Maldrake, the door to Maldrake's Sanctum on the sixth floor."};
+ITEMDEF.vtcontract={n:'The Silver Contract',k:'quest',t:'Lore',ic:'book',c:'#d8d0b8',stack:1,price:0,sw:.1,d:"A sheet of grey vellum: the contract between Wystan Maldrake and the Pale Sovereign. The last clause says how it ends. Read all of it aloud to Maldrake in his Sanctum, and he must agree that it is over."};
+ITEMDEF.vtgatekey={n:'The Gate Key of Sale',k:'quest',t:'Key',ic:'key',c:'#e6ecf6',stack:1,price:0,rar:1,sw:.3,d:"A long silver key with a crown for a bow. It opens the great gate of Sale at the west end of the Blighted Road. The Pale Sovereign left it with Maldrake."};
+ITEMDEF.vtring={n:"Maldrake's Silver Ring",k:'quest',t:'Lore',ic:'ring',c:'#e4ecf8',stack:1,price:0,sw:.1,d:"Maldrake's ring, a plain band of pale silver that is always cold. The dead of Underhill walk when it turns. It cannot be taken off, except by killing the one who wears it."};
+ITEMDEF.vtbroken={n:'The Broken Ring',k:'quest',t:'Lore',ic:'ring',c:'#c0c8d4',stack:1,price:0,sw:.1,d:"The two halves of Maldrake's silver ring. It has no power now."};
+for(let i=1;i<=7;i++)ITEMDEF['vtpg'+i]={n:"Maldrake's Journal, page "+i,k:'quest',t:'Lore',ic:'book',c:'#b8a888',stack:1,price:0,sw:.05,d:'A page of the journal of Wystan Maldrake. Read it again at the lectern or desk where you found it.'};
+ITEMDEF.vtpg0={n:'The Roll of Underhill',k:'quest',t:'Lore',ic:'book',c:'#c8b898',stack:1,price:0,sw:.1,d:'The parish roll of Underhill. It lists, in order, the eight villagers the grey fever took first. The eight coffins in the Ring open in that order.'};
+ITEMDEF.vtstaff={n:"Maldrake's Black Staff",k:'weapon',t:'Staff',ic:'staff',c:'#9aa4b8',dmg:[188,262],magic:118,req:{int:74},lvl:89,price:0,rar:1,eff:{bossdmg:.5,daze:.3},sw:.44,d:"The staff of black ash that Maldrake carried. Adds 118 to the power of spells, bosses take 50% more, and one blow in three leaves the foe dazed. Needs level 89."};
+ITEMDEF.vtring2={n:'Ring of the Quiet Silver',k:'ring',t:'Ring',ic:'ring',c:'#cfe0f6',price:0,lvl:89,pas:{ward:16,dodge:.07,regen:.7,mpRegen:.5},int:7,hp:80,rar:1,sw:.1,d:"A clean silver band made from the metal of Maldrake's broken ring. Adds 7 Intelligence and 80 health, every blow on the wearer is 16 lighter, enemies miss 7% more, and wounds and tiredness heal steadily. Needs level 89."};
+ITEMDEF.vtamulet={n:'Underhill Well Ring',k:'ring',t:'Ring',ic:'ring',c:'#b8d0e8',price:0,lvl:88,pas:{ward:10,dodge:.04},hp:60,rar:1,sw:.1,d:"A silver ring stamped with a small well, a keepsake of Underhill. Adds 60 health and every blow on the wearer is 10 lighter. Needs level 88."};
+/* ---------- the spell Maldrake leaves: every hero may learn it (the sympathy ending) ---------- */
+{const id='vtquiet',s={cls:'Vault',lv:88,id,name:'Quiet the Dead',aim:['area',5],fx:[['undead',12,[110,150]],['sleep',3]],d:'Undead within 5 squares flee for 12 rounds or are destroyed outright, and the living cower for 3 rounds. Learned from Maldrake.',col:'#cfe0ff',cost:30,price:0};
+  if(typeof MX!=='undefined'&&!MX.some(m=>m.id===id)){MX.push(s);MX_POWER[id]={lv:s.lv,act:true,cost:s.cost,type:'mx',name:s.name,d:s.d,col:s.col,mx:id,aim:s.aim,fx:s.fx,icn:'sp_c20'}}}
+/* ---------- loading: the pictures first, then the level; the Wenlock graveyard's pictures are used, so they are loaded with it ---------- */
+function vtLoad(){
+  if(VT.loading)return VT.loading;
+  VT.loading=Promise.all([gyLoad(),typeof khLoadAssets==='function'?khLoadAssets():0]).then(()=>{try{gyAlias();vtPics()}catch(e){console.error('vtLoad',e)}VT.ready=true}).catch(e=>{console.error('vtLoad',e);VT.ready=true});
+  return VT.loading}
+{const _g=goToLevel;goToLevel=function(n,entry){
+  if(vtIs(n)&&!VT.ready&&!VT._wait){VT._wait=1;vtLoad().then(()=>{VT._wait=0;goToLevel(n,entry)});return}
+  if(vtIs(n)&&LEVELS[n]===undefined&&KH_LAZY[n])try{KH_LAZY[n]()}catch(e){console.error(e)}
+  const dead=vtIs(n)&&G.lst&&G.lst[n]&&G.lst[n].dead?new Set(G.lst[n].dead):null;
+  const r=_g.call(this,n,entry);
+  try{if(vtIs(n)){
+    if(dead&&G.enemies)G.enemies=G.enemies.filter(e=>!(e.id<ENEMY_SPAWNS.length&&dead.has(e.id)));   // the fallen stay down: nothing returns to a barrow
+    if(typeof vtArrive==='function')vtArrive(n)}}catch(e){console.error('vtArrive',e)}
+  return r}}
+{const _j=jumpToLevel;jumpToLevel=function(n,target){
+  if(vtIs(n)&&!VT.ready&&!VT._wait){VT._wait=1;vtLoad().then(()=>{VT._wait=0;jumpToLevel(n,target)});return}
+  if(vtIs(n)&&target<88)target=88;
+  return _j.apply(this,arguments)}}
+{const _r=restore;restore=function(sv){
+  if(sv&&vtIs(sv.level)&&!VT.ready&&!VT._wait){VT._wait=1;vtLoad().then(()=>{VT._wait=0;restore(sv)});return}
+  return _r.apply(this,arguments)}}
+{const _rn=restoreNow;restoreNow=function(sv){const r=_rn.apply(this,arguments);
+  try{if(vtIs(LEVEL)&&typeof vtArrive==='function')vtArrive(LEVEL)}catch(e){console.error('vt restore',e)}
+  return r}}
+{const _wd=wdDoorLevel;wdDoorLevel=function(n){return _wd.apply(this,arguments)||vtIs(n)}}
+if(typeof TELE_KEEP_HI!=='undefined')TELE_KEEP_HI.add(9670);   // the hill has a stone, the crypt floors none (noTele)
+/* ---------- the look and the sound ---------- */
+{const _w=weatherNow;weatherNow=function(){
+  if(LEVEL===VT.ID)return {id:'fog',n:'Grey blight-mist',fog:.026,haze:.78,dark:.05,mix:.5,col:[196,214,178],text:'A sick grey-green mist lies on the hill. The grass is dead to the root, the barrows are open at the doors, and the crows do not fly. Somewhere low a bell is tolling for nobody.'};
+  if(vtIs(LEVEL))return null;
+  return _w.apply(this,arguments)}}
+if(typeof WIND_AMT!=='undefined'){WIND_AMT[9670]=.42;for(let n=9671;n<=9678;n++)WIND_AMT[n]=.02}
+const VTS={nextCrow:0,nextBell:0,nextDrip:0,nextCreak:0,nextMoan:0,nextWhisper:0};
+function vtsCrow(v){if(!AC||G.mute)return;const n=1+((Math.random()*3)|0),f=500+Math.random()*180;for(let i=0;i<n;i++){tone(f,f*.7,.2,'sawtooth',.03*v,i*.34);nz(.2,.012*v,'bandpass',1500,1000,i*.34+.02)}}
+function vtsBell(v){if(!AC||G.mute)return;const f=146.8;tone(f,f*.995,2.6,'sine',.05*v,0);tone(f*2.4,f*2.38,1.7,'sine',.02*v,0);tone(f*3.9,f*3.9,1.0,'sine',.01*v,0);nz(.5,.004*v,'bandpass',900,600,0)}   // one slow, low toll, far off
+function vtsDrip(v){if(!AC||G.mute)return;const f=900+Math.random()*700;tone(f,f*.6,.12,'sine',.03*v,0);tone(f*.7,f*.5,.14,'sine',.012*v,.1)}
+function vtsCreak(v){if(!AC||G.mute)return;const f=100+Math.random()*60;tone(f,f*1.5,.6,'sawtooth',.02*v,0);tone(f*1.5,f*1.1,.4,'sawtooth',.016*v,.4);nz(.7,.008*v,'bandpass',380,280,0)}
+function vtsMoan(v){if(!AC||G.mute)return;const f=170+Math.random()*60;tone(f,f*.8,1.6,'sine',.02*v,0);tone(f*1.5,f*1.2,1.4,'triangle',.008*v,.2);nz(1.4,.004*v,'bandpass',700,400,0)}
+function vtsTick(){
+  if(!AC||!NB||!MASTER||G.state!=='play'||G.mute||!vtIs(LEVEL)||!SNDOPT.amb)return;
+  const now=AC.currentTime;
+  if(LEVEL===VT.ID){
+    if(now>VTS.nextCrow){VTS.nextCrow=now+8+Math.random()*14;vtsCrow(.5+Math.random()*.5)}
+    if(now>VTS.nextBell){VTS.nextBell=now+19+Math.random()*16;vtsBell(.5+Math.random()*.4)}
+    if(now>VTS.nextCreak){VTS.nextCreak=now+16+Math.random()*24;vtsCreak(.5)}
+  }else{
+    if(now>VTS.nextDrip){VTS.nextDrip=now+3+Math.random()*6;vtsDrip(.5+Math.random()*.5)}
+    if(now>VTS.nextCreak){VTS.nextCreak=now+13+Math.random()*20;vtsCreak(.5+Math.random()*.4)}
+    if(now>VTS.nextMoan){VTS.nextMoan=now+24+Math.random()*30;vtsMoan(.5+Math.random()*.4)}
+    if(LEVEL===9673&&now>VTS.nextBell){VTS.nextBell=now+17+Math.random()*14;vtsBell(.35)}   // the bell gallery rings itself, very faintly
+    if(LEVEL===9675&&now>VTS.nextWhisper){VTS.nextWhisper=now+11+Math.random()*13;vtsMoan(.6)}
+  }}
+{const _ys=yarSoundTick;yarSoundTick=function(){_ys.apply(this,arguments);try{vtsTick()}catch(e){console.error('vts',e)}}}
+/* the lights: lamps take the colour of the floor; the wall torches of each floor are one flame colour, put in the engine's list after setupLights has emptied it */
+{const _sl=setupLights;setupLights=function(){
+  const r=_sl.apply(this,arguments);
+  try{if(vtIs(LEVEL)){const L=LEVELS[LEVEL],V=L&&L._vt;if(V){
+      for(const l of LIGHTS){if(!l.free||l.lamp)continue;const key=Math.floor(l.x)+','+Math.floor(l.y);l.col=V.lcol[key]||V.col;l.kI=V.kI||1.35;l.range2=V.range2||110;l.calm=true}
+      if(V.torches&&V.torch){gyFlames();const T=V.torch;
+        for(const [x,y,f,nar] of V.torches){const d=GYM_D[f],O=nar?.035:TORCH_OUT;
+          LIGHTS.push({x:x+.5+d[0]*(.5+O),y:y+.5+d[1]*(.5+O),ph:hash2(x,y,5)*6.28,key:(y*MW+x)*4+f,taken:false,red:!!T.red,fl:T.fl,col:T.col,o:O,nar:!!nar,range2:150,kI:1.25})}}}}}catch(e){console.error('vt lights',e)}
+  return r}}
+/* ---------- the loot: chests hold potions, mana, gear and gold, better the deeper the floor ---------- */
+if(typeof CONTAINERS!=='undefined'&&!CONTAINERS.includes('gy_chest'))CONTAINERS.push('gy_chest');
+{const _lf=lootFor;lootFor=function(d){
+  if(vtIs(LEVEL)&&d&&d.k==='gy_chest'){
+    const r=q=>hash2(d.x,d.y,900+q+LEVEL),items=[],add=(id,n)=>{if(ITEMDEF[id])items.push({id,n:ITEMDEF[id].stack?(n||1):1})},k=Math.max(0,LEVEL-9670);
+    for(let q=0;q<2+(k>3?1:0);q++)add(potionFor(r(10+q)),1);add('supermana',1+(k>2?1:0));if(r(2)<.6)add('elixir',1);
+    for(let q=0;q<1+(k>3?1:0);q++){const a=typeof armourDrop==='function'?armourDrop(r(20+q)):null;if(a)add(a)}
+    if(typeof ringFor==='function'&&r(3)<.5)add(ringFor(r(4),88+(k>3?1:0)));
+    d.gold=(d.goldAmt||0)||3200+k*400+Math.floor(r(5)*2800);return items}
+  return _lf.apply(this,arguments)}}
+/* ---------- the map names, for the parchment sheets ---------- */
+if(typeof mpmgiKind==='function'){const _k=mpmgiKind;mpmgiKind=function(lv){return lv>=9671&&lv<=9678?'dungeon':lv===9670?'land':_k.apply(this,arguments)}}
+/* ---------- the road: the east and west gates of the hill, to the neighbouring places ---------- */
+function vtNeighbour(dir){
+  const id=VT.link[dir];let at=null,ok=false;
+  try{if(typeof VT.neighbour==='function'){const r=VT.neighbour(dir);if(r){return r}}}catch(e){console.error(e)}
+  try{if(typeof BL_ARRIVE!=='undefined'&&BL_ARRIVE[id]){at=BL_ARRIVE[id][dir==='east'?'west':'east']||null}}catch(e){}
+  ok=!!(LEVELS[id]||(typeof KH_LAZY!=='undefined'&&KH_LAZY[id]));
+  if(ok&&!at){if(!LEVELS[id]&&KH_LAZY[id])try{KH_LAZY[id]()}catch(e){console.error(e)}const L=LEVELS[id];if(L&&L.start)at={x:L.start.x,y:L.start.y,f:L.start.f}}
+  return ok&&at?{id,at}:null}
+function vtRoad(dir){
+  const n=vtNeighbour(dir),name=dir==='east'?'Lanternrest Waystation':'Hollowbell Abbey';
+  if(!n){sfx('locked');msg('The road '+(dir==='east'?'back to '+name:'on to '+name)+' is lost in black fog. (That part of the Blighted Road is not open yet.)','#c8d0b8');return}
+  sfx('door');goToLevel(n.id,n.at)}
+/* ---------- the doors: the pale-silver locks, the stairs, the secret door, the road ---------- */
+const VT_LOCKS={
+  L1:{lvl:9671,name:'The first pale-silver lock',key:'vtkey1',msg:"A gate of grey iron with a pale-silver lock set in it, a disc of cold metal the size of a hand, humming very faintly. The Barrow Warden wears the key.",open:'The Pale Silver Key turns in the lock without a sound, and the disc goes dark. The gate swings in.'},
+  L2:{lvl:9673,name:'The second pale-silver lock',need:'bells',msg:"A gate with a pale-silver lock and no keyhole at all. On the plate beside it: THE PEAL OF UNDERHILL OPENS ME. The five bells of the gallery hang over the hall behind you.",open:'The last bell dies away, and the pale-silver lock opens like an eye.'},
+  L3:{lvl:9674,name:'The third pale-silver lock',need:'sigils',msg:"A tall gate of pale silver with three round seats cut into it, each the size of a small plate. Three sigils of Underhill would fit them. The cellars hold three rooms; each guards one.",open:'The three sigils sit in their seats and the silver round them runs bright. The great gate rolls aside.'},
+  L4:{lvl:9676,name:"The lock of the Sanctum",key:'vtseal',msg:"The last gate of the Vault, bound in pale silver, with a lock shaped like a crown. A seal on a cord would fit it. The Silver Warden walks the stair in front of it, wearing one.",open:"The Sanctum Seal fits the crown-shaped lock. It turns once, and stays turned, and a cold light comes under the gate."}};
+function vtLockOpen(id){const F=vtF();return !!F.locks[id]}
+function vtLockSet(id,quiet){
+  const F=vtF(),L=VT_LOCKS[id],V=LEVELS[L.lvl]&&LEVELS[L.lvl]._vt;if(!F.locks[id])F.locks[id]=1;
+  if(V&&V.locks&&V.locks[id]&&LEVEL===L.lvl&&G.grid&&G.grid[V.locks[id].y])G.grid[V.locks[id].y][V.locks[id].x]=0;
+  if(!quiet){sfx('door');msg(L.open,'#cfe0ff')}}
+function vtLockTry(id){
+  const L=VT_LOCKS[id],F=vtF();
+  if(F.locks[id]){vtLockSet(id,true);return true}
+  if(L.key&&bagCount(L.key)){bagRemove(L.key,1);vtLockSet(id);return true}
+  if(L.need==='bells'&&F.bellsDone){vtLockSet(id);return true}
+  if(L.need==='sigils'&&bagCount('vtsigil')>=3){bagRemove('vtsigil',3);vtLockSet(id);return true}
+  sfx('locked');msg(L.msg,'#c8d4e8');return false}
+{const _k=khBump;khBump=function(nx,ny,g){const d=KH_DOOR[g];
+  if(d&&d.vt){
+    if(d.vt==='lock'){if(vtLockOpen(d.id)){if(G.grid[ny][nx]!==0)G.grid[ny][nx]=0;return true}vtLockTry(d.id);return true}
+    if(d.vt==='road'){vtRoad(d.dir);return true}
+    if(d.vt==='secret'){const F=vtF();if(F.secret){if(G.grid[ny][nx]!==0)G.grid[ny][nx]=0;return true}sfx('bump');msg('A wall of damp stone. Nothing else.','#a8a498');return true}
+    if(d.vt==='ringgate'){const F=vtF();if(F.ringDone){if(G.grid[ny][nx]!==0)G.grid[ny][nx]=0;return true}sfx('locked');msg('A gate of grey iron with no lock and no handle. Eight coffins stand in a ring round a rune behind you. Something here must be done in the right order.','#c8d4e8');return true}
+    if(d.vt==='stair'){sfx('door');const at=typeof d.at==='function'?d.at():d.at;goToLevel(d.lvl,at);return true}
+    return true}
+  return _k.apply(this,arguments)}}
+/* open locks stay open: when the level is loaded, and every frame until the grid has caught up (the grid is made after the level is loaded) */
+{const _u=update;update=function(dt){try{if(vtIs(LEVEL)&&G.state==='play'){const F=G.flags.vt;
+    if(F&&G.vtOpenLv!==LEVEL){G.vtOpenLv=LEVEL;const V=LEVELS[LEVEL]._vt;if(V&&V.locks)for(const id in V.locks)if(F.locks[id]&&G.grid[V.locks[id].y])G.grid[V.locks[id].y][V.locks[id].x]=0;
+      if(V&&V.secret&&F.secret&&G.grid[V.secret.y])G.grid[V.secret.y][V.secret.x]=0;
+      if(V&&V.ringgate&&F.ringDone&&G.grid[V.ringgate.y])G.grid[V.ringgate.y][V.ringgate.x]=0}
+    vtTraps(dt)}}catch(e){console.error('vt update',e)}return _u.apply(this,arguments)}}
+{const _ll=loadLevel;loadLevel=function(n){const r=_ll.apply(this,arguments);G.vtOpenLv=-1;return r}}
+/* ---------- the traps: spike plates (a tile of a different stone, which can be walked round or pressed), and hidden plates that wake the dead ---------- */
+function vtTraps(dt){
+  const L=LEVELS[LEVEL],V=L&&L._vt;if(!V||!V.traps||!V.traps.length)return;const F=vtF(),P=G.P,key=P.x+','+P.y;
+  for(const t of V.traps){
+    const k=LEVEL+':'+t.x+','+t.y;if(F.tr[k])continue;
+    if(t.x===P.x&&t.y===P.y){F.tr[k]=1;vtSpring(t);return}
+    if(t.hidden&&!t.warned){const d=DIRS[P.f],ax=P.x+d[0],ay=P.y+d[1],bx=P.x+d[0]*2,by=P.y+d[1]*2;
+      if((ax===t.x&&ay===t.y)||(bx===t.x&&by===t.y)){t.warned=1;if(vtNotices()){msg('Something about the floor ahead looks wrong. There might be a trap.','#e8d8a0')}}}}}
+function vtNotices(){try{return G.heroes.some((h,i)=>h.alive&&h.hp>0&&(/Thief|Assassin|Ranger|Archer/i.test((HERO_DEF[i]&&HERO_DEF[i].cls)||(h.cls||''))||(h.dex||0)>=14))}catch(e){return false}}
+function vtSpring(t){
+  if(t.kind==='spike'){
+    sfx('bump');G.shake=.5;msg('Click. Spikes shoot up out of the floor.','#e8a090');
+    for(let hi=0;hi<4;hi++){const h=G.heroes[hi];if(!h||!h.alive||h.hp<=0)continue;const front=hi<2,d=Math.max(1,Math.round(h.max*(front?.09:.045)));
+      h.hp-=d;h.hurt=1;msg(HERO_DEF[hi].name+' takes '+d+' from the spikes.','#e8a090');addFloat(portraitX(hi)+19,250,'-'+d,'#e8a090');
+      if(h.hp<=0){h.hp=0;h.alive=false;msg(HERO_DEF[hi].name+' has fallen!','#ff8a7a');try{bondFall(hi)}catch(x){}if(G.sel===hi)nextHero()}}
+    later(1800,()=>msg('The spikes sink back. The plate is safe now.','#c8c0a8'))}
+  else if(t.kind==='ambush'){
+    sfx('door');G.shake=.3;msg('A plate clicks under your boot. Bones rattle in the walls all round you.','#e8c8a0');
+    const spec=t.spawn||['gyskel','gyskel'],P=G.P,free=gyFreeAround({x:P.x,y:P.y},3);
+    spec.forEach((tt,i)=>{const f=free[i];if(f){addEnemy(tt,f[0],f[1],true);const m=G.enemies[G.enemies.length-1];if(m){m.lvl=LEVELS[LEVEL].diff;m.vtAdd=1}}})}}
+/* ---------- the dead of a place stay dead; creatures count for the quests ---------- */
+{const _he=hurtEnemy;hurtEnemy=function(e,dmg){
+  const was=e&&e.hp>0;_he.apply(this,arguments);
+  try{if(was&&e.hp<=0&&vtIs(LEVEL)){const F=vtF();
+    if(LEVEL===VT.ID&&ENEMY_DEF[e.t]&&ENEMY_DEF[e.t].gy&&!ENEMY_DEF[e.t].vtb)G.flags.vtHill=(G.flags.vtHill|0)+1;
+    if(typeof vtDied==='function')vtDied(e)}}catch(x){console.error('vt hurt',x)}}}
+/* a creature of the vault is never lowered or raised: it stands at its floor's rating */
+function vtFoe(L,t,x,y,lvl){L.enemies.push({t,x,y,lvl:lvl||L.diff});return true}
+
+/* ---- src/desert/vault_build.js ---- */
+/* ==========================================================================
+   THE FLOORS OF THE VAULT (levels 9671 to 9678; prefix vt / VTB). One generic maker (vtMake) builds a crypt floor from a plan: rooms carved as rectangles, doors (stairs, pale-silver locks, the secret door),
+   walls from the graveyard's painted brick in the floor's own colour, wall torches of one flame colour, candle niches, floors of the graveyard's stones. Each floor then furnishes itself (its dress function):
+   decor, creatures, lights, traps. Walls and ceilings are 1.5 high so that the engine's wall torches stand at hand height.
+   A decor piece with an npc id is talked to by vault_story.js (khNpc 'vto_...'); the game keeps only a few fields of a piece, so its number i is looked up by square (vtI).
+   ========================================================================== */
+const VTB={WH:1.5,S:.8};
+/* the stone of a spike plate: the dim slate, a little bluer, with a dark seam inset from the edge and a pale rune cross in the middle, so that it can be seen and walked round */
+function vtPlateFloor(){
+  if(FLOORS.vtf_plate)return 'vtf_plate';const src=FLOORS[gyFloorTone('vtf_slate','gyf_slate',1.12,[.82,.95,1.3])];if(!src)return 'gyf_slate';
+  const N=Math.round(Math.sqrt(src.length/4)),d=new Uint8ClampedArray(src);
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){const i=(y*N+x)*4,e=Math.min(x,y,N-1-x,N-1-y),c=Math.min(Math.abs(x-N/2),Math.abs(y-N/2)),dg=Math.abs(x-N/2)+Math.abs(y-N/2);
+    let k=1,add=0;
+    if(e<N*.04)k=.2;                                      // the seam between this stone and the next
+    else if(e<N*.09)add=70;                               // a pale raised rim all round
+    else if(c<2&&e>N*.14)add=95;                          // the rune cross
+    else if(dg<N*.1)add=60;                               // a small bright diamond in the middle
+    else k=1.04;
+    d[i]=Math.min(255,src[i]*k+add*.85);d[i+1]=Math.min(255,src[i+1]*k+add*.95);d[i+2]=Math.min(255,src[i+2]*k+add*1.15)}
+  FLOORS.vtf_plate=d;return 'vtf_plate'}
+/* an iron gate set in the wall: the brick above it, the gate itself over darkness (not over brick, which showed through the bars as a blank pale panel); extra paints on top (the glowing locks) */
+function vtGateTile(brick,WH,tag,gain,rgb,glow){
+  return gyTile('vtdark',WH,{fac:{img:'stairFix_2',i:0,n:1},gain:gain,rgb:rgb,tag:tag,emit:.3,draw:(x,w,h)=>{
+    const im=IMG['gyp_'+brick+'_0'],f=IMG.gyp_stairFix_2,gh=f?f.height*128/f.width:94,top=Math.max(0,h-gh-1);
+    if(im&&top>0){x.save();x.beginPath();x.rect(0,0,w,top);x.clip();for(let yy=0;yy<top;yy+=128)x.drawImage(im,0,yy,128,128);x.restore()}
+    if(glow)glow(x,w,h)}})}
+const VT_SPEC={};
+const vtI=d=>{const L=LEVELS[LEVEL],q=L&&L.decor.find(z=>z.x===d.x&&z.y===d.y&&z.npc===d.npc);return q&&q.i!==undefined?q.i:(d.i||0)};   // the number of a piece, looked up by its square
+/* ---------- the maker ---------- */
+function vtMake(id){
+  if(LEVELS[id])return LEVELS[id];
+  const S=VT_SPEC[id];if(!S)throw new Error('vt: no plan for '+id);
+  gyAlias();vtPics();
+  const W=S.W,H=S.H,WH=VTB.WH,hs=(a,b,c)=>hash2(a,b,c+id),g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
+  for(const r of S.rects)for(let y=r[1];y<=r[3];y++)for(let x=r[0];x<=r[2];x++)g[y][x]='.';
+  const chars={},chMap=new Map();let nextCh=0x300;const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
+  const open=(x,y)=>g[y]&&g[y][x]==='.',near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(open(x+dx,y+dy))return true;return false};
+  const vt=v=>ch(gyTile(S.brick+'_'+v,WH,S.rgb||S.wall?{gain:1.05*(S.wall||1),rgb:S.rgb}:undefined));
+  const VAR=(S.vars||[0,0,0,3,3,5,5,1,0,3,2,4]).map(vt),RIM=[4,5,1,4,2].map(vt);
+  const rimCell=new Set();for(const r of S.rects)for(let y=r[1]-1;y<=r[3]+1;y++)for(let x=r[0]-1;x<=r[2]+1;x++)if(g[y]&&g[y][x]==='#')rimCell.add(y*W+x);
+  const rows=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++){
+    if(g[y][x]==='.'){s+='.';continue}
+    if(!near(x,y)){s+=VAR[0];continue}
+    s+=rimCell.has(y*W+x)&&hs(x,y,3)<.45?RIM[(hs(x,y,4)*RIM.length)|0]:VAR[(hs(x,y,5)*VAR.length)|0]}rows.push(s)}
+  const put=(x,y,c)=>{rows[y]=rows[y].slice(0,x)+c+rows[y].slice(x+1)};
+  const decor=[],enemies=[],items=[],lights=[],lcol={},occ=new Set(),traps=[],locks={},miss=[],V={lcol,col:S.lcol,torch:S.torch,locks,traps,miss,id};
+  const reserved=new Set();   // squares in front of a door: nothing stands there
+  /* ---- the doors ---- */
+  let start=null;const doorSq=[];
+  for(const D of S.doors){
+    const dx=D.x,dy=D.y;let gid;
+    const inner=[[0,-1],[1,0],[0,1],[-1,0]].map(([a,b])=>[dx+a,dy+b]).find(([x,y])=>open(x,y));
+    if(!inner)throw new Error('vt '+id+': door at '+dx+','+dy+' has no floor beside it');
+    if(D.kind==='stair'){
+      gid=gyTile(S.brick+'_0',WH,{fac:{img:'stairFix_0',i:0,n:1},gain:1.1,rgb:S.rgb,tag:'vtstair'+D.to});
+      KH_DOOR[gid]={vt:'stair',lvl:D.to,get at(){return typeof D.at==='function'?D.at():D.at}};
+      }
+    else if(D.kind==='lock'){
+      const L=VT_LOCKS[D.lock],seats=D.lock==='L3'?3:1;
+      gid=vtGateTile(S.brick,WH,'vtlock'+D.lock,1.5,[1.05,1.2,1.6],(x,w,h)=>{
+        for(let s=0;s<seats;s++){const cx=seats===1?64:34+s*30,cy=h-(seats===1?56:62),R=seats===1?11:9;const gr=x.createRadialGradient(cx,cy,1,cx,cy,R+5);gr.addColorStop(0,'rgba(235,246,255,1)');gr.addColorStop(.45,'rgba(160,200,250,.75)');gr.addColorStop(1,'rgba(90,130,200,0)');
+          x.fillStyle=gr;x.beginPath();x.arc(cx,cy,R+5,0,6.3);x.fill();x.strokeStyle='rgba(240,248,255,1)';x.lineWidth=1.8;x.beginPath();x.arc(cx,cy,R*.55,0,6.3);x.stroke();x.beginPath();x.arc(cx,cy,R,0,6.3);x.stroke()}});
+      KH_DOOR[gid]={vt:'lock',id:D.lock};locks[D.lock]={x:dx,y:dy}}
+    else if(D.kind==='secret'){
+      gid=gyTile(S.brick+'_'+(D.v===undefined?2:D.v),WH,{gain:1.05*(S.wall||1),rgb:[(S.rgb||[1,1,1])[0],(S.rgb||[1,1,1])[1],(S.rgb||[1,1,1])[2]+.00031],tag:'vtsecret'});
+      KH_DOOR[gid]={vt:'secret'};V.secret={x:dx,y:dy}}
+    else if(D.kind==='ringgate'){
+      gid=vtGateTile(S.brick,WH,'vtring',1.35,[1.0,1.05,1.3]);
+      KH_DOOR[gid]={vt:'ringgate'};V.ringgate={x:dx,y:dy}}
+    else if(D.kind==='road'){
+      gid=gyTile('texGrey_1',2.4,{fac:{img:'gatesC_0',i:0,n:1},gain:1.1,tag:'vtroad'+D.dir});
+      KH_DOOR[gid]={vt:'road',dir:D.dir}}
+    put(dx,dy,ch(gid));doorSq.push([dx,dy,inner[0],inner[1]]);reserved.add(inner[0]+','+inner[1]);occ.add(inner[0]+','+inner[1]);
+    {const f=inner[1]>dy?2:inner[1]<dy?0:inner[0]>dx?1:3;if(D.down)V.downAt={x:inner[0],y:inner[1],f};if(D.start)start={x:inner[0],y:inner[1],f}}}
+  /* ---- the helpers a floor's dress function uses ---- */
+  const free=(x,y)=>open(x,y)&&!occ.has(x+','+y);
+  const dec=(a,x,y,o)=>{o=o||{};const kk=GYA[a]?'gy_'+a:a;if(!open(x,y)){miss.push(a+'@'+x+','+y);return null}
+    const d={k:kk,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}d.sc=(o.sc||1)*(o.raw?1:VTB.S);if(o.npc){d.npc=o.npc;d.deco=false;if(o.block)d.solid=1}
+    if(o.i!==undefined)d.i=o.i;if(o.wd)d.wd=o.wd;if(o.txt)d.txt=o.txt;if(o.goldAmt)d.goldAmt=o.goldAmt;if(o.ox!==undefined){d.ox=o.ox;d.oy=o.oy}decor.push(d);occ.add(x+','+y);return d};
+  const sign=(x,y,wd,a,b)=>{if(!open(x,y)){miss.push('sign@'+x+','+y);return}decor.push({k:'sign_gy',x,y,block:false,wd,txt:[a,b||''],sc:1})};
+  const foe=(t,x,y,lvl)=>{if(!open(x,y)||(occ.has(x+','+y)&&!reserved.has(x+','+y))){miss.push('foe '+t+'@'+x+','+y);return false}enemies.push({t,x,y,lvl:lvl||S.diff});occ.add(x+','+y);return true};
+  const light=(x,y,col)=>{if(!open(x,y)){miss.push('light@'+x+','+y);return}lights.push([x,y]);if(col)lcol[x+','+y]=col};
+  const trap=(kind,x,y,o)=>{if(!open(x,y)){miss.push('trap@'+x+','+y);return}traps.push(Object.assign({kind,x,y,hidden:kind==='ambush'},o||{}))};
+  const fm=[];for(let y=0;y<H;y++)fm.push(new Array(W).fill(S.floorDef||'0'));
+  const setF=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(open(x,y))fm[y][x]=f};
+  const C={id,S,W,H,g,rows,open,free,dec,sign,foe,light,trap,setF,decor,enemies,lights,lcol,occ,traps,V,rng:(a,b)=>hash2(a,b,id*3),start:null};
+  S.dress(C);
+  /* ---- the way in: the arrival square ---- */
+  /* ---- wall torches of this floor's colour: along the way, every few squares, in the rooms more often; none beside a lock or a stair ---- */
+  const torches=[];
+  {const blk=new Set();for(const d of decor)if(d.block)blk.add(d.x+','+d.y);const skip=doorSq.map(q=>[q[0],q[1]]);
+   const cand=[];
+   for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(open(x,y)||rows[y][x]==='.'||skip.some(q=>Math.hypot(q[0]-x,q[1]-y)<2.2))continue;
+     for(let f=0;f<4;f++){const nx=x+GYM_D[f][0],ny=y+GYM_D[f][1];if(!open(nx,ny)||blk.has(nx+','+ny))continue;
+       const d4=GYM_D.filter(([a,b])=>open(nx+a,ny+b)).length,nar=(!open(nx-1,ny)&&!open(nx+1,ny))||(!open(nx,ny-1)&&!open(nx,ny+1));
+       cand.push({x,y,f,nar,pri:d4>=3?1:d4===2?2:3,h:hs(x,y,f*7)})}}
+   cand.sort((a,b)=>a.pri-b.pri||a.h-b.h);
+   const nearT=(c,gp)=>torches.some(t=>Math.hypot(t[0]-c.x,t[1]-c.y)<gp);
+   for(const c of cand){const gp=c.nar?3.4:2.7;if(nearT(c,gp))continue;torches.push([c.x,c.y,c.f,c.nar?1:0])}}
+  V.torches=torches;
+  /* ---- candle niches: a few alcoves cut into the walls of the halls ---- */
+  {const tk=new Set(torches.map(t=>t[0]+','+t[1])),NIL=gyTile(S.brick+'_0',WH,{fac:{img:'cryptD_3',i:0,n:1},gain:.92*(S.wall||1),rgb:S.rgb,tag:'vtniche'+id,draw:(x,w,h)=>{
+     const c=IMG.gyp_cryptD_2;x.globalCompositeOperation='lighter';const gr=x.createRadialGradient(64,h-62,2,64,h-62,46);gr.addColorStop(0,'rgba(255,170,70,.2)');gr.addColorStop(1,'rgba(255,140,40,0)');x.fillStyle=gr;x.fillRect(0,h-120,w,120);x.globalCompositeOperation='source-over';
+     if(c)x.drawImage(c,0,0,c.width,c.height*.5,46,h-84,36,25)}}),cand=[];
+   const nearDoor=(x,y)=>doorSq.some(q=>Math.hypot(q[0]-x,q[1]-y)<3.2);
+   for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(open(x,y)||rows[y][x]==='.'||tk.has(x+','+y)||nearDoor(x,y))continue;
+     const ns=GYM_D.filter(([a,b])=>open(x+a,y+b));if(ns.length!==1)continue;const [a,b]=ns[0],nx=x+a,ny=y+b;
+     if(torches.some(t=>Math.hypot(t[0]-x,t[1]-y)<1.6)||occ.has(nx+','+ny))continue;cand.push({x,y,nx,ny,h:hs(x,y,95)})}
+   cand.sort((p,q)=>p.h-q.h);const nic=[];
+   for(const c of cand){if(nic.length>=(S.niches===undefined?10:S.niches))break;if(nic.some(n=>Math.hypot(n.x-c.x,n.y-c.y)<5))continue;nic.push(c);put(c.x,c.y,ch(NIL));light(c.nx,c.ny,[1.15,.8,.42])}}
+  /* ---- a lamp every few squares where none is near ---- */
+  {const have=lights.slice();for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!open(x,y))continue;if(have.every(l=>Math.hypot(l[0]-x,l[1]-y)>=(S.lampGap||5.2))){have.push([x,y]);lights.push([x,y]);lcol[x+','+y]=S.lcol}}}
+  /* ---- floors ---- */
+  const fb0=gyFloorTone('vtf_'+id+'a',GY_FLOORSET[S.fl0===undefined?3:S.fl0],S.fgain||.5,S.ftint||[.9,.93,1]),fb1=gyFloorTone('vtf_'+id+'b',GY_FLOORSET[S.fl1===undefined?5:S.fl1],S.fgain1||.7,S.ftint||[.9,.93,1]),
+    fw0=gyFloorWet('vtf_'+id+'w',fb0,S.lcol,id%97+3),fSet=[fb0,fb1,fw0,gyFloorTone('gyf_cflag','gyf_flag',.46,[.88,.92,1]),vtPlateFloor(),fb0];
+  const fmS=fm.map(r=>r.join(''));
+  const names=S.names||[];
+  const L={rows,chars,fmap:fmS,floorSet:fSet,floor:fb0,floor2:fb1,ceil:S.ceil||'gyc_crypt',ceilH:WH,start,enemies,items,decor,lights,portals:[],day:0,amb:S.amb===undefined?.02:S.amb,torchGap:1e9,noTele:true,noExtras:true,
+    name:VT.NAMES[id],label:VT.NAMES[id],diff:S.diff,mapNames:names,_vt:V};
+  V.start=start;V.floorsN=fSet.length;
+  LEVELS[id]=L;LEVEL_NAMES[id]=VT.NAMES[id];LEVEL_RATING[id]=S.diff;
+  if(miss.length)console.warn('vt '+id+' missed: '+miss.join(' '));
+  return L}
+for(const id of [9671,9672,9673,9674,9675,9676,9677,9678])KH_LAZY[id]=((n)=>()=>vtMake(n))(id);
+/* the ASCII of a floor, for the tests and for the notes: # wall, . floor, D door, letters for pieces */
+function vtAscii(id){
+  const L=LEVELS[id]||(KH_LAZY[id]&&(KH_LAZY[id](),LEVELS[id]));if(!L)return '';const rows=L.rows.map(r=>r.split('').map(c=>c==='.'?'.':'#'));
+  for(const [k,gid] of Object.entries(L.chars)){const d=KH_DOOR[gid];if(!d)continue;for(let y=0;y<rows.length;y++)for(let x=0;x<L.rows[y].length;x++)if(L.rows[y][x]===k)rows[y][x]=d.vt==='lock'?'L':d.vt==='stair'?'S':d.vt==='secret'?'?':d.vt==='ringgate'?'R':'D'}
+  for(const d of L.decor){if(d.k==='sign_gy')continue;const c=d.npc?'N':d.block?'o':'-';if(rows[d.y][d.x]==='.'||rows[d.y][d.x]==='-')rows[d.y][d.x]=c}
+  for(const e of L.enemies)rows[e.y][e.x]=/^vt/.test(e.t)?'B':'e';
+  for(const t of (L._vt&&L._vt.traps)||[])rows[t.y][t.x]=t.kind==='spike'?'^':'x';
+  return rows.map(r=>r.join('')).join('\n')}
+/* the self-check: from the arrival square with every lock shut, what can be reached; used by the tests */
+function vtReach(id,opts){
+  const L=LEVELS[id]||(KH_LAZY[id]&&(KH_LAZY[id](),LEVELS[id]));opts=opts||{};const W=L.rows[0].length,H=L.rows.length,bs=new Set();
+  for(const d of L.decor)if(d.block||(d.npc&&d.solid))bs.add(d.x+','+d.y);
+  const gate=(x,y)=>{if(!opts.thru)return false;const c=L.rows[y][x],d=c!=='.'&&KH_DOOR[L.chars[c]];return !!(d&&(d.vt==='lock'||d.vt==='secret'||d.vt==='ringgate'))};   // with thru, the locks and the secret door count as open
+  const seen=new Set([L.start.x+','+L.start.y]),q=[[L.start.x,L.start.y]];
+  for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of GYM_D){const nx=x+a,ny=y+b,k=nx+','+ny;if(seen.has(k)||nx<0||ny<0||nx>=W||ny>=H||(L.rows[ny][nx]!=='.'&&!gate(nx,ny))||bs.has(k))continue;seen.add(k);q.push([nx,ny])}}
+  const open=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(L.rows[y][x]==='.'&&!seen.has(x+','+y)&&!bs.has(x+','+y))open.push([x,y]);
+  return {seen,unreached:open}}
+
+/* ---- src/desert/vault_floors.js ---- */
+/* ==========================================================================
+   THE PLANS OF THE FLOORS (prefix vtp). Each plan: size, the rooms (rectangles x0,y0,x1,y1), the doors, the look, the names of the places for the map, and a dress function that furnishes it.
+   Coordinates are squares, x across and y down. The marks used in the pieces: npc ids 'vto_...' are talked to in vault_story.js (i is the number of the page, bell, coffin, sign and so on).
+   ========================================================================== */
+const vtDown=(to)=>()=>{vtMake(to);return LEVELS[to].start};          // the way down arrives at the start of the next floor
+const vtUp=(from)=>()=>{vtMake(from);return LEVELS[from]._vt.downAt};  // the way up arrives beside the stair down of the floor above
+const P_BRAZ=['hl_p_candle'];
+/* ===== 9671 THE BARROW STAIR: the way in, the Hall of Guards, the Warden's Hall and the first pale-silver lock ===== */
+VT_SPEC[9671]={W:29,H:29,diff:88,brick:'texGrey',rgb:[.95,.97,1.03],lcol:[1.5,.95,.55],torch:{fl:0,col:[1.5,.9,.45],name:'orange',css:'#e8923a'},fgain:.52,
+  rects:[[11,2,17,5],[13,6,15,8],[5,9,23,15],[4,12,4,12],[1,9,3,15],[24,12,24,12],[25,9,27,15],[13,16,15,18],[8,19,20,24],[14,26,14,27]],
+  doors:[{x:14,y:1,kind:'stair',to:VT.ID,at:()=>VT.hillBack,start:true},{x:14,y:25,kind:'lock',lock:'L1'},{x:14,y:28,kind:'stair',to:9672,at:vtDown(9672),down:true}],
+  names:[{t:'The Vestibule',x:14,y:3,k:'place'},{t:'The Hall of Guards',x:14,y:12,k:'place'},{t:'The Cells',x:2,y:12,k:'place'},{t:"The Scribe's Alcove",x:26,y:12,k:'place'},{t:"The Warden's Hall",x:14,y:21,k:'place'},{t:'The First Lock',x:14,y:25,k:'place'}],
+  dress(C){const {dec,sign,foe,light,trap}=C;
+    sign(12,2,[0,-1],'THE VAULT OF MALDRAKE','Barrows of Underhill');sign(16,2,[0,-1],'CLOSED BY THE GARRISON','Do not go down alone');
+    dec('candles',11,5,{block:true,sc:.8});dec('candles',17,5,{block:true,sc:.8});light(14,3,[1.5,1,.6]);
+    dec('bones',12,4,{sc:.7});dec('web',11,2,{sc:.5});dec('web',17,2,{sc:.5});
+    // the Hall of Guards: sarcophagi down both sides, candles, cobwebs
+    let n=0;for(const x of [7,10,18,21])for(const y of [9,15])dec('sarc',x,y,{block:true,npc:'vto_sarc',i:n++});
+    dec('candles',6,12,{block:true,sc:.8});dec('candles',22,12,{block:true,sc:.8});
+    for(const [x,y] of [[9,12],[14,11],[19,12],[14,14]])light(x,y,[1.45,.9,.55]);
+    for(const [x,y] of [[5,9],[23,9],[5,15],[23,15],[12,9],[16,15]])dec('web',x,y,{sc:.55});
+    for(const [x,y] of [[8,13],[15,10],[20,14]])dec('bones',x,y,{sc:.8});
+    sign(8,9,[0,-1],'THE HALL OF GUARDS','They have kept watch a long time');
+    trap('ambush',14,12,{spawn:['gyskel','gypike']});
+    // the cells: the garrison's one survivor
+    for(const [x,y] of [[1,10],[3,10],[1,14],[3,14]])dec('hl_p_cage',x,y,{block:true,npc:'vto_cage',sc:.9,raw:true});
+    dec('bones',1,12,{sc:.8});dec('bones',3,13,{sc:.7});light(2,12,[1.45,.95,.6]);
+    {const kp=KH_KEEPERS.vto_fenn;if(kp){const d=dec(khFaceKey(kp.face),2,12,{block:false,npc:'vto_fenn',raw:true});if(d)d.sc=kp.sc||1}}
+    // the Scribe's Alcove: the first page of the journal, a chest, a shelf
+    dec('hl_p_lectern',26,10,{block:true,npc:'vto_book',i:1,raw:true,sc:.9});dec('hl_p_shelf',26,13,{block:true,npc:'vto_shelf',raw:true,sc:1});dec('chest',27,14,{block:true});light(26,12,[1.4,.95,.6]);
+    dec('bones',25,15,{sc:.8});dec('candles',25,9,{block:true,sc:.7});
+    // the way to the Warden: two spike plates in a passage of three, hidden warnings, then the Warden's Hall
+    trap('spike',13,17);trap('spike',15,17);light(14,17,[1.4,.9,.55]);C.setF(13,17,13,17,'4');C.setF(15,17,15,17,'4');
+    sign(14,16,[0,-1],'MIND THE FLOOR','The middle is the way');
+    dec('candles',8,19,{block:true,sc:.8});dec('candles',20,19,{block:true,sc:.8});dec('candles',8,24,{block:true,sc:.8});dec('candles',20,24,{block:true,sc:.8});
+    for(const [x,y] of [[8,21],[8,22],[20,21],[20,22]])dec('sarc',x,y,{block:true,npc:'vto_sarc',i:n++});
+    for(const [x,y] of [[14,20],[10,23],[18,23],[14,24],[14,26]])light(x,y,[1.5,.95,.55]);
+    foe('vtwarden',14,22);foe('gypike',11,22);foe('gypike',17,22);
+    // the dead of the hall
+    for(const [t,x,y] of [['gyskel',8,10],['gyskel',12,10],['gyskel',16,10],['gyskel',20,11],['gyskel',11,14],['gyskel',17,14],['gypike',9,13],['gypike',19,13],['gybmage',14,15]])foe(t,x,y);
+    foe('gyghoul',26,11);foe('gyghoul',26,15);foe('gyskel',2,10)||0;
+    C.setF(8,19,20,24,'3')}};
+/* ===== 9672 THE OSSUARY OF THE ROLL: the Roll of Underhill and the ring of eight coffins ===== */
+const VT_RING={names:[['PIERS COBB','45, smith'],['EDDA MARL','9, the miller\'s daughter'],['NAN PELTER','40, midwife'],['BROTHER ALDER','52, priest of Underhill'],['OLD JOSS THATCHER','74'],['NELL BRIGHT','19, shepherdess'],['WAT BRAMBLE','33, ferryman'],['DAME ORLA FENN','68, widow']],
+  pos:[[15,15],[19,16],[21,19],[19,22],[15,23],[11,22],[9,19],[11,16]],order:[1,4,2,6,7,0,5,3]};   // the order of death is the order to open them: Edda, Joss, Nan, Wat, Orla, Piers, Nell, Brother Alder
+VT_SPEC[9672]={W:31,H:32,diff:88,brick:'texBone',lcol:[1.35,1.2,.62],torch:{fl:4,col:[1.45,1.25,.4],name:'yellow',css:'#f2d23c'},fgain:.6,wall:.9,ftint:[.95,.95,.98],
+  rects:[[13,2,17,3],[14,4,16,4],[10,5,20,9],[8,7,9,7],[2,5,7,9],[21,7,22,7],[23,5,28,9],[15,10,15,12],[7,13,23,25],[15,27,15,29]],
+  doors:[{x:15,y:1,kind:'stair',to:9671,at:vtUp(9671),start:true},{x:15,y:26,kind:'ringgate'},{x:15,y:30,kind:'stair',to:9673,at:vtDown(9673),down:true}],
+  names:[{t:'The Vestibule',x:15,y:3,k:'place'},{t:'The Reading Room',x:15,y:7,k:'place'},{t:"The Gravedigger's Rest",x:4,y:7,k:'place'},{t:'The Cold Store',x:26,y:7,k:'place'},{t:'The Ring of Coffins',x:15,y:19,k:'place'},{t:'The Coffin Gate',x:15,y:26,k:'place'}],
+  dress(C){const {dec,sign,foe,light,trap}=C;
+    sign(14,2,[0,-1],'THE OSSUARY OF THE ROLL','Read the Roll before you open a lid');dec('candles',13,3,{block:true,sc:.75});dec('candles',17,3,{block:true,sc:.75});light(15,3,[1.35,1.2,.6]);
+    // the Reading Room
+    dec('hl_p_lectern',15,6,{block:true,npc:'vto_book',i:0,raw:true,sc:.9});dec('candles',11,5,{block:true,sc:.8});dec('candles',19,5,{block:true,sc:.8});
+    let n=0;for(const [x,y] of [[11,9],[13,9],[17,9],[19,9]])dec('sarc',x,y,{block:true,npc:'vto_sarc',i:n++});
+    for(const [x,y] of [[12,7],[18,7],[15,8]])light(x,y,[1.35,1.2,.6]);for(const [x,y] of [[10,5],[20,9],[10,9]])dec('web',x,y,{sc:.55});
+    foe('gyskel',12,6);foe('gyskel',18,6);foe('gyghoul',15,8);
+    // the Gravedigger's Rest: a chest guarded by two plates, a tally on the desk
+    dec('hl_p_desk',3,5,{block:true,npc:'vto_book',i:2,raw:true,sc:.9});dec('chest',4,9,{block:true});trap('spike',4,8);trap('spike',3,9);C.setF(4,8,4,8,'4');C.setF(3,9,3,9,'4');
+    dec('bones',6,6,{sc:.8});dec('bones',2,8,{sc:.8});dec('hl_p_candle',7,5,{block:true,sc:.6,raw:true});light(4,7,[1.35,1.15,.6]);
+    sign(5,5,[0,-1],"THE GRAVEDIGGER'S REST","Tally of the dead, in his own hand");
+    foe('gyzombie',5,7);foe('gyzombie',3,7);
+    // the Cold Store: biers and a chest
+    for(const [x,y] of [[24,6],[26,6],[24,8],[26,8]])dec('sarc',x,y,{block:true,npc:'vto_sarc',i:n++});dec('chest',28,5,{block:true});light(26,7,[1.35,1.2,.6]);dec('web',23,5,{sc:.55});dec('bones',28,9,{sc:.8});
+    foe('gyghoul',25,7);foe('gyghoul',27,7);foe('gybmage',27,9);
+    // the corridor and the Ring of Coffins
+    light(15,11,[1.35,1.2,.6]);sign(14,13,[0,-1],'THE RING','Eight lids, one order');
+    VT_RING.pos.forEach(([x,y],i)=>dec('hl_p_coffin',x,y,{block:true,npc:'vto_coffin',i,raw:true,sc:.95}));
+    dec('rune',15,19,{block:true,npc:'vto_rune',raw:true,sc:1.0});
+    for(const [x,y] of [[13,13],[17,13],[9,14],[21,14],[9,24],[21,24],[13,24],[17,24]])dec('candles',x,y,{block:true,sc:.75});
+    for(const [x,y] of [[15,17],[13,19],[17,19],[15,21],[10,15],[20,15],[10,23],[20,23],[12,18],[18,18]])light(x,y,[.75,1.1,1.5]);
+    for(const [x,y] of [[7,13],[23,13],[7,25],[23,25]])dec('web',x,y,{sc:.6});
+    foe('gyskel',9,17);foe('gyskel',21,21);foe('gyghoul',12,20);foe('gyskel',18,14);
+    C.setF(7,13,23,25,'3');C.setF(14,18,16,20,'2');
+    light(15,27,[.75,1.1,1.5]);light(15,29,[.75,1.1,1.5])}};
+/* ===== 9673 THE BELL GALLERY: five bells hang along the north wall; the peal of Underhill opens the second lock ===== */
+const VT_BELLS={names:['The Miller\'s Bell','The Great Bell','The Child\'s Bell','The Priest\'s Bell','The Widow\'s Bell'],sub:['Cast for the mill, the deepest of the five','Cast last, and never rung alone','Cast for the youngest of the parish','Cast for the one who buried the rest','Cast for the ones who stayed behind'],
+  xs:[7,12,17,22,27],order:[2,4,0,3,1],freq:[196,110,392,262,329]};   // the child, the widow, the miller, the priest, then the Great Bell
+VT_SPEC[9673]={W:33,H:26,diff:88,brick:'texBlack',lcol:[.5,.8,1.5],torch:{fl:3,col:[.45,.8,1.7],name:'blue',css:'#4f9cff'},fgain:.55,ftint:[.85,.92,1.1],ceil:'gyc_2',
+  rects:[[14,2,18,4],[15,5,17,5],[3,6,29,13],[15,14,17,15],[12,16,20,19],[16,21,16,23],[6,14,6,15],[2,16,10,22],[26,14,26,15],[24,16,30,22]],
+  doors:[{x:16,y:1,kind:'stair',to:9672,at:vtUp(9672),start:true},{x:16,y:20,kind:'lock',lock:'L2'},{x:16,y:24,kind:'stair',to:9674,at:vtDown(9674),down:true}],
+  names:[{t:'The Vestibule',x:16,y:3,k:'place'},{t:'The Bell Gallery',x:16,y:9,k:'place'},{t:"The Ringers' Room",x:6,y:19,k:'place'},{t:"The Founder's Loft",x:27,y:19,k:'place'},{t:"The Founder's Landing",x:16,y:17,k:'place'},{t:'The Second Lock',x:16,y:20,k:'place'}],
+  dress(C){const {dec,sign,foe,light,trap}=C;
+    sign(15,2,[0,-1],'THE BELL GALLERY','Five bells. One peal.');dec('candles',14,4,{block:true,sc:.75});dec('candles',18,4,{block:true,sc:.75});light(16,3,[.55,.85,1.5]);
+    // the five bells, with the plate of each hung beside it on the wall
+    VT_BELLS.xs.forEach((x,i)=>{const big=i===1;dec(big?'wm_bell':'bell',x,6,{block:true,npc:'vto_bell',i,raw:true,sc:big?1.5:[2.4,0,1.7,2.1,2.0][i]});sign(x,6,[0,-1],VT_BELLS.names[i].toUpperCase(),VT_BELLS.sub[i])});
+    for(const x of [9,14,19,24])dec('column',x,9,{block:true,sc:.75});
+    for(const [x,y] of [[3,6],[29,6],[3,13],[29,13]])dec('candles',x,y,{block:true,sc:.8});
+    for(const [x,y] of [[6,8],[12,8],[17,8],[22,8],[27,8],[8,12],[16,12],[24,12]])light(x,y,[.5,.85,1.5]);
+    for(const [x,y] of [[4,7],[28,7],[10,13],[20,13]])dec('web',x,y,{sc:.55});for(const [x,y] of [[5,11],[26,11],[14,12]])dec('bones',x,y,{sc:.8});
+    trap('ambush',16,11,{spawn:['gyshade','gywraith']});
+    // the Ringers' Room: the third page, a chest, plates
+    dec('hl_p_lectern',3,17,{block:true,npc:'vto_book',i:3,raw:true,sc:.9});dec('chest',9,21,{block:true});dec('sacks',9,17,{block:false,sc:.8,raw:true});dec('sacks',2,21,{block:false,sc:.8,raw:true});
+    trap('spike',8,21);trap('spike',9,20);C.setF(8,21,8,21,'4');C.setF(9,20,9,20,'4');light(6,19,[.5,.85,1.5]);
+    sign(5,16,[0,-1],"THE RINGERS' ROOM",'Ropes, a ledger, a bench');dec('hl_p_candle',5,22,{block:true,sc:.6,raw:true});
+    // the Founder's Loft
+    dec('hl_p_desk',29,17,{block:true,npc:'vto_book',i:21,raw:true,sc:.9});dec('chest',29,21,{block:true});dec('sacks',25,21,{sc:.8,raw:true});light(27,19,[.5,.85,1.5]);
+    sign(27,16,[0,-1],"THE FOUNDER'S LOFT",'Where the bells were cast');dec('bones',25,17,{sc:.8});
+    // the landing and the lock
+    for(const [x,y] of [[12,16],[20,16]])dec('candles',x,y,{block:true,sc:.75});trap('spike',14,18);trap('spike',18,17);C.setF(14,18,14,18,'4');C.setF(18,17,18,17,'4');light(16,17,[.55,.85,1.5]);light(16,22,[.55,.85,1.5]);
+    sign(16,16,[0,-1],'THE SECOND LOCK','The peal opens it');
+    // the dead of the gallery
+    for(const [t,x,y] of [['gywraith',6,10],['gywraith',16,8],['gywraith',26,10],['gyshade',10,11],['gyshade',22,11],['gyshade',14,7],['gybanshee',20,9],['gybanshee',8,8],['gyshade',5,19],['gyshade',8,18],['gywraith',27,18],['gybanshee',28,20],['gywraith',14,17],['gywraith',18,19]])foe(t,x,y);
+    C.setF(3,6,29,13,'3')}};
+/* ===== 9674 THE SILVERED CELLARS: where the Sovereign's silver was kept; three rooms each guard a sigil; the third lock wants all three ===== */
+VT_SPEC[9674]={W:35,H:30,diff:89,brick:'texGrey',rgb:[.9,1,1.22],lcol:[.78,.72,1.45],torch:{fl:2,col:[.56,.36,.74],name:'purple',css:'#b06cf0'},fgain:.58,ftint:[.9,.9,1.12],ceil:'gyc_1',
+  rects:[[15,2,19,4],[17,5,17,7],[12,8,22,16],[8,12,11,12],[1,8,7,16],[23,12,26,12],[27,8,33,16],[13,17,13,21],[2,22,14,28],[21,18,21,25]],
+  doors:[{x:17,y:1,kind:'stair',to:9673,at:vtUp(9673),start:true},{x:21,y:17,kind:'lock',lock:'L3'},{x:21,y:26,kind:'stair',to:9675,at:vtDown(9675),down:true}],
+  names:[{t:'The Vestibule',x:17,y:3,k:'place'},{t:'The Counting Hall',x:17,y:12,k:'place'},{t:'The Room of Needles',x:4,y:12,k:'place'},{t:"The Hounds' Den",x:30,y:12,k:'place'},{t:'The Silvered Hall',x:8,y:25,k:'place'},{t:'The Third Lock',x:21,y:17,k:'place'}],
+  dress(C){const {dec,sign,foe,light,trap}=C;
+    sign(16,2,[0,-1],'THE SILVERED CELLARS','Counted, weighed and paid out');dec('candles',15,4,{block:true,sc:.75});dec('candles',19,4,{block:true,sc:.75});light(17,3,[.8,.75,1.5]);
+    // the Counting Hall
+    dec('hl_p_desk',21,9,{block:true,npc:'vto_book',i:4,raw:true,sc:.95});dec('hl_p_desk',13,9,{block:true,npc:'vto_desk',raw:true,sc:.95});
+    for(const [x,y] of [[12,8],[22,8],[12,16],[22,16]])dec('candles',x,y,{block:true,sc:.8});
+    for(const [x,y] of [[15,10],[19,10],[15,14],[19,14],[17,12]])light(x,y,[.8,.75,1.5]);for(const [x,y] of [[13,13],[20,15],[16,16]])dec('bones',x,y,{sc:.8});dec('web',12,10,{sc:.55});dec('web',22,14,{sc:.55});
+    sign(16,8,[0,-1],'THE COUNTING HALL','All silver in, all silver out');
+    for(const [t,x,y] of [['gywraith',15,11],['gywraith',19,13],['gywraith',17,15],['gyhound',14,14],['gyhound',20,10]])foe(t,x,y);
+    // A: the Room of Needles. A field of spike plates, one lane between them, and the first sigil on an altar at the far end.
+    {const lane=new Set(['7,12','6,12','5,12','5,13','4,13','3,13','3,12','2,12']);
+     for(let y=8;y<=16;y++)for(let x=2;x<=7;x++){if(lane.has(x+','+y))continue;trap('spike',x,y);C.setF(x,y,x,y,'4')}
+     dec('altar',1,12,{block:true,npc:'vto_sigilaltar',i:0,raw:true,sc:.9});dec('candles',1,10,{block:true,sc:.8});dec('candles',1,14,{block:true,sc:.8});for(const [x,y] of [[4,12],[6,13],[3,10],[5,15]])light(x,y,[.8,.75,1.5]);
+     sign(7,10,[0,-1],'THE ROOM OF NEEDLES','Walk where the floor is plain')}
+    // B: the Hounds' Den
+    dec('altar',33,12,{block:true,npc:'vto_sigilaltar',i:1,raw:true,sc:.9});
+    for(const [x,y] of [[28,9],[32,9],[29,15],[32,15],[30,12]])dec('bones',x,y,{sc:1});for(const [x,y] of [[29,11],[31,13],[28,14]])dec('web',x,y,{sc:.55});for(const [x,y] of [[29,12],[32,12],[30,9],[30,15]])light(x,y,[.8,.75,1.5]);
+    trap('ambush',30,12,{spawn:['gyhound','gyhound']});foe('gyhound',29,10);foe('gyhound',32,14);foe('gyhound',30,14);foe('gyghoul',28,11);
+    sign(28,8,[0,-1],"THE HOUNDS' DEN",'Feed them or fight them');
+    // C: the Silvered Hall
+    dec('altar',3,28,{block:true,npc:'vto_sigilaltar',i:2,raw:true,sc:.9});dec('chest',14,28,{block:true});dec('chest',14,22,{block:true});
+    for(const [x,y] of [[3,22],[8,22],[12,22],[3,26],[13,26]])dec('candles',x,y,{block:true,sc:.8});for(const [x,y] of [[5,24],[9,25],[12,24],[4,27],[9,27]])light(x,y,[.8,.75,1.5]);
+    for(const [x,y] of [[6,22],[11,28]])dec('sarc',x,y,{block:true,npc:'vto_sarc',i:50+x});
+    foe('gygiant',8,24);foe('gygiant',11,26);foe('gypike',6,26);foe('gypike',10,23);foe('gybmage',5,25);foe('gyzombie',12,25);
+    sign(13,21,[0,-1],'THE SILVERED HALL','Where the silver slept');
+    // the passage to the lock and the stair
+    light(13,19,[.8,.75,1.5]);light(21,20,[.8,.75,1.5]);light(21,23,[.8,.75,1.5]);sign(20,16,[0,1],'THE THIRD LOCK','Three seats, three sigils');
+    C.setF(12,8,22,16,'3')}};
+/* ===== 9675 THE HALL OF UNDERHILL: the village sits down to supper; the old study and the red-eyed book ===== */
+VT_SPEC[9675]={W:37,H:28,diff:89,brick:'texRed',lcol:[1.5,.8,.48],torch:{fl:0,col:[1.5,.8,.4],name:'orange',css:'#e0803a'},fgain:.5,ftint:[1,.92,.9],ceil:'gyc_0',wall:.88,
+  rects:[[16,2,20,4],[17,5,19,5],[5,6,31,17],[9,18,10,18],[5,19,14,25],[17,18,19,18],[18,19,18,23],[27,18,28,18],[24,19,33,25],[35,22,35,22]],
+  doors:[{x:18,y:1,kind:'stair',to:9674,at:vtUp(9674),start:true},{x:18,y:24,kind:'stair',to:9676,at:vtDown(9676),down:true},{x:34,y:22,kind:'secret',v:2},{x:36,y:22,kind:'stair',to:9678,at:vtDown(9678),secretStair:true}],
+  names:[{t:'The Vestibule',x:18,y:3,k:'place'},{t:'The Hall of Underhill',x:18,y:11,k:'place'},{t:'The Chapel',x:9,y:22,k:'place'},{t:"Maldrake's Old Study",x:28,y:22,k:'place'}],
+  dress(C){const {dec,sign,foe,light,trap}=C;
+    sign(17,2,[0,-1],'THE HALL OF UNDERHILL','Where the village sat down to supper');dec('candles',16,4,{block:true,sc:.75});dec('candles',20,4,{block:true,sc:.75});light(18,3,[1.5,.85,.5]);
+    // the long tables, and the dead of Underhill still sitting at them
+    const T=[10,14,18,22,26];for(const x of T){dec('hl_p_candle',x,8,{block:true,sc:.65,raw:true});dec('hl_p_candle',x,15,{block:true,sc:.65,raw:true})}
+    let v=0;for(const x of [8,12,16,20,24,28]){dec('zombie',x,8,{block:true,npc:'vto_villager',i:v++,sc:.95,raw:true});dec('zombie',x,15,{block:true,npc:'vto_villager',i:v++,sc:.95,raw:true})}
+    for(const [x,y] of [[6,7],[30,7],[6,16],[30,16]])dec('candles',x,y,{block:true,sc:.8});
+    for(const [x,y] of [[8,10],[14,11],[20,11],[26,10],[8,13],[14,13],[20,13],[26,13],[31,11]])light(x,y,[1.5,.85,.5]);for(const [x,y] of [[5,6],[31,6],[5,17],[31,17],[18,9]])dec('web',x,y,{sc:.55});
+    for(const [x,y] of [[11,12],[24,12]])dec('bones',x,y,{sc:.9});
+    sign(13,6,[0,-1],'SUPPER AT SEVEN','Chalked on the wall, in a child\'s hand');
+    for(const [t,x,y] of [['gyzombie',10,11],['gyzombie',16,12],['gyzombie',22,11],['gyzombie',28,12],['gyzombie',12,13],['gyzombie',26,11],['gygiant',18,12],['gygiant',24,13],['gyghoul',7,12],['gyghoul',30,12],['gyghoul',20,9]])foe(t,x,y);
+    trap('ambush',18,11,{spawn:['gyzombie','gyghoul']});
+    // the chapel
+    dec('altar',9,20,{block:true,npc:'vto_altar',raw:true,sc:.85});dec('candles',7,20,{block:true,sc:.8});dec('candles',11,20,{block:true,sc:.8});
+    for(const [x,y] of [[6,23],[8,23],[10,23],[12,23]])dec('bench',x,y,{sc:.8,raw:true});for(const [x,y] of [[6,22],[12,22],[8,25],[11,25]])light(x,y,[1.5,.85,.5]);dec('ccross',13,19,{block:true,sc:.7});
+    sign(6,19,[0,-1],'THE CHAPEL OF UNDERHILL','Brother Alder preached here, to the last');
+    foe('gyskel',7,22);foe('gyskel',12,24);foe('gybmage',9,24);foe('gypike',6,24);
+    // the old study: the fifth page, a chest, and the book with the red eye
+    dec('hl_p_lectern',31,20,{block:true,npc:'vto_book',i:5,raw:true,sc:.9});dec('hl_p_desk',27,20,{block:true,npc:'vto_desk',raw:true,sc:.95});dec('chest',32,24,{block:true});
+    dec('hl_p_shelf',33,20,{block:true,npc:'vto_shelf1',raw:true,sc:1});dec('hl_p_shelf',33,24,{block:true,npc:'vto_shelf',raw:true,sc:1});dec('candles',25,19,{block:true,sc:.75});dec('hl_p_candle',25,25,{block:true,sc:.6,raw:true});
+    for(const [x,y] of [[26,22],[30,22],[29,24],[24,22]])light(x,y,[1.4,.85,.5]);sign(28,19,[0,-1],"MALDRAKE'S OLD STUDY",'Private. Knock.');dec('web',24,25,{sc:.55});
+    foe('gywraith',27,23);foe('gywraith',30,21);
+    // the passage down
+    light(18,21,[1.5,.85,.5]);light(18,18,[1.5,.85,.5]);light(35,22,[.8,.9,1.5]);
+    C.setF(5,6,31,17,'3')}};
+/* ===== 9676 THE STAIR OF QUIET: the last approach; the Hall of Plates; the Silver Warden and the lock of the Sanctum ===== */
+VT_SPEC[9676]={W:29,H:36,diff:89,brick:'texBlack',rgb:[.95,.92,1.1],lcol:[.7,.55,1.25],torch:{fl:2,col:[.56,.36,.74],name:'purple',css:'#b06cf0'},fgain:.52,ftint:[.9,.88,1.1],ceil:'gyc_2',
+  rects:[[12,2,16,4],[13,5,15,5],[9,6,19,13],[13,14,15,16],[5,17,23,24],[4,20,4,20],[1,18,3,22],[24,20,24,20],[25,18,27,22],[13,25,15,26],[8,27,20,32],[14,34,14,34]],
+  doors:[{x:14,y:1,kind:'stair',to:9675,at:vtUp(9675),start:true},{x:14,y:33,kind:'lock',lock:'L4'},{x:14,y:35,kind:'stair',to:9677,at:vtDown(9677),down:true}],
+  names:[{t:'The Vestibule',x:14,y:3,k:'place'},{t:'The Stair of Quiet',x:14,y:9,k:'place'},{t:'The Hall of Plates',x:14,y:20,k:'place'},{t:'The Western Vault',x:2,y:20,k:'place'},{t:'The Eastern Vault',x:26,y:20,k:'place'},{t:"The Silver Warden's Landing",x:14,y:29,k:'place'},{t:"The Sanctum Lock",x:14,y:33,k:'place'}],
+  dress(C){const {dec,sign,foe,light,trap}=C;
+    sign(13,2,[0,-1],'THE STAIR OF QUIET','Walk softly. He sleeps badly.');dec('candles',12,4,{block:true,sc:.75});dec('candles',16,4,{block:true,sc:.75});light(14,3,[.7,.55,1.3]);
+    // the stair hall: statues of the dead of Underhill, and the sixth page
+    for(const [x,y] of [[10,7],[18,7],[10,12],[18,12]])dec('angel',x,y,{block:true,sc:.85});for(const [x,y] of [[12,6],[16,6]])dec('column',x,y,{block:true,sc:.7});
+    dec('hl_p_lectern',14,7,{block:true,npc:'vto_book',i:6,raw:true,sc:.9});for(const [x,y] of [[12,9],[16,9],[14,11],[11,9],[17,9]])light(x,y,[.7,.55,1.3]);for(const [x,y] of [[9,6],[19,13],[9,13]])dec('web',x,y,{sc:.55});
+    sign(10,6,[0,-1],'THE STAIR OF QUIET','Eighty-one steps. One for each of them.');
+    foe('gygiant',12,10);foe('gygiant',16,10);foe('gybmage',11,8);foe('gybmage',17,8);trap('ambush',14,9,{spawn:['gywraith','gywraith']});
+    // the Hall of Plates: rows of plates, lanes between them
+    {const lanes=new Set();for(let y=17;y<=24;y++){lanes.add('14,'+y);lanes.add('6,'+y);lanes.add('22,'+y)}for(let x=5;x<=23;x++){lanes.add(x+',17');lanes.add(x+',24');lanes.add(x+',20')}
+     for(let y=18;y<=23;y++)for(let x=7;x<=21;x++){if(lanes.has(x+','+y)||(x>=13&&x<=15))continue;if((x*3+y)%4===0){trap('spike',x,y);C.setF(x,y,x,y,'4')}}}
+    for(const [x,y] of [[5,17],[23,17],[5,24],[23,24]])dec('candles',x,y,{block:true,sc:.8});for(const [x,y] of [[8,19],[14,19],[20,19],[8,22],[14,22],[20,22]])light(x,y,[.7,.55,1.3]);
+    for(const [x,y] of [[10,24],[18,17]])dec('bones',x,y,{sc:.9});sign(9,17,[0,-1],'THE HALL OF PLATES','Where the floor is plain, it is kind');
+    for(const [t,x,y] of [['gywraith',8,18],['gywraith',20,23],['gywraith',14,21],['gygiant',10,21],['gygiant',18,20],['gyzombie',6,23],['gyzombie',22,18],['gybmage',14,18]])foe(t,x,y);trap('ambush',14,24,{spawn:['gyskel','gypike']});
+    // the two vaults
+    dec('chest',1,22,{block:true});dec('sarc',2,18,{block:true,npc:'vto_sarc',i:60});dec('sarc',2,20,{block:true,npc:'vto_sarc',i:61});light(2,20,[.7,.55,1.3]);dec('candles',3,22,{block:true,sc:.75});foe('gywraith',3,19);
+    dec('chest',27,22,{block:true});dec('sarc',26,18,{block:true,npc:'vto_sarc',i:62});dec('sarc',26,20,{block:true,npc:'vto_sarc',i:63});light(26,20,[.7,.55,1.3]);dec('candles',25,22,{block:true,sc:.75});foe('gywraith',25,19);
+    sign(2,18,[0,-1],'THE WESTERN VAULT','Three sarcophagi, one chest');sign(26,18,[0,-1],'THE EASTERN VAULT','Three sarcophagi, one chest');
+    // the Landing
+    for(const [x,y] of [[8,27],[20,27],[8,32],[20,32]])dec('candles',x,y,{block:true,sc:.85});for(const [x,y] of [[14,28],[10,30],[18,30],[14,32],[14,34],[14,26]])light(x,y,[.8,.6,1.4]);
+    for(const [x,y] of [[8,29],[20,29]])dec('angel',x,y,{block:true,sc:.9});sign(13,27,[0,-1],"THE SILVER WARDEN'S LANDING",'He keeps the last seal');
+    foe('vtsilver',14,30);foe('gypike',11,30);foe('gypike',17,30);foe('gybmage',14,28);
+    C.setF(5,17,23,24,'3')}};
+/* ===== 9677 MALDRAKE'S SANCTUM ===== */
+VT_SPEC[9677]={W:25,H:24,diff:89,brick:'texBlack',rgb:[.92,.9,1.12],lcol:[.85,.9,1.5],torch:{fl:3,col:[.45,.8,1.7],name:'blue',css:'#4f9cff'},fgain:.5,ftint:[.9,.9,1.15],ceil:'gyc_2',niches:6,lampGap:6,
+  rects:[[9,2,15,4],[4,5,20,18],[11,19,13,20]],
+  doors:[{x:12,y:21,kind:'stair',to:9676,at:vtUp(9676),start:true}],
+  names:[{t:"Maldrake's Table",x:12,y:4,k:'place'},{t:'The Candles of Underhill',x:12,y:11,k:'place'},{t:'The Stair',x:12,y:20,k:'place'}],
+  dress(C){const {dec,sign,foe,light,trap}=C;
+    dec('hl_p_desk',12,4,{block:true,npc:'vto_desk2',raw:true,sc:1.05});dec('hl_p_mirror',9,2,{block:true,npc:'vto_mirror',raw:true,sc:1});dec('hl_p_mirror',15,2,{block:true,npc:'vto_mirror',raw:true,sc:1});
+    dec('candles',10,2,{block:true,sc:.9});dec('candles',14,2,{block:true,sc:.9});light(12,3,[.9,.95,1.5]);light(10,3,[.85,.9,1.5]);light(14,3,[.85,.9,1.5]);
+    // the memorial: twelve candles for the twelve households, in two rows, each with a small stone
+    [[6,8],[8,8],[10,8],[14,8],[16,8],[18,8],[6,14],[8,14],[10,14],[14,14],[16,14],[18,14]].forEach(([x,y],i)=>{dec('candles',x,y,{block:true,sc:.5,npc:'vto_memorial',i,raw:true});light(x,y,[.95,.9,1.4])});
+    for(const [x,y] of [[5,6],[19,6],[5,17],[19,17]])dec('column',x,y,{block:true,sc:.75});for(const [x,y] of [[6,11],[18,11],[12,16]])dec('rose',x,y,{sc:.8,raw:true});
+    for(const [x,y] of [[12,9],[12,13],[7,11],[17,11]])light(x,y,[.85,.9,1.5]);
+    sign(6,18,[0,1],'UNDERHILL','Twelve households. Eighty-one souls.');
+    // the one who waits
+    {const kp=KH_KEEPERS.vto_maldrake;if(kp){const d=dec('vti_maldrake',12,7,{block:false,npc:'vto_maldrake',raw:true});if(d){d.sc=1.05;d.k=khFaceKey('vti_maldrake')}}}
+    C.setF(4,5,20,18,'3')}};
+/* ===== 9678 THE SECRET ARCHIVE ===== */
+VT_SPEC[9678]={W:21,H:18,diff:89,brick:'texBone',rgb:[1.05,1,.9],lcol:[1.4,1.05,.62],torch:{fl:0,col:[1.5,.9,.45],name:'orange',css:'#e8923a'},fgain:.58,ftint:[1,.96,.9],ceil:'gyc_3',niches:4,lampGap:5,
+  rects:[[2,2,18,14]],
+  doors:[{x:10,y:15,kind:'stair',to:9675,at:()=>{vtMake(9675);const V=LEVELS[9675]._vt;return {x:35,y:22,f:3}},start:true}],
+  names:[{t:'The Secret Archive',x:10,y:8,k:'place'},{t:"Maldrake's Desk",x:10,y:4,k:'place'}],
+  dress(C){const {dec,sign,foe,light,trap}=C;
+    for(const x of [3,5,7,13,15,17])dec('hl_p_shelf',x,2,{block:true,npc:'vto_shelf',raw:true,sc:1});dec('hl_p_shelf',2,6,{block:true,npc:'vto_shelf',raw:true,sc:1});dec('hl_p_shelf',2,9,{block:true,npc:'vto_shelf',raw:true,sc:1});dec('hl_p_shelf',18,6,{block:true,npc:'vto_shelf',raw:true,sc:1});dec('hl_p_shelf',18,9,{block:true,npc:'vto_shelf',raw:true,sc:1});
+    dec('hl_p_desk',10,4,{block:true,npc:'vto_contractdesk',raw:true,sc:1.05});dec('hl_p_lectern',14,5,{block:true,npc:'vto_book',i:7,raw:true,sc:.9});dec('chest',17,13,{block:true,goldAmt:9000});dec('chest',3,13,{block:true});
+    for(const [x,y] of [[8,4],[12,4],[6,11],[14,11]])dec('candles',x,y,{block:true,sc:.75});for(const [x,y] of [[10,6],[6,8],[14,8],[10,12],[4,4],[16,4]])light(x,y,[1.4,1.05,.62]);
+    {const kp=KH_KEEPERS.vto_hesper;if(kp){const d=dec(khFaceKey(kp.face),10,9,{block:false,npc:'vto_hesper',raw:true});if(d)d.sc=kp.sc||1}}
+    sign(9,2,[0,-1],'THE ARCHIVE','Nobody comes here. That is the idea.');dec('web',2,2,{sc:.6});dec('web',18,2,{sc:.6});dec('bones',16,12,{sc:.8});
+    C.setF(2,2,18,14,'3')}};
+
+/* ---- src/desert/vault_hill.js ---- */
+/* ==========================================================================
+   THE BARROW HILL (level 9670, rated 88; prefix vt / VTH). The outside of the Vault of Maldrake: a big blighted hill of barrows beside the Blighted Road, 64 by 56, under a grey-green mist.
+   The road runs east to west along the south (gates in both ends of the boundary lead to Lanternrest and to Hollowbell Abbey); a path winds up the hill in switchbacks between barrows and leaning stones
+   to a terrace under the hill, where the front of the Vault stands with a dark door. At the foot of the hill, by the road, is the Garrison's picket: tents, a fire, a wrecked cart, a stone for teleporting,
+   and Sergeant Hale of Oldhaven, who gives the quests. South of the road lie the ruins of Underhill, the village the hill belonged to.
+   The ground is a gentle slope made with the engine's terrain (heights), the road level at the foot and the terrace at the top.
+   ========================================================================== */
+const VTH={W:64,H:56,road:{y0:44,y1:46},gateW:{x:1,y:45},gateE:{x:62,y:45},path:[[34,43],[34,37],[46,37],[46,30],[22,30],[22,23],[34,23],[34,13]],front:{x:34,y:12},hale:{x:30,y:41},tele:{x:37,y:42}};
+VT.arrive={east:{x:60,y:45,f:3},west:{x:3,y:45,f:1}};VT.hillBack={x:34,y:13,f:2};
+/* a floor made from another one with the colour drawn out of it, so that the grass is sick, not lush */
+function vtFloorSick(out,src,gain,tint,sat){
+  if(FLOORS[out])return out;const b=FLOORS[src];if(!b)return src;const d=new Uint8ClampedArray(b.length);
+  for(let i=0;i<d.length;i+=4){const l=b[i]*.3+b[i+1]*.59+b[i+2]*.11;d[i]=Math.min(255,(l+(b[i]-l)*sat)*gain*tint[0]);d[i+1]=Math.min(255,(l+(b[i+1]-l)*sat)*gain*tint[1]);d[i+2]=Math.min(255,(l+(b[i+2]-l)*sat)*gain*tint[2]);d[i+3]=255}
+  FLOORS[out]=d;return out}
+function vtHillFloors(){
+  const dead=vtFloorSick('vtf_dead','gyf_grass',.72,[1.05,1.02,.74],.22),mud=vtFloorSick('vtf_mud','gyf_dirt',.82,[1,.98,.84],.5),grav=vtFloorSick('vtf_grav','gyf_gravel',.9,[.98,1,1.02],.4),
+    flag=vtFloorSick('vtf_flag','gyf_flag',.6,[.92,.97,1.04],.5),road=vtFloorSick('vtf_road','gyf_cobble',.74,[1,.98,.88],.4),rub=vtFloorSick('vtf_rub','gyf_slate',.78,[.92,.96,1],.5);
+  return [dead,mud,grav,flag,road,rub]}
+const VTH_SIGNS=[
+ ['THE BARROW HILL','Closed by order of the Garrison at Lanternrest. The dead are up. Go round.'],
+ ['WEST: HOLLOWBELL ABBEY','EAST: LANTERNREST. If you can read this, you are still on the Road.'],
+ ['UNDERHILL','Twelve households. A good well. Mind the hill.'],
+ ['OLDHAVEN GARRISON, FORWARD PICKET','Halt. State your business. If your business is dying, wait your turn.'],
+ ['THE VAULT OF MALDRAKE','Barrow-wizard of Underhill, and a good one. Knock, and wait.'],
+ ['KEEP TO THE PATH','The hill does not like visitors. Neither does what lives in it.'],
+ ["FOUR OF HALE'S MEN",'Allin, Brook, Denny and Price, of the Oldhaven garrison. A helmet hangs on each cross, hung straight. They were sent to find out why the dead walked.'],
+ ['UNDERHILL HARVEST FAIR',"Pig racing, a pie contest and the vicar's hat toss. Cancelled this year, on account of the fever. Somebody has written underneath: Next year."]];
+/* one tile of the front (0 left, 1 door, 2 right), like a tomb front of the graveyard (gyTombTile) but with the name plaque drawn mirrored: the engine turns the texture of a north-facing wall round, so mirrored text reads right */
+function vtFrontTile(st,i){
+  const pf=true,mild=st.rgb.map(v=>1+(v-1)*.35);
+  return gyTile(st.tex,3.4,{fac:{img:st.img,i,n:3,fit:pf},gain:1.0,rgb:mild,tag:'vtfront'+i,draw:(x,w,h)=>{
+    const G=['#2a5a26','#3b7f31','#58a03e','#244c24','#6fb04a'],hs=(a,b,c)=>hash2(a,b,c+9670*3+i*11);
+    const nv=Math.round(st.ivy/9);
+    for(let k=0;k<nv;k++){const edge=i===0?hs(k,1,1)*.55:i===2?1-hs(k,1,1)*.55:hs(k,1,1),px=edge*w,top=hs(k,2,1)<.5,len=h*(top?(.08+hs(k,3,1)*.28):(.1+hs(k,3,1)*.3));
+      let qx=px,qy=top?0:h;x.strokeStyle='#27481f';x.lineWidth=1.3+hs(k,4,1)*1.4;x.beginPath();x.moveTo(qx,qy);
+      for(let t=1;t<=6;t++){qx+=(hs(k,t+5,2)-.5)*8;qy+=(top?1:-1)*len/6;x.lineTo(qx,qy)}x.stroke();
+      for(let t=0;t<7;t++){x.fillStyle=G[(hs(k,t+9,3)*5)|0];x.beginPath();x.ellipse(px+(hs(k,t+20,4)-.5)*12,top?len*t/7:h-len*t/7,2.5+hs(k,t+30,5)*3.5,2+hs(k,t+40,5)*2,hs(k,t+50,6)*3,0,6.3);x.fill()}}
+    if(i===1){const pw=84,ph=17,px=(w-pw)/2,py=h*.905;x.save();x.translate(w,0);x.scale(-1,1);
+      x.fillStyle='#24211d';x.fillRect(px,py,pw,ph);x.strokeStyle='#9a8858';x.lineWidth=1.4;x.strokeRect(px+1.5,py+1.5,pw-3,ph-3);
+      x.fillStyle='#e0d08e';x.font='bold 12px '+(typeof FTITLE!=='undefined'?FTITLE:'serif');x.textAlign='center';x.textBaseline='middle';x.fillText(st.pl,w/2,py+ph/2+.5);x.restore()}}})}
+function vtHillBuild(){
+  if(LEVELS[VT.ID])return LEVELS[VT.ID];
+  gyAlias();vtPics();
+  const W=VTH.W,H=VTH.H,hs=(a,b,c)=>hash2(a,b,c+9670),R=gyRng(96700);
+  const chars={},chMap=new Map();let nextCh=0x300;const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
+  const rows=[];for(let y=0;y<H;y++)rows.push(new Array(W).fill('.'));
+  const block=new Uint8Array(W*H),fm=new Array(W*H).fill('0'),hgt=new Float32Array(W*H).fill(.3),rk=new Float32Array(W*H);
+  const solid=(x,y,c)=>{rows[y][x]=c;block[y*W+x]=1};
+  const decor=[],enemies=[],lights=[],used=new Set(),path=new Set(),lcol={};
+  const inside=(x,y)=>x>=2&&x<=61&&y>=13&&y<=53;
+  const isOpen=(x,y)=>inside(x,y)&&rows[y][x]==='.';
+  const free=(x,y)=>isOpen(x,y)&&!used.has(x+','+y);
+  const setF=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(x>=0&&y>=0&&x<W&&y<H)fm[y*W+x]=f};
+  const pth=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){path.add(x+','+y);fm[y*W+x]=f||'2'}};
+  const dec=(a,x,y,o)=>{o=o||{};const k=GYA[a]?'gy_'+a:a;if(!isOpen(x,y))return null;
+    if(used.has(x+','+y)){const j=decor.findIndex(q=>q.x===x&&q.y===y);if(j>=0){if(decor[j].npc)return null;decor.splice(j,1)}}   // a piece put there on purpose takes the place of scenery that was scattered
+    const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}
+    if(o.block&&o.npc)d.solid=1;if(o.sc)d.sc=o.sc;if(o.npc){d.npc=o.npc;d.deco=false}if(o.i!==undefined)d.i=o.i;if(o.wd)d.wd=o.wd;if(o.txt)d.txt=o.txt;if(o.ox!==undefined){d.ox=o.ox;d.oy=o.oy}decor.push(d);used.add(x+','+y);return d};
+  const D=(a,x,y,o)=>free(x,y)&&!path.has(x+','+y)?dec(a,x,y,o):null,DB=(a,x,y,o)=>D(a,x,y,Object.assign({block:true},o||{}));
+  const foe=(t,x,y)=>{if(!free(x,y))return false;enemies.push({t,x,y,lvl:88});used.add(x+','+y);return true};
+  const lamp=(x,y,col)=>{if(isOpen(x,y)){lights.push([x,y]);if(col)lcol[x+','+y]=col}};
+  const PALE=[.72,1.12,.9];
+  // ---- the ground: dead grass, mud, the road, the path, the terrace ----
+  setF(0,0,W-1,H-1,'0');
+  pth(2,VTH.road.y0,61,VTH.road.y1,'4');
+  for(let i=1;i<VTH.path.length;i++){const [a,b]=VTH.path[i-1],[c,d]=VTH.path[i];pth(Math.min(a,c),Math.min(b,d),Math.max(a,c)+(a===c?1:0),Math.max(b,d)+(b===d?1:0),'2')}
+  pth(26,13,42,17,'3');   // the terrace under the front
+  setF(22,37,32,43,'1');setF(4,47,24,53,'1');   // bare earth at the picket and in Underhill
+  // ---- the heights: level at the road, rising in a long slope to the terrace; rolling a little between the paths ----
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,t=Math.max(0,Math.min(1,(44-y)/31)),s=t*t*(3-2*t);hgt[i]=.3+1.25*s+((hs(x>>1,y>>1,1)-.5)*.08+Math.sin(x*.45+y*.3)*.035)*s}
+  for(const k of path){const [x,y]=k.split(',').map(Number);if(y<44){const i=y*W+x;let a=0,n=0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const j=(y+dy)*W+(x+dx);if(j>=0&&j<W*H){a+=hgt[j];n++}}hgt[i]=Math.min(hgt[i],a/n)}}   // a path is worn a little lower than the ground beside it
+  for(const [x0,y0,x1,y1] of [[22,37,32,43],[26,13,42,17],[2,44,61,46]]){let m=0,n=0;for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){m+=hgt[y*W+x];n++}m/=n;for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)hgt[y*W+x]=m}
+  // ---- the boundary: the hillside above, a bank of dark thorn and old bark all round, the two road gates, the front of the Vault ----
+  const wallH=2.1,wt=v=>ch((typeof wwTile==='function'&&IMG.tex_1)?wwTile(['tex_1','tex_2','tex_1'][v%3],2.6,{gain:.55}):gyTile('texBlack_'+(v%6),wallH,{gain:.7})),WC=[0,0,0,1,3,5,0,3,2].map(wt);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(inside(x,y))continue;solid(x,y,WC[(hs(x,y,7)*WC.length)|0])}
+  for(const [dir,g] of [['west',VTH.gateW],['east',VTH.gateE]]){
+    const gid=gyTile('texBlack_1',2.6,{fac:{img:'stairFix_2',i:0,n:1},gain:.9,rgb:[1.1,1.1,1.05],tag:'vtroadgate'+dir,draw:(x,w,h)=>{if(dir==='east'){x.translate(w,0);x.scale(-1,1)}   // seen looking east the engine turns a wall's texture round, so the east gate's lettering is drawn mirrored
+      x.fillStyle='#24211d';x.fillRect(14,h*.2,100,22);x.strokeStyle='#9a8858';x.lineWidth=1.4;x.strokeRect(15.5,h*.2+1.5,97,19);
+      x.fillStyle='#e0d08e';x.font='bold 10px '+(typeof FTITLE!=='undefined'?FTITLE:'serif');x.textAlign='center';x.textBaseline='middle';x.fillText(dir==='east'?'LANTERNREST':'HOLLOWBELL',64,h*.2+11.5)}});KH_DOOR[gid]={vt:'road',dir};rows[g.y][g.x]=ch(gid);block[g.y*W+g.x]=1}
+  for(const [x,y] of [[3,43],[3,47],[60,43],[60,47]]){dec('lantern',x,y,{block:true});lamp(x,y,[1.15,1.0,.7])}
+  for(const [x,y,t] of [[4,44,0],[59,44,1]]){}
+  // the front of the Vault, three tiles wide in the hillside under the terrace, with wings of ivy-grown stone, statues and lanterns
+  {const st={tex:'texBlack_1',rgb:[1.25,1.25,1.4],img:'f_vault',ivy:34,pl:'MALDRAKE'},T={id:9670},lg=vtFrontTile(st,0),dg=vtFrontTile(st,1),rg=vtFrontTile(st,2),fy=VTH.front.y;
+   KH_DOOR[dg]={vt:'stair',lvl:9671,get at(){vtMake(9671);return LEVELS[9671].start}};
+   for(const [x,t] of [[33,lg],[34,dg],[35,rg]]){rows[fy][x]=ch(t);block[fy*W+x]=1}
+   for(const x of [28,29,30,31,32,36,37,38,39,40]){const gid=gyTile('texGrey_'+[0,3,5][x%3],3.0,{gain:.8,tag:'vtwing'+x});rows[fy][x]=ch(gid);block[fy*W+x]=1}
+   dec('angel',31,13,{block:true,sc:.95});dec('angel',37,13,{block:true,sc:.95});dec('lantern',33,13,{block:true});dec('lantern',35,13,{block:true});lamp(34,13,[.8,1.1,1.5]);lamp(34,15,[.8,1.1,1.5]);
+   dec('urn',30,13,{block:true,sc:.9});dec('urn',38,13,{block:true,sc:.9});dec('obelisk',28,14,{block:true,sc:.8});dec('obelisk',40,14,{block:true,sc:.8});
+   for(const x of [29,32,36,39])lamp(x,13,[.7,1.05,1.4]);
+   dec('ww_sign',32,15,{block:true,npc:'vto_sign',i:4});dec('bench',31,16,{block:false,sc:.8});dec('bench',37,16,{block:false,sc:.8});dec('rose',33,16,{sc:.5});dec('rose',35,16,{sc:.5})}
+  // ---- the picket of the Oldhaven garrison, at the foot of the hill: two tents, a fire, barrels, a wrecked cart, the stone for teleporting, Hale ----
+  {dec('yar_tent',25,40,{block:true,sc:1.3});dec('yar_tent',31,38,{block:true,sc:1.3});dec('brazier2',28,42,{block:true,sc:1});lamp(28,41,[1.6,1.0,.5]);dec('brazier0',34,38,{block:false});
+   dec('barrel',24,43,{block:true,sc:.9});dec('barrel',25,43,{block:true,sc:.9});dec('crate',26,43,{block:true,sc:.9});dec('sacks',23,41,{block:false,sc:.9});
+   dec('cart',31,42,{block:true,sc:1.3,npc:'vto_cart'});for(const [x,y] of [[32,43],[30,43]])dec('bones',x,y,{sc:.8});
+   dec('banner',27,38,{block:true,sc:.9,npc:'vto_banner'});dec('ww_sign',33,44,{block:true,npc:'vto_sign',i:3});
+   dec('bench',27,41,{block:false,sc:.8});
+   const kp=KH_KEEPERS.vto_hale;if(kp){const d=dec(khFaceKey(kp.face),VTH.hale.x,VTH.hale.y,{block:false,npc:'vto_hale'});if(d)d.sc=kp.sc||1.05}
+   {const k2=KH_KEEPERS.vto_hale2;if(k2){const d=dec(khFaceKey(k2.face),37,15,{block:false,npc:'vto_hale2'});if(d)d.sc=k2.sc||1.05}}   // the same man, on the terrace in front of the door once the hill is clear (vtHaleSync in vault_story.js shows one of the two)
+   const kw=KH_KEEPERS.vto_wick;if(kw){const d=dec(khFaceKey(kw.face),26,42,{block:false,npc:'vto_wick'});if(d)d.sc=kw.sc||1}
+   lamp(30,40,[1.4,1.0,.6]);lamp(25,42,[1.4,1.0,.6]);
+   for(const y of [37,39,41,43])dec('wcross',20,y,{block:true,sc:.95,npc:'vto_sign',i:6});lamp(20,40,[1.3,1.0,.7])}
+  // ---- the road: signs, milestones, lanterns, the plague cart and its horse (which is a skeleton) ----
+  dec('ww_sign',6,43,{block:true,npc:'vto_sign',i:1});dec('ww_sign',57,47,{block:true,npc:'vto_sign',i:1});dec('ww_sign',34,42,{block:true,npc:'vto_sign',i:0});
+  for(let x=8;x<=58;x+=9){for(const y of [43,47]){if(free(x,y)&&!path.has(x+','+y)){DB('lantern',x,y);lamp(x,y,[.8,1.05,.8])}}}
+  dec('cart',47,47,{block:true,sc:1.2,npc:'vto_plaguecart'});for(const [x,y] of [[46,48],[48,48],[47,48],[49,47]])dec('bones',x,y,{sc:.8});dec('sacks',45,47,{block:false,sc:.8});
+  // ---- the hill: barrows, stones, dead trees, lanterns along the path ----
+  const BARR=[[40,35,'hatch'],[28,35,'mound'],[52,34,'hatch'],[40,28,'mound'],[28,27,'hatch'],[16,27,'mound'],[50,22,'hatch'],[14,22,'hatch'],[44,18,'mound'],[22,18,'hatch'],[10,30,'mound'],[56,29,'hatch'],[52,16,'mound'],[16,15,'hatch']];
+  BARR.forEach(([x,y,k],i)=>{const d=DB(k,x,y,{sc:k==='hatch'?1.5:1.4,npc:'vto_barrow',i});if(d){lamp(x,y+1,[.72,1.1,.86])}});
+  for(let k=1;k<VTH.path.length;k++){const [a,b]=VTH.path[k-1],[c,d]=VTH.path[k],len=Math.abs(a-c)+Math.abs(b-d);for(let t=3;t<len;t+=6){const x=a+Math.sign(c-a)*t,y=b+Math.sign(d-b)*t;const ox=a===c?-1:0,oy=b===d?-1:0;if(free(x+ox,y+oy)&&!path.has((x+ox)+','+(y+oy))){DB('lantern',x+ox,y+oy);lamp(x+ox,y+oy,PALE)}}}
+  for(let n=0;n<70;n++){const x=3+((hs(n,1,11)*58)|0),y=14+((hs(n,2,11)*38)|0);if(!free(x,y)||path.has(x+','+y)||(y>=44&&y<=46))continue;const r=hs(n,3,11);
+    if(r<.5)DB('lean',x,y,{sc:.9+hs(n,4,11)*.3});else if(r<.75)DB('stone1',x,y,{sc:.95});else if(r<.88)DB('wcross',x,y,{sc:.95});else DB('slab',x,y,{sc:.95})}
+  const TR=['dead','ltree2'];for(let n=0;n<190;n++){const x=2+((hs(n,1,12)*60)|0),y=13+((hs(n,2,12)*41)|0);if(!free(x,y)||path.has(x+','+y)||(y>=43&&y<=47))continue;if(Math.abs(x-VTH.hale.x)<9&&y>=36)continue;DB(TR[hs(n,3,12)<.7?0:1],x,y,{sc:.85+hs(n,4,12)*.45})}
+  for(let n=0;n<24;n++){const x=3+((hs(n,1,13)*58)|0),y=14+((hs(n,2,13)*38)|0);if(free(x,y)&&!path.has(x+','+y))DB('rpost',x,y)}
+  for(let n=0;n<22;n++){const x=3+((hs(n,1,14)*58)|0),y=14+((hs(n,2,14)*38)|0);if(free(x,y)&&!path.has(x+','+y))D('bones',x,y,{sc:.8})}
+  for(const [x,y] of [[24,16],[44,15],[30,19],[38,19]])D('dead',x,y,{block:true,sc:1.1});
+  // a ring of standing stones north west of the path
+  for(let a=0;a<8;a++){const x=Math.round(14+Math.cos(a*.785)*4),y=Math.round(36+Math.sin(a*.785)*4);DB(a%2?'column':'obelisk',x,y,{sc:.75})}
+  // dead tufts: the grass here is brown, and what is left of it stands in clumps
+  {const GR=['pgrass0','pgrass1','pgrass2','pbracken'].filter(k=>IMG[k]);if(GR.length)for(let n=0;n<340;n++){const x=3+((hs(n,1,29)*58)|0),y=14+((hs(n,2,29)*39)|0);if(path.has(x+','+y))continue;const k=GR[(hs(n,3,29)*GR.length)|0],d=D(k,x,y,{block:false,sc:.6+hs(n,4,29)*.7});if(d){d.ox=(hs(n,5,29)-.5)*.7;d.oy=(hs(n,6,29)-.5)*.7}}}
+  // ---- Underhill, south of the road: a ruined chapel, three cottages, the well, broken fences ----
+  {dec('chapel',14,50,{block:true,npc:'vto_chapel'});dec('hut',7,49,{block:true,npc:'vto_hut',i:0});dec('hut',21,50,{block:true,npc:'vto_hut',i:1});dec('hut',27,50,{block:true,npc:'vto_hut',i:2});
+   dec('ww_well',34,51,{block:true,npc:'vto_well'});dec('ww_sign',10,48,{block:true,npc:'vto_sign',i:2});dec('ww_sign',24,48,{block:true,npc:'vto_sign',i:7});
+   for(const x of [5,6,8,9,17,18,19,23,24,25,29,30])D('fence',x,53,{block:true,sc:.9});for(const [x,y] of [[12,49],[16,49],[20,52],[26,52]])D('lean',x,y,{block:true});
+   for(const [x,y] of [[10,50],[18,52],[30,52],[34,49]])lamp(x,y,[.75,1.0,.8]);for(const [x,y] of [[8,51],[22,52],[32,50]])D('bones',x,y,{sc:.8});
+   dec('chest',36,52,{block:true});dec('chest',5,52,{block:true})}
+  // ---- the dead: skeletons and ghouls on the terraces, wraiths by the stones, hounds on the road, ravens everywhere ----
+  const FOES=[['gyskel',38,36],['gyskel',30,33],['gyskel',44,32],['gyskel',26,29],['gyskel',36,25],['gyskel',16,25],['gyghoul',50,30],['gyghoul',20,27],['gyghoul',30,21],['gyghoul',12,33],['gyghoul',42,20],
+    ['gyzombie',48,25],['gyzombie',32,29],['gyzombie',24,21],['gyzombie',40,22],['gywraith',16,37],['gywraith',50,19],['gywraith',26,15],['gyhound',54,44],['gyhound',12,45],['gyraven',36,32],['gyraven',20,19],['gyraven',48,36],['gypike',34,18],['gypike',30,17],['gybmage',38,17],
+    ['gyskel',40,47],['gyghoul',55,48],['gyzombie',16,48]];
+  for(const [t,x,y] of FOES){if(!foe(t,x,y)){let ok=false;for(let r=1;r<4&&!ok;r++)for(let a=-r;a<=r&&!ok;a++)for(let b=-r;b<=r&&!ok;b++)if(Math.max(Math.abs(a),Math.abs(b))===r&&!path.has((x+a)+','+(y+b)))ok=foe(t,x+a,y+b)}}
+  // ---- the level ----
+  const rowsS=[],fmS=[];for(let y=0;y<H;y++){rowsS.push(rows[y].join(''));let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmS.push(s)}
+  const mapNames=[{t:'The Road to Lanternrest',x:58,y:45,k:'place'},{t:'The Road to Hollowbell Abbey',x:5,y:45,k:'place'},{t:"The Garrison's Picket",x:29,y:40,k:'place'},{t:'Underhill, a ruined village',x:16,y:50,k:'place'},{t:'The Barrow Path',x:40,y:37,k:'place'},{t:'The Standing Stones',x:14,y:36,k:'place'},{t:'The Barrows',x:28,y:27,k:'place'},{t:'The Door of the Vault',x:34,y:14,k:'place'}];
+  const fl=vtHillFloors();
+  const lv={rows:rowsS,chars,fmap:fmS,floorSet:fl,floor:fl[0],ceil:'cloud',start:{x:VT.arrive.west.x,y:VT.arrive.west.y,f:VT.arrive.west.f},enemies,items:[],decor,lights,portals:[],day:.58,outdoor:true,amb:.86,
+    name:VT.NAMES[9670],label:VT.NAMES[9670],noExtras:true,diff:88,ceilH:5.2,tele:{x:VTH.tele.x,y:VTH.tele.y},teleName:'The Barrow Hill',torchGap:1e9,mapNames,
+    _vt:{kind:'hill',lcol,col:PALE,kI:1.2,range2:90,locks:{},traps:[]}};
+  LEVELS[VT.ID]=lv;
+  {for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(rows[y][x]!=='.')block[y*W+x]=1;try{TERRS[VT.ID]=yarTerrain(W,H,hgt,rk,block)}catch(e){console.error(e)}}
+  // ---- check: everything that can be walked to can be reached from the road; a piece that walls something in is taken away ----
+  {const D4=[[1,0],[-1,0],[0,1],[0,-1]];const st={x:VT.arrive.west.x,y:VT.arrive.west.y};
+   for(let pass=0;pass<6;pass++){const bs=new Set();for(const d of decor)if(d.block)bs.add(d.x+','+d.y);const seen=new Uint8Array(W*H),q=[st.y*W+st.x];seen[q[0]]=1;
+     for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [a,b] of D4){const nx=x+a,ny=y+b;if(nx<2||ny<13||nx>61||ny>53||rows[ny][nx]!=='.'||seen[ny*W+nx]||bs.has(nx+','+ny))continue;seen[ny*W+nx]=1;q.push(ny*W+nx)}}
+     const kill=new Set();for(let y=13;y<=53;y++)for(let x=2;x<=61;x++)if(rows[y][x]==='.'&&!seen[y*W+x]&&!bs.has(x+','+y))for(const [a,b] of D4){const k=(x+a)+','+(y+b);if(bs.has(k))kill.add(k)}
+     if(!kill.size)break;for(let i=decor.length-1;i>=0;i--){const d=decor[i];if(d.block&&kill.has(d.x+','+d.y)&&!d.npc)decor.splice(i,1)}}}
+  return lv}
+KH_LAZY[VT.ID]=vtHillBuild;
+
+/* ---- src/desert/vault_boss.js ---- */
+/* ==========================================================================
+   THE FIGHTS OF THE VAULT (prefix vt / VTX): the Barrow Warden (floor 1, carries the Pale Silver Key), the Silver Warden (floor 6, carries the Sanctum Seal) and Wystan Maldrake himself.
+   Maldrake is not on the floor as a creature: he sits at his table as a person to talk to (vault_story.js). If the party chooses to fight, vtMaldrakeFight() takes him off the chair and puts the
+   creature in his place. He is a hard level 89 boss in three phases (the dead of Underhill climb up at two thirds and at one third; the silver ring flares; he weeps, and says so).
+   If the party chooses to listen instead (the Silver Contract read aloud), vtMaldrakeFree() ends it without a blow.
+   Flags in G.flags.vt: fight (the fight began), fhp (his health, so that a saved game keeps it), dead (he fell in the fight), freed (the contract was read), gotKey, ph (phases done).
+   ========================================================================== */
+const VTX_MOVES=[
+ [{every:3,mult:1.1,near:6,affl:'cursed',txt:'Maldrake lifts one hand and a black flame goes out of it, low and quiet, like a thing he has done a thousand nights.',col:'#a8b8ff',verb:'Black flame burns'},
+  {every:5,all:true,mult:.5,affl:'shaken',txt:'The silver ring turns on his finger. Every hero feels something cold take hold of the heart, and let go.',col:'#cfe0ff',verb:'Cold seizes'}],
+ [{every:3,mult:1.2,near:6,affl:'haunted',txt:'Maldrake says one word and the floor beside the front hero opens like a mouth. "I am so sorry," he says, and then the dead hand comes up.',col:'#90a8ff',verb:'A dead hand grips'},
+  {every:4,all:true,mult:.6,affl:'cursed',txt:'The ring flares white. A wave of pale silver light goes through the whole party.',col:'#e8f0ff',verb:'Silver light burns'}],
+ [{every:2,mult:1.25,near:7,affl:'shaken',txt:'Maldrake is crying. He does not stop casting. "Please," he says, and a spear of black silver goes through the front line.',col:'#8098ff',verb:'A spear of silver hits'},
+  {every:3,all:true,mult:.7,affl:'cursed',txt:'The ring screams. Every hero is thrown by the sound.',col:'#f0f4ff',verb:'The ring screams at'}]];
+ENEMY_DEF.vtmaldrake.act=e=>{
+  if(e.hp<=0)return 0;const ph=Math.min(2,e.vtPh||0);
+  const spec={moves:VTX_MOVES[ph]};if(ph>=1)spec.mend=[7,.025,'The ring drinks a little of the silver in the floor, and his wounds close.'];
+  return gyBossAct(e,spec)};
+ENEMY_DEF.vtwarden.act=e=>gyBossAct(e,{moves:[{every:3,mult:1.3,near:2,affl:'bleeding',txt:'The Barrow Warden brings the silvered blade round in a long stroke, the stroke of a man who has stood a post for three hundred years.',col:'#c8d8f0',verb:'The silver blade cuts'},{every:6,all:true,mult:.5,affl:'shaken',txt:'The Warden strikes the floor with the flat of the sword. The whole hall rings like a struck pan.',col:'#d8e4f4',verb:'The ringing deafens'}]});
+ENEMY_DEF.vtsilver.act=e=>gyBossAct(e,{moves:[{every:3,mult:1.4,near:2,affl:'shaken',txt:'The Silver Warden swings the great sword in a flat arc, with no more effort than a gate swinging.',col:'#d0e0ff',verb:'The great sword hits'},{every:5,all:true,mult:.6,affl:'cursed',txt:'Silver mist pours out of the Warden\'s helm and fills the landing.',col:'#e0ecff',verb:'The silver mist burns'}],mend:[9,.03,'The Warden stands very still, and the silver in his armour closes the cuts.']});
+const VTX_HELP={vtwarden:['gyskel','The Warden raises a hand, and two of the old guard step out of the walls.'],vtsilver:['gywraith','Two wraiths of the barrow guard slide out of the black stone and kneel to the Warden. Then they stand.'],vtmaldrake:['gyzombie','Villagers of Underhill climb up the stair behind him, in their Sunday clothes, with silver in their veins. They do not want to be here.']};
+/* ---- every blow on one of the three: the helpers at two thirds and one third; the phases of Maldrake; his health is kept for a saved game ---- */
+{const _he=hurtEnemy;hurtEnemy=function(e,dmg){
+  const def=e&&ENEMY_DEF[e.t],isV=!!(def&&def.vtb&&e.hp>0);
+  _he.apply(this,arguments);
+  try{
+    if(isV){
+      if(e.hp>0&&e.t==='vtmaldrake'){const F=vtF();F.fhp=e.hp/Math.max(1,e.maxhp)}
+      if(e.hp<=0){vtBossDied(e);return}
+      const step=Math.min(2,Math.floor((1-e.hp/e.maxhp)*3));if(e.vtSum===undefined)e.vtSum=Math.min(2,Math.max(0,Math.floor((1-(e.hp+dmg)/e.maxhp)*3)));
+      while(e.vtSum<step){e.vtSum++;e.vtPh=e.vtSum;const H=VTX_HELP[e.t],free=gyFreeAround(e,4);
+        if(H&&free.length){for(let n=0;n<2&&n<free.length;n++){addEnemy(H[0],free[n][0],free[n][1],true);const m=G.enemies[G.enemies.length-1];if(m){m.vtAdd=1;m.lvl=LEVELS[LEVEL].diff}}msg(H[1],'#d8d0e0');sfx('growl')}
+        if(e.t==='vtmaldrake')msg(e.vtSum===1?'"They will not stop," Maldrake says, to himself. "I cannot make them stop."':'"Hurry," he says. "Hurry. Before the ring turns again."','#c8d4ff')}}
+  }catch(x){console.error('vt boss hurt',x)}}}
+function vtBossDied(e){
+  const F=vtF(),t=e.t;
+  {const L=LEVELS[LEVEL];for(const q of G.enemies)if(q.hp>0&&q.vtAdd){q.hp=0;q.dying=.4}}
+  if(t==='vtwarden'){
+    if(!bagAdd(mkItem('vtkey1')))G.items.push({k:'vtkey1',x:e.x,y:e.y,taken:false});F.keyTaken=1;
+    msg('The Barrow Warden falls apart. A key of pale silver lies in the bones on a chain.','#ffe36a');sfx('win');
+    later(1200,()=>msg('You have the Pale Silver Key. It opens the pale-silver lock at the south end of the hall.','#ffe36a'))}
+  else if(t==='vtsilver'){
+    if(!bagAdd(mkItem('vtseal')))G.items.push({k:'vtseal',x:e.x,y:e.y,taken:false});F.sealTaken=1;
+    msg('The Silver Warden folds in on himself. A heavy seal of pale silver hangs from his belt on a cord.','#ffe36a');sfx('win');
+    later(1200,()=>msg("You have the Sanctum Seal. It fits the lock on the door to Maldrake's Sanctum.",'#ffe36a'))}
+  else if(t==='vtmaldrake'){
+    F.dead=1;F.fight=2;F.gotKey=1;
+    for(const it of ['potion6','potion6','supermana','supermana','elixir']){if(!bagAdd(mkItem(it)))G.items.push({k:it,x:e.x,y:e.y,taken:false})}
+    for(const it of ['vtgatekey','vtstaff','vtring']){if(!bagAdd(mkItem(it)))G.items.push({k:it,x:e.x,y:e.y,taken:false})}
+    msg('You have the Gate Key of Sale.','#ffe36a');sfx('win');
+    const LAST="Wystan Maldrake sinks down on one knee, and the silver ring ticks against the floor. He looks at his hands, as if he had not seen them for years. 'Thank you,' he says. 'It was the only way you could, and I would not have let you do it any other way. The key is in my coat. The ring will not come off me, and it will not stop. Somebody must read the paper to the dead. I could not.' He is a heap of grey cloth, and the ring is still cold on a finger that is no longer there. The dead of Underhill have not lain down.";
+    later(1500,()=>{G.talk={d:{k:'vti_maldrake',x:G.P.x,y:G.P.y,npc:'vto_maldrake'},n:{name:'Wystan Maldrake',root:()=>null},node:say(LAST,[['Take the key and go.',()=>{vtBossEnd();return null}]]),t:G.time,btns:[]}})}}
+function vtBossEnd(){const F=vtF();try{vtMaldrakeVanish()}catch(e){}if(typeof qNote==='function')qNote()}
+/* ---- the fight starts: the chair is empty, the creature stands where he sat ---- */
+function vtMaldrakeVanish(){const L=LEVELS[9677];if(L)for(const d of L.decor)if(d.npc==='vto_maldrake')d.found=true;if(LEVEL===9677)for(const d of G.decor)if(d.npc==='vto_maldrake'){d.found=true;d.block=false}}
+function vtMaldrakeFight(){
+  const F=vtF();if(F.fight)return;F.fight=1;F.fhp=1;G.talk=null;vtMaldrakeVanish();
+  const L=LEVELS[9677],d=L.decor.find(q=>q.npc==='vto_maldrake'),x=d?d.x:12,y=d?d.y:7;
+  addEnemy('vtmaldrake',x,y,true);const m=G.enemies[G.enemies.length-1];if(m){m.lvl=89;m.base=89;m.fixed=LEVEL;m.maxhp=enemyStat('vtmaldrake',89).hp;m.hp=m.maxhp;m.vtPh=0;m.vtSum=0}
+  sfx('growl');G.shake=.5;msg('Maldrake stands. The ring is a white fire on his hand. "Then be quick," he says.','#cfe0ff')}
+/* a saved game inside the fight, or after it: the chair is empty, the creature (if still alive) stands with the health it had */
+function vtSanctumState(){
+  const F=vtF();if(LEVEL!==9677)return;
+  if(F.fight||F.freed)vtMaldrakeVanish();
+  if(F.fight===1&&!F.dead&&!F.freed&&!G.enemies.some(e=>e.t==='vtmaldrake'&&e.hp>0)){
+    const L=LEVELS[9677],d=L.decor.find(q=>q.npc==='vto_maldrake'),x=d?d.x:12,y=d?d.y:7;
+    addEnemy('vtmaldrake',x,y,true);const m=G.enemies[G.enemies.length-1];if(m){m.lvl=89;m.base=89;m.fixed=LEVEL;m.maxhp=enemyStat('vtmaldrake',89).hp;m.hp=Math.max(1,Math.ceil(m.maxhp*(F.fhp===undefined?1:F.fhp)));m.vtPh=Math.min(2,Math.floor((1-m.hp/m.maxhp)*3));m.vtSum=m.vtPh}}}
+
+/* ---- src/desert/vault_story.js ---- */
+/* ==========================================================================
+   THE PEOPLE, BOOKS AND QUESTS OF THE VAULT (prefix vt / VTS2). Sergeant Hale of Oldhaven stands at the garrison picket on the hill and gives the five quests bl7a to bl7e; the rest of the Vault is read:
+   the Roll of Underhill, the seven journal pages, the coffins, the bells, the sigil altars, the red-eyed book, the contract, Maldrake and Hesper.
+   THE STORY: Wystan Maldrake kept the barrows of Underhill and was the village's nearest thing to a doctor. The grey fever (the Blight) came. The Pale Sovereign's agent, the Pale Factor, offered silver
+   that would mend the village, for a service, and Maldrake signed. The silver did not mend the sick. It stood them up again after they died, and the ring he wears turns them out to walk the Blighted Road.
+   He sealed himself under the hill behind five pale-silver locks so that the living could not reach him and he could do no worse. The Sovereign also left him the key of the gate of Sale to keep.
+   Ending A (sympathy): read him the Silver Contract aloud, every clause (the contract is in the secret archive); the ring breaks, he gives the key and a spell, and dies at peace.
+   Ending B (fight): the hard boss. The key comes from his body. No sympathy bonus.
+   Quests: bl7a The Dead on the Hill, bl7b Down the Barrow Stair, bl7c What Maldrake Wrote, bl7d The Last Locks, bl7e The Gate Key of Sale. Hale gives a and e; b, c and d complete as the party earns them.
+   ========================================================================== */
+/* ---------- the plain rules ---------- */
+const vtPages=()=>{const F=vtF();return [1,2,3,4,5,6].filter(i=>F.pages[i]).length};
+const vtFlag=f=>()=>!!vtF()[f];
+if(typeof QAREA_ORDER!=='undefined'&&!QAREA_ORDER.includes('The Blighted Lands'))QAREA_ORDER.push('The Blighted Lands');
+function vtQuest(id,title,who,steps,reward,o){
+  const q=Object.assign({title,who,need:steps.length,goal:()=>steps.reduce((n,s)=>n+(s[1]()?1:0),0),reward},o||{});
+  Object.defineProperty(q,'desc',{enumerable:true,configurable:true,get(){const s=steps.find(s=>!s[1]());return s?(typeof s[0]==='function'?s[0]():s[0]):'All is done. Tell Sergeant Hale.'}});
+  QUESTS[id]=q;QAREA[id]='The Blighted Lands';if(typeof MAIN_QUESTS!=='undefined')MAIN_QUESTS.add(id);return q}
+const VT_REW={bl7a:{gold:3000,xp:20000,items:['potion6']},bl7b:{gold:4000,xp:30000,items:['potion6','supermana']},bl7c:{gold:5000,xp:36000,items:['elixir']},bl7d:{gold:6000,xp:45000,items:['supermana','elixir']},bl7e:{gold:12000,xp:70000,items:['vtamulet']}};
+QUESTS.bl7a={title:'The Dead on the Hill',who:'Sergeant Hale, at the garrison picket',need:8,cnt:'vtHill',goal:q=>(G.flags.vtHill|0)-(q.base||0),reward:VT_REW.bl7a};
+Object.defineProperty(QUESTS.bl7a,'desc',{enumerable:true,configurable:true,get(){return 'Kill 8 of the dead on the Barrow Hill, so that Sergeant Hale can get to the door. ('+Math.min(8,Math.max(0,(G.flags.vtHill|0)-((G.quests.bl7a&&G.quests.bl7a.base)||0)))+' of 8)'}});
+QAREA.bl7a='The Blighted Lands';if(typeof MAIN_QUESTS!=='undefined')MAIN_QUESTS.add('bl7a');
+vtQuest('bl7b','Down the Barrow Stair','Sergeant Hale, in front of the Vault door',[
+  ["Go through the door of the Vault at the top of the hill. In the Barrow Stair, kill the Barrow Warden for the Pale Silver Key and open the first pale-silver lock at the south end of the Warden's Hall.",()=>!!vtF().locks.L1],
+  ["On the second floor, open the Ring of Coffins in the order of the Roll of Underhill (the Roll is on the lectern in the Reading Room), and go down through the Coffin Gate.",()=>!!vtF().ringDone],
+  ["On the third floor, ring the five bells of the Bell Gallery in the right order, and open the second pale-silver lock.",()=>!!vtF().locks.L2]],VT_REW.bl7b);
+vtQuest('bl7c','What Maldrake Wrote','Sergeant Hale, in front of the Vault door',[
+  [()=>"Find four pages of Maldrake's journal. They lie on the lecterns and desks of the Vault, one on each of the first six floors ("+Math.min(4,vtPages())+" of 4).",()=>vtPages()>=4]],VT_REW.bl7c,{need:4,goal:()=>Math.min(4,vtPages())});
+vtQuest('bl7d','The Last Locks','Sergeant Hale, in front of the Vault door',[
+  ["On the fourth floor, the Silvered Cellars, fetch the three Silver Sigils of Underhill (the Room of Needles, the Hounds' Den, the Silvered Hall) and open the third pale-silver lock.",()=>!!vtF().locks.L3],
+  ["On the sixth floor, kill the Silver Warden for the Sanctum Seal, and open the last pale-silver lock.",()=>!!vtF().locks.L4],
+  ["Go down into Maldrake's Sanctum.",()=>!!vtF().reach[9677]]],VT_REW.bl7d);
+vtQuest('bl7e','The Gate Key of Sale','Sergeant Hale, in front of the Vault door',[
+  ["Take the Gate Key of Sale from Wystan Maldrake in his Sanctum, by listening to him or by killing him.",()=>!!vtF().gotKey||bagCount('vtgatekey')>0]],VT_REW.bl7e);
+QNEXT.bl7a='bl7b';QNEXT.bl7b='bl7c';QNEXT.bl7c='bl7d';QNEXT.bl7d='bl7e';
+QNOTE.bl7e='Sergeant Hale writes to Lanternrest and to Oldhaven: the dead of the Barrow Hill are the Sovereign\'s, the way west is open as far as the gate of Sale, and the party holds the key.';
+QGIVER.vto_hale=['bl7a','bl7b','bl7c','bl7d','bl7e'];QGIVER.vto_hale2=QGIVER.vto_hale;
+/* quests that are earned in the Vault finish by themselves (the party is not going to climb six floors to be told so) */
+{const _u=update;let nt=0;update=function(dt){try{if(vtInside(LEVEL)&&G.state==='play'&&(nt-=dt)<=0){nt=1.2;for(const id of ['bl7b','bl7c','bl7d'])if(qReady(id))qTurnIn(id)}}catch(e){console.error('vt auto',e)}return _u.apply(this,arguments)}}
+/* ---------- the texts ---------- */
+const VT_SARC=[
+ "TOLL, the keeper of this door. He kept it for forty years, and he is still on duty.",
+ "A barrow-chief of the old people, name worn off. Somebody has put a clay cup of water on the lid, very recently, and the water is clean.",
+ "MARTHA GREY, 1 child, 4 grandchildren, 1 very strong opinion about the weather.",
+ "HERE LIES A STRANGER, who came to Underhill in a storm and was given supper. He stayed, and then he stayed longer.",
+ "OSWIN REEVE, who counted the village's sheep every spring, and was always one short. He was the one.",
+ "Two names on one lid, and a gap between them where a third was meant to go. The stone-cutter ran out of money.",
+ "GAFFER PENN, bee-man. The lid has a small, neat hole in it, and bees have been through it in better years.",
+ "A sarcophagus with its lid slid off a hand's breadth. Inside, dust, and a ribbon, and a tooth.",
+ "ALDWYN DUNN, thatcher. He thatched the Vault door in his youth. It has never leaked.",
+ "THE LAST OF THE OLD PEOPLE. The stone is much older than the village, and it is not unfriendly.",
+ "HOB AND NELLIE LARK. They quarrelled for sixty years, and lie side by side, with a hand's breadth of stone between them.",
+ "BROTHER SILAS, who taught the children their letters in the chapel. Every letter on this stone is correct.",
+ "A cracked lid. Silver thread runs through the crack like a vein, and it is cold.",
+ "MOTHER TAMSIN, the village midwife before Nan Pelter. The lid is smooth in one place, where children touch it for luck.",
+ "EDRIC WELLS, a boy of fourteen. His mother carved the lid herself, and it is not very good, and it is the best thing here."];
+const VT_VILLAGERS=[
+ "A woman in a blue apron sits at the table with a wooden spoon in her hand. The bowl in front of her is full of grey dust. Silver thread runs along the veins of her wrists.",
+ "A man in his Sunday coat, with a clay pipe in his teeth that has never been lit. His eyes are open. He is watching the door, as a man watches a door when he is waiting for somebody who is late.",
+ "A child in a nightshirt sits on a stool with her feet not touching the floor. She has been sitting there for a long time. The silver in her veins has made her very still.",
+ "An old man leans on a stick he has not put down, with his chin on his chest. He might be asleep. He is not asleep.",
+ "A young woman has her hair in a plait with a blue ribbon. The ribbon is new. Someone has tied it for her, very recently, and very carefully.",
+ "A big man with a smith's forearms sits with his hands flat on the table, as though the table might get up.",
+ "A man and a woman sit side by side with their hands held on the table between them. Their fingers have gone grey, and have not let go.",
+ "A boy of about twelve, with a toy boat in front of him, a good one with a paper sail. He is not playing with it.",
+ "An old woman in a shawl, with her eyes shut. Her lips move in a prayer that is nine hundred years old and she is saying it very slowly.",
+ "A man with a ferryman's hands and a ferryman's rope round his waist, still wet, though nothing here is wet.",
+ "A girl with a shepherd's crook across her knees, and a lamb made of grey wool on the table in front of her.",
+ "A thin man with ink on his fingers, a clerk or a priest, who has written the same line on the table in front of him over and over with his finger: 'I will be late for supper.'"];
+const VT_VILLAGERS_FREE=["The villager sits as before, but the silver thread has gone dull and the grey hand has let go of the spoon. This one is only dead, now, and at rest.","The villager's eyes are closed. The pipe has fallen out of the mouth. There is a smile, or something close to one.","The child has put her head on the table, like a child at the end of a long evening.","The old man has put down the stick, at last, and is asleep, properly.","The ribbon is still blue. The girl is quiet.","The smith's hands have opened, and the table has been left to stay where it is.","The two hands have not let go of each other. They do not need to.","The boy has taken up the paper boat, and has it in both hands.","The old woman's lips have stopped. The prayer is finished.","The rope has come undone, and has dropped to the floor in a neat coil.","The lamb of grey wool has been taken in both arms.","The clerk has finished the line. It says, now, 'I am not late.'"];
+const VT_BARROWS=["The barrow of the Millers. The wooden door in its side is shut, and a rowan twig has been nailed over the latch.","An open barrow of the Thatchers. The door is off, and fresh earth lies on the grass in front of it. Something has come out of this one, and not long ago.","The barrow of the Pelter family. The door is shut, but the grass in front is trodden flat in a path that leads to the road.","An open barrow of the Brambles. A dead crow sits on the lintel, stiff as a carving.","The barrow of the Cobbs. The door is shut. A horseshoe hangs over it, and it has been there a long time and is not much help.","An open barrow. The door hangs from one hinge, and the dark inside is warmer than the air outside.","The barrow of the Fenns. The door is shut and barred with a black iron bar. Somebody has chalked 'SORRY' on it.","An open barrow. Silver thread shines faintly on the threshold, in the dirt, like a snail's track.","The barrow of the Brights. Shut. A wreath of dead flowers is tied to the latch. They were fresh a week ago.","An open barrow of the Reeves. Eleven footprints go out of it and none go in.","The barrow of the Dunns, the last before the path turns. Shut. A child's wooden horse stands by the door.","An open barrow. The sound of a slow, patient shovel comes out of it, though there is no shovel.","The barrow of the Larks. Shut, and neatly kept. Somebody comes here and cleans it, and has done so quite recently.","An old barrow, older than the village, with no door at all, only a round stone. It is warm to the touch, and does not feel unfriendly."];
+/* ---------- the signs, the camp, the hill, Underhill ---------- */
+khNpc('vto_sign','A sign','ww_sign',d=>{const t=VTH_SIGNS[vtI(d)%VTH_SIGNS.length];return gySay(t[0]+'. '+t[1],[BYE])});
+khNpc('vto_barrow','A barrow','gy_hatch',d=>gySay(VT_BARROWS[vtI(d)%VT_BARROWS.length],[BYE]));
+khNpc('vto_cart','A wrecked wagon','cart',()=>gySay("A garrison wagon, on its side, with the king's mark burned into the tailboard. The horse is still in the harness. It is a skeleton. It looks a little offended.",[BYE]));
+khNpc('vto_plaguecart','A dead-cart','cart',()=>gySay("The dead-cart of Underhill, the kind a village keeps for a bad autumn. It is empty. Whatever it carried has got up and walked away, and left the shafts neatly on the ground.",[BYE]));
+khNpc('vto_banner','A garrison standard','banner',()=>gySay("The standard of the Oldhaven garrison, a white tower on blue. There is a hole in it about the size of a hand.",[BYE]));
+khNpc('vto_hut','A cottage of Underhill','gy_hut',d=>{const i=vtI(d);return gySay(["The door is off. Inside, the table is laid for supper for six, and every dish is full of grey dust.","A cottage with a good thatch, and a pot on the hook over a cold hearth. On the wall someone has pencilled the heights of four children, with their names. The last mark is a month old.","A cottage with the shutters nailed up from the inside. Nobody came out. The nails are bright, and so are the scratches round them."][i%3],[BYE])});
+khNpc('vto_chapel','The chapel of Underhill','gy_chapel',()=>gySay("The ruined chapel of Underhill. The bell frame at the gable is empty. Hale says the bells went into the hill a long time ago and nobody saw them go, and the bell that tolls at night comes from there.",[BYE]));
+khNpc('vto_well','The well of Underhill','ww_well',()=>gySay("The well of Underhill. A thin skin of pale silver lies on the water, and when you lift it with a stick it hangs from the stick like grey wax, and will not drop off. The villagers drank this, in the autumn of the fever. They said it was sweet.",[BYE]));
+khNpc('vto_wick','Corporal Wick, of the Oldhaven garrison','kh_ohsold1_1',d=>{const F=vtF();
+  return gySay(F.freed?"Corporal Wick has his bandaged arm out of its sling and is looking at it. 'Funny thing,' he says. 'It stopped hurting at the same time the bell stopped. I don't know what you did, but I thank you for it.'":F.dead?"Corporal Wick has been told. He is very quiet. 'The key is yours, then,' he says. 'We will manage the dead. We always do.'":"Corporal Wick has one arm in a sling and the other round a tin mug. 'Sergeant won't say it,' he says, 'so I will. We have been here nine days and I have buried four of my friends, and the next night they came up the hill and walked past me. Quite politely. One of them said good evening. Find out who's doing it, sir. Please. I should like to have a word.'",[BYE])},{sc:1});
+/* ---------- Hale ---------- */
+const VT_HALE={
+ intro:"Halt. Oh, good, you are alive. That puts you ahead of most. I am Sergeant Hale, King Osric's garrison at Oldhaven, forward picket, which is a fancy name for me, Corporal Wick and a wagon. The garrison at Lanternrest sent six of us up the Road to find out why the dead walk down off this hill. There were six of us.",
+ intro2:"They come down every night about the time the bell tolls. In rows. Quite tidy. They go west along the Road as far as Hollowbell, and they come back before dawn, and nobody tells them to stop. We have lost three wagons and four good men. The village below is Underhill, or was. It had twelve households. I have not found one living person in it.",
+ intro3:"At the top of the hill there is a door. Behind it is the Vault of Maldrake, the barrow-tomb of the village, and Maldrake kept it: a quiet man, a hedge-wizard, who mended my wagon wheel once with a charm and would not take a penny. He went down in there at the start of winter and shut the doors with locks of pale silver. And that is when the dead started getting up. I would like to know why, and I would like it stopped. Will you go?",
+ offer:"First, the hill. Eight of the dead, for sword practice, so that I can bring my men up to the terrace and not lose another. Then we talk about the door.",
+ accept:"Good. Mind the path. The barrows with the doors open are the ones that are in use. They come out slow, but there are a lot of them. I will be here, by the fire, with Wick, and a very small amount of hope."};
+function vtHaleFresh(){
+  const F=vtF();
+  if(qSt('bl7e')==='done'||F.fin){
+    return gySay(F.freed?"Hale is sitting on a barrel with his helmet in his lap. 'I do not know what you did down there,' he says, 'but the bell has not rung since the day you went in. I stood on the hill last night and nothing walked down it. Nothing. I think I may cry, and I would like you to look at the hill while I do it. The road is yours, as far as the gate of Sale.'":"Hale does not get up. 'You did what you had to,' he says. 'The key is yours. I will not say I am sorry he is gone. I will say that I did not like the sound of it, when you said he thanked you. The dead are still walking, I see. The Sovereign still has a hand in it. Somebody must come back and read the paper to them one day, whatever the paper is.'",[BYE]);}
+  if(qSt('bl7a')===null){
+    const offer=()=>gySay(VT_HALE.offer,[["We will clear the hill.",()=>{qAccept('bl7a');G.flags.vtMet=1;return gySay(VT_HALE.accept,[BYE])}],['Not yet.',()=>null]]);
+    const three=()=>gySay(VT_HALE.intro3,[["We will go.",offer],["Who are the dead?",()=>vtHaleDead()],['Not yet.',()=>null]]);
+    const two=()=>gySay(VT_HALE.intro2,[['Go on.',three]]);
+    return gySay(VT_HALE.intro,[['Go on.',two]])}
+  if(qReady('bl7a'))return gySay("Hale looks up the hill, and counts something in his head. 'That is eight,' he says. 'The path is quiet. I can feel the difference in my teeth. Take this: it is what the Oldhaven garrison pays when it has anything to pay with. And the next job is the hard one. The door.'",[['We will take it.',()=>{const rw=rewardText('bl7a');qTurnIn('bl7a');return gySay("Hale gives you "+rw+". 'I will bring the picket up to the terrace, by the door,' he says. 'Find me there when you come out. The door at the top,' 'Pale silver locks. The first is on the other side of a Warden, if I have heard right: the old barrow guard. Go down the Stair, find what they are guarding, and work out why Maldrake shut himself in. I want to know what he wrote. Anything he wrote. A man leaves a trail.'",[BYE])}],BYE]);
+  if(qReady('bl7e'))return gySay(F.freed?"You have the key, and Hale sees it before you say a word. 'Gods,' he says. 'You did it without a fight. I heard the bell stop. All of us did. The whole hill went quiet, and Wick sat down in the road.' He takes a long breath. 'The Gate Key of Sale. Keep it. Oldhaven will hear about this, and so will the king. The garrison at Lanternrest will be glad.'":"You have the key. Hale looks at it for a long time. 'Was it hard?' he asks. 'It was hard,' he answers himself. 'Well. It is done, and you have it. Oldhaven will hear. The dead will go on walking, but there is a road to Sale in your pocket, and I will tell the king that is more than anybody else managed.'",[['Here you are.',()=>{const rw=rewardText('bl7e');qTurnIn('bl7e');F.fin=1;return gySay("Hale gives you "+rw+". 'The road west is yours,' he says. 'Hollowbell is next. The abbey is full of monks, and I understand none of them are alive. Be careful of the bell.'",[BYE])}],BYE]);
+  // a quest under way: where to go next
+  const hint=qSt('bl7b')==='active'?"'The door is at the top of the path, between the angels. Down the Stair, find the Warden, find the key. And do not walk in the middle of a passage you cannot see the end of.'":qSt('bl7c')==='active'?"'Maldrake wrote things down. A man like that does. Find his journal pages, there are lecterns and desks all down the Vault. I would like to know what he was thinking, whether I like it or not.'":qSt('bl7d')==='active'?"'The last locks, then. Three sigils on the fourth floor. A seal on the sixth, from the one they call the Silver Warden. And then him.'":qSt('bl7e')==='active'?"'The key of Sale is on his table, if the Pale Sovereign's men are to be believed. I would like to hear how he looks. If you can, see to it that he is not suffering.'":"'Eight of the dead, for sword practice. The hill is yours.'";
+  return gySay(["Hale is poking the fire with a bone, which he will not admit is a bone. ",""][0]+hint,[['Tell me about the dead.',()=>vtHaleDead()],['What do you know about the garrison?',()=>vtHaleGarrison()],["Has anyone been through here lately?",()=>vtHaleWren()],BYE])}
+function vtHaleDead(){return gySay("'They are Underhill's. I know a few faces. The miller. The ferryman's wife. There was a little girl, last week, in a nightshirt, going west with the rest, holding a doll. I could not shoot her. Wick shot at her, and missed on purpose, and neither of us has mentioned it. They are not angry, you understand. They look tired. They look as if they have been told to walk and nobody has said where.'",[BYE])}
+function vtHaleGarrison(){return gySay("'The garrison at Lanternrest is the fort up the Road, the old coaching inn with a wall round it. Oldhaven put a hundred men in it when the Road went bad. It is the one safe place between here and the Pale Bridge, if you do not count what the soldiers cook. They sent six of us here. Their captain is a hard woman, and fair. She will want a report.'",[BYE])}
+function vtHaleWren(){return gySay("'A girl in a green cloak, and an old wizard with a staff the shape of a corkscrew, came along the Road nine days ago, going west. Pleasant girl. She asked about the hill, and I said do not go in, and she said she had somewhere to be. She did not look at the hill once, you know. As though she did not dare to. The old man looked at it a long time. He said something about silver. Then they went on to Sale.'",[BYE])}
+khNpc('vto_hale','Sergeant Hale of Oldhaven','kh_ohsold1_0',()=>vtHaleFresh(),{q:QGIVER.vto_hale});
+khNpc('vto_hale2','Sergeant Hale of Oldhaven','kh_ohsold1_0',()=>vtHaleFresh(),{q:QGIVER.vto_hale});   // the same man, on the terrace once the hill is clear
+/* Hale stands at the picket until the hill is clear (bl7a done), and then on the terrace in front of the door, where the party comes out of the Vault */
+function vtHaleSync(){if(LEVEL!==9670||!G.decor)return;const up=qSt('bl7a')==='done';for(const d of G.decor){if(d.npc==='vto_hale')d.found=up;else if(d.npc==='vto_hale2')d.found=!up}}
+{const _u=update;let nt=0;update=function(dt){try{if(LEVEL===9670&&G.state==='play'&&(nt-=dt)<=0){nt=.8;vtHaleSync()}}catch(e){}return _u.apply(this,arguments)}}
+/* ---------- the journal: the Roll, the seven pages, a note from the loft ---------- */
+const VT_BOOK=[
+ {t:'The Roll of Underhill',x:"PARISH ROLL OF UNDERHILL, kept by Brother Alder, clerk and priest. In the autumn of the third year of the Blight the grey fever came to the village. These are the ones it took, in the order it took them. One: Edda Marl, aged nine, the miller's daughter. Two: Old Joss Thatcher, aged seventy-four. Three: Nan Pelter, aged forty, the midwife. Four: Wat Bramble, aged thirty-three, the ferryman. Five: Dame Orla Fenn, aged sixty-eight, widow. Six: Piers Cobb, aged forty-five, the smith. Seven: Nell Bright, aged nineteen, shepherdess. Eight, in another hand: Brother Alder, aged fifty-two, who wrote this roll and buried the others. Underneath, in a third hand, small and tidy: 'They asked to lie together, so I have laid them in the Ring, each in a coffin of their own. I will not have them woken in the wrong order. Open them as they went. W.M.'"},
+ {t:'Maldrake\'s journal, page one',x:"WYSTAN MALDRAKE, his journal. The first week of the fever. I keep the barrows of this hill, and I am the nearest thing Underhill has to a doctor, which is to say I know which herbs not to use. Edda Marl died this morning. She was nine. Her father carried her up the hill himself. The herbs do nothing. I have written to the abbey at Hollowbell for a physician. There is no answer. There is no answer from anywhere. The Road is empty, and the sky over the west is the colour of old milk."},
+ {t:'The gravedigger\'s tally',x:"TALLY, kept by the gravedigger of Underhill in the fever autumn. Tuesday, two. Wednesday, one. Thursday, three, and the priest is poorly. I have run out of coffin wood. Mr Maldrake says to use the old barrow chests, and he will lay them in a Ring in the vault below, in the order they go, so that nobody is put in the wrong place and nobody is forgotten. I told him I never heard of such a thing. He said, 'Neither had I.' Then he put his hand on my shoulder, and I was surprised, because I am not used to it. (On the back, in Maldrake's hand: 'The tally is wrong by one. I have corrected it.')"},
+ {t:'Maldrake\'s journal, the peal',x:"MALDRAKE, in the Bell Gallery. The old rule of the parish is that the bells ring for the dead by their age: the youngest first, and the Great Bell last, because the Great Bell is never rung alone. When the fever took eight in one week I rang them all, and wrote the order down so that it would not be forgotten. First the Child's Bell. Then the Widow's, for those who stay behind. Then the Miller's. Then the Priest's. Last, the Great Bell. Pull them in that order, and the lock will hear it. I made the lock to hear it. I wanted somebody to be able to come in, in the end, who had read this far."},
+ {t:'Letters of the Pale Factor',x:"TO MASTER WYSTAN MALDRAKE OF UNDERHILL. We are told that your village is sick. The Pale Sovereign has silver that mends it, a gift of the Pale Lands, given freely. A cup in the well will do for a household. Sign below for the delivery, and for a small service we ask in return, which will not be heavy. Your servant, the Pale Factor. [Second letter, a month later:] Master Maldrake. The Sovereign is much pleased. Your village is on its feet. We ask the service now. Those who have been mended will walk the Road west at night as far as Hollowbell, and come back by dawn. They will not tire. You will turn the ring on your finger to send them out, and turn it back to call them in. Keep the key that came with this letter. It is the key of the gate of Sale. The Sovereign will send for it."},
+ {t:'Maldrake\'s journal, the study',x:"MALDRAKE. I have tried to take off the ring. It does not come off. I have tried to stop, and I cannot stop. The dead of Underhill sit down to supper in the Great Hall every night at seven, in their best clothes, and I cannot make them eat, and I cannot make them leave. The silver did not mend them. It let them die, and then it stood them up again, and the Pale Factor looked very pleased. Hesper went before the silver came. She does not sit at the table. I do not know why. I am glad. I am so glad. If you are reading this in my old study, there is a shelf behind you with a book on it that has a red eye. That is the way to the Archive. Everything that I could not say aloud is there."},
+ {t:'Maldrake\'s journal, the stair',x:"MALDRAKE. I have built the locks. Five of them, in pale silver, the sort that answer only to the living with a reason: a key, a peal, a sigil for each of three, a seal. They keep the dead in and the living out, so that nobody is hurt, and so that I cannot do worse than I have done. The Silver Warden holds the last seal. He was the oldest of the barrow guard, and asked to stay on. If you have got this far you are either a soldier or a fool, and I say to both: I am sorry, and please be quick. The ring turns every night at midnight, and I am not always able to hold it back."},
+ {t:'Maldrake\'s journal, the last page',x:"MALDRAKE, in the Archive. If anyone reads this, the contract is on the desk. The last clause says that the debt is paid if the whole of the contract is read aloud to me, before a witness, and I agree that it is over. I have never been able to read it aloud. The Sovereign wrote that clause so that the words would stop in my throat, and they do. I can only hear it. If a stranger will read it to me, I will agree. Please. Bring it down to the Sanctum and read it, every word. Then the ring will break. And forgive me, if you can, the Road I have blighted."}];
+VT_BOOK[21]={t:"The founder's ledger",x:"LEDGER of the bell-founder of Underhill. Five bells cast for the village in my time, all from one pour: the Child's Bell (high, thin, the first to ring), the Widow's, the Miller's (the deepest), the Priest's, and the Great Bell, cast last, and a good deal heavier than the plan. A note in the margin: 'Ring the Great Bell last. It does not like to ring alone. Nobody knows why. The Great Bell is very old, and has views.'"};
+khNpc('vto_book','A lectern','hl_p_lectern',d=>{
+  const i=vtI(d),B=VT_BOOK[i],F=vtF();if(!B)return gySay("A book, closed. The pages have stuck together.",[BYE]);
+  const first=i<=7&&!F.pages[i];
+  if(first){F.pages[i]=1;if(i>=1&&!bagCount('vtpg'+i)&&ITEMDEF['vtpg'+i])bagAdd(mkItem('vtpg'+i));if(i===0&&!bagCount('vtpg0'))bagAdd(mkItem('vtpg0'));sfx('key');msg('You read: '+B.t+'.','#ffe36a');
+    if(i>=1&&i<=6&&vtPages()===4)msg('That is four pages of the journal.','#ffe36a')}
+  return gySay(B.t.toUpperCase()+'. '+B.x,[BYE])},{sc:1});
+khNpc('vto_desk','A desk','hl_p_desk',()=>gySay("A desk with a few things on it: a pen worn to a stub, a dried inkwell, and an old wax seal that has been pressed and pressed until the picture has gone.",[BYE]));
+khNpc('vto_desk2',"Maldrake's table",'hl_p_desk',()=>gySay("Maldrake's table. Tea in a cup, long cold. A child's toy cart with a missing wheel. A map of the Road, with a very tidy line drawn along it from here to the west, and a very tidy cross on Sale. And a pale silver key with a crown for a bow, lying on a folded cloth, as if it were being kept clean.",[BYE]));
+khNpc('vto_shelf','A bookcase','hl_p_shelf',()=>gySay("A bookcase, full of books about herbs, bells, barrows and weather. A few are about the history of Underhill, a village of twelve households that was never very important, and every one of them has been read to pieces.",[BYE]));
+khNpc('vto_shelf1','A bookcase with a red eye','hl_p_shelf',d=>{const F=vtF();
+  if(F.secret)return gySay("The bookcase stands as before. One book is slightly out of line, and a door in the east wall of the study stands open, with a narrow stair beyond it.",[BYE]);
+  return gySay("A bookcase of rotted volumes, and one book on the third shelf with a red eye painted on its spine. The eye is warm, and follows you a very little. The painting is not old.",[['Pull the red-eyed book.',()=>{F.secret=1;sfx('door');G.shake=.4;if(G.grid[LEVELS[9675]._vt.secret.y])G.grid[LEVELS[9675]._vt.secret.y][LEVELS[9675]._vt.secret.x]=0;msg('Somewhere in the east wall of the study, a stone door slides open.','#ffe36a');return gySay("The book tips forward like a lever, and a low grinding comes from the east wall. A stone door has opened there, and behind it a narrow stair goes down into the dark.",[BYE])}],['Leave it.',()=>null]])});
+khNpc('vto_cage','An iron cage','hl_p_cage',()=>gySay("An iron cage, empty but for a tin cup and a rag. Somebody has scratched a calendar on the bars, and given up at nineteen.",[BYE]));
+khNpc('vto_fenn','Private Tam Fenn, of the Oldhaven garrison','kh_ohsold1_1',()=>{const F=vtF(),g=!F.fennGift;
+  const t=g?"A soldier is crouched in the corner of the cell with a sword across his knees. 'Quiet,' he whispers. 'Quiet. I am Private Fenn, of Hale's patrol. The sergeant sent six of us in, and I am the only one who got as far as this room, and that is only because I hid. The Warden at the bottom wears a pale key round his neck. And the passage before it has plates on the sides. Walk down the middle.' He presses a flask into your hand. 'It was my mother's. Please. Take it.'":"'Walk down the middle,' Fenn says. 'The passage to the Warden. Down the middle. And whatever you do, do not open the Ring in the wrong order. I did not do it myself. I heard about it.'";
+  if(g){F.fennGift=1;if(!bagAdd(mkItem('potion6')))G.items.push({k:'potion6',x:G.P.x,y:G.P.y,taken:false})}
+  return gySay(t,[BYE])});
+khNpc('vto_sarc','A sarcophagus','gy_sarc',d=>gySay(VT_SARC[vtI(d)%VT_SARC.length],[BYE]));
+khNpc('vto_altar','The altar of Underhill','gy_altar',()=>gySay("A plain altar of grey stone, with a bowl on it, and in the bowl a handful of grey earth from every grave in the village, mixed. It is the oldest thing here, and the only thing in the Vault that has not been touched by the silver.",[BYE]));
+khNpc('vto_villager','A villager of Underhill','gy_zombie',d=>{const i=vtI(d),F=vtF();return gySay(F.freed?VT_VILLAGERS_FREE[i%12]:VT_VILLAGERS[i%12],[BYE])});
+const VT_HOUSE=['Marl','Thatcher','Pelter','Bramble','Fenn','Cobb','Bright','Penn','Tanner','Reeve','Dunn','Lark'];
+khNpc('vto_memorial','A candle for a household','gy_candles',d=>{const i=vtI(d),F=vtF();return gySay("A candle for the household of "+VT_HOUSE[i%12]+", in Underhill. "+(F.freed?"It has gone out, and nobody has relit it. It does not need to be.":"It has burned for three winters, and the wax has never run down. Beside it lies a small stone with the names of the household, scratched very carefully, one at a time."),[BYE])});
+khNpc('vto_mirror','A tall mirror','hl_p_mirror',()=>gySay(vtF().freed?"A tall mirror, dark and still. Nothing looks out of it now.":"A tall standing mirror, dark as a pond. Two pale eyes look out of it from very deep. They are not yours. They look at you for a moment, in a polite and interested sort of way, and then go away.",[BYE]));
+khNpc('vto_rune','The rune of the Ring','gy_rune',()=>{const F=vtF();return gySay(F.ringDone?"The rune in the middle of the Ring has gone dark. The eight coffins stand open round it, and the gate to the south is open.":"A tall stone with a pale rune on it, glowing. Under it, cut small: 'THE ORDER THEY WENT.' The eight coffins stand round it in a ring, and every lid has a name on it. "+(F.ring&&F.ring.length?F.ring.length+" of 8 are open.":"None are open."),[BYE])});
+const VT_COFFIN_SAY=["Inside there is nothing but grey dust, and a coil of pale silver thread. The lid is light, and sinks back by itself when you let go.","The coffin is empty, and lined with a child's blanket that is not nearly old enough to be here.","The lid lifts. There is a spoon inside, and a lock of hair tied with blue wool.","Nothing in it but silver thread, and a wedding ring that fits nobody now.","Dust, a clay pipe, and a flat stone with the shape of a hand worn into it.","Inside, the dust has been smoothed very carefully, as if somebody had made a bed of it.","Only a rope, coiled, and a ferryman's brass whistle.","Dust, and a brass bell the size of a thumb. It does not make a sound."];
+khNpc('vto_coffin','A coffin','hl_p_coffin',d=>{
+  const i=vtI(d),F=vtF(),nm=VT_RING.names[i];F.ring=F.ring||[];
+  if(F.ringDone)return gySay("The coffin of "+nm[0]+", "+nm[1]+". The lid is open. There is nothing in it.",[BYE]);
+  if(F.ring.includes(i))return gySay("The coffin of "+nm[0]+" is open, and stays open. "+F.ring.length+" of 8.",[BYE]);
+  return gySay("A coffin with a lid of black wood, and a brass plate: "+nm[0]+", "+nm[1]+". "+(F.ring.length?F.ring.length+" of 8 have been opened.":"Nothing has been opened yet."),[['Open the lid.',()=>vtCoffin(i)],['Leave it.',()=>null]])});
+function vtCoffin(i){
+  const F=vtF();F.ring=F.ring||[];const want=VT_RING.order[F.ring.length];
+  if(i===want){F.ring.push(i);sfx('door');
+    if(F.ring.length===8){F.ringDone=1;G.shake=.5;sfx('win');const V=LEVELS[9672]._vt;if(V.ringgate&&G.grid[V.ringgate.y])G.grid[V.ringgate.y][V.ringgate.x]=0;msg('The eighth lid lifts. The rune in the middle of the Ring goes out, and the Coffin Gate in the south wall rolls open.','#ffe36a');
+      return gySay(VT_COFFIN_SAY[i]+" All eight lids stand open, in the order they went. The rune goes out. Far off, a heavy gate opens.",[BYE])}
+    msg(F.ring.length+' of 8.','#c8d8a0');return gySay(VT_COFFIN_SAY[i]+" "+F.ring.length+" of 8.",[BYE])}
+  F.ring=[];sfx('growl');G.shake=.5;msg('Wrong. Every lid slams shut, and something answers from inside.','#d09a80');
+  const free=gyFreeAround({x:G.P.x,y:G.P.y},3);for(let n=0;n<2&&n<free.length;n++){addEnemy('gyghoul',free[n][0],free[n][1],true);const m=G.enemies[G.enemies.length-1];if(m){m.vtAdd=1;m.lvl=88}}
+  return gySay("The lid lifts. That was not the right one. Every lid in the Ring slams shut at once, the rune flares, and two grey shapes climb out of the nearest coffins, not at all pleased to have been disturbed.",[BYE])}
+khNpc('vto_bell','A bell','gy_bell',d=>{
+  const i=vtI(d),F=vtF();F.bells=F.bells||[];
+  if(F.bellsDone)return gySay(VT_BELLS.names[i]+" hangs quiet. The peal is done.",[BYE]);
+  return gySay(VT_BELLS.names[i].toUpperCase()+". "+VT_BELLS.sub[i]+". "+(F.bells.length?F.bells.length+" of 5 rung in this peal.":"The rope is within reach."),[['Ring it.',()=>vtBell(i)],['Leave it.',()=>null]])});
+function vtBellSound(i,vol){if(!AC||G.mute)return;const f=VT_BELLS.freq[i];tone(f,f*.997,2.8,'sine',.07*(vol||1),0);tone(f*2.4,f*2.39,1.9,'sine',.025*(vol||1),0);tone(f*4.1,f*4.1,1.1,'sine',.012*(vol||1),0);nz(.4,.006*(vol||1),'bandpass',1200,800,0)}
+function vtBell(i){
+  const F=vtF();F.bells=F.bells||[];const want=VT_BELLS.order[F.bells.length];
+  vtBellSound(i,1);
+  if(i===want){F.bells.push(i);msg('The bell rings. '+F.bells.length+' of 5.','#a8c8ff');
+    if(F.bells.length===5){F.bellsDone=1;later(1800,()=>{vtLockSet('L2');G.shake=.4})
+      return gySay("The Great Bell rings last, long and deep, and the whole gallery hums with it. Somewhere to the south, a pale-silver lock hears it.",[BYE])}
+    return gySay("The bell rings, clear and true. "+F.bells.length+" of 5.",[BYE])}
+  F.bells=[];if(AC&&!G.mute){for(const k of [0,1,2,3,4])tone(VT_BELLS.freq[k]*(1+k*.03),VT_BELLS.freq[k]*(1+k*.03),1.2,'sawtooth',.02,k*.05)}
+  msg('Wrong. The bells jangle all at once, and the dead answer.','#d09a80');G.shake=.5;
+  const free=gyFreeAround({x:G.P.x,y:G.P.y},3);for(const t of ['gyshade','gybanshee']){const f=free.shift();if(!f)break;addEnemy(t,f[0],f[1],true);const m=G.enemies[G.enemies.length-1];if(m){m.vtAdd=1;m.lvl=88}}
+  return gySay("That was not the right bell. All five jangle together, a sour, scraping noise, and from the dark above the gallery something very thin begins to scream.",[BYE])}
+khNpc('vto_sigilaltar','An altar of pale silver','gy_altar',d=>{
+  const i=vtI(d),F=vtF();F.sig=F.sig||{};const where=["the Room of Needles","the Hounds' Den","the Silvered Hall"][i];
+  if(F.sig[i]||F.locks.L3)return gySay("The altar in "+where+", empty. The sigil is gone.",[BYE]);
+  return gySay("A low altar of pale silver, with a round seat cut in it, and in the seat a flat silver disc stamped with a small house and a well. The sigil of Underhill. It is cold.",[['Take the sigil.',()=>{F.sig[i]=1;bagAdd(mkItem('vtsigil'));sfx('key');msg('You take a Silver Sigil of Underhill ('+Object.keys(F.sig).length+' of 3).','#ffe36a');return gySay("You take the sigil. The altar goes dull.",[BYE])}],['Leave it.',()=>null]])});
+khNpc('vto_contractdesk',"Maldrake's desk",'hl_p_desk',()=>{const F=vtF();
+  if(F.contract||bagCount('vtcontract')||F.freed)return gySay("The desk is empty now. On the blotter, a clean square where the paper lay.",[BYE]);
+  return gySay("A tidy desk. On the blotter, a single sheet of grey vellum, written in silver ink, and sealed with a small pale crown. It is the only thing in the Archive that is not covered in dust. It has been read many, many times.",[['Take the contract.',()=>{F.contract=1;bagAdd(mkItem('vtcontract'));sfx('key');msg('You take the Silver Contract.','#ffe36a');return gySay("You take the paper. It is light, and cold, and the last clause is underlined.",[BYE])}],['Leave it.',()=>null]])});
+khNpc('vto_hesper','Hesper Maldrake','gy_ghost2',()=>{const F=vtF();
+  const t=F.freed?"Hesper's light is very steady now. 'I felt it,' she says. 'The ring. All the way down here. Thank you. I will sit with him a while. I am not going anywhere. I am quite content.'":F.contract||bagCount('vtcontract')?"'You have it,' says the ghost of a woman with a plain, kind face. 'Good. Take it down to the Sanctum, and read it to him, every word. He cannot say it. The Sovereign saw to that. I could not carry it, you see. I am only a draught with opinions. I was his wife. I died in the spring before the silver came, and I have been in the Archive, keeping his accounts. Be gentle. Please. He was always the gentlest man I knew.'":"A ghost sits at the end of the room, in a plain grey dress, with a ledger on her knee. 'Oh,' she says. 'Somebody has come. I am Hesper Maldrake. I was his wife. I died in the spring before the silver came, and I have been in the Archive ever since, keeping his accounts, because he forgot how. There is a paper on the desk. It is the one that matters. Take it down to him. He cannot read it aloud. The Sovereign saw to that. But you can.'";
+  return gySay(t,[BYE])});
+/* ---------- Maldrake ---------- */
+const VT_CONTRACT="THE CONTRACT OF SILVER. 'I, Wystan Maldrake, of Underhill, a hedge-wizard, receive from the Pale Sovereign, by the hand of the Pale Factor, silver for the mending of the people of my village. In return I give my art to the Sovereign's service for as long as any silver of this gift remains in any person of Underhill, living or dead. I will raise, keep and send out whom the Sovereign names. I will keep the Key of the Gate of Sale until it is sent for. I will not take off the ring.' It is signed in a farmer's careful hand. Under the signature, in much smaller writing: 'The debt is paid if, before a witness, the whole of this contract is read aloud to the signer, and the signer, hearing it, agrees that it is ended. The ring will then break.'";
+khNpc('vto_maldrake','Wystan Maldrake','vti_maldrake',()=>vtMaldrakeTalk(),{});
+function vtMaldrakeTalk(){
+  const F=vtF();F.metM=1;
+  const hasC=bagCount('vtcontract')>0,top=!F.talked;F.talked=1;
+  const head=top?"A thin grey man sits at a table under a window of black glass, and does not look up. His hair has gone the colour of the silver on his finger. 'You have come through the locks,' he says. 'Then the Silver Warden is dead. I felt it here.' He touches the ring. 'I am Wystan Maldrake. I was the barrow-keeper of Underhill, and a hedge-wizard, and a husband, and I am very tired. Say what you have come for. I will try to listen before it turns.'":"Maldrake looks up from his hands. 'Yes?' he says. 'Say it quickly. The ring is warm.'";
+  const opts=[];
+  if(hasC)opts.push(["We have read your Silver Contract. Let us read it to you.",()=>vtReadContract(0)]);
+  else if(vtPages()>=3||F.pages[7])opts.push(["We have read your journal. It said to bring the contract.",()=>gySay("He closes his eyes. 'The contract is in the Archive,' he says. 'Behind the red-eyed book, on the fifth floor, in my old study. It is the paper on the desk. I hid it from myself, so that I could not burn it, in case the ring needed it. Bring it. Please. I will hold the ring as long as I can. It will not be long.'",[BYE])]);
+  opts.push(["Why did you do it?",()=>gySay("'For eighty-one people,' he says. 'You must understand that I did not know. A man in a grey coat came to the village in the autumn, very polite, and said there was silver that would cure the fever. We were burying one a day. I signed in a good light, with a steady hand, and I read the first clause and not the others, because I wanted to believe. The silver mended them, for a season. Then the fever took them anyway, and the silver stood them up again, and they looked at me.' He stops. 'They do not eat. They do not sleep. They sit. I cannot make them leave. And at midnight the ring turns, and I send them down the Road. I would do anything not to. I have tried. It turns my hand.'",[BYE])]);
+  opts.push(["We have come for the Gate Key of Sale.",()=>vtKeyAsk()]);
+  opts.push(['Leave.',()=>null]);
+  return gySay(head,opts)}
+function vtKeyAsk(){return gySay("'It is on the table,' he says. 'A key with a crown for a bow. The Sovereign gave it to me to keep, and said she would send for it.' He turns it on the cloth with one finger, and does not pick it up. 'I would give it to you in a moment. I cannot. The ring will not let me give it, not to anyone who is not hers. You would have to take it, and I would try not to hurt you, and I would fail. I am very sorry. I think you had better be quick, and I think you had better be sure.'",[["Then we will do it.",()=>{vtMaldrakeFight();return null}],["Not yet. There may be another way.",()=>null]])}
+function vtReadContract(n){
+  const parts=[
+   ["You unfold the grey vellum and begin to read aloud. 'The Contract of Silver. I, Wystan Maldrake, of Underhill, a hedge-wizard, receive from the Pale Sovereign, by the hand of the Pale Factor, silver for the mending of the people of my village.' Maldrake has put both hands over his mouth. His shoulders shake. He nods, very slowly, to say go on.",'Go on.'],
+   ["'In return I give my art to the Sovereign's service for as long as any silver of this gift remains in any person of Underhill, living or dead. I will raise, keep and send out whom the Sovereign names.' The silver ring is turning on his finger, round and round, slowly, as if it were listening. 'I did not read that part,' he whispers. 'I did not read that part.'",'Go on.'],
+   ["'I will keep the Key of the Gate of Sale until it is sent for. I will not take off the ring.' He is crying, quietly, without any fuss, like a man who has cried for three winters and is very practised. 'Yes,' he says. 'Yes. That is what I wrote. Is there more?'",'Go on.'],
+   ["'The debt is paid if, before a witness, the whole of this contract is read aloud to the signer, and the signer, hearing it, agrees that it is ended.' You look up. 'The ring will then break.'",'Ask him.']];
+  if(n<parts.length)return gySay(parts[n][0],[[parts[n][1],()=>vtReadContract(n+1)]]);
+  return gySay("'I agree,' says Wystan Maldrake. His voice is clear and steady, for the first time since you came in. 'I have heard it, every word, and I agree that it is ended. It is ended. Let it be ended.'",[['Break the ring.',()=>{vtMaldrakeFree();return null}]])}
+function vtMaldrakeFree(){
+  const F=vtF();if(F.freed)return;F.freed=1;F.gotKey=1;F.fight=F.fight||0;G.talk=null;bagRemove('vtcontract',1);
+  if(AC&&!G.mute){tone(880,220,1.4,'sine',.08,0);tone(1320,330,1.2,'sine',.04,.1);nz(.8,.01,'bandpass',2000,400,0)}
+  G.shake=.6;msg('The silver ring breaks across, with a sound like a dropped glass. Far above you, a bell stops.','#cfe0ff');sfx('win');
+  for(const it of ['vtgatekey','vtring2','vtbroken'])if(!bagAdd(mkItem(it)))G.items.push({k:it,x:G.P.x,y:G.P.y,taken:false});
+  for(const it of ['potion6','potion6','supermana','supermana','elixir'])if(!bagAdd(mkItem(it)))G.items.push({k:it,x:G.P.x,y:G.P.y,taken:false});
+  try{for(const h of G.heroes){h.learned=h.learned||[];if(!h.learned.includes('vtquiet'))h.learned.push('vtquiet')}msg('Maldrake teaches the party Quiet the Dead. It joins the power page of every hero.','#ffe9a0')}catch(e){console.error(e)}
+  G.gold+=10000;giveXP(60000);msg('You have the Gate Key of Sale, and 10,000 gold.','#ffe36a');
+  vtMaldrakeVanish();
+  later(1200,()=>{G.talk={d:{k:'vti_maldrake',x:G.P.x,y:G.P.y,npc:'vto_maldrake'},n:{name:'Wystan Maldrake',root:()=>null},node:say("Maldrake takes a long breath, the first long breath he has taken in three winters. 'Thank you,' he says. 'Take the key. It was never mine to keep. I have made you a ring from the silver, and given you the one spell I learned in all this time that is any good: the words that let the dead lie down. Use them kindly. And go and tell Hale that the bell will not ring again.' He sits down at his table with his hands open on the cloth, and the window of black glass behind him goes, very slowly, clear. 'I can see the hill,' he says. 'I can see it. It is rather nice.' He does not say anything more.",[['Leave him in peace.',()=>{vtMaldrakeVanish();return null}]]),t:G.time,btns:[]}})}
+/* ---------- the story pages, what to do next, the arrival of a level ---------- */
+STORY.push(
+ {id:'vthill',c:()=>vtF().reach&&vtF().reach[9670],t:'The Barrow Hill',x:'Past the toll house and the farm and the hollow church, the Blighted Road came to a hill of barrows, and a garrison picket at its foot. Sergeant Hale of Oldhaven told the party that the dead of the village of Underhill walk down off this hill every night, west along the Road, and come back by dawn. At the top of the hill a door leads into the Vault of Maldrake.'},
+ {id:'vtvault',c:()=>vtF().reach&&vtF().reach[9671],t:'Into the Vault',x:'The party went down the Barrow Stair into the Vault: a crypt of six floors, closed with five locks of pale silver, kept by the old barrow guard. The Barrow Warden wore the first key.'},
+ {id:'vtroll',c:()=>vtF().pages&&vtF().pages[0],t:'The Roll of Underhill',x:'On the second floor the party read the Roll of Underhill, which lists the eight villagers the grey fever took first, in the order they died. Eight coffins stand in a ring round a rune, and open only in that order.'},
+ {id:'vtpeal',c:()=>vtF().bellsDone,t:'The Peal of Underhill',x:'The party rang the five bells of the Bell Gallery in the order of the old parish rule: the child, the widow, the miller, the priest, and last the Great Bell. The second lock opened.'},
+ {id:'vtletters',c:()=>vtF().pages&&vtF().pages[4],t:'The Pale Factor',x:'In the cellars the party found the letters of the Pale Factor, the agent of the Pale Sovereign. He offered the village of Underhill silver that would mend the grey fever, in return for a small service. The service was the walking of the dead down the Blighted Road.'},
+ {id:'vtjournal',c:()=>vtPages()>=4,t:'What Maldrake Wrote',x:'The journal of Wystan Maldrake, the hedge-wizard who kept the barrows, tells how the silver did not mend his village but stood it up again after it died. He sealed himself under the hill behind locks of pale silver so that he could do no more harm, and wrote that he hoped somebody would come who had read this far.'},
+ {id:'vtmal',c:()=>vtF().reach&&vtF().reach[9677],t:'Wystan Maldrake',x:'In the Sanctum under the hill sits Wystan Maldrake, thin and grey, with a ring of pale silver he cannot take off. He kept the Gate Key of Sale for the Pale Sovereign. He is not a cruel man. He is a man who signed a paper.'},
+ {id:'vtfree',c:()=>vtF().freed,t:'A Quiet Hill',x:'The party read the Silver Contract aloud to Maldrake, every clause, and he agreed that it was ended. The ring broke, and the bell on the hill stopped. He gave the party the Gate Key of Sale, a ring of the quiet silver, and the spell that lets the dead lie down, and sat at his table and watched the hill clear.'},
+ {id:'vtkill',c:()=>vtF().dead,t:'The Key from the Barrow',x:'The party fought Wystan Maldrake in his Sanctum and killed him. He thanked them. The Gate Key of Sale came from his coat. The ring on his hand did not stop, and the dead of Underhill still walk.'});
+{const _sn=storyNext;storyNext=function(){const F=G.flags,V=F.vt;
+  if(V&&(V.reach||V.pages)&&!(F.vtDone)){
+    if(qSt('bl7e')==='done')return 'The Vault of Maldrake is done. The key of the gate of Sale is yours. Go west along the Blighted Road.';
+    if(V.gotKey||bagCount('vtgatekey'))return 'Take the Gate Key of Sale back to Sergeant Hale, on the terrace in front of the door of the Vault.';
+    if(qSt('bl7d')==='active'||qSt('bl7e')==='active'||V.reach&&V.reach[9676])return V.contract||bagCount('vtcontract')?"Go down to Maldrake's Sanctum, below the sixth floor, and read him the Silver Contract aloud.":"Take the Sanctum Seal from the Silver Warden on the sixth floor, go down to Maldrake's Sanctum and take the Gate Key of Sale from him. For a kinder end, find the Silver Contract in the Secret Archive (the red-eyed book, in the old study on the fifth floor).";
+    if(qSt('bl7c')==='active'||qSt('bl7b')==='active'||qSt('bl7a')==='done')return 'Go down through the Vault of Maldrake: the Barrow Warden holds the first key, the Roll of Underhill opens the Ring of Coffins, the five bells open the second lock, three sigils the third, and the Silver Warden holds the last seal.'}
+  if(qSt('bl7a')==='active')return 'Kill 8 of the dead on the Barrow Hill, and talk to Sergeant Hale at the garrison picket again.';
+  if(V&&V.reach&&V.reach[9670]&&qSt('bl7a')===null)return 'Speak to Sergeant Hale at the garrison picket at the foot of the Barrow Hill.';
+  return _sn.apply(this,arguments)}}
+/* what happens when a floor is entered (also after a saved game): the first words of each place, the reach flags, the state of the sanctum */
+const VT_FIRST={9670:'The Barrow Hill. Level 88. A grey-green mist, dead grass, and a bell tolling for nobody.',9671:'The Barrow Stair. Level 88. Candles, old stone, and something that stands guard.',9672:'The Ossuary of the Roll. Level 88. Eight coffins in a ring, and a lectern with a book.',9673:'The Bell Gallery. Level 88. Five bells hang over the hall.',9674:'The Silvered Cellars. Level 89. The air is cold, and the walls shine faintly.',9675:'The Hall of Underhill. Level 89. A long table has been laid for supper, and it is full.',9676:'The Stair of Quiet. Level 89. The last way down.',9677:"Maldrake's Sanctum. Level 89. Twelve candles, a table, and one man.",9678:'The Secret Archive. Level 89. Books, dust, and one clean desk.'};
+function vtArrive(n){
+  const F=vtF();F.reach=F.reach||{};const first=!F.reach[n];F.reach[n]=1;if(first)msg(VT_FIRST[n],'#cfd8c0');
+  if(n===9677)vtSanctumState();
+  if(n===9670)vtHaleSync();
+  if(LEVEL===9677&&first&&!F.freed&&!F.fight)later(800,()=>msg('A man at a table looks up, and then looks away again, as if he were used to being disappointed.','#cfe0ff'))}
+/* ---------- the rings on the maps (the quest log's circles) ---------- */
+if(typeof QRF!=='undefined'){const N=(l,...ids)=>({lvl:l,npc:ids}),E=(l,rx)=>({lvl:l,en:rx}),X=(l,x,y)=>({lvl:l,xy:[x,y]}),F=(l,fn)=>({lvl:l,fn});
+  const books=l=>F(l,()=>{const L=LEVELS[l],V=vtF(),o=[];if(L)for(const d of L.decor)if(d.npc==='vto_book'&&!V.pages[d.i]&&d.i>=1&&d.i<=6)o.push({x:d.x,y:d.y});return o});
+  QRF.T.bl7a={give:[N(9670,'vto_hale','vto_hale2')],act:[E(9670,/^gy(skel|ghoul|zombie|wraith|hound|raven|pike|bmage)$/)],ready:[N(9670,'vto_hale','vto_hale2')]};
+  QRF.T.bl7b={give:[N(9670,'vto_hale','vto_hale2')],act:()=>{const V=vtF();return !V.locks.L1?[E(9671,/^vtwarden$/),X(9671,14,25),X(9670,34,12)]:!V.ringDone?[N(9672,'vto_rune')]:[N(9673,'vto_bell')]}};
+  QRF.T.bl7c={give:[N(9670,'vto_hale','vto_hale2')],act:()=>[books(9671),books(9672),books(9673),books(9674),books(9675),books(9676)]};
+  QRF.T.bl7d={give:[N(9670,'vto_hale','vto_hale2')],act:()=>{const V=vtF();return !V.locks.L3?[N(9674,'vto_sigilaltar')]:!V.locks.L4?[E(9676,/^vtsilver$/),X(9676,14,33)]:[N(9677,'vto_maldrake')]}};
+  QRF.T.bl7e={give:[N(9670,'vto_hale','vto_hale2')],act:[N(9677,'vto_maldrake')],ready:[N(9670,'vto_hale','vto_hale2')]}}
+/* ---------- the parchment maps (one drawing for the hill and the floors) ---------- */
+const VTMP={ground:{'0':'#b8b58f','1':'#b9a07c','2':'#c9c2ae','3':'#bdb8ae','4':'#d0c6a8','5':'#8c919c'},ink:'#241812'};
+function vtMapDraw(c,x,L,api){
+  const R=L.rows,W=R[0].length,H=R.length,F=api.fit(W,H),s=F.s,X=F.X,Y=F.Y,PX=F.ox,PY=F.oy,PW=W*s,PH=H*s,INK=MPL.INK,hill=LEVEL===9670;
+  const wall=(cx,cy)=>!(R[cy]&&R[cy][cx]==='.'),col=(cx,cy)=>{const g=L.chars[R[cy][cx]],q=GY.col&&GY.col[g];return q||[110,108,104]};
+  x.save();x.shadowColor='rgba(40,30,10,.5)';x.shadowBlur=14;x.shadowOffsetX=3;x.shadowOffsetY=5;x.fillStyle='#2a2418';x.fillRect(PX-1.6,PY-1.6,PW+3.2,PH+3.2);x.restore();
+  x.save();x.beginPath();x.rect(PX,PY,PW,PH);x.clip();
+  for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){
+    if(wall(cx,cy)){const k=col(cx,cy),v=hash2(cx,cy,5)*12-6;x.fillStyle=`rgb(${Math.max(0,Math.min(255,k[0]*.8+v))|0},${Math.max(0,Math.min(255,k[1]*.8+v))|0},${Math.max(0,Math.min(255,k[2]*.8+v))|0})`}
+    else{const f=L.fmap[cy][cx];x.fillStyle=VTMP.ground[f]||'#cfc8b6'}
+    x.fillRect(X(cx)-.1,Y(cy)-.1,s+.2,s+.2)}
+  x.strokeStyle=VTMP.ink;x.lineWidth=hill?.5:.7;x.lineCap='round';x.beginPath();
+  for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){if(wall(cx,cy))continue;const X0=X(cx),Y0=Y(cy);
+    if(wall(cx,cy-1)){x.moveTo(X0,Y0);x.lineTo(X0+s,Y0)}if(wall(cx,cy+1)){x.moveTo(X0,Y0+s);x.lineTo(X0+s,Y0+s)}if(wall(cx-1,cy)){x.moveTo(X0,Y0);x.lineTo(X0,Y0+s)}if(wall(cx+1,cy)){x.moveTo(X0+s,Y0);x.lineTo(X0+s,Y0+s)}}
+  x.stroke();
+  const D=(G.decor&&G.decor.length&&vtIs(LEVEL)?G.decor:L.decor).slice().sort((a,b)=>a.y-b.y);
+  const BIG=/^(gy_(chapel|hut|angel|altar|sarc|candles|lych|obelisk|column|ccross|tomb|urn|chest|lever|mound|barrow|hatch|bell)|hl_p_(coffin|lectern|desk|cage|shelf)|yar_tent|wm_bell|cart)$/;
+  for(const d of D){if(d.found||d.hidden)continue;const k=d.k||'';
+    if(BIG.test(k)&&IMG[k]){const im=IMG[k],big=/chapel|hut|tent|hatch/.test(k),hh=Math.max(2.4,Math.min(big?14:8,(NPC_H[k]||1)*s*(d.sc||1)*(big?1.5:1.3))),ww=hh*im.width/im.height;x.drawImage(im,X(d.x+.5)-ww/2,Y(d.y+1)-hh+s*.3,ww,hh)}
+    else if(hill&&/^gy_(stone1|stone2|lean|slab|wcross|rpost)$/.test(k)){x.fillStyle='#7a766c';x.strokeStyle=VTMP.ink;x.lineWidth=.25;x.fillRect(X(d.x+.2),Y(d.y+.1),s*.6,s*.8);x.strokeRect(X(d.x+.2),Y(d.y+.1),s*.6,s*.8)}
+    else if(/^gy_lantern$/.test(k)){x.fillStyle='#d8d0a0';x.beginPath();x.arc(X(d.x+.5),Y(d.y+.5),s*.4,0,6.3);x.fill()}
+    else if(hill&&/^(dead|ltree2|gy_dead)$/.test(k)){x.fillStyle='#4a4238';x.beginPath();x.arc(X(d.x+.5),Y(d.y+.5),s*.34,0,6.3);x.fill()}}
+  const tint=L._vt&&L._vt.torch;
+  if(tint){x.fillStyle=tint.css;x.strokeStyle=VTMP.ink;x.lineWidth=.3;for(const t of (L._vt.torches||[])){const dx=GYM_D[t[2]][0],dy=GYM_D[t[2]][1];x.beginPath();x.arc(X(t[0]+.5+dx*.6),Y(t[1]+.5+dy*.6),Math.max(1,s*.34),0,6.3);x.fill();x.stroke()}}
+  // the pale-silver locks and the stairs
+  for(const [k,gid] of Object.entries(L.chars)){const dd=KH_DOOR[gid];if(!dd)continue;for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++)if(R[cy][cx]===k){
+    x.fillStyle=dd.vt==='lock'?'#d8e4f8':dd.vt==='stair'||dd.vt==='road'?'#e8c860':'#a0a0a0';x.strokeStyle=VTMP.ink;x.lineWidth=.4;if(dd.vt==='secret')continue;x.beginPath();x.arc(X(cx+.5),Y(cy+.5),Math.max(1.4,s*.5),0,6.3);x.fill();x.stroke()}}
+  x.restore();
+  const names=L.mapNames||[];
+  names.forEach((n,i)=>{const px=X(n.x+.5),py=Y(n.y+.5);x.save();x.fillStyle='rgba(250,240,200,.92)';x.strokeStyle=INK;x.lineWidth=.6;x.beginPath();x.arc(px,py,3.6,0,6.3);x.fill();x.stroke();x.restore();api.text(x,String(i+1),px,py+.2,5.4,INK)});
+  api.title(x,VT.NAMES[LEVEL]||'The Vault of Maldrake','',12,5);
+  api.compass(x,50,262,15);
+  {const a=392,b=40,w=84,lh=10.4,h=14+names.length*lh;api.panel(x,a,b,w,h);api.text(x,'Places',a+w/2,b+8,6.6,'#6a1a0e');
+    names.forEach((n,i)=>{api.text(x,(i+1)+'  '+n.t.replace(/^The /,''),a+5,b+17+i*lh,5.2,INK,'left')})}
+  {const a=6,b=46,w=84,rowsK=hill?[['Dead grass',VTMP.ground['0']],['Road',VTMP.ground['4']],['Path',VTMP.ground['2']],['Terrace',VTMP.ground['3']]]:[['Floor',VTMP.ground['3']],['Wall',(()=>{const k=col(0,0);return `rgb(${k[0]*.8|0},${k[1]*.8|0},${k[2]*.8|0})`})()],['Pale lock','#d8e4f8'],['Stair','#e8c860']],h=14+rowsK.length*13;
+    api.panel(x,a,b,w,h);api.text(x,'Key',a+w/2,b+8,6.6,'#6a1a0e');
+    rowsK.forEach(([t,cc],i)=>{x.fillStyle=cc;x.strokeStyle=INK;x.lineWidth=.5;x.fillRect(a+6,b+16+i*13,10,6);x.strokeRect(a+6,b+16+i*13,10,6);api.text(x,t,a+22,b+19+i*13,6,INK,'left')})}}
+mplInstall({name:'vault',levels:[9670,9671,9672,9673,9674,9675,9676,9677,9678],draw:vtMapDraw,tint:[2,6,0],foot:'You are the yellow arrow. The numbers on the map are listed on the right.'});
+/* the Go to area list */
+{const _gl=gotoListRaw;gotoListRaw=function(){const out=_gl.apply(this,arguments);
+  try{if(!out.some(r=>r.n===VT.ID)){out.push({h:'The Vault of Maldrake, on the Blighted Road'});for(let n=VT.ID;n<=VT.LAST;n++)out.push({n,name:VT.NAMES[n]})}}catch(e){console.error(e)}
+  return out}}
+/* ---------- the test links: ?town=vault&lvl=88 (the picket at the foot of the hill; add &q=1..5 for the quests, &pages=1, &contract=1, &open=1 for every lock open), ?town=vaultboss&lvl=89 (the sanctum, every lock open) ---------- */
+function vtSpot(w){return w==='vaultboss'?[9677,12,20,0]:[9670,30,44,0]}
+{const _j=jumpFromUrl;jumpFromUrl=function(){
+  const q=new URLSearchParams(location.search),town=(q.get('town')||'').toLowerCase().replace(/[^a-z]/g,'');
+  if(town!=='vault'&&town!=='vaultboss'&&town!=='vaultarchive')return _j.apply(this,arguments);
+  const orig=location.pathname+location.search+location.hash,target=Math.max(1,Math.min(95,parseInt(q.get('lvl')||'88',10)||88));
+  q.set('town','ironhill');q.set('lvl','40');
+  try{history.replaceState(null,'',location.pathname+'?'+q.toString()+location.hash)}catch(e){}
+  try{_j.apply(this,arguments)}finally{try{history.replaceState(null,'',orig)}catch(e){}}
+  G.heroes.forEach((h,i)=>{while(h.lvl<target){h.xp=xpNeed(h.lvl);levelUp(i)}h.alive=true;h.hp=h.max;h.mp=h.mpMax;h.food=Math.max(h.food||0,100)});
+  if(q.get('gear')!=='0')try{giveJumpGear(target)}catch(e){console.error(e)}
+  const F=vtF(),Q=(town==='vaultboss'||town==='vaultarchive')?Math.max(3,parseInt(q.get('q')||'0',10)||0):(parseInt(q.get('q')||'0',10)||0);   // the sanctum and the archive come with the way open and the quests under way
+  if(Q>=1){qAccept('bl7a');G.flags.vtMet=1;G.flags.vtHill=8;qTurnIn('bl7a')}     // qTurnIn starts bl7b by itself
+  if(q.get('open')||town==='vaultboss'||Q>=3){for(const k of ['L1','L2','L3','L4'])F.locks[k]=1;F.ringDone=1;F.bellsDone=1;F.secret=1}
+  if(q.get('pages')||Q>=3){for(let i=0;i<=6;i++){F.pages[i]=1;if(i>=1&&!bagCount('vtpg'+i))bagAdd(mkItem('vtpg'+i))}}
+  if(q.get('contract')||town==='vaultarchive'){F.pages[7]=1;if(!bagCount('vtcontract'))bagAdd(mkItem('vtcontract'));F.contract=1}
+  if(q.get('keys')){for(const id of ['vtkey1','vtseal'])bagAdd(mkItem(id));for(let i=0;i<3;i++)bagAdd(mkItem('vtsigil'))}
+  let [id,x0,y0,f0]=vtSpot(town==='vaultarchive'?'vault':town);
+  if(town==='vaultarchive'){id=9678}
+  const go=()=>{vtMake&&0;const L=LEVELS[id]||(KH_LAZY[id]&&(KH_LAZY[id](),LEVELS[id]));let at={x:x0,y:y0,f:f0};if(town==='vaultarchive'){at={x:L.start.x,y:L.start.y,f:L.start.f}}
+    goToLevel(id,at);G.state='play';G.menu=false;msg('Your party stands at '+VT.NAMES[id]+', at level '+target+'.','#ffe36a')};
+  G.state='play';G.menu=false;if(VT.ready)go();else vtLoad().then(go)}}
+
+/* ---- src/desert/blight_glue.js ---- */
+/* ==========================================================================
+   THE SEAM BETWEEN THE BLIGHTED ROAD (blight_road.js) AND THE VAULT OF MALDRAKE (vault_core.js), which was built on its own.
+   The Vault's gates ask VT.neighbour(dir) where the next place on the road is, and its neighbours land the party on the squares given here.
+   East is the Wenlock side (the previous place), west is the Sale side (the next place).
+   ========================================================================== */
+if(typeof BL_ROAD!=='undefined'&&typeof VT!=='undefined'){
+  const bgJ=()=>BL_ROAD.findIndex(q=>q.id===9670);
+  {const p=BL_ROAD[bgJ()];if(p&&VT.arrive){p.fromE=VT.arrive.east;p.fromW=VT.arrive.west;p.built=true}}
+  VT.neighbour=function(dir){const j=bgJ(),q=BL_ROAD[dir==='east'?j-1:j+1];if(!q)return null;
+    return {id:q.id,at:dir==='east'?q.fromW:q.fromE}};
+}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
