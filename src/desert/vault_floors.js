@@ -183,7 +183,7 @@ VT_SPEC[9676]={W:29,H:36,diff:89,brick:'texBlack',rgb:[.95,.92,1.1],lcol:[.7,.55
     // the two vaults
     dec('chest',1,22,{block:true});dec('sarc',2,18,{block:true,npc:'vto_sarc',i:60});dec('sarc',2,20,{block:true,npc:'vto_sarc',i:61});light(2,20,[.7,.55,1.3]);dec('candles',3,22,{block:true,sc:.75});foe('gywraith',3,19);
     dec('chest',27,22,{block:true});dec('sarc',26,18,{block:true,npc:'vto_sarc',i:62});dec('sarc',26,20,{block:true,npc:'vto_sarc',i:63});light(26,20,[.7,.55,1.3]);dec('candles',25,22,{block:true,sc:.75});foe('gywraith',25,19);
-    sign(2,17,[0,-1],'THE WESTERN VAULT','');sign(26,17,[0,-1],'THE EASTERN VAULT','');
+    sign(2,18,[0,-1],'THE WESTERN VAULT','Three sarcophagi, one chest');sign(26,18,[0,-1],'THE EASTERN VAULT','Three sarcophagi, one chest');
     // the Landing
     for(const [x,y] of [[8,27],[20,27],[8,32],[20,32]])dec('candles',x,y,{block:true,sc:.85});for(const [x,y] of [[14,28],[10,30],[18,30],[14,32],[14,34],[14,26]])light(x,y,[.8,.6,1.4]);
     for(const [x,y] of [[8,29],[20,29]])dec('angel',x,y,{block:true,sc:.9});sign(13,27,[0,-1],"THE SILVER WARDEN'S LANDING",'He keeps the last seal');
@@ -195,7 +195,7 @@ VT_SPEC[9677]={W:25,H:24,diff:89,brick:'texBlack',rgb:[.92,.9,1.12],lcol:[.85,.9
   doors:[{x:12,y:21,kind:'stair',to:9676,at:vtUp(9676),start:true}],
   names:[{t:"Maldrake's Table",x:12,y:4,k:'place'},{t:'The Candles of Underhill',x:12,y:11,k:'place'},{t:'The Stair',x:12,y:20,k:'place'}],
   dress(C){const {dec,sign,foe,light,trap}=C;
-    dec('hl_p_desk',12,4,{block:true,npc:'vto_desk2',raw:true,sc:1.05});dec('hl_p_mirror',9,3,{block:true,npc:'vto_mirror',raw:true,sc:1});dec('hl_p_mirror',15,3,{block:true,npc:'vto_mirror',raw:true,sc:1});
+    dec('hl_p_desk',12,4,{block:true,npc:'vto_desk2',raw:true,sc:1.05});dec('hl_p_mirror',9,2,{block:true,npc:'vto_mirror',raw:true,sc:1});dec('hl_p_mirror',15,2,{block:true,npc:'vto_mirror',raw:true,sc:1});
     dec('candles',10,2,{block:true,sc:.9});dec('candles',14,2,{block:true,sc:.9});light(12,3,[.9,.95,1.5]);light(10,3,[.85,.9,1.5]);light(14,3,[.85,.9,1.5]);
     // the memorial: twelve candles for the twelve households, in two rows, each with a small stone
     [[6,8],[8,8],[10,8],[14,8],[16,8],[18,8],[6,14],[8,14],[10,14],[14,14],[16,14],[18,14]].forEach(([x,y],i)=>{dec('candles',x,y,{block:true,sc:.5,npc:'vto_memorial',i,raw:true});light(x,y,[.95,.9,1.4])});

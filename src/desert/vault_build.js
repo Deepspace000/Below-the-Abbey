@@ -123,7 +123,8 @@ function vtAscii(id){
 function vtReach(id,opts){
   const L=LEVELS[id]||(KH_LAZY[id]&&(KH_LAZY[id](),LEVELS[id]));opts=opts||{};const W=L.rows[0].length,H=L.rows.length,bs=new Set();
   for(const d of L.decor)if(d.block||(d.npc&&d.solid))bs.add(d.x+','+d.y);
+  const gate=(x,y)=>{if(!opts.thru)return false;const c=L.rows[y][x],d=c!=='.'&&KH_DOOR[L.chars[c]];return !!(d&&(d.vt==='lock'||d.vt==='secret'||d.vt==='ringgate'))};   // with thru, the locks and the secret door count as open
   const seen=new Set([L.start.x+','+L.start.y]),q=[[L.start.x,L.start.y]];
-  for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of GYM_D){const nx=x+a,ny=y+b,k=nx+','+ny;if(seen.has(k)||nx<0||ny<0||nx>=W||ny>=H||L.rows[ny][nx]!=='.'||bs.has(k))continue;seen.add(k);q.push([nx,ny])}}
+  for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of GYM_D){const nx=x+a,ny=y+b,k=nx+','+ny;if(seen.has(k)||nx<0||ny<0||nx>=W||ny>=H||(L.rows[ny][nx]!=='.'&&!gate(nx,ny))||bs.has(k))continue;seen.add(k);q.push([nx,ny])}}
   const open=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(L.rows[y][x]==='.'&&!seen.has(x+','+y)&&!bs.has(x+','+y))open.push([x,y]);
   return {seen,unreached:open}}
