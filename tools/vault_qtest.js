@@ -73,6 +73,7 @@ async () => {
     await tryit('hill', async () => {
       ok(await go(9670, 30, 44, 0), 'standing on the hill');
       const hale = decorOf(9670, 'vto_hale'); ok(!!hale, 'Hale stands on the hill at ' + (hale && hale.x + ',' + hale.y));
+      ok(G.decor.find(d => d.npc === 'vto_hale').found !== true && G.decor.find(d => d.npc === 'vto_hale2').found === true, 'at first Hale is at the picket, not on the terrace');
       ok(QGIVER.vto_hale.includes('bl7a') && questMark({ npc: 'vto_hale' }) === 1, 'a gold ! over Hale');
       ok(/Halt/.test(say(npcRoot('vto_hale', 9670))), 'Hale introduces himself');
       const t = fin(npcRoot('vto_hale', 9670)); ok(/door|Maldrake/.test(say(npcRoot('vto_hale', 9670))), 'Hale tells of the door and Maldrake');
@@ -86,6 +87,8 @@ async () => {
       ok(questMark({ npc: 'vto_hale' }) === 2, 'a green ? over Hale');
       const th = npcRoot('vto_hale', 9670); const done = pick(th, /take it/); ok(qSt('bl7a') === 'done', 'bl7a handed in');
       ok(qSt('bl7b') === 'active', 'bl7b started by itself');
+      for (let i = 0; i < 12; i++) { await wait(300); if (G.decor.find(d => d.npc === 'vto_hale').found) break }
+      ok(G.decor.find(d => d.npc === 'vto_hale').found === true && G.decor.find(d => d.npc === 'vto_hale2').found === false, 'Hale moves up to the terrace once the hill is clear');
       ok(G.gold > 0, 'rewards paid');
     });
     // ---- floor 1: the Warden and the first lock ----
@@ -218,7 +221,7 @@ async () => {
     });
     // ---- Hale takes the news ----
     await tryit('hale', async () => {
-      ok(await go(9670, 30, 44, 0), 'back on the hill'); ok(questMark({ npc: 'vto_hale' }) === 2, 'a green ? over Hale');
+      ok(await go(9670, 34, 14, 2), 'back on the terrace'); await wait(1200); ok(G.decor.find(d => d.npc === 'vto_hale2').found === false, 'Hale waits on the terrace'); ok(questMark({ npc: 'vto_hale2' }) === 2, 'a green ? over Hale');
       const t = npcRoot('vto_hale', 9670); const hs = say(t); ok(sym ? /without a fight/.test(hs) : /Was it hard/.test(hs), 'Hale knows how it went');
       pick(t, /Here you are/); ok(qSt('bl7e') === 'done', 'bl7e handed in'); ok(bagCount('vtgatekey') === 1, 'the party keeps the Gate Key of Sale'); ok(bagCount('vtamulet') === 1, 'the Well-charm');
       const after = say(npcRoot('vto_hale', 9670)); ok(sym ? /bell has not rung/.test(after) : /did not like the sound/.test(after), 'Hale says goodbye differently');

@@ -95,6 +95,7 @@ function vtHillBuild(){
    dec('banner',27,38,{block:true,sc:.9,npc:'vto_banner'});dec('ww_sign',33,44,{block:true,npc:'vto_sign',i:3});
    dec('bench',27,41,{block:false,sc:.8});
    const kp=KH_KEEPERS.vto_hale;if(kp){const d=dec(khFaceKey(kp.face),VTH.hale.x,VTH.hale.y,{block:false,npc:'vto_hale'});if(d)d.sc=kp.sc||1.05}
+   {const k2=KH_KEEPERS.vto_hale2;if(k2){const d=dec(khFaceKey(k2.face),37,15,{block:false,npc:'vto_hale2'});if(d)d.sc=k2.sc||1.05}}   // the same man, on the terrace in front of the door once the hill is clear (vtHaleSync in vault_story.js shows one of the two)
    const kw=KH_KEEPERS.vto_wick;if(kw){const d=dec(khFaceKey(kw.face),26,42,{block:false,npc:'vto_wick'});if(d)d.sc=kw.sc||1}
    lamp(30,40,[1.4,1.0,.6]);lamp(25,42,[1.4,1.0,.6]);
    for(const y of [37,39,41,43])dec('wcross',20,y,{block:true,sc:.95,npc:'vto_sign',i:6});lamp(20,40,[1.3,1.0,.7])}
