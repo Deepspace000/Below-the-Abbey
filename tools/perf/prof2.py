@@ -1,11 +1,11 @@
 """Who calls the expensive canvas functions? One scene, CPU profile, native canvas time grouped by the JS caller (two levels up).
 python prof2.py <port> <query>"""
-import sys, time, collections
+import os, sys, time, collections
 from playwright.sync_api import sync_playwright
 PORT, Q = sys.argv[1], sys.argv[2]
 NATIVE = {'drawImage', 'getImageData', 'putImageData', 'fillRect', 'fillText', 'strokeText', 'measureText', 'createLinearGradient', 'createRadialGradient', 'fill', 'stroke', 'clip', 'save', 'restore'}
 with sync_playwright() as p:
-    b = p.chromium.launch(args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader'])
+    b = p.chromium.launch(executable_path=os.environ.get('BTA_CHROME') or None, args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader'])
     pg = b.new_page(viewport={'width': 960, 'height': 640})
     pg.goto('http://localhost:%s/index.html%s&v=%d' % (PORT, Q, time.time()), timeout=240000)
     pg.wait_for_function('()=>window.__ready===true&&G.state==="play"', timeout=240000); pg.wait_for_timeout(6000)

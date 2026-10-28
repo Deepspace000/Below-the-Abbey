@@ -1,6 +1,6 @@
 """CPU profile of Below the Abbey in a few scenes: where does the main thread spend its time?
 python prof.py [port]  ->  prints per-scene frame rate, long tasks, heap, save size and the top functions by self time."""
-import sys, time, json, collections
+import os, sys, time, json, collections
 from playwright.sync_api import sync_playwright
 PORT = sys.argv[1] if len(sys.argv) > 1 else '8371'
 BASE = 'http://localhost:%s/index.html' % PORT
@@ -23,7 +23,7 @@ def agg(profile, top=28):
     return [(k, round(v / 1000), round(100 * v / tot, 1)) for k, v in self_t.most_common(top)], round(tot / 1000)
 
 with sync_playwright() as p:
-    b = p.chromium.launch(args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader'])
+    b = p.chromium.launch(executable_path=os.environ.get('BTA_CHROME') or None, args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader'])
     pg = b.new_page(viewport={'width': 960, 'height': 640}); pg.add_init_script(INIT)
     cdp = pg.context.new_cdp_session(pg); cdp.send('Profiler.enable'); cdp.send('Profiler.setSamplingInterval', {'interval': 500})
     errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
