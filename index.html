@@ -59347,7 +59347,7 @@ function hgpaBuild(L){
    stat.waxDecals=n;stat.waxSwapped=sw}
   // ---- 7) the scale table (see the header). Runs last so that nothing above is undone. ----
   {const treeH=d=>[1.6,2.0,2.4,2.7][(hs(d.x,d.y,5)*4)|0],jit=(d,s,a,b)=>a+(b-a)*hs(d.x,d.y,s);
-   const R=[[/^hg_house\d$/,()=>2.2],[/^(hgtb_plant_belltree|hgt_fairytree)$/,treeH],[/^hgt_vine_roundleaf$/,d=>jit(d,6,1.5,1.9)],[/^hg_lamp$/,d=>jit(d,7,1.3,1.5)],[/^hgt_lamppost$/,()=>1.3],
+   const R=[[/^hg_house\d$/,()=>1.8],[/^(hgtb_plant_belltree|hgt_fairytree)$/,treeH],[/^hgt_vine_roundleaf$/,d=>jit(d,6,1.5,1.9)],[/^hg_lamp$/,d=>jit(d,7,1.3,1.5)],[/^hgt_lamppost$/,()=>1.3],
     [/^hgtb_deco_shellstatue$/,d=>jit(d,8,1.35,1.5)],[/^hgtb_deco_pearlplinth$/,()=>.65],[/^art_hgxstat\d$/,d=>jit(d,9,1.3,1.5)],[/^wm_statue$/,()=>1.5],[/^hgtb_deco_fountain$/,()=>1.4],
     [/^hgt_shellflower$/,d=>jit(d,10,1.1,1.3)],[/^hgt_bulbflower$/,d=>jit(d,11,1,1.2)],[/^hgtb_plant_spiralfern$/,d=>jit(d,12,.75,.95)],[/^hgtb_plantbed$/,()=>.55],[/^hgt_fern$/,d=>Math.min(eff(d),jit(d,13,.8,.95))],
     [/^hgt_pearlbush$/,d=>jit(d,14,.75,.9)],[/^hgt_mushrooms$/,d=>jit(d,15,.65,.85)],[/^hgt_reeds$/,d=>jit(d,16,.6,.9)],[/^hgtb_bench$/,()=>.5],[/^hgtb_furn_table_chairs$/,()=>.6],[/^hgtb_furn_clock$/,()=>1.1],[/^hgtb_furn_bunk$/,()=>.9],
@@ -59394,7 +59394,7 @@ function hgpaPost(){const L=LEVELS[HGD.ID],A=L&&L._hgpa;if(!A||A.post)return;if(
   // 1) house dimming and the scale clamp (after hgd_polish_c)
   let cl=0,hd=0;const inZ=(x,y)=>bio[y*W+x]<4;
   for(const d of L.decor){if(d.pic||!inZ(d.x,d.y)||!NPC_H[d.k])continue;const h=NPC_H[d.k]*(d.sc||1);let mx=0;
-    if(/^(hg_house0|hg_house1)$/.test(d.k)&&IMG['hgpa_hd_'+d.k]){d.k='hgpa_hd_'+d.k;d.sc=2.2/NPC_H[d.k];hd++;continue}
+    if(/^(hg_house0|hg_house1)$/.test(d.k)&&IMG['hgpa_hd_'+d.k]){d.k='hgpa_hd_'+d.k;d.sc=1.8/NPC_H[d.k];hd++;continue}
     if(/^hgpa_hd_/.test(d.k))continue;
     if(/^(hgtb_plant_belltree|hgt_fairytree)$/.test(d.k))mx=2.7;else if(/^(hg_npc\d|hg_wizard|pickpocket)$/.test(d.k))mx=.98;else if(/^hgdfc_/.test(d.k))mx=.95;else if(/^hgtb_plant_spiralfern$/.test(d.k))mx=.95;else if(/lamp|lantern/.test(d.k)&&!/hang/.test(d.k))mx=1.5;else if(/statue/.test(d.k))mx=1.7;
     if(mx&&h>mx+.01){d.sc=Math.round(mx/NPC_H[d.k]*1000)/1000;cl++}}
