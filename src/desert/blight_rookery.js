@@ -88,20 +88,19 @@ function blrWar(){
 function blrApplyNow(){try{bl3Apply(LEVEL)}catch(e){}}
 /* ---------- the quests ---------- */
 bl3Q('blq44',"The Parliament's Service",'Speaker Rook',[
-  ['Find the three silver thimbles of the Parliament: at the sluice on the east bank of the millrace, in the loft of the windmill, and in the plague cart on the road.',()=>blrTh()>=3,['blr_thimble']],
+  ['Find the three silver thimbles of the Parliament: at the sluice on the east bank of the millrace, in the loft of the windmill, and in the plague cart on the road.',()=>blrTh()>=3,['blr_thimble0','blr_thimble1','blr_thimble2']],
   ['Give the three thimbles to the Speaker at the Parliament Stones on the hill.',()=>qSt('blq44')==='done'||!!blF().thGiven,['blr_speaker']]],
   {gold:4400,xp:37000,items:['blrookring','potion6']});
 bl3Q('blq45','The Last Grinding','Gaffer Tolly, a ghost',[
   ['Open the sluice at the millrace (the lever on the east bank, by the dead watermill).',()=>!!blF().race,['blr_sluice']],
-  ['Take three sacks of rye from the loft of the windmill.',()=>blrSacks()>=3||!!blF().ground,['blr_sack']],
+  ['Take three sacks of rye from the loft of the windmill.',()=>blrSacks()>=3||!!blF().ground,['blr_sack0','blr_sack1','blr_sack2']],
   ['Grind the rye at the millstone on the grinding floor.',()=>!!blF().ground,['blr_stone']]],
   {gold:4000,xp:34000,items:['blmillcap','potion6']});
 bl3Q('blq46',"The Queen's Perch",'Gaffer Tolly, a ghost',[
   ["Settle the Crow Queen in the cap of the mill: put her down, or make peace with the Parliament.",()=>!!blF().queen||blrPeace(),['blr_capdoor']]],
   {gold:5200,xp:40000,items:['potion6','potion6']});
 bl3Q('blq47','Look West','Dame Tolly, a ghost',[
-  ["Look west through the brass spyglass in the cap of the mill, and see what stands at the end of the road.",()=>!!blF().glass,['blr_glass']],
-  ["Tell Dame Tolly in the miller's house what you saw.",()=>qSt('blq47')==='done',['blr_widow']]],
+  ["Look west through the brass spyglass in the cap of the mill, and see what stands at the end of the road.",()=>!!blF().glass,['blr_glass']]],
   {gold:3800,xp:32000,items:['potion6','potion6','potion6']});
 wwGive('blr_tolly','blq45',()=>true,{
   offer:'Would you grind something for me? I want to make one last loaf, for my wife, and I cannot. The sluice is shut, so the wheel does not turn. The lever is on the east bank of the race, by the old watermill. Three sacks of rye lie in the loft, and I cannot lift them, my hands go through. A last grinding. It is a small thing to ask of the living.',
@@ -130,13 +129,13 @@ yrHook('blr_speaker',d=>{const F=blF();
   return null});
 /* ---------- the objects ---------- */
 const BLR_THIMBLE_TXT=['A bright thimble of pale silver lies in the grass by the sluice, with a small crown stamped on it.','A silver thimble sits in the straw of the loft, where a nest has been made round it.','A silver thimble shines among the planks of the plague cart, stuck into the sack of a dead pilgrim.'];
-khNpc('blr_thimble','A silver thimble','bl_thimble',d=>{const F=blF(),i=(d&&d.i)|0,bit=1<<i;
+for(let i=0;i<3;i++)khNpc('blr_thimble'+i,'A silver thimble','bl_thimble',d=>{const F=blF(),bit=1<<i;
   if((F.th|0)&bit)return say('A scuff in the dirt where a thimble lay.',[BYE]);
   return say(BLR_THIMBLE_TXT[i]||BLR_THIMBLE_TXT[0],[['Take the thimble.',()=>{F.th=(F.th|0)|bit;d&&(d.found=true,d.hidden=true);bl3Give('blthimble');sfx('key');msg('You take a silver thimble ('+blrTh()+' of 3).','#ffe36a');if(qSt('blq44')==='active')yrStep('You take a silver thimble ('+blrTh()+' of 3).');return null}],BYE])});
 khNpc('blr_sluice','The sluice lever','gy_lever',()=>{const F=blF();
   if(F.race)return say('The sluice is open. Black water runs fast down the race, and the wheel of the dead watermill is turning, very slowly, with a sound like a long breath.',[BYE]);
   return say('A long iron lever set in a post at the head of the sluice. The lever is stiff with rust, and beyond it the black water is heaped against a wooden gate.',[['Pull the lever.',()=>{F.race=1;sfx('door');msg('The sluice opens. Black water thunders down the race.','#ffe36a');if(qSt('blq45')==='active')yrStep('You open the sluice.');return null}],BYE])});
-khNpc('blr_sack','A sack of rye','kh_oqstuff_9',d=>{const F=blF(),i=(d&&d.i)|0,bit=1<<i;
+for(let i=0;i<3;i++)khNpc('blr_sack'+i,'A sack of rye','kh_oqstuff_9',d=>{const F=blF(),bit=1<<i;
   if((F.sacks|0)&bit)return say('Only a dent in the straw where the sack lay.',[BYE]);
   return say('A small sack of dry rye, tied at the neck with a bit of string. A mouse looks out of the straw, and looks away.',[['Take the sack.',()=>{F.sacks=(F.sacks|0)|bit;d&&(d.found=true,d.hidden=true);bl3Give('blgrainsack');sfx('key');msg('You take a sack of rye ('+blrSacks()+' of 3).','#ffe36a');if(qSt('blq45')==='active')yrStep('You take a sack of rye ('+blrSacks()+' of 3).');return null}],BYE])});
 khNpc('blr_stone','The millstone','ww_stone',()=>{const F=blF();
@@ -219,9 +218,9 @@ function blrBuild(p){
   C.dec('bl_urn',30,28,{block:true,sc:.8,npc:'blr_watermill'});
   C.light(29,28,C.pale);C.light(33,28,C.pale);
   C.dec('gy_lever',27,30,{block:true,npc:'blr_sluice',sc:1});C.light(28,31,C.pale);
-  if(!((F.th|0)&1))C.dec('bl_thimble',28,31,{block:true,npc:'blr_thimble',i:0,sc:1.0,bob:.1});
+  if(!((F.th|0)&1))C.dec('bl_thimble',28,31,{block:true,npc:'blr_thimble0',sc:1.0,bob:.1});
   C.dec('kh_cart1_0',50,38,{block:true,npc:'blr_cart',sc:1});
-  if(!((F.th|0)&4))C.dec('bl_thimble',51,38,{block:true,npc:'blr_thimble',i:2,sc:1.0,bob:.1});
+  if(!((F.th|0)&4))C.dec('bl_thimble',51,38,{block:true,npc:'blr_thimble2',sc:1.0,bob:.1});
   C.dec('ww_crowtree',68,10,{block:true,sc:1.2,npc:'blr_millwindow'});
   for(const [x,y] of [[40,22],[48,26],[66,32],[10,32],[18,22]])C.dec('gy_rpost',x,y,{block:true});
   for(let y=42;y<=62;y+=3)for(let x=44;x<=74;x+=4){const d=C.D('ww_totem',x+(hs(x,y,5)<.5?0:1),y,{block:true,npc:'blr_scare',sc:.85});}
@@ -234,7 +233,7 @@ function blrBuild(p){
   for(let x=9;x<=72;x+=9){if(x>=20&&x<=30)continue;C.dec('gy_lantern',x,38,{block:true});C.light(x,38,C.pale)}
   C.dress({trees:120,scrub:200,stones:12,bones:6,posts:10,keep:(x,y)=>(y>=32&&y<=38)||(x>=38&&x<=48&&y>=6&&y<=34)||(x>=48&&x<=72&&y>=12&&y<=30)||(x>=10&&x<=35&&y>=20&&y<=40)||(x>=22&&x<=28)});
   // the creatures: crows on the hill and over the road, flocks in dead trees, scarecrows in the field, the dead pilgrims
-  C.foes([['blcrow',56,16],['blcrow',64,24],['blcrow',52,24],['blcrow',46,30],['blcrow',34,30],['blcrow',70,38],['blcrow',14,38],['blcrowflock',68,12],['blcrowflock',36,8],['blcrowflock',10,10],['blcrowflock',16,52],
+  C.foes([['blcrow',56,16],['blcrow',64,24],['blcrow',52,24],['blcrow',46,30],['blcrow',34,30],['blcrow',58,39],['blcrow',14,38],['blcrowflock',68,12],['blcrowflock',36,8],['blcrowflock',10,10],['blcrowflock',16,52],
     ['blscare',50,44],['blscare',58,48],['blscare',66,52],['blscare',72,44],['blscare',54,58],['blscare',62,58],['blshade',60,14],['blshade',40,20],['blshade',12,46],['blhusk',52,40],['blhusk',72,56],['blhusk',14,26],['blhusk',34,46],
     ['blghoul',66,42],['blghoul',46,52],['blghoul',20,50],['bldeadwarden',60,34],['bldeadwarden',34,36],['bldeadwarden',10,36],['blbones',56,38],['blbones',40,40],['blhound',70,22],['blhound',30,60],['blbloat',20,60]]);
   for(const [k,x,y] of [['potion6',34,10],['potion6',70,30],['potion6',48,64]])C.items.push({k,x,y,taken:false});
@@ -265,8 +264,8 @@ function blrLoft(){
     enemies:[['blcrow',4,5],['blcrow',9,4],['blcrow',7,7],['blshade',3,7]],
     build:C=>{
       for(const [x,y] of [[1,2],[2,2],[11,2],[1,5],[11,6],[2,7]])C.raw('hay',x,y,{block:true,sc:1});
-      [[3,3],[9,3],[6,7]].forEach(([x,y],i)=>{if(!((F.sacks|0)&(1<<i)))C.raw('kh_oqstuff_9',x,y,{npc:'blr_sack',solid:1,deco:false,i,sc:.9})});
-      if(!((F.th|0)&2))C.raw('bl_thimble',6,2,{npc:'blr_thimble',solid:1,deco:false,i:1,sc:1.0,bob:.2});
+      [[3,3],[9,3],[6,7]].forEach(([x,y],i)=>{if(!((F.sacks|0)&(1<<i)))C.raw('kh_oqstuff_9',x,y,{npc:'blr_sack'+i,solid:1,deco:false,sc:.9})});
+      if(!((F.th|0)&2))C.raw('bl_thimble',6,2,{npc:'blr_thimble1',solid:1,deco:false,sc:1.0,bob:.2});
       C.raw('gy_hatch2',2,7,{npc:'blr_loftdown',solid:1,deco:false,sc:1});
       C.raw('gy_hatch2',10,7,{npc:'blr_capdoor',solid:1,deco:false,sc:1});
       for(const x of [1,11])C.raw('hl_p_window',x,4,{block:true,sc:1.0});
@@ -278,7 +277,7 @@ function blrCap(){
     enemies:[['blcrowqueen',5,3],['blcrow',2,5],['blcrow',8,5],['blcrowflock',5,7]],
     build:C=>{
       C.raw('ww_crowtree',5,1,{npc:'blr_nest',solid:1,deco:false,sc:.9});
-      C.raw('gy_raven',5,3,{npc:'blr_queen',solid:1,deco:false,sc:3.0});
+      C.raw('gy_raven',5,2,{npc:'blr_queen',solid:1,deco:false,sc:3.0});
       C.raw('gy_rune',9,2,{npc:'blr_glass',solid:1,deco:false,sc:.9});
       C.raw('ww_cauldron',1,3,{npc:'blr_wheel',solid:1,deco:false,sc:1.2});
       for(const x of [0,10])C.raw('hl_p_window',x,4,{block:true,sc:1.0});
@@ -298,8 +297,8 @@ for(const [id,fn] of [[BLR.GROUND,blrGround],[BLR.LOFT,blrLoft],[BLR.CAP,blrCap]
   KH_LAZY[id]=()=>{if(!LEVELS[id]){if(!LEVELS[BLR.ID])KH_LAZY[BLR.ID]();blrArt();fn()}return LEVELS[id]};
 /* the quest rings */
 if(typeof QRF!=='undefined'){const N=(l,...ids)=>({lvl:l,npc:ids}),E=(l,rx)=>({lvl:l,en:rx}),T=QRF.T;
-  T.blq44={give:[N(9690,'blr_speaker')],act:()=>{if(blrTh()>=3)return [N(9690,'blr_speaker')];const F=blF(),o=[];if(!((F.th|0)&1))o.push(N(9690,'blr_thimble'));if(!((F.th|0)&2))o.push(N(9692,'blr_thimble'));if(!((F.th|0)&4))o.push(N(9690,'blr_thimble'));return o},ready:[N(9690,'blr_speaker')]};
-  T.blq45={give:[N(9691,'blr_tolly')],act:()=>{const F=blF();if(F.ground)return [N(9691,'blr_tolly')];if(!F.race)return [N(9690,'blr_sluice')];if(blrSacks()<3)return [N(9692,'blr_sack')];return [N(9691,'blr_stone')]},ready:[N(9691,'blr_tolly')]};
+  T.blq44={give:[N(9690,'blr_speaker')],act:()=>{if(blrTh()>=3)return [N(9690,'blr_speaker')];const F=blF(),o=[];if(!((F.th|0)&1))o.push(N(9690,'blr_thimble0'));if(!((F.th|0)&2))o.push(N(9692,'blr_thimble1'));if(!((F.th|0)&4))o.push(N(9690,'blr_thimble2'));return o},ready:[N(9690,'blr_speaker')]};
+  T.blq45={give:[N(9691,'blr_tolly')],act:()=>{const F=blF();if(F.ground)return [N(9691,'blr_tolly')];if(!F.race)return [N(9690,'blr_sluice')];if(blrSacks()<3)return [N(9692,'blr_sack0','blr_sack1','blr_sack2')];return [N(9691,'blr_stone')]},ready:[N(9691,'blr_tolly')]};
   T.blq46={give:[N(9691,'blr_tolly')],act:()=>blF().queen||blrPeace()?[N(9691,'blr_tolly')]:[N(9692,'blr_capdoor'),E(9693,/^blcrowqueen$/),N(9690,'blr_speaker')],ready:[N(9691,'blr_tolly')]};
   T.blq47={give:[N(9694,'blr_widow')],act:()=>blF().glass?[N(9694,'blr_widow')]:[N(9692,'blr_capdoor'),N(9693,'blr_glass')],ready:[N(9694,'blr_widow')]}}
 blRegister(9,blrBuild,{fromE:{x:75,y:35,f:3},fromW:{x:4,y:35,f:1},exitY:35,rooms:[9691,9692,9693,9694],names:{9691:'The Rookery Mill: the grinding floor',9692:'The Rookery Mill: the loft',9693:'The Rookery Mill: the cap',9694:"The Miller's House"},rating:{9691:89,9692:89,9693:89,9694:89}});

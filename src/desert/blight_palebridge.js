@@ -65,7 +65,7 @@ const BLP_PELL=['Watchman Pell. I have the night watch on the north wall. I coun
 khNpc('blp_pell','Watchman Pell','kh_ohsold1_3',()=>yrLines('blp_pell',BLP_PELL));
 /* ---------- the quests ---------- */
 bl3Q('blq48','Lamps for the Last Mile','Joss Fenn, lamplighter',[
-  ['Light the four road lamps on the dead land between the bridge and the wall of Sale. Each stands at the north edge of the road.',()=>blpLamps()>=4,['blp_lamp']]],
+  ['Light the four road lamps on the dead land between the bridge and the wall of Sale. Each stands at the north edge of the road.',()=>blpLamps()>=4,['blp_lamp0','blp_lamp1','blp_lamp2','blp_lamp3']]],
   {gold:4200,xp:36000,items:['blwatchhelm','potion6']});
 bl3Q('blq49','The Watch Banner','Sergeant Hob Pike',[
   ['Find the banner of the Sale watch in the plague cart by the road, on the east bank of the ravine, beyond the bridge.',()=>!!(blF().banner||blF().bannerGiven),['blp_cart']],
@@ -118,7 +118,7 @@ yrHook('blp_pike',d=>{const F=blF();
   if(qSt('blq49')==='active'&&(F.banner||bagCount('blbanner')>0)&&!F.bannerGiven)return say('Sergeant Pike sees the grey cloth in your arms and takes his helm off.',[['Give him the banner.',()=>{F.bannerGiven=1;bagRemove('blbanner',1);sfx('win');bl3Heal();msg('You return the banner of the Sale watch. Every hero is healed.','#ffe9a0');if(qReady('blq49'))qTurnIn('blq49');return say('"That is it," he says, and holds it up. "That is it." He is quiet for a moment, and then he coughs. "Well. Never mind."',[BYE])}],['Not yet.',()=>null]]);
   return null});
 /* ---------- the objects ---------- */
-khNpc('blp_lamp','A cold road lamp','gy_lantern',d=>{const F=blF(),i=(d&&d.i)|0,bit=1<<i;
+for(let i=0;i<4;i++)khNpc('blp_lamp'+i,'A cold road lamp','gy_lantern',d=>{const F=blF(),bit=1<<i;
   if((F.lamps|0)&bit)return say('The lamp burns yellow and steady. It is a small kind light on a dead road.',[BYE]);
   const earlier=(F.lamps|0)&((1<<i)-1);
   if(i>0&&earlier!==(1<<i)-1)return say('A cold lamp on a post. It will not light. The lamp before it, towards the wall, has to be lit first, so that this one has a flame to take.',[BYE]);
@@ -143,7 +143,7 @@ khNpc('blp_sign_w','A signpost','greensign',()=>say('A signpost in the toll yard
 khNpc('blp_sign_br','A signpost at the bridge','greensign',()=>say('A signpost at the foot of the bridge. THE PALE BRIDGE. BUILT FOR SALE BY THE FREE MEN OF THE ROAD. HELD, it says, in new paint, and below that, in old: IN PERPETUITY.',[BYE]));
 khNpc('blp_mile','A stone','bl_slab',()=>say('A grey slab at the road\'s edge, cut with the words SALE and 1 STAGE. Somebody has put a small bunch of dried flowers at its foot, and somebody else has taken them away.',[BYE]));
 khNpc('blp_toll','The toll bar','gy_rpost',()=>say('A black bar across the road on two posts, with a crow-shaped lantern on one end. A board says TOLL: NONE. The bar has been lifted off its pegs and stands against the wall.',[BYE]));
-khNpc('blp_angel','A pale statue','gy_angel',d=>say(['A statue of a woman in a plain gown, with her hands held out as if to catch something. The plinth reads: THE FREE MEN OF THE ROAD, WHO BUILT THIS BRIDGE.','A statue of a man in a plain gown, with his hands folded. The plinth reads: AND THOSE WHO HELD IT.'][(d&&d.i)|0]||'A pale statue.',[BYE]));
+for(let i=0;i<2;i++)khNpc('blp_angel'+i,'A pale statue','gy_angel',()=>say(['A statue of a woman in a plain gown, with her hands held out as if to catch something. The plinth reads: THE FREE MEN OF THE ROAD, WHO BUILT THIS BRIDGE.','A statue of a man in a plain gown, with his hands folded. The plinth reads: AND THOSE WHO HELD IT.'][i],[BYE]));
 khNpc('blp_wall','The wall of Sale','bl_column',()=>say('The outer wall of Sale: grey stone, three paces thick, and higher than any house in the town. Every stone has been scratched with a name. It goes on for as far as you can see in both directions.',[BYE]));
 khNpc('blp_camp','A cold camp','gy_candles',()=>say('A cold camp at the side of the road, with a rolled blanket and a ring of dead embers. Somebody was waiting here for the bridge to open. There is a hand-lettered card: WE WENT HOME. WE WERE TOLD IT WAS CLOSED.',[BYE]));
 khNpc('blp_cartchest','A pilgrim\'s chest','gy_chest',()=>{const F=blF();if(F.cartChest)return say('The chest is open and empty.',[BYE]);
@@ -169,10 +169,10 @@ function blpBuild(p){
   for(let y=3;y<=66;y++){for(const x of [45,57]){if(y>=33&&y<=37)continue;hgt[ix(x,y)]=-.1}}
   for(let x=46;x<=56;x++){C.dec('bl_fence',x,33,{block:true,sc:.9});C.dec('bl_fence',x,37,{block:true,sc:.9})}
   for(const x of [47,51,55]){for(const y of [32,38]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.pale)}}
-  for(const [x,y,i] of [[44,32,0],[58,32,1],[44,38,1],[58,38,0]])C.dec('gy_angel',x,y,{block:true,npc:'blp_angel',i,sc:.9});
+  for(const [x,y,i] of [[44,32,0],[58,32,1],[44,38,1],[58,38,0]])C.dec('gy_angel',x,y,{block:true,npc:'blp_angel'+i,sc:.9});
   // the Pale Knight stands on the bridge, a person until the party chooses
   C.dec('bl_paleknight',51,35,{block:true,npc:'blp_knight',sc:1.0});
-  C.enemies.push({t:'blbones',x:48,y:31,lvl:90});
+  C.foe('blbones',42,31);
   C.post(43,37,'bl_pb_br',[{n:'THE PALE BRIDGE',d:0},{n:'HELD',d:0}],'blp_sign_br','',{i:3});
   C.milestone(42,33);
   // Sale's outer wall: three thick, the whole height, with an open arch in the road and two towers; a little toll yard inside
@@ -191,9 +191,9 @@ function blpBuild(p){
   for(const y of [10,16,22,46,52,58]){C.dec('bl_column',11,y,{block:true,npc:'blp_wall',sc:.9})}
   for(const y of [14,20,50,56]){C.dec('gy_lantern',12,y,{block:true});C.light(12,y,C.pale)}
   if(!F.glove&&!F.gloveGiven)C.dec('gy_ring',11,44,{block:true,npc:'blp_glove',sc:1,bob:.1});
-  for(const [x,y] of [[11,45],[12,46],[11,42],[12,45]])C.dec('bl_stone2',x,y,{block:true,sc:.7});
+  for(const [x,y] of [[12,45],[12,47]])C.dec('bl_stone2',x,y,{block:true,sc:.7});
   // the dead land between the wall and the bridge: four unlit lamps, a camp, graves, dead hedges
-  BLP_LAMPS.forEach(([x,y],i)=>{const lit=(F.lamps|0)&(1<<i);C.dec('gy_lantern',x,y,{block:true,npc:'blp_lamp',i});C.light(x,y,lit?C.warm:C.pale)});
+  BLP_LAMPS.forEach(([x,y],i)=>{const lit=(F.lamps|0)&(1<<i);C.dec('gy_lantern',x,y,{block:true,npc:'blp_lamp'+i});C.light(x,y,lit?C.warm:C.pale)});
   C.person('blp_joss',15,37,2);
   C.dec('gy_candles',24,38,{block:true,npc:'blp_camp',sc:.8});C.dec('kh_oqstuff_8',22,38,{block:true,sc:.7});C.dec('gy_chest',26,39,{block:true,npc:'blp_cartchest',sc:.9});C.light(25,40,C.pale);
   for(let a=0;a<7;a++){const x=18+a*3,y=44+(a%2);C.dec('gy_mound',x,y,{block:true,sc:.7});C.dec(['bl_wcross','bl_lean','bl_stone1'][a%3],x,y-1,{block:true,sc:.8})}
@@ -211,7 +211,7 @@ function blpBuild(p){
   C.dress({trees:90,scrub:160,stones:12,bones:8,posts:6,keep:(x,y)=>(y>=31&&y<=39)||(x>=2&&x<=14&&y>=24&&y<=46)||(x>=44&&x<=58)||(x>=60&&x<=70&&y>=24&&y<=31)});
   // the creatures: the dead lands are the Sovereign's; the toll yard and the arch are the watch's and quiet
   C.foes([['bldeadwarden',20,34],['bldeadwarden',30,36],['bldeadwarden',38,35],['blghoul',22,30],['blghoul',34,42],['blghoul',28,26],['blhusk',16,28],['blhusk',24,50],['blhusk',36,56],['blhusk',40,24],['blbones',20,40],['blbones',32,34],['blbones',44,50],['blshade',26,20],['blshade',36,48],['blshade',18,56],['blbloat',30,60],['blhound',22,60],['blcrow',34,28],['blcrow',24,34],
-    ['bldeadwarden',64,34],['bldeadwarden',70,35],['blghoul',66,42],['blghoul',68,20],['blhusk',62,48],['blhusk',72,52],['blbones',62,22],['blshade',64,58],['blshade',70,12],['blhound',66,56],['blbones',68,44],['blcrow',66,30],['blcrowflock',72,14],['blbloat',60,56]]);
+    ['bldeadwarden',64,34],['bldeadwarden',64,35],['blghoul',66,42],['blghoul',68,20],['blhusk',62,48],['blhusk',72,52],['blbones',62,22],['blshade',64,58],['blshade',70,12],['blhound',66,56],['blbones',68,44],['blcrow',66,30],['blcrowflock',72,14],['blbloat',60,56]]);
   for(const [k,x,y] of [['potion6',28,30],['potion6',64,40],['potion6',30,54]])C.items.push({k,x,y,taken:false});
   C.mapNames.push({t:'The Pale Bridge',x:51,y:35,k:'place'},{t:'The Ravine',x:51,y:20,k:'place'},{t:'The Wall of Sale',x:9,y:20,k:'place'},{t:'The Gatehouse',x:9,y:29,k:'place'},{t:'The Wall Walk',x:9,y:41,k:'place'},{t:'The Toll Yard',x:4,y:35,k:'place'},{t:'The Last Mile',x:28,y:35,k:'place'},{t:'The Cold Camp',x:24,y:38,k:'place'},{t:'The Waystation Shell',x:66,y:27,k:'place'},{t:'The Plague Cart',x:62,y:38,k:'place'},{t:'To the Rookery Mill',x:75,y:33,k:'place'},{t:'To Sale',x:2,y:33,k:'place'});
   const lv=C.finish({start:{x:75,y:35,f:3}});
@@ -246,7 +246,7 @@ for(const [id,fn] of [[BLP.GUARD,blpGuard],[BLP.WALK,blpWalk]])
   KH_LAZY[id]=()=>{if(!LEVELS[id]){if(!LEVELS[BLP.ID])KH_LAZY[BLP.ID]();blpArt();fn()}return LEVELS[id]};
 /* the quest rings */
 if(typeof QRF!=='undefined'){const N=(l,...ids)=>({lvl:l,npc:ids}),E=(l,rx)=>({lvl:l,en:rx}),T=QRF.T;
-  T.blq48={give:[N(9700,'blp_joss')],act:()=>blpLamps()>=4?[N(9700,'blp_joss')]:[N(9700,'blp_lamp')],ready:[N(9700,'blp_joss')]};
+  T.blq48={give:[N(9700,'blp_joss')],act:()=>blpLamps()>=4?[N(9700,'blp_joss')]:[N(9700,'blp_lamp'+Math.min(3,blpLamps()))],ready:[N(9700,'blp_joss')]};
   T.blq49={give:[N(9700,'blp_pike')],act:()=>blF().banner||bagCount('blbanner')>0?[N(9700,'blp_pike')]:[N(9700,'blp_cart')],ready:[N(9700,'blp_pike')]};
   T.blq50={give:[N(9700,'blp_piper')],act:()=>blpPassed()?[N(9701,'blp_captain')]:[N(9700,'blp_knight')],ready:[N(9701,'blp_captain')]};
   T.blq51={give:[N(9701,'blp_captain')],act:()=>blF().glove||bagCount('blwrenglove')>0?[N(9701,'blp_captain')]:[N(9700,'blp_glove')],ready:[N(9701,'blp_captain')]}}

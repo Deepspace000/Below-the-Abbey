@@ -87,7 +87,7 @@ bl3Q('blq41','The Silent Supper','Brother Anselm, a ghost',[
   ['Put six Hollow Brothers to rest. They walk the cloister and the yard and will not sit for supper.',()=>blhHb()>=6,['blh_anselm']]],
   {gold:3800,xp:32000,items:['potion6','potion6','potion6']});
 bl3Q('blq42','The Bell Ropes','Brother Cuthbert, a ghost',[
-  ['Cut the three ropes of the plague bell: two in the ringing chamber at the foot of the tower, one in the belfry beside the bell.',()=>blhRopes()>=3,['blh_rope']]],
+  ['Cut the three ropes of the plague bell: two in the ringing chamber at the foot of the tower, one in the belfry beside the bell.',()=>blhRopes()>=3,['blh_rope0','blh_rope1','blh_rope2']]],
   {gold:4200,xp:35000,items:['blringercowl','potion6']});
 bl3Q('blq43','The Tolling Abbot','Prior Hugh, a ghost',[
   ['Put Abbot Cornelius to rest in the belfry, at the top of the bell tower. He has the pale silver clapper.',()=>!!blF().abbot,['blh_abbotdoor']]],
@@ -129,7 +129,7 @@ bl3Take('blh_letter','A letter on a desk','gy_book','letter','blsevrinletter',
   'A single folded letter lies on the scribe\'s desk, with a grey rose pressed into the wax. It has never been opened. Written across the front: TO THE PRIOR AND BROTHERS OF HOLLOWBELL. FROM BROTHER SEVRIN, OF THE HOUSE UNDER OLDHAVEN.',
   'The desk is bare where the letter lay. There is a clean square in the dust.','Take the letter.',"You take Brother Sevrin's letter.");
 const BLH_GRAVES=[['BR. WILFRID','Cellarer. Counted every cask.'],['BR. MARTIN','Gardener of the infirmary.'],['BR. TOBIAS','Novice. Nineteen.'],['BR. JOHN','Choirmaster. Died singing.'],['BR. AMBROSE','Porter. Let in the cart.'],['BR. NICHOLAS','Brewer. Left a good ale.'],['BR. PETER','Infirmarian. Died last.']];
-khNpc('blh_grave','A grave board','bl_slab',d=>{const t=BLH_GRAVES[d.i]||BLH_GRAVES[0];return say(t[0]+'. '+t[1]+' Cut under it, smaller: HE HEARD THE BELL.',[BYE])});
+for(let i=0;i<8;i++)khNpc('blh_grave'+i,'A grave board','bl_slab',()=>{const t=BLH_GRAVES[i]||['PILGRIMS','Buried without a name, in the quarantine rows.'];return say(t[0]+'. '+t[1]+' Cut under it, smaller: HE HEARD THE BELL.',[BYE])});
 khNpc('blh_sign_lane','A signboard','greensign',()=>say('A board at the foot of the lane. HOLLOWBELL ABBEY. PILGRIMS WELCOME. GUESTS RECEIVED AS CHRIST. Below it, in a newer hand: PLEASE DO NOT RING THE BELL. It has been scratched at, and a second hand has added: IT RINGS ITSELF.',[BYE]));
 khNpc('blh_well','The cloister well','ww_well',()=>say('A stone well in the middle of the garth, with a wooden lid. Cut round the rim: THE WATER OF HOLLOWBELL IS SWEET. The water is dark, and a long way down. When you lean over, a bell sounds, once, from the bottom of the shaft.',[BYE]));
 khNpc('blh_church','The abbey church','bl_church',()=>say('The abbey church has fallen in. The nave is open to the sky and filled with nettles, and the altar stands in the middle of them, quite clean. At the crossing a narrow stair goes down into the dark.',[BYE]));
@@ -149,8 +149,8 @@ khNpc('blh_seated','A brother at supper','gy_skel',()=>say('A skeleton in a brow
 khNpc('blh_kitchen','The kitchen range','gy_candles',()=>say('A big black range with seven pots on it, all of them simmering. The fire has no fuel and no ash. A ladle hangs ready on every hook. Chalked on the wall: SOUP. SOUP. SOUP. BREAD (NONE).',[BYE]));
 khNpc('blh_tower','The bell tower','bl_tower',()=>say('A round tower of grey stone with a conical roof, higher than the church. A slit window near the top glows faintly white. Every few minutes the whole tower hums.',[BYE]));
 khNpc('blh_ruin','A ruined wall','bl_column',()=>say('A broken stretch of the precinct wall, with the stones tumbled out into the grass. Somebody has built a small cairn on top, and put a pale stone on it.',[BYE]));
-khNpc('blh_rope','A bell rope','bl_rope',d=>{
-  const F=blF(),i=(d&&d.i)|0,bit=1<<i;
+for(let i=0;i<3;i++)khNpc('blh_rope'+i,'A bell rope','bl_rope',d=>{
+  const F=blF(),bit=1<<i;
   if((F.ropes|0)&bit)return say('The rope has been cut. The loose end hangs a little above the floor, and does not swing.',[BYE]);
   return say(['A thick bell rope hangs from the ceiling, grey with age, with a woolly grip at the end. It is cold to the touch, and it moves a very little when nobody is near it.','The second rope. It is thicker than the first, and wet, and it is moving as if somebody far above were pulling.','The third rope hangs beside the plague bell itself. It is as thick as an arm, and it is warm, and the bell above it is humming.'][i]||'A bell rope.',
     [['Cut the rope.',()=>{F.ropes=(F.ropes|0)|bit;d&&(d.found=true,d.hidden=true);sfx('key');
@@ -161,7 +161,7 @@ khNpc('blh_abbotdoor','Stairs up to the belfry','gy_stair',()=>say('A narrow sto
 khNpc('blh_stairdown','Stairs down','gy_stair',()=>say('The stair back down to the ringing chamber.',[['Go down.',()=>{sfx('door');G.talk=null;goToLevel(BLH.TOWER,{x:4,y:2,f:2});return null}],BYE]));
 khNpc('blh_cryptdoor','The stair to the crypt','gy_stair',()=>say('A stair under the fallen crossing of the church, going down. A smell of cold stone and old candle comes up it.',[BYE]));
 khNpc('blh_coffin','A brother\'s coffin','gy_coffin',()=>say('A plain coffin with a name plate. The lid has been pushed aside from inside, and the plate says: BR. WILFRID. HE COUNTED EVERYTHING. The inside is empty, and neat.',[BYE]));
-khNpc('blh_sarc','An abbot\'s tomb','gy_sarc',d=>say(['ABBOT ANSELM I. HE FOUNDED THIS HOUSE. HE RANG THE FIRST BELL, WHICH WAS OF IRON, AND WAS SATISFIED.','ABBOT GILES. HE BUILT THE CLOISTER. HE SAID IT WAS FOR THE BROTHERS TO WALK IN, AND NOT FOR THE BELL TO BE HEARD IN.','ABBOT CORNELIUS. A LEFT SPACE, AND A NAME CUT IN IT, AND A DATE THAT HAS NOT YET BEEN FILLED IN.'][(d&&d.i)|0]||'An abbot\'s tomb.',[BYE]));
+for(let i=0;i<3;i++)khNpc('blh_sarc'+i,'An abbot\'s tomb','gy_sarc',()=>say(['ABBOT ANSELM I. HE FOUNDED THIS HOUSE. HE RANG THE FIRST BELL, WHICH WAS OF IRON, AND WAS SATISFIED.','ABBOT GILES. HE BUILT THE CLOISTER. HE SAID IT WAS FOR THE BROTHERS TO WALK IN, AND NOT FOR THE BELL TO BE HEARD IN.','ABBOT CORNELIUS. A LEFT SPACE, AND A NAME CUT IN IT, AND A DATE THAT HAS NOT YET BEEN FILLED IN.'][i],[BYE]));
 khNpc('blh_cryptchest','A brothers\' chest','gy_chest',()=>{const F=blF();if(F.crypt1)return say('The chest is open and empty.',[BYE]);
   return say('A small iron chest with a candle stub on the lid. It holds what the brothers kept for their burial.',[['Open it.',()=>{F.crypt1=1;G.gold+=2000;bl3Give('potion6');sfx('win');msg('You take 2000 gold and a potion.','#ffe36a');return null}],BYE])});
 /* the abbot: three phases of his bell */
@@ -214,7 +214,7 @@ function blhBuild(p){
   C.dec('gy_rose',40,28,{block:true,npc:'blh_infirmary',sc:1});
   // the brothers' graves: seven mounds, seven boards, in a railed plot in the north east
   for(let x=57;x<=69;x++)C.dec('bl_fence',x,11,{block:true,sc:.85});
-  BLH_GRAVES.forEach((g,i)=>{const x=58+i*2,y=7;C.dec('gy_mound',x,y+1,{block:true,sc:.75});C.dec(blSlab('bl_hbg'+i,[g[0].replace('BR. ',''),'BROTHER'],{h:.95,top:.2,span:.55}),x,y,{block:true,npc:'blh_grave',i})});
+  BLH_GRAVES.forEach((g,i)=>{const x=58+i*2,y=7;C.dec('gy_mound',x,y+1,{block:true,sc:.75});C.dec(blSlab('bl_hbg'+i,[g[0].replace('BR. ',''),'BROTHER'],{h:.95,top:.2,span:.55}),x,y,{block:true,npc:'blh_grave'+i})});
   for(const [x,y] of [[57,5],[69,5],[57,10],[69,10]]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.pale)}
   C.dec('bl_ccross',64,9,{block:true,sc:.9});C.dec('bl_angel',63,5,{block:true,sc:.9});
   // the lane, the signs, the people
@@ -233,7 +233,7 @@ function blhBuild(p){
   C.dec('ww_cauldron',68,50,{block:true,npc:'blh_foundry',sc:1.6});C.dec('gy_candles',65,50,{block:true,sc:.8});C.dec('gy_candles',71,50,{block:true,sc:.8});C.light(68,52,C.pale);
   for(let a=0;a<10;a++){const x=Math.round(68+5.5*Math.cos(a*.628)),y=Math.round(50+4*Math.sin(a*.628));if(a===5||a===0)continue;C.dec('bl_urn',x,y,{block:true,sc:.7})}
   for(let r=0;r<3;r++)for(let c=0;c<9;c++){const x=30+c*3,y=52+r*4;C.dec('gy_mound',x,y,{block:true,sc:.7});C.dec(['bl_wcross','bl_lean','bl_stone1'][(c+r)%3],x,y-1,{block:true,sc:.8})}
-  C.dec(blSlab('bl_hb_pit',['PILGRIMS','FROM THE ROAD'],{h:.95,top:.2,span:.55}),29,50,{block:true,npc:'blh_grave',i:4});C.light(34,49,C.pale);C.light(46,49,C.pale);
+  C.dec(blSlab('bl_hb_pit',['PILGRIMS','FROM THE ROAD'],{h:.95,top:.2,span:.55}),29,50,{block:true,npc:'blh_grave7'});C.light(34,49,C.pale);C.light(46,49,C.pale);
   C.dress({trees:130,scrub:250,stones:14,bones:8,posts:6,keep:(x,y)=>(x>=13&&x<=71&&y>=3&&y<=32)||(y>=35&&y<=41)||(x>=38&&x<=44&&y>=32&&y<=44)||(x>=14&&x<=22&&y>=42&&y<=50)||(x>=62&&x<=74&&y>=45&&y<=56)||(x>=28&&x<=56&&y>=48&&y<=64)});
   // the creatures: brothers in the cloister and yard, ringers at the tower, the raised dead in the graves, the road
   C.foes([['blbrother',31,16],['blbrother',45,16],['blbrother',31,21],['blbrother',45,21],['blbrother',36,26],['blbrother',50,26],['blbrother',26,19],['blbrother',66,8],['blbrother',62,18],
@@ -295,7 +295,7 @@ function blhTowerRoom(){
     lights:[[2,2],[6,2],[4,5]],lcol:{'2,2':BLH_COL.pale,'6,2':BLH_COL.pale,'4,5':BLH_COL.warm},col:[.8,1.05,.9],
     enemies:[['blringer',6,5],['blringer',2,6],['blcrow',4,3]],
     build:C=>{
-      C.raw('bl_rope',2,3,{npc:'blh_rope',solid:1,deco:false,i:0,sc:1.2});C.raw('bl_rope',6,3,{npc:'blh_rope',solid:1,deco:false,i:1,sc:1.2});
+      C.raw('bl_rope',2,3,{npc:'blh_rope0',solid:1,deco:false,sc:1.2});C.raw('bl_rope',6,3,{npc:'blh_rope1',solid:1,deco:false,sc:1.2});
       C.raw('gy_stair',4,1,{npc:'blh_abbotdoor',solid:1,deco:false,sc:.95});
       C.npc('blh_cuthbert',4,5);
       for(const x of [1,7])C.raw('hl_p_window',x,4,{block:true,sc:1.0});
@@ -307,7 +307,7 @@ function blhBelfry(){
     enemies:[['blabbot',7,4],['blcrow',3,5],['blcrow',11,5],['blshade',3,8],['blshade',11,8]],
     build:C=>{
       C.raw('bl_silverbell',7,2,{npc:'blh_bell',solid:1,deco:false,sc:3.2});
-      C.raw('bl_rope',9,5,{npc:'blh_rope',solid:1,deco:false,i:2,sc:1.2});
+      C.raw('bl_rope',9,5,{npc:'blh_rope2',solid:1,deco:false,sc:1.2});
       for(const x of [1,13])C.raw('hl_p_window',x,4,{block:true,sc:1.1});
       for(const [x,y] of [[2,2],[12,2]])C.raw('gy_candles',x,y,{block:true,sc:.9});
       C.raw('barrel',2,9,{block:true,sc:.9});C.raw('crate',12,9,{block:true,sc:.9});C.raw('gy_bones',5,7,{block:false,sc:.6});C.raw('gy_bones',9,8,{block:false,sc:.5});C.raw('gy_web',1,1,{block:false,sc:.6});C.raw('gy_web',13,1,{block:false,sc:.6});
@@ -320,7 +320,7 @@ function blhCrypt(){
     build:C=>{
       for(const [x,y] of [[1,3],[1,6],[1,9],[17,3],[17,6],[17,9]])C.raw('gy_niche',x,y,{block:true,sc:.9});
       for(const [x,y] of [[4,3],[14,3],[4,7],[14,7],[7,10],[11,10]])C.raw('gy_coffin',x,y,{npc:'blh_coffin',solid:1,deco:false,sc:.9});
-      C.raw('gy_sarc',6,1,{npc:'blh_sarc',solid:1,deco:false,sc:1.1,i:0});C.raw('gy_sarc',9,1,{npc:'blh_sarc',solid:1,deco:false,sc:1.1,i:1});C.raw('gy_sarc',12,1,{npc:'blh_sarc',solid:1,deco:false,sc:1.1,i:2});
+      C.raw('gy_sarc',6,1,{npc:'blh_sarc0',solid:1,deco:false,sc:1.1});C.raw('gy_sarc',9,1,{npc:'blh_sarc1',solid:1,deco:false,sc:1.1});C.raw('gy_sarc',12,1,{npc:'blh_sarc2',solid:1,deco:false,sc:1.1});
       for(const [x,y] of [[2,1],[16,1],[1,11],[17,11]])C.raw('gy_candles',x,y,{block:true,sc:.85});
       C.raw('gy_chest',16,11,{npc:'blh_cryptchest',solid:1,deco:false,sc:.9});
       C.raw('gy_web',1,1,{block:false,sc:.6});C.raw('gy_web',17,1,{block:false,sc:.6});C.raw('gy_bones',8,6,{block:false,sc:.7});C.raw('gy_bones',11,5,{block:false,sc:.7});
@@ -331,6 +331,6 @@ for(const [id,fn] of [[BLH.CHAPTER,blhChapter],[BLH.SCRIPT,blhScript],[BLH.REFEC
 if(typeof QRF!=='undefined'){const N=(l,...ids)=>({lvl:l,npc:ids}),E=(l,rx)=>({lvl:l,en:rx}),T=QRF.T;
   T.blq40={give:[N(9680,'blh_elias')],act:()=>blF().letterRead?[N(9680,'blh_elias')]:blF().letter||bagCount('blsevrinletter')>0?[N(9681,'blh_prior')]:[N(9682,'blh_letter')],ready:[N(9680,'blh_elias')]};
   T.blq41={give:[N(9683,'blh_anselm')],act:[E(9680,/^blbrother$/)],ready:[N(9683,'blh_anselm')]};
-  T.blq42={give:[N(9684,'blh_cuthbert')],act:()=>blhRopes()>=3?[N(9684,'blh_cuthbert')]:[N(9684,'blh_rope'),N(9685,'blh_rope')],ready:[N(9684,'blh_cuthbert')]};
+  T.blq42={give:[N(9684,'blh_cuthbert')],act:()=>blhRopes()>=3?[N(9684,'blh_cuthbert')]:[N(9684,'blh_rope0','blh_rope1'),N(9685,'blh_rope2')],ready:[N(9684,'blh_cuthbert')]};
   T.blq43={give:[N(9681,'blh_prior')],act:()=>blF().abbot?[N(9681,'blh_prior')]:[N(9684,'blh_abbotdoor'),E(9685,/^blabbot$/)],ready:[N(9681,'blh_prior')]}}
 blRegister(8,blhBuild,{fromE:{x:79,y:38,f:3},fromW:{x:4,y:38,f:1},exitY:38,rooms:[9681,9682,9683,9684,9685,9686],names:{9681:'The Chapter House',9682:'The Scriptorium',9683:'The Refectory',9684:'The Ringing Chamber',9685:'The Belfry of Hollowbell',9686:'The Crypt of the Brothers'},rating:{9681:88,9682:88,9683:88,9684:88,9685:88,9686:88}});
