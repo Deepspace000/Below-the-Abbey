@@ -82,13 +82,17 @@ function wlnStreetPlate(d){
 /* a freestanding street sign: a signpost whose two boards are painted at three times the size, one board to a street, each post with its own shapes and colours; the boards are in the picture of the post itself, so the letters read from every side (never mirrored) */
 let WLN_POSTS=0;
 const WLN_BOARD=[[[104,70,44],[236,222,184]],[[60,96,70],[240,232,196]],[[110,50,46],[240,226,190]],[[44,70,108],[238,232,206]],[[84,64,104],[236,226,196]],[[52,92,98],[240,232,200]]];
+/* names: a string per board (the Wenlock street signs: the shape follows the post), or {n:name,d:way} (the signposts to towns and places, see signposts_towns.js): d -1 or 1 is an arrow with its point to the left
+   or the right of whoever looks at it, d 0 a board for a place straight ahead and d 2 one for a place behind, both with a small triangle in front of the name */
 function wlnPostPic(i,names){
   const S=3,W=825,H=849,src=IMG.greensign,c=document.createElement('canvas');c.width=550;c.height=566;const x=c.getContext('2d');x.scale(2/3,2/3);
   x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';
   if(src)x.drawImage(src,70,0,135,283,414-68*S,0,135*S,H);
-  const board=(bx,by,bw,bh,dir,shape,name,pal)=>{
+  const board=(bx,by,bw,bh,dir,shape,name,pal,nobj)=>{
+    const mk=nobj&&(dir===0||dir===2)?dir||1:0;   // 1 = ahead (triangle up), 2 = behind (triangle down)
+    if(nobj){if(mk){shape=2;dir=1}else shape=0}
     x.save();x.shadowColor='rgba(0,0,0,.45)';x.shadowBlur=10;x.shadowOffsetY=6;
-    x.beginPath();const t=shape===0?bh*.42:0,L=bx,R=bx+bw,T=by,B=by+bh;
+    x.beginPath();const t=shape===0?bh*(nobj?.34+.07*((i+bx)%3):.42):0,L=bx,R=bx+bw,T=by,B=by+bh;
     if(shape===2){const r=bh*.3;x.moveTo(L+r,T);x.lineTo(R-r,T);x.quadraticCurveTo(R,T,R,T+r);x.lineTo(R,B-r);x.quadraticCurveTo(R,B,R-r,B);x.lineTo(L+r,B);x.quadraticCurveTo(L,B,L,B-r);x.lineTo(L,T+r);x.quadraticCurveTo(L,T,L+r,T)}
     else if(dir<0){x.moveTo(L+t,T);x.lineTo(R,T);x.lineTo(R,B);x.lineTo(L+t,B);if(t){x.lineTo(L,(T+B)/2)}else{x.lineTo(L,B);x.lineTo(L,T)}}
     else{x.moveTo(L,T);x.lineTo(R-t,T);if(t){x.lineTo(R,(T+B)/2)}else{x.lineTo(R,T);x.lineTo(R,B)}x.lineTo(R-t,B);x.lineTo(L,B)}
@@ -96,15 +100,18 @@ function wlnPostPic(i,names){
     x.save();x.clip();for(let g=0;g<14;g++){x.fillStyle='rgba(255,240,210,'+(.05+.04*((g*7+i)%3))+')';x.fillRect(L,T+g*bh/14+2,bw,2.2)}x.restore();
     x.strokeStyle='rgb('+pal[1][0]+','+pal[1][1]+','+pal[1][2]+')';x.lineWidth=6;x.stroke();
     // the name: one line, shrunk (and a little narrowed) to fit with a margin
-    const ix=L+(dir<0?t:0)+22,iw=bw-t-44,fonts=['Georgia','"Palatino Linotype",Palatino,"Book Antiqua",Georgia','"Times New Roman",Times,Georgia'];
+    const ix=L+(dir<0?t:0)+22+(mk?64:0),iw=bw-t-44-(mk?64:0),fonts=['Georgia','"Palatino Linotype",Palatino,"Book Antiqua",Georgia','"Times New Roman",Times,Georgia'];
     let fs=Math.round(bh*.5),sx=1;const fam=fonts[(i+name.length)%3];x.font='bold '+fs+'px '+fam;let tw=x.measureText(name).width;
     if(tw>iw){sx=Math.max(.76,iw/tw);tw*=sx}while(tw>iw&&fs>16){fs-=2;x.font='bold '+fs+'px '+fam;tw=x.measureText(name).width*sx}
     x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';x.save();x.translate(ix+iw/2,(T+B)/2+3);x.scale(sx,1);
     x.lineWidth=Math.max(5,fs*.16);x.strokeStyle='rgba(20,14,8,.85)';x.strokeText(name,0,0);x.fillStyle='rgb('+pal[1][0]+','+pal[1][1]+','+pal[1][2]+')';x.fillText(name,0,0);x.restore();
+    if(mk){const mx=L+22+30,my=(T+B)/2+2,u=24;x.beginPath();if(mk===1){x.moveTo(mx,my-u);x.lineTo(mx+u,my+u*.8);x.lineTo(mx-u,my+u*.8)}else{x.moveTo(mx,my+u);x.lineTo(mx+u,my-u*.8);x.lineTo(mx-u,my-u*.8)}x.closePath();
+      x.fillStyle='rgb('+pal[1][0]+','+pal[1][1]+','+pal[1][2]+')';x.strokeStyle='rgba(20,14,8,.85)';x.lineWidth=7;x.lineJoin='round';x.stroke();x.fill()}
   };
   const pal=WLN_BOARD[i%WLN_BOARD.length],pal2=WLN_BOARD[(i+2)%WLN_BOARD.length],sh=i%3;
-  board(40,104,640,198,-1,sh,names[0],pal);
-  if(names[1])board(150,330,640,198,1,(sh+1)%3,names[1],pal2);
+  const nm=n=>typeof n==='string'?n:n.n,dw=(n,def)=>typeof n==='string'||n.d===undefined?def:n.d,ob=n=>typeof n!=='string';
+  board(40,104,640,198,dw(names[0],-1),sh,nm(names[0]),pal,ob(names[0]));
+  if(names[1])board(150,330,640,198,dw(names[1],1),(sh+1)%3,nm(names[1]),pal2,ob(names[1]));
   return c;
 }
 function wlnPost(C,x,y,plates,talk,rad){
