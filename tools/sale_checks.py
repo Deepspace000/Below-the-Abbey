@@ -164,3 +164,21 @@ for qid, r in QR.items():
     else: check('sa10 tavern offers a room, a meal and news', r.get('inn') and 'Take rooms' in r['inn'] and 'Buy a meal' in r['inn'], r.get('inn'))
 check('all ten shops open', QR['allOpen'])
 check('save and load keep the open shops and the done quests', QR['restore']['lv'] == 600 and QR['restore']['open'] and QR['restore']['tiles'] and QR['restore']['quests'] == ','.join(['done'] * 10), QR['restore'])
+
+# ---- rings, talk, text rules ----
+XJS = r"""async () => {
+  const R = {rings: {}, talk: [], dash: []};
+  for (const id of ['sa1','sa2','sa3','sa4','sa5','sa6','sa7','sa8','sa9','sa10']) {
+    const was = G.quests[id]; delete G.quests[id];
+    try { const give = QRF.specs(id, 'give'); qAccept(id); const act = QRF.specs(id, QRF.stage(id)); R.rings[id] = [give.length, act.length, QRF.stage(id)] } catch (e) { R.rings[id] = 'ERR ' + e }
+    G.quests[id] = was;
+  }
+  for (const n of Object.keys(NPCS).filter(n => /^sa_/.test(n))) { try { const nd = NPCS[n].root({x: 1, y: 1, k: '_', npc: n}); R.talk.push([n, !!(nd && nd.text)]) } catch (e) { R.talk.push([n, 'ERR ' + e]) } }
+  const txt = JSON.stringify([SA_Q, SA_GHOSTS, SA_REGS, SA_INNGH, SA_KEEP, SA_NEWS, SA_SEALED, SA_DIG, SA_SURV]) + Object.keys(QUESTS).filter(k => /^sa\d/.test(k)).map(k => QUESTS[k].desc + QUESTS[k].title).join('');
+  R.dash = (txt.match(/—|–/g) || []).length;
+  return R;
+}"""
+X = pg.evaluate(XJS)
+check('quest rings: give and act specs for all ten', all(isinstance(v, list) and v[0] > 0 and v[1] > 0 for v in X['rings'].values()), X['rings'])
+check('every Sale person talks', all(t[1] is True for t in X['talk']), [t for t in X['talk'] if t[1] is not True])
+check('no em dashes or en dashes in Sale text', X['dash'] == 0, X['dash'])

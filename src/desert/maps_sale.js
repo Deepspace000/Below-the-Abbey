@@ -82,7 +82,7 @@ mplInstall({name:'sale',levels:[600],tint:[-26,-22,-6],fit:mpSaleFit,
 if(typeof WORLD_LOCS!=='undefined'&&!WORLD_LOCS.some(l=>l.k==='sale'))WORLD_LOCS.push({k:'sale',n:'Sale',sub:'a town of the dead',lv:[600,601,602,603].concat(SA.STUBS,Array.from({length:100},(_,i)=>SA.H0+i)),x:-462,y:292,ic:'town'});
 if(typeof QWORLD!=='undefined')QWORLD.Sale='sale';
 if(typeof WORLD_ROADS!=='undefined'&&!WORLD_ROADS.some(r=>r.join()==='westgate,sale'))WORLD_ROADS.push(['westgate','sale']);
-if(typeof WMN_SPEC!=='undefined')WMN_SPEC.sale=WMN_SPEC.sale||[];
+if(typeof WMN_SPEC!=='undefined')WMN_SPEC.sale=[['i_town',-5,0,26],['i_graves',13,1,16]];   // a town with its burial ground
 {const _gl=gotoListRaw;gotoListRaw=function(){const out=_gl.apply(this,arguments);try{const rows=[{h:'Sale, a town of the dead (level 90)'}];for(const n of [600,601,602,603]){if(LEVELS[n]||KH_LAZY[n])rows.push({n,name:LEVEL_NAMES[n]||('Level '+n)})}
   for(const d of SA_DOORS.filter(d=>d.shop).slice(0,3))if(KH_LAZY[d.id])rows.push({n:d.id,name:LEVEL_NAMES[d.id]||d.name});
   const i=out.findIndex(r=>r.h&&/^Oldhaven/.test(r.h));out.splice(i<0?out.length:i,0,...rows)}catch(e){console.error('sagoto',e)}return out}}

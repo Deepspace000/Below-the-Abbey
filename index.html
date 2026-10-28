@@ -6557,7 +6557,7 @@ function questShow(qid){ // a quest picked in the log: show where it is, whateve
   const loc=questWorldLoc(qid); // somewhere else: the map of the whole land, with that place circled
   if(loc){
     G.qFocus.loc=loc.k;G.menu=false;G.map=false;G.overview=true;G.world=true;G.teleMode=false;G.qNote=null;
-    const z=1.6;G.wv={z,x:clamp(-(loc.x-240)*z,-1000*z,260*z),y:clamp(-(loc.y-160)*z,-170*z,260*z)};G._wvT=G.time;return; // _wvT: the map was only just opened, so it is not re-centred on the party
+    const z=1.6;G.wv={z,x:clamp(-(loc.x-240)*z,-1000*z,700*z),y:clamp(-(loc.y-160)*z,-170*z,260*z)};G._wvT=G.time;return; // _wvT: the map was only just opened, so it is not re-centred on the party
   }
   G.qFocus=null;G.qNote={t:G.time,text:`"${q.title}" cannot be placed on a map yet.`};
 }
@@ -7517,8 +7517,8 @@ function drawDragGhost(){
   if(d.hover){ctx.strokeStyle='#ffe36a';ctx.lineWidth=2;rrect(ctx,d.hover.x-1,d.hover.y-1,d.hover.w+2,d.hover.h+2,4);ctx.stroke()}
   ctx.globalAlpha=.92;if(def)itemIcon(def,d.x,d.y,1.5);ctx.globalAlpha=1;
 }
-const wvDefault=()=>{const z=.85,wc=typeof wvCentre==='function'?wvCentre():null;if(wc)return {z,x:clamp(-(wc[0]-240)*z,-1000*z,260*z),y:clamp(-(wc[1]-160)*z,-170*z,260*z)};const l=typeof WORLD_LOCS!=='undefined'?WORLD_LOCS.find(q=>q.lv.includes(LEVEL)):null;if(!l)return {z,x:-30,y:0};   // the map opens with the party in the middle of it
-  return {z,x:clamp(-(l.x-240)*z,-1000*z,260*z),y:clamp(-(l.y-160)*z,-170*z,260*z)}};
+const wvDefault=()=>{const z=.85,wc=typeof wvCentre==='function'?wvCentre():null;if(wc)return {z,x:clamp(-(wc[0]-240)*z,-1000*z,700*z),y:clamp(-(wc[1]-160)*z,-170*z,260*z)};const l=typeof WORLD_LOCS!=='undefined'?WORLD_LOCS.find(q=>q.lv.includes(LEVEL)):null;if(!l)return {z,x:-30,y:0};   // the map opens with the party in the middle of it
+  return {z,x:clamp(-(l.x-240)*z,-1000*z,700*z),y:clamp(-(l.y-160)*z,-170*z,260*z)}};
 function setWorldZoom(nz,cx,cy){
   const V=G.wv||(G.wv=wvDefault());nz=clamp(nz,.6,5);
   const px=240+(cx-240-V.x)/V.z,py=160+(cy-160-V.y)/V.z; // the map point under the cursor stays under it
@@ -65180,7 +65180,7 @@ mplInstall({name:'sale',levels:[600],tint:[-26,-22,-6],fit:mpSaleFit,
 if(typeof WORLD_LOCS!=='undefined'&&!WORLD_LOCS.some(l=>l.k==='sale'))WORLD_LOCS.push({k:'sale',n:'Sale',sub:'a town of the dead',lv:[600,601,602,603].concat(SA.STUBS,Array.from({length:100},(_,i)=>SA.H0+i)),x:-462,y:292,ic:'town'});
 if(typeof QWORLD!=='undefined')QWORLD.Sale='sale';
 if(typeof WORLD_ROADS!=='undefined'&&!WORLD_ROADS.some(r=>r.join()==='westgate,sale'))WORLD_ROADS.push(['westgate','sale']);
-if(typeof WMN_SPEC!=='undefined')WMN_SPEC.sale=WMN_SPEC.sale||[];
+if(typeof WMN_SPEC!=='undefined')WMN_SPEC.sale=[['i_town',-5,0,26],['i_graves',13,1,16]];   // a town with its burial ground
 {const _gl=gotoListRaw;gotoListRaw=function(){const out=_gl.apply(this,arguments);try{const rows=[{h:'Sale, a town of the dead (level 90)'}];for(const n of [600,601,602,603]){if(LEVELS[n]||KH_LAZY[n])rows.push({n,name:LEVEL_NAMES[n]||('Level '+n)})}
   for(const d of SA_DOORS.filter(d=>d.shop).slice(0,3))if(KH_LAZY[d.id])rows.push({n:d.id,name:LEVEL_NAMES[d.id]||d.name});
   const i=out.findIndex(r=>r.h&&/^Oldhaven/.test(r.h));out.splice(i<0?out.length:i,0,...rows)}catch(e){console.error('sagoto',e)}return out}}
