@@ -32,7 +32,7 @@ INF.TOWNS=[
   {k:'khemetra',name:'Khemetra',match:(b,l,bk)=>bk.to===44&&/^house\d+$/.test(b.id)&&INF.okKinds.includes(INF.kind[l])},
   // Wenlock: the plain lots of the town (no special lot); its homes are rooms made by wlinMake (wenlock_in.js), whose later lines reset the level to 80, so the infested ones are put right again afterwards (infWlFix)
   {k:'wenlock',name:'Wenlock',range:[7001,7099],wlin:1,tpl:1,match:(b,l,bk)=>bk.to===WL.ID&&/^wlin\d+$/.test(b.id)&&typeof b.wlin==='string'&&b.wlin.indexOf('home_')===0,
-    ids:()=>WL_HOUSES.filter(h=>!h.spk&&h.id>=7001&&h.id<=7099).map(h=>h.id),
+    ids:()=>WL_HOUSES.filter(h=>!h.spk&&h.id>=7001&&h.id<=7099&&![7025,7033,7043,7054].includes(h.id))  /* 7025, 7033, 7043 and 7054 are the thief quest houses (wenlock_thief.js) */.map(h=>h.id),
     strip:n=>/^wli_(home_(cat|dog)|cat2)$/.test(n)||/^wli_home_kid$/.test(n)},
   // Yarrim: the fisher cottages (yarrim_town.js, ids 1500-1515, one of which is the Steam House bath)
   {k:'yarrim',name:'Yarrim',range:[1500,1515],tpl:1,match:(b,l,bk)=>bk.to===290&&/^yc\d+$/.test(b.id),ids:()=>{const o=[];for(let i=1500;i<=1515;i++)if(i!==INF.YR_BATH)o.push(i);return o}},
