@@ -29,3 +29,10 @@ Still on stand-ins (sheets not made yet, the code already prefers these names wh
 
 ## Ideas not done
 Market-day stalls change by time of day; people that walk about; painted interiors of the cellar quests were dropped when the ten-quest chain replaced the loose side quests.
+
+## Thieves, the watch and the cells (src/desert/wenlock_watch.js and wenlock_thief.js, last in ORDER)
+- Night is 20:00 to 05:00 (`G.clock` minutes, 1440 a day; resting at the inn or camping passes the time). `wlzNight()`.
+- Four watchmen (`wlz_g1` to `wlz_g4`, `WLZ_ROUTES`) walk fixed beats along the roads by day and night, stop and turn at corners; they see a square within about 5.5 squares (stealth skill and masks shorten it), facing it, with a clear line, and at night only if it is lit (lamp, lit window, or their own lantern within 2.4 squares). Walk-through pictures, never hostile.
+- Four shady quests `wlq60` to `wlq63` (clients `wlt_fence`, `wlt_gambler`, `wlt_agent`, `wlt_poacher`; houses `WLT`: Church View 7043, Bluebell Cottage 7054, Weaver's Cottage 7025, The Willows 7033). Doors stay shut by day (`wltDoor`). A theft, swap or copy while a watchman sees the front square of that house is an arrest (`wlzArrest`); leaving with loot in sight is too; ignoring a warning at the door twice is too.
+- The cells are level **7097** (inside the Wenlock room range 7000 to 7099, next to the Village Hall steps). Bail 500 gold, or three nights (clock to 08:00 of the fourth morning, nobody healed, every hero Poorly and Flea-bitten). `wltConfiscate` takes the loot and puts it back so the quests can be finished.
+- Quick test link: `?town=wenlock&lvl=80&wlt=1` (2, 3, 4 or jail): 22:00, 1200 gold, at that house's door with its quest taken. Test: `python tools/wenlock_thief_test.py [port] [shots]`.
