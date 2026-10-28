@@ -12,7 +12,10 @@ with sync_playwright() as p:
     pg.on('pageerror', lambda e: errs.append('PAGE ' + str(e)))
     pg.on('console', lambda m: errs.append('CON ' + m.text) if m.type == 'error' else None)
     pg.goto('http://localhost:%s/index.html?%s&v=%d' % (PORT, url, time.time()), wait_until='domcontentloaded', timeout=90000)
-    pg.wait_for_function("()=>typeof G!=='undefined'&&G.state==='play'&&typeof LEVEL!=='undefined'", timeout=120000)
+    try:
+        pg.wait_for_function("()=>typeof G!=='undefined'&&G.state==='play'&&typeof LEVEL!=='undefined'", timeout=40000)
+    except Exception as e:
+        print('BOOT FAILED', errs[:8]); b.close(); sys.exit(1)
     pg.wait_for_timeout(2500)
     r = pg.evaluate(js)
     print(json.dumps(r, indent=1)[:12000])

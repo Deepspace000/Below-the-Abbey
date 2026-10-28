@@ -13,8 +13,8 @@ function blFloors(){
   if(BL._floors)return;
   if(typeof gyFloors==='function')try{gyFloors()}catch(e){console.error(e)}
   const tone=(out,src,g,t)=>{if(typeof gyFloorTone==='function'&&FLOORS[src])gyFloorTone(out,src,g,t);if(!FLOORS[out])FLOORS[out]=FLOORS.cobble||FLOORS.grass};
-  tone('blf_grass','gyf_grass',.56,[.98,.92,.66]);   // dead grass: dry, yellow-olive, grey
-  tone('blf_dirt','gyf_dirt',.62,[.92,.9,.82]);
+  tone('blf_grass','gyf_grass',.66,[1.3,.92,.5]);   // dead grass: dry, yellow-olive, grey
+  tone('blf_dirt','gyf_dirt',.86,[1.0,.94,.84]);
   tone('blf_gravel','gyf_gravel',.7,[.92,.95,.92]);
   tone('blf_flag','gyf_flag',.66,[.9,.95,.95]);
   tone('blf_cobble','gyf_cobble',.74,[.9,.94,.92]);
@@ -81,25 +81,36 @@ function blPost(key,boards,i){
 /* a slab of grey stone with words cut into it (a milestone, a grave board, a plaque). lines: up to three; the picture is the graveyard's blank slab. */
 function blSlab(key,lines,opt){
   if(IMG[key])return key;opt=opt||{};
-  const base=IMG.gy_slab||IMG.gy_stone2||IMG.gy_stone1;if(!base)return 'gy_slab';
+  blDeadArt();const base=IMG.bl_slab||IMG.bl_stone2;if(!base)return 'bl_slab';
   const w=base.width,h=base.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(base,0,0);
   x.textAlign='center';x.textBaseline='middle';
   const n=lines.length,top=h*(opt.top||.14),span=h*(opt.span||.74),lh=span/Math.max(n,2);
   lines.forEach((t,i)=>{const big=i===0&&n>1&&!opt.flat,fs=Math.round(lh*(big?.62:.5));let f=fs;x.font='bold '+f+'px Georgia,"Times New Roman",serif';
     while(x.measureText(t).width>w*.84&&f>10){f-=1;x.font='bold '+f+'px Georgia,"Times New Roman",serif'}
-    const cy=top+lh*(i+.5);x.fillStyle='rgba(235,230,215,.38)';x.fillText(t,w/2+1,cy+1.5);x.fillStyle=BL_STONE_INK;x.fillText(t,w/2,cy)});   // cut letters: a dark face and a pale lower edge
+    const cy=top+lh*(i+.5);x.fillStyle='rgba(240,236,222,.5)';x.fillText(t,w/2+1.5,cy+2);x.lineWidth=Math.max(1,f/14);x.strokeStyle='#0c0a08';x.strokeText(t,w/2,cy);x.fillStyle='#0c0a08';x.fillText(t,w/2,cy)});   // cut letters: a dark face and a pale lower edge
   IMG[key]=c;NPC_H[key]=opt.h||1.05;return key}
 /* a milestone that counts the stages down to Sale (n = place number 1 to 10; the stone stands at the west end of the place) */
 function blMilestone(n){const left=10-n;return blSlab('bl_mile'+n,['SALE',left>0?left+(left===1?' STAGE':' STAGES'):'THE GATE'],{h:1.0,top:.2,span:.62})}
+
+/* the graveyard's stones and fences carry bright ivy, and Wenlock's bushes are green: the road gets its own dead, greyed copies of the painted pieces (a filter over the painting, nothing drawn) */
+function blDeadArt(){
+  if(BL._art||!IMG.gyp_stonesB_0)return;
+  const mk=(key,src,filter,h)=>{if(!src||!src.width)return;const c=document.createElement('canvas');c.width=src.width;c.height=src.height;const x=c.getContext('2d');try{x.filter=filter}catch(e){}x.drawImage(src,0,0);IMG[key]=c;if(h)NPC_H[key]=h};
+  for(const a of ['stone1','stone2','lean','wcross','ccross','tomb','urn','obelisk','column','mausoleum','angel','crypt','barrow','fence','chapel','hut']){const g=GYA[a];if(g)mk('bl_'+a,IMG['gyp_'+g[0]],'saturate(.55) brightness(.8)',g[1])}
+  mk('bl_slab',(typeof GY!=='undefined'&&GY._slabC)||IMG.gyp_stonesB_2,'saturate(.5) brightness(.85)',1.1);
+  ['lbush0','lbush0_1','lbush0_2'].forEach((k,i)=>mk('bl_hedge'+i,IMG[k],'sepia(.55) saturate(.4) brightness(.5)',NPC_H[k]||.8));
+  ['pgrass0','pgrass1','pgrass2','pgrass3'].forEach((k,i)=>mk('bl_grass'+i,IMG[k],'sepia(.9) saturate(.6) brightness(.48)',NPC_H[k]||.45));
+  mk('bl_wfence',IMG.fence,'sepia(.7) saturate(.4) brightness(.42)',NPC_H.fence||.7);
+  BL._art=1}
 /* ---------- 5. the level builder ---------- */
 let BL_HOUSE_READY=false;
 function blHouseInit(){if(BL_HOUSE_READY)return;try{wlHeights();wlRoofs();wlStyles()}catch(e){console.error('bl house init',e)}BL_HOUSE_READY=true}
 const blRng=seed=>{let a=seed|0;return()=>{a=(a+0x6D2B79F5)|0;let t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296}};
-const BL_TREES=['gy_dead','ww_thorn','ww_willow','ww_oakmoss','ww_oakface','ww_pine2','gy_dead','ww_thorn'];
-const BL_SCRUB=['ww_twig','ww_twig2'];
+const BL_TREES=['gy_dead','ww_willow','ww_oakmoss','gy_dead','ww_oakmoss','ww_willow','gy_dead','ww_oakface'];
+const BL_SCRUB=['ww_twig2','bl_grass0','bl_grass1','bl_grass2','bl_grass3','bl_grass0','bl_grass1'];
 function blKit(spec){
   const id=spec.id,W=spec.W,H=spec.H,hs=(a,b,c)=>hash2(a,b,c),R=blRng(id*7+3),X0=2,X1=W-3,Y0=2,Y1=H-3;
-  blFloors();blHouseInit();
+  blFloors();blHouseInit();blDeadArt();
   const chars={},chMap=new Map();let nextCh=0x300;const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
   const rows=[];for(let y=0;y<H;y++)rows.push(new Array(W).fill('.'));
   const block=new Uint8Array(W*H),fm=new Array(W*H).fill('0'),hgt=new Float32Array(W*H).fill(.3),rk=new Float32Array(W*H);
@@ -137,18 +148,18 @@ function blKit(spec){
   C.hills=amp=>{for(let y=0;y<H;y++)for(let x=0;x<W;x++){hgt[y*W+x]=.3+amp*((vn(x,y,17,id+1)-.5)*1.6+(vn(x,y,7,id+2)-.5)*.5)}};
   C.flatten=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(x>=0&&y>=0&&x<W&&y<H)hgt[y*W+x]=.3};
   /* the boundary: a bank of dark leaves and bark, two cells thick all round */
-  const wallH=2.1,wt=v=>ch(typeof wwTile==='function'&&IMG.tex_1?wwTile(['tex_1','tex_2','tex_1'][v%3],2.6,{gain:.55,rgb:[.86,.94,.84]}):gyTile('texGrey_'+(v%3),wallH,{gain:.55}));
+  const wallH=2.1,wt=v=>ch(gyTile(['texBlack_3','texGrey_2','texBlack_3'][v%3],wallH+.6,{gain:.62,rgb:[.8,.9,.8]}));
   C.boundary=()=>{const WC=[0,0,0,1,3,5,0,3,2].map(wt);for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(x>=X0&&x<=X1&&y>=Y0&&y<=Y1)continue;solid(x,y,WC[(hs(x,y,7)*WC.length)|0])}};
   /* ---- gates: the east and west exits, using the table BL_ROAD ---- */
   C.gate=(side,y,opt)=>{
     opt=opt||{};const p=blPlaceOf(id),x=side==='E'?W-2:1,dest=()=>{const q=p&&(side==='E'?blEastDest(p):blWestDest(p));return q};
     if(p&&!dest())return false;
-    const tag='blx'+id+side,gid=gyTile('texGrey_1',2.5,{fac:{img:'gatesC_0',i:0,n:1},gain:1.1,tag});
+    const tag='blx'+id+side,gid=gyTile('texGrey_1',2.5,{fac:{img:'gatesC_0',i:0,n:1},gain:.9,tag,emit:.1});
     KH_DOOR[gid]={get lvl(){return dest().lvl},get at(){const d=dest();if(!LEVELS[d.lvl]&&KH_LAZY[d.lvl])KH_LAZY[d.lvl]();return d.at},bl:1,side};
     rows[y][x]=ch(gid);block[y*W+x]=1;
     const dx=side==='E'?-1:1;
     for(const yy of [y-1,y+1]){dec('gy_lantern',x+dx,yy,{block:true});lights.push([x+dx,yy]);lcol[(x+dx)+','+yy]=opt.col||C.pale}
-    dec('gy_urn',x+dx,y-2,{block:true,sc:.8});dec('gy_urn',x+dx,y+2,{block:true,sc:.8});
+    dec('bl_urn',x+dx,y-2,{block:true,sc:.8});dec('bl_urn',x+dx,y+2,{block:true,sc:.8});
     pth(side==='E'?x-4:x+1,y,side==='E'?x-1:x+4,y,'1');
     C.exits[side]={x:x+dx,y};return true};
   /* ---- houses: an enterable building in the style of Wenlock (walls, painted roof, door to a room) ---- */
@@ -168,6 +179,14 @@ function blKit(spec){
     h.front=[fx,fy];C.reserve(h.x0-1,h.y0-1,h.x1+1,h.y1+1);used.delete(fx+','+fy);
     if(h.lit!==false){for(const o of [-2,2]){const lx=horiz?fx+o:fx,ly=horiz?fy:fy+o;if(isOpen(lx,ly)){lights.push([lx,ly]);lcol[lx+','+ly]=h.col||C.warm}}}   // the lit windows
     return h};
+  /* ---- a painted building over a hidden block of wall (the barn, a mill): the picture stands in front of the south face; the door is in the front row ---- */
+  C.picHouse=h=>{ // h:{img,x0,y0,x1,y1,w,door:[x,y],to,wh}
+    if(!IMG[h.img])return false;const wh=h.wh||2.4,pw=ch(TM.make('plain','wlgrey',wh).gid),dt=TM.make('door','wlgrey',wh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;
+    const door=h.door||[(h.x0+h.x1)>>1,h.y1];
+    if(h.to)KH_DOOR[dgid]={lvl:h.to,get at(){if(!LEVELS[h.to]&&KH_LAZY[h.to])KH_LAZY[h.to]();const L=LEVELS[h.to],st=L&&L.start;return st?{x:st.x,y:st.y,f:0}:{x:4,y:4,f:0}}};
+    for(let y=h.y0;y<=h.y1;y++)for(let x=h.x0;x<=h.x1;x++){if(rows[y][x]==='.')solid(x,y,x===door[0]&&y===door[1]?ch(dgid):pw);used.add(x+','+y)}
+    sky.push({x:(h.x0+h.x1+1)/2,y:h.y1+1.15,k:h.img,w:h.w,z:0,big:1});
+    h.front=[door[0],door[1]+1];C.reserve(h.x0-1,h.y0-1,h.x1+1,h.y1+1);used.delete(h.front[0]+','+h.front[1]);return true};
   /* ---- a lettered signpost (once per key) and a milestone ---- */
   C.post=(x,y,key,boards,npcId,say_,o)=>{const k=blPost(key,boards,(o&&o.i)||0);if(npcId&&!NPCS[npcId])khNpc(npcId,'A signpost',k,()=>say(say_,[BYE]));return dec(k,x,y,{block:true,npc:npcId,sc:(o&&o.sc)||1})};
   C.milestone=(x,y)=>{const n=blPlaceN(id),k=blMilestone(n),nid='bl_mile'+n;if(!NPCS[nid]){const left=10-n;khNpc(nid,'A milestone',k,()=>say(left>0?'A grey milestone beside the road. The letters cut in it read SALE, '+left+(left===1?' STAGE':' STAGES')+'. Somebody has scratched a small tally under it, and the tally stops.':'A grey milestone at the foot of the bridge. The letters cut in it read SALE, THE GATE. Under it somebody has scratched: NO FURTHER.',[BYE]))}return dec(k,x,y,{block:true,npc:nid,sc:1})};
@@ -179,9 +198,9 @@ function blKit(spec){
     const nT=opt.trees===undefined?int(W*H*.045):opt.trees;
     for(let n=0;n<nT;n++){const x=X0+((hs(n,1,21)*(X1-X0))|0),y=Y0+((hs(n,2,21)*(Y1-Y0))|0);if(path.has(x+','+y)||keep(x,y)||near(x,y,1))continue;C.DB(BL_TREES[(hs(n,3,21)*BL_TREES.length)|0],x,y,{sc:.85+hs(n,4,21)*.45})}
     const nS=opt.scrub===undefined?int(W*H*.1):opt.scrub;
-    for(let n=0;n<nS;n++){const x=X0+((hs(n,1,22)*(X1-X0))|0),y=Y0+((hs(n,2,22)*(Y1-Y0))|0);if(path.has(x+','+y)||keep(x,y))continue;const d=C.D(BL_SCRUB[(hs(n,3,22)*2)|0],x,y,{sc:.7+hs(n,4,22)*.8});if(d){d.ox=(hs(n,5,22)-.5)*.7;d.oy=(hs(n,6,22)-.5)*.7}}
+    for(let n=0;n<nS;n++){const x=X0+((hs(n,1,22)*(X1-X0))|0),y=Y0+((hs(n,2,22)*(Y1-Y0))|0);if(path.has(x+','+y)||keep(x,y))continue;const d=C.D(BL_SCRUB[(hs(n,3,22)*BL_SCRUB.length)|0],x,y,{sc:.7+hs(n,4,22)*.8});if(d){d.ox=(hs(n,5,22)-.5)*.7;d.oy=(hs(n,6,22)-.5)*.7}}
     const nG=opt.stones===undefined?int(W*H*.008):opt.stones;
-    for(let n=0;n<nG;n++){const x=X0+2+((hs(n,1,23)*(X1-X0-4))|0),y=Y0+2+((hs(n,2,23)*(Y1-Y0-4))|0);if(keep(x,y)||!near(x,y,2)&&hs(n,9,23)<.5)continue;C.DB(['gy_lean','gy_lean','gy_stone1','gy_wcross','gy_stone2'][(hs(n,3,23)*5)|0],x,y,{sc:.85+hs(n,4,23)*.2})}
+    for(let n=0;n<nG;n++){const x=X0+2+((hs(n,1,23)*(X1-X0-4))|0),y=Y0+2+((hs(n,2,23)*(Y1-Y0-4))|0);if(keep(x,y)||!near(x,y,2)&&hs(n,9,23)<.5)continue;C.DB(['bl_lean','bl_lean','bl_stone1','bl_wcross','bl_stone2'][(hs(n,3,23)*5)|0],x,y,{sc:.85+hs(n,4,23)*.2})}
     const nB=opt.bones===undefined?int(W*H*.004):opt.bones;
     for(let n=0;n<nB;n++){const x=X0+((hs(n,1,24)*(X1-X0))|0),y=Y0+((hs(n,2,24)*(Y1-Y0))|0);if(keep(x,y))continue;C.D('gy_bones',x,y,{sc:.7})}
     const nP=opt.posts===undefined?int(W*H*.003):opt.posts;
