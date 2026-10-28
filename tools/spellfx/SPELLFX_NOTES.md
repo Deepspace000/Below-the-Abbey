@@ -57,3 +57,10 @@ Nothing blocks the turn: the only delay is the 0.3 to 0.5 s the picture takes to
 `python -m http.server 8356` from the repo root, then `python tools/spellfx/spellfx_sheets.py [group ...]` writes a contact sheet per group
 (`sheet_fire.png`, `sheet_frost.png`, ...: one row per spell, six frames across the effect). The game loop is stepped by hand
 (`tools/spellfx/spellfx_lib.py`), so frames are captured at exact times after the cast.
+
+## Class animations added (28 Oct, later pass)
+
+* New object kinds in spObjDraw: dagger (a point-down dagger drops onto the foe and stays in for a moment; used by SPIMP.steel and SPIMP.deep for Thief and Assassin), vcut (a great sword chopping straight down; used by SPIMP.smash for Warrior, Barbarian and the big smash powers), icecase (white and blue crystals close round the foe and crack apart; used by SPIMP.frost on big hits and for blizzards).
+* Ranger and Archer arrows are larger with a glowing head and big fletching; Arrow Rain and Arrow Storm drop seven arrows; long shots (Heartseeker, Killing Shot, Piercing, Perfect) add a shock ring and streaks on impact.
+* Not yet done: Paladin, Monk and Goat get only their older looks; check the sheets (python tools/spellfx/spellfx_sheets.py paladin monk goat).
+
