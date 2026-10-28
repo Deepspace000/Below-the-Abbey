@@ -22,7 +22,9 @@ const VTH_SIGNS=[
  ['UNDERHILL','Twelve households. A good well. Mind the hill.'],
  ['OLDHAVEN GARRISON, FORWARD PICKET','Halt. State your business. If your business is dying, wait your turn.'],
  ['THE VAULT OF MALDRAKE','Barrow-wizard of Underhill, and a good one. Knock, and wait.'],
- ['KEEP TO THE PATH','The hill does not like visitors. Neither does what lives in it.']];
+ ['KEEP TO THE PATH','The hill does not like visitors. Neither does what lives in it.'],
+ ["FOUR OF HALE'S MEN",'Allin, Brook, Denny and Price, of the Oldhaven garrison. A helmet hangs on each cross, hung straight. They were sent to find out why the dead walked.'],
+ ['UNDERHILL HARVEST FAIR',"Pig racing, a pie contest and the vicar's hat toss. Cancelled this year, on account of the fever. Somebody has written underneath: Next year."]];
 /* one tile of the front (0 left, 1 door, 2 right), like a tomb front of the graveyard (gyTombTile) but with the name plaque drawn mirrored: the engine turns the texture of a north-facing wall round, so mirrored text reads right */
 function vtFrontTile(st,i){
   const pf=true,mild=st.rgb.map(v=>1+(v-1)*.35);
@@ -94,7 +96,8 @@ function vtHillBuild(){
    dec('bench',27,41,{block:false,sc:.8});
    const kp=KH_KEEPERS.vto_hale;if(kp){const d=dec(khFaceKey(kp.face),VTH.hale.x,VTH.hale.y,{block:false,npc:'vto_hale'});if(d)d.sc=kp.sc||1.05}
    const kw=KH_KEEPERS.vto_wick;if(kw){const d=dec(khFaceKey(kw.face),26,42,{block:false,npc:'vto_wick'});if(d)d.sc=kw.sc||1}
-   lamp(30,40,[1.4,1.0,.6]);lamp(25,42,[1.4,1.0,.6])}
+   lamp(30,40,[1.4,1.0,.6]);lamp(25,42,[1.4,1.0,.6]);
+   for(const y of [37,39,41,43])dec('wcross',20,y,{block:true,sc:.95,npc:'vto_sign',i:6});lamp(20,40,[1.3,1.0,.7])}
   // ---- the road: signs, milestones, lanterns, the plague cart and its horse (which is a skeleton) ----
   dec('ww_sign',6,43,{block:true,npc:'vto_sign',i:1});dec('ww_sign',57,47,{block:true,npc:'vto_sign',i:1});dec('ww_sign',34,42,{block:true,npc:'vto_sign',i:0});
   for(let x=8;x<=58;x+=9){for(const y of [43,47]){if(free(x,y)&&!path.has(x+','+y)){DB('lantern',x,y);lamp(x,y,[.8,1.05,.8])}}}
@@ -115,7 +118,7 @@ function vtHillBuild(){
   {const GR=['pgrass0','pgrass1','pgrass2','pbracken'].filter(k=>IMG[k]);if(GR.length)for(let n=0;n<340;n++){const x=3+((hs(n,1,29)*58)|0),y=14+((hs(n,2,29)*39)|0);if(path.has(x+','+y))continue;const k=GR[(hs(n,3,29)*GR.length)|0],d=D(k,x,y,{block:false,sc:.6+hs(n,4,29)*.7});if(d){d.ox=(hs(n,5,29)-.5)*.7;d.oy=(hs(n,6,29)-.5)*.7}}}
   // ---- Underhill, south of the road: a ruined chapel, three cottages, the well, broken fences ----
   {dec('chapel',14,50,{block:true,npc:'vto_chapel'});dec('hut',7,49,{block:true,npc:'vto_hut',i:0});dec('hut',21,50,{block:true,npc:'vto_hut',i:1});dec('hut',27,50,{block:true,npc:'vto_hut',i:2});
-   dec('ww_well',34,51,{block:true,npc:'vto_well'});dec('ww_sign',10,48,{block:true,npc:'vto_sign',i:2});
+   dec('ww_well',34,51,{block:true,npc:'vto_well'});dec('ww_sign',10,48,{block:true,npc:'vto_sign',i:2});dec('ww_sign',24,48,{block:true,npc:'vto_sign',i:7});
    for(const x of [5,6,8,9,17,18,19,23,24,25,29,30])D('fence',x,53,{block:true,sc:.9});for(const [x,y] of [[12,49],[16,49],[20,52],[26,52]])D('lean',x,y,{block:true});
    for(const [x,y] of [[10,50],[18,52],[30,52],[34,49]])lamp(x,y,[.75,1.0,.8]);for(const [x,y] of [[8,51],[22,52],[32,50]])D('bones',x,y,{sc:.8});
    dec('chest',36,52,{block:true});dec('chest',5,52,{block:true})}

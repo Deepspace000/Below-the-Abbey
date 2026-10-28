@@ -301,7 +301,7 @@ function vtSpot(w){return w==='vaultboss'?[9677,12,20,0]:[9670,30,44,0]}
   try{_j.apply(this,arguments)}finally{try{history.replaceState(null,'',orig)}catch(e){}}
   G.heroes.forEach((h,i)=>{while(h.lvl<target){h.xp=xpNeed(h.lvl);levelUp(i)}h.alive=true;h.hp=h.max;h.mp=h.mpMax;h.food=Math.max(h.food||0,100)});
   if(q.get('gear')!=='0')try{giveJumpGear(target)}catch(e){console.error(e)}
-  const F=vtF(),Q=parseInt(q.get('q')||'0',10)||0;
+  const F=vtF(),Q=(town==='vaultboss'||town==='vaultarchive')?Math.max(3,parseInt(q.get('q')||'0',10)||0):(parseInt(q.get('q')||'0',10)||0);   // the sanctum and the archive come with the way open and the quests under way
   if(Q>=1){qAccept('bl7a');G.flags.vtMet=1;G.flags.vtHill=8;qTurnIn('bl7a')}     // qTurnIn starts bl7b by itself
   if(q.get('open')||town==='vaultboss'||Q>=3){for(const k of ['L1','L2','L3','L4'])F.locks[k]=1;F.ringDone=1;F.bellsDone=1;F.secret=1}
   if(q.get('pages')||Q>=3){for(let i=0;i<=6;i++){F.pages[i]=1;if(i>=1&&!bagCount('vtpg'+i))bagAdd(mkItem('vtpg'+i))}}

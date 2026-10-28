@@ -2650,7 +2650,7 @@ function render3D(){
     let side=0,g=0,guard=0,nHit=1;
     if(TERRACE){nHit=terrTerrace(x,rX,rY);if(nHit===0){zbuf[x]=99;wtop[x]=-1e9;continue}terrCover(nHit,rX,rY,cx,cy)} // terraced town: the ground is walked cell by cell and every wall that can be seen is listed, nearest first
     else{
-    while(guard++<(LEVEL===530?100:64)){
+    while(guard++<(LEVEL===530||LEVEL===9670?100:64)){
       if(sdx<sdy){sdx+=ddx;mx+=stx;side=0}else{sdy+=ddy;my+=sty;side=1}
       if(mx<0||my<0||mx>=MW||my>=MH){g=1;break}
       g=grid[my][mx];if(g>0)break;
@@ -64536,6 +64536,12 @@ function vtPlateFloor(){
     else k=1.04;
     d[i]=Math.min(255,src[i]*k+add*.85);d[i+1]=Math.min(255,src[i+1]*k+add*.95);d[i+2]=Math.min(255,src[i+2]*k+add*1.15)}
   FLOORS.vtf_plate=d;return 'vtf_plate'}
+/* an iron gate set in the wall: the brick above it, the gate itself over darkness (not over brick, which showed through the bars as a blank pale panel); extra paints on top (the glowing locks) */
+function vtGateTile(brick,WH,tag,gain,rgb,glow){
+  return gyTile('vtdark',WH,{fac:{img:'stairFix_2',i:0,n:1},gain:gain,rgb:rgb,tag:tag,emit:.3,draw:(x,w,h)=>{
+    const im=IMG['gyp_'+brick+'_0'],f=IMG.gyp_stairFix_2,gh=f?f.height*128/f.width:94,top=Math.max(0,h-gh-1);
+    if(im&&top>0){x.save();x.beginPath();x.rect(0,0,w,top);x.clip();for(let yy=0;yy<top;yy+=128)x.drawImage(im,0,yy,128,128);x.restore()}
+    if(glow)glow(x,w,h)}})}
 const VT_SPEC={};
 const vtI=d=>{const L=LEVELS[LEVEL],q=L&&L.decor.find(z=>z.x===d.x&&z.y===d.y&&z.npc===d.npc);return q&&q.i!==undefined?q.i:(d.i||0)};   // the number of a piece, looked up by its square
 /* ---------- the maker ---------- */
@@ -64569,15 +64575,15 @@ function vtMake(id){
       }
     else if(D.kind==='lock'){
       const L=VT_LOCKS[D.lock],seats=D.lock==='L3'?3:1;
-      gid=gyTile(S.brick+'_0',WH,{fac:{img:'stairFix_2',i:0,n:1},gain:1.25,rgb:[1.1,1.22,1.5],tag:'vtlock'+D.lock,emit:.55,draw:(x,w,h)=>{
-        for(let s=0;s<seats;s++){const cx=seats===1?64:34+s*30,cy=h-(seats===1?48:56);const gr=x.createRadialGradient(cx,cy,2,cx,cy,seats===1?22:15);gr.addColorStop(0,'rgba(230,244,255,.95)');gr.addColorStop(.5,'rgba(150,190,240,.6)');gr.addColorStop(1,'rgba(90,130,200,0)');
-          x.fillStyle=gr;x.beginPath();x.arc(cx,cy,seats===1?22:15,0,6.3);x.fill();x.strokeStyle='rgba(235,245,255,.95)';x.lineWidth=2;x.beginPath();x.arc(cx,cy,seats===1?11:7,0,6.3);x.stroke()}}});
+      gid=vtGateTile(S.brick,WH,'vtlock'+D.lock,1.5,[1.05,1.2,1.6],(x,w,h)=>{
+        for(let s=0;s<seats;s++){const cx=seats===1?64:34+s*30,cy=h-(seats===1?56:62),R=seats===1?11:9;const gr=x.createRadialGradient(cx,cy,1,cx,cy,R+5);gr.addColorStop(0,'rgba(235,246,255,1)');gr.addColorStop(.45,'rgba(160,200,250,.75)');gr.addColorStop(1,'rgba(90,130,200,0)');
+          x.fillStyle=gr;x.beginPath();x.arc(cx,cy,R+5,0,6.3);x.fill();x.strokeStyle='rgba(240,248,255,1)';x.lineWidth=1.8;x.beginPath();x.arc(cx,cy,R*.55,0,6.3);x.stroke();x.beginPath();x.arc(cx,cy,R,0,6.3);x.stroke()}});
       KH_DOOR[gid]={vt:'lock',id:D.lock};locks[D.lock]={x:dx,y:dy}}
     else if(D.kind==='secret'){
       gid=gyTile(S.brick+'_'+(D.v===undefined?2:D.v),WH,{gain:1.05*(S.wall||1),rgb:[(S.rgb||[1,1,1])[0],(S.rgb||[1,1,1])[1],(S.rgb||[1,1,1])[2]+.00031],tag:'vtsecret'});
       KH_DOOR[gid]={vt:'secret'};V.secret={x:dx,y:dy}}
     else if(D.kind==='ringgate'){
-      gid=gyTile(S.brick+'_0',WH,{fac:{img:'stairFix_2',i:0,n:1},gain:1.1,rgb:[1.0,1.0,1.18],tag:'vtring',emit:.4});
+      gid=vtGateTile(S.brick,WH,'vtring',1.35,[1.0,1.05,1.3]);
       KH_DOOR[gid]={vt:'ringgate'};V.ringgate={x:dx,y:dy}}
     else if(D.kind==='road'){
       gid=gyTile('texGrey_1',2.4,{fac:{img:'gatesC_0',i:0,n:1},gain:1.1,tag:'vtroad'+D.dir});
@@ -64898,7 +64904,9 @@ const VTH_SIGNS=[
  ['UNDERHILL','Twelve households. A good well. Mind the hill.'],
  ['OLDHAVEN GARRISON, FORWARD PICKET','Halt. State your business. If your business is dying, wait your turn.'],
  ['THE VAULT OF MALDRAKE','Barrow-wizard of Underhill, and a good one. Knock, and wait.'],
- ['KEEP TO THE PATH','The hill does not like visitors. Neither does what lives in it.']];
+ ['KEEP TO THE PATH','The hill does not like visitors. Neither does what lives in it.'],
+ ["FOUR OF HALE'S MEN",'Allin, Brook, Denny and Price, of the Oldhaven garrison. A helmet hangs on each cross, hung straight. They were sent to find out why the dead walked.'],
+ ['UNDERHILL HARVEST FAIR',"Pig racing, a pie contest and the vicar's hat toss. Cancelled this year, on account of the fever. Somebody has written underneath: Next year."]];
 /* one tile of the front (0 left, 1 door, 2 right), like a tomb front of the graveyard (gyTombTile) but with the name plaque drawn mirrored: the engine turns the texture of a north-facing wall round, so mirrored text reads right */
 function vtFrontTile(st,i){
   const pf=true,mild=st.rgb.map(v=>1+(v-1)*.35);
@@ -64970,7 +64978,8 @@ function vtHillBuild(){
    dec('bench',27,41,{block:false,sc:.8});
    const kp=KH_KEEPERS.vto_hale;if(kp){const d=dec(khFaceKey(kp.face),VTH.hale.x,VTH.hale.y,{block:false,npc:'vto_hale'});if(d)d.sc=kp.sc||1.05}
    const kw=KH_KEEPERS.vto_wick;if(kw){const d=dec(khFaceKey(kw.face),26,42,{block:false,npc:'vto_wick'});if(d)d.sc=kw.sc||1}
-   lamp(30,40,[1.4,1.0,.6]);lamp(25,42,[1.4,1.0,.6])}
+   lamp(30,40,[1.4,1.0,.6]);lamp(25,42,[1.4,1.0,.6]);
+   for(const y of [37,39,41,43])dec('wcross',20,y,{block:true,sc:.95,npc:'vto_sign',i:6});lamp(20,40,[1.3,1.0,.7])}
   // ---- the road: signs, milestones, lanterns, the plague cart and its horse (which is a skeleton) ----
   dec('ww_sign',6,43,{block:true,npc:'vto_sign',i:1});dec('ww_sign',57,47,{block:true,npc:'vto_sign',i:1});dec('ww_sign',34,42,{block:true,npc:'vto_sign',i:0});
   for(let x=8;x<=58;x+=9){for(const y of [43,47]){if(free(x,y)&&!path.has(x+','+y)){DB('lantern',x,y);lamp(x,y,[.8,1.05,.8])}}}
@@ -64991,7 +65000,7 @@ function vtHillBuild(){
   {const GR=['pgrass0','pgrass1','pgrass2','pbracken'].filter(k=>IMG[k]);if(GR.length)for(let n=0;n<340;n++){const x=3+((hs(n,1,29)*58)|0),y=14+((hs(n,2,29)*39)|0);if(path.has(x+','+y))continue;const k=GR[(hs(n,3,29)*GR.length)|0],d=D(k,x,y,{block:false,sc:.6+hs(n,4,29)*.7});if(d){d.ox=(hs(n,5,29)-.5)*.7;d.oy=(hs(n,6,29)-.5)*.7}}}
   // ---- Underhill, south of the road: a ruined chapel, three cottages, the well, broken fences ----
   {dec('chapel',14,50,{block:true,npc:'vto_chapel'});dec('hut',7,49,{block:true,npc:'vto_hut',i:0});dec('hut',21,50,{block:true,npc:'vto_hut',i:1});dec('hut',27,50,{block:true,npc:'vto_hut',i:2});
-   dec('ww_well',34,51,{block:true,npc:'vto_well'});dec('ww_sign',10,48,{block:true,npc:'vto_sign',i:2});
+   dec('ww_well',34,51,{block:true,npc:'vto_well'});dec('ww_sign',10,48,{block:true,npc:'vto_sign',i:2});dec('ww_sign',24,48,{block:true,npc:'vto_sign',i:7});
    for(const x of [5,6,8,9,17,18,19,23,24,25,29,30])D('fence',x,53,{block:true,sc:.9});for(const [x,y] of [[12,49],[16,49],[20,52],[26,52]])D('lean',x,y,{block:true});
    for(const [x,y] of [[10,50],[18,52],[30,52],[34,49]])lamp(x,y,[.75,1.0,.8]);for(const [x,y] of [[8,51],[22,52],[32,50]])D('bones',x,y,{sc:.8});
    dec('chest',36,52,{block:true});dec('chest',5,52,{block:true})}
@@ -65391,7 +65400,7 @@ function vtSpot(w){return w==='vaultboss'?[9677,12,20,0]:[9670,30,44,0]}
   try{_j.apply(this,arguments)}finally{try{history.replaceState(null,'',orig)}catch(e){}}
   G.heroes.forEach((h,i)=>{while(h.lvl<target){h.xp=xpNeed(h.lvl);levelUp(i)}h.alive=true;h.hp=h.max;h.mp=h.mpMax;h.food=Math.max(h.food||0,100)});
   if(q.get('gear')!=='0')try{giveJumpGear(target)}catch(e){console.error(e)}
-  const F=vtF(),Q=parseInt(q.get('q')||'0',10)||0;
+  const F=vtF(),Q=(town==='vaultboss'||town==='vaultarchive')?Math.max(3,parseInt(q.get('q')||'0',10)||0):(parseInt(q.get('q')||'0',10)||0);   // the sanctum and the archive come with the way open and the quests under way
   if(Q>=1){qAccept('bl7a');G.flags.vtMet=1;G.flags.vtHill=8;qTurnIn('bl7a')}     // qTurnIn starts bl7b by itself
   if(q.get('open')||town==='vaultboss'||Q>=3){for(const k of ['L1','L2','L3','L4'])F.locks[k]=1;F.ringDone=1;F.bellsDone=1;F.secret=1}
   if(q.get('pages')||Q>=3){for(let i=0;i<=6;i++){F.pages[i]=1;if(i>=1&&!bagCount('vtpg'+i))bagAdd(mkItem('vtpg'+i))}}

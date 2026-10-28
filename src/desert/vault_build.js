@@ -18,6 +18,12 @@ function vtPlateFloor(){
     else k=1.04;
     d[i]=Math.min(255,src[i]*k+add*.85);d[i+1]=Math.min(255,src[i+1]*k+add*.95);d[i+2]=Math.min(255,src[i+2]*k+add*1.15)}
   FLOORS.vtf_plate=d;return 'vtf_plate'}
+/* an iron gate set in the wall: the brick above it, the gate itself over darkness (not over brick, which showed through the bars as a blank pale panel); extra paints on top (the glowing locks) */
+function vtGateTile(brick,WH,tag,gain,rgb,glow){
+  return gyTile('vtdark',WH,{fac:{img:'stairFix_2',i:0,n:1},gain:gain,rgb:rgb,tag:tag,emit:.3,draw:(x,w,h)=>{
+    const im=IMG['gyp_'+brick+'_0'],f=IMG.gyp_stairFix_2,gh=f?f.height*128/f.width:94,top=Math.max(0,h-gh-1);
+    if(im&&top>0){x.save();x.beginPath();x.rect(0,0,w,top);x.clip();for(let yy=0;yy<top;yy+=128)x.drawImage(im,0,yy,128,128);x.restore()}
+    if(glow)glow(x,w,h)}})}
 const VT_SPEC={};
 const vtI=d=>{const L=LEVELS[LEVEL],q=L&&L.decor.find(z=>z.x===d.x&&z.y===d.y&&z.npc===d.npc);return q&&q.i!==undefined?q.i:(d.i||0)};   // the number of a piece, looked up by its square
 /* ---------- the maker ---------- */
@@ -51,15 +57,15 @@ function vtMake(id){
       }
     else if(D.kind==='lock'){
       const L=VT_LOCKS[D.lock],seats=D.lock==='L3'?3:1;
-      gid=gyTile(S.brick+'_0',WH,{fac:{img:'stairFix_2',i:0,n:1},gain:1.25,rgb:[1.1,1.22,1.5],tag:'vtlock'+D.lock,emit:.55,draw:(x,w,h)=>{
-        for(let s=0;s<seats;s++){const cx=seats===1?64:34+s*30,cy=h-(seats===1?48:56);const gr=x.createRadialGradient(cx,cy,2,cx,cy,seats===1?22:15);gr.addColorStop(0,'rgba(230,244,255,.95)');gr.addColorStop(.5,'rgba(150,190,240,.6)');gr.addColorStop(1,'rgba(90,130,200,0)');
-          x.fillStyle=gr;x.beginPath();x.arc(cx,cy,seats===1?22:15,0,6.3);x.fill();x.strokeStyle='rgba(235,245,255,.95)';x.lineWidth=2;x.beginPath();x.arc(cx,cy,seats===1?11:7,0,6.3);x.stroke()}}});
+      gid=vtGateTile(S.brick,WH,'vtlock'+D.lock,1.5,[1.05,1.2,1.6],(x,w,h)=>{
+        for(let s=0;s<seats;s++){const cx=seats===1?64:34+s*30,cy=h-(seats===1?56:62),R=seats===1?11:9;const gr=x.createRadialGradient(cx,cy,1,cx,cy,R+5);gr.addColorStop(0,'rgba(235,246,255,1)');gr.addColorStop(.45,'rgba(160,200,250,.75)');gr.addColorStop(1,'rgba(90,130,200,0)');
+          x.fillStyle=gr;x.beginPath();x.arc(cx,cy,R+5,0,6.3);x.fill();x.strokeStyle='rgba(240,248,255,1)';x.lineWidth=1.8;x.beginPath();x.arc(cx,cy,R*.55,0,6.3);x.stroke();x.beginPath();x.arc(cx,cy,R,0,6.3);x.stroke()}});
       KH_DOOR[gid]={vt:'lock',id:D.lock};locks[D.lock]={x:dx,y:dy}}
     else if(D.kind==='secret'){
       gid=gyTile(S.brick+'_'+(D.v===undefined?2:D.v),WH,{gain:1.05*(S.wall||1),rgb:[(S.rgb||[1,1,1])[0],(S.rgb||[1,1,1])[1],(S.rgb||[1,1,1])[2]+.00031],tag:'vtsecret'});
       KH_DOOR[gid]={vt:'secret'};V.secret={x:dx,y:dy}}
     else if(D.kind==='ringgate'){
-      gid=gyTile(S.brick+'_0',WH,{fac:{img:'stairFix_2',i:0,n:1},gain:1.1,rgb:[1.0,1.0,1.18],tag:'vtring',emit:.4});
+      gid=vtGateTile(S.brick,WH,'vtring',1.35,[1.0,1.05,1.3]);
       KH_DOOR[gid]={vt:'ringgate'};V.ringgate={x:dx,y:dy}}
     else if(D.kind==='road'){
       gid=gyTile('texGrey_1',2.4,{fac:{img:'gatesC_0',i:0,n:1},gain:1.1,tag:'vtroad'+D.dir});
