@@ -36,6 +36,8 @@ A big winding road west from Wenlock's west gate to Sale, in linked areas of ris
 
 **Added by the owner (29 Oct 2026):** a garrison of soldiers sent from Oldhaven (King Osric's men) is somewhere on the road. Suggested home: Lanternrest Waystation (place 6) as their fort, or a separate Oldhaven Outpost between places 5 and 6. They are cut off, short of supplies, and want help; they can give quests, sell army gear and keep the road clear around them.
 
+**Decided (owner, 29 Oct 2026):** the Oldhaven garrison is Lanternrest Waystation itself (a walled fort: gate, tents in the yard, refugees behind it; army gear shop; supply, rescue and kill quests; the captain knows Wren and says she passed with Aldous Wend towards Sale).
+
 Sale is the furthest town west; beyond it lie the Pale Lands.
 
 ## Open design questions (not answered yet)
