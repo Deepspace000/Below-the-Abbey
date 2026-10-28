@@ -32,6 +32,8 @@ A big winding road west from Wenlock's west gate to Sale, in linked areas of ris
 9. **The Rookery Mill (89).** A windmill and a court of crows that watch the road for the Sovereign; a crow queen.
 10. **The Pale Bridge and the Gate of Sale (90).** The last bridge before Sale, held by a pale knight, with Sale's outer wall and gatehouse beyond.
 
+**Decided (owner, 29 Oct 2026):** the ten places are approved. Maldrake (the owner wrote 'Mandrake'; spelling to confirm, we use Maldrake) is a SAD former wizard who was conned by the Pale Sovereign into wreaking havoc on his own people; he is not a plain villain (the party can end it with sympathy as well as a fight). EACH PLACE HAS ITS OWN MAP (separate levels linked along the road, not one long map).
+
 **Added by the owner (29 Oct 2026):** a garrison of soldiers sent from Oldhaven (King Osric's men) is somewhere on the road. Suggested home: Lanternrest Waystation (place 6) as their fort, or a separate Oldhaven Outpost between places 5 and 6. They are cut off, short of supplies, and want help; they can give quests, sell army gear and keep the road clear around them.
 
 Sale is the furthest town west; beyond it lie the Pale Lands.
