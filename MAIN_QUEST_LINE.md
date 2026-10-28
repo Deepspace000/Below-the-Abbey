@@ -117,9 +117,23 @@ Added with src/desert/blackswill.js (quests, boss, map marks, gate, story pages)
 | 65 | The Gate in the Atrium (wk1) | 80 | Aldous Wend, wizard | The party stands in the great atrium at the top of the maze. A tall painted gate has opened in the north wall. Aldous Wend tells them it leads out of the Hollow Lands to the western kingdoms; walk through it into the Maze of Gardens and to its far end | The Deeper Hollow (475), top atrium, north wall | 3,000 gold, 20,000 xp, potion |
 | 66 | The Maze of Gardens | 80 to 81 | none | A peaceful hedge maze in sunlight (level 490, own file). Reaching its far end completes wk1 and starts wk2 | The Maze of Gardens | see wk1 |
 | 67 | The Town of Wenlock (wk2) | 80 | none | Walk into Wenlock, the first town of the western kingdoms (level 496, own file) | Wenlock | 4,000 gold, 25,000 xp, potion |
-| 68 | The Mayor of Wenlock (wk3) | 80 | The mayor of Wenlock | Speak to the mayor. The chain ends here for now: the road to the western kingdoms goes on in the next part of the game | Wenlock | 6,000 gold, 40,000 xp, 2 potions |
+| 68 | The Mayor of Wenlock (wk3) | 80 | The mayor of Wenlock | Speak to the mayor. He says the road west is shut; the chain goes on in Act 9 | Wenlock | 6,000 gold, 40,000 xp, 2 potions |
 
 The other builders tell the quest code where the party is by calling `wkMet('garden')`, `wkMet('wenlock')` and `wkMet('mayor')` (defined in blackswill.js, declared in wk_ids.js). The gate on the surface calls `goToLevel(WK.GARDEN, WK.GSTART)`; `bswGateFoot()` gives the spot in the atrium where the party should stand when it comes back from the garden.
+
+## Act 9: the closed road and the Warden's Seals (levels 80 to 84)
+
+Added with src/desert/wenlock_seals.js (last in the injection order). The west gate of Wenlock (the signposted THE WESTERN KINGDOMS gate at the west end of High Street) was shut years ago on the order of the Road Wardens. It opens with THREE WARDEN'S SEALS, one from each dark place of Wenlock, each engraved with the pale silver mark seen in Vance's ledger and on the Pale Sovereign's key pieces. Test links: `?town=wenlock&lvl=80&ws=1` (at the mayor, errand done, wk4 not taken), `&ws=2` (all three bosses dead, wk4 taken, no seal yet), `&ws=3` (three seals in the bag, wk8 ready), `&ws=gate` (the gate open), `&ws=p1`, `p2`, `p3` (bosses dead, at that plinth). Test: `python tools/wenlock_seals_test.py`.
+
+| # | Step | Level | Quest giver | What you do | Where | Reward |
+|---|---|---|---|---|---|---|
+| 69 | The Closed Road (wk4) | 80 | Mayor Aldous Thistlewood | After the welcome errand (wlq1) and wk3, the mayor tells that the west gate was shut by the Road Wardens and needs three seals, and names the three places. Accepting pays at once and opens wk5 to wk7 | Wenlock | 6,000 gold, 40,000 xp, potion |
+| 70 | The Seal under the Well (wk5) | 80 | Mayor (taken with wk4) | Kill the Well-Warden in the Amethyst Deep (502) of the maze under the well; he drops the seal. Old save: the stone plinth near the pedestal of that court gives it | The Well Maze (497 to 502) | 9,000 gold, 60,000 xp, potion |
+| 71 | The Seal in the Wood (wk6) | 82 | Mayor (taken with wk4) | Kill Grisselda Blackbriar; she drops the seal. Old save: the bone totem in her parlour (521) gives it | Blackbriar Wood (520 to 523) | 10,000 gold, 66,000 xp, potion |
+| 72 | The Seal in the Graveyard (wk7) | 84 | Mayor (taken with wk4) | Kill the Prioress Morwenna, last boss of the four mazes; she drops the seal. Old save: the stone altar in the yard (530) near the lych-gate gives it | The Wenlock graveyard (530 to 535) | 11,000 gold, 72,000 xp, potion |
+| 73 | The Western Gate (wk8) | 84 | Mayor | Opens when all three seals are had. Hand them to the mayor: a short scene at the gate, the gate opens, and he says who the Road Wardens served (the Pale Sovereign) and that the west has fallen quiet. Walking through the open gate shows "The road west lies beyond. The next part of the story is not written yet." and sends the party back into Wenlock | Wenlock, west gate | 15,000 gold, 100,000 xp, 3 potions |
+
+The three seals can be had in any order. Each seal quest is done the moment its seal is obtained. Flags: `G.flags.ws = {told, got:{1,2,3}}` and `G.flags.wsGate`. Nothing lies beyond the gate yet.
 
 ## Branches that belong to the story
 
@@ -129,6 +143,6 @@ The other builders tell the quest code where the party is by calling `wkMet('gar
 
 ## What is still open
 
-The road after Wenlock (the western kingdoms) is the next part of the game, not in the game yet.
+The road west of Wenlock (the western kingdoms beyond the opened west gate) is the next part of the game, not in the game yet. The gate opens in Act 9 and shows an end-of-part message.
 
 The latest main chapters before Act 7 (60 to 63) are the Violet Tower, the Hollow Court, Vance's Letters and the Wizard's Answer. The letters, the Pale Sovereign and the dead court under the Abbey set up the next part of the game, which is not in the game yet.

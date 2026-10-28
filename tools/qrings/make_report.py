@@ -6,7 +6,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 STEP = {'gandrick': '3', 'ironhill': '5', 'mines': '6', 'overseer': '6 (side)', 'escape': '7', 'pass': '8', 'scoria': '9', 'kh_seal': '10', 'yar2': '14', 'kh_sea': '15', 'yar3': '16', 'yar4': '17', 'yar5': '18', 'yar6': '19', 'yar7': '20',
         'vq1': '21', 'vq2': '22', 'vq3': '23', 'vq4': '24', 'vq5': '25', 'kg0': '26', 'kg1': '27', 'kg2': '28', 'kg3': '29', 'kg4': '30', 'sd2': '31', 'vq6': '32', 'oq0': '33', 'oa1': '35', 'oa2': '36', 'oa3': '36', 'oa4': '36', 'oa6': '36', 'oa7': '36',
         'oa5': '37', 'oa8': '38', 'oa9': '39', 'ad1': '40', 'ad2': '41', 'ad3': '42', 'ad4': '43', 'hc1': '44', 'hc2': '45', 'hgb1': '49', 'hgb2': '50', 'hgb3': '51', 'hgb4': '52', 'hgrescue': '53', 'dh1': '54', 'dh2': '55', 'dh3': '56',
-        'dq11': '58', 'dq12': '59', 'hgsph': '60', 'bsw1': '62', 'wk1': '65', 'wk2': '67', 'wk3': '68', 'mq1': 'monastery', 'mq2': 'monastery', 'shell': 'branch'}
+        'dq11': '58', 'dq12': '59', 'hgsph': '60', 'bsw1': '62', 'wk1': '65', 'wk2': '67', 'wk3': '68', 'wk4': '69', 'wk5': '70', 'wk6': '71', 'wk7': '72', 'wk8': '73', 'mq1': 'monastery', 'mq2': 'monastery', 'shell': 'branch'}
 for i in range(1, 9): STEP['sg%d' % i] = '34'
 for i in range(1, 8): STEP['kh_c%d' % i] = '9 (Khemetra maps)'
 for i in range(1, 6): STEP['gyq%d' % i] = 'Graveyard %d (L84-87)' % i
