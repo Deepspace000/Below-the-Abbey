@@ -49,7 +49,7 @@ def run(p, town):
     for hid in first:
         pg.evaluate("(id)=>{G.cut=null;G.talk=null;goToLevel(id,{x:LEVELS[id].start.x,y:LEVELS[id].start.y,f:0})}", hid); pg.wait_for_timeout(2500)
         h = pg.evaluate("""(id)=>{const L=LEVELS[id];const alive=G.enemies.filter(e=>e.hp>0);
-          return {lvl:LEVEL,n:alive.length,types:alive.map(e=>e.t),bodies:LEVELS[LEVEL].decor.filter(d=>d.infBody&&d.k==='bones').length,
+          return {lvl:LEVEL,n:alive.length,types:alive.map(e=>e.t),bodies:LEVELS[LEVEL].decor.filter(d=>d.infBody&&/^corpse/.test(d.k)).length,
             people:G.decor.filter(d=>d.npc&&d.npc!=='kh_gold'&&!d.hidden).map(d=>d.npc),stair:G.portals[1]&&G.portals[1].to,stairCell:L.rows[0].indexOf('1'),scene:!!L.scene,
             reach:(()=>{const r=infReach(L,L.start);const sx=L.rows[0].indexOf('1');return r.has(sx+',1')&&alive.every(e=>r.has(e.x+','+e.y))})(),name:L.name}}""", hid)
         print('  house', hid, h['name'], h)

@@ -37,6 +37,10 @@ function infReach(L,from,extraBlock){
   return seen;
 }
 /* change a built house into an infested one */
+// the painted corpses (assets/ds_corpse0..3: on the back, on the front, curled up, in a robe). Usable as a decor name anywhere:
+// {k:'corpse0'..'corpse3'}, or infCorpse(x,y) for one picked by position. Each is about 1.1 squares wide and lies low on the floor.
+Object.assign(NPC_H,{corpse0:.186,corpse1:.205,corpse2:.42,corpse3:.248});
+function infCorpse(x,y){return 'corpse'+((hash2(x*7+3,y*13+1,(typeof INF!=='undefined'&&INF.SEED||1)+21)*4)|0)}
 function infMake(L,b,lvl,back){
   const cid=infCellarOf(lvl),town=back.to,rating=Math.max(1,((typeof LEVEL_RATING!=='undefined'&&LEVEL_RATING[town])||16)-3),H=L.rows.length,W=L.rows[0].length;
   L.infest=1;L.infestCellar=cid;L.diff=rating;LEVEL_RATING[lvl]=rating;L.amb=Math.min(L.amb||.66,.4);delete L.scene;
@@ -57,7 +61,7 @@ function infMake(L,b,lvl,back){
   occ.add(sx+',1');
   // the bodies (a person's spot, or a free square when nobody lived here; sometimes a second one)
   const spots=free.filter(([x,y])=>!occ.has(x+','+y)&&Math.abs(x-st.x)+Math.abs(y-st.y)>=2);
-  const bodyAt=(p,i)=>{const q=p||spots[R(40+i,spots.length)]||free[0];if(!q)return;const x=q[0]!==undefined?q[0]:q.x,y=q[0]!==undefined?q[1]:q.y;L.decor.push({k:'bones',x,y,block:false,infBody:1});occ.add(x+','+y)};
+  const bodyAt=(p,i)=>{const q=p||spots[R(40+i,spots.length)]||free[0];if(!q)return;const x=q[0]!==undefined?q[0]:q.x,y=q[0]!==undefined?q[1]:q.y;L.decor.push({k:infCorpse(x,y),x,y,block:false,infBody:1});occ.add(x+','+y)};
   bodies.forEach((p,i)=>bodyAt(p,i));
   if(R(50,10)<4)bodyAt(null,9);
   // 1 to 5 creatures: not near the door, not on the stair, on squares the party can walk to
@@ -90,7 +94,8 @@ function infCellar(hid,cid,rating,sx){
     if(k<nChest){decor.push({k:'chest',x:cs[R(60+ri,2)][0],y:r.far,block:true});used.add(cs[0][0]+','+r.far)}
     const other=cs.find(c=>!decor.some(d=>d.x===c[0]&&d.y===c[1]));
     if(other)decor.push({k:R(70+ri,2)?'barrel':'crate',x:other[0],y:other[1],block:true});
-    if(R(80+ri,3)===0){const q=cellsOf(r).filter(([x,y])=>x!==r.px&&!decor.some(d=>d.x===x&&d.y===y));const c=q[R(85+ri,q.length)];if(c)decor.push({k:'bones',x:c[0],y:c[1],block:false})}});
+    if(R(80+ri,3)===0){const q=cellsOf(r).filter(([x,y])=>x!==r.px&&!decor.some(d=>d.x===x&&d.y===y));const c=q[R(85+ri,q.length)];if(c)decor.push({k:'bones',x:c[0],y:c[1],block:false})}
+    if(R(90+ri,3)===0){const q=cellsOf(r).filter(([x,y])=>x!==r.px&&!decor.some(d=>d.x===x&&d.y===y));const c=q[R(95+ri,q.length)];if(c)decor.push({k:infCorpse(c[0],c[1]),x:c[0],y:c[1],block:false,infBody:1})}});
   decor.forEach(d=>used.add(d.x+','+d.y));
   // creatures, mostly weak: 4 to 7, in the rooms and the corridor
   const cells=[];for(const r of rooms)for(const c of cellsOf(r))cells.push(c);for(let x=9;x<=26;x++)cells.push([x,CY]);
