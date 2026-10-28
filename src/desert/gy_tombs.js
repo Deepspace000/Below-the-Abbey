@@ -6,22 +6,23 @@
 /* The fronts of the six tombs in the yard are all different: each has its own stone and tint, its own ivy, a name plaque over the door, a pair of statues or urns (stat: left, right), a lamp colour, and a few extras (ext: [piece, along, deep, solid, scale]).
    The picture used for the front is the mausoleum (gatesC_4), the grassy barrow with its dark arch (stairFix_1) or the grassy mound with wooden doors (gatesC_3). */
 const GY_TSTYLE={
-  536:{tex:'texGrey_0',rgb:[.92,1,1.12],img:'gatesC_4',ivy:26,stat:['angel','angel'],sc:.95,lamp:[.5,1.05,1.45],pl:'VANE',ext:[['rose',-1,2,false,.55],['rose',1,2,false,.55],['bench',-3,3]]},
-  537:{tex:'texGrey_2',rgb:[1.12,1.02,.84],img:'gatesC_4',ivy:70,stat:['urn','urn'],sc:1,lamp:[1.55,1.0,.45],pl:'ASHBY',ext:[['bench',-2,3],['bench',2,3],['rose',-1,2,false,.55],['rose',1,2,false,.55]]},
-  538:{tex:'texBlack_1',rgb:[1.35,1.35,1.5],img:'gatesC_4',ivy:8,stat:['obelisk','obelisk'],sc:.9,lamp:[.85,.6,1.5],pl:'THORNE',ext:[['urn',-1,3,true],['urn',1,3,true]]},
-  539:{tex:'texBone_2',rgb:[.78,.92,.8],img:'stairFix_1',ivy:90,stat:['ccross','ccross'],sc:.95,lamp:[.45,1.3,.7],pl:'MARSH',ext:[['mound',-2,2,true,.8],['mound',2,2,true,.8],['web',-1,2]]},
-  540:{tex:'texRed_0',rgb:[1,.84,.78],img:'gatesC_3',ivy:44,stat:['column','column'],sc:.95,lamp:[1.55,.5,.34],pl:'COBB',ext:[['bench',2,3],['rose',-1,2,false,.55],['rose',1,2,false,.55]]},
-  541:{tex:'texGrey_4',rgb:[1,.94,1.14],img:'gatesC_4',ivy:56,stat:['angel','ccross'],sc:.9,lamp:[1.35,1.25,.95],pl:'FELL',ext:[['rose',-1,2,false,.55],['bench',-2,3],['urn',2,3,true]]}};
+  536:{tex:'texGrey_0',rgb:[.92,1,1.12],img:'f_gothic',ivy:26,stat:['angel','angel'],sc:.95,lamp:[.5,1.05,1.45],pl:'VANE',ext:[['rose',-1,2,false,.55],['rose',1,2,false,.55],['bench',-3,3]]},
+  537:{tex:'texGrey_2',rgb:[1.12,1.02,.84],img:'f_classical',ivy:70,stat:['urn','urn'],sc:1,lamp:[1.55,1.0,.45],pl:'ASHBY',ext:[['bench',-2,3],['bench',2,3],['rose',-1,2,false,.55],['rose',1,2,false,.55]]},
+  538:{tex:'texBlack_1',rgb:[1.35,1.35,1.5],img:'f_vault',ivy:8,stat:['obelisk','obelisk'],sc:.9,lamp:[.85,.6,1.5],pl:'THORNE',ext:[['urn',-1,3,true],['urn',1,3,true]]},
+  539:{tex:'texBone_2',rgb:[.78,.92,.8],img:'f_gothic',ivy:90,stat:['ccross','ccross'],sc:.95,lamp:[.45,1.3,.7],pl:'MARSH',ext:[['mound',-2,2,true,.8],['mound',2,2,true,.8],['web',-1,2]]},
+  540:{tex:'texRed_0',rgb:[1,.84,.78],img:'f_classical',ivy:44,stat:['column','column'],sc:.95,lamp:[1.55,.5,.34],pl:'COBB',ext:[['bench',2,3],['rose',-1,2,false,.55],['rose',1,2,false,.55]]},
+  541:{tex:'texGrey_4',rgb:[1,.94,1.14],img:'f_vault',ivy:56,stat:['angel','ccross'],sc:.9,lamp:[1.35,1.25,.95],pl:'FELL',ext:[['rose',-1,2,false,.55],['bench',-2,3],['urn',2,3,true]]}};
 /* one tile of a tomb front (0 left, 1 door, 2 right): the stone, the front picture, ivy hanging from the top and growing from the foot, and over the door the name plaque */
 function gyTombTile(T,st,i){
-  return gyTile(st.tex,3.4,{fac:{img:st.img,i,n:3},gain:1.0,rgb:st.rgb,tag:'tomb'+T.id+'_'+i,draw:(x,w,h)=>{
+  const pf=st.img.startsWith('f_'),mild=pf?st.rgb.map(v=>1+(v-1)*.35):st.rgb;   // a painted front keeps its own colours: only a light tint of the tomb's stone
+  return gyTile(st.tex,3.4,{fac:{img:st.img,i,n:3,fit:pf},gain:1.0,rgb:mild,tag:'tomb'+T.id+'_'+i,draw:(x,w,h)=>{
     const G=['#2a5a26','#3b7f31','#58a03e','#244c24','#6fb04a'],hs=(a,b,c)=>hash2(a,b,c+T.id*3+i*11);
-    const nv=Math.round(st.ivy/3);
+    const nv=Math.round(st.ivy/(pf?9:3));
     for(let k=0;k<nv;k++){const edge=i===0?hs(k,1,1)*.55:i===2?1-hs(k,1,1)*.55:hs(k,1,1),px=edge*w,top=hs(k,2,1)<.5,len=h*(top?(.08+hs(k,3,1)*.28):(.1+hs(k,3,1)*.3));
       let qx=px,qy=top?0:h;x.strokeStyle='#27481f';x.lineWidth=1.3+hs(k,4,1)*1.4;x.beginPath();x.moveTo(qx,qy);
       for(let t=1;t<=6;t++){qx+=(hs(k,t+5,2)-.5)*8;qy+=(top?1:-1)*len/6;x.lineTo(qx,qy)}x.stroke();
       for(let t=0;t<7;t++){x.fillStyle=G[(hs(k,t+9,3)*5)|0];x.beginPath();x.ellipse(px+(hs(k,t+20,4)-.5)*12,top?len*t/7:h-len*t/7,2.5+hs(k,t+30,5)*3.5,2+hs(k,t+40,5)*2,hs(k,t+50,6)*3,0,6.3);x.fill()}}
-    if(i===1){const pw=84,ph=17,px=(w-pw)/2,py=h*(st.img==='gatesC_4'?.405:.56);x.fillStyle='#24211d';x.fillRect(px,py,pw,ph);x.strokeStyle='#9a8858';x.lineWidth=1.4;x.strokeRect(px+1.5,py+1.5,pw-3,ph-3);
+    if(i===1){const pw=84,ph=17,px=(w-pw)/2,py=h*(pf?(st.img==='f_classical'?.335:.905):st.img==='gatesC_4'?.405:.56);x.fillStyle='#24211d';x.fillRect(px,py,pw,ph);x.strokeStyle='#9a8858';x.lineWidth=1.4;x.strokeRect(px+1.5,py+1.5,pw-3,ph-3);
       x.fillStyle='#e0d08e';x.font='bold 12px '+(typeof FTITLE!=='undefined'?FTITLE:'serif');x.textAlign='center';x.textBaseline='middle';x.fillText(st.pl,w/2,py+ph/2+.5)}}})}
 const GY_TOMB_NAMES={536:'The Vane Tomb',537:'The Ashby Vault',538:'The Thorne Mausoleum',539:'The Marsh Crypt',540:'The Cobb Vault',541:'The Fell Tomb'};
 function gyTombBuild(id){

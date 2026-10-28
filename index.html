@@ -55322,10 +55322,12 @@ function gyIvy(){
     x.globalAlpha=1;GY._ivy[a]=c;IMG['gy_'+a]=c}catch(e){console.error('gyIvy',a,e)}}}
 /* cobwebs are drawn faint and fine: the painted web at half strength */
 function gyWeb(){const s=IMG.gyp_bonesH_1;if(!s)return;if(!GY._web){const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.globalAlpha=.5;x.drawImage(s,0,0);GY._web=c}IMG.gy_web=GY._web}
+const GY_FRONTS=['gothic','classical','vault','dungeongate'];   // assets/gy2/f_<name>.webp, cut by tools/gy_fronts/ingest.py
 function gyLoad(){
   if(GY.loading)return GY.loading;
   GY.loading=new Promise(res=>{
     const jobs=Object.keys(typeof GY_LIST!=='undefined'?GY_LIST:{}).map(k=>[k,'assets/gy/'+GY_LIST[k][0]]);
+    for(const k of GY_FRONTS)jobs.push(['f_'+k,'assets/gy2/f_'+k+'.webp']);   // the painted crypt fronts and the dungeon gate
     let left=jobs.length;if(!left){GY.ready=true;res();return}
     const done=()=>{if(--left<=0){try{gyAlias()}catch(e){console.error(e)}GY.ready=true;res()}};
     for(const [k,src] of jobs){if(IMG['gyp_'+k]){done();continue}const i=new Image();i.onload=()=>{IMG['gyp_'+k]=i;done()};i.onerror=()=>done();i.src=src+'?v='+(typeof VERSION!=='undefined'?VERSION:'')}
@@ -55389,17 +55391,23 @@ function gyFloorWet(out,src,tint,seed){
   FLOORS[out]=d;return out}
 /* wall tiles: a painted texture stood up into a tall tile (stacked, each copy slid sideways), or one slice of a big front picture */
 function gyTile(tex,wh,opt){
-  opt=opt||{};const key=tex+'|'+wh+'|'+(opt.fac?opt.fac.img+opt.fac.i+'/'+opt.fac.n:'')+(opt.rgb?opt.rgb.join(','):'')+(opt.gain||'')+(opt.tag||'');if(GY.tiles[key]!==undefined)return GY.tiles[key];
+  opt=opt||{};const key=tex+'|'+wh+'|'+(opt.fac?opt.fac.img+opt.fac.i+'/'+opt.fac.n+(opt.fac.fit?'f'+(opt.fac.at||''):''):'')+(opt.rgb?opt.rgb.join(','):'')+(opt.gain||'')+(opt.tag||'');if(GY.tiles[key]!==undefined)return GY.tiles[key];
   const im=IMG['gyp_'+tex],Hp=Math.round(128*wh),c=document.createElement('canvas');c.width=128;c.height=Hp;const x=c.getContext('2d');
   x.fillStyle='#14120f';x.fillRect(0,0,128,Hp);
   if(im){const units=Math.ceil(wh);for(let u=0;u<units;u++){const y=Hp-(u+1)*128,sh=((u*.37+(tex.length%5)*.11)%1)*128;
       x.save();if(u%2){x.translate(128,0);x.scale(-1,1)}for(const dx of [-sh,128-sh])x.drawImage(im,0,0,im.width,im.height,dx,y,128,128);x.restore()}}
-  if(opt.fac){const f=IMG['gyp_'+opt.fac.img];if(f){const n=opt.fac.n,i=opt.fac.i,s=n*128/f.width,fh=f.height*s,sw=f.width/n;x.imageSmoothingQuality='high';x.drawImage(f,i*sw,0,sw,f.height,0,Hp-fh,128,fh)}}
+  if(opt.fac&&opt.fac.fit){const f=IMG['gyp_'+opt.fac.img];if(f){   // a painted front fitted by height (whole piece on n tiles, centred or with the point 'at' (0..1 across the piece) on the middle of the n tiles), cut into n slices; the stone shows round it
+      const n=opt.fac.n,fk=opt.fac.img+'|'+n+'|'+Hp+'|'+(opt.fac.at||0);const F=GY._fit=GY._fit||{};
+      if(!F[fk]){const sc=Hp/f.height,fw=f.width*sc,cv=document.createElement('canvas');cv.width=n*128;cv.height=Hp;const cx=cv.getContext('2d');cx.imageSmoothingQuality='high';cx.drawImage(f,n*64-(opt.fac.at||.5)*fw,0,fw,Hp);F[fk]=cv}
+      x.drawImage(F[fk],opt.fac.i*128,0,128,Hp,0,0,128,Hp)}}
+  else if(opt.fac){const f=IMG['gyp_'+opt.fac.img];if(f){const n=opt.fac.n,i=opt.fac.i,s=n*128/f.width,fh=f.height*s,sw=f.width/n;x.imageSmoothingQuality='high';x.drawImage(f,i*sw,0,sw,f.height,0,Hp-fh,128,fh)}}
   if(opt.draw)try{opt.draw(x,128,Hp)}catch(e){console.error('gyTile draw',e)}   // paint more on the tile (a plaque, ivy, candles in a niche) before the shading
   x.globalCompositeOperation='multiply';const gr=x.createLinearGradient(0,0,0,Hp);gr.addColorStop(0,'rgb(255,255,255)');gr.addColorStop(.7,'rgb(236,238,240)');gr.addColorStop(1,'rgb(176,178,180)');x.fillStyle=gr;x.fillRect(0,0,128,Hp);x.globalCompositeOperation='source-over';
   const d=x.getImageData(0,0,128,Hp).data,gain=opt.gain||1.05,m=opt.rgb||[1,1,1];
   for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,d[i]*gain*m[0]);d[i+1]=Math.min(255,d[i+1]*gain*m[1]);d[i+2]=Math.min(255,d[i+2]*gain*m[2])}
-  const id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;const gid=KH_NEXT_GID++;T_TILE[gid]=id;
+  let em=null;   // a front (door, gate, arch) is partly self lit, so that it stays readable in the stormlight and at dusk: a dim copy of the picture is added after the lighting
+  if(opt.fac&&opt.emit!==0){const k=opt.emit||.42;em=new Uint8ClampedArray(d.length);for(let i=0;i<d.length;i+=4){em[i]=d[i]*k;em[i+1]=d[i+1]*k;em[i+2]=d[i+2]*k;em[i+3]=255}}
+  const id=addTex(d,em);TEX[id].h=Hp;TEX[id].wh=wh;const gid=KH_NEXT_GID++;T_TILE[gid]=id;
   {let r=0,g=0,b=0,n=0;for(let i=0;i<d.length;i+=4*37){r+=d[i];g+=d[i+1];b+=d[i+2];n++}(GY.col=GY.col||{})[gid]=[r/n|0,g/n|0,b/n|0]}
   return GY.tiles[key]=gid}
 /* ---- the creatures. hp is only a size (ordinary creatures take their health from the balance code); the four ghost-enemies are sized to the old boss formula so they come out at 15,000 to 20,000 health ---- */
@@ -55627,7 +55635,7 @@ function gyYardBuild(){
    for(const y of [33,37])dec('rose',65,y,{sc:.5})}
   // ---- the tomb and its plaza ----
   {const cx=GY_Y.crypt.x,cy=GY_Y.crypt.y;const cd=dec('crypt',cx,cy,{block:false,npc:'gyo_crypt'});if(cd)cd.sc=.0001;   // an unseen marker for the quest signs; the tomb itself is built into the ground below
-   {const mk=i=>gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i,n:3},gain:1.0}),dg=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:1,n:3},gain:1.0,rgb:[1,1,1.00099]});   // the tomb's own door tile (the Avenue fronts use the plain middle slice and must not share it)
+   {const mk=i=>gyTile('texGrey_0',3.4,{fac:{img:'f_gothic',i,n:3,fit:1},gain:1.0}),dg=gyTile('texGrey_0',3.4,{fac:{img:'f_gothic',i:1,n:3,fit:1},gain:1.0,rgb:[1,1,1.00099]});   // the tomb's own door tile (the Avenue fronts use the plain middle slice and must not share it)
     KH_DOOR[dg]={lvl:GY.CRYPT,get at(){return {x:GY_C.start.x,y:GY_C.start.y,f:GY_C.start.f}},gy:'crypt'};
     for(const [x,t] of [[cx-1,mk(0)],[cx,dg],[cx+1,mk(2)]]){rows[cy][x]=ch(t);block[cy*W+x]=1}}   // a solid front of vine-grown stone with its door in the middle: walk up and press on to go down
    for(const [dx,dy] of [[-4,2],[4,2],[-4,8],[4,8],[0,10]])lamp(cx+dx,cy+dy);
@@ -55670,10 +55678,10 @@ function gyYardBuild(){
      else if(dmin>=3&&r<.55)DB(TR[(hs(x,y,36)*TR.length)|0],x,y,{sc:.95+hs(x,y,37)*.4})}}
   // ---- THE AVENUE OF VAULTS (north east): a cobbled lane between two rows of tomb fronts, under an arch ----
   {pth(51,9,53,34,'5');
-   for(let y=11;y<=33;y++)for(const x of [50,54]){let gid=gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:(y+(x===54?1:0))%3,n:3},gain:1.0});
+   for(let y=11;y<=33;y++)for(const x of [50,54]){let gid=gyTile('texGrey_0',3.4,{fac:{img:['f_vault','f_classical','f_gothic'][(((y-11)/3)|0)%3],i:(y-11)%3,n:3,fit:1},gain:1.0});
      if(x===50&&y===22){gid=gyTile('texGrey_0',3.4,{fac:{img:'stairFix_0',i:0,n:1},gain:1.0,rgb:[1,1,1.00042]});KH_DOOR[gid]={lvl:542,get at(){return {x:3,y:9,f:1}},gy:'avenue'}}   // one of the tomb fronts is a stair down to the vaults beneath the Avenue
      rows[y][x]=ch(gid);block[y*W+x]=1;path.add(x+','+y)}
-   for(let x=51;x<=53;x++){rows[9][x]=ch(gyTile('texGrey_0',3.4,{fac:{img:'gatesC_4',i:x-51,n:3},gain:1.0,rgb:[1,1,1+(x-51)*.00007]}));block[9*W+x]=1}   // the closed north end of the Avenue: a plain stone front, not a black void
+   for(let x=51;x<=53;x++){rows[9][x]=ch(gyTile('texGrey_0',3.4,{fac:{img:'f_vault',i:x-51,n:3,fit:1},gain:1.0,rgb:[1,1,1+(x-51)*.00007]}));block[9*W+x]=1}   // the closed north end of the Avenue: a plain stone front, not a black void
    dec('arch',52,10,{sc:1.45});for(const x of [51,53])for(const y of [18,26])lamp(x,y);
    for(const y of [14,22,30]){if(free(52,y)&&false)dec('lantern',52,y)}
    for(const y of [12,19,27])for(const x of [49,55]){if(free(x,y))DB(['ltree20','ltree21','ltree12'][(hs(x,y,38)*3)|0],x,y,{sc:1.1})}}
@@ -55685,7 +55693,7 @@ function gyYardBuild(){
   for(const g of GY_Y.doors){
     {const md=dec(g.pic,g.x,g.y,{block:false,npc:'gyo_door'+g.k});if(md)md.sc=.0001;   // an unseen marker for the quest signs
      const kind=['red','grey','black','pale'][g.k],[nw,wh]=GY_ENTRY[kind],id=GY.M[g.k],half=(nw-1)/2;IMG['gyp_entry_'+kind]=gyEntryPic(kind);
-     for(let q=0;q<nw;q++){const x=g.x-half+q,gid=gyTile('texGrey_0',wh,{fac:{img:'entry_'+kind,i:q,n:nw},gain:1.0,rgb:[1,1,1+(g.k*8+q)*.00001]});
+     for(let q=0;q<nw;q++){const x=g.x-half+q,gid=gyTile('texGrey_0',wh,{fac:kind==='pale'?{img:'f_dungeongate',i:q,n:nw,fit:1,at:.34}:{img:'entry_'+kind,i:q,n:nw},gain:1.0,rgb:[1,1,1+(g.k*8+q)*.00001]});
        if(q===half)KH_DOOR[gid]={lvl:id,get at(){if(!LEVELS[id]&&KH_LAZY[id])KH_LAZY[id]();const st=LEVELS[id].start;return {x:st.x,y:st.y,f:st.f}},gy:'mazedoor',k:g.k};
        rows[g.y][x]=ch(gid);block[g.y*W+x]=1}   // a built front five tiles wide (three for the trapdoor) with the door in the middle: solid, you go in by walking up and pressing on
      const fy=g.y+(g.y<35?1:-1);
@@ -55867,7 +55875,7 @@ KH_LAZY[GY.CRYPT]=gyCryptBuild;
    glow behind the bars; the Grey Charnel is a damp stair arch between two lengths of iron fence and lamps; the Black Barrow is a dark arch set in a grassy barrow between obelisks; the Pale Catacombs are
    the double wooden doors of a grassy mound between urns. gyEntryPic(kind) returns the canvas (kinds: red, grey, black, pale); GY_ENTRY says how many tiles wide and how tall each is.
    ========================================================================== */
-const GY_ENTRY={red:[5,3.4,'THE RED OSSUARY'],grey:[5,3.0,'THE GREY CHARNEL'],black:[5,3.0,'THE BLACK BARROW'],pale:[3,1.9,'THE PALE CATACOMBS'],gate:[5,3.0,'SAINT WENNA']};   // gate: the lych-gate of the yard (built by gy_yard.js)
+const GY_ENTRY={red:[5,3.4,'THE RED OSSUARY'],grey:[5,3.0,'THE GREY CHARNEL'],black:[5,3.0,'THE BLACK BARROW'],pale:[3,2.6,'THE PALE CATACOMBS'],gate:[5,3.0,'SAINT WENNA']};   // gate: the lych-gate of the yard (built by gy_yard.js)
 function gyEntryPic(kind){
   const K=GY._entry=GY._entry||{};if(K[kind])return K[kind];
   const [n,wh,title]=GY_ENTRY[kind],W=n*128,H=Math.round(wh*128),c=document.createElement('canvas');c.width=W*2;c.height=H*2;const x=c.getContext('2d');x.scale(2,2);x.imageSmoothingQuality='high';const I=k=>IMG['gyp_'+k],hs=(a,b,s)=>hash2(a,b,s+n*7);
@@ -55944,22 +55952,23 @@ function gyEntryPic(kind){
 /* The fronts of the six tombs in the yard are all different: each has its own stone and tint, its own ivy, a name plaque over the door, a pair of statues or urns (stat: left, right), a lamp colour, and a few extras (ext: [piece, along, deep, solid, scale]).
    The picture used for the front is the mausoleum (gatesC_4), the grassy barrow with its dark arch (stairFix_1) or the grassy mound with wooden doors (gatesC_3). */
 const GY_TSTYLE={
-  536:{tex:'texGrey_0',rgb:[.92,1,1.12],img:'gatesC_4',ivy:26,stat:['angel','angel'],sc:.95,lamp:[.5,1.05,1.45],pl:'VANE',ext:[['rose',-1,2,false,.55],['rose',1,2,false,.55],['bench',-3,3]]},
-  537:{tex:'texGrey_2',rgb:[1.12,1.02,.84],img:'gatesC_4',ivy:70,stat:['urn','urn'],sc:1,lamp:[1.55,1.0,.45],pl:'ASHBY',ext:[['bench',-2,3],['bench',2,3],['rose',-1,2,false,.55],['rose',1,2,false,.55]]},
-  538:{tex:'texBlack_1',rgb:[1.35,1.35,1.5],img:'gatesC_4',ivy:8,stat:['obelisk','obelisk'],sc:.9,lamp:[.85,.6,1.5],pl:'THORNE',ext:[['urn',-1,3,true],['urn',1,3,true]]},
-  539:{tex:'texBone_2',rgb:[.78,.92,.8],img:'stairFix_1',ivy:90,stat:['ccross','ccross'],sc:.95,lamp:[.45,1.3,.7],pl:'MARSH',ext:[['mound',-2,2,true,.8],['mound',2,2,true,.8],['web',-1,2]]},
-  540:{tex:'texRed_0',rgb:[1,.84,.78],img:'gatesC_3',ivy:44,stat:['column','column'],sc:.95,lamp:[1.55,.5,.34],pl:'COBB',ext:[['bench',2,3],['rose',-1,2,false,.55],['rose',1,2,false,.55]]},
-  541:{tex:'texGrey_4',rgb:[1,.94,1.14],img:'gatesC_4',ivy:56,stat:['angel','ccross'],sc:.9,lamp:[1.35,1.25,.95],pl:'FELL',ext:[['rose',-1,2,false,.55],['bench',-2,3],['urn',2,3,true]]}};
+  536:{tex:'texGrey_0',rgb:[.92,1,1.12],img:'f_gothic',ivy:26,stat:['angel','angel'],sc:.95,lamp:[.5,1.05,1.45],pl:'VANE',ext:[['rose',-1,2,false,.55],['rose',1,2,false,.55],['bench',-3,3]]},
+  537:{tex:'texGrey_2',rgb:[1.12,1.02,.84],img:'f_classical',ivy:70,stat:['urn','urn'],sc:1,lamp:[1.55,1.0,.45],pl:'ASHBY',ext:[['bench',-2,3],['bench',2,3],['rose',-1,2,false,.55],['rose',1,2,false,.55]]},
+  538:{tex:'texBlack_1',rgb:[1.35,1.35,1.5],img:'f_vault',ivy:8,stat:['obelisk','obelisk'],sc:.9,lamp:[.85,.6,1.5],pl:'THORNE',ext:[['urn',-1,3,true],['urn',1,3,true]]},
+  539:{tex:'texBone_2',rgb:[.78,.92,.8],img:'f_gothic',ivy:90,stat:['ccross','ccross'],sc:.95,lamp:[.45,1.3,.7],pl:'MARSH',ext:[['mound',-2,2,true,.8],['mound',2,2,true,.8],['web',-1,2]]},
+  540:{tex:'texRed_0',rgb:[1,.84,.78],img:'f_classical',ivy:44,stat:['column','column'],sc:.95,lamp:[1.55,.5,.34],pl:'COBB',ext:[['bench',2,3],['rose',-1,2,false,.55],['rose',1,2,false,.55]]},
+  541:{tex:'texGrey_4',rgb:[1,.94,1.14],img:'f_vault',ivy:56,stat:['angel','ccross'],sc:.9,lamp:[1.35,1.25,.95],pl:'FELL',ext:[['rose',-1,2,false,.55],['bench',-2,3],['urn',2,3,true]]}};
 /* one tile of a tomb front (0 left, 1 door, 2 right): the stone, the front picture, ivy hanging from the top and growing from the foot, and over the door the name plaque */
 function gyTombTile(T,st,i){
-  return gyTile(st.tex,3.4,{fac:{img:st.img,i,n:3},gain:1.0,rgb:st.rgb,tag:'tomb'+T.id+'_'+i,draw:(x,w,h)=>{
+  const pf=st.img.startsWith('f_'),mild=pf?st.rgb.map(v=>1+(v-1)*.35):st.rgb;   // a painted front keeps its own colours: only a light tint of the tomb's stone
+  return gyTile(st.tex,3.4,{fac:{img:st.img,i,n:3,fit:pf},gain:1.0,rgb:mild,tag:'tomb'+T.id+'_'+i,draw:(x,w,h)=>{
     const G=['#2a5a26','#3b7f31','#58a03e','#244c24','#6fb04a'],hs=(a,b,c)=>hash2(a,b,c+T.id*3+i*11);
-    const nv=Math.round(st.ivy/3);
+    const nv=Math.round(st.ivy/(pf?9:3));
     for(let k=0;k<nv;k++){const edge=i===0?hs(k,1,1)*.55:i===2?1-hs(k,1,1)*.55:hs(k,1,1),px=edge*w,top=hs(k,2,1)<.5,len=h*(top?(.08+hs(k,3,1)*.28):(.1+hs(k,3,1)*.3));
       let qx=px,qy=top?0:h;x.strokeStyle='#27481f';x.lineWidth=1.3+hs(k,4,1)*1.4;x.beginPath();x.moveTo(qx,qy);
       for(let t=1;t<=6;t++){qx+=(hs(k,t+5,2)-.5)*8;qy+=(top?1:-1)*len/6;x.lineTo(qx,qy)}x.stroke();
       for(let t=0;t<7;t++){x.fillStyle=G[(hs(k,t+9,3)*5)|0];x.beginPath();x.ellipse(px+(hs(k,t+20,4)-.5)*12,top?len*t/7:h-len*t/7,2.5+hs(k,t+30,5)*3.5,2+hs(k,t+40,5)*2,hs(k,t+50,6)*3,0,6.3);x.fill()}}
-    if(i===1){const pw=84,ph=17,px=(w-pw)/2,py=h*(st.img==='gatesC_4'?.405:.56);x.fillStyle='#24211d';x.fillRect(px,py,pw,ph);x.strokeStyle='#9a8858';x.lineWidth=1.4;x.strokeRect(px+1.5,py+1.5,pw-3,ph-3);
+    if(i===1){const pw=84,ph=17,px=(w-pw)/2,py=h*(pf?(st.img==='f_classical'?.335:.905):st.img==='gatesC_4'?.405:.56);x.fillStyle='#24211d';x.fillRect(px,py,pw,ph);x.strokeStyle='#9a8858';x.lineWidth=1.4;x.strokeRect(px+1.5,py+1.5,pw-3,ph-3);
       x.fillStyle='#e0d08e';x.font='bold 12px '+(typeof FTITLE!=='undefined'?FTITLE:'serif');x.textAlign='center';x.textBaseline='middle';x.fillText(st.pl,w/2,py+ph/2+.5)}}})}
 const GY_TOMB_NAMES={536:'The Vane Tomb',537:'The Ashby Vault',538:'The Thorne Mausoleum',539:'The Marsh Crypt',540:'The Cobb Vault',541:'The Fell Tomb'};
 function gyTombBuild(id){
@@ -63123,7 +63132,7 @@ function stlTable(){
 /* ==========================================================================
    FLYING CROWS. The Crow Swarm and the Carrion Crow of Blackbriar Wood (wwcrows, wwcrow) and the Carrion Raven of the graveyard and the Pale Catacombs
    (gyraven) are all creatures with fly:true, but their old pictures were crows STANDING with their feet on nothing. They now use painted
-   crows seen from the FRONT with their wings spread (assets/crow, made with Canva and cut by tools/crows/ingest_crows.py):
+   crows seen from the FRONT with their wings spread (assets/crow, made with Gemini and cut by tools/crows/ingest_crows.py):
      crow_0..2     one crow, wings up, wings level, wings down        (the Carrion Raven, and the old single crow)
      flock_0..2    five to seven crows at different sizes, three wing poses     (the Crow Swarm)
      carrion_0..3  a bigger, scruffier crow: wings up, level, down, and a dive with the wings swept wide (the Carrion Crow; the dive shows while it lunges)
@@ -63137,9 +63146,9 @@ const CROW={on:false,files:{crow:3,flock:3,carrion:4},got:{},rate:{crow:9,flock:
 /* span: width of the picture in squares (one square is about a person); body: where the body centre sits in the picture, from the top (0..1);
    rise: how high the BODY floats above the ground, in squares (about shoulder height is .75); */
 const CROW_KIND={
-  wwcrows:{set:'flock',span:1.55,body:.5,rise:.62,sh:.95},
-  wwcrow:{set:'carrion',span:1.4,body:.5,rise:.66,sh:.8},
-  gyraven:{set:'crow',span:.8,body:.5,rise:.66,sh:.7}};
+  wwcrows:{set:'flock',span:1.55,body:.576,rise:.62,sh:.95},
+  wwcrow:{set:'carrion',span:1.4,body:.71,rise:.66,sh:.8},
+  gyraven:{set:'crow',span:.8,body:.709,rise:.66,sh:.7}};
 function crowLoad(){
   if(CROW._started)return;CROW._started=true;
   const ver=typeof VERSION!=='undefined'?VERSION:'';
