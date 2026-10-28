@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.696';
+const VERSION='3.697';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -64926,7 +64926,7 @@ function saBuild(){
   const free=(x,y)=>x>2&&y>2&&x<69&&y<69&&rows[y][x]==='.'&&!block[y*W+x]&&!used.has(x+','+y)&&!isRoad(x,y);
   const dc=(k,x,y,o)=>{used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true,deco:true},o||{}))};
   const tryDc=(k,x,y,o)=>{if(k&&IMG[k]&&free(x,y)){dc(k,x,y,o);return true}return false};
-  const solidDc=(k,x,y,o)=>{if(k&&IMG[k]&&free(x,y)){dc(k,x,y,Object.assign({block:true,walk:false},o||{}));return true}return false};
+  const solidDc=(k,x,y,o)=>{if(k&&IMG[k]&&free(x,y)){const soft=/lantern|lamp|hedge|bush/.test(k)&&!(o&&(o.npc||o.solid));dc(k,x,y,soft?(o||{}):Object.assign({block:true,walk:false},o||{}));return true}return false}; // lamps and bushes are walk-through, as in the rest of the game
   const walk=(k,x,y,o)=>{used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true},o||{}))};
   const near=(x,y,rad)=>{for(let r=0;r<=rad;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(free(x+dx,y+dy))return [x+dx,y+dy]}return null};
   const person=(id,x,y,rad)=>{const kp=KH_KEEPERS[id];if(!kp)return null;const q=near(x,y,rad||3);if(!q)return null;walk(khFaceKey(kp.face),q[0],q[1],{npc:id,sc:kp.sc||1});SA.people.push([id,q[0],q[1]]);return q};
@@ -65843,6 +65843,7 @@ function blKit(spec){
   const pth=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){path.add(x+','+y);fm[y*W+x]=f||'1'}};C.pth=pth;
   /* things that stand about: dec = exactly there (if open); D = also not on a path; DB = solid version of D; DW = walk-through of D */
   const dec=(k,x,y,o)=>{o=o||{};if(!isOpen(x,y)||!k)return null;
+    if(o.block&&/lantern|lamp|hedge|bush/.test(k)&&!o.npc)o=Object.assign({},o,{block:false}); // lamps and bushes are walk-through, as in the rest of the game
     const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}
     if(o.block&&o.npc)d.solid=1;if(o.sc)d.sc=o.sc;if(o.npc){d.npc=o.npc;d.deco=false}if(o.i!==undefined)d.i=o.i;if(o.wd){d.wd=o.wd;d.pic=1}if(o.txt)d.txt=o.txt;if(o.bob!==undefined)d.bob=o.bob;
     if(o.ox!==undefined)d.ox=o.ox;if(o.oy!==undefined)d.oy=o.oy;
@@ -67087,6 +67088,7 @@ function vtHillBuild(){
   const pth=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){path.add(x+','+y);fm[y*W+x]=f||'2'}};
   const dec=(a,x,y,o)=>{o=o||{};const k=GYA[a]?'gy_'+a:a;if(!isOpen(x,y))return null;
     if(used.has(x+','+y)){const j=decor.findIndex(q=>q.x===x&&q.y===y);if(j>=0){if(decor[j].npc)return null;decor.splice(j,1)}}   // a piece put there on purpose takes the place of scenery that was scattered
+    if(o.block&&/lantern|lamp|hedge|bush/.test(k)&&!o.npc)o=Object.assign({},o,{block:false});   // lamps and bushes are walk-through
     const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}
     if(o.block&&o.npc)d.solid=1;if(o.sc)d.sc=o.sc;if(o.npc){d.npc=o.npc;d.deco=false}if(o.i!==undefined)d.i=o.i;if(o.wd)d.wd=o.wd;if(o.txt)d.txt=o.txt;if(o.ox!==undefined){d.ox=o.ox;d.oy=o.oy}decor.push(d);used.add(x+','+y);return d};
   const D=(a,x,y,o)=>free(x,y)&&!path.has(x+','+y)?dec(a,x,y,o):null,DB=(a,x,y,o)=>D(a,x,y,Object.assign({block:true},o||{}));

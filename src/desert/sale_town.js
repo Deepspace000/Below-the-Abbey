@@ -94,7 +94,7 @@ function saBuild(){
   const free=(x,y)=>x>2&&y>2&&x<69&&y<69&&rows[y][x]==='.'&&!block[y*W+x]&&!used.has(x+','+y)&&!isRoad(x,y);
   const dc=(k,x,y,o)=>{used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true,deco:true},o||{}))};
   const tryDc=(k,x,y,o)=>{if(k&&IMG[k]&&free(x,y)){dc(k,x,y,o);return true}return false};
-  const solidDc=(k,x,y,o)=>{if(k&&IMG[k]&&free(x,y)){dc(k,x,y,Object.assign({block:true,walk:false},o||{}));return true}return false};
+  const solidDc=(k,x,y,o)=>{if(k&&IMG[k]&&free(x,y)){const soft=/lantern|lamp|hedge|bush/.test(k)&&!(o&&(o.npc||o.solid));dc(k,x,y,soft?(o||{}):Object.assign({block:true,walk:false},o||{}));return true}return false}; // lamps and bushes are walk-through, as in the rest of the game
   const walk=(k,x,y,o)=>{used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true},o||{}))};
   const near=(x,y,rad)=>{for(let r=0;r<=rad;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(free(x+dx,y+dy))return [x+dx,y+dy]}return null};
   const person=(id,x,y,rad)=>{const kp=KH_KEEPERS[id];if(!kp)return null;const q=near(x,y,rad||3);if(!q)return null;walk(khFaceKey(kp.face),q[0],q[1],{npc:id,sc:kp.sc||1});SA.people.push([id,q[0],q[1]]);return q};

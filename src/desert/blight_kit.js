@@ -125,6 +125,7 @@ function blKit(spec){
   const pth=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){path.add(x+','+y);fm[y*W+x]=f||'1'}};C.pth=pth;
   /* things that stand about: dec = exactly there (if open); D = also not on a path; DB = solid version of D; DW = walk-through of D */
   const dec=(k,x,y,o)=>{o=o||{};if(!isOpen(x,y)||!k)return null;
+    if(o.block&&/lantern|lamp|hedge|bush/.test(k)&&!o.npc)o=Object.assign({},o,{block:false}); // lamps and bushes are walk-through, as in the rest of the game
     const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}
     if(o.block&&o.npc)d.solid=1;if(o.sc)d.sc=o.sc;if(o.npc){d.npc=o.npc;d.deco=false}if(o.i!==undefined)d.i=o.i;if(o.wd){d.wd=o.wd;d.pic=1}if(o.txt)d.txt=o.txt;if(o.bob!==undefined)d.bob=o.bob;
     if(o.ox!==undefined)d.ox=o.ox;if(o.oy!==undefined)d.oy=o.oy;
