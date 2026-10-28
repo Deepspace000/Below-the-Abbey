@@ -46,38 +46,42 @@ function wmnShape(l){
   return {parts:s.slice().sort((a,b)=>a[2]-b[2]),off,fi,ib:[l.x+x0,y0+off,l.x+x1,y1+off]}}
 
 /* ---------- the layout: pictures, then names ---------- */
-const WMN_REG=[['The Unknown Lands',476,-16,19],['The Known Lands',196,12,19],['The Sea Lands',652,16,19],['The Hollow Lands',-60,150,16],['The Western Reaches',-300,64,19],['The Far West',-760,100,19],['The Grey Downs',-560,250,15],['The Eastern Lands',1230,16,19]];
+const WMN_REG=[['The Unknown Lands',476,-16,19],['The Known Lands',196,12,19],['The Sea Lands',652,16,19],['The Hollow Lands',-60,150,16],['The Western Reaches',-300,64,19],['The Far West',-760,100,19],['The Grey Downs',-575,176,15],['The Eastern Lands',1230,16,19]];
 const wmnHit=(a,b)=>a[0]<b[2]&&a[2]>b[0]&&a[1]<b[3]&&a[3]>b[1];
+/* spreading the places: each place, with its name under it, is a box; boxes that touch are pushed apart (a little at a time, never far from the place's own spot) until none overlap */
+function wmnSpread(){
+  const c=ctx,B=[],M=3,MAXD=80;
+  for(const l of WORLD_LOCS){if(l._x0===undefined){l._x0=l.x;l._y0=l.y}l.x=l._x0;l.y=l._y0}
+  for(const l of WORLD_LOCS){const sh=wmnShape(l),big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle',nsz=big?7.6:6.6;
+    c.save();c.font=`bold ${nsz}px ${FUI}`;const w=c.measureText(l.n).width+(typeof locRating==='function'&&!G.flags.autoScaleOn?24:0);c.restore();
+    const a=sh.ib[0]-l.x,b=sh.ib[1]-l.y,e=sh.ib[2]-l.x,f=sh.ib[3]-l.y,sub=l.sub?9:0;
+    B.push({l,x0:Math.min(a,-w/2-2),y0:b,x1:Math.max(e,w/2+2),y1:f+12+sub+4})}
+  for(let it=0;it<400;it++){let moved=false;
+    for(let i=0;i<B.length;i++)for(let j=i+1;j<B.length;j++){const p=B[i],q=B[j];
+      const ox=Math.min(p.l.x+p.x1,q.l.x+q.x1)-Math.max(p.l.x+p.x0,q.l.x+q.x0)+M,oy=Math.min(p.l.y+p.y1,q.l.y+q.y1)-Math.max(p.l.y+p.y0,q.l.y+q.y0)+M;
+      if(ox<=0||oy<=0)continue;moved=true;
+      if(ox<oy){const d=ox/2+.1,s=(p.l.x+(p.x0+p.x1)/2)<=(q.l.x+(q.x0+q.x1)/2)?-1:1;p.l.x+=s*d;q.l.x-=s*d}
+      else{const d=oy/2+.1,s=(p.l.y+(p.y0+p.y1)/2)<=(q.l.y+(q.y0+q.y1)/2)?-1:1;p.l.y+=s*d;q.l.y-=s*d}
+      for(const r of [p,q]){r.l.x=Math.max(r.l._x0-MAXD,Math.min(r.l._x0+MAXD,r.l.x));r.l.y=Math.max(r.l._y0-MAXD,Math.min(r.l._y0+MAXD,r.l.y))}}
+    if(!moved)break}
+  for(const l of WORLD_LOCS){l.x=Math.round(l.x*2)/2;l.y=Math.round(l.y*2)/2}}
 function wmnLayout(){
   let fo=true;try{fo=!document.fonts||document.fonts.check("bold 10px 'IM Fell English SC'")}catch(e){}
   const key=(G.flags.autoScaleOn?1:0)+'|'+(fo?1:0)+'|'+WORLD_LOCS.length;if(WMN.lay&&WMN.layKey===key)return WMN.lay;
+  try{wmnSpread()}catch(e){console.error('spread',e)}
   const c=ctx,out={},placed=[],info=[];
   for(const [t,x,y,sz] of WMN_REG){c.save();c.font=`${sz}px ${FTITLE}`;const w=c.measureText(t).width+t.length*1.5+6;c.restore();placed.push([x-w/2,y-sz*.7,x+w/2,y+sz*.7])}
   for(const [t,x,y,sz] of WMN_SMALL){c.save();c.font=`italic ${sz}px ${FUI}`;const w=c.measureText(t).width;c.restore();placed.push([x-w/2-2,y-sz*.7,x+w/2+2,y+sz*.7])}
   for(const l of WORLD_LOCS){const sh=wmnShape(l);const lb=[sh.ib[0],sh.ib[1],sh.ib[2],sh.ib[3]-(sh.fi||0)];out[l.k]={sh,ib:sh.ib,lb,parts:sh.parts,off:sh.off};placed.push(lb)}
   const order=WORLD_LOCS.slice().sort((a,b)=>(b.ic==='castle'||b.ic==='town'||b.ic==='abbey'||b.ic==='orangecastle'?1:0)-(a.ic==='castle'||a.ic==='town'||a.ic==='abbey'||a.ic==='orangecastle'?1:0));
   for(const l of order){
-    const L=out[l.k],ib=L.lb,big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle',nsz=big?9:7.8;
+    const L=out[l.k],ib=L.lb,big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle',nsz=big?7.6:6.6;
     const lr=(!G.flags.autoScaleOn&&typeof locRating==='function')?locRating(l):null,t2=lr?'Lv '+lr:'';
-    c.save();c.font=`bold ${nsz}px ${FUI}`;const w1=c.measureText(l.n).width;c.font=`bold 7px ${FUI}`;const w2=lr?c.measureText(t2).width:0;c.font=`bold 6.6px ${FUI}`;const sw=l.sub?c.measureText(l.sub).width:0;c.restore();
+    c.save();c.font=`bold ${nsz}px ${FUI}`;const w1=c.measureText(l.n).width;c.font=`bold 6px ${FUI}`;const w2=lr?c.measureText(t2).width:0;c.font=`bold 6px ${FUI}`;const sw=l.sub?c.measureText(l.sub).width:0;c.restore();
     const gap=lr?4:0,wt=w1+gap+w2,bw=Math.max(wt,sw),sub=l.sub?9:0,ym=(ib[1]+ib[3])/2;
-    // every spot round the picture where the name could stand: under it, over it, beside it, each a few steps further out. The clear spot nearest to the picture wins
-    // (the gap between the name and the picture is what counts; under is preferred a little). The block keeps 7 free under the name for the quest dots; a spot that has no room
-    // for those still counts, a little behind (the dots may then sit on whatever is there).
-    const cands=[];
-    for(const strip of [6,0]){const H=12+sub+strip;
-      for(const [side,bias] of [['b',0],['r',1.5],['l',1.5],['t',3]])for(let k=-4;k<=4;k++)for(let step=0;step<10;step++){
-        let cx,ny;
-        if(side==='b'){cx=l.x+k*bw*.22;ny=ib[3]+6.5+step*3.5}else if(side==='t'){cx=l.x+k*bw*.22;ny=ib[1]-7-sub-strip-step*3.5}
-        else if(side==='r'){cx=ib[2]+3+bw/2+step*3.5;ny=ym-sub/2+k*6}else{cx=ib[0]-3-bw/2-step*3.5;ny=ym-sub/2+k*6}
-        const r=[cx-bw/2-2,ny-6,cx+bw/2+2,ny-6+H],gx=Math.max(0,r[0]-ib[2],ib[0]-r[2]),gy=Math.max(0,r[1]-ib[3],ib[1]-r[3]);
-        const own=Math.hypot(gx,gy);let near=1e9;                                   // a name must not stand nearer to another place's picture than to its own
-        for(const m of order)if(m!==l){const o=out[m.k].lb,hx=Math.max(0,r[0]-o[2],o[0]-r[2]),hy=Math.max(0,r[1]-o[3],o[1]-r[3]);near=Math.min(near,Math.hypot(hx,hy))}
-        cands.push({cx,ny,r,d:own+bias+Math.abs(k)*1.2+(strip?0:2.5)+(near<own+4?(own+4-near)*1.5+6:0)})}}
-    cands.sort((p,q)=>p.d-q.d);
-    let best=null,bestA=1e9;
-    for(const q of cands){let a=0;for(const p of placed){if(wmnHit(q.r,p)){const ox=Math.min(q.r[2],p[2])-Math.max(q.r[0],p[0]),oy=Math.min(q.r[3],p[3])-Math.max(q.r[1],p[1]);a+=ox*oy+1}}
-      if(a<bestA){bestA=a;best=q;if(!a)break}}
+    // the name always stands straight under its own picture, a little smaller, its top just over the bottom edge of the picture so that it is plainly attached to it
+    const ny=ib[3]+nsz/2-1.5,H=12+sub+6,best={cx:l.x,ny,r:[l.x-bw/2-2,ny-6,l.x+bw/2+2,ny-6+H]};let bestA=0;
+    for(const p of placed)if(p!==L.lb&&wmnHit(best.r,p))bestA++;
     placed.push(best.r);Object.assign(L,{cx:best.cx,ny:best.ny,rect:[best.r[0],best.r[1],best.r[2],best.r[1]+12+sub+6],w1,w2,gap,wt,t2,nsz,over:bestA>0});
   }
   WMN.lay=out;WMN.layKey=key;return out}
@@ -94,8 +98,8 @@ function wmnBlocked(x,y,d){const lay=wmnLayout(),m=d*.5+1.5;
 function wmnIco(l){const L=wmnLay(l);if(!L)return;const K=WMN_ICO_SCALE;for(const p of L.parts)wmnDraw(ctx,p[0],l.x+p[1]*K,p[2]*K+L.off,p[3]*K,!!p[4])}
 function wmnLabel(l,v,txtH){
   const L=wmnLay(l);if(!L||L.cx===undefined)return;const col=v?'#1c1208':'#5a4a30',xs=L.cx-L.wt/2;
-  if(L.t2){txtH(l.n,xs+L.w1/2,L.ny,L.nsz,col);txtH(L.t2,xs+L.w1+L.gap+L.w2/2,L.ny,7,'#7a1a10')}else txtH(l.n,L.cx,L.ny,L.nsz,col);
-  if(l.sub)txtH(l.sub,L.cx,L.ny+9,6.6,'#4a3a22')}
+  if(L.t2){txtH(l.n,xs+L.w1/2,L.ny,L.nsz,col);txtH(L.t2,xs+L.w1+L.gap+L.w2/2,L.ny,6,'#7a1a10')}else txtH(l.n,L.cx,L.ny,L.nsz,col);
+  if(l.sub)txtH(l.sub,L.cx,L.ny+8,6,'#4a3a22')}
 /* the quest dots stand in the strip left under each name */
 function wmnDots(l,nq,c){const L=wmnLay(l);if(!L||!L.rect)return;
   for(let i=0;i<nq;i++){const row=(i/14)|0,inRow=Math.min(14,nq-row*14),col=i%14;c.beginPath();c.arc(L.cx+(col-(inRow-1)/2)*3.4,L.rect[3]-4+row*3.4,1.15,0,TAU);c.fill();c.stroke()}}

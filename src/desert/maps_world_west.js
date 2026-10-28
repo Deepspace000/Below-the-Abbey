@@ -377,7 +377,7 @@ function wmwAtlasData(){
 /* the paged flow: groups fill columns, two columns to a page */
 /* sorting: by area (the groups as they are), or every place in one list from the lowest level to the highest, or the reverse; places with no level come last */
 const WMW_SORTS=['area','low','high'],WMW_SORTN={area:'By area',low:'Low to high',high:'High to low'};
-function wmwRowLevel(r){const ids=Array.isArray(r[0])?r[0]:[r[0]];let lo=1e9;for(const v of ids){const q=LEVEL_RATING[v];if(q!==undefined&&q<lo)lo=q}return lo<1e9?lo:null}
+function wmwRowLevel(r){const ids=Array.isArray(r[0])?r[0]:[r[0]];let lo=1e9;for(const v of ids){const q=LEVEL_RATING[v];if(q!==undefined&&q<lo)lo=q}return lo<1e9?lo:(r[3]?parseInt(r[3])||null:null)}
 function wmwAtlasView(){
   const D=wmwAtlasData(),m=(typeof G!=='undefined'&&G.wAtlasSort)||'area';
   if(m==='area'){ // the groups in the order of their lowest level, and the rows of each group in level order (places with no level last)
@@ -433,7 +433,7 @@ function wmwAtlasDraw(){
       c.font=`10px ${FTITLE}`;c.textAlign='left';c.textBaseline='middle';c.fillStyle='#2a3f8a';c.fillText(g.t,X+(g.sw?16:0),y+5);y+=12;
       c.strokeStyle='rgba(42,26,12,.55)';c.lineWidth=.5;c.beginPath();c.moveTo(X,y-1.5);c.lineTo(X+W,y-1.5);c.stroke();
       for(const r of g.rows){const ids=Array.isArray(r[0])?r[0]:[r[0]],nm=r[1]||(ids.length?WMW_LEVELNAME(ids[0]):'');
-        const auto=ids.some(visit),rt=rate(ids),idt='',key=ids.length?String(ids[0]):'n:'+nm,Fv=G.flags.atlasV||{},Fc=G.flags.atlasC||{},seenAny=auto||!!Fv[key],done=!!Fc[key];
+        const auto=ids.some(visit),rt=rate(ids)||r[3]||'',idt='',key=ids.length?String(ids[0]):'n:'+nm,Fv=G.flags.atlasV||{},Fc=G.flags.atlasC||{},seenAny=auto||!!Fv[key],done=!!Fc[key];
         (G._atlAuto=G._atlAuto||{})[key]=auto;
         // two small boxes: seen (ticked by itself when the party has been there, or by hand) and done (by hand)
         for(const [bx,on,kind] of [[X,seenAny,'v'],[X+8.5,done,'c']]){c.fillStyle=on?(kind==='c'?'#6b8e3a':'#d8b040'):'rgba(255,248,226,.55)';c.fillRect(bx,y+.4,6,6);c.strokeStyle='rgba(42,26,12,.75)';c.lineWidth=.5;c.strokeRect(bx,y+.4,6,6);

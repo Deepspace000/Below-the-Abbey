@@ -164,3 +164,13 @@ const HGW4_BOAT=[{col:'#e08a2a',a:.3,sc:.5,flip:0,ox:-.22,bob:.03},{col:'#2bd0bc
   return r}}
 /* ---------- 5b. big fish keep their distance from the camera (the fish themselves are drawn in hgd_polish_e.js) ---------- */
 HGW4.fishMin=2.6;
+
+/* ---------- round 4 critic fixes (zones north and towns): the three darkest danger halls get a hanging lamp each, with a warm pool ---------- */
+{const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];const r=_b.apply(this,arguments);const L=LEVELS[HGD.ID];
+  if(!had&&L&&L._hgdp&&L.decor&&!L._hgr4)try{L._hgr4=1;const open=(x,y)=>L.rows[y]&&L.rows[y][x]==='.';
+    for(const nm of ['Beetle Row','The Bug Nest','Blue Bug Nest 2','The Lamp Clearing']){const z=L._hgdp.zones.find(q=>q.name===nm);if(!z)continue;let n=0;
+      for(let rr=0;rr<=6&&n<2;rr+=2)for(let dy=-rr;dy<=rr&&n<2;dy+=2)for(let dx=-rr;dx<=rr&&n<2;dx+=2){const x=z.x+dx,y=z.y+dy;if(!open(x,y)||L.decor.some(d=>d.x===x&&d.y===y&&(d.block||d.npc)))continue;
+        if(HGDPC.lights.some(q=>Math.hypot(q.x-x,q.y-y)<3))continue;
+        L.decor.push({k:'hgt_hanglamp',x,y,block:false,walk:true,deco:true,sc:1,cl:1});L.lights=L.lights||[];L.lights.push([x,y]);HGDPC.lights.push({x,y,col:[1,.78,.45],kI:.95,r2:64});n++}}}
+  catch(e){console.error('hgr4 lights',e)}
+  return r}}

@@ -98,7 +98,7 @@ function mpGreendaleDraw(c,x,L,api){
   for(const d of L.decor||[]){const a=cx(d.x),b=cy(d.y);
     if(d.k==='deer')mpGreendaleDeer(x,a,b,(d.sc||1)*1.05,hash2(d.x,d.y,5)<.5);
     else if(d.k==='rabbits'){mpGreendaleRabbit(x,a-2,b,.9);mpGreendaleRabbit(x,a+2.5,b+1.5,.75)}
-    else if(d.k==='greensign')mpGreendaleSign(x,a,b,1);
+    else if(d.k==='greensign'||/^spt_gd/.test(d.k))mpGreendaleSign(x,a,b,1);
     else if(d.k==='mossstone'){x.fillStyle='#8a9a86';x.strokeStyle=MPL.INK;x.lineWidth=.8;x.beginPath();x.moveTo(a-3,b+3);x.lineTo(a-3.4,b-3);x.quadraticCurveTo(a,b-8,a+3.4,b-3);x.lineTo(a+3,b+3);x.closePath();x.fill();x.stroke();x.fillStyle='#5a9a52';x.beginPath();x.arc(a-2,b-1,1.4,0,6.3);x.arc(a+2.2,b+1,1.1,0,6.3);x.fill();MPLI.star(x,a,b-3,.7,MPL.GOLD)}
     else if(d.k==='lamp'){x.fillStyle=MPL.GOLD2;x.strokeStyle=MPL.INK;x.lineWidth=.5;x.beginPath();x.arc(a,b-1,1.5,0,6.3);x.fill();x.stroke();x.beginPath();x.moveTo(a,b);x.lineTo(a,b+3);x.stroke()}}
   /* the hidden door, the gates */

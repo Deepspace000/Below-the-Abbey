@@ -7,7 +7,7 @@ URL = 'http://localhost:%s/index.html?town=graveyard&lvl=84&v=%d' % (PORT, time.
 
 def boot(p, w=900, h=600):
     prof = os.path.join(os.environ.get('TEMP', '.'), 'gyfronts_profile')
-    b = p.chromium.launch_persistent_context(prof, args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader'], viewport={'width': w, 'height': h})
+    b = p.chromium.launch_persistent_context(prof, executable_path=os.environ.get('BTA_CHROME'), args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader'], viewport={'width': w, 'height': h})
     pg = b.pages[0] if b.pages else b.new_page()
     errs = []
     pg.on('pageerror', lambda e: errs.append('PAGE ' + str(e)))

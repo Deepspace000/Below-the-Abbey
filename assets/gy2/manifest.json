@@ -1,12 +1,27 @@
 {
  "f_gothic": {
   "file": "f_gothic.webp",
-  "w": 256,
-  "h": 374
+  "w": 638,
+  "h": 893
  },
  "f_classical": {
   "file": "f_classical.webp",
-  "w": 372,
-  "h": 356
+  "w": 640,
+  "h": 875
+ },
+ "f_vault": {
+  "file": "f_vault.webp",
+  "w": 625,
+  "h": 843
+ },
+ "f_dungeongate": {
+  "file": "f_dungeongate.webp",
+  "w": 640,
+  "h": 852
+ },
+ "f_redgate": {
+  "file": "f_redgate.webp",
+  "w": 714,
+  "h": 662
  }
 }

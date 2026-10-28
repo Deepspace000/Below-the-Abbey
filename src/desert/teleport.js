@@ -35,6 +35,7 @@ const TELE_KEEP_HI=new Set([6074,6136,6147,6169,6176,6223,6250,6255,6700,6701,67
 function teleWanted(n,L){
   L=L||LEVELS[n];
   if(n>=400&&n<=423)return true;            // the Pilgrim’s Path (hidden stones and the cliff stone) is always kept, built or not
+  if(n>=9600&&n<=9709)return false;         // the Blighted Road has no stones at all: the party walks it
   if(L&&L.noTele)return false;
   if(TELE_NONE.has(n))return false;
   if(n>=1000&&n<13200)return TELE_KEEP_HI.has(n);

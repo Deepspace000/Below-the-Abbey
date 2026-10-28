@@ -47,10 +47,12 @@ function gyIvy(){
     x.globalAlpha=1;GY._ivy[a]=c;IMG['gy_'+a]=c}catch(e){console.error('gyIvy',a,e)}}}
 /* cobwebs are drawn faint and fine: the painted web at half strength */
 function gyWeb(){const s=IMG.gyp_bonesH_1;if(!s)return;if(!GY._web){const c=document.createElement('canvas');c.width=s.width;c.height=s.height;const x=c.getContext('2d');x.globalAlpha=.5;x.drawImage(s,0,0);GY._web=c}IMG.gy_web=GY._web}
+const GY_FRONTS=['gothic','classical','vault','dungeongate','redgate'];   // assets/gy2/f_<name>.webp, cut by tools/gy_fronts/ingest.py
 function gyLoad(){
   if(GY.loading)return GY.loading;
   GY.loading=new Promise(res=>{
     const jobs=Object.keys(typeof GY_LIST!=='undefined'?GY_LIST:{}).map(k=>[k,'assets/gy/'+GY_LIST[k][0]]);
+    for(const k of GY_FRONTS)jobs.push(['f_'+k,'assets/gy2/f_'+k+'.webp']);   // the painted crypt fronts and the dungeon gate
     let left=jobs.length;if(!left){GY.ready=true;res();return}
     const done=()=>{if(--left<=0){try{gyAlias()}catch(e){console.error(e)}GY.ready=true;res()}};
     for(const [k,src] of jobs){if(IMG['gyp_'+k]){done();continue}const i=new Image();i.onload=()=>{IMG['gyp_'+k]=i;done()};i.onerror=()=>done();i.src=src+'?v='+(typeof VERSION!=='undefined'?VERSION:'')}
@@ -114,17 +116,23 @@ function gyFloorWet(out,src,tint,seed){
   FLOORS[out]=d;return out}
 /* wall tiles: a painted texture stood up into a tall tile (stacked, each copy slid sideways), or one slice of a big front picture */
 function gyTile(tex,wh,opt){
-  opt=opt||{};const key=tex+'|'+wh+'|'+(opt.fac?opt.fac.img+opt.fac.i+'/'+opt.fac.n:'')+(opt.rgb?opt.rgb.join(','):'')+(opt.gain||'')+(opt.tag||'');if(GY.tiles[key]!==undefined)return GY.tiles[key];
+  opt=opt||{};const key=tex+'|'+wh+'|'+(opt.fac?opt.fac.img+opt.fac.i+'/'+opt.fac.n+(opt.fac.fit?'f'+(opt.fac.at||''):''):'')+(opt.rgb?opt.rgb.join(','):'')+(opt.gain||'')+(opt.tag||'');if(GY.tiles[key]!==undefined)return GY.tiles[key];
   const im=IMG['gyp_'+tex],Hp=Math.round(128*wh),c=document.createElement('canvas');c.width=128;c.height=Hp;const x=c.getContext('2d');
   x.fillStyle='#14120f';x.fillRect(0,0,128,Hp);
   if(im){const units=Math.ceil(wh);for(let u=0;u<units;u++){const y=Hp-(u+1)*128,sh=((u*.37+(tex.length%5)*.11)%1)*128;
       x.save();if(u%2){x.translate(128,0);x.scale(-1,1)}for(const dx of [-sh,128-sh])x.drawImage(im,0,0,im.width,im.height,dx,y,128,128);x.restore()}}
-  if(opt.fac){const f=IMG['gyp_'+opt.fac.img];if(f){const n=opt.fac.n,i=opt.fac.i,s=n*128/f.width,fh=f.height*s,sw=f.width/n;x.imageSmoothingQuality='high';x.drawImage(f,i*sw,0,sw,f.height,0,Hp-fh,128,fh)}}
+  if(opt.fac&&opt.fac.fit){const f=IMG['gyp_'+opt.fac.img];if(f){   // a painted front fitted by height (whole piece on n tiles, centred or with the point 'at' (0..1 across the piece) on the middle of the n tiles), cut into n slices; the stone shows round it
+      const n=opt.fac.n,fk=opt.fac.img+'|'+n+'|'+Hp+'|'+(opt.fac.at||0);const F=GY._fit=GY._fit||{};
+      if(!F[fk]){const sc=Hp/f.height,fw=f.width*sc,cv=document.createElement('canvas');cv.width=n*128;cv.height=Hp;const cx=cv.getContext('2d');cx.imageSmoothingQuality='high';cx.drawImage(f,n*64-(opt.fac.at||.5)*fw,0,fw,Hp);F[fk]=cv}
+      x.drawImage(F[fk],opt.fac.i*128,0,128,Hp,0,0,128,Hp)}}
+  else if(opt.fac){const f=IMG['gyp_'+opt.fac.img];if(f){const n=opt.fac.n,i=opt.fac.i,s=n*128/f.width,fh=f.height*s,sw=f.width/n;x.imageSmoothingQuality='high';x.drawImage(f,i*sw,0,sw,f.height,0,Hp-fh,128,fh)}}
   if(opt.draw)try{opt.draw(x,128,Hp)}catch(e){console.error('gyTile draw',e)}   // paint more on the tile (a plaque, ivy, candles in a niche) before the shading
   x.globalCompositeOperation='multiply';const gr=x.createLinearGradient(0,0,0,Hp);gr.addColorStop(0,'rgb(255,255,255)');gr.addColorStop(.7,'rgb(236,238,240)');gr.addColorStop(1,'rgb(176,178,180)');x.fillStyle=gr;x.fillRect(0,0,128,Hp);x.globalCompositeOperation='source-over';
   const d=x.getImageData(0,0,128,Hp).data,gain=opt.gain||1.05,m=opt.rgb||[1,1,1];
   for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,d[i]*gain*m[0]);d[i+1]=Math.min(255,d[i+1]*gain*m[1]);d[i+2]=Math.min(255,d[i+2]*gain*m[2])}
-  const id=addTex(d,null);TEX[id].h=Hp;TEX[id].wh=wh;const gid=KH_NEXT_GID++;T_TILE[gid]=id;
+  let em=null;   // a front (door, gate, arch) is partly self lit, so that it stays readable in the stormlight and at dusk: a dim copy of the picture is added after the lighting
+  if(opt.fac&&opt.emit!==0){const k=opt.emit||.42;em=new Uint8ClampedArray(d.length);for(let i=0;i<d.length;i+=4){em[i]=d[i]*k;em[i+1]=d[i+1]*k;em[i+2]=d[i+2]*k;em[i+3]=255}}
+  const id=addTex(d,em);TEX[id].h=Hp;TEX[id].wh=wh;const gid=KH_NEXT_GID++;T_TILE[gid]=id;
   {let r=0,g=0,b=0,n=0;for(let i=0;i<d.length;i+=4*37){r+=d[i];g+=d[i+1];b+=d[i+2];n++}(GY.col=GY.col||{})[gid]=[r/n|0,g/n|0,b/n|0]}
   return GY.tiles[key]=gid}
 /* ---- the creatures. hp is only a size (ordinary creatures take their health from the balance code); the four ghost-enemies are sized to the old boss formula so they come out at 15,000 to 20,000 health ---- */

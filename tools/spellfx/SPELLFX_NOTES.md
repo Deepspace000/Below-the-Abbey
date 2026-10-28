@@ -58,15 +58,11 @@ Nothing blocks the turn: the only delay is the 0.3 to 0.5 s the picture takes to
 (`sheet_fire.png`, `sheet_frost.png`, ...: one row per spell, six frames across the effect). The game loop is stepped by hand
 (`tools/spellfx/spellfx_lib.py`), so frames are captured at exact times after the cast.
 
-## Follow-up status (work paused by the owner)
+## Class animations added (28 Oct, later pass)
 
-Done: frost rebuilt as a full white and blue twin of the fireball (cold charge with falling ice motes, comet projectile, shattering crystal burst, icicle spikes on big hits,
-rime and crystals creeping over the foe, breath mist, ice crack and chime, blizzard streaks for area frost, lingering icy tint while a foe is chilled; a daze that is not frost shows
-orbiting stars instead). Weapon classes: every class power is now picked up (`spInfo` for all classes, `SPREG` entries for every current power, `spWeapon` fallback by class,
-power type and name for any new power: steel and deep blade strokes, crescent sweeps, smash with ground crack, bash, smite, fletched arrows that stick and fade, knives, net, scan, vanish).
-Sheets made and looked at: frost, thief, ranger (archer sheet written, not yet looked at).
+* New object kinds in spObjDraw: dagger (a point-down dagger drops onto the foe and stays in for a moment; used by SPIMP.steel and SPIMP.deep for Thief and Assassin), vcut (a great sword chopping straight down; used by SPIMP.smash for Warrior, Barbarian and the big smash powers), icecase (white and blue crystals close round the foe and crack apart; used by SPIMP.frost on big hits and for blizzards).
+* Ranger and Archer arrows are larger with a glowing head and big fletching; Arrow Rain and Arrow Storm drop seven arrows; long shots (Heartseeker, Killing Shot, Piercing, Perfect) add a shock ring and streaks on impact.
 
-Remaining: look at sheets for archer, warrior, barbarian, paladin, assassin, monk, goat, newcasters (`python tools/spellfx/spellfx_sheets.py <group>`, one browser at a time);
-check Hunter's Mark and the other weapon buffs in the hud region (the sheet script now switches to the hud view by itself); full-size look at arrow, frost and slash frames
-(`tools/spellfx/spellfx_frames.py`); re-run the coverage check against the final power table; measure frame time again. The page load was very slow under the machine load
-(the lib waits up to 400 s).
+## Paladin, Monk and Goat (elements hallow, ki, goat)
+
+Paladin: hammer slam (Smite, Righteous Blow twice), cross of light (Judgment), sun burst (Sunbrand). Monk: ki fists (palm, stun with dizzy stars, flurry hits via SPIMP.kihit), kick arcs, giant fist (Fist of the Mountain). Goat: ram horns and BONK/CRASH burst, hoof stomp, rock fall. The registry 4th field carries the variant (o.v). Check: python tools/spellfx/spellfx_sheets.py paladin monk goat. Objects added to spObjDraw: hammer rays cross fist hoof horns pow dizzy speed.

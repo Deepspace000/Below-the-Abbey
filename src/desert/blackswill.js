@@ -32,7 +32,7 @@ if(typeof MAIN_QUESTS!=='undefined')['bsw1','wk1','wk2','wk3'].forEach(id=>MAIN_
 if(typeof QNEXT!=='undefined'){QNEXT.wk1='wk2';QNEXT.wk2='wk3'}
 if(typeof QNOTE!=='undefined'){
   QNOTE.bsw1='The black water drains, and a grey light comes down through the rock.';
-  QNOTE.wk3='The road to the western kingdoms goes on from Wenlock, in the next part of the game.'}
+  QNOTE.wk3='The mayor says the road west is shut. He will tell you why once you have settled in.'}
 if(typeof QAREA_ORDER!=='undefined'&&!QAREA_ORDER.includes('The Western Kingdoms'))QAREA_ORDER.push('The Western Kingdoms');
 /* the hand-in hook the garden and Wenlock builders call (see wk_ids.js) */
 function bswQuestEnsure(id){if(qSt(id)===null){G.quests[id]={st:'active',ord:(G.flags.qSeq=(G.flags.qSeq|0)+1),base:0}}}
@@ -40,7 +40,7 @@ wkMet=function(what){
   const F=G.flags;try{
     if(what==='garden'&&!F.wkGarden){F.wkGarden=1;bswQuestEnsure('wk1');qTurnIn('wk1');if(qSt('wk2')===null)bswQuestEnsure('wk2')}
     else if(what==='wenlock'&&!F.wkWenlock){F.wkGarden=1;F.wkWenlock=1;bswQuestEnsure('wk1');qTurnIn('wk1');bswQuestEnsure('wk2');qTurnIn('wk2');if(qSt('wk3')===null)bswQuestEnsure('wk3')}
-    else if(what==='mayor'&&!F.wkMayor){F.wkGarden=1;F.wkWenlock=1;F.wkMayor=1;for(const id of ['wk1','wk2','wk3']){bswQuestEnsure(id);qTurnIn(id)}msg('The road to the western kingdoms goes on from Wenlock, in the next part of the game.','#ffe36a')}
+    else if(what==='mayor'&&!F.wkMayor){F.wkGarden=1;F.wkWenlock=1;F.wkMayor=1;for(const id of ['wk1','wk2','wk3']){bswQuestEnsure(id);qTurnIn(id)}msg('The mayor says the road west is shut. He will tell you why once you have settled in.','#ffe36a')}
   }catch(e){console.error('wkMet',e)}};
 /* ---------- the story pages ---------- */
 STORY.push(
@@ -49,9 +49,9 @@ STORY.push(
   {id:'wkgate',c:()=>qSt('wk1')!==null||G.flags.bswDead,t:'The Gate in the Atrium',x:'In the north wall of the atrium a tall gate stood open that nobody had seen before: dark stone, wrought iron, and beyond it a gravel path between green hedges in full sun. Aldous Wend was waiting at its foot. The gate leads out of the Hollow Lands, to the western kingdoms, and the first thing beyond it is the Maze of Gardens.'},
   {id:'wkmaze',c:()=>G.flags.wkGate||G.flags.wkGarden,t:'The Maze of Gardens',x:'Beyond the gate lay a maze of tall, clipped hedges, rose arbours, wisteria tunnels, fountains and lily ponds, all in warm light and birdsong. Nothing in it is hostile. The way through winds a long time between the hedges, and the party followed it to the far end.'},
   {id:'wenlock',c:()=>G.flags.wkWenlock,t:'Wenlock',x:'The far end of the gardens opened on Wenlock, a peaceful town of stone and timber cottages with flower boxes, a market square with a fountain, an inn, a church and a green. It is the first town of the western kingdoms.'},
-  {id:'wkmayor',c:()=>G.flags.wkMayor,t:'The Mayor of Wenlock',x:'The party spoke to the mayor of Wenlock, who welcomed them. The road to the western kingdoms goes on from here, in the next part of the game.'});
+  {id:'wkmayor',c:()=>G.flags.wkMayor,t:'The Mayor of Wenlock',x:'The party spoke to the mayor of Wenlock, who welcomed them. The road west out of Wenlock is shut.'});
 {const _sn=storyNext;storyNext=function(){const F=G.flags;
-  if(F.wkMayor)return 'You have met the mayor of Wenlock. The road to the western kingdoms goes on in the next part of the game.';
+  if(F.wkMayor)return 'You have met the mayor of Wenlock. The road west out of Wenlock is shut.';
   if(F.wkWenlock)return 'Speak to the mayor of Wenlock.';
   if(F.wkGarden)return 'Walk into Wenlock, the town at the far end of the garden.';
   if(F.wkGate)return 'Walk the Maze of Gardens to its far end. The town of Wenlock lies beyond.';

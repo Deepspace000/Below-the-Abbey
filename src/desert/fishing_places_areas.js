@@ -69,13 +69,12 @@ fplDef(470,c=>{fplLakes(c,{n:5,seed:71,rx:[3.4,4.6],ry:[2.4,3.2],margin:7,tol:.5
 /* the Deeper Hollow (475) and the Underlevel (476): spots along the edges of the dark waters, deep water */
 fplDef(475,c=>{c.windows({max:12,step:14,water:'deep',seed:75});c.shore({step:7,max:10,water:'deep',seed:75})});
 fplDef(476,c=>{c.shore({step:8,max:30,water:'deep',seed:76})});
-/* Greendale (32): a small lake in the east meadow, a rowing boat, and a little plank jetty */
+/* Greendale (32): a small lake in the east meadow beyond the plots (the large and medium for-sale houses stand at x 42 to 49, so the lake is a two-row pond at x 56 to 62 with a walkable north bank) and a rowing boat */
 fplDef(32,c=>{
-  const cells=c.ellipse(47,10.5,3.3,2,17).filter(([x,y])=>!(x===47&&y<=10));
+  c.clear(55,8,62,8);   // the north bank is walkable, so the pond never cuts the east end off
+  const cells=c.ellipse(59,9.5,3.2,1.25,17);
   if(!c.lake(cells,{floor:'water'}))return;
-  c.jetty(47,8,0,1,3);
-  c.stand(47,10,-1,0);c.stand(47,10,1,0);c.edgeStand(cells,'W',11);c.edgeStand(cells,'E',11);
+  c.edgeStand(cells,'N',58);c.edgeStand(cells,'N',60);c.edgeStand(cells,'W',9);
   fplBank(c,{seed:43});
-  c.deco('yar_boat_row',50,12,{block:false,walk:false,sc:1.1,force:1});
-  c.deco('bench',45,7,{block:true,walk:false});c.deco('pt_willow',51,8,{sc:1.2});
+  c.deco('yar_boat_row',60,10,{block:false,walk:false,sc:1.1,force:1});
 });

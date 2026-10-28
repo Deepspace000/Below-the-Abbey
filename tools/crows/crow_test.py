@@ -15,12 +15,12 @@ SETUP = """([t,d,hurt])=>{
     window.__spot=best}
   const [x,y,f]=window.__spot;G.enemies=G.enemies.filter(q=>false);
   G.P.x=x;G.P.y=y;G.P.f=f;G.P.angT=(f-1)*Math.PI/2;G.C={x,y,a:G.P.angT};
-  addEnemy(t,x+DX[f]*d,y+DY[f]*d,false);const e=G.enemies[G.enemies.length-1];e.chilled=99999;e.alert=false;
+  addEnemy(t,x+DX[f]*d,y+DY[f]*d,false);const e=G.enemies[G.enemies.length-1];e.alert=false;
   if(hurt){e.hp=Math.max(1,Math.round(e.maxhp*hurt))}
   G.msgs=[];G.lvlBanners.length=0;G.talk=null;return [window.__spot,e.t,e.hp,e.maxhp,ENEMY_DEF[t].img,ENEMY_DEF[t].w,ENEMY_DEF[t].floatH,typeof CROW!=='undefined'&&CROW.on]}"""
 
 def boot(p, url):
-    b = p.chromium.launch(args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader'])
+    b = p.chromium.launch(executable_path=os.environ.get('BTA_CHROME'),args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader'])
     pg = b.new_page(viewport={'width': 900, 'height': 640})
     errs = []
     pg.on('pageerror', lambda e: errs.append('PAGE ' + str(e)))

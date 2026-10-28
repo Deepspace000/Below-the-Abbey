@@ -7,7 +7,7 @@ os.makedirs(OUT, exist_ok=True)
 URL = 'http://localhost:%s/index.html?town=oldhaven&lvl=55&v=%d' % (PORT, time.time())
 
 def boot(p, w=960, h=640):
-    b = p.chromium.launch(args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader'])
+    b = p.chromium.launch(channel='chrome', args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader'])
     pg = b.new_page(viewport={'width': w, 'height': h})
     errs = []
     pg.on('pageerror', lambda e: errs.append('PAGE ' + str(e) + ' ' + str(getattr(e,'stack','') or '')[:400]))

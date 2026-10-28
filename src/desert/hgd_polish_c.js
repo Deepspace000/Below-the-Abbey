@@ -126,7 +126,7 @@ const HGDPC_BOARD=[ // lost, wanted, notice: one board in every town
 const HGDPC_VIG=[
  {title:'The Gardener\'s Rest',text:'Here stands Orrin Hedge, who trimmed the hedge of Hedgefoot for forty years. He was last seen trimming it from the inside. We think he is still at it.',p:[[0,0,'wm_statue',1,'b'],[-2,1,'hgtb_bench',1.1],[2,1,'urn',1],[-2,-1,'hgt_gardenlantern',1,'l'],[2,-1,'hgt_gardenlantern',1,'l'],[0,2,'noticeboard',.9,'n']]},
  {title:'The Bell of the Lost',text:'Ring once for every one the maze has kept. It has been rung 211 times. The rope wore through, so we ring it with a spoon. A scratch beside the bell says: the cairn pays its tithe to whoever kneels at the bell.',p:[[0,0,'wm_bell',1,'b'],[-2,0,'wm_brazier',1,'l'],[2,0,'wm_brazier',1,'l'],[-1,2,'hgtb_bench',1.1],[2,2,'urn',1],[0,-2,'hg_chestwax',1,'c'],[1,2,'noticeboard',.9,'n']]},
- {title:'The Honey Press',text:'Sticky, loud and strictly no tasting. A smaller notice beneath says: whoever tasted is still stuck.',p:[[0,0,'hgtb_stall_orange_pottery',.85],[-2,1,'wm_barrel_tall',1],[2,1,'hg_waxbarrel',1],[-1,2,'hg_jar',1],[2,-1,'hg_jar',.9],[-2,-1,'hl_p_candle',1,'l'],[0,2,'noticeboard',.9,'n']]},
+ {title:'The Honey Press',text:'Sticky, loud and strictly no tasting. A smaller notice beneath says: whoever tasted is still stuck.',p:[[0,0,'hpa_waxbarrel',1.7,'b'],[-2,0,'hg_hive',1],[2,0,'hg_hive',.8],[-2,2,'icn_hgcomb',.55],[2,2,'hg_jar',1],[-1,-2,'hl_p_candle',1,'l'],[1,-2,'hg_wax0',.8],[0,2,'noticeboard',.9,'n']]},
  {title:'The Pearl Fountain',text:'Throw one coin for luck. The keeper collects on Thursdays, whatever day it is.',p:[[0,0,'hgtb_deco_fountain',.95,'b'],[-2,1,'hgtb_bench',1.1],[2,1,'hgtb_bench',1.1],[-2,-1,'hgtb_deco_lanterns',.75,'l'],[1,-2,'hgt_pearlbush',1],[0,2,'noticeboard',.9,'n']]},
  {title:'The Old Well',text:'Forty fathoms deep. Do not drop anything you want back, and do not drop anything you do not. A mark by the stones says: look below the second crate.',p:[[0,0,'well',1,'b'],[-1,1,'wm_bucket',1],[-2,0,'wm_barrel',1],[2,0,'hg_jar',1],[2,2,'sacks',1],[0,-2,'hg_chestwax',1,'c'],[0,2,'noticeboard',.9,'n']]},
  {title:'The Lamplighters\' Post',text:'Two lamplighters, one ladder and forty years of disagreement. The ladder is winning.',p:[[0,0,'hgt_lamppost',.8,'bl'],[-2,1,'wm_lantern_gold',1,'l'],[2,1,'hgtb_lantern',.9,'l'],[-2,-1,'wm_crate',1],[2,-1,'hgtb_bench',1.1],[0,2,'noticeboard',.9,'n']]},
@@ -266,7 +266,7 @@ function hgdpcLetter(){let todo=0;
     else{x.lineWidth=Math.max(2,fs*.12);x.strokeStyle='rgba(20,12,6,.85)';x.strokeText(S.text,cx,cy);x.fillStyle='#ecd9a2';x.fillText(S.text,cx,cy)}
     IMG[k]=c;NPC_H[k]=NPC_H[k]||NPC_H[S.base]}
   return todo}
-{const _u=update;update=function(dt){if(!HGDPC.lettered){try{if(!hgdpcLetter())HGDPC.lettered=1}catch(e){HGDPC.lettered=1;console.error('hgdpc letter',e)}}return _u.apply(this,arguments)}}
+{const _u=update;update=function(dt){if(!HGDPC.lettered&&typeof LEVEL!=="undefined"&&LEVEL===HGD.ID){try{if(!hgdpcLetter())HGDPC.lettered=1}catch(e){HGDPC.lettered=1;console.error('hgdpc letter',e)}}return _u.apply(this,arguments)}}
 
 /* ==========================================================================
    ROUND 2 (towns): who stands where and looks like what, houses, church silhouettes, lettered signs, coloured light pools, one table of heights
@@ -303,7 +303,7 @@ const HGDPC_CH=[ // round 3: real painted fronts, no flattening tints (a gentle 
  {src:'icn_shrine_moor',h:2.7,f:'brightness(1.5) saturate(1.1)',glow:[[.5,.88,.2,'rgba(255,200,120,.55)']]},
  {src:'hg_house1',h:2.8,f:'sepia(.4) saturate(1.6) brightness(1.2)',glow:[[.27,.82,.07,'rgba(255,220,130,.9)'],[.73,.82,.07,'rgba(255,220,130,.9)']]},
  {src:'hgtb_shrine',h:2.5,f:'brightness(1.35) saturate(1.2)',glow:[[.5,.5,.3,'rgba(150,255,230,.35)']]},
- {src:'icn_shrine_sand',h:2.7,f:'brightness(1.5) saturate(1.2)',glow:[[.5,.8,.2,'rgba(255,205,120,.5)']]},
+ {src:'icn_shrine_golden',h:3.1,f:'brightness(1.55) saturate(1.2)',glow:[[.3,.97,.1,'rgba(255,210,130,.9)'],[.7,.97,.1,'rgba(255,210,130,.9)'],[.5,.3,.12,'rgba(255,215,140,.6)']]},
  {src:'hg_tower4',h:4.2,f:'brightness(1.3) saturate(1.2)',glow:[[.5,.9,.14,'rgba(200,230,255,.6)']]},
  {src:'hg_tower7',h:4.4,f:'brightness(1.3) saturate(1.15)',glow:[[.5,.93,.1,'rgba(255,215,255,.6)']]},
  {src:'icn_shrine_sut',h:2.7,f:'brightness(1.4) saturate(1.25)',glow:[[.5,.5,.25,'rgba(255,225,130,.45)']]}];
