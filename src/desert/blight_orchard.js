@@ -50,7 +50,7 @@ khNpc('bo_bartle','Bartle Cask, cider-maker','kh_ohfolk2_2',()=>yrLines('bo_bart
   'Forty autumns I pressed this orchard. White trees, red apples, a cider the king drank twice. Then the trees went white, and the apples went the shape of a head. I stopped pressing. A man has to draw the line somewhere, and I drew it at the teeth.',
   'The bell is the cause. It hangs in the Harvest Yard and tolls at dusk, and the pickers come down out of the rows with their baskets, and the skulls ripen. The Reaper-Farmer keeps it. He used to be Farmer Orrin. He took the Pale man’s wages, same as everyone.',
   'Do not drink what the orchard makes now. Do not let it near a cat. I tried. The cat looked at me for a week.']));
-khNpc('bo_hesper','Mother Hesper, hedge-witch','kh_ohfolk4_3',()=>yrLines('bo_hesper',[
+khNpc('bo_hesper','Mother Hesper, hedge-witch','kh_ohfolk2_3',()=>yrLines('bo_hesper',[
   'I am not that sort of witch. I do hedges. I do the little things that live in hedges, and the cures that grow in them. What is happening in the orchard is not the hedge’s business, and the hedge knows it, and is cross.',
   'The skull-apples are not as terrible as they look. Eight parts bone-meal, one part grief, and a pinch of cider yeast. Properly steeped, they stop a rotting. Properly cooked, they are very nearly pie.',
   'If you see a rowan sprig on the way, nod to it. It was kind to me once.']));

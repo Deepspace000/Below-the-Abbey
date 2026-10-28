@@ -74,6 +74,13 @@ def run_links():
         ok = all(x.get('ok', True) for x in r) and all(v for k, v in r[-1].items() if k.startswith(('back', 'to')))
         print('errors', real(errs)[:12])
         b.close()
+        # the jump links ?town=blight5 and ?town=blight6 land in the east end of each place
+        for town, lv in (('blight5', 9650), ('blight6', 9660)):
+            b2, pg2, errs2 = boot(p, town)
+            r2 = pg2.evaluate("() => ({lvl: LEVEL, pos: [G.P.x, G.P.y], name: LEVEL_NAMES[LEVEL]})")
+            print(town, r2)
+            ok = ok and r2['lvl'] == lv and not real(errs2)
+            b2.close()
         return ok and not real(errs)
 
 

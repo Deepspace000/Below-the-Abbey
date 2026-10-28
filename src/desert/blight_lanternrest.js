@@ -60,6 +60,13 @@ function blrBanner(){return IMG.wl2_hall_0?'wl2_hall_0':IMG.kh_throne1_1?'kh_thr
 {const _sl=setupLights;setupLights=function(){const r=_sl.apply(this,arguments);
   try{if(LEVEL===BLR.ID){for(const l of LIGHTS){if(!l.free||l.lamp)continue;l.kI=1.7;l.range2=100;l.calm=true}}}catch(e){console.error('blr lights',e)}
   return r}}
+/* sound: no crows or tolling in the fort (the road's sounds are held back), the smith's hammer from the forge (Wenlock's), loud in the forge itself; no dripping in the warm rooms */
+const BLRS={nextH:0};
+{const _ys=yarSoundTick;yarSoundTick=function(){
+  try{if(blIs(LEVEL)&&LEVEL>=BLR.ID&&LEVEL<=BLR.BEACON&&AC&&NB&&MASTER&&G.state==='play'&&!G.mute&&SNDOPT.amb){const now=AC.currentTime;
+    if(LEVEL===BLR.ID){BLS.nextCrow=Math.max(BLS.nextCrow,now+45);BLS.nextToll=Math.max(BLS.nextToll,now+90)}else BLS.nextDrip=Math.max(BLS.nextDrip,now+99);
+    if((LEVEL===BLR.ID||LEVEL===BLR.FORGE)&&now>BLRS.nextH){BLRS.nextH=now+3.2+Math.random()*3;const d=LEVEL===BLR.FORGE?1:Math.max(0,1-Math.hypot(G.P.x-62,G.P.y-14)/34);if(d>.05&&typeof wlsHammer==='function')wlsHammer(.5*d)}}}catch(e){console.error('blr sound',e)}
+  return _ys.apply(this,arguments)}}
 /* ---------- the people ---------- */
 const blrMen=(id,name,face,lines,o)=>khNpc(id,name,face,()=>yrLines(id,lines),o);
 khNpc('blr_marsh','Captain Eldred Marsh, of Oldhaven','kh_ohsold1_1',()=>{
@@ -84,7 +91,7 @@ khNpc('blr_surgeon','Surgeon Ysolde Fenn','kh_ohfolk5_1',()=>yrLines('blr_surgeo
   'I have seven in the infirmary, and fourteen in the camp who ought to be. A bandage does not need to be sterile if you have no other bandage. That is the first rule of field medicine, and I hate it.',
   'The road wounds do not heal clean. The wound goes grey and stays grey. Salve helps. Antidote helps with the other thing. Mostly I hold hands, and boil water, and curse.',
   'If you see Captain Dace, tell him to stop trying to stand up. He is a very good patient in the sense that he is exactly as bad as I expected.']));
-khNpc('blr_nell','Nell Wick, chandler','kh_ohfolk2_3',()=>yrLines('blr_nell',[
+khNpc('blr_nell','Nell Wick, chandler','kh_ohfolk1_0',()=>yrLines('blr_nell',[
   'I made candles in Gallowmere for forty years, and then there was no more tallow and no more Gallowmere. I came up the road with a bag of wicks and nothing to put on them. The fort has the torches. The torches are for the walls. I understand. I still sit here and make wicks.',
   'A tallow candle is a good, honest thing. It burns down and does not complain. People do not think of it, until the dark has a face.',
   'The light on the wall is the only thing that keeps the road-crows back. That is why the torches are the first to go short, and the last thing we can spare.']));
@@ -115,10 +122,10 @@ blrMen('blr_gate2','Sentry Mags Pellew','kh_ohsold1_5',['"We turned away eleven 
 blrMen('blr_wall1','Sentry Tobin Hart, on the wall','kh_ohsold1_3',['"I walk the wall from the beacon tower to the stable and back, a hundred and four paces. I have worn a groove."','"At night the road lights up with pale lamps, a long way off, in a line, like somebody is carrying them west. I do not look. That is rule one."']);
 blrMen('blr_wall2','Sentry Dill Cobb, on the wall','kh_oqmen_2',['"I am not afraid. I am simply watching very carefully, and very close to the wall."','"The torches are the only thing that matter. A wall is a thing you stand behind. A torch is a thing you stand in front of."']);
 blrMen('blr_drill','Sergeant Bram Oakes, drillmaster','kh_ohsold1_2',['"Shield high! Spear low! Heart, you idiot, in the middle! That is a dummy, not your mother-in-law!"','"We drill every morning. The recruits are all cooks and farriers. They are improving. One of them hit the dummy on Tuesday."']);
-blrMen('blr_cook','Cook Peg Harrow','kh_ohfolk2_2',['"Cabbage. I had a pig once. He was called Colonel. We are not to say what became of him."','"The stew is for everyone: soldiers, refugees, the dog, the other dog. Eat at the pot, not in the tents. It keeps the tents tidy."']);
-blrMen('blr_stable','Ostler Joss Marlow','kh_ohfolk1_5',['"Nine horses left of thirty. They do not like the road. The horses never did like the road. They are cleverer than the army."','"I sleep in the straw with the big grey. He is called Lord Pettigrew, which I did not choose."'],{sc:1});
+blrMen('blr_cook','Cook Peg Harrow','kh_ohfolk1_5',['"Cabbage. I had a pig once. He was called Colonel. We are not to say what became of him."','"The stew is for everyone: soldiers, refugees, the dog, the other dog. Eat at the pot, not in the tents. It keeps the tents tidy."']);
+blrMen('blr_stable','Ostler Joss Marlow','kh_ohfolk3_3',['"Nine horses left of thirty. They do not like the road. The horses never did like the road. They are cleverer than the army."','"I sleep in the straw with the big grey. He is called Lord Pettigrew, which I did not choose."'],{sc:1});
 const BLR_REF=[
-  ['blr_ref1','Old Gaffer Ham, refugee','kh_ohfolk2_3',['"I walked from Gallowmere. I am eighty-one. The fort took me in. I told the captain I was not worth the bread. He said, nobody is, and gave me the bread."','"I have a granddaughter in Sale. At least I did. I am going to find her, once I can stand up straight."']],
+  ['blr_ref1','Old Gaffer Ham, refugee','kh_ohfolk2_2',['"I walked from Gallowmere. I am eighty-one. The fort took me in. I told the captain I was not worth the bread. He said, nobody is, and gave me the bread."','"I have a granddaughter in Sale. At least I did. I am going to find her, once I can stand up straight."']],
   ['blr_ref2','Mistress Tansy Dunn, refugee','kh_ohfolk3_2',['"We had a farm near the Church of the Hollow Saint. We left when the bells started ringing backwards. My husband carried the cow. We lost the cow."','"The soldiers are kind. Very kind. They are just so tired that kindness comes out of them like a yawn."']],
   ['blr_ref3','Young Alfie Dunn','kh_ohfolk1_4',['"I am going to be a soldier. Sergeant Oakes says I have the stance. I have never had a stance before, so I think I am very good."','"I have a stick. It is my sword. It has killed seven imaginary crows."']],
   ['blr_ref4','Brother Anselm, a monk of the Hollow Saint','kh_ohfolk5_4',['"I carried the Saint’s relic from the church. The church bells began to toll by themselves, and I thought, that is enough of that. I am saying the office in the camp. People attend. It is mostly the dog."','"There is a prayer for every day, in my order. For today it is: Lord, let it be dull."']],
