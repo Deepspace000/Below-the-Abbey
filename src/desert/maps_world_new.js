@@ -48,9 +48,27 @@ function wmnShape(l){
 /* ---------- the layout: pictures, then names ---------- */
 const WMN_REG=[['The Unknown Lands',476,-16,19],['The Known Lands',196,12,19],['The Sea Lands',652,16,19],['The Hollow Lands',-60,150,16],['The Western Reaches',-300,64,19],['The Far West',-760,100,19],['The Grey Downs',-575,176,15],['The Eastern Lands',1230,16,19]];
 const wmnHit=(a,b)=>a[0]<b[2]&&a[2]>b[0]&&a[1]<b[3]&&a[3]>b[1];
+/* spreading the places: each place, with its name under it, is a box; boxes that touch are pushed apart (a little at a time, never far from the place's own spot) until none overlap */
+function wmnSpread(){
+  const c=ctx,B=[],M=3,MAXD=80;
+  for(const l of WORLD_LOCS){if(l._x0===undefined){l._x0=l.x;l._y0=l.y}l.x=l._x0;l.y=l._y0}
+  for(const l of WORLD_LOCS){const sh=wmnShape(l),big=l.ic==='castle'||l.ic==='town'||l.ic==='abbey'||l.ic==='orangecastle',nsz=big?7.6:6.6;
+    c.save();c.font=`bold ${nsz}px ${FUI}`;const w=c.measureText(l.n).width+(typeof locRating==='function'&&!G.flags.autoScaleOn?24:0);c.restore();
+    const a=sh.ib[0]-l.x,b=sh.ib[1]-l.y,e=sh.ib[2]-l.x,f=sh.ib[3]-l.y,sub=l.sub?9:0;
+    B.push({l,x0:Math.min(a,-w/2-2),y0:b,x1:Math.max(e,w/2+2),y1:f+12+sub+4})}
+  for(let it=0;it<400;it++){let moved=false;
+    for(let i=0;i<B.length;i++)for(let j=i+1;j<B.length;j++){const p=B[i],q=B[j];
+      const ox=Math.min(p.l.x+p.x1,q.l.x+q.x1)-Math.max(p.l.x+p.x0,q.l.x+q.x0)+M,oy=Math.min(p.l.y+p.y1,q.l.y+q.y1)-Math.max(p.l.y+p.y0,q.l.y+q.y0)+M;
+      if(ox<=0||oy<=0)continue;moved=true;
+      if(ox<oy){const d=ox/2+.1,s=(p.l.x+(p.x0+p.x1)/2)<=(q.l.x+(q.x0+q.x1)/2)?-1:1;p.l.x+=s*d;q.l.x-=s*d}
+      else{const d=oy/2+.1,s=(p.l.y+(p.y0+p.y1)/2)<=(q.l.y+(q.y0+q.y1)/2)?-1:1;p.l.y+=s*d;q.l.y-=s*d}
+      for(const r of [p,q]){r.l.x=Math.max(r.l._x0-MAXD,Math.min(r.l._x0+MAXD,r.l.x));r.l.y=Math.max(r.l._y0-MAXD,Math.min(r.l._y0+MAXD,r.l.y))}}
+    if(!moved)break}
+  for(const l of WORLD_LOCS){l.x=Math.round(l.x*2)/2;l.y=Math.round(l.y*2)/2}}
 function wmnLayout(){
   let fo=true;try{fo=!document.fonts||document.fonts.check("bold 10px 'IM Fell English SC'")}catch(e){}
   const key=(G.flags.autoScaleOn?1:0)+'|'+(fo?1:0)+'|'+WORLD_LOCS.length;if(WMN.lay&&WMN.layKey===key)return WMN.lay;
+  try{wmnSpread()}catch(e){console.error('spread',e)}
   const c=ctx,out={},placed=[],info=[];
   for(const [t,x,y,sz] of WMN_REG){c.save();c.font=`${sz}px ${FTITLE}`;const w=c.measureText(t).width+t.length*1.5+6;c.restore();placed.push([x-w/2,y-sz*.7,x+w/2,y+sz*.7])}
   for(const [t,x,y,sz] of WMN_SMALL){c.save();c.font=`italic ${sz}px ${FUI}`;const w=c.measureText(t).width;c.restore();placed.push([x-w/2-2,y-sz*.7,x+w/2+2,y+sz*.7])}
