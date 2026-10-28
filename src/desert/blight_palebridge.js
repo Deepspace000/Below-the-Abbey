@@ -32,8 +32,8 @@ function blpArt(){
   bl3Tint('bl_paleknight','gyp_boss_2','saturate(.15) brightness(1.5) contrast(.9)',2.1);
   bl3Tint('bl_paletower','wl_bldg1_4','saturate(.2) brightness(.8)',null);
   bl3Ghost('bl_g_dummy','kh_ohsold1_3');
-  for(const [k,h] of [['kh_cart1_0',1.1],['gy_angel',1.95],['gy_lever',.9],['gy_igate',2.2],['gy_arch',2.5]])if(NPC_H[k]===undefined)NPC_H[k]=h;
-  BLP._art=1}
+  for(const [k,h] of [['b9_cart',.95],['kh_cart1_0',1.1],['gy_angel',1.95],['gy_lever',.9],['gy_igate',2.2],['gy_arch',2.5]])if(NPC_H[k]===undefined)NPC_H[k]=h;
+  b9Art();BLP._art=1}
 /* ---------- the sound: wind over the ravine, a far bell from Sale ---------- */
 const BLPS={next:0};
 function blpTick(){
@@ -124,7 +124,7 @@ for(let i=0;i<4;i++)khNpc('blp_lamp'+i,'A cold road lamp','gy_lantern',d=>{const
   if(i>0&&earlier!==(1<<i)-1)return say('A cold lamp on a post. It will not light. The lamp before it, towards the wall, has to be lit first, so that this one has a flame to take.',[BYE]);
   return say('A cold road lamp on an iron post, with its glass dusty and its wick dry. Joss Fenn left a taper stub in the hook.',[['Light the lamp.',()=>{F.lamps=(F.lamps|0)|bit;sfx('key');try{const L=LEVELS[BLP.ID];if(L&&L._bl)L._bl.lcol[BLP_LAMPS[i][0]+','+BLP_LAMPS[i][1]]=[1.5,1.05,.55];for(const l of LIGHTS)if(Math.floor(l.x)===BLP_LAMPS[i][0]&&Math.floor(l.y)===BLP_LAMPS[i][1])l.col=[1.5,1.05,.55]}catch(e){}
     msg('You light the lamp ('+blpLamps()+' of 4).','#ffe36a');if(qSt('blq78')==='active')yrStep('You light a road lamp ('+blpLamps()+' of 4).');if(blpLamps()>=4)bl3Heal();return null}],BYE])});
-khNpc('blp_cart','A plague cart','kh_cart1_0',d=>{const F=blF();
+khNpc('blp_cart','A plague cart','b9_cart',d=>{const F=blF();
   if(F.banner||F.bannerGiven)return say('The cart is empty, apart from sacking and old straw. A mouse looks out and goes in again.',[BYE]);
   return say('A grey plague cart, tipped half into the ditch. In the sacking at the back, a roll of grey cloth with a white tower sewn on it.',[['Take the banner.',()=>{F.banner=1;bl3Give('blbanner');sfx('key');msg('You take the banner of the Sale watch.','#ffe36a');return null}],BYE])});
 khNpc('blp_glove','A glove in the stones','gy_ring',d=>{const F=blF();
@@ -159,15 +159,16 @@ khNpc('blp_stairs_up','The stair to the wall walk','gy_stair',()=>say('A stair i
 function blpBuild(p){
   blpArt();
   const C=blKit({id:BLP.ID,W:BLP.W,H:BLP.H,name:p.name,lvl:90,start:{x:75,y:35,f:3},wind:.45});
+  b9Late();
   const {hs,block,fm,hgt}=C,F=blF(),W=BLP.W,H=BLP.H,ix=(x,y)=>y*W+x;
-  C.hills(.12);C.boundary();C.setF(2,2,77,67,'0');
+  C.hills(.12);b9Boundary(C,W,H);C.setF(2,2,77,67,'0');
   C.pth(2,34,77,36,'1');C.pth(2,33,5,37,'4');C.pth(40,34,57,36,'4');C.pth(46,34,56,36,'3');C.pth(11,34,13,36,'4');
   C.flatten(2,28,77,42);
   C.gate('E',35);C.gate('W',35);
   // the ravine: dry, deep, the whole height of the map; the bridge deck crosses it
   for(let y=3;y<=66;y++)for(let x=46;x<=56;x++){if(y>=34&&y<=36)continue;const edge=x===46||x===56;fm[ix(x,y)]=edge?'5':'6';hgt[ix(x,y)]=edge?-.5:-1.3;block[ix(x,y)]=1;C.used.add(x+','+y)}
   for(let y=3;y<=66;y++){for(const x of [45,57]){if(y>=33&&y<=37)continue;hgt[ix(x,y)]=-.1}}
-  for(let x=46;x<=56;x++){C.dec('bl_fence',x,33,{block:true,sc:.9});C.dec('bl_fence',x,37,{block:true,sc:.9})}
+  for(let x=46;x<=56;x++){C.dec('b9_fence',x,33,{block:true,sc:.9});C.dec('b9_fence',x,37,{block:true,sc:.9})}
   for(const x of [47,51,55]){for(const y of [32,38]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.pale)}}
   for(const [x,y,i] of [[44,32,0],[58,32,1],[44,38,1],[58,38,0]])C.dec('gy_angel',x,y,{block:true,npc:'blp_angel'+i,sc:.9});
   // the Pale Knight stands on the bridge, a person until the party chooses
@@ -178,8 +179,8 @@ function blpBuild(p){
   // Sale's outer wall: three thick, the whole height, with an open arch in the road and two towers; a little toll yard inside
   const WT=C.ch(gyTile('texGrey_2',3.5,{gain:.85,rgb:[.95,1,1]})),WT2=C.ch(gyTile('texGrey_1',3.5,{gain:.8,rgb:[.92,.98,1]}));
   for(let y=3;y<=66;y++){if(y>=34&&y<=36)continue;for(let x=8;x<=10;x++)C.solid(x,y,(hs(x,y,11)<.5)?WT:WT2)}
-  C.house({x0:6,x1:12,y0:27,y1:32,face:'E',sty:'flint',roof:'slate',wh:3.6,to:BLP.GUARD,door:[12,29],lit:false});
-  C.house({x0:6,x1:12,y0:38,y1:43,face:'E',sty:'flint',roof:'slate',wh:3.6,to:BLP.WALK,door:[12,41],lit:false});
+  C.house({x0:6,x1:12,y0:27,y1:32,face:'E',sty:'flint',roof:WL_ROOFS.b9slate?'b9slate':'slate',wh:3.6,to:BLP.GUARD,door:[12,29]});
+  C.house({x0:6,x1:12,y0:38,y1:43,face:'E',sty:'flint',roof:WL_ROOFS.b9slate?'b9slate':'slate',wh:3.6,to:BLP.WALK,door:[12,41]});
   for(const [x,y] of [[13,27],[13,31],[13,39],[13,43],[13,33],[13,37]]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.warm)}
   C.dec('gy_arch',9,35,{block:false,sc:1.5});
   C.dec('gy_rpost',6,33,{block:true,sc:1});C.dec('gy_rpost',6,37,{block:true,sc:1});C.dec('gy_rpost',4,34,{block:true,npc:'blp_toll',sc:1});C.dec('gy_rpost',4,36,{block:true,sc:1});
@@ -199,8 +200,8 @@ function blpBuild(p){
   for(let a=0;a<7;a++){const x=18+a*3,y=44+(a%2);C.dec('gy_mound',x,y,{block:true,sc:.7});C.dec(['bl_wcross','bl_lean','bl_stone1'][a%3],x,y-1,{block:true,sc:.8})}
   for(let x=14;x<=44;x++){if(x>=40&&x<=43)continue;for(const y of [32,38]){if(hs(x,y,33)<.8)C.DB('bl_hedge'+((hs(x,y,35)*3)|0),x,y,{sc:.62+hs(x,y,34)*.22})}}
   // the east bank: the cart with the banner, the waystation shell, the herald, the signs, lamps
-  C.dec('kh_cart1_0',62,38,{block:true,npc:'blp_cart',sc:1});C.light(63,40,C.pale);
-  C.house({x0:64,x1:69,y0:25,y1:29,face:'S',sty:'flint',roof:'moss',wh:2.4,lit:false});
+  C.dec('b9_cart',62,38,{block:true,npc:'blp_cart',sc:1});C.light(63,40,C.pale);
+  C.house({x0:64,x1:69,y0:25,y1:29,face:'S',sty:'flint',roof:WL_ROOFS.b9moss?'b9moss':'moss',wh:2.4,lit:false});
   C.dec('gy_web',63,30,{sc:.7});
   C.person('blp_piper',60,33,2);
   C.milestone(72,33);
@@ -215,10 +216,16 @@ function blpBuild(p){
   for(const [k,x,y] of [['potion6',28,30],['potion6',64,40],['potion6',30,54]])C.items.push({k,x,y,taken:false});
   C.mapNames.push({t:'The Pale Bridge',x:51,y:35,k:'place'},{t:'The Ravine',x:51,y:20,k:'place'},{t:'The Wall of Sale',x:9,y:20,k:'place'},{t:'The Gatehouse',x:9,y:29,k:'place'},{t:'The Wall Walk',x:9,y:41,k:'place'},{t:'The Toll Yard',x:4,y:35,k:'place'},{t:'The Last Mile',x:28,y:35,k:'place'},{t:'The Cold Camp',x:24,y:38,k:'place'},{t:'The Waystation Shell',x:66,y:27,k:'place'},{t:'The Plague Cart',x:62,y:38,k:'place'},{t:'To the Rookery Mill',x:75,y:33,k:'place'},{t:'To Sale',x:2,y:33,k:'place'});
   const lv=C.finish({start:{x:75,y:35,f:3}});
+  b9Dim(lv);
+  // the ravine is a black drop with mist lying in it, dead roots on the lip and nothing to see at the bottom
+  {const mist=[],lip=[];for(let y=4;y<=66;y+=2)for(let x=47;x<=55;x+=2){if(y>=33&&y<=37)continue;mist.push([x+((y>>1)%2),y]);}
+   for(let y=4;y<=66;y+=3){if(y>=31&&y<=39)continue;lip.push([46,y],[56,y])}
+   b9Mist(lv,mist,{sc:1.7,bob:0,bobr:.9});b9Mist(lv,lip,{k:'b9_twig',sc:.8,bob:0,bobr:0});
+   lv.floorSet=lv.floorSet.slice();if(FLOORS.b9_abyss)lv.floorSet[6]='b9_abyss'}
   lv.tele=undefined;lv._ground={'6':'#4c4a42','5':'#7a7260','4':'#d6d0bc','3':'#cfd0cc'};
   return lv}
 /* ---------- the rooms ---------- */
-const blpWall=()=>IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0';
+const blpWall=()=>{b9Art();return IMG.b9_wall?'b9_wall':IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0'};
 function blpGuard(){
   blRoom({id:BLP.GUARD,name:'The Gatehouse of Sale',w:13,h:9,amb:.55,rating:90,floor:'wood',wall:blpWall(),
     back:{to:BLP.ID,x:13,y:29,f:1},

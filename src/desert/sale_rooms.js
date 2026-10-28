@@ -55,7 +55,7 @@ const SA_NEWS=['The Sanctuary has been barred from the inside since last spring.
 function saMakeRoom(h){
   const id=h.id,back={to:SA.ID,x:h.front[0],y:h.front[1],f:h.out};let b,name;
   if(h.spk){const sp=h.sp;name=sp.name;b={id:'sain'+id,wlin:'sa_'+sp.key,name,room:'shop',keeper:'sa_k_'+sp.key,floor:'wood',wallImg:'kh_ohwall1_0'}}
-  else{const H=SA_HOMES[h.home];name=H.name;const vn=wlinHomeVariant(H.scene,id);if(!WLIN_ROOMS[vn]._sa){WLIN_ROOMS[vn]._sa=1;WLIN_ROOMS[vn].amb=Math.max(.28,WLIN_ROOMS[vn].amb*.62)}
+  else{const H=SA_HOMES[h.home];name=H.name;const vn=wlinHomeVariant(H.scene,id);if(!WLIN_ROOMS[vn]._sa){WLIN_ROOMS[vn]._sa=1;const R=WLIN_ROOMS[vn];R.amb=Math.max(.24,R.amb*.5);R.raw=(R.raw||[]).concat([['gy_web',1,1,{block:false,walk:true,deco:true,sc:.6}],['gy_web',R.w-2,1,{block:false,walk:true,deco:true,sc:.55}],['gy_bones',R.w>>1,R.h-2,{block:false,walk:true,deco:true,sc:.6}],['gy_candles',2,R.h-2,{block:false,walk:true,deco:true,sc:.5}]])}
     b={id:'sain'+id,wlin:vn,name,room:'home',keeper:H.keeper,floor:'wood',wallImg:'kh_ohwall1_0'}}
   const R=khRoom(b,id,back);LEVELS[id]=R.level;LEVELS[id].diff=90;LEVEL_NAMES[id]=name;LEVEL_RATING[id]=90;return R.level}
 for(const h of SA_HOUSES)if(h.spk||(h.home&&h.home!=='rope'))KH_LAZY[h.id]=()=>{if(!LEVELS[h.id])saMakeRoom(h)};

@@ -30,11 +30,12 @@ const SA_LOTS=[
   ['N',5,2],['N',8,3,'general'],['N',13,2],['N',16,3,'armour'],['N',21,2],['N',24,3,'weapons'],['N',43,3,'apothecary'],['N',48,2],['N',52,3,'books'],['N',60,3,'jeweller'],['N',64,2],
   ['S',5,2],['S',8,3,'butcher'],['S',13,2],['S',24,3,'alchemist'],['S',43,3,'tavern'],['S',48,3,'tailor'],['S',56,2],['S',60,2],['S',64,2],
   ['CW',42,2],['CW',47,2,'rope'],['CW',52,2],['CW',57,2],['CE',44,2],['CE',49,2],['CE',54,2],
-  ['TW',41,2],['TW',46,2],['TW',51,2],['TW',56,2],['TE',43,2],['TE',48,2],['TE',53,2],['TE',58,2],
-  ['BW',22,2],['BW',26,2,'ringer'],['BW',32,2],['BE',24,2],['BE',28,2],['BE',32,2],
+  ['TW',41,2],['TW',46,2,'reeve'],['TW',51,2],['TW',56,2],['TE',43,2],['TE',48,2,'midwife'],['TE',53,2],['TE',58,2],
+  ['BW',22,2],['BW',26,2,'ringer'],['BW',32,2,'billet'],['BE',24,2,'cats'],['BE',28,2],['BE',32,2],
   ['KN',28,2],['KN',44,2,'digger'],['KS',30,2],['KS',40,2],['KS',46,2]
 ];
-const SA_HOMES={rope:{name:"The Ropewalk Cottage",room:'cellardoor'},ringer:{name:"The Bellman's Cottage",room:'home',scene:'messy',keeper:'sa_k_ringer'},digger:{name:"The Gravedigger's Cottage",room:'home',scene:'spartan',keeper:'sa_k_digger'}};
+const SA_HOMES={rope:{name:"The Ropewalk Cottage",room:'cellardoor'},ringer:{name:"The Bellman's Cottage",room:'home',scene:'messy',keeper:'sa_k_ringer'},digger:{name:"The Gravedigger's Cottage",room:'home',scene:'spartan',keeper:'sa_k_digger'},
+  reeve:{name:"The Reeve's House",room:'home',scene:'scholar'},midwife:{name:"The Midwife's Cottage",room:'home',scene:'healer'},billet:{name:"The Watchman's Billet",room:'home',scene:'soldier'},cats:{name:"The Wool Merchant's House",room:'home',scene:'merchant'}};   // the last four are empty and quiet: webs, a candle, and nobody home
 function saLotRect(side,pos,w){
   let x0,y0,x1,y1,face;
   if(side==='N'){x0=pos;x1=pos+w-1;y0=SA_Y-2;y1=SA_Y-1;face='S'}
@@ -187,9 +188,9 @@ function saBuild(){
   // the Ropewalk Cottage's door leads down to the Hollow Cellar: the lot's door is made when its room is built (sale_rooms.js)
   // ---- Gibbet Square: a dead fountain, a gibbet, lamps, a plague cart, benches, bones, a notice ----
   {const S=SA_SQ;
-    tryDc('sa_fountain',35,38,{block:true,walk:false,sc:1.2,npc:'sa_fountain',deco:false});
-    tryDc('sa_gibbet',38,33,{block:true,walk:false,sc:1.1,npc:'sa_gibbet',deco:false});
-    tryDc('sa_cart',32,40,{block:true,walk:false,sc:1});
+    tryDc('sa_fountain',35,38,{block:true,walk:false,sc:1.35,npc:'sa_fountain',deco:false});
+    tryDc('sa_gibbet',38,33,{block:true,walk:false,sc:1.15,npc:'sa_gibbet',deco:false});tryDc('gy_rpost',37,33,{block:true,walk:false,sc:.8});tryDc('gy_raven',39,33,{sc:.6,bob:.0});
+    tryDc('sa_cart',32,40,{block:true,walk:false,sc:1.1});tryDc('sa_coffins',31,40,{block:true,walk:false,sc:.9});tryDc('sa_coffins',33,41,{block:true,walk:false,sc:.8});
     for(const [x,y] of [[30,30],[40,30],[30,42],[40,42],[35,31]])lamp(x,y);
     for(const [x,y] of [[31,38],[39,40],[33,33],[37,41]])tryDc('gy_bench',x,y,{block:true,walk:false,sc:1});
     for(const [x,y] of [[34,40],[37,35],[32,34],[39,38],[36,32],[31,41]])bones(x,y);
@@ -214,6 +215,12 @@ function saBuild(){
   for(let x=7;x<=66;x++){if(x>=SA_SQ.x0-1&&x<=SA_SQ.x1+1)continue;if(x%7!==3)continue;for(const y of [SA_Y-1,SA_Y+1])if(free(x,y)){lamp(x,y);break}}
   for(const [x,y] of [[21,40],[21,50],[21,58],[52,40],[52,50],[52,58],[56,24],[58,32],[56,36]])if(free(x,y))lamp(x,y);else if(free(x-1,y))lamp(x-1,y);
   for(let x=24;x<=64;x+=10)if(free(x,62))lamp(x,62);
+  // ---- the polish: candle-lit windows, a dead well, crows, a gravestone in the front gardens (the quiet streets were too evenly dark) ----
+  {let lit=0;for(const h of houses){if(h.spk&&hs(h.id,3,41)<.7||(!h.spk&&hs(h.id,4,41)<.34)){const lx=h.front[0],ly=h.front[1];if(!saZoneAt(lx,ly)&&!lights.some(l=>Math.abs(l[0]-lx)+Math.abs(l[1]-ly)<2)){lights.push([lx,ly]);lit++}}}
+   SA.litWindows=lit;
+   for(const [x,y] of [[51,46],[55,48],[22,34],[46,41]]){const q=near(x,y,3);if(q&&tryDc('sa_well',q[0],q[1],{block:true,walk:false,sc:1.05}))break}
+   for(let n=0;n<34;n++){const x=5+((hs(n,5,44)*62)|0),y=5+((hs(n,6,44)*62)|0);if(saZoneAt(x,y)||!free(x,y))continue;if(!(SA_ROAD(x-1,y)||SA_ROAD(x+1,y)||SA_ROAD(x,y-1)||SA_ROAD(x,y+1)))continue;
+     const r=hs(n,7,44);if(r<.45)tryDc('gy_raven',x,y,{sc:.55+hs(n,8,44)*.2});else if(r<.8)solidDc(pick(['gy_stone1','gy_stone2','gy_lean','gy_wcross'],x,y,45),x,y,{sc:.75});else tryDc('gy_candles',x,y,{sc:.5})}}
   // ---- the people, the dead and the quest things (sale_folk.js, sale_quests.js) ----
   const C={W,H,rows,block,fm,hgt,sky,decor,lights,items,enemies,used,street,ch,TM,solid,free,dc,tryDc,solidDc,walk,near,person,pick,hs,lamp,foe,houses,pch,chars,lv,setF,isRoad,tree,bones,web};
   if(typeof saPlaceFolk==='function')saPlaceFolk(C);

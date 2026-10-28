@@ -23,10 +23,14 @@ function saLoad(){
 /* a ghost: a painted townsperson made pale and see-through, fading out towards the feet */
 function saGhost(src,key,tone){
   const im=IMG[src];if(!im||!im.width||IMG[key])return;
+  /* the painted person is kept (face, clothes, folds) and drained of colour, then given a cold blue light, a pale glow round the edge and a fade at the feet */
   IMG[key]=mkCanvas(im.width,im.height,(x,w,h)=>{
-    x.globalAlpha=.8;x.drawImage(im,0,0);x.globalAlpha=1;
-    x.globalCompositeOperation='source-atop';x.fillStyle=tone||'rgba(140,185,235,.6)';x.fillRect(0,0,w,h);
-    x.globalCompositeOperation='destination-in';const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'rgba(0,0,0,.8)');g.addColorStop(.65,'rgba(0,0,0,.66)');g.addColorStop(1,'rgba(0,0,0,.08)');x.fillStyle=g;x.fillRect(0,0,w,h)});
+    const t=document.createElement('canvas');t.width=w;t.height=h;const tx=t.getContext('2d');
+    try{tx.filter='grayscale(1) contrast(1.25) brightness(1.18)'}catch(e){}tx.drawImage(im,0,0);tx.filter='none';
+    tx.globalCompositeOperation='source-atop';tx.fillStyle=tone||'rgba(120,170,230,.42)';tx.fillRect(0,0,w,h);
+    try{x.shadowColor='rgba(150,200,255,.75)';x.shadowBlur=Math.max(4,w*.05)}catch(e){}
+    x.globalAlpha=.78;x.drawImage(t,0,0);x.shadowBlur=0;x.globalAlpha=1;
+    x.globalCompositeOperation='destination-in';const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'rgba(0,0,0,.82)');g.addColorStop(.55,'rgba(0,0,0,.6)');g.addColorStop(.85,'rgba(0,0,0,.28)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,w,h)});
   NPC_H[key]=NPC_H[src]||.98}
 const SA_GHOSTFOLK=['kh_ohfolk1_0','kh_ohfolk1_2','kh_ohfolk2_0','kh_ohfolk2_5','kh_ohfolk3_3','kh_ohfolk4_0','kh_ohfolk4_3','kh_ohfolk5_2','kh_ohfolk6_0','kh_ohsold1_1','kh_oqmen_1','kh_ohfolk3_0'];
 /* the stone of Sale: the painted Oldhaven walls, cooled and darkened (a style per look) */
@@ -53,7 +57,14 @@ function saPrep(){
   // the stand-ins for the pieces that are painted later: a boarded door is the iron fence, the gibbet and the dead fountain are the wooden post and a tall stone
   const alias=(k,srcs,h)=>{if(IMG['sa_'+k]){NPC_H['sa_'+k]=NPC_H['sa_'+k]||(SA_ART.man&&SA_ART.man[k]&&SA_ART.man[k].h_cells)||h;return}for(const s of srcs)if(IMG[s]){IMG['sa_'+k]=IMG[s];NPC_H['sa_'+k]=h;return}};
   for(const i of [0,1,2]){if(!IMG['sa_planks'+i]){IMG['sa_planks'+i]=mkCanvas(8,8,()=>{});NPC_H['sa_planks'+i]=.5}} // the planks are painted on the door tile itself; this invisible piece only carries the keeper's voice and the quest mark
-  alias('gibbet',['gy_rpost'],2.4);alias('fountain',['gy_urn'],1.5);alias('cart',['kh_cart1_0'],.9);
+// the pieces that were stand-ins are made from the painted props that exist, darkened and mossed by a filter (nothing drawn): the gibbet is the hanging cage, the dead fountain the stone fountain gone green, the plague cart the covered cart gone grey
+  const grade=(k,src,filter,h)=>{if(IMG['sa_'+k]&&SA_ART.man&&SA_ART.man[k])return;const im=IMG[src];if(!im||!im.width)return false;
+    IMG['sa_'+k]=mkCanvas(im.width,im.height,(x)=>{try{x.filter=filter}catch(e){}x.drawImage(im,0,0)});NPC_H['sa_'+k]=h;return true};
+  grade('gibbet','hl_p_cage','brightness(.5) saturate(.55) sepia(.45) contrast(1.1)',2.0)||alias('gibbet',['gy_rpost'],2.4);
+  grade('fountain','fountain','brightness(.62) saturate(.7) hue-rotate(38deg) contrast(1.08)',1.05)||alias('fountain',['gy_urn'],1.5);
+  grade('cart','cart','brightness(.5) saturate(.35) sepia(.3) contrast(1.1)',.95)||alias('cart',['kh_cart1_0'],.9);
+  // a dead well and a heap of coffins for the lanes (the same filter again)
+  grade('well','well','brightness(.55) saturate(.4) hue-rotate(30deg)',.85);grade('coffins','gy_coffin','brightness(.6) saturate(.5) sepia(.3)',1.1);
 }
 /* ---- the dead (the graveyard's creatures under Sale's own names; none of them is a boss) ---- */
 {const cl=(base,o)=>Object.assign({},ENEMY_DEF[base],{gy:undefined,sa:1},o);

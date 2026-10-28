@@ -1,0 +1,1 @@
+() => [SA_HOUSES.filter(h => h.home).map(h => [h.home, h.id, h.front, h.out]), SA.litWindows, G.decor.filter(d => /sa_cart|sa_coffins|sa_well|sa_fountain|sa_gibbet/.test(d.k)).map(d => d.k + d.x + ',' + d.y)]

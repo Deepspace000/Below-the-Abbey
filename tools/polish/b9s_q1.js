@@ -1,0 +1,1 @@
+() => Object.keys(IMG).filter(k => /fount|well|cage|cart|coffin|hearse|gallow|gibb|stock|pillory|crate|barrel|bier|rpost|scare/i.test(k)).map(k => k + ':' + (IMG[k].width || '?') + 'x' + (IMG[k].height || '?') + ' h' + NPC_H[k])

@@ -132,7 +132,9 @@ function wltDoor(t,d){
 function wltEnsure(){for(const t of WLT){const id=t.h.id;if(!LEVELS[id]&&KH_LAZY[id])try{KH_LAZY[id]()}catch(e){console.error('wlt build',e)}}}
 /* the room is called by the name of the house (the level banner, the quest ring: "Go to Church View") */
 for(const t of WLT){const id=t.h.id,old=KH_LAZY[id];if(!old)continue;
-  KH_LAZY[id]=()=>{if(LEVELS[id])return;old();const L=LEVELS[id];if(L){L.name=t.name;L.label=t.name}LEVEL_NAMES[id]=t.name}}
+  KH_LAZY[id]=()=>{if(LEVELS[id])return;old();const L=LEVELS[id];if(L){L.name=t.name;L.label=t.name;L.amb=Math.min(L.amb||.7,.4)}LEVEL_NAMES[id]=t.name}}   // these doors only open at night: the rooms are lit by a candle or two, not by day
+/* three of the four houses came out as the same cat room (four cats, a cushion, a bed): each gets its own kind of home instead */
+{const _hv=wlinHomeVariant,SC=['spartan','merchant','scholar','noble'];wlinHomeVariant=function(scene,id){const t=wltHouseOf(id);if(t&&(scene==='cats'||scene==='children'))scene=SC[t.n-1]||'warm';return _hv.call(this,scene,id)}}
 {const _g=goToLevel;goToLevel=function(n,entry){
   const from=LEVEL,tf=wltHouseOf(from),r=_g.apply(this,arguments);
   try{
@@ -171,6 +173,9 @@ function wltFurnish(t,D,C){
   if(t.n===3)put('readdesk','wlt_ledger',{h:.7});
   if(t.n===4){const q=spot();if(q)C.put('rolledcarpets',q[0],q[1],{npc:'wlt_rug'})}
   put('dresser','wlt_val',{h:.9});
+  // each house is furnished after its owner, so no two rooms look the same
+  const extra={1:[['pew',.62],['tapestry',.9],['candlerack',1.0],['font',.6]],2:[['ale',.8],['longtable',.6],['lute',.55],['coatrack',1.0],['waterbarrel',.6]],3:[['spinwheel',.7],['tailor',1.0],['shelving',1.1],['scrollrack',.9]],4:[['mannequin',.9],['clock',1.1],['bookshelf',1.1],['globe',.6]]}[t.n]||[];
+  for(const [pr,h] of extra){const q=spot();if(!q)break;try{wlinProp(C,pr,q[0],q[1],{free:1,h})}catch(e){}}
   // the front window, in the wall beside the door
   const wy=H-2,wq=[[mid-3,wy],[mid+3,wy],[mid-2,wy],[mid+2,wy]].find(q=>q[0]>=1&&q[0]<=W-2&&!C.has(q[0],q[1])&&!taken.has(q[0]+','+q[1]));
   if(wq)wlinProp(C,'glasswin',wq[0],wq[1],{npc:'wlt_peek',free:1,h:.8});

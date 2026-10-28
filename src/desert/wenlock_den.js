@@ -70,14 +70,22 @@ function wldGive(i){
 khNpc('wld_book',"The hermit's book",'wl2_church_4',()=>wldBookRoot(),{sc:1});
 /* ---- the rooms ---- */
 function wldMake(){
-  const b={id:'wldden',name:"Old Bracken's Den",room:'cellar',keeper:null,floor:FLOORS.wl2f1?'wl2f1':'wood',wallImg:IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0'};
+  // the walls of a hermit's burrow are dark stone and earth, not the cream plaster of the town's houses
+  if(!IMG.wld_wall){const src=IMG.kh_ohwall1_0||IMG.wl2_wall_3;if(src&&src.width){const c=document.createElement('canvas');c.width=src.width;c.height=src.height;const x=c.getContext('2d');try{x.filter='brightness(.5) saturate(.55) sepia(.35) contrast(1.1)'}catch(e){}x.drawImage(src,0,0);IMG.wld_wall=c}}
+  const b={id:'wldden',name:"Old Bracken's Den",room:'cellar',keeper:null,floor:FLOORS.wl2f1?'wl2f1':'wood',wallImg:IMG.wld_wall?'wld_wall':IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0'};
   b.tpl=()=>({w:WLD.W,h:WLD.H,floor:b.floor,amb:.3,noExtras:true,lights:WLD_LIGHTS.map(p=>[p[0],p[1]]),build:C=>{
     for(const [x,y] of [[5,1],[9,1],[5,3],[9,3]])wlinProp(C,'votive',x,y,{npc:undefined});
     wlinProp(C,'lectern',WLD_ROOM.book[0],WLD_ROOM.book[1],{npc:'wld_book',h:.95});
+    // the dead ends of the maze hold the hermit's things: a water barrel, a store of kindling, a candle shelf, a cat
+    {const open=(x,y)=>WLD_MAZE[y]&&WLD_MAZE[y][x]!=='#'&&WLD_MAZE[y][x]!==undefined,inRoom=(x,y)=>x>=WLD_ROOM.x0&&x<=WLD_ROOM.x1&&y>=WLD_ROOM.y0&&y<=WLD_ROOM.y1,PR=[['waterbarrel',.7],['coopstack',.8],['candlerack',1.0],['cat',.3],['herbrack',1.0],['ale',.7]];let n=0;
+     for(let y=1;y<WLD.H-1;y++)for(let x=1;x<WLD.W-1;x++){if(!open(x,y)||inRoom(x,y)||(x===7&&y===13))continue;
+       let nb=0;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]])if(open(x+dx,y+dy))nb++;
+       if(nb===1){const p=PR[n%PR.length];n++;try{wlinProp(C,p[0],x,y,{h:p[1]})}catch(e){}}}
+     for(const [x,y] of [[1,12],[13,3],[3,7],[11,9]]){if(open(x,y)&&!inRoom(x,y)){try{C.raw&&C.raw(IMG.gy_web?'gy_web':'web',x,y,{block:false,sc:.6})}catch(e){}}}}
   }});
   const R=khRoom(b,WLD.ID,{to:WL.ID,x:WLD.front[0],y:WLD.front[1],f:2});
   const L=R.level;
-  L.rows=WLD_MAZE.slice();L.start={x:7,y:13,f:0};L.ceil='tomb';L.diff=80;L.noTele=true;
+  L.rows=WLD_MAZE.map(r=>r.replace(/#/g,'w'));L.start={x:7,y:13,f:0};L.ceil='tomb';L.diff=80;L.noTele=true;
   LEVELS[WLD.ID]=L;LEVEL_NAMES[WLD.ID]="Old Bracken's Den";LEVEL_RATING[WLD.ID]=80;
   return L;
 }

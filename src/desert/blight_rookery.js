@@ -25,16 +25,50 @@ if(typeof BOSS_GOLD!=='undefined')BOSS_GOLD.blcrowqueen=[3800,4600];
 if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^blcrowqueen/,'bleeding',.3]);
 /* the flying crow pictures of tools/crows are used for every crow of the road, and the Queen is the big Carrion Crow */
 if(typeof CROW_KIND!=='undefined'){CROW_KIND.blcrow={set:'crow',span:.9,body:.709,rise:.7,sh:.7};CROW_KIND.blcrowflock={set:'flock',span:1.55,body:.576,rise:.62,sh:.95};CROW_KIND.blcrowqueen={set:'carrion',span:3.3,body:.71,rise:1.1,sh:1.5}}
+/* ---------- polish shared by places 9 and 10 (the Rookery Mill and the Pale Bridge): the pale fence, huts and roofs of the road made dark and dead, the plague cart, the abyss floor, ground mist ---------- */
+const B9={};
+function b9Art(){
+  if(B9._art)return;
+  try{wlRoofs()}catch(e){}
+  const T=(k,src,f,h)=>{try{return bl3Tint(k,src,f,h)}catch(e){return false}};
+  T('b9_cart','cart','brightness(.5) saturate(.35) sepia(.3) contrast(1.1)',.95);
+  for(const [nm,src,f] of [['b9thatch',(WL_ROOFS&&(WL_ROOFS.thatch2||WL_ROOFS.thatch)),'brightness(.46) saturate(.35) sepia(.25)'],['b9slate',(WL_ROOFS&&WL_ROOFS.slate),'brightness(.55) saturate(.5)'],['b9moss',(WL_ROOFS&&(WL_ROOFS.moss||WL_ROOFS.thatch)),'brightness(.45) saturate(.5) hue-rotate(10deg)']])
+    if(src&&T('b9_roof_'+nm,src,f))WL_ROOFS[nm]='b9_roof_'+nm;
+  T('b9_wall',IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0','brightness(.52) saturate(.5) contrast(1.12)');
+  try{gyFloorTone('b9_abyss','gyf_gravel',.08,[.75,.85,.95])}catch(e){}
+  IMG.b9_mist=mkCanvas(260,90,(x,w,h)=>{for(let i=0;i<8;i++){const cx=w*(.16+hash2(i,1,6)*.68),cy=h*(.5+hash2(i,2,6)*.2),r=w*(.13+hash2(i,3,6)*.1);x.save();x.translate(cx,cy);x.scale(1,.46);const g=x.createRadialGradient(0,0,0,0,0,r);g.addColorStop(0,'rgba(188,204,200,.34)');g.addColorStop(1,'rgba(188,204,200,0)');x.fillStyle=g;x.beginPath();x.arc(0,0,r,0,6.3);x.fill();x.restore()}});
+  NPC_H.b9_mist=.9;
+  B9._art=1}
+/* the kit makes bl_fence and bl_hut when a level starts, so these dark copies are made right after blKit() */
+function b9Late(){
+  const T=(k,src,f,h)=>{try{return !IMG[k]&&bl3Tint(k,src,f,h)}catch(e){return false}};
+  T('b9_fence','bl_fence','brightness(.5) saturate(.4) sepia(.3) contrast(1.1)');
+  T('b9_hut','bl_hut','brightness(.52) saturate(.4) sepia(.2) contrast(1.1)');
+  T('b9_twig','ww_twig2','brightness(.5) saturate(.45) sepia(.2)')}
+/* the edge of the map: the kit's boundary shows as a bright white paling in the fog, so these two places use a dark wall of grey and black stone instead */
+function b9Boundary(C,W,H){
+  const wc=['texGrey_1','texGrey_3','texBlack_2','texGrey_0','texGrey_3'].map(t=>C.ch(gyTile(t,2.7,{gain:.55,rgb:[.82,.9,.92]})));
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(x>=2&&x<=W-3&&y>=2&&y<=H-3)continue;C.solid(x,y,wc[(C.hs(x,y,7)*wc.length)|0])}}
+/* after the level is finished: dark copies for the pale pictures, and extra dressing on the cells of a ravine or a race (mist, dead reeds) */
+function b9Dim(lv){
+  const sw={bl_fence:'b9_fence',bl_hut:'b9_hut',kh_cart1_0:'b9_cart',ww_twig2:'b9_twig'};
+  for(const d of lv.decor){const k=sw[d.k];if(k&&IMG[k])d.k=k}
+  for(const d of lv.sky||[]){const k=sw[d.k];if(k&&IMG[k])d.k=k}}
+function b9Mist(lv,cells,opt){
+  const taken=new Set(lv.decor.map(d=>d.x+','+d.y));opt=opt||{};let n=0;
+  for(const [x,y] of cells){if(taken.has(x+','+y))continue;const r=hash2(x,y,71);
+    lv.decor.push({k:opt.k||'b9_mist',x,y,block:false,walk:true,deco:true,bob:(opt.bob||0)+r*(opt.bobr||.5),sc:(opt.sc||1.5)*(.8+r*.5)});n++}
+  return n}
 /* ---------- the pictures ---------- */
 function blrkArt(){
   if(BLRK._art)return;
   try{if(typeof blgArt==='function')blgArt()}catch(e){console.error(e)}
-  bl3Tint('bl_windmill','wl_bldg1_2','saturate(.3) brightness(.62) sepia(.2)',null);
-  bl3Tint('bl_watermill','wl_bldg1_3','saturate(.3) brightness(.6) sepia(.15)',null);
+  bl3Tint('bl_windmill','wl_bldg1_2','saturate(.25) brightness(.46) sepia(.25) contrast(1.1)',null);
+  bl3Tint('bl_watermill','wl_bldg1_3','saturate(.25) brightness(.45) sepia(.2) contrast(1.1)',null);
   bl3Ghost('bl_g_miller','kh_ohfolk4_3');bl3Ghost('bl_g_widow','kh_ohfolk3_1');
   bl3Tint('bl_thimble','gy_ring','saturate(.1) brightness(1.5)',.34);
   for(const [k,h] of [['gy_raven',1.05],['bl_g_miller',.98],['bl_g_widow',.98],['hay',.8],['kh_oqstuff_9',.5],['ww_stone',1.7],['ww_crowtree',1.9],['gy_obelisk',2.3],['gy_column',1.9],['gy_lever',.9],['kh_cart1_0',1.1]])if(NPC_H[k]===undefined||k.startsWith('bl_g_'))NPC_H[k]=h;
-  BLRK._art=1}
+  b9Art();BLRK._art=1}
 /* ---------- the sound: crows, the creak of the sails, the race ---------- */
 const BLRKS={nextCaw:0,nextSail:0};
 function blrTick(){
@@ -179,8 +213,9 @@ bl3Kill('blcrowqueen',e=>{const F=blF();if(F.queen)return;F.queen=1;bl3Give('blc
 function blrkBuild(p){
   blrkArt();
   const C=blKit({id:BLRK.ID,W:BLRK.W,H:BLRK.H,name:p.name,lvl:89,start:{x:75,y:35,f:3},wind:.42});
+  b9Late();
   const {hs,block,fm}=C,F=blF(),W=BLRK.W,H=BLRK.H,ix=(x,y)=>y*W+x,hgt=C.hgt;
-  C.hills(.34);C.boundary();C.setF(2,2,77,67,'0');
+  C.hills(.34);b9Boundary(C,W,H);C.setF(2,2,77,67,'0');
   C.pth(2,34,77,36,'1');C.pth(43,15,44,33,'1');C.pth(16,29,16,33,'1');C.pth(52,28,60,28,'1');C.pth(56,26,60,33,'1');C.pth(28,28,28,33,'1');C.pth(29,29,34,29,'1');
   C.flatten(2,28,77,40);C.flatten(36,4,52,20);C.flatten(50,14,70,30);C.flatten(12,22,34,40);
   C.gate('E',35);C.gate('W',35);
@@ -192,9 +227,9 @@ function blrkBuild(p){
   for(let y=34;y<=36;y++)for(let x=18;x<=32;x++)wat[ix(x,y)]=0;
   for(let y=3;y<=66;y++)for(let x=3;x<=76;x++){if(wat[ix(x,y)]){fm[ix(x,y)]='6';hgt[ix(x,y)]=-.3;block[ix(x,y)]=1;C.used.add(x+','+y)}}
   for(let y=34;y<=36;y++)for(let x=24;x<=26;x++)fm[ix(x,y)]='3';
-  for(let x=23;x<=27;x++){if(x!==25)C.dec('bl_fence',x,33,{block:true,sc:.8});C.dec('bl_fence',x,37,{block:true,sc:.8})}
+  for(let x=23;x<=27;x++){if(x!==25)C.dec('b9_fence',x,33,{block:true,sc:.8});C.dec('b9_fence',x,37,{block:true,sc:.8})}
   C.dec('gy_lantern',23,33,{block:true});C.light(23,33,C.pale);C.dec('gy_lantern',27,37,{block:true});C.light(27,37,C.pale);
-  C.dec('bl_fence',25,33,{block:true,sc:.8,npc:'blr_bridge'});
+  C.dec('b9_fence',25,33,{block:true,sc:.8,npc:'blr_bridge'});
   C.dec('bl_urn',22,38,{block:true,npc:'blr_pond',sc:.8});
   // the windmill on the hill
   C.picHouse({img:'bl_windmill',x0:42,x1:45,y0:10,y1:14,w:5.4,wh:3.2,to:BLRK.GROUND,door:[43,14]});
@@ -212,14 +247,14 @@ function blrkBuild(p){
   for(const [x,y] of [[PC[0]-8,PC[1]],[PC[0]+8,PC[1]],[PC[0],PC[1]-6],[PC[0],PC[1]+6]]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.pale)}
   C.pth(55,24,56,26,'1');
   // the miller's house west of the race, the dead watermill east of it, the sluice, the pond, the field
-  C.house({x0:14,x1:19,y0:24,y1:28,face:'S',sty:'timber',roof:'thatch2',wh:2.3,to:BLRK.HOUSE,col:C.warm});
+  C.house({x0:14,x1:19,y0:24,y1:28,face:'S',sty:'timber',roof:WL_ROOFS.b9thatch?'b9thatch':'thatch2',wh:2.3,to:BLRK.HOUSE,col:C.warm});
   C.dec('hay',12,27,{block:true,sc:1});C.dec('barrel',20,29,{block:true,sc:.9});C.dec('kh_oqstuff_8',12,30,{block:true,sc:.7});
   C.picHouse({img:'bl_watermill',x0:29,x1:33,y0:22,y1:26,w:5.4,wh:2.6,door:[31,26]});
   C.dec('bl_urn',30,28,{block:true,sc:.8,npc:'blr_watermill'});
   C.light(29,28,C.pale);C.light(33,28,C.pale);
   C.dec('gy_lever',27,30,{block:true,npc:'blr_sluice',sc:1});C.light(28,31,C.pale);
   if(!((F.th|0)&1))C.dec('bl_thimble',28,31,{block:true,npc:'blr_thimble0',sc:1.0,bob:.1});
-  C.dec('kh_cart1_0',50,38,{block:true,npc:'blr_cart',sc:1});
+  C.dec('b9_cart',50,38,{block:true,npc:'blr_cart',sc:1});
   if(!((F.th|0)&4))C.dec('bl_thimble',51,38,{block:true,npc:'blr_thimble2',sc:1.0,bob:.1});
   C.dec('ww_crowtree',68,10,{block:true,sc:1.2,npc:'blr_millwindow'});
   for(const [x,y] of [[40,22],[48,26],[66,32],[10,32],[18,22]])C.dec('gy_rpost',x,y,{block:true});
@@ -239,10 +274,14 @@ function blrkBuild(p){
   for(const [k,x,y] of [['potion6',34,10],['potion6',70,30],['potion6',48,64]])C.items.push({k,x,y,taken:false});
   C.mapNames.push({t:'The Rookery Mill',x:43,y:11,k:'place'},{t:'The Parliament Stones',x:60,y:20,k:'place'},{t:'The Plank Bridge',x:25,y:35,k:'place'},{t:'The Millrace',x:25,y:20,k:'place'},{t:"The Miller's House",x:16,y:26,k:'place'},{t:'The Old Watermill',x:31,y:24,k:'place'},{t:'The Sluice',x:27,y:30,k:'place'},{t:'The Mill Pond',x:25,y:57,k:'place'},{t:'The Scarecrow Field',x:58,y:52,k:'place'},{t:'The Crow Tree',x:68,y:10,k:'place'},{t:'To Hollowbell Abbey',x:75,y:33,k:'place'},{t:'To the Pale Bridge',x:6,y:33,k:'place'});
   const lv=C.finish({start:{x:75,y:35,f:3}});
+  b9Dim(lv);
+  {const race=[],bank=[];for(let y=4;y<=66;y+=2){if(y>=32&&y<=38)continue;race.push([24+(y%4?0:1),y]);race.push([26-(y%4?0:1),y]);bank.push([23,y],[27,y])}
+   for(let a=0;a<14;a++){race.push([17+((hs(a,1,3)*16)|0),50+((hs(a,2,3)*14)|0)])}
+   b9Mist(lv,race,{sc:1.25,bob:0,bobr:.12});b9Mist(lv,bank,{k:'b9_twig',sc:.7,bob:0,bobr:0})}
   lv.tele=undefined;lv.floorSet=lv.floorSet.slice();lv.floorSet[6]='blf_water';lv._ground={'6':'#5f7c7c','5':'#8a7e5e','4':'#cbc6b2'};
   return lv}
 /* ---------- the rooms ---------- */
-const blrWall=()=>IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0';
+const blrWall=()=>{b9Art();return IMG.b9_wall?'b9_wall':IMG.wl2_wall_3?'wl2_wall_3':'kh_ohwall1_0'};
 function blrGround(){
   blRoom({id:BLRK.GROUND,name:'The Rookery Mill: the grinding floor',w:13,h:10,amb:.5,rating:89,floor:'wood',wall:blrWall(),
     back:{to:BLRK.ID,x:43,y:15,f:2},
@@ -284,7 +323,7 @@ function blrCap(){
       C.raw('gy_hatch2',5,8,{npc:'blr_capdown',solid:1,deco:false,sc:1});
       C.raw('gy_bones',3,6,{block:false,sc:.6});C.raw('gy_bones',8,7,{block:false,sc:.6});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_web',9,1,{block:false,sc:.5})}})}
 function blrHouse(){
-  blRoom({id:BLRK.HOUSE,name:"The Miller's House",w:11,h:8,amb:.5,rating:89,floor:'wood',wall:'kh_ohwall1_0',
+  blRoom({id:BLRK.HOUSE,name:"The Miller's House",w:11,h:8,amb:.5,rating:89,floor:'wood',wall:blrWall(),
     back:{to:BLRK.ID,x:16,y:29,f:2},
     lights:[[3,2],[8,2],[5,5]],lcol:{'3,2':[1.4,1.0,.6],'8,2':[1.35,.98,.58],'5,5':[1.3,.95,.6]},col:[1.3,.95,.6],
     enemies:[['blcrow',8,5]],
