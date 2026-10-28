@@ -306,7 +306,7 @@ function blhBelfry(){
     lights:[[3,2],[11,2],[7,6],[3,8],[11,8]],lcol:{'3,2':BLH_COL.pale,'11,2':BLH_COL.pale,'7,6':[.95,1.15,1.2],'3,8':BLH_COL.pale,'11,8':BLH_COL.pale},col:[.85,1.1,1.0],
     enemies:[['blabbot',7,4],['blcrow',3,5],['blcrow',11,5],['blshade',3,8],['blshade',11,8]],
     build:C=>{
-      C.raw('bl_silverbell',7,2,{npc:'blh_bell',solid:1,deco:false,sc:3.2});
+      C.raw('bl_silverbell',7,2,{npc:'blh_bell',solid:1,deco:false,sc:1.9});
       C.raw('bl_rope',9,5,{npc:'blh_rope2',solid:1,deco:false,sc:1.2});
       for(const x of [1,13])C.raw('hl_p_window',x,4,{block:true,sc:1.1});
       for(const [x,y] of [[2,2],[12,2]])C.raw('gy_candles',x,y,{block:true,sc:.9});
