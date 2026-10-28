@@ -62,5 +62,7 @@ Nothing blocks the turn: the only delay is the 0.3 to 0.5 s the picture takes to
 
 * New object kinds in spObjDraw: dagger (a point-down dagger drops onto the foe and stays in for a moment; used by SPIMP.steel and SPIMP.deep for Thief and Assassin), vcut (a great sword chopping straight down; used by SPIMP.smash for Warrior, Barbarian and the big smash powers), icecase (white and blue crystals close round the foe and crack apart; used by SPIMP.frost on big hits and for blizzards).
 * Ranger and Archer arrows are larger with a glowing head and big fletching; Arrow Rain and Arrow Storm drop seven arrows; long shots (Heartseeker, Killing Shot, Piercing, Perfect) add a shock ring and streaks on impact.
-* Not yet done: Paladin, Monk and Goat get only their older looks; check the sheets (python tools/spellfx/spellfx_sheets.py paladin monk goat).
 
+## Paladin, Monk and Goat (elements hallow, ki, goat)
+
+Paladin: hammer slam (Smite, Righteous Blow twice), cross of light (Judgment), sun burst (Sunbrand). Monk: ki fists (palm, stun with dizzy stars, flurry hits via SPIMP.kihit), kick arcs, giant fist (Fist of the Mountain). Goat: ram horns and BONK/CRASH burst, hoof stomp, rock fall. The registry 4th field carries the variant (o.v). Check: python tools/spellfx/spellfx_sheets.py paladin monk goat. Objects added to spObjDraw: hammer rays cross fist hoof horns pow dizzy speed.
