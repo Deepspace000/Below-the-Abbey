@@ -109,9 +109,11 @@ function stlAhead(){
     if(!stlBusy()&&!(typeof hostileNear==='function'&&hostileNear())){
       const h=G.heroes[i],w=h&&heroWeapon(h),range=(w&&w.ranged)||1;
       if(!frontEnemy(range)){
-        const d0=DIRS[G.P.f];let person=false;
-        for(const k of [1,0,2]){const x=G.P.x+d0[0]*k,y=G.P.y+d0[1]*k;if(G.decor.some(d=>d.npc&&d.walk&&!d.found&&d.x===x&&d.y===y)){person=true;break}}
-        if(!person){const s=stlAhead();if(s){stlPress(s);return false}}}}
+        const d0=DIRS[G.P.f],s=stlAhead();let person=false;
+        // a person nearer than the stall (or underfoot) is talked to as before; a keeper standing behind the stall does not take the press away from it
+        const ks=s?(s.x===G.P.x&&s.y===G.P.y?0:Math.abs(s.x-G.P.x)+Math.abs(s.y-G.P.y)):9;
+        for(const k of [1,0,2]){if(s&&k>=ks&&ks>0)continue;const x=G.P.x+d0[0]*k,y=G.P.y+d0[1]*k;if(G.decor.some(d=>d.npc&&d.walk&&!d.found&&d.x===x&&d.y===y)){person=true;break}}
+        if(!person&&s){stlPress(s);return false}}}
   }catch(e){console.error('stl use',e)}
   return _ha.apply(this,arguments)}}
 /* a click on a stall: the sprite hits that the renderer gathers (see the line after the item hits in the sprite loop) */
@@ -123,7 +125,7 @@ function stlHitAt(x,y){
     return h.stl?h:null}
   return null}
 {const _vt=viewTap;viewTap=function(x,y){
-  try{if(!stlBusy()){const h=stlHitAt(x,y);if(h){if(h.ty>2.6){msg('Too far away. Step closer.','#d09a80');return}stlPress(h.ref);return}}}catch(e){console.error('stl tap',e)}
+  try{if(!stlBusy()){const h=stlHitAt(x,y);if(h){if(h.ty>(h.ref._stlPseudo?3.6:2.6)){msg('Too far away. Step closer.','#d09a80');return}stlPress(h.ref);return}}}catch(e){console.error('stl tap',e)}
   return _vt.apply(this,arguments)}}
 /* the painted stalls behind the keepers of the Deeper Hollow: no decor of their own, so each picture is given its keeper's click area */
 {const _sl=spriteList;spriteList=function(){
@@ -143,7 +145,7 @@ function stlHitAt(x,y){
 function stlTip(){
   const S=typeof STB!=='undefined'?STB:null,hv=STL.hv;
   if(!S||S.pt!=='mouse'||S.mx<0||S.mx>=420||S.my>=210||stlBusy()||(typeof TP!=='undefined'&&TP)||topBtn(S.mx,S.my)){hv.d=null;return}
-  const h=stlHitAt(S.mx,S.my);if(!h||h.ty>2.6){hv.d=null;return}
+  const h=stlHitAt(S.mx,S.my);if(!h||h.ty>(h.ref._stlPseudo?3.6:2.6)){hv.d=null;return}
   const now=performance.now();if(hv.d!==h.ref){hv.d=h.ref;hv.t0=now;hv.txt=null;return}
   if(now-hv.t0<380)return;
   if(hv.txt===null||now-hv.at>2500){let b=null;try{b=stlBind(h.ref,true)}catch(e){}hv.txt=b?'Trade at '+(b.title||'the stall'):'Market stall';hv.at=now}
