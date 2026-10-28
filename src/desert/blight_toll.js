@@ -9,7 +9,7 @@
    ========================================================================== */
 const BLT={ID:9610,HOUSE:9611,W:72,H:64,keep:{x:42,y:29}};
 LEVEL_NAMES[BLT.HOUSE]="The Wardens' Toll House";LEVEL_RATING[BLT.HOUSE]=84;
-const BLT_HOUSE={x0:39,x1:46,y0:21,y1:26,face:'S',sty:'flint',roof:'slate',wh:2.5,to:BLT.HOUSE};
+const BLT_HOUSE={x0:39,x1:46,y0:21,y1:26,face:'S',sty:'dflint',roof:'slate',wh:2.5,to:BLT.HOUSE};
 /* ---------- things carried ---------- */
 ITEMDEF.blledger={n:"The Wardens' Ledger",k:'quest',t:'Quest item',ic:'book',c:'#6a5a40',stack:1,price:0,sw:.5,d:'A long ledger bound in grey cloth, taken from the desk of the toll house. Every line is a day, a weight of pale silver, and the words paid by the Sovereign’s clerk. Take it to Wat Harrow at the toll yard.'};
 ITEMDEF.blcandle={n:'White Shrine Candle',k:'quest',t:'Quest item',ic:'ore',c:'#e8e4d0',stack:1,price:0,sw:.1,d:'A stub of white wax with the stamp of the wayside shrine on its foot. A Road Warden took it from the shrine and kept it in his belt. It belongs on the shrine.'};
@@ -160,6 +160,8 @@ function bltBuild(p){
   for(const [x0,y0,x1,y1] of [[28,5,50,26],[14,38,34,58],[40,40,68,58],[4,5,10,27]]){
     for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){if(C.path.has(x+','+y)||hs(x,y,41)>.22)continue;const d=C.D('ww_twig2',x,y,{sc:.5+hs(x,y,42)*.4});if(d){d.ox=(hs(x,y,43)-.5)*.6;d.oy=(hs(x,y,44)-.5)*.6}}}
   C.dec('kh_ohgard1_5',30,12,{block:true,sc:.8});C.dec('kh_ohgard2_3',45,52,{block:true,sc:.8});
+  b14TollDress(C);
+  b14Patches(C,{keep:(x,y)=>x>=35&&x<=53&&y>=26&&y<=37||x>=49&&x<=61&&y>=18&&y<=28});
   C.dress({trees:150,scrub:260,stones:20,bones:8,posts:5,keep:(x,y)=>(x>=35&&x<=53&&y>=26&&y<=37)||(y>=29&&y<=35)||(x>=49&&x<=61&&y>=18&&y<=28)});
   // the creatures: Dead Road Wardens on the road and in the yard, husks in the fields, bones at the shrine, a flock in the crow tree
   C.foes([['bldeadwarden',56,31],['bldeadwarden',38,34],['bldeadwarden',30,32],['bldeadwarden',17,31],['bldeadwarden',52,25],['bldeadwarden',8,33],
@@ -185,7 +187,7 @@ function bltRoom(){
       C.raw('gy_skel',7,3,{npc:'blt_deadwarden',solid:1,deco:false,sc:.95});
       C.raw('gy_chest',11,2,{npc:'blt_sealchest',solid:1,deco:false,sc:.9});
       P('bed',2,6,{h:.8});P('bed',2,7,{h:.8});P('candlerack',4,5,{h:1.0});P('coatrack',11,5,{h:1.0});P('noticeboard',5,1,{h:.9,block:false});
-      P('waterbarrel',11,7,{h:.7});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_bones',8,6,{block:false,sc:.7});C.raw('gy_bones',3,7,{block:false,sc:.6})}})}
+      P('waterbarrel',11,7,{h:.7});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_bones',8,6,{block:false,sc:.3});C.raw('gy_bones',3,7,{block:false,sc:.3})}})}
 /* wardens put down count towards blq2 */
 {const _h=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;const r=_h.apply(this,arguments);
   try{if(was&&e.hp<=0&&e.t==='bldeadwarden'&&qSt('blq2')==='active'){const F=blF();F.wk=(F.wk|0)+1;if(F.wk<=5)msg('A Road Warden put to rest ('+Math.min(5,F.wk)+' of 5).','#ffe36a')}}catch(x){console.error(x)}
@@ -198,3 +200,17 @@ if(typeof QRF!=='undefined'){const N=(l,...ids)=>({lvl:l,npc:ids}),E=(l,rx)=>({l
 /* ---------- registration ---------- */
 blRegister(1,bltBuild,{fromE:{x:65,y:32,f:3},fromW:{x:4,y:32,f:1},exitY:32,rooms:[BLT.HOUSE],names:{9611:"The Wardens' Toll House"},rating:{9611:84}});
 KH_LAZY[BLT.HOUSE]=()=>{if(!LEVELS[BLT.HOUSE]){if(!LEVELS[BLT.ID])KH_LAZY[BLT.ID]();bltRoom()}return LEVELS[BLT.HOUSE]};
+
+/* ---------- polish (round 1 to 4): the yard of the toll house, dressed ---------- */
+function b14TollDress(C){
+  const stocks=b14Dead('b14_stocks','wl_prop1_2','saturate(.3) brightness(.6)',1.0),cart=b14Dead('b14_cart','cart','saturate(.3) brightness(.62)',1.1),
+    ban=b14Dead('b14_banner','banner','saturate(.5) brightness(.75)',1.6),cage=b14Dead('b14_cage','ww_cagefull','saturate(.4) brightness(.7)',1.1),
+    sacks=b14Dead('b14_sacks','sacks','saturate(.3) brightness(.6)',.7),gcart=b14Dead('b14_gcart','wl_prop1_5','saturate(.2) brightness(.55)',1.0);
+  // the stocks in the yard, a wrecked cart each side of the yard, a barrel stack at the house, torn banners on poles at the yard gates, cages with bones hung at the toll bar
+  b14Place(C,[[stocks,38,34],[cart,33,34,{sc:1}],[gcart,56,34],['barrel',40,27,{sc:.9}],['barrel',41,27,{sc:.8}],['crate',45,27,{sc:.9}],[sacks,46,28,{sc:.9}],
+    [ban,36,31],[ban,36,33],[ban,52,31],[ban,52,33],[cage,51,29],[cage,51,35],['gy_lantern',41,28],['gy_lantern',43,28]]);
+  C.light(41,28,C.warm);C.light(43,28,C.warm);
+  for(const [x,y] of [[39,32],[44,31],[50,33],[34,32],[57,32],[26,33],[14,31],[62,31]])C.dec('gy_bones',x,y,{sc:.4});
+  // the road verges: wrecked carts and crate stacks, every so often, never in the road
+  for(const [x,y] of [[22,34],[30,30],[60,30],[66,30]])C.dec(x%2?cart:gcart,x,y,{block:true,sc:.9});
+  for(const [x,y] of [[16,30],[44,36],[64,34]])C.dec('crate',x,y,{block:true,sc:.8})}

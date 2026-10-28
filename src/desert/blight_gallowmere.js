@@ -13,9 +13,9 @@ const BLG={ID:9640,OSK:9641,REEVE:9642,NAN:9643,W:90,H:76};
 BL_ROAD[3].W=BLG.W;BL_ROAD[3].H=BLG.H;
 for(const [id,n] of [[9641,"Osk Brine's House"],[9642,"The Reeve's Flooded Hall"],[9643,"Nan Sallow's Cottage"]]){LEVEL_NAMES[id]=n;LEVEL_RATING[id]=86}
 const BLG_LAMPS=[[72,37],[67,37],[62,37],[57,37],[52,37]];
-const BLG_HOUSE_NAN={x0:30,x1:32,y0:33,y1:34,face:'S',sty:'timber',roof:'thatch2',wh:2.2,to:BLG.NAN};
-const BLG_HOUSE_OSK={x0:41,x1:43,y0:43,y1:44,face:'N',sty:'timber',roof:'thatch2',wh:2.3,to:BLG.OSK};
-const BLG_HOUSE_REEVE={x0:24,x1:31,y0:8,y1:11,face:'S',sty:'flint',roof:'slate',wh:2.7,to:BLG.REEVE};
+const BLG_HOUSE_NAN={x0:30,x1:32,y0:33,y1:34,face:'S',sty:'dtimber',roof:'thatch2',wh:2.2,to:BLG.NAN};
+const BLG_HOUSE_OSK={x0:41,x1:43,y0:43,y1:44,face:'N',sty:'dtimber',roof:'thatch2',wh:2.3,to:BLG.OSK};
+const BLG_HOUSE_REEVE={x0:24,x1:31,y0:8,y1:11,face:'S',sty:'dflint',roof:'slate',wh:2.7,to:BLG.REEVE};
 const BLG_DOCK={x:50,y:48,boat:[51,48]},BLG_HERON={boat:[62,19],at:{x:62,y:18}},BLG_REEVEISLE={boat:[28,19],at:{x:28,y:18}};
 /* ---------- things carried ---------- */
 ITEMDEF.blferrylamp={n:"Osk's Ferry Lantern",k:'quest',t:'Quest item',ic:'ore',c:'#e0c080',stack:1,price:0,sw:.4,d:'A tarnished ship\'s lantern with a horn window and a hook for the bow of a boat. The oil has long since gone, but the wick is still dry and the glass has not a crack in it. Osk Brine would like it back.'};
@@ -28,7 +28,7 @@ function blgArt(){
   if(typeof gyFloorTone==='function'&&FLOORS.water&&!FLOORS.blf_water)try{gyFloorTone('blf_water','water',.95,[.6,.95,.9])}catch(e){console.error(e)}
   if(!FLOORS.blf_water)FLOORS.blf_water=FLOORS.water||FLOORS.cobble;
   if(!FLOORS.blf_flood){if(typeof gyFloorTone==='function'&&FLOORS.water)try{gyFloorTone('blf_flood','water',.5,[.7,.9,.8])}catch(e){}if(!FLOORS.blf_flood)FLOORS.blf_flood=FLOORS.blf_water}
-  for(const [k,h] of [['yar_boat_row',.55],['greeds',.9],['reeds',.85],['hgwm_reed0',1.5],['ww_crowtree',1.9],['ww_totem',1.2],['ww_sign',1.2],['ww_willow',2.6],['wm_boat',.8],['gy_ghost0',1.1],['gy_ghost1',1.1],['gy_ghost2',1.1],['lamp',1.5],['kh_oqstuff_9',.5]])if(NPC_H[k]===undefined)NPC_H[k]=h;
+  for(const [k,h] of [['yar_boat_row',.55],[b14Dead('b14_greeds','greeds','saturate(.2) brightness(.5)'),.9],[b14Dead('b14_reeds','reeds','saturate(.12) brightness(.5)'),.85],['hgwm_reed0',1.5],['ww_crowtree',1.9],['ww_totem',1.2],['ww_sign',1.2],['ww_willow',2.6],['wm_boat',.8],['gy_ghost0',1.1],['gy_ghost1',1.1],['gy_ghost2',1.1],['lamp',1.5],['kh_oqstuff_9',.5]])if(NPC_H[k]===undefined)NPC_H[k]=h;
   BLG._art=1}
 /* ---------- the sound: water, drips, the sigh of the wisps ---------- */
 const BLGS={nextDrip:0,nextGlug:0,nextSigh:0,nextCrow:0};
@@ -200,7 +200,7 @@ function blgBuild(p){
   box(BLG_HOUSE_OSK.x0-1,BLG_HOUSE_OSK.y0-1,BLG_HOUSE_OSK.x1+1,BLG_HOUSE_OSK.y1+1);box(BLG_HOUSE_NAN.x0-1,BLG_HOUSE_NAN.y0-1,BLG_HOUSE_NAN.x1+1,BLG_HOUSE_NAN.y1+1);
   box(BLG_HOUSE_REEVE.x0-1,BLG_HOUSE_REEVE.y0-1,BLG_HOUSE_REEVE.x1+1,BLG_HOUSE_REEVE.y1+2);
   // ground and water
-  for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=ix(x,y);if(land[i]){fm[i]='5';hgt[i]=.3}else{fm[i]='6';hgt[i]=-.3;block[i]=1}}
+  for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=ix(x,y);if(land[i]){fm[i]='0';hgt[i]=.3}else{fm[i]='5';hgt[i]=-.3;block[i]=1}}
   C.setF(74,28,87,62,'0');C.setF(2,28,14,62,'0');
   C.pth(50,38,74,39,'2');C.pth(14,38,22,39,'2');C.pth(22,38,50,39,'1');C.pth(75,37,87,39,'1');C.pth(2,37,13,39,'1');
   C.pth(33,35,40,41,'3');C.pth(47,40,48,47,'1');C.pth(49,48,50,48,'2');C.pth(62,17,62,18,'2');C.pth(28,17,28,18,'2');C.pth(35,52,38,58,'1');C.pth(36,40,36,33,'1');C.pth(42,40,42,41,'1');C.pth(31,35,31,37,'1');
@@ -209,7 +209,7 @@ function blgBuild(p){
   C.gate('E',38);C.gate('W',38);
   // the houses: two stilt houses with enterable doors, a few shut ones
   C.house(BLG_HOUSE_NAN);C.house(BLG_HOUSE_OSK);C.house(BLG_HOUSE_REEVE);
-  for(const h of [{x0:40,x1:41,y0:33,y1:34,face:'S',sty:'timber',roof:'thatch2',wh:2.1},{x0:26,x1:27,y0:42,y1:43,face:'N',sty:'timber',roof:'thatch2',wh:2.1},{x0:46,x1:47,y0:32,y1:33,face:'S',sty:'timber',roof:'thatch2',wh:2.1},{x0:30,x1:31,y0:44,y1:45,face:'N',sty:'timber',roof:'thatch2',wh:2.1}])C.house(Object.assign({lit:false},h));
+  for(const h of [{x0:40,x1:41,y0:33,y1:34,face:'S',sty:'dtimber',roof:'thatch2',wh:2.1},{x0:26,x1:27,y0:42,y1:43,face:'N',sty:'dtimber',roof:'thatch2',wh:2.1},{x0:46,x1:47,y0:32,y1:33,face:'S',sty:'dtimber',roof:'thatch2',wh:2.1},{x0:30,x1:31,y0:44,y1:45,face:'N',sty:'dtimber',roof:'thatch2',wh:2.1}])C.house(Object.assign({lit:false},h));
   for(const h of [BLG_HOUSE_NAN,BLG_HOUSE_OSK,BLG_HOUSE_REEVE]){for(const [x,y] of [[h.x0-1,h.y0-1],[h.x1+1,h.y0-1],[h.x0-1,h.y1+1],[h.x1+1,h.y1+1]])C.dec('gy_rpost',x,y,{block:true,sc:.9})}
   C.dec('gy_lantern',25,12,{block:true});C.light(25,12,C.pale);C.dec('gy_lantern',29,12,{block:true});C.light(29,12,C.warm);
   // the village green: the Gallows Tree, the hanged, the well, signs, lamps
@@ -239,14 +239,15 @@ function blgBuild(p){
   [[8,14],[67,11],[38,33]].forEach(([x,y],i)=>{const set=(F.mk|0)&(1<<i);C.dec(blgMarkKey(i,!!set),x,y,{block:true,npc:'blg_marker',i});if(!set)C.dec(['gy_ghost0','gy_ghost1','gy_ghost2'][i],x+(i===2?-1:1),y+1,{block:true,npc:'blg_ghost'+i,sc:.9})});
   [[38,64],[8,56],[82,58]].forEach(([x,y],i)=>{if(!((F.salt|0)&(1<<i)))C.dec('kh_oqstuff_9',x,y,{block:true,npc:'blg_salt',i,sc:.9})});
   [[10,50],[6,52],[12,58],[8,46],[44,58],[41,64],[30,50],[78,52],[84,50],[70,12]].forEach(([x,y],i)=>C.dec('gy_mound',x,y,{block:true,npc:'blg_bog',i,sc:.7}));
+  b14GalDress(C,land,ix);
   // reeds along every shore, grey and tall; drowned willows; scrub; pale lights over the water
   for(let y=Y0+1;y<=Y1-1;y++)for(let x=X0+1;x<=X1-1;x++){
     const i=ix(x,y),r=hs(x,y,61);
     if(land[i]){const sh=wat(x-1,y)||wat(x+1,y)||wat(x,y-1)||wat(x,y+1);
-      if(sh&&r<.55&&ok(x,y)&&!C.path.has(x+','+y)){const d=C.D(r<.08?'greeds':r<.3?'hgwm_reed0':'reeds',x,y,{sc:.8+hs(x,y,62)*.5});if(d){d.ox=(hs(x,y,63)-.5)*.5}}
+      if(sh&&r<.55&&ok(x,y)&&!C.path.has(x+','+y)){const d=C.D(r<.08?b14Dead('b14_greeds','greeds','saturate(.2) brightness(.5)'):r<.3?'hgwm_reed0':b14Dead('b14_reeds','reeds','saturate(.12) brightness(.5)'),x,y,{sc:.8+hs(x,y,62)*.5});if(d){d.ox=(hs(x,y,63)-.5)*.5}}
       else if(!sh&&r>.93&&ok(x,y)&&!C.path.has(x+','+y))C.DB(r>.97?'ww_willow':'gy_dead',x,y,{sc:.85+hs(x,y,64)*.4})
       else if(!sh&&r<.12&&ok(x,y)&&!C.path.has(x+','+y)){const d=C.D('bl_grass'+((hs(x,y,65)*4)|0),x,y,{sc:.7+hs(x,y,66)*.6});if(d){d.ox=(hs(x,y,67)-.5)*.6;d.oy=(hs(x,y,68)-.5)*.5}}}
-    else if(r<.045){const nb=wat(x-1,y)&&wat(x+1,y)&&wat(x,y-1)&&wat(x,y+1);if(nb&&!(y>=36&&y<=41&&x>=48&&x<=76)){const d=C.dec(r<.02?'hgwm_reed0':'greeds',x,y,{sc:.9+hs(x,y,69)*.5});if(d)d.ox=(hs(x,y,70)-.5)*.4}}}
+    else if(r<.045){const nb=wat(x-1,y)&&wat(x+1,y)&&wat(x,y-1)&&wat(x,y+1);if(nb&&!(y>=36&&y<=41&&x>=48&&x<=76)){const d=C.dec(r<.02?'hgwm_reed0':b14Dead('b14_greeds','greeds','saturate(.2) brightness(.5)'),x,y,{sc:.9+hs(x,y,69)*.5});if(d)d.ox=(hs(x,y,70)-.5)*.4}}}
   for(let n=0;n<26;n++){const x=X0+2+((hs(n,1,71)*(X1-X0-4))|0),y=Y0+2+((hs(n,2,71)*(Y1-Y0-4))|0);if(wat(x,y)&&!(y>=35&&y<=42&&x>=14&&x<=76))C.light(x,y,[.55,1.15,.8])}
   // the dead and the wisps (the wisps wait where the lamps have not reached, none within five squares of a lit lamp)
   const land2=(t,x,y,r)=>{for(let k=0;k<=(r||4);k++)for(let dy=-k;dy<=k;dy++)for(let dx=-k;dx<=k;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==k)continue;const a=x+dx,b=y+dy;if(ok(a,b)&&!C.path.has(a+','+b)){C.foe(t,a,b);return true}}return false};
@@ -258,7 +259,7 @@ function blgBuild(p){
   for(const [k,x,y] of [['potion6',9,34],['potion6',38,66],['potion6',84,60]])C.items.push({k,x,y,taken:false});
   C.mapNames.push({t:'The Causeway',x:62,y:36,k:'place'},{t:'The Village Green',x:36,y:37,k:'place'},{t:'The Gallows Tree',x:36,y:30,k:'place'},{t:"Osk Brine's House",x:42,y:42,k:'place'},{t:"Nan Sallow's Cottage",x:31,y:32,k:'place'},{t:'The Jetty',x:49,y:49,k:'place'},{t:'Heron Isle',x:66,y:12,k:'place'},{t:"The Reeve's Isle",x:28,y:10,k:'place'},{t:'The Salt Pans',x:38,y:63,k:'place'},{t:'The Reed Beds',x:8,y:16,k:'place'},{t:'The Peat Fields',x:9,y:52,k:'place'},{t:'The Toll Hut',x:80,y:33,k:'place'},{t:'To Ashenfold and the Church',x:85,y:36,k:'place'},{t:'To the Bone Orchard',x:6,y:36,k:'place'});
   const lv=C.finish({start:{x:84,y:38,f:3}});
-  lv.tele=undefined;lv.floorSet=lv.floorSet.slice();lv.floorSet[6]='blf_water';lv._ground={'6':'#6d8c8a','5':'#8a7e5e','4':'#cbc6b2'};
+  lv.tele=undefined;lv.floorSet=lv.floorSet.slice();lv.floorSet[0]='blf_mud';lv.floorSet[5]=b14Mere();lv._ground={'5':'#6d8c8a','0':'#8a7e5e','4':'#cbc6b2'};   // the engine has six floor slots (0 to 5): land is slot 0 (wet mud), water slot 5 (before this the water was char 6, which drew as slot 5, the mud)
   return lv}
 /* ---------- the rooms ---------- */
 function blgOsk(){
@@ -282,8 +283,8 @@ function blgReeve(){
       const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
       P('banner',3,1,{h:1.6});P('banner',11,1,{h:1.6});P('tapestry',7,0,{h:1.1,free:true,block:false});P('counciltable',7,6,{h:.8});P('chandelier',7,8,{h:1.0,free:true,block:false});
       C.raw('mi_pew',7,2,{npc:'blg_reevechair',solid:1,deco:false,sc:1.0});C.raw('gy_chest',9,2,{npc:'blg_reevechest',solid:1,deco:false,sc:.9});
-      C.raw('hay',1,9,{block:false,sc:.6});C.raw('gy_bones',5,9,{block:false,sc:.6});C.raw('gy_bones',11,10,{block:false,sc:.5});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_web',13,1,{block:false,sc:.5});
-      C.raw('greeds',2,5,{block:false,sc:.9});C.raw('greeds',12,5,{block:false,sc:.9});C.raw('greeds',1,7,{block:false,sc:.7})}})}
+      C.raw('hay',1,9,{block:false,sc:.6});C.raw('gy_bones',5,9,{block:false,sc:.3});C.raw('gy_bones',11,10,{block:false,sc:.3});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_web',13,1,{block:false,sc:.5});
+      C.raw(b14Dead('b14_greeds','greeds','saturate(.2) brightness(.5)'),2,5,{block:false,sc:.9});C.raw(b14Dead('b14_greeds','greeds','saturate(.2) brightness(.5)'),12,5,{block:false,sc:.9});C.raw(b14Dead('b14_greeds','greeds','saturate(.2) brightness(.5)'),1,7,{block:false,sc:.7})}})}
 function blgNan(){
   const f=BLG_HOUSE_NAN.front;
   blRoom({id:BLG.NAN,name:"Nan Sallow's Cottage",w:11,h:9,amb:.5,rating:86,floor:'wood',wall:'kh_ohwall1_2',
@@ -304,3 +305,18 @@ if(typeof QRF!=='undefined'){const N=(l,...ids)=>({lvl:l,npc:ids}),T=QRF.T;
   T.blq13={give:[N(9640,'blg_tam')],act:[N(9640,'blg_marker')],ready:[N(9640,'blg_tam')]};
   T.blq14={give:[N(9643,'blg_nan')],act:()=>blF().reeve?[N(9643,'blg_nan')]:[N(9640,'blg_boat0'),{lvl:9642,en:/^blreeve$/}],ready:[N(9643,'blg_nan')]}}
 blRegister(4,blgBuild,{fromE:{x:84,y:38,f:3},fromW:{x:4,y:38,f:1},exitY:38,rooms:[9641,9642,9643],names:{9641:"Osk Brine's House",9642:"The Reeve's Flooded Hall",9643:"Nan Sallow's Cottage"},rating:{9641:86,9642:86,9643:86}});
+
+/* ---------- polish (round 1 to 4): the village and the banks, dressed ---------- */
+function b14GalDress(C,land,ix){
+  const nets=b14Dead('b14_nets','yar_nets','saturate(.25) brightness(.62)',1.2),pots=b14Dead('b14_pots','yar_pots','saturate(.3) brightness(.6)',.4),cage=b14Dead('b14_cage','ww_cagefull','saturate(.4) brightness(.7)',1.1),
+    cage0=b14Dead('b14_cage0','ww_cageempty','saturate(.4) brightness(.7)',1.1),cart=b14Dead('b14_cart','cart','saturate(.3) brightness(.62)',1.1),sacks=b14Dead('b14_sacks','sacks','saturate(.3) brightness(.6)',.7),
+    ban=b14Dead('b14_banner','banner','saturate(.5) brightness(.75)',1.6),crates=b14Dead('b14_fcrates','yar_crates','saturate(.3) brightness(.6)',.8);
+  const ok=(x,y)=>x>=C.X0&&y>=C.Y0&&x<=C.X1&&y<=C.Y1&&land[ix(x,y)]&&C.free(x,y)&&!C.path.has(x+','+y);
+  const put=(k,x,y,o)=>{if(ok(x,y))C.dec(k,x,y,Object.assign({block:true},o||{}))};
+  // the village green: cages with bones at the Gallows Tree, nets on poles, pots, crates, a cart, torn banners
+  put(cage,35,33,{sc:.9});put(cage0,37,33,{sc:.9});put(ban,32,37);put(ban,40,36);put(nets,44,36,{sc:1});put(nets,28,36,{sc:1});put(pots,45,40);put(pots,29,40);put(crates,47,41);put(crates,43,39);put(cart,31,41,{sc:.9});put(sacks,44,43,{sc:.9});
+  // the jetty and the causeway: nets, pots and crates
+  put(nets,49,46);put(pots,52,47);put(crates,48,50);put(nets,58,36);put(pots,64,36);put(crates,70,36);put(pots,76,36);
+  // the banks: a wrecked cart each end, sacks and barrels by the toll hut and the bone orchard road
+  put(cart,78,36,{sc:.9});put(cart,8,36,{sc:.9});put('barrel',79,34,{sc:.8});put(sacks,81,34);put('barrel',6,36,{sc:.8});put(crates,10,36);
+  for(const [x,y] of [[34,38],[40,38],[44,38],[48,38],[56,38],[66,38],[10,38],[78,38]])if(ok(x,y))C.dec('gy_bones',x,y,{sc:.4})}
