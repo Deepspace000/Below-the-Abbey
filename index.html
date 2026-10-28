@@ -1302,6 +1302,8 @@ function areaAudio(){
     else if(LEVEL===35){T.music_tavern=.5;T.village_ambience=.15}
     else if(LEVEL===44){T.village_ambience=.8}
     else if(LEVEL===496){T.village_ambience=.26;T.wind_loop=.05}
+    else if(LEVEL===600){T.wind_loop=.2} // Sale: cold wind, no village (src/desert/sale_sound.js adds the bell, crows and notes)
+    else if(LEVEL>=601&&LEVEL<=603){T.dungeon_ambience=.3} // the cellar, the crypt and the belfry of Sale
     else if(LEVEL===305){T.village_ambience=.5}
     else if(typeof yarSea==='function'&&yarSea(LEVEL)){T.village_ambience=LEVEL===290||LEVEL===304?.22:.06}
     else if(STREAM_LISTS[LEVEL]&&LEVEL>=50&&!(LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor)){T.dungeon_ambience=.18}
@@ -2841,7 +2843,7 @@ function spriteList(){
 let SC=ctx; // sprites are painted straight onto the full-size screen, not into the small 3D picture, so they stay sharp
 function drawSprites(cx,cy,dX,dY,pX,pY){
   sprRelease();
-  const inv=-1/PL,list=spriteList().concat(LEVEL===44&&LEVELS[44].sky?khSkyList(cx,cy,dX,dY):((LEVEL===YR.ID||LEVEL===496||LEVEL===305||LEVEL===304||LEVEL===364||LEVEL===470||hgtLook(LEVEL)||(LEVEL>=400&&LEVEL<440)||(typeof hsSkyOn==='function'&&hsSkyOn(LEVEL)))&&LEVELS[LEVEL]&&LEVELS[LEVEL].sky?khSkyList(cx,cy,dX,dY,LEVELS[LEVEL],.6):[])),proj=[],far=LEVEL===44?26:(G.day||0)>0?34:20,far2=far*far,farT=LEVEL===44?26:(G.day||0)>0?33:16; // outdoors the trees stay drawn as far as the walls can be seen
+  const inv=-1/PL,list=spriteList().concat(LEVEL===44&&LEVELS[44].sky?khSkyList(cx,cy,dX,dY):((LEVEL===YR.ID||LEVEL===496||LEVEL===600||LEVEL===305||LEVEL===304||LEVEL===364||LEVEL===470||hgtLook(LEVEL)||(LEVEL>=400&&LEVEL<440)||(typeof hsSkyOn==='function'&&hsSkyOn(LEVEL)))&&LEVELS[LEVEL]&&LEVELS[LEVEL].sky?khSkyList(cx,cy,dX,dY,LEVELS[LEVEL],.6):[])),proj=[],far=LEVEL===44?26:(G.day||0)>0?34:20,far2=far*far,farT=LEVEL===44?26:(G.day||0)>0?33:16; // outdoors the trees stay drawn as far as the walls can be seen
   for(const s of list){
     if(s.custom){const q=s.custom.prep(cx,cy,dX,dY);if(q>0){s.tY=q;s.tX=0;proj.push(s)}continue} // a fish tank (hgt_tanks.js) draws itself
     const rx=s.x-cx,ry=s.y-cy;
@@ -3739,7 +3741,7 @@ function giveJumpGear(target){
 }
 function jumpFromUrl(){
   const q=new URLSearchParams(location.search);let town=(q.get('town')||'').toLowerCase().replace(/[^a-z]/g,'');if(!town)return;
-  const target=Math.max(1,Math.min(town==='witchwood'?82:town==='blackswill'||town==='gardens'?80:40,parseInt(q.get('lvl')||'8',10)||8));
+  const target=Math.max(1,Math.min(town==='sale'?90:town==='witchwood'?82:town==='blackswill'||town==='gardens'?80:40,parseInt(q.get('lvl')||'8',10)||8));
   backupAuto();
   const sv=readSave('auto')||readSave('prev');
   if(sv&&!['oldhaven','oakwood','landpath','pilgrim','monastery','monasterygate','hollowland','orangetower','orangeboss','hollowgrass','kraken'].includes(town)){restore(sv)}
@@ -3756,7 +3758,7 @@ function jumpFromUrl(){
     msg('The party stands at the Kraken line with all four Kraken harpoons. Walk east.','#ffe36a');return}
   if(town==='abbey'||town==='thornwood'){F.townSeen=0;delete F.abbeyIntroSeen;G.bossDead=true;goToLevel(2);G.state='play';G.menu=false;return}
   F.townSeen=1;F.abbeyIntroSeen=1;F.gwoodSeen=1;
-  const AREAS={brackenden:[496,89,8,0],hgtest:[480,10,20,0],hgtrooms:[4960,14,4,2],hgtmaze:[486,106,216,0],hgttank:[487,30,45,0],hgtesttwo:[485,10,50,0],ulb:[482,75,3,2],nibb:[484,75,146,0],exsce:[481,75,147,0],glorm:[483,75,144,0],hollowgrass:[470,75,142,0],hollowland:[364,35,60,0],orangetower:[440,12,14,0],orangeboss:[443,17,19,0],oldhaven:[305,74,141,0],wenlock:[496,95,50,3],yarrim:[290,18,40,1],gardens:[490,45,87,0],witchwood:[520,27,52,0],oakwood:[311,2,36,1],landpath:[400,76,555,0],monasterygate:[411,73,306,0],pilgrim:[400,76,555,0],monastery:[430,42,66,0],bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],khemetracity:[44,201,379,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
+  const AREAS={brackenden:[496,89,8,0],hgtest:[480,10,20,0],hgtrooms:[4960,14,4,2],hgtmaze:[486,106,216,0],hgttank:[487,30,45,0],hgtesttwo:[485,10,50,0],ulb:[482,75,3,2],nibb:[484,75,146,0],exsce:[481,75,147,0],glorm:[483,75,144,0],hollowgrass:[470,75,142,0],hollowland:[364,35,60,0],orangetower:[440,12,14,0],orangeboss:[443,17,19,0],oldhaven:[305,74,141,0],wenlock:[496,95,50,3],sale:[600,67,36,3],yarrim:[290,18,40,1],gardens:[490,45,87,0],witchwood:[520,27,52,0],oakwood:[311,2,36,1],landpath:[400,76,555,0],monasterygate:[411,73,306,0],pilgrim:[400,76,555,0],monastery:[430,42,66,0],bluedunes:[60,BLUEDUNES.start.x,BLUEDUNES.start.y,1],goldenerg:[61,GOLDEN.start.x,GOLDEN.start.y,1],violeterg:[62,VIOLET.start.x,VIOLET.start.y,2],flatlands:[64,FLAT.start.x,FLAT.start.y,3],whitedunes:[63,WHITE.start.x,WHITE.start.y,0],bluecave:[41,BLUECAVE.x,BLUECAVE.y,3],prism:[40,25,32,0],hollow:[39,1,37,1],road:[10,1,15,1],ironroad:[10,1,15,1],gwood:[7,22,28,0],moor:[19,1,20,1],pass:[22,1,76,1],thornwood:[2,6,12,1],grave:[20,1,13,1],sandroad:[41,2,210,1],tomb:[42,48,70,0],reddunes:[43,REDDUNES.cxS,REDDUNES.start.y,0],khemetra:[43,REDDUNES.cxN,RS.NORTH+14,0],khemetracity:[44,201,379,0],tombhall:[42,48,44,0],burrow:[50,10,14,0],sandpalms:[41,51,125,0],desert:[41,61,60,0],tombgate:[41,70,14,0]};
   // the Deeper Hollow: the door into the maze, and the landing just before the first boat (the maze is built first, then the spot is read from it)
   {const hgdSpot=(which)=>{try{if(typeof hgBuild==='function'){hgBuild();hgdBuild()}}catch(e){console.error(e)}const L=LEVELS[475];if(!L)return [475,101,198,0];
       if(which==='boat'&&L._hgdb&&L._hgdb.docks&&L._hgdb.docks[0]){const d=L._hgdb.docks[0];return [475,d.ax,d.ay,DIRS.findIndex(q=>q[0]===d.dx&&q[1]===d.dy)]}
@@ -64303,6 +64305,885 @@ function wldMake(){
 }
 KH_LAZY[WLD.ID]=()=>{if(!LEVELS[WLD.ID])wldMake()};
 LEVEL_NAMES[WLD.ID]="Old Bracken's Den";LEVEL_RATING[WLD.ID]=80;
+
+/* ---- src/desert/sale_ids.js ---- */
+/* ==========================================================================
+   SALE: THE NUMBERS (prefix sa / SA). A grim gothic town of the dead, rated 90, at the end of the (future) Blighted Lands road, west of Wenlock.
+   Level ids (all free ranges; see tools/SALE_NOTES.md):
+     600        Sale, the town (72 by 72)
+     601        The Hollow Cellar (survivors; quest sa4)          602 The Sale Crypt (relic; quest sa9)          603 The Belfry (the boy; quest sa7)
+     604 to 619 reserved. 604 to 609 are stubs ("the Blighted Road, not built yet", a way back to Sale) so that a save or a link to them loads; the real road may replace them with
+                `saAttachRoad(toLevel, x, y, f)` (see sale_town.js), which makes the east gate of Sale lead there.
+     7200 to 7299  rooms behind the doors of Sale (the ten shops, two cottages; 7299 is the Sanctuary, which stays barred, Wren and Aldous Wend will live there later).
+   SA.START is where the party arrives from the east gate (the entrance square); SA.EAST is the gate tile itself.
+   ========================================================================== */
+const SA={ID:600,W:72,H:72,CELLAR:601,CRYPT:602,BELFRY:603,STUBS:[604,605,606,607,608,609],RESERVED:[610,619],H0:7200,H1:7299,SANCT:7299,RATING:90,
+  START:{x:67,y:36,f:3},EAST:{x:69,y:36},ROAD:null,ready:false,loading:null};
+const saIs=n=>n>=600&&n<=619||n>=7200&&n<=7299;
+for(let i=600;i<=619;i++)LEVEL_RATING[i]=90;for(let i=7200;i<=7299;i++)LEVEL_RATING[i]=90;
+Object.assign(LEVEL_NAMES,{600:'Sale',601:'The Hollow Cellar',602:'The Sale Crypt',603:'The Belfry of Sale'});
+for(const i of SA.STUBS)LEVEL_NAMES[i]='The Blighted Road';
+/* the stubs: one small bare room with a way back to the east gate of Sale, built when first asked for (a saved game or a link that names one of these levels) */
+function saStubBuild(id){
+  if(LEVELS[id])return LEVELS[id];
+  const R=khRoom({id:'sastub'+id,name:'The Blighted Road',room:'ruin',keeper:null,enemies:[]},id,{to:SA.ID,x:SA.START.x,y:SA.START.y,f:3});
+  const L=R.level;L.diff=90;L.noExtras=true;L.decor=L.decor.filter(d=>!d.npc);L.decor.push({k:'cairn',x:5,y:4,block:true,npc:'sa_stub'});
+  LEVELS[id]=L;return L}
+for(const i of SA.STUBS)KH_LAZY[i]=()=>saStubBuild(i);
+for(let i=SA.RESERVED[0];i<=SA.RESERVED[1];i++)KH_LAZY[i]=()=>saStubBuild(i);
+
+/* ---- src/desert/sale_art.js ---- */
+/* ==========================================================================
+   SALE: THE LOOK (prefix sa / SA). Pictures, creatures, items, weather and the way the town loads.
+   Sale reuses what is already painted: Wenlock's walls, roofs and folk (assets/wl, wl2), the graveyard's undead, ghosts, dead trees, lanterns, gothic fronts and brick (assets/gy, gy2),
+   and adds only what the painted set lacks, in assets/sa (manifest.json): the barricade, the gibbet and the dead fountain. Each piece has a stand-in until its sheet is cut.
+   The look: cold dusk, low fog (weatherNow), dark roofs, grey and black stone, ghosts made from the painted townsfolk (pale, see-through, fading at the feet).
+   ========================================================================== */
+const SA_ART={man:null};
+/* the painted pieces of Sale itself, loaded as IMG['sa_<name>'] (assets/sa/manifest.json: name -> {file, h_cells}); none yet is fine */
+async function saLoadOwn(){
+  try{SA_ART.man=await (await fetch('assets/sa/manifest.json?v='+VERSION)).json()}catch(e){SA_ART.man={}}
+  await Promise.all(Object.keys(SA_ART.man||{}).map(k=>loadImg('sa_'+k,'assets/sa/'+SA_ART.man[k].file)));
+}
+function saLoad(){
+  if(SA.loading)return SA.loading;
+  SA.loading=(async()=>{
+    await wlLoad();
+    await gyLoad();
+    await saLoadOwn();
+    saPrep();
+    SA.ready=true;
+  })().catch(e=>{console.error('saLoad',e);SA.ready=true});
+  return SA.loading}
+/* a ghost: a painted townsperson made pale and see-through, fading out towards the feet */
+function saGhost(src,key,tone){
+  const im=IMG[src];if(!im||!im.width||IMG[key])return;
+  IMG[key]=mkCanvas(im.width,im.height,(x,w,h)=>{
+    x.globalAlpha=.8;x.drawImage(im,0,0);x.globalAlpha=1;
+    x.globalCompositeOperation='source-atop';x.fillStyle=tone||'rgba(140,185,235,.6)';x.fillRect(0,0,w,h);
+    x.globalCompositeOperation='destination-in';const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'rgba(0,0,0,.8)');g.addColorStop(.65,'rgba(0,0,0,.66)');g.addColorStop(1,'rgba(0,0,0,.08)');x.fillStyle=g;x.fillRect(0,0,w,h)});
+  NPC_H[key]=NPC_H[src]||.98}
+const SA_GHOSTFOLK=['kh_ohfolk1_0','kh_ohfolk1_2','kh_ohfolk2_0','kh_ohfolk2_5','kh_ohfolk3_3','kh_ohfolk4_0','kh_ohfolk4_3','kh_ohfolk5_2','kh_ohfolk6_0','kh_ohsold1_1','kh_oqmen_1','kh_ohfolk3_0'];
+/* the stone of Sale: the painted Oldhaven walls, cooled and darkened (a style per look) */
+const SA_STYLES={sa_slate:[150,156,172,0],sa_moss:[148,168,146,0],sa_black:[108,110,124,0],sa_bone:[206,200,186,.04],sa_brick:[184,142,134,0],sa_ash:[168,166,164,0]};
+function saRoofs(){
+  const mk=(name,src,rgb)=>{const im=IMG[src];if(!im||!im.width)return;if(IMG[name]){WL_ROOFS[name]=name;return}
+    IMG[name]=mkCanvas(im.width,im.height,(x,w,h)=>{x.drawImage(im,0,0);x.globalCompositeOperation='multiply';x.fillStyle='rgb('+rgb.join(',')+')';x.fillRect(0,0,w,h);x.globalCompositeOperation='destination-in';x.drawImage(im,0,0)});WL_ROOFS[name]=name};
+  const base=k=>WL_ROOFS[k]||'kh_ohroof1_0';
+  mk('sa_rf_1',base('slate'),[150,152,170]);mk('sa_rf_2',base('stone'),[140,144,150]);mk('sa_rf_3',base('moss'),[150,170,150]);mk('sa_rf_4',base('dark'),[160,150,160]);mk('sa_rf_5',base('plum'),[150,125,150]);
+  mk('sa_rf_6',base('tile'),[150,112,106]);mk('sa_rf_7',base('tile2'),[136,118,112]);mk('sa_rf_8',base('thatch'),[130,124,110]);mk('sa_rf_9',base('shingle'),[130,122,126]);
+}
+const SA_ROOFSET=['sa_rf_1','sa_rf_2','sa_rf_3','sa_rf_4','sa_rf_5','sa_rf_6','sa_rf_7','sa_rf_8','sa_rf_9'];
+function saFloors(){
+  gyAlias();
+  const t=(out,src,g,c)=>gyFloorTone(out,src,g,c);t('gyf_cflag','gyf_flag',.46,[.88,.92,1]);
+  t('sa_cobble','gyf_cobble',.62,[.9,.95,1.06]);t('sa_flag','gyf_flag',.52,[.9,.94,1.06]);t('sa_dead','gyf_dirt',.5,[.92,.98,.86]);t('sa_earth','gyf_dirt',.66,[1,.92,.84]);
+  t('sa_dry','gyf_grass',.42,[1.05,.92,.5]);t('sa_mire','gyf_dirt',.34,[.8,.95,.9]);
+  return ['sa_cobble','sa_flag','sa_dead','sa_earth','sa_mire','sa_dry']}
+function saPrep(){
+  wlHeights();wlRoofs();wlStyles();gyAlias();saRoofs();
+  for(const k in SA_STYLES){const t=SA_STYLES[k];OH_STY[k]={plain:'kh_ohwall1_0',alt:'kh_ohwall1_1',win:'kh_ohwall1_4',shop:'kh_ohwall1_4',door:'kh_ohwall1_5',win2:'kh_ohwall1_4',slit:'kh_ohwall1_3',tint:t,zoom:1.5,contrast:1.7}}
+  SA_GHOSTFOLK.forEach((s,i)=>saGhost(s,'sa_gh_'+i));
+  for(const i of [0,1,2]){if(IMG['gyp_ghost_'+i])NPC_H['sa_gl_'+i]=1.1}
+  // the stand-ins for the pieces that are painted later: a boarded door is the iron fence, the gibbet and the dead fountain are the wooden post and a tall stone
+  const alias=(k,srcs,h)=>{if(IMG['sa_'+k]){NPC_H['sa_'+k]=NPC_H['sa_'+k]||(SA_ART.man&&SA_ART.man[k]&&SA_ART.man[k].h_cells)||h;return}for(const s of srcs)if(IMG[s]){IMG['sa_'+k]=IMG[s];NPC_H['sa_'+k]=h;return}};
+  for(const i of [0,1,2]){if(!IMG['sa_planks'+i]){IMG['sa_planks'+i]=mkCanvas(8,8,()=>{});NPC_H['sa_planks'+i]=.5}} // the planks are painted on the door tile itself; this invisible piece only carries the keeper's voice and the quest mark
+  alias('gibbet',['gy_rpost'],2.4);alias('fountain',['gy_urn'],1.5);alias('cart',['kh_cart1_0'],.9);
+}
+/* ---- the dead (the graveyard's creatures under Sale's own names; none of them is a boss) ---- */
+{const cl=(base,o)=>Object.assign({},ENEMY_DEF[base],{gy:undefined,sa:1},o);
+ Object.assign(ENEMY_DEF,{
+  saskel:cl('gyskel',{name:'Gaunt Skeleton'}),sapike:cl('gypike',{name:'Pikeman of the Watch'}),sabmage:cl('gybmage',{name:'Bone Priest'}),
+  saghoul:cl('gyghoul',{name:'Sale Ghoul'}),sazombie:cl('gyzombie',{name:'Plague Zombie'}),sagiant:cl('gygiant',{name:'Bloated Gravedigger'}),
+  sawight:cl('gywraith',{name:'Wight of Sale'}),saranulf:cl('gyaldric',{name:'Sir Ranulf the Hollow',hp:230,dmg:[8,13],hit:.9,xp:200,boss:undefined,gyb:undefined,verb:'cleaves',act:undefined,w:gyW('boss_2',1.4),sa:1,named:1})});
+ for(const t of ['saskel','sapike','sabmage','saghoul','sazombie','sagiant','sawight','saranulf'])if(ENEMY_DEF[t].gyb!==undefined)delete ENEMY_DEF[t].gyb;
+ if(typeof NO_VARY!=='undefined')NO_VARY.push('saranulf');if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push('saranulf');
+ if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^saghoul/,'tomblung',.2],[/^sazombie/,'foodpoison',.2],[/^sagiant/,'foodpoison',.2],[/^sawight/,'shaken',.2],[/^saranulf/,'shaken',.2],[/^saskel|^sapike/,'graverot',.12])}
+/* ---- the things the party carries for the ten trust quests ---- */
+Object.assign(ITEMDEF,{
+  sa_oil:{n:'Flask of Lamp Oil',k:'quest',t:'Quest item',ic:'lantern',c:'#d8b050',stack:1,price:0,sw:.3,d:'A stoppered clay flask of lamp oil, sealed with wax, left in a cupboard in the dead quarter of Sale. Somebody has scratched P on the base. It belongs to Pennyworth\'s Provisions.'},
+  sa_flour:{n:'Sack of Rye Flour',k:'quest',t:'Quest item',ic:'ore',c:'#d8cba0',stack:1,price:0,sw:.8,d:'A small sack of rye flour from the mill at Hollin Farm, still dry, still good, and stamped with a wheatsheaf. The baker will know it.'},
+  sa_sign:{n:'The Gilded Eye',k:'quest',t:'Quest item',ic:'amulet',c:'#e0b850',stack:1,price:0,sw:.5,d:'A carved and gilded shop sign in the shape of an eye, taken down from the jeweller\'s door by something with long fingers and hung in a ruined farm. The gilt is scratched, the eye is still bright.'},
+  sa_gravesalt:{n:'Grave-Salt',k:'quest',t:'Quest item',ic:'ore',c:'#e8e8f0',stack:1,price:0,sw:.3,d:'A fist of white crystals found in the Sale Crypt where the walls sweat. The alchemist wants it more than gold. It is cold, and your fingers go numb if you hold it too long.'},
+  sa_letter:{n:"The Scrivener's Letter",k:'quest',t:'Quest item',ic:'book',c:'#e8dcc0',stack:1,price:0,sw:.05,d:'A letter folded in thirds, sealed with black wax and addressed in a careful hand to the bellman of Sale. It is damp.'},
+  sa_reply:{n:"The Bellman's Reply",k:'quest',t:'Quest item',ic:'book',c:'#cfc4a8',stack:1,price:0,sw:.05,d:'A scrap of paper with three words on it, written with a shaking hand. The bellman has signed it with a drawing of a bell.'}});
+/* ---- the look: cold fog and dusk over the streets; the cellars, crypt and belfry keep their own dark ---- */
+{const _w=weatherNow;weatherNow=function(){
+  if(LEVEL===SA.ID)return {id:'fog',n:'Grave fog',fog:.03,haze:.6,dark:.55,mix:.55,col:[150,160,184],text:'A cold grey fog lies in the streets of Sale. A bell tolls somewhere, a long way off, and nobody is ringing it.'};
+  if(saIs(LEVEL))return null;
+  return _w.apply(this,arguments)}}
+/* ---- arrival: the pictures first, then the level; every id of Sale builds when asked for ---- */
+{const _g=goToLevel;goToLevel=function(n,entry){
+  if(saIs(n)&&!SA.ready&&!SA._wait){SA._wait=1;try{msg('Fog, and the toll of a far bell...','#a8b8d8')}catch(e){}saLoad().then(()=>{SA._wait=0;goToLevel(n,entry)}).catch(()=>{SA._wait=0});return}
+  if(saIs(n)&&!LEVELS[n]&&KH_LAZY[n])try{KH_LAZY[n]()}catch(e){console.error('sale build',e)}
+  if(saIs(n)&&!LEVELS[n]){try{sfx('locked');msg('The door is locked. Nobody answers.','#d09a80')}catch(e){}return}
+  const r=_g.apply(this,arguments);
+  if(saIs(n)){try{saArrive(n)}catch(e){console.error('saArrive',e)}}
+  return r}}
+{const _j=jumpToLevel;jumpToLevel=function(n,target){
+  if(saIs(n)&&!SA.ready&&!SA._wait){SA._wait=1;saLoad().then(()=>{SA._wait=0;jumpToLevel(n,target)});return}
+  return _j.apply(this,arguments)}}
+{const _r=restore;restore=function(sv){
+  const l=sv&&sv.level;
+  if(saIs(l)&&!SA.ready&&!SA._wait){SA._wait=1;saLoad().then(()=>{SA._wait=0;if(!LEVELS[l]&&KH_LAZY[l])try{KH_LAZY[l]()}catch(e){console.error(e)}restore(sv)});return}
+  return _r.apply(this,arguments)}}
+{const _rn=restoreNow;restoreNow=function(sv){const r=_rn.apply(this,arguments);try{if(saIs(LEVEL))saArrive(LEVEL)}catch(e){console.error('sale restore',e)}return r}}
+{const _wd=wdDoorLevel;wdDoorLevel=function(n){return _wd.apply(this,arguments)||saIs(n)}}
+
+/* ---- src/desert/sale_town.js ---- */
+/* ==========================================================================
+   SALE: THE TOWN (level 600, rated 90). A small, grim, gothic town of the dead, 72 by 72, in dusk fog. One road, Candle Street, runs west to east through Gibbet Square (a dead fountain, a gibbet, a lamp at each corner);
+   the Sanctuary (a gothic chapel) stands at the north of the square. Bell Lane goes north to the Belfry, Charnel Row south into the dead quarter (ruined houses, the Hollow Cellar, the crypt),
+   Tanners' Lane south through a few quiet cottages, and the Back Track runs along the south side to the gravedigger's cottage and, past the fog, Hollin Farm (ruins).
+   Ten shops line Candle Street. Every one is BARRICADED (planks over the door, the keeper's voice through the boards) until the party has won that keeper's trust (sale_quests.js).
+   The party arrives from the east gate at SA.START (the entrance square); the road to the east gate is not built yet: saAttachRoad(to,x,y,f) lets later work attach it. Test link: ?town=sale&lvl=90.
+   Hostile ground: only the dead quarter and Hollin Farm (SA_ZONES); everywhere else the dead are peaceful ghosts and the party walks freely (sale_folk.js).
+   ========================================================================== */
+const SA_Y=36,SA_SQ={x0:30,y0:30,x1:40,y1:42};
+const SA_ROADS=[[3,36,68,36,'0','Candle Street'],[57,20,57,35,'3','Bell Lane'],[20,37,20,60,'3','Charnel Row'],[53,37,53,60,'3',"Tanners' Lane"],[20,61,66,61,'3','Back Track']];
+const SA_ROAD=(x,y)=>SA_ROADS.some(r=>x>=r[0]&&x<=r[2]&&y>=r[1]&&y<=r[3]);
+/* where the dead are hostile; nowhere else is */
+const SA_ZONES=[{k:'dead',n:'The Dead Quarter',x0:8,y0:38,x1:34,y1:67},{k:'farm',n:'Hollin Farm',x0:57,y0:55,x1:68,y1:67}];
+const saZoneAt=(x,y)=>SA_ZONES.find(z=>x>=z.x0&&x<=z.x1&&y>=z.y0&&y<=z.y1)||null;
+/* the ten shops: name, kind, keeper, look. `q` is the trust quest that opens it, `room` the Wenlock room it is furnished like, `stock` its goods (sale_rooms.js) */
+const SA_SPEC={
+  general:{name:"Pennyworth's Provisions",kind:'general',keeper:'Tabitha Pennyworth',sty:'sa_slate',roof:'sa_rf_1',wh:2.5,room:'general',q:'sa1',key:'general'},
+  armour:{name:"Ironbrow's Armoury",kind:'armour',keeper:'Sergeant Hob Ironbrow',sty:'sa_black',roof:'sa_rf_2',wh:2.6,room:'armour',q:'sa2',key:'armour'},
+  weapons:{name:"Stroud and Daughter, Weaponsmiths",kind:'weapons',keeper:'Marta Stroud',sty:'sa_brick',roof:'sa_rf_7',wh:2.5,room:'weapons',q:'sa3',key:'weapons'},
+  apothecary:{name:"Marrowbone's Remedies",kind:'herb',keeper:'Old Nan Marrowbone',sty:'sa_moss',roof:'sa_rf_3',wh:2.4,room:'herbs',q:'sa4',key:'apothecary'},
+  books:{name:'The Dead Letter Scriptorium',kind:'scroll',keeper:'Ottoline Quill',sty:'sa_ash',roof:'sa_rf_5',wh:2.6,room:'scrolls',q:'sa5',key:'books'},
+  jeweller:{name:'The Gilded Eye, Jewellers',kind:'jewel',keeper:'Silvio Gilt',sty:'sa_bone',roof:'sa_rf_4',wh:2.4,room:'chandler',q:'sa6',key:'jeweller'},
+  tailor:{name:"Madame Veil, Mourning Tailor",kind:'tailor',keeper:'Madame Orla Veil',sty:'sa_ash',roof:'sa_rf_9',wh:2.4,room:'tailor',q:'sa7',key:'tailor'},
+  butcher:{name:'Crust and Cleaver',kind:'bakery',keeper:'Hettie Mawd',sty:'sa_brick',roof:'sa_rf_6',wh:2.4,room:'bakery',q:'sa8',key:'butcher'},
+  alchemist:{name:"Vesper's Alembic",kind:'potion',keeper:'Master Orrin Vesper',sty:'sa_slate',roof:'sa_rf_5',wh:2.6,room:'potion',q:'sa9',key:'alchemist'},
+  tavern:{name:'The Last Orders',kind:'inn',keeper:'Big Bram Cobb',sty:'sa_black',roof:'sa_rf_4',wh:2.9,room:'inn',q:'sa10',key:'tavern'}
+};
+/* the lots. [side, position, width, special]. N and S: the two sides of Candle Street (position = x). CW and CE: Charnel Row. TW, TE: Tanners' Lane. BW, BE: Bell Lane. KN and KS: the Back Track (position = x) */
+const SA_LOTS=[
+  ['N',5,2],['N',8,3,'general'],['N',13,2],['N',16,3,'armour'],['N',21,2],['N',24,3,'weapons'],['N',43,3,'apothecary'],['N',48,2],['N',52,3,'books'],['N',60,3,'jeweller'],['N',64,2],
+  ['S',5,2],['S',8,3,'butcher'],['S',13,2],['S',24,3,'alchemist'],['S',43,3,'tavern'],['S',48,3,'tailor'],['S',56,2],['S',60,2],['S',64,2],
+  ['CW',42,2],['CW',47,2,'rope'],['CW',52,2],['CW',57,2],['CE',44,2],['CE',49,2],['CE',54,2],
+  ['TW',41,2],['TW',46,2],['TW',51,2],['TW',56,2],['TE',43,2],['TE',48,2],['TE',53,2],['TE',58,2],
+  ['BW',22,2],['BW',26,2,'ringer'],['BW',32,2],['BE',24,2],['BE',28,2],['BE',32,2],
+  ['KN',28,2],['KN',44,2,'digger'],['KS',30,2],['KS',40,2],['KS',46,2]
+];
+const SA_HOMES={rope:{name:"The Ropewalk Cottage",room:'cellardoor'},ringer:{name:"The Bellman's Cottage",room:'home',scene:'messy',keeper:'sa_k_ringer'},digger:{name:"The Gravedigger's Cottage",room:'home',scene:'spartan',keeper:'sa_k_digger'}};
+function saLotRect(side,pos,w){
+  let x0,y0,x1,y1,face;
+  if(side==='N'){x0=pos;x1=pos+w-1;y0=SA_Y-2;y1=SA_Y-1;face='S'}
+  else if(side==='S'){x0=pos;x1=pos+w-1;y0=SA_Y+1;y1=SA_Y+2;face='N'}
+  else if(side==='CW'||side==='TW'||side==='BW'){const lx={CW:20,TW:53,BW:57}[side];x0=lx-2;x1=lx-1;y0=pos;y1=pos+w-1;face='E'}
+  else if(side==='CE'||side==='TE'||side==='BE'){const lx={CE:20,TE:53,BE:57}[side];x0=lx+1;x1=lx+2;y0=pos;y1=pos+w-1;face='W'}
+  else if(side==='KN'){x0=pos;x1=pos+w-1;y0=59;y1=60;face='S'}
+  else{x0=pos;x1=pos+w-1;y0=62;y1=63;face='N'}
+  return {x0,y0,x1,y1,face}}
+function saLotDoor(h){
+  const horiz=h.face==='N'||h.face==='S',span=horiz?h.x1-h.x0+1:h.y1-h.y0+1,ci=(horiz?h.x0:h.y0)+((span-1)>>1)+(span>=4&&hash2(h.x0,h.y0,13)<.5?1:0);
+  if(h.face==='N'){h.door=[ci,h.y0];h.front=[ci,h.y0-1];h.out=0;h.wall=[0,1]}
+  else if(h.face==='S'){h.door=[ci,h.y1];h.front=[ci,h.y1+1];h.out=2;h.wall=[0,-1]}
+  else if(h.face==='E'){h.door=[h.x1,ci];h.front=[h.x1+1,ci];h.out=1;h.wall=[-1,0]}
+  else{h.door=[h.x0,ci];h.front=[h.x0-1,ci];h.out=3;h.wall=[1,0]}
+  return h}
+const SA_HOUSES=[];
+{for(const [side,pos,w,sp] of SA_LOTS){const r=saLotRect(side,pos,w);SA_HOUSES.push(Object.assign(r,{w,spk:SA_SPEC[sp]?sp:null,sp:SA_SPEC[sp]||null,home:SA_HOMES[sp]?sp:null}))}
+ let n=SA.H0+1;for(const h of SA_HOUSES){saLotDoor(h);h.id=n++}}
+/* the Sanctuary: a gothic chapel at the north of the square, five squares wide, its door always barred (Wren and Aldous Wend will live there later: its room is 7299, not built) */
+const SA_CHAPEL={x0:32,x1:36,y0:25,y1:29,front:[34,30],out:0};
+const SA_BELFRY={x0:55,x1:59,y0:15,y1:19,door:[57,19],front:[57,20]};
+const SA_CRYPTGATE={x:20,y:62,front:[20,61]};   // the crypt stair: the south end of Charnel Row, below the Back Track
+/* the doors of the town that lead somewhere (for tests and the map): id = the level behind; shops are SA_DOORS entries with .shop */
+const SA_DOORS=[];
+for(const h of SA_HOUSES)if(h.spk||h.home)SA_DOORS.push({id:h.id,name:h.sp?h.sp.name:SA_HOMES[h.home].name,shop:h.spk,home:h.home,front:{x:h.front[0],y:h.front[1]},out:h.out,door:{x:h.door[0],y:h.door[1]}});
+/* ---- the barricade: the painted door with planks nailed across it ---- */
+function saBarricadeTex(baseId,wh,seed){
+  const src=TEX[baseId],Hp=Math.round(128*wh),c=document.createElement('canvas');c.width=128;c.height=Hp;const x=c.getContext('2d');
+  x.putImageData(new ImageData(new Uint8ClampedArray(src.d),128,Hp),0,0);
+  const y0=Hp-128,pl=(cx,cy,len,ang,h,s)=>{x.save();x.translate(cx,cy);x.rotate(ang);const g=x.createLinearGradient(0,-h/2,0,h/2);g.addColorStop(0,'#3a2c1e');g.addColorStop(.5,'#5a4630');g.addColorStop(1,'#2a1f15');x.fillStyle=g;x.fillRect(-len/2,-h/2,len,h);
+    x.strokeStyle='rgba(0,0,0,.65)';x.lineWidth=1.5;x.strokeRect(-len/2,-h/2,len,h);
+    for(let i=0;i<10;i++){const gy=-h/2+2+hash2(i,s,3)*(h-4);x.strokeStyle='rgba(20,10,4,'+(.25+hash2(i,s,4)*.3)+')';x.lineWidth=1;x.beginPath();x.moveTo(-len/2+hash2(i,s,5)*20,gy);x.lineTo(len/2-hash2(i,s,6)*20,gy+(hash2(i,s,7)-.5)*3);x.stroke()}
+    for(const nx of [-len/2+9,len/2-9]){x.fillStyle='#8a8478';x.beginPath();x.arc(nx,0,2.3,0,6.3);x.fill();x.fillStyle='rgba(0,0,0,.5)';x.beginPath();x.arc(nx+.8,.8,1.2,0,6.3);x.fill()}
+    x.restore()};
+  pl(64,y0+30+seed%5,148,-.14+(seed%3)*.03,17,seed);pl(64,y0+60,150,.1-(seed%2)*.05,18,seed+1);pl(64,y0+92-seed%4,146,-.07,17,seed+2);
+  pl(60+seed%7,y0+64,140,Math.PI/2+.04,15,seed+3);
+  const id=addTex(x.getImageData(0,0,128,Hp).data,null);TEX[id].h=Hp;TEX[id].wh=wh;return id}
+function saBuild(){
+  if(LEVELS[SA.ID])return true;
+  if(!SA.ready||(typeof KH_READY!=='undefined'&&!KH_READY)){saLoad();return false}
+  saPrep();
+  const FS=saFloors();
+  const W=SA.W,H=SA.H,N=W*H,hs=(a,b,c)=>hash2(a,b,c);
+  const TM=ohTiles(),chars={D:LEVEL41_DATA.chars.D},chMap=new Map();let nextCh=0x300;
+  const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
+  const pch=n=>{const c=String.fromCharCode(nextCh++);chars[c]=30+n;return c};
+  const rows=[];for(let y=0;y<H;y++)rows.push(new Array(W).fill('.'));
+  const block=new Uint8Array(N),fm=new Array(N).fill('2'),hgt=new Float32Array(N).fill(.3),rk=new Float32Array(N);
+  const solid=(x,y,c)=>{rows[y][x]=c;block[y*W+x]=1};
+  const sky=[],decor=[],lights=[],items=[],enemies=[],used=new Set(),street=new Set();
+  const lv={rows:null,start:{x:SA.START.x,y:SA.START.y,f:SA.START.f},enemies,items,decor,scenery:[],sky,fmap:null,floorSet:FS,floor:FS[2],ceil:'cloud',day:.62,outdoor:true,amb:.6,
+    name:'Sale',label:'Sale',noExtras:true,diff:90,tele:{x:38,y:40},ceilH:5.2,chars,lights,portals:[],torchGap:1e9};
+  const setF=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(x>=0&&y>=0&&x<W&&y<H)fm[y*W+x]=f};
+  const isRoad=(x,y)=>street.has(x+','+y);
+  const free=(x,y)=>x>2&&y>2&&x<69&&y<69&&rows[y][x]==='.'&&!block[y*W+x]&&!used.has(x+','+y)&&!isRoad(x,y);
+  const dc=(k,x,y,o)=>{used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true,deco:true},o||{}))};
+  const tryDc=(k,x,y,o)=>{if(k&&IMG[k]&&free(x,y)){dc(k,x,y,o);return true}return false};
+  const solidDc=(k,x,y,o)=>{if(k&&IMG[k]&&free(x,y)){dc(k,x,y,Object.assign({block:true,walk:false},o||{}));return true}return false};
+  const walk=(k,x,y,o)=>{used.add(x+','+y);decor.push(Object.assign({k,x,y,block:false,walk:true},o||{}))};
+  const near=(x,y,rad)=>{for(let r=0;r<=rad;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(free(x+dx,y+dy))return [x+dx,y+dy]}return null};
+  const person=(id,x,y,rad)=>{const kp=KH_KEEPERS[id];if(!kp)return null;const q=near(x,y,rad||3);if(!q)return null;walk(khFaceKey(kp.face),q[0],q[1],{npc:id,sc:kp.sc||1});SA.people.push([id,q[0],q[1]]);return q};
+  SA.people=[];SA.free=free;SA.near=near;
+  const pick=(arr,a,b,c)=>arr[(hs(a,b,c)*arr.length)|0];
+  const lamp=(x,y)=>{if(solidDc('gy_lantern',x,y))lights.push([x,y])};
+  const foe=(t,x,y)=>{const q=near(x,y,4);if(!q)return false;used.add(q[0]+','+q[1]);enemies.push({t,x:q[0],y:q[1],lvl:90});return true};
+  const DEAD=['gy_dead','gy_dead','gy_yew'],tree=(x,y)=>solidDc(pick(DEAD,x,y,61),x,y,{sc:.9+hs(x,y,62)*.35});
+  const bones=(x,y)=>tryDc('gy_bones',x,y,{sc:.8}),web=(x,y)=>tryDc('gy_web',x,y,{sc:.55});
+  // ---- the ground ----
+  setF(0,0,W-1,H-1,'2');
+  const road=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){street.add(x+','+y);fm[y*W+x]=f}};
+  for(const r of SA_ROADS)road(r[0],r[1],r[2],r[3],r[4]);
+  setF(SA_SQ.x0,SA_SQ.y0,SA_SQ.x1,SA_SQ.y1,'1');for(let x=SA_SQ.x0;x<=SA_SQ.x1;x++)fm[SA_Y*W+x]='0';
+  // the dead quarter is bare earth and dead grass, Hollin Farm too; the mire is a few sunk patches
+  for(const z of SA_ZONES)for(let y=z.y0;y<=z.y1;y++)for(let x=z.x0;x<=z.x1;x++)if(!isRoad(x,y)&&hs(x,y,5)<.8)fm[y*W+x]=hs(x>>1,y>>1,6)<.3?'5':'3';
+  for(let y=3;y<69;y++)for(let x=3;x<69;x++)if(fm[y*W+x]==='2'&&hs(x>>2,y>>2,8)<.16)fm[y*W+x]='5';
+  // ---- the boundary: a black wall of tall stone, two squares thick, with the east gate ----
+  const WALL=1.9,wt=[0,1,2].map(i=>ch(TM.make('plain',['sa_black','sa_slate','sa_ash'][i],WALL).gid));
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(x>=3&&x<=68&&y>=3&&y<=68)continue;solid(x,y,wt[(hs(x,y,7)*3)|0])}
+  {const gh=2.6,gate=TM.make('gate','sa_black',gh,'gy_igate');T_DOORS.sagate=gate.tex;const pil=ch(TM.make('plain','sa_black',gh).gid),gc=pch(1);
+    solid(69,SA_Y-1,pil);solid(69,SA_Y+1,pil);rows[SA_Y][69]=gc;block[SA_Y*W+69]=0;
+    lv.portals[1]={to:SA.ID,x:SA.START.x,y:SA.START.y,f:SA.START.f,tex:'sagate',req:'saRoadOpen',lock:'The iron gate of Sale is shut. A rotten cart lies on its side across the road beyond, and crows sit on the cart and watch you. The road is not passable yet.'};
+    if(SA.ROAD)Object.assign(lv.portals[1],{to:SA.ROAD.to,x:SA.ROAD.x,y:SA.ROAD.y,f:SA.ROAD.f,req:undefined,lock:undefined});
+    // a gate house of two pointed lanterns
+    for(const y of [SA_Y-2,SA_Y+2]){if(solidDc('gy_lantern',68,y))lights.push([68,y])}}
+  // ---- the buildings ----
+  const STYS=['sa_slate','sa_moss','sa_black','sa_bone','sa_brick','sa_ash'],houses=SA_HOUSES;
+  houses.forEach((h,k)=>{
+    const sp=h.sp;h.k=k;h.sty=sp?sp.sty:pick(STYS,h.x0,h.y0,14);h.rk=sp?sp.roof:pick(SA_ROOFSET,h.x0,h.y0,15);
+    {const pv=houses[k-1],pv2=houses[k-2];
+     if(!sp&&pv&&pv.face===h.face){for(let t=1;t<=STYS.length&&(h.sty===pv.sty||(pv2&&pv2.face===h.face&&h.sty===pv2.sty));t++)h.sty=STYS[(STYS.indexOf(h.sty)+t)%STYS.length];
+       for(let t=1;t<=SA_ROOFSET.length&&(h.rk===pv.rk||(pv2&&pv2.face===h.face&&h.rk===pv2.rk));t++)h.rk=SA_ROOFSET[(SA_ROOFSET.indexOf(h.rk)+t)%SA_ROOFSET.length]}}
+    h.wh=sp?sp.wh:Math.round((2.0+hs(h.x0,h.y0,16)*.7)*10)/10;h.name=sp?sp.name:(h.home?SA_HOMES[h.home].name:null)});
+  SA.dgid={};   // door gid per house id: {bar, open, texBar, texOpen}
+  for(const h of houses){
+    const sty=h.sty,wh=h.wh,front=(x,y)=>h.face==='N'?y===h.y0:h.face==='S'?y===h.y1:h.face==='E'?x===h.x1:x===h.x0;
+    const plain=ch(TM.make('plain',sty,wh).gid),plain2=ch(TM.make('plain2',sty,wh).gid),win=ch(TM.make(h.spk&&h.sp.kind!=='inn'?'shopfront':'window',sty,wh).gid),side=ch(TM.make('window',sty,wh).gid),gwin=ch(TM.make('gwin',sty,wh).gid);
+    const dtile=TM.make('door',sty,wh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dtile.tex;
+    const D={door:dgid,texOpen:dtile.tex,texBar:h.spk?saBarricadeTex(dtile.tex,wh,h.id):dtile.tex,house:h};SA.dgid[h.id]=D;
+    const tgt=h.home==='rope'?SA.CELLAR:h.id;
+    KH_DOOR[dgid]={lvl:h.spk||h.home?tgt:undefined,get at(){if(!LEVELS[tgt]&&KH_LAZY[tgt])KH_LAZY[tgt]();const L=LEVELS[tgt],st=L&&L.start;return st?{x:st.x,y:st.y,f:0}:{x:4,y:4,f:0}},
+      sale:h.spk?{shop:h.spk}:h.home?null:{sealed:1,h:h.id}};
+    if(h.spk){KH_DOOR[dgid].lvl=undefined;T_TILE[dgid]=D.texBar}
+    for(let y=h.y0;y<=h.y1;y++)for(let x=h.x0;x<=h.x1;x++){
+      let c;if(x===h.door[0]&&y===h.door[1])c=ch(dgid);else if(front(x,y))c=win;else c=((x+y)%3===0)?side:((x*5+y*3)%5===1?gwin:(x*3+y)%4===1?plain2:plain);
+      solid(x,y,c)}
+    const horiz=h.face==='N'||h.face==='S',span=horiz?h.x1-h.x0+1:h.y1-h.y0+1;
+    sky.push({x:(h.x0+h.x1+1)/2,y:(h.y0+h.y1+1)/2,k:wlRoofFor(h.rk,h),w:span+.5+(h.sp?.15:0),z:h.wh-.03});
+    // a lamp or a dead shrub by the door, never in the road
+    const sideCells=horiz?[[h.front[0]-1,h.front[1]],[h.front[0]+1,h.front[1]]]:[[h.front[0],h.front[1]-1],[h.front[0],h.front[1]+1]];
+    const wallRow=horiz?[[h.x0-1,h.face==='S'?h.y1:h.y0],[h.x1+1,h.face==='S'?h.y1:h.y0]]:[[h.face==='E'?h.x1:h.x0,h.y0-1],[h.face==='E'?h.x1:h.x0,h.y1+1]];
+    for(const [tx,ty] of wallRow)if(free(tx,ty)&&hs(tx,ty,96)<.55){const r=hs(tx,ty,97);if(r<.4)tryDc('gy_urn',tx,ty,{block:true,walk:false,sc:.5});else if(r<.7)bones(tx,ty);else tryDc('gy_web',tx,ty,{sc:.5})}
+  }
+  // the barricades: a flat picture of planks on the wall by each shop door, spoken for by the shopkeeper behind it (the quest mark shows over it)
+  for(const h of houses){if(!h.spk)continue;const k='sa_planks'+(h.id%3);
+    if(IMG[k]){decor.push({k,x:h.front[0],y:h.front[1],wd:h.wall,pic:1,block:false,walk:true,deco:false,npc:'sa_b_'+h.spk,bob:.05,cloudid:'sa_bar'})}}
+  // the signs of the shops, and the street names
+  for(const h of houses){
+    if(!h.spk)continue;const horizontal=h.face==='N'||h.face==='S';
+    for(const sgn of [1,-1]){const sx=horizontal?h.front[0]+sgn:h.front[0],sy=horizontal?h.front[1]:h.front[1]+sgn,wallCell=horizontal?[sx,h.face==='S'?h.y1:h.y0]:[h.face==='E'?h.x1:h.x0,sy];
+      if(rows[wallCell[1]]&&rows[wallCell[1]][wallCell[0]]==='.')continue;
+      if(!free(sx,sy)&&!isRoad(sx,sy))continue;
+      decor.push({k:'sign_sa'+h.id,x:sx,y:sy,block:false,wd:h.wall,txt:[(h.name.length>24?h.name.split(',')[0]:h.name).toUpperCase()],sc:.7,bob:(h.wall[0]+h.wall[1])>0?.4:.26});break}}
+  // ---- the Sanctuary: a gothic chapel front, five squares wide, three of them the (barred) door ----
+  {const C=SA_CHAPEL,wh=3.6,cp=ch(TM.make('plain','sa_ash',wh).gid),cw=ch(TM.make('window','sa_ash',wh).gid);
+    SA.sanct=[];
+    for(let y=C.y0;y<=C.y1;y++)for(let x=C.x0;x<=C.x1;x++){
+      if(y===C.y1&&IMG.gyp_f_gothic){const i=x-C.x0,gid=gyTile('texGrey_0',wh,{fac:{img:'f_gothic',i,n:5,fit:1,at:.5},gain:1.05,tag:'sanct'+i});
+        if(i>=1&&i<=3){KH_DOOR[gid]={sale:{sanct:1},lvl:undefined};SA.sanct.push(gid)}solid(x,y,ch(gid))}
+      else if(y===C.y1){solid(x,y,(x-C.x0)%2?cw:cp)}
+      else solid(x,y,(x+y)%3===0?cw:cp)}
+    sky.push({x:(C.x0+C.x1+1)/2,y:(C.y0+C.y1+1)/2,k:wlRoofFor('sa_rf_2'),w:6.4,z:wh-.03});
+    const tw=wlPick('church_tower','kh_ohtower1_4');if(tw)sky.push({x:C.x0+.2,y:C.y1+.4,k:tw,w:3.2,z:wh-.03,big:1});
+    decor.push({k:'sign_sasanct',x:C.front[0]+2,y:C.front[1],block:false,wd:[0,-1],txt:['THE SANCTUARY'],sc:.8,bob:.3});
+    for(let y=C.y0;y<=C.y1;y++)for(let x=C.x0-1;x<=C.x1+1;x++)used.add(x+','+y);
+    used.add(C.front[0]+','+C.front[1]);used.add(C.front[0]+','+(C.front[1]+1))}
+  // ---- the Belfry: a black tower at the north end of Bell Lane ----
+  {const B=SA_BELFRY,wh=4.4,bp=ch(TM.make('plain','sa_black',wh).gid),bw=ch(TM.make('window','sa_black',wh).gid),bd=TM.make('door','sa_black',wh),dgid=KH_NEXT_GID++;T_TILE[dgid]=bd.tex;
+    KH_DOOR[dgid]={lvl:SA.BELFRY,get at(){if(!LEVELS[SA.BELFRY]&&KH_LAZY[SA.BELFRY])KH_LAZY[SA.BELFRY]();const L=LEVELS[SA.BELFRY];return L?{x:L.start.x,y:L.start.y,f:0}:{x:5,y:12,f:0}}};
+    for(let y=B.y0;y<=B.y1;y++)for(let x=B.x0;x<=B.x1;x++)solid(x,y,x===B.door[0]&&y===B.door[1]?ch(dgid):(x+y)%2?bw:bp);
+    const tw=wlPick('church_tower','kh_ohtower1_4','kh_ohtower1_1');if(tw)sky.push({x:57.5,y:17.6,k:tw,w:5.4,z:wh-.03,big:1});
+    for(let y=B.y0-2;y<=B.y1+1;y++)for(let x=B.x0-1;x<=B.x1+1;x++)used.add(x+','+y);
+    decor.push({k:'sign_sabelfry',x:B.front[0]+1,y:B.front[1],block:false,wd:[0,-1],txt:['THE BELFRY'],sc:.7,bob:.3})}
+  // ---- the crypt stair, at the south end of Charnel Row: an arch in the Back Track's south wall of stone ----
+  {const G0=SA_CRYPTGATE,wh=2.6,cp=ch(TM.make('plain','sa_black',wh).gid);
+    for(let x=G0.x-2;x<=G0.x+2;x++)for(const y of [62,63]){if(rows[y][x]==='.')solid(x,y,cp)}
+    const gid=gyTile('texGrey_0',wh,{fac:{img:'f_vault',i:0,n:1,fit:1,at:.5},gain:1.05,tag:'crypt'});KH_DOOR[gid]={lvl:SA.CRYPT,get at(){if(!LEVELS[SA.CRYPT]&&KH_LAZY[SA.CRYPT])KH_LAZY[SA.CRYPT]();const L=LEVELS[SA.CRYPT];return L?{x:L.start.x,y:L.start.y,f:0}:{x:12,y:11,f:0}}};
+    rows[G0.y][G0.x]=ch(gid);
+    decor.push({k:'sign_sacrypt',x:G0.front[0]+1,y:G0.front[1],block:false,wd:[0,1],txt:['THE CRYPT'],sc:.7,bob:.3})}
+  // the Ropewalk Cottage's door leads down to the Hollow Cellar: the lot's door is made when its room is built (sale_rooms.js)
+  // ---- Gibbet Square: a dead fountain, a gibbet, lamps, a plague cart, benches, bones, a notice ----
+  {const S=SA_SQ;
+    tryDc('sa_fountain',35,38,{block:true,walk:false,sc:1.2,npc:'sa_fountain',deco:false});
+    tryDc('sa_gibbet',38,33,{block:true,walk:false,sc:1.1,npc:'sa_gibbet',deco:false});
+    tryDc('sa_cart',32,40,{block:true,walk:false,sc:1});
+    for(const [x,y] of [[30,30],[40,30],[30,42],[40,42],[35,31]])lamp(x,y);
+    for(const [x,y] of [[31,38],[39,40],[33,33],[37,41]])tryDc('gy_bench',x,y,{block:true,walk:false,sc:1});
+    for(const [x,y] of [[34,40],[37,35],[32,34],[39,38],[36,32],[31,41]])bones(x,y);
+    for(const [x,y] of [[33,31],[37,31]])tryDc('gy_candles',x,y,{block:true,walk:false,sc:.7});
+    tryDc('gy_sign',31,32,{block:true,walk:false,npc:'sa_notice',deco:false,sc:.95});
+    for(const [x,y] of [[31,35],[39,37],[36,41],[33,38]])web(x,y);
+    tryDc('gy_rpost',32,37,{});}
+  // ---- the dead quarter: stones, bones, webs, dead trees, broken fences, ruined yards ----
+  for(const z of SA_ZONES)for(let n=0;n<(z.k==='dead'?110:50);n++){const x=z.x0+((hs(n,1,31)*(z.x1-z.x0+1))|0),y=z.y0+((hs(n,2,31)*(z.y1-z.y0+1))|0);if(!free(x,y)||SA_ROAD(x-1,y)||SA_ROAD(x+1,y)||SA_ROAD(x,y-1)||SA_ROAD(x,y+1))continue;
+    const r=hs(n,3,31);if(r<.3)tree(x,y);else if(r<.5)solidDc(pick(['gy_stone1','gy_stone2','gy_lean','gy_wcross'],x,y,32),x,y,{sc:.9});else if(r<.7)bones(x,y);else if(r<.85)web(x,y);else solidDc('gy_fence',x,y,{sc:.9})}
+  // ---- Hollin Farm: a barn, a hut, hay, a cart, a broken fence, bones ----
+  {const pic=(img,x0,y0,x1,y1,wh,sx,sy,w)=>{if(!IMG[img])return false;const pw=ch(TM.make('plain','sa_black',wh).gid);for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(rows[y][x]==='.'){solid(x,y,pw);used.add(x+','+y)}sky.push({x:sx,y:sy,k:img,w,z:0,big:1});for(let y=y0-2;y<=y1+1;y++)for(let x=x0-1;x<=x1+1;x++)used.add(x+','+y);return true};
+    pic('wl_bldg1_5',62,57,65,59,2.4,64,56.8,4.4);
+    tryDc('gy_hut',60,63,{block:true,walk:false,sc:1.05,npc:'sa_hut',deco:false});
+    for(const [x,y] of [[59,58],[66,62],[63,65],[58,65]])tryDc('hay',x,y,{block:true,walk:false,sc:1.2});
+    for(const [x,y] of [[60,60],[64,62],[66,66],[58,57]])solidDc('gy_fence',x,y,{sc:.9});
+    for(const [x,y] of [[61,59],[65,64],[59,61]])bones(x,y)}
+  // ---- everywhere else: dead trees and fences in the back gardens, lamps along the roads ----
+  for(let n=0;n<260;n++){const x=4+((hs(n,1,20)*64)|0),y=4+((hs(n,2,20)*64)|0);if(!free(x,y)||saZoneAt(x,y)||(x>=SA_SQ.x0-1&&x<=SA_SQ.x1+1&&y>=SA_SQ.y0-1&&y<=SA_SQ.y1+1))continue;
+    if(SA_ROAD(x-1,y)||SA_ROAD(x+1,y)||SA_ROAD(x,y-1)||SA_ROAD(x,y+1))continue;
+    const r=hs(n,3,20);if(r<.34)tree(x,y);else if(r<.5)solidDc('gy_fence',x,y,{sc:.9});else if(r<.62)bones(x,y);else if(r<.75)tryDc('hay',x,y,{block:true,walk:false,sc:1.1});else if(r<.9)web(x,y);else solidDc('gy_stone2',x,y,{sc:.85})}
+  for(let x=7;x<=66;x++){if(x>=SA_SQ.x0-1&&x<=SA_SQ.x1+1)continue;if(x%7!==3)continue;for(const y of [SA_Y-1,SA_Y+1])if(free(x,y)){lamp(x,y);break}}
+  for(const [x,y] of [[21,40],[21,50],[21,58],[52,40],[52,50],[52,58],[56,24],[58,32],[56,36]])if(free(x,y))lamp(x,y);else if(free(x-1,y))lamp(x-1,y);
+  for(let x=24;x<=64;x+=10)if(free(x,62))lamp(x,62);
+  // ---- the people, the dead and the quest things (sale_folk.js, sale_quests.js) ----
+  const C={W,H,rows,block,fm,hgt,sky,decor,lights,items,enemies,used,street,ch,TM,solid,free,dc,tryDc,solidDc,walk,near,person,pick,hs,lamp,foe,houses,pch,chars,lv,setF,isRoad,tree,bones,web};
+  if(typeof saPlaceFolk==='function')saPlaceFolk(C);
+  if(typeof saPlaceQuest==='function')saPlaceQuest(C);
+  // ---- the level ----
+  lv.rows=rows.map(r=>r.join(''));
+  const fmap=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmap.push(s)}lv.fmap=fmap;
+  lv.mapNames=[{t:'Candle Street',x:15,y:35,k:'lane'},{t:'Gibbet Square',x:35,y:34.5,k:'place'},{t:'Bell Lane',x:57,y:27,k:'lane'},{t:'Charnel Row',x:20,y:50,k:'lane'},{t:"Tanners' Lane",x:53,y:50,k:'lane'},{t:'Back Track',x:42,y:61,k:'lane'},
+    {t:'The Sanctuary',x:34,y:26.5,k:'place'},{t:'The Belfry',x:57,y:16.5,k:'place'},{t:'The Dead Quarter',x:15,y:52,k:'place'},{t:'Hollin Farm',x:63,y:62,k:'place'},{t:'The Crypt',x:20,y:64.5,k:'place'}];
+  {for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=chars[rows[y][x]];if(c>=30&&c<100)block[y*W+x]=0}}
+  SA.houses=houses;SA.street=street;
+  LEVELS[SA.ID]=lv;LEVEL_NAMES[SA.ID]='Sale';
+  {const T=yarTerrain(W,H,hgt,rk,block);TERRS[SA.ID]=T}
+  return true}
+KH_LAZY[SA.ID]=()=>{saBuild()};
+/* ---- the east gate: later work attaches the Blighted Lands road here ---- */
+function saAttachRoad(to,x,y,f){
+  SA.ROAD={to,x,y,f:f||0};const L=LEVELS[SA.ID];
+  if(L&&L.portals&&L.portals[1]){const p=L.portals[1];p.to=to;p.x=x;p.y=y;p.f=f||0;delete p.req;delete p.lock}
+  G.flags.saRoadOpen=1}
+/* ---- the doors: barricaded shops, sealed houses, the barred Sanctuary ---- */
+const SA_SEALED=['The door is nailed shut from the outside. Somebody has scratched a tally of days into the frame, and then stopped counting.','The door is bolted. Behind it, very faintly, something is humming a lullaby.','The door is shut and the shutters are closed. A dry wreath hangs on the knocker, as brown as a leaf.','The door will not move. Someone has piled furniture behind it, and the dust on the doorstep has not been disturbed in years.','The door is locked. A child\'s boot lies on the step, and has lain there a long time.'];
+function saShopOpen(k){return !!(G.flags&&G.flags['sa_open_'+k])}
+function saApplyDoors(){
+  if(!SA.dgid)return;
+  for(const id in SA.dgid){const D=SA.dgid[id],h=D.house;if(!h.spk)continue;const open=saShopOpen(h.spk);T_TILE[D.door]=open?D.texOpen:D.texBar;KH_DOOR[D.door].lvl=open?h.id:undefined}
+  const L=LEVELS[SA.ID];if(L&&G.decor)for(const d of G.decor){if(d.cloudid==='sa_bar'){const k=(d.npc||'').slice(5);if(saShopOpen(k)){d.found=true;d.block=false}else d.found=false}}
+}
+/* press on a barricaded door: the keeper answers through the boards */
+function saBarricadeTalk(shop,nx,ny){
+  sfx('locked');try{startTalk({k:'_',x:nx,y:ny,npc:'sa_b_'+shop})}catch(e){console.error(e)}}
+{const _kb=khBump;khBump=function(nx,ny,g){const d=KH_DOOR[g];
+  if(d&&d.sale&&saIs(LEVEL)){const s=d.sale;
+    if(s.shop&&!saShopOpen(s.shop)){saBarricadeTalk(s.shop,nx,ny);return true}
+    if(s.sanct){sfx('locked');G.talk={d:{k:'_',x:nx,y:ny},n:{name:'The Sanctuary'},node:say('The doors of the chapel are barred from the inside. A heavy beam holds them, and between the doors a thin line of candlelight shows. A voice you cannot place says, very quietly, nothing at all, and then a latch moves.\n\nBarred from inside. Someone is sheltering here.',[['Leave them be.',()=>null]]),t:G.time,btns:[]};G.hold=null;G.queued=null;return true}
+    if(s.sealed){sfx('locked');msg(SA_SEALED[(hash2(s.h,5,5)*SA_SEALED.length)|0],'#d09a80');return true}}
+  return _kb.apply(this,arguments)}}
+/* ---- arriving: doors by the flags, the first words, the stolen gate ---- */
+function saArrive(n){
+  const F=G.flags;
+  if(n===SA.ID){
+    saApplyDoors();
+    if(!F.saMet){F.saMet=1;msg('Sale. A bell tolls, and nobody is ringing it.','#a8b8d8')}
+    if(SA.ROAD)F.saRoadOpen=1;
+    try{if(typeof saZoneHint==='function')saZoneHint()}catch(e){}
+  }
+}
+
+/* ---- src/desert/sale_rooms.js ---- */
+/* ==========================================================================
+   SALE: THE ROOMS. The ten shops (levels 7201 and up, one per door of SA_HOUSES), two cottages, and the three small levels: the Hollow Cellar (601), the Sale Crypt (602) and the Belfry (603).
+   The shops are Wenlock's rooms (WLIN_ROOMS) dimmed, with the Wenlock folk taken out; they only open once the keeper's trust quest is done (sale_town.js, sale_quests.js).
+   Stock is for a party of level 90: only the gear of levels 50 to 95, the whole potion ladder, the best scrolls and rings.
+   ========================================================================== */
+/* ---- what the shops sell ---- */
+const saHas=r=>ITEMDEF[r[0]];
+function saGear(kinds,part){
+  const ids=Object.keys(ITEMDEF).filter(id=>{const d=ITEMDEF[id];return d&&!d.rar&&kinds.includes(d.k)&&(d.price||0)>0&&(d.lvl||1)>=50&&(d.lvl||1)<=95}).sort((a,b)=>(ITEMDEF[b].lvl||1)-(ITEMDEF[a].lvl||1)||ITEMDEF[a].price-ITEMDEF[b].price);
+  return ids.filter((id,i)=>part===undefined||i%2===part).map(id=>[id,1])}
+KH_STOCK.sa_general=()=>KH_STOCK.wli_general().concat([['hgescape',3],['potion5',2]].filter(saHas));
+KH_STOCK.sa_armour=()=>saGear(['shield','head','chest','legs','arms','armor','armour'],0);
+KH_STOCK.sa_weapons=()=>saGear(['weapon']);
+KH_STOCK.sa_apothecary=()=>KH_STOCK.wli_herbs().concat([['healdraught',6],['greaterheal',5],['superiorheal',4],['elixir',3],['antidote',8],['salve',8]].filter(saHas));
+KH_STOCK.sa_books=()=>KH_STOCK.wli_scrolls();
+KH_STOCK.sa_jeweller=()=>Object.keys(ITEMDEF).filter(id=>{const d=ITEMDEF[id];return d&&(d.k==='ring'||d.k==='amulet'||d.k==='neck')&&(d.price||0)>0}).sort((a,b)=>ITEMDEF[a].price-ITEMDEF[b].price).map(id=>[id,1]);
+KH_STOCK.sa_tailor=()=>KH_STOCK.wli_tailor().concat(saGear(['head','chest','legs','arms'],1));
+KH_STOCK.sa_butcher=()=>[['sausage',16],['roast',12],['pie',10],['bread',14],['herring',8],['pottage',8],['cheese',6]].filter(saHas);
+KH_STOCK.sa_alchemist=()=>KH_STOCK.wli_potion();
+KH_STOCK.sa_tavern=()=>[['ale',16],['pottage',8],['pie',6],['bread',8],['sausage',8],['cheese',6]].filter(saHas);
+/* ---- the keepers ---- */
+const SA_KEEP={
+  general:{face:'kh_ohfolk2_5',thanks:"The boards are down. I had forgotten the door opened outwards. Come in, come in. I sell what I could carry down here in the first week, and I have been rationing it to nobody ever since. Take what you like and leave what you pay."},
+  armour:{face:'kh_ohsold1_0',thanks:"You killed Ranulf. He was my captain, and then he was not, and then he was walking about in his armour. I did not have it in me. Thank you. The armour on these racks is all that is left of the watch. It is yours for gold."},
+  weapons:{face:'kh_ohfolk4_0',thanks:"The ghouls have stopped coming to the whetstone at night. I can hear it. My daughter is back at the bench, which means there is a Stroud and Daughter again. Look at the blades, they are good."},
+  apothecary:{face:'kh_ohfolk3_1',thanks:"My three are out. I could hear them on the other side of the wall, counting steps. Sit, dear, there is nothing wrong with you that a draught will not help. Everything here is for the living."},
+  books:{face:'kh_ohfolk5_0',thanks:"He answered! Three words, and I know that hand. I have run the scriptorium for twenty years and I have never been so glad of a bad letter. The scrolls and the rings are on the shelves. The ink is still wet on some."},
+  jeweller:{face:'kh_ohfolk5_5',thanks:"My Eye! Look at it, the gilt is scratched and the glass is not. It will go back over the door tomorrow. Stones, rings and chains, then. Nothing here was ever buried with anybody, and I will say so to anyone who asks."},
+  tailor:{face:'kh_ohfolk1_3',thanks:"He is home, and eating a whole loaf in the corner, which is how I know he is fine. You have my cloth, my thread and my thanks. I make mourning wear, mostly. Business has been very good for nine years."},
+  butcher:{face:'kh_ohfolk2_2',thanks:"Flour! Real flour. I will have a loaf in the oven before you reach the door. The meat is from the cellar and I will not say what it was before. It was a cow. I promise. It was a cow."},
+  alchemist:{face:'kh_ohfolk5_4',thanks:"Grave-salt, and a good fat piece. Splendid. I will have the batch started tonight. The mixtures on the shelf are finished and tested. Do not ask me how, I tested them on the neighbours, and they are dead already."},
+  tavern:{face:'kh_ohfolk3_5',thanks:"Three rounds, three regulars, and not a single complaint about the beer. They have gone to wherever it is they were going. The Last Orders is open. A bed is upstairs, a hot meal is in the kitchen, and a cold ale is where it always was."}
+};
+for(const key in SA_SPEC){const sp=SA_SPEC[key],K=SA_KEEP[key],id='sa_k_'+key;
+  const root=d=>{const F=G.flags;
+    const opts=[];
+    if(!F['sa_thanked_'+key]){F['sa_thanked_'+key]=1;return say(K.thanks,[['Let us see the wares.',()=>{if(key==='tavern')return saInnNode(d);openShop(d,KH_STOCK['sa_'+key](),sp.name);return null}],BYE])}
+    if(key==='tavern')return saInnNode(d);
+    return say(['Take your time. Everything has its price and its place.','The door is open now, and I mean to keep it that way.','Good to see living faces. Yours are very nearly the best I have seen this year.'][(F.rounds||0)%3],[['Browse the wares',()=>{openShop(d,KH_STOCK['sa_'+key](),sp.name);return null}],BYE])};
+  khNpc(id,sp.keeper,K.face,root)}
+function saInnNode(d){
+  const cost=150;
+  return say('The Last Orders. A hot meal, a cold ale and a bed that is upstairs where a bed should be. A room is '+cost+' gold, and you wake mended and fed. The cellar has a few things in it, but we do not go down there at night.',[
+    ['Take rooms ('+cost+' gold)',()=>{if(G.gold<cost)return say('That is '+cost+' gold. I cannot go lower. The bed is the only warm thing in Sale.',[BYE]);G.gold-=cost;restParty(true);return say('You sleep behind a barred door, and nothing knocks. Everyone wakes healed and fed.',[BYE])}],
+    ['Buy a meal or a drink',()=>{openShop(d,KH_STOCK.sa_tavern(),'The Last Orders');return null}],
+    ['Any news?',()=>say(SA_NEWS[(G.rounds||0)%SA_NEWS.length],[BYE])],BYE])}
+const SA_NEWS=['The Sanctuary has been barred from the inside since last spring. We leave bread on the step. It is gone in the morning. We do not know who takes it, and we are careful not to ask.','The dead keep to the dead quarter and the old farm. Everyone else is a ghost and means no harm. Mind the ghouls south of Charnel Row, and mind the bell, which rings on its own.','The shops are all barricaded, because nobody trusted anybody. If you do the favours, the planks come down. That is how it works here.'];
+/* ---- the Wenlock rooms, dimmed and emptied of Wenlock folk, one per shop ---- */
+{const LOOK={general:'stone',armour:'cellar',weapons:'cellar',apothecary:'stone',books:'oak',jeweller:'stone',tailor:'stone',butcher:'cellar',alchemist:'stone',tavern:'oakflag'};
+ for(const key in SA_SPEC){const sp=SA_SPEC[key],base=WLIN_ROOMS[sp.room];if(!base)continue;
+  const D=Object.assign({},base,{look:LOOK[key]||'stone',amb:Math.max(.26,base.amb*.58),folk:[],noExtras:true,win:(base.win||[]).slice(0,2)});
+  D.raw=(base.raw||[]).concat([['gy_web',1,1,{block:false,walk:true,deco:true,sc:.6}],['gy_web',D.w-2,1,{block:false,walk:true,deco:true,sc:.6}]]);
+  if(key==='tavern'){D.folk=[['sa_inn_g1',6,4],['sa_inn_g2',9,4],['sa_inn_g3',5,5]]}
+  WLIN_ROOMS['sa_'+key]=D}}
+function saMakeRoom(h){
+  const id=h.id,back={to:SA.ID,x:h.front[0],y:h.front[1],f:h.out};let b,name;
+  if(h.spk){const sp=h.sp;name=sp.name;b={id:'sain'+id,wlin:'sa_'+sp.key,name,room:'shop',keeper:'sa_k_'+sp.key,floor:'wood',wallImg:'kh_ohwall1_0'}}
+  else{const H=SA_HOMES[h.home];name=H.name;const vn=wlinHomeVariant(H.scene,id);if(!WLIN_ROOMS[vn]._sa){WLIN_ROOMS[vn]._sa=1;WLIN_ROOMS[vn].amb=Math.max(.28,WLIN_ROOMS[vn].amb*.62)}
+    b={id:'sain'+id,wlin:vn,name,room:'home',keeper:H.keeper,floor:'wood',wallImg:'kh_ohwall1_0'}}
+  const R=khRoom(b,id,back);LEVELS[id]=R.level;LEVELS[id].diff=90;LEVEL_NAMES[id]=name;LEVEL_RATING[id]=90;return R.level}
+for(const h of SA_HOUSES)if(h.spk||(h.home&&h.home!=='rope'))KH_LAZY[h.id]=()=>{if(!LEVELS[h.id])saMakeRoom(h)};
+/* ---- the three small levels ---- */
+function saMini(id,S){
+  if(LEVELS[id])return LEVELS[id];
+  gyAlias();
+  const W=S.W,H=S.H,hs=(a,b,c)=>hash2(a,b,c),g=[];for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
+  for(const r of S.rects)for(let y=r[1];y<=r[3];y++)for(let x=r[0];x<=r[2];x++)g[y][x]='.';
+  const chars={},chMap=new Map();let nextCh=0x300;const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
+  const WH=S.wh||2.8,open=(x,y)=>g[y]&&g[y][x]==='.',near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(open(x+dx,y+dy))return true;return false};
+  const V=S.tex.map(t=>ch(gyTile(t,WH,{rgb:S.rgb||[.9,.94,1]})));
+  const rows=[];for(let y=0;y<H;y++){let s='';for(let x=0;x<W;x++){s+=open(x,y)?'.':near(x,y)?V[(hs(x,y,9)*V.length)|0]:V[0]}rows.push(s)}
+  // the way out: a plain door in the wall
+  {const TMx=ohTiles(),dt=TMx.make('door','sa_black',WH),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;KH_DOOR[dgid]={lvl:S.back.to,at:{x:S.back.x,y:S.back.y,f:S.back.f}};
+   const ex=S.exit;rows[ex[1]]=rows[ex[1]].slice(0,ex[0])+ch(dgid)+rows[ex[1]].slice(ex[0]+1)}
+  const decor=[],lights=[],items=[],enemies=[],occ=new Set();
+  const dec=(a,x,y,o)=>{o=o||{};const k=GYA[a]?'gy_'+a:a;if(!open(x,y)||occ.has(x+','+y))return null;const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}if(o.sc)d.sc=o.sc;if(o.npc){d.npc=o.npc;d.deco=false;d.solid=1}decor.push(d);occ.add(x+','+y);return d};
+  const light=(x,y)=>lights.push([x,y]);
+  const foe=(t,x,y)=>{if(open(x,y)&&!occ.has(x+','+y)){enemies.push({t,x,y,lvl:90});occ.add(x+','+y)}};
+  const person=(npcId,x,y)=>{const kp=KH_KEEPERS[npcId];if(!kp||!open(x,y))return;decor.push({k:khFaceKey(kp.face),x,y,block:true,npc:npcId,sc:kp.sc||1});occ.add(x+','+y)};
+  const item=(k,x,y)=>items.push({k,x,y});
+  S.fill({dec,light,foe,person,item,open,W,H,occ});
+  const cf=FLOORS[S.floor]?S.floor:'gyf_flag',L={rows,chars,floor:cf,ceil:CEILS.gyc_crypt?'gyc_crypt':'beam',ceilH:WH+1,start:{x:S.start.x,y:S.start.y,f:S.start.f},enemies,items,decor,lights,portals:[],day:0,amb:S.amb||.2,torchGap:1e9,noTele:true,noExtras:true,
+    name:S.name,label:S.name,diff:90,mapNames:S.names||[]};
+  LEVELS[id]=L;LEVEL_NAMES[id]=S.name;LEVEL_RATING[id]=90;return L}
+const saRopeHouse=()=>SA_HOUSES.find(h=>h.home==='rope');
+/* 601: the Hollow Cellar. A low cellar under the Ropewalk Cottage: an entry chamber, a passage, a long chamber, and a nook at the east end where three living people have been hiding for a month. */
+KH_LAZY[SA.CELLAR]=()=>{const rh=saRopeHouse();saMini(SA.CELLAR,{name:SA_NAMES[601],W:24,H:15,wh:2.5,tex:['texGrey_1','texGrey_3','texBlack_2','texGrey_0'],rgb:[.85,.9,.95],floor:'gyf_cflag',amb:.16,
+  rects:[[1,5,6,9],[7,7,10,7],[11,3,19,11],[20,6,22,8]],start:{x:2,y:7,f:1},exit:[0,7],back:{to:SA.ID,x:rh.front[0],y:rh.front[1],f:rh.out},
+  names:[{t:'The Entry',x:3,y:7,k:'place'},{t:'The Long Chamber',x:15,y:7,k:'place'},{t:'The Hiding Nook',x:21,y:7,k:'place'}],
+  fill:({dec,light,foe,person})=>{
+    for(const [x,y] of [[2,5],[5,5],[2,9],[6,9],[12,3],[14,3],[18,3],[12,11],[17,11],[19,10]])dec(['barrel','crate','barrel','crate','sacks'][(x+y)%5],x,y,{block:true});
+    for(const [x,y] of [[1,6],[6,6],[11,4],[19,4],[11,10],[3,9],[9,7]])dec('web',x,y,{sc:.55});for(const [x,y] of [[4,8],[8,7],[15,9],[16,5]])dec('bones',x,y,{sc:.85});
+    dec('candles',21,5,{block:true,sc:.55});dec('coffin',13,7,{block:true,sc:.8});
+    for(const [x,y] of [[2,6],[6,8],[10,7],[12,5],[16,7],[18,10],[21,7],[4,5]])light(x,y);
+    foe('saghoul',4,6);foe('saghoul',5,8);foe('saskel',12,6);foe('saghoul',14,9);foe('sazombie',17,6);foe('saskel',18,4);
+    person('sa_surv1',21,6);person('sa_surv2',21,8);person('sa_surv3',22,7)}})};
+/* 602: the Sale Crypt. A stair down from the end of Charnel Row, a hall of sarcophagi, and a vault at the far end where the walls sweat grave-salt. */
+KH_LAZY[SA.CRYPT]=()=>saMini(SA.CRYPT,{name:SA_NAMES[602],W:29,H:15,wh:3.0,tex:['texGrey_0','texGrey_3','texGrey_0','texGrey_5','texBlack_3'],rgb:[.9,.95,1.02],floor:'gyf_cflag',amb:.12,
+  rects:[[1,5,5,9],[6,7,7,7],[8,3,18,11],[19,7,20,7],[21,4,27,10]],start:{x:2,y:7,f:1},exit:[0,7],back:{to:SA.ID,x:SA_CRYPTGATE.front[0],y:SA_CRYPTGATE.front[1],f:0},
+  names:[{t:'The Stair',x:3,y:7,k:'place'},{t:'The Hall of Sarcophagi',x:13,y:7,k:'place'},{t:'The Salt Vault',x:24,y:7,k:'place'}],
+  fill:({dec,light,foe,item})=>{
+    for(const [x,y] of [[9,4],[12,4],[15,4],[18,4],[9,10],[12,10],[15,10],[18,10]])dec('sarc',x,y,{block:true,sc:.9});
+    for(const [x,y] of [[10,7],[14,7],[17,7]])dec('candles',x,y,{block:true,sc:.7});
+    for(const [x,y] of [[2,5],[4,9],[3,6]])dec('niche',x,y,{sc:.8});dec('altar',24,4,{block:true});dec('coffin',26,9,{block:true,sc:.8});dec('candles',22,9,{block:true,sc:.6});
+    for(const [x,y] of [[8,3],[18,3],[8,11],[18,11],[21,4],[27,10]])dec('web',x,y,{sc:.6});for(const [x,y] of [[3,8],[11,6],[16,9],[23,6],[25,8]])dec('bones',x,y,{sc:.85});
+    for(const [x,y] of [[2,6],[4,8],[7,7],[10,5],[13,9],[16,5],[19,7],[22,5],[25,7],[26,5]])light(x,y);
+    foe('saskel',3,8);foe('saskel',10,6);foe('saghoul',12,8);foe('saghoul',15,6);foe('sawight',16,9);foe('sabmage',14,5);foe('saskel',17,10);foe('sawight',22,7);foe('sagiant',25,6);
+    item('sa_gravesalt',26,7)}});
+/* 603: the Belfry. A narrow stair tower: a ground room, a stair, a landing, a stair, and the bell chamber, where a boy hides under the bell. */
+KH_LAZY[SA.BELFRY]=()=>saMini(SA.BELFRY,{name:SA_NAMES[603],W:13,H:21,wh:3.2,tex:['texBlack_0','texBlack_3','texGrey_3','texBlack_5'],rgb:[.9,.92,1],floor:'gyf_slate',amb:.2,
+  rects:[[3,15,9,19],[6,12,6,14],[3,8,9,11],[6,5,6,7],[3,1,9,4]],start:{x:6,y:18,f:0},exit:[6,20],back:{to:SA.ID,x:SA_BELFRY.front[0],y:SA_BELFRY.front[1],f:2},
+  names:[{t:'The Foot of the Tower',x:6,y:17,k:'place'},{t:'The Landing',x:6,y:9.5,k:'place'},{t:'The Bell Chamber',x:6,y:2.5,k:'place'}],
+  fill:({dec,light,foe,person})=>{
+    dec('bell',4,2,{block:true,sc:1.8});dec('bell',8,2,{block:true,sc:1.4});dec('candles',3,10,{block:true,sc:.6});dec('candles',9,17,{block:true,sc:.6});
+    for(const [x,y] of [[3,15],[9,15],[3,8],[9,8],[3,1],[9,1]])dec('web',x,y,{sc:.55});for(const [x,y] of [[5,17],[7,9]])dec('bones',x,y,{sc:.8});
+    for(const [x,y] of [[4,17],[8,17],[6,13],[4,9],[8,9],[6,6],[5,3],[7,3]])light(x,y);
+    foe('saghoul',5,16);foe('saghoul',8,17);foe('sawight',5,10);foe('saraven',4,3);foe('saraven',8,4);
+    person('sa_pip',6,2)}});
+const SA_NAMES={601:'The Hollow Cellar',602:'The Sale Crypt',603:'The Belfry of Sale'};
+
+/* ---- src/desert/sale_folk.js ---- */
+/* ==========================================================================
+   SALE: THE FOLK. Who is about, who is dangerous, and where.
+   THE RULE OF THE STREETS. Everywhere in Sale except SA_ZONES (the Dead Quarter south of Candle Street and west of Tanners' Lane, and Hollin Farm in the south east) the dead are GHOSTS: pale
+   walk-through townsfolk who talk and never fight. In the two zones the dead are hostile (skeletons, ghouls, zombies, wights, a bone priest, a bloated gravedigger, Sir Ranulf the Hollow): they wake only when the
+   party is inside the same zone, and lose it (go quiet and walk home) the moment it leaves. So Candle Street, the square, Bell Lane, Tanners' Lane and the Back Track west of the farm are safe to walk, and every shop door can be reached.
+   The living: the gravedigger Old Spade, the bellman Wick Tolliver, three survivors in the Hollow Cellar, the boy in the Belfry, and the ten shopkeepers behind their boards.
+   ========================================================================== */
+Object.assign(ENEMY_DEF,{saraven:Object.assign({},ENEMY_DEF.gyraven,{gy:undefined,sa:1,name:'Belfry Raven'})});
+/* ---- ghosts: id, name, picture (index into SA_GHOSTFOLK, or 'gl0'..'gl2' for the three painted ladies), lines, and where they stand (the nearest free square off the road) ---- */
+const SA_GHOSTS=[
+  ['sa_g_watch','A ghost of the watch',9,["I am the watch. I have been the watch for nine years. Nobody has come through this gate in that time, so I am doing well.","The shops are shut and barricaded, every one. The keepers will talk to you through the boards if you knock. The dead quarter is south of Charnel Row. Do not go in there unless you can fight."],[66,38]],
+  ['sa_g_gibbet','A hanged ghost',10,["I was hanged on that gibbet for stealing a loaf of bread. That was in my second year of being a baker's boy. I am dead now and the loaf is still in the oven. Nobody has dared to hang anyone else since.","The gibbet is not used any more. I stand next to it out of habit."],[39,34]],
+  ['sa_g_priest','A ghost in a stole',1,["I was the priest of the Sanctuary. I am not allowed in any more. It is barred from the inside, and I did not see who barred it.","A candle burns in the window every night. Somebody leaves bread on the step, and in the morning it is gone. I think they are alive. I would not knock."],[35,32]],
+  ['sa_g_mother','A ghost mother',3,["I am dead. It is all right. My daughter is dead as well, and we are both here, so nothing is wrong.","If you find her, she is near the fountain. She will tell you she is not allowed to talk to strangers. She is."],[33,39]],
+  ['sa_g_girl','A ghost girl',11,["I am not allowed to talk to strangers. Hello.","The fountain has been dry since before I died. I used to put my feet in it. Now I put my feet near it."],[36,38]],
+  ['sa_g_baker','A ghost baker',4,["I baked bread for forty years. I have not baked any for nine, because I cannot hold a loaf, only the idea of one.","Hettie Mawd runs Crust and Cleaver now. She is alive. She sells good bread, and I tell her what is wrong with it."],[27,34]],
+  ['sa_g_carter','A ghost carter',5,["My cart is the one in the square. It still has the last load on it. It is plague bedding, and nobody has moved it, which is a very good idea.","If you want a ride to the east gate, I am sorry. The horse is dead too, and he has taken it badly."],[32,41]],
+  ['sa_g_old','An old ghost',2,["I sat on this bench every afternoon for fifty years. I died on it. I have been sitting on it ever since. I am not sure the arrangement changed much.","The living are polite to me. I appreciate it."],[31,37]],
+  ['sa_g_lad','A ghost apprentice',7,["I was Stroud's apprentice. The weaponsmith is barricaded now. She will not open the door unless a stranger kills ghouls for her. She says it is nothing personal. It is a little personal.","I never finished my first sword. It is still on the bench in there, half-ground. I think about it."],[26,37]],
+  ['sa_g_widow','A ghost widow',6,["My husband died first and I died second. He says he got there first. I say I was never late for anything.","We were married forty years. I have been dead for nine. We are still married. That is how I know the vows are good."],[46,35]],
+  ['sa_g_sexton','A ghost sexton',8,["I dug every grave in Sale until there were too many. Then I stopped, and then I was in one.","Old Spade is the gravedigger now. He is alive. He keeps to his cottage on the Back Track, and he does not talk to ghosts, which is rude, but he is busy."],[38,61]],
+  ['sa_g_bell','A ghost bellwoman',0,["I rang the bell for forty years. Now it rings without me. I tell it when to stop. It does not listen.","Wick Tolliver is the bellman now. He is alive. He lives in the little house on Bell Lane and he is very tired."],[56,28]],
+  ['sa_g_reeve','A ghost of the reeve',1,["I was the reeve of Sale. I kept the book of the dead, and I am in it, on page ninety. The book is on the table in the Dead Letter Scriptorium.","If you can persuade Ottoline Quill to open her door, she has the whole book. Be nice to her. She is not in a good mood, and she has not been since she died. No, since she nearly died."],[50,35]],
+  ['sa_g_lamp','A ghost lamplighter',5,["I lit every lamp on this street for thirty years. I still do. I do it with my hand, which does nothing, but the street likes the effort.","The lamps in Sale burn on their own now. I like to think I am responsible."],[22,35]],
+  ['sa_g_drover','A ghost drover',9,["I drove cattle from the east farms to the market in Sale. The road was long. It is longer now, because it is blocked.","If you came from the east, then the road is open, and I would like to hear about it."],[63,37]]];
+for(const [id,name,fi,lines] of SA_GHOSTS)khNpc(id,name,'sa_gh_'+fi,()=>yrLines(id,lines));
+/* the regulars of the Last Orders: three ghosts in the square who would like a drink (quest sa10, sale_quests.js), and three inside the tavern once it is open */
+const SA_REGS=[['sa_reg1','Old Tobias Lamb, a ghost',0,[41,39],"Tobias Lamb, a drover, dead nine years. I used to have three ales a night at the Last Orders. Now I have none, and I do not sleep, so the nights are long."],
+  ['sa_reg2','Mad Meg Hollow, a ghost',3,[44,41],"Meg Hollow. Sold eels. Died of them, the doctor said. I miss the Last Orders. I miss anything with a cup."],
+  ['sa_reg3','Ned the Drover, a ghost',9,[38,41],"Ned. I drove carts. I died in a ditch, thinking about the Last Orders, and I would like to say that the beer was worth it."]];
+for(const [id,name,fi,at,line] of SA_REGS)khNpc(id,name,'sa_gh_'+fi,()=>say(line,[BYE]));
+const SA_INNGH={sa_inn_g1:['An old ghost at the bar',2,["I drank here for sixty years. I am still here, and the ale is still good. I cannot drink it, but I can tell when it is.","The Last Orders closes at midnight. It has closed at midnight every night since I died. I check."]],
+  sa_inn_g2:['A ghost minstrel',8,["I know eleven songs. They are all about the dead. I was very popular, once, and then everybody died.","If you want a tune, I play the lute. It plays itself, but I am nearby."]],
+  sa_inn_g3:['A ghost serving girl',11,["Three ales for the corner, one for the bar, and a very small one for the dog. The dog is dead too.","Big Bram is a good man. He kept the doors open as long as he could. Then he barricaded them. That was a good choice."]]};
+for(const id in SA_INNGH){const [name,fi,lines]=SA_INNGH[id];khNpc(id,name,'sa_gh_'+fi,()=>yrLines(id,lines))}
+/* ---- the living ---- */
+const SA_DIG=["Spade. Gravedigger. There is no shortage of work, but it is the same grave every time, and the dead keep coming up out of it.","I do not talk to the ghosts. They want to talk about their own funerals, and I have been to them all.","If you are going into the dead quarter, go in with a full health bar and an empty bag. Leave it at the Last Orders. Oh, it is closed. Leave it at the cottage."];
+khNpc('sa_digger','Old Spade, the gravedigger','kh_ohfolk3_3',()=>yrLines('sa_digger',SA_DIG));
+khNpc('sa_k_digger','Old Spade, the gravedigger','kh_ohfolk3_3',()=>yrLines('sa_digger2',["Mind the boots. Mind the floor. Mind the corner. I have a lot of things for digging and none of them are tidy.","The dead quarter is south of Charnel Row. The farm is south-east, down the track. They do not leave their ground, so if you cannot win, walk out of it. They go quiet."]));
+khNpc('sa_k_ringer','Wick Tolliver, the bellman','kh_ohfolk2_3',()=>yrLines('sa_ringer2',["I ring the bell at dawn and dusk. It rings by itself the rest of the time, and I have given up arguing with it.","There is a boy in the belfry. Not mine. Madame Veil's nephew. He climbed up there to hide and did not come down. I cannot go up. My knees."]));
+khNpc('sa_ringer','Wick Tolliver, the bellman','kh_ohfolk2_3',()=>{
+  const F=G.flags;
+  if(qSt('sa5')==='active'&&bagCount('sa_letter')>0&&!bagCount('sa_reply')){bagRemove('sa_letter',1);bagAdd(mkItem('sa_reply'));yrStep('Wick has read the letter and written a reply.');
+    return say("A letter. For me. From Ottoline Quill! I have not had a letter in nine years, and she has not spoken to me in ten. Wait. Wait there.\n\nHe writes three words on the back, shakes it dry, and gives it to you. 'Tell her yes.'",[BYE])}
+  if(qSt('sa5')==='active'&&bagCount('sa_reply')>0)return say("Take that back to her. Tell her yes. Tell her I said it three times. Do not read it.",[BYE]);
+  return yrLines('sa_ringer',["Wick Tolliver, the bellman. I ring the bell at dawn and dusk. It rings by itself the rest of the time. I have asked it to stop, nicely.","The bell is the only thing in Sale that makes any noise, and it is the one thing nobody can find the rope of."])});
+/* the three survivors in the Hollow Cellar and the boy in the belfry (quests sa4 and sa7) */
+const SA_SURV=[['sa_surv1','Dorcas Heel, an apprentice','kh_ohfolk3_0',"I am so glad to see a living face I could cry, and I have, twice. We are Nan Marrowbone's apprentices. We came down here to hide from the ghouls and the door stuck. That was a month ago. Go back up. I know the way out. There is a coal chute behind the barrels."],
+  ['sa_surv2','Little Jory, an apprentice','kh_ohfolk1_5',"Is it daytime? I have not seen daytime in a month. We have eaten all the beans. We have eaten the candles. Please tell Nan we are alive. And that I did not eat her candles. It was Dorcas."],
+  ['sa_surv3','Tam Marrowbone, an apprentice','kh_ohfolk6_3',"Nan's grandson. They said do not go in the cellar, so I went in the cellar. Do not tell her. Tell her we are fine. We are not fine, but you got here, so we are going to be."]];
+for(const [id,name,face,line] of SA_SURV)khNpc(id,name,face,d=>{const n=+id.slice(-1),F=G.flags;
+  if(qSt('sa4')==='active'&&!F['sa4_'+n]){F['sa4_'+n]=1;yrStep(name.split(',')[0]+' is free and on the way out.');d.found=true;d.block=false;return say(line,[BYE])}
+  return say('They have gone up the coal chute. The cellar is a good deal quieter.',[BYE])});
+khNpc('sa_pip','Pip, Madame Veil\'s nephew','kh_ohfolk1_5',d=>{const F=G.flags;
+  if(qSt('sa7')==='active'&&!F.sa7a){F.sa7a=1;yrStep('Pip is free and on his way down.');d.found=true;d.block=false;return say("You are not a ghost! You are not a ghoul! You are two people and some more people! I climbed up here because the ghouls were in the street and I did not know the bell was haunted. It is. It rings when I do not touch it. Can I go home? Is Aunt Orla angry? She is, is she. Tell her I am coming. I am coming down very slowly, because of the ravens.",[BYE])}
+  return say('The boy has gone down the stairs. The bell sways by itself, and rings once.',[BYE])});
+/* ---- readable things ---- */
+khNpc('sa_notice','The notice board',null,()=>say('A board nailed to a post, with five notices.\n\nBY ORDER OF THE REEVE: the dead quarter is closed. Do not go there. If you go there, do not take anything out of it. If you take something out of it, do not take it into the shops.\n\nWANTED: a living apothecary. Apply to Nan Marrowbone, door barricaded, shout.\n\nFOUND: one boot. Child\'s. Left.\n\nLOST: Hollin Farm.\n\nTHE LAST ORDERS WILL REOPEN WHEN THE BOARDS ARE DOWN.',[BYE]));
+khNpc('sa_fountain','The dead fountain',null,()=>say('A round stone fountain with a basin full of dust and dead leaves. The figure at its centre has no head. Somebody has propped a wooden ladle against it, and somebody has put a coin in the basin, and nobody has taken it.',[BYE]));
+khNpc('sa_gibbet','The gibbet',null,()=>say('A tall wooden gibbet, black with weather, and an empty iron cage hanging from it. A loaf of bread lies in the bottom of the cage, hard as stone. The ghost who is standing beside it does not look up.',[BYE]));
+khNpc('sa_hut','A ruined farm hut',null,()=>say('A farm hut with half its roof gone. The walls are scratched with the marks of claws, and a child\'s toy horse sits on the sill. There is nothing in it to take.',[BYE]));
+khNpc('sa_stub','A cairn of stones',null,()=>say('A cairn of stones with a bit of red cloth tied to it. A signpost leans against it, with an arrow pointing back the way you came. The road to the east has not been built yet.',[BYE]));
+/* ---- placing them ---- */
+function saPlaceFolk(C){
+  const {person,near,free,walk,decor}=C,hs=C.hs;
+  for(const [id,,,,at] of SA_GHOSTS)person(id,at[0],at[1],4);
+  for(const [id,,,at] of SA_REGS)person(id,at[0],at[1],4);
+  person('sa_digger',41,60,3);person('sa_ringer',56,23,3);
+  // the ghost children and a crow or two on the posts of the safe streets
+  for(const [x,y] of [[10,34],[27,38],[47,37],[55,33],[8,38]])C.tryDc('gy_rpost',x,y,{});
+}
+/* ---- the dead are hostile only inside their zones ---- */
+{const _ea=enemyAct;enemyAct=function(e){
+  if(LEVEL===SA.ID){const def=ENEMY_DEF[e.t];
+    if(def&&def.sa){const z=saZoneAt(e.rx,e.ry),px=G.P.x,py=G.P.y,inZ=!!(z&&px>=z.x0&&px<=z.x1&&py>=z.y0&&py<=z.y1);
+      if(!inZ){if(e.alert||e.x!==e.rx||e.y!==e.ry){e.alert=false;if(!enemyAt(e.rx,e.ry)&&!(px===e.rx&&py===e.ry)){e.x=e.rx;e.y=e.ry}}return 0}}}
+  return _ea.apply(this,arguments)}}
+/* walking into a hostile zone says so, once each time */
+{const _u=update;update=function(dt){
+  try{if(G.state==='play'&&LEVEL===SA.ID&&G.P){const z=saZoneAt(G.P.x|0,G.P.y|0),zk=z?z.k:'';
+    if(G._saZone!==zk){G._saZone=zk;if(z)msg(z.n+'. The dead here are not peaceful.','#e8a090');else if(G._saZoneSeen)msg('Back on the safe streets. The dead here are ghosts, and mean no harm.','#a8c8e8');G._saZoneSeen=1}}}catch(e){}
+  return _u.apply(this,arguments)}}
+function saZoneHint(){G._saZone=undefined;G._saZoneSeen=0}
+
+/* ---- src/desert/sale_quests.js ---- */
+/* ==========================================================================
+   SALE: THE TEN TRUST QUESTS (ids sa1 to sa10, journal area "Sale"). Every shop of Sale is barricaded. The keeper answers through the boards ("Go away", then "Prove you are friends"), and gives the party one job.
+   Doing it takes the planks down (flag sa_open_<shop>, saApplyDoors in sale_town.js), opens the shop and changes the keeper's talk. Any order. Rewards are modest in gold, ordinary in experience (shown before the doubling of QREW_MUL).
+     sa1  Pennyworth's Provisions   collect: 3 flasks of lamp oil from the ruined houses of Charnel Row (dead quarter)
+     sa2  Ironbrow's Armoury        kill: Sir Ranulf the Hollow, a named wight at the south end of Charnel Row
+     sa3  Stroud and Daughter       kill: 8 ghouls (the dead quarter and Hollin Farm)
+     sa4  Marrowbone's Remedies     rescue: three apprentices hiding in the Hollow Cellar (601)
+     sa5  The Dead Letter Scriptorium  deliver: a letter to the bellman on Bell Lane, and bring his reply back
+     sa6  The Gilded Eye            retrieve: the stolen shop sign, from the ruined hut at Hollin Farm
+     sa7  Madame Veil, Mourning Tailor  rescue: her nephew Pip, hiding in the Belfry (603)
+     sa8  Crust and Cleaver         collect: 4 sacks of rye flour from Hollin Farm
+     sa9  Vesper's Alembic          relic: grave-salt from the vault of the Sale Crypt (602)
+     sa10 The Last Orders           serve: three ales to the three ghost regulars in the square
+   ========================================================================== */
+QAREA_ORDER.splice(Math.max(0,QAREA_ORDER.indexOf('Wenlock'))+1,0,'Sale');
+const saF=()=>G.flags;
+const SA_REW={sa1:{gold:300,xp:4000},sa2:{gold:500,xp:6500},sa3:{gold:500,xp:6000},sa4:{gold:600,xp:7000},sa5:{gold:300,xp:4500},sa6:{gold:450,xp:5500},sa7:{gold:700,xp:8000},sa8:{gold:350,xp:4500},sa9:{gold:800,xp:9000,items:['potion5']},sa10:{gold:400,xp:5000}};
+function saQ(id,title,who,need,goal,desc,extra){
+  const q=Object.assign({title,who,need,goal,reward:SA_REW[id]},extra||{});
+  Object.defineProperty(q,'desc',{enumerable:true,get(){return typeof desc==='function'?desc():desc}});
+  QUESTS[id]=q;QAREA[id]='Sale';return q}
+const saFlagCount=(pre,n)=>()=>{let c=0;for(let i=1;i<=n;i++)if(saF()[pre+i])c++;return c};
+/* the questions and answers: what the keeper says through the boards. offer / accept / remind(n,m) / ready / thanks / after, as khQD */
+const SA_Q={
+ sa1:{key:'general',who:'Tabitha Pennyworth',title:'Lamp Oil for Pennyworth',
+  go:"A woman's voice, behind the planks: \"Go away. We are shut. We have been shut for nine years, and I have not changed my mind.\"",
+  proof:"\"Prove you are friends. Everyone says they are friends. The last one who said so was a ghoul with a bad cough.\"",
+  offer:"\"Tabitha Pennyworth, Pennyworth's Provisions. I have everything on these shelves except lamp oil, and without lamp oil I cannot light a lamp, and in this town that matters. There are flasks in the ruined houses on Charnel Row, in the dead quarter, where the storehouses were. Bring me three, and I will take the boards down.\"",
+  accept:"\"Three flasks. They have a P scratched on the bottom. The dead quarter is south of Charnel Row, and the dead there are not friendly. Mind them.\"",
+  remind:(n,m)=>`"Have you got the oil? That is ${n} of ${m} flasks. The ruined houses on Charnel Row, south of Candle Street."`,
+  ready:"\"That clink. Is that glass? Is that oil? Put it through the gap.\"",
+  thanks:"\"Three. All with a P on them. Wait there. I am coming out with the crowbar.\"",after:"\"The boards are down. Come in and spend something.\""},
+ sa2:{key:'armour',who:'Sergeant Hob Ironbrow',title:'The Hollow Captain',
+  go:"A gruff voice behind the planks: \"Go away. Armoury is shut. Move along.\"",
+  proof:"\"Move along. Unless you can prove you are not one of Ranulf's.\"",
+  offer:"\"Sergeant Hob Ironbrow, watch of Sale. Our captain was Sir Ranulf. He died on the wall in the plague and got up again, and now he walks the Charnel Yard at the south end of Charnel Row in his own armour, and takes any man of the watch who comes near. I cannot leave my door while he is out, and I cannot kill him, because he taught me how to fight. Kill Sir Ranulf the Hollow, and I will take the boards down.\"",
+  accept:"\"He wears the old black plate and a blue light where his eyes were. He hits hard and he is slow. Do not go in without healing. The Charnel Yard is the end of Charnel Row, past the ruined houses.\"",
+  remind:(n,m)=>'"Sir Ranulf is still walking. The Charnel Yard, south end of Charnel Row. Kill him and come back."',
+  ready:"\"I felt it. The bell stopped for a moment. Tell me it is done.\"",
+  thanks:"\"He is down. Thank you. Do you know, I would have given a great deal not to hear that. Wait there, I am taking the boards down myself.\"",after:"\"The door is open. Take what you like.\""},
+ sa3:{key:'weapons',who:'Marta Stroud',title:'Ghouls at the Whetstone',
+  go:"A woman's voice, behind the planks: \"Go away. We are shut. We are all shut.\"",
+  proof:"\"Prove you are friends. I have a hammer, and I know where you are standing.\"",
+  offer:"\"Marta Stroud, weaponsmith. I make the blades, my daughter makes the noise. Ghouls come out of the dead quarter at night and chew my whetstone, and the sound sets my teeth on edge, and I cannot work. Kill eight ghouls, in the dead quarter or at Hollin Farm, and I will take the boards down. I will count them. I count everything.\"",
+  accept:"\"Eight. Ghouls, not skeletons. The skeletons do not chew. They only scrape.\"",
+  remind:(n,m)=>`"${n} of ${m} ghouls. I can hear the rest of them. Eight, and you are done."`,
+  ready:"\"It is quiet. I have not heard that sound in nine years. Is it done?\"",
+  thanks:"\"Eight! I counted the bells. Wait there. Mind your fingers, the planks are old and have nails.\"",after:"\"The door is open. Buy something sharp.\""},
+ sa4:{key:'apothecary',who:'Old Nan Marrowbone',title:'Three in the Cellar',
+  go:"An old woman's voice, behind the planks: \"Go away. No cures today. No cures any day. Go away.\"",
+  proof:"\"If you have come about the bell, I do not know anything. If you have come about the apprentices, speak up.\"",
+  offer:"\"Nan Marrowbone, herbalist. I had three apprentices. They went down the cellar of the Ropewalk Cottage, on Charnel Row, to hide when the ghouls came, and the door stuck, and that was a month ago. I cannot go, my legs, and the cellar is full of the things that used to live in cellars. Find my three. Bring them out. I will take the boards down.\"",
+  accept:"\"The Ropewalk Cottage is the second house on the west side of Charnel Row, in the dead quarter. The door is in the front room. Dorcas, Jory and Tam. Tell them I said to come home and be told off.\"",
+  remind:(n,m)=>`"${n} of ${m} apprentices. The Ropewalk Cottage, on Charnel Row, down the cellar stair."`,
+  ready:"\"I hear boots on the stair. Three pairs. Oh, my dears. Is it all of them?\"",
+  thanks:"\"All three. Thank you, with my whole heart, and my knees. Wait there. I am taking the boards down myself.\"",after:"\"The door is open. Come in, dear. Sit.\""},
+ sa5:{key:'books',who:'Ottoline Quill',title:'A Letter to the Bellman',
+  go:"A woman's voice, behind the planks: \"Go away. We are shut. If you are here for a book, I have none.\"",
+  proof:"\"Prove you are friends. Slip it under the door. Whatever it is. It had better be an apology.\"",
+  offer:"\"Ottoline Quill, scrivener. I need a letter taken to Wick Tolliver, the bellman, in the little house on Bell Lane. We have not spoken in ten years. It is about a bell, and a quarrel, and a misunderstanding about a bell. I cannot go out and I will not put it through the boards. Take it to him, wait for his reply, bring it back, and I will take the boards down.\"",
+  accept:"\"Here is the letter. Do not read it. It is sealed, and anyway, it is damp. He lives on the west side of Bell Lane. Do not let him offer you tea.\"",
+  remind:(n,m)=>bagCount('sa_reply')?'"You have a reply. Slip it under the door."':bagCount('sa_letter')?'"Have you given Wick the letter? He lives on the west side of Bell Lane, in the little house."':'"I gave you a letter. Where is it? It is not on the street, is it?"',
+  ready:"\"Three words? He wrote me three words? Give it here, through the gap.\"",
+  thanks:"\"He said yes. After ten years. I knew he would. I knew it. Wait there, I am taking the boards down. I am putting on a better cardigan.\"",after:"\"The door is open. Mind the ink.\""},
+ sa6:{key:'jeweller',who:'Silvio Gilt',title:'The Stolen Sign',
+  go:"A man's voice, behind the planks: \"Go away. We are closed. Nothing of value is here. Nothing. Go.\"",
+  proof:"\"If you are a thief, I have nothing. If you are not a thief, I am still sure I have nothing.\"",
+  offer:"\"Silvio Gilt, jeweller. Somebody took the sign off my door. It is a gilded eye, carved, on a bracket. A ghoul took it, I think, for the shine, and carried it to Hollin Farm, in the south east. A shop without its sign is a shop nobody finds. Bring the Gilded Eye back, and I will take the boards down.\"",
+  accept:"\"It is in a ruined hut at Hollin Farm. Follow the Back Track east past Tanners' Lane. Mind the dead.\"",
+  remind:(n,m)=>'"The Gilded Eye. It is at Hollin Farm, in the ruined hut. Please hurry. I can see my own bracket from here, and it looks bare."',
+  ready:"\"That is my sign. I can tell by the sound it makes. Put it through the gap.\"",
+  thanks:"\"My Eye. Look at it. Scratched. Still the finest sign in Sale. Wait there, I am coming out for the ladder.\"",after:"\"The door is open, and so is the Eye. Come in.\""},
+ sa7:{key:'tailor',who:'Madame Orla Veil',title:'The Boy in the Belfry',
+  go:"A woman's voice, sharp, behind the planks: \"Go away. I am not in. I am not dressed for visitors.\"",
+  proof:"\"Prove you are friends. You do not look like friends. You look like you need a hem.\"",
+  offer:"\"Madame Orla Veil, mourning tailor. My nephew Pip climbed up the belfry on the day the ghouls came, and he has not come down. I can hear the bell ring when the wind does not blow. He is eleven. I cannot climb. I am sixty. Go up, bring him out, and I will take the boards down.\"",
+  accept:"\"The Belfry is the black tower at the top of Bell Lane. He will be at the top, under the bell. There are ravens. And something worse. Mind your step.\"",
+  remind:(n,m)=>'"My nephew. The Belfry, top of Bell Lane. Please. I can hear the bell."',
+  ready:"\"That is his voice. Tell me that is his voice.\"",
+  thanks:"\"Pip! You wretched, wonderful boy! Wait there. Wait there, both of you, I am putting down my shears.\"",after:"\"The door is open. Pip is under the table. Do not ask.\""},
+ sa8:{key:'butcher',who:'Hettie Mawd',title:'Flour from Hollin Farm',
+  go:"A woman's voice, behind the planks: \"Go away. No meat today. No bread either.\"",
+  proof:"\"Prove you are friends, and prove you are not hungry. I cannot feed anybody. I have no flour.\"",
+  offer:"\"Hettie Mawd, Crust and Cleaver. Butcher and baker, the only one in Sale. I have meat, I have an oven, and I have not a grain of flour. The mill at Hollin Farm, south east, has sacks of rye in the ruins. Bring me four. I will make you the best loaf you have ever had, and I will take the boards down.\"",
+  accept:"\"Four sacks, the ones stamped with a wheatsheaf. They are in the ruins at Hollin Farm. Mind the dead. They like flour too, for some reason.\"",
+  remind:(n,m)=>`"${n} of ${m} sacks of flour. Hollin Farm, south east, down the Back Track."`,
+  ready:"\"I can smell that. Dry rye. Put it through the gap.\"",
+  thanks:"\"Four sacks! Proper flour. The oven is already warm. Wait there, I am taking the boards down.\"",after:"\"The door is open, and the bread is in.\""},
+ sa9:{key:'alchemist',who:'Master Orrin Vesper',title:'Grave-Salt from the Crypt',
+  go:"A man's voice, thin and irritable, behind the planks: \"Go away. The alembic is shut. I am in the middle of something.\"",
+  proof:"\"If you are going to ask for a potion, there is none. If you are going to ask for the recipe, there is none of that either.\"",
+  offer:"\"Orrin Vesper, alchemist. I need grave-salt, a fist of it. It grows on the walls of the Sale Crypt where the damp gets in, at the end of Charnel Row, down the stair. It is the one thing I cannot make and cannot do without. Fetch me a piece, from the vault at the far end, and I will take the boards down.\"",
+  accept:"\"The crypt is down the stair at the south end of Charnel Row. The salt is in the vault, white and cold. The dead in there will not like you taking it. Good luck.\"",
+  remind:(n,m)=>'"The grave-salt. The Sale Crypt, down the stair at the end of Charnel Row, in the vault at the far end."',
+  ready:"\"Is that cold? Is it white? Is it the salt? Put it through the gap.\"",
+  thanks:"\"Splendid. The best I have seen. Wait there, I am coming out, and I am bringing nothing flammable.\"",after:"\"The door is open. Do not touch the green flask.\""},
+ sa10:{key:'tavern',who:'Big Bram Cobb',title:'A Round for the Dead',
+  go:"A deep voice, behind the planks: \"Go away. Closed. Last orders was nine years ago.\"",
+  proof:"\"Prove you are friends. A friend would buy a round. A friend would buy three.\"",
+  offer:"\"Bram Cobb, landlord of the Last Orders. I have three regulars standing in the square who have not had a drink in nine years. Old Tobias Lamb, Mad Meg Hollow and Ned the Drover. They are ghosts. They cannot hold a mug, but they can take a drink if it is put to them properly. I am passing you three ales through the gap. Take one to each of them, and I will take the boards down.\"",
+  accept:"\"Here, three mugs. They are in the square, near the fountain and by my door. Go on. They will be very polite about it.\"",
+  remind:(n,m)=>`"${n} of ${m} drinks. Tobias Lamb, Meg Hollow and Ned the Drover, in Gibbet Square."`,
+  ready:"\"I heard a cheer. Faint. Did they cheer?\"",
+  thanks:"\"A round for the dead. That is the best thing anyone has done in this town in nine years. Wait there, the planks are coming down.\"",after:"\"The door is open. A bed is upstairs.\""}};
+/* the quests themselves: what is asked, and how the log counts it */
+saQ('sa1',SA_Q.sa1.title,SA_Q.sa1.who,3,()=>bagCount('sa_oil'),'Bring 3 flasks of lamp oil from the ruined houses on Charnel Row (the dead quarter, south of Candle Street) to Tabitha Pennyworth at the barricaded general store.',{take:{sa_oil:3}});
+saQ('sa2',SA_Q.sa2.title,SA_Q.sa2.who,1,()=>(saF().k_saranulf||0)>0?1:0,"Kill Sir Ranulf the Hollow, the wight who walks the Charnel Yard at the south end of Charnel Row, and tell Sergeant Hob Ironbrow at the barricaded armoury.");
+saQ('sa3',SA_Q.sa3.title,SA_Q.sa3.who,8,q=>Math.min(8,(saF().k_saghoul||0)-(q.base||0)),'Kill 8 ghouls, in the dead quarter or at Hollin Farm, then tell Marta Stroud at the barricaded weaponsmith.',{cnt:'k_saghoul'});
+saQ('sa4',SA_Q.sa4.title,SA_Q.sa4.who,3,saFlagCount('sa4_',3),()=>saF().sa4_1||saF().sa4_2||saF().sa4_3?'Find the rest of Nan Marrowbone\'s three apprentices in the Hollow Cellar, under the Ropewalk Cottage on Charnel Row.':'Find the three apprentices in the Hollow Cellar, under the Ropewalk Cottage (second house on the west side of Charnel Row), and tell Nan Marrowbone.');
+saQ('sa5',SA_Q.sa5.title,SA_Q.sa5.who,1,()=>bagCount('sa_reply')?1:0,()=>bagCount('sa_reply')?'Take the bellman\'s reply back to Ottoline Quill at the barricaded Dead Letter Scriptorium.':'Take the letter to Wick Tolliver, the bellman, in the little house on the west side of Bell Lane, and bring his reply back to Ottoline Quill.',{give:'sa_letter',take:{sa_reply:1}});
+saQ('sa6',SA_Q.sa6.title,SA_Q.sa6.who,1,()=>bagCount('sa_sign'),'Find the Gilded Eye, the stolen shop sign, in the ruined hut at Hollin Farm (south east, along the Back Track), and take it to Silvio Gilt at the barricaded jeweller.',{take:{sa_sign:1}});
+saQ('sa7',SA_Q.sa7.title,SA_Q.sa7.who,1,()=>saF().sa7a?1:0,'Climb the Belfry, the black tower at the top of Bell Lane, and find Madame Veil\'s nephew Pip at the top. Then tell Madame Veil at the barricaded tailor.');
+saQ('sa8',SA_Q.sa8.title,SA_Q.sa8.who,4,()=>bagCount('sa_flour'),'Bring 4 sacks of rye flour from the ruins of Hollin Farm (south east, along the Back Track) to Hettie Mawd at the barricaded Crust and Cleaver.',{take:{sa_flour:4}});
+saQ('sa9',SA_Q.sa9.title,SA_Q.sa9.who,1,()=>bagCount('sa_gravesalt'),'Fetch grave-salt from the vault at the far end of the Sale Crypt (the stair at the south end of Charnel Row) and take it to Master Orrin Vesper at the barricaded alchemist.',{take:{sa_gravesalt:1}});
+saQ('sa10',SA_Q.sa10.title,SA_Q.sa10.who,3,saFlagCount('sa10_',3),()=>'Give an ale to each of the three ghost regulars in Gibbet Square (Tobias Lamb, Meg Hollow and Ned the Drover), then tell Big Bram Cobb at the barricaded Last Orders.');
+const SA_QSHOP={};for(const id in SA_Q)SA_QSHOP[id]=SA_Q[id].key;
+/* the voice behind the boards, and the way it leads from "Go away" to the quest and back */
+for(const id in SA_Q){const Q=SA_Q[id],key=Q.key,sp=SA_SPEC[key];
+  khNpc('sa_b_'+key,Q.who+', behind the boards',null,d=>{
+    const F=saF(),st=qSt(id);
+    if(saShopOpen(key))return say(Q.after,[BYE]);
+    if(st===null&&!F['sa_met_'+key])return say(Q.go,[['Say you mean no harm.',()=>{F['sa_met_'+key]=1;return say(Q.proof,[['Ask what they need.',()=>qNode(id,saDlg(id))],['Leave.',()=>null]])}],['Leave.',()=>null]]);
+    return qNode(id,saDlg(id))});
+  QGIVER['sa_b_'+key]=[id]}
+function saDlg(id){const Q=SA_Q[id];return khQD(Q.offer,Q.accept,Q.remind,Q.ready,Q.thanks,Q.after,'Here you go.')}
+/* handing in opens the shop */
+function saOpenShop(key){
+  const F=saF();F['sa_open_'+key]=1;sfx('door');msg('The planks come down, one by one. '+SA_SPEC[key].name+' is open.','#ffe36a');saApplyDoors()}
+{const _qt=qTurnIn;qTurnIn=function(id){const r=_qt.apply(this,arguments);try{if(r&&SA_QSHOP[id])saOpenShop(SA_QSHOP[id])}catch(e){console.error(e)}return r}}
+{const _qa=qAccept;qAccept=function(id){_qa.apply(this,arguments);if(id==='sa10')for(let i=0;i<3;i++)bagAdd(mkItem('ale'));if(id==='sa4'||id==='sa7')try{msg('Tip: the way down is a door in the dead quarter.','#a8b8d8')}catch(e){}}}
+/* the three ghost regulars take their ale */
+SA_REGS.forEach(([id],i)=>{const n=i+1;yrHook(id,d=>{const F=saF();
+  if(qSt('sa10')==='active'&&!F['sa10_'+n]){
+    if(bagCount('ale')<1)return say("A ghost looks at your hands, and then at your face. \"Come back with a drink, would you? I would be ever so grateful.\"",[BYE]);
+    bagRemove('ale',1);F['sa10_'+n]=1;yrStep(['Old Tobias Lamb','Mad Meg Hollow','Ned the Drover'][i]+' has had a drink.');
+    return say(["He takes the mug in both hands, and the ale goes down his throat and out of the back of his neck, and he does not seem to mind. \"Oh, that is good. Oh, that is the real thing. Thank you.\" He sits down on the cobbles, looking happier than any ghost you have seen.","She holds the mug up to the light, says \"To the Last Orders\", and drinks it in one go. The ale puddles on the cobbles. She looks at it with great pleasure. \"I never could finish one,\" she says. \"Now I never need to.\"","Ned takes the mug and downs it, and the beer falls through him and splashes on his boots. \"That is the best pint I never had,\" he says, and wipes his mouth on a sleeve that is not there."][i],[BYE])}
+  return null})});
+/* ---- what lies about for the quests, and the dead of the two zones ---- */
+function saPlaceQuest(C){
+  const {items,near,used,foe}=C,put=(k,x,y,r)=>{const q=near(x,y,r||4);if(q){used.add(q[0]+','+q[1]);items.push({k,x:q[0],y:q[1]})}};
+  for(const [x,y] of [[17,44],[23,48],[17,56]])put('sa_oil',x,y);
+  for(const [x,y] of [[60,56],[66,60],[61,65],[67,65]])put('sa_flour',x,y);
+  put('sa_sign',62,63,3);
+  const DEAD=[['saghoul',16,46],['saghoul',23,46],['saghoul',14,52],['saghoul',24,52],['saghoul',18,56],['saghoul',26,58],['saghoul',12,60],['saskel',22,42],['saskel',15,48],['saskel',25,56],['saskel',10,50],
+    ['sapike',28,52],['sapike',14,58],['sazombie',11,44],['sazombie',30,60],['sawight',24,64],['sawight',13,64],['sabmage',28,46],['sagiant',32,54],['saranulf',23,60]];
+  const FARM=[['saghoul',60,57],['saghoul',66,63],['saghoul',59,64],['saghoul',64,66],['sazombie',62,61],['sazombie',67,58],['saskel',58,60],['saskel',65,65],['sawight',66,66]];
+  for(const [t,x,y] of DEAD.concat(FARM))foe(t,x,y)}
+/* ---- the rings and marks on the maps: a gold ! over every keeper with a job, a ? once it is done (the engine's marks follow QGIVER); the ring points at the thing to do ---- */
+if(typeof QRF!=='undefined'){
+  const N=(l,...ids)=>({lvl:l,npc:ids}),E=(l,rx)=>({lvl:l,en:rx}),I=(l,id)=>({lvl:l,item:id}),b=k=>N(SA.ID,'sa_b_'+k);
+  const T=QRF.T;
+  T.sa1={give:[b('general')],act:[I(SA.ID,'sa_oil')],ready:[b('general')]};
+  T.sa2={give:[b('armour')],act:[E(SA.ID,/^saranulf$/)],ready:[b('armour')]};
+  T.sa3={give:[b('weapons')],act:[E(SA.ID,/^saghoul$/)],ready:[b('weapons')]};
+  T.sa4={give:[b('apothecary')],act:[N(SA.CELLAR,'sa_surv1','sa_surv2','sa_surv3')],ready:[b('apothecary')]};
+  T.sa5={give:[b('books')],act:()=>bagCount('sa_reply')?[b('books')]:[N(SA.ID,'sa_ringer')],ready:[b('books')]};
+  T.sa6={give:[b('jeweller')],act:[I(SA.ID,'sa_sign')],ready:[b('jeweller')]};
+  T.sa7={give:[b('tailor')],act:[N(SA.BELFRY,'sa_pip')],ready:[b('tailor')]};
+  T.sa8={give:[b('butcher')],act:[I(SA.ID,'sa_flour')],ready:[b('butcher')]};
+  T.sa9={give:[b('alchemist')],act:[I(SA.CRYPT,'sa_gravesalt')],ready:[b('alchemist')]};
+  T.sa10={give:[b('tavern')],act:()=>[N(SA.ID,...['sa_reg1','sa_reg2','sa_reg3'].filter((id,i)=>!saF()['sa10_'+(i+1)]))],ready:[b('tavern')]};
+  QRF.LOC[SA.ID]='sale';QRF.LOC[SA.CELLAR]='sale';QRF.LOC[SA.CRYPT]='sale';QRF.LOC[SA.BELFRY]='sale'}
+
+/* ---- src/desert/sale_sound.js ---- */
+/* ==========================================================================
+   THE SOUND OF SALE (prefix sas / SAS). Made in the browser and from the game's own samples: a cold wind (WIND_AMT), the bell of the Belfry tolling by itself (church_bell1 and 2, low and slow), the hour,
+   crows cawing from the posts, a low ghostly note now and then, the creak of a gibbet chain in the square. Cellars, the crypt and the belfry: slow drips and a hollow hum.
+   ========================================================================== */
+WIND_AMT[600]=.36;
+const SAS={nextCrow:0,nextBell:0,nextNote:0,nextCreak:0,nextDrip:0,hour:-1};
+function sasCaw(vol){
+  if(!AC||G.mute)return;const f=360+Math.random()*140,n=2+((Math.random()*3)|0);
+  for(let i=0;i<n;i++){const d=i*(.23+Math.random()*.05);tone(f*(1+(Math.random()-.5)*.1),f*.78,.17,'sawtooth',.045*vol,d);nz(.07,.05*vol,'bandpass',1300,900,d)}}
+function sasBell(vol){playSmp('church_bell1',.5*vol,.7);setTimeout(()=>playSmp('church_bell2',.4*vol,.68),3000)}
+function sasNote(vol){if(!AC||G.mute)return;const b=130+Math.random()*60;tone(b,b*.8,2.6,'sine',.05*vol,0);tone(b*1.5,b*1.2,2.4,'sine',.025*vol,.15);tone(b*2.01,b*1.6,1.8,'sine',.012*vol,.3)}
+function sasCreak(vol){if(!AC||G.mute)return;const f=190+Math.random()*60;tone(f,f*1.25,.35,'sawtooth',.03*vol,0);tone(f*1.4,f*1.1,.3,'sawtooth',.02*vol,.45);nz(.1,.03*vol,'bandpass',900,600,.05)}
+function sasDrip(vol){if(!AC||G.mute)return;const f=900+Math.random()*500;tone(f,f*.5,.12,'sine',.05*vol,0);tone(f*.7,f*.35,.2,'sine',.015*vol,.09)}
+function saSoundTick(){
+  if(!AC||!NB||!MASTER||G.state!=='play'||G.mute||!saIs(LEVEL))return;
+  const now=AC.currentTime;
+  if(LEVEL===SA.ID){
+    if(SNDOPT.amb&&now>SAS.nextCrow){SAS.nextCrow=now+7+Math.random()*14;sasCaw(.5+Math.random()*.5)}
+    if(SNDOPT.amb&&now>SAS.nextBell){SAS.nextBell=now+38+Math.random()*50;sasBell(.8)}
+    if(SNDOPT.amb&&now>SAS.nextNote){SAS.nextNote=now+14+Math.random()*22;sasNote(.6+Math.random()*.4)}
+    if(SNDOPT.amb&&now>SAS.nextCreak){const d=Math.hypot(G.P.x-38,G.P.y-33);SAS.nextCreak=now+4+Math.random()*7;if(d<20)sasCreak(Math.max(.1,1-d/20))}
+    const h=Math.floor(G.clock/60)%24;if(SAS.hour<0)SAS.hour=h;else if(h!==SAS.hour){SAS.hour=h;if(SNDOPT.amb){const k=Math.max(1,h%12||12);for(let i=0;i<k;i++)setTimeout(()=>playSmp('church_bell1',.45,.72),i*2600)}}
+  }else{
+    if(SNDOPT.amb&&now>SAS.nextDrip){SAS.nextDrip=now+1.6+Math.random()*4;sasDrip(.5+Math.random()*.5)}
+    if(SNDOPT.amb&&now>SAS.nextNote&&LEVEL<7000){SAS.nextNote=now+16+Math.random()*20;sasNote(.35)}
+  }
+}
+{const _ys=yarSoundTick;yarSoundTick=function(){_ys.apply(this,arguments);try{saSoundTick()}catch(e){console.error('sas',e)}}}
+
+/* ---- src/desert/maps_sale.js ---- */
+/* Area map for Sale (level 600): a grim gothic town of the dead. Drawn from the real level data on cold, dusky parchment: Candle Street, Gibbet Square with its dead fountain and gibbet, the Sanctuary, the Belfry,
+   Bell Lane, Charnel Row, Tanners' Lane, the Back Track, every house and shop with its own roof, the dead quarter and Hollin Farm shaded as dangerous ground, lamps and dead trees. It is shown whole (no fog of war).
+   Also puts Sale on the world map (west of the road that is not yet open), and the Go to area list. The quest marks (gold ! and green ?) over the shopkeepers are laid on by maps_questmarks.js. */
+function mpSaleFit(L){const A=MPL.AREA,s=3.5,ox=A.x+(A.w-SA.W*s)/2,oy=A.y+(A.h-SA.H*s)/2;return {s,ox,oy,X:c=>ox+c*s,Y:r=>oy+r*s}}
+const MPSA_WALL={sa_slate:'#b4b8c4',sa_moss:'#a8b49c',sa_black:'#7a7a88',sa_bone:'#e0d8c4',sa_brick:'#b88878',sa_ash:'#bab6b0'};
+const MPSA_ROOF={sa_rf_1:['#5a6678','#434d5c'],sa_rf_2:['#8a8a90','#686870'],sa_rf_3:['#5e7a56','#465e40'],sa_rf_4:['#4a4a56','#34343e'],sa_rf_5:['#6e4e6c','#523a52'],sa_rf_6:['#9a4a38','#74362a'],sa_rf_7:['#7a5a4a','#5c4236'],sa_rf_8:['#8a7e5a','#6a603e'],sa_rf_9:['#6a5e5e','#4e4444']};
+function mpSaleHouse(x,h,F){
+  const s=F.s,X0=F.X(h.x0),Y0=F.Y(h.y0),W=(h.x1-h.x0+1)*s,Hh=(h.y1-h.y0+1)*s,wall=MPSA_WALL[h.sty]||'#b8b4ac',[hi,lo]=MPSA_ROOF[h.rk]||MPSA_ROOF.sa_rf_1,m=Math.max(.5,s*.14);
+  x.save();x.fillStyle='rgba(30,24,30,.35)';x.fillRect(X0+1.2,Y0+1.4,W,Hh);
+  x.fillStyle=wall;x.strokeStyle=MPL.INK;x.lineWidth=.6;x.fillRect(X0,Y0,W,Hh);x.strokeRect(X0,Y0,W,Hh);
+  const horiz=W>=Hh,rx=X0+m,ry=Y0+m,rw=W-2*m,rh=Hh-2*m;
+  x.fillStyle=hi;if(horiz){x.fillRect(rx,ry,rw,rh/2);x.fillStyle=lo;x.fillRect(rx,ry+rh/2,rw,rh/2)}else{x.fillRect(rx,ry,rw/2,rh);x.fillStyle=lo;x.fillRect(rx+rw/2,ry,rw/2,rh)}
+  x.strokeStyle='rgba(20,15,25,.4)';x.lineWidth=.3;if(horiz){for(let yy=ry+1.1;yy<ry+rh;yy+=1.1){x.beginPath();x.moveTo(rx,yy);x.lineTo(rx+rw,yy);x.stroke()}}else{for(let xx=rx+1.1;xx<rx+rw;xx+=1.1){x.beginPath();x.moveTo(xx,ry);x.lineTo(xx,ry+rh);x.stroke()}}
+  if(h.spk){x.strokeStyle=MPL.GOLD;x.lineWidth=.9;x.strokeRect(X0-.7,Y0-.7,W+1.4,Hh+1.4)}
+  x.fillStyle='#2a1a10';x.beginPath();x.arc(h.face==='E'?F.X(h.x1+1):h.face==='W'?F.X(h.x0):F.X(h.door[0]+.5),h.face==='S'?F.Y(h.y1+1):h.face==='N'?F.Y(h.y0):F.Y(h.door[1]+.5),1,0,6.3);x.fill();
+  x.restore()}
+mplInstall({name:'sale',levels:[600],tint:[-26,-22,-6],fit:mpSaleFit,
+  foot:'You are the yellow arrow. The numbers on the map are the shops, listed on the right.',
+  draw(c,x,L,api){
+    const F=mpSaleFit(L),A=MPL.AREA,s=F.s,X=F.X,Y=F.Y,I=api.I,ink=MPL.INK,W=SA.W,H=SA.H;
+    x.save();x.beginPath();x.rect(A.x,A.y,A.w,A.h);x.clip();
+    const gr=x.createLinearGradient(0,A.y,0,A.y+A.h);gr.addColorStop(0,'#b4b8a0');gr.addColorStop(1,'#9fa690');x.fillStyle=gr;x.fillRect(A.x,A.y,A.w,A.h);
+    for(let i=0;i<150;i++){x.fillStyle=i%3?'rgba(80,90,70,.2)':'rgba(220,220,200,.18)';x.beginPath();x.ellipse(X(hash2(i,1,300)*W),Y(hash2(i,2,300)*H),3+hash2(i,3,300)*14,2+hash2(i,4,300)*6,hash2(i,5,300)*3,0,6.3);x.fill()}
+    // the dangerous ground: the dead quarter and Hollin Farm, shaded dull red and hatched
+    for(const z of SA_ZONES){x.fillStyle='rgba(150,60,50,.2)';x.fillRect(X(z.x0),Y(z.y0),(z.x1-z.x0+1)*s,(z.y1-z.y0+1)*s);x.strokeStyle='rgba(120,40,34,.5)';x.lineWidth=.7;x.setLineDash([3,2]);x.strokeRect(X(z.x0),Y(z.y0),(z.x1-z.x0+1)*s,(z.y1-z.y0+1)*s);x.setLineDash([]);
+      x.save();x.beginPath();x.rect(X(z.x0),Y(z.y0),(z.x1-z.x0+1)*s,(z.y1-z.y0+1)*s);x.clip();x.strokeStyle='rgba(120,40,34,.22)';x.lineWidth=.5;for(let k=-80;k<(z.x1-z.x0+1)*s+80;k+=5){x.beginPath();x.moveTo(X(z.x0)+k,Y(z.y0));x.lineTo(X(z.x0)+k-(z.y1-z.y0+1)*s*.6,Y(z.y1+1));x.stroke()}x.restore()}
+    // the square
+    {const S=SA_SQ;x.fillStyle='#cfcbc0';x.strokeStyle='rgba(30,24,30,.6)';x.lineWidth=.7;x.fillRect(X(S.x0),Y(S.y0),(S.x1-S.x0+1)*s,(S.y1-S.y0+1)*s);x.strokeRect(X(S.x0),Y(S.y0),(S.x1-S.x0+1)*s,(S.y1-S.y0+1)*s);
+      x.strokeStyle='rgba(60,60,70,.3)';x.lineWidth=.3;for(let xx=S.x0;xx<=S.x1+1;xx+=1.5){x.beginPath();x.moveTo(X(xx),Y(S.y0));x.lineTo(X(xx),Y(S.y1+1));x.stroke()}}
+    // roads
+    const road=(x0,y0,x1,y1,col,w)=>{x.strokeStyle='rgba(30,24,30,.55)';x.lineWidth=w*s+1.1;x.lineCap='butt';x.beginPath();x.moveTo(X(x0+.5),Y(y0+.5));x.lineTo(X(x1+.5),Y(y1+.5));x.stroke();x.strokeStyle=col;x.lineWidth=w*s;x.beginPath();x.moveTo(X(x0+.5),Y(y0+.5));x.lineTo(X(x1+.5),Y(y1+.5));x.stroke()};
+    for(const r of SA_ROADS)road(r[0],r[1],r[2],r[3],r[4]==='0'?'#d6d2c6':'#b8a888',r[4]==='0'?1:.9);
+    // the boundary wall
+    x.strokeStyle='#5a5a66';x.lineWidth=2;x.strokeRect(X(3),Y(3),66*s,66*s);x.strokeStyle=ink;x.lineWidth=.5;x.strokeRect(X(3)-1,Y(3)-1,66*s+2,66*s+2);x.strokeRect(X(3)+1,Y(3)+1,66*s-2,66*s-2);
+    // the east gate, iron, between two posts
+    x.fillStyle='#4a4a56';x.strokeStyle=ink;x.lineWidth=.6;x.fillRect(X(68.6),Y(35.2),3.2,2.2*s);x.strokeRect(X(68.6),Y(35.2),3.2,2.2*s);
+    // decor: dead trees, stones, bones
+    const trees=[];for(const d of L.decor){const k=d.k;
+      if(k==='gy_dead'||k==='gy_yew')trees.push(d);
+      else if(/^gy_(stone1|stone2|lean|wcross)$/.test(k)){x.fillStyle='#aaa6a0';x.strokeStyle=ink;x.lineWidth=.3;x.beginPath();x.arc(X(d.x+.5),Y(d.y+.7),.9,Math.PI,0);x.lineTo(X(d.x+.5)+.9,Y(d.y+.7)+.8);x.lineTo(X(d.x+.5)-.9,Y(d.y+.7)+.8);x.closePath();x.fill();x.stroke()}
+      else if(k==='hay'){x.fillStyle='#c8b060';x.strokeStyle=ink;x.lineWidth=.35;x.beginPath();x.arc(X(d.x+.5),Y(d.y+.6),1.1,Math.PI,0);x.closePath();x.fill();x.stroke()}
+      else if(k==='gy_bones'){x.fillStyle='#efe8d8';x.beginPath();x.arc(X(d.x+.5),Y(d.y+.5),.5,0,6.3);x.fill()}}
+    // the houses and shops
+    for(const h of SA_HOUSES)mpSaleHouse(x,h,F);
+    // the Sanctuary: a gothic chapel with a spire, and the Belfry, a black tower
+    {const C=SA_CHAPEL,a=X(C.x0),b=Y(C.y0),w=(C.x1-C.x0+1)*s,hh=(C.y1-C.y0+1)*s;x.fillStyle='rgba(30,24,30,.35)';x.fillRect(a+1.4,b+1.6,w,hh);x.fillStyle='#bab6b0';x.strokeStyle=ink;x.lineWidth=.7;x.fillRect(a,b,w,hh);x.strokeRect(a,b,w,hh);
+      x.fillStyle='#8a8a90';x.fillRect(a+1.2,b+1.2,w-2.4,hh/2-1.2);x.fillStyle='#686870';x.fillRect(a+1.2,b+hh/2,w-2.4,hh/2-1.2);
+      x.fillStyle='#bab6b0';x.fillRect(a-2.4,b+hh-5.4,6.4,6.4);x.strokeRect(a-2.4,b+hh-5.4,6.4,6.4);x.fillStyle='#4a4a56';x.beginPath();x.moveTo(a-3,b+hh-5.4);x.lineTo(a+.8,b+hh-11);x.lineTo(a+4.6,b+hh-5.4);x.closePath();x.fill();x.stroke();
+      x.strokeStyle=MPL.GOLD;x.lineWidth=.9;x.strokeRect(a-.6,b-.6,w+1.2,hh+1.2);
+      x.fillStyle='#2a1a10';x.fillRect(X(34),Y(29.2),s,.5*s);}
+    {const B=SA_BELFRY,a=X(B.x0),b=Y(B.y0),w=(B.x1-B.x0+1)*s,hh=(B.y1-B.y0+1)*s;x.fillStyle='rgba(30,24,30,.4)';x.fillRect(a+1.4,b+1.6,w,hh);x.fillStyle='#5a5a66';x.strokeStyle=ink;x.lineWidth=.7;x.fillRect(a,b,w,hh);x.strokeRect(a,b,w,hh);x.fillStyle='#34343e';x.fillRect(a+2,b+2,w-4,hh-4);I.tower(x,a+w/2,b+hh*.7,.8)}
+    // the crypt gate and the gibbet, the fountain, the lamps
+    {const G0=SA_CRYPTGATE;x.fillStyle='#34343e';x.strokeStyle=ink;x.lineWidth=.5;x.fillRect(X(G0.x-.6),Y(G0.y),2.2*s,s);x.strokeRect(X(G0.x-.6),Y(G0.y),2.2*s,s);I.skull(x,X(G0.x+.5),Y(G0.y+2.2),.55)}
+    x.strokeStyle=ink;x.lineWidth=.9;x.beginPath();x.moveTo(X(38.5),Y(34));x.lineTo(X(38.5),Y(31.8));x.lineTo(X(40),Y(31.8));x.moveTo(X(40),Y(31.8));x.lineTo(X(40),Y(32.6));x.stroke();
+    x.fillStyle='#d0ccc0';x.strokeStyle=ink;x.lineWidth=.5;x.beginPath();x.arc(X(35.5),Y(38.5),1.9,0,6.3);x.fill();x.stroke();x.fillStyle='#8a8a94';x.beginPath();x.arc(X(35.5),Y(38.5),1.1,0,6.3);x.fill();
+    trees.sort((p,q)=>p.y-q.y);for(const d of trees){const a=X(d.x+.5),b=Y(d.y+.6);I.tree(x,a,b+1,.5+hash2(d.x,d.y,9)*.12,'#59604a')}
+    for(const [lx,ly] of L.lights){x.fillStyle='rgba(255,220,130,.35)';x.beginPath();x.arc(X(lx+.5),Y(ly+.5),2.4,0,6.3);x.fill();x.fillStyle=MPL.GOLD2;x.strokeStyle=ink;x.lineWidth=.4;x.beginPath();x.arc(X(lx+.5),Y(ly+.5),.8,0,6.3);x.fill();x.stroke()}
+    // names
+    const nm=(t,cx,cy,sz,col)=>api.text(x,t,X(cx),Y(cy),sz,col);
+    nm('Candle Street',14,34.4,4.4,'#3a2a3c');nm('Gibbet Square',35,43.6,4.6,'#7a1c1c');nm('Bell Lane',63,27,3.8,'#3a2a3c');nm('Charnel Row',14,56,3.8,'#3a2a3c');nm("Tanners' Lane",46,52,3.8,'#3a2a3c');nm('Back Track',42,59.8,3.8,'#3a2a3c');
+    nm('The Sanctuary',34.5,23.6,4.6,'#7a1c1c');nm('The Belfry',57,13.4,4.4,'#7a1c1c');nm('The Dead Quarter',17,66.2,4.6,'#8a2a1c');nm('Hollin Farm',62.5,54.4,4.2,'#8a2a1c');nm('The Crypt',20.5,66.6,3.8,'#3a2a3c');
+    api.text(x,'East gate',X(65),Y(33.5),3.6,MPL.LAPIS);api.text(x,'(the road is not built yet)',X(64),Y(39.2),3.4,'#7a2a1a');
+    // numbered discs over the shops
+    const disc=(a,b,n)=>{x.fillStyle=MPL.GOLD2;x.strokeStyle=ink;x.lineWidth=.6;x.beginPath();x.arc(a,b,2.5,0,6.3);x.fill();x.stroke();x.fillStyle=ink;x.font=`bold 3.6px ${FUI}`;x.textAlign='center';x.textBaseline='middle';x.fillText(String(n),a,b+.2)};
+    const PL=[];let n=0;for(const h of SA_HOUSES){if(!h.spk)continue;n++;PL.push([n,h.name]);disc(X((h.x0+h.x1+1)/2),h.face==='S'?Y(h.y0)-1.6:Y(h.y1+1)+1.6,n)}
+    n++;PL.push([n,'The Sanctuary (barred)']);disc(X(34.5),Y(24.2),n);
+    x.restore();
+    x.strokeStyle=ink;x.lineWidth=1;x.strokeRect(A.x,A.y,A.w,A.h);x.strokeStyle=MPL.GOLD;x.lineWidth=1.6;x.strokeRect(A.x+1.5,A.y+1.5,A.w-3,A.h-3);
+    api.title(x,'Sale','A town of the dead');
+    x.save();x.fillStyle='#5a2a2a';x.strokeStyle=ink;x.lineWidth=.7;x.beginPath();x.moveTo(6,214);x.lineTo(88,214);x.lineTo(83,222);x.lineTo(88,230);x.lineTo(6,230);x.lineTo(11,222);x.closePath();x.fill();x.stroke();x.restore();x.save();x.fillStyle='#ecdcc0';x.font=`bold 7px ${FUI}`;x.textAlign='center';x.textBaseline='middle';x.fillText('Keep to the Streets',47,222.4);x.restore();
+    api.compass(x,438,58,14);
+    api.panel(x,6,52,82,80);api.text(x,'About Sale',47,61,7.2,MPL.LAPIS);
+    api.notes(x,['A small town of black stone, dusk and fog. Ghosts keep the streets and mean no harm.','Every shop is barricaded. The dead quarter (red) and Hollin Farm are not safe.'],11,71,70,5.9,3);
+    api.panel(x,6,138,82,72);api.text(x,'Key',47,147,7.2,MPL.LAPIS);
+    [['House, shop',()=>mpSaleHouse(x,{x0:0,x1:1,y0:0,y1:1,sty:'sa_slate',rk:'sa_rf_1',face:'S',door:[0,1],front:[0,2],spk:'k'},{s:5,X:v=>12+v*5,Y:v=>153+v*5-4})],['Dangerous ground',()=>{x.fillStyle='rgba(150,60,50,.3)';x.fillRect(12,166,12,5);x.strokeStyle='rgba(120,40,34,.7)';x.lineWidth=.6;x.setLineDash([3,2]);x.strokeRect(12,166,12,5);x.setLineDash([])}],['Lamp',()=>{x.fillStyle=MPL.GOLD2;x.strokeStyle=ink;x.lineWidth=.4;x.beginPath();x.arc(16,181,1.6,0,6.3);x.fill();x.stroke()}],['Crypt gate',()=>I.skull(x,16,194,.7)]].forEach(([t,f],i)=>{try{f()}catch(e){}api.text(x,t,28,[158,168,181,194][i]+(i===0?2:0),5.2,'#3a2a1c','left')});
+    api.panel(x,392,74,86,PL.length*7.5+16);api.text(x,'Places',435,82,7.2,MPL.LAPIS);
+    PL.forEach(([k,t],i)=>api.text(x,k+' '+t.replace(/^The /,'').replace(', Weaponsmiths','').replace('Stroud and Daughter','Stroud and Daughter').replace(', Mourning Tailor','').replace(', Jewellers',''),396,91+i*7.5,4.4,'#3a2a1c','left'));
+  }});
+/* the whole town is shown, not fogged */
+{const _f=mplFogOn;mplFogOn=function(L){if(LEVEL===SA.ID)return false;return _f.apply(this,arguments)}}
+/* Sale on the world map, in the far west beyond the road that is not yet open, and in the Go to area list */
+if(typeof WORLD_LOCS!=='undefined'&&!WORLD_LOCS.some(l=>l.k==='sale'))WORLD_LOCS.push({k:'sale',n:'Sale',sub:'a town of the dead',lv:[600,601,602,603].concat(SA.STUBS,Array.from({length:100},(_,i)=>SA.H0+i)),x:-462,y:292,ic:'town'});
+if(typeof QWORLD!=='undefined')QWORLD.Sale='sale';
+if(typeof WORLD_ROADS!=='undefined'&&!WORLD_ROADS.some(r=>r.join()==='westgate,sale'))WORLD_ROADS.push(['westgate','sale']);
+if(typeof WMN_SPEC!=='undefined')WMN_SPEC.sale=WMN_SPEC.sale||[];
+{const _gl=gotoListRaw;gotoListRaw=function(){const out=_gl.apply(this,arguments);try{const rows=[{h:'Sale, a town of the dead (level 90)'}];for(const n of [600,601,602,603]){if(LEVELS[n]||KH_LAZY[n])rows.push({n,name:LEVEL_NAMES[n]||('Level '+n)})}
+  for(const d of SA_DOORS.filter(d=>d.shop).slice(0,3))if(KH_LAZY[d.id])rows.push({n:d.id,name:LEVEL_NAMES[d.id]||d.name});
+  const i=out.findIndex(r=>r.h&&/^Oldhaven/.test(r.h));out.splice(i<0?out.length:i,0,...rows)}catch(e){console.error('sagoto',e)}return out}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
