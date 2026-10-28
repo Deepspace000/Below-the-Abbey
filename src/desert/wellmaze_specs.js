@@ -55,6 +55,7 @@ WM.SPECS=[
 WM.TRIES=600;
 WM.WANT=[{to:'stairOut',lo:105,hi:125,max:190},{to:'stairOut',lo:76,hi:92,max:125},{to:'stairOut',lo:46,hi:62,max:125},{to:'boss',lo:52,hi:66,max:90}]; // about half the old walks (229, 167, 97, 120) and half the old longest walks
 WM.M=[];
+function wmMakeAll(){ // the four mazes are made the first time anyone asks for one (boot used to spend about 3 s on this)
 {const D4=[[0,-1],[1,0],[0,1],[-1,0]];
   const faceOf=(dx,dy)=>D4.findIndex(d=>d[0]===dx&&d[1]===dy);
   WM.SPECS.forEach((sp,k)=>{
@@ -90,3 +91,11 @@ WM.M=[];
   for(let k=1;k<4;k++){const u=WM.M[k].up;WM.M[k].arrive={x:u.ax,y:u.ay,f:u.f}} // facing into the room, away from the door it came through
   for(let k=0;k<3;k++){const d=WM.M[k].down;WM.M[k].back={x:d.ax,y:d.ay,f:d.f}} // where the party stands when it climbs back up from the level below
 }
+}
+let _wmDone=false;
+function wmEnsure(){if(_wmDone)return;_wmDone=true;
+  Object.defineProperty(WM,'M',{value:[],writable:true,configurable:true,enumerable:true});
+  Object.defineProperty(WK,'WELLSTART',{value:null,writable:true,configurable:true,enumerable:true});
+  wmMakeAll()}
+Object.defineProperty(WM,'M',{configurable:true,enumerable:true,get(){wmEnsure();return WM.M},set(v){Object.defineProperty(WM,'M',{value:v,writable:true,configurable:true,enumerable:true})}});
+Object.defineProperty(WK,'WELLSTART',{configurable:true,enumerable:true,get(){wmEnsure();return WK.WELLSTART},set(v){Object.defineProperty(WK,'WELLSTART',{value:v,writable:true,configurable:true,enumerable:true})}});

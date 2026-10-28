@@ -266,7 +266,7 @@ function hgdpcLetter(){let todo=0;
     else{x.lineWidth=Math.max(2,fs*.12);x.strokeStyle='rgba(20,12,6,.85)';x.strokeText(S.text,cx,cy);x.fillStyle='#ecd9a2';x.fillText(S.text,cx,cy)}
     IMG[k]=c;NPC_H[k]=NPC_H[k]||NPC_H[S.base]}
   return todo}
-{const _u=update;update=function(dt){if(!HGDPC.lettered){try{if(!hgdpcLetter())HGDPC.lettered=1}catch(e){HGDPC.lettered=1;console.error('hgdpc letter',e)}}return _u.apply(this,arguments)}}
+{const _u=update;update=function(dt){if(!HGDPC.lettered&&typeof LEVEL!=="undefined"&&LEVEL===HGD.ID){try{if(!hgdpcLetter())HGDPC.lettered=1}catch(e){HGDPC.lettered=1;console.error('hgdpc letter',e)}}return _u.apply(this,arguments)}}
 
 /* ==========================================================================
    ROUND 2 (towns): who stands where and looks like what, houses, church silhouettes, lettered signs, coloured light pools, one table of heights

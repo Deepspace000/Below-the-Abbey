@@ -1156,6 +1156,8 @@ function makeItemSprites(){
    ========================================================================== */
 let AC=null,MASTER=null,NB=null;
 function audioUnlock(){ // iPad and iPhone keep sound off until a touch, and mute Web Audio when the silent switch is on
+  if(AC&&AC.state==='running'&&window.__silentEl&&!window.__silentEl.paused)return; // already unlocked: every key press and tap called this
+  if(AC){const n=performance.now();if(n-(audioUnlock.t||0)<400)return;audioUnlock.t=n} // not on every key press while the browser is still holding sound back
   try{
     if(AC&&AC.state!=='running')AC.resume();
     if(!window.__silentEl){const a=document.createElement('audio');a.setAttribute('playsinline','');a.loop=true;a.src='data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYyLjEyLjEwMQAAAAAAAAAAAAAA//NwwAAAAAAAAAAAAEluZm8AAAAPAAAADgAAA5IAQUFBQUFBQVBQUFBQUFBeXl5eXl5ebW1tbW1tbXx8fHx8fHyKioqKioqKmZmZmZmZmaioqKioqKiotra2tra2tsXFxcXFxcXU1NTU1NTU4uLi4uLi4vHx8fHx8fH/////////AAAAAExhdmM2Mi4yOAAAAAAAAAAAAAAAACQDaQAAAAAAAAOSa0KUHgAAAAAAAAAAAAAAAAD/8yDEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVV//MixCcAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVVVVVVVVVVVVVVX/8yDETwAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVV//MgxHYAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVVVVVVVVVVVVVf/zIMSdAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVX/8yLExAAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVf/zIMTYAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVVVVVVVVVVVVVVX/8yDE2AAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVV//MgxNgAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zIsTXAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//MgxNgAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zIMTYAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/8yDE2AAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//MixNcAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=';a.volume=.01;window.__silentEl=a}
@@ -2805,6 +2807,12 @@ function fitScale(t,def,base){
     v=h>0?Math.min(1,Math.max(.3,(FIT_MAX-fl)/h)):1;if(IMG[def.img])fitCache.set(key,v)}
   return v;
 }
+function sprNear(cam){ // big levels (the Deeper Hollow has 7,900 decor): the ones within 41 squares of where the camera was a moment ago, in the same order; the loop below still drops anything over 36 away
+  const D=G.decor;if(D.length<=250)return D;
+  const c=sprNear.c,t=G.time;
+  if(c&&c.D===D&&c.n===D.length&&c.lv===LEVEL&&Math.abs(c.x-cam.x)<4&&Math.abs(c.y-cam.y)<4&&Math.abs(t-c.t)<.5)return c.a;
+  const a=[];for(const d of D){const dx=d.x-cam.x,dy=d.y-cam.y;if(dx*dx+dy*dy<=1700)a.push(d)}
+  sprNear.c={D,n:D.length,lv:LEVEL,x:cam.x,y:cam.y,t,a};return a}
 function spriteList(){
   const L=[];
   for(const e of G.enemies){
@@ -2819,7 +2827,7 @@ function spriteList(){
   if(G.flora&&G.flora.length){const px=G.C.x+.5,py=G.C.y+.5;for(const f of G.flora){const dx=f.wx-px,dy=f.wy-py;if(dx*dx+dy*dy>256)continue;const im=IMG[f.k];if(!im)continue;L.push({x:f.wx,y:f.wy,img:im,w:(NPC_H[f.k]?NPC_H[f.k]*im.width/im.height:decorW(f.k))*f.sc,decor:f.decor})}} // lots of tiny tufts: only those within sixteen cells are drawn
   const DROP={well:.07,fountain:.1,chest:.05,cart:.05,barrel:.03,crate:.03,bench:.04,urn:.03,memorial:.04,statue:.03,coffin:.03,gate:.02,tree0:.15,tree1:.13,tree2:.09,tree3:.14,tree4:.15,tree5:.16,tree6:.13,tree7:.14};
   const cam=G.C||{x:0,y:0};
-  for(const d of (LEVEL===44&&G.khB?khNearDecor(cam.x,cam.y):G.decor)){if(d.found)continue;if(d.hidden)continue;if(G.decor.length>250&&((d.x-cam.x)*(d.x-cam.x)+(d.y-cam.y)*(d.y-cam.y))>1300)continue;const k=(d.wind&&IMG[d.k+'f'])?(Math.sin(G.C.a)<0?d.k+'f':d.k):(d.lk&&IMG[d.lk])?d.lk:(d.k==='grave'&&IMG.grave2&&hash2(d.x,d.y,5)>.5)?'grave2':d.k;if(d.wd&&d.txt){{const hx=/^sign_wl/.test(d.k)&&d.k!=='sign_wlst'?.18:.1;L.push({x:d.x+.5+d.wd[0]*hx,y:d.y+.5+d.wd[1]*hx,img:shopSign(d),w:.8*(d.sc||1),bob:(d.bob===undefined?.3:d.bob)+.2,hang:[d.wd[0],d.wd[1]],mount:[d.wd[0],d.wd[1]],decor:d})}continue}
+  for(const d of (LEVEL===44&&G.khB?khNearDecor(cam.x,cam.y):sprNear(cam))){if(d.found)continue;if(d.hidden)continue;if(G.decor.length>250&&((d.x-cam.x)*(d.x-cam.x)+(d.y-cam.y)*(d.y-cam.y))>1300)continue;const k=(d.wind&&IMG[d.k+'f'])?(Math.sin(G.C.a)<0?d.k+'f':d.k):(d.lk&&IMG[d.lk])?d.lk:(d.k==='grave'&&IMG.grave2&&hash2(d.x,d.y,5)>.5)?'grave2':d.k;if(d.wd&&d.txt){{const hx=/^sign_wl/.test(d.k)&&d.k!=='sign_wlst'?.18:.1;L.push({x:d.x+.5+d.wd[0]*hx,y:d.y+.5+d.wd[1]*hx,img:shopSign(d),w:.8*(d.sc||1),bob:(d.bob===undefined?.3:d.bob)+.2,hang:[d.wd[0],d.wd[1]],mount:[d.wd[0],d.wd[1]],decor:d})}continue}
     if(d.pic&&d.wd&&IMG[d.k]){const im=(d.lk&&IMG[d.lk])?IMG[d.lk]:IMG[d.k],hh=NPC_H[d.k]||.6;L.push({x:d.x+.5+d.wd[0]*.47,y:d.y+.5+d.wd[1]*.47,img:im,w:hh*im.width/im.height,bob:d.bob===undefined?.45:d.bob,flat:[d.wd[0],d.wd[1]],pic:1,decor:d});continue}
     if(d.msgr&&IMG[d.k]){L.push({x:d.x+.5+d.wd[0]*.46,y:d.y+.5+d.wd[1]*.46,img:IMG[d.k],w:.55,bob:.45,flat:[d.wd[0],d.wd[1]],decor:d});continue}
     if(d.k==='lever'){const lk=IMG.hl_lever0?(d.pulled?((G.time-(d.pullT||0))<.14?'hl_lever1':'hl_lever2'):'hl_lever0'):'lever',li=IMG[lk]||IMG.lever;L.push({x:d.x+.5+d.wd[0]*.43,y:d.y+.5+d.wd[1]*.43,img:li,w:.34,bob:.34,flat:[d.wd[0],d.wd[1]],decor:d});continue} // a lever: old wood, with its off, halfway and on pictures
@@ -53423,6 +53431,7 @@ WM.SPECS=[
 WM.TRIES=600;
 WM.WANT=[{to:'stairOut',lo:105,hi:125,max:190},{to:'stairOut',lo:76,hi:92,max:125},{to:'stairOut',lo:46,hi:62,max:125},{to:'boss',lo:52,hi:66,max:90}]; // about half the old walks (229, 167, 97, 120) and half the old longest walks
 WM.M=[];
+function wmMakeAll(){ // the four mazes are made the first time anyone asks for one (boot used to spend about 3 s on this)
 {const D4=[[0,-1],[1,0],[0,1],[-1,0]];
   const faceOf=(dx,dy)=>D4.findIndex(d=>d[0]===dx&&d[1]===dy);
   WM.SPECS.forEach((sp,k)=>{
@@ -53458,6 +53467,14 @@ WM.M=[];
   for(let k=1;k<4;k++){const u=WM.M[k].up;WM.M[k].arrive={x:u.ax,y:u.ay,f:u.f}} // facing into the room, away from the door it came through
   for(let k=0;k<3;k++){const d=WM.M[k].down;WM.M[k].back={x:d.ax,y:d.ay,f:d.f}} // where the party stands when it climbs back up from the level below
 }
+}
+let _wmDone=false;
+function wmEnsure(){if(_wmDone)return;_wmDone=true;
+  Object.defineProperty(WM,'M',{value:[],writable:true,configurable:true,enumerable:true});
+  Object.defineProperty(WK,'WELLSTART',{value:null,writable:true,configurable:true,enumerable:true});
+  wmMakeAll()}
+Object.defineProperty(WM,'M',{configurable:true,enumerable:true,get(){wmEnsure();return WM.M},set(v){Object.defineProperty(WM,'M',{value:v,writable:true,configurable:true,enumerable:true})}});
+Object.defineProperty(WK,'WELLSTART',{configurable:true,enumerable:true,get(){wmEnsure();return WK.WELLSTART},set(v){Object.defineProperty(WK,'WELLSTART',{value:v,writable:true,configurable:true,enumerable:true})}});
 
 /* ---- src/desert/wellmaze_build.js ---- */
 /* ==========================================================================
@@ -59700,7 +59717,7 @@ function hgdpcLetter(){let todo=0;
     else{x.lineWidth=Math.max(2,fs*.12);x.strokeStyle='rgba(20,12,6,.85)';x.strokeText(S.text,cx,cy);x.fillStyle='#ecd9a2';x.fillText(S.text,cx,cy)}
     IMG[k]=c;NPC_H[k]=NPC_H[k]||NPC_H[S.base]}
   return todo}
-{const _u=update;update=function(dt){if(!HGDPC.lettered){try{if(!hgdpcLetter())HGDPC.lettered=1}catch(e){HGDPC.lettered=1;console.error('hgdpc letter',e)}}return _u.apply(this,arguments)}}
+{const _u=update;update=function(dt){if(!HGDPC.lettered&&typeof LEVEL!=="undefined"&&LEVEL===HGD.ID){try{if(!hgdpcLetter())HGDPC.lettered=1}catch(e){HGDPC.lettered=1;console.error('hgdpc letter',e)}}return _u.apply(this,arguments)}}
 
 /* ==========================================================================
    ROUND 2 (towns): who stands where and looks like what, houses, church silhouettes, lettered signs, coloured light pools, one table of heights
