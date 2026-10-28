@@ -2843,7 +2843,7 @@ function spriteList(){
 let SC=ctx; // sprites are painted straight onto the full-size screen, not into the small 3D picture, so they stay sharp
 function drawSprites(cx,cy,dX,dY,pX,pY){
   sprRelease();
-  const inv=-1/PL,list=spriteList().concat(LEVEL===44&&LEVELS[44].sky?khSkyList(cx,cy,dX,dY):((LEVEL===YR.ID||LEVEL===496||LEVEL===600||LEVEL===305||LEVEL===304||LEVEL===364||LEVEL===470||hgtLook(LEVEL)||(LEVEL>=400&&LEVEL<440)||(typeof hsSkyOn==='function'&&hsSkyOn(LEVEL)))&&LEVELS[LEVEL]&&LEVELS[LEVEL].sky?khSkyList(cx,cy,dX,dY,LEVELS[LEVEL],.6):[])),proj=[],far=LEVEL===44?26:(G.day||0)>0?34:20,far2=far*far,farT=LEVEL===44?26:(G.day||0)>0?33:16; // outdoors the trees stay drawn as far as the walls can be seen
+  const inv=-1/PL,list=spriteList().concat(LEVEL===44&&LEVELS[44].sky?khSkyList(cx,cy,dX,dY):((LEVEL===YR.ID||LEVEL===496||LEVEL===600||LEVEL===305||LEVEL===304||LEVEL===364||LEVEL===470||hgtLook(LEVEL)||(LEVEL>=400&&LEVEL<440)||(LEVEL>=9610&&LEVEL<=9709)||(typeof hsSkyOn==='function'&&hsSkyOn(LEVEL)))&&LEVELS[LEVEL]&&LEVELS[LEVEL].sky?khSkyList(cx,cy,dX,dY,LEVELS[LEVEL],.6):[])),proj=[],far=LEVEL===44?26:(G.day||0)>0?34:20,far2=far*far,farT=LEVEL===44?26:(G.day||0)>0?33:16; // outdoors the trees stay drawn as far as the walls can be seen
   for(const s of list){
     if(s.custom){const q=s.custom.prep(cx,cy,dX,dY);if(q>0){s.tY=q;s.tX=0;proj.push(s)}continue} // a fish tank (hgt_tanks.js) draws itself
     const rx=s.x-cx,ry=s.y-cy;
@@ -3740,8 +3740,8 @@ function giveJumpGear(target){
   G.gold=Math.max(G.gold,rich?900:200);
 }
 function jumpFromUrl(){
-  const q=new URLSearchParams(location.search);let town=(q.get('town')||'').toLowerCase().replace(/[^a-z]/g,'');if(!town)return;
-  const target=Math.max(1,Math.min(town==='sale'?90:town==='witchwood'?82:town==='blackswill'||town==='gardens'?80:40,parseInt(q.get('lvl')||'8',10)||8));
+  const q=new URLSearchParams(location.search);let town=(q.get('town')||'').toLowerCase();town=/^blight\d*$/.test(town)?town:town.replace(/[^a-z]/g,'');if(!town)return;
+  const target=Math.max(1,Math.min(/^blight/.test(town)||town==='sale'?90:town==='witchwood'?82:town==='blackswill'||town==='gardens'?80:40,parseInt(q.get('lvl')||(/^blight/.test(town)?'84':'8'),10)||8)); // blight1 to blight10: the Blighted Road (blight_road.js)
   backupAuto();
   const sv=readSave('auto')||readSave('prev');
   if(sv&&!['oldhaven','oakwood','landpath','pilgrim','monastery','monasterygate','hollowland','orangetower','orangeboss','hollowgrass','kraken'].includes(town)){restore(sv)}
@@ -3767,6 +3767,7 @@ function jumpFromUrl(){
     Object.defineProperty(AREAS,'boatdock',{enumerable:true,configurable:true,get(){return hgdSpot('boat')}})}
   try{for(const w of ['infested','infestedcellar'])Object.defineProperty(AREAS,w,{enumerable:true,configurable:true,get(){return infSpot(w==='infestedcellar'?'cellar':'house')}})}catch(e){console.error(e)} // an infested house in Oldhaven, and its cellar (infested.js)
   try{for(const tk of ['wenlock','yarrim','thornwick','ironhill','anaea'])for(const c of ['','cellar'])Object.defineProperty(AREAS,'infested'+tk+c,{enumerable:true,configurable:true,get(){return infSpot(c?'cellar':'house',tk)}})}catch(e){console.error(e)} // the same in the other towns: ?town=infestedwenlock&lvl=8 (infested.js)
+  try{if(typeof blAreas==='function')blAreas(AREAS)}catch(e){console.error(e)} // the ten places of the Blighted Road (blight_road.js)
   try{Object.defineProperty(AREAS,'blackswill',{enumerable:true,configurable:true,get(){return bswSpot()}})}catch(e){console.error(e)} // the Black Swill's island (blackswill.js)
   if(!AREAS[town]&&town.length>=4){const m=Object.keys(AREAS).filter(k=>k.startsWith(town)||town.startsWith(k));if(m.length===1)town=m[0]} // near-misses like whitedune find the right area
   if(AREAS[town]&&town!=='thornwood'){const [lv,ax,ay,af]=AREAS[town];F.gandrickDead=1;F.northGate=1;F.mayorKilled=1;F.mayorDown=1;F.ironRoad=1;for(const k of ['gandrick','ironhill'])G.quests[k]={st:'done',base:0};if(lv===44&&LEVELS[44].stub){khEnter(()=>{goToLevel(lv,{x:ax,y:ay,f:af});G.state='play';G.menu=false});return}goToLevel(lv,{x:ax,y:ay,f:af});if(town==='orangeboss'){let tries=0;const iv=setInterval(()=>{const b=LEVEL===lv&&!TP&&G.enemies.find(e=>e.t==='hlboss0');if(b){clearInterval(iv);let py=b.y+3;while(py>b.y+1&&!(G.grid[py]&&G.grid[py][b.x]===0))py--;G.P.x=b.x;G.P.y=py;G.P.f=0;G.P.angT=-Math.PI/2;G.C={x:G.P.x,y:G.P.y,a:G.P.angT}}else if(++tries>100)clearInterval(iv)},100)}G.state='play';G.menu=false;return}
@@ -65570,6 +65571,840 @@ if(typeof WMN_SPEC!=='undefined')WMN_SPEC.sale=[['i_town',-5,0,26],['i_graves',1
 {const _gl=gotoListRaw;gotoListRaw=function(){const out=_gl.apply(this,arguments);try{const rows=[{h:'Sale, a town of the dead (level 90)'}];for(const n of [600,601,602,603]){if(LEVELS[n]||KH_LAZY[n])rows.push({n,name:LEVEL_NAMES[n]||('Level '+n)})}
   for(const d of SA_DOORS.filter(d=>d.shop).slice(0,3))if(KH_LAZY[d.id])rows.push({n:d.id,name:LEVEL_NAMES[d.id]||d.name});
   const i=out.findIndex(r=>r.h&&/^Oldhaven/.test(r.h));out.splice(i<0?out.length:i,0,...rows)}catch(e){console.error('sagoto',e)}return out}}
+
+/* ---- src/desert/blight_road.js ---- */
+/* ==========================================================================
+   THE BLIGHTED ROAD: THE FRAMEWORK (prefix bl / BL). The road west from the open gate of Wenlock to the town of Sale, in ten linked places of rising level (84 up to 90), each its own map.
+   Every builder of a place relies on this file and on blight_kit.js (the look, the sounds, the creatures, the level builder). See tools/BLIGHT_NOTES.md.
+   BL_ROAD is the one table of the ten places: id, name, rating, links, whether the place is built, and where the party lands in it.
+     n  id    name                                           rating  built by
+     1  9610  The Toll House of the Road Wardens             84      blight_toll.js
+     2  9620  Ashenfold Farm                                  85      blight_ashenfold.js
+     3  9630  The Church of the Hollow Saint                  86
+     4  9640  Gallowmere                                      86
+     5  9650  The Bone Orchard                                87
+     6  9660  Lanternrest Waystation                          87
+     7  9670  The Vault of Maldrake (9671 and up are its floors) 88 to 89
+     8  9680  Hollowbell Abbey                                88
+     9  9690  The Rookery Mill                                89
+    10  9700  The Pale Bridge and the Gate of Sale            90
+   A place owns the ids id to id+9 (9611 to 9619 for the Toll House: interiors, cellars, crypt floors). Sale has its own range, chosen by its builder (set BL_SALE).
+   HOW A BUILDER ADDS A PLACE:  blRegister(n, builderFn, {fromE:{x,y,f}, fromW:{x,y,f}, rooms:[ids], names:{id:'name'}, rating:{id:n}}).
+     builderFn builds LEVELS[id] (use blRoadLevel in blight_kit.js, or any other way) and returns it. fromE is where the party lands when it comes in from the EAST neighbour (the Wenlock side),
+     fromW where it lands when it comes in from the WEST neighbour. blExit(kit,'E'|'W',y) in blight_kit.js puts the gates that use the table. Until a place is registered its id has a stub:
+     a short empty stretch of road with a milestone, linked both ways, so that the road can be walked end to end.
+   Flags (saved with the game): G.flags.bl = {...}. Jump links: ?town=blight1 ... ?town=blight10 (the east end of that place), lvl defaults to the place's rating.
+   ========================================================================== */
+const BL={REGION:'The Blighted Lands',builders:{},stubs:{}};
+const BL_ROAD=[
+  {n:1,id:9610,name:'The Toll House of the Road Wardens',lvl:84,W:72,H:64},
+  {n:2,id:9620,name:'Ashenfold Farm',lvl:85,W:80,H:70},
+  {n:3,id:9630,name:'The Church of the Hollow Saint',lvl:86,W:72,H:64},
+  {n:4,id:9640,name:'Gallowmere',lvl:86,W:72,H:64},
+  {n:5,id:9650,name:'The Bone Orchard',lvl:87,W:72,H:64},
+  {n:6,id:9660,name:'Lanternrest Waystation',lvl:87,W:72,H:64},
+  {n:7,id:9670,name:'The Vault of Maldrake',lvl:88,W:72,H:64},
+  {n:8,id:9680,name:'Hollowbell Abbey',lvl:88,W:72,H:64},
+  {n:9,id:9690,name:'The Rookery Mill',lvl:89,W:72,H:64},
+  {n:10,id:9700,name:'The Pale Bridge and the Gate of Sale',lvl:90,W:72,H:64}];
+/* the town at the far end: its builder sets BL_SALE.id (and where the party lands there) */
+const BL_SALE={id:null,at:{x:3,y:3,f:1}};
+/* Wenlock: where the party lands when it comes back through the west gate (the gate stands at x=2 of level 496, the street runs along y=50) */
+const BL_WENLOCK={id:496,at:{x:5,y:50,f:1}};
+for(const p of BL_ROAD){
+  p.built=false;p.rooms=[];p.sale=10-p.n;
+  p.fromE={x:p.W-5,y:p.H>>1,f:3};p.fromW={x:4,y:p.H>>1,f:1};
+  p.exitY=p.H>>1;
+  LEVEL_NAMES[p.id]=p.name;LEVEL_RATING[p.id]=p.lvl}
+const BL_IDS=[];for(let n=9610;n<=9709;n++)BL_IDS.push(n);
+const blIs=n=>n>=9610&&n<=9709;
+const blPlaceOf=n=>BL_ROAD.find(p=>n>=p.id&&n<=p.id+9)||null;
+const blPlaceN=n=>{const p=blPlaceOf(n);return p?p.n:0};
+const blF=()=>{const F=G.flags;if(!F.bl)F.bl={};return F.bl};
+/* where the east exit of place n leads, and where the west exit leads: {lvl, at} (read when the door is used, so a builder may change the table later) */
+function blEastDest(p){
+  if(p.n===1)return {lvl:BL_WENLOCK.id,at:BL_WENLOCK.at};
+  const q=BL_ROAD[p.n-2];return {lvl:q.id,at:q.fromW}}
+function blWestDest(p){
+  if(p.n===10)return BL_SALE.id?{lvl:BL_SALE.id,at:BL_SALE.at}:null;
+  const q=BL_ROAD[p.n];return {lvl:q.id,at:q.fromE}}
+/* a builder registers its place: the level builder, where the party lands, the extra ids it owns */
+function blRegister(n,fn,o){
+  const p=BL_ROAD[n-1];if(!p)throw new Error('blRegister: no place '+n);o=o||{};
+  BL.builders[p.id]=fn;p.built=true;
+  if(o.fromE)p.fromE=o.fromE;if(o.fromW)p.fromW=o.fromW;if(o.exitY!==undefined)p.exitY=o.exitY;
+  for(const id of o.rooms||[]){if(!p.rooms.includes(id))p.rooms.push(id)}
+  for(const id in (o.names||{})){LEVEL_NAMES[id]=o.names[id]}
+  for(const id in (o.rating||{})){LEVEL_RATING[id]=o.rating[id]}
+  if(o.lvl){p.lvl=o.lvl;LEVEL_RATING[p.id]=o.lvl}
+  KH_LAZY[p.id]=()=>blBuildMain(p)}
+function blBuildMain(p){
+  if(LEVELS[p.id])return LEVELS[p.id];
+  const f=BL.builders[p.id];
+  return f?f(p):blStubBuild(p)}
+/* every id of the road has a lazy builder, so that a save made in any of them loads (a place that is not built yet gets its stub) */
+for(const p of BL_ROAD){
+  KH_LAZY[p.id]=()=>blBuildMain(p);
+  for(let k=1;k<=9;k++){const id=p.id+k;if(!KH_LAZY[id])KH_LAZY[id]=()=>{if(!LEVELS[id]&&typeof blRoomStub==='function')blRoomStub(id,p);return LEVELS[id]}}}
+/* ---------- arrival: the pictures are loaded first (Wenlock's loader also brings the graveyard and the witch wood), then the level ---------- */
+const blNeedArt=()=>!(typeof WLART!=='undefined'&&WLART.ready&&(typeof KH_READY==='undefined'||KH_READY)&&(typeof GY==='undefined'||GY.ready)&&(typeof WW==='undefined'||WW.ready));
+function blWait(then){if(BL._wait)return true;BL._wait=1;try{msg('The Blighted Lands come into view...','#b8d0a8')}catch(e){}wlLoad().then(()=>{BL._wait=0;then()}).catch(e=>{BL._wait=0;console.error('bl load',e)});return true}
+{const _g=goToLevel;goToLevel=function(n,entry){
+  if(blIs(n)&&blNeedArt()&&blWait(()=>goToLevel(n,entry)))return;
+  if(blIs(n)&&LEVELS[n]===undefined&&KH_LAZY[n])try{KH_LAZY[n]()}catch(e){console.error('bl build',n,e)}
+  const r=_g.call(this,n,entry);
+  try{if(blIs(n)&&typeof blArrive==='function')blArrive(n)}catch(e){console.error('blArrive',e)}
+  return r}}
+{const _j=jumpToLevel;jumpToLevel=function(n,target){
+  if(blIs(n)&&blNeedArt()&&blWait(()=>jumpToLevel(n,target)))return;
+  if(blIs(n)){const p=blPlaceOf(n);if(p&&target<p.lvl)target=p.lvl}
+  return _j.call(this,n,target)}}
+{const _r=restore;restore=function(sv){
+  if(sv&&blIs(sv.level)&&blNeedArt()&&blWait(()=>restore(sv)))return;
+  if(sv&&blIs(sv.level)&&!LEVELS[sv.level]&&KH_LAZY[sv.level])try{KH_LAZY[sv.level]()}catch(e){console.error('bl restore',e)}
+  return _r.apply(this,arguments)}}
+{const _rn=restoreNow;restoreNow=function(sv){const r=_rn.apply(this,arguments);try{if(blIs(LEVEL)&&typeof blArrive==='function')blArrive(LEVEL)}catch(e){console.error('bl restoreNow',e)}return r}}
+if(typeof wdDoorLevel==='function'){const _wd=wdDoorLevel;wdDoorLevel=function(n){return _wd.apply(this,arguments)||blIs(n)}}
+/* ---------- the open west gate of Wenlock leads to the Toll House (once it is built) ---------- */
+{const _up=usePortal;usePortal=function(i){const p=G.portals&&G.portals[i];
+  if(LEVEL===BL_WENLOCK.id&&p&&p.wsWest&&G.flags.wsGate&&BL_ROAD[0].built){
+    sfx('door');G.talk=null;const q=BL_ROAD[0];
+    goToLevel(q.id,q.fromE);
+    try{msg('You walk out through the open west gate, and the hedges on either side of the road are dead.','#b8d0a8')}catch(e){}
+    return}
+  return _up.apply(this,arguments)}}
+/* the story says where the road goes once it is built */
+function blTextFix(){
+  const hint='The west gate of Wenlock is open. Take the road west through the Blighted Lands, place by place, to the town of Sale. Ten milestones count the stages down.';
+  if(typeof QNOTE!=='undefined'&&QNOTE.wk8!==undefined)QNOTE.wk8='The west gate of Wenlock stands open. The road west runs through the Blighted Lands to the town of Sale.';
+  if(typeof STORY!=='undefined'){const s=STORY.find(e=>e&&e.id==='wsgate');if(s&&s.x)s.x=s.x.replace('The road west lies beyond the gate. The next part of the story is not written yet.','The road west lies beyond the gate, and it leads through the Blighted Lands to the town of Sale.')}
+  if(typeof storyNext==='function'){const _sn=storyNext;storyNext=function(){const F=G.flags;
+    if(F.wsGate&&BL_ROAD[0].built){
+      const bf=F.bl||{};
+      if(bf.last&&bf.last>1)return 'Follow the Blighted Road west. You have reached '+(BL_ROAD[Math.min(9,bf.last-1)].name)+'. Sale is '+BL_ROAD[Math.min(9,bf.last-1)].sale+' stages on.';
+      return hint}
+    return _sn.apply(this,arguments)}}}
+blTextFix();
+/* ---------- the quest region, the Go to area list, the test links ---------- */
+if(typeof QAREA_ORDER!=='undefined'&&!QAREA_ORDER.includes(BL.REGION))QAREA_ORDER.push(BL.REGION);
+if(typeof QWORLD!=='undefined')QWORLD[BL.REGION]='wenlock';
+{const _gl=gotoListRaw;gotoListRaw=function(){const out=_gl.apply(this,arguments);
+  try{if(!out.some(r=>r.n===9610)){out.push({h:'The Blighted Lands, west of Wenlock'});for(const p of BL_ROAD)if(p.built){out.push({n:p.id,name:p.name});for(const id of p.rooms)out.push({n:id,name:LEVEL_NAMES[id]||('Room '+id)})}}}catch(e){console.error(e)}
+  return out}}
+/* ?town=blight1 to ?town=blight10: the party at the east end of that place (called from jumpFromUrl in index.html) */
+function blAreas(AREAS){
+  for(const p of BL_ROAD)Object.defineProperty(AREAS,'blight'+p.n,{enumerable:true,configurable:true,get(){return [p.id,p.fromE.x,p.fromE.y,p.fromE.f]}});
+  Object.defineProperty(AREAS,'blight',{enumerable:true,configurable:true,get(){const p=BL_ROAD[0];return [p.id,p.fromE.x,p.fromE.y,p.fromE.f]}})}
+
+/* ---- src/desert/blight_kit.js ---- */
+/* ==========================================================================
+   THE BLIGHTED ROAD: THE KIT (prefix bl / BL). What every place of the road shares (see blight_road.js for the table and how to add a place, tools/BLIGHT_NOTES.md for the notes):
+   1. the look: a sickly grey-green light, fog, dead grass, pale lamps (blFloors, weatherNow, setupLights below)
+   2. the sound: wind, crows, creaking, now and then a far bell tolling (blsTick)
+   3. the creatures: undead of the road, built from the painted pieces of the graveyard and the witch wood (ENEMY_DEF bl*)
+   4. lettered pictures: signposts, milestones that count down to Sale, grave boards (blPost, blSlab, blMilestone)
+   5. blRoadLevel(spec): the level builder. It gives a "kit" C (ground, paths, walls, gates, houses, props, creatures, lights, a dressing pass) and returns the finished level.
+   Pictures come from the graveyard (gy_*), the witch wood (ww_*), Wenlock (wl_*, wl2_*, kh_oh*) and the engine; nothing here is drawn in code except lettering and ground textures.
+   ========================================================================== */
+/* ---------- 1. the ground and the light ---------- */
+const BL_FLOORSET=['blf_grass','blf_dirt','blf_gravel','blf_flag','blf_cobble','blf_mud','blf_ash'];
+function blFloors(){
+  if(BL._floors)return;
+  if(typeof gyFloors==='function')try{gyFloors()}catch(e){console.error(e)}
+  const tone=(out,src,g,t)=>{if(typeof gyFloorTone==='function'&&FLOORS[src])gyFloorTone(out,src,g,t);if(!FLOORS[out])FLOORS[out]=FLOORS.cobble||FLOORS.grass};
+  tone('blf_grass','gyf_grass',.66,[1.3,.92,.5]);   // dead grass: dry, yellow-olive, grey
+  tone('blf_dirt','gyf_dirt',.86,[1.0,.94,.84]);
+  tone('blf_gravel','gyf_gravel',.7,[.92,.95,.92]);
+  tone('blf_flag','gyf_flag',.66,[.9,.95,.95]);
+  tone('blf_cobble','gyf_cobble',.74,[.9,.94,.92]);
+  tone('blf_mud','gyf_dirt',.42,[.8,.85,.72]);
+  tone('blf_ash','gyf_gravel',.5,[.85,.85,.82]);
+  BL._floors=1}
+/* the air: a pale green-grey fog out of doors, in every place of the road */
+{const _w=weatherNow;weatherNow=function(){
+  if(blIs(LEVEL)){const L=LEVELS[LEVEL];
+    if(L&&L.outdoor)return {id:'fog',n:'Blight haze',fog:.016,haze:.34,dark:.02,mix:.5,col:[128,146,120],text:'A thin grey-green haze hangs over the dead grass, and the light has a sick colour. Somewhere a crow is complaining.'};
+    return null}
+  return _w.apply(this,arguments)}}
+/* lamps: a pale blue-green flame for the dead places, warm for a lamp that a living hand lights. lv._bl.lcol maps "x,y" to a colour. */
+{const _sl=setupLights;setupLights=function(){
+  const r=_sl.apply(this,arguments);
+  try{if(blIs(LEVEL)){const L=LEVELS[LEVEL],lc=(L._bl&&L._bl.lcol)||{},cols=L._bl&&L._bl.col||[.78,1.1,.95];
+    for(const l of LIGHTS){if(!l.free||l.lamp)continue;const key=Math.floor(l.x)+','+Math.floor(l.y);l.col=lc[key]||cols;l.kI=L.outdoor?1.1:1.4;l.range2=L.outdoor?70:120;l.calm=true}}}catch(e){console.error('bl lights',e)}
+  return r}}
+/* ---------- 2. the sound ---------- */
+const BLS={nextCrow:0,nextCreak:0,nextToll:0,nextDrip:0,nextWind:0};
+function blsToll(strokes,vol){if(!AC||G.mute)return;for(let i=0;i<strokes;i++){const d=i*3.4;tone(130,126,3.2,'sine',.085*vol,d);tone(260,255,2.4,'sine',.04*vol,d);tone(392,386,1.8,'sine',.02*vol,d);tone(522,540,1.2,'triangle',.012*vol,d)}}   // a cracked bell, low, a long way off
+function blsTick(){
+  if(!AC||!NB||!MASTER||G.state!=='play'||G.mute||!blIs(LEVEL)||!SNDOPT.amb)return;
+  const now=AC.currentTime,L=LEVELS[LEVEL],out=L&&L.outdoor;
+  if(out){
+    if(now>BLS.nextCrow){BLS.nextCrow=now+7+Math.random()*14;if(typeof wwsCrow==='function')wwsCrow(.55+Math.random()*.5)}
+    if(now>BLS.nextCreak){BLS.nextCreak=now+13+Math.random()*22;if(typeof wwsCreak==='function')wwsCreak(.45+Math.random()*.4)}
+    if(now>BLS.nextToll){BLS.nextToll=now+38+Math.random()*50;blsToll(1+((Math.random()*2)|0),.5+Math.random()*.4)}
+  }else{
+    if(now>BLS.nextCreak){BLS.nextCreak=now+9+Math.random()*14;if(typeof wwsCreak==='function')wwsCreak(.4)}
+    if(now>BLS.nextDrip){BLS.nextDrip=now+5+Math.random()*8;if(typeof wwsDrip==='function')wwsDrip(.6)}}}
+{const _ys=yarSoundTick;yarSoundTick=function(){_ys.apply(this,arguments);try{blsTick()}catch(e){console.error('bls',e)}}}
+/* ---------- 3. the creatures of the road (the pictures are the graveyard's and the witch wood's; ratings follow the place) ---------- */
+function blW(img,h){const e=typeof GY_LIST!=='undefined'&&GY_LIST[img];return e?+(h*e[1]/e[2]).toFixed(2):h*.7}
+function blWw(img,h){const e=typeof WW_LIST!=='undefined'&&WW_LIST[img];return e?+(h*e[1]/e[2]).toFixed(2):h*.7}
+Object.assign(ENEMY_DEF,{
+  bldeadwarden:{name:'Dead Road Warden',hp:56,dmg:[6,10],hit:.85,w:blW('crA_1',.74),img:'gyi_pike',xp:24,gold:[0,0],speed:1,verb:'jabs',bl:1},
+  blhusk:{name:'Roadside Husk',hp:60,dmg:[5,9],hit:.82,w:blW('crA_4',.62),img:'gyi_zombie',xp:21,gold:[0,0],speed:1,verb:'pummels',bl:1},
+  blghoul:{name:'Road Ghoul',hp:50,dmg:[6,10],hit:.85,w:blW('crA_3',.55),img:'gyi_ghoul',xp:22,gold:[0,0],speed:2,verb:'claws',bl:1},
+  blbones:{name:'Wayside Skeleton',hp:46,dmg:[5,9],hit:.84,w:blW('crA_0',.68),img:'gyi_skel',xp:20,gold:[0,0],speed:1,verb:'slashes',bl:1},
+  blbloat:{name:'Bloated Drowned Man',hp:86,dmg:[7,12],hit:.84,w:blW('crA_5',.72),img:'gyi_giant',xp:30,gold:[0,0],speed:1,verb:'crushes',bl:1},
+  blcrow:{name:'Plague Crow',hp:38,dmg:[5,9],hit:.87,w:blW('crB_6',.55),img:'gyi_raven',xp:20,gold:[0,0],speed:2,fly:true,floatH:.3,verb:'stabs',bl:1},
+  blshade:{name:'Road Shade',hp:46,dmg:[6,10],hit:.87,w:blW('crB_1',.68),img:'gyi_shade',xp:24,gold:[0,0],speed:2,fly:true,floatH:.2,verb:'rakes',bl:1,glow:.35},
+  blhound:{name:'Bone Hound',hp:46,dmg:[6,10],hit:.86,w:blW('crB_4',.5),img:'gyi_hound',xp:24,gold:[0,0],speed:2,verb:'savages',bl:1},
+  blscare:{name:'Walking Scarecrow',hp:70,dmg:[7,12],hit:.85,w:blWw('guardA_0',1.6),img:'wwi_scare',xp:28,gold:[0,0],speed:1,verb:'rakes',bl:1,still:1,wake:'The scarecrow drops off its pole with a sound like a hundred dry twigs.'},
+  blscarebig:{name:'The Heart-Scarecrow',hp:360,dmg:[9,15],hit:.9,w:blWw('guardA_0',2.5),img:'wwi_scare',xp:620,gold:[0,0],speed:1,verb:'rakes',boss:true,aboveParty:0,bl:1,still:1,glow:.15,wake:'The tallest scarecrow lifts its head. A pale silver light shows through the straw in its chest.'},
+  blcrowflock:{name:'Crow Flock',hp:60,dmg:[6,10],hit:.86,w:blWw('guardA_4',1.3),img:'wwi_crows',xp:24,gold:[0,0],speed:2,fly:true,floatH:.2,verb:'pecks at',bl:1,still:1,wake:'The dead tree bursts into a screaming cloud of crows.'}
+});
+if(typeof NO_VARY!=='undefined')NO_VARY.push('blscarebig');
+if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push('blscarebig');
+if(typeof BOSS_GOLD!=='undefined')BOSS_GOLD.blscarebig=[3000,3800];
+if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^blghoul/,'tomblung',.2],[/^(blhusk|blbloat)/,'foodpoison',.2],[/^blshade/,'cursed',.15],[/^(blcrow|blhound)/,'bleeding',.18],[/^blscare/,'fever',.12]);
+/* ---------- 4. lettered pictures ---------- */
+const BL_STONE_INK='#1a1712';
+function blWeathered(cv){ // a lettered post or board is greyed and darkened, as everything on the road is
+  const c=document.createElement('canvas');c.width=cv.width;c.height=cv.height;const x=c.getContext('2d');try{x.filter='saturate(.3) brightness(.82)'}catch(e){}x.drawImage(cv,0,0);x.filter='none';
+  x.globalCompositeOperation='multiply';x.fillStyle='rgb(176,184,170)';x.fillRect(0,0,c.width,c.height);x.globalCompositeOperation='destination-in';x.drawImage(cv,0,0);return c}
+/* a signpost with one to three boards lettered on it. boards: [name or {n,d}] (d: -1 left, 1 right, 0 ahead, 2 behind), i picks the colours. Returns the decor key (made once). */
+function blPost(key,boards,i){
+  if(IMG[key])return key;
+  if(!IMG.greensign||typeof wlnPostPic!=='function')return 'greensign';
+  try{IMG[key]=blWeathered(wlnPostPic(i||0,boards.map(b=>typeof b==='string'?{n:b,d:0}:b)));NPC_H[key]=1.35}catch(e){console.error('blPost',e);return 'greensign'}
+  return key}
+/* a slab of grey stone with words cut into it (a milestone, a grave board, a plaque). lines: up to three; the picture is the graveyard's blank slab. */
+function blSlab(key,lines,opt){
+  if(IMG[key])return key;opt=opt||{};
+  blDeadArt();const base=IMG.bl_slab||IMG.bl_stone2;if(!base)return 'bl_slab';
+  const w=base.width,h=base.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(base,0,0);
+  x.textAlign='center';x.textBaseline='middle';
+  const n=lines.length,top=h*(opt.top||.14),span=h*(opt.span||.74),lh=span/Math.max(n,2);
+  lines.forEach((t,i)=>{const big=i===0&&n>1&&!opt.flat,fs=Math.round(lh*(big?.62:.5));let f=fs;x.font='bold '+f+'px Georgia,"Times New Roman",serif';
+    while(x.measureText(t).width>w*.84&&f>10){f-=1;x.font='bold '+f+'px Georgia,"Times New Roman",serif'}
+    const cy=top+lh*(i+.5);x.fillStyle='rgba(240,236,222,.5)';x.fillText(t,w/2+1.5,cy+2);x.lineWidth=Math.max(1,f/14);x.strokeStyle='#0c0a08';x.strokeText(t,w/2,cy);x.fillStyle='#0c0a08';x.fillText(t,w/2,cy)});   // cut letters: a dark face and a pale lower edge
+  IMG[key]=c;NPC_H[key]=opt.h||1.05;return key}
+/* a milestone that counts the stages down to Sale (n = place number 1 to 10; the stone stands at the west end of the place) */
+function blMilestone(n){const left=10-n;return blSlab('bl_mile'+n,['SALE',left>0?left+(left===1?' STAGE':' STAGES'):'THE GATE'],{h:1.0,top:.2,span:.62})}
+
+/* the graveyard's stones and fences carry bright ivy, and Wenlock's bushes are green: the road gets its own dead, greyed copies of the painted pieces (a filter over the painting, nothing drawn) */
+function blDeadArt(){
+  if(BL._art||!IMG.gyp_stonesB_0)return;
+  const mk=(key,src,filter,h)=>{if(!src||!src.width)return;const c=document.createElement('canvas');c.width=src.width;c.height=src.height;const x=c.getContext('2d');try{x.filter=filter}catch(e){}x.drawImage(src,0,0);IMG[key]=c;if(h)NPC_H[key]=h};
+  for(const a of ['stone1','stone2','lean','wcross','ccross','tomb','urn','obelisk','column','mausoleum','angel','crypt','barrow','fence','chapel','hut']){const g=GYA[a];if(g)mk('bl_'+a,IMG['gyp_'+g[0]],'saturate(.55) brightness(.8)',g[1])}
+  mk('bl_slab',(typeof GY!=='undefined'&&GY._slabC)||IMG.gyp_stonesB_2,'saturate(.5) brightness(.85)',1.1);
+  ['lbush0','lbush0_1','lbush0_2'].forEach((k,i)=>mk('bl_hedge'+i,IMG[k],'sepia(.55) saturate(.4) brightness(.5)',NPC_H[k]||.8));
+  ['pgrass0','pgrass1','pgrass2','pgrass3'].forEach((k,i)=>mk('bl_grass'+i,IMG[k],'sepia(.9) saturate(.6) brightness(.48)',NPC_H[k]||.45));
+  mk('bl_wfence',IMG.fence,'sepia(.7) saturate(.4) brightness(.42)',NPC_H.fence||.7);
+  BL._art=1}
+/* ---------- 5. the level builder ---------- */
+let BL_HOUSE_READY=false;
+function blHouseInit(){if(BL_HOUSE_READY)return;try{wlHeights();wlRoofs();wlStyles()}catch(e){console.error('bl house init',e)}BL_HOUSE_READY=true}
+const blRng=seed=>{let a=seed|0;return()=>{a=(a+0x6D2B79F5)|0;let t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296}};
+const BL_TREES=['gy_dead','ww_willow','ww_oakmoss','gy_dead','ww_oakmoss','ww_willow','gy_dead','ww_oakface'];
+const BL_SCRUB=['ww_twig2','bl_grass0','bl_grass1','bl_grass2','bl_grass3','bl_grass0','bl_grass1'];
+function blKit(spec){
+  const id=spec.id,W=spec.W,H=spec.H,hs=(a,b,c)=>hash2(a,b,c),R=blRng(id*7+3),X0=2,X1=W-3,Y0=2,Y1=H-3;
+  blFloors();blHouseInit();blDeadArt();
+  const chars={},chMap=new Map();let nextCh=0x300;const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
+  const rows=[];for(let y=0;y<H;y++)rows.push(new Array(W).fill('.'));
+  const block=new Uint8Array(W*H),fm=new Array(W*H).fill('0'),hgt=new Float32Array(W*H).fill(.3),rk=new Float32Array(W*H);
+  const decor=[],enemies=[],items=[],lights=[],sky=[],used=new Set(),path=new Set(),lcol={},mapNames=[],TM=(typeof ohTiles==='function')?ohTiles():null;
+  const C={id,W,H,rows,block,fm,hgt,decor,enemies,items,lights,sky,used,path,lcol,mapNames,ch,chars,TM,hs,R,X0,X1,Y0,Y1,rating:spec.lvl||LEVEL_RATING[id]||84,exits:{}};
+  const isOpen=(x,y)=>x>=X0&&y>=Y0&&x<=X1&&y<=Y1&&rows[y][x]==='.';
+  const free=(x,y)=>isOpen(x,y)&&!used.has(x+','+y);
+  C.isOpen=isOpen;C.free=free;
+  const solid=(x,y,c)=>{rows[y][x]=c;block[y*W+x]=1};C.solid=solid;
+  const setF=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(x>=0&&y>=0&&x<W&&y<H)fm[y*W+x]=f};C.setF=setF;
+  /* a road or a path: the ground is changed and nothing is put on it by D/DB (dec ignores the path flag) */
+  const pth=(x0,y0,x1,y1,f)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){path.add(x+','+y);fm[y*W+x]=f||'1'}};C.pth=pth;
+  /* things that stand about: dec = exactly there (if open); D = also not on a path; DB = solid version of D; DW = walk-through of D */
+  const dec=(k,x,y,o)=>{o=o||{};if(!isOpen(x,y)||!k)return null;
+    const d={k,x,y,block:!!o.block};if(!o.block){d.walk=true;d.deco=true}
+    if(o.block&&o.npc)d.solid=1;if(o.sc)d.sc=o.sc;if(o.npc){d.npc=o.npc;d.deco=false}if(o.i!==undefined)d.i=o.i;if(o.wd){d.wd=o.wd;d.pic=1}if(o.txt)d.txt=o.txt;if(o.bob!==undefined)d.bob=o.bob;
+    if(o.ox!==undefined)d.ox=o.ox;if(o.oy!==undefined)d.oy=o.oy;
+    decor.push(d);used.add(x+','+y);return d};
+  C.dec=dec;C.D=(k,x,y,o)=>free(x,y)&&!path.has(x+','+y)?dec(k,x,y,o):null;C.DB=(k,x,y,o)=>C.D(k,x,y,Object.assign({block:true},o||{}));
+  C.reserve=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)used.add(x+','+y)};
+  const lamp=(x,y,col)=>{if(isOpen(x,y)){lights.push([x,y]);if(col)lcol[x+','+y]=col}};C.lamp=lamp;
+  C.warm=[1.5,1.05,.55];C.pale=[.7,1.1,.95];
+  C.light=(x,y,col)=>{lights.push([x,y]);if(col)lcol[x+','+y]=col};
+  C.foe=(t,x,y)=>{if(!free(x,y))return false;enemies.push({t,x,y,lvl:C.rating});used.add(x+','+y);return true};
+  /* the nearest free cell to (x,y) within rad (also off the paths when offPath) */
+  C.near=(x,y,rad,offPath)=>{for(let r=0;r<=rad;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const a=x+dx,b=y+dy;if(free(a,b)&&!(offPath&&path.has(a+','+b)))return [a,b]}return null};
+  C.foeNear=(t,x,y,rad)=>{const q=C.near(x,y,rad||3,true);return q?C.foe(t,q[0],q[1]):false};
+  /* a person: the keeper of an id from KH_KEEPERS (khNpc), standing near x,y */
+  C.person=(npcId,x,y,rad,o)=>{const kp=KH_KEEPERS[npcId];if(!kp)return null;const q=C.near(x,y,rad||3,false);if(!q)return null;
+    const d={k:khFaceKey(kp.face),x:q[0],y:q[1],block:false,walk:true,npc:npcId,sc:(o&&o.sc)||kp.sc||1};decor.push(d);used.add(q[0]+','+q[1]);return d};
+  /* an object with something to say: walk up and press (khNpc registered by the caller) */
+  C.thing=(k,npcId,x,y,o)=>dec(k,x,y,Object.assign({block:true,npc:npcId},o||{}));
+  /* the ground: smooth noise for gentle hills, kept flat on roads */
+  const vn=(x,y,cs,sd)=>{const u=x/cs,v=y/cs,i=Math.floor(u),j=Math.floor(v),fx=u-i,fy=v-j,sx=fx*fx*(3-2*fx),sy=fy*fy*(3-2*fy);return(hs(i,j,sd)*(1-sx)+hs(i+1,j,sd)*sx)*(1-sy)+(hs(i,j+1,sd)*(1-sx)+hs(i+1,j+1,sd)*sx)*sy};
+  C.hills=amp=>{for(let y=0;y<H;y++)for(let x=0;x<W;x++){hgt[y*W+x]=.3+amp*((vn(x,y,17,id+1)-.5)*1.6+(vn(x,y,7,id+2)-.5)*.5)}};
+  C.flatten=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(x>=0&&y>=0&&x<W&&y<H)hgt[y*W+x]=.3};
+  /* the boundary: a bank of dark leaves and bark, two cells thick all round */
+  const wallH=2.1,wt=v=>ch(gyTile(['texBlack_3','texGrey_2','texBlack_3'][v%3],wallH+.6,{gain:.62,rgb:[.8,.9,.8]}));
+  C.boundary=()=>{const WC=[0,0,0,1,3,5,0,3,2].map(wt);for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(x>=X0&&x<=X1&&y>=Y0&&y<=Y1)continue;solid(x,y,WC[(hs(x,y,7)*WC.length)|0])}};
+  /* ---- gates: the east and west exits, using the table BL_ROAD ---- */
+  C.gate=(side,y,opt)=>{
+    opt=opt||{};const p=blPlaceOf(id),x=side==='E'?W-2:1,dest=()=>{const q=p&&(side==='E'?blEastDest(p):blWestDest(p));return q};
+    if(p&&!dest())return false;
+    const tag='blx'+id+side,gid=gyTile('texGrey_1',2.5,{fac:{img:'gatesC_0',i:0,n:1},gain:.9,tag,emit:.1});
+    KH_DOOR[gid]={get lvl(){return dest().lvl},get at(){const d=dest();if(!LEVELS[d.lvl]&&KH_LAZY[d.lvl])KH_LAZY[d.lvl]();return d.at},bl:1,side};
+    rows[y][x]=ch(gid);block[y*W+x]=1;
+    const dx=side==='E'?-1:1;
+    for(const yy of [y-1,y+1]){dec('gy_lantern',x+dx,yy,{block:true});lights.push([x+dx,yy]);lcol[(x+dx)+','+yy]=opt.col||C.pale}
+    dec('bl_urn',x+dx,y-2,{block:true,sc:.8});dec('bl_urn',x+dx,y+2,{block:true,sc:.8});
+    pth(side==='E'?x-4:x+1,y,side==='E'?x-1:x+4,y,'1');
+    C.exits[side]={x:x+dx,y};return true};
+  /* ---- houses: an enterable building in the style of Wenlock (walls, painted roof, door to a room) ---- */
+  C.house=h=>{ // h:{x0,y0,x1,y1,face:'S'|'N'|'E'|'W',sty,roof,wh,to,name,door:[x,y] (default: middle of the front wall)}
+    const sty=(WL.sty&&WL.sty[h.sty||'timber'])||h.sty||'timber',wh=h.wh||2.3,horiz=h.face==='N'||h.face==='S';
+    const door=h.door||(horiz?[(h.x0+h.x1)>>1,h.face==='S'?h.y1:h.y0]:[h.face==='E'?h.x1:h.x0,(h.y0+h.y1)>>1]);
+    const front=(x,y)=>h.face==='N'?y===h.y0:h.face==='S'?y===h.y1:h.face==='E'?x===h.x1:x===h.x0;
+    const plain=ch(TM.make('plain',sty,wh).gid),plain2=ch(TM.make('plain2',sty,wh).gid),win=ch(TM.make('window',sty,wh).gid),gwin=ch(TM.make('gwin',sty,wh).gid);
+    const dtile=TM.make('door',sty,wh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dtile.tex;
+    if(h.to)KH_DOOR[dgid]={lvl:h.to,get at(){if(!LEVELS[h.to]&&KH_LAZY[h.to])KH_LAZY[h.to]();const L=LEVELS[h.to],st=L&&L.start;return st?{x:st.x,y:st.y,f:0}:{x:4,y:4,f:0}}};
+    for(let y=h.y0;y<=h.y1;y++)for(let x=h.x0;x<=h.x1;x++){
+      let c;if(x===door[0]&&y===door[1])c=ch(dgid);else if(front(x,y))c=win;else c=((x*5+y*3)%5===1)?gwin:((x*3+y)%4===1)?plain2:plain;
+      solid(x,y,c);used.add(x+','+y)}
+    const span=horiz?h.x1-h.x0+1:h.y1-h.y0+1;
+    sky.push({x:(h.x0+h.x1+1)/2,y:(h.y0+h.y1+1)/2,k:wlRoofFor(h.roof||'thatch2',h),w:span+.6,z:wh-.03});
+    const fx=door[0]+(h.face==='E'?1:h.face==='W'?-1:0),fy=door[1]+(h.face==='S'?1:h.face==='N'?-1:0);
+    h.front=[fx,fy];C.reserve(h.x0-1,h.y0-1,h.x1+1,h.y1+1);used.delete(fx+','+fy);
+    if(h.lit!==false){for(const o of [-2,2]){const lx=horiz?fx+o:fx,ly=horiz?fy:fy+o;if(isOpen(lx,ly)){lights.push([lx,ly]);lcol[lx+','+ly]=h.col||C.warm}}}   // the lit windows
+    return h};
+  /* ---- a painted building over a hidden block of wall (the barn, a mill): the picture stands in front of the south face; the door is in the front row ---- */
+  C.picHouse=h=>{ // h:{img,x0,y0,x1,y1,w,door:[x,y],to,wh}
+    if(!IMG[h.img])return false;const wh=h.wh||2.4,pw=ch(TM.make('plain','wlgrey',wh).gid),dt=TM.make('door','wlgrey',wh),dgid=KH_NEXT_GID++;T_TILE[dgid]=dt.tex;
+    const door=h.door||[(h.x0+h.x1)>>1,h.y1];
+    if(h.to)KH_DOOR[dgid]={lvl:h.to,get at(){if(!LEVELS[h.to]&&KH_LAZY[h.to])KH_LAZY[h.to]();const L=LEVELS[h.to],st=L&&L.start;return st?{x:st.x,y:st.y,f:0}:{x:4,y:4,f:0}}};
+    for(let y=h.y0;y<=h.y1;y++)for(let x=h.x0;x<=h.x1;x++){if(rows[y][x]==='.')solid(x,y,x===door[0]&&y===door[1]?ch(dgid):pw);used.add(x+','+y)}
+    sky.push({x:(h.x0+h.x1+1)/2,y:h.y1+1.15,k:h.img,w:h.w,z:0,big:1});
+    h.front=[door[0],door[1]+1];C.reserve(h.x0-1,h.y0-1,h.x1+1,h.y1+1);used.delete(h.front[0]+','+h.front[1]);return true};
+  /* ---- a lettered signpost (once per key) and a milestone ---- */
+  C.post=(x,y,key,boards,npcId,say_,o)=>{const k=blPost(key,boards,(o&&o.i)||0);if(npcId&&!NPCS[npcId])khNpc(npcId,'A signpost',k,()=>say(say_,[BYE]));return dec(k,x,y,{block:true,npc:npcId,sc:(o&&o.sc)||1})};
+  C.milestone=(x,y)=>{const n=blPlaceN(id),k=blMilestone(n),nid='bl_mile'+n;if(!NPCS[nid]){const left=10-n;khNpc(nid,'A milestone',k,()=>say(left>0?'A grey milestone beside the road. The letters cut in it read SALE, '+left+(left===1?' STAGE':' STAGES')+'. Somebody has scratched a small tally under it, and the tally stops.':'A grey milestone at the foot of the bridge. The letters cut in it read SALE, THE GATE. Under it somebody has scratched: NO FURTHER.',[BYE]))}return dec(k,x,y,{block:true,npc:nid,sc:1})};
+  /* a grave board: names cut in a slab, one line each (key must be unique) */
+  C.grave=(x,y,key,lines,o)=>{o=o||{};const k=blSlab(key,lines,{h:o.h||.95,top:.18,span:.6});return C.DB(k,x,y,{sc:o.sc||1,npc:o.npc,i:o.i})};
+  /* ---- the dressing pass: dead trees round the edge and scattered, dead scrub, leaning stones, bones, crows on posts. opt: {trees,scrub,stones,bones,posts,keep:fn(x,y) true = leave clear} ---- */
+  C.dress=opt=>{opt=opt||{};const keep=opt.keep||(()=>false),near=(x,y,r)=>{for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++)if(path.has((x+a)+','+(y+b)))return true;return false};
+    for(let i=X0+1;i<=X1-1;i+=2)for(const [x,y] of [[i,Y0+1],[i,Y1-1],[X0+1,i],[X1-1,i]]){if(hs(x,y,25)<.82&&!keep(x,y))C.DB(BL_TREES[(hs(x,y,26)*BL_TREES.length)|0],x,y,{sc:.95+hs(x,y,27)*.35})}
+    const nT=opt.trees===undefined?int(W*H*.045):opt.trees;
+    for(let n=0;n<nT;n++){const x=X0+((hs(n,1,21)*(X1-X0))|0),y=Y0+((hs(n,2,21)*(Y1-Y0))|0);if(path.has(x+','+y)||keep(x,y)||near(x,y,1))continue;C.DB(BL_TREES[(hs(n,3,21)*BL_TREES.length)|0],x,y,{sc:.85+hs(n,4,21)*.45})}
+    const nS=opt.scrub===undefined?int(W*H*.1):opt.scrub;
+    for(let n=0;n<nS;n++){const x=X0+((hs(n,1,22)*(X1-X0))|0),y=Y0+((hs(n,2,22)*(Y1-Y0))|0);if(path.has(x+','+y)||keep(x,y))continue;const d=C.D(BL_SCRUB[(hs(n,3,22)*BL_SCRUB.length)|0],x,y,{sc:.7+hs(n,4,22)*.8});if(d){d.ox=(hs(n,5,22)-.5)*.7;d.oy=(hs(n,6,22)-.5)*.7}}
+    const nG=opt.stones===undefined?int(W*H*.008):opt.stones;
+    for(let n=0;n<nG;n++){const x=X0+2+((hs(n,1,23)*(X1-X0-4))|0),y=Y0+2+((hs(n,2,23)*(Y1-Y0-4))|0);if(keep(x,y)||!near(x,y,2)&&hs(n,9,23)<.5)continue;C.DB(['bl_lean','bl_lean','bl_stone1','bl_wcross','bl_stone2'][(hs(n,3,23)*5)|0],x,y,{sc:.85+hs(n,4,23)*.2})}
+    const nB=opt.bones===undefined?int(W*H*.004):opt.bones;
+    for(let n=0;n<nB;n++){const x=X0+((hs(n,1,24)*(X1-X0))|0),y=Y0+((hs(n,2,24)*(Y1-Y0))|0);if(keep(x,y))continue;C.D('gy_bones',x,y,{sc:.7})}
+    const nP=opt.posts===undefined?int(W*H*.003):opt.posts;
+    for(let n=0;n<nP;n++){const x=X0+((hs(n,1,28)*(X1-X0))|0),y=Y0+((hs(n,2,28)*(Y1-Y0))|0);if(keep(x,y))continue;C.DB('gy_rpost',x,y)}};
+  const int=Math.floor;
+  /* a fair, wide pass of creatures: list [type,x,y] near each spot (a free cell is found if the spot is taken) */
+  C.foes=list=>{for(const [t,x,y] of list)C.foeNear(t,x,y,4)};
+  /* ---- the level ---- */
+  C.finish=o=>{o=o||{};
+    const rowsS=[],fmS=[];for(let y=0;y<H;y++){rowsS.push(rows[y].join(''));let s='';for(let x=0;x<W;x++)s+=fm[y*W+x];fmS.push(s)}
+    const st=o.start||spec.start||{x:W-5,y:H>>1,f:3};
+    const lv={rows:rowsS,chars,fmap:fmS,floorSet:BL_FLOORSET.slice(),floor:BL_FLOORSET[0],ceil:'cloud',start:st,enemies,items,decor,sky,scenery:[],lights,portals:[],day:.62,outdoor:true,amb:.86,
+      name:spec.name,label:spec.name,noExtras:true,diff:C.rating,ceilH:5.2,noTele:!spec.tele,torchGap:1e9,mapNames,_bl:{lcol,col:o.col||[.72,1.1,.95],kind:'road',n:blPlaceN(id)}};
+    if(spec.tele)lv.tele=spec.tele;
+    LEVELS[id]=lv;LEVEL_NAMES[id]=spec.name;LEVEL_RATING[id]=C.rating;
+    // the check: everything that can be walked to is reached from the start; a prop that walls a pocket in is taken away
+    {const D4=[[1,0],[-1,0],[0,1],[0,-1]];
+     for(let pass=0;pass<6;pass++){const bs=new Set();for(const d of decor)if(d.block)bs.add(d.x+','+d.y);
+      const seen=new Uint8Array(W*H),q=[st.y*W+st.x];seen[q[0]]=1;
+      for(let i=0;i<q.length;i++){const c=q[i],x=c%W,y=(c/W)|0;for(const [a,b] of D4){const nx=x+a,ny=y+b;if(nx<X0||ny<Y0||nx>X1||ny>Y1||rows[ny][nx]!=='.'||seen[ny*W+nx]||bs.has(nx+','+ny))continue;seen[ny*W+nx]=1;q.push(ny*W+nx)}}
+      const kill=new Set();for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++)if(rows[y][x]==='.'&&!seen[y*W+x]&&!bs.has(x+','+y))for(const [a,b] of D4){const k=(x+a)+','+(y+b);if(bs.has(k))kill.add(k)}
+      if(!kill.size)break;let gone=0;
+      for(let i=decor.length-1;i>=0;i--){const d=decor[i];if(d.block&&kill.has(d.x+','+d.y)&&!d.npc){decor.splice(i,1);gone++}}
+      if(!gone)break}}
+    {for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(rows[y][x]!=='.')block[y*W+x]=1;try{TERRS[id]=yarTerrain(W,H,hgt,rk,block)}catch(e){console.error(e)}}
+    if(typeof WIND_AMT!=='undefined')WIND_AMT[id]=spec.wind===undefined?.3:spec.wind;
+    return lv};
+  return C}
+/* ---------- a room (an interior, a cellar): khRoom with a template of your own. spec: {id, name, w, h, floor, amb, wall, lights:[[x,y]], build:fn(C), back:{to,x,y,f}, enemies:[[t,x,y]], rating} ---------- */
+function blRoom(spec){
+  const id=spec.id,b={id:'bl'+id,name:spec.name,room:'home',keeper:null,floor:spec.floor||'wood',wallImg:spec.wall||'kh_ohwall1_0',
+    tpl:()=>({w:spec.w,h:spec.h,floor:spec.floor||'wood',amb:spec.amb||.55,tele:spec.tele,noExtras:true,lights:spec.lights||[[2,2],[spec.w-3,2],[spec.w>>1,spec.h>>1]],enemies:(spec.enemies||[]).map(e=>[e[0],e[1],e[2],spec.rating||LEVEL_RATING[id]||84]),build:spec.build})};
+  const R=khRoom(b,id,spec.back);
+  const L=R.level;LEVELS[id]=L;LEVEL_NAMES[id]=spec.name;LEVEL_RATING[id]=spec.rating||LEVEL_RATING[id]||84;L.diff=L.rating=spec.rating||84;L.noExtras=true;L._bl={lcol:spec.lcol||{},col:spec.col||[1.4,1.0,.6],kind:'room'};
+  return L}
+/* ---------- the stubs: a place that is not built yet is a short stretch of road with its milestone, linked both ways ---------- */
+function blStubBuild(p){
+  const C=blKit({id:p.id,W:44,H:20,name:p.name,lvl:p.lvl,start:{x:39,y:10,f:3}});
+  C.boundary();C.setF(2,2,41,17,'0');C.pth(2,9,41,11,'1');
+  C.gate('E',10);C.gate('W',10);
+  C.milestone(38,8);
+  C.post(35,12,'bl_stubpost',['BLIGHTED ROAD'],'bl_stubsign','A signpost at the side of the road. The board reads BLIGHTED ROAD. Somebody has written under it: this stretch is not written yet. Keep walking.',{i:3});
+  C.dress({trees:30,scrub:70,stones:6,bones:2,posts:2,keep:(x,y)=>y>=8&&y<=12});
+  const lv=C.finish({start:{x:39,y:10,f:3}});
+  p.fromE={x:39,y:10,f:3};p.fromW={x:4,y:10,f:1};p.exitY=10;
+  return lv}
+function blRoomStub(id,p){
+  const main=p.id;
+  blRoom({id,name:'An unfinished room',w:9,h:7,amb:.55,back:{to:main,x:p.fromE.x,y:p.fromE.y,f:p.fromE.f},build:()=>{}})}
+/* arrival: the first visit says where the party is; the last place reached is kept for the story hint */
+function blArrive(n){
+  const p=blPlaceOf(n);if(!p)return;const F=blF();
+  if(n===p.id){if(!F.last||F.last<p.n)F.last=p.n;if(!F['seen'+p.n]){F['seen'+p.n]=1;try{msg(p.name+'. Sale is '+p.sale+(p.sale===1?' stage':' stages')+' on.','#b8d0a8')}catch(e){}}}}
+
+/* ---- src/desert/blight_toll.js ---- */
+/* ==========================================================================
+   PLACE 1 OF THE BLIGHTED ROAD: THE TOLL HOUSE OF THE ROAD WARDENS (level 9610, rated 84; the toll house inside is 9611; prefix blt / BLT). The first blighted ground outside the west gate of Wenlock.
+   72 by 64. The road runs east to west along y 31 to 33 between dead hedges; the east gate (x 70) leads back to Wenlock, the west gate (x 1) on to Ashenfold Farm (9620). In the middle the Wardens' toll yard
+   with the toll bar, the toll house (a house in the style of Wenlock, door to 9611 with the ledger desk, a strongbox of pale silver wax seals, and a dead warden), a graveyard row of the nine Wardens, the ruined
+   wayside shrine to the south west, a roadmender's hut in a side track, a crow tree, a field of dead stalks. Milestone: SALE 9 STAGES.
+   People: Wat Harrow (the toll keeper who survived, blt_keeper), Marl Quill (the crow-keeper, blt_crow), Sister Anwen (a living nun at the shrine, blt_nun).
+   Quests: blq1 The Wardens' Ledger (Wat: take the ledger from the desk), blq2 Rest for the Wardens (Marl: five Dead Road Wardens), blq3 The Shrine Candle (Anwen: the candle in the dead warden's belt, lit at the shrine).
+   Flags: G.flags.bl = {ledger, candle, shrineLit, chest, wk (wardens put down since blq2 was taken)}.
+   ========================================================================== */
+const BLT={ID:9610,HOUSE:9611,W:72,H:64,keep:{x:42,y:29}};
+LEVEL_NAMES[BLT.HOUSE]="The Wardens' Toll House";LEVEL_RATING[BLT.HOUSE]=84;
+const BLT_HOUSE={x0:39,x1:46,y0:21,y1:26,face:'S',sty:'flint',roof:'slate',wh:2.5,to:BLT.HOUSE};
+/* ---------- things carried ---------- */
+ITEMDEF.blledger={n:"The Wardens' Ledger",k:'quest',t:'Quest item',ic:'book',c:'#6a5a40',stack:1,price:0,sw:.5,d:'A long ledger bound in grey cloth, taken from the desk of the toll house. Every line is a day, a weight of pale silver, and the words paid by the Sovereign’s clerk. Take it to Wat Harrow at the toll yard.'};
+ITEMDEF.blcandle={n:'White Shrine Candle',k:'quest',t:'Quest item',ic:'ore',c:'#e8e4d0',stack:1,price:0,sw:.1,d:'A stub of white wax with the stamp of the wayside shrine on its foot. A Road Warden took it from the shrine and kept it in his belt. It belongs on the shrine.'};
+ITEMDEF.blwaxseal={n:'Pale Silver Wax Seal',k:'quest',t:'Quest item',ic:'ore',c:'#c8d0d8',stack:1,price:0,sw:.1,d:'A lump of grey wax stamped with a small pale silver mark. It is the same mark that is on the Warden’s Seals of Wenlock.'};
+ITEMDEF.blwardenring={n:"Warden's Toll Ring",k:'ring',t:'Ring',ic:'ring',c:'#b8c0c8',price:0,lvl:84,pas:{ward:15,dodge:.06,regen:.6,mpRegen:.4},int:5,hp:70,rar:1,sw:.1,d:'A heavy ring of grey metal, stamped with the toll bar of the Road Wardens. Adds 5 Intelligence and 70 health, every blow on the wearer is 15 lighter, enemies miss 6% more, and wounds and weariness close steadily. Needs level 84.'};
+/* ---------- the people ---------- */
+const BLT_KEEP_LINES=[
+  'I took the toll here for thirty years. Pale silver, always, never copper. I asked the Warden-Captain once why, and he smiled at me, and I never asked again.',
+  'They went into the toll house one night, all nine of them, and shut the door. In the morning the hedges were dead. I sleep in the lean-to by the shrine road now, and I do not sleep much.',
+  'There are two rules on this road. Do not drink from the ditch. Do not answer anything that calls you by name. I have kept both, and I am still here.',
+  'The road goes on west to Ashenfold Farm. I would not walk it at dusk. It is always dusk now.'];
+khNpc('blt_keeper','Wat Harrow, toll keeper','kh_ohfolk2_3',()=>yrLines('blt_keeper',BLT_KEEP_LINES));
+const BLT_CROW_LINES=[
+  'The crows still mind me, mostly. They have stopped bringing me what I ask for and started bringing me what they like. Last week it was a ring with the finger still in it.',
+  'Crows know the road better than the Wardens ever did. They say there is a bridge at the end of it, and a gate, and a pale knight who does not blink.',
+  'Do not feed the crows near the toll house. They are not my crows there. They belong to the dead wardens, and the dead wardens pay in bones.'];
+khNpc('blt_crow','Marl Quill, crow-keeper','kh_ohfolk3_3',()=>yrLines('blt_crow',BLT_CROW_LINES));
+const BLT_NUN_LINES=[
+  'I walked here from Wenlock to pray at the shrine of the Hollow Saint, and found it dark. I will stay until it is lit again. The Saint will not mind a little waiting. She has had a great deal of practice.',
+  'The Hollow Saint kept the road once. They say she walked it from end to end and lit a candle at every shrine, and the candles are why the road was ever safe.',
+  'Do not be afraid of the dark here. Be afraid of the pale light in it. The dead carry that.'];
+khNpc('blt_nun','Sister Anwen','kh_ohfolk5_2',()=>yrLines('blt_nun',BLT_NUN_LINES));
+/* ---------- the quests ---------- */
+function bltQ(id,title,who,steps,reward,extra){const q=yrQ(id,title,who,steps,reward,extra);QAREA[id]=BL.REGION;return q}
+const bltF=()=>{const F=blF();return F};
+bltQ('blq1',"The Wardens' Ledger",'Wat Harrow, toll keeper',[
+  ["Take the Wardens' ledger from the desk in the toll house (the black house in the middle of the toll yard) and bring it to Wat Harrow.",()=>bagCount('blledger')>0,['blt_ledger']]],
+  {gold:2600,xp:23000,items:['potion6','potion6']});
+QUESTS.blq2={title:'Rest for the Wardens',who:'Marl Quill, crow-keeper',need:5,goal:()=>Math.min(5,bltF().wk|0),reward:{gold:3200,xp:27000,items:['blwardenring','potion6']},
+  get desc(){const n=Math.min(5,bltF().wk|0);return n>=5?'Go back to Marl Quill. All five are at rest.':'Put five Dead Road Wardens to rest ('+n+' of 5). They walk the road and the toll yard round the toll house.'}};
+QAREA.blq2=BL.REGION;
+bltQ('blq3','The Shrine Candle','Sister Anwen',[
+  ["Find the shrine's white candle. A dead Road Warden kept it in his belt, inside the toll house.",()=>bagCount('blcandle')>0||!!bltF().shrineLit,['blt_deadwarden']],
+  ['Light the candle at the wayside shrine, south west of the toll yard.',()=>!!bltF().shrineLit,['blt_shrine']]],
+  {gold:2200,xp:19000,items:['potion6','potion6','potion6']});
+wwGive('blt_keeper','blq1',()=>true,{
+  offer:"Will you do something for me? The Wardens kept a ledger in the toll house, in the desk at the back. Every toll, every name, every payment. I want it, and I want to know who the silver came from. I cannot go in. A dead warden sits at that desk, and he looks at me.",
+  accept:'Thank you. The desk is under the clock, at the back of the house. Bring the book out, and do not read it standing near the window.',
+  remind:()=>'The ledger is on the desk in the toll house. Have you got it yet?',
+  ready:'That is it. That is the Wardens’ ledger. Give it here, slowly.',
+  thanks:'I have read the last page. The silver paid for the shut gate, and for a man named Maldrake, who was never a Warden at all. Thirty years of silver in advance, to a vault in the hills. Take this, and my thanks.',
+  after:'I have copied the names out onto the wall of my lean-to. One day somebody will want them.'});
+wwGive('blt_crow','blq2',()=>true,{
+  offer:'Nine Wardens died in that house, and not one of them has the manners to stay down. They walk the road, and they stand in the toll yard as if somebody might still pay. Put five of them to rest, and the crows and I will sleep better.',
+  accept:'Five. They are easy to find. They are the ones in the helmets, and they are always polite right until the spear.',
+  remind:()=>'Five Dead Road Wardens, on the road or in the toll yard. You have done '+Math.min(5,bltF().wk|0)+'.',
+  ready:'Five of them down. I could hear it from the north field. The crows went quiet.',
+  thanks:'Take this. One of them used to wear it, and he will not be wanting it back.',
+  after:'There are still some in the toll house, I think. But the road is quieter, and the crows thank you.'});
+wwGive('blt_nun','blq3',()=>true,{
+  offer:'The shrine of the Hollow Saint stands dark, south west of the toll yard. Its white candle was taken, and I think I know where it went. A Road Warden took it into the toll house and has kept it in his belt ever since. Will you bring it back to me, and light it?',
+  accept:'Bless you. The toll house is the big black house in the yard. The shrine is to the south west, down the little track. Light the candle there, and the Saint will do the rest.',
+  remind:()=>bltF().candle||bagCount('blcandle')>0?'You have the candle. Light it at the shrine, south west of the toll yard.':'The candle is on a dead warden in the toll house.',
+  ready:'The shrine is lit! I could see the glow from here. Oh, thank you.',
+  thanks:'The Saint keeps her own accounts, but I think she will put this one in your favour.',
+  after:'The shrine burns steadily now. I sit by it, and nothing on the road comes near it.'});
+/* ---------- the objects ---------- */
+khNpc('blt_ledger',"The Wardens' ledger",'gy_book',d=>{
+  const F=bltF();
+  if(F.ledger&&!F.ledgerDone&&!bagCount('blledger'))return say('The desk is bare where the ledger lay. If you have lost it, there is nothing more here.',[BYE]);
+  if(F.ledger)return say('The desk is bare, apart from rings of damp where cups were put down.',[BYE]);
+  return say("A long ledger lies open on the desk. Each line is a day, a weight of pale silver, and the words PAID BY THE SOVEREIGN'S CLERK. The last page is a copy of an order: THE GATE OF WENLOCK TO BE SHUT, THE SEALS SET. SILVER FOR THE VAULT OF MALDRAKE, THIRTY YEARS IN ADVANCE. The dead warden at the desk does not stop you.",[['Take the ledger.',()=>{F.ledger=1;if(!bagAdd(mkItem('blledger')))G.items.push({k:'blledger',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg("You take the Wardens' ledger.",'#ffe36a');return null}],BYE])});
+khNpc('blt_deadwarden','A dead warden','gy_skel',d=>{
+  const F=bltF();
+  if(!F.candle&&!F.shrineLit)return say('A Road Warden in a grey tabard sits at the desk with his hands on the wood. He has been dead a long time and has not noticed. A stub of white candle is stuck in his belt, with a shrine stamp on its foot.',[['Take the candle.',()=>{F.candle=1;if(!bagAdd(mkItem('blcandle')))G.items.push({k:'blcandle',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg('You take the white shrine candle.','#ffe36a');return null}],BYE]);
+  return say('The dead warden sits at the desk with his hands on the wood. He does not look up. His belt is empty now.',[BYE])});
+khNpc('blt_sealchest','A strongbox','gy_chest',d=>{
+  const F=bltF();
+  if(F.chest)return say('The strongbox is open and empty, except for grey wax dust.',[BYE]);
+  return say('An iron strongbox with the toll bar stamped on its lid. It is not locked. Inside are ledger slips, a few coins, and a lump of grey wax stamped with a small pale silver mark.',[['Take what is in it.',()=>{F.chest=1;G.gold+=900;if(!bagAdd(mkItem('blwaxseal')))G.items.push({k:'blwaxseal',x:G.P.x,y:G.P.y,taken:false});sfx('win');msg('You take 900 gold and a pale silver wax seal.','#ffe36a');return null}],BYE])});
+function bltShrine(){
+  const F=bltF();
+  if(F.shrineLit)return say('The white candle burns steadily on the shrine of the Hollow Saint. The air near it is warm and smells of wax. The crows do not come within a stone’s throw.',[BYE]);
+  if(bagCount('blcandle')>0)return say('A ruined wayside shrine to the Hollow Saint: a low arch, a stone shelf, a round hollow where a candle stood. You have the white candle.',[['Set the candle in the hollow and light it.',()=>{bagRemove('blcandle',1);F.shrineLit=1;sfx('win');try{G.heroes.forEach((h,i)=>{if(h.alive){h.hp=h.max;h.mp=h.mpMax}})}catch(e){}msg('The candle takes a flame from nothing. A warm light spreads over the party, and every hero is healed.','#ffe9a0');
+      try{const L=LEVELS[BLT.ID];if(L&&L._bl)L._bl.lcol[(BLT.shrine.x)+','+(BLT.shrine.y+1)]=[1.5,1.05,.55]}catch(e){}return null}],BYE]);
+  return say('A ruined wayside shrine to the Hollow Saint: a low arch of grey stone with a window, a shelf, and a round hollow where a candle once stood. The hollow is empty and cold.',[BYE])}
+khNpc('blt_shrine','A ruined wayside shrine','gy_candles',()=>bltShrine());
+khNpc('blt_hut','A roadmender’s hut','bl_hut',()=>say('A roadmender’s hut in a side track. The door is nailed shut from the outside, with four nails and a good deal of care. Something inside taps once on the wood, politely, and then stops.',[BYE]));
+khNpc('blt_crowtree','A crow tree','ww_crowtree',()=>say('A dead tree black with crows. They do not move. Every one of them is looking at you.',[BYE]));
+const BLT_GRAVES=[
+  ['WARDEN ABEL PETTIFER','Held the bar thirty years. Let nobody through without silver.'],
+  ['WARDEN HOB DREWE','He asked what the silver was for. The stone says only: Paid.'],
+  ['WARDEN IVY CARROW','The only woman of the nine. She said the toll house was cold. It is now.'],
+  ['WARDEN CAPTAIN MORLEY','Of the Road Wardens. Under his own orders until the last.'],
+  ['WARDEN TOBY LAMMAS','Nineteen years old. He wanted to see Sale.'],
+  ['WARDEN SIMEON KETT','Sentry. Asleep at his post, and still there.']];
+khNpc('blt_wgrave','A grave board','bl_slab',d=>{const t=BLT_GRAVES[d.i]||BLT_GRAVES[0];return say(t[0]+'. '+t[1]+' The grave is not undisturbed.',[BYE])});
+khNpc('blt_notice','A notice post','greensign',()=>say("A notice nailed to a post. BY ORDER OF THE ROAD WARDENS. THE ROAD IS CLOSED. NO CARTS, NO PILGRIMS, NO LETTERS. ALL TOLLS TO BE PAID IN PALE SILVER AT THE BAR. Underneath, in a different ink: THE BAR IS BROKEN. PAY NOBODY.",[BYE]));
+khNpc('blt_lean','A lean-to','bl_hut',()=>say('A lean-to of planks and a cart-cover, by the side track. A blanket, a tin cup, and a great many scratches on the wall: names, in columns. Wat Harrow has been copying them out.',[BYE]));
+/* ---------- the level ---------- */
+function bltBuild(p){
+  const C=blKit({id:BLT.ID,W:BLT.W,H:BLT.H,name:p.name,lvl:84,start:{x:65,y:32,f:3},wind:.34});
+  const {hs,rows}=C,F=blF();
+  C.hills(.16);
+  C.boundary();
+  C.setF(2,2,69,61,'0');
+  // the road: a dirt road three wide, a cobbled toll yard, a gravel apron at each gate
+  C.pth(2,31,69,33,'1');C.pth(36,28,53,36,'4');C.pth(42,27,42,30,'4');C.pth(20,34,20,40,'2');
+  C.pth(12,16,13,30,'1');C.pth(56,12,57,30,'1');C.pth(12,16,24,16,'1');
+  C.flatten(2,26,69,38);
+  C.gate('E',32);C.gate('W',32);
+  // the toll house, and the yard in front of it
+  C.house(BLT_HOUSE);
+  C.reserve(36,28,53,36);
+  C.lamp(40,29,C.warm);C.lamp(44,29,C.warm);
+  for(const x of [40,44]){C.dec('gy_lantern',x,29,{block:true})}
+  C.dec('bl_urn',38,28,{block:true,sc:.8});C.dec('bl_urn',47,28,{block:true,sc:.8});
+  C.dec('kh_ohgard2_1',48,27,{block:true,sc:.9});C.dec('kh_oqstuff_8',49,27,{block:true});C.dec('kh_oqstuff_9',37,27,{block:true});
+  C.dec('kh_ohgard2_3',50,35,{block:true,sc:.9});C.dec('kh_ohgard2_1',37,35,{block:true,sc:.9});
+  // the toll bar, broken open: two posts with a crow each, a fallen pole of fence
+  C.dec('gy_rpost',48,30,{block:true});C.dec('gy_rpost',48,34,{block:true});
+  C.dec('bl_fence',47,34,{block:true,sc:.7});C.dec('bl_fence',49,30,{block:true,sc:.7});
+  C.post(47,30,'bl_toll_post',[{n:"THE WARDENS' TOLL",d:0},{n:'WENLOCK',d:1}],'bl_tollsign','A signpost at the toll bar. One board reads THE WARDENS’ TOLL, and below it, smaller: ALL PAY. The other reads WENLOCK, pointing east. The bar itself is broken, and the pole lies in the road.',{i:2});
+  C.dec('greensign',35,30,{block:true,npc:'blt_notice'});
+  // the Wardens' graves, nine mounds in a railed row and six boards
+  C.reserve(50,19,60,27);
+  for(let x=51;x<=59;x+=2)C.dec('gy_mound',x,24,{block:true,sc:.8});
+  for(let x=50;x<=60;x++){C.dec('bl_fence',x,22,{block:true,sc:.9});}
+  BLT_GRAVES.forEach((g,i)=>{const k=blSlab('bl_wg'+i,[g[0].replace('WARDEN CAPTAIN ','').replace('WARDEN ',''),'WARDEN'],{h:.95,top:.2,span:.55});C.dec(k,i<5?51+i*2:55,i<5?23:26,{block:true,npc:'blt_wgrave',i})});
+  for(const [x,y] of [[50,20],[60,20],[50,26],[60,26]]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.pale)}
+  // the ruined wayside shrine
+  BLT.shrine={x:20,y:40};
+  C.dec('bl_chapel',20,39,{block:true,sc:.75});
+  C.dec('gy_candles',20,41,{block:true,npc:'blt_shrine',sc:.9});
+  C.dec('gy_bench',18,42,{block:false});C.dec('gy_bench',22,42,{block:false});
+  C.dec('gy_rose',17,41,{sc:.6});C.dec('gy_rose',23,41,{sc:.6});C.dec('bl_urn',17,39,{block:true,sc:.8});C.dec('bl_urn',23,39,{block:true,sc:.8});
+  C.light(20,42,F.shrineLit?C.warm:C.pale);
+  C.pth(20,41,20,43,'3');
+  C.person('blt_nun',21,43,2);
+  // the roadmender's hut up the north track, the lean-to by the shrine road, the crow tree and the crow-keeper in the north east
+  C.dec('bl_hut',13,14,{block:true,npc:'blt_hut'});C.dec('bl_fence',11,17,{block:true,sc:.8});C.dec('bl_fence',15,17,{block:true,sc:.8});C.lamp(13,17,C.pale);
+  C.dec('bl_hut',26,36,{block:true,npc:'blt_lean',sc:.6});C.dec('kh_oqstuff_8',28,36,{block:true,sc:.7});C.dec('kh_oqstuff_9',24,36,{block:true,sc:.7});C.light(27,37,C.warm);
+  C.dec('ww_crowtree',58,13,{block:true,npc:'blt_crowtree'});
+  for(const [x,y] of [[55,14],[61,14],[56,11],[60,11]])C.dec('gy_rpost',x,y,{block:true});
+  C.person('blt_keeper',42,30,2);C.person('blt_crow',56,15,2);
+  // the milestone and the signs at the gates
+  C.milestone(7,30);
+  C.post(66,34,'bl_toll_e',[{n:'WENLOCK',d:1}],'bl_signE','A signpost inside the east gate. The board reads WENLOCK, to the east, and below it somebody has scratched: THE HEDGES WERE GREEN THIS MORNING.',{i:4});
+  C.post(5,34,'bl_toll_w',[{n:'ASHENFOLD FARM',d:-1}],'bl_signW','A signpost by the west gate. The board reads ASHENFOLD FARM, to the west. Underneath, in smaller letters: SUPPER AT SIX.',{i:5});
+  // the dead hedges: two rows of bare thorn along the road, with gaps for the side tracks and the toll yard
+  for(let x=3;x<=68;x++){
+    if(x>=35&&x<=53)continue;
+    if([12,13,56,57,26,27,20].includes(x))continue;
+    for(const y of [29,35]){if(hs(x,y,33)<.86)C.DB('bl_hedge'+((hs(x,y,35)*3)|0),x,y,{sc:.62+hs(x,y,34)*.22})}}
+  // lamps along the road: pale, one every eight squares, on the south side
+  for(let x=10;x<=66;x+=8){if(x>34&&x<54)continue;C.dec('gy_lantern',x,36,{block:true});C.light(x,36,C.pale)}
+  // dead fields: stalks of corn gone grey, a few wheelbarrows, stones
+  for(const [x0,y0,x1,y1] of [[28,5,50,26],[14,38,34,58],[40,40,68,58],[4,5,10,27]]){
+    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){if(C.path.has(x+','+y)||hs(x,y,41)>.22)continue;const d=C.D('ww_twig2',x,y,{sc:.5+hs(x,y,42)*.4});if(d){d.ox=(hs(x,y,43)-.5)*.6;d.oy=(hs(x,y,44)-.5)*.6}}}
+  C.dec('kh_ohgard1_5',30,12,{block:true,sc:.8});C.dec('kh_ohgard2_3',45,52,{block:true,sc:.8});
+  C.dress({trees:150,scrub:260,stones:20,bones:8,posts:5,keep:(x,y)=>(x>=35&&x<=53&&y>=26&&y<=37)||(y>=29&&y<=35)||(x>=49&&x<=61&&y>=18&&y<=28)});
+  // the creatures: Dead Road Wardens on the road and in the yard, husks in the fields, bones at the shrine, a flock in the crow tree
+  C.foes([['bldeadwarden',56,31],['bldeadwarden',38,34],['bldeadwarden',30,32],['bldeadwarden',17,31],['bldeadwarden',52,25],['bldeadwarden',8,33],
+    ['blbones',16,38],['blbones',24,39],['blbones',19,46],['blhusk',34,16],['blhusk',46,10],['blhusk',24,50],['blhusk',58,46],['blghoul',9,45],['blcrow',30,28],['blcrow',52,38]]);
+  enemiesAdd(C,[['blcrowflock',58,15]]);
+  for(const [k,x,y] of [['potion6',27,13],['potion6',48,50],['potion6',8,12]])C.items.push({k,x,y,taken:false});
+  C.mapNames.push({t:"The Wardens' Toll House",x:42,y:23,k:'place'},{t:'The Toll Yard',x:44,y:32,k:'place'},{t:'The Wayside Shrine',x:20,y:40,k:'place'},{t:"The Wardens' Graves",x:55,y:24,k:'place'},{t:"The Roadmender's Hut",x:13,y:13,k:'place'},{t:'The Crow Tree',x:58,y:13,k:'place'},{t:'To Wenlock',x:66,y:30,k:'place'},{t:'To Ashenfold Farm',x:6,y:30,k:'place'});
+  const lv=C.finish({start:{x:65,y:32,f:3}});
+  lv.tele=undefined;
+  return lv}
+/* a creature placed on the exact cell (a tree is solid): the foe goes on a free cell next to it */
+function enemiesAdd(C,list){for(const [t,x,y] of list){if(!C.foe(t,x,y)&&!C.foeNear(t,x,y,2))console.error('no cell for',t,x,y)}}
+/* the toll house inside: 13 by 9 */
+function bltRoom(){
+  blRoom({id:BLT.HOUSE,name:"The Wardens' Toll House",w:13,h:9,amb:.5,rating:84,floor:'wood',wall:'kh_ohwall1_0',
+    back:{to:BLT.ID,x:BLT_HOUSE.front[0],y:BLT_HOUSE.front[1],f:2},
+    lights:[[3,2],[9,2],[6,5],[2,7],[10,7]],lcol:{'3,2':[1.4,1.0,.6],'9,2':[.7,1.1,.95],'6,5':[1.3,.95,.6],'2,7':[.7,1.1,.95],'10,7':[1.3,.95,.6]},col:[1.3,.95,.6],
+    enemies:[['bldeadwarden',10,6]],
+    build:C=>{
+      const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
+      P('bookshelf',2,1,{h:1.1});P('bookshelf',4,1,{h:1.1});P('hearth',9,1,{h:1.3});P('clock',7,1,{h:1.1});
+      P('readdesk',6,3,{h:.85});C.raw('gy_book',6,3,{npc:'blt_ledger',solid:1,deco:false,bob:.38,sc:1});
+      C.raw('gy_skel',7,3,{npc:'blt_deadwarden',solid:1,deco:false,sc:.95});
+      C.raw('gy_chest',11,2,{npc:'blt_sealchest',solid:1,deco:false,sc:.9});
+      P('bed',2,6,{h:.8});P('bed',2,7,{h:.8});P('candlerack',4,5,{h:1.0});P('coatrack',11,5,{h:1.0});P('noticeboard',5,1,{h:.9,block:false});
+      P('waterbarrel',11,7,{h:.7});C.raw('gy_web',1,1,{block:false,sc:.5});C.raw('gy_bones',8,6,{block:false,sc:.7});C.raw('gy_bones',3,7,{block:false,sc:.6})}})}
+/* wardens put down count towards blq2 */
+{const _h=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;const r=_h.apply(this,arguments);
+  try{if(was&&e.hp<=0&&e.t==='bldeadwarden'&&qSt('blq2')==='active'){const F=blF();F.wk=(F.wk|0)+1;if(F.wk<=5)msg('A Road Warden put to rest ('+Math.min(5,F.wk)+' of 5).','#ffe36a')}}catch(x){console.error(x)}
+  return r}}
+/* the quest rings (see quest_rings_fix.js) */
+if(typeof QRF!=='undefined'){const N=(l,...ids)=>({lvl:l,npc:ids}),E=(l,rx)=>({lvl:l,en:rx}),T=QRF.T;
+  T.blq1={give:[N(9610,'blt_keeper')],act:()=>blF().ledger?[N(9610,'blt_keeper')]:[N(9611,'blt_ledger')],ready:[N(9610,'blt_keeper')]};
+  T.blq2={give:[N(9610,'blt_crow')],act:[E(9610,/^bldeadwarden$/)],ready:[N(9610,'blt_crow')]};
+  T.blq3={give:[N(9610,'blt_nun')],act:()=>blF().candle||blF().shrineLit?[N(9610,'blt_shrine')]:[N(9611,'blt_deadwarden')],ready:[N(9610,'blt_nun')]}}
+/* ---------- registration ---------- */
+blRegister(1,bltBuild,{fromE:{x:65,y:32,f:3},fromW:{x:4,y:32,f:1},exitY:32,rooms:[BLT.HOUSE],names:{9611:"The Wardens' Toll House"},rating:{9611:84}});
+KH_LAZY[BLT.HOUSE]=()=>{if(!LEVELS[BLT.HOUSE]){if(!LEVELS[BLT.ID])KH_LAZY[BLT.ID]();bltRoom()}return LEVELS[BLT.HOUSE]};
+
+/* ---- src/desert/blight_ashenfold.js ---- */
+/* ==========================================================================
+   PLACE 2 OF THE BLIGHTED ROAD: ASHENFOLD FARM (level 9620, rated 85; the farmhouse kitchen is 9621, the cellar 9622, the barn 9623; prefix bla / BLA). 80 by 70.
+   The road runs east to west along y 34 to 36 (east gate x 78 back to the Toll House, west gate x 1 on to the Church of the Hollow Saint, 9630). A lane leads north into the muddy farmyard: the farmhouse (door to
+   9621, where the dead family still sit at supper: the farmer, his wife, his mother and old Uncle Amos), the barn (9623, with the living cowman Hob), a well, haystacks, carts, a dead orchard, and two dead fields
+   with walking scarecrows (they stand still until the party is close, then drop off their poles). The biggest scarecrow, in the north field, has a pale silver heart. The trapdoor in the kitchen leads to the cellar (9622), where a child is hiding.
+   People: Hob Fenner the cowman (bla_hob, in the barn), Mistress Edda Sedge the farmer's wife (bla_edda, a ghost at the table), Tilly Sedge (bla_tilly, the child), Farmer Wilf Sedge (bla_wilf, at the table), Gran Sedge (bla_gran), Uncle Amos (bla_amos).
+   Quests: blq4 The Child in the Cellar (Hob), blq5 The Silver Heart (Hob: kill the Heart-Scarecrow, burn its heart in the kitchen hearth), blq6 The Farmer's Ring (Edda: dig the ring out of the long furrow, put it on Wilf's finger at the table).
+   Flags: G.flags.bl = {tillyFound, tillyFree, heart, heartBurnt, ring, ringGiven, chestA}.
+   ========================================================================== */
+const BLA={ID:9620,HOUSE:9621,CELLAR:9622,BARN:9623,W:80,H:70};
+for(const [id,n] of [[9621,"The Sedges' Kitchen"],[9622,'The Farmhouse Cellar'],[9623,'The Ashenfold Barn']]){LEVEL_NAMES[id]=n;LEVEL_RATING[id]=85}
+const BLA_HOUSE={x0:42,x1:51,y0:19,y1:24,face:'S',sty:'brick',roof:'thatch2',wh:2.4,to:BLA.HOUSE};
+const BLA_BARN={img:'wl_bldg1_5',x0:56,x1:60,y0:20,y1:24,w:5.2,wh:2.4,to:BLA.BARN};
+ITEMDEF.blheart={n:'Pale Silver Heart',k:'quest',t:'Quest item',ic:'ore',c:'#d8e0e8',stack:1,price:0,sw:.3,d:'A lump of pale silver the size of a fist, shaped roughly like a heart, taken from the chest of the great scarecrow. It is cold, and it is faintly warm when you hold it. Burn it in the hearth of the farmhouse kitchen.'};
+ITEMDEF.blring={n:"The Farmer's Wedding Ring",k:'quest',t:'Quest item',ic:'ring',c:'#e0b050',stack:1,price:0,sw:.1,d:'A plain gold ring worn thin, dug out of the long furrow in the dead field. Inside it is cut: W and E, and a date forty years gone. It belongs on Farmer Wilf Sedge’s finger.'};
+ITEMDEF.blsedgering={n:"Sedge's Wedding Band",k:'ring',t:'Ring',ic:'ring',c:'#d8b868',price:0,lvl:85,pas:{ward:16,dodge:.06,regen:.7,mpRegen:.4},int:5,hp:75,rar:1,sw:.1,d:'A second ring in the Sedge family, thin gold, left on the supper table for whoever finished the quarrel. Adds 5 Intelligence and 75 health, every blow on the wearer is 16 lighter, enemies miss 6% more, and wounds and weariness close steadily. Needs level 85.'};
+ITEMDEF.blscythe={n:"Hob's Reaping Hook",k:'weapon',t:'Sword',ic:'sword',c:'#c0c8c8',dmg:[440,540],hit:.2,req:{str:68},lvl:85,price:0,rar:1,eff:{bleed:[.35,6,40],bossdmg:.3},dbl:.2,sw:.46,d:'A long reaping hook with a grey ash handle, sharpened on the same stone for fifty harvests. Wounds bleed hard, and bosses take 30% more. Needs level 85.'};
+/* ---------- the people ---------- */
+khNpc('bla_hob','Hob Fenner, cowman','kh_ohfolk7_3',()=>yrLines('bla_hob',[
+  'I have been in this barn since the supper started. That was nine days ago. They have not finished eating. They do not eat, you understand. They just sit, and pass the bread.',
+  'The cows went first. Then the dog went quiet. Then the scarecrows started coming down off their poles at dusk, one at a time, and standing in the lane. I do not go out at dusk.',
+  'Mistress Edda was good to me. I would like to think she knows what she is. I would like to think she would not mind me not coming in.']));
+khNpc('bla_edda','Edda Sedge, at supper','gy_ghost1',()=>yrLines('bla_edda',[
+  'Sit, sit. There is plenty. Wilf will be along in a moment, he never lets the soup go cold.',
+  'It is a nice evening. A little grey, but nice. Tilly will be home soon, she is only playing in the cellar.',
+  'You will have heard about the scarecrow. I told Wilf not to stuff him with silver. Silver is for the wedding, I said.']),{sc:1});
+khNpc('bla_wilf','Farmer Wilf Sedge, at supper','gy_zombie',()=>yrLines('bla_wilf',[
+  'Pass the bread. Pass the bread. Pass the bread.',
+  'There was something I had to do before supper. My hand feels light. I cannot think what I have lost.']),{sc:1});
+khNpc('bla_gran','Gran Sedge, at supper','gy_ghost0',()=>yrLines('bla_gran',[
+  'I said to him, you cannot sow in October. Nobody listens to the old.',
+  'A very polite young man came and said he would take the harvest away. A pale man. His coat was all wax. We shook hands, and the grain was never the same.']),{sc:1});
+khNpc('bla_amos','Uncle Amos, at supper','gy_skel',()=>yrLines('bla_amos',[
+  'Clack. (He holds out an empty plate to you, with great dignity, and puts it down again.)',
+  'Clack. Clack. (He has the look of a man who never thought much of the soup.)']),{sc:.95});
+khNpc('bla_tilly','Tilly Sedge','kh_ohfolk3_0',d=>{
+  const F=blF();
+  if(!F.tillyFound){F.tillyFound=1;sfx('key');return say('A small girl in a nightdress sits behind the barrels with a doll, with her knees up and her hands over her ears. She looks up very slowly. "Are you dead?" she says. "Mummy says it is only for a little while. But I do not think the rest of them are going to stop. Please can I come out?"',[['Come out. We will take you somewhere safe.',()=>blaFreeTilly(d)],['Stay there a moment longer.',()=>null]])}
+  if(!F.tillyFree)return say('"Please can I come out? I have been so quiet."',[['Come out. We will take you somewhere safe.',()=>blaFreeTilly(d)],BYE]);
+  return yrLines('bla_tilly',['"Hob says I am to stay in the barn and never go near the kitchen. I told him I would not. I do not want any more supper."','"My doll is called Mrs Pennyworth. She was in the cellar with me. She says thank you."'])},{sc:.78});
+function blaFreeTilly(d){
+  const F=blF();F.tillyFree=1;sfx('win');
+  if(d){d.found=true;d.block=false}
+  try{const L=LEVELS[BLA.CELLAR];if(L)for(const x of L.decor)if(x.npc==='bla_tilly')x.found=true}catch(e){}
+  try{const L=LEVELS[BLA.BARN];if(L&&!L.decor.some(x=>x.npc==='bla_tilly'))blaTillyIn(L.decor)}catch(e){}
+  msg('Tilly slips past the kitchen and runs across the yard to the barn.','#ffe36a');return null}
+function blaTillyIn(decor){const kp=KH_KEEPERS.bla_tilly;decor.push({k:khFaceKey(kp.face),x:9,y:5,block:false,walk:true,npc:'bla_tilly',sc:kp.sc||1})}
+/* ---------- the quests ---------- */
+function blaQ(id,title,who,steps,reward){const q=yrQ(id,title,who,steps,reward);QAREA[id]=BL.REGION;return q}
+blaQ('blq4','The Child in the Cellar','Hob Fenner, cowman',[
+  ["Find Tilly, the farmer's girl, in the cellar under the farmhouse (the trapdoor is in the kitchen) and take her out to the barn.",()=>!!blF().tillyFree,['bla_tilly']]],
+  {gold:3000,xp:25000,items:['potion6','potion6']});
+blaQ('blq5','The Silver Heart','Hob Fenner, cowman',[
+  ['Break the great scarecrow in the north field of Ashenfold and take the pale silver heart from its chest.',()=>!!(blF().heart||blF().heartBurnt),['bla_hob']],
+  ['Burn the silver heart in the hearth of the farmhouse kitchen.',()=>!!blF().heartBurnt,['bla_hearth']]],
+  {gold:4200,xp:32000,items:['blscythe','potion6']});
+blaQ('blq6',"The Farmer's Ring",'Edda Sedge, at supper',[
+  ["Find Wilf Sedge's wedding ring. Edda says he lost it ploughing the long furrow in the south field, by the old stone.",()=>!!(blF().ring||blF().ringGiven),['bla_ringspot']],
+  ['Give the ring to Farmer Wilf, at the supper table in the kitchen.',()=>!!blF().ringGiven,['bla_wilf']]],
+  {gold:3400,xp:28000,items:['blsedgering','potion6']});
+wwGive('bla_hob','blq4',()=>true,{
+  offer:'Please. The farmer’s girl, Tilly, ran into the cellar when it began, and I have not seen her since. I heard her through the floor the first night. I cannot get in: the family sit at supper in the kitchen, and when I open the door they all turn their heads together. Would you go?',
+  accept:'Thank you. The trapdoor is in the kitchen, in the corner by the dresser. Go quietly. They are not unkind. They just do not stop.',
+  remind:()=>'Tilly is in the cellar, under the kitchen. Take her out to me in the barn.',
+  ready:'She is here. Oh, thank the Saint. Look at her. She has not even lost the doll.',
+  thanks:'You have done a better thing than you know. Take this.',
+  after:'Tilly sleeps in the loft. She talks about the dead people at supper as if they were an odd set of relatives.'});
+wwGive('bla_hob','blq5',()=>qSt('blq4')==='done',{
+  offer:'There is one more thing, and it is worse. The great scarecrow in the north field was ours. Wilf made it for the wedding of the barley. Something put silver in its chest, and now it walks, and the others follow it. Break it, and take out what is in its chest. The only fire hot enough is the kitchen hearth, and you will have to walk in past the family to use it.',
+  accept:'Then you are braver than I am. Do not let the others near you while you fight it. They wake when you are close.',
+  remind:()=>blF().heart?'You have the heart. Burn it in the hearth of the farmhouse kitchen.':'The great scarecrow stands in the north field, in the rows of dead corn.',
+  ready:'It is done. I could feel it go from here, like a tooth coming out.',
+  thanks:'The field will not grow, but it will stop walking. Take my reaping hook. I have no more use for it.',
+  after:'The scarecrows still stand on their poles, but they stay on them now.'});
+wwGive('bla_edda','blq6',()=>true,{
+  offer:'Oh, you are so kind to listen. It is only a small thing. Wilf lost his wedding ring ploughing the long furrow in the south field, by the old stone, and he has not been right since. His hand feels light, he says. I cannot leave the table. Would you look for it?',
+  accept:'Thank you, dear. The old stone is in the south field. Dig by the foot of it, where the furrow ends.',
+  remind:()=>blF().ring?'You have the ring. Put it on Wilf’s finger, at the table.':'The ring is in the long furrow, by the old stone in the south field.',
+  ready:'He has stopped saying it. He is only sitting, now, and holding my hand.',
+  thanks:'Thank you. We will be going soon, I think. Take the other ring from the table. It was my mother’s.',
+  after:'It is a very quiet supper tonight. A good one.'});
+/* ---------- the objects ---------- */
+khNpc('bla_hearth','The kitchen hearth','gy_candles',()=>{
+  const F=blF();
+  if(F.heartBurnt)return say('The fire has burnt down to white ash. A small puddle of silver cooled on the hearthstone and was swept away.',[BYE]);
+  if(bagCount('blheart')>0)return say('A wide stone hearth with a good fire. The family at the table do not look round. You have the pale silver heart.',[['Throw the heart into the fire.',()=>{bagRemove('blheart',1);F.heartBurnt=1;sfx('win');msg('The silver heart screams once, thinly, and runs down into the ashes. Far off, in the north field, something falls over.','#ffe9a0');return null}],BYE]);
+  return say('A wide stone hearth with a good fire, though nobody has fed it. The family at the table do not look round.',[BYE])});
+khNpc('bla_cellardoor','A trapdoor','gy_hatch2',()=>say('A trapdoor in the kitchen floor, in the corner by the dresser. The ring-pull is worn bright. Somebody small, below, is breathing very carefully.',[['Open it and go down.',()=>{sfx('door');G.talk=null;goToLevel(BLA.CELLAR,{x:5,y:2,f:2});return null}],BYE]));
+khNpc('bla_ringspot','Turned earth','gy_mound',()=>{
+  const F=blF();
+  if(F.ring||F.ringGiven)return say('The furrow is dug up where you took the ring. Nothing else is here.',[BYE]);
+  return say('The long furrow ends at an old stone. The earth at its foot has been turned over once, long ago, and a thin edge of gold shows in it.',[['Dig.',()=>{F.ring=1;if(!bagAdd(mkItem('blring')))G.items.push({k:'blring',x:G.P.x,y:G.P.y,taken:false});sfx('key');msg("You dig up Wilf Sedge's wedding ring.",'#ffe36a');return null}],BYE])});
+/* Wilf, with the ring in the bag, gets a branch of his own */
+yrHook('bla_wilf',d=>{const F=blF();
+  if(F.ring&&!F.ringGiven&&bagCount('blring')>0)return say('Farmer Wilf sits at the head of the table with his hand flat on the cloth, as if waiting. His fingers are bare.',[['Put the ring on his finger.',()=>{bagRemove('blring',1);F.ringGiven=1;sfx('win');msg('Wilf Sedge looks at his hand for a long time.','#ffe9a0');return say('He turns the ring once, with his thumb. "There," he says, in a perfectly ordinary voice. "That was it." He takes his wife’s hand, and does not say anything else.',[BYE])}],BYE]);
+  if(F.ringGiven)return yrLines('bla_wilf2',['"Thank you. I knew I had put it somewhere."','"Pass the bread, Edda. No. Sit. Let somebody else pass it."']);
+  return null});
+khNpc('bla_well','The Ashenfold well','ww_well',()=>say('A stone well with a little roof, and a rope gone black with damp. You drop a pebble. It lands a very long time later, in something that is not quite water. A sign nailed to the roof says: DO NOT DRINK. DO NOT LOOK DOWN. DO NOT ANSWER.',[BYE]));
+khNpc('bla_scarepole','A scarecrow pole','ww_totem',()=>say('An empty scarecrow pole, with a crosspiece, and a few rags on it. The straw has gone. Where it went, you can guess.',[BYE]));
+khNpc('bla_stone','The old stone','ww_stone',()=>say('A tall grey stone at the end of the long furrow. The ploughmen used to turn the team here. Generations of them have leaned on it. There is turned earth at its foot.',[BYE]));
+khNpc('bla_chest','A farm chest','gy_chest',d=>{
+  const F=blF();if(F.chestA)return say('The chest is empty.',[BYE]);
+  return say('A plain chest with a rusted padlock, hanging open. Inside, under the sacking, is the farm’s egg money, and a little more.',[['Take it.',()=>{F.chestA=1;G.gold+=1400;if(ITEMDEF.supermana&&bagAdd(mkItem('supermana'))){}sfx('win');msg('You take 1400 gold.','#ffe36a');return null}],BYE])});
+khNpc('bla_sign_farm','A farm signpost','greensign',()=>say('A signpost at the end of the farm lane. The board reads ASHENFOLD FARM, to the north, and below it: EGGS. MILK. HONEST DEALING. Somebody has added with a nail: AND SUPPER.',[BYE]));
+khNpc('bla_pigs','A pig sty','bl_fence',()=>say('A sty with a low roof. The pigs are gone. The mud inside is deeply trodden, in a ring, as if something walked round and round all night.',[BYE]));
+/* the hearth in the kitchen and the cellar door are decor; the heart drops when the great scarecrow dies */
+{const _h=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;const r=_h.apply(this,arguments);
+  try{if(was&&e.hp<=0&&e.t==='blscarebig'){const F=blF();if(!F.heart&&!F.heartBurnt){F.heart=1;if(!bagAdd(mkItem('blheart')))G.items.push({k:'blheart',x:Math.round(e.x),y:Math.round(e.y),taken:false});msg('A pale silver heart falls out of the straw. You take it.','#ffe36a');sfx('win')}}}catch(x){console.error(x)}
+  return r}}
+/* ---------- the level ---------- */
+function blaBuild(p){
+  const C=blKit({id:BLA.ID,W:BLA.W,H:BLA.H,name:p.name,lvl:85,start:{x:73,y:35,f:3},wind:.36});
+  const {hs}=C,F=blF();
+  C.hills(.15);C.boundary();C.setF(2,2,77,67,'0');
+  C.pth(2,34,77,36,'1');C.pth(35,25,65,33,'5');C.pth(46,25,50,33,'5');C.pth(26,21,26,33,'1');
+  C.flatten(2,18,77,40);
+  C.gate('E',35);C.gate('W',35);
+  // the farmhouse, the barn, the yard
+  C.house(BLA_HOUSE);C.picHouse(BLA_BARN);C.reserve(35,25,65,33);
+  for(const [x,y] of [[43,26],[50,26]]){C.dec('gy_lantern',x,y,{block:true});C.light(x,y,C.warm)}
+  C.dec('bl_urn',41,25,{block:true,sc:.8});C.dec('bl_urn',52,25,{block:true,sc:.8});
+  C.dec('ww_well',39,29,{block:true,npc:'bla_well'});
+  C.dec('hay',63,26,{block:true,sc:1.3});C.dec('hay',64,29,{block:true,sc:1.2});C.dec('hay',61,31,{block:true,sc:1.1});C.dec('hay',37,27,{block:true,sc:1.0});
+  C.dec('kh_ohgard1_5',55,29,{block:true,sc:.9});C.dec('kh_ohgard2_3',44,31,{block:true,sc:.9});C.dec('kh_ohgard2_1',53,27,{block:true,sc:.9});C.dec('kh_oqstuff_8',54,27,{block:true});C.dec('kh_oqstuff_9',62,28,{block:true});C.dec('kh_ohgard2_1',36,31,{block:true,sc:.9});
+  C.dec('bl_barrow',58,30,{block:true,sc:.9});
+  // wooden fences round the yard, with the lane open; the pig sty beside the barn
+  for(let x=35;x<=65;x++){if(x>=45&&x<=51)continue;C.dec('bl_wfence',x,33,{block:true,sc:.9})}
+  for(let y=26;y<=32;y++){C.dec('bl_wfence',35,y,{block:true,sc:.9});C.dec('bl_wfence',65,y,{block:true,sc:.9})}
+  C.dec('bl_fence',62,22,{block:true,sc:.8,npc:'bla_pigs'});C.dec('bl_fence',63,22,{block:true,sc:.8});
+  C.post(44,36,'bl_ash_farm',[{n:'ASHENFOLD FARM',d:0}],'bla_sign_farm','A signpost at the end of the farm lane. The board reads ASHENFOLD FARM, to the north, and below it: EGGS. MILK. HONEST DEALING. Somebody has added with a nail: AND SUPPER.',{i:1});
+  C.light(48,32,C.warm);C.light(40,31,C.pale);C.light(60,31,C.warm);
+  // dead hedges along the road, with gaps for the lane and the field tracks
+  for(let x=3;x<=76;x++){if([26,27,47,48,49,70].includes(x))continue;
+    for(const y of [32,38]){if(x>=35&&x<=65&&y===32)continue;if(hs(x,y,33)<.84)C.DB('bl_hedge'+((hs(x,y,35)*3)|0),x,y,{sc:.62+hs(x,y,34)*.22})}}
+  for(let x=10;x<=74;x+=8){if(x>34&&x<66)continue;C.dec('gy_lantern',x,38,{block:true});C.light(x,38,C.pale)}
+  C.milestone(8,33);
+  C.post(5,37,'bl_ash_w',[{n:'THE CHURCH OF THE HOLLOW SAINT',d:-1}],'bla_signW','A signpost by the west gate. The board reads THE CHURCH OF THE HOLLOW SAINT, to the west. Below it somebody has written: THE BELLS ARE UPSIDE DOWN. DO NOT BE ALARMED.',{i:2});
+  C.post(74,37,'bl_ash_e',[{n:"THE WARDENS' TOLL HOUSE",d:1}],'bla_signE','A signpost inside the east gate. The board reads THE WARDENS’ TOLL HOUSE, to the east. Below it: NO TOLL TO RETURN.',{i:3});
+  // the fields: rows of dead corn, scarecrow poles, the stone and the long furrow, an orchard of dead apple trees
+  for(const [x0,y0,x1,y1] of [[4,5,34,28],[4,42,34,64]])for(let y=y0;y<=y1;y++){if(y%3===0)continue;for(let x=x0;x<=x1;x++){if(C.path.has(x+','+y)||hs(x,y,41)>.5)continue;const d=C.D(hs(x,y,45)<.5?'ww_twig2':'bl_grass'+((hs(x,y,46)*4)|0),x,y,{sc:.7+hs(x,y,42)*.7});if(d){d.ox=(hs(x,y,43)-.5)*.5;d.oy=(hs(x,y,44)-.5)*.2}}}
+  C.reserve(8,44,28,58);
+  C.dec('ww_stone',27,51,{block:true,npc:'bla_stone',sc:.8});C.dec('gy_mound',26,52,{block:true,npc:'bla_ringspot',sc:.6});C.light(26,53,C.pale);
+  for(const [x,y] of [[12,8],[20,16],[30,10],[8,22],[16,46],[30,58]])C.dec('ww_totem',x,y,{block:true,npc:'bla_scarepole',sc:.8});
+  for(const [x,y] of [[68,44],[72,48],[66,52],[74,56]])C.dec('ww_stump',x,y,{block:true,sc:.7});
+  for(const [x,y] of [[10,10],[22,12],[28,24],[16,26]])C.dec('hay',x,y,{block:true,sc:1.1});
+  C.dec('kh_ohgard2_3',14,30,{block:true,sc:.8});C.dec('kh_ohgard1_5',32,44,{block:true,sc:.8});
+  for(const [x,y] of [[40,50],[44,54],[50,52],[56,56],[62,50],[46,60],[54,62],[60,60]])C.DB('ww_oakmoss',x,y,{sc:.8});   // the dead orchard
+  C.dress({trees:130,scrub:180,stones:14,bones:8,posts:6,keep:(x,y)=>(x>=34&&x<=66&&y>=17&&y<=34)||(y>=32&&y<=38)||(x>=6&&x<=34&&y>=3&&y<=29)||(x>=6&&x<=34&&y>=41&&y<=65)});
+  // the creatures
+  C.foes([['blscare',12,12],['blscare',24,8],['blscare',30,18],['blscare',8,20],['blscare',22,24],['blscare',14,46],['blscare',24,56],['blscare',32,50],['blscarebig',18,10],
+    ['blhusk',62,42],['blhusk',50,40],['blhusk',72,50],['blghoul',44,58],['blbones',38,36],['blbones',62,36],['blbones',20,34],['blhound',54,46],['blcrow',30,32],['blcrow',60,29],['blcrowflock',56,60]]);
+  for(const [k,x,y] of [['potion6',30,26],['potion6',20,60],['potion6',68,60]])C.items.push({k,x,y,taken:false});
+  C.mapNames.push({t:'Ashenfold Farmhouse',x:46,y:21,k:'place'},{t:'The Barn',x:58,y:22,k:'place'},{t:'The Well',x:39,y:28,k:'place'},{t:'The North Field',x:18,y:12,k:'place'},{t:'The Long Furrow',x:18,y:51,k:'place'},{t:'The Old Stone',x:27,y:50,k:'place'},{t:'The Dead Orchard',x:52,y:56,k:'place'},{t:'To the Toll House',x:73,y:33,k:'place'},{t:'To the Church',x:6,y:33,k:'place'});
+  const lv=C.finish({start:{x:73,y:35,f:3}});
+  // the pale heart-scarecrow is still while it lives: remove it from a save in which the heart was taken
+  if(F.heart||F.heartBurnt)lv.enemies=lv.enemies.filter(e=>e.t!=='blscarebig');
+  return lv}
+/* ---------- the rooms ---------- */
+function blaKitchen(){
+  const f=BLA_HOUSE.front;
+  blRoom({id:BLA.HOUSE,name:"The Sedges' Kitchen",w:15,h:10,amb:.52,rating:85,floor:'wood',wall:'kh_ohwall1_2',
+    back:{to:BLA.ID,x:f[0],y:f[1],f:2},
+    lights:[[3,2],[7,5],[11,2],[3,7],[12,7]],lcol:{'3,2':[1.4,1.0,.6],'7,5':[1.35,.98,.58],'11,2':[1.4,1.0,.6],'3,7':[1.3,.95,.6],'12,7':[.75,1.1,.95]},col:[1.3,.95,.6],
+    enemies:[['blbones',12,8]],
+    build:C=>{
+      const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
+      P('hearth',7,1,{h:1.3});C.raw('crate',7,2,{npc:'bla_hearth',solid:1,deco:false,hidden:true});
+      P('dresser',2,1,{h:1.05});P('clock',11,1,{h:1.1});P('rocker',12,3,{h:.7});P('bookshelf',13,1,{h:1.0});
+      P('longtable',7,5,{h:.7});P('longtable',9,5,{h:.7});P('longtable',5,5,{h:.7});
+      // the family at supper: four places, each behind the table
+      C.raw('gy_ghost1',5,4,{npc:'bla_edda',solid:1,deco:false,sc:1});C.raw('gy_zombie',7,4,{npc:'bla_wilf',solid:1,deco:false,sc:1});C.raw('gy_ghost0',9,4,{npc:'bla_gran',solid:1,deco:false,sc:1});C.raw('gy_skel',11,5,{npc:'bla_amos',solid:1,deco:false,sc:.95});
+      C.raw('gy_hatch2',2,5,{npc:'bla_cellardoor',solid:1,deco:false,sc:1});
+      P('candlerack',3,3,{h:1.0});P('pietable',12,7,{h:.7});P('waterbarrel',1,8,{h:.7});P('cat',4,8,{h:.26});P('veg',13,8,{h:.6});
+      C.raw('gy_web',1,1,{block:false,sc:.5})}})}
+function blaCellar(){
+  blRoom({id:BLA.CELLAR,name:'The Farmhouse Cellar',w:11,h:8,amb:.4,rating:85,floor:'wood',wall:'kh_ohwall1_0',
+    back:{to:BLA.HOUSE,x:3,y:5,f:3},
+    lights:[[3,2],[8,2],[5,5]],lcol:{'3,2':[.75,1.1,.95],'8,2':[1.3,.95,.6],'5,5':[.75,1.1,.95]},col:[1.2,.95,.65],
+    enemies:[['blghoul',8,5]],
+    build:C=>{
+      const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
+      P('coopstack',2,1,{h:.95});P('coopstack',4,1,{h:.95});P('shelving',7,1,{h:1.2});P('shelving',9,1,{h:1.2});P('waterbarrel',1,3,{h:.7});P('veg',9,4,{h:.6});
+      P('cot',8,6,{h:.55});P('coopstack',2,6,{h:.9});
+      C.raw('gy_chest',9,6,{npc:'bla_chest',solid:1,deco:false,sc:.9});C.raw('gy_bones',5,4,{block:false,sc:.6});
+      if(!blF().tillyFree){const kp=KH_KEEPERS.bla_tilly;C.raw(khFaceKey(kp.face),3,5,{npc:'bla_tilly',solid:1,deco:false,sc:kp.sc||1,block:false,walk:true})}}})}
+function blaBarn(){
+  const f=BLA_BARN.front;
+  blRoom({id:BLA.BARN,name:'The Ashenfold Barn',w:13,h:9,amb:.5,rating:85,floor:'wood',wall:'kh_ohwall1_0',
+    back:{to:BLA.ID,x:f[0],y:f[1],f:2},
+    lights:[[3,2],[9,2],[6,5]],lcol:{'3,2':[1.35,.98,.58],'9,2':[1.3,.95,.6],'6,5':[1.35,.98,.58]},col:[1.3,.95,.6],
+    enemies:[['blhusk',10,6]],
+    build:C=>{
+      const P=(n,x,y,o)=>{try{wlinProp(C,n,x,y,o)}catch(e){C.raw('crate',x,y,{})}};
+      for(const [x,y] of [[2,1],[3,1],[10,1],[11,1],[1,6],[11,7]])C.raw('hay',x,y,{block:true,sc:1.1});
+      P('coopstack',5,1,{h:.95});P('waterbarrel',8,1,{h:.7});P('cothearth',6,1,{h:.95});P('bed',2,5,{h:.7});P('dresser',11,4,{h:1.0});
+      C.npc('bla_hob',6,4)}})}
+KH_LAZY[BLA.HOUSE]=()=>{if(!LEVELS[BLA.HOUSE]){if(!LEVELS[BLA.ID])KH_LAZY[BLA.ID]();blaKitchen()}return LEVELS[BLA.HOUSE]};
+KH_LAZY[BLA.CELLAR]=()=>{if(!LEVELS[BLA.CELLAR]){if(!LEVELS[BLA.ID])KH_LAZY[BLA.ID]();blaCellar()}return LEVELS[BLA.CELLAR]};
+KH_LAZY[BLA.BARN]=()=>{if(!LEVELS[BLA.BARN]){if(!LEVELS[BLA.ID])KH_LAZY[BLA.ID]();blaBarn();if(blF().tillyFree&&!LEVELS[BLA.BARN].decor.some(x=>x.npc==='bla_tilly'))blaTillyIn(LEVELS[BLA.BARN].decor)}return LEVELS[BLA.BARN]};
+/* the quest rings */
+if(typeof QRF!=='undefined'){const N=(l,...ids)=>({lvl:l,npc:ids}),E=(l,rx)=>({lvl:l,en:rx}),T=QRF.T;
+  T.blq4={give:[N(9623,'bla_hob')],act:()=>blF().tillyFound?[N(9622,'bla_tilly')]:[N(9622,'bla_tilly'),N(9621,'bla_cellardoor')],ready:[N(9623,'bla_hob')]};
+  T.blq5={give:[N(9623,'bla_hob')],act:()=>blF().heart?[N(9621,'bla_hearth')]:[E(9620,/^blscarebig$/)],ready:[N(9623,'bla_hob')]};
+  T.blq6={give:[N(9621,'bla_edda')],act:()=>blF().ring?[N(9621,'bla_wilf')]:[N(9620,'bla_ringspot')],ready:[N(9621,'bla_edda')]}}
+blRegister(2,blaBuild,{fromE:{x:73,y:35,f:3},fromW:{x:4,y:35,f:1},exitY:35,rooms:[9621,9622,9623],names:{9621:"The Sedges' Kitchen",9622:'The Farmhouse Cellar',9623:'The Ashenfold Barn'},rating:{9621:85,9622:85,9623:85}});
+
+/* ---- src/desert/blight_maps.js ---- */
+/* ==========================================================================
+   THE BLIGHTED ROAD: the parchment area maps (every id 9610 to 9709) in the style of maps_*.js (compare gy_maps.js): drawn from the real level rows, fmap and decor, with the named places numbered and listed.
+   A builder gets a map for free: put {t,x,y,k:'place'} rows into the level's mapNames (blKit: C.mapNames.push(...)).
+   ========================================================================== */
+const BLMP={ground:{'0':'#b3b48c','1':'#b49c76','2':'#c8c2b0','3':'#b4b0a6','4':'#d6d0bc','5':'#8f8468','6':'#7c6e58'},ink:'#241812'};
+function blMapDraw(c,x,L,api){
+  const R=L.rows,W=R[0].length,H=R.length,F=api.fit(W,H),s=F.s,X=F.X,Y=F.Y,PX=F.ox,PY=F.oy,PW=W*s,PH=H*s,INK=MPL.INK,out=!!L.outdoor;
+  const wall=(cx,cy)=>!(R[cy]&&R[cy][cx]==='.'),col=(cx,cy)=>{const g=L.chars&&L.chars[R[cy][cx]],q=(typeof GY!=='undefined'&&GY.col&&GY.col[g])||null;return q||(out?[96,100,92]:[120,100,80])};
+  x.save();x.shadowColor='rgba(40,30,10,.5)';x.shadowBlur=14;x.shadowOffsetX=3;x.shadowOffsetY=5;x.fillStyle='#2a2418';x.fillRect(PX-1.6,PY-1.6,PW+3.2,PH+3.2);x.restore();
+  x.save();x.beginPath();x.rect(PX,PY,PW,PH);x.clip();
+  for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){
+    if(wall(cx,cy)){const k=col(cx,cy),v=hash2(cx,cy,5)*12-6;x.fillStyle=`rgb(${Math.max(0,Math.min(255,k[0]*.8+v))|0},${Math.max(0,Math.min(255,k[1]*.8+v))|0},${Math.max(0,Math.min(255,k[2]*.8+v))|0})`}
+    else{const f=L.fmap&&L.fmap[cy]?L.fmap[cy][cx]:'x';x.fillStyle=out?(BLMP.ground[f]||'#cfc8b6'):'#c9b896'}
+    x.fillRect(X(cx)-.1,Y(cy)-.1,s+.2,s+.2)}
+  x.strokeStyle=BLMP.ink;x.lineWidth=.6;x.lineCap='round';x.beginPath();
+  for(let cy=0;cy<H;cy++)for(let cx=0;cx<W;cx++){if(wall(cx,cy))continue;const X0=X(cx),Y0=Y(cy);
+    if(wall(cx,cy-1)){x.moveTo(X0,Y0);x.lineTo(X0+s,Y0)}if(wall(cx,cy+1)){x.moveTo(X0,Y0+s);x.lineTo(X0+s,Y0+s)}if(wall(cx-1,cy)){x.moveTo(X0,Y0);x.lineTo(X0,Y0+s)}if(wall(cx+1,cy)){x.moveTo(X0+s,Y0);x.lineTo(X0+s,Y0+s)}}
+  x.stroke();
+  const D=((typeof G!=='undefined'&&blIs(LEVEL)&&G.decor&&G.decor.length)?G.decor:L.decor).slice().sort((a,b)=>a.y-b.y);
+  const BIG=/^(bl_(chapel|hut|mausoleum|angel|crypt|obelisk|column|ccross|tomb|urn)|gy_(candles|chest|mound|hatch2)|ww_(well|stone|totem|crowtree|stump))$/,TREE=/^(gy_dead|ww_(oakmoss|oakface|willow|thorn|pine2)|ltree)/;
+  for(const d of D){if(d.found||d.hidden)continue;const k=d.k||'';
+    if(BIG.test(k)&&IMG[k]){const im=IMG[k],big=/chapel|mausoleum|hut|crypt|well/.test(k),hh=Math.max(2.4,Math.min(big?12:7,(NPC_H[k]||1)*s*(d.sc||1)*(big?1.4:1.2))),ww=hh*im.width/im.height;x.drawImage(im,X(d.x+.5)-ww/2,Y(d.y+1)-hh+s*.3,ww,hh)}
+    else if(TREE.test(k)){x.fillStyle='rgba(60,70,52,.8)';x.beginPath();x.arc(X(d.x+.5),Y(d.y+.5),Math.max(.9,s*.42),0,6.3);x.fill()}
+    else if(/^bl_hedge/.test(k)){x.fillStyle='rgba(88,82,60,.9)';x.beginPath();x.arc(X(d.x+.5),Y(d.y+.6),Math.max(.7,s*.34),0,6.3);x.fill()}
+    else if(/^(bl_(stone1|stone2|lean|slab|wcross)|bl_wg\d|bl_mile\d|gy_rpost)/.test(k)){x.fillStyle='#7a766c';x.lineWidth=.25;x.fillRect(X(d.x+.25),Y(d.y+.15),s*.5,s*.7)}
+    else if(/^gy_lantern$/.test(k)){x.fillStyle='#e8c050';x.beginPath();x.arc(X(d.x+.5),Y(d.y+.5),Math.max(.6,s*.36),0,6.3);x.fill()}}
+  // roofs of the houses: the painted pieces of the sky list, as small dark gables
+  for(const sk of (L.sky||[])){if(!sk||sk.w===undefined||sk.z===0||sk.big)continue;x.fillStyle='rgba(70,52,44,.75)';x.fillRect(X(sk.x-sk.w/2),Y(sk.y-1.4),sk.w*s,2.8*s)}
+  x.restore();
+  const names=L.mapNames||[];
+  names.forEach((n,i)=>{const px=X(n.x+.5),py=Y(n.y+.5);x.save();x.fillStyle='rgba(250,240,200,.92)';x.strokeStyle=INK;x.lineWidth=.6;x.beginPath();x.arc(px,py,3.6,0,6.3);x.fill();x.stroke();x.restore();api.text(x,String(i+1),px,py+.2,5.4,INK)});
+  api.title(x,LEVEL_NAMES[LEVEL]||L.name||'The Blighted Road','',12,5);
+  api.compass(x,50,262,15);
+  if(names.length){const a=392,b=40,w=86,lh=10.4,h=14+names.length*lh;api.panel(x,a,b,w,h);api.text(x,'Places',a+w/2,b+8,6.6,'#6a1a0e');
+    names.forEach((n,i)=>{api.text(x,(i+1)+'  '+n.t.replace(/^The /,''),a+5,b+17+i*lh,5.2,INK,'left')})}
+  {const p=blPlaceOf(LEVEL);if(p){const a=6,b=46,w=84,h=30;api.panel(x,a,b,w,h);api.text(x,'The Blighted Road',a+w/2,b+8,5.6,'#6a1a0e');api.text(x,'Place '+p.n+' of 10',a+w/2,b+17,5.2,INK);api.text(x,'Sale: '+p.sale+(p.sale===1?' stage':' stages'),a+w/2,b+25,5.2,INK)}}}
+mplInstall({name:'blight',levels:BL_IDS,draw:blMapDraw,tint:[2,6,0],foot:'You are the yellow arrow. The numbers on the map are listed on the right.'});
+/* the world map: one place west of the shut gate of the Western Kingdoms, standing for the whole road (the road's own list is in the Go to area menu) */
+function blWorldAdd(){try{if(typeof WORLD_LOCS==='undefined'||WORLD_LOCS.find(l=>l.k==='blightroad'))return;const g=WORLD_LOCS.find(l=>l.k==='westgate');if(!g)return;WORLD_LOCS.push({k:'blightroad',n:'The Blighted Lands',lv:BL_ROAD.map(p=>p.id),x:g.x-92,y:g.y+8,ic:'graves'})}catch(e){console.error('bl world',e)}}
+blWorldAdd();
+if(typeof wmwBuild==='function'){const _wb=wmwBuild;wmwBuild=function(){const r=_wb.apply(this,arguments);blWorldAdd();return r}}
 
 /*@@DESERT:END@@*/
 /* ---------- boot ---------- */
