@@ -12,7 +12,7 @@ Heal spells restore a **fixed number of health points**, like the healing potion
 |---|---|---|---|---|---|
 | Heal | single, 1 | 10 | 0.4 | 3 | 10 / 26 / 41 / 46 / 63 |
 | Greater Heal | single, 60 | 270 | 0.5 | 26 | - / - / 360 / 366 / 465 |
-| Restoration | single, spell level 50 | 560 | 0.6 | 52 | - / - / 715 / 722 / 912 |
+| Restoration | single, spell level 62 | 560 | 0.6 | 52 | - / - / 715 / 722 / 912 |
 | Purify | group, spell level 10 | 8 | 0.3 | 9 | - / 20 / 31 / 35 / 48 |
 | Mend | group, 30 | 30 | 0.4 | 19 | - / 50 / 65 / 70 / 93 |
 | Divine Intervention | group, 70 | 100 | 0.4 | 45 | - / - / - / 154 / 198 |
@@ -39,9 +39,9 @@ Other classes (Paladin, Monk, Goat, scrolls) keep the old formula. Potions, inn 
 
 Targets met: at level 1 Heal restores 40 percent of a typical hero (wanted 30 to 60); at level 70 Heal restores 5.7 percent (3 to 6), the top single heal Greater Heal 45 percent (35 to 50). The priest has three single heals (Heal, Greater Heal, Restoration) and three group heals; Purify, Mend and Divine Intervention fill the middle as group heals (4 percent, 9 percent and 19 percent per ally at level 70).
 
-## Restoration (new single heal, spell level 50, bought in the Spells tab like the other spells)
+## Restoration (new single heal, spell level 62, bought in the Spells tab like the other spells)
 
-Learned the same way as Purify and the other priest spells: from level 50, for 3000 gold, in the priest's Spells tab (spells are bought there, not in a shop). Mana 52, fixed. It is the strongest single heal: about twice Greater Heal at every level (1.96 to 2.07 times), with the same kind of level and Faith bonus, so the order never inverts. Greater Heal is a power at level 60, so Restoration (level 50) unlocks before it, but it is stronger than both Heal and Greater Heal.
+Learned the same way as Purify and the other priest spells: from level 62, for 3000 gold, in the priest's Spells tab (spells are bought there, not in a shop). Mana 52, fixed. It is the strongest single heal: about twice Greater Heal at every level (1.96 to 2.07 times), with the same kind of level and Faith bonus, so the order never inverts. Greater Heal is a power at level 60, so Restoration (level 50) unlocks before it, but it is stronger than both Heal and Greater Heal.
 
 | level | amount | mana | hp per mana | % of typical max | Greater Heal amount | ratio |
 |---|---|---|---|---|---|---|

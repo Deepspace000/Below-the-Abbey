@@ -93,7 +93,7 @@
 7,
 9
 ],
-"rounds": 2.752676068146761,
+"rounds": 2.838361911221678,
 "foeHp": 2176,
 "party": "Warrior/Thief/Mage/Priest",
 "foes": 1
@@ -107,7 +107,7 @@
 7,
 9
 ],
-"rounds": 9.61192196622053,
+"rounds": 10.261712101291288,
 "foeHp": 2176,
 "party": "Warrior/Thief/Mage/Priest",
 "foes": 3
@@ -121,7 +121,7 @@
 7,
 9
 ],
-"rounds": 22.837247070933174,
+"rounds": 24.598909707459917,
 "foeHp": 2176,
 "party": "Warrior/Thief/Mage/Priest",
 "foes": 6
@@ -135,7 +135,7 @@
 7,
 9
 ],
-"rounds": 2.363175815885134,
+"rounds": 2.413498096823688,
 "foeHp": 3167,
 "party": "Warrior/Thief/Mage/Priest",
 "foes": 1
@@ -149,7 +149,7 @@
 7,
 9
 ],
-"rounds": 7.194907145471041,
+"rounds": 7.437876004253289,
 "foeHp": 3167,
 "party": "Warrior/Thief/Mage/Priest",
 "foes": 3
@@ -163,7 +163,7 @@
 7,
 9
 ],
-"rounds": 21.564935881888417,
+"rounds": 22.505024098160362,
 "foeHp": 3167,
 "party": "Warrior/Thief/Mage/Priest",
 "foes": 6
@@ -177,7 +177,7 @@
 7,
 9
 ],
-"rounds": 1.903176337111835,
+"rounds": 1.9306222664939963,
 "foeHp": 3758,
 "party": "Warrior/Thief/Mage/Priest",
 "foes": 1
@@ -191,7 +191,7 @@
 7,
 9
 ],
-"rounds": 5.7327219586578355,
+"rounds": 5.844480322869649,
 "foeHp": 3758,
 "party": "Warrior/Thief/Mage/Priest",
 "foes": 3
@@ -205,7 +205,7 @@
 7,
 9
 ],
-"rounds": 18.890191554521202,
+"rounds": 19.71762752576247,
 "foeHp": 3758,
 "party": "Warrior/Thief/Mage/Priest",
 "foes": 6
@@ -219,7 +219,7 @@
 7,
 9
 ],
-"rounds": 1.7121850985604363,
+"rounds": 1.734052049638902,
 "foeHp": 3842,
 "party": "Warrior/Thief/Mage/Priest",
 "foes": 1
@@ -233,7 +233,7 @@
 7,
 9
 ],
-"rounds": 4.718317301329807,
+"rounds": 4.782338202639875,
 "foeHp": 3842,
 "party": "Warrior/Thief/Mage/Priest",
 "foes": 3
@@ -247,7 +247,7 @@
 7,
 9
 ],
-"rounds": 15.54029327404811,
+"rounds": 16.179191245143656,
 "foeHp": 3842,
 "party": "Warrior/Thief/Mage/Priest",
 "foes": 6
@@ -261,7 +261,7 @@
 7,
 9
 ],
-"rounds": 0.7982763227523786,
+"rounds": 0.8029904193177461,
 "foeHp": 3863,
 "party": "Warrior/Thief/Mage/Priest",
 "foes": 1
@@ -275,7 +275,7 @@
 7,
 9
 ],
-"rounds": 2.155220320224724,
+"rounds": 2.1666674747415193,
 "foeHp": 3863,
 "party": "Warrior/Thief/Mage/Priest",
 "foes": 3
@@ -289,7 +289,7 @@
 7,
 9
 ],
-"rounds": 4.135781481013668,
+"rounds": 4.16284726138765,
 "foeHp": 3863,
 "party": "Warrior/Thief/Mage/Priest",
 "foes": 6
@@ -303,7 +303,7 @@
 7,
 9
 ],
-"rounds": 0.5928635484421266,
+"rounds": 0.5954653840636489,
 "foeHp": 3870,
 "party": "Warrior/Thief/Mage/Priest",
 "foes": 1
@@ -317,7 +317,7 @@
 7,
 9
 ],
-"rounds": 1.6023428566068967,
+"rounds": 1.6086752979148446,
 "foeHp": 3870,
 "party": "Warrior/Thief/Mage/Priest",
 "foes": 3
@@ -331,7 +331,7 @@
 7,
 9
 ],
-"rounds": 3.0533988510592236,
+"rounds": 3.064894045963543,
 "foeHp": 3870,
 "party": "Warrior/Thief/Mage/Priest",
 "foes": 6
@@ -345,7 +345,7 @@
 8,
 2
 ],
-"rounds": 9.15472557528939,
+"rounds": 9.840070530073099,
 "foeHp": 859,
 "party": "Barbarian/Archer/Sorcerer/Paladin",
 "foes": 1
@@ -359,7 +359,7 @@
 8,
 2
 ],
-"rounds": 26.822840676867155,
+"rounds": 29.42988758855285,
 "foeHp": 859,
 "party": "Barbarian/Archer/Sorcerer/Paladin",
 "foes": 3
@@ -373,7 +373,7 @@
 8,
 2
 ],
-"rounds": 55.181561534267416,
+"rounds": 60.780369929522365,
 "foeHp": 859,
 "party": "Barbarian/Archer/Sorcerer/Paladin",
 "foes": 6
@@ -387,7 +387,7 @@
 8,
 2
 ],
-"rounds": 3.937480790049377,
+"rounds": 3.963671180504378,
 "foeHp": 1624,
 "party": "Barbarian/Archer/Sorcerer/Paladin",
 "foes": 1
@@ -401,7 +401,7 @@
 8,
 2
 ],
-"rounds": 20.18113155855566,
+"rounds": 21.619289454193208,
 "foeHp": 1624,
 "party": "Barbarian/Archer/Sorcerer/Paladin",
 "foes": 3
@@ -415,7 +415,7 @@
 8,
 2
 ],
-"rounds": 45.64127064609788,
+"rounds": 49.334473020906245,
 "foeHp": 1624,
 "party": "Barbarian/Archer/Sorcerer/Paladin",
 "foes": 6
@@ -443,7 +443,7 @@
 8,
 2
 ],
-"rounds": 5.891489810033194,
+"rounds": 5.947491024743174,
 "foeHp": 2176,
 "party": "Barbarian/Archer/Sorcerer/Paladin",
 "foes": 3
@@ -457,7 +457,7 @@
 8,
 2
 ],
-"rounds": 15.07584849929158,
+"rounds": 15.750363457776402,
 "foeHp": 2176,
 "party": "Barbarian/Archer/Sorcerer/Paladin",
 "foes": 6
@@ -499,7 +499,7 @@
 8,
 2
 ],
-"rounds": 14.011658661866578,
+"rounds": 14.50367251923636,
 "foeHp": 3167,
 "party": "Barbarian/Archer/Sorcerer/Paladin",
 "foes": 6
@@ -541,7 +541,7 @@
 8,
 2
 ],
-"rounds": 9.605745172902157,
+"rounds": 9.941337412011947,
 "foeHp": 3758,
 "party": "Barbarian/Archer/Sorcerer/Paladin",
 "foes": 6
@@ -583,7 +583,7 @@
 8,
 2
 ],
-"rounds": 5.091852003222713,
+"rounds": 5.095757963134811,
 "foeHp": 3842,
 "party": "Barbarian/Archer/Sorcerer/Paladin",
 "foes": 6
@@ -681,7 +681,7 @@
 10,
 11
 ],
-"rounds": 8.153922116321956,
+"rounds": 8.451411709362976,
 "foeHp": 859,
 "party": "Ranger/Assassin/Monk/Goat",
 "foes": 1
@@ -695,7 +695,7 @@
 10,
 11
 ],
-"rounds": 29.21046981372953,
+"rounds": 30.72336461933922,
 "foeHp": 859,
 "party": "Ranger/Assassin/Monk/Goat",
 "foes": 3
@@ -709,7 +709,7 @@
 10,
 11
 ],
-"rounds": 60.79529135984097,
+"rounds": 64.13129398430358,
 "foeHp": 859,
 "party": "Ranger/Assassin/Monk/Goat",
 "foes": 6
@@ -723,7 +723,7 @@
 10,
 11
 ],
-"rounds": 4.487283101201782,
+"rounds": 4.491095980835189,
 "foeHp": 1624,
 "party": "Ranger/Assassin/Monk/Goat",
 "foes": 1
@@ -737,7 +737,7 @@
 10,
 11
 ],
-"rounds": 21.79249405699221,
+"rounds": 22.62445716559866,
 "foeHp": 1624,
 "party": "Ranger/Assassin/Monk/Goat",
 "foes": 3
@@ -751,7 +751,7 @@
 10,
 11
 ],
-"rounds": 48.231839417664894,
+"rounds": 50.35552979598977,
 "foeHp": 1624,
 "party": "Ranger/Assassin/Monk/Goat",
 "foes": 6
@@ -793,7 +793,7 @@
 10,
 11
 ],
-"rounds": 13.414385561713283,
+"rounds": 13.609365226880904,
 "foeHp": 2176,
 "party": "Ranger/Assassin/Monk/Goat",
 "foes": 6
@@ -835,7 +835,7 @@
 10,
 11
 ],
-"rounds": 11.516262905582241,
+"rounds": 11.638736509613336,
 "foeHp": 3167,
 "party": "Ranger/Assassin/Monk/Goat",
 "foes": 6
@@ -877,7 +877,7 @@
 10,
 11
 ],
-"rounds": 7.95649762852877,
+"rounds": 7.982577213575141,
 "foeHp": 3758,
 "party": "Ranger/Assassin/Monk/Goat",
 "foes": 6
