@@ -34,7 +34,7 @@ function hgtClean(s){return String(s).replace(/[—–]/g,', ').replace(/\s+/g,'
 function hgtTitle(txt){
   let s=hgtClean(txt).replace(/^(A |An )?(child's|neat|note|scrap|torn|Carved|Chalked|Scratched|Scribbled|Written|Etched|Painted|Pinned)[^:]{0,40}:\s*/i,'');
   const m=/^(.+?[.!?])(\s|$)/.exec(s);let t=(m?m[1]:s).replace(/[.!?]+$/,'');
-  if(t.length>36){const c=t.search(/[,;]| and | but | then | when | until | because | so | though | while /);if(c>=10&&c<=36)t=t.slice(0,c);else{const w=t.split(' ');let o='';for(const x of w){if((o+' '+x).trim().length>32)break;o=(o+' '+x).trim()}t=(o||t.slice(0,30)).replace(/\s+(a|an|the|of|to|and|or|in|on|at|is|was|for|my|i)$/i,'')+'...'}}
+  if(t.length>36){const c=t.search(/[,;]| and | but | then | when | until | because | so | though | while /);if(c>=14&&c<=36)t=t.slice(0,c);else{const w=t.split(' ');let o='';for(const x of w){if((o+' '+x).trim().length>26||o.split(' ').length>=5)break;o=(o+' '+x).trim()}t=(o||t.slice(0,24)).replace(/(\s+(a|an|the|of|to|and|or|in|on|at|is|was|for|my|i|me|us|not|as|than|that|with|from|by|has|had|are|be|it|its|this|your|you|we|our))+$/i,'')}}
   return t||'Note';
 }
 function hgtCase(t){return t.split('|').map(u=>/^[A-Z0-9 ,'!?.-]{6,}$/.test(u)?u.charAt(0)+u.slice(1).toLowerCase():u).join('|')}
@@ -110,7 +110,7 @@ function hgtOne(d){
   const cv=hgtPaint(kind,label,hm?d.k:null);if(!cv)return false; // picture not loaded yet: try again later
   const key='hgt_'+(hm?d.k:kind)+'_'+hgtHash(label).toString(36);
   IMG[key]=cv;NPC_H[key]=NPC_H[hm?d.k:'art_hs_'+kind];
-  d.hgtBase=d.k;d.hgt=label;if(d.pic&&d.wd)d.lk=key;else d.k=key; // a wall picture keeps its id (maps and quests read it) and shows the lettered copy through d.lk
+  d.hgtBase=d.k;d.hgt=label;if(!d.label&&(d.npc==='hgd_pa_note'||d.npc==='hgd_note'))d.label=label;if(d.pic&&d.wd)d.lk=key;else d.k=key; // a wall picture keeps its id (maps and quests read it) and shows the lettered copy through d.lk
   HGTX.n++;return true;
 }
 function hgtApply(L){if(!L||!L.decor)return 0;let n=0;for(const d of L.decor)if(hgtOne(d))n++;return n}
