@@ -1,0 +1,2 @@
+()=>{const L=LEVELS[477];const m={};for(const d of L.decor){if(/hgwm_|seagrass|hgdf_vine|^ltree|^hgw/.test(d.k))continue;let h;try{h=hgweHt(d)}catch(e){continue}const k=d.k;const o=m[k]=m[k]||{n:0,min:9,max:0,blk:0};o.n++;o.min=Math.min(o.min,h);o.max=Math.max(o.max,h);if(d.block)o.blk++}
+return Object.entries(m).map(([k,o])=>k.slice(0,26)+' n'+o.n+' '+o.min.toFixed(2)+'-'+o.max.toFixed(2)+(o.blk?' B'+o.blk:'')).sort().join('\n')}

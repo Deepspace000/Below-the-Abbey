@@ -1,0 +1,1 @@
+(l)=>{G.heroes.forEach(h=>{h.hp=h.max=9999});(KH_LAZY[l]&&KH_LAZY[l]());const s=LEVELS[l].start;goToLevel(l,{x:s.x,y:s.y,f:0});return {LEVEL,state:G.state,ver:typeof VERSION!=='undefined'?VERSION:null,hgw4:!!(LEVELS[l]&&LEVELS[l]._hgw4),info:LEVELS[l]&&LEVELS[l]._hgw4}}

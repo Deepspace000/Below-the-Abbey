@@ -1,0 +1,1 @@
+()=>{const L=LEVELS[477],op=(x,y)=>L.rows[y]&&L.rows[y][x]==='.';return L._hgdwe.vignettes.map(v=>{for(let dist=3;dist>=1;dist--)for(let f=0;f<4;f++){const d=DIRS[f];let ok=true;for(let k=1;k<=dist;k++)if(!op(v.x-d[0]*k,v.y-d[1]*k))ok=false;if(ok)return [v.name.replace(/[ ']/g,'_'),v.x-d[0]*dist,v.y-d[1]*dist,f]}return [v.name.replace(/[ ']/g,'_'),v.x,v.y,0]})}

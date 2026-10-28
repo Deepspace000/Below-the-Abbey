@@ -3,7 +3,7 @@
 const L=LEVELS[475],M=L._hgdm,W=M.W,H=M.H,bio=M.bio,rows=L.rows,ZB=4,out={};
 const inZ=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&bio[y*W+x]<ZB;
 const ch=(x,y)=>rows[y]&&rows[y][x];
-const isWallC=c=>!!c&&c!=='.'&&c.charCodeAt(0)>=0x2e0&&c.charCodeAt(0)<0x2e8;
+const isWallC=c=>!!c&&c!=='.'&&((c.charCodeAt(0)>=0x2e0&&c.charCodeAt(0)<0x2e8)||(c.charCodeAt(0)>=0x380&&c.charCodeAt(0)<0x390));
 const pass=(x,y)=>{const c=ch(x,y);return !!c&&c!=='#'&&!isWallC(c)};
 const DV=[[0,-1],[1,0],[0,1],[-1,0]];
 const med=a=>{a=a.slice().sort((p,q)=>p-q);return a.length?a[a.length>>1]:0};
@@ -100,6 +100,17 @@ out.kinds={};{const kc={};for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(inZ(x,y)&&
  let rows3=0;const pk={};for(const d of D){if(d.pic||d.npc||d.loot)continue;(pk[d.k]=pk[d.k]||[]).push(d)}
  for(const k in pk){const set=new Set(pk[k].map(d=>d.x+','+d.y));for(const d of pk[k]){for(const [a,b] of [[1,0],[0,1]]){let n=1;for(let i=1;i<=3;i++)if(set.has((d.x+a*i)+','+(d.y+b*i)))n++;else break;if(n>=3)rows3++}}}
  out.rows3=rows3;
+ // round 4: enemies near arrival squares, scale outliers after hgd_polish_c, post-hook state
+ {const spots=L._hgdm.prec.filter(p=>p.b<ZB).map(p=>[p.lx||p.x,p.ly||p.y]);for(const d of L.decor)if(d.k==='teleporter'&&inZ(d.x,d.y))spots.push([d.x,d.y]);
+  out.enemiesNearArrival=L.enemies.filter(e=>inZ(e.x,e.y)&&!/^(hgdb_|hgmini|hgdwarden)/.test(e.t)&&spots.some(s=>Math.hypot(s[0]-e.x,s[1]-e.y)<=3.2)).map(e=>[e.t,e.x,e.y]);
+  const bad=[];for(const d of D){if(d.pic||!NPC_H[d.k])continue;const h=NPC_H[d.k]*(d.sc||1);
+   if(/^(hgtb_plant_belltree|hgt_fairytree)$/.test(d.k)&&h>2.71)bad.push([d.k,d.x,d.y,+h.toFixed(2)]);
+   if(/^(hg_npc\d|hg_wizard|pickpocket)$/.test(d.k)&&h>.99)bad.push([d.k,d.x,d.y,+h.toFixed(2)])}
+  out.scaleBad=bad;out.noHeight2=D.filter(d=>!d.pic&&/^(art_hgt_lamppost|art_hgtb_lamp_tall|art_hgtb_deco_shellstatue|art_hgt_gardenlantern)$/.test(d.k)&&!(NPC_H[d.k]>0)).length;
+  out.post=[L._hgpa.post,L._hgpa.clamped,L._hgpa.dimmed,L._hgpa.wallVariants];out.r4stat=[L._hgpa.stat.hubs,L._hgpa.stat.hubLights,L._hgpa.stat.shore,L._hgpa.stat.waxDecals,L._hgpa.stat.waxSwapped,L._hgpa.stat.enemiesMoved];
+  let wxn=0;for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=rows[y][x];if(c&&c.charCodeAt(0)>=0x380&&c.charCodeAt(0)<0x390)wxn++}out.waxVariantCells=wxn;
+  const sg2=D.filter(d=>d.pic&&/^art_hgdf_wsym2$/.test(d.k)&&bio[d.y*W+d.x]===2).length;out.waxWsym2=sg2;
+  const cnt={};for(const d of D)if(d.pic&&bio[d.y*W+d.x]===2)cnt[d.k]=(cnt[d.k]||0)+1;out.waxPics=cnt}
  out.lightsEngine=null;
 }
 return out})()

@@ -1,15 +1,17 @@
-import json,time,pathlib,os,sys
-Q=pathlib.Path(__file__).resolve().parent/'north_q'
-def run(cmd,timeout=300):
-    n=str(time.time_ns());(Q/(n+'.tmp')).write_text(json.dumps(cmd),encoding='utf-8');os.replace(Q/(n+'.tmp'),Q/(n+'.json'))
-    t=time.time()
-    while time.time()-t<timeout:
-        o=Q/(n+'.out')
-        if o.exists():
-            time.sleep(.1);j=json.loads(o.read_text(encoding='utf-8'));o.unlink();return j
+import sys,json,os,time,glob
+Q=os.path.join(os.path.dirname(os.path.abspath(__file__)),'north_q')
+def call(c,timeout=300):
+    n=str(int(time.time()*1000)); open(os.path.join(Q,n+'.tmp'),'w').write(json.dumps(c)); os.rename(os.path.join(Q,n+'.tmp'),os.path.join(Q,n+'.json'))
+    o=os.path.join(Q,n+'.out'); t=time.time()
+    while not os.path.exists(o):
         time.sleep(.3)
-    raise TimeoutError
-def ev(js,arg=None): return run({'op':'eval','js':js,'arg':arg})
-def shot(x,y,f=-1,path=None,wait=800): return run({'op':'shot','tx':x,'ty':y,'f':f,'path':path,'wait':wait})['r']
+        if time.time()-t>timeout: return 'TIMEOUT'
+    time.sleep(.1); r=json.load(open(o)); os.remove(o); return r
+def wait_ready():
+    while not os.path.exists(os.path.join(Q,'ready')): time.sleep(1)
 if __name__=='__main__':
-    if sys.argv[1]=='ready': print((Q/'ready').exists())
+    wait_ready()
+    if sys.argv[1]=='eval': print(json.dumps(call({'op':'eval','js':open(sys.argv[2]).read()})))
+    elif sys.argv[1]=='shot':
+        for s in sys.argv[3:]:
+            v=[int(a) for a in s.split(',')]; r=call({'op':'shot','path':sys.argv[2]+'_%d_%d.png'%(v[0],v[1]),'tx':v[0],'ty':v[1],'f':v[2] if len(v)>2 else -1}); print(v,r['r'] if 'r' in r else r)

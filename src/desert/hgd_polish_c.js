@@ -328,6 +328,8 @@ HGDPC.lights=[];
 /* ---------- one table of heights (squares): [pattern, low, high], applied to every prop of the zone that is not a person ---------- */
 const HGDPC_SCALE=[[/^hg_lamp$/,1.2,1.4],[/^hgt_shellflower$/,1.3,1.6],[/^hgt_bulbflower$/,1.2,1.5],[/^hgtb_plant_spiralfern$/,1.0,1.3],[/^hgtb_deco_shellstatue$/,1.35,1.7],[/^art_hgxstat\d$/,1.3,1.6],[/^hgtb_deco_pearlplinth$/,.5,.8],[/^hgtb_deco_banner$/,1.0,1.25],
  [/^hgt_lamppost$/,1.2,1.5],[/^art_hgdf_vine\d$/,1.0,1.25],[/^hgtb_deco_fountain$/,1.2,1.5],[/^hgt_fountain$/,1.1,1.4],[/^(wm_bookshelf|hgtb_furn_bookshelf)$/,1.3,1.6],[/^hg_chestwax$/,.35,.5],[/^hgtb_table$/,.4,.5],[/^hgtb_bench$/,.4,.55],[/^hgtb_chair$/,.5,.65],[/^(wm_noticeboard|noticeboard)$/,.8,.9],[/^hgtb_stall_/,1.1,1.4],[/^wm_statue$/,1.4,1.7],[/^(hgt_fairytree|hgtb_plant_belltree)$/,2.3,3.6]];
+/* round 4: the per-kind scale table (heights next to a person of about 1.0). Jars, wax barrels and sacks were person-sized, huts were hardly taller than a person, the cream and pink cloud bushes and the lantern cluster at Nacre Landing were giants */
+HGDPC_SCALE.push([/^hg_jar$/,.45,.65],[/^hg_waxbarrel$/,.5,.65],[/^hg_lectern$/,.7,.85],[/^sacks$/,.3,.42],[/^sack2$/,.32,.45],[/^hgdfc_(cream|pink|lilac)\d$/,.55,.8],[/^hgtb_deco_lanterns$/,.55,.8],[/^icn_hgdi_/,1.5,1.8],[/^wm_bell$/,.7,.85],[/^hgt_reeds$/,.6,.9]);
 function hgdpcScalePass(L,zoneOf){let fixed=0;const rep={};
   for(const d of L.decor){if(d.npc&&!/hgdpc_text/.test(d.npc)||!zoneOf(d)||!NPC_H[d.k])continue;
     for(const [re,lo,hi] of HGDPC_SCALE){if(!re.test(d.k))continue;const base=NPC_H[d.k],h=base*(d.sc||1);let want=h;
@@ -469,21 +471,35 @@ function hgdpc2Build(L){
     if(SW.includes(d.k)){const alt=SW.filter(k=>k!==d.k).map(k=>[k,same(k)]).sort((a,b)=>a[1]-b[1])[0];const w=!(/^(hgt_fern|hgt_mushrooms|hgt_pearlbush|hgtb_plantbed)$/.test(alt[0])&&false);d.k=alt[0];delete d.sc;if(d.block){d.block=false;d.walk=true}cl++}
     else{unreg(d);L.decor.splice(L.decor.indexOf(d),1);cl++}}
   st.clustersFixed=cl;
+  /* I1. round 4: nobody is hidden. Within one square of a giver, shopkeeper or priest nothing of any size stands, and nothing of a sack's or crate's size stands in the line of sight (up to two squares along the open row or column). Props move to the nearest cell that is out of every line. */
+  {const gv=L.decor.filter(d=>d.npc&&/^hgd_(q\d+|s2_[a-z]+\d|shop\d|church\d)$/.test(d.npc)&&zoneOf(d)),nts=L.decor.filter(d=>d.npc&&/^(hgd_note|hgd_pa_note|hgdb_note)$/.test(d.npc)&&zoneOf(d)),people=gv.concat(nts);
+   const clr=(p,x,y)=>{const dx=Math.sign(x-p.x),dy=Math.sign(y-p.y),n=Math.max(Math.abs(x-p.x),Math.abs(y-p.y));for(let i=1;i<n;i++)if(!open(p.x+dx*i,p.y+dy*i))return false;return true};
+   const lineD=(x,y,arr)=>{let m=9;for(const p of arr){if((x===p.x||y===p.y)&&(x!==p.x||y!==p.y)){const n=Math.abs(x-p.x)+Math.abs(y-p.y);if(n<m&&clr(p,x,y))m=n}}return m};
+   const near1=(x,y)=>people.some(p=>Math.max(Math.abs(x-p.x),Math.abs(y-p.y))<=1);
+   const SOLID=/tree|statue|well|fountain|plinth|hgxstat|hgxrock|house|hut|stall/;
+   const bad=d=>{if(d.npc||d.hgdTier||d.hs||d.pic||d.skind||d.cl||!NPC_H[d.k]||/lamp|lantern|candle|brazier|chest|teleporter|hanglamp|^hgdpc_/.test(d.k))return false;
+     const h=NPC_H[d.k]*(d.sc||1);if(h<.3)return false;if(near1(d.x,d.y))return true;if(h>=.3&&lineD(d.x,d.y,nts)<=2)return true;if(d.block&&SOLID.test(d.k))return false;return h>=.35&&lineD(d.x,d.y,gv)<=2};
+   let moved=0;
+   for(let pass=0;pass<3;pass++)for(const d of L.decor.slice()){if(!zoneOf(d)||!bad(d))continue;
+     unreg(d);let q=null;
+     for(const lim of [3,2,0]){if(q)break;for(let r=1;r<=10&&!q;r++){let bd=1e9;for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=d.x+dx,y=d.y+dy;if(!ok(x,y,!!d.block,0)||near1(x,y)||(lim&&lineD(x,y,people)<=lim))continue;const dd=dx*dx+dy*dy;if(dd<bd){bd=dd;q=[x,y]}}}}
+     if(q){d.x=q[0];d.y=q[1];reserved.add(q.join());moved++}reg(d)}
+   st.hidersMoved=moved}
   /* F. pools of coloured light: the centre of every square, every stall, and each junction round a square or enclave */
   const pools=[];const addPool=(x,y,col,kI,r2)=>{HGDPC.lights.push({x,y,col,kI,r2});pools.push([x,y])};
-  const around=(z,col,reach,gap,maxN)=>{let n=0;const cs=[];for(let dy=-reach;dy<=reach;dy++)for(let dx=-reach;dx<=reach;dx++){const x=z.x+dx,y=z.y+dy;if(!open(x,y)||Math.hypot(dx,dy)>reach)continue;if(n4(x,y)>=3)cs.push([x,y,hgdpcH(x,y,40)])}
-    cs.sort((a,b)=>a[2]-b[2]);const got=[];for(const [x,y] of cs){if(got.length>=maxN)break;if(got.some(g=>Math.hypot(g[0]-x,g[1]-y)<gap))continue;got.push([x,y]);addPool(x,y,col,.42,30)}};
+  const around=(z,col,reach,gap,maxN,kb)=>{let n=0;const cs=[];for(let dy=-reach;dy<=reach;dy++)for(let dx=-reach;dx<=reach;dx++){const x=z.x+dx,y=z.y+dy;if(!open(x,y)||Math.hypot(dx,dy)>reach)continue;if(n4(x,y)>=3)cs.push([x,y,hgdpcH(x,y,40)])}
+    cs.sort((a,b)=>a[2]-b[2]);const got=[];for(const [x,y] of cs){if(got.length>=maxN)break;if(got.some(g=>Math.hypot(g[0]-x,g[1]-y)<gap))continue;got.push([x,y]);addPool(x,y,col,kb||.75,44)}};
   towns.forEach((z,t)=>{const col=HGDPC_TCOL[t];addPool(z.x,z.y,col,1.25,100);around(z,col,z.r+8,6,16);
     for(const d of L.decor.filter(d=>stallRe.test(d.npc||'')&&Math.hypot(d.x-z.x,d.y-z.y)<=z.r+1)){const k=/^hgd_shop/.test(d.npc)?'general':d.npc.match(/s2_([a-z]+)/)[1];addPool(d.x,d.y,HGDPC_KCOL[k]||col,.5,26)}});
-  encl.slice(0,10).forEach((z,i)=>{const col=HGDPC_ECOL[i%10];addPool(z.x,z.y,col,1.7,110);around(z,col,z.r+9,5,14)});
+  encl.slice(0,10).forEach((z,i)=>{const col=HGDPC_ECOL[i%10];addPool(z.x,z.y,col,2.6,150);around(z,col,z.r+10,4,22,/Lantern Landing|Mossy|Quiet|Sleeping/.test(z.name)?1.5:0)});
   st.pools=pools.length;
   /* F2. light along the corridors round every square and enclave: a hanging lamp and a pool of light every four or five squares, so props are seen and no way is black */
   const allL=pools.concat((L.lights||[]).map(q=>[q[0],q[1]]));let lampsAdded=0;
   const corr=(z,col,reach,gap,kI,r2)=>{const cs=[];for(let dy=-reach;dy<=reach;dy++)for(let dx=-reach;dx<=reach;dx++){const x=z.x+dx,y=z.y+dy;if(!open(x,y)||Math.hypot(dx,dy)>reach||Math.hypot(dx,dy)<z.r*.6||n4(x,y)>3)continue;cs.push([x,y,hgdpcH(x,y,50)])}
     cs.sort((a,b)=>a[2]-b[2]);for(const [x,y] of cs){if(allL.some(g=>Math.hypot(g[0]-x,g[1]-y)<gap))continue;if(occ.has(x+','+y)&&occ.get(x+','+y).some(d=>d.block||d.npc))continue;
-      allL.push([x,y]);addPool(x,y,col,kI,r2);if(!busy(x,y)&&!reserved.has(x+','+y)){put({k:'hgt_hanglamp',x,y,block:false,walk:true,deco:true,sc:1,cl:1});lampsAdded++}}};
-  towns.forEach((z,t)=>corr(z,HGDPC_TCOL[t],z.r+9,5,.55,34));
-  encl.slice(0,10).forEach((z,i)=>corr(z,HGDPC_ECOL[i%10],z.r+12,4.5,.6,36));
+      allL.push([x,y]);addPool(x,y,col,kI,r2);if(!busy(x,y)&&!reserved.has(x+','+y)&&!L.decor.some(n=>n.npc&&/^(hgd_note|hgd_pa_note|hgdb_note)$/.test(n.npc)&&(n.x===x||n.y===y)&&Math.abs(n.x-x)+Math.abs(n.y-y)<=3)){put({k:'hgt_hanglamp',x,y,block:false,walk:true,deco:true,sc:1,cl:1});lampsAdded++}}};
+  towns.forEach((z,t)=>corr(z,HGDPC_TCOL[t],z.r+11,4,1.0,56));
+  encl.slice(0,10).forEach((z,i)=>{const dk=/Mossy|Quiet|Sleeping|Lantern Landing/.test(z.name);corr(z,HGDPC_ECOL[i%10],z.r+18,dk?2.6:3.6,dk?2.8:1.1,dk?80:56)});
   st.corridorLamps=lampsAdded;st.pools=pools.length;
   /* F3. every landmark of a square says what it is: a named plaque beside the main piece, and a light on it */
   let plaques=0;
@@ -516,8 +532,58 @@ function hgdpc2Build(L){
    st.labelled=labelled}
   /* G. the heights table */
   const sp=hgdpcScalePass(L,zoneOf);st.scaleFixed=sp.fixed;st.scaleTable=sp.table;
+  /* I2. round 4: hanging shop signs are 0.6 of a person (they were 1.05 and filled the view), hung a little above the ground */
+  {let n=0;for(const d of L.decor)if(/^hgdpc_ss\d+$/.test(d.k||'')&&NPC_H[d.k]&&zoneOf(d)){d.sc=+(.62/NPC_H[d.k]).toFixed(3);d.lift=Math.max(d.lift||0,.3);n++}st.shopSigns=n}
   /* H. lettered boards: the notice board of each town and every plaque carries its own heading */
   towns.forEach((z,t)=>{for(const d of L.decor)if(d.npc==='hgdpc_text'&&d.k==='wm_noticeboard'&&Math.hypot(d.x-z.x,d.y-z.y)<=z.r+2&&d.__nb===undefined){const key='hgdpc_nb'+t;d.__nb=1;
     HGDPC_LET[key]={base:'wm_noticeboard',r:[.16,.0,.68,.2],text:HGDPC_TOWN[t].toUpperCase()+' NOTICES',maxw:300,bg:'#d8c68e'};NPC_H[key]=NPC_H.wm_noticeboard||.95;d.k=key}});
   let vn=0;for(const d of L.decor)if(d.npc==='hgdpc_text'&&d.k==='noticeboard'&&d.kname){const key='hgdpc_vn'+vn++;HGDPC_LET[key]={base:'noticeboard',r:[.1,.2,.8,.16],text:String(d.kname).toUpperCase().replace(/^THE /,''),maxw:260,bg:'#d8c68e'};NPC_H[key]=NPC_H.noticeboard||.77;d.k=key}
   HGDPC.lettered=0;L._hgdpc2={stats:st}}
+
+/* ---------- round 4: corridor notes stand up facing the walker ----------
+   A note on the side wall of a corridor is seen edge-on and cannot be read beyond one square. Every note picture in the towns and enclaves (the
+   zone of this file) becomes a standing sign in the corner of its square, 1.35 times its usual size, so it faces the walker and reads from
+   three or four squares. A loose parchment page becomes the scroll on its board. Called from hgd_polish_text.js just before the lettering. */
+function hgdpcCorr(L){
+  if(!L||!L._hgdp||!L.decor||typeof HGS_SET==='undefined')return 0;let n=0;
+  const zs=L._hgdp.zones.filter(z=>z.type==='safe');
+  for(const d of L.decor){if(d.hgcc||!d.hgs||!d.pic||!d.wd||!/^(hgd_note|hgd_pa_note|hgdb_note)$/.test(d.npc||''))continue;
+    if(!zs.some(z=>Math.hypot(d.x-z.x,d.y-z.y)<=z.r+3))continue;
+    let kind=d.hgs;if(kind==='page')kind='scroll';if(!/^(scroll|plaque|slate|tablet)$/.test(kind))continue;
+    const img='art_hs_'+kind;if(!(IMG[img]&&IMG[img].width))continue;
+    if(d.hgt){delete d.hgt;delete d.lk;delete d.hgtBase}
+    d.k=img;d.hgs=kind;d.hgcc=1;const wd=d.wd;d.hgsWd=wd.slice?wd.slice():wd;d.pic=0;d.ox=wd[0]*.3;d.oy=wd[1]*.3;
+    if(wd[0]===0&&wd[1]!==0)d.ox=(hash2(d.x,d.y,17)<.5?-1:1)*.14;else if(wd[1]===0&&wd[0]!==0)d.oy=(hash2(d.x,d.y,19)<.5?-1:1)*.14;
+    d.sc=1.35*(.94+hash2(d.x,d.y,23)*.12);d.bob=0;d.block=false;d.walk=true;d.deco=true;n++}
+  try{hgdpcLate(L)}catch(e){console.error('hgdpcLate',e)}
+  return n}
+/* the late clearing pass (all other polish passes have run): nothing small stands on or in front of a note (one or two squares in line) or within a square of a giver, shopkeeper or priest.
+   Only walk-through props move (to the nearest free cell out of the lines); a hanging lamp picture in front of a note is dropped (its light stays). */
+function hgdpcLate(L){
+  if(L._hgdpcLate||!L._hgdp)return;L._hgdpcLate=1;const rows=L.rows,open=(x,y)=>rows[y]&&rows[y][x]==='.';
+  const zs=L._hgdp.zones.filter(z=>z.type==='safe'),zoneOf=d=>zs.some(z=>Math.hypot(d.x-z.x,d.y-z.y)<=z.r+3);
+  const nts=L.decor.filter(d=>d.npc&&/^(hgd_note|hgd_pa_note|hgdb_note)$/.test(d.npc)&&zoneOf(d)),gv=L.decor.filter(d=>d.npc&&/^hgd_(q\d+|s2_[a-z]+\d|shop\d|church\d)$/.test(d.npc)&&zoneOf(d)),all=nts.concat(gv);
+  const clr=(p,x,y)=>{const dx=Math.sign(x-p.x),dy=Math.sign(y-p.y),n=Math.max(Math.abs(x-p.x),Math.abs(y-p.y));for(let i=1;i<n;i++)if(!open(p.x+dx*i,p.y+dy*i))return false;return true};
+  const lineD=(x,y,arr)=>{let m=9;for(const p of arr)if((x===p.x||y===p.y)&&(x!==p.x||y!==p.y)){const n=Math.abs(x-p.x)+Math.abs(y-p.y);if(n<m&&clr(p,x,y))m=n}return m};
+  const near1=(x,y)=>all.some(p=>Math.max(Math.abs(x-p.x),Math.abs(y-p.y))<=1);
+  const taken=new Set(L.decor.filter(d=>!d.pic||d.block||d.npc).map(d=>d.x+','+d.y));L.items.forEach(i=>taken.add(i.x+','+i.y));L.enemies.forEach(e=>taken.add(e.x+','+e.y));
+  if(L.start)taken.add(L.start.x+','+L.start.y);
+  let moved=0,dropped=0,notesMoved=0;
+  const bigs=L.decor.filter(b=>b.block&&!b.npc&&!b.hs&&NPC_H[b.k]&&NPC_H[b.k]*(b.sc||1)>=.3);
+  const blocked=(x,y)=>bigs.some(b=>{const c=Math.max(Math.abs(b.x-x),Math.abs(b.y-y));return c===0||(c<=2&&(b.x===x||b.y===y)&&clr({x,y},b.x,b.y))});
+  for(let pass=0;pass<2;pass++)for(const n of nts){if(!blocked(n.x,n.y))continue;let q=null;
+    for(let r=1;r<=8&&!q;r++){let bd=1e9;for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=n.x+dx,y=n.y+dy;if(!open(x,y)||taken.has(x+','+y)||blocked(x,y)||near1(x,y))continue;const dd=dx*dx+dy*dy;if(dd<bd){bd=dd;q=[x,y]}}}
+    if(q){n.x=q[0];n.y=q[1];taken.add(q.join());notesMoved++}}
+  for(const n of nts){for(const b of bigs.slice()){if(!/art_hgxrock|art_hgxprop|art_hpb_/.test(b.k)||b.hgdTier)continue;const c=Math.max(Math.abs(b.x-n.x),Math.abs(b.y-n.y));
+    if(c===0||(c<=2&&(b.x===n.x||b.y===n.y)&&clr(n,b.x,b.y))){const i=L.decor.indexOf(b);if(i>=0){L.decor.splice(i,1);bigs.splice(bigs.indexOf(b),1);dropped++}}}} // a small blocker that cannot move: removing a blocker never closes a way
+  for(const d of L.decor.slice()){if(d.npc||d.pic||d.hs||d.hgdTier||d.skind||d.block||d.found||!zoneOf(d))continue;
+    const lamp=/hanglamp/.test(d.k||'');if(!lamp&&(!NPC_H[d.k]||/lantern|candle|chest|teleporter|^hgdpc_/.test(d.k)))continue;
+    const h=(NPC_H[d.k]||.8)*(d.sc||1);if(!lamp&&h<.3)continue;
+    const hitN=nts.some(p=>{const c=Math.max(Math.abs(d.x-p.x),Math.abs(d.y-p.y));return c===0||(c<=2&&(d.x===p.x||d.y===p.y)&&clr(p,d.x,d.y))});
+    const hitG=!lamp&&gv.some(p=>Math.max(Math.abs(d.x-p.x),Math.abs(d.y-p.y))<=1);
+    if(!hitN&&!hitG)continue;
+    if(lamp){L.decor.splice(L.decor.indexOf(d),1);dropped++;continue}
+    taken.delete(d.x+','+d.y);let q=null;
+    for(const lim of [3,2,0]){if(q)break;for(let r=1;r<=10&&!q;r++){let bd=1e9;for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=d.x+dx,y=d.y+dy;if(!open(x,y)||taken.has(x+','+y)||near1(x,y)||(lim&&lineD(x,y,all)<=lim))continue;const dd=dx*dx+dy*dy;if(dd<bd){bd=dd;q=[x,y]}}}}
+    if(q){d.x=q[0];d.y=q[1];taken.add(q.join());moved++}else if(/art_hgxprop|art_hpb_|art_hgxrock/.test(d.k)){L.decor.splice(L.decor.indexOf(d),1);dropped++}else taken.add(d.x+','+d.y)}
+  L._hgdpcLateN=[moved,dropped,notesMoved]}

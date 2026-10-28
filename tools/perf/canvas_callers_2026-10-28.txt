@@ -1,0 +1,17 @@
+total sampled ms 15638
+9497 ms 60.7 % drawImage <- crtPass:7282 <- crtPass:21375
+62 ms 0.4 % drawImage <- drawWorld:7025 <- drawWorld:57664
+5 ms 0.0 % stroke <- panel:3065 <- panel:21388
+3 ms 0.0 % strokeText <- num:3222 <- drawPortraits:3189
+1 ms 0.0 % fillRect <- panel:3065 <- panel:21388
+1 ms 0.0 % stroke <- roughStrokeRect:161 <- drawPortraits:3189
+1 ms 0.0 % stroke <- wornEdge:162 <- panel:3065
+1 ms 0.0 % drawImage <- sprBlit:2740 <- drawSprites:2834
+1 ms 0.0 % fillRect <- drawMinimap:6829 <- drawMinimap:45424
+1 ms 0.0 % drawImage <- drawSprites:2834 <- drawWorld:7025
+1 ms 0.0 % drawImage <- render3D:2535 <- render3D:29221
+1 ms 0.0 % fillText <- P.fillText:43925 <- P.fillText:49166
+1 ms 0.0 % measureText <- wrapMsg:6930 <- drawMessages:6935
+canvas calls per frame: {'drawImage': 180, 'getImageData': 9, 'putImageData': 1, 'fillText': 40}
+
+[exited with code 0]

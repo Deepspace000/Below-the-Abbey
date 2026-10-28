@@ -1,0 +1,1 @@
+()=>({LEVEL,state:G.state,ver:typeof VERSION!=='undefined'?VERSION:null,has477:!!LEVELS[477],has475:!!LEVELS[475],hgw4_477:!!(LEVELS[477]&&LEVELS[477]._hgw4),hgw4_475:!!(LEVELS[475]&&LEVELS[475]._hgw4),P:G.P&&{x:G.P.x,y:G.P.y,f:G.P.f},fonts:typeof HGTX!=='undefined'?HGTX.fonts:null})

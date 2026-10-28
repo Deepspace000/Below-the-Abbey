@@ -1,0 +1,66 @@
+{
+ "info": {
+  "moved": 59,
+  "swapped": 29,
+  "landmarks": 63,
+  "capped": 28,
+  "labels": 39,
+  "chestsMoved": 7,
+  "enemies": 96,
+  "relabelled": 30
+ },
+ "badEnemies": [],
+ "onAppr": [],
+ "notes": 39,
+ "badT": [],
+ "dups": [],
+ "wrong": [],
+ "unlettered": [],
+ "quest": {
+  "chests": 12,
+  "moved": 7,
+  "steps": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12
+  ],
+  "keys": 12
+ },
+ "q2": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7
+ ],
+ "oldBoth": 1,
+ "runsN": 61,
+ "worstGap": 5,
+ "hts": {
+  "art_wm_barrel": [
+   0.3,
+   0.32,
+   0.4,
+   0.28
+  ],
+  "yar_nets": [
+   0.28,
+   0.47,
+   0.26,
+   0.26
+  ]
+ },
+ "flagsMoved": 7,
+ "hsn": 25
+}

@@ -266,7 +266,7 @@ function hgweFlip(im){let c=hgweFlipC.get(im);if(!c){c=document.createElement('c
   try{if(LEVEL!==HGDWE.ID)return;const L=LEVELS[HGDWE.ID],F=L&&L._hgdweFish;if(!F||!G.C)return;const t=G.time,a=G.C.a,dX=Math.cos(a),dY=Math.sin(a),px=G.P.x+.5,py=G.P.y+.5;
     for(let i=0;i<F.length;i++){const f=F[i],ph=(t*f.sp+f.ph)%2,u=ph<1?ph:2-ph,dir=ph<1?1:-1,x=f.A[0]+(f.B[0]-f.A[0])*u+(f.vert?f.lat*.5:0),y=f.A[1]+(f.B[1]-f.A[1])*u+(f.vert?0:f.lat*.5);
       if(Math.abs(x-px)>13||Math.abs(y-py)>13)continue;const fr=((t*3.4+i)|0)&1,im=IMG['uw_'+f.k+'_'+fr];if(!im)continue;
-      const vx=(f.B[0]-f.A[0])*dir,vy=(f.B[1]-f.A[1])*dir,right=(dX*vy-dY*vx)>0,hh=Math.min(.35,(NPC_H['uw_'+f.k+'_0']||.4)*f.sz),w=hh*im.width/im.height;if(Math.hypot(x-px,y-py)<1.3)continue;if(F.prot&&F.prot.some(q=>Math.hypot(q[0]-x,q[1]-y)<1.6))continue;
+      const vx=(f.B[0]-f.A[0])*dir,vy=(f.B[1]-f.A[1])*dir,right=(dX*vy-dY*vx)>0,hh=Math.min(.35,(NPC_H['uw_'+f.k+'_0']||.4)*f.sz),w=hh*im.width/im.height;if(Math.hypot(x-px,y-py)<(hh>.25?2.6:1.3))continue;if(F.prot&&F.prot.some(q=>Math.hypot(q[0]-x,q[1]-y)<1.6))continue;
       out.push({x,y,img:right?hgweFlip(im):im,w,bob:f.h+Math.sin(t*.9+i)*.04,decor:{walk:true,k:'uw_sw'+(i%9)}})}}catch(e){}}}
 
 /* ==========================================================================

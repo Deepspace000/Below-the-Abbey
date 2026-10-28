@@ -1,0 +1,1 @@
+()=>{const b=G.decor.filter(d=>d.hgdBoatSpr);const r=b.map(d=>[d.x,d.y,d.k,d.sc,d.bob]);b.forEach(d=>{d._y=d.y;d.y=-5});G.P.x=39;G.P.y=137;G.P.f=0;G.P.angT=-Math.PI/2;G.C={x:39,y:137,a:G.P.angT};return r}

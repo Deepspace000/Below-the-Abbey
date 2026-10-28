@@ -1,6 +1,6 @@
 import os, time
 from playwright.sync_api import sync_playwright
-PORT = os.environ.get('A_PORT', '8340')
+PORT = os.environ.get('A_PORT', '8320')
 def boot(p, w=1000, h=640, extra=''):
     b = p.chromium.launch(args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader'])
     pg = b.new_page(viewport={'width': w, 'height': h})

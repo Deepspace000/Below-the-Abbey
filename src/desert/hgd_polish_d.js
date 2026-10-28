@@ -48,9 +48,16 @@ function hgpdTrim(c){const w=c.width,h=c.height,d=c.getContext('2d').getImageDat
 function hgpdTurn(src,deg,sy,shade){const w=src.width,h=src.height,m=Math.ceil(Math.hypot(w,h)),c=document.createElement('canvas');c.width=m;c.height=m;const x=c.getContext('2d');x.translate(m/2,m/2);x.rotate(deg*Math.PI/180);x.scale(1,sy||1);x.drawImage(src,-w/2,-h/2);
   if(shade){x.globalCompositeOperation='source-atop';x.fillStyle=shade;x.fillRect(-m,-m,m*2,m*2)}return hgpdTrim(c)}
 function hgpdWreck(boat){const w=boat.width,h=boat.height,c=document.createElement('canvas');c.width=Math.round(w*1.25);c.height=Math.round(h*1.15);const x=c.getContext('2d');
-  // the bow half: the right side is torn off along a ragged line, the whole piece leans over on its keel
-  x.save();x.translate(w*.02,h*.96);x.rotate(-.13);x.translate(0,-h*.96);x.beginPath();
-  const P=[[0,0],[.58,0],[.5,.14],[.64,.27],[.52,.42],[.66,.58],[.55,.72],[.7,.86],[.6,1],[0,1]];P.forEach((q,i)=>i?x.lineTo(q[0]*w,q[1]*h):x.moveTo(q[0]*w,q[1]*h));x.closePath();x.clip();x.drawImage(boat,0,0);x.restore();
+  // the bow half: the planking is stove in along a ragged line and the bare ribs stand up out of the break, the whole piece leans over on its keel
+  x.save();x.translate(w*.02,h*.96);x.rotate(-.13);x.translate(0,-h*.96);
+  const P=[[0,0],[.36,0],[.43,.2],[.5,.13],[.55,.36],[.63,.3],[.69,.52],[.78,.46],[.86,.66],[.95,.6],[1,.7],[1,1],[0,1]];
+  x.save();x.beginPath();P.forEach((q,i)=>i?x.lineTo(q[0]*w,q[1]*h):x.moveTo(q[0]*w,q[1]*h));x.closePath();x.clip();x.drawImage(boat,0,0);
+  x.fillStyle='rgba(8,10,14,.5)';x.fillRect(w*.4,0,w*.62,h*.2);x.restore(); // the open hold behind the ribs
+  for(const [vx,vy,rh] of [[.5,.13,.15],[.58,.34,.17],[.66,.3,.13],[.74,.5,.16],[.82,.46,.12],[.9,.62,.13]]){ // ribs: tapered bare timbers with a lit edge
+    const rx=vx*w,ry=vy*h,bw=w*.024,g=x.createLinearGradient(rx-bw,0,rx+bw,0);g.addColorStop(0,'#0e0a06');g.addColorStop(.55,'#281d12');g.addColorStop(1,'#120c07');
+    x.fillStyle=g;x.beginPath();x.moveTo(rx-bw,ry+h*.22);x.lineTo(rx-bw*.55,ry-h*rh);x.lineTo(rx-bw*.1,ry-h*rh-h*.02);x.lineTo(rx+bw*.5,ry-h*rh*.9);x.lineTo(rx+bw,ry+h*.22);x.closePath();x.fill();
+    x.strokeStyle='rgba(120,96,64,.3)';x.lineWidth=Math.max(1,w*.004);x.beginPath();x.moveTo(rx-bw*.1,ry-h*rh);x.lineTo(rx+bw*.1,ry+h*.2);x.stroke()}
+  x.restore();
   // a piece of the stern, thrown a little way off, on its side
   x.save();x.translate(w*1.0,h*1.1);x.rotate(.62);x.scale(.5,.5);x.translate(-w*.4,-h);x.beginPath();
   const Q=[[.46,.12],[1,.0],[1,1],[.5,1],[.62,.8],[.44,.62],[.58,.44],[.4,.3]];Q.forEach((q,i)=>i?x.lineTo(q[0]*w,q[1]*h):x.moveTo(q[0]*w,q[1]*h));x.closePath();x.clip();x.drawImage(boat,0,0);x.restore();
@@ -122,7 +129,7 @@ function hgpdBuild(L){
   const nameAt=(t,x,y)=>{info.names.push({t,x,y,k:'place'})};
   /* ---- 0a. the walls: the old tint [4,3,5,.5] multiplied the rock to black and then screened a flat beige over it, so every wall was a smooth blank slab. A plain darkening keeps the cracks and the facets. ---- */
   try{const TM=ohTiles(),chUp=String.fromCharCode(0x331);
-    if(OH_STY.hgdu_rock){OH_STY.hgdu_rock.tint=[248,242,255];L.chars['#']=TM.make('plain','hgdu_rock',2.7).gid}
+    if(OH_STY.hgdu_rock){{const lp=hgpdLit(OH_STY.hgdu_rock.plain);if(IMG[lp]&&IMG[lp].width)OH_STY.hgdu_rock.plain=lp}OH_STY.hgdu_rock.tint=[248,242,255];L.chars['#']=TM.make('plain','hgdu_rock',2.7).gid}
     if(OH_STY.hgdu_up){OH_STY.hgdu_up.tint=[196,186,176];L.chars[chUp]=TM.make('door','hgdu_up',2.7).gid}}catch(e){console.error('hgpd walls',e)}
   /* ---- 0. proportions of the repeated props ---- */
   {const by={};for(const d of L.decor)(by[d.k]=by[d.k]||[]).push(d);
@@ -302,7 +309,7 @@ function hgpdBuild(L){
     for(let n=0;n<18;n++){let best=null,bs=-1;for(const c of jc){let m=1e9;for(const q of picked)m=Math.min(m,Math.hypot(q.x-c.x,q.y-c.y));if(m<20)continue;const s=Math.min(m,60)+rnd()*4;if(s>bs){bs=s;best=c}}if(!best)break;picked.push(best)}
     picked.forEach((c,i)=>{const up=i%2===0,d=up?dUp:dBoat,n=d[ix(c.x,c.y)],dir=dirTo(d,c.x,c.y);if(n<0||!dir)return;
       const text=up?'A flat stone is set into the wall, covered in glowing runes nobody can read. Under them somebody has scratched the word UP. The nearest ladder to the surface is about '+n+' steps from here. The way starts to the '+dir+'.':'A board is nailed to the wall with scraps of paper pinned on it. The top scrap says BOAT. The nearest boat is about '+n+' steps from here. The way starts to the '+dir+'.';
-      add(up?'hgpd_rune':'hgpd_board',c.x,c.y,{wd:c.w,bob:.18,sc:up?.7:.9,read:{n:up?'A rune stone':'A notice board',t:text}});info.signs++})}
+      add(up?'hgpd_rune':'hgpd_board',c.x,c.y,{wd:c.w,bob:.18,sc:up?.95:.9,read:{n:up?'A rune stone':'A notice board',t:text}});info.signs++})}
   /* ---- 5. dead ends that are still empty get a small scene of their own ---- */
   // round 3: sixteen different kits (each has its own main piece, no two share both props); a dead end takes the kit used least in its neighbourhood
   const FILL=[
@@ -331,7 +338,7 @@ function hgpdBuild(L){
   {const marked=(x,y)=>L.decor.some(d=>Math.abs(d.x-x)<=3&&Math.abs(d.y-y)<=3&&!(d.pic&&/web/.test(d.k)))||(L.lights||[]).some(q=>Math.hypot(q[0]-x,q[1]-y)<=5);
     const LM=[(x,y,w)=>{add('hgpd_hook',x,y,{wd:w,bob:.55,sc:1});light(x,y,.4)},(x,y,w)=>{P('hgpd_rubble',x,y,{sc:1.4,ox:w[0]*.3,oy:w[1]*.3});P('hgpd_root',x,y,{sc:1.4,ox:-w[1]*.2,oy:w[0]*.2})},(x,y,w)=>{P('hgpd_crate',x,y,{sc:.85,ox:w[0]*.3,oy:w[1]*.3});P('hgpd_bucket',x,y,{sc:.9,ox:w[0]*.3-w[1]*.0,oy:w[1]*.3})},
       (x,y,w)=>{P('hgpd_bones',x,y,{sc:1.5,ox:w[0]*.25,oy:w[1]*.25});P('hgpd_tooth',x,y,{sc:1.3,ox:w[0]*.3,oy:w[1]*.3})},(x,y,w)=>{P('hgpd_post',x,y,{sc:.8,ox:w[0]*.36,oy:w[1]*.36})},
-      (x,y,w)=>{P('hgpd_candle',x,y,{sc:1,ox:w[0]*.3,oy:w[1]*.3});P('hgpd_candle',x,y,{sc:.8,ox:w[0]*.3+.12,oy:w[1]*.3});light(x,y,.25)},(x,y,w)=>{add('hgpd_rune',x,y,{wd:w,bob:.18,sc:.7,read:{n:'A rune stone',t:HGPD_RUNES[ri++%HGPD_RUNES.length]}})}];
+      (x,y,w)=>{P('hgpd_candle',x,y,{sc:1,ox:w[0]*.3,oy:w[1]*.3});P('hgpd_candle',x,y,{sc:.8,ox:w[0]*.3+.12,oy:w[1]*.3});light(x,y,.25)},(x,y,w)=>{add('hgpd_rune',x,y,{wd:w,bob:.18,sc:.95,read:{n:'A rune stone',t:HGPD_RUNES[ri++%HGPD_RUNES.length]}})}];
     let ri=0;
     let li=0;const run=(x0,y0,dx,dy)=>{let x=x0,y=y0,since=0;while(land(x,y)){const straight=land(x+dx,y+dy)&&land(x-dx,y-dy)&&!land(x+dy,y+dx)&&!land(x-dy,y-dx);
         if(!straight){since=0}else if(marked(x,y))since=0;else{since++;if(since>=14){const w=wallDir(x,y);if(w&&!foe(x,y,0)&&!keep.some(k=>Math.hypot(k[0]-x,k[1]-y)<4)){LM[li++%LM.length](x,y,w);info.marks++;since=0}}}
@@ -407,7 +414,7 @@ function hgpdBuild(L){
       if(!d.label){let lb=rd.n||'';
         if(isSign){const ri=HGPD_RUNES.indexOf(rd.t);
           if(/rune/.test(d.k))lb=ri>=0?RT[ri]:/UP\./.test(rd.t)?'The way up':'Rune stone';
-          else lb=/BOAT/.test(rd.t)?'The way to a boat':/WAIT/.test(rd.t)?'Wait':ONAME.has(rd.t)?(ALC.find(a=>a[1]===rd.t)[0]):'Pinned scraps'}
+          else lb=/BOAT/.test(rd.t)?'Way to a boat':/WAIT/.test(rd.t)?'Wait':ONAME.has(rd.t)?(ALC.find(a=>a[1]===rd.t)[0]):'Pinned scraps'}
         else if(rd.page)lb='Journal, page '+rd.page;
         else if(ONAME.has(rd.t))lb=ALC.find(a=>a[1]===rd.t)[0];
         else if(/wheel/.test(d.k)||/wheel/.test(rd.t))lb='A ship\'s wheel';
@@ -415,13 +422,19 @@ function hgpdBuild(L){
         if(!lb||lb.split(/\s+/).length>4)lb=(lb||'A note').split(/\s+/).slice(0,4).join(' ');
         d.label=lb.replace(/[—–]/g,',')}}
     for(const d of L.decor){if(d.pic&&d.wd&&/rune|board/.test(d.k)&&!d.text){d.text=HGPD_RUNES[ri2++%HGPD_RUNES.length];if(!d.label)d.label='Rune stone'}}
+    // 10b2. round 4: every three-by-three hall with no light within four squares gets a standing lantern in one corner and a lit pool (hubs measured 62 of 255, now aimed at 70 or more)
+    {const lt=L.lights||[],hubs=[];for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!land(x,y)||O.isle[ix(x,y)])continue;let r=true;for(let j=-1;j<=1&&r;j++)for(let i=-1;i<=1;i++)if(!land(x+i,y+j)||O.isle[ix(x+i,y+j)]){r=false;break}if(r)hubs.push([x,y])}
+      const HC=['gold','amber','teal','gold','white'];let hi=0;info.hubLights=0;
+      for(const [x,y] of hubs){if(lt.some(q=>Math.hypot(q[0]-x,q[1]-y)<=1.5))continue;if(foe(x,y,2))continue;
+        const cx=x+(((x*7+y*3)&1)?1:-1),cy=y+(((x*5+y*11)&1)?1:-1);if(!land(cx,cy)||L.decor.some(d=>!d.pic&&d.x===cx&&d.y===cy&&d.block))continue;
+        add('hgpd_lanternW',cx,cy,{sc:1.3,ox:.12});clight(cx,cy,HC[hi++%HC.length],.95,{z:.3,rw:.65,a:.8});info.hubLights++}}
     // 10c. a picture that is missing is swapped for a candle, so the game never draws an empty slot
     for(const d of L.decor)if(/^hgpd_/.test(d.k)&&!IMG[d.k]){d.k=IMG.hgpd_candle?'hgpd_candle':d.k;info.missing=(info.missing||0)+1}
   }
   /* ---- 7. names on the map ---- */
   L.mapNames=(L.mapNames||[]).concat(info.names);
   info.pages=info.vig.filter(v=>v.p).length;L._hgpd=info}
-{const _b=hgduBuild;hgduBuild=function(){const had=!!LEVELS[HGDU.ID];_b.apply(this,arguments);const L=LEVELS[HGDU.ID];if(!had&&L&&L._hgdo&&L._bsu)try{const t0=performance.now();hgpdBuild(L);if(L._hgpd)L._hgpd.ms=Math.round(performance.now()-t0)}catch(e){console.error('hgpdBuild',e)}}}
+{const _b=hgduBuild;hgduBuild=function(){const had=!!LEVELS[HGDU.ID];_b.apply(this,arguments);const L=LEVELS[HGDU.ID];if(!had&&L&&L._hgdo&&L._bsu)try{const t0=performance.now();hgpdBuild(L);try{if(!window.__NOHGPDWV)hgpdWallVar(L)}catch(e){console.error('hgpd wallvar',e)}if(L._hgpd)L._hgpd.ms=Math.round(performance.now()-t0)}catch(e){console.error('hgpdBuild',e)}}}
 /* a stone statue in a dead-end nook whose mouth is a junction square fills the whole screen as you pass (the engine scales a sprite by 1/depth): those few are dropped */
 if(typeof hgdnPlace==='function'){const _hp=hgdnPlace;hgdnPlace=function(L){const had=!!L._hgdn,r=_hp.apply(this,arguments);
   try{if(!had&&r&&L._hgdo){const O=L._hgdo,rows=L.rows,land=(x,y)=>rows[y]&&rows[y][x]==='.'&&O.wm[y*201+x]!==1,DV=[[0,-1],[1,0],[0,1],[-1,0]],dg=(x,y)=>DV.filter(d=>land(x+d[0],y+d[1])).length;
@@ -432,6 +445,21 @@ if(typeof hgdnPlace==='function'){const _hp=hgdnPlace;hgdnPlace=function(L){cons
   try{if(LEVEL===HGPD.ID&&G.state==='play'&&HGPD.chapel&&G.time>HGPD.bellT){const d=Math.hypot(G.P.x-HGPD.chapel[0],G.P.y-HGPD.chapel[1]);HGPD.bellT=G.time+9+Math.random()*7;
       if(d<16&&AC&&!G.mute&&SNDOPT.amb){const v=Math.max(.012,.06*(1-d/16));tone(196,188,1.6,'sine',v,0);tone(392,380,1.1,'sine',v*.5,.02);tone(588,570,.7,'sine',v*.25,.04)}}}catch(e){}
   return _u.apply(this,arguments)}}
+// round 4: a brightened copy of a wall texture (the rock was too dark to lift with light alone: hubs measured 62), cached under key+'_lit'
+function hgpdLit(key,f){try{const im=IMG[key];if(!im||!im.width)return key;const k=key+'_lit';if(IMG[k])return k;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.filter='brightness('+(f||1.3)+') contrast(1.04)';x.drawImage(im,0,0);IMG[k]=c;return k}catch(e){return key}}
+/* ---------- round 4: the one rock tile is broken up. Three more wall tiles (the second painted brick, a damp green-stained one, a pale chalky one) are scattered over the wall squares that face a
+   corridor, in two-by-two patches (about one square in six), done last so no builder that looks for '#' is confused. ---------- */
+function hgpdWallVar(L){
+  if(!OH_STY.hgdu_rock||L._hgpdWV)return;L._hgpdWV=1;const TM=ohTiles(),W=201,H=201,rows=L.rows;
+  const BR=OH_STY.hgdu_rock.plain,BR2=IMG.art_tex_hgdu_brick2&&IMG.art_tex_hgdu_brick2.width?hgpdLit('art_tex_hgdu_brick2'):BR;
+  const V=[['hgpd_wv0',BR2,[246,244,252]],['hgpd_wv1',BR,[200,236,216]],['hgpd_wv2',BR2,[255,250,236]]],chs=[];
+  V.forEach(([sty,img0,tint],i)=>{const img=IMG[img0]&&IMG[img0].width?img0:(IMG[BR]&&IMG[BR].width?BR:'art_tex_wall_cave');OH_STY[sty]=Object.assign({},OH_STY.hgdu_rock,{plain:img,door:img,win:img,alt:img,tint});const c=String.fromCharCode(0x3d0+i);L.chars[c]=TM.make('plain',sty,2.7).gid;chs.push(c)});
+  const h=(x,y)=>{let v=(x*374761393+y*668265263+476)>>>0;v=Math.imul(v^(v>>>13),1274126177)>>>0;return ((v^(v>>>16))>>>0)/4294967296};
+  let n=0;const out=rows.map((r,y)=>{if(y<1||y>=H-1)return r;const a=r.split('');
+    for(let x=1;x<W-1;x++){if(a[x]!=='#')continue;if(rows[y][x-1]!=='.'&&rows[y][x+1]!=='.'&&rows[y-1][x]!=='.'&&rows[y+1][x]!=='.')continue;
+      const q=h(x>>1,y>>1);if(q<.17){a[x]=chs[Math.floor(q/.17*3)%3];n++}}
+    return a.join('')});
+  for(let y=0;y<H;y++)rows[y]=out[y];if(L._hgpd)L._hgpd.wallVar=n}
 /* ==========================================================================
    ROUND 2 (lighting, beacons, orbs)
    - coloured pools: the lights made in hgpdBuild carry a colour; the engine takes a colour per light (LIGHTS[].col) and a range (range2).
@@ -443,7 +471,7 @@ if(typeof hgdnPlace==='function'){const _hp=hgdnPlace;hgdnPlace=function(L){cons
 {const _s=setupLights;setupLights=function(){_s.apply(this,arguments);
   try{if(LEVEL!==HGPD.ID||!HGPD.cl)return;for(const l of LIGHTS){if(!l.free||l.lamp)continue;const c=HGPD.cl[(l.x-.5)+','+(l.y-.5)];if(c){l.col=c[0];l.calm=true;l.kI=Math.max(1.05,c[1]*1.7);l.range2=c[1]>=.9?150:c[1]>=.6?80:56}}}catch(e){}}}
 {const _sl=setLightLevel;setLightLevel=function(l){_sl.apply(this,arguments);
-  if(HGPD_R2&&LEVEL===HGPD.ID){RANGE*=1.8;for(let i=0;i<=1024;i++)LUT[i]+=.17+.1*(i/1024)}}}
+  if(HGPD_R2&&LEVEL===HGPD.ID){RANGE*=1.8;for(let i=0;i<=1024;i++)LUT[i]+=.27+.1*(i/1024)}}}
 function hgpdGlows(){
   if(LEVEL!==HGPD.ID||!HGPD.glows||typeof bsuAirOn!=='function'||!bsuAirOn())return;
   const C=G.C,LA=C.a+(typeof LKYAW==='number'?LKYAW:0),dX=Math.cos(LA),dY=Math.sin(LA),pX=-dY*PL,pY=dX*PL,cx=C.x+.5-dX*.28,cy=C.y+.5-dY*.28,T=G.time,taken=(G.flags&&G.flags.orbTaken)||{};

@@ -44,7 +44,7 @@ T.kg1={give:[N(302,'ci_ketra')],act:[harp({lvl:338,cat:1}),N(330,'sea_land_338')
 T.kg2={give:[N(300,'sb_maeve')],act:[harp({lvl:337,cat:2}),N(330,'sea_land_337')],ready:[N(300,'sb_maeve')]};
 T.kg3={give:[N(301,'ib_aldous')],act:[harp({lvl:341,cat:3}),N(330,'sea_land_341')],ready:[N(301,'ib_aldous')]};
 T.kg4={give:[N(303,'ll_isolde')],act:[harp({lvl:323,cat:4}),N(303,'uw_dive_303')],ready:[N(303,'ll_isolde')]};
-T.sd2={give:[N(290,'yr_menkaure')],act:[X(330,560,300)],ready:[N(290,'yr_menkaure')]};
+T.sd2={give:[N(290,'yr_menkaure')],act:[F(330,()=>{const k=(G.enemies||[]).find(e=>e.t==='kraken'&&e.hp>0);return k?[{x:Math.round(k.x),y:Math.round(k.y)}]:[{x:SN.KRAKEN_X+8,y:320}]})],ready:[N(290,'yr_menkaure')]}; // the Kraken itself once it has risen, else the line it waits behind
 T.vq6={give:[N(305,'oh_cap')],act:[N(306,'oh_king')],ready:[N(306,'oh_king')]};
 /* ---- Act 5: Oldhaven (305), the Oakwood (311) ---- */
 T.oq0={give:[N(305,'oh_cap')],act:[N(305,'oh_x_weigher','oh_x_ringer','oh_x_baker','oh_x_fool')],ready:[N(305,'oh_cap')]};
@@ -127,13 +127,16 @@ QRF.live=sp=>{ // the squares of one spec on the level the party is on
 QRF.NAMES={199:'The Palace of Khemetra',213:"Menkaure's Shipwrights",235:'A Boarded House',260:'The Cisterns beneath Khemetra',261:"Ishkander's Study",266:'The Tunnel to the Narrow Sea'};
 QRF.nm=l=>{const n=LEVEL_NAMES[l]||(LEVELS[l]&&LEVELS[l].name)||QRF.NAMES[l]||'';return n.replace(/^The /,'the ')};
 /* ---- the door that leads towards another level: a path over doors (portals and hatches, in either direction), up to six doors long; the ring sits in front of the first door of the way ---- */
-QRF.getL=l=>{if(!LEVELS[l]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[l]){try{KH_LAZY[l]()}catch(e){}}return LEVELS[l]||null};
+QRF.budget=0; // how many not yet built levels one path search may build (they are small rooms; the walk stops there)
+QRF.getL=l=>{if(!LEVELS[l]&&QRF.budget>0&&typeof KH_LAZY!=='undefined'&&KH_LAZY[l]){QRF.budget--;try{KH_LAZY[l]()}catch(e){}}return LEVELS[l]||null};
 QRF.adj=l=>{const L=QRF.getL(l),o=new Set();if(!L)return [];for(const p of L.portals||[])if(p&&p.to!==undefined&&+p.to!==l)o.add(+p.to);for(const d of L.decor||[])if(d.enter&&d.enter.to!==undefined&&+d.enter.to!==l)o.add(+d.enter.to);
   if(QRF._rev===undefined||QRF._revN!==Object.keys(LEVELS).length){QRF._rev={};QRF._revN=Object.keys(LEVELS).length;for(const k in LEVELS){const M=LEVELS[k];if(!M)continue;for(const p of M.portals||[])if(p&&p.to!==undefined)(QRF._rev[+p.to]=QRF._rev[+p.to]||new Set()).add(+k)}}
   for(const k of QRF._rev[l]||[])if(k!==l)o.add(k);return [...o]};
-QRF.path=(a,b)=>{const prev={[a]:null},q=[a];let n=0;while(q.length&&n++<400){const c=q.shift();if(c===b)break;for(const x of QRF.adj(c)){if(!(x in prev)){prev[x]=c;q.push(x)}}}
+QRF.path=(a,b)=>{const prev={[a]:null},q=[a];let n=0;QRF.budget=24;while(q.length&&n++<3000){const c=q.shift();if(c===b)break;for(const x of QRF.adj(c)){if(!(x in prev)){prev[x]=c;q.push(x)}}}
   if(!(b in prev))return null;const out=[];for(let c=b;c!==null;c=prev[c])out.push(c);out.reverse();return out.length<=7?out:null};
-QRF.door=function(Lt){const S=LEVEL,pa=QRF.path(S,Lt);if(!pa||pa.length<2)return null;const N1=pa[1],L1=QRF.getL(N1),LS=LEVELS[S];
+QRF.door=function(Lt){const k=LEVEL+'>'+Lt;if(QRF._dcl!==LEVEL){QRF._dcl=LEVEL;QRF._dc={}}if(k in QRF._dc)return QRF._dc[k];return QRF._dc[k]=QRF._door(Lt)}; // once per level and goal, not every frame
+QRF._door=function(Lt){const S=LEVEL,pa=QRF.path(S,Lt);if(!pa||pa.length<2)return null;const N1=pa[1];QRF.budget=2;const L1=QRF.getL(N1),LS=LEVELS[S];
+  if(G.grid&&G.portals)for(let i=0;i<G.portals.length;i++)if(G.portals[i]&&+G.portals[i].to===N1)for(let y=0;y<G.grid.length;y++){const x=G.grid[y].indexOf(30+i);if(x>=0)return {x,y}} // the door itself: the cell numbered 30+i is door i
   if(L1){const p=(L1.portals||[]).find(p=>p&&+p.to===S);if(p)return {x:p.x,y:p.y}}
   if(LS){const d=(LS.decor||[]).find(d=>d.enter&&+d.enter.to===N1);if(d)return {x:d.x,y:d.y}}
   return null};

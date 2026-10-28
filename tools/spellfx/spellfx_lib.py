@@ -42,10 +42,15 @@ class Game:
         self.pg.on('console', lambda m: self.logs.append((m.type, m.text)) if m.type == 'error' and 'ERR_CONNECTION' not in m.text and 'Failed to load resource' not in m.text else None)
         self.pg.on('pageerror', lambda e: self.logs.append(('pageerror', str(e))))
         self.pg.goto(URL % time.time(), wait_until='commit', timeout=120000)
-        self.pg.wait_for_function('window.__ready', timeout=120000)
+        self.pg.wait_for_function('window.__ready', timeout=400000)
         self.pg.wait_for_timeout(7000)
         self.pg.evaluate(SETUP)
-        self.step(150)
+        last, same = None, 0
+        for i in range(40):  # the town jump of the url finishes after some frames: step until the level stays the same
+            r = self.ev("()=>{try{__step(8)}catch(e){return 'err'}return LEVEL+':'+G.state+':'+G.enemies.length}")
+            same = same + 1 if r == last and r != 'err' else 0
+            last = r
+            if same >= 3: break
     def ev(self, js, arg=None):
         return self.pg.evaluate(js, arg) if arg is not None else self.pg.evaluate(js)
     def step(self, n=1): self.ev('n=>window.__step(n)', n)

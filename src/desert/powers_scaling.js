@@ -4,11 +4,13 @@
    (single-target powers are one line, area powers another; buffs and control have their own lines).
 
    The rule. Each class has one number E, the damage a single-target power does for each point of its cost, written in "usual blows":
-        damage of a use  =  cost x E x U x g
+        damage of a use  =  cost x e x U x g          e = E x CM x GE x (1 - TAPER x (unlock level - 1) / 79)
    U is the caster's own usual blow (see psU): the average weapon hit with strength, rings, double-hit chance and damage bonuses for a fighter, and
    (intelligence bonus + staff magic + 8) with the spell bonuses for a mage or a sorcerer. So the power grows with the weapon, the stat and the gear, as
-   the creatures' health grows with the level of the place. g = (1 + 0.0035 x (hero level - the power's unlock level)) x (1 + 0.002 x hero level): the first part rewards each level of mastery beyond the
-   unlock, the second makes every power a little stronger as the hero grows, beyond what the weapon and the stats give. An area power does 0.4 x that for each foe it reaches (so about 1.2 times a single power when three are close).
+   the creatures' health grows with the level of the place. g = (1 + 0.002 x (hero level - the power's unlock level)) x (1 + 0.001 x hero level): the first part rewards each level of
+   mastery beyond the unlock, the second makes every power a little stronger as the hero grows, beyond what the weapon and the stats give (the best weapons stop at level 70).
+   GE (0.75) and TAPER (0.15) were set from simulated fights so that the party kills about as fast as before (tools/powers_audit, POWERS_AFTER.md).
+   An area power does 0.4 x that for each foe it reaches (so about 1.2 times a single power when three are close).
    Damage over time (bleed, poison, burn) is part of the same total, and is spread over its rounds. Costs are fixed numbers that rise with the
    unlock level; they never change with the caster's level, so an early power stays cheap and simply stops mattering as the heroes grow.
    Powers keep their names and ids and their place in the list; new powers are put in by level, and old saved selections are moved to follow them.
@@ -16,7 +18,7 @@
    ========================================================================== */
 (function(){
 if(typeof CLASSES==='undefined'||typeof MX==='undefined')return;
-const K=.0035,KL=.002,GT=.4;
+const K=.002,KL=.001,GT=.4;
 const isCaster=n=>n==='Mage'||n==='Sorcerer';
 const clsOf=h=>{const i=G.heroes.indexOf(h);return i>=0&&HERO_DEF[i]?HERO_DEF[i].cls:'Warrior'};
 const heroIdx=h=>G.heroes.indexOf(h);
@@ -28,15 +30,18 @@ function useHero(){ // the hero who is using a power now
   try{const h=G.heroes[G.curHero===undefined?G.sel:G.curHero];if(h)return h}catch(e){}
   return null;
 }
-function cardHero(){ // the hero whose card is on screen (the powers page), else the selected hero
-  try{if(G.inv&&G.inv.open&&G.heroes[G.inv.hero])return G.heroes[G.inv.hero];const h=G.heroes[G.sel||0];if(h)return h}catch(e){}
+function cardHero(){ // the hero whose card is on screen (the powers page, or the spell shop), else the selected hero
+  try{if(G.menu==='spellshop'&&G.heroes[G.sshero||0])return G.heroes[G.sshero||0];if(G.inv&&G.inv.open&&G.heroes[G.inv.hero])return G.heroes[G.inv.hero];const h=G.heroes[G.sel||0];if(h)return h}catch(e){}
   return null;
 }
 const rng=(M,u)=>{const a=[1,2];a._M=M;a._u=u;return a}; // a damage range for the spell code, that is replaced by a number worked out from the hero (see mxDmg below)
 
 /* [kind, key, cost, role, options]  kind c: a class power by name, x: a spell by id, n: a new power.   role s: single target, g: area.
    options: dot: share of the total that is damage over time. p: the plain words of the card (the number is added by the game). */
+const GE=.75,TAPER=.15; // GE: one factor for all classes, TAPER: the damage for each point of cost falls by this much between level 1 and level 80, both set so that fights do not get much shorter than before (see POWERS_AFTER.md)
 const E_CLS={Warrior:.31,Barbarian:.30,Paladin:.25,Ranger:.35,Archer:.36,Thief:.38,Assassin:.33,Mage:.20,Sorcerer:.20,Priest:.20,Monk:.40,Goat:.36};
+const CM={Warrior:1.10,Barbarian:1.18,Paladin:.9,Ranger:1.13,Archer:1.10,Thief:1.18,Assassin:1.12,Mage:1.25,Sorcerer:1.25,Priest:1,Monk:1.22,Goat:1.22}; // a small correction for each class, from the fight simulations: the old ladders were not equally generous (the Monk's Flurry of Blows was a bargain, the Paladin's powers were traps)
+const eff=(cls,u)=>E_CLS[cls]*CM[cls]*GE*(1-TAPER*Math.max(0,Math.min(80,u)-1)/79);
 const SPEC={
 Warrior:[
  ['c','Power Strike',6,'s',{p:'A crushing blow.'}],
@@ -150,8 +155,6 @@ const NUM_FIX=[
 ];
 
 /* ---- the numbers of one power ---- */
-const MAP={}; // 'class|key' -> {cost,role,M,dot,p}
-function noteMap(cls,key,cost,role,o,u){const E=E_CLS[cls],M=cost*E*(role==='g'?GT:1);MAP[cls+'|'+key]={cost,role,M,dot:o.dot||0,p:o.p,u,cls}}
 const fmt=n=>String(Math.max(1,Math.round(n)));
 function dmgText(info,h){
   if(!h)return '';const U=psU(h),g=gF(h.lvl,info.u),tot=info.M*U*g,dir=tot*(1-info.dot);
@@ -181,8 +184,10 @@ function psBackstab(){try{const f=frontEnemy(1);return f&&!f.e.alert?1.5:1}catch
 function setCasterDmg(P,info){
   Object.defineProperty(P,'dmg',{get(){
     const h=useHero();if(!h)return [1,2];
-    const sp=1+pasH(h,'spellPct'),D=info.M*psU(h)*gF(h.lvl,info.u),c=D/sp-intB(h)-magicBonus(h);
-    return [Math.max(1,Math.round(c*.85)),Math.max(2,Math.round(c*1.15))]},set(v){},configurable:true,enumerable:true});
+    // the spell code adds the intelligence bonus and the staff's magic to the roll, and then the spell bonuses: the roll is whatever is left of the target, which can be
+    // below zero for a small power in the hands of a mage with a good staff (rnd and the rounding below handle that); the spread is 15 percent of the whole.
+    const sp=1+pasH(h,'spellPct'),D=info.M*psU(h)*gF(h.lvl,info.u)/sp,c=D-intB(h)-magicBonus(h),sd=Math.max(1,D*.15);
+    return [Math.round(c-sd),Math.round(c+sd)]},set(v){},configurable:true,enumerable:true});
 }
 function annotateMx(P,fxList,info){ // give the damage ranges and the damage over time of a spell their share of the total
   const dmgs=fxList.filter(f=>f[0]==='dmg'||f[0]==='exec'||f[0]==='undead');
@@ -218,17 +223,17 @@ function psApply(){
     for(const [kind,key,cost,role,o] of SPEC[cls]){
       if(kind==='c'){
         const P=c.powers.find(p=>p.name===key&&p.act&&!p._ps);if(!P){console.warn('powers_scaling: no class power',cls,key);continue}
-        const info={cost,role,M:cost*E_CLS[cls]*(role==='g'?GT:1),dot:o.dot||0,p:o.p,u:P.lv};P._ps=1;
+        const info={cost,role,M:cost*eff(cls,P.lv)*(role==='g'?GT:1),dot:o.dot||0,p:o.p,u:P.lv};P._ps=1;
         applyClassPower(cls,P,cost,role,o,info);
         if(c.powers[0]===P&&c.sp){c.sp.cost=cost}
       }else if(kind==='x'){
         const s=MX.find(z=>z.id===key),P=MX_POWER[key];if(!s||!P){console.warn('powers_scaling: no spell',key);continue}
-        const info={cost,role,M:cost*E_CLS[cls]*(role==='g'?GT:1),dot:o.dot||0,p:o.p,u:s.lv};
+        const info={cost,role,M:cost*eff(cls,s.lv)*(role==='g'?GT:1),dot:o.dot||0,p:o.p,u:s.lv};
         s.cost=cost;P.cost=cost;annotateMx(P,P.fx,info);defineDesc(P,info);
         Object.defineProperty(s,'d',{get(){let h=null;try{h=cardHero()}catch(e){}return o.p+dmgText(info,h)},set(v){},configurable:true,enumerable:true});
       }else{
         const P=newClassPower(cls,key,cost);
-        const info={cost,role,M:cost*E_CLS[cls]*(role==='g'?GT:1),dot:0,p:o.p,u:key.lv};
+        const info={cost,role,M:cost*eff(cls,key.lv)*(role==='g'?GT:1),dot:0,p:o.p,u:key.lv};
         applyClassPower(cls,P,cost,role,o,info);
         P._new=1;adds.push(P);
       }
@@ -261,17 +266,24 @@ psApply();
   try{if(fx&&fx._M!==undefined&&E.st&&E.st[fx[0]]&&typeof E.st[fx[0]]==='object'){const h=G.heroes[hi],n=Math.max(1,fx[1]);E.st[fx[0]].d=Math.max(1,Math.round(fx._M*psU(h)*gF(h.lvl,fx._u)/n))}}catch(e){console.error(e)}
   return r}}
 
-/* ---- the list of powers: saved selections follow the new order ---- */
+/* ---- the list of powers: saved selections follow the new order ----
+   An old save keeps the number of the selected power in the old list (the class powers, then the learned spells). The first time the list is asked for after
+   such a save is loaded (the save has no flag powOrder yet), every hero's number is moved to the same power in the new list. The flag is saved with the game. */
 {const _hp=heroPowers;heroPowers=function(hi){
-  const h=G.heroes[hi];
-  if(h&&h.powV!==1){
-    const cn=HERO_DEF[hi]&&HERO_DEF[hi].cls,old=OLD_IDX[cn];
-    if(old&&h.powSel>0){ // an old saved selection counts in the order the list had before: the class powers, then the learned spells
-      let n;if(h.powSel<old.length){n=CLASSES.find(x=>x.name===cn).powers.indexOf(old[h.powSel]);if(n<0)n=0}else n=h.powSel-old.length+CLASSES.find(x=>x.name===cn).powers.length;
-      h.powSel=n}
-    h.powV=1;
-  }
+  try{const F=G.flags;
+    if(F&&F.powOrder!==1&&G.heroes&&G.heroes.length){F.powOrder=1;
+      G.heroes.forEach((h,j)=>{const cn=HERO_DEF[j]&&HERO_DEF[j].cls,old=OLD_IDX[cn],c=CLASSES.find(x=>x.name===cn);
+        if(old&&c&&h.powSel>0){let n;if(h.powSel<old.length){n=c.powers.indexOf(old[h.powSel]);if(n<0)n=0}else n=h.powSel-old.length+c.powers.length;h.powSel=n}})}
+  }catch(e){console.error(e)}
   return _hp.apply(this,arguments)}}
+
+/* ---- the Powers page: with a long ladder the rows are small and the line with the cost was hidden under the next row, so the cost is shown at the right end of each active row ---- */
+{const _dl=drawPowerLadder;drawPowerLadder=function(hi){
+  _dl.apply(this,arguments);
+  try{const h=G.heroes[hi],PW=heroPowers(hi),RH=PW.length>8?Math.min(26,Math.floor(228/PW.length)):26;
+    if(RH<22)PW.forEach((p,k)=>{if(!p.act||!p.cost)return;const y=22+k*RH,open=h.lvl>=p.lv,chosen=(h.powSel||0)===k&&open;
+      ctx.save();ctx.globalAlpha=open?1:.5;txt(String(p.cost),chosen?283:301,y+RH/2+1,7,'#9ac8ff','right',true);ctx.restore()})}catch(e){}
+}}
 
 /* ---- animations and pictures for the new powers ---- */
 try{PFX_RULES.unshift([/hallowed|sunlance|dawn of judg/i,'holy'],[/arcane ruin|soul rend|annihilat|unmaking/i,'bolt'],[/starfall/i,'fire'],[/thunderous roar/i,'shock'],[/worldsplitter|mountain's wrath|avalanche/i,'shock'])}catch(e){}
@@ -286,5 +298,5 @@ function pwTintIcons(){
     IMG[id]=pToneMap(b,t[1],t[2],1.6,.9,0);p.icn=id}
 }
 {const _m=typeof mxTintIcons==='function'?mxTintIcons:null;if(_m)mxTintIcons=function(){_m.apply(this,arguments);try{pwTintIcons()}catch(e){console.error(e)}}}
-window.PS={K,KL,GT,E_CLS,SPEC,MAP,psU,gF,uW,uM,NEW_N,ORIG_LEN};
+window.PS={K,KL,GT,GE,TAPER,CM,eff,E_CLS,SPEC,psU,gF,uW,uM,NEW_N,ORIG_LEN};
 })();

@@ -177,6 +177,45 @@ function hgpaBuild(L){
        if(!nt)nt='Scratched: Note number '+(++extra)+' on this wall. I kept count so that I would not lose myself.';
        if(d.npc==='hgd_pa_note')d.text=nt;else d.pbt=nt;t=nt;stat.notesFixed++}
      seen.add(t.trim().toLowerCase());if(d.npc==='hgd_note')d.bob=.35+.4*hs(d.x,d.y,17)}}
+  // ---- 6b) round 4: hubs get real light, the party never arrives inside a monster's face, shores get reeds, honeycomb walls get decals ----
+  {const HB=[[[1,.82,.5],.9,60],[[.55,.9,1],1.6,84],[[1,.74,.35],.9,60],[[.85,.92,1],.9,60]];
+   const losClear=(x0,y0,x1,y1)=>{if(x0!==x1&&y0!==y1)return false;const sx=Math.sign(x1-x0),sy=Math.sign(y1-y0);let x=x0,y=y0;while(x!==x1||y!==y1){x+=sx;y+=sy;if(!pass(x,y))return false}return true};
+   let hubs=0;
+   for(const p of prec){const b=p.b,H0=HB[b];let cx=p.x,cy=p.y;if(!pass(cx,cy)){let bd=1e9;for(let dy=-5;dy<=5;dy++)for(let dx=-5;dx<=5;dx++){const r=Math.hypot(dx,dy);if(r<bd&&pass(p.x+dx,p.y+dy)&&inZ(p.x+dx,p.y+dy)){bd=r;cx=p.x+dx;cy=p.y+dy}}if(bd>1e8)continue}
+     p.lx=cx;p.ly=cy;
+     LT.push([cx,cy,H0[0],H0[1],H0[2]]);hubs++;
+     // a prop that explains the light, if the square is free
+     const taken=[[cx,cy]];
+     const cand=[];for(let dy=-4;dy<=4;dy++)for(let dx=-4;dx<=4;dx++){const x=cx+dx,y=cy+dy,c=Math.max(Math.abs(dx),Math.abs(dy));if(c<1||!okCell(x,y)||!losClear(cx,cy,x,y))continue;cand.push([x,y,c+hs(x,y,41)*1.5])}
+     cand.sort((a,c)=>a[2]-c[2]);
+     let nl=0;for(const [x,y] of cand){if(taken.some(t=>Math.hypot(t[0]-x,t[1]-y)<2.5))continue;
+       const o=pickLight(x,y,b);let ox=0,oy=0,fnd=false;for(const [a,c] of DV)if(!pass(x+a,y+c)){ox=a*.32;oy=c*.32;fnd=true;break}if(!fnd){ox=.3;oy=.3}
+       L.decor.push({k:o[0],x,y,ox,oy,block:false,walk:true,deco:true,hpa:1});LT.push([x,y,o[1],o[2],o[3]]);
+       const g=gk2(x,y);if(!lastK.has(g))lastK.set(g,[]);lastK.get(g).push([x,y,o[0]]);taken.push([x,y]);nl++;if(nl>=1)break}
+     stat.hubLights=(stat.hubLights||0)+nl+1}
+   stat.hubs=hubs}
+  // enemies: nobody within 3 squares of a precinct centre or a teleporter (the squares the party appears on), mini bosses and bosses excepted
+  {const spots=prec.map(p=>[p.x,p.y]);for(const d of L.decor)if(d.k==='teleporter'&&inZ(d.x,d.y))spots.push([d.x,d.y]);
+   const isBoss=e=>/^(hgdb_|hgmini|hgdwarden)/.test(e.t);let moved=0;
+   const used=new Set(L.enemies.map(e=>e.x+','+e.y));
+   for(const e of L.enemies){if(!inZ(e.x,e.y)||isBoss(e))continue;const sp=spots.find(s=>Math.hypot(s[0]-e.x,s[1]-e.y)<=3.2);if(!sp)continue;
+     let best=null,bd=1e9;for(let dy=-12;dy<=12;dy++)for(let dx=-12;dx<=12;dx++){const x=sp[0]+dx,y=sp[1]+dy,r=Math.hypot(dx,dy);if(r<6||r>12||!okCell(x,y)||bio[y*W+x]!==bio[e.y*W+e.x]||used.has(x+','+y)||L.fmap[y][x]==='6')continue;if(spots.some(s=>Math.hypot(s[0]-x,s[1]-y)<4))continue;const sc=r+hs(x,y,43)*3;if(sc<bd){bd=sc;best=[x,y]}}
+     if(best){used.delete(e.x+','+e.y);e.x=best[0];e.y=best[1];used.add(best.join(','));moved++}}
+   stat.enemiesMoved=moved}
+  // the shore of a flooded passage: a few reeds, mushrooms or bushes stand at the edge so the water does not end in a hard line
+  {const water=(x,y)=>L.fmap[y]&&L.fmap[y][x]==='6'&&open(x,y),KIND=['hgt_reeds','hgt_mushrooms','hgt_reeds','hgt_pearlbush'];let n=0;const at=[];
+   for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!inZ(x,y)||water(x,y)||!okCell(x,y))continue;let wd=null;for(const [a,c] of DV)if(water(x+a,y+c)){wd=[a,c];break}if(!wd)continue;
+     if(hs(x,y,44)>.8||at.some(q=>Math.abs(q[0]-x)<2&&Math.abs(q[1]-y)<2))continue;at.push([x,y]);
+     L.decor.push({k:KIND[bio[y*W+x]],x,y,ox:wd[0]*.3,oy:wd[1]*.3,block:false,walk:true,deco:true,hpa:1,shore:1});n++}
+   stat.shore=n}
+  // honeycomb: the plain tan walls get wax decals (drips, comb patches, stains, runs); half of the repeated wall sign of this biome is swapped for them
+  {hgpaDecalArt();let n=0,sw=0;const WD=['hgpa_dd0','hgpa_dd1','hgpa_dd2','hgpa_dd3'],wax=String.fromCharCode(0x2e2),at2=[];
+   for(const d of L.decor){if(d.pic&&d.k==='art_hgdf_wsym2'&&inZ(d.x,d.y)&&bio[d.y*W+d.x]===2&&hs(d.x,d.y,45)<.6){d.k=WD[(hs(d.x,d.y,46)*4)|0];d.sc=undefined;d.bob=.45+.3*hs(d.x,d.y,47);sw++}}
+   const hasPic=new Set();for(const d of L.decor)if(d.pic&&d.wd)hasPic.add(d.x+','+d.y+','+d.wd[0]+','+d.wd[1]);
+   for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(bio[y*W+x]!==2||!pass(x,y)||busy.has(y*W+x))continue;
+     for(const [a,c] of DV){if(rows[y+c][x+a]!==wax)continue;if(hs(x,y,48+a*3+c)>.075||hasPic.has(x+','+y+','+a+','+c))continue;if(at2.some(q=>Math.abs(q[0]-x)<4&&Math.abs(q[1]-y)<4))continue;
+       at2.push([x,y]);L.decor.push({k:WD[(hs(x,y,49)*4)|0],x,y,wd:[a,c],pic:1,block:false,walk:true,deco:true,bob:.4+.35*hs(x,y,50),hpa:1});n++;break}}
+   stat.waxDecals=n;stat.waxSwapped=sw}
   // ---- 7) the scale table (see the header). Runs last so that nothing above is undone. ----
   {const treeH=d=>[1.6,2.0,2.4,2.7][(hs(d.x,d.y,5)*4)|0],jit=(d,s,a,b)=>a+(b-a)*hs(d.x,d.y,s);
    const R=[[/^hg_house\d$/,()=>2.2],[/^(hgtb_plant_belltree|hgt_fairytree)$/,treeH],[/^hgt_vine_roundleaf$/,d=>jit(d,6,1.5,1.9)],[/^hg_lamp$/,d=>jit(d,7,1.3,1.5)],[/^hgt_lamppost$/,()=>1.3],
@@ -191,3 +230,57 @@ function hgpaBuild(L){
 {const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];_b.apply(this,arguments);const L=LEVELS[HGD.ID];try{hgpaEnemies()}catch(e){console.error('hgpa enemies',e)}if(!had&&L&&L._hgdm&&L._hgdp&&L.decor)try{hgpaBuild(L);hgpaEnemies()}catch(e){console.error('hgpa',e)}}}
 // the coloured lights of the zone (after the torches and level lights are set up)
 {const _sl=setupLights;setupLights=function(){_sl.apply(this,arguments);try{if(LEVEL===HGD.ID){const Lv=LEVELS[HGD.ID],A=Lv&&Lv._hgpa;if(A)for(const q of A.lights)LIGHTS.push({x:q[0]+.5,y:q[1]+.5,ph:hash2(q[0],q[1],23)*6.28,key:-7000-LIGHTS.length,taken:false,red:false,free:true,calm:true,hpa:1,col:q[2],kI:q[3],range2:q[4]})}}catch(e){console.error('hgpa lights',e)}}}
+
+/* ======================= ROUND 4 (north zone) =======================
+   - the Stone Warrens wall is brightened before the maze is built (own copy of the picture), so hubs and corridors read
+   - honeycomb: wall variants (drip, glowing cells, wax bloom) in clusters, and wax decals (wall pictures made in code, walls may be)
+   - houses in the zone are dimmed by a third so that one painted house is not the brightest thing in a dark room
+   - after every other builder has run (first frame of the level): variant walls are laid in, and proportions are clamped to the scale table
+     (hgd_polish_c rescales trees to 3.5 and villagers to 1.68 after this file's build)                                                    */
+for(const k of ['hgpa_dd0','hgpa_dd1','hgpa_dd2','hgpa_dd3'])NPC_H[k]=.8;
+for(const [k,v] of [['art_hgt_lamppost',1.3],['art_hgtb_lamp_tall',1.3],['art_hgtb_deco_shellstatue',1.4],['art_hgt_gardenlantern',1.15]])if(NPC_H[k]===undefined)NPC_H[k]=NPC_H[k.replace(/^art_/,'')]||v;
+function hgpaDecalArt(){if(IMG.hgpa_dd0)return;
+  const amber=(x,a)=>{const g=x.createLinearGradient(0,0,0,170);g.addColorStop(0,'rgba(255,214,110,'+a+')');g.addColorStop(1,'rgba(176,96,22,'+a+')');return g};
+  const drip=(x,cx,len,wd,fill)=>{x.fillStyle='rgba(30,14,0,.3)';x.beginPath();x.moveTo(cx-wd/2+3,0);x.lineTo(cx+wd/2+3,0);x.lineTo(cx+wd/3+3,len);x.arc(cx+3,len,wd/3,0,Math.PI);x.closePath();x.fill();
+    x.fillStyle=fill;x.beginPath();x.moveTo(cx-wd/2,0);x.lineTo(cx+wd/2,0);x.lineTo(cx+wd/3,len);x.arc(cx,len,wd/3,0,Math.PI);x.closePath();x.fill()};
+  IMG.hgpa_dd0=mkCanvas(160,180,(x,w,h)=>{ // honey drips running down from the top
+    for(const [cx,len,wd] of [[34,120,13],[70,160,16],[104,96,11],[132,134,14]]){drip(x,cx,len,wd,amber(x,.92));x.fillStyle='rgba(255,246,190,.55)';x.fillRect(cx-wd/4,4,wd/6,len-10)}
+    x.fillStyle=amber(x,.8);x.fillRect(0,0,w,14)});
+  IMG.hgpa_dd1=mkCanvas(170,170,(x,w,h)=>{ // a patch of comb cells, some filled and glowing
+    const hex=(cx,cy,r)=>{x.beginPath();for(let i=0;i<6;i++){const a=Math.PI/6+i*Math.PI/3;x[i?'lineTo':'moveTo'](cx+r*Math.cos(a),cy+r*Math.sin(a))}x.closePath()};
+    const R=22,cells=[[0,0],[1,0],[-1,0],[.5,1],[-.5,1],[.5,-1],[-.5,-1],[1.5,1],[-1.5,1],[0,2]];
+    cells.forEach(([i,j],n)=>{const cx=85+i*R*1.74,cy=80+j*R*1.5;if(cy>150)return;x.fillStyle='rgba(20,10,0,.35)';hex(cx+3,cy+3,R);x.fill();
+      const full=(n*7)%3!==0,g=x.createRadialGradient(cx,cy,2,cx,cy,R);g.addColorStop(0,full?'rgba(255,226,130,.95)':'rgba(70,40,10,.9)');g.addColorStop(1,full?'rgba(214,138,40,.95)':'rgba(40,22,6,.95)');x.fillStyle=g;hex(cx,cy,R-1);x.fill();
+      x.strokeStyle='rgba(96,56,12,.95)';x.lineWidth=3;hex(cx,cy,R-1);x.stroke();x.strokeStyle='rgba(255,236,170,.4)';x.lineWidth=1;hex(cx-1,cy-1,R-5);x.stroke()})});
+  IMG.hgpa_dd2=mkCanvas(170,150,(x,w,h)=>{ // pale wax runs
+    for(const [cx,len,wd] of [[30,70,18],[62,120,22],[100,90,20],[134,110,16]]){const g=x.createLinearGradient(0,0,0,len);g.addColorStop(0,'rgba(240,228,190,.95)');g.addColorStop(1,'rgba(196,176,120,.9)');drip(x,cx,len,wd,g);x.fillStyle='rgba(255,255,244,.5)';x.fillRect(cx-wd/5,3,wd/7,len-8)}
+    x.fillStyle='rgba(236,222,180,.9)';x.fillRect(0,0,w,12)});
+  IMG.hgpa_dd3=mkCanvas(180,160,(x,w,h)=>{ // an old honey stain with two runs
+    const g=x.createRadialGradient(90,70,6,90,70,70);g.addColorStop(0,'rgba(214,138,40,.8)');g.addColorStop(.7,'rgba(150,84,20,.5)');g.addColorStop(1,'rgba(120,64,10,0)');x.fillStyle=g;x.beginPath();x.ellipse(90,70,78,60,0,0,6.3);x.fill();
+    drip(x,70,128,18,amber(x,.85));drip(x,112,104,13,amber(x,.85));x.fillStyle='rgba(255,240,170,.55)';x.fillRect(66,64,3,56)})}
+// a dimmer copy of a painted house, for the dark rooms
+function hgpaDim(){for(const k of ['hg_house0','hg_house1']){const nk='hgpa_hd_'+k;if(IMG[nk]||!IMG[k]||!IMG[k].width)continue;const b=IMG[k],c=document.createElement('canvas');c.width=b.width;c.height=b.height;const x=c.getContext('2d');try{x.filter='brightness(.66) saturate(.8)'}catch(e){}x.drawImage(b,0,0);try{x.filter='none'}catch(e){}IMG[nk]=c;NPC_H[nk]=NPC_H[k]}}
+{const _u2=update;update=function(dt){try{if(LEVEL===HGD.ID){hgpaDim();hgpaPost()}}catch(e){if(!hgpaPost.err){hgpaPost.err=1;console.error('hgpa post',e)}}return _u2.apply(this,arguments)}}
+function hgpaPost(){const L=LEVELS[HGD.ID],A=L&&L._hgpa;if(!A||A.post)return;if(!G.grid||!G.grid.length)return;const M=L._hgdm,W=M.W,H=M.H,bio=M.bio;A.post=1;
+  // 1) house dimming and the scale clamp (after hgd_polish_c)
+  let cl=0,hd=0;const inZ=(x,y)=>bio[y*W+x]<4;
+  for(const d of L.decor){if(d.pic||!inZ(d.x,d.y)||!NPC_H[d.k])continue;const h=NPC_H[d.k]*(d.sc||1);let mx=0;
+    if(/^(hg_house0|hg_house1)$/.test(d.k)&&IMG['hgpa_hd_'+d.k]){d.k='hgpa_hd_'+d.k;d.sc=2.2/NPC_H[d.k];hd++;continue}
+    if(/^hgpa_hd_/.test(d.k))continue;
+    if(/^(hgtb_plant_belltree|hgt_fairytree)$/.test(d.k))mx=2.7;else if(/^(hg_npc\d|hg_wizard|pickpocket)$/.test(d.k))mx=.98;else if(/^hgdfc_/.test(d.k))mx=.95;else if(/^hgtb_plant_spiralfern$/.test(d.k))mx=.95;else if(/lamp|lantern/.test(d.k)&&!/hang/.test(d.k))mx=1.5;else if(/statue/.test(d.k))mx=1.7;
+    if(mx&&h>mx+.01){d.sc=Math.round(mx/NPC_H[d.k]*1000)/1000;cl++}}
+  A.clamped=cl;A.dimmed=hd;
+  // 2) honeycomb wall variants
+  try{const base=IMG.hg_wax;if(!base||!base.width)return;const TM=ohTiles(),wax=String.fromCharCode(0x2e2),rows=L.rows.map(r=>r.split(''));
+    const V=[
+     (x,w,h)=>{x.drawImage(base,0,0,w,h);const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'rgba(120,64,10,.62)');g.addColorStop(.5,'rgba(120,64,10,.18)');g.addColorStop(1,'rgba(120,64,10,0)');x.fillStyle=g;x.fillRect(0,0,w,h);
+       for(const [cx,len,wd] of [[18,70,9],[52,104,11],[86,60,8],[112,92,10]]){x.fillStyle='rgba(255,196,80,.55)';x.beginPath();x.moveTo(cx-wd/2,0);x.lineTo(cx+wd/2,0);x.lineTo(cx+wd/3,len);x.arc(cx,len,wd/3,0,Math.PI);x.fill();x.fillStyle='rgba(255,240,170,.4)';x.fillRect(cx-wd/5,0,wd/6,len)}},
+     (x,w,h)=>{x.drawImage(base,0,0,w,h);x.fillStyle='rgba(60,30,6,.25)';x.fillRect(0,0,w,h);const hex=(cx,cy,r)=>{x.beginPath();for(let i=0;i<6;i++){const a=Math.PI/6+i*Math.PI/3;x[i?'lineTo':'moveTo'](cx+r*Math.cos(a),cy+r*Math.sin(a))}x.closePath()};
+       for(const [cx,cy] of [[40,40],[70,40],[55,66],[85,66],[25,66],[55,14],[100,92],[70,92]]){const g=x.createRadialGradient(cx,cy,2,cx,cy,17);g.addColorStop(0,'rgba(255,214,110,.92)');g.addColorStop(1,'rgba(200,120,30,.75)');x.fillStyle=g;hex(cx,cy,15);x.fill();x.strokeStyle='rgba(90,50,10,.9)';x.lineWidth=2.5;hex(cx,cy,15);x.stroke()}},
+     (x,w,h)=>{x.drawImage(base,0,0,w,h);x.fillStyle='rgba(255,246,214,.2)';x.fillRect(0,0,w,h);for(let i=0;i<9;i++){const cx=(i*47)%w,cy=(i*71)%h,g=x.createRadialGradient(cx,cy,2,cx,cy,30);g.addColorStop(0,'rgba(255,252,236,.5)');g.addColorStop(1,'rgba(255,252,236,0)');x.fillStyle=g;x.fillRect(cx-30,cy-30,60,60)}
+       x.fillStyle='rgba(70,40,12,.5)';for(let i=0;i<7;i++){x.fillRect(8+i*18,(i*37)%h,2,24+(i*11)%20)}}];
+    const chars=V.map((fn,i)=>{const key='hgpa_wx'+i;IMG[key]=mkCanvas(128,128,fn);const sty='hgpa_wx'+i;OH_STY[sty]=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:key,door:key,win:key,alt:key,zoom:1,contrast:1.0,tint:[255,255,255,0]});const c=String.fromCharCode(0x380+i);L.chars[c]=TM.make('plain',sty,2.7).gid;return c});
+    const hv=(x,y,s)=>{let h=(Math.imul(x+1,374761393)+Math.imul(y+1,668265263)+Math.imul(s+7,2147483647))>>>0;h=Math.imul(h^(h>>>13),1274126177)>>>0;return((h^(h>>>16))>>>0)/4294967296};
+    let n=0;for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(rows[y][x]!==wax||bio[y*W+x]!==2)continue;const r=hv(x>>1,y>>1,60);if(r>.34)continue;const i=r<.12?0:r<.22?1:2;rows[y][x]=chars[i];if(G.grid[y]&&G.grid[y][x]!==undefined)G.grid[y][x]=L.chars[chars[i]];n++}
+    L.rows=rows.map(r=>r.join(''));A.wallVariants=n}catch(e){console.error('hgpa wall variants',e)}}
+{const _b4=hgdBuild;hgdBuild=function(){try{if(!LEVELS[HGD.ID]&&typeof IMG!=='undefined'&&IMG.tex_abbeywall&&IMG.tex_abbeywall.width&&!IMG.hgpa_w1){const b=IMG.tex_abbeywall,c=document.createElement('canvas');c.width=b.width;c.height=b.height;const x=c.getContext('2d');try{x.filter='brightness(1.18) contrast(1.04)'}catch(e){}x.drawImage(b,0,0);try{x.filter='none'}catch(e){}IMG.hgpa_w1=c;HGDM.biomes[1].wall='hgpa_w1'}}catch(e){console.error('hgpa warren wall',e)}return _b4.apply(this,arguments)}}

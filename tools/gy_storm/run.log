@@ -1,0 +1,124 @@
+  boot 2s {'lv': 1, 'st': 'title', 'gys': False, 'ready': None}
+  boot 12s {'lv': 1, 'st': 'title', 'gys': False, 'ready': None}
+  boot 22s {'lv': 1, 'st': 'title', 'gys': False, 'ready': None}
+  boot 32s {'lv': 1, 'st': 'title', 'gys': False, 'ready': None}
+  boot 43s {'lv': 1, 'st': 'title', 'gys': False, 'ready': None}
+  boot 53s {'lv': 1, 'st': 'title', 'gys': False, 'ready': None}
+  boot 63s {'lv': 1, 'st': 'title', 'gys': False, 'ready': None}
+  boot 73s {'lv': 1, 'st': 'title', 'gys': False, 'ready': None}
+  boot 83s {'lv': 1, 'st': 'title', 'gys': False, 'ready': None}
+  boot 93s {'lv': 1, 'st': 'title', 'gys': False, 'ready': None}
+  boot 106s {'lv': 1, 'st': 'play', 'gys': False, 'ready': True}
+  boot 116s {'lv': 530, 'st': 'play', 'gys': True, 'ready': True}
+C:\Users\mirko\Downloads\workspace\Below-the-Abbey\tools\gy_storm\shoot.py:29: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  px = list(im.getdata()); n = len(px)
+{
+ "sanity": {
+  "level": 530,
+  "ready": true,
+  "pan": true,
+  "wx": "Stormclouds",
+  "amb": 0.92,
+  "reduced": false,
+  "mute": false,
+  "sndAmb": 1,
+  "cpf": 64
+ },
+ "flash": {
+  "first": 1,
+  "last": 244,
+  "peak": 1
+ },
+ "audio": {
+  "ac": true,
+  "state": "running",
+  "nb": true,
+  "rainSample": true
+ },
+ "frames": {
+  "f1_plaza_north_calm": 6.8,
+  "f2_plaza_east_calm": 11.8,
+  "f3_rows_west_rain": 17.6,
+  "f4_rows_north_rain": 22.7,
+  "f5_FLASH_fork_south": 29.4,
+  "f6_after_east": 35.4,
+  "f7_FLASH_first_flicker_west": 41.9,
+  "f8_gate_south_calm": 47.9
+ },
+ "span_s": 47.9,
+ "natural_strikes_in_span": 0,
+ "luma": {
+  "f1_plaza_north_calm": 57.7,
+  "f2_plaza_east_calm": 56.8,
+  "f3_rows_west_rain": 45.3,
+  "f4_rows_north_rain": 56.8,
+  "f5_FLASH_fork_south": 88.7,
+  "f6_after_east": 53.2,
+  "f7_FLASH_first_flicker_west": 57.9,
+  "f8_gate_south_calm": 54.6
+ },
+ "luma_before": [
+  55.1,
+  70.6,
+  48.5,
+  64.3
+ ],
+ "thunder": {
+  "thunders": 1,
+  "rumbleCalls": 1,
+  "audioSourcesCreated": 3,
+  "mute": false
+ },
+ "rainSound_on": {
+  "src": true,
+  "gain": 0.0238
+ },
+ "rainSound_off": {
+  "src": true
+ },
+ "frame_ms": {
+  "on": 61.61,
+  "off": 61.52,
+  "panoStepAvg": 1.28,
+  "cpf": 96
+ },
+ "fps": 3,
+ "leave": {
+  "crypt": {
+   "level": 531,
+   "rain": 0,
+   "strike": false,
+   "queue": 0,
+   "rainSrc": true,
+   "ambNow": 0.04,
+   "ambLevel": 0.04,
+   "wx": null,
+   "kI0": 0
+  },
+  "wenlock": {
+   "level": 531,
+   "rain": 0,
+   "strike": false,
+   "queue": 0,
+   "rainSrc": false,
+   "ambNow": 0.04,
+   "ambLevel": 0,
+   "wx": null,
+   "kI0": 0
+  },
+  "back": {
+   "level": 530,
+   "rain": 0,
+   "strike": false,
+   "queue": 0,
+   "rainSrc": false,
+   "ambNow": 0.92,
+   "ambLevel": 0.92,
+   "wx": "Stormclouds",
+   "kI0": 0
+  }
+ },
+ "errors": [],
+ "resource_errors": 918
+}
+done

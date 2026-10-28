@@ -1,4 +1,4 @@
-"""Persistent browser for the north zone (port 8330). Queue: north_q/<n>.json = {"op":"eval","js":"()=>..","arg":..} | {"op":"shot","path":"x.png","tx":..,"ty":..,"f":0..3|-1,"wait":700} (returns luminance of the 3D view) | {"op":"reload"}"""
+"""Persistent browser for the north zone (port 8320). Queue: north_q/<n>.json = {"op":"eval","js":"()=>..","arg":..} | {"op":"shot","path":"x.png","tx":..,"ty":..,"f":0..3|-1,"wait":700} (returns luminance of the 3D view) | {"op":"reload"}"""
 import json, time, pathlib, io
 from playwright.sync_api import sync_playwright
 from PIL import Image
@@ -9,7 +9,7 @@ GO = """([x,y,f])=>{const L=LEVELS[475],ok=(a,b)=>L.rows[b]&&L.rows[b][a]==='.';
 errs = []
 def load(pg):
     errs.clear()
-    pg.goto('http://localhost:8330/index.html?town=deephollow&lvl=34&v=%d' % time.time(), wait_until='domcontentloaded', timeout=90000)
+    pg.goto('http://localhost:8320/index.html?town=deephollow&lvl=34&v=%d' % time.time(), wait_until='domcontentloaded', timeout=90000)
     for k in range(120):
         pg.wait_for_timeout(2000)
         try:

@@ -10,7 +10,7 @@
 // text rectangle per picture: [x0,y0,x1,y1] as fractions of the picture, ink (dark paper ink, brass dark engraved, cream stone), face, rot, maxLines
 const HGTX_TBL={
   page:{r:[.16,.2,.84,.8],ink:'dark',fam:'t',n:3},
-  scroll:{r:[.28,.38,.78,.72],ink:'dark',fam:'u',n:3},
+  scroll:{r:[.2,.34,.84,.76],ink:'dark',fam:'u',n:3},
   plaque:{r:[.17,.2,.83,.46],ink:'brass',fam:'u',n:3},
   tablet:{r:[.2,.2,.8,.62],ink:'cream',fam:'u',n:3},
   slate:{r:[.2,.24,.8,.7],ink:'cream',fam:'u',n:3,rot:-.03},
@@ -20,7 +20,10 @@ const HGTX_TBL={
   waymarker:{r:[.26,.56,.74,.76],ink:'cream',fam:'u',n:3},
   hanging:{r:[.3,.57,.7,.71],ink:'cream',fam:'t',n:2},
   board:{r:[.12,.185,.88,.3],ink:'cream',fam:'u',n:1},
-  post:{r:[.22,.3,.86,.42],ink:'cream',fam:'u',n:1,top:[.14,.12,.74,.24]}
+  post:{r:[.22,.3,.86,.42],ink:'cream',fam:'u',n:1,top:[.14,.12,.74,.24]},
+  // level 476 (hgd_polish_d.js): the grey notice board gets a lettered plank across its lower third, the rune stone a reading line on its plinth
+  hboard:{r:[.2,.66,.8,.86],ink:'cream',fam:'u',n:2,plank:[.1,.6,.9,.9],base:true},
+  hrune:{r:[.16,.845,.84,.965],ink:'gold',fam:'u',n:1,base:true}
 };
 // a few pictures are a little larger so that their writing can be read from three squares (HGS_SET.h is also what hgd_polish_signs.js uses)
 HGS_SET.plaque.h=.6;NPC_H.art_hs_plaque=.6;HGS_SET.scroll.h=.7;NPC_H.art_hs_scroll=.7;
@@ -41,6 +44,9 @@ const HGTX_LAB={hl_vance0:'Letter: the Narrow Sea silver',hl_vance1:"Letter: the
   hl_note6:'The covered mirrors',hl_note7:'A voice in the dark',hl_note8:'The lights go out',hl_note9:'The witch was a guest',hl_note10:'Duke Aldric buried alive',hl_note11:'A thin man in black',
   hl_note12:'Open coffins',hl_note13:'The wizard at the top',hl_note14:'Names on the wall',hl_note15:'Spikes, darts, plates',hl_note16:'The wrong colour wall',hl_note17:'Five letters in blood'};
 function hgtLabel(d){
+  if(!d.label&&/^hgpd_(board|rune)/.test(d.k||'')){ // the game copies only some decor fields into G.decor: read the label from the built level's own entry
+    try{const L=LEVELS[LEVEL],m=L&&L.decor&&L.decor.find(e=>e.x===d.x&&e.y===d.y&&e.label&&/^hgpd_(board|rune)/.test(e.hgtBase||e.k||''));if(m)d.label=m.label}catch(e){}
+    if(!d.label)return ''}
   if(d.label)return hgtClean(d.label);
   if(d.npc&&HGTX_LAB[d.npc])return HGTX_LAB[d.npc];
   const txt=hgsText(d),kind=d.hgs||'page';
@@ -77,12 +83,14 @@ function hgtBlock(x,lines,R,fs,fam,ink,seed){
   lines.forEach((ln,i)=>{const w=x.measureText(ln).width;let px=cx-w/2;const py=cy0+i*lh;
     for(let k=0;k<ln.length;k++){const ch=ln[k],cw=x.measureText(ch).width;if(ch!==' ')hgtInk(x,ch,px,py,fs,ink,seed+ln+k);px+=cw}});
 }
-function hgtPaint(kind,label){
-  const base=IMG['art_hs_'+kind],T=HGTX_TBL[kind];if(!base||!base.width||!T)return null;
-  const id=kind+'|'+label;if(HGTX.cache[id])return HGTX.cache[id];
+function hgtPaint(kind,label,bk){
+  const T=HGTX_TBL[kind],base=bk?IMG[bk]:IMG['art_hs_'+kind];if(!base||!base.width||!T)return null;
+  const id=(bk||kind)+'|'+label;if(HGTX.cache[id])return HGTX.cache[id];
   const w=base.width,h=base.height,fam=hgtFam(T.fam);
   const c=mkCanvas(w,h,x=>{
     x.drawImage(base,0,0);
+    if(T.plank){const q=T.plank,X=q[0]*w,Y=q[1]*h,PW=(q[2]-q[0])*w,PH=(q[3]-q[1])*h;const g=x.createLinearGradient(0,Y,0,Y+PH);g.addColorStop(0,'#4a3a2a');g.addColorStop(.5,'#3a2c20');g.addColorStop(1,'#2a2018');
+      x.fillStyle=g;x.fillRect(X,Y,PW,PH);x.strokeStyle='#14100a';x.lineWidth=Math.max(2,h*.012);x.strokeRect(X,Y,PW,PH);x.fillStyle='#8a8f96';for(const nx of [X+PW*.04,X+PW*.96])for(const ny of [Y+PH*.2,Y+PH*.8]){x.beginPath();x.arc(nx,ny,Math.max(1.5,h*.012),0,7);x.fill()}}
     const parts=label.split('|');
     const draw=(txt,r)=>{const R=[r[0]*w,r[1]*h,r[2]*w,r[3]*h],rw=R[2]-R[0],rh=R[3]-R[1];
       const f=hgtFit(x,txt,rw,rh,fam,T.n,h*.17);
@@ -94,12 +102,14 @@ function hgtPaint(kind,label){
   return HGTX.cache[id]=c;
 }
 function hgtOne(d){
-  if(d.hgt||!d.k||d.k.indexOf('art_hs_')!==0)return false;
-  const kind=d.k.slice(7);if(!HGTX_TBL[kind])return false;
+  if(d.hgt||!d.k)return false;
+  const hm=/^hgpd_(board|rune)(_m)?$/.exec(d.k);
+  if(!hm&&d.k.indexOf('art_hs_')!==0)return false;
+  const kind=hm?'h'+hm[1]:d.k.slice(7);if(!HGTX_TBL[kind])return false;
   const label=hgtLabel(d);if(!label)return false;
-  const cv=hgtPaint(kind,label);if(!cv)return false; // picture not loaded yet: try again later
-  const key='hgt_'+kind+'_'+hgtHash(label).toString(36);
-  IMG[key]=cv;NPC_H[key]=NPC_H['art_hs_'+kind];
+  const cv=hgtPaint(kind,label,hm?d.k:null);if(!cv)return false; // picture not loaded yet: try again later
+  const key='hgt_'+(hm?d.k:kind)+'_'+hgtHash(label).toString(36);
+  IMG[key]=cv;NPC_H[key]=NPC_H[hm?d.k:'art_hs_'+kind];
   d.hgtBase=d.k;d.hgt=label;if(d.pic&&d.wd)d.lk=key;else d.k=key; // a wall picture keeps its id (maps and quests read it) and shows the lettered copy through d.lk
   HGTX.n++;return true;
 }
@@ -109,5 +119,5 @@ function hgtList(){const o=[];for(const id in LEVELS){const L=LEVELS[id];if(!L||
 try{if(typeof HL!=='undefined'){for(let k=0;k<=HL.N;k++)HGSG.IDS.push(HL.BASE+k);HGSG.IDS.push(HL.CAV)}}catch(e){}
 // notes of the older floors keep their words in lists (HL_NOTES, HL_VANCE) and name them only by the npc id
 {const _t=hgsText;hgsText=function(d){const r=_t(d);if(r)return r;try{const m=/^hl_(note|vance)(\d+)$/.exec(d.npc||'');if(m){const A=m[1]==='note'?HL_NOTES:HL_VANCE,v=A&&A[+m[2]];return typeof v==='string'?v:(v&&(v.t||v.text||v[0]))||''}}catch(e){}return r}}
-{const _a=hgsApply;hgsApply=function(L){const r=_a.apply(this,arguments);try{hgtApply(L)}catch(e){console.error('hgt',e)}return r}}
+{const _a=hgsApply;hgsApply=function(L){const r=_a.apply(this,arguments);try{if(typeof hgdpcCorr==='function')hgdpcCorr(L)}catch(e){console.error('hgdpcCorr',e)}try{hgtApply(L)}catch(e){console.error('hgt',e)}return r}}
 {const _sl=setupLights;setupLights=function(){const r=_sl.apply(this,arguments);try{if(typeof LEVEL!=='undefined'&&LEVELS[LEVEL])hgtApply(LEVELS[LEVEL]);if(G&&G.decor)for(const d of G.decor)hgtOne(d)}catch(e){console.error('hgt',e)}return r}}

@@ -1,0 +1,110 @@
+{
+ "c2_audit.js": {
+  "zoneDecor": 1348,
+  "pictures": 35,
+  "picUse": "oldman:4 fisher:4 monk:4 child:4 hg_npc2:4 hg_npc1:4",
+  "giverPictures": "20 of 20",
+  "giverMax": 1,
+  "repeatSent": [
+   "3x They said it before they went in.",
+   "3x We still have the short."
+  ],
+  "repeatCount": 2,
+  "maxRepeat": 3,
+  "emptyText": [],
+  "badChars": 0,
+  "npcAdjacent": 0,
+  "npcWithin2": 3,
+  "adjSample": [],
+  "blockerRows": 3,
+  "blockerRowAt": [
+   "14,159",
+   "64,127",
+   "68,132"
+  ],
+  "houses": 32,
+  "churchArt": [
+   "hgd_church0:-@106,177",
+   "hgd_church1:-@16,162",
+   "hgd_church2:-@61,129",
+   "hgd_church3:-@77,104",
+   "hgd_church4:-@41,84",
+   "hgd_church5:-@25,40",
+   "hgd_church6:-@124,16",
+   "hgd_church7:-@146,33"
+  ],
+  "stacked": 7,
+  "onWall": 1,
+  "clusters": 4,
+  "clusterList": [
+   "hgt_fairytree x3@13,172",
+   "hgpa_dd0 x3@61,126",
+   "hgpa_dd0 x3@59,125",
+   "hgpa_dd0 x3@62,123"
+  ],
+  "cutOff": 0,
+  "npcUnreach": 0,
+  "lights": 740,
+  "extraLights": 1476,
+  "stats": {
+   "peopleRescaled": 97,
+   "peopleSwapped": 81,
+   "groveSwapped": 54,
+   "groveRemoved": 28,
+   "stackedRemoved": 176,
+   "movedBlockers": 0,
+   "freedBlockers": 0,
+   "shopSigns": 56,
+   "boards": 8,
+   "signposts": 8,
+   "vignettes": 18,
+   "vignettePieces": 112,
+   "vignetteChests": 4
+  }
+ },
+ "c3_audit2.js": {
+  "churchDist": "0:6 1:6 2:7 3:3 4:6 5:6 6:3 7:6",
+  "houses": 32,
+  "housesInStreet": 30,
+  "churchDoorBlockers": [],
+  "notesSigns": 170,
+  "noLabel": [],
+  "emptyText": [],
+  "longLabels": [],
+  "dupLabelsNear": 0,
+  "pocket": 0,
+  "plaques": 7,
+  "corridorLamps": 627,
+  "emDash": 0
+ },
+ "c5_audit.js": {
+  "people": 68,
+  "hidden": [],
+  "hiddenNotes": [
+   "89|142|art_hgxrock1|89|144"
+  ],
+  "ss": [
+   0.6,
+   0.62,
+   48
+  ],
+  "notes": 37,
+  "wallNotes": 0,
+  "standNotes": 37,
+  "nolabel": [],
+  "outl": {
+   "hgt_bulbflower": 1.5,
+   "hgt_shellflower": 1.6,
+   "hgdfc_cream1": 1.29,
+   "hgdfc_pink1": 1.68,
+   "hpa_ribbon": 1.15,
+   "hgtb_furn_bed": 1.1,
+   "hgt_fern": 1.1
+  },
+  "dash": 0,
+  "blockedNpc": [],
+  "stats": {
+   "hid": 81
+  }
+ }
+}

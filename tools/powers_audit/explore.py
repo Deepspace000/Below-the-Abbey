@@ -7,8 +7,8 @@ with sync_playwright() as p:
     pg = b.new_page(viewport={'width': 900, 'height': 600})
     errs=[]
     pg.on('pageerror', lambda e: errs.append('PAGE ' + str(e)))
-    pg.goto(URL, wait_until='domcontentloaded', timeout=90000)
-    pg.wait_for_function("()=>typeof G!=='undefined'&&G.state==='play'&&typeof heroSpecial==='function'", timeout=120000)
+    pg.goto(URL, wait_until='domcontentloaded', timeout=300000)
+    pg.wait_for_function("()=>typeof G!=='undefined'&&G.state==='play'&&typeof heroSpecial==='function'", timeout=420000)
     pg.wait_for_timeout(1500)
     print(json.dumps(pg.evaluate(open(js).read()), indent=0)[:6000])
     print(errs[:5])

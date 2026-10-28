@@ -25,6 +25,7 @@ with sync_playwright() as p:
             if not far: res.append({'id': id, 'stage': sk, 'target': T, 'note': 'no door path into the target level (world map only)'}); continue
             d0, S = far[0]
             path = pg.evaluate("([a,b])=>QR.path(a,b)", [S, T])
+            if not path: res.append({'id': id, 'stage': sk, 'target': T, 'note': 'no path from %s' % S, 'start': S}); continue
             steps = []
             for i, H in enumerate(path[:-1]):
                 o = pg.evaluate("([i,s,l,f])=>QR.test(i,s,l,f)", [id, st, H, fl])

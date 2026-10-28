@@ -63,8 +63,8 @@ def p_params(x):
 # ------------------------------------------------------------------ BEFORE
 def before_doc():
     L = ['# Character powers: the state before the retune (v3.682 plus the heal retune)\n',
-         'Every power of every class, in unlock order. `python tools/powers_audit/dump_inventory.py before` lists them from the running game (`inventory_before.json`); `python tools/powers_audit/run_audit.py before 40` measures them (`raw_before.json`).\n',
-         '**Method.** For each class and each of the levels 1, 10, 20, 30, 40, 50, 60, 70 and 80 a fresh hero of that class is built (levelled up with the real `levelUp`, so stats, health and mana are the real ones), given the best shop weapon of its type that its level and stats allow (Sword for Warrior, Axe for Barbarian, Mace for Paladin, Priest, Monk and Goat, Bow for Ranger and Archer, Dagger for Thief and Assassin, the best staff for Mage and Sorcerer), and every spell of its class that its level allows. Then every unlocked active power is used 40 times through the real `heroSpecial` on three standing dummies of that level in a corridor (health 1,000,000,000, one square, two squares and three squares ahead). The numbers are the average damage on the first dummy (direct damage, and damage over time added up as the status says), the mana (or stamina) that was really deducted, and the status or buff that was put on. "Spell" of a mage or sorcerer is the scroll in hand and is outside the ladder. Passive powers have no cost.\n',
+         'Every power of every class, in unlock order. `python tools/powers_audit/dump_inventory.py before` lists them from the running game (`inventory_before.json`); `python tools/powers_audit/run_audit.py before 3` measures them (`raw_before.json`).\n',
+         '**Method.** For each class and each of the levels 1, 10, 20, 30, 40, 50, 60, 70 and 80 a fresh hero of that class is built (levelled up with the real `levelUp`, so stats, health and mana are the real ones), given the best shop weapon of its type that its level and stats allow (Sword for Warrior, Axe for Barbarian, Mace for Paladin, Priest, Monk and Goat, Bow for Ranger and Archer, Dagger for Thief and Assassin, the best staff for Mage and Sorcerer), and every spell of its class that its level allows. Then every unlocked active power is used several times through the real `heroSpecial` on three standing dummies of that level in a corridor (health 1,000,000,000, one square, two squares and three squares ahead), in expectation mode: no dice (every range is rolled at its middle, there are no double hits) and the chance of a double hit is added back as its expected value for the powers that roll the weapon, so that the numbers are free of sampling noise (an earlier run with real dice, 40 uses each, agreed within a few percent). The numbers are the damage on the first dummy (direct damage, and damage over time added up as the status says), the mana (or stamina) that was really deducted, and the status or buff that was put on. "Spell" of a mage or sorcerer is the scroll in hand and is outside the ladder. Passive powers have no cost.\n',
          '**Resource:** stamina for Warrior, Barbarian, Ranger, Archer, Thief, Assassin, Monk and Goat; mana for Paladin, Mage, Sorcerer and Priest. There are **no cooldowns** in the game: a power is limited only by the resource (and it can be used every round).\n',
          '**Counts:** %d class powers (%d active, rest passive) in 12 classes, plus %d bought spells (levels 10 to 50, learned from the Spells shop) = %d active powers measured.\n' % (
              sum(1 for x in inv_b if x['src'] == 'class'), sum(1 for x in inv_b if x['src'] == 'class' and x['act']), sum(1 for x in inv_b if x['src'] == 'spell'), sum(1 for x in inv_b if x['act']))]
@@ -111,26 +111,6 @@ def flag_lines(fl):
 
 
 # ------------------------------------------------------------------ AFTER
-def match_after(cls, k, e):
-    """the entry of the after data that is the same power as e of the before data"""
-    d = Aa.get(cls, {})
-    if e['type'] == 'mx' and e['id'] in d:
-        return d[e['id']]
-    nm = e['name']
-    for k2, e2 in d.items():
-        if e2['name'] == nm and e2['type'] != 'mx' or (e2['name'] == nm and e2['id'] is None):
-            if e2['lv'] == e['lv'] or True:
-                if e2['name'] == nm and e2['id'] is None or e2['type'] != 'mx':
-                    if e2['name'] == nm:
-                        return e2
-    al = ALIAS_B2A.get((cls, nm, e['type']))
-    if al:
-        for k2, e2 in d.items():
-            if e2['name'] == al:
-                return e2
-    return None
-
-
 def fight_table():
     fb = json.load(open(os.path.join(HERE, 'fight_before.json')))['res']
     fa = json.load(open(os.path.join(HERE, 'fight_after.json')))['res']
@@ -145,14 +125,52 @@ def fight_table():
     return out
 
 
+def expected_table():
+    eb = json.load(open(os.path.join(HERE, 'expected_before.json')))['res']
+    ea = json.load(open(os.path.join(HERE, 'expected_after.json')))['res']
+    out = ['| party | level | 1 foe: before > after | 3 foes: before > after | 6 foes: before > after |', '|---|---|---|---|---|']
+    allc = []
+    rows = {}
+    for b in eb:
+        a = [x for x in ea if x['party'] == b['party'] and x['L'] == b['L'] and x['foes'] == b['foes']][0]
+        rows.setdefault((b['party'], b['L']), {})[b['foes']] = (b['rounds'], a['rounds'])
+        allc.append((a['rounds'] / b['rounds'] - 1) * 100)
+    for (p, L), d in rows.items():
+        out.append('| %s | %d | %s |' % (p, L, ' | '.join('%.1f > %.1f (%+.0f%%)' % (d[f][0], d[f][1], (d[f][1] / d[f][0] - 1) * 100) for f in (1, 3, 6))))
+    within = sum(1 for c in allc if abs(c) <= 25)
+    out.append('')
+    out.append('All %d cells: mean change %+.1f%%, shortest %+.0f%%, longest %+.0f%%; %d cells (%.0f%%) within 25 percent either way.' % (len(allc), sum(allc) / len(allc), min(allc), max(allc), within, within * 100.0 / len(allc)))
+    l60 = [(a['rounds'] / b['rounds'] - 1) * 100 for b in eb if b['L'] == 60 for a in ea if a['party'] == b['party'] and a['L'] == 60 and a['foes'] == b['foes']]
+    out.append('At level 60 (the case the owner asked about): mean %+.1f%%, shortest %+.0f%%, longest %+.0f%%.' % (sum(l60) / len(l60), min(l60), max(l60)))
+    return out
+
+
+def new_powers_table():
+    out = ['| class | new power | unlock | cost | line | what the card says at level 80 |', '|---|---|---|---|---|---|']
+    n = 0
+    for cls in Aa:
+        res = [x for x in inv_a if x['cls'] == cls][0]['res']
+        old = {x.get('name') or x['id'] for x in inv_b if x['cls'] == cls}
+        for k, e in sorted(Aa[cls].items(), key=lambda t: t[1]['lv']):
+            if not e['act'] or e['name'] in old or not e['lvls']:
+                continue
+            top = e['lvls'].get(80) or e['lvls'][max(e['lvls'])]
+            ro = A.role(top)
+            out.append('| %s | %s | %d | %s %s | %s | %s |' % (cls, e['name'], e['lv'], e['cost'], res.lower(), {'single': 'single target', 'group': 'area', 'control': 'control', 'control-area': 'control (area)'}.get(ro, ro), shortdesc(e['desc'], 170)))
+            n += 1
+    out.append('')
+    out.append('%d new powers.' % n)
+    return out
+
+
 def after_doc():
     L = ['# Character powers: before and after the retune\n',
-         'Files: `src/desert/powers_scaling.js` (all numbers; last before `jump_ready.js` in `tools/inject.py`), harness in `tools/powers_audit/` (`audit.js`, `run_audit.py`, `fight.js`, `run_fight.py`, `analyse.py`, `report.py`, `shots.py`). Old numbers: `POWERS_BEFORE.md`. Re-run: start `python -m http.server 8357` in the repo root, then `python tools/powers_audit/run_audit.py after 40`, `python tools/powers_audit/run_fight.py after`, `python tools/powers_audit/report.py`.\n',
+         'Files: `src/desert/powers_scaling.js` (all numbers; last before `jump_ready.js` in `tools/inject.py`), harness in `tools/powers_audit/` (`audit.js`, `run_audit.py`, `fight.js`, `run_fight.py`, `analyse.py`, `report.py`, `shots.py`). Old numbers: `POWERS_BEFORE.md`. Re-run: start `python -m http.server 8357` in the repo root, then `python tools/powers_audit/run_audit.py after 3`, `python tools/powers_audit/run_fight.py after`, `python tools/powers_audit/report.py`.\n',
          '## The rule in plain words\n',
          'Inside one class, a later power must hit harder **and** cost more than an earlier power of the same kind, and each point of cost must buy about the same damage all along the line (within 20 percent), so a stronger power is neither a bargain nor a trap. Kinds ("lines") are: single-target damage, area damage, offensive buffs, defensive buffs, control of one foe, control of an area. Healing is left to `heal_scaling.js`, and the mage and sorcerer scroll "Spell" is the scroll in hand.\n',
          'Each class has one number **E**: how many "usual blows" of damage one point of cost buys with a single-target power. A **usual blow U** is the hero\'s own average hit: for a fighter the weapon\'s average damage plus the strength bonus and rings, times the damage bonuses from passives and the chance of a double hit; for a mage or sorcerer (intelligence bonus + the staff\'s magic + 8) times the spell bonuses. So a power grows with the weapon, the stat and the gear exactly as the creatures grow with the place.\n',
-         '    damage of a use = cost x E x U x (1 + 0.0035 x (level - unlock level)) x (1 + 0.002 x level)\n',
-         'An area power does 0.4 of that to **each** foe (about 1.2 times a single power when three are close). Bleed, poison and burn are part of the same total, spread over their rounds. E per class (usual blows per point of cost): Warrior 0.31, Barbarian 0.30, Paladin 0.25, Ranger 0.35, Archer 0.36, Thief 0.38, Assassin 0.33, Mage 0.20, Sorcerer 0.20, Priest 0.20, Monk 0.40, Goat 0.36. They were taken from what each class\'s own powers did before, so the class balance is kept. The first bracket pays each level of mastery above the unlock, the second makes every power a little stronger as the hero grows, beyond the weapon and the stats (the best weapons stop at level 70, so without it the top powers would stop growing). Costs are fixed numbers that rise with the unlock level and never change with the caster level, so an early power stays cheap and simply matters less and less as the heroes grow (a cheap power is still usable, it is just a smaller blow). Each card now says the real number for the hero it is shown for, for example "About 612 damage for Sigrid at level 40." (checked against the measured average: zero mismatches).\n',
+         '    damage of a use = cost x e x U x g          e = E x 0.75 x (1 - 0.15 x (unlock level - 1) / 79)          g = (1 + 0.002 x (level - unlock level)) x (1 + 0.002 x level)\n',
+         'An area power does 0.4 of that to **each** foe (about 1.2 times a single power when three are close). Bleed, poison and burn are part of the same total, spread over their rounds. E per class (usual blows per point of cost, before the two corrections): Warrior 0.31, Barbarian 0.30, Paladin 0.25, Ranger 0.35, Archer 0.36, Thief 0.38, Assassin 0.33, Mage 0.20, Sorcerer 0.20, Priest 0.20, Monk 0.40, Goat 0.36. They were taken from what each class\'s own powers did before, so the class balance is kept. The first bracket of g pays each level of mastery above the unlock, the second makes every power a little stronger as the hero grows, beyond the weapon and the stats (the best weapons stop at level 70, so without it the top powers would stop growing). The factor 0.75 and the taper of 0.15 were set from the fight simulations below (see the balance section). Costs are fixed numbers that rise with the unlock level and never change with the caster level, so an early power stays cheap and simply matters less and less as the heroes grow (a cheap power is still usable, it is just a smaller blow). Each card now says the real number for the hero it is shown for, for example "About 612 damage for Sigrid at level 40." (checked against the measured average: zero mismatches).\n',
          '## Results\n']
     ncls = len(Aa)
     npow = sum(1 for c in Aa.values() for e in c.values() if e['act'] and e['lvls'])
@@ -208,8 +226,16 @@ def after_doc():
                 pc = '%.0f' % (A.power_value(x80) / e['cost'])
             lab = {'single': 'single', 'group': 'area', 'control': 'control (one foe)', 'control-area': 'control (area)', 'buff-off': 'buff (offence)', 'buff-def': 'buff (defence)', 'special': 'special'}.get(ro, ro)
             L.append('| %d | %s%s | %s | %s > %s | %s | %s |' % (lv, e['name'] + (' (spell)' if e['type'] == 'mx' and e['k'] < 0 else ''), '' if eb else ' **new**', lab, eb['cost'] if eb else 'new', e['cost'], ' | '.join(cells), pc))
+    L.append('\n## New powers\n')
+    L.append('Learned the way the class powers are: automatically at the unlock level (they stand in the ladder by level). The Barbarian roar of level 40 was a one-round stun and is now a real roar. Saved selections of the Special power are moved to follow the new order (flag `powOrder`, saved with the game).\n')
+    L += new_powers_table()
     L.append('\n## Balance: rounds to kill\n')
-    L.append('The party fights creatures of its own level with the real `heroAttack` and `heroSpecial` (no enemy attacks: only how many rounds it takes to kill all of them). Each hero uses its highest class power it can afford (class powers only, no bought spells, no healing or buffs), otherwise a plain attack; the foe is an ordinary non-flying, non-undead creature of about 170 base health, one or three in a corridor. Averages of 8 fights.\n')
+    L.append('**Smooth check (no dice).** For each party the real `heroAttack` and `heroSpecial` are tried once against the line of foes, the best affordable use is taken every round until the stamina or mana is gone, and the rounds to kill are counted (a fraction of a round at the end). Before = the numbers of v3.682, after = this retune.\n')
+    try:
+        L += expected_table()
+    except Exception as ex:
+        L.append('(expected data missing: %s)' % ex)
+    L.append('\n**Simulated fights (with dice).** The party fights creatures of its own level with the real `heroAttack` and `heroSpecial` (no enemy attacks: only how many rounds it takes to kill all of them). Each hero uses its highest class power it can afford (class powers only, no bought spells, no healing or buffs), otherwise a plain attack; the foe is an ordinary non-flying, non-undead creature of about 170 base health, one or three in a corridor. Averages of 8 fights (the dice make single fights vary a lot, so the smooth check above is the one to trust).\n')
     try:
         L += fight_table()
     except Exception as ex:

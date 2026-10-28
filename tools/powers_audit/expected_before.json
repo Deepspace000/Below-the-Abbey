@@ -1,0 +1,1013 @@
+{
+"res": [
+{
+"foe": "hgdspider",
+"L": 10,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 11.282263708946163,
+"foeHp": 859,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 10,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 33.70736768464956,
+"foeHp": 859,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 10,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 69.59490604469674,
+"foeHp": 859,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 20,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 7.578436440922924,
+"foeHp": 1624,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 20,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 31.0083156597116,
+"foeHp": 1624,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 20,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 66.1531344878946,
+"foeHp": 1624,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 30,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 2.588205932551916,
+"foeHp": 2176,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 30,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 8.71805813491655,
+"foeHp": 2176,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 30,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 21.943383239629195,
+"foeHp": 2176,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 40,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 2.3009256706517784,
+"foeHp": 3167,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 40,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 5.9965820535411245,
+"foeHp": 3167,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 40,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 20.022902979490382,
+"foeHp": 3167,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 50,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 2.2894919156994256,
+"foeHp": 3758,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 50,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 5.93552042157154,
+"foeHp": 3758,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 50,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 17.673162183571257,
+"foeHp": 3758,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 60,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 2.148973132774692,
+"foeHp": 3842,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 60,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 5.601044034159089,
+"foeHp": 3842,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 60,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 14.475019068302442,
+"foeHp": 3842,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 70,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 0.9893182004002763,
+"foeHp": 3863,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 70,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 2.6649286352845083,
+"foeHp": 3863,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 70,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 5.100321773158271,
+"foeHp": 3863,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 80,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 0.9134224225625335,
+"foeHp": 3870,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 80,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 2.4133135054753114,
+"foeHp": 3870,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 80,
+"cls": [
+0,
+5,
+7,
+9
+],
+"rounds": 4.5548944168993675,
+"foeHp": 3870,
+"party": "Warrior/Thief/Mage/Priest",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 10,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 8.587024077603818,
+"foeHp": 859,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 10,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 26.35334608550591,
+"foeHp": 859,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 10,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 54.71206694290616,
+"foeHp": 859,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 20,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 3.6821475500131355,
+"foeHp": 1624,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 20,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 18.890601226111013,
+"foeHp": 1624,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 20,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 44.35074031365324,
+"foeHp": 1624,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 30,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 1.7578405348416855,
+"foeHp": 2176,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 30,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 5.805475360119116,
+"foeHp": 2176,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 30,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 15.012691439153393,
+"foeHp": 2176,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 40,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 1.7717960497452958,
+"foeHp": 3167,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 40,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 4.775687505155269,
+"foeHp": 3167,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 40,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 13.43239075151587,
+"foeHp": 3167,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 50,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 1.6298339990306818,
+"foeHp": 3758,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 50,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 4.395739287299414,
+"foeHp": 3758,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 50,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 10.150755799820494,
+"foeHp": 3758,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 60,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 1.6441239310583387,
+"foeHp": 3842,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 60,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 3.4725616514674607,
+"foeHp": 3842,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 60,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 6.1020040720951565,
+"foeHp": 3842,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 70,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 0.5550439961875597,
+"foeHp": 3863,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 70,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 1.5510300864300883,
+"foeHp": 3863,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 70,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 2.9992978709849316,
+"foeHp": 3863,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 80,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 0.4830012660493214,
+"foeHp": 3870,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 80,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 1.3399656272047098,
+"foeHp": 3870,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 80,
+"cls": [
+1,
+4,
+8,
+2
+],
+"rounds": 2.5819733856247744,
+"foeHp": 3870,
+"party": "Barbarian/Archer/Sorcerer/Paladin",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 10,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 7.82832208856668,
+"foeHp": 859,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 10,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 28.88486978597426,
+"foeHp": 859,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 10,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 60.469691332085695,
+"foeHp": 859,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 20,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 4.673174927431221,
+"foeHp": 1624,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 20,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 21.83467034815753,
+"foeHp": 1624,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 20,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 48.27401570883021,
+"foeHp": 1624,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 30,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 1.3786062928768934,
+"foeHp": 2176,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 30,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 4.173111735114761,
+"foeHp": 2176,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 30,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 11.44663965598032,
+"foeHp": 2176,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 40,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 1.3431486969807283,
+"foeHp": 3167,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 40,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 4.0294460909421845,
+"foeHp": 3167,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 40,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 9.905487944337397,
+"foeHp": 3167,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 50,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 1.1897843709166498,
+"foeHp": 3758,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 50,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 3.5693531127499494,
+"foeHp": 3758,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 50,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 7.37138434815898,
+"foeHp": 3758,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 60,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 0.915093071057858,
+"foeHp": 3842,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 60,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 2.745279213173574,
+"foeHp": 3842,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 60,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 5.490558426347148,
+"foeHp": 3842,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 70,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 0.5470344889311434,
+"foeHp": 3863,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 70,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 1.400300291628128,
+"foeHp": 3863,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 70,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 2.5510524240809263,
+"foeHp": 3863,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 6
+},
+{
+"foe": "hgdspider",
+"L": 80,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 0.5059146124491353,
+"foeHp": 3870,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 1
+},
+{
+"foe": "hgdspider",
+"L": 80,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 1.3023999765485403,
+"foeHp": 3870,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 3
+},
+{
+"foe": "hgdspider",
+"L": 80,
+"cls": [
+3,
+6,
+10,
+11
+],
+"rounds": 2.379704941636006,
+"foeHp": 3870,
+"party": "Ranger/Assassin/Monk/Goat",
+"foes": 6
+}
+],
+"errs": []
+}

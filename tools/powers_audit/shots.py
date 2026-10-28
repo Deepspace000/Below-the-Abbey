@@ -11,10 +11,12 @@ with sync_playwright() as p:
     b = p.chromium.launch(args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader'])
     pg = b.new_page(viewport={'width': 1100, 'height': 760})
     errs = []
+    failed = []
+    pg.on('requestfailed', lambda r: failed.append(r.url))
     pg.on('pageerror', lambda e: errs.append('PAGE ' + str(e)))
     pg.on('console', lambda m: errs.append('CON ' + m.text) if m.type == 'error' and 'ERR_CONNECTION' not in m.text else None)
-    pg.goto('http://localhost:%s/index.html?town=thornwick&lvl=1&v=%d' % (PORT, time.time()), wait_until='domcontentloaded', timeout=90000)
-    pg.wait_for_function("()=>typeof G!=='undefined'&&G.state==='play'&&typeof heroSpecial==='function'", timeout=120000)
+    pg.goto('http://localhost:%s/index.html?town=thornwick&lvl=1&v=%d' % (PORT, time.time()), wait_until='domcontentloaded', timeout=300000)
+    pg.wait_for_function("()=>typeof G!=='undefined'&&G.state==='play'&&typeof heroSpecial==='function'", timeout=420000)
     pg.wait_for_timeout(2500)
     pg.evaluate(open(os.path.join(HERE, 'audit.js'), encoding='utf-8').read())
     names = pg.evaluate("()=>CLASSES.map(c=>c.name)")
@@ -25,4 +27,5 @@ with sync_playwright() as p:
             pg.screenshot(path=os.path.join(OUT, '%02d_%s_L%d.png' % (ci, nm, L)))
         print(nm, flush=True)
     print('page errors', errs[:10])
+    print('failed requests (not errors in the game):', sorted(set(failed))[:6])
     b.close()

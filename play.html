@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.683';
+const VERSION='3.684';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -2573,7 +2573,7 @@ function render3D(){
   {const WXN=typeof weatherNow==='function'?weatherNow():null;if(WXN&&WXN.fog){hzrate+=WXN.fog;hzmax=Math.max(hzmax,WXN.haze);for(let i=0;i<3;i++)hzr[i]+=(WXN.col[i]-hzr[i])*WXN.mix}} // rain, fog, snow and heat thicken the air
   const PQ=(SK||uwL||day>.3)?PARTY_TINT_ONE:PARTY_TINT,tbR=PQ[0]*(uwL?.84:SK?SK.g[0]:HLK?HLK.tint[0]*(1+.1*day):1),tbG=PQ[1]*(uwL?1:SK?SK.g[1]*.94:HLK?HLK.tint[1]*(1+.02*day):.94),tbB=PQ[2]*(uwL?1.12:SK?SK.g[2]*.84:HLK?HLK.tint[2]*(1-.08*day):.84), ttR=HGL?(HLK?HLK.lamp[0]:.5):(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?.85:1.3,ttG=HGL?(HLK?HLK.lamp[1]:.95):(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?.28:.88,ttB=HGL?(HLK?HLK.lamp[2]:1.5):(LEVEL===364||(LEVEL>=440&&LEVEL<=460))?1.5:.5; // in the Hollow Land the warm lights glow purple
   NCOL=false;for(let j=0;j<nn/3;j++){const kr=nearK[j*3];if(kr>=0){NCR[j]=kr;NCG[j]=nearK[j*3+1];NCB[j]=nearK[j*3+2];NCOL=true}else{NCR[j]=ttR;NCG[j]=ttG;NCB[j]=ttB}} // each warm light has its own colour, or the level's lamp colour
-  const ovcLv=LEVEL===2||LEVEL===3||LEVEL===7||LEVEL===10||LEVEL===19||LEVEL===20,SKP=uwL?uwPan():ovcLv&&SKYOVC?SKYOVC:SKYPAN; // the early open areas sit under a heavy moving overcast
+  const ovcLv=LEVEL===2||LEVEL===3||LEVEL===7||LEVEL===10||LEVEL===19||LEVEL===20||LEVEL===530,SKP=uwL?uwPan():ovcLv&&(LEVEL===530?self.GYS_PAN:SKYOVC)?(LEVEL===530?self.GYS_PAN:SKYOVC):SKYPAN; // the early open areas sit under a heavy moving overcast
   const skyPan=(skyLv||ovcLv||desertLv||LEVEL===3||LEVEL===13||LEVEL===32||LEVEL===33)&&SKP?(()=>{for(let x=0;x<VW;x++){const cm=2*x/VW-1;UCOL[x]=((((Math.atan2(dY+pY*cm,dX+pX*cm)/TAU)%1)+1)%1*1024+t*(ovcLv?11:7))%1024|0}return true})():false; // the sky is one panorama on walls and ceiling alike
   const fmp=G.fmap,fd2=G.fl2,fd3=G.fl3,fd4=G.fl4,fd5=G.fl5,fd6=G.fl6,IFL=(HLK&&!(LEVELS[LEVEL]&&LEVELS[LEVEL].terrace))?hgtIntFloor(HLK,[fd,fd2||fd,fd3||fd,fd4||fd,fd5||fd,fd6||fd]):null,lmp=G.lmap,lmN=lmp?clamp(1.2-(G.day||0)*1.35,0,1)*.95:0;
   TERR_NOW=desertLv&&skyPan?terrFor(LEVEL):(LEVELS[LEVEL]&&LEVELS[LEVEL].terrace?terrFor(LEVEL):null);CAMZ=EYE;const TERRACE=!!(TERR_NOW&&TERR_NOW.terr); // real hills: the camera rides the ground, the ground is marched column by column, the sky is painted behind it
@@ -2741,6 +2741,7 @@ function sprBlit(SRC,HZ,hA,sx,sy,sw2,sh2,dx,dy,dw,dh){SC.drawImage(SRC,sx,sy,sw2
 /* The sprite cache is held to a budget in pixels (not just a count of 900 pictures, which could be 900 MB of canvas): the iPad runs out of canvas memory, and then the maps go black and the pictures flash.
    A canvas that leaves the cache is not thrown away to wait for the garbage collector (Safari keeps it counted until then): it goes in a pool, to be reused for the next copy of the same size, or it is shrunk to nothing. */
 const SPR_PXMAX=14e6,SPR_POOLPX=3e6,SPR_FREE=new Map(),SPR_DEAD=[];let SPR_PX=0,SPR_FREEPX=0;
+const HURT_SCR=(()=>{const c=document.createElement('canvas');c.width=64;c.height=64;return {c,x:c.getContext('2d')}})(); // one scratch canvas for the red wash of wounded creatures, reused every frame
 function sprCanvas(w,h){const k=w*4096+h,l=SPR_FREE.get(k);if(l&&l.length){const c=l.pop();SPR_FREEPX-=w*h;const X=c.getContext('2d');X.globalCompositeOperation='source-over';X.globalAlpha=1;X.clearRect(0,0,w,h);return c}const c=document.createElement('canvas');c.width=w;c.height=h;return c}
 function sprKeep(key,c){SPR_CACHE.set(key,c);SPR_PX+=c.width*c.height;
   while((SPR_CACHE.size>900||SPR_PX>SPR_PXMAX)&&SPR_CACHE.size>1){const k=SPR_CACHE.keys().next().value,o=SPR_CACHE.get(k);SPR_CACHE.delete(k);SPR_PX-=o.width*o.height;SPR_DEAD.push(o)}}
@@ -2909,9 +2910,9 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
       if(s.decor&&s.decor.burn>0){X.fillStyle=`rgba(10,6,4,${(.15+.6*s.decor.burn/5).toFixed(3)})`;X.fillRect(0,0,tw,th)}
       if(s.hurt>.3){ // a creature close to death is flushed with red: nothing at 70 percent health, a strong red glow near the end, a slow throb in the last tenth (the red is added as light, so the picture keeps its detail)
         const k=Math.min(1,(s.hurt-.3)/.7),thr=s.hurt>.88?.55+.45*Math.sin(G.time*9):1;
-        const M=sprCanvas(tw+2,th+2),MX2=M.getContext('2d');MX2.globalCompositeOperation='source-over';MX2.clearRect(0,0,tw+2,th+2);MX2.drawImage(SRC,0,0);MX2.globalCompositeOperation='source-in';MX2.fillStyle='rgb(225,30,20)';MX2.fillRect(0,0,tw+2,th+2);
+        const M=HURT_SCR.c,MX2=HURT_SCR.x;if(M.width<tw+2)M.width=tw+2;if(M.height<th+2)M.height=th+2;MX2.globalCompositeOperation='source-over';MX2.clearRect(0,0,M.width,M.height);MX2.drawImage(SRC,0,0);MX2.globalCompositeOperation='source-in';MX2.fillStyle='rgb(225,30,20)';MX2.fillRect(0,0,tw+2,th+2);MX2.globalCompositeOperation='source-over';
         X.globalCompositeOperation='source-atop';X.fillStyle=`rgba(150,0,0,${(k*.26).toFixed(3)})`;X.fillRect(0,0,tw,th);
-        X.globalCompositeOperation='lighter';X.globalAlpha=k*k*.62*thr+k*.06;X.drawImage(M,0,0);X.globalAlpha=1;X.globalCompositeOperation='source-over'}
+        X.globalCompositeOperation='lighter';X.globalAlpha=k*k*.62*thr+k*.06;X.drawImage(M,0,0,tw+2,th+2,0,0,tw+2,th+2);X.globalAlpha=1;X.globalCompositeOperation='source-over'}
       if(s.flash>0){X.fillStyle=`rgba(255,70,40,${(s.flash*.55).toFixed(3)})`;X.fillRect(0,0,tw,th)}
     }
     if(s.fade!==undefined&&s.fade<1){SC.globalAlpha=Math.max(0,s.fade)}
@@ -3012,6 +3013,7 @@ function drawSprites(cx,cy,dX,dY,pX,pY){
     if(anyVis){
       if(s.decor&&(s.decor.loot||s.decor.npc||(BURNABLE.test(s.decor.k)&&!s.decor.burn)||s.decor.k==='lever'))G.hits.push({type:'decor',ref:s.decor,x0:left,x1:left+sw,y0:top,y1:bottom,ty});
       if(s.item)G.hits.push({type:'item',ref:s.item,x0:left,x1:left+sw,y0:top-4,y1:bottom+2,ty});
+      if(typeof stlHitRef==='function'){const sr=stlHitRef(s);if(sr)G.hits.push({type:'decor',ref:sr,x0:left,x1:left+sw,y0:top,y1:bottom,ty,stl:1})} // a market stall leads to the shop of the person beside it (stall_shop.js)
     }
   }
   while(hmi<HM.length)hgtmDraw(HM[hmi++]);
@@ -59051,7 +59053,7 @@ function hgweFlip(im){let c=hgweFlipC.get(im);if(!c){c=document.createElement('c
   try{if(LEVEL!==HGDWE.ID)return;const L=LEVELS[HGDWE.ID],F=L&&L._hgdweFish;if(!F||!G.C)return;const t=G.time,a=G.C.a,dX=Math.cos(a),dY=Math.sin(a),px=G.P.x+.5,py=G.P.y+.5;
     for(let i=0;i<F.length;i++){const f=F[i],ph=(t*f.sp+f.ph)%2,u=ph<1?ph:2-ph,dir=ph<1?1:-1,x=f.A[0]+(f.B[0]-f.A[0])*u+(f.vert?f.lat*.5:0),y=f.A[1]+(f.B[1]-f.A[1])*u+(f.vert?0:f.lat*.5);
       if(Math.abs(x-px)>13||Math.abs(y-py)>13)continue;const fr=((t*3.4+i)|0)&1,im=IMG['uw_'+f.k+'_'+fr];if(!im)continue;
-      const vx=(f.B[0]-f.A[0])*dir,vy=(f.B[1]-f.A[1])*dir,right=(dX*vy-dY*vx)>0,hh=Math.min(.35,(NPC_H['uw_'+f.k+'_0']||.4)*f.sz),w=hh*im.width/im.height;if(Math.hypot(x-px,y-py)<1.3)continue;if(F.prot&&F.prot.some(q=>Math.hypot(q[0]-x,q[1]-y)<1.6))continue;
+      const vx=(f.B[0]-f.A[0])*dir,vy=(f.B[1]-f.A[1])*dir,right=(dX*vy-dY*vx)>0,hh=Math.min(.35,(NPC_H['uw_'+f.k+'_0']||.4)*f.sz),w=hh*im.width/im.height;if(Math.hypot(x-px,y-py)<(hh>.25?2.6:1.3))continue;if(F.prot&&F.prot.some(q=>Math.hypot(q[0]-x,q[1]-y)<1.6))continue;
       out.push({x,y,img:right?hgweFlip(im):im,w,bob:f.h+Math.sin(t*.9+i)*.04,decor:{walk:true,k:'uw_sw'+(i%9)}})}}catch(e){}}}
 
 /* ==========================================================================
@@ -59303,6 +59305,45 @@ function hgpaBuild(L){
        if(!nt)nt='Scratched: Note number '+(++extra)+' on this wall. I kept count so that I would not lose myself.';
        if(d.npc==='hgd_pa_note')d.text=nt;else d.pbt=nt;t=nt;stat.notesFixed++}
      seen.add(t.trim().toLowerCase());if(d.npc==='hgd_note')d.bob=.35+.4*hs(d.x,d.y,17)}}
+  // ---- 6b) round 4: hubs get real light, the party never arrives inside a monster's face, shores get reeds, honeycomb walls get decals ----
+  {const HB=[[[1,.82,.5],.9,60],[[.55,.9,1],1.6,84],[[1,.74,.35],.9,60],[[.85,.92,1],.9,60]];
+   const losClear=(x0,y0,x1,y1)=>{if(x0!==x1&&y0!==y1)return false;const sx=Math.sign(x1-x0),sy=Math.sign(y1-y0);let x=x0,y=y0;while(x!==x1||y!==y1){x+=sx;y+=sy;if(!pass(x,y))return false}return true};
+   let hubs=0;
+   for(const p of prec){const b=p.b,H0=HB[b];let cx=p.x,cy=p.y;if(!pass(cx,cy)){let bd=1e9;for(let dy=-5;dy<=5;dy++)for(let dx=-5;dx<=5;dx++){const r=Math.hypot(dx,dy);if(r<bd&&pass(p.x+dx,p.y+dy)&&inZ(p.x+dx,p.y+dy)){bd=r;cx=p.x+dx;cy=p.y+dy}}if(bd>1e8)continue}
+     p.lx=cx;p.ly=cy;
+     LT.push([cx,cy,H0[0],H0[1],H0[2]]);hubs++;
+     // a prop that explains the light, if the square is free
+     const taken=[[cx,cy]];
+     const cand=[];for(let dy=-4;dy<=4;dy++)for(let dx=-4;dx<=4;dx++){const x=cx+dx,y=cy+dy,c=Math.max(Math.abs(dx),Math.abs(dy));if(c<1||!okCell(x,y)||!losClear(cx,cy,x,y))continue;cand.push([x,y,c+hs(x,y,41)*1.5])}
+     cand.sort((a,c)=>a[2]-c[2]);
+     let nl=0;for(const [x,y] of cand){if(taken.some(t=>Math.hypot(t[0]-x,t[1]-y)<2.5))continue;
+       const o=pickLight(x,y,b);let ox=0,oy=0,fnd=false;for(const [a,c] of DV)if(!pass(x+a,y+c)){ox=a*.32;oy=c*.32;fnd=true;break}if(!fnd){ox=.3;oy=.3}
+       L.decor.push({k:o[0],x,y,ox,oy,block:false,walk:true,deco:true,hpa:1});LT.push([x,y,o[1],o[2],o[3]]);
+       const g=gk2(x,y);if(!lastK.has(g))lastK.set(g,[]);lastK.get(g).push([x,y,o[0]]);taken.push([x,y]);nl++;if(nl>=1)break}
+     stat.hubLights=(stat.hubLights||0)+nl+1}
+   stat.hubs=hubs}
+  // enemies: nobody within 3 squares of a precinct centre or a teleporter (the squares the party appears on), mini bosses and bosses excepted
+  {const spots=prec.map(p=>[p.x,p.y]);for(const d of L.decor)if(d.k==='teleporter'&&inZ(d.x,d.y))spots.push([d.x,d.y]);
+   const isBoss=e=>/^(hgdb_|hgmini|hgdwarden)/.test(e.t);let moved=0;
+   const used=new Set(L.enemies.map(e=>e.x+','+e.y));
+   for(const e of L.enemies){if(!inZ(e.x,e.y)||isBoss(e))continue;const sp=spots.find(s=>Math.hypot(s[0]-e.x,s[1]-e.y)<=3.2);if(!sp)continue;
+     let best=null,bd=1e9;for(let dy=-12;dy<=12;dy++)for(let dx=-12;dx<=12;dx++){const x=sp[0]+dx,y=sp[1]+dy,r=Math.hypot(dx,dy);if(r<6||r>12||!okCell(x,y)||bio[y*W+x]!==bio[e.y*W+e.x]||used.has(x+','+y)||L.fmap[y][x]==='6')continue;if(spots.some(s=>Math.hypot(s[0]-x,s[1]-y)<4))continue;const sc=r+hs(x,y,43)*3;if(sc<bd){bd=sc;best=[x,y]}}
+     if(best){used.delete(e.x+','+e.y);e.x=best[0];e.y=best[1];used.add(best.join(','));moved++}}
+   stat.enemiesMoved=moved}
+  // the shore of a flooded passage: a few reeds, mushrooms or bushes stand at the edge so the water does not end in a hard line
+  {const water=(x,y)=>L.fmap[y]&&L.fmap[y][x]==='6'&&open(x,y),KIND=['hgt_reeds','hgt_mushrooms','hgt_reeds','hgt_pearlbush'];let n=0;const at=[];
+   for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!inZ(x,y)||water(x,y)||!okCell(x,y))continue;let wd=null;for(const [a,c] of DV)if(water(x+a,y+c)){wd=[a,c];break}if(!wd)continue;
+     if(hs(x,y,44)>.8||at.some(q=>Math.abs(q[0]-x)<2&&Math.abs(q[1]-y)<2))continue;at.push([x,y]);
+     L.decor.push({k:KIND[bio[y*W+x]],x,y,ox:wd[0]*.3,oy:wd[1]*.3,block:false,walk:true,deco:true,hpa:1,shore:1});n++}
+   stat.shore=n}
+  // honeycomb: the plain tan walls get wax decals (drips, comb patches, stains, runs); half of the repeated wall sign of this biome is swapped for them
+  {hgpaDecalArt();let n=0,sw=0;const WD=['hgpa_dd0','hgpa_dd1','hgpa_dd2','hgpa_dd3'],wax=String.fromCharCode(0x2e2),at2=[];
+   for(const d of L.decor){if(d.pic&&d.k==='art_hgdf_wsym2'&&inZ(d.x,d.y)&&bio[d.y*W+d.x]===2&&hs(d.x,d.y,45)<.6){d.k=WD[(hs(d.x,d.y,46)*4)|0];d.sc=undefined;d.bob=.45+.3*hs(d.x,d.y,47);sw++}}
+   const hasPic=new Set();for(const d of L.decor)if(d.pic&&d.wd)hasPic.add(d.x+','+d.y+','+d.wd[0]+','+d.wd[1]);
+   for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(bio[y*W+x]!==2||!pass(x,y)||busy.has(y*W+x))continue;
+     for(const [a,c] of DV){if(rows[y+c][x+a]!==wax)continue;if(hs(x,y,48+a*3+c)>.075||hasPic.has(x+','+y+','+a+','+c))continue;if(at2.some(q=>Math.abs(q[0]-x)<4&&Math.abs(q[1]-y)<4))continue;
+       at2.push([x,y]);L.decor.push({k:WD[(hs(x,y,49)*4)|0],x,y,wd:[a,c],pic:1,block:false,walk:true,deco:true,bob:.4+.35*hs(x,y,50),hpa:1});n++;break}}
+   stat.waxDecals=n;stat.waxSwapped=sw}
   // ---- 7) the scale table (see the header). Runs last so that nothing above is undone. ----
   {const treeH=d=>[1.6,2.0,2.4,2.7][(hs(d.x,d.y,5)*4)|0],jit=(d,s,a,b)=>a+(b-a)*hs(d.x,d.y,s);
    const R=[[/^hg_house\d$/,()=>2.2],[/^(hgtb_plant_belltree|hgt_fairytree)$/,treeH],[/^hgt_vine_roundleaf$/,d=>jit(d,6,1.5,1.9)],[/^hg_lamp$/,d=>jit(d,7,1.3,1.5)],[/^hgt_lamppost$/,()=>1.3],
@@ -59317,6 +59358,60 @@ function hgpaBuild(L){
 {const _b=hgdBuild;hgdBuild=function(){const had=!!LEVELS[HGD.ID];_b.apply(this,arguments);const L=LEVELS[HGD.ID];try{hgpaEnemies()}catch(e){console.error('hgpa enemies',e)}if(!had&&L&&L._hgdm&&L._hgdp&&L.decor)try{hgpaBuild(L);hgpaEnemies()}catch(e){console.error('hgpa',e)}}}
 // the coloured lights of the zone (after the torches and level lights are set up)
 {const _sl=setupLights;setupLights=function(){_sl.apply(this,arguments);try{if(LEVEL===HGD.ID){const Lv=LEVELS[HGD.ID],A=Lv&&Lv._hgpa;if(A)for(const q of A.lights)LIGHTS.push({x:q[0]+.5,y:q[1]+.5,ph:hash2(q[0],q[1],23)*6.28,key:-7000-LIGHTS.length,taken:false,red:false,free:true,calm:true,hpa:1,col:q[2],kI:q[3],range2:q[4]})}}catch(e){console.error('hgpa lights',e)}}}
+
+/* ======================= ROUND 4 (north zone) =======================
+   - the Stone Warrens wall is brightened before the maze is built (own copy of the picture), so hubs and corridors read
+   - honeycomb: wall variants (drip, glowing cells, wax bloom) in clusters, and wax decals (wall pictures made in code, walls may be)
+   - houses in the zone are dimmed by a third so that one painted house is not the brightest thing in a dark room
+   - after every other builder has run (first frame of the level): variant walls are laid in, and proportions are clamped to the scale table
+     (hgd_polish_c rescales trees to 3.5 and villagers to 1.68 after this file's build)                                                    */
+for(const k of ['hgpa_dd0','hgpa_dd1','hgpa_dd2','hgpa_dd3'])NPC_H[k]=.8;
+for(const [k,v] of [['art_hgt_lamppost',1.3],['art_hgtb_lamp_tall',1.3],['art_hgtb_deco_shellstatue',1.4],['art_hgt_gardenlantern',1.15]])if(NPC_H[k]===undefined)NPC_H[k]=NPC_H[k.replace(/^art_/,'')]||v;
+function hgpaDecalArt(){if(IMG.hgpa_dd0)return;
+  const amber=(x,a)=>{const g=x.createLinearGradient(0,0,0,170);g.addColorStop(0,'rgba(255,214,110,'+a+')');g.addColorStop(1,'rgba(176,96,22,'+a+')');return g};
+  const drip=(x,cx,len,wd,fill)=>{x.fillStyle='rgba(30,14,0,.3)';x.beginPath();x.moveTo(cx-wd/2+3,0);x.lineTo(cx+wd/2+3,0);x.lineTo(cx+wd/3+3,len);x.arc(cx+3,len,wd/3,0,Math.PI);x.closePath();x.fill();
+    x.fillStyle=fill;x.beginPath();x.moveTo(cx-wd/2,0);x.lineTo(cx+wd/2,0);x.lineTo(cx+wd/3,len);x.arc(cx,len,wd/3,0,Math.PI);x.closePath();x.fill()};
+  IMG.hgpa_dd0=mkCanvas(160,180,(x,w,h)=>{ // honey drips running down from the top
+    for(const [cx,len,wd] of [[34,120,13],[70,160,16],[104,96,11],[132,134,14]]){drip(x,cx,len,wd,amber(x,.92));x.fillStyle='rgba(255,246,190,.55)';x.fillRect(cx-wd/4,4,wd/6,len-10)}
+    x.fillStyle=amber(x,.8);x.fillRect(0,0,w,14)});
+  IMG.hgpa_dd1=mkCanvas(170,170,(x,w,h)=>{ // a patch of comb cells, some filled and glowing
+    const hex=(cx,cy,r)=>{x.beginPath();for(let i=0;i<6;i++){const a=Math.PI/6+i*Math.PI/3;x[i?'lineTo':'moveTo'](cx+r*Math.cos(a),cy+r*Math.sin(a))}x.closePath()};
+    const R=22,cells=[[0,0],[1,0],[-1,0],[.5,1],[-.5,1],[.5,-1],[-.5,-1],[1.5,1],[-1.5,1],[0,2]];
+    cells.forEach(([i,j],n)=>{const cx=85+i*R*1.74,cy=80+j*R*1.5;if(cy>150)return;x.fillStyle='rgba(20,10,0,.35)';hex(cx+3,cy+3,R);x.fill();
+      const full=(n*7)%3!==0,g=x.createRadialGradient(cx,cy,2,cx,cy,R);g.addColorStop(0,full?'rgba(255,226,130,.95)':'rgba(70,40,10,.9)');g.addColorStop(1,full?'rgba(214,138,40,.95)':'rgba(40,22,6,.95)');x.fillStyle=g;hex(cx,cy,R-1);x.fill();
+      x.strokeStyle='rgba(96,56,12,.95)';x.lineWidth=3;hex(cx,cy,R-1);x.stroke();x.strokeStyle='rgba(255,236,170,.4)';x.lineWidth=1;hex(cx-1,cy-1,R-5);x.stroke()})});
+  IMG.hgpa_dd2=mkCanvas(170,150,(x,w,h)=>{ // pale wax runs
+    for(const [cx,len,wd] of [[30,70,18],[62,120,22],[100,90,20],[134,110,16]]){const g=x.createLinearGradient(0,0,0,len);g.addColorStop(0,'rgba(240,228,190,.95)');g.addColorStop(1,'rgba(196,176,120,.9)');drip(x,cx,len,wd,g);x.fillStyle='rgba(255,255,244,.5)';x.fillRect(cx-wd/5,3,wd/7,len-8)}
+    x.fillStyle='rgba(236,222,180,.9)';x.fillRect(0,0,w,12)});
+  IMG.hgpa_dd3=mkCanvas(180,160,(x,w,h)=>{ // an old honey stain with two runs
+    const g=x.createRadialGradient(90,70,6,90,70,70);g.addColorStop(0,'rgba(214,138,40,.8)');g.addColorStop(.7,'rgba(150,84,20,.5)');g.addColorStop(1,'rgba(120,64,10,0)');x.fillStyle=g;x.beginPath();x.ellipse(90,70,78,60,0,0,6.3);x.fill();
+    drip(x,70,128,18,amber(x,.85));drip(x,112,104,13,amber(x,.85));x.fillStyle='rgba(255,240,170,.55)';x.fillRect(66,64,3,56)})}
+// a dimmer copy of a painted house, for the dark rooms
+function hgpaDim(){for(const k of ['hg_house0','hg_house1']){const nk='hgpa_hd_'+k;if(IMG[nk]||!IMG[k]||!IMG[k].width)continue;const b=IMG[k],c=document.createElement('canvas');c.width=b.width;c.height=b.height;const x=c.getContext('2d');try{x.filter='brightness(.66) saturate(.8)'}catch(e){}x.drawImage(b,0,0);try{x.filter='none'}catch(e){}IMG[nk]=c;NPC_H[nk]=NPC_H[k]}}
+{const _u2=update;update=function(dt){try{if(LEVEL===HGD.ID){hgpaDim();hgpaPost()}}catch(e){if(!hgpaPost.err){hgpaPost.err=1;console.error('hgpa post',e)}}return _u2.apply(this,arguments)}}
+function hgpaPost(){const L=LEVELS[HGD.ID],A=L&&L._hgpa;if(!A||A.post)return;if(!G.grid||!G.grid.length)return;const M=L._hgdm,W=M.W,H=M.H,bio=M.bio;A.post=1;
+  // 1) house dimming and the scale clamp (after hgd_polish_c)
+  let cl=0,hd=0;const inZ=(x,y)=>bio[y*W+x]<4;
+  for(const d of L.decor){if(d.pic||!inZ(d.x,d.y)||!NPC_H[d.k])continue;const h=NPC_H[d.k]*(d.sc||1);let mx=0;
+    if(/^(hg_house0|hg_house1)$/.test(d.k)&&IMG['hgpa_hd_'+d.k]){d.k='hgpa_hd_'+d.k;d.sc=2.2/NPC_H[d.k];hd++;continue}
+    if(/^hgpa_hd_/.test(d.k))continue;
+    if(/^(hgtb_plant_belltree|hgt_fairytree)$/.test(d.k))mx=2.7;else if(/^(hg_npc\d|hg_wizard|pickpocket)$/.test(d.k))mx=.98;else if(/^hgdfc_/.test(d.k))mx=.95;else if(/^hgtb_plant_spiralfern$/.test(d.k))mx=.95;else if(/lamp|lantern/.test(d.k)&&!/hang/.test(d.k))mx=1.5;else if(/statue/.test(d.k))mx=1.7;
+    if(mx&&h>mx+.01){d.sc=Math.round(mx/NPC_H[d.k]*1000)/1000;cl++}}
+  A.clamped=cl;A.dimmed=hd;
+  // 2) honeycomb wall variants
+  try{const base=IMG.hg_wax;if(!base||!base.width)return;const TM=ohTiles(),wax=String.fromCharCode(0x2e2),rows=L.rows.map(r=>r.split(''));
+    const V=[
+     (x,w,h)=>{x.drawImage(base,0,0,w,h);const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'rgba(120,64,10,.62)');g.addColorStop(.5,'rgba(120,64,10,.18)');g.addColorStop(1,'rgba(120,64,10,0)');x.fillStyle=g;x.fillRect(0,0,w,h);
+       for(const [cx,len,wd] of [[18,70,9],[52,104,11],[86,60,8],[112,92,10]]){x.fillStyle='rgba(255,196,80,.55)';x.beginPath();x.moveTo(cx-wd/2,0);x.lineTo(cx+wd/2,0);x.lineTo(cx+wd/3,len);x.arc(cx,len,wd/3,0,Math.PI);x.fill();x.fillStyle='rgba(255,240,170,.4)';x.fillRect(cx-wd/5,0,wd/6,len)}},
+     (x,w,h)=>{x.drawImage(base,0,0,w,h);x.fillStyle='rgba(60,30,6,.25)';x.fillRect(0,0,w,h);const hex=(cx,cy,r)=>{x.beginPath();for(let i=0;i<6;i++){const a=Math.PI/6+i*Math.PI/3;x[i?'lineTo':'moveTo'](cx+r*Math.cos(a),cy+r*Math.sin(a))}x.closePath()};
+       for(const [cx,cy] of [[40,40],[70,40],[55,66],[85,66],[25,66],[55,14],[100,92],[70,92]]){const g=x.createRadialGradient(cx,cy,2,cx,cy,17);g.addColorStop(0,'rgba(255,214,110,.92)');g.addColorStop(1,'rgba(200,120,30,.75)');x.fillStyle=g;hex(cx,cy,15);x.fill();x.strokeStyle='rgba(90,50,10,.9)';x.lineWidth=2.5;hex(cx,cy,15);x.stroke()}},
+     (x,w,h)=>{x.drawImage(base,0,0,w,h);x.fillStyle='rgba(255,246,214,.2)';x.fillRect(0,0,w,h);for(let i=0;i<9;i++){const cx=(i*47)%w,cy=(i*71)%h,g=x.createRadialGradient(cx,cy,2,cx,cy,30);g.addColorStop(0,'rgba(255,252,236,.5)');g.addColorStop(1,'rgba(255,252,236,0)');x.fillStyle=g;x.fillRect(cx-30,cy-30,60,60)}
+       x.fillStyle='rgba(70,40,12,.5)';for(let i=0;i<7;i++){x.fillRect(8+i*18,(i*37)%h,2,24+(i*11)%20)}}];
+    const chars=V.map((fn,i)=>{const key='hgpa_wx'+i;IMG[key]=mkCanvas(128,128,fn);const sty='hgpa_wx'+i;OH_STY[sty]=Object.assign({},OH_STY.castle2||OH_STY.gold,{plain:key,door:key,win:key,alt:key,zoom:1,contrast:1.0,tint:[255,255,255,0]});const c=String.fromCharCode(0x380+i);L.chars[c]=TM.make('plain',sty,2.7).gid;return c});
+    const hv=(x,y,s)=>{let h=(Math.imul(x+1,374761393)+Math.imul(y+1,668265263)+Math.imul(s+7,2147483647))>>>0;h=Math.imul(h^(h>>>13),1274126177)>>>0;return((h^(h>>>16))>>>0)/4294967296};
+    let n=0;for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){if(rows[y][x]!==wax||bio[y*W+x]!==2)continue;const r=hv(x>>1,y>>1,60);if(r>.34)continue;const i=r<.12?0:r<.22?1:2;rows[y][x]=chars[i];if(G.grid[y]&&G.grid[y][x]!==undefined)G.grid[y][x]=L.chars[chars[i]];n++}
+    L.rows=rows.map(r=>r.join(''));A.wallVariants=n}catch(e){console.error('hgpa wall variants',e)}}
+{const _b4=hgdBuild;hgdBuild=function(){try{if(!LEVELS[HGD.ID]&&typeof IMG!=='undefined'&&IMG.tex_abbeywall&&IMG.tex_abbeywall.width&&!IMG.hgpa_w1){const b=IMG.tex_abbeywall,c=document.createElement('canvas');c.width=b.width;c.height=b.height;const x=c.getContext('2d');try{x.filter='brightness(1.18) contrast(1.04)'}catch(e){}x.drawImage(b,0,0);try{x.filter='none'}catch(e){}IMG.hgpa_w1=c;HGDM.biomes[1].wall='hgpa_w1'}}catch(e){console.error('hgpa warren wall',e)}return _b4.apply(this,arguments)}}
 
 /* ---- src/desert/hgd_polish_c.js ---- */
 /* ==========================================================================
@@ -59649,6 +59744,8 @@ HGDPC.lights=[];
 /* ---------- one table of heights (squares): [pattern, low, high], applied to every prop of the zone that is not a person ---------- */
 const HGDPC_SCALE=[[/^hg_lamp$/,1.2,1.4],[/^hgt_shellflower$/,1.3,1.6],[/^hgt_bulbflower$/,1.2,1.5],[/^hgtb_plant_spiralfern$/,1.0,1.3],[/^hgtb_deco_shellstatue$/,1.35,1.7],[/^art_hgxstat\d$/,1.3,1.6],[/^hgtb_deco_pearlplinth$/,.5,.8],[/^hgtb_deco_banner$/,1.0,1.25],
  [/^hgt_lamppost$/,1.2,1.5],[/^art_hgdf_vine\d$/,1.0,1.25],[/^hgtb_deco_fountain$/,1.2,1.5],[/^hgt_fountain$/,1.1,1.4],[/^(wm_bookshelf|hgtb_furn_bookshelf)$/,1.3,1.6],[/^hg_chestwax$/,.35,.5],[/^hgtb_table$/,.4,.5],[/^hgtb_bench$/,.4,.55],[/^hgtb_chair$/,.5,.65],[/^(wm_noticeboard|noticeboard)$/,.8,.9],[/^hgtb_stall_/,1.1,1.4],[/^wm_statue$/,1.4,1.7],[/^(hgt_fairytree|hgtb_plant_belltree)$/,2.3,3.6]];
+/* round 4: the per-kind scale table (heights next to a person of about 1.0). Jars, wax barrels and sacks were person-sized, huts were hardly taller than a person, the cream and pink cloud bushes and the lantern cluster at Nacre Landing were giants */
+HGDPC_SCALE.push([/^hg_jar$/,.45,.65],[/^hg_waxbarrel$/,.5,.65],[/^hg_lectern$/,.7,.85],[/^sacks$/,.3,.42],[/^sack2$/,.32,.45],[/^hgdfc_(cream|pink|lilac)\d$/,.55,.8],[/^hgtb_deco_lanterns$/,.55,.8],[/^icn_hgdi_/,1.5,1.8],[/^wm_bell$/,.7,.85],[/^hgt_reeds$/,.6,.9]);
 function hgdpcScalePass(L,zoneOf){let fixed=0;const rep={};
   for(const d of L.decor){if(d.npc&&!/hgdpc_text/.test(d.npc)||!zoneOf(d)||!NPC_H[d.k])continue;
     for(const [re,lo,hi] of HGDPC_SCALE){if(!re.test(d.k))continue;const base=NPC_H[d.k],h=base*(d.sc||1);let want=h;
@@ -59790,21 +59887,35 @@ function hgdpc2Build(L){
     if(SW.includes(d.k)){const alt=SW.filter(k=>k!==d.k).map(k=>[k,same(k)]).sort((a,b)=>a[1]-b[1])[0];const w=!(/^(hgt_fern|hgt_mushrooms|hgt_pearlbush|hgtb_plantbed)$/.test(alt[0])&&false);d.k=alt[0];delete d.sc;if(d.block){d.block=false;d.walk=true}cl++}
     else{unreg(d);L.decor.splice(L.decor.indexOf(d),1);cl++}}
   st.clustersFixed=cl;
+  /* I1. round 4: nobody is hidden. Within one square of a giver, shopkeeper or priest nothing of any size stands, and nothing of a sack's or crate's size stands in the line of sight (up to two squares along the open row or column). Props move to the nearest cell that is out of every line. */
+  {const gv=L.decor.filter(d=>d.npc&&/^hgd_(q\d+|s2_[a-z]+\d|shop\d|church\d)$/.test(d.npc)&&zoneOf(d)),nts=L.decor.filter(d=>d.npc&&/^(hgd_note|hgd_pa_note|hgdb_note)$/.test(d.npc)&&zoneOf(d)),people=gv.concat(nts);
+   const clr=(p,x,y)=>{const dx=Math.sign(x-p.x),dy=Math.sign(y-p.y),n=Math.max(Math.abs(x-p.x),Math.abs(y-p.y));for(let i=1;i<n;i++)if(!open(p.x+dx*i,p.y+dy*i))return false;return true};
+   const lineD=(x,y,arr)=>{let m=9;for(const p of arr){if((x===p.x||y===p.y)&&(x!==p.x||y!==p.y)){const n=Math.abs(x-p.x)+Math.abs(y-p.y);if(n<m&&clr(p,x,y))m=n}}return m};
+   const near1=(x,y)=>people.some(p=>Math.max(Math.abs(x-p.x),Math.abs(y-p.y))<=1);
+   const SOLID=/tree|statue|well|fountain|plinth|hgxstat|hgxrock|house|hut|stall/;
+   const bad=d=>{if(d.npc||d.hgdTier||d.hs||d.pic||d.skind||d.cl||!NPC_H[d.k]||/lamp|lantern|candle|brazier|chest|teleporter|hanglamp|^hgdpc_/.test(d.k))return false;
+     const h=NPC_H[d.k]*(d.sc||1);if(h<.3)return false;if(near1(d.x,d.y))return true;if(h>=.3&&lineD(d.x,d.y,nts)<=2)return true;if(d.block&&SOLID.test(d.k))return false;return h>=.35&&lineD(d.x,d.y,gv)<=2};
+   let moved=0;
+   for(let pass=0;pass<3;pass++)for(const d of L.decor.slice()){if(!zoneOf(d)||!bad(d))continue;
+     unreg(d);let q=null;
+     for(const lim of [3,2,0]){if(q)break;for(let r=1;r<=10&&!q;r++){let bd=1e9;for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=d.x+dx,y=d.y+dy;if(!ok(x,y,!!d.block,0)||near1(x,y)||(lim&&lineD(x,y,people)<=lim))continue;const dd=dx*dx+dy*dy;if(dd<bd){bd=dd;q=[x,y]}}}}
+     if(q){d.x=q[0];d.y=q[1];reserved.add(q.join());moved++}reg(d)}
+   st.hidersMoved=moved}
   /* F. pools of coloured light: the centre of every square, every stall, and each junction round a square or enclave */
   const pools=[];const addPool=(x,y,col,kI,r2)=>{HGDPC.lights.push({x,y,col,kI,r2});pools.push([x,y])};
-  const around=(z,col,reach,gap,maxN)=>{let n=0;const cs=[];for(let dy=-reach;dy<=reach;dy++)for(let dx=-reach;dx<=reach;dx++){const x=z.x+dx,y=z.y+dy;if(!open(x,y)||Math.hypot(dx,dy)>reach)continue;if(n4(x,y)>=3)cs.push([x,y,hgdpcH(x,y,40)])}
-    cs.sort((a,b)=>a[2]-b[2]);const got=[];for(const [x,y] of cs){if(got.length>=maxN)break;if(got.some(g=>Math.hypot(g[0]-x,g[1]-y)<gap))continue;got.push([x,y]);addPool(x,y,col,.42,30)}};
+  const around=(z,col,reach,gap,maxN,kb)=>{let n=0;const cs=[];for(let dy=-reach;dy<=reach;dy++)for(let dx=-reach;dx<=reach;dx++){const x=z.x+dx,y=z.y+dy;if(!open(x,y)||Math.hypot(dx,dy)>reach)continue;if(n4(x,y)>=3)cs.push([x,y,hgdpcH(x,y,40)])}
+    cs.sort((a,b)=>a[2]-b[2]);const got=[];for(const [x,y] of cs){if(got.length>=maxN)break;if(got.some(g=>Math.hypot(g[0]-x,g[1]-y)<gap))continue;got.push([x,y]);addPool(x,y,col,kb||.75,44)}};
   towns.forEach((z,t)=>{const col=HGDPC_TCOL[t];addPool(z.x,z.y,col,1.25,100);around(z,col,z.r+8,6,16);
     for(const d of L.decor.filter(d=>stallRe.test(d.npc||'')&&Math.hypot(d.x-z.x,d.y-z.y)<=z.r+1)){const k=/^hgd_shop/.test(d.npc)?'general':d.npc.match(/s2_([a-z]+)/)[1];addPool(d.x,d.y,HGDPC_KCOL[k]||col,.5,26)}});
-  encl.slice(0,10).forEach((z,i)=>{const col=HGDPC_ECOL[i%10];addPool(z.x,z.y,col,1.7,110);around(z,col,z.r+9,5,14)});
+  encl.slice(0,10).forEach((z,i)=>{const col=HGDPC_ECOL[i%10];addPool(z.x,z.y,col,2.6,150);around(z,col,z.r+10,4,22,/Lantern Landing|Mossy|Quiet|Sleeping/.test(z.name)?1.5:0)});
   st.pools=pools.length;
   /* F2. light along the corridors round every square and enclave: a hanging lamp and a pool of light every four or five squares, so props are seen and no way is black */
   const allL=pools.concat((L.lights||[]).map(q=>[q[0],q[1]]));let lampsAdded=0;
   const corr=(z,col,reach,gap,kI,r2)=>{const cs=[];for(let dy=-reach;dy<=reach;dy++)for(let dx=-reach;dx<=reach;dx++){const x=z.x+dx,y=z.y+dy;if(!open(x,y)||Math.hypot(dx,dy)>reach||Math.hypot(dx,dy)<z.r*.6||n4(x,y)>3)continue;cs.push([x,y,hgdpcH(x,y,50)])}
     cs.sort((a,b)=>a[2]-b[2]);for(const [x,y] of cs){if(allL.some(g=>Math.hypot(g[0]-x,g[1]-y)<gap))continue;if(occ.has(x+','+y)&&occ.get(x+','+y).some(d=>d.block||d.npc))continue;
-      allL.push([x,y]);addPool(x,y,col,kI,r2);if(!busy(x,y)&&!reserved.has(x+','+y)){put({k:'hgt_hanglamp',x,y,block:false,walk:true,deco:true,sc:1,cl:1});lampsAdded++}}};
-  towns.forEach((z,t)=>corr(z,HGDPC_TCOL[t],z.r+9,5,.55,34));
-  encl.slice(0,10).forEach((z,i)=>corr(z,HGDPC_ECOL[i%10],z.r+12,4.5,.6,36));
+      allL.push([x,y]);addPool(x,y,col,kI,r2);if(!busy(x,y)&&!reserved.has(x+','+y)&&!L.decor.some(n=>n.npc&&/^(hgd_note|hgd_pa_note|hgdb_note)$/.test(n.npc)&&(n.x===x||n.y===y)&&Math.abs(n.x-x)+Math.abs(n.y-y)<=3)){put({k:'hgt_hanglamp',x,y,block:false,walk:true,deco:true,sc:1,cl:1});lampsAdded++}}};
+  towns.forEach((z,t)=>corr(z,HGDPC_TCOL[t],z.r+11,4,1.0,56));
+  encl.slice(0,10).forEach((z,i)=>{const dk=/Mossy|Quiet|Sleeping|Lantern Landing/.test(z.name);corr(z,HGDPC_ECOL[i%10],z.r+18,dk?2.6:3.6,dk?2.8:1.1,dk?80:56)});
   st.corridorLamps=lampsAdded;st.pools=pools.length;
   /* F3. every landmark of a square says what it is: a named plaque beside the main piece, and a light on it */
   let plaques=0;
@@ -59837,11 +59948,61 @@ function hgdpc2Build(L){
    st.labelled=labelled}
   /* G. the heights table */
   const sp=hgdpcScalePass(L,zoneOf);st.scaleFixed=sp.fixed;st.scaleTable=sp.table;
+  /* I2. round 4: hanging shop signs are 0.6 of a person (they were 1.05 and filled the view), hung a little above the ground */
+  {let n=0;for(const d of L.decor)if(/^hgdpc_ss\d+$/.test(d.k||'')&&NPC_H[d.k]&&zoneOf(d)){d.sc=+(.62/NPC_H[d.k]).toFixed(3);d.lift=Math.max(d.lift||0,.3);n++}st.shopSigns=n}
   /* H. lettered boards: the notice board of each town and every plaque carries its own heading */
   towns.forEach((z,t)=>{for(const d of L.decor)if(d.npc==='hgdpc_text'&&d.k==='wm_noticeboard'&&Math.hypot(d.x-z.x,d.y-z.y)<=z.r+2&&d.__nb===undefined){const key='hgdpc_nb'+t;d.__nb=1;
     HGDPC_LET[key]={base:'wm_noticeboard',r:[.16,.0,.68,.2],text:HGDPC_TOWN[t].toUpperCase()+' NOTICES',maxw:300,bg:'#d8c68e'};NPC_H[key]=NPC_H.wm_noticeboard||.95;d.k=key}});
   let vn=0;for(const d of L.decor)if(d.npc==='hgdpc_text'&&d.k==='noticeboard'&&d.kname){const key='hgdpc_vn'+vn++;HGDPC_LET[key]={base:'noticeboard',r:[.1,.2,.8,.16],text:String(d.kname).toUpperCase().replace(/^THE /,''),maxw:260,bg:'#d8c68e'};NPC_H[key]=NPC_H.noticeboard||.77;d.k=key}
   HGDPC.lettered=0;L._hgdpc2={stats:st}}
+
+/* ---------- round 4: corridor notes stand up facing the walker ----------
+   A note on the side wall of a corridor is seen edge-on and cannot be read beyond one square. Every note picture in the towns and enclaves (the
+   zone of this file) becomes a standing sign in the corner of its square, 1.35 times its usual size, so it faces the walker and reads from
+   three or four squares. A loose parchment page becomes the scroll on its board. Called from hgd_polish_text.js just before the lettering. */
+function hgdpcCorr(L){
+  if(!L||!L._hgdp||!L.decor||typeof HGS_SET==='undefined')return 0;let n=0;
+  const zs=L._hgdp.zones.filter(z=>z.type==='safe');
+  for(const d of L.decor){if(d.hgcc||!d.hgs||!d.pic||!d.wd||!/^(hgd_note|hgd_pa_note|hgdb_note)$/.test(d.npc||''))continue;
+    if(!zs.some(z=>Math.hypot(d.x-z.x,d.y-z.y)<=z.r+3))continue;
+    let kind=d.hgs;if(kind==='page')kind='scroll';if(!/^(scroll|plaque|slate|tablet)$/.test(kind))continue;
+    const img='art_hs_'+kind;if(!(IMG[img]&&IMG[img].width))continue;
+    if(d.hgt){delete d.hgt;delete d.lk;delete d.hgtBase}
+    d.k=img;d.hgs=kind;d.hgcc=1;const wd=d.wd;d.hgsWd=wd.slice?wd.slice():wd;d.pic=0;d.ox=wd[0]*.3;d.oy=wd[1]*.3;
+    if(wd[0]===0&&wd[1]!==0)d.ox=(hash2(d.x,d.y,17)<.5?-1:1)*.14;else if(wd[1]===0&&wd[0]!==0)d.oy=(hash2(d.x,d.y,19)<.5?-1:1)*.14;
+    d.sc=1.35*(.94+hash2(d.x,d.y,23)*.12);d.bob=0;d.block=false;d.walk=true;d.deco=true;n++}
+  try{hgdpcLate(L)}catch(e){console.error('hgdpcLate',e)}
+  return n}
+/* the late clearing pass (all other polish passes have run): nothing small stands on or in front of a note (one or two squares in line) or within a square of a giver, shopkeeper or priest.
+   Only walk-through props move (to the nearest free cell out of the lines); a hanging lamp picture in front of a note is dropped (its light stays). */
+function hgdpcLate(L){
+  if(L._hgdpcLate||!L._hgdp)return;L._hgdpcLate=1;const rows=L.rows,open=(x,y)=>rows[y]&&rows[y][x]==='.';
+  const zs=L._hgdp.zones.filter(z=>z.type==='safe'),zoneOf=d=>zs.some(z=>Math.hypot(d.x-z.x,d.y-z.y)<=z.r+3);
+  const nts=L.decor.filter(d=>d.npc&&/^(hgd_note|hgd_pa_note|hgdb_note)$/.test(d.npc)&&zoneOf(d)),gv=L.decor.filter(d=>d.npc&&/^hgd_(q\d+|s2_[a-z]+\d|shop\d|church\d)$/.test(d.npc)&&zoneOf(d)),all=nts.concat(gv);
+  const clr=(p,x,y)=>{const dx=Math.sign(x-p.x),dy=Math.sign(y-p.y),n=Math.max(Math.abs(x-p.x),Math.abs(y-p.y));for(let i=1;i<n;i++)if(!open(p.x+dx*i,p.y+dy*i))return false;return true};
+  const lineD=(x,y,arr)=>{let m=9;for(const p of arr)if((x===p.x||y===p.y)&&(x!==p.x||y!==p.y)){const n=Math.abs(x-p.x)+Math.abs(y-p.y);if(n<m&&clr(p,x,y))m=n}return m};
+  const near1=(x,y)=>all.some(p=>Math.max(Math.abs(x-p.x),Math.abs(y-p.y))<=1);
+  const taken=new Set(L.decor.filter(d=>!d.pic||d.block||d.npc).map(d=>d.x+','+d.y));L.items.forEach(i=>taken.add(i.x+','+i.y));L.enemies.forEach(e=>taken.add(e.x+','+e.y));
+  if(L.start)taken.add(L.start.x+','+L.start.y);
+  let moved=0,dropped=0,notesMoved=0;
+  const bigs=L.decor.filter(b=>b.block&&!b.npc&&!b.hs&&NPC_H[b.k]&&NPC_H[b.k]*(b.sc||1)>=.3);
+  const blocked=(x,y)=>bigs.some(b=>{const c=Math.max(Math.abs(b.x-x),Math.abs(b.y-y));return c===0||(c<=2&&(b.x===x||b.y===y)&&clr({x,y},b.x,b.y))});
+  for(let pass=0;pass<2;pass++)for(const n of nts){if(!blocked(n.x,n.y))continue;let q=null;
+    for(let r=1;r<=8&&!q;r++){let bd=1e9;for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=n.x+dx,y=n.y+dy;if(!open(x,y)||taken.has(x+','+y)||blocked(x,y)||near1(x,y))continue;const dd=dx*dx+dy*dy;if(dd<bd){bd=dd;q=[x,y]}}}
+    if(q){n.x=q[0];n.y=q[1];taken.add(q.join());notesMoved++}}
+  for(const n of nts){for(const b of bigs.slice()){if(!/art_hgxrock|art_hgxprop|art_hpb_/.test(b.k)||b.hgdTier)continue;const c=Math.max(Math.abs(b.x-n.x),Math.abs(b.y-n.y));
+    if(c===0||(c<=2&&(b.x===n.x||b.y===n.y)&&clr(n,b.x,b.y))){const i=L.decor.indexOf(b);if(i>=0){L.decor.splice(i,1);bigs.splice(bigs.indexOf(b),1);dropped++}}}} // a small blocker that cannot move: removing a blocker never closes a way
+  for(const d of L.decor.slice()){if(d.npc||d.pic||d.hs||d.hgdTier||d.skind||d.block||d.found||!zoneOf(d))continue;
+    const lamp=/hanglamp/.test(d.k||'');if(!lamp&&(!NPC_H[d.k]||/lantern|candle|chest|teleporter|^hgdpc_/.test(d.k)))continue;
+    const h=(NPC_H[d.k]||.8)*(d.sc||1);if(!lamp&&h<.3)continue;
+    const hitN=nts.some(p=>{const c=Math.max(Math.abs(d.x-p.x),Math.abs(d.y-p.y));return c===0||(c<=2&&(d.x===p.x||d.y===p.y)&&clr(p,d.x,d.y))});
+    const hitG=!lamp&&gv.some(p=>Math.max(Math.abs(d.x-p.x),Math.abs(d.y-p.y))<=1);
+    if(!hitN&&!hitG)continue;
+    if(lamp){L.decor.splice(L.decor.indexOf(d),1);dropped++;continue}
+    taken.delete(d.x+','+d.y);let q=null;
+    for(const lim of [3,2,0]){if(q)break;for(let r=1;r<=10&&!q;r++){let bd=1e9;for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=d.x+dx,y=d.y+dy;if(!open(x,y)||taken.has(x+','+y)||near1(x,y)||(lim&&lineD(x,y,all)<=lim))continue;const dd=dx*dx+dy*dy;if(dd<bd){bd=dd;q=[x,y]}}}}
+    if(q){d.x=q[0];d.y=q[1];taken.add(q.join());moved++}else if(/art_hgxprop|art_hpb_|art_hgxrock/.test(d.k)){L.decor.splice(L.decor.indexOf(d),1);dropped++}else taken.add(d.x+','+d.y)}
+  L._hgdpcLateN=[moved,dropped,notesMoved]}
 
 /* ---- src/desert/hgd_polish_d.js ---- */
 /* ==========================================================================
@@ -59894,9 +60055,16 @@ function hgpdTrim(c){const w=c.width,h=c.height,d=c.getContext('2d').getImageDat
 function hgpdTurn(src,deg,sy,shade){const w=src.width,h=src.height,m=Math.ceil(Math.hypot(w,h)),c=document.createElement('canvas');c.width=m;c.height=m;const x=c.getContext('2d');x.translate(m/2,m/2);x.rotate(deg*Math.PI/180);x.scale(1,sy||1);x.drawImage(src,-w/2,-h/2);
   if(shade){x.globalCompositeOperation='source-atop';x.fillStyle=shade;x.fillRect(-m,-m,m*2,m*2)}return hgpdTrim(c)}
 function hgpdWreck(boat){const w=boat.width,h=boat.height,c=document.createElement('canvas');c.width=Math.round(w*1.25);c.height=Math.round(h*1.15);const x=c.getContext('2d');
-  // the bow half: the right side is torn off along a ragged line, the whole piece leans over on its keel
-  x.save();x.translate(w*.02,h*.96);x.rotate(-.13);x.translate(0,-h*.96);x.beginPath();
-  const P=[[0,0],[.58,0],[.5,.14],[.64,.27],[.52,.42],[.66,.58],[.55,.72],[.7,.86],[.6,1],[0,1]];P.forEach((q,i)=>i?x.lineTo(q[0]*w,q[1]*h):x.moveTo(q[0]*w,q[1]*h));x.closePath();x.clip();x.drawImage(boat,0,0);x.restore();
+  // the bow half: the planking is stove in along a ragged line and the bare ribs stand up out of the break, the whole piece leans over on its keel
+  x.save();x.translate(w*.02,h*.96);x.rotate(-.13);x.translate(0,-h*.96);
+  const P=[[0,0],[.36,0],[.43,.2],[.5,.13],[.55,.36],[.63,.3],[.69,.52],[.78,.46],[.86,.66],[.95,.6],[1,.7],[1,1],[0,1]];
+  x.save();x.beginPath();P.forEach((q,i)=>i?x.lineTo(q[0]*w,q[1]*h):x.moveTo(q[0]*w,q[1]*h));x.closePath();x.clip();x.drawImage(boat,0,0);
+  x.fillStyle='rgba(8,10,14,.5)';x.fillRect(w*.4,0,w*.62,h*.2);x.restore(); // the open hold behind the ribs
+  for(const [vx,vy,rh] of [[.5,.13,.15],[.58,.34,.17],[.66,.3,.13],[.74,.5,.16],[.82,.46,.12],[.9,.62,.13]]){ // ribs: tapered bare timbers with a lit edge
+    const rx=vx*w,ry=vy*h,bw=w*.024,g=x.createLinearGradient(rx-bw,0,rx+bw,0);g.addColorStop(0,'#0e0a06');g.addColorStop(.55,'#281d12');g.addColorStop(1,'#120c07');
+    x.fillStyle=g;x.beginPath();x.moveTo(rx-bw,ry+h*.22);x.lineTo(rx-bw*.55,ry-h*rh);x.lineTo(rx-bw*.1,ry-h*rh-h*.02);x.lineTo(rx+bw*.5,ry-h*rh*.9);x.lineTo(rx+bw,ry+h*.22);x.closePath();x.fill();
+    x.strokeStyle='rgba(120,96,64,.3)';x.lineWidth=Math.max(1,w*.004);x.beginPath();x.moveTo(rx-bw*.1,ry-h*rh);x.lineTo(rx+bw*.1,ry+h*.2);x.stroke()}
+  x.restore();
   // a piece of the stern, thrown a little way off, on its side
   x.save();x.translate(w*1.0,h*1.1);x.rotate(.62);x.scale(.5,.5);x.translate(-w*.4,-h);x.beginPath();
   const Q=[[.46,.12],[1,.0],[1,1],[.5,1],[.62,.8],[.44,.62],[.58,.44],[.4,.3]];Q.forEach((q,i)=>i?x.lineTo(q[0]*w,q[1]*h):x.moveTo(q[0]*w,q[1]*h));x.closePath();x.clip();x.drawImage(boat,0,0);x.restore();
@@ -59968,7 +60136,7 @@ function hgpdBuild(L){
   const nameAt=(t,x,y)=>{info.names.push({t,x,y,k:'place'})};
   /* ---- 0a. the walls: the old tint [4,3,5,.5] multiplied the rock to black and then screened a flat beige over it, so every wall was a smooth blank slab. A plain darkening keeps the cracks and the facets. ---- */
   try{const TM=ohTiles(),chUp=String.fromCharCode(0x331);
-    if(OH_STY.hgdu_rock){OH_STY.hgdu_rock.tint=[248,242,255];L.chars['#']=TM.make('plain','hgdu_rock',2.7).gid}
+    if(OH_STY.hgdu_rock){{const lp=hgpdLit(OH_STY.hgdu_rock.plain);if(IMG[lp]&&IMG[lp].width)OH_STY.hgdu_rock.plain=lp}OH_STY.hgdu_rock.tint=[248,242,255];L.chars['#']=TM.make('plain','hgdu_rock',2.7).gid}
     if(OH_STY.hgdu_up){OH_STY.hgdu_up.tint=[196,186,176];L.chars[chUp]=TM.make('door','hgdu_up',2.7).gid}}catch(e){console.error('hgpd walls',e)}
   /* ---- 0. proportions of the repeated props ---- */
   {const by={};for(const d of L.decor)(by[d.k]=by[d.k]||[]).push(d);
@@ -60148,7 +60316,7 @@ function hgpdBuild(L){
     for(let n=0;n<18;n++){let best=null,bs=-1;for(const c of jc){let m=1e9;for(const q of picked)m=Math.min(m,Math.hypot(q.x-c.x,q.y-c.y));if(m<20)continue;const s=Math.min(m,60)+rnd()*4;if(s>bs){bs=s;best=c}}if(!best)break;picked.push(best)}
     picked.forEach((c,i)=>{const up=i%2===0,d=up?dUp:dBoat,n=d[ix(c.x,c.y)],dir=dirTo(d,c.x,c.y);if(n<0||!dir)return;
       const text=up?'A flat stone is set into the wall, covered in glowing runes nobody can read. Under them somebody has scratched the word UP. The nearest ladder to the surface is about '+n+' steps from here. The way starts to the '+dir+'.':'A board is nailed to the wall with scraps of paper pinned on it. The top scrap says BOAT. The nearest boat is about '+n+' steps from here. The way starts to the '+dir+'.';
-      add(up?'hgpd_rune':'hgpd_board',c.x,c.y,{wd:c.w,bob:.18,sc:up?.7:.9,read:{n:up?'A rune stone':'A notice board',t:text}});info.signs++})}
+      add(up?'hgpd_rune':'hgpd_board',c.x,c.y,{wd:c.w,bob:.18,sc:up?.95:.9,read:{n:up?'A rune stone':'A notice board',t:text}});info.signs++})}
   /* ---- 5. dead ends that are still empty get a small scene of their own ---- */
   // round 3: sixteen different kits (each has its own main piece, no two share both props); a dead end takes the kit used least in its neighbourhood
   const FILL=[
@@ -60177,7 +60345,7 @@ function hgpdBuild(L){
   {const marked=(x,y)=>L.decor.some(d=>Math.abs(d.x-x)<=3&&Math.abs(d.y-y)<=3&&!(d.pic&&/web/.test(d.k)))||(L.lights||[]).some(q=>Math.hypot(q[0]-x,q[1]-y)<=5);
     const LM=[(x,y,w)=>{add('hgpd_hook',x,y,{wd:w,bob:.55,sc:1});light(x,y,.4)},(x,y,w)=>{P('hgpd_rubble',x,y,{sc:1.4,ox:w[0]*.3,oy:w[1]*.3});P('hgpd_root',x,y,{sc:1.4,ox:-w[1]*.2,oy:w[0]*.2})},(x,y,w)=>{P('hgpd_crate',x,y,{sc:.85,ox:w[0]*.3,oy:w[1]*.3});P('hgpd_bucket',x,y,{sc:.9,ox:w[0]*.3-w[1]*.0,oy:w[1]*.3})},
       (x,y,w)=>{P('hgpd_bones',x,y,{sc:1.5,ox:w[0]*.25,oy:w[1]*.25});P('hgpd_tooth',x,y,{sc:1.3,ox:w[0]*.3,oy:w[1]*.3})},(x,y,w)=>{P('hgpd_post',x,y,{sc:.8,ox:w[0]*.36,oy:w[1]*.36})},
-      (x,y,w)=>{P('hgpd_candle',x,y,{sc:1,ox:w[0]*.3,oy:w[1]*.3});P('hgpd_candle',x,y,{sc:.8,ox:w[0]*.3+.12,oy:w[1]*.3});light(x,y,.25)},(x,y,w)=>{add('hgpd_rune',x,y,{wd:w,bob:.18,sc:.7,read:{n:'A rune stone',t:HGPD_RUNES[ri++%HGPD_RUNES.length]}})}];
+      (x,y,w)=>{P('hgpd_candle',x,y,{sc:1,ox:w[0]*.3,oy:w[1]*.3});P('hgpd_candle',x,y,{sc:.8,ox:w[0]*.3+.12,oy:w[1]*.3});light(x,y,.25)},(x,y,w)=>{add('hgpd_rune',x,y,{wd:w,bob:.18,sc:.95,read:{n:'A rune stone',t:HGPD_RUNES[ri++%HGPD_RUNES.length]}})}];
     let ri=0;
     let li=0;const run=(x0,y0,dx,dy)=>{let x=x0,y=y0,since=0;while(land(x,y)){const straight=land(x+dx,y+dy)&&land(x-dx,y-dy)&&!land(x+dy,y+dx)&&!land(x-dy,y-dx);
         if(!straight){since=0}else if(marked(x,y))since=0;else{since++;if(since>=14){const w=wallDir(x,y);if(w&&!foe(x,y,0)&&!keep.some(k=>Math.hypot(k[0]-x,k[1]-y)<4)){LM[li++%LM.length](x,y,w);info.marks++;since=0}}}
@@ -60253,7 +60421,7 @@ function hgpdBuild(L){
       if(!d.label){let lb=rd.n||'';
         if(isSign){const ri=HGPD_RUNES.indexOf(rd.t);
           if(/rune/.test(d.k))lb=ri>=0?RT[ri]:/UP\./.test(rd.t)?'The way up':'Rune stone';
-          else lb=/BOAT/.test(rd.t)?'The way to a boat':/WAIT/.test(rd.t)?'Wait':ONAME.has(rd.t)?(ALC.find(a=>a[1]===rd.t)[0]):'Pinned scraps'}
+          else lb=/BOAT/.test(rd.t)?'Way to a boat':/WAIT/.test(rd.t)?'Wait':ONAME.has(rd.t)?(ALC.find(a=>a[1]===rd.t)[0]):'Pinned scraps'}
         else if(rd.page)lb='Journal, page '+rd.page;
         else if(ONAME.has(rd.t))lb=ALC.find(a=>a[1]===rd.t)[0];
         else if(/wheel/.test(d.k)||/wheel/.test(rd.t))lb='A ship\'s wheel';
@@ -60261,13 +60429,19 @@ function hgpdBuild(L){
         if(!lb||lb.split(/\s+/).length>4)lb=(lb||'A note').split(/\s+/).slice(0,4).join(' ');
         d.label=lb.replace(/[—–]/g,',')}}
     for(const d of L.decor){if(d.pic&&d.wd&&/rune|board/.test(d.k)&&!d.text){d.text=HGPD_RUNES[ri2++%HGPD_RUNES.length];if(!d.label)d.label='Rune stone'}}
+    // 10b2. round 4: every three-by-three hall with no light within four squares gets a standing lantern in one corner and a lit pool (hubs measured 62 of 255, now aimed at 70 or more)
+    {const lt=L.lights||[],hubs=[];for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(!land(x,y)||O.isle[ix(x,y)])continue;let r=true;for(let j=-1;j<=1&&r;j++)for(let i=-1;i<=1;i++)if(!land(x+i,y+j)||O.isle[ix(x+i,y+j)]){r=false;break}if(r)hubs.push([x,y])}
+      const HC=['gold','amber','teal','gold','white'];let hi=0;info.hubLights=0;
+      for(const [x,y] of hubs){if(lt.some(q=>Math.hypot(q[0]-x,q[1]-y)<=1.5))continue;if(foe(x,y,2))continue;
+        const cx=x+(((x*7+y*3)&1)?1:-1),cy=y+(((x*5+y*11)&1)?1:-1);if(!land(cx,cy)||L.decor.some(d=>!d.pic&&d.x===cx&&d.y===cy&&d.block))continue;
+        add('hgpd_lanternW',cx,cy,{sc:1.3,ox:.12});clight(cx,cy,HC[hi++%HC.length],.95,{z:.3,rw:.65,a:.8});info.hubLights++}}
     // 10c. a picture that is missing is swapped for a candle, so the game never draws an empty slot
     for(const d of L.decor)if(/^hgpd_/.test(d.k)&&!IMG[d.k]){d.k=IMG.hgpd_candle?'hgpd_candle':d.k;info.missing=(info.missing||0)+1}
   }
   /* ---- 7. names on the map ---- */
   L.mapNames=(L.mapNames||[]).concat(info.names);
   info.pages=info.vig.filter(v=>v.p).length;L._hgpd=info}
-{const _b=hgduBuild;hgduBuild=function(){const had=!!LEVELS[HGDU.ID];_b.apply(this,arguments);const L=LEVELS[HGDU.ID];if(!had&&L&&L._hgdo&&L._bsu)try{const t0=performance.now();hgpdBuild(L);if(L._hgpd)L._hgpd.ms=Math.round(performance.now()-t0)}catch(e){console.error('hgpdBuild',e)}}}
+{const _b=hgduBuild;hgduBuild=function(){const had=!!LEVELS[HGDU.ID];_b.apply(this,arguments);const L=LEVELS[HGDU.ID];if(!had&&L&&L._hgdo&&L._bsu)try{const t0=performance.now();hgpdBuild(L);try{if(!window.__NOHGPDWV)hgpdWallVar(L)}catch(e){console.error('hgpd wallvar',e)}if(L._hgpd)L._hgpd.ms=Math.round(performance.now()-t0)}catch(e){console.error('hgpdBuild',e)}}}
 /* a stone statue in a dead-end nook whose mouth is a junction square fills the whole screen as you pass (the engine scales a sprite by 1/depth): those few are dropped */
 if(typeof hgdnPlace==='function'){const _hp=hgdnPlace;hgdnPlace=function(L){const had=!!L._hgdn,r=_hp.apply(this,arguments);
   try{if(!had&&r&&L._hgdo){const O=L._hgdo,rows=L.rows,land=(x,y)=>rows[y]&&rows[y][x]==='.'&&O.wm[y*201+x]!==1,DV=[[0,-1],[1,0],[0,1],[-1,0]],dg=(x,y)=>DV.filter(d=>land(x+d[0],y+d[1])).length;
@@ -60278,6 +60452,21 @@ if(typeof hgdnPlace==='function'){const _hp=hgdnPlace;hgdnPlace=function(L){cons
   try{if(LEVEL===HGPD.ID&&G.state==='play'&&HGPD.chapel&&G.time>HGPD.bellT){const d=Math.hypot(G.P.x-HGPD.chapel[0],G.P.y-HGPD.chapel[1]);HGPD.bellT=G.time+9+Math.random()*7;
       if(d<16&&AC&&!G.mute&&SNDOPT.amb){const v=Math.max(.012,.06*(1-d/16));tone(196,188,1.6,'sine',v,0);tone(392,380,1.1,'sine',v*.5,.02);tone(588,570,.7,'sine',v*.25,.04)}}}catch(e){}
   return _u.apply(this,arguments)}}
+// round 4: a brightened copy of a wall texture (the rock was too dark to lift with light alone: hubs measured 62), cached under key+'_lit'
+function hgpdLit(key,f){try{const im=IMG[key];if(!im||!im.width)return key;const k=key+'_lit';if(IMG[k])return k;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.filter='brightness('+(f||1.3)+') contrast(1.04)';x.drawImage(im,0,0);IMG[k]=c;return k}catch(e){return key}}
+/* ---------- round 4: the one rock tile is broken up. Three more wall tiles (the second painted brick, a damp green-stained one, a pale chalky one) are scattered over the wall squares that face a
+   corridor, in two-by-two patches (about one square in six), done last so no builder that looks for '#' is confused. ---------- */
+function hgpdWallVar(L){
+  if(!OH_STY.hgdu_rock||L._hgpdWV)return;L._hgpdWV=1;const TM=ohTiles(),W=201,H=201,rows=L.rows;
+  const BR=OH_STY.hgdu_rock.plain,BR2=IMG.art_tex_hgdu_brick2&&IMG.art_tex_hgdu_brick2.width?hgpdLit('art_tex_hgdu_brick2'):BR;
+  const V=[['hgpd_wv0',BR2,[246,244,252]],['hgpd_wv1',BR,[200,236,216]],['hgpd_wv2',BR2,[255,250,236]]],chs=[];
+  V.forEach(([sty,img0,tint],i)=>{const img=IMG[img0]&&IMG[img0].width?img0:(IMG[BR]&&IMG[BR].width?BR:'art_tex_wall_cave');OH_STY[sty]=Object.assign({},OH_STY.hgdu_rock,{plain:img,door:img,win:img,alt:img,tint});const c=String.fromCharCode(0x3d0+i);L.chars[c]=TM.make('plain',sty,2.7).gid;chs.push(c)});
+  const h=(x,y)=>{let v=(x*374761393+y*668265263+476)>>>0;v=Math.imul(v^(v>>>13),1274126177)>>>0;return ((v^(v>>>16))>>>0)/4294967296};
+  let n=0;const out=rows.map((r,y)=>{if(y<1||y>=H-1)return r;const a=r.split('');
+    for(let x=1;x<W-1;x++){if(a[x]!=='#')continue;if(rows[y][x-1]!=='.'&&rows[y][x+1]!=='.'&&rows[y-1][x]!=='.'&&rows[y+1][x]!=='.')continue;
+      const q=h(x>>1,y>>1);if(q<.17){a[x]=chs[Math.floor(q/.17*3)%3];n++}}
+    return a.join('')});
+  for(let y=0;y<H;y++)rows[y]=out[y];if(L._hgpd)L._hgpd.wallVar=n}
 /* ==========================================================================
    ROUND 2 (lighting, beacons, orbs)
    - coloured pools: the lights made in hgpdBuild carry a colour; the engine takes a colour per light (LIGHTS[].col) and a range (range2).
@@ -60289,7 +60478,7 @@ if(typeof hgdnPlace==='function'){const _hp=hgdnPlace;hgdnPlace=function(L){cons
 {const _s=setupLights;setupLights=function(){_s.apply(this,arguments);
   try{if(LEVEL!==HGPD.ID||!HGPD.cl)return;for(const l of LIGHTS){if(!l.free||l.lamp)continue;const c=HGPD.cl[(l.x-.5)+','+(l.y-.5)];if(c){l.col=c[0];l.calm=true;l.kI=Math.max(1.05,c[1]*1.7);l.range2=c[1]>=.9?150:c[1]>=.6?80:56}}}catch(e){}}}
 {const _sl=setLightLevel;setLightLevel=function(l){_sl.apply(this,arguments);
-  if(HGPD_R2&&LEVEL===HGPD.ID){RANGE*=1.8;for(let i=0;i<=1024;i++)LUT[i]+=.17+.1*(i/1024)}}}
+  if(HGPD_R2&&LEVEL===HGPD.ID){RANGE*=1.8;for(let i=0;i<=1024;i++)LUT[i]+=.27+.1*(i/1024)}}}
 function hgpdGlows(){
   if(LEVEL!==HGPD.ID||!HGPD.glows||typeof bsuAirOn!=='function'||!bsuAirOn())return;
   const C=G.C,LA=C.a+(typeof LKYAW==='number'?LKYAW:0),dX=Math.cos(LA),dY=Math.sin(LA),pX=-dY*PL,pY=dX*PL,cx=C.x+.5-dX*.28,cy=C.y+.5-dY*.28,T=G.time,taken=(G.flags&&G.flags.orbTaken)||{};
@@ -60856,7 +61045,7 @@ function hgsAll(){for(const id of HGSG.IDS){try{hgsApply(LEVELS[id])}catch(e){co
 // text rectangle per picture: [x0,y0,x1,y1] as fractions of the picture, ink (dark paper ink, brass dark engraved, cream stone), face, rot, maxLines
 const HGTX_TBL={
   page:{r:[.16,.2,.84,.8],ink:'dark',fam:'t',n:3},
-  scroll:{r:[.28,.38,.78,.72],ink:'dark',fam:'u',n:3},
+  scroll:{r:[.2,.34,.84,.76],ink:'dark',fam:'u',n:3},
   plaque:{r:[.17,.2,.83,.46],ink:'brass',fam:'u',n:3},
   tablet:{r:[.2,.2,.8,.62],ink:'cream',fam:'u',n:3},
   slate:{r:[.2,.24,.8,.7],ink:'cream',fam:'u',n:3,rot:-.03},
@@ -60866,7 +61055,10 @@ const HGTX_TBL={
   waymarker:{r:[.26,.56,.74,.76],ink:'cream',fam:'u',n:3},
   hanging:{r:[.3,.57,.7,.71],ink:'cream',fam:'t',n:2},
   board:{r:[.12,.185,.88,.3],ink:'cream',fam:'u',n:1},
-  post:{r:[.22,.3,.86,.42],ink:'cream',fam:'u',n:1,top:[.14,.12,.74,.24]}
+  post:{r:[.22,.3,.86,.42],ink:'cream',fam:'u',n:1,top:[.14,.12,.74,.24]},
+  // level 476 (hgd_polish_d.js): the grey notice board gets a lettered plank across its lower third, the rune stone a reading line on its plinth
+  hboard:{r:[.2,.66,.8,.86],ink:'cream',fam:'u',n:2,plank:[.1,.6,.9,.9],base:true},
+  hrune:{r:[.16,.845,.84,.965],ink:'gold',fam:'u',n:1,base:true}
 };
 // a few pictures are a little larger so that their writing can be read from three squares (HGS_SET.h is also what hgd_polish_signs.js uses)
 HGS_SET.plaque.h=.6;NPC_H.art_hs_plaque=.6;HGS_SET.scroll.h=.7;NPC_H.art_hs_scroll=.7;
@@ -60887,6 +61079,9 @@ const HGTX_LAB={hl_vance0:'Letter: the Narrow Sea silver',hl_vance1:"Letter: the
   hl_note6:'The covered mirrors',hl_note7:'A voice in the dark',hl_note8:'The lights go out',hl_note9:'The witch was a guest',hl_note10:'Duke Aldric buried alive',hl_note11:'A thin man in black',
   hl_note12:'Open coffins',hl_note13:'The wizard at the top',hl_note14:'Names on the wall',hl_note15:'Spikes, darts, plates',hl_note16:'The wrong colour wall',hl_note17:'Five letters in blood'};
 function hgtLabel(d){
+  if(!d.label&&/^hgpd_(board|rune)/.test(d.k||'')){ // the game copies only some decor fields into G.decor: read the label from the built level's own entry
+    try{const L=LEVELS[LEVEL],m=L&&L.decor&&L.decor.find(e=>e.x===d.x&&e.y===d.y&&e.label&&/^hgpd_(board|rune)/.test(e.hgtBase||e.k||''));if(m)d.label=m.label}catch(e){}
+    if(!d.label)return ''}
   if(d.label)return hgtClean(d.label);
   if(d.npc&&HGTX_LAB[d.npc])return HGTX_LAB[d.npc];
   const txt=hgsText(d),kind=d.hgs||'page';
@@ -60923,12 +61118,14 @@ function hgtBlock(x,lines,R,fs,fam,ink,seed){
   lines.forEach((ln,i)=>{const w=x.measureText(ln).width;let px=cx-w/2;const py=cy0+i*lh;
     for(let k=0;k<ln.length;k++){const ch=ln[k],cw=x.measureText(ch).width;if(ch!==' ')hgtInk(x,ch,px,py,fs,ink,seed+ln+k);px+=cw}});
 }
-function hgtPaint(kind,label){
-  const base=IMG['art_hs_'+kind],T=HGTX_TBL[kind];if(!base||!base.width||!T)return null;
-  const id=kind+'|'+label;if(HGTX.cache[id])return HGTX.cache[id];
+function hgtPaint(kind,label,bk){
+  const T=HGTX_TBL[kind],base=bk?IMG[bk]:IMG['art_hs_'+kind];if(!base||!base.width||!T)return null;
+  const id=(bk||kind)+'|'+label;if(HGTX.cache[id])return HGTX.cache[id];
   const w=base.width,h=base.height,fam=hgtFam(T.fam);
   const c=mkCanvas(w,h,x=>{
     x.drawImage(base,0,0);
+    if(T.plank){const q=T.plank,X=q[0]*w,Y=q[1]*h,PW=(q[2]-q[0])*w,PH=(q[3]-q[1])*h;const g=x.createLinearGradient(0,Y,0,Y+PH);g.addColorStop(0,'#4a3a2a');g.addColorStop(.5,'#3a2c20');g.addColorStop(1,'#2a2018');
+      x.fillStyle=g;x.fillRect(X,Y,PW,PH);x.strokeStyle='#14100a';x.lineWidth=Math.max(2,h*.012);x.strokeRect(X,Y,PW,PH);x.fillStyle='#8a8f96';for(const nx of [X+PW*.04,X+PW*.96])for(const ny of [Y+PH*.2,Y+PH*.8]){x.beginPath();x.arc(nx,ny,Math.max(1.5,h*.012),0,7);x.fill()}}
     const parts=label.split('|');
     const draw=(txt,r)=>{const R=[r[0]*w,r[1]*h,r[2]*w,r[3]*h],rw=R[2]-R[0],rh=R[3]-R[1];
       const f=hgtFit(x,txt,rw,rh,fam,T.n,h*.17);
@@ -60940,12 +61137,14 @@ function hgtPaint(kind,label){
   return HGTX.cache[id]=c;
 }
 function hgtOne(d){
-  if(d.hgt||!d.k||d.k.indexOf('art_hs_')!==0)return false;
-  const kind=d.k.slice(7);if(!HGTX_TBL[kind])return false;
+  if(d.hgt||!d.k)return false;
+  const hm=/^hgpd_(board|rune)(_m)?$/.exec(d.k);
+  if(!hm&&d.k.indexOf('art_hs_')!==0)return false;
+  const kind=hm?'h'+hm[1]:d.k.slice(7);if(!HGTX_TBL[kind])return false;
   const label=hgtLabel(d);if(!label)return false;
-  const cv=hgtPaint(kind,label);if(!cv)return false; // picture not loaded yet: try again later
-  const key='hgt_'+kind+'_'+hgtHash(label).toString(36);
-  IMG[key]=cv;NPC_H[key]=NPC_H['art_hs_'+kind];
+  const cv=hgtPaint(kind,label,hm?d.k:null);if(!cv)return false; // picture not loaded yet: try again later
+  const key='hgt_'+(hm?d.k:kind)+'_'+hgtHash(label).toString(36);
+  IMG[key]=cv;NPC_H[key]=NPC_H[hm?d.k:'art_hs_'+kind];
   d.hgtBase=d.k;d.hgt=label;if(d.pic&&d.wd)d.lk=key;else d.k=key; // a wall picture keeps its id (maps and quests read it) and shows the lettered copy through d.lk
   HGTX.n++;return true;
 }
@@ -60955,7 +61154,7 @@ function hgtList(){const o=[];for(const id in LEVELS){const L=LEVELS[id];if(!L||
 try{if(typeof HL!=='undefined'){for(let k=0;k<=HL.N;k++)HGSG.IDS.push(HL.BASE+k);HGSG.IDS.push(HL.CAV)}}catch(e){}
 // notes of the older floors keep their words in lists (HL_NOTES, HL_VANCE) and name them only by the npc id
 {const _t=hgsText;hgsText=function(d){const r=_t(d);if(r)return r;try{const m=/^hl_(note|vance)(\d+)$/.exec(d.npc||'');if(m){const A=m[1]==='note'?HL_NOTES:HL_VANCE,v=A&&A[+m[2]];return typeof v==='string'?v:(v&&(v.t||v.text||v[0]))||''}}catch(e){}return r}}
-{const _a=hgsApply;hgsApply=function(L){const r=_a.apply(this,arguments);try{hgtApply(L)}catch(e){console.error('hgt',e)}return r}}
+{const _a=hgsApply;hgsApply=function(L){const r=_a.apply(this,arguments);try{if(typeof hgdpcCorr==='function')hgdpcCorr(L)}catch(e){console.error('hgdpcCorr',e)}try{hgtApply(L)}catch(e){console.error('hgt',e)}return r}}
 {const _sl=setupLights;setupLights=function(){const r=_sl.apply(this,arguments);try{if(typeof LEVEL!=='undefined'&&LEVELS[LEVEL])hgtApply(LEVELS[LEVEL]);if(G&&G.decor)for(const d of G.decor)hgtOne(d)}catch(e){console.error('hgt',e)}return r}}
 
 /* ---- src/desert/quest_rings_fix.js ---- */
@@ -61005,7 +61204,7 @@ T.kg1={give:[N(302,'ci_ketra')],act:[harp({lvl:338,cat:1}),N(330,'sea_land_338')
 T.kg2={give:[N(300,'sb_maeve')],act:[harp({lvl:337,cat:2}),N(330,'sea_land_337')],ready:[N(300,'sb_maeve')]};
 T.kg3={give:[N(301,'ib_aldous')],act:[harp({lvl:341,cat:3}),N(330,'sea_land_341')],ready:[N(301,'ib_aldous')]};
 T.kg4={give:[N(303,'ll_isolde')],act:[harp({lvl:323,cat:4}),N(303,'uw_dive_303')],ready:[N(303,'ll_isolde')]};
-T.sd2={give:[N(290,'yr_menkaure')],act:[X(330,560,300)],ready:[N(290,'yr_menkaure')]};
+T.sd2={give:[N(290,'yr_menkaure')],act:[F(330,()=>{const k=(G.enemies||[]).find(e=>e.t==='kraken'&&e.hp>0);return k?[{x:Math.round(k.x),y:Math.round(k.y)}]:[{x:SN.KRAKEN_X+8,y:320}]})],ready:[N(290,'yr_menkaure')]}; // the Kraken itself once it has risen, else the line it waits behind
 T.vq6={give:[N(305,'oh_cap')],act:[N(306,'oh_king')],ready:[N(306,'oh_king')]};
 /* ---- Act 5: Oldhaven (305), the Oakwood (311) ---- */
 T.oq0={give:[N(305,'oh_cap')],act:[N(305,'oh_x_weigher','oh_x_ringer','oh_x_baker','oh_x_fool')],ready:[N(305,'oh_cap')]};
@@ -61088,13 +61287,16 @@ QRF.live=sp=>{ // the squares of one spec on the level the party is on
 QRF.NAMES={199:'The Palace of Khemetra',213:"Menkaure's Shipwrights",235:'A Boarded House',260:'The Cisterns beneath Khemetra',261:"Ishkander's Study",266:'The Tunnel to the Narrow Sea'};
 QRF.nm=l=>{const n=LEVEL_NAMES[l]||(LEVELS[l]&&LEVELS[l].name)||QRF.NAMES[l]||'';return n.replace(/^The /,'the ')};
 /* ---- the door that leads towards another level: a path over doors (portals and hatches, in either direction), up to six doors long; the ring sits in front of the first door of the way ---- */
-QRF.getL=l=>{if(!LEVELS[l]&&typeof KH_LAZY!=='undefined'&&KH_LAZY[l]){try{KH_LAZY[l]()}catch(e){}}return LEVELS[l]||null};
+QRF.budget=0; // how many not yet built levels one path search may build (they are small rooms; the walk stops there)
+QRF.getL=l=>{if(!LEVELS[l]&&QRF.budget>0&&typeof KH_LAZY!=='undefined'&&KH_LAZY[l]){QRF.budget--;try{KH_LAZY[l]()}catch(e){}}return LEVELS[l]||null};
 QRF.adj=l=>{const L=QRF.getL(l),o=new Set();if(!L)return [];for(const p of L.portals||[])if(p&&p.to!==undefined&&+p.to!==l)o.add(+p.to);for(const d of L.decor||[])if(d.enter&&d.enter.to!==undefined&&+d.enter.to!==l)o.add(+d.enter.to);
   if(QRF._rev===undefined||QRF._revN!==Object.keys(LEVELS).length){QRF._rev={};QRF._revN=Object.keys(LEVELS).length;for(const k in LEVELS){const M=LEVELS[k];if(!M)continue;for(const p of M.portals||[])if(p&&p.to!==undefined)(QRF._rev[+p.to]=QRF._rev[+p.to]||new Set()).add(+k)}}
   for(const k of QRF._rev[l]||[])if(k!==l)o.add(k);return [...o]};
-QRF.path=(a,b)=>{const prev={[a]:null},q=[a];let n=0;while(q.length&&n++<400){const c=q.shift();if(c===b)break;for(const x of QRF.adj(c)){if(!(x in prev)){prev[x]=c;q.push(x)}}}
+QRF.path=(a,b)=>{const prev={[a]:null},q=[a];let n=0;QRF.budget=24;while(q.length&&n++<3000){const c=q.shift();if(c===b)break;for(const x of QRF.adj(c)){if(!(x in prev)){prev[x]=c;q.push(x)}}}
   if(!(b in prev))return null;const out=[];for(let c=b;c!==null;c=prev[c])out.push(c);out.reverse();return out.length<=7?out:null};
-QRF.door=function(Lt){const S=LEVEL,pa=QRF.path(S,Lt);if(!pa||pa.length<2)return null;const N1=pa[1],L1=QRF.getL(N1),LS=LEVELS[S];
+QRF.door=function(Lt){const k=LEVEL+'>'+Lt;if(QRF._dcl!==LEVEL){QRF._dcl=LEVEL;QRF._dc={}}if(k in QRF._dc)return QRF._dc[k];return QRF._dc[k]=QRF._door(Lt)}; // once per level and goal, not every frame
+QRF._door=function(Lt){const S=LEVEL,pa=QRF.path(S,Lt);if(!pa||pa.length<2)return null;const N1=pa[1];QRF.budget=2;const L1=QRF.getL(N1),LS=LEVELS[S];
+  if(G.grid&&G.portals)for(let i=0;i<G.portals.length;i++)if(G.portals[i]&&+G.portals[i].to===N1)for(let y=0;y<G.grid.length;y++){const x=G.grid[y].indexOf(30+i);if(x>=0)return {x,y}} // the door itself: the cell numbered 30+i is door i
   if(L1){const p=(L1.portals||[]).find(p=>p&&+p.to===S);if(p)return {x:p.x,y:p.y}}
   if(LS){const d=(LS.decor||[]).find(d=>d.enter&&+d.enter.to===N1);if(d)return {x:d.x,y:d.y}}
   return null};
@@ -61343,6 +61545,174 @@ function HGWL_push(x,y,col){HGDWL.lights.push({x,y,col,kI:1.9,r2:80})}
     const T=HGW3_BOAT[li%HGW3_BOAT.length],key=hgw3Tint('yar_boat_row',T.col,T.a,'hgw3_boat'+li,T.flip);if(key){d.k=key;d.sc=T.sc;d.ox=T.ox;d.bob=-.14}}}catch(e){}
   return r}}
 
+/* ---- src/desert/hgd_polish_e4.js ---- */
+/* ==========================================================================
+   THE DEEPER HOLLOW, WATER ZONE, POLISH ROUND 4 (prefix hgw4 / HGW4). Runs after hgd_polish_e3.js; patches the built levels 477 (Drowned Maze) and 475 (boat lakes).
+   1. Shell Chests quest (wq4): exactly one flag per distinct chest, moved chests included (old saves are folded onto the chest's original position).
+   2. Creatures: at least 6 squares from every set piece, never in a straight line of sight within 8 of one, off the approach squares.
+   3. Writing: every note has an explicit short title (no cut sentences, never "Note"); signs are re-lettered after the text arrives; signs are a little larger.
+   4. Docks: each of the six lake docks has its own painted-stone arch, sky, water, beacon and moorings (the arch tile is wall geometry, so it is made per dock); boats are smaller, lifted and tinted lightly.
+   5. Proportions: props near a set piece never outgrow it; net racks are capped; big fish keep 2.6 squares from the camera.
+   6. Variety: no repeated candelabra, crystal cluster, barrel or lantern inside one set piece; variants rotate between the 13 pieces.
+   7. Landmarks: every straight run of 8 or more squares has a lit tall landmark on the sight line at least every 6 squares.
+   Exposes LEVELS[477]._hgw4 and LEVELS[475]._hgw4 for tools/polish/w4_audit.js.
+   ========================================================================== */
+const HGW4={ID:477,LAKE:475,map:{}};
+/* ---------- 1. the Shell Chests quest ---------- */
+function hgw4Moved(){ // position now -> position it stood on before it was moved (kept in the save as a flag so that any level can count)
+  const F=G.flags;if(!F)return {};F.hgdwMoved=F.hgdwMoved||{};for(const k in HGW4.map)F.hgdwMoved[k]=HGW4.map[k];return F.hgdwMoved}
+function hgw4Norm(){ // one flag for each chest: the original position
+  try{const F=G.flags;if(!F||!F.hgdwOpened)return;const m=hgw4Moved();for(const pos in m){if(F.hgdwOpened[pos]){F.hgdwOpened[m[pos]]=1;delete F.hgdwOpened[pos]}}}catch(e){console.error('hgw4 norm',e)}}
+function hgw4Opened(){const F=G.flags||{},f=F.hgdwOpened||{},m=Object.assign({},F.hgdwMoved||{},HGW4.map),s=new Set();for(const k in f)if(f[k])s.add(m[k]||k);return s.size}
+try{if(QUESTS.wq4){QUESTS.wq4.goal=()=>Math.min(hgw4Opened(),12);if(typeof HGDQ_DEF!=='undefined'&&HGDQ_DEF.wq4)HGDQ_DEF.wq4.goal=QUESTS.wq4.goal}}catch(e){console.error('hgw4 wq4',e)}
+{const _lf=lootFor;lootFor=function(d){const r=_lf.apply(this,arguments);try{if(LEVEL===HGDW.ID&&d&&d.hgdwTier)hgw4Norm()}catch(e){}return r}}
+/* ---------- 3. titles: written by hand, matched by the first words of the note ---------- */
+const HGW4_TITLES=[ // [first words, title of one to four words]
+  ['A brass plate at the foot','Four Saints'],['The archivist moved','Archivist\'s Note'],['Cut into the rim of the bell','Bell Rim'],['Scratched on the boat','Ferry Hull'],['A shrine to the pond saint','Pond Saint'],
+  ['Written on the frame','Mirror Frame'],['A diver\'s slate','Hest\'s Slate'],['Scratched on a clam shell','Clam Shell'],['A small brass plate','Fair Measure'],['Chalked on a crate','Cargo Notice'],
+  ['A fisher\'s note: I hung','Three Lanterns'],['The stone says','Rune Words'],['Scratched small: A dead end','A Dead End'],['Chalked: Turn back','Turn Back'],['Written in oil: Two lefts','Two Lefts'],
+  ['Scratched: Somebody sat','Someone Sat Here'],['Carved: I counted forty','Forty Breaths'],['A fisher\'s mark','Eel Mark'],['Chalked: My brother','Green Walls'],['NOTICE','Warden\'s Notice'],
+  ['Carved in the wall at the crossing','Steps 22 East'],['A lantern-maker','Out 46 West'],['Painted on the stone in fading','Land 56 North'],['Scratched with a spoon handle','Steps 86 North'],
+  ['A ferryman\'s tally','Air 42 South'],['Chiselled in neat capitals','Stairs 46 West'],['Written in lamp oil','Stairs 97 East'],['A sailor\'s rhyme','Light 59 South'],
+  ['Scratched under the bell','Bell Foundry'],['A ticket stub','Ferry Ticket'],['Small offerings','Offerings'],['A second card','Mirror Card'],['Scratched on a tin cup','Tin Cup'],
+  ['Chalked on the rock','Count Twice'],['Weights stacked','Stamped Weights'],['A ledger page','Cargo Ledger'],['A fisherman\'s knot','Lucky Knot'],['Small stones piled','Pilgrim Stones'],['Pinned under the notice','Diver Names']];
+function hgw4Title(d){const t=String(d.hgdwText||'');for(const [a,b] of HGW4_TITLES)if(t.indexOf(a)===0)return b;return null}
+function hgw4Relabel(d){ // a sign whose lettering is missing, was made before its title existed, or came out as a blank "Note"
+  try{if(!d||!d.k)return false;
+    if(d.hgdwText&&!d.hgw4t){const t=hgw4Title(d);if(t){d.label=t;d.hgw4t=1}}
+    if(!d.hgt&&!d.hgtBase){if(d.label&&typeof hgtOne==='function')hgtOne(d);return false}
+    const want=hgtClean(d.label||'');if(!want||d.hgt===want)return false;
+    if(d.hgtBase){if(d.pic&&d.wd)d.lk=undefined;else d.k=d.hgtBase}
+    d.hgt=undefined;return hgtOne(d)}catch(e){return false}}
+function hgw4Fill(d){ // a playing copy that lost its words (the engine copies a fixed list of fields): take them from the level's own scenery
+  try{if(d.npc!=='hgdw_note'||d.hgdwText)return;const L=LEVELS[LEVEL];if(!L||!L.decor)return;
+    const s=L.decor.find(q=>q.hgdwText&&q.npc===d.npc&&q.x===d.x&&q.y===d.y&&(!d.wd||!q.wd||(q.wd[0]===d.wd[0]&&q.wd[1]===d.wd[1])));if(s){d.hgdwText=s.hgdwText;if(s.label)d.label=s.label}}catch(e){}}
+function hgw4Signs(list){let n=0;for(const d of list||[]){if(!d)continue;hgw4Fill(d);if(d.hgdwText!==undefined||d.hgtBase||d.hgt)if(hgw4Relabel(d))n++;
+    // signs are a little bigger, so that the lettering reads from three squares (true height 0.62 or more)
+    if((d.hgtBase||d.hgt)&&!d.pic&&!d.hgw4s){try{const h=hgweHt(d);if(h>0&&h<.62){d.sc=+(d.sc*.62/h).toFixed(3)}d.hgw4s=1}catch(e){}}}return n}
+/* ---------- 2, 5, 6, 7: the maze ---------- */
+const HGW4_VAR={ // families of props that are swapped so that no set piece repeats one: [kind, height]
+  candle:[['art_wm_candelabra',.8],['art_wm_orb_pedestal',.7],['art_hgtb_glasspost',1.0]],
+  crystal:[['art_wm_crystal_small',.3],['art_wm_crystal_teal',.4],['art_wm_crystal_tall',.65]],
+  barrel:[['art_wm_barrel',.4],['art_wm_keg',.36],['art_wm_crate',.38],['uw_amphora',.44]],
+  lantern:[['art_hgtb_lamp_tall',1.1],['art_hgt_gardenlantern',.95],['art_wm_lamp_post',1.05]]};
+const HGW4_FAM={art_wm_candelabra:'candle',art_wm_orb_pedestal:'candle',art_wm_crystal_small:'crystal',art_wm_crystal_teal:'crystal',art_wm_crystal_tall:'crystal',art_wm_barrel:'barrel',art_wm_keg:'barrel',uw_amphora:'barrel',art_hgtb_lamp_tall:'lantern',art_hgt_gardenlantern:'lantern'};
+function hgw4Maze(L){
+  const info=L._hgw4={moved:0,swapped:0,landmarks:0,capped:0,labels:0,chestsMoved:0,enemies:0};
+  const S=L.rows.length,open=(x,y)=>L.rows[y]&&L.rows[y][x]==='.',D=[[0,-1],[1,0],[0,1],[-1,0]],have=k=>IMG[k]&&IMG[k].width;
+  const E=L._hgdwe||{vignettes:[]},st=(L._hgdw&&L._hgdw.stairs)||[],far=(L._hgdw&&L._hgdw.far)||{x:-9,y:-9};
+  const R=(a,b,c)=>hash2(a,b,c+9400);
+  // ----- the chests that were moved: remember them for the quest and for the saves -----
+  for(const d of L.decor)if(d.k==='uw_shellchest'&&d.hgdwOrig){HGW4.map[d.x+','+d.y]=d.hgdwOrig[0]+','+d.hgdwOrig[1];info.chestsMoved++}
+  // ----- titles for every note -----
+  for(const d of L.decor)if(d.hgdwText!==undefined||d.npc==='hgdw_note'){const t=hgw4Title(d);if(t){d.label=t;d.hgw4t=1;info.labels++}}
+  // ----- creatures keep well away from every set piece, its straight lines of sight and the stairs -----
+  {const P=E.vignettes.map(v=>[v.x,v.y]);
+   const lineSeen=(x,y,px,py)=>{if(x!==px&&y!==py)return false;const dx=Math.sign(px-x),dy=Math.sign(py-y);let cx=x,cy=y;while(cx!==px||cy!==py){cx+=dx;cy+=dy;if(!open(cx,cy))return false}return true};
+   const dist=(x,y)=>{let m=1e9;for(const q of P){let d=Math.hypot(q[0]-x,q[1]-y);if(d<8&&lineSeen(x,y,q[0],q[1]))d-=2;if(d<m)m=d}return m};
+   const other=[];for(const d of L.decor)if(d.k==='uw_shellchest')other.push([d.x,d.y,3]);else if(d.hgdwText&&(d.pic||d.npc))other.push([d.x,d.y,2]);for(const i of L.items)other.push([i.x,i.y,2]);for(const s of st){other.push([s.ax,s.ay,3]);other.push([s.x,s.y,3])}
+   const solid=new Set(L.decor.filter(d=>d.block&&!d.pic).map(d=>d.x+','+d.y));
+   const isFar=e=>Math.abs(e.x-far.x)<=2&&Math.abs(e.y-far.y)<=2;
+   const okAt=(x,y,self)=>open(x,y)&&!solid.has(x+','+y)&&dist(x,y)>=6&&other.every(q=>Math.hypot(q[0]-x,q[1]-y)>=q[2])&&L.enemies.every(e=>e===self||Math.hypot(e.x-x,e.y-y)>=1.6);
+   for(const e of L.enemies){if(isFar(e)||okAt(e.x,e.y,e))continue;let best=null,bd=1e9;
+     for(let y=1;y<S-1;y++)for(let x=1;x<S-1;x++){if(isFar({x,y})||!okAt(x,y,e))continue;const d=Math.hypot(x-e.x,y-e.y);if(d<bd){bd=d;best=[x,y]}}
+     if(best){e.x=best[0];e.y=best[1];info.moved++}}
+   info.enemies=L.enemies.length}
+  // ----- proportions: props near a set piece never outgrow it, net racks are capped -----
+  for(const v of E.vignettes){const piece=L.decor.filter(d=>!d.pic&&d.x===v.x&&d.y===v.y&&d.block)[0];const ph=piece?hgweHt(piece):.9;const cap=Math.max(.26,Math.min(.5,ph*.55));
+    for(const d of L.decor){if(d.pic||d===piece||d.hgdwText||!d.k||d.hgdwm||Math.hypot(d.x-v.x,d.y-v.y)>3.2)continue;if(!/^art_wm_barrel|^art_wm_keg|^art_wm_crate$|^yar_nets|^yar_pots|^uw_amphora|^art_wm_bucket/.test(d.k))continue;const h=hgweHt(d);if(h>cap){d.sc=+(d.sc*cap/h).toFixed(3);info.capped++}}}
+  // the squares from which a set piece is looked at (up to four squares out along each straight line): nothing big stands in the way of the view
+  {const ap=new Map();for(const v of E.vignettes)for(const D4 of D){for(let k=2;k<=4;k++){const x=v.x+D4[0]*k,y=v.y+D4[1]*k;if(!open(x,y))break;ap.set(x+','+y,D4)}}
+   for(const d of L.decor){if(d.pic||d.hgdwText||d.hgdwm||!d.k||!/^art_wm_(barrel|keg|crate|bucket|cage_lantern|candelabra|orb_pedestal|skeleton)|^uw_amphora|^yar_|^art_hgxprop/.test(d.k))continue;const D4=ap.get(d.x+','+d.y);if(!D4)continue;
+     const h=hgweHt(d);if(h>.28&&h<.9){if(d.block){d.block=false;d.walk=true}d.sc=+(d.sc*.28/h).toFixed(3);if(D4[0])d.oy=(d.oy||0)>=0?.34:-.34;else d.ox=(d.ox||0)>=0?.34:-.34;info.capped++}}}
+  for(const d of L.decor)if(!d.pic&&/^yar_nets/.test(d.k)){const h=hgweHt(d);if(h>.55){d.sc=+(d.sc*.55/h).toFixed(3);info.capped++}}
+  // ----- variety inside each set piece, and between them -----
+  E.vignettes.forEach((v,vi)=>{const seen=new Set(),zone=L.decor.filter(d=>!d.pic&&!d.hgdwText&&!d.hgdwm&&HGW4_FAM[d.k]&&Math.hypot(d.x-v.x,d.y-v.y)<=3.2).sort((a,b)=>a.x-b.x||a.y-b.y);
+    for(const d of zone){const fam=HGW4_VAR[HGW4_FAM[d.k]];let start=fam.findIndex(f=>f[0]===d.k);if(start<0)start=0;start=(start+vi)%fam.length;let pick=null;
+      for(let i=0;i<fam.length;i++){const f=fam[(start+i)%fam.length];if(!seen.has(f[0])&&have(f[0])){pick=f;break}}
+      if(pick&&pick[0]!==d.k){const oh=hgweHt(d);d.k=pick[0];d.sc=+hgweSc(pick[0],Math.min(pick[1],Math.max(.2,oh*(pick[1]>.9?1:1.15)))).toFixed(3);info.swapped++}
+      seen.add(d.k)}});
+  // ----- landmarks on the sight line of every long straight run -----
+  const AMB=[1,.78,.42],TEAL=[.5,1,.9],VIO=[.8,.55,1];
+  const LM=[['art_hgtb_lamp_tall',1.2,AMB],['art_wm_crystal_tall',1.0,TEAL],['art_hgxstat1',1.3,TEAL],['art_wm_candelabra',.85,AMB],['art_hgtb_glasspost',1.1,TEAL],['art_wm_lamp_post',1.1,AMB],['art_hgt_gardenlantern',1.0,VIO],['art_wm_orb_pedestal',.8,VIO]];
+  const tallOn=d=>!d.pic&&!/^art_hgwm_|^uw_seagrass|^art_hgdf_|^uw_vent|^uw_sw|^ltree/.test(d.k)&&hgweHt(d)>=.8;
+  {const runs=[];for(let y=1;y<S-1;y++){let x=1;while(x<S-1){if(!open(x,y)){x++;continue}const x0=x;while(open(x,y))x++;if(x-x0>=8)runs.push({h:1,c:y,a:x0,n:x-x0})}}
+   for(let x=1;x<S-1;x++){let y=1;while(y<S-1){if(!open(x,y)){y++;continue}const y0=y;while(open(x,y))y++;if(y-y0>=8)runs.push({h:0,c:x,a:y0,n:y-y0})}}
+   const solid=new Set(L.decor.filter(d=>d.block&&!d.pic).map(d=>d.x+','+d.y));const stSq=new Set();for(const s of st){stSq.add(s.x+','+s.y);stSq.add(s.ax+','+s.ay)}
+   let lm=0;
+   for(const r of runs){const cell=i=>r.h?[r.a+i,r.c]:[r.c,r.a+i];
+     const on=new Array(r.n).fill(false);for(let i=0;i<r.n;i++){const c=cell(i);if(L.decor.some(d=>d.x===c[0]&&d.y===c[1]&&(tallOn(d)||(d.hgdwText&&d.pic))))on[i]=true}
+     for(const side of [1,-1]){ // looking along the run from each end, something tall within 6 squares and never a gap of 9
+       let last=side>0?-1:r.n;for(let step=0;step<r.n;step++){const i=side>0?step:r.n-1-step;if(on[i]){last=i;continue}
+         if(Math.abs(i-last)>=6&&Math.abs(i-last)>=6){ // place it here, or on the nearest free square
+           let pi=-1;for(let k=0;k<4&&pi<0;k++){for(const j of [i-side*k,i+side*k]){if(j<1||j>=r.n-1)continue;const c=cell(j);if(!solid.has(c[0]+','+c[1])&&!stSq.has(c[0]+','+c[1])&&!on[j]&&!L.items.some(t=>t.x===c[0]&&t.y===c[1])){pi=j;break}}}
+           if(pi<0)continue;const c=cell(pi);let L0=LM[(lm++)%LM.length],g=0;while(!have(L0[0])&&g++<8)L0=LM[(lm++)%LM.length];
+           L.decor.push({k:L0[0],x:c[0],y:c[1],block:false,walk:true,deco:true,sc:+hgweSc(L0[0],L0[1]).toFixed(3),hgdwe:1,hgw4:1,ox:r.h?0:(R(c[0],c[1],1)<.5?-.14:.14),oy:r.h?(R(c[0],c[1],1)<.5?-.14:.14):0});
+           HGDWE.lights.push({x:c[0],y:c[1],col:L0[2],kI:1.3,r2:40});on[pi]=true;last=pi;info.landmarks++}}}}}
+  // ----- the writing: relabel the signs of the built level -----
+  info.relabelled=hgw4Signs(L.decor);
+}
+{const _b=hgdwBuild;hgdwBuild=function(){const r=_b.apply(this,arguments);const L=LEVELS[HGDW.ID];if(L&&L._hgw3&&!L._hgw4)try{hgw4Maze(L)}catch(e){console.error('hgw4 maze',e)}return r}}
+// the playing copy of the scenery is made from the level's, and loses the labels on the way: letter the signs again once it is there
+{const _rs=reset;reset=function(){const r=_rs.apply(this,arguments);try{if(LEVEL===HGDW.ID||LEVEL===HGD.ID){if(LEVEL===HGDW.ID){hgw4Moved();hgw4Norm()}hgw4Signs(G.decor)}}catch(e){console.error('hgw4 reset',e)}return r}}
+{const _sl=setupLights;setupLights=function(){const r=_sl.apply(this,arguments);try{if(LEVEL===HGDW.ID||LEVEL===HGD.ID)hgw4Signs(G.decor)}catch(e){}return r}}
+/* ---------- 4. the docks of the three lakes ---------- */
+const HGW4_DOCK=[ // per lake: shape of the arch, light, water, stone
+  {shape:'round',sky:['#2b1b0e','#c98b3a'],water:['#7a5420','#1f1408'],stone:[255,228,186],post:'#ffcf7a'},
+  {shape:'point',sky:['#0b2a2c','#46b8ac'],water:['#1f7a74','#062321'],stone:[196,240,236],post:'#9ff2e4'},
+  {shape:'flat',sky:['#1a1030','#8a5ad0'],water:['#52368f','#130b28'],stone:[226,206,255],post:'#c9a2ff'}];
+function hgw4DockTex(li,role){
+  const key='hgw4_dock'+li+role;if(IMG[key]&&IMG[key].width)return key;
+  const T=HGW4_DOCK[li%3],B=HGW3_BEACON[(li+(role==='far'?1:0))%3],bi=IMG[B[0]],wall=IMG.tex_abbeywall;if(!bi||!bi.width)return null;
+  const c=document.createElement('canvas');c.width=128;c.height=128;const x=c.getContext('2d');
+  if(wall)x.drawImage(wall,0,0,128,128);else{x.fillStyle='#4a4638';x.fillRect(0,0,128,128)}
+  x.globalCompositeOperation='multiply';x.fillStyle='rgb('+T.stone.join(',')+')';x.fillRect(0,0,128,128);x.globalCompositeOperation='source-over';
+  const arch=()=>{x.beginPath();if(T.shape==='round'){x.moveTo(16,128);x.lineTo(16,58);x.arc(64,58,48,Math.PI,0);x.lineTo(112,128)}
+    else if(T.shape==='point'){x.moveTo(18,128);x.lineTo(18,70);x.quadraticCurveTo(20,34,64,6);x.quadraticCurveTo(108,34,110,70);x.lineTo(110,128)}
+    else{x.moveTo(14,128);x.lineTo(14,34);x.lineTo(114,34);x.lineTo(114,128)}x.closePath()};
+  x.save();arch();x.clip();
+  const hz=T.shape==='flat'?66:72;let g=x.createLinearGradient(0,0,0,hz);g.addColorStop(0,T.sky[0]);g.addColorStop(1,T.sky[1]);x.fillStyle=g;x.fillRect(0,0,128,hz);
+  g=x.createLinearGradient(0,hz,0,128);g.addColorStop(0,T.water[0]);g.addColorStop(1,T.water[1]);x.fillStyle=g;x.fillRect(0,hz,128,128-hz);
+  x.fillStyle='rgba(8,14,16,.78)';x.beginPath();x.moveTo(0,hz);for(let i=0;i<=16;i++)x.lineTo(i*8,hz-3-((hash2(li,i,role==='far'?7:3)*9)|0));x.lineTo(128,hz);x.closePath();x.fill(); // the far shore
+  x.fillStyle=T.sky[1];x.globalAlpha=.35;x.fillRect(0,hz-1,128,2);x.globalAlpha=1;
+  const bh=T.shape==='flat'?32:38,bw=bi.width*bh/bi.height,bx=64+(role==='far'?-12:8)-bw/2,by=hz+6-bh;
+  x.drawImage(bi,bx,by,bw,bh);
+  x.save();x.beginPath();x.rect(0,hz,128,60);x.clip();x.translate(0,hz*2+12);x.scale(1,-1);x.globalAlpha=.28;x.drawImage(bi,bx,by,bw,bh*.55,bx,by+bh*.45,bw,bh*.55);x.restore();x.globalAlpha=1;
+  if(role==='dep'){const bk=hgw3Tint('yar_boat_row',HGW4_BOAT[li%3].col,.3,'hgw4_tb'+li,HGW4_BOAT[li%3].flip),bm=bk&&IMG[bk];if(bm){const bw2=[46,60,40][li%3],bh2=bw2*bm.height/bm.width,bx2=[44,56,60][li%3]-bw2/2+20;x.drawImage(bm,bx2,104-bh2,bw2,bh2)}} // the boat at its mooring
+  x.strokeStyle='rgba(255,255,255,.22)';x.lineWidth=1;for(let i=0;i<7;i++){const yy=hz+8+i*7,xx=20+((hash2(li,i,5)*50)|0);x.beginPath();x.moveTo(xx,yy);x.lineTo(xx+26+i*4,yy);x.stroke()}
+  x.restore();
+  x.lineJoin='round';arch();x.strokeStyle='#0d1315';x.lineWidth=5;x.stroke();arch();x.strokeStyle='rgba(255,255,255,.18)';x.lineWidth=1;x.stroke();
+  x.strokeStyle='rgba(8,10,12,.55)';x.lineWidth=2; // stones of the arch ring
+  if(T.shape==='round'){for(let a=0;a<=8;a++){const t=Math.PI+a*Math.PI/8;x.beginPath();x.moveTo(64+Math.cos(t)*48,58+Math.sin(t)*48);x.lineTo(64+Math.cos(t)*58,58+Math.sin(t)*58);x.stroke()}}
+  else if(T.shape==='point'){for(let a=0;a<6;a++){const yy=70-a*10;x.beginPath();x.moveTo(18+a*2,yy);x.lineTo(8+a*1.5,yy-2);x.stroke();x.beginPath();x.moveTo(110-a*2,yy);x.lineTo(120-a*1.5,yy-2);x.stroke()}}
+  else{for(let a=0;a<6;a++){x.beginPath();x.moveTo(16+a*20,34);x.lineTo(16+a*20,22);x.stroke()}x.fillStyle='#1b1b1e';x.fillRect(10,26,108,8)}
+  // jetty: planks across the front, two posts with a lamp each (the far dock has a rope and one lamp)
+  x.fillStyle='#6a4a28';x.fillRect(10,112,108,12);x.strokeStyle='#241406';x.lineWidth=1.4;x.strokeRect(10,112,108,12);for(let i=1;i<7;i++){x.beginPath();x.moveTo(10+i*15.4,112);x.lineTo(10+i*15.4,124);x.stroke()}
+  for(const px of (role==='far'?[24]:[22,106])){x.fillStyle='#4a3018';x.fillRect(px-3,86,6,28);x.strokeRect(px-3,86,6,28);const lg=x.createRadialGradient(px,82,1,px,82,12);lg.addColorStop(0,T.post);lg.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=lg;x.fillRect(px-12,70,24,24);x.fillStyle=T.post;x.beginPath();x.arc(px,82,3.2,0,7);x.fill()}
+  if(role==='far'){x.strokeStyle='#cbb68a';x.lineWidth=1.6;x.beginPath();x.moveTo(24,96);x.quadraticCurveTo(64,112,104,98);x.stroke()}
+  x.strokeStyle='rgba(0,0,0,.8)';x.lineWidth=3;x.strokeRect(1.5,1.5,125,125);
+  IMG[key]=c;return key}
+function hgw4Docks(L){ // the pictures may still be loading when the level is built: whatever is not done yet is tried again until it is
+  if(!L||!L.chars||!L._hgdl)return 0;const info=L._hgw4=L._hgw4||{docks:0},TM=ohTiles(),chD=String.fromCharCode(0x360);let pending=0;
+  L._hgw4done=L._hgw4done||{};
+  L._hgdl.lakes.forEach(k=>{if(k.wm||!k.docks)return;for(const role of ['dep','far']){const id=k.i+role;if(L._hgw4done[id])continue;const d=k.docks[role];if(!d)continue;
+    const tex=hgw4DockTex(k.i,role);if(!tex){pending++;continue}
+    const ch=String.fromCharCode(0x370+k.i*2+(role==='far'?1:0));OH_STY['hgw4_'+tex]=Object.assign({},OH_STY.hgdb_dock||{},{door:tex});const gid=TM.make('door','hgw4_'+tex,2.7).gid;
+    L.chars[ch]=gid;const row=L.rows[d.y];if(row&&row[d.x]===chD)L.rows[d.y]=row.slice(0,d.x)+ch+row.slice(d.x+1);
+    try{if(LEVEL===HGD.ID&&G.grid&&G.grid[d.y])G.grid[d.y][d.x]=gid}catch(e){}
+    L._hgw4done[id]=1;info.docks++}});
+  return pending}
+function hgw4DockLoop(){let n=0;const t=setInterval(()=>{n++;try{const L=LEVELS[HGD.ID];if(!L||!L._hgdl||n>80){clearInterval(t);return}if(hgw4Docks(L)===0)clearInterval(t)}catch(e){clearInterval(t)}},1500)}
+{const _b=hgdBuild;hgdBuild=function(){const r=_b.apply(this,arguments);const L=LEVELS[HGD.ID];if(L&&L._hgw3&&!L._hgw4){L._hgw4={docks:0};try{if(hgw4Docks(L)>0)hgw4DockLoop()}catch(e){console.error('hgw4 docks',e)}}return r}}
+// the boats at anchor: lighter paint, smaller, lifted off the bottom of the screen, one pose for each lake
+const HGW4_BOAT=[{col:'#e08a2a',a:.3,sc:.5,flip:0,ox:-.22,bob:.03},{col:'#2bd0bc',a:.3,sc:.62,flip:1,ox:.2,bob:.02},{col:'#9a5ae8',a:.3,sc:.44,flip:1,ox:.0,bob:.04},{col:'#4a7a5a',a:.2,sc:.55,flip:0,ox:.1,bob:.03}];
+{const _s=hgdbSync;hgdbSync=function(){const r=_s.apply(this,arguments);
+  try{const L=LEVELS[HGD.ID];if(G.decor&&L&&L._hgdl)for(const d of G.decor)if(d.hgdBoatSpr){let li=0,bd=1e9;for(const k of L._hgdl.lakes){const dd=Math.hypot((k.x0+k.x1)/2-d.x,(k.y0+k.y1)/2-d.y);if(dd<bd){bd=dd;li=k.i}}
+    const T=HGW4_BOAT[li%HGW4_BOAT.length],key=hgw3Tint('yar_boat_row',T.col,T.a,'hgw4_boat'+li,T.flip);if(key){d.k=key;d.sc=T.sc;d.ox=T.ox;d.bob=T.bob}}}catch(e){}
+  return r}}
+/* ---------- 5b. big fish keep their distance from the camera (the fish themselves are drawn in hgd_polish_e.js) ---------- */
+HGW4.fishMin=2.6;
+
 /* ---- src/desert/spellfx.js ---- */
 /* ==========================================================================
    SPELL ANIMATIONS (spellfx.js). Every spell of the magic users has its own animation, built from a small effect system:
@@ -61358,7 +61728,7 @@ SPFX.set=function(v){SPFX.lvl=v==='off'||v===0?0:v==='low'||v===1?1:2;try{localS
 SPFX.q=()=>SPFX.lvl===1?.45:SPFX.slow?.65:1;
 const sR=(a,b)=>a+Math.random()*(b-a),sN=n=>Math.max(1,Math.round(n*SPFX.q())),sE=u=>1-(1-u)*(1-u),sCl=clamp;
 /* ---- the colours of each element: [core, mid, dark] ---- */
-const SPPAL={fire:['#fff0b8','#ff8a24','#a82400'],ruin:['#ffe6ff','#ff4a80','#601060'],frost:['#f0ffff','#6cc8ff','#2c68c8'],bolt:['#ffffff','#a8c0ff','#4060d0'],arcane:['#f4e8ff','#a478ff','#5030b0'],poison:['#eaffc8','#7ade40','#2a7a10'],holy:['#fffbe4','#ffd860','#d09020'],shadow:['#d0b0ff','#7a3cc0','#240a40'],earth:['#e8d0a0','#a88050','#503018'],nature:['#d8ffa8','#5ac040','#20601a'],blood:['#ffc0b0','#e03030','#801010'],gold:['#fffbd8','#ffd040','#c08010'],shout:['#fff0c8','#ffa848','#c04010'],smoke:['#e0e0e8','#9a9aa8','#585864'],disint:['#e4fff0','#70ffb0','#1a9a60'],chaos:['#ffffff','#ff70e0','#6040ff'],wind:['#ffffff','#d8f0e8','#88a8a0']};
+const SPPAL={fire:['#fff0b8','#ff8a24','#a82400'],ruin:['#ffe6ff','#ff4a80','#601060'],frost:['#f4ffff','#8fd4ff','#3a78d8'],bolt:['#ffffff','#a8c0ff','#4060d0'],arcane:['#f4e8ff','#a478ff','#5030b0'],poison:['#eaffc8','#7ade40','#2a7a10'],holy:['#fffbe4','#ffd860','#d09020'],shadow:['#d0b0ff','#7a3cc0','#240a40'],earth:['#e8d0a0','#a88050','#503018'],nature:['#d8ffa8','#5ac040','#20601a'],blood:['#ffc0b0','#e03030','#801010'],gold:['#fffbd8','#ffd040','#c08010'],shout:['#fff0c8','#ffa848','#c04010'],smoke:['#e0e0e8','#9a9aa8','#585864'],disint:['#e4fff0','#70ffb0','#1a9a60'],chaos:['#ffffff','#ff70e0','#6040ff'],wind:['#ffffff','#d8f0e8','#88a8a0'],steel:['#ffffff','#d8e4f4','#8090a8'],deep:['#ffd8d0','#e02828','#701010'],smash:['#fff4d8','#ffc060','#a05020'],bash:['#fff0d0','#d8b878','#806040'],wood:['#f6e8b8','#c8a060','#6a4a20']};
 /* ---- cached sprites ---- */
 const SPS={};
 function spCv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c}
@@ -61453,6 +61823,14 @@ function spObjDraw(o,h){
     case 'band':{const a=(u<.15?u/.15:1)*(1-u);ctx.strokeStyle=o.c;ctx.lineWidth=2;for(let i=0;i<3;i++){const uu=(u*1.3+i/3)%1,yy=o.y+26-uu*58,ww=17+Math.sin(uu*Math.PI)*5;ctx.globalAlpha=a*Math.sin(uu*Math.PI)*.9;ctx.beginPath();ctx.ellipse(o.x,yy,ww,4.5,0,0,TAU);ctx.stroke()}break}
     case 'column':{const a=Math.min(1,u*8)*(1-u),w=o.w*(.6+.4*sE(u));const q=ctx.createLinearGradient(0,o.y-70,0,o.y+30);q.addColorStop(0,hexA(o.c,0));q.addColorStop(.5,hexA(o.c,.55));q.addColorStop(1,hexA(o.c,.1));ctx.globalAlpha=a;ctx.fillStyle=q;ctx.fillRect(o.x-w/2,o.y-70,w,100);ctx.drawImage(spGlow(o.c),o.x-w,o.y-w*.6,w*2,w*1.2);break}
     case 'ghost':{if(typeof portraitImg!=='function')break;const im=portraitImg(o.j);if(!im)break;const a=Math.min(1,u*5)*(1-u)*.5,x=portraitX(o.j),y=o.y-30,sw=Math.min(im.width,im.height*(38/58)),sx=(im.width-sw)/2;ctx.save();ctx.beginPath();ctx.rect(x-14,y,66,58);ctx.clip();ctx.globalAlpha=a;for(const dx of [-9,9]){ctx.drawImage(im,sx,0,sw,im.height,x+dx*Math.sin(Math.min(1,u*2)*1.57),y,38,58)}ctx.restore();break}
+    case 'blade':{ctx.lineCap='round';for(let i=0;i<o.n;i++){const lt=o.t-i*o.gap;if(lt<0)continue;const pr=Math.min(1,lt/.07),a=lt<.07?1:Math.max(0,1-(lt-.07)/.18);if(a<=0)continue;
+        const dir=(i%2?-1:1),L=o.len*(1+(i%3)*.12),cx=o.x+(i-(o.n-1)/2)*o.sp*.5,cy=o.y+((i%3)-1)*o.sp*.4,x0=cx-dir*L*.5,y0=cy-L*.62,x1=cx+dir*L*.5,y1=cy+L*.62,px=x0+(x1-x0)*pr,py=y0+(y1-y0)*pr,qx=x0+(x1-x0)*Math.max(0,pr-.7),qy=y0+(y1-y0)*Math.max(0,pr-.7);
+        ctx.globalAlpha=a*.45;ctx.strokeStyle=o.c;ctx.lineWidth=9*o.w;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(px,py);ctx.stroke();ctx.globalAlpha=a*.8;ctx.strokeStyle='#ffffff';ctx.lineWidth=3.4*o.w;ctx.beginPath();ctx.moveTo(qx,qy);ctx.lineTo(px,py);ctx.stroke();ctx.lineWidth=1.6*o.w;ctx.globalAlpha=a;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(px,py);ctx.stroke();ctx.globalAlpha=a;ctx.drawImage(spGlow('#ffffff'),px-8,py-8,16,16)}break}
+    case 'cres':{const pr=Math.min(1,u*3.2),a=Math.pow(1-u,1.2),N=18,R=o.r,a0=-2.5,a1=-2.5+3.1*pr;for(const [th,c,al] of [[16,o.c,.5],[7,'#ffffff',.95]]){ctx.beginPath();for(let n=0;n<=N;n++){const an=a0+(a1-a0)*n/N,w=Math.sin(n/N*Math.PI);ctx.lineTo(o.x+Math.cos(an)*(R+th*w),o.y+Math.sin(an)*(R+th*w)*.8)}for(let n=N;n>=0;n--){const an=a0+(a1-a0)*n/N;ctx.lineTo(o.x+Math.cos(an)*R,o.y+Math.sin(an)*R*.8)}ctx.closePath();ctx.fillStyle=c;ctx.globalAlpha=a*al;ctx.fill()}break}
+    case 'drop':{const a=Math.pow(1-u,2),g=ctx.createLinearGradient(0,o.y-120,0,o.y+6);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.7,'rgba(255,248,224,1)');g.addColorStop(1,'rgba(255,230,170,0)');ctx.globalAlpha=a;ctx.fillStyle=g;ctx.fillRect(o.x-5-8*u,o.y-120,10+16*u,126);break}
+    case 'spikes':{const gr=Math.min(1,u*6),a=u>.55?1-(u-.55)/.45:1;for(let i=0;i<o.n;i++){const bx=o.x+(i-(o.n-1)/2)*13*o.z,by=o.y+17*o.z+(u>.55?(u-.55)*18:0),h=(30+(i%3)*15)*o.z*gr,w=5.5*o.z,g=ctx.createLinearGradient(0,by-h,0,by);g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.5,'rgba(170,225,255,.95)');g.addColorStop(1,'rgba(70,140,230,.7)');ctx.globalAlpha=a;ctx.fillStyle=g;ctx.strokeStyle='rgba(255,255,255,.95)';ctx.lineWidth=.9;ctx.beginPath();ctx.moveTo(bx-w,by);ctx.lineTo(bx+(i%2?1:-1)*1.2,by-h);ctx.lineTo(bx+w,by);ctx.closePath();ctx.fill();ctx.stroke()}break}
+    case 'stuck':{const a=u<.7?1:1-(u-.7)/.3,j=u<.12?Math.sin(u*160)*1.2:0,c=Math.cos(o.ang),sn=Math.sin(o.ang),L=22*o.z+8,hx=o.x+j,hy=o.y,tx=hx-c*L,ty=hy-sn*L;ctx.lineCap='round';ctx.globalAlpha=a;ctx.strokeStyle='#e8cc90';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(hx,hy);ctx.stroke();ctx.fillStyle='#ff8a70';for(const sd of [1,-1]){ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx+c*7+sn*3.4*sd,ty+sn*7-c*3.4*sd);ctx.lineTo(tx+c*8,ty+sn*8);ctx.closePath();ctx.fill()}break}
+    case 'net':{const a=Math.min(1,u*6)*(u>.6?1-(u-.6)/.4:1),R=36*o.z;ctx.strokeStyle='#e8d8b0';ctx.lineWidth=1;ctx.globalAlpha=a;ctx.beginPath();for(let i=-3;i<=3;i++){ctx.moveTo(ex+i*R/3,ey-R);ctx.lineTo(ex+i*R/3+Math.sin(i)*3,ey+R);ctx.moveTo(ex-R,ey+i*R/3);ctx.lineTo(ex+R,ey+i*R/3+Math.cos(i)*3)}ctx.stroke();ctx.beginPath();ctx.ellipse(ex,ey,R*1.05,R*1.1,0,0,TAU);ctx.stroke();break}
     case 'orb':{const a=Math.min(1,u*4)*(1-u*.4),yy=o.y+(o.y1-o.y)*sE(u),xx=o.x+(o.x1-o.x)*sE(u),r=14+u*26;ctx.globalAlpha=a;ctx.drawImage(spGlow('#ffe890'),xx-r,yy-r,r*2,r*2);ctx.drawImage(spStar('#fff6c0'),xx-r*.5,yy-r*.5,r,r);break}
   }
   ctx.globalAlpha=1;return true}
@@ -61489,9 +61867,16 @@ function spSnd(k,d){
     case 'poof':nz(.4,.25,'bandpass',600,200,d);nz(.2,.12,'lowpass',1200,200,d);break;
     case 'heal':[523,659,784,1047].forEach((f,i)=>tone(f,f,.5,'sine',.08,d+i*.07));break;
     case 'aura':[392,523,659,784].forEach((f,i)=>tone(f,f*1.01,.55,'triangle',.06,d+i*.08));nz(.5,.05,'highpass',3000,6000,d);break;
+    case 'ice':tone(120,48,.3,'sine',.25,d);[2093,2637,3136,3951].forEach((f,i)=>tone(f,f*.98,.5,'sine',.05,d+.02+i*.045));nz(.2,.2,'highpass',4500,8000,d);nz(.06,.14,'highpass',6000,9000,d+.16);break;
+    case 'cold':nz(.4,.07,'highpass',5000,9000,d);tone(1568,2093,.4,'sine',.04,d);tone(2349,2637,.35,'sine',.03,d+.08);break;
+    case 'clang':nz(.1,.28,'highpass',3000,9000,d);tone(2400,1800,.18,'triangle',.07,d);tone(3200,2800,.14,'sine',.04,d+.01);tone(120,70,.1,'sine',.15,d);break;
+    case 'thud':tone(95,36,.38,'sine',.5,d);nz(.3,.4,'lowpass',1400,90,d);nz(.07,.25,'bandpass',1200,400,d);break;
+    case 'swoosh':nz(.22,.22,'bandpass',500,3200,d);break;
+    case 'thunk':tone(190,90,.1,'triangle',.3,d);nz(.07,.25,'bandpass',900,300,d);tone(900,600,.06,'square',.04,d);break;
+    case 'twang':tone(240,150,.18,'triangle',.2,d);tone(620,330,.1,'sine',.12,d);nz(.2,.15,'bandpass',600,3600,d);break;
     case 'coin':for(let i=0;i<3;i++)tone(1800+i*300,1800+i*300,.12,'sine',.07,d+i*.07);break;
   }}
-const SPSND={fire:'boom',ruin:'boom',frost:'crack',bolt:'thunder',arcane:'arcane',poison:'poison',holy:'chime',shadow:'shadow',earth:'rumble',nature:'wind',blood:'claw',gold:'ping',shout:'rumble',smoke:'poof',disint:'zap',chaos:'zap',wind:'wind'};
+const SPSND={steel:'clang',deep:'clang',smash:'thud',bash:'thud',wood:'thunk',fire:'boom',ruin:'boom',frost:'ice',bolt:'thunder',arcane:'arcane',poison:'poison',holy:'chime',shadow:'shadow',earth:'rumble',nature:'wind',blood:'claw',gold:'ping',shout:'rumble',smoke:'poof',disint:'zap',chaos:'zap',wind:'wind'};
 {const _pfs=pfxSound;pfxSound=function(){if(SPFX.cap)return;return _pfs.apply(this,arguments)}}
 {const _sb=sndBoom;sndBoom=function(){if(SPFX.cap)return;return _sb.apply(this,arguments)}}
 const SPIMPPLAY=impPlay;{impPlay=function(h,r,v){if(SPFX.cap){SPFX.cap.imp.push([h,r,v]);return true}return SPIMPPLAY.apply(this,arguments)}}
@@ -61513,12 +61898,16 @@ SPIMP.fire=function(x,y,z,b,fx,tg,main){
   if(main){spShake(.34+.3*bb);spStop(.05+.03*bb)}
   SPFX.tint.set(tg.e,{m:ru?'ruin':'fire',t:0,d:1.1})};
 SPIMP.ruin=SPIMP.fire;
-SPIMP.frost=function(x,y,z,b,fx,tg,main){const m=main?1:.45,bb=Math.min(1,b);
-  spFlash('205,238,255',.58*m,.1);if(main)spFlash('120,190,255',.36,.22,1);
-  sObj({k:'pic',n:'ice',x,y,s:76*z,d:.58,g0:.5,rot:sR(-.2,.2)});spRing(x,y,58*z,.3,'#c4ecff',3,.9,1);spRing(x,y+16*z,70*z,.4,'#8fd0ff',1.8,.55,.28);
-  for(let i=sN(main?12:7);i>0;i--){const a=sR(0,TAU),s=sR(70,190)*z,p=pAdd(PK.SHARD,x,y,Math.cos(a)*s,Math.sin(a)*s-30,sR(.5,.85),sR(6,11)*z,sR(6,11)*z,'#cfeeff',260);p.vr=sR(-9,9)}
-  sBurst(14,PK.MOTE,x,y,10,70,.5,.95,4,5,'#e8fbff',0);sBurst(5,PK.SMOKE,x,y+10*z,10,40,.5,.8,8*z,24*z,'#bcd8f0',-6,-Math.PI,0);
-  if(main){spShake(.22+.15*bb);spStop(.04+.02*bb)}SPFX.tint.set(tg.e,{m:'frost',t:0,d:1.15})};
+SPIMP.frost=function(x,y,z,b,fx,tg,main){const m=main?1:.5,bb=Math.min(1,b);
+  spFlash('218,243,255',.75*m,.1);if(main)spFlash('130,200,255',.4,.26,1);
+  sObj({k:'pic',n:'ice',x,y,s:120*z*(main?1:.8),d:.64,g0:.45,rot:sR(-.15,.15)});sObj({k:'pic',n:'ice',x,y:y+4*z,s:82*z,d:.5,g0:.3,a:.7,rot:sR(3,3.4)});
+  pAdd(PK.GLOW,x,y,0,0,.42,26*z,92*z,'#9ad8ff',0);
+  spRing(x,y,66*z,.32,'#d4f2ff',3.2,.9,1);spRing(x,y+18*z,86*z,.46,'#8fd0ff',2,.6,.28);
+  for(let i=sN(main?16:9);i>0;i--){const a=sR(0,TAU),s=sR(80,230)*z,r=sR(8,16)*z,p=pAdd(PK.SHARD,x,y,Math.cos(a)*s,Math.sin(a)*s-40,sR(.55,.95),r,r,i%2?'#cfeeff':'#a8dcff',300);p.vr=sR(-10,10)}
+  for(let i=sN(8);i>0;i--)pAdd(PK.SMOKE,x+sR(-14,14)*z,y+sR(-6,14)*z,sR(-24,24),sR(-40,-8),sR(.8,1.2),10*z,sR(30,46)*z,'#e8f4ff',-6);
+  sBurst(18,PK.MOTE,x,y,10,90,.5,1,4,6,'#f0fbff',0);sBurst(10,PK.STREAK,x,y,100,260,.2,.4,1.4,1.4,'#dff4ff',200);
+  if(main&&(bb>.35||fx.o.sp))sObj({k:'spikes',x,y,z,n:7,d:.75});
+  if(main){spShake(.26+.2*bb);spStop(.06+.03*bb)}SPFX.tint.set(tg.e,{m:'frost',t:0,d:1.45})};
 SPIMP.bolt=function(x,y,z,b,fx,tg,main){const m=main?1:.5,bb=Math.min(1,b);
   spFlash('226,236,255',.9*m,.09);spFlash('170,190,255',.5*m,.1,0,.12);if(main)spFlash('120,150,255',.3,.25,1);
   if(!tg.noTop)sObj({k:'bolt',x,y,d:.34,seed:Math.floor(x*3+y)&255,z:Math.max(.8,z*.9)});
@@ -61572,8 +61961,39 @@ SPIMP.chaos=function(x,y,z,b,fx,tg,main){const cs=['#ff4080','#40c0ff','#ffe040'
   for(let i=sN(18);i>0;i--){const a=sR(0,TAU),s=sR(40,200)*z;pAdd(PK.GLOW,x,y,Math.cos(a)*s,Math.sin(a)*s,sR(.3,.6),sR(5,9)*z,2,cs[i%5],0)}for(let i=sN(8);i>0;i--)pAdd(PK.MOTE,x+sR(-20,20),y+sR(-20,20),sR(-30,30),sR(-60,-10),sR(.5,.9),5,5,cs[(i+2)%5],0);
   if(main){spShake(.22);spStop(.04)}};
 SPIMP.wind=function(x,y,z,b,fx,tg,main){for(let i=sN(10);i>0;i--)pAdd(PK.STREAK,x-50*z+sR(-10,10),y+sR(-24,24)*z,sR(260,420),sR(-30,30),sR(.25,.4),1.4,1.4,'#e8f8f0',0);for(let i=sN(6);i>0;i--){const p=pAdd(PK.LEAF,x+sR(-30,30),y+sR(-20,20),sR(80,200),sR(-60,0),sR(.5,.9),3,3,'#8ac060',60);p.vr=sR(-12,12)}if(main)spShake(.12)};
+SPIMP.steel=function(x,y,z,b,fx,tg,main){const n=fx.o.n||2,m=main?1:.5;
+  spFlash('238,244,255',.42*m,.07);sObj({k:'blade',x,y,n,gap:.045,len:62*z,sp:14*z,c:'#cfe0ff',w:Math.max(.8,z),d:.5});
+  sBurst(8,PK.STREAK,x,y,100,270,.18,.34,1.4,1.4,'#ffffff',160);sBurst(6,PK.SPARK,x,y,60,170,.25,.45,2,2,'#ffe9a8',260);
+  if(main){spShake(.14+.04*n);if(n>=3)spStop(.03)}SPFX.tint.set(tg.e,{m:'steel',t:0,d:.2+.05*n})};
+SPIMP.deep=function(x,y,z,b,fx,tg,main){const m=main?1:.5,dk=fx.o.dark,c=dk?'#a868ff':'#ff3030';
+  spFlash(dk?'200,150,255':'255,80,70',.4*m,.1);spFlash('255,255,255',.3*m,.05);
+  sObj({k:'blade',x,y,n:fx.o.n||1,gap:.06,len:(fx.o.long?92:76)*z,sp:16*z,c,w:Math.max(1,1.5*z),d:.55});
+  sBurst(12,PK.SPARK,x,y,60,200,.4,.7,2.2,2.2,dk?'#8a40e0':'#c01818',300);sBurst(6,PK.STREAK,x,y,100,260,.2,.36,1.3,1.3,'#ffffff',200);
+  if(main){spShake(.3);spStop(.06)}SPFX.tint.set(tg.e,{m:'deep',t:0,d:.4,dk:dk?1:0})};
+SPIMP.crescent=function(x,y,z,b,fx,tg,main){const m=main?1:.5;
+  spFlash('255,242,214',.45*m,.09);sObj({k:'cres',x,y,r:58*z,d:.36,c:'#ffe9b0'});
+  sBurst(12,PK.STREAK,x,y,110,300,.2,.4,1.6,1.6,'#fff2c0',200);for(let i=sN(4);i>0;i--)pAdd(PK.SMOKE,x+sR(-14,14)*z,y+sR(6,18)*z,sR(-24,24),sR(-20,-4),sR(.5,.8),8*z,26*z,'#8a7a60',-4);
+  if(main){spShake(.36);spStop(.05)}SPFX.tint.set(tg.e,{m:'steel',t:0,d:.25})};
+SPIMP.smash=function(x,y,z,b,fx,tg,main){const m=main?1:.5,big=fx.o.big;
+  spFlash('255,238,205',(.5+(big?.15:0))*m,.1);sObj({k:'drop',x,y,d:.24});sObj({k:'crack',x,y,z:z*(big?1.25:1),d:.85});spRing(x,y+16*z,(big?96:76)*z,.42,'#ffd890',2.6,.75,.28);spRing(x,y,50*z,.26,'#fff2d0',3,.8,1);
+  for(let i=sN(big?10:7);i>0;i--)pAdd(PK.SMOKE,x+sR(-22,22)*z,y+sR(6,22)*z,sR(-34,34),sR(-34,-6),sR(.7,1.05),9*z,sR(26,38)*z,'#8a7556',-4);
+  for(let i=sN(big?8:5);i>0;i--){const a=-Math.PI*sR(.1,.9),s=sR(70,190)*z,p=pAdd(PK.ROCK,x,y+12*z,Math.cos(a)*s,Math.sin(a)*s,sR(.5,.8),sR(3,6)*z,sR(3,6)*z,['#8a6a44','#6e5236','#9a7a54'][i%3],460);p.vr=sR(-12,12)}
+  sBurst(10,PK.STREAK,x,y,100,280,.2,.4,1.6,1.6,'#ffe6b0',220);
+  if(main){spShake(.5+(big?.25:0));spStop(.07)}SPFX.tint.set(tg.e,{m:'steel',t:0,d:.25})};
+SPIMP.bash=function(x,y,z,b,fx,tg,main){const m=main?1:.5;
+  spFlash('255,236,200',.32*m,.08);spRing(x,y,56*z,.3,'#ffe0a0',3,.9,1);spRing(x,y+16*z,78*z,.4,'#d8b878',2,.6,.28);
+  for(let i=sN(6);i>0;i--)pAdd(PK.SMOKE,x+sR(-18,18)*z,y+sR(6,20)*z,sR(-30,30),sR(-26,-6),sR(.6,.9),8*z,sR(22,32)*z,'#9a8a68',-4);sBurst(8,PK.SPARK,x,y,60,170,.3,.5,2,2,'#ffdca0',200);
+  if(main){spShake(.3);spStop(.05)}};
+SPIMP.wood=function(x,y,z,b,fx,tg,main){const n=fx.o.n||1,m=main?1:.5;
+  spFlash('255,240,210',.2*m,.06);for(let i=sN(10);i>0;i--){const a=sR(0,TAU),s=sR(50,180)*z,p=pAdd(PK.ROCK,x,y,Math.cos(a)*s,Math.sin(a)*s-30,sR(.35,.6),sR(1.6,3)*z,sR(1.6,3)*z,'#c8a060',380);p.vr=sR(-18,18)}
+  sBurst(6,PK.SPARK,x,y,60,170,.25,.4,1.8,1.8,'#ffe9a8',200);for(let i=sN(3);i>0;i--)pAdd(PK.SMOKE,x,y,sR(-14,14),sR(-18,-4),sR(.4,.6),5*z,16*z,'#a8946a',-3);
+  spRing(x,y,28*z,.2,'#f0dcaa',2,.8,1);
+  const dx=x-fx.a0.x,dy=y-fx.a0.y,ang=Math.atan2(dy,dx);if(fx.dl!=='net')for(let k=0;k<n;k++)sObj({k:'stuck',x:x+(k-(n-1)/2)*6*z,y:y+(k-(n-1)/2)*4*z,ang,z,d:.95});
+  if(main){spShake(.12);spStop(.03)}};
 /* the little extras of each way of delivering a spell */
 const SPDLX={
+  smite(x,y,z,fx,tg){sObj({k:'blade',x,y,n:1,gap:0,len:70*z,sp:0,c:'#ffe27a',w:Math.max(1,1.3*z),d:.45});sObj({k:'cres',x,y,r:52*z,d:.32,c:'#fff2b0'})},
+  net(x,y,z,fx,tg){sObj({k:'net',x,y,z,d:.9})},
   roots(x,y,z,fx,tg){sObj({k:'roots',x,y,z,d:.9})},
   swarm(x,y,z,fx,tg){sObj({k:'swarm',e:tg.e,x,y,z,d:.9})},
   chains(x,y,z,fx,tg){sObj({k:'chains',e:tg.e,x,y,z,d:.8})},
@@ -61594,7 +62014,9 @@ function spImpact(fx,tg){
   if(fx.dl==='drain'&&main){for(let i=sN(14);i>0;i--){const life=sR(.45,.7),pp=spPort(fx.i);pAdd(PK.MOTE,x+sR(-14,14)*z,y+sR(-10,10)*z,(pp.x-x)/life,(pp.y-y)/life,life,3.5,3.5,i%2?'#c090ff':'#ff90d0',0,1)}}
   const ms=tg.marks,sz=spSize(e),top=sCl(sz.sh*.5+8,20,64);
   for(let i=0;i<ms.length&&i<3;i++)sObj({k:'mark',m:ms[i],e,x,y,off:(i-(Math.min(3,ms.length)-1)/2)*18,top,d:1});
-  if(fx.dl==='flurry'&&main)for(let n=1;n<=4;n++)fx.q.push({t:fx.t+n*.07,f:()=>{SPIMP.gold(x+sR(-14,14)*z,y+sR(-14,14)*z,z*.7,0,fx,tg,false);spShake(.1)}});
+  const fn=fx.o.n||4;
+  if(fx.dl==='flurry'&&main){for(let n=1;n<=fn;n++)fx.q.push({t:fx.t+n*(fn>6?.045:.07),f:()=>{SPIMP.gold(x+sR(-14,14)*z,y+sR(-14,14)*z,z*.7,0,fx,tg,false);spShake(.1)}});fx.q.push({t:fx.t+(fn+1)*(fn>6?.045:.07),f:()=>{spRing(x,y,86*z,.4,'#ffe27a',3.4,.95,1);spRing(x,y+16*z,100*z,.5,'#ffd060',2,.6,.28);spFlash('255,235,170',.4,.1);spShake(.34);spStop(.05)}})}
+  if((fx.dl==='crescent'||fx.dl==='bash')&&main&&fx.o.n>1)for(let n=1;n<fx.o.n;n++)fx.q.push({t:fx.t+n*.13,f:()=>{SPIMP[fx.el](x,y,z*.95,0,fx,tg,false);spShake(.2)}});
 }
 function spRelease(tg,el){
   if(tg.rel)return;tg.rel=1;const e=tg.e,c=(SPFX.held.get(e)||1)-1;if(c>0)SPFX.held.set(e,c);else SPFX.held.delete(e);
@@ -61605,7 +62027,7 @@ function spRelease(tg,el){
 function spPort(j){const y=G.inv&&G.inv.open?238:232;return {x:portraitX(j)+19,y:y+30,top:y}}
 function spParty(j,kind,col,bs){
   const p=spPort(j),x=p.x,y=p.y,c=col||'#ffe9a0';
-  if(kind==='heal'){spRing(x,y,34,.6,'#9affb0',2.6,.9,.5,1);spRing(x,y+6,22,.45,'#ffe9a0',1.8,.8,.5,1);sObj({k:'pic',n:'heal',x,y,s:70,d:.85,g0:.7,a:.85,h:1});sBurst(2,PK.GLOW,x,y,0,0,.55,.6,14,44,'#9affb0',0,undefined,undefined,1);
+  if(kind==='heal'){spRing(x,y,34,.6,'#9affb0',2.6,.9,.5,1);spRing(x,y+6,22,.45,'#ffe9a0',1.8,.8,.5,1);sObj({k:'pic',n:'heal',x,y,s:60,d:.85,g0:.7,a:.45,h:1});{const gp=pAdd(PK.GLOW,x,y,0,0,.55,12,34,'#9affb0',0,1);gp.al=.5}
     for(let i=sN(18);i>0;i--)pAdd(PK.MOTE,x+sR(-17,17),y+sR(8,26),sR(-5,5),sR(-80,-34),sR(.7,1.2),sR(2.5,4.5),sR(2.5,4.5),['#9affb0','#ffe9a0','#ffffff'][i%3],0,1)}
   else if(kind==='cleanse'){sObj({k:'band',x,y,c:'#d8f4ff',d:.8,h:1});spRing(x,y,30,.5,'#bfeaff',2,.8,.5,1);for(let i=sN(12);i>0;i--)pAdd(PK.MOTE,x+sR(-17,17),y+sR(8,26),sR(-4,4),sR(-70,-30),sR(.6,1),sR(2.5,4),sR(2.5,4),i%2?'#d8f4ff':'#ffffff',0,1)}
   else if(kind==='rise'){sObj({k:'column',x,y,c:'#ffd860',w:44,d:1.0,h:1});spRing(x,y+14,38,.7,'#ffe27a',2.6,.9,.45,1);spRing(x,y,26,.5,'#fff6c8',2,.8,.45,1);sBurst(2,PK.GLOW,x,y,0,0,.7,.75,16,56,'#ffd860',0,undefined,undefined,1);
@@ -61615,12 +62037,24 @@ function spParty(j,kind,col,bs){
     if(st==='rage'){for(let i=sN(10);i>0;i--)pAdd(PK.TONGUE,x+sR(-15,15),y+sR(14,28),sR(-8,8),sR(-90,-40),sR(.5,.8),sR(11,18),sR(11,18),'fire',-30,1);sBurst(2,PK.GLOW,x,y,0,0,.6,.65,14,44,'#ff4030',0,undefined,undefined,1);spRing(x,y,30,.5,'#ff7050',2.4,.9,.5,1)}
     else if(st==='mirror'){sObj({k:'ghost',j,y,d:.9,h:1});sObj({k:'band',x,y,c:'#9ac8ff',d:.8,h:1});for(let i=sN(10);i>0;i--)pAdd(PK.MOTE,x+sR(-22,22),y+sR(-22,22),sR(-8,8),sR(-30,-5),sR(.6,1),3,4,'#d0e4ff',0,1)}
     else if(st==='bless'){sObj({k:'shaft',x,y,y0:y-66,w:46,d:.85,h:1});sObj({k:'band',x,y,c:'#ffe27a',d:.85,h:1});for(let i=sN(14);i>0;i--)pAdd(PK.MOTE,x+sR(-17,17),y+sR(0,26),sR(-5,5),sR(-60,-25),sR(.8,1.2),sR(2.5,4),sR(2.5,4),i%2?'#fff2b0':'#ffd860',0,1)}
+    else if(st==='vanish'){for(let i=sN(10);i>0;i--)pAdd(PK.SMOKE,x+sR(-16,16),y+sR(-16,20),sR(-12,12),sR(-30,-8),sR(.6,.95),8,sR(20,28),'#2a1a40',-3,1);for(let i=sN(10);i>0;i--)pAdd(PK.MOTE,x+sR(-18,18),y+sR(-20,24),sR(-10,10),sR(-40,-10),sR(.5,.9),3,4,'#b890ff',0,1);spRing(x,y,26,.45,'#8a58d8',2,.7,.5,1)}
     else if(st==='bark'){for(let i=sN(10);i>0;i--){const p2=pAdd(PK.LEAF,x+sR(-18,18),y+sR(10,28),sR(-14,14),sR(-60,-25),sR(.7,1.1),sR(3,5),sR(3,5),['#6ac040','#4a9a30','#9ae060'][i%3],0,1);p2.vr=sR(-8,8)}sObj({k:'band',x,y,c:'#8aa860',d:.8,h:1});spRing(x,y,28,.5,'#9ac060',2,.8,.5,1)}
     else if(st==='banner'){sObj({k:'band',x,y,c:'#ffd860',d:.85,h:1});sObj({k:'band',x,y:y-6,c:'#fff0b0',d:.7,h:1});for(let i=sN(12);i>0;i--)pAdd(PK.MOTE,x+sR(-18,18),y+sR(4,28),sR(-4,4),sR(-70,-30),sR(.7,1.1),sR(3,4.5),sR(3,4.5),'#ffe070',0,1)}
     else{sObj({k:'band',x,y,c,d:.85,h:1});spRing(x,y,30,.55,c,2.4,.9,.5,1);sBurst(2,PK.GLOW,x,y,0,0,.5,.55,12,40,c,0,undefined,undefined,1);for(let i=sN(14);i>0;i--)pAdd(PK.MOTE,x+sR(-18,18),y+sR(6,28),sR(-5,5),sR(-65,-28),sR(.7,1.1),sR(2.5,4),sR(2.5,4),i%2?c:'#ffffff',0,1)}}
 }
 /* ---- the spell book: how each spell looks. [element, delivery, buff style] ---- */
 const SPREG={
+ 'pw:Power Strike':['smash','smash'],'pw:Cleave':['smash','crescent',0,{n:2}],'pw:Battle Cry':['shout','wave','rage',{amb:1}],'pw:Shield Wall':[0,0,'ward'],'pw:Skullsplitter':['smash','smash',0,{big:1}],"pw:Titan's Fury":['smash','smash',0,{big:1}],'pw:Worldsplitter':['smash','smash',0,{big:1}],
+ 'pw:Rage Blow':['smash','smash'],'pw:Bloodlust':[0,0,'rage'],pw_thunderous_roar:['shout','wave'],'pw:Savage Roar':['shout','wave'],'pw:Skull Cleaver':['smash','smash',0,{big:1}],'pw:Whirlwind':['smash','crescent',0,{n:1}],'pw:Avatar of Ruin':['smash','smash',0,{big:1}],"pw:Mountain's Wrath":['smash','smash',0,{big:1}],
+ 'pw:Smite':['holy','smite'],'pw:Divine Shield':[0,0,'bless'],'pw:Righteous Blow':['holy','smite'],'pw:Holy Wrath':['holy','sky'],'pw:Judgment':['holy','smite'],'pw:Sunbrand':['holy','smite'],'pw:Lay on Hands':[0,0,'heal'],
+ 'pw:Aimed Shot':['wood','arrow',0,{n:1}],'pw:Pinning Shot':['wood','arrow',0,{n:1,pin:1}],'pw:Rapid Fire':['wood','arrow',0,{n:3}],"pw:Hunter's Mark":[0,0,'bark'],'pw:Heartseeker':['wood','arrow',0,{n:1,long:1}],'pw:Arrow Storm':['wood','rain'],'pw:Killing Shot':['wood','arrow',0,{n:1,long:1}],
+ 'pw:Volley':['wood','arrow',0,{n:2}],'pw:Piercing Shot':['wood','arrow',0,{n:1,long:1}],'pw:Triple Shot':['wood','arrow',0,{n:3}],'pw:Arrow Rain':['wood','rain'],'pw:Perfect Shot':['wood','arrow',0,{n:1,long:1}],'pw:Starfall Shot':['gold','rain'],
+ 'pw:Twin Stab':['steel','strike',0,{n:2}],'pw:Smoke Bomb':['smoke','burst'],'pw:Flurry':['steel','strike',0,{n:3}],'pw:Death Mark':['deep','strike',0,{n:1,long:1}],'pw:Shadowstrike':['deep','strike',0,{n:2,dark:1}],'pw:Sense Traps':['gold','scan'],'pw:Moonless Kill':['deep','strike',0,{n:1,dark:1,long:1}],
+ 'pw:Backstab':['deep','strike',0,{n:1}],'pw:Vanish':[0,0,'vanish'],'pw:Nerve Strike':['steel','strike',0,{n:1}],'pw:Assassinate':['deep','strike',0,{n:1,long:1}],'pw:Needle in the Dark':['deep','strike',0,{n:1,dark:1}],"pw:Reaper's Kiss":['deep','strike',0,{n:2,dark:1}],
+ 'pw:Palm Strike':['gold','punch'],'pw:Flurry of Blows':['gold','flurry',0,{n:4}],'pw:Stunning Fist':['gold','punch'],'pw:Dragon Kick':['smash','smash'],'pw:Fist of the Mountain':['smash','smash',0,{big:1}],'pw:Hundred-Fold Palm':['gold','flurry',0,{n:8}],
+ 'pw:Headbutt':['bash','bash'],'pw:Charge':['bash','bash'],'pw:Rampage':['bash','bash',0,{n:3}],'pw:Legend of the Mountain':['smash','smash',0,{big:1}],'pw:Avalanche of Horns':['smash','smash',0,{big:1}],
+ pw_arcane_ruin:['arcane','lance'],pw_starfall:['arcane','rain'],pw_soul_rend:['shadow','burst'],pw_annihilating_ray:['ruin','beam'],pw_hallowed_fire:['holy','sky'],pw_sunlance:['holy','lance'],pw_dawn_of_judgement:['holy','sky'],
+ 'pw:Frost Nova':['frost','blizzard'],
  w10:['shout','wave'],w20:[0,0,'ward'],w30:['blood','slash'],w40:[0,0,'banner'],w50:['shout','wave'],
  b10:['shout','wave'],b20:['blood','slash'],b30:[0,0,'rage'],b40:['earth','wave'],b50:[0,0,'rage'],
  p10:[0,0,'heal'],p20:['holy','chains'],p30:[0,0,'bless'],p40:['holy','sky'],p50:['holy','sky','bless'],
@@ -61635,16 +62069,35 @@ const SPREG={
  g10:['shout','wave'],g20:[0,0,'heal'],g30:['arcane','poly'],g40:['earth','burst'],g50:['earth','wave'],
  'sp:fire':['fire','ball'],'sp:frost':['frost','ball'],'sp:light':['holy','light'],
  'pw:Fireball':['fire','ball'],'pw:Chain Lightning':['bolt','chain'],'pw:Meteor':['fire','meteor'],'pw:Mage Armor':[0,0,'ward'],
- 'pw:Siphon':['shadow','drain'],'pw:Frost Nova':['frost','wave'],'pw:Lightning Storm':['bolt','sky'],'pw:Cataclysm':['ruin','meteor'],
+ 'pw:Siphon':['shadow','drain'],'pw:Lightning Storm':['bolt','sky'],'pw:Cataclysm':['ruin','meteor'],
  'pw:Blessing':[0,0,'bless'],'pw:Mend':[0,0,'heal'],'pw:Revive':[0,0,'rise'],'pw:Greater Heal':[0,0,'heal'],'pw:Divine Intervention':[0,0,'rise'],'pw:Heal':[0,0,'heal']};
 /* a spell that has no entry (one added later) gets a look from its name, its colour and what it does */
+function spWeapon(info){
+  const n=(info.name||'').toLowerCase(),c=info.cls,t=info.type,area=Array.isArray(info.aim),rng=info.range||3;
+  const dark=/shadow|dark|night|moon|reaper|needle|kiss|vanish|death|silent|grave|void|murder/.test(n);
+  if(t==='sense')return {el:'gold',dl:'scan',bs:null};
+  if(t==='buff'||t==='heal'||t==='healx'||t==='revive'){
+    if(/cry|shout|roar/.test(n))return {el:'shout',dl:'wave',bs:'rage',o:{amb:1},amb:true};
+    return {el:null,dl:null,bs:/shield|ward|wall|armor|guard|aegis/.test(n)?'ward':/cry|rage|blood|fury|frenzy|roar|lust/.test(n)?'rage':/holy|divine|bless|light/.test(n)?'bless':/vanish|shadow|cloak|hide|mist/.test(n)?'vanish':c==='Ranger'||c==='Archer'?'bark':c==='Paladin'||c==='Priest'?'bless':'banner'}}
+  if(t==='daze')return /smoke|bomb|fog|mist/.test(n)||c==='Thief'?{el:'smoke',dl:'burst',bs:null}:{el:'shout',dl:'wave',bs:null};
+  if(t==='aoe'){if(c==='Ranger'||c==='Archer')return {el:'wood',dl:'rain',bs:null};if(c==='Paladin')return {el:'holy',dl:'sky',bs:null};if(c==='Monk')return {el:'gold',dl:'flurry',bs:null,o:{n:3}};return {el:'smash',dl:'crescent',bs:null,o:{n:1}}}
+  if(t==='shot'||t==='volley'||t==='ranged'){const el=/fire|flame|burn|ember/.test(n)?'fire':/poison|venom|toxic/.test(n)?'poison':/shadow|dark|cursed|black/.test(n)?'shadow':/holy|sun|dawn|star/.test(n)?'holy':'wood';
+    return {el,dl:/net|snare|trap/.test(n)?'net':'arrow',bs:null,o:{n:t==='volley'?2:t==='ranged'?3:(/rapid|triple|multi|volley|barrage/.test(n)?3:1),long:/pierc|perfect|kill|heart|snipe|star|true|deadeye/.test(n)||rng>=5}}}
+  if(/knife|knives|dagger|throw/.test(n))return {el:'steel',dl:'knives',bs:null,o:{n:5}};
+  if(c==='Thief'||c==='Assassin')return dark||c==='Assassin'&&/stab|assassin|kill|death/.test(n)?{el:'deep',dl:'strike',bs:null,o:{n:t==='multi'?2:1,dark,long:/kill|death|assassin|patient/.test(n)}}:{el:'steel',dl:'strike',bs:null,o:{n:t==='multi'?3:2}};
+  if(c==='Paladin')return {el:'holy',dl:'smite',bs:null};
+  if(c==='Monk')return t==='multi'||/flurry|hundred|thousand/.test(n)?{el:'gold',dl:'flurry',bs:null,o:{n:t==='multi'?4:7}}:/mountain|kick|dragon/.test(n)?{el:'smash',dl:'smash',bs:null}:{el:'gold',dl:'punch',bs:null};
+  if(c==='Goat')return /legend|avalanche|mountain|horns/.test(n)?{el:'smash',dl:'smash',bs:null,o:{big:1}}:{el:'bash',dl:'bash',bs:null,o:{n:t==='multi'?3:1}};
+  if(t==='multi'||/whirl|cleave|sweep|swing|spin|arc/.test(n))return {el:'smash',dl:'crescent',bs:null,o:{n:t==='multi'?2:1}};
+  return {el:'smash',dl:'smash',bs:null,o:/split|titan|ruin|wrath|fury|mountain|legend|crush|skull|doom|world/.test(n)?{big:1}:null}}
 function spAuto(info){
+  if(!SPCASTERS.includes(info.cls)&&SPWT.concat(['buff','heal','healx','revive']).includes(info.type)&&!/frost|ice|icicle|blizzard|freez|glacier|winter|hail/i.test(info.name||''))return spWeapon(info);
   const n=(info.name||'').toLowerCase(),ks=(info.fx||[]).map(f=>f[0]),has=k=>ks.includes(k),aim=info.aim,ally=aim==='party'||aim==='self'||aim==='dead'||aim==='front|ally';
   const foeFx=ks.some(k=>!['buff','heal','healpct','cleanse','revive','feed'].includes(k));
   if(ally&&!foeFx||info.type==='buff'||info.type==='healx'||info.type==='revive'||info.type==='heal')return {el:null,dl:null,bs:has('revive')||info.type==='revive'?'rise':has('heal')||has('healpct')||info.type==='healx'||info.type==='heal'?'heal':has('cleanse')?'cleanse':'ward'};
   let el='arcane';
   if(/fire|flame|burn|inferno|meteor|dragon|ember|blaze|scorch/.test(n)||has('burn'))el='fire';
-  else if(/frost|ice|freez|blizzard|cold|snow|nova|chill/.test(n))el='frost';
+  else if(/frost|ice|icicle|spike|freez|blizzard|glacier|winter|hail|cold|snow|nova|chill/.test(n))el='frost';
   else if(/lightning|thunder|storm|bolt|shock|spark/.test(n))el='bolt';
   else if(/holy|smite|divine|sacred|light|angel|radiant|bless|undead|wrath/.test(n))el='holy';
   else if(/poison|venom|toxic|cloud|plague|acid|wasp|swarm/.test(n)||has('poison'))el='poison';
@@ -61657,20 +62110,26 @@ function spAuto(info){
   else if(/smoke|fog|mist/.test(n))el='smoke';
   const area=Array.isArray(aim)||aim==='all';let dl='burst';
   if(['fire','frost','arcane','poison','shadow','disint','gold'].includes(el))dl=has('hold')||has('poly')?'burst':'ball';
-  if(el==='bolt')dl=area?'chain':'sky';if(el==='holy')dl='sky';if(el==='blood')dl=area?'burst':'slash';if(el==='nature')dl='roots';if(el==='shout'||el==='earth'&&area)dl='wave';
+  if(el==='frost'&&area)dl='blizzard';if(el==='bolt')dl=area?'chain':'sky';if(el==='holy')dl='sky';if(el==='blood')dl=area?'burst':'slash';if(el==='nature')dl='roots';if(el==='shout'||el==='earth'&&area)dl='wave';
   if(has('poly'))dl='poly';if(has('steal'))dl='steal';
-  return {el,dl,bs:null}}
-function spReg(info){const r=SPREG[info.id];return r?{el:r[0]||null,dl:r[1]||null,bs:r[2]||null}:spAuto(info)}
+  return {el,dl,bs:null,o:/spike|icicle/.test(n)?{sp:1}:null}}
+function spReg(info){const r=SPREG[info.id];return r?{el:r[0]||null,dl:r[1]||null,bs:r[2]||null,o:r[3]||null,amb:!!(r[3]&&r[3].amb)}:spAuto(info)}
 /* ---- reading the cast: which spell, who is hit ---- */
 const SPCASTERS=['Mage','Sorcerer','Priest'];
+const SPWT=['melee','multi','butt','twin','backstab','shot','volley','ranged','aoe','daze','sense','drain'];
 function spInfo(i){
-  const P=curPower(i);if(!P||P.pas||P.act===false)return null;const cls=HERO_DEF[i].cls;let id,name=P.name,aim=P.aim,fx=P.fx,range=P.range||4;
-  if(P.type==='mx')id=P.mx;
-  else if(P.type==='spell'){const sp=specialInfo(i);if(!sp.spell)return null;const S=SPELLS[sp.spell];id='sp:'+sp.spell;name=S.n;range=S.range||3;aim=S.self?'self':'front'}
-  else if(SPCASTERS.includes(cls)&&['aoe','daze','drain','healx','revive','buff','heal'].includes(P.type)||SPREG['pw:'+P.name]){
-    id='pw:'+P.name;if(P.type==='aoe'||P.type==='daze')aim=['area',P.range||3];else if(P.type==='drain'){aim='front';range=1}else aim='party'}
-  else return null;
-  return {id,name,aim,fx,col:P.col,range,type:P.type,cls}}
+  const P=curPower(i);if(!P||P.pas||P.act===false)return null;const cls=HERO_DEF[i].cls,t=P.type;let id,name=P.name,aim=P.aim,fx=P.fx,range=P.range||4;
+  if(t==='mx')id=P.mx;
+  else if(t==='spell'){const sp=specialInfo(i);if(!sp.spell)return null;const S=SPELLS[sp.spell];id='sp:'+sp.spell;name=S.n;range=S.range||3;aim=S.self?'self':'front'}
+  else{
+    id='pw:'+P.name;
+    if(t==='aoe'||t==='daze')aim=['area',P.range||3];
+    else if(t==='drain'){aim='front';range=1}
+    else if(['melee','multi','butt','twin','backstab'].includes(t)){aim='front';range=1}
+    else if(t==='shot'||t==='volley'||t==='ranged'){aim='front';range=P.range||3}
+    else if(['buff','heal','healx','revive','sense'].includes(t))aim='party';
+    else return null}
+  return {id,name,aim,fx,col:P.col,range,type:t,cls}}
 function spPreTargets(info){const aim=info.aim,out=[];
   if(aim==='front'||aim==='front|ally'){const f=frontEnemy(info.range||4);if(f)out.push(f.e)}
   else if(aim==='all'||Array.isArray(aim)){const n=aim==='all'?8:aim[1];for(const e of G.enemies)if(e.hp>0&&Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y)<=n&&hasLOS(G.P.x,G.P.y,e.x,e.y))out.push(e)}
@@ -61681,7 +62140,9 @@ function spSnap(info){const S={en:new Map(),hp:G.heroes.map(h=>h.hp),al:G.heroes
 const SPDL={ // [charge, travel, stagger]
  ball:[.16,.26,.05],meteor:[.14,.4,.06],arrow:[.08,.15,.045],lance:[.12,.12,.045],drain:[.12,.18,.04],beam:[.14,.06,.03],breath:[.12,.24,.04],rain:[.1,.22,.035],
  sky:[.14,.1,.05],wave:[.1,.12,.06],chain:[.14,.06,.09],burst:[.1,.05,.03],slash:[.08,.05,.04],roots:[.1,.06,.04],poly:[.1,.05,.04],punch:[.08,.05,.04],rift:[.12,.1,.05],steal:[.08,.05,.03],mark:[.08,.05,.03],swarm:[.1,.05,.03],chains:[.1,.08,.04],flurry:[.08,.05,.04],sleep:[.1,.05,.03],time:[.1,.12,.03],light:[.1,.3,0]};
-const SPPROJ=new Set(['ball','meteor','arrow','lance','drain','beam','breath','rain']),SPOWN=new Set(['beam','breath','rain']),SPSHARE=new Set(['ball','meteor','arrow','lance','drain']);
+Object.assign(SPDL,{strike:[.03,.04,.05],smash:[.08,.05,.06],bash:[.06,.05,.06],crescent:[.05,.04,.05],smite:[.08,.05,.05],knives:[.05,.22,.04],blizzard:[.12,.1,.05],net:[.06,.05,.05],scan:[.1,.1,0]});
+const SPNOCH=new Set(['strike','smash','bash','crescent','smite','punch','flurry','slash','knives','net','scan','burst','poly','steal','mark','roots','swarm','chains','sleep']);
+const SPPROJ=new Set(['ball','meteor','arrow','lance','drain','beam','breath','rain','knives']),SPOWN=new Set(['beam','breath','rain','knives']),SPSHARE=new Set(['ball','meteor','arrow','lance','drain']);
 function spSrc(i){return {x:210+(i-1.5)*26,y:196}}
 function spAfter(i,info,pre,pf,fs,f0,cap){
   if(PFX.length>pf)PFX.length=pf;if(FXS.length>fs)FXS.length=fs;try{SPELL_KIND=null}catch(e){}
@@ -61691,13 +62152,14 @@ function spAfter(i,info,pre,pf,fs,f0,cap){
   if(!list.length&&reg.el)for(const e of pre.pre)list.push({e,dmg:0,marks:[],dead:e.hp<=0});
   list.sort((a,b)=>(Math.abs(a.e.x-G.P.x)+Math.abs(a.e.y-G.P.y))-(Math.abs(b.e.x-G.P.x)+Math.abs(b.e.y-G.P.y)));
   const foes=reg.el&&reg.dl!=='light'?list.slice(0,7):[];
-  const fx={i,info,el:reg.el,dl:reg.dl,bs:reg.bs,t:0,tg:[],q:[],n:0,src:spSrc(i),tc:0,end:.4,col:info.col};
+  const fx={i,info,el:reg.el,dl:reg.dl,bs:reg.bs,o:reg.o||{},t:0,tg:[],q:[],n:0,src:spSrc(i),a0:{x:spSrc(i).x+(i<2?-70:70),y:206},tc:0,end:.4,col:info.col};
   const dl=SPDL[reg.dl]||SPDL.burst;fx.tc=dl[0];let tMain=fx.tc+dl[1];
   foes.forEach((o,n)=>{const e=o.e;
     const tg={e,n,dmg:o.dmg,marks:o.marks,fl:[],imp:n===0?cap.imp:null,b:Math.min(1.5,o.dmg/60+(o.dead?.3:0)),proj:(n===0&&SPPROJ.has(reg.dl))||SPOWN.has(reg.dl),did:0,rel:0,prev:n>0?foes[n-1].e:null,noTop:reg.dl==='chain'&&n>0};
     tg.ti=SPSHARE.has(reg.dl)&&n>0?tMain+.04+(n-1)*dl[2]:fx.tc+dl[1]+n*dl[2];if(n===0)tMain=tg.ti;
     if(e.flash>0)e.flash=0;SPFX.held.set(e,(SPFX.held.get(e)||0)+1);fx.tg.push(tg)});
   if(!foes.length&&cap.imp.length)for(const a of cap.imp.slice(0,2))SPIMPPLAY(a[0],a[1],a[2]);
+  for(const tg of fx.tg)if(tg.e.chilled>0)tg.e.chillK=reg.el==='frost'?'ice':'daze';
   const fl=G.floats.splice(f0);
   for(const f of fl){if(f.y<215&&fx.tg.length){let best=fx.tg[0],bd=1e9;for(const tg of fx.tg){const d=Math.abs((tg.e.sx||210)-f.x);if(d<bd){bd=d;best=tg}}best.fl.push(f)}else G.floats.push(f)}
   fx.end=Math.max(.3,...fx.tg.map(t=>t.ti+.05),fx.tc+.05);
@@ -61708,31 +62170,38 @@ function spAfter(i,info,pre,pf,fs,f0,cap){
   if(hasCl&&!heal.length&&!bj.size)livingHeroes().forEach(j=>party.push([j,'cleanse']));
   const run=()=>{for(const [j,k] of party)spParty(j,k,info.col||'#ffe9a0',reg.bs)};
   if(party.length){if(pt>0)fx.q.push({t:pt,f:run});else run();spSnd(party.some(p=>p[1]==='buff')?'aura':'heal',pt);if(party.some(p=>p[1]==='rise'))spSnd('chime',pt+.05)}
-  if(foes.length||reg.dl==='light'){
-    const pp=spPort(i);pAdd(PK.GLOW,pp.x,pp.top+4,0,-18,.4,10,30,P[1],0,1);
-    if(fx.tc>.09)spFlash(rgbOf(P[1]),.24,.16,1);
+  if(foes.length||reg.dl==='light'||reg.amb||reg.dl==='scan'){
+    const pp=spPort(i);if(!SPNOCH.has(reg.dl)){pAdd(PK.GLOW,pp.x,pp.top+4,0,-18,.4,10,30,P[1],0,1);
+    if(fx.tc>.09)spFlash(rgbOf(P[1]),reg.el==='frost'?.3:.24,.16,1)}
     if(reg.dl==='light')spSpecialLight(fx);
     else if(['ball','meteor','breath','lance','drain'].includes(reg.dl))spSnd('whoosh',0);
+    if(reg.el==='frost'&&!SPNOCH.has(reg.dl))spSnd('cold',0);if(reg.dl==='arrow'||reg.dl==='rain')spSnd('twang',0);if(reg.dl==='knives')spSnd('swoosh',0);if(reg.amb)spSnd('rumble',0);
     if(foes.length&&SPSND[reg.el])spSnd(SPSND[reg.el],tMain);
-    if(reg.dl==='wave'||reg.dl==='time'||reg.dl==='rift')spWaveStart(fx);
+    if(['wave','time','rift','blizzard','scan'].includes(reg.dl))spWaveStart(fx);
   }
   if(!foes.length&&!party.length&&reg.dl!=='light'&&!fx.q.length)return;
   SPFX.fx.push(fx);SPFX.live=1;
 }
 function spSpecialLight(fx){const pp=spPort(fx.i);sObj({k:'orb',x:pp.x,y:pp.top,x1:210,y1:70,d:.9,h:1});spFlash('255,240,190',.38,.6,1,.2);for(let i=sN(16);i>0;i--)pAdd(PK.MOTE,sR(40,380),sR(20,150),sR(-6,6),sR(8,28),sR(.8,1.4),3,5,'#fff2b0',0);spSnd('chime',.15)}
-function spWaveStart(fx){const P=SPPAL[fx.el],s=fx.src;
+function spBlizzard(fx){
+  spFlash('205,228,255',.22,.9,1,0,0);
+  for(let i=0;i<7;i++)fx.q.push({t:i*.06,f:()=>{const q=SPFX.q();for(let k=Math.round(16*q);k>0;k--)pAdd(PK.GLOW,-10,sR(10,200),sR(260,430),sR(-45,45),sR(.6,.9),sR(2,4),sR(1,2),k%2?'#ffffff':'#bfe4ff',0);for(let k=Math.round(3*q);k>0;k--)pAdd(PK.STREAK,-10,sR(10,200),sR(520,780),sR(-30,30),sR(.3,.45),1.2,1.2,'#e8f6ff',0)}})}
+function spWaveStart(fx){const P=SPPAL[fx.el]||SPPAL.shout,s=fx.src;
   if(fx.dl==='time'){fx.q.push({t:fx.tc,f:()=>{sObj({k:'clock',x:210,y:98,r:70,d:.8});spFlash('200,215,255',.4,.2);spRing(210,100,230,.5,'#c8d8ff',3,.8,.6)}});return}
   if(fx.dl==='rift')return;
+  if(fx.dl==='scan'){fx.q.push({t:0,f:()=>{spRing(210,104,240,.6,'#ffe9a0',3,.8,.5);spRing(210,104,150,.5,'#fff6c8',2,.6,.5);for(let i=sN(14);i>0;i--)pAdd(PK.MOTE,sR(40,380),sR(30,170),sR(-8,8),sR(-30,-6),sR(.6,1),3,4,'#fff2b0',0)}});return}
+  if(fx.dl==='blizzard')spBlizzard(fx);
   fx.q.push({t:0,f:()=>{spRing(s.x,s.y,300,.5,P[1],4.5,.9,.22);spRing(s.x,s.y,260,.55,P[0],2.4,.7,.22)}});fx.q.push({t:.09,f:()=>spRing(s.x,s.y,250,.5,P[1],3,.6,.2)})}
-/* ---- the charge, the projectiles, the beam ---- */
 function spCharge(fx,dt){
   const P=SPPAL[fx.el]||SPPAL.arcane,s=fx.src,p=sCl(fx.t/Math.max(.05,fx.tc),0,1),r=4+14*p;
   ctx.globalAlpha=.6+.4*Math.sin(fx.t*55)*.5;ctx.drawImage(spGlow(P[1]),s.x-r*2.2,s.y-r*2.2,r*4.4,r*4.4);ctx.globalAlpha=1;ctx.drawImage(spGlow(P[0]),s.x-r,s.y-r,r*2,r*2);
+  if(fx.el==='frost'&&fx.n<150&&Math.random()<.85*SPFX.q()){pAdd(PK.MOTE,s.x+sR(-20,20),s.y-sR(34,70),sR(-6,6),sR(55,100),sR(.28,.42),3,3,'#e8fbff',0);fx.n++}
   if(fx.n<150&&Math.random()<.9*SPFX.q()){const a=sR(0,TAU),R=sR(24,36);pAdd(PK.SPARK,s.x+Math.cos(a)*R,s.y+Math.sin(a)*R*.8,-Math.cos(a)*R/.1,-Math.sin(a)*R*.8/.1,.1,2.2,2.2,P[0],0);fx.n++}}
 function spBody(fx,x,y,s,ang){
   const el=fx.el,P=SPPAL[el]||SPPAL.arcane;ctx.globalAlpha=.85;ctx.drawImage(spGlow(P[1]),x-s*2.4,y-s*2.4,s*4.8,s*4.8);
   if(el==='fire'||el==='ruin'){for(let k=0;k<3;k++){ctx.save();ctx.globalAlpha=.95;ctx.translate(x,y);ctx.rotate(ang-Math.PI/2+(k-1)*.42+Math.sin(fx.t*40+k*2)*.1);const w=s*1.35,h=s*(3.4+(k%2)*.9);ctx.drawImage(spTongue(el==='ruin'?'ruin':'fire'),-w/2,-h*.72,w,h);ctx.restore()}}
-  else if(el==='frost'){ctx.save();ctx.globalAlpha=1;ctx.translate(x,y);ctx.rotate(fx.t*12);ctx.fillStyle='#e8ffff';ctx.strokeStyle='#ffffff';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(0,-s*1.5);ctx.lineTo(s*.55,0);ctx.lineTo(0,s*1.2);ctx.lineTo(-s*.55,0);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore()}
+  else if(el==='frost'){for(let k=0;k<3;k++){ctx.save();ctx.globalAlpha=.9;ctx.translate(x,y);ctx.rotate(ang-Math.PI/2+(k-1)*.4+Math.sin(fx.t*34+k*2)*.08);const w=s*1.25,h=s*(3.2+(k%2)*.8);ctx.drawImage(spTongue('ice'),-w/2,-h*.72,w,h);ctx.restore()}
+    ctx.save();ctx.globalAlpha=1;ctx.translate(x,y);ctx.rotate(fx.t*12);ctx.fillStyle='#f0ffff';ctx.strokeStyle='#ffffff';ctx.lineWidth=.8;for(let k=0;k<3;k++){ctx.rotate(TAU/3);ctx.beginPath();ctx.moveTo(0,-s*1.5);ctx.lineTo(s*.4,-s*.2);ctx.lineTo(0,s*.3);ctx.lineTo(-s*.4,-s*.2);ctx.closePath();ctx.fill();ctx.stroke()}ctx.restore()}
   else if(el==='arcane'||el==='shadow'||el==='disint'||el==='poison'){for(let k=0;k<2;k++){const a=fx.t*16+k*Math.PI,r=s*1.2;ctx.globalAlpha=.9;ctx.drawImage(spGlow(P[0]),x+Math.cos(a)*r-s*.4,y+Math.sin(a)*r*.7-s*.4,s*.8,s*.8)}}
   ctx.globalAlpha=1;ctx.drawImage(spGlow(P[0]),x-s*1.3,y-s*1.3,s*2.6,s*2.6);ctx.drawImage(spGlow('#ffffff'),x-s*.7,y-s*.7,s*1.4,s*1.4)}
 function spTrail(fx,x,y,s,ang,big){
@@ -61747,17 +62216,35 @@ function spTrail(fx,x,y,s,ang,big){
   else if(el==='poison'){if(em(1)){pAdd(PK.GLOW,x,y,bx*20,by*20,sR(.2,.32),s*.8,s*.2,'#7ade40',0);fx.n++}if(em(.5)){pAdd(PK.BUB,x+sR(-4,4),y+sR(-4,4),bx*10,-18,sR(.4,.7),1.5,3.5,'#b8ff80',-4);fx.n++}if(em(.4)){pAdd(PK.DRIP,x,y,0,60,.3,5,0,'#9aff58',160);fx.n++}}
   else{const c=P0(el);if(em(1)){pAdd(PK.GLOW,x,y,bx*24,by*24,sR(.2,.32),s*.8,s*.2,c[1],0);fx.n++}if(em(.8)){pAdd(PK.MOTE,x+sR(-3,3),y+sR(-3,3),bx*20+sR(-20,20),by*20+sR(-20,20),sR(.3,.5),3,3,c[0],0);fx.n++}}}
 const P0=el=>SPPAL[el]||SPPAL.arcane;
+function spArrowDraw(x,y,ang,len,P,al,long){
+  const c=Math.cos(ang),sn=Math.sin(ang),tx=x-c*len,ty=y-sn*len;ctx.lineCap='round';
+  ctx.globalAlpha=al*.5;ctx.strokeStyle='#ffffff';ctx.lineWidth=.9;ctx.beginPath();ctx.moveTo(x-c*(long?110:56),y-sn*(long?110:56));ctx.lineTo(tx,ty);ctx.stroke(); // the thin motion line
+  if(long){ctx.globalAlpha=al*.35;ctx.strokeStyle=P[1];ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x-c*80,y-sn*80);ctx.lineTo(x,y);ctx.stroke()}
+  ctx.globalAlpha=al;ctx.strokeStyle='#f0d8a0';ctx.lineWidth=1.8;ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(x,y);ctx.stroke(); // the shaft
+  ctx.fillStyle='#ffffff';ctx.beginPath();ctx.moveTo(x+c*5,y+sn*5);ctx.lineTo(x-c*3+sn*2.6,y-sn*3-c*2.6);ctx.lineTo(x-c*3-sn*2.6,y-sn*3+c*2.6);ctx.closePath();ctx.fill(); // the head
+  ctx.fillStyle='#ff8a70';for(const sd of [1,-1]){ctx.beginPath();ctx.moveTo(tx+c*1,ty+sn*1);ctx.lineTo(tx+c*7+sn*3.6*sd,ty+sn*7-c*3.6*sd);ctx.lineTo(tx+c*8,ty+sn*8);ctx.closePath();ctx.fill()} // the fletching
+  ctx.globalAlpha=1}
 function spProj(fx,tg,dt){
   const e=tg.e,tx=e.sx?sCl(e.sx,12,408):210,ty=e.sy?sCl(e.sy,24,192):100,D=fx.dl,P=P0(fx.el),z=spZ(e),p=sCl((fx.t-fx.tc)/Math.max(.02,tg.ti-fx.tc),0,1);
   if(D==='ball'||D==='drain'||D==='meteor'){
     const met=D==='meteor',x0=met?tx+80:fx.src.x,y0=met?-30:fx.src.y,q=Math.pow(p,met?1.7:1.45),x=x0+(tx-x0)*q,y=y0+(ty-y0)*q,ang=Math.atan2(ty-y0,tx-x0),s=met?(10+28*q)*Math.max(.9,z):(6+19*q)*Math.max(.85,z);
     spBody(fx,x,y,s,ang);spTrail(fx,x,y,s,ang,met)}
   else if(D==='arrow'||D==='lance'){
-    const lan=D==='lance',x0=fx.src.x,y0=fx.src.y,x=x0+(tx-x0)*p,y=y0+(ty-y0)*p,qt=Math.max(0,p-(lan?.5:.3)),xt=x0+(tx-x0)*qt,yt=y0+(ty-y0)*qt;
-    ctx.lineCap='round';ctx.strokeStyle=P[1];ctx.globalAlpha=.55;ctx.lineWidth=lan?7:4;ctx.beginPath();ctx.moveTo(xt,yt);ctx.lineTo(x,y);ctx.stroke();ctx.strokeStyle='#ffffff';ctx.globalAlpha=1;ctx.lineWidth=lan?2.6:1.6;ctx.beginPath();ctx.moveTo(xt,yt);ctx.lineTo(x,y);ctx.stroke();
-    const r=lan?9:6;ctx.globalAlpha=.9;ctx.drawImage(spGlow(P[1]),x-r,y-r,r*2,r*2);ctx.globalAlpha=1;if(fx.n<150&&Math.random()<.7*SPFX.q()){pAdd(PK.SPARK,x,y,sR(-30,30),sR(-30,30),.25,2,2,P[0],0);fx.n++}}
+    const lan=D==='lance',n=lan?1:(fx.o.n||1),long=!!fx.o.long||lan,x0=fx.a0.x,y0=fx.a0.y;
+    for(let k=0;k<n;k++){const off=(k-(n-1)/2),pk=sCl(p*1.08-k*.03,0,1);if(pk<=0)continue;const sx=x0+off*16,sy=y0,ex=tx+off*6*z,ey=ty+off*4*z,x=sx+(ex-sx)*pk,y=sy+(ey-sy)*pk,ang=Math.atan2(ey-sy,ex-sx);
+      if(lan){ctx.lineCap='round';const qt=Math.max(0,pk-.5);ctx.strokeStyle=P[1];ctx.globalAlpha=.55;ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(sx+(ex-sx)*qt,sy+(ey-sy)*qt);ctx.lineTo(x,y);ctx.stroke();ctx.strokeStyle='#fff';ctx.globalAlpha=1;ctx.lineWidth=2.6;ctx.stroke();ctx.globalAlpha=.9;ctx.drawImage(spGlow(P[1]),x-9,y-9,18,18);ctx.globalAlpha=1}
+      else{spArrowDraw(x,y,ang,18+6*z,P,1,long);if(fx.el!=='wood')spTrail(fx,x,y,4,ang,false)}
+      if(fx.n<150&&Math.random()<.5*SPFX.q()){pAdd(PK.SPARK,x,y,sR(-30,30),sR(-30,30),.22,1.8,1.8,P[0],0);fx.n++}}}
+  else if(D==='knives'){
+    const n=fx.o.n||5,x0=fx.a0.x,y0=fx.a0.y;
+    for(let k=0;k<n;k++){const off=(k-(n-1)/2),pk=sCl(p*1.1-k*.04,0,1);if(pk<=0)continue;const sx=x0+off*10,ex=tx+off*7*z,ey=ty+off*5*z,x=sx+(ex-sx)*pk,y=y0+(ey-y0)*pk,ang=Math.atan2(ey-y0,ex-sx),sp=fx.t*38+k*1.7;
+      ctx.lineCap='round';ctx.strokeStyle='#ffffff';ctx.globalAlpha=.55;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x-Math.cos(ang)*48,y-Math.sin(ang)*48);ctx.lineTo(x,y);ctx.stroke();
+      ctx.save();ctx.translate(x,y);ctx.rotate(sp);ctx.scale(1.5,1.5);ctx.globalAlpha=1;ctx.fillStyle='#f4f8ff';ctx.strokeStyle='#9ab0d0';ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(0,-6.5);ctx.lineTo(2.2,0);ctx.lineTo(0,3);ctx.lineTo(-2.2,0);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#d8a050';ctx.fillRect(-1,3,2,3.4);ctx.restore();
+      if(fx.n<150&&Math.random()<.4*SPFX.q()){pAdd(PK.SPARK,x,y,sR(-20,20),sR(-20,20),.2,1.6,1.6,'#ffffff',0);fx.n++}}ctx.globalAlpha=1}
   else if(D==='rain'){
-    for(let i=0;i<4;i++){const pp=sCl(p*1.2-i*.07,0,1);if(pp<=0||pp>=1)continue;const ax=tx+(i-1.5)*10,ay=ty-160*(1-pp);ctx.strokeStyle=P[0];ctx.lineWidth=1.6;ctx.globalAlpha=.95;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(ax-5*(1-pp),ay-20);ctx.lineTo(ax,ay);ctx.stroke();ctx.strokeStyle=P[1];ctx.globalAlpha=.45;ctx.lineWidth=4;ctx.stroke()}ctx.globalAlpha=1}
+    const wood=fx.el==='wood';
+    for(let i=0;i<4;i++){const pp=sCl(p*1.2-i*.07,0,1);if(pp<=0||pp>=1)continue;const ax=tx+(i-1.5)*10,ay=ty-160*(1-pp);
+      if(wood)spArrowDraw(ax,ay,Math.PI/2+.1,16,P,1,false);else{ctx.strokeStyle=P[0];ctx.lineWidth=1.6;ctx.globalAlpha=.95;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(ax-5*(1-pp),ay-20);ctx.lineTo(ax,ay);ctx.stroke();ctx.strokeStyle=P[1];ctx.globalAlpha=.45;ctx.lineWidth=4;ctx.stroke()}}ctx.globalAlpha=1}
   else if(D==='breath'){
     if(tg.n<4&&fx.n<150){const dx=tx-fx.src.x,dy=ty-fx.src.y,sp=Math.hypot(dx,dy)/.2,a=Math.atan2(dy,dx),q=SPFX.q();
       for(let k=0;k<2;k++)if(Math.random()<q){const aa=a+sR(-.12,.12),s2=sp*sR(.8,1.2);pAdd(PK.TONGUE,fx.src.x,fx.src.y,Math.cos(aa)*s2,Math.sin(aa)*s2,sR(.2,.28),sR(14,22),sR(18,28),'fire',0);fx.n++}
@@ -61774,16 +62261,16 @@ function spBeam(fx,dt){
 function spFxStep(fx,dt){
   fx.t+=dt;const t=fx.t;
   for(let i=0;i<fx.q.length;i++)if(fx.q[i].t<=t){const o=fx.q.splice(i,1)[0];i--;o.f()}
-  if(fx.el&&fx.dl!=='light'&&t<fx.tc)spCharge(fx,dt);
+  if(fx.el&&fx.dl!=='light'&&t<fx.tc&&!SPNOCH.has(fx.dl))spCharge(fx,dt);
   if(fx.dl==='beam'&&fx.el&&t>=fx.tc&&t<fx.tc+.3)spBeam(fx,dt);
   for(const tg of fx.tg){if(t>=fx.tc&&t<tg.ti&&tg.proj&&fx.dl!=='beam')spProj(fx,tg,dt);if(!tg.did&&t>=tg.ti){tg.did=1;spImpact(fx,tg)}}
   return t<fx.end||fx.q.length>0}
 /* ---- the tint on a creature that was hit: white flash, then burning, frozen, shocked, poisoned... ---- */
 const SPSMALL=new WeakMap(),SILC=spCv(256,256),SILG=SILC.getContext('2d');
 function spSmall(img){let c=SPSMALL.get(img);if(c)return c;const k=Math.min(1,250/Math.max(img.width,img.height));c=spCv(Math.max(2,Math.round(img.width*k)),Math.max(2,Math.round(img.height*k)));c.getContext('2d').drawImage(img,0,0,c.width,c.height);SPSMALL.set(img,c);return c}
-function spPaint(sz,e,col,al,comp,ox,oy){
+function spPaint(sz,e,col,al,comp,ox,oy,cl){
   if(al<=.01)return;const sm=spSmall(sz.s.img),w=sm.width,h=sm.height;SILG.globalCompositeOperation='source-over';SILG.clearRect(0,0,256,256);SILG.drawImage(sm,0,0);SILG.globalCompositeOperation='source-in';SILG.fillStyle=col;SILG.fillRect(0,0,w,h);
-  ctx.globalCompositeOperation=comp;ctx.globalAlpha=Math.min(1,al);ctx.drawImage(SILC,0,0,w,h,e.sx-sz.sw/2+(ox||0),e.sy-sz.sh*.45+(oy||0),sz.sw,sz.sh)}
+  ctx.globalCompositeOperation=comp;ctx.globalAlpha=Math.min(1,al);if(cl!==undefined&&cl<1){ctx.drawImage(SILC,0,h*(1-cl),w,h*cl,e.sx-sz.sw/2+(ox||0),e.sy-sz.sh*.45+sz.sh*(1-cl)+(oy||0),sz.sw,sz.sh*cl)}else ctx.drawImage(SILC,0,0,w,h,e.sx-sz.sw/2+(ox||0),e.sy-sz.sh*.45+(oy||0),sz.sw,sz.sh)}
 function spTintEmit(e,tn,sz){
   if(!e.sx)return;const q=SPFX.q(),sw=sz.sw,sh=sz.sh,m=tn.m,rx=()=>e.sx+sR(-.32,.32)*sw,ry=()=>e.sy+sR(-.3,.34)*sh,k=Math.max(.6,sw/110);
   if((m==='fire'||m==='ruin')&&tn.t<tn.d*.8&&Math.random()<.9*q){const sz2=sR(8,13)*k;pAdd(PK.TONGUE,rx(),ry(),sR(-8,8),sR(-70,-40),sR(.28,.42),sz2,sz2,m==='ruin'?'ruin':'fire',-50);if(Math.random()<.45)pAdd(PK.EMBER,rx(),ry(),sR(-12,12),sR(-60,-30),sR(.5,.9),2.5,.8,'#ff9a3a',-10)}
@@ -61798,13 +62285,19 @@ function spTintDraw(dt){
       if(t<.1)spPaint(sz,e,'#ffffff',.95*(1-t/.1*.35),'lighter');
       else spPaint(sz,e,ru?'rgb(255,60,150)':'rgb(255,110,30)',.5*(1-(t-.1)/(tn.d-.1))*(.82+.18*Math.sin(t*45)),'lighter');
       if(t>.05)spPaint(sz,e,'rgb(20,8,2)',.4*Math.pow(1-u,.8),'source-over')}
+    else if(m==='steel')spPaint(sz,e,'#ffffff',.85*(1-u),'lighter');
+    else if(m==='deep'){spPaint(sz,e,tn.dk?'rgb(150,90,230)':'rgb(255,50,40)',.6*(1-u),'lighter');if(t<.06)spPaint(sz,e,'#ffffff',.7,'lighter')}
     else if(m==='frost'){
-      if(t<.07)spPaint(sz,e,'#ffffff',.9,'lighter');
-      else{spPaint(sz,e,'rgb(120,200,255)',.5*(u<.7?1:1-(u-.7)/.3),'lighter');spPaint(sz,e,'rgb(200,235,255)',.22*(u<.7?1:1-(u-.7)/.3),'source-over')}
-      if(u>.64&&!tn.cr){tn.cr=1;const ex=e.sx,ey=e.sy,z=spZ(e);for(let i=sN(9);i>0;i--){const a=sR(0,TAU),s=sR(50,140)*z,p=pAdd(PK.SHARD,ex+sR(-.3,.3)*sz.sw,ey+sR(-.3,.3)*sz.sh,Math.cos(a)*s,Math.sin(a)*s-30,sR(.4,.7),sR(4,8)*z,sR(4,8)*z,'#cfeeff',260);p.vr=sR(-9,9)}spPaint(sz,e,'#ffffff',.7,'lighter');spSnd('crack',0)}}
+      const k=u<.7?1:1-(u-.7)/.3,gr=sCl((t-.06)/.28,0,1);
+      if(t<.06)spPaint(sz,e,'#ffffff',.9,'lighter');
+      else{spPaint(sz,e,'rgb(120,200,255)',.5*k,'lighter',0,0,gr);spPaint(sz,e,'rgb(214,238,255)',.3*k,'source-over',0,0,gr)}
+      if(!tn.pts){tn.pts=[];for(let i=0;i<9;i++)tn.pts.push([sR(-.36,.36),sR(-.4,.38),sR(.7,1.2)])}
+      ctx.globalCompositeOperation='lighter';const z=spZ(e);for(let i=0;i<tn.pts.length;i++){const q=tn.pts[i],sc=sCl((t-.1-i*.02)/.2,0,1)*(u>.64?Math.max(0,1-(u-.64)/.08):1);if(sc<=0)continue;ctx.globalAlpha=k*.95;const r=(7+4*q[2])*z*sc;ctx.drawImage(spStar('#d8f0ff'),e.sx+q[0]*sz.sw-r,e.sy+q[1]*sz.sh-r,r*2,r*2)}
+      if(t<tn.d*.85&&Math.random()<.2*SPFX.q())pAdd(PK.SMOKE,e.sx+sR(-.1,.1)*sz.sw,e.sy-sz.sh*.4,sR(-6,6),sR(-24,-10),sR(.6,.9),4*z,sR(12,18)*z,'#e0f0ff',-2);
+      if(u>.64&&!tn.cr){tn.cr=1;for(let i=sN(10);i>0;i--){const q=tn.pts[i%9],s2=sR(20,70),p=pAdd(PK.SHARD,e.sx+q[0]*sz.sw,e.sy+q[1]*sz.sh,sR(-1,1)*s2,sR(-40,20),sR(.5,.8),sR(4,9)*z,sR(4,9)*z,'#cfeeff',280);p.vr=sR(-9,9)}spPaint(sz,e,'#ffffff',.7,'lighter');spSnd('crack',0)}}
     else if(m==='bolt'){const fl=Math.floor(t*34),a=(1-u)*(fl%2?.6:.95);
-      for(let k=0;k<4;k++)spPaint(sz,e,'#dce8ff',a*.5,'lighter',(k%2?1:-1)*(1.6+Math.random()*1.4),(k<2?1:-1)*(1.2+Math.random()*1.4));
-      spPaint(sz,e,'#ffffff',a*.8,'lighter',(Math.random()-.5)*3,(Math.random()-.5)*2)}
+      for(let k=0;k<4;k++)spPaint(sz,e,'#dce8ff',a*(t<.1?.5:.25),'lighter',(k%2?1:-1)*(1.6+Math.random()*1.4),(k<2?1:-1)*(1.2+Math.random()*1.4));
+      spPaint(sz,e,'#ffffff',a*(t<.1?.8:.3),'lighter',(Math.random()-.5)*3,(Math.random()-.5)*2)}
     else if(m==='arcane')spPaint(sz,e,'rgb(170,110,255)',.55*(.5+.5*Math.sin(t*16))*(1-u*.5),'lighter');
     else if(m==='poison'){spPaint(sz,e,'rgb(110,230,70)',.4*(1-u*.5)*(.75+.25*Math.sin(t*9)),'lighter');spPaint(sz,e,'rgb(50,130,30)',.2*(1-u),'source-over')}
     else if(m==='holy')spPaint(sz,e,'rgb(255,238,170)',.62*(1-u),'lighter');
@@ -61814,15 +62307,27 @@ function spTintDraw(dt){
 /* ---- the frame: advance everything, then draw (normal-blended things first, then the light) ---- */
 const SPNORM=new Set(['tend','roots','crack','swarm','rift']);
 function spAbort(){for(const fx of SPFX.fx)for(const tg of fx.tg)spRelease(tg,fx.el);SPFX.fx.length=0;SPFX.obj.length=0;SPFX.fl.length=0;SPFX.tint.clear();SPFX.held.clear();for(const p of SPP)p.a=0;SPFX.live=0}
+function spChillDraw(dt){
+  for(const e of G.enemies){if(!(e.chilled>0)||e.hp<=0||SPFX.tint.has(e)||SPFX.held.has(e)||!e.sx)continue;const sz=spSize(e);if(!sz.s||!sz.s.img)continue;
+    if(e.chillK==='daze'){const zz=spZ(e);ctx.globalCompositeOperation='lighter';for(let i=0;i<3;i++){const an=G.time*5+i*2.1;ctx.globalAlpha=.9;ctx.drawImage(spStar('#ffe9a0'),e.sx+Math.cos(an)*15*zz-5,e.sy-sz.sh*.5-2+Math.sin(an)*4-5,10,10)}ctx.globalAlpha=1;continue}
+    spPaint(sz,e,'rgb(130,205,255)',.3+.07*Math.sin(G.time*5+e.seed),'lighter');spPaint(sz,e,'rgb(214,238,255)',.12,'source-over');
+    if(Math.random()<.04*SPFX.q())pAdd(PK.MOTE,e.sx+sR(-.3,.3)*sz.sw,e.sy+sR(-.3,.3)*sz.sh,0,sR(-8,8),sR(.4,.7),3,3,'#e8fbff',0)}
+  ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1}
+function spChillOnly(dt){
+  if(G.state!=='play'||G.cut||!SPFX.lvl||(G.inv&&G.inv.open)||G.menu||G.overview||G.map)return;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();spChillDraw(dt);ctx.restore();
+  if(SPFX.npt||SPFX.pnew){spPtsUpdate(dt);ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();ctx.globalCompositeOperation='lighter';spPtsDraw(0,true);ctx.restore();SPFX.pnew=0}}
 function spFrame(dt){
-  const S=SPFX;if(!S.live)return;
+  const S=SPFX;
+  if(!S.live&&(S.npt>0||S.pnew))S.live=1;
+  if(!S.live){if(S.chill)spChillOnly(dt);return}
   S.ew+=(Math.min(dt,.1)-S.ew)*.04;S.slow=S.ew>.036?1:S.ew<.026?0:S.slow;
   if(G.state!=='play'||G.cut||!S.lvl||(G.inv&&G.inv.open)||G.menu||G.overview||G.map){spAbort();return}
   const w0=performance.now();
   spPtsUpdate(dt);for(let i=S.obj.length-1;i>=0;i--){const o=S.obj[i];o.t+=dt;if(o.t>=o.d)S.obj.splice(i,1)}
   ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();ctx.globalCompositeOperation='source-over';
   spPtsDraw(0,false);for(const o of S.obj)if(!o.h&&SPNORM.has(o.k))spObjDraw(o,0);
-  spTintDraw(dt);
+  spTintDraw(dt);spChillDraw(dt);
   ctx.globalCompositeOperation='lighter';for(const o of S.obj)if(!o.h&&!SPNORM.has(o.k))spObjDraw(o,0);
   for(let i=S.fx.length-1;i>=0;i--){if(!spFxStep(S.fx[i],dt))S.fx.splice(i,1)}
   spPtsDraw(0,true);ctx.restore();
@@ -61832,8 +62337,8 @@ function spFrame(dt){
   S.live=(S.fx.length||S.obj.length||S.tint.size||S.fl.length||S.npt>0||S.pnew)?1:0;S.pnew=0;
   const ms=performance.now()-w0;S.stat.ms+=ms;S.stat.n++;if(ms>S.stat.max)S.stat.max=ms}
 /* ---- the hooks ---- */
-{const _ui=ui;ui=function(dt){_ui.apply(this,arguments);try{spFrame(dt||.016)}catch(e){if(SPFX.errs++<5)console.error('spellfx',e);if(SPFX.errs>20){try{spAbort()}catch(x){}}}}}
-{const _sl=spriteList;spriteList=function(){const L=_sl.apply(this,arguments);if(SPFX.live)for(let i=0;i<L.length;i++){const s=L[i];if(s.e)SPFX.spr.set(s.e,s)}return L}}
+{const _ui=ui;ui=function(dt){_ui.apply(this,arguments);try{if(SPFX.lvl)SPFX.chill=!!(G.enemies&&G.state==='play'&&G.enemies.some(e=>e.chilled>0&&e.hp>0));spFrame(dt||.016)}catch(e){if(SPFX.errs++<5)console.error('spellfx',e);if(SPFX.errs>20){try{spAbort()}catch(x){}}}}}
+{const _sl=spriteList;spriteList=function(){const L=_sl.apply(this,arguments);if(SPFX.live||SPFX.chill)for(let i=0;i<L.length;i++){const s=L[i];if(s.e)SPFX.spr.set(s.e,s)}return L}}
 {const _up=update;update=function(dt){ // hit-stop: the world slows for a moment at the impact; a creature waiting for the impact does not start to fall yet
   let hd=null;if(SPFX.held.size){hd=[];for(const e of SPFX.held.keys())hd.push(e,e.dying)}
   if(SPFX.stop>0){SPFX.stop-=dt;dt*=.07}
@@ -61857,11 +62362,13 @@ function spFrame(dt){
    (single-target powers are one line, area powers another; buffs and control have their own lines).
 
    The rule. Each class has one number E, the damage a single-target power does for each point of its cost, written in "usual blows":
-        damage of a use  =  cost x E x U x g
+        damage of a use  =  cost x e x U x g          e = E x CM x GE x (1 - TAPER x (unlock level - 1) / 79)
    U is the caster's own usual blow (see psU): the average weapon hit with strength, rings, double-hit chance and damage bonuses for a fighter, and
    (intelligence bonus + staff magic + 8) with the spell bonuses for a mage or a sorcerer. So the power grows with the weapon, the stat and the gear, as
-   the creatures' health grows with the level of the place. g = (1 + 0.0035 x (hero level - the power's unlock level)) x (1 + 0.002 x hero level): the first part rewards each level of mastery beyond the
-   unlock, the second makes every power a little stronger as the hero grows, beyond what the weapon and the stats give. An area power does 0.4 x that for each foe it reaches (so about 1.2 times a single power when three are close).
+   the creatures' health grows with the level of the place. g = (1 + 0.002 x (hero level - the power's unlock level)) x (1 + 0.001 x hero level): the first part rewards each level of
+   mastery beyond the unlock, the second makes every power a little stronger as the hero grows, beyond what the weapon and the stats give (the best weapons stop at level 70).
+   GE (0.75) and TAPER (0.15) were set from simulated fights so that the party kills about as fast as before (tools/powers_audit, POWERS_AFTER.md).
+   An area power does 0.4 x that for each foe it reaches (so about 1.2 times a single power when three are close).
    Damage over time (bleed, poison, burn) is part of the same total, and is spread over its rounds. Costs are fixed numbers that rise with the
    unlock level; they never change with the caster's level, so an early power stays cheap and simply stops mattering as the heroes grow.
    Powers keep their names and ids and their place in the list; new powers are put in by level, and old saved selections are moved to follow them.
@@ -61869,7 +62376,7 @@ function spFrame(dt){
    ========================================================================== */
 (function(){
 if(typeof CLASSES==='undefined'||typeof MX==='undefined')return;
-const K=.0035,KL=.002,GT=.4;
+const K=.002,KL=.001,GT=.4;
 const isCaster=n=>n==='Mage'||n==='Sorcerer';
 const clsOf=h=>{const i=G.heroes.indexOf(h);return i>=0&&HERO_DEF[i]?HERO_DEF[i].cls:'Warrior'};
 const heroIdx=h=>G.heroes.indexOf(h);
@@ -61881,15 +62388,18 @@ function useHero(){ // the hero who is using a power now
   try{const h=G.heroes[G.curHero===undefined?G.sel:G.curHero];if(h)return h}catch(e){}
   return null;
 }
-function cardHero(){ // the hero whose card is on screen (the powers page), else the selected hero
-  try{if(G.inv&&G.inv.open&&G.heroes[G.inv.hero])return G.heroes[G.inv.hero];const h=G.heroes[G.sel||0];if(h)return h}catch(e){}
+function cardHero(){ // the hero whose card is on screen (the powers page, or the spell shop), else the selected hero
+  try{if(G.menu==='spellshop'&&G.heroes[G.sshero||0])return G.heroes[G.sshero||0];if(G.inv&&G.inv.open&&G.heroes[G.inv.hero])return G.heroes[G.inv.hero];const h=G.heroes[G.sel||0];if(h)return h}catch(e){}
   return null;
 }
 const rng=(M,u)=>{const a=[1,2];a._M=M;a._u=u;return a}; // a damage range for the spell code, that is replaced by a number worked out from the hero (see mxDmg below)
 
 /* [kind, key, cost, role, options]  kind c: a class power by name, x: a spell by id, n: a new power.   role s: single target, g: area.
    options: dot: share of the total that is damage over time. p: the plain words of the card (the number is added by the game). */
+const GE=.75,TAPER=.15; // GE: one factor for all classes, TAPER: the damage for each point of cost falls by this much between level 1 and level 80, both set so that fights do not get much shorter than before (see POWERS_AFTER.md)
 const E_CLS={Warrior:.31,Barbarian:.30,Paladin:.25,Ranger:.35,Archer:.36,Thief:.38,Assassin:.33,Mage:.20,Sorcerer:.20,Priest:.20,Monk:.40,Goat:.36};
+const CM={Warrior:1.10,Barbarian:1.18,Paladin:.9,Ranger:1.13,Archer:1.10,Thief:1.18,Assassin:1.12,Mage:1.25,Sorcerer:1.25,Priest:1,Monk:1.22,Goat:1.22}; // a small correction for each class, from the fight simulations: the old ladders were not equally generous (the Monk's Flurry of Blows was a bargain, the Paladin's powers were traps)
+const eff=(cls,u)=>E_CLS[cls]*CM[cls]*GE*(1-TAPER*Math.max(0,Math.min(80,u)-1)/79);
 const SPEC={
 Warrior:[
  ['c','Power Strike',6,'s',{p:'A crushing blow.'}],
@@ -62003,8 +62513,6 @@ const NUM_FIX=[
 ];
 
 /* ---- the numbers of one power ---- */
-const MAP={}; // 'class|key' -> {cost,role,M,dot,p}
-function noteMap(cls,key,cost,role,o,u){const E=E_CLS[cls],M=cost*E*(role==='g'?GT:1);MAP[cls+'|'+key]={cost,role,M,dot:o.dot||0,p:o.p,u,cls}}
 const fmt=n=>String(Math.max(1,Math.round(n)));
 function dmgText(info,h){
   if(!h)return '';const U=psU(h),g=gF(h.lvl,info.u),tot=info.M*U*g,dir=tot*(1-info.dot);
@@ -62034,8 +62542,10 @@ function psBackstab(){try{const f=frontEnemy(1);return f&&!f.e.alert?1.5:1}catch
 function setCasterDmg(P,info){
   Object.defineProperty(P,'dmg',{get(){
     const h=useHero();if(!h)return [1,2];
-    const sp=1+pasH(h,'spellPct'),D=info.M*psU(h)*gF(h.lvl,info.u),c=D/sp-intB(h)-magicBonus(h);
-    return [Math.max(1,Math.round(c*.85)),Math.max(2,Math.round(c*1.15))]},set(v){},configurable:true,enumerable:true});
+    // the spell code adds the intelligence bonus and the staff's magic to the roll, and then the spell bonuses: the roll is whatever is left of the target, which can be
+    // below zero for a small power in the hands of a mage with a good staff (rnd and the rounding below handle that); the spread is 15 percent of the whole.
+    const sp=1+pasH(h,'spellPct'),D=info.M*psU(h)*gF(h.lvl,info.u)/sp,c=D-intB(h)-magicBonus(h),sd=Math.max(1,D*.15);
+    return [Math.round(c-sd),Math.round(c+sd)]},set(v){},configurable:true,enumerable:true});
 }
 function annotateMx(P,fxList,info){ // give the damage ranges and the damage over time of a spell their share of the total
   const dmgs=fxList.filter(f=>f[0]==='dmg'||f[0]==='exec'||f[0]==='undead');
@@ -62071,17 +62581,17 @@ function psApply(){
     for(const [kind,key,cost,role,o] of SPEC[cls]){
       if(kind==='c'){
         const P=c.powers.find(p=>p.name===key&&p.act&&!p._ps);if(!P){console.warn('powers_scaling: no class power',cls,key);continue}
-        const info={cost,role,M:cost*E_CLS[cls]*(role==='g'?GT:1),dot:o.dot||0,p:o.p,u:P.lv};P._ps=1;
+        const info={cost,role,M:cost*eff(cls,P.lv)*(role==='g'?GT:1),dot:o.dot||0,p:o.p,u:P.lv};P._ps=1;
         applyClassPower(cls,P,cost,role,o,info);
         if(c.powers[0]===P&&c.sp){c.sp.cost=cost}
       }else if(kind==='x'){
         const s=MX.find(z=>z.id===key),P=MX_POWER[key];if(!s||!P){console.warn('powers_scaling: no spell',key);continue}
-        const info={cost,role,M:cost*E_CLS[cls]*(role==='g'?GT:1),dot:o.dot||0,p:o.p,u:s.lv};
+        const info={cost,role,M:cost*eff(cls,s.lv)*(role==='g'?GT:1),dot:o.dot||0,p:o.p,u:s.lv};
         s.cost=cost;P.cost=cost;annotateMx(P,P.fx,info);defineDesc(P,info);
         Object.defineProperty(s,'d',{get(){let h=null;try{h=cardHero()}catch(e){}return o.p+dmgText(info,h)},set(v){},configurable:true,enumerable:true});
       }else{
         const P=newClassPower(cls,key,cost);
-        const info={cost,role,M:cost*E_CLS[cls]*(role==='g'?GT:1),dot:0,p:o.p,u:key.lv};
+        const info={cost,role,M:cost*eff(cls,key.lv)*(role==='g'?GT:1),dot:0,p:o.p,u:key.lv};
         applyClassPower(cls,P,cost,role,o,info);
         P._new=1;adds.push(P);
       }
@@ -62114,17 +62624,24 @@ psApply();
   try{if(fx&&fx._M!==undefined&&E.st&&E.st[fx[0]]&&typeof E.st[fx[0]]==='object'){const h=G.heroes[hi],n=Math.max(1,fx[1]);E.st[fx[0]].d=Math.max(1,Math.round(fx._M*psU(h)*gF(h.lvl,fx._u)/n))}}catch(e){console.error(e)}
   return r}}
 
-/* ---- the list of powers: saved selections follow the new order ---- */
+/* ---- the list of powers: saved selections follow the new order ----
+   An old save keeps the number of the selected power in the old list (the class powers, then the learned spells). The first time the list is asked for after
+   such a save is loaded (the save has no flag powOrder yet), every hero's number is moved to the same power in the new list. The flag is saved with the game. */
 {const _hp=heroPowers;heroPowers=function(hi){
-  const h=G.heroes[hi];
-  if(h&&h.powV!==1){
-    const cn=HERO_DEF[hi]&&HERO_DEF[hi].cls,old=OLD_IDX[cn];
-    if(old&&h.powSel>0){ // an old saved selection counts in the order the list had before: the class powers, then the learned spells
-      let n;if(h.powSel<old.length){n=CLASSES.find(x=>x.name===cn).powers.indexOf(old[h.powSel]);if(n<0)n=0}else n=h.powSel-old.length+CLASSES.find(x=>x.name===cn).powers.length;
-      h.powSel=n}
-    h.powV=1;
-  }
+  try{const F=G.flags;
+    if(F&&F.powOrder!==1&&G.heroes&&G.heroes.length){F.powOrder=1;
+      G.heroes.forEach((h,j)=>{const cn=HERO_DEF[j]&&HERO_DEF[j].cls,old=OLD_IDX[cn],c=CLASSES.find(x=>x.name===cn);
+        if(old&&c&&h.powSel>0){let n;if(h.powSel<old.length){n=c.powers.indexOf(old[h.powSel]);if(n<0)n=0}else n=h.powSel-old.length+c.powers.length;h.powSel=n}})}
+  }catch(e){console.error(e)}
   return _hp.apply(this,arguments)}}
+
+/* ---- the Powers page: with a long ladder the rows are small and the line with the cost was hidden under the next row, so the cost is shown at the right end of each active row ---- */
+{const _dl=drawPowerLadder;drawPowerLadder=function(hi){
+  _dl.apply(this,arguments);
+  try{const h=G.heroes[hi],PW=heroPowers(hi),RH=PW.length>8?Math.min(26,Math.floor(228/PW.length)):26;
+    if(RH<22)PW.forEach((p,k)=>{if(!p.act||!p.cost)return;const y=22+k*RH,open=h.lvl>=p.lv,chosen=(h.powSel||0)===k&&open;
+      ctx.save();ctx.globalAlpha=open?1:.5;txt(String(p.cost),chosen?283:301,y+RH/2+1,7,'#9ac8ff','right',true);ctx.restore()})}catch(e){}
+}}
 
 /* ---- animations and pictures for the new powers ---- */
 try{PFX_RULES.unshift([/hallowed|sunlance|dawn of judg/i,'holy'],[/arcane ruin|soul rend|annihilat|unmaking/i,'bolt'],[/starfall/i,'fire'],[/thunderous roar/i,'shock'],[/worldsplitter|mountain's wrath|avalanche/i,'shock'])}catch(e){}
@@ -62139,8 +62656,439 @@ function pwTintIcons(){
     IMG[id]=pToneMap(b,t[1],t[2],1.6,.9,0);p.icn=id}
 }
 {const _m=typeof mxTintIcons==='function'?mxTintIcons:null;if(_m)mxTintIcons=function(){_m.apply(this,arguments);try{pwTintIcons()}catch(e){console.error(e)}}}
-window.PS={K,KL,GT,E_CLS,SPEC,MAP,psU,gF,uW,uM,NEW_N,ORIG_LEN};
+window.PS={K,KL,GT,GE,TAPER,CM,eff,E_CLS,SPEC,psU,gF,uW,uM,NEW_N,ORIG_LEN};
 })();
+
+/* ---- src/desert/gy_storm.js ---- */
+/* ==========================================================================
+   STORMCLOUDS OVER THE WENLOCK GRAVEYARD (level 530 only; the crypt, the mazes, Wenlock and the wood keep their own looks).
+   Sky: a 1024 by 256 panorama of three parallax cloud banks (bruise purple far, slate middle, blue-black near). The banks are
+   painted once into small baked pictures (noise, shaded, rim-lit on their upper edges) and slid past each other, a few columns of
+   the panorama per frame into a back buffer that is swapped in whole (no seams, about 1 ms a frame). The engine's sky code reads
+   GYS_PAN in place of the overcast picture (one test in index.html, line with ovcLv).
+   Light: a greenish-grey dusk (weatherNow) and a cool multiply wash over the view.
+   Lightning: every 6 to 20 seconds, a double flicker (about 230 ms), sheet glow inside the clouds, sometimes a jagged fork, then a
+   rolling thunder 1 to 3 seconds later. The flash lifts the ambient light and the lamps for that moment (render3D wrapper; nothing is saved).
+   Rain only in the stretches when the storm is brewing: thin streaks, low count, soft rain loop. A light wind and a few drifting leaves.
+   Everything is keyed on LEVEL===530 and G.state==='play'; it touches no combat, save data or gameplay.
+   Notes: tools/gy_storm/NOTES.md
+   ========================================================================== */
+const GYS={ID:530,ready:false,next:0,strike:null,thunderQ:[],thunders:0,sounds:0,strikes:0,pt:0,rainSrc:null,rainG:null,rain:0,f:0,
+  force:null,hold:null,off:false,   // test hooks: force the rain (1 or -1 for none), hold the flash at a point in time (ms), switch the whole effect off
+  V0:28,V1:158,L:null,pan:null,back:null,pan32:null,back32:null,col:0,cpf:64,ms:0,cyc:null,br:null,
+  reduced:(()=>{try{return !!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)}catch(e){return false}})(),
+  CAL:130,RAINT:150,CYC:330};   // calm for 130 s, then 150 s of rain (20 s of it fading in and out), then 50 s of calm again
+const gysOn=()=>!GYS.off&&typeof LEVEL!=='undefined'&&LEVEL===GYS.ID&&G.state==='play';
+const gysSm=(a,b,x)=>{x=Math.min(1,Math.max(0,(x-a)/(b-a)));return x*x*(3-2*x)};
+/* ---- the cloud banks: tileable value noise, shaded and rim-lit, packed as 0xAABBGGRR; built once on the first visit ---- */
+function gysNoise(seed,cx,cy,oct,pers){   // 512 columns (wrapping) by 256 rows, values about 0..1
+  const W=512,H=256;let s=seed>>>0;const rnd=()=>{s=(s+0x6D2B79F5)>>>0;let t=s;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296};
+  const out=new Float32Array(W*H);let amp=(1-pers)/(1-Math.pow(pers,oct));
+  for(let o=0;o<oct;o++){
+    const nx=cx<<o,ny=(cy<<o)+1,g=new Float32Array(nx*(ny+1));for(let i=0;i<g.length;i++)g[i]=rnd();
+    const X0=new Int32Array(W),X1=new Int32Array(W),FX=new Float32Array(W);
+    for(let x=0;x<W;x++){const p=x*nx/W,i=Math.floor(p),f=p-i;X0[x]=i%nx;X1[x]=(i+1)%nx;FX[x]=f*f*(3-2*f)}
+    for(let y=0;y<H;y++){const p=y*(ny-1)/H,j=Math.floor(p),f=p-j,fy=f*f*(3-2*f),r0=j*nx,r1=(j+1)*nx,ro=y*W;
+      for(let x=0;x<W;x++){const a=g[r0+X0[x]],b=g[r0+X1[x]],c=g[r1+X0[x]],d=g[r1+X1[x]],fx=FX[x];
+        out[ro+x]+=amp*((a+(b-a)*fx)*(1-fy)+(c+(d-c)*fx)*fy)}}
+    amp*=pers}
+  return out}
+/* the palette is written as the colour wanted on the screen; gysP divides out what the engine and the overlay do to the sky on the way (ambient .83 x .92, the warm
+   tint, the cool wash), so that the picture comes out as written */
+const gysP=(r,g,b)=>[Math.min(255,r/.638),Math.min(255,g/.633),Math.min(255,b/.546)];
+const GYS_SPEC=[ // far (bruise purple, low on the horizon), middle (slate), near (blue-black, heavy)
+  {seed:7311,cx:24,cy:7,oct:4,th:.50,sc:.40,alp:.80,core:gysP(66,50,86),rim:gysP(126,110,144),env:v=>.25+.75*gysSm(60,140,v)},
+  {seed:1907,cx:18,cy:6,oct:5,th:.44,sc:.44,alp:.92,core:gysP(52,60,76),rim:gysP(112,126,138),env:v=>.55+.45*gysSm(40,100,v)-.25*gysSm(135,170,v)},
+  {seed:4421,cx:14,cy:5,oct:5,th:.37,sc:.48,alp:.98,core:gysP(24,28,44),rim:gysP(90,106,122),env:v=>1-.5*gysSm(105,168,v)}];
+function gysBake(sp){
+  const n=gysNoise(sp.seed,sp.cx,sp.cy,sp.oct,.56),W=1024,H=256,d=new Float32Array(W*H),E=new Float32Array(H);
+  for(let y=0;y<H;y++)E[y]=sp.env(y);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const h=x>>1,a=n[y*512+h],b=n[y*512+((h+1)&511)],v=(x&1)?(a+b)*.5:a;d[y*W+x]=Math.min(1,Math.max(0,(v-sp.th)/sp.sc*E[y]))}
+  const out=new Uint32Array(W*H),c=sp.core,rc=sp.rim;
+  for(let y=4;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,dd=d[i];if(dd<.012)continue;
+    const a=Math.min(1,dd*1.7)*sp.alp,sh=1.28-.62*dd,rim=Math.min(1,Math.max(0,(dd-d[i-4*W])*2.8))*.85;
+    const cr=c[0]*sh,cg=c[1]*sh,cb=c[2]*sh,r=Math.min(255,cr+(rc[0]-cr)*rim),g=Math.min(255,cg+(rc[1]-cg)*rim),b=Math.min(255,cb+(rc[2]-cb)*rim);   // the lit edge is blended in, never added (nothing burns out)
+    out[i]=((a*255)<<24|((b|0)<<16)|((g|0)<<8)|(r|0))>>>0}
+  return out}
+const GYS_BASE=[gysP(34,40,58),gysP(40,48,64),gysP(60,72,86),gysP(92,108,102),gysP(126,142,124),gysP(130,146,128)],GYS_BV=[20,60,90,125,152,172];
+function gysBuild(){
+  if(GYS.ready)return;const N=1024*256;
+  GYS.L=GYS_SPEC.map(gysBake);
+  const br={r:new Float32Array(256),g:new Float32Array(256),b:new Float32Array(256)};   // the sky between the clouds: blue-black overhead, a sick green glow low down
+  for(let v=0;v<256;v++){let j=0;while(j<GYS_BV.length-2&&v>GYS_BV[j+1])j++;const f=Math.min(1,Math.max(0,(v-GYS_BV[j])/(GYS_BV[j+1]-GYS_BV[j])));
+    br.r[v]=GYS_BASE[j][0]+(GYS_BASE[j+1][0]-GYS_BASE[j][0])*f;br.g[v]=GYS_BASE[j][1]+(GYS_BASE[j+1][1]-GYS_BASE[j][1])*f;br.b[v]=GYS_BASE[j][2]+(GYS_BASE[j+1][2]-GYS_BASE[j][2])*f}
+  GYS.br=br;GYS.pan=new Uint8ClampedArray(N*4);GYS.back=new Uint8ClampedArray(N*4);GYS.pan32=new Uint32Array(GYS.pan.buffer);GYS.back32=new Uint32Array(GYS.back.buffer);
+  for(let v=0;v<256;v++){const c=0xFF000000|((br.b[v]|0)<<16)|((br.g[v]|0)<<8)|(br.r[v]|0);GYS.pan32.fill(c>>>0,v*1024,v*1024+1024)}
+  gysCycle(0);gysCompose(GYS.pan32,0,1024);GYS.back32.set(GYS.pan32);GYS.col=0;GYS.ready=true;self.GYS_PAN=GYS.pan}
+/* the layers' positions for one pass over the panorama: drift (each bank at its own speed), a slow billow up and down, and a shear */
+function gysCycle(t){
+  const C=GYS.cyc||(GYS.cyc={ox:[0,0,0],w:[new Int32Array(1024),new Int32Array(1024),new Int32Array(1024)],sh:[new Int32Array(256),new Int32Array(256),new Int32Array(256)]});
+  const spd=[8,5.5,2],amp=[3,5,8],sha=[4,7,11],TAU=6.2832;   // the engine slides the whole panorama round at 11 px/s; the banks lag behind it by different amounts, so the near bank (2) goes by fastest and the far one (8) slowest
+  for(let q=0;q<3;q++){C.ox[q]=Math.floor(t*spd[q]);const w=C.w[q],s=C.sh[q];
+    for(let x=0;x<1024;x++)w[x]=Math.round(amp[q]*Math.sin(t*(.05+.02*q)+x*TAU*(3+q)/1024+q));
+    for(let v=0;v<256;v++)s[v]=Math.round(sha[q]*Math.sin(t*.04*(q+1)+v*.055*(q+1)+q*2))}}
+function gysCompose(O,c0,c1){
+  const C=GYS.cyc,L0=GYS.L[0],L1=GYS.L[1],L2=GYS.L[2],BR=GYS.br.r,BG=GYS.br.g,BB=GYS.br.b,V0=GYS.V0,V1=GYS.V1,K=1/255,
+    o0=C.ox[0],o1=C.ox[1],o2=C.ox[2],S0=C.sh[0],S1=C.sh[1],S2=C.sh[2],W0=C.w[0],W1=C.w[1],W2=C.w[2];
+  for(let x=c0;x<c1;x++){const w0=W0[x],w1=W1[x],w2=W2[x];
+    for(let v=V0;v<=V1;v++){
+      let r=BR[v],g=BG[v],b=BB[v],p,a,k;
+      p=L0[(v-w0)*1024+((x-o0+S0[v])&1023)];a=p>>>24;if(a!==0){k=a*K;r+=((p&255)-r)*k;g+=(((p>>8)&255)-g)*k;b+=(((p>>16)&255)-b)*k}
+      p=L1[(v-w1)*1024+((x-o1+S1[v])&1023)];a=p>>>24;if(a!==0){k=a*K;r+=((p&255)-r)*k;g+=(((p>>8)&255)-g)*k;b+=(((p>>16)&255)-b)*k}
+      p=L2[(v-w2)*1024+((x-o2+S2[v])&1023)];a=p>>>24;if(a!==0){k=a*K;r+=((p&255)-r)*k;g+=(((p>>8)&255)-g)*k;b+=(((p>>16)&255)-b)*k}
+      O[v*1024+x]=(0xFF000000|((b|0)<<16)|((g|0)<<8)|(r|0))>>>0}}}
+/* one slice of the next panorama per frame (the number of columns follows how fast the machine is); when the last slice is done the buffers swap */
+function gysPanoStep(){
+  const t0=performance.now();
+  if(GYS.col===0)gysCycle(G.time);
+  const c1=Math.min(1024,GYS.col+GYS.cpf);gysCompose(GYS.back32,GYS.col,c1);GYS.col=c1;
+  if(c1>=1024){GYS.col=0;let o=GYS.pan;GYS.pan=GYS.back;GYS.back=o;o=GYS.pan32;GYS.pan32=GYS.back32;GYS.back32=o;self.GYS_PAN=GYS.pan}
+  const dt=performance.now()-t0;GYS.ms=GYS.ms*.9+dt*.1;
+  if(dt>1.8&&GYS.cpf>32)GYS.cpf-=16;else if(dt<.8&&GYS.cpf<256)GYS.cpf+=16}
+/* ---- lightning: the shape of the flash in time (0 to 1), the strike, the fork ---- */
+function gysPulse(ms){   // two quick flickers, about 230 ms in all
+  if(ms<0||ms>250)return 0;
+  if(GYS.reduced)return ms<200?Math.sin(Math.PI*ms/200)*.5:0;
+  const tri=(a,b,c,p)=>ms<a||ms>c?0:ms<b?(ms-a)/(b-a)*p:(c-ms)/(c-b)*p;
+  return Math.max(tri(0,25,75,.62),tri(105,130,230,1),ms>230?(250-ms)/20*.08:0)}
+function gysStrike(opt){
+  const t=G.time,o=opt||{},far=o.far!==undefined?o.far:Math.random(),C=G.C,LA=C.a+(typeof LKYAW==='number'?LKYAW:0);
+  const az=o.az!==undefined?o.az:(Math.random()<.7?LA+(Math.random()-.5)*2.1:Math.random()*Math.PI*2);
+  const fork=o.fork!==undefined?o.fork:Math.random()<.55,seed=(Math.random()*1e6)|0;
+  GYS.strike={t0:t,az,far,fork,seed,amp:(1-.35*far)*(GYS.reduced?.7:1),pts:null};GYS.strikes++;
+  const delay=o.delay!==undefined?o.delay:1+far*2;   // far strikes: later and quieter thunder
+  GYS.thunderQ.push({at:t+delay,vol:.2*(1-.55*far),far});
+  GYS.next=t+6+Math.random()*14}
+function gysFlash(){const s=GYS.strike;if(!s)return 0;const ms=GYS.hold!==null?GYS.hold:(G.time-s.t0)*1000;if(GYS.hold===null&&ms>300)GYS.strike=null;return gysPulse(ms)*s.amp}
+function gysFork(s,x,y0,y1){   // a jagged bolt with a few branches; the points are made once per strike
+  if(s.pts)return s.pts;let sd=s.seed||1;const r=()=>{sd=(sd*1664525+1013904223)>>>0;return sd/4294967296},segs=[];
+  const P=(x0,y,w,main,d)=>{let px=x0,py=y;const n=main?11:5;for(let i=0;i<n;i++){const nx=px+(r()-.5)*w*(main?1:1.4)+(main?0:d*3),ny=Math.min(py+(y1-y0)/(main?10:7)*(.7+r()*.6),y1);segs.push([px,py,nx,ny,main?1:.5]);px=nx;py=ny;if(py>=y1)break;if(main&&i>2&&i<8&&r()<.3)P(px,py,w*.6,false,r()<.5?-1:1)}};
+  P(x,y0,26,true,0);s.pts=segs;return segs}
+/* ---- sound: a rolling rumble with a slow start (nothing sudden), and the rain loop ---- */
+function gysRumble(vol){
+  GYS.sounds++;if(!AC||G.mute||!SNDOPT.amb||!NB||!MASTER)return;vol*=SNDOPT.amb*(typeof SFXM==='number'?SFXM:1)*4;const t0=AC.currentTime;   // x4: low-passed noise is quiet
+  const layer=(delay,f0,f1,a,att,dur)=>{const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain(),t=t0+delay;s.buffer=NB;s.loop=true;f.type='lowpass';f.Q.value=.9;f.frequency.setValueAtTime(f0,t);f.frequency.exponentialRampToValueAtTime(f1,t+dur);
+    g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol*a,t+att);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(f);f.connect(g);g.connect(MASTER);s.start(t,Math.random()*.9);s.stop(t+dur+.1)};
+  layer(0,260,60,1,.45,3.2);layer(.5+Math.random()*.3,200,45,.8,.6,3.6);layer(1.3+Math.random()*.5,150,40,.55,.7,3.4);
+  const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.setValueAtTime(58,t0);o.frequency.exponentialRampToValueAtTime(32,t0+3.4);g.gain.setValueAtTime(.0001,t0);g.gain.linearRampToValueAtTime(vol*.12,t0+.7);g.gain.exponentialRampToValueAtTime(.0001,t0+3.4);o.connect(g);g.connect(MASTER);o.start(t0);o.stop(t0+3.5)}
+function gysRainSound(rain,dt){
+  const want=gysOn()&&!G.mute&&SNDOPT.amb&&AC&&MASTER&&typeof SMP!=='undefined'&&SMP.rain_loop?rain*.1*SNDOPT.amb:0;
+  if(!GYS.rainSrc){if(want<=.001)return;const s=AC.createBufferSource(),g=AC.createGain();s.buffer=SMP.rain_loop;s.loop=true;g.gain.value=0;s.connect(g);g.connect(MASTER);s.start();GYS.rainSrc=s;GYS.rainG=g}
+  const g=GYS.rainG.gain,cur=g.value,nv=cur+(want-cur)*Math.min(1,dt/1.5);g.value=nv;
+  if(want<=.001&&nv<.002){try{GYS.rainSrc.stop()}catch(e){}try{GYS.rainSrc.disconnect();GYS.rainG.disconnect()}catch(e){}GYS.rainSrc=GYS.rainG=null}}
+/* ---- the update: strikes, thunder, the rain cycle, the rain sound ---- */
+{const _u=update;update=function(dt){
+  try{
+    if(gysOn()){
+      const t=G.time;
+      if(!GYS.next)GYS.next=t+5+Math.random()*8;
+      if(t>GYS.next&&!GYS.strike)gysStrike();
+      for(let i=GYS.thunderQ.length-1;i>=0;i--)if(t>=GYS.thunderQ[i].at){const q=GYS.thunderQ.splice(i,1)[0];GYS.thunders++;gysRumble(q.vol)}
+      GYS.pt+=Math.min(dt||0,.2);
+      const c=GYS.pt%GYS.CYC,a=c-GYS.CAL;
+      GYS.rain=GYS.force!==null?(GYS.force>=0?1:0):gysSm(0,20,a)*(1-gysSm(GYS.RAINT-20,GYS.RAINT,a));
+      if(GYS.rain<.01)GYS.rain=0;
+    }else{GYS.rain=0;GYS.strike=null;GYS.thunderQ.length=0;GYS.next=0;GYS.f=0}
+    gysRainSound(GYS.rain,Math.min(dt||0,.2));
+  }catch(e){console.error('GYS',e)}
+  return _u.apply(this,arguments)}}
+if(typeof WIND_AMT!=='undefined'&&!WIND_AMT[GYS.ID])WIND_AMT[GYS.ID]=.55;   // a light wind
+/* ---- the colour of the air: a greenish-grey dusk instead of the warm mist ---- */
+{const _w=weatherNow;weatherNow=function(){const w=_w.apply(this,arguments);
+  if(LEVEL===GYS.ID&&!GYS.off&&w&&w.id==='fog')return Object.assign({},w,{n:'Stormclouds',fog:.022,haze:.34,mix:.44,col:[112,130,118],text:'Heavy stormclouds are piling over the graveyard. The air is green and still, and thunder walks about somewhere beyond the yews.'});
+  return w}}
+/* ---- the sky, the ground and the lamps: the next slice of the panorama; in a flash the light is raised for that frame and put back after ---- */
+{const _r=render3D;render3D=function(){
+  if(!gysOn())return _r.apply(this,arguments);
+  if(!GYS.ready)try{gysBuild()}catch(e){console.error('GYS build',e)}
+  const f=gysFlash();GYS.f=f;
+  if(GYS.ready)gysPanoStep();
+  const a0=G.amb;
+  G.amb=(a0||0)*.9+f*.4;
+  if(f>0)for(const L of LIGHTS){if(L.kI0===undefined)L.kI0=L.kI||1;L.kI=L.kI0*(1+.9*f)}   // the crypt doors and the ghost-lights glow in the flash
+  else for(const L of LIGHTS)if(L.kI0!==undefined){L.kI=L.kI0;L.kI0=undefined}
+  try{return _r.apply(this,arguments)}finally{G.amb=a0}}}
+/* ---- the picture: cool wash, brow, sheet glow, fork, rain, leaves (all inside the 3D view, over the sprites) ---- */
+{const _d=drawWorld;drawWorld=function(){
+  const r=_d.apply(this,arguments);
+  if(gysOn())try{gysOverlay()}catch(e){console.error('GYS overlay',e)}
+  return r}}
+function gysOverlay(){
+  const t=G.time,f=GYS.f||0,hh=typeof HH==='number'?HH:105,s=GYS.strike;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,420,210);ctx.clip();
+  ctx.globalCompositeOperation='multiply';ctx.fillStyle='rgb(214,226,218)';ctx.fillRect(0,0,420,210);   // cooler, greener, a little darker
+  let g;
+  ctx.globalCompositeOperation='lighter';
+  if(f>.01){   // the clouds light up from inside, and a cold wash lies over the yard
+    const C=G.C,LA=C.a+(typeof LKYAW==='number'?LKYAW:0);
+    g=ctx.createLinearGradient(0,0,0,210);g.addColorStop(0,`rgba(132,152,210,${.26*f})`);g.addColorStop(.55,`rgba(104,128,176,${.12*f})`);g.addColorStop(1,`rgba(84,104,144,${.06*f})`);ctx.fillStyle=g;ctx.fillRect(0,0,420,210);
+    if(s){const d=((s.az-LA)%(Math.PI*2)+Math.PI*3)%(Math.PI*2)-Math.PI,inView=Math.abs(d)<1.3,bx=210*(1+Math.tan(Math.max(-1.3,Math.min(1.3,d)))/PL);
+      const gx=Math.max(-60,Math.min(480,bx)),rr=130+80*(1-s.far),rg=ctx.createRadialGradient(gx,hh*.38,4,gx,hh*.38,rr);rg.addColorStop(0,`rgba(190,205,255,${.5*f})`);rg.addColorStop(.5,`rgba(130,150,215,${.2*f})`);rg.addColorStop(1,'rgba(90,110,170,0)');ctx.fillStyle=rg;ctx.fillRect(0,0,420,hh+20);
+      if(s.fork&&inView){const segs=gysFork(s,bx,0,hh-14),ph=GYS.hold!==null?GYS.hold:(t-s.t0)*1000,vis=ph<85||(ph>105&&ph<235)?1:.35;
+        ctx.lineCap='round';ctx.lineJoin='round';
+        for(const [w,col] of [[6,`rgba(120,140,255,${.14*vis*f})`],[3,`rgba(190,205,255,${.4*vis*f})`],[1.2,`rgba(246,248,255,${.95*vis})`]])
+          for(const main of [1,.5]){ctx.strokeStyle=col;ctx.lineWidth=w*main;ctx.beginPath();for(const sg of segs)if(sg[4]===main){ctx.moveTo(sg[0],sg[1]);ctx.lineTo(sg[2],sg[3])}ctx.stroke()}}}
+  }
+  ctx.globalCompositeOperation='source-over';
+  if(GYS.rain>0)gysRain(GYS.rain,t);
+  gysLeaves(t);
+  ctx.restore()}
+function gysRain(a,t){   // thin slanted streaks, at most 76 of them, no splashes
+  const n=Math.round((GYS.reduced?40:76)*a);if(n<1)return;
+  ctx.lineWidth=.8;
+  for(let b=0;b<2;b++){ctx.strokeStyle=b?'rgba(176,192,206,.15)':'rgba(196,210,222,.24)';ctx.beginPath();
+    for(let i=b;i<n;i+=2){const sp=300+hash2(i,1,81)*180,ln=7+hash2(i,2,82)*6,ph=hash2(i,4,84)*260,pos=ph+t*sp,cyc=Math.floor(pos/260),y=(pos%260)-25,x=hash2(i,cyc,85)*480-30-y*.22;ctx.moveTo(x,y);ctx.lineTo(x-ln*.22,y+ln)}
+    ctx.stroke()}}
+function gysLeaves(t){   // a few dry leaves blown across the view now and then (each is on screen for about half of its cycle)
+  const n=GYS.reduced?2:6;
+  for(let i=0;i<n;i++){
+    const per=9+hash2(i,7,91)*9,u=((t+hash2(i,8,92)*per)%per)/per,life=.5;if(u>life)continue;const k=u/life,
+      x=440-k*500+Math.sin(k*9+i)*10,y=100+hash2(i,9,93)*90+Math.sin(k*13+i*2)*14+k*18;
+    ctx.save();ctx.translate(x,y);ctx.rotate(k*14+i);ctx.fillStyle=['#74603a','#8a5a2c','#66683a'][i%3];ctx.globalAlpha=.75*Math.min(1,k*8,(1-k)*8);ctx.fillRect(-2,-1,4,2.2);ctx.restore()}}
+
+/* ---- src/desert/stall_shop.js ---- */
+/* ==========================================================================
+   STALL SHOPS (prefix stl / STL). In a town a market stall is mostly scenery, so pressing on one used to do nothing. Now pressing a stall (a click on its picture,
+   the hover tip over it, or the use key and the pad button while facing it) goes straight to the SHOP PAGE of the nearest shopkeeper, the person who stands at or
+   behind it (within six steps on foot, the one directly behind it first), the same page that the Trade button of that person opens. A stall with nobody to mind it
+   says a short line about itself. Anything that already does something keeps it: people, chests, doors, and stalls that are shops of their own.
+   A person is a shopkeeper when the first page of their talk has a trade button that opens a shop. That is tried quietly (the shop window is held back and
+   nothing is spent), and the answer is kept for the level. The painted stalls behind the keepers of the Deeper Hollow (hgd_stalls.js) are pictures with no decor
+   of their own, so they get a click area that leads to their keeper's shop. tools/stall_shop/BINDINGS.md lists every binding. Loads late, just before jump_ready.js.
+   ========================================================================== */
+const STL={cap:null,src:null,probe:new Map(),list:null,listN:-1,hgSrc:null,hg:null,hgKeep:null,hv:{d:null,t0:0,txt:null,at:0},
+  towns:new Set([3,13,32,33,44,290,304,305,311,364,430,470,475,481,482,483,484,490,496,520]),reach:6,
+  flav:{
+    stall:['The stall is empty. Nobody is minding it.','Nobody is minding this stall. The boards are bare and a little dusty.','The stall is shut for now. A folded cloth and an empty crate are all that is left.'],
+    tent:['The tent flap is tied shut. Nobody is inside.','Nobody is home. The tent smells of damp canvas and old rope.'],
+    cart:['The cart is empty. Whoever owns it has wandered off.','Nothing on the cart but loose straw and a bent nail.'],
+    counter:['The counter is bare. Nobody is serving.','Nobody is behind the counter.'],
+    barrow:['The barrow is empty. Nobody is selling anything from it.'],
+    wagon:['The wagon is empty. Nobody is selling anything from it.']}};
+const STL_STRONG=/stall|market|booth|awning|kiosk|canopy|pavilion/i,STL_WEAK=/(^|_)(cart|tent|barrow|wagon|counter)/i,STL_NOT=/cross|fountain|pump|statue|sign|bench|well|banner|stallion/i;
+const STL_OPT=/^(trade|browse|buy|shop)\b|\b(wares|goods|for sale)\b/i,STL_OPT_NO=/\b(room|bed|sleep|rest|stay|lodg)/i;
+/* the shop window is held back while a shopkeeper is being tried out */
+{const _os=openShop;openShop=function(d,stock,name){if(STL.cap){STL.cap.push([d,stock,name]);return}return _os.apply(this,arguments)}}
+/* what kind of stall a piece of decor is ('' if none). A stall by name counts anywhere; a cart, tent, barrow, wagon or counter counts in a town, or anywhere a person stands close by */
+function stlKind(d){
+  if(d._stlK!==undefined)return d._stlK;
+  let r='';const k=String(d.k||'');
+  if(k&&!STL_NOT.test(k)){
+    if(STL_STRONG.test(k))r=/tent|canopy|pavilion/i.test(k)?'tent':'stall';
+    else{const m=STL_WEAK.exec(k);
+      if(m){r=m[2].toLowerCase();
+        if(!STL.towns.has(LEVEL)&&!(G.decor||[]).some(o=>o.npc&&NPCS[o.npc]&&Math.abs(o.x-d.x)<=3&&Math.abs(o.y-d.y)<=3))r=''}}}
+  d._stlK=r;return r}
+/* a stall that does nothing of its own: not a person, chest, shop, door or lever */
+function stlIsStall(d){
+  if(!d||d.npc||d.loot||d.shop||d.contents||d.enter||d.door||d.exitDoor||d.found||d.k==='lever'||d.pfCut||(d.sc!==undefined&&d.sc<.05))return false;
+  return !!(d._stlPseudo||stlKind(d))}
+function stlStalls(){
+  if(STL.list&&STL.src===G.decor&&STL.listN===G.decor.length)return STL.list;
+  STL.src=G.decor;STL.listN=G.decor.length;STL.probe.clear();STL.list=G.decor.filter(stlIsStall);return STL.list}
+/* the people within `max` steps on foot of a stall, nearest first (walking over open floor; solid things do not stop the count, a wall or a door does) */
+function stlNear(d,max,side){
+  const W=MW,sx=d.x|0,sy=d.y|0,by=new Map();
+  for(const o of G.decor){if(!o.npc||o.found||!NPCS[o.npc]||(o.sc!==undefined&&o.sc<.05))continue;const c=Math.round(o.y)*W+Math.round(o.x),l=by.get(c);if(l)l.push(o);else by.set(c,[o])}
+  const seen=new Set([sy*W+sx]),out=[];let cur=[[sx,sy]];
+  for(let step=0;step<=max&&cur.length;step++){
+    const nxt=[];
+    for(const [x,y] of cur){
+      const l=by.get(y*W+x);if(l)for(const o of l)out.push({o,dist:step});
+      if(step===max)continue;
+      for(const [dx,dy] of DIRS){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=MH)continue;const c=ny*W+nx;if(seen.has(c)||G.grid[ny][nx]!==0)continue;seen.add(c);nxt.push([nx,ny])}}
+    cur=nxt}
+  // ties: the one standing behind the stall (on the far side from the party) first, then beside it
+  const vx=side?Math.sign(sx-G.P.x):0,vy=side?Math.sign(sy-G.P.y):0;
+  for(const c of out){const dx=Math.round(c.o.x)-sx,dy=Math.round(c.o.y)-sy;c.beh=dx*vx+dy*vy;c.e=dx*dx+dy*dy}
+  return out.sort((a,b)=>a.dist-b.dist||b.beh-a.beh||a.e-b.e)}
+/* the trade button of a first page of talk, or -1 */
+function stlPick(node){return node&&node.opts?node.opts.findIndex(o=>o&&typeof o[0]==='string'&&typeof o[1]==='function'&&STL_OPT.test(o[0])&&!STL_OPT_NO.test(o[0])):-1}
+/* try a person out on the quiet: does the trade button open a shop, and what is it called? ({title}, or null) */
+function stlTry(o){
+  const n=NPCS[o.npc];if(!n||typeof n.root!=='function')return null;
+  const prevTalk=G.talk,prevCap=STL.cap,g0=G.gold,cap=[];let res=null;
+  STL.cap=cap;
+  try{
+    const node=n.root(o);
+    if(cap.length)res={title:cap[0][2]||''};
+    else{const i=stlPick(node);
+      if(i>=0){G.talk={d:o,n,node,t:G.time,btns:[]};const r=node.opts[i][1]();if(cap.length&&!r)res={title:cap[0][2]||node.opts[i][0]}}}
+  }catch(e){console.warn('stl try',e)}
+  finally{STL.cap=prevCap;G.talk=prevTalk;if(G.gold!==g0){G.gold=g0;res=null}}
+  return res}
+function stlShopOf(o){
+  if(STL.src!==G.decor){STL.src=G.decor;STL.probe.clear();STL.list=null}
+  const c=STL.probe.get(o.npc);if(c&&(c.r||G.time-c.t<30))return c.r;
+  const r=stlTry(o);STL.probe.set(o.npc,{r,t:G.time});return r}
+/* open the shop page of a person, exactly as their Trade button does (their talk is not shown first) */
+function stlOpen(o){
+  const n=NPCS[o.npc];if(!n||typeof n.root!=='function')return false;
+  const node=n.root(o);if(G.loot)return true; // a person who opens the shop at once
+  const i=stlPick(node);if(i<0)return false;
+  const T={d:o,n,node,t:G.time,btns:[]};G.talk=T;G.hold=null;G.queued=null;
+  const r=node.opts[i][1]();
+  if(G.talk===T){if(r){T.node=r;T.t=G.time}else G.talk=null}
+  return true}
+/* the shopkeeper a stall leads to: {o, title, dist} or null */
+function stlBind(d,side){
+  if(d._stlNpc){const s=stlShopOf(d._stlNpc);if(s)return {o:d._stlNpc,title:s.title,dist:0}}
+  for(const c of stlNear(d,STL.reach,side)){const s=stlShopOf(c.o);if(s)return {o:c.o,title:s.title,dist:c.dist}}
+  return null}
+function stlLine(d){const a=STL.flav[stlKind(d)]||STL.flav.stall;return a[Math.floor(hash2(d.x|0,d.y|0,23)*a.length)%a.length]}
+function stlBusy(){return G.state!=='play'||G.talk||G.loot||G.cut||G.menu||G.map||(G.inv&&G.inv.open)}
+/* press on a stall: the shop page of the keeper, or a line about the stall */
+function stlPress(d){
+  if(stlBusy())return false;
+  let b=null;try{b=stlBind(d,true)}catch(e){console.warn('stl bind',e)}
+  if(b){const t=(b.title||'').replace(/^The /,'the ');msg(t?'You step over to '+t+'.':'You step over to the stall.','#e8dcc0');
+    if(stlOpen(b.o))return true}
+  msg(stlLine(d),'#d8c8a0');return true}
+/* the stall the party is facing, one or two steps ahead (or underfoot) */
+function stlAhead(){
+  const f=DIRS[G.P.f],L=stlStalls();
+  for(const k of [1,2,0]){
+    const x=G.P.x+f[0]*k,y=G.P.y+f[1]*k,d=L.find(q=>q.x===x&&q.y===y&&stlIsStall(q));
+    if(d)return d;
+    if(k>0&&cellBlocked(x,y))return null}
+  return null}
+/* the use key and the pad button are the attack button: with nothing to hit and nobody to talk to, a stall in front is used */
+{const _ha=heroAttack;heroAttack=function(i){
+  try{
+    if(!stlBusy()&&!(typeof hostileNear==='function'&&hostileNear())){
+      const h=G.heroes[i],w=h&&heroWeapon(h),range=(w&&w.ranged)||1;
+      if(!frontEnemy(range)){
+        const d0=DIRS[G.P.f];let person=false;
+        for(const k of [1,0,2]){const x=G.P.x+d0[0]*k,y=G.P.y+d0[1]*k;if(G.decor.some(d=>d.npc&&d.walk&&!d.found&&d.x===x&&d.y===y)){person=true;break}}
+        if(!person){const s=stlAhead();if(s){stlPress(s);return false}}}}
+  }catch(e){console.error('stl use',e)}
+  return _ha.apply(this,arguments)}}
+/* a click on a stall: the sprite hits that the renderer gathers (see the line after the item hits in the sprite loop) */
+function stlHitRef(s){const d=s.decor;if(d)return stlIsStall(d)?d:null;return s.stlRef||null}
+function stlHitAt(x,y){
+  for(const h of G.hits.slice().sort((a,b)=>a.ty-b.ty)){
+    if(h.type!=='decor'&&h.type!=='item')continue;
+    if(x<h.x0||x>h.x1||y<h.y0||y>h.y1)continue;
+    return h.stl?h:null}
+  return null}
+{const _vt=viewTap;viewTap=function(x,y){
+  try{if(!stlBusy()){const h=stlHitAt(x,y);if(h){if(h.ty>2.6){msg('Too far away. Step closer.','#d09a80');return}stlPress(h.ref);return}}}catch(e){console.error('stl tap',e)}
+  return _vt.apply(this,arguments)}}
+/* the painted stalls behind the keepers of the Deeper Hollow: no decor of their own, so each picture is given its keeper's click area */
+{const _sl=spriteList;spriteList=function(){
+  const L=_sl.apply(this,arguments);
+  try{if(G.state==='play'&&G.decor&&typeof hgdstKind==='function'){
+    const ims=new Map();for(const k of ['general','arms','armour','magic','trader']){const im=IMG['art_hgstall_'+k];if(im)ims.set(im,k)}
+    if(ims.size){
+      if(STL.hgSrc!==G.decor){STL.hgSrc=G.decor;STL.hg=new Map();STL.hgKeep=G.decor.filter(d=>d.npc&&hgdstKind(d.npc)&&hgdstKind(d.npc)!=='church'&&hgdstKind(d.npc)!=='inn').map(d=>({d,k:hgdstKind(d.npc)}))}
+      for(const s of L){
+        if(s.decor||!s.img)continue;const k=ims.get(s.img);if(!k)continue;
+        let best=null,bd=1.6;for(const q of STL.hgKeep){if(q.k!==k)continue;const dx=q.d.x+.5-s.x,dy=q.d.y+.5-s.y,e=dx*dx+dy*dy;if(e<bd){bd=e;best=q}}
+        if(!best)continue;
+        let p=STL.hg.get(best.d);if(!p){p={k:'hgstall_'+k,x:best.d.x,y:best.d.y,_stlPseudo:1,_stlK:'stall',_stlNpc:best.d};STL.hg.set(best.d,p)}
+        s.stlRef=p}}}}catch(e){console.error('stl hg',e)}
+  return L}}
+/* a small tip when the mouse rests on a stall (the same look as the button tips of hovertips.js) */
+function stlTip(){
+  const S=typeof STB!=='undefined'?STB:null,hv=STL.hv;
+  if(!S||S.pt!=='mouse'||S.mx<0||S.mx>=420||S.my>=210||stlBusy()||(typeof TP!=='undefined'&&TP)||topBtn(S.mx,S.my)){hv.d=null;return}
+  const h=stlHitAt(S.mx,S.my);if(!h||h.ty>2.6){hv.d=null;return}
+  const now=performance.now();if(hv.d!==h.ref){hv.d=h.ref;hv.t0=now;hv.txt=null;return}
+  if(now-hv.t0<380)return;
+  if(hv.txt===null||now-hv.at>2500){let b=null;try{b=stlBind(h.ref,true)}catch(e){}hv.txt=b?'Trade at '+(b.title||'the stall'):'Market stall';hv.at=now}
+  const tip=[hv.txt,'Click'];
+  ctx.save();ctx.setTransform(ctx.canvas.width/DW,0,0,ctx.canvas.height/DH,0,0);
+  ctx.font='8px '+FUI;const lw=ctx.measureText(tip[0]).width;ctx.font='bold 7.5px '+FUI;const kw=ctx.measureText(tip[1]).width+8;
+  const w=lw+kw+18,ht=16;let x=S.mx+10,y=S.my+14;if(x+w>DW-4)x=DW-4-w;if(y+ht>DH-4)y=S.my-ht-8;if(x<4)x=4;
+  ctx.globalAlpha=.97;rrect(ctx,x,y,w,ht,4);ctx.fillStyle='rgba(14,10,6,.94)';ctx.fill();ctx.lineWidth=1;ctx.strokeStyle='#8a7448';ctx.stroke();
+  ctx.font='8px '+FUI;ctx.fillStyle='#e8dcb4';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(tip[0],x+6,y+ht/2+.5);
+  const kx=x+10+lw;rrect(ctx,kx,y+3,kw,ht-6,3);ctx.fillStyle='rgba(70,52,24,.98)';ctx.fill();ctx.lineWidth=.8;ctx.strokeStyle='#c8a860';ctx.stroke();
+  ctx.font='bold 7.5px '+FUI;ctx.fillStyle='#ffe9a0';ctx.textAlign='center';ctx.fillText(tip[1],kx+kw/2,y+ht/2+.5);
+  ctx.restore()}
+{const _cp=crtPass;crtPass=function(){_cp.apply(this,arguments);try{stlTip()}catch(e){}}}
+/* for the report (tools/stall_shop/BINDINGS.md): every stall of this level and the shop it leads to */
+function stlTable(){
+  const rows=[];
+  for(const d of stlStalls()){const b=stlBind(d,false);rows.push({k:d.k,kind:stlKind(d),x:d.x,y:d.y,npc:b?b.o.npc:null,who:b?String((NPCS[b.o.npc]||{}).name||''):null,title:b?b.title:null,dist:b?b.dist:null,at:b?[b.o.x,b.o.y]:null})}
+  if(typeof hgdstKind==='function')for(const d of G.decor){const k=d.npc&&hgdstKind(d.npc);if(!k||k==='church'||k==='inn')continue;const s=stlShopOf(d);rows.push({k:'hgstall_'+k,kind:'painted stall',x:d.x,y:d.y,npc:d.npc,who:String((NPCS[d.npc]||{}).name||''),title:s?s.title:null,dist:0,at:[d.x,d.y]})}
+  return rows}
+
+/* ---- src/desert/crows.js ---- */
+/* ==========================================================================
+   FLYING CROWS. The Crow Swarm and the Carrion Crow of Blackbriar Wood (wwcrows, wwcrow) and the Carrion Raven of the graveyard and the Pale Catacombs
+   (gyraven) are all creatures with fly:true, but their old pictures were crows STANDING with their feet on nothing. They now use painted
+   crows seen from the FRONT with their wings spread (assets/crow, made with Canva and cut by tools/crows/ingest_crows.py):
+     crow_0..2     one crow, wings up, wings level, wings down        (the Carrion Raven, and the old single crow)
+     flock_0..2    five to seven crows at different sizes, three wing poses     (the Crow Swarm)
+     carrion_0..3  a bigger, scruffier crow: wings up, level, down, and a dive with the wings swept wide (the Carrion Crow; the dive shows while it lunges)
+   The engine draws one picture per creature, so the flap is done here: every frame of a set has the same size and the body sits in the
+   same place, and the sprite list below swaps the picture (up, level, down, level) as time goes by, each crow a little out of step.
+   A soft shadow is laid on the ground under each one (the engine draws none for flyers), so a crow never seems to hang from nothing.
+   The creature kinds (wwcrows, wwcrow, gyraven) and their numbers are unchanged, so old saves still work; only the picture and the way it
+   hovers are new. Until the pictures have loaded the old ones are used. Notes: tools/crows/NOTES.md.
+   ========================================================================== */
+const CROW={on:false,files:{crow:3,flock:3,carrion:4},got:{},rate:{crow:9,flock:7,carrion:7}};
+/* span: width of the picture in squares (one square is about a person); body: where the body centre sits in the picture, from the top (0..1);
+   rise: how high the BODY floats above the ground, in squares (about shoulder height is .75); */
+const CROW_KIND={
+  wwcrows:{set:'flock',span:1.55,body:.5,rise:.62,sh:.95},
+  wwcrow:{set:'carrion',span:1.4,body:.5,rise:.66,sh:.8},
+  gyraven:{set:'crow',span:.8,body:.5,rise:.66,sh:.7}};
+function crowLoad(){
+  if(CROW._started)return;CROW._started=true;
+  const ver=typeof VERSION!=='undefined'?VERSION:'';
+  for(const set in CROW.files){
+    let left=CROW.files[set];const imgs=[];
+    for(let k=0;k<CROW.files[set];k++){
+      const i=new Image();
+      i.onload=()=>{imgs[k]=i;if(--left===0){CROW.got[set]=imgs;try{crowInstall()}catch(e){console.error(e)}}};
+      i.onerror=()=>{if(--left===0&&imgs.filter(Boolean).length>=3){CROW.got[set]=imgs;try{crowInstall()}catch(e){console.error(e)}}};
+      i.src='assets/crow/'+set+'_'+k+'.webp?v='+ver}}
+}
+/* once a set has loaded, the creatures that use it get its first picture as their base picture and their new size and height */
+function crowInstall(){
+  let any=false;
+  for(const t in CROW_KIND){
+    const K=CROW_KIND[t],fr=CROW.got[K.set],def=ENEMY_DEF[t];
+    if(!fr||!def||!fr[0])continue;
+    const key='crw_'+K.set+'0';IMG[key]=fr[0];
+    const h=K.span*fr[0].height/fr[0].width,ft=Math.max(.02,K.rise-(1-K.body)*h);
+    def.img=key;def.w=+K.span.toFixed(3);def.floatH=+ft.toFixed(3);def.fly=true;
+    K.h=h;K.live=true;any=true;
+    if(typeof HUGE_FOES!=='undefined'&&!HUGE_FOES.includes(t))HUGE_FOES.push(t); // sized by hand here: the fit-to-window shrink is not applied
+    if(typeof fitCache!=='undefined')fitCache.clear()}
+  if(any)CROW.on=true;
+}
+/* a soft dark oval, painted once: the shadow on the ground under a crow */
+function crowShadow(){
+  if(IMG.crw_shadow)return IMG.crw_shadow;
+  const c=document.createElement('canvas');c.width=128;c.height=32;const x=c.getContext('2d');
+  const g=x.createRadialGradient(64,16,2,64,16,64);g.addColorStop(0,'rgba(0,0,0,.62)');g.addColorStop(.55,'rgba(0,0,0,.34)');g.addColorStop(1,'rgba(0,0,0,0)');
+  x.save();x.translate(0,16);x.scale(1,.25);x.translate(0,-16);x.fillStyle=g;x.fillRect(0,-48,128,128);x.restore();
+  return IMG.crw_shadow=c;
+}
+/* the wing beat: up, level, down, level; the dive picture while it lunges */
+const CROW_BEAT=[0,1,2,1];
+function crowFrame(t,e){
+  const K=CROW_KIND[t];if(!K||!K.live)return null;const fr=CROW.got[K.set];if(!fr)return null;
+  if(fr[3]&&e.lunge>.2&&e.hp>0)return fr[3];
+  if(e.hp<=0)return fr[2]||fr[0];                       // a falling crow has its wings folded down
+  const ph=(G.time*CROW.rate[K.set]+(e.seed||0)*7.3)%4;return fr[CROW_BEAT[ph|0]]||fr[0];
+}
+{const _sl=spriteList;spriteList=function(){
+  const L=_sl.apply(this,arguments);
+  if(!CROW.on)return L;
+  try{
+    const sh=[];
+    for(const s of L){
+      const e=s.e;if(!e)continue;const K=CROW_KIND[e.t];if(!K||!K.live)continue;
+      const im=crowFrame(e.t,e);if(im)s.img=im;
+      if(e.hp>0){const so=crowShadow();sh.push({x:s.x,y:s.y,img:so,w:K.span*K.sh*(s.w/(ENEMY_DEF[e.t].w||1)),bob:0,drop:.5,fade:s.fade,crowShadow:1})}
+    }
+    if(sh.length)L.unshift(...sh);                      // first in the list: at the same depth the shadow is painted before its crow
+  }catch(err){}
+  return L}}
+crowLoad();
 
 /* ---- src/desert/jump_ready.js ---- */
 /* ==========================================================================

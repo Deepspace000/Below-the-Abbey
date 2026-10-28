@@ -53,3 +53,16 @@ Tools: tools/polish/w3_all.py (one browser session: audit of 477, save tests, ab
 - The pale flat fish of (19,17) was not found in the fish list (all seven species are painted); the old screenshot object may be a sea creature from another module.
 - No new paintings (no Gemini session); everything reuses existing front-on art.
 - The arch and planks at the three departure docks are still engine geometry and look alike; the lakes differ by boat, beacon, light, haze and landing props.
+
+# Round 4 (hgd_polish_e4.js, ORDER right after hgd_polish_e3.js; small edit in hgd_polish_e.js: big fish hidden within 2.6 squares)
+
+Tools: tools/polish/w4_daemon.py (one persistent browser on port 8323, queue in w4_q), w4lib.py, w4ev.py (run a js file), w4shot.py (shot at x y f), w4_audit.js (set piece distances, titles, quest counting, run gaps), shots in tools/polish/w4_shots/.
+
+## What changed, issue by issue
+1. Creatures: every creature (the warden's core excepted) is at least 6 squares from every set piece, at least 8 when a straight open line joins them, at least 3 from chests and stairs, 2 from signs. 59 moved. Audit: 0 within 6, 0 on any approach square (the four squares straight out from each set piece).
+2. Shell Chests (wq4): the quest counted a moved chest twice (quests2 wrote "x,y", e3 wrote the old position). Now the goal counts distinct chests through a map position->original position (kept in the save as flags.hgdwMoved so any level can count), lootFor folds the position key onto the original one, reset folds old saves. Tested: opening all 12 in order gives 1..12, the 7 moved chests alone give 1..7, an old save with both keys of one chest counts 1.
+3. Writing: the real cause of the blank "Note": the playing copy G.decor loses the label, so the sign was lettered with no text at setupLights; and the level copy was lettered before e3 gave it a label, so it carried the cut sentence. hgw4Relabel re-letters on reset and setupLights. 39 notes have a hand written title of 1 to 4 words in HGW4_TITLES (e.g. Stairs 46 West, Hest's Slate, Ferry Ticket), none cut, none "Note", none repeated. Standing signs are raised to a true height of at least .62.
+4. Docks: the dock arch is an engine wall tile; each of the six docks now gets its own tile (own char and gid, made after the build): lake 1 round arch with amber sky and a lamp beacon, lake 2 pointed arch, teal, shell statue, lake 3 square lintel, violet, crystal pillar; far docks show the next lake's beacon and one lamp with a rope; departure docks show the lake's boat. Boats at anchor are lighter, smaller and lifted.
+5. Proportions: props within 3.2 squares of a set piece are capped at .55 of its height (barrels, kegs, crates, nets, pots, buckets); anything small standing on the four approach squares is shrunk to .28 and pushed against the wall (blocking ones become walk through); net racks capped at .55.
+6. Variety: candelabra, crystal clusters, barrels, lamps rotate through three or four variants, never the same twice inside one set piece.
+7. Landmarks: every straight run of 8 or more squares gets a lit tall landmark on the sight line (centred, not beside it) wherever there would be more than 6 squares without one (65 added).

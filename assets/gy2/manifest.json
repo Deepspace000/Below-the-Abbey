@@ -1,0 +1,12 @@
+{
+ "f_gothic": {
+  "file": "f_gothic.webp",
+  "w": 256,
+  "h": 374
+ },
+ "f_classical": {
+  "file": "f_classical.webp",
+  "w": 372,
+  "h": 356
+ }
+}

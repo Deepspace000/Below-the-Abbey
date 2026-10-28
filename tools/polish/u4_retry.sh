@@ -1,0 +1,3 @@
+#!/bin/bash
+# retry a playwright script when the page crashes under memory pressure: u4_retry.sh script args...
+for i in 1 2 3 4; do out=$(python "$@" 2>&1); if echo "$out" | grep -q "crashed"; then sleep 8; else echo "$out" | tail -8 | cut -c1-220; exit 0; fi; done; echo "$out" | tail -2

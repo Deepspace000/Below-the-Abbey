@@ -12,7 +12,7 @@ def boot(p, w=960, h=640):
     errs = []
     pg.on('pageerror', lambda e: errs.append('PAGE ' + str(e) + ' ' + str(getattr(e,'stack','') or '')[:400]))
     pg.on('console', lambda m: errs.append('CON ' + m.text) if m.type == 'error' else None)
-    pg.goto(URL, wait_until='domcontentloaded', timeout=90000)
-    pg.wait_for_function("()=>typeof G!=='undefined'&&G.state==='play'&&typeof LEVEL!=='undefined'", timeout=120000)
+    pg.goto(URL, wait_until='domcontentloaded', timeout=240000)
+    pg.wait_for_function("()=>typeof G!=='undefined'&&G.state==='play'&&typeof LEVEL!=='undefined'", timeout=300000)
     pg.wait_for_timeout(2000)
     return b, pg, errs

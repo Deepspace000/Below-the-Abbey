@@ -20,3 +20,14 @@ Audit scripts: c2_audit.js (round 2 table), c3_audit2.js (round 3 additions), c3
 
 ## Checks
 See the final report of the session for the luminance numbers and counts. Console errors: none on load, the tour or 93 talks. Old saves: chests and quest objects were not moved (first pass vignette chests are untouched, hgdTier items are skipped by every move).
+
+# Round 4 (towns_CRITIC3.md fixes), still src/desert/hgd_polish_c.js
+
+Server port 8321, daemon c5_daemon.py (queue c5_q, c5lib.py), shots c5_shots/, audit c5_audit.js, lum c5_lum.py (samples c3_samples.js), tour c5_tour.py, one shot c5shot.py.
+1. Per-kind scale table: HGDPC_SCALE.push(...) after the table: jars .45-.65, wax barrels, lectern, sacks .3-.42 (they were person sized and hid the Hedgefoot giver), huts 1.5-1.8 (were 1.1), pink/cream/lilac cloud bushes, the lantern cluster (hgtb_deco_lanterns .55-.8, was 1.35 at Nacre Landing), bells, reeds. Drifting petal clouds keep hgd_polish_b's cap (they float).
+2. Step I1 (after step E): nothing within one square of a giver, shopkeeper, priest or note, and nothing of h>=.35 within two squares in line of a giver; notes: nothing h>=.3 within two squares in line. Props go to the nearest cell out of every line (3 tiers).
+3. Step I2: hanging shop signs (hgdpc_ss*) 0.62 of a person, lift .3.
+4. Corridor notes: hgdpcCorr(L) at the end of this file, called from hgd_polish_text.js (hgsApply wrapper, just before hgtApply). Every wall note picture in a town or enclave becomes a standing sign in the square corner, scale 1.35 (page becomes scroll), so it faces the walker and reads at 3 to 4 squares. hgdpcLate(L) clears small props off and in front of notes (and drops hanging-lamp pictures there), moves a note that stands behind a blocker, last resort removes a small rock/clutter blocker (removing never closes a way). Scroll text rectangle enlarged in HGTX_TBL.
+5. Light: corridor lamps every 4 (towns) / 3.6 (enclaves, 3 in the dark-wall ones) squares, stronger pools (kI .85 to 2.8, r2 52 to 80), around-pools .75 (1.5 in Lantern Landing, Mossy Corner, Quiet Room, Sleeping Nook), enclave centre pools 2.6.
+Result: hub mean 79 (min 65), corridors mean 75, darkest sampled corridor 59 after the last tweak (49 before it, one sample).
+Not fixed: a rock that guards a secret (hgdTier) stands 2 squares in line of the Mossy Corner note (89,142).

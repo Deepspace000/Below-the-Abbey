@@ -1,0 +1,19 @@
+hub mean 79.3 min 65.2 cor mean 74.5 under50 1 of 54 min 49.1
+Hedgefoot {'hubs': [75.0, 75.0], 'cors': [80.4, 53.1, 76.2]}
+Cairnhold {'hubs': [87.2, 73.5], 'cors': [60.0, 63.8, 74.0]}
+Combwick {'hubs': [69.3, 75.7], 'cors': [66.8, 63.4, 61.4]}
+Nacre Landing {'hubs': [70.6, 75.6], 'cors': [68.7, 100.8, 84.9]}
+Dunewell {'hubs': [75.1, 75.1], 'cors': [93.4, 103.3, 82.7]}
+Blue Lantern {'hubs': [80.7, 75.5], 'cors': [99.9, 96.9, 73.3]}
+Tessera {'hubs': [59.7, 76.7], 'cors': [58.5, 67.3, 68.2]}
+Gildmere {'hubs': [66.4, 64.0], 'cors': [59.8, 63.1, 83.8]}
+The Quiet Room {'hubs': [90.5, 93.3], 'cors': [98.5, 86.1, 54.3]}
+The Lamp Clearing {'hubs': [62.5, 71.0], 'cors': [90.8, 60.6, 73.5]}
+The Pond Enclave {'hubs': [79.4, 71.5], 'cors': [65.6, 73.7, 86.4]}
+The Reading Room {'hubs': [77.0, 82.3], 'cors': [75.2, 79.9, 74.7]}
+The Rest Stop {'hubs': [78.3, 83.5], 'cors': [91.3, 91.0, 88.4]}
+The Sleeping Nook {'hubs': [81.4, 71.2], 'cors': [66.2, 57.6, 77.9]}
+The Lantern Landing {'hubs': [61.9, 79.4], 'cors': [64.8, 82.9, 74.1]}
+The Mossy Corner {'hubs': [115.1, 100.7], 'cors': [49.1, 57.9, 54.2]}
+The Waiting Room {'hubs': [77.8, 101.8], 'cors': [99.5, 58.0, 57.6]}
+The Safe Hollow {'hubs': [110.6, 91.1], 'cors': [81.0, 62.3, 84.9]}

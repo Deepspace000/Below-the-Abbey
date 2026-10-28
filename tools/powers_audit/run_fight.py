@@ -11,15 +11,15 @@ with sync_playwright() as p:
     pg = b.new_page(viewport={'width': 900, 'height': 600})
     errs = []
     pg.on('pageerror', lambda e: errs.append('PAGE ' + str(e)))
-    pg.goto(URL, wait_until='domcontentloaded', timeout=90000)
-    pg.wait_for_function("()=>typeof G!=='undefined'&&G.state==='play'&&typeof heroSpecial==='function'", timeout=120000)
+    pg.goto(URL, wait_until='domcontentloaded', timeout=300000)
+    pg.wait_for_function("()=>typeof G!=='undefined'&&G.state==='play'&&typeof heroSpecial==='function'", timeout=420000)
     pg.wait_for_timeout(1500)
     pg.evaluate(open(os.path.join(HERE, 'audit.js'), encoding='utf-8').read())
     pg.evaluate(open(os.path.join(HERE, 'fight.js'), encoding='utf-8').read())
     out = []
     for nm, cl in PARTIES.items():
         for L in (20, 40, 60, 80):
-            for foes in (1, 3):
+            for foes in (1, 3, 6):
                 r = pg.evaluate("([c,L,n])=>window.__pf.fight(c,L,n,8)", [cl, L, foes])
                 r['party'] = nm; r['foes'] = foes
                 out.append(r)

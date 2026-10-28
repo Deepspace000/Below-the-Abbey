@@ -38,7 +38,7 @@ QR.click=function(id){G.menu='quests';G.qs=0;let found=false;
  G.menu=false;questShow(id);return {panel:false}};
 QR.test=async function(id,stage,lvl,pre){
  const out={id,stage,lvl};try{
- QR.fresh(pre);QR.setState(id,stage);if(pre){try{(0,eval)(pre)}catch(e){out.preErr=String(e)}}await QR.goto(lvl);if(pre){try{(0,eval)(pre)}catch(e){}}await QR.sleep(1100);out.level=LEVEL;
+ QR.fresh(pre);QR.setState(id,stage);if(pre){try{(0,eval)(pre)}catch(e){out.preErr=String(e)}}await QR.goto(lvl);if(pre){try{(0,eval)(pre)}catch(e){}}await QR.sleep((lvl===483||lvl===484)?1300:150);out.level=LEVEL;
  QR.rec.ev=[];QR.geo=null;
  const c=QR.click(id);out.panel=c.panel;out.err=c.err;
  await QR.sleep(60);let got=[];for(let t=0;t<34;t++){QR.rec.ev=[];QR.rec.on=true;await QR.sleep(380);QR.rec.on=false;got=QR.rec.ev;if(got.some(e=>e.t==='ring'||e.t==='wring'))break}QR.rec.ev=got;
@@ -61,7 +61,7 @@ QR.reach=function(x,y){if(!G.grid||!G.P)return null;const H=G.grid.length,W=G.gr
  while(q.length){const [cx,cy]=q.pop();if(near(cx,cy))return true;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=cx+dx,ny=cy+dy;if(nx<0||ny<0||nx>=W||ny>=H||seen[ny*W+nx])continue;seen[ny*W+nx]=1;const v=G.grid[ny][nx];if(v===0||v===3||v===4||v===5||v===7||v===8)q.push([nx,ny])}}
  return G.decor.some(d=>d.k==='teleporter')?'tele':false};
 /* path over doors: the game's own (quest_rings_fix.js) path finder, so the test walks the same way the ring points */
-QR.path=function(a,b){return QRF.path(a,b)};
+QR.path=function(a,b){QRF.budget=100000;const r=QRF.path(a,b);return r};
 QR.starts=function(target){const dist={[target]:0},q=[target];while(q.length){const c=q.shift();if(dist[c]>=3)continue;for(const n of QRF.adj(c))if(!(n in dist)){dist[n]=dist[c]+1;q.push(n)}}return dist};
 /* a drawing error must not stop the game loop in the test */
 {const _ui=ui;ui=function(){try{return _ui.apply(this,arguments)}catch(e){QR.uiErr=String(e)}}}
