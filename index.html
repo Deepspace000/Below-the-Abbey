@@ -69884,7 +69884,7 @@ function b58Ground(L,seed,o){
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){
     if(L.rows[y][x]!=='.')continue;const c=fm[y][x];
     if(c==='0'){const a=b58vn(x,y,6,seed),b=b58vn(x,y,4,seed+9);
-      if(a>(o.mud||.7)){fm[y][x]='5';n++}else if(b<(o.bare||.2)){fm[y][x]=(hash2(x,y,seed)<.5)?'1':'2';n++}}
+      if(a>(o.mud||.7)+.1){fm[y][x]='5';n++}else if(a>(o.mud||.7)){fm[y][x]='1';n++}else if(b<(o.bare||.2)){fm[y][x]=(hash2(x,y,seed)<.6)?'2':'1';n++}}
     else if(c==='4'&&o.cobbleMud&&o.cobbleMud(x,y)){fm[y][x]='5';n++}}
   L.fmap=fm.map(r=>r.join(''));return n}
 function b58Reach(L,extra){
@@ -69912,10 +69912,12 @@ function b58Wrap(id,fn){
   const o=KH_LAZY[id];if(!o)return;
   KH_LAZY[id]=function(){const had=!!LEVELS[id];const r=o.apply(this,arguments);const L=LEVELS[id];
     if(L&&!L._b58){L._b58=1;try{b58Art();fn(L)}catch(e){console.error('b58 '+id,e)}}return r}}
+/* the wall stairs of Lanternrest lead up to a wall walk that is closed: a board says so, so that nobody looks for a way up */
+khNpc('b58_wallsign','Notice at the wall stair','greensign',()=>say('A board nailed above the wall stair: WALL WALK. SENTRIES ONLY. BY ORDER OF CAPT. MARSH. The stair is chained shut at the top, and a sentry stands guard at the foot.',[BYE]));
 /* ----- the Bone Orchard ----- */
 b58Wrap(9650,L=>{
   b58DarkTrees(L);
-  b58Ground(L,50,{mud:.68,bare:.16});
+  b58Ground(L,50,{mud:.74,bare:.14});
   // the bell stood inside a box of three iron fences and could not be seen: the bell now stands in the open on its own
   L.decor=L.decor.filter(d=>!(d.k==='bl_fence'&&d.x>=43&&d.x<=45&&d.y>=28&&d.y<=29));
   const occ=b58Occ(L);
@@ -69924,6 +69926,7 @@ b58Wrap(9650,L=>{
   // a lit brazier at each end of the lane, and by the press shed
   for(const [x,y] of [[43,35],[45,35],[63,33]]){if(b58Add(L,occ,'b58_brazier',x,y,{sc:.9}))b58Light(L,x,y,B58_WARM)}
   b58Crows(L,occ,7,9,[6,6,32,30],.3);b58Crows(L,occ,8,6,[56,6,78,22],.3);b58Crows(L,occ,9,8,[6,42,56,66],.3);
+  for(const [x,y] of [[38,23],[42,23],[62,28],[66,28],[70,15],[72,15]])b58Light(L,x,y,[1.5,1.0,.5]);
   b58Wheel(L,occ,[[60,30],[66,33]]);
   // the crypt field has no warm light at all: two candle lights on the crypt path
   b58Light(L,24,45,[1.3,.95,.6]);b58Light(L,24,58,[1.3,.95,.6])});
@@ -69941,6 +69944,7 @@ b58Wrap(9660,L=>{
   const ban=IMG.wl2_hall_0?'wl2_hall_0':(IMG.kh_throne1_1?'kh_throne1_1':null);
   for(const x of [22,28,34,38,50,54,60,66]){if(ban)b58Add(L,occ,ban,x,47,{sc:.9});if(x%12===10||x===34||x===60)if(b58Add(L,occ,'b58_brazier',x+2,47,{sc:.9}))b58Light(L,x+2,47,B58_WARM)}
   for(const y of [14,22,30,38]){if(ban){b58Add(L,occ,ban,17,y,{sc:.9});b58Add(L,occ,ban,71,y,{sc:.9})}}
+  for(const [x,y] of [[22,15],[66,15],[22,40],[66,40]]){const sx=x+(x<40?2:-2);if(L.rows[y][sx]==='.'&&!occ.has(sx+','+y)){L.decor.push({k:'greensign',x:sx,y,block:true,solid:1,npc:'b58_wallsign',deco:false,sc:.8});occ.add(sx+','+y)}}
   // stores and carts: crates, barrels, sacks by the hall, the stable and the stew
   const clutter=[['kh_oqstuff_8',43,16],['kh_oqstuff_2',45,16],['kh_oqstuff_9',47,17],['kh_oqstuff_2',58,12],['kh_oqstuff_8',59,13],['kh_oqstuff_9',65,12],['kh_oqstuff_2',36,20],['kh_oqstuff_9',37,19],['kh_oqstuff_6',40,24],
     ['kh_oqstuff_8',26,13],['kh_oqstuff_2',25,29],['kh_oqstuff_9',60,28],['kh_oqstuff_6',56,29],['kh_oqstuff_4',50,22],['kh_oqstuff_5',62,33],['kh_oqstuff_2',33,40],['kh_oqstuff_8',66,33],['kh_oqstuff_9',27,36],['kh_oqstuff_6',36,34],['bl_barrow',55,16]];
@@ -69951,9 +69955,10 @@ b58Wrap(9660,L=>{
 /* ----- Hollowbell Abbey ----- */
 b58Wrap(9680,L=>{
   b58DarkTrees(L);
-  b58Ground(L,80,{mud:.7,bare:.16});
+  b58Ground(L,80,{mud:.76,bare:.14});
   const occ=b58Occ(L);
   for(const d of L.decor)if(d.k==='gy_lych'&&IMG.b58_lych){d.k='b58_lych'}
+  for(const [x,y] of [[53,22],[56,22],[21,46],[23,46],[24,16],[28,16]])b58Light(L,x,y,[1.4,1.05,.6]);
   for(const [x,y] of [[39,30],[43,30],[39,26],[43,26]])if(b58Add(L,occ,'b58_brazier',x,y,{sc:.95}))b58Light(L,x,y,[1.25,1.1,.8]);
   b58Crows(L,occ,13,12,[16,6,68,30],.3);b58Crows(L,occ,14,8,[4,41,80,68],.3)});
 /* ----- crypts and cellars get a tomb ceiling instead of house beams ----- */
