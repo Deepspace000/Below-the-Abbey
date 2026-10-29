@@ -11,6 +11,14 @@
       top) had a floor of 0.3 of the drawn size, so anything taller than 2.7 squares, and a flier lifted off the floor, still came out too high; and a wide creature in a
       group hid the ones standing behind it. For everything below 3.0 squares tall the rule now has no floor (height plus float never above .8), and a creature (other than the great aboveParty ones)
       creature is never drawn wider than 1 square. Giants (3.0 and up) and the creatures listed in HUGE_FOES stay as they are. tools/ps_battle_audit.py checks all of it. */
+/* the castle's soldiers and officers are people in armour: they stand a little taller than a villager, not twice as tall (owner: the Gate Captain was too tall). Done once, after the pictures are in. */
+const PSS_SOLDIERS={psgatecaptain:1.25,pshalberd:1.2,pssentinel:1.25,psguard:1.1,psarcher:1.05,psarmour:1.15,psofficer:1.15,psturnkey:1.2,psquestioner:1.3,psteward:1.3,pssacristan:1.2,pscarver:1.2,psarmourer:1.15};
+let PSS_SOLD_DONE=false;
+function pssSoldiers(){
+  if(PSS_SOLD_DONE||!PSP.picsReady)return;PSS_SOLD_DONE=true;
+  for(const t in PSS_SOLDIERS){const d=ENEMY_DEF[t];if(!d)continue;const h=PSS_SOLDIERS[t];d.ph=h;
+    if(typeof d.img==='string'&&IMG[d.img]){const im=IMG[d.img];d.w=+(h*im.width/im.height).toFixed(2);NPC_H[d.img]=h}
+    if(typeof HUGE_FOES!=='undefined'){const i=HUGE_FOES.indexOf(t);if(i>=0)HUGE_FOES.splice(i,1)}}}
 const PSS_SEEN={};
 function pssTarget(k,h){
   if(/ghost_hound|hhound|_hound$/.test(k))return h>.7?+(h*.6).toFixed(2):h;
@@ -19,6 +27,7 @@ function pssTarget(k,h){
   if(h>1.15)return +(h*(h>1.25?.57:.6)).toFixed(2);
   return h}
 function pssPeople(L){
+  pssSoldiers();
   if(!L||!L.decor)return;
   for(const d of L.decor){
     const k=d.k;if(typeof k!=='string')continue;
