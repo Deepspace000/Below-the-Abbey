@@ -229,6 +229,7 @@ function pspRest(){
   return r}}
 {const _w=weatherNow;weatherNow=function(){
   if(pspIs(LEVEL)){const L=LEVELS[LEVEL];
+    if(L&&L.outdoor&&L.fogAt&&G.P){const f=L.fogAt(G.P.x,G.P.y);return {id:'fog',n:'Mist',fog:f[3]||.014,haze:.3,dark:0,mix:.4,col:[f[0],f[1],f[2]],text:'A cold mist lies on the ground, and bats wheel high over the roofs. The night sky never changes, and the moon never sets.'}}
     if(L&&L.outdoor)return {id:'fog',n:'Teal mist',fog:.014,haze:.3,dark:0,mix:.4,col:PSP_PAL.mist,text:'A cold teal mist lies on the ground, and bats wheel high over the roofs. The night sky never changes, and the moon never sets.'};
     return null}
   return _w.apply(this,arguments)}}
