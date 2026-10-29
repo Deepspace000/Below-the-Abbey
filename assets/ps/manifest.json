@@ -1620,11 +1620,11 @@
 },
 "p_chamberlain": {
 "file": "p_chamberlain.webp",
-"w": 207,
-"px_h": 405,
+"w": 247,
+"px_h": 640,
 "h": 1.8,
 "kind": "sprite",
-"sheet": "gh2"
+"sheet": "g9"
 },
 "p_librarian": {
 "file": "p_librarian.webp",
@@ -1636,51 +1636,51 @@
 },
 "p_courtier1": {
 "file": "p_courtier1.webp",
-"w": 178,
-"px_h": 405,
+"w": 219,
+"px_h": 640,
 "h": 1.7,
 "kind": "sprite",
-"sheet": "gh2"
+"sheet": "g8"
 },
 "p_courtier2": {
 "file": "p_courtier2.webp",
-"w": 270,
-"px_h": 399,
+"w": 386,
+"px_h": 640,
 "h": 1.8,
 "kind": "sprite",
-"sheet": "gh2"
+"sheet": "g8"
 },
 "p_courtier3": {
 "file": "p_courtier3.webp",
-"w": 184,
-"px_h": 394,
+"w": 242,
+"px_h": 640,
 "h": 1.8,
 "kind": "sprite",
-"sheet": "gh2"
+"sheet": "g9"
 },
 "p_courtier4": {
 "file": "p_courtier4.webp",
-"w": 150,
-"px_h": 406,
+"w": 352,
+"px_h": 640,
 "h": 1.8,
 "kind": "sprite",
-"sheet": "gh2"
+"sheet": "g8"
 },
 "p_courtier5": {
 "file": "p_courtier5.webp",
-"w": 164,
-"px_h": 401,
+"w": 232,
+"px_h": 640,
 "h": 1.7,
 "kind": "sprite",
-"sheet": "gh2"
+"sheet": "g9"
 },
 "p_courtier6": {
 "file": "p_courtier6.webp",
-"w": 218,
-"px_h": 401,
+"w": 269,
+"px_h": 640,
 "h": 1.8,
 "kind": "sprite",
-"sheet": "gh2"
+"sheet": "g9"
 },
 "p_ghost_jester": {
 "file": "p_ghost_jester.webp",
@@ -2393,5 +2393,13 @@
 "h": 6.0,
 "kind": "sprite",
 "sheet": "ne"
+},
+"c_pswraith": {
+"file": "c_pswraith.webp",
+"w": 231,
+"px_h": 640,
+"h": 2.1,
+"kind": "sprite",
+"sheet": "g9"
 }
 }
