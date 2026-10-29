@@ -80,7 +80,7 @@ async () => {
       const r = pick(t, /We will go/); const r2 = pick(r, /clear the hill/); ok(qSt('bl7a') === 'active', 'bl7a taken from Hale (' + qSt('bl7a') + ')');
       {const live = id => { const o = []; for (const st of ['give', 'act', 'ready']) { const sp = QRF.specs(id, st) || []; let n = 0; for (const x of sp) n += QRF.live(x).length; o.push(st + ':' + n) } return o.join(' ') };
        ok(QRF.live(QRF.specs('bl7a', 'ready')[0]).length === 1, 'the quest ring for bl7a stands on Hale'); ok(QRF.live(QRF.specs('bl7a', 'act')[0]).length >= 5, 'the ring marks the dead on the hill (' + live('bl7a') + ')');
-       ok(G.decor.some(d => d.k === 'teleporter'), 'the stone of the hill is in the level (teleporter decor)'); }
+       ok(!G.decor.some(d => d.k === 'teleporter'), 'no stone on the hill (3.695 removed the road teleport stones; the level has no teleporter decor)'); }
       const foes = G.enemies.filter(e => e.hp > 0 && ENEMY_DEF[e.t].gy && !ENEMY_DEF[e.t].vtb); ok(foes.length >= 20, 'the hill holds the dead (' + foes.length + ')');
       for (let i = 0; i < 8; i++) kill(foes[i]);
       ok((G.flags.vtHill | 0) >= 8 && qReady('bl7a'), 'eight dead killed, bl7a ready (' + G.flags.vtHill + ')');

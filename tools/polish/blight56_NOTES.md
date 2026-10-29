@@ -36,3 +36,10 @@ Two test failures that are NOT from this pass:
 
 ## Screenshots
 `tools/polish/shots56/before/*.png` (before), `tools/polish/shots56/after/*.png` (after).
+
+## Round 2 (29 Oct 2026): Bone Orchard 9650 and Lanternrest 9660
+- Lanternrest wall: now warm sandstone with a pale coping, dark notches and some lit arrow slits (`blrCren` draw in `gyTile`, blight_lanternrest.js); lamps every six squares along the foot of the south wall, barrels and hay stacked in the yard, nine ordinary people in the rooms (blr_i_*, blr_h_*, blr_a_*, blr_f_boy, blr_n_p1/p2), painted soldier's tent (`assets/ds_blr_tent.png`, blue copy by filter), face tree scaled to .7.
+- Rain: blight_sky.js adds fog, haze and a colour shift per unit of rain to whatever weatherNow returned; a wrapper at the end of blight58_polish.js (prefix b2r) pre-subtracts that for 9660, so the fort keeps a thin warm haze in rain (fog cannot go fully back: it floors at .0006 before the sky adds .014).
+- Orchard: painted skull-apple tree (`assets/ds_bo_skapple.png`) for the five picking trees and about one in five of the other row trees, with a green glow at the pickable ones; painted harvest bell (`ds_bl_bell.png`, toned); Reaper-Farmer smaller (2.0) and moved off the bell axis to 46,30; the crypt is dark flint 3.0 high.
+- Art made in Gemini (one generation at a time, own tab, closed after): bo_skapple, blr_tent, bl_bell, blh_church, blh_abbot. Cut with `tools/polish/blr2_cut.py <jpg> <name> [maxh]` (also removes the ground line Gemini draws).
+- Tests: blight56_test `rest` now checks that there is NO stone on the road (3.695), `links` handles place 7. All modes pass on port 8612. Shots: `tools/polish/r2before`, `tools/polish/r2after` (`blightR2_shots.py`, `r2_sheet.py`).

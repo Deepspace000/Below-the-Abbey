@@ -27,3 +27,10 @@ Tools (all in tools/polish): `blight8910_dump.py` (dumps the 15 levels to JSON, 
 
 ## Screenshots
 before: tools/polish/b8910_before/*.png, after: tools/polish/b8910_after/*.png
+
+## Round 2 (29 Oct 2026): Hollowbell 9680, Rookery Mill 9690, Pale Bridge 9700
+- Hollowbell: painted ruined church front (`ds_blh_church.png`, used as `bl_church`, drawn 6.8 wide), painted Abbot (`ds_blh_abbot.png`, 1.9 tall), the painted bell (`ds_bl_bell.png`) made pale silver for the belfry; refectory table candelabra smaller.
+- Rookery: bridge fence has gaps, flock span 1.15 and queen span 2.6 (was 1.55 and 3.3), cap has no flock at the start (queen and two crows), queen perch 2.4, grinding floor has more sacks, crate and barrel.
+- Pale Bridge: Pale Knight 1.65 tall as a person, 1.7 as an enemy (was 2.1 and 2.3); bridge posts with gaps and cold lights deep in the ravine; milestone moved to 69,33 so SALE THE GATE is not cut off on arrival; banners, barrels and a lit spot flank the Sale arch; two watchmen in the gatehouse and two on the wall walk.
+- Tests (load links quests bosses walk save) all pass on 8612; reachability: no unreachable person, door or creature (`blight8910_check.py`).
+- Not done: lit windows as pictures, a painted Pale Knight, the battlement piece (done in code for Lanternrest instead), more varied Hollowbell chapter house floor.

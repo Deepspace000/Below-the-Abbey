@@ -7,7 +7,7 @@
    Hostile ground: only the dead quarter and Hollin Farm (SA_ZONES); everywhere else the dead are peaceful ghosts and the party walks freely (sale_folk.js).
    ========================================================================== */
 const SA_Y=36,SA_SQ={x0:30,y0:30,x1:40,y1:42};
-const SA_ROADS=[[3,36,68,36,'0','Candle Street'],[57,20,57,35,'3','Bell Lane'],[20,37,20,60,'3','Charnel Row'],[53,37,53,60,'3',"Tanners' Lane"],[20,61,66,61,'3','Back Track']];
+const SA_ROADS=[[4,36,68,36,'0','Candle Street'],[57,20,57,35,'3','Bell Lane'],[20,37,20,60,'3','Charnel Row'],[53,37,53,60,'3',"Tanners' Lane"],[20,61,66,61,'3','Back Track']];
 const SA_ROAD=(x,y)=>SA_ROADS.some(r=>x>=r[0]&&x<=r[2]&&y>=r[1]&&y<=r[3]);
 /* where the dead are hostile; nowhere else is */
 const SA_ZONES=[{k:'dead',n:'The Dead Quarter',x0:8,y0:38,x1:34,y1:67},{k:'farm',n:'Hollin Farm',x0:57,y0:55,x1:68,y1:67}];
