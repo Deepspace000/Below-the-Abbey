@@ -74,8 +74,18 @@ const PSW_STAND={
   tapestry:['hl_p_banner','saturate(.3) hue-rotate(205deg)',1.4],plaque:['hs_plaque','',.7],sack:['sack2','',.4],sacks:['sacks','',.5],keg:['wm_keg','',.55],crate:['wm_crate','',.5],pot:['vase3','',.5],
   grill:['hl_p_chains','',1.3],stool:['hgtb_chair','saturate(.2) brightness(.7)',.4],rug:['hgtb_rug_lilac_runner','',.2],banner_long_a:['hl_p_banner','saturate(1.4) sepia(.7) hue-rotate(-15deg) brightness(.75)',2.4],banner_long_b:['hl_p_banner','saturate(1.2) sepia(.9) hue-rotate(-30deg) brightness(.65)',2.4],
 };
+{const DK='grayscale(.85) brightness(.46) contrast(1.3)';
+ const F={furn_sideboard:['hgtb_furn_cabinet',DK,.85],furn_organ:['mi_altar',DK,2.0],furn_chair_high:['hgtb_chair',DK,1.1],furn_fireplace_tall:['hgtb_furn_hearth',DK,1.7],furn_wardrobe:['hgtb_furn_cabinet',DK,1.6],furn_cradle:['hgtb_furn_bed',DK,.5],furn_bed_canopy:['hgtb_furn_bed',DK,1.3],furn_bookcase:['hl_p_shelf',DK,1.9],furn_desk:['hl_p_desk',DK,.9],furn_screen_tracery:['hl_p_window',DK,1.6],furn_pulpit:['hl_p_lectern',DK,1.5],furn_altarpiece:['mi_altar',DK,2.1],furn_pew_black:['mi_pew',DK,.9],furn_lectern_black:['hl_p_lectern',DK,1.15],furn_clock_grandfather:['hgtb_furn_clock',DK,1.9],furn_candelabra_black:['mi_candel',DK,1.5],window_stained_tall:['hl_p_window','',3.4]};
+ for(const n in F){PSW_STAND[n]=F[n];if(typeof PSP_PICS!=='undefined'&&!PSP_PICS[n])PSP_PICS[n]=[F[n][2],[F[n][0]],{dark:1}]}}
+/* ambient ghosts: translucent stand-ins (a painted ghost_<name> or p_ghost_<name> in assets/ps wins) */
+const PSW_GHOST={ghost_servant:[['gyi_ghost1','hl_p_ghost'],1.6],ghost_cook:[['gyi_ghost0','hl_p_ghost'],1.6],ghost_baker:[['gyi_ghost0','hl_p_ghost'],1.6],ghost_armourer:[['hl_p_armour','hl_p_ghost'],1.7],ghost_choir:[['gyi_banshee','gyi_ghost2','hl_p_ghost'],1.5],ghost_monk:[['gyi_ghost2','hl_p_ghost'],1.6],ghost_scholar:[['gyi_ghost1','hl_p_ghost'],1.6],ghost_maid:[['gyi_ghost0','hl_p_ghost'],1.5]};
+for(const n in PSW_GHOST)if(typeof PSP_PICS!=='undefined'&&!PSP_PICS[n])PSP_PICS[n]=[PSW_GHOST[n][1],PSW_GHOST[n][0],{ghost:1}];
 function pswPic(name){
-  if(IMG['ps_'+name]){NPC_H['ps_'+name]=NPC_H['ps_'+name]||(PSW_STAND[name]?PSW_STAND[name][2]:1);return 'ps_'+name}
+  const pnt=n=>IMG[n]&&!IMG[n]._ps;
+  if(PSW_GHOST[name]&&!pnt('ps_'+name)&&!pnt('ps_p_'+name)){const k='psw_'+name;if(IMG[k])return k;const src=PSW_GHOST[name][0].map(n=>IMG[n]).find(i=>i&&i.width);if(!src)return null;
+    try{const c=document.createElement('canvas');c.width=src.width;c.height=src.height;const x=c.getContext('2d');x.globalAlpha=.5;x.filter='brightness(1.2) saturate(.4) hue-rotate(185deg)';x.drawImage(src,0,0);IMG[k]=c}catch(e){IMG[k]=src}NPC_H[k]=PSW_GHOST[name][1];return k}
+  if(PSW_GHOST[name]&&pnt('ps_p_'+name)){NPC_H['ps_p_'+name]=NPC_H['ps_p_'+name]||PSW_GHOST[name][1];return 'ps_p_'+name}
+  if(pnt('ps_'+name)){NPC_H['ps_'+name]=NPC_H['ps_'+name]||(PSW_STAND[name]?PSW_STAND[name][2]:1);return 'ps_'+name}
   const k='psw_'+name,d=PSW_STAND[name];
   if(IMG[k])return k;
   if(!d){if(typeof PSP_PICS!=='undefined'&&PSP_PICS[name]&&typeof pspPic==='function')return pspPic(name);return IMG[name]?name:null}
@@ -106,6 +116,7 @@ function pswLoad(){
 {const _wd=wdDoorLevel;wdDoorLevel=function(n){return _wd.apply(this,arguments)||pswIs(n)}}
 {const _ll=loadLevel;loadLevel=function(n){const r=_ll.apply(this,arguments);G.pswOpenLv=-1;return r}}
 function pswArrive(n){
+  PSW._gd=null;
   pswFoePics();
   const F=pswF(),L=LEVELS[n],V=L&&L._psw;
   if(V&&V.secret&&F.sacristyOpen&&G.grid[V.secret.y])G.grid[V.secret.y][V.secret.x]=0;
@@ -127,7 +138,19 @@ function pswArrive(n){
 /* an opened hidden door stays open: applied on load of the level and every frame until the grid exists */
 {const _u=update;update=function(dt){try{if(pswIs(LEVEL)&&G.state==='play'){const F=G.flags.psp,L=LEVELS[LEVEL],V=L&&L._psw;
     if(F&&G.pswOpenLv!==LEVEL&&G.grid&&G.grid.length){G.pswOpenLv=LEVEL;if(V&&V.secret&&F.sacristyOpen&&G.grid[V.secret.y])G.grid[V.secret.y][V.secret.x]=0}
-    if(V&&V.rests)pswRestWatch(V)}}catch(e){console.error('psw update',e)}return _u.apply(this,arguments)}}
+    if(V&&V.rests)pswRestWatch(V);if(V&&V.ghosts)pswGhostTick(V)}}catch(e){console.error('psw update',e)}return _u.apply(this,arguments)}}
+/* ghosts: drift along their loops, chill and gutter the candles when near, cold spots */
+function pswGhostTick(V){
+  const t=G.time||0,P=G.P;if(!P||!G.decor)return;
+  if(PSW._gv!==LEVEL||!PSW._gd){PSW._gv=LEVEL;PSW._gd=G.decor.filter(d=>d.npc&&/^psw_gh/.test(d.npc));PSW._cold=new Set();PSW._gseen={}}
+  const gl=[];
+  for(const d of PSW._gd){const g=V.ghostById[d.npc];if(!g||d.hidden)continue;
+    const L=g.len;let a=((t*g.sp+g.ph*L)%L+L)%L,i=0;while(i<g.seg.length-1&&a>g.seg[i]){a-=g.seg[i];i++}
+    const p0=g.pts[i],p1=g.pts[(i+1)%g.pts.length],u=g.seg[i]?a/g.seg[i]:0,wx=p0[0]+(p1[0]-p0[0])*u+.5,wy=p0[1]+(p1[1]-p0[1])*u+.5;
+    d.x=Math.floor(wx);d.y=Math.floor(wy);d.ox=wx-(d.x+.5);d.oy=wy-(d.y+.5);gl.push([wx,wy,d])}
+  for(const q of gl){if(Math.hypot(q[0]-P.x-.5,q[1]-P.y-.5)<3.2){const k=q[2].npc;if(!PSW._gseen[k]||t-PSW._gseen[k]>45){PSW._gseen[k]=t;try{msg('The air goes cold. The candle flames lean away and gutter.','#bfe0f0');sfx('rattle')}catch(e){}}}}
+  for(const l of LIGHTS){if(l.kI===undefined)continue;if(l._k0===undefined)l._k0=l.kI;let f=1;for(const q of gl){const dd=Math.hypot(q[0]-l.x,q[1]-l.y);if(dd<4)f=Math.min(f,.35+.65*(dd/4)*Math.abs(Math.sin(t*19+(l.ph||0)*7)))}l.kI=l._k0*f}
+  V.cold.forEach((c,i)=>{if(!PSW._cold.has(i)&&Math.hypot(c.x-P.x,c.y-P.y)<c.r){PSW._cold.add(i);try{msg(c.t,'#bfe0f0');sfx('rattle')}catch(e){}}})}
 /* rest rooms: a calm line on walking in; (the bed does the resting) */
 function pswRestWatch(V){
   const P=G.P,k=LEVEL;let inn=null;for(const r of V.rests)if(P.x>=r.x0&&P.x<=r.x1&&P.y>=r.y0&&P.y<=r.y1)inn=r;
@@ -235,7 +258,18 @@ function pswMake(id){
   const fill=(x0,y0,x1,y1,fn)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)fn(x,y)};
   /* wall dressing: a thing hung on the wall beside floor cell x,y (wd = the way to the wall). Does not block. */
   const w=(name,x,y,wd,o)=>p(name,x,y,Object.assign({wd},o||{}));
-  const C={id,S,W,H,g,rows,open,free,dec,p,w,sign,foe,light,setF,fill,decor,enemies,lights,lcol,occ,V,items,reserved,hs,hh};
+  /* an ambient ghost drifting slowly along a closed loop of open squares (a decor that the update hook moves), and a cold spot (a message when the party walks in) */
+  const ghosts=[];V.ghosts=ghosts;V.ghostById={};V.cold=[];
+  const GL={servant:'"Is it dinner? It is always almost dinner."',cook:'"The pot must not boil dry. Who is watching the pot?"',baker:'"The loaves are proving. Mind the draught."',armourer:'"Every blade back on its rack. Every one. I counted."',choir:'The voice is very far away, and very sad, and it does not stop.',monk:'"Silence. Please. Some of us are praying."',scholar:'"Shh. Overdue. Everything is overdue."',maid:'"Is the bed made? I made the bed."'};
+  const ghost=(name,pts,o)=>{o=o||{};const k=pswPic(name);if(!k){miss.push('noghost:'+name);return null}
+    if(!pts.every(q=>open(q[0],q[1]))){miss.push('ghostloop:'+name+'@'+pts[0]);return null}
+    const gid='psw_gh'+id+'_'+ghosts.length,kind=name.replace('ghost_','');
+    khNpc(gid,'A ghost',k,()=>say(o.line||GL[kind]||'The ghost does not answer.',[BYE]));
+    const d=dec(k,pts[0][0],pts[0][1],{npc:gid,walkOk:1,lift:.12,sc:o.sc||1});if(!d)return null;
+    const seg=pts.map((q,i)=>{const r=pts[(i+1)%pts.length];return Math.hypot(r[0]-q[0],r[1]-q[1])}),len=seg.reduce((a,b)=>a+b,0);
+    if(!len)return d;const g={pts,seg,len,sp:o.sp||.3,ph:o.ph===undefined?hs(pts[0][0],pts[0][1],3):o.ph};ghosts.push(g);V.ghostById[gid]=g;return d};
+  const cold=(x,y,r,t)=>V.cold.push({x,y,r:r||2,t:t||'A cold spot. Your breath shows, and something brushes past you that is not there.'});
+  const C={id,S,W,H,g,rows,open,free,dec,p,w,sign,foe,light,setF,fill,decor,enemies,lights,lcol,occ,V,items,reserved,hs,hh,ghost,cold};
   S.dress(C);
   /* ---- wall torches: sickly green-white and verdigris in the cold rooms, orange in the warm ones ---- */
   const torches=[],warmAt=(x,y)=>(S.warm||[]).some(r=>x>=r[0]-1&&x<=r[2]+1&&y>=r[1]-1&&y<=r[3]+1);
@@ -252,7 +286,7 @@ function pswMake(id){
   /* ---- a lamp every few squares where none is near ---- */
   {const have=lights.slice();for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!open(x,y))continue;if(have.every(l=>Math.hypot(l[0]-x,l[1]-y)>=(S.lampGap||4.6))){have.push([x,y]);lights.push([x,y]);lcol[x+','+y]=warmAt(x,y)?[1.45,1.0,.5]:V.col}}}
   const fmS=fm.map(r=>r.join(''));
-  const L={rows,chars,fmap:fmS,floorSet:FL.slice(),floor:FL[0],floor2:FL[1],ceil:CEILS.pswc?'pswc':'gyc_1',ceilH:WH,start,enemies,items,decor,lights,portals:[],day:0,amb:S.amb===undefined?.16:S.amb,torchGap:1e9,noTele:true,noExtras:true,
+  const L={rows,chars,fmap:fmS,floorSet:FL.slice(),floor:FL[0],floor2:FL[1],ceil:(S.ceil&&CEILS[S.ceil])?S.ceil:(CEILS.pswc?'pswc':'gyc_1'),ceilH:WH,start,enemies,items,decor,lights,portals:[],day:0,amb:S.amb===undefined?.16:S.amb,torchGap:1e9,noTele:true,noExtras:true,
     name:PSW.NAMES[id],label:PSW.NAMES[id],diff:S.diff,mapNames:S.names||[],_psw:V};
   /* heights: floors that rise (stairs, platforms, galleries). Walls stand on 0 and are as tall as the roof, so a raised floor still has a ceiling above it. */
   {let any=false,bad=0;for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(hh[i])any=true;if(open(x,y)){if(open(x+1,y)&&Math.abs(hh[i+1]-hh[i])>.55)bad++;if(open(x,y+1)&&Math.abs(hh[i+W]-hh[i])>.55)bad++}}
@@ -298,7 +332,7 @@ PSW_SPEC[9750]={W:48,H:40,diff:101,wh:3.4,lcol:pswCold,
   doors:[{x:45,y:22,kind:'link',link:pswLk(9750,45,22),start:1},{x:45,y:12,kind:'link',link:pswLk(9750,45,12)},{x:6,y:3,kind:'lock',link:pswLk(9750,6,3)},{x:20,y:36,kind:'dungeon',link:pswLk(9750,20,36)}],
   start:{x:42,y:22,f:3},
   names:[{t:'West Turret',x:6,y:7,k:'place'},{t:'The Forge',x:13,y:6,k:'place'},{t:'The Armoury',x:20,y:7,k:'place'},{t:'The Guardroom',x:26,y:7,k:'place'},{t:'The Bakehouse',x:35,y:7,k:'place'},{t:'Service Lane',x:20,y:12,k:'place'},{t:'The Larder',x:5,y:17,k:'place'},{t:'The Scullery',x:5,y:24,k:'place'},{t:'The Pantry',x:13,y:16,k:'place'},{t:'The Still-room',x:13,y:23,k:'place'},{t:'The Great Kitchen',x:23,y:17,k:'place'},{t:"The Steward's Office",x:36,y:16,k:'place'},{t:"The Servants' Hall",x:34,y:24,k:'place'},{t:'Lower Lane',x:20,y:28,k:'place'},{t:"The Maids' Loft",x:6,y:34,k:'place'},{t:'The Undercroft Stair',x:20,y:32,k:'place'},{t:'The Coal Cellar',x:12,y:33,k:'place'},{t:'The Buttery',x:29,y:33,k:'place'},{t:'The Salting Room',x:36,y:33,k:'place'},{t:'The Service Gallery',x:42,y:8,k:'place'},{t:'The Chute Court',x:42,y:34,k:'place'}],
-  dress(C){const {dec,p,w,sign,foe,light}=C;
+  dress(C){const {dec,p,w,sign,foe,light,ghost,cold}=C;
     const cyc=(a,i)=>a[i%a.length];
     const wall=(nm,xs,y,wd)=>xs.forEach(x=>w(nm,x,y,wd));
     // ---- the West Turret: a round stair room, black stone, a spiral going up ----
@@ -366,11 +400,11 @@ PSW_SPEC[9750]={W:48,H:40,diff:101,wh:3.4,lcol:pswCold,
     w('lantern_bracket',32,16,[0,-1]);w('vine_b',31,17,[0,1]);w('c_psgargoyle',33,17,[0,1]);w('iron_fence_a',31,16,[0,-1]);
     // ---- the Steward's Office, up a stair, looking down on the kitchen ----
     sign(36,14,[0,-1],"THE STEWARD'S OFFICE",'Ledgers and keys');
-    p('desk',37,15,{npc:'psw_ledger'});p('chair',37,16,{});p('cabinet',35,14,{npc:'psw_keyshelf'});p('cabinet',38,14);p('globe',34,14);p('lamp',34,18);p('rug',36,17,{walkOk:1});p('candle',38,18);
+    p('furn_desk',37,15,{npc:'psw_ledger'});p('furn_chair_high',37,16,{});p('furn_wardrobe',35,14,{npc:'psw_keyshelf'});p('furn_sideboard',38,14);p('globe',34,14);p('furn_clock_grandfather',34,18);p('furn_fireplace_tall',38,17);p('rug',36,17,{walkOk:1});p('candle',38,18);
     pswBook(C,1,35,17);w('window_great',38,16,[1,0]);w('tapestry',36,18,[0,1]);w('c_psgargoyle',34,15,[-1,0]);light(36,16,pswSick);
     // ---- the Servants' Hall ----
     sign(34,21,[0,-1],"THE SERVANTS' HALL",'Meals at the bell');
-    [33,34,36,37].forEach(x=>{p('table',x,25);p('stool',x,26,{})});p('hearth',34,22);p('hearth',35,22);p('pot',31,26);p('barrels',38,22);
+    [33,34,36,37].forEach(x=>{p('table',x,25);p('stool',x,26,{})});p('furn_fireplace_tall',34,22);p('furn_sideboard',35,22);p('furn_chair_high',32,22,{});p('pot',31,26);p('barrels',38,22);
     {const k=pswPic('ghost_chamberlain'),k2=pswPic('ghost_librarian');dec(k,32,24,{npc:'psw_servant1',walkOk:1});dec(k2,36,23,{npc:'psw_servant2',walkOk:1});dec(k,38,25,{npc:'psw_servant3',walkOk:1})}
     pswBook(C,2,32,22);w('tapestry',38,24,[1,0]);w('c_psgargoyle',31,21,[0,-1]);w('alcove_maiden',31,25,[-1,0]);w('vine_b',33,26,[0,1]);foe('psbakeghost',37,22);light(34,24,pswCold);p('coffer',38,26);
     // ---- Lower Lane ----
@@ -383,7 +417,7 @@ PSW_SPEC[9750]={W:48,H:40,diff:101,wh:3.4,lcol:pswCold,
     [[3,33],[3,35],[8,33],[8,35]].forEach(([x,y],i)=>p('bed',x,y,{npc:i===0?'psw_bed':undefined}));
     p('chest',8,36);p('cabinet',5,36);p('candle',5,33);p('candle',7,35);p('table',6,33);p('vase',7,36,{});p('rug',6,35,{walkOk:1});p('sack',4,34,{});p('chair',7,33,{});
     {const kp=KH_KEEPERS.psw_dorcas;if(kp)dec(kp.face,6,34,{npc:'psw_dorcas',walkOk:1,sc:kp.sc||1})}
-    w('window_stained',8,34,[1,0]);w('vine_a',3,34,[-1,0]);w('tapestry',5,32,[0,-1]);
+    w('window_stained_tall',8,34,[1,0]);w('vine_a',3,34,[-1,0]);w('tapestry',5,32,[0,-1]);
     for(const [x,y] of [[5,34],[7,34],[6,31]])light(x,y,pswWarm);
     // ---- the Undercroft stair hall: the dungeon door ----
     sign(18,35,[0,1],'THE UNDERCROFT','Keys with the Steward');sign(22,35,[0,1],'NO FOOD BELOW','Nothing goes down to be eaten');
@@ -411,9 +445,18 @@ PSW_SPEC[9750]={W:48,H:40,diff:101,wh:3.4,lcol:pswCold,
     sign(44,21,[1,0],'THE KITCHEN DOOR','Out to the Court of Statues');dec('gy_column',43,20,{block:true,sc:1.2});dec('gy_column',43,24,{block:true,sc:1.2});p('barrels',44,24);p('barrels',44,25);p('lamp',44,20);
     w('vine_a',40,22,[-1,0]);w('c_psgargoyle',42,20,[0,-1]);w('window_great',40,24,[-1,0]);light(42,24,pswCold);foe('psarmour',41,25);
     p('cl_knight',41,28);w('vine_b',40,27,[-1,0]);w('lantern_bracket',41,26,[1,0]);
-    p('barrels',40,31);p('barrels',40,32);p('cl_knight',42,34);p('chest',44,36);p('crate',44,31);w('c_psgargoyle',43,31,[0,-1]);w('vine_a',44,34,[1,0]);foe('psarmour',42,36);foe('pskrat',41,33);light(42,33,pswVerd)}};
+    p('barrels',40,31);p('barrels',40,32);p('cl_knight',42,34);p('chest',44,36);p('crate',44,31);w('c_psgargoyle',43,31,[0,-1]);w('vine_a',44,34,[1,0]);foe('psarmour',42,36);foe('pskrat',41,33);light(42,33,pswVerd);
+    // ---- the household that never left: ghosts drift through the kitchens, a few wraiths watch ----
+    ghost('ghost_baker',[[32,8],[37,8],[37,9],[32,9]],{sp:.25});ghost('ghost_servant',[[33,5],[36,5],[36,6],[33,6]],{sp:.2,ph:.4});
+    ghost('ghost_cook',[[22,20],[24,20],[24,22],[22,22]],{sp:.3});ghost('ghost_servant',[[20,17],[27,17],[27,20],[20,20]],{sp:.28,ph:.5});ghost('ghost_maid',[[20,24],[27,25],[24,25]],{sp:.25});
+    ghost('ghost_servant',[[32,23],[37,23]],{sp:.2});ghost('ghost_cook',[[11,24],[15,24],[15,22],[11,22]],{sp:.22});
+    ghost('ghost_armourer',[[19,8],[21,8],[21,9],[19,9]],{sp:.25});ghost('ghost_armourer',[[12,8],[14,8]],{sp:.2,ph:.5});ghost('ghost_monk',[[25,8],[28,8],[28,7],[25,7]],{sp:.2});
+    ghost('ghost_servant',[[5,12],[35,12]],{sp:.35});ghost('ghost_maid',[[35,28],[5,28]],{sp:.3});ghost('ghost_servant',[[41,5],[42,12]],{sp:.22});ghost('ghost_cook',[[18,31],[22,31]],{sp:.2});
+    cold(33,8,2);cold(23,18,2.5);cold(36,23,2);cold(20,8,2);cold(15,12,2);cold(20,33,2.5);cold(42,10,2);cold(13,24,2);
+    foe('psbookwraith',23,16);foe('psbookwraith',20,5);foe('psbookwraith',37,10);
+}};
 /* ===== 9760 THE GROUND FLOOR, CLOISTER, CHAPEL AND LIBRARY (the east wing): 48 x 40 ===== */
-PSW_SPEC[9760]={W:48,H:40,diff:101,wh:3.4,lcol:pswCold,
+PSW_SPEC[9760]={W:48,H:40,diff:101,ceil:'tex_vault_ribbed',wh:3.4,lcol:pswCold,
   rects:[
     r(3,9,6,16,'blk',3),r(4,17,5,18,'blk',3,.3),r(3,19,6,27,'blk',3),r(4,28,5,29,'blk',3,.3),r(3,30,6,37,'blk',3),
     r(7,10,8,10,'dark',1),r(7,22,8,22,'verd',0),r(7,34,8,34,'dark',1),
@@ -432,7 +475,7 @@ PSW_SPEC[9760]={W:48,H:40,diff:101,wh:3.4,lcol:pswCold,
   doors:[{x:2,y:22,kind:'link',link:pswLk(9760,2,22),start:1},{x:2,y:12,kind:'link',link:pswLk(9760,2,12)},{x:42,y:3,kind:'lock',link:pswLk(9760,42,3)},{x:35,y:17,kind:'secret'}],
   start:{x:5,y:22,f:1},
   names:[{t:"The Pilgrims' Hall",x:4,y:13,k:'place'},{t:'The Library',x:16,y:9,k:'place'},{t:'The Cloister',x:15,y:18,k:'place'},{t:'The Garth',x:15,y:23,k:'place'},{t:'The Ossuary',x:15,y:34,k:'place'},{t:'The Chapter House',x:33,y:5,k:'place'},{t:'East Turret',x:41,y:6,k:'place'},{t:'The Almonry',x:41,y:13,k:'place'},{t:'The Sacristy',x:32,y:13,k:'place'},{t:'The Chapel',x:33,y:22,k:'place'},{t:'The Chancel',x:41,y:22,k:'place'},{t:'The Bell Room',x:33,y:33,k:'place'},{t:'The Clock Room',x:42,y:33,k:'place'},{t:'The Dormitory',x:4,y:33,k:'place'}],
-  dress(C){const {dec,p,w,sign,foe,light}=C;
+  dress(C){const {dec,p,w,sign,foe,light,ghost,cold}=C;
     const cyc=(a,i)=>a[i%a.length];const stat=pswStat;
     const wall=(nm,xs,y,wd)=>xs.forEach(x=>w(nm,x,y,wd));
     // ---- the Pilgrims' Hall: three narrow chambers one above the other, with low arches between them ----
@@ -446,13 +489,13 @@ PSW_SPEC[9760]={W:48,H:40,diff:101,wh:3.4,lcol:pswCold,
     sign(3,30,[0,-1],'THE DORMITORY','Pilgrims sleep here');foe('psmonk',5,35);light(4,34,pswVerd);
     // ---- the Library: tall stacks, a gallery up two steps, ladders ----
     C.setF(9,5,24,5,'5');sign(17,4,[0,-1],'THE LIBRARY','Books must be returned');
-    [11,14,17,20,23].forEach(x=>{const gap=(x===14||x===20);for(let y=6;y<=12;y++){if(gap&&y===9)continue;p(y%2?'bookcase_tall':'bookcase_wm',x,y)}});
+    [11,14,17,20,23].forEach(x=>{const gap=(x===14||x===20);for(let y=6;y<=12;y++){if(gap&&y===9)continue;p('furn_bookcase',x,y)}});
     for(let x=10;x<=23;x+=2)w(cyc(['bookcase_tall','bookcase_wm'],x),x,4,[0,-1]);
     p('stairs_moss',13,7,{sc:.8});p('stairs_moss',19,10,{sc:.8});
-    [[10,13],[12,13],[17,13],[20,13],[22,13]].forEach(([x,y])=>p('reading_desk',x,y));[10,12,17,20,22].forEach(x=>p('chair',x,14,{}));
-    p('lectern',13,13,{npc:'psw_lectern'});p('globe',18,14);p('scroll_rack',21,14);p('candelabra',22,12);p('candelabra',9,13);
+    [[10,13],[12,13],[17,13],[20,13],[22,13]].forEach(([x,y])=>p('furn_desk',x,y));[10,12,17,20,22].forEach(x=>p('chair',x,14,{}));
+    p('furn_lectern_black',13,13,{npc:'psw_lectern'});p('globe',18,14);p('scroll_rack',21,14);p('furn_candelabra_black',22,12);p('furn_candelabra_black',9,13);
     {const kp=KH_KEEPERS.psw_librarian;if(kp)dec(pswPic('ghost_librarian'),16,13,{npc:'psw_librarian',walkOk:1})}
-    p('reading_desk',13,11,{npc:'psw_habit'});
+    p('furn_desk',13,11,{npc:'psw_habit'});
     w('c_psgargoyle',9,4,[0,-1]);w('c_psgargoyle',24,4,[0,-1]);w('alcove_weeper',9,8,[-1,0]);w('alcove_knight',9,12,[-1,0]);w('window_great',24,8,[1,0]);w('window_great',24,12,[1,0]);w('vine_a',9,11,[-1,0]);w('banner_long_a',9,6,[-1,0]);w('banner_long_b',24,8,[1,0]);
     p('iron_rail',12,4,{block:false});p('iron_rail',16,4,{block:false});p('iron_rail',21,4,{block:false});
     foe('psbookwraith',13,9);foe('psbookwraith',19,8);foe('psbookwraith',22,11);foe('psbookwraith',16,11);foe('psink',18,13);foe('psink',15,6);
@@ -478,33 +521,33 @@ PSW_SPEC[9760]={W:48,H:40,diff:101,wh:3.4,lcol:pswCold,
     [[13,17,[0,-1]],[17,17,[0,-1]],[16,29,[0,1]],[11,36,[0,1]],[14,36,[0,1]],[17,36,[0,1]],[20,36,[0,1]],[9,9,[-1,0]],[24,10,[1,0]],[30,26,[0,1]],[34,26,[0,1]],[6,12,[1,0]],[6,24,[1,0]],[29,33,[-1,0]],[44,36,[1,0]],[31,8,[0,1]],[35,8,[0,1]]].forEach(([x,y,d])=>w('c_psgargoyle',x,y,d));
     // ---- the Chapter House ----
     sign(30,4,[0,-1],'THE CHAPTER HOUSE','Where the chapter sat');
-    p('lectern',33,6,{npc:'psw_chapterbook'});[30,36].forEach(x=>{p('bench_moss',x,8);p('bench_moss',x+1,8)});p('tomb',30,5,{sc:.9});p('candelabra',31,4);p('candelabra',36,4);p(stat(),37,8);
-    w('window_stained',33,4,[0,-1]);w('window_stained',35,4,[0,-1]);w('banner_long_a',30,8,[0,1]);w('banner_long_b',36,8,[0,1]);w('c_psgargoyle',34,4,[0,-1]);w('vine_a',29,7,[-1,0]);w('alcove_monk',29,8,[0,1]);w('c_psgargoyle',33,8,[0,1]);
+    p('furn_lectern_black',33,6,{npc:'psw_chapterbook'});[30,36].forEach(x=>{p('furn_pew_black',x,8);p('furn_pew_black',x+1,8)});p('tomb',30,5,{sc:.9});p('furn_candelabra_black',31,4);p('furn_candelabra_black',36,4);p(stat(),37,8);
+    w('window_stained_tall',33,4,[0,-1]);w('window_stained_tall',35,4,[0,-1]);w('banner_long_a',30,8,[0,1]);w('banner_long_b',36,8,[0,1]);w('c_psgargoyle',34,4,[0,-1]);w('vine_a',29,7,[-1,0]);w('alcove_monk',29,8,[0,1]);w('c_psgargoyle',33,8,[0,1]);
     {const kp=KH_KEEPERS.psw_chaplain;if(kp)dec(pswPic('ghost_chamberlain'),33,7,{npc:'psw_chaplain',walkOk:1})}
     pswBook(C,5,36,7);foe('psmonk',31,7);foe('psmonk',36,5);foe('psmonk',33,5);light(33,5,pswCold);light(30,7,pswVerd);light(36,7,pswVerd);
     // ---- the East Turret ----
     sign(40,4,[0,-1],'THE EAST TURRET','Stair to the second floor');
-    p('suit',39,4);p('suit',44,4);p('stairs_curved',44,7,{sc:1.1});p('candelabra',39,8);p('cl_monk',44,8);
+    p('suit',39,4);p('suit',44,4);p('stairs_curved',44,7,{sc:1.1});p('furn_candelabra_black',39,8);p('cl_monk',44,8);
     w('c_psgargoyle',41,4,[0,-1]);w('c_psgargoyle',43,4,[0,-1]);w('banner_long_b',39,7,[-1,0]);w('ivy',44,6,[1,0]);w('window_slit',40,8,[0,1]);foe('psarmour',40,7);light(41,7,pswVerd);light(43,5,pswCold);
     // ---- the Almonry (REST ROOM, warm) ----
     sign(41,10,[0,-1],'THE ALMONRY','A bed for pilgrims');
-    p('bed',39,12,{npc:'psw_bed2'});p('bed',39,14);p('bed',44,12);p('chest',44,16);p('candle',40,15);p('rug',42,13,{walkOk:1});p('vase',40,10,{});p('chair',43,14,{});p('table',43,11);p('cabinet',44,14);
-    w('window_stained',44,13,[1,0]);w('vine_a',39,16,[-1,0]);w('tapestry',40,16,[0,1]);
+    p('furn_bed_canopy',39,12,{npc:'psw_bed2'});p('furn_bed_canopy',39,14);p('furn_bed_canopy',44,12);p('furn_cradle',40,11);p('chest',44,16);p('candle',40,15);p('rug',42,13,{walkOk:1});p('furn_chair_high',43,14,{});p('furn_sideboard',43,11);p('furn_wardrobe',44,14);
+    w('window_stained_tall',44,13,[1,0]);w('vine_a',39,16,[-1,0]);w('tapestry',40,16,[0,1]);
     for(const [x,y] of [[41,12],[43,15],[40,14]])light(x,y,pswWarm);
     // ---- the Sacristy ----
     sign(30,10,[0,-1],'THE SACRISTY','Vestments and the sacred vessels');
-    [29,31,33,35].forEach((x,i)=>p(cyc(['cabinet','bookcase_wm'],i),x,10));w('tapestry',28,13,[-1,0]);w('tapestry',36,13,[1,0]);p('candelabra',33,16);p('candelabra',28,16);p('table',35,12);w('mirror',32,10,[0,-1]);p('chair',36,15,{});
+    [29,31,33,35].forEach((x,i)=>p(cyc(['furn_wardrobe','furn_sideboard'],i),x,10));w('tapestry',28,13,[-1,0]);w('tapestry',36,13,[1,0]);p('furn_candelabra_black',33,16);p('furn_candelabra_black',28,16);p('table',35,12);w('mirror',32,10,[0,-1]);p('chair',36,15,{});
     dec(pswPic('reliquary_chest'),32,13,{block:true,npc:'psw_reliquary',sc:1.15});p(stat(),36,12);p(stat(),28,12);w('c_psgargoyle',30,10,[0,-1]);w('alcove_empty',28,15,[-1,0]);w('vine_b',36,14,[1,0]);
     foe('pssacristan',33,14);for(const [x,y] of [[32,12],[30,15],[35,14],[29,11]])light(x,y,cyc([pswVerd,pswCold],x));
     // ---- the Chapel: nave, stalls, six candles, the odd bracket ----
     sign(31,18,[0,-1],'THE CHAPEL','Please do not light the candles out of order');
-    [30,31,33,34,36,37].forEach(x=>{p('pews',x,20);p('pews',x,24)});pswBook(C,4,32,20);
-    [[29,26],[29,18],[33,18],[33,26],[37,18],[37,26]].forEach(([x,y],i)=>p('candelabra',x,y,{npc:'psw_cand'+(i+1)}));
-    dec(pswPic('candelabra'),28,20,{block:true,npc:'psw_bracket',sc:1.0});p('font',28,23,{npc:'psw_font'});p('plaque',28,24,{npc:'psw_candleplaque'});
+    [30,31,33,34,36,37].forEach(x=>{p('furn_pew_black',x,20);p('furn_pew_black',x,24)});pswBook(C,4,32,20);
+    [[29,26],[29,18],[33,18],[33,26],[37,18],[37,26]].forEach(([x,y],i)=>p('furn_candelabra_black',x,y,{npc:'psw_cand'+(i+1)}));
+    dec(pswPic('furn_candelabra_black'),28,20,{block:true,npc:'psw_bracket',sc:1.0});p('font',28,23,{npc:'psw_font'});p('plaque',28,24,{npc:'psw_candleplaque'});
     [[30,21],[34,21],[31,23],[36,23],[41,20],[41,24],[40,19],[40,25]].forEach(([x,y])=>foe('pschorister',x,y));
-    wall('window_stained',[30,33,37],18,[0,-1]);w('banner_long_a',32,26,[0,1]);w('banner_long_b',28,19,[-1,0]);w('banner_long_a',28,25,[-1,0]);wall('window_stained',[31,35,38],26,[0,1]);w('c_psgargoyle',35,18,[0,-1]);w('c_psgargoyle',36,26,[0,1]);w('vine_a',28,19,[-1,0]);w('vine_b',28,25,[-1,0]);
+    wall('window_stained_tall',[30,33,37],18,[0,-1]);w('banner_long_a',32,26,[0,1]);w('banner_long_b',28,19,[-1,0]);w('banner_long_a',28,25,[-1,0]);wall('window_stained_tall',[31,35,38],26,[0,1]);w('c_psgargoyle',35,18,[0,-1]);w('c_psgargoyle',36,26,[0,1]);w('vine_a',28,19,[-1,0]);w('vine_b',28,25,[-1,0]);
     p('chandelier',31,22,{walkOk:1,bob:.6});p('chandelier',35,22,{walkOk:1,bob:.6});
-    p('altar',44,22,{npc:'psw_altar',sc:1.1});p('lectern',41,22,{npc:'psw_nave'});p('st_saint1',44,20);p('st_saint2',44,24);w('alcove_knight',43,18,[0,-1]);w('alcove_maiden',43,26,[0,1]);p('candelabra',42,20);p('candelabra',42,24);
+    p('furn_altarpiece',44,22,{npc:'psw_altar',sc:1.1});p('furn_lectern_black',41,22,{npc:'psw_nave'});p('furn_organ',44,19);p('st_saint2',44,24);p('furn_pulpit',38,20);p('furn_screen_tracery',38,24);p('furn_clock_grandfather',28,26);w('alcove_knight',43,18,[0,-1]);w('alcove_maiden',43,26,[0,1]);p('furn_candelabra_black',42,20);p('furn_candelabra_black',42,24);
     w('window_great',44,21,[1,0]);w('window_great',44,23,[1,0]);w('c_psgargoyle',40,18,[0,-1]);w('c_psgargoyle',40,26,[0,1]);
     for(const [x,y] of [[31,19],[35,19],[31,25],[35,25],[38,22],[41,22],[43,22]])light(x,y,cyc([pswCold,pswVerd],x+y));
     // ---- the Bell Room: a great bell on a raised floor ----
@@ -516,7 +559,16 @@ PSW_SPEC[9760]={W:48,H:40,diff:101,wh:3.4,lcol:pswCold,
     sign(42,29,[0,-1],'THE CLOCK ROOM','The clock stopped at midnight');
     p('clock',40,30,{sc:1.8});p('clock',43,30,{sc:1.4});p('chandelier',41,34,{walkOk:1,bob:.6});p('barrels',44,36);p('barrels',39,36);p('tools',44,32);p('cl_smith',39,35);
     w('clock_face',44,34,[1,0]);w('clock_face',42,29,[0,-1]);w('banner_long_a',40,29,[0,-1]);w('banner_long_b',44,30,[1,0]);w('c_psgargoyle',40,36,[0,1]);w('c_psgargoyle',43,36,[0,1]);w('vine_a',39,31,[-1,0]);w('lantern_bracket',44,31,[1,0]);foe('psarmour',43,35);foe('psink',41,31);
-    light(41,33,pswSick);light(43,35,pswCold);light(40,30,pswVerd)}};
+    light(41,33,pswSick);light(43,35,pswCold);light(40,30,pswVerd);
+    // ---- a ghost choir, ghost scholars and the monks who never left; cold spots; wraiths ----
+    ghost('ghost_choir',[[29,22],[38,22]],{sp:.22});ghost('ghost_choir',[[30,23],[36,23],[36,21],[30,21]],{sp:.18,ph:.3});ghost('ghost_choir',[[31,19],[36,19]],{sp:.15,ph:.7});
+    ghost('ghost_choir',[[40,22],[41,19],[41,25]],{sp:.17});
+    ghost('ghost_scholar',[[12,6],[12,12]],{sp:.25});ghost('ghost_scholar',[[19,6],[19,13]],{sp:.22,ph:.3});ghost('ghost_scholar',[[16,6],[16,12]],{sp:.2,ph:.6});
+    ghost('ghost_monk',[[10,18],[20,18],[20,28],[10,28]],{sp:.28});ghost('ghost_monk',[[14,22],[16,22],[16,24],[14,24]],{sp:.2});ghost('ghost_monk',[[10,34],[20,34]],{sp:.2});ghost('ghost_monk',[[30,6],[36,6]],{sp:.18});
+    ghost('ghost_maid',[[40,11],[43,11],[43,15],[40,15]],{sp:.12,line:'"A bed for pilgrims. Rest. You look tired, and I have time."'});ghost('ghost_monk',[[4,10],[4,15]],{sp:.2});ghost('ghost_monk',[[31,31],[35,31],[35,35],[31,35]],{sp:.15});
+    cold(33,22,2.5);cold(15,12,2);cold(15,23,2.5);cold(14,34,2);cold(33,33,2);cold(5,14,2);cold(41,23,2);
+    foe('psbookwraith',19,28);foe('psbookwraith',33,23);foe('psbookwraith',42,35);
+}};
 }
 /* ---------- things lying about (pickups), people, key flow, quests ---------- */
 PSW.pick={};                           // npc id -> flag name: taken things are hidden again on every arrival
