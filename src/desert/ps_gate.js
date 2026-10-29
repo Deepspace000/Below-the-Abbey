@@ -262,7 +262,7 @@ function psgBuildApproach(info){
   C.prop('col_twist',19,27,{block:true});C.prop('col_twist',22,27,{block:true});C.prop('statue_plinth',20,25,{block:true});
   /* ---- 8. the people and the things ---- */
   const nearWalk=(x,y)=>{for(let r=0;r<=3;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const a=x+dx,b=y+dy;if(C.free(a,b)&&!block[ix(a,b)])return [a,b]}return null};
-  const TOK=[[35,52,'gy_ring'],[10,51,'gy_locket'],[7,48,'gy_rose'],[20,45,'gy_book'],[44,48,'gy_bell'],[40,38,'ww_ribbon'],[50,34,'ww_boot'],[38,31,'gy_ring'],[26,12,'ww_crumbs']];
+  const TOK=[[35,52,'gy_ring'],[10,51,'gy_locket'],[7,48,'gy_ring'],[20,45,'gy_book'],[44,48,'gy_bell'],[40,38,'gy_locket'],[50,34,'gy_ring'],[38,31,'gy_ring'],[26,12,'gy_book']];
   TOK.forEach(([x,y,k],i)=>{const q=nearWalk(x,y);if(q)C.dec(k,q[0],q[1],{block:true,npc:'psg_tok'+i,sc:1.7})});
   C.chest(41,45,{tier:1});
   const FOE=(t,x,y)=>{const q=nearWalk(x,y);return q?pspFoe(C,t,q[0],q[1]):false},WAKE=(t,x,y)=>{const q=nearWalk(x,y);return q?pspStatueWake(C,t,q[0],q[1]):false};
@@ -314,14 +314,14 @@ function psgBuildGatehouse(){
   C.picture('lantern_bracket',15,15,[-1,0]);C.picture('lantern_bracket',17,15,[1,0]);
   pspStatueWake(C,'psgatecaptain',16,11);pspFoe(C,'psguard',16,6);pspFoe(C,'psguard',16,15);
   /* the west guardroom: racks, a cold hearth, a table, bunks in their alcove */
-  for(const x of [5,7,11])P('weaponrack',x,12);C.prop('hearth_cold',9,12,{block:true});
+  C.prop('hearth_cold',9,12,{block:true});
   P('longtable',8,15);dec('gy_bench',10,17,{block:false});dec('gy_bench',8,13,{block:false});
   P('bed',4,10);P('bed',6,10);P('shields',4,12,{bob:.3});dec('barrel',12,18,{});dec('crate',11,18,{sc:.9});dec('sacks',12,14,{});
   C.vineWall(4,9,6,9,[0,-1]);C.alcove(10,18,'alcove_empty',[0,1]);
   for(const [x,y] of [[7,13],[11,15],[5,16],[9,17]])C.light(x,y,SI);C.light(5,10,GR);
   pspFoe(C,'psguard',5,13);pspFoe(C,'psguard',11,15);pspFoe(C,'pshalberd',12,12);pspFoe(C,'psarcher',4,16);
   /* the east guardroom: racks, mannequins, a duty table, the stair up */
-  for(const x of [21,23,28])P('weaponrack',x,9);P('mannequin',21,13);P('mannequin',28,13);
+  P('mannequin',21,13);P('mannequin',28,13);
   P('counciltable',24,14);dec('gy_bench',24,16,{block:false});dec('gy_bench',24,12,{block:false});
   C.prop('col_fluted',22,16,{block:true});C.prop('col_fluted',27,16,{block:true});dec('barrel',28,18,{});dec('crate',27,18,{sc:.9});C.chest(21,18,{tier:0});
   C.alcove(23,9,'alcove_knight',[0,-1]);C.vines(26,9,{});C.sign(24,9,[0,-1],'STAIR TO THE WINCH LOFT','Winch and chains. Guards at work.');
@@ -355,14 +355,14 @@ function psgBuildLoft(){
   C.links({style:{'stair':'stair'}});
   const P=(n,x,y,o)=>psgProp(C,n,x,y,o),dec=(k,x,y,o)=>C.dec(k,x,y,o);
   C.sign(8,4,[0,-1],'THE MURDER HOLES','They open on the passage below');C.sign(4,7,[0,-1],'THE WINCH LOFT','Keep the chains clear');
-  P('spinwheel',15,8,{h:2.4});for(const [x,y] of [[14,5],[16,11],[14,12]])dec(psgToned('hl_p_chains'),x,y,{block:false,sc:1.2});
+  for(const [x,y] of [[14,5],[16,11],[14,12]])dec(psgToned('hl_p_chains'),x,y,{block:false,sc:1.2});
   dec(psgToned('wm_chain'),8,5,{block:false});dec(psgToned('wm_chain'),16,5,{block:false,sc:1.1});C.prop('col_twist',13,5,{block:true});C.prop('col_twist',17,5,{block:true});C.prop('col_twist',13,12,{block:true});C.prop('col_twist',17,12,{block:true});
   /* the table and the dead Road Warden: his bones, his coat, and his horn */
   P('counciltable',8,14);dec('gy_bones',7,14,{block:false,sc:1.6});dec('gy_bones',10,14,{block:false,sc:1});
   dec('gy_bell',9,13,{npc:'psg_horn',sc:1.5,block:true});
   C.sign(8,15,[0,1],'A ROAD WARDEN',"His horn is on the table");
   C.chest(11,5,{tier:1});dec('barrel',17,13,{});dec('crate',16,13,{sc:.9});dec('sacks',6,5,{});dec('barrel',6,11,{sc:.9});
-  P('weaponrack',7,15);P('weaponrack',10,15);C.alcove(6,13,'alcove_monk',[-1,0]);C.vineWall(3,7,3,11,[-1,0]);C.vines(9,7,{});
+  C.alcove(6,13,'alcove_monk',[-1,0]);C.vineWall(3,7,3,11,[-1,0]);C.vines(9,7,{});
   for(const [x,y] of [[8,5],[15,4],[16,13],[8,13],[11,9],[4,9]])C.light(x,y,y>12?SI:GR);
   pspFoe(C,'psguard',14,4);pspFoe(C,'psguard',15,12);pspFoe(C,'pshalberd',11,9);pspFoe(C,'pshalberd',15,6);
   psgHaunt(C,[['pic','window_sheeted_a',17,5,[1,0]],['pic','window_sheeted_b',17,8,[1,0]],['pic','window_sheeted_c',17,11,[1,0]],['prop','cobweb_thick_a',9,7],['prop','cobweb_thick_b',7,9],['red','lantern_red_a',6,9],['red','lantern_red_b',16,9],
@@ -373,14 +373,14 @@ pspRegister(9722,psgBuildLoft);
 /* ===== 9723 THE PORTER'S LODGE (18 x 14, REST ROOM): warm candlelight, a bed, a stove with a kettle, a chest of potions, Merrick Dole ===== */
 function psgBuildLodge(){
   const WARM=PSP_PAL.warm;
-  const C=pspMake({id:9723,start:{x:9,y:4,f:2},wh:2.7,floor:'flag',wall:'panel',amb:.5,lcol:WARM}),dec=(k,x,y,o)=>C.dec(k,x,y,o);
+  const C=pspMake({id:9723,start:{x:9,y:4,f:2},wh:2.7,floor:'flag',wall:'brick',amb:.5,lcol:WARM}),dec=(k,x,y,o)=>C.dec(k,x,y,o);
   C.room(7,3,11,6,{floor:'runner',name:"The Porter's Lodge",at:[9,9],warm:true});C.room(3,7,14,11,{floor:'flag',warm:true});
-  psgDressWalls(C,{wh:2.7,set:['panel','brick','panel','ash'],win:.0});
+  psgDressWalls(C,{wh:2.7,set:['brick','ash','brick','ash'],win:.0});
   psgWin(C,[[4,6],[13,6],[2,9],[15,9],[9,2]].filter(q=>!(q[0]===9&&q[1]===2)),2.7);
   C.links({});
   const P=(n,x,y,o)=>psgProp(C,n,x,y,o,true);
-  P('cothearth',13,7);C.prop('bed_cobweb_a',6,8,{block:true});P('dresser',4,10);P('dresser',4,11);P('pietable',9,9);dec('gy_bench',9,11,{block:false});dec('gy_bench',9,7,{block:false});
-  P('rocker',12,9);P('clock',14,9);P('coatrack',7,3);dec('barrel',14,11,{});dec('sacks',13,11,{});dec('hl_p_candle',7,10,{sc:.9,block:false});dec('hl_p_candle',11,10,{sc:.9,block:false});
+  P('cothearth',13,7);C.prop('bed_cobweb_a',6,8,{block:true});dec('gy_bench',9,11,{block:false});dec('gy_bench',9,7,{block:false});
+  P('clock',14,9);P('coatrack',7,3);dec('barrel',14,11,{});dec('sacks',13,11,{});dec('hl_p_candle',7,10,{sc:.9,block:false});dec('hl_p_candle',11,10,{sc:.9,block:false});
   C.vines(7,5,{});C.vines(11,5,{});
   C.sign(10,3,[0,-1],"THE PORTER'S LODGE",'Rest here. Nothing hostile comes in.');
   C.person('psg_porter',10,8,2);
