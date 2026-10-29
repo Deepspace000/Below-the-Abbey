@@ -43,7 +43,7 @@ function psgHaunt(C,list){for(const [k,name,x,y,a,b] of list){if(!C.isOpen(x,y))
 /* a darkened, green-shifted copy of one of the Wenlock room props (bed, table, rack ...) so that it sits in the black and green castle; cached */
 function psgToned(key,warm){
   const k='psg_t'+(warm?'w':'')+'_'+key;if(IMG[k])return k;const src=IMG[key];if(!src||!src.width)return key;
-  bl3Tint(k,key,warm?'saturate(.8) brightness(.8) contrast(1.05)':'saturate(.4) brightness(.6) contrast(1.1)');return IMG[k]?k:key}
+  bl3Tint(k,key,warm?'saturate(.8) brightness(.8) contrast(1.05)':'grayscale(.92) sepia(.15) brightness(.78) contrast(1.05)');return IMG[k]?k:key}
 /* a Wenlock room prop by its WLIN_P name, placed with the kit: C2.prop(name,x,y,{block,sc,h,npc}) */
 function psgProp(C,name,x,y,o,warm){
   o=o||{};const p=typeof WLIN_P!=='undefined'&&WLIN_P[name];if(!p)return null;const key='wl2_'+p[0];if(!IMG[key])return null;
@@ -228,7 +228,7 @@ function psgBuildApproach(info){
   for(const [x,y] of [[31,8],[33,8],[31,14],[33,14]]){lamp(x,y)}
   C.picture('window_great',25,8,[0,-1]);C.picture('window_great',39,8,[0,-1]);
   /* the clock-tower gate arch: a round clock face high over the door, two long banners hanging beside it */
-  C.prop('gate_clock',32,8,{block:false});if(!IMG[pspPic('gate_clock')]||IMG[pspPic('gate_clock')]._ps){C.prop('clock_face',32,7,{block:false,bob:2.3});C.prop('banner_long_a',31,7,{block:false,bob:.3});C.prop('banner_long_b',33,7,{block:false,bob:.3})}C.light(32,8,PAL.brassHi?[1.1,.8,.45]:SI);
+  C.prop('gate_clock',32,8,{block:false,sc:.6});if(!IMG[pspPic('gate_clock')]||IMG[pspPic('gate_clock')]._ps){C.prop('clock_face',32,7,{block:false,bob:2.3});C.prop('banner_long_a',31,7,{block:false,bob:.3});C.prop('banner_long_b',33,7,{block:false,bob:.3})}C.light(32,8,PAL.brassHi?[1.1,.8,.45]:SI);
   C.vineWall(26,8,28,8,[0,-1]);C.vineWall(36,8,38,8,[0,-1]);C.light(27,11,GR);C.light(37,11,GR);
   C.sign(31,7,[0,-1],'THE GREAT GATE','Castle of the Pale Sovereign');
   psgHaunt(C,[['red','lantern_red_a',30,9],['red','lantern_red_b',34,9],['red','lantern_red_a',31,16],['red','lantern_red_b',33,16],['red','lantern_red_a',30,23],['red','lantern_red_b',35,51],['red','lantern_red_a',29,51],['prop','cobweb_thick_a',32,9]]);
@@ -334,8 +334,8 @@ function psgBuildLoft(){
   C.links({style:{'stair':'stair'}});
   const P=(n,x,y,o)=>psgProp(C,n,x,y,o),dec=(k,x,y,o)=>C.dec(k,x,y,o);
   C.sign(8,4,[0,-1],'THE MURDER HOLES','They open on the passage below');C.sign(4,7,[0,-1],'THE WINCH LOFT','Keep the chains clear');
-  P('spinwheel',15,8,{h:2.4});for(const [x,y] of [[14,5],[16,11],[14,12]])dec('hl_p_chains',x,y,{block:false,sc:1.2});
-  dec('wm_chain',8,5,{block:false});dec('wm_chain',16,5,{block:false,sc:1.1});C.prop('col_twist',13,5,{block:true});C.prop('col_twist',17,5,{block:true});C.prop('col_twist',13,12,{block:true});C.prop('col_twist',17,12,{block:true});
+  P('spinwheel',15,8,{h:2.4});for(const [x,y] of [[14,5],[16,11],[14,12]])dec(psgToned('hl_p_chains'),x,y,{block:false,sc:1.2});
+  dec(psgToned('wm_chain'),8,5,{block:false});dec(psgToned('wm_chain'),16,5,{block:false,sc:1.1});C.prop('col_twist',13,5,{block:true});C.prop('col_twist',17,5,{block:true});C.prop('col_twist',13,12,{block:true});C.prop('col_twist',17,12,{block:true});
   /* the table and the dead Road Warden: his bones, his coat, and his horn */
   P('counciltable',8,14);dec('gy_bones',7,14,{block:false,sc:1.6});dec('gy_bones',10,14,{block:false,sc:1});
   dec('gy_bell',9,13,{npc:'psg_horn',sc:1.5,block:true});

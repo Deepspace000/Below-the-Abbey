@@ -72154,7 +72154,7 @@ function psgHaunt(C,list){for(const [k,name,x,y,a,b] of list){if(!C.isOpen(x,y))
 /* a darkened, green-shifted copy of one of the Wenlock room props (bed, table, rack ...) so that it sits in the black and green castle; cached */
 function psgToned(key,warm){
   const k='psg_t'+(warm?'w':'')+'_'+key;if(IMG[k])return k;const src=IMG[key];if(!src||!src.width)return key;
-  bl3Tint(k,key,warm?'saturate(.8) brightness(.8) contrast(1.05)':'saturate(.4) brightness(.6) contrast(1.1)');return IMG[k]?k:key}
+  bl3Tint(k,key,warm?'saturate(.8) brightness(.8) contrast(1.05)':'grayscale(.92) sepia(.15) brightness(.78) contrast(1.05)');return IMG[k]?k:key}
 /* a Wenlock room prop by its WLIN_P name, placed with the kit: C2.prop(name,x,y,{block,sc,h,npc}) */
 function psgProp(C,name,x,y,o,warm){
   o=o||{};const p=typeof WLIN_P!=='undefined'&&WLIN_P[name];if(!p)return null;const key='wl2_'+p[0];if(!IMG[key])return null;
@@ -72339,7 +72339,7 @@ function psgBuildApproach(info){
   for(const [x,y] of [[31,8],[33,8],[31,14],[33,14]]){lamp(x,y)}
   C.picture('window_great',25,8,[0,-1]);C.picture('window_great',39,8,[0,-1]);
   /* the clock-tower gate arch: a round clock face high over the door, two long banners hanging beside it */
-  C.prop('gate_clock',32,8,{block:false});if(!IMG[pspPic('gate_clock')]||IMG[pspPic('gate_clock')]._ps){C.prop('clock_face',32,7,{block:false,bob:2.3});C.prop('banner_long_a',31,7,{block:false,bob:.3});C.prop('banner_long_b',33,7,{block:false,bob:.3})}C.light(32,8,PAL.brassHi?[1.1,.8,.45]:SI);
+  C.prop('gate_clock',32,8,{block:false,sc:.6});if(!IMG[pspPic('gate_clock')]||IMG[pspPic('gate_clock')]._ps){C.prop('clock_face',32,7,{block:false,bob:2.3});C.prop('banner_long_a',31,7,{block:false,bob:.3});C.prop('banner_long_b',33,7,{block:false,bob:.3})}C.light(32,8,PAL.brassHi?[1.1,.8,.45]:SI);
   C.vineWall(26,8,28,8,[0,-1]);C.vineWall(36,8,38,8,[0,-1]);C.light(27,11,GR);C.light(37,11,GR);
   C.sign(31,7,[0,-1],'THE GREAT GATE','Castle of the Pale Sovereign');
   psgHaunt(C,[['red','lantern_red_a',30,9],['red','lantern_red_b',34,9],['red','lantern_red_a',31,16],['red','lantern_red_b',33,16],['red','lantern_red_a',30,23],['red','lantern_red_b',35,51],['red','lantern_red_a',29,51],['prop','cobweb_thick_a',32,9]]);
@@ -72445,8 +72445,8 @@ function psgBuildLoft(){
   C.links({style:{'stair':'stair'}});
   const P=(n,x,y,o)=>psgProp(C,n,x,y,o),dec=(k,x,y,o)=>C.dec(k,x,y,o);
   C.sign(8,4,[0,-1],'THE MURDER HOLES','They open on the passage below');C.sign(4,7,[0,-1],'THE WINCH LOFT','Keep the chains clear');
-  P('spinwheel',15,8,{h:2.4});for(const [x,y] of [[14,5],[16,11],[14,12]])dec('hl_p_chains',x,y,{block:false,sc:1.2});
-  dec('wm_chain',8,5,{block:false});dec('wm_chain',16,5,{block:false,sc:1.1});C.prop('col_twist',13,5,{block:true});C.prop('col_twist',17,5,{block:true});C.prop('col_twist',13,12,{block:true});C.prop('col_twist',17,12,{block:true});
+  P('spinwheel',15,8,{h:2.4});for(const [x,y] of [[14,5],[16,11],[14,12]])dec(psgToned('hl_p_chains'),x,y,{block:false,sc:1.2});
+  dec(psgToned('wm_chain'),8,5,{block:false});dec(psgToned('wm_chain'),16,5,{block:false,sc:1.1});C.prop('col_twist',13,5,{block:true});C.prop('col_twist',17,5,{block:true});C.prop('col_twist',13,12,{block:true});C.prop('col_twist',17,12,{block:true});
   /* the table and the dead Road Warden: his bones, his coat, and his horn */
   P('counciltable',8,14);dec('gy_bones',7,14,{block:false,sc:1.6});dec('gy_bones',10,14,{block:false,sc:1});
   dec('gy_bell',9,13,{npc:'psg_horn',sc:1.5,block:true});
@@ -73270,6 +73270,13 @@ function pscBuild(info){
   // the south lanes
   Q('arch_ivy',10,50);Q('arch_low',22,51);Q('arch_ivy',27,50);Q('arch_low',41,50);Q('arch_low',53,51);B('barrel',8,51,{sc:.9});B('barrel',9,51,{sc:.9});Q('cobble_heap',24,51);
   for(let x=6;x<=29;x+=3)hang(x%2?'vine_a':'vine_b',x,51,[0,1],0);for(let x=36;x<=58;x+=3)hang(x%2?'vine_b':'vine_a',x,51,[0,1],0);
+  /* ===== the schnoor: painted lit house fronts and doors hung along the lane walls (one wall side only, none on top of other dressing) ===== */
+  {const SCH=['schnoor_door','schnoor_a','schnoor_door','schnoor_d','schnoor_b','schnoor_door','schnoor_c'];let n=0;
+   const busy=(x,y)=>C.decor.some(d=>Math.abs(d.x-x)<=1&&Math.abs(d.y-y)<=1);
+   for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(rows[y][x]!=='.'||hs(x,y,77)>.14)continue;
+     const sides=[[0,-1],[0,1],[-1,0],[1,0]].filter(([dx,dy])=>rows[y+dy]&&rows[y+dy][x+dx]!=='.');if(sides.length!==1||busy(x,y))continue;
+     const [dx,dy]=sides[0];if(C.lights&&C.lights.some(l=>l[0]===x&&l[1]===y))continue;
+     hang(SCH[n++%SCH.length],x,y,[dx,dy],-.3)}}
   /* ===== the creatures ===== */
   const ok=(x,y)=>!pscSafe(x,y,9)&&!pscNearFront(x,y,3)&&rows[y]&&rows[y][x]==='.';
   const foe=(t,x,y,rad)=>{const q=C.near(x,y,rad||3,false);if(q&&ok(q[0],q[1]))C.foe(t,q[0],q[1])};
@@ -75649,10 +75656,16 @@ for(let id=PSP.LO;id<=PSP.HI;id++){if(!KH_LAZY[id]){LEVEL_RATING[id]=LEVEL_RATIN
 /* ---------- arrival: the pictures first (Wenlock's loader brings the graveyard, the witch wood and the Oldhaven folk; then our own manifest), then the level ---------- */
 async function pspLoadOwn(){
   try{PSP.man=await (await fetch('assets/ps/manifest.json?v='+VERSION)).json()}catch(e){PSP.man={}}
-  await Promise.all(Object.keys(PSP.man||{}).map(k=>{const m=PSP.man[k];return loadImg('ps_'+k,'assets/ps/'+m.file).then(()=>{if(m.h&&m.kind!=='tex')NPC_H['ps_'+k]=m.h;if(/^(arch_|alcove_|door_|gate_|bridge_arch|castle_)/.test(k))pspDePlum('ps_'+k)}).catch(()=>0)}))}
+  await Promise.all(Object.keys(PSP.man||{}).map(k=>{const m=PSP.man[k];return loadImg('ps_'+k,'assets/ps/'+m.file).then(()=>{if(m.h&&m.kind!=='tex')NPC_H['ps_'+k]=m.h;if(/^(arch_|alcove_|door_|gate_|bridge_arch|castle_|iron_|bridge_rail|lantern_bracket)/.test(k))pspDePlum('ps_'+k)}).catch(()=>0)}))}
 /* the painted arches and alcoves came with a dark plum fill in their openings (reads as a violet haze in the lane): turn dark purple pixels neutral blue-black */
 function pspDePlum(key){try{const im=IMG[key];if(!im||!im.width||im._ps2)return;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);const d=x.getImageData(0,0,c.width,c.height),a=d.data;
-  for(let i=0;i<a.length;i+=4){if(!a[i+3])continue;const r=a[i],g=a[i+1],b=a[i+2],mx=Math.max(r,g,b);if(mx<96&&r-g>5&&b-g>5){const l=(r+g+b)/3*.8;a[i]=l*.7;a[i+1]=l*.95;a[i+2]=l*1.1}}x.putImageData(d,0,0);c._ps2=1;IMG[key]=c}catch(e){}}
+  const iron=/^ps_(iron_|arch_iron|bridge_rail|lantern_bracket)/.test(key);
+  for(let i=0;i<a.length;i+=4){if(!a[i+3])continue;const r=a[i],g=a[i+1],b=a[i+2],mx=Math.max(r,g,b);if(iron&&r-g>6&&b-g>4){const l=(r+g+b)/3;a[i]=l*.8;a[i+1]=l*.98;a[i+2]=l*1.1}else if(mx<96&&r-g>5&&b-g>5){const l=(r+g+b)/3*.8;a[i]=l*.7;a[i+1]=l*.95;a[i+2]=l*1.1}}if(key==='ps_arch_high'||key==='ps_arch_ivy'){   // the opening of the tall arches is a dark plug: make it see-through (flood from the middle of the opening) so the lane can be seen through the arch
+    const w=c.width,h=c.height,dark=i=>a[i*4+3]>200&&Math.max(a[i*4],a[i*4+1],a[i*4+2])<64,st=[];
+    for(const fy of [.8,.7,.6]){const sx=w>>1,sy=Math.floor(h*fy);if(dark(sy*w+sx)){st.push(sy*w+sx);break}}
+    const seen=new Uint8Array(w*h);let n=0;while(st.length){const i=st.pop();if(seen[i]||!dark(i))continue;seen[i]=1;n++;const x0=i%w,y0=(i/w)|0;if(x0>0)st.push(i-1);if(x0<w-1)st.push(i+1);if(y0>0)st.push(i-w);if(y0<h-1)st.push(i+w)}
+    if(n>w*h*.04)for(let i=0;i<seen.length;i++)if(seen[i])a[i*4+3]=0}
+  x.putImageData(d,0,0);c._ps2=1;IMG[key]=c}catch(e){}}
 function pspLoad(then){
   if(PSP._wait)return true;PSP._wait=1;
   try{msg('The Pale Lands come into view...','#d8d4f0')}catch(e){}

@@ -706,6 +706,13 @@ function pscBuild(info){
   // the south lanes
   Q('arch_ivy',10,50);Q('arch_low',22,51);Q('arch_ivy',27,50);Q('arch_low',41,50);Q('arch_low',53,51);B('barrel',8,51,{sc:.9});B('barrel',9,51,{sc:.9});Q('cobble_heap',24,51);
   for(let x=6;x<=29;x+=3)hang(x%2?'vine_a':'vine_b',x,51,[0,1],0);for(let x=36;x<=58;x+=3)hang(x%2?'vine_b':'vine_a',x,51,[0,1],0);
+  /* ===== the schnoor: painted lit house fronts and doors hung along the lane walls (one wall side only, none on top of other dressing) ===== */
+  {const SCH=['schnoor_door','schnoor_a','schnoor_door','schnoor_d','schnoor_b','schnoor_door','schnoor_c'];let n=0;
+   const busy=(x,y)=>C.decor.some(d=>Math.abs(d.x-x)<=1&&Math.abs(d.y-y)<=1);
+   for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(rows[y][x]!=='.'||hs(x,y,77)>.14)continue;
+     const sides=[[0,-1],[0,1],[-1,0],[1,0]].filter(([dx,dy])=>rows[y+dy]&&rows[y+dy][x+dx]!=='.');if(sides.length!==1||busy(x,y))continue;
+     const [dx,dy]=sides[0];if(C.lights&&C.lights.some(l=>l[0]===x&&l[1]===y))continue;
+     hang(SCH[n++%SCH.length],x,y,[dx,dy],-.3)}}
   /* ===== the creatures ===== */
   const ok=(x,y)=>!pscSafe(x,y,9)&&!pscNearFront(x,y,3)&&rows[y]&&rows[y][x]==='.';
   const foe=(t,x,y,rad)=>{const q=C.near(x,y,rad||3,false);if(q&&ok(q[0],q[1]))C.foe(t,q[0],q[1])};
