@@ -22,6 +22,7 @@ const PSH_GMAP=[['p_ghost_monk','priest'],['p_ghost_servant','butler'],['p_ghost
 for(const [n,src,h] of PSH_FURN)PSP_PICS[n]=[h,[src],{dark:1}];
 for(const [n,src,h] of PSH_GPICS)PSP_PICS[n]=[h,src,{ghost:1}];
 if(!PSP_PICS.window_stained_tall)PSP_PICS.window_stained_tall=[3.4,['hl_p_window'],{}];
+for(const [n,h] of [['corbel_gargoyle_a',.75],['corbel_gargoyle_b',.65],['corbel_gargoyle_c',.75]])if(!PSP_PICS[n])PSP_PICS[n]=[h,['gy_slab','gy_bench'],{}];
 PSP_PICS.banner_long_a=[3.0,['hl_p_banner'],{}];PSP_PICS.banner_long_b=[3.0,['hl_p_banner'],{}];PSP_PICS.tex_vault_ribbed=[1,['gy_slab'],{}];
 /* ---------- loading: the graveyard's stone, the Oldhaven people, and the few extra stand-in pictures ---------- */
 const PSH_EXTRA=[['ds_wm_statue','ds_wm_statue.png'],['ds_hgtb_furn_chandelier','ds_hgtb_furn_chandelier.png'],['ds_hgtb_table','ds_hgtb_table.png'],['ds_hgtb_chair','ds_hgtb_chair.png'],['ds_hgtb_furn_hearth','ds_hgtb_furn_hearth.png'],
@@ -151,8 +152,9 @@ Object.assign(ENEMY_DEF,{
   pshhound:{name:'Pale Hunting Hound',hp:54,dmg:[7,11],hit:.87,w:.7,ph:.95,img:pic('pshhound'),xp:27,gold:[0,0],speed:2,verb:'savages',ps:1},
   pswraith:{name:'Hall Wraith',hp:118,dmg:[10,15],hit:.88,w:.7,ph:2.1,img:pic('pswraith'),xp:36,gold:[0,0],speed:2,fly:true,floatH:.12,verb:'rakes',ps:1,glow:.35},
   psofficer:{name:'Ghost Officer',hp:110,dmg:[11,16],hit:.89,w:.7,ph:1.9,img:pic('psofficer'),xp:34,gold:[0,0],speed:1,verb:'cuts',ps:1,glow:.25},
-  psstairwarden:{name:'The Stair Warden',hp:500,dmg:[11,17],hit:.9,w:1.4,ph:3.0,img:pic('psstairwarden'),xp:900,gold:[0,0],speed:1,verb:'swings his halberd at',boss:true,aboveParty:0,ps:1,still:1,glow:.3,noFlee:1,wake:'The giant armour on the landing straightens, and a halberd as long as a tree comes down off its shoulder.'},
-  psantlered:{name:'The Antlered Lord',hp:450,dmg:[10,16],hit:.9,w:1.6,ph:2.5,img:pic('psantlered'),xp:800,gold:[0,0],speed:1,verb:'gores',boss:true,aboveParty:0,ps:1,still:1,glow:.35,noFlee:1,wake:'The antlered ghost lifts its head from the table, and a horn sounds somewhere under the floor.'}});
+  psstairwarden:{name:'The Stair Warden',hp:380,dmg:[11,17],hit:.9,w:1.4,ph:3.0,img:pic('psstairwarden'),xp:900,gold:[0,0],speed:1,verb:'swings his halberd at',boss:true,aboveParty:0,ps:1,still:1,glow:.3,noFlee:1,wake:'The giant armour on the landing straightens, and a halberd as long as a tree comes down off its shoulder.'},
+  psantlered:{name:'The Antlered Lord',hp:420,dmg:[10,16],hit:.9,w:1.6,ph:2.5,img:pic('psantlered'),xp:800,gold:[0,0],speed:1,verb:'gores',boss:true,aboveParty:0,ps:1,still:1,glow:.35,noFlee:1,wake:'The antlered ghost lifts its head from the table, and a horn sounds somewhere under the floor.'}});
+for(const t of ['psarmour','psservant','pscourtier','psdancer','psfiend','pscarver','pshhound','pswraith','psofficer']){const d=ENEMY_DEF[t];if(d){d.hp=Math.round(d.hp*.85);d.gold=[160,420]}}
 for(const t of ['psstairwarden','psantlered']){if(typeof NO_VARY!=='undefined')NO_VARY.push(t);if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push(t)}
 if(typeof BOSS_GOLD!=='undefined'){BOSS_GOLD.psstairwarden=[5200,6200];BOSS_GOLD.psantlered=[4600,5600]}
 if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^ps(armour|stairwarden)/,'shaken',.15],[/^ps(courtier|fiend|dancer|wraith)/,'cursed',.15],[/^psofficer/,'bleeding',.15],[/^pscarver/,'bleeding',.2],[/^ps(antlered|hhound)/,'bleeding',.18])}
@@ -271,6 +273,17 @@ function pshDoorTile(kind){
     x.strokeStyle='rgba(0,0,0,.5)';x.lineWidth=2;x.stroke()};
   const st=kind==='iron'||kind==='barred'||kind==='steps'?'stair':'hall';
   return PSH._dt[kind]=gyTile(PSH_STYLES[st].tex,WH,{gain:1.15,rgb:PSH_STYLES[st].rgb,tag:'psh_door_'+kind,emit:.25,fac:{img:'gatesC_0',i:0,n:1},draw})}
+/* the barred stair door (all three stairs to the second floor): the painted iron-gated arch (arch_iron, with its chain and padlock) in a stone wall, cold light behind the bars, a brass key plate with a big keyhole and a chalked word under it */
+function pspStairDoorTile(tex,wh,gain,rgb,tag){
+  const k='psp_stairdoor_'+tag+'_'+wh;PSH._sdt=PSH._sdt||{};if(PSH._sdt[k]!==undefined)return PSH._sdt[k];
+  const draw=(x,w,h)=>{const im=IMG.ps_arch_iron,dw=112,x0=(w-dw)/2,top=h*.16,dh=h-top;
+    const g=x.createLinearGradient(0,top,0,h);g.addColorStop(0,'#101830');g.addColorStop(.5,'#3a4c78');g.addColorStop(1,'#1a2440');x.fillStyle=g;x.fillRect(x0+6,top+30,dw-12,dh-30);
+    const gr=x.createRadialGradient(w/2,h*.55,4,w/2,h*.55,70);gr.addColorStop(0,'rgba(170,205,255,.55)');gr.addColorStop(1,'rgba(90,130,220,0)');x.fillStyle=gr;x.fillRect(0,top,w,dh);
+    if(im&&im.width)x.drawImage(im,x0,top,dw,dh);
+    x.fillStyle='#b8a050';x.beginPath();x.arc(w/2,h*.6,11,0,6.3);x.fill();x.strokeStyle='#5a4a20';x.lineWidth=2;x.stroke();
+    x.fillStyle='#120c04';x.beginPath();x.arc(w/2,h*.595,4.2,0,6.3);x.fill();x.fillRect(w/2-1.8,h*.595,3.6,9);
+    x.fillStyle='rgba(225,225,205,.75)';x.font='bold 11px serif';x.textAlign='center';x.fillText('BELOW',w/2,h*.955)};
+  return PSH._sdt[k]=gyTile(tex,wh,{gain:gain,rgb:rgb,tag:'psp_sd_'+tag,emit:.4,draw})}
 /* the secret-door tiles look exactly like the plain wall of the room, but are their own tile numbers */
 function pshSecretTile(style){return gyTile(PSH_STYLES[style].tex,PSH.WH,{gain:PSH_STYLES[style].gain,rgb:[PSH_STYLES[style].rgb[0],PSH_STYLES[style].rgb[1],PSH_STYLES[style].rgb[2]+.00031],tag:'psh_secret_'+style,draw:(x,w,h)=>{const S=PSH_STYLES[style],wain=h*.3;x.fillStyle=S.band;x.fillRect(0,h-wain,w,wain);x.fillStyle=S.trim;x.globalAlpha=.55;x.fillRect(0,h-wain-2,w,3);x.globalAlpha=1}})}
 /* ---------- the level: a chain of tall rooms (64 by 48), no hall bigger than the columns and furniture allow ---------- */
@@ -326,7 +339,7 @@ function pshBuild(){
   for(const l of PSP.LINKS)if(l.to===PSH.ID&&l.land)reserve(l.land[0]-1,l.land[1]-1,l.land[0]+1,l.land[1]+1);
   for(const l of LK){if(!l.at)continue;
     const kind=l.to===9730?(l.at[0]===32?'great':'gallery'):l.to===9750?'service':l.to===9760?'cloister':'iron';
-    over[l.at[0]+','+l.at[1]]=pshDoorTile(kind);doorRec.push({at:l.at,link:l,kind});reserve(l.at[0]-1,l.at[1]-2,l.at[0]+1,l.at[1]+2)}
+    over[l.at[0]+','+l.at[1]]=l.lock?pspStairDoorTile(PSH_STYLES.stair.tex,PSH.WH,1.15,PSH_STYLES.stair.rgb,'h'):pshDoorTile(kind);doorRec.push({at:l.at,link:l,kind});reserve(l.at[0]-1,l.at[1]-2,l.at[0]+1,l.at[1]+2)}
   reserve(31,6,33,9);
   const ownTile=kind=>{const b=pshDoorTile(kind),n=KH_NEXT_GID++;T_TILE[n]=T_TILE[b];if(GY.col&&GY.col[b])GY.col[n]=GY.col[b];return n};
   const special={ // wall tiles that are doors of their own
@@ -347,7 +360,8 @@ function pshBuild(){
     decor.push(d);if(!o.over)occ.add(x+','+y);return d};
   const pic=(k,x,y,wd,o)=>{o=Object.assign({},o||{});if(/banner_long/.test(k))o.bob=.1;const key=x+','+y+','+wd[0]+','+wd[1];if(!open(x,y)||wocc.has(key)||g[y+wd[1]]===undefined||g[y+wd[1]][x+wd[0]]!=='#'||over[(x+wd[0])+','+(y+wd[1])]!==undefined){miss.push('pic '+k+'@'+x+','+y);return null}
     const d={k,x,y,block:false,walk:true,deco:true,wd:[wd[0],wd[1]],pic:1};if(o.bob!==undefined)d.bob=o.bob;if(o.npc){d.npc=o.npc;d.deco=false}decor.push(d);wocc.add(key);return d};
-  const foe=(t,x,y)=>{if(!open(x,y)||occ.has(x+','+y)||(keep.has(x+','+y))){miss.push('foe '+t+'@'+x+','+y);return false}if(!ENEMY_DEF[t]){miss.push('nodef '+t);return false}enemies.push({t,x,y,lvl:101});occ.add(x+','+y);return true};
+  const foe=(t,x,y)=>{if(!open(x,y)||occ.has(x+','+y)||(keep.has(x+','+y))){miss.push('foe '+t+'@'+x+','+y);return false}if(!ENEMY_DEF[t]){miss.push('nodef '+t);return false}const bossy=/stairwarden|antlered/.test(t);if(!bossy&&hs(x,y,41)>=.68){return false}   // the ground floor is the gentle floor: about a third fewer foes, level 100
+    enemies.push({t,x,y,lvl:bossy?101:100});occ.add(x+','+y);return true};
   const lamp=(x,y,col,k,r)=>{if(!open(x,y))return;lights.push([x,y]);lcol[x+','+y]=col||PSH_COL.cold;if(k)kI[x+','+y]=k;if(r)r2[x+','+y]=r};
   const sign=(x,y,wd,a,b)=>{if(!open(x,y)){miss.push('sign@'+x+','+y);return}decor.push({k:'sign_gy',x,y,block:false,wd:[wd[0],wd[1]],txt:[a,b||''],sc:1})};
   const COLS=['col_fluted','col_twist','col_silver'];
@@ -405,6 +419,13 @@ function pshHaunt(o){
   const by=(a,b)=>a[a.length-1]-b[b.length-1];
   const spaced=(list,n,gap,use)=>{let c=0;const got=[];list.sort(by);for(const e of list){if(c>=n)break;if(got.some(q=>Math.hypot(q[0]-e[0],q[1]-e[1])<gap))continue;if(use(e,c)!==false){got.push(e);c++}}return c};
   const cnt=o.counts||{};
+  /* never seal a square: a blocking prop is refused when it would cut any square that can be reached now from the start (flood fill) */
+  const blockedSet=new Set(o.blocked?o.blocked():[]);
+  const reach=extra=>{const r=new Set(),q=[],sx=o.start[0],sy=o.start[1];if(!o.open(sx,sy))return r;r.add(sx+','+sy);q.push([sx,sy]);
+    for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of D4){const nx=x+a,ny=y+b,k=nx+','+ny;if(r.has(k)||k===extra||blockedSet.has(k)||!o.open(nx,ny))continue;r.add(k);q.push([nx,ny])}}return r};
+  let base=o.start?reach(null):null;
+  const canBlock=(x,y)=>{if(!base)return true;const k=x+','+y;if(blockedSet.has(k))return false;const r=reach(k);for(const c of base)if(c!==k&&!r.has(c))return false;return true};
+  const didBlock=(x,y)=>{if(!base)return;blockedSet.add(x+','+y);base=reach(null)};
   out.mirror=spaced(slots.slice(),cnt.mirror||0,6,(e,i)=>{const k=key('mirror',i);if(!k)return false;return o.wallPic(k,e[0],e[1],e[2],{bob:.5,mirror:i})});
   out.portrait=spaced(slots.slice(),cnt.portrait||0,3.2,(e,i)=>{const k=key('portrait',i+(o.pi||0));if(!k)return false;return o.wallPic(k,e[0],e[1],e[2],{bob:.6,portrait:i})});
   out.sheetwin=spaced(slots.slice(),cnt.sheetwin||0,4,(e,i)=>{const k=key('sheetwin',i);if(!k)return false;return o.wallPic(k,e[0],e[1],e[2],{bob:.5})});
@@ -412,7 +433,7 @@ function pshHaunt(o){
   out.redlamp=spaced(slots.slice(),cnt.redlamp||0,6.5,(e,i)=>{const k=key('redlamp',i);if(!k)return false;const r=o.wallPic(k,e[0],e[1],e[2],{bob:1.0});if(r&&o.light)o.light(e[0],e[1],PSH_RED);return r});
   out.cobthick=spaced(narrow.slice(),cnt.cobthick||0,5,(e,i)=>{const k=key('cobthick',i);if(!k)return false;return o.floorProp(k,e[0],e[1],{block:false,thick:1})});
   out.candles=spaced(floor.slice(),cnt.candles||0,5,(e,i)=>{const k=key('candles',i);if(!k)return false;const r=o.floorProp(k,e[0],e[1],{block:false,sc:.7});if(r&&o.light)o.light(e[0],e[1],[1.6,1.0,.45]);return r});
-  out.dust=spaced(floor.slice(),cnt.dust||0,4.5,(e,i)=>{const k=key('dust',i);if(!k)return false;return o.floorProp(k,e[0],e[1],{block:true})});
+  out.dust=spaced(floor.slice(),cnt.dust||0,4.5,(e,i)=>{const k=key('dust',i);if(!k||!canBlock(e[0],e[1]))return false;const r=o.floorProp(k,e[0],e[1],{block:true});if(r)didBlock(e[0],e[1]);return r});
   out.spider=spaced(corners.slice(),cnt.spider||0,9,(e,i)=>{const k=key('spider',i);if(!k)return false;return o.floorProp(k,e[0],e[1],{block:false,sc:.6})});
   return out}
 /* little tales told by a haunted mirror and an ancestor, for the interactive touches */
@@ -436,8 +457,9 @@ function pshFurnish(S){
   PSH.mst=mst;
   const pew=(x,y)=>put(P('furn_pew_black'),x,y,{block:true});
   for(const [n,h] of [['corbel_gargoyle_a',.75],['corbel_gargoyle_b',.65],['corbel_gargoyle_c',.75]])if(!PSP_PICS[n])PSP_PICS[n]=[h,['gy_slab','gy_bench'],{}];
-  const gar=(x,y,wd)=>{const d=pic(P('st_gargoyle'),x,y,wd,{bob:1.7});if(!d)return d;   // a gargoyle crouched high, on a visible stone corbel
-    const nm=['corbel_gargoyle_a','corbel_gargoyle_b','corbel_gargoyle_c'][(x*7+y*3)%3];decor.push({k:P(nm),x,y,block:false,walk:true,deco:true,wd:[wd[0],wd[1]],pic:1,bob:1.02});return d};
+  let garN=0;   // a gargoyle crouched on a visible stone corbel, low enough (1.55) to be seen from the floor; only the best 16 of the level are kept
+  const gar=(x,y,wd)=>{if(garN>=16||hs(x,y,17)>=.55)return null;const d=pic(P('st_gargoyle'),x,y,wd,{bob:1.55});if(!d)return d;garN++;
+    const nm=['corbel_gargoyle_a','corbel_gargoyle_b','corbel_gargoyle_c'][(x*7+y*3)%3];decor.push({k:P(nm),x,y,block:false,walk:true,deco:true,wd:[wd[0],wd[1]],pic:1,bob:.88});return d};
   const vine=(x,y,wd,n)=>pic(P(n||'vine_a'),x,y,wd,{bob:.9});
   const alc=(x,y,n)=>put(P(n),x,y,{block:true});
   /* ===== A. the Entrance Hall ===== */
@@ -472,7 +494,7 @@ function pshFurnish(S){
   foe('psfiend',9,44);foe('psfiend',14,44);foe('psfiend',21,45);foe('pscarver',12,45);foe('pscourtier',23,44);
   put('chest',15,41,{block:true,force:1});
   /* the painters' closet */
-  thing('hl_p_shelf','psh_pigments',4,39);thing(P('furn_lectern_black'),'psh_easel',6,39);put(P('furn_desk'),5,38,{block:true});lamp(5,40,CO,1.6,100);
+  thing('hl_p_shelf','psh_pigments',4,39);thing(P('furn_lectern_black'),'psh_easel',6,39);put(P('furn_desk'),4,38,{block:true});lamp(5,40,CO,1.6,100);
   ghost('child','p_ghost_child',[[5,44],[23,44],[5,43],[23,45]],{sp:.55,shy:1,lines:['Shh. Nurse will find us.','Do not tell nurse I was inside the frames.']});
   put(P('furn_clock_grandfather'),11,45,{block:true});put(P('furn_clock_grandfather'),20,45,{block:true});put(P('furn_screen_tracery'),9,45,{block:true});put(P('furn_lectern_black'),16,45,{block:true});
   /* ===== C. the Hall of Statues (with alcoves, columns and a winter bay behind) ===== */
@@ -619,9 +641,7 @@ function pshFurnish(S){
   sign(32,6,N,'UP THE GRAND STAIR','The way to the state rooms. Ask the Chamberlain.');sign(38,8,Ea,'THE AUDIENCE CHAMBER','The Sovereign receives no one');
   hang(32,11,2.3);hang(32,7,1.8,V);lamp(28,7,V,1.7,120);lamp(36,7,V,1.7,120);
   /* the way up: broad mossy steps rising to the great barred double door, chains and a padlock, cold light through the bars */
-  put(P('iron_gate_big'),32,6,{block:false,force:true,sc:1.1,over:true});put(P('chains'),31,6,{block:false,force:true,over:true});put(P('chains'),33,6,{block:false,force:true,over:true});
-  put(P('arch_stair'),32,8,{block:false,force:true,sc:1.2,over:true});for(const [x,y] of [[32,7]])put(P('stairs_moss'),x,y,{block:false,force:true,over:true});
-  pic(P('vine_b'),31,6,N,{bob:.9});pic(P('vine_a'),33,6,N,{bob:.9});pic(P('banner_long_a'),30,6,N,{bob:hi});pic(P('banner_long_b'),34,6,N,{bob:hi});lamp(32,6,[.7,1.0,1.9],2.2,150);lamp(32,9,[.7,1.0,1.8],1.6,110);
+  pic(P('vine_b'),31,6,N,{bob:.9});pic(P('vine_a'),33,6,N,{bob:.9});pic(P('banner_long_a'),30,6,N,{bob:hi});pic(P('banner_long_b'),34,6,N,{bob:hi});lamp(32,6,[.5,.72,1.2],1.5,90);
   foe('psstairwarden',32,13);
   put(P('furn_organ'),28,7,{block:true});put(P('furn_altarpiece'),36,7,{block:true});put(P('furn_clock_grandfather'),27,8,{block:true});
   ghost('maid','p_ghost_maid',[[28,7],[36,7],[36,8],[28,8]],{sp:.22,clue:2,lines:['They took the key down to where the lamps do not burn.','He went up the stair and never came down.','I wash the steps every night. They will not stay clean.']});
@@ -666,7 +686,7 @@ function pshFurnish(S){
   foe('psofficer',43,22);
   /* ===== the long-abandoned house: sheets, webs, mirrors, ancestors, candles, red lanterns ===== */
   {const taken=new Set();for(const d of decor)if(d.wd)taken.add(d.x+','+d.y+','+d.wd[0]+','+d.wd[1]);let mi=0,pi=0;
-   pshHaunt({W:S.W,H:S.H,seed:9740,pi:3,open:(x,y)=>open(x,y),free:(x,y)=>S.fr(x,y)&&!S.keep.has(x+','+y),wall:(x,y,a,b)=>g[y+b]&&g[y+b][x+a]==='#'&&S.over[(x+a)+','+(y+b)]===undefined,taken:(x,y,a,b)=>taken.has(x+','+y+','+a+','+b),
+   pshHaunt({W:S.W,H:S.H,seed:9740,pi:3,start:[32,44],blocked:()=>decor.filter(d=>d.block).map(d=>d.x+','+d.y),open:(x,y)=>open(x,y),free:(x,y)=>S.fr(x,y)&&!S.keep.has(x+','+y),wall:(x,y,a,b)=>g[y+b]&&g[y+b][x+a]==='#'&&S.over[(x+a)+','+(y+b)]===undefined,taken:(x,y,a,b)=>taken.has(x+','+y+','+a+','+b),
      stand:{portrait:(i)=>pshPortrait(20+i)},
      counts:{mirror:9,portrait:16,sheetwin:9,cobcorner:20,cobthick:9,candles:14,redlamp:11,dust:9,spider:5},
      wallPic:(k,x,y,wd,o)=>{const oo={bob:o.bob};if(o.mirror!==undefined)oo.npc='psh_mir'+(mi++%12);else if(o.portrait!==undefined&&(pi++%2===0))oo.npc='psh_ancp'+(pi%8);const d=pic(k,x,y,wd,oo);return !!d},
@@ -725,7 +745,7 @@ function pshGhostTick(dt){
     d.bob=(D.sp>0?.12:.04)+.05*Math.sin(t*1.4+g.seed);
     if(dp<6)near.push([d.x,d.y,dp]);
     // whisper
-    if(D.lines&&dp<2.4&&t-g.say>16+(g.li%3)*4){g.say=t;const line=D.lines[g.li%D.lines.length];g.li++;
+    if(D.lines&&dp<2.4&&t-g.say>16+(g.li%3)*4&&t-(PSH._lastSay||-99)>8){g.say=t;PSH._lastSay=t;const line=D.lines[g.li%D.lines.length];g.li++;
       msg('"'+line+'"','#b4d0e8');PSH.chill=t;
       if(D.clue)pspClue(D.clue);
       if(D.music){try{if(typeof tone==='function'){const n=[392,440,494,587,523,440,392];n.forEach((f,i)=>{tone(f,f*.99,.5,'triangle',.04,i*.5)})}}catch(e){}}

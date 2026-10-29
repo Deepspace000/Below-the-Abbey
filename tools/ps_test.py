@@ -122,6 +122,9 @@ REACH_JS = """(args) => { const [id, thru] = args; if (!LEVELS[id]) KH_LAZY[id](
   const seen = new Set(); const q = []; for (const s of starts) { const k = s[0] + ',' + s[1]; if (!seen.has(k)) { seen.add(k); q.push(s) } }
   for (let i = 0; i < q.length; i++) { const [x, y] = q[i]; for (const [a, b] of [[1,0],[-1,0],[0,1],[0,-1]]) { const nx = x + a, ny = y + b, k = nx + ',' + ny; if (seen.has(k) || nx < 0 || ny < 0 || nx >= W || ny >= H || (L.rows[ny][nx] !== '.' && !door(nx, ny)) || bs.has(k) || tb(nx, ny)) continue; seen.add(k); q.push([nx, ny]) } }
   const lost = []; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (L.rows[y][x] === '.' && !seen.has(x + ',' + y) && !bs.has(x + ',' + y) && !tb(x, y)) lost.push([x, y]);
+  // intended secrets of the Great Halls: the Painters' Closet (4..6,38..41, opens with the brass key), the statue niche (42,39) and the frame niche (15,41)
+  const secret = (x, y) => id === 9740 && ((x >= 4 && x <= 6 && y >= 38 && y <= 41) || (x === 42 && y === 39) || (x === 15 && y === 41));
+  for (let i = lost.length - 1; i >= 0; i--) if (secret(lost[i][0], lost[i][1])) lost.splice(i, 1);
   o.lost = lost.length; o.sample = lost.slice(0, 6);
   const P = L._ps || {}, zones = P.safe || [];
   const inz = (z, x, y, e) => z.rect ? (x >= z.x0 - e && x <= z.x1 + e && y >= z.y0 - e && y <= z.y1 + e) : Math.hypot(x - z.x, y - z.y) <= z.r + e;
