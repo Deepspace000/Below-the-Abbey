@@ -41,6 +41,12 @@ def real(errs):
 
 
 FAILS = []
+ONLY = [int(a) for a in os.environ.get('PS_ONLY', '').split(',') if a]
+
+
+def only(ids):
+    """PS_ONLY=9720,9721 limits a mode to those levels (a package tests its own levels while the others are unfinished)"""
+    return [i for i in ids if not ONLY or i in ONLY]
 
 
 def check(name, ok, extra=''):
@@ -98,7 +104,7 @@ def run_links():
               if (built.includes(l.to)) { if (!LEVELS[l.to]) KH_LAZY[l.to](); const T = LEVELS[l.to]; const [x, y] = l.land;
                 if (T.rows[y][x] !== '.') o.bad.push('land square not open');
                 for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const cx = x + dx, cy = y + dy; if (T.rows[cy][cx] !== '.' && !(cx === l.land[0] && cy === l.land[1])) { const g = T.rows[cy][cx]; const dd = g !== '.' && KH_DOOR[T.chars[g]]; if (!dd) o.bad.push('3x3 not clear at ' + cx + ',' + cy) } ; if (T.decor.some(q => q.block && q.x === cx && q.y === cy)) o.bad.push('blocking decor in 3x3 at ' + cx + ',' + cy) } }
-              const tw = PSP.LINKS.find(q => q.from === l.to && q.to === l.from); if (!tw) o.bad.push('no twin')
+              const tw = PSP.LINKS.find(q => q.from === l.to && q.to === l.from); if (!tw && !l.ext) o.bad.push('no twin')
             } catch (e) { o.bad.push(String(e)) } out.push(o) } return out }""")
         for o in r:
             check('link ' + o['name'], not o['bad'], o['bad'])
@@ -110,10 +116,15 @@ def run_links():
 REACH_JS = """(args) => { const [id, thru] = args; if (!LEVELS[id]) KH_LAZY[id](); const L = LEVELS[id], W = L.rows[0].length, H = L.rows.length, o = {bad: []};
   const bs = new Set(); for (const d of L.decor) if ((d.block || (d.npc && d.solid)) && !/^psd_cell/.test(d.npc || '')) bs.add(d.x + ',' + d.y);   // a cell gate opens when the party speaks to it
   const starts = [[L.start.x, L.start.y]]; for (const l of PSP.LINKS) if (l.to === id && l.land) starts.push([l.land[0], l.land[1]]);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const c = L.rows[y][x]; const d = c !== '.' && KH_DOOR[L.chars[c]]; if (d && d.psh === 'warp' && d.A && d.B) { starts.push([d.A[0], d.A[1]]); starts.push([d.B[0], d.B[1]]) } }   // a stair warp joins its two landings
   const door = (x, y) => { const c = L.rows[y][x]; const d = c !== '.' && KH_DOOR[L.chars[c]]; return !!(d && (d.psh === 'warp' || d.psh === 'closet' || d.psh === 'niche' || d.psw === 'secret')) };   // doors inside a level that open for the party (closet key, lever, hidden niches, the warp to the lady's room); level changes and sealed doors stay shut
+  const TB = (TERRS[id] && TERRS[id].block) || null; const tb = (x, y) => !!(TB && TB[y * W + x]);   // open to the eye but closed to the feet (pits, ravines, fence cells)
   const seen = new Set(); const q = []; for (const s of starts) { const k = s[0] + ',' + s[1]; if (!seen.has(k)) { seen.add(k); q.push(s) } }
-  for (let i = 0; i < q.length; i++) { const [x, y] = q[i]; for (const [a, b] of [[1,0],[-1,0],[0,1],[0,-1]]) { const nx = x + a, ny = y + b, k = nx + ',' + ny; if (seen.has(k) || nx < 0 || ny < 0 || nx >= W || ny >= H || (L.rows[ny][nx] !== '.' && !door(nx, ny)) || bs.has(k)) continue; seen.add(k); q.push([nx, ny]) } }
-  const lost = []; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (L.rows[y][x] === '.' && !seen.has(x + ',' + y) && !bs.has(x + ',' + y)) lost.push([x, y]);
+  for (let i = 0; i < q.length; i++) { const [x, y] = q[i]; for (const [a, b] of [[1,0],[-1,0],[0,1],[0,-1]]) { const nx = x + a, ny = y + b, k = nx + ',' + ny; if (seen.has(k) || nx < 0 || ny < 0 || nx >= W || ny >= H || (L.rows[ny][nx] !== '.' && !door(nx, ny)) || bs.has(k) || tb(nx, ny)) continue; seen.add(k); q.push([nx, ny]) } }
+  const lost = []; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (L.rows[y][x] === '.' && !seen.has(x + ',' + y) && !bs.has(x + ',' + y) && !tb(x, y)) lost.push([x, y]);
+  // intended secrets of the Great Halls: the Painters' Closet (4..6,38..41, opens with the brass key), the statue niche (42,39) and the frame niche (15,41)
+  const secret = (x, y) => id === 9740 && ((x >= 4 && x <= 6 && y >= 38 && y <= 41) || (x === 42 && y === 39) || (x === 15 && y === 41));
+  for (let i = lost.length - 1; i >= 0; i--) if (secret(lost[i][0], lost[i][1])) lost.splice(i, 1);
   o.lost = lost.length; o.sample = lost.slice(0, 6);
   const P = L._ps || {}, zones = P.safe || [];
   const inz = (z, x, y, e) => z.rect ? (x >= z.x0 - e && x <= z.x1 + e && y >= z.y0 - e && y <= z.y1 + e) : Math.hypot(x - z.x, y - z.y) <= z.r + e;
@@ -126,7 +137,7 @@ REACH_JS = """(args) => { const [id, thru] = args; if (!LEVELS[id]) KH_LAZY[id](
 def run_reach():
     with sync_playwright() as p:
         b, pg, errs = boot(p)
-        for id_ in pg.evaluate(BUILT):
+        for id_ in only(pg.evaluate(BUILT)):
             r = pg.evaluate(REACH_JS, [id_, 1])
             check('reach %d (%d cut off %s)' % (id_, r['lost'], r['sample']), r['lost'] == 0 and not r['bad'], r['bad'])
         check('no page errors', not real(errs), real(errs)[:8])
@@ -148,6 +159,14 @@ def run_key():
             if o.get('skip'):
                 print('SKIP stair door', o['name'], '(level not built)'); continue
             check('locked stair door ' + o['name'], not o['bad'], o['bad'])
+        # the key now lies in the Oubliette 9800: a strongbox (npc psd_strongbox) on the dais, refused while the Hunger lives, giving pskey2 after; the jump link and the clue flow agree
+        r2 = pg.evaluate("""() => { const o = {bad: []}; if (PSP.KEY2.hiddenIn !== 9800) o.bad.push('KEY2.hiddenIn is ' + PSP.KEY2.hiddenIn);
+          const jl = (typeof PSP_JUMP !== 'undefined' && PSP_JUMP.palespirekey) || null; if (!LEVELS[9800]) KH_LAZY[9800](); const L = LEVELS[9800];
+          if (!L.decor.some(d => d.npc === 'psd_strongbox')) o.bad.push('no strongbox in 9800'); if (!L.enemies.some(e => e.t === 'pshunger')) o.bad.push('no Hunger in 9800');
+          if (typeof pspClue !== 'function') o.bad.push('no pspClue'); else { const F = G.flags.psp || (G.flags.psp = {}); F.keyClue = 0; pspClue(1); pspClue(3); if (F.keyClue !== 3) o.bad.push('clue flag ' + F.keyClue) }
+          if (!QUESTS.psq10) o.bad.push('no psq10'); else { const d = QUESTS.psq10.desc; if (!d || d.length < 20) o.bad.push('psq10 desc') }
+          return o }""")
+        check('the key lies in the Oubliette strongbox and the clue flow works', not r2['bad'], r2['bad'])
         check('no page errors', not real(errs), real(errs)[:8])
         b.close()
 
@@ -155,7 +174,7 @@ def run_key():
 def run_quests():
     with sync_playwright() as p:
         b, pg, errs = boot(p)
-        for id_ in pg.evaluate(BUILT):   # some packages register their people when their level is first built
+        for id_ in only(pg.evaluate(BUILT)):   # some packages register their people when their level is first built
             enter(pg, id_)
         r = pg.evaluate("""() => { const o = {def: [], undef: [], bad: []}; for (let n = 1; n <= 38; n++) { const id = 'psq' + n; const q = QUESTS[id];
           if (!q) { o.undef.push(id); continue } o.def.push(id); const bad = [];
@@ -171,7 +190,7 @@ def run_quests():
 def run_walk():
     with sync_playwright() as p:
         b, pg, errs = boot(p)
-        for id_ in pg.evaluate(BUILT):
+        for id_ in only(pg.evaluate(BUILT)):
             enter(pg, id_)
             r = pg.evaluate("""(id) => { const L = LEVELS[id], o = {bad: [], doors: 0};
           const W = G.grid[0].length, H = G.grid.length; const reach = new Set([G.P.x + ',' + G.P.y]); const q = [[G.P.x, G.P.y]];
@@ -186,7 +205,7 @@ def run_walk():
 def run_save():
     with sync_playwright() as p:
         b, pg, errs = boot(p)
-        for id_ in pg.evaluate(BUILT):
+        for id_ in only(pg.evaluate(BUILT)):
             enter(pg, id_)
             ok = pg.evaluate("""(id) => { const L = LEVELS[id]; writeSave('auto'); const sv = readSave('auto'); if (!sv || sv.level !== id) return 'save level ' + (sv && sv.level); restore(sv); return LEVEL === id ? 'ok' : 'loaded ' + LEVEL }""", id_)
             pg.wait_for_timeout(600)

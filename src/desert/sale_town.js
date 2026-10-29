@@ -121,6 +121,11 @@ function saBuild(){
     if(SA.ROAD)Object.assign(lv.portals[1],{to:SA.ROAD.to,x:SA.ROAD.x,y:SA.ROAD.y,f:SA.ROAD.f,req:undefined,lock:undefined});
     // a gate house of two pointed lanterns
     for(const y of [SA_Y-2,SA_Y+2]){if(solidDc('gy_lantern',68,y))lights.push([68,y])}}
+  // ---- the WEST gate (Pale Spire redesign): a gate tile in the wall at PSP.SALE.gate, one open square before it, leading up the castle road to the Pale Approach (9720) ----
+  if(typeof PSP!=='undefined'){const gh=2.6,pil=ch(TM.make('plain','sa_black',gh).gid),gc=pch(2),gx=PSP.SALE.gate[0],gy=PSP.SALE.gate[1];
+    solid(gx,gy-1,pil);solid(gx,gy+1,pil);rows[gy][gx]=gc;block[gy*W+gx]=0;rows[gy][gx+1]='.';block[gy*W+gx+1]=0;
+    lv.portals[2]={to:PSP.ENTRY.id,x:PSP.ENTRY.x,y:PSP.ENTRY.y,f:PSP.ENTRY.f,tex:'sagate'};
+    for(const y of [gy-2,gy+2]){if(solidDc('gy_lantern',3,y))lights.push([3,y])}}
   // ---- the buildings ----
   const STYS=['sa_slate','sa_moss','sa_black','sa_bone','sa_brick','sa_ash'],houses=SA_HOUSES;
   houses.forEach((h,k)=>{
