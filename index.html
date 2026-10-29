@@ -73435,9 +73435,13 @@ async function pshLoadOwn(){
   await Promise.all(PSH_EXTRA.filter(a=>!IMG[a[0]]).map(a=>loadImg(a[0],'assets/'+a[1]).catch(()=>0)));
   try{if(!PSH.man)PSH.man=await (await fetch('assets/ps/manifest.json?v='+VERSION)).json()}catch(e){PSH.man={}}
   await Promise.all(Object.keys(PSH.man||{}).filter(k=>!IMG['ps_'+k]||IMG['ps_'+k]._ps).map(k=>loadImg('ps_'+k,'assets/ps/'+(PSH.man[k].file||k+'.png')).then(()=>{if(IMG['ps_'+k]&&PSH.man[k].h)NPC_H['ps_'+k]=PSH.man[k].h}).catch(()=>0)))}
+/* retone the painted pieces that sit outside the palette (orange banners, magenta-fringed iron, bright brown): a filtered copy replaces the image, once */
+function pshRetone(){
+  for(const [n,f] of [['banner_long_a','hue-rotate(150deg) saturate(.5) brightness(.55)'],['banner_long_b','hue-rotate(-12deg) saturate(.55) brightness(.5)'],['furn_candelabra_black','saturate(.3)'],['pt_feast','saturate(.55) brightness(.9)'],['rose_pale','saturate(.5)'],['hl_p_shelf','saturate(.45) brightness(.8)'],['hl_p_coffin','saturate(.35) brightness(.85)'],['col_fluted','saturate(.2)'],['col_twist','saturate(.2)'],['col_silver','saturate(.2)'],['furn_table_long_black','saturate(.2)'],['furn_chair_dining_black','saturate(.2)'],['furn_pew_black','saturate(.2)'],['furn_screen_tracery','saturate(.2)'],['furn_sideboard','saturate(.2)'],['furn_wardrobe','saturate(.2)'],['furn_clock_grandfather','saturate(.5)']]){
+    const k=n.startsWith('hl_')?n:'ps_'+n,im=IMG[k];if(!im||!im.width||im._rt)continue;const c=pshFilt(k,f);if(c){c._rt=1;IMG[k]=c}}}
 function pshLoad(){
   if(PSH.loading)return PSH.loading;
-  PSH.loading=Promise.all([gyLoad(),typeof khLoadAssets==='function'?khLoadAssets():0,pshLoadOwn()]).then(()=>{try{gyAlias();pshPics()}catch(e){console.error('pshLoad',e)}PSH.ready=true}).catch(e=>{console.error('pshLoad',e);PSH.ready=true});
+  PSH.loading=Promise.all([gyLoad(),typeof khLoadAssets==='function'?khLoadAssets():0,pshLoadOwn()]).then(()=>{try{gyAlias();pshPics();pshRetone()}catch(e){console.error('pshLoad',e)}PSH.ready=true}).catch(e=>{console.error('pshLoad',e);PSH.ready=true});
   return PSH.loading}
 {const _g=goToLevel;goToLevel=function(n,entry){
   if(pshIs(n)&&!PSH.ready){if(!PSH._wait){PSH._wait=1;pshLoad().then(()=>{PSH._wait=0;goToLevel(n,entry)})}return}
@@ -73472,8 +73476,8 @@ function pshFrame(inner,w,h,o){o=o||{};const t=Math.round(Math.min(w,h)*.085)+4,
   x.fillStyle='rgba(20,10,30,.18)';x.fillRect(t,t,w,h);x.strokeStyle='rgba(0,0,0,.55)';x.lineWidth=3;x.strokeRect(t+1.5,t+1.5,w-3,h-3);return c}
 const PSH_POOL=['hl_pt0','hl_pt1','hl_pt2','hl_pt3','hl_pt4','hl_pt5'];
 function pshPortrait(i){ // the i-th stand-in portrait: six painted ones, flipped and re-coloured so that no two neighbours match
-  const src=PSH_POOL[i%6],hue=[0,25,-30,60,-60,110,150,-100][((i/6)|0)%8],flip=((i/3)|0)%2===1,k='pshpt'+i;if(IMG[k])return k;
-  const c=pshFilt(src,'hue-rotate('+hue+'deg) saturate('+(.55+((i*7)%5)*.12)+') brightness('+(.85+((i*3)%4)*.07)+')',flip);if(!c)return 'ps_pt_king';c._ps=1;IMG[k]=c;NPC_H[k]=1.35;return k}
+  const src=PSH_POOL[i%6],hue=[0,12,-14,22,-20,8,-8,16][((i/6)|0)%8],flip=((i/3)|0)%2===1,k='pshpt'+i;if(IMG[k])return k;
+  const c=pshFilt(src,'hue-rotate('+hue+'deg) saturate('+(.4+((i*7)%5)*.06)+') brightness('+(.85+((i*3)%4)*.07)+')',flip);if(!c)return 'ps_pt_king';c._ps=1;IMG[k]=c;NPC_H[k]=1.35;return k}
 function pshPics(){
   const S=(n,cv,h)=>pshSet(n,cv,h);
   S('col_fluted',pshFilt('ds_dpillar1','grayscale(1) brightness(.5) contrast(1.15) sepia(.45) hue-rotate(195deg)'),3.0);
@@ -73526,7 +73530,7 @@ function pshPics(){
     const blk='brightness(.52) contrast(1.15) saturate(.5) sepia(.2) hue-rotate(195deg)';
     for(const [n,src,h] of PSH_FURN)S(n,pshFilt(src,blk),h);
     // long banners: the old banner stretched tall, aged brass and orange-brown
-    for(const [n,flip,f] of [['banner_long_a',false,'hue-rotate(22deg) saturate(.9) brightness(.58)'],['banner_long_b',true,'hue-rotate(12deg) saturate(.7) brightness(.5)']]){const b=pshFilt('hl_p_banner',f,flip);
+    for(const [n,flip,f] of [['banner_long_a',false,'hue-rotate(150deg) saturate(.55) brightness(.5)'],['banner_long_b',true,'hue-rotate(-8deg) saturate(.6) brightness(.42)']]){const b=pshFilt('hl_p_banner',f,flip);
       if(b){const c=pshCv(Math.round(b.width*.62),Math.round(b.height*1.5)),x=c.getContext('2d');x.drawImage(b,0,0,c.width,c.height);S(n,c,3.0)}}
     // ghosts: pale, cold, see-through
     const gf='saturate(.2) brightness(1.15) hue-rotate(190deg) opacity(.62)';
@@ -73582,7 +73586,7 @@ function pshFloors(){
   FLOORS.psf_run=mk((x,y)=>{const e=Math.min(x,y,N-1-x,N-1-y);if(e<5)return [40,22,16];if(e<9)return [170,130,70];if(e<12)return [56,28,18];const lx=Math.abs((x%32)-16)+Math.abs((y%32)-16);let v=lx<9?1.2:1;const n=hh(x>>1,y>>1,807)*.1;return [(98*v)*(1+n),(46*v)*(1+n),(30*v)*(1+n)]});
   FLOORS.psf_wood=mk((x,y)=>{const pl=Math.floor(y/16),e=y%16,v=.62+hh(pl,(x>>5)+pl,808)*.28+vn(x,y,16,809)*.14;if(e<1.2)return [14,12,12];return [60*v,52*v,44*v]});
   FLOORS.psf_carpet=mk((x,y)=>{const e=Math.min(x,y,N-1-x,N-1-y);if(e<4)return [30,70,52];if(e<8)return [170,150,90];const lx=Math.abs((x%32)-16)+Math.abs((y%32)-16);const v=lx<7?1.15:1,n=hh(x,y,810)*.1;return [(70*v)*(1+n),(104*v)*(1+n),(82*v)*(1+n)]});
-  FLOORS.psf_dais=mk((x,y)=>{const e=Math.min(x,y,N-1-x,N-1-y);if(e<2)return [14,18,28];const v=vn(x,y,32,811)*.5+vn(x,y,8,812)*.3;return [66+v*34,78+v*40,102+v*36]});
+  FLOORS.psf_dais=mk((x,y)=>{const e=Math.min(x,y,N-1-x,N-1-y);if(e<2)return [14,18,28];const v=vn(x,y,32,811)*.5+vn(x,y,8,812)*.3;return [62+v*32,72+v*36,88+v*30]});
   FLOORS.psf_black=mk((x,y)=>{const e=Math.min(x%64,y%64,63-x%64,63-y%64);if(e<1.4)return [8,10,14];const v=vn(x,y,32,813)*.5+vn(x,y,8,814)*.4,vein=Math.abs(Math.sin(x*.05-y*.06+vn(x,y,32,815)*4))<.05?40:0;return [18+v*18+vein*.6,22+v*20+vein*.8,32+v*26+vein]});
   if(typeof gyFloorTone==='function'&&FLOORS.gyf_grass)gyFloorTone('psf_grass','gyf_grass',.72,[.78,.95,.88]);
   // the painted textures (assets/ps tex_*) replace the code-drawn flagstone, black marble and vault when they are loaded
@@ -73604,8 +73608,8 @@ const PSH_STYLES={
   salon:{tex:'texBlack_1',rgb:[.7,.86,1.06],gain:1.4,trim:'#b8a070',band:'rgba(8,16,30,.52)',silk:'#2a3858'},
   trophy:{tex:'texBlack_3',rgb:[.9,.84,.8],gain:1.35,trim:'#a07a48',band:'rgba(28,18,12,.7)',wood:1},
   screens:{tex:'texBlack_3',rgb:[.86,.84,.82],gain:1.35,trim:'#907850',band:'rgba(22,16,12,.75)',wood:1},
-  lady:{tex:'texBone_0',rgb:[1.1,.96,.8],gain:1.0,trim:'#e8d0a0',band:'rgba(110,70,50,.35)',silk:'#8a6458'},
-  stair:{tex:'texBlack_4',rgb:[.66,.8,1.02],gain:1.45,trim:'#a89060',band:'rgba(4,8,18,.72)'},
+  lady:{tex:'texBlack_2',rgb:[.84,.82,.92],gain:1.4,trim:'#b89a60',band:'rgba(16,10,18,.62)',silk:'#3a2634'},
+  stair:{tex:'texBlack_4',rgb:[.7,.82,.98],gain:1.35,trim:'#a89060',band:'rgba(4,8,18,.72)'},
   closet:{tex:'texBlack_3',rgb:[.9,.86,.78],gain:1.25,trim:'#98846a',band:'rgba(24,20,16,.5)'}};
 function pshTile(style,kind,v){
   const S=PSH_STYLES[style],WH=PSH.WH,key=style+kind+(v||0);PSH._tl=PSH._tl||{};if(PSH._tl[key]!==undefined)return PSH._tl[key];
@@ -73628,11 +73632,11 @@ function pshTile(style,kind,v){
         x.fillStyle='rgba(255,255,255,.55)';for(let j=0;j<6;j++){x.fillRect(cx-hw+8+((j*13)%50),top+10+((j*29)%(bot-top-20)),4,10)}}
       else{const g=x.createLinearGradient(0,top,0,bot);g.addColorStop(0,'#1c1830');g.addColorStop(1,'#0a0814');x.fillStyle=g;x.fillRect(0,0,w,h);
         // ivy creeping in from the top and the sides of the bay
-        x.fillStyle='#2f5a34';for(let i=0;i<46;i++){const px=cx-hw+((i*37)%(hw*2)),py=top+((i*i*11)%((bot-top)*.55));x.beginPath();x.ellipse(px,py,5+((i*3)%4),3+(i%3),((i*7)%6)/2,0,6.3);x.fill()}x.fillStyle='#4a7e46';for(let i=0;i<24;i++){x.beginPath();x.ellipse(cx-hw+((i*53)%(hw*2)),top+((i*29)%((bot-top)*.5)),3,2,i,0,6.3);x.fill()}}
+        x.fillStyle='#1f3a26';for(let i=0;i<16;i++){const px=cx-hw+((i*37)%(hw*2)),py=top+((i*i*11)%((bot-top)*.55));x.beginPath();x.ellipse(px,py,5+((i*3)%4),3+(i%3),((i*7)%6)/2,0,6.3);x.fill()}x.fillStyle='#2c4a2e';for(let i=0;i<6;i++){x.beginPath();x.ellipse(cx-hw+((i*53)%(hw*2)),top+((i*29)%((bot-top)*.5)),3,2,i,0,6.3);x.fill()}}
       x.restore();
       x.strokeStyle=S.trim;x.lineWidth=5;x.beginPath();x.moveTo(cx-hw,bot);x.lineTo(cx-hw,top+hw*1.1);x.quadraticCurveTo(cx-hw,top,cx,top-hw*.35);x.quadraticCurveTo(cx+hw,top,cx+hw,top+hw*1.1);x.lineTo(cx+hw,bot);x.stroke();
       x.strokeStyle='rgba(0,0,0,.5)';x.lineWidth=2;x.stroke()}
-    if(kind==='ivy'){x.fillStyle='#2c5632';for(let i=0;i<150;i++){const px=(i*53)%w,py=h*(Math.pow(((i*37)%100)/100,1.5))*.85,r=3+((i*5)%5);x.globalAlpha=.9;x.beginPath();x.ellipse(px,py,r,r*.6,((i*3)%6)/2,0,6.3);x.fill()}
+    if(kind==='ivy'){x.fillStyle='#1e3a26';for(let i=0;i<110;i++){const px=(i*53)%w,py=h*(Math.pow(((i*37)%100)/100,1.5))*.85,r=3+((i*5)%5);x.globalAlpha=.7;x.beginPath();x.ellipse(px,py,r,r*.6,((i*3)%6)/2,0,6.3);x.fill()}
       x.fillStyle='#4c8248';for(let i=0;i<80;i++){x.beginPath();x.ellipse((i*71)%w,h*(((i*41)%100)/100)*.8,3,2,i,0,6.3);x.fill()}x.globalAlpha=1}
     if(kind==='plain'&&!S.wood&&!S.silk){const arch=(cx2,hw2,top2,bot2,al)=>{x.beginPath();x.moveTo(cx2-hw2,bot2);x.lineTo(cx2-hw2,top2+hw2*1.2);x.quadraticCurveTo(cx2-hw2,top2+hw2*.1,cx2,top2-hw2*.3);x.quadraticCurveTo(cx2+hw2,top2+hw2*.1,cx2+hw2,top2+hw2*1.2);x.lineTo(cx2+hw2,bot2);x.closePath();x.fillStyle='rgba(0,0,0,'+al+')';x.fill();x.strokeStyle=S.trim;x.globalAlpha=.55;x.lineWidth=3;x.stroke();x.globalAlpha=1};
       // no blind arches: tall arched recesses read as doors that lead nowhere
@@ -73644,7 +73648,7 @@ function pshTile(style,kind,v){
     if(kind==='face'){const cx=w/2,cy=h*.42;x.fillStyle='rgba(130,146,170,.55)';x.beginPath();x.ellipse(cx,cy,26,34,0,0,6.3);x.fill();x.strokeStyle='rgba(0,0,0,.7)';x.lineWidth=3;x.stroke();x.fillStyle='#02040a';x.beginPath();x.ellipse(cx-10,cy-8,6,8,.3,0,6.3);x.fill();x.beginPath();x.ellipse(cx+10,cy-8,6,8,-.3,0,6.3);x.fill();
       x.fillStyle='#8cd8ff';x.globalAlpha=.8;x.beginPath();x.arc(cx-10,cy-6,2.2,0,6.3);x.fill();x.beginPath();x.arc(cx+10,cy-6,2.2,0,6.3);x.fill();x.globalAlpha=1;x.fillStyle='#02040a';x.beginPath();x.ellipse(cx,cy+16,10,13,0,0,6.3);x.fill();x.strokeStyle='rgba(0,0,0,.6)';x.lineWidth=2;x.beginPath();x.moveTo(cx-6,cy+3);x.lineTo(cx,cy+8);x.lineTo(cx+6,cy+3);x.stroke();
       x.fillStyle='rgba(130,146,170,.5)';for(const s2 of [-1,1]){x.beginPath();x.moveTo(cx+s2*22,cy-24);x.lineTo(cx+s2*40,cy-50);x.lineTo(cx+s2*12,cy-30);x.closePath();x.fill()}}
-    if(kind==='pilaster'){x.fillStyle='rgba(255,255,255,.1)';x.fillRect(w*.3,0,w*.4,h);x.fillStyle='rgba(0,0,0,.18)';x.fillRect(w*.3,0,3,h);x.fillRect(w*.7-3,0,3,h);x.fillStyle=S.trim;x.globalAlpha=.6;x.fillRect(w*.26,0,w*.48,5);x.fillRect(w*.26,h-wain-7,w*.48,6);x.globalAlpha=1}
+    if(kind==='pilaster'){x.fillStyle='rgba(0,0,0,.1)';x.fillRect(w*.3,0,w*.4,h);x.fillStyle='rgba(0,0,0,.18)';x.fillRect(w*.3,0,3,h);x.fillRect(w*.7-3,0,3,h);x.fillStyle=S.trim;x.globalAlpha=.6;x.fillRect(w*.26,0,w*.48,5);x.fillRect(w*.26,h-wain-7,w*.48,6);x.globalAlpha=1}
   };
   return PSH._tl[key]=gyTile(tex,WH,{gain:S.gain,rgb:S.rgb,tag:'psh_'+key,draw});
 }
@@ -73696,7 +73700,7 @@ const PSH_ROOMS=[ // k, rectangles (inner floor), wall style, floor slot, name
   ['N',[[26,18,38,38]],'hall','0','The Great Nave'],
   ['I',[[26,6,38,17]],'stair','5','The Grand Stair Hall'],
   ['G',[[11,6,24,15]],'salon','0','The Music Salon'],
-  ['H',[[4,4,9,10]],'lady','4',"The Lady's Withdrawing Room"],
+  ['H',[[4,4,9,10]],'lady','3',"The Lady's Withdrawing Room"],
   ['D',[[8,19,24,27]],'hall','0','The Dining Hall'],
   ['E',[[3,29,24,31]],'screens','1','The Screens Passage'],
   ['M',[[8,33,24,35]],'screens','3',"The Minstrels' Gallery"],
@@ -73783,7 +73787,7 @@ function pshBuild(){
     if(g[y][x]==='.'){s+='.';continue}
     const k=x+','+y;
     if(over[k]!==undefined){s+=ch(over[k]);continue}
-    const st=styleAt(x,y);let kd=kindAt[k]||'plain';const v=(hs(x,y,3)*2)|0;if(kd==='plain'&&hs(x,y,5)<.2&&st!=='lady'&&st!=='closet')kd='ivy';
+    const st=styleAt(x,y);let kd=kindAt[k]||'plain';const v=(hs(x,y,3)*2)|0;if(kd==='face'||kd==='ivy')kd='plain';
     s+=ch(pshTile(st,kd,kd==='plain'?v:0))}rows.push(s)}
   // the door records: which tile number is which door
   for(const d of doorRec){const c=rows[d.at[1]][d.at[0]],gid=chars[c];KH_DOOR[gid]={psh:'link',link:d.link,get lvl(){return d.link.to},get at(){const q=d.link.land;return {x:q[0],y:q[1],f:q[2]}},kind:d.kind}}
@@ -73806,7 +73810,7 @@ LEVEL_NAMES[9740]='The Ground Floor: the Great Halls';LEVEL_RATING[9740]=101;
 for(const n of ['a','b','c']){PSP_PICS['mirror_haunted_'+n]=[2.2,['hl_p_mirror'],{dark:1}];PSP_PICS['candles_glow_'+n]=[.8,['hl_p_candle'],{keep:1}]}
 const PSH_HP={mirror:['mirror_haunted_a','mirror_haunted_b','mirror_haunted_c'],portrait:[1,2,3,4,5,6,7,8].map(i=>'portrait_ancestor_'+i),sheetwin:['window_sheeted_a','window_sheeted_b','window_sheeted_c'],
   cobcorner:['cobweb_corner_a','cobweb_corner_b'],cobthick:['cobweb_thick_a','cobweb_thick_b','cobweb_thick_c'],candles:['candles_glow_a','candles_glow_b','candles_glow_c'],redlamp:['lantern_red_a','lantern_red_b'],dust:['dust_sheet_furniture_a','dust_sheet_furniture_b'],spider:['web_spider'],bedweb:['bed_cobweb_a','bed_cobweb_b']};
-const PSH_RED=[1.7,.32,.26];
+const PSH_RED=[1.25,.3,.24];
 const pshPainted=n=>{const k='ps_'+n;return IMG[k]&&!IMG[k]._ps?k:null};
 function pshHaunt(o){
   const W=o.W,H=o.H,D4=[[0,-1],[1,0],[0,1],[-1,0]],hs=(a,b,c)=>hash2(a,b,c+(o.seed||0)),out={};
@@ -73983,7 +73987,7 @@ function pshFurnish(S){
   ghost('trayA','p_ghost_diner',[[4,30],[22,30],[4,30]],{sp:.4,lines:['Mind your back, sir.']});
   ghost('trayB','p_ghost_maid',[[22,29],[5,29],[22,29]],{sp:.35,lines:['The soup is cold. It was always cold.']});
   /* ===== M. the Minstrels' Gallery (up the narrow stair): a balcony strip over the dining hall ===== */
-  for(let x=10;x<=23;x++)if(x!==22)put(P('iron_rail'),x,33,{});
+  for(const x of [11,15,19])put('ps_urn_pale',x,33,{block:true});
   for(const x of [12,17])col(x,34,2);
   put(P('furn_harpsichord_black'),10,35,{block:true});put(P('furn_chair_dining_black'),12,35,{block:true});put(P('furn_candelabra_black'),16,35,{block:true});
   for(const x of [9,13,19])mark(x,36,'face');
@@ -74027,11 +74031,11 @@ function pshFurnish(S){
   for(const x of [5,7,9])mark(x,3,'win');
   pic(P('furn_mirror_gothic'),4,8,We,{bob:hi});wall(pt(160),[[4,6],[4,9]],We,{bob:hi});pic(pt(161),9,10,So,{bob:hi});
   put(P('furn_candelabra_black'),4,10,{block:true});put(P('furn_candelabra_black'),8,10,{block:true});put('ps_urn_big',9,5,{block:true});
-  for(const [x,y] of [[5,8],[8,8],[6,4],[5,10],[9,9]])lamp(x,y,WM,1.9,140);
+  for(const [x,y] of [[5,8],[8,8],[6,4]])lamp(x,y,PSH_COL.gold,1.2,110);
   put(P('furn_wardrobe'),9,6,{block:true});put(P('furn_cradle'),4,4,{block:true});put(P('furn_desk'),6,10,{block:true});put(P('furn_screen_tracery'),7,7,{block:true});put(P('furn_clock_grandfather'),9,4,{block:true});
   /* ===== I. the Grand Stair Hall ===== */
   for(const x of [29,31,33,35])mark(x,5,'win');mark(30,5,'pilaster');mark(34,5,'pilaster');mark(28,5,'ivy');mark(36,5,'ivy');mark(27,5,'face');mark(37,5,'face');
-  for(let y=9;y<=16;y++){put('ps_balustrade',30,y,{block:true});put('ps_balustrade',34,y,{block:true})}
+  for(let y=9;y<=15;y+=2){col(30,y,y);col(34,y,y+1)}
   put(PSH.st(3),30,8,{block:true});put(PSH.st(5),34,8,{block:true});
   for(const x of [27,29])pic(P('alcove_knight'),x,6,N,{bob:.2});
   for(const x of [35,37])pic(P('alcove_maiden'),x,6,N,{bob:.2});
@@ -74053,7 +74057,6 @@ function pshFurnish(S){
   for(let x=42;x<=55;x++){if((x-42)%5===2)put(P('furn_candelabra_black'),x,30,{block:true});else put(P('furn_table_long_black'),x,30,{block:true,sc:.8})}
   for(let x=43;x<=55;x+=2){put(P('furn_chair_dining_black'),x,29,{block:true});put(P('furn_chair_dining_black'),x,31,{block:true})}
   thing(P('furn_chair_dining_black'),'psh_headchair',41,30);thing('hl_p_note','psh_sheet3',56,30,{sc:.5});
-  for(let x=41;x<=59;x++)if(x!==50&&x!==51)put('ps_balustrade',x,26,{block:true});
   for(const x of [43,47,55,59])pic(PB(),x,26,N,{bob:hi});
   for(const x of [41,45,49,53,57])mark(x,25,'win');
   for(const x of [42,52,58])mark(x,25,'face');
@@ -74089,7 +74092,7 @@ function pshFurnish(S){
   {const taken=new Set();for(const d of decor)if(d.wd)taken.add(d.x+','+d.y+','+d.wd[0]+','+d.wd[1]);let mi=0,pi=0;
    pshHaunt({W:S.W,H:S.H,seed:9740,pi:3,start:[32,44],blocked:()=>decor.filter(d=>d.block).map(d=>d.x+','+d.y),open:(x,y)=>open(x,y),free:(x,y)=>S.fr(x,y)&&!S.keep.has(x+','+y),wall:(x,y,a,b)=>g[y+b]&&g[y+b][x+a]==='#'&&S.over[(x+a)+','+(y+b)]===undefined,taken:(x,y,a,b)=>taken.has(x+','+y+','+a+','+b),
      stand:{portrait:(i)=>pshPortrait(20+i)},
-     counts:{mirror:9,portrait:16,sheetwin:9,cobcorner:20,cobthick:9,candles:14,redlamp:11,dust:9,spider:5},
+     counts:{mirror:9,portrait:16,sheetwin:9,cobcorner:20,cobthick:9,candles:14,redlamp:11,dust:5,spider:5},
      wallPic:(k,x,y,wd,o)=>{const oo={bob:o.bob};if(o.mirror!==undefined)oo.npc='psh_mir'+(mi++%12);else if(o.portrait!==undefined&&(pi++%2===0))oo.npc='psh_ancp'+(pi%8);const d=pic(k,x,y,wd,oo);return !!d},
      floorProp:(k,x,y,o)=>!!put(k,x,y,o),
      light:(x,y,c)=>lamp(x,y,c,1.3,70)})}}
