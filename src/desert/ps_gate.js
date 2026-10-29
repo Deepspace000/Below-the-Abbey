@@ -27,13 +27,17 @@ if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push('psgatecaptain');
 if(typeof BOSS_GOLD!=='undefined')BOSS_GOLD.psgatecaptain=[4200,5200];
 if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^ps(guard|halberd|archer|sentinel)/,'shaken',.12],[/^psgatecaptain/,'shaken',.25]);
 /* pictures this package asks the art agent for (stand-ins until painted): the clock-tower gate, long banners, buttresses */
-for(const [n,h,src] of [['gate_clock',5.0,['gy_crypt','gy_mausoleum']],['banner_long_a',3.2,['hl_p_banner','mw_banner']],['banner_long_b',3.2,['hl_p_banner','mw_banner']],['buttress_a',3.6,['gy_column','gy_crypt']],['buttress_b',3.6,['gy_column','gy_crypt']],['pillar_lantern',2.4,['gy_column','gy_crypt']],['skull_pillar',1.4,['gy_column','gy_crypt']]])if(!PSP_PICS[n])PSP_PICS[n]=[h,src,{}];
+for(const [n,h,src] of [['gate_clock',5.0,['gy_crypt','gy_mausoleum']],['banner_long_a',3.2,['hl_p_banner','mw_banner']],['banner_long_b',3.2,['hl_p_banner','mw_banner']],['buttress_a',3.6,['gy_column','gy_crypt']],['buttress_b',3.6,['gy_column','gy_crypt']],['pillar_lantern',2.4,['gy_column','gy_crypt']],['skull_pillar',1.4,['gy_column','gy_crypt']],['sconce_black',1.3,['gy_lantern','gy_column']]])if(!PSP_PICS[n])PSP_PICS[n]=[h,src,{}];
 /* the haunted dressing the owner asked for (painted pieces are dropped into assets/ps by the art agent; until then these show as darkened stand-ins) */
 for(const [n,h,src] of [['window_sheeted_a',2.4,['ps_window_slit','gy_crypt']],['window_sheeted_b',2.4,['ps_window_slit','gy_crypt']],['window_sheeted_c',2.4,['ps_window_slit','gy_crypt']],['bed_cobweb_a',2.6,['ps_bed_four','gy_crypt']],['bed_cobweb_b',2.6,['ps_bed_four','gy_crypt']],
   ['cobweb_corner_a',1.8,['gy_web','gy_crypt']],['cobweb_corner_b',1.8,['gy_web','gy_crypt']],['cobweb_thick_a',2.6,['gy_web','gy_crypt']],['cobweb_thick_b',2.6,['gy_web','gy_crypt']],['cobweb_thick_c',2.6,['gy_web','gy_crypt']],['web_spider',.6,['gy_web','gy_bones']],
   ['mirror_haunted_a',2.0,['ps_furn_mirror_gothic','gy_crypt']],['mirror_haunted_b',2.0,['ps_furn_mirror_gothic','gy_crypt']],['mirror_haunted_c',2.0,['ps_furn_mirror_gothic','gy_crypt']],
   ['candles_glow_a',.8,['hl_p_candle','gy_candle']],['candles_glow_b',.8,['hl_p_candle','gy_candle']],['candles_glow_c',.8,['hl_p_candle','gy_candle']],['lantern_red_a',1.2,['ps_lantern_hanging','gy_lantern']],['lantern_red_b',1.2,['ps_lantern_hanging','gy_lantern']],
   ...[1,2,3,4,5,6,7,8].map(i=>['portrait_ancestor_'+i,1.5,['ps_pt_ancestors','ps_pt_king','gy_crypt']])])if(!PSP_PICS[n])PSP_PICS[n]=[h,src,{}];
+/* owner rule: a door, gate or arch stands only in a real wall cell or is a real link. Free-standing arch pieces on open floor go nowhere, so every builder drops them before it finishes. */
+const PSG_ARCHES=['arch_high','arch_low','arch_ivy','arch_iron','arch_stair','bridge_arch','gate_clock','rose_arch'];
+function psgNoLooseArch(C){const ks=new Set(PSG_ARCHES.map(n=>pspPic(n)));const d=C.decor;for(let i=d.length-1;i>=0;i--){const e=d[i];if(ks.has(e.k)&&!e.wd&&C.rows[e.y]&&C.rows[e.y][e.x]==='.')d.splice(i,1)}}
+const PSG_GOLD=[1.8,1.2,.55];
 const PSG_RED=[1.7,.42,.3];
 /* hung on a wall: C.picture with a lift; web on an arch or in a corner; a red lantern with its light; a sheet over a window */
 function psgHaunt(C,list){for(const [k,name,x,y,a,b] of list){if(!C.isOpen(x,y))continue;
@@ -110,6 +114,7 @@ function psgBuildApproach(info){
   /* lanes and plaza */
   PSG_LEG.forEach(([y,h,x0,x1])=>carve(x0,y,x1,y+1,'cobble'));
   carve(28,50,36,53,'flag');carve(31,22,33,22,'flag');
+  PSG_LEG.forEach(([y,h,x0,x1])=>{for(let x=x0;x<=x1;x++)C.setFloorCell(x,y+1,'flagdark')});   // road edging: a dark dressed-flag kerb along the wall side of every lane, a cobble lane between it and the fence kerb
   /* connectors (stair passages) */
   [[6,46,7,50,1.2,.3,45,51],[51,39,52,43,2.1,1.2,38,44],[12,32,13,36,3.0,2.1,31,37],[45,25,46,29,3.9,3.0,24,30]].forEach(([a,b,c,d,hN,hS,ry0,ry1])=>{carve(a,b,c,d,'flag');C.rise(a,ry0,c,ry1,hN,hS,'y')});
   /* bands between the legs: fence row, three pit rows, the retaining wall row */
@@ -176,10 +181,11 @@ function psgBuildApproach(info){
   B.forEach((bd,k)=>{
     bd.cells.forEach((x,i)=>{
       if(i%9===4&&x>bd.cells[0]+1&&x<bd.cells[bd.cells.length-1]-1){post(x,bd.y-1,[.6,.85,1.0])}
+      else if(((i+k*3)%11===7||(i+k*3)%11===8)&&x>bd.cells[0]+2&&x<bd.cells[bd.cells.length-1]-2){if(k%2)C.prop('moss_rock',x,bd.y-1,{block:false,sc:.8})}   // a two-square gap in the fence now and then (the drop is still unwalkable)
       else C.prop(FENCE[(x+k)&1],x,bd.y-1,{block:false,maxW:1.02});
       const cl=hs((x/3)|0,bd.y,40)<.5;                                   // clumps three squares wide, every other clump bare
       for(let y=bd.y-4;y<=bd.y-2;y++){const r=hs(x,y,41);
-        if(cl&&r<.3)C.prop('rose_pale',x,y,{block:false,sc:.9+hs(x,y,42)*.4});
+        if(cl&&r<.3&&k%2===0)C.prop('rose_pale',x,y,{block:false,sc:.9+hs(x,y,42)*.4});
         else if(cl&&r<.42)C.prop('ivy_clump',x,y,{block:false});
         else if(!cl&&r<.07)C.prop('moss_rock',x,y,{block:false});
         else if(r>.97)C.dec('gy_bones',x,y,{block:false,sc:.7});
@@ -220,6 +226,12 @@ function psgBuildApproach(info){
         else if(kind==='plin'){C.prop('statue_plinth',x,sy,{block:true})}
         else if(kind==='tree'){D(pspPic('moss_rock'),x,sy,{block:false,sc:.6})}}
       x+=STEP[(i+k)%STEP.length]}});
+  /* the plain wall between the rhythm pieces is broken up: lit slit windows and long banners hung on the south wall, in an uneven order that differs on every leg */
+  PSG_LEG.forEach(([ly,h,x0,x1],k)=>{const sy=ly+1;for(let x=x0+1;x<=x1-1;x++){
+    if(!open(x,sy)||open(x,sy+1)||k===0&&x>=28||!C.free(x,sy)||C.decor.some(d=>Math.abs(d.x-x)<1.5&&d.y===sy))continue;
+    const r=hs(x,sy,61);
+    if(r<.16){C.picture('sconce_black',x,sy,[0,1],{bob:1.0});C.light(x,sy,k%2?[1.5,1.0,.5]:[.5,1.2,.9])}
+    else if(r<.27)C.picture(['banner_long_a','banner_long_b','banner_violet'][(hs(x,sy,62)*3)|0],x,sy,[0,1])}});
   /* ---- 6b. the five legs, each with one landmark and its own light ---- */
   /* leg 1: the ruined shrine to the west: a saint on a plinth between two lantern posts, a pale rose, fallen stone, a warm light */
   C.prop('statue_plinth',16,52,{block:true});C.prop('st_saint2',16,52,{block:true,sc:.8,bob:1.6});post(13,52,[1.4,1,.6]);post(19,52,[1.4,1,.6]);
@@ -262,18 +274,19 @@ function psgBuildApproach(info){
   for(let y=7;y<=15;y++)for(const x of [30,34]){if(open(x,y)&&block[ix(x,y)]&&!C.decor.some(d=>d.x===x&&d.y===y))C.prop(FENCE[(x+y)&1],x,y,{block:false,maxW:1.02})}
   for(const x of [25,26,27,28,29,35,36,37,38,39])C.prop(FENCE[x&1],x,15,{block:false,maxW:1.02});
   C.prop('st_veiled',27,11,{block:true});C.prop('st_headless',37,11,{block:true});
-  for(const [x,y] of [[26,12],[28,9],[36,9],[38,12]])C.prop('rose_pale',x,y,{block:true,sc:1.1});
+  for(const [x,y] of [[26,12],[28,9],[36,9],[38,12]])C.prop('moss_rock',x,y,{block:true,sc:.9});
   C.prop('urn_big',25,8,{block:true});C.prop('urn_big',39,8,{block:true});
-  for(const [x,y] of [[31,8],[33,8],[31,14],[33,14]]){lamp(x,y)}
+  for(const [x,y] of [[31,8],[33,8],[31,14],[33,14],[31,11],[33,11]]){lamp(x,y,PSG_GOLD)}
+  for(const [x,y] of [[32,7],[32,9],[32,12],[28,10],[36,10]])C.light(x,y,PSG_GOLD);   // the lit destination: the gate and the forecourt glow gold against the cold road
   C.picture('window_great',25,8,[0,-1]);C.picture('window_great',39,8,[0,-1]);
   /* the clock-tower gate arch: a round clock face high over the door, two long banners hanging beside it */
   C.prop('gate_clock',32,8,{block:false,sc:.55});C.prop('castle_view',32,7,{block:false,sc:.65});if(!IMG[pspPic('gate_clock')]||IMG[pspPic('gate_clock')]._ps){C.prop('clock_face',32,7,{block:false,bob:2.3});C.prop('banner_long_a',31,7,{block:false,bob:.3});C.prop('banner_long_b',33,7,{block:false,bob:.3})}C.light(32,8,PAL.brassHi?[1.1,.8,.45]:SI);
   C.vineWall(26,8,28,8,[0,-1]);C.vineWall(36,8,38,8,[0,-1]);C.light(27,11,GR);C.light(37,11,GR);
-  psgHaunt(C,[['red','lantern_red_a',30,9],['red','lantern_red_b',34,9],['red','lantern_red_a',31,16],['red','lantern_red_b',33,16],['red','lantern_red_a',30,23],['red','lantern_red_b',35,51],['red','lantern_red_a',29,51],['prop','cobweb_thick_a',32,9]]);
+  psgHaunt(C,[['red','lantern_red_a',30,9],['red','lantern_red_b',34,9],['red','lantern_red_a',31,16],['red','lantern_red_b',33,16],['red','lantern_red_a',30,23],['red','lantern_red_b',35,51],['red','lantern_red_a',29,51]]);
   /* ---- 7. hidden nooks ---- */
   C.vines(42,46,{});C.vines(42,47,{});C.prop('alcove_empty',42,48,{block:false});
   C.alcove(41,48,'alcove_weeper',[0,-1]);C.alcove(43,48,'alcove_monk',[0,-1]);C.chest(42,50,{tier:1});C.light(42,49,GR);C.prop('st_hand',40,49,{block:true});C.prop('urn_big',44,49,{block:true});
-  C.vines(48,36,{});C.alcove(48,32,'alcove_knight',[0,-1]);C.alcove(49,32,'alcove_maiden',[0,-1]);C.chest(50,35,{tier:1});C.light(48,34,GR);C.prop('st_gargoyle',47,34,{block:true});C.vineWall(47,33,47,35,[-1,0]);
+  C.vines(48,36,{});C.alcove(48,32,'alcove_knight',[0,-1]);C.alcove(49,32,'alcove_maiden',[0,-1]);C.chest(50,35,{tier:1});C.light(48,34,GR);
   C.vines(20,29,{});C.alcove(19,25,'alcove_weeper',[0,-1]);C.alcove(22,25,'alcove_empty',[0,-1]);C.chest(23,28,{tier:1});C.light(20,27,GR);
   C.prop('pillar_lantern',19,27,{block:true});C.prop('pillar_lantern',22,27,{block:true});C.prop('statue_plinth',20,25,{block:true});
   /* ---- 8. the people and the things ---- */
@@ -289,7 +302,10 @@ function psgBuildApproach(info){
   for(const [x,y] of [[10,44],[49,33],[21,27],[43,49]])WAKE('pssentinel',x,y);
   for(const e of C.enemies)e.lvl=Math.max(96,Math.min(100,Math.round(96.5+3.5*(52-e.y)/44)));   // the ramp: level 96 at Sale's gate to 100 at the barbican
   C.glow(6.5,SI);
+  psgNoLooseArch(C);
   const lv=C.finish({start:{x:32,y:52,f:0}});
+  lv.fogAt=(x,y)=>{const S=[[56,[64,92,108,.014]],[44,[74,104,84,.016]],[37,[62,86,122,.015]],[30,[96,84,116,.014]],[23,[58,112,116,.013]],[14,[120,96,66,.011]],[6,[130,102,62,.01]]];
+    if(y>=S[0][0])return S[0][1];for(let i=0;i<S.length-1;i++){const a=S[i],b=S[i+1];if(y<=a[0]&&y>=b[0]){const t=(a[0]-y)/(a[0]-b[0]);return a[1].map((v,j)=>v+(b[1][j]-v)*t)}}return S[S.length-1][1]};   // the mist changes colour up the crag: teal, sick green, aqueduct blue, violet, drowned cyan, then amber at the gate
   lv.mapNames=[{t:"Pilgrim's Landing",x:32,y:51,k:'place'},{t:'The Long Climb',x:20,y:45,k:'place'},{t:'The Gully Bridge',x:30,y:37,k:'place'},{t:"The Pilgrims' Cairn",x:27,y:28,k:'place'},{t:'The Long Bridge',x:32,y:19,k:'place'},{t:'The Barbican',x:32,y:12,k:'place'},{t:'The Great Gate',x:32,y:7,k:'place'}];
   return lv}
 pspRegister(9720,psgBuildApproach);
@@ -316,7 +332,7 @@ function psgBuildGatehouse(){
   C.carve(13,14,14,15);C.carve(18,14,19,15);C.carve(13,6,14,6);C.carve(18,5,19,5);
   psgDressWalls(C,{wh:4.0,win:.0});
   psgWin(C,[[3,14],[3,16],[9,11],[29,11],[29,13],[29,15],[29,17],[10,3],[22,2],[16,1]],4.0);
-  C.links({style:{'Court':'great','stair up':'stair'}});
+  C.links({style:{'Court':'great','stair up':'stair',"Porter":'iron'}});
   const P=(n,x,y,o)=>psgProp(C,n,x,y,o),dec=(k,x,y,o)=>C.dec(k,x,y,o);
   /* the passage: plaques, a portcullis held high, murder holes, banners, arches to walk under */
   C.sign(15,5,[-1,0],'THE GREAT GATEHOUSE','Castle of the Pale Sovereign');C.sign(17,7,[1,0],'NO ARMS BEYOND THE INNER GATE','By order of the Gate Captain');
@@ -327,19 +343,19 @@ function psgBuildGatehouse(){
   C.alcove(15,17,'alcove_knight',[-1,0]);C.alcove(17,17,'alcove_weeper',[1,0]);C.alcove(15,19,'alcove_monk',[-1,0]);
   C.vineWall(15,3,15,4,[-1,0]);C.vineWall(17,3,17,4,[1,0]);C.vines(16,6,{});
   for(const y of [6,10,14,18])C.light(16,y,y%8===6?SI:GR);
-  C.picture('lantern_bracket',15,15,[-1,0]);C.picture('lantern_bracket',17,15,[1,0]);
+  C.picture('lantern_bracket',15,16,[-1,0]);C.picture('lantern_bracket',17,16,[1,0]);
   pspStatueWake(C,'psgatecaptain',16,11);pspFoe(C,'psguard',16,6);pspFoe(C,'psguard',16,15);
   /* the west guardroom: racks, a cold hearth, a table, bunks in their alcove */
   C.prop('hearth_cold',9,12,{block:true});
-  P('longtable',8,15);dec('gy_bench',10,17,{block:false});dec('gy_bench',8,13,{block:false});
-  P('bed',4,10);P('bed',6,10);P('shields',4,12,{bob:.3});dec('barrel',12,18,{});dec('crate',11,18,{sc:.9});dec('sacks',12,14,{});
+  
+  P('shields',4,12,{bob:.3});dec('barrel',12,18,{});dec('crate',11,18,{sc:.9});
   C.vineWall(4,9,6,9,[0,-1]);C.alcove(10,18,'alcove_empty',[0,1]);
   for(const [x,y] of [[7,13],[11,15],[5,16],[9,17]])C.light(x,y,SI);C.light(5,10,GR);
   pspFoe(C,'psguard',5,13);pspFoe(C,'psguard',11,15);pspFoe(C,'pshalberd',12,12);pspFoe(C,'psarcher',4,16);
   /* the east guardroom: racks, mannequins, a duty table, the stair up */
   P('mannequin',21,13);P('mannequin',28,13);
   P('counciltable',24,14);dec('gy_bench',24,16,{block:false});dec('gy_bench',24,12,{block:false});
-  C.prop('col_fluted',22,16,{block:true});C.prop('col_fluted',27,16,{block:true});dec('barrel',28,18,{});dec('crate',27,18,{sc:.9});C.chest(21,18,{tier:0});
+  C.prop('pillar_lantern',22,16,{block:true,sc:.8});C.prop('pillar_lantern',27,16,{block:true,sc:.8});dec('barrel',28,18,{});dec('crate',27,18,{sc:.9});C.chest(21,18,{tier:0});
   C.alcove(23,9,'alcove_knight',[0,-1]);C.vines(26,9,{});C.sign(24,9,[0,-1],'STAIR TO THE WINCH LOFT','Winch and chains. Guards at work.');
   for(const [x,y] of [[22,11],[27,12],[22,17],[26,17]])C.light(x,y,SI);
   pspFoe(C,'psguard',22,11);pspFoe(C,'pshalberd',25,16);pspFoe(C,'psarcher',28,15);pspFoe(C,'psarcher',28,17);pspFoe(C,'psguard',22,14);
@@ -350,19 +366,20 @@ function psgBuildGatehouse(){
   /* the gaoler's closet: a cage, bones, a chest, a face in the wall */
   C.prop('cage',22,4,{block:true});dec('gy_bones',23,6,{block:false,sc:.9});dec('gy_bones',21,5,{block:false,sc:.6});C.chest(24,5,{tier:1});C.alcove(20,4,'alcove_empty',[-1,0]);C.picture('chains',24,4,[1,0]);C.light(22,5,GR);
   psgHaunt(C,[['prop','cobweb_thick_a',16,8],['prop','cobweb_thick_b',16,16],['prop','cobweb_thick_c',16,4],['red','lantern_red_a',15,12],['red','lantern_red_b',17,13],['red','lantern_red_a',15,6],['red','lantern_red_b',17,19],
-    ['pic','cobweb_corner_a',4,13,[-1,0]],['pic','window_sheeted_a',4,14,[-1,0]],['pic','window_sheeted_b',4,16,[-1,0]],['pic','portrait_ancestor_1',6,12,[0,-1],{bob:.7}],['pic','portrait_ancestor_2',10,12,[0,-1],{bob:.7}],['prop','web_spider',5,12],
+    ['pic','cobweb_corner_a',4,13,[-1,0]],['pic','window_sheeted_a',4,14,[-1,0]],['pic','window_sheeted_b',4,16,[-1,0]],['pic','portrait_ancestor_1',7,12,[0,-1],{bob:.7}],['pic','portrait_ancestor_2',10,12,[0,-1],{bob:.7}],
     ['pic','window_sheeted_c',28,11,[1,0]],['pic','window_sheeted_a',28,13,[1,0]],['pic','window_sheeted_b',28,15,[1,0]],['pic','portrait_ancestor_3',27,9,[0,-1],{bob:.7}],['pic','portrait_ancestor_4',22,9,[0,-1],{bob:.7}],['pic','cobweb_corner_b',28,10,[1,0]],
-    ['pic','portrait_ancestor_5',9,4,[0,-1],{bob:.7}],['pic','portrait_ancestor_6',11,4,[0,-1],{bob:.7}],['pic','mirror_haunted_a',8,6,[-1,0]],['prop','candles_glow_a',9,5],['prop','candles_glow_b',11,5],['pic','cobweb_corner_a',12,6,[1,0]],
-    ['pic','cobweb_corner_a',21,3,[0,-1]],['pic','cobweb_corner_b',23,3,[0,-1]],['prop','web_spider',22,3]]);
+    ['pic','portrait_ancestor_5',9,4,[0,-1],{bob:.7}],['pic','portrait_ancestor_6',11,4,[0,-1],{bob:.7}],['pic','mirror_haunted_a',8,6,[-1,0]],['prop','candles_glow_a',9,5],['prop','candles_glow_b',11,5],['pic','cobweb_corner_a',12,7,[1,0]],
+    ['pic','cobweb_corner_a',21,3,[0,-1]],['pic','cobweb_corner_b',23,3,[0,-1]]]);
   C.light(9,5,[1.5,1.05,.55]);C.light(11,5,[1.5,1.05,.55]);
   C.glow(6,SI);
+  psgNoLooseArch(C);
   return C.finish({start:{x:16,y:19,f:0}})}
 pspRegister(9721,psgBuildGatehouse);
 /* ===== 9722 THE WINCH LOFT (20 x 18): the stair hall, the murder-hole floor, the great winch, the Warden's table with his horn, a gallery ===== */
 function psgBuildLoft(){
   const C=pspMake({id:9722,start:{x:4,y:9,f:1},wh:3.6,floor:'flagdark',wall:'ash',amb:.15,lcol:PSP_PAL.green}),SI=PSP_PAL.silver,GR=PSP_PAL.green;
   C.room(3,7,6,11,{floor:'flagdark',name:'The Stair',at:[4,9]});
-  C.room(7,8,16,10,{floor:'flag'});C.setFloor(9,8,14,10,'grate');C.mapNames.push({t:'The Murder-Hole Floor',x:11,y:9,k:'place'});
+  C.room(7,8,16,10,{floor:'flag'});C.setFloor(9,8,14,10,'flagdark');C.mapNames.push({t:'The Murder-Hole Floor',x:11,y:9,k:'place'});
   C.room(13,3,17,14,{floor:'flagdark',name:'The Winch',at:[15,6]});
   C.room(6,12,11,15,{floor:'flag',name:"The Warden's Table",at:[8,13]});C.carve(8,11,9,11);
   C.room(7,4,11,6,{floor:'marble',name:'The Gallery',at:[9,5]});C.carve(9,7,9,7);
@@ -371,32 +388,32 @@ function psgBuildLoft(){
   C.links({style:{'stair':'stair'}});
   const P=(n,x,y,o)=>psgProp(C,n,x,y,o),dec=(k,x,y,o)=>C.dec(k,x,y,o);
   C.sign(8,4,[0,-1],'THE MURDER HOLES','They open on the passage below');C.sign(4,7,[0,-1],'THE WINCH LOFT','Keep the chains clear');
-  for(const [x,y] of [[14,5],[16,11],[14,12]])dec(psgToned('hl_p_chains'),x,y,{block:false,sc:1.2});
-  dec(psgToned('wm_chain'),8,5,{block:false});dec(psgToned('wm_chain'),16,5,{block:false,sc:1.1});C.prop('col_twist',13,5,{block:true});C.prop('col_twist',17,5,{block:true});C.prop('col_twist',13,12,{block:true});C.prop('col_twist',17,12,{block:true});
+  for(const [x,y] of [[14,5]])dec(psgToned('hl_p_chains'),x,y,{block:false,sc:1.2});
+  C.prop('pillar_lantern',13,5,{block:true,sc:.8});C.prop('pillar_lantern',17,5,{block:true,sc:.8});C.prop('pillar_lantern',13,12,{block:true,sc:.8});C.prop('pillar_lantern',17,12,{block:true,sc:.8});
   /* the table and the dead Road Warden: his bones, his coat, and his horn */
   P('counciltable',8,14);dec('gy_bones',7,14,{block:false,sc:1.6});dec('gy_bones',10,14,{block:false,sc:1});
   dec('gy_bell',9,13,{npc:'psg_horn',sc:1.5,block:true});
-  C.sign(8,15,[0,1],'A ROAD WARDEN',"His horn is on the table");
   C.chest(11,5,{tier:1});dec('barrel',17,13,{});dec('crate',16,13,{sc:.9});dec('sacks',6,5,{});dec('barrel',6,11,{sc:.9});
   C.alcove(6,13,'alcove_monk',[-1,0]);C.vineWall(3,7,3,11,[-1,0]);C.vines(9,7,{});
   for(const [x,y] of [[8,5],[15,4],[16,13],[8,13],[11,9],[4,9]])C.light(x,y,y>12?SI:GR);
   pspFoe(C,'psguard',14,4);pspFoe(C,'psguard',15,12);pspFoe(C,'pshalberd',11,9);pspFoe(C,'pshalberd',15,6);
   psgHaunt(C,[['pic','window_sheeted_a',17,5,[1,0]],['pic','window_sheeted_b',17,8,[1,0]],['pic','window_sheeted_c',17,11,[1,0]],['prop','cobweb_thick_a',9,7],['prop','cobweb_thick_b',7,9],['red','lantern_red_a',6,9],['red','lantern_red_b',16,9],
-    ['pic','cobweb_corner_a',7,12,[-1,0]],['pic','mirror_haunted_b',10,4,[0,-1]],['pic','portrait_ancestor_7',7,12,[0,-1],{bob:.7}],['pic','portrait_ancestor_8',10,12,[0,-1],{bob:.7}],['prop','web_spider',16,4]]);
+    ['pic','cobweb_corner_a',6,12,[-1,0]],['pic','mirror_haunted_b',10,4,[0,-1]],['pic','portrait_ancestor_7',7,12,[0,-1],{bob:.7}],['pic','portrait_ancestor_8',10,12,[0,-1],{bob:.7}]]);
   C.glow(6,SI);
+  psgNoLooseArch(C);
   return C.finish({start:{x:4,y:9,f:1}})}
 pspRegister(9722,psgBuildLoft);
 /* ===== 9723 THE PORTER'S LODGE (18 x 14, REST ROOM): warm candlelight, a bed, a stove with a kettle, a chest of potions, Merrick Dole ===== */
 function psgBuildLodge(){
   const WARM=PSP_PAL.warm;
-  const C=pspMake({id:9723,start:{x:9,y:4,f:2},wh:2.7,floor:'flag',wall:'brick',amb:.5,lcol:WARM}),dec=(k,x,y,o)=>C.dec(k,x,y,o);
-  C.room(7,3,11,6,{floor:'runner',name:"The Porter's Lodge",at:[9,9],warm:true});C.room(3,7,14,11,{floor:'flag',warm:true});
+  const C=pspMake({id:9723,start:{x:9,y:4,f:2},wh:2.7,floor:'flagdark',wall:'brick',amb:.5,lcol:WARM}),dec=(k,x,y,o)=>C.dec(k,x,y,o);
+  C.room(7,3,11,6,{floor:'flagdark',name:"The Porter's Lodge",at:[9,9],warm:true});C.room(3,7,14,11,{floor:'flagdark',warm:true});
   psgDressWalls(C,{wh:2.7,set:['brick','ash','brick','ash'],win:.0});
   psgWin(C,[[4,6],[13,6],[2,9],[15,9],[9,2]].filter(q=>!(q[0]===9&&q[1]===2)),2.7);
   C.links({});
   const P=(n,x,y,o)=>psgProp(C,n,x,y,o,true);
   P('cothearth',13,7);C.prop('bed_cobweb_a',6,8,{block:true});dec('gy_bench',9,11,{block:false});dec('gy_bench',9,7,{block:false});
-  P('clock',14,9);P('coatrack',7,3);dec('barrel',14,11,{});dec('sacks',13,11,{});dec('hl_p_candle',7,10,{sc:.9,block:false});dec('hl_p_candle',11,10,{sc:.9,block:false});
+  P('clock',14,9);P('coatrack',7,3);dec('barrel',14,11,{});
   C.vines(7,5,{});C.vines(11,5,{});
   C.sign(10,3,[0,-1],"THE PORTER'S LODGE",'Rest here. Nothing hostile comes in.');
   C.person('psg_porter',10,8,2);
@@ -404,6 +421,7 @@ function psgBuildLodge(){
     ['prop','candles_glow_a',8,9],['prop','candles_glow_b',10,9],['pic','cobweb_corner_a',7,3,[0,-1]],['pic','cobweb_corner_b',11,3,[0,-1]],['pic','cobweb_corner_a',14,11,[1,0]]]);
   C.light(8,9,WARM);C.light(10,9,WARM);
   pspRest(C,{x0:3,y0:3,x1:14,y1:11,bed:[4,8],chest:[13,10],name:"The Porter's Lodge",line:'The Porter\'s Lodge. It is warm, and it smells of tea. Nothing hostile comes in here.'});
+  psgNoLooseArch(C);
   return C.finish({start:{x:9,y:4,f:2}})}
 pspRegister(9723,psgBuildLodge);
 /* ==========================================================================
