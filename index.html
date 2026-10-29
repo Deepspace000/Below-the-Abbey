@@ -76026,6 +76026,8 @@ function pscCurate(id,L){
   const bigAt=(x,y)=>(dec.get(x+','+y)||[]).some(d=>d.block&&PSC_BIG.test(String(d.k)));
   const smallAt=(x,y)=>(dec.get(x+','+y)||[]).some(d=>d.block&&!PSC_BIG.test(String(d.k)));
   const near=(x,y)=>{if(open(x,y))return [x,y];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]])if(open(x+a,y+b))return [x+a,y+b];return null};
+  // signs carry only the name of the place: no hint lines under it
+  for(const d of L.decor||[])if(Array.isArray(d.txt)&&d.txt.length>1)d.txt[1]='';
   // key points: the start, every door of this level, every landing into it
   const keys=[];const add=p=>{if(p&&p[0]!=null){const q=near(Math.round(p[0]),Math.round(p[1]));if(q)keys.push(q)}};
   const st=L.start||{};add([st.x,st.y]);
