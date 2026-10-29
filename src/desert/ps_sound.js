@@ -32,3 +32,6 @@ function pspTick(){
   if(id>=9780&&id<=9800){if(D('d',3,7))pssDrip(.6+Math.random()*.4);if(D('c',12,26))pssChain(.7);if(D('m',26,50))pssMoan(.6);if(D('r',14,30))pssRats(.8);if(id===9790&&D('wt',6,12))pssWater(.8);return}
   if(D('p',20,40))pssPad(.6)}
 {const _ys=yarSoundTick;yarSoundTick=function(){_ys.apply(this,arguments);try{pspTick()}catch(e){console.error('psp tick',e)}}}
+
+/* every creature of the castle stands on the ground: ghosts, wraiths and the rest never hover (the engine floats a creature whose definition has fly:true) */
+for(const k in ENEMY_DEF){if(/^ps/.test(k)){const d=ENEMY_DEF[k];if(d&&(d.fly||d.floatH!==undefined)){d.fly=false;delete d.floatH}}}
