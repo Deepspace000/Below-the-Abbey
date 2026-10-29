@@ -17,7 +17,7 @@ const BKS={off:false,lv:0,ready:false,pan:null,back:null,pan32:null,back32:null,
   next:0,strike:null,thunderQ:[],strikes:0,thunders:0,f:0,hold:null,force:null,   // test hooks: force=[wet 0/1, strength], hold=flash ms
   rainSrc:null,rainG:null,hissSrc:null,hissG:null,hissF:null,lampK:0,lampN:0,fr:0,wind:0,
   reduced:(()=>{try{return !!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)}catch(e){return false}})()};
-const bksIs=n=>(n>=9610&&n<=9709)||n===600;
+const bksIs=n=>(n>=9610&&n<=9709)||n===600||n===9720;   // 9720 = the Pale Approach (Pale Spire package 1): same sky engine, bruised violet with a red tinge, kept dry by ps_gate.js
 /* a room of the road above ground (not the Vault's floors, not a cellar or a crypt): the rain is heard through the roof */
 function bksIndoor(){
   if(BKS.off||typeof LEVEL==='undefined'||G.state!=='play'||!BKS.arrived||!(LEVEL>=9610&&LEVEL<=9709)||(LEVEL>=9671&&LEVEL<=9678))return false;
@@ -27,10 +27,10 @@ function bksIndoor(){
 const bksOn=()=>!BKS.off&&typeof LEVEL!=='undefined'&&G.state==='play'&&bksIs(LEVEL)&&!!LEVELS[LEVEL]&&!!LEVELS[LEVEL].outdoor;
 /* ---- the look of a place, from its number (a vault, and the road's red places, are fixed so the red skies are surely there) ---- */
 function bksSeed(n){let s=(n*2654435761)>>>0;s^=s>>>15;s=Math.imul(s,2246822519)>>>0;s^=s>>>13;return s>>>0}
-const BKS_RED={9610:0,9620:0,9630:1,9640:0,9650:1,9660:0,9670:1,9680:0,9690:1,9700:0,600:0};   // 1 = red tinge (about a third of the places)
+const BKS_RED={9610:0,9620:0,9630:1,9640:0,9650:1,9660:0,9670:1,9680:0,9690:1,9700:0,600:0,9720:1};   // 1 = red tinge (about a third of the places)
 function bksLookOf(n){const s=bksSeed(n);
   const red=BKS_RED[n]!==undefined?BKS_RED[n]:((s>>>9)%3===0?1:0);
-  return {look:s%3,red:red?.78+((s>>>12)%5)*.05:0,th:((s>>>16)%9-4)*.012,drift:.8+((s>>>20)%7)*.08,shift:(s>>>4)%1024,rate:(s>>>24)%3}}
+  return {look:n===9720?2:s%3,red:red?.78+((s>>>12)%5)*.05:0,th:((s>>>16)%9-4)*.012,drift:.8+((s>>>20)%7)*.08,shift:(s>>>4)%1024,rate:(s>>>24)%3}}
 /* the three looks (colours as wanted on screen, gysP divides out the engine's tint). red mixes toward the red variant */
 const BKS_LOOKS=[
   {nm:'overcast',th:[.30,.28,.26],core:[[92,94,98],[76,79,84],[56,59,65]],rim:[[142,146,150],[128,132,138],[104,110,118]],base:[[54,58,66],[74,78,84],[102,106,106],[130,134,128]],hor:[150,154,146]},

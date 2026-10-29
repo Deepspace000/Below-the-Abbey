@@ -1,0 +1,2 @@
+() => { const ks=Object.keys(IMG); const pick=re=>ks.filter(k=>re.test(k)); return {n:ks.length,
+ gy:pick(/^gy_/).slice(0,200), hl:pick(/^hl_/).slice(0,120), statue:pick(/statue|pillar|throne|column|fountain|angel|gargoyle|hound|banner|chandel|candel|bed|table|chair|chest|barrel|cauldron|chain|bookcase|lectern|altar|pew|font|harp|globe/i).slice(0,200), gyp:pick(/^gyp_tex/).slice(0,60), ww:pick(/^ww_/).slice(0,60)} }

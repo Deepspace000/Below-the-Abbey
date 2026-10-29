@@ -1,0 +1,1 @@
+() => { const out={}; try{ const L=KH_LAZY[9721]; out.pre=!!L; const lv=KH_LAZY[9721](); out.rows=lv&&lv.rows.length; out.name=lv&&lv.name }catch(e){out.err=String(e)+' '+(e.stack||'').slice(0,300)} return out }
