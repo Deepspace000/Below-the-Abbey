@@ -964,19 +964,19 @@
 },
 "p_ghost_lady": {
 "file": "p_ghost_lady.webp",
-"w": 377,
+"w": 329,
 "px_h": 640,
 "h": 1.8,
 "kind": "sprite",
-"sheet": "g5"
+"sheet": "g7"
 },
 "p_ghost_gentleman": {
 "file": "p_ghost_gentleman.webp",
-"w": 137,
+"w": 239,
 "px_h": 640,
 "h": 1.8,
 "kind": "sprite",
-"sheet": "g5"
+"sheet": "g6"
 },
 "p_ghost_child": {
 "file": "p_ghost_child.webp",
@@ -988,27 +988,27 @@
 },
 "p_ghost_maid": {
 "file": "p_ghost_maid.webp",
-"w": 244,
+"w": 240,
 "px_h": 640,
 "h": 1.7,
 "kind": "sprite",
-"sheet": "g5"
+"sheet": "g7"
 },
 "p_ghost_butler": {
 "file": "p_ghost_butler.webp",
-"w": 316,
+"w": 210,
 "px_h": 640,
 "h": 1.8,
 "kind": "sprite",
-"sheet": "gh"
+"sheet": "g6"
 },
 "p_ghost_soldier": {
 "file": "p_ghost_soldier.webp",
-"w": 141,
+"w": 232,
 "px_h": 640,
 "h": 1.8,
 "kind": "sprite",
-"sheet": "g5"
+"sheet": "g6"
 },
 "p_ghost_priest": {
 "file": "p_ghost_priest.webp",
@@ -1572,11 +1572,11 @@
 },
 "p_gaunt": {
 "file": "p_gaunt.webp",
-"w": 182,
+"w": 238,
 "px_h": 640,
 "h": 1.8,
 "kind": "sprite",
-"sheet": "s7"
+"sheet": "g7"
 },
 "p_stamford": {
 "file": "p_stamford.webp",
@@ -1684,11 +1684,11 @@
 },
 "p_ghost_jester": {
 "file": "p_ghost_jester.webp",
-"w": 217,
-"px_h": 392,
+"w": 235,
+"px_h": 640,
 "h": 1.8,
 "kind": "sprite",
-"sheet": "gh2"
+"sheet": "g6"
 },
 "ghost_choir": {
 "file": "ghost_choir.webp",
@@ -2276,11 +2276,11 @@
 },
 "c_pshoundmaster": {
 "file": "c_pshoundmaster.webp",
-"w": 355,
-"px_h": 700,
+"w": 238,
+"px_h": 640,
 "h": 1.9,
 "kind": "sprite",
-"sheet": "g4"
+"sheet": "g7"
 },
 "c_pshunger": {
 "file": "c_pshunger.webp",
