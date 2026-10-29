@@ -352,7 +352,7 @@ function pshBuild(){
   const sign=(x,y,wd,a,b)=>{if(!open(x,y)){miss.push('sign@'+x+','+y);return}decor.push({k:'sign_gy',x,y,block:false,wd:[wd[0],wd[1]],txt:[a,b||''],sc:1})};
   const COLS=['col_fluted','col_twist','col_silver'];
   const col=(x,y,n)=>put('ps_'+COLS[n%3],x,y,{block:true});
-  PSH.st=i=>{const n=['ps_st_veiled','ps_hst0','ps_hst1','ps_hst2','ps_hst3','ps_hst4','ps_hst5','ps_hst7'];return IMG[n[i%8]]?n[i%8]:'ps_hst0'};
+  PSH.st=i=>{const n=['ps_st_veiled','ps_st_saint1','ps_st_saint2','ps_st_judge','ps_st_saint3','ps_st_bishop','ps_st_saint4','ps_st_headless'];const k=n[i%8];return IMG[k]&&!IMG[k]._ps?k:(IMG['ps_hst'+(i%5)]?'ps_hst'+(i%5):'ps_hst0')};
   const stat=(x,y,i,o)=>put(PSH.st(i),x,y,Object.assign({block:true},o||{}));
   const pt=(i)=>pshPortrait(i);
   const mark=(x,y,kind)=>{kindAt[x+','+y]=kind};
@@ -618,7 +618,7 @@ function pshFurnish(S){
   hang(32,11,2.3);hang(32,7,1.8,V);lamp(28,7,V,1.7,120);lamp(36,7,V,1.7,120);
   /* the way up: broad mossy steps rising to the great barred double door, chains and a padlock, cold light through the bars */
   put(P('iron_gate_big'),32,6,{block:false,force:true,sc:1.1,over:true});put(P('chains'),31,6,{block:false,force:true,over:true});put(P('chains'),33,6,{block:false,force:true,over:true});
-  put(P('arch_stair'),32,8,{block:false,force:true,sc:1.2,over:true});for(const [x,y] of [[32,7],[31,9],[33,9],[32,11],[31,13],[33,13]])put(P('stairs_moss'),x,y,{block:false,force:true,over:true});
+  put(P('arch_stair'),32,8,{block:false,force:true,sc:1.2,over:true});for(const [x,y] of [[32,7]])put(P('stairs_moss'),x,y,{block:false,force:true,over:true});
   pic(P('vine_b'),31,6,N,{bob:.9});pic(P('vine_a'),33,6,N,{bob:.9});pic(P('banner_long_a'),30,6,N,{bob:hi});pic(P('banner_long_b'),34,6,N,{bob:hi});lamp(32,6,[.7,1.0,1.9],2.2,150);lamp(32,9,[.7,1.0,1.8],1.6,110);
   foe('psstairwarden',32,13);
   put(P('furn_organ'),28,7,{block:true});put(P('furn_altarpiece'),36,7,{block:true});put(P('furn_clock_grandfather'),27,8,{block:true});

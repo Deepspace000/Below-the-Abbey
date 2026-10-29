@@ -181,8 +181,8 @@ if(typeof CONTAINERS!=='undefined')for(const k of ['wm_chest','gy_chest','psw_co
     d.gold=(d.goldAmt||0)||3800+Math.floor(r(5)*3000);return items}
   return _lf.apply(this,arguments)}}
 /* ---------- floors and walls (made in code): black weathered stone, verdigris trim, dark green moss ---------- */
-const PSW_STY={ash:{tex:'texGrey',g:.9,rgb:[.78,.88,1.0],v:[0,0,0,3,3,5,5,1,2,4]},blk:{tex:'texBlack',g:1.2,rgb:[.85,.95,1.1],v:[0,1,2,3,4]},dark:{tex:'texGrey',g:.7,rgb:[.78,.88,1.02],v:[1,1,2,2,4,0,3]},
-  warm:{tex:'texBone',g:1.28,rgb:[1.12,1.0,.86],v:[0,1,2,3,4,5]},moss:{tex:'texGrey',g:.8,rgb:[.62,.95,.8],v:[0,1,3,4,5,2]},verd:{tex:'texBone',g:.62,rgb:[.68,.92,1.05],v:[0,1,2,3,4,5]}};
+const PSW_STY={ash:{tex:'texBlack',g:1.2,rgb:[.8,.9,1.0],v:[0,0,0,3,3,4,4,1,2,4]},blk:{tex:'texBlack',g:1.2,rgb:[.85,.95,1.1],v:[0,1,2,3,4]},dark:{tex:'texBlack',g:.9,rgb:[.78,.88,1.0],v:[1,1,2,2,4,0,3]},
+  warm:{tex:'texBone',g:1.28,rgb:[1.12,1.0,.86],v:[0,1,2,3,4,5]},moss:{tex:'texBlack',g:1.05,rgb:[.64,.96,.8],v:[0,1,3,4,2]},verd:{tex:'texBone',g:.62,rgb:[.68,.92,1.05],v:[0,1,2,3,4,5]}};
 function pswFloors(){
   if(PSW._fl)return PSW._fl;gyFloors();
   const mk=(nm,fn)=>{if(FLOORS[nm])return nm;const N=128,d=new Uint8ClampedArray(N*N*4);for(let y=0;y<N;y++)for(let x=0;x<N;x++){const o=(y*N+x)*4,c=fn(x,y);d[o]=c[0];d[o+1]=c[1];d[o+2]=c[2];d[o+3]=255}FLOORS[nm]=d;return nm};
