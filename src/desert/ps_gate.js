@@ -166,6 +166,7 @@ function psgMake(id){
     if(D.kind==='arch')gid=psgArchTile(WH,'a',RG);
     else if(D.kind==='stair')gid=gyTile('texGrey_0',WH,{fac:{img:'stairFix_0',i:0,n:1},gain:1.2,rgb:RG.rgb,tag:'psstair'});
     else{const TM=ohTiles(),dt=TM.make('door','wlgrey',WH);gid=KH_NEXT_GID++;T_TILE[gid]=dt.tex}
+    {const base=gid;gid=KH_NEXT_GID++;T_TILE[gid]=T_TILE[base];if(GY.col&&GY.col[base])GY.col[gid]=GY.col[base]}   // one tile id per door (cached art tiles are shared)
     KH_DOOR[gid]=psgDoorFor(l);put(D.x,D.y,ch(gid));doorSq.push([D.x,D.y]);reserved.add(inner[0]+','+inner[1])}
   const free=(x,y)=>open(x,y)&&!occ.has(x+','+y);
   const raw=(k,x,y,d)=>{d=d||{};if(!open(x,y)){miss.push(k+'@'+x+','+y);return null}
@@ -202,7 +203,7 @@ function psgMake(id){
   LEVELS[id]=L;LEVEL_NAMES[id]=name;LEVEL_RATING[id]=S.diff;
   if(miss.length)console.warn('psg '+id+' missed: '+miss.join(' '));
   return L}
-for(const id of [9721,9722,9723])KH_LAZY[id]=((n)=>()=>psgMake(n))(id);
+for(const id of [9721,9722,9723])pspRegister(id,((n)=>()=>psgMake(n))(id));
 /* ==========================================================================
    PART B: THE INTERIORS (9721 gatehouse, 9722 winch loft, 9723 porter's lodge). Coordinates: x across, y down.
    ========================================================================== */
@@ -407,7 +408,7 @@ function psgBuildApproach(){
   lv._psg={lcol:C.lcol,col:[.95,.62,1.5],torches:null,kI:1.3,range2:90};
   lv.mapNames=[{t:'The Pale Approach',x:40,y:60,k:'place'},{t:'The Guards\' Rest',x:40,y:59,k:'place'},{t:'The Waymark Terrace',x:40,y:45,k:'place'},{t:'The Barbican',x:40,y:17,k:'place'},{t:'The Great Gate',x:40,y:9,k:'place'}];
   return lv}
-KH_LAZY[9720]=()=>psgBuildApproach();
+pspRegister(9720,()=>psgBuildApproach());
 /* ==========================================================================
    PART D: PEOPLE, QUESTS AND OBJECTS. Flags in G.flags.psp: tok (bitmask of the nine pilgrims' tokens taken), horn (the Warden's Horn taken), cap (Gate Captain dead), ring (key ring taken), sketch (given),
    seen9720 .. seen9723 (first arrival lines). Quests psq1 The Pilgrims' Offerings and psq2 The Captain's Key Ring, both given by Merrick Dole (psg_porter).
@@ -422,6 +423,9 @@ bl3Q('psq2',"The Captain's Key Ring",'Merrick Dole, the porter',[
   ['Defeat the Gate Captain in the passage of the Great Gatehouse, and bring his key ring to Merrick Dole the porter.',()=>bagCount('pskeyring')>=1,['psgatecaptain']]],
   {gold:4000,xp:25000,items:['potion6','potion6','potion6']},{take:{pskeyring:1}});
 for(const q of ['psq1','psq2'])QAREA[q]=PSP.REGION;
+if(typeof QRF!=='undefined'){const N=(l,...ids)=>({lvl:l,npc:ids}),E=(l,rx)=>({lvl:l,en:rx});   // where the quest ring points
+  QRF.T.psq1={give:[N(9723,'psg_porter')],act:[N(9720,'psg_cairn','psg_tok0','psg_tok1','psg_tok2','psg_tok3','psg_tok4','psg_tok5','psg_tok6','psg_tok7','psg_tok8')],ready:[N(9723,'psg_porter')]};
+  QRF.T.psq2={give:[N(9723,'psg_porter')],act:[E(9721,/^psgatecaptain$/)],ready:[N(9723,'psg_porter')]}}
 if(typeof QAREA_ORDER!=='undefined'&&!QAREA_ORDER.includes(PSP.REGION))QAREA_ORDER.push(PSP.REGION);
 if(typeof QWORLD!=='undefined'&&!QWORLD[PSP.REGION])QWORLD[PSP.REGION]='wenlock';
 const PSG_Q={

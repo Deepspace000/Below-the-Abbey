@@ -360,7 +360,7 @@ function pscBase(info){
   // the two wall stairs, each behind a grille: sealed for now
   for(const [sx,sy,tag] of [[4,60,'gl0'],[91,60,'gl1']]){
     const g=pscTile(tag,3.4,(x,Wd,Hp)=>{pscCourses(x,Wd,Hp,3);x.fillStyle='#14122a';pscPointed(x,64,Hp,86,Hp*.18,'#14122a','#d8deee',5);x.strokeStyle='#8a90a8';x.lineWidth=4;for(let b=26;b<110;b+=14){x.beginPath();x.moveTo(b,Hp*.34);x.lineTo(b,Hp);x.stroke()}x.beginPath();x.moveTo(20,Hp*.55);x.lineTo(108,Hp*.55);x.stroke();pscIvy(x,Wd,Hp,140+sx,6,.3)},{v:2});
-    C.solid(sx,sy,ch(g));const l=linkAt(sx,sy);KH_DOOR[g]={lvl:l?l.to:9850,psc:1,seal:'The wall walk is closed. An iron grille is locked across the foot of the stair, and the lock is pale with frost.',at:{x:6,y:60,f:1}}}
+    C.solid(sx,sy,ch(g));const l=linkAt(sx,sy);KH_DOOR[g]={lvl:l?l.to:9850,psc:1,seal:'The wall walk is closed. An iron grille is locked across the foot of the stair, and the lock is pale with frost.',get at(){return l?{x:l.land[0],y:l.land[1],f:l.land[2]}:{x:6,y:58,f:0}}}}
   /* ---- floors ---- */
   const circ=(cx,cy,r,f)=>{for(let y=Math.floor(cy-r);y<=cy+r;y++)for(let x=Math.floor(cx-r);x<=cx+r;x++)if(x>=0&&y>=0&&x<W&&y<H&&rows[y][x]==='.'&&Math.hypot(x-cx,y-cy)<=r)fm[y*W+x]=f};
   Fl(46,17,50,83,'1');Fl(21,17,75,19,'2');Fl(44,17,52,19,'5');Fl(21,33,75,34,'1');
@@ -545,12 +545,12 @@ function pscBuild(info){
   for(const [h,lvl] of [[{x0:10,y0:56,x1:18,y1:62,face:'S',sty:'wlgrey',roof:'thatch2',wh:2.5,door:[14,62],col:WARM},PSC.LODGE],[{x0:79,y0:59,x1:86,y1:64,face:'S',sty:'wlgrey',roof:'thatch2',wh:2.5,door:[82,64],col:[1.0,.9,1.3]},PSC.MEWS]]){
     C.house(h);const g=C.chars[rows[h.door[1]][h.door[0]]];const l=pspLinkAt(9730,h.door[0],h.door[1]);
     if(l)KH_DOOR[g]={lvl:l.to,get at(){if(!LEVELS[l.to]&&KH_LAZY[l.to])KH_LAZY[l.to]();return {x:l.land[0],y:l.land[1],f:l.land[2]}},psc:1}}
-  plaque(13,64,'lodge',['THE GARDENER\'S','LODGE'],"THE GARDENER'S LODGE. A plaque by the door. Hobb Ashby, gardener. Knock before you come in. A fire is lit. Boots off.");
+  plaque(12,64,'lodge',['THE GARDENER\'S','LODGE'],"THE GARDENER'S LODGE. A plaque by the door. Hobb Ashby, gardener. Knock before you come in. A fire is lit. Boots off.");
   plaque(84,66,'mews',['THE MEWS','AND STABLE'],'THE MEWS AND STABLE. A plaque by a wide door. The hawks have not been fed for a long time and have not minded.');
   /* the lamps of the wall stairs, benches, ivy around them */
   lampAt(6,58,VIOL);lampAt(6,62,VIOL);lampAt(89,58,VIOL);lampAt(89,62,VIOL);B(BENCH,6,60,{sc:.9});B(BENCH,89,60,{sc:.9});
   /* more of the court: statues singly in the lawns, rings round the lawns */
-  for(const [n,x,y] of [['st_bishop',32,34],['st_judge',64,34],['st_hand',40,36],['st_chimera',26,38],['st_hydra',70,38],['st_gargoyle',58,48],['st_veiled',38,48],['st_hound',24,31],['st_headless',72,31],['st_mourners',23,24],['st_bishop',73,24],['st_hand',23,34]])S(n,x,y);
+  for(const [n,x,y] of [['st_bishop',32,34],['st_judge',64,34],['st_hand',40,36],['st_chimera',26,38],['st_hydra',70,38],['st_gargoyle',58,48],['st_veiled',38,48],['st_hound',24,31],['st_headless',72,31],['st_mourners',23,24],['st_bishop',73,24],['st_hand',23,37]])S(n,x,y);
   for(const [n,x,y] of [['st_hound',28,54],['st_judge',20,57],['st_veiled',24,60],['st_chimera',8,64],['st_hydra',18,70],['st_headless',22,76],['st_bishop',30,78],['st_mourners',38,80],['st_gargoyle',34,76],['st_hand',44,66],['st_hound',56,66],['st_judge',54,76],['st_bishop',60,64],['st_veiled',78,64],['st_chimera',88,66],['st_gargoyle',80,82],['st_hydra',72,82],['st_mourners',64,82],['st_hand',9,58],['st_hound',88,80]])S(n,x,y);
   for(const [x,y] of [[18,76],[26,80],[34,72],[40,78],[54,70],[58,80],[76,82],[80,76]])lampAt(x,y,(x+y)%2?SILV:VIOL);
   for(const [x,y] of [[25,44],[31,50],[67,44],[73,50],[26,28],[70,30]])lampAt(x,y,(x+y)%2?SILV:VIOL);
@@ -584,6 +584,7 @@ function pscBuild(info){
     {t:'The Waystone Nook',x:12,y:76,k:'place'},{t:'The Weeping Alcove',x:30,y:60,k:'place'},{t:'The Rose Garden',x:37,y:70,k:'place'},{t:'The Gargoyle Arbour',x:28,y:25,k:'place'},{t:'The Hound Kennel',x:87,y:54,k:'place'},{t:"The Headless Knights' Corner",x:85,y:74,k:'place'},
     {t:"The Sculptor's Yard",x:69,y:74,k:'place'},{t:'The Hydra Pool',x:39,y:27,k:'place'},{t:'The Mirror Pond',x:60,y:27,k:'place'},{t:'The Lantern Bench',x:69,y:25,k:'place'},{t:'The Knot',x:24,y:69,k:'place'},{t:'The Orchard of Stone Fruit',x:63,y:57,k:'place'},
     {t:"The Gardener's Lodge",x:14,y:59,k:'place'},{t:'The Mews and Stable',x:82,y:61,k:'place'});
+  for(let i=C.decor.length-1;i>=0;i--){const d=C.decor[i];if(C.rows[d.y]&&C.rows[d.y][d.x]!=='.'&&!d.npc)C.decor.splice(i,1)}   // a hedge or wall laid over a prop takes the prop away
   const lv=C.finish({start:{x:48,y:83,f:0},col:[.88,1.0,1.3]});
   lv.floorSet=PSC_FLOORSET.slice();lv.floor=lv.floorSet[0];lv.day=.82;lv.amb=.9;lv.ceilH=7;lv.name=info.name;lv.label=info.name;
   lv._psc={lcol:C.lcol,col:[.88,1.0,1.3]};lv.noTele=false;lv.tele=PSC.TELE;
@@ -594,6 +595,10 @@ function pscBuild(info){
 function pscWidenRoom(L,w,h){   // the contract sizes are one column / one row more than the room maker's: pad with wall
   while(L.rows.length<h)L.rows.push('w'.repeat(L.rows[0].length));
   if(L.rows[0].length<w)L.rows=L.rows.map(r=>r+'w'.repeat(w-r.length))}
+function pscRoomDoor(L,l){   // the room maker's plain exit square becomes a door tile of the shared kind (KH_DOOR.psp), so the link tests and the key/seal glue see it
+  const gid=KH_NEXT_GID++;T_TILE[gid]=T_TILE[pspDoorGid('oak',2.5)];KH_DOOR[gid]={get lvl(){return l.to},get at(){return {x:l.land[0],y:l.land[1],f:l.land[2]}},psp:l,lock:null,prov:false,pspName:l.name};
+  const ch='d';L.chars=Object.assign({},L.chars||{});L.chars[ch]=gid;
+  const r=L.rows[l.at[1]];L.rows[l.at[1]]=r.slice(0,l.at[0])+ch+r.slice(l.at[0]+1)}
 function pscLodge(info){
   if(typeof pspPics==='function')pspPics();
   const l=pspLinkAt(9731,10,14);
@@ -606,7 +611,7 @@ function pscLodge(info){
       raw('crate',17,10,{sc:.9});raw('barrel',18,11,{sc:.9});raw('gy_chest',2,11,{sc:.95});raw('gy_bones',9,10,{block:false,sc:.4});raw('flowerpot',5,2,{block:false,sc:.9});raw('flowerpot',9,12,{block:false,sc:.9});
       npc('psc_gardener',10,3)}});
   PSC.chest['9731:2,11']={pot:3,mana:2,elixir:1,gold:900};
-  const L=LEVELS[PSC.LODGE];pscWidenRoom(L,20,16);L.diff=L.rating=101;L.noExtras=true;LEVEL_RATING[PSC.LODGE]=101;return L}
+  const L=LEVELS[PSC.LODGE];pscWidenRoom(L,20,16);pscRoomDoor(L,l);L.diff=L.rating=101;L.noExtras=true;LEVEL_RATING[PSC.LODGE]=101;return L}
 function pscMews(info){
   if(typeof pspPics==='function')pspPics();
   const l=pspLinkAt(9732,12,18);
@@ -618,11 +623,11 @@ function pscMews(info){
     build:({put,raw,npc})=>{
       for(const [x,y] of [[3,2],[8,2],[16,2],[21,2],[2,8],[22,8]])raw('gy_rpost',x,y,{sc:1.1});
       raw('gy_rpost',10,15,{npc:'psc_feather',solid:1,deco:false,sc:1.0});
-      for(const [x,y] of [[2,13],[6,13],[10,13]]){raw('hay',x,y,{sc:1.0});raw('crate',x+1,y+3,{sc:.8})}
+      for(const [x,y] of [[2,13],[6,13],[10,13]]){raw('hay',x,y,{sc:1.0});raw('crate',x===10?9:x+1,y+3,{sc:.8})}
       raw(HORSE,18,13,{sc:1});raw('gy_chest',14,13,{npc:'psc_glovechest',solid:1,deco:false,sc:.95});
       raw('barrel',23,15,{sc:.9});raw('barrel',23,16,{sc:.9});raw('gy_bones',20,11,{block:false,sc:.5});raw('gy_web',1,1,{block:false,sc:.4});raw('gy_web',23,1,{block:false,sc:.4});
       npc('psc_falconer',12,5)}});
-  const L=LEVELS[PSC.MEWS];pscWidenRoom(L,26,20);L.diff=L.rating=101;L.noExtras=true;LEVEL_RATING[PSC.MEWS]=101;return L}
+  const L=LEVELS[PSC.MEWS];pscWidenRoom(L,26,20);pscRoomDoor(L,l);L.diff=L.rating=101;L.noExtras=true;LEVEL_RATING[PSC.MEWS]=101;return L}
 nmFeather();
 function nmFeather(){
   khNpc('psc_feather','A perch by the door','gy_rpost',d=>{const F=pscF();

@@ -346,7 +346,7 @@ PSW_SPEC[9750]={W:72,H:64,diff:101,wh:2.2,lcol:pswCold,
     sign(68,5,[0,-1],'GARDEROBE','');p('bucket',68,6,{});p('stool',67,5,{});sign(68,52,[0,-1],'GARDEROBE','');p('bucket',68,53,{});
     // the doors east
     sign(67,39,[0,-1],'THE KITCHEN DOOR','Out to the Court of Statues');sign(67,23,[0,-1],'TO THE GREAT HALLS','Through the Screens Passage');
-    p('lamp',67,41,{block:true});p('lamp',67,25,{block:true});
+    p('lamp',68,41,{block:true});p('lamp',68,25,{block:true});
     // ---- the Maids' Loft (REST ROOM, warm) ----
     sign(5,46,[0,-1],"THE MAIDS' LOFT",'Rest here');
     [[5,48],[5,52],[11,48],[11,52]].forEach(([x,y],i)=>p('bed',x,y,{block:true,npc:i===0?'psw_bed':undefined}));
@@ -574,4 +574,9 @@ yrQ('psq20','Bread for the Dead','Dorcas Fenne, kitchen maid',[['Bring six Pale 
 yrQ('psq21','A Sword Out of Place','The Armourer, in the armoury',[['Find three sword hilts: in the armoury, the great kitchen and the guardroom. Bring them to the Armourer.',()=>bagCount('pshilt')>=3,['psw_hilt1','psw_hilt2','psw_hilt3']]],{gold:6000,xp:35000,items:['psarmourplate']},{take:{pshilt:3}});
 yrQ('psq22','Overdue','The Librarian, in the library',[['Return five strayed books to the Librarian: the Steward\'s office, the servants\' hall, the cloister, the chapel, the chapter house.',()=>[1,2,3,4,5].every(i=>bagCount('psbook'+i)>=1),['psw_book1','psw_book2','psw_book3','psw_book4','psw_book5']]],{gold:6500,xp:40000,items:['pslibring']},{take:{psbook1:1,psbook2:1,psbook3:1,psbook4:1,psbook5:1}});
 yrQ('psq23',"The Chaplain's Candles",'The Chaplain, in the chapter house',[['Light the six candles of the chapel in the order on the plaque by the font.',()=>!!pswF().candlesDone,['psw_cand1','psw_cand2','psw_cand3','psw_cand4','psw_cand5','psw_cand6']]],{gold:7000,xp:45000,items:['pscandle','psfont']});
-for(const q of ['psq20','psq21','psq22','psq23'])QAREA[q]='The Pale Lands';
+for(const q of ['psq20','psq21','psq22','psq23'])QAREA[q]=PSP.REGION;
+if(typeof QRF!=='undefined'){const N=(l,...ids)=>({lvl:l,npc:ids});
+  QRF.T.psq20={give:[N(9750,'psw_dorcas')],act:[N(9750,'psw_loaf1','psw_loaf2','psw_loaf3','psw_loaf4','psw_loaf5','psw_loaf6')],ready:[N(9750,'psw_dorcas')]};
+  QRF.T.psq21={give:[N(9750,'psw_armourer')],act:[N(9750,'psw_hilt1','psw_hilt2','psw_hilt3')],ready:[N(9750,'psw_armourer')]};
+  QRF.T.psq22={give:[N(9760,'psw_librarian')],act:[N(9760,'psw_librarian')],ready:[N(9760,'psw_librarian')]};
+  QRF.T.psq23={give:[N(9760,'psw_chaplain')],act:[N(9760,'psw_cand1','psw_cand2','psw_cand3','psw_cand4','psw_cand5','psw_cand6')],ready:[N(9760,'psw_chaplain')]}}

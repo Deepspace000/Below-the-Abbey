@@ -354,12 +354,12 @@ ITEMDEF.psantidote={n:'Pale Antidote',k:'potion',t:'Potion',ic:'potion',c:'#d0e8
 /* ==========================================================================
    THE PRISONERS AND THEIR NINE QUESTS (psq30 to psq38). Premise, task and reward are the plan's; the words are plain.
    ========================================================================== */
-if(typeof QAREA_ORDER!=='undefined'&&!QAREA_ORDER.includes('The Pale Spire'))QAREA_ORDER.push('The Pale Spire');
+if(typeof QAREA_ORDER!=='undefined'&&!QAREA_ORDER.includes(PSP.REGION))QAREA_ORDER.push(PSP.REGION);
 const psdStones=()=>Object.keys(psdF().stone).length;
 function psdQ(id,title,who,steps,reward,extra){
   const q=Object.assign({title,who,need:steps.length,goal:()=>steps.reduce((n,s)=>n+(s[1]()?1:0),0),reward},extra||{});
   Object.defineProperty(q,'desc',{enumerable:true,configurable:true,get(){const s=steps.find(s=>!s[1]());return s?(typeof s[0]==='function'?s[0]():s[0]):'Go back to '+who.split(',')[0]+'. All is done.'}});
-  QUESTS[id]=q;QAREA[id]='The Pale Spire';return q}
+  QUESTS[id]=q;QAREA[id]=PSP.REGION;return q}
 const psdHas=(id,n)=>()=>bagCount(id)>=(n||1);
 psdQ('psq30',"The Gaoler's Tin",'Hob Garrick, thief, in Cell Block A of the Undercroft Gaols',[["Bring Hob Garrick's tin of lock picks from the chest in the north east corner of the Question Room, in the Undercroft Gaols (below the kitchens). Red string on the lid.",psdHas('pstin')]],{gold:6000,xp:40000,items:['pspickset']},{take:{pstin:1}});
 psdQ('psq31','The Signet Behind the Portrait','Lady Isaude Marwen, in Cell Block A of the Undercroft Gaols',[["Find Lady Isaude's portrait in the West Gallery (the Gallery of Portraits, ground floor of the Great Halls) and bring her heron signet ring from behind it.",psdHas('pssignet')]],{gold:7000,xp:45000,items:['pslocket']},{take:{pssignet:1}});

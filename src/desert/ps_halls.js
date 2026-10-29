@@ -266,7 +266,8 @@ function pshBuild(){
   reserve(55,16,57,19);
   // special door tiles
   const gidLady=pshDoorTile('closet'),gidClo=pshDoorTile('closet'),gidBar=pshDoorTile('barred');
-  over['13,29']=pshDoorTile('closet');over['10,69']=gidClo;over['69,19']=gidBar;
+  over['13,29']=(()=>{const b=pshDoorTile('closet'),g=KH_NEXT_GID++;T_TILE[g]=T_TILE[b];if(GY.col&&GY.col[b])GY.col[g]=GY.col[b];return g})();   // its own tile id: the warp door must not share the closet's KH_DOOR record
+  over['10,69']=gidClo;over['69,19']=gidBar;
   over['24,69']=pshSecretTile('gallery');over['88,69']=pshSecretTile('statues');
   reserve(12,28,14,30);reserve(9,69,11,71);reserve(68,18,70,20);reserve(23,68,25,71);reserve(87,68,89,71);
   const decor=[],enemies=[],items=[],lights=[],lcol={},kI={},r2={},occ=new Set(),wocc=new Set(),miss=[];
@@ -302,7 +303,7 @@ function pshBuild(){
     const st=styleAt(x,y),kd=kindAt[k]||'plain',v=(hs(x,y,3)*2)|0;
     s+=ch(pshTile(st,kd,kd==='plain'?v:0))}rows.push(s)}
   // the door records: which tile number is which door
-  for(const d of doorRec){const c=rows[d.at[1]][d.at[0]],gid=chars[c];KH_DOOR[gid]={psh:'link',link:d.link,get lvl(){return d.link.to},kind:d.kind}}
+  for(const d of doorRec){const c=rows[d.at[1]][d.at[0]],gid=chars[c];KH_DOOR[gid]={psh:'link',link:d.link,get lvl(){return d.link.to},get at(){const q=d.link.land;return {x:q[0],y:q[1],f:q[2]}},kind:d.kind}}
   {const c=rows[29][13];KH_DOOR[chars[c]]={psh:'warp',a:[13,30,2],b:[13,28,0],y:29,msgIn:true}}
   {const c=rows[69][10];KH_DOOR[chars[c]]={psh:'closet'}}
   {const c=rows[19][69];KH_DOOR[chars[c]]={psh:'barred'}}
@@ -371,7 +372,7 @@ function pshFurnish(S){
   for(let y=70;y<=81;y++)mark(107,y,'ivy');for(let x=100;x<=106;x++)mark(x,69,'ivy');
   put('fountain',103,77,{block:true});for(const [x,y] of [[101,73],[105,73],[101,80],[105,80]])put('gy_bench',x,y,{block:true});
   for(const [x,y] of [[100,71],[106,71],[100,75],[100,79],[106,79]])put('ps_urn_pale',x,y,{block:true});
-  put('ps_hst1',102,71,{block:true});put('ps_hst2',104,81,{block:true});put('ps_hst4',106,73,{block:true});
+  put('ps_hst1',102,71,{block:true});put('ps_hst2',103,81,{block:true});put('ps_hst4',106,73,{block:true});
   for(const x of [99,100,101,105,106])put('ps_hedge',x,70,{});
   wall(pt(30),[[68,71],[68,73],[68,79],[68,81]],We);
   thing('ps_p_curator','psh_curator',74,80);sign(70,81,So,'THE HALL OF STATUES','Kings and monsters of the old house');
@@ -456,7 +457,7 @@ function pshFurnish(S){
   for(const [x,y] of [[88,16],[98,16],[88,32],[98,32]])hang(x,y,1.8);
   foe('psantlered',93,15);foe('psarmour',84,13);foe('psarmour',102,13);foe('pscarver',88,30);
   for(const [x,y] of [[84,32],[100,32],[90,20],[96,20]])foe('pshhound',x,y);
-  thing('hl_p_note','psh_huntbook',92,26,{sc:.5});
+  thing('hl_p_note','psh_huntbook',92,27,{sc:.5});
 }
 
 /* ---------- doors ---------- */
@@ -494,7 +495,6 @@ function pshTake(id,name,pic,flag,item,before,after,btn,done){
 const pshTalk=(id,name,pic,text)=>khNpc(id,name,pic,()=>say(text,[BYE]));
 const pshCount=o=>Object.keys(o||{}).length;
 /* ---------- quests and people ---------- */
-if(typeof QAREA!=='undefined'){for(const q of ['psq10','psq11','psq12'])QAREA[q]='The Pale Lands'}
 yrQ('psq10','Up the Grand Stair','The Chamberlain, in the Entrance Hall',[
   ['Find the Second Floor Key. The Chamberlain says the household went up the Grand Stair and the keys went with the Sacristan. Ask the porter at the gate, the librarian and the prisoners below.',()=>!!pshF().key2||bagCount('pskey2')>0||!!pshF().stairOpen,['psh_chamberlain']],
   ['Open the iron-bound Grand Stair door at the north end of the Great Halls with the key.',()=>!!pshF().stairOpen,['psh_chamberlain']]],{gold:8000,xp:50000,items:['potion6','potion6']});
@@ -505,6 +505,11 @@ yrQ('psq12',"The Curator's Count",'The Curator, in the Hall of Statues',[
   ['Read the nameplates of six statues in the Hall of Statues, so that the Curator can have them counted and named.',()=>pshCount(pshF().pl)>=6,['psh_pl0','psh_pl1','psh_pl2','psh_pl3','psh_pl4','psh_pl5']]],{gold:5000,xp:30000,items:['potion6']});
 khNpc('psh_chamberlain','The Chamberlain (a ghost)','ps_p_chamberlain',()=>say('Good evening. Or good morning. I have lost the habit of telling them apart. I am the Chamberlain of this house, and I am afraid the house is closed. The Sovereign and the whole household went up the Grand Stair long ago, and the stair has been locked ever since. I cannot open it myself. I cannot open anything, now.',[
   ['What is this place?',()=>say('The Great Halls, the ground floor of the main block. The Great Hall is straight ahead, with the long tables. The Gallery of Portraits is west, the Hall of Statues is east. The service wing is beyond the Screens Passage, west of the Great Hall, and the cloister and chapel are beyond the Banqueting Hall, to the east.',[BYE])],BYE]));
+for(const q of ['psq10','psq11','psq12'])QAREA[q]=PSP.REGION;   // after yrQ, which files them under Yarrim
+if(typeof QRF!=='undefined'){const N=(l,...ids)=>({lvl:l,npc:ids});
+  QRF.T.psq10={give:[N(9740,'psh_chamberlain')],act:[N(9740,'psh_chamberlain')],ready:[N(9740,'psh_chamberlain')]};
+  QRF.T.psq11={give:[N(9740,'psh_lutenist')],act:[N(9740,'psh_lutenist')],ready:[N(9740,'psh_lutenist')]};
+  QRF.T.psq12={give:[N(9740,'psh_curator')],act:[N(9740,'psh_pl0','psh_pl1','psh_pl2','psh_pl3','psh_pl4','psh_pl5')],ready:[N(9740,'psh_curator')]}}
 blGiveOpt('psh_chamberlain','psq10',()=>true,{
   offer:'There is a door at the north end of the Great Halls, the Grand Stair, with a silver lock. The Sovereign sent for the key when the household went up, and nobody ever brought it back. If the key could be found, the stair could be opened. I would like to know that somebody had tried. Will you look for it?',
   accept:'Thank you. The keys of the upper floors were always returned to the Sacristan at dusk. The porter at the gate, the librarian in the east wing and the prisoners in the dungeons may remember more than I do. I am a ghost, and ghosts forget.',

@@ -49,6 +49,16 @@ def check(name, ok, extra=''):
         FAILS.append(name)
 
 
+def enter(pg, id_):
+    """go to a level and wait until the party is really there (each package loads its art on the first visit and only then enters)"""
+    pg.evaluate("""(id) => { if (!LEVELS[id] && KH_LAZY[id]) KH_LAZY[id](); const L = LEVELS[id]; goToLevel(id, {x: L.start.x, y: L.start.y, f: L.start.f}) }""", id_)
+    try:
+        pg.wait_for_function('(id) => LEVEL === id && G.state === "play"', arg=id_, timeout=90000)
+    except Exception:
+        print('could not enter', id_)
+    pg.wait_for_timeout(500)
+
+
 BUILT = "() => PSP.LEVELS.filter(l => l.built).map(l => l.id)"
 
 
@@ -98,11 +108,11 @@ def run_links():
 
 
 REACH_JS = """(args) => { const [id, thru] = args; if (!LEVELS[id]) KH_LAZY[id](); const L = LEVELS[id], W = L.rows[0].length, H = L.rows.length, o = {bad: []};
-  const bs = new Set(); for (const d of L.decor) if (d.block || (d.npc && d.solid)) bs.add(d.x + ',' + d.y);
+  const bs = new Set(); for (const d of L.decor) if ((d.block || (d.npc && d.solid)) && !/^psd_cell/.test(d.npc || '')) bs.add(d.x + ',' + d.y);   // a cell gate opens when the party speaks to it
   const starts = [[L.start.x, L.start.y]]; for (const l of PSP.LINKS) if (l.to === id && l.land) starts.push([l.land[0], l.land[1]]);
-  const door = (x, y) => { const c = L.rows[y][x]; const d = c !== '.' && KH_DOOR[L.chars[c]]; return !!d };
+  const door = (x, y) => { const c = L.rows[y][x]; const d = c !== '.' && KH_DOOR[L.chars[c]]; return !!(d && (d.psh === 'warp' || d.psh === 'closet' || d.psh === 'niche' || d.psw === 'secret')) };   // doors inside a level that open for the party (closet key, lever, hidden niches, the warp to the lady's room); level changes and sealed doors stay shut
   const seen = new Set(); const q = []; for (const s of starts) { const k = s[0] + ',' + s[1]; if (!seen.has(k)) { seen.add(k); q.push(s) } }
-  for (let i = 0; i < q.length; i++) { const [x, y] = q[i]; for (const [a, b] of [[1,0],[-1,0],[0,1],[0,-1]]) { const nx = x + a, ny = y + b, k = nx + ',' + ny; if (seen.has(k) || nx < 0 || ny < 0 || nx >= W || ny >= H || L.rows[ny][nx] !== '.' || bs.has(k)) continue; seen.add(k); q.push([nx, ny]) } }
+  for (let i = 0; i < q.length; i++) { const [x, y] = q[i]; for (const [a, b] of [[1,0],[-1,0],[0,1],[0,-1]]) { const nx = x + a, ny = y + b, k = nx + ',' + ny; if (seen.has(k) || nx < 0 || ny < 0 || nx >= W || ny >= H || (L.rows[ny][nx] !== '.' && !door(nx, ny)) || bs.has(k)) continue; seen.add(k); q.push([nx, ny]) } }
   const lost = []; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (L.rows[y][x] === '.' && !seen.has(x + ',' + y) && !bs.has(x + ',' + y)) lost.push([x, y]);
   o.lost = lost.length; o.sample = lost.slice(0, 6);
   const P = L._ps || {}, zones = P.safe || [];
@@ -145,6 +155,8 @@ def run_key():
 def run_quests():
     with sync_playwright() as p:
         b, pg, errs = boot(p)
+        for id_ in pg.evaluate(BUILT):   # some packages register their people when their level is first built
+            enter(pg, id_)
         r = pg.evaluate("""() => { const o = {def: [], undef: [], bad: []}; for (let n = 1; n <= 38; n++) { const id = 'psq' + n; const q = QUESTS[id];
           if (!q) { o.undef.push(id); continue } o.def.push(id); const bad = [];
           if (!q.title) bad.push('title'); if (!q.who) bad.push('who'); if (!q.reward) bad.push('reward'); if (QAREA[id] !== 'The Pale Lands') bad.push('area ' + QAREA[id]);
@@ -160,7 +172,8 @@ def run_walk():
     with sync_playwright() as p:
         b, pg, errs = boot(p)
         for id_ in pg.evaluate(BUILT):
-            r = pg.evaluate("""(id) => { if (!LEVELS[id]) KH_LAZY[id](); goToLevel(id, {x: LEVELS[id].start.x, y: LEVELS[id].start.y, f: LEVELS[id].start.f}); const L = LEVELS[id], o = {bad: [], doors: 0};
+            enter(pg, id_)
+            r = pg.evaluate("""(id) => { const L = LEVELS[id], o = {bad: [], doors: 0};
           const W = G.grid[0].length, H = G.grid.length; const reach = new Set([G.P.x + ',' + G.P.y]); const q = [[G.P.x, G.P.y]];
           for (let i = 0; i < q.length; i++) { const [x, y] = q[i]; for (const [a, b] of [[1,0],[-1,0],[0,1],[0,-1]]) { const nx = x + a, ny = y + b, k = nx + ',' + ny; if (reach.has(k) || nx < 0 || ny < 0 || nx >= W || ny >= H || G.grid[ny][nx] !== 0 || (typeof cellBlocked === 'function' && cellBlocked(nx, ny))) continue; reach.add(k); q.push([nx, ny]) } }
           for (const l of PSP.LINKS.filter(l => l.from === id && l.at)) { o.doors++; const [x, y] = l.at; const nb = [[1,0],[-1,0],[0,1],[0,-1]].some(([a, b]) => reach.has((x + a) + ',' + (y + b))); if (!nb && !PSP.LINKS.some(t => t.to === id && t.land && t.land[0] === l.at[0])) o.bad.push('door ' + l.at + ' not reached from the start') }
@@ -174,7 +187,8 @@ def run_save():
     with sync_playwright() as p:
         b, pg, errs = boot(p)
         for id_ in pg.evaluate(BUILT):
-            ok = pg.evaluate("""(id) => { if (!LEVELS[id]) KH_LAZY[id](); const L = LEVELS[id]; goToLevel(id, {x: L.start.x, y: L.start.y, f: L.start.f}); writeSave('auto'); const sv = readSave('auto'); if (!sv || sv.level !== id) return 'save level ' + (sv && sv.level); restore(sv); return LEVEL === id ? 'ok' : 'loaded ' + LEVEL }""", id_)
+            enter(pg, id_)
+            ok = pg.evaluate("""(id) => { const L = LEVELS[id]; writeSave('auto'); const sv = readSave('auto'); if (!sv || sv.level !== id) return 'save level ' + (sv && sv.level); restore(sv); return LEVEL === id ? 'ok' : 'loaded ' + LEVEL }""", id_)
             pg.wait_for_timeout(600)
             check('save and load in %d' % id_, ok == 'ok', ok)
         check('no page errors', not real(errs), real(errs)[:8])
@@ -194,7 +208,7 @@ def run_shots():
     with sync_playwright() as p:
         b, pg, errs = boot(p)
         for id_ in (ids or pg.evaluate(BUILT)):
-            pg.evaluate("""(id) => { if (!LEVELS[id]) KH_LAZY[id](); const L = LEVELS[id]; goToLevel(id, {x: L.start.x, y: L.start.y, f: L.start.f}) }""", id_)
+            pg.evaluate("""(id) => { if (!LEVELS[id] && KH_LAZY[id]) KH_LAZY[id](); const L = LEVELS[id]; goToLevel(id, {x: L.start.x, y: L.start.y, f: L.start.f}) }""", id_)
             pg.wait_for_timeout(1800)
             pg.screenshot(path=os.path.join(SHOTS, 'ps_%d.png' % id_))
             print('shot', id_)
