@@ -40,7 +40,7 @@ function pspDePlum(key){try{const im=IMG[key];if(!im||!im.width||im._ps2)return;
   for(let i=0;i<a.length;i+=4){if(!a[i+3])continue;const r=a[i],g=a[i+1],b=a[i+2],mx=Math.max(r,g,b);if(iron&&r-g>6&&b-g>4){const l=(r+g+b)/3;a[i]=l*.8;a[i+1]=l*.98;a[i+2]=l*1.1}else if(mx<96&&r-g>5&&b-g>5){const l=(r+g+b)/3*.8;a[i]=l*.7;a[i+1]=l*.95;a[i+2]=l*1.1}}if(key==='ps_arch_high'||key==='ps_arch_ivy'){   // the opening of the tall arches is a dark plug: make it see-through (flood from the middle of the opening) so the lane can be seen through the arch
     const w=c.width,h=c.height,dark=i=>a[i*4+3]>200&&Math.max(a[i*4],a[i*4+1],a[i*4+2])<64,st=[];
     for(const fy of [.8,.7,.6]){const sx=w>>1,sy=Math.floor(h*fy);if(dark(sy*w+sx)){st.push(sy*w+sx);break}}
-    const seen=new Uint8Array(w*h);let n=0;while(st.length){const i=st.pop();if(seen[i]||!dark(i))continue;seen[i]=1;n++;const x0=i%w,y0=(i/w)|0;if(x0>0)st.push(i-1);if(x0<w-1)st.push(i+1);if(y0>0)st.push(i-w);if(y0<h-1)st.push(i+w)}
+    const seen=new Uint8Array(w*h);let n=0;const ivyArch=key==='ps_arch_ivy';while(st.length){const i=st.pop();if(seen[i]||!dark(i))continue;if(ivyArch){const px=i%w,py=(i/w)|0;const u=(py/h-.26)/.32;if(u<=0||Math.abs(px-w*.495)>w*.17*Math.sqrt(Math.min(1,u)))continue}   /* the ivy arch is dark stone all over: only the opening may go see-through */seen[i]=1;n++;const x0=i%w,y0=(i/w)|0;if(x0>0)st.push(i-1);if(x0<w-1)st.push(i+1);if(y0>0)st.push(i-w);if(y0<h-1)st.push(i+w)}
     if(n>w*h*.04)for(let i=0;i<seen.length;i++)if(seen[i])a[i*4+3]=0}
   x.putImageData(d,0,0);c._ps2=1;IMG[key]=c}catch(e){}}
 function pspLoad(then){

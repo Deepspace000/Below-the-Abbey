@@ -135,7 +135,7 @@ function psdStain(x,w,h,v,id,k){
   for(let n=0;n<3;n++){const px=R(n,1)*w,len=PSD_VIS*(.15+R(n,2)*.45),wd=2+R(n,3)*4,gr=x.createLinearGradient(0,yb,0,yb+len);gr.addColorStop(0,'rgba(60,150,110,.2)');gr.addColorStop(1,'rgba(60,170,120,0)');x.fillStyle=gr;x.fillRect(px,yb,wd,len)}
   if(k>=0){x.fillStyle='rgba(70,190,130,.18)';for(let n=0;n<2;n++){const px=R(n,9)*(w-30);x.fillRect(px,yb,30,6+R(n,10)*8)}}
   const dg=x.createLinearGradient(0,h-80,0,h);dg.addColorStop(0,'rgba(0,0,0,0)');dg.addColorStop(1,'rgba(0,12,6,.65)');x.fillStyle=dg;x.fillRect(0,h-80,w,80);
-  if(k>=1)for(let n=0;n<(k>1?26:8);n++){const px=R(n,4)*w,py=h-R(n,5)*(k>1?110:44),r=2+R(n,6)*5;x.fillStyle=['#17301c','#1f3a24','#10241a','#284630'][(R(n,7)*4)|0];x.globalAlpha=.9;x.beginPath();x.ellipse(px,py,r,r*.6,R(n,8)*3,0,6.3);x.fill()}
+  if(k>=1)for(let n=0;n<(k>1?26:8);n++){const px=R(n,4)*w,py=h-R(n,5)*(k>1?110:44),r=2+R(n,6)*5;x.fillStyle=['#17301c','#1f3a24','#10241a','#284630'][(R(n,7)*4)|0];x.globalAlpha=.5;x.beginPath();x.ellipse(px,py,r,r*.6,R(n,8)*3,0,6.3);x.fill()}
   x.globalAlpha=1}
 function psdTile(S,kind,v){
   const key=S.id+kind+v;if(PSD.tl[key]!==undefined)return PSD.tl[key];
@@ -150,12 +150,12 @@ function psdTile(S,kind,v){
         x.strokeStyle='#1d2e24';x.lineWidth=3;x.beginPath();x.moveTo(64,top);x.lineTo(64,bot);x.moveTo(52,top+(bot-top)*.5);x.lineTo(76,top+(bot-top)*.5);x.stroke();
         const sp=x.createLinearGradient(0,bot,0,h);sp.addColorStop(0,'rgba(190,255,215,.3)');sp.addColorStop(1,'rgba(190,255,215,0)');x.fillStyle=sp;x.beginPath();x.moveTo(50,bot);x.lineTo(78,bot);x.lineTo(122,h);x.lineTo(6,h);x.closePath();x.fill()};break;
     case 'v':o.draw=(x,w,h)=>{psdStain(x,w,h,v,id,2);const yb=h-PSD_VIS;for(let n=0;n<9;n++){let px=R(n,1)*w,py=yb;x.strokeStyle=n%2?'#150f09':'#231a10';x.lineWidth=2+R(n,2)*3;x.beginPath();x.moveTo(px,py);for(let t=0;t<9;t++){px+=(R(n,t+10)-.5)*16;py+=PSD_VIS*(.07+R(n,t+20)*.09);x.lineTo(px,py)}x.stroke()}
-        for(let n=0;n<60;n++){const px=R(n,31)*w,py=yb+PSD_VIS*Math.pow(R(n,32),.75),r=2.5+R(n,33)*4.5;x.fillStyle=['#142a1a','#1c3622','#0e2016','#26422c'][(R(n,34)*4)|0];x.globalAlpha=.92;x.beginPath();x.ellipse(px,py,r,r*.62,R(n,35)*3.1,0,6.3);x.fill()}x.globalAlpha=1};break;
+        for(let n=0;n<60;n++){const px=R(n,31)*w,py=yb+PSD_VIS*Math.pow(R(n,32),.75),r=2.5+R(n,33)*4.5;x.fillStyle=['#142a1a','#1c3622','#0e2016','#26422c'][(R(n,34)*4)|0];x.globalAlpha=.55;x.beginPath();x.ellipse(px,py,r,r*.62,R(n,35)*3.1,0,6.3);x.fill()}x.globalAlpha=1};break;
     case 'r':o.draw=(x,w,h)=>{psdStain(x,w,h,v,id,0);const top=h-2.45*128,bot=h-4;x.save();psdPointed(x,16,112,top,bot,40);x.fillStyle='#030806';x.fill();x.strokeStyle='#16221c';x.lineWidth=7;x.stroke();x.restore();psdPointed(x,30,98,top+18,bot,32);x.strokeStyle='rgba(8,14,11,.55)';x.lineWidth=2.5;x.stroke();   // a dark moulding: a bright outline seen edge-on from the passage was a cyan strip floor to ceiling
         x.fillStyle='rgba(34,70,54,.55)';x.fillRect(8,top+44,14,9);x.fillRect(106,top+44,14,9)};break;
-    case 'f':o.draw=(x,w,h)=>{psdStain(x,w,h,v,id,1);const cy=h-(1.5+R(1,1)*.5)*128,cx=64;x.fillStyle='rgba(120,170,140,.6)';x.beginPath();x.ellipse(cx,cy,36,46,0,0,6.3);x.fill();x.strokeStyle='rgba(10,30,20,.8)';x.lineWidth=4;x.stroke();
+    case 'f':o.draw=(x,w,h)=>{psdStain(x,w,h,v,id,1);const cy=h-(1.5+R(1,1)*.5)*128,cx=64;x.fillStyle='rgba(62,86,76,.45)';x.beginPath();x.ellipse(cx,cy,36,46,0,0,6.3);x.fill();x.strokeStyle='rgba(10,30,20,.8)';x.lineWidth=4;x.stroke();
         x.fillStyle='#020604';x.beginPath();x.ellipse(cx-15,cy-11,9,12,.2,0,6.3);x.ellipse(cx+15,cy-11,9,12,-.2,0,6.3);x.fill();x.beginPath();x.moveTo(cx,cy-2);x.lineTo(cx-6,cy+13);x.lineTo(cx+6,cy+13);x.closePath();x.fill();
-        x.beginPath();x.ellipse(cx,cy+29,18,(v%2?16:10),0,0,6.3);x.fill();x.fillStyle='rgba(185,215,198,.75)';for(let t=-3;t<=3;t++)x.fillRect(cx+t*4.8-1.5,cy+18,3,7);
+        x.beginPath();x.ellipse(cx,cy+29,18,(v%2?16:10),0,0,6.3);x.fill();x.fillStyle='rgba(110,138,124,.4)';for(let t=-3;t<=3;t++)x.fillRect(cx+t*4.8-1.5,cy+18,3,7);
         x.strokeStyle='rgba(10,30,20,.85)';x.lineWidth=5;x.beginPath();x.moveTo(cx-28,cy-28);x.lineTo(cx-6,cy-20);x.moveTo(cx+28,cy-28);x.lineTo(cx+6,cy-20);x.stroke();
         x.fillStyle='rgba(60,170,120,.5)';x.fillRect(cx-20,cy-52,40,5)};break;
     case 'l':o.draw=(x,w,h)=>{x.fillStyle='rgba(110,200,160,.25)';x.fillRect(0,0,w,14);x.fillStyle='rgba(0,0,0,.45)';x.fillRect(0,14,w,4);psdStain(x,w,h,v,id,1)};break;
@@ -185,6 +185,7 @@ function psdMake(info){
   const id=info.id;if(LEVELS[id])return LEVELS[id];
   const S=PSD.SPEC[id];if(!S)throw new Error('psd: no plan for '+id);S.id=id;
   try{gyAlias()}catch(e){}
+  try{pswCastleTone()}catch(e){console.error('psd tone',e)}
   const W=info.W,H=info.H,WH=S.WH,hs=(a,b,c)=>hash2(a,b,c+id),g=[];
   for(let y=0;y<H;y++)g.push(new Array(W).fill('#'));
   const mp={g,R:(x0,y0,x1,y1,c)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(g[y]&&x>=0&&x<W)g[y][x]=c||'.'},
@@ -248,7 +249,7 @@ function psdMake(info){
   /* cobwebs, candles in the dark, red lanterns and the odd haunted mirror (shared dresser in ps_halls.js) */
   try{const taken=new Set();for(const d of decor)if(d.wd)taken.add(d.x+','+d.y+','+d.wd[0]+','+d.wd[1]);let mi=0;
     pshHaunt({W,H,seed:id,start:start?[start.x,start.y]:null,blocked:()=>decor.filter(d=>d.block).map(d=>d.x+','+d.y),open:(x,y)=>open(x,y)&&!deepAt(x,y),free:(x,y)=>free(x,y)&&!keep.has(x+','+y),wall:(x,y,a,b)=>!open(x+a,y+b)&&rows[y+b]!==undefined&&rows[y+b][x+a]!=='.'&&!doorSq.some(q=>q[0]===x+a&&q[1]===y+b),taken:(x,y,a,b)=>taken.has(x+','+y+','+a+','+b),
-      counts:S.haunt||{mirror:3,cobcorner:14,cobthick:2,candles:4,redlamp:5,spider:3},
+      counts:Object.assign({},S.haunt||{mirror:3,cobcorner:14,cobthick:2,candles:4,redlamp:5,spider:3},{cobthick:0}),
       wallPic:(k,x,y,wd,o)=>{const oo={wd,raw:true,sc:1};if(o.mirror!==undefined)oo.npc='psh_mir'+((mi++)%12);const d=dec(k,x,y,oo);if(d)taken.add(x+','+y+','+wd[0]+','+wd[1]);return !!d},
       floorProp:(k,x,y,o)=>!!dec(k,x,y,{block:!!o.block,sc:o.sc||1,raw:true}),light:(x,y,c)=>light(x,y,c)})}catch(e){console.error('psd haunt',e)}
   /* ---- wall torches (green-white), candle niches, lamps ---- */
@@ -269,16 +270,27 @@ function psdMake(info){
      const ns=GYM_D.filter(([a,b])=>open(x+a,y+b));if(ns.length!==1)continue;const [a,b]=ns[0],nx=x+a,ny=y+b;
      if(torches.some(t=>Math.hypot(t[0]-x,t[1]-y)<1.6)||occ.has(nx+','+ny))continue;cand.push({x,y,nx,ny,h:hs(x,y,95)})}
    cand.sort((p,q)=>p.h-q.h);const nic=[];
-   for(const c of cand){if(nic.length>=(S.niches===undefined?6:S.niches))break;if(nic.some(n=>Math.hypot(n.x-c.x,n.y-c.y)<6))continue;nic.push(c);put(c.x,c.y,ch(NIL));light(c.nx,c.ny,[.7,1.25,.9])}}
+   for(const c of cand){if(nic.length>=(S.niches===undefined?0:S.niches))break;if(nic.some(n=>Math.hypot(n.x-c.x,n.y-c.y)<6))continue;nic.push(c);put(c.x,c.y,ch(NIL));light(c.nx,c.ny,[.7,1.25,.9])}}
   {const have=lights.slice();for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!open(x,y))continue;if(have.every(l=>Math.hypot(l[0]-x,l[1]-y)>=(S.lampGap||5.4))){have.push([x,y]);lights.push([x,y]);lcol[x+','+y]=S.lcol}}}
   /* ---- floors: 0 black flags, 1 lighter flags / bones, 2 wet cobbles, 3 causeway and bridge flags, 4 straw, 5 shallow water, 6 deep water (blocked) ---- */
   const T=(out,src,gain,tint)=>{try{return gyFloorTone(out,src,gain,tint)}catch(e){return src}};
-  const wat=(out,gain,tint)=>FLOORS.water?T(out,'water',gain,tint):T(out,'gyf_slate',gain*.6,[.4,.8,.7]);
+  /* calm still water: a dark green-black plane with broad soft swells and no bright ripple lines (the painted water floor had thin cyan lines that read as strips, and a hard edge where it met the wall base). Tileable. */
+  const wat=(out,gain,tint)=>{const nm=out+'_calm';if(FLOORS[nm])return nm;const N=128,d=new Uint8ClampedArray(N*N*4),deep=gain<1.65,base=deep?[6,22,25]:[14,42,44],TP=Math.PI*2;
+    for(let y=0;y<N;y++)for(let x=0;x<N;x++){const v=.5*Math.sin(TP*(2*x+y)/N)+.32*Math.sin(TP*(x-3*y)/N+1.3)+.2*Math.sin(TP*(4*x+2*y)/N+2.1),n=(hash2(x>>1,y>>1,91)-.5)*3,o=(y*N+x)*4;
+      d[o]=base[0]+v*2.2+n;d[o+1]=base[1]+v*4+n;d[o+2]=base[2]+v*4+n;d[o+3]=255}FLOORS[nm]=d;return nm};
   if(!FLOORS.water&&typeof wlFloors==='function'){}
   const ft=S.ftint||[.7,.95,.8];
   const fb0=T('psf_'+id+'a',GY_FLOORSET[3],S.fgain||.5,ft),fb1=T('psf_'+id+'b',GY_FLOORSET[S.fl1===undefined?5:S.fl1],S.fgain1||.7,ft);
   const fSet=[fb0,fb1,gyFloorWet('psf_'+id+'w',fb0,S.lcol,id%97+3),T('psf_'+id+'c','gyf_flag',.75,[.8,1,.9]),T('psf_straw','gyf_dirt',.8,[1.1,1.1,.7]),wat('psf_shallow',1.7,[.4,1.1,1.05]),wat('psf_deep',1.6,[.3,.85,.95])];
   if(S.flood&&G.flags&&G.flags.psp&&G.flags.psp.d&&G.flags.psp.d.wheelsDone)for(const q of S.flood)for(let y=q[1];y<=q[3];y++)for(let x=q[0];x<=q[2];x++)if(fm[y][x]==='5')fm[y][x]='2';
+  /* the name stones are blocks cut into the wall, not slabs standing on the floor: each hangs on the wall beside its square (moved to the nearest square with a wall if it stood in the open) */
+  try{const okWall=(x,y)=>GYM_D.find(([a,b])=>g[y+b]&&g[y+b][x+a]!==undefined&&!open(x+a,y+b)&&!doorSq.some(q=>q[0]===x+a&&q[1]===y+b));
+    for(const d of decor){if(d.k!=='gy_nameplate'||!d.npc||!IMG.psx_plate)continue;
+      let w=okWall(d.x,d.y);
+      if(!w){let best=null,bd=1e9;for(let r=1;r<=5;r++)for(let b=-r;b<=r;b++)for(let a=-r;a<=r;a++){const x=d.x+a,y=d.y+b;if(!open(x,y)||deepAt(x,y)||decor.some(q=>q!==d&&q.x===x&&q.y===y&&(q.block||q.npc))||enemies.some(e=>e.x===x&&e.y===y))continue;if(!okWall(x,y))continue;const h=Math.hypot(a,b);if(h<bd){bd=h;best=[x,y]}}
+        if(best){d.x=best[0];d.y=best[1];w=okWall(d.x,d.y)}}
+      if(w){d.k='psx_plate';d.wd=[w[0],w[1]];d.pic=1;d.block=false;d.solid=0;d.deco=false;d.sc=1}}}catch(e){console.error('psd plates',e)}
+  try{pswCastleFix(decor,lcol,null)}catch(e){console.error('psd fix',e)}
   const fmS=fm.map(r=>r.join(''));
   const L={rows,chars,fmap:fmS,floorSet:fSet,floor:fb0,floor2:fb1,ceil:S.ceil||'gyc_crypt',ceilH:WH,start:start||{x:2,y:2,f:2},enemies,items,decor,lights,portals:[],day:0,amb:S.amb===undefined?.05:S.amb,torchGap:1e9,noTele:true,noExtras:true,
     name:info.name,label:info.name,diff:info.lvl,mapNames:S.names||[],_psd:V};
@@ -376,7 +388,7 @@ function psdRest(C,cands,name){
   return false}
 const psdMany=(f,list)=>{for(const a of list)f.apply(null,a)};
 /* ====================================================================== 9780 THE UNDERCROFT GAOLS ====================================================================== */
-PSD.SPEC[9780]={pt:'ashlar',pg:2.3,prgb:[.82,.95,.88],brick:'texBlack',gain:1.3,rgb:[.5,.85,.64],WH:3.8,lcol:[.74,.97,.82],torch:{fl:5,col:[.45,1.2,.7],name:'green',css:'#5fe090'},fgain:.6,ftint:[.7,.95,.8],fl1:5,ceil:'gyc_crypt',amb:.05,
+PSD.SPEC[9780]={pt:'ashlar',pg:2.1,prgb:[.84,.94,.9],brick:'texBlack',gain:1.2,rgb:[.56,.82,.7],WH:3.8,lcol:[.7,.9,.84],torch:{fl:5,col:[.45,1.2,.7],name:'green',css:'#5fe090'},fgain:.6,ftint:[.7,.95,.8],fl1:5,ceil:'gyc_crypt',amb:.05,
  keepAt:[[40,33,1]],plan:PSD_PLAN[9780],
  doors:[{x:24,y:2,kind:'stair'},{x:40,y:36,kind:'stair'},
   {x:2,y:28,kind:'sealed',msg:'A heavy oak door bound with corroded iron, barred from the other side. Cold air comes under it, and the sound of water. This way leads to the Wine Cellar, and it cannot be opened from here.'},
@@ -449,7 +461,7 @@ PSD.SPEC[9780]={pt:'ashlar',pg:2.3,prgb:[.82,.95,.88],brick:'texBlack',gain:1.3,
   dec('bench',38,31,{sc:.8});dec('bench',44,35,{sc:.8});P('brazier',38,35,{block:true});P('brazier',44,31,{block:true});light(38,35,PSD_FIRE);light(44,31,PSD_FIRE);light(41,34,PSD_DIM);
   dec('bones',43,33,{sc:.7});twig(37,31);foe('psturnkey',33,30);foe('pskrat',44,26);}};
 /* ====================================================================== 9790 THE DEEP CELLS AND THE CISTERN ====================================================================== */
-PSD.SPEC[9790]={pt:'ashlar_moss',pg:2.4,prgb:[.78,.96,.9],brick:'texBlack',gain:1.35,rgb:[.45,.85,.72],WH:4.6,lcol:[.62,.93,.84],torch:{fl:5,col:[.35,1.25,.85],name:'green',css:'#4fe0b0'},fgain:.55,ftint:[.55,.9,.85],fl1:5,ceil:'gyc_2',amb:.04,
+PSD.SPEC[9790]={pt:'ashlar_moss',pg:1.9,prgb:[.74,.9,.86],brick:'texBlack',gain:1.2,rgb:[.5,.8,.72],WH:4.6,lcol:[.58,.84,.78],torch:{fl:5,col:[.35,1.25,.85],name:'green',css:'#4fe0b0'},fgain:.55,ftint:[.55,.9,.85],fl1:5,ceil:'gyc_2',amb:.04,
  keepAt:[[8,33,1]],plan:PSD_PLAN[9790],flood:[[16,9,37,10],[13,5,15,7],[17,5,19,7]],
  doors:[{x:40,y:2,kind:'stair'},{x:8,y:36,kind:'stair'}],
  names:[{t:'The Stair Landing',x:41,y:6,k:'place'},{t:'Cell Block B',x:10,y:9,k:'place'},{t:'The Flooded Half',x:26,y:10,k:'place'},{t:'The Drain',x:28,y:13,k:'place'},{t:'The Cistern',x:25,y:25,k:'place'},{t:'The West Wheel',x:10,y:22,k:'place'},{t:'The South Wheel',x:25,y:30,k:'place'},{t:'The East Wheel',x:43,y:22,k:'place'},{t:'The Stair Room',x:8,y:34,k:'place'}],
@@ -489,7 +501,7 @@ PSD.SPEC[9790]={pt:'ashlar_moss',pg:2.4,prgb:[.78,.96,.9],brick:'texBlack',gain:
   sign(11,35,[0,1],'THE STAIR TO THE OUBLIETTE','Nobody was meant to come back up');
   dec('bench',5,32,{sc:.8});P('barrels',12,35,{block:true});P('brazier',12,32,{block:true});light(12,32,PSD_FIRE);light(8,34,PSD_DIM);dec('bones',6,35,{sc:.7});twig(9,35);foe('psdrowned',10,34);}};
 /* ====================================================================== 9800 THE OUBLIETTE ====================================================================== */
-PSD.SPEC[9800]={pt:'brick_dark',pg:2.1,prgb:[.38,.95,.66],brick:'texBlack',gain:1.15,rgb:[.5,.82,.6],WH:5.2,lcol:[.36,.68,.5],lampGap:7,torch:{fl:5,col:[.4,1.1,.55],name:'green',css:'#6fe080'},fgain:.5,fgain1:.75,ftint:[.55,.85,.7],fl1:4,ceil:'gyc_3',amb:.03,
+PSD.SPEC[9800]={pt:'brick_slate',pg:2.1,prgb:[.62,.86,.78],brick:'texBlack',gain:1.15,rgb:[.58,.82,.72],WH:5.2,lcol:[.52,.78,.7],lampGap:7,torch:{fl:5,col:[.4,1.1,.55],name:'green',css:'#6fe080'},fgain:.5,fgain1:.75,ftint:[.55,.85,.7],fl1:4,ceil:'gyc_3',amb:.03,
  keepAt:[],plan:PSD_PLAN[9800],
  doors:[{x:8,y:2,kind:'stair'}],
  names:[{t:'The Shaft Foot',x:8,y:5,k:'place'},{t:'The Winding Way',x:11,y:10,k:'place'},{t:'The Ring Passage',x:22,y:12,k:'place'},{t:'The Pit',x:22,y:21,k:'place'},{t:'The Cells of the Oubliette',x:10,y:21,k:'place'}],
@@ -516,8 +528,8 @@ PSD.SPEC[9800]={pt:'brick_dark',pg:2.1,prgb:[.38,.95,.66],brick:'texBlack',gain:
   foe('psshackle',14,15);foe('psshackle',30,27);foe('psshackle',14,28);foe('pscellghost',18,12);foe('pscellghost',30,15);foe('pscellghost',26,31);
   /* the pit */
   /* the vault of the Second Floor Key: a strongbox on a dais at the north end of the pit, chains, a faint violet glow that can be seen from the ring passage */
-  P('dais_steps',22,18,{});P('reliquary_chest',22,17,{block:true,npc:'psd_strongbox',sc:.7});
-  light(22,18,[.9,.75,1.9]);light(22,16,[.7,.6,1.5]);
+  P('dais_steps',22,18,{});{const rc=P('reliquary_chest',22,17,{block:true,npc:'psd_strongbox',sc:1.1});if(rc&&IMG.psx_chest)rc.lk='psx_chest'}
+  light(22,18,[.6,.85,.95]);light(22,16,[.5,.75,.85]);
   foe('pshunger',22,21);dec('chest',22,25,{block:true,goldAmt:9000,sc:.6});
   psdMany(P,[['shackled_skeleton',20,22,{}],['shackled_skeleton',24,22,{}],['shackled_skeleton',20,16,{}],['shackled_skeleton',24,16,{}]]);
   for(const [x,y] of [[19,17],[25,17],[19,25],[25,25],[18,21],[26,21]])dec('bones',x,y,{sc:.45});
