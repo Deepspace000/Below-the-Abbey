@@ -182,7 +182,7 @@ if(typeof CONTAINERS!=='undefined')for(const k of ['wm_chest','gy_chest','psw_co
   return _lf.apply(this,arguments)}}
 /* ---------- floors and walls (made in code): black weathered stone, verdigris trim, dark green moss ---------- */
 const PSW_STY={ash:{p:'ashlar',pg:2.3,tex:'texBlack',g:1.2,rgb:[.8,.9,1.0],v:[0,0,0,3,3,4,4,1,2,4]},blk:{p:'brick_dark',pg:2.5,tex:'texBlack',g:1.2,rgb:[.85,.95,1.1],v:[0,1,2,3,4]},dark:{p:'ashlar',pg:1.8,tex:'texBlack',g:.9,rgb:[.78,.88,1.0],v:[1,1,2,2,4,0,3]},
-  warm:{p:'brick_dark',pg:3.0,prgb:[1.3,1.0,.78],tex:'texBone',g:1.28,rgb:[1.12,1.0,.86],v:[0,1,2,3,4,5]},moss:{p:'ashlar_moss',pg:2.5,tex:'texBlack',g:1.05,rgb:[.64,.96,.8],v:[0,1,3,4,2]},verd:{p:'ivy_wall',pg:2.0,tex:'texBone',g:.62,rgb:[.68,.92,1.05],v:[0,1,2,3,4,5]}};
+  warm:{p:'brick_dark',pg:2.0,prgb:[1.0,.84,.74],tex:'texBone',g:1.1,rgb:[1.0,.92,.84],v:[0,1,2,3,4,5]},moss:{p:'ashlar_moss',pg:2.5,tex:'texBlack',g:1.05,rgb:[.64,.96,.8],v:[0,1,3,4,2]},verd:{p:'ivy_wall',pg:2.0,tex:'texBone',g:.62,rgb:[.68,.92,1.05],v:[0,1,2,3,4,5]}};
 function pswFloors(){
   if(PSW._fl)return PSW._fl;gyFloors();
   const mk=(nm,fn)=>{if(FLOORS[nm])return nm;const N=128,d=new Uint8ClampedArray(N*N*4);for(let y=0;y<N;y++)for(let x=0;x<N;x++){const o=(y*N+x)*4,c=fn(x,y);d[o]=c[0];d[o+1]=c[1];d[o+2]=c[2];d[o+3]=255}FLOORS[nm]=d;return nm};
@@ -326,10 +326,10 @@ PSW_SPEC[9750]={W:48,H:40,diff:101,wh:3.4,lcol:pswCold,
     r(3,14,8,19,'dark',0),r(5,20,5,20,'dark',0),r(3,21,8,26,'moss',6),r(9,23,9,23,'moss',6),
     r(10,14,16,18,'dark',0),r(17,16,17,16,'dark',0),r(10,20,16,26,'moss',6),r(17,23,17,23,'moss',6),
     r(18,14,29,25,'blk',1),r(23,26,23,27,'blk',1),
-    r(30,16,32,17,'moss',5),r(33,16,33,17,'blk',1),r(34,14,38,18,'dark',3,1.0),r(30,23,30,23,'blk',1),r(31,21,38,26,'blk',4),r(35,27,35,27,'blk',4),
+    r(30,16,32,17,'moss',0),r(33,16,33,17,'blk',1),r(34,14,38,18,'dark',3,1.0),r(30,23,30,23,'blk',1),r(31,21,38,26,'blk',4),r(35,27,35,27,'blk',4),
     r(5,27,5,27,'moss',6),r(13,27,13,27,'moss',6),
     r(3,28,39,28,'verd',6),r(9,29,9,29,'verd',6),r(16,29,16,29,'verd',6),r(24,29,24,29,'verd',6),r(33,29,33,29,'verd',6),r(18,27,18,27,'verd',6),r(27,27,27,27,'verd',6),
-    r(6,29,6,31,'moss',5),r(3,32,8,36,'warm',4,1.0),
+    r(6,29,6,31,'moss',0),r(3,32,8,36,'warm',4,1.0),
     r(20,29,20,29,'blk',2),r(16,30,24,35,'blk',2),r(12,29,12,29,'dark',1),r(10,30,14,36,'dark',1),r(15,33,15,33,'dark',1),r(25,33,25,33,'dark',1),
     r(29,29,29,29,'dark',1),r(26,30,32,36,'dark',1),r(33,33,33,33,'dark',1),r(36,29,36,29,'verd',6),r(34,30,38,36,'verd',6),r(39,34,39,34,'verd',6),
     r(40,4,44,13,'blk',1),r(40,14,41,19,'blk',1),r(40,20,44,25,'blk',1),r(40,26,41,30,'blk',1),r(40,31,44,37,'blk',1)],
@@ -392,7 +392,7 @@ PSW_SPEC[9750]={W:48,H:40,diff:101,wh:3.4,lcol:pswCold,
     w('vine_b',10,16,[-1,0]);w('lantern_bracket',13,18,[0,1]);foe('pskrat',11,17);foe('psbakeghost',15,18);light(13,17,pswCold);
     // ---- the Still-room with the well ----
     sign(12,20,[0,-1],'THE STILL-ROOM','Milk and small beer');
-    p('well_pale',13,23,{sc:1.2,npc:'psw_well'});p('cabinet',10,21);p('cabinet',10,25);p('barrels',16,21);p('barrels',16,25);p('urn_big',11,22);p('keg',14,25);p('stool',12,24,{});
+    p('cabinet',10,21);p('cabinet',10,25);p('barrels',16,21);p('barrels',16,25);p('urn_big',11,22);p('keg',14,25);p('stool',12,24,{});
     p('arch_low',11,23,{block:false});w('vine_a',16,22,[1,0]);w('alcove_maiden',12,26,[0,1]);foe('pskrat',11,25);foe('pskrat',15,21);light(13,21,pswVerd);light(13,25,pswCold);
     // ---- the Great Kitchen: a vault with a huge hearth on a dais ----
     sign(24,14,[0,-1],'THE GREAT KITCHEN','The fires are lit and nobody is cooking');
@@ -515,9 +515,9 @@ PSW_SPEC[9760]={W:48,H:40,diff:101,ceil:'tex_vault_ribbed',wh:3.4,lcol:pswCold,
     w('alcove_monk',9,20,[-1,0]);w('alcove_weeper',9,24,[-1,0]);w('alcove_knight',11,17,[0,-1]);w('alcove_maiden',19,17,[0,-1]);w('alcove_weeper',11,29,[0,1]);w('alcove_knight',19,29,[0,1]);
     w('vine_a',10,17,[0,-1]);w('vine_b',14,17,[0,-1]);w('vine_a',18,17,[0,-1]);w('vine_b',13,29,[0,1]);w('vine_a',17,29,[0,1]);w('vine_b',21,24,[1,0]);w('c_psgargoyle',9,17,[0,-1]);w('c_psgargoyle',21,17,[0,-1]);w('c_psgargoyle',9,29,[0,1]);w('c_psgargoyle',21,29,[0,1]);
     p('bench_moss',9,26);pswBook(C,3,10,26);p('bench_moss',21,21);p('bench_moss',10,18);
-    p('well',15,23,{sc:1.15,npc:'psw_well2'});dec('gy_yew',12,20,{block:true,sc:.8});dec('gy_yew',18,20,{block:true,sc:.8});dec('gy_yew',12,26,{block:true,sc:.8});dec('gy_yew',18,26,{block:true,sc:.8});
-    p('shrub',13,21);p('shrub',17,21);p('shrub',13,25);p('cl_angel',17,23);p('pond',17,25,{});p('lilies',16,26,{walkOk:1});p('flowers',14,21,{walkOk:1});p('flowers2',16,21,{walkOk:1});p('fern',14,25,{walkOk:1});p('rose',13,23,{walkOk:1});p('flowers3',12,24,{walkOk:1});
-    foe('psmonk',10,19);foe('psmonk',20,28);foe('psmonk',20,20);if(ENEMY_DEF.psmarblehound){foe('psmarblehound',16,28);foe('psmarblehound',10,22)}
+    dec('gy_yew',12,20,{block:true,sc:.8});dec('gy_yew',18,20,{block:true,sc:.8});dec('gy_yew',12,26,{block:true,sc:.8});dec('gy_yew',18,26,{block:true,sc:.8});
+    p('shrub',13,21);p('shrub',17,21);p('shrub',13,25);p('cl_angel',17,23);
+    foe('psmonk',10,19);foe('psmonk',20,28);foe('psmonk',20,20);
     for(const [x,y] of [[10,19],[20,19],[10,27],[20,27],[15,24],[14,18],[16,28]])light(x,y,cyc([pswCold,pswVerd],x));
     // passage to the chapel
     p('cl_monk',24,21);p('cl_maiden',25,23);w('vine_a',23,22,[0,-1]);w('lantern_bracket',26,22,[0,1]);p('arch_low',26,22,{block:false});
