@@ -44,7 +44,7 @@ function pscArrive(n){PSC.benchUsed=false;PSC.springUsed=false;
 {const _up=update;update=function(dt){_up.apply(this,arguments);try{if(pscIs(LEVEL)&&LEVELS[LEVEL]&&LEVELS[LEVEL].outdoor)G.day=.5}catch(e){}}}
 {const _w=weatherNow;weatherNow=function(){
   if(pscIs(LEVEL)){const L=LEVELS[LEVEL];
-    if(L&&L.outdoor)return {id:'mist',n:'Teal mist',fog:.02,haze:.34,dark:1,mix:.6,col:[92,120,142],text:'A cold teal mist lies in the canyon lanes under a thin crescent moon. Bats wheel over the spires. Nothing else moves, and everything looks.'};
+    if(L&&L.outdoor)return {id:'mist',n:'Teal mist',fog:.016,haze:.28,dark:0,mix:.5,col:[96,124,146],text:'A cold teal mist lies in the canyon lanes under a thin crescent moon. Bats wheel over the spires. Nothing else moves, and everything looks.'};
     return null}
   return _w.apply(this,arguments)}}
 {const _sl=setupLights;setupLights=function(){
@@ -55,6 +55,9 @@ function pscArrive(n){PSC.benchUsed=false;PSC.springUsed=false;
 if(typeof TELE_KEEP_HI!=='undefined')TELE_KEEP_HI.add(9730);
 /* ---------- floors: dark cobbles, flags, wet cobbles, dark bed, dark lawn, chequer, still water ---------- */
 const PSC_FLOORSET=['psf_cobble','psf_flag','psf_wet','psf_bed','psf_lawn','psf_chequer','psf_water'];
+function pscPaintFloors(){const N=128;for(const [out,tex,g,t] of [['psf_cobble','cobble',1.9,[.92,1,1.08]],['psf_flag','flagstone',1.7,[.9,1,1.08]],['psf_wet','cobble_wet',1.6,[.85,.98,1.14]]]){const im=IMG['ps_tex_'+tex];if(!im||!im.width)continue;
+  const c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(im,0,0,N,N);const d=x.getImageData(0,0,N,N).data;
+  for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,d[i]*g*t[0]);d[i+1]=Math.min(255,d[i+1]*g*t[1]);d[i+2]=Math.min(255,d[i+2]*g*t[2]);d[i+3]=255}FLOORS[out]=new Uint8ClampedArray(d)}}
 function pscFloors(){
   if(PSC._fl)return;blFloors();
   const tone=(out,src,g,t)=>{if(typeof gyFloorTone==='function'&&FLOORS[src])gyFloorTone(out,src,g,t);if(!FLOORS[out])FLOORS[out]=FLOORS.cobble||FLOORS.grass};
@@ -63,6 +66,7 @@ function pscFloors(){
   tone('psf_bed','gyf_dirt',.42,[.6,.8,.62]);
   tone('psf_lawn','gyf_grass',.72,[.68,1.05,.76]);
   tone('psf_wet','gyf_cobble',.44,[.66,.82,.98]);
+  pscPaintFloors();
   if(typeof gyFloorWet==='function'&&FLOORS.psf_wet)try{const w=gyFloorWet('psf_wetx','psf_wet',[.36,.5,.62],23);if(FLOORS[w])FLOORS.psf_wet=FLOORS[w]}catch(e){}
   {const b=FLOORS.psf_flag,N=Math.round(Math.sqrt(b.length/4)),d=new Uint8ClampedArray(b.length);
    for(let y=0;y<N;y++)for(let x=0;x<N;x++){const i=(y*N+x)*4,q=(((x*2/N)|0)+((y*2/N)|0))&1,m=q?1.0:.3;d[i]=Math.min(255,b[i]*m*(q?1:.85));d[i+1]=Math.min(255,b[i+1]*m*(q?1:.95));d[i+2]=Math.min(255,b[i+2]*m*(q?1:.9));d[i+3]=255}
@@ -84,7 +88,10 @@ function pscIvy(x,W,Hp,seed,amt,maxLen,fromBottom){const R=blRng(seed),K=PSC_K.i
     for(const [lx,ly] of pts)for(let j=0;j<3;j++){const ox=(R()-.5)*14,oy=(R()-.5)*10,r=2.4+R()*3.4;x.fillStyle=K[(R()*5)|0];x.beginPath();x.ellipse(lx+ox,ly+oy,r,r*.65,R()*3,0,6.3);x.fill()}}}
 function pscPointed(x,cx,y1,ww,top,fill,stroke,lw){x.beginPath();x.moveTo(cx-ww/2,y1);x.lineTo(cx-ww/2,top+ww*.55);x.quadraticCurveTo(cx-ww/2,top+ww*.08,cx,top);x.quadraticCurveTo(cx+ww/2,top+ww*.08,cx+ww/2,top+ww*.55);x.lineTo(cx+ww/2,y1);x.closePath();if(fill){x.fillStyle=fill;x.fill()}if(stroke){x.lineWidth=lw||4;x.strokeStyle=stroke;x.stroke()}}
 /* bricks, dark, in courses; y0..y1 is the strip painted */
-function pscBricks(x,W,Hp,seed,y0,y1){const R=blRng(seed),cols=[PSC_K.brick,PSC_K.brick2,'#463f3a','#322d2b','#3f3b37','#2f3a33'];
+/* the painted textures (assets/ps tex_*), laid on a tile 128 wide from the bottom up; false when the picture is not there */
+function pscPaintTex(x,W,Hp,name,y0,y1,off){const im=typeof IMG!=='undefined'&&IMG['ps_tex_'+name];if(!im||!im.width)return false;
+  x.save();x.beginPath();x.rect(0,y0,W,y1-y0);x.clip();for(let y=y1-128,u=0;y>y0-128;y-=128,u++){const sh=((off||0)+u*47)%128;for(const dx of [-sh,128-sh]){x.save();if(u%2){x.translate(W,0);x.scale(-1,1)}x.drawImage(im,0,0,im.width,im.height,dx,y,128,128);x.restore()}}x.restore();return true}
+function pscBricks(x,W,Hp,seed,y0,y1){if(pscPaintTex(x,W,Hp,'brick_dark',y0,y1,seed*13))return;const R=blRng(seed),cols=[PSC_K.brick,PSC_K.brick2,'#463f3a','#322d2b','#3f3b37','#2f3a33'];
   x.save();x.beginPath();x.rect(0,y0,W,y1-y0);x.clip();x.fillStyle=PSC_K.mort;x.fillRect(0,y0,W,y1-y0);
   for(let y=y1-17,r=0;y>y0-17;y-=17,r++)for(let bx=-(r%2)*20;bx<W;bx+=40){x.fillStyle=cols[(R()*6)|0];x.fillRect(bx+1,y+1,38,15);if(R()<.16){x.fillStyle='rgba(70,120,70,.4)';x.fillRect(bx+1,y+1,38,4)}}
   x.restore()}
@@ -181,7 +188,7 @@ function pscBrickWall(k,wh){
     if(k===6){x.fillStyle=T.stone2;x.fillRect(14,Hp*.28,100,Hp*.34);x.strokeStyle=T.stoneLt;x.lineWidth=4;x.strokeRect(14,Hp*.28,100,Hp*.34);pscFace(x,64,Hp*.45,38,9);pscIvy(x,W,Hp,206,4,.4)}
     pscMossBase(x,W,Hp,300+k,30)},{v:k})}
 /* the castle front and the curtain wall: black ashlar, tall thin windows, faces, copper cornices */
-function pscAshlar(x,W,Hp,seed){const R=blRng(seed);x.fillStyle=PSC_K.mort;x.fillRect(0,0,W,Hp);const cols=[PSC_K.stone,PSC_K.stone2,'#252a27','#323833'];
+function pscAshlar(x,W,Hp,seed){if(pscPaintTex(x,W,Hp,'ashlar',0,Hp,seed*7))return;const R=blRng(seed);x.fillStyle=PSC_K.mort;x.fillRect(0,0,W,Hp);const cols=[PSC_K.stone,PSC_K.stone2,'#252a27','#323833'];
   for(let y=Hp-34,r=0;y>-34;y-=34,r++)for(let bx=-(r%2)*32;bx<W;bx+=64){x.fillStyle=cols[(R()*4)|0];x.fillRect(bx+2,y+2,60,30)}}
 function pscCastle(k,wh){
   return pscTile('cs'+k,wh,(x,W,Hp)=>{const T=PSC_K;pscAshlar(x,W,Hp,500+k);
@@ -360,19 +367,19 @@ const pscGone=d=>{if(d){d.found=true;d.hidden=true;d.block=false}};
 const pscTint=(key,src,filter,h)=>{if(IMG[key])return key;if(!bl3Tint(key,src,filter,h))return src;return key};
 const pscDecorOf=id=>G.decor&&G.decor.find(d=>d.npc===id);
 const pscHeal=(f)=>{try{G.heroes.forEach(h=>{if(h.alive)h.hp=Math.min(h.max,h.hp+Math.ceil(h.max*f))})}catch(e){}};
-khNpc('psc_gardener','Hobb Ashby, the gardener','ps_p_gardener',d=>{
+khNpc('psc_gardener','Hobb Ashby, the gardener','ps_c_pshedger',d=>{
   const F=pscF();
   return say(F.hobb?"Sit down, sit down. There is hot water on the stove and the bed is made. Nobody has ever come into the lodge to hurt me, and I have never worked out why. I do not ask.":"Oh! A living face. Come in and shut the door, the draught is bad for the seedlings. I am Hobb Ashby, gardener to the Pale Sovereign, and I have not been told to stop, so I have not stopped. The roses want cutting, the hedges want clipping, and the statues want something I cannot name.",
     [['Rest by the stove (free).',()=>{F.hobb=1;G.talk=null;restParty(true);return say('You sleep in the lodge by the stove. Nothing comes in. You wake warm and healed.',[BYE])}],
      ['Tell me about the statues.',()=>{F.hobb=1;return say("They were not here when I was a boy. A sculptor called Ossian came, and he kept carving, and when he ran out of room he carved the ones that bite. Do not walk close to the ugly ones. They wake up if you come within three squares. The kind ones stay still.",[['Go on.',()=>say("The pale roses in the Rose Garden are the only thing here that I did not plant for the Sovereign. They came by themselves. I cut them for the lodge. If you cut five for me I will give you something for it.",[BYE])],BYE])}],
      ['Where is it safe in the court?',()=>say('The Waystone Nook, in the south west corner, in front of my door behind the clipped hedges. Nothing goes in there. The stone will carry you back to Sale or Lanternrest, so you can fetch supplies and come back. And this lodge. And that is all.',[BYE])],BYE])},{sc:1});
-khNpc('psc_ysmay','Lady Ysmay','ps_p_courtier2',d=>{
+khNpc('psc_ysmay','Lady Ysmay','ps_c_pscourtier',d=>{
   const F=pscF();
   if(F.ossianDead)return say("He has stopped. I can feel it, like a bell that has stopped ringing. Thank you. Sit by the pond for a while. It is still here.",[BYE]);
   return say("I am Ysmay. I have stood by this pond for a very long time. I used to be the Sovereign's cousin, then the Sovereign's guest, and now I am only here. The still water shows what stood here before the statues.",
     [['Who made the statues?',()=>say("My husband, Ossian. He was a good man with a chisel, and then he began to carve what he saw in the dark. Each one is a little worse than the last. He walks the Sculptor's Yard and the statue ring now, with a mallet, and wakes what he has made when he is hurt.",[BYE])],
      ['The castle keys?',()=>say("The Sacristan hid things where the candles are, I heard. That was when they came for him. I only know that.",[BYE])],BYE])},{sc:1});
-khNpc('psc_falconer','The Falconer','ps_p_falconer',d=>{
+khNpc('psc_falconer','The Falconer','ps_c_psfalconer',d=>{
   const F=pscF();
   return say(F.fcount?"The hawk is gone. The glove is all that is left. Bring it, if you find it, and the Hound Master's whistle too. I will tell you why when you have them.":"I kept the Sovereign's hawks. I am not alive any more, but the ravens do not know that, and they will not leave the perches. Do not touch the feather on the near perch. It is a trap that I set myself, to catch a thief, and I forgot to take it down.",[BYE])},{sc:1});
 /* psq3 The Sculptor's Chisel: Lady Ysmay, put Ossian down and bring her his chisel */
@@ -574,12 +581,12 @@ function pscBuild(info){
   plaque(50,26,'cloister',['THE CLOISTER','DOOR'],'A plaque beside a carved door in the east wing. THE CLOISTER DOOR. It leads to the cloister, the chapel and the library. The leaves on the door are carved so well that they look wet.');
   plaque(34,50,'court',['THE COURT','OF STATUES'],'A black stone plaque. THE COURT OF STATUES. Under it, in smaller letters: Keep to the cobbles. Do not stare at the ones that stare. Do not touch the roses. The clock tower is straight ahead, to the north.');
   /* ===== the gate yard and the Torstrasse: gate piers, urns, an arch, the street climbs north ===== */
-  lampAt(30,49,SK);lampAt(34,49,SK);Q('arch_iron',32,50);Q('arch_high',32,46);Q('arch_ivy',32,41);
+  lampAt(30,49,SK);lampAt(34,49,SK);for(const [x,y,n] of [[30,47,'lantern_red_a'],[34,47,'lantern_red_b'],[31,35,'lantern_red_a'],[33,35,'lantern_red_b'],[31,18,'lantern_red_a'],[33,18,'lantern_red_b']]){if(C.isOpen(x,y)){Q(n,x,y);lampAt(x,y,PSG_RED)}}Q('arch_iron',32,50);Q('arch_high',32,46);Q('arch_ivy',32,41);
   S('st_veiled',31,44);S('st_hand',32,43);S('st_bishop',31,40);
   for(const y of [40,47])B('urn_big',32,y,{sc:1});
   /* ===== the clock tower and the walk-under passage ===== */
   for(const y of [21,23,25])hang(ALC[(y>>1)%5],32,y,[y%2?-1:1,0],0);
-  Q('bell_big',32,22);lampAt(32,21,GR);lampAt(32,25,GR);
+  Q('bell_big',32,22,{sc:.8,bob:1.5});lampAt(32,21,GR);lampAt(32,25,GR);
   /* ===== the fountain square under the clock: the weeping giant's basin in the middle, statues on plinths, benches, ring of lamps ===== */
   hang('banner_long_a',30,27,[0,-1],.3);hang('banner_long_b',34,27,[0,-1],.3);hang('banner_long_b',32,24,[-1,0],.3);hang('banner_long_a',32,24,[1,0],.3);
   S('st_fountain',32,30);
@@ -699,6 +706,13 @@ function pscBuild(info){
   // the south lanes
   Q('arch_ivy',10,50);Q('arch_low',22,51);Q('arch_ivy',27,50);Q('arch_low',41,50);Q('arch_low',53,51);B('barrel',8,51,{sc:.9});B('barrel',9,51,{sc:.9});Q('cobble_heap',24,51);
   for(let x=6;x<=29;x+=3)hang(x%2?'vine_a':'vine_b',x,51,[0,1],0);for(let x=36;x<=58;x+=3)hang(x%2?'vine_b':'vine_a',x,51,[0,1],0);
+  /* ===== the schnoor: painted lit house fronts and doors hung along the lane walls (one wall side only, none on top of other dressing) ===== */
+  {const SCH=['schnoor_door','schnoor_a','schnoor_door','schnoor_d','schnoor_b','schnoor_door','schnoor_c'];let n=0;
+   const busy=(x,y)=>C.decor.some(d=>Math.abs(d.x-x)<=1&&Math.abs(d.y-y)<=1);
+   for(let y=3;y<H-3;y++)for(let x=3;x<W-3;x++){if(rows[y][x]!=='.'||hs(x,y,77)>.14)continue;
+     const sides=[[0,-1],[0,1],[-1,0],[1,0]].filter(([dx,dy])=>rows[y+dy]&&rows[y+dy][x+dx]!=='.');if(sides.length!==1||busy(x,y))continue;
+     const [dx,dy]=sides[0];if(C.lights&&C.lights.some(l=>l[0]===x&&l[1]===y))continue;
+     hang(SCH[n++%SCH.length],x,y,[dx,dy],-.3)}}
   /* ===== the creatures ===== */
   const ok=(x,y)=>!pscSafe(x,y,9)&&!pscNearFront(x,y,3)&&rows[y]&&rows[y][x]==='.';
   const foe=(t,x,y,rad)=>{const q=C.near(x,y,rad||3,false);if(q&&ok(q[0],q[1]))C.foe(t,q[0],q[1])};
@@ -743,14 +757,17 @@ function pscLodge(info){
   if(typeof pspPics==='function')pspPics();
   const l=pspLinkAt(9731,8,12);
   const W2=[1.5,1.05,.55];
-  blRoom({id:PSC.LODGE,name:info.name,w:16,h:13,amb:.7,rating:101,floor:'wood',wall:'kh_ohwall1_2',
+  blRoom({id:PSC.LODGE,name:info.name,w:16,h:13,amb:.7,rating:101,floor:'wood',wall:'ps_tex_brick_dark',
     back:{to:l.to,x:l.land[0],y:l.land[1],f:l.land[2]},
     lights:[[2,2],[13,2],[8,5],[2,9],[13,9]],lcol:{'2,2':W2,'13,2':W2,'8,5':W2,'2,9':[1.4,1.0,.6],'13,9':[1.4,1.0,.6]},col:[1.4,1.0,.6],
     build:({put,raw,npc})=>{
-      put('hearth',2,1);put('kitchenshelf',5,1);put('potshelf',7,1);put('rack',10,1);put('rack',11,1);put('bed',13,2);put('bed',14,2);
+      put('hearth',2,1);put('kitchenshelf',5,1);put('potshelf',7,1);put('rack',10,1);put('rack',11,1);raw(pspPic('bed_cobweb_a'),13,2,{sc:1});
       for(const x of [5,7,9])put('table',x,5);put('chair',4,6);put('chair',10,6);put('cushions',2,6);put('amphora',1,3);put('amphora',1,8);
       raw('crate',13,9,{sc:.9});raw('barrel',14,10,{sc:.9});raw('gy_chest',2,10,{sc:.95});raw('gy_bones',6,9,{block:false,sc:.4});raw('flowerpot',4,2,{block:false,sc:.9});raw('flowerpot',12,10,{block:false,sc:.9});
       raw(pspPic('vine_a'),12,1,{block:false,wd:[0,-1],pic:1,bob:0});raw(pspPic('window_slit'),8,1,{block:false,wd:[0,-1],pic:1,bob:1.1});raw(pspPic('lantern_hanging'),3,4,{block:false,wd:[-1,0],pic:1,bob:.9});
+      const hang=(n,x,y,wd,bob)=>raw(pspPic(n),x,y,{block:false,wd,pic:1,bob:bob||0});
+      hang('portrait_ancestor_1',9,1,[0,-1],.8);hang('portrait_ancestor_2',1,5,[-1,0],.8);hang('mirror_haunted_a',14,6,[1,0]);hang('window_sheeted_a',3,1,[0,-1],0);hang('cobweb_corner_a',1,1,[0,-1]);hang('cobweb_corner_b',14,1,[0,-1]);hang('cobweb_corner_a',14,11,[1,0]);
+      raw(pspPic('candles_glow_a'),6,4,{block:false});raw(pspPic('candles_glow_b'),8,4,{block:false});raw(pspPic('web_spider'),1,2,{block:false});
       npc('psc_gardener',8,3)}});
   PSC.chest['9731:2,10']={pot:3,mana:2,elixir:1,gold:900};
   const L=LEVELS[PSC.LODGE];pscWidenRoom(L,16,14);pscRoomDoor(L,l);L.diff=L.rating=101;L.noExtras=true;LEVEL_RATING[PSC.LODGE]=101;return L}
@@ -759,7 +776,7 @@ function pscMews(info){
   const l=pspLinkAt(9732,10,14);
   const HORSE=pscTint('psc_horse','statue','grayscale(1) brightness(1.1) contrast(.9)',1.5);
   const G1=[.8,1.15,.95];
-  blRoom({id:PSC.MEWS,name:info.name,w:20,h:15,amb:.5,rating:101,floor:'cobble',wall:'kh_ohwall1_0',
+  blRoom({id:PSC.MEWS,name:info.name,w:20,h:15,amb:.5,rating:101,floor:'cobble',wall:'ps_tex_ashlar',
     back:{to:l.to,x:l.land[0],y:l.land[1],f:l.land[2]},
     lights:[[3,2],[10,2],[17,2],[3,11],[17,11],[10,7]],lcol:{'3,2':G1,'10,2':[.7,1.2,.9],'17,2':G1,'3,11':G1,'17,11':G1,'10,7':[.7,1.2,.9]},col:[.85,1.12,.95],
     enemies:[['psraven',3,3],['psraven',7,3],['psraven',14,3],['psraven',18,3],['psraven',3,6]],
@@ -770,6 +787,12 @@ function pscMews(info){
       raw(HORSE,16,9,{sc:1});raw('gy_chest',3,12,{npc:'psc_glovechest',solid:1,deco:false,sc:.95});
       raw('barrel',18,12,{sc:.9});raw('barrel',18,11,{sc:.9});raw('gy_bones',14,10,{block:false,sc:.5});raw('gy_web',1,1,{block:false,sc:.4});raw('gy_web',18,1,{block:false,sc:.4});
       raw(pspPic('window_slit'),5,1,{block:false,wd:[0,-1],pic:1,bob:1.2});raw(pspPic('window_slit'),15,1,{block:false,wd:[0,-1],pic:1,bob:1.2});raw(pspPic('vine_b'),10,1,{block:false,wd:[0,-1],pic:1,bob:0});
+      const hang=(n,x,y,wd,bob)=>raw(pspPic(n),x,y,{block:false,wd,pic:1,bob:bob||0});
+      hang('cobweb_corner_a',1,1,[0,-1]);hang('cobweb_corner_b',18,1,[0,-1]);hang('window_sheeted_b',8,1,[0,-1],0);hang('portrait_ancestor_3',12,1,[0,-1],.8);hang('mirror_haunted_c',1,5,[-1,0]);
+      raw(pspPic('lantern_red_a'),4,4,{block:false});raw(pspPic('lantern_red_b'),16,4,{block:false});raw(pspPic('web_spider'),18,2,{block:false});
+      for(const [x,y] of [[5,8],[5,9],[5,11],[5,12],[14,8],[14,9],[14,11],[14,12]]){const k=pspPic((x+y)&1?'iron_fence_a':'iron_fence_b'),im=IMG[k],w=im&&im.width?(NPC_H[k]||1.5)*im.width/im.height:1;raw(k,x,y,{sc:Math.min(1,1/w)})}
+      for(const [x,y] of [[8,7],[12,7],[8,10],[12,10],[6,6],[14,6]])raw(pspPic('col_twist'),x,y,{sc:.9});
+      raw(pspPic('arch_low'),10,6,{block:false});raw(pspPic('arch_iron'),10,9,{block:false});raw(pspPic('urn_big'),2,4,{sc:.9});raw(pspPic('urn_big'),17,5,{sc:.9});
       npc('psc_falconer',10,4)}});
   const L=LEVELS[PSC.MEWS];pscWidenRoom(L,20,16);pscRoomDoor(L,l);L.diff=L.rating=101;L.noExtras=true;LEVEL_RATING[PSC.MEWS]=101;return L}
 nmFeather();

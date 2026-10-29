@@ -30,31 +30,33 @@ const PSP_PAL={
   verdigris:'#5aa890',bone:'#d0d4d8',brass:'#b08a40',brassHi:'#e0b860',banner:'#8a4a22',iron:'#181c22',moss:'#2a3e3a',mossHi:'#44605a',ivy:['#1a2c2e','#24383a','#122224','#30484a'],
   glass:['#3a2a1a','#d8923a','#241810'],     // window glass, top to bottom: tiny lit windows, aged amber
   silver:[.78,.95,1.1],violet:[.55,.8,1.1],green:[.6,.95,1.1],warm:[1.5,1.05,.55],   // light colours: cold teal moonlight; warm only in rest rooms (violet and green are kept as names for old callers and are teal-blue now)
-  amb:{out:.62,in:.17},sky:{top:[16,34,50],mid:[34,66,86],low:[78,116,130]},mist:[64,92,108],moon:[220,236,240],
+  amb:{out:.8,in:.2},sky:{top:[16,34,50],mid:[34,66,86],low:[78,116,130]},mist:[64,92,108],moon:[220,236,240],
   floorTint:{flag:[.72,.82,.92],cobble:[.62,.74,.86],wet:[.55,.68,.82]}};
 /* ---------- the stone, in code ---------- */
 function pspPointed(x,x0,x1,top,bot,ap){x.beginPath();x.moveTo(x0,bot);x.lineTo(x0,top+ap);x.quadraticCurveTo(x0,top+ap*.25,(x0+x1)/2,top);x.quadraticCurveTo(x1,top+ap*.25,x1,top+ap);x.lineTo(x1,bot);x.closePath()}
+/* painted textures (assets/ps tex_*): alias them for gyTile (it reads IMG['gyp_'+name]); fb is the code-made fallback */
+function pspTex(n,fb){const k='ps_tex_'+n;if(typeof IMG!=='undefined'&&IMG[k]&&IMG[k].width){IMG['gyp_pst_'+n]=IMG[k];return 'pst_'+n}return fb}
 function pspWallGid(style,v,wh){
   const k=style+v+'|'+wh;if(PSPK.tiles[k]!==undefined)return PSPK.tiles[k];
-  const P=PSP_PAL,A=[P.stoneGain,P.stone],g=(tex,opt)=>gyTile(tex,wh,Object.assign({gain:A[0],rgb:A[1]},opt));let gid;
+  const P=PSP_PAL,A=[P.stoneGain,P.stone],g=(tex,opt)=>gyTile(tex,wh,Object.assign({gain:tex.startsWith('pst_')?1.9:A[0],rgb:tex.startsWith('pst_')?[.9,1,1.08]:A[1]},opt));let gid;
   const wet=(x,w,h)=>{const gr=x.createLinearGradient(0,0,0,h);gr.addColorStop(0,'rgba(120,150,180,.0)');gr.addColorStop(.5,'rgba(60,90,130,.10)');gr.addColorStop(1,'rgba(14,28,50,.3)');x.fillStyle=gr;x.fillRect(0,0,w,h);
     for(let q=0;q<5;q++){const px=hash2(q,v,61)*w;x.fillStyle='rgba(150,190,230,.10)';x.fillRect(px,0,1.6,h*(.4+hash2(q,v,62)*.6))}};   // wet streaks and a shine
   switch(style){
     case 'dun':gid=gyTile('texBlack_'+(v%5),wh,{gain:1.3,rgb:[.7,.84,.78],tag:'psd'+v});break;
-    case 'dark':gid=gyTile('texBlack_'+(v%5),wh,{gain:.85,rgb:[.7,.82,.76],tag:'psk'+v});break;
+    case 'dark':gid=pspTex('ashlar',null)?g('pst_ashlar',{gain:1.6,tag:'pskP'+v,draw:wet}):gyTile('texBlack_'+(v%5),wh,{gain:.85,rgb:[.7,.82,.76],tag:'psk'+v});break;
     case 'bone':gid=gyTile('texBone_'+(1+v%4),wh,{gain:1.0,rgb:[.86,.92,.84],tag:'psb'+v});break;
-    case 'brick':gid=g('texBlack_'+(v%5),{gain:1.35,rgb:[.78,.78,.7],tag:'psbr'+v,draw:(x,w,h)=>{x.strokeStyle='rgba(10,16,12,.55)';x.lineWidth=1.5;for(let yy=0,r=0;yy<h;yy+=14,r++){x.beginPath();x.moveTo(0,yy);x.lineTo(w,yy);x.stroke();for(let xx=(r%2)*16;xx<w;xx+=32){x.beginPath();x.moveTo(xx,yy);x.lineTo(xx,yy+14);x.stroke()}}wet(x,w,h)}});break;
-    case 'panel':gid=g('texBone_'+(1+v%3),{gain:.5,rgb:[.7,.8,.62],tag:'psp'+v,draw:(x,w,h)=>{x.globalAlpha=.6;x.fillStyle='#10201a';for(let i=0;i<2;i++){const px=8+i*60;x.fillRect(px,h*.18,52,h*.5);x.fillStyle='#1c342a';x.fillRect(px+4,h*.18+4,44,h*.5-8);x.fillStyle='#10201a'}x.globalAlpha=1;x.fillStyle=P.brass;x.fillRect(0,h*.7,w,3)}});break;
-    case 'win':gid=g('texBlack_2',{tag:'psw'+v,draw:(x,w,h)=>{const top=h-h*.9,bot=h-34,x0=48,x1=80;x.save();pspPointed(x,x0-6,x1+6,top-6,bot+6,36);x.fillStyle=P.copper;x.fill();pspPointed(x,x0,x1,top,bot,34);const gr=x.createLinearGradient(0,top,0,bot);gr.addColorStop(0,P.glass[1]);gr.addColorStop(.5,P.glass[0]);gr.addColorStop(1,P.glass[2]);x.fillStyle=gr;x.fill();x.clip();
+    case 'brick':if(pspTex('brick_dark')!=='pst_brick_dark'){gid=g('texBlack_'+(v%5),{gain:1.35,rgb:[.78,.78,.7],tag:'psbr'+v,draw:(x,w,h)=>{x.strokeStyle='rgba(10,16,12,.55)';x.lineWidth=1.5;for(let yy=0,r=0;yy<h;yy+=14,r++){x.beginPath();x.moveTo(0,yy);x.lineTo(w,yy);x.stroke();for(let xx=(r%2)*16;xx<w;xx+=32){x.beginPath();x.moveTo(xx,yy);x.lineTo(xx,yy+14);x.stroke()}}wet(x,w,h)}});break}gid=g('pst_brick_dark',{gain:1.15,rgb:[.92,.86,.95],tag:'psbrP'+v,draw:wet});break;
+    case 'panel':if(pspTex('timber_plaster')==='pst_timber_plaster'){gid=g('pst_timber_plaster',{gain:.62,rgb:[.8,.78,.9],tag:'pspP'+v,draw:wet});break}gid=g('texBone_'+(1+v%3),{gain:.5,rgb:[.7,.8,.62],tag:'psp'+v,draw:(x,w,h)=>{x.globalAlpha=.6;x.fillStyle='#10201a';for(let i=0;i<2;i++){const px=8+i*60;x.fillRect(px,h*.18,52,h*.5);x.fillStyle='#1c342a';x.fillRect(px+4,h*.18+4,44,h*.5-8);x.fillStyle='#10201a'}x.globalAlpha=1;x.fillStyle=P.brass;x.fillRect(0,h*.7,w,3)}});break;
+    case 'win':gid=g(pspTex('ashlar','texBlack_2'),{tag:'psw'+v,draw:(x,w,h)=>{const top=h-h*.9,bot=h-34,x0=48,x1=80;x.save();pspPointed(x,x0-6,x1+6,top-6,bot+6,36);x.fillStyle=P.copper;x.fill();pspPointed(x,x0,x1,top,bot,34);const gr=x.createLinearGradient(0,top,0,bot);gr.addColorStop(0,P.glass[1]);gr.addColorStop(.5,P.glass[0]);gr.addColorStop(1,P.glass[2]);x.fillStyle=gr;x.fill();x.clip();
       x.strokeStyle=P.bone;x.lineWidth=2.4;x.beginPath();x.moveTo(64,top);x.lineTo(64,bot);for(let yy=top+36;yy<bot;yy+=38){x.moveTo(x0,yy);x.lineTo(x1,yy)}x.stroke();
       x.fillStyle='rgba(180,255,210,.35)';x.beginPath();x.arc(64,top+36,8,0,6.3);x.fill();x.restore();wet(x,w,h)}});break;   // tall thin lancet, green glass
-    case 'pier':gid=g('texBlack_1',{tag:'psr'+v,draw:(x,w,h)=>{const gr=x.createLinearGradient(30,0,98,0);gr.addColorStop(0,'rgba(10,20,16,.6)');gr.addColorStop(.3,'rgba(150,200,170,.22)');gr.addColorStop(.7,'rgba(120,170,140,.08)');gr.addColorStop(1,'rgba(8,16,12,.62)');x.fillStyle=gr;x.fillRect(30,0,68,h);x.fillStyle=P.copperDk;x.fillRect(26,h-14,76,14);x.fillRect(26,0,76,10);x.fillStyle=P.copper;x.fillRect(26,10,76,3)}});break;
-    case 'ivy':gid=g('texBlack_'+(1+v%4),{tag:'psi'+v,draw:(x,w,h)=>{const G=P.ivy;for(let k=0;k<9;k++){let px=hash2(k,v,71)*w,py=h;x.strokeStyle='#0c1c14';x.lineWidth=2;x.beginPath();x.moveTo(px,py);for(let t=0;t<8;t++){px+=(hash2(k,t,72)-.5)*14;py-=h*(.05+hash2(k,t,73)*.09);x.lineTo(px,py)}x.stroke()}
+    case 'pier':gid=g(pspTex('ashlar','texBlack_1'),{tag:'psr'+v,draw:(x,w,h)=>{const gr=x.createLinearGradient(30,0,98,0);gr.addColorStop(0,'rgba(10,20,16,.6)');gr.addColorStop(.3,'rgba(150,200,170,.22)');gr.addColorStop(.7,'rgba(120,170,140,.08)');gr.addColorStop(1,'rgba(8,16,12,.62)');x.fillStyle=gr;x.fillRect(30,0,68,h);x.fillStyle=P.copperDk;x.fillRect(26,h-14,76,14);x.fillRect(26,0,76,10);x.fillStyle=P.copper;x.fillRect(26,10,76,3)}});break;
+    case 'ivy':if(pspTex('ivy_wall')==='pst_ivy_wall'){gid=g('pst_ivy_wall',{gain:2.2,tag:'psiP'+v,draw:wet});break}gid=g('texBlack_'+(1+v%4),{tag:'psi'+v,draw:(x,w,h)=>{const G=P.ivy;for(let k=0;k<9;k++){let px=hash2(k,v,71)*w,py=h;x.strokeStyle='#0c1c14';x.lineWidth=2;x.beginPath();x.moveTo(px,py);for(let t=0;t<8;t++){px+=(hash2(k,t,72)-.5)*14;py-=h*(.05+hash2(k,t,73)*.09);x.lineTo(px,py)}x.stroke()}
       for(let k=0;k<420;k++){const px=hash2(k,v,74)*w,py=h*(1-Math.pow(hash2(k,v,75),1.5)),r=1.4+hash2(k,v,76)*2.6;x.fillStyle=G[(hash2(k,v,77)*4)|0];x.globalAlpha=.94;x.beginPath();x.ellipse(px,py,r,r*.62,hash2(k,v,78)*3.1,0,6.3);x.fill()}x.globalAlpha=1;wet(x,w,h)}});break;
-    case 'moss':gid=g('texBlack_'+(v%5),{tag:'psm'+v,draw:(x,w,h)=>{for(let k=0;k<120;k++){const px=hash2(k,v,81)*w,py=h*(1-Math.pow(hash2(k,v,82),2.2)),r=2+hash2(k,v,83)*5;x.fillStyle=hash2(k,v,84)<.5?P.moss:P.mossHi;x.globalAlpha=.8;x.beginPath();x.arc(px,py,r,0,6.3);x.fill()}x.globalAlpha=1;wet(x,w,h)}});break;
+    case 'moss':if(pspTex('ashlar_moss')==='pst_ashlar_moss'){gid=g('pst_ashlar_moss',{tag:'psmP'+v,draw:wet});break}gid=g('texBlack_'+(v%5),{tag:'psm'+v,draw:(x,w,h)=>{for(let k=0;k<120;k++){const px=hash2(k,v,81)*w,py=h*(1-Math.pow(hash2(k,v,82),2.2)),r=2+hash2(k,v,83)*5;x.fillStyle=hash2(k,v,84)<.5?P.moss:P.mossHi;x.globalAlpha=.8;x.beginPath();x.arc(px,py,r,0,6.3);x.fill()}x.globalAlpha=1;wet(x,w,h)}});break;
     case 'copper':gid=g('texBlack_3',{gain:1.1,rgb:[.5,1.05,.85],tag:'psc2'+v,draw:(x,w,h)=>{x.strokeStyle='rgba(10,50,40,.6)';x.lineWidth=2;for(let xx=8;xx<w;xx+=16){x.beginPath();x.moveTo(xx,0);x.lineTo(xx,h);x.stroke()}x.fillStyle='rgba(150,230,200,.12)';for(let xx=8;xx<w;xx+=32)x.fillRect(xx,0,5,h)}});break;
-    case 'arch':gid=g('texBlack_3',{tag:'psc'+v,draw:(x,w,h)=>{const top=h*.16,bot=h-4;x.save();pspPointed(x,x,22,106,top,26);x.restore();pspPointed(x,x,24,104,top,24);x.fillStyle='#08120e';x.fill();x.strokeStyle=P.bone;x.lineWidth=5;x.stroke();x.strokeStyle=P.copper;x.lineWidth=2;x.stroke()}});break;
-    default:gid=g('texBlack_'+(v%5),{tag:'psa'+v,draw:wet});}   // 'ash': black weathered stone, wet
+    case 'arch':gid=g(pspTex('ashlar','texBlack_3'),{tag:'psc'+v,draw:(x,w,h)=>{const top=h*.16,bot=h-4;x.save();pspPointed(x,x,22,106,top,26);x.restore();pspPointed(x,x,24,104,top,24);x.fillStyle='#08120e';x.fill();x.strokeStyle=P.bone;x.lineWidth=5;x.stroke();x.strokeStyle=P.copper;x.lineWidth=2;x.stroke()}});break;
+    default:gid=g(pspTex('ashlar','texBlack_'+(v%5)),{tag:'psa'+v,draw:wet});}   // 'ash': black weathered stone, wet
   return PSPK.tiles[k]=gid}
 function pspDoorGid(style,wh){
   const k='door_'+style+'|'+wh;if(PSPK.tiles[k]!==undefined)return PSPK.tiles[k];let gid;const P=PSP_PAL;
@@ -79,6 +81,11 @@ function pspFloor(name){
   if(typeof gyFloors==='function')try{gyFloors()}catch(e){}
   const out='psf_'+name,N=128,hs=(a,b,c)=>hash2(a,b,c);
   const tone=(src,g,t)=>FLOORS[src]?gyFloorTone(out,src,g,t):(FLOORS[out]=FLOORS.cobble||FLOORS.grass,out);
+  {const PT={flag:['flagstone',1.7,[.9,1,1.08]],flagdark:['flagstone',1.1,[.82,.94,1.04]],gravel:['gravel',1.5,[.92,1,1.06]],cobble:['cobble',1.9,[.92,1,1.08]],wet:['cobble_wet',1.6,[.85,.98,1.14]],marble:['marble',1.9,[.95,1,1.05]]}[name];
+    const im=PT&&IMG['ps_tex_'+PT[0]];
+    if(im&&im.width){const c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(im,0,0,N,N);const d=x.getImageData(0,0,N,N).data;
+      for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,d[i]*PT[1]*PT[2][0]);d[i+1]=Math.min(255,d[i+1]*PT[1]*PT[2][1]);d[i+2]=Math.min(255,d[i+2]*PT[1]*PT[2][2]);d[i+3]=255}
+      FLOORS[out]=new Uint8ClampedArray(d);return PSPK.floors[name]=out}}
   switch(name){
     case 'flag':tone('gyf_flag',.8,[.7,.82,.94]);break;
     case 'flagdark':tone('gyf_flag',.5,[.64,.78,.9]);break;
@@ -97,8 +104,8 @@ function pspFloor(name){
       FLOORS[out]=d}break;
     case 'runner':{const base=FLOORS.gyf_flag,d=new Uint8ClampedArray(N*N*4);
       for(let y=0;y<N;y++)for(let x=0;x<N;x++){const o=(y*N+x)*4,e=Math.min(x,127-x),n=hs(x>>2,y>>2,43)*10;
-        let r=22+n*.4,g=62+n*.8,b=46+n*.6;
-        if(e<5){r=184;g=154;b=72}else if(e<8){r=14;g=34;b=26}else if(Math.abs(x-64)<6&&((y>>4)&1)===0){r=120;g=170;b=140}
+        let r=62+n*.5,g=20+n*.4,b=30+n*.4;
+        if(e<5){r=128;g=104;b=52}else if(e<8){r=26,g=10,b=14}else if(Math.abs(x-64)<6&&((y>>4)&1)===0){r=104;g=60;b=60}
         d[o]=r;d[o+1]=g;d[o+2]=b;d[o+3]=255}
       FLOORS[out]=d}break;
     case 'grate':{tone('gyf_flag',.22,[.58,.74,.9]);const d=new Uint8ClampedArray(FLOORS[out]);for(let y=0;y<N;y++)for(let x=0;x<N;x++){const bar=(x%16<3)||(y%16<3),o=(y*N+x)*4,v=bar?96:6;if(bar||(x%16<5||y%16<5)){d[o]=v*.8;d[o+1]=v*1.1;d[o+2]=v*.9}else{d[o]=3;d[o+1]=7;d[o+2]=6}}FLOORS[out]=d}break;
@@ -283,6 +290,8 @@ function pspNoiseSky(){
       const seam=Math.max(0,f-.6)*1.3*(.5+fl);   // pale moonlit edges
       r=r*k+seam*34;g=g*k+seam*52;b=b*k+seam*62;
       const o=(y*W+x)*4,star=(y<110&&hs(x,y,99)>.9985)?(120+hs(x,y,98)*120):0;d[o]=Math.min(255,r*1.3+star);d[o+1]=Math.min(255,g*1.3+star);d[o+2]=Math.min(255,b*1.3+star);d[o+3]=255}}
+  {const im=IMG['ps_tex_sky_night'];if(im&&im.width){const c=document.createElement('canvas');c.width=c.height=256;const cx=c.getContext('2d');cx.imageSmoothingQuality='high';cx.drawImage(im,0,0,256,256);const t=cx.getImageData(0,0,256,256).data;   // the painted overcast: stretched down the sky, mirrored along it so that it never shows a seam
+    for(let y=0;y<H;y++){const ty=Math.min(255,Math.floor(y*256/220));for(let x=0;x<W;x++){const m=x&511,tx=m<256?m:511-m,o=(y*W+x)*4,q=(ty*256+tx)*4;for(let k=0;k<3;k++)d[o+k]=Math.min(255,t[q+k]*.8*1.15+d[o+k]*.22)}}}}
   return PSPK.skyBase=d}
 /* the castle view: the picture is composited into a copy of the sky each frame (the engine drifts the sky sideways, so the castle is drawn against the drift) */
 function pspCastleImg(near){const k=pspPic(near?'castle_view_near':'castle_view');return IMG[k]||null}
