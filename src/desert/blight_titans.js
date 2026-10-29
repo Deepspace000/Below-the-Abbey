@@ -1,8 +1,8 @@
 /* ==========================================================================
-   THE FIVE GIANTS OF THE BLIGHTED ROAD (prefix tt / TT). Five huge, deformed bosses of level 100 wander the road between Wenlock and Sale. Each stands in one of the road's places
+   THE SIX GIANTS OF THE BLIGHTED ROAD (prefix tt / TT). Six huge, deformed bosses of level 100 wander the road between Wenlock and Sale. Each stands in one of the road's places
    (not Lanternrest, the safe fort) and, as game time passes, walks on to a neighbouring place. They show on the world map (a red mark on the place where each one is) and on the
    mini map (a big pulsing ring, from far off). Slower than the party; one that notices the party chases, and loses it again if the party gets far enough away. People of the road talk
-   about them in terror (an extra question on many of their talk screens); Captain Marsh of Lanternrest pays a great reward for all five.
+   about them in terror (an extra question on many of their talk screens); Captain Marsh of Lanternrest pays a great reward for all six.
    State: G.flags.tt = {at:{tt0:placeNumber,...}, dead:{tt0:1,...}, t:game minutes at the last hop}. Pictures: stand-ins made from the graveyard's giants until painted pieces arrive
    (assets/tt/, art_tt0..4 if present).
    ========================================================================== */
@@ -17,21 +17,23 @@ const TT={
     {id:'tt3',n:'Brannock the Stitched',ph:4.4,src:'gyi_giant',wide:1.2,tall:1.05,split:1,fx:'grayscale(.6) brightness(.8)',verb:'pounds',
      look:'a giant sewn together out of many dead men, with mismatched arms and legs and thick black stitches',rumour:'Brannock. They say he is made of everyone who ever tried to stop the plague. You can see the seams. I saw a face on his shoulder that I knew.'},
     {id:'tt4',n:'Old Nine-Hands',ph:4.8,src:'gyi_zombie',wide:1.3,tall:1.1,arms:1,fx:'grayscale(.5) hue-rotate(310deg) saturate(1.6) brightness(.65)',verb:'rakes',
-     look:'a gaunt giant with nine long arms that never stop reaching, and no face at all',rumour:'Old Nine-Hands. Nine arms, and not one of them is ever still. He feels for you in the dark. He has no face, so he cannot be reasoned with, and I have tried.'}],
+     look:'a gaunt giant with nine long arms that never stop reaching, and no face at all',rumour:'Old Nine-Hands. Nine arms, and not one of them is ever still. He feels for you in the dark. He has no face, so he cannot be reasoned with, and I have tried.'},
+    {id:'tt5',n:'Old White Eyes',ph:4.9,src:'gyi_zombie',wide:.95,tall:1.18,eyes:1,fx:'grayscale(.7) brightness(1.05) contrast(.9)',verb:'swings at',
+     look:'a tall, ancient giant in a rotted dinner jacket and a tilted hat, with milky white eyes, humming a slow tune',rumour:'Old White Eyes. You hear him before anything, humming, a slow sad tune through the fog, and then the fog goes cold. They say he was a singer once, for a crowd that is long gone. He still sings to them. Do not interrupt him.'}],
   path:[1,2,3,4,5,7,8,9,10],            // the places a giant can stand in, in road order (6 is Lanternrest: never)
   hopMin:240,                            // game minutes between steps
   gossip:[
-    'Do not go out on the road after dark. The giants walk it. There are five of them, and I have seen three, and I would not say that it was luck.',
+    'Do not go out on the road after dark. The giants walk it. There are six of them, and I have seen three, and I would not say that it was luck.',
     'The giants. Have you seen them? Of course you have not, or you would not be asking. Look for the ring on your little map. If it is near, go the other way, and do not run, they like that.',
     'They are slow. That is the only mercy. A giant cannot catch a man who keeps walking, but a man cannot keep walking for ever, and they know it.',
     'My brother went out to the milestone to fetch a cart wheel. We found the wheel.',
-    'I have lived here all my life and I never saw a thing as tall as a tree walk, until the blight. Now I see five of them. Five! And everyone pretends the road is only dangerous.',
+    'I have lived here all my life and I never saw a thing as tall as a tree walk, until the blight. Now I see six of them. Six! And everyone pretends the road is only dangerous.',
     'They keep to the open road, mostly. Indoors you are safe, as far as I know. As far as I know, nobody has ever tested it twice.']};
 for(const t of TT.list){TT[t.id]=t}
 Object.assign(ENEMY_DEF,Object.fromEntries(TT.list.map((t,i)=>[t.id,{name:t.n,hp:1150+i*60,dmg:[19+i,30+i*2],hit:.86,w:3.2,img:'art_'+t.id,xp:3400+i*200,gold:[6500+i*500,9500+i*600],speed:1,verb:t.verb,boss:true,tt:1,aboveParty:0,dropMagic:1}])));
 if(typeof NO_VARY!=='undefined')for(const t of TT.list)NO_VARY.push(t.id);
 const ttPlaceOf=lv=>{const p=typeof BL_ROAD!=='undefined'&&BL_ROAD.find(q=>q.id===lv);return p?p.n:0};
-function ttF(){const F=G.flags;if(!F.tt)F.tt={at:{tt0:2,tt1:4,tt2:5,tt3:8,tt4:9},dead:{},t:G.clock||0};if(!F.tt.at)F.tt.at={};if(!F.tt.dead)F.tt.dead={};return F.tt}
+function ttF(){const F=G.flags;if(!F.tt)F.tt={at:{tt0:2,tt1:4,tt2:5,tt3:8,tt4:9,tt5:3},dead:{},t:G.clock||0};if(!F.tt.at)F.tt.at={};if(F.tt.at.tt5===undefined)F.tt.at.tt5=3;if(!F.tt.dead)F.tt.dead={};return F.tt}
 /* the giants walk on: one chance in two every four game hours, one place along the road (never the party's own place, and never Lanternrest) */
 function ttSync(skipN){
   const F=ttF(),steps=Math.min(30,Math.floor(((G.clock||0)-F.t)/TT.hopMin));if(steps<1){if(((G.clock||0)-F.t)<0)F.t=G.clock||0;return}
@@ -56,6 +58,7 @@ function ttArt(){
     else if(t.skew){x.setTransform(1,0,t.skew,1,t.skew<0?-t.skew*H:0,0);x.drawImage(s,pad,0,dw,H)}
     else x.drawImage(s,pad,0,dw,H);
     x.setTransform(1,0,0,1,0,0);try{x.filter='none'}catch(e){}
+    if(t.eyes){x.fillStyle='#f4f4ee';x.shadowColor='#ffffff';x.shadowBlur=6;for(const ex of [.43,.57]){x.beginPath();x.ellipse(W*ex,H*.13,W*.026,H*.012,0,0,6.3);x.fill()}x.shadowBlur=0;x.fillStyle='#2a2420';x.beginPath();x.moveTo(W*.34,H*.085);x.lineTo(W*.66,H*.085);x.lineTo(W*.6,H*.045);x.lineTo(W*.4,H*.045);x.closePath();x.fill();x.fillRect(W*.3,H*.082,W*.4,H*.012)}
     if(t.id==='tt0'){x.fillStyle='#2a0608';x.strokeStyle='#d89a8a';x.lineWidth=1.4;for(let k=0;k<9;k++){const px=W*(.32+.36*((k*37)%10)/10),py=H*(.42+.34*((k*53)%10)/10);x.beginPath();x.ellipse(px,py,W*.035,H*.02,0,0,6.3);x.fill();x.stroke()}}
     IMG['art_'+t.id]=c;NPC_H['art_'+t.id]=t.ph;ENEMY_DEF[t.id].w=+(t.ph*W/H).toFixed(2)}
   TT._art=TT.list.every(t=>IMG['art_'+t.id])}
@@ -106,18 +109,18 @@ function ttMapMarks(V,z){
 /* killing one */
 {const _he=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;_he.apply(this,arguments);
   if(was&&e.hp<=0&&ENEMY_DEF[e.t]&&ENEMY_DEF[e.t].tt){const F=ttF();F.dead[e.t]=1;const left=TT.list.filter(t=>!F.dead[t.id]).length;
-    try{msg(ENEMY_DEF[e.t].name+' falls, and the ground shakes. '+(left?left+' of the five giants still walk the road.':'The last of the five giants is dead.'),'#ffb070');sfx('win')}catch(x){}}}}
-/* the talk of the road: an extra question on the people's screens, and Captain Marsh's reward for all five */
-QUESTS.ttgiants={title:'The Five Giants',who:'Captain Eldred Marsh',desc:'Five huge, deformed giants walk the Blighted Road: Gorsemaw the Many-Mouthed, Mother Sallowtide, Hobb Crookspine, Brannock the Stitched and Old Nine-Hands. They show as red marks on the world map and as big red rings on the mini map. Kill all five. Each is level 100.',need:5,goal:()=>Object.keys(ttF().dead).length,reward:{gold:40000,xp:600000}};
+    try{msg(ENEMY_DEF[e.t].name+' falls, and the ground shakes. '+(left?left+' of the six giants still walk the road.':'The last of the six giants is dead.'),'#ffb070');sfx('win')}catch(x){}}}}
+/* the talk of the road: an extra question on the people's screens, and Captain Marsh's reward for all six */
+QUESTS.ttgiants={title:'The Six Giants',who:'Captain Eldred Marsh',desc:'Six huge, deformed giants walk the Blighted Road: Gorsemaw the Many-Mouthed, Mother Sallowtide, Hobb Crookspine, Brannock the Stitched, Old Nine-Hands and Old White Eyes. They show as red marks on the world map and as big red rings on the mini map. Kill all six. Each is level 100.',need:6,goal:()=>Object.keys(ttF().dead).length,reward:{gold:40000,xp:600000}};
 QAREA.ttgiants='The Blighted Lands';
 function ttMarshQ(){
   const F=ttF();
-  return qNode('ttgiants',{offer:'There are five of them, Captain Marsh says, and he counts them on his fingers, and has to start again twice. "Gorsemaw. Sallowtide. Crookspine. Brannock. Old Nine-Hands. Each is the height of a tower and a good deal worse to look at. My scouts do not come back from them. I am told you are a fighting party. Kill all five, and the king will hear of it, and I will pay what the garrison chest can bear, which is more than it ought."',
+  return qNode('ttgiants',{offer:'There are six of them, Captain Marsh says, and he counts them on his fingers, and has to start again twice. "Gorsemaw. Sallowtide. Crookspine. Brannock. Old Nine-Hands. And one they call Old White Eyes, who hums. Each is the height of a tower and a good deal worse to look at. My scouts do not come back from them. I am told you are a fighting party. Kill all six, and the king will hear of it, and I will pay what the garrison chest can bear, which is more than it ought."',
     accept:'The giants shift along the road as the days go by. Watch the red marks on the world map, and the red rings on your mini map. They are slower than you. Never stand and trade blows unless you must.',
-    remind:(g,nn)=>QUESTS.ttgiants.desc+' ('+g+' of '+nn+' dead.)',ready:'All five. All five! I will have to start the count again, because I cannot believe it.',thanks:'The road is a little less terrible. Take this, with the garrison’s thanks.',after:'The road is quiet. Quieter than it has been for years. I do not trust it, but I thank you for it.'})}
+    remind:(g,nn)=>QUESTS.ttgiants.desc+' ('+g+' of '+nn+' dead.)',ready:'All six. All six! I will have to start the count again, because I cannot believe it.',thanks:'The road is a little less terrible. Take this, with the garrison’s thanks.',after:'The road is quiet. Quieter than it has been for years. I do not trust it, but I thank you for it.'})}
 function ttAddRumour(id){
   const keep=KH_KEEPERS[id],np=NPCS[id];if(!keep||!keep.root)return;const root=keep.root;if(root._tt)return;
-  let h=0;for(const ch of id)h=(h*31+ch.charCodeAt(0))>>>0;const own=TT.list[h%5],line=TT.gossip[h%TT.gossip.length];
+  let h=0;for(const ch of id)h=(h*31+ch.charCodeAt(0))>>>0;const own=TT.list[h%TT.list.length],line=TT.gossip[h%TT.gossip.length];
   const w=function(){const n=root.apply(this,arguments);try{
     if(n&&Array.isArray(n.opts)&&!n.pages&&n.opts.length<6){
       const q=id==='blr_marsh'?['The giants on the road',()=>ttMarshQ()]:['What do you know about the giants?',()=>{const F=ttF();return say(line+' '+(F.dead[own.id]?'': '"'+own.rumour+'"'),[BYE])}];
@@ -128,4 +131,4 @@ function ttAddRumour(id){
     const ok=/^(blt|bla|blc|blg|blh|blr|blp|vto)_/.test(id)?(!/^(A|An|The)\s/.test(nm)&&!NOTPERSON.test(nm)&&!/(maldrake|hesper|speaker|queen|rook|knight)/i.test(id+nm)):/^sa_(k_|g_|reg|inn_g)/.test(id);
     if(ok)try{ttAddRumour(id)}catch(e){console.error('tt rumour',id,e)}}
   try{ttAddRumour('blr_marsh')}catch(e){}}
-if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('Five giants walk the Blighted Road. They show on the world map and the mini map as red marks.');
+if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('Six giants walk the Blighted Road. They show on the world map and the mini map as red marks.');
