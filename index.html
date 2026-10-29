@@ -87,6 +87,13 @@ function wallMip(tex,k){ // a wall picture blurred over 2^k texels, made once: a
   for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){const o=(y*TS+x)*4;let a=0,b=0,c=0;for(let d=-r;d<=r;d++){const i=((Math.min(TS-1,Math.max(0,y+d)))*TS+x)*4;a+=tmp[i];b+=tmp[i+1];c+=tmp[i+2]}out[o]=a/n;out[o+1]=b/n;out[o+2]=c/n;out[o+3]=255}
   return tex[key]=out;
 }
+var PSW_ON=true; // false: the castle's walls are read texel by texel as before
+function wallMipH(tex,j,e){ // a wall picture (any height) blurred sideways over 2^j texels, made once per picture: a box wide enough that every texel is counted by some screen column
+  const key=(e?'he':'hd')+j;if(tex[key])return tex[key];
+  const src=e?tex.e:tex.d,H=src.length/(TS*4),w=1<<j,h0=w>>1,out=new Uint8ClampedArray(src.length);
+  for(let y=0;y<H;y++){const r=y*TS*4;for(let x=0;x<TS;x++){let a=0,b=0,c=0;const lo=x-h0;for(let d=0;d<w;d++){let xx=lo+d;xx=xx<0?0:xx>TS-1?TS-1:xx;const i=r+xx*4;a+=src[i];b+=src[i+1];c+=src[i+2]}const o=r+x*4;out[o]=a/w;out[o+1]=b/w;out[o+2]=c/w;out[o+3]=255}}
+  return tex[key]=out;
+}
 function stoneTex(seed,o){
   const d=new Uint8ClampedArray(TS*TS*4), rh=TS/o.rows;
   for(let y=0;y<TS;y++)for(let x=0;x<TS;x++){
@@ -2677,6 +2684,7 @@ function render3D(){
     const wh=TEX[ti].wh||(LEVEL===3&&mx>0&&my>0&&mx<MW-1&&my<MH-1?1.55:CEILH); // Thornwick's houses are one storey under the high sky; the forest round it stays tall
     const skyW=(LEVEL===22&&g===1&&T_SKY[0]!==undefined)||(!!TEX[ti].sky&&!!SKYPAN),tileW=!skyW&&!TEX[ti].h&&wh>2&&(g>=100||g===1||g===2||g===6||(g>=9&&g<=14)||(g>=20&&g<=22)); // tall plain walls repeat their pattern instead of stretching
     const tex=TEX[ti],te=tex.e,wlv=fastW&&perp>4?Math.min(4,Math.floor(Math.log2(TS*perp/F*.7))):0,td=wlv>0&&tex.d&&tex.d.length===TS*TS*4?wallMip(tex,wlv):tex.d; // far facades are read from blurred copies
+    let tdW=td,teW=te;if(td&&wlv===0&&PSW_ON&&LEVEL>=9710&&LEVEL<=9998){const sp=TS*perp/(F*Math.abs(side===0?rX:rY));if(sp>1.5){const jw=Math.min(6,Math.ceil(Math.log2(sp)));tdW=wallMipH(tex,jw,0);if(te)teW=wallMipH(tex,jw,1)}} // castle: a wall seen far off or edge-on has many texels under one screen column; a thin gold frame or lit doorway was picked up by one column and missed by the next, so it showed as a lone bright strip (see wallMipH)
     const kd=doorLv&&g>=100?KH_DOOR[g]:undefined,dg=kd!==undefined&&kd.lvl!==undefined&&!kd.noGlow,dgs=dg?(.7+.18*Math.sin(t*2.1+mx*1.7+my*.9))*(1-Math.min(.55,perp*.008)):0; // a doorway that can be entered glows softly, brighter near the threshold
     const eyeR=TERRACE?CAMZ-THF[hi]:TERR_NOW?CAMZ-terrH(hx,hy):EYE,unit=F/perp,lineH=wh*unit,y0=HH-(wh-eyeR)*unit,yBot=HH+eyeR*unit;let yT=y0;
     if(tex.cren&&((wx*2)%1)>.55)yT=y0+tex.cren*unit; // a battlement: every other stretch of the wall top is a gap between two merlons
@@ -2704,7 +2712,7 @@ function render3D(){
     let fk=1;if(HLK){fk=HGW_FACE[face]*(.93+.14*(((Math.imul(mx,73856093)^Math.imul(my,19349663))>>>8&255)/255));const wxw=side===0?hy:hx,fr=wxw-Math.floor(wxw),eW=.08;if(fr<eW||fr>1-eW){const lo=fr<eW,ax=side===0?0:lo?-1:1,ay=side===0?(lo?-1:1):0,nx=side===0?-stx:0,ny=side===1?-sty:0,cA=hgwW(mx+ax,my+ay,grid),cB=hgwW(mx+ax+nx,my+ay+ny,grid),kk=(lo?fr:1-fr)/eW;if(cA&&cB)fk*=.6+.4*kk;else if(!cA&&!cB)fk*=1.32-.32*kk}} // concave corner: dark line, convex corner: light line, by facing
     const bil=!!HLK&&!!tex.h&&!skyW&&!tileW&&unit>105;let bx0=0,bx1=0,bfx=0;if(bil){const fl=(side===0&&rX>0)||(side===1&&rY<0),c=(fl?TS-wx*TS:wx*TS)-.5,x0=Math.floor(c);bfx=c-x0;bx0=x0&(TS-1);bx1=(x0+1)&(TS-1)}
     const iu=1/unit,hasHLK=!!HLK,texH=tex.h||0,vmode=skyW?0:tileW?1:texH?2:3;
-    let tdU=td,teU=te,rowsT=0; // on a terrace the painting reads a column-major copy of the picture where there is one (see wallTexT)
+    let tdU=tdW,teU=teW,rowsT=0; // on a terrace the painting reads a column-major copy of the picture where there is one (see wallTexT)
     if(TERRACE&&!bil&&td===tex.d&&td){const dT=wallTexT(ti,tex);if(dT){if(!te){tdU=dT;rowsT=WTR[ti]}else{const eT=wallTexE(ti,te);if(eT){tdU=dT;teU=eT;rowsT=WTR[ti]}}}}
     {const P=WSP;P[0]=y0;P[1]=stepT;P[2]=vmode;P[3]=wh;P[4]=texH;P[5]=yBot;P[6]=iu;P[7]=ivw;P[8]=hzr[0]*skw;P[9]=hzr[1]*skw;P[10]=hzr[2]*skw;P[11]=lb*tbR;P[12]=lb*tbG;P[13]=lb*tbB;P[14]=RLR;P[15]=RLG;P[16]=na;P[17]=nra;P[18]=fk;P[19]=hasHLK?HLK.wallAO:0;P[20]=hasHLK?HLK.wallSat*(1+.25*day):1;P[21]=hasHLK?1:0;P[22]=bil?1:0;P[23]=bx0;P[24]=bx1;P[25]=bfx;P[26]=dg?1:0;P[27]=dgs;P[28]=dg?kd.n:0;P[29]=dg&&kd.lf?1:0;P[30]=dg?kd.i:0;P[31]=rowsT;P[32]=hasHLK&&hgtIsTown(LEVEL)?HLK.sheen*(.12+.88*day):0;P[33]=t*(hasHLK?HLK.sheenSpeed:0)+(mx*.7+my*.5);P[34]=Math.floor(t*4)}
     if(sy0<=sy1)wallSpan(D,tdU,teU,sy0,sy1,x,tx);
