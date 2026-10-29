@@ -33,7 +33,10 @@ for(let id=PSP.LO;id<=PSP.HI;id++){if(!KH_LAZY[id]){LEVEL_RATING[id]=LEVEL_RATIN
 /* ---------- arrival: the pictures first (Wenlock's loader brings the graveyard, the witch wood and the Oldhaven folk; then our own manifest), then the level ---------- */
 async function pspLoadOwn(){
   try{PSP.man=await (await fetch('assets/ps/manifest.json?v='+VERSION)).json()}catch(e){PSP.man={}}
-  await Promise.all(Object.keys(PSP.man||{}).map(k=>{const m=PSP.man[k];return loadImg('ps_'+k,'assets/ps/'+m.file).then(()=>{if(m.h&&m.kind!=='tex')NPC_H['ps_'+k]=m.h}).catch(()=>0)}))}
+  await Promise.all(Object.keys(PSP.man||{}).map(k=>{const m=PSP.man[k];return loadImg('ps_'+k,'assets/ps/'+m.file).then(()=>{if(m.h&&m.kind!=='tex')NPC_H['ps_'+k]=m.h;if(/^(arch_|alcove_|door_|gate_|bridge_arch|castle_)/.test(k))pspDePlum('ps_'+k)}).catch(()=>0)}))}
+/* the painted arches and alcoves came with a dark plum fill in their openings (reads as a violet haze in the lane): turn dark purple pixels neutral blue-black */
+function pspDePlum(key){try{const im=IMG[key];if(!im||!im.width||im._ps2)return;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);const d=x.getImageData(0,0,c.width,c.height),a=d.data;
+  for(let i=0;i<a.length;i+=4){if(!a[i+3])continue;const r=a[i],g=a[i+1],b=a[i+2],mx=Math.max(r,g,b);if(mx<96&&r-g>5&&b-g>5){const l=(r+g+b)/3*.8;a[i]=l*.7;a[i+1]=l*.95;a[i+2]=l*1.1}}x.putImageData(d,0,0);c._ps2=1;IMG[key]=c}catch(e){}}
 function pspLoad(then){
   if(PSP._wait)return true;PSP._wait=1;
   try{msg('The Pale Lands come into view...','#d8d4f0')}catch(e){}
