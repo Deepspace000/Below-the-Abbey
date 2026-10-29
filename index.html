@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.706';
+const VERSION='3.707';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -44002,13 +44002,58 @@ function hgdmpDrawTrail(vi){
 WORLD_LOCS.push({k:'deephollow',n:'The Deeper Hollow',sub:'a giant maze',lv:[475],x:-96,y:190,ic:'trees'}) // north east of the Hollow Grasslands;
 LEVEL_RATING[HGD.ID]=HGD.DIFF;
 function hgdmpMini(){
-  if(HGDMP.mini)return HGDMP.mini;const S=48,c=document.createElement('canvas');c.width=c.height=S*2;const x=c.getContext('2d');x.scale(2,2);
-  x.fillStyle='#e9dcb4';x.fillRect(0,0,S,S);
-  // the maze as a hedge of lines: a lattice, drawn the same every time (the real level may not be built yet)
-  const rnd=hgdmRng(475009),N=24,cell=S/N,cols=HGDMP.tints;
-  for(let j=0;j<N;j++)for(let i=0;i<N;i++){const b=Math.max(0,Math.min(7,Math.floor((1-j/N)*7.4)));x.fillStyle=cols[b];x.globalAlpha=.55;x.fillRect(i*cell,j*cell,cell,cell)}x.globalAlpha=1;
-  x.strokeStyle='#2a1a0c';x.lineWidth=.6;x.beginPath();for(let j=0;j<N;j+=2)for(let i=0;i<N;i+=2){if(rnd()<.5){x.moveTo(i*cell,j*cell);x.lineTo((i+2)*cell,j*cell)}else{x.moveTo(i*cell,j*cell);x.lineTo(i*cell,(j+2)*cell)}}x.stroke();
-  x.strokeStyle='#2a1a0c';x.lineWidth=1.4;x.strokeRect(.7,.7,S-1.4,S-1.4);x.fillStyle='#f4ecd6';x.fillRect(S/2-3,S-5,6,5);x.strokeStyle='#2a1a0c';x.lineWidth=.8;x.strokeRect(S/2-3,S-5,6,5);
+  /* the Deeper Hollow as a hand-inked maze plan: a real maze (backtracker with extra openings), hedge walls, a moat round a central garden, ponds and winding streams with plank bridges, trees in dead ends, statues, an outer wall with four turrets and a gate. Drawn once, the same every time. */
+  if(HGDMP.mini)return HGDMP.mini;const S=640,N=40,cell=S/N,c=document.createElement('canvas');c.width=c.height=S;const x=c.getContext('2d');
+  const rnd=hgdmRng(475009),cols=HGDMP.tints,wob=()=>(rnd()-.5)*1.3;
+  x.fillStyle='#eadfb8';x.fillRect(0,0,S,S);
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){const bd=Math.max(0,Math.min(7,Math.floor((1-j/N)*7.4)));x.fillStyle=cols[bd];x.globalAlpha=.34;x.fillRect(i*cell,j*cell,cell+.6,cell+.6)}x.globalAlpha=1;
+  for(let k=0;k<900;k++){x.fillStyle='rgba(120,96,56,'+(.04+rnd()*.06)+')';x.fillRect(rnd()*S,rnd()*S,1+rnd()*2,1)}
+  // the maze: hw[j][i] is the wall on the top of cell (i,j), vw[j][i] on its left; all walls to start with
+  const hw=[],vw=[],seen=[];for(let j=0;j<=N;j++){hw.push(new Array(N+1).fill(true));vw.push(new Array(N+1).fill(true));seen.push(new Array(N+1).fill(false))}
+  const st=[[N>>1,N>>1]];seen[N>>1][N>>1]=true;
+  while(st.length){const [i,j]=st[st.length-1],nb=[];if(i>0&&!seen[j][i-1])nb.push([i-1,j,'l']);if(i<N-1&&!seen[j][i+1])nb.push([i+1,j,'r']);if(j>0&&!seen[j-1][i])nb.push([i,j-1,'u']);if(j<N-1&&!seen[j+1][i])nb.push([i,j+1,'d']);
+    if(!nb.length){st.pop();continue}const [a,b,d]=nb[(rnd()*nb.length)|0];seen[b][a]=true;
+    if(d==='l')vw[j][i]=false;else if(d==='r')vw[j][i+1]=false;else if(d==='u')hw[j][i]=false;else hw[j+1][i]=false;st.push([a,b])}
+  for(let k=0;k<N*N*.16;k++){const i=1+((rnd()*(N-2))|0),j=1+((rnd()*(N-2))|0);if(rnd()<.5)vw[j][i]=false;else hw[j][i]=false}   // loops: more ways through
+  // water: a moat round the central garden, four ponds, two winding streams
+  const water=[];for(let j=0;j<N;j++)water.push(new Array(N).fill(false));const cx=N/2-.5,cy=N/2-.5;
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){const d=Math.max(Math.abs(i-cx),Math.abs(j-cy));if(d>3.4&&d<5.6)water[j][i]=true}
+  const pond=(pi,pj,rx,ry)=>{for(let j=0;j<N;j++)for(let i=0;i<N;i++)if(((i-pi)/rx)**2+((j-pj)/ry)**2<=1)water[j][i]=true};pond(7,8,3,2.4);pond(32,31,3.4,2.8);pond(33,7,2.2,2);pond(6,32,2.4,2.8);
+  for(let i=0;i<14;i++){const j=Math.round(27+3*Math.sin(i*.55));water[j][i]=true;water[j+1][i]=true}
+  for(let i=24;i<N;i++){const j=Math.round(13+2.6*Math.sin(i*.5+1));water[j][i]=true;water[j+1][i]=true}
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){if(!water[j][i])continue;if(i>0&&water[j][i-1])vw[j][i]=false;if(j>0&&water[j-1][i])hw[j][i]=false}
+  // the central garden: open ground
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){const dx=Math.abs(i-cx),dy=Math.abs(j-cy);if(dx<=3.4&&dy<=3.4){water[j][i]=false;if(i>0&&Math.abs(i-1-cx)<=3.4)vw[j][i]=false;if(j>0&&Math.abs(j-1-cy)<=3.4)hw[j][i]=false}}
+  // four plank causeways over the moat
+  const mid=N>>1;for(let t=2;t<=7;t++){for(const [bi,bj] of [[mid-1,mid-t],[mid,mid-t],[mid-1,mid+t-1],[mid,mid+t-1],[mid-t,mid-1],[mid-t,mid],[mid+t-1,mid-1],[mid+t-1,mid]]){if(bi>=0&&bj>=0&&bi<N&&bj<N&&water[bj][bi]===true)water[bj][bi]='b'}}
+  // water on the page
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){if(!water[j][i])continue;const X=i*cell,Y=j*cell;
+    x.fillStyle=water[j][i]==='b'?'#b49a62':'#6fa6bc';x.fillRect(X,Y,cell+.5,cell+.5);
+    if(water[j][i]!=='b'){x.fillStyle='rgba(40,96,130,.4)';x.fillRect(X,Y+cell*.5,cell,cell*.5);x.strokeStyle='rgba(235,245,240,.75)';x.lineWidth=.9;x.beginPath();for(let k=0;k<2;k++){const ry=Y+cell*(.25+k*.4)+wob();x.moveTo(X+cell*.15,ry);x.quadraticCurveTo(X+cell*.35,ry-2,X+cell*.5,ry);x.quadraticCurveTo(X+cell*.65,ry+2,X+cell*.85,ry)}x.stroke()}
+    else{x.strokeStyle='rgba(60,40,20,.7)';x.lineWidth=1;x.beginPath();for(let k=1;k<4;k++){x.moveTo(X+cell*k/4,Y);x.lineTo(X+cell*k/4,Y+cell)}x.stroke()}}
+  // shorelines
+  x.strokeStyle='rgba(40,70,80,.8)';x.lineWidth=1.6;x.beginPath();for(let j=0;j<N;j++)for(let i=0;i<N;i++){if(water[j][i]!==true)continue;const X=i*cell,Y=j*cell;
+    if(i===0||water[j][i-1]===false){x.moveTo(X,Y);x.lineTo(X,Y+cell)}if(i===N-1||water[j][i+1]===false){x.moveTo(X+cell,Y);x.lineTo(X+cell,Y+cell)}
+    if(j===0||water[j-1][i]===false){x.moveTo(X,Y);x.lineTo(X+cell,Y)}if(j===N-1||water[j+1][i]===false){x.moveTo(X,Y+cell);x.lineTo(X+cell,Y+cell)}}x.stroke();
+  // hedge walls: dark outline, green body, lighter leaf flecks
+  const wl=[];for(let j=0;j<N;j++)for(let i=0;i<N;i++){const wi=water[j][i]===true;
+    if(hw[j][i]&&j>0&&!(wi&&water[j-1][i]===true))wl.push([i*cell,j*cell,(i+1)*cell,j*cell]);
+    if(vw[j][i]&&i>0&&!(wi&&water[j][i-1]===true))wl.push([i*cell,j*cell,i*cell,(j+1)*cell])}
+  for(const pass of [0,1]){x.lineCap='round';x.lineWidth=pass?3.2:5.4;x.strokeStyle=pass?'#4f7a36':'#1d2a12';x.beginPath();for(const [a,b,e,f] of wl){x.moveTo(a+wob()*.4,b+wob()*.4);x.lineTo(e+wob()*.4,f+wob()*.4)}x.stroke()}
+  x.fillStyle='rgba(150,196,96,.8)';for(const [a,b,e,f] of wl){const n=1+((rnd()*2)|0);for(let k=0;k<n;k++){const t=rnd();x.fillRect(a+(e-a)*t-.6,b+(f-b)*t-.6,1.4,1.4)}}
+  // trees in dead ends, small statues at crossings, a few gold finds
+  for(let j=1;j<N-1;j++)for(let i=1;i<N-1;i++){if(water[j][i])continue;const op=(!hw[j][i]?1:0)+(!hw[j+1][i]?1:0)+(!vw[j][i]?1:0)+(!vw[j][i+1]?1:0),X=(i+.5)*cell,Y=(j+.5)*cell;
+    if(op===1&&rnd()<.34){x.fillStyle='#1f3a1c';x.beginPath();x.arc(X,Y,cell*.3,0,6.3);x.fill();x.fillStyle='#4a7a3a';x.beginPath();x.arc(X-1,Y-1.2,cell*.22,0,6.3);x.fill();x.fillStyle='#8cb866';x.beginPath();x.arc(X-2,Y-2.2,cell*.1,0,6.3);x.fill()}
+    else if(op===4&&rnd()<.5){x.fillStyle='#8a8478';x.strokeStyle='#2a2418';x.lineWidth=.8;x.beginPath();x.arc(X,Y,cell*.2,0,6.3);x.fill();x.stroke()}
+    else if(op===3&&rnd()<.07){x.fillStyle='#e8d070';x.strokeStyle='#4a3a10';x.lineWidth=.7;x.beginPath();x.arc(X,Y,cell*.17,0,6.3);x.fill();x.stroke()}}
+  // the central garden: gravel, flower beds, a fountain
+  {const g0=(cx-3.4+.5)*cell,g1=(cx+3.4+.5)*cell,w=g1-g0;x.fillStyle='#cdbf94';x.fillRect(g0,g0,w,w);x.strokeStyle='#8a7a50';x.lineWidth=.8;x.strokeRect(g0,g0,w,w);
+    x.fillStyle='#6a9a58';for(const [ox,oy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){x.beginPath();x.arc(S/2+ox*cell*1.9,S/2+oy*cell*1.9,cell*.9,0,6.3);x.fill();x.strokeStyle='#2a4a24';x.lineWidth=.9;x.stroke()}
+    x.fillStyle='#8fb4bc';x.strokeStyle='#4a5a50';x.lineWidth=1.6;x.beginPath();x.arc(S/2,S/2,cell*.95,0,6.3);x.fill();x.stroke();x.fillStyle='#d8d4c4';x.beginPath();x.arc(S/2,S/2,cell*.32,0,6.3);x.fill();x.stroke()}
+  // the outer wall of stone with four turrets, and the gate in the south
+  x.strokeStyle='#2a2014';x.lineWidth=9;x.strokeRect(2,2,S-4,S-4);x.strokeStyle='#8a806c';x.lineWidth=5.4;x.strokeRect(2,2,S-4,S-4);x.strokeStyle='rgba(235,226,196,.5)';x.lineWidth=1.2;x.strokeRect(1,1,S-2,S-2);
+  for(const [tx,ty] of [[2,2],[S-2,2],[2,S-2],[S-2,S-2]]){x.fillStyle='#9a907c';x.strokeStyle='#2a2014';x.lineWidth=2;x.beginPath();x.arc(tx,ty,cell*.62,0,6.3);x.fill();x.stroke();x.fillStyle='#5a4e3c';x.beginPath();x.arc(tx,ty,cell*.3,0,6.3);x.fill()}
+  x.fillStyle='#eadfb8';x.fillRect(S/2-cell*.7,S-9,cell*1.4,12);x.fillStyle='#5a4a30';x.fillRect(S/2-cell*.95,S-13,cell*.3,12);x.fillRect(S/2+cell*.65,S-13,cell*.3,12);
   return HGDMP.mini=c}
 {const _wi=mpWorldIco;mpWorldIco=function(l,x,y,z){if(l&&l.k==='deephollow'){const m=hgdmpMini(),c=ctx;c.save();c.imageSmoothingQuality='high';c.shadowColor='rgba(40,24,10,.45)';c.shadowBlur=3;c.globalAlpha=WM_DH.a;c.drawImage(m,x+WM_DH.ox,y+WM_DH.oy,WM_DH.s,WM_DH.s);c.restore();return}return _wi.apply(this,arguments)}}
 
@@ -48436,7 +48481,7 @@ const WMN_ICSPEC={town:'i_town',castle:'i_castle',abbey:'i_abbey',cave:'i_cave',
 function wmnSpec(l){return WMN_SPEC[l.k]||[[WMN_ICSPEC[l.ic]||'i_oaks',0,0,l.ic==='castle'||l.ic==='orangecastle'?40:28]]}
 /* the picture's footprint: its parts, how far down they are drawn, and its box (the bottom stands a little below the place's own point) */
 const WMN_FOOT={i_town:.88,i_seaside:.87,i_castle:.87,i_desertcity:.87,i_cave:.87,i_mine:.85,i_graves:.9,i_crypt:.92,i_oaks:.87,i_pines:.88,i_mountains:.77};   // how far down each picture its solid part goes (the rest is the faded ground): a name may stand over that
-const WM_DH={s:96,ox:-48,oy:-62,a:.5};   // the Deeper Hollow's picture: its size on the map, where it starts from the place's spot, and how see-through it is
+const WM_DH={s:96,ox:-48,oy:-62,a:.62};   // the Deeper Hollow's picture: its size on the map, where it starts from the place's spot, and how see-through it is
 const WMN_BOX={deephollow:[WM_DH.ox-1,WM_DH.oy-1,WM_DH.ox+WM_DH.s+1,WM_DH.oy+WM_DH.s+1]};   // places whose picture is drawn by another file: their box
 function wmnShape(l){
   if(WMN_BOX[l.k]){const b=WMN_BOX[l.k];return {parts:[],off:0,ib:[l.x+b[0],l.y+b[1],l.x+b[2],l.y+b[3]]}}

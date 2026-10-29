@@ -37,7 +37,7 @@ const WMN_ICSPEC={town:'i_town',castle:'i_castle',abbey:'i_abbey',cave:'i_cave',
 function wmnSpec(l){return WMN_SPEC[l.k]||[[WMN_ICSPEC[l.ic]||'i_oaks',0,0,l.ic==='castle'||l.ic==='orangecastle'?40:28]]}
 /* the picture's footprint: its parts, how far down they are drawn, and its box (the bottom stands a little below the place's own point) */
 const WMN_FOOT={i_town:.88,i_seaside:.87,i_castle:.87,i_desertcity:.87,i_cave:.87,i_mine:.85,i_graves:.9,i_crypt:.92,i_oaks:.87,i_pines:.88,i_mountains:.77};   // how far down each picture its solid part goes (the rest is the faded ground): a name may stand over that
-const WM_DH={s:96,ox:-48,oy:-62,a:.5};   // the Deeper Hollow's picture: its size on the map, where it starts from the place's spot, and how see-through it is
+const WM_DH={s:96,ox:-48,oy:-62,a:.62};   // the Deeper Hollow's picture: its size on the map, where it starts from the place's spot, and how see-through it is
 const WMN_BOX={deephollow:[WM_DH.ox-1,WM_DH.oy-1,WM_DH.ox+WM_DH.s+1,WM_DH.oy+WM_DH.s+1]};   // places whose picture is drawn by another file: their box
 function wmnShape(l){
   if(WMN_BOX[l.k]){const b=WMN_BOX[l.k];return {parts:[],off:0,ib:[l.x+b[0],l.y+b[1],l.x+b[2],l.y+b[3]]}}

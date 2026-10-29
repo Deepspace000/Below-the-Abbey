@@ -96,10 +96,10 @@ function pspStand(name){
   const key='ps_'+name;if(IMG[key])return key;const e=PSP_PICS[name]||[1.4,['gy_column','gy_urn'],{}],o=e[2]||{},r=pspRaw(name)||(()=>{for(const s of ['gy_column','gy_urn','gy_bench'])if(IMG[s]&&IMG[s].width)return {k:s,im:IMG[s]};return null})();
   if(!r)return key;
   const im=r.im,c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');
-  try{x.filter=o.keep?'none':o.stone?'grayscale(.9) brightness(1.15) contrast(.95)':o.dark?'grayscale(.6) brightness(.8) contrast(1.1)':'grayscale(.55) brightness(1.2) contrast(.96)'}catch(err){}
+  try{x.filter=o.keep?'none':o.stone?'grayscale(.85) brightness(.78) contrast(1.1)':o.dark?'grayscale(.7) brightness(.62) contrast(1.15)':'grayscale(.6) brightness(.72) contrast(1.1)'}catch(err){}
   if(o.flip){x.translate(c.width,0);x.scale(-1,1)}
   x.drawImage(im,0,0);x.setTransform(1,0,0,1,0,0);x.filter='none';
-  if(!o.keep){x.globalCompositeOperation='source-atop';x.fillStyle=o.ghost?'rgba(200,210,255,.34)':'rgba(190,186,232,.2)';x.fillRect(0,0,c.width,c.height);x.globalCompositeOperation='source-over'}
+  if(!o.keep){x.globalCompositeOperation='source-atop';x.fillStyle=o.ghost?'rgba(170,240,205,.32)':'rgba(40,96,66,.3)';x.fillRect(0,0,c.width,c.height);x.globalCompositeOperation='source-over'}
   IMG[key]=c;NPC_H[key]=e[0];IMG[key]._ps=1;return key}
 function pspPic(name){const k='ps_'+name;if(!IMG[k])pspStand(name);if(NPC_H[k]===undefined&&PSP_PICS[name])NPC_H[k]=PSP_PICS[name][0];return IMG[k]?k:'gy_column'}
 /* after the pictures are loaded: every name of the table gets its picture (painted or stand-in); creatures get their width from the picture and the height 'ph' */
