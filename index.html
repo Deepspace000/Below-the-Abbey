@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.707';
+const VERSION='3.711';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -75264,6 +75264,363 @@ function pspTick(){
   if(id>=9780&&id<=9800){if(D('d',3,7))pssDrip(.6+Math.random()*.4);if(D('c',12,26))pssChain(.7);if(D('m',26,50))pssMoan(.6);if(D('r',14,30))pssRats(.8);if(id===9790&&D('wt',6,12))pssWater(.8);return}
   if(D('p',20,40))pssPad(.6)}
 {const _ys=yarSoundTick;yarSoundTick=function(){_ys.apply(this,arguments);try{pspTick()}catch(e){console.error('psp tick',e)}}}
+
+/* ---- src/desert/ps_gear.js ---- */
+/* ==========================================================================
+   THE PALE SPIRE: GOTHIC GEAR (prefix pgr / PGR; item ids pg_*). 26 unique pieces of level 100 gear, the strongest in the game: 12 weapons (two each of Sword, Axe, Mace, Bow, Staff,
+   Dagger), 10 armour pieces (two each of head, chest, arms, legs, shield) and 4 rings. Every piece lies behind a boss, a quest, a riddle chest or a key chest, two on each built level
+   and one or two outside (the Approach 9720 and the Court 9730). This file hooks from outside: it edits no level file. Plan, table and the list for the future floors: tools/PALE_SPIRE_GEAR.md.
+   How a piece is found:
+     boss   the first time the boss dies it drops the piece (hurtEnemy hook, message)
+     quest  the item id is appended to QUESTS[q].reward.items (and a full bag drops it on the ground instead of losing it)
+     riddle a chest in a dead end of the level (found by pgrSpot after the level is built); talk to it, answer a question about the castle; a wrong answer wakes two creatures, the chest stays shut
+     key    a chest in a dead end that opens only for an item found elsewhere on the level
+   State: G.flags.psp.pg = {got:{itemId:1}} (a piece is given once). To add a piece for a new floor, add a row to PGR.PLACE and an item to PGR_ITEMS (see the notes).
+   ========================================================================== */
+const PGR={};
+/* palette: dark violet, black, antique brass, verdigris, bone */
+const PGR_C={vio:'#4a2a6a',blk:'#1a1624',brass:'#b08d3c',verd:'#3f8f7a',bone:'#d8d0b8'};
+const PGR_ITEMS={};
+function pgrItem(id,o){
+  const it=Object.assign({k:'weapon',price:0,lvl:100,rar:1,gear:1},o);it.id=id;it.pg=1;
+  if(it.k==='weapon'){it.hit=it.hit===undefined?.2:it.hit;if(it.t==='Bow')it.ranged=7;it.d=it.d+' Needs level 100.'}
+  else it.d=it.d+' Needs level 100.';
+  ITEMDEF[id]=it;PGR_ITEMS[id]=it;return it}
+/* ---------- weapons ---------- */
+pgrItem('pg_tollblade',{n:'Tollbell Greatsword',t:'Sword',ic:'sword',c:PGR_C.brass,dmg:[760,880],req:{str:78},eff:{bossdmg:.4,stun:.15},dbl:.2,sw:.7,
+  d:"A greatsword with a blade of bell bronze that rings low when it strikes, carried by the Gate Captain. About one blow in seven knocks the foe down, one blow in five does double damage, and bosses take 40% more."});
+pgrItem('pg_weepingedge',{n:'Blade of the Weeping Saint',t:'Sword',ic:'sword',c:PGR_C.vio,dmg:[790,910],req:{str:78},eff:{bleed:[.5,8,60],exec:[.35,3]},dbl:.18,pas:{lifesteal:.04},sw:.5,
+  d:"A thin black blade, with a saint's face carved in the hilt and a drop of green on the corner of each eye. Wounds bleed hard, a foe under 35% health takes three times the blow, and the wielder heals 4% of the melee damage dealt."});
+pgrItem('pg_tearmaul',{n:'Tearstone Maul',t:'Mace',ic:'mace',c:PGR_C.bone,dmg:[600,700],req:{str:76},eff:{stun:.3,bossdmg:.35,shock:.2},dbl:.18,sw:.9,
+  d:"A hammer of grey stone that weeps clear water from its head after every blow, taken from the Weeping Colossus. Three blows in ten knock the foe down, one blow in five shakes the ground and throws down every foe close by, and bosses take 35% more."});
+pgrItem('pg_reckoning',{n:"The Steward's Reckoning",t:'Mace',ic:'mace',c:PGR_C.brass,dmg:[620,720],req:{str:76},eff:{vuln:[.4,5],bossdmg:.45,daze:.3},dbl:.2,sw:.85,
+  d:"An iron mace on a chain, with a brass head cast in the shape of a bunch of keys. The Pale Steward counted everything with it. Four blows in ten leave the foe open to harm for five turns, three in ten leave it dazed, and bosses take 45% more."});
+pgrItem('pg_gargcleaver',{n:'Gargoyle-Wing Cleaver',t:'Axe',ic:'axe',c:PGR_C.verd,dmg:[420,490],req:{str:76},eff:{cleave:1,bleed:[.5,6,60],bossdmg:.4},dbl:.22,sw:.8,
+  d:"A broad axe whose blade is one stone wing of Mother Gargoyle, edged and set on a black haft. Each blow carries on into the foe behind, wounds bleed, and bosses take 40% more."});
+pgrItem('pg_gaolheadsman',{n:"Drowned Gaoler's Headsman",t:'Axe',ic:'axe',c:PGR_C.blk,dmg:[425,490],req:{str:76},eff:{cleave:1,exec:[.4,4],bossdmg:.5},dbl:.2,sw:.8,
+  d:"A black headsman's axe, green with cistern slime, that the Drowned Gaoler used on the prisoners. Each blow carries on into the foe behind, a foe under 40% health takes four times the blow, and bosses take 50% more."});
+pgrItem('pg_falconbow',{n:"Falconer's Last Bow",t:'Bow',ic:'bow',c:PGR_C.bone,dmg:[680,780],req:{dex:76},eff:{pierce:1,double:.4},dbl:.18,sw:.42,
+  d:"A bow of pale horn and black raven feathers, the last bow of the Sovereign's falconer. Shoots 7 squares, its arrows pass through to the foe behind, and four shots in ten send a second arrow."});
+pgrItem('pg_winchbow',{n:'Portcullis-Wire Bow',t:'Bow',ic:'bow',c:PGR_C.brass,dmg:[700,800],req:{dex:76},eff:{pierce:1,vuln:[.35,4],bossdmg:.4},dbl:.2,sw:.45,
+  d:"A bow with limbs of black iron, strung with winch wire from the gatehouse portcullis. Shoots 7 squares, its arrows pass through to the foe behind, a hit often leaves the foe open to harm, and bosses take 40% more."});
+pgrItem('pg_briarstaff',{n:'Briarwood Rood Staff',t:'Staff',ic:'staff',c:PGR_C.verd,dmg:[270,320],magic:180,req:{int:76},eff:{bossdmg:.5,daze:.4,shock:.2},pas:{spellPct:.12,mpRegen:.8},sw:.44,
+  d:"A staff of living briar with a single pale rose at the tip, cut from the Thorn Warden. Adds 180 to the power of spells, spell damage +12%, tiredness fades faster, bosses take 50% more, and foes reel dazed."});
+pgrItem('pg_candlestaff',{n:'Staff of the Last Candle',t:'Staff',ic:'staff',c:PGR_C.vio,dmg:[285,335],magic:192,req:{int:76},eff:{bossdmg:.6,daze:.35},pas:{spellPct:.15,regen:.6,mpRegen:1},sw:.44,
+  d:"A tall black staff topped with a candle that never burns down. The Chaplain lit it for the last service. Adds 192 to the power of spells, spell damage +15%, wounds close steadily, tiredness fades faster, bosses take 60% more, and foes reel dazed."});
+pgrItem('pg_keyblade',{n:"Porter's Keyblade",t:'Dagger',ic:'dagger',c:PGR_C.brass,dmg:[470,540],req:{dex:74},eff:{bleed:[.6,8,50],exec:[.4,4]},dbl:.3,sw:.3,
+  d:"A dagger forged from the oldest key of the gatehouse, with the wards of the lock for a blade. Wounds bleed hard, a foe under 40% health takes four times the blow, and three blows in ten do double damage."});
+pgrItem('pg_questioner',{n:"The Questioner's Hook",t:'Dagger',ic:'dagger',c:PGR_C.blk,dmg:[490,560],req:{dex:74},eff:{bleed:[.5,6,70],vuln:[.4,5],bossdmg:.35},dbl:.28,pas:{crit:.08},sw:.3,
+  d:"A short black hook-knife from the Question Room, worn smooth by the hands that used it. Wounds bleed deeply, four blows in ten leave the foe open to harm, bosses take 35% more, and double hits come 8% more often."});
+/* ---------- armour ---------- */
+pgrItem('pg_ravenhelm',{n:'Raven-Beak Helm',k:'head',t:'Helm',ic:'head',c:PGR_C.blk,armor:32,pas:{dodge:.09,crit:.08,regen:.8},sw:.4,
+  d:"A black helm drawn forward into a long raven's beak, with two slits for the eyes. Armour 32, enemies miss 9% more, double hits come 8% more often, and wounds close steadily."});
+pgrItem('pg_candlecrown',{n:'Crown of a Hundred Candles',k:'head',t:'Helm',ic:'head',c:PGR_C.brass,armor:33,pas:{dmgPct:.1,spellPct:.1,mpRegen:.9},sw:.4,
+  d:"A brass crown with a hundred small cups for candles, black with old wax. Armour 33, all damage +10%, spell damage +10%, and tiredness fades faster."});
+pgrItem('pg_cathedralplate',{n:'Plate of the Black Cathedral',k:'chest',t:'Chest',ic:'chest',c:PGR_C.vio,armor:84,pas:{ward:30,thorns:14,regen:.9,dodge:.08},sw:.55,
+  d:"Black plate with pointed arches worked into the breast and a rose window of violet glass over the heart, from the armour on the Grand Stair. Armour 84, every blow on the wearer is 30 lighter, every enemy that strikes takes 14 damage, enemies miss 8% more, and wounds close steadily."});
+pgrItem('pg_pitplate',{n:'Reliquary Plate of the Pit',k:'chest',t:'Chest',ic:'chest',c:PGR_C.bone,armor:86,pas:{lifesteal:.06,ward:26,regen:1.1,secondWind:.4},sw:.55,
+  d:"Pale plate ribbed like a cage of bones, with small reliquary boxes set on the breast. It came out of the pit under the Oubliette. Armour 86, heals 6% of the melee damage dealt, every blow on the wearer is 26 lighter, wounds close steadily, and once per 30 rounds below a quarter health it heals 40%."});
+pgrItem('pg_harrowarms',{n:"Road Warden's Vambraces",k:'arms',t:'Arms',ic:'arms',c:PGR_C.verd,armor:20,pas:{dmgPct:.06,thorns:10,ward:10},sw:.4,
+  d:"Grey vambraces gone green at the seams, the last gear of the Road Wardens. Armour 20, all damage +6%, every enemy that strikes takes 10 damage, and every blow on the wearer is 10 lighter."});
+pgrItem('pg_falconarms',{n:"Falconer's Mourning Gauntlets",k:'arms',t:'Arms',ic:'arms',c:PGR_C.blk,armor:21,pas:{crit:.07,dodge:.07,dmgPct:.05},sw:.4,
+  d:"Black gauntlets with a thick leather cuff on the left, for a hawk to perch on. Armour 21, double hits come 7% more often, enemies miss 7% more, and all damage +5%."});
+pgrItem('pg_pilgrimlegs',{n:"Pilgrim's Mourning Greaves",k:'legs',t:'Legs',ic:'legs',c:PGR_C.vio,armor:25,pas:{regen:1,dodge:.08,ward:12},sw:.4,
+  d:"Dark violet greaves, worn through at the knees from a long walk on the cold road. Armour 25, wounds close quickly, enemies miss 8% more, and every blow on the wearer is 12 lighter."});
+pgrItem('pg_cobweblegs',{n:'Cobweb-Mail Leggings',k:'legs',t:'Legs',ic:'legs',c:PGR_C.bone,armor:26,pas:{dodge:.1,thorns:9,mpRegen:.6},sw:.35,
+  d:"Leggings of fine silver rings that are webbed over with grey spider silk, which never tears. Armour 26, enemies miss 10% more, every enemy that strikes takes 9 damage, and tiredness fades faster."});
+pgrItem('pg_votiveshield',{n:'Votive Shield of the Nine Tokens',k:'shield',t:'Shield',ic:'shield',c:PGR_C.brass,armor:35,pas:{ward:20,thorns:16,dodge:.06},sw:.5,
+  d:"A tall pointed shield, hung with nine small pilgrim tokens on brass chains. Armour 35, every blow on the wearer is 20 lighter, every enemy that strikes takes 16 damage, and enemies miss 6% more."});
+pgrItem('pg_dawnshield',{n:'Bulwark of the Last Dawn',k:'shield',t:'Shield',ic:'shield',c:PGR_C.vio,armor:36,pas:{ward:24,secondWind:.4,thorns:12,regen:.7},sw:.5,
+  d:"A black shield with a pale sunrise cut into the face, made for Sir Edrik Stamford's house. Armour 36, every blow on the wearer is 24 lighter, every enemy that strikes takes 12 damage, wounds close steadily, and once per 30 rounds below a quarter health it heals 40%."});
+/* ---------- rings ---------- */
+pgrItem('pg_cairnring',{k:'ring',n:'Cairn-Stone Band',t:'Ring',ic:'ring',c:PGR_C.bone,pas:{ward:26,regen:1,dodge:.08},hp:120,str:8,sw:.1,
+  d:"A plain ring cut from one grey stone of the pilgrims' cairn. Adds 8 Strength and 120 health, every blow on the wearer is 26 lighter, enemies miss 8% more, and wounds close steadily."});
+pgrItem('pg_briarring',{k:'ring',n:'Briar Rose Band',t:'Ring',ic:'ring',c:PGR_C.verd,pas:{ward:27,dodge:.09,regen:1.2,lifesteal:.03},hp:110,dex:8,sw:.1,
+  d:"A ring of twisted green wire with one small white rose. It still has thorns. Adds 8 Dexterity and 110 health, every blow on the wearer is 27 lighter, enemies miss 9% more, wounds close quickly, and the wearer heals 3% of the melee damage dealt."});
+pgrItem('pg_silencering',{k:'ring',n:'Ring of the Silent Question',t:'Ring',ic:'ring',c:PGR_C.blk,pas:{ward:28,crit:.08,dmgPct:.07},hp:130,str:9,sw:.1,
+  d:"A heavy black ring with no mark at all on the inside, the only thing that the gaolers never made a prisoner answer. Adds 9 Strength and 130 health, every blow on the wearer is 28 lighter, double hits come 8% more often, and all damage +7%."});
+pgrItem('pg_bellring',{k:'ring',n:'Drowned Bell Ring',t:'Ring',ic:'ring',c:PGR_C.verd,pas:{ward:30,mpRegen:1.1,regen:1,thorns:10},hp:140,int:10,sw:.1,
+  d:"A small bell of green bronze on a ring band. It rings under water, and nothing hears it ring twice. Adds 10 Intelligence and 140 health, every blow on the wearer is 30 lighter, every enemy that strikes takes 10 damage, wounds close steadily, and tiredness fades faster."});
+if(typeof ART_ITEM_IDS!=='undefined')ART_ITEM_IDS.push(...Object.keys(PGR_ITEMS));   // painted icons: assets/icn_<id>.png (tools/PS_GEAR_ICONS.md)
+/* ---------- where every piece lies: [item, level, how, reference] ---------- */
+PGR.PLACE=[
+  ['pg_pilgrimlegs',9720,'riddle','pgr_c9720r'],['pg_cairnring',9720,'key','pgr_c9720k'],
+  ['pg_tollblade',9721,'boss','psgatecaptain'],['pg_ravenhelm',9721,'riddle','pgr_c9721r'],
+  ['pg_winchbow',9722,'key','pgr_c9722k'],['pg_harrowarms',9722,'quest','psq35'],
+  ['pg_votiveshield',9723,'quest','psq1'],['pg_keyblade',9723,'quest','psq2'],
+  ['pg_tearmaul',9730,'boss','pscolossus'],['pg_gargcleaver',9730,'boss','psgargmother'],
+  ['pg_briarring',9731,'quest','psq4'],['pg_briarstaff',9731,'boss','psthornwarden'],
+  ['pg_falconbow',9732,'key','pgr_c9732k'],['pg_falconarms',9732,'quest','psq5'],
+  ['pg_cathedralplate',9740,'boss','psstairwarden'],['pg_candlecrown',9740,'riddle','pgr_c9740r'],
+  ['pg_reckoning',9750,'boss','psteward'],['pg_cobweblegs',9750,'riddle','pgr_c9750r'],
+  ['pg_weepingedge',9760,'boss','pssacristan'],['pg_candlestaff',9760,'quest','psq23'],
+  ['pg_questioner',9780,'boss','psquestioner'],['pg_silencering',9780,'riddle','pgr_c9780r'],
+  ['pg_gaolheadsman',9790,'boss','psdrowngaoler'],['pg_bellring',9790,'quest','psq33'],
+  ['pg_pitplate',9800,'boss','pshunger'],['pg_dawnshield',9800,'quest','psq37']];
+/* state and giving */
+const pgrF=()=>{const F=pspF();if(!F.pg)F.pg={got:{}};if(!F.pg.got)F.pg.got={};return F.pg};
+const pgrGot=id=>!!pgrF().got[id];
+function pgrHas(id){
+  if(bagCount(id)>0)return true;
+  for(const h of G.heroes||[])if(h&&h.eq)for(const k in h.eq)if(h.eq[k]&&h.eq[k].id===id)return true;
+  return false}
+function pgrPut(id){if(!bagAdd(mkItem(id)))G.items.push({k:id,x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false})}
+/* give a piece once; false if it was given before */
+function pgrGive(id,line){
+  const F=pgrF();if(F.got[id]||!ITEMDEF[id])return false;
+  F.got[id]=1;pgrPut(id);
+  try{msg(line||('You find '+ITEMDEF[id].n+'.'),'#ffe36a');sfx('win')}catch(e){}
+  return true}
+const pgrStatus=()=>PGR.PLACE.map(p=>({item:p[0],level:p[1],how:p[2],ref:p[3],got:pgrGot(p[0])}));
+/* ---------- bosses: the first death drops the piece ---------- */
+PGR.boss={};
+for(const [it,lv,how,ref] of PGR.PLACE)if(how==='boss')PGR.boss[ref]=it;
+{const _he=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;const r=_he.apply(this,arguments);
+  try{if(was&&e.hp<=0&&PGR.boss[e.t]){const id=PGR.boss[e.t],nm=(ENEMY_DEF[e.t]&&ENEMY_DEF[e.t].name)||'The boss';
+    pgrGive(id,nm+' falls, and leaves '+ITEMDEF[id].n+' on the stones. You take it.')}}catch(x){console.error('pgr boss',x)}
+  return r}}
+/* ---------- quests: the reward list gets the piece; a full bag drops it on the ground instead of losing it ---------- */
+for(const [it,lv,how,ref] of PGR.PLACE)if(how==='quest'&&typeof QUESTS!=='undefined'&&QUESTS[ref]){
+  const r=QUESTS[ref].reward||(QUESTS[ref].reward={});r.items=r.items||[];if(!r.items.includes(it))r.items.push(it)}
+{const _qt=qTurnIn;qTurnIn=function(id){const r=_qt.apply(this,arguments);
+  try{if(r&&QUESTS[id]&&QUESTS[id].reward)for(const it of (QUESTS[id].reward.items||[]))if(PGR_ITEMS[it]){
+    pgrF().got[it]=1;if(!pgrHas(it)&&!G.items.some(q=>q.k===it&&!q.taken))pgrPut(it)}}catch(e){console.error('pgr quest',e)}
+  return r}}
+/* ---------- the chests ---------- */
+PGR.CHESTS={
+  pgr_c9720r:{lv:9720,kind:'riddle',foe:['psguard','pshalberd'],
+    intro:"A chest of black wood stands in a hollow behind the dead trees. A brass plate on the lid says: A WRONG ANSWER WAKES THE HOUSE. THE PILGRIMS LEFT SMALL THINGS ON THE CAIRN, AND THEY LIE ABOUT THE ROAD AND THE BARBICAN. HOW MANY?",
+    ans:[['Seven.',0],['Nine.',1],['Twelve.',0]]},
+  pgr_c9720k:{lv:9720,kind:'key',key:'pstoken',alt:()=>qSt('psq1')==='done',btn:"Press a pilgrim's token into the hollow.",
+    intro:"A small chest of grey stone stands at the foot of a dead tree, with a cairn carved on the lid. In the middle of the cairn is a hollow the size of a pilgrim's token.",
+    miss:"You have no pilgrim's token. The porter says that nine of them lie about the road and the barbican.",
+    ok:"You press a token into the hollow, and the lid swings up."},
+  pgr_c9721r:{lv:9721,kind:'riddle',foe:['pshalberd','psguard'],
+    intro:"A black chest stands in a corner of the guardroom, with a brass plate on the lid: A WRONG ANSWER WAKES THE HOUSE. THE DEAD MAN IN THE WINCH LOFT WORE A GREY CLOAK. WHAT WAS HE?",
+    ans:[['A priest of the chapel.',0],['A cook of the kitchens.',0],['A Road Warden.',1]]},
+  pgr_c9722k:{lv:9722,kind:'key',key:'pshorn',btn:"Sound the Warden's Horn at the chest.",
+    intro:"A chest of iron-bound black wood stands among the winch gear, with a bell cast on the lid. The lock is the mouth of a horn. Only a horn sounded at it will open it.",
+    miss:"You have no horn. A Road Warden's horn lies on the table in this loft.",
+    ok:"The horn sounds, low and long, and the lock turns."},
+  pgr_c9732k:{lv:9732,kind:'key',key:'pswhistle',btn:"Blow the Hound Master's whistle.",
+    intro:"A chest stands at the back of the kennels, with a hound carved on the lid. A small silver mouthpiece is set into the lock. It wants a whistle.",
+    miss:"You have no whistle. The Hound Master carries one, out on the east lawn.",
+    ok:"The whistle sounds, thin and high, and the lock springs open."},
+  pgr_c9740r:{lv:9740,kind:'riddle',foe:['psservant','pscourtier'],
+    intro:"A black chest stands in a dead end of the halls, with a brass plate on the lid: A WRONG ANSWER WAKES THE HOUSE. WHICH BIRD IS CUT INTO LADY ISAUDE MARWEN'S SIGNET RING?",
+    ans:[['A raven.',0],['A heron.',1],['A falcon.',0]]},
+  pgr_c9750r:{lv:9750,kind:'riddle',foe:['pscook','pskrat'],
+    intro:"A black chest stands behind the stores, with a brass plate on the lid: A WRONG ANSWER WAKES THE HOUSE. THE FOOTMAN SAYS THAT THE PALE STEWARD COUNTS THE SERVANTS, AND WHAT ELSE?",
+    ans:[['The candles.',0],['The loaves.',0],['The spoons.',1]]},
+  pgr_c9780r:{lv:9780,kind:'riddle',foe:['psturnkey','psflayed'],
+    intro:"A black chest stands in a dead end of the gaols, with a brass plate on the lid: A WRONG ANSWER WAKES THE HOUSE. WHAT COLOUR IS THE STRING ROUND THE LID OF HOB GARRICK'S TIN?",
+    ans:[['Red.',1],['Blue.',0],['White.',0]]}};
+for(const [it,lv,how,ref] of PGR.PLACE)if((how==='riddle'||how==='key')&&PGR.CHESTS[ref])PGR.CHESTS[ref].item=it;
+/* ambush: two creatures of the level's kind wake round the party (at most four alive at a time) */
+function pgrAmbush(cid){
+  const c=PGR.CHESTS[cid],L=LEVELS[LEVEL];if(!c||!L)return 0;
+  PGR.amb=(PGR.amb||[]).filter(e=>e.hp>0&&G.enemies.includes(e));if(PGR.amb.length>=4)return 0;
+  const types=c.foe.filter(t=>ENEMY_DEF[t]),px=Math.round(G.P.x),py=Math.round(G.P.y);if(!types.length)return 0;
+  const bs=new Set(G.decor.filter(d=>d.block&&!d.found).map(d=>d.x+','+d.y)),taken=new Set(G.enemies.filter(e=>e.hp>0).map(e=>Math.round(e.x)+','+Math.round(e.y)));
+  let n=0;
+  for(let r=2;r<=5&&n<2;r++)for(let dy=-r;dy<=r&&n<2;dy++)for(let dx=-r;dx<=r&&n<2;dx++){
+    if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const x=px+dx,y=py+dy,k=x+','+y;
+    if(!L.rows[y]||L.rows[y][x]!=='.'||bs.has(k)||taken.has(k))continue;
+    addEnemy(types[n%types.length],x,y,true);const e=G.enemies[G.enemies.length-1];if(e){PGR.amb.push(e);taken.add(k);n++}}
+  return n}
+function pgrChestTalk(cid,d){
+  const c=PGR.CHESTS[cid],it=ITEMDEF[c.item];
+  if(pgrGot(c.item))return say('The chest is open and empty. Grey cobwebs hang across the inside of the lid.',[BYE]);
+  const open=()=>{pgrGive(c.item,'The lid swings up. Inside, on black cloth, lies '+it.n+'. You take it.');if(d){d.found=true;d.hidden=true;d.block=false}G.talk=null;return null};
+  if(c.kind==='key'){
+    const have=pgrHas(c.key)||(c.alt&&c.alt());
+    return say(c.intro,[[c.btn,()=>have||pgrHas(c.key)||(c.alt&&c.alt())?(msg(c.ok,'#d8d4f0'),open()):say(c.miss,[BYE])],BYE])}
+  const opts=c.ans.map(a=>[a[0],()=>{
+    if(a[1]){msg('The plate says RIGHT, and the lock turns.','#d8d4f0');return open()}
+    const n=pgrAmbush(cid);sfx('growl');G.talk=null;
+    msg(n?'The plate says WRONG. The lid stays shut, and the shadows round you stand up.':'The plate says WRONG. The lid stays shut. You may try again.','#ff9a8a');return null}]);
+  opts.push(['Leave it.',()=>null]);
+  return say(c.intro,opts)}
+for(const cid in PGR.CHESTS)khNpc(cid,'A black chest','gy_chest',(d=>()=>pgrChestTalk(cid,d))(null));
+/* the chest talks with the decor entry it was called with */
+for(const cid in PGR.CHESTS){const c=PGR.CHESTS[cid];NPCS[cid].root=KH_KEEPERS[cid].root=function(d){return pgrChestTalk(cid,d)};
+  if(typeof bl3Hide==='function')bl3Hide(c.lv,cid,()=>pgrGot(c.item))}
+/* find a dead end for a chest: an open reachable cell with three walls (else two, when the rest stays joined), far from doors, rest rooms, safe zones and the waystone */
+function pgrSpot(L,id,taken,minD){
+  const W=L.rows[0].length,H=L.rows.length,open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&L.rows[y][x]==='.';
+  const blk=new Set(),occ=new Set();
+  for(const d of L.decor){occ.add(d.x+','+d.y);if(d.block||(d.npc&&d.solid))blk.add(d.x+','+d.y)}
+  for(const e of L.enemies||[])occ.add(Math.round(e.x)+','+Math.round(e.y));for(const i of L.items||[])occ.add(Math.round(i.x)+','+Math.round(i.y));
+  const free=(x,y)=>open(x,y)&&!blk.has(x+','+y);
+  const doors=[[L.start.x,L.start.y]];
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const c=L.rows[y][x];if(c!=='.'&&L.chars&&KH_DOOR[L.chars[c]])doors.push([x,y])}
+  for(const l of PSP.LINKS){if(l.from===id&&l.at)doors.push(l.at);if(l.to===id&&l.land)doors.push(l.land)}
+  const P=L._ps||{},zones=(P.safe||[]).slice(),rests=P.rests||[];
+  const inz=(z,x,y,e)=>z.rect?(x>=z.x0-e&&x<=z.x1+e&&y>=z.y0-e&&y<=z.y1+e):Math.hypot(x-z.x,y-z.y)<=z.r+e;
+  const tele=L.tele||(PSP.TELE&&PSP.TELE.id===id?PSP.TELE.at:null);
+  const dist=new Map([[L.start.x+','+L.start.y,0]]),q=[[L.start.x,L.start.y]];
+  for(let i=0;i<q.length;i++){const [x,y]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b,k=nx+','+ny;if(dist.has(k)||!free(nx,ny))continue;dist.set(k,dist.get(x+','+y)+1);q.push([nx,ny])}}
+  const reachCount=skip=>{const seen=new Set([L.start.x+','+L.start.y]),qq=[[L.start.x,L.start.y]];for(let i=0;i<qq.length;i++){const [x,y]=qq[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b,k=nx+','+ny;if(seen.has(k)||k===skip||!free(nx,ny))continue;seen.add(k);qq.push([nx,ny])}}return seen.size};
+  const cand=[];
+  for(const [k,dd] of dist){
+    const [x,y]=k.split(',').map(Number);if(occ.has(k)||dd<12)continue;
+    if(zones.some(z=>inz(z,x,y,3))||rests.some(z=>inz({rect:1,x0:z.x0,y0:z.y0,x1:z.x1,y1:z.y1},x,y,3)))continue;
+    if(tele&&Math.hypot(x-tele[0],y-tele[1])<=10)continue;
+    let md=99;for(const o of doors)md=Math.min(md,Math.abs(o[0]-x)+Math.abs(o[1]-y));if(md<6)continue;
+    if(taken.some(t=>Math.abs(t[0]-x)+Math.abs(t[1]-y)<(minD||14)))continue;
+    const walls=[[1,0],[-1,0],[0,1],[0,-1]].filter(([a,b])=>!free(x+a,y+b)).length;if(walls<2)continue;
+    cand.push({x,y,walls,sc:(walls>=3?1000:0)+dd+md*3+hash2(x,y,id)*4})}
+  cand.sort((a,b)=>b.sc-a.sc);
+  const base=reachCount(null);
+  for(const c of cand.slice(0,60)){
+    if(c.walls>=3)return [c.x,c.y];
+    if(reachCount(c.x+','+c.y)===base-1)return [c.x,c.y]}
+  return null}
+function pgrPlace(id){
+  const L=LEVELS[id];if(!L||L._pgr)return;L._pgr=1;const taken=[];
+  for(const cid in PGR.CHESTS){const c=PGR.CHESTS[cid];if(c.lv!==id)continue;
+    const s=pgrSpot(L,id,taken);if(!s){console.error('pgr: no spot for',cid);continue}
+    taken.push(s);c.at=s;
+    L.decor.push({k:'gy_chest',x:s[0],y:s[1],block:true,solid:1,npc:cid,deco:false,sc:.95})}}
+for(const lv of [...new Set(Object.values(PGR.CHESTS).map(c=>c.lv))]){
+  const b=KH_LAZY[lv];if(!b)continue;
+  KH_LAZY[lv]=function(){const r=b.apply(this,arguments);try{pgrPlace(lv)}catch(e){console.error('pgr place',lv,e)}return r}}
+
+/* ---- src/desert/blight_titans.js ---- */
+/* ==========================================================================
+   THE SIX GIANTS OF THE BLIGHTED ROAD (prefix tt / TT). Six huge, deformed bosses of level 100 wander the road between Wenlock and Sale. Each stands in one of the road's places
+   (not Lanternrest, the safe fort) and, as game time passes, walks on to a neighbouring place. They show on the world map (a red mark on the place where each one is) and on the
+   mini map (a big pulsing ring, from far off). Slower than the party; one that notices the party chases, and loses it again if the party gets far enough away. People of the road talk
+   about them in terror (an extra question on many of their talk screens); Captain Marsh of Lanternrest pays a great reward for all six.
+   State: G.flags.tt = {at:{tt0:placeNumber,...}, dead:{tt0:1,...}, t:game minutes at the last hop}. Pictures: stand-ins made from the graveyard's giants until painted pieces arrive
+   (assets/tt/, art_tt0..4 if present).
+   ========================================================================== */
+const TT={
+  list:[
+    {id:'tt0',n:'Gorsemaw the Many-Mouthed',ph:4.2,verb:'swallows',src:'gyi_giant',wide:1.55,tall:1.0,fx:'hue-rotate(70deg) saturate(1.4) brightness(.78)',
+     look:'a bloated giant, as tall as a church tower, with a dozen wet mouths down his belly that all talk at once',rumour:'Gorsemaw. He is as tall as the church tower and he has mouths all down his belly. They are all talking, all the time. I could not tell you what they say, and I would not want to.'},
+    {id:'tt1',n:'Mother Sallowtide',ph:5.0,src:'gyi_ghoul',wide:.85,tall:1.3,fx:'hue-rotate(165deg) saturate(.8) brightness(.9)',verb:'drowns',
+     look:'a drowned giantess, swollen and blue, dripping, with arms that drag on the ground',rumour:'Mother Sallowtide. You hear her before you see her, because she drips. She is a drowned woman as big as a barn, and she holds you under until you stop. Stay out of the low ground.'},
+    {id:'tt2',n:'Hobb Crookspine',ph:4.6,src:'gyi_zombie',wide:1.1,tall:1.0,skew:-.38,fx:'sepia(.7) saturate(1.2) brightness(.7)',verb:'hooks',
+     look:'a giant bent double by a spine like a gallows hook, with an iron cage swinging on his back',rumour:'Hobb Crookspine. His back grew into a hook, and he carries a gibbet cage on it, and there is always someone in the cage. I do not want to know whether it is a new one each time.'},
+    {id:'tt3',n:'Brannock the Stitched',ph:4.4,src:'gyi_giant',wide:1.2,tall:1.05,split:1,fx:'grayscale(.6) brightness(.8)',verb:'pounds',
+     look:'a giant sewn together out of many dead men, with mismatched arms and legs and thick black stitches',rumour:'Brannock. They say he is made of everyone who ever tried to stop the plague. You can see the seams. I saw a face on his shoulder that I knew.'},
+    {id:'tt4',n:'Old Nine-Hands',ph:4.8,src:'gyi_zombie',wide:1.3,tall:1.1,arms:1,fx:'grayscale(.5) hue-rotate(310deg) saturate(1.6) brightness(.65)',verb:'rakes',
+     look:'a gaunt giant with nine long arms that never stop reaching, and no face at all',rumour:'Old Nine-Hands. Nine arms, and not one of them is ever still. He feels for you in the dark. He has no face, so he cannot be reasoned with, and I have tried.'},
+    {id:'tt5',n:'Old White Eyes',ph:4.4,src:'gyi_giant',wide:1.6,tall:1.0,eyes:1,fx:'grayscale(.6) brightness(1.05) contrast(.9)',verb:'smothers',
+     look:'a huge, bloated, ancient monster with a pale swollen body and two blank milky white eyes',rumour:'Old White Eyes. A huge swollen thing, pale as a drowned man, with two blank white eyes like boiled eggs. He cannot see you, they say, and he does not need to. You hear him wheezing before anything, and then the fog goes cold. Keep quiet and keep walking.'}],
+  path:[1,2,3,4,5,7,8,9,10],            // the places a giant can stand in, in road order (6 is Lanternrest: never)
+  hopMin:240,                            // game minutes between steps
+  gossip:[
+    'Do not go out on the road after dark. The giants walk it. There are six of them, and I have seen three, and I would not say that it was luck.',
+    'The giants. Have you seen them? Of course you have not, or you would not be asking. Look for the ring on your little map. If it is near, go the other way, and do not run, they like that.',
+    'They are slow. That is the only mercy. A giant cannot catch a man who keeps walking, but a man cannot keep walking for ever, and they know it.',
+    'My brother went out to the milestone to fetch a cart wheel. We found the wheel.',
+    'I have lived here all my life and I never saw a thing as tall as a tree walk, until the blight. Now I see six of them. Six! And everyone pretends the road is only dangerous.',
+    'They keep to the open road, mostly. Indoors you are safe, as far as I know. As far as I know, nobody has ever tested it twice.']};
+for(const t of TT.list){TT[t.id]=t}
+Object.assign(ENEMY_DEF,Object.fromEntries(TT.list.map((t,i)=>[t.id,{name:t.n,hp:1150+i*60,dmg:[19+i,30+i*2],hit:.86,w:3.2,img:'art_'+t.id,xp:3400+i*200,gold:[6500+i*500,9500+i*600],speed:1,verb:t.verb,boss:true,tt:1,aboveParty:0,dropMagic:1}])));
+if(typeof NO_VARY!=='undefined')for(const t of TT.list)NO_VARY.push(t.id);
+const ttPlaceOf=lv=>{const p=typeof BL_ROAD!=='undefined'&&BL_ROAD.find(q=>q.id===lv);return p?p.n:0};
+function ttF(){const F=G.flags;if(!F.tt)F.tt={at:{tt0:2,tt1:4,tt2:5,tt3:8,tt4:9,tt5:3},dead:{},t:G.clock||0};if(!F.tt.at)F.tt.at={};if(F.tt.at.tt5===undefined)F.tt.at.tt5=3;if(!F.tt.dead)F.tt.dead={};return F.tt}
+/* the giants walk on: one chance in two every four game hours, one place along the road (never the party's own place, and never Lanternrest) */
+function ttSync(skipN){
+  const F=ttF(),steps=Math.min(30,Math.floor(((G.clock||0)-F.t)/TT.hopMin));if(steps<1){if(((G.clock||0)-F.t)<0)F.t=G.clock||0;return}
+  F.t+=steps*TT.hopMin;
+  for(let s=0;s<steps;s++)for(const t of TT.list){if(F.dead[t.id])continue;const n=F.at[t.id]||2;if(n===skipN)continue;
+    if(Math.random()<.5){const i=Math.max(0,TT.path.indexOf(n)),j=Math.max(0,Math.min(TT.path.length-1,i+(Math.random()<.5?-1:1)));if(TT.path[j]!==skipN)F.at[t.id]=TT.path[j]}}}
+/* the pictures: until painted ones arrive, deformed copies of the graveyard's giants (stretched, bent, stitched, many-armed) */
+/* painted pieces: assets/tt/tt0.webp .. tt4.webp (straight on, full height) replace the stand-ins when they exist */
+function ttLoadPainted(){
+  if(TT._painted)return;TT._painted=1;
+  for(const t of TT.list){const im=new Image();im.onload=()=>{IMG['art_'+t.id]=im;IMG['art_'+t.id]._painted=1;NPC_H['art_'+t.id]=t.ph;ENEMY_DEF[t.id].w=+(t.ph*im.width/im.height).toFixed(2)};im.onerror=()=>{};im.src='assets/tt/'+t.id+'.webp?v='+VERSION}}
+function ttArt(){
+  ttLoadPainted();
+  if(TT._art)return;const need=TT.list.filter(t=>!IMG['art_'+t.id]);   // a painted piece that has loaded is never replaced
+  for(const t of need){
+    const s=IMG[t.src]||IMG.gyi_giant||IMG.gyi_zombie;if(!s||!s.width)continue;
+    const W=Math.round(s.width*t.wide*(t.arms?1.7:1)+(t.skew?Math.abs(t.skew)*s.height:0)),H=Math.round(s.height*t.tall),c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+    try{x.filter=t.fx}catch(e){}
+    const dw=s.width*t.wide,pad=(W-dw)/2;
+    if(t.arms){for(const [ang,sc,dx] of [[-.5,.9,-.28],[.5,.9,.28],[-.28,.96,-.15],[.28,.96,.15]]){x.save();x.translate(W/2+dx*W*.3,H);x.rotate(ang*.5);x.globalAlpha=.8;x.drawImage(s,-dw*sc/2,-H*sc,dw*sc,H*sc);x.restore()}x.globalAlpha=1;x.drawImage(s,pad,0,dw,H)}
+    else if(t.split){x.drawImage(s,0,0,s.width/2,s.height,pad,0,dw/2,H);try{x.filter='hue-rotate(150deg) saturate(.9) brightness(.9)'}catch(e){}x.drawImage(s,s.width/2,0,s.width/2,s.height,pad+dw/2,0,dw/2,H);try{x.filter='none'}catch(e){}x.strokeStyle='#10080a';x.lineWidth=3;x.beginPath();for(let y=6;y<H-8;y+=14){x.moveTo(W/2-4,y);x.lineTo(W/2+4,y+5)}x.stroke()}
+    else if(t.skew){x.setTransform(1,0,t.skew,1,t.skew<0?-t.skew*H:0,0);x.drawImage(s,pad,0,dw,H)}
+    else x.drawImage(s,pad,0,dw,H);
+    x.setTransform(1,0,0,1,0,0);try{x.filter='none'}catch(e){}
+    if(t.eyes){x.fillStyle='#f4f4ee';x.shadowColor='#ffffff';x.shadowBlur=6;for(const ex of [.43,.57]){x.beginPath();x.ellipse(W*ex,H*.13,W*.026,H*.012,0,0,6.3);x.fill()}x.shadowBlur=0}
+    if(t.id==='tt0'){x.fillStyle='#2a0608';x.strokeStyle='#d89a8a';x.lineWidth=1.4;for(let k=0;k<9;k++){const px=W*(.32+.36*((k*37)%10)/10),py=H*(.42+.34*((k*53)%10)/10);x.beginPath();x.ellipse(px,py,W*.035,H*.02,0,0,6.3);x.fill();x.stroke()}}
+    IMG['art_'+t.id]=c;NPC_H['art_'+t.id]=t.ph;ENEMY_DEF[t.id].w=+(t.ph*W/H).toFixed(2)}
+  TT._art=TT.list.every(t=>IMG['art_'+t.id])}
+/* a giant stands in a place: placed when its map is built, far from the arrival square */
+function ttPlace(){
+  const n=ttPlaceOf(LEVEL);if(!n||n===6||!BL_ROAD.find(q=>q.id===LEVEL))return;
+  ttSync(n);const F=ttF();ttArt();
+  const here=TT.list.filter(t=>!F.dead[t.id]&&F.at[t.id]===n);if(!here.length)return;
+  const cells=wReach(G.P.x,G.P.y,90).filter(c=>c[2]>=24&&c[2]<=80),taken=[];if(cells.length<10)return;
+  for(const t of here){let pick=null;for(let k=0;k<200&&!pick;k++){const c=cells[(Math.random()*cells.length)|0];if(taken.every(q=>Math.hypot(q[0]-c[0],q[1]-c[1])>=14))pick=c}
+    if(!pick)continue;taken.push(pick);const st=enemyStat(t.id,100);
+    G.enemies.push({id:G.enemies.length,t:t.id,lvl:100,x:pick[0],y:pick[1],rx:pick[0],ry:pick[1],hx:pick[0],hy:pick[1],hp:st.hp,maxhp:st.hp,alert:false,chilled:0,flash:0,lunge:0,dying:0,seed:Math.random()*10,sx:210,sy:100})}}
+{const _pt=placeTeleporter;placeTeleporter=function(){_pt.apply(this,arguments);try{ttPlace()}catch(e){console.error('tt place',e)}}}
+/* the way of these creatures: they wander slowly, notice the party only when close, chase slower than the party walks, and give up when left behind */
+{const _ea=enemyAct;enemyAct=function(e){
+  const def=ENEMY_DEF[e.t];if(!def||!def.tt||e.chilled>0)return _ea.apply(this,arguments);
+  const dist=Math.abs(e.x-G.P.x)+Math.abs(e.y-G.P.y);if(e.hx===undefined){e.hx=e.x;e.hy=e.y}
+  if(!e.alert){
+    if(dist<=6&&(hasLOS(e.x,e.y,G.P.x,G.P.y)||dist<=3)){e.alert=true;sfx('growl');msg('The '+def.name+' has noticed you!','#ff7a6a');return 200}
+    if(G.rounds%2)return 0;
+    const opts=DIRS.map(d=>[e.x+d[0],e.y+d[1]]).filter(([x,y])=>!cellBlocked(x,y)&&!enemyAt(x,y)&&!(x===G.P.x&&y===G.P.y)&&Math.hypot(x-e.hx,y-e.hy)<=42);
+    if(!opts.length)return 0;
+    let pick=null;if(e.pv){const sx=e.x+e.pv[0],sy=e.y+e.pv[1];if(opts.some(o=>o[0]===sx&&o[1]===sy)&&Math.random()<.88)pick=[sx,sy]}
+    if(!pick)pick=opts[(Math.random()*opts.length)|0];e.pv=[pick[0]-e.x,pick[1]-e.y];e.x=pick[0];e.y=pick[1];return dist<=14?150:0}
+  if(dist>11){e.alert=false;e.pv=null;return 0}
+  if(dist>1&&(G.rounds+e.id)%3===0)return 0;
+  return _ea.apply(this,arguments)}}
+/* the mini map: a big pulsing red ring over each giant, from far off */
+{const _m=drawMinimap;drawMinimap=function(x,y,w,h){_m.apply(this,arguments);
+  try{if(G.state==='play'&&ttPlaceOf(LEVEL)&&ttPlaceOf(LEVEL)!==6){const cs=4.6*MMZ(),ox=x+w/2-(G.C.x+.5)*cs,oy=y+h/2-(G.C.y+.5)*cs,pl=.5+.5*Math.sin(G.time*4);
+    ctx.save();ctx.beginPath();ctx.rect(x+2,y+2,w-4,h-4);ctx.clip();
+    for(const e of G.enemies){const def=ENEMY_DEF[e.t];if(e.hp<=0||!def||!def.tt)continue;
+      const px=ox+(e.rx+.5)*cs,py=oy+(e.ry+.5)*cs;if(px<x-10||px>x+w+10||py<y-10||py>y+h+10)continue;
+      ctx.fillStyle='rgba(150,16,24,'+(.55+.25*pl)+')';ctx.strokeStyle='#ffd0c0';ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(px,py,cs*(1.5+.25*pl),0,TAU);ctx.fill();ctx.stroke();
+      ctx.strokeStyle='#1c0406';ctx.lineWidth=1.3;ctx.beginPath();ctx.arc(px,py,cs*.7,0,TAU);ctx.stroke();ctx.fillStyle='#1c0406';ctx.fillRect(px-cs*.2,py-cs*.55,cs*.4,cs*1.1)}
+    ctx.restore()}}catch(e){}}}
+/* the world map: each living giant is marked on the place where it stands (its picture, small, on a red glow) */
+{const _wc=mpWorldCreatures;mpWorldCreatures=function(V,z){_wc.apply(this,arguments);try{ttMapMarks(V,z)}catch(e){}}}
+function ttMapMarks(V,z){
+  if(typeof WMB_ROAD==='undefined')return;ttSync(ttPlaceOf(LEVEL));ttArt();const F=ttF(),c=ctx,byPlace={};
+  for(const t of TT.list){if(F.dead[t.id])continue;const n=F.at[t.id];(byPlace[n]=byPlace[n]||[]).push(t)}
+  for(const n in byPlace){const loc=WORLD_LOCS.find(l=>l.k===WMB_ROAD[+n]);if(!loc)continue;const list=byPlace[n],pl=.5+.5*Math.sin(G.time*3);
+    list.forEach((t,i)=>{const mx=loc.x+(i-(list.length-1)/2)*15,my=loc.y-30,im=IMG['art_'+t.id],h=19;
+      c.save();c.fillStyle='rgba(176,24,30,'+(.28+.2*pl)+')';c.beginPath();c.arc(mx,my-h*.4,h*.62+pl*2,0,TAU);c.fill();c.strokeStyle='#5a0a0e';c.lineWidth=1.1;c.stroke();
+      if(im&&im.width){const w=h*im.width/im.height;c.shadowColor='rgba(60,0,4,.8)';c.shadowBlur=3;c.drawImage(im,mx-w/2,my-h,w,h)}else{c.fillStyle='#3a0808';c.fillRect(mx-3,my-h,6,h)}
+      if(z>=1.6){c.font='italic bold 5px '+FUI;c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=1.8;c.strokeStyle='rgba(238,226,190,.95)';c.strokeText(t.n,mx,my+4);c.fillStyle='#6a0c10';c.fillText(t.n,mx,my+4)}
+      c.restore()})}}
+/* killing one */
+{const _he=hurtEnemy;hurtEnemy=function(e,dmg){const was=e&&e.hp>0;_he.apply(this,arguments);
+  if(was&&e.hp<=0&&ENEMY_DEF[e.t]&&ENEMY_DEF[e.t].tt){const F=ttF();F.dead[e.t]=1;const left=TT.list.filter(t=>!F.dead[t.id]).length;
+    try{msg(ENEMY_DEF[e.t].name+' falls, and the ground shakes. '+(left?left+' of the six giants still walk the road.':'The last of the six giants is dead.'),'#ffb070');sfx('win')}catch(x){}}}}
+/* the talk of the road: an extra question on the people's screens, and Captain Marsh's reward for all six */
+QUESTS.ttgiants={title:'The Six Giants',who:'Captain Eldred Marsh',desc:'Six huge, deformed giants walk the Blighted Road: Gorsemaw the Many-Mouthed, Mother Sallowtide, Hobb Crookspine, Brannock the Stitched, Old Nine-Hands and Old White Eyes. They show as red marks on the world map and as big red rings on the mini map. Kill all six. Each is level 100.',need:6,goal:()=>Object.keys(ttF().dead).length,reward:{gold:40000,xp:600000}};
+QAREA.ttgiants='The Blighted Lands';
+function ttMarshQ(){
+  const F=ttF();
+  return qNode('ttgiants',{offer:'There are six of them, Captain Marsh says, and he counts them on his fingers, and has to start again twice. "Gorsemaw. Sallowtide. Crookspine. Brannock. Old Nine-Hands. And one they call Old White Eyes, who wheezes. Each is the height of a tower and a good deal worse to look at. My scouts do not come back from them. I am told you are a fighting party. Kill all six, and the king will hear of it, and I will pay what the garrison chest can bear, which is more than it ought."',
+    accept:'The giants shift along the road as the days go by. Watch the red marks on the world map, and the red rings on your mini map. They are slower than you. Never stand and trade blows unless you must.',
+    remind:(g,nn)=>QUESTS.ttgiants.desc+' ('+g+' of '+nn+' dead.)',ready:'All six. All six! I will have to start the count again, because I cannot believe it.',thanks:'The road is a little less terrible. Take this, with the garrison’s thanks.',after:'The road is quiet. Quieter than it has been for years. I do not trust it, but I thank you for it.'})}
+function ttAddRumour(id){
+  const keep=KH_KEEPERS[id],np=NPCS[id];if(!keep||!keep.root)return;const root=keep.root;if(root._tt)return;
+  let h=0;for(const ch of id)h=(h*31+ch.charCodeAt(0))>>>0;const own=TT.list[h%TT.list.length],line=TT.gossip[h%TT.gossip.length];
+  const w=function(){const n=root.apply(this,arguments);try{
+    if(n&&Array.isArray(n.opts)&&!n.pages&&n.opts.length<6){
+      const q=id==='blr_marsh'?['The giants on the road',()=>ttMarshQ()]:['What do you know about the giants?',()=>{const F=ttF();return say(line+' '+(F.dead[own.id]?'': '"'+own.rumour+'"'),[BYE])}];
+      n.opts=n.opts.filter(o=>o!==BYE);n.opts.push(q);n.opts.push(BYE)}}catch(e){}return n};
+  w._tt=1;keep.root=w;if(np)np.root=w}
+{const NOTPERSON=/(table|desk|ledger|log|book|board|slate|husband|diary|slip|note|map|sign|bell|rope|wagon|tent|bench|stocks|stew|dummy|beacon|spyglass|ladder|stair|lever|sack|thimble|nest|wheel|pond|bridge|scarecrow|statue|stone|wall|ballista|toll bar|glove|camp|mirror|coffin|rune|altar|barrow|banner|chapel|cage|shelf|cabinet|memorial|candle|dormitory|infirmary|foundry|lodge|rule|kitchen|tower|ruin|grave|shrine|tree|pauper|niche|well|earth|lean-to|lantern|nets|orders|scratches|post)/i;
+  for(const id in KH_KEEPERS){const nm=(KH_KEEPERS[id].name||'');
+    const ok=/^(blt|bla|blc|blg|blh|blr|blp|vto)_/.test(id)?(!/^(A|An|The)\s/.test(nm)&&!NOTPERSON.test(nm)&&!/(maldrake|hesper|speaker|queen|rook|knight)/i.test(id+nm)):/^sa_(k_|g_|reg|inn_g)/.test(id);
+    if(ok)try{ttAddRumour(id)}catch(e){console.error('tt rumour',id,e)}}
+  try{ttAddRumour('blr_marsh')}catch(e){}}
+if(typeof HGDP_GOSS!=='undefined')HGDP_GOSS.push('Six giants walk the Blighted Road. They show on the world map and the mini map as red marks.');
 
 /* ---- src/desert/blight_growths.js ---- */
 /* ==========================================================================
