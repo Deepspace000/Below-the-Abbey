@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.714';
+const VERSION='3.715';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -71526,7 +71526,7 @@ function bksRain(R,t,f,rd){
    ========================================================================== */
 const PSP={REGION:'The Pale Lands',LO:9710,HI:9998,ENTRY:{id:9720,x:32,y:52,f:0}};
 /* id of every level and block (a block of ten ids: the first is the main level, the rest are its rooms, floors or towers) */
-PSP.ID={DOOR:9710,APPROACH:9720,GATEHOUSE:9721,WINCH:9722,LODGE:9723,
+PSP.ID={DOOR:9710,ROAD:9715,APPROACH:9720,GATEHOUSE:9721,WINCH:9722,LODGE:9723,
   COURT:9730,GARDENER:9731,MEWS:9732,
   HALLS:9740,WEST:9750,EAST:9760,ORCHARD:9770,YEWMAZE:9775,
   DUNG1:9780,DUNG2:9790,DUNG3:9800,CELLARS:9810,
@@ -71538,6 +71538,7 @@ PSP.ID={DOOR:9710,APPROACH:9720,GATEHOUSE:9721,WINCH:9722,LODGE:9723,
 const PSP_LV=(id,name,W,H,lvl,pkg,kind,o)=>Object.assign({id,name,W,H,lvl,pkg,kind,built:false},o||{});
 PSP.LEVELS=[
  PSP_LV(9710,'The Pale Door',48,40,100,0,'in',{note:'where Sale opens onto the Pale Lands; built later with the Sanctuary of Sale (7299)'}),
+ PSP_LV(9715,'The Crooked Road',48,64,100,0,'out',{note:'the road from the east postern of the Court of Statues to the Crooked Tower (the Never-Ending Tower, level id 1e9); ps_road.js'}),
  PSP_LV(9720,'The Pale Approach',64,56,100,1,'out'),
  PSP_LV(9721,'The Great Gatehouse',32,24,100,1,'in'),
  PSP_LV(9722,'The Winch Loft',20,18,100,1,'in'),
@@ -71588,6 +71589,10 @@ PSP_L(9721,[26,8],9722,[4,9,1],{name:'stair up to the winch loft'});
 PSP_L(9722,[2,9],9721,[26,10,2],{name:'stair down to the east guardroom'});
 PSP_L(9721,[7,19],9723,[9,4,2],{name:"door to the Porter's Lodge"});
 PSP_L(9723,[9,2],9721,[7,17,0],{name:'door back to the west guardroom'});
+/* the Crooked Road (ps_road.js): east postern of the Court of Statues -> road -> the Crooked Tower (NT.BASE = 1e9, arrive at NT.ENT.arrive {18,26,0}); the tower's own south gate leads back to 9715 (nt_map.js) */
+PSP_L(9730,[60,30],9715,[40,59,0],{name:'the East Postern, to the Crooked Road'});
+PSP_L(9715,[40,61],9730,[58,30,3],{name:'back to the East Postern'});
+PSP_L(9715,[30,4],1000000000,[18,26,0],{name:'the gate of the Crooked Tower',ext:1});
 /* package 2: courtyard, lodge, mews, the four doors, the wall stairs (provisional) */
 PSP_L(9730,[10,40],9731,[8,10,0],{name:"the Gardener's Lodge"});
 PSP_L(9731,[8,12],9730,[10,42,2],{name:'out of the lodge'});
@@ -71630,7 +71635,7 @@ PSP.KEY2={item:'pskey2',name:'The Second Floor Key',flag:'key2',hiddenIn:9800}; 
 PSP.REST=[9723,9731,9740,9750,9760];                 // levels that hold a quiet rest room (free rest, no creatures, warm candle light); the room names are in the plan
 /* test and jump links (?town=...&lvl=...): name -> [level, x, y, f]; the party level for a link is the level rating of the target, capped at 115 */
 PSP.JUMPS={palespire:[9720,32,52,0],palespire1:[9720,32,52,0],palespire2:[9730,32,49,0],palespire3:[9740,32,44,0],palespire4:[9750,42,22,3],
-  palespire5:[9760,5,22,1],palespire6:[9780,24,5,2],palespire7:[9790,40,5,2],palespire8:[9800,8,5,2],palespirekey:[9800,22,14,2]};
+  palespire5:[9760,5,22,1],palespire6:[9780,24,5,2],palespire7:[9790,40,5,2],palespire8:[9800,8,5,2],palespirekey:[9800,22,14,2],crookedroad:[9715,40,59,0]};
 /* small readers (no side effects) */
 const pspIs=n=>n>=PSP.LO&&n<=PSP.HI;
 const pspLevel=id=>PSP.LEVELS.find(l=>l.id===id)||null;
@@ -72141,7 +72146,7 @@ if(typeof HUGE_FOES!=='undefined')HUGE_FOES.push('psgatecaptain');
 if(typeof BOSS_GOLD!=='undefined')BOSS_GOLD.psgatecaptain=[4200,5200];
 if(typeof AFFL_HITS!=='undefined')AFFL_HITS.push([/^ps(guard|halberd|archer|sentinel)/,'shaken',.12],[/^psgatecaptain/,'shaken',.25]);
 /* pictures this package asks the art agent for (stand-ins until painted): the clock-tower gate, long banners, buttresses */
-for(const [n,h,src] of [['gate_clock',5.0,['gy_crypt','gy_mausoleum']],['banner_long_a',3.2,['hl_p_banner','mw_banner']],['banner_long_b',3.2,['hl_p_banner','mw_banner']],['buttress_a',3.6,['gy_column','gy_crypt']],['buttress_b',3.6,['gy_column','gy_crypt']]])PSP_PICS[n]=[h,src,{}];
+for(const [n,h,src] of [['gate_clock',5.0,['gy_crypt','gy_mausoleum']],['banner_long_a',3.2,['hl_p_banner','mw_banner']],['banner_long_b',3.2,['hl_p_banner','mw_banner']],['buttress_a',3.6,['gy_column','gy_crypt']],['buttress_b',3.6,['gy_column','gy_crypt']],['pillar_lantern',2.4,['gy_column','gy_crypt']],['skull_pillar',1.4,['gy_column','gy_crypt']]])if(!PSP_PICS[n])PSP_PICS[n]=[h,src,{}];
 /* the haunted dressing the owner asked for (painted pieces are dropped into assets/ps by the art agent; until then these show as darkened stand-ins) */
 for(const [n,h,src] of [['window_sheeted_a',2.4,['ps_window_slit','gy_crypt']],['window_sheeted_b',2.4,['ps_window_slit','gy_crypt']],['window_sheeted_c',2.4,['ps_window_slit','gy_crypt']],['bed_cobweb_a',2.6,['ps_bed_four','gy_crypt']],['bed_cobweb_b',2.6,['ps_bed_four','gy_crypt']],
   ['cobweb_corner_a',1.8,['gy_web','gy_crypt']],['cobweb_corner_b',1.8,['gy_web','gy_crypt']],['cobweb_thick_a',2.6,['gy_web','gy_crypt']],['cobweb_thick_b',2.6,['gy_web','gy_crypt']],['cobweb_thick_c',2.6,['gy_web','gy_crypt']],['web_spider',.6,['gy_web','gy_bones']],
@@ -72207,7 +72212,8 @@ function psgDrawCastle(W,H,near){
    Heights: leg k stands at LEG[k][1] (0.3 at the foot, 3.9 at the bridgehead, 4.4 on the forecourt). The castle view (kit sky) grows as the party climbs.
    ========================================================================== */
 const PSG_LEG=[[51,.3,6,36],[44,1.2,6,52],[37,2.1,12,52],[30,3.0,12,46],[23,3.9,30,46]];   // lane row y, ground height, x from, x to
-const PSG_CONN=[[6,7],[51,52],[12,13],[45,46]];                                              // connector columns between leg k and k+1
+const PSG_CONN=[[6,7],[51,52],[12,13],[45,46]];
+const PSG_GRAND=[31,33];                                                                       // the Pilgrim Steps: a broad stair straight up from the landing (x31..33, y46..50) to the second leg, so the arrival faces its way on                                              // connector columns between leg k and k+1
 function psgBuildApproach(info){
   const W=64,H=56;
   const C=pspMake({id:9720,start:{x:32,y:52,f:0},walled:true,wall:'dark',wh:4.4,floor:'cobble',amb:.82,wind:.25,castle:{at:[32,-40],far:93,near:49,lift:30,lift1:0,h0:70,h1:150,wm:1.9},terrace:true});
@@ -72227,13 +72233,15 @@ function psgBuildApproach(info){
   [[6,46,7,50,1.2,.3,45,51],[51,39,52,43,2.1,1.2,38,44],[12,32,13,36,3.0,2.1,31,37],[45,25,46,29,3.9,3.0,24,30]].forEach(([a,b,c,d,hN,hS,ry0,ry1])=>{carve(a,b,c,d,'flag');C.rise(a,ry0,c,ry1,hN,hS,'y')});
   /* bands between the legs: fence row, three pit rows, the retaining wall row */
   const band=k=>{const [y,h,x0,x1]=PSG_LEG[k],[y2,h2,u0,u1]=PSG_LEG[k+1];const a=Math.max(x0,u0),b=Math.min(x1,u1),cs=PSG_CONN[k];
-    const cells=[];for(let x=a;x<=b;x++){if(x>=cs[0]&&x<=cs[1])continue;cells.push(x)}return {y,h,y2,h2,cells}};
+    const cells=[];for(let x=a;x<=b;x++){if(x>=cs[0]&&x<=cs[1])continue;if(k===0&&x>=PSG_GRAND[0]&&x<=PSG_GRAND[1])continue;cells.push(x)}return {y,h,y2,h2,cells}};
   const B=[0,1,2,3].map(band);
   B.forEach(bd=>{for(const x of bd.cells){
     carve(x,bd.y-1,x,bd.y-1,'flagdark');unwalk(x,bd.y-1,x,bd.y-1);   // the fence cell
     carve(x,bd.y-4,x,bd.y-2,'wet');unwalk(x,bd.y-4,x,bd.y-2);        // the pit
     carve(x,bd.y-5,x,bd.y-5);                                       // (the retaining wall is painted back below)
   }});
+  /* the Pilgrim Steps: from the landing plaza straight up to leg 2 (six treads of .15, well under the .55 step limit), flanked by low walls so it reads as a stair */
+  carve(PSG_GRAND[0],46,PSG_GRAND[1],50,'flag');C.rise(PSG_GRAND[0],45,PSG_GRAND[1],51,1.2,.3,'y');
   /* ---- 2. the ravine, the Long Bridge, the Barbican forecourt ---- */
   C.ravine(4,16,59,21,1.5,'gravel');
   for(const x of [35,36,37,38,39,40,41,42,43,44,45,46]){carve(x,22,x,22,'flagdark');unwalk(x,22,x,22)}   // L5's fence over the ravine
@@ -72252,11 +72260,21 @@ function psgBuildApproach(info){
   carve(47,32,50,35,'flagdark');carve(48,36,48,36,'cobble');                  // B
   carve(18,25,23,28,'flagdark');carve(20,29,20,29,'cobble');                  // C
   carve(26,27,29,29,'flagdark');                                               // the cairn niche
+  /* the nooks stand at heights the party can really step to (the first build left nook A a 1.6 drop below the lane, so its chests could not be reached) */
+  const setH=(x0,y0,x1,y1,h)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)hgt[ix(x,y)]=h};
+  setH(40,48,44,50,.3);C.rise(42,45,42,48,1.2,.3,'y');                          // A: down a short stair from leg 2
+  setH(47,32,50,35,1.9);setH(48,36,48,36,2.0);                                  // B: a step down from leg 3
+  setH(18,25,23,28,2.8);setH(20,29,20,29,2.9);                                  // C: a step down from leg 4
+  setH(26,27,29,28,2.7);                                                         // the cairn niche
   /* ---- 4. the walls: every rock cell beside open ground is dressed, retaining walls are low ---- */
   const near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(open(x+dx,y+dy))return true;return false};
-  const SET=['ash','ash','ash','brick','moss','ash','ivy','brick'];
+  /* the canyon walls are built in bays of five squares (a pier at the head of every bay, a blind window in the middle of every third, one kind of stone per bay and a different run of them down each side), not squares dealt at random */
+  const BAYS=['ash','moss','ash','brick','ivy','ash','brick','moss'];
   for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(open(x,y)||!near(x,y))continue;
-    const r=hs(x,y,9);let st=SET[(r*SET.length)|0];if(r>.89)st='win';paintWall(x,y,st,4.4)}
+    const u=x+y,bay=(u/5)|0,pos=u%5,base=BAYS[(bay*3+((y/9)|0))%BAYS.length];
+    let st=base,wh=4.4;if(pos===0)st='pier';else if(pos===2&&bay%3===1)st='win';else if(base==='ivy'&&pos===4)st='moss';
+    if(bay%4===2)wh=3.8;                                  // every fourth bay stands a little lower, so the skyline steps
+    paintWall(x,y,st,wh)}
   B.forEach(bd=>{for(const x of bd.cells){const wh=bd.h2-(bd.h-.7)+.6,r=hs(x,bd.y,12);
     paintWall(x,bd.y-5,r<.35?'ivy':r<.6?'moss':r<.8?'brick':'ash',wh)}});
   /* castle foundation wall on the north bank of the ravine (low, so the sky shows over it), and the gate wall with its towers */
@@ -72266,67 +72284,93 @@ function psgBuildApproach(info){
   for(let x=25;x<=39;x++)if(!open(x,7))paintWall(x,7,x%3===0?'win':'ash',(x>=29&&x<=35)?3.2:2.4);
   /* ---- 5. the doors (the contract table): back to Sale, the Great Gate ---- */
   C.links({style:{'Sale':'gate','Great Gate':'great'}});
-  /* ---- 6. dressing ---- */
+  /* ---- 6. dressing ---- THE PLAN: every leg is a lane two squares wide; the NORTH row (the lane's fence side) is the path and carries nothing that blocks and nothing tall; everything that stands is on the SOUTH row against the wall, in a rhythm
+     (buttress, statue niche, lantern post, arch, vine curtain, plinth, gnarled tree ...) that begins at a different place on every leg, with one landmark per leg and plain wall between. */
   const pit=(x,y)=>block[ix(x,y)]&&open(x,y);
   const lamp=(x,y,col)=>{C.dec('gy_lantern',x,y,{block:false});C.light(x,y,col||SI)};
   const FENCE=['iron_fence_a','iron_fence_b'];
+  const D=(k,x,y,o)=>C.free(x,y)?C.dec(k,x,y,o):null,T=k=>psgToned(k);
+  const post=(x,y,col)=>{C.prop('pillar_lantern',x,y,{block:false,sc:.8});C.light(x,y,col||[.9,.7,1.1])};   // a finished post with its own hanging lantern (instead of a bare column)
+  /* the pit bands: an iron fence along the lane, a lantern post in it now and then, sparse growth in the pit (clumps, not a carpet) */
   B.forEach((bd,k)=>{
     bd.cells.forEach((x,i)=>{
-      C.prop(FENCE[(x+k)&1],x,bd.y-1,{block:false,maxW:1.02});
+      if(i%9===4&&x>bd.cells[0]+1&&x<bd.cells[bd.cells.length-1]-1){post(x,bd.y-1,[.6,.85,1.0])}
+      else C.prop(FENCE[(x+k)&1],x,bd.y-1,{block:false,maxW:1.02});
+      const cl=hs((x/3)|0,bd.y,40)<.5;                                   // clumps three squares wide, every other clump bare
       for(let y=bd.y-4;y<=bd.y-2;y++){const r=hs(x,y,41);
-        if(r<.16)C.prop('rose_pale',x,y,{block:false,sc:.9+hs(x,y,42)*.4});
-        else if(r<.27)C.prop('ivy_clump',x,y,{block:false});
-        else if(r<.34)C.prop('moss_rock',x,y,{block:false});
-        else if(r<.38)C.dec('gy_bones',x,y,{block:false,sc:.7});
-        else if(r<.42)C.dec('gy_dead',x,y,{block:false,sc:.9+hs(x,y,43)*.4})}
-      if(hs(x,bd.y,44)<.34)C.picture(hs(x,bd.y,45)<.5?'vine_a':'vine_b',x,bd.y-4,[0,-1]);   // vines hang down the retaining wall
-      if(i%9===4){C.alcove(x,bd.y-4,['alcove_weeper','alcove_monk','alcove_knight','alcove_maiden'][(i+k)&3],[0,-1])}
-      if(i%8===2){lamp(x,bd.y-1);}
+        if(cl&&r<.3)C.prop('rose_pale',x,y,{block:false,sc:.9+hs(x,y,42)*.4});
+        else if(cl&&r<.42)C.prop('ivy_clump',x,y,{block:false});
+        else if(!cl&&r<.07)C.prop('moss_rock',x,y,{block:false});
+        else if(r>.97)C.dec('gy_bones',x,y,{block:false,sc:.7});
+        else if(r>.94)C.dec('gy_dead',x,y,{block:false,sc:.9+hs(x,y,43)*.4})}
+      if(i%14===9)C.dec(T('gy_dead'),x,bd.y-3,{block:false,sc:1.6+hs(x,bd.y,46)*.4});   // a gnarled yew growing out of the pit, seen over the fence
+      if(x%4===1&&hs((x/4)|0,bd.y,44)<.3)C.picture(hs(x,bd.y,45)<.5?'vine_a':'vine_b',x,bd.y-4,[0,-1]);   // a vine curtain down the retaining wall, here and there
+      if(i%13===6){C.alcove(x,bd.y-4,['alcove_weeper','alcove_monk','alcove_knight','alcove_maiden'][(i+k)&3],[0,-1])}
       if(i%11===5)C.light(x,bd.y-3,[.35,.9,.5])});   // a cold glow far down in the pit
   });
+  /* the Pilgrim Steps: parapets of iron fence down both sides, an arch over the first flight, a lantern post at each foot, nothing on the stair itself */
+  for(const x of [PSG_GRAND[0]-1,PSG_GRAND[1]+1])for(let y=46;y<=50;y++)C.prop(FENCE[(x+y)&1],x,y,{block:false,maxW:1.02});
+  C.archway(32,48,'arch_high');post(PSG_GRAND[0]-1,51,[1.1,.95,.7]);post(PSG_GRAND[1]+1,51,[1.1,.95,.7]);
   for(let x=35;x<=46;x++)C.prop(FENCE[x&1],x,22,{block:false,maxW:1.02});
   for(let x=5;x<=58;x+=3){if(x>=28&&x<=36)continue;C.prop('rose_pale',x,17+((x/3)&3),{block:false,sc:.8})}     // the ravine: wild roses on its ledges
   for(let x=6;x<=58;x+=5){if(x>=26&&x<=38)continue;C.dec('gy_dead',x,18+((x/5)&3),{block:false,sc:1+hs(x,5,2)*.4})}
   for(const x of [10,18,26,38,46,54])C.light(x,19,[.3,.8,.5]);
-  /* the plaza: Pilgrim's Landing */
-    C.prop('st_veiled',30,53,{block:true});C.prop('st_headless',34,53,{block:true});
+  /* the plaza: Pilgrim's Landing (the statue pair, the two signs, the waymark; the middle stays clear from the door to the foot of the steps) */
+  C.prop('st_veiled',30,53,{block:true});C.prop('st_headless',34,53,{block:true});
   C.sign(33,53,[0,1],'THE PALE ROAD','To the castle of the Pale Sovereign');C.sign(31,53,[0,1],'SALE','Back through the west gate');
-  lamp(28,50);lamp(36,50);lamp(28,53,SI);lamp(36,53,SI);
+  lamp(28,51);lamp(36,50);
   C.vines(29,53,{});C.vines(35,53,{});C.prop('urn_big',28,53,{block:true});C.prop('urn_big',36,53,{block:true});
   C.grave(36,51,'psg_waymark',['THE PALE SPIRE','CASTLE OF THE','PALE SOVEREIGN'],{h:1.25,npc:'psg_waymark'});
-  /* L1 */
-  C.archway(24,51,'arch_ivy');C.archway(14,52,'arch_iron');
-  for(const x of [10,18,22])C.alcove(x,52,['alcove_monk','alcove_weeper','alcove_empty'][x%3],[0,1]);
-  lamp(8,51);lamp(26,52);lamp(16,51);C.prop('st_hand',20,51,{block:true});
-  /* connector 1 */
-  C.archway(6,48,'arch_stair');C.vineWall(6,46,6,50,[-1,0]);C.vines(7,47,{});lamp(7,49);
-  /* L2 */
-  C.archway(15,44,'arch_high');C.archway(30,45,'arch_ivy');C.archway(44,44,'arch_low');
-  C.prop('well_pale',24,45,{block:true});C.prop('cart_old',38,45,{block:true});
-  for(const x of [9,20,34,47])C.alcove(x,45,['alcove_maiden','alcove_knight','alcove_empty','alcove_weeper'][(x>>2)&3],[0,1]);
-  C.vineWall(8,44,10,44,[0,-1]);lamp(12,44);lamp(27,45);lamp(41,44);lamp(48,45);C.prop('st_gargoyle',32,44,{block:true});
-  /* connector 2 */
-  C.archway(51,41,'arch_stair');C.vineWall(52,39,52,43,[1,0]);C.vines(51,40,{});lamp(51,42);
-  /* L3 */
-  C.archway(20,37,'arch_high');C.archway(40,38,'arch_ivy');C.archway(47,37,'arch_low');
-  for(const x of [15,25,36,43])C.alcove(x,38,['alcove_knight','alcove_maiden','alcove_weeper','alcove_monk'][(x>>1)&3],[0,1]);
-  lamp(18,38);lamp(34,37);lamp(44,38);C.prop('statue_plinth',24,38,{block:true});C.prop('rose_arch',38,37,{block:false});
-  /* connector 3 */
-  C.archway(12,34,'arch_stair');C.vineWall(12,32,12,36,[-1,0]);C.vines(13,33,{});lamp(13,35);
-  /* L4 */
-  C.archway(17,30,'arch_ivy');C.archway(38,31,'arch_high');
-  for(const x of [14,22,33,42])C.alcove(x,31,['alcove_empty','alcove_knight','alcove_maiden','alcove_monk'][(x>>1)&3],[0,1]);
-  lamp(16,30);lamp(31,31);lamp(40,30);C.vineWall(14,30,16,30,[0,-1]);C.prop('st_veiled',34,31,{block:true});
+  /* the connectors: a stair arch, vines on the wall and one lantern each */
+  for(const [cx,cy,wd,vx,vy,lx,ly2] of [[6,48,[-1,0],7,47,7,49],[51,41,[1,0],51,40,51,42],[12,34,[-1,0],13,33,13,35],[45,27,[1,0],45,26,46,28]]){C.archway(cx,cy,'arch_stair');C.vineWall(wd[0]<0?cx:cx+1,cy-2,wd[0]<0?cx:cx+1,cy+2,wd);C.vines(vx,vy,{});lamp(lx,ly2)}
+  /* the rhythm engine: along the south wall of each leg, kinds in a fixed order, spaced four to six squares, skipping the reserved places */
+  const SEQ=['butt','alc','post','arch','butt','vine','alc','plin','tree','butt','post','alc'],STEP=[4,5,4,6,5,4,5];
+  const ALC=['alcove_knight','alcove_weeper','alcove_maiden','alcove_monk','alcove_empty'],ARC=['arch_ivy','arch_high','arch_low','arch_iron'];
+  const RES=[[0,28,99],[1,PSG_GRAND[0]-2,PSG_GRAND[1]+2],[1,34,38],[1,40,44],[3,23,27],[2,45,49],[4,29,35]];   // [leg, from x, to x]: the plaza, the foot of the steps, the wayside shrine, nook A's door, the high shrine, nook B's door, the bridgehead
+  PSG_LEG.forEach(([ly,h,x0,x1],k)=>{const sy=ly+1,conn=[].concat(k>0?[PSG_CONN[k-1]]:[],k<4?[PSG_CONN[k]]:[]);let x=x0+2+k*2,i=k*5,n=0;
+    while(x<=x1-2){
+      const bad=conn.some(c=>x>=c[0]-2&&x<=c[1]+2)||RES.some(r=>r[0]===k&&x>=r[1]&&x<=r[2])||!open(x,sy)||(k===0&&x>=28);
+      if(!bad){const kind=SEQ[i%SEQ.length];i++;n++;
+        if(kind==='butt')C.prop(x%2?'buttress_a':'buttress_b',x,sy,{block:false});
+        else if(kind==='alc')C.alcove(x,sy,ALC[(x+k)%ALC.length],[0,1]);
+        else if(kind==='post'){post(x,sy)}
+        else if(kind==='arch'){C.archway(x,sy,ARC[(k+n)%ARC.length]);C.light(x,sy,[.5,.9,.8])}
+        else if(kind==='vine'){C.vineWall(x-1,sy,x+1,sy,[0,1]);C.vines(x,sy,{})}
+        else if(kind==='plin'){C.prop('statue_plinth',x,sy,{block:true})}
+        else if(kind==='tree'){D(pspPic('moss_rock'),x,sy,{block:false,sc:.6})}}
+      x+=STEP[(i+k)%STEP.length]}});
+  /* ---- 6b. the five legs, each with one landmark and its own light ---- */
+  /* leg 1: the ruined shrine to the west: a saint on a plinth between two lantern posts, a pale rose, fallen stone, a warm light */
+  C.prop('statue_plinth',16,52,{block:true});C.prop('st_saint2',16,52,{block:true,sc:.8,bob:1.6});post(13,52,[1.4,1,.6]);post(19,52,[1.4,1,.6]);
+  C.prop('rose_pale',14,52,{block:false,sc:1.1});C.prop('rose_pale',18,52,{block:false,sc:.95});C.light(16,51,[1.6,1.1,.6]);
+  lamp(10,51);
+  /* leg 2: the graveyard, a few stones and crosses spaced unevenly, two old yews, green mist */
+  [[12,'gy_ccross'],[18,'gy_stone1'],[27,'gy_tomb'],[41,'gy_wcross'],[47,'gy_stone2']].forEach(([x,k],i)=>D(T(k),x,45,{block:false,sc:.95+(i%2)*.1}));
+    C.light(18,44,[.5,1.1,.7]);C.light(40,45,[.5,1.1,.7]);
+  /* leg 3: the aqueduct leg: three stone arches span the lane, cold blue light, the gully bridge in the middle */
+  for(const x of [17,26,45])D(pspPic('bridge_arch'),x,x%2?37:38,{block:false});C.light(24,37,[.6,.9,1.3]);C.light(44,38,[.6,.9,1.3]);
+  /* leg 4: the statue avenue, five saints and judges on the south wall with plain wall between */
+  [[15,'st_veiled'],[20,'st_bishop'],[27,'st_judge'],[36,'st_mourners'],[42,'st_hand']].forEach(([x,n])=>D(pspPic(n),x,31,{block:true}));C.light(21,30,SI);C.light(37,30,SI);
+  for(const [x,y] of [[4,16],[4,21],[59,16],[59,21],[4,18],[59,18]])C.dec(pspPic('moss_rock'),x,y,{block:false});   // (the ravine corners are not chest spots)
+  C.fence(31,16,31,21,{sc:1.1});C.fence(33,16,33,21,{sc:1.1});   // the Long Bridge: iron parapets both sides
+  /* leg 5: the drowned terrace: wet flags, moss and urns on the south wall, cyan light */
+  C.setFloor(34,23,46,24,'wet');for(const x of [35,41,45])D(pspPic(x%2?'moss_rock':'ivy_clump'),x,23,{block:false});for(const x of [38,43])D(pspPic('urn_big'),x,24,{block:true,sc:.9});C.light(36,23,[.5,1.3,1.3]);C.light(44,24,[.5,1.3,1.3]);
+  /* the lanes' own lights, one lantern at each end of a long leg */
+  lamp(8,51);lamp(8,45);lamp(48,45);lamp(14,38);lamp(50,38);lamp(14,31);lamp(44,31);lamp(31,24);lamp(43,24);
+  /* two wayside shrines (a calm safe zone, a bench, a lantern, a free rest), a third and two thirds of the way up */
+  const shrine=(x0,y,name,line)=>{const id='psg_bench_'+x0+'_'+y;C.safe.push({rect:1,x0,y0:y,x1:x0+2,y1:y+1});C.rests.push({x0,y0:y,x1:x0+2,y1:y+1,line,name});
+    C.light(x0+1,y,C.warmCol);if(!NPCS[id])khNpc(id,'A pilgrim bench','gy_bench',()=>say('A stone bench under a small shrine of the Pale Mother, with a lantern that does not flicker. Somebody has left a loaf and a cup of water. The cold stays on the road.',[['Rest here (free).',()=>{G.talk=null;restParty(true);return say('You rest a while on the bench. Everyone wakes healed and fed.',[BYE])}],BYE]));
+    C.dec('gy_bench',x0+1,y+1,{block:true,npc:id,sc:1.1});D(pspPic('lantern_red_a'),x0,y,{block:false});D(pspPic('statue_plinth'),x0+2,y+1,{block:true})};   // (bench and plinth both on the south row: the north row of the lane stays open)
+  shrine(35,44,'The Wayside Shrine','A wayside shrine. A bench, a warm lantern, a loaf and a cup. Nothing hostile comes near.');
+  shrine(24,30,'The High Shrine','A second shrine, higher up the road. A bench and a lantern. Nothing hostile comes near.');
   /* the cairn niche (quest psq1) */
   C.thing('gy_mound','psg_cairn',27,28,{sc:1.6});
   for(const [dx,dy,k] of [[-1,0,'bl_stone1'],[1,1,'bl_lean'],[0,-1,'bl_stone2']])C.dec(k,27+dx,28+dy,{block:true,sc:.7});
   C.picture('alcove_weeper',27,27,[0,-1]);lamp(26,29);C.vines(29,27,{});
-  /* connector 4 */
-  C.archway(45,27,'arch_stair');C.vineWall(46,25,46,29,[1,0]);C.vines(45,26,{});lamp(46,28);
   /* L5 and the bridgehead */
-  C.archway(38,23,'arch_ivy');C.archway(32,22,'arch_high');
+  C.archway(32,22,'arch_high');
   for(const x of [34,41,44])C.alcove(x,24,['alcove_knight','alcove_weeper','alcove_maiden'][x%3],[0,1]);
-  lamp(31,24);lamp(36,23);lamp(43,24);C.vines(31,22,{});C.vines(33,22,{});C.prop('urn_big',31,23,{block:true});C.prop('urn_big',33,23,{block:true});
+  C.vines(31,22,{});C.vines(33,22,{});C.prop('urn_big',31,23,{block:true});C.prop('urn_big',33,23,{block:true});
   C.sign(30,23,[-1,0],'THE LONG BRIDGE','Keep to the middle. The rail is old.');
   /* the Long Bridge: lamps on the rails, a statue at each end, arches below the deck are drawn by the kit */
   for(const y of [17,20]){C.dec('gy_lantern',31,y,{block:false});C.light(31,y,GR);C.dec('gy_lantern',33,y,{block:false});C.light(33,y,GR)}
@@ -72345,35 +72389,12 @@ function psgBuildApproach(info){
   C.prop('gate_clock',32,8,{block:false,sc:.55});C.prop('castle_view',32,7,{block:false,sc:.65});if(!IMG[pspPic('gate_clock')]||IMG[pspPic('gate_clock')]._ps){C.prop('clock_face',32,7,{block:false,bob:2.3});C.prop('banner_long_a',31,7,{block:false,bob:.3});C.prop('banner_long_b',33,7,{block:false,bob:.3})}C.light(32,8,PAL.brassHi?[1.1,.8,.45]:SI);
   C.vineWall(26,8,28,8,[0,-1]);C.vineWall(36,8,38,8,[0,-1]);C.light(27,11,GR);C.light(37,11,GR);
   psgHaunt(C,[['red','lantern_red_a',30,9],['red','lantern_red_b',34,9],['red','lantern_red_a',31,16],['red','lantern_red_b',33,16],['red','lantern_red_a',30,23],['red','lantern_red_b',35,51],['red','lantern_red_a',29,51],['prop','cobweb_thick_a',32,9]]);
-  /* canyon street: buttresses lean against the lane walls, spaced along each leg */
-  for(const [y,xs] of [[52,[10,14,24]],[45,[10,18,26,36,42,48]],[38,[14,22,30,45,50]],[31,[14,20,26,32,41,44]],[24,[33,39,45]]])for(const x of xs)C.prop(x%2?'buttress_a':'buttress_b',x,y,{block:false});
-  /* ---- 6b. the five legs, each with its own landmark and light ---- */
-  const D=(k,x,y,o)=>C.free(x,y)?C.dec(k,x,y,o):null,T=k=>psgToned(k);
-  /* leg 1: the ruined shrine (broken columns, a candelabrum, rubble, warm amber light) */
-  for(const x of [15,27])C.prop('col_fluted',x,52,{block:true});C.prop('col_fluted',8,52,{block:false,sc:.9});for(const x of [11,16,21])C.prop('cobble_heap',x,51,{block:false});C.prop('candelabra_tall',15,52,{block:false});C.light(15,52,[1.6,1.1,.6]);C.light(10,51,[1.4,1,.6]);
-  /* leg 2: the graveyard (crosses, stones, a dead yew, green mist) */
-  [12,15,19,22,27,35,41,44,49].forEach((x,i)=>{D(T(['gy_ccross','gy_stone1','gy_wcross','gy_tomb','gy_stone2'][i%5]),x,45,{block:false,sc:.95});if(i%3===0)D(T('gy_dead'),x+1,44,{block:false,sc:1.3})});
-  C.light(18,44,[.5,1.1,.7]);C.light(40,45,[.5,1.1,.7]);
-  /* leg 3: the aqueduct leg (stone arches span the lane, cold blue light) */
-  for(const x of [15,26,34,44])D(pspPic('bridge_arch'),x,x%2?37:38,{block:false});C.light(24,37,[.6,.9,1.3]);C.light(44,38,[.6,.9,1.3]);
-  /* leg 4: the statue avenue (a line of saints and judges down the south side) */
-  [15,19,24,29,35,39,43].forEach((x,i)=>D(pspPic(['st_veiled','st_bishop','st_judge','st_mourners','st_headless','st_hand','st_veiled'][i]),x,31,{block:true}));C.light(21,30,SI);C.light(37,30,SI);
-  for(const [x,y] of [[4,16],[4,21],[59,16],[59,21],[4,18],[59,18]])C.dec(pspPic('moss_rock'),x,y,{block:false});   // (the ravine corners are not chest spots)
-  C.fence(31,16,31,21,{sc:1.1});C.fence(33,16,33,21,{sc:1.1});   // the Long Bridge: iron parapets both sides
-  /* leg 5: the drowned terrace (wet flags, still pools of moss, urns, cyan light) */
-  C.setFloor(34,23,46,24,'wet');for(const x of [35,38,42,45])D(pspPic(x%2?'moss_rock':'ivy_clump'),x,24,{block:false});for(const x of [37,40,44])D(pspPic('urn_big'),x,23,{block:true,sc:.9});C.light(36,23,[.5,1.3,1.3]);C.light(44,24,[.5,1.3,1.3]);
-  /* two wayside shrines (a calm safe zone, a bench, a lantern, a free rest), a third and two thirds of the way up */
-  const shrine=(x0,y,name,line)=>{const id='psg_bench_'+x0+'_'+y;C.safe.push({rect:1,x0,y0:y,x1:x0+2,y1:y+1});C.rests.push({x0,y0:y,x1:x0+2,y1:y+1,line,name});
-    C.light(x0+1,y,C.warmCol);if(!NPCS[id])khNpc(id,'A pilgrim bench','gy_bench',()=>say('A stone bench under a small shrine of the Pale Mother, with a lantern that does not flicker. Somebody has left a loaf and a cup of water. The cold stays on the road.',[['Rest here (free).',()=>{G.talk=null;restParty(true);return say('You rest a while on the bench. Everyone wakes healed and fed.',[BYE])}],BYE]));
-    C.dec('gy_bench',x0+1,y+1,{block:true,npc:id,sc:1.1});D(pspPic('lantern_red_a'),x0,y,{block:false});D(pspPic('statue_plinth'),x0+2,y,{block:true})};
-  shrine(35,44,'The Wayside Shrine','A wayside shrine. A bench, a warm lantern, a loaf and a cup. Nothing hostile comes near.');
-  shrine(24,30,'The High Shrine','A second shrine, higher up the road. A bench and a lantern. Nothing hostile comes near.');
   /* ---- 7. hidden nooks ---- */
   C.vines(42,46,{});C.vines(42,47,{});C.prop('alcove_empty',42,48,{block:false});
   C.alcove(41,48,'alcove_weeper',[0,-1]);C.alcove(43,48,'alcove_monk',[0,-1]);C.chest(42,50,{tier:1});C.light(42,49,GR);C.prop('st_hand',40,49,{block:true});C.prop('urn_big',44,49,{block:true});
   C.vines(48,36,{});C.alcove(48,32,'alcove_knight',[0,-1]);C.alcove(49,32,'alcove_maiden',[0,-1]);C.chest(50,35,{tier:1});C.light(48,34,GR);C.prop('st_gargoyle',47,34,{block:true});C.vineWall(47,33,47,35,[-1,0]);
   C.vines(20,29,{});C.alcove(19,25,'alcove_weeper',[0,-1]);C.alcove(22,25,'alcove_empty',[0,-1]);C.chest(23,28,{tier:1});C.light(20,27,GR);
-  C.prop('col_twist',19,27,{block:true});C.prop('col_twist',22,27,{block:true});C.prop('statue_plinth',20,25,{block:true});
+  C.prop('pillar_lantern',19,27,{block:true});C.prop('pillar_lantern',22,27,{block:true});C.prop('statue_plinth',20,25,{block:true});
   /* ---- 8. the people and the things ---- */
   const nearWalk=(x,y)=>{for(let r=0;r<=3;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const a=x+dx,b=y+dy;if(C.free(a,b)&&!block[ix(a,b)])return [a,b]}return null};
   const TOK=[[35,52,'gy_ring'],[10,51,'gy_locket'],[7,48,'gy_ring'],[20,45,'gy_book'],[44,48,'gy_bell'],[40,38,'gy_locket'],[50,34,'gy_ring'],[38,31,'gy_ring'],[26,12,'gy_book']];
@@ -72598,7 +72619,7 @@ const PSG_ARR={9720:'The Pale Approach. A cobbled road climbs the crag in long s
    Everything that is a person, a statue or a creature uses pspPic(name) / 'ps_c_<id>' (ps_core.js), so painted pieces from assets/ps drop in with no code change.
    ========================================================================== */
 const PSC={ID:9730,LODGE:9731,MEWS:9732,W:64,H:56,R:101,TELE:[8,44],loops:{},lamps:[],benchUsed:false,
-  FRONTS:[[32,12],[18,12],[14,24],[50,24]],   // the four door fronts: no creature within 3 squares
+  FRONTS:[[32,12],[18,12],[14,24],[50,24],[58,30]],   // the four door fronts: no creature within 3 squares
   NECKS:[3,1,5,2,4]};   // the order of the five hydra necks (the plaque in the Weeping Alcove says it)
 const pscIs=n=>n>=9730&&n<=9739;
 const pscF=()=>{const F=pspF();return F.c||(F.c={necks:[],roses:0,taken:{}})};
@@ -72877,7 +72898,7 @@ Object.assign(ENEMY_DEF,{
   pshedger:pscE('pshedger',{name:'Hollow Gardener',hp:66,dmg:[7,12],verb:'shears',xp:32,wander:true,roam:6}),
   psthornsprite:pscE('psthornsprite',{name:'Thorn Sprite',hp:30,dmg:[5,9],speed:2,verb:'pricks',xp:24,pscs:1,wake:'Something small and green uncurls from the hedge, holding a thorn like a spear.'}),
   psmoth:pscE('psmoth',{name:'Pale Moth Swarm',hp:34,dmg:[4,8],speed:2,fly:true,floatH:.3,verb:'dusts',xp:28,pscs:1,wake:'The white flowers lift off their stems. They were moths, and now they are in your eyes.',blind:1}),
-  psraven:pscE('psraven',{name:'Pale Raven',hp:40,dmg:[6,10],speed:2,fly:true,floatH:.3,verb:'stabs',xp:28,pscfeather:1}),
+  psraven:pscE('psraven',{name:'Pale Raven',hp:40,dmg:[6,10],speed:2,fly:false,floatH:0,verb:'stabs',xp:28,pscfeather:1}),
   /* the five slow wanderers (hp is a size: bosses are about 0.5 to 0.7 of Maldrake scaled up, tuned by eye) */
   pscolossus:pscE('pscolossus',{name:'The Weeping Colossus',hp:560,dmg:[11,17],hit:.9,verb:'crushes',xp:900,boss:true,aboveParty:0,pscwalk:1}),
   psgargmother:pscE('psgargmother',{name:'Mother Gargoyle',hp:450,dmg:[9,15],hit:.9,speed:2,fly:true,floatH:.3,verb:'rakes',xp:800,boss:true,aboveParty:0,pscwalk:1}),
@@ -73109,7 +73130,7 @@ function pscBase(info){
   for(const [x,y] of [[13,37],[13,38],[51,37],[51,38]])C.solid(x,y,ch(T.culvert));
   /* the doors of the contract: every link of this level, a door tile of its own */
   const clone=base=>{const gid=KH_NEXT_GID++;T_TILE[gid]=T_TILE[base];if(GY.col&&GY.col[base])GY.col[gid]=GY.col[base];return gid};
-  const DOORS={'32,10':T.great[1],'18,10':T.gallery[1],'12,24':T.kitchen,'52,24':T.cloister,'10,40':T.cloister,'54,40':T.kitchen,'3,34':T.grille,'60,34':T.grille,'32,52':T.gate};
+  const DOORS={'32,10':T.great[1],'18,10':T.gallery[1],'12,24':T.kitchen,'52,24':T.cloister,'10,40':T.cloister,'54,40':T.kitchen,'3,34':T.grille,'60,34':T.grille,'32,52':T.gate,'60,30':T.gate};
   const bind=l=>{const base=DOORS[l.at[0]+','+l.at[1]];if(!base)return;const gid=clone(base);C.solid(l.at[0],l.at[1],ch(gid));
     const d={lvl:l.to,get at(){if(!LEVELS[l.to]&&KH_LAZY[l.to])try{KH_LAZY[l.to]()}catch(e){console.error(e)}return {x:l.land[0],y:l.land[1],f:l.land[2]}},psc:1};
     if(l.prov)d.seal='The wall walk is closed. An iron grille is locked across the foot of the stair, and the lock is furred with green rust.';
@@ -75339,14 +75360,14 @@ const PSD_GREEN=[.7,1.2,.85],PSD_FIRE=[.6,1.35,.75],PSD_DIM=[.55,1.0,.75],PSD_FR
 function psdGate(C,key,x,y,who,note){
   const nid='psd_cell'+key;PSD.cells[key]={who,note,x,y,level:C.id};
   if(!NPCS[nid]){const pn=who&&NPCS[who];khNpc(nid,pn?pn.name:'A cell door',pn?pn.img:'gy_igate2',d=>psdGateTalk(key,d))}
-  return C.P('cell_door',x,y,{block:true,npc:nid,sc:.7,raw:true})}
+  return C.P('cell_door',x,y,{block:true,npc:nid,sc:.9,raw:true})}
 /* a living prisoner behind the gate (the picture is p_<name>) */
 function psdPerson(C,who,pic,x,y){return C.P('p_'+pic,x,y,{block:true,npc:who,raw:true,sc:1})}
 /* a cell furnished. The gate is at (gx,gy); the cell runs three squares away from it in the direction (dx,dy). */
 function psdCell(C,key,gx,gy,dx,dy,who,pic,note,extra){
   const px=-dy,py=dx,at=k=>[gx+dx*k,gy+dy*k],mid=at(2),back=at(3);
   psdGate(C,key,gx,gy,who,note);
-  C.P('straw_bed',back[0]-px,back[1]-py,{});C.P(['bucket_well','chains','barrels','cage','bones'][((gx*7+gy*3)>>1)%5],back[0]+px,back[1]+py,{sc:.6});
+  C.P('straw_bed',back[0]-px,back[1]-py,{});C.P(['bucket_well','chains','bones'][((gx*7+gy*3)>>1)%3],back[0]+px,back[1]+py,{sc:.55});
   if(who){psdPerson(C,who,pic,mid[0],mid[1]);C.light(mid[0],mid[1],PSD_FRIEND)}
   if(extra)extra(C,mid[0],mid[1],back,at)}
 /* a rest nook for each dungeon floor: a straw pallet, a candle, a warm pool of light, no foe within a few squares; the party sleeps free */
@@ -75479,10 +75500,10 @@ PSD.SPEC[9800]={pt:'brick_dark',pg:2.1,prgb:[.55,.92,.72],brick:'texBlack',gain:
   /* the shaft foot: far above, one grey shaft of light; roots hang down the walls */
   sign(7,3,[0,-1],'THE OUBLIETTE','What is put down here is forgotten');
   psdRest(C,[[10,5],[6,5],[9,6],[7,6]],'The shaft foot');
-  dec('gy_nameplate',5,5,{block:true,npc:'psd_stone4',sc:1,raw:true});dec('bench',11,5,{sc:.8});P('brazier',12,4,{});light(12,4,PSD_FIRE);P('chains',5,3,{});dec('web',4,3,{sc:.55});dec('bones',10,8,{sc:.8});P('moss_rock',6,8,{});twig(9,7,.9);
-  light(8,5,[.9,1.4,1.05]);light(8,7,[.8,1.3,1]);P('st_mourners',4,8,{block:true});
+  dec('gy_nameplate',5,5,{block:true,npc:'psd_stone4',sc:1,raw:true});P('brazier',12,4,{});light(12,4,PSD_FIRE);P('chains',5,3,{});dec('web',4,3,{sc:.55});dec('bones',10,8,{sc:.4});P('moss_rock',6,8,{});twig(9,7,.9);
+  light(8,5,[.9,1.4,1.05]);light(8,7,[.8,1.3,1]);
   /* the winding way */
-  P('chains',8,9,{});dec('bones',9,10,{sc:.7});twig(11,10);light(9,9,PSD_DIM);light(13,10,PSD_DIM);
+  P('chains',8,9,{});twig(11,10);light(9,9,PSD_DIM);light(13,10,PSD_DIM);
   /* the ring passage: bones in drifts, shackle posts, green fires at the corners */
   const who=[['psd_gaunt','gaunt'],['psd_stamford','stamford'],['psd_yseult','yseult']];
   const defs=[{who:0},{who:1},{note:'The door opens. A man in the remains of a uniform is sitting against the back wall with his sword across his knees. It is a very good sword, and he has not let go of it. Under him is a small chest.',chest:1},
@@ -75490,24 +75511,24 @@ PSD.SPEC[9800]={pt:'brick_dark',pg:2.1,prgb:[.55,.92,.72],brick:'texBlack',gain:
     {who:2},{note:"The door opens on a heap of straw, a woman's shawl and a tin cup full of bone dust. A small chest stands in the straw.",chest:1},{note:'The cell is cold in a way that has nothing to do with the stone. Something in the corner is waiting for you to speak first.',foe:'pscellghost'}];
   const cells=[[12,15,-1],[12,19,-1],[12,23,-1],[12,27,-1],[32,15,1],[32,19,1],[32,23,1]];
   cells.forEach(([gx,gy,dx],i)=>{const cd=defs[i],w=cd.who!==undefined?who[cd.who]:null;
-    psdCell(C,'9800_'+i,gx,gy,dx,0,w?w[0]:null,w?w[1]:null,cd.note,(C,mx,my)=>{if(cd.chest)dec('chest',mx,my+1,{block:true});if(cd.foe)foe(cd.foe,mx,my)})});
+    psdCell(C,'9800_'+i,gx,gy,dx,0,w?w[0]:null,w?w[1]:null,cd.note,(C,mx,my)=>{if(cd.chest)dec('chest',mx,my+1,{block:true,sc:.6});if(cd.foe)foe(cd.foe,mx,my)})});
   for(const [x,y] of [[14,12],[30,12],[14,30],[30,30]]){P('brazier',x,y,{block:true});light(x,y,PSD_FIRE)}
   psdMany(light,[[22,12,PSD_DIM],[22,30,PSD_DIM],[14,21,PSD_DIM],[30,21,PSD_DIM],[17,12,[.9,1.35,1]],[27,12,[.9,1.35,1]],[17,30,[.9,1.35,1]],[27,30,[.9,1.35,1]]]);
-  psdMany(P,[['shackled_skeleton',14,17,{}],['shackled_skeleton',30,25,{}],['shackled_skeleton',14,25,{}],['shackled_skeleton',30,17,{}],['chains',22,12,{}],['chains',22,30,{}]]);
+  psdMany(P,[['shackled_skeleton',14,17,{sc:.65}],['shackled_skeleton',30,25,{sc:.65}],['shackled_skeleton',14,25,{sc:.65}],['shackled_skeleton',30,17,{sc:.65}],['chains',22,12,{}],['chains',22,30,{}]]);
   foe('psbonecrawl',20,12);foe('psbonecrawl',26,12);foe('psbonecrawl',14,21);foe('psbonecrawl',30,21);foe('psbonecrawl',22,31);foe('psbonecrawl',17,31);
   foe('psshackle',14,15);foe('psshackle',30,27);foe('psshackle',14,28);foe('pscellghost',18,12);foe('pscellghost',30,15);foe('pscellghost',26,31);
   /* the pit */
   /* the vault of the Second Floor Key: a strongbox on a dais at the north end of the pit, chains, a faint violet glow that can be seen from the ring passage */
-  P('dais_steps',22,18,{});P('reliquary_chest',22,17,{block:true,npc:'psd_strongbox',sc:1.15});P('chains',21,17,{});P('chains',23,17,{});P('candelabra_tall',21,18,{block:true,sc:.8});P('candelabra_tall',23,18,{block:true,sc:.8});
+  P('dais_steps',22,18,{});P('reliquary_chest',22,17,{block:true,npc:'psd_strongbox',sc:.7});P('chains',21,17,{});P('chains',23,17,{});
   light(22,18,[.9,.75,1.9]);light(22,16,[.7,.6,1.5]);
-  foe('pshunger',22,21);dec('chest',22,25,{block:true,goldAmt:9000,sc:1});
+  foe('pshunger',22,21);dec('chest',22,25,{block:true,goldAmt:9000,sc:.6});
   psdMany(P,[['shackled_skeleton',20,22,{}],['shackled_skeleton',24,22,{}],['shackled_skeleton',20,16,{}],['shackled_skeleton',24,16,{}]]);
-  for(const [x,y] of [[19,17],[25,17],[19,25],[25,25],[18,21],[26,21]])dec('bones',x,y,{sc:.9});
+  for(const [x,y] of [[19,17],[25,17],[19,25],[25,25],[18,21],[26,21]])dec('bones',x,y,{sc:.45});
   psdMany(light,[[22,19,[.7,1.2,.85]],[22,24,[.7,1.2,.85]]]);
-  for(let a=0;a<46;a++){const t=C.rng(a,3)*6.283,r=7+C.rng(a,5)*3,x=Math.round(22+Math.cos(t)*r*1.2),y=Math.round(21+Math.sin(t)*r*1.2);dec('bones',x,y,{sc:.6+C.rng(a,7)*.4})}
+  for(let a=0;a<18;a++){const t=C.rng(a,3)*6.283,r=7+C.rng(a,5)*3,x=Math.round(22+Math.cos(t)*r*1.2),y=Math.round(21+Math.sin(t)*r*1.2);if(x===22||y===21)continue;dec('bones',x,y,{sc:.3+C.rng(a,7)*.2})}
   for(let a=0;a<24;a++){const t=C.rng(a,13)*6.283,r=7+C.rng(a,15)*3,x=Math.round(22+Math.cos(t)*r*1.2),y=Math.round(21+Math.sin(t)*r*1.2);twig(x,y,.8)}
   /* the secret chamber behind the east wall */
-  P('st_bishop',37,30,{block:true});dec('chest',34,28,{block:true,goldAmt:4200});dec('bones',36,29,{sc:.8});dec('web',37,28,{sc:.6});twig(35,31);light(35,30,[.9,1.35,1]);
+  dec('chest',34,28,{block:true,goldAmt:4200,sc:.6});dec('bones',36,29,{sc:.4});dec('web',37,28,{sc:.6});twig(35,31);light(35,30,[.9,1.35,1]);
   }};
 /* the secret door of the Oubliette and the crawl of the Gaols open the same way */
 PSD.SPEC[9800].doors.push({x:32,y:29,kind:'secret',key:'chamber',msg:'A slab of the wall is on a counterweight. It rolls aside with a sound like a long breath, and a small room of old bone lies behind it.'});
@@ -75875,6 +75896,187 @@ if(typeof storyNext==='function'){const _sn=storyNext;storyNext=function(){try{c
 function pspItemsFill(){for(const id in PSP_ITEMS){if(ITEMDEF[id])continue;const q=PSP_ITEMS[id];ITEMDEF[id]={n:q.n,k:q.k||'quest',t:q.t||'Quest item',ic:q.ic||'ore',c:q.c||'#d0d0e0',stack:q.stack||1,price:0,sw:.2,d:q.d,psfill:1}}}
 pspItemsFill();
 
+/* ---- src/desert/ps_road.js ---- */
+/* ==========================================================================
+   THE PALE SPIRE: THE CROOKED ROAD (prefix pcr / PCR). Level 9715, outdoor, 48 x 64, rating 100.
+   The way from the Pale Spire to the Never-Ending Tower. From the east postern of the Court of Statues (9730, square 60,30) a five-wide road
+   winds north in switchbacks, through a bone field, past a rest shrine, a glade of crosses and a glade of leaning lamps, to the forecourt of the
+   Crooked Tower, where the gate (30,4) opens on the tower's entrance hall (NT.BASE, arrive at NT.ENT.arrive). The tower's south gate (nt_map.js) leads back here.
+   Contract: the links are in ps_ids.js (9730 <-> 9715, 9715 -> NT.BASE with ext:1). A party under level 100 is turned back at the tower gate (ntLevelOk in nt_map.js).
+   Look: dark gothic. Black stone walls, dead gnarled trees, overcast sky, bones, iron fences, leaning lamps, a rest shrine. No houses, no village props, no animals.
+   Rules kept: the middle three squares of the road stay empty (nothing stands on the route); solid props stand only five squares or more off the route centre line
+   (trees, stones) or on the edge row (fence and lamp pictures, which can be walked through); the few creatures stand in the glades, at least three squares off the route.
+   ========================================================================== */
+const PCR={ID:9715,W:48,H:64,
+  /* the centre line of the road, from the postern (south east) to the tower gate (north) */
+  ROUTE:[[40,60],[40,52],[10,52],[10,42],[38,42],[38,32],[12,32],[12,22],[30,22],[30,6]],
+  /* glades: [x0,y0,x1,y1,floor,name] */
+  GLADES:[[22,48,34,56,'gravel','The Bone Field'],[3,38,15,46,'flagdark','The Wayside Shrine'],[30,28,44,36,'gravel','The Glade of Crosses'],[4,18,18,26,'gravel','The Leaning Lamps'],[22,6,38,14,'flagdark','The Tower Forecourt']]};
+function pcrBuild(info){
+  const W=PCR.W,H=PCR.H;
+  const C=pspMake({id:9715,start:{x:40,y:59,f:0},walled:true,wall:'dark',wh:3.4,floor:'cobble',amb:.78,wind:.3});
+  const {rows,block}=C,hs=C.hs,PAL=PSP_PAL,SI=PAL.silver,GR=PAL.green,ix=(x,y)=>y*W+x;
+  const open=(x,y)=>rows[y]&&rows[y][x]==='.';
+  /* ---- the road: five wide, along the centre line ---- */
+  const R=PCR.ROUTE,cl=[];
+  for(let i=0;i<R.length-1;i++){const [ax,ay]=R[i],[bx,by]=R[i+1];
+    if(ax===bx){for(let y=Math.min(ay,by);y<=Math.max(ay,by);y++)cl.push([ax,y])}else{for(let x=Math.min(ax,bx);x<=Math.max(ax,bx);x++)cl.push([x,ay])}}
+  for(const [x,y] of cl){C.carve(x-2,y-2,x+2,y+2);C.setFloor(x-2,y-2,x+2,y+2,'cobble')}
+  for(const g of PCR.GLADES){C.carve(g[0],g[1],g[2],g[3]);C.setFloor(g[0],g[1],g[2],g[3],g[4])}
+  /* the line of the road itself in dressed flags, one square wide, so that the way reads from far off */
+  for(const [x,y] of cl)C.setFloorCell(x,y,'flagdark');
+  /* distance from the centre line (Chebyshev), for every open square */
+  const dist=new Float32Array(W*H).fill(99);
+  for(const [cx,cy] of cl)for(let y=Math.max(0,cy-6);y<=Math.min(H-1,cy+6);y++)for(let x=Math.max(0,cx-6);x<=Math.min(W-1,cx+6);x++){const d=Math.max(Math.abs(x-cx),Math.abs(y-cy));if(d<dist[ix(x,y)])dist[ix(x,y)]=d}
+  const D=(x,y)=>dist[ix(x,y)];
+  /* ---- the walls: black stone, moss, a little ivy ---- */
+  const near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(open(x+dx,y+dy))return true;return false};
+  const SET=['dark','dark','ash','dark','moss','ash','dun','ivy','dark','ash'];
+  for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(open(x,y)||!near(x,y))continue;C.solid(x,y,C.ch(pspWallGid(SET[(hs(x,y,3)*SET.length)|0],(hs(x,y,4)*4)|0,3.4)))}
+  /* ---- the doors: the postern (south), the tower gate (north) ---- */
+  C.links({style:{'Postern':'gate','Tower':'great'}});
+  /* ---- dressing ---- */
+  const FENCE=['iron_fence_a','iron_fence_b'];
+  const lamp=(x,y,col)=>{if(!C.free(x,y))return;C.dec('gy_lantern',x,y,{block:false,sc:1.05});C.light(x,y,col||SI)};
+  const edge=(x,y)=>open(x,y)&&D(x,y)===2;                // the outer row of the road
+  const far=(x,y,d)=>open(x,y)&&D(x,y)>=(d||5)&&C.free(x,y);   // well off the route: solid props only here
+  const tree=(x,y,sc)=>{if(far(x,y,3))C.dec('gy_dead',x,y,{block:true,sc:sc||1.5+hs(x,y,7)*.7})};
+  /* the iron fence along the outer row, with gaps, and a leaning lamp every few squares (walk-through pictures) */
+  for(const [cx,cy] of cl){
+    for(const [dx,dy] of [[-2,0],[2,0],[0,-2],[0,2]]){const x=cx+dx,y=cy+dy;
+      if(!edge(x,y)||C.decor.some(d=>d.x===x&&d.y===y))continue;
+      const r=hs(x,y,21);
+      if(r<.5)C.prop(FENCE[(x+y)&1],x,y,{block:false,maxW:1.02});
+      else if(r<.58)C.dec('gy_dead',x,y,{block:false,sc:.9+hs(x,y,22)*.5});          // a bare twig tree you can brush past
+      else if(r<.66)C.dec('gy_bones',x,y,{block:false,sc:.7});
+      else if(r<.72)C.prop('moss_rock',x,y,{block:false})}}
+  cl.forEach(([x,y],i)=>{if(i%11===5){for(const [dx,dy] of [[-2,0],[2,0],[0,-2],[0,2]])if(edge(x+dx,y+dy)){lamp(x+dx,y+dy,i%22===5?SI:GR);break}}});
+  /* the glades: dead trees, stones, bones */
+  for(const g of PCR.GLADES){
+    const [x0,y0,x1,y1]=g;
+    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){if(!open(x,y)||!C.free(x,y))continue;const r=hs(x,y,31),d=D(x,y);
+      if(d>=3){
+        if(r<.10)tree(x,y);
+        else if(r<.13)C.dec('gy_bones',x,y,{block:false,sc:.8});
+        else if(r<.155&&g[5]!=='The Tower Forecourt')C.dec(['gy_stone1','gy_stone2','gy_ccross','gy_wcross'][(hs(x,y,32)*4)|0],x,y,{block:true,sc:.95})}}}
+  /* the Bone Field: skulls on posts and heaps of bones */
+  for(const [x,y] of [[24,50],[27,54],[31,50],[33,54],[23,55],[30,55]])if(far(x,y,3))C.prop('skull_pillar',x,y,{block:true});
+  for(let k=0;k<26;k++){const x=22+((hs(k,1,51)*13)|0),y=48+((hs(k,2,51)*9)|0);if(open(x,y)&&C.free(x,y))C.dec('gy_bones',x,y,{block:false,sc:.6+hs(k,3,51)*.5})}
+  /* the Glade of Crosses: rows of crosses and a great old tree */
+  for(let x=33;x<=43;x+=2)for(const y of [29,35])if(far(x,y,3))C.dec(['gy_ccross','gy_wcross','gy_stone1'][(x>>1)%3],x,y,{block:true,sc:1});
+  tree(42,29,2.3);tree(31,35,2.1);
+  /* the Leaning Lamps: lamps that lean over the road, a ring of them */
+  for(const [x,y] of [[5,19],[8,19],[11,19],[15,19],[5,25],[8,25],[15,25],[17,22],[5,22]])if(open(x,y))lamp(x,y,hs(x,y,9)<.5?SI:[.8,1.2,.6]);
+  C.sign(14,24,[0,1],'THE CROOKED ROAD','To the Crooked Tower, north');
+  /* the Wayside Shrine: a safe place with a bench, a warm lantern, a free rest */
+  {const x0=5,y=41,id='pcr_bench';
+    C.safe.push({rect:1,x0,y0:y,x1:x0+2,y1:y+1});
+    C.rests.push({x0,y0:y,x1:x0+2,y1:y+1,line:'A wayside shrine. A bench, a warm lantern, a loaf and a cup. Nothing hostile comes near.',name:'The Wayside Shrine'});
+    C.light(x0+1,y,C.warmCol);
+    if(!NPCS[id])khNpc(id,'A pilgrim bench','gy_bench',()=>say('A stone bench under a small shrine of the Pale Mother, with a lantern that does not flicker. The road behind you is long, and the one ahead is longer.',[['Rest a while.',()=>{try{restParty(true)}catch(e){}return null}],['Leave.',()=>null]]));
+    C.dec('gy_bench',x0+1,y+1,{block:true,npc:id,sc:1.1});C.dec(pspPic('lantern_red_a'),x0,y,{block:false});C.dec(pspPic('statue_plinth'),x0+2,y,{block:true})}
+  for(const [x,y] of [[5,39],[9,39],[13,39],[4,45],[14,45]])if(far(x,y,3))C.dec(pspPic('urn_big'),x,y,{block:true,sc:.9});
+  /* the tower forecourt: two lamps, two urns, a sign, the gate framed by an arch */
+  C.prop('arch_iron',30,5,{block:false});
+  for(const x of [26,34]){lamp(x,8,SI)}
+  for(const x of [24,36])C.prop('urn_big',x,7,{block:true});
+  for(const x of [23,37])C.prop('col_fluted',x,10,{block:true});
+  C.sign(28,6,[0,-1],'THE CROOKED TOWER','North of the Pale Spire. Level 100 and up');
+  C.vines(26,5,{});C.vines(34,5,{});
+  /* the postern end */
+  C.sign(38,59,[0,1],'THE CROOKED ROAD','North to the Crooked Tower');lamp(38,58,SI);lamp(42,58,SI);
+  /* a few chests in the glades */
+  for(const [x,y,t] of [[24,54,1],[41,34,1],[6,20,1]])if(far(x,y,3))C.chest(x,y,{tier:t});
+  /* ---- creatures: few, in the glades, at least three squares off the route ---- */
+  const spot=(x0,y0,x1,y1,seed)=>{for(let k=0;k<80;k++){const x=x0+((hs(k,seed,61)*(x1-x0+1))|0),y=y0+((hs(k,seed,62)*(y1-y0+1))|0);if(open(x,y)&&D(x,y)>=3&&C.free(x,y)&&!C.safe.some(z=>pspInZone(z,x,y,2)))return [x,y]}return null};
+  const FOE=(t,g,seed,wake)=>{const q=spot(g[0],g[1],g[2],g[3],seed);if(q)(wake?pspStatueWake:pspFoe)(C,t,q[0],q[1])};
+  const G=PCR.GLADES;
+  FOE('psguard',G[0],1);FOE('pshalberd',G[0],2);FOE('pssentinel',G[0],3,1);
+  FOE('psmourner',G[2],4);FOE('pssentinel',G[2],5,1);FOE('psguard',G[2],6);
+  FOE('psmourner',G[3],7);FOE('psguard',G[3],8);
+  FOE('pssentinel',G[4],9,1);FOE('pssentinel',G[4],10,1);
+  for(const e of C.enemies)e.lvl=100;
+  C.glow(7,SI);
+  const lv=C.finish({start:{x:40,y:59,f:0}});
+  lv.mapNames=[{t:'The East Postern',x:40,y:58,k:'place'},{t:'The Bone Field',x:28,y:52,k:'place'},{t:'The Wayside Shrine',x:7,y:42,k:'place'},{t:'The Glade of Crosses',x:37,y:32,k:'place'},{t:'The Leaning Lamps',x:10,y:22,k:'place'},{t:'The Tower Forecourt',x:30,y:10,k:'place'}];
+  return lv}
+pspRegister(9715,pcrBuild);
+/* the tower gate turns back a party below level 100 (ntLevelOk, nt_map.js) */
+{const _k=khBump;khBump=function(nx,ny,g){const d=KH_DOOR[g];
+  if(d&&d.psp&&d.psp.to===1000000000&&typeof ntLevelOk==='function'&&!ntLevelOk()){ntTooLow();return true}
+  return _k.apply(this,arguments)}}
+
+/* ---- src/desert/ps_curate.js ---- */
+/* ps_curate.js: the Pale Spire's curator. Runs once on every castle level right after it is built.
+   1. Works out the MAIN ROUTE of the level: the cheapest walk from the start to every door, stair and landing (it steers round big furniture).
+   2. Clears small loose props (urns, candelabra, chairs, barrels, rubble, flowers and so on) off that route and one square either side of it.
+   3. Thins the foes by a third, and moves any foe standing within 3 squares of the route to a quiet spot further off (rooms, corners, side places).
+      Bosses, statues that wake, patrols, the slow ghosts and anything in a rest room stay as they are.
+   The report is in LEVELS[id]._curate. */
+const PSC_SMALL=/urn|vase|candel|chair|stool|barrel|crate|sack|pot\b|plant|flower|rose|rubble|bones|skull|bucket|basket|lantern|brazier|cobweb|web|sheet|mirror|rug|cask|jar|candle|tray|book|crow|bat|moss|weed|bush/i;
+const PSC_BIG=/table|sideboard|wardrobe|bed|pulpit|pew|fireplace|throne|clock|col|screen|statue|st_|fountain|bench|altar|tomb|bookcase|shelf|rack|gargoyle|tree|well|stair|bridge|tower|fence|gate|door|arch/i;
+function pscHeap(){const a=[];return {n:()=>a.length,push(c,v){a.push([c,v]);let i=a.length-1;while(i>0){const p=(i-1)>>1;if(a[p][0]<=a[i][0])break;[a[p],a[i]]=[a[i],a[p]];i=p}},
+  pop(){const t=a[0],l=a.pop();if(a.length){a[0]=l;let i=0;for(;;){let m=i,L=2*i+1,R=L+1;if(L<a.length&&a[L][0]<a[m][0])m=L;if(R<a.length&&a[R][0]<a[m][0])m=R;if(m===i)break;[a[m],a[i]]=[a[i],a[m]];i=m}}return t}}}
+function pscCurate(id,L){
+  if(!L||L._curated||!L.rows)return L;L._curated=1;
+  const info=pspLevel(id),W=L.rows[0].length,H=L.rows.length,P=L._ps||{};
+  const TB=(typeof TERRS!=='undefined'&&TERRS[id]&&TERRS[id].block)||null;
+  const open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&L.rows[y][x]==='.'&&!(TB&&TB[y*W+x]);
+  const dec=new Map();for(const d of L.decor||[]){if(d.pic||d.deco)continue;const k=d.x+','+d.y;(dec.get(k)||dec.set(k,[]).get(k)).push(d)}
+  const bigAt=(x,y)=>(dec.get(x+','+y)||[]).some(d=>d.block&&PSC_BIG.test(String(d.k)));
+  const smallAt=(x,y)=>(dec.get(x+','+y)||[]).some(d=>d.block&&!PSC_BIG.test(String(d.k)));
+  const near=(x,y)=>{if(open(x,y))return [x,y];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]])if(open(x+a,y+b))return [x+a,y+b];return null};
+  // key points: the start, every door of this level, every landing into it
+  const keys=[];const add=p=>{if(p&&p[0]!=null){const q=near(Math.round(p[0]),Math.round(p[1]));if(q)keys.push(q)}};
+  const st=L.start||{};add([st.x,st.y]);
+  for(const l of PSP.LINKS){if(l.from===id&&l.at)add(l.at);if(l.to===id&&l.land)add(l.land)}
+  if(PSP.TELE&&PSP.TELE.id===id)add(PSP.TELE.at);
+  const cost=new Float32Array(W*H).fill(1e9),par=new Int32Array(W*H).fill(-1),s0=keys[0];
+  if(!s0)return L;
+  const hp=pscHeap();cost[s0[1]*W+s0[0]]=0;hp.push(0,s0[1]*W+s0[0]);
+  while(hp.n()){const [c,v]=hp.pop();if(c>cost[v])continue;const x=v%W,y=(v/W)|0;
+    for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(!open(nx,ny))continue;const w=1+(bigAt(nx,ny)?40:smallAt(nx,ny)?3:0),nv=ny*W+nx;if(c+w<cost[nv]){cost[nv]=c+w;par[nv]=v;hp.push(c+w,nv)}}}
+  const path=new Set();for(const k of keys){let v=k[1]*W+k[0];if(cost[v]>=1e9)continue;while(v>=0&&!path.has(v)){path.add(v);v=par[v]}}
+  const rep={route:path.size,props:0,foes0:0,foes1:0,moved:0,dropped:0};
+  // clear small loose props from the route and one square either side
+  const near1=new Set();for(const v of path){const x=v%W,y=(v/W)|0;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)near1.add((y+b)*W+x+a)}
+  const keepD=d=>d.pic||d.deco||d.npc||d.goldAmt||d.psKeep||!PSC_SMALL.test(String(d.k))||PSC_BIG.test(String(d.k));
+  L.decor=(L.decor||[]).filter(d=>{if(keepD(d))return true;const v=Math.round(d.y)*W+Math.round(d.x);if(near1.has(v)){rep.props++;return false}return true});
+  // gaol levels: nothing decorative or domestic (mirrors, portraits, dust sheets, candle tables, sheeted windows)
+  if(id>=9780&&id<=9800){const bad=/mirror|portrait|dust_sheet|window_sheeted|candles_glow|st_mourners|st_bishop|bench/;L.decor=(L.decor||[]).filter(d=>{if(d.npc&&!/^psh_/.test(d.npc))return true;if(d.psKeep||d.goldAmt)return true;if(bad.test(String(d.k))){rep.props++;return false}if(/lantern_red|web_spider/.test(String(d.k))){const x=Math.round(d.x),y=Math.round(d.y);if(open(x,y)&&(open(x+1,y)?1:0)+(open(x-1,y)?1:0)+(open(x,y+1)?1:0)+(open(x,y-1)?1:0)<=2){rep.props++;return false}}return true})}
+  // every castle level: no free-standing blocking prop in a corridor cell (two or fewer open orthogonal neighbours). Removed, or (chests with gold) moved to the nearest roomy cell.
+  {const ON=(x,y)=>(open(x+1,y)?1:0)+(open(x-1,y)?1:0)+(open(x,y+1)?1:0)+(open(x,y-1)?1:0);
+   const keepK=/door|gate|arch|portcull|bridge|stair|sign|pillar|col_|wall/i;
+   const taken=new Set((L.decor||[]).filter(d=>d.block).map(d=>Math.round(d.x)+','+Math.round(d.y)));for(const e of L.enemies||[])taken.add(Math.round(e.x)+','+Math.round(e.y));
+   const room=(x,y)=>{if(!open(x,y)||taken.has(x+','+y)||near1.has(y*W+x))return false;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(!open(x+a,y+b))return false;return true};
+   const out=[];rep.corr=0;rep.corrMoved=0;
+   for(const d of L.decor||[]){
+     if(!d.block||d.pic||d.deco||d.npc||d.psKeep||keepK.test(String(d.k))){out.push(d);continue}
+     const x=Math.round(d.x),y=Math.round(d.y);if(!open(x,y)||ON(x,y)!==2||!(path.has(y*W+x)||(id>=9780&&id<=9800))){out.push(d);continue}
+     if(d.goldAmt){let best=null,bd=1e9;for(let r=1;r<=8&&!best;r++)for(let b=-r;b<=r;b++)for(let a=-r;a<=r;a++){if(Math.max(Math.abs(a),Math.abs(b))!==r||!room(x+a,y+b))continue;const h=Math.hypot(a,b);if(h<bd){bd=h;best=[x+a,y+b]}}
+       if(best){taken.delete(x+','+y);d.x=best[0];d.y=best[1];taken.add(best[0]+','+best[1]);rep.corrMoved++;out.push(d);continue}}
+     rep.corr++;(rep.rm||(rep.rm=[])).push([d.k,x,y])}
+   L.decor=out}
+  // foes
+  const dist=new Int16Array(W*H).fill(999),q=[];for(const v of path){dist[v]=0;q.push(v)}
+  for(let i=0;i<q.length;i++){const v=q[i],x=v%W,y=(v/W)|0;if(dist[v]>=6)continue;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H)continue;const nv=ny*W+nx;if(dist[nv]>dist[v]+1){dist[nv]=dist[v]+1;q.push(nv)}}}
+  const safe=(x,y)=>(P.safe||[]).some(z=>pspInZone(z,x,y,1))||(P.rests||[]).some(r=>x>=r.x0-1&&x<=r.x1+1&&y>=r.y0-1&&y<=r.y1+1);
+  const loops=P.loops||{},E=L.enemies||[];rep.foes0=E.length;
+  const prot=(e,i)=>{const d=ENEMY_DEF[e.t]||{};return !!(loops[i]||d.boss||d.still||d.pswake||e.boss||e.keep||e.psKeep||safe(e.x,e.y)||/^ps(stairwarden|antlered)/.test(e.t))};
+  const occ=new Set(E.map(e=>e.x+','+e.y));for(const d of L.decor||[])if(d.block)occ.add(Math.round(d.x)+','+Math.round(d.y));
+  const freeSpot=(e)=>{let best=null,bd=1e9;for(let r=1;r<=14;r++){for(let b=-r;b<=r;b++)for(let a=-r;a<=r;a++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const x=e.x+a,y=e.y+b;if(!open(x,y)||occ.has(x+','+y)||dist[y*W+x]<4||safe(x,y))continue;let n=0;for(let c=-1;c<=1;c++)for(let d=-1;d<=1;d++)if(open(x+c,y+d))n++;if(n<4)continue;const h=Math.hypot(a,b);if(h<bd){bd=h;best=[x,y]}}if(best)break}return best};
+  const out=[],nloops={};let cand=0;
+  E.forEach((e,i)=>{
+    if(prot(e,i)){if(loops[i])nloops[out.length]=loops[i];out.push(e);return}
+    cand++;if(cand%3===0||cand%7===0){rep.dropped++;return}                  // a third fewer
+    const near=dist[Math.round(e.y)*W+Math.round(e.x)]<=3;
+    if(near){const s=freeSpot(e);if(!s){rep.dropped++;return}occ.delete(e.x+','+e.y);e.x=s[0];e.y=s[1];occ.add(s[0]+','+s[1]);rep.moved++}
+    out.push(e)});
+  L.enemies=out;P.loops=nloops;rep.foes1=out.length;L._curate=rep;return L}
+/* every castle level is curated the first time it is built */
+{for(const info of PSP.LEVELS){const id=info.id,orig=KH_LAZY[id];if(!orig||orig._psc)continue;
+  const w=()=>{const had=LEVELS[id];const lv=orig();if(!had||!lv._curated)try{pscCurate(id,LEVELS[id]||lv)}catch(e){console.error('ps curate',id,e)}return LEVELS[id]||lv};w._psc=1;KH_LAZY[id]=w}}
+
 /* ---- src/desert/ps_maps.js ---- */
 /* ==========================================================================
    THE PALE SPIRE: PARCHMENT MAPS (package 6). One area map per level in the style of the Blighted Road and the Vault maps (drawn from the real rows, rooms numbered from mapNames, key at the right;
@@ -76177,62 +76379,6 @@ for(const lv of [...new Set(Object.values(PGR.CHESTS).map(c=>c.lv))]){
     else{for(let i=0;i<5;i++)if(orig.t[i])IMG['tele'+i]=orig.t[i];if(orig.h!==undefined)NPC_H.teleporter=orig.h}}catch(e){console.error('tele swap',e)}};
   const _pt=placeTeleporter;placeTeleporter=function(){swap();return _pt.apply(this,arguments)}}
 
-/* ---- src/desert/ps_curate.js ---- */
-/* ps_curate.js: the Pale Spire's curator. Runs once on every castle level right after it is built.
-   1. Works out the MAIN ROUTE of the level: the cheapest walk from the start to every door, stair and landing (it steers round big furniture).
-   2. Clears small loose props (urns, candelabra, chairs, barrels, rubble, flowers and so on) off that route and one square either side of it.
-   3. Thins the foes by a third, and moves any foe standing within 3 squares of the route to a quiet spot further off (rooms, corners, side places).
-      Bosses, statues that wake, patrols, the slow ghosts and anything in a rest room stay as they are.
-   The report is in LEVELS[id]._curate. */
-const PSC_SMALL=/urn|vase|candel|chair|stool|barrel|crate|sack|pot\b|plant|flower|rose|rubble|bones|skull|bucket|basket|lantern|brazier|cobweb|web|sheet|mirror|rug|cask|jar|candle|tray|book|crow|bat|moss|weed|bush/i;
-const PSC_BIG=/table|sideboard|wardrobe|bed|pulpit|pew|fireplace|throne|clock|col|screen|statue|st_|fountain|bench|altar|tomb|bookcase|shelf|rack|gargoyle|tree|well|stair|bridge|tower|fence|gate|door|arch/i;
-function pscHeap(){const a=[];return {n:()=>a.length,push(c,v){a.push([c,v]);let i=a.length-1;while(i>0){const p=(i-1)>>1;if(a[p][0]<=a[i][0])break;[a[p],a[i]]=[a[i],a[p]];i=p}},
-  pop(){const t=a[0],l=a.pop();if(a.length){a[0]=l;let i=0;for(;;){let m=i,L=2*i+1,R=L+1;if(L<a.length&&a[L][0]<a[m][0])m=L;if(R<a.length&&a[R][0]<a[m][0])m=R;if(m===i)break;[a[m],a[i]]=[a[i],a[m]];i=m}}return t}}}
-function pscCurate(id,L){
-  if(!L||L._curated||!L.rows)return L;L._curated=1;
-  const info=pspLevel(id),W=L.rows[0].length,H=L.rows.length,P=L._ps||{};
-  const TB=(typeof TERRS!=='undefined'&&TERRS[id]&&TERRS[id].block)||null;
-  const open=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&L.rows[y][x]==='.'&&!(TB&&TB[y*W+x]);
-  const dec=new Map();for(const d of L.decor||[]){if(d.pic||d.deco)continue;const k=d.x+','+d.y;(dec.get(k)||dec.set(k,[]).get(k)).push(d)}
-  const bigAt=(x,y)=>(dec.get(x+','+y)||[]).some(d=>d.block&&PSC_BIG.test(String(d.k)));
-  const smallAt=(x,y)=>(dec.get(x+','+y)||[]).some(d=>d.block&&!PSC_BIG.test(String(d.k)));
-  const near=(x,y)=>{if(open(x,y))return [x,y];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]])if(open(x+a,y+b))return [x+a,y+b];return null};
-  // key points: the start, every door of this level, every landing into it
-  const keys=[];const add=p=>{if(p&&p[0]!=null){const q=near(Math.round(p[0]),Math.round(p[1]));if(q)keys.push(q)}};
-  const st=L.start||{};add([st.x,st.y]);
-  for(const l of PSP.LINKS){if(l.from===id&&l.at)add(l.at);if(l.to===id&&l.land)add(l.land)}
-  if(PSP.TELE&&PSP.TELE.id===id)add(PSP.TELE.at);
-  const cost=new Float32Array(W*H).fill(1e9),par=new Int32Array(W*H).fill(-1),s0=keys[0];
-  if(!s0)return L;
-  const hp=pscHeap();cost[s0[1]*W+s0[0]]=0;hp.push(0,s0[1]*W+s0[0]);
-  while(hp.n()){const [c,v]=hp.pop();if(c>cost[v])continue;const x=v%W,y=(v/W)|0;
-    for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,ny=y+b;if(!open(nx,ny))continue;const w=1+(bigAt(nx,ny)?40:smallAt(nx,ny)?3:0),nv=ny*W+nx;if(c+w<cost[nv]){cost[nv]=c+w;par[nv]=v;hp.push(c+w,nv)}}}
-  const path=new Set();for(const k of keys){let v=k[1]*W+k[0];if(cost[v]>=1e9)continue;while(v>=0&&!path.has(v)){path.add(v);v=par[v]}}
-  const rep={route:path.size,props:0,foes0:0,foes1:0,moved:0,dropped:0};
-  // clear small loose props from the route and one square either side
-  const near1=new Set();for(const v of path){const x=v%W,y=(v/W)|0;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)near1.add((y+b)*W+x+a)}
-  const keepD=d=>d.pic||d.deco||d.npc||d.goldAmt||d.psKeep||!PSC_SMALL.test(String(d.k))||PSC_BIG.test(String(d.k));
-  L.decor=(L.decor||[]).filter(d=>{if(keepD(d))return true;const v=Math.round(d.y)*W+Math.round(d.x);if(near1.has(v)){rep.props++;return false}return true});
-  // foes
-  const dist=new Int16Array(W*H).fill(999),q=[];for(const v of path){dist[v]=0;q.push(v)}
-  for(let i=0;i<q.length;i++){const v=q[i],x=v%W,y=(v/W)|0;if(dist[v]>=6)continue;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=W||ny>=H)continue;const nv=ny*W+nx;if(dist[nv]>dist[v]+1){dist[nv]=dist[v]+1;q.push(nv)}}}
-  const safe=(x,y)=>(P.safe||[]).some(z=>pspInZone(z,x,y,1))||(P.rests||[]).some(r=>x>=r.x0-1&&x<=r.x1+1&&y>=r.y0-1&&y<=r.y1+1);
-  const loops=P.loops||{},E=L.enemies||[];rep.foes0=E.length;
-  const prot=(e,i)=>{const d=ENEMY_DEF[e.t]||{};return !!(loops[i]||d.boss||d.still||d.pswake||e.boss||e.keep||e.psKeep||safe(e.x,e.y)||/^ps(stairwarden|antlered)/.test(e.t))};
-  const occ=new Set(E.map(e=>e.x+','+e.y));for(const d of L.decor||[])if(d.block)occ.add(Math.round(d.x)+','+Math.round(d.y));
-  const freeSpot=(e)=>{let best=null,bd=1e9;for(let r=1;r<=14;r++){for(let b=-r;b<=r;b++)for(let a=-r;a<=r;a++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const x=e.x+a,y=e.y+b;if(!open(x,y)||occ.has(x+','+y)||dist[y*W+x]<4||safe(x,y))continue;let n=0;for(let c=-1;c<=1;c++)for(let d=-1;d<=1;d++)if(open(x+c,y+d))n++;if(n<4)continue;const h=Math.hypot(a,b);if(h<bd){bd=h;best=[x,y]}}if(best)break}return best};
-  const out=[],nloops={};let cand=0;
-  E.forEach((e,i)=>{
-    if(prot(e,i)){if(loops[i])nloops[out.length]=loops[i];out.push(e);return}
-    cand++;if(cand%3===0||cand%7===0){rep.dropped++;return}                  // a third fewer
-    const near=dist[Math.round(e.y)*W+Math.round(e.x)]<=3;
-    if(near){const s=freeSpot(e);if(!s){rep.dropped++;return}occ.delete(e.x+','+e.y);e.x=s[0];e.y=s[1];occ.add(s[0]+','+s[1]);rep.moved++}
-    out.push(e)});
-  L.enemies=out;P.loops=nloops;rep.foes1=out.length;L._curate=rep;return L}
-/* every castle level is curated the first time it is built */
-{for(const info of PSP.LEVELS){const id=info.id,orig=KH_LAZY[id];if(!orig||orig._psc)continue;
-  const w=()=>{const had=LEVELS[id];const lv=orig();if(!had||!lv._curated)try{pscCurate(id,LEVELS[id]||lv)}catch(e){console.error('ps curate',id,e)}return LEVELS[id]||lv};w._psc=1;KH_LAZY[id]=w}}
-
 /* ---- src/desert/nt_look.js ---- */
 /* ==========================================================================
    THE NEVER-ENDING TOWER: THE LOOK (prefix nt / NT). Every floor of the tower has its own colour and its own look. All of it is worked out from the floor number alone,
@@ -76271,7 +76417,7 @@ function ntPalette(n){
   const wall=ntHsv(hue,sat,val),wl=(wall[0]+wall[1]+wall[2])/3||.3;
   const norm=c=>{const l=(c[0]+c[1]+c[2])/3||.3;return c.map(v=>v/l)};   // a tint to multiply a grey stone with: mean 1, so the stone keeps its own lightness
   const tint=norm(ntHsv(hue,Math.min(.85,sat*1.1),Math.max(.55,val)));
-  const fh=(hue+(R()<.5?30:-30)+360)%360,ftint=norm(ntHsv(fh,sat*.6,.8));
+  const fh=(hue+(R()<.5?55:-55)+360)%360,ftint=norm(ntHsv(fh,sat*.5,.8));   // the floor leans away from the wall's hue, so a floor reads as stone under coloured walls
   const th=(hue+R.pick([-40,-20,0,20,40])+360)%360;   // the torch light is near the stone's own colour
   let best=NT_FLAMES[0],bd=999;for(const f of NT_FLAMES){const d=Math.min(Math.abs(f[1]-th),360-Math.abs(f[1]-th));if(d<bd){bd=d;best=f}}
   const lc=ntHsv(th,.55+R()*.3,1),lcol=lc.map(v=>+(v*1.4+.12).toFixed(3));
@@ -76850,6 +76996,12 @@ function ntBuildFloor(n){
   const occ=new Set(),decor=[],enemies=[],items=[],lights=[],lcol={},torches=[],V={lcol,col:P.lcol,torch:{fl:P.flame,col:P.lcol,red:P.flame===1},id};
   const reserved=new Set([plan.down.ix+','+plan.down.iy,plan.up.ix+','+plan.up.iy,plan.stone.x+','+plan.stone.y]);
   for(const k of reserved)occ.add(k);
+  /* the route from the arrival to the stairs up (a shortest walk): nothing stands on it, so no brazier, chest, urn or creature can block the way */
+  const route=new Set();
+  {let x=plan.up.ix,y=plan.up.iy,d=plan.dist[y*W+x];
+   for(let g=0;g<6000;g++){route.add(x+','+y);if(!(d>0))break;let moved=false;for(const [dx,dy] of NTG_D){const nx=x+dx,ny=y+dy;if(open(nx,ny)&&plan.dist[ny*W+nx]===d-1){x=nx;y=ny;d--;moved=true;break}}if(!moved)break}}
+  for(const k of route)occ.add(k);
+  V.route=route;
   const free=(x,y)=>open(x,y)&&!occ.has(x+','+y);
   /* the arrival square and the stone: a clear zone round them, where nothing stands and no creature is put */
   const SAFE=7,safeFrom=[[plan.down.ix,plan.down.iy],[plan.stone.x,plan.stone.y]];
@@ -77024,16 +77176,18 @@ function ntsTick(){
 
 /* ---- src/desert/nt_map.js ---- */
 /* ==========================================================================
-   THE NEVER-ENDING TOWER: THE WAY IN (prefix ntm). The entrance hall "The Crooked Tower" (level id NT.BASE), the great door (sealed with pale silver until the Pale Spire is finished),
+   THE NEVER-ENDING TOWER: THE WAY IN (prefix ntm). The entrance hall "The Crooked Tower" (level id NT.BASE), the great door (open to any party of level 100 or more),
    the place on the world map north of the Pale Spire, the teleport network (a handful of floors to choose from), the achievements, the stats line, the Go to area rows, the jump links
    (?town=neverending and ?town=neverending&floor=N), the parchment map of a floor.
-   ntUnlock() opens the tower; the Pale Spire's last boss is meant to call it (or set G.flags.psp.finished). Notes: tools/NT_NOTES.md
+   The tower is always open; the only gate is the party's level (NTM.MINLVL, see ntLevelOk). Notes: tools/NT_NOTES.md
    ========================================================================== */
-const NTM={JUMP_CAP:300,MILESTONES:[10,25,50,100,250,500,1000]};
+const NTM={MINLVL:100,JUMP_CAP:300,MILESTONES:[10,25,50,100,250,500,1000]};
 LEVEL_NAMES[NT.BASE]='The Crooked Tower';LEVEL_RATING[NT.BASE]=100;
 const ntF=()=>{const F=G.flags;return F.nt||(F.nt={deepest:0,best:{floor:0,level:0},ms:{}})};
-const ntUnlocked=()=>{const F=G.flags||{};return !!((F.psp&&F.psp.finished)||(F.nt&&(F.nt.open||F.nt.debug)))};
-function ntUnlock(){const f=ntF();if(!f.open){f.open=1;try{msg('Far to the north, a door of pale silver unlocks with a sound like a bell.','#d8e4ff');sfx('win')}catch(e){}}}
+const ntUnlocked=()=>true;   // the tower is always open; the level gate is ntLevelOk
+/* the party must be level 100 (the highest hero, like partyLevel everywhere else); the jump links set the debug flag and pass */
+const ntLevelOk=()=>partyLevel()>=NTM.MINLVL||!!NT.DEBUG||!!(G.flags&&G.flags.nt&&G.flags.nt.debug);
+function ntTooLow(){try{sfx('locked');msg('The way in is barred. Only a party of level '+NTM.MINLVL+' or more may enter the Crooked Tower.','#d8e4ff')}catch(e){}}
 /* ---------- the entrance hall ---------- */
 const NTE={W:38,H:30,door:{x0:17,x1:20,y:3},gate:{x0:18,x1:19,y:27}};
 function ntBuildEntrance(){
@@ -77052,7 +77206,7 @@ function ntBuildEntrance(){
   try{T=ntWallTiles(0,look);
     if(IMG.nt_tower_front)IMG.gyp_nt_tower_front=IMG.nt_tower_front;
     const fr=IMG.gyp_nt_tower_front?'nt_tower_front':'f_gothic';
-    for(let i=0;i<4;i++)gDoor.push(ntTile(0,'texGrey_0',2.3,{fac:{img:fr,i,n:4},gain:1.1,rgb:look.pal.wallTint,tag:'nt0d'+i,emit:.32}));
+    for(let i=0;i<4;i++)gDoor.push(ntTile(0,'texGrey_0',2.3,{fac:{img:fr,i,n:4},gain:1.1,rgb:look.pal.wallTint,tag:'nt0d'+i,emit:.6}));
     for(let i=0;i<2;i++)gGate.push(ntTile(0,'texGrey_0',2.3,{fac:{img:'gatesC_0',i,n:2},gain:1.1,rgb:look.pal.wallTint,tag:'nt0g'+i,emit:.25}))}finally{NT._making=false}
   const chars={},chMap=new Map();let nextCh=0x300;const ch=gid=>{let c=chMap.get(gid);if(!c){c=String.fromCharCode(nextCh++);chMap.set(gid,c);chars[c]=gid}return c};
   const near=(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(open(x+dx,y+dy))return true;return false};
@@ -77080,10 +77234,11 @@ KH_LAZY[NT.BASE]=()=>{if(!NT.ready)return null;return ntBuildEntrance()};
 /* the great door and the south gate */
 {const _k=khBump;khBump=function(nx,ny,g){const d=KH_DOOR[g];
   if(d&&d.nt==='door'){
-    if(!ntUnlocked()){sfx('locked');msg('The great door is sealed with pale silver. No key opens it, and it will not move.','#d8e4ff');return true}
+    if(!ntLevelOk()){ntTooLow();return true}
     sfx('door');const {plan}=ntPlan(1);goToLevel(ntIdOf(1),{x:plan.down.ix,y:plan.down.iy,f:plan.down.f});return true}
   if(d&&d.nt==='exit'){
-    const to=typeof PSP!=='undefined'&&PSP.ENTRY?PSP.ENTRY:null;
+    /* the south gate leads to the Crooked Road (ps_road.js, level 9715), which runs back to the Pale Spire; arrive at its north end facing south */
+    const to=typeof PSP!=='undefined'&&PSP.ID&&PSP.ID.ROAD?{id:PSP.ID.ROAD,x:30,y:6,f:2}:null;
     if(to&&(LEVELS[to.id]||KH_LAZY[to.id])){sfx('door');goToLevel(to.id,{x:to.x,y:to.y,f:to.f});return true}
     sfx('bump');msg('The road south to the Pale Spire is lost in cold mist.','#b8c8e0');return true}
   return _k.apply(this,arguments)}}
@@ -77113,7 +77268,7 @@ function ntArrive(n,restored){
 /* ---------- the world map: a huge crooked tower north of the Pale Spire ---------- */
 if(typeof WMB_PLACES!=='undefined'&&typeof WORLD_LOCS!=='undefined'&&!WORLD_LOCS.some(l=>l.k==='neverending')){
   const P={k:'neverending',n:'The Never-Ending Tower',full:'The Never-Ending Tower',r:'100 and up',x:-906,y:98,ids:[],ic:'castle',pic:[['i_spire',0,0,36],['i_spire',3,-22,27],['i_spire',7,-38,19]],note:'a huge crooked tower, north of the Pale Spire',pale:1};
-  Object.defineProperty(P,'ids',{enumerable:true,configurable:true,get(){return (ntUnlocked()||NT.DEBUG)?[NT.BASE]:[]}});
+  Object.defineProperty(P,'ids',{enumerable:true,configurable:true,get(){return [NT.BASE]}});
   WMB_PLACES.push(P);
   const o={k:P.k,n:P.n,x:P.x,y:P.y,ic:P.ic,bl:P,planned:P.r,get lv(){return P.ids.filter(wmbHas)}};
   WORLD_LOCS.push(o);WMN_SPEC[P.k]=P.pic;
@@ -77160,12 +77315,11 @@ function ntTeleNode(sel,page){
 /* ---------- Go to area, and the jump to the tower ---------- */
 {const _gl=gotoListRaw;gotoListRaw=function(){const out=_gl.apply(this,arguments);
   try{if(!out.some(r=>r.n===NT.BASE)){out.push({h:'The Never-Ending Tower, north of the Pale Spire'});
-    out.push({n:NT.BASE,name:ntUnlocked()||NT.DEBUG?'The Crooked Tower':'The Crooked Tower (sealed)'});
-    if(ntUnlocked()||NT.DEBUG){LEVEL_RATING[ntIdOf(1)]=ntRatingOf(1);out.push({n:ntIdOf(1),name:'Floor 1'});const d=ntF().deepest;if(d>1){LEVEL_RATING[ntIdOf(d)]=ntRatingOf(d);out.push({n:ntIdOf(d),name:'Floor '+d+', the deepest reached'})}}}}catch(e){console.error(e)}
+    out.push({n:NT.BASE,name:'The Crooked Tower'});
+    {LEVEL_RATING[ntIdOf(1)]=ntRatingOf(1);out.push({n:ntIdOf(1),name:'Floor 1'});const d=ntF().deepest;if(d>1){LEVEL_RATING[ntIdOf(d)]=ntRatingOf(d);out.push({n:ntIdOf(d),name:'Floor '+d+', the deepest reached'})}}}}catch(e){console.error(e)}
   return out}}
 {const _j=jumpToLevel;jumpToLevel=function(n,target){
   if(ntIs(n)){
-    if(!ntUnlocked()&&!NT.DEBUG){try{sfx('locked');msg('The Crooked Tower is sealed with pale silver.','#d8e4ff')}catch(e){}return}
     target=Math.min(NTM.JUMP_CAP,Math.max(target||0,ntFloorOf(n)>0?ntRatingOf(ntFloorOf(n)):99))}
   return _j.call(this,n,target)}}
 /* called from jumpFromUrl (index.html): the party's level for ?town=neverending[&floor=N] (floor N: level 99 + N, but never above JUMP_CAP) */
@@ -77177,7 +77331,7 @@ function ntAreas(AREAS){
   const q=new URLSearchParams(location.search);
   Object.defineProperty(AREAS,'neverending',{enumerable:true,configurable:true,get(){
     const f=Math.max(0,parseInt(q.get('floor')||'0',10)||0);
-    const F=ntF();F.debug=1;   // a jump link bypasses the seal
+    const F=ntF();F.debug=1;   // a jump link bypasses the level gate
     if(f>0){const {plan}=ntPlan(f);return [ntIdOf(f),plan.down.ix,plan.down.iy,plan.down.f]}
     return [NT.BASE,18,24,0]}})}
 /* ---------- the parchment map of a floor ---------- */
