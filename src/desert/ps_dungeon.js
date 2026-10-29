@@ -234,6 +234,12 @@ function psdMake(info){
   const light=(x,y,col)=>{if(!open(x,y)){miss.push('light@'+x+','+y);return}lights.push([x,y]);if(col)lcol[x+','+y]=col};
   const C={id,S,W,H,g,rows,open,free,dec,P,sign,foe,light,setF,decor,enemies,lights,lcol,occ,keep,V,fm,info,rng:(a,b)=>hash2(a,b,id*3)};
   S.dress(C);
+  /* cobwebs, candles in the dark, red lanterns and the odd haunted mirror (shared dresser in ps_halls.js) */
+  try{const taken=new Set();for(const d of decor)if(d.wd)taken.add(d.x+','+d.y+','+d.wd[0]+','+d.wd[1]);let mi=0;
+    pshHaunt({W,H,seed:id,open:(x,y)=>open(x,y)&&!deepAt(x,y),free:(x,y)=>free(x,y)&&!keep.has(x+','+y),wall:(x,y,a,b)=>!open(x+a,y+b)&&rows[y+b]!==undefined&&rows[y+b][x+a]!=='.'&&!doorSq.some(q=>q[0]===x+a&&q[1]===y+b),taken:(x,y,a,b)=>taken.has(x+','+y+','+a+','+b),
+      counts:S.haunt||{mirror:3,cobcorner:18,cobthick:8,candles:7,redlamp:7,spider:4},
+      wallPic:(k,x,y,wd,o)=>{const oo={wd,raw:true,sc:1};if(o.mirror!==undefined)oo.npc='psh_mir'+((mi++)%12);const d=dec(k,x,y,oo);if(d)taken.add(x+','+y+','+wd[0]+','+wd[1]);return !!d},
+      floorProp:(k,x,y,o)=>!!dec(k,x,y,{block:!!o.block,sc:o.sc||1,raw:true}),light:(x,y,c)=>light(x,y,c)})}catch(e){console.error('psd haunt',e)}
   /* ---- wall torches (green-white), candle niches, lamps ---- */
   const torches=[];
   {const blk=new Set();for(const d of decor)if(d.block)blk.add(d.x+','+d.y);const skip=doorSq.map(q=>[q[0],q[1]]),cand=[];
@@ -370,6 +376,7 @@ PSD.SPEC[9780]={brick:'texBlack',gain:1.3,rgb:[.5,.85,.64],WH:3.8,lcol:[.6,1.0,.
   foe('psturnkey',18,9);foe('psturnkey',30,9);foe('psturnkey',24,12);foe('gyrat',14,11);foe('gyrat',34,11);
   /* the Key Room: the gaolers' keys on boards, a cage, a chest */
   P('cage',42,9,{block:true});P('table_high',41,11,{block:true});P('chains',39,8,{});P('chains',43,8,{});P('brazier',39,12,{block:true});light(39,12,PSD_FIRE);dec('chest',43,12,{block:true,goldAmt:2400});dec('bones',40,9,{sc:.7});
+  for(const [x,y] of [[39,9],[40,10],[41,9],[43,10]])if(dec('gy_nameplate',x,y,{block:true,npc:'psd_gaolerlog',sc:1,raw:true}))break;
   foe('psturnkey',40,11);
   /* the Chain Room: hooks, a rack, the dead still hanging */
   P('rack',9,8,{block:true});P('shackled_skeleton',6,8,{});P('shackled_skeleton',8,12,{});P('chains',5,10,{});P('chains',10,12,{});dec('bones',7,11,{sc:.8});dec('web',5,8,{sc:.55});light(8,10,PSD_DIM);sign(6,12,[0,1],'THE CHAIN STAIR','Winds down to the south passage');sign(5,28,[0,-1],'THE CHAIN STAIR','Winds up to the Chain Room');
@@ -436,7 +443,7 @@ PSD.SPEC[9790]={brick:'texBlack',gain:1.35,rgb:[.45,.85,.72],WH:4.6,lcol:[.48,.9
   psdCell(C,'9790_2',14,8,0,-1,'psd_sedge','sedge');
   psdCell(C,'9790_3',18,8,0,-1,null,null,'The door swings open and water runs out over your boots. Two prisoners drowned here, side by side, and one of them is still on his feet. A small chest floats against the back wall.',(C,mx,my)=>{foe('psdrowned',mx,my);dec('chest',mx+1,my,{block:true})});
   sign(8,10,[0,1],'THE VALVES OF THE CISTERN','Turn the wheels in this order: SOUTH, then WEST, then EAST. Never out of turn.');
-  dec('gy_nameplate',4,9,{block:true,npc:'psd_stone2',sc:1,raw:true});
+  dec('gy_nameplate',4,9,{block:true,npc:'psd_stone2',sc:1,raw:true});for(const [x,y] of [[4,10],[5,9],[4,8],[5,10],[6,9]])if(dec('gy_nameplate',x,y,{block:true,npc:'psd_scratch',sc:.8,raw:true}))break;
   
   psdMany(P,[['chains',5,10,{}],['chains',13,9,{}],['chains',24,10,{}],['column',20,9,{block:true}],['column',28,10,{block:true}],['column',34,9,{block:true}]]);
   psdMany(dec,[['bench',8,9,{sc:.8}],['bones',9,10,{sc:.7}],['bones',22,9,{sc:.7}],['bones',31,10,{sc:.7}],['web',3,9,{sc:.5}]]);
@@ -484,6 +491,9 @@ PSD.SPEC[9800]={brick:'texBlack',gain:1.15,rgb:[.5,.82,.6],WH:5.2,lcol:[.36,.68,
   foe('psbonecrawl',20,12);foe('psbonecrawl',26,12);foe('psbonecrawl',14,21);foe('psbonecrawl',30,21);foe('psbonecrawl',22,31);foe('psbonecrawl',17,31);
   foe('psshackle',14,15);foe('psshackle',30,27);foe('psshackle',14,28);foe('pscellghost',18,12);foe('pscellghost',30,15);foe('pscellghost',26,31);
   /* the pit */
+  /* the vault of the Second Floor Key: a strongbox on a dais at the north end of the pit, chains, a faint violet glow that can be seen from the ring passage */
+  P('dais_steps',22,18,{});P('reliquary_chest',22,17,{block:true,npc:'psd_strongbox',sc:1.15});P('chains',21,17,{});P('chains',23,17,{});P('candelabra_tall',21,18,{block:true,sc:.8});P('candelabra_tall',23,18,{block:true,sc:.8});
+  light(22,18,[.9,.75,1.9]);light(22,16,[.7,.6,1.5]);
   foe('pshunger',22,21);dec('chest',22,25,{block:true,goldAmt:9000,sc:1});
   psdMany(P,[['shackled_skeleton',20,22,{}],['shackled_skeleton',24,22,{}],['shackled_skeleton',20,16,{}],['shackled_skeleton',24,16,{}]]);
   for(const [x,y] of [[19,17],[25,17],[19,25],[25,25],[18,21],[26,21]])dec('bones',x,y,{sc:.9});
@@ -541,16 +551,16 @@ function psdTalk(qid,D,d){
   return gySay(D.intro,[['Is there anything we can do?',()=>psdOffer(qid,D)],['Who else is kept here?',()=>gySay(D.others||"Others are in the cells round about. Speak to each one, and the door opens.",[BYE])],BYE])}
 function psdPrisoner(id,name,face,qid,D){khNpc(id,name,face,d=>psdTalk(qid,D,d),{q:[qid]});PSD.people=PSD.people||{};PSD.people[id]=D}
 const psdLeft=()=>{const F=psdF();return F.wheel.length};
-psdPrisoner('psd_garrick','Hob Garrick, thief','kh_ohfolk1_0','psq30',{
+psdPrisoner('psd_garrick','Hob Garrick, thief','ps_p_ghost_gentleman','psq30',{
   intro:"Hob Garrick, thief, and I will say so before you do. I came in over the kitchen roof for six candlesticks. Six! Silver, mind. The turnkeys caught me on the stairs, and the Questioner took everything off me, my boots included, and my tin.",
   offer:"My tin of picks. Round, dented, the lid tied down with red string. The Questioner keeps what he takes in a chest in the Question Room, the north east corner. I would go myself, but the door is not the only thing in my way. Bring it back and I will make it worth your while. I know something about the Sacristan.",
   accept:"Bless you. Mind the Questioner. He talks to the walls, and I think the walls have started to answer.",
   remind:()=>bagCount('pstin')?"You have the tin! Give it here.":"The tin is in a chest in the north east corner of the Question Room, with red string round the lid.",
   ready:"That is it. Red string and all, and the lid is still tied.",
-  thanks:"Wonderful. Those picks have opened better doors than yours. Take the set, I have another in my boot. And since you were kind: the day before the guards took the Sacristan, I saw him carry something into the chapel in a cloth, very carefully. Not a book. He put it where the candles are. That is all I know, and it is not nothing.",
+  thanks:"Wonderful. Those picks have opened better doors than yours. Take the set, I have another in my boot. And since you were kind: the night the guards took the Sacristan, I was in the shaft cell under the stairs, and I heard them go down past me with a ring of long silver keys, down and down, to the oubliette. They came back up without them. That is all I know, and it is not nothing.",
   after:"Hob Garrick, honest man, at your service. If you ever find six silver candlesticks, they are mine.",
-  done:()=>{pspF().garrickTold=1}});
-psdPrisoner('psd_isaude','Lady Isaude Marwen','kh_ohfolk2_0','psq31',{
+  done:()=>{pspF().garrickTold=1;try{pspClue(3)}catch(e){}}});
+psdPrisoner('psd_isaude','Lady Isaude Marwen','ps_p_ghost_lady','psq31',{
   intro:"I am Lady Isaude Marwen, and no, you do not have to bow. The Steward wanted my signet, because whoever holds it holds my house, and the house is all I have left. So I hid it where he would never think to look.",
   offer:"Behind my own portrait, in the Gallery of Portraits, the West Gallery on the ground floor of the Great Halls. A gold signet with a heron cut in it. Will you fetch it? I do not ask you to give it to anyone. I only want to hold it once before I am forgotten.",
   accept:"Thank you. My portrait is the one where I look as if I knew a joke. The frame is gold. Lift the frame, not the canvas. The canvas is very old.",
@@ -558,16 +568,16 @@ psdPrisoner('psd_isaude','Lady Isaude Marwen','kh_ohfolk2_0','psq31',{
   ready:"That is my heron. Oh. Give it to me.",
   thanks:"It is warm from your hand. Thank you. Take this locket. It held my husband's hair, and now it can hold your luck.",
   after:"I am still Lady Marwen. I find that is enough."});
-psdPrisoner('psd_peck','Ansel Peck, cook','kh_ohfolk3_0','psq32',{
+psdPrisoner('psd_peck','Ansel Peck, cook','ps_p_ghost_butler','psq32',{
   intro:"Ansel Peck, cook to the Pale Court for thirty one years, and for twenty nine of them the food was fit to eat. Then the Steward told me to cook for the dead. Nobody eats at their feasts. Nobody. So I stopped cooking, and here I am.",
   offer:"The Steward starved the kitchens to make me give in. If you put him down, I will think kindly of you for the rest of my life, which may be short. And my ladle, an iron one, I left it hanging by the great pot. Bring it, and I will give you something that does not taste of ash.",
   accept:"He is a tall thin ghost with a ring of keys, in the kitchens. You cannot miss him, he rattles. Mind the rats, they have been at the flour.",
   remind:()=>!pspF().stewardDead?"The Pale Steward is still in the kitchens on the ground floor. Tall, thin, a ring of keys.":bagCount('psladle')?"You have my ladle! Give it here.":"The Steward is gone, good. Now my ladle, an iron one by the great pot in the kitchens.",
   ready:"My ladle! And the Steward is gone? I can taste the air already.",
-  thanks:"Ten bowls of my best, packed for the road. They stay warm, I never found out why. And since you ask about the Sacristan: a sad, careful man. He told me once he kept the upper keys where the candles are. The chapel, I think.",
+  thanks:"Ten bowls of my best, packed for the road. They stay warm, I never found out why. And since you ask about the Sacristan: a sad, careful man. He told me once the upper keys were sent down with the guards, to where the lamps do not burn. Down, I think. Not up.",
   after:"If the kitchens are free, I will be there before the week is out. Somebody has to feed this place properly.",
-  done:()=>{psdGive('psstew',9);pspF().peckTold=1}});
-psdPrisoner('psd_sedge','Mother Sedge, wellwife','kh_ohfolk4_0','psq33',{
+  done:()=>{psdGive('psstew',9);pspF().peckTold=1;try{pspClue(2)}catch(e){}}});
+psdPrisoner('psd_sedge','Mother Sedge, wellwife','ps_p_ghost_maid','psq33',{
   intro:"Mother Sedge, wellwife of the Low Street. I have drawn water for the poor since before the Sovereign, and I know one thing about water: it goes where you let it. Look at my floor.",
   offer:"The cistern is flooded, and my cell with it. Three valve wheels hold the water back, and someone jammed them on purpose. They turn in an order, and the order is written on the wall of this block. Turn them right and the water goes down. The last wheel wakes whatever lives in the tank. Will you do it?",
   accept:"South first, then west, then east, as the wall says. Turn one wrong and every wheel springs back and the pipes scream. The thing in the tank is the old Gaoler. He drowned in there, and he does not know it yet.",
@@ -576,7 +586,7 @@ psdPrisoner('psd_sedge','Mother Sedge, wellwife','kh_ohfolk4_0','psq33',{
   thanks:"Take this. A rain charm, the sort the wellwives hang over the well. It says that whatever comes, it will also stop.",
   after:"My feet are dry for the first time in a year. I shall sit here and enjoy it.",
   others:"Calpurnia is two cells along, she prays. Harrow across from her, he counts. The fourth cell had two men in it, and the water got them."});
-psdPrisoner('psd_calpurnia','Sister Calpurnia','kh_ohfolk5_0','psq34',{
+psdPrisoner('psd_calpurnia','Sister Calpurnia','ps_p_ghost_priest','psq34',{
   intro:"Sister Calpurnia, of the chapel of the Spire. They shut me in here when I would not bless the Sovereign. I said I could not bless a man who had never asked me to. It is a great deal of fuss for a sentence.",
   offer:"Those who were kept here scratched their names on the walls, and nobody has read them since. There are five Name Stones, two in the Gaols above, two here in the Deep Cells, and one in the Oubliette at the bottom. Read them. Then go to the altar of the chapel and say the names aloud. Somebody must. It is the only burial they will have.",
   accept:"Read each stone slowly. The names are all that is left of them. Then the chapel, on the ground floor of the east wing. Stand close to the altar and speak.",
@@ -584,7 +594,7 @@ psdPrisoner('psd_calpurnia','Sister Calpurnia','kh_ohfolk5_0','psq34',{
   ready:"You have said them. I felt it, even down here, like a bell a long way off. Thank you.",
   thanks:"Take my candle. It has burned for nobody since I was brought here, and it is no shorter. Perhaps it was waiting.",
   after:"I am no longer afraid of the dark. It was never the dark that was the trouble."});
-psdPrisoner('psd_harrow','Captain Dyrwen Harrow','kh_ohsold1_0','psq35',{
+psdPrisoner('psd_harrow','Captain Dyrwen Harrow','ps_p_ghost_soldier','psq35',{
   intro:"Captain Dyrwen Harrow, last Warden of the Road. I held the gate while the others went west. They took me alive, which I regret. Now I tell the rats the news. The rats are not good listeners.",
   offer:"My horn hangs in the Winch Loft above the gatehouse, where they hung it as a trophy. It is battered and tarnished, but it is the horn of the Road Wardens, and I would like to hold it once more. Bring it to me. Then it is yours to keep.",
   accept:"The Great Gatehouse, the east guardroom, the stair up to the loft. Go quietly. The Gate Captain sleeps lightly.",
@@ -592,7 +602,7 @@ psdPrisoner('psd_harrow','Captain Dyrwen Harrow','kh_ohsold1_0','psq35',{
   ready:"That is her. She is cold. She was always cold.",
   thanks:"Keep the horn, I do not need it. Take this seal instead. Wenlock has others like it, and a man who carries one will be heard at the Wardens' doors.",
   after:"Captain Harrow, at ease. For the first time in nine years, at ease."});
-psdPrisoner('psd_gaunt','Wilhelmina Gaunt','kh_ohfolk6_0','psq36',{
+psdPrisoner('psd_gaunt','Wilhelmina Gaunt','ps_p_ghost_dancer','psq36',{
   intro:"Wilhelmina Gaunt. Court painter to three Sovereigns, and the only one of them who ever asked me to paint what I saw. That was a mistake, and they shut me down here for it. There is one empty frame in the Gallery of Portraits. Mine. I never filled it.",
   offer:"I would like it painted. I cannot go, you see. Three pots of pigment from the Painters' Closet behind the Gallery, on the ground floor of the Great Halls. Bring them to me, and I will lend you my brush and palette, and you will paint the frame yourself, in my name.",
   accept:"The closet is behind the Gallery, a small room with a brush hanging on the door. The pots are clay, and small. Bring three.",
@@ -604,7 +614,7 @@ psdPrisoner('psd_gaunt','Wilhelmina Gaunt','kh_ohfolk6_0','psq36',{
   ready:"Is it done? Describe it to me. No, do not. I would rather imagine it.",
   thanks:"That is the first frame I ever finished by another's hand. Keep my palette. And you will find the frame has opened something in the Gallery. That was the idea.",
   after:"I can see it from here, if I close my eyes. It is a good frame."});
-psdPrisoner('psd_stamford','Sir Edrik Stamford','kh_ohsold1_1','psq37',{
+psdPrisoner('psd_stamford','Sir Edrik Stamford','ps_p_ghost_gentleman','psq37',{
   intro:"Sir Edrik Stamford, knight of King Osric's garrison. We were four on the road when the Pale Guard took us, and I am the one who is still alive, if you call this alive.",
   offer:"They took my sword, Dawnwarden. It was my father's, and his father's. It hangs on a rack in the Armoury now, ground floor, west wing, south of the kitchens. I would like to hold it once more. Bring it here, and afterwards it is yours. A sword is no use to me in a cell.",
   accept:"A plain blade, a white pommel, a sunrise cut into the guard. You will know it when you see it.",
@@ -612,7 +622,7 @@ psdPrisoner('psd_stamford','Sir Edrik Stamford','kh_ohsold1_1','psq37',{
   ready:"Dawnwarden. Gods, it is light.",
   thanks:"It was my father's. Now it is yours, because you carried it through the Spire when I could not. Keep it bright.",
   after:"I held it for a whole minute. That is more than I hoped for."});
-psdPrisoner('psd_yseult','Yseult Ardent, cupbearer','kh_ohfolk7_0','psq38',{
+psdPrisoner('psd_yseult','Yseult Ardent, cupbearer','ps_p_ghost_maid','psq38',{
   intro:"Yseult Ardent, cupbearer. Forty years I tasted the Sovereign's cup, every morning and every night, and I am still alive. That is the first thing that should tell you something.",
   offer:"I know what is in the cup now, and I can make an antidote. It needs silver roses, from the Rose Garden in the courtyard, the ones with a violet heart. Three of them. Bring them to me and I will make it, and tell you what I know about the Sovereign.",
   accept:"Silver white petals and a violet heart. The Rose Garden of the Court of Statues. Mind the gardener, he does not like them picked.",
@@ -665,6 +675,16 @@ function psdGaolerRise(){
   const f=fr[Math.min(fr.length-1,3)];addEnemy('psdrowngaoler',f[0],f[1],true);const m=G.enemies[G.enemies.length-1];
   if(m){m.lvl=103;m.base=103;m.fixed=LEVEL;m.maxhp=enemyStat('psdrowngaoler',103).hp;m.hp=m.maxhp;m.psPh=0;m.psSum=0}
   sfx('growl');G.shake=.5;msg('A huge shape stands up out of the water, wrapped in chains, with a ring of keys at its belt. "Nobody leaves," it says, as it has said for a hundred years.','#a8d0f0')}
+/* ---------- the Second Floor Key: the strongbox in the Oubliette, and the hints that lead to it ---------- */
+khNpc('psd_strongbox','The strongbox','ps_reliquary_chest',()=>{const F=psdF(),P=pspF();
+  if(P.key2||bagCount('pskey2'))return say('The strongbox stands open. On the grey velvet lies the print of a long key, and nothing else.',[BYE]);
+  if(!F.hungerDead)return say('A black iron strongbox on a dais, chained to the floor. A faint violet light shines through the keyhole and the seams of the lid. The lid will not lift while the Hunger is alive.',[BYE]);
+  return say('The chains fall away. In the strongbox, on grey velvet, lies a tall silver key with a violet stone in the bow, glowing very faintly.',[['Take the key.',()=>{
+    P.key2=true;if(!bagAdd(mkItem('pskey2')))G.items.push({k:'pskey2',x:Math.round(G.P.x),y:Math.round(G.P.y),taken:false});
+    sfx('key');msg('You take the Second Floor Key. It opens the three stair doors to the second floor. Climb back up: the Grand Stair is at the north end of the Great Halls.','#ffe36a');
+    try{if(qSt('psq10')==='active')msg('Journal: you have the key.','#ffe36a')}catch(e){}G.talk=null;return null}],BYE])});
+khNpc('psd_gaolerlog',"The Gaoler's log",'hl_p_note',()=>{try{pspClue(3)}catch(e){}return say("The Gaoler's log lies open on the table. The last page, in square handwriting: 'Dusk. The Sacristan's receipt for the upper keys, sent down to the oubliette with two guards. Locked in the strongbox on the dais, at the bottom of the pit, where nobody will climb for them. The Hunger sits on it. God help whoever wants them.'",[BYE])});
+khNpc('psd_scratch','Scratches on the wall','gy_nameplate',()=>{try{pspClue(2)}catch(e){}return say('Somebody has scratched into the stone with a nail: THEY CARRIED THE LONG KEYS PAST MY DOOR. DOWN. DOWN. NOT UP. I COUNTED THE STEPS.',[BYE])});
 /* ---------- the three bosses: moves, helpers at two thirds and one third, what they leave ---------- */
 const PSD_BOSS={
  psquestioner:{moves:[{every:3,mult:1.2,near:2,affl:'bleeding',txt:'The Questioner lifts a glowing iron out of the brazier and lays it across the front hero, quite gently. "A few questions," he says, in the voice of a clerk reading a list.',col:'#f0c8c0',verb:'The hot iron burns'},{every:5,all:true,mult:.5,affl:'shaken',txt:'He lets go of a chain, and every hook and weight in the room swings. The screaming that was in the walls comes out all at once.',col:'#e0d0f0',verb:'The screaming hurts'}],help:['psflayed','Two Flayed Prisoners tear loose from the wall chains, wailing.']},
@@ -686,7 +706,7 @@ function psdBossDied(e){
   const F=psdF(),t=e.t;for(const q of G.enemies)if(q.hp>0&&q.psdAdd){q.hp=0;q.dying=.4}
   if(t==='psquestioner'){F.questionerDead=1;sfx('win');msg('The Questioner folds up like a coat. The iron rings on the floor, and the room is quiet for the first time in a long while.','#ffe36a')}
   else if(t==='psdrowngaoler'){F.gaoler=2;sfx('win');msg('The Drowned Gaoler goes down in a rush of dark water, and the ring of keys sinks with him. The cistern begins, slowly, to drain.','#ffe36a');later(1400,()=>msg('Somewhere above, Mother Sedge is calling that her cell is dry.','#a8d0f0'))}
-  else if(t==='pshunger'){F.hungerDead=1;sfx('win');msg('The Hunger comes apart into pale dust and a great many bones. The pit is only a pit. A chest stands at its edge.','#ffe36a')}}
+  else if(t==='pshunger'){F.hungerDead=1;sfx('win');msg('The Hunger comes apart into pale dust and a great many bones. The pit is only a pit. On a dais at its far end, a strongbox glows faintly.','#ffe36a')}}
 /* the chest of the pit and the other chests: potions, mana, gear and gold, better the deeper the floor */
 {const _lf=lootFor;lootFor=function(d){
   if(psdIs(LEVEL)&&d&&(d.k==='gy_chest'||d.k==='chest')){

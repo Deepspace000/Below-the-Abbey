@@ -156,6 +156,14 @@ def run_key():
             if o.get('skip'):
                 print('SKIP stair door', o['name'], '(level not built)'); continue
             check('locked stair door ' + o['name'], not o['bad'], o['bad'])
+        # the key now lies in the Oubliette 9800: a strongbox (npc psd_strongbox) on the dais, refused while the Hunger lives, giving pskey2 after; the jump link and the clue flow agree
+        r2 = pg.evaluate("""() => { const o = {bad: []}; if (PSP.KEY2.hiddenIn !== 9800) o.bad.push('KEY2.hiddenIn is ' + PSP.KEY2.hiddenIn);
+          const jl = (typeof PSP_JUMP !== 'undefined' && PSP_JUMP.palespirekey) || null; if (!LEVELS[9800]) KH_LAZY[9800](); const L = LEVELS[9800];
+          if (!L.decor.some(d => d.npc === 'psd_strongbox')) o.bad.push('no strongbox in 9800'); if (!L.enemies.some(e => e.t === 'pshunger')) o.bad.push('no Hunger in 9800');
+          if (typeof pspClue !== 'function') o.bad.push('no pspClue'); else { const F = G.flags.psp || (G.flags.psp = {}); F.keyClue = 0; pspClue(1); pspClue(3); if (F.keyClue !== 3) o.bad.push('clue flag ' + F.keyClue) }
+          if (!QUESTS.psq10) o.bad.push('no psq10'); else { const d = QUESTS.psq10.desc; if (!d || d.length < 20) o.bad.push('psq10 desc') }
+          return o }""")
+        check('the key lies in the Oubliette strongbox and the clue flow works', not r2['bad'], r2['bad'])
         check('no page errors', not real(errs), real(errs)[:8])
         b.close()
 

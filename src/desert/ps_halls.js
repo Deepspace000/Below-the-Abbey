@@ -14,11 +14,14 @@ const PSH_FURN=[['furn_sideboard','hl_p_desk',1.5],['furn_organ','hl_p_shelf',3.
   ['furn_table_long_black','hl_p_feast',1.0],['furn_chair_dining_black','ds_hgtb_chair',1.3],['furn_harpsichord_black','hl_p_desk',1.3],['furn_candelabra_black','ds_hpb_candelabra_6',1.7],['furn_clock_grandfather','hl_p_shelf',2.3],
   ['furn_mirror_gothic','hl_p_mirror',2.2],['furn_pew_black','gy_bench',1.1],['furn_lectern_black','hl_p_lectern',1.5]];
 /* ghost pictures: [name, sources (first that exists), height, filter]; translucent cold figures made from existing ghost sprites until the art agent paints p_ghost_* / ghost_* */
-const PSH_GPICS=[['p_ghost_lady',['gyp_ghost_1'],1.8],['p_ghost_monk',['kh_ohfolk6_0','gyp_ghost_0'],1.8],['p_ghost_child',['gyp_ghost_0'],1.05],['p_ghost_maid',['kh_ohfolk2_1','gyp_ghost_2'],1.7],['p_ghost_servant',['gyp_ghost_0'],1.7],
-  ['p_ghost_coachman',['kh_ohfolk1_2','gyp_ghost_2'],1.75],['p_ghost_diner',['kh_ohfolk3_2','gyp_ghost_1'],1.5],['p_ghost_hunter',['kh_ohsold1_0','gyp_ghost_2'],1.85],['p_ghost_sculptor',['kh_ohfolk5_2','gyp_ghost_0'],1.75],['p_ghost_choir',['gyp_ghost_0'],1.2],
-  ['p_ghost_bride',['gyp_ghost_1'],1.85],['p_ghost_prisoner',['kh_ohfolk7_2','gyp_ghost_0'],1.7],['p_ghost_officer',['kh_ohsold1_1','gyp_ghost_2'],1.9],['ghost_hound',['gyp_crB_4','gyi_hound'],.9],['ghost_couple',['gyp_ghost_1'],1.85],['ghost_wraith',['gyp_ghost_0'],2.0]];
+const PSH_GPICS=[['p_ghost_lady',['gyp_ghost_1'],1.8],['p_ghost_monk',['gyp_ghost_0'],1.8],['p_ghost_child',['gyp_ghost_0'],1.05],['p_ghost_maid',['gyp_ghost_2'],1.7],['p_ghost_servant',['gyp_ghost_0'],1.7],
+  ['p_ghost_coachman',['gyp_ghost_2'],1.75],['p_ghost_diner',['gyp_ghost_1'],1.5],['p_ghost_hunter',['gyp_ghost_2'],1.85],['p_ghost_sculptor',['gyp_ghost_0'],1.75],['p_ghost_choir',['gyp_ghost_0'],1.2],
+  ['p_ghost_bride',['gyp_ghost_1'],1.85],['p_ghost_prisoner',['gyp_ghost_0'],1.7],['p_ghost_officer',['gyp_ghost_2'],1.9],['ghost_hound',['gyp_crB_4','gyi_hound'],.9],['ghost_couple',['gyp_ghost_1'],1.85],['ghost_wraith',['gyp_ghost_0'],2.0]];
+/* named hauntings to the painted p_ghost_* pieces (butler child dancer gentleman lady maid priest soldier) */
+const PSH_GMAP=[['p_ghost_monk','priest'],['p_ghost_servant','butler'],['p_ghost_coachman','gentleman'],['p_ghost_diner','gentleman'],['p_ghost_hunter','soldier'],['p_ghost_sculptor','butler'],['p_ghost_choir','child'],['p_ghost_bride','lady'],['p_ghost_prisoner','soldier'],['p_ghost_officer','soldier']];
 for(const [n,src,h] of PSH_FURN)PSP_PICS[n]=[h,[src],{dark:1}];
 for(const [n,src,h] of PSH_GPICS)PSP_PICS[n]=[h,src,{ghost:1}];
+if(!PSP_PICS.window_stained_tall)PSP_PICS.window_stained_tall=[3.4,['hl_p_window'],{}];
 PSP_PICS.banner_long_a=[3.0,['hl_p_banner'],{}];PSP_PICS.banner_long_b=[3.0,['hl_p_banner'],{}];PSP_PICS.tex_vault_ribbed=[1,['gy_slab'],{}];
 /* ---------- loading: the graveyard's stone, the Oldhaven people, and the few extra stand-in pictures ---------- */
 const PSH_EXTRA=[['ds_wm_statue','ds_wm_statue.png'],['ds_hgtb_furn_chandelier','ds_hgtb_furn_chandelier.png'],['ds_hgtb_table','ds_hgtb_table.png'],['ds_hgtb_chair','ds_hgtb_chair.png'],['ds_hgtb_furn_hearth','ds_hgtb_furn_hearth.png'],
@@ -115,7 +118,7 @@ function pshPics(){
   C('pshhound','gyp_crB_4','grayscale(.7) brightness(1.4)',.95);
   {const a=IMG.gyp_ghost_1,b=IMG.gyp_ghost_2;if(a&&b){const h=Math.max(a.height,b.height),c=pshCv(Math.round((a.width+b.width)*.78),h),x=c.getContext('2d');try{x.filter='saturate(.4) brightness(1.15) opacity(.85)'}catch(e){}
     x.drawImage(a,0,h-a.height);x.translate(c.width,0);x.scale(-1,1);x.drawImage(b,0,h-b.height);pshSet('c_psdancer',c,1.8);if(ENEMY_DEF.psdancer)ENEMY_DEF.psdancer.w=+(1.8*c.width/c.height).toFixed(2)}}
-  for(const [n,src] of [['p_chamberlain','kh_ohfolk4_1'],['p_lutenist','kh_ohfolk6_1'],['p_curator','kh_ohfolk5_2']]){const c=pshFilt(src,ghost);if(c)pshSet(n,c,1.7)}
+  for(const [n,src] of [['p_chamberlain','gyp_ghost_2'],['p_lutenist','gyp_ghost_1'],['p_curator','gyp_ghost_0']]){const c=pshFilt(src,ghost);if(c)pshSet(n,c,1.7)}
   { // black gothic furniture: very dark carved wood with a faint cold sheen
     const blk='brightness(.52) contrast(1.15) saturate(.5) sepia(.2) hue-rotate(195deg)';
     for(const [n,src,h] of PSH_FURN)S(n,pshFilt(src,blk),h);
@@ -125,9 +128,15 @@ function pshPics(){
     // ghosts: pale, cold, see-through
     const gf='saturate(.2) brightness(1.15) hue-rotate(190deg) opacity(.62)';
     for(const [n,src,h] of PSH_GPICS){let c=null;for(const q of src){c=pshFilt(q,gf);if(c)break}if(c)S(n,c,h)}
-    {const a=IMG.ps_p_ghost_lady||IMG.gyp_ghost_1,b=IMG.gyp_ghost_2;if(a&&b){const hh=Math.max(a.height,b.height),c=pshCv(Math.round((a.width+b.width)*.8),hh),x=c.getContext('2d');try{x.filter=gf}catch(e){}x.drawImage(a,0,hh-a.height);x.translate(c.width,0);x.scale(-1,1);x.drawImage(b,0,hh-b.height);S('ghost_couple',c,1.85)}}
-    for(const [id,src,f,h] of [['pswraith','gyp_ghost_1','brightness(.55) saturate(.35) hue-rotate(195deg) opacity(.9)',2.1],['psofficer','kh_ohsold1_1','saturate(.2) brightness(1.1) hue-rotate(195deg) opacity(.78)',1.9]]){const c=pshFilt(src,f)||pshFilt('gyp_ghost_2',f);if(c){pshSet('c_'+id,c,h);const d=ENEMY_DEF[id];if(d)d.w=+(h*c.width/c.height).toFixed(2)}}
+    {const a=IMG.ps_p_ghost_lady||IMG.gyp_ghost_1,b=IMG.ps_p_ghost_gentleman||IMG.gyp_ghost_2;if(a&&b){const hh=Math.max(a.height,b.height),c=pshCv(Math.round((a.width+b.width)*.8),hh),x=c.getContext('2d');try{x.filter=gf}catch(e){}x.drawImage(a,0,hh-a.height);x.translate(c.width,0);x.scale(-1,1);x.drawImage(b,0,hh-b.height);S('ghost_couple',c,1.85)}}
+    for(const [id,src,f,h] of [['pswraith','gyp_ghost_1','brightness(.55) saturate(.35) hue-rotate(195deg) opacity(.9)',2.1],['psofficer','saturate(.2) brightness(1.1) hue-rotate(195deg) opacity(.78)',1.9]]){const c=pshFilt(src,f)||pshFilt('gyp_ghost_2',f);if(c){pshSet('c_'+id,c,h);const d=ENEMY_DEF[id];if(d)d.w=+(h*c.width/c.height).toFixed(2)}}
   }
+  /* the painted gaunt ghosts (p_ghost_*) stand in for every named haunting: no folk sprites, no minstrels */
+  for(const [a,b] of PSH_GMAP){const k='ps_p_ghost_'+b;if(IMG[k]&&!IMG[k]._ps){IMG['ps_'+a]=IMG[k];NPC_H['ps_'+a]=NPC_H[k]||1.8}}
+  for(const [a,b] of [['p_chamberlain','butler'],['p_lutenist','dancer'],['p_curator','gentleman']]){const k='ps_p_ghost_'+b;if(IMG[k]){IMG['ps_'+a]=IMG[k];NPC_H['ps_'+a]=NPC_H[k]||1.8}}
+  {const k='ps_p_ghost_soldier';if(IMG[k]&&ENEMY_DEF.psofficer){IMG['ps_c_psofficer']=IMG[k];NPC_H['ps_c_psofficer']=1.9;ENEMY_DEF.psofficer.w=+(1.9*IMG[k].width/IMG[k].height).toFixed(2)}}
+  /* hostile hall folk wear the painted gaunt ghosts too, tinted so that a foe is not mistaken for a harmless haunting */
+  for(const [id,b,f,h] of [['psservant','butler','hue-rotate(70deg) saturate(1.5) brightness(.8) contrast(1.15)',1.8],['pscourtier','gentleman','hue-rotate(250deg) saturate(1.5) brightness(.78) contrast(1.15)',1.85],['psdancer','dancer','hue-rotate(305deg) saturate(1.6) brightness(.85)',1.6],['pscarver','butler','hue-rotate(165deg) saturate(1.7) brightness(.7) contrast(1.2)',1.9]]){const k='ps_p_ghost_'+b;if(IMG[k]){const c=pshFilt(k,f);if(c){pshSet('c_'+id,c,h);const d=ENEMY_DEF[id];if(d)d.w=+(h*c.width/c.height).toFixed(2)}}}
   PSH.pics=1}
 
 /* ---------- the creatures of the halls (ratings follow the place: 101; the bosses are tuned by eye, see the notes) ---------- */
@@ -172,6 +181,9 @@ function pshFloors(){
   FLOORS.psf_dais=mk((x,y)=>{const e=Math.min(x,y,N-1-x,N-1-y);if(e<2)return [14,18,28];const v=vn(x,y,32,811)*.5+vn(x,y,8,812)*.3;return [66+v*34,78+v*40,102+v*36]});
   FLOORS.psf_black=mk((x,y)=>{const e=Math.min(x%64,y%64,63-x%64,63-y%64);if(e<1.4)return [8,10,14];const v=vn(x,y,32,813)*.5+vn(x,y,8,814)*.4,vein=Math.abs(Math.sin(x*.05-y*.06+vn(x,y,32,815)*4))<.05?40:0;return [18+v*18+vein*.6,22+v*20+vein*.8,32+v*26+vein]});
   if(typeof gyFloorTone==='function'&&FLOORS.gyf_grass)gyFloorTone('psf_grass','gyf_grass',.72,[.78,.95,.88]);
+  // the painted textures (assets/ps tex_*) replace the code-drawn flagstone, black marble and vault when they are loaded
+  const fromTex=(key,g,tn)=>{const im=IMG['ps_'+key];if(!im||!im.width)return null;try{const c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.drawImage(im,0,0,N,N);const s=x.getImageData(0,0,N,N).data,d=new Uint8ClampedArray(N*N*4);for(let i=0;i<d.length;i+=4){d[i]=Math.min(255,s[i]*g*tn[0]);d[i+1]=Math.min(255,s[i+1]*g*tn[1]);d[i+2]=Math.min(255,s[i+2]*g*tn[2]);d[i+3]=255}return d}catch(e){return null}};
+  {const a=fromTex('tex_flagstone',2.2,[.8,.95,1.15]);if(a)FLOORS.psf_flag=a;const b=fromTex('tex_marble',2.4,[.75,.95,1.1]);if(b)FLOORS.psf_black=b;const v=fromTex('tex_vault_ceiling',2.6,[.75,.92,1.2]);if(v)CEILS.psc_hall=v}
   PSH._fl=['psf_chq','psf_flag','psf_run','psf_wood','psf_carpet','psf_dais',FLOORS.psf_grass?'psf_grass':'psf_black'];
   // a ribbed groin vault: diagonal and cross ribs of pale slate, dark webbing that darkens toward the springers, a boss at the crossing (tex_vault_ribbed)
   if(!CEILS.psc_hall){const d=new Uint8ClampedArray(N*N*4);for(let y=0;y<N;y++)for(let x=0;x<N;x++){const o=(y*N+x)*4,e=Math.min(x,y,N-1-x,N-1-y),dd=Math.min(Math.abs(x-y),Math.abs(x+y-(N-1)))/1.42,cx=x-N/2+.5,cy=y-N/2+.5,rc=Math.hypot(cx,cy);
@@ -340,7 +352,7 @@ function pshBuild(){
   const sign=(x,y,wd,a,b)=>{if(!open(x,y)){miss.push('sign@'+x+','+y);return}decor.push({k:'sign_gy',x,y,block:false,wd:[wd[0],wd[1]],txt:[a,b||''],sc:1})};
   const COLS=['col_fluted','col_twist','col_silver'];
   const col=(x,y,n)=>put('ps_'+COLS[n%3],x,y,{block:true});
-  PSH.st=i=>{const n=['ps_st_veiled','ps_hst0','ps_hst1','ps_hst2','ps_hst3','ps_hst4','ps_hst5','ps_hst7'];return IMG[n[i%8]]?n[i%8]:'ps_hst0'};
+  PSH.st=i=>{const n=['ps_st_veiled','ps_st_saint1','ps_st_saint2','ps_st_judge','ps_st_saint3','ps_st_bishop','ps_st_saint4','ps_st_headless'];const k=n[i%8];return IMG[k]&&!IMG[k]._ps?k:(IMG['ps_hst'+(i%5)]?'ps_hst'+(i%5):'ps_hst0')};
   const stat=(x,y,i,o)=>put(PSH.st(i),x,y,Object.assign({block:true},o||{}));
   const pt=(i)=>pshPortrait(i);
   const mark=(x,y,kind)=>{kindAt[x+','+y]=kind};
@@ -373,6 +385,39 @@ function pshBuild(){
 if(typeof pspRegister==='function'){try{pspRegister(PSH.ID,pshBuild,{})}catch(e){KH_LAZY[PSH.ID]=pshBuild}}else KH_LAZY[PSH.ID]=pshBuild;
 LEVEL_NAMES[9740]='The Ground Floor: the Great Halls';LEVEL_RATING[9740]=101;
 
+/* ---------- THE HAUNTED HOUSE DRESSER (shared by halls, wings and dungeon): sheeted windows, dust-sheeted furniture, cobwebs, haunted mirrors, ancestor portraits, glowing candles, red lanterns.
+   Painted pieces (assets/ps) are used when they exist; a few have a stand-in (mirror, candles, portraits in the halls); the others are simply not placed until painted. ---------- */
+for(const n of ['a','b','c']){PSP_PICS['mirror_haunted_'+n]=[2.2,['hl_p_mirror'],{dark:1}];PSP_PICS['candles_glow_'+n]=[.8,['hl_p_candle'],{keep:1}]}
+const PSH_HP={mirror:['mirror_haunted_a','mirror_haunted_b','mirror_haunted_c'],portrait:[1,2,3,4,5,6,7,8].map(i=>'portrait_ancestor_'+i),sheetwin:['window_sheeted_a','window_sheeted_b','window_sheeted_c'],
+  cobcorner:['cobweb_corner_a','cobweb_corner_b'],cobthick:['cobweb_thick_a','cobweb_thick_b','cobweb_thick_c'],candles:['candles_glow_a','candles_glow_b','candles_glow_c'],redlamp:['lantern_red_a','lantern_red_b'],dust:['dust_sheet_furniture_a','dust_sheet_furniture_b'],spider:['web_spider'],bedweb:['bed_cobweb_a','bed_cobweb_b']};
+const PSH_RED=[1.7,.32,.26];
+const pshPainted=n=>{const k='ps_'+n;return IMG[k]&&!IMG[k]._ps?k:null};
+function pshHaunt(o){
+  const W=o.W,H=o.H,D4=[[0,-1],[1,0],[0,1],[-1,0]],hs=(a,b,c)=>hash2(a,b,c+(o.seed||0)),out={};
+  const key=(t,i)=>{const nm=PSH_HP[t][i%PSH_HP[t].length],p=pshPainted(nm);if(p)return p;if(o.stand&&o.stand[t])return o.stand[t](i,nm);if(PSP_PICS[nm])return pspPic(nm);return null};
+  const slots=[],corners=[],narrow=[],floor=[];
+  for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!o.open(x,y))continue;const ws=D4.filter(([a,b])=>o.wall(x,y,a,b)&&!o.taken(x,y,a,b));
+    for(const [a,b] of ws)slots.push([x,y,[a,b],hs(x,y,a*3+b+11)]);
+    const wl=D4.filter(([a,b])=>o.wall(x,y,a,b));
+    if(wl.length>=2&&wl.some(([a,b])=>wl.some(([c,d])=>a*c+b*d===0)))corners.push([x,y,wl,hs(x,y,5)]);
+    if(wl.length===2&&wl[0][0]+wl[1][0]===0&&wl[0][1]+wl[1][1]===0&&o.free(x,y))narrow.push([x,y,hs(x,y,6)]);
+    if(o.free(x,y)&&wl.length>=1)floor.push([x,y,wl,hs(x,y,7)])}
+  const by=(a,b)=>a[a.length-1]-b[b.length-1];
+  const spaced=(list,n,gap,use)=>{let c=0;const got=[];list.sort(by);for(const e of list){if(c>=n)break;if(got.some(q=>Math.hypot(q[0]-e[0],q[1]-e[1])<gap))continue;if(use(e,c)!==false){got.push(e);c++}}return c};
+  const cnt=o.counts||{};
+  out.mirror=spaced(slots.slice(),cnt.mirror||0,6,(e,i)=>{const k=key('mirror',i);if(!k)return false;return o.wallPic(k,e[0],e[1],e[2],{bob:.5,mirror:i})});
+  out.portrait=spaced(slots.slice(),cnt.portrait||0,3.2,(e,i)=>{const k=key('portrait',i+(o.pi||0));if(!k)return false;return o.wallPic(k,e[0],e[1],e[2],{bob:.6,portrait:i})});
+  out.sheetwin=spaced(slots.slice(),cnt.sheetwin||0,4,(e,i)=>{const k=key('sheetwin',i);if(!k)return false;return o.wallPic(k,e[0],e[1],e[2],{bob:.5})});
+  out.cobcorner=spaced(corners.slice(),cnt.cobcorner||0,3,(e,i)=>{const k=key('cobcorner',i);if(!k)return false;const w=e[2][i%e[2].length];return o.wallPic(k,e[0],e[1],w,{bob:.9})});
+  out.redlamp=spaced(slots.slice(),cnt.redlamp||0,6.5,(e,i)=>{const k=key('redlamp',i);if(!k)return false;const r=o.wallPic(k,e[0],e[1],e[2],{bob:1.0});if(r&&o.light)o.light(e[0],e[1],PSH_RED);return r});
+  out.cobthick=spaced(narrow.slice(),cnt.cobthick||0,5,(e,i)=>{const k=key('cobthick',i);if(!k)return false;return o.floorProp(k,e[0],e[1],{block:false,thick:1})});
+  out.candles=spaced(floor.slice(),cnt.candles||0,5,(e,i)=>{const k=key('candles',i);if(!k)return false;const r=o.floorProp(k,e[0],e[1],{block:false,sc:.7});if(r&&o.light)o.light(e[0],e[1],[1.6,1.0,.45]);return r});
+  out.dust=spaced(floor.slice(),cnt.dust||0,4.5,(e,i)=>{const k=key('dust',i);if(!k)return false;return o.floorProp(k,e[0],e[1],{block:true})});
+  out.spider=spaced(corners.slice(),cnt.spider||0,9,(e,i)=>{const k=key('spider',i);if(!k)return false;return o.floorProp(k,e[0],e[1],{block:false,sc:.6})});
+  return out}
+/* little tales told by a haunted mirror and an ancestor, for the interactive touches */
+const PSH_MIRROR_LINES=['The glass shows the room behind you, and the room is empty. You are not in it.','You look into the mirror. Something in it looks away.','A pale hand is pressed flat on the other side of the glass. It was there before you came.','The mirror shows a lit candle where there is none. The reflection of the room is older than the room.','Your breath does not cloud the glass. Someone else\'s does.','For a moment the mirror shows a girl standing behind you. When you turn, she is closer.'];
+const PSH_ANCESTOR_LINES=['The painted eyes follow you along the wall. You are almost sure they are not painted.','The portrait is of a lean man with a hard mouth. The nameplate has been scratched off from the inside.','A pale old woman in black, painted with her hands folded. One of the folded hands is no longer in the picture.','Every ancestor of the house is painted with the same cold smile. It is a little wider than it was.'];
 /* ---------- what stands in each room ---------- */
 function pshFurnish(S){
   const {put,pic,foe,lamp,sign,col,stat,pt,mark,open,fr,RI,decor,hs,g}=S;
@@ -464,6 +509,8 @@ function pshFurnish(S){
   for(const y of [22,28,34]){stat(27,y,y%5);stat(37,y,(y+1)%5)}
   for(const y of [21,27,33])put(P('urn_big'),37,y,{block:true});
   for(const y of [24,30,36])vine(26,y,We,'vine_b');
+  // tall stained windows high in both nave walls, like the clerestory of a cathedral
+  for(const y of [20,23,28,33])pic(P('window_stained_tall'),26,y,We,{bob:.55});for(const y of [22,24,29,34])pic(P('window_stained_tall'),38,y,Ea,{bob:.55});
   hang(32,21,1.9);hang(32,26,2.0);hang(32,31,2.0);hang(32,36,1.9);
   for(const y of [20,28,34])lamp(27,y,V,1.5,120);
   for(const [x,y] of [[31,22],[33,26],[31,30],[33,34]])put(P('furn_candelabra_black'),x,y,{block:true});for(const [x,y] of [[33,22],[31,26],[33,30]])put(P('urn_big'),x,y,{block:true});
@@ -476,8 +523,8 @@ function pshFurnish(S){
   for(const y of [20,21,26,27,32,33]){pew(28,y);pew(36,y)}
   put(P('furn_pulpit'),27,25,{block:true});put(P('furn_pulpit'),37,25,{block:true});put(P('furn_screen_tracery'),28,36,{block:true});put(P('furn_screen_tracery'),36,36,{block:true});
   ghost('monk1','p_ghost_monk',[[32,37],[32,20],[32,37]],{sp:.28,lines:['Requiem aeternam. We sing for the household.','The household does not hear us. We sing anyway.']});
-  ghost('monk2','p_ghost_monk',[[32,34],[32,20],[32,37],[32,34]],{sp:.28,lines:['Light a candle. Not that one.']});
-  ghost('monk3','p_ghost_monk',[[32,30],[32,20],[32,37],[32,30]],{sp:.28,lines:['Walk behind us. Do not walk in front.']});
+  ghost('monk2','p_ghost_diner',[[32,34],[32,20],[32,37],[32,34]],{sp:.28,lines:['Light a candle. Not that one.']});
+  ghost('monk3','p_ghost_maid',[[32,30],[32,20],[32,37],[32,30]],{sp:.28,lines:['Walk behind us. Do not walk in front.']});
   ghost('bride','p_ghost_bride',[[27,20],[27,36],[27,20]],{sp:.24,lines:['I was to be married at noon. The bells never rang.','Have you seen my groom? He went up the great stair.']});
   foe('pswraith',37,29);foe('pswraith',27,23);
   /* ===== D. the Dining Hall ===== */
@@ -508,7 +555,7 @@ function pshFurnish(S){
   hang(13,30,1.6);hang(21,30,1.6);
   for(const x of [5,11,19,23])gar(x,31,So);
   foe('psservant',14,30);foe('psservant',20,29);foe('pscarver',17,30);foe('psarmour',6,29);
-  ghost('trayA','p_ghost_servant',[[4,30],[22,30],[4,30]],{sp:.4,lines:['Mind your back, sir.']});
+  ghost('trayA','p_ghost_diner',[[4,30],[22,30],[4,30]],{sp:.4,lines:['Mind your back, sir.']});
   ghost('trayB','p_ghost_maid',[[22,29],[5,29],[22,29]],{sp:.35,lines:['The soup is cold. It was always cold.']});
   /* ===== M. the Minstrels' Gallery (up the narrow stair): a balcony strip over the dining hall ===== */
   for(let x=10;x<=23;x++)if(x!==22)put(P('iron_rail'),x,33,{});
@@ -569,9 +616,13 @@ function pshFurnish(S){
   wall(pt(200),[[26,6]],We,{bob:hi});wall(pt(210),[[38,7]],Ea,{bob:hi});
   sign(32,6,N,'UP THE GRAND STAIR','The way to the state rooms. Ask the Chamberlain.');sign(38,8,Ea,'THE AUDIENCE CHAMBER','The Sovereign receives no one');
   hang(32,11,2.3);hang(32,7,1.8,V);lamp(28,7,V,1.7,120);lamp(36,7,V,1.7,120);
+  /* the way up: broad mossy steps rising to the great barred double door, chains and a padlock, cold light through the bars */
+  put(P('iron_gate_big'),32,6,{block:false,force:true,sc:1.1,over:true});put(P('chains'),31,6,{block:false,force:true,over:true});put(P('chains'),33,6,{block:false,force:true,over:true});
+  put(P('arch_stair'),32,8,{block:false,force:true,sc:1.2,over:true});for(const [x,y] of [[32,7]])put(P('stairs_moss'),x,y,{block:false,force:true,over:true});
+  pic(P('vine_b'),31,6,N,{bob:.9});pic(P('vine_a'),33,6,N,{bob:.9});pic(P('banner_long_a'),30,6,N,{bob:hi});pic(P('banner_long_b'),34,6,N,{bob:hi});lamp(32,6,[.7,1.0,1.9],2.2,150);lamp(32,9,[.7,1.0,1.8],1.6,110);
   foe('psstairwarden',32,13);
   put(P('furn_organ'),28,7,{block:true});put(P('furn_altarpiece'),36,7,{block:true});put(P('furn_clock_grandfather'),27,8,{block:true});
-  ghost('maid','p_ghost_maid',[[28,7],[36,7],[36,8],[28,8]],{sp:.22,lines:['He went up the stair and never came down.','I wash the steps every night. They will not stay clean.']});
+  ghost('maid','p_ghost_maid',[[28,7],[36,7],[36,8],[28,8]],{sp:.22,clue:2,lines:['They took the key down to where the lamps do not burn.','He went up the stair and never came down.','I wash the steps every night. They will not stay clean.']});
   /* ===== F. the Banqueting Hall ===== */
   for(let x=42,i=0;x<=58;x+=4,i++){col(x,27,i);col(x,34,i+1)}
   for(let k=0;k<5;k++){put('ps_p_courtier'+(k+1),43+k*3,29,{block:true,npc:'psh_guest'+k})}
@@ -611,15 +662,25 @@ function pshFurnish(S){
   ghost('hunter','p_ghost_hunter',[[42,22],[58,22],[58,20],[42,20]],{sp:.34,lines:['Hounds! Where are the hounds?','The quarry was not an animal.']});
   ghost('hhound','ghost_hound',[[44,22],[58,22],[58,20],[44,20]],{sp:.34,sc:1});
   foe('psofficer',43,22);
-}
+  /* ===== the long-abandoned house: sheets, webs, mirrors, ancestors, candles, red lanterns ===== */
+  {const taken=new Set();for(const d of decor)if(d.wd)taken.add(d.x+','+d.y+','+d.wd[0]+','+d.wd[1]);let mi=0,pi=0;
+   pshHaunt({W:S.W,H:S.H,seed:9740,pi:3,open:(x,y)=>open(x,y),free:(x,y)=>S.fr(x,y)&&!S.keep.has(x+','+y),wall:(x,y,a,b)=>g[y+b]&&g[y+b][x+a]==='#'&&S.over[(x+a)+','+(y+b)]===undefined,taken:(x,y,a,b)=>taken.has(x+','+y+','+a+','+b),
+     stand:{portrait:(i)=>pshPortrait(20+i)},
+     counts:{mirror:9,portrait:16,sheetwin:9,cobcorner:20,cobthick:9,candles:14,redlamp:11,dust:9,spider:5},
+     wallPic:(k,x,y,wd,o)=>{const oo={bob:o.bob};if(o.mirror!==undefined)oo.npc='psh_mir'+(mi++%12);else if(o.portrait!==undefined&&(pi++%2===0))oo.npc='psh_ancp'+(pi%8);const d=pic(k,x,y,wd,oo);return !!d},
+     floorProp:(k,x,y,o)=>!!put(k,x,y,o),
+     light:(x,y,c)=>lamp(x,y,c,1.3,70)})}}
 
 /* ---------- doors ---------- */
 function pshSelfMove(a){G.talk=null;sfx('door');G.P.x=a[0];G.P.y=a[1];G.P.f=a[2];G.P.angT=(a[2]-1)*Math.PI/2;G.C={x:a[0],y:a[1],a:G.P.angT};try{reveal()}catch(e){}}
+/* ---------- the hunt for the Second Floor Key: graded clues (F.keyClue 1 = not on this floor, 2 = sent below with the guard, 3 = in the Oubliette); the key itself lies in the Oubliette 9800 ---------- */
+const PSH_CLUE_MSG={1:'Journal: the Second Floor Key is not on this floor.',2:'Journal: the upper keys went down with the guard.',3:'Journal: the Second Floor Key lies in the Oubliette, at the very bottom of the dungeons.'};
+function pspClue(n,text){const F=pshF();if(text)msg(text,'#e8dcc0');if((F.keyClue|0)<n){F.keyClue=n;if(typeof qSt==='function'&&qSt('psq10')==='active')msg(PSH_CLUE_MSG[n],'#ffe36a')}}
 function pshDoor(d,nx,ny){
   const F=pshF();
   if(d.psh==='link'){const l=d.link;
     if(l.lock){
-      if(bagCount(l.lock)<=0){sfx('locked');msg('An iron-bound door with a silver lock. It will not move. The key must be somewhere on this floor.','#c8c4e8');
+      if(bagCount(l.lock)<=0){sfx('locked');msg('An iron-bound double door with a great silver lock, chained and padlocked. It will not move. The key is not on this floor. Look below.','#c8c4e8');pspClue(1);
         if(typeof QUESTS!=='undefined'&&QUESTS.psq10&&qSt('psq10')===null){qAccept('psq10');msg('The Chamberlain in the Entrance Hall may know where the key is kept.','#ffe36a')}return true}
       if(!F.stairOpen){F.stairOpen=1;msg('The silver key turns in the lock without a sound. The door opens inward.','#dcd4ff')}}
     if(!LEVELS[l.to]&&!KH_LAZY[l.to]){sfx('locked');msg('The way beyond is not open yet.','#c8c4e8');return true}
@@ -664,6 +725,7 @@ function pshGhostTick(dt){
     // whisper
     if(D.lines&&dp<2.4&&t-g.say>16+(g.li%3)*4){g.say=t;const line=D.lines[g.li%D.lines.length];g.li++;
       msg('"'+line+'"','#b4d0e8');PSH.chill=t;
+      if(D.clue)pspClue(D.clue);
       if(D.music){try{if(typeof tone==='function'){const n=[392,440,494,587,523,440,392];n.forEach((f,i)=>{tone(f,f*.99,.5,'triangle',.04,i*.5)})}}catch(e){}}
       else if(g.li%2){try{sfx('rattle')}catch(e){}}}}
   // candles gutter near ghosts, and a cold breath is felt now and then
@@ -681,11 +743,18 @@ function pshTake(id,name,pic,flag,item,before,after,btn,done){
   khNpc(id,name,pic,d=>{const F=pshF();if(F[flag])return say(after,[BYE]);
     return say(before,[[btn,()=>{F[flag]=1;pshGive(item);sfx('key');msg(done,'#ffe36a');G.talk=null;return null}],BYE])});}
 const pshTalk=(id,name,pic,text)=>khNpc(id,name,pic,()=>say(text,[BYE]));
+for(let i=0;i<12;i++)khNpc('psh_mir'+i,'A mirror','ps_mirror_haunted_a',()=>say(PSH_MIRROR_LINES[i%PSH_MIRROR_LINES.length],[BYE]));
+for(let i=0;i<8;i++)khNpc('psh_ancp'+i,'A portrait','ps_portrait_ancestor_'+(1+i%8),()=>say(PSH_ANCESTOR_LINES[i%PSH_ANCESTOR_LINES.length],[BYE]));
 const pshCount=o=>Object.keys(o||{}).length;
 /* ---------- quests and people ---------- */
-yrQ('psq10','Up the Grand Stair','The Chamberlain, in the Entrance Hall',[
-  ['Find the Second Floor Key. The Chamberlain says the household went up the Grand Stair and the keys went with the Sacristan. Ask the porter at the gate, the librarian and the prisoners below.',()=>!!pshF().key2||bagCount('pskey2')>0||!!pshF().stairOpen,['psh_chamberlain']],
-  ['Open the iron-bound Grand Stair door at the north end of the Great Halls with the key.',()=>!!pshF().stairOpen,['psh_chamberlain']]],{gold:8000,xp:50000,items:['potion6','potion6']});
+{const kc=()=>pshF().keyClue|0,hasKey=()=>!!pshF().key2||bagCount('pskey2')>0;
+  const S=[['',()=>kc()>=1||hasKey()||!!pshF().stairOpen,['psh_chamberlain']],['',()=>kc()>=2||hasKey()||!!pshF().stairOpen,['psh_chamberlain']],['',()=>hasKey()||!!pshF().stairOpen,['psh_chamberlain']],['',()=>!!pshF().stairOpen,['psh_chamberlain']]];
+  const T=[()=>'Find the Second Floor Key. Try the chained iron-bound door at the top of the Grand Stair, then ask around: ledgers, books, ghosts and the prisoners may remember where the keys went.',
+    ()=>'The Second Floor Key is not on this floor. Find word of where the upper keys went: a ledger in the service wing, the library, a chaplain note, a ghost, a prisoner.',
+    ()=>kc()>=3?'The upper keys went down with the guard. The key lies in the Oubliette, at the very bottom of the dungeons. Fight your way down and open the strongbox on the dais.':'The upper keys went down with the guard. Find out where: the gaoler log book in the Undercroft Gaols, the prisoners, the sacristy journal.',
+    ()=>'You have the key. Open the chained Grand Stair door at the north end of the Great Halls.'];
+  S.forEach((s,i)=>Object.defineProperty(s,'0',{get:T[i]}));
+  yrQ('psq10','Up the Grand Stair','The Chamberlain, in the Entrance Hall',S,{gold:8000,xp:50000,items:['potion6','potion6']})}
 yrQ('psq11','The Wrong Waltz','The Lutenist, in the Music Salon',[
   ['Find the three sheets of the waltz: one on the stand in the Music Salon, one on the lectern in the Gallery of Portraits, one on the high table of the Banqueting Hall.',()=>!!(bagCount('pssheet1')&&bagCount('pssheet2')&&bagCount('pssheet3'))||!!pshF().waltz,['psh_stand1','psh_stand2','psh_sheet3']],
   ['Play the three sheets at the harpsichord in the Music Salon.',()=>!!pshF().waltz,['psh_harp']]],{gold:6500,xp:40000,items:['pslutering']});
@@ -700,8 +769,8 @@ if(typeof QRF!=='undefined'){const N=(l,...ids)=>({lvl:l,npc:ids});
   QRF.T.psq12={give:[N(9740,'psh_curator')],act:[N(9740,'psh_pl0','psh_pl1','psh_pl2','psh_pl3','psh_pl4','psh_pl5')],ready:[N(9740,'psh_curator')]}}
 blGiveOpt('psh_chamberlain','psq10',()=>true,{
   offer:'There is a door at the north end of the Great Halls, at the top of the Grand Stair, with a silver lock. The Sovereign sent for the key when the household went up, and nobody ever brought it back. If the key could be found, the stair could be opened. I would like to know that somebody had tried. Will you look for it?',
-  accept:'Thank you. The keys of the upper floors were always returned to the Sacristan at dusk. The porter at the gate, the librarian in the east wing and the prisoners in the dungeons may remember more than I do. I am a ghost, and ghosts forget.',
-  remind:()=>pshF().stairOpen?'Go back to the Chamberlain: the door is open.':'The key to the Grand Stair. Ask the porter at the gate, the librarian, and the prisoners below. Then open the iron-bound door at the north end of the Great Halls.',
+  accept:'Thank you. The keys of the upper floors were always sent for safekeeping, and I do not remember where. Try the door, read what the household left behind, ask the ghosts and the prisoners. I am a ghost, and ghosts forget.',
+  remind:()=>pshF().stairOpen?'Go back to the Chamberlain: the door is open.':(pshF().keyClue|0)>=3?'The key lies in the Oubliette, at the bottom of the dungeons. Then open the iron-bound door at the north end of the Great Halls.':'The key to the Grand Stair is not on this floor. Look below: ledgers, books, ghosts and prisoners will tell you more.',
   ready:'You have opened it. I heard the lock turn from here, and I think I have not heard a sound so good in a hundred years.',
   thanks:'The household is up there still. Mind them. Take this, it is the last of the kitchen stores.',
   after:'The stair is open. I will stay here, in case anyone comes back down.'});
