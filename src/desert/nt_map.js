@@ -176,3 +176,11 @@ if(typeof mplInstall==='function'){
     {const a=6,b=46,w=92,h=22;api.panel(x,a,b,w,h);api.text(x,'Rating '+(L.diff||100),a+w/2,b+8,5.6,'#4a2a6a');api.text(x,'Gold: up. Blue: down. Light disc: stone.',a+w/2,b+17,4.4,INK)}};
   mplInstall({get name(){let n=0;const S=G.seen;if(S)for(const r of S)for(let i=0;i<r.length;i+=3)if(r[i])n++;return 'nt'+n},levels:{includes:n=>ntIs(n)},draw:ntmDraw,tint:[3,2,6],foot:'You are the yellow arrow. Gold square: stairs up. Blue square: stairs down. Pale disc: the teleport stone.'})}
 if(typeof mpmgiKind==='function'){const _k=mpmgiKind;mpmgiKind=function(lv){return ntIs(lv)?'dungeon':_k.apply(this,arguments)}}
+/* ---------- the painted picture of the tower on the world map (assets/ps/i_neverending.webp, tall, transparent); the stacked spires show until it has loaded ---------- */
+if(typeof WMN_BOX!=='undefined')WMN_BOX.neverending=[-22,-58,22,12];
+{const ntIcon={im:null,tried:0};
+  {const _wi=mpWorldIco;mpWorldIco=function(l,x,y,z){
+    if(l&&l.k==='neverending'){
+      if(!ntIcon.tried){ntIcon.tried=1;const im=new Image();im.onload=()=>{ntIcon.im=im};im.onerror=()=>{};im.src='assets/ps/i_neverending.webp?v='+VERSION}
+      if(ntIcon.im){const c=ctx,h=70,w=h*ntIcon.im.width/ntIcon.im.height;c.save();c.shadowColor='rgba(30,20,40,.55)';c.shadowBlur=4;c.drawImage(ntIcon.im,x-w/2,y+12-h,w,h);c.restore();return}}
+    return _wi.apply(this,arguments)}}}

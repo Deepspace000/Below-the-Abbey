@@ -217,3 +217,10 @@ function pgrPlace(id){
 for(const lv of [...new Set(Object.values(PGR.CHESTS).map(c=>c.lv))]){
   const b=KH_LAZY[lv];if(!b)continue;
   KH_LAZY[lv]=function(){const r=b.apply(this,arguments);try{pgrPlace(lv)}catch(e){console.error('pgr place',lv,e)}return r}}
+
+/* the painted teleport stone (assets/ps tele0 asleep, tele1 to tele4 awake) stands in the castle only: every other stone of the game keeps its own picture */
+{let orig=null;const swap=()=>{try{const inC=typeof pspIs==='function'&&pspIs(LEVEL)&&IMG.ps_tele0;
+    if(!orig)orig={t:[0,1,2,3,4].map(i=>IMG['tele'+i]),h:NPC_H.teleporter};
+    if(inC){for(let i=0;i<5;i++)if(IMG['ps_tele'+i])IMG['tele'+i]=IMG['ps_tele'+i];NPC_H.teleporter=1.0}
+    else{for(let i=0;i<5;i++)if(orig.t[i])IMG['tele'+i]=orig.t[i];if(orig.h!==undefined)NPC_H.teleporter=orig.h}}catch(e){console.error('tele swap',e)}};
+  const _pt=placeTeleporter;placeTeleporter=function(){swap();return _pt.apply(this,arguments)}}

@@ -45,7 +45,7 @@ addEventListener('unhandledrejection',function(e){if(window.__ready)return;var r
    BELOW THE ABBEY  -  a small grid-based first-person dungeon crawler
    Design space 480x320 (canvas is 2x).  3D viewport is 420x210 design units.
    ========================================================================== */
-const VERSION='3.712';
+const VERSION='3.713';
 // a stale copy in the browser cache reloads itself once, with the new version in the address (version.json is stamped at every release; the itch.io build has none)
 try{if(/^https?:/.test(location.protocol)&&!/itch\.(io|zone)|hwcdn|itchio/.test(location.hostname))fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.v&&j.v!==VERSION){const q=new URLSearchParams(location.search);if(q.get('v')!==j.v){q.set('v',j.v);location.replace(location.pathname+'?'+q.toString())}}}).catch(()=>{})}catch(e){}
 const FUI="'IM Fell English SC',Georgia,serif", FTXT="'IM Fell English',Georgia,serif", FTITLE="'UnifrakturCook','IM Fell English SC',Georgia,serif";
@@ -76181,6 +76181,13 @@ for(const lv of [...new Set(Object.values(PGR.CHESTS).map(c=>c.lv))]){
   const b=KH_LAZY[lv];if(!b)continue;
   KH_LAZY[lv]=function(){const r=b.apply(this,arguments);try{pgrPlace(lv)}catch(e){console.error('pgr place',lv,e)}return r}}
 
+/* the painted teleport stone (assets/ps tele0 asleep, tele1 to tele4 awake) stands in the castle only: every other stone of the game keeps its own picture */
+{let orig=null;const swap=()=>{try{const inC=typeof pspIs==='function'&&pspIs(LEVEL)&&IMG.ps_tele0;
+    if(!orig)orig={t:[0,1,2,3,4].map(i=>IMG['tele'+i]),h:NPC_H.teleporter};
+    if(inC){for(let i=0;i<5;i++)if(IMG['ps_tele'+i])IMG['tele'+i]=IMG['ps_tele'+i];NPC_H.teleporter=1.0}
+    else{for(let i=0;i<5;i++)if(orig.t[i])IMG['tele'+i]=orig.t[i];if(orig.h!==undefined)NPC_H.teleporter=orig.h}}catch(e){console.error('tele swap',e)}};
+  const _pt=placeTeleporter;placeTeleporter=function(){swap();return _pt.apply(this,arguments)}}
+
 /* ---- src/desert/nt_look.js ---- */
 /* ==========================================================================
    THE NEVER-ENDING TOWER: THE LOOK (prefix nt / NT). Every floor of the tower has its own colour and its own look. All of it is worked out from the floor number alone,
@@ -77149,6 +77156,14 @@ if(typeof mplInstall==='function'){
     {const a=6,b=46,w=92,h=22;api.panel(x,a,b,w,h);api.text(x,'Rating '+(L.diff||100),a+w/2,b+8,5.6,'#4a2a6a');api.text(x,'Gold: up. Blue: down. Light disc: stone.',a+w/2,b+17,4.4,INK)}};
   mplInstall({get name(){let n=0;const S=G.seen;if(S)for(const r of S)for(let i=0;i<r.length;i+=3)if(r[i])n++;return 'nt'+n},levels:{includes:n=>ntIs(n)},draw:ntmDraw,tint:[3,2,6],foot:'You are the yellow arrow. Gold square: stairs up. Blue square: stairs down. Pale disc: the teleport stone.'})}
 if(typeof mpmgiKind==='function'){const _k=mpmgiKind;mpmgiKind=function(lv){return ntIs(lv)?'dungeon':_k.apply(this,arguments)}}
+/* ---------- the painted picture of the tower on the world map (assets/ps/i_neverending.webp, tall, transparent); the stacked spires show until it has loaded ---------- */
+if(typeof WMN_BOX!=='undefined')WMN_BOX.neverending=[-22,-58,22,12];
+{const ntIcon={im:null,tried:0};
+  {const _wi=mpWorldIco;mpWorldIco=function(l,x,y,z){
+    if(l&&l.k==='neverending'){
+      if(!ntIcon.tried){ntIcon.tried=1;const im=new Image();im.onload=()=>{ntIcon.im=im};im.onerror=()=>{};im.src='assets/ps/i_neverending.webp?v='+VERSION}
+      if(ntIcon.im){const c=ctx,h=70,w=h*ntIcon.im.width/ntIcon.im.height;c.save();c.shadowColor='rgba(30,20,40,.55)';c.shadowBlur=4;c.drawImage(ntIcon.im,x-w/2,y+12-h,w,h);c.restore();return}}
+    return _wi.apply(this,arguments)}}}
 
 /* ---- src/desert/blight_titans.js ---- */
 /* ==========================================================================

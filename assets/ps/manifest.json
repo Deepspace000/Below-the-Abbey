@@ -2329,5 +2329,69 @@
 "h": 0.75,
 "kind": "sprite",
 "sheet": "cb"
+},
+"buttress_a": {
+"file": "buttress_a.webp",
+"w": 289,
+"px_h": 720,
+"h": 3.6,
+"kind": "sprite",
+"sheet": "bt"
+},
+"buttress_b": {
+"file": "buttress_b.webp",
+"w": 319,
+"px_h": 720,
+"h": 3.6,
+"kind": "sprite",
+"sheet": "bt"
+},
+"tele0": {
+"file": "tele0.webp",
+"w": 394,
+"px_h": 420,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "tp"
+},
+"tele1": {
+"file": "tele1.webp",
+"w": 394,
+"px_h": 420,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "tp"
+},
+"tele2": {
+"file": "tele2.webp",
+"w": 394,
+"px_h": 420,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "tp"
+},
+"tele3": {
+"file": "tele3.webp",
+"w": 394,
+"px_h": 420,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "tp"
+},
+"tele4": {
+"file": "tele4.webp",
+"w": 394,
+"px_h": 420,
+"h": 1.0,
+"kind": "sprite",
+"sheet": "tp"
+},
+"i_neverending": {
+"file": "i_neverending.webp",
+"w": 407,
+"px_h": 640,
+"h": 6.0,
+"kind": "sprite",
+"sheet": "ne"
 }
 }
